@@ -1,6 +1,7 @@
 class Ruby::Signature::Parser
   token tUIDENT tLIDENT tNAMESPACE tINTERFACEIDENT tLKEYWORD tUKEYWORD tGLOBALIDENT
         tIVAR tCLASSVAR
+        tANNOTATION
         tSTRING tSYMBOL tINTEGER
         kLPAREN kRPAREN kLBRACKET kRBRACKET kLBRACE kRBRACE
         kVOID kNIL kANY kTOP kBOT kSELF kSELFQ kINSTANCE kCLASS kBOOL kSINGLETON kTYPE kDEF kMODULE kSUPER
@@ -15,6 +16,8 @@ class Ruby::Signature::Parser
   left kBAR
   nonassoc kARROW
   preclow
+
+  expect 1
 
 rule
 
@@ -43,16 +46,23 @@ rule
   start_new_scope: { start_new_variables_scope }
   start_merged_scope: { start_merged_variables_scope }
 
+  annotations:
+      { result = [] }
+    | tANNOTATION annotations {
+        result = val[1].unshift(Annotation.new(string: val[0].value, location: val[0].location))
+      }
+
   class_decl:
-      kCLASS start_new_scope class_name type_params super_class class_members kEND {
+      annotations kCLASS start_new_scope class_name type_params super_class class_members kEND {
         reset_variable_scope
 
-        location = val[0].location + val[6].location
+        location = val[1].location + val[7].location
         result = Declarations::Class.new(
-          name: val[2].value,
-          type_params: val[3]&.value || [],
-          super_class: val[4],
-          members: val[5],
+          name: val[3].value,
+          type_params: val[4]&.value || [],
+          super_class: val[5],
+          members: val[6],
+          annotations: val[0],
           location: location
         )
       }
@@ -69,15 +79,16 @@ rule
       }
 
   module_decl:
-      kMODULE start_new_scope class_name type_params module_self_type class_members kEND {
+      annotations kMODULE start_new_scope class_name type_params module_self_type class_members kEND {
         reset_variable_scope
 
-        location = val[0].location + val[6].location
+        location = val[1].location + val[7].location
         result = Declarations::Module.new(
-          name: val[2].value,
-          type_params: val[3]&.value || [],
-          self_type: val[4],
-          members: val[5],
+          name: val[3].value,
+          type_params: val[4]&.value || [],
+          self_type: val[5],
+          members: val[6],
+          annotations: val[0],
           location: location
         )
       }
@@ -109,41 +120,47 @@ rule
     | alias_member
 
   attribute_member:
-      kATTRREADER keyword type {
-        result = Members::AttrReader.new(name: val[1].value,
+      annotations kATTRREADER keyword type {
+        result = Members::AttrReader.new(name: val[2].value,
                                          ivar_name: nil,
-                                         type: val[2],
-                                         location: val[0].location + val[2].location)
+                                         type: val[3],
+                                         annotations: val[0],
+                                         location: val[1].location + val[3].location)
       }
-    | kATTRREADER method_name attr_var_opt kCOLON type {
-        result = Members::AttrReader.new(name: val[1].value.to_sym,
-                                         ivar_name: val[2],
-                                         type: val[4],
-                                         location: val[0].location + val[4].location)
+    | annotations kATTRREADER method_name attr_var_opt kCOLON type {
+        result = Members::AttrReader.new(name: val[2].value.to_sym,
+                                         ivar_name: val[3],
+                                         type: val[5],
+                                         annotations: val[0],
+                                         location: val[1].location + val[5].location)
       }
-    | kATTRWRITER keyword type {
-        result = Members::AttrWriter.new(name: val[1].value,
+    | annotations kATTRWRITER keyword type {
+        result = Members::AttrWriter.new(name: val[2].value,
                                          ivar_name: nil,
-                                         type: val[2],
-                                         location: val[0].location + val[2].location)
+                                         type: val[3],
+                                         annotations: val[0],
+                                         location: val[1].location + val[3].location)
       }
-    | kATTRWRITER method_name attr_var_opt kCOLON type {
-        result = Members::AttrWriter.new(name: val[1].value.to_sym,
-                                         ivar_name: val[2],
-                                         type: val[4],
-                                         location: val[0].location + val[4].location)
+    | annotations kATTRWRITER method_name attr_var_opt kCOLON type {
+        result = Members::AttrWriter.new(name: val[2].value.to_sym,
+                                         ivar_name: val[3],
+                                         type: val[5],
+                                         annotations: val[0],
+                                         location: val[1].location + val[5].location)
       }
-    | kATTRACCESSOR keyword type {
-        result = Members::AttrAccessor.new(name: val[1].value,
+    | annotations kATTRACCESSOR keyword type {
+        result = Members::AttrAccessor.new(name: val[2].value,
                                            ivar_name: nil,
-                                           type: val[2],
-                                           location: val[0].location + val[2].location)
+                                           type: val[3],
+                                           annotations: val[0],
+                                           location: val[1].location + val[3].location)
       }
-    | kATTRACCESSOR method_name attr_var_opt kCOLON type {
-        result = Members::AttrAccessor.new(name: val[1].value.to_sym,
-                                           ivar_name: val[2],
-                                           type: val[4],
-                                           location: val[0].location + val[4].location)
+    | annotations kATTRACCESSOR method_name attr_var_opt kCOLON type {
+        result = Members::AttrAccessor.new(name: val[2].value.to_sym,
+                                           ivar_name: val[3],
+                                           type: val[5],
+                                           annotations: val[0],
+                                           location: val[1].location + val[5].location)
       }
 
   attr_var_opt:
@@ -175,14 +192,15 @@ rule
     }
 
   interface_decl:
-      kINTERFACE start_new_scope interface_name type_params interface_members kEND {
+      annotations kINTERFACE start_new_scope interface_name type_params interface_members kEND {
         reset_variable_scope
 
-        location = val[0].location + val[5].location
+        location = val[1].location + val[6].location
         result = Declarations::Interface.new(
-          name: val[2].value,
-          type_params: val[3]&.value || [],
-          members: val[4],
+          name: val[3].value,
+          type_params: val[4]&.value || [],
+          members: val[5],
+          annotations: val[0],
           location: location
         )
       }
@@ -211,45 +229,49 @@ rule
     | alias_member
 
   include_member:
-      kINCLUDE qualified_name {
-        if val[1].value.alias?
-          raise SemanticsError.new("Should include module or interface", subject: val[1].value, location: val[1.location])
+      annotations kINCLUDE qualified_name {
+        if val[2].value.alias?
+          raise SemanticsError.new("Should include module or interface", subject: val[2].value, location: val[2].location)
         end
-        result = Members::Include.new(name: val[1].value,
+        result = Members::Include.new(name: val[2].value,
                                       args: [],
-                                      location: val[0].location + val[1].location)
+                                      annotations: val[0],
+                                      location: val[1].location + val[2].location)
       }
-    | kINCLUDE qualified_name kLBRACKET type_list kRBRACKET {
-        if val[1].value.alias?
-          raise SemanticsError.new("Should include module or interface", subject: val[1].value, location: val[1.location])
+    | annotations kINCLUDE qualified_name kLBRACKET type_list kRBRACKET {
+        if val[2].value.alias?
+          raise SemanticsError.new("Should include module or interface", subject: val[2].value, location: val[2].location)
         end
-        result = Members::Include.new(name: val[1].value,
-                                      args: val[3],
-                                      location: val[0].location + val[4].location)
+        result = Members::Include.new(name: val[2].value,
+                                      args: val[4],
+                                      annotations: val[0],
+                                      location: val[1].location + val[5].location)
       }
 
   extend_member:
-      kEXTEND qualified_name {
-        if val[1].value.alias?
-          raise SemanticsError.new("Should extend module or interface", subject: val[1].value, location: val[1.location])
+      annotations kEXTEND qualified_name {
+        if val[2].value.alias?
+          raise SemanticsError.new("Should extend module or interface", subject: val[2].value, location: val[2].location)
         end
-        result = Members::Extend.new(name: val[1].value,
+        result = Members::Extend.new(name: val[2].value,
                                      args: [],
-                                     location: val[0].location + val[1].location)
+                                     annotations: val[0],
+                                     location: val[1].location + val[2].location)
       }
-    | kEXTEND qualified_name kLBRACKET type_list kRBRACKET {
-        if val[1].value.alias?
-          raise SemanticsError.new("Should extend module or interface", subject: val[1].value, location: val[1.location])
+    | annotations kEXTEND qualified_name kLBRACKET type_list kRBRACKET {
+        if val[2].value.alias?
+          raise SemanticsError.new("Should extend module or interface", subject: val[2].value, location: val[2].location)
         end
-        result = Members::Extend.new(name: val[1].value,
-                                     args: val[3],
-                                     location: val[0].location + val[4].location)
+        result = Members::Extend.new(name: val[2].value,
+                                     args: val[4],
+                                     annotations: val[0],
+                                     location: val[1].location + val[5].location)
     }
 
   method_member:
-      kDEF method_kind def_name method_types {
-        location = val[0].location + val[3].last.location
-        types = val[3].map do |type|
+      annotations kDEF method_kind def_name method_types {
+        location = val[1].location + val[4].last.location
+        types = val[4].map do |type|
           case type
           when LocatedValue
             type.value
@@ -258,9 +280,10 @@ rule
           end
         end
         result = Members::MethodDefinition.new(
-          name: val[2].value,
-          kind: val[1],
+          name: val[3].value,
+          kind: val[2],
           types: types,
+          annotations: val[0],
           location: location
         )
       }
@@ -373,28 +396,31 @@ rule
       }
 
   alias_member:
-      kALIAS method_name method_name {
+      annotations kALIAS method_name method_name {
         result = Members::Alias.new(
-          new_name: val[1].value.to_sym,
-          old_name: val[2].value.to_sym,
+          new_name: val[2].value.to_sym,
+          old_name: val[3].value.to_sym,
           kind: :instance,
-          location: val[0].location + val[2].location
+          annotations: val[0],
+          location: val[1].location + val[3].location
         )
       }
-    | kALIAS kSELF kDOT method_name kSELF kDOT method_name {
+    | annotations kALIAS kSELF kDOT method_name kSELF kDOT method_name {
         result = Members::Alias.new(
-          new_name: val[3].value.to_sym,
-          old_name: val[6].value.to_sym,
+          new_name: val[4].value.to_sym,
+          old_name: val[7].value.to_sym,
           kind: :singleton,
-          location: val[0].location + val[6].location
+          annotations: val[0],
+          location: val[1].location + val[7].location
         )
       }
 
   type_decl:
-      kTYPE tLIDENT kEQ type {
-        location = val[0].location + val[3].location
-        result = Declarations::Alias.new(name: val[1].value.to_sym,
-                                         type: val[3],
+      annotations kTYPE tLIDENT kEQ type {
+        location = val[1].location + val[4].location
+        result = Declarations::Alias.new(name: val[2].value.to_sym,
+                                         type: val[4],
+                                         annotations: val[0],
                                          location: location)
       }
 
@@ -786,6 +812,7 @@ TypeName = Ruby::Signature::TypeName
 Declarations = Ruby::Signature::AST::Declarations
 Members = Ruby::Signature::AST::Members
 MethodType = Ruby::Signature::MethodType
+Annotation = Ruby::Signature::AST::Annotation
 
 class LocatedValue
   attr_reader :location
@@ -943,6 +970,11 @@ PUNCTS = {
 }
 PUNCTS_RE = Regexp.union(*PUNCTS.keys)
 
+ANNOTATION_RE = Regexp.union(/%a\{.*?\}/,
+                             /%a\[.*?\]/,
+                             /%a\(.*?\)/,
+                             /%a\<.*?\>/,
+                             /%a\|.*?\|/)
 def next_token
   if @type
     type = @type
@@ -956,6 +988,9 @@ def next_token
   when input.scan(/`(\\`|[^`])+`/)
     s = input.matched.yield_self {|s| s[1, s.length-2] }.gsub(/\\`/, '`')
     new_token(:tQUOTEDMETHOD, s)
+  when input.scan(ANNOTATION_RE)
+    s = input.matched.yield_self {|s| s[3, s.length-4] }.strip
+    new_token(:tANNOTATION, s)
   when input.scan(/self\?/)
     new_token(:kSELFQ, "self?")
   when input.scan(KEYWORDS_RE)

@@ -572,4 +572,100 @@ class Ruby::Signature::SignatureParsingTest < Minitest::Test
       assert_equal expected_names, decls[0].members.map(&:name)
     end
   end
+
+  def test_annotation_on_declaration
+    Parser.parse_signature(<<~SIG).yield_self do |decls|
+      %a(foo)
+      %a[hello world]
+      class Hello end
+      
+      %a{Lorem Ipsum}
+      module Foo end
+
+      %a< undocumented >
+      interface _Foo end
+
+      %a|bar is okay|
+      type string = String
+    SIG
+
+      decls[0].yield_self do |decl|
+        assert_instance_of Declarations::Class, decl
+
+        assert_equal "foo", decl.annotations[0].string
+        assert_equal "%a(foo)", decl.annotations[0].location.source
+
+        assert_equal "hello world", decl.annotations[1].string
+        assert_equal "%a[hello world]", decl.annotations[1].location.source
+      end
+
+      decls[1].yield_self do |decl|
+        assert_instance_of Declarations::Module, decl
+
+        assert_equal "Lorem Ipsum", decl.annotations[0].string
+        assert_equal "%a{Lorem Ipsum}", decl.annotations[0].location.source
+      end
+
+      decls[2].yield_self do |decl|
+        assert_instance_of Declarations::Interface, decl
+
+        assert_equal "undocumented", decl.annotations[0].string
+        assert_equal "%a< undocumented >", decl.annotations[0].location.source
+      end
+
+      decls[3].yield_self do |decl|
+        assert_instance_of Declarations::Alias, decl
+
+        assert_equal "bar is okay", decl.annotations[0].string
+        assert_equal "%a|bar is okay|", decl.annotations[0].location.source
+      end
+    end
+  end
+
+  def test_annotations_on_members
+    Parser.parse_signature(<<~SIG).yield_self do |decls|
+      class Hello
+        %a{noreturn}
+        def foo: () -> any
+
+        %a[incompatible]
+        include Foo
+
+        %a{prepend}
+        extend Foo
+
+        %a{dynamic}
+        attr_reader foo: Bar
+
+        %a{constructor}
+        alias to_str to_s
+      end
+    SIG
+
+      decls[0].members[0].yield_self do |m|
+        assert_instance_of Members::MethodDefinition, m
+        assert_equal ["noreturn"], m.annotations.map(&:string)
+      end
+
+      decls[0].members[1].yield_self do |m|
+        assert_instance_of Members::Include, m
+        assert_equal ["incompatible"], m.annotations.map(&:string)
+      end
+
+      decls[0].members[2].yield_self do |m|
+        assert_instance_of Members::Extend, m
+        assert_equal ["prepend"], m.annotations.map(&:string)
+      end
+
+      decls[0].members[3].yield_self do |m|
+        assert_instance_of Members::AttrReader, m
+        assert_equal ["dynamic"], m.annotations.map(&:string)
+      end
+
+      decls[0].members[4].yield_self do |m|
+        assert_instance_of Members::Alias, m
+        assert_equal ["constructor"], m.annotations.map(&:string)
+      end
+    end
+  end
 end

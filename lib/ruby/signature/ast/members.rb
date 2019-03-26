@@ -6,12 +6,14 @@ module Ruby
           attr_reader :name
           attr_reader :kind
           attr_reader :types
+          attr_reader :annotations
           attr_reader :location
 
-          def initialize(name:, kind:, types:, location:)
+          def initialize(name:, kind:, types:, annotations:, location:)
             @name = name
             @kind = kind
             @types = types
+            @annotations = annotations
             @location = location
           end
 
@@ -66,11 +68,13 @@ module Ruby
         module Mixin
           attr_reader :name
           attr_reader :args
+          attr_reader :annotations
           attr_reader :location
 
-          def initialize(name:, args:, location:)
+          def initialize(name:, args:, annotations:, location:)
             @name = name
             @args = args
+            @annotations = annotations
             @location = location
           end
 
@@ -99,12 +103,14 @@ module Ruby
           attr_reader :name
           attr_reader :type
           attr_reader :ivar_name
+          attr_reader :annotations
           attr_reader :location
 
-          def initialize(name:, type:, ivar_name:, location:)
+          def initialize(name:, type:, ivar_name:, annotations:, location:)
             @name = name
             @type = type
             @ivar_name = ivar_name
+            @annotations = annotations
             @location = location
           end
 
@@ -164,12 +170,14 @@ module Ruby
           attr_reader :new_name
           attr_reader :old_name
           attr_reader :kind
+          attr_reader :annotations
           attr_reader :location
 
-          def initialize(new_name:, old_name:, kind:, location:)
+          def initialize(new_name:, old_name:, kind:, annotations:, location:)
             @new_name = new_name
             @old_name = old_name
             @kind = kind
+            @annotations = annotations
             @location = location
           end
 

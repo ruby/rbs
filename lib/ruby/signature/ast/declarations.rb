@@ -27,13 +27,15 @@ module Ruby
           attr_reader :type_params
           attr_reader :members
           attr_reader :super_class
+          attr_reader :annotations
           attr_reader :location
 
-          def initialize(name:, type_params:, super_class:, members:, location:)
+          def initialize(name:, type_params:, super_class:, members:, annotations:, location:)
             @name = name
             @type_params = type_params
             @super_class = super_class
             @members = members
+            @annotations = annotations
             @location = location
           end
 
@@ -57,13 +59,15 @@ module Ruby
           attr_reader :type_params
           attr_reader :members
           attr_reader :location
+          attr_reader :annotations
           attr_reader :self_type
 
-          def initialize(name:, type_params:, members:, self_type:, location:)
+          def initialize(name:, type_params:, members:, self_type:, annotations:, location:)
             @name = name
             @type_params = type_params
             @self_type = self_type
             @members = members
+            @annotations = annotations
             @location = location
           end
 
@@ -86,12 +90,14 @@ module Ruby
           attr_reader :name
           attr_reader :type_params
           attr_reader :members
+          attr_reader :annotations
           attr_reader :location
 
-          def initialize(name:, type_params:, members:, location:)
+          def initialize(name:, type_params:, members:, annotations:, location:)
             @name = name
             @type_params = type_params
             @members = members
+            @annotations = annotations
             @location = location
           end
 
@@ -112,11 +118,13 @@ module Ruby
         class Alias
           attr_reader :name
           attr_reader :type
+          attr_reader :annotations
           attr_reader :location
 
-          def initialize(name:, type:, location:)
+          def initialize(name:, type:, annotations:, location:)
             @name = name
             @type = type
+            @annotations = annotations
             @location = location
           end
 

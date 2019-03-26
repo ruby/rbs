@@ -10,5 +10,6 @@ require "ruby/signature/types"
 require "ruby/signature/method_type"
 require "ruby/signature/ast/declarations"
 require "ruby/signature/ast/members"
+require "ruby/signature/ast/annotation"
 
 require "ruby/signature/parser"
