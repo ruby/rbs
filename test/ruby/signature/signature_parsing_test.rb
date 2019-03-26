@@ -668,4 +668,28 @@ class Ruby::Signature::SignatureParsingTest < Minitest::Test
       end
     end
   end
+
+  def test_prepend
+    Parser.parse_signature(<<~SIG).yield_self do |decls|
+      class Foo
+        prepend Foo
+        prepend _Enumerable[Integer, Array[Integer]]
+      end
+    SIG
+
+      decls[0].members[0].yield_self do |m|
+        assert_instance_of Members::Prepend, m
+        assert_equal TypeName.new(name: :Foo, namespace: Namespace.empty), m.name
+        assert_equal [], m.args
+        assert_equal "prepend Foo", m.location.source
+      end
+
+      decls[0].members[1].yield_self do |m|
+        assert_instance_of Members::Prepend, m
+        assert_equal TypeName.new(name: :_Enumerable, namespace: Namespace.empty), m.name
+        assert_equal [parse_type("Integer"), parse_type("Array[Integer]")], m.args
+        assert_equal "prepend _Enumerable[Integer, Array[Integer]]", m.location.source
+      end
+    end
+  end
 end

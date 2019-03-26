@@ -99,6 +99,10 @@ module Ruby
           include Mixin
         end
 
+        class Prepend
+          include Mixin
+        end
+
         module Attribute
           attr_reader :name
           attr_reader :type

@@ -8,6 +8,7 @@ class Ruby::Signature::Parser
         kPRIVATE kPUBLIC kALIAS
         kCOLON kCOLON2 kCOMMA kBAR kAMP kHAT kARROW kQUESTION kEXCLAMATION kSTAR kSTAR2 kFATARROW kEQ kDOT kLT
         kINTERFACE kEND kINCLUDE kEXTEND kATTRREADER kATTRWRITER kATTRACCESSOR tOPERATOR tQUOTEDMETHOD
+        kPREPEND
         type_TYPE type_SIGNATURE
 
   prechigh
@@ -109,6 +110,7 @@ rule
       method_member
     | include_member
     | extend_member
+    | prepend_member
     | var_type_member
     | attribute_member
     | kPUBLIC {
@@ -268,6 +270,26 @@ rule
                                      location: val[1].location + val[5].location)
     }
 
+  prepend_member:
+      annotations kPREPEND qualified_name {
+        if val[2].value.alias?
+          raise SemanticsError.new("Should prepend module or interface", subject: val[2].value, location: val[2].location)
+        end
+        result = Members::Prepend.new(name: val[2].value,
+                                      args: [],
+                                      annotations: val[0],
+                                      location: val[1].location + val[2].location)
+      }
+    | annotations kPREPEND qualified_name kLBRACKET type_list kRBRACKET {
+        if val[2].value.alias?
+          raise SemanticsError.new("Should prepend module or interface", subject: val[2].value, location: val[2].location)
+        end
+        result = Members::Prepend.new(name: val[2].value,
+                                      args: val[4],
+                                      annotations: val[0],
+                                      location: val[1].location + val[5].location)
+      }
+
   method_member:
       annotations kDEF method_kind def_name method_types {
         location = val[1].location + val[4].last.location
@@ -375,7 +397,7 @@ rule
   method_name0:
       tUIDENT | tLIDENT
     | kCLASS | kVOID | kNIL | kANY | kTOP | kBOT | kINSTANCE | kBOOL | kSINGLETON
-    | kTYPE | kMODULE | kPRIVATE | kPUBLIC | kEND | kINCLUDE | kEXTEND
+    | kTYPE | kMODULE | kPRIVATE | kPUBLIC | kEND | kINCLUDE | kEXTEND | kPREPEND
     | kATTRREADER | kATTRACCESSOR | kATTRWRITER | kDEF
 
   type_params:
@@ -930,6 +952,7 @@ KEYWORDS = {
   "end" => :kEND,
   "include" => :kINCLUDE,
   "extend" => :kEXTEND,
+  "prepend" => :kPREPEND,
   "module" => :kMODULE,
   "attr_reader" => :kATTRREADER,
   "attr_writer" => :kATTRWRITER,
