@@ -86,6 +86,38 @@ module Ruby
           end
         end
 
+        class Extension
+          attr_reader :name
+          attr_reader :type_params
+          attr_reader :extension_name
+          attr_reader :members
+          attr_reader :annotations
+          attr_reader :location
+
+          def initialize(name:, type_params:, extension_name:, members:, annotations:, location:)
+            @name = name
+            @type_params = type_params
+            @extension_name = extension_name
+            @members = members
+            @annotations = annotations
+            @location = location
+          end
+
+          def ==(other)
+            other.is_a?(Extension) &&
+              other.name == name &&
+              other.type_params == type_params &&
+              other.extension_name == extension_name &&
+              other.members == members
+          end
+
+          alias eql? ==
+
+          def hash
+            self.class.hash ^ name.hash ^ type_params.hash ^ extension_name.hash ^ members.hash
+          end
+        end
+
         class Interface
           attr_reader :name
           attr_reader :type_params

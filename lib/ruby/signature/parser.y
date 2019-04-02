@@ -8,7 +8,7 @@ class Ruby::Signature::Parser
         kPRIVATE kPUBLIC kALIAS
         kCOLON kCOLON2 kCOMMA kBAR kAMP kHAT kARROW kQUESTION kEXCLAMATION kSTAR kSTAR2 kFATARROW kEQ kDOT kLT
         kINTERFACE kEND kINCLUDE kEXTEND kATTRREADER kATTRWRITER kATTRACCESSOR tOPERATOR tQUOTEDMETHOD
-        kPREPEND
+        kPREPEND kEXTENSION
         type_TYPE type_SIGNATURE
 
   prechigh
@@ -43,6 +43,7 @@ rule
     | interface_decl
     | module_decl
     | class_decl
+    | extension_decl
 
   start_new_scope: { start_new_variables_scope }
   start_merged_scope: { start_merged_variables_scope }
@@ -52,6 +53,23 @@ rule
     | tANNOTATION annotations {
         result = val[1].unshift(Annotation.new(string: val[0].value, location: val[0].location))
       }
+
+  extension_decl:
+      annotations kEXTENSION start_new_scope class_name type_params kLPAREN extension_name kRPAREN class_members kEND {
+        reset_variable_scope
+
+        location = val[1].location + val[9].location
+        result = Declarations::Extension.new(
+          name: val[3].value,
+          type_params: val[4]&.value || [],
+          extension_name: val[6].value.to_sym,
+          members: val[8],
+          annotations: val[0],
+          location: location
+        )
+      }
+
+  extension_name: tUIDENT | tLIDENT
 
   class_decl:
       annotations kCLASS start_new_scope class_name type_params super_class class_members kEND {
@@ -398,7 +416,7 @@ rule
       tUIDENT | tLIDENT
     | kCLASS | kVOID | kNIL | kANY | kTOP | kBOT | kINSTANCE | kBOOL | kSINGLETON
     | kTYPE | kMODULE | kPRIVATE | kPUBLIC | kEND | kINCLUDE | kEXTEND | kPREPEND
-    | kATTRREADER | kATTRACCESSOR | kATTRWRITER | kDEF
+    | kATTRREADER | kATTRACCESSOR | kATTRWRITER | kDEF | kEXTENSION
 
   type_params:
       { result = nil }
@@ -961,6 +979,7 @@ KEYWORDS = {
   "public" => :kPUBLIC,
   "private" => :kPRIVATE,
   "alias" => :kALIAS,
+  "extension" => :kEXTENSION
 }
 KEYWORDS_RE = /#{Regexp.union(*KEYWORDS.keys)}\b/
 

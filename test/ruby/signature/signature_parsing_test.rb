@@ -692,4 +692,28 @@ class Ruby::Signature::SignatureParsingTest < Minitest::Test
       end
     end
   end
+
+  def test_extension
+    Parser.parse_signature(<<~SIG).yield_self do |decls|
+      extension Array[X] (Pathname)
+        @name: String
+
+        include Foo
+        extend Bar
+        prepend Baz
+
+        attr_reader path: X
+        def Pathname: (String) -> Pathname
+      end
+    SIG
+      decls[0].yield_self do |decl|
+        assert_instance_of Declarations::Extension, decl
+        assert_equal TypeName.new(name: :Array, namespace: Namespace.empty), decl.name
+        assert_equal :Pathname, decl.extension_name
+        assert_equal [:X], decl.type_params
+
+        assert_equal 6, decl.members.size
+      end
+    end
+  end
 end
