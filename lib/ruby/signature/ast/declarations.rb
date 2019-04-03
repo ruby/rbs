@@ -21,6 +21,13 @@ module Ruby
             def hash
               self.class.hash ^ name.hash ^ args.hash
             end
+
+            def to_json(*a)
+              {
+                name: name,
+                args: args
+              }.to_json(*a)
+            end
           end
 
           attr_reader :name
@@ -51,6 +58,18 @@ module Ruby
 
           def hash
             self.class.hash ^ name.hash ^ type_params.hash ^ super_class.hash ^ member.hash
+          end
+
+          def to_json(*a)
+            {
+              declaration: :class,
+              name: name,
+              type_params: type_params,
+              members: members,
+              super_class: super_class,
+              annotations: annotations,
+              location: location
+            }.to_json(*a)
           end
         end
 
@@ -84,6 +103,18 @@ module Ruby
           def hash
             self.class.hash ^ name.hash ^ type_params.hash ^ self_type.hash ^ members.hash
           end
+
+          def to_json(*a)
+            {
+              declaration: :module,
+              name: name,
+              type_params: type_params,
+              members: members,
+              self_type: self_type,
+              annotations: annotations,
+              location: location
+            }.to_json(*a)
+          end
         end
 
         class Extension
@@ -116,6 +147,18 @@ module Ruby
           def hash
             self.class.hash ^ name.hash ^ type_params.hash ^ extension_name.hash ^ members.hash
           end
+
+          def to_json(*a)
+            {
+              declaration: :extension,
+              name: name,
+              type_params: type_params,
+              extension_name: extension_name,
+              members: members,
+              annotations: annotations,
+              location: location
+            }.to_json(*a)
+          end
         end
 
         class Interface
@@ -145,6 +188,17 @@ module Ruby
           def hash
             self.class.hash ^ type_params.hash ^ members.hash
           end
+
+          def to_json(*a)
+            {
+              declaration: :interface,
+              name: name,
+              type_params: type_params,
+              members: members,
+              annotations: annotations,
+              location: location
+            }.to_json(*a)
+          end
         end
 
         class Alias
@@ -171,6 +225,16 @@ module Ruby
           def hash
             self.class.hash ^ name.hash ^ type.hash
           end
+
+          def to_json(*a)
+            {
+              declaration: :alias,
+              name: name,
+              type: type,
+              annotations: annotations,
+              location: location
+            }
+          end
         end
 
         class Constant
@@ -195,6 +259,15 @@ module Ruby
           def hash
             self.class.hash ^ name.hash ^ type.hash
           end
+
+          def to_json(*a)
+            {
+              declaration: :constant,
+              name: name,
+              type: type,
+              location: location
+            }
+          end
         end
 
         class Global
@@ -218,6 +291,15 @@ module Ruby
 
           def hash
             self.class.hash ^ name.hash ^ type.hash
+          end
+
+          def to_json(*a)
+            {
+              declaration: :global,
+              name: name,
+              type: type,
+              location: location
+            }
           end
         end
       end

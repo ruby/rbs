@@ -79,6 +79,22 @@ module Ruby
           loc.name == name &&
           loc.start_pos == end_pos
       end
+
+      def to_json(*args)
+        {
+          start: {
+            line: start_line,
+            column: start_column
+          },
+          end: {
+            line: end_line,
+            column: end_column
+          },
+          buffer: {
+            name: name&.to_s
+          }
+        }.to_json(*args)
+      end
     end
   end
 end

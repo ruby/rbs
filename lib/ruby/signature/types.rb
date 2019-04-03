@@ -26,6 +26,33 @@ module Ruby
           alias eql? ==
 
           include NoFreeVariables
+
+          def to_json(*a)
+            klass = case self
+                    when Types::Bases::Bool
+                      :bool
+                    when Types::Bases::Void
+                      :void
+                    when Types::Bases::Any
+                      :any
+                    when Types::Bases::Nil
+                      :nil
+                    when Types::Bases::Top
+                      :top
+                    when Types::Bases::Bottom
+                      :bot
+                    when Types::Bases::Self
+                      :self
+                    when Types::Bases::Instance
+                      :instance
+                    when Types::Bases::Class
+                      :class
+                    else
+                      raise "Unexpected base type: #{type.inspect}"
+                    end
+
+            { class: klass, location: location }.to_json(*a)
+          end
         end
 
         class Bool < Base; end
@@ -63,6 +90,10 @@ module Ruby
             set << name
           end
         end
+
+        def to_json(*a)
+          { class: :variable, name: name, location: location }.to_json(*a)
+        end
       end
 
       class ClassSingleton
@@ -85,6 +116,10 @@ module Ruby
         end
 
         include NoFreeVariables
+
+        def to_json(*a)
+          { class: :class_singleton, name: name, location: location }.to_json(*a)
+        end
       end
 
       module Application
@@ -120,6 +155,10 @@ module Ruby
           @args = args
           @location = location
         end
+
+        def to_json(*a)
+          { class: :interface, name: name, args: args, location: location }.to_json(*a)
+        end
       end
 
       class ClassInstance
@@ -131,6 +170,10 @@ module Ruby
           @name = name
           @args = args
           @location = location
+        end
+
+        def to_json(*a)
+          { class: :class_instance, name: name, args: args, location: location }.to_json(*a)
         end
       end
 
@@ -154,6 +197,10 @@ module Ruby
         end
 
         include NoFreeVariables
+
+        def to_json(*a)
+          { class: :alias, name: name, location: location }.to_json(*a)
+        end
       end
 
       class Tuple
@@ -181,6 +228,10 @@ module Ruby
               type.free_variables set
             end
           end
+        end
+
+        def to_json(*a)
+          { class: :tuple, types: types, location: location }.to_json(*a)
         end
       end
 
@@ -210,6 +261,10 @@ module Ruby
             end
           end
         end
+
+        def to_json(*a)
+          { class: :record, fields: fields, location: location }.to_json(*a)
+        end
       end
 
       class Optional
@@ -233,6 +288,10 @@ module Ruby
 
         def free_variables(set = Set.new)
           type.free_variables(set)
+        end
+
+        def to_json(*a)
+          { class: :optional, type: type, location: location }.to_json(*a)
         end
       end
 
@@ -262,6 +321,10 @@ module Ruby
             end
           end
         end
+
+        def to_json(*a)
+          { class: :union, types: types, location: location }.to_json(*a)
+        end
       end
 
       class Intersection
@@ -289,6 +352,10 @@ module Ruby
               type.free_variables set
             end
           end
+        end
+
+        def to_json(*a)
+          { class: :intersection, types: types, location: location }.to_json(*a)
         end
       end
 
@@ -318,6 +385,10 @@ module Ruby
             else
               enum_for :map_type
             end
+          end
+
+          def to_json(*a)
+            { type: type, name: name }.to_json(*a)
           end
         end
 
@@ -411,6 +482,18 @@ module Ruby
             enum_for :map_type
           end
         end
+
+        def to_json(*a)
+          {
+            required_positionals: required_positionals,
+            optional_positionals: optional_positionals,
+            rest_positionals: rest_positionals,
+            trailing_positionals: trailing_positionals,
+            required_keywords: required_keywords,
+            optional_keywords: optional_keywords,
+            rest_keywords: rest_keywords
+          }.to_json(*a)
+        end
       end
 
       class Proc
@@ -435,6 +518,10 @@ module Ruby
         def free_variables(set)
           type.free_variables(set)
         end
+
+        def to_json(*a)
+          { class: :proc, type: type, location: location }.to_json(*a)
+        end
       end
 
       class Literal
@@ -457,6 +544,10 @@ module Ruby
         end
 
         include NoFreeVariables
+
+        def to_json(*a)
+          { class: :literal, literal: literal.inspect, location: location }.to_json(*a)
+        end
       end
     end
   end

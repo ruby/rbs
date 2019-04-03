@@ -15,6 +15,13 @@ module Ruby
             other.type == type &&
             other.required == required
         end
+
+        def to_json(*a)
+          {
+            type: type,
+            required: required
+          }.to_json(*a)
+        end
       end
 
       attr_reader :type_params
@@ -34,6 +41,15 @@ module Ruby
           other.type_params == type_params &&
           other.type == type &&
           other.block == block
+      end
+
+      def to_json(*a)
+        {
+          type_params: type_params,
+          type: type,
+          block: block,
+          location: location
+        }.to_json(*a)
       end
     end
   end

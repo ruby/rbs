@@ -29,6 +29,16 @@ module Ruby
           def hash
             self.class.hash ^ name.hash ^ kind.hash ^ types.hash
           end
+
+          def to_json(*a)
+            {
+              member: :method_definition,
+              kind: kind,
+              types: types,
+              annotations: annotations,
+              location: location
+            }.to_json(*a)
+          end
         end
 
         module Var
@@ -55,14 +65,41 @@ module Ruby
 
         class InstanceVariable
           include Var
+
+          def to_json(*a)
+            {
+              member: :instance_variable,
+              name: name,
+              type: type,
+              location: location
+            }.to_json(*a)
+          end
         end
 
         class ClassInstanceVariable
           include Var
+
+          def to_json(*a)
+            {
+              member: :class_instance_variable,
+              name: name,
+              type: type,
+              location: location
+            }.to_json(*a)
+          end
         end
 
         class ClassVariable
           include Var
+
+          def to_json(*a)
+            {
+              member: :class_variable,
+              name: name,
+              type: type,
+              location: location
+            }.to_json(*a)
+          end
         end
 
         module Mixin
@@ -93,14 +130,44 @@ module Ruby
 
         class Include
           include Mixin
+
+          def to_json(*a)
+            {
+              member: :include,
+              name: name,
+              args: args,
+              annotations: annotations,
+              location: location
+            }.to_json(*a)
+          end
         end
 
         class Extend
           include Mixin
+
+          def to_json(*a)
+            {
+              member: :extend,
+              name: name,
+              args: args,
+              annotations: annotations,
+              location: location
+            }.to_json(*a)
+          end
         end
 
         class Prepend
           include Mixin
+
+          def to_json(*a)
+            {
+              member: :prepend,
+              name: name,
+              args: args,
+              annotations: annotations,
+              location: location
+            }.to_json(*a)
+          end
         end
 
         module Attribute
@@ -134,14 +201,47 @@ module Ruby
 
         class AttrReader
           include Attribute
+
+          def to_json(*a)
+            {
+              member: :attr_reader,
+              name: name,
+              type: type,
+              ivar_name: ivar_name,
+              annotations: annotations,
+              location: location
+            }.to_json(*a)
+          end
         end
 
         class AttrAccessor
           include Attribute
+
+          def to_json(*a)
+            {
+              member: :attr_accessor,
+              name: name,
+              type: type,
+              ivar_name: ivar_name,
+              annotations: annotations,
+              location: location
+            }.to_json(*a)
+          end
         end
 
         class AttrWriter
           include Attribute
+
+          def to_json(*a)
+            {
+              member: :attr_writer,
+              name: name,
+              type: type,
+              ivar_name: ivar_name,
+              annotations: annotations,
+              location: location
+            }.to_json(*a)
+          end
         end
 
         module LocationOnly
@@ -164,10 +264,18 @@ module Ruby
 
         class Public
           include LocationOnly
+
+          def to_json(*a)
+            { member: :public, location: location }.to_json(*a)
+          end
         end
 
         class Private
           include LocationOnly
+
+          def to_json(*a)
+            { member: :private, location: location }.to_json(*a)
+          end
         end
 
         class Alias
@@ -196,6 +304,17 @@ module Ruby
 
           def hash
             self.class.hash ^ new_name.hash ^ old_name.hash ^ kind
+          end
+
+          def to_json(*a)
+            {
+              member: :alias,
+              new_name: new_name,
+              old_name: old_name,
+              kind: kind,
+              annotations: annotations,
+              location: location
+            }.to_json(*a)
           end
         end
       end

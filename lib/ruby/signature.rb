@@ -1,6 +1,7 @@
 require "ruby/signature/version"
 
 require "set"
+require "json"
 
 require "ruby/signature/buffer"
 require "ruby/signature/location"

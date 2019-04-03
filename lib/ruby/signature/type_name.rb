@@ -29,7 +29,11 @@ module Ruby
       end
 
       def to_s
-        "#{namespace.to_s}::#{name}"
+        "#{namespace.to_s}#{name}"
+      end
+
+      def to_json(*a)
+        to_s.to_json(*a)
       end
 
       def class?

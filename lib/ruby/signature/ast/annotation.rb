@@ -19,6 +19,10 @@ module Ruby
         def hash
           self.class.hash ^ string.hash
         end
+
+        def to_json(*a)
+          { string: string, location: location }.to_json(*a)
+        end
       end
     end
   end
