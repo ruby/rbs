@@ -1,0 +1,2 @@
+class BasicObject
+end

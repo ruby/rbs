@@ -1,7 +1,5 @@
 require "test_helper"
 
-require "test_helper"
-
 class Ruby::Signature::SignatureParsingTest < Minitest::Test
   Parser = Ruby::Signature::Parser
   Buffer = Ruby::Signature::Buffer

@@ -12,5 +12,7 @@ require "ruby/signature/method_type"
 require "ruby/signature/ast/declarations"
 require "ruby/signature/ast/members"
 require "ruby/signature/ast/annotation"
+require "ruby/signature/environment"
+require "ruby/signature/environment_loader"
 
 require "ruby/signature/parser"
