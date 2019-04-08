@@ -355,7 +355,7 @@ rule
           required_keywords: params[4],
           optional_keywords: params[5],
           rest_keywords: params[6],
-          return_type: val[4]
+          return_type: val[5]
         )
 
         block = val[3]&.value
