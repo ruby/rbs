@@ -10,9 +10,7 @@ class Ruby::Signature::SignatureParsingTest < Minitest::Test
   Members = Ruby::Signature::AST::Members
   MethodType = Ruby::Signature::MethodType
 
-  def parse_type(string, variables: Set.new)
-    Parser.parse_type(string, variables: variables)
-  end
+  include TestHelper
 
   def test_type_alias
     Parser.parse_signature("type foo = any").yield_self do |decls|
