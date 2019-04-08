@@ -290,8 +290,8 @@ rule
 
   prepend_member:
       annotations kPREPEND qualified_name {
-        if val[2].value.alias?
-          raise SemanticsError.new("Should prepend module or interface", subject: val[2].value, location: val[2].location)
+        unless val[2].value.class?
+          raise SemanticsError.new("Should prepend module", subject: val[2].value, location: val[2].location)
         end
         result = Members::Prepend.new(name: val[2].value,
                                       args: [],
@@ -299,8 +299,8 @@ rule
                                       location: val[1].location + val[2].location)
       }
     | annotations kPREPEND qualified_name kLBRACKET type_list kRBRACKET {
-        if val[2].value.alias?
-          raise SemanticsError.new("Should prepend module or interface", subject: val[2].value, location: val[2].location)
+        unless val[2].value.class?
+          raise SemanticsError.new("Should prepend module", subject: val[2].value, location: val[2].location)
         end
         result = Members::Prepend.new(name: val[2].value,
                                       args: val[4],
