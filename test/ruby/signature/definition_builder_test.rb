@@ -1,0 +1,394 @@
+require "test_helper"
+
+class Ruby::Signature::DefinitionBuilderTest < Minitest::Test
+  include TestHelper
+
+  Environment = Ruby::Signature::Environment
+  EnvironmentLoader = Ruby::Signature::EnvironmentLoader
+  Declarations = Ruby::Signature::AST::Declarations
+  TypeName = Ruby::Signature::TypeName
+  Namespace = Ruby::Signature::Namespace
+  DefinitionBuilder = Ruby::Signature::DefinitionBuilder
+  Definition = Ruby::Signature::Definition
+  BuiltinNames = Ruby::Signature::BuiltinNames
+
+  class SignatureManager
+    attr_reader :files
+
+    def initialize
+      @files = {}
+
+      files[Pathname("builtin.rbi")] = BUILTINS
+    end
+
+    def self.new
+      instance = super
+
+      if block_given?
+        yield instance
+      else
+        instance
+      end
+    end
+
+    BUILTINS = <<SIG
+class BasicObject
+  def __id__: -> Integer
+
+  private
+  def initialize: -> void
+end
+
+class Object < BasicObject
+  include Kernel
+ 
+  public
+  def __id__: -> Integer
+
+  private
+  def respond_to_missing?: (Symbol, bool) -> bool
+end
+
+module Kernel
+  private
+  def puts: (*any) -> nil
+end
+
+class Class < Module
+end
+
+class Module
+end
+
+class String
+  include Comparable
+  prepend Enumerable[String, void]
+
+  def self.try_convert: (any) -> String?
+end
+
+class Integer
+end
+
+class Symbol
+end
+
+module Comparable
+end
+
+module Enumerable[A, B]
+end
+SIG
+
+    def build
+      Dir.mktmpdir do |tmpdir|
+        tmppath = Pathname(tmpdir)
+
+        files.each do |path, content|
+          absolute_path = tmppath + path
+          absolute_path.parent.mkpath
+          absolute_path.write(content)
+        end
+
+        env = Environment.new()
+        loader = EnvironmentLoader.new(env: env)
+        loader.stdlib_root = nil
+        loader.add path: tmppath
+        loader.load
+
+        yield env
+      end
+    end
+  end
+
+  def type_name(string)
+    Namespace.parse(string).yield_self do |namespace|
+      last = namespace.path.last
+      TypeName.new(name: last, namespace: namespace.parent)
+    end
+  end
+
+  def assert_method_definition(method, types, accessibility: nil)
+    assert_instance_of Definition::Method, method
+    assert_equal types, method.method_types.map(&:to_s)
+    assert_equal accessibility, method.accessibility if accessibility
+    yield method.super if block_given?
+  end
+
+  def test_build_ancestors
+    SignatureManager.new do |manager|
+      manager.files[Pathname("foo.rbi")] = <<EOF
+module X
+end
+
+class Foo
+  extend X
+end
+
+module Y[A]
+end
+
+class Bar[X]
+  include Y[X]
+end
+EOF
+      manager.build do |env|
+        builder = DefinitionBuilder.new(env: env)
+
+        builder.build_ancestors(Definition::Ancestor::Instance.new(name: BuiltinNames::BasicObject.name, args: [])).yield_self do |ancestors|
+          assert_equal [Definition::Ancestor::Instance.new(name: BuiltinNames::BasicObject.name, args: [])], ancestors
+        end
+
+        builder.build_ancestors(Definition::Ancestor::Instance.new(name: BuiltinNames::Object.name, args: [])).yield_self do |ancestors|
+          assert_equal [
+                         Definition::Ancestor::Instance.new(name: BuiltinNames::Object.name, args: []),
+                         Definition::Ancestor::Instance.new(name: BuiltinNames::Kernel.name, args: []),
+                         Definition::Ancestor::Instance.new(name: BuiltinNames::BasicObject.name, args: []),
+                       ], ancestors
+        end
+
+        builder.build_ancestors(Definition::Ancestor::Instance.new(name: BuiltinNames::String.name, args: [])).yield_self do |ancestors|
+          assert_equal [
+                         Definition::Ancestor::Instance.new(name: BuiltinNames::Enumerable.name, args: [parse_type("::String"), parse_type("void")]),
+                         Definition::Ancestor::Instance.new(name: BuiltinNames::String.name, args: []),
+                         Definition::Ancestor::Instance.new(name: BuiltinNames::Comparable.name, args: []),
+                         Definition::Ancestor::Instance.new(name: BuiltinNames::Object.name, args: []),
+                         Definition::Ancestor::Instance.new(name: BuiltinNames::Kernel.name, args: []),
+                         Definition::Ancestor::Instance.new(name: BuiltinNames::BasicObject.name, args: []),
+                       ], ancestors
+        end
+
+        builder.build_ancestors(Definition::Ancestor::Singleton.new(name: BuiltinNames::BasicObject.name)).yield_self do |ancestors|
+          assert_equal [
+                         Definition::Ancestor::Singleton.new(name: BuiltinNames::BasicObject.name),
+                         Definition::Ancestor::Instance.new(name: BuiltinNames::Class.name, args: []),
+                         Definition::Ancestor::Instance.new(name: BuiltinNames::Module.name, args: []),
+                         Definition::Ancestor::Instance.new(name: BuiltinNames::Object.name, args: []),
+                         Definition::Ancestor::Instance.new(name: BuiltinNames::Kernel.name, args: []),
+                         Definition::Ancestor::Instance.new(name: BuiltinNames::BasicObject.name, args: []),
+                       ], ancestors
+        end
+
+        builder.build_ancestors(Definition::Ancestor::Singleton.new(name: TypeName.new(name: :Foo, namespace: Namespace.root))).yield_self do |ancestors|
+          assert_equal [
+                         Definition::Ancestor::Singleton.new(name: TypeName.new(name: :Foo, namespace: Namespace.root)),
+                         Definition::Ancestor::Instance.new(name: TypeName.new(name: :X, namespace: Namespace.root), args: []),
+                         Definition::Ancestor::Singleton.new(name: BuiltinNames::Object.name),
+                         Definition::Ancestor::Singleton.new(name: BuiltinNames::BasicObject.name),
+                         Definition::Ancestor::Instance.new(name: BuiltinNames::Class.name, args: []),
+                         Definition::Ancestor::Instance.new(name: BuiltinNames::Module.name, args: []),
+                         Definition::Ancestor::Instance.new(name: BuiltinNames::Object.name, args: []),
+                         Definition::Ancestor::Instance.new(name: BuiltinNames::Kernel.name, args: []),
+                         Definition::Ancestor::Instance.new(name: BuiltinNames::BasicObject.name, args: []),
+                       ], ancestors
+        end
+
+        builder.build_ancestors(Definition::Ancestor::Instance.new(name: TypeName.new(name: :Bar, namespace: Namespace.root), args: [parse_type("::Integer")])).yield_self do |ancestors|
+          assert_equal [
+                         Definition::Ancestor::Instance.new(name: TypeName.new(name: :Bar, namespace: Namespace.root), args: [parse_type("::Integer")]),
+                         Definition::Ancestor::Instance.new(name: TypeName.new(name: :Y, namespace: Namespace.root), args: [parse_type("::Integer")]),
+                         Definition::Ancestor::Instance.new(name: BuiltinNames::Object.name, args: []),
+                         Definition::Ancestor::Instance.new(name: BuiltinNames::Kernel.name, args: []),
+                         Definition::Ancestor::Instance.new(name: BuiltinNames::BasicObject.name, args: []),
+                       ], ancestors
+        end
+
+        builder.build_ancestors(Definition::Ancestor::Singleton.new(name: BuiltinNames::Kernel.name)).yield_self do |ancestors|
+          assert_equal [
+                         Definition::Ancestor::Singleton.new(name: BuiltinNames::Kernel.name),
+                         Definition::Ancestor::Instance.new(name: BuiltinNames::Module.name, args: []),
+                         Definition::Ancestor::Instance.new(name: BuiltinNames::Object.name, args: []),
+                         Definition::Ancestor::Instance.new(name: BuiltinNames::Kernel.name, args: []),
+                         Definition::Ancestor::Instance.new(name: BuiltinNames::BasicObject.name, args: []),
+                       ], ancestors
+        end
+
+        builder.build_ancestors(Definition::Ancestor::Instance.new(name: BuiltinNames::Kernel.name, args: [])).yield_self do |ancestors|
+          assert_equal [
+                         Definition::Ancestor::Instance.new(name: BuiltinNames::Kernel.name, args: []),
+                       ], ancestors
+        end
+      end
+    end
+  end
+
+  def test_build_ancestors_cycle
+    SignatureManager.new do |manager|
+      manager.files[Pathname("foo.rbi")] = <<EOF
+module X[A]
+  include Y[A]
+end
+
+module Y[A]
+  include X[Array[A]]
+end
+EOF
+      manager.build do |env|
+        builder = DefinitionBuilder.new(env: env)
+
+        assert_raises do
+          builder.build_ancestors(Definition::Ancestor::Instance.new(
+            name: type_name("::X"),
+            args: [parse_type("::Integer")])
+          )
+        end
+      end
+    end
+  end
+
+  def test_build_invalid_type_application
+    SignatureManager.new do |manager|
+      manager.files[Pathname("foo.rbi")] = <<EOF
+module X[A]
+end
+
+class Y[A, B]
+end
+
+class A < Y
+  
+end
+
+class B < Y[Integer, void]
+  include X
+end
+
+class C
+  extend X
+end
+EOF
+      manager.build do |env|
+        builder = DefinitionBuilder.new(env: env)
+
+        assert_raises DefinitionBuilder::InvalidTypeApplicationError do
+          builder.build_ancestors(Definition::Ancestor::Instance.new(name: type_name("::A"), args: []))
+        end
+
+        assert_raises DefinitionBuilder::InvalidTypeApplicationError do
+          builder.build_ancestors(Definition::Ancestor::Instance.new(name: type_name("::B"), args: []))
+        end
+
+        assert_raises DefinitionBuilder::InvalidTypeApplicationError do
+          builder.build_ancestors(Definition::Ancestor::Singleton.new(name: type_name("::C")))
+        end
+      end
+    end
+  end
+
+  def test_build_interface
+    SignatureManager.new do |manager|
+      manager.files[Pathname("foo.rbi")] = <<EOF
+interface _Foo
+  def bar: -> _Foo
+  include _Hash
+end
+
+interface _Hash
+  def hash: -> Integer
+  def eql?: (any) -> bool
+end
+
+interface _Baz
+  include _Hash[bool]
+end
+EOF
+      manager.build do |env|
+        builder = DefinitionBuilder.new(env: env)
+
+        foo = type_name("::_Foo")
+        baz = type_name("::_Baz")
+
+        builder.build_interface(foo, env.find_type_decl(foo)).yield_self do |definition|
+          assert_instance_of Definition, definition
+
+          assert_equal [:bar, :hash, :eql?].sort, definition.methods.keys.sort
+
+          assert_method_definition definition.methods[:bar], ["() -> ::_Foo"], accessibility: :public
+          assert_method_definition definition.methods[:hash], ["() -> ::Integer"], accessibility: :public
+          assert_method_definition definition.methods[:eql?], ["(any) -> bool"], accessibility: :public
+        end
+
+        assert_raises DefinitionBuilder::InvalidTypeApplicationError do
+          builder.build_interface(baz, env.find_type_decl(baz))
+        end
+      end
+    end
+  end
+
+  def test_build_one_instance
+    SignatureManager.new do |manager|
+      manager.build do |env|
+        builder = DefinitionBuilder.new(env: env)
+
+        builder.build_one_instance(BuiltinNames::Object.name).yield_self do |definition|
+          definition.methods[:__id__].yield_self do |method|
+            assert_method_definition method, ["() -> ::Integer"], accessibility: :public
+          end
+
+          definition.methods[:respond_to_missing?].yield_self do |method|
+            assert_method_definition method, ["(::Symbol, bool) -> bool"], accessibility: :private
+          end
+        end
+      end
+    end
+  end
+
+  def test_build_one_singleton
+    SignatureManager.new do |manager|
+      manager.build do |env|
+        builder = DefinitionBuilder.new(env: env)
+
+        builder.build_one_singleton(BuiltinNames::String.name).yield_self do |definition|
+          definition.methods[:try_convert].yield_self do |method|
+            assert_method_definition method, ["(any) -> ::String?"], accessibility: :public
+          end
+        end
+      end
+    end
+  end
+
+  def test_build_instance
+    SignatureManager.new do |manager|
+      manager.build do |env|
+        builder = DefinitionBuilder.new(env: env)
+
+        builder.build_instance(BuiltinNames::Object.name).yield_self do |definition|
+          assert_equal Set.new([:__id__, :initialize, :puts, :respond_to_missing?]), Set.new(definition.methods.keys)
+
+          definition.methods[:__id__].yield_self do |method|
+            assert_method_definition method, ["() -> ::Integer"], accessibility: :public
+          end
+
+          definition.methods[:initialize].yield_self do |method|
+            assert_method_definition method, ["() -> void"], accessibility: :private
+          end
+
+          definition.methods[:puts].yield_self do |method|
+            assert_method_definition method, ["(*any) -> nil"], accessibility: :private
+          end
+
+          definition.methods[:respond_to_missing?].yield_self do |method|
+            assert_method_definition method, ["(::Symbol, bool) -> bool"], accessibility: :private
+          end
+        end
+      end
+    end
+  end
+
+  def test_build_singleton
+    SignatureManager.new do |manager|
+      manager.build do |env|
+        builder = DefinitionBuilder.new(env: env)
+
+        builder.build_singleton(BuiltinNames::BasicObject.name).yield_self do |definition|
+          assert_equal ["() -> ::BasicObject"], definition.methods[:new].method_types.map {|x| x.to_s }
+        end
+
+        builder.build_singleton(BuiltinNames::String.name).yield_self do |definition|
+          assert_equal ["() -> ::String"], definition.methods[:new].method_types.map {|x| x.to_s }
+        end
+      end
+    end
+  end
+end
+

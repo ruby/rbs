@@ -56,7 +56,7 @@ module Ruby
           signature_files.push *each_signature(stdlib_root + "builtin")
         end
 
-        paths.flat_map do |path|
+        paths.each do |path|
           case path
           when Pathname
             signature_files.push *each_signature(path)
@@ -68,7 +68,9 @@ module Ruby
         signature_files.each do |file|
           buffer = Buffer.new(name: file.to_s, content: file.read)
           env.buffers.push(buffer)
-          env.declarations.push *Parser.parse_signature(buffer)
+          Parser.parse_signature(buffer).each do |decl|
+            env << decl
+          end
         end
       end
     end

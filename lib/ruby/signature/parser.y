@@ -237,6 +237,10 @@ rule
           raise SemanticsError.new("Interface cannot have singleton method", subject: val[0], location: val[0].location)
         end
 
+        if val[0].types.last == :super
+          raise SemanticsError.new("Interface method cannot have `super` type", subject: val[0], location: val[0].location)
+        end
+
         result = val[0]
       }
     | include_member {

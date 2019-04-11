@@ -30,6 +30,14 @@ module Ruby
             self.class.hash ^ name.hash ^ kind.hash ^ types.hash
           end
 
+          def instance?
+            kind == :instance || kind == :singleton_instance
+          end
+
+          def singleton?
+            kind == :singleton || kind == :singleton_instance
+          end
+
           def to_json(*a)
             {
               member: :method_definition,

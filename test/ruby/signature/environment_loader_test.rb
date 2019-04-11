@@ -4,6 +4,8 @@ class Ruby::Signature::EnvironmentLoaderTest < Minitest::Test
   Environment = Ruby::Signature::Environment
   EnvironmentLoader = Ruby::Signature::EnvironmentLoader
   Declarations = Ruby::Signature::AST::Declarations
+  TypeName = Ruby::Signature::TypeName
+  Namespace = Ruby::Signature::Namespace
 
   def mktmpdir
     Dir.mktmpdir do |path|
@@ -22,6 +24,9 @@ end
       path.join("controllers").mkdir
       path.join("controllers/people_controller.rbi").write(<<-EOF)
 class PeopleController
+end
+
+extension Object (People)
 end
       EOF
 
@@ -42,6 +47,13 @@ end
       assert env.declarations.any? {|decl| decl.is_a?(Declarations::Class) && decl.name.name == :Pathname }
       assert env.declarations.any? {|decl| decl.is_a?(Declarations::Class) && decl.name.name == :Person }
       assert env.declarations.any? {|decl| decl.is_a?(Declarations::Class) && decl.name.name == :PeopleController }
+
+      assert env.find_class(TypeName.new(name: :BasicObject, namespace: Namespace.root))
+      assert env.find_class(TypeName.new(name: :Pathname, namespace: Namespace.root))
+      assert env.find_class(TypeName.new(name: :Person, namespace: Namespace.root))
+      assert env.find_class(TypeName.new(name: :PeopleController, namespace: Namespace.root))
+      refute_empty env.find_extensions(TypeName.new(name: :Object, namespace: Namespace.root))
+      assert_empty env.find_extensions(TypeName.new(name: :Pathname, namespace: Namespace.root))
     end
   end
 

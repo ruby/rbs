@@ -51,6 +51,31 @@ module Ruby
           location: location
         }.to_json(*a)
       end
+
+      def sub(s)
+        s.without(*type_params).yield_self do |sub|
+          map_type do |ty|
+            ty.sub(sub)
+          end
+        end
+      end
+
+      def free_variables(set = Set.new)
+        type.free_variables(set)
+        block&.type&.free_variables(set)
+        set.subtract(type_params)
+      end
+
+      def map_type(&block)
+        self.class.new(
+          type_params: type_params,
+          type: type.map_type(&block),
+          block: self.block&.yield_self do |b|
+            Block.new(type: b.type.map_type(&block), required: b.required)
+          end,
+          location: location
+        )
+      end
     end
   end
 end

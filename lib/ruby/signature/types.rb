@@ -7,6 +7,12 @@ module Ruby
         end
       end
 
+      module NoSubst
+        def sub(s)
+          self
+        end
+      end
+
       module Bases
         class Base
           attr_reader :location
@@ -26,6 +32,7 @@ module Ruby
           alias eql? ==
 
           include NoFreeVariables
+          include NoSubst
 
           def to_json(*a)
             klass = case self
@@ -94,6 +101,25 @@ module Ruby
         def to_json(*a)
           { class: :variable, name: name, location: location }.to_json(*a)
         end
+
+        def sub(s)
+          s.apply(self)
+        end
+
+        def self.build(v)
+          case v
+          when Symbol
+            new(name: v, location: nil)
+          when Array
+            v.map {|x| new(name: x, location: nil) }
+          end
+        end
+
+        @@count = 0
+        def self.fresh(v = :T)
+          @@count = @@count + 1
+          new(name: :"#{v}@#{@@count}", location: nil)
+        end
       end
 
       class ClassSingleton
@@ -116,6 +142,7 @@ module Ruby
         end
 
         include NoFreeVariables
+        include NoSubst
 
         def to_json(*a)
           { class: :class_singleton, name: name, location: location }.to_json(*a)
@@ -159,6 +186,12 @@ module Ruby
         def to_json(*a)
           { class: :interface, name: name, args: args, location: location }.to_json(*a)
         end
+
+        def sub(s)
+          self.class.new(name: name,
+                         args: args.map {|ty| ty.sub(s) },
+                         location: location)
+        end
       end
 
       class ClassInstance
@@ -174,6 +207,12 @@ module Ruby
 
         def to_json(*a)
           { class: :class_instance, name: name, args: args, location: location }.to_json(*a)
+        end
+
+        def sub(s)
+          self.class.new(name: name,
+                         args: args.map {|ty| ty.sub(s) },
+                         location: location)
         end
       end
 
@@ -197,6 +236,7 @@ module Ruby
         end
 
         include NoFreeVariables
+        include NoSubst
 
         def to_json(*a)
           { class: :alias, name: name, location: location }.to_json(*a)
@@ -233,6 +273,11 @@ module Ruby
         def to_json(*a)
           { class: :tuple, types: types, location: location }.to_json(*a)
         end
+
+        def sub(s)
+          self.class.new(types: types.map {|ty| ty.sub(s) },
+                         location: location)
+        end
       end
 
       class Record
@@ -265,6 +310,11 @@ module Ruby
         def to_json(*a)
           { class: :record, fields: fields, location: location }.to_json(*a)
         end
+
+        def sub(s)
+          self.class.new(fields: fields.transform_values {|ty| ty.sub(s) },
+                         location: location)
+        end
       end
 
       class Optional
@@ -292,6 +342,10 @@ module Ruby
 
         def to_json(*a)
           { class: :optional, type: type, location: location }.to_json(*a)
+        end
+
+        def sub(s)
+          self.class.new(type: type.sub(s), location: location)
         end
       end
 
@@ -325,6 +379,11 @@ module Ruby
         def to_json(*a)
           { class: :union, types: types, location: location }.to_json(*a)
         end
+
+        def sub(s)
+          self.class.new(types: types.map {|ty| ty.sub(s) },
+                         location: location)
+        end
       end
 
       class Intersection
@@ -356,6 +415,11 @@ module Ruby
 
         def to_json(*a)
           { class: :intersection, types: types, location: location }.to_json(*a)
+        end
+
+        def sub(s)
+          self.class.new(types: types.map {|ty| ty.sub(s) },
+                         location: location)
         end
       end
 
@@ -491,8 +555,26 @@ module Ruby
             trailing_positionals: trailing_positionals,
             required_keywords: required_keywords,
             optional_keywords: optional_keywords,
-            rest_keywords: rest_keywords
+            rest_keywords: rest_keywords,
+            return_type: return_type
           }.to_json(*a)
+        end
+
+        def sub(s)
+          map_type {|ty| ty.sub(s) }
+        end
+
+        def with_return_type(type)
+          Function.new(
+            required_positionals: required_positionals,
+            optional_positionals: optional_positionals,
+            rest_positionals: rest_positionals,
+            trailing_positionals: trailing_positionals,
+            required_keywords: required_keywords,
+            optional_keywords: optional_keywords,
+            rest_keywords: rest_keywords,
+            return_type: type
+          )
         end
       end
 
@@ -522,6 +604,10 @@ module Ruby
         def to_json(*a)
           { class: :proc, type: type, location: location }.to_json(*a)
         end
+
+        def sub(s)
+          self.class.new(type: type.sub(s), location: location)
+        end
       end
 
       class Literal
@@ -544,6 +630,7 @@ module Ruby
         end
 
         include NoFreeVariables
+        include NoSubst
 
         def to_json(*a)
           { class: :literal, literal: literal.inspect, location: location }.to_json(*a)

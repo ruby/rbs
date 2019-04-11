@@ -36,6 +36,10 @@ module Ruby
         to_s.to_json(*a)
       end
 
+      def to_namespace
+        namespace.append(self.name)
+      end
+
       def class?
         kind == :class
       end
@@ -44,8 +48,20 @@ module Ruby
         kind == :alias
       end
 
+      def absolute!
+        self.class.new(namespace: namespace.absolute!, name: name)
+      end
+
+      def absolute?
+        namespace.absolute?
+      end
+
       def interface?
         kind == :interface
+      end
+
+      def with_prefix(namespace)
+        self.class.new(namespace: namespace + self.namespace, name: name)
       end
     end
   end
