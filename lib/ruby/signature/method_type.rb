@@ -76,6 +76,23 @@ module Ruby
           location: location
         )
       end
+
+      def to_s
+        s = case
+            when block && block.required
+              "(#{type.param_to_s}) { (#{block.type.param_to_s} -> #{block.type.return_to_s} } -> #{type.return_to_s}"
+            when block
+              "(#{type.param_to_s}) ?{ (#{block.type.param_to_s} -> #{block.type.return_to_s} } -> #{type.return_to_s}"
+            else
+              "(#{type.param_to_s}) -> #{type.return_to_s}"
+            end
+
+        if type_params.empty?
+          s
+        else
+          "[#{type_params.join(", ")}] #{s}"
+        end
+      end
     end
   end
 end

@@ -35,30 +35,33 @@ module Ruby
           include NoSubst
 
           def to_json(*a)
-            klass = case self
-                    when Types::Bases::Bool
-                      :bool
-                    when Types::Bases::Void
-                      :void
-                    when Types::Bases::Any
-                      :any
-                    when Types::Bases::Nil
-                      :nil
-                    when Types::Bases::Top
-                      :top
-                    when Types::Bases::Bottom
-                      :bot
-                    when Types::Bases::Self
-                      :self
-                    when Types::Bases::Instance
-                      :instance
-                    when Types::Bases::Class
-                      :class
-                    else
-                      raise "Unexpected base type: #{type.inspect}"
-                    end
-
+            klass = to_s.to_sym
             { class: klass, location: location }.to_json(*a)
+          end
+
+          def to_s(level = 0)
+            case self
+            when Types::Bases::Bool
+              'bool'
+            when Types::Bases::Void
+              'void'
+            when Types::Bases::Any
+              'any'
+            when Types::Bases::Nil
+              'nil'
+            when Types::Bases::Top
+              'top'
+            when Types::Bases::Bottom
+              'bot'
+            when Types::Bases::Self
+              'self'
+            when Types::Bases::Instance
+              'instance'
+            when Types::Bases::Class
+              'class'
+            else
+              raise "Unexpected base type: #{type.inspect}"
+            end
           end
         end
 
@@ -120,6 +123,10 @@ module Ruby
           @@count = @@count + 1
           new(name: :"#{v}@#{@@count}", location: nil)
         end
+
+        def to_s(level = 0)
+          name.to_s
+        end
       end
 
       class ClassSingleton
@@ -147,6 +154,10 @@ module Ruby
         def to_json(*a)
           { class: :class_singleton, name: name, location: location }.to_json(*a)
         end
+
+        def to_s(level = 0)
+          "singleton(#{name})"
+        end
       end
 
       module Application
@@ -168,6 +179,14 @@ module Ruby
             args.each do |arg|
               arg.free_variables(set)
             end
+          end
+        end
+
+        def to_s(level = 0)
+          if args.empty?
+            name.to_s
+          else
+            "#{name}[#{args.join(", ")}]"
           end
         end
       end
@@ -241,6 +260,10 @@ module Ruby
         def to_json(*a)
           { class: :alias, name: name, location: location }.to_json(*a)
         end
+
+        def to_s(level = 0)
+          name.to_s
+        end
       end
 
       class Tuple
@@ -277,6 +300,10 @@ module Ruby
         def sub(s)
           self.class.new(types: types.map {|ty| ty.sub(s) },
                          location: location)
+        end
+
+        def to_s(level = 0)
+          "[ #{types.join(", ")} ]"
         end
       end
 
@@ -315,6 +342,13 @@ module Ruby
           self.class.new(fields: fields.transform_values {|ty| ty.sub(s) },
                          location: location)
         end
+
+        def to_s(level = 0)
+          fields = self.fields.map do |key, type|
+            "#{key}: #{type}"
+          end
+          "{ #{fields.join(", ")} }"
+        end
       end
 
       class Optional
@@ -346,6 +380,10 @@ module Ruby
 
         def sub(s)
           self.class.new(type: type.sub(s), location: location)
+        end
+
+        def to_s(level = 0)
+          "#{type.to_s(1)}?"
         end
       end
 
@@ -384,6 +422,14 @@ module Ruby
           self.class.new(types: types.map {|ty| ty.sub(s) },
                          location: location)
         end
+
+        def to_s(level = 0)
+          if level > 0
+            "(#{types.join(" | ")})"
+          else
+            types.join(" | ")
+          end
+        end
       end
 
       class Intersection
@@ -421,6 +467,15 @@ module Ruby
           self.class.new(types: types.map {|ty| ty.sub(s) },
                          location: location)
         end
+
+        def to_s(level = 0)
+          strs = types.map {|ty| ty.to_s(2) }
+          if level > 0
+            "(#{strs.join(" & ")})"
+          else
+            strs.join(" & ")
+          end
+        end
       end
 
       class Function
@@ -453,6 +508,14 @@ module Ruby
 
           def to_json(*a)
             { type: type, name: name }.to_json(*a)
+          end
+
+          def to_s
+            if name
+              "#{type} #{name}"
+            else
+              "#{type}"
+            end
           end
         end
 
@@ -576,6 +639,33 @@ module Ruby
             return_type: type
           )
         end
+
+        def empty?
+          required_positionals.empty? &&
+            optional_positionals.empty? &&
+            !rest_positionals &&
+            trailing_positionals.empty? &&
+            required_keywords.empty? &&
+            optional_keywords.empty? &&
+            !rest_keywords
+        end
+
+        def param_to_s
+          params = []
+          params.push(*required_positionals.map(&:to_s))
+          params.push(*optional_positionals.map {|p| "?#{p}"})
+          params.push("*#{rest_positionals}") if rest_positionals
+          params.push(*trailing_positionals.map(&:to_s))
+          params.push(*required_keywords.map {|name, param| "#{name}: #{param}" })
+          params.push(*optional_keywords.map {|name, param| "?#{name}: #{param}" })
+          params.push("**#{rest_keywords}") if rest_keywords
+
+          params.join(", ")
+        end
+
+        def return_to_s
+          return_type.to_s(1)
+        end
       end
 
       class Proc
@@ -608,6 +698,10 @@ module Ruby
         def sub(s)
           self.class.new(type: type.sub(s), location: location)
         end
+
+        def to_s(level = 0)
+          "^(#{type.param_to_s}) -> #{type.return_to_s}".lstrip
+        end
       end
 
       class Literal
@@ -634,6 +728,10 @@ module Ruby
 
         def to_json(*a)
           { class: :literal, literal: literal.inspect, location: location }.to_json(*a)
+        end
+
+        def to_s(level = 0)
+          literal.to_s
         end
       end
     end
