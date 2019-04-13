@@ -315,7 +315,7 @@ EOF
     end
   end
 
-  def test_build_one_instance
+  def test_build_one_instance_methods
     SignatureManager.new do |manager|
       manager.build do |env|
         builder = DefinitionBuilder.new(env: env)
@@ -333,7 +333,38 @@ EOF
     end
   end
 
-  def test_build_one_singleton
+  def test_build_one_instance_variables
+    SignatureManager.new do |manager|
+      manager.files[Pathname("foo.rbi")] = <<EOF
+class Hello[A]
+  @name: A
+  @@count: A
+  self.@email: String
+end
+EOF
+      manager.build do |env|
+        builder = DefinitionBuilder.new(env: env)
+
+        builder.build_one_instance(type_name("::Hello")).yield_self do |definition|
+          assert_instance_of Definition, definition
+
+          assert_equal [:@name].sort, definition.instance_variables.keys.sort
+          definition.instance_variables[:@name].yield_self do |variable|
+            assert_instance_of Definition::Variable, variable
+            assert_equal parse_type("A", variables: [:A]), variable.type
+          end
+
+          assert_equal [:@@count].sort, definition.class_variables.keys.sort
+          definition.class_variables[:@@count].yield_self do |variable|
+            assert_instance_of Definition::Variable, variable
+            assert_equal parse_type("::A"), variable.type
+          end
+        end
+      end
+    end
+  end
+
+  def test_build_one_singleton_methods
     SignatureManager.new do |manager|
       manager.build do |env|
         builder = DefinitionBuilder.new(env: env)
@@ -341,6 +372,37 @@ EOF
         builder.build_one_singleton(BuiltinNames::String.name).yield_self do |definition|
           definition.methods[:try_convert].yield_self do |method|
             assert_method_definition method, ["(any) -> ::String?"], accessibility: :public
+          end
+        end
+      end
+    end
+  end
+
+  def test_build_one_singleton_variables
+    SignatureManager.new do |manager|
+      manager.files[Pathname("foo.rbi")] = <<EOF
+class Hello[A]
+  @name: A
+  @@count: A
+  self.@email: String
+end
+EOF
+      manager.build do |env|
+        builder = DefinitionBuilder.new(env: env)
+
+        builder.build_one_singleton(type_name("::Hello")).yield_self do |definition|
+          assert_instance_of Definition, definition
+
+          assert_equal [:@email].sort, definition.instance_variables.keys.sort
+          definition.instance_variables[:@email].yield_self do |variable|
+            assert_instance_of Definition::Variable, variable
+            assert_equal parse_type("::String"), variable.type
+          end
+
+          assert_equal [:@@count].sort, definition.class_variables.keys.sort
+          definition.class_variables[:@@count].yield_self do |variable|
+            assert_instance_of Definition::Variable, variable
+            assert_equal parse_type("::A"), variable.type
           end
         end
       end
@@ -375,6 +437,46 @@ EOF
     end
   end
 
+  def test_build_instance_variables
+    SignatureManager.new do |manager|
+      manager.files[Pathname("foo.rbi")] = <<EOF
+class Hello[A]
+  @name: A
+  @@email: String
+end
+
+class Foo < Hello[String]
+end
+
+class Bar < Foo
+  @name: String
+end
+EOF
+      manager.build do |env|
+        builder = DefinitionBuilder.new(env: env)
+
+        builder.build_instance(type_name("::Bar")).yield_self do |definition|
+          assert_instance_of Definition, definition
+
+          assert_equal [:@name].sort, definition.instance_variables.keys.sort
+          definition.instance_variables[:@name].yield_self do |variable|
+            assert_instance_of Definition::Variable, variable
+            assert_equal parse_type("::String"), variable.type
+            assert_equal :Bar, variable.declared_in.name.name
+            assert_equal :Hello, variable.parent_variable.declared_in.name.name
+          end
+
+          assert_equal [:@@email].sort, definition.class_variables.keys.sort
+          definition.class_variables[:@@email].yield_self do |variable|
+            assert_instance_of Definition::Variable, variable
+            assert_equal parse_type("::String"), variable.type
+            assert_equal :Hello, variable.declared_in.name.name
+          end
+        end
+      end
+    end
+  end
+
   def test_build_singleton
     SignatureManager.new do |manager|
       manager.build do |env|
@@ -390,5 +492,44 @@ EOF
       end
     end
   end
+
+  def test_build_singleton_variables
+    SignatureManager.new do |manager|
+      manager.files[Pathname("foo.rbi")] = <<EOF
+class Hello
+  self.@name: Integer
+  @@email: String
 end
 
+class Foo < Hello
+end
+
+class Bar < Foo
+  self.@name: String
+end
+EOF
+      manager.build do |env|
+        builder = DefinitionBuilder.new(env: env)
+
+        builder.build_singleton(type_name("::Bar")).yield_self do |definition|
+          assert_instance_of Definition, definition
+
+          assert_equal [:@name].sort, definition.instance_variables.keys.sort
+          definition.instance_variables[:@name].yield_self do |variable|
+            assert_instance_of Definition::Variable, variable
+            assert_equal parse_type("::String"), variable.type
+            assert_equal :Bar, variable.declared_in.name.name
+            assert_equal :Hello, variable.parent_variable.declared_in.name.name
+          end
+
+          assert_equal [:@@email].sort, definition.class_variables.keys.sort
+          definition.class_variables[:@@email].yield_self do |variable|
+            assert_instance_of Definition::Variable, variable
+            assert_equal parse_type("::String"), variable.type
+            assert_equal :Hello, variable.declared_in.name.name
+          end
+        end
+      end
+    end
+  end
+end

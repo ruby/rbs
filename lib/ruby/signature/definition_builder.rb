@@ -232,6 +232,18 @@ module Ruby
                     )
                   end
                 end
+              when AST::Members::InstanceVariable
+                definition.instance_variables[member.name] = Definition::Variable.new(
+                  type: absolute_type(member.type, namespace: namespace),
+                  parent_variable: nil,
+                  declared_in: decl
+                )
+              when AST::Members::ClassVariable
+                definition.class_variables[member.name] = Definition::Variable.new(
+                  type: absolute_type(member.type, namespace: namespace),
+                  parent_variable: nil,
+                  declared_in: decl
+                )
               end
             end
           end
@@ -298,6 +310,18 @@ module Ruby
                     )
                   end
                 end
+              when AST::Members::ClassInstanceVariable
+                definition.instance_variables[member.name] = Definition::Variable.new(
+                  type: absolute_type(member.type, namespace: namespace),
+                  parent_variable: nil,
+                  declared_in: decl
+                )
+              when AST::Members::ClassVariable
+                definition.class_variables[member.name] = Definition::Variable.new(
+                  type: absolute_type(member.type, namespace: namespace),
+                  parent_variable: nil,
+                  declared_in: decl
+                )
               end
             end
           end
@@ -403,8 +427,26 @@ module Ruby
             current_definition.methods.each do |name, method|
               merge_method definition.methods, name, method, sub, namespace
             end
+
+            current_definition.instance_variables.each do |name, variable|
+              merge_variable definition.instance_variables, name, variable
+            end
+
+            current_definition.class_variables.each do |name, variable|
+              merge_variable definition.class_variables, name, variable
+            end
           end
         end
+      end
+
+      def merge_variable(variables, name, variable)
+        super_variable = variables[name]
+
+        variables[name] = Definition::Variable.new(
+          parent_variable: super_variable,
+          type: variable.type,
+          declared_in: variable.declared_in
+        )
       end
 
       def merge_method(methods, name, method, sub, namespace)

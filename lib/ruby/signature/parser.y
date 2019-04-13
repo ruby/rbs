@@ -197,16 +197,36 @@ rule
         )
       }
     | tCLASSVAR kCOLON type {
+        type = val[2]
+
+        if type.is_a?(Types::Variable)
+          type = Types::ClassInstance.new(
+            name: TypeName.new(name: type.name, namespace: Namespace.empty),
+            args: [],
+            location: type.location
+          )
+        end
+
         result = Members::ClassVariable.new(
           name: val[0].value,
-          type: val[2],
+          type: type,
           location: val[0].location + val[2].location
         )
       }
     | kSELF kDOT tIVAR kCOLON type {
+      type = val[4]
+
+      if type.is_a?(Types::Variable)
+        type = Types::ClassInstance.new(
+          name: TypeName.new(name: type.name, namespace: Namespace.empty),
+          args: [],
+          location: type.location
+        )
+      end
+
       result = Members::ClassInstanceVariable.new(
         name: val[2].value,
-        type: val[4],
+        type: type,
         location: val[0].location + val[4].location
       )
     }

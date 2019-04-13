@@ -4,12 +4,12 @@ module Ruby
       class Variable
         attr_reader :parent_variable
         attr_reader :type
-        attr_reader :declaration
+        attr_reader :declared_in
 
-        def initialize(parent_variable:, type:, declaration:)
-          @parent_variable = parent
+        def initialize(parent_variable:, type:, declared_in:)
+          @parent_variable = parent_variable
           @type = type
-          @declaration = declaration
+          @declared_in = declared_in
         end
       end
 
