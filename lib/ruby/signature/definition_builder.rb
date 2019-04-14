@@ -65,6 +65,31 @@ module Ruby
         end
       end
 
+      class NoTypeFoundError < StandardError
+        attr_reader :type_name
+        attr_reader :location
+
+        def initialize(type_name:, location:)
+          @type_name = type_name
+          @location = location
+
+          loc = if location
+                  "#{location.name}:#{location}"
+                else
+                  "*:*:*...*:*"
+                end
+
+          super "#{loc}: Could not find #{type_name}"
+        end
+
+        def self.check!(type_name, env:, location:)
+          env.find_type_decl(type_name) or
+            raise new(type_name: type_name, location: location)
+
+          type_name
+        end
+      end
+
       attr_reader :env
       attr_reader :instance_cache
       attr_reader :singleton_cache
@@ -103,7 +128,7 @@ module Ruby
             unless self_ancestor.name == BuiltinNames::BasicObject.name
               super_ancestor = decl.super_class&.yield_self do |super_class|
                 Definition::Ancestor::Instance.new(
-                  name: absolute_class_name(super_class.name, namespace: namespace),
+                  name: absolute_type_name(super_class.name, namespace: namespace, location: location || decl.location),
                   args: super_class.args.map {|ty| absolute_type(ty.sub(sub), namespace: namespace) }
                 )
               end || Definition::Ancestor::Instance.new(name: BuiltinNames::Object.name, args: [])
@@ -117,7 +142,7 @@ module Ruby
             when AST::Members::Include
               if member.name.class?
                 ancestor = Definition::Ancestor::Instance.new(
-                  name: absolute_class_name(member.name, namespace: namespace),
+                  name: absolute_type_name(member.name, namespace: namespace, location: member.location),
                   args: member.args.map {|ty| absolute_type(ty.sub(sub), namespace: namespace) }
                 )
                 build_ancestors ancestor, ancestors: ancestors, building_ancestors: building_ancestors, location: member.location
@@ -131,7 +156,7 @@ module Ruby
             case member
             when AST::Members::Prepend
               ancestor = Definition::Ancestor::Instance.new(
-                name: absolute_class_name(member.name, namespace: namespace),
+                name: absolute_type_name(member.name, namespace: namespace, location: member.location),
                 args: member.args.map {|ty| absolute_type(ty.sub(sub), namespace: namespace) }
               )
               build_ancestors ancestor, ancestors: ancestors, building_ancestors: building_ancestors, location: member.location
@@ -149,7 +174,7 @@ module Ruby
             else
               super_ancestor = decl.super_class&.yield_self do |super_class|
                 Definition::Ancestor::Singleton.new(
-                  name: absolute_class_name(super_class.name, namespace: namespace)
+                  name: absolute_type_name(super_class.name, namespace: namespace, location: location || decl.location)
                 )
               end || Definition::Ancestor::Singleton.new(name: BuiltinNames::Object.name)
 
@@ -168,7 +193,7 @@ module Ruby
             when AST::Members::Extend
               if member.name.class?
                 ancestor = Definition::Ancestor::Instance.new(
-                  name: absolute_class_name(member.name, namespace: namespace),
+                  name: absolute_type_name(member.name, namespace: namespace, location: member.location),
                   args: member.args.map {|ty| absolute_type(ty.sub(sub), namespace: namespace) }
                 )
                 build_ancestors ancestor, ancestors: ancestors, building_ancestors: building_ancestors, location: member.location
@@ -533,31 +558,36 @@ module Ruby
         end
       end
 
-      def absolute_class_name(type_name, namespace:)
-        env.absolute_class_name(type_name, namespace: namespace) || type_name.absolute!
-      end
+      def absolute_type_name(type_name, namespace:, location:)
+        absolute_name = case
+                        when type_name.class?
+                          env.absolute_class_name(type_name, namespace: namespace)
+                        when type_name.alias?
+                          env.absolute_alias_name(type_name, namespace: namespace)
+                        when type_name.interface?
+                          env.absolute_interface_name(type_name, namespace: namespace)
+                        end
 
-      def absolute_interface_name(type_name, namespace:)
-        env.absolute_interface_name(type_name, namespace: namespace) || type_name.absolute!
+        absolute_name or NoTypeFoundError.check!(type_name.absolute!, env: env, location: location)
       end
 
       def absolute_type(type, namespace:)
         case type
         when Types::ClassSingleton
-          absolute_name = absolute_class_name(type.name, namespace: namespace)
+          absolute_name = absolute_type_name(type.name, namespace: namespace, location: type.location)
           Types::ClassSingleton.new(name: absolute_name, location: type.location)
         when Types::ClassInstance
-          absolute_name = absolute_class_name(type.name, namespace: namespace)
+          absolute_name = absolute_type_name(type.name, namespace: namespace, location: type.location)
           Types::ClassInstance.new(name: absolute_name,
                                    args: type.args.map {|ty| absolute_type(ty, namespace: namespace) },
                                    location: type.location)
         when Types::Interface
-          absolute_name = absolute_interface_name(type.name, namespace: namespace)
+          absolute_name = absolute_type_name(type.name, namespace: namespace, location: type.location)
           Types::Interface.new(name: absolute_name,
                                args: type.args.map {|ty| absolute_type(ty, namespace: namespace) },
                                location: type.location)
         when Types::Alias
-          absolute_name = env.absolute_alias_name(type.name, namespace: namespace) || type.name.absolute!
+          absolute_name = absolute_type_name(type.name, namespace: namespace, location: type.location)
           Types::Alias.new(name: absolute_name, location: type.location)
         when Types::Tuple
           Types::Tuple.new(

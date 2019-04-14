@@ -338,7 +338,7 @@ EOF
       manager.files[Pathname("foo.rbi")] = <<EOF
 class Hello[A]
   @name: A
-  @@count: A
+  @@count: Integer
   self.@email: String
 end
 EOF
@@ -357,7 +357,7 @@ EOF
           assert_equal [:@@count].sort, definition.class_variables.keys.sort
           definition.class_variables[:@@count].yield_self do |variable|
             assert_instance_of Definition::Variable, variable
-            assert_equal parse_type("::A"), variable.type
+            assert_equal parse_type("::Integer"), variable.type
           end
         end
       end
@@ -383,7 +383,7 @@ EOF
       manager.files[Pathname("foo.rbi")] = <<EOF
 class Hello[A]
   @name: A
-  @@count: A
+  @@count: Integer
   self.@email: String
 end
 EOF
@@ -402,7 +402,7 @@ EOF
           assert_equal [:@@count].sort, definition.class_variables.keys.sort
           definition.class_variables[:@@count].yield_self do |variable|
             assert_instance_of Definition::Variable, variable
-            assert_equal parse_type("::A"), variable.type
+            assert_equal parse_type("::Integer"), variable.type
           end
         end
       end
