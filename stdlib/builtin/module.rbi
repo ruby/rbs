@@ -1,0 +1,2 @@
+class Module
+end

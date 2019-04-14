@@ -37,7 +37,7 @@ module Ruby
         @stderr = stderr
       end
 
-      COMMANDS = [:ast, :version]
+      COMMANDS = [:ast, :ancestors, :methods, :method, :version]
 
       def library_parse(opts, options:)
         opts.on("-r LIBRARY") do |lib|
@@ -60,7 +60,7 @@ module Ruby
 
         OptionParser.new do |opts|
           library_parse(opts, options: options)
-        end.parse!(args)
+        end.order!(args)
 
         command = args.shift&.to_sym
 
@@ -87,8 +87,157 @@ module Ruby
         stdout.flush
       end
 
+      def run_ancestors(args, options)
+        kind = :instance
+
+        OptionParser.new do |opts|
+          opts.on("--instance") { kind = :instance }
+          opts.on("--singleton") { kind = :singleton }
+        end.order!(args)
+
+        env = Environment.new()
+        loader = EnvironmentLoader.new(env: env)
+
+        options.setup(loader)
+
+        loader.load
+
+        builder = DefinitionBuilder.new(env: env)
+        type_name = parse_type_name(args[0]).absolute!
+
+        if env.class?(type_name)
+          ancestor = case kind
+                     when :instance
+                       definition = env.find_class(type_name)
+                       Definition::Ancestor::Instance.new(name: type_name,
+                                                          args: Types::Variable.build(definition.type_params))
+                     when :singleton
+                       Definition::Ancestor::Singleton.new(name: type_name)
+                     end
+
+          ancestors = builder.build_ancestors(ancestor)
+
+          ancestors.each do |ancestor|
+            case ancestor
+            when Definition::Ancestor::Singleton
+              stdout.puts "singleton(#{ancestor.name})"
+            when Definition::Ancestor::Instance
+              if ancestor.args.empty?
+                stdout.puts ancestor.name.to_s
+              else
+                stdout.puts "#{ancestor.name}[#{ancestor.args.join(", ")}]"
+              end
+            end
+          end
+        else
+          stdout.puts "Cannot find class: #{type_name}"
+        end
+      end
+
+      def run_methods(args, options)
+        kind = :instance
+        inherit = true
+
+        OptionParser.new do |opts|
+          opts.on("--instance") { kind = :instance }
+          opts.on("--singleton") { kind = :singleton }
+          opts.on("--inherit") { inherit = true }
+          opts.on("--no-inherit") { inherit = false }
+        end.order!(args)
+
+        env = Environment.new()
+        loader = EnvironmentLoader.new(env: env)
+
+        options.setup(loader)
+
+        loader.load
+
+        builder = DefinitionBuilder.new(env: env)
+        type_name = parse_type_name(args[0]).absolute!
+
+        if env.class?(type_name)
+          definition = case kind
+                       when :instance
+                         builder.build_instance(type_name)
+                       when :singleton
+                         builder.build_singleton(type_name)
+                       end
+
+          definition.methods.keys.sort.each do |name|
+            method = definition.methods[name]
+            if inherit || method.implemented_in == definition.declaration
+              stdout.puts "#{name} (#{method.accessibility})"
+            end
+          end
+        else
+          stdout.puts "Cannot find class: #{type_name}"
+        end
+      end
+
+      def run_method(args, options)
+        kind = :instance
+
+        OptionParser.new do |opts|
+          opts.on("--instance") { kind = :instance }
+          opts.on("--singleton") { kind = :singleton }
+        end.order!(args)
+
+        unless args.size == 2
+          stdout.puts "Expected two arguments, but given #{args.size}."
+          return
+        end
+
+        env = Environment.new()
+        loader = EnvironmentLoader.new(env: env)
+
+        options.setup(loader)
+
+        loader.load
+
+        builder = DefinitionBuilder.new(env: env)
+        type_name = parse_type_name(args[0]).absolute!
+        method_name = args[1].to_sym
+
+        unless env.class?(type_name)
+          stdout.puts "Cannot find class: #{type_name}"
+          return
+        end
+
+        definition = case kind
+                     when :instance
+                       builder.build_instance(type_name)
+                     when :singleton
+                       builder.build_singleton(type_name)
+                     end
+
+        method = definition.methods[method_name]
+
+        unless method
+          stdout.puts "Cannot find method: #{method_name}"
+          return
+        end
+
+        stdout.puts "#{type_name}#{kind == :instance ? "#" : "."}#{method_name}"
+        stdout.puts "  defined_in: #{method.defined_in&.name&.absolute!}"
+        stdout.puts "  implementation: #{method.implemented_in.name.absolute!}"
+        stdout.puts "  accessibility: #{method.accessibility}"
+        stdout.puts "  types:"
+        separator = " "
+        for type in method.method_types
+          stdout.puts "    #{separator} #{type}"
+          separator = "|"
+        end
+      end
+
       def run_version(args)
         stdout.puts "ruby-signature #{VERSION}"
+      end
+
+      def parse_type_name(string)
+        Namespace.parse(string).yield_self do |namespace|
+          last = namespace.path.last
+          TypeName.new(name: last, namespace: namespace.parent)
+        end
       end
     end
   end

@@ -47,6 +47,10 @@ module Ruby
         name_to_decl[type_name]
       end
 
+      def class?(type_name)
+        find_class(type_name)&.is_a?(AST::Declarations::Class)
+      end
+
       def find_type_decl(type_name)
         name_to_decl[type_name]
       end
