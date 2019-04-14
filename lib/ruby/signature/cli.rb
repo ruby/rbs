@@ -37,7 +37,7 @@ module Ruby
         @stderr = stderr
       end
 
-      COMMANDS = [:ast, :ancestors, :methods, :method, :version]
+      COMMANDS = [:ast, :list, :ancestors, :methods, :method, :version]
 
       def library_parse(opts, options:)
         opts.on("-r LIBRARY") do |lib|
@@ -85,6 +85,44 @@ module Ruby
 
         stdout.print JSON.generate(env.declarations)
         stdout.flush
+      end
+
+      def run_list(args, options)
+        list = []
+
+        OptionParser.new do |opts|
+          opts.on("--class") { list << :class }
+          opts.on("--module") { list << :module }
+          opts.on("--interface") { list << :interface }
+        end.order!(args)
+
+        list.push(:class, :module, :interface) if list.empty?
+
+        env = Environment.new()
+        loader = EnvironmentLoader.new(env: env)
+
+        options.setup(loader)
+
+        loader.load
+
+        env.each_decl.sort_by(&:to_s).each do |type_name|
+          decl = env.find_class(type_name)
+
+          case decl
+          when AST::Declarations::Class
+            if list.include?(:class)
+              stdout.puts "#{type_name} (class)"
+            end
+          when AST::Declarations::Module
+            if list.include?(:module)
+              stdout.puts "#{type_name} (module)"
+            end
+          when AST::Declarations::Interface
+            if list.include?(:interface)
+              stdout.puts "#{type_name} (interface)"
+            end
+          end
+        end
       end
 
       def run_ancestors(args, options)

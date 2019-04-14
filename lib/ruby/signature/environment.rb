@@ -47,6 +47,20 @@ module Ruby
         name_to_decl[type_name]
       end
 
+      def each_decl
+        if block_given?
+          name_to_decl.each_key do |name|
+            yield name
+          end
+        else
+          enum_for :each_decl
+        end
+      end
+
+      def each_class_name(&block)
+        each_decl.select {|name| class?(name) }.each &block
+      end
+
       def class?(type_name)
         find_class(type_name)&.is_a?(AST::Declarations::Class)
       end
