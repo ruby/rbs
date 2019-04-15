@@ -11,6 +11,7 @@ class Ruby::Signature::DefinitionBuilderTest < Minitest::Test
   DefinitionBuilder = Ruby::Signature::DefinitionBuilder
   Definition = Ruby::Signature::Definition
   BuiltinNames = Ruby::Signature::BuiltinNames
+  Types = Ruby::Signature::Types
 
   class SignatureManager
     attr_reader :files
@@ -212,6 +213,71 @@ EOF
     end
   end
 
+  def test_build_ancestors_extension
+    SignatureManager.new do |manager|
+      manager.files[Pathname("foo.rbi")] = <<EOF
+module X[A]
+end
+
+module Y[A]
+end
+
+class Foo[A]
+  include X[Integer]
+  prepend Y[A]
+  extend Y[1]
+end
+
+module Z[A]
+end
+
+extension Foo[X] (Foo)
+  include Z[X]
+  prepend Z[String]
+  extend Y[2]
+end
+EOF
+      manager.build do |env|
+        builder = DefinitionBuilder.new(env: env)
+
+        builder.build_ancestors(Definition::Ancestor::Instance.new(name: type_name("::Foo"), args: [Types::Variable.build(:A)])).yield_self do |ancestors|
+          assert_equal [
+                         Definition::Ancestor::Instance.new(name: type_name("::Y"), args: [Types::Variable.build(:A)]),
+                         Definition::Ancestor::Instance.new(name: type_name("::Z"), args: [parse_type("::String")]),
+                         Definition::Ancestor::ExtensionInstance.new(name: type_name("::Foo"),
+                                                                     args: [Types::Variable.build(:A)],
+                                                                     extension_name: :Foo),
+                         Definition::Ancestor::Instance.new(name: type_name("::Z"), args: [Types::Variable.build(:A)]),
+                         Definition::Ancestor::Instance.new(name: type_name("::Foo"), args: [Types::Variable.build(:A)]),
+                         Definition::Ancestor::Instance.new(name: type_name("::X"), args: [parse_type("::Integer")]),
+                         Definition::Ancestor::Instance.new(name: type_name("::Object"), args: []),
+                         Definition::Ancestor::Instance.new(name: type_name("::Kernel"), args: []),
+                         Definition::Ancestor::Instance.new(name: type_name("::BasicObject"), args: []),
+                       ],
+                       ancestors
+        end
+
+        builder.build_ancestors(Definition::Ancestor::Singleton.new(name: type_name("::Foo"))).yield_self do |ancestors|
+          assert_equal [
+                         Definition::Ancestor::ExtensionSingleton.new(name: type_name("::Foo"),
+                                                                      extension_name: :Foo),
+                         Definition::Ancestor::Instance.new(name: type_name("::Y"), args: [parse_type(2)]),
+                         Definition::Ancestor::Singleton.new(name: type_name("::Foo")),
+                         Definition::Ancestor::Instance.new(name: type_name("::Y"), args: [parse_type(1)]),
+                         Definition::Ancestor::Singleton.new(name: type_name("::Object")),
+                         Definition::Ancestor::Singleton.new(name: type_name("::BasicObject")),
+                         Definition::Ancestor::Instance.new(name: type_name("::Class"), args: []),
+                         Definition::Ancestor::Instance.new(name: type_name("::Module"), args: []),
+                         Definition::Ancestor::Instance.new(name: type_name("::Object"), args: []),
+                         Definition::Ancestor::Instance.new(name: type_name("::Kernel"), args: []),
+                         Definition::Ancestor::Instance.new(name: type_name("::BasicObject"), args: []),
+                       ],
+                       ancestors
+        end
+      end
+    end
+  end
+
   def test_build_ancestors_cycle
     SignatureManager.new do |manager|
       manager.files[Pathname("foo.rbi")] = <<EOF
@@ -327,6 +393,104 @@ EOF
 
           definition.methods[:respond_to_missing?].yield_self do |method|
             assert_method_definition method, ["(::Symbol, bool) -> bool"], accessibility: :private
+          end
+        end
+      end
+    end
+  end
+
+  def test_build_one_extension_instance
+    SignatureManager.new do |manager|
+      manager.files[Pathname("foo.rbi")] = <<EOF
+class Hello
+end
+
+extension Hello (Test)
+  def assert_equal: (any, any) -> void
+  def self.setup: () -> void
+
+  @name: String
+  self.@email: String
+  @@count: Integer
+
+  include _Foo[bool]
+end
+
+interface _Foo[X]
+  def foo: -> X
+end
+EOF
+      manager.build do |env|
+        builder = DefinitionBuilder.new(env: env)
+
+        builder.build_one_instance(type_name("::Hello"), extension_name: :Test).yield_self do |definition|
+          assert_equal [:assert_equal, :foo].sort, definition.methods.keys.sort
+
+          definition.methods[:assert_equal].tap do |method|
+            assert_method_definition method, ["(any, any) -> void"], accessibility: :public
+          end
+
+          definition.methods[:foo].tap do |method|
+            assert_method_definition method, ["() -> bool"], accessibility: :public
+          end
+
+          assert_equal [:@name].sort, definition.instance_variables.keys.sort
+          definition.instance_variables[:@name].tap do |variable|
+            assert_equal parse_type("::String"), variable.type
+          end
+
+          assert_equal [:@@count].sort, definition.class_variables.keys.sort
+          definition.class_variables[:@@count].tap do |variable|
+            assert_equal parse_type("::Integer"), variable.type
+          end
+        end
+      end
+    end
+  end
+
+  def test_build_one_extension_singleton
+    SignatureManager.new do |manager|
+      manager.files[Pathname("foo.rbi")] = <<EOF
+class Hello
+end
+
+extension Hello (Test)
+  def assert_equal: (any, any) -> void
+  def self.setup: () -> void
+
+  @name: String
+  self.@email: String
+  @@count: Integer
+
+  extend _Foo[bool]
+end
+
+interface _Foo[X]
+  def foo: -> X
+end
+EOF
+      manager.build do |env|
+        builder = DefinitionBuilder.new(env: env)
+
+        builder.build_one_singleton(type_name("::Hello"), extension_name: :Test).yield_self do |definition|
+          assert_equal [:setup, :foo].sort, definition.methods.keys.sort
+
+          definition.methods[:setup].tap do |method|
+            assert_method_definition method, ["() -> void"], accessibility: :public
+          end
+
+          definition.methods[:foo].tap do |method|
+            assert_method_definition method, ["() -> bool"], accessibility: :public
+          end
+
+          assert_equal [:@email].sort, definition.instance_variables.keys.sort
+          definition.instance_variables[:@email].tap do |variable|
+            assert_equal parse_type("::String"), variable.type
+          end
+
+          assert_equal [:@@count].sort, definition.class_variables.keys.sort
+          definition.class_variables[:@@count].tap do |variable|
+            assert_equal parse_type("::Integer"), variable.type
           end
         end
       end
@@ -528,6 +692,33 @@ EOF
             assert_equal parse_type("::String"), variable.type
             assert_equal :Hello, variable.declared_in.name.name
           end
+        end
+      end
+    end
+  end
+
+  def test_build_extension
+    SignatureManager.new do |manager|
+      manager.files[Pathname("foo.rbi")] = <<EOF
+class Hello
+end
+
+extension Hello (Hoge)
+  def hoge: -> self
+  def self.hoge: -> 1
+end
+EOF
+      manager.build do |env|
+        builder = DefinitionBuilder.new(env: env)
+
+        builder.build_instance(type_name("::Hello")).tap do |definition|
+          assert_instance_of Definition, definition
+          assert_method_definition definition.methods[:hoge], ["() -> self"]
+        end
+
+        builder.build_singleton(type_name("::Hello")).tap do |definition|
+          assert_instance_of Definition, definition
+          assert_method_definition definition.methods[:hoge], ["() -> 1"]
         end
       end
     end

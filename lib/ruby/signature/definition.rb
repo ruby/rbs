@@ -62,6 +62,8 @@ module Ruby
       module Ancestor
         Instance = Struct.new(:name, :args, keyword_init: true)
         Singleton = Struct.new(:name, keyword_init: true)
+        ExtensionInstance = Struct.new(:name, :extension_name, :args, keyword_init: true)
+        ExtensionSingleton = Struct.new(:name, :extension_name, keyword_init: true)
       end
 
       attr_reader :declaration
@@ -72,7 +74,10 @@ module Ruby
       attr_reader :ancestors
 
       def initialize(declaration:, self_type:, ancestors:)
-        unless declaration.is_a?(AST::Declarations::Class) || declaration.is_a?(AST::Declarations::Module) || declaration.is_a?(AST::Declarations::Interface)
+        unless declaration.is_a?(AST::Declarations::Class) ||
+          declaration.is_a?(AST::Declarations::Module) ||
+          declaration.is_a?(AST::Declarations::Interface) ||
+          declaration.is_a?(AST::Declarations::Extension)
           raise "Declaration should be a class, module, or interface: #{declaration.name}"
         end
 

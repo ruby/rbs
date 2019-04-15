@@ -73,6 +73,14 @@ module Ruby
         name_to_extensions[type_name] || []
       end
 
+      def each_extension(type_name, &block)
+        if block_given?
+          (name_to_extensions[type_name] || []).each(&block)
+        else
+          enum_for :each_extension, type_name
+        end
+      end
+
       def absolute_type_name(name, environment:, namespace:)
         raise "Namespace should be absolute: #{namespace}" unless namespace.absolute?
         raise "Namespace cannot be empty: #{namespace}" if namespace.empty?

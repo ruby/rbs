@@ -12,12 +12,7 @@ module Ruby
           @args = args
           @params = params
           @location = location
-          loc = if location
-                  "#{location.name}:#{location}"
-                else
-                  "*:*:*...*:*"
-                end
-          super "#{loc}: #{type_name} expects parameters [#{params.join(", ")}], but given args [#{args.join(", ")}]"
+          super "#{Location.to_string location}: #{type_name} expects parameters [#{params.join(", ")}], but given args [#{args.join(", ")}]"
         end
 
         def self.check!(type_name:, args:, params:, location:)
@@ -27,17 +22,39 @@ module Ruby
         end
       end
 
+      class InvalidExtensionParameterError < StandardError
+        attr_reader :type_name
+        attr_reader :extension_name
+        attr_reader :location
+        attr_reader :extension_params
+        attr_reader :class_params
+
+        def initialize(type_name:, extension_name:, extension_params:, class_params:, location:)
+          @type_name = type_name
+          @extension_name = extension_name
+          @extension_params = extension_params
+          @class_params = class_params
+          @location = location
+
+          super "#{Location.to_string location}: Expected #{class_params.size} parameters to #{type_name} (#{extension_name}) but has #{extension_params.size} parameters"
+        end
+
+        def self.check!(type_name:, extension_name:, extension_params:, class_params:, location:)
+          unless extension_params.size == class_params.size
+            raise new(type_name: type_name,
+                      extension_name: extension_name,
+                      extension_params: extension_params,
+                      class_params: class_params,
+                      location: location)
+          end
+        end
+      end
+
       class RecursiveAncestorError < StandardError
         attr_reader :ancestors
         attr_reader :location
 
         def initialize(ancestors:, location:)
-          loc = if location
-                  "#{location.name}:#{location}"
-                else
-                  "*:*:*...*:*"
-                end
-
           last = case last = ancestors.last
                  when Definition::Ancestor::Singleton
                    "singleton(#{last.name})"
@@ -48,7 +65,8 @@ module Ruby
                      "#{last.name}[#{last.args.join(", ")}]"
                    end
                  end
-          super "#{loc}: Detected recursive ancestors: #{last}"
+
+          super "#{Location.to_string location}: Detected recursive ancestors: #{last}"
         end
 
         def self.check!(self_ancestor, ancestors:, location:)
@@ -73,13 +91,7 @@ module Ruby
           @type_name = type_name
           @location = location
 
-          loc = if location
-                  "#{location.name}:#{location}"
-                else
-                  "*:*:*...*:*"
-                end
-
-          super "#{loc}: Could not find #{type_name}"
+          super "#{Location.to_string location}: Could not find #{type_name}"
         end
 
         def self.check!(type_name, env:, location:)
@@ -87,6 +99,28 @@ module Ruby
             raise new(type_name: type_name, location: location)
 
           type_name
+        end
+      end
+
+      class DuplicatedMethodDefinitionError < StandardError
+        attr_reader :decl
+        attr_reader :location
+
+        def initialize(decl:, name:, location:)
+          decl_str = case decl
+                     when AST::Declarations::Interface, AST::Declarations::Class, AST::Declarations::Module
+                       decl.type_name.to_s
+                     when AST::Declarations::Extension
+                       "#{decl.type_name} (#{decl.extension_name})"
+                     end
+
+          super "#{Location.to_string location}: #{decl_str} has duplicated method definition: #{name}"
+        end
+
+        def self.check!(decl:, methods:, name:, location:)
+          if methods.key?(name)
+            raise new(decl: decl, name: name, location: location)
+          end
         end
       end
 
@@ -152,6 +186,51 @@ module Ruby
 
           ancestors.unshift(self_ancestor)
 
+          env.each_extension(self_ancestor.name).sort_by {|e| e.extension_name.to_s }.each do |extension|
+            InvalidExtensionParameterError.check!(
+              type_name: self_ancestor.name,
+              extension_name: extension.extension_name,
+              extension_params: extension.type_params,
+              class_params: self_ancestor.args.map(&:name),
+              location: extension.location
+            )
+
+            sub = Substitution.build(extension.type_params, self_ancestor.args)
+
+            extension.members.each do |member|
+              case member
+              when AST::Members::Include
+                if member.name.class?
+                  ancestor = Definition::Ancestor::Instance.new(
+                    name: absolute_type_name(member.name, namespace: namespace, location: member.location),
+                    args: member.args.map {|ty| absolute_type(ty.sub(sub), namespace: namespace) }
+                  )
+                  build_ancestors ancestor, ancestors: ancestors, building_ancestors: building_ancestors, location: member.location
+                end
+              end
+            end
+
+            extension_ancestor = Definition::Ancestor::ExtensionInstance.new(
+              name: extension.name.absolute!,
+              extension_name: extension.extension_name,
+              args: self_ancestor.args,
+            )
+            ancestors.unshift(extension_ancestor)
+
+            extension.members.each do |member|
+              case member
+              when AST::Members::Prepend
+                if member.name.class?
+                  ancestor = Definition::Ancestor::Instance.new(
+                    name: absolute_type_name(member.name, namespace: namespace, location: member.location),
+                    args: member.args.map {|ty| absolute_type(ty.sub(sub), namespace: namespace) }
+                  )
+                  build_ancestors ancestor, ancestors: ancestors, building_ancestors: building_ancestors, location: member.location
+                end
+              end
+            end
+          end
+
           decl.members.each do |member|
             case member
             when AST::Members::Prepend
@@ -202,79 +281,32 @@ module Ruby
           end
 
           ancestors.unshift(self_ancestor)
+
+          env.each_extension(self_ancestor.name).sort_by {|e| e.extension_name.to_s }.each do |extension|
+            extension.members.each do |member|
+              case member
+              when AST::Members::Extend
+                if member.name.class?
+                  ancestor = Definition::Ancestor::Instance.new(
+                    name: absolute_type_name(member.name, namespace: namespace, location: member.location),
+                    args: member.args.map {|ty| absolute_type(ty, namespace: namespace) }
+                  )
+                  build_ancestors ancestor, ancestors: ancestors, building_ancestors: building_ancestors, location: member.location
+                end
+              end
+            end
+
+            extension_ancestor = Definition::Ancestor::ExtensionSingleton.new(
+              name: extension.name.absolute!,
+              extension_name: extension.extension_name
+            )
+            ancestors.unshift(extension_ancestor)
+          end
         end
 
         building_ancestors.pop
 
         ancestors
-      end
-
-      def build_one_instance(type_name)
-        decl = env.find_class(type_name)
-
-        case decl
-        when AST::Declarations::Module, AST::Declarations::Class
-          self_type = Types::ClassInstance.new(name: type_name,
-                                               args: Types::Variable.build(decl.type_params),
-                                               location: nil)
-
-          ancestors = [Definition::Ancestor::Instance.new(name: type_name, args: self_type.args)]
-          namespace = type_name.to_namespace
-
-          Definition.new(declaration: decl, self_type: self_type, ancestors: ancestors).tap do |definition|
-            each_member_with_accessibility decl.members do |member, accessibility|
-              case member
-              when AST::Members::MethodDefinition
-                if member.instance?
-                  name = member.name
-                  method_types = member.types.map do |method_type|
-                    method_type.map_type do |type|
-                      absolute_type(type, namespace: namespace)
-                    end
-                  end
-                  definition.methods[name] = Definition::Method.new(super_method: nil,
-                                                                    method_types: method_types,
-                                                                    defined_in: decl,
-                                                                    implemented_in: decl,
-                                                                    accessibility: accessibility)
-                end
-              when AST::Members::Include
-                if member.name.interface?
-                  interface_definition = build_one_instance(member.name)
-                  sub = Substitution.build(interface_definition.type_params, member.args)
-                  method_types = member.types.map do |method_type|
-                    method_type.sub(sub).map_type do |type|
-                      absolute_type(type, namespace: namespace)
-                    end
-                  end
-                  interface_definition.methods.each do |name, method|
-                    definition.methods[name] = Definition::Method.new(
-                      super_method: nil,
-                      method_types: method_types,
-                      defined_in: method.defined_in,
-                      implemented_in: decl,
-                      accessibility: method.accessibility
-                    )
-                  end
-                end
-              when AST::Members::InstanceVariable
-                definition.instance_variables[member.name] = Definition::Variable.new(
-                  type: absolute_type(member.type, namespace: namespace),
-                  parent_variable: nil,
-                  declared_in: decl
-                )
-              when AST::Members::ClassVariable
-                definition.class_variables[member.name] = Definition::Variable.new(
-                  type: absolute_type(member.type, namespace: namespace),
-                  parent_variable: nil,
-                  declared_in: decl
-                )
-              end
-            end
-          end
-        when AST::Declarations::Interface
-          build_interface type_name, decl
-        end
       end
 
       def each_member_with_accessibility(members, accessibility: :public)
@@ -286,69 +318,6 @@ module Ruby
             accessibility = :private
           else
             yield member, accessibility
-          end
-        end
-      end
-
-      def build_one_singleton(type_name)
-        decl = env.find_class(type_name)
-
-        case decl
-        when AST::Declarations::Module, AST::Declarations::Class
-          self_type = Types::ClassSingleton.new(name: type_name, location: nil)
-          ancestors = [Definition::Ancestor::Singleton.new(name: type_name)]
-          namespace = type_name.to_namespace
-
-          Definition.new(declaration: decl, self_type: self_type, ancestors: ancestors).tap do |definition|
-            each_member_with_accessibility decl.members do |member, accessibility|
-              case member
-              when AST::Members::MethodDefinition
-                if member.singleton?
-                  name = member.name
-                  method_types = member.types.map do |method_type|
-                    method_type.map_type do |type|
-                      absolute_type(type, namespace: namespace)
-                    end
-                  end
-                  definition.methods[name] = Definition::Method.new(super_method: nil,
-                                                                    method_types: method_types,
-                                                                    defined_in: decl,
-                                                                    implemented_in: decl,
-                                                                    accessibility: accessibility)
-                end
-              when AST::Members::Extend
-                if member.name.interface?
-                  interface_definition = build_one_instance(member.name)
-                  sub = Substitution.build(interface_definition.type_params, member.args)
-                  method_types = member.types.map do |method_type|
-                    method_type.sub(sub).map_type do |type|
-                      absolute_type(type, namespace: namespace)
-                    end
-                  end
-                  interface_definition.methods.each do |name, method|
-                    definition.methods[name] = Definition::Method.new(
-                      super_method: nil,
-                      method_types: method_types,
-                      defined_in: method.defined_in,
-                      implemented_in: decl,
-                      accessibility: method.accessibility
-                    )
-                  end
-                end
-              when AST::Members::ClassInstanceVariable
-                definition.instance_variables[member.name] = Definition::Variable.new(
-                  type: absolute_type(member.type, namespace: namespace),
-                  parent_variable: nil,
-                  declared_in: decl
-                )
-              when AST::Members::ClassVariable
-                definition.class_variables[member.name] = Definition::Variable.new(
-                  type: absolute_type(member.type, namespace: namespace),
-                  parent_variable: nil,
-                  declared_in: decl
-                )
-              end
-            end
           end
         end
       end
@@ -369,6 +338,10 @@ module Ruby
                 [ancestor, build_one_instance(ancestor.name)]
               when Definition::Ancestor::Singleton
                 [ancestor, build_one_singleton(ancestor.name)]
+              when Definition::Ancestor::ExtensionInstance
+                [ancestor, build_one_instance(ancestor.name, extension_name: ancestor.extension_name)]
+              when Definition::Ancestor::ExtensionSingleton
+                [ancestor, build_one_extension_singleton(ancestor.name, extension_name: ancestor.extension_name)]
               end
             end
 
@@ -392,6 +365,10 @@ module Ruby
                 [ancestor, build_one_instance(ancestor.name)]
               when Definition::Ancestor::Singleton
                 [ancestor, build_one_singleton(ancestor.name)]
+              when Definition::Ancestor::ExtensionInstance
+                [ancestor, build_one_instance(ancestor.name, extension_name: ancestor.extension_name)]
+              when Definition::Ancestor::ExtensionSingleton
+                [ancestor, build_one_singleton(ancestor.name, extension_name: ancestor.extension_name)]
               end
             end
 
@@ -438,13 +415,218 @@ module Ruby
         end
       end
 
+      def build_one_instance(type_name, extension_name: nil)
+        decl = if extension_name
+                 env.each_extension(type_name).find {|ext| ext.extension_name == extension_name } or
+                   raise "Unknown extension: #{type_name} (#{extension_name})"
+               else
+                 env.find_class(type_name)
+               end
+
+        case decl
+        when AST::Declarations::Interface
+          build_interface type_name, decl
+        else
+          namespace = type_name.to_namespace
+
+          case decl
+          when AST::Declarations::Class, AST::Declarations::Module
+            self_type = Types::ClassInstance.new(name: type_name,
+                                                 args: Types::Variable.build(decl.type_params),
+                                                 location: nil)
+            ancestors = [Definition::Ancestor::Instance.new(name: type_name, args: self_type.args)]
+          when AST::Declarations::Extension
+            self_type = Types::ClassInstance.new(name: type_name, args: Types::Variable.build(decl.type_params), location: nil)
+            ancestors = [Definition::Ancestor::ExtensionInstance.new(name: type_name,
+                                                                     extension_name: extension_name,
+                                                                     args: self_type.args)]
+          end
+
+          Definition.new(declaration: decl, self_type: self_type, ancestors: ancestors).tap do |definition|
+            each_member_with_accessibility(decl.members) do |member, accessibility|
+              case member
+              when AST::Members::MethodDefinition
+                if member.instance?
+                  name = member.name
+                  method_types = member.types.map do |method_type|
+                    method_type.map_type do |type|
+                      absolute_type(type, namespace: namespace)
+                    end
+                  end
+
+                  DuplicatedMethodDefinitionError.check!(
+                    decl: decl,
+                    methods: definition.methods,
+                    name: name,
+                    location: member.location
+                  )
+
+                  definition.methods[name] = Definition::Method.new(super_method: nil,
+                                                                    method_types: method_types,
+                                                                    defined_in: decl,
+                                                                    implemented_in: decl,
+                                                                    accessibility: accessibility)
+                end
+              when AST::Members::Include
+                if member.name.interface?
+                  absolute_name = absolute_type_name(member.name, namespace: namespace, location: member.location)
+                  interface_definition = build_one_instance(absolute_name)
+                  absolute_args = member.args.map {|ty| absolute_type(ty, namespace: namespace) }
+
+                  InvalidTypeApplicationError.check!(
+                    type_name: absolute_name,
+                    args: absolute_args,
+                    params: interface_definition.type_params,
+                    location: member.location
+                  )
+
+                  sub = Substitution.build(interface_definition.type_params, absolute_args)
+                  interface_definition.methods.each do |name, method|
+                    method_types = method.method_types.map do |method_type|
+                      method_type.sub(sub).map_type do |type|
+                        absolute_type(type, namespace: namespace)
+                      end
+                    end
+
+                    DuplicatedMethodDefinitionError.check!(
+                      decl: decl,
+                      methods: definition.methods,
+                      name: name,
+                      location: member.location
+                    )
+
+                    definition.methods[name] = Definition::Method.new(
+                      super_method: nil,
+                      method_types: method_types,
+                      defined_in: method.defined_in,
+                      implemented_in: decl,
+                      accessibility: method.accessibility
+                    )
+                  end
+                end
+              when AST::Members::InstanceVariable
+                definition.instance_variables[member.name] = Definition::Variable.new(
+                  type: absolute_type(member.type, namespace: namespace),
+                  parent_variable: nil,
+                  declared_in: decl
+                )
+              when AST::Members::ClassVariable
+                definition.class_variables[member.name] = Definition::Variable.new(
+                  type: absolute_type(member.type, namespace: namespace),
+                  parent_variable: nil,
+                  declared_in: decl
+                )
+              end
+            end
+          end
+        end
+      end
+
+      def build_one_singleton(type_name, extension_name: nil)
+        decl = if extension_name
+                 env.each_extension(type_name).find {|ext| ext.extension_name == extension_name } or
+                   raise "Unknown extension: #{type_name} (#{extension_name})"
+               else
+                 env.find_class(type_name)
+               end
+
+        namespace = type_name.to_namespace
+
+        case decl
+        when AST::Declarations::Module, AST::Declarations::Class
+          self_type = Types::ClassSingleton.new(name: type_name, location: nil)
+          ancestors = [Definition::Ancestor::Singleton.new(name: type_name)]
+        when AST::Declarations::Extension
+          self_type = Types::ClassSingleton.new(name: type_name, location: nil)
+          ancestors = [Definition::Ancestor::ExtensionSingleton.new(name: type_name, extension_name: extension_name)]
+        end
+
+        Definition.new(declaration: decl, self_type: self_type, ancestors: ancestors).tap do |definition|
+          each_member_with_accessibility(decl.members) do |member, accessibility|
+            case member
+            when AST::Members::MethodDefinition
+              if member.singleton?
+                name = member.name
+                method_types = member.types.map do |method_type|
+                  method_type.map_type do |type|
+                    absolute_type(type, namespace: namespace)
+                  end
+                end
+
+                DuplicatedMethodDefinitionError.check!(
+                  decl: decl,
+                  methods: definition.methods,
+                  name: name,
+                  location: member.location
+                )
+
+                definition.methods[name] = Definition::Method.new(super_method: nil,
+                                                                  method_types: method_types,
+                                                                  defined_in: decl,
+                                                                  implemented_in: decl,
+                                                                  accessibility: accessibility)
+              end
+            when AST::Members::Extend
+              if member.name.interface?
+                absolute_name = absolute_type_name(member.name, namespace: namespace, location: member.location)
+                interface_definition = build_one_instance(absolute_name)
+                absolute_args = member.args.map {|ty| absolute_type(ty, namespace: namespace) }
+
+                InvalidTypeApplicationError.check!(
+                  type_name: absolute_name,
+                  args: absolute_args,
+                  params: interface_definition.type_params,
+                  location: member.location
+                )
+
+                sub = Substitution.build(interface_definition.type_params, absolute_args)
+                interface_definition.methods.each do |name, method|
+                  method_types = method.method_types.map do |method_type|
+                    method_type.sub(sub).map_type do |type|
+                      absolute_type(type, namespace: namespace)
+                    end
+                  end
+
+                  DuplicatedMethodDefinitionError.check!(
+                    decl: decl,
+                    methods: definition.methods,
+                    name: name,
+                    location: member.location
+                  )
+
+                  definition.methods[name] = Definition::Method.new(
+                    super_method: nil,
+                    method_types: method_types,
+                    defined_in: method.defined_in,
+                    implemented_in: decl,
+                    accessibility: method.accessibility
+                  )
+                end
+              end
+            when AST::Members::ClassInstanceVariable
+              definition.instance_variables[member.name] = Definition::Variable.new(
+                type: absolute_type(member.type, namespace: namespace),
+                parent_variable: nil,
+                declared_in: decl
+              )
+            when AST::Members::ClassVariable
+              definition.class_variables[member.name] = Definition::Variable.new(
+                type: absolute_type(member.type, namespace: namespace),
+                parent_variable: nil,
+                declared_in: decl
+              )
+            end
+          end
+        end
+      end
+
       def merge_definitions(pairs, decl:, self_type:, ancestors:)
         Definition.new(declaration: decl, self_type: self_type, ancestors: ancestors).tap do |definition|
           pairs.reverse_each do |(ancestor, current_definition)|
             sub = case ancestor
-                  when Definition::Ancestor::Instance
+                  when Definition::Ancestor::Instance, Definition::Ancestor::ExtensionInstance
                     Substitution.build(current_definition.type_params, ancestor.args)
-                  when Definition::Ancestor::Singleton
+                  when Definition::Ancestor::Singleton, Definition::Ancestor::ExtensionSingleton
                     Substitution.build([], [])
                   end
             namespace = current_definition.name.absolute!.to_namespace

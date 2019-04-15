@@ -159,11 +159,19 @@ module Ruby
             case ancestor
             when Definition::Ancestor::Singleton
               stdout.puts "singleton(#{ancestor.name})"
+            when Definition::Ancestor::ExtensionSingleton
+              stdout.puts "singleton(#{ancestor.name} (#{ancestor.extension_name}))"
             when Definition::Ancestor::Instance
               if ancestor.args.empty?
                 stdout.puts ancestor.name.to_s
               else
                 stdout.puts "#{ancestor.name}[#{ancestor.args.join(", ")}]"
+              end
+            when Definition::Ancestor::ExtensionInstance
+              if ancestor.args.empty?
+                stdout.puts "#{ancestor.name} (#{ancestor.extension_name})"
+              else
+                stdout.puts "#{ancestor.name}[#{ancestor.args.join(", ")}] (#{ancestor.extension_name})"
               end
             end
           end

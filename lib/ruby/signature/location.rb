@@ -48,7 +48,11 @@ module Ruby
       end
 
       def to_s
-        "#{start_line}:#{start_column}...#{end_line}:#{end_column}"
+        "#{name || "-"}:#{start_line}:#{start_column}...#{end_line}:#{end_column}"
+      end
+
+      def self.to_string(location, default: "*:*:*...*:*")
+        location&.to_s || default
       end
 
       def ==(other)
