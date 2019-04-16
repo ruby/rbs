@@ -731,7 +731,7 @@ module Ruby
         end
 
         def to_s(level = 0)
-          literal.to_s
+          literal.inspect
         end
       end
     end
