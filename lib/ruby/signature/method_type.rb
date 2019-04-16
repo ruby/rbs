@@ -22,6 +22,13 @@ module Ruby
             required: required
           }.to_json(*a)
         end
+
+        def sub(s)
+          self.class.new(
+            type: type.sub(s),
+            required: required
+          )
+        end
       end
 
       attr_reader :type_params

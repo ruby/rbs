@@ -109,9 +109,9 @@ module Ruby
         def initialize(decl:, name:, location:)
           decl_str = case decl
                      when AST::Declarations::Interface, AST::Declarations::Class, AST::Declarations::Module
-                       decl.type_name.to_s
+                       decl.name.to_s
                      when AST::Declarations::Extension
-                       "#{decl.type_name} (#{decl.extension_name})"
+                       "#{decl.name} (#{decl.extension_name})"
                      end
 
           super "#{Location.to_string location}: #{decl_str} has duplicated method definition: #{name}"
@@ -394,7 +394,7 @@ module Ruby
                     MethodType.new(
                       type_params: type_params,
                       type: method_type.type.sub(sub).with_return_type(instance_definition.self_type),
-                      block: method_type.block&.sub(sub),
+                      block: method_type.block&.yield_self {|ty| ty.sub(sub) },
                       location: method_type.location
                     )
                   end
