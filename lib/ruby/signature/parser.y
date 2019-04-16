@@ -557,6 +557,10 @@ rule
     | kSELF {
         result = Types::Bases::Self.new(location: val[0].location)
       }
+    | kSELFQ {
+        result = Types::Optional.new(type: Types::Bases::Self.new(location: val[0].location),
+                                     location: val[0].location)
+      }
     | kINSTANCE {
         result = Types::Bases::Instance.new(location: val[0].location)
       }
