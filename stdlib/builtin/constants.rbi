@@ -1,0 +1,6 @@
+STDOUT: IO
+STDERR: IO
+STDIN: IO
+
+File::FNM_DOTMATCH: Integer
+Math::PI: Float

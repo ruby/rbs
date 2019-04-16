@@ -1,8 +1,26 @@
-class Integer
+interface _ToI
+  def to_i: -> Integer
 end
 
-class String
+interface _ToInt
+  def to_int: -> Integer
 end
 
-class Symbol
+interface _ToS
+  def to_s: -> String
+end
+
+interface _Each[A, B]
+  def each: { (A) -> void } -> B
+end
+
+class TrueClass
+  def !: -> bool
+end
+
+class FalseClass
+  def !: -> bool
+end
+
+class NilClass
 end

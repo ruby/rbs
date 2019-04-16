@@ -1,0 +1,2 @@
+class Range[A]
+end
