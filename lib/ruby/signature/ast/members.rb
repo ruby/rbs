@@ -324,6 +324,14 @@ module Ruby
               location: location
             }.to_json(*a)
           end
+
+          def instance?
+            kind == :instance
+          end
+
+          def singleton?
+            kind == :singleton
+          end
         end
       end
     end

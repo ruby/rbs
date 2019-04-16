@@ -723,4 +723,43 @@ EOF
       end
     end
   end
+
+  def test_build_alias
+    SignatureManager.new do |manager|
+      manager.files[Pathname("foo.rbi")] = <<EOF
+class Hello
+  def foo: (String) -> void
+  alias bar foo
+end
+
+interface _World
+  def hello: () -> bool
+  alias world hello
+end
+
+class Error
+  alias self.xxx self.yyy
+end
+EOF
+      manager.build do |env|
+        builder = DefinitionBuilder.new(env: env)
+
+        builder.build_instance(type_name("::Hello")).tap do |definition|
+          assert_instance_of Definition, definition
+          assert_method_definition definition.methods[:foo], ["(::String) -> void"]
+          assert_method_definition definition.methods[:bar], ["(::String) -> void"]
+        end
+
+        builder.build_interface(type_name("::_World"), env.find_class(type_name("::_World"))).tap do |definition|
+          assert_instance_of Definition, definition
+          assert_method_definition definition.methods[:hello], ["() -> bool"]
+          assert_method_definition definition.methods[:world], ["() -> bool"]
+        end
+
+        assert_raises DefinitionBuilder::UnknownMethodAliasError do
+          builder.build_singleton(type_name("::Error"))
+        end
+      end
+    end
+  end
 end

@@ -124,6 +124,26 @@ module Ruby
         end
       end
 
+      class UnknownMethodAliasError < StandardError
+        attr_reader :original_name
+        attr_reader :aliased_name
+        attr_reader :location
+
+        def initialize(original_name:, aliased_name:, location:)
+          @original_name = original_name
+          @aliased_name = aliased_name
+          @location = location
+
+          super "#{Location.to_string location}: Unknown method alias name: #{original_name} => #{aliased_name}"
+        end
+
+        def self.check!(methods:, original_name:, aliased_name:, location:)
+          unless methods.key?(original_name)
+            raise new(original_name: original_name, aliased_name: aliased_name, location: location)
+          end
+        end
+      end
+
       attr_reader :env
       attr_reader :instance_cache
       attr_reader :singleton_cache
@@ -467,6 +487,25 @@ module Ruby
                                                                     implemented_in: decl,
                                                                     accessibility: accessibility)
                 end
+              when AST::Members::Alias
+                if member.instance?
+                  UnknownMethodAliasError.check!(
+                    methods: definition.methods,
+                    original_name: member.old_name,
+                    aliased_name: member.new_name,
+                    location: member.location
+                  )
+
+                  DuplicatedMethodDefinitionError.check!(
+                    decl: decl,
+                    methods: definition.methods,
+                    name: member.new_name,
+                    location: member.location
+                  )
+
+                  # FIXME: may cause a problem if #old_name has super type
+                  definition.methods[member.new_name] = definition.methods[member.old_name]
+                end
               when AST::Members::Include
                 if member.name.interface?
                   absolute_name = absolute_type_name(member.name, namespace: namespace, location: member.location)
@@ -565,6 +604,25 @@ module Ruby
                                                                   defined_in: decl,
                                                                   implemented_in: decl,
                                                                   accessibility: accessibility)
+              end
+            when AST::Members::Alias
+              if member.singleton?
+                UnknownMethodAliasError.check!(
+                  methods: definition.methods,
+                  original_name: member.old_name,
+                  aliased_name: member.new_name,
+                  location: member.location
+                )
+
+                DuplicatedMethodDefinitionError.check!(
+                  decl: decl,
+                  methods: definition.methods,
+                  name: member.new_name,
+                  location: member.location
+                )
+
+                # FIXME: may cause a problem if #old_name has super type
+                definition.methods[member.new_name] = definition.methods[member.old_name]
               end
             when AST::Members::Extend
               if member.name.interface?
@@ -725,6 +783,13 @@ module Ruby
           declaration.members.each do |member|
             case member
             when AST::Members::MethodDefinition
+              DuplicatedMethodDefinitionError.check!(
+                decl: declaration,
+                methods: definition.methods,
+                name: member.name,
+                location: member.location
+              )
+
               method = Definition::Method.new(
                 super_method: nil,
                 method_types: member.types.map do |method_type|
@@ -735,6 +800,23 @@ module Ruby
                 accessibility: :public
               )
               definition.methods[member.name] = method
+            when AST::Members::Alias
+              UnknownMethodAliasError.check!(
+                methods: definition.methods,
+                original_name: member.old_name,
+                aliased_name: member.new_name,
+                location: member.location
+              )
+
+              DuplicatedMethodDefinitionError.check!(
+                decl: declaration,
+                methods: definition.methods,
+                name: member.new_name,
+                location: member.location
+              )
+
+              # FIXME: may cause a problem if #old_name has super type
+              definition.methods[member.new_name] = definition.methods[member.old_name]
             end
           end
         end
