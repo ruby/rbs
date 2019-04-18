@@ -40,7 +40,7 @@ $ ruby-signature ancestors --singleton Array        # (Array.class.ancestors)
 
 This command prints the _ancestors_ of the class.
 The name of the command is borrowed from `Class#ancestors`, but the semantics is a bit different.
-The `ancestors` command is more precise.
+The `ancestors` command is more precise (I believe).
 
 ### ruby-signature methods [--singleton|--instance] CLASS
 
