@@ -1,28 +1,80 @@
 # Ruby::Signature
 
-Welcome to your new gem! In this directory, you'll find the files you need to be able to package up your Ruby library into a gem. Put your Ruby code in the file `lib/ruby/signature`. To experiment with that code, run `bin/console` for an interactive prompt.
+Ruby::Signature provides syntax and semantics definition for `the` Ruby Signature language, `.rbi` files.
+It consists of a parser, the syntax, and class definition interpreter, the semantics.
 
-TODO: Delete this and the text above, and describe your gem
+## Build
 
-## Installation
+We haven't published a gem yet.
+You need to install the dependencies, and build its parser.
 
-Add this line to your application's Gemfile:
-
-```ruby
-gem 'ruby-signature'
 ```
-
-And then execute:
-
-    $ bundle
-
-Or install it yourself as:
-
-    $ gem install ruby-signature
+$ bundle
+$ bundle exec rake parser
+$ bundle exec exe/ruby-signature
+```
 
 ## Usage
 
-TODO: Write usage instructions here
+```
+$ ruby-signature list
+$ ruby-signature ancestors ::Object
+$ ruby-signature methods ::Object
+$ ruby-signature method ::Object tap
+```
+
+### ruby-signature [--class|--module|interface] list
+
+```
+$ ruby-signature list
+```
+
+This command lists all of the classes/modules/interfaes defined in `.rbi` files.
+
+### ruby-signature ancestors [--singleton|--instance] CLASS
+
+```
+$ ruby-signature ancestors Array                    # ([].class.ancestors)
+$ ruby-signature ancestors --singleton Array        # (Array.class.ancestors)
+```
+
+This command prints the _ancestors_ of the class.
+The name of the command is borrowed from `Class#ancestors`, but the semantics is a bit different.
+The `ancestors` command is more precise.
+
+### ruby-signature methods [--singleton|--instance] CLASS
+
+```
+$ ruby-signature methods ::Integer                  # 1.methods
+$ ruby-signature methods --singleton ::Object       # Object.methods
+```
+
+This command prints all methods provided for the class.
+
+### ruby-signature method [--singleton|--instance] CLASS METHOD
+
+```
+$ ruby-signature method ::Integer '+'               # 1+2
+$ ruby-signature method --singleton ::Object tap    # Object.tap { ... }
+```
+
+This command prints type and properties of the method.
+
+### Options
+
+It accepts two global options, `-r` and `-I`.
+
+`-r` is for libraries. You can specify the names of libraries.
+
+```
+$ ruby-signature -r set list
+```
+
+`-I` is for application signatures. You can specify the name of directory.
+
+```
+$ ruby-signature -I sig list
+```
 
 ## Development
 
