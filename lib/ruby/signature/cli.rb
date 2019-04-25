@@ -275,7 +275,7 @@ module Ruby
         end
       end
 
-      def run_version(args)
+      def run_version(args, options)
         stdout.puts "ruby-signature #{VERSION}"
       end
 
