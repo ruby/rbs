@@ -9,7 +9,7 @@ class Ruby::Signature::Parser
         kCOLON kCOLON2 kCOMMA kBAR kAMP kHAT kARROW kQUESTION kEXCLAMATION kSTAR kSTAR2 kFATARROW kEQ kDOT kLT
         kINTERFACE kEND kINCLUDE kEXTEND kATTRREADER kATTRWRITER kATTRACCESSOR tOPERATOR tQUOTEDMETHOD
         kPREPEND kEXTENSION
-        type_TYPE type_SIGNATURE
+        type_TYPE type_SIGNATURE type_METHODTYPE
 
   prechigh
   nonassoc kQUESTION
@@ -27,6 +27,9 @@ rule
         result = val[1]
       }
     | type_SIGNATURE signatures {
+        result = val[1]
+      }
+    | type_METHODTYPE method_type {
         result = val[1]
       }
 
@@ -946,6 +949,27 @@ def self.parse_type(input, variables: [])
   end
 
   self.new(:TYPE, buffer: buffer).yield_self do |parser|
+    parser.start_new_variables_scope
+
+    variables.each do |var|
+      parser.insert_bound_variable var
+    end
+
+    parser.do_parse
+  ensure
+    parser.reset_variable_scope
+  end
+end
+
+def self.parse_method_type(input, variables: [])
+  case input
+  when Ruby::Signature::Buffer
+    buffer = input
+  else
+    buffer = Ruby::Signature::Buffer.new(name: nil, content: input.to_s)
+  end
+
+  self.new(:METHODTYPE, buffer: buffer).yield_self do |parser|
     parser.start_new_variables_scope
 
     variables.each do |var|
