@@ -9,7 +9,7 @@ class Ruby::Signature::Parser
         kCOLON kCOLON2 kCOMMA kBAR kAMP kHAT kARROW kQUESTION kEXCLAMATION kSTAR kSTAR2 kFATARROW kEQ kDOT kLT
         kINTERFACE kEND kINCLUDE kEXTEND kATTRREADER kATTRWRITER kATTRACCESSOR tOPERATOR tQUOTEDMETHOD
         kPREPEND kEXTENSION
-        type_TYPE type_SIGNATURE type_METHODTYPE
+        type_TYPE type_SIGNATURE type_METHODTYPE tEOF
 
   prechigh
   nonassoc kQUESTION
@@ -23,15 +23,17 @@ class Ruby::Signature::Parser
 rule
 
   target:
-      type_TYPE type {
+      type_TYPE type eof {
         result = val[1]
       }
-    | type_SIGNATURE signatures {
+    | type_SIGNATURE signatures eof {
         result = val[1]
       }
-    | type_METHODTYPE method_type {
+    | type_METHODTYPE method_type eof {
         result = val[1]
       }
+
+  eof: | tEOF
 
   signatures:
       { result = [] }
@@ -899,12 +901,14 @@ require "strscan"
 
 attr_reader :input
 attr_reader :buffer
+attr_reader :eof_re
 
-def initialize(type, buffer:)
+def initialize(type, buffer:, eof_re:)
   super()
   @type = type
   @buffer = buffer
   @input = StringScanner.new(buffer.content)
+  @eof_re = eof_re
   @bound_variables_stack = []
 end
 
@@ -929,7 +933,7 @@ def is_bound_variable?(var)
   (@bound_variables_stack.last || Set.new).member?(var)
 end
 
-def self.parse_signature(input)
+def self.parse_signature(input, eof_re: nil)
   case input
   when Ruby::Signature::Buffer
     buffer = input
@@ -937,10 +941,10 @@ def self.parse_signature(input)
     buffer = Ruby::Signature::Buffer.new(name: nil, content: input.to_s)
   end
 
-  self.new(:SIGNATURE, buffer: buffer).do_parse
+  self.new(:SIGNATURE, buffer: buffer, eof_re: eof_re).do_parse
 end
 
-def self.parse_type(input, variables: [])
+def self.parse_type(input, variables: [], eof_re: nil)
   case input
   when Ruby::Signature::Buffer
     buffer = input
@@ -948,7 +952,7 @@ def self.parse_type(input, variables: [])
     buffer = Ruby::Signature::Buffer.new(name: nil, content: input.to_s)
   end
 
-  self.new(:TYPE, buffer: buffer).yield_self do |parser|
+  self.new(:TYPE, buffer: buffer, eof_re: eof_re).yield_self do |parser|
     parser.start_new_variables_scope
 
     variables.each do |var|
@@ -961,7 +965,7 @@ def self.parse_type(input, variables: [])
   end
 end
 
-def self.parse_method_type(input, variables: [])
+def self.parse_method_type(input, variables: [], eof_re: nil)
   case input
   when Ruby::Signature::Buffer
     buffer = input
@@ -969,7 +973,7 @@ def self.parse_method_type(input, variables: [])
     buffer = Ruby::Signature::Buffer.new(name: nil, content: input.to_s)
   end
 
-  self.new(:METHODTYPE, buffer: buffer).yield_self do |parser|
+  self.new(:METHODTYPE, buffer: buffer, eof_re: eof_re).yield_self do |parser|
     parser.start_new_variables_scope
 
     variables.each do |var|
@@ -1076,9 +1080,16 @@ def next_token
     return [:"type_#{type}", nil]
   end
 
+  if @eof
+    return
+  end
+
   input.skip(/(\s|#.*)+/)
 
   case
+  when eof_re && input.scan(eof_re)
+    @eof = true
+    [:tEOF, input.matched]
   when input.scan(/`(\\`|[^`])+`/)
     s = input.matched.yield_self {|s| s[1, s.length-2] }.gsub(/\\`/, '`')
     new_token(:tQUOTEDMETHOD, s)
