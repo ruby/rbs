@@ -1080,11 +1080,11 @@ def next_token
     return [:"type_#{type}", nil]
   end
 
-  if @eof
-    return
-  end
+  return if @eof
 
   input.skip(/(\s|#.*)+/)
+
+  return if input.eos?
 
   case
   when eof_re && input.scan(eof_re)
@@ -1131,6 +1131,8 @@ def next_token
     new_token(:tSTRING, s)
   when input.scan(/[+-]?\d[\d_]*/)
     new_token(:tINTEGER, input.matched.to_i)
+  else
+    raise "Unexpected token: #{input.peek(10)}..."
   end
 end
 

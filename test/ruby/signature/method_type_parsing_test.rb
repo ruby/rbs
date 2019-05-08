@@ -14,7 +14,7 @@ class Ruby::Signature::MethodTypeParsingTest < Minitest::Test
   end
 
   def test_method_type_eof_re
-    Parser.parse_method_type("()->void` Integer", eof_re: /`}/).yield_self do |type|
+    Parser.parse_method_type("()->void~ Integer", eof_re: /~/).yield_self do |type|
       assert_equal "() -> void", type.to_s
     end
   end
