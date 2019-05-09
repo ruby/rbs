@@ -62,7 +62,9 @@ module Ruby
       end
 
       def class?(type_name)
-        find_class(type_name)&.is_a?(AST::Declarations::Class)
+        find_class(type_name)&.yield_self do |decl|
+          decl.is_a?(AST::Declarations::Class) || decl.is_a?(AST::Declarations::Module)
+        end
       end
 
       def find_type_decl(type_name)
