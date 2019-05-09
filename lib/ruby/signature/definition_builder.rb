@@ -365,6 +365,16 @@ module Ruby
               end
             end
 
+            if decl.is_a?(AST::Declarations::Module)
+              if decl.self_type
+                self_interface = absolute_type(decl.self_type, namespace: type_name.to_namespace)
+                ancestor = Definition::Ancestor::Instance.new(name: self_interface.name,
+                                                              args: self_interface.args)
+
+                definition_pairs.push [ancestor, build_one_instance(ancestor.name)]
+              end
+            end
+
             merge_definitions(definition_pairs, decl: decl, self_type: self_type, ancestors: ancestors)
           end
         end
@@ -392,41 +402,43 @@ module Ruby
               end
             end
 
-            definition_pairs.find {|ancestor, _| ancestor == self_ancestor }.tap do |_, definition|
-              unless definition.methods[:new]&.implemented_in == decl
-                instance_definition = build_instance(type_name)
-                type_params = decl.type_params
-                initialize_method = instance_definition.methods[:initialize]
-                method_types = initialize_method.method_types.map do |method_type|
-                  case method_type
-                  when MethodType
-                    fvs = method_type.free_variables
-                    unless fvs.empty?
-                      bound_variables = method_type.type_params
-                      renamed_types = bound_variables.map {|x| Types::Variable.fresh(x) }
-                      sub = Substitution.build(bound_variables, renamed_types)
-                      type_params = renamed_types.unshift(*type_params)
-                    else
-                      sub = Substitution.build([], [])
-                      type_params = method_type.type_params
+            if decl.is_a?(AST::Declarations::Class)
+              definition_pairs.find {|ancestor, _| ancestor == self_ancestor }.tap do |_, definition|
+                unless definition.methods[:new]&.implemented_in == decl
+                  instance_definition = build_instance(type_name)
+                  type_params = decl.type_params
+                  initialize_method = instance_definition.methods[:initialize]
+                  method_types = initialize_method.method_types.map do |method_type|
+                    case method_type
+                    when MethodType
+                      fvs = method_type.free_variables
+                      unless fvs.empty?
+                        bound_variables = method_type.type_params
+                        renamed_types = bound_variables.map {|x| Types::Variable.fresh(x) }
+                        sub = Substitution.build(bound_variables, renamed_types)
+                        type_params = renamed_types.unshift(*type_params)
+                      else
+                        sub = Substitution.build([], [])
+                        type_params = method_type.type_params
+                      end
+
+                      MethodType.new(
+                        type_params: type_params,
+                        type: method_type.type.sub(sub).with_return_type(instance_definition.self_type),
+                        block: method_type.block&.yield_self {|ty| ty.sub(sub) },
+                        location: method_type.location
+                      )
                     end
+                  end.compact
 
-                    MethodType.new(
-                      type_params: type_params,
-                      type: method_type.type.sub(sub).with_return_type(instance_definition.self_type),
-                      block: method_type.block&.yield_self {|ty| ty.sub(sub) },
-                      location: method_type.location
-                    )
-                  end
-                end.compact
-
-                definition.methods[:new] = Definition::Method.new(
-                  super_method: nil,
-                  defined_in: nil,
-                  implemented_in: decl,
-                  method_types: method_types,
-                  accessibility: :public
-                )
+                  definition.methods[:new] = Definition::Method.new(
+                    super_method: nil,
+                    defined_in: nil,
+                    implemented_in: decl,
+                    method_types: method_types,
+                    accessibility: :public
+                  )
+                end
               end
             end
 

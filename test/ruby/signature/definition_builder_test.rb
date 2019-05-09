@@ -762,4 +762,56 @@ EOF
       end
     end
   end
+
+  def test_build_one_module_instance
+    SignatureManager.new do |manager|
+      manager.files[Pathname("foo.rbi")] = <<EOF
+interface _Each[A, B]
+  def each: { (A) -> void } -> B
+end
+
+module Enumerable[X, Y] : _Each[X, Y]
+  def count: -> Integer
+end
+EOF
+      manager.build do |env|
+        builder = DefinitionBuilder.new(env: env)
+
+        builder.build_instance(type_name("::Enumerable")).yield_self do |definition|
+          assert_instance_of Definition, definition
+
+          assert_equal [:count, :each], definition.methods.keys.sort
+          assert_method_definition definition.methods[:count], ["() -> ::Integer"]
+          assert_method_definition definition.methods[:each], ["() { (X) -> void } -> Y"]
+        end
+      end
+    end
+  end
+
+  def test_build_one_module_singleton
+    SignatureManager.new do |manager|
+      manager.files[Pathname("foo.rbi")] = <<EOF
+interface _Each[A, B]
+  def each: { (A) -> void } -> B
+end
+
+module Enumerable[X, Y] : _Each[X, Y]
+  def count: -> Integer
+end
+EOF
+      manager.build do |env|
+        builder = DefinitionBuilder.new(env: env)
+
+        builder.build_singleton(type_name("::Enumerable")).yield_self do |definition|
+          assert_instance_of Definition, definition
+
+          assert_equal [:__id__, :initialize, :puts, :respond_to_missing?], definition.methods.keys.sort
+          assert_method_definition definition.methods[:__id__], ["() -> ::Integer"]
+          assert_method_definition definition.methods[:initialize], ["() -> void"]
+          assert_method_definition definition.methods[:puts], ["(*any) -> nil"]
+          assert_method_definition definition.methods[:respond_to_missing?], ["(::Symbol, bool) -> bool"]
+        end
+      end
+    end
+  end
 end
