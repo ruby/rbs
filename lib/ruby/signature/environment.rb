@@ -21,11 +21,18 @@ module Ruby
         @name_to_alias = {}
       end
 
+      def cache_name(cache, name:, decl:)
+        if cache.key?(name)
+          raise DuplicatedDeclarationError.new(name, decl, cache[name])
+        end
+        cache[name] = decl
+      end
+
       def <<(decl)
         declarations << decl
         case decl
         when AST::Declarations::Class, AST::Declarations::Module, AST::Declarations::Interface
-          name_to_decl[decl.name.absolute!] = decl
+          cache_name name_to_decl, name: decl.name.absolute!, decl: decl
         when AST::Declarations::Extension
           yield_self do
             name = decl.name.absolute!
@@ -35,11 +42,11 @@ module Ruby
             exts << decl
           end
         when AST::Declarations::Alias
-          name_to_alias[decl.name.absolute!] = decl
+          cache_name name_to_alias, name: decl.name.absolute!, decl: decl
         when AST::Declarations::Constant
-          name_to_constant[decl.name.absolute!] = decl
+          cache_name name_to_constant, name: decl.name.absolute!, decl: decl
         when AST::Declarations::Global
-          name_to_global[decl.name] = decl
+          cache_name name_to_global, name: decl.name, decl: decl
         end
       end
 
@@ -49,16 +56,36 @@ module Ruby
 
       def each_decl
         if block_given?
-          name_to_decl.each_key do |name|
-            yield name
+          name_to_decl.each do |name, decl|
+            yield name, decl
           end
         else
           enum_for :each_decl
         end
       end
 
+      def each_constant
+        if block_given?
+          name_to_constant.each do |name, decl|
+            yield name, decl
+          end
+        else
+          enum_for :each_constant
+        end
+      end
+
+      def each_global
+        if block_given?
+          name_to_global.each do |name, global|
+            yield name, global
+          end
+        else
+          enum_for :each_global
+        end
+      end
+
       def each_class_name(&block)
-        each_decl.select {|name| class?(name) }.each &block
+        each_decl.select {|name,| class?(name) }.each &block
       end
 
       def class?(type_name)
@@ -83,9 +110,8 @@ module Ruby
         end
       end
 
-      def absolute_type_name(name, environment:, namespace:)
+      def absolute_type_name_in(environment, name:, namespace:)
         raise "Namespace should be absolute: #{namespace}" unless namespace.absolute?
-        raise "Namespace cannot be empty: #{namespace}" if namespace.empty?
 
         if name.absolute?
           name
@@ -95,11 +121,11 @@ module Ruby
           if environment.key?(absolute_name)
             absolute_name
           else
-            parent = namespace.parent
-            if parent.empty?
+            if namespace.empty?
               nil
             else
-              absolute_type_name name, environment: environment, namespace: parent
+              parent = namespace.parent
+              absolute_type_name_in environment, name: name, namespace: parent
             end
           end
         end
@@ -107,17 +133,128 @@ module Ruby
 
       def absolute_class_name(name, namespace:)
         raise "Class name expected: #{name}" unless name.class?
-        absolute_type_name name, environment: name_to_decl, namespace: namespace
+        absolute_type_name_in name_to_decl, name: name, namespace: namespace
       end
 
       def absolute_interface_name(name, namespace:)
         raise "Interface name expected: #{name}" unless name.interface?
-        absolute_type_name name, environment: name_to_decl, namespace: namespace
+        absolute_type_name_in name_to_decl, name: name, namespace: namespace
       end
 
       def absolute_alias_name(name, namespace:)
         raise "Alias name expected: #{name}" unless name.alias?
-        absolute_type_name name, environment: name_to_alias, namespace: namespace
+        absolute_type_name_in name_to_alias, name: name, namespace: namespace
+      end
+
+      def absolute_type_name(type_name, namespace:)
+        absolute_name = case
+                        when type_name.class?
+                          absolute_class_name(type_name, namespace: namespace)
+                        when type_name.alias?
+                          absolute_alias_name(type_name, namespace: namespace)
+                        when type_name.interface?
+                          absolute_interface_name(type_name, namespace: namespace)
+                        end
+
+        absolute_name || yield(type_name)
+      end
+
+      def absolute_name_or(name, type)
+        if name.absolute?
+          type
+        else
+          yield
+        end
+      end
+
+      def absolute_type(type, namespace:, &block)
+        case type
+        when Types::ClassSingleton
+          absolute_name_or(type.name, type) do
+            absolute_name = absolute_type_name(type.name, namespace: namespace) { yield(type) }
+            Types::ClassSingleton.new(name: absolute_name, location: type.location)
+          end
+        when Types::ClassInstance
+          absolute_name_or(type.name, type) do
+            absolute_name = absolute_type_name(type.name, namespace: namespace) { yield(type) }
+            Types::ClassInstance.new(name: absolute_name,
+                                     args: type.args.map {|ty|
+                                       absolute_type(ty, namespace: namespace, &block)
+                                     },
+                                     location: type.location)
+          end
+        when Types::Interface
+          absolute_name_or(type.name, type) do
+            absolute_name = absolute_type_name(type.name, namespace: namespace) { yield(type) }
+            Types::Interface.new(name: absolute_name,
+                                 args: type.args.map {|ty|
+                                   absolute_type(ty, namespace: namespace, &block)
+                                 },
+                                 location: type.location)
+          end
+        when Types::Alias
+          absolute_name_or(type.name, type) do
+            absolute_name = absolute_type_name(type.name, namespace: namespace) { yield(type) }
+            Types::Alias.new(name: absolute_name, location: type.location)
+          end
+        when Types::Tuple
+          Types::Tuple.new(
+            types: type.types.map {|ty| absolute_type(ty, namespace: namespace, &block) },
+            location: type.location
+          )
+        when Types::Record
+          Types::Record.new(
+            fields: type.fields.transform_values {|ty| absolute_type(ty, namespace: namespace, &block) },
+            location: type.location
+          )
+        when Types::Union
+          Types::Union.new(
+            types: type.types.map {|ty| absolute_type(ty, namespace: namespace, &block) },
+            location: type.location
+          )
+        when Types::Intersection
+          Types::Intersection.new(
+            types: type.types.map {|ty| absolute_type(ty, namespace: namespace, &block) },
+            location: type.location
+          )
+        when Types::Optional
+          Types::Optional.new(
+            type: absolute_type(type.type, namespace: namespace, &block),
+            location: type.location
+          )
+        when Types::Proc
+          Types::Proc.new(
+            type: type.type.map_type {|ty| absolute_type(ty, namespace: namespace, &block) },
+            location: type.location
+          )
+        else
+          type
+        end
+      end
+
+      # Validates presence of the relative type, and application arity match.
+      def validate(type, namespace:)
+        case type
+        when Types::ClassInstance, Types::Interface
+          if type.name.namespace.relative?
+            type = absolute_type(type, namespace: namespace) do |type|
+              NoTypeFoundError.check!(type.name.absolute!, env: self, location: type.location)
+            end
+          end
+
+          decl = find_class(type.name)
+
+          InvalidTypeApplicationError.check!(
+            type_name: type.name,
+            args: type.args,
+            params: decl.type_params,
+            location: type.location
+          )
+        end
+
+        type.each_type do |type_|
+          validate(type_, namespace: namespace)
+        end
       end
     end
   end

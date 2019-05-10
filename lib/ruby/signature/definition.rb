@@ -120,6 +120,32 @@ module Ruby
       def type_params
         @self_type.args.map(&:name)
       end
+
+      def each_type(&block)
+        if block_given?
+          methods.each_value do |method|
+            if method.defined_in == self.declaration
+              method.method_types.each do |method_type|
+                method_type.each_type(&block)
+              end
+            end
+          end
+
+          instance_variables.each_value do |var|
+            if var.declared_in == self.declaration
+              yield var.type
+            end
+          end
+
+          class_variables.each_value do |var|
+            if var.declared_in == self.declaration
+              yield var.type
+            end
+          end
+        else
+          enum_for :each_type
+        end
+      end
     end
   end
 end

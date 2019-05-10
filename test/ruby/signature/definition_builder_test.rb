@@ -12,102 +12,8 @@ class Ruby::Signature::DefinitionBuilderTest < Minitest::Test
   Definition = Ruby::Signature::Definition
   BuiltinNames = Ruby::Signature::BuiltinNames
   Types = Ruby::Signature::Types
-
-  class SignatureManager
-    attr_reader :files
-
-    def initialize
-      @files = {}
-
-      files[Pathname("builtin.rbi")] = BUILTINS
-    end
-
-    def self.new
-      instance = super
-
-      if block_given?
-        yield instance
-      else
-        instance
-      end
-    end
-
-    BUILTINS = <<SIG
-class BasicObject
-  def __id__: -> Integer
-
-  private
-  def initialize: -> void
-end
-
-class Object < BasicObject
-  include Kernel
- 
-  public
-  def __id__: -> Integer
-
-  private
-  def respond_to_missing?: (Symbol, bool) -> bool
-end
-
-module Kernel
-  private
-  def puts: (*any) -> nil
-end
-
-class Class < Module
-end
-
-class Module
-end
-
-class String
-  include Comparable
-  prepend Enumerable[String, void]
-
-  def self.try_convert: (any) -> String?
-end
-
-class Integer
-end
-
-class Symbol
-end
-
-module Comparable
-end
-
-module Enumerable[A, B]
-end
-SIG
-
-    def build
-      Dir.mktmpdir do |tmpdir|
-        tmppath = Pathname(tmpdir)
-
-        files.each do |path, content|
-          absolute_path = tmppath + path
-          absolute_path.parent.mkpath
-          absolute_path.write(content)
-        end
-
-        env = Environment.new()
-        loader = EnvironmentLoader.new(env: env)
-        loader.stdlib_root = nil
-        loader.add path: tmppath
-        loader.load
-
-        yield env
-      end
-    end
-  end
-
-  def type_name(string)
-    Namespace.parse(string).yield_self do |namespace|
-      last = namespace.path.last
-      TypeName.new(name: last, namespace: namespace.parent)
-    end
-  end
+  InvalidTypeApplicationError = Ruby::Signature::InvalidTypeApplicationError
+  UnknownMethodAliasError = Ruby::Signature::UnknownMethodAliasError
 
   def assert_method_definition(method, types, accessibility: nil)
     assert_instance_of Definition::Method, method
@@ -326,15 +232,15 @@ EOF
       manager.build do |env|
         builder = DefinitionBuilder.new(env: env)
 
-        assert_raises DefinitionBuilder::InvalidTypeApplicationError do
+        assert_raises InvalidTypeApplicationError do
           builder.build_ancestors(Definition::Ancestor::Instance.new(name: type_name("::A"), args: []))
         end
 
-        assert_raises DefinitionBuilder::InvalidTypeApplicationError do
+        assert_raises InvalidTypeApplicationError do
           builder.build_ancestors(Definition::Ancestor::Instance.new(name: type_name("::B"), args: []))
         end
 
-        assert_raises DefinitionBuilder::InvalidTypeApplicationError do
+        assert_raises InvalidTypeApplicationError do
           builder.build_ancestors(Definition::Ancestor::Singleton.new(name: type_name("::C")))
         end
       end
@@ -374,7 +280,7 @@ EOF
           assert_method_definition definition.methods[:eql?], ["(any) -> bool"], accessibility: :public
         end
 
-        assert_raises DefinitionBuilder::InvalidTypeApplicationError do
+        assert_raises InvalidTypeApplicationError do
           builder.build_interface(baz, env.find_type_decl(baz))
         end
       end
@@ -756,7 +662,7 @@ EOF
           assert_method_definition definition.methods[:world], ["() -> bool"]
         end
 
-        assert_raises DefinitionBuilder::UnknownMethodAliasError do
+        assert_raises UnknownMethodAliasError do
           builder.build_singleton(type_name("::Error"))
         end
       end
@@ -770,14 +676,14 @@ interface _Each[A, B]
   def each: { (A) -> void } -> B
 end
 
-module Enumerable[X, Y] : _Each[X, Y]
+module Enumerable2[X, Y] : _Each[X, Y]
   def count: -> Integer
 end
 EOF
       manager.build do |env|
         builder = DefinitionBuilder.new(env: env)
 
-        builder.build_instance(type_name("::Enumerable")).yield_self do |definition|
+        builder.build_instance(type_name("::Enumerable2")).yield_self do |definition|
           assert_instance_of Definition, definition
 
           assert_equal [:count, :each], definition.methods.keys.sort
@@ -795,14 +701,14 @@ interface _Each[A, B]
   def each: { (A) -> void } -> B
 end
 
-module Enumerable[X, Y] : _Each[X, Y]
+module Enumerable2[X, Y] : _Each[X, Y]
   def count: -> Integer
 end
 EOF
       manager.build do |env|
         builder = DefinitionBuilder.new(env: env)
 
-        builder.build_singleton(type_name("::Enumerable")).yield_self do |definition|
+        builder.build_singleton(type_name("::Enumerable2")).yield_self do |definition|
           assert_instance_of Definition, definition
 
           assert_equal [:__id__, :initialize, :puts, :respond_to_missing?], definition.methods.keys.sort
