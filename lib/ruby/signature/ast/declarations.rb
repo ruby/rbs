@@ -233,7 +233,7 @@ module Ruby
               type: type,
               annotations: annotations,
               location: location
-            }
+            }.to_json(*a)
           end
         end
 
@@ -266,7 +266,7 @@ module Ruby
               name: name,
               type: type,
               location: location
-            }
+            }.to_json(*a)
           end
         end
 
@@ -299,7 +299,7 @@ module Ruby
               name: name,
               type: type,
               location: location
-            }
+            }.to_json(*a)
           end
         end
       end
