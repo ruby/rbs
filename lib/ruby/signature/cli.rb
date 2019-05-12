@@ -310,6 +310,11 @@ module Ruby
           stdout.puts "#{Location.to_string global.location}:\tValidating #{name}"
           env.validate global.type, namespace: Namespace.root
         end
+
+        env.each_alias do |name, decl|
+          stdout.puts "#{Location.to_string decl.location}:\tValidating #{name}"
+          env.validate decl.type, namespace: name.namespace
+        end
       end
 
       def run_version(args, options)

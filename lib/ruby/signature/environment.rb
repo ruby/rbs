@@ -84,6 +84,14 @@ module Ruby
         end
       end
 
+      def each_alias(&block)
+        if block_given?
+          name_to_alias.each(&block)
+        else
+          enum_for :each_alias
+        end
+      end
+
       def each_class_name(&block)
         each_decl.select {|name,| class?(name) }.each &block
       end
