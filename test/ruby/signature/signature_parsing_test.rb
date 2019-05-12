@@ -13,15 +13,15 @@ class Ruby::Signature::SignatureParsingTest < Minitest::Test
   include TestHelper
 
   def test_type_alias
-    Parser.parse_signature("type foo = any").yield_self do |decls|
+    Parser.parse_signature("type Steep::foo = any").yield_self do |decls|
       assert_equal 1, decls.size
 
       type_decl = decls[0]
 
       assert_instance_of Declarations::Alias, type_decl
-      assert_equal :foo, type_decl.name
+      assert_equal TypeName.new(name: :foo, namespace: Namespace.parse("Steep")), type_decl.name
       assert_equal Types::Bases::Any.new(location: nil), type_decl.type
-      assert_equal "type foo = any", type_decl.location.source
+      assert_equal "type Steep::foo = any", type_decl.location.source
     end
   end
 

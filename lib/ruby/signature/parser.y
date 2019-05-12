@@ -485,9 +485,9 @@ rule
       }
 
   type_decl:
-      annotations kTYPE tLIDENT kEQ type {
+      annotations kTYPE qualified_name kEQ type {
         location = val[1].location + val[4].location
-        result = Declarations::Alias.new(name: val[2].value.to_sym,
+        result = Declarations::Alias.new(name: val[2].value,
                                          type: val[4],
                                          annotations: val[0],
                                          location: location)
