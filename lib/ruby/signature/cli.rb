@@ -37,7 +37,7 @@ module Ruby
         @stderr = stderr
       end
 
-      COMMANDS = [:ast, :list, :ancestors, :methods, :method, :version]
+      COMMANDS = [:ast, :list, :ancestors, :methods, :method, :validate, :version]
 
       def library_parse(opts, options:)
         opts.on("-r LIBRARY") do |lib|
@@ -105,9 +105,7 @@ module Ruby
 
         loader.load
 
-        env.each_decl.sort_by(&:to_s).each do |type_name|
-          decl = env.find_class(type_name)
-
+        env.each_decl.sort_by {|name,| name.to_s }.each do |type_name, decl|
           case decl
           when AST::Declarations::Class
             if list.include?(:class)
@@ -272,6 +270,45 @@ module Ruby
         for type in method.method_types
           stdout.puts "    #{separator} #{type}"
           separator = "|"
+        end
+      end
+
+      def run_validate(args, options)
+        env = Environment.new()
+        loader = EnvironmentLoader.new(env: env)
+
+        options.setup(loader)
+
+        loader.load
+
+        builder = DefinitionBuilder.new(env: env)
+
+        env.each_decl do |name, decl|
+          case decl
+          when AST::Declarations::Class, AST::Declarations::Module
+            stdout.puts "#{Location.to_string decl.location}:\tValidating #{name}"
+            builder.build_instance(decl.name.absolute!).each_type do |type|
+              env.validate type, namespace: Namespace.root
+            end
+            builder.build_singleton(decl.name.absolute!).each_type do |type|
+              env.validate type, namespace: Namespace.root
+            end
+          when AST::Declarations::Interface
+            stdout.puts "#{Location.to_string decl.location}:\tValidating #{name}"
+            builder.build_interface(decl.name.absolute!, decl).each_type do |type|
+              env.validate type, namespace: Namespace.root
+            end
+          end
+        end
+
+        env.each_constant do |name, const|
+          stdout.puts "#{Location.to_string const.location}:\tValidating #{name}"
+          env.validate const.type, namespace: name.namespace
+        end
+
+        env.each_global do |name, global|
+          stdout.puts "#{Location.to_string global.location}:\tValidating #{name}"
+          env.validate global.type, namespace: Namespace.root
         end
       end
 

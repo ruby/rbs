@@ -84,6 +84,17 @@ module Ruby
         )
       end
 
+      def each_type(&block)
+        if block_given?
+          type.each_type(&block)
+          self.block&.yield_self do |b|
+            b.type.each_type(&block)
+          end
+        else
+          enum_for :each_type
+        end
+      end
+
       def to_s
         s = case
             when block && block.required

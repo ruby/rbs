@@ -3,6 +3,7 @@ require "ruby/signature/version"
 require "set"
 require "json"
 
+require "ruby/signature/errors"
 require "ruby/signature/buffer"
 require "ruby/signature/location"
 require "ruby/signature/namespace"

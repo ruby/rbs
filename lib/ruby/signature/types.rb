@@ -13,6 +13,16 @@ module Ruby
         end
       end
 
+      module EmptyEachType
+        def each_type
+          if block_given?
+            # nop
+          else
+            enum_for :each_type
+          end
+        end
+      end
+
       module Bases
         class Base
           attr_reader :location
@@ -33,6 +43,7 @@ module Ruby
 
           include NoFreeVariables
           include NoSubst
+          include EmptyEachType
 
           def to_json(*a)
             klass = to_s.to_sym
@@ -127,6 +138,8 @@ module Ruby
         def to_s(level = 0)
           name.to_s
         end
+
+        include EmptyEachType
       end
 
       class ClassSingleton
@@ -158,6 +171,8 @@ module Ruby
         def to_s(level = 0)
           "singleton(#{name})"
         end
+
+        include EmptyEachType
       end
 
       module Application
@@ -187,6 +202,14 @@ module Ruby
             name.to_s
           else
             "#{name}[#{args.join(", ")}]"
+          end
+        end
+
+        def each_type(&block)
+          if block_given?
+            args.each(&block)
+          else
+            enum_for :each_type
           end
         end
       end
@@ -264,6 +287,8 @@ module Ruby
         def to_s(level = 0)
           name.to_s
         end
+
+        include EmptyEachType
       end
 
       class Tuple
@@ -304,6 +329,14 @@ module Ruby
 
         def to_s(level = 0)
           "[ #{types.join(", ")} ]"
+        end
+
+        def each_type(&block)
+          if block_given?
+            types.each(&block)
+          else
+            enum_for :each_type
+          end
         end
       end
 
@@ -349,6 +382,14 @@ module Ruby
           end
           "{ #{fields.join(", ")} }"
         end
+
+        def each_type(&block)
+          if block_given?
+            fields.each_value(&block)
+          else
+            enum_for :each_type
+          end
+        end
       end
 
       class Optional
@@ -384,6 +425,14 @@ module Ruby
 
         def to_s(level = 0)
           "#{type.to_s(1)}?"
+        end
+
+        def each_type
+          if block_given?
+            yield type
+          else
+            enum_for :each_type
+          end
         end
       end
 
@@ -430,6 +479,14 @@ module Ruby
             types.join(" | ")
           end
         end
+
+        def each_type(&block)
+          if block_given?
+            types.each(&block)
+          else
+            enum_for :each_type
+          end
+        end
       end
 
       class Intersection
@@ -442,7 +499,7 @@ module Ruby
         end
 
         def ==(other)
-          other.is_a?(Interface) && other.types == types
+          other.is_a?(Intersection) && other.types == types
         end
 
         alias eql? ==
@@ -474,6 +531,14 @@ module Ruby
             "(#{strs.join(" & ")})"
           else
             strs.join(" & ")
+          end
+        end
+
+        def each_type(&block)
+          if block_given?
+            types.each(&block)
+          else
+            enum_for :each_type
           end
         end
       end
@@ -610,6 +675,21 @@ module Ruby
           end
         end
 
+        def each_type
+          if block_given?
+            required_positionals.each {|param| yield param.type }
+            optional_positionals.each {|param| yield param.type }
+            rest_positionals&.yield_self {|param| yield param.type }
+            trailing_positionals.each {|param| yield param.type }
+            required_keywords.each_value {|param| yield param.type }
+            optional_keywords.each_value {|param| yield param.type }
+            rest_keywords&.yield_self {|param| yield param.type }
+            yield(return_type)
+          else
+            enum_for :each_type
+          end
+        end
+
         def to_json(*a)
           {
             required_positionals: required_positionals,
@@ -702,6 +782,14 @@ module Ruby
         def to_s(level = 0)
           "^(#{type.param_to_s}) -> #{type.return_to_s}".lstrip
         end
+
+        def each_type(&block)
+          if block_given?
+            type.each_type(&block)
+          else
+            enum_for :each_type
+          end
+        end
       end
 
       class Literal
@@ -725,6 +813,7 @@ module Ruby
 
         include NoFreeVariables
         include NoSubst
+        include EmptyEachType
 
         def to_json(*a)
           { class: :literal, literal: literal.inspect, location: location }.to_json(*a)
