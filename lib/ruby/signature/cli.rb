@@ -286,7 +286,7 @@ module Ruby
         env.each_decl do |name, decl|
           case decl
           when AST::Declarations::Class, AST::Declarations::Module
-            stdout.puts "#{Location.to_string decl.location}:\tValidating #{name}"
+            stdout.puts "#{Location.to_string decl.location}:\tValidating class/module definition: `#{name}`..."
             builder.build_instance(decl.name.absolute!).each_type do |type|
               env.validate type, namespace: Namespace.root
             end
@@ -294,7 +294,7 @@ module Ruby
               env.validate type, namespace: Namespace.root
             end
           when AST::Declarations::Interface
-            stdout.puts "#{Location.to_string decl.location}:\tValidating #{name}"
+            stdout.puts "#{Location.to_string decl.location}:\tValidating interface: `#{name}`..."
             builder.build_interface(decl.name.absolute!, decl).each_type do |type|
               env.validate type, namespace: Namespace.root
             end
@@ -302,17 +302,17 @@ module Ruby
         end
 
         env.each_constant do |name, const|
-          stdout.puts "#{Location.to_string const.location}:\tValidating #{name}"
+          stdout.puts "#{Location.to_string const.location}:\tValidating constant: `#{name}`..."
           env.validate const.type, namespace: name.namespace
         end
 
         env.each_global do |name, global|
-          stdout.puts "#{Location.to_string global.location}:\tValidating #{name}"
+          stdout.puts "#{Location.to_string global.location}:\tValidating global: `#{name}`..."
           env.validate global.type, namespace: Namespace.root
         end
 
         env.each_alias do |name, decl|
-          stdout.puts "#{Location.to_string decl.location}:\tValidating #{name}"
+          stdout.puts "#{Location.to_string decl.location}:\tValidating alias: `#{name}`..."
           env.validate decl.type, namespace: name.namespace
         end
       end
