@@ -1,0 +1,2 @@
+class StandardError < Exception
+end
