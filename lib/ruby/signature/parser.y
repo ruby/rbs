@@ -6,7 +6,7 @@ class Ruby::Signature::Parser
         kLPAREN kRPAREN kLBRACKET kRBRACKET kLBRACE kRBRACE
         kVOID kNIL kANY kTOP kBOT kSELF kSELFQ kINSTANCE kCLASS kBOOL kSINGLETON kTYPE kDEF kMODULE kSUPER
         kPRIVATE kPUBLIC kALIAS
-        kCOLON kCOLON2 kCOMMA kBAR kAMP kHAT kARROW kQUESTION kEXCLAMATION kSTAR kSTAR2 kFATARROW kEQ kDOT kLT
+        kCOLON kCOLON2 kCOMMA kBAR kAMP kHAT kARROW kQUESTION kEXCLAMATION kSTAR kSTAR2 kFATARROW kEQ kDOT kLT kGT
         kINTERFACE kEND kINCLUDE kEXTEND kATTRREADER kATTRWRITER kATTRACCESSOR tOPERATOR tQUOTEDMETHOD
         kPREPEND kEXTENSION
         type_TYPE type_SIGNATURE type_METHODTYPE tEOF
@@ -421,7 +421,7 @@ rule
 
   method_name:
       tOPERATOR
-    | kAMP | kHAT | kSTAR | kLT | kEXCLAMATION
+    | kAMP | kHAT | kSTAR | kLT | kGT | kEXCLAMATION
     | method_name0
     | method_name0 kQUESTION {
         unless val[0].location.pred?(val[1].location)
@@ -639,6 +639,7 @@ rule
         result = Types::Optional.new(type: val[0], location: val[0].location + val[1].location)
       }
     | record_type
+    | object_type
 
   type_list:
       type {
@@ -655,6 +656,29 @@ rule
     | type_list2 kCOMMA type {
       result = val[0] + [val[2]]
     }
+
+  object_type:
+      kLT object_members kGT {
+        result = Types::Object.new(
+          members: val[1],
+          location: val[0].location + val[2].location
+        )
+      }
+
+  object_members:
+      object_member {
+        result = val[0]
+      }
+    | object_members kCOMMA object_member {
+        result = val[0].merge!(val[2])
+      }
+
+  object_member:
+      def_name method_type {
+        result = {
+          val[0].value => val[1]
+        }
+      }
 
   record_type:
       kLBRACE record_fields kRBRACE {
@@ -1043,7 +1067,6 @@ PUNCTS = {
   "==" => :tOPERATOR,
   ">=" => :tOPERATOR,
   "<=" => :tOPERATOR,
-  ">" => :tOPERATOR,
   "::" => :kCOLON2,
   ":" => :kCOLON,
   "(" => :kLPAREN,
@@ -1065,6 +1088,7 @@ PUNCTS = {
   "*" => :kSTAR,
   "." => :kDOT,
   "<" => :kLT,
+  ">" => :kGT
 }
 PUNCTS_RE = Regexp.union(*PUNCTS.keys)
 

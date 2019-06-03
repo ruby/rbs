@@ -823,6 +823,42 @@ module Ruby
           literal.inspect
         end
       end
+
+      class Object
+        attr_reader :members
+        attr_reader :location
+
+        def initialize(members:, location:)
+          @members = members
+          @location = location
+        end
+
+        def ==(other)
+          other.is_a?(Object) && other.members == members
+        end
+
+        alias eql? ==
+
+        def hash
+          self.class.hash ^ members.hash
+        end
+
+        def to_json(*a)
+          {
+            class: :object,
+            members: members,
+            location: location
+          }.to_json(*a)
+        end
+
+        def to_s(level = 0)
+          s = members.each.with_object([]) do |(name, type), array|
+            array << "#{name}: #{type}"
+          end
+
+          "< #{s.join(", ")} >"
+        end
+      end
     end
   end
 end

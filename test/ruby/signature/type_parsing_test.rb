@@ -489,4 +489,15 @@ class Ruby::Signature::TypeParsingTest < Minitest::Test
       Parser.parse_type("Array[A]", variables: [:A, :Array])
     end
   end
+
+  def test_object_type
+    Parser.parse_type("< __id__: () -> Integer, as_json : () -> any >", variables: []).yield_self do |type|
+      assert_instance_of Types::Object, type
+
+      assert_equal [:__id__, :as_json].sort, type.members.keys.sort
+      assert_equal "() -> Integer", type.members[:__id__].to_s
+      assert_equal "() -> any", type.members[:as_json].to_s
+      assert_equal "< __id__: () -> Integer, as_json : () -> any >", type.location.source
+    end
+  end
 end
