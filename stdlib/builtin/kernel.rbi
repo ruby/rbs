@@ -1,8 +1,20 @@
+interface _Exception0
+  def exception: () -> any
+end
+
+interface _Exception1[T]
+  def exception: (T) -> any
+end
+
 module Kernel
   private
-  def raise: () -> any
-           | (String) -> any
-           | (*any) -> any
+
+  def raise: () -> bot
+           | (String, ?cause: any) -> bot
+           | (_Exception0 exception_instance, ?cause: any) -> bot
+           | (_Exception1[T] exception_class, T message, ?Array[String]? backtrace, ?cause: any) -> bot
+
+  alias fail raise
 
   def block_given?: -> bool
   def enum_for: (Symbol, *any) -> any
