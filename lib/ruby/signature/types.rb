@@ -487,6 +487,14 @@ module Ruby
             enum_for :each_type
           end
         end
+
+        def map_type(&block)
+          if block_given?
+            Union.new(types: types.map(&block), location: location)
+          else
+            enum_for :map_type
+          end
+        end
       end
 
       class Intersection
@@ -539,6 +547,14 @@ module Ruby
             types.each(&block)
           else
             enum_for :each_type
+          end
+        end
+
+        def map_type(&block)
+          if block_given?
+            Intersection.new(types: types.map(&block), location: location)
+          else
+            enum_for :map_type
           end
         end
       end
