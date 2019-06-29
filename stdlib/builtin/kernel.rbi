@@ -12,7 +12,7 @@ module Kernel
   def raise: () -> bot
            | (String, ?cause: any) -> bot
            | (_Exception0 exception_instance, ?cause: any) -> bot
-           | (_Exception1[T] exception_class, T message, ?Array[String]? backtrace, ?cause: any) -> bot
+           | [T] (_Exception1[T] exception_class, T message, ?Array[String]? backtrace, ?cause: any) -> bot
 
   alias fail raise
 
