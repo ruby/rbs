@@ -558,11 +558,11 @@ EOF
         builder = DefinitionBuilder.new(env: env)
 
         builder.build_singleton(BuiltinNames::BasicObject.name).yield_self do |definition|
-          assert_equal ["() -> ::BasicObject"], definition.methods[:new].method_types.map {|x| x.to_s }
+          assert_equal ["() -> ::BasicObject", "any"], definition.methods[:new].method_types.map {|x| x.to_s }
         end
 
         builder.build_singleton(BuiltinNames::String.name).yield_self do |definition|
-          assert_equal ["() -> ::String"], definition.methods[:new].method_types.map {|x| x.to_s }
+          assert_equal ["() -> ::String", "any"], definition.methods[:new].method_types.map {|x| x.to_s }
         end
       end
     end

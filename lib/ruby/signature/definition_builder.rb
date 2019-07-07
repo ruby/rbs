@@ -285,6 +285,9 @@ module Ruby
                         block: method_type.block&.yield_self {|ty| ty.sub(sub) },
                         location: method_type.location
                       )
+                    when :any, :super
+                      # ignore
+                      nil
                     end
                   end.compact
 
@@ -292,7 +295,7 @@ module Ruby
                     super_method: nil,
                     defined_in: nil,
                     implemented_in: env.find_class(Ruby::Signature::BuiltinNames::Class.name),
-                    method_types: method_types,
+                    method_types: method_types + [:any],
                     accessibility: :public
                   )
                 end
@@ -455,8 +458,12 @@ module Ruby
                   sub = Substitution.build(interface_definition.type_params, absolute_args)
                   interface_definition.methods.each do |name, method|
                     method_types = method.method_types.map do |method_type|
-                      method_type.sub(sub).map_type do |type|
-                        absolute_type(type, namespace: namespace)
+                      if method_type.is_a?(MethodType)
+                        method_type.sub(sub).map_type do |type|
+                          absolute_type(type, namespace: namespace)
+                        end
+                      else
+                        method_type
                       end
                     end
 
@@ -657,6 +664,8 @@ module Ruby
               [absolute_type(method_type.sub(sub), namespace: namespace)]
             when :super
               super_method.method_types
+            when :any
+              [method_type]
             end
           end,
           super_method: super_method,

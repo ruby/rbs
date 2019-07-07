@@ -734,4 +734,18 @@ end
       EOS
     end
   end
+
+  def test_dynamic_method_type
+    Parser.parse_signature(<<~SIG).yield_self do |decls|
+      class Foo
+        def eval: any
+      end
+    SIG
+
+      decls[0].members[0].yield_self do |m|
+        assert_instance_of Members::MethodDefinition, m
+        assert_equal :any, m.types[0]
+      end
+    end
+  end
 end

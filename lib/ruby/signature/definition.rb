@@ -39,7 +39,14 @@ module Ruby
         def sub(s)
           self.class.new(
             super_method: super_method&.sub(s),
-            method_types: method_types.map {|ty| ty.sub(s) },
+            method_types: method_types.map do |ty|
+              case ty
+              when MethodType
+                ty.sub(s)
+              when :any
+                ty
+              end
+            end,
             defined_in: defined_in,
             implemented_in: implemented_in,
             accessibility: @accessibility
@@ -50,7 +57,12 @@ module Ruby
           self.class.new(
             super_method: super_method&.map_type(&block),
             method_types: method_types.map do |ty|
-              ty.map_type(&block)
+              case ty
+              when MethodType
+                ty.map_type(&block)
+              when :any
+                ty
+              end
             end,
             defined_in: defined_in,
             implemented_in: implemented_in,
@@ -126,7 +138,12 @@ module Ruby
           methods.each_value do |method|
             if method.defined_in == self.declaration
               method.method_types.each do |method_type|
-                method_type.each_type(&block)
+                case method_type
+                when MethodType
+                  method_type.each_type(&block)
+                when :any
+                  # noop
+                end
               end
             end
           end

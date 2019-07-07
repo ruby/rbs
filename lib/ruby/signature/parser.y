@@ -378,6 +378,7 @@ rule
   method_types:
       method_type { result = [val[0]] }
     | kSUPER { result = [LocatedValue.new(value: :super, location: val[0].location)] }
+    | kANY { result = [LocatedValue.new(value: :any, location: val[0].location)] }
     | method_type kBAR method_types {
         result = val[2].unshift(val[0])
       }
