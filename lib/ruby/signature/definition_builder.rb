@@ -268,7 +268,7 @@ module Ruby
                   method_types = initialize_method.method_types.map do |method_type|
                     case method_type
                     when MethodType
-                      fvs = method_type.free_variables
+                      fvs = method_type.free_variables + type_params
                       unless fvs.empty?
                         bound_variables = method_type.type_params
                         renamed_types = bound_variables.map {|x| Types::Variable.fresh(x) }
