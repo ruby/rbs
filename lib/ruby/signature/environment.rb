@@ -110,6 +110,10 @@ module Ruby
         name_to_extensions[type_name] || []
       end
 
+      def find_alias(type_name)
+        name_to_alias[type_name]
+      end
+
       def each_extension(type_name, &block)
         if block_given?
           (name_to_extensions[type_name] || []).each(&block)
