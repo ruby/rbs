@@ -72,6 +72,11 @@ module Ruby
         end
       end
 
+      def to_type_name
+        parent, name = split
+        TypeName.new(name: name, namespace: parent)
+      end
+
       def self.parse(string)
         if string.start_with?("::")
           new(path: string.split("::").drop(1).map(&:to_sym), absolute: true)
