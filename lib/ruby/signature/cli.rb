@@ -37,7 +37,7 @@ module Ruby
         @stderr = stderr
       end
 
-      COMMANDS = [:ast, :list, :ancestors, :methods, :method, :validate, :version]
+      COMMANDS = [:ast, :list, :ancestors, :methods, :method, :validate, :constant, :version]
 
       def library_parse(opts, options:)
         opts.on("-r LIBRARY") do |lib|
@@ -314,6 +314,42 @@ module Ruby
         env.each_alias do |name, decl|
           stdout.puts "#{Location.to_string decl.location}:\tValidating alias: `#{name}`..."
           env.validate decl.type, namespace: name.namespace
+        end
+      end
+
+      def run_constant(args, options)
+        context = nil
+
+        OptionParser.new do |opts|
+          opts.on("--context CONTEXT") {|c| context = c }
+        end.order!(args)
+
+        unless args.size == 1
+          stdout.puts "Expected one argument."
+          return
+        end
+
+        env = Environment.new()
+        loader = EnvironmentLoader.new(env: env)
+
+        options.setup(loader)
+
+        loader.load
+
+        builder = DefinitionBuilder.new(env: env)
+        table = ConstantTable.new(builder: builder)
+
+        namespace = context ? Namespace.parse(context).absolute! : Namespace.root
+        stdout.puts "Context: #{namespace}"
+        name = Namespace.parse(args[0]).to_type_name
+        stdout.puts "Constant name: #{name}"
+
+        constant = table.resolve_constant_reference(name, context: namespace)
+
+        if constant
+          stdout.puts " => #{constant.name}: #{constant.type}"
+        else
+          stdout.puts " => [no constant]"
         end
       end
 
