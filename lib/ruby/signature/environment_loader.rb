@@ -1,12 +1,10 @@
 module Ruby
   module Signature
     class EnvironmentLoader
-      attr_reader :env
       attr_reader :paths
       attr_accessor :stdlib_root
 
-      def initialize(env:, stdlib_root: Pathname(__dir__) + "../../../stdlib")
-        @env = env
+      def initialize(stdlib_root: Pathname(__dir__) + "../../../stdlib")
         @stdlib_root = stdlib_root
         @paths = []
       end
@@ -49,7 +47,7 @@ module Ruby
         end
       end
 
-      def load
+      def load(env:)
         signature_files = []
 
         if stdlib_root

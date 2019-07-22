@@ -99,11 +99,12 @@ SIG
           absolute_path.write(content)
         end
 
-        env = Ruby::Signature::Environment.new()
-        loader = Ruby::Signature::EnvironmentLoader.new(env: env)
+        loader = Ruby::Signature::EnvironmentLoader.new()
         loader.stdlib_root = nil
         loader.add path: tmppath
-        loader.load
+
+        env = Ruby::Signature::Environment.new()
+        loader.load(env: env)
 
         yield env
       end

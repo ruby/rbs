@@ -36,12 +36,13 @@ end
 
   def test_loading_builtin_and_library_and_directory
     with_signatures do |path|
-      env = Environment.new
-      loader = EnvironmentLoader.new(env: env)
+      loader = EnvironmentLoader.new()
 
       loader.add(library: "pathname")
       loader.add(path: path)
-      loader.load
+
+      env = Environment.new
+      loader.load(env: env)
 
       assert env.declarations.any? {|decl| decl.is_a?(Declarations::Class) && decl.name.name == :BasicObject }
       assert env.declarations.any? {|decl| decl.is_a?(Declarations::Class) && decl.name.name == :Pathname }
@@ -59,10 +60,10 @@ end
 
   def test_loading_without_stdlib
     with_signatures do |path|
-      env = Environment.new
-      loader = EnvironmentLoader.new(env: env, stdlib_root: nil)
+      loader = EnvironmentLoader.new(stdlib_root: nil)
 
-      loader.load
+      env = Environment.new
+      loader.load(env: env)
 
       refute env.declarations.any? {|decl| decl.is_a?(Declarations::Class) && decl.name.name == :BasicObject }
       refute env.declarations.any? {|decl| decl.is_a?(Declarations::Class) && decl.name.name == :Pathname }
@@ -71,13 +72,14 @@ end
 
   def test_loading_unknown_library
     with_signatures do |path|
-      env = Environment.new
-      loader = EnvironmentLoader.new(env: env)
+      loader = EnvironmentLoader.new()
 
       loader.add(library: "no_such_library")
 
+      env = Environment.new
+
       assert_raises do
-        loader.load
+        loader.load(env: env)
       end
     end
   end
