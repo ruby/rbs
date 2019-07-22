@@ -21,6 +21,17 @@ module Ruby
         @name_to_alias = {}
       end
 
+      def initialize_copy(other)
+        @buffers = other.buffers.dup
+        @declarations = other.declarations.dup
+
+        @name_to_decl = other.name_to_decl.dup
+        @name_to_extensions = other.name_to_extensions.dup
+        @name_to_constant = other.name_to_constant.dup
+        @name_to_global = other.name_to_global.dup
+        @name_to_alias = other.name_to_alias.dup
+      end
+
       def cache_name(cache, name:, decl:)
         if cache.key?(name)
           raise DuplicatedDeclarationError.new(name, decl, cache[name])
