@@ -187,23 +187,19 @@ module Ruby
             Types::ClassSingleton.new(name: absolute_name, location: type.location)
           end
         when Types::ClassInstance
-          absolute_name_or(type.name, type) do
-            absolute_name = absolute_type_name(type.name, namespace: namespace) { yield(type) }
-            Types::ClassInstance.new(name: absolute_name,
-                                     args: type.args.map {|ty|
-                                       absolute_type(ty, namespace: namespace, &block)
-                                     },
-                                     location: type.location)
-          end
+          absolute_name = absolute_type_name(type.name, namespace: namespace) { yield(type) }
+          Types::ClassInstance.new(name: absolute_name,
+                                   args: type.args.map {|ty|
+                                     absolute_type(ty, namespace: namespace, &block)
+                                   },
+                                   location: type.location)
         when Types::Interface
-          absolute_name_or(type.name, type) do
-            absolute_name = absolute_type_name(type.name, namespace: namespace) { yield(type) }
-            Types::Interface.new(name: absolute_name,
-                                 args: type.args.map {|ty|
-                                   absolute_type(ty, namespace: namespace, &block)
-                                 },
-                                 location: type.location)
-          end
+          absolute_name = absolute_type_name(type.name, namespace: namespace) { yield(type) }
+          Types::Interface.new(name: absolute_name,
+                               args: type.args.map {|ty|
+                                 absolute_type(ty, namespace: namespace, &block)
+                               },
+                               location: type.location)
         when Types::Alias
           absolute_name_or(type.name, type) do
             absolute_name = absolute_type_name(type.name, namespace: namespace) { yield(type) }
