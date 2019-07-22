@@ -291,7 +291,7 @@ module Ruby
                   definition.methods[:new] = Definition::Method.new(
                     super_method: nil,
                     defined_in: nil,
-                    implemented_in: decl,
+                    implemented_in: env.find_class(Ruby::Signature::BuiltinNames::Class.name),
                     method_types: method_types,
                     accessibility: :public
                   )
