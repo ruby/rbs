@@ -340,6 +340,7 @@ module Ruby
               when AST::Members::MethodDefinition
                 if member.instance?
                   name = member.name
+
                   method_types = member.types.map do |method_type|
                     case method_type
                     when MethodType
@@ -348,6 +349,8 @@ module Ruby
                       end
                     when :super
                       :super
+                    when :any
+                      :any
                     end
                   end
 
@@ -527,8 +530,13 @@ module Ruby
               if member.singleton?
                 name = member.name
                 method_types = member.types.map do |method_type|
-                  method_type.map_type do |type|
-                    absolute_type(type, namespace: namespace)
+                  case method_type
+                  when MethodType
+                    method_type.map_type do |type|
+                      absolute_type(type, namespace: namespace)
+                    end
+                  when :any
+                    :any
                   end
                 end
 
