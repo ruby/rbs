@@ -1,6 +1,6 @@
 class BasicObject
   def initialize: -> void
-  def !: (any) -> bool
+  def !: () -> bool
   def `!=`: (any) -> bool
   def __id__: -> Integer
   def __send__: (*any) -> any

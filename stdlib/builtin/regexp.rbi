@@ -17,6 +17,7 @@ class Regexp
                 | (String, Integer) -> any
                 | (String, bool) -> any
                 | (Regexp) -> any
+
   def `===`: (String) -> bool
   def `=~`: (String) -> Integer?
   def casefold?: -> bool
