@@ -262,6 +262,9 @@ module Ruby
           end
 
           decl = find_class(type.name)
+          unless decl
+            raise NoTypeFoundError.new(type_name: type.name, location: type.location)
+          end
 
           InvalidTypeApplicationError.check!(
             type_name: type.name,
