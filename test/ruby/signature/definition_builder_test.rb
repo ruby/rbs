@@ -497,7 +497,7 @@ EOF
           end
 
           definition.methods[:initialize].yield_self do |method|
-            assert_method_definition method, ["() -> void"], accessibility: :private
+            assert_method_definition method, ["() -> void", "any"], accessibility: :private
           end
 
           definition.methods[:puts].yield_self do |method|
@@ -718,7 +718,7 @@ EOF
 
           assert_equal [:__id__, :initialize, :puts, :respond_to_missing?], definition.methods.keys.sort
           assert_method_definition definition.methods[:__id__], ["() -> ::Integer"]
-          assert_method_definition definition.methods[:initialize], ["() -> void"]
+          assert_method_definition definition.methods[:initialize], ["() -> void", "any"]
           assert_method_definition definition.methods[:puts], ["(*any) -> nil"]
           assert_method_definition definition.methods[:respond_to_missing?], ["(::Symbol, bool) -> bool"]
         end
@@ -743,13 +743,46 @@ EOF
 
           assert_method_definition definition.methods[:instance_reader], ["() -> ::String"]
           assert_ivar_definitioin definition.instance_variables[:@instance_reader], "::String"
+        end
+      end
+    end
+  end
 
-          assert_method_definition definition.methods[:instance_writer=], ["(::Integer instance_writer) -> ::Integer"]
-          assert_ivar_definitioin definition.instance_variables[:@writer], "::Integer"
+  def test_initialize_any
+    SignatureManager.new do |manager|
+      manager.files[Pathname("foo.rbi")] = <<EOF
+class Hello
+  def initialize: (String, Integer) -> void
+end
+EOF
+      manager.build do |env|
+        builder = DefinitionBuilder.new(env: env)
 
-          assert_method_definition definition.methods[:instance_accessor], ["() -> ::Symbol"]
-          assert_method_definition definition.methods[:instance_accessor=], ["(::Symbol instance_accessor) -> ::Symbol"]
-          assert_nil definition.instance_variables[:@instance_accessor]
+        builder.build_instance(type_name("::Hello")).yield_self do |definition|
+          assert_instance_of Definition, definition
+
+          assert_operator definition.methods, :key?, :initialize
+          assert_method_definition definition.methods[:initialize], ["(::String, ::Integer) -> void", "any"]
+        end
+      end
+    end
+  end
+
+  def test_new_any
+    SignatureManager.new do |manager|
+      manager.files[Pathname("foo.rbi")] = <<EOF
+class Hello
+  def initialize: (String, Integer) -> void
+end
+EOF
+      manager.build do |env|
+        builder = DefinitionBuilder.new(env: env)
+
+        builder.build_singleton(type_name("::Hello")).yield_self do |definition|
+          assert_instance_of Definition, definition
+
+          assert_operator definition.methods, :key?, :new
+          assert_method_definition definition.methods[:new], ["(::String, ::Integer) -> ::Hello", "any"]
         end
       end
     end

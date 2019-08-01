@@ -354,6 +354,10 @@ module Ruby
                     end
                   end
 
+                  if name == :initialize && !method_types.member?(:any)
+                    method_types << :any
+                  end
+
                   DuplicatedMethodDefinitionError.check!(
                     decl: decl,
                     methods: definition.methods,
