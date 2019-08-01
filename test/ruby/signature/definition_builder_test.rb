@@ -22,6 +22,11 @@ class Ruby::Signature::DefinitionBuilderTest < Minitest::Test
     yield method.super if block_given?
   end
 
+  def assert_ivar_definitioin(ivar, type)
+    assert_instance_of Definition::Variable, ivar
+    assert_equal parse_type(type), ivar.type
+  end
+
   def test_build_ancestors
     SignatureManager.new do |manager|
       manager.files[Pathname("foo.rbi")] = <<EOF
@@ -716,6 +721,35 @@ EOF
           assert_method_definition definition.methods[:initialize], ["() -> void"]
           assert_method_definition definition.methods[:puts], ["(*any) -> nil"]
           assert_method_definition definition.methods[:respond_to_missing?], ["(::Symbol, bool) -> bool"]
+        end
+      end
+    end
+  end
+
+  def test_attributes
+    SignatureManager.new do |manager|
+      manager.files[Pathname("foo.rbi")] = <<EOF
+class Hello
+  attr_reader instance_reader: String
+  attr_writer instance_writer(@writer): Integer
+  attr_accessor instance_accessor(): Symbol
+end
+EOF
+      manager.build do |env|
+        builder = DefinitionBuilder.new(env: env)
+
+        builder.build_instance(type_name("::Hello")).yield_self do |definition|
+          assert_instance_of Definition, definition
+
+          assert_method_definition definition.methods[:instance_reader], ["() -> ::String"]
+          assert_ivar_definitioin definition.instance_variables[:@instance_reader], "::String"
+
+          assert_method_definition definition.methods[:instance_writer=], ["(::Integer instance_writer) -> ::Integer"]
+          assert_ivar_definitioin definition.instance_variables[:@writer], "::Integer"
+
+          assert_method_definition definition.methods[:instance_accessor], ["() -> ::Symbol"]
+          assert_method_definition definition.methods[:instance_accessor=], ["(::Symbol instance_accessor) -> ::Symbol"]
+          assert_nil definition.instance_variables[:@instance_accessor]
         end
       end
     end

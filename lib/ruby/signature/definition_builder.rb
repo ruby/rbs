@@ -356,6 +356,65 @@ module Ruby
                                                                     implemented_in: decl,
                                                                     accessibility: accessibility)
                 end
+              when AST::Members::AttrReader, AST::Members::AttrAccessor, AST::Members::AttrWriter
+                name = member.name
+                type = absolute_type(member.type, namespace: namespace)
+                ivar_name = case member.ivar_name
+                            when false
+                              nil
+                            else
+                              member.ivar_name || :"@#{member.name}"
+                            end
+
+                if member.is_a?(AST::Members::AttrReader) || member.is_a?(AST::Members::AttrAccessor)
+                  definition.methods[name] = Definition::Method.new(
+                    super_method: nil,
+                    method_types: [
+                      MethodType.new(
+                        type_params: [],
+                        type: Types::Function.empty(type),
+                        block: nil,
+                        location: nil
+                      )
+                    ],
+                    defined_in: decl,
+                    implemented_in: decl,
+                    accessibility: accessibility
+                  )
+                end
+
+                if member.is_a?(AST::Members::AttrWriter) || member.is_a?(AST::Members::AttrAccessor)
+                  definition.methods[:"#{name}="] = Definition::Method.new(
+                    super_method: nil,
+                    method_types: [
+                      MethodType.new(
+                        type_params: [],
+                        type: Types::Function.new(required_positionals: [Types::Function::Param.new(name: name, type: type)],
+                                                  optional_positionals: [],
+                                                  rest_positionals: nil,
+                                                  trailing_positionals: [],
+                                                  required_keywords: {},
+                                                  optional_keywords: {},
+                                                  rest_keywords: nil,
+                                                  return_type: type),
+                        block: nil,
+                        location: nil
+                      )
+                    ],
+                    defined_in: decl,
+                    implemented_in: decl,
+                    accessibility: accessibility
+                  )
+                end
+
+                if ivar_name
+                  definition.instance_variables[ivar_name] = Definition::Variable.new(
+                    parent_variable: nil,
+                    type: type,
+                    declared_in: decl
+                  )
+                end
+
               when AST::Members::Alias
                 if member.instance?
                   UnknownMethodAliasError.check!(

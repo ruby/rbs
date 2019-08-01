@@ -723,6 +723,19 @@ module Ruby
           map_type {|ty| ty.sub(s) }
         end
 
+        def self.empty(return_type)
+          Function.new(
+            required_positionals: [],
+            optional_positionals: [],
+            rest_positionals: nil,
+            trailing_positionals: [],
+            required_keywords: {},
+            optional_keywords: {},
+            rest_keywords: nil,
+            return_type: return_type
+          )
+        end
+
         def with_return_type(type)
           Function.new(
             required_positionals: required_positionals,
