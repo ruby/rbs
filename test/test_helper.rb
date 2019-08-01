@@ -3,7 +3,7 @@ require "ruby/signature"
 require "tmpdir"
 require 'minitest/reporters'
 
-MiniTest::Reporters.use!
+Minitest::Reporters.use! [Minitest::Reporters::DefaultReporter.new]
 
 module TestHelper
   def parse_type(string, variables: Set.new)
