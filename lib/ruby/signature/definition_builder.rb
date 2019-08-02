@@ -338,8 +338,13 @@ module Ruby
                 if member.instance?
                   name = member.name
                   method_types = member.types.map do |method_type|
-                    method_type.map_type do |type|
-                      absolute_type(type, namespace: namespace)
+                    case method_type
+                    when MethodType
+                      method_type.map_type do |type|
+                        absolute_type(type, namespace: namespace)
+                      end
+                    when :super
+                      :super
                     end
                   end
 
