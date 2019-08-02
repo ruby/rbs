@@ -20,6 +20,8 @@ class Integer < Numeric
   def `[]`: (Integer) -> Integer
   def `<<`: (Integer) -> Integer
   def floor: (Integer) -> Integer
+           | () -> Integer
+  def divmod: (Numeric) -> [Integer, Numeric]
   def `**`: (Integer) -> Integer
   def `/`: (Integer) -> Integer
        | (Float) -> Float
