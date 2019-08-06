@@ -704,4 +704,34 @@ class Ruby::Signature::SignatureParsingTest < Minitest::Test
       end
     end
   end
+
+  def assert_valid_signature
+    Parser.parse_signature yield
+  end
+
+  def test_parsings
+    assert_valid_signature do
+      <<-EOS
+module Foo: _Bar
+end
+      EOS
+    end
+
+    assert_valid_signature do
+      <<-EOS
+class A
+  def =~: (any) -> bool
+  def ===: (any) -> bool
+end
+      EOS
+    end
+
+    assert_valid_signature do
+      <<-EOS
+class X
+  def foo: (type: any, class: any, module: any, if: any, include: any, yield: any, def: any, self: any, instance: any, any: any, void: void) -> any
+end
+      EOS
+    end
+  end
 end
