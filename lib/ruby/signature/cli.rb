@@ -76,12 +76,12 @@ module Ruby
       end
 
       def run_ast(args, options)
-        env = Environment.new()
-        loader = EnvironmentLoader.new(env: env)
+        loader = EnvironmentLoader.new()
 
         options.setup(loader)
 
-        loader.load
+        env = Environment.new()
+        loader.load(env: env)
 
         stdout.print JSON.generate(env.declarations)
         stdout.flush
@@ -98,12 +98,12 @@ module Ruby
 
         list.push(:class, :module, :interface) if list.empty?
 
-        env = Environment.new()
-        loader = EnvironmentLoader.new(env: env)
+        loader = EnvironmentLoader.new()
 
         options.setup(loader)
 
-        loader.load
+        env = Environment.new()
+        loader.load(env: env)
 
         env.each_decl.sort_by {|name,| name.to_s }.each do |type_name, decl|
           case decl
@@ -131,12 +131,12 @@ module Ruby
           opts.on("--singleton") { kind = :singleton }
         end.order!(args)
 
-        env = Environment.new()
-        loader = EnvironmentLoader.new(env: env)
+        loader = EnvironmentLoader.new()
 
         options.setup(loader)
 
-        loader.load
+        env = Environment.new()
+        loader.load(env: env)
 
         builder = DefinitionBuilder.new(env: env)
         type_name = parse_type_name(args[0]).absolute!
@@ -189,12 +189,12 @@ module Ruby
           opts.on("--no-inherit") { inherit = false }
         end.order!(args)
 
-        env = Environment.new()
-        loader = EnvironmentLoader.new(env: env)
+        loader = EnvironmentLoader.new()
 
         options.setup(loader)
 
-        loader.load
+        env = Environment.new()
+        loader.load(env: env)
 
         builder = DefinitionBuilder.new(env: env)
         type_name = parse_type_name(args[0]).absolute!
@@ -231,12 +231,12 @@ module Ruby
           return
         end
 
-        env = Environment.new()
-        loader = EnvironmentLoader.new(env: env)
+        loader = EnvironmentLoader.new()
 
         options.setup(loader)
 
-        loader.load
+        env = Environment.new()
+        loader.load(env: env)
 
         builder = DefinitionBuilder.new(env: env)
         type_name = parse_type_name(args[0]).absolute!
@@ -274,12 +274,12 @@ module Ruby
       end
 
       def run_validate(args, options)
-        env = Environment.new()
-        loader = EnvironmentLoader.new(env: env)
+        loader = EnvironmentLoader.new()
 
         options.setup(loader)
 
-        loader.load
+        env = Environment.new()
+        loader.load(env: env)
 
         builder = DefinitionBuilder.new(env: env)
 
@@ -329,12 +329,12 @@ module Ruby
           return
         end
 
-        env = Environment.new()
-        loader = EnvironmentLoader.new(env: env)
+        loader = EnvironmentLoader.new()
 
         options.setup(loader)
 
-        loader.load
+        env = Environment.new()
+        loader.load(env: env)
 
         builder = DefinitionBuilder.new(env: env)
         table = ConstantTable.new(builder: builder)
