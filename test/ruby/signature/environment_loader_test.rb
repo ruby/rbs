@@ -70,16 +70,33 @@ end
     end
   end
 
+  def test_loading_gem
+    with_signatures do |path|
+      loader = EnvironmentLoader.new()
+
+      # We have racc gem as development dependency
+
+      loader.add(library: "racc")
+
+      assert_equal 1, loader.paths.size
+      loader.paths[0].tap do |path|
+        assert_instance_of EnvironmentLoader::GemPath, path
+        assert_nil path.version
+        assert_match %r{racc-\d.\d.\d+/sig$}, path.path.to_s
+      end
+    end
+  end
+
   def test_loading_unknown_library
     with_signatures do |path|
       loader = EnvironmentLoader.new()
 
-      loader.add(library: "no_such_library")
+      assert_raises EnvironmentLoader::UnknownLibraryNameError do
+        loader.add(library: "no_such_library")
+      end
 
-      env = Environment.new
-
-      assert_raises do
-        loader.load(env: env)
+      assert_raises EnvironmentLoader::UnknownLibraryNameError do
+        loader.add(library: "racc:0.0.0")
       end
     end
   end
