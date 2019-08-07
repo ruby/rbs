@@ -37,7 +37,7 @@ module Ruby
         @stderr = stderr
       end
 
-      COMMANDS = [:ast, :list, :ancestors, :methods, :method, :validate, :constant, :version]
+      COMMANDS = [:ast, :list, :ancestors, :methods, :method, :validate, :constant, :paths, :version]
 
       def library_parse(opts, options:)
         opts.on("-r LIBRARY") do |lib|
@@ -355,6 +355,41 @@ module Ruby
 
       def run_version(args, options)
         stdout.puts "ruby-signature #{VERSION}"
+      end
+
+      def run_paths(args, options)
+        loader = EnvironmentLoader.new()
+
+        options.setup(loader)
+
+        kind_of = -> (path) {
+          case
+          when path.file?
+            "file"
+          when path.directory?
+            "dir"
+          when !path.exist?
+            "absent"
+          else
+            "unknown"
+          end
+        }
+
+        if loader.stdlib_root
+          path = loader.stdlib_root
+          stdout.puts "#{path}/builtin (#{kind_of[path]}, stdlib)"
+        end
+
+        loader.paths.each do |path|
+          case path
+          when Pathname
+            stdout.puts "#{path} (#{kind_of[path]})"
+          when EnvironmentLoader::GemPath
+            stdout.puts "#{path.path} (#{kind_of[path.path]}, gem, name=#{path.name}, version=#{path.version})"
+          when EnvironmentLoader::LibraryPath
+            stdout.puts "#{path.path} (#{kind_of[path.path]}, library, name=#{path.name})"
+          end
+        end
       end
 
       def parse_type_name(string)
