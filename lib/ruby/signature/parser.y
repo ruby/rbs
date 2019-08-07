@@ -18,7 +18,7 @@ class Ruby::Signature::Parser
   nonassoc kARROW
   preclow
 
-  expect 1
+  expect 2
 
 rule
 
@@ -112,6 +112,19 @@ rule
           type_params: val[4]&.value || [],
           self_type: val[5],
           members: val[6],
+          annotations: val[0],
+          location: location
+        )
+      }
+    | annotations kMODULE start_new_scope tUKEYWORD type class_members kEND {
+        reset_variable_scope
+
+        location = val[1].location + val[6].location
+        result = Declarations::Module.new(
+          name: val[3].value,
+          type_params: [],
+          self_type: val[4],
+          members: val[5],
           annotations: val[0],
           location: location
         )
@@ -441,11 +454,13 @@ rule
       }
     | tQUOTEDMETHOD
 
-  method_name0:
-      tUIDENT | tLIDENT
-    | kCLASS | kVOID | kNIL | kANY | kTOP | kBOT | kINSTANCE | kBOOL | kSINGLETON
+
+  method_name0: tUIDENT | tLIDENT | identifier_keywords
+
+  identifier_keywords:
+      kCLASS | kVOID | kNIL | kANY | kTOP | kBOT | kINSTANCE | kBOOL | kSINGLETON
     | kTYPE | kMODULE | kPRIVATE | kPUBLIC | kEND | kINCLUDE | kEXTEND | kPREPEND
-    | kATTRREADER | kATTRACCESSOR | kATTRWRITER | kDEF | kEXTENSION
+    | kATTRREADER | kATTRACCESSOR | kATTRWRITER | kDEF | kEXTENSION | kSELF
 
   type_params:
       { result = nil }
@@ -686,6 +701,12 @@ rule
         result = { val[0].value => val[1] }
       }
 
+  keyword_name:
+      keyword
+    | identifier_keywords kCOLON {
+        result = val[0]
+      }
+
   keyword: tLKEYWORD | tUKEYWORD
 
   function_type:
@@ -808,14 +829,14 @@ rule
       }
 
   required_keyword:
-      keyword type var_name_opt {
+      keyword_name type var_name_opt {
         param = Types::Function::Param.new(type: val[1],
                                            name: val[2]&.value&.to_sym)
         result = { val[0].value => param }
       }
 
   optional_keyword:
-      kQUESTION keyword type var_name_opt {
+      kQUESTION keyword_name type var_name_opt {
         param = Types::Function::Param.new(type: val[2],
                                            name: val[3]&.value&.to_sym)
         result = { val[1].value => param }
@@ -1040,7 +1061,10 @@ KEYWORDS = {
 KEYWORDS_RE = /#{Regexp.union(*KEYWORDS.keys)}\b/
 
 PUNCTS = {
+  "===" => :tOPERATOR,
   "==" => :tOPERATOR,
+  "=~" => :tOPERATOR,
+  "!~" => :tOPERATOR,
   ">=" => :tOPERATOR,
   "<=" => :tOPERATOR,
   ">" => :tOPERATOR,
