@@ -64,6 +64,7 @@ module Enumerable[A, B] : _Each[A, B]
               | { (A) -> any } -> Array[A]
   def select: -> Enumerator[A, Array[A]]
             | { (A) -> any } -> Array[A]
+  alias filter select
 
   def find_index: (any) -> Integer?
                 | { (A) -> any } -> Integer?
