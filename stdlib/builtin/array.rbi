@@ -49,7 +49,7 @@ class Array[A]
                | -> Enumerator[A, self]
   def reject!: { (A) -> any } -> self?
              | -> Enumerator[A, self?]
-  def dig: (Integer, any) -> any
+  def dig: (Integer, *any) -> any
   def each: { (A) -> any } -> self
           | -> Enumerator[A, self]
   def each_index: { (Integer) -> any } -> self
