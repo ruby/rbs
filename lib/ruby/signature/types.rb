@@ -677,13 +677,13 @@ module Ruby
         def map_type(&block)
           if block_given?
             Function.new(
-              required_positionals: required_positionals.map {|param| param.map_type &block },
-              optional_positionals: optional_positionals.map {|param| param.map_type &block },
-              rest_positionals: rest_positionals&.yield_self {|param| param.map_type &block },
-              trailing_positionals: trailing_positionals.map {|param| param.map_type &block },
-              required_keywords: required_keywords.transform_values {|param| param.map_type &block },
-              optional_keywords: optional_keywords.transform_values {|param| param.map_type &block },
-              rest_keywords: rest_keywords&.yield_self {|param| param.map_type &block },
+              required_positionals: required_positionals.map {|param| param.map_type(&block) },
+              optional_positionals: optional_positionals.map {|param| param.map_type(&block) },
+              rest_positionals: rest_positionals&.yield_self {|param| param.map_type(&block) },
+              trailing_positionals: trailing_positionals.map {|param| param.map_type(&block) },
+              required_keywords: required_keywords.transform_values {|param| param.map_type(&block) },
+              optional_keywords: optional_keywords.transform_values {|param| param.map_type(&block) },
+              rest_keywords: rest_keywords&.yield_self {|param| param.map_type(&block) },
               return_type: yield(return_type)
             )
           else

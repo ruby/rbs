@@ -92,7 +92,7 @@ module Ruby
         signature_files = []
 
         if stdlib_root
-          signature_files.push *each_signature(stdlib_root + "builtin")
+          signature_files.push(*each_signature(stdlib_root + "builtin"))
         end
 
         each_signature do |path|
