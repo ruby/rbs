@@ -142,8 +142,8 @@ singleton(::BasicObject)
   def test_paths
     with_cli do |cli|
       cli.run(%w(-r set -r racc -I sig/test paths))
-      assert_match %r{/ruby-signature/stdlib/builtin \(dir, stdlib\)$}, stdout.string
-      assert_match %r{/ruby-signature/stdlib/set \(dir, library, name=set\)$}, stdout.string
+      assert_match %r{/stdlib/builtin \(dir, stdlib\)$}, stdout.string
+      assert_match %r{/stdlib/set \(dir, library, name=set\)$}, stdout.string
       assert_match %r{/racc-\d\.\d\.\d+/sig \(absent, gem, name=racc, version=\)$}, stdout.string
       assert_match %r{^sig/test \(absent\)$}, stdout.string
     end
