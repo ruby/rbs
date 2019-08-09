@@ -90,8 +90,8 @@ class Array[A]
 
   def pack: (String, ?buffer: String) -> String
 
-  def permutation: (?Integer) { (self) -> any } -> Array[self]
-                 | (?Integer) -> Enumerator[self, Array[self]]
+  def permutation: (?Integer) { (self) -> any } -> self
+                 | (?Integer) -> Enumerator[self, self]
 
   def pop: -> A?
          | (Integer) -> self
