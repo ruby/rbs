@@ -104,7 +104,7 @@ module Ruby
       end
 
       def each_class_name(&block)
-        each_decl.select {|name,| class?(name) }.each &block
+        each_decl.select {|name,| class?(name) }.each(&block)
       end
 
       def class?(type_name)

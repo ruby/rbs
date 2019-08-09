@@ -50,7 +50,7 @@ module Ruby
           self.class.new(
             super_method: super_method&.map_type(&block),
             method_types: method_types.map do |ty|
-              ty.map_type &block
+              ty.map_type(&block)
             end,
             defined_in: defined_in,
             implemented_in: implemented_in,
