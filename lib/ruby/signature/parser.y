@@ -930,6 +930,7 @@ def initialize(type, buffer:, eof_re:)
   @buffer = buffer
   @input = StringScanner.new(buffer.content)
   @eof_re = eof_re
+  @eof = false
   @bound_variables_stack = []
 end
 
