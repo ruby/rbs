@@ -8,7 +8,11 @@ class Array[A]
   def `*`: (Integer) -> self
          | (String) -> String
   def `-`: (self) -> self
+  def difference: (self) -> self
   def `+`: (self) -> self
+  def `|`: (self) -> self
+  def union: (self) -> self
+  def `&`: (self) -> self
   def `<<`: (A) -> self
 
   def `[]`: (Integer) -> A
@@ -102,6 +106,7 @@ class Array[A]
   def product: (*Array[A]) -> Array[Array[A]]
              | (*Array[A]) { (Array[A]) -> any } -> self
 
+  def assoc: (any) -> any
   def rassoc: (any) -> any
 
   def repeated_combination: (Integer) { (self) -> any } -> self
@@ -114,6 +119,8 @@ class Array[A]
 
   def reverse: -> self
   def reverse!: -> self
+  def reverse_each: { (A) -> any } -> self
+                  | -> Enumerator[A, self]
 
   def rindex: (A) -> Integer?
             | { (A) -> any } -> Integer?
@@ -127,6 +134,8 @@ class Array[A]
             | (Integer, ?random: any) -> self
 
   def select!: -> Enumerator[A, self]
+             | { (A) -> any } -> self
+  def filter!: -> Enumerator[A, self]
              | { (A) -> any } -> self
 
   def shift: -> A?
@@ -144,6 +153,8 @@ class Array[A]
             | (Integer, Integer) -> self?
             | (Range[Integer]) -> self?
 
+  def to_a: -> self
+  def to_ary: -> self
   def to_h: -> Hash[any, any]
 
   def transpose: -> self
@@ -155,4 +166,7 @@ class Array[A]
 
   def zip: [X] (Array[X]) -> Array[[A, X]]
          | [X] (Array[X]) { (A, X) -> any } -> nil
+
+  def bsearch: { (A) -> any } -> A?
+  def bsearch_index : { (A) -> any } -> Integer?
 end
