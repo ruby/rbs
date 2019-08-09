@@ -1124,7 +1124,7 @@ def next_token
   when input.scan(/self\?/)
     new_token(:kSELFQ, "self?")
   when input.scan(KEYWORDS_RE)
-    new_token(KEYWORDS[input.matched])
+    new_token(KEYWORDS[input.matched], input.matched.to_sym)
   when input.scan(/:\w+\b/)
     s = input.matched.yield_self {|s| s[1, s.length] }.to_sym
     new_token(:tSYMBOL, s)
