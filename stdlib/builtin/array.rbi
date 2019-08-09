@@ -154,5 +154,5 @@ class Array[A]
   def values_at: (*Integer | Range[Integer]) -> self
 
   def zip: [X] (Array[X]) -> Array[[A, X]]
-         | [X, Y] (Array[X]) { (A, X) -> Y } -> Array[Y]
+         | [X] (Array[X]) { (A, X) -> any } -> nil
 end
