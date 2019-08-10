@@ -2,6 +2,7 @@ require "ruby/signature/version"
 
 require "set"
 require "json"
+require "pathname"
 
 require "ruby/signature/errors"
 require "ruby/signature/buffer"
