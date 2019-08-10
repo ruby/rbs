@@ -263,11 +263,11 @@ class Ruby::Signature::TypeParsingTest < Minitest::Test
                      Types::Function::Param.new(type: Types::Bases::Any.new(location: nil), name: nil)
                    ], fun.required_positionals
       assert_equal [], fun.optional_positionals
-      assert_equal nil, fun.rest_positionals
+      assert_nil fun.rest_positionals
       assert_equal [], fun.trailing_positionals
       assert_equal({}, fun.required_keywords)
       assert_equal({}, fun.optional_keywords)
-      assert_equal nil, fun.rest_keywords
+      assert_nil fun.rest_keywords
 
       assert_equal "^(any) -> void", type.location.source
     end
@@ -282,11 +282,11 @@ class Ruby::Signature::TypeParsingTest < Minitest::Test
                      Types::Function::Param.new(type: Types::Bases::Void.new(location: nil), name: nil),
                    ], fun.required_positionals
       assert_equal [], fun.optional_positionals
-      assert_equal nil, fun.rest_positionals
+      assert_nil fun.rest_positionals
       assert_equal [], fun.trailing_positionals
       assert_equal({}, fun.required_keywords)
       assert_equal({}, fun.optional_keywords)
-      assert_equal nil, fun.rest_keywords
+      assert_nil fun.rest_keywords
 
       assert_equal "^(any, void) -> void", type.location.source
     end
@@ -301,11 +301,11 @@ class Ruby::Signature::TypeParsingTest < Minitest::Test
                      Types::Function::Param.new(type: Types::Bases::Void.new(location: nil), name: :_y),
                    ], fun.required_positionals
       assert_equal [], fun.optional_positionals
-      assert_equal nil, fun.rest_positionals
+      assert_nil fun.rest_positionals
       assert_equal [], fun.trailing_positionals
       assert_equal({}, fun.required_keywords)
       assert_equal({}, fun.optional_keywords)
-      assert_equal nil, fun.rest_keywords
+      assert_nil fun.rest_keywords
 
       assert_equal "^(any x, void _y) -> void", type.location.source
     end
@@ -322,11 +322,11 @@ class Ruby::Signature::TypeParsingTest < Minitest::Test
                      Types::Function::Param.new(type: Types::Bases::Void.new(location: nil), name: nil),
                      Types::Function::Param.new(type: Types::Bases::Nil.new(location: nil), name: :y),
                    ], fun.optional_positionals
-      assert_equal nil, fun.rest_positionals
+      assert_nil fun.rest_positionals
       assert_equal [], fun.trailing_positionals
       assert_equal({}, fun.required_keywords)
       assert_equal({}, fun.optional_keywords)
-      assert_equal nil, fun.rest_keywords
+      assert_nil fun.rest_keywords
 
       assert_equal "^(any x, ?void, ?nil y) -> void", type.location.source
     end
@@ -348,7 +348,7 @@ class Ruby::Signature::TypeParsingTest < Minitest::Test
       assert_equal [], fun.trailing_positionals
       assert_equal({}, fun.required_keywords)
       assert_equal({}, fun.optional_keywords)
-      assert_equal nil, fun.rest_keywords
+      assert_nil fun.rest_keywords
 
       assert_equal "^(any x, ?void, ?nil y, *any a) -> void", type.location.source
     end
@@ -369,7 +369,7 @@ class Ruby::Signature::TypeParsingTest < Minitest::Test
                    ], fun.trailing_positionals
       assert_equal({}, fun.required_keywords)
       assert_equal({}, fun.optional_keywords)
-      assert_equal nil, fun.rest_keywords
+      assert_nil fun.rest_keywords
 
       assert_equal "^(any x, *any a, nil z) -> void", type.location.source
     end
@@ -381,14 +381,14 @@ class Ruby::Signature::TypeParsingTest < Minitest::Test
 
       assert_equal [], fun.required_positionals
       assert_equal [], fun.optional_positionals
-      assert_equal nil, fun.rest_positionals
+      assert_nil fun.rest_positionals
       assert_equal [], fun.trailing_positionals
       assert_equal({
                      foo: Types::Function::Param.new(type: Types::Bases::Any.new(location: nil), name: nil),
                      _bar: Types::Function::Param.new(type: Types::Bases::Nil.new(location: nil), name: :bar),
                    }, fun.required_keywords)
       assert_equal({}, fun.optional_keywords)
-      assert_equal nil, fun.rest_keywords
+      assert_nil fun.rest_keywords
 
       assert_equal "^(foo: any, _bar: nil bar) -> void", type.location.source
     end
@@ -400,7 +400,7 @@ class Ruby::Signature::TypeParsingTest < Minitest::Test
 
       assert_equal [], fun.required_positionals
       assert_equal [], fun.optional_positionals
-      assert_equal nil, fun.rest_positionals
+      assert_nil fun.rest_positionals
       assert_equal [], fun.trailing_positionals
       assert_equal({}, fun.required_keywords)
       assert_equal({
