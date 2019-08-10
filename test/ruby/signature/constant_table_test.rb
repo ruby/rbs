@@ -121,6 +121,28 @@ EOF
     end
   end
 
+  def test_reference_constant_inherit_module
+    SignatureManager.new do |manager|
+      manager.files[Pathname("foo.rbi")] = <<EOF
+class Set
+end
+
+module Foo::Bar
+end
+EOF
+      manager.build do |env|
+        builder = DefinitionBuilder.new(env: env)
+        table = ConstantTable.new(builder: builder)
+
+        table.resolve_constant_reference(TypeName.new(name: :Set, namespace: Namespace.empty), context: Namespace.parse("::Foo::Bar")).tap do |constant|
+          assert_instance_of Constant, constant
+          assert_equal "::Set", constant.name.to_s
+          assert_equal 'singleton(::Set)', constant.type.to_s
+        end
+      end
+    end
+  end
+
   def test_reference_constant_inherit2
     SignatureManager.new do |manager|
       manager.files[Pathname("foo.rbi")] = <<EOF

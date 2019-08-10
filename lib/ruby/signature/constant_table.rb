@@ -83,21 +83,29 @@ module Ruby
         constant_scopes_cache[name] ||= constant_scopes0(name, scopes: [])
       end
 
+      def constant_scopes_module(name, scopes:)
+        decl = env.find_class(name)
+        namespace = name.to_namespace
+
+        decl.members.each do |member|
+          case member
+          when AST::Members::Include
+            constant_scopes_module absolute_type_name(name, namespace: namespace),
+                                   scopes: scopes
+          end
+        end
+
+        scopes.unshift namespace
+      end
+
       def constant_scopes0(name, scopes: [])
         decl = env.find_class(name)
         namespace = name.to_namespace
 
         case decl
         when AST::Declarations::Module
-          decl.members.each do |member|
-            case member
-            when AST::Members::Include
-              constant_scopes0 absolute_type_name(member.name, namespace: namespace),
-                              scopes: scopes
-            end
-          end
-
-          scopes.unshift namespace
+          constant_scopes0 BuiltinNames::Module.name, scopes: scopes
+          constant_scopes_module name, scopes: scopes
 
         when AST::Declarations::Class
           unless name == BuiltinNames::BasicObject.name
@@ -111,8 +119,8 @@ module Ruby
           decl.members.each do |member|
             case member
             when AST::Members::Include
-              constant_scopes0 absolute_type_name(member.name, namespace: namespace),
-                              scopes: scopes
+              constant_scopes_module absolute_type_name(member.name, namespace: namespace),
+                                     scopes: scopes
             end
           end
 
@@ -125,8 +133,8 @@ module Ruby
           extension.members.each do |member|
             case member
             when AST::Members::Include
-              constant_scopes0 absolute_type_name(member.name, namespace: namespace),
-                              scopes: []
+              constant_scopes_module absolute_type_name(member.name, namespace: namespace),
+                                     scopes: []
             end
           end
         end
