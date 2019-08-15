@@ -45,6 +45,10 @@ module Ruby
         self.class.new(path: path, absolute: true)
       end
 
+      def relative!
+        self.class.new(path: path, absolute: false)
+      end
+
       def empty?
         path.empty?
       end

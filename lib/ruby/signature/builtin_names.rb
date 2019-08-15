@@ -41,6 +41,11 @@ module Ruby
       Enumerable = Name.define(:Enumerable)
       Class = Name.define(:Class)
       Module = Name.define(:Module)
+      Array = Name.define(:Array)
+      Hash = Name.define(:Hash)
+      Range = Name.define(:Range)
+      Enumerator = Name.define(:Enumerator)
+      Set = Name.define(:Set)
     end
   end
 end
