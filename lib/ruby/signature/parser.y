@@ -434,7 +434,7 @@ rule
 
   method_name:
       tOPERATOR
-    | kAMP | kHAT | kSTAR | kLT | kEXCLAMATION
+    | kAMP | kHAT | kSTAR | kLT | kEXCLAMATION | kSTAR2 | kBAR
     | method_name0
     | method_name0 kQUESTION {
         unless val[0].location.pred?(val[1].location)
@@ -1066,9 +1066,15 @@ PUNCTS = {
   "==" => :tOPERATOR,
   "=~" => :tOPERATOR,
   "!~" => :tOPERATOR,
+  "!=" => :tOPERATOR,
   ">=" => :tOPERATOR,
   "<=" => :tOPERATOR,
   ">" => :tOPERATOR,
+  "~" => :tOPERATOR,
+  "+@" => :tOPERATOR,
+  "+" => :tOPERATOR,
+  "[]=" => :tOPERATOR,
+  "[]" => :tOPERATOR,
   "::" => :kCOLON2,
   ":" => :kCOLON,
   "(" => :kLPAREN,
@@ -1090,6 +1096,11 @@ PUNCTS = {
   "*" => :kSTAR,
   "." => :kDOT,
   "<" => :kLT,
+  "-@" => :tOPERATOR,
+  "-" => :tOPERATOR,
+  "/" => :tOPERATOR,
+  "`" => :tOPERATOR,
+  "%" => :tOPERATOR,
 }
 PUNCTS_RE = Regexp.union(*PUNCTS.keys)
 
