@@ -70,7 +70,8 @@ rule
           extension_name: val[6].value.to_sym,
           members: val[8],
           annotations: val[0],
-          location: location
+          location: location,
+          comment: leading_comment(val[0].first&.location || location)
         )
       }
 
@@ -87,7 +88,8 @@ rule
           super_class: val[5],
           members: val[6],
           annotations: val[0],
-          location: location
+          location: location,
+          comment: leading_comment(val[0].first&.location || location)
         )
       }
 
@@ -113,7 +115,8 @@ rule
           self_type: val[5],
           members: val[6],
           annotations: val[0],
-          location: location
+          location: location,
+          comment: leading_comment(val[0].first&.location || location)
         )
       }
     | annotations kMODULE start_new_scope tUKEYWORD type class_members kEND {
@@ -126,7 +129,8 @@ rule
           self_type: val[4],
           members: val[5],
           annotations: val[0],
-          location: location
+          location: location,
+          comment: leading_comment(val[0].first&.location || location)
         )
       }
 
@@ -159,46 +163,58 @@ rule
 
   attribute_member:
       annotations kATTRREADER keyword type {
+        location = val[1].location + val[3].location
         result = Members::AttrReader.new(name: val[2].value,
                                          ivar_name: nil,
                                          type: val[3],
                                          annotations: val[0],
-                                         location: val[1].location + val[3].location)
+                                         location: location,
+                                         comment: leading_comment(val[0].first&.location || location))
       }
     | annotations kATTRREADER method_name attr_var_opt kCOLON type {
+        location = val[1].location + val[5].location
         result = Members::AttrReader.new(name: val[2].value.to_sym,
                                          ivar_name: val[3],
                                          type: val[5],
                                          annotations: val[0],
-                                         location: val[1].location + val[5].location)
+                                         location: location,
+                                         comment: leading_comment(val[0].first&.location || location))
       }
     | annotations kATTRWRITER keyword type {
+        location = val[1].location + val[3].location
         result = Members::AttrWriter.new(name: val[2].value,
                                          ivar_name: nil,
                                          type: val[3],
                                          annotations: val[0],
-                                         location: val[1].location + val[3].location)
+                                         location: location,
+                                         comment: leading_comment(val[0].first&.location || location))
       }
     | annotations kATTRWRITER method_name attr_var_opt kCOLON type {
+        location = val[1].location + val[5].location
         result = Members::AttrWriter.new(name: val[2].value.to_sym,
                                          ivar_name: val[3],
                                          type: val[5],
                                          annotations: val[0],
-                                         location: val[1].location + val[5].location)
+                                         location: location,
+                                         comment: leading_comment(val[0].first&.location || location))
       }
     | annotations kATTRACCESSOR keyword type {
+        location = val[1].location + val[3].location
         result = Members::AttrAccessor.new(name: val[2].value,
                                            ivar_name: nil,
                                            type: val[3],
                                            annotations: val[0],
-                                           location: val[1].location + val[3].location)
+                                           location: location,
+                                           comment: leading_comment(val[0].first&.location || location))
       }
     | annotations kATTRACCESSOR method_name attr_var_opt kCOLON type {
+        location = val[1].location + val[5].location
         result = Members::AttrAccessor.new(name: val[2].value.to_sym,
                                            ivar_name: val[3],
                                            type: val[5],
                                            annotations: val[0],
-                                           location: val[1].location + val[5].location)
+                                           location: location,
+                                           comment: leading_comment(val[0].first&.location || location))
       }
 
   attr_var_opt:
@@ -208,10 +224,12 @@ rule
 
   var_type_member:
       tIVAR kCOLON type {
+        location = val[0].location + val[2].location
         result = Members::InstanceVariable.new(
           name: val[0].value,
           type: val[2],
-          location: val[0].location + val[2].location
+          location: location,
+          comment: leading_comment(location)
         )
       }
     | tCLASSVAR kCOLON type {
@@ -225,10 +243,12 @@ rule
           )
         end
 
+        location = val[0].location + val[2].location
         result = Members::ClassVariable.new(
           name: val[0].value,
           type: type,
-          location: val[0].location + val[2].location
+          location: location,
+          comment: leading_comment(location)
         )
       }
     | kSELF kDOT tIVAR kCOLON type {
@@ -242,10 +262,12 @@ rule
         )
       end
 
+      location = val[0].location + val[4].location
       result = Members::ClassInstanceVariable.new(
         name: val[2].value,
         type: type,
-        location: val[0].location + val[4].location
+        location: location,
+        comment: leading_comment(location)
       )
     }
 
@@ -259,7 +281,8 @@ rule
           type_params: val[4]&.value || [],
           members: val[5],
           annotations: val[0],
-          location: location
+          location: location,
+          comment: leading_comment(val[0].first&.location || location)
         )
       }
 
@@ -295,19 +318,23 @@ rule
         if val[2].value.alias?
           raise SemanticsError.new("Should include module or interface", subject: val[2].value, location: val[2].location)
         end
+        location = val[1].location + val[2].location
         result = Members::Include.new(name: val[2].value,
                                       args: [],
                                       annotations: val[0],
-                                      location: val[1].location + val[2].location)
+                                      location: location,
+                                      comment: leading_comment(val[0].first&.location || location))
       }
     | annotations kINCLUDE qualified_name kLBRACKET type_list kRBRACKET {
         if val[2].value.alias?
           raise SemanticsError.new("Should include module or interface", subject: val[2].value, location: val[2].location)
         end
+        location = val[1].location + val[5].location
         result = Members::Include.new(name: val[2].value,
                                       args: val[4],
                                       annotations: val[0],
-                                      location: val[1].location + val[5].location)
+                                      location: location,
+                                      comment: leading_comment(val[0].first&.location || location))
       }
 
   extend_member:
@@ -315,19 +342,23 @@ rule
         if val[2].value.alias?
           raise SemanticsError.new("Should extend module or interface", subject: val[2].value, location: val[2].location)
         end
+        location = val[1].location + val[2].location
         result = Members::Extend.new(name: val[2].value,
                                      args: [],
                                      annotations: val[0],
-                                     location: val[1].location + val[2].location)
+                                     location: location,
+                                     comment: leading_comment(val[0].first&.location || location))
       }
     | annotations kEXTEND qualified_name kLBRACKET type_list kRBRACKET {
         if val[2].value.alias?
           raise SemanticsError.new("Should extend module or interface", subject: val[2].value, location: val[2].location)
         end
+        location = val[1].location + val[5].location
         result = Members::Extend.new(name: val[2].value,
                                      args: val[4],
                                      annotations: val[0],
-                                     location: val[1].location + val[5].location)
+                                     location: location,
+                                     comment: leading_comment(val[0].first&.location || location))
     }
 
   prepend_member:
@@ -335,19 +366,23 @@ rule
         unless val[2].value.class?
           raise SemanticsError.new("Should prepend module", subject: val[2].value, location: val[2].location)
         end
+        location = val[1].location + val[2].location
         result = Members::Prepend.new(name: val[2].value,
                                       args: [],
                                       annotations: val[0],
-                                      location: val[1].location + val[2].location)
+                                      location: location,
+                                      comment: leading_comment(val[0].first&.location || location))
       }
     | annotations kPREPEND qualified_name kLBRACKET type_list kRBRACKET {
         unless val[2].value.class?
           raise SemanticsError.new("Should prepend module", subject: val[2].value, location: val[2].location)
         end
+        location = val[1].location + val[5].location
         result = Members::Prepend.new(name: val[2].value,
                                       args: val[4],
                                       annotations: val[0],
-                                      location: val[1].location + val[5].location)
+                                      location: location,
+                                      comment: leading_comment(val[0].first&.location || location))
       }
 
   method_member:
@@ -366,7 +401,8 @@ rule
           kind: val[2],
           types: types,
           annotations: val[0],
-          location: location
+          location: location,
+          comment: leading_comment(val[0].first&.location || val[1].location)
         )
       }
 
@@ -481,21 +517,25 @@ rule
 
   alias_member:
       annotations kALIAS method_name method_name {
+        location = val[1].location + val[3].location
         result = Members::Alias.new(
           new_name: val[2].value.to_sym,
           old_name: val[3].value.to_sym,
           kind: :instance,
           annotations: val[0],
-          location: val[1].location + val[3].location
+          location: location,
+          comment: leading_comment(val[0].first&.location || location)
         )
       }
     | annotations kALIAS kSELF kDOT method_name kSELF kDOT method_name {
+        location = val[1].location + val[7].location
         result = Members::Alias.new(
           new_name: val[4].value.to_sym,
           old_name: val[7].value.to_sym,
           kind: :singleton,
           annotations: val[0],
-          location: val[1].location + val[7].location
+          location: location,
+          comment: leading_comment(val[0].first&.location || location)
         )
       }
 
@@ -505,7 +545,8 @@ rule
         result = Declarations::Alias.new(name: val[2].value,
                                          type: val[4],
                                          annotations: val[0],
-                                         location: location)
+                                         location: location,
+                                         comment: leading_comment(val[0].first&.location || location))
       }
 
   const_decl:
@@ -513,14 +554,16 @@ rule
         location = val[0].location + val[2].location
         result = Declarations::Constant.new(name: val[0].value,
                                             type: val[2],
-                                            location: location)
+                                            location: location,
+                                            comment: leading_comment(location))
       }
     | namespace tUKEYWORD type {
         location = (val[0] || val[1]).location + val[2].location
         name = TypeName.new(name: val[1].value, namespace: val[0]&.value || Namespace.empty)
         result = Declarations::Constant.new(name: name,
                                             type: val[2],
-                                            location: location)
+                                            location: location,
+                                            comment: leading_comment(location))
       }
 
   global_decl:
@@ -528,7 +571,8 @@ rule
         location = val[0].location + val[2].location
         result = Declarations::Global.new(name: val[0].value.to_sym,
                                           type: val[2],
-                                          location: location)
+                                          location: location,
+                                          comment: leading_comment(location))
       }
 
   type:
@@ -932,6 +976,7 @@ def initialize(type, buffer:, eof_re:)
   @eof_re = eof_re
   @eof = false
   @bound_variables_stack = []
+  @comments = {}
 end
 
 def start_merged_variables_scope
@@ -1006,6 +1051,22 @@ def self.parse_method_type(input, variables: [], eof_re: nil)
   ensure
     parser.reset_variable_scope
   end
+end
+
+def leading_comment(location)
+  @comments[location.start_line-1]
+end
+
+def push_comment(string, location)
+  new_comment = AST::Comment.new(string: string+"\n", location: location)
+
+  if (prev_comment = leading_comment(location)) && prev_comment.location.start_column == location.start_column
+    @comments.delete prev_comment.location.end_line
+    new_comment = AST::Comment.new(string: prev_comment.string + new_comment.string,
+                                   location: prev_comment.location + new_comment.location)
+  end
+
+  @comments[new_comment.location.end_line] = new_comment
 end
 
 def new_token(type, value = input.matched)
@@ -1118,9 +1179,27 @@ def next_token
 
   return if @eof
 
-  input.skip(/(\s|#.*)+/)
+  while true
+    return if input.eos?
 
-  return if input.eos?
+    case
+    when input.scan(/\n/)
+      # clear comment
+    when input.scan(/\s+/)
+      # skip
+    when input.scan(/(?<header>#[ \t]*)(?<string>.*)\n/)
+      start_index = input.pos - input.matched.size + input[:header].size
+      end_index = input.pos-1
+
+      location = Ruby::Signature::Location.new(buffer: buffer,
+                                               start_pos: start_index,
+                                               end_pos: end_index)
+
+      push_comment input[:string], location
+    else
+      break
+    end
+  end
 
   case
   when eof_re && input.scan(eof_re)
