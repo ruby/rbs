@@ -808,4 +808,46 @@ EOF
       end
     end
   end
+
+  def test_code_comment
+    Parser.parse_signature(<<-EOF).yield_self do |foo_decl,|
+# Passes each element of the collection to the given block. The method
+# returns `true` if the block never returns `false` or `nil` . If the
+# block is not given, Ruby adds an implicit block of `{ |obj| obj }` which
+# will cause [all?](Enumerable.downloaded.ruby_doc#method-i-all-3F) to
+# return `true` when none of the collection members are `false` or `nil` .
+#
+# If instead a pattern is supplied, the method returns whether `pattern
+# === element` for every collection member.
+#
+#     %w[ant bear cat].all? { |word| word.length >= 3 } #=> true
+#     %w[ant bear cat].all? { |word| word.length >= 4 } #=> false
+#     %w[ant bear cat].all?(/t/)                        #=> false
+#     [1, 2i, 3.14].all?(Numeric)                       #=> true
+#     [nil, true, 99].all?                              #=> false
+#     [].all?                                           #=> true
+class Foo
+end
+    EOF
+
+      assert_instance_of Declarations::Class, foo_decl
+      assert_equal <<-EOF, foo_decl.comment.string
+Passes each element of the collection to the given block. The method
+returns `true` if the block never returns `false` or `nil` . If the
+block is not given, Ruby adds an implicit block of `{ |obj| obj }` which
+will cause [all?](Enumerable.downloaded.ruby_doc#method-i-all-3F) to
+return `true` when none of the collection members are `false` or `nil` .
+
+If instead a pattern is supplied, the method returns whether `pattern
+=== element` for every collection member.
+
+    %w[ant bear cat].all? { |word| word.length >= 3 } #=> true
+    %w[ant bear cat].all? { |word| word.length >= 4 } #=> false
+    %w[ant bear cat].all?(/t/)                        #=> false
+    [1, 2i, 3.14].all?(Numeric)                       #=> true
+    [nil, true, 99].all?                              #=> false
+    [].all?                                           #=> true
+EOF
+    end
+  end
 end

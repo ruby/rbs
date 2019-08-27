@@ -1183,19 +1183,17 @@ def next_token
     return if input.eos?
 
     case
-    when input.scan(/\n/)
-      # clear comment
     when input.scan(/\s+/)
       # skip
-    when input.scan(/(?<header>#[ \t]*)(?<string>.*)\n/)
-      start_index = input.pos - input.matched.size + input[:header].size
+    when input.scan(/#(( *)|( (?<string>.*)))\n/)
+      start_index = input.pos - input.matched.size
       end_index = input.pos-1
 
       location = Ruby::Signature::Location.new(buffer: buffer,
                                                start_pos: start_index,
                                                end_pos: end_index)
 
-      push_comment input[:string], location
+      push_comment input[:string] || "", location
     else
       break
     end
