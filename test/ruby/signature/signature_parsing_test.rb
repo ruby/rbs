@@ -98,16 +98,16 @@ class Ruby::Signature::SignatureParsingTest < Minitest::Test
     end
 
     Parser.parse_signature(<<~SIG).yield_self do |decls|
-        interface _Each[A, B]
-          #
-          # Yield all elements included in `self`.
-          #  
-          def count: -> Integer
-                   | (any) -> Integer
-                   | [X] { (A) -> X } -> Integer
+      interface _Each[A, B]
+        #
+        # Yield all elements included in `self`.
+        #  
+        def count: -> Integer
+                 | (any) -> Integer
+                 | [X] { (A) -> X } -> Integer
 
-          include _Hash[Integer]
-        end
+        include _Hash[Integer]
+      end
       SIG
 
       assert_equal 1, decls.size
@@ -181,33 +181,33 @@ class Ruby::Signature::SignatureParsingTest < Minitest::Test
     end
 
     Parser.parse_signature(<<~SIG).yield_self do |decls|
-        module Enumerable[A, B] : _Each
-          @foo: String
-          self.@bar: Integer
-          @@baz: Array[Integer]
+      module Enumerable[A, B] : _Each
+        @foo: String
+        self.@bar: Integer
+        @@baz: Array[Integer]
 
-          def one: -> void
-          def self.two: -> any
-          def self?.three: -> bool
+        def one: -> void
+        def self.two: -> any
+        def self?.three: -> bool
 
-          include X
-          include _X
+        include X
+        include _X
 
-          extend Y
-          extend _Y
+        extend Y
+        extend _Y
 
-          attr_reader a: Integer
-          attr_reader a(@A): String
-          attr_reader a(): bool
+        attr_reader a: Integer
+        attr_reader a(@A): String
+        attr_reader a(): bool
 
-          attr_writer b: Integer
-          attr_writer b(@B): String
-          attr_writer b(): bool
+        attr_writer b: Integer
+        attr_writer b(@B): String
+        attr_writer b(): bool
 
-          attr_accessor c: Integer
-          attr_accessor c(@C): String
-          attr_accessor c(): bool
-        end
+        attr_accessor c: Integer
+        attr_accessor c(@C): String
+        attr_accessor c(): bool
+      end
       SIG
 
       assert_equal 1, decls.size
@@ -732,6 +732,80 @@ class X
   def foo: (type: any, class: any, module: any, if: any, include: any, yield: any, def: any, self: any, instance: any, any: any, void: void) -> any
 end
       EOS
+    end
+  end
+
+  def test_class_comment
+    Parser.parse_signature(<<-EOF).yield_self do |foo_decl,bar_decl|
+# This is a class.
+# Foo Bar Baz.
+class Foo
+end
+
+# This is not comment of class.
+
+# This is another class.
+module Bar
+end
+EOF
+
+      assert_instance_of Declarations::Class, foo_decl
+
+      assert_equal <<EOF, foo_decl.comment.string
+This is a class.
+Foo Bar Baz.
+EOF
+
+      assert_instance_of Declarations::Module, bar_decl
+      assert_equal <<EOF, bar_decl.comment.string
+This is another class.
+EOF
+    end
+  end
+
+  def test_member_comment
+    Parser.parse_signature(<<-EOF).yield_self do |foo_decl,|
+# This is a class.
+# Foo Bar Baz.
+class Foo
+  # This is a method.
+  def hello: () -> void
+
+  # This is include
+  include Enumerable[Integer]
+
+  # `@size` is the size of Foo.
+  @size: Integer
+end
+    EOF
+
+      assert_instance_of Declarations::Class, foo_decl
+
+      assert_equal <<EOF, foo_decl.comment.string
+This is a class.
+Foo Bar Baz.
+EOF
+
+      foo_decl.members[0].tap do |member|
+        assert_instance_of Members::MethodDefinition, member
+        assert_equal <<EOF, member.comment.string
+This is a method.
+EOF
+      end
+
+      foo_decl.members[1].tap do |member|
+        assert_instance_of Members::Include, member
+        assert_equal <<EOF, member.comment.string
+This is include
+EOF
+      end
+
+      foo_decl.members[2].tap do |member|
+        assert_instance_of Members::InstanceVariable, member
+        assert_equal <<EOF, member.comment.string
+`@size` is the size of Foo.
+EOF
+      end
     end
   end
 end

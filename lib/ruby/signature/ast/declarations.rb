@@ -36,14 +36,16 @@ module Ruby
           attr_reader :super_class
           attr_reader :annotations
           attr_reader :location
+          attr_reader :comment
 
-          def initialize(name:, type_params:, super_class:, members:, annotations:, location:)
+          def initialize(name:, type_params:, super_class:, members:, annotations:, location:, comment:)
             @name = name
             @type_params = type_params
             @super_class = super_class
             @members = members
             @annotations = annotations
             @location = location
+            @comment = comment
           end
 
           def ==(other)
@@ -68,7 +70,8 @@ module Ruby
               members: members,
               super_class: super_class,
               annotations: annotations,
-              location: location
+              location: location,
+              comment: comment
             }.to_json(*a)
           end
         end
@@ -80,14 +83,16 @@ module Ruby
           attr_reader :location
           attr_reader :annotations
           attr_reader :self_type
+          attr_reader :comment
 
-          def initialize(name:, type_params:, members:, self_type:, annotations:, location:)
+          def initialize(name:, type_params:, members:, self_type:, annotations:, location:, comment:)
             @name = name
             @type_params = type_params
             @self_type = self_type
             @members = members
             @annotations = annotations
             @location = location
+            @comment = comment
           end
 
           def ==(other)
@@ -112,7 +117,8 @@ module Ruby
               members: members,
               self_type: self_type,
               annotations: annotations,
-              location: location
+              location: location,
+              comment: comment
             }.to_json(*a)
           end
         end
@@ -124,14 +130,16 @@ module Ruby
           attr_reader :members
           attr_reader :annotations
           attr_reader :location
+          attr_reader :comment
 
-          def initialize(name:, type_params:, extension_name:, members:, annotations:, location:)
+          def initialize(name:, type_params:, extension_name:, members:, annotations:, location:, comment:)
             @name = name
             @type_params = type_params
             @extension_name = extension_name
             @members = members
             @annotations = annotations
             @location = location
+            @comment = comment
           end
 
           def ==(other)
@@ -156,7 +164,8 @@ module Ruby
               extension_name: extension_name,
               members: members,
               annotations: annotations,
-              location: location
+              location: location,
+              comment: comment
             }.to_json(*a)
           end
         end
@@ -167,13 +176,15 @@ module Ruby
           attr_reader :members
           attr_reader :annotations
           attr_reader :location
+          attr_reader :comment
 
-          def initialize(name:, type_params:, members:, annotations:, location:)
+          def initialize(name:, type_params:, members:, annotations:, location:, comment:)
             @name = name
             @type_params = type_params
             @members = members
             @annotations = annotations
             @location = location
+            @comment = comment
           end
 
           def ==(other)
@@ -196,7 +207,8 @@ module Ruby
               type_params: type_params,
               members: members,
               annotations: annotations,
-              location: location
+              location: location,
+              comment: comment
             }.to_json(*a)
           end
         end
@@ -206,12 +218,14 @@ module Ruby
           attr_reader :type
           attr_reader :annotations
           attr_reader :location
+          attr_reader :comment
 
-          def initialize(name:, type:, annotations:, location:)
+          def initialize(name:, type:, annotations:, location:, comment:)
             @name = name
             @type = type
             @annotations = annotations
             @location = location
+            @comment = comment
           end
 
           def ==(other)
@@ -232,7 +246,8 @@ module Ruby
               name: name,
               type: type,
               annotations: annotations,
-              location: location
+              location: location,
+              comment: comment
             }.to_json(*a)
           end
         end
@@ -241,11 +256,13 @@ module Ruby
           attr_reader :name
           attr_reader :type
           attr_reader :location
+          attr_reader :comment
 
-          def initialize(name:, type:, location:)
+          def initialize(name:, type:, location:, comment:)
             @name = name
             @type = type
             @location = location
+            @comment = comment
           end
 
           def ==(other)
@@ -265,7 +282,8 @@ module Ruby
               declaration: :constant,
               name: name,
               type: type,
-              location: location
+              location: location,
+              comment: comment
             }.to_json(*a)
           end
         end
@@ -274,11 +292,13 @@ module Ruby
           attr_reader :name
           attr_reader :type
           attr_reader :location
+          attr_reader :comment
 
-          def initialize(name:, type:, location:)
+          def initialize(name:, type:, location:, comment:)
             @name = name
             @type = type
             @location = location
+            @comment = comment
           end
 
           def ==(other)
@@ -298,7 +318,8 @@ module Ruby
               declaration: :global,
               name: name,
               type: type,
-              location: location
+              location: location,
+              comment: comment
             }.to_json(*a)
           end
         end
