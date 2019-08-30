@@ -42,4 +42,8 @@ class String
   def to_i: -> Integer
           | (Integer) -> Integer
   def end_with?: (*String) -> bool
+  def strip: -> String
+  def strip!: -> self?
+  def casecmp: (String) -> Integer?
+  def casecmp?: (String) -> bool?
 end
