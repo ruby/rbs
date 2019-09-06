@@ -1214,7 +1214,7 @@ def next_token
   when eof_re && input.scan(eof_re)
     @eof = true
     [:tEOF, input.matched]
-  when input.scan(/`(\\`|[^`])+`/)
+  when input.scan(/`(\\`|[^` :])+`/)
     s = input.matched.yield_self {|s| s[1, s.length-2] }.gsub(/\\`/, '`')
     new_token(:tQUOTEDMETHOD, s)
   when input.scan(ANNOTATION_RE)

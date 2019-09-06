@@ -869,4 +869,27 @@ If instead a pattern is supplied, the method returns whether `pattern
 EOF
     end
   end
+
+  def test_parsing_quoted_method_name
+    Parser.parse_signature(<<-EOF).yield_self do |foo_decl,|
+module Kernel
+  def `: (Symbol | String name) -> String?
+
+  # Returns a `Binding` object, describing the variable and method bindings
+  # at the point of call. This object can be used when calling `eval` to
+  # execute the evaluated command in this environment. See also the
+  # description of class `Binding` .
+  # 
+  # ```ruby
+  # def get_binding(param)
+  #   binding
+  # end
+  # b = get_binding("hello")
+  # eval("param", b)   #=> "hello"
+  # ```
+  def binding: () -> Binding
+end
+    EOF
+    end
+  end
 end
