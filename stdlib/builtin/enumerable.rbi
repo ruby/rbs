@@ -49,9 +49,9 @@ module Enumerable[Elem]
             | () { (Elem arg0) -> any } -> bool
 
   def collect: [U] () { (Elem arg0) -> U } -> ::Array[U]
-             | () -> T::Enumerator[Elem]
+             | () -> ::Enumerator[Elem]
 
-  def collect_concat: [U] () { (Elem arg0) -> T::Enumerator[U] } -> ::Array[U]
+  def collect_concat: [U] () { (Elem arg0) -> ::Enumerator[U] } -> ::Array[U]
 
   # Returns the number of items in `enum` through enumeration. If an
   # argument is given, the number of items in `enum` that are equal to
@@ -69,24 +69,24 @@ module Enumerable[Elem]
            | () { (Elem arg0) -> any } -> Integer
 
   def cycle: (?Integer n) { (Elem arg0) -> any } -> NilClass
-           | (?Integer n) -> T::Enumerator[Elem]
+           | (?Integer n) -> ::Enumerator[Elem]
 
   def detect: (?Proc ifnone) { (Elem arg0) -> any } -> Elem?
-            | (?Proc ifnone) -> T::Enumerator[Elem]
+            | (?Proc ifnone) -> ::Enumerator[Elem]
 
   def drop: (Integer n) -> ::Array[Elem]
 
   def drop_while: () { (Elem arg0) -> any } -> ::Array[Elem]
-                | () -> T::Enumerator[Elem]
+                | () -> ::Enumerator[Elem]
 
   def each_cons: (Integer n) { (::Array[Elem] arg0) -> any } -> NilClass
-               | (Integer n) -> T::Enumerator[::Array[Elem]]
+               | (Integer n) -> ::Enumerator[::Array[Elem]]
 
-  def each_with_index: () { (Elem arg0, Integer arg1) -> any } -> T::Enumerable[Elem]
-                     | () -> T::Enumerator[[ Elem, Integer ]]
+  def each_with_index: () { (Elem arg0, Integer arg1) -> any } -> ::Enumerable[Elem]
+                     | () -> ::Enumerator[[ Elem, Integer ]]
 
   def each_with_object: [U] (U arg0) { (Elem arg0, any arg1) -> any } -> U
-                      | [U] (U arg0) -> T::Enumerator[[ Elem, U ]]
+                      | [U] (U arg0) -> ::Enumerator[[ Elem, U ]]
 
   # Returns an array containing the items in *enum* .
   # 
@@ -100,11 +100,11 @@ module Enumerable[Elem]
   def entries: () -> ::Array[Elem]
 
   def find_all: () { (Elem arg0) -> any } -> ::Array[Elem]
-              | () -> T::Enumerator[Elem]
+              | () -> ::Enumerator[Elem]
 
   def find_index: (?any value) -> Integer?
                 | () { (Elem arg0) -> any } -> Integer?
-                | () -> T::Enumerator[Elem]
+                | () -> ::Enumerator[Elem]
 
   # Returns the first element, or the first `n` elements, of the enumerable.
   # If the enumerable is empty, the first form returns `nil`, and the
@@ -124,7 +124,7 @@ module Enumerable[Elem]
           | [U] (any arg0) { (Elem arg0) -> U } -> ::Array[U]
 
   def group_by: [U] () { (Elem arg0) -> U } -> ::Hash[U, ::Array[Elem]]
-              | () -> T::Enumerator[Elem]
+              | () -> ::Enumerator[Elem]
 
   def `include?`: (any arg0) -> bool
 
@@ -157,9 +157,9 @@ module Enumerable[Elem]
          | (?Integer arg0) -> ::Array[Elem]
          | (?Integer arg0) { (Elem arg0, Elem arg1) -> Integer } -> ::Array[Elem]
 
-  def max_by: () -> T::Enumerator[Elem]
+  def max_by: () -> ::Enumerator[Elem]
             | () { (Elem arg0) -> (Comparable | ::Array[any]) } -> Elem?
-            | (?Integer arg0) -> T::Enumerator[Elem]
+            | (?Integer arg0) -> ::Enumerator[Elem]
             | (?Integer arg0) { (Elem arg0) -> (Comparable | ::Array[any]) } -> ::Array[Elem]
 
   # Returns the object in *enum* with the minimum value. The first form
@@ -186,9 +186,9 @@ module Enumerable[Elem]
          | (?Integer arg0) -> ::Array[Elem]
          | (?Integer arg0) { (Elem arg0, Elem arg1) -> Integer } -> ::Array[Elem]
 
-  def min_by: () -> T::Enumerator[Elem]
+  def min_by: () -> ::Enumerator[Elem]
             | () { (Elem arg0) -> (Comparable | ::Array[any]) } -> Elem?
-            | (?Integer arg0) -> T::Enumerator[Elem]
+            | (?Integer arg0) -> ::Enumerator[Elem]
             | (?Integer arg0) { (Elem arg0) -> (Comparable | ::Array[any]) } -> ::Array[Elem]
 
   # Returns a two element array which contains the minimum and the maximum
@@ -204,7 +204,7 @@ module Enumerable[Elem]
             | () { (Elem arg0, Elem arg1) -> Integer } -> [ Elem?, Elem? ]
 
   def minmax_by: () -> [ Elem?, Elem? ]
-               | () { (Elem arg0) -> (Comparable | ::Array[any]) } -> T::Enumerator[Elem]
+               | () { (Elem arg0) -> (Comparable | ::Array[any]) } -> ::Enumerator[Elem]
 
   # Passes each element of the collection to the given block. The method
   # returns `true` if the block never returns `true` for all elements. If
@@ -249,13 +249,13 @@ module Enumerable[Elem]
           | () { (Elem arg0) -> any } -> bool
 
   def partition: () { (Elem arg0) -> any } -> [ ::Array[Elem], ::Array[Elem] ]
-               | () -> T::Enumerator[Elem]
+               | () -> ::Enumerator[Elem]
 
   def reject: () { (Elem arg0) -> any } -> ::Array[Elem]
-            | () -> T::Enumerator[Elem]
+            | () -> ::Enumerator[Elem]
 
-  def reverse_each: () { (Elem arg0) -> any } -> T::Enumerator[Elem]
-                  | () -> T::Enumerator[Elem]
+  def reverse_each: () { (Elem arg0) -> any } -> ::Enumerator[Elem]
+                  | () -> ::Enumerator[Elem]
 
   # Returns an array containing the items in *enum* sorted.
   # 
@@ -281,12 +281,12 @@ module Enumerable[Elem]
           | () { (Elem arg0, Elem arg1) -> Integer } -> ::Array[Elem]
 
   def sort_by: () { (Elem arg0) -> (Comparable | ::Array[any]) } -> ::Array[Elem]
-             | () -> T::Enumerator[Elem]
+             | () -> ::Enumerator[Elem]
 
   def take: (Integer n) -> ::Array[Elem]?
 
   def take_while: () { (Elem arg0) -> any } -> ::Array[Elem]
-                | () -> T::Enumerator[Elem]
+                | () -> ::Enumerator[Elem]
 
   # Implemented in C++
   # Returns the result of interpreting *enum* as a list of `[key, value]`
@@ -305,16 +305,16 @@ module Enumerable[Elem]
   def to_h: () -> ::Hash[any, any]
 
   def each_slice: (Integer n) { (::Array[Elem] arg0) -> any } -> NilClass
-                | (Integer n) -> T::Enumerator[::Array[Elem]]
+                | (Integer n) -> ::Enumerator[::Array[Elem]]
 
   def find: (?Proc ifnone) { (Elem arg0) -> any } -> Elem?
-          | (?Proc ifnone) -> T::Enumerator[Elem]
+          | (?Proc ifnone) -> ::Enumerator[Elem]
 
   def flat_map: [U] () { (Elem arg0) -> U } -> U
-              | () -> T::Enumerator[Elem]
+              | () -> ::Enumerator[Elem]
 
   def map: [U] () { (Elem arg0) -> U } -> ::Array[U]
-         | () -> T::Enumerator[Elem]
+         | () -> ::Enumerator[Elem]
 
   def member?: (any arg0) -> bool
 
@@ -324,7 +324,7 @@ module Enumerable[Elem]
             | () { (Elem arg0, Elem arg1) -> Elem } -> Elem?
 
   def select: () { (Elem arg0) -> any } -> ::Array[Elem]
-            | () -> T::Enumerator[Elem]
+            | () -> ::Enumerator[Elem]
 
   # Returns an array containing the items in *enum* .
   # 

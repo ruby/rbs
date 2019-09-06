@@ -1,2 +1,0 @@
-class StandardError < Exception
-end

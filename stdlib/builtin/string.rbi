@@ -48,7 +48,7 @@ class String < Object
   # 
   # If a block is given, which is a deprecated form, works the same as
   # `each_byte` .
-  def bytes: () -> Array
+  def bytes: () -> Array[String]
 
   # Returns the length of `str` in bytes.
   # 
@@ -99,7 +99,7 @@ class String < Object
   # 
   # If a block is given, which is a deprecated form, works the same as
   # `each_char` .
-  def chars: () -> Array
+  def chars: () -> Array[String]
 
   def chomp: (?String arg0) -> String
 
@@ -226,16 +226,16 @@ class String < Object
   def dump: () -> String
 
   def each_byte: () { (Integer arg0) -> any } -> String
-               | () -> T::Enumerator[Integer]
+               | () -> ::Enumerator[Integer]
 
   def each_char: () { (String arg0) -> any } -> String
-               | () -> T::Enumerator[String]
+               | () -> ::Enumerator[String]
 
   def each_codepoint: () { (Integer arg0) -> any } -> String
-                    | () -> T::Enumerator[Integer]
+                    | () -> ::Enumerator[Integer]
 
   def each_line: (?String arg0) { (String arg0) -> any } -> String
-               | (?String arg0) -> T::Enumerator[String]
+               | (?String arg0) -> ::Enumerator[String]
 
   # Returns `true` if *str* has a length of zero.
   # 
@@ -259,14 +259,14 @@ class String < Object
   def getbyte: (Integer arg0) -> Integer?
 
   def gsub: (Regexp | String arg0, ?String arg1) -> String
-          | (Regexp | String arg0, ?Hash arg1) -> String
+          | (Regexp | String arg0, ?Hash[String, String] arg1) -> String
           | (Regexp | String arg0) { (String arg0) -> any } -> String
-          | (Regexp | String arg0) -> T::Enumerator[String]
+          | (Regexp | String arg0) -> ::Enumerator[String]
           | (Regexp | String arg0) -> String
 
   def gsub!: (Regexp | String arg0, ?String arg1) -> String?
            | (Regexp | String arg0) { (String arg0) -> any } -> String?
-           | (Regexp | String arg0) -> T::Enumerator[String]
+           | (Regexp | String arg0) -> ::Enumerator[String]
 
   # Returns a hash based on the string’s length, content and encoding.
   # 
@@ -512,7 +512,7 @@ class String < Object
   # ```
   def strip!: () -> String
 
-  def sub: (Regexp | String arg0, ?String | Hash arg1) -> String
+  def sub: (Regexp | String arg0, ?String | Hash[String, String] arg1) -> String
          | (Regexp | String arg0) { (String arg0) -> any } -> String
 
   def sub!: (Regexp | String arg0, ?String arg1) -> String
@@ -679,7 +679,7 @@ class String < Object
   # meaning of `options` and use with different encodings.
   def upcase!: () -> String?
 
-  def upto: [Bool] (String arg0, ?Bool arg1) -> T::Enumerator[String]
+  def upto: [Bool] (String arg0, ?Bool arg1) -> ::Enumerator[String]
           | [Bool] (String arg0, ?Bool arg1) { (String arg0) -> any } -> String
 
   # Returns true for a string which is encoded correctly.

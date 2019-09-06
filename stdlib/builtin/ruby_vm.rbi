@@ -4,11 +4,11 @@
 class RubyVM < Object
 end
 
-RubyVM::DEFAULT_PARAMS: Hash
+RubyVM::DEFAULT_PARAMS: Hash[Symbol, Integer]
 
-RubyVM::INSTRUCTION_NAMES: Array
+RubyVM::INSTRUCTION_NAMES: Array[String]
 
-RubyVM::OPTS: Array
+RubyVM::OPTS: Array[String]
 
 class RubyVM::InstructionSequence < Object
 end

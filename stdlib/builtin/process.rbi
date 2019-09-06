@@ -346,7 +346,7 @@ module Process::UID
   def self.eid=: (Integer user) -> Integer
 end
 
-class Process::Tms[Elem] < Struct
+class Process::Tms < Struct[Float]
 end
 
 class Process::Waiter < Thread

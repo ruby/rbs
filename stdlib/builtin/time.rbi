@@ -730,6 +730,6 @@ class Time < Object
   def month: () -> Integer
 end
 
-Time::RFC2822_DAY_NAME: Array
+Time::RFC2822_DAY_NAME: Array[String]
 
-Time::RFC2822_MONTH_NAME: Array
+Time::RFC2822_MONTH_NAME: Array[String]

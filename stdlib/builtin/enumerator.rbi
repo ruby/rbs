@@ -96,7 +96,7 @@
 # # => [], [:b], [1], [:b, 1], [1, 2], [:b, 1, 2], 3
 # ```
 class Enumerator[Elem] < Object
-  include Enumerable
+  include Enumerable[Elem]
 
   def each: () { (Elem arg0) -> any } -> any
           | () -> self
@@ -236,17 +236,17 @@ class Enumerator[Elem] < Object
   def size: () -> (Integer | Float)?
 
   def with_index: (?Integer offset) { (Elem arg0, Integer arg1) -> any } -> any
-                | (?Integer offset) -> T::Enumerator[[ Elem, Integer ]]
+                | (?Integer offset) -> ::Enumerator[[ Elem, Integer ]]
 
   def with_object: [U] (U arg0) { (Elem arg0, U arg1) -> any } -> any
-                 | [U] (U arg0) -> T::Enumerator[[ Elem, U ]]
+                 | [U] (U arg0) -> ::Enumerator[[ Elem, U ]]
 end
 
 class Enumerator::Generator[Elem] < Object
-  include Enumerable
+  include Enumerable[Elem]
 end
 
-class Enumerator::Lazy[Elem] < Enumerator
+class Enumerator::Lazy[Elem] < Enumerator[Elem]
 end
 
 class Enumerator::Yielder < Object

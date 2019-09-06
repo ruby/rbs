@@ -318,7 +318,7 @@
 # arr                       #=> [1, 2, 3]
 # ```
 class Array[Elem] < Object
-  include Enumerable
+  include Enumerable[Elem]
 
   def self.[]: [U] (*U arg0) -> ::Array[U]
 
@@ -327,7 +327,7 @@ class Array[Elem] < Object
   def *: (Integer arg0) -> ::Array[Elem]
        | (String arg0) -> String
 
-  def +: (T::Enumerable[Elem] arg0) -> ::Array[Elem]
+  def +: (Enumerable[Elem] arg0) -> ::Array[Elem]
        | (::Array[Elem] arg0) -> ::Array[Elem]
 
   def -: (::Array[any] arg0) -> ::Array[Elem]
@@ -357,10 +357,10 @@ class Array[Elem] < Object
   def clear: () -> ::Array[Elem]
 
   def collect: [U] () { (Elem arg0) -> U } -> ::Array[U]
-             | () -> T::Enumerator[Elem]
+             | () -> ::Enumerator[Elem]
 
   def combination: (Integer arg0) { (::Array[Elem] arg0) -> any } -> ::Array[Elem]
-                 | (Integer arg0) -> T::Enumerator[::Array[Elem]]
+                 | (Integer arg0) -> ::Enumerator[::Array[Elem]]
 
   # This is implemented in C++ to fix the return type
   # Returns a copy of `self` with all `nil` elements removed.
@@ -402,7 +402,7 @@ class Array[Elem] < Object
            | () { (Elem arg0) -> any } -> Integer
 
   def cycle: (?Integer arg0) { (Elem arg0) -> any } -> any
-           | (?Integer arg0) -> T::Enumerator[Elem]
+           | (?Integer arg0) -> ::Enumerator[Elem]
 
   def delete: (Elem arg0) -> Elem?
             | (Elem arg0) { () -> Elem } -> Elem
@@ -410,20 +410,20 @@ class Array[Elem] < Object
   def delete_at: (Integer arg0) -> Elem?
 
   def delete_if: () { (Elem arg0) -> any } -> ::Array[Elem]
-               | () -> T::Enumerator[Elem]
+               | () -> ::Enumerator[Elem]
 
   def difference: (*::Array[any] arrays) -> ::Array[Elem]
 
   def drop: (Integer arg0) -> ::Array[Elem]
 
   def drop_while: () { (Elem arg0) -> any } -> ::Array[Elem]
-                | () -> T::Enumerator[Elem]
+                | () -> ::Enumerator[Elem]
 
-  def each: () -> T::Enumerator[Elem]
+  def each: () -> ::Enumerator[Elem]
           | () { (Elem arg0) -> any } -> ::Array[Elem]
 
   def each_index: () { (Integer arg0) -> any } -> ::Array[Elem]
-                | () -> T::Enumerator[Elem]
+                | () -> ::Enumerator[Elem]
 
   # Returns `true` if `self` contains no elements.
   # 
@@ -481,7 +481,7 @@ class Array[Elem] < Object
 
   def index: [U] (?U arg0) -> Integer?
            | () { (Elem arg0) -> any } -> Integer?
-           | () -> T::Enumerator[Elem]
+           | () -> ::Enumerator[Elem]
 
   def initialize: () -> Object
                 | (?Integer arg0) -> Object
@@ -531,14 +531,14 @@ class Array[Elem] < Object
   def length: () -> Integer
 
   def map: [U] () { (Elem arg0) -> U } -> ::Array[U]
-         | () -> T::Enumerator[Elem]
+         | () -> ::Enumerator[Elem]
 
   def map!: [U] () { (Elem arg0) -> U } -> ::Array[U]
-          | () -> T::Enumerator[Elem]
+          | () -> ::Enumerator[Elem]
 
   def member?: (Elem arg0) -> bool
 
-  def permutation: (?Integer arg0) -> T::Enumerator[Elem]
+  def permutation: (?Integer arg0) -> ::Enumerator[Elem]
                  | (?Integer arg0) { (::Array[Elem] arg0) -> any } -> ::Array[Elem]
 
   def pop: (?Integer arg0) -> ::Array[Elem]
@@ -553,16 +553,16 @@ class Array[Elem] < Object
   def rassoc: [U] (U arg0) -> Elem?
 
   def reject: () { (Elem arg0) -> any } -> ::Array[Elem]
-            | () -> T::Enumerator[Elem]
+            | () -> ::Enumerator[Elem]
 
   def reject!: () { (Elem arg0) -> any } -> ::Array[Elem]
-             | () -> T::Enumerator[Elem]
+             | () -> ::Enumerator[Elem]
 
   def repeated_combination: (Integer arg0) { (::Array[Elem] arg0) -> any } -> ::Array[Elem]
-                          | (Integer arg0) -> T::Enumerator[Elem]
+                          | (Integer arg0) -> ::Enumerator[Elem]
 
   def repeated_permutation: (Integer arg0) { (::Array[Elem] arg0) -> any } -> ::Array[Elem]
-                          | (Integer arg0) -> T::Enumerator[Elem]
+                          | (Integer arg0) -> ::Enumerator[Elem]
 
   # Returns a new array containing `self` ‘s elements in reverse order.
   # 
@@ -582,11 +582,11 @@ class Array[Elem] < Object
   def reverse!: () -> ::Array[Elem]
 
   def reverse_each: () { (Elem arg0) -> any } -> ::Array[Elem]
-                  | () -> T::Enumerator[Elem]
+                  | () -> ::Enumerator[Elem]
 
   def rindex: (?Elem arg0) -> Integer?
             | () { (Elem arg0) -> any } -> Integer?
-            | () -> T::Enumerator[Elem]
+            | () -> ::Enumerator[Elem]
 
   def rotate: (?Integer arg0) -> ::Array[Elem]
 
@@ -596,10 +596,10 @@ class Array[Elem] < Object
             | (?Integer arg0) -> ::Array[Elem]
 
   def select: () { (Elem arg0) -> any } -> ::Array[Elem]
-            | () -> T::Enumerator[Elem]
+            | () -> ::Enumerator[Elem]
 
   def select!: () { (Elem arg0) -> any } -> ::Array[Elem]
-             | () -> T::Enumerator[Elem]
+             | () -> ::Enumerator[Elem]
 
   # Removes the first element of `self` and returns it (shifting all other
   # elements down by one). Returns `nil` if the array is empty.
@@ -705,12 +705,12 @@ class Array[Elem] < Object
            | () { (Elem arg0, Elem arg1) -> Integer } -> ::Array[Elem]
 
   def sort_by!: [U] () { (Elem arg0) -> U } -> ::Array[Elem]
-              | () -> T::Enumerator[Elem]
+              | () -> ::Enumerator[Elem]
 
   def take: (Integer arg0) -> ::Array[Elem]
 
   def take_while: () { (Elem arg0) -> any } -> ::Array[Elem]
-                | () -> T::Enumerator[Elem]
+                | () -> ::Enumerator[Elem]
 
   # Returns `self` .
   # 

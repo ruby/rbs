@@ -94,4 +94,7 @@ class BasicObject
                    | [U] () { () -> U } -> U
 
   def instance_exec: [U, V] (*V args) { (any args) -> U } -> U
+
+  private
+  def initialize: () -> void
 end

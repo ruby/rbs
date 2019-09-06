@@ -134,8 +134,8 @@
 # 
 # See also Object\#hash and
 # [Object\#eql?](https://ruby-doc.org/core-2.6.3/Object.html#method-i-eql-3F)
-class Hash[K, V, Elem] < Object
-  include Enumerable
+class Hash[K, V] < Object
+  include Enumerable[[K, V]]
 
   def self.[]: [U, V] (*::Array[[ U, V ]] arg0) -> ::Hash[U, V]
 
@@ -179,19 +179,19 @@ class Hash[K, V, Elem] < Object
             | [U] (K arg0) { (K arg0) -> U } -> (U | V)
 
   def delete_if: () { (K arg0, V arg1) -> any } -> ::Hash[K, V]
-               | () -> T::Enumerator[[ K, V ]]
+               | () -> ::Enumerator[[ K, V ]]
 
   def each: () { ([ K, V ] arg0) -> any } -> ::Hash[K, V]
-          | () -> T::Enumerator[[ K, V ]]
+          | () -> ::Enumerator[[ K, V ]]
 
   def each_key: () { (K arg0) -> any } -> ::Hash[K, V]
-              | () -> T::Enumerator[[ K, V ]]
+              | () -> ::Enumerator[[ K, V ]]
 
   def each_pair: () { (K arg0, V arg1) -> any } -> ::Hash[K, V]
-               | () -> T::Enumerator[[ K, V ]]
+               | () -> ::Enumerator[[ K, V ]]
 
   def each_value: () { (V arg0) -> any } -> ::Hash[K, V]
-                | () -> T::Enumerator[[ K, V ]]
+                | () -> ::Enumerator[[ K, V ]]
 
   # Returns `true` if *hsh* contains no key-value pairs.
   # 
@@ -208,9 +208,9 @@ class Hash[K, V, Elem] < Object
 
   def has_value?: (V arg0) -> bool
 
-  def initialize: () -> Hash
-                | (?any default) -> Hash
-                | () { (Hash hash, any key) -> any } -> void
+  def initialize: () -> void
+                | (?any default) -> void
+                | () { (Hash[any, any] hash, any key) -> any } -> void
 
   # Return the contents of this hash as a string.
   # 
@@ -257,7 +257,7 @@ class Hash[K, V, Elem] < Object
   def invert: () -> ::Hash[V, K]
 
   def keep_if: () { (K arg0, V arg1) -> any } -> ::Hash[K, V]
-             | () -> T::Enumerator[[ K, V ]]
+             | () -> ::Enumerator[[ K, V ]]
 
   def key: (V arg0) -> K?
 
@@ -320,7 +320,7 @@ class Hash[K, V, Elem] < Object
   # h.reject {|k,v| k < "b"}  #=> {"b" => 200, "c" => 300}
   # h.reject {|k,v| v > 100}  #=> {"a" => 100}
   # ```
-  def reject: () -> T::Enumerator[[ K, V ]]
+  def reject: () -> ::Enumerator[[ K, V ]]
             | () { (K arg0, V arg1) -> any } -> ::Hash[K, V]
 
   def reject!: () { (K arg0, V arg1) -> any } -> ::Hash[K, V]

@@ -88,7 +88,7 @@
 # r.member?(Xs.new(5))       #=> true
 # ```
 class Range[Elem] < Object
-  include Enumerable
+  include Enumerable[Elem]
 
   def self.new: [U] (U from, U to, ?bool exclude_end) -> ::Range[U]
 
@@ -108,7 +108,7 @@ class Range[Elem] < Object
   def cover?: (any obj) -> bool
 
   def each: () { (Elem arg0) -> any } -> self
-          | () -> T::Enumerator[Elem]
+          | () -> ::Enumerator[Elem]
 
   # Returns the object that defines the end of the range.
   # 
@@ -212,7 +212,7 @@ class Range[Elem] < Object
   def size: () -> Integer?
 
   def step: (?Integer n) { (Elem arg0) -> any } -> self
-          | (?Integer n) -> T::Enumerator[Elem]
+          | (?Integer n) -> ::Enumerator[Elem]
 
   # Convert this range object to a printable form (using
   # [to\_s](Range.downloaded.ruby_doc#method-i-to_s) to convert the begin

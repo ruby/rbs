@@ -81,16 +81,12 @@ module Kernel
 
   def dup: () -> self
 
-  def enum_for: (?Symbol method, *any args) -> T::Enumerator[any]
-              | (?Symbol method, *any args) { () -> any } -> T::Enumerator[any]
+  def enum_for: (?Symbol method, *any args) -> ::Enumerator[any]
+              | (?Symbol method, *any args) { () -> any } -> ::Enumerator[any]
 
   def eql?: (any other) -> bool
 
   def `extend`: (Module mod) -> NilClass
-
-  def exit: (?Integer status) -> any
-
-  def exit!: (?Integer status) -> any
 
   # Creates a subprocess. If a block is specified, that block is run in the
   # subprocess, and the subprocess terminates with a status of zero.
@@ -169,8 +165,8 @@ module Kernel
 
   def tap: () { (any x) -> void } -> self
 
-  def to_enum: (?Symbol method, *any args) -> T::Enumerator[any]
-             | (?Symbol method, *any args) { () -> any } -> T::Enumerator[any]
+  def to_enum: (?Symbol method, *any args) -> ::Enumerator[any]
+             | (?Symbol method, *any args) { () -> any } -> ::Enumerator[any]
 
   def to_s: () -> String
 
@@ -383,7 +379,7 @@ module Kernel
   # } #=> :ok
   # ```
   def loop: () { () -> any } -> bot
-          | () -> T::Enumerator[any]
+          | () -> ::Enumerator[any]
 
   def open: (String name, ?String | Integer rest, ?String block) -> IO?
 
@@ -613,4 +609,4 @@ module Kernel
   def system: (*String args) -> (NilClass | FalseClass | TrueClass)
 end
 
-Kernel::RUBYGEMS_ACTIVATION_MONITOR: Monitor
+Kernel::RUBYGEMS_ACTIVATION_MONITOR: any

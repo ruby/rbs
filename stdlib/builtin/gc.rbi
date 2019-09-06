@@ -82,9 +82,9 @@ module GC
   def self.stress: () -> (Integer | TrueClass | FalseClass)
 end
 
-GC::INTERNAL_CONSTANTS: Hash
+GC::INTERNAL_CONSTANTS: Hash[Symbol, Integer]
 
-GC::OPTS: Array
+GC::OPTS: Array[String]
 
 module GC::Profiler
   def self.clear: () -> void

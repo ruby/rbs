@@ -102,10 +102,10 @@
 # rows, columns = $stdout.winsize
 # puts "Your screen is #{columns} wide and #{rows} tall"
 # ```
-class IO[Elem] < Object
+class IO < Object
   include File::Constants
 
-  include Enumerable
+  include Enumerable[String]
 
   def <<: (any arg0) -> self
 
@@ -210,16 +210,16 @@ class IO[Elem] < Object
   def closed?: () -> bool
 
   def each: (?String sep, ?Integer limit) { (String arg0) -> any } -> self
-          | (?String sep, ?Integer limit) -> T::Enumerator[String]
+          | (?String sep, ?Integer limit) -> ::Enumerator[String]
 
   def each_byte: () { (Integer arg0) -> any } -> self
-               | () -> T::Enumerator[Integer]
+               | () -> ::Enumerator[Integer]
 
   def each_char: () { (String arg0) -> any } -> self
-               | () -> T::Enumerator[String]
+               | () -> ::Enumerator[String]
 
   def each_codepoint: () { (Integer arg0) -> any } -> self
-                    | () -> T::Enumerator[Integer]
+                    | () -> ::Enumerator[Integer]
 
   # Returns true if *ios* is at end of file that means there are no more
   # data to read. The stream must be opened for reading or an `IOError` will
@@ -533,16 +533,16 @@ class IO[Elem] < Object
   def self.for_fd: (Integer fd, ?Integer mode, ?Integer opt) -> self
 
   def bytes: () { (Integer arg0) -> any } -> self
-           | () -> T::Enumerator[Integer]
+           | () -> ::Enumerator[Integer]
 
   def chars: () { (String arg0) -> any } -> self
-           | () -> T::Enumerator[String]
+           | () -> ::Enumerator[String]
 
   def codepoints: () { (Integer arg0) -> any } -> self
-                | () -> T::Enumerator[Integer]
+                | () -> ::Enumerator[Integer]
 
   def each_line: (?String sep, ?Integer limit) { (String arg0) -> any } -> self
-               | (?String sep, ?Integer limit) -> T::Enumerator[String]
+               | (?String sep, ?Integer limit) -> ::Enumerator[String]
 
   # Returns true if *ios* is at end of file that means there are no more
   # data to read. The stream must be opened for reading or an `IOError` will
@@ -576,7 +576,7 @@ class IO[Elem] < Object
   def eof?: () -> bool
 
   def lines: (?String sep, ?Integer limit) { (String arg0) -> any } -> self
-           | (?String sep, ?Integer limit) -> T::Enumerator[String]
+           | (?String sep, ?Integer limit) -> ::Enumerator[String]
 
   # Alias for: [fileno](IO.downloaded.ruby_doc#method-i-fileno)
   def to_i: () -> Integer

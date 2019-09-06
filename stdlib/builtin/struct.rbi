@@ -27,7 +27,7 @@
 # struct member which is either a quoted string ( `"name"` ) or a
 # [Symbol](https://ruby-doc.org/core-2.6.3/Symbol.html) ( `:name` ).
 class Struct[Elem] < Object
-  include Enumerable
+  include Enumerable[Elem]
 
   def initialize: (Symbol | String arg0, *Symbol | String arg1, ?keyword_init: bool keyword_init) -> void
 
@@ -36,5 +36,5 @@ class Struct[Elem] < Object
 
   def self.members: () -> ::Array[Symbol]
 
-  def new: (*any args) -> Struct
+  def new: (*any args) -> Struct[any]
 end
