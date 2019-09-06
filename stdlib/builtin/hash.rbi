@@ -1,20 +1,384 @@
-class Hash[K,V]
-  def `[]`: (K) -> V?
-  def `[]=`: (K, V) -> V
-  def size: -> Integer
-  def transform_values: [X] { (V) -> X } -> Hash[K, X]
-  def each_key: { (K) -> void } -> instance
-              | -> Enumerator[K, self]
-  def self.`[]`: [K, V] (Array[[K, V]]) -> Hash[K, V]
-  def keys: () -> Array[K]
-  def each: { ([K, V]) -> any } -> self
-          | -> Enumerator[[K, V], self]
-  def key?: (K) -> bool
-  def merge: (Hash[K, V]) -> Hash[K, V]
-  def delete: (K) -> V?
-  def each_value: { (V) -> void } -> self
-                | -> Enumerator[V, self]
-  def empty?: -> bool
+# A [Hash](Hash) is a dictionary-like collection of
+# unique keys and their values. Also called associative arrays, they are
+# similar to Arrays, but where an
+# [Array](https://ruby-doc.org/core-2.6.3/Array.html) uses integers as its
+# index, a [Hash](Hash) allows you to use any object
+# type.
+# 
+# Hashes enumerate their values in the order that the corresponding keys
+# were inserted.
+# 
+# A [Hash](Hash) can be easily created by using its
+# implicit form:
+# 
+# ```ruby
+# grades = { "Jane Doe" => 10, "Jim Doe" => 6 }
+# ```
+# 
+# Hashes allow an alternate syntax for keys that are symbols. Instead of
+# 
+# ```ruby
+# options = { :font_size => 10, :font_family => "Arial" }
+# ```
+# 
+# You could write it as:
+# 
+# ```ruby
+# options = { font_size: 10, font_family: "Arial" }
+# ```
+# 
+# Each named key is a symbol you can access in hash:
+# 
+# ```ruby
+# options[:font_size]  # => 10
+# ```
+# 
+# A [Hash](Hash) can also be created through its
+# [::new](Hash#method-c-new) method:
+# 
+# ```ruby
+# grades = Hash.new
+# grades["Dorothy Doe"] = 9
+# ```
+# 
+# Hashes have a *default value* that is returned when accessing keys that
+# do not exist in the hash. If no default is set `nil` is used. You can
+# set the default value by sending it as an argument to
+# [::new](Hash#method-c-new):
+# 
+# ```ruby
+# grades = Hash.new(0)
+# ```
+# 
+# Or by using the [default=](Hash#method-i-default-3D)
+# method:
+# 
+# ```ruby
+# grades = {"Timmy Doe" => 8}
+# grades.default = 0
+# ```
+# 
+# Accessing a value in a [Hash](Hash) requires using
+# its key:
+# 
+# ```ruby
+# puts grades["Jane Doe"] # => 0
+# ```
+# 
+# 
+# Hashes are an easy way to represent data structures, such as
+# 
+# ```ruby
+# books         = {}
+# books[:matz]  = "The Ruby Programming Language"
+# books[:black] = "The Well-Grounded Rubyist"
+# ```
+# 
+# Hashes are also commonly used as a way to have named parameters in
+# functions. Note that no brackets are used below. If a hash is the last
+# argument on a method call, no braces are needed, thus creating a really
+# clean interface:
+# 
+# ```ruby
+# Person.create(name: "John Doe", age: 27)
+# 
+# def self.create(params)
+#   @name = params[:name]
+#   @age  = params[:age]
+# end
+# ```
+# 
+# 
+# Two objects refer to the same hash key when their `hash` value is
+# identical and the two objects are `eql?` to each other.
+# 
+# A user-defined class may be used as a hash key if the `hash` and `eql?`
+# methods are overridden to provide meaningful behavior. By default,
+# separate instances refer to separate hash keys.
+# 
+# A typical implementation of `hash` is based on the object’s data while
+# `eql?` is usually aliased to the overridden `==` method:
+# 
+# ```ruby
+# class Book
+#   attr_reader :author, :title
+# 
+#   def initialize(author, title)
+#     @author = author
+#     @title = title
+#   end
+# 
+#   def ==(other)
+#     self.class === other and
+#       other.author == @author and
+#       other.title == @title
+#   end
+# 
+#   alias eql? ==
+# 
+#   def hash
+#     @author.hash ^ @title.hash # XOR
+#   end
+# end
+# 
+# book1 = Book.new 'matz', 'Ruby in a Nutshell'
+# book2 = Book.new 'matz', 'Ruby in a Nutshell'
+# 
+# reviews = {}
+# 
+# reviews[book1] = 'Great reference!'
+# reviews[book2] = 'Nice and compact!'
+# 
+# reviews.length #=> 1
+# ```
+# 
+# See also Object\#hash and
+# [Object\#eql?](https://ruby-doc.org/core-2.6.3/Object.html#method-i-eql-3F)
+class Hash[K, V, Elem] < Object
+  include Enumerable
 
-  include Enumerable[[K, V], self]
+  def self.[]: [U, V] (*::Array[[ U, V ]] arg0) -> ::Hash[U, V]
+
+  def []: (K arg0) -> V?
+
+  def []=: (K arg0, V arg1) -> V
+
+  def assoc: (K arg0) -> ::Array[K | V]
+
+  # Removes all key-value pairs from *hsh* .
+  # 
+  # ```ruby
+  # h = { "a" => 100, "b" => 200 }   #=> {"a"=>100, "b"=>200}
+  # h.clear                          #=> {}
+  # ```
+  def clear: () -> ::Hash[K, V]
+
+  # Makes *hsh* compare its keys by their identity, i.e. it will consider
+  # exact same objects as same keys.
+  # 
+  # ```ruby
+  # h1 = { "a" => 100, "b" => 200, :c => "c" }
+  # h1["a"]        #=> 100
+  # h1.compare_by_identity
+  # h1.compare_by_identity? #=> true
+  # h1["a".dup]    #=> nil  # different objects.
+  # h1[:c]         #=> "c"  # same symbols are all same.
+  # ```
+  def compare_by_identity: () -> ::Hash[K, V]
+
+  # Returns `true` if *hsh* will compare its keys by their identity. Also
+  # see `Hash#compare_by_identity` .
+  def compare_by_identity?: () -> bool
+
+  def default: (?K arg0) -> V?
+             | (?K arg0) { (K arg0) -> V } -> V?
+
+  def default=: (V arg0) -> V
+
+  def delete: (K arg0) -> V?
+            | [U] (K arg0) { (K arg0) -> U } -> (U | V)
+
+  def delete_if: () { (K arg0, V arg1) -> any } -> ::Hash[K, V]
+               | () -> T::Enumerator[[ K, V ]]
+
+  def each: () { ([ K, V ] arg0) -> any } -> ::Hash[K, V]
+          | () -> T::Enumerator[[ K, V ]]
+
+  def each_key: () { (K arg0) -> any } -> ::Hash[K, V]
+              | () -> T::Enumerator[[ K, V ]]
+
+  def each_pair: () { (K arg0, V arg1) -> any } -> ::Hash[K, V]
+               | () -> T::Enumerator[[ K, V ]]
+
+  def each_value: () { (V arg0) -> any } -> ::Hash[K, V]
+                | () -> T::Enumerator[[ K, V ]]
+
+  # Returns `true` if *hsh* contains no key-value pairs.
+  # 
+  # ```ruby
+  # {}.empty?   #=> true
+  # ```
+  def empty?: () -> bool
+
+  def fetch: (K arg0) -> V
+           | [X] (K arg0, ?X arg1) -> (V | X)
+           | [X] (K arg0) { (K arg0) -> X } -> (V | X)
+
+  def has_key?: (K arg0) -> bool
+
+  def has_value?: (V arg0) -> bool
+
+  def initialize: () -> Hash
+                | (?any default) -> Hash
+                | () { (Hash hash, any key) -> any } -> void
+
+  # Return the contents of this hash as a string.
+  # 
+  # ```ruby
+  # h = { "c" => 300, "a" => 100, "d" => 400, "c" => 300  }
+  # h.to_s   #=> "{\"c\"=>300, \"a\"=>100, \"d\"=>400}"
+  # ```
+  # 
+  # 
+  # 
+  # Also aliased as: [to\_s](Hash.downloaded.ruby_doc#method-i-to_s)
+  def inspect: () -> String
+
+  # Returns a new hash created by using *hsh* ’s values as keys, and the
+  # keys as values. If a key with the same value already exists in the *hsh*
+  # , then the last one defined will be used, the earlier value(s) will be
+  # discarded.
+  # 
+  # ```ruby
+  # h = { "n" => 100, "m" => 100, "y" => 300, "d" => 200, "a" => 0 }
+  # h.invert   #=> {0=>"a", 100=>"m", 200=>"d", 300=>"y"}
+  # ```
+  # 
+  # If there is no key with the same value,
+  # [\#invert](Hash.downloaded.ruby_doc#method-i-invert) is involutive.
+  # 
+  # ```ruby
+  # h = { a: 1, b: 3, c: 4 }
+  # h.invert.invert == h #=> true
+  # ```
+  # 
+  # The condition, no key with the same value, can be tested by comparing
+  # the size of inverted hash.
+  # 
+  # ```ruby
+  # # no key with the same value
+  # h = { a: 1, b: 3, c: 4 }
+  # h.size == h.invert.size #=> true
+  # 
+  # # two (or more) keys has the same value
+  # h = { a: 1, b: 3, c: 1 }
+  # h.size == h.invert.size #=> false
+  # ```
+  def invert: () -> ::Hash[V, K]
+
+  def keep_if: () { (K arg0, V arg1) -> any } -> ::Hash[K, V]
+             | () -> T::Enumerator[[ K, V ]]
+
+  def key: (V arg0) -> K?
+
+  def key?: (K arg0) -> bool
+
+  # Returns a new array populated with the keys from this hash. See also
+  # `Hash#values` .
+  # 
+  # ```ruby
+  # h = { "a" => 100, "b" => 200, "c" => 300, "d" => 400 }
+  # h.keys   #=> ["a", "b", "c", "d"]
+  # ```
+  def keys: () -> ::Array[K]
+
+  # Returns the number of key-value pairs in the hash.
+  # 
+  # ```ruby
+  # h = { "d" => 100, "a" => 200, "v" => 300, "e" => 400 }
+  # h.size          #=> 4
+  # h.delete("a")   #=> 200
+  # h.size          #=> 3
+  # h.length        #=> 3
+  # ```
+  # 
+  # [\#length](Hash.downloaded.ruby_doc#method-i-length) is an alias for
+  # [\#size](Hash.downloaded.ruby_doc#method-i-size).
+  def length: () -> Integer
+
+  def member?: (K arg0) -> bool
+
+  def merge: [A, B] (*::Hash[A, B] arg0) -> ::Hash[A | K, B | V]
+           | [A, B] (*::Hash[A, B] arg0) { (K arg0, V arg1, B arg2) -> (V | B) } -> ::Hash[A | K, B | V]
+
+  def rassoc: (K arg0) -> ::Array[K | V]
+
+  # Rebuilds the hash based on the current hash values for each key. If
+  # values of key objects have changed since they were inserted, this method
+  # will reindex *hsh* . If `Hash#rehash` is called while an iterator is
+  # traversing the hash, a `RuntimeError` will be raised in the iterator.
+  # 
+  # ```ruby
+  # a = [ "a", "b" ]
+  # c = [ "c", "d" ]
+  # h = { a => 100, c => 300 }
+  # h[a]       #=> 100
+  # a[0] = "z"
+  # h[a]       #=> nil
+  # h.rehash   #=> {["z", "b"]=>100, ["c", "d"]=>300}
+  # h[a]       #=> 100
+  # ```
+  def rehash: () -> ::Hash[K, V]
+
+  # Returns a new hash consisting of entries for which the block returns
+  # false.
+  # 
+  # If no block is given, an enumerator is returned instead.
+  # 
+  # ```ruby
+  # h = { "a" => 100, "b" => 200, "c" => 300 }
+  # h.reject {|k,v| k < "b"}  #=> {"b" => 200, "c" => 300}
+  # h.reject {|k,v| v > 100}  #=> {"a" => 100}
+  # ```
+  def reject: () -> T::Enumerator[[ K, V ]]
+            | () { (K arg0, V arg1) -> any } -> ::Hash[K, V]
+
+  def reject!: () { (K arg0, V arg1) -> any } -> ::Hash[K, V]
+
+  def select: () { (K arg0, V arg1) -> any } -> ::Hash[K, V]
+
+  def select!: () { (K arg0, V arg1) -> any } -> ::Hash[K, V]
+
+  # Removes a key-value pair from *hsh* and returns it as the two-item array
+  # `[` *key, value* `]`, or the hash’s default value if the hash is empty.
+  # 
+  # ```ruby
+  # h = { 1 => "a", 2 => "b", 3 => "c" }
+  # h.shift   #=> [1, "a"]
+  # h         #=> {2=>"b", 3=>"c"}
+  # ```
+  def shift: () -> ::Array[K | V]
+
+  # Returns the number of key-value pairs in the hash.
+  # 
+  # ```ruby
+  # h = { "d" => 100, "a" => 200, "v" => 300, "e" => 400 }
+  # h.size          #=> 4
+  # h.delete("a")   #=> 200
+  # h.size          #=> 3
+  # h.length        #=> 3
+  # ```
+  # 
+  # [\#length](Hash.downloaded.ruby_doc#method-i-length) is an alias for
+  # [\#size](Hash.downloaded.ruby_doc#method-i-size).
+  def size: () -> Integer
+
+  def store: (K arg0, V arg1) -> V
+
+  # Converts *hsh* to a nested array of `[` *key, value* `]` arrays.
+  # 
+  # ```ruby
+  # h = { "c" => 300, "a" => 100, "d" => 400, "c" => 300  }
+  # h.to_a   #=> [["c", 300], ["a", 100], ["d", 400]]
+  # ```
+  def to_a: () -> ::Array[[ K, V ]]
+
+  # Returns `self` .
+  def to_hash: () -> ::Hash[K, V]
+
+  # Alias for: [inspect](Hash.downloaded.ruby_doc#method-i-inspect)
+  def to_s: () -> String
+
+  def value?: (V arg0) -> bool
+
+  # Returns a new array populated with the values from *hsh* . See also
+  # `Hash#keys` .
+  # 
+  # ```ruby
+  # h = { "a" => 100, "b" => 200, "c" => 300 }
+  # h.values   #=> [100, 200, 300]
+  # ```
+  def values: () -> ::Array[V]
+
+  def values_at: (*K arg0) -> ::Array[V]
 end

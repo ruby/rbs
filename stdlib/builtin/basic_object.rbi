@@ -1,18 +1,97 @@
+# [BasicObject](BasicObject) is the parent class of
+# all classes in Ruby. It's an explicit blank class.
+# 
+# [BasicObject](BasicObject) can be used for creating
+# object hierarchies independent of Ruby's object hierarchy, proxy objects
+# like the Delegator class, or other uses where namespace pollution from
+# Ruby's methods and classes must be avoided.
+# 
+# To avoid polluting [BasicObject](BasicObject) for
+# other users an appropriately named subclass of
+# [BasicObject](BasicObject) should be created instead
+# of directly modifying BasicObject:
+# 
+# ```ruby
+# class MyObjectSystem < BasicObject
+# end
+# ```
+# 
+# [BasicObject](BasicObject) does not include
+# [Kernel](https://ruby-doc.org/core-2.6.3/Kernel.html) (for methods like
+# `puts` ) and [BasicObject](BasicObject) is outside
+# of the namespace of the standard library so common classes will not be
+# found without using a full class path.
+# 
+# A variety of strategies can be used to provide useful portions of the
+# standard library to subclasses of
+# [BasicObject](BasicObject). A subclass could
+# `include Kernel` to obtain `puts`, `exit`, etc. A custom Kernel-like
+# module could be created and included or delegation can be used via
+# [method\_missing](BasicObject#method-i-method_missing)
+# :
+# 
+# ```ruby
+# class MyObjectSystem < BasicObject
+#   DELEGATE = [:puts, :p]
+# 
+#   def method_missing(name, *args, &block)
+#     super unless DELEGATE.include? name
+#     ::Kernel.send(name, *args, &block)
+#   end
+# 
+#   def respond_to_missing?(name, include_private = false)
+#     DELEGATE.include?(name) or super
+#   end
+# end
+# ```
+# 
+# Access to classes and modules from the Ruby standard library can be
+# obtained in a [BasicObject](BasicObject) subclass by
+# referencing the desired constant from the root like `::File` or
+# `::Enumerator` . Like
+# [method\_missing](BasicObject#method-i-method_missing)
+# , const\_missing can be used to delegate constant lookup to `Object` :
+# 
+# ```ruby
+# class MyObjectSystem < BasicObject
+#   def self.const_missing(name)
+#     ::Object.const_get(name)
+#   end
+# end
+# ```
 class BasicObject
-  def initialize: -> void
+  # Boolean negate.
   def !: () -> bool
-  def `!=`: (any) -> bool
-  def __id__: -> Integer
-  def __send__: (*any) -> any
-  def equal?: (any) -> bool
-  def instance_eval: (String, ?String filename, ?Integer lineno) -> any
-                   | [X] { (self) -> X } -> X
-  def instance_exec: [X] (*any) { (*any) -> X } -> X
 
-  private
+  def !=: (any other) -> bool
 
-  def method_missing: (Symbol, *any) -> any
-  def singleton_method_added: (Symbol) -> void
-  def singleton_method_removed: (Symbol) -> void
-  def singleton_method_undefined: (Symbol) -> void
+  def ==: (any other) -> bool
+
+  # Returns an integer identifier for `obj` .
+  # 
+  # The same number will be returned on all calls to `object_id` for a given
+  # object, and no two active objects will share an id.
+  # 
+  # Note: that some objects of builtin classes are reused for optimization.
+  # This is the case for immediate values and frozen string literals.
+  # 
+  # Immediate values are not passed by reference but are passed by value:
+  # `nil`, `true`, `false`, Fixnums, Symbols, and some Floats.
+  # 
+  # ```ruby
+  # Object.new.object_id  == Object.new.object_id  # => false
+  # (21 * 2).object_id    == (21 * 2).object_id    # => true
+  # "hello".object_id     == "hello".object_id     # => false
+  # "hi".freeze.object_id == "hi".freeze.object_id # => true
+  # ```
+  def __id__: () -> Integer
+
+  def __send__: (Symbol arg0, *any arg1) -> any
+
+  def equal?: (any other) -> bool
+
+  def instance_eval: (?String arg0, ?String filename, ?Integer lineno) -> any
+                   | [U] () { () -> U } -> U
+
+  def instance_exec: [U, V] (*V args) { (any args) -> U } -> U
 end
