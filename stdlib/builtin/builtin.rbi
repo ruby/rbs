@@ -10,6 +10,10 @@ interface _ToS
   def to_s: -> String
 end
 
+interface _ToStr
+  def to_str: () -> String
+end
+
 interface _Each[A, B]
   def each: { (A) -> void } -> B
 end

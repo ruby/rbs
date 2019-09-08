@@ -8,8 +8,8 @@
 class Dir < Object
   include Enumerable[String, Dir]
 
-  def self.chdir: (?String | Pathname arg0) -> Integer
-                | [U] (?String | Pathname arg0) { (String arg0) -> U } -> U
+  def self.chdir: (?_ToStr arg0) -> Integer
+                | [U] (?_ToStr arg0) { (String arg0) -> U } -> U
 
   def self.chroot: (String arg0) -> Integer
 
