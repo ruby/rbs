@@ -135,7 +135,7 @@
 # See also Object\#hash and
 # [Object\#eql?](https://ruby-doc.org/core-2.6.3/Object.html#method-i-eql-3F)
 class Hash[K, V] < Object
-  include Enumerable[[K, V]]
+  include Enumerable[[K, V], Hash[K, V]]
 
   def self.[]: [U, V] (*::Array[[ U, V ]] arg0) -> ::Hash[U, V]
 
@@ -179,19 +179,19 @@ class Hash[K, V] < Object
             | [U] (K arg0) { (K arg0) -> U } -> (U | V)
 
   def delete_if: () { (K arg0, V arg1) -> any } -> ::Hash[K, V]
-               | () -> ::Enumerator[[ K, V ]]
+               | () -> ::Enumerator[[ K, V ], self]
 
   def each: () { ([ K, V ] arg0) -> any } -> ::Hash[K, V]
-          | () -> ::Enumerator[[ K, V ]]
+          | () -> ::Enumerator[[ K, V ], self]
 
   def each_key: () { (K arg0) -> any } -> ::Hash[K, V]
-              | () -> ::Enumerator[[ K, V ]]
+              | () -> ::Enumerator[[ K, V ], self]
 
   def each_pair: () { (K arg0, V arg1) -> any } -> ::Hash[K, V]
-               | () -> ::Enumerator[[ K, V ]]
+               | () -> ::Enumerator[[ K, V ], self]
 
   def each_value: () { (V arg0) -> any } -> ::Hash[K, V]
-                | () -> ::Enumerator[[ K, V ]]
+                | () -> ::Enumerator[[ K, V ], self]
 
   # Returns `true` if *hsh* contains no key-value pairs.
   # 
@@ -257,7 +257,7 @@ class Hash[K, V] < Object
   def invert: () -> ::Hash[V, K]
 
   def keep_if: () { (K arg0, V arg1) -> any } -> ::Hash[K, V]
-             | () -> ::Enumerator[[ K, V ]]
+             | () -> ::Enumerator[[ K, V ], self]
 
   def key: (V arg0) -> K?
 
@@ -320,7 +320,7 @@ class Hash[K, V] < Object
   # h.reject {|k,v| k < "b"}  #=> {"b" => 200, "c" => 300}
   # h.reject {|k,v| v > 100}  #=> {"a" => 100}
   # ```
-  def reject: () -> ::Enumerator[[ K, V ]]
+  def reject: () -> ::Enumerator[[ K, V ], self]
             | () { (K arg0, V arg1) -> any } -> ::Hash[K, V]
 
   def reject!: () { (K arg0, V arg1) -> any } -> ::Hash[K, V]

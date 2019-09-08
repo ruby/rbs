@@ -6,7 +6,7 @@
 # `config.h` and `main.rb` ), the parent directory ( `..` ), and the
 # directory itself ( `.` ).
 class Dir < Object
-  include Enumerable[String]
+  include Enumerable[String, Dir]
 
   def self.chdir: (?String | Pathname arg0) -> Integer
                 | [U] (?String | Pathname arg0) { (String arg0) -> U } -> U
@@ -20,7 +20,7 @@ class Dir < Object
   def self.exist?: (String file) -> bool
 
   def self.foreach: (String dir, ?Encoding arg0) { (String arg0) -> any } -> NilClass
-                  | (String dir, ?Encoding arg0) -> ::Enumerator[String]
+                  | (String dir, ?Encoding arg0) -> ::Enumerator[String, self]
 
   # Returns the path to the current working directory of this process as a
   # string.
@@ -66,7 +66,7 @@ class Dir < Object
   def close: () -> NilClass
 
   def each: () { (String arg0) -> any } -> self
-          | () -> ::Enumerator[String]
+          | () -> ::Enumerator[String, self]
 
   # Returns the file descriptor used in *dir* .
   # 

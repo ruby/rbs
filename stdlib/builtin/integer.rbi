@@ -198,7 +198,7 @@ class Integer < Numeric
   def divmod: (Integer | Float | Rational | BigDecimal arg0) -> [ Integer | Float | Rational | BigDecimal, Integer | Float | Rational | BigDecimal ]
 
   def downto: (Integer limit) { (Integer arg0) -> any } -> Integer
-            | (Integer limit) -> ::Enumerator[Integer]
+            | (Integer limit) -> ::Enumerator[Integer, self]
 
   def eql?: (Object arg0) -> bool
 
@@ -384,7 +384,7 @@ class Integer < Numeric
   def succ: () -> Integer
 
   def times: () { (Integer arg0) -> any } -> Integer
-           | () -> ::Enumerator[Integer]
+           | () -> ::Enumerator[Integer, self]
 
   def to_c: () -> Complex
 
@@ -451,7 +451,7 @@ class Integer < Numeric
   def truncate: () -> Integer
 
   def upto: (Integer arg0) { (Integer arg0) -> any } -> Integer
-          | (Integer arg0) -> ::Enumerator[Integer]
+          | (Integer arg0) -> ::Enumerator[Integer, self]
 
   def zero?: () -> bool
 

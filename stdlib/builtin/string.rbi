@@ -226,16 +226,16 @@ class String < Object
   def dump: () -> String
 
   def each_byte: () { (Integer arg0) -> any } -> String
-               | () -> ::Enumerator[Integer]
+               | () -> ::Enumerator[Integer, self]
 
   def each_char: () { (String arg0) -> any } -> String
-               | () -> ::Enumerator[String]
+               | () -> ::Enumerator[String, self]
 
   def each_codepoint: () { (Integer arg0) -> any } -> String
-                    | () -> ::Enumerator[Integer]
+                    | () -> ::Enumerator[Integer, self]
 
   def each_line: (?String arg0) { (String arg0) -> any } -> String
-               | (?String arg0) -> ::Enumerator[String]
+               | (?String arg0) -> ::Enumerator[String, self]
 
   # Returns `true` if *str* has a length of zero.
   # 
@@ -261,12 +261,12 @@ class String < Object
   def gsub: (Regexp | String arg0, ?String arg1) -> String
           | (Regexp | String arg0, ?Hash[String, String] arg1) -> String
           | (Regexp | String arg0) { (String arg0) -> any } -> String
-          | (Regexp | String arg0) -> ::Enumerator[String]
+          | (Regexp | String arg0) -> ::Enumerator[String, self]
           | (Regexp | String arg0) -> String
 
   def gsub!: (Regexp | String arg0, ?String arg1) -> String?
            | (Regexp | String arg0) { (String arg0) -> any } -> String?
-           | (Regexp | String arg0) -> ::Enumerator[String]
+           | (Regexp | String arg0) -> ::Enumerator[String, self]
 
   # Returns a hash based on the string’s length, content and encoding.
   # 
@@ -679,7 +679,7 @@ class String < Object
   # meaning of `options` and use with different encodings.
   def upcase!: () -> String?
 
-  def upto: [Bool] (String arg0, ?Bool arg1) -> ::Enumerator[String]
+  def upto: [Bool] (String arg0, ?Bool arg1) -> ::Enumerator[String, self]
           | [Bool] (String arg0, ?Bool arg1) { (String arg0) -> any } -> String
 
   # Returns true for a string which is encoded correctly.

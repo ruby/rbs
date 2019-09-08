@@ -264,7 +264,7 @@ class Numeric < Object
   def singleton_method_added: (Symbol arg0) -> TypeError
 
   def step: (?Numeric? limit, ?Numeric step) { (Numeric arg0) -> any } -> Numeric
-          | (?Numeric? limit, ?Numeric step) -> ::Enumerator[Numeric]
+          | (?Numeric? limit, ?Numeric step) -> ::Enumerator[Numeric, self]
 
   # Returns the value as a complex.
   def to_c: () -> Complex

@@ -95,10 +95,10 @@
 # puts ext_each(o.to_enum) {|*x| puts x; [:b, *x] }
 # # => [], [:b], [1], [:b, 1], [1, 2], [:b, 1, 2], 3
 # ```
-class Enumerator[Elem] < Object
-  include Enumerable[Elem]
+class Enumerator[Elem, Return] < Object
+  include Enumerable[Elem, Return]
 
-  def each: () { (Elem arg0) -> any } -> any
+  def each: () { (Elem arg0) -> any } -> Return
           | () -> self
 
   def feed: (Elem arg0) -> NilClass
@@ -236,17 +236,17 @@ class Enumerator[Elem] < Object
   def size: () -> (Integer | Float)?
 
   def with_index: (?Integer offset) { (Elem arg0, Integer arg1) -> any } -> any
-                | (?Integer offset) -> ::Enumerator[[ Elem, Integer ]]
+                | (?Integer offset) -> ::Enumerator[[ Elem, Integer ], Return]
 
   def with_object: [U] (U arg0) { (Elem arg0, U arg1) -> any } -> any
-                 | [U] (U arg0) -> ::Enumerator[[ Elem, U ]]
+                 | [U] (U arg0) -> ::Enumerator[[ Elem, U ], Return]
 end
 
-class Enumerator::Generator[Elem] < Object
-  include Enumerable[Elem]
+class Enumerator::Generator[Elem, Return] < Object
+  include Enumerable[Elem, Return]
 end
 
-class Enumerator::Lazy[Elem] < Enumerator[Elem]
+class Enumerator::Lazy[Elem, Return] < Enumerator[Elem, Return]
 end
 
 class Enumerator::Yielder < Object

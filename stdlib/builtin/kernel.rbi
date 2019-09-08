@@ -81,8 +81,8 @@ module Kernel
 
   def dup: () -> self
 
-  def enum_for: (?Symbol method, *any args) -> ::Enumerator[any]
-              | (?Symbol method, *any args) { () -> any } -> ::Enumerator[any]
+  def enum_for: (?Symbol method, *any args) -> ::Enumerator[any, any]
+              | (?Symbol method, *any args) { () -> any } -> ::Enumerator[any, any]
 
   def eql?: (any other) -> bool
 
@@ -165,8 +165,8 @@ module Kernel
 
   def tap: () { (any x) -> void } -> self
 
-  def to_enum: (?Symbol method, *any args) -> ::Enumerator[any]
-             | (?Symbol method, *any args) { () -> any } -> ::Enumerator[any]
+  def to_enum: (?Symbol method, *any args) -> ::Enumerator[any, any]
+             | (?Symbol method, *any args) { () -> any } -> ::Enumerator[any, any]
 
   def to_s: () -> String
 
@@ -379,7 +379,7 @@ module Kernel
   # } #=> :ok
   # ```
   def loop: () { () -> any } -> bot
-          | () -> ::Enumerator[any]
+          | () -> ::Enumerator[any, bot]
 
   def open: (String name, ?String | Integer rest, ?String block) -> IO?
 

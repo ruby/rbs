@@ -105,7 +105,7 @@
 class IO < Object
   include File::Constants
 
-  include Enumerable[String]
+  include Enumerable[String, IO]
 
   def <<: (any arg0) -> self
 
@@ -210,16 +210,16 @@ class IO < Object
   def closed?: () -> bool
 
   def each: (?String sep, ?Integer limit) { (String arg0) -> any } -> self
-          | (?String sep, ?Integer limit) -> ::Enumerator[String]
+          | (?String sep, ?Integer limit) -> ::Enumerator[String, self]
 
   def each_byte: () { (Integer arg0) -> any } -> self
-               | () -> ::Enumerator[Integer]
+               | () -> ::Enumerator[Integer, self]
 
   def each_char: () { (String arg0) -> any } -> self
-               | () -> ::Enumerator[String]
+               | () -> ::Enumerator[String, self]
 
   def each_codepoint: () { (Integer arg0) -> any } -> self
-                    | () -> ::Enumerator[Integer]
+                    | () -> ::Enumerator[Integer, self]
 
   # Returns true if *ios* is at end of file that means there are no more
   # data to read. The stream must be opened for reading or an `IOError` will
@@ -533,16 +533,16 @@ class IO < Object
   def self.for_fd: (Integer fd, ?Integer mode, ?Integer opt) -> self
 
   def bytes: () { (Integer arg0) -> any } -> self
-           | () -> ::Enumerator[Integer]
+           | () -> ::Enumerator[Integer, self]
 
   def chars: () { (String arg0) -> any } -> self
-           | () -> ::Enumerator[String]
+           | () -> ::Enumerator[String, self]
 
   def codepoints: () { (Integer arg0) -> any } -> self
-                | () -> ::Enumerator[Integer]
+                | () -> ::Enumerator[Integer, self]
 
   def each_line: (?String sep, ?Integer limit) { (String arg0) -> any } -> self
-               | (?String sep, ?Integer limit) -> ::Enumerator[String]
+               | (?String sep, ?Integer limit) -> ::Enumerator[String, self]
 
   # Returns true if *ios* is at end of file that means there are no more
   # data to read. The stream must be opened for reading or an `IOError` will
@@ -576,7 +576,7 @@ class IO < Object
   def eof?: () -> bool
 
   def lines: (?String sep, ?Integer limit) { (String arg0) -> any } -> self
-           | (?String sep, ?Integer limit) -> ::Enumerator[String]
+           | (?String sep, ?Integer limit) -> ::Enumerator[String, self]
 
   # Alias for: [fileno](IO.downloaded.ruby_doc#method-i-fileno)
   def to_i: () -> Integer
