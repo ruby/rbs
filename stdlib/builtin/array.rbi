@@ -327,7 +327,7 @@ class Array[Elem] < Object
   def *: (Integer arg0) -> ::Array[Elem]
        | (String arg0) -> String
 
-  def +: (Enumerable[Elem] arg0) -> ::Array[Elem]
+  def +: (::Enumerable[Elem] arg0) -> ::Array[Elem]
        | (::Array[Elem] arg0) -> ::Array[Elem]
 
   def -: (::Array[any] arg0) -> ::Array[Elem]
@@ -538,7 +538,7 @@ class Array[Elem] < Object
 
   def member?: (Elem arg0) -> bool
 
-  def permutation: (?Integer arg0) -> ::Enumerator[Elem]
+  def permutation: (?Integer arg0) -> ::Enumerator[::Array[Elem]]
                  | (?Integer arg0) { (::Array[Elem] arg0) -> any } -> ::Array[Elem]
 
   def pop: (?Integer arg0) -> ::Array[Elem]
@@ -559,10 +559,10 @@ class Array[Elem] < Object
              | () -> ::Enumerator[Elem]
 
   def repeated_combination: (Integer arg0) { (::Array[Elem] arg0) -> any } -> ::Array[Elem]
-                          | (Integer arg0) -> ::Enumerator[Elem]
+                          | (Integer arg0) -> ::Enumerator[::Array[Elem]]
 
   def repeated_permutation: (Integer arg0) { (::Array[Elem] arg0) -> any } -> ::Array[Elem]
-                          | (Integer arg0) -> ::Enumerator[Elem]
+                          | (Integer arg0) -> ::Enumerator[::Array[Elem]]
 
   # Returns a new array containing `self` ‘s elements in reverse order.
   # 

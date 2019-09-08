@@ -178,7 +178,7 @@ class Module < Object
 
   # Returns the name of the module *mod* . Returns nil for anonymous
   # modules.
-  def name: () -> String
+  def name: () -> String?
 
   def `prepend`: (*Module arg0) -> self
 

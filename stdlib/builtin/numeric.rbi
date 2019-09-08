@@ -160,6 +160,9 @@ class Numeric < Object
 
   def fdiv: (Numeric arg0) -> Numeric
 
+  # Returns `true` if `num` is a finite number, otherwise returns `false`.
+  def finite?: () -> bool
+
   # Returns the largest number less than or equal to `num` with a precision
   # of `ndigits` decimal digits (default: 0).
   # 
@@ -186,6 +189,10 @@ class Numeric < Object
   # Returns zero.
   def imaginary: () -> Numeric
 
+  # Returns `nil`, `-1`, or `1` depending on whether the value is
+  # finite, `-Infinity`, or `+Infinity`.
+  def infinite?: () -> Integer?
+
   # Returns `true` if `num` is an
   # [Integer](https://ruby-doc.org/core-2.6.3/Integer.html).
   # 
@@ -209,6 +216,9 @@ class Numeric < Object
 
   def modulo: (Numeric arg0) -> (Integer | Float | Rational | BigDecimal)
 
+  # Returns `true` if `num` is less than 0.
+  def negative?: () -> bool
+
   # Returns `self` if `num` is not zero, `nil` otherwise.
   # 
   # This behavior is useful when chaining comparisons:
@@ -228,6 +238,9 @@ class Numeric < Object
 
   # Returns an array; \[num.abs, num.arg\].
   def polar: () -> [ Numeric, Numeric ]
+
+  # Returns `true` if `num` is greater than 0.
+  def positive?: () -> bool
 
   def quo: (Numeric arg0) -> Numeric
 

@@ -363,7 +363,7 @@ class Hash[K, V] < Object
   # ```
   def to_a: () -> ::Array[[ K, V ]]
 
-  # Returns `self` .
+  # Returns `self`.
   def to_hash: () -> ::Hash[K, V]
 
   # Alias for: [inspect](Hash.downloaded.ruby_doc#method-i-inspect)
