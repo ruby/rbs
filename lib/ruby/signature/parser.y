@@ -8,7 +8,7 @@ class Ruby::Signature::Parser
         kPRIVATE kPUBLIC kALIAS
         kCOLON kCOLON2 kCOMMA kBAR kAMP kHAT kARROW kQUESTION kEXCLAMATION kSTAR kSTAR2 kFATARROW kEQ kDOT kLT
         kINTERFACE kEND kINCLUDE kEXTEND kATTRREADER kATTRWRITER kATTRACCESSOR tOPERATOR tQUOTEDMETHOD
-        kPREPEND kEXTENSION
+        kPREPEND kEXTENSION kINCOMPATIBLE
         type_TYPE type_SIGNATURE type_METHODTYPE tEOF
 
   prechigh
@@ -386,9 +386,9 @@ rule
       }
 
   method_member:
-      annotations kDEF method_kind def_name method_types {
-        location = val[1].location + val[4].last.location
-        types = val[4].map do |type|
+      annotations attributes kDEF method_kind def_name method_types {
+        location = val[2].location + val[5].last.location
+        types = val[5].map do |type|
           case type
           when LocatedValue
             type.value
@@ -397,13 +397,20 @@ rule
           end
         end
         result = Members::MethodDefinition.new(
-          name: val[3].value,
-          kind: val[2],
+          name: val[4].value,
+          kind: val[3],
           types: types,
           annotations: val[0],
           location: location,
-          comment: leading_comment(val[0].first&.location || val[1].location)
+          comment: leading_comment(val[0].first&.location || val[1].first&.location || val[2].location),
+          attributes: val[1].map(&:value)
         )
+      }
+
+  attributes:
+      { result = [] }
+    | attributes kINCOMPATIBLE {
+        result = val[0].push(val[1])
       }
 
   method_kind:
@@ -496,7 +503,7 @@ rule
   identifier_keywords:
       kCLASS | kVOID | kNIL | kANY | kTOP | kBOT | kINSTANCE | kBOOL | kSINGLETON
     | kTYPE | kMODULE | kPRIVATE | kPUBLIC | kEND | kINCLUDE | kEXTEND | kPREPEND
-    | kATTRREADER | kATTRACCESSOR | kATTRWRITER | kDEF | kEXTENSION | kSELF
+    | kATTRREADER | kATTRACCESSOR | kATTRWRITER | kDEF | kEXTENSION | kSELF | kINCOMPATIBLE
 
   type_params:
       { result = nil }
@@ -1118,7 +1125,8 @@ KEYWORDS = {
   "public" => :kPUBLIC,
   "private" => :kPRIVATE,
   "alias" => :kALIAS,
-  "extension" => :kEXTENSION
+  "extension" => :kEXTENSION,
+  "incompatible" => :kINCOMPATIBLE
 }
 KEYWORDS_RE = /#{Regexp.union(*KEYWORDS.keys)}\b/
 

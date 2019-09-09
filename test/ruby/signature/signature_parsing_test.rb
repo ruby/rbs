@@ -424,6 +424,25 @@ class Ruby::Signature::SignatureParsingTest < Minitest::Test
     end
   end
 
+  def test_incompatible_method_definition
+    Parser.parse_signature(<<~SIG).yield_self do |decls|
+      class Foo
+        incompatible def foo: () -> Integer
+      end
+     SIG
+      assert_equal 1, decls.size
+
+      decls[0].yield_self do |decl|
+        assert_instance_of Declarations::Class, decl
+
+        assert_instance_of Members::MethodDefinition, decl.members[0]
+        decl.members[0].yield_self do |m|
+          assert_equal [:incompatible], m.attributes
+        end
+      end
+    end
+  end
+
   def test_method_super
     Parser.parse_signature(<<~SIG).yield_self do |decls|
       class Foo

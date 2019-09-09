@@ -9,27 +9,30 @@ module Ruby
           attr_reader :annotations
           attr_reader :location
           attr_reader :comment
+          attr_reader :attributes
 
-          def initialize(name:, kind:, types:, annotations:, location:, comment:)
+          def initialize(name:, kind:, types:, annotations:, location:, comment:, attributes:)
             @name = name
             @kind = kind
             @types = types
             @annotations = annotations
             @location = location
             @comment = comment
+            @attributes = attributes
           end
 
           def ==(other)
             other.is_a?(MethodDefinition) &&
               other.name == name &&
               other.kind == kind &&
-              other.types == types
+              other.types == types &&
+              other.attributes == attributes
           end
 
           alias eql? ==
 
           def hash
-            self.class.hash ^ name.hash ^ kind.hash ^ types.hash
+            self.class.hash ^ name.hash ^ kind.hash ^ types.hash ^ attributes.hash
           end
 
           def instance?
@@ -47,7 +50,8 @@ module Ruby
               types: types,
               annotations: annotations,
               location: location,
-              comment: comment
+              comment: comment,
+              attributes: attributes
             }.to_json(*a)
           end
         end

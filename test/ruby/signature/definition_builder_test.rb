@@ -754,4 +754,37 @@ EOF
       end
     end
   end
+
+  def test_incompatible_method
+    SignatureManager.new do |manager|
+      manager.files[Pathname("foo.rbi")] = <<EOF
+class Hello
+  def initialize: () -> void
+  incompatible def hello: () -> Integer
+  def world: -> void
+end
+EOF
+      manager.build do |env|
+        builder = DefinitionBuilder.new(env: env)
+
+        builder.build_instance(type_name("::Hello")).yield_self do |definition|
+          assert_instance_of Definition, definition
+
+          assert_equal [:incompatible], definition.methods[:initialize].attributes
+          assert_equal [:incompatible], definition.methods[:hello].attributes
+          assert_equal [], definition.methods[:world].attributes
+        end
+      end
+
+      manager.build do |env|
+        builder = DefinitionBuilder.new(env: env)
+
+        builder.build_singleton(type_name("::Hello")).yield_self do |definition|
+          assert_instance_of Definition, definition
+
+          assert_equal [:incompatible], definition.methods[:new].attributes
+        end
+      end
+    end
+  end
 end

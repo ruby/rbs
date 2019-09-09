@@ -293,7 +293,8 @@ module Ruby
                     defined_in: nil,
                     implemented_in: env.find_class(Ruby::Signature::BuiltinNames::Class.name),
                     method_types: method_types,
-                    accessibility: :public
+                    accessibility: :public,
+                    attributes: [:incompatible]
                   )
                 end
               end
@@ -355,11 +356,18 @@ module Ruby
                     location: member.location
                   )
 
+                  attrs = if name == :initialize
+                            (member.attributes + [:incompatible]).uniq
+                          else
+                            member.attributes
+                          end
+
                   definition.methods[name] = Definition::Method.new(super_method: nil,
                                                                     method_types: method_types,
                                                                     defined_in: decl,
                                                                     implemented_in: decl,
-                                                                    accessibility: accessibility)
+                                                                    accessibility: accessibility,
+                                                                    attributes: attrs)
                 end
               when AST::Members::AttrReader, AST::Members::AttrAccessor, AST::Members::AttrWriter
                 name = member.name
@@ -384,7 +392,8 @@ module Ruby
                     ],
                     defined_in: decl,
                     implemented_in: decl,
-                    accessibility: accessibility
+                    accessibility: accessibility,
+                    attributes: []
                   )
                 end
 
@@ -408,7 +417,8 @@ module Ruby
                     ],
                     defined_in: decl,
                     implemented_in: decl,
-                    accessibility: accessibility
+                    accessibility: accessibility,
+                    attributes: []
                   )
                 end
 
@@ -472,7 +482,8 @@ module Ruby
                       method_types: method_types,
                       defined_in: method.defined_in,
                       implemented_in: decl,
-                      accessibility: method.accessibility
+                      accessibility: method.accessibility,
+                      attributes: []
                     )
                   end
                 end
@@ -536,7 +547,8 @@ module Ruby
                                                                   method_types: method_types,
                                                                   defined_in: decl,
                                                                   implemented_in: decl,
-                                                                  accessibility: accessibility)
+                                                                  accessibility: accessibility,
+                                                                  attributes: member.attributes)
               end
             when AST::Members::Alias
               if member.singleton?
@@ -590,7 +602,8 @@ module Ruby
                     method_types: method_types,
                     defined_in: method.defined_in,
                     implemented_in: decl,
-                    accessibility: method.accessibility
+                    accessibility: method.accessibility,
+                    attributes: method.attributes
                   )
                 end
               end
@@ -662,7 +675,8 @@ module Ruby
           super_method: super_method,
           defined_in: method.defined_in,
           implemented_in: method.implemented_in,
-          accessibility: method.accessibility
+          accessibility: method.accessibility,
+          attributes: method.attributes
         )
       end
 
@@ -730,7 +744,8 @@ module Ruby
                 end,
                 defined_in: declaration,
                 implemented_in: nil,
-                accessibility: :public
+                accessibility: :public,
+                attributes: member.attributes
               )
               definition.methods[member.name] = method
             when AST::Members::Alias

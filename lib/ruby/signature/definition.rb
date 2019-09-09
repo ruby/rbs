@@ -19,13 +19,15 @@ module Ruby
         attr_reader :defined_in
         attr_reader :implemented_in
         attr_reader :accessibility
+        attr_reader :attributes
 
-        def initialize(super_method:, method_types:, defined_in:, implemented_in:, accessibility:)
+        def initialize(super_method:, method_types:, defined_in:, implemented_in:, accessibility:, attributes:)
           @super_method = super_method
           @method_types = method_types
           @defined_in = defined_in
           @implemented_in = implemented_in
           @accessibility = accessibility
+          @attributes = attributes
         end
 
         def public?
@@ -42,7 +44,8 @@ module Ruby
             method_types: method_types.map {|ty| ty.sub(s) },
             defined_in: defined_in,
             implemented_in: implemented_in,
-            accessibility: @accessibility
+            accessibility: @accessibility,
+            attributes: attributes
           )
         end
 
@@ -54,7 +57,8 @@ module Ruby
             end,
             defined_in: defined_in,
             implemented_in: implemented_in,
-            accessibility: @accessibility
+            accessibility: @accessibility,
+            attributes: attributes
           )
         end
       end
