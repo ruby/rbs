@@ -24,7 +24,7 @@ module TestHelper
     def initialize
       @files = {}
 
-      files[Pathname("builtin.rbi")] = BUILTINS
+      files[Pathname("builtin.rbs")] = BUILTINS
     end
 
     def self.new

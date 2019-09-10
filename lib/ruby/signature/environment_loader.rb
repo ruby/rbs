@@ -63,7 +63,7 @@ module Ruby
           if path
             case
             when path.file?
-              if path.extname == ".rbi" || immediate
+              if path.extname == ".rbs" || immediate
                 yield path
               end
             when path.directory?

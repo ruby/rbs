@@ -11,7 +11,7 @@ class Ruby::Signature::ConstantTableTest < Minitest::Test
 
   def test_name_to_constant
     SignatureManager.new do |manager|
-      manager.files[Pathname("foo.rbi")] = <<EOF
+      manager.files[Pathname("foo.rbs")] = <<EOF
 Name: String
 EOF
 
@@ -36,7 +36,7 @@ EOF
 
   def test_reference_top_level
     SignatureManager.new do |manager|
-      manager.files[Pathname("foo.rbi")] = <<EOF
+      manager.files[Pathname("foo.rbs")] = <<EOF
 Name: String
 EOF
       manager.build do |env|
@@ -58,7 +58,7 @@ EOF
 
   def test_reference_constant_context
     SignatureManager.new do |manager|
-      manager.files[Pathname("foo.rbi")] = <<EOF
+      manager.files[Pathname("foo.rbs")] = <<EOF
 class Foo
 end
 
@@ -87,7 +87,7 @@ EOF
 
   def test_reference_constant_inherit
     SignatureManager.new do |manager|
-      manager.files[Pathname("foo.rbi")] = <<EOF
+      manager.files[Pathname("foo.rbs")] = <<EOF
 class Parent
 end
 
@@ -123,7 +123,7 @@ EOF
 
   def test_reference_constant_inherit_module
     SignatureManager.new do |manager|
-      manager.files[Pathname("foo.rbi")] = <<EOF
+      manager.files[Pathname("foo.rbs")] = <<EOF
 class Set
 end
 
@@ -145,7 +145,7 @@ EOF
 
   def test_reference_constant_inherit2
     SignatureManager.new do |manager|
-      manager.files[Pathname("foo.rbi")] = <<EOF
+      manager.files[Pathname("foo.rbs")] = <<EOF
 class Foo
 end
 
@@ -166,7 +166,7 @@ EOF
 
   def test_reference_constant_inherit3
     SignatureManager.new do |manager|
-      manager.files[Pathname("foo.rbi")] = <<EOF
+      manager.files[Pathname("foo.rbs")] = <<EOF
 class Stuff
 end
 

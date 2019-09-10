@@ -4,7 +4,7 @@ class Ruby::Signature::BufferTest < Minitest::Test
   Buffer = Ruby::Signature::Buffer
 
   def test_buffer
-    buffer = Buffer.new(name: Pathname("foo.rbi"), content: <<-CONTENT)
+    buffer = Buffer.new(name: Pathname("foo.rbs"), content: <<-CONTENT)
 123
 abc
     CONTENT

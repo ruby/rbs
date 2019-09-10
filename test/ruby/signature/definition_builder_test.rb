@@ -29,7 +29,7 @@ class Ruby::Signature::DefinitionBuilderTest < Minitest::Test
 
   def test_build_ancestors
     SignatureManager.new do |manager|
-      manager.files[Pathname("foo.rbi")] = <<EOF
+      manager.files[Pathname("foo.rbs")] = <<EOF
 module X
 end
 
@@ -126,7 +126,7 @@ EOF
 
   def test_build_ancestors_extension
     SignatureManager.new do |manager|
-      manager.files[Pathname("foo.rbi")] = <<EOF
+      manager.files[Pathname("foo.rbs")] = <<EOF
 module X[A]
 end
 
@@ -191,7 +191,7 @@ EOF
 
   def test_build_ancestors_cycle
     SignatureManager.new do |manager|
-      manager.files[Pathname("foo.rbi")] = <<EOF
+      manager.files[Pathname("foo.rbs")] = <<EOF
 module X[A]
   include Y[A]
 end
@@ -215,7 +215,7 @@ EOF
 
   def test_build_invalid_type_application
     SignatureManager.new do |manager|
-      manager.files[Pathname("foo.rbi")] = <<EOF
+      manager.files[Pathname("foo.rbs")] = <<EOF
 module X[A]
 end
 
@@ -254,7 +254,7 @@ EOF
 
   def test_build_interface
     SignatureManager.new do |manager|
-      manager.files[Pathname("foo.rbi")] = <<EOF
+      manager.files[Pathname("foo.rbs")] = <<EOF
 interface _Foo
   def bar: -> _Foo
   include _Hash
@@ -312,7 +312,7 @@ EOF
 
   def test_build_one_extension_instance
     SignatureManager.new do |manager|
-      manager.files[Pathname("foo.rbi")] = <<EOF
+      manager.files[Pathname("foo.rbs")] = <<EOF
 class Hello
 end
 
@@ -361,7 +361,7 @@ EOF
 
   def test_build_one_extension_singleton
     SignatureManager.new do |manager|
-      manager.files[Pathname("foo.rbi")] = <<EOF
+      manager.files[Pathname("foo.rbs")] = <<EOF
 class Hello
 end
 
@@ -410,7 +410,7 @@ EOF
 
   def test_build_one_instance_variables
     SignatureManager.new do |manager|
-      manager.files[Pathname("foo.rbi")] = <<EOF
+      manager.files[Pathname("foo.rbs")] = <<EOF
 class Hello[A]
   @name: A
   @@count: Integer
@@ -455,7 +455,7 @@ EOF
 
   def test_build_one_singleton_variables
     SignatureManager.new do |manager|
-      manager.files[Pathname("foo.rbi")] = <<EOF
+      manager.files[Pathname("foo.rbs")] = <<EOF
 class Hello[A]
   @name: A
   @@count: Integer
@@ -514,7 +514,7 @@ EOF
 
   def test_build_instance_variables
     SignatureManager.new do |manager|
-      manager.files[Pathname("foo.rbi")] = <<EOF
+      manager.files[Pathname("foo.rbs")] = <<EOF
 class Hello[A]
   @name: A
   @@email: String
@@ -570,7 +570,7 @@ EOF
 
   def test_build_singleton_variables
     SignatureManager.new do |manager|
-      manager.files[Pathname("foo.rbi")] = <<EOF
+      manager.files[Pathname("foo.rbs")] = <<EOF
 class Hello
   self.@name: Integer
   @@email: String
@@ -610,7 +610,7 @@ EOF
 
   def test_build_extension
     SignatureManager.new do |manager|
-      manager.files[Pathname("foo.rbi")] = <<EOF
+      manager.files[Pathname("foo.rbs")] = <<EOF
 class Hello
 end
 
@@ -637,7 +637,7 @@ EOF
 
   def test_build_alias
     SignatureManager.new do |manager|
-      manager.files[Pathname("foo.rbi")] = <<EOF
+      manager.files[Pathname("foo.rbs")] = <<EOF
 class Hello
   def foo: (String) -> void
   alias bar foo
@@ -676,7 +676,7 @@ EOF
 
   def test_build_one_module_instance
     SignatureManager.new do |manager|
-      manager.files[Pathname("foo.rbi")] = <<EOF
+      manager.files[Pathname("foo.rbs")] = <<EOF
 interface _Each[A, B]
   def each: { (A) -> void } -> B
 end
@@ -701,7 +701,7 @@ EOF
 
   def test_build_one_module_singleton
     SignatureManager.new do |manager|
-      manager.files[Pathname("foo.rbi")] = <<EOF
+      manager.files[Pathname("foo.rbs")] = <<EOF
 interface _Each[A, B]
   def each: { (A) -> void } -> B
 end
@@ -728,7 +728,7 @@ EOF
 
   def test_attributes
     SignatureManager.new do |manager|
-      manager.files[Pathname("foo.rbi")] = <<EOF
+      manager.files[Pathname("foo.rbs")] = <<EOF
 class Hello
   attr_reader instance_reader: String
   attr_writer instance_writer(@writer): Integer
@@ -757,7 +757,7 @@ EOF
 
   def test_incompatible_method
     SignatureManager.new do |manager|
-      manager.files[Pathname("foo.rbi")] = <<EOF
+      manager.files[Pathname("foo.rbs")] = <<EOF
 class Hello
   def initialize: () -> void
   incompatible def hello: () -> Integer

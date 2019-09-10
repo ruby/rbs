@@ -16,13 +16,13 @@ class Ruby::Signature::EnvironmentLoaderTest < Minitest::Test
   def with_signatures
     mktmpdir do |path|
       path.join("models").mkdir
-      path.join("models/person.rbi").write(<<-EOF)
+      path.join("models/person.rbs").write(<<-EOF)
 class Person
 end
       EOF
 
       path.join("controllers").mkdir
-      path.join("controllers/people_controller.rbi").write(<<-EOF)
+      path.join("controllers/people_controller.rbs").write(<<-EOF)
 class PeopleController
 end
 

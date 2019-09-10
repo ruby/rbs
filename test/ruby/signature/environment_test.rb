@@ -9,7 +9,7 @@ class Ruby::Signature::EnvironmentTest < Minitest::Test
 
   def test_absolute_type_name
     SignatureManager.new do |manager|
-      manager.add_file("foo.rbi", <<-EOF)
+      manager.add_file("foo.rbs", <<-EOF)
 class String::Foo
 end
 
@@ -27,7 +27,7 @@ end
 
   def test_absolute_type
     SignatureManager.new do |manager|
-      manager.add_file("foo.rbi", <<-EOF)
+      manager.add_file("foo.rbs", <<-EOF)
 class Array[A]
 end
 
@@ -71,7 +71,7 @@ end
 
   def test_validate
     SignatureManager.new do |manager|
-      manager.add_file("foo.rbi", <<-EOF)
+      manager.add_file("foo.rbs", <<-EOF)
 class Array[A]
 end
 

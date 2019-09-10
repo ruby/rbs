@@ -5,7 +5,7 @@ class Ruby::Signature::LocationTest < Minitest::Test
   Location = Ruby::Signature::Location
 
   def test_location_source
-    buffer = Buffer.new(name: Pathname("foo.rbi"), content: <<-CONTENT)
+    buffer = Buffer.new(name: Pathname("foo.rbs"), content: <<-CONTENT)
 123
 abc
     CONTENT
@@ -28,7 +28,7 @@ abc
   end
 
   def test_location_plus
-    buffer = Buffer.new(name: Pathname("foo.rbi"), content: <<-CONTENT)
+    buffer = Buffer.new(name: Pathname("foo.rbs"), content: <<-CONTENT)
 123
 abc
     CONTENT
