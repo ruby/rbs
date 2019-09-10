@@ -56,6 +56,10 @@ module Ruby
         namespace.absolute?
       end
 
+      def relative!
+        self.class.new(namespace: namespace.relative!, name: name)
+      end
+
       def interface?
         kind == :interface
       end

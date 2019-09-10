@@ -749,6 +749,20 @@ module Ruby
           )
         end
 
+        def update(required_positionals: self.required_positionals, optional_positionals: self.optional_positionals, rest_positionals: self.rest_positionals, trailing_positionals: self.trailing_positionals,
+                   required_keywords: self.required_keywords, optional_keywords: self.optional_keywords, rest_keywords: self.rest_keywords, return_type: self.return_type)
+          Function.new(
+            required_positionals: required_positionals,
+            optional_positionals: optional_positionals,
+            rest_positionals: rest_positionals,
+            trailing_positionals: trailing_positionals,
+            required_keywords: required_keywords,
+            optional_keywords: optional_keywords,
+            rest_keywords: rest_keywords,
+            return_type: return_type
+          )
+        end
+
         def empty?
           required_positionals.empty? &&
             optional_positionals.empty? &&

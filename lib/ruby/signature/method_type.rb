@@ -67,6 +67,15 @@ module Ruby
         end
       end
 
+      def update(type_params: self.type_params, type: self.type, block: self.block, location: self.location)
+        self.class.new(
+          type_params: type_params,
+          type: type,
+          block: block,
+          location: location
+        )
+      end
+
       def free_variables(set = Set.new)
         type.free_variables(set)
         block&.type&.free_variables(set)

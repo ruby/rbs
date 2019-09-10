@@ -37,7 +37,7 @@ module Ruby
         @stderr = stderr
       end
 
-      COMMANDS = [:ast, :list, :ancestors, :methods, :method, :validate, :constant, :paths, :version]
+      COMMANDS = [:ast, :list, :ancestors, :methods, :method, :validate, :constant, :paths, :scaffold, :version]
 
       def library_parse(opts, options:)
         opts.on("-r LIBRARY") do |lib|
@@ -390,6 +390,22 @@ module Ruby
             stdout.puts "#{path.path} (#{kind_of[path.path]}, library, name=#{path.name})"
           end
         end
+      end
+
+      def run_scaffold(args, options)
+        format = args.shift
+
+        parser = case format
+                 when "rbi"
+                   Scaffold::RBI.new()
+                 end
+
+        args.each do |file|
+          parser.parse Pathname(file).read
+        end
+
+        writer = Writer.new(out: stdout)
+        writer.write parser.decls
       end
 
       def parse_type_name(string)
