@@ -1,20 +1,141 @@
-class MatchData
-  def `[]`: (Integer | String | Symbol) -> String?
-          | (Integer, Integer) -> Array[String]
-          | (Range[Integer]) -> Array[String]
-  def begin: (Integer) -> Integer?
-           | (String | Symbol) -> Integer
-  def captures: -> Array[String]
-  def end: (Integer | String | Symbol) -> Integer
-  def length: -> Integer
-  def named_captures: -> Hash[String, String?]
-  def names: -> Array[String]
-  def offset: (Integer | String | Symbol) -> [Integer, Integer]
-  def post_match: -> String
-  def pre_match: -> String
-  def regexp: -> Regexp
-  def size: -> Integer
-  def string: -> String
-  def to_a: -> Array[String]
-  def values_at: (*(Integer | String | Symbol)) -> Array[String?]
+class MatchData < Object
+  def ==: (any arg0) -> bool
+
+  def []: (Integer i_or_start_or_range_or_name) -> String?
+        | (Integer i_or_start_or_range_or_name, ?Integer length) -> ::Array[String]
+        | (::Range[Integer] i_or_start_or_range_or_name) -> ::Array[String]
+        | (String | Symbol i_or_start_or_range_or_name) -> String?
+
+  def begin: (Integer n) -> Integer
+
+  # Returns the array of captures; equivalent to `mtch.to_a[1..-1]` .
+  # 
+  # ```ruby
+  # f1,f2,f3,f4 = /(.)(.)(\d+)(\d)/.match("THX1138.").captures
+  # f1    #=> "H"
+  # f2    #=> "X"
+  # f3    #=> "113"
+  # f4    #=> "8"
+  # ```
+  def captures: () -> ::Array[String]
+
+  def `end`: (Integer n) -> Integer
+
+  def eql?: (any other) -> bool
+
+  # Produce a hash based on the target string, regexp and matched positions
+  # of this matchdata.
+  # 
+  # See also Object\#hash.
+  def hash: () -> Integer
+
+  def inspect: () -> String
+
+  # Returns the number of elements in the match array.
+  # 
+  # ```ruby
+  # m = /(.)(.)(\d+)(\d)/.match("THX1138.")
+  # m.length   #=> 5
+  # m.size     #=> 5
+  # ```
+  def length: () -> Integer
+
+  # Returns a [Hash](https://ruby-doc.org/core-2.6.3/Hash.html) using named
+  # capture.
+  # 
+  # A key of the hash is a name of the named captures. A value of the hash
+  # is a string of last successful capture of corresponding group.
+  # 
+  # ```ruby
+  # m = /(?.)(?.)/.match("01")
+  # m.named_captures #=> {"a" => "0", "b" => "1"}
+  # 
+  # m = /(?.)(?.)?/.match("0")
+  # m.named_captures #=> {"a" => "0", "b" => nil}
+  # 
+  # m = /(?.)(?.)/.match("01")
+  # m.named_captures #=> {"a" => "1"}
+  # 
+  # m = /(?x)|(?y)/.match("x")
+  # m.named_captures #=> {"a" => "x"}
+  # ```
+  def named_captures: () -> ::Hash[String, String?]
+
+  def names: () -> ::Array[String]
+
+  def offset: (Integer n) -> ::Array[Integer]
+
+  # Returns the portion of the original string after the current match.
+  # Equivalent to the special variable `$'` .
+  # 
+  # ```ruby
+  # m = /(.)(.)(\d+)(\d)/.match("THX1138: The Movie")
+  # m.post_match   #=> ": The Movie"
+  # ```
+  def post_match: () -> String
+
+  # Returns the portion of the original string before the current match.
+  # Equivalent to the special variable `` $` `` .
+  # 
+  # ```ruby
+  # m = /(.)(.)(\d+)(\d)/.match("THX1138.")
+  # m.pre_match   #=> "T"
+  # ```
+  def pre_match: () -> String
+
+  # Returns the regexp.
+  # 
+  # ```ruby
+  # m = /a.*b/.match("abc")
+  # m.regexp #=> /a.*b/
+  # ```
+  def regexp: () -> Regexp
+
+  # Returns the number of elements in the match array.
+  # 
+  # ```ruby
+  # m = /(.)(.)(\d+)(\d)/.match("THX1138.")
+  # m.length   #=> 5
+  # m.size     #=> 5
+  # ```
+  def size: () -> Integer
+
+  # Returns a frozen copy of the string passed in to `match` .
+  # 
+  # ```ruby
+  # m = /(.)(.)(\d+)(\d)/.match("THX1138.")
+  # m.string   #=> "THX1138."
+  # ```
+  def string: () -> String
+
+  # Returns the array of matches.
+  # 
+  # ```ruby
+  # m = /(.)(.)(\d+)(\d)/.match("THX1138.")
+  # m.to_a   #=> ["HX1138", "H", "X", "113", "8"]
+  # ```
+  # 
+  # Because `to_a` is called when expanding `*` *variable* , there’s a
+  # useful assignment shortcut for extracting matched fields. This is
+  # slightly slower than accessing the fields directly (as an intermediate
+  # array is generated).
+  # 
+  # ```ruby
+  # all,f1,f2,f3 = * /(.)(.)(\d+)(\d)/.match("THX1138.")
+  # all   #=> "HX1138"
+  # f1    #=> "H"
+  # f2    #=> "X"
+  # f3    #=> "113"
+  # ```
+  def to_a: () -> ::Array[String]
+
+  # Returns the entire matched string.
+  # 
+  # ```ruby
+  # m = /(.)(.)(\d+)(\d)/.match("THX1138.")
+  # m.to_s   #=> "HX1138"
+  # ```
+  def to_s: () -> String
+
+  def values_at: (*Integer indexes) -> ::Array[String]
 end

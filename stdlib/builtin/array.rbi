@@ -1,172 +1,808 @@
-class Array[A]
-  include Enumerable[A, self]
+# Arrays are ordered, integer-indexed collections of any object.
+# 
+# [Array](Array) indexing starts at 0, as in C or
+# Java. A negative index is assumed to be relative to the end of the
+# array---that is, an index of -1 indicates the last element of the array,
+# -2 is the next to last element in the array, and so on.
+# 
+# 
+# A new array can be created by using the literal constructor `[]` .
+# Arrays can contain different types of objects. For example, the array
+# below contains an
+# [Integer](https://ruby-doc.org/core-2.6.3/Integer.html), a
+# [String](https://ruby-doc.org/core-2.6.3/String.html) and a Float:
+# 
+# ```ruby
+# ary = [1, "two", 3.0] #=> [1, "two", 3.0]
+# ```
+# 
+# An array can also be created by explicitly calling
+# [::new](Array#method-c-new) with zero, one (the
+# initial size of the [Array](Array) ) or two
+# arguments (the initial size and a default object).
+# 
+# ```ruby
+# ary = Array.new    #=> []
+# Array.new(3)       #=> [nil, nil, nil]
+# Array.new(3, true) #=> [true, true, true]
+# ```
+# 
+# Note that the second argument populates the array with references to the
+# same object. Therefore, it is only recommended in cases when you need to
+# instantiate arrays with natively immutable objects such as Symbols,
+# numbers, true or false.
+# 
+# To create an array with separate objects a block can be passed instead.
+# This method is safe to use with mutable objects such as hashes, strings
+# or other arrays:
+# 
+# ```ruby
+# Array.new(4) {Hash.new}    #=> [{}, {}, {}, {}]
+# Array.new(4) {|i| i.to_s } #=> ["0", "1", "2", "3"]
+# ```
+# 
+# This is also a quick way to build up multi-dimensional arrays:
+# 
+# ```ruby
+# empty_table = Array.new(3) {Array.new(3)}
+# #=> [[nil, nil, nil], [nil, nil, nil], [nil, nil, nil]]
+# ```
+# 
+# An array can also be created by using the Array() method, provided by
+# [Kernel](https://ruby-doc.org/core-2.6.3/Kernel.html), which tries to
+# call [to\_ary](Array#method-i-to_ary), then
+# [to\_a](Array#method-i-to_a) on its argument.
+# 
+# ```ruby
+# Array({:a => "a", :b => "b"}) #=> [[:a, "a"], [:b, "b"]]
+# ```
+# 
+# 
+# In addition to the methods it mixes in through the
+# [Enumerable](https://ruby-doc.org/core-2.6.3/Enumerable.html) module,
+# the [Array](Array) class has proprietary methods for
+# accessing, searching and otherwise manipulating arrays.
+# 
+# Some of the more common ones are illustrated below.
+# 
+# 
+# Elements in an array can be retrieved using the
+# [\#\[\]](Array#method-i-5B-5D) method. It can take a
+# single integer argument (a numeric index), a pair of arguments (start
+# and length) or a range. Negative indices start counting from the end,
+# with -1 being the last element.
+# 
+# ```ruby
+# arr = [1, 2, 3, 4, 5, 6]
+# arr[2]    #=> 3
+# arr[100]  #=> nil
+# arr[-3]   #=> 4
+# arr[2, 3] #=> [3, 4, 5]
+# arr[1..4] #=> [2, 3, 4, 5]
+# arr[1..-3] #=> [2, 3, 4]
+# ```
+# 
+# Another way to access a particular array element is by using the
+# [at](Array#method-i-at) method
+# 
+# ```ruby
+# arr.at(0) #=> 1
+# ```
+# 
+# The [slice](Array#method-i-slice) method works in an
+# identical manner to [\#\[\]](Array#method-i-5B-5D).
+# 
+# To raise an error for indices outside of the array bounds or else to
+# provide a default value when that happens, you can use
+# [fetch](Array#method-i-fetch).
+# 
+# ```ruby
+# arr = ['a', 'b', 'c', 'd', 'e', 'f']
+# arr.fetch(100) #=> IndexError: index 100 outside of array bounds: -6...6
+# arr.fetch(100, "oops") #=> "oops"
+# ```
+# 
+# The special methods [first](Array#method-i-first)
+# and [last](Array#method-i-last) will return the
+# first and last elements of an array, respectively.
+# 
+# ```ruby
+# arr.first #=> 1
+# arr.last  #=> 6
+# ```
+# 
+# To return the first `n` elements of an array, use
+# [take](Array#method-i-take)
+# 
+# ```ruby
+# arr.take(3) #=> [1, 2, 3]
+# ```
+# 
+# [drop](Array#method-i-drop) does the opposite of
+# [take](Array#method-i-take), by returning the
+# elements after `n` elements have been dropped:
+# 
+# ```ruby
+# arr.drop(3) #=> [4, 5, 6]
+# ```
+# 
+# 
+# Arrays keep track of their own length at all times. To query an array
+# about the number of elements it contains, use
+# [length](Array#method-i-length),
+# [count](Array#method-i-count) or
+# [size](Array#method-i-size).
+# 
+# ```ruby
+# browsers = ['Chrome', 'Firefox', 'Safari', 'Opera', 'IE']
+# browsers.length #=> 5
+# browsers.count #=> 5
+# ```
+# 
+# To check whether an array contains any elements at all
+# 
+# ```ruby
+# browsers.empty? #=> false
+# ```
+# 
+# To check whether a particular item is included in the array
+# 
+# ```ruby
+# browsers.include?('Konqueror') #=> false
+# ```
+# 
+# 
+# Items can be added to the end of an array by using either
+# [push](Array#method-i-push) or
+# [\<\<](Array#method-i-3C-3C)
+# 
+# ```ruby
+# arr = [1, 2, 3, 4]
+# arr.push(5) #=> [1, 2, 3, 4, 5]
+# arr << 6    #=> [1, 2, 3, 4, 5, 6]
+# ```
+# 
+# [unshift](Array#method-i-unshift) will add a new
+# item to the beginning of an array.
+# 
+# ```ruby
+# arr.unshift(0) #=> [0, 1, 2, 3, 4, 5, 6]
+# ```
+# 
+# With [insert](Array#method-i-insert) you can add a
+# new element to an array at any position.
+# 
+# ```ruby
+# arr.insert(3, 'apple')  #=> [0, 1, 2, 'apple', 3, 4, 5, 6]
+# ```
+# 
+# Using the [insert](Array#method-i-insert) method,
+# you can also insert multiple values at once:
+# 
+# ```ruby
+# arr.insert(3, 'orange', 'pear', 'grapefruit')
+# #=> [0, 1, 2, "orange", "pear", "grapefruit", "apple", 3, 4, 5, 6]
+# ```
+# 
+# 
+# The method [pop](Array#method-i-pop) removes the
+# last element in an array and returns it:
+# 
+# ```ruby
+# arr =  [1, 2, 3, 4, 5, 6]
+# arr.pop #=> 6
+# arr #=> [1, 2, 3, 4, 5]
+# ```
+# 
+# To retrieve and at the same time remove the first item, use
+# [shift](Array#method-i-shift):
+# 
+# ```ruby
+# arr.shift #=> 1
+# arr #=> [2, 3, 4, 5]
+# ```
+# 
+# To delete an element at a particular index:
+# 
+# ```ruby
+# arr.delete_at(2) #=> 4
+# arr #=> [2, 3, 5]
+# ```
+# 
+# To delete a particular element anywhere in an array, use
+# [delete](Array#method-i-delete):
+# 
+# ```ruby
+# arr = [1, 2, 2, 3]
+# arr.delete(2) #=> 2
+# arr #=> [1,3]
+# ```
+# 
+# A useful method if you need to remove `nil` values from an array is
+# [compact](Array#method-i-compact):
+# 
+# ```ruby
+# arr = ['foo', 0, nil, 'bar', 7, 'baz', nil]
+# arr.compact  #=> ['foo', 0, 'bar', 7, 'baz']
+# arr          #=> ['foo', 0, nil, 'bar', 7, 'baz', nil]
+# arr.compact! #=> ['foo', 0, 'bar', 7, 'baz']
+# arr          #=> ['foo', 0, 'bar', 7, 'baz']
+# ```
+# 
+# Another common need is to remove duplicate elements from an array.
+# 
+# It has the non-destructive
+# [uniq](Array#method-i-uniq), and destructive method
+# [uniq\!](Array#method-i-uniq-21)
+# 
+# ```ruby
+# arr = [2, 5, 6, 556, 6, 6, 8, 9, 0, 123, 556]
+# arr.uniq #=> [2, 5, 6, 556, 8, 9, 0, 123]
+# ```
+# 
+# 
+# Like all classes that include the
+# [Enumerable](https://ruby-doc.org/core-2.6.3/Enumerable.html) module,
+# [Array](Array) has an each method, which defines
+# what elements should be iterated over and how. In case of Array’s
+# [each](Array#method-i-each), all elements in the
+# [Array](Array) instance are yielded to the supplied
+# block in sequence.
+# 
+# Note that this operation leaves the array unchanged.
+# 
+# ```ruby
+# arr = [1, 2, 3, 4, 5]
+# arr.each {|a| print a -= 10, " "}
+# # prints: -9 -8 -7 -6 -5
+# #=> [1, 2, 3, 4, 5]
+# ```
+# 
+# Another sometimes useful iterator is
+# [reverse\_each](Array#method-i-reverse_each) which
+# will iterate over the elements in the array in reverse order.
+# 
+# ```ruby
+# words = %w[first second third fourth fifth sixth]
+# str = ""
+# words.reverse_each {|word| str += "#{word} "}
+# p str #=> "sixth fifth fourth third second first "
+# ```
+# 
+# The [map](Array#method-i-map) method can be used to
+# create a new array based on the original array, but with the values
+# modified by the supplied block:
+# 
+# ```ruby
+# arr.map {|a| 2*a}     #=> [2, 4, 6, 8, 10]
+# arr                   #=> [1, 2, 3, 4, 5]
+# arr.map! {|a| a**2}   #=> [1, 4, 9, 16, 25]
+# arr                   #=> [1, 4, 9, 16, 25]
+# ```
+# 
+# 
+# Elements can be selected from an array according to criteria defined in
+# a block. The selection can happen in a destructive or a non-destructive
+# manner. While the destructive operations will modify the array they were
+# called on, the non-destructive methods usually return a new array with
+# the selected elements, but leave the original array unchanged.
+# 
+# 
+# ```ruby
+# arr = [1, 2, 3, 4, 5, 6]
+# arr.select {|a| a > 3}       #=> [4, 5, 6]
+# arr.reject {|a| a < 3}       #=> [3, 4, 5, 6]
+# arr.drop_while {|a| a < 4}   #=> [4, 5, 6]
+# arr                          #=> [1, 2, 3, 4, 5, 6]
+# ```
+# 
+# 
+# [select\!](Array#method-i-select-21) and
+# [reject\!](Array#method-i-reject-21) are the
+# corresponding destructive methods to
+# [select](Array#method-i-select) and
+# [reject](Array#method-i-reject)
+# 
+# Similar to [select](Array#method-i-select) vs.
+# [reject](Array#method-i-reject),
+# [delete\_if](Array#method-i-delete_if) and
+# [keep\_if](Array#method-i-keep_if) have the exact
+# opposite result when supplied with the same block:
+# 
+# ```ruby
+# arr.delete_if {|a| a < 4}   #=> [4, 5, 6]
+# arr                         #=> [4, 5, 6]
+# 
+# arr = [1, 2, 3, 4, 5, 6]
+# arr.keep_if {|a| a < 4}   #=> [1, 2, 3]
+# arr                       #=> [1, 2, 3]
+# ```
+class Array[Elem] < Object
+  include Enumerable[Elem, Array[Elem]]
 
-  def initialize: (?Integer, ?A) -> void
-                | (self) -> void
-                | (Integer) { (Integer) -> A } -> void
+  def self.[]: [U] (*U arg0) -> ::Array[U]
 
-  def `*`: (Integer) -> self
-         | (String) -> String
-  def `-`: (self) -> self
-  def difference: (self) -> self
-  def `+`: (self) -> self
-  def `|`: (self) -> self
-  def union: (self) -> self
-  def `&`: (self) -> self
-  def `<<`: (A) -> self
+  def &: (::Array[Elem] arg0) -> ::Array[Elem]
 
-  def `[]`: (Integer) -> A
-          | (Range[Integer]) -> self?
-          | (0, Integer) -> self
-          | (Integer, Integer) -> self?
-  def at: (Integer) -> A
-        | (Range[Integer]) -> self?
-        | (Integer, Integer) -> self?
-  def `[]=`: (Integer, A) -> A
-           | (Integer, Integer, A) -> A
-           | (Integer, Integer, self) -> self
-           | (Range[Integer], A) -> A
-           | (Range[Integer], self) -> self
+  def *: (Integer arg0) -> ::Array[Elem]
+       | (String arg0) -> String
 
-  def push: (*A) -> self
-  def append: (*A) -> self
+  def +: (::Enumerable[Elem, any] arg0) -> ::Array[Elem]
+       | (::Array[Elem] arg0) -> ::Array[Elem]
 
-  def clear: -> self
+  def -: (::Array[any] arg0) -> ::Array[Elem]
 
-  def collect!: { (A) -> A } -> self
-              | -> Enumerator[A, self]
-  def map!: { (A) -> A } -> self
-          | -> Enumerator[A, self]
+  def <<: (Elem arg0) -> ::Array[Elem]
 
-  def combination: (?Integer) { (self) -> any } -> Array[self]
-                 | (?Integer) -> Enumerator[self, Array[self]]
+  def []: (Integer | Float arg0) -> Elem?
+        | (::Range[Integer] arg0) -> ::Array[Elem]?
+        | (Integer arg0, ?Integer arg1) -> ::Array[Elem]?
 
-  def empty?: -> bool
-  def compact: -> self
-  def compact!: -> self?
-  def concat: (*Array[A]) -> self
-            | (*A) -> self
-  def delete: (A) -> A?
-            | [X] (A) { () -> X } -> (A | X)
-  def delete_at: (Integer) -> A?
-  def delete_if: { (A) -> any } -> self
-               | -> Enumerator[A, self]
-  def reject!: { (A) -> any } -> self?
-             | -> Enumerator[A, self?]
-  def dig: (Integer, *any) -> any
-  def each: { (A) -> any } -> self
-          | -> Enumerator[A, self]
-  def each_index: { (Integer) -> any } -> self
-                | -> Enumerator[Integer, self]
-  def fetch: (Integer) -> A
-           | (Integer, A) -> A
-           | (Integer) { (Integer) -> A } -> A
-  def fill: (A) -> self
-          | { (Integer) -> A } -> self
-          | (A, Integer, ?Integer?) -> self
-          | (A, Range[Integer]) -> self
-          | (Integer, ?Integer?) { (Integer) -> A} -> self
-          | (Range[Integer]) { (Integer) -> A } -> self
+  def []=: (Integer arg0, Elem arg1) -> Elem
+         | (Integer arg0, Integer arg1, ?Elem arg2) -> Elem
+         | (::Range[Integer] arg0, Elem arg1) -> Elem
 
-  def find_index: (A) -> Integer?
-                | { (A) -> any } -> Integer?
-                | -> Enumerator[A, Integer?]
+  def `append`: (*Elem arg0) -> ::Array[Elem]
 
-  def index: (A) -> Integer?
-           | { (A) -> any } -> Integer?
-           | -> Enumerator[A, Integer?]
+  def assoc: (Elem arg0) -> ::Array[Elem]
 
-  def flatten: (?Integer?) -> Array[any]
-  def flatten!: (?Integer?) -> self?
+  def at: (Integer arg0) -> Elem
 
-  def insert: (Integer, *A) -> self
+  # Removes all elements from `self` .
+  # 
+  # ```ruby
+  # a = [ "a", "b", "c", "d", "e" ]
+  # a.clear    #=> [ ]
+  # ```
+  def clear: () -> ::Array[Elem]
 
-  def join: (any) -> String
+  def collect: [U] () { (Elem arg0) -> U } -> ::Array[U]
+             | () -> ::Enumerator[Elem, self]
 
-  def keep_if: { (A) -> any } -> self
-             | -> Enumerator[A, self]
+  def combination: (Integer arg0) { (::Array[Elem] arg0) -> any } -> ::Array[Elem]
+                 | (Integer arg0) -> ::Enumerator[::Array[Elem], self]
 
-  def last: -> A?
-          | (Integer) -> self
+  # This is implemented in C++ to fix the return type
+  # Returns a copy of `self` with all `nil` elements removed.
+  # 
+  # ```ruby
+  # [ "a", nil, "b", nil, "c", nil ].compact
+  #                   #=> [ "a", "b", "c" ]
+  # ```
+  def compact: () -> ::Array[any]
 
-  def length: -> Integer
-  def size: -> Integer
+  # Removes `nil` elements from the array.
+  # 
+  # Returns `nil` if no changes were made, otherwise returns the array.
+  # 
+  # ```ruby
+  # [ "a", nil, "b", nil, "c" ].compact! #=> [ "a", "b", "c" ]
+  # [ "a", "b", "c" ].compact!           #=> nil
+  # ```
+  def compact!: () -> ::Array[Elem]
 
-  def pack: (String, ?buffer: String) -> String
+  def concat: [T] (::Array[T] arrays) -> ::Array[Elem | T]
 
-  def permutation: (?Integer) { (self) -> any } -> self
-                 | (?Integer) -> Enumerator[self, self]
+  # Returns the number of elements.
+  # 
+  # If an argument is given, counts the number of elements which equal `obj`
+  # using `==` .
+  # 
+  # If a block is given, counts the number of elements for which the block
+  # returns a true value.
+  # 
+  # ```ruby
+  # ary = [1, 2, 4, 2]
+  # ary.count                  #=> 4
+  # ary.count(2)               #=> 2
+  # ary.count {|x| x%2 == 0}   #=> 3
+  # ```
+  def count: () -> Integer
+           | (?Elem arg0) -> Integer
+           | () { (Elem arg0) -> any } -> Integer
 
-  def pop: -> A?
-         | (Integer) -> self
+  def cycle: (?Integer arg0) { (Elem arg0) -> any } -> any
+           | (?Integer arg0) -> ::Enumerator[Elem, self]
 
-  def unshift: (*A) -> self
-  def prepend: (*A) -> self
+  def delete: (Elem arg0) -> Elem?
+            | (Elem arg0) { () -> Elem } -> Elem
 
-  def product: (*Array[A]) -> Array[Array[A]]
-             | (*Array[A]) { (Array[A]) -> any } -> self
+  def delete_at: (Integer arg0) -> Elem?
 
-  def assoc: (any) -> any
-  def rassoc: (any) -> any
+  def delete_if: () { (Elem arg0) -> any } -> ::Array[Elem]
+               | () -> ::Enumerator[Elem, self]
 
-  def repeated_combination: (Integer) { (self) -> any } -> self
-                          | (Integer) -> Enumerator[self, self]
+  def difference: (*::Array[any] arrays) -> ::Array[Elem]
 
-  def repeated_permutation: (Integer) { (self) -> any } -> self
-                          | (Integer) -> Enumerator[self, self]
+  def drop: (Integer arg0) -> ::Array[Elem]
 
-  def replace: (self) -> self
+  def drop_while: () { (Elem arg0) -> any } -> ::Array[Elem]
+                | () -> ::Enumerator[Elem, self]
 
-  def reverse: -> self
-  def reverse!: -> self
-  def reverse_each: { (A) -> any } -> self
-                  | -> Enumerator[A, self]
+  def each: () -> ::Enumerator[Elem, self]
+          | () { (Elem arg0) -> any } -> ::Array[Elem]
 
-  def rindex: (A) -> Integer?
-            | { (A) -> any } -> Integer?
-            | -> Enumerator[A, Integer?]
+  def each_index: () { (Integer arg0) -> any } -> ::Array[Elem]
+                | () -> ::Enumerator[Elem, self]
 
-  def rotate: (?Integer) -> self
+  # Returns `true` if `self` contains no elements.
+  # 
+  # ```ruby
+  # [].empty?   #=> true
+  # ```
+  def empty?: () -> bool
 
-  def rotate!: (?Integer) -> self
+  def fetch: (Integer arg0) -> Elem
+           | (Integer arg0, ?Elem arg1) -> Elem
+           | (Integer arg0) { (Integer arg0) -> Elem } -> Elem
 
-  def sample: (?random: any) -> A?
-            | (Integer, ?random: any) -> self
+  def fill: (?Elem arg0) -> ::Array[Elem]
+          | (?Elem arg0, ?Integer arg1, ?Integer arg2) -> ::Array[Elem]
+          | (?Elem arg0, ?::Range[Integer] arg1) -> ::Array[Elem]
+          | () { (Integer arg0) -> Elem } -> ::Array[Elem]
+          | (?Integer arg0, ?Integer arg1) { (Integer arg0) -> Elem } -> ::Array[Elem]
+          | (?::Range[Integer] arg0) { (Integer arg0) -> Elem } -> ::Array[Elem]
 
-  def select!: -> Enumerator[A, self]
-             | { (A) -> any } -> self
-  def filter!: -> Enumerator[A, self]
-             | { (A) -> any } -> self
+  # Returns the first element, or the first `n` elements, of the array. If
+  # the array is empty, the first form returns `nil`, and the second form
+  # returns an empty array. See also
+  # [\#last](Array.downloaded.ruby_doc#method-i-last) for the opposite
+  # effect.
+  # 
+  # ```ruby
+  # a = [ "q", "r", "s", "t" ]
+  # a.first     #=> "q"
+  # a.first(2)  #=> ["q", "r"]
+  # ```
+  def first: () -> Elem?
+           | (?Integer arg0) -> ::Array[Elem]
 
-  def shift: -> A?
-           | (Integer) -> self
+  # This is implemented in C++ to fix the return type
+  # Returns a new array that is a one-dimensional flattening of `self`
+  # (recursively).
+  # 
+  # That is, for every element that is an array, extract its elements into
+  # the new array.
+  # 
+  # The optional `level` argument determines the level of recursion to
+  # flatten.
+  # 
+  # ```ruby
+  # s = [ 1, 2, 3 ]           #=> [1, 2, 3]
+  # t = [ 4, 5, 6, [7, 8] ]   #=> [4, 5, 6, [7, 8]]
+  # a = [ s, t, 9, 10 ]       #=> [[1, 2, 3], [4, 5, 6, [7, 8]], 9, 10]
+  # a.flatten                 #=> [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+  # a = [ 1, 2, [3, [4, 5] ] ]
+  # a.flatten(1)              #=> [1, 2, 3, [4, 5]]
+  # ```
+  def flatten: (?Integer depth) -> ::Array[any]
 
-  def shuffle: (?random: any) -> self
+  def `include?`: [U] (U arg0) -> bool
 
-  def shuffle!: (?random: any) -> self
+  def index: [U] (?U arg0) -> Integer?
+           | () { (Elem arg0) -> any } -> Integer?
+           | () -> ::Enumerator[Elem, self]
 
-  def slice: (Integer) -> A?
-           | (Integer, Integer) -> self?
-           | (Range[Integer]) -> self?
+  def initialize: () -> Object
+                | (?Integer arg0) -> Object
+                | (?Integer arg0, ?Elem arg1) -> void
 
-  def slice!: (Integer) -> A?
-            | (Integer, Integer) -> self?
-            | (Range[Integer]) -> self?
+  def insert: (Integer arg0, *Elem arg1) -> ::Array[Elem]
 
-  def to_a: -> self
-  def to_ary: -> self
-  def to_h: -> Hash[any, any]
+  # Creates a string representation of `self` .
+  # 
+  # ```ruby
+  # [ "a", "b", "c" ].to_s     #=> "[\"a\", \"b\", \"c\"]"
+  # ```
+  # 
+  # 
+  # 
+  # Also aliased as: [to\_s](Array.downloaded.ruby_doc#method-i-to_s)
+  def inspect: () -> String
 
-  def transpose: -> self
+  def join: (?String arg0) -> String
 
-  def uniq!: -> self?
-           | { (A) -> any } -> self?
+  def keep_if: () { (Elem arg0) -> any } -> ::Array[Elem]
 
-  def values_at: (*Integer | Range[Integer]) -> self
+  # Returns the last element(s) of `self` . If the array is empty, the first
+  # form returns `nil` .
+  # 
+  # See also [\#first](Array.downloaded.ruby_doc#method-i-first) for the
+  # opposite effect.
+  # 
+  # ```ruby
+  # a = [ "w", "x", "y", "z" ]
+  # a.last     #=> "z"
+  # a.last(2)  #=> ["y", "z"]
+  # ```
+  def last: () -> Elem?
+          | (?Integer arg0) -> ::Array[Elem]
 
-  def zip: [X] (Array[X]) -> Array[[A, X]]
-         | [X] (Array[X]) { (A, X) -> any } -> nil
+  # Returns the number of elements in `self` . May be zero.
+  # 
+  # ```ruby
+  # [ 1, 2, 3, 4, 5 ].length   #=> 5
+  # [].length                  #=> 0
+  # ```
+  # 
+  # 
+  # 
+  # Also aliased as: [size](Array.downloaded.ruby_doc#method-i-size)
+  def length: () -> Integer
 
-  def bsearch: { (A) -> any } -> A?
-  def bsearch_index : { (A) -> any } -> Integer?
+  def map: [U] () { (Elem arg0) -> U } -> ::Array[U]
+         | () -> ::Enumerator[Elem, self]
+
+  def map!: [U] () { (Elem arg0) -> U } -> ::Array[U]
+          | () -> ::Enumerator[Elem, self]
+
+  def member?: (Elem arg0) -> bool
+
+  def permutation: (?Integer arg0) -> ::Enumerator[::Array[Elem], self]
+                 | (?Integer arg0) { (::Array[Elem] arg0) -> any } -> ::Array[Elem]
+
+  def pop: (?Integer arg0) -> ::Array[Elem]
+         | () -> Elem?
+
+  def `prepend`: (*Elem arg0) -> ::Array[Elem]
+
+  def product: [U] (*::Array[U] arg0) -> ::Array[::Array[Elem | U]]
+
+  def push: (*Elem arg0) -> ::Array[Elem]
+
+  def rassoc: [U] (U arg0) -> Elem?
+
+  def reject: () { (Elem arg0) -> any } -> ::Array[Elem]
+            | () -> ::Enumerator[Elem, self]
+
+  def reject!: () { (Elem arg0) -> any } -> ::Array[Elem]
+             | () -> ::Enumerator[Elem, self]
+
+  def repeated_combination: (Integer arg0) { (::Array[Elem] arg0) -> any } -> ::Array[Elem]
+                          | (Integer arg0) -> ::Enumerator[::Array[Elem], self]
+
+  def repeated_permutation: (Integer arg0) { (::Array[Elem] arg0) -> any } -> ::Array[Elem]
+                          | (Integer arg0) -> ::Enumerator[::Array[Elem], self]
+
+  # Returns a new array containing `self` ‘s elements in reverse order.
+  # 
+  # ```ruby
+  # [ "a", "b", "c" ].reverse   #=> ["c", "b", "a"]
+  # [ 1 ].reverse               #=> [1]
+  # ```
+  def reverse: () -> ::Array[Elem]
+
+  # Reverses `self` in place.
+  # 
+  # ```ruby
+  # a = [ "a", "b", "c" ]
+  # a.reverse!       #=> ["c", "b", "a"]
+  # a                #=> ["c", "b", "a"]
+  # ```
+  def reverse!: () -> ::Array[Elem]
+
+  def reverse_each: () { (Elem arg0) -> any } -> ::Array[Elem]
+                  | () -> ::Enumerator[Elem, self]
+
+  def rindex: (?Elem arg0) -> Integer?
+            | () { (Elem arg0) -> any } -> Integer?
+            | () -> ::Enumerator[Elem, self]
+
+  def rotate: (?Integer arg0) -> ::Array[Elem]
+
+  def rotate!: (?Integer arg0) -> ::Array[Elem]
+
+  def sample: () -> Elem?
+            | (?Integer arg0) -> ::Array[Elem]
+
+  def select: () { (Elem arg0) -> any } -> ::Array[Elem]
+            | () -> ::Enumerator[Elem, self]
+
+  def select!: () { (Elem arg0) -> any } -> ::Array[Elem]
+             | () -> ::Enumerator[Elem, self]
+
+  # Removes the first element of `self` and returns it (shifting all other
+  # elements down by one). Returns `nil` if the array is empty.
+  # 
+  # If a number `n` is given, returns an array of the first `n` elements (or
+  # less) just like `array.slice!(0, n)` does. With `ary` containing only
+  # the remainder elements, not including what was shifted to `new_ary` .
+  # See also [\#unshift](Array.downloaded.ruby_doc#method-i-unshift) for the
+  # opposite effect.
+  # 
+  # ```ruby
+  # args = [ "-m", "-q", "filename" ]
+  # args.shift     #=> "-m"
+  # args           #=> ["-q", "filename"]
+  # 
+  # args = [ "-m", "-q", "filename" ]
+  # args.shift(2)  #=> ["-m", "-q"]
+  # args           #=> ["filename"]
+  # ```
+  def shift: () -> Elem?
+           | (?Integer arg0) -> ::Array[Elem]
+
+  # Returns a new array with elements of `self` shuffled.
+  # 
+  # ```ruby
+  # a = [ 1, 2, 3 ]           #=> [1, 2, 3]
+  # a.shuffle                 #=> [2, 3, 1]
+  # a                         #=> [1, 2, 3]
+  # ```
+  # 
+  # The optional `rng` argument will be used as the random number generator.
+  # 
+  # ```ruby
+  # a.shuffle(random: Random.new(1))  #=> [1, 3, 2]
+  # ```
+  def shuffle: () -> ::Array[Elem]
+
+  # Shuffles elements in `self` in place.
+  # 
+  # ```ruby
+  # a = [ 1, 2, 3 ]           #=> [1, 2, 3]
+  # a.shuffle!                #=> [2, 3, 1]
+  # a                         #=> [2, 3, 1]
+  # ```
+  # 
+  # The optional `rng` argument will be used as the random number generator.
+  # 
+  # ```ruby
+  # a.shuffle!(random: Random.new(1))  #=> [1, 3, 2]
+  # ```
+  def shuffle!: () -> ::Array[Elem]
+
+  def slice!: (::Range[Integer] arg0) -> ::Array[Elem]
+            | (Integer arg0, ?Integer arg1) -> ::Array[Elem]
+            | (Integer | Float arg0) -> Elem?
+
+  # Returns a new array created by sorting `self` .
+  # 
+  # Comparisons for the sort will be done using the `<=>` operator or using
+  # an optional code block.
+  # 
+  # The block must implement a comparison between `a` and `b` and return an
+  # integer less than 0 when `b` follows `a`, `0` when `a` and `b` are
+  # equivalent, or an integer greater than 0 when `a` follows `b` .
+  # 
+  # The result is not guaranteed to be stable. When the comparison of two
+  # elements returns `0`, the order of the elements is unpredictable.
+  # 
+  # ```ruby
+  # ary = [ "d", "a", "e", "c", "b" ]
+  # ary.sort                     #=> ["a", "b", "c", "d", "e"]
+  # ary.sort {|a, b| b <=> a}    #=> ["e", "d", "c", "b", "a"]
+  # ```
+  # 
+  # See also
+  # [Enumerable\#sort\_by](https://ruby-doc.org/core-2.6.3/Enumerable.html#method-i-sort_by)
+  # .
+  def sort: () -> ::Array[Elem]
+          | () { (Elem arg0, Elem arg1) -> Integer } -> ::Array[Elem]
+
+  # Sorts `self` in place.
+  # 
+  # Comparisons for the sort will be done using the `<=>` operator or using
+  # an optional code block.
+  # 
+  # The block must implement a comparison between `a` and `b` and return an
+  # integer less than 0 when `b` follows `a`, `0` when `a` and `b` are
+  # equivalent, or an integer greater than 0 when `a` follows `b` .
+  # 
+  # The result is not guaranteed to be stable. When the comparison of two
+  # elements returns `0`, the order of the elements is unpredictable.
+  # 
+  # ```ruby
+  # ary = [ "d", "a", "e", "c", "b" ]
+  # ary.sort!                     #=> ["a", "b", "c", "d", "e"]
+  # ary.sort! {|a, b| b <=> a}    #=> ["e", "d", "c", "b", "a"]
+  # ```
+  # 
+  # See also
+  # [Enumerable\#sort\_by](https://ruby-doc.org/core-2.6.3/Enumerable.html#method-i-sort_by)
+  # .
+  def sort!: () -> ::Array[Elem]
+           | () { (Elem arg0, Elem arg1) -> Integer } -> ::Array[Elem]
+
+  def sort_by!: [U] () { (Elem arg0) -> U } -> ::Array[Elem]
+              | () -> ::Enumerator[Elem, self]
+
+  def take: (Integer arg0) -> ::Array[Elem]
+
+  def take_while: () { (Elem arg0) -> any } -> ::Array[Elem]
+                | () -> ::Enumerator[Elem, self]
+
+  # Returns `self` .
+  # 
+  # If called on a subclass of [Array](Array.downloaded.ruby_doc), converts
+  # the receiver to an [Array](Array.downloaded.ruby_doc) object.
+  def to_a: () -> ::Array[Elem]
+
+  # Returns `self` .
+  def to_ary: () -> ::Array[Elem]
+
+  def transpose: () -> ::Array[Elem]
+
+  def union: (*::Array[any] arrays) -> ::Array[any]
+
+  # Returns a new array by removing duplicate values in `self` .
+  # 
+  # If a block is given, it will use the return value of the block for
+  # comparison.
+  # 
+  # It compares values using their
+  # [hash](Array.downloaded.ruby_doc#method-i-hash) and
+  # [eql?](Array.downloaded.ruby_doc#method-i-eql-3F) methods for
+  # efficiency.
+  # 
+  # `self` is traversed in order, and the first occurrence is kept.
+  # 
+  # ```ruby
+  # a = [ "a", "a", "b", "b", "c" ]
+  # a.uniq   # => ["a", "b", "c"]
+  # 
+  # b = [["student","sam"], ["student","george"], ["teacher","matz"]]
+  # b.uniq {|s| s.first}   # => [["student", "sam"], ["teacher", "matz"]]
+  # ```
+  def uniq: () -> ::Array[Elem]
+
+  # Removes duplicate elements from `self` .
+  # 
+  # If a block is given, it will use the return value of the block for
+  # comparison.
+  # 
+  # It compares values using their
+  # [hash](Array.downloaded.ruby_doc#method-i-hash) and
+  # [eql?](Array.downloaded.ruby_doc#method-i-eql-3F) methods for
+  # efficiency.
+  # 
+  # `self` is traversed in order, and the first occurrence is kept.
+  # 
+  # Returns `nil` if no changes are made (that is, no duplicates are found).
+  # 
+  # ```ruby
+  # a = [ "a", "a", "b", "b", "c" ]
+  # a.uniq!   # => ["a", "b", "c"]
+  # 
+  # b = [ "a", "b", "c" ]
+  # b.uniq!   # => nil
+  # 
+  # c = [["student","sam"], ["student","george"], ["teacher","matz"]]
+  # c.uniq! {|s| s.first}   # => [["student", "sam"], ["teacher", "matz"]]
+  # ```
+  def uniq!: () -> ::Array[Elem]
+
+  def unshift: (*Elem arg0) -> ::Array[Elem]
+
+  def values_at: (*::Range[Integer] | Integer arg0) -> ::Array[Elem]
+
+  def zip: [U] (*::Array[U] arg0) -> ::Array[[ Elem, U? ]]
+
+  def |: (::Array[Elem] arg0) -> ::Array[Elem]
+
+  # Alias for: [length](Array.downloaded.ruby_doc#method-i-length)
+  def size: () -> Integer
+
+  def slice: (::Range[Integer] arg0) -> ::Array[Elem]?
+           | (Integer | Float arg0) -> Elem?
+           | (Integer arg0, ?Integer arg1) -> ::Array[Elem]?
+
+  # {#sum} will combine non-{Numeric} {Elem} types using `:+`, the sigs here
+  # assume any custom implementation of `:+` is sane and returns the same type
+  # as the receiver.
+  # 
+  # @note Since `[].sum` is `0`, {Integer} is a potential return type even if it
+  #   is incompatible to sum with the {Elem} type.
+  # 
+  # @example returning {Integer}
+  #   T::Array[Float].new.sum #=> 0
+  # @example returning {Elem}
+  #   [1.0].sum #=> 1.0
+  def sum: () -> (Elem | Integer)
+         | [T] () { (Elem arg0) -> T } -> (Integer | T)
+         | [T] (?T arg0) -> (Elem | T)
+         | [U] (?U arg0) { (Elem arg0) -> U } -> U
+
+  # Alias for: [inspect](Array.downloaded.ruby_doc#method-i-inspect)
+  def to_s: () -> String
 end
