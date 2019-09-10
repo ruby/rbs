@@ -70,7 +70,7 @@ class Object < BasicObject
   # # does not meet condition, drop value
   # 2.yield_self.detect(&:odd?)            # => nil
   # ```
-  def `yield_self`: () { (any arg) -> any } -> any
+  def `yield_self`: [X] () { (self) -> X } -> X
 
   # `then` is just an alias of `yield_self`. Separately def'd here for easier IDE integration
   # Yields self to the block and returns the result of the block.
