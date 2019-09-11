@@ -11,4 +11,7 @@
 # can be called to get the default behavior of printing the warning to
 # $stderr.
 module Warning
+  # Writes warning message msg to $stderr, followed by a newline if the message does not end in a newline.
+  # This method is called by Ruby for all emitted warnings.
+  def warn: (String) -> nil
 end
