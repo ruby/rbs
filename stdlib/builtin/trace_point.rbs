@@ -14,10 +14,10 @@ class TracePoint < Object
   def self.trace: (*Symbol events) { (TracePoint tp) -> void } -> TracePoint
 
   # Return the generated binding object from event
-  def binding: () -> any
+  def binding: () -> Binding
 
   # Return the called name of the method being called
-  def callee_id: () -> any
+  def callee_id: () -> Symbol
 
   def `defined_class`: () -> Module
 
@@ -69,7 +69,7 @@ class TracePoint < Object
   def lineno: () -> Integer
 
   # Return the name at the definition of the method being called
-  def method_id: () -> any
+  def method_id: () -> Symbol
 
   # Path of the file being run
   def path: () -> String
@@ -87,5 +87,5 @@ class TracePoint < Object
   # ```ruby
   # trace.binding.eval('self')
   # ```
-  def `self`: () -> any
+  def `self`: () -> Binding
 end
