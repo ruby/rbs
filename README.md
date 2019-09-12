@@ -1,6 +1,6 @@
 # Ruby::Signature
 
-Ruby::Signature provides syntax and semantics definition for `the` Ruby Signature language, `.rbi` files.
+Ruby::Signature provides syntax and semantics definition for `the` Ruby Signature language, `.rbs` files.
 It consists of a parser, the syntax, and class definition interpreter, the semantics.
 
 ## Build
@@ -29,7 +29,7 @@ $ ruby-signature method ::Object tap
 $ ruby-signature list
 ```
 
-This command lists all of the classes/modules/interfaes defined in `.rbi` files.
+This command lists all of the classes/modules/interfaes defined in `.rbs` files.
 
 ### ruby-signature ancestors [--singleton|--instance] CLASS
 
