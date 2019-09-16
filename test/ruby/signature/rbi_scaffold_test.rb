@@ -356,6 +356,7 @@ end
 class Foo
   # This is useful method.
   sig { void }
+  # Another comment.
   sig { returns(Integer) }
   def foo; end
 end
@@ -375,6 +376,8 @@ end
 #   It is super useful.
 class Foo
   # This is useful method.
+  # 
+  # Another comment.
   def foo: () -> void
          | () -> Integer
 end

@@ -96,6 +96,11 @@ module Ruby
           end
         end
 
+        def join_comments(nodes, comments)
+          cs = nodes.map {|node| comments[node.first_lineno - 1] }.compact
+          AST::Comment.new(string: cs.map(&:string).join("\n"), location: nil)
+        end
+
         def process(node, outer: [], comments:)
           case node.type
           when :CLASS
@@ -157,7 +162,7 @@ module Ruby
             sigs = pop_sig
 
             if sigs
-              comment = comments[sigs.first.first_lineno - 1]
+              comment = join_comments(sigs, comments)
 
               args = node.children[2]
               types = sigs.map {|sig| method_type(args, sig, variables: current_module.type_params) }
@@ -177,9 +182,9 @@ module Ruby
             sigs = pop_sig
 
             if sigs
-              comment = comments[sigs.first.first_lineno - 1]
-              args = node.children[1]
+              comment = join_comments(sigs, comments)
 
+              args = node.children[1]
               types = sigs.map {|sig| method_type(args, sig, variables: current_module.type_params) }
 
               current_module.members << AST::Members::MethodDefinition.new(
