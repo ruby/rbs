@@ -30,4 +30,18 @@ class Ruby::Signature::MethodTypeParsingTest < Minitest::Test
 
     assert_equal "}", error.error_value
   end
+
+  def test_self_type
+    Parser.parse_method_type("[A] () { () -> A } @ Integer -> A").yield_self do |type|
+      assert_equal "Integer", type.block.self_type.to_s
+    end
+
+    Parser.parse_method_type("[A] () { () -> A } @ singleton(Integer) -> A").yield_self do |type|
+      assert_equal "singleton(Integer)", type.block.self_type.to_s
+    end
+
+    Parser.parse_method_type("[A] () { () -> A } @ self -> A").yield_self do |type|
+      assert_equal "self", type.block.self_type.to_s
+    end
+  end
 end

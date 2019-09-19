@@ -129,4 +129,12 @@ class Bar
 end
     SIG
   end
+
+  def test_block_self
+    assert_writer <<-SIG
+class Foo
+  def instance_eval: [A] () { () -> A } @ self -> A
+end
+    SIG
+  end
 end

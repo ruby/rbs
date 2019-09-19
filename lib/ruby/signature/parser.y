@@ -5,6 +5,7 @@ class Ruby::Signature::Parser
         tSTRING tSYMBOL tINTEGER tWRITE_ATTR
         kLPAREN kRPAREN kLBRACKET kRBRACKET kLBRACE kRBRACE
         kVOID kNIL kANY kTOP kBOT kSELF kSELFQ kINSTANCE kCLASS kBOOL kSINGLETON kTYPE kDEF kMODULE kSUPER
+        kATMARK
         kPRIVATE kPUBLIC kALIAS
         kCOLON kCOLON2 kCOMMA kBAR kAMP kHAT kARROW kQUESTION kEXCLAMATION kSTAR kSTAR2 kFATARROW kEQ kDOT kLT
         kINTERFACE kEND kINCLUDE kEXTEND kATTRREADER kATTRWRITER kATTRACCESSOR tOPERATOR tQUOTEDMETHOD
@@ -459,13 +460,19 @@ rule
 
   block_opt:
       { result = nil }
-    | kLBRACE function_type kRBRACE {
-        block = MethodType::Block.new(type: val[1].value, required: true)
-        result = LocatedValue.new(value: block, location: val[0].location + val[2].location)
+    | kLBRACE function_type kRBRACE self_type_opt {
+        block = MethodType::Block.new(type: val[1].value, required: true, self_type: val[3])
+        result = LocatedValue.new(value: block, location: val[0].location + (val[3] || val[2]).location)
       }
-    | kQUESTION kLBRACE function_type kRBRACE {
-        block = MethodType::Block.new(type: val[2].value, required: false)
-        result = LocatedValue.new(value: block, location: val[0].location + val[3].location)
+    | kQUESTION kLBRACE function_type kRBRACE self_type_opt {
+        block = MethodType::Block.new(type: val[2].value, required: false, self_type: val[4])
+        result = LocatedValue.new(value: block, location: val[0].location + (val[4] || val[3]).location)
+      }
+
+  self_type_opt:
+      { result = nil }
+    | kATMARK simple_type {
+        result = val[1]
       }
 
   def_name:
@@ -1173,6 +1180,7 @@ PUNCTS = {
   "/" => :tOPERATOR,
   "`" => :tOPERATOR,
   "%" => :tOPERATOR,
+  "@" => :kATMARK
 }
 PUNCTS_RE = Regexp.union(*PUNCTS.keys)
 
@@ -1229,6 +1237,10 @@ def next_token
   when input.scan(/:\w+\b/)
     s = input.matched.yield_self {|s| s[1, s.length] }.to_sym
     new_token(:tSYMBOL, s)
+  when input.scan(/@[a-zA-Z_]\w*/)
+    new_token(:tIVAR, input.matched.to_sym)
+  when input.scan(/@@[a-zA-Z_]\w*/)
+    new_token(:tCLASSVAR, input.matched.to_sym)
   when input.scan(PUNCTS_RE)
     new_token(PUNCTS[input.matched])
   when input.scan(/(::)?([A-Z]\w*::)+/)
@@ -1239,10 +1251,6 @@ def next_token
     new_token(:tUKEYWORD, input.matched.chop.to_sym)
   when input.scan(/\$[A-Za-z_]\w*/)
     new_token(:tGLOBALIDENT)
-  when input.scan(/@[a-zA-Z_]\w*/)
-    new_token(:tIVAR, input.matched.to_sym)
-  when input.scan(/@@[a-zA-Z_]\w*/)
-    new_token(:tCLASSVAR, input.matched.to_sym)
   when input.scan(/_[a-zA-Z]\w*\b/)
     new_token(:tINTERFACEIDENT)
   when input.scan(/[A-Z]\w*\b/)
