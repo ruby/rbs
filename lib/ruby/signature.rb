@@ -5,6 +5,7 @@ require "json"
 require "pathname"
 require "pp"
 require "ripper"
+require "logger"
 
 require "ruby/signature/errors"
 require "ruby/signature/buffer"
