@@ -408,4 +408,27 @@ class Dir
 end
     EOF
   end
+
+  def test_bind_proc
+    parser = RBI.new
+
+    parser.parse <<-EOF
+class Hello
+  sig do
+    type_parameters(:U)
+    .params(
+        blk: T.proc.bind(T.untyped).params().returns(T.type_parameter(:U)),
+    )
+    .returns(T.type_parameter(:U))
+  end
+  def instance_eval(arg0=T.unsafe(nil), filename=T.unsafe(nil), lineno=T.unsafe(nil), &blk); end
+end
+    EOF
+
+    assert_write parser.decls, <<-EOF
+class Hello
+  def instance_eval: [U] () { () -> U } @ any -> U
+end
+    EOF
+  end
 end

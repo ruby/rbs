@@ -308,6 +308,7 @@ module Ruby
 
         def parse_params(args_node, args, method_type, variables:)
           vars = (node_to_hash(each_arg(args).to_a[0]) || {}).transform_values {|value| type_of(value, variables: variables) }
+          nodes = (node_to_hash(each_arg(args).to_a[0]) || {})
 
           required_positionals = []
           optional_positionals = []
@@ -374,11 +375,12 @@ module Ruby
 
           method_block = nil
           if block
-            if (type = vars[block])
+            if (type = vars[block]) && (node = nodes[block])
               if type.is_a?(Types::Proc)
+                self_type = proc_bind(node, variables: variables)
                 method_block = MethodType::Block.new(required: true,
                                                      type: type.type,
-                                                     self_type: nil)
+                                                     self_type: self_type)
               else
                 STDERR.puts "Unexpected block type: #{type}"
                 PP.pp args_node, STDERR
@@ -482,7 +484,17 @@ module Ruby
           else
             type_node.type == :CALL && proc_type?(type_node.children[0])
           end
+        end
 
+        def proc_bind(node, variables:)
+          if call_node?(node, name: :bind, receiver: -> (_) { true })
+            type_node = each_arg(node.children[2]).to_a[0]
+            type_of(type_node, variables: variables)
+          else
+            if node.type == :CALL
+              proc_bind(node.children[0], variables: variables)
+            end
+          end
         end
 
         def call_node?(node, name:, receiver: -> (node) { node.type == :CONST && node.children[0] == :T }, args: -> (node) { true })
