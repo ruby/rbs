@@ -20,14 +20,16 @@ module Ruby
         attr_reader :implemented_in
         attr_reader :accessibility
         attr_reader :attributes
+        attr_reader :annotations
 
-        def initialize(super_method:, method_types:, defined_in:, implemented_in:, accessibility:, attributes:)
+        def initialize(super_method:, method_types:, defined_in:, implemented_in:, accessibility:, attributes:, annotations:)
           @super_method = super_method
           @method_types = method_types
           @defined_in = defined_in
           @implemented_in = implemented_in
           @accessibility = accessibility
           @attributes = attributes
+          @annotations = annotations
         end
 
         def public?
@@ -45,7 +47,8 @@ module Ruby
             defined_in: defined_in,
             implemented_in: implemented_in,
             accessibility: @accessibility,
-            attributes: attributes
+            attributes: attributes,
+            annotations: annotations
           )
         end
 
@@ -58,7 +61,8 @@ module Ruby
             defined_in: defined_in,
             implemented_in: implemented_in,
             accessibility: @accessibility,
-            attributes: attributes
+            attributes: attributes,
+            annotations: annotations
           )
         end
       end

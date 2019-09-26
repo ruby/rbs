@@ -294,7 +294,8 @@ module Ruby
                     implemented_in: env.find_class(Ruby::Signature::BuiltinNames::Class.name),
                     method_types: method_types,
                     accessibility: :public,
-                    attributes: [:incompatible]
+                    attributes: [:incompatible],
+                    annotations: []
                   )
                 end
               end
@@ -367,7 +368,8 @@ module Ruby
                                                                     defined_in: decl,
                                                                     implemented_in: decl,
                                                                     accessibility: accessibility,
-                                                                    attributes: attrs)
+                                                                    attributes: attrs,
+                                                                    annotations: member.annotations)
                 end
               when AST::Members::AttrReader, AST::Members::AttrAccessor, AST::Members::AttrWriter
                 name = member.name
@@ -393,7 +395,8 @@ module Ruby
                     defined_in: decl,
                     implemented_in: decl,
                     accessibility: accessibility,
-                    attributes: []
+                    attributes: [],
+                    annotations: member.annotations
                   )
                 end
 
@@ -418,7 +421,8 @@ module Ruby
                     defined_in: decl,
                     implemented_in: decl,
                     accessibility: accessibility,
-                    attributes: []
+                    attributes: [],
+                    annotations: member.annotations
                   )
                 end
 
@@ -483,7 +487,8 @@ module Ruby
                       defined_in: method.defined_in,
                       implemented_in: decl,
                       accessibility: method.accessibility,
-                      attributes: []
+                      attributes: [],
+                      annotations: method.annotations
                     )
                   end
                 end
@@ -548,7 +553,8 @@ module Ruby
                                                                   defined_in: decl,
                                                                   implemented_in: decl,
                                                                   accessibility: accessibility,
-                                                                  attributes: member.attributes)
+                                                                  attributes: member.attributes,
+                                                                  annotations: member.annotations)
               end
             when AST::Members::Alias
               if member.singleton?
@@ -603,7 +609,8 @@ module Ruby
                     defined_in: method.defined_in,
                     implemented_in: decl,
                     accessibility: method.accessibility,
-                    attributes: method.attributes
+                    attributes: method.attributes,
+                    annotations: method.annotations
                   )
                 end
               end
@@ -676,7 +683,8 @@ module Ruby
           defined_in: method.defined_in,
           implemented_in: method.implemented_in,
           accessibility: method.accessibility,
-          attributes: method.attributes
+          attributes: method.attributes,
+          annotations: method.annotations
         )
       end
 
@@ -745,7 +753,8 @@ module Ruby
                 defined_in: declaration,
                 implemented_in: nil,
                 accessibility: :public,
-                attributes: member.attributes
+                attributes: member.attributes,
+                annotations: member.annotations
               )
               definition.methods[member.name] = method
             when AST::Members::Alias
