@@ -11,6 +11,10 @@ module TestHelper
     Ruby::Signature::Parser.parse_type(string, variables: variables)
   end
 
+  def parse_method_type(string, variables: Set.new)
+    Ruby::Signature::Parser.parse_method_type(string, variables: variables)
+  end
+
   def type_name(string)
     Ruby::Signature::Namespace.parse(string).yield_self do |namespace|
       last = namespace.path.last

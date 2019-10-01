@@ -789,6 +789,39 @@ module Ruby
         def return_to_s
           return_type.to_s(1)
         end
+
+        def drop_head
+          case
+          when !required_positionals.empty?
+            [
+              required_positionals[0],
+              update(required_positionals: required_positionals.drop(1))
+            ]
+          when !optional_positionals.empty?
+            [
+              optional_positionals[0],
+              update(optional_positionals: optional_positionals.drop(1))
+            ]
+          else
+            raise "Cannot #drop_head"
+          end
+        end
+
+        def drop_tail
+          case
+          when !trailing_positionals.empty?
+            [
+              trailing_positionals.last,
+              update(trailing_positionals: trailing_positionals.take(trailing_positionals.size - 1))
+            ]
+          else
+            raise "Cannot #drop_tail"
+          end
+        end
+
+        def has_keyword?
+          !required_keywords.empty? || !optional_keywords.empty? || rest_keywords
+        end
       end
 
       class Proc
