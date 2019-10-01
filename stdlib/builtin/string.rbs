@@ -24,6 +24,7 @@ class String < Object
 
   def ===: (any arg0) -> bool
 
+  %a{rbs:test:skip}
   def =~: (Object arg0) -> Integer?
 
   def []: (Integer arg0, ?Integer arg1) -> String?

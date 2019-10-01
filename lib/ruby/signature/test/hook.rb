@@ -90,9 +90,38 @@ module Ruby
           @singleton_methods = []
 
           @errors = []
+        end
 
+        def prepend!
           klass.prepend @instance_module
           klass.singleton_class.prepend @singleton_module
+
+          if block_given?
+            yield
+            disable
+          end
+
+          self
+        end
+
+        def self.install(env, klass, logger:)
+          new(env, klass, logger: logger).prepend!
+        end
+
+        def refinement
+          klass = self.klass
+          instance_module = self.instance_module
+          singleton_module = self.singleton_module
+
+          Module.new do
+            refine klass do
+              prepend instance_module
+            end
+
+            refine klass.singleton_class do
+              prepend singleton_module
+            end
+          end
         end
 
         def verify_all
@@ -114,7 +143,7 @@ module Ruby
 
           builder.build_singleton(type_name).tap do |definition|
             definition.methods.each do |name, method|
-              if method.defined_in&.name&.absolute! == type_name
+              if method.defined_in&.name&.absolute! == type_name || name == :new
                 unless method.annotations.any? {|a| a.string == "rbs:test:skip" }
                   logger.info "Installing hook on #{type_name}.#{name}: #{method.method_types.join(" | ")}"
                   verify singleton_method: name, types: method.method_types
@@ -159,7 +188,13 @@ module Ruby
             end
 
             method = self.method(name)
-            result = method.super_method.call(*args, &block)
+            prepended = self.class.ancestors.include?(hook.instance_module) || self.singleton_class.ancestors.include?(hook.singleton_module)
+            result = if prepended
+                       method.super_method.call(*args, &block)
+                     else
+                       # Using refinement
+                       method.call(*args, &block)
+                     end
 
             hook.logger.debug { "#{method_name} returns: #{result.inspect}" }
 

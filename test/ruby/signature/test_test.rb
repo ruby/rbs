@@ -13,7 +13,9 @@ class Ruby::Signature::TestTest < Minitest::Test
   end
 
   def logger
-    @logger = Logger.new(io)
+    @logger ||= Logger.new(io).tap do |l|
+      l.level = "debug"
+    end
   end
 
   def test_verify_instance_method
@@ -48,7 +50,7 @@ EOF
           end
         end
 
-        hook = Ruby::Signature::Test::Hook.new(env, klass, logger: logger)
+        hook = Ruby::Signature::Test::Hook.install(env, klass, logger: logger)
                  .verify(instance_method: :foo,
                          types: ["(::String x, ::Integer i, foo: 123 foo) { (Integer) -> Array[Integer] } -> ::String"])
 
@@ -84,7 +86,7 @@ EOF
           end
         end
 
-        hook = Ruby::Signature::Test::Hook.new(env, klass, logger: logger)
+        hook = Ruby::Signature::Test::Hook.install(env, klass, logger: logger)
                  .verify(singleton_method: :open,
                          types: ["() { (::String) -> void } -> ::String"])
 
@@ -125,7 +127,9 @@ EOF
           end
         end
 
-        hook = Ruby::Signature::Test::Hook.new(env, klass, logger: logger).verify_all
+        ::Object.const_set :Foo, klass
+
+        hook = Ruby::Signature::Test::Hook.install(env, klass, logger: logger).verify_all
 
         hook.run do
           foo = klass.open {
@@ -137,6 +141,10 @@ EOF
 
         puts io.string
         assert_empty hook.errors
+      ensure
+        ::Object.instance_eval do
+          remove_const :Foo
+        end
       end
     end
   end
