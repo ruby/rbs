@@ -10,6 +10,7 @@ class Ruby::Signature::Parser
         kINTERFACE kEND kINCLUDE kEXTEND kATTRREADER kATTRWRITER kATTRACCESSOR tOPERATOR tQUOTEDMETHOD
         kPREPEND kEXTENSION kINCOMPATIBLE
         type_TYPE type_SIGNATURE type_METHODTYPE tEOF
+        kOUT kIN kUNCHECKED
 
   prechigh
   nonassoc kQUESTION
@@ -78,13 +79,13 @@ rule
   extension_name: tUIDENT | tLIDENT
 
   class_decl:
-      annotations kCLASS start_new_scope class_name type_params super_class class_members kEND {
+      annotations kCLASS start_new_scope class_name module_type_params super_class class_members kEND {
         reset_variable_scope
 
         location = val[1].location + val[7].location
         result = Declarations::Class.new(
           name: val[3].value,
-          type_params: val[4]&.value || [],
+          type_params: val[4]&.value || Declarations::ModuleTypeParams.empty,
           super_class: val[5],
           members: val[6],
           annotations: val[0],
@@ -105,13 +106,13 @@ rule
       }
 
   module_decl:
-      annotations kMODULE start_new_scope class_name type_params module_self_type class_members kEND {
+      annotations kMODULE start_new_scope class_name module_type_params module_self_type class_members kEND {
         reset_variable_scope
 
         location = val[1].location + val[7].location
         result = Declarations::Module.new(
           name: val[3].value,
-          type_params: val[4]&.value || [],
+          type_params: val[4]&.value || Declarations::ModuleTypeParams.empty,
           self_type: val[5],
           members: val[6],
           annotations: val[0],
@@ -125,7 +126,7 @@ rule
         location = val[1].location + val[6].location
         result = Declarations::Module.new(
           name: val[3].value,
-          type_params: [],
+          type_params: Declarations::ModuleTypeParams.empty,
           self_type: val[4],
           members: val[5],
           annotations: val[0],
@@ -272,13 +273,13 @@ rule
     }
 
   interface_decl:
-      annotations kINTERFACE start_new_scope interface_name type_params interface_members kEND {
+      annotations kINTERFACE start_new_scope interface_name module_type_params interface_members kEND {
         reset_variable_scope
 
         location = val[1].location + val[6].location
         result = Declarations::Interface.new(
           name: val[3].value,
-          type_params: val[4]&.value || [],
+          type_params: val[4]&.value || Declarations::ModuleTypeParams.empty,
           members: val[5],
           annotations: val[0],
           location: location,
@@ -477,7 +478,7 @@ rule
 
   method_name:
       tOPERATOR
-    | kAMP | kHAT | kSTAR | kLT | kEXCLAMATION | kSTAR2 | kBAR
+    | kAMP | kHAT | kSTAR | kLT | kEXCLAMATION | kSTAR2 | kBAR | kOUT | kIN
     | method_name0
     | method_name0 kQUESTION {
         unless val[0].location.pred?(val[1].location)
@@ -504,6 +505,40 @@ rule
       kCLASS | kVOID | kNIL | kANY | kTOP | kBOT | kINSTANCE | kBOOL | kSINGLETON
     | kTYPE | kMODULE | kPRIVATE | kPUBLIC | kEND | kINCLUDE | kEXTEND | kPREPEND
     | kATTRREADER | kATTRACCESSOR | kATTRWRITER | kDEF | kEXTENSION | kSELF | kINCOMPATIBLE
+    | kUNCHECKED
+
+  module_type_params:
+      { result = nil }
+    | kLBRACKET module_type_params0 kRBRACKET {
+        val[1].each {|p| insert_bound_variable(p.name) }
+
+        result = LocatedValue.new(value: val[1], location: val[0].location + val[2].location)
+      }
+
+  module_type_params0:
+      module_type_param {
+        result = Declarations::ModuleTypeParams.new()
+        result.add(val[0])
+      }
+    | module_type_params0 kCOMMA module_type_param {
+        result = val[0].add(val[2])
+      }
+
+  module_type_param:
+      type_param_check type_param_variance tUIDENT {
+        result = Declarations::ModuleTypeParams::TypeParam.new(name: val[2].value.to_sym,
+                                                               variance: val[1],
+                                                               skip_validation: val[0])
+      }
+
+  type_param_variance:
+      { result = :invariant }
+    | kOUT { result = :covariant }
+    | kIN { result = :contravariant }
+
+  type_param_check:
+      { result = false }
+    | kUNCHECKED { result = true }
 
   type_params:
       { result = nil }
@@ -1126,7 +1161,10 @@ KEYWORDS = {
   "private" => :kPRIVATE,
   "alias" => :kALIAS,
   "extension" => :kEXTENSION,
-  "incompatible" => :kINCOMPATIBLE
+  "incompatible" => :kINCOMPATIBLE,
+  "unchecked" => :kUNCHECKED,
+  "out" => :kOUT,
+  "in" => :kIN,
 }
 KEYWORDS_RE = /#{Regexp.union(*KEYWORDS.keys)}\b/
 

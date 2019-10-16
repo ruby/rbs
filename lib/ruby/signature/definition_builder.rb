@@ -23,16 +23,16 @@ module Ruby
         case self_ancestor
         when Definition::Ancestor::Instance
           args = self_ancestor.args
-          params = decl.type_params
+          param_names = decl.type_params.each.map(&:name)
 
           InvalidTypeApplicationError.check!(
             type_name: self_ancestor.name,
             args: args,
-            params: params,
+            params: decl.type_params,
             location: location || decl.location
           )
 
-          sub = Substitution.build(params, args)
+          sub = Substitution.build(param_names, args)
 
           case decl
           when AST::Declarations::Class
@@ -203,7 +203,7 @@ module Ruby
         try_cache type_name, cache: instance_cache do
           decl = env.find_class(type_name)
           self_ancestor = Definition::Ancestor::Instance.new(name: type_name,
-                                                             args: Types::Variable.build(decl.type_params))
+                                                             args: Types::Variable.build(decl.type_params.each.map(&:name)))
           self_type = Types::ClassInstance.new(name: type_name, args: self_ancestor.args, location: nil)
 
           case decl
@@ -323,7 +323,7 @@ module Ruby
           case decl
           when AST::Declarations::Class, AST::Declarations::Module
             self_type = Types::ClassInstance.new(name: type_name,
-                                                 args: Types::Variable.build(decl.type_params),
+                                                 args: Types::Variable.build(decl.type_params.each.map(&:name)),
                                                  location: nil)
             ancestors = [Definition::Ancestor::Instance.new(name: type_name, args: self_type.args)]
           when AST::Declarations::Extension
@@ -462,7 +462,7 @@ module Ruby
                   InvalidTypeApplicationError.check!(
                     type_name: absolute_name,
                     args: absolute_args,
-                    params: interface_definition.type_params,
+                    params: interface_definition.type_params_decl,
                     location: member.location
                   )
 
@@ -584,7 +584,7 @@ module Ruby
                 InvalidTypeApplicationError.check!(
                   type_name: absolute_name,
                   args: absolute_args,
-                  params: interface_definition.type_params,
+                  params: interface_definition.type_params_decl,
                   location: member.location
                 )
 
@@ -705,7 +705,7 @@ module Ruby
       def build_interface(type_name, declaration)
         self_type = Types::Interface.new(
           name: type_name,
-          args: declaration.type_params.map {|x| Types::Variable.new(name: x, location: nil) },
+          args: declaration.type_params.each.map {|p| Types::Variable.new(name: p.name, location: nil) },
           location: nil
         )
 
@@ -728,7 +728,7 @@ module Ruby
                 location: member.location
               )
 
-              sub = Substitution.build(type_params, args)
+              sub = Substitution.build(type_params.each.map(&:name), args)
               mixin.methods.each do |name, method|
                 definition.methods[name] = method.sub(sub)
               end

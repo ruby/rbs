@@ -54,7 +54,7 @@ module Ruby
                         end
           write_comment decl.comment, level: 0
           write_annotation decl.annotations, level: 0
-          out.puts "class #{name_and_args(decl.name, decl.type_params)}#{super_class}"
+          out.puts "class #{name_and_params(decl.name, decl.type_params)}#{super_class}"
 
           decl.members.each.with_index do |member, index|
             if index > 0
@@ -72,7 +72,7 @@ module Ruby
 
           write_comment decl.comment, level: 0
           write_annotation decl.annotations, level: 0
-          out.puts "module #{name_and_args(decl.name, decl.type_params)}#{self_type}"
+          out.puts "module #{name_and_params(decl.name, decl.type_params)}#{self_type}"
           decl.members.each.with_index do |member, index|
             if index > 0
               out.puts
@@ -96,7 +96,7 @@ module Ruby
         when AST::Declarations::Interface
           write_comment decl.comment, level: 0
           write_annotation decl.annotations, level: 0
-          out.puts "interface #{name_and_args(decl.name, decl.type_params)}"
+          out.puts "interface #{name_and_params(decl.name, decl.type_params)}"
           decl.members.each.with_index do |member, index|
             if index > 0
               out.puts
@@ -116,6 +116,30 @@ module Ruby
             write_member member
           end
           out.puts "end"
+        end
+      end
+
+      def name_and_params(name, params)
+        if params.empty?
+          "#{name}"
+        else
+          ps = params.each.map do |param|
+            s = ""
+            if param.skip_validation
+              s << "unchecked "
+            end
+            case param.variance
+            when :invariant
+              # nop
+            when :covariant
+              s << "out "
+            when :contravariant
+              s << "in "
+            end
+            s + param.name.to_s
+          end
+
+          "#{name}[#{ps.join(", ")}]"
         end
       end
 

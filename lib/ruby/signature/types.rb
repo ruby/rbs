@@ -126,6 +126,8 @@ module Ruby
             new(name: v, location: nil)
           when Array
             v.map {|x| new(name: x, location: nil) }
+          else
+            raise
           end
         end
 

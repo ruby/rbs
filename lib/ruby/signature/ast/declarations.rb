@@ -2,6 +2,59 @@ module Ruby
   module Signature
     module AST
       module Declarations
+        class ModuleTypeParams
+          attr_reader :params
+
+          TypeParam = Struct.new(:name, :variance, :skip_validation, keyword_init: true)
+
+          def initialize()
+            @params = []
+          end
+
+          def add(param)
+            params << param
+            self
+          end
+
+          def ==(other)
+            other.is_a?(ModuleTypeParams) && other.params == params
+          end
+
+          def [](name)
+            params.find {|p| p.name == name }
+          end
+
+          def to_json(*a)
+            {
+              params: params
+            }.to_json(*a)
+          end
+
+          def each(&block)
+            params.each(&block)
+          end
+
+          def self.empty
+            new
+          end
+
+          def variance(name)
+            self[name].variance
+          end
+
+          def skip_validation?(name)
+            self[name].skip_validation
+          end
+
+          def empty?
+            params.empty?
+          end
+
+          def size
+            params.size
+          end
+        end
+
         class Class
           class Super
             attr_reader :name

@@ -11,7 +11,7 @@ module Ruby
         @args = args
         @params = params
         @location = location
-        super "#{Location.to_string location}: #{type_name} expects parameters [#{params.join(", ")}], but given args [#{args.join(", ")}]"
+        super "#{Location.to_string location}: #{type_name} expects parameters [#{params.each.map(&:name).join(", ")}], but given args [#{args.join(", ")}]"
       end
 
       def self.check!(type_name:, args:, params:, location:)

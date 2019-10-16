@@ -144,9 +144,9 @@ module Ruby
         if env.class?(type_name)
           ancestor = case kind
                      when :instance
-                       definition = env.find_class(type_name)
+                       decl = env.find_class(type_name)
                        Definition::Ancestor::Instance.new(name: type_name,
-                                                          args: Types::Variable.build(definition.type_params))
+                                                          args: Types::Variable.build(decl.type_params.each.map(&:name)))
                      when :singleton
                        Definition::Ancestor::Singleton.new(name: type_name)
                      end

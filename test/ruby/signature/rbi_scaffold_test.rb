@@ -307,7 +307,7 @@ end
     EOF
 
     assert_write parser.decls, <<-EOF
-class Array[Elem]
+class Array[out Elem]
   include Enumerable
 end
     EOF
@@ -405,6 +405,28 @@ end
 
     assert_write parser.decls, <<-EOF
 class Dir
+  include Enumerable
+end
+    EOF
+  end
+
+  def test_parameter_type_member_variance
+    parser = RBI.new
+
+    parser.parse <<-EOF
+class Dir
+  extend T::Generic
+
+  X = type_member(:out)
+  Y = type_member(:in)
+  Z = type_member()
+
+  include Enumerable
+end
+    EOF
+
+    assert_write parser.decls, <<-EOF
+class Dir[out X, in Y, Z]
   include Enumerable
 end
     EOF
