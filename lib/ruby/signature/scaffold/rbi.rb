@@ -528,7 +528,7 @@ module Ruby
 
         def each_arg(array, &block)
           if block_given?
-            if array&.type == :ARRAY
+            if array&.type == :ARRAY || array&.type == :LIST
               array.children.each do |arg|
                 if arg
                   yield arg
