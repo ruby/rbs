@@ -91,7 +91,7 @@ EOF
                          types: ["() { (::String) -> void } -> ::String"])
 
         hook.run do
-          foo = klass.open {|foo|
+          _foo = klass.open {|foo|
             1 + 2 + 3
           }
         end
@@ -132,7 +132,7 @@ EOF
         hook = Ruby::Signature::Test::Hook.install(env, klass, logger: logger).verify_all
 
         hook.run do
-          foo = klass.open {
+          _foo = klass.open {
             1 + 2 + 3
 
             self.foo(1, 2, 3)
