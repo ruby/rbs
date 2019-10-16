@@ -30,9 +30,10 @@ end
 
     parser.parse(rbi)
 
-    decls = parser.decls
+    parser.decls
 
-    # pp decls
+    # decls = parser.decls
+    # pp parser.decls
   end
 
   def assert_write(decls, string)

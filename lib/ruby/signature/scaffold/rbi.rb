@@ -318,7 +318,7 @@ module Ruby
           rest_keywords = nil
 
           var_names = args_node.children[0]
-          pre_num, pre_init, opt, first_post, post_num, post_init, rest, kw, kwrest, block = args_node.children[1].children
+          pre_num, _pre_init, opt, _first_post, post_num, _post_init, rest, kw, kwrest, block = args_node.children[1].children
 
           pre_num.times.each do |i|
             name = var_names[i]
