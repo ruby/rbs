@@ -133,7 +133,7 @@ EOF
 
         hook.run do
           _foo = klass.open {
-            1 + 2 + 3
+            _bar = 1 + 2 + 3
 
             self.foo(1, 2, 3)
           }
