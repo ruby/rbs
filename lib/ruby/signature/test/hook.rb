@@ -210,7 +210,7 @@ module Ruby
 
             if errorss.none?(&:empty?)
               if (best_errors = hook.find_best_errors(errorss))
-                new_errors.push *best_errors
+                new_errors.push(*best_errors)
               else
                 new_errors << Errors::UnresolvedOverloadingError.new(
                   klass: hook.klass,
@@ -224,7 +224,7 @@ module Ruby
               hook.logger.error Errors.to_string(error)
             end
 
-            hook.errors.push *new_errors
+            hook.errors.push(*new_errors)
             result
           end
         end
@@ -311,8 +311,8 @@ module Ruby
         end
 
         def disable
-          self.instance_module.remove_method *instance_methods
-          self.singleton_module.remove_method *singleton_methods
+          self.instance_module.remove_method(*instance_methods)
+          self.singleton_module.remove_method(*singleton_methods)
           self
         end
 
