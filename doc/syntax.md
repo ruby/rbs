@@ -402,13 +402,13 @@ _decl_ ::= _class-decl_                         # Class declaration
          | _const-decl_                         # Constant declaration
          | _global-decl_                        # Global declaration
 
-_class-decl_ ::= `class` _class-name_ _type-parameters_ _members_ `end`
-               | `class` _class-name_ _type-parameters_ `<` _class-name_ _type-arguments_ _members_ `end`
+_class-decl_ ::= `class` _class-name_ _module-type-parameters_ _members_ `end`
+               | `class` _class-name_ _module-type-parameters_ `<` _class-name_ _type-arguments_ _members_ `end`
  
-_module-decl_ ::= `module` _module-name_ _type-parameters_ _members_ `end`
-                | `module` _module-name_ _type-parameters_ `:` _class-name_ _type-arguments_ _members_ `end`
+_module-decl_ ::= `module` _module-name_ _module-type-parameters_ _members_ `end`
+                | `module` _module-name_ _module-type-parameters_ `:` _class-name_ _type-arguments_ _members_ `end`
 
-_interface-decl_ ::= `interface` _interface-name_ _type-parameters_ _interface-members_ `end`
+_interface-decl_ ::= `interface` _interface-name_ _module-type-parameters_ _interface-members_ `end`
 
 _interface-members_ ::= _method-member_              # Method 
                       | _include-member_             # Mixin (include)
@@ -424,6 +424,12 @@ _global-decl_ ::= _global-name_ `:` _type_
 
 _const-name_ ::= _namespace_ /[A-Z]\w*/
 _global-name_ ::= /$[a-zA-Z]\w+/ | ...
+
+_module-type-parameters_ ::=                                                  # Empty
+                           | `[` _module-type-parameter_ `,` ... `]`
+
+_module-type-parameter_ ::= _variance_ _type-variable_
+_variance_ ::= `out` | `in`
 ```
 
 ### Class declaration
