@@ -459,7 +459,7 @@ module Ruby
               STDERR.puts "Unexpected type for `class_of`: #{type}"
               Types::Bases::Any.new(location: nil)
             end
-          when type_node.type == :ARRAY
+          when type_node.type == :ARRAY, type_node.type == :LIST
             types = each_arg(type_node).map {|node| type_of(node, variables: variables) }
             Types::Tuple.new(types: types, location: nil)
           else
@@ -528,7 +528,7 @@ module Ruby
 
         def each_arg(array, &block)
           if block_given?
-            if array&.type == :ARRAY
+            if array&.type == :ARRAY || array&.type == :LIST
               array.children.each do |arg|
                 if arg
                   yield arg
