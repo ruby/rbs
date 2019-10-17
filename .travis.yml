@@ -5,7 +5,4 @@ cache: bundler
 rvm:
   - 2.6.5
   - ruby-head
-jobs:
-  allow_failures:
-    - rvm: ruby-head
 before_install: gem install bundler -v 2.0.1
