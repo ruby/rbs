@@ -92,7 +92,7 @@ class Ruby::Signature::SignatureParsingTest < Minitest::Test
 
       assert_instance_of Declarations::Interface, interface_decl
       assert_equal TypeName.new(name: :_Each, namespace: Namespace.empty), interface_decl.name
-      assert_equal [:A, :B], interface_decl.type_params
+      assert_equal [:A, :B], interface_decl.type_params.each.map(&:name)
       assert_equal [], interface_decl.members
       assert_equal "interface _Each[A, B] end", interface_decl.location.source
     end
@@ -116,7 +116,7 @@ class Ruby::Signature::SignatureParsingTest < Minitest::Test
 
       assert_instance_of Declarations::Interface, interface_decl
       assert_equal TypeName.new(name: :_Each, namespace: Namespace.empty), interface_decl.name
-      assert_equal [:A, :B], interface_decl.type_params
+      assert_equal [:A, :B], interface_decl.type_params.each.map(&:name)
 
       assert_equal 2, interface_decl.members.size
       interface_decl.members[0].yield_self do |def_member|
@@ -174,7 +174,7 @@ class Ruby::Signature::SignatureParsingTest < Minitest::Test
 
       assert_instance_of Declarations::Module, module_decl
       assert_equal TypeName.new(name: :Enumerable, namespace: Namespace.empty), module_decl.name
-      assert_equal [:A, :B], module_decl.type_params
+      assert_equal [:A, :B], module_decl.type_params.each.map(&:name)
       assert_equal parse_type("_Each"), module_decl.self_type
       assert_equal [], module_decl.members
       assert_equal "module Enumerable[A, B] : _Each end", module_decl.location.source
@@ -363,7 +363,7 @@ class Ruby::Signature::SignatureParsingTest < Minitest::Test
       decls[0].yield_self do |class_decl|
         assert_instance_of Declarations::Class, class_decl
         assert_equal TypeName.new(name: :Array, namespace: Namespace.empty), class_decl.name
-        assert_equal [:A], class_decl.type_params
+        assert_equal [:A], class_decl.type_params.each.map(&:name)
         assert_nil class_decl.super_class
       end
     end
@@ -374,7 +374,7 @@ class Ruby::Signature::SignatureParsingTest < Minitest::Test
       decls[0].yield_self do |class_decl|
         assert_instance_of Declarations::Class, class_decl
         assert_equal TypeName.new(name: :Array, namespace: Namespace.root), class_decl.name
-        assert_equal [:A], class_decl.type_params
+        assert_equal [:A], class_decl.type_params.each.map(&:name)
 
         assert_instance_of Declarations::Class::Super, class_decl.super_class
         assert_equal TypeName.new(name: :Object, namespace: Namespace.empty), class_decl.super_class.name
@@ -890,6 +890,32 @@ module Kernel
   def binding: () -> Binding
 end
     EOF
+    end
+  end
+
+  def test_module_type_param_variance
+    Parser.parse_signature("interface _Each[A, out B, unchecked in C] end").yield_self do |decls|
+      assert_equal 1, decls.size
+
+      interface_decl = decls[0]
+
+      assert_instance_of Declarations::Interface, interface_decl
+      a, b, c = interface_decl.type_params.each.to_a
+
+      assert_instance_of Declarations::ModuleTypeParams::TypeParam, a
+      assert_equal :A, a.name
+      assert_equal :invariant, a.variance
+      refute a.skip_validation
+
+      assert_instance_of Declarations::ModuleTypeParams::TypeParam, b
+      assert_equal :B, b.name
+      assert_equal :covariant, b.variance
+      refute b.skip_validation
+
+      assert_instance_of Declarations::ModuleTypeParams::TypeParam, c
+      assert_equal :C, c.name
+      assert_equal :contravariant, c.variance
+      assert c.skip_validation
     end
   end
 end

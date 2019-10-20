@@ -129,6 +129,15 @@ module Ruby
         @self_type.args.map(&:name)
       end
 
+      def type_params_decl
+        case declaration
+        when AST::Declarations::Extension
+          nil
+        else
+          declaration.type_params
+        end
+      end
+
       def each_type(&block)
         if block_given?
           methods.each_value do |method|

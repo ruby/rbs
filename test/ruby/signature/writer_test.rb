@@ -129,4 +129,11 @@ class Bar
 end
     SIG
   end
+
+  def test_variance
+    assert_writer <<-SIG
+class Foo[out A, unchecked B, in C] < Bar[A, C, B]
+end
+    SIG
+  end
 end

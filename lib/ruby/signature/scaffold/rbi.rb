@@ -49,7 +49,7 @@ module Ruby
           modules.push AST::Declarations::Class.new(
             name: nested_name(name),
             super_class: super_class && AST::Declarations::Class::Super.new(name: const_to_name(super_class), args: []),
-            type_params: [],
+            type_params: AST::Declarations::ModuleTypeParams.empty,
             members: [],
             annotations: [],
             location: nil,
@@ -66,7 +66,7 @@ module Ruby
         def push_module(name, comment:)
           modules.push AST::Declarations::Module.new(
             name: nested_name(name),
-            type_params: [],
+            type_params: AST::Declarations::ModuleTypeParams.empty,
             members: [],
             annotations: [],
             location: nil,
@@ -204,7 +204,19 @@ module Ruby
                 node.type == :HASH &&
                   each_arg(node.children[0]).each_slice(2).any? {|a, _| a.type == :LIT && a.children[0] == :fixed }
               }
-                current_module.type_params << node.children[0]
+                if (a0 = each_arg(send.children[1]).to_a[0])&.type == :LIT
+                  variance = case a0.children[0]
+                             when :out
+                               :covariant
+                             when :in
+                               :contravariant
+                             end
+                end
+
+                current_module.type_params.add(
+                  AST::Declarations::ModuleTypeParams::TypeParam.new(name: node.children[0],
+                                                                     variance: variance || :invariant,
+                                                                     skip_validation: false))
               end
             else
               name = node.children[0].yield_self do |n|
@@ -418,7 +430,7 @@ module Ruby
         def type_of0(type_node, variables:)
           case
           when type_node.type == :CONST
-            if variables.include?(type_node.children[0])
+            if variables.each.include?(type_node.children[0])
               Types::Variable.new(name: type_node.children[0], location: nil)
             else
               Types::ClassInstance.new(name: const_to_name(type_node), args: [], location: nil)
