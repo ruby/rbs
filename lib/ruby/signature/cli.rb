@@ -55,11 +55,24 @@ module Ruby
         opts
       end
 
+      def parse_logging_options(opts)
+        opts.on("--log-level=LEVEL", "Specify log level (defaults to `warn`)") do |level|
+          Ruby::Signature.logger_level = level
+        end
+
+        opts.on("--log-output=OUTPUT", "Specify the file to output log (defaults to stderr)") do |output|
+          Ruby::Signature.logger_output = File.open(output, "a")
+        end
+
+        opts
+      end
+
       def run(args)
         options = LibraryOptions.new
 
         OptionParser.new do |opts|
           library_parse(opts, options: options)
+          parse_logging_options(opts)
         end.order!(args)
 
         command = args.shift&.to_sym
