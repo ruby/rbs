@@ -262,7 +262,7 @@ end
 
 interface _Hash
   def hash: -> Integer
-  def eql?: (any) -> bool
+  def eql?: (untyped) -> bool
 end
 
 interface _Baz
@@ -282,7 +282,7 @@ EOF
 
           assert_method_definition definition.methods[:bar], ["() -> ::_Foo"], accessibility: :public
           assert_method_definition definition.methods[:hash], ["() -> ::Integer"], accessibility: :public
-          assert_method_definition definition.methods[:eql?], ["(any) -> bool"], accessibility: :public
+          assert_method_definition definition.methods[:eql?], ["(untyped) -> bool"], accessibility: :public
         end
 
         assert_raises InvalidTypeApplicationError do
@@ -317,7 +317,7 @@ class Hello
 end
 
 extension Hello (Test)
-  def assert_equal: (any, any) -> void
+  def assert_equal: (untyped, untyped) -> void
   def self.setup: () -> void
 
   @name: String
@@ -338,7 +338,7 @@ EOF
           assert_equal [:assert_equal, :foo].sort, definition.methods.keys.sort
 
           definition.methods[:assert_equal].tap do |method|
-            assert_method_definition method, ["(any, any) -> void"], accessibility: :public
+            assert_method_definition method, ["(untyped, untyped) -> void"], accessibility: :public
           end
 
           definition.methods[:foo].tap do |method|
@@ -366,7 +366,7 @@ class Hello
 end
 
 extension Hello (Test)
-  def assert_equal: (any, any) -> void
+  def assert_equal: (untyped, untyped) -> void
   def self.setup: () -> void
 
   @name: String
@@ -446,7 +446,7 @@ EOF
 
         builder.build_one_singleton(BuiltinNames::String.name).yield_self do |definition|
           definition.methods[:try_convert].yield_self do |method|
-            assert_method_definition method, ["(any) -> ::String?"], accessibility: :public
+            assert_method_definition method, ["(untyped) -> ::String?"], accessibility: :public
           end
         end
       end
@@ -501,7 +501,7 @@ EOF
           end
 
           definition.methods[:puts].yield_self do |method|
-            assert_method_definition method, ["(*any) -> nil"], accessibility: :private
+            assert_method_definition method, ["(*untyped) -> nil"], accessibility: :private
           end
 
           definition.methods[:respond_to_missing?].yield_self do |method|
@@ -719,7 +719,7 @@ EOF
           assert_equal [:__id__, :initialize, :puts, :respond_to_missing?], definition.methods.keys.sort
           assert_method_definition definition.methods[:__id__], ["() -> ::Integer"]
           assert_method_definition definition.methods[:initialize], ["() -> void"]
-          assert_method_definition definition.methods[:puts], ["(*any) -> nil"]
+          assert_method_definition definition.methods[:puts], ["(*untyped) -> nil"]
           assert_method_definition definition.methods[:respond_to_missing?], ["(::Symbol, bool) -> bool"]
         end
       end

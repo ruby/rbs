@@ -63,9 +63,9 @@ class BasicObject
   # Boolean negate.
   def !: () -> bool
 
-  def !=: (any other) -> bool
+  def !=: (untyped other) -> bool
 
-  def ==: (any other) -> bool
+  def ==: (untyped other) -> bool
 
   # Returns an integer identifier for `obj` .
   # 
@@ -86,14 +86,14 @@ class BasicObject
   # ```
   def __id__: () -> Integer
 
-  def __send__: (Symbol arg0, *any arg1) -> any
+  def __send__: (Symbol arg0, *untyped arg1) -> untyped
 
-  def equal?: (any other) -> bool
+  def equal?: (untyped other) -> bool
 
-  def instance_eval: (?String arg0, ?String filename, ?Integer lineno) -> any
+  def instance_eval: (?String arg0, ?String filename, ?Integer lineno) -> untyped
                    | [U] () { () -> U } -> U
 
-  def instance_exec: [U, V] (*V args) { (any args) -> U } -> U
+  def instance_exec: [U, V] (*V args) { (untyped args) -> U } -> U
 
   private
   def initialize: () -> void

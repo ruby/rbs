@@ -1,28 +1,28 @@
 class Set[A]
   def self.`[]`: [X] (*X) -> Set[X]
 
-  def initialize: (_Each[A, any]) -> any
-                | [X] (_Each[X, any]) { (X) -> A } -> any
-                | (?nil) -> any
+  def initialize: (_Each[A, untyped]) -> untyped
+                | [X] (_Each[X, untyped]) { (X) -> A } -> untyped
+                | (?nil) -> untyped
 
-  def intersection: (_Each[A, any]) -> self
-  def &: (_Each[A, any]) -> self
+  def intersection: (_Each[A, untyped]) -> self
+  def &: (_Each[A, untyped]) -> self
 
-  def union: (_Each[A, any]) -> self
-  def `+`: (_Each[A, any]) -> self
-  def `|`: (_Each[A, any]) -> self
+  def union: (_Each[A, untyped]) -> self
+  def `+`: (_Each[A, untyped]) -> self
+  def `|`: (_Each[A, untyped]) -> self
 
-  def difference: (_Each[A, any]) -> self
-  def `-`: (_Each[A, any]) -> self
+  def difference: (_Each[A, untyped]) -> self
+  def `-`: (_Each[A, untyped]) -> self
 
   def add: (A) -> self
   def `<<`: (A) -> self
   def add?: (A) -> self?
 
-  def member?: (any) -> bool
-  def include?: (any) -> bool
+  def member?: (untyped) -> bool
+  def include?: (untyped) -> bool
 
-  def `^`: (_Each[A, any]) -> self
+  def `^`: (_Each[A, untyped]) -> self
 
   def classify: [X] { (A) -> X } -> Hash[X, self]
 
@@ -31,31 +31,31 @@ class Set[A]
   def collect!: { (A) -> A } -> self
   alias map! collect!
 
-  def delete: (any) -> self
-  def delete?: (any) -> self?
+  def delete: (untyped) -> self
+  def delete?: (untyped) -> self?
 
-  def delete_if: { (A) -> any } -> self
-  def reject!: { (A) -> any } -> self
+  def delete_if: { (A) -> untyped } -> self
+  def reject!: { (A) -> untyped } -> self
 
   def disjoint?: (self) -> bool
 
-  def divide: { (A, A) -> any } -> Set[self]
-            | { (A) -> any } -> Set[self]
+  def divide: { (A, A) -> untyped } -> Set[self]
+            | { (A) -> untyped } -> Set[self]
 
   def each: { (A) -> void } -> self
 
   def empty?: -> bool
 
-  def flatten: -> Set[any]
+  def flatten: -> Set[untyped]
 
   def intersect?: -> bool
 
-  def keep_if: { (A) -> any } -> self
+  def keep_if: { (A) -> untyped } -> self
 
   def size: -> Integer
   alias length size
 
-  def merge: (_Each[A, any]) -> self
+  def merge: (_Each[A, untyped]) -> self
 
   def subset?: (self) -> bool
   def proper_subst?: (self) -> bool
@@ -63,13 +63,13 @@ class Set[A]
   def superset?: (self) -> bool
   def proper_superset?: (self) -> bool
 
-  def replace: (_Each[A, any]) -> self
+  def replace: (_Each[A, untyped]) -> self
 
   def reset: -> self
 
-  def select!: { (A) -> any } -> self?
+  def select!: { (A) -> untyped } -> self?
 
-  def subtract: (_Each[A, any]) -> self
+  def subtract: (_Each[A, untyped]) -> self
 
   def to_a: -> Array[A]
 

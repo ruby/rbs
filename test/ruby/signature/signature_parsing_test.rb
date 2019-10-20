@@ -13,7 +13,7 @@ class Ruby::Signature::SignatureParsingTest < Minitest::Test
   include TestHelper
 
   def test_type_alias
-    Parser.parse_signature("type Steep::foo = any").yield_self do |decls|
+    Parser.parse_signature("type Steep::foo = untyped").yield_self do |decls|
       assert_equal 1, decls.size
 
       type_decl = decls[0]
@@ -21,12 +21,12 @@ class Ruby::Signature::SignatureParsingTest < Minitest::Test
       assert_instance_of Declarations::Alias, type_decl
       assert_equal TypeName.new(name: :foo, namespace: Namespace.parse("Steep")), type_decl.name
       assert_equal Types::Bases::Any.new(location: nil), type_decl.type
-      assert_equal "type Steep::foo = any", type_decl.location.source
+      assert_equal "type Steep::foo = untyped", type_decl.location.source
     end
   end
 
   def test_constant
-    Parser.parse_signature("FOO: any").yield_self do |decls|
+    Parser.parse_signature("FOO: untyped").yield_self do |decls|
       assert_equal 1, decls.size
 
       const_decl = decls[0]
@@ -34,10 +34,10 @@ class Ruby::Signature::SignatureParsingTest < Minitest::Test
       assert_instance_of Declarations::Constant, const_decl
       assert_equal TypeName.new(name: :FOO, namespace: Namespace.empty), const_decl.name
       assert_equal Types::Bases::Any.new(location: nil), const_decl.type
-      assert_equal "FOO: any", const_decl.location.source
+      assert_equal "FOO: untyped", const_decl.location.source
     end
 
-    Parser.parse_signature("::BAR: any").yield_self do |decls|
+    Parser.parse_signature("::BAR: untyped").yield_self do |decls|
       assert_equal 1, decls.size
 
       const_decl = decls[0]
@@ -45,10 +45,10 @@ class Ruby::Signature::SignatureParsingTest < Minitest::Test
       assert_instance_of Declarations::Constant, const_decl
       assert_equal TypeName.new(name: :BAR, namespace: Namespace.root), const_decl.name
       assert_equal Types::Bases::Any.new(location: nil), const_decl.type
-      assert_equal "::BAR: any", const_decl.location.source
+      assert_equal "::BAR: untyped", const_decl.location.source
     end
 
-    Parser.parse_signature("FOO : any").yield_self do |decls|
+    Parser.parse_signature("FOO : untyped").yield_self do |decls|
       assert_equal 1, decls.size
 
       const_decl = decls[0]
@@ -56,10 +56,10 @@ class Ruby::Signature::SignatureParsingTest < Minitest::Test
       assert_instance_of Declarations::Constant, const_decl
       assert_equal TypeName.new(name: :FOO, namespace: Namespace.empty), const_decl.name
       assert_equal Types::Bases::Any.new(location: nil), const_decl.type
-      assert_equal "FOO : any", const_decl.location.source
+      assert_equal "FOO : untyped", const_decl.location.source
     end
 
-    Parser.parse_signature("::BAR : any").yield_self do |decls|
+    Parser.parse_signature("::BAR : untyped").yield_self do |decls|
       assert_equal 1, decls.size
 
       const_decl = decls[0]
@@ -67,12 +67,12 @@ class Ruby::Signature::SignatureParsingTest < Minitest::Test
       assert_instance_of Declarations::Constant, const_decl
       assert_equal TypeName.new(name: :BAR, namespace: Namespace.root), const_decl.name
       assert_equal Types::Bases::Any.new(location: nil), const_decl.type
-      assert_equal "::BAR : any", const_decl.location.source
+      assert_equal "::BAR : untyped", const_decl.location.source
     end
   end
 
   def test_global
-    Parser.parse_signature("$FOO: any").yield_self do |decls|
+    Parser.parse_signature("$FOO: untyped").yield_self do |decls|
       assert_equal 1, decls.size
 
       global_decl = decls[0]
@@ -80,7 +80,7 @@ class Ruby::Signature::SignatureParsingTest < Minitest::Test
       assert_instance_of Declarations::Global, global_decl
       assert_equal :"$FOO", global_decl.name
       assert_equal Types::Bases::Any.new(location: nil), global_decl.type
-      assert_equal "$FOO: any", global_decl.location.source
+      assert_equal "$FOO: untyped", global_decl.location.source
     end
   end
 
@@ -103,7 +103,7 @@ class Ruby::Signature::SignatureParsingTest < Minitest::Test
         # Yield all elements included in `self`.
         #  
         def count: -> Integer
-                 | (any) -> Integer
+                 | (untyped) -> Integer
                  | [X] { (A) -> X } -> Integer
 
         include _Hash[Integer]
@@ -132,7 +132,7 @@ class Ruby::Signature::SignatureParsingTest < Minitest::Test
           assert_empty t2.type_params
           assert_equal 1, t2.type.required_positionals.size
           assert_nil t2.block
-          assert_equal "(any) -> Integer", t2.location.source
+          assert_equal "(untyped) -> Integer", t2.location.source
 
           assert_equal [:X], t3.type_params
           assert_instance_of MethodType::Block, t3.block
@@ -187,7 +187,7 @@ class Ruby::Signature::SignatureParsingTest < Minitest::Test
         @@baz: Array[Integer]
 
         def one: -> void
-        def self.two: -> any
+        def self.two: -> untyped
         def self?.three: -> bool
 
         include X
@@ -245,7 +245,7 @@ class Ruby::Signature::SignatureParsingTest < Minitest::Test
       module_decl.members[4].yield_self do |m|
         assert_instance_of Members::MethodDefinition, m
         assert_equal :singleton, m.kind
-        assert_equal "def self.two: -> any", m.location.source
+        assert_equal "def self.two: -> untyped", m.location.source
       end
 
       module_decl.members[5].yield_self do |m|
@@ -388,7 +388,7 @@ class Ruby::Signature::SignatureParsingTest < Minitest::Test
       class Foo[X, Y]
         def foo: -> Integer
                | ?{ -> void } -> Integer
-               | [A] () { (String, ?Object, *Float, Symbol, foo: bool, ?bar: any, **Y) -> X } -> A
+               | [A] () { (String, ?Object, *Float, Symbol, foo: bool, ?bar: untyped, **Y) -> X } -> A
       end
     SIG
       assert_equal 1, decls.size
@@ -415,7 +415,7 @@ class Ruby::Signature::SignatureParsingTest < Minitest::Test
 
           m.types[2].yield_self do |ty|
             assert_instance_of MethodType, ty
-            assert_equal "[A] () { (String, ?Object, *Float, Symbol, foo: bool, ?bar: any, **Y) -> X } -> A", ty.location.source
+            assert_equal "[A] () { (String, ?Object, *Float, Symbol, foo: bool, ?bar: untyped, **Y) -> X } -> A", ty.location.source
             assert_instance_of MethodType::Block, ty.block
             assert ty.block.required
           end
@@ -530,24 +530,24 @@ class Ruby::Signature::SignatureParsingTest < Minitest::Test
         def type: -> String
         def module: -> String
         def private: -> String
-        def public: -> any
-        def &: (any) -> any
-        def ^: (any) -> any
-        def *: (any) -> any
-        def ==: (any) -> any
-        def <: (any) -> any
-        def <=: (any) -> any
-        def >: (any) -> any
-        def >=: (any) -> any
-        def end: -> any
-        def include: -> any
-        def extend: -> any
-        def attr_reader: -> any
-        def attr_accessor: -> any
-        def attr_writer: -> any
-        def `\\``: -> any
-        def def!: -> any
-        def !: -> any
+        def public: -> untyped
+        def &: (untyped) -> untyped
+        def ^: (untyped) -> untyped
+        def *: (untyped) -> untyped
+        def ==: (untyped) -> untyped
+        def <: (untyped) -> untyped
+        def <=: (untyped) -> untyped
+        def >: (untyped) -> untyped
+        def >=: (untyped) -> untyped
+        def end: -> untyped
+        def include: -> untyped
+        def extend: -> untyped
+        def attr_reader: -> untyped
+        def attr_accessor: -> untyped
+        def attr_writer: -> untyped
+        def `\\``: -> untyped
+        def def!: -> untyped
+        def !: -> untyped
       end
     SIG
       expected_names = [
@@ -641,7 +641,7 @@ class Ruby::Signature::SignatureParsingTest < Minitest::Test
     Parser.parse_signature(<<~SIG).yield_self do |decls|
       class Hello
         %a{noreturn}
-        def foo: () -> any
+        def foo: () -> untyped
 
         %a[incompatible]
         include Foo
@@ -739,8 +739,8 @@ end
     assert_valid_signature do
       <<-EOS
 class A
-  def =~: (any) -> bool
-  def ===: (any) -> bool
+  def =~: (untyped) -> bool
+  def ===: (untyped) -> bool
 end
       EOS
     end
@@ -748,7 +748,7 @@ end
     assert_valid_signature do
       <<-EOS
 class X
-  def foo: (type: any, class: any, module: any, if: any, include: any, yield: any, def: any, self: any, instance: any, any: any, void: void) -> any
+  def foo: (type: untyped, class: untyped, module: untyped, if: untyped, include: untyped, yield: untyped, def: untyped, self: untyped, instance: untyped, any: untyped, void: void) -> untyped
 end
       EOS
     end

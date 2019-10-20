@@ -40,9 +40,9 @@ class Symbol < Object
 
   def <=>: (Symbol other) -> Integer?
 
-  def ==: (any obj) -> bool
+  def ==: (untyped obj) -> bool
 
-  def =~: (any obj) -> Integer?
+  def =~: (untyped obj) -> Integer?
 
   def []: (Integer idx_or_range) -> String
         | (Integer idx_or_range, ?Integer n) -> String
@@ -87,9 +87,9 @@ class Symbol < Object
   # Same as `sym.to_s.length` .
   def length: () -> Integer
 
-  def match: (any obj) -> Integer?
+  def match: (untyped obj) -> Integer?
 
-  def match?: (*any args) -> any
+  def match?: (*untyped args) -> untyped
 
   # Same as `sym.to_s.succ.intern` .
   def next: () -> Symbol

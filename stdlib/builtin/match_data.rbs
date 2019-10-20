@@ -1,5 +1,5 @@
 class MatchData < Object
-  def ==: (any arg0) -> bool
+  def ==: (untyped arg0) -> bool
 
   def []: (Integer i_or_start_or_range_or_name) -> String?
         | (Integer i_or_start_or_range_or_name, ?Integer length) -> ::Array[String]
@@ -21,7 +21,7 @@ class MatchData < Object
 
   def `end`: (Integer n) -> Integer
 
-  def eql?: (any other) -> bool
+  def eql?: (untyped other) -> bool
 
   # Produce a hash based on the target string, regexp and matched positions
   # of this matchdata.

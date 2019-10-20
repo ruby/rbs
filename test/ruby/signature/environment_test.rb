@@ -54,8 +54,8 @@ end
         assert_equal parse_type("::Integer & ::Foo"), env.absolute_type(parse_type("Integer & Foo"), namespace: Namespace.root)
         assert_equal parse_type("::Integer & ::String::Foo"), env.absolute_type(parse_type("Integer & Foo"), namespace: Namespace.parse("::String"))
 
-        assert_equal parse_type("[::Foo, any]"), env.absolute_type(parse_type("[Foo, any]"), namespace: Namespace.root)
-        assert_equal parse_type("[::String::Foo, any]"), env.absolute_type(parse_type("[Foo, any]"), namespace: Namespace.parse("::String"))
+        assert_equal parse_type("[::Foo, untyped]"), env.absolute_type(parse_type("[Foo, untyped]"), namespace: Namespace.root)
+        assert_equal parse_type("[::String::Foo, untyped]"), env.absolute_type(parse_type("[Foo, untyped]"), namespace: Namespace.parse("::String"))
 
         assert_equal parse_type("{foo: ::Foo}"), env.absolute_type(parse_type("{ foo: Foo }"), namespace: Namespace.root)
         assert_equal parse_type("{foo: ::String::Foo }"), env.absolute_type(parse_type("{ foo: Foo }"), namespace: Namespace.parse("::String"))

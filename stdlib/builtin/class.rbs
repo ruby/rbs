@@ -80,7 +80,7 @@ class Class < Module
   # 
   # klass.allocate.initialized? #=> false
   # ```
-  def allocate: () -> any
+  def allocate: () -> untyped
 
   # Sorbet hijacks Class#new to re-use the sig from MyClass#initialize when creating new instances of a class.
   # This method must be here so that all calls to MyClass.new aren't forced to take 0 arguments.
@@ -88,9 +88,9 @@ class Class < Module
   # invokes that object’s `initialize` method, passing it *args* . This is
   # the method that ends up getting called whenever an object is constructed
   # using .new.
-  def new: (*any args) -> any
+  def new: (*untyped args) -> untyped
 
-  def inherited: (Class arg0) -> any
+  def inherited: (Class arg0) -> untyped
 
   def instance_methods: (?bool arg0) -> ::Array[Symbol]
 
@@ -117,6 +117,6 @@ class Class < Module
 
   def initialize: () -> void
                 | (?Class superclass) -> void
-                | () { (Class arg0) -> any } -> void
-                | (?Class superclass) { (Class arg0) -> any } -> void
+                | () { (Class arg0) -> untyped } -> void
+                | (?Class superclass) { (Class arg0) -> untyped } -> void
 end

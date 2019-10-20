@@ -19,7 +19,7 @@ _type_ ::= _class-name_ _type-arguments_                (Class instance type)
          | `instance`
          | `class`
          | `bool`
-         | `any`
+         | `untyped`
          | `nil`
          | `top`
          | `bot`
@@ -179,7 +179,7 @@ Proc type denots type of procedures, `Proc` instances.
 
 `bool` is an abstract type for truth value.
 
-`any` is for _a type without type checking_. It is `?` in gradual typing, _dynamic_ in some other languages. Subtype _and_ supertype of all of the types.
+`untyped` is for _a type without type checking_. It is `?` in gradual typing, _dynamic_ in some languages like C#, and _any_ in TypeScript. It is both subtype _and_ supertype of all of the types. (The type was `any` but renamed to `untyped`.)
 
 `nil` is for _nil_.
 

@@ -30,7 +30,7 @@
 class File[Elem] < IO
   def self.absolute_path: (String file, ?String dir) -> String
 
-  def self.atime: (any file) -> Time
+  def self.atime: (untyped file) -> Time
 
   def self.basename: (String file, ?String suffix) -> String
 
@@ -38,7 +38,7 @@ class File[Elem] < IO
                   | (String arg0, ?Integer arg1) -> String
                   | (String arg0, ?Integer arg1, ?Integer arg2) -> String
 
-  def self.birthtime: (any file) -> Time
+  def self.birthtime: (untyped file) -> Time
 
   def self.blockdev?: (String | IO file) -> bool
 
@@ -48,7 +48,7 @@ class File[Elem] < IO
 
   def self.chown: (Integer owner, Integer group, *String files) -> Integer
 
-  def self.ctime: (any file) -> Time
+  def self.ctime: (untyped file) -> Time
 
   def self.delete: (*String files) -> Integer
 
@@ -60,9 +60,9 @@ class File[Elem] < IO
 
   def self.executable_real?: (String file) -> bool
 
-  def self.exist?: (any file) -> bool
+  def self.exist?: (untyped file) -> bool
 
-  def self.expand_path: (any file, ?any dir) -> String
+  def self.expand_path: (untyped file, ?untyped dir) -> String
 
   def self.extname: (String path) -> String
 
@@ -76,7 +76,7 @@ class File[Elem] < IO
 
   def self.identical?: (String | IO file_1, String | IO file_2) -> bool
 
-  def self.join: (*any arg0) -> String
+  def self.join: (*untyped arg0) -> String
 
   def self.lchmod: (Integer mode, *String files) -> Integer
 
@@ -86,7 +86,7 @@ class File[Elem] < IO
 
   def self.lstat: (String file) -> File::Stat
 
-  def self.mtime: (any file) -> Time
+  def self.mtime: (untyped file) -> Time
 
   def self.owned?: (String file) -> bool
 
@@ -118,7 +118,7 @@ class File[Elem] < IO
 
   def self.split: (String file) -> [ String, String ]
 
-  def self.stat: (any file) -> File::Stat
+  def self.stat: (untyped file) -> File::Stat
 
   def self.sticky?: (String file) -> bool
 

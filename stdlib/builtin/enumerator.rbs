@@ -98,7 +98,7 @@
 class Enumerator[Elem, Return] < Object
   include Enumerable[Elem, Return]
 
-  def each: () { (Elem arg0) -> any } -> Return
+  def each: () { (Elem arg0) -> untyped } -> Return
           | () -> self
 
   def feed: (Elem arg0) -> NilClass
@@ -235,10 +235,10 @@ class Enumerator[Elem, Return] < Object
   # ```
   def size: () -> (Integer | Float)?
 
-  def with_index: (?Integer offset) { (Elem arg0, Integer arg1) -> any } -> any
+  def with_index: (?Integer offset) { (Elem arg0, Integer arg1) -> untyped } -> untyped
                 | (?Integer offset) -> ::Enumerator[[ Elem, Integer ], Return]
 
-  def with_object: [U] (U arg0) { (Elem arg0, U arg1) -> any } -> any
+  def with_object: [U] (U arg0) { (Elem arg0, U arg1) -> untyped } -> untyped
                  | [U] (U arg0) -> ::Enumerator[[ Elem, U ], Return]
 end
 
@@ -250,7 +250,7 @@ class Enumerator::Lazy[Elem, Return] < Enumerator[Elem, Return]
 end
 
 class Enumerator::Yielder < Object
-  def <<: (*any arg0) -> void
+  def <<: (*untyped arg0) -> void
 
-  def yield: (*any arg0) -> void
+  def yield: (*untyped arg0) -> void
 end

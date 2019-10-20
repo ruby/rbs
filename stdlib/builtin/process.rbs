@@ -12,7 +12,7 @@ module Process
 
   def self.clock_gettime: (Symbol | Integer clock_id, ?Symbol unit) -> (Float | Integer)
 
-  def self.daemon: (?any nochdir, ?any noclose) -> Integer
+  def self.daemon: (?untyped nochdir, ?untyped noclose) -> Integer
 
   def self.detach: (Integer pid) -> Thread
 
@@ -264,7 +264,7 @@ end
 class Process::Status < Object
   def &: (Integer num) -> Integer
 
-  def ==: (any other) -> bool
+  def ==: (untyped other) -> bool
 
   def >>: (Integer num) -> Integer
 

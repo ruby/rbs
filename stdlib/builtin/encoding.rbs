@@ -6,7 +6,7 @@ class Encoding < Object
   #           "SJIS"=>"Shift_JIS", "eucJP"=>"EUC-JP", "CP932"=>"Windows-31J"}
   def self.aliases: () -> ::Hash[String, String]
 
-  def self.compatible?: (any obj1, any obj2) -> Encoding?
+  def self.compatible?: (untyped obj1, untyped obj2) -> Encoding?
 
   # Returns default external encoding.
   # 

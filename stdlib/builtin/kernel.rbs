@@ -18,7 +18,7 @@ module Kernel
   def caller_locations: (?Integer start_or_range, ?Integer length) -> ::Array[Thread::Backtrace::Location]?
                       | (?::Range[Integer] start_or_range) -> ::Array[Thread::Backtrace::Location]?
 
-  def catch: (?Object tag) { (Object arg0) -> any } -> any
+  def catch: (?Object tag) { (Object arg0) -> untyped } -> untyped
 
   # In a perfect world this should be:
   # 
@@ -30,12 +30,12 @@ module Kernel
   # 
   # is very surprising since users expect their methods to be present.
   # So we settle for untyped.
-  def `class`: () -> any
+  def `class`: () -> untyped
 
   def define_singleton_method: (Symbol | String symbol, ?Proc | Method | UnboundMethod method) -> Symbol
-                             | (Symbol | String symbol) { () -> any } -> Symbol
+                             | (Symbol | String symbol) { () -> untyped } -> Symbol
 
-  def eval: (String arg0, ?Binding arg1, ?String filename, ?Integer lineno) -> any
+  def eval: (String arg0, ?Binding arg1, ?String filename, ?Integer lineno) -> untyped
 
   # Returns `true` if `yield` would execute a block in the current context.
   # The `iterator?` form is mildly deprecated.
@@ -67,13 +67,13 @@ module Kernel
 
   def srand: (?Numeric number) -> Numeric
 
-  def !~: (any other) -> bool
+  def !~: (untyped other) -> bool
 
-  def <=>: (any other) -> Integer?
+  def <=>: (untyped other) -> Integer?
 
-  def ===: (any other) -> bool
+  def ===: (untyped other) -> bool
 
-  def =~: (any other) -> NilClass
+  def =~: (untyped other) -> NilClass
 
   def clone: () -> self
 
@@ -81,10 +81,10 @@ module Kernel
 
   def dup: () -> self
 
-  def enum_for: (?Symbol method, *any args) -> ::Enumerator[any, any]
-              | (?Symbol method, *any args) { () -> any } -> ::Enumerator[any, any]
+  def enum_for: (?Symbol method, *untyped args) -> ::Enumerator[untyped, untyped]
+              | (?Symbol method, *untyped args) { () -> untyped } -> ::Enumerator[untyped, untyped]
 
-  def eql?: (any other) -> bool
+  def eql?: (untyped other) -> bool
 
   def `extend`: (Module mod) -> NilClass
 
@@ -106,7 +106,7 @@ module Kernel
   # Note that fork(2) is not available on some platforms like Windows and
   # NetBSD 4. Therefore you should use spawn() instead of fork().
   def fork: () -> Integer?
-          | () { () -> any } -> Integer?
+          | () { () -> untyped } -> Integer?
 
   def freeze: () -> self
 
@@ -122,9 +122,9 @@ module Kernel
 
   def instance_variable_defined?: (Symbol | String arg0) -> bool
 
-  def instance_variable_get: (Symbol | String arg0) -> any
+  def instance_variable_get: (Symbol | String arg0) -> untyped
 
-  def instance_variable_set: (Symbol | String arg0, any arg1) -> any
+  def instance_variable_set: (Symbol | String arg0, untyped arg1) -> untyped
 
   def instance_variables: () -> ::Array[Symbol]
 
@@ -146,12 +146,12 @@ module Kernel
 
   def public_methods: (?bool all) -> ::Array[Symbol]
 
-  def `public_send`: (Symbol | String arg0, *any args) -> any
+  def `public_send`: (Symbol | String arg0, *untyped args) -> untyped
 
-  def remove_instance_variable: (Symbol arg0) -> any
+  def remove_instance_variable: (Symbol arg0) -> untyped
 
-  def `send`: (String | Symbol arg0, *any arg1) -> any
-            | (String | Symbol arg0, *any arg1) { () -> any } -> any
+  def `send`: (String | Symbol arg0, *untyped arg1) -> untyped
+            | (String | Symbol arg0, *untyped arg1) { () -> untyped } -> untyped
 
   def `singleton_class`: () -> Class
 
@@ -163,16 +163,16 @@ module Kernel
 
   def tainted?: () -> bool
 
-  def tap: () { (any x) -> void } -> self
+  def tap: () { (untyped x) -> void } -> self
 
-  def to_enum: (?Symbol method, *any args) -> ::Enumerator[any, any]
-             | (?Symbol method, *any args) { () -> any } -> ::Enumerator[any, any]
+  def to_enum: (?Symbol method, *untyped args) -> ::Enumerator[untyped, untyped]
+             | (?Symbol method, *untyped args) { () -> untyped } -> ::Enumerator[untyped, untyped]
 
   def to_s: () -> String
 
   def trust: () -> self
 
-  def `undef`: (*any arg) -> void
+  def `undef`: (*untyped arg) -> void
 
   def untaint: () -> self
 
@@ -199,8 +199,8 @@ module Kernel
   # Array(nil)         #=> []
   # Array(1)           #=> [1]
   # ```
-  def Array: (NilClass x) -> any
-           | (any x) -> ::Array[any]
+  def Array: (NilClass x) -> untyped
+           | (untyped x) -> ::Array[untyped]
 
   def BigDecimal: (Integer | Float | Rational | BigDecimal | String initial, ?Integer digits, ?exception: bool exception) -> BigDecimal
 
@@ -236,7 +236,7 @@ module Kernel
 
   def abort: (?String msg) -> bot
 
-  def at_exit: () { () -> any } -> Proc
+  def at_exit: () { () -> untyped } -> Proc
 
   def autoload: (String | Symbol _module, String filename) -> NilClass
 
@@ -337,7 +337,7 @@ module Kernel
           | (?Class arg0, ?::Array[String] arg1) -> bot
           | (?Class arg0, ?String arg1, ?::Array[String] arg2) -> bot
 
-  def format: (String format, *any args) -> String
+  def format: (String format, *untyped args) -> String
 
   def gets: (?String arg0, ?Integer arg1) -> String
 
@@ -378,8 +378,8 @@ module Kernel
   #   puts enum.next
   # } #=> :ok
   # ```
-  def loop: () { () -> any } -> bot
-          | () -> ::Enumerator[any, bot]
+  def loop: () { () -> untyped } -> bot
+          | () -> ::Enumerator[untyped, bot]
 
   def open: (String name, ?String | Integer rest, ?String block) -> IO?
 
@@ -402,17 +402,17 @@ module Kernel
   #     cat, 1, 2, 3, 99
   def print: (*Kernel args) -> NilClass
 
-  def printf: (?IO arg0, ?String arg1, *any arg2) -> NilClass
+  def printf: (?IO arg0, ?String arg1, *untyped arg2) -> NilClass
 
-  def proc: () { () -> any } -> Proc
+  def proc: () { () -> untyped } -> Proc
 
-  def lambda: () { () -> any } -> Proc
+  def lambda: () { () -> untyped } -> Proc
 
   def putc: (Integer arg0) -> Integer
 
-  def puts: (*any arg0) -> NilClass
+  def puts: (*untyped arg0) -> NilClass
 
-  def p: (*any arg0) -> NilClass
+  def p: (*untyped arg0) -> NilClass
 
   # If called without an argument, or if `max.to_i.abs == 0`, rand returns
   # a pseudo-random floating point number between 0.0 and 1.0, including 0.0
@@ -467,13 +467,13 @@ module Kernel
   def sleep: () -> bot
            | (Numeric duration) -> Integer
 
-  def sprintf: (String format, *any args) -> String
+  def sprintf: (String format, *untyped args) -> String
 
-  def syscall: (Integer num, *any args) -> any
+  def syscall: (Integer num, *untyped args) -> untyped
 
   def test: (String cmd, String file1, ?String file2) -> (TrueClass | FalseClass | Time)
 
-  def throw: (Object tag, ?any obj) -> bot
+  def throw: (Object tag, ?untyped obj) -> bot
 
   def warn: (*String msg) -> NilClass
 
@@ -609,4 +609,4 @@ module Kernel
   def system: (*String args) -> (NilClass | FalseClass | TrueClass)
 end
 
-Kernel::RUBYGEMS_ACTIVATION_MONITOR: any
+Kernel::RUBYGEMS_ACTIVATION_MONITOR: untyped

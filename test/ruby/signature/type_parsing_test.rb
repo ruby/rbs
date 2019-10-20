@@ -18,6 +18,11 @@ class Ruby::Signature::TypeParsingTest < Minitest::Test
       assert_equal "any", type.location.source
     end
 
+    Parser.parse_type("untyped").yield_self do |type|
+      assert_instance_of Types::Bases::Any, type
+      assert_equal "untyped", type.location.source
+    end
+
     Parser.parse_type("bool").yield_self do |type|
       assert_instance_of Types::Bases::Bool, type
       assert_equal "bool", type.location.source
@@ -83,11 +88,11 @@ class Ruby::Signature::TypeParsingTest < Minitest::Test
       assert_equal "::Enumerator::Lazy", type.location.source
     end
 
-    Parser.parse_type("Array[any]").yield_self do |type|
+    Parser.parse_type("Array[untyped]").yield_self do |type|
       assert_instance_of Types::ClassInstance, type
       assert_equal TypeName.new(namespace: Namespace.empty, name: :Array), type.name
       assert_equal [Types::Bases::Any.new(location: nil)], type.args
-      assert_equal "Array[any]", type.location.source
+      assert_equal "Array[untyped]", type.location.source
     end
   end
 
@@ -117,7 +122,7 @@ class Ruby::Signature::TypeParsingTest < Minitest::Test
     end
 
     assert_raises Parser::SyntaxError do
-      Parser.parse_type("foo[any]")
+      Parser.parse_type("foo[untyped]")
     end
   end
 
@@ -150,32 +155,32 @@ class Ruby::Signature::TypeParsingTest < Minitest::Test
       assert_equal "::Foo::_Foo", type.location.source
     end
 
-    Parser.parse_type("_Foo[any, nil]").yield_self do |type|
+    Parser.parse_type("_Foo[untyped, nil]").yield_self do |type|
       assert_instance_of Types::Interface, type
       assert_equal TypeName.new(namespace: Namespace.empty, name: :_Foo), type.name
       assert_equal [Types::Bases::Any.new(location: nil), Types::Bases::Nil.new(location: nil)], type.args
-      assert_equal "_Foo[any, nil]", type.location.source
+      assert_equal "_Foo[untyped, nil]", type.location.source
     end
   end
 
   def test_tuple
-    Parser.parse_type("[any, nil, void]").yield_self do |type|
+    Parser.parse_type("[untyped, nil, void]").yield_self do |type|
       assert_instance_of Types::Tuple, type
       assert_equal [
                      Types::Bases::Any.new(location: nil),
                      Types::Bases::Nil.new(location: nil),
                      Types::Bases::Void.new(location: nil)
                    ], type.types
-      assert_equal "[any, nil, void]", type.location.source
+      assert_equal "[untyped, nil, void]", type.location.source
     end
 
     assert_raises Parser::SyntaxError do
-      Parser.parse_type("[any]")
+      Parser.parse_type("[untyped]")
     end
   end
 
   def test_union_intersection
-    Parser.parse_type("any | void | nil").yield_self do |type|
+    Parser.parse_type("untyped | void | nil").yield_self do |type|
       assert_instance_of Types::Union, type
 
       assert_equal [
@@ -184,10 +189,10 @@ class Ruby::Signature::TypeParsingTest < Minitest::Test
                      Types::Bases::Nil.new(location: nil)
                    ], type.types
 
-      assert_equal "any | void | nil", type.location.source
+      assert_equal "untyped | void | nil", type.location.source
     end
 
-    Parser.parse_type("any & void & nil").yield_self do |type|
+    Parser.parse_type("untyped & void & nil").yield_self do |type|
       assert_instance_of Types::Intersection, type
 
       assert_equal [
@@ -196,28 +201,28 @@ class Ruby::Signature::TypeParsingTest < Minitest::Test
                      Types::Bases::Nil.new(location: nil)
                    ], type.types
 
-      assert_equal "any & void & nil", type.location.source
+      assert_equal "untyped & void & nil", type.location.source
     end
 
-    Parser.parse_type("any | void & nil").yield_self do |type|
+    Parser.parse_type("untyped | void & nil").yield_self do |type|
       assert_instance_of Types::Union, type
       assert_instance_of Types::Intersection, type.types[1]
 
-      assert_equal "any | void & nil", type.location.source
+      assert_equal "untyped | void & nil", type.location.source
     end
 
-    Parser.parse_type("any & void | nil").yield_self do |type|
+    Parser.parse_type("untyped & void | nil").yield_self do |type|
       assert_instance_of Types::Union, type
       assert_instance_of Types::Intersection, type.types[0]
 
-      assert_equal "any & void | nil", type.location.source
+      assert_equal "untyped & void | nil", type.location.source
     end
 
-    Parser.parse_type("any & (void | nil)").yield_self do |type|
+    Parser.parse_type("untyped & (void | nil)").yield_self do |type|
       assert_instance_of Types::Intersection, type
       assert_instance_of Types::Union, type.types[1]
 
-      assert_equal "any & (void | nil)", type.location.source
+      assert_equal "untyped & (void | nil)", type.location.source
     end
   end
 
@@ -254,7 +259,7 @@ class Ruby::Signature::TypeParsingTest < Minitest::Test
       assert_equal "^() -> void", type.location.source
     end
 
-    Parser.parse_type("^(any) -> void").yield_self do |type|
+    Parser.parse_type("^(untyped) -> void").yield_self do |type|
       assert_instance_of Types::Proc, type
 
       fun = type.type
@@ -269,10 +274,10 @@ class Ruby::Signature::TypeParsingTest < Minitest::Test
       assert_equal({}, fun.optional_keywords)
       assert_nil fun.rest_keywords
 
-      assert_equal "^(any) -> void", type.location.source
+      assert_equal "^(untyped) -> void", type.location.source
     end
 
-    Parser.parse_type("^(any, void) -> void").yield_self do |type|
+    Parser.parse_type("^(untyped, void) -> void").yield_self do |type|
       assert_instance_of Types::Proc, type
 
       fun = type.type
@@ -288,10 +293,10 @@ class Ruby::Signature::TypeParsingTest < Minitest::Test
       assert_equal({}, fun.optional_keywords)
       assert_nil fun.rest_keywords
 
-      assert_equal "^(any, void) -> void", type.location.source
+      assert_equal "^(untyped, void) -> void", type.location.source
     end
 
-    Parser.parse_type("^(any x, void _y) -> void").yield_self do |type|
+    Parser.parse_type("^(untyped x, void _y) -> void").yield_self do |type|
       assert_instance_of Types::Proc, type
 
       fun = type.type
@@ -307,10 +312,10 @@ class Ruby::Signature::TypeParsingTest < Minitest::Test
       assert_equal({}, fun.optional_keywords)
       assert_nil fun.rest_keywords
 
-      assert_equal "^(any x, void _y) -> void", type.location.source
+      assert_equal "^(untyped x, void _y) -> void", type.location.source
     end
 
-    Parser.parse_type("^(any x, ?void, ?nil y) -> void").yield_self do |type|
+    Parser.parse_type("^(untyped x, ?void, ?nil y) -> void").yield_self do |type|
       assert_instance_of Types::Proc, type
 
       fun = type.type
@@ -328,10 +333,10 @@ class Ruby::Signature::TypeParsingTest < Minitest::Test
       assert_equal({}, fun.optional_keywords)
       assert_nil fun.rest_keywords
 
-      assert_equal "^(any x, ?void, ?nil y) -> void", type.location.source
+      assert_equal "^(untyped x, ?void, ?nil y) -> void", type.location.source
     end
 
-    Parser.parse_type("^(any x, ?void, ?nil y, *any a) -> void").yield_self do |type|
+    Parser.parse_type("^(untyped x, ?void, ?nil y, *untyped a) -> void").yield_self do |type|
       assert_instance_of Types::Proc, type
 
       fun = type.type
@@ -350,10 +355,10 @@ class Ruby::Signature::TypeParsingTest < Minitest::Test
       assert_equal({}, fun.optional_keywords)
       assert_nil fun.rest_keywords
 
-      assert_equal "^(any x, ?void, ?nil y, *any a) -> void", type.location.source
+      assert_equal "^(untyped x, ?void, ?nil y, *untyped a) -> void", type.location.source
     end
 
-    Parser.parse_type("^(any x, *any a, nil z) -> void").yield_self do |type|
+    Parser.parse_type("^(untyped x, *untyped a, nil z) -> void").yield_self do |type|
       assert_instance_of Types::Proc, type
 
       fun = type.type
@@ -371,10 +376,10 @@ class Ruby::Signature::TypeParsingTest < Minitest::Test
       assert_equal({}, fun.optional_keywords)
       assert_nil fun.rest_keywords
 
-      assert_equal "^(any x, *any a, nil z) -> void", type.location.source
+      assert_equal "^(untyped x, *untyped a, nil z) -> void", type.location.source
     end
 
-    Parser.parse_type("^(foo: any, _bar: nil bar) -> void").yield_self do |type|
+    Parser.parse_type("^(foo: untyped, _bar: nil bar) -> void").yield_self do |type|
       assert_instance_of Types::Proc, type
 
       fun = type.type
@@ -390,10 +395,10 @@ class Ruby::Signature::TypeParsingTest < Minitest::Test
       assert_equal({}, fun.optional_keywords)
       assert_nil fun.rest_keywords
 
-      assert_equal "^(foo: any, _bar: nil bar) -> void", type.location.source
+      assert_equal "^(foo: untyped, _bar: nil bar) -> void", type.location.source
     end
 
-    Parser.parse_type("^(?_bar: nil, **any rest) -> void").yield_self do |type|
+    Parser.parse_type("^(?_bar: nil, **untyped rest) -> void").yield_self do |type|
       assert_instance_of Types::Proc, type
 
       fun = type.type
@@ -409,23 +414,23 @@ class Ruby::Signature::TypeParsingTest < Minitest::Test
       assert_equal Types::Function::Param.new(type: Types::Bases::Any.new(location: nil),
                                               name: :rest), fun.rest_keywords
 
-      assert_equal "^(?_bar: nil, **any rest) -> void", type.location.source
+      assert_equal "^(?_bar: nil, **untyped rest) -> void", type.location.source
     end
   end
 
   def test_optional
-    Parser.parse_type("any?").yield_self do |type|
+    Parser.parse_type("untyped?").yield_self do |type|
       assert_instance_of Types::Optional, type
       assert_instance_of Types::Bases::Any, type.type
 
-      assert_equal "any?", type.location.source
+      assert_equal "untyped?", type.location.source
     end
 
-    Parser.parse_type("^() -> any?").yield_self do |type|
+    Parser.parse_type("^() -> untyped?").yield_self do |type|
       assert_instance_of Types::Proc, type
     end
 
-    Parser.parse_type("any | void?").yield_self do |type|
+    Parser.parse_type("untyped | void?").yield_self do |type|
       assert_instance_of Types::Union, type
     end
   end
@@ -454,13 +459,13 @@ class Ruby::Signature::TypeParsingTest < Minitest::Test
   end
 
   def test_record
-    Parser.parse_type("{ foo: any, 3 => 'hoge' }").yield_self do |type|
+    Parser.parse_type("{ foo: untyped, 3 => 'hoge' }").yield_self do |type|
       assert_instance_of Types::Record, type
       assert_equal({
                      foo: Types::Bases::Any.new(location: nil),
                      3 => Types::Literal.new(literal: "hoge", location: nil)
                    }, type.fields)
-      assert_equal "{ foo: any, 3 => 'hoge' }", type.location.source
+      assert_equal "{ foo: untyped, 3 => 'hoge' }", type.location.source
     end
   end
 

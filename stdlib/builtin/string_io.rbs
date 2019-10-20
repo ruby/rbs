@@ -1,6 +1,6 @@
 class StringIO
-  def initialize: (?String, ?String) -> any
-  def puts: (*any) -> void
+  def initialize: (?String, ?String) -> untyped
+  def puts: (*untyped) -> void
   def readline: () -> String
               | (String) -> String
   def write: (String) -> void

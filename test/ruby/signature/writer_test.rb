@@ -110,7 +110,7 @@ interface _Each[X, Y]
 
   def `def`: () -> Symbol
 
-  def `: (String) -> any
+  def `: (String) -> untyped
 end
     SIG
   end

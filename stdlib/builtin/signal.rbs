@@ -50,6 +50,6 @@ module Signal
 
   def self.signame: (Integer arg0) -> String?
 
-  def self.trap: (Integer | String | Symbol signal, ?any command) -> (String | Proc)
-               | (Integer | String | Symbol signal) { (Integer arg0) -> any } -> (String | Proc)
+  def self.trap: (Integer | String | Symbol signal, ?untyped command) -> (String | Proc)
+               | (Integer | String | Symbol signal) { (Integer arg0) -> untyped } -> (String | Proc)
 end

@@ -4,7 +4,7 @@ class Ruby::Signature::Parser
         tANNOTATION
         tSTRING tSYMBOL tINTEGER tWRITE_ATTR
         kLPAREN kRPAREN kLBRACKET kRBRACKET kLBRACE kRBRACE
-        kVOID kNIL kANY kTOP kBOT kSELF kSELFQ kINSTANCE kCLASS kBOOL kSINGLETON kTYPE kDEF kMODULE kSUPER
+        kVOID kNIL kANY kUNTYPED kTOP kBOT kSELF kSELFQ kINSTANCE kCLASS kBOOL kSINGLETON kTYPE kDEF kMODULE kSUPER
         kPRIVATE kPUBLIC kALIAS
         kCOLON kCOLON2 kCOMMA kBAR kAMP kHAT kARROW kQUESTION kEXCLAMATION kSTAR kSTAR2 kFATARROW kEQ kDOT kLT
         kINTERFACE kEND kINCLUDE kEXTEND kATTRREADER kATTRWRITER kATTRACCESSOR tOPERATOR tQUOTEDMETHOD
@@ -502,7 +502,7 @@ rule
   method_name0: tUIDENT | tLIDENT | identifier_keywords
 
   identifier_keywords:
-      kCLASS | kVOID | kNIL | kANY | kTOP | kBOT | kINSTANCE | kBOOL | kSINGLETON
+      kCLASS | kVOID | kNIL | kANY | kUNTYPED | kTOP | kBOT | kINSTANCE | kBOOL | kSINGLETON
     | kTYPE | kMODULE | kPRIVATE | kPUBLIC | kEND | kINCLUDE | kEXTEND | kPREPEND
     | kATTRREADER | kATTRACCESSOR | kATTRWRITER | kDEF | kEXTENSION | kSELF | kINCOMPATIBLE
     | kUNCHECKED
@@ -646,6 +646,10 @@ rule
         result = Types::Bases::Void.new(location: val[0].location)
       }
     | kANY {
+        Ruby::Signature.logger.warn "`any` type is deprecated. Use `untyped` instead. (#{val[0].location.to_s})"
+        result = Types::Bases::Any.new(location: val[0].location)
+      }
+    | kUNTYPED {
         result = Types::Bases::Any.new(location: val[0].location)
       }
     | kBOOL {
@@ -1141,6 +1145,7 @@ KEYWORDS = {
   "self" => :kSELF,
   "void" => :kVOID,
   "any" => :kANY,
+  "untyped" => :kUNTYPED,
   "top" => :kTOP,
   "bot" => :kBOT,
   "instance" => :kINSTANCE,

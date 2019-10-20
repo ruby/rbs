@@ -31,10 +31,10 @@ class Struct[Elem] < Object
 
   def initialize: (Symbol | String arg0, *Symbol | String arg1, ?keyword_init: bool keyword_init) -> void
 
-  def each: () { (Elem arg0) -> any } -> any
+  def each: () { (Elem arg0) -> untyped } -> untyped
           | () -> self
 
   def self.members: () -> ::Array[Symbol]
 
-  def new: (*any args) -> Struct[any]
+  def new: (*untyped args) -> Struct[untyped]
 end

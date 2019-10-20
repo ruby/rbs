@@ -100,5 +100,5 @@ class Object < BasicObject
   # # does not meet condition, drop value
   # 2.yield_self.detect(&:odd?)            # => nil
   # ```
-  def then: () { (any arg) -> any } -> any
+  def then: () { (untyped arg) -> untyped } -> untyped
 end

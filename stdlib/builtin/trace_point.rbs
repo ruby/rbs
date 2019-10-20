@@ -9,7 +9,7 @@ class TracePoint < Object
   # 
   # This method is only for debugging
   # [TracePoint](TracePoint.downloaded.ruby_doc) itself.
-  def self.stat: () -> any
+  def self.stat: () -> untyped
 
   def self.trace: (*Symbol events) { (TracePoint tp) -> void } -> TracePoint
 
@@ -75,10 +75,10 @@ class TracePoint < Object
   def path: () -> String
 
   # Value from exception raised on the `:raise` event
-  def raised_exception: () -> any
+  def raised_exception: () -> untyped
 
   # Return value from `:return`, `c_return`, and `b_return` event
-  def return_value: () -> any
+  def return_value: () -> untyped
 
   # Return the trace object during event
   # 
