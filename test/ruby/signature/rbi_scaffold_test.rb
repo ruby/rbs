@@ -164,7 +164,7 @@ end
 
     assert_write parser.decls, <<-EOF
 class Hello
-  def hello: [U] (U arg0) { (Elem arg0) -> any } -> ::Array[U]
+  def hello: [U] (U arg0) { (Elem arg0) -> untyped } -> ::Array[U]
 end
     EOF
   end
@@ -203,8 +203,8 @@ end
 class Class
   def initialize: () -> void
                 | (?Class superclass) -> void
-                | () { (Class arg0) -> any } -> void
-                | (?Class superclass) { (Class arg0) -> any } -> void
+                | () { (Class arg0) -> untyped } -> void
+                | (?Class superclass) { (Class arg0) -> untyped } -> void
 end
     EOF
   end
@@ -325,7 +325,7 @@ end
 
     assert_write parser.decls, <<-EOF
 class Foo
-  def hello: () -> any
+  def hello: () -> untyped
 end
     EOF
   end

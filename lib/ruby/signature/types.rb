@@ -57,7 +57,7 @@ module Ruby
             when Types::Bases::Void
               'void'
             when Types::Bases::Any
-              'any'
+              'untyped'
             when Types::Bases::Nil
               'nil'
             when Types::Bases::Top
