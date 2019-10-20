@@ -30,3 +30,24 @@ require "ruby/signature/writer"
 require "ruby/signature/scaffold/rbi"
 
 require "ruby/signature/parser"
+
+module Ruby::Signature
+  class <<self
+    attr_reader :logger_level
+    attr_reader :logger_output
+
+    def logger
+      @logger ||= Logger.new(logger_output || STDERR, level: logger_level || "warn", progname: "ruby-signature")
+    end
+
+    def logger_output=(val)
+      @logger_output = val
+      @logger = nil
+    end
+
+    def logger_level=(level)
+      @logger_level = level
+      @logger = nil
+    end
+  end
+end
