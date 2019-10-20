@@ -18,6 +18,11 @@ class Ruby::Signature::TypeParsingTest < Minitest::Test
       assert_equal "any", type.location.source
     end
 
+    Parser.parse_type("untyped").yield_self do |type|
+      assert_instance_of Types::Bases::Any, type
+      assert_equal "untyped", type.location.source
+    end
+
     Parser.parse_type("bool").yield_self do |type|
       assert_instance_of Types::Bases::Bool, type
       assert_equal "bool", type.location.source
