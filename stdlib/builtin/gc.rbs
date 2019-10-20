@@ -95,7 +95,7 @@ module GC::Profiler
 
   def self.enabled?: () -> bool
 
-  def self.raw_data: () -> ::Array[::Hash[Symbol, any]]
+  def self.raw_data: () -> ::Array[::Hash[Symbol, untyped]]
 
   def self.report: (?IO io) -> void
 

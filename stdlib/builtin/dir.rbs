@@ -19,7 +19,7 @@ class Dir < Object
 
   def self.exist?: (String file) -> bool
 
-  def self.foreach: (String dir, ?Encoding arg0) { (String arg0) -> any } -> NilClass
+  def self.foreach: (String dir, ?Encoding arg0) { (String arg0) -> untyped } -> NilClass
                   | (String dir, ?Encoding arg0) -> ::Enumerator[String, self]
 
   # Returns the path to the current working directory of this process as a
@@ -33,7 +33,7 @@ class Dir < Object
   def self.getwd: () -> String
 
   def self.glob: (String | ::Array[String] pattern, ?Integer flags) -> ::Array[String]
-               | (String | ::Array[String] pattern, ?Integer flags) { (String arg0) -> any } -> NilClass
+               | (String | ::Array[String] pattern, ?Integer flags) { (String arg0) -> untyped } -> NilClass
 
   def self.home: (?String arg0) -> String
 
@@ -65,7 +65,7 @@ class Dir < Object
   # ```
   def close: () -> NilClass
 
-  def each: () { (String arg0) -> any } -> self
+  def each: () { (String arg0) -> untyped } -> self
           | () -> ::Enumerator[String, self]
 
   # Returns the file descriptor used in *dir* .
@@ -140,5 +140,5 @@ class Dir < Object
   def to_path: () -> String?
 
   def self.[]: (String | ::Array[String] pattern, ?Integer flags) -> ::Array[String]
-             | (String | ::Array[String] pattern, ?Integer flags) { (String arg0) -> any } -> NilClass
+             | (String | ::Array[String] pattern, ?Integer flags) { (String arg0) -> untyped } -> NilClass
 end

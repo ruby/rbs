@@ -178,19 +178,19 @@ class Hash[K, V] < Object
   def delete: (K arg0) -> V?
             | [U] (K arg0) { (K arg0) -> U } -> (U | V)
 
-  def delete_if: () { (K arg0, V arg1) -> any } -> ::Hash[K, V]
+  def delete_if: () { (K arg0, V arg1) -> untyped } -> ::Hash[K, V]
                | () -> ::Enumerator[[ K, V ], self]
 
-  def each: () { ([ K, V ] arg0) -> any } -> ::Hash[K, V]
+  def each: () { ([ K, V ] arg0) -> untyped } -> ::Hash[K, V]
           | () -> ::Enumerator[[ K, V ], self]
 
-  def each_key: () { (K arg0) -> any } -> ::Hash[K, V]
+  def each_key: () { (K arg0) -> untyped } -> ::Hash[K, V]
               | () -> ::Enumerator[[ K, V ], self]
 
-  def each_pair: () { (K arg0, V arg1) -> any } -> ::Hash[K, V]
+  def each_pair: () { (K arg0, V arg1) -> untyped } -> ::Hash[K, V]
                | () -> ::Enumerator[[ K, V ], self]
 
-  def each_value: () { (V arg0) -> any } -> ::Hash[K, V]
+  def each_value: () { (V arg0) -> untyped } -> ::Hash[K, V]
                 | () -> ::Enumerator[[ K, V ], self]
 
   # Returns `true` if *hsh* contains no key-value pairs.
@@ -209,8 +209,8 @@ class Hash[K, V] < Object
   def has_value?: (V arg0) -> bool
 
   def initialize: () -> void
-                | (?any default) -> void
-                | () { (Hash[any, any] hash, any key) -> any } -> void
+                | (?untyped default) -> void
+                | () { (Hash[untyped, untyped] hash, untyped key) -> untyped } -> void
 
   # Return the contents of this hash as a string.
   # 
@@ -256,7 +256,7 @@ class Hash[K, V] < Object
   # ```
   def invert: () -> ::Hash[V, K]
 
-  def keep_if: () { (K arg0, V arg1) -> any } -> ::Hash[K, V]
+  def keep_if: () { (K arg0, V arg1) -> untyped } -> ::Hash[K, V]
              | () -> ::Enumerator[[ K, V ], self]
 
   def key: (V arg0) -> K?
@@ -321,13 +321,13 @@ class Hash[K, V] < Object
   # h.reject {|k,v| v > 100}  #=> {"a" => 100}
   # ```
   def reject: () -> ::Enumerator[[ K, V ], self]
-            | () { (K arg0, V arg1) -> any } -> ::Hash[K, V]
+            | () { (K arg0, V arg1) -> untyped } -> ::Hash[K, V]
 
-  def reject!: () { (K arg0, V arg1) -> any } -> ::Hash[K, V]
+  def reject!: () { (K arg0, V arg1) -> untyped } -> ::Hash[K, V]
 
-  def select: () { (K arg0, V arg1) -> any } -> ::Hash[K, V]
+  def select: () { (K arg0, V arg1) -> untyped } -> ::Hash[K, V]
 
-  def select!: () { (K arg0, V arg1) -> any } -> ::Hash[K, V]
+  def select!: () { (K arg0, V arg1) -> untyped } -> ::Hash[K, V]
 
   # Removes a key-value pair from *hsh* and returns it as the two-item array
   # `[` *key, value* `]`, or the hash’s default value if the hash is empty.

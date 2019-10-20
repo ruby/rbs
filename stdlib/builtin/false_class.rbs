@@ -5,14 +5,14 @@
 class FalseClass
   # And—Returns `false` . *obj* is always evaluated as it is the argument to
   # a method call—there is no short-circuit evaluation in this case.
-  def &: (any obj) -> FalseClass
+  def &: (untyped obj) -> FalseClass
 
   # Exclusive Or—If *obj* is `nil` or `false`, returns `false` ; otherwise,
   # returns `true` .
-  def ^: (any obj) -> bool
+  def ^: (untyped obj) -> bool
 
   # Or—Returns `false` if *obj* is `nil` or `false` ; `true` otherwise.
-  def |: (any obj) -> bool
+  def |: (untyped obj) -> bool
 
   def !: () -> TrueClass
 end

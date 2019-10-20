@@ -58,9 +58,9 @@ class Module < Object
 
   def <=>: (Module other) -> Integer?
 
-  def ==: (any other) -> bool
+  def ==: (untyped other) -> bool
 
-  def ===: (any other) -> bool
+  def ===: (untyped other) -> bool
 
   def >: (Module other) -> bool?
 
@@ -96,39 +96,39 @@ class Module < Object
 
   def autoload?: (Symbol name) -> String?
 
-  def class_eval: (String arg0, ?String filename, ?Integer lineno) -> any
-                | [U] (any arg0) { (any m) -> U } -> U
+  def class_eval: (String arg0, ?String filename, ?Integer lineno) -> untyped
+                | [U] (untyped arg0) { (untyped m) -> U } -> U
 
-  def class_exec: (*any args) { () -> any } -> any
+  def class_exec: (*untyped args) { () -> untyped } -> untyped
 
   def class_variable_defined?: (Symbol | String arg0) -> bool
 
-  def class_variable_get: (Symbol | String arg0) -> any
+  def class_variable_get: (Symbol | String arg0) -> untyped
 
-  def class_variable_set: (Symbol | String arg0, any arg1) -> any
+  def class_variable_set: (Symbol | String arg0, untyped arg1) -> untyped
 
   def class_variables: (?bool inherit) -> ::Array[Symbol]
 
   def const_defined?: (Symbol | String arg0, ?bool inherit) -> bool
 
-  def const_get: (Symbol | String arg0, ?bool inherit) -> any
+  def const_get: (Symbol | String arg0, ?bool inherit) -> untyped
 
-  def const_missing: (Symbol arg0) -> any
+  def const_missing: (Symbol arg0) -> untyped
 
-  def const_set: (Symbol | String arg0, any arg1) -> any
+  def const_set: (Symbol | String arg0, untyped arg1) -> untyped
 
   def constants: (?bool inherit) -> ::Array[Symbol]
 
   def define_method: (Symbol | String arg0, ?Proc | Method | UnboundMethod arg1) -> Symbol
-                   | (Symbol | String arg0) { () -> any } -> Symbol
+                   | (Symbol | String arg0) { () -> untyped } -> Symbol
 
-  def eql?: (any other) -> bool
+  def eql?: (untyped other) -> bool
 
-  def equal?: (any other) -> bool
+  def equal?: (untyped other) -> bool
 
-  def extend_object: (any arg0) -> any
+  def extend_object: (untyped arg0) -> untyped
 
-  def extended: (Module othermod) -> any
+  def extended: (Module othermod) -> untyped
 
   # Prevents further modifications to *mod* .
   # 
@@ -139,7 +139,7 @@ class Module < Object
 
   def `include?`: (Module arg0) -> bool
 
-  def included: (Module othermod) -> any
+  def included: (Module othermod) -> untyped
 
   # Returns the list of modules included in *mod* .
   # 
@@ -157,22 +157,22 @@ class Module < Object
   def included_modules: () -> ::Array[Module]
 
   def initialize: () -> Object
-                | () { (Module arg0) -> any } -> void
+                | () { (Module arg0) -> untyped } -> void
 
   def instance_method: (Symbol arg0) -> UnboundMethod
 
   def instance_methods: (?bool include_super) -> ::Array[Symbol]
 
-  def method_added: (Symbol meth) -> any
+  def method_added: (Symbol meth) -> untyped
 
   def method_defined?: (Symbol | String arg0) -> bool
 
-  def method_removed: (Symbol method_name) -> any
+  def method_removed: (Symbol method_name) -> untyped
 
-  def module_eval: (String arg0, ?String filename, ?Integer lineno) -> any
-                 | [U] (any arg0) { (any m) -> U } -> U
+  def module_eval: (String arg0, ?String filename, ?Integer lineno) -> untyped
+                 | [U] (untyped arg0) { (untyped m) -> U } -> U
 
-  def module_exec: (*any args) { () -> any } -> any
+  def module_exec: (*untyped args) { () -> untyped } -> untyped
 
   def module_function: (*Symbol | String arg0) -> self
 
@@ -184,7 +184,7 @@ class Module < Object
 
   def prepend_features: (Module arg0) -> self
 
-  def prepended: (Module othermod) -> any
+  def prepended: (Module othermod) -> untyped
 
   def `private`: (*Symbol | String arg0) -> self
 
@@ -214,11 +214,11 @@ class Module < Object
 
   def public_method_defined?: (Symbol | String arg0) -> bool
 
-  def refine: (Class arg0) { (any arg0) -> any } -> self
+  def refine: (Class arg0) { (untyped arg0) -> untyped } -> self
 
-  def remove_class_variable: (Symbol arg0) -> any
+  def remove_class_variable: (Symbol arg0) -> untyped
 
-  def remove_const: (Symbol arg0) -> any
+  def remove_const: (Symbol arg0) -> untyped
 
   def remove_method: (Symbol | String arg0) -> self
 

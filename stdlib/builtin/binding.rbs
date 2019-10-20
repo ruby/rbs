@@ -64,7 +64,7 @@ class Binding < Object
   # ```ruby
   # binding.eval("#{symbol}")
   # ```
-  def local_variable_get: (String | Symbol symbol) -> any
+  def local_variable_get: (String | Symbol symbol) -> untyped
 
   # Set local variable named `symbol` as `obj`.
   # 
@@ -90,7 +90,7 @@ class Binding < Object
   # ```
   # 
   # if `obj` can be dumped in Ruby code.
-  def local_variable_set: (String | Symbol symbol, any obj) -> any
+  def local_variable_set: (String | Symbol symbol, untyped obj) -> untyped
 
   # Returns the bound receiver of the binding object.
   def receiver: () -> Object

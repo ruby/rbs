@@ -36,24 +36,24 @@
 module Comparable
   # Compares two objects based on the receiver’s `<=>` method, returning
   # true if it returns -1.
-  def <: (any other) -> bool
+  def <: (untyped other) -> bool
 
   # Compares two objects based on the receiver’s `<=>` method, returning
   # true if it returns -1 or 0.
-  def <=: (any other) -> bool
+  def <=: (untyped other) -> bool
 
   # Compares two objects based on the receiver’s `<=>` method, returning
   # true if it returns 0. Also returns true if *obj* and *other* are the
   # same object.
-  def ==: (any other) -> bool
+  def ==: (untyped other) -> bool
 
   # Compares two objects based on the receiver’s `<=>` method, returning
   # true if it returns 1.
-  def >: (any other) -> bool
+  def >: (untyped other) -> bool
 
   # Compares two objects based on the receiver’s `<=>` method, returning
   # true if it returns 0 or 1.
-  def >=: (any other) -> bool
+  def >=: (untyped other) -> bool
 
   # Returns `false` if *obj* `<=>` *min* is less than zero or if *anObject*
   # `<=>` *max* is greater than zero, `true` otherwise.
@@ -64,7 +64,7 @@ module Comparable
   # 'cat'.between?('ant', 'dog')   #=> true
   # 'gnu'.between?('ant', 'dog')   #=> false
   # ```
-  def between?: (any min, any max) -> bool
+  def between?: (untyped min, untyped max) -> bool
 
   # Returns *min* if *obj* `<=>` *min* is less than zero, *max* if *obj*
   # `<=>` *max* is greater than zero and *obj* otherwise.
@@ -77,5 +77,5 @@ module Comparable
   # 'd'.clamp('a', 'f')      #=> 'd'
   # 'z'.clamp('a', 'f')      #=> 'f'
   # ```
-  def clamp: (any min, any max) -> any
+  def clamp: (untyped min, untyped max) -> untyped
 end

@@ -122,7 +122,7 @@
 # 
 #   - fatal – impossible to rescue
 class Exception < Object
-  def ==: (any arg0) -> bool
+  def ==: (untyped arg0) -> bool
 
   # Returns any backtrace associated with the exception. The backtrace is an
   # array of strings, each containing either “filename:lineNo: in \`method”‘

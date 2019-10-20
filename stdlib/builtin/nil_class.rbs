@@ -1,8 +1,8 @@
 # The class of the singleton object `nil` .
 class NilClass < Object
-  def &: (any obj) -> FalseClass
+  def &: (untyped obj) -> FalseClass
 
-  def ^: (any obj) -> bool
+  def ^: (untyped obj) -> bool
 
   # Returns zero as a rational. The optional argument `eps` is always
   # ignored.
@@ -13,7 +13,7 @@ class NilClass < Object
   # ```ruby
   # nil.to_a   #=> []
   # ```
-  def to_a: () -> any
+  def to_a: () -> untyped
 
   # Returns zero as a complex.
   def to_c: () -> Complex
@@ -30,12 +30,12 @@ class NilClass < Object
   # ```ruby
   # nil.to_h   #=> {}
   # ```
-  def to_h: () -> ::Hash[any, any]
+  def to_h: () -> ::Hash[untyped, untyped]
 
   # Returns zero as a rational.
   def to_r: () -> Rational
 
-  def |: (any obj) -> bool
+  def |: (untyped obj) -> bool
 
   # Only the object *nil* responds `true` to `nil?` .
   def `nil?`: () -> TrueClass

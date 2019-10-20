@@ -118,7 +118,7 @@ class UnboundMethod
   #     In test, class = B
   #     prog.rb:16:in `bind': bind argument must be an instance of B (TypeError)
   #      from prog.rb:16
-  def bind: (any obj) -> Method
+  def bind: (untyped obj) -> Method
 
   # Returns the name of the method.
   def name: () -> Symbol

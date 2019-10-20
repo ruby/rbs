@@ -92,9 +92,9 @@ class Range[Elem] < Object
 
   def self.new: [U] (U from, U to, ?bool exclude_end) -> ::Range[U]
 
-  def ==: (any obj) -> bool
+  def ==: (untyped obj) -> bool
 
-  def ===: (any obj) -> bool
+  def ===: (untyped obj) -> bool
 
   # Returns the object that defines the beginning of the range.
   # 
@@ -105,9 +105,9 @@ class Range[Elem] < Object
 
   def bsearch: [U] () { (Elem arg0) -> bool } -> U?
 
-  def cover?: (any obj) -> bool
+  def cover?: (untyped obj) -> bool
 
-  def each: () { (Elem arg0) -> any } -> self
+  def each: () { (Elem arg0) -> untyped } -> self
           | () -> ::Enumerator[Elem, self]
 
   # Returns the object that defines the end of the range.
@@ -144,7 +144,7 @@ class Range[Elem] < Object
   # See also Object\#hash.
   def hash: () -> Integer
 
-  def `include?`: (any obj) -> bool
+  def `include?`: (untyped obj) -> bool
 
   def initialize: (Elem _begin, Elem _end, ?bool exclude_end) -> void
 
@@ -211,7 +211,7 @@ class Range[Elem] < Object
   # ```
   def size: () -> Integer?
 
-  def step: (?Integer n) { (Elem arg0) -> any } -> self
+  def step: (?Integer n) { (Elem arg0) -> untyped } -> self
           | (?Integer n) -> ::Enumerator[Elem, self]
 
   # Convert this range object to a printable form (using
@@ -219,7 +219,7 @@ class Range[Elem] < Object
   # and end objects).
   def to_s: () -> String
 
-  def eql?: (any obj) -> bool
+  def eql?: (untyped obj) -> bool
 
-  def member?: (any obj) -> bool
+  def member?: (untyped obj) -> bool
 end

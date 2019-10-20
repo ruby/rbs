@@ -24,7 +24,7 @@
 class Random < Object
   include Random::Formatter
 
-  def ==: (any arg0) -> bool
+  def ==: (untyped arg0) -> bool
 
   def bytes: (Integer size) -> String
 

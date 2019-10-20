@@ -10,7 +10,7 @@ class Method < Object
   # m.call(3)    #=> 15
   # m.call(20)   #=> 32
   # ```
-  def call: (*any args) -> any
+  def call: (*untyped args) -> untyped
 
   # Returns a proc that is the composition of this method and the given *g*
   # . The returned proc takes a variable number of arguments, calls *g* with
@@ -25,7 +25,7 @@ class Method < Object
   # g = proc {|x| x + x }
   # p (f << g).call(2) #=> 16
   # ```
-  def <<: (any g) -> any
+  def <<: (untyped g) -> untyped
 
   # Invokes the method with `obj` as the parameter like
   # [call](Method.downloaded.ruby_doc#method-i-call). This allows a method
@@ -39,7 +39,7 @@ class Method < Object
   #   # ...
   # end
   # ```
-  def ===: (*any obj) -> any
+  def ===: (*untyped obj) -> untyped
 
   # Returns a proc that is the composition of this method and the given *g*
   # . The returned proc takes a variable number of arguments, calls *g* with
@@ -54,7 +54,7 @@ class Method < Object
   # g = proc {|x| x + x }
   # p (f >> g).call(2) #=> 8
   # ```
-  def >>: (any g) -> any
+  def >>: (untyped g) -> untyped
 
   # Invokes the *meth* with the specified arguments, returning the method’s
   # return value.
@@ -64,7 +64,7 @@ class Method < Object
   # m.call(3)    #=> 15
   # m.call(20)   #=> 32
   # ```
-  def []: (*any args) -> any
+  def []: (*untyped args) -> untyped
 
   # Returns an indication of the number of arguments accepted by a method.
   # Returns a nonnegative integer for methods that take a fixed number of
@@ -120,7 +120,7 @@ class Method < Object
   # ```
   def clone: () -> Method
 
-  def curry: (*any args) -> any
+  def curry: (*untyped args) -> untyped
 
   # Returns the name of the method.
   def name: () -> Symbol
@@ -158,18 +158,18 @@ class Method < Object
   # def foo(bar, baz, *args, &blk); end
   # method(:foo).parameters #=> [[:req, :bar], [:req, :baz], [:rest, :args], [:block, :blk]]
   # ```
-  def parameters: () -> ::Array[any]
+  def parameters: () -> ::Array[untyped]
 
   # Returns the bound receiver of the method object.
   # 
   # ```ruby
   # (1..3).method(:map).receiver # => 1..3
   # ```
-  def receiver: () -> any
+  def receiver: () -> untyped
 
   # Returns the Ruby source filename and line number containing this method
   # or nil if this method was not defined in Ruby (i.e. native).
-  def source_location: () -> any
+  def source_location: () -> untyped
 
   # Returns a [Method](Method.downloaded.ruby_doc) of superclass which would
   # be called when super is used or nil if there is no method on superclass.
@@ -178,5 +178,5 @@ class Method < Object
   # Dissociates *meth* from its current receiver. The resulting
   # `UnboundMethod` can subsequently be bound to a new object of the same
   # class (see `UnboundMethod` ).
-  def unbind: () -> any
+  def unbind: () -> untyped
 end

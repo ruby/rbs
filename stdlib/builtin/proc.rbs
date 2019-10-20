@@ -258,9 +258,9 @@ class Proc < Object
   # ```
   def binding: () -> Binding
 
-  def call: (*any arg0) -> any
+  def call: (*untyped arg0) -> untyped
 
-  def []: (*any arg0) -> any
+  def []: (*untyped arg0) -> untyped
 
   def curry: (?Integer arity) -> Proc
 

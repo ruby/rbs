@@ -191,7 +191,7 @@ class Thread < Object
   # Returns the main thread.
   def self.main: () -> Thread
 
-  def []: (String | Symbol key) -> any
+  def []: (String | Symbol key) -> untyped
 
   # Attribute Assignment—Sets or creates the value of a fiber-local
   # variable, using either a symbol or a string.
@@ -203,7 +203,7 @@ class Thread < Object
   # and
   # [thread\_variable\_get](Thread.downloaded.ruby_doc#method-i-thread_variable_get)
   # .
-  def []=: (String | Symbol key, any value) -> any
+  def []=: (String | Symbol key, untyped value) -> untyped
 
   def alive?: () -> bool
 
@@ -240,7 +240,7 @@ class Thread < Object
   # There is also a class level method to set this for all threads, see
   # [::abort\_on\_exception=](Thread.downloaded.ruby_doc#method-c-abort_on_exception-3D)
   # .
-  def abort_on_exception=: (bool abort_on_exception) -> any
+  def abort_on_exception=: (bool abort_on_exception) -> untyped
 
   # Adds *proc* as a handler for tracing.
   # 
@@ -249,10 +249,10 @@ class Thread < Object
   # and
   # [Kernel\#set\_trace\_func](https://ruby-doc.org/core-2.6.3/Kernel.html#method-i-set_trace_func)
   # .
-  def add_trace_func: (any proc) -> any
+  def add_trace_func: (untyped proc) -> untyped
 
   # Returns the current backtrace of the target thread.
-  def backtrace: (*any args) -> ::Array[any]
+  def backtrace: (*untyped args) -> ::Array[untyped]
 
   # Returns the execution stack for the target thread—an array containing
   # backtrace location objects.
@@ -264,7 +264,7 @@ class Thread < Object
   # This method behaves similarly to
   # [Kernel\#caller\_locations](https://ruby-doc.org/core-2.6.3/Kernel.html#method-i-caller_locations)
   # except it applies to a specific thread.
-  def backtrace_locations: (*any args) -> ::Array[any]?
+  def backtrace_locations: (*untyped args) -> ::Array[untyped]?
 
   # Terminates `thr` and schedules another thread to be run.
   # 
@@ -283,11 +283,11 @@ class Thread < Object
   # and
   # [Hash\#fetch](https://ruby-doc.org/core-2.6.3/Hash.html#method-i-fetch)
   # .
-  def fetch: (*any sym) -> any
+  def fetch: (*untyped sym) -> untyped
 
   def group: () -> ThreadGroup?
 
-  def initialize: (*any args) -> Thread
+  def initialize: (*untyped args) -> Thread
 
   # The calling thread will suspend execution and run this `thr` .
   # 
@@ -326,7 +326,7 @@ class Thread < Object
   #     Waiting
   #     tick...
   #     tick...
-  def join: (*any limit) -> Thread
+  def join: (*untyped limit) -> Thread
 
   # Returns `true` if the given string (or symbol) exists as a fiber-local
   # variable.
@@ -346,7 +346,7 @@ class Thread < Object
 
   # set given name to the ruby thread. On some platform, it may set the name
   # to pthread and/or kernel.
-  def name=: (any name) -> any
+  def name=: (untyped name) -> untyped
 
   # Returns whether or not the asynchronous queue is empty for the target
   # thread.
@@ -356,7 +356,7 @@ class Thread < Object
   # See
   # [::pending\_interrupt?](Thread.downloaded.ruby_doc#method-c-pending_interrupt-3F)
   # for more information.
-  def pending_interrupt?: (*any args) -> bool
+  def pending_interrupt?: (*untyped args) -> bool
 
   # Returns the priority of *thr* . Default is inherited from the current
   # thread which creating the new thread, or zero for the initial main
@@ -393,7 +393,7 @@ class Thread < Object
   # count1    #=> 622504
   # count2    #=> 5832
   # ```
-  def priority=: (Integer priority) -> any
+  def priority=: (Integer priority) -> untyped
 
   # Returns the status of the thread-local “report on exception” condition
   # for this `thr` .
@@ -424,7 +424,7 @@ class Thread < Object
   # There is also a class level method to set this for all new threads, see
   # [::report\_on\_exception=](Thread.downloaded.ruby_doc#method-c-report_on_exception-3D)
   # .
-  def report_on_exception=: (bool report_on_exception) -> any
+  def report_on_exception=: (bool report_on_exception) -> untyped
 
   # Wakes up `thr`, making it eligible for scheduling.
   # 
@@ -519,14 +519,14 @@ class Thread < Object
   # The value “bar” is returned for the thread local, where nil is returned
   # for the fiber local. The fiber is executed in the same thread, so the
   # thread local values are available.
-  def thread_variable_get: (any key) -> any
+  def thread_variable_get: (untyped key) -> untyped
 
   # Sets a thread local with `key` to `value` . Note that these are local to
   # threads, and not to fibers. Please see
   # [\#thread\_variable\_get](Thread.downloaded.ruby_doc#method-i-thread_variable_get)
   # and [\#\[\]](Thread.downloaded.ruby_doc#method-i-5B-5D) for more
   # information.
-  def thread_variable_set: (any key, any value) -> any
+  def thread_variable_set: (untyped key, untyped value) -> untyped
 
   def thread_variables: () -> ::Array[Symbol]
 
@@ -576,7 +576,7 @@ class Thread < Object
   # thread, see
   # [abort\_on\_exception](Thread.downloaded.ruby_doc#method-i-abort_on_exception)
   # .
-  def self.abort_on_exception: () -> any
+  def self.abort_on_exception: () -> untyped
 
   # When set to `true`, if any thread is aborted by an exception, the
   # raised exception will be re-raised in the main thread. Returns the new
@@ -608,14 +608,14 @@ class Thread < Object
   # thread, see
   # [abort\_on\_exception=](Thread.downloaded.ruby_doc#method-i-abort_on_exception-3D)
   # .
-  def self.abort_on_exception=: (any abort_on_exception) -> any
+  def self.abort_on_exception=: (untyped abort_on_exception) -> untyped
 
   # Wraps the block in a single, VM-global
   # [Mutex\#synchronize](https://ruby-doc.org/core-2.6.3/Mutex.html#method-i-synchronize)
   # , returning the value of the block. A thread executing inside the
   # exclusive section will only block other threads which also use the
   # [::exclusive](Thread.downloaded.ruby_doc#method-c-exclusive) mechanism.
-  def self.exclusive: () { () -> any } -> any
+  def self.exclusive: () { () -> untyped } -> untyped
 
   # Terminates the currently running thread and schedules another thread to
   # be run.
@@ -625,13 +625,13 @@ class Thread < Object
   # [Thread](Thread.downloaded.ruby_doc).
   # 
   # If this is the main thread, or the last thread, exit the process.
-  def self.exit: () -> any
+  def self.exit: () -> untyped
 
   # Basically the same as [::new](Thread.downloaded.ruby_doc#method-c-new).
   # However, if class [Thread](Thread.downloaded.ruby_doc) is subclassed,
   # then calling `start` in that subclass will not invoke the subclass’s
   # `initialize` method.
-  def self.fork: (*any args) -> any
+  def self.fork: (*untyped args) -> untyped
 
   # Changes asynchronous interrupt timing.
   # 
@@ -754,15 +754,15 @@ class Thread < Object
   #   # all exceptions inherited from Exception are prohibited.
   # }
   # ```
-  def self.handle_interrupt: (any hash) -> any
+  def self.handle_interrupt: (untyped hash) -> untyped
 
-  def self.kill: (Thread thread) -> any
+  def self.kill: (Thread thread) -> untyped
 
-  def self.list: () -> any
+  def self.list: () -> untyped
 
   # Give the thread scheduler a hint to pass execution to another thread. A
   # running thread may or may not switch, it depends on OS and processor.
-  def self.pass: () -> any
+  def self.pass: () -> untyped
 
   # Returns whether or not the asynchronous queue is empty.
   # 
@@ -819,17 +819,17 @@ class Thread < Object
   #     }
   #     ...
   #     flag = false # stop thread
-  def self.pending_interrupt?: (*any args) -> bool
+  def self.pending_interrupt?: (*untyped args) -> bool
 
-  def self.report_on_exception: () -> any
+  def self.report_on_exception: () -> untyped
 
-  def self.report_on_exception=: (any report_on_exception) -> any
+  def self.report_on_exception=: (untyped report_on_exception) -> untyped
 
   # Basically the same as [::new](Thread.downloaded.ruby_doc#method-c-new).
   # However, if class [Thread](Thread.downloaded.ruby_doc) is subclassed,
   # then calling `start` in that subclass will not invoke the subclass’s
   # `initialize` method.
-  def self.start: (*any args) -> any
+  def self.start: (*untyped args) -> untyped
 
   # Stops execution of the current thread, putting it into a “sleep” state,
   # and schedules execution of another thread.
@@ -842,7 +842,7 @@ class Thread < Object
   # a.join
   # #=> "abc"
   # ```
-  def self.`stop`: () -> any
+  def self.`stop`: () -> untyped
 end
 
 class Thread::Backtrace < Object
@@ -888,19 +888,19 @@ end
 # ```
 class Thread::ConditionVariable < Object
   # Wakes up all threads waiting for this lock.
-  def broadcast: () -> any
+  def broadcast: () -> untyped
 
-  def marshal_dump: () -> any
+  def marshal_dump: () -> untyped
 
   # Wakes up the first thread in line waiting for this lock.
-  def signal: () -> any
+  def signal: () -> untyped
 
   # Releases the lock held in `mutex` and waits; reacquires the lock on
   # wakeup.
   # 
   # If `timeout` is given, this method returns after `timeout` seconds
   # passed, even if no other thread doesn't signal.
-  def wait: (*any _) -> any
+  def wait: (*untyped _) -> untyped
 end
 
 # [Mutex](Mutex) implements a simple semaphore that
@@ -927,7 +927,7 @@ end
 class Thread::Mutex < Object
   # Attempts to grab the lock and waits if it isn’t available. Raises
   # `ThreadError` if `mutex` was locked by the current thread.
-  def lock: () -> any
+  def lock: () -> untyped
 
   # Returns `true` if this lock is currently held by some thread.
   def locked?: () -> bool
@@ -937,7 +937,7 @@ class Thread::Mutex < Object
 
   # Obtains a lock, runs the block, and releases the lock when the block
   # completes. See the example under `Mutex` .
-  def synchronize: () -> any
+  def synchronize: () -> untyped
 
   # Attempts to obtain the lock and returns immediately. Returns `true` if
   # the lock was granted.
@@ -945,7 +945,7 @@ class Thread::Mutex < Object
 
   # Releases the lock. Raises `ThreadError` if `mutex` wasn’t locked by the
   # current thread.
-  def unlock: () -> any
+  def unlock: () -> untyped
 end
 
 # The [Queue](Queue) class implements multi-producer,
@@ -982,10 +982,10 @@ end
 # ```
 class Thread::Queue < Object
   # Alias for: [push](Queue.downloaded.ruby_doc#method-i-push)
-  def <<: (any obj) -> any
+  def <<: (untyped obj) -> untyped
 
   # Removes all objects from the queue.
-  def clear: () -> any
+  def clear: () -> untyped
 
   # Closes the queue. A closed queue cannot be re-opened.
   # 
@@ -1017,19 +1017,19 @@ class Thread::Queue < Object
   #           end
   #         }
   #         q.close
-  def close: () -> any
+  def close: () -> untyped
 
   # Returns `true` if the queue is closed.
   def closed?: () -> bool
 
   # Alias for: [pop](Queue.downloaded.ruby_doc#method-i-pop)
-  def deq: (*any args) -> any
+  def deq: (*untyped args) -> untyped
 
   # Returns `true` if the queue is empty.
   def empty?: () -> bool
 
   # Alias for: [push](Queue.downloaded.ruby_doc#method-i-push)
-  def enq: (any obj) -> any
+  def enq: (untyped obj) -> untyped
 
   # Returns the length of the queue.
   # 
@@ -1038,10 +1038,10 @@ class Thread::Queue < Object
   # Also aliased as: [size](Queue.downloaded.ruby_doc#method-i-size)
   def length: () -> Integer
 
-  def marshal_dump: () -> any
+  def marshal_dump: () -> untyped
 
   # Returns the number of threads waiting on the queue.
-  def num_waiting: () -> any
+  def num_waiting: () -> untyped
 
   # Retrieves data from the queue.
   # 
@@ -1053,7 +1053,7 @@ class Thread::Queue < Object
   # 
   # Also aliased as: [deq](Queue.downloaded.ruby_doc#method-i-deq),
   # [shift](Queue.downloaded.ruby_doc#method-i-shift)
-  def pop: (*any args) -> any
+  def pop: (*untyped args) -> untyped
 
   # Pushes the given `object` to the queue.
   # 
@@ -1061,10 +1061,10 @@ class Thread::Queue < Object
   # 
   # Also aliased as: [enq](Queue.downloaded.ruby_doc#method-i-enq),
   # [\<\<](Queue.downloaded.ruby_doc#method-i-3C-3C)
-  def push: (any obj) -> any
+  def push: (untyped obj) -> untyped
 
   # Alias for: [pop](Queue.downloaded.ruby_doc#method-i-pop)
-  def shift: (*any args) -> any
+  def shift: (*untyped args) -> untyped
 
   # Alias for: [length](Queue.downloaded.ruby_doc#method-i-length)
   def size: () -> Integer
@@ -1077,18 +1077,18 @@ end
 # of how a [SizedQueue](SizedQueue) works.
 class Thread::SizedQueue < Thread::Queue
   # Alias for: [push](SizedQueue.downloaded.ruby_doc#method-i-push)
-  def <<: (*any args) -> any
+  def <<: (*untyped args) -> untyped
 
   # Alias for: [push](SizedQueue.downloaded.ruby_doc#method-i-push)
-  def enq: (*any args) -> any
+  def enq: (*untyped args) -> untyped
 
-  def initialize: (any max) -> SizedQueue
+  def initialize: (untyped max) -> SizedQueue
 
   # Returns the maximum size of the queue.
   def max: () -> Integer
 
   # Sets the maximum size of the queue to the given `number` .
-  def max=: (Integer max) -> any
+  def max=: (Integer max) -> untyped
 
   # Pushes `object` to the queue.
   # 
@@ -1100,13 +1100,13 @@ class Thread::SizedQueue < Thread::Queue
   # 
   # Also aliased as: [enq](SizedQueue.downloaded.ruby_doc#method-i-enq),
   # [\<\<](SizedQueue.downloaded.ruby_doc#method-i-3C-3C)
-  def push: (*any args) -> any
+  def push: (*untyped args) -> untyped
 end
 
-ConditionVariable: any
+ConditionVariable: untyped
 
-Mutex: any
+Mutex: untyped
 
-Queue: any
+Queue: untyped
 
-SizedQueue: any
+SizedQueue: untyped

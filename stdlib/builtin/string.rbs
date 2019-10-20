@@ -20,9 +20,9 @@ class String < Object
 
   def <=>: (String other) -> Integer?
 
-  def ==: (any arg0) -> bool
+  def ==: (untyped arg0) -> bool
 
-  def ===: (any arg0) -> bool
+  def ===: (untyped arg0) -> bool
 
   %a{rbs:test:skip}
   def =~: (Object arg0) -> Integer?
@@ -147,7 +147,7 @@ class String < Object
   # If a block is given, which is a deprecated form, works the same as
   # `each_codepoint` .
   def codepoints: () -> ::Array[Integer]
-                | () { () -> any } -> ::Array[Integer]
+                | () { () -> untyped } -> ::Array[Integer]
 
   def concat: (Integer | Object arg0) -> String
 
@@ -226,16 +226,16 @@ class String < Object
   # ```
   def dump: () -> String
 
-  def each_byte: () { (Integer arg0) -> any } -> String
+  def each_byte: () { (Integer arg0) -> untyped } -> String
                | () -> ::Enumerator[Integer, self]
 
-  def each_char: () { (String arg0) -> any } -> String
+  def each_char: () { (String arg0) -> untyped } -> String
                | () -> ::Enumerator[String, self]
 
-  def each_codepoint: () { (Integer arg0) -> any } -> String
+  def each_codepoint: () { (Integer arg0) -> untyped } -> String
                     | () -> ::Enumerator[Integer, self]
 
-  def each_line: (?String arg0) { (String arg0) -> any } -> String
+  def each_line: (?String arg0) { (String arg0) -> untyped } -> String
                | (?String arg0) -> ::Enumerator[String, self]
 
   # Returns `true` if *str* has a length of zero.
@@ -261,12 +261,12 @@ class String < Object
 
   def gsub: (Regexp | String arg0, ?String arg1) -> String
           | (Regexp | String arg0, ?Hash[String, String] arg1) -> String
-          | (Regexp | String arg0) { (String arg0) -> any } -> String
+          | (Regexp | String arg0) { (String arg0) -> untyped } -> String
           | (Regexp | String arg0) -> ::Enumerator[String, self]
           | (Regexp | String arg0) -> String
 
   def gsub!: (Regexp | String arg0, ?String arg1) -> String?
-           | (Regexp | String arg0) { (String arg0) -> any } -> String?
+           | (Regexp | String arg0) { (String arg0) -> untyped } -> String?
            | (Regexp | String arg0) -> ::Enumerator[String, self]
 
   # Returns a hash based on the string’s length, content and encoding.
@@ -458,13 +458,13 @@ class String < Object
   def rstrip!: () -> String
 
   def scan: (Regexp | String arg0) -> ::Array[String | ::Array[String]]
-          | (Regexp | String arg0) { () -> any } -> ::Array[String | ::Array[String]]
+          | (Regexp | String arg0) { () -> untyped } -> ::Array[String | ::Array[String]]
 
   def scrub: (?String arg0) -> String
-           | (?String arg0) { (any arg0) -> any } -> String
+           | (?String arg0) { (untyped arg0) -> untyped } -> String
 
   def scrub!: (?String arg0) -> String
-            | (?String arg0) { (any arg0) -> any } -> String
+            | (?String arg0) { (untyped arg0) -> untyped } -> String
 
   def setbyte: (Integer arg0, Integer arg1) -> Integer
 
@@ -514,10 +514,10 @@ class String < Object
   def strip!: () -> String
 
   def sub: (Regexp | String arg0, ?String | Hash[String, String] arg1) -> String
-         | (Regexp | String arg0) { (String arg0) -> any } -> String
+         | (Regexp | String arg0) { (String arg0) -> untyped } -> String
 
   def sub!: (Regexp | String arg0, ?String arg1) -> String
-          | (Regexp | String arg0) { (String arg0) -> any } -> String
+          | (Regexp | String arg0) { (String arg0) -> untyped } -> String
 
   # Returns the successor to *str* . The successor is calculated by
   # incrementing characters starting from the rightmost alphanumeric (or the
@@ -681,7 +681,7 @@ class String < Object
   def upcase!: () -> String?
 
   def upto: [Bool] (String arg0, ?Bool arg1) -> ::Enumerator[String, self]
-          | [Bool] (String arg0, ?Bool arg1) { (String arg0) -> any } -> String
+          | [Bool] (String arg0, ?Bool arg1) { (String arg0) -> untyped } -> String
 
   # Returns true for a string which is encoded correctly.
   # 

@@ -241,7 +241,7 @@ class Time < Object
   # ```
   def dst?: () -> bool
 
-  def eql?: (any arg0) -> bool
+  def eql?: (untyped arg0) -> bool
 
   # Returns `true` if *time* represents Friday.
   # 
