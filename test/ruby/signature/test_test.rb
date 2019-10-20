@@ -107,7 +107,7 @@ EOF
       manager.files[Pathname("foo.rbs")] = <<EOF
 class Foo
   def self.open: () { (String) -> void } -> Integer
-  def foo: (*any) -> String
+  def foo: (*untyped) -> String
 end
 EOF
       manager.build do |env|
@@ -262,7 +262,7 @@ EOF
           assert_empty errors
         end
 
-        parse_method_type("(parent: any, type: any) -> any").tap do |method_type|
+        parse_method_type("(parent: untyped, type: untyped) -> untyped").tap do |method_type|
           errors = []
           hook.typecheck_args "#foo",
                               method_type,

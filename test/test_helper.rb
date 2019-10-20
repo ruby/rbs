@@ -61,7 +61,7 @@ end
 
 module Kernel
   private
-  def puts: (*any) -> nil
+  def puts: (*untyped) -> nil
 end
 
 class Class < Module
@@ -74,7 +74,7 @@ class String
   include Comparable
   prepend Enumerable[String, void]
 
-  def self.try_convert: (any) -> String?
+  def self.try_convert: (untyped) -> String?
 end
 
 class Integer
