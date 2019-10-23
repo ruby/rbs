@@ -506,7 +506,48 @@ module Ruby
                 )
               end
             end
+
+            type_params = case decl
+                          when AST::Declarations::Extension
+                            env.find_class(decl.name.absolute!).type_params.rename_to(decl.type_params)
+                          else
+                            decl.type_params
+                          end
+
+            validate_parameter_variance_in_methods_type(
+              decl: decl,
+              methods: definition.methods,
+              type_params: type_params
+            )
           end
+        end
+      end
+
+      def validate_parameter_variance_in_methods_type(decl:, methods:, type_params:)
+        params = type_params.each.map(&:name)
+        errors = []
+
+        methods.each do |name, method|
+          method.method_types.each do |method_type|
+            calculator = VarianceCalculator.new(builder: self)
+            result = calculator.in_method_type(method_type: method_type, variables: params)
+
+            type_params.each do |param|
+              unless param.skip_validation
+                unless result.compatible?(param.name, with_annotation: param.variance)
+                  errors.push InvalidVarianceAnnotationError::MethodTypeError.new(
+                    method_name: name,
+                    method_type: method_type,
+                    param: param
+                  )
+                end
+              end
+            end
+          end
+        end
+
+        unless errors.empty?
+          raise InvalidVarianceAnnotationError.new(decl: decl, errors: errors)
         end
       end
 
