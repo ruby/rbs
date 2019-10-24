@@ -4,11 +4,13 @@ module Ruby
   module Signature
     module Test
       class Hook
-        IS_AP = Object.instance_method(:is_a?)
+        IS_AP = Kernel.instance_method(:is_a?)
         DEFINE_METHOD = Module.instance_method(:define_method)
         INSTANCE_EVAL = BasicObject.instance_method(:instance_eval)
         INSTANCE_EXEC = BasicObject.instance_method(:instance_exec)
         METHOD = Kernel.instance_method(:method)
+        CLASS = Kernel.instance_method(:class)
+        SINGLETON_CLASS = Kernel.instance_method(:singleton_class)
 
         module Errors
           ArgumentTypeError =
@@ -187,8 +189,8 @@ module Ruby
               end
             end
 
-            method = self.method(name)
-            prepended = self.class.ancestors.include?(hook.instance_module) || self.singleton_class.ancestors.include?(hook.singleton_module)
+            method = hook.call(self, METHOD, name)
+            prepended = hook.call(self, CLASS).ancestors.include?(hook.instance_module) || hook.call(self, SINGLETON_CLASS).ancestors.include?(hook.singleton_module)
             result = if prepended
                        method.super_method.call(*args, &block)
                      else
