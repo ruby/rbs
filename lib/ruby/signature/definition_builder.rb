@@ -515,6 +515,16 @@ module Ruby
         end
       end
 
+      def validate_params_with(type_params, result:)
+        type_params.each do |param|
+          unless param.skip_validation
+            unless result.compatible?(param.name, with_annotation: param.variance)
+              yield param
+            end
+          end
+        end
+      end
+
       def validate_parameter_variance(decl:, methods:)
         type_params = case decl
                       when AST::Declarations::Extension
@@ -535,14 +545,10 @@ module Ruby
             absolute_args = decl.super_class.args.map {|type| absolute_type(type, namespace: namespace) }
             result = calculator.in_inherit(name: absolute_super_name, args: absolute_args, variables: param_names)
 
-            type_params.each do |param|
-              unless param.skip_validation
-                unless result.compatible?(param.name, with_annotation: param.variance)
-                  errors.push InvalidVarianceAnnotationError::InheritanceError.new(
-                    param: param
-                  )
-                end
-              end
+            validate_params_with type_params, result: result do |param|
+              errors.push InvalidVarianceAnnotationError::InheritanceError.new(
+                param: param
+              )
             end
           end
         end
@@ -555,15 +561,11 @@ module Ruby
               absolute_args = member.args.map {|type| absolute_type(type, namespace: namespace) }
               result = calculator.in_inherit(name: absolute_module_name, args: absolute_args, variables: param_names)
 
-              type_params.each do |param|
-                unless param.skip_validation
-                  unless result.compatible?(param.name, with_annotation: param.variance)
-                    errors.push InvalidVarianceAnnotationError::MixinError.new(
-                      include_member: member,
-                      param: param
-                    )
-                  end
-                end
+              validate_params_with type_params, result: result do |param|
+                errors.push InvalidVarianceAnnotationError::MixinError.new(
+                  include_member: member,
+                  param: param
+                )
               end
             end
           end
@@ -573,16 +575,12 @@ module Ruby
           method.method_types.each do |method_type|
             result = calculator.in_method_type(method_type: method_type, variables: param_names)
 
-            type_params.each do |param|
-              unless param.skip_validation
-                unless result.compatible?(param.name, with_annotation: param.variance)
-                  errors.push InvalidVarianceAnnotationError::MethodTypeError.new(
-                    method_name: name,
-                    method_type: method_type,
-                    param: param
-                  )
-                end
-              end
+            validate_params_with type_params, result: result do |param|
+              errors.push InvalidVarianceAnnotationError::MethodTypeError.new(
+                method_name: name,
+                method_type: method_type,
+                param: param
+              )
             end
           end
         end
