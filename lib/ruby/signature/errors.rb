@@ -154,5 +154,21 @@ module Ruby
         super "#{Location.to_string decls.last.location}: Duplicated declaration: #{name}"
       end
     end
+
+    class InvalidVarianceAnnotationError < StandardError
+      MethodTypeError = Struct.new(:method_name, :method_type, :param, keyword_init: true)
+      InheritanceError = Struct.new(:super_class, :param, keyword_init: true)
+      MixinError = Struct.new(:include_member, :param, keyword_init: true)
+
+      attr_reader :decl
+      attr_reader :errors
+
+      def initialize(decl:, errors:)
+        @decl = decl
+        @errors = errors
+
+        super "#{Location.to_string decl.location}: Invalid variance annotation: #{decl.name}"
+      end
+    end
   end
 end

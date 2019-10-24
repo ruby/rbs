@@ -53,6 +53,15 @@ module Ruby
           def size
             params.size
           end
+
+          def rename_to(names)
+            ModuleTypeParams.new().tap do |params|
+              names.each.with_index do |new_name, index|
+                param = self.params[index]
+                params.add(TypeParam.new(name: new_name, variance: param.variance, skip_validation: param.skip_validation))
+              end
+            end
+          end
         end
 
         class Class

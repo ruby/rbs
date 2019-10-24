@@ -708,6 +708,20 @@ module Ruby
           end
         end
 
+        def each_param(&block)
+          if block_given?
+            required_positionals.each(&block)
+            optional_positionals.each(&block)
+            rest_positionals&.yield_self(&block)
+            trailing_positionals.each(&block)
+            required_keywords.each_value(&block)
+            optional_keywords.each_value(&block)
+            rest_keywords&.yield_self(&block)
+          else
+            enum_for :each_param
+          end
+        end
+
         def to_json(*a)
           {
             required_positionals: required_positionals,
