@@ -1,4 +1,5 @@
 require "ruby/signature"
+require "pp"
 
 module Ruby
   module Signature
@@ -11,6 +12,7 @@ module Ruby
         METHOD = Kernel.instance_method(:method)
         CLASS = Kernel.instance_method(:class)
         SINGLETON_CLASS = Kernel.instance_method(:singleton_class)
+        PP = Kernel.instance_method(:pp)
 
         module Errors
           ArgumentTypeError =
