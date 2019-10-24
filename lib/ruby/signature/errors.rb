@@ -157,6 +157,8 @@ module Ruby
 
     class InvalidVarianceAnnotationError < StandardError
       MethodTypeError = Struct.new(:method_name, :method_type, :param, keyword_init: true)
+      InheritanceError = Struct.new(:super_class, :param, keyword_init: true)
+      MixinError = Struct.new(:include_member, :param, keyword_init: true)
 
       attr_reader :decl
       attr_reader :errors

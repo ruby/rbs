@@ -507,30 +507,71 @@ module Ruby
               end
             end
 
-            type_params = case decl
-                          when AST::Declarations::Extension
-                            env.find_class(decl.name.absolute!).type_params.rename_to(decl.type_params)
-                          else
-                            decl.type_params
-                          end
-
-            validate_parameter_variance_in_methods_type(
+            validate_parameter_variance(
               decl: decl,
-              methods: definition.methods,
-              type_params: type_params
+              methods: definition.methods
             )
           end
         end
       end
 
-      def validate_parameter_variance_in_methods_type(decl:, methods:, type_params:)
-        params = type_params.each.map(&:name)
+      def validate_parameter_variance(decl:, methods:)
+        type_params = case decl
+                      when AST::Declarations::Extension
+                        env.find_class(decl.name.absolute!).type_params.rename_to(decl.type_params)
+                      else
+                        decl.type_params
+                      end
+
+        namespace = decl.name.absolute!.to_namespace
+        calculator = VarianceCalculator.new(builder: self)
+        param_names = type_params.each.map(&:name)
+
         errors = []
+
+        if decl.is_a?(AST::Declarations::Class)
+          if decl.super_class
+            absolute_super_name = absolute_type_name(decl.super_class.name, namespace: namespace, location: decl.location)
+            absolute_args = decl.super_class.args.map {|type| absolute_type(type, namespace: namespace) }
+            result = calculator.in_inherit(name: absolute_super_name, args: absolute_args, variables: param_names)
+
+            type_params.each do |param|
+              unless param.skip_validation
+                unless result.compatible?(param.name, with_annotation: param.variance)
+                  errors.push InvalidVarianceAnnotationError::InheritanceError.new(
+                    param: param
+                  )
+                end
+              end
+            end
+          end
+        end
+
+        decl.members.each do |member|
+          case member
+          when AST::Members::Include
+            if member.name.class?
+              absolute_module_name = absolute_type_name(member.name, namespace: namespace, location: decl.location)
+              absolute_args = member.args.map {|type| absolute_type(type, namespace: namespace) }
+              result = calculator.in_inherit(name: absolute_module_name, args: absolute_args, variables: param_names)
+
+              type_params.each do |param|
+                unless param.skip_validation
+                  unless result.compatible?(param.name, with_annotation: param.variance)
+                    errors.push InvalidVarianceAnnotationError::MixinError.new(
+                      include_member: member,
+                      param: param
+                    )
+                  end
+                end
+              end
+            end
+          end
+        end
 
         methods.each do |name, method|
           method.method_types.each do |method_type|
-            calculator = VarianceCalculator.new(builder: self)
-            result = calculator.in_method_type(method_type: method_type, variables: params)
+            result = calculator.in_method_type(method_type: method_type, variables: param_names)
 
             type_params.each do |param|
               unless param.skip_validation
