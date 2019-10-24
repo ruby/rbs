@@ -488,7 +488,7 @@ module Ruby
             type_check(value, env.find_alias(type.name).type)
           when Types::Tuple
             call(value, IS_AP, ::Array) &&
-              type.types.map.with_index {|ty, index| type_check(value[index], ty) }
+              type.types.map.with_index {|ty, index| type_check(value[index], ty) }.all?
           when Types::Record
             call(value, IS_AP, ::Hash)
           when Types::Proc
