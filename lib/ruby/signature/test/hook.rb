@@ -470,7 +470,12 @@ module Ruby
           when Types::Bases::Instance
             call(value, IS_AP, klass)
           when Types::ClassInstance
-            call(value, IS_AP, Object.const_get(type.name.to_s))
+            klass = Object.const_get(type.name.to_s)
+            if klass == ::Array
+              call(value, IS_AP, klass) && value.all? {|v| type_check(v, type.args[0]) }
+            else
+              call(value, IS_AP, klass)
+            end
           when Types::ClassSingleton
             klass = Object.const_get(type.name.to_s)
             value == klass

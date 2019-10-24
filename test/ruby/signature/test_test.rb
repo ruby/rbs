@@ -152,7 +152,7 @@ EOF
   def test_type_check
     SignatureManager.new do |manager|
       manager.files[Pathname("foo.rbs")] = <<EOF
-type foo = String | Integer | [String, String]
+type foo = String | Integer | [String, String] | ::Array[Integer]
 EOF
       manager.build do |env|
         hook = Ruby::Signature::Test::Hook.new(env, Object, logger: logger)
@@ -160,8 +160,10 @@ EOF
         assert hook.type_check(3, parse_type("::foo"))
         assert hook.type_check("3", parse_type("::foo"))
         assert hook.type_check(["foo", "bar"], parse_type("::foo"))
+        assert hook.type_check([1, 2, 3], parse_type("::foo"))
         refute hook.type_check(:foo, parse_type("::foo"))
         refute hook.type_check(["foo", 3], parse_type("::foo"))
+        refute hook.type_check([1, 2, "3"], parse_type("::foo"))
 
         assert hook.type_check(Object, parse_type("singleton(::Object)"))
         assert hook.type_check(Object, parse_type("::Class"))
