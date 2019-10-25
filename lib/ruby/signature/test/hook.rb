@@ -1,14 +1,19 @@
 require "ruby/signature"
+require "pp"
 
 module Ruby
   module Signature
     module Test
       class Hook
-        IS_AP = Object.instance_method(:is_a?)
+        IS_AP = Kernel.instance_method(:is_a?)
         DEFINE_METHOD = Module.instance_method(:define_method)
         INSTANCE_EVAL = BasicObject.instance_method(:instance_eval)
         INSTANCE_EXEC = BasicObject.instance_method(:instance_exec)
         METHOD = Kernel.instance_method(:method)
+        CLASS = Kernel.instance_method(:class)
+        SINGLETON_CLASS = Kernel.instance_method(:singleton_class)
+        PP = Kernel.instance_method(:pp)
+        INSPECT = Kernel.instance_method(:inspect)
 
         module Errors
           ArgumentTypeError =
@@ -37,21 +42,25 @@ module Ruby
             end
           end
 
+          def self.inspect_(obj)
+            Hook.inspect_(obj)
+          end
+
           def self.to_string(error)
             method = "#{error.klass.name}#{error.method_name}"
             case error
             when ArgumentTypeError
-              "[#{method}] ArgumentTypeError: expected #{format_param error.param} but given `#{error.value.inspect}`"
+              "[#{method}] ArgumentTypeError: expected #{format_param error.param} but given `#{inspect_(error.value)}`"
             when BlockArgumentTypeError
-              "[#{method}] BlockArgumentTypeError: expected #{format_param error.param} but given `#{error.value.inspect}`"
+              "[#{method}] BlockArgumentTypeError: expected #{format_param error.param} but given `#{inspect_(error.value)}`"
             when ArgumentError
               "[#{method}] ArgumentError: expected method type #{error.method_type}"
             when BlockArgumentError
               "[#{method}] BlockArgumentError: expected method type #{error.method_type}"
             when ReturnTypeError
-              "[#{method}] ReturnTypeError: expected `#{error.type}` but returns `#{error.value.inspect}`"
+              "[#{method}] ReturnTypeError: expected `#{error.type}` but returns `#{inspect_(error.value)}`"
             when BlockReturnTypeError
-              "[#{method}] BlockReturnTypeError: expected `#{error.type}` but returns `#{error.value.inspect}`"
+              "[#{method}] BlockReturnTypeError: expected `#{error.type}` but returns `#{inspect_(error.value)}`"
             when UnexpectedBlockError
               "[#{method}] UnexpectedBlockError: unexpected block is given for `#{error.method_type}`"
             when MissingBlockError
@@ -59,7 +68,7 @@ module Ruby
             when UnresolvedOverloadingError
               "[#{method}] UnresolvedOverloadingError: couldn't find a suitable overloading"
             else
-              raise "Unexpected error: #{error.inspect}"
+              raise "Unexpected error: #{inspect_(error)}"
             end
           end
         end
@@ -161,7 +170,7 @@ module Ruby
           hook = self
 
           proc do |*args, &block|
-            hook.logger.debug { "#{method_name} receives arguments: #{args.inspect}" }
+            hook.logger.debug { "#{method_name} receives arguments: #{hook.inspect_(args)}" }
 
             block_call = nil
 
@@ -170,7 +179,7 @@ module Ruby
 
               block = hook.call(Object.new, INSTANCE_EVAL) do |fresh_obj|
                 proc do |*as|
-                  hook.logger.debug { "#{method_name} receives block arguments: #{as.inspect}" }
+                  hook.logger.debug { "#{method_name} receives block arguments: #{hook.inspect_(as)}" }
 
                   ret = if self.equal?(fresh_obj)
                           original_block[*as]
@@ -180,15 +189,15 @@ module Ruby
 
                   block_call = ArgsReturn.new(arguments: as, return_value: ret)
 
-                  hook.logger.debug { "#{method_name} returns from block: #{ret.inspect}" }
+                  hook.logger.debug { "#{method_name} returns from block: #{hook.inspect_(ret)}" }
 
                   ret
                 end
               end
             end
 
-            method = self.method(name)
-            prepended = self.class.ancestors.include?(hook.instance_module) || self.singleton_class.ancestors.include?(hook.singleton_module)
+            method = hook.call(self, METHOD, name)
+            prepended = hook.call(self, CLASS).ancestors.include?(hook.instance_module) || hook.call(self, SINGLETON_CLASS).ancestors.include?(hook.singleton_module)
             result = if prepended
                        method.super_method.call(*args, &block)
                      else
@@ -196,7 +205,7 @@ module Ruby
                        method.call(*args, &block)
                      end
 
-            hook.logger.debug { "#{method_name} returns: #{result.inspect}" }
+            hook.logger.debug { "#{method_name} returns: #{hook.inspect_(result)}" }
 
             call = Call.new(method_call: ArgsReturn.new(arguments: args, return_value: result),
                             block_call: block_call,
@@ -308,6 +317,14 @@ module Ruby
 
         def call(receiver, method, *args, &block)
           method.bind(receiver).call(*args, &block)
+        end
+
+        def inspect_(obj)
+          Hook.inspect_(obj)
+        end
+
+        def self.inspect_(obj)
+          INSPECT.bind(obj).call()
         end
 
         def disable
