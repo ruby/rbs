@@ -410,6 +410,8 @@ module Ruby
                    else
                      fun.rest_positionals
                    end
+                 elsif fun.required_positionals.empty? && fun.optional_positionals.empty?
+                   Types::Function::Param.new(name: nil, type: Types::Literal.new(location: nil, literal: []))
                  else
                    Types::Function::Param.new(name: nil, type: Types::Bases::Any.new(location: nil))
                  end)
