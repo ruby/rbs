@@ -93,7 +93,7 @@ class BasicObject
   def instance_eval: (?String arg0, ?String filename, ?Integer lineno) -> untyped
                    | [U] () { (self) -> U } -> U
 
-  def instance_exec: [U, V] (*V args) { (untyped args) -> U } -> U
+  def instance_exec: [U, V] (*V args) { (*V args) -> U } -> U
 
   private
   def initialize: () -> void
