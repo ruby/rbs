@@ -293,7 +293,7 @@ module Ruby
 
           if method_type.block
             if call.block_call
-              typecheck_args(method_name, method_type, block_args(method_type.block.type), call.block_call, errors, type_error: Errors::BlockArgumentTypeError, argument_error: Errors::BlockArgumentError)
+              typecheck_args(method_name, method_type, method_type.block.type, call.block_call, errors, type_error: Errors::BlockArgumentTypeError, argument_error: Errors::BlockArgumentError)
               typecheck_return(method_name, method_type, method_type.block.type, call.block_call, errors, return_error: Errors::BlockReturnTypeError)
             else
               if method_type.block.required
@@ -395,27 +395,6 @@ module Ruby
           end
 
           true
-        end
-
-        def block_args(fun)
-          fun.update(
-               required_positionals: [],
-               trailing_positionals: [],
-               optional_positionals: fun.required_positionals + fun.optional_positionals,
-               rest_positionals:
-                 if fun.rest_positionals
-                   unless fun.trailing_positionals.empty?
-                     types = [
-                       fun.rest_positionals,
-                       *fun.trailing_positionals,
-                     ].compact
-                     Types::Union.new(types: types, location: nil)
-                   else
-                     fun.rest_positionals
-                   end
-                 else
-                   Types::Function::Param.new(name: nil, type: Types::Bases::Any.new(location: nil))
-                 end)
         end
 
         def zip_args(args, fun, &block)
