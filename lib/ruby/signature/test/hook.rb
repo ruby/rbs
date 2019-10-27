@@ -492,6 +492,8 @@ module Ruby
             klass = Object.const_get(type.name.to_s)
             if klass == ::Array
               call(value, IS_AP, klass) && value.all? {|v| type_check(v, type.args[0]) }
+            elsif klass == ::Hash
+              call(value, IS_AP, klass) && value.all? {|k, v| type_check(k, type.args[0]) && type_check(v, type.args[1]) }
             else
               call(value, IS_AP, klass)
             end
