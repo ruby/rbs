@@ -320,6 +320,8 @@ module Ruby
         end
 
         def inspect_(obj)
+          obj.inspect
+        rescue
           Hook.inspect_(obj)
         end
 
