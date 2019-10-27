@@ -255,6 +255,7 @@ module Ruby
           when singleton_method
             call(self.singleton_module, DEFINE_METHOD, singleton_method, &delegation(singleton_method, method_types, ".#{singleton_method}"))
           end
+
           self
         end
 
@@ -320,12 +321,12 @@ module Ruby
         end
 
         def inspect_(obj)
-          obj.inspect
-        rescue
           Hook.inspect_(obj)
         end
 
         def self.inspect_(obj)
+          obj.inspect
+        rescue
           INSPECT.bind(obj).call()
         end
 
