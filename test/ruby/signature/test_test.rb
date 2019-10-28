@@ -314,4 +314,110 @@ EOF
       end
     end
   end
+
+  def test_verify_block
+    SignatureManager.new do |manager|
+      manager.build do |env|
+        klass = Class.new do
+          def hello
+            yield ["3", 3]
+          end
+
+          def world
+            yield "3", 3
+          end
+
+          def self.name
+            "Foo"
+          end
+        end
+
+        hook = Ruby::Signature::Test::Hook.install(env, klass, logger: logger)
+                 .verify(instance_method: :hello,
+                         types: ["() { (::String, ::Integer) -> void } -> void"])
+                 .verify(instance_method: :world,
+                         types: ["() { ([::String, ::Integer]) -> void } -> void"])
+
+        hook.run do
+          klass.new.hello { }
+          klass.new.world { }
+        end
+
+        refute_empty hook.errors.select {|e| e.method_name == "#hello" }.map {|e| Test::Hook::Errors.to_string(e) }
+        refute_empty hook.errors.select {|e| e.method_name == "#world" }.map {|e| Test::Hook::Errors.to_string(e) }
+      end
+    end
+  end
+
+  def test_verify_block_no_yelld
+    SignatureManager.new do |manager|
+      manager.build do |env|
+        klass = Class.new do
+          def hello
+          end
+
+          def self.name
+            "Foo"
+          end
+        end
+
+        hook = Ruby::Signature::Test::Hook.install(env, klass, logger: logger)
+                 .verify(instance_method: :hello,
+                         types: ["() { (::String, ::Integer) -> void } -> void"])
+        hook.run do
+          klass.new.hello { }
+        end
+
+        assert_empty hook.errors.map {|e| Test::Hook::Errors.to_string(e) }
+      end
+    end
+  end
+
+  def test_verify_block_no_yied
+    SignatureManager.new do |manager|
+      manager.build do |env|
+        klass = Class.new do
+          def hello
+          end
+
+          def self.name
+            "Foo"
+          end
+        end
+
+        hook = Ruby::Signature::Test::Hook.install(env, klass, logger: logger)
+                 .verify(instance_method: :hello,
+                         types: ["() { (::String, ::Integer) -> void } -> void"])
+        hook.run do
+          klass.new.hello { }
+        end
+
+        assert_empty hook.errors.map {|e| Test::Hook::Errors.to_string(e) }
+      end
+    end
+  end
+
+  def test_verify_block_not_given
+    SignatureManager.new do |manager|
+      manager.build do |env|
+        klass = Class.new do
+          def hello
+          end
+
+          def self.name
+            "Foo"
+          end
+        end
+
+        hook = Ruby::Signature::Test::Hook.install(env, klass, logger: logger)
+                 .verify(instance_method: :hello,
+                         types: ["() { (::String, ::Integer) -> void } -> void"])
+        hook.run do
+          klass.new.hello
+        end
+
+        refute_empty hook.errors.map {|e| Test::Hook::Errors.to_string(e) }
+      end
+    end
+  end
 end

@@ -292,13 +292,18 @@ module Ruby
           typecheck_return(method_name, method_type, method_type.type, call.method_call, errors, return_error: Errors::ReturnTypeError)
 
           if method_type.block
-            if call.block_call
+            case
+            when call.block_call
+              # Block is yielded
               typecheck_args(method_name, method_type, method_type.block.type, call.block_call, errors, type_error: Errors::BlockArgumentTypeError, argument_error: Errors::BlockArgumentError)
               typecheck_return(method_name, method_type, method_type.block.type, call.block_call, errors, return_error: Errors::BlockReturnTypeError)
-            else
+            when !call.block_given
+              # Block is not given
               if method_type.block.required
                 errors << Errors::MissingBlockError.new(klass: klass, method_name: method_name, method_type: method_type)
               end
+            else
+              # Block is given, but not yielded
             end
           else
             if call.block_given
