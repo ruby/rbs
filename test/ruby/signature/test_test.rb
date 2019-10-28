@@ -420,4 +420,30 @@ EOF
       end
     end
   end
+
+  def test_verify_block_yielded_twice
+    SignatureManager.new do |manager|
+      manager.build do |env|
+        klass = Class.new do
+          def hello
+            yield
+            yield "foo", 2
+          end
+
+          def self.name
+            "Foo"
+          end
+        end
+
+        hook = Ruby::Signature::Test::Hook.install(env, klass, logger: logger)
+                 .verify(instance_method: :hello,
+                         types: ["() { (::String, ::Integer) -> void } -> void"])
+        hook.run do
+          klass.new.hello {}
+        end
+
+        refute_empty hook.errors.map {|e| Test::Hook::Errors.to_string(e) }
+      end
+    end
+  end
 end

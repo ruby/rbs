@@ -172,7 +172,7 @@ module Ruby
           proc do |*args, &block|
             hook.logger.debug { "#{method_name} receives arguments: #{hook.inspect_(args)}" }
 
-            block_call = nil
+            block_calls = []
 
             if block
               original_block = block
@@ -187,7 +187,7 @@ module Ruby
                           hook.call(self, INSTANCE_EXEC, *as, &original_block)
                         end
 
-                  block_call = ArgsReturn.new(arguments: as, return_value: ret)
+                  block_calls << ArgsReturn.new(arguments: as, return_value: ret)
 
                   hook.logger.debug { "#{method_name} returns from block: #{hook.inspect_(ret)}" }
 
@@ -207,12 +207,30 @@ module Ruby
 
             hook.logger.debug { "#{method_name} returns: #{hook.inspect_(result)}" }
 
-            call = Call.new(method_call: ArgsReturn.new(arguments: args, return_value: result),
-                            block_call: block_call,
-                            block_given: block != nil)
+            calls = if block_calls.empty?
+                      [Call.new(method_call: ArgsReturn.new(arguments: args, return_value: result),
+                                block_call: nil,
+                                block_given: block != nil)]
+                    else
+                      block_calls.map do |block_call|
+                        Call.new(method_call: ArgsReturn.new(arguments: args, return_value: result),
+                                 block_call: block_call,
+                                 block_given: block != nil)
+                      end
+                    end
 
-            errorss = method_types.map do |method_type|
-              hook.test(method_name, method_type, call)
+            errorss = []
+
+            method_types.each do |method_type|
+              yield_errors = calls.map do |call|
+                hook.test(method_name, method_type, call)
+              end.reject(&:empty?)
+
+              if yield_errors.empty?
+                errorss << []
+              else
+                errorss.push(*yield_errors)
+              end
             end
 
             new_errors = []
@@ -227,6 +245,8 @@ module Ruby
                   method_types: method_types
                 )
               end
+
+              # raise Errors.to_string(new_errors.last)
             end
 
             new_errors.each do |error|
