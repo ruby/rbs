@@ -96,6 +96,10 @@ module Ruby
         ArgsReturn = Struct.new(:arguments, :return_value, keyword_init: true)
         Call = Struct.new(:method_call, :block_call, :block_given, keyword_init: true)
 
+        def builder
+          @builder ||= DefinitionBuilder.new(env: env)
+        end
+
         def initialize(env, klass, logger:, raise_on_error: false)
           @env = env
           @logger = logger
@@ -156,7 +160,6 @@ module Ruby
         def verify_all
           type_name = Namespace.parse(klass.name).to_type_name.absolute!
 
-          builder = DefinitionBuilder.new(env: env)
           builder.build_instance(type_name).tap do |definition|
             definition.methods.each do |name, method|
               if method.defined_in.name.absolute! == type_name
@@ -541,7 +544,7 @@ module Ruby
           when Types::Optional
             call(value, IS_AP, NilClass) || type_check(value, type.type)
           when Types::Alias
-            type_check(value, env.find_alias(type.name).type)
+            type_check(value, builder.expand_alias(type.name))
           when Types::Tuple
             call(value, IS_AP, ::Array) &&
               type.types.map.with_index {|ty, index| type_check(value[index], ty) }.all?

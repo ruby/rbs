@@ -153,6 +153,8 @@ EOF
     SignatureManager.new do |manager|
       manager.files[Pathname("foo.rbs")] = <<EOF
 type foo = String | Integer | [String, String] | ::Array[Integer]
+type M::t = Integer
+type M::s = t
 EOF
       manager.build do |env|
         hook = Ruby::Signature::Test::Hook.new(env, Object, logger: logger)
@@ -168,6 +170,9 @@ EOF
         assert hook.type_check(Object, parse_type("singleton(::Object)"))
         assert hook.type_check(Object, parse_type("::Class"))
         refute hook.type_check(Object, parse_type("singleton(::String)"))
+
+        assert hook.type_check(3, parse_type("::M::t"))
+        assert hook.type_check(3, parse_type("::M::s"))
       end
     end
   end

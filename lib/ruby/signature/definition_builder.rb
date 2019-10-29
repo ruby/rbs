@@ -870,6 +870,10 @@ module Ruby
           NoTypeFoundError.check!(type_name.absolute!, env: env, location: location)
         end
       end
+
+      def expand_alias(type_name)
+        absolute_type(env.find_alias(type_name).type, namespace: type_name.namespace)
+      end
     end
   end
 end
