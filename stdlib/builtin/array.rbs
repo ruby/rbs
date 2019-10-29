@@ -483,9 +483,10 @@ class Array[Elem] < Object
            | () { (Elem arg0) -> untyped } -> Integer?
            | () -> ::Enumerator[Elem, self]
 
-  def initialize: () -> Object
-                | (?Integer arg0) -> Object
-                | (?Integer arg0, ?Elem arg1) -> void
+  def initialize: () -> void
+                | (Array[Elem] ary) -> void
+                | (Integer size, ?Elem val) -> void
+                | (Integer size) { (Integer index) -> Elem } -> void
 
   def insert: (Integer arg0, *Elem arg1) -> ::Array[Elem]
 
