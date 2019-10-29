@@ -5,6 +5,15 @@ module Ruby
   module Signature
     module Test
       class Hook
+        class Error < Exception
+          attr_reader :errors
+
+          def initialize(errors)
+            @errors = errors
+            super "Type error detected: [#{errors.map {|e| Errors.to_string(e) }.join(", ")}]"
+          end
+        end
+
         IS_AP = Kernel.instance_method(:is_a?)
         DEFINE_METHOD = Module.instance_method(:define_method)
         INSTANCE_EVAL = BasicObject.instance_method(:instance_eval)
@@ -87,7 +96,7 @@ module Ruby
         ArgsReturn = Struct.new(:arguments, :return_value, keyword_init: true)
         Call = Struct.new(:method_call, :block_call, :block_given, keyword_init: true)
 
-        def initialize(env, klass, logger:)
+        def initialize(env, klass, logger:, raise_on_error: false)
           @env = env
           @logger = logger
           @klass = klass
@@ -99,6 +108,17 @@ module Ruby
           @singleton_methods = []
 
           @errors = []
+
+          @raise_on_error = raise_on_error
+        end
+
+        def raise_on_error!(error = true)
+          @raise_on_error = error
+          self
+        end
+
+        def raise_on_error?
+          @raise_on_error
         end
 
         def prepend!
@@ -249,11 +269,18 @@ module Ruby
               # raise Errors.to_string(new_errors.last)
             end
 
-            new_errors.each do |error|
-              hook.logger.error Errors.to_string(error)
+            unless new_errors.empty?
+              new_errors.each do |error|
+                hook.logger.error Errors.to_string(error)
+              end
+
+              hook.errors.push(*new_errors)
+
+              if hook.raise_on_error?
+                raise Error.new(new_errors)
+              end
             end
 
-            hook.errors.push(*new_errors)
             result
           end
         end
