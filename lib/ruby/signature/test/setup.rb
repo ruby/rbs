@@ -11,12 +11,14 @@ begin
   filter = ENV.fetch("RBS_TEST_TARGET").split(",")
   skips = (ENV["RBS_TEST_SKIP"] || "").split(",")
   logger.level = (ENV["RBS_TEST_LOGLEVEL"] || "info")
+  raise_on_error = ENV["RBS_TEST_RAISE"]
 rescue
   STDERR.puts "ruby/signature/test/setup handles the following environment variables:"
   STDERR.puts "  [REQUIRED] RBS_TEST_TARGET: test target class name, `Foo::Bar,Foo::Baz` for each class or `Foo::*` for all classes under `Foo`"
   STDERR.puts "  [OPTIONAL] RBS_TEST_SKIP: skip testing classes"
   STDERR.puts "  [OPTIONAL] RBS_TEST_OPT: options for signatures (`-r` for libraries or `-I` for signatures)"
   STDERR.puts "  [OPTIONAL] RBS_TEST_LOGLEVEL: one of debug|info|warn|error|fatal (defaults to info)"
+  STDERR.puts "  [OPTIONAL] RBS_TEST_RAISE: specify any value to raise an exception when type error is detected"
   exit 1
 end
 
@@ -48,7 +50,7 @@ TracePoint.trace :end do |tp|
       if hooks.none? {|hook| hook.klass == tp.self }
         if env.find_class(type_name)
           logger.info "Setting up a hook for #{class_name}"
-          hooks << Ruby::Signature::Test::Hook.install(env, tp.self, logger: logger).verify_all
+          hooks << Ruby::Signature::Test::Hook.install(env, tp.self, logger: logger).verify_all.raise_on_error!(raise_on_error)
         end
       end
     end

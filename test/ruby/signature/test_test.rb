@@ -446,4 +446,32 @@ EOF
       end
     end
   end
+
+  def test_verify_error
+    SignatureManager.new do |manager|
+      manager.build do |env|
+        klass = Class.new do
+          def hello()
+            yield 30
+          end
+
+          def self.name
+            "Foo"
+          end
+        end
+
+        hook = Ruby::Signature::Test::Hook.install(env, klass, logger: logger)
+                 .raise_on_error!
+                 .verify(instance_method: :hello,
+                         types: ["() { (String) -> void } -> void"])
+
+
+        assert_raises(Ruby::Signature::Test::Hook::Error) do
+          hook.run do
+            klass.new.hello {|x| 30 }
+          end
+        end
+      end
+    end
+  end
 end
