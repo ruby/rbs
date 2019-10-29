@@ -100,6 +100,7 @@ You need to specify `RBS_TEST_TARGET` to run the test, and you can customize the
 - `RBS_TEST_SKIP` (optional)
 - `RBS_TEST_OPT` (optional)
 - `RBS_TEST_LOGLEVEL` (optional)
+- `RBS_TEST_RAISE` (optional)
 
 `RBS_TEST_TARGET` is to specify the classes you want to test. `RBS_TEST_TARGET` can contain comma-separated class name pattern, which is one of an exact class name or with wildcard `*`.
 
@@ -118,6 +119,10 @@ RBS_TEST_OPT='-r set -r pathname -I sig'
 
 `RBS_TEST_LOGLEVEL` can be used to configure log level. Defaults to `info`.
 
+`RBS_TEST_RAISE` may help to debug the type signatures.
+If the environment variable is set, it raises an exception when a type error is detected.
+You can see the backtrace how the type error is caused and debug your program or signature.
+
 So, a typical command line to start the test would look like the following:
 
 ```
@@ -125,7 +130,8 @@ $ RBS_TEST_LOGLEVEL=error \
   RBS_TEST_TARGET='Kaigi::*' \
   RBS_TEST_SKIP='Kaigi::MonkeyPatch' \
   RBS_TEST_OPT='-rset -rpathname -Isig -Iprivate' \
-  RUBY_OPT='-rbundler/setup -rruby/signature/test/setup' \
+  RBS_TEST_RAISE=true \
+  RUBYOPT='-rbundler/setup -rruby/signature/test/setup' \
   bundle exec rake test
 ```
 
