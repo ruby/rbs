@@ -265,8 +265,6 @@ module Ruby
                   method_types: method_types
                 )
               end
-
-              # raise Errors.to_string(new_errors.last)
             end
 
             unless new_errors.empty?
