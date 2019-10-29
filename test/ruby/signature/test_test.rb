@@ -277,29 +277,6 @@ EOF
                               argument_error: Test::Hook::Errors::ArgumentError
           assert_empty errors.map {|e| Test::Hook::Errors.to_string(e) }
         end
-
-        parse_method_type("() { (Integer) -> void } -> void").tap do |method_type|
-          errors = []
-
-          hook.typecheck_args "#foo",
-                              method_type,
-                              hook.block_args(method_type.block.type),
-                              Test::Hook::ArgsReturn.new(arguments: [], return_value: nil),
-                              errors,
-                              type_error: Test::Hook::Errors::BlockArgumentTypeError,
-                              argument_error: Test::Hook::Errors::BlockArgumentError
-          assert_empty errors.map {|e| Test::Hook::Errors.to_string(e) }
-
-          errors.clear
-          hook.typecheck_args "#foo",
-                              method_type,
-                              hook.block_args(method_type.block.type),
-                              Test::Hook::ArgsReturn.new(arguments: [1,2], return_value: nil),
-                              errors,
-                              type_error: Test::Hook::Errors::BlockArgumentTypeError,
-                              argument_error: Test::Hook::Errors::BlockArgumentError
-          assert_empty errors.map {|e| Test::Hook::Errors.to_string(e) }
-        end
       end
     end
   end
