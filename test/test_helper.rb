@@ -62,6 +62,7 @@ end
 module Kernel
   private
   def puts: (*untyped) -> nil
+  def to_i: -> Integer
 end
 
 class Class < Module

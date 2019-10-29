@@ -642,7 +642,7 @@ EOF
         builder = DefinitionBuilder.new(env: env)
 
         builder.build_instance(BuiltinNames::Object.name).yield_self do |definition|
-          assert_equal Set.new([:__id__, :initialize, :puts, :respond_to_missing?]), Set.new(definition.methods.keys)
+          assert_equal Set.new([:__id__, :initialize, :puts, :respond_to_missing?, :to_i]), Set.new(definition.methods.keys)
 
           definition.methods[:__id__].yield_self do |method|
             assert_method_definition method, ["() -> ::Integer"], accessibility: :public
@@ -868,7 +868,7 @@ EOF
         builder.build_singleton(type_name("::Enumerable2")).yield_self do |definition|
           assert_instance_of Definition, definition
 
-          assert_equal [:__id__, :initialize, :puts, :respond_to_missing?], definition.methods.keys.sort
+          assert_equal [:__id__, :initialize, :puts, :respond_to_missing?, :to_i], definition.methods.keys.sort
           assert_method_definition definition.methods[:__id__], ["() -> ::Integer"]
           assert_method_definition definition.methods[:initialize], ["() -> void"]
           assert_method_definition definition.methods[:puts], ["(*untyped) -> nil"]

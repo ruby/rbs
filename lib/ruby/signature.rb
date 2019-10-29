@@ -6,6 +6,7 @@ require "pathname"
 require "pp"
 require "ripper"
 require "logger"
+require "tsort"
 
 require "ruby/signature/errors"
 require "ruby/signature/buffer"
@@ -29,6 +30,7 @@ require "ruby/signature/constant_table"
 require "ruby/signature/ast/comment"
 require "ruby/signature/writer"
 require "ruby/signature/scaffold/rbi"
+require "ruby/signature/environment_walker"
 
 require "ruby/signature/parser"
 
