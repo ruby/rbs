@@ -49,7 +49,7 @@ TracePoint.trace :end do |tp|
       type_name = Ruby::Signature::Namespace.parse(class_name).absolute!.to_type_name
       if hooks.none? {|hook| hook.klass == tp.self }
         if env.find_class(type_name)
-          logger.info "Setting up a hook for #{class_name}"
+          logger.info "Setting up hooks for #{class_name}"
           hooks << Ruby::Signature::Test::Hook.install(env, tp.self, logger: logger).verify_all.raise_on_error!(raise_on_error)
         end
       end

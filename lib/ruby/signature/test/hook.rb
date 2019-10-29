@@ -161,7 +161,7 @@ module Ruby
             definition.methods.each do |name, method|
               if method.defined_in.name.absolute! == type_name
                 unless method.annotations.any? {|a| a.string == "rbs:test:skip" }
-                  logger.info "Installing hook on #{type_name}##{name}: #{method.method_types.join(" | ")}"
+                  logger.info "Installing a hook on #{type_name}##{name}: #{method.method_types.join(" | ")}"
                   verify instance_method: name, types: method.method_types
                 else
                   logger.info "Skipping test of #{type_name}##{name}"
@@ -174,10 +174,10 @@ module Ruby
             definition.methods.each do |name, method|
               if method.defined_in&.name&.absolute! == type_name || name == :new
                 unless method.annotations.any? {|a| a.string == "rbs:test:skip" }
-                  logger.info "Installing hook on #{type_name}.#{name}: #{method.method_types.join(" | ")}"
+                  logger.info "Installing a hook on #{type_name}.#{name}: #{method.method_types.join(" | ")}"
                   verify singleton_method: name, types: method.method_types
                 else
-                  logger.info "Skipping test of #{type_name}##{name}"
+                  logger.info "Skipping test of #{type_name}.#{name}"
                 end
               end
             end
