@@ -317,7 +317,7 @@
 # arr.keep_if {|a| a < 4}   #=> [1, 2, 3]
 # arr                       #=> [1, 2, 3]
 # ```
-class Array[Elem] < Object
+class Array[unchecked out Elem] < Object
   include Enumerable[Elem, Array[Elem]]
 
   def self.[]: [U] (*U arg0) -> ::Array[U]

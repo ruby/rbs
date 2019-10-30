@@ -95,7 +95,7 @@
 # puts ext_each(o.to_enum) {|*x| puts x; [:b, *x] }
 # # => [], [:b], [1], [:b, 1], [1, 2], [:b, 1, 2], 3
 # ```
-class Enumerator[Elem, Return] < Object
+class Enumerator[unchecked out Elem, out Return] < Object
   include Enumerable[Elem, Return]
 
   def each: () { (Elem arg0) -> untyped } -> Return
@@ -242,11 +242,11 @@ class Enumerator[Elem, Return] < Object
                  | [U] (U arg0) -> ::Enumerator[[ Elem, U ], Return]
 end
 
-class Enumerator::Generator[Elem, Return] < Object
+class Enumerator::Generator[out Elem, out Return] < Object
   include Enumerable[Elem, Return]
 end
 
-class Enumerator::Lazy[Elem, Return] < Enumerator[Elem, Return]
+class Enumerator::Lazy[out Elem, out Return] < Enumerator[Elem, Return]
 end
 
 class Enumerator::Yielder < Object
