@@ -134,7 +134,7 @@
 # 
 # See also Object\#hash and
 # [Object\#eql?](https://ruby-doc.org/core-2.6.3/Object.html#method-i-eql-3F)
-class Hash[K, V] < Object
+class Hash[unchecked out K, unchecked out V] < Object
   include Enumerable[[K, V], Hash[K, V]]
 
   def self.[]: [U, V] (*::Array[[ U, V ]] arg0) -> ::Hash[U, V]

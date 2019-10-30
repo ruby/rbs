@@ -14,7 +14,7 @@ interface _ToStr
   def to_str: () -> String
 end
 
-interface _Each[A, B]
+interface _Each[out A, out B]
   def each: { (A) -> void } -> B
 end
 
