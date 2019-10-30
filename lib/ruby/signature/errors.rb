@@ -167,7 +167,22 @@ module Ruby
         @decl = decl
         @errors = errors
 
-        super "#{Location.to_string decl.location}: Invalid variance annotation: #{decl.name}"
+        message = [
+          "#{Location.to_string decl.location}: Invalid variance annotation: #{decl.name}"
+        ]
+
+        errors.each do |error|
+          case error
+          when MethodTypeError
+            message << "  MethodTypeError (#{error.param.name}): on `#{error.method_name}` #{error.method_type.to_s} (#{error.method_type.location&.start_line})"
+          when InheritanceError
+            message << "  InheritanceError: #{error.super_class}"
+          when MixinError
+            message << "  MixinError: #{error.include_member.name} (#{error.include_member.location&.start_line})"
+          end
+        end
+
+        super message.join("\n")
       end
     end
   end
