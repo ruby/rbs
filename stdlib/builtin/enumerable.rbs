@@ -125,10 +125,10 @@ module Enumerable[Elem, Return]: _Each[Elem, Return]
 
   def `include?`: (untyped arg0) -> bool
 
-  def inject: [A] (?A initial, ?Symbol arg0) -> untyped
-            | (?Symbol arg0) -> untyped
-            | (?Elem initial) { (Elem arg0, Elem arg1) -> Elem } -> Elem
-            | () { (Elem arg0, Elem arg1) -> Elem } -> Elem?
+  def inject: (untyped init, Symbol method) -> untyped
+            | (Symbol method) -> untyped
+            | [A] (A initial) { (Elem, A) -> A } -> Elem
+            | () { (Elem, Elem) -> Elem } -> Elem
 
   # Returns the object in *enum* with the maximum value. The first form
   # assumes all objects implement `Comparable` ; the second uses the block
@@ -315,10 +315,7 @@ module Enumerable[Elem, Return]: _Each[Elem, Return]
 
   def member?: (untyped arg0) -> bool
 
-  def reduce: [A] (?A initial, ?Symbol arg0) -> untyped
-            | (?Symbol arg0) -> untyped
-            | (?Elem initial) { (Elem arg0, Elem arg1) -> Elem } -> Elem
-            | () { (Elem arg0, Elem arg1) -> Elem } -> Elem?
+  alias reduce inject
 
   def select: () { (Elem arg0) -> untyped } -> ::Array[Elem]
             | () -> ::Enumerator[Elem, Return]
