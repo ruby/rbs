@@ -7,7 +7,6 @@ class Integer < Numeric
        | (Float arg0) -> Float
        | (Rational arg0) -> Rational
        | (BigDecimal arg0) -> BigDecimal
-       | (Integer | Float arg0) -> (Integer | Float)
 
   def &: (Integer arg0) -> Integer
 
@@ -16,7 +15,6 @@ class Integer < Numeric
        | (Rational arg0) -> Rational
        | (BigDecimal arg0) -> BigDecimal
        | (Complex arg0) -> Complex
-       | (Integer | Float arg0) -> (Integer | Float)
 
   def **: (Integer arg0) -> Numeric
         | (Float arg0) -> Numeric
@@ -29,7 +27,6 @@ class Integer < Numeric
        | (Rational arg0) -> Rational
        | (BigDecimal arg0) -> BigDecimal
        | (Complex arg0) -> Complex
-       | (Integer | Float arg0) -> (Integer | Float)
 
   def +@: () -> Integer
 
@@ -38,7 +35,6 @@ class Integer < Numeric
        | (Rational arg0) -> Rational
        | (BigDecimal arg0) -> BigDecimal
        | (Complex arg0) -> Complex
-       | (Integer | Float arg0) -> (Integer | Float)
 
   def -@: () -> Integer
 
@@ -47,7 +43,6 @@ class Integer < Numeric
        | (Rational arg0) -> Rational
        | (BigDecimal arg0) -> BigDecimal
        | (Complex arg0) -> Complex
-       | (Integer | Float arg0) -> (Integer | Float)
 
   def <: (Integer arg0) -> bool
        | (Float arg0) -> bool
