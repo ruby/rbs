@@ -174,8 +174,16 @@ class Ruby::Signature::TypeParsingTest < Minitest::Test
       assert_equal "[untyped, nil, void]", type.location.source
     end
 
-    assert_raises Parser::SyntaxError do
-      Parser.parse_type("[untyped]")
+    Parser.parse_type("[untyped]").yield_self do |type|
+      assert_instance_of Types::Tuple, type
+      assert_equal [Types::Bases::Any.new(location: nil)], type.types
+      assert_equal "[untyped]", type.location.source
+    end
+
+    Parser.parse_type("[ ]").yield_self do |type|
+      assert_instance_of Types::Tuple, type
+      assert_equal [], type.types
+      assert_equal "[ ]", type.location.source
     end
   end
 

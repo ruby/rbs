@@ -137,6 +137,8 @@ Records are `Hash` objects, fixed set of keys, and heterogeneous.
 Tuples are `Array` objects, fixed size, and heterogeneous.
 
 ```
+[ ]                               # Empty like `[]`
+[String]                          # Single string like `["hi"]`
 [Integer, Integer]                # Pair of integers like `[1, 2]`
 [Symbol, Integer, Integer]        # Tuple of Symbol, Integer, and Integer like `[:pair, 30, 22]`
 ```

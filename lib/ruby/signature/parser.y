@@ -721,6 +721,15 @@ rule
           raise SyntaxError.new(token_str: "kLBRACKET", error_value: val[1])
         end
       }
+    | kLBRACKET kRBRACKET {
+        location = val[0].location + val[1].location
+        result = Types::Tuple.new(types: [], location: location)
+      }
+    | kLBRACKET type kRBRACKET {
+        location = val[0].location + val[2].location
+        types = [val[1]]
+        result = Types::Tuple.new(types: types, location: location)
+      }
     | kLBRACKET type_list2 kRBRACKET {
         location = val[0].location + val[2].location
         types = val[1]
