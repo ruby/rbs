@@ -721,7 +721,11 @@ rule
           raise SyntaxError.new(token_str: "kLBRACKET", error_value: val[1])
         end
       }
-    | kLBRACKET type_list2 kRBRACKET {
+    | kLBRACKET kRBRACKET {
+        location = val[0].location + val[1].location
+        result = Types::Tuple.new(types: [], location: location)
+      }
+    | kLBRACKET type_list kRBRACKET {
         location = val[0].location + val[2].location
         types = val[1]
         result = Types::Tuple.new(types: types, location: location)
@@ -752,14 +756,6 @@ rule
     | type_list kCOMMA type {
         result = val[0] + [val[2]]
       }
-
-  type_list2:
-      type kCOMMA type {
-        result = [val[0], val[2]]
-      }
-    | type_list2 kCOMMA type {
-      result = val[0] + [val[2]]
-    }
 
   record_type:
       kLBRACE record_fields kRBRACE {
