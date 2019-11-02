@@ -45,7 +45,7 @@ module Ruby
       end
 
       def last_position
-        content.bytesize
+        content.size
       end
     end
   end

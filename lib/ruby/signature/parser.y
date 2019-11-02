@@ -1116,8 +1116,8 @@ def push_comment(string, location)
 end
 
 def new_token(type, value = input.matched)
-  start_index = input.pos - input.matched.bytesize
-  end_index = input.pos
+  start_index = input.charpos - input.matched.size
+  end_index = input.charpos
 
   location = Ruby::Signature::Location.new(buffer: buffer,
                                            start_pos: start_index,
@@ -1240,8 +1240,8 @@ def next_token
     when input.scan(/\s+/)
       # skip
     when input.scan(/#(( *)|( (?<string>.*)))\n/)
-      start_index = input.pos - input.matched.size
-      end_index = input.pos-1
+      start_index = input.charpos - input.matched.size
+      end_index = input.charpos-1
 
       location = Ruby::Signature::Location.new(buffer: buffer,
                                                start_pos: start_index,

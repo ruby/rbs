@@ -918,4 +918,15 @@ end
       assert c.skip_validation
     end
   end
+
+  def test_mame
+    Parser.parse_signature(<<EOF).yield_self do |decls|
+# h –
+class Exception < Object
+end
+EOF
+
+      assert_equal "class Exception < Object", decls[0].location.source.lines[0].chomp
+    end
+  end
 end
