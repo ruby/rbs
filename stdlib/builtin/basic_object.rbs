@@ -90,7 +90,7 @@ class BasicObject
 
   def equal?: (untyped other) -> bool
 
-  def instance_eval: (?String arg0, ?String filename, ?Integer lineno) -> untyped
+  def instance_eval: (String arg0, ?String filename, ?Integer lineno) -> untyped
                    | [U] () { (self) -> U } -> U
 
   def instance_exec: [U, V] (*V args) { (*V args) -> U } -> U
