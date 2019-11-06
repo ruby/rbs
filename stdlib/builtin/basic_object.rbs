@@ -86,11 +86,11 @@ class BasicObject
   # ```
   def __id__: () -> Integer
 
-  def __send__: (Symbol arg0, *untyped arg1) -> untyped
+  def __send__: (Symbol | String arg0, *untyped arg1) -> untyped
 
   def equal?: (untyped other) -> bool
 
-  def instance_eval: (?String arg0, ?String filename, ?Integer lineno) -> untyped
+  def instance_eval: (String arg0, ?String filename, ?Integer lineno) -> untyped
                    | [U] () { (self) -> U } -> U
 
   def instance_exec: [U, V] (*V args) { (*V args) -> U } -> U
