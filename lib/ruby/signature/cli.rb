@@ -202,6 +202,11 @@ module Ruby
           opts.on("--no-inherit") { inherit = false }
         end.order!(args)
 
+        unless args.size == 1
+          stdout.puts "Expected one argument."
+          return
+        end
+
         loader = EnvironmentLoader.new()
 
         options.setup(loader)
