@@ -100,6 +100,7 @@ module Enumerable[unchecked out Elem, out Return]: _Each[Elem, Return]
               | () -> ::Enumerator[Elem, Return]
 
   alias select find_all
+  alias filter find_all
 
   def find_index: (?untyped value) -> Integer?
                 | () { (Elem arg0) -> untyped } -> Integer?

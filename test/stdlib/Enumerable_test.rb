@@ -7,6 +7,11 @@ class EnumerableTest < StdlibTest
     [1, 2, 3].find_all { |x| x.even? }
   end
 
+  def test_filter
+    [1, 2, 3].filter
+    [1, 2, 3].filter { |x| x.even? }
+  end
+
   def test_grep
     [1, 2, 3].grep(-> x { x.even? })
     [1, 2, 3].grep(-> x { x.even? }) { |x| x * 2 }
