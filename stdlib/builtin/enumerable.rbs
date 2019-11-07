@@ -99,6 +99,8 @@ module Enumerable[unchecked out Elem, out Return]: _Each[Elem, Return]
   def find_all: () { (Elem arg0) -> untyped } -> ::Array[Elem]
               | () -> ::Enumerator[Elem, Return]
 
+  alias select find_all
+
   def find_index: (?untyped value) -> Integer?
                 | () { (Elem arg0) -> untyped } -> Integer?
                 | () -> ::Enumerator[Elem, Return]
@@ -319,9 +321,6 @@ module Enumerable[unchecked out Elem, out Return]: _Each[Elem, Return]
   def member?: (untyped arg0) -> bool
 
   alias reduce inject
-
-  def select: () { (Elem arg0) -> untyped } -> ::Array[Elem]
-            | () -> ::Enumerator[Elem, Return]
 
   # Returns an array containing the items in *enum* .
   # 
