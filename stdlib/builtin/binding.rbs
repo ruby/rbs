@@ -93,7 +93,7 @@ class Binding < Object
   def local_variable_set: [U] (String | Symbol symbol, U obj) -> U
 
   # Returns the bound receiver of the binding object.
-  def receiver: () -> Object
+  def receiver: () -> untyped
 
   # Returns the Ruby source filename and line number of the binding object.
   def source_location: () -> [ String, Integer ]
