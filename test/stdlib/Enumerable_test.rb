@@ -3,32 +3,46 @@ class EnumerableTest < StdlibTest
   using hook.refinement
 
   def test_find_all
-    [1, 2, 3].find_all
-    [1, 2, 3].find_all { |x| x.even? }
+    enumerable.find_all
+    enumerable.find_all { |x| x.even? }
   end
 
   def test_filter
-    [1, 2, 3].filter
-    [1, 2, 3].filter { |x| x.even? }
+    enumerable.filter
+    enumerable.filter { |x| x.even? }
   end
 
   def test_grep
-    [1, 2, 3].grep(-> x { x.even? })
-    [1, 2, 3].grep(-> x { x.even? }) { |x| x * 2 }
+    enumerable.grep(-> x { x.even? })
+    enumerable.grep(-> x { x.even? }) { |x| x * 2 }
   end
 
   def test_grep_v
-    [1, 2, 3].grep_v(-> x { x.even? })
-    [1, 2, 3].grep_v(-> x { x.even? }) { |x| x * 2 }
+    enumerable.grep_v(-> x { x.even? })
+    enumerable.grep_v(-> x { x.even? }) { |x| x * 2 }
   end
 
   def test_select
-    [1, 2, 3].select
-    [1, 2, 3].select { |x| x.even? }
+    enumerable.select
+    enumerable.select { |x| x.even? }
   end
 
   def test_uniq
-    [1, 2, 3].uniq
-    [1, 2, 3].uniq { |x| x.even? }
+    enumerable.uniq
+    enumerable.uniq { |x| x.even? }
+  end
+
+  private
+
+  def enumerable
+    Class.new {
+      def each
+        yield 1
+        yield 2
+        yield 3
+      end
+
+      include Enumerable
+    }.new
   end
 end
