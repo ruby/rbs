@@ -26,4 +26,9 @@ class EnumerableTest < StdlibTest
     [1, 2, 3].select
     [1, 2, 3].select { |x| x.even? }
   end
+
+  def test_uniq
+    [1, 2, 3].uniq
+    [1, 2, 3].uniq { |x| x.even? }
+  end
 end

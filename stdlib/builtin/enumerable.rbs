@@ -365,4 +365,7 @@ module Enumerable[unchecked out Elem, out Return]: _Each[Elem, Return]
   # p pythagorean_triples.take_while { |*, z| z < 100 }.force
   # ```
   def lazy: () -> Enumerator::Lazy[Elem, Return]
+
+  def uniq: () -> ::Array[Elem]
+          | () { (Elem item) -> untyped } -> ::Array[Elem]
 end
