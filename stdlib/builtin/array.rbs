@@ -746,6 +746,7 @@ class Array[unchecked out Elem] < Object
   # b.uniq {|s| s.first}   # => [["student", "sam"], ["teacher", "matz"]]
   # ```
   def uniq: () -> ::Array[Elem]
+          | () { (Elem item) -> untyped } -> ::Array[Elem]
 
   # Removes duplicate elements from `self` .
   # 
