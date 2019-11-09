@@ -391,4 +391,6 @@ module Enumerable[unchecked out Elem, out Return]: _Each[Elem, Return]
 
   def chunk: () -> ::Enumerator[Elem, Return]
            | [U] () { (Elem elt) -> U } -> ::Enumerator[[U, ::Array[Elem]], ::Enumerator::Generator[Elem, Return]]
+
+  def chunk_while: () { (Elem elt_before, Elem elt_after) -> bool } -> ::Enumerator[::Array[Elem], ::Enumerator::Generator[Elem, Return]]
 end

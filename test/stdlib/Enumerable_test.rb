@@ -68,6 +68,10 @@ class EnumerableTest < StdlibTest
     enumerable.chunk { |x| x.even? }
   end
 
+  def test_chunk_while
+    enumerable.chunk_while { |elt_before, elt_after| (elt_before & elt_after).zero? }
+  end
+
   private
 
   def enumerable
