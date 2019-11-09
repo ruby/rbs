@@ -63,6 +63,11 @@ class EnumerableTest < StdlibTest
     enumerable.zip([4,5,6]) { |arr| arr.sum }
   end
 
+  def test_chunk
+    enumerable.chunk
+    enumerable.chunk { |x| x.even? }
+  end
+
   private
 
   def enumerable
