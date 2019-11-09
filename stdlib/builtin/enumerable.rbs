@@ -378,4 +378,6 @@ module Enumerable[unchecked out Elem, out Return]: _Each[Elem, Return]
                 | () -> ::Enumerator[Elem, Return]
 
   def chain: (*self enumerables) -> ::Enumerator::Chain[Elem, ::Array[self]]
+
+  def tally: () -> ::Hash[Elem, Integer]
 end

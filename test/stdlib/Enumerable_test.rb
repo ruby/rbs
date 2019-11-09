@@ -49,6 +49,10 @@ class EnumerableTest < StdlibTest
     enumerable.chain([4, 5])
   end
 
+  def test_tally
+    enumerable.tally
+  end
+
   private
 
   def enumerable
