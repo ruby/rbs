@@ -76,6 +76,11 @@ class EnumerableTest < StdlibTest
     enumerable.slice_when { |elt_before, elt_after| (elt_before & elt_after).zero? }
   end
 
+  def test_slice_after
+    enumerable.slice_after(1)
+    enumerable.slice_after { |elt| elt.even? }
+  end
+
   private
 
   def enumerable
