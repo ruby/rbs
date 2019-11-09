@@ -58,6 +58,11 @@ class EnumerableTest < StdlibTest
     enumerable.each_entry { |x| x }
   end
 
+  def test_zip
+    enumerable.zip([4,5,6])
+    enumerable.zip([4,5,6]) { |arr| arr.sum }
+  end
+
   private
 
   def enumerable
