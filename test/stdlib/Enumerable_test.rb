@@ -72,6 +72,10 @@ class EnumerableTest < StdlibTest
     enumerable.chunk_while { |elt_before, elt_after| (elt_before & elt_after).zero? }
   end
 
+  def test_slice_when
+    enumerable.slice_when { |elt_before, elt_after| (elt_before & elt_after).zero? }
+  end
+
   private
 
   def enumerable
