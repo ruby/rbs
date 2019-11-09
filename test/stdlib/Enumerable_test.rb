@@ -39,9 +39,11 @@ class EnumerableTest < StdlibTest
     enumerable.sum('') { |x| x.to_s }
   end
 
-  def test_filter_map
-    enumerable.filter_map
-    enumerable.filter_map { |x| x.even? && x * 2 }
+  if Enumerable.public_method_defined?(:filter_map)
+    def test_filter_map
+      enumerable.filter_map
+      enumerable.filter_map { |x| x.even? && x * 2 }
+    end
   end
 
   def test_chain
@@ -49,8 +51,10 @@ class EnumerableTest < StdlibTest
     enumerable.chain([4, 5])
   end
 
-  def test_tally
-    enumerable.tally
+  if Enumerable.public_method_defined?(:tally)
+    def test_tally
+      enumerable.tally
+    end
   end
 
   def test_each_entry
