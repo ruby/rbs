@@ -44,6 +44,11 @@ class EnumerableTest < StdlibTest
     enumerable.filter_map { |x| x.even? && x * 2 }
   end
 
+  def test_chain
+    enumerable.chain
+    enumerable.chain([4, 5])
+  end
+
   private
 
   def enumerable
