@@ -81,6 +81,11 @@ class EnumerableTest < StdlibTest
     enumerable.slice_after { |elt| elt.even? }
   end
 
+  def test_slice_before
+    enumerable.slice_before(1)
+    enumerable.slice_before { |elt| elt.even? }
+  end
+
   private
 
   def enumerable
