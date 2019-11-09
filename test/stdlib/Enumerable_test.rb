@@ -39,6 +39,11 @@ class EnumerableTest < StdlibTest
     enumerable.sum('') { |x| x.to_s }
   end
 
+  def test_filter_map
+    enumerable.filter_map
+    enumerable.filter_map { |x| x.even? && x * 2 }
+  end
+
   private
 
   def enumerable
