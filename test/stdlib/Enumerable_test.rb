@@ -53,6 +53,11 @@ class EnumerableTest < StdlibTest
     enumerable.tally
   end
 
+  def test_each_entry
+    enumerable.each_entry
+    enumerable.each_entry { |x| x }
+  end
+
   private
 
   def enumerable
