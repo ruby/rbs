@@ -32,6 +32,13 @@ class EnumerableTest < StdlibTest
     enumerable.uniq { |x| x.even? }
   end
 
+  def test_sum
+    enumerable.sum
+    enumerable.sum { |x| x * 2 }
+    enumerable.sum(0)
+    enumerable.sum('') { |x| x.to_s }
+  end
+
   private
 
   def enumerable

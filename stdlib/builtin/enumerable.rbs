@@ -368,4 +368,9 @@ module Enumerable[unchecked out Elem, out Return]: _Each[Elem, Return]
 
   def uniq: () -> ::Array[Elem]
           | () { (Elem item) -> untyped } -> ::Array[Elem]
+
+  def sum: () -> (Elem | Integer)
+         | [T] () { (Elem arg0) -> T } -> (Integer | T)
+         | [T] (?T arg0) -> (Elem | T)
+         | [U] (?U arg0) { (Elem arg0) -> U } -> U
 end
