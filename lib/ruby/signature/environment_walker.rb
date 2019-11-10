@@ -5,6 +5,7 @@ module Ruby
 
       def initialize(env:)
         @env = env
+        @only_ancestors = nil
       end
 
       def builder
