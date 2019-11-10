@@ -520,6 +520,8 @@ class Ruby::Signature::SignatureParsingTest < Minitest::Test
         def class: -> String
         def void: -> String
         def nil?: -> String
+        def true: -> untyped
+        def false: -> untyped
         def any: -> String
         def top: -> String
         def bot: -> String
@@ -554,6 +556,8 @@ class Ruby::Signature::SignatureParsingTest < Minitest::Test
         :class,
         :void,
         :nil?,
+        :true,
+        :false,
         :any,
         :top,
         :bot,

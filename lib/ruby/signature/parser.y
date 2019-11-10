@@ -4,7 +4,7 @@ class Ruby::Signature::Parser
         tANNOTATION
         tSTRING tSYMBOL tINTEGER tWRITE_ATTR
         kLPAREN kRPAREN kLBRACKET kRBRACKET kLBRACE kRBRACE
-        kVOID kNIL kANY kUNTYPED kTOP kBOT kSELF kSELFQ kINSTANCE kCLASS kBOOL kSINGLETON kTYPE kDEF kMODULE kSUPER
+        kVOID kNIL kTRUE kFALSE kANY kUNTYPED kTOP kBOT kSELF kSELFQ kINSTANCE kCLASS kBOOL kSINGLETON kTYPE kDEF kMODULE kSUPER
         kPRIVATE kPUBLIC kALIAS
         kCOLON kCOLON2 kCOMMA kBAR kAMP kHAT kARROW kQUESTION kEXCLAMATION kSTAR kSTAR2 kFATARROW kEQ kDOT kLT
         kINTERFACE kEND kINCLUDE kEXTEND kATTRREADER kATTRWRITER kATTRACCESSOR tOPERATOR tQUOTEDMETHOD
@@ -502,7 +502,7 @@ rule
   method_name0: tUIDENT | tLIDENT | identifier_keywords
 
   identifier_keywords:
-      kCLASS | kVOID | kNIL | kANY | kUNTYPED | kTOP | kBOT | kINSTANCE | kBOOL | kSINGLETON
+      kCLASS | kVOID | kNIL | kTRUE | kFALSE | kANY | kUNTYPED | kTOP | kBOT | kINSTANCE | kBOOL | kSINGLETON
     | kTYPE | kMODULE | kPRIVATE | kPUBLIC | kEND | kINCLUDE | kEXTEND | kPREPEND
     | kATTRREADER | kATTRACCESSOR | kATTRWRITER | kDEF | kEXTENSION | kSELF | kINCOMPATIBLE
     | kUNCHECKED
@@ -676,6 +676,12 @@ rule
       }
     | kCLASS {
         result = Types::Bases::Class.new(location: val[0].location)
+      }
+    | kTRUE {
+        result = Types::Literal.new(literal: true, location: val[0].location)
+      }
+    | kFALSE {
+        result = Types::Literal.new(literal: false, location: val[0].location)
       }
     | tINTEGER {
         result = Types::Literal.new(literal: val[0].value, location: val[0].location)
@@ -1147,6 +1153,8 @@ KEYWORDS = {
   "instance" => :kINSTANCE,
   "bool" => :kBOOL,
   "nil" => :kNIL,
+  "true" => :kTRUE,
+  "false" => :kFALSE,
   "singleton" => :kSINGLETON,
   "interface" => :kINTERFACE,
   "end" => :kEND,
