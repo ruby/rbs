@@ -32,6 +32,13 @@ class NilClass < Object
   # ```
   def to_h: () -> ::Hash[untyped, untyped]
 
+  # Always returns zero.
+  # 
+  # ```ruby
+  # nil.to_i   #=> 0.0
+  # ```
+  def to_i: () -> Integer
+
   # Returns zero as a rational.
   def to_r: () -> Rational
 
