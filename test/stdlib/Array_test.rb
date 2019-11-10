@@ -8,4 +8,9 @@ class ArrayTest < StdlibTest
     Array.new([1,2,3])
     Array.new(3) { true }
   end
+
+  def test_uniq
+    [1, 2, 3].uniq
+    [1, 2, 3].uniq { |x| x.even? }
+  end
 end
