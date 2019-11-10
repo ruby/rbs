@@ -254,3 +254,7 @@ class Enumerator::Yielder < Object
 
   def yield: (*untyped arg0) -> void
 end
+
+class Enumerator::Chain[out Elem, out Return] < Object
+  include Enumerable[Elem, Return]
+end

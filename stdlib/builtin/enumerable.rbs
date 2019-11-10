@@ -99,6 +99,9 @@ module Enumerable[unchecked out Elem, out Return]: _Each[Elem, Return]
   def find_all: () { (Elem arg0) -> untyped } -> ::Array[Elem]
               | () -> ::Enumerator[Elem, Return]
 
+  alias select find_all
+  alias filter find_all
+
   def find_index: (?untyped value) -> Integer?
                 | () { (Elem arg0) -> untyped } -> Integer?
                 | () -> ::Enumerator[Elem, Return]
@@ -119,6 +122,9 @@ module Enumerable[unchecked out Elem, out Return]: _Each[Elem, Return]
 
   def grep: (untyped arg0) -> ::Array[Elem]
           | [U] (untyped arg0) { (Elem arg0) -> U } -> ::Array[U]
+
+  def grep_v: (untyped arg0) -> ::Array[Integer]
+            | [U] (untyped arg0) { (Elem arg0) -> U } -> ::Array[U]
 
   def group_by: [U] () { (Elem arg0) -> U } -> ::Hash[U, ::Array[Elem]]
               | () -> ::Enumerator[Elem, Return]
@@ -317,9 +323,6 @@ module Enumerable[unchecked out Elem, out Return]: _Each[Elem, Return]
 
   alias reduce inject
 
-  def select: () { (Elem arg0) -> untyped } -> ::Array[Elem]
-            | () -> ::Enumerator[Elem, Return]
-
   # Returns an array containing the items in *enum* .
   # 
   # ```ruby
@@ -362,4 +365,40 @@ module Enumerable[unchecked out Elem, out Return]: _Each[Elem, Return]
   # p pythagorean_triples.take_while { |*, z| z < 100 }.force
   # ```
   def lazy: () -> Enumerator::Lazy[Elem, Return]
+
+  def uniq: () -> ::Array[Elem]
+          | () { (Elem item) -> untyped } -> ::Array[Elem]
+
+  def sum: () -> (Elem | Integer)
+         | [T] () { (Elem arg0) -> T } -> (Integer | T)
+         | [T] (?T arg0) -> (Elem | T)
+         | [U] (?U arg0) { (Elem arg0) -> U } -> U
+
+  def filter_map: [U] () { (Elem arg0) -> U? } -> ::Array[U]
+                | () -> ::Enumerator[Elem, Return]
+
+  def chain: (*self enumerables) -> ::Enumerator::Chain[Elem, ::Array[self]]
+
+  def tally: () -> ::Hash[Elem, Integer]
+
+  def each_entry: () -> ::Enumerator[Elem, Return]
+                | () { (Elem arg0) -> untyped } -> self
+
+  # variadic type parameter is not supported yet
+  # https://github.com/ruby/ruby-signature/issues/21
+  def zip: [Elem2, Return2] (::Enumerable[Elem2, Return2] enum) -> ::Array[[Elem, Elem2 | nil]]
+         | [U, Elem2, Return2] (::Enumerable[Elem2, Return2]) { ([Elem, Elem2 | nil]) -> U } -> nil
+
+  def chunk: () -> ::Enumerator[Elem, Return]
+           | [U] () { (Elem elt) -> U } -> ::Enumerator[[U, ::Array[Elem]], ::Enumerator::Generator[Elem, Return]]
+
+  def chunk_while: () { (Elem elt_before, Elem elt_after) -> bool } -> ::Enumerator[::Array[Elem], ::Enumerator::Generator[Elem, Return]]
+
+  def slice_when: () { (Elem elt_before, Elem elt_after) -> bool } -> ::Enumerator[::Array[Elem], ::Enumerator::Generator[Elem, Return]]
+
+  def slice_after: (untyped pattern) -> ::Enumerator[::Array[Elem], ::Enumerator::Generator[Elem, Return]]
+                 | () { (Elem elt) -> bool } -> ::Enumerator[::Array[Elem], ::Enumerator::Generator[Elem, Return]]
+
+  def slice_before: (untyped pattern) -> ::Enumerator[::Array[Elem], ::Enumerator::Generator[Elem, Return]]
+                  | () { (Elem elt) -> bool } -> ::Enumerator[::Array[Elem], ::Enumerator::Generator[Elem, Return]]
 end
