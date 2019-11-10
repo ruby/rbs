@@ -17,6 +17,24 @@ class StringTest < StdlibTest
     s.bytesize
   end
 
+  def delete_prefix
+    "foo".delete_prefix("f")
+  end
+
+  def delete_prefix!
+    "foo".delete_prefix! "f"
+    "foo".delete_prefix! "a"
+  end
+
+  def delete_suffix
+    "foo".delete_suffix "o"
+  end
+
+  def delete_suffix!
+    "foo".delete_suffix! "o"
+    "foo".delete_suffix! "a"
+  end
+
   def test_endwith
     s = "string"
     s.end_with?

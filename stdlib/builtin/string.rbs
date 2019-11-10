@@ -158,6 +158,14 @@ class String < Object
   def delete: (String arg0, *String arg1) -> String
 
   def delete!: (String arg0, *String arg1) -> String?
+  
+  def delete_prefix: (String) -> String
+
+  def delete_prefix!: (String) -> String?
+
+  def delete_suffix: (String) -> String
+
+  def delete_suffix!: (String) -> String?
 
   # Returns a copy of *str* with all uppercase letters replaced with their
   # lowercase counterparts. Which letters exactly are replaced, and by which
