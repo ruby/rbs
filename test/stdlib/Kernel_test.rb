@@ -554,6 +554,12 @@ class KernelTest < StdlibTest
   end
 
   def test_system
-    # TODO
+    system('echo 1')
+    system('echo', '1')
+    system('echo 1', 2 => 1)
+    system('echo 1', exception: true)
+    system({ 'FOO' => 'BAR' }, 'echo 1', exception: true)
+    system({ 'FOO' => 'BAR' }, 'echo 1')
+    # system(['echo', 'display-name'], '1') # TODO
   end
 end

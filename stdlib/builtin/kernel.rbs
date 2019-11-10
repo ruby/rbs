@@ -565,7 +565,143 @@ module Kernel
   #     *
   # 
   # See `Kernel.exec` for the standard shell.
-  def system: (*String args) -> (NilClass | FalseClass | TrueClass)
+  # TODO: support system(['echo', 'display-name'], 'arg', 'of', 'echo') style
+  def system: (
+                # w/o env, redirect
+                *String args,
+                ?unsetenv_others: (TrueClass | FalseClass),
+                ?pgroup: (TrueClass | Integer | NilClass),
+                ?new_pgroup: (TrueClass | FalseClass),
+                ?umask: Integer,
+                ?close_others: (TrueClass | FalseClass),
+                ?chdir: String,
+
+                # See Process.setrlimit
+                ?rlimit_as: (Integer | [Integer, Integer]),
+                ?rlimit_core: (Integer | [Integer, Integer]),
+                ?rlimit_cpu: (Integer | [Integer, Integer]),
+                ?rlimit_data: (Integer | [Integer, Integer]),
+                ?rlimit_fsize: (Integer | [Integer, Integer]),
+                ?rlimit_memlock: (Integer | [Integer, Integer]),
+                ?rlimit_msgqueue: (Integer | [Integer, Integer]),
+                ?rlimit_nice: (Integer | [Integer, Integer]),
+                ?rlimit_nofile: (Integer | [Integer, Integer]),
+                ?rlimit_nproc: (Integer | [Integer, Integer]),
+                ?rlimit_rss: (Integer | [Integer, Integer]),
+                ?rlimit_rtprio: (Integer | [Integer, Integer]),
+                ?rlimit_rttime: (Integer | [Integer, Integer]),
+                ?rlimit_sbsize: (Integer | [Integer, Integer]),
+                ?rlimit_sigpending: (Integer | [Integer, Integer]),
+                ?rlimit_stack: (Integer | [Integer, Integer]),
+
+                # exception is available only for system
+                ?exception: (TrueClass | FalseClass),
+              ) -> (NilClass | FalseClass | TrueClass)
+            | (
+                # w/o env, w/ redirect
+                *String args,
+                spawn_redirect_hash,
+                ?unsetenv_others: (TrueClass | FalseClass),
+                ?pgroup: (TrueClass | Integer | NilClass),
+                ?new_pgroup: (TrueClass | FalseClass),
+                ?umask: Integer,
+                ?close_others: (TrueClass | FalseClass),
+                ?chdir: String,
+
+                # See Process.setrlimit
+                ?rlimit_as: (Integer | [Integer, Integer]),
+                ?rlimit_core: (Integer | [Integer, Integer]),
+                ?rlimit_cpu: (Integer | [Integer, Integer]),
+                ?rlimit_data: (Integer | [Integer, Integer]),
+                ?rlimit_fsize: (Integer | [Integer, Integer]),
+                ?rlimit_memlock: (Integer | [Integer, Integer]),
+                ?rlimit_msgqueue: (Integer | [Integer, Integer]),
+                ?rlimit_nice: (Integer | [Integer, Integer]),
+                ?rlimit_nofile: (Integer | [Integer, Integer]),
+                ?rlimit_nproc: (Integer | [Integer, Integer]),
+                ?rlimit_rss: (Integer | [Integer, Integer]),
+                ?rlimit_rtprio: (Integer | [Integer, Integer]),
+                ?rlimit_rttime: (Integer | [Integer, Integer]),
+                ?rlimit_sbsize: (Integer | [Integer, Integer]),
+                ?rlimit_sigpending: (Integer | [Integer, Integer]),
+                ?rlimit_stack: (Integer | [Integer, Integer]),
+
+                # exception is available only for system
+                ?exception: (TrueClass | FalseClass),
+              ) -> (NilClass | FalseClass | TrueClass)
+            | (
+                # w/ env, w/o redirect
+                Hash[String, String] env,
+                *String args,
+                ?unsetenv_others: (TrueClass | FalseClass),
+                ?pgroup: (TrueClass | Integer | NilClass),
+                ?new_pgroup: (TrueClass | FalseClass),
+                ?umask: Integer,
+                ?close_others: (TrueClass | FalseClass),
+                ?chdir: String,
+
+                # See Process.setrlimit
+                ?rlimit_as: (Integer | [Integer, Integer]),
+                ?rlimit_core: (Integer | [Integer, Integer]),
+                ?rlimit_cpu: (Integer | [Integer, Integer]),
+                ?rlimit_data: (Integer | [Integer, Integer]),
+                ?rlimit_fsize: (Integer | [Integer, Integer]),
+                ?rlimit_memlock: (Integer | [Integer, Integer]),
+                ?rlimit_msgqueue: (Integer | [Integer, Integer]),
+                ?rlimit_nice: (Integer | [Integer, Integer]),
+                ?rlimit_nofile: (Integer | [Integer, Integer]),
+                ?rlimit_nproc: (Integer | [Integer, Integer]),
+                ?rlimit_rss: (Integer | [Integer, Integer]),
+                ?rlimit_rtprio: (Integer | [Integer, Integer]),
+                ?rlimit_rttime: (Integer | [Integer, Integer]),
+                ?rlimit_sbsize: (Integer | [Integer, Integer]),
+                ?rlimit_sigpending: (Integer | [Integer, Integer]),
+                ?rlimit_stack: (Integer | [Integer, Integer]),
+
+                # exception is available only for system
+                ?exception: (TrueClass | FalseClass),
+              ) -> (NilClass | FalseClass | TrueClass)
+            | (
+                # w/ env, redirect
+                Hash[String, String] env,
+                *String args,
+                spawn_redirect_hash,
+                ?unsetenv_others: (TrueClass | FalseClass),
+                ?pgroup: (TrueClass | Integer | NilClass),
+                ?new_pgroup: (TrueClass | FalseClass),
+                ?umask: Integer,
+                ?close_others: (TrueClass | FalseClass),
+                ?chdir: String,
+
+                # See Process.setrlimit
+                ?rlimit_as: (Integer | [Integer, Integer]),
+                ?rlimit_core: (Integer | [Integer, Integer]),
+                ?rlimit_cpu: (Integer | [Integer, Integer]),
+                ?rlimit_data: (Integer | [Integer, Integer]),
+                ?rlimit_fsize: (Integer | [Integer, Integer]),
+                ?rlimit_memlock: (Integer | [Integer, Integer]),
+                ?rlimit_msgqueue: (Integer | [Integer, Integer]),
+                ?rlimit_nice: (Integer | [Integer, Integer]),
+                ?rlimit_nofile: (Integer | [Integer, Integer]),
+                ?rlimit_nproc: (Integer | [Integer, Integer]),
+                ?rlimit_rss: (Integer | [Integer, Integer]),
+                ?rlimit_rtprio: (Integer | [Integer, Integer]),
+                ?rlimit_rttime: (Integer | [Integer, Integer]),
+                ?rlimit_sbsize: (Integer | [Integer, Integer]),
+                ?rlimit_sigpending: (Integer | [Integer, Integer]),
+                ?rlimit_stack: (Integer | [Integer, Integer]),
+
+                # exception is available only for system
+                ?exception: (TrueClass | FalseClass),
+              ) -> (NilClass | FalseClass | TrueClass)
 end
+
+type Kernel::spawn_redirect_hash = Hash[(spawn_redirect_fd | Array[spawn_redirect_fd]), spawn_redirect_target]
+type Kernel::spawn_redirect_fd = :in | :out | :err | Integer | IO
+type Kernel::spawn_redirect_target = spawn_redirect_fd
+                                   | String
+                                   | [String] | [String, String] | [String, String, Integer]
+                                   | [:child, spawn_redirect_fd]
+                                   | :close
 
 Kernel::RUBYGEMS_ACTIVATION_MONITOR: untyped
