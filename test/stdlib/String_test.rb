@@ -40,4 +40,12 @@ class StringTest < StdlibTest
     String.new("", encoding: Encoding::ASCII_8BIT, capacity: 123)
     String.new(encoding: Encoding::ASCII_8BIT, capacity: 123)
   end
+
+  def test_succ
+    "".succ
+  end
+
+  def test_succ!
+    "".succ
+  end
 end
