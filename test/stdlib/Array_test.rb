@@ -2,6 +2,11 @@ class ArrayTest < StdlibTest
   target Array
   using hook.refinement
 
+  def test_try_convert
+    Array.try_convert([1])
+    Array.try_convert("1")
+  end
+
   def test_new
     Array.new(1)
     Array.new(1, true)

@@ -322,6 +322,8 @@ class Array[unchecked out Elem] < Object
 
   def self.[]: [U] (*U arg0) -> ::Array[U]
 
+  def self.try_convert: [U] (untyped arg0) -> ::Array[U]?
+
   def &: (::Array[Elem] arg0) -> ::Array[Elem]
 
   def *: (Integer arg0) -> ::Array[Elem]
