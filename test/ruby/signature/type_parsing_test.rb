@@ -1,6 +1,8 @@
 require "test_helper"
 
 class Ruby::Signature::TypeParsingTest < Minitest::Test
+  include TestHelper
+
   Parser = Ruby::Signature::Parser
   Buffer = Ruby::Signature::Buffer
   Types = Ruby::Signature::Types
@@ -13,9 +15,11 @@ class Ruby::Signature::TypeParsingTest < Minitest::Test
       assert_equal "void", type.location.source
     end
 
-    Parser.parse_type("any").yield_self do |type|
-      assert_instance_of Types::Bases::Any, type
-      assert_equal "any", type.location.source
+    silence_warnings do
+      Parser.parse_type("any").yield_self do |type|
+        assert_instance_of Types::Bases::Any, type
+        assert_equal "any", type.location.source
+      end
     end
 
     Parser.parse_type("untyped").yield_self do |type|
