@@ -66,4 +66,42 @@ class StringTest < StdlibTest
   def test_succ!
     "".succ
   end
+
+  def test_encode
+    s = "string"
+    s.encode("ascii")
+    s.encode("ascii", Encoding::ASCII_8BIT)
+    s.encode(Encoding::ASCII_8BIT, "ascii")
+    s.encode("ascii", invalid: :replace)
+    s.encode(Encoding::ASCII_8BIT, Encoding::ASCII_8BIT, undef: nil)
+    s.encode(
+      invalid: nil,
+      undef: :replace,
+      replace: "foo",
+      fallback: {"a" => "a"},
+      xml: :text,
+      universal_newline: true,
+    )
+    s.encode(cr_newline: true)
+    s.encode(crlf_newline: true)
+  end
+
+  def test_encode!
+    s = "string"
+    s.encode!("ascii")
+    s.encode!("ascii", Encoding::ASCII_8BIT)
+    s.encode!(Encoding::ASCII_8BIT, "ascii")
+    s.encode!("ascii", invalid: :replace)
+    s.encode!(Encoding::ASCII_8BIT, Encoding::ASCII_8BIT, undef: nil)
+    s.encode!(
+      invalid: nil,
+      undef: :replace,
+      replace: "foo",
+      fallback: {"a" => "a"},
+      xml: :text,
+      universal_newline: true,
+    )
+    s.encode!(cr_newline: true)
+    s.encode!(crlf_newline: true)
+  end
 end
