@@ -2,7 +2,8 @@ class Regexp < Object
   def self.escape: (String | Symbol arg0) -> String
 
   def self.last_match: () -> MatchData
-                     | (?Integer arg0) -> String
+                     | (Integer n) -> String?
+                     | (Symbol | String n) -> String
 
   def self.try_convert: (untyped obj) -> Regexp?
 
@@ -13,7 +14,7 @@ class Regexp < Object
   def =~: (String? str) -> Integer?
 
   # Returns the value of the case-insensitive flag.
-  # 
+  #
   # ```ruby
   # /a/.casefold?           #=> false
   # /a/i.casefold?          #=> true
@@ -28,7 +29,7 @@ class Regexp < Object
   def fixed_encoding?: () -> bool
 
   # Produce a hash based on the text and options of this regular expression.
-  # 
+  #
   # See also Object\#hash.
   def hash: () -> Integer
 
@@ -38,13 +39,15 @@ class Regexp < Object
   # Produce a nicely formatted string-version of *rxp* . Perhaps
   # surprisingly, `#inspect` actually produces the more natural version of
   # the string than `#to_s` .
-  # 
+  #
   # ```ruby
   # /ab+c/ix.inspect        #=> "/ab+c/ix"
   # ```
   def inspect: () -> String
 
   def match: (String? arg0, ?Integer arg1) -> MatchData?
+
+  def match?: (String? arg0, ?Integer arg1) -> bool
 
   def named_captures: () -> ::Hash[String, ::Array[Integer]]
 
@@ -55,30 +58,30 @@ class Regexp < Object
   # details. Note that additional bits may be set in the returned options:
   # these are used internally by the regular expression code. These extra
   # bits are ignored if the options are passed to `Regexp::new` .
-  # 
+  #
   # ```ruby
   # Regexp::IGNORECASE                  #=> 1
   # Regexp::EXTENDED                    #=> 2
   # Regexp::MULTILINE                   #=> 4
-  # 
+  #
   # /cat/.options                       #=> 0
   # /cat/ix.options                     #=> 3
   # Regexp.new('cat', true).options     #=> 1
   # /\xa1\xa2/e.options                 #=> 16
-  # 
+  #
   # r = /cat/ix
   # Regexp.new(r.source, r.options)     #=> /cat/ix
   # ```
   def options: () -> Integer
 
   # Returns the original string of the pattern.
-  # 
+  #
   # ```ruby
   # /ab+c/ix.source #=> "ab+c"
   # ```
-  # 
+  #
   # Note that escape sequences are retained as is.
-  # 
+  #
   # ```ruby
   # /\x20\+/.source  #=> "\\x20\\+"
   # ```
@@ -91,7 +94,7 @@ class Regexp < Object
   # two, as the source of the regular expression itself may differ, as the
   # example shows). `Regexp#inspect` produces a generally more readable
   # version of *rxp* .
-  # 
+  #
   # ```ruby
   # r1 = /ab+c/ix           #=> /ab+c/ix
   # s1 = r1.to_s            #=> "(?ix-m:ab+c)"
@@ -108,6 +111,10 @@ class Regexp < Object
                   | (Regexp arg0) -> self
 
   def self.quote: (String | Symbol arg0) -> String
+
+  def self.union: () -> self
+                | (String | Regexp arg0, *String | Regexp args) -> self
+                | (::Array[String | Regexp]) -> self
 
   def eql?: (untyped other) -> bool
 end
