@@ -369,7 +369,7 @@ class Array[unchecked out Elem] < Object
   # [ "a", nil, "b", nil, "c", nil ].compact
   #                   #=> [ "a", "b", "c" ]
   # ```
-  def compact: () -> ::Array[untyped]
+  def compact: () -> ::Array[Elem]
 
   # Removes `nil` elements from the array.
   # 
@@ -553,10 +553,10 @@ class Array[unchecked out Elem] < Object
 
   def rassoc: [U] (U arg0) -> Elem?
 
-  def reject: () { (Elem arg0) -> untyped } -> ::Array[Elem]
+  def reject: () { (Elem arg0) -> bool } -> ::Array[Elem]
             | () -> ::Enumerator[Elem, self]
 
-  def reject!: () { (Elem arg0) -> untyped } -> ::Array[Elem]
+  def reject!: () { (Elem arg0) -> bool } -> ::Array[Elem]
              | () -> ::Enumerator[Elem, self]
 
   def repeated_combination: (Integer arg0) { (::Array[Elem] arg0) -> untyped } -> ::Array[Elem]
@@ -596,10 +596,10 @@ class Array[unchecked out Elem] < Object
   def sample: () -> Elem?
             | (?Integer arg0) -> ::Array[Elem]
 
-  def select: () { (Elem arg0) -> untyped } -> ::Array[Elem]
+  def select: () { (Elem arg0) -> bool } -> ::Array[Elem]
             | () -> ::Enumerator[Elem, self]
 
-  def select!: () { (Elem arg0) -> untyped } -> ::Array[Elem]
+  def select!: () { (Elem arg0) -> bool } -> ::Array[Elem]
              | () -> ::Enumerator[Elem, self]
 
   # Removes the first element of `self` and returns it (shifting all other
@@ -710,7 +710,7 @@ class Array[unchecked out Elem] < Object
 
   def take: (Integer arg0) -> ::Array[Elem]
 
-  def take_while: () { (Elem arg0) -> untyped } -> ::Array[Elem]
+  def take_while: () { (Elem arg0) -> bool } -> ::Array[Elem]
                 | () -> ::Enumerator[Elem, self]
 
   # Returns `self` .
