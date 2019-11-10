@@ -43,6 +43,8 @@ class Object < BasicObject
   # ```
   def object_id: () -> Integer
 
+  def respond_to?: (String | Symbol, ?bool) -> bool
+
   # Yields self to the block and returns the result of the block.
   # 
   # ```ruby
