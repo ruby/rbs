@@ -22,6 +22,12 @@ module TestHelper
     end
   end
 
+  def silence_warnings
+    Ruby::Signature.logger.stub :warn, nil do
+      yield
+    end
+  end
+
   class SignatureManager
     attr_reader :files
 
