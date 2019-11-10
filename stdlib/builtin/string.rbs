@@ -540,6 +540,8 @@ class String < Object
   # ```
   def succ: () -> String
 
+  def succ!: () -> String
+
   def sum: (?Integer arg0) -> Integer
 
   # Returns a copy of *str* with uppercase alphabetic characters converted
