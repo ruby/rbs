@@ -45,10 +45,10 @@ class Regexp < Object
   # ```
   def inspect: () -> String
 
-  def match: (String arg0, ?Integer arg1) -> MatchData?
-           | (String arg0, ?Integer arg1) { (MatchData) -> untyped } -> untyped
+  def match: (String? | Symbol | _ToStr arg0, ?Integer arg1) -> MatchData?
+           | (String? | Symbol | _ToStr arg0, ?Integer arg1) { (MatchData) -> untyped } -> untyped
 
-  def match?: (String? arg0, ?Integer arg1) -> bool
+  def match?: (String? | Symbol | _ToStr arg0, ?Integer arg1) -> bool
 
   def named_captures: () -> ::Hash[String, ::Array[Integer]]
 

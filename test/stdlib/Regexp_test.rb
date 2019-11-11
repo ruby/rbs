@@ -97,9 +97,13 @@ class RegexpTest < StdlibTest
   end
 
   def test_match
-    /(.)(.)(.)/.match("abc") #=> MatchData
-    /(.)(.)/.match("abc", 1) #=> MatchData
-    /b/.match("a")           #=> nil
+    /R.../.match("Ruby")    #=> MatchData
+    /P.../.match("Ruby")    #=> nil
+    /R.../.match(:Ruby)     #=> MatchData
+    /R.../.match(nil)       #=> nil
+    o = Class.new { def to_str; "object"; end }.new
+    /R.../.match(o)         #=> nil
+    /R.../.match("Ruby", 1) #=> nil
     /M(.*)/.match("Matz") do |m|
       # nop
     end
@@ -110,8 +114,12 @@ class RegexpTest < StdlibTest
 
   def test_match?
     /R.../.match?("Ruby")    #=> true
-    /R.../.match?("Ruby", 1) #=> false
     /P.../.match?("Ruby")    #=> false
+    /R.../.match?(:Ruby)     #=> true
+    /R.../.match?(nil)       #=> false
+    o = Class.new { def to_str; "object"; end }.new
+    /R.../.match?(o)         #=> false
+    /R.../.match?("Ruby", 1) #=> false
   end
 
   def test_named_captures
