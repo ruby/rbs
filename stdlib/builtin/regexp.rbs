@@ -107,14 +107,14 @@ class Regexp < Object
 
   def ~: () -> Integer?
 
-  def self.compile: (String arg0, ?untyped options, ?String kcode) -> self
-                  | (Regexp arg0) -> self
+  def self.compile: (String arg0, ?untyped options, ?String kcode) -> Regexp
+                  | (Regexp arg0) -> Regexp
 
   def self.quote: (String | Symbol arg0) -> String
 
-  def self.union: () -> self
-                | (String | Regexp arg0, *String | Regexp args) -> self
-                | (::Array[String | Regexp]) -> self
+  def self.union: () -> Regexp
+                | (String | Regexp arg0, *String | Regexp args) -> Regexp
+                | (::Array[String | Regexp]) -> Regexp
 
   def eql?: (untyped other) -> bool
 end
