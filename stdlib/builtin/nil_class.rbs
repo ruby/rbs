@@ -35,9 +35,9 @@ class NilClass < Object
   # Always returns zero.
   # 
   # ```ruby
-  # nil.to_i   #=> 0.0
+  # nil.to_i   #=> 0
   # ```
-  def to_i: () -> Integer
+  def to_i: () -> 0
 
   # Returns zero as a rational.
   def to_r: () -> Rational
