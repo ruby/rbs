@@ -103,4 +103,6 @@ class Object < BasicObject
   # 2.yield_self.detect(&:odd?)            # => nil
   # ```
   def then: () { (untyped arg) -> untyped } -> untyped
+
+  def itself: () -> self
 end

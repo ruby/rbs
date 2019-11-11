@@ -220,7 +220,13 @@ module Ruby
             end
 
             method = hook.call(self, METHOD, name)
-            prepended = hook.call(self, CLASS).ancestors.include?(hook.instance_module) || hook.call(self, SINGLETON_CLASS).ancestors.include?(hook.singleton_module)
+            klass = hook.call(self, CLASS)
+            singleton_klass = begin
+              hook.call(self, SINGLETON_CLASS)
+            rescue TypeError
+              nil
+            end
+            prepended = klass.ancestors.include?(hook.instance_module) || singleton_klass&.ancestors&.include?(hook.singleton_module)
             result = if prepended
                        method.super_method.call(*args, &block)
                      else
