@@ -97,8 +97,15 @@ class RegexpTest < StdlibTest
   end
 
   def test_match
-    /(.)(.)(.)/.match("abc")[2] #=> "b"
-    /(.)(.)/.match("abc", 1)[2] #=> "c"
+    /(.)(.)(.)/.match("abc") #=> MatchData
+    /(.)(.)/.match("abc", 1) #=> MatchData
+    /b/.match("a")           #=> nil
+    /M(.*)/.match("Matz") do |m|
+      # nop
+    end
+    /M(.*)/.match("Matz", 1) do |m|
+      # nop
+    end
   end
 
   def test_match?

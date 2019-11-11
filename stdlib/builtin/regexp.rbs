@@ -45,7 +45,8 @@ class Regexp < Object
   # ```
   def inspect: () -> String
 
-  def match: (String? arg0, ?Integer arg1) -> MatchData?
+  def match: (String arg0, ?Integer arg1) -> MatchData?
+           | (String arg0, ?Integer arg1) { (MatchData) -> untyped } -> untyped
 
   def match?: (String? arg0, ?Integer arg1) -> bool
 
