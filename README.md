@@ -1,6 +1,6 @@
 # Ruby::Signature
 
-Ruby::Signature provides syntax and semantics definition for `the` Ruby Signature language, `.rbs` files.
+Ruby::Signature provides syntax and semantics definition for the `Ruby Signature` language, `.rbs` files.
 It consists of a parser, the syntax, and class definition interpreter, the semantics.
 
 ![Travis master](https://travis-ci.com/ruby/ruby-signature.svg?branch=master)
