@@ -1,6 +1,6 @@
 # The class of the singleton object `nil` .
 class NilClass < Object
-  def &: (untyped obj) -> FalseClass
+  def &: (untyped obj) -> false
 
   def ^: (untyped obj) -> bool
 
@@ -45,5 +45,5 @@ class NilClass < Object
   def |: (untyped obj) -> bool
 
   # Only the object *nil* responds `true` to `nil?` .
-  def `nil?`: () -> TrueClass
+  def `nil?`: () -> true
 end
