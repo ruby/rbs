@@ -27,7 +27,7 @@
 # Various constants for the methods in [File](File)
 # can be found in
 # [File::Constants](https://ruby-doc.org/core-2.6.3/File/Constants.html).
-class File[Elem] < IO
+class File < IO
   def self.absolute_path: (String file, ?String dir) -> String
 
   def self.atime: (untyped file) -> Time
