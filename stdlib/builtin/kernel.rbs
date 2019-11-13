@@ -18,7 +18,8 @@ module Kernel
   def caller_locations: (?Integer start_or_range, ?Integer length) -> ::Array[Thread::Backtrace::Location]?
                       | (?::Range[Integer] start_or_range) -> ::Array[Thread::Backtrace::Location]?
 
-  def catch: (?Object tag) { (Object arg0) -> untyped } -> untyped
+  def catch: [T] (T tag) { (T tag) -> untyped } -> untyped
+           | () { (Object tag) -> untyped } -> untyped
 
   # In a perfect world this should be:
   # 
@@ -53,6 +54,7 @@ module Kernel
   # try do "hello" end   #=> "hello"
   # ```
   def iterator?: () -> bool
+  alias block_given? iterator?
 
   # Returns the names of the current local variables.
   # 
@@ -75,18 +77,19 @@ module Kernel
 
   def =~: (untyped other) -> NilClass
 
-  def clone: () -> self
+  def clone: (?freeze: (TrueClass | FalseClass)) -> self
 
-  def display: (IO port) -> NilClass
+  def display: (?IO port) -> NilClass
 
   def dup: () -> self
 
   def enum_for: (?Symbol method, *untyped args) -> ::Enumerator[untyped, untyped]
               | (?Symbol method, *untyped args) { () -> untyped } -> ::Enumerator[untyped, untyped]
+  alias to_enum enum_for
 
   def eql?: (untyped other) -> bool
 
-  def `extend`: (Module mod) -> NilClass
+  def `extend`: (*Module mod) -> self
 
   # Creates a subprocess. If a block is specified, that block is run in the
   # subprocess, and the subprocess terminates with a status of zero.
@@ -124,61 +127,53 @@ module Kernel
 
   def instance_variable_get: (Symbol | String arg0) -> untyped
 
-  def instance_variable_set: (Symbol | String arg0, untyped arg1) -> untyped
+  def instance_variable_set: [T] (Symbol | String arg0, T arg1) -> T
 
   def instance_variables: () -> ::Array[Symbol]
 
   def is_a?: (Class | Module arg0) -> bool
+  alias kind_of? is_a?
 
-  def kind_of?: (Class arg0) -> bool
-
-  def method: (Symbol arg0) -> Method
+  def method: (Symbol | String arg0) -> Method
 
   def methods: (?bool regular) -> ::Array[Symbol]
 
-  def `nil?`: () -> bool
+  def `nil?`: () -> FalseClass
 
   def private_methods: (?bool all) -> ::Array[Symbol]
 
   def protected_methods: (?bool all) -> ::Array[Symbol]
 
-  def public_method: (Symbol arg0) -> Method
+  def public_method: (Symbol | String arg0) -> Method
 
   def public_methods: (?bool all) -> ::Array[Symbol]
 
   def `public_send`: (Symbol | String arg0, *untyped args) -> untyped
+                   | (Symbol | String arg0, *untyped args) { (*untyped) -> untyped } -> untyped
 
-  def remove_instance_variable: (Symbol arg0) -> untyped
+  def remove_instance_variable: (Symbol | String arg0) -> untyped
 
   def `send`: (String | Symbol arg0, *untyped arg1) -> untyped
-            | (String | Symbol arg0, *untyped arg1) { () -> untyped } -> untyped
+            | (String | Symbol arg0, *untyped arg1) { (*untyped) -> untyped } -> untyped
 
   def `singleton_class`: () -> Class
 
-  def singleton_method: (Symbol arg0) -> Method
+  def singleton_method: (Symbol | String arg0) -> Method
 
   def singleton_methods: (?bool all) -> ::Array[Symbol]
 
   def taint: () -> self
+  alias untrust taint
 
   def tainted?: () -> bool
+  alias untrusted? tainted?
 
   def tap: () { (untyped x) -> void } -> self
 
-  def to_enum: (?Symbol method, *untyped args) -> ::Enumerator[untyped, untyped]
-             | (?Symbol method, *untyped args) { () -> untyped } -> ::Enumerator[untyped, untyped]
-
   def to_s: () -> String
 
-  def trust: () -> self
-
-  def `undef`: (*untyped arg) -> void
-
   def untaint: () -> self
-
-  def untrust: () -> self
-
-  def untrusted?: () -> bool
+  alias trust untaint
 
   # Returns `arg` as an [Array](https://ruby-doc.org/core-2.6.3/Array.html)
   # .
@@ -199,10 +194,11 @@ module Kernel
   # Array(nil)         #=> []
   # Array(1)           #=> [1]
   # ```
-  def Array: (NilClass x) -> untyped
-           | (untyped x) -> ::Array[untyped]
-
-  def BigDecimal: (Integer | Float | Rational | BigDecimal | String initial, ?Integer digits, ?exception: bool exception) -> BigDecimal
+  def Array: (NilClass x) -> [ ]
+           | [T] (::Array[T] x) -> ::Array[T]
+           | [T] (::Range[T] x) -> ::Array[T]
+           | [K, V] (::Hash[K, V] x) -> ::Array[[K, V]]
+           | [T] (T x) -> ::Array[T]
 
   def Complex: (Numeric | String x, ?Numeric | String y, ?exception: bool exception) -> Complex
 
@@ -210,7 +206,8 @@ module Kernel
 
   def Hash: [K, V] (Object x) -> ::Hash[K, V]
 
-  def Integer: (Numeric | String arg, ?Integer base, ?exception: bool exception) -> Integer
+  def Integer: (Numeric | String arg, ?exception: bool exception) -> Integer
+             | (String arg, ?Integer base, ?exception: bool exception) -> Integer
 
   def Rational: (Numeric | String | Object x, ?Numeric | String y, ?exception: bool exception) -> Rational
 
@@ -255,23 +252,6 @@ module Kernel
   # eval("param", b)   #=> "hello"
   # ```
   def binding: () -> Binding
-
-  # Returns `true` if `yield` would execute a block in the current context.
-  # The `iterator?` form is mildly deprecated.
-  # 
-  # ```ruby
-  # def try
-  #   if block_given?
-  #     yield
-  #   else
-  #     "no block"
-  #   end
-  # end
-  # try                  #=> "no block"
-  # try { "hello" }      #=> "hello"
-  # try do "hello" end   #=> "hello"
-  # ```
-  def block_given?: () -> bool
 
   # Initiates the termination of the Ruby script by raising the `SystemExit`
   # exception. This exception may be caught. The optional parameter is used
@@ -333,13 +313,14 @@ module Kernel
   # `Exception` object or `nil`, can be specified via the `:cause`
   # argument.
   def fail: () -> bot
-          | (?String arg0) -> bot
-          | (?Class arg0, ?::Array[String] arg1) -> bot
-          | (?Class arg0, ?String arg1, ?::Array[String] arg2) -> bot
+          | (String arg0) -> bot
+          | (?Exception arg0, ?String arg1, ?::Array[String] arg2) -> bot
+  alias raise fail
 
   def format: (String format, *untyped args) -> String
+  alias sprintf format
 
-  def gets: (?String arg0, ?Integer arg1) -> String
+  def gets: (?String arg0, ?Integer arg1) -> String?
 
   # Returns an array of the names of global variables.
   # 
@@ -381,7 +362,8 @@ module Kernel
   def loop: () { () -> untyped } -> bot
           | () -> ::Enumerator[untyped, bot]
 
-  def open: (String name, ?String | Integer rest, ?String block) -> IO?
+  def open: (String name, ?String mode, ?Integer perm) -> IO?
+          | [T] (String name, ?String mode, ?Integer perm) { (IO) -> T } -> T
 
   # Prints each object in turn to `$stdout` . If the output field separator
   # ( `$,` ) is not `nil`, its contents will appear between each field. If
@@ -400,15 +382,16 @@ module Kernel
   # 
   #     cat12399
   #     cat, 1, 2, 3, 99
-  def print: (*Kernel args) -> NilClass
+  def print: (*Kernel args) -> nil
 
-  def printf: (?IO arg0, ?String arg1, *untyped arg2) -> NilClass
+  def printf: (?IO arg0, ?String arg1, *untyped arg2) -> nil
 
   def proc: () { () -> untyped } -> Proc
 
   def lambda: () { () -> untyped } -> Proc
 
   def putc: (Integer arg0) -> Integer
+          | (String arg0) -> String
 
   def puts: (*untyped arg0) -> NilClass
 
@@ -468,38 +451,13 @@ module Kernel
   def sleep: () -> bot
            | (Numeric duration) -> Integer
 
-  def sprintf: (String format, *untyped args) -> String
-
   def syscall: (Integer num, *untyped args) -> untyped
 
-  def test: (String cmd, String file1, ?String file2) -> (TrueClass | FalseClass | Time)
+  def test: (String | Integer cmd, String | IO file1, ?String | IO file2) -> (TrueClass | FalseClass | Time | nil | Integer)
 
   def throw: (Object tag, ?untyped obj) -> bot
 
-  def warn: (*String msg) -> NilClass
-
-  # With no arguments, raises the exception in `$!` or raises a
-  # `RuntimeError` if `$!` is `nil` . With a single `String` argument,
-  # raises a `RuntimeError` with the string as a message. Otherwise, the
-  # first parameter should be the name of an `Exception` class (or an object
-  # that returns an `Exception` object when sent an `exception` message).
-  # The optional second parameter sets the message associated with the
-  # exception, and the third parameter is an array of callback information.
-  # Exceptions are caught by the `rescue` clause of `begin...end` blocks.
-  # 
-  # ```ruby
-  # raise "Failed to create socket"
-  # raise ArgumentError, "No parameters", caller
-  # ```
-  # 
-  # The `cause` of the generated exception is automatically set to the
-  # “current” exception ( `$!` ) if any. An alternative value, either an
-  # `Exception` object or `nil`, can be specified via the `:cause`
-  # argument.
-  def raise: () -> bot
-           | (?String arg0) -> bot
-           | (?Class arg0, ?String arg1, ?::Array[String] arg2) -> bot
-           | (?Exception arg0, ?String arg1, ?::Array[String] arg2) -> bot
+  def warn: (*untyped msg, ?uplevel: Integer | nil) -> NilClass
 
   # Replaces the current process by running the given external *command* ,
   # which can take one of the following forms:
