@@ -122,6 +122,13 @@ SIG
       end
     end
   end
+
+  def assert_write(decls, string)
+    writer = Ruby::Signature::Writer.new(out: StringIO.new)
+    writer.write(decls)
+
+    assert_equal string, writer.out.string
+  end
 end
 
 require "minitest/autorun"

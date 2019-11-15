@@ -2,7 +2,8 @@ require "test_helper"
 
 class Ruby::Signature::RbiScaffoldTest < Minitest::Test
   RBI = Ruby::Signature::Scaffold::RBI
-  Writer = Ruby::Signature::Writer
+
+  include TestHelper
 
   def test_1
     parser = RBI.new
@@ -34,13 +35,6 @@ end
 
     # decls = parser.decls
     # pp parser.decls
-  end
-
-  def assert_write(decls, string)
-    writer = Writer.new(out: StringIO.new)
-    writer.write(decls)
-
-    assert_equal string, writer.out.string
   end
 
   def test_module
