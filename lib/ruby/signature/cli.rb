@@ -416,6 +416,8 @@ module Ruby
         parser = case format
                  when "rbi"
                    Scaffold::RBI.new()
+                 when "rb"
+                   Scaffold::RB.new()
                  end
 
         args.each do |file|
