@@ -2,10 +2,33 @@ module Ruby
   module Signature
     module Scaffold
       class RB
-        attr_reader :decls
+        attr_reader :source_decls
+        attr_reader :toplevel_members
 
         def initialize
-          @decls = []
+          @source_decls = []
+          @toplevel_members = []
+        end
+
+        def decls
+          decls = []
+
+          decls.push *source_decls
+
+          unless toplevel_members.empty?
+            top = AST::Declarations::Extension.new(
+              name: TypeName.new(name: :Object, namespace: Namespace.empty),
+              extension_name: :Toplevel,
+              members: toplevel_members,
+              annotations: [],
+              comment: nil,
+              location: nil,
+              type_params: AST::Declarations::ModuleTypeParams.empty
+            )
+            decls << top
+          end
+
+          decls
         end
 
         def parse(string)
@@ -50,7 +73,7 @@ module Ruby
               comment: comments[node.first_lineno - 1]
             )
 
-            decls.push kls
+            source_decls.push kls
 
             each_node class_body do |child|
               process child, namespace: kls.name.to_namespace, current_module: kls, comments: comments
@@ -68,14 +91,13 @@ module Ruby
               comment: comments[node.first_lineno - 1]
             )
 
-            decls.push mod
+            source_decls.push mod
 
             each_node module_body do |child|
               process child, namespace: mod.name.to_namespace, current_module: mod, comments: comments
             end
 
           when :DEFN, :DEFS
-            if current_module
               if node.type == :DEFN
                 def_name, def_body = node.children
                 kind = :instance
@@ -93,7 +115,7 @@ module Ruby
                 )
               ]
 
-              current_module.members << AST::Members::MethodDefinition.new(
+              member = AST::Members::MethodDefinition.new(
                 name: def_name,
                 location: nil,
                 annotations: [],
@@ -102,7 +124,12 @@ module Ruby
                 comment: comments[node.first_lineno - 1],
                 attributes: []
               )
-            end
+
+              if current_module
+                current_module.members.push member
+              else
+                toplevel_members.push member
+              end
           when :FCALL
             if current_module
               # Inside method definition cannot reach here.

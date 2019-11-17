@@ -159,4 +159,21 @@ class Hello
 end
     EOF
   end
+
+  def test_toplevel
+    parser = RB.new
+
+    rb = <<-EOR
+def hello
+end
+    EOR
+
+    parser.parse(rb)
+
+    assert_write parser.decls, <<-EOF
+extension Object (Toplevel)
+  def hello: () -> untyped
+end
+    EOF
+  end
 end
