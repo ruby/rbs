@@ -92,4 +92,71 @@ class Hello
 end
     EOF
   end
+
+  def test_comments
+    parser = RB.new
+
+    rb = <<-EOR
+# Comments for class.
+# This is a comment.
+class Hello
+  # Comment for include.
+  include Foo
+
+  # Comment to be ignored
+
+  # Comment for extend
+  extend ::Bar, baz
+
+  # Comment for hello
+  def hello()
+  end
+
+  # Comment for world
+  def self.world
+  end
+
+  # Comment for attr_reader
+  attr_reader :x
+
+  # Comment for attr_accessor
+  attr_accessor :y, :z
+
+  # Comment for attr_writer
+  attr_writer foo, :a
+end
+    EOR
+
+    parser.parse(rb)
+
+    assert_write parser.decls, <<-EOF
+# Comments for class.
+# This is a comment.
+class Hello
+  # Comment for include.
+  include Foo
+
+  # Comment for extend
+  extend ::Bar
+
+  # Comment for hello
+  def hello: () -> untyped
+
+  # Comment for world
+  def self.world: () -> untyped
+
+  # Comment for attr_reader
+  attr_reader x: untyped
+
+  # Comment for attr_accessor
+  attr_accessor y: untyped
+
+  # Comment for attr_accessor
+  attr_accessor z: untyped
+
+  # Comment for attr_writer
+  attr_writer a: untyped
+end
+    EOF
+  end
 end

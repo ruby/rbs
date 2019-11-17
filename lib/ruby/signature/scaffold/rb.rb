@@ -9,14 +9,34 @@ module Ruby
         end
 
         def parse(string)
-          process RubyVM::AbstractSyntaxTree.parse(string), namespace: Namespace.empty, current_module: nil
+          comments = Ripper.lex(string).yield_self do |tokens|
+            tokens.each.with_object({}) do |token, hash|
+              if token[1] == :on_comment
+                line = token[0][0]
+                body = token[2][2..]
+
+                body = "\n" if body.empty?
+
+                comment = AST::Comment.new(string: body, location: nil)
+                if (prev_comment = hash[line - 1])
+                  hash[line - 1] = nil
+                  hash[line] = AST::Comment.new(string: prev_comment.string + comment.string,
+                                                location: nil)
+                else
+                  hash[line] = comment
+                end
+              end
+            end
+          end
+
+          process RubyVM::AbstractSyntaxTree.parse(string), namespace: Namespace.empty, current_module: nil, comments: comments
         end
 
         def nested_name(name)
           (current_namespace + const_to_name(name).to_namespace).to_type_name.relative!
         end
 
-        def process(node, namespace:, current_module:)
+        def process(node, namespace:, current_module:, comments:)
           case node.type
           when :CLASS
             class_name, super_class, *class_body = node.children
@@ -27,13 +47,13 @@ module Ruby
               members: [],
               annotations: [],
               location: nil,
-              comment: nil
+              comment: comments[node.first_lineno - 1]
             )
 
             decls.push kls
 
             each_node class_body do |child|
-              process child, namespace: kls.name.to_namespace, current_module: kls
+              process child, namespace: kls.name.to_namespace, current_module: kls, comments: comments
             end
           when :MODULE
             module_name, *module_body = node.children
@@ -45,13 +65,13 @@ module Ruby
               members: [],
               annotations: [],
               location: nil,
-              comment: nil
+              comment: comments[node.first_lineno - 1]
             )
 
             decls.push mod
 
             each_node module_body do |child|
-              process child, namespace: mod.name.to_namespace, current_module: mod
+              process child, namespace: mod.name.to_namespace, current_module: mod, comments: comments
             end
 
           when :DEFN, :DEFS
@@ -79,7 +99,7 @@ module Ruby
                 annotations: [],
                 types: types,
                 kind: kind,
-                comment: nil,
+                comment: comments[node.first_lineno - 1],
                 attributes: []
               )
             end
@@ -97,7 +117,7 @@ module Ruby
                       args: [],
                       annotations: [],
                       location: nil,
-                      comment: nil
+                      comment: comments[node.first_lineno - 1]
                     )
                   end
                 end
@@ -109,7 +129,7 @@ module Ruby
                       args: [],
                       annotations: [],
                       location: nil,
-                      comment: nil
+                      comment: comments[node.first_lineno - 1]
                     )
                   end
                 end
@@ -121,7 +141,7 @@ module Ruby
                       ivar_name: nil,
                       type: Types::Bases::Any.new(location: nil),
                       location: nil,
-                      comment: nil,
+                      comment: comments[node.first_lineno - 1],
                       annotations: []
                     )
                   end
@@ -134,7 +154,7 @@ module Ruby
                       ivar_name: nil,
                       type: Types::Bases::Any.new(location: nil),
                       location: nil,
-                      comment: nil,
+                      comment: comments[node.first_lineno - 1],
                       annotations: []
                     )
                   end
@@ -147,7 +167,7 @@ module Ruby
                       ivar_name: nil,
                       type: Types::Bases::Any.new(location: nil),
                       location: nil,
-                      comment: nil,
+                      comment: comments[node.first_lineno - 1],
                       annotations: []
                     )
                   end
@@ -156,7 +176,7 @@ module Ruby
             end
           else
             each_child node do |child|
-              process child, namespace: namespace, current_module: current_module
+              process child, namespace: namespace, current_module: current_module, comments: comments
             end
           end
         end
