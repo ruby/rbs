@@ -282,6 +282,36 @@ EOF
                               argument_error: Test::Hook::Errors::ArgumentError
           assert_empty errors.map {|e| Test::Hook::Errors.to_string(e) }
         end
+
+        parse_method_type("(Integer?, *String) -> String").tap do |method_type|
+          errors = []
+          hook.typecheck_args "#foo",
+                              method_type,
+                              method_type.type,
+                              Test::Hook::ArgsReturn.new(arguments: [1], return_value: "1"),
+                              errors,
+                              type_error: Test::Hook::Errors::ArgumentTypeError,
+                              argument_error: Test::Hook::Errors::ArgumentError
+          assert_empty errors
+
+          hook.typecheck_args "#foo",
+                              method_type,
+                              method_type.type,
+                              Test::Hook::ArgsReturn.new(arguments: [1, ''], return_value: "1"),
+                              errors,
+                              type_error: Test::Hook::Errors::ArgumentTypeError,
+                              argument_error: Test::Hook::Errors::ArgumentError
+          assert_empty errors
+
+          hook.typecheck_args "#foo",
+                              method_type,
+                              method_type.type,
+                              Test::Hook::ArgsReturn.new(arguments: [1, '', ''], return_value: "1"),
+                              errors,
+                              type_error: Test::Hook::Errors::ArgumentTypeError,
+                              argument_error: Test::Hook::Errors::ArgumentError
+          assert_empty errors
+        end
       end
     end
   end
