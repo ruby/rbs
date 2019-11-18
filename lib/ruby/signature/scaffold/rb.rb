@@ -201,6 +201,31 @@ module Ruby
                 end
               end
             end
+
+          when :CDECL
+            type_name = case
+                        when node.children[0].is_a?(Symbol)
+                          ns = if current_module
+                                 current_module.name.to_namespace
+                               else
+                                 Namespace.empty
+                               end
+                          TypeName.new(name: node.children[0], namespace: ns)
+                        else
+                          name = const_to_name(node.children[0])
+                          if current_module
+                            name.with_prefix current_module.name.to_namespace
+                          else
+                            name
+                          end.relative!
+                        end
+
+            source_decls << AST::Declarations::Constant.new(
+              name: type_name,
+              type: Types::Bases::Any.new(location: nil),
+              location: nil,
+              comment: comments[node.first_lineno - 1]
+            )
           else
             each_child node do |child|
               process child, namespace: namespace, current_module: current_module, comments: comments
@@ -214,11 +239,7 @@ module Ruby
             TypeName.new(name: node.children[0], namespace: Namespace.empty)
           when :COLON2
             if node.children[0]
-              if node.children[0].type == :COLON3
-                namespace = Namespace.root
-              else
-                namespace = const_to_name(node.children[0]).to_namespace
-              end
+              namespace = const_to_name(node.children[0]).to_namespace
             else
               namespace = Namespace.empty
             end

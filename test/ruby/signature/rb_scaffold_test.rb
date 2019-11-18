@@ -176,4 +176,26 @@ extension Object (Toplevel)
 end
     EOF
   end
+
+  def test_const
+    parser = RB.new
+
+    rb = <<-EOR
+module Foo
+  VERSION = '0.1.1'
+  ::Hello::World = :foo
+end
+    EOR
+
+    parser.parse(rb)
+
+    assert_write parser.decls, <<-EOF
+module Foo
+end
+
+Foo::VERSION: untyped
+
+Hello::World: untyped
+    EOF
+  end
 end
