@@ -53,7 +53,7 @@ end
 
     assert_write parser.decls, <<-EOF
 class Hello
-  def hello: (untyped a, ?untyped b, *untyped c, untyped d, e: untyped e, ?f: untyped f, **untyped g) { () -> untyped } -> untyped
+  def hello: (untyped a, ?::Integer b, *untyped c, untyped d, e: untyped e, ?f: ::Integer f, **untyped g) { () -> untyped } -> untyped
 
   def self.world: () { (untyped, untyped, untyped, x: untyped, y: untyped) -> untyped } -> untyped
 end
@@ -193,9 +193,44 @@ end
 module Foo
 end
 
-Foo::VERSION: untyped
+Foo::VERSION: ::String
 
-Hello::World: untyped
+Hello::World: ::Symbol
+    EOF
+  end
+
+  def test_literal_types
+    parser = RB.new
+
+    rb = <<-'EOR'
+A = 1
+B = 1.0
+C = "hello#{21}"
+D = :hello
+E = nil
+F = false
+G = [1,2,3]
+H = { id: 123 }
+    EOR
+
+    parser.parse(rb)
+
+    assert_write parser.decls, <<-EOF
+A: ::Integer
+
+B: ::Float
+
+C: ::String
+
+D: ::Symbol
+
+E: untyped?
+
+F: bool
+
+G: ::Array[untyped]
+
+H: ::Hash[untyped, untyped]
     EOF
   end
 end

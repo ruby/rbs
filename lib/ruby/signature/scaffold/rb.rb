@@ -222,7 +222,7 @@ module Ruby
 
             source_decls << AST::Declarations::Constant.new(
               name: type_name,
-              type: Types::Bases::Any.new(location: nil),
+              type: node_type(node.children.last),
               location: nil,
               comment: comments[node.first_lineno - 1]
             )
@@ -278,7 +278,10 @@ module Ruby
           while opt&.type == :OPT_ARG
             lvasgn, opt = opt.children
             name = lvasgn.children[0]
-            fun.optional_positionals << Types::Function::Param.new(name: name, type: untyped)
+            fun.optional_positionals << Types::Function::Param.new(
+              name: name,
+              type: node_type(lvasgn.children[1])
+            )
           end
 
           if rest
@@ -297,7 +300,7 @@ module Ruby
             when nil, :NODE_SPECIAL_REQUIRED_KEYWORD
               fun.required_keywords[name] = Types::Function::Param.new(name: name, type: untyped)
             when RubyVM::AbstractSyntaxTree::Node
-              fun.optional_keywords[name] = Types::Function::Param.new(name: name, type: untyped)
+              fun.optional_keywords[name] = Types::Function::Param.new(name: name, type: node_type(value))
             else
               raise "Unexpected keyword arg value: #{value}"
             end
@@ -390,6 +393,38 @@ module Ruby
           end
 
           nodes.empty? ? nil : nodes
+        end
+
+        def node_type(node, default: Types::Bases::Any.new(location: nil))
+          case node.type
+          when :LIT
+            case node.children[0]
+            when Symbol
+              BuiltinNames::Symbol.instance_type
+            when Integer
+              BuiltinNames::Integer.instance_type
+            when Float
+              BuiltinNames::Float.instance_type
+            else
+              default
+            end
+          when :STR, :DSTR
+            BuiltinNames::String.instance_type
+          when :NIL
+            # This type is technical non-sense, but may help practically.
+            Types::Optional.new(
+              type: Types::Bases::Any.new(location: nil),
+              location: nil
+            )
+          when :TRUE, :FALSE
+            Types::Bases::Bool.new(location: nil)
+          when :ARRAY, :LIST
+            BuiltinNames::Array.instance_type(default)
+          when :HASH
+            BuiltinNames::Hash.instance_type(default, default)
+          else
+            default
+          end
         end
       end
     end

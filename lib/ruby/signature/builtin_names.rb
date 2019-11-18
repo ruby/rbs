@@ -46,6 +46,9 @@ module Ruby
       Range = Name.define(:Range)
       Enumerator = Name.define(:Enumerator)
       Set = Name.define(:Set)
+      Symbol = Name.define(:Symbol)
+      Integer = Name.define(:Integer)
+      Float = Name.define(:Float)
     end
   end
 end
