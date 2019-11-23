@@ -53,9 +53,9 @@ class HashTest < StdlibTest
   end
 
   def test_filter!
-    { a: 1, b: 2 }.filter!
-    { a: 1, b: 2 }.filter! { |k, v| v == 1 }
-    { a: 1, b: 2 }.filter! { |k, v| v == 3 }
+    { a: 1 }.filter!
+    { a: 1 }.filter! { |k, v| v == 0 }
+    { a: 1 }.filter! { |k, v| v == 1 }
   end
 
   def test_flatten
@@ -73,13 +73,14 @@ class HashTest < StdlibTest
   end
 
   def test_select
-    { a: 1, b: 2 }.select
-    { a: 1, b: 2 }.select { |k, v| v == 1 }
+    h = { a: 1 }
+    h.filter
+    h.filter { |k, v| v == 1 }
   end
 
   def test_select!
-    { a: 1, b: 2 }.select!
-    { a: 1, b: 2 }.select! { |k, v| v == 1 }
-    { a: 1, b: 2 }.select! { |k, v| v == 3 }
+    { a: 1 }.select!
+    { a: 1 }.select! { |k, v| v == 0 }
+    { a: 1 }.select! { |k, v| v == 1 }
   end
 end
