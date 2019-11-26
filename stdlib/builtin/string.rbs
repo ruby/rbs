@@ -709,4 +709,30 @@ class String < Object
            | (Regexp arg0, ?Integer arg1) -> String?
            | (Regexp arg0, ?String arg1) -> String?
            | (String arg0) -> String?
+
+  def encode: (
+    ?(Encoding | String) encoding,
+    ?(Encoding | String) from_encoding,
+    ?invalid: :replace ?,
+    ?undef: :replace ?,
+    ?replace: String,
+    ?fallback: Hash[String, String] | Proc | Method,
+    ?xml: :text | :attr,
+    ?universal_newline: TrueClass,
+    ?cr_newline: TrueClass,
+    ?crlf_newline: TrueClass
+  ) -> String
+
+  def encode!: (
+    ?(Encoding | String) encoding,
+    ?(Encoding | String) from_encoding,
+    ?invalid: :replace ?,
+    ?undef: :replace ?,
+    ?replace: String,
+    ?fallback: Hash[String, String] | Proc | Method,
+    ?xml: :text | :attr,
+    ?universal_newline: TrueClass,
+    ?cr_newline: TrueClass,
+    ?crlf_newline: TrueClass
+  ) -> self
 end
