@@ -1273,7 +1273,7 @@ def next_token
     new_token(:tWRITE_ATTR)
   when input.scan(KEYWORDS_RE)
     new_token(KEYWORDS[input.matched], input.matched.to_sym)
-  when input.scan(/:\w+\b/)
+  when input.scan(/:\w+(\?|\!)?\b?/)
     s = input.matched.yield_self {|s| s[1, s.length] }.to_sym
     new_token(:tSYMBOL, s)
   when input.scan(PUNCTS_RE)

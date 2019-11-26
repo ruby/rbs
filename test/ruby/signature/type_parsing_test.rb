@@ -445,6 +445,24 @@ class Ruby::Signature::TypeParsingTest < Minitest::Test
     Parser.parse_type("untyped | void?").yield_self do |type|
       assert_instance_of Types::Union, type
     end
+
+    Parser.parse_type(":foo??").yield_self do |type|
+      assert_instance_of Types::Optional, type
+      assert_instance_of Types::Literal, type.type
+      assert_equal :foo?, type.type.literal
+    end
+
+    Parser.parse_type(":foo!?").yield_self do |type|
+      assert_instance_of Types::Optional, type
+      assert_instance_of Types::Literal, type.type
+      assert_equal :foo!, type.type.literal
+    end
+
+    Parser.parse_type(":foo ?").yield_self do |type|
+      assert_instance_of Types::Optional, type
+      assert_instance_of Types::Literal, type.type
+      assert_equal :foo, type.type.literal
+    end
   end
 
   def test_literal
@@ -457,6 +475,11 @@ class Ruby::Signature::TypeParsingTest < Minitest::Test
     Parser.parse_type(":foo").yield_self do |type|
       assert_instance_of Types::Literal, type
       assert_equal :foo, type.literal
+    end
+
+    Parser.parse_type(":foo?").yield_self do |type|
+      assert_instance_of Types::Literal, type
+      assert_equal :foo?, type.literal
     end
 
     Parser.parse_type("'hello world'").yield_self do |type|
