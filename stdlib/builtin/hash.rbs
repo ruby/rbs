@@ -143,6 +143,14 @@ class Hash[unchecked out K, unchecked out V] < Object
 
   def []=: (K arg0, V arg1) -> V
 
+  def <: (::Hash[K, V]) -> bool
+
+  def <=: (::Hash[K, V]) -> bool
+
+  def >: (::Hash[K, V]) -> bool
+
+  def >=: (::Hash[K, V]) -> bool
+
   def assoc: (K arg0) -> ::Array[K | V]
 
   # Removes all key-value pairs from *hsh* .
@@ -152,6 +160,10 @@ class Hash[unchecked out K, unchecked out V] < Object
   # h.clear                          #=> {}
   # ```
   def clear: () -> ::Hash[K, V]
+
+  def compact: () -> ::Hash[K, V]
+
+  def compact!: () -> ::Hash[K, V]?
 
   # Makes *hsh* compare its keys by their identity, i.e. it will consider
   # exact same objects as same keys.
@@ -203,6 +215,14 @@ class Hash[unchecked out K, unchecked out V] < Object
   def fetch: (K arg0) -> V
            | [X] (K arg0, ?X arg1) -> (V | X)
            | [X] (K arg0) { (K arg0) -> X } -> (V | X)
+
+  def filter: () { (K arg0, V arg1) -> untyped } -> ::Hash[K, V]
+            | () -> ::Enumerator[[ K, V ], self]
+
+  def filter!: () { (K arg0, V arg1) -> untyped } -> ::Hash[K, V]?
+             | () -> ::Enumerator[[ K, V ], self]
+
+  def flatten: (?Integer level) -> ::Array[untyped]
 
   def has_key?: (K arg0) -> bool
 
@@ -325,9 +345,13 @@ class Hash[unchecked out K, unchecked out V] < Object
 
   def reject!: () { (K arg0, V arg1) -> untyped } -> ::Hash[K, V]
 
-  def select: () { (K arg0, V arg1) -> untyped } -> ::Hash[K, V]
+  def replace: (::Hash[K, V]) -> ::Hash[K, V]
 
-  def select!: () { (K arg0, V arg1) -> untyped } -> ::Hash[K, V]
+  def select: () { (K arg0, V arg1) -> untyped } -> ::Hash[K, V]
+            | () -> ::Enumerator[[ K, V ], self]
+
+  def select!: () { (K arg0, V arg1) -> untyped } -> ::Hash[K, V]?
+             | () -> ::Enumerator[[ K, V ], self]
 
   # Removes a key-value pair from *hsh* and returns it as the two-item array
   # `[` *key, value* `]`, or the hash’s default value if the hash is empty.
@@ -365,6 +389,8 @@ class Hash[unchecked out K, unchecked out V] < Object
 
   # Returns `self`.
   def to_hash: () -> ::Hash[K, V]
+
+  def to_proc: () -> ^(K) -> V
 
   # Alias for: [inspect](Hash.downloaded.ruby_doc#method-i-inspect)
   def to_s: () -> String
