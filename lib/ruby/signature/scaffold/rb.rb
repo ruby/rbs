@@ -13,7 +13,7 @@ module Ruby
         def decls
           decls = []
 
-          decls.push *source_decls
+          decls.push(*source_decls)
 
           unless toplevel_members.empty?
             top = AST::Declarations::Extension.new(
@@ -265,7 +265,7 @@ module Ruby
         def function_type_from_body(node)
           table_node, args_node, *_ = node.children
 
-          pre_num, _pre_init, opt, _first_post, post_num, _post_init, rest, kw, kwrest, block = args_node.children
+          pre_num, _pre_init, opt, _first_post, post_num, _post_init, rest, kw, kwrest, _block = args_node.children
 
           untyped = Types::Bases::Any.new(location: nil)
 
