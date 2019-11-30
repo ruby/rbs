@@ -111,8 +111,8 @@ singleton(::BasicObject)
       cli.run(%w(-r set method ::Object yield_self))
       assert_equal <<-EOF, stdout.string
 ::Object#yield_self
-  defined_in: ::Kernel
-  implementation: ::Kernel
+  defined_in: ::Object
+  implementation: ::Object
   accessibility: public
   types:
       [X] () { (self) -> X } -> X
