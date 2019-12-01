@@ -2,6 +2,9 @@ require "ruby/signature"
 require "ruby/signature/test"
 require "minitest/autorun"
 
+# stdlibs
+require "base64"
+
 logger = Logger.new(STDERR)
 logger.level = ENV["RBS_TEST_LOGLEVEL"] || "info"
 
