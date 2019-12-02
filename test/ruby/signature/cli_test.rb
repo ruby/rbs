@@ -116,6 +116,7 @@ singleton(::BasicObject)
   accessibility: public
   types:
       [X] () { (self) -> X } -> X
+    | () -> ::Enumerator[self, untyped]
       EOF
     end
   end
