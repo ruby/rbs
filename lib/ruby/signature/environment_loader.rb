@@ -93,6 +93,7 @@ module Ruby
 
         if stdlib_root
           signature_files.push(*each_signature(stdlib_root + "builtin"))
+          signature_files.push(*each_signature(stdlib_root + "base64"))
           signature_files.push(*each_signature(stdlib_root + "erb"))
         end
 

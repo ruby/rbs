@@ -1,0 +1,15 @@
+module Base64
+  def self.decode64: (String str) -> String
+  def self.encode64: (String bin) -> String
+  def self.strict_decode64: (String str) -> String
+  def self.strict_encode64: (String bin) -> String
+  def self.urlsafe_decode64: (String str) -> String
+  def self.urlsafe_encode64: (String bin) -> String
+
+  def decode64: (String str) -> String
+  def encode64: (String bin) -> String
+  def strict_decode64: (String str) -> String
+  def strict_encode64: (String bin) -> String
+  def urlsafe_decode64: (String str) -> String
+  def urlsafe_encode64: (String bin) -> String
+end

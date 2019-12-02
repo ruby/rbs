@@ -3,6 +3,7 @@ require "ruby/signature/test"
 require "minitest/autorun"
 
 # stdlibs
+require "base64"
 require "erb"
 
 logger = Logger.new(STDERR)
