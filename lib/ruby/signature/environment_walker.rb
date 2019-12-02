@@ -28,7 +28,7 @@ module Ruby
           yield name.absolute!
         end
 
-        env.each_alias do |name|
+        env.each_alias do |name, _|
           yield name.absolute!
         end
       end
@@ -76,7 +76,7 @@ module Ruby
             end
           end
         when name.alias?
-          each_type_name env.expand_alias(name), &block
+          each_type_name builder.expand_alias(name), &block
         end
       end
 
