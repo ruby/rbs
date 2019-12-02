@@ -1,7 +1,7 @@
 require "test_helper"
 
-class Ruby::Signature::RbScaffoldTest < Minitest::Test
-  RB = Ruby::Signature::Scaffold::RB
+class Ruby::Signature::RbPrototypeTest < Minitest::Test
+  RB = Ruby::Signature::Prototype::RB
 
   include TestHelper
 
