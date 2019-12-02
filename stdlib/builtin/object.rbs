@@ -24,85 +24,109 @@
 class Object < BasicObject
   include Kernel
 
-  # Returns an integer identifier for `obj` .
-  # 
-  # The same number will be returned on all calls to `object_id` for a given
-  # object, and no two active objects will share an id.
-  # 
-  # Note: that some objects of builtin classes are reused for optimization.
-  # This is the case for immediate values and frozen string literals.
-  # 
-  # Immediate values are not passed by reference but are passed by value:
-  # `nil`, `true`, `false`, Fixnums, Symbols, and some Floats.
-  # 
-  # ```ruby
-  # Object.new.object_id  == Object.new.object_id  # => false
-  # (21 * 2).object_id    == (21 * 2).object_id    # => true
-  # "hello".object_id     == "hello".object_id     # => false
-  # "hi".freeze.object_id == "hi".freeze.object_id # => true
-  # ```
-  def object_id: () -> Integer
+  def !~: (untyped) -> bool
 
-  def respond_to?: (String | Symbol, ?bool) -> bool
+  def <=>: (untyped) -> Integer?
 
-  # Yields self to the block and returns the result of the block.
-  # 
-  # ```ruby
-  # 3.next.then {|x| x**x }.to_s             #=> "256"
-  # "my string".yield_self {|s| s.upcase }   #=> "MY STRING"
-  # ```
-  # 
-  # Good usage for `yield_self` is value piping in method chains:
-  # 
-  # ```ruby
-  # require 'open-uri'
-  # require 'json'
-  # 
-  # construct_url(arguments).
-  #   yield_self {|url| open(url).read }.
-  #   yield_self {|response| JSON.parse(response) }
-  # ```
-  # 
-  # When called without block, the method returns `Enumerator`, which can
-  # be used, for example, for conditional circuit-breaking:
-  # 
-  # ```ruby
-  # # meets condition, no-op
-  # 1.yield_self.detect(&:odd?)            # => 1
-  # # does not meet condition, drop value
-  # 2.yield_self.detect(&:odd?)            # => nil
-  # ```
-  def `yield_self`: [X] () { (self) -> X } -> X
+  def ===: (untyped) -> bool
 
-  # `then` is just an alias of `yield_self`. Separately def'd here for easier IDE integration
-  # Yields self to the block and returns the result of the block.
-  # 
-  # ```ruby
-  # 3.next.then {|x| x**x }.to_s             #=> "256"
-  # "my string".yield_self {|s| s.upcase }   #=> "MY STRING"
-  # ```
-  # 
-  # Good usage for `yield_self` is value piping in method chains:
-  # 
-  # ```ruby
-  # require 'open-uri'
-  # require 'json'
-  # 
-  # construct_url(arguments).
-  #   yield_self {|url| open(url).read }.
-  #   yield_self {|response| JSON.parse(response) }
-  # ```
-  # 
-  # When called without block, the method returns `Enumerator`, which can
-  # be used, for example, for conditional circuit-breaking:
-  # 
-  # ```ruby
-  # # meets condition, no-op
-  # 1.yield_self.detect(&:odd?)            # => 1
-  # # does not meet condition, drop value
-  # 2.yield_self.detect(&:odd?)            # => nil
-  # ```
-  def then: () { (untyped arg) -> untyped } -> untyped
+  def =~: (untyped) -> bool
+
+  def class: -> untyped
+
+  def clone: (?freeze: bool) -> self
+
+  def define_singleton_method: (Symbol, Method | UnboundMethod) -> Symbol
+                             | (Symbol) { (*untyped) -> untyped } -> Symbol
+
+  def display: (?_Writeable port) -> void
+
+  def dup: -> self
+
+  def enum_for: (Symbol method, *untyped args) ?{ (*untyped args) -> Integer } -> Enumerator[untyped, untyped]
+              | (*untyped args) ?{ (*untyped args) -> Integer } -> Enumerator[untyped, untyped]
+
+  alias to_enum enum_for
+
+  def eql?: (untyped) -> bool
+
+  def `extend`: (*Module) -> self
+
+  def freeze: () -> self
+
+  def frozen: () -> bool
+
+  def hash: () -> Integer
+
+  def inspect: () -> String
+
+  def instance_of?: (Module) -> bool
+
+  def instance_variable_defined?: (String | Symbol var) -> bool
+
+  def instance_variable_get: (String | Symbol var) -> untyped
+
+  def instance_variable_set: [X] (String | Symbol var, X value) -> X
+
+  def instance_variables: () -> Array[Symbol]
+
+  def is_a?: (Module) -> bool
+
+  alias kind_of? is_a?
 
   def itself: () -> self
+
+  def method: (String | Symbol name) -> Method
+
+  def methods: () -> Array[Symbol]
+
+  def nil?: () -> bool
+
+  def object_id: () -> Integer
+
+  def private_methods: () -> Array[Symbol]
+
+  def protected_methods: () -> Array[Symbol]
+
+  def public_method: (name name) -> Method
+
+  def public_send: (name name, *untyped args) ?{ (*untyped) -> untyped } -> untyped
+
+  def remove_instance_variable: (name name) -> untyped
+
+  def respond_to?: (name name, ?bool include_all) -> bool
+
+  def send: (name name, *untyped args) ?{ (*untyped) -> untyped } -> untyped
+
+  def singleton_class: () -> Class
+
+  def singleton_method: (name name) -> Method
+
+  def singleton_methods: () -> Array[Symbol]
+
+  def taint: () -> self
+
+  alias untrust taint
+
+  def tainted?: () -> bool
+
+  alias untrusted? tainted?
+
+  def tap: () { (self) -> void } -> self
+
+  def yield_self: [X] () { (self) -> X } -> X
+
+  def to_s: () -> String
+
+  def untaint: () -> self
+
+  alias trust untaint
+
+  alias then yield_self
 end
+
+interface _Writeable
+  def write: (untyped) -> void
+end
+
+type Object::name = Symbol | String
