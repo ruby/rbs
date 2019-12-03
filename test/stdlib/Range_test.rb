@@ -65,4 +65,62 @@ class RangeTest < StdlibTest
     ('A'...'Z').include?('AB')
     (1..).include?(-2)
   end
+
+  def test_inspect
+    (1..10).inspect
+    ('A'...'Z').inspect
+    (1..).inspect
+  end
+
+  def test_last
+    (1..10).last
+    (1..10).last(3)
+    ('A'...'Z').last
+  end
+
+  def test_max
+    (1..10).max
+    (1..10).max(3)
+    (1..10).max { |i, j| i <=> j }
+    (1..10).max(3) { |i, j| i <=> j }
+  end
+
+  def test_min
+    (1..10).min
+    (1..10).min(3)
+    (1..10).min { |i, j| i <=> j }
+    (1..10).min(3) { |i, j| i <=> j }
+  end
+
+  def test_size
+    (1..10).size
+    ('A'...'Z').size
+    (1..).size
+  end
+
+  def test_step
+    (1..10).step
+    (1..10).step(2)
+    ('A'...'Z').step { |s| s.downcase }
+    ('A'...'Z').step(2) { |s| s.downcase }
+  end
+
+  def test_to_s
+    (1..10).to_s
+    ('A'...'Z').to_s
+    (1..).to_s
+  end
+
+  def test_eql?
+    (1..10).eql?(1..10)
+    (1..10).eql?(1)
+    ('A'...'Z').eql?('a'...'z')
+    (1..).eql?(1..Float::INFINITY)
+  end
+
+  def test_member?
+    (1..10).member?(5)
+    ('A'...'Z').member?('AB')
+    (1..).member?(-2)
+  end
 end
