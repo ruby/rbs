@@ -37,7 +37,7 @@ module Ruby
         @stderr = stderr
       end
 
-      COMMANDS = [:ast, :list, :ancestors, :methods, :method, :validate, :constant, :paths, :scaffold, :version]
+      COMMANDS = [:ast, :list, :ancestors, :methods, :method, :validate, :constant, :paths, :prototype, :version]
 
       def library_parse(opts, options:)
         opts.on("-r LIBRARY") do |lib|
@@ -410,14 +410,14 @@ module Ruby
         end
       end
 
-      def run_scaffold(args, options)
+      def run_prototype(args, options)
         format = args.shift
 
         parser = case format
                  when "rbi"
-                   Scaffold::RBI.new()
+                   Prototype::RBI.new()
                  when "rb"
-                   Scaffold::RB.new()
+                   Prototype::RB.new()
                  end
 
         args.each do |file|

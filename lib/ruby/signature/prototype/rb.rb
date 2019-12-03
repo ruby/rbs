@@ -1,6 +1,6 @@
 module Ruby
   module Signature
-    module Scaffold
+    module Prototype
       class RB
         attr_reader :source_decls
         attr_reader :toplevel_members

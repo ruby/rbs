@@ -1,6 +1,6 @@
 module Ruby
   module Signature
-    module Scaffold
+    module Prototype
       class RBI
         attr_reader :decls
         attr_reader :modules
