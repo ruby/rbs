@@ -96,6 +96,7 @@ module Ruby
           signature_files.push(*each_signature(stdlib_root + "base64"))
           signature_files.push(*each_signature(stdlib_root + "erb"))
           signature_files.push(*each_signature(stdlib_root + "securerandom"))
+          signature_files.push(*each_signature(stdlib_root + "abbrev"))
         end
 
         each_signature do |path|
