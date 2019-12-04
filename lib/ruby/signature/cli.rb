@@ -413,6 +413,31 @@ module Ruby
       def run_prototype(args, options)
         format = args.shift
 
+        case format
+        when "rbi", "rb"
+          decls = run_prototype_file(format, args)
+        when "runtime"
+          libs = []
+
+          OptionParser.new do |opts|
+            opts.on("-r [LIB]") do |lib|
+              libs << lib
+            end
+          end.parse!(args)
+
+          require *libs
+
+          decls = Prototype::Runtime.new(patterns: args).decls
+        else
+          stdout.puts "Supported formats: rbi, rb, runtime"
+          exit 1
+        end
+
+        writer = Writer.new(out: stdout)
+        writer.write decls
+      end
+
+      def run_prototype_file(format, args)
         parser = case format
                  when "rbi"
                    Prototype::RBI.new()
@@ -424,8 +449,7 @@ module Ruby
           parser.parse Pathname(file).read
         end
 
-        writer = Writer.new(out: stdout)
-        writer.write parser.decls
+        parser.decls
       end
 
       def parse_type_name(string)

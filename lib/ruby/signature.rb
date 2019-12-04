@@ -31,6 +31,7 @@ require "ruby/signature/ast/comment"
 require "ruby/signature/writer"
 require "ruby/signature/prototype/rbi"
 require "ruby/signature/prototype/rb"
+require "ruby/signature/prototype/runtime"
 require "ruby/signature/environment_walker"
 
 require "ruby/signature/parser"
