@@ -6,6 +6,7 @@ require "minitest/autorun"
 require "base64"
 require "erb"
 require "securerandom"
+require "abbrev"
 
 logger = Logger.new(STDERR)
 logger.level = ENV["RBS_TEST_LOGLEVEL"] || "info"
