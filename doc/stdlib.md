@@ -4,7 +4,7 @@ This is a guide for contributing to `ruby-signature` by writing/revising stdlib 
 
 ## Signatures
 
-Signatures for standard libraries are located in `stdlib` directory. `stdlib/builtin` is for builtin libraries. Other libraries have directories like `stdlibt/set` or `stdlib/pathname`.
+Signatures for standard libraries are located in `stdlib` directory. `stdlib/builtin` is for builtin libraries. Other libraries have directories like `stdlib/set` or `stdlib/pathname`.
 
 To write signatures see [syntax guide](syntax.md).
 
