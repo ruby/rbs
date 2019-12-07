@@ -1,7 +1,11 @@
+require_relative "test_helper"
+
 require "erb"
 
 class ERBTest < StdlibTest
   target ERB
+  library "erb"
+
   using hook.refinement
 
   def test_version

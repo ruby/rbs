@@ -1,3 +1,5 @@
+require_relative "test_helper"
+
 class IntegerTest < StdlibTest
   target Integer
   using hook.refinement

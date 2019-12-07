@@ -1,3 +1,5 @@
+require_relative "test_helper"
+
 class ArrayTest < StdlibTest
   target Array
   using hook.refinement

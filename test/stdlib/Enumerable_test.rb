@@ -1,3 +1,5 @@
+require_relative "test_helper"
+
 class EnumerableTest < StdlibTest
   target Enumerable
   using hook.refinement

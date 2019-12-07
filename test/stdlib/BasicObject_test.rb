@@ -1,3 +1,5 @@
+require_relative "test_helper"
+
 class BasicObjectTest < StdlibTest
   target BasicObject
   using hook.refinement

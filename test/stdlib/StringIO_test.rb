@@ -1,3 +1,5 @@
+require_relative "test_helper"
+
 class StringIOTest < StdlibTest
   target StringIO
   using hook.refinement

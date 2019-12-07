@@ -1,3 +1,5 @@
+require_relative "test_helper"
+
 class RegexpTest < StdlibTest
   target Regexp
   using hook.refinement

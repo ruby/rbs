@@ -1,3 +1,5 @@
+require_relative "test_helper"
+
 class UnboundMethodTest < StdlibTest
   target UnboundMethod
   using hook.refinement
