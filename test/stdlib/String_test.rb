@@ -114,4 +114,12 @@ class StringTest < StdlibTest
   def test_unary_minus
     -''
   end
+
+  def test_unicode_normalize
+    "a\u0300".unicode_normalize
+    "a\u0300".unicode_normalize(:nfc)
+    "a\u0300".unicode_normalize(:nfd)
+    "a\u0300".unicode_normalize(:nfkc)
+    "a\u0300".unicode_normalize(:nfkd)
+  end
 end

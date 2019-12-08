@@ -739,4 +739,6 @@ class String < Object
   def +@: () -> String
 
   def -@: () -> String
+
+  def unicode_normalize: (?(:nfc | :nfd | :nfkc | :nfkd)) -> String
 end
