@@ -163,4 +163,11 @@ class StringTest < StdlibTest
     "test".each_grapheme_cluster
     "test".each_grapheme_cluster { |c| nil }
   end
+
+  def test_unpack1
+    "a".unpack1("")
+    "a".unpack1("c")
+    "a".unpack1("A")
+    "\x00\x00\x00\x00".unpack1("f")
+  end
 end

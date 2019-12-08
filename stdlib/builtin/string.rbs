@@ -763,4 +763,6 @@ class String < Object
 
   def each_grapheme_cluster: () { (String grapheme) -> untyped } -> self
                            | () -> ::Enumerator[String, self]
+
+  def unpack1: (String format) -> (Integer | Float | String | nil)
 end
