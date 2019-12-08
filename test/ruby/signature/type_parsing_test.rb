@@ -482,6 +482,39 @@ class Ruby::Signature::TypeParsingTest < Minitest::Test
       assert_equal :foo?, type.literal
     end
 
+    Parser.parse_type(":$foo").yield_self do |type|
+      assert_instance_of Types::Literal, type
+      assert_equal :$foo, type.literal
+    end
+
+    Parser.parse_type(":@foo").yield_self do |type|
+      assert_instance_of Types::Literal, type
+      assert_equal :@foo, type.literal
+    end
+
+    Parser.parse_type(":@@foo").yield_self do |type|
+      assert_instance_of Types::Literal, type
+      assert_equal :@@foo, type.literal
+    end
+
+    Parser.parse_type(":+").yield_self do |type|
+      assert_instance_of Types::Literal, type
+      assert_equal :+, type.literal
+    end
+
+    Parser.parse_type(":-").yield_self do |type|
+      assert_instance_of Types::Literal, type
+      assert_equal :-, type.literal
+    end
+
+    assert_raises Parser::SyntaxError do
+      Parser.parse_type(":+foo")
+    end
+
+    assert_raises Parser::SyntaxError do
+      Parser.parse_type(":@")
+    end
+
     Parser.parse_type("'hello world'").yield_self do |type|
       assert_instance_of Types::Literal, type
       assert_equal "hello world", type.literal
