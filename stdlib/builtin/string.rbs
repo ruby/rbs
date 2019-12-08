@@ -735,4 +735,6 @@ class String < Object
     ?cr_newline: TrueClass,
     ?crlf_newline: TrueClass
   ) -> self
+
+  def +@: () -> String
 end

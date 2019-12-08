@@ -106,4 +106,8 @@ class StringTest < StdlibTest
     s.encode!(cr_newline: true)
     s.encode!(crlf_newline: true)
   end
+
+  def test_unary_plus
+    +''
+  end
 end
