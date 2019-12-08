@@ -146,4 +146,8 @@ class StringTest < StdlibTest
     "foo"[/(?<foo>foo)/, "foo"] = "bar"
     "foo"["foo"] = "bar"
   end
+
+  def test_undump
+    "\"hello \\n ''\"".undump
+  end
 end
