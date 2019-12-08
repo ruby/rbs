@@ -47,4 +47,9 @@ class IntegerTest < StdlibTest
     1.digits
     1.digits(2)
   end
+
+  def test_allbits?
+    1.allbits?(1)
+    2.allbits?(1)
+  end
 end

@@ -489,4 +489,6 @@ class Integer < Numeric
   def ~: () -> Integer
 
   def digits: (?Integer base) -> ::Array[Integer]
+
+  def allbits?: (_ToInt mask) -> bool
 end
