@@ -130,4 +130,10 @@ class StringTest < StdlibTest
     "a\u0300".unicode_normalize!(:nfkc)
     "a\u0300".unicode_normalize!(:nfkd)
   end
+
+  def test_casecmp?
+    "aBcDeF".casecmp?("abcde")
+    "aBcDeF".casecmp?("abcdef")
+    "foo".casecmp?(2)
+  end
 end

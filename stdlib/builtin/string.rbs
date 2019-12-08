@@ -743,4 +743,7 @@ class String < Object
   def unicode_normalize: (?(:nfc | :nfd | :nfkc | :nfkd)) -> String
 
   def unicode_normalize!: (?(:nfc | :nfd | :nfkc | :nfkd)) -> String
+
+  def casecmp?: (String other) -> bool
+              | (untyped other) -> nil
 end
