@@ -1,3 +1,5 @@
+require_relative "test_helper"
+
 class NilClassTest < StdlibTest
   target NilClass
   using hook.refinement

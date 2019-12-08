@@ -1,3 +1,5 @@
+require_relative "test_helper"
+
 class StringTest < StdlibTest
   target String
   using hook.refinement

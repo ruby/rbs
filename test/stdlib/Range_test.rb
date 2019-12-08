@@ -1,3 +1,5 @@
+require_relative "test_helper"
+
 class RangeTest < StdlibTest
   target Range
   using hook.refinement

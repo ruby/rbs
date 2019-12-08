@@ -1,7 +1,10 @@
+require_relative "test_helper"
 require "abbrev"
 
 class AbbrevTest < StdlibTest
   target Abbrev
+  library "abbrev"
+
   using hook.refinement
 
   def test_abbrev

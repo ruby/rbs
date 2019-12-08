@@ -34,8 +34,11 @@ namespace :generate do
     raise "#{path} already exists!" if path.exist?
 
     path.write <<~RUBY
+      require_relative "test_helper"
+      
       class #{klass}Test < StdlibTest
         target #{klass}
+        # library "pathname", "set", "securerandom"     # Declare library signatures to load
         using hook.refinement
 
         # def test_method_name

@@ -1,4 +1,6 @@
-require 'securerandom'
+require_relative "test_helper"
+
+require "securerandom"
 
 class KernelTest < StdlibTest
   target Kernel

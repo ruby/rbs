@@ -1,7 +1,10 @@
+require_relative "test_helper"
 require "base64"
 
 class Base64Test < StdlibTest
   target Base64
+  library "base64"
+
   using hook.refinement
 
   include Base64

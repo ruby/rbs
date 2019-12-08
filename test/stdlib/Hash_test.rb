@@ -1,3 +1,5 @@
+require_relative "test_helper"
+
 class HashTest < StdlibTest
   target Hash
   using hook.refinement
