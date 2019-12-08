@@ -52,4 +52,9 @@ class IntegerTest < StdlibTest
     1.allbits?(1)
     2.allbits?(1)
   end
+
+  def test_anybits?
+    0xf0.anybits?(0xf)
+    0xf1.anybits?(0xf)
+  end
 end

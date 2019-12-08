@@ -491,4 +491,6 @@ class Integer < Numeric
   def digits: (?Integer base) -> ::Array[Integer]
 
   def allbits?: (_ToInt mask) -> bool
+
+  def anybits?: (_ToInt mask) -> bool
 end
