@@ -765,4 +765,6 @@ class String < Object
                            | () -> ::Enumerator[String, self]
 
   def unpack1: (String format) -> (Integer | Float | String | nil)
+
+  def unicode_normalized?: (?(:nfc | :nfd | :nfkc | :nfkd)) -> bool
 end

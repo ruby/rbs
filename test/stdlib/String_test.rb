@@ -170,4 +170,12 @@ class StringTest < StdlibTest
     "a".unpack1("A")
     "\x00\x00\x00\x00".unpack1("f")
   end
+
+  def test_unicode_normalized?
+    "a\u0300".unicode_normalized?
+    "a\u0300".unicode_normalized?(:nfc)
+    "a\u0300".unicode_normalized?(:nfd)
+    "a\u0300".unicode_normalized?(:nfkc)
+    "a\u0300".unicode_normalized?(:nfkd)
+  end
 end
