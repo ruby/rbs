@@ -495,4 +495,7 @@ class Integer < Numeric
   def anybits?: (_ToInt mask) -> bool
 
   def nobits?: (_ToInt mask) -> bool
+
+  def pow: (Numeric numeric) -> Numeric
+         | (Integer other, Integer modulo) -> Integer
 end

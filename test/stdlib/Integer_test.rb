@@ -62,4 +62,9 @@ class IntegerTest < StdlibTest
     0xf0.nobits?(0xf)
     0xf1.nobits?(0xf)
   end
+
+  def test_pow
+    1.pow(2.0)
+    3.pow(4, 5)
+  end
 end
