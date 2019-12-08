@@ -425,7 +425,7 @@ module Ruby
             end
           end.parse!(args)
 
-          require *libs
+          require(*libs)
 
           decls = Prototype::Runtime.new(patterns: args).decls
         else
