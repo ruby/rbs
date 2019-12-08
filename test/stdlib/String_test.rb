@@ -154,4 +154,8 @@ class StringTest < StdlibTest
   def test_grapheme_clusters
     "\u{1F1EF}\u{1F1F5}".grapheme_clusters
   end
+
+  def test_reverse!
+    "test".reverse!
+  end
 end

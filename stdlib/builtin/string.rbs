@@ -758,4 +758,6 @@ class String < Object
   def undump: () -> String
 
   def grapheme_clusters: () -> ::Array[::String]
+
+  def reverse!: () -> String
 end
