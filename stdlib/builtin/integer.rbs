@@ -487,4 +487,6 @@ class Integer < Numeric
   def |: (Integer arg0) -> Integer
 
   def ~: () -> Integer
+
+  def digits: (?Integer base) -> ::Array[Integer]
 end

@@ -42,4 +42,9 @@ class IntegerTest < StdlibTest
     1.to_s(35)
     1.to_s(36)
   end
+
+  def test_digits
+    1.digits
+    1.digits(2)
+  end
 end
