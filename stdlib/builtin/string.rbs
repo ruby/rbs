@@ -737,4 +737,6 @@ class String < Object
   ) -> self
 
   def +@: () -> String
+
+  def -@: () -> String
 end

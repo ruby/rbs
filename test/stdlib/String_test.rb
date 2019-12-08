@@ -110,4 +110,8 @@ class StringTest < StdlibTest
   def test_unary_plus
     +''
   end
+
+  def test_unary_minus
+    -''
+  end
 end
