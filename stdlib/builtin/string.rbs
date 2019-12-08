@@ -756,4 +756,6 @@ class String < Object
          | (String other_str, String new_str) -> String
 
   def undump: () -> String
+
+  def grapheme_clusters: () -> ::Array[::String]
 end

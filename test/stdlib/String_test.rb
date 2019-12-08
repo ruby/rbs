@@ -150,4 +150,8 @@ class StringTest < StdlibTest
   def test_undump
     "\"hello \\n ''\"".undump
   end
+
+  def test_grapheme_clusters
+    "\u{1F1EF}\u{1F1F5}".grapheme_clusters
+  end
 end
