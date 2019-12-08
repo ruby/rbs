@@ -158,4 +158,9 @@ class StringTest < StdlibTest
   def test_reverse!
     "test".reverse!
   end
+
+  def test_each_grapheme_cluster
+    "test".each_grapheme_cluster
+    "test".each_grapheme_cluster { |c| nil }
+  end
 end

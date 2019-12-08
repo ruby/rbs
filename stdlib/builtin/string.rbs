@@ -760,4 +760,7 @@ class String < Object
   def grapheme_clusters: () -> ::Array[::String]
 
   def reverse!: () -> String
+
+  def each_grapheme_cluster: () { (String grapheme) -> untyped } -> self
+                           | () -> ::Enumerator[String, self]
 end
