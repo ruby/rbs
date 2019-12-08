@@ -57,4 +57,9 @@ class IntegerTest < StdlibTest
     0xf0.anybits?(0xf)
     0xf1.anybits?(0xf)
   end
+
+  def test_nobits?
+    0xf0.nobits?(0xf)
+    0xf1.nobits?(0xf)
+  end
 end

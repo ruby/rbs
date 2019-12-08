@@ -493,4 +493,6 @@ class Integer < Numeric
   def allbits?: (_ToInt mask) -> bool
 
   def anybits?: (_ToInt mask) -> bool
+
+  def nobits?: (_ToInt mask) -> bool
 end
