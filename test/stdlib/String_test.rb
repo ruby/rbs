@@ -136,4 +136,14 @@ class StringTest < StdlibTest
     "aBcDeF".casecmp?("abcdef")
     "foo".casecmp?(2)
   end
+
+  def test_aset_m
+    "foo"[0] = "b"
+    "foo"[0, 3] = "bar"
+    "foo"[0..3] = "bar"
+    "foo"[/foo/] = "bar"
+    "foo"[/(foo)/, 1] = "bar"
+    "foo"[/(?<foo>foo)/, "foo"] = "bar"
+    "foo"["foo"] = "bar"
+  end
 end

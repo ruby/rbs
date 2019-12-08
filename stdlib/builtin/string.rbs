@@ -746,4 +746,12 @@ class String < Object
 
   def casecmp?: (String other) -> bool
               | (untyped other) -> nil
+
+  def []=: (Integer pos, String new_str) -> String
+         | (Integer begin_pos, Integer end_pos, String new_str) -> String
+         | (::Range[Integer] range, String new_str) -> String
+         | (Regexp regexp, String new_str) -> String
+         | (Regexp regexp, Integer capture, String new_str) -> String
+         | (Regexp regexp, String name, String new_str) -> String
+         | (String other_str, String new_str) -> String
 end
