@@ -42,4 +42,29 @@ class IntegerTest < StdlibTest
     1.to_s(35)
     1.to_s(36)
   end
+
+  def test_digits
+    1.digits
+    1.digits(2)
+  end
+
+  def test_allbits?
+    1.allbits?(1)
+    2.allbits?(1)
+  end
+
+  def test_anybits?
+    0xf0.anybits?(0xf)
+    0xf1.anybits?(0xf)
+  end
+
+  def test_nobits?
+    0xf0.nobits?(0xf)
+    0xf1.nobits?(0xf)
+  end
+
+  def test_pow
+    1.pow(2.0)
+    3.pow(4, 5)
+  end
 end
