@@ -11,5 +11,5 @@ module Base64
   def strict_decode64: (String str) -> String
   def strict_encode64: (String bin) -> String
   def urlsafe_decode64: (String str) -> String
-  def urlsafe_encode64: (String bin) -> String
+  def urlsafe_encode64: (String bin, ?padding: bool) -> String
 end
