@@ -388,6 +388,8 @@ end
 
 # Raised by `exit` to initiate the termination of the script.
 class SystemExit < Exception
+  def status: () -> Integer
+  def success?: () -> bool
 end
 
 # Raised in case of a stack overflow.
