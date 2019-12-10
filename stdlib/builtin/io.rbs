@@ -453,6 +453,8 @@ class IO < Object
   def set_encoding: (?String | Encoding ext_or_ext_int_enc) -> self
                   | (?String | Encoding ext_or_ext_int_enc, ?String | Encoding int_enc) -> self
 
+  def set_encoding_by_bom: () -> Encoding?
+
   # Returns status information for *ios* as an object of type `File::Stat` .
   # 
   # ```ruby
