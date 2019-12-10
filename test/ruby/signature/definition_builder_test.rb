@@ -939,4 +939,63 @@ EOF
       end
     end
   end
+
+  def test_initialize
+    SignatureManager.new do |manager|
+      manager.files[Pathname("foo.rbs")] = <<EOF
+class Hello[A]
+  def initialize: [X] () { (X) -> A } -> void
+  def get: () -> A
+end
+EOF
+
+      manager.build do |env|
+        builder = DefinitionBuilder.new(env: env)
+
+        builder.build_instance(type_name("::Hello")).yield_self do |definition|
+          assert_instance_of Definition, definition
+
+          assert_method_definition definition.methods[:initialize], ["[X] () { (X) -> A } -> void"]
+        end
+
+        builder.build_singleton(type_name("::Hello")).yield_self do |definition|
+          assert_instance_of Definition, definition
+
+          assert_method_definition definition.methods[:new], ["[A, X] () { (X) -> A } -> ::Hello[A]"]
+        end
+      end
+    end
+  end
+
+  def test_initialize2
+    SignatureManager.new do |manager|
+      manager.files[Pathname("foo.rbs")] = <<EOF
+class Hello[A]
+  def initialize: [A] () { (A) -> void } -> void
+end
+EOF
+
+      manager.build do |env|
+        builder = DefinitionBuilder.new(env: env)
+
+        builder.build_instance(type_name("::Hello")).yield_self do |definition|
+          assert_instance_of Definition, definition
+
+          assert_method_definition definition.methods[:initialize], ["[A] () { (A) -> void } -> void"]
+        end
+
+        builder.build_singleton(type_name("::Hello")).yield_self do |definition|
+          assert_instance_of Definition, definition
+
+          definition.methods[:new].tap do |method|
+            assert_instance_of Definition::Method, method
+
+            assert_equal 1, method.method_types.size
+            # [A, A@1] () { (A@1) -> void } -> ::Hello[A]
+            assert_match(/\A\[A, A@(\d+)\] \(\) \{ \(A@\1\) -> void \} -> ::Hello\[A\]\Z/, method.method_types[0].to_s)
+          end
+        end
+      end
+    end
+  end
 end
