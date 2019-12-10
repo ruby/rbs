@@ -735,4 +735,36 @@ class String < Object
     ?cr_newline: TrueClass,
     ?crlf_newline: TrueClass
   ) -> self
+
+  def +@: () -> String
+
+  def -@: () -> String
+
+  def unicode_normalize: (?(:nfc | :nfd | :nfkc | :nfkd)) -> String
+
+  def unicode_normalize!: (?(:nfc | :nfd | :nfkc | :nfkd)) -> String
+
+  def casecmp?: (String other) -> bool
+              | (untyped other) -> nil
+
+  def []=: (Integer pos, String new_str) -> String
+         | (Integer begin_pos, Integer end_pos, String new_str) -> String
+         | (::Range[Integer] range, String new_str) -> String
+         | (Regexp regexp, String new_str) -> String
+         | (Regexp regexp, Integer capture, String new_str) -> String
+         | (Regexp regexp, String name, String new_str) -> String
+         | (String other_str, String new_str) -> String
+
+  def undump: () -> String
+
+  def grapheme_clusters: () -> ::Array[::String]
+
+  def reverse!: () -> String
+
+  def each_grapheme_cluster: () { (String grapheme) -> untyped } -> self
+                           | () -> ::Enumerator[String, self]
+
+  def unpack1: (String format) -> (Integer | Float | String | nil)
+
+  def unicode_normalized?: (?(:nfc | :nfd | :nfkc | :nfkd)) -> bool
 end

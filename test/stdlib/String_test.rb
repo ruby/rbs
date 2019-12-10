@@ -106,4 +106,76 @@ class StringTest < StdlibTest
     s.encode!(cr_newline: true)
     s.encode!(crlf_newline: true)
   end
+
+  def test_unary_plus
+    +''
+  end
+
+  def test_unary_minus
+    -''
+  end
+
+  def test_unicode_normalize
+    "a\u0300".unicode_normalize
+    "a\u0300".unicode_normalize(:nfc)
+    "a\u0300".unicode_normalize(:nfd)
+    "a\u0300".unicode_normalize(:nfkc)
+    "a\u0300".unicode_normalize(:nfkd)
+  end
+
+  def test_unicode_normalize!
+    "a\u0300".unicode_normalize!
+    "a\u0300".unicode_normalize!(:nfc)
+    "a\u0300".unicode_normalize!(:nfd)
+    "a\u0300".unicode_normalize!(:nfkc)
+    "a\u0300".unicode_normalize!(:nfkd)
+  end
+
+  def test_casecmp?
+    "aBcDeF".casecmp?("abcde")
+    "aBcDeF".casecmp?("abcdef")
+    "foo".casecmp?(2)
+  end
+
+  def test_aset_m
+    "foo"[0] = "b"
+    "foo"[0, 3] = "bar"
+    "foo"[0..3] = "bar"
+    "foo"[/foo/] = "bar"
+    "foo"[/(foo)/, 1] = "bar"
+    "foo"[/(?<foo>foo)/, "foo"] = "bar"
+    "foo"["foo"] = "bar"
+  end
+
+  def test_undump
+    "\"hello \\n ''\"".undump
+  end
+
+  def test_grapheme_clusters
+    "\u{1F1EF}\u{1F1F5}".grapheme_clusters
+  end
+
+  def test_reverse!
+    "test".reverse!
+  end
+
+  def test_each_grapheme_cluster
+    "test".each_grapheme_cluster
+    "test".each_grapheme_cluster { |c| nil }
+  end
+
+  def test_unpack1
+    "a".unpack1("")
+    "a".unpack1("c")
+    "a".unpack1("A")
+    "\x00\x00\x00\x00".unpack1("f")
+  end
+
+  def test_unicode_normalized?
+    "a\u0300".unicode_normalized?
+    "a\u0300".unicode_normalized?(:nfc)
+    "a\u0300".unicode_normalized?(:nfd)
+    "a\u0300".unicode_normalized?(:nfkc)
+    "a\u0300".unicode_normalized?(:nfkd)
+  end
 end
