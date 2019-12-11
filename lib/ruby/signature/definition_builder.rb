@@ -263,24 +263,31 @@ module Ruby
               definition_pairs.find {|ancestor, _| ancestor == self_ancestor }.tap do |_, definition|
                 unless definition.methods[:new]&.implemented_in == decl
                   instance_definition = build_instance(type_name)
-                  type_params = decl.type_params
+                  class_params = decl.type_params.each.map(&:name)
                   initialize_method = instance_definition.methods[:initialize]
                   method_types = initialize_method.method_types.map do |method_type|
                     case method_type
                     when MethodType
-                      fvs = method_type.free_variables + type_params
+                      fvs = method_type.free_variables + class_params
                       unless fvs.empty?
+                        param_name_set = Set.new(class_params)
                         bound_variables = method_type.type_params
-                        renamed_types = bound_variables.map {|x| Types::Variable.fresh(x) }
+                        renamed_types = bound_variables.map do |x|
+                          if param_name_set.member?(x)
+                            Types::Variable.fresh(x)
+                          else
+                            Types::Variable.new(name: x, location: nil)
+                          end
+                        end
                         sub = Substitution.build(bound_variables, renamed_types)
-                        type_params = renamed_types.unshift(*type_params)
+                        method_type_params = renamed_types.unshift(*class_params)
                       else
                         sub = Substitution.build([], [])
-                        type_params = method_type.type_params
+                        method_type_params = method_type.type_params
                       end
 
                       MethodType.new(
-                        type_params: type_params,
+                        type_params: method_type_params,
                         type: method_type.type.sub(sub).with_return_type(instance_definition.self_type),
                         block: method_type.block&.yield_self {|ty| ty.sub(sub) },
                         location: method_type.location
