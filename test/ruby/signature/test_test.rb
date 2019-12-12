@@ -60,8 +60,6 @@ EOF
           instance.foo("", 3, foo: 234) {}
           instance.foo
         end
-
-        puts io.string
       end
     end
   end
@@ -97,7 +95,6 @@ EOF
         end
 
         refute_empty hook.errors
-        puts io.string
       end
     end
   end
@@ -139,7 +136,6 @@ EOF
           }
         end
 
-        puts io.string
         assert_empty hook.errors
       ensure
         ::Object.instance_eval do
