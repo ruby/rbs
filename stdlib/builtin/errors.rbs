@@ -446,6 +446,7 @@ end
 #     UncaughtThrowError: uncaught throw "foo"
 class UncaughtThrowError < ArgumentError
   def tag: () -> untyped
+  def value: () -> untyped
 end
 
 # Raised when attempting to divide an integer by 0.
