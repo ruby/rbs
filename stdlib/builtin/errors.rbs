@@ -130,6 +130,7 @@ end
 # ```
 class KeyError < IndexError
   def key: () -> untyped
+  def receiver: () -> untyped
 end
 
 # Raised when a file required (a Ruby script, extension library, ...)

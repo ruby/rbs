@@ -11,4 +11,12 @@ class KeyErrorTest < StdlibTest
       error.key
     end
   end
+
+  def test_receiver
+    begin
+      {}.fetch(:foo)
+    rescue KeyError => error
+      error.receiver
+    end
+  end
 end
