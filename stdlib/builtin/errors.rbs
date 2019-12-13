@@ -129,6 +129,7 @@ end
 # h.fetch("baz") #=> KeyError: key not found: "baz"
 # ```
 class KeyError < IndexError
+  def key: () -> untyped
 end
 
 # Raised when a file required (a Ruby script, extension library, ...)
