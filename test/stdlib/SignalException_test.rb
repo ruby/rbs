@@ -7,4 +7,8 @@ class SignalExceptionTest < StdlibTest
   def test_signm
     SignalException.new("INT").signm
   end
+
+  def test_signo
+    SignalException.new("INT").signo
+  end
 end
