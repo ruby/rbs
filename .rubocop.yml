@@ -1,0 +1,8 @@
+require: rubocop-rubycw
+AllCops:
+  TargetRubyVersion: 2.6
+  DisabledByDefault: true
+  Exclude:
+    - 'test/**/*_test.rb'
+Rubycw/Rubycw:
+  Enabled: true
