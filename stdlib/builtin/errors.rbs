@@ -306,6 +306,7 @@ end
 # received Exception SIGHUP
 # ```
 class SignalException < Exception
+  def signm: () -> String
 end
 
 # The most standard error types are subclasses of
