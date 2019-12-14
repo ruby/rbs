@@ -16,7 +16,7 @@ task :stdlib_test do
 end
 
 task :rubocop do
-  sh "rubocop -P"
+  sh "rubocop --parallel"
 end
 
 rule ".rb" => ".y" do |t|
