@@ -147,6 +147,6 @@ If the execution of the program escape from the class definition, the instrument
 You can run the test with:
 
 ```
-$ bundle exec ruby bin/test_runner.rb              # Run all tests
-$ bundle exec ruby bin/test_runner.rb String Hash  # Run specific tests
+$ bundle exec ruby bin/test_runner.rb         # Run all tests
+$ bundle exec ruby test/stdlib/String_test.rb # Run specific tests
 ```
