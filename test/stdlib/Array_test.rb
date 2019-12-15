@@ -20,4 +20,24 @@ class ArrayTest < StdlibTest
     [1, 2, 3].uniq
     [1, 2, 3].uniq { |x| x.even? }
   end
+
+  def test_collect
+    [1, 2, 3].collect
+    [1, 2, 3].collect { |x| x * 2 }
+  end
+
+  def test_map
+    [1, 2, 3].map
+    [1, 2, 3].map { |x| x * 2 }
+  end
+
+  def test_collect!
+    [1, 2, 3].collect!
+    [1, 2, 3].collect! { |x| x * 2 }
+  end
+
+  def test_map!
+    [1, 2, 3].map!
+    [1, 2, 3].map! { |x| x * 2 }
+  end
 end
