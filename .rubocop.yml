@@ -1,0 +1,9 @@
+require: rubocop-rubycw
+AllCops:
+  TargetRubyVersion: 2.6
+  DisabledByDefault: true
+  Exclude:
+    - 'test/**/*_test.rb'
+    - 'vendor/bundle/**/*'
+Rubycw/Rubycw:
+  Enabled: true

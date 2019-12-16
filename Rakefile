@@ -9,10 +9,14 @@ Rake::TestTask.new(:test) do |t|
   end
 end
 
-task :default => [:test, :stdlib_test]
+task :default => [:test, :stdlib_test, :rubocop]
 
 task :stdlib_test do
   sh "ruby bin/test_runner.rb"
+end
+
+task :rubocop do
+  sh "rubocop --parallel"
 end
 
 rule ".rb" => ".y" do |t|
