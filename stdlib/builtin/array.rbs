@@ -360,6 +360,11 @@ class Array[unchecked out Elem] < Object
 
   def collect: [U] () { (Elem arg0) -> U } -> ::Array[U]
              | () -> ::Enumerator[Elem, self]
+  alias map collect
+
+  def collect!: [U] () { (Elem arg0) -> U } -> ::Array[U]
+             | () -> ::Enumerator[Elem, self]
+  alias map! collect!
 
   def combination: (Integer arg0) { (::Array[Elem] arg0) -> untyped } -> ::Array[Elem]
                  | (Integer arg0) -> ::Enumerator[::Array[Elem], self]
@@ -532,12 +537,6 @@ class Array[unchecked out Elem] < Object
   # 
   # Also aliased as: [size](Array.downloaded.ruby_doc#method-i-size)
   def length: () -> Integer
-
-  def map: [U] () { (Elem arg0) -> U } -> ::Array[U]
-         | () -> ::Enumerator[Elem, self]
-
-  def map!: [U] () { (Elem arg0) -> U } -> ::Array[U]
-          | () -> ::Enumerator[Elem, self]
 
   def member?: (Elem arg0) -> bool
 
