@@ -7,15 +7,19 @@ class FrozenErrorTest < StdlibTest
   def test_initialize
     FrozenError.new
     FrozenError.new('')
-    FrozenError.new('', 42)
+    if RUBY_27_OR_LATER
+      FrozenError.new('', 42)
+    end
   end
 
-  def test_receiver
-    begin
-      ''.freeze.strip!
-      raise
-    rescue FrozenError => error
-      error.receiver
+  if RUBY_27_OR_LATER
+    def test_receiver
+      begin
+        ''.freeze.strip!
+        raise
+      rescue FrozenError => error
+        error.receiver
+      end
     end
   end
 end
