@@ -470,5 +470,6 @@ class ZeroDivisionError < StandardError
 end
 
 class FrozenError < RuntimeError
+  def initialize: (?String msg, ?untyped receiver) -> FrozenError
   def receiver: () -> untyped
 end
