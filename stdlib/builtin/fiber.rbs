@@ -68,4 +68,6 @@ class Fiber < Object
   # After finishing execution of the fiber block this method will always
   # return false. You need to `require 'fiber'` before using this method.
   def alive?: () -> bool
+
+  def resume: (*untyped args) -> untyped
 end
