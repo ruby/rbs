@@ -60,6 +60,8 @@
 #     14
 #     FiberError: dead fiber called
 class Fiber < Object
+  def self.yield: (*untyped args) -> untyped
+
   def initialize: () { () -> void } -> Fiber
 
   def resume: (*untyped args) -> untyped

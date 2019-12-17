@@ -8,7 +8,7 @@ class FiberTest < StdlibTest
     Fiber.new {}
   end
 
-  def test_resume
+  def test_resume_and_yield
     f = Fiber.new { Fiber.yield(1); Fiber.yield('2', :foo) }
     f.resume(1)
     f.resume('2', :foo)
