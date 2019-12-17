@@ -62,8 +62,6 @@
 class Fiber < Object
   def initialize: () { () -> void } -> Fiber
 
-  def current: () -> Fiber
-
   # Returns true if the fiber can still be resumed (or transferred to).
   # After finishing execution of the fiber block this method will always
   # return false. You need to `require 'fiber'` before using this method.
