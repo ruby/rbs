@@ -60,6 +60,8 @@
 #     14
 #     FiberError: dead fiber called
 class Fiber < Object
+  def initialize: () { () -> void } -> Fiber
+
   def current: () -> Fiber
 
   # Returns true if the fiber can still be resumed (or transferred to).
