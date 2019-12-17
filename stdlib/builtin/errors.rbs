@@ -468,3 +468,7 @@ end
 # ```
 class ZeroDivisionError < StandardError
 end
+
+class FrozenError < RuntimeError
+  def receiver: () -> untyped
+end
