@@ -15,4 +15,10 @@ class ExceptionTest < StdlibTest
   def test_to_tty
     Exception.to_tty?
   end
+
+  def test_exception
+    Exception.exception
+    Exception.exception('test')
+    NameError.exception
+  end
 end
