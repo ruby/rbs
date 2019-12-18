@@ -11,4 +11,8 @@ class ExceptionTest < StdlibTest
     Exception.new.full_message(order: :top)
     Exception.new.full_message(order: :bottom)
   end
+
+  def test_to_tty
+    Exception.to_tty?
+  end
 end

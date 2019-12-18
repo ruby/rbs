@@ -122,6 +122,8 @@
 # 
 #   - fatal – impossible to rescue
 class Exception < Object
+  def self.to_tty?: () -> bool
+
   def ==: (untyped arg0) -> bool
 
   # Returns any backtrace associated with the exception. The backtrace is an
