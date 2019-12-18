@@ -184,4 +184,6 @@ class Exception < Object
   # Returns exception’s message (or the name of the exception if no message
   # is set).
   def to_s: () -> String
+
+  def full_message: (?highlight: bool, ?order: :top | :bottom) -> String
 end
