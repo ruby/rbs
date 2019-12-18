@@ -14,5 +14,12 @@ class LoadErrorTest < StdlibTest
     rescue LoadError => exception
       exception.path
     end
+
+    begin
+      eval('require_relative ""')
+      raise
+    rescue LoadError => exception
+      exception.path
+    end
   end
 end

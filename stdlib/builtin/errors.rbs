@@ -142,7 +142,7 @@ end
 # 
 #     LoadError: no such file to load -- this/file/does/not/exist
 class LoadError < ScriptError
-  def path: () -> String
+  def path: () -> (String | nil)
 end
 
 # Raised when Ruby can't yield as requested.
