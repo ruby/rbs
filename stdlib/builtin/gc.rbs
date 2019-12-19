@@ -87,6 +87,8 @@ module GC
 
   def self.verify_compaction_references: () -> ::Hash[:considered | :moved, Hash[Symbol | Integer, Integer]]
 
+  def self.verify_internal_consistency: () -> nil
+
   def self.latest_gc_info: () -> ::Hash[::Symbol, untyped]
                          | [K] (?Hash[K, untyped] hash) -> ::Hash[::Symbol | K, untyped]
                          | (Symbol key) -> untyped

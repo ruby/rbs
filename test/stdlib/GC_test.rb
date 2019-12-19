@@ -36,6 +36,10 @@ class GCTest < StdlibTest
     end
   end
 
+  def test_verify_internal_consistency
+    GC.verify_internal_consistency
+  end
+
   def test_latest_gc_info
     GC.latest_gc_info
     GC.latest_gc_info({})
