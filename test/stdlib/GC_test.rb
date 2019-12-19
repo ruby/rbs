@@ -15,4 +15,14 @@ class GCTest < StdlibTest
     garbage_collect(immediate_sweep: true)
     garbage_collect(immediate_sweep: false)
   end
+
+  def test_start
+    GC.start
+    GC.start(full_mark: true)
+    GC.start(full_mark: false)
+    GC.start(immediate_mark: true)
+    GC.start(immediate_mark: false)
+    GC.start(immediate_sweep: true)
+    GC.start(immediate_sweep: false)
+  end
 end

@@ -33,7 +33,7 @@ module GC
   # ```
   def self.enable: () -> bool
 
-  def self.start: (?full_mark: bool full_mark, ?immediate_sweep: bool immediate_sweep) -> NilClass
+  def self.start: (?full_mark: bool full_mark, ?immediate_mark: bool immediate_mark, ?immediate_sweep: bool immediate_sweep) -> nil
 
   # Returns a [Hash](https://ruby-doc.org/core-2.6.3/Hash.html) containing
   # information about the [GC](GC.downloaded.ruby_doc).
