@@ -37,4 +37,10 @@ class GCTest < StdlibTest
     GC.latest_gc_info({})
     GC.latest_gc_info(:state)
   end
+
+  def test_set_stress
+    GC.stress = 0
+    GC.stress = true
+    GC.stress = false
+  end
 end
