@@ -30,6 +30,10 @@ class GCTest < StdlibTest
     def test_compact
       GC.compact
     end
+
+    def test_verify_compaction_references
+      GC.verify_compaction_references
+    end
   end
 
   def test_latest_gc_info
