@@ -25,4 +25,10 @@ class GCTest < StdlibTest
     GC.start(immediate_sweep: true)
     GC.start(immediate_sweep: false)
   end
+
+  if RUBY_27_OR_LATER
+    def test_compact
+      GC.compact
+    end
+  end
 end

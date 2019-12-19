@@ -81,6 +81,8 @@ module GC
   # Returns current status of [GC](GC.downloaded.ruby_doc) stress mode.
   def self.stress: () -> (Integer | TrueClass | FalseClass)
 
+  def self.compact: () -> ::Hash[:considered | :moved, Hash[Symbol | Integer, Integer]]
+
   def garbage_collect: (?full_mark: bool full_mark, ?immediate_mark: bool immediate_mark, ?immediate_sweep: bool immediate_sweep) -> nil
 end
 
