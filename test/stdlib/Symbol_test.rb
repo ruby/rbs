@@ -9,5 +9,10 @@ class SymbolTest < StdlibTest
       :a.start_with?("a")
       :a.start_with?("b")
     end
+
+    def test_end_with?
+      :a.end_with?("a")
+      :a.end_with?("b")
+    end
   end
 end

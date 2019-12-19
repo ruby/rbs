@@ -130,4 +130,5 @@ class Symbol < Object
   def to_sym: () -> self
 
   def start_with?: (String str) -> bool
+  def end_with?: (String str) -> bool
 end
