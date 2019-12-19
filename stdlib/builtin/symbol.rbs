@@ -128,4 +128,6 @@ class Symbol < Object
   # In general, `to_sym` returns the `Symbol` corresponding to an object. As
   # *sym* is already a symbol, `self` is returned in this case.
   def to_sym: () -> self
+
+  def start_with?: (String str) -> bool
 end
