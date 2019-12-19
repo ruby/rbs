@@ -83,6 +83,10 @@ module GC
 
   def self.compact: () -> ::Hash[:considered | :moved, Hash[Symbol | Integer, Integer]]
 
+  def self.latest_gc_info: () -> ::Hash[::Symbol, untyped]
+                         | [K] (?Hash[K, untyped] hash) -> ::Hash[::Symbol | K, untyped]
+                         | (Symbol key) -> untyped
+
   def garbage_collect: (?full_mark: bool full_mark, ?immediate_mark: bool immediate_mark, ?immediate_sweep: bool immediate_sweep) -> nil
 end
 

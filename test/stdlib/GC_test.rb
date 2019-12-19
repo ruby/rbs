@@ -31,4 +31,10 @@ class GCTest < StdlibTest
       GC.compact
     end
   end
+
+  def test_latest_gc_info
+    GC.latest_gc_info
+    GC.latest_gc_info({})
+    GC.latest_gc_info(:state)
+  end
 end
