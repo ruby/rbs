@@ -89,6 +89,8 @@ module GC
 
   def self.verify_internal_consistency: () -> nil
 
+  def self.verify_transient_heap_internal_consistency: () -> nil
+
   def self.latest_gc_info: () -> ::Hash[::Symbol, untyped]
                          | [K] (?Hash[K, untyped] hash) -> ::Hash[::Symbol | K, untyped]
                          | (Symbol key) -> untyped
