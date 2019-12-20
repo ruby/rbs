@@ -9,5 +9,10 @@ class TimeTest < StdlibTest
       Time.new.floor
       Time.new.floor(1)
     end
+
+    def test_ceil
+      Time.new.ceil
+      Time.new.ceil(1)
+    end
   end
 end
