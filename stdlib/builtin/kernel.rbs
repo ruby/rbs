@@ -539,9 +539,9 @@ module Kernel
   # # never get here
   # ```
   def exec: (
-              # env: on, redirect: on, display_name: on
+              # env: on, redirect: on
               Hash[String, String] env,
-              [String, String] cmd_and_display_name,
+              ([String, String] | String) cmd,
               *String args,
               spawn_redirect_hash,
               ?unsetenv_others: (TrueClass | FalseClass),
@@ -570,9 +570,38 @@ module Kernel
               ?rlimit_stack: (Integer | [Integer, Integer]),
             ) -> bot
           | (
-              # env: on, redirect: on, display_name: off
+              # env: on, redirect: off
               Hash[String, String] env,
-              String cmd,
+              ([String, String] | String) cmd,
+              *String args,
+              ?unsetenv_others: (TrueClass | FalseClass),
+              ?pgroup: (TrueClass | Integer | NilClass),
+              ?new_pgroup: (TrueClass | FalseClass),
+              ?umask: Integer,
+              ?close_others: (TrueClass | FalseClass),
+              ?chdir: String,
+
+              # See Process.setrlimit
+              ?rlimit_as: (Integer | [Integer, Integer]),
+              ?rlimit_core: (Integer | [Integer, Integer]),
+              ?rlimit_cpu: (Integer | [Integer, Integer]),
+              ?rlimit_data: (Integer | [Integer, Integer]),
+              ?rlimit_fsize: (Integer | [Integer, Integer]),
+              ?rlimit_memlock: (Integer | [Integer, Integer]),
+              ?rlimit_msgqueue: (Integer | [Integer, Integer]),
+              ?rlimit_nice: (Integer | [Integer, Integer]),
+              ?rlimit_nofile: (Integer | [Integer, Integer]),
+              ?rlimit_nproc: (Integer | [Integer, Integer]),
+              ?rlimit_rss: (Integer | [Integer, Integer]),
+              ?rlimit_rtprio: (Integer | [Integer, Integer]),
+              ?rlimit_rttime: (Integer | [Integer, Integer]),
+              ?rlimit_sbsize: (Integer | [Integer, Integer]),
+              ?rlimit_sigpending: (Integer | [Integer, Integer]),
+              ?rlimit_stack: (Integer | [Integer, Integer]),
+            ) -> bot
+          | (
+              # env: off, redirect: on
+              ([String, String] | String) cmd,
               *String args,
               spawn_redirect_hash,
               ?unsetenv_others: (TrueClass | FalseClass),
@@ -601,157 +630,8 @@ module Kernel
               ?rlimit_stack: (Integer | [Integer, Integer]),
             ) -> bot
           | (
-              # env: on, redirect: off, display_name: on
-              Hash[String, String] env,
-              [String, String] cmd_and_display_name,
-              *String args,
-              ?unsetenv_others: (TrueClass | FalseClass),
-              ?pgroup: (TrueClass | Integer | NilClass),
-              ?new_pgroup: (TrueClass | FalseClass),
-              ?umask: Integer,
-              ?close_others: (TrueClass | FalseClass),
-              ?chdir: String,
-
-              # See Process.setrlimit
-              ?rlimit_as: (Integer | [Integer, Integer]),
-              ?rlimit_core: (Integer | [Integer, Integer]),
-              ?rlimit_cpu: (Integer | [Integer, Integer]),
-              ?rlimit_data: (Integer | [Integer, Integer]),
-              ?rlimit_fsize: (Integer | [Integer, Integer]),
-              ?rlimit_memlock: (Integer | [Integer, Integer]),
-              ?rlimit_msgqueue: (Integer | [Integer, Integer]),
-              ?rlimit_nice: (Integer | [Integer, Integer]),
-              ?rlimit_nofile: (Integer | [Integer, Integer]),
-              ?rlimit_nproc: (Integer | [Integer, Integer]),
-              ?rlimit_rss: (Integer | [Integer, Integer]),
-              ?rlimit_rtprio: (Integer | [Integer, Integer]),
-              ?rlimit_rttime: (Integer | [Integer, Integer]),
-              ?rlimit_sbsize: (Integer | [Integer, Integer]),
-              ?rlimit_sigpending: (Integer | [Integer, Integer]),
-              ?rlimit_stack: (Integer | [Integer, Integer]),
-            ) -> bot
-          | (
-              # env: on, redirect: off, display_name: off
-              Hash[String, String] env,
-              String cmd,
-              *String args,
-              ?unsetenv_others: (TrueClass | FalseClass),
-              ?pgroup: (TrueClass | Integer | NilClass),
-              ?new_pgroup: (TrueClass | FalseClass),
-              ?umask: Integer,
-              ?close_others: (TrueClass | FalseClass),
-              ?chdir: String,
-
-              # See Process.setrlimit
-              ?rlimit_as: (Integer | [Integer, Integer]),
-              ?rlimit_core: (Integer | [Integer, Integer]),
-              ?rlimit_cpu: (Integer | [Integer, Integer]),
-              ?rlimit_data: (Integer | [Integer, Integer]),
-              ?rlimit_fsize: (Integer | [Integer, Integer]),
-              ?rlimit_memlock: (Integer | [Integer, Integer]),
-              ?rlimit_msgqueue: (Integer | [Integer, Integer]),
-              ?rlimit_nice: (Integer | [Integer, Integer]),
-              ?rlimit_nofile: (Integer | [Integer, Integer]),
-              ?rlimit_nproc: (Integer | [Integer, Integer]),
-              ?rlimit_rss: (Integer | [Integer, Integer]),
-              ?rlimit_rtprio: (Integer | [Integer, Integer]),
-              ?rlimit_rttime: (Integer | [Integer, Integer]),
-              ?rlimit_sbsize: (Integer | [Integer, Integer]),
-              ?rlimit_sigpending: (Integer | [Integer, Integer]),
-              ?rlimit_stack: (Integer | [Integer, Integer]),
-            ) -> bot
-          | (
-              # env: off, redirect: on, display_name: on
-              [String, String] cmd_and_display_name,
-              *String args,
-              spawn_redirect_hash,
-              ?unsetenv_others: (TrueClass | FalseClass),
-              ?pgroup: (TrueClass | Integer | NilClass),
-              ?new_pgroup: (TrueClass | FalseClass),
-              ?umask: Integer,
-              ?close_others: (TrueClass | FalseClass),
-              ?chdir: String,
-
-              # See Process.setrlimit
-              ?rlimit_as: (Integer | [Integer, Integer]),
-              ?rlimit_core: (Integer | [Integer, Integer]),
-              ?rlimit_cpu: (Integer | [Integer, Integer]),
-              ?rlimit_data: (Integer | [Integer, Integer]),
-              ?rlimit_fsize: (Integer | [Integer, Integer]),
-              ?rlimit_memlock: (Integer | [Integer, Integer]),
-              ?rlimit_msgqueue: (Integer | [Integer, Integer]),
-              ?rlimit_nice: (Integer | [Integer, Integer]),
-              ?rlimit_nofile: (Integer | [Integer, Integer]),
-              ?rlimit_nproc: (Integer | [Integer, Integer]),
-              ?rlimit_rss: (Integer | [Integer, Integer]),
-              ?rlimit_rtprio: (Integer | [Integer, Integer]),
-              ?rlimit_rttime: (Integer | [Integer, Integer]),
-              ?rlimit_sbsize: (Integer | [Integer, Integer]),
-              ?rlimit_sigpending: (Integer | [Integer, Integer]),
-              ?rlimit_stack: (Integer | [Integer, Integer]),
-            ) -> bot
-          | (
-              # env: off, redirect: on, display_name: off
-              String cmd,
-              *String args,
-              spawn_redirect_hash,
-              ?unsetenv_others: (TrueClass | FalseClass),
-              ?pgroup: (TrueClass | Integer | NilClass),
-              ?new_pgroup: (TrueClass | FalseClass),
-              ?umask: Integer,
-              ?close_others: (TrueClass | FalseClass),
-              ?chdir: String,
-
-              # See Process.setrlimit
-              ?rlimit_as: (Integer | [Integer, Integer]),
-              ?rlimit_core: (Integer | [Integer, Integer]),
-              ?rlimit_cpu: (Integer | [Integer, Integer]),
-              ?rlimit_data: (Integer | [Integer, Integer]),
-              ?rlimit_fsize: (Integer | [Integer, Integer]),
-              ?rlimit_memlock: (Integer | [Integer, Integer]),
-              ?rlimit_msgqueue: (Integer | [Integer, Integer]),
-              ?rlimit_nice: (Integer | [Integer, Integer]),
-              ?rlimit_nofile: (Integer | [Integer, Integer]),
-              ?rlimit_nproc: (Integer | [Integer, Integer]),
-              ?rlimit_rss: (Integer | [Integer, Integer]),
-              ?rlimit_rtprio: (Integer | [Integer, Integer]),
-              ?rlimit_rttime: (Integer | [Integer, Integer]),
-              ?rlimit_sbsize: (Integer | [Integer, Integer]),
-              ?rlimit_sigpending: (Integer | [Integer, Integer]),
-              ?rlimit_stack: (Integer | [Integer, Integer]),
-            ) -> bot
-          | (
-              # env: off, redirect: off, display_name: on
-              [String, String] cmd_and_display_name,
-              *String args,
-              ?unsetenv_others: (TrueClass | FalseClass),
-              ?pgroup: (TrueClass | Integer | NilClass),
-              ?new_pgroup: (TrueClass | FalseClass),
-              ?umask: Integer,
-              ?close_others: (TrueClass | FalseClass),
-              ?chdir: String,
-
-              # See Process.setrlimit
-              ?rlimit_as: (Integer | [Integer, Integer]),
-              ?rlimit_core: (Integer | [Integer, Integer]),
-              ?rlimit_cpu: (Integer | [Integer, Integer]),
-              ?rlimit_data: (Integer | [Integer, Integer]),
-              ?rlimit_fsize: (Integer | [Integer, Integer]),
-              ?rlimit_memlock: (Integer | [Integer, Integer]),
-              ?rlimit_msgqueue: (Integer | [Integer, Integer]),
-              ?rlimit_nice: (Integer | [Integer, Integer]),
-              ?rlimit_nofile: (Integer | [Integer, Integer]),
-              ?rlimit_nproc: (Integer | [Integer, Integer]),
-              ?rlimit_rss: (Integer | [Integer, Integer]),
-              ?rlimit_rtprio: (Integer | [Integer, Integer]),
-              ?rlimit_rttime: (Integer | [Integer, Integer]),
-              ?rlimit_sbsize: (Integer | [Integer, Integer]),
-              ?rlimit_sigpending: (Integer | [Integer, Integer]),
-              ?rlimit_stack: (Integer | [Integer, Integer]),
-            ) -> bot
-          | (
-              # env: off, redirect: off, display_name: off
-              String cmd,
+              # env: off, redirect: off
+              ([String, String] | String) cmd,
               *String args,
               ?unsetenv_others: (TrueClass | FalseClass),
               ?pgroup: (TrueClass | Integer | NilClass),
@@ -805,9 +685,9 @@ module Kernel
   #
   # See `Kernel.exec` for the standard shell.
   def system: (
-                # env: on, redirect: on, display_name: on
+                # env: on, redirect: on
                 Hash[String, String] env,
-                [String, String] cmd_and_display_name,
+                ([String, String] | String) cmd,
                 *String args,
                 spawn_redirect_hash,
                 ?unsetenv_others: (TrueClass | FalseClass),
@@ -839,9 +719,41 @@ module Kernel
                 ?exception: (TrueClass | FalseClass),
               ) -> (NilClass | FalseClass | TrueClass)
             | (
-                # env: on, redirect: on, display_name: off
+                # env: on, redirect: off
                 Hash[String, String] env,
-                String cmd,
+                ([String, String] | String) cmd,
+                *String args,
+                ?unsetenv_others: (TrueClass | FalseClass),
+                ?pgroup: (TrueClass | Integer | NilClass),
+                ?new_pgroup: (TrueClass | FalseClass),
+                ?umask: Integer,
+                ?close_others: (TrueClass | FalseClass),
+                ?chdir: String,
+
+                # See Process.setrlimit
+                ?rlimit_as: (Integer | [Integer, Integer]),
+                ?rlimit_core: (Integer | [Integer, Integer]),
+                ?rlimit_cpu: (Integer | [Integer, Integer]),
+                ?rlimit_data: (Integer | [Integer, Integer]),
+                ?rlimit_fsize: (Integer | [Integer, Integer]),
+                ?rlimit_memlock: (Integer | [Integer, Integer]),
+                ?rlimit_msgqueue: (Integer | [Integer, Integer]),
+                ?rlimit_nice: (Integer | [Integer, Integer]),
+                ?rlimit_nofile: (Integer | [Integer, Integer]),
+                ?rlimit_nproc: (Integer | [Integer, Integer]),
+                ?rlimit_rss: (Integer | [Integer, Integer]),
+                ?rlimit_rtprio: (Integer | [Integer, Integer]),
+                ?rlimit_rttime: (Integer | [Integer, Integer]),
+                ?rlimit_sbsize: (Integer | [Integer, Integer]),
+                ?rlimit_sigpending: (Integer | [Integer, Integer]),
+                ?rlimit_stack: (Integer | [Integer, Integer]),
+
+                # exception is available only for system
+                ?exception: (TrueClass | FalseClass),
+              ) -> (NilClass | FalseClass | TrueClass)
+            | (
+                # env: off, redirect: on
+                ([String, String] | String) cmd,
                 *String args,
                 spawn_redirect_hash,
                 ?unsetenv_others: (TrueClass | FalseClass),
@@ -873,172 +785,8 @@ module Kernel
                 ?exception: (TrueClass | FalseClass),
               ) -> (NilClass | FalseClass | TrueClass)
             | (
-                # env: on, redirect: off, display_name: on
-                Hash[String, String] env,
-                [String, String] cmd_and_display_name,
-                *String args,
-                ?unsetenv_others: (TrueClass | FalseClass),
-                ?pgroup: (TrueClass | Integer | NilClass),
-                ?new_pgroup: (TrueClass | FalseClass),
-                ?umask: Integer,
-                ?close_others: (TrueClass | FalseClass),
-                ?chdir: String,
-
-                # See Process.setrlimit
-                ?rlimit_as: (Integer | [Integer, Integer]),
-                ?rlimit_core: (Integer | [Integer, Integer]),
-                ?rlimit_cpu: (Integer | [Integer, Integer]),
-                ?rlimit_data: (Integer | [Integer, Integer]),
-                ?rlimit_fsize: (Integer | [Integer, Integer]),
-                ?rlimit_memlock: (Integer | [Integer, Integer]),
-                ?rlimit_msgqueue: (Integer | [Integer, Integer]),
-                ?rlimit_nice: (Integer | [Integer, Integer]),
-                ?rlimit_nofile: (Integer | [Integer, Integer]),
-                ?rlimit_nproc: (Integer | [Integer, Integer]),
-                ?rlimit_rss: (Integer | [Integer, Integer]),
-                ?rlimit_rtprio: (Integer | [Integer, Integer]),
-                ?rlimit_rttime: (Integer | [Integer, Integer]),
-                ?rlimit_sbsize: (Integer | [Integer, Integer]),
-                ?rlimit_sigpending: (Integer | [Integer, Integer]),
-                ?rlimit_stack: (Integer | [Integer, Integer]),
-
-                # exception is available only for system
-                ?exception: (TrueClass | FalseClass),
-              ) -> (NilClass | FalseClass | TrueClass)
-            | (
-                # env: on, redirect: off, display_name: off
-                Hash[String, String] env,
-                String cmd,
-                *String args,
-                ?unsetenv_others: (TrueClass | FalseClass),
-                ?pgroup: (TrueClass | Integer | NilClass),
-                ?new_pgroup: (TrueClass | FalseClass),
-                ?umask: Integer,
-                ?close_others: (TrueClass | FalseClass),
-                ?chdir: String,
-
-                # See Process.setrlimit
-                ?rlimit_as: (Integer | [Integer, Integer]),
-                ?rlimit_core: (Integer | [Integer, Integer]),
-                ?rlimit_cpu: (Integer | [Integer, Integer]),
-                ?rlimit_data: (Integer | [Integer, Integer]),
-                ?rlimit_fsize: (Integer | [Integer, Integer]),
-                ?rlimit_memlock: (Integer | [Integer, Integer]),
-                ?rlimit_msgqueue: (Integer | [Integer, Integer]),
-                ?rlimit_nice: (Integer | [Integer, Integer]),
-                ?rlimit_nofile: (Integer | [Integer, Integer]),
-                ?rlimit_nproc: (Integer | [Integer, Integer]),
-                ?rlimit_rss: (Integer | [Integer, Integer]),
-                ?rlimit_rtprio: (Integer | [Integer, Integer]),
-                ?rlimit_rttime: (Integer | [Integer, Integer]),
-                ?rlimit_sbsize: (Integer | [Integer, Integer]),
-                ?rlimit_sigpending: (Integer | [Integer, Integer]),
-                ?rlimit_stack: (Integer | [Integer, Integer]),
-
-                # exception is available only for system
-                ?exception: (TrueClass | FalseClass),
-              ) -> (NilClass | FalseClass | TrueClass)
-            | (
-                # env: off, redirect: on, display_name: on
-                [String, String] cmd_and_display_name,
-                *String args,
-                spawn_redirect_hash,
-                ?unsetenv_others: (TrueClass | FalseClass),
-                ?pgroup: (TrueClass | Integer | NilClass),
-                ?new_pgroup: (TrueClass | FalseClass),
-                ?umask: Integer,
-                ?close_others: (TrueClass | FalseClass),
-                ?chdir: String,
-
-                # See Process.setrlimit
-                ?rlimit_as: (Integer | [Integer, Integer]),
-                ?rlimit_core: (Integer | [Integer, Integer]),
-                ?rlimit_cpu: (Integer | [Integer, Integer]),
-                ?rlimit_data: (Integer | [Integer, Integer]),
-                ?rlimit_fsize: (Integer | [Integer, Integer]),
-                ?rlimit_memlock: (Integer | [Integer, Integer]),
-                ?rlimit_msgqueue: (Integer | [Integer, Integer]),
-                ?rlimit_nice: (Integer | [Integer, Integer]),
-                ?rlimit_nofile: (Integer | [Integer, Integer]),
-                ?rlimit_nproc: (Integer | [Integer, Integer]),
-                ?rlimit_rss: (Integer | [Integer, Integer]),
-                ?rlimit_rtprio: (Integer | [Integer, Integer]),
-                ?rlimit_rttime: (Integer | [Integer, Integer]),
-                ?rlimit_sbsize: (Integer | [Integer, Integer]),
-                ?rlimit_sigpending: (Integer | [Integer, Integer]),
-                ?rlimit_stack: (Integer | [Integer, Integer]),
-
-                # exception is available only for system
-                ?exception: (TrueClass | FalseClass),
-              ) -> (NilClass | FalseClass | TrueClass)
-            | (
-                # env: off, redirect: on, display_name: off
-                String cmd,
-                *String args,
-                spawn_redirect_hash,
-                ?unsetenv_others: (TrueClass | FalseClass),
-                ?pgroup: (TrueClass | Integer | NilClass),
-                ?new_pgroup: (TrueClass | FalseClass),
-                ?umask: Integer,
-                ?close_others: (TrueClass | FalseClass),
-                ?chdir: String,
-
-                # See Process.setrlimit
-                ?rlimit_as: (Integer | [Integer, Integer]),
-                ?rlimit_core: (Integer | [Integer, Integer]),
-                ?rlimit_cpu: (Integer | [Integer, Integer]),
-                ?rlimit_data: (Integer | [Integer, Integer]),
-                ?rlimit_fsize: (Integer | [Integer, Integer]),
-                ?rlimit_memlock: (Integer | [Integer, Integer]),
-                ?rlimit_msgqueue: (Integer | [Integer, Integer]),
-                ?rlimit_nice: (Integer | [Integer, Integer]),
-                ?rlimit_nofile: (Integer | [Integer, Integer]),
-                ?rlimit_nproc: (Integer | [Integer, Integer]),
-                ?rlimit_rss: (Integer | [Integer, Integer]),
-                ?rlimit_rtprio: (Integer | [Integer, Integer]),
-                ?rlimit_rttime: (Integer | [Integer, Integer]),
-                ?rlimit_sbsize: (Integer | [Integer, Integer]),
-                ?rlimit_sigpending: (Integer | [Integer, Integer]),
-                ?rlimit_stack: (Integer | [Integer, Integer]),
-
-                # exception is available only for system
-                ?exception: (TrueClass | FalseClass),
-              ) -> (NilClass | FalseClass | TrueClass)
-            | (
-                # env: off, redirect: off, display_name: on
-                [String, String] cmd_and_display_name,
-                *String args,
-                ?unsetenv_others: (TrueClass | FalseClass),
-                ?pgroup: (TrueClass | Integer | NilClass),
-                ?new_pgroup: (TrueClass | FalseClass),
-                ?umask: Integer,
-                ?close_others: (TrueClass | FalseClass),
-                ?chdir: String,
-
-                # See Process.setrlimit
-                ?rlimit_as: (Integer | [Integer, Integer]),
-                ?rlimit_core: (Integer | [Integer, Integer]),
-                ?rlimit_cpu: (Integer | [Integer, Integer]),
-                ?rlimit_data: (Integer | [Integer, Integer]),
-                ?rlimit_fsize: (Integer | [Integer, Integer]),
-                ?rlimit_memlock: (Integer | [Integer, Integer]),
-                ?rlimit_msgqueue: (Integer | [Integer, Integer]),
-                ?rlimit_nice: (Integer | [Integer, Integer]),
-                ?rlimit_nofile: (Integer | [Integer, Integer]),
-                ?rlimit_nproc: (Integer | [Integer, Integer]),
-                ?rlimit_rss: (Integer | [Integer, Integer]),
-                ?rlimit_rtprio: (Integer | [Integer, Integer]),
-                ?rlimit_rttime: (Integer | [Integer, Integer]),
-                ?rlimit_sbsize: (Integer | [Integer, Integer]),
-                ?rlimit_sigpending: (Integer | [Integer, Integer]),
-                ?rlimit_stack: (Integer | [Integer, Integer]),
-
-                # exception is available only for system
-                ?exception: (TrueClass | FalseClass),
-              ) -> (NilClass | FalseClass | TrueClass)
-            | (
-                # env: off, redirect: off, display_name: off
-                String cmd,
+                # env: off, redirect: off
+                ([String, String] | String) cmd,
                 *String args,
                 ?unsetenv_others: (TrueClass | FalseClass),
                 ?pgroup: (TrueClass | Integer | NilClass),
