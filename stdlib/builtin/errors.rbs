@@ -388,6 +388,8 @@ end
 # 
 #     Errno::ENOENT: No such file or directory - does/not/exist
 class SystemCallError < StandardError
+  def initialize: (String msg, ?Integer errno, ?String location) -> SystemCallError
+  def errno: () -> Integer?
 end
 
 # Raised by `exit` to initiate the termination of the script.
