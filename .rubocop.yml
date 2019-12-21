@@ -5,6 +5,5 @@ AllCops:
   Exclude:
     - 'test/**/*_test.rb'
     - 'vendor/bundle/**/*'
-    - lib/ruby/signature/parser.rb
 Rubycw/Rubycw:
   Enabled: true
