@@ -122,6 +122,10 @@
 # 
 #   - fatal – impossible to rescue
 class Exception < Object
+  def self.to_tty?: () -> bool
+
+  def self.exception: (?String msg) -> self
+
   def ==: (untyped arg0) -> bool
 
   # Returns any backtrace associated with the exception. The backtrace is an
@@ -184,4 +188,6 @@ class Exception < Object
   # Returns exception’s message (or the name of the exception if no message
   # is set).
   def to_s: () -> String
+
+  def full_message: (?highlight: bool, ?order: :top | :bottom) -> String
 end
