@@ -33,7 +33,7 @@ module GC
   # ```
   def self.enable: () -> bool
 
-  def self.start: (?full_mark: bool full_mark, ?immediate_sweep: bool immediate_sweep) -> NilClass
+  def self.start: (?full_mark: bool full_mark, ?immediate_mark: bool immediate_mark, ?immediate_sweep: bool immediate_sweep) -> nil
 
   # Returns a [Hash](https://ruby-doc.org/core-2.6.3/Hash.html) containing
   # information about the [GC](GC.downloaded.ruby_doc).
@@ -80,6 +80,22 @@ module GC
 
   # Returns current status of [GC](GC.downloaded.ruby_doc) stress mode.
   def self.stress: () -> (Integer | TrueClass | FalseClass)
+
+  def self.stress=: ((Integer | TrueClass | FalseClass) flag) -> (Integer | TrueClass | FalseClass)
+
+  def self.compact: () -> ::Hash[:considered | :moved, Hash[Symbol | Integer, Integer]]
+
+  def self.verify_compaction_references: () -> ::Hash[:considered | :moved, Hash[Symbol | Integer, Integer]]
+
+  def self.verify_internal_consistency: () -> nil
+
+  def self.verify_transient_heap_internal_consistency: () -> nil
+
+  def self.latest_gc_info: () -> ::Hash[::Symbol, untyped]
+                         | [K] (?Hash[K, untyped] hash) -> ::Hash[::Symbol | K, untyped]
+                         | (Symbol key) -> untyped
+
+  def garbage_collect: (?full_mark: bool full_mark, ?immediate_mark: bool immediate_mark, ?immediate_sweep: bool immediate_sweep) -> nil
 end
 
 GC::INTERNAL_CONSTANTS: Hash[Symbol, Integer]
