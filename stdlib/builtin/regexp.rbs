@@ -1,9 +1,9 @@
 class Regexp < Object
   def self.escape: (String | Symbol arg0) -> String
 
-  def self.last_match: () -> MatchData
+  def self.last_match: () -> MatchData?
                      | (Integer n) -> String?
-                     | (Symbol | String n) -> String
+                     | (Symbol | String n) -> String?
 
   def self.try_convert: (untyped obj) -> Regexp?
 
