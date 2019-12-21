@@ -8,7 +8,7 @@ class FrozenErrorTest < StdlibTest
     FrozenError.new
     FrozenError.new('')
     if RUBY_27_OR_LATER
-      FrozenError.new('', 42)
+      FrozenError.new('', receiver: 42)
     end
   end
 
