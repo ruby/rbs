@@ -60,10 +60,9 @@
 #     14
 #     FiberError: dead fiber called
 class Fiber < Object
-  def current: () -> Fiber
+  def self.yield: (*untyped args) -> untyped
 
-  # Returns true if the fiber can still be resumed (or transferred to).
-  # After finishing execution of the fiber block this method will always
-  # return false. You need to `require 'fiber'` before using this method.
-  def alive?: () -> bool
+  def initialize: () { () -> void } -> Fiber
+
+  def resume: (*untyped args) -> untyped
 end
