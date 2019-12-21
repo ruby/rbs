@@ -560,6 +560,6 @@ class KernelTest < StdlibTest
     system('echo 1', exception: true)
     system({ 'FOO' => 'BAR' }, 'echo 1', exception: true)
     system({ 'FOO' => 'BAR' }, 'echo 1')
-    # system(['echo', 'display-name'], '1') # TODO
+    system(['echo', 'display-name'], '1')
   end
 end
