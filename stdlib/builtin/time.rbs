@@ -728,6 +728,10 @@ class Time < Object
   # t.month        #=> 11
   # ```
   def month: () -> Integer
+
+  def floor: (?Integer ndigits) -> Time
+
+  def ceil: (?Integer ndigits) -> Time
 end
 
 Time::RFC2822_DAY_NAME: Array[String]

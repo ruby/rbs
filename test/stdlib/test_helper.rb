@@ -3,6 +3,8 @@ require "ruby/signature/test"
 require "minitest/autorun"
 
 class StdlibTest < Minitest::Test
+  RUBY_27_OR_LATER = Gem::Version.new(RUBY_VERSION) >= Gem::Version.new('2.7.0')
+
   DEFAULT_LOGGER = Logger.new(STDERR)
   DEFAULT_LOGGER.level = ENV["RBS_TEST_LOGLEVEL"] || "info"
 
