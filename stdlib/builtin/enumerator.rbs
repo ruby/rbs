@@ -235,10 +235,10 @@ class Enumerator[unchecked out Elem, out Return] < Object
   # ```
   def size: () -> (Integer | Float)?
 
-  def with_index: (?Integer offset) { (Elem arg0, Integer arg1) -> untyped } -> untyped
+  def with_index: (?Integer offset) { (Elem arg0, Integer arg1) -> untyped } -> Return
                 | (?Integer offset) -> ::Enumerator[[ Elem, Integer ], Return]
 
-  def with_object: [U] (U arg0) { (Elem arg0, U arg1) -> untyped } -> untyped
+  def with_object: [U] (U arg0) { (Elem arg0, U arg1) -> untyped } -> U
                  | [U] (U arg0) -> ::Enumerator[[ Elem, U ], Return]
 end
 
