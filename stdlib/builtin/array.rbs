@@ -336,7 +336,7 @@ class Array[unchecked out Elem] < Object
 
   def <<: (Elem arg0) -> ::Array[Elem]
 
-  def []: (Integer | Float arg0) -> Elem?
+  def []: (Integer | Float arg0) -> Elem
         | (::Range[Integer] arg0) -> ::Array[Elem]?
         | (Integer arg0, ?Integer arg1) -> ::Array[Elem]?
 
