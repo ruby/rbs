@@ -6,7 +6,7 @@ class MatchData < Object
         | (::Range[Integer] i_or_start_or_range_or_name) -> ::Array[String]
         | (String | Symbol i_or_start_or_range_or_name) -> String?
 
-  def begin: (Integer n) -> Integer
+  def begin: (Integer | String | Symbol n) -> Integer?
 
   # Returns the array of captures; equivalent to `mtch.to_a[1..-1]` .
   # 
@@ -19,7 +19,7 @@ class MatchData < Object
   # ```
   def captures: () -> ::Array[String]
 
-  def `end`: (Integer n) -> Integer
+  def `end`: (Integer | String | Symbol n) -> Integer?
 
   def eql?: (untyped other) -> bool
 
@@ -63,7 +63,7 @@ class MatchData < Object
 
   def names: () -> ::Array[String]
 
-  def offset: (Integer n) -> ::Array[Integer]
+  def offset: (Integer | Symbol | String n) -> ([Integer, Integer] | [nil, nil])
 
   # Returns the portion of the original string after the current match.
   # Equivalent to the special variable `$'` .
@@ -137,5 +137,5 @@ class MatchData < Object
   # ```
   def to_s: () -> String
 
-  def values_at: (*Integer indexes) -> ::Array[String]
+  def values_at: (*Integer | Symbol | String indexes) -> ::Array[String?]
 end

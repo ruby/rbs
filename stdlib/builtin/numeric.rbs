@@ -156,7 +156,7 @@ class Numeric < Object
 
   def divmod: (Numeric arg0) -> [ Numeric, Numeric ]
 
-  def eql?: (Numeric arg0) -> bool
+  def eql?: (untyped arg0) -> bool
 
   def fdiv: (Numeric arg0) -> Numeric
 
