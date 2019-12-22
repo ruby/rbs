@@ -992,8 +992,33 @@ EOF
 
             assert_equal 1, method.method_types.size
             # [A, A@1] () { (A@1) -> void } -> ::Hello[A]
-            assert_match(/\A\[A, A@(\d+)\] \(\) \{ \(A@\1\) -> void \} -> ::Hello\[A\]\Z/, method.method_types[0].to_s)
+            assert_match(/\A\[A, A@(\d+)\] \(\) { \(A@\1\) -> void } -> ::Hello\[A\]\Z/, method.method_types[0].to_s)
           end
+        end
+      end
+    end
+  end
+
+  def test_build_super
+    SignatureManager.new do |manager|
+      manager.files[Pathname("foo.rbs")] = <<EOF
+class Hello
+  def say: (String) -> void
+end
+
+extension Hello (World)
+  def say: (Integer) -> void
+         | super
+end
+EOF
+
+      manager.build do |env|
+        builder = DefinitionBuilder.new(env: env)
+
+        builder.build_instance(type_name("::Hello")).yield_self do |definition|
+          assert_instance_of Definition, definition
+
+          assert_method_definition definition.methods[:say], ["(::Integer) -> void", "(::String) -> void"]
         end
       end
     end

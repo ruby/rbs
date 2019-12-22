@@ -580,14 +580,17 @@ module Ruby
 
         methods.each do |name, method|
           method.method_types.each do |method_type|
-            result = calculator.in_method_type(method_type: method_type, variables: param_names)
+            case method_type
+            when MethodType
+              result = calculator.in_method_type(method_type: method_type, variables: param_names)
 
-            validate_params_with type_params, result: result do |param|
-              errors.push InvalidVarianceAnnotationError::MethodTypeError.new(
-                method_name: name,
-                method_type: method_type,
-                param: param
-              )
+              validate_params_with type_params, result: result do |param|
+                errors.push InvalidVarianceAnnotationError::MethodTypeError.new(
+                  method_name: name,
+                  method_type: method_type,
+                  param: param
+                )
+              end
             end
           end
         end
