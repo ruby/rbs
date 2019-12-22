@@ -25,7 +25,7 @@ The tool `require`s all of the libraries specified with `-r` option, and then us
 The commandline receives the name of classes you want to prototype, exact class name (like `Pathname`) or pattern with `*` (like `IO::*`).
 
 ```
-$ bundle exec rbs prototype runtime -r pathname Pathname
+$ bundle exec rbs prototype runtime --require pathname Pathname
 class Pathname
   def self.getwd: () -> untyped
 
