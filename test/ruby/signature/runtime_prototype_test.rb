@@ -2,6 +2,7 @@ require "test_helper"
 
 class Ruby::Signature::RuntimePrototypeTest < Minitest::Test
   Runtime = Ruby::Signature::Prototype::Runtime
+  DefinitionBuilder = Ruby::Signature::DefinitionBuilder
 
   include TestHelper
 
@@ -26,10 +27,13 @@ class Ruby::Signature::RuntimePrototypeTest < Minitest::Test
 
     def self.baz(&block)
     end
+
+    def self.b()
+    end
   end
 
   def test_1
-    p = Runtime.new(patterns: ["Ruby::Signature::RuntimePrototypeTest::*"])
+    p = Runtime.new(patterns: ["Ruby::Signature::RuntimePrototypeTest::*"], env: nil, missing_only: false)
 
     assert_write p.decls, <<-EOF
 module Ruby::Signature::RuntimePrototypeTest::Foo
@@ -38,6 +42,8 @@ end
 
 class Ruby::Signature::RuntimePrototypeTest::Test < String
   include Foo
+
+  def self.b: () -> untyped
 
   def self.baz: () { (*untyped) -> untyped } -> untyped
 
@@ -54,5 +60,41 @@ end
 
 Ruby::Signature::RuntimePrototypeTest::Test::NAME: String
     EOF
+  end
+
+  def test_missing_only
+    SignatureManager.new do |manager|
+      manager.files[Pathname("foo.rbs")] = <<EOF
+class Ruby::Signature::RuntimePrototypeTest::Test
+  def self.baz: () -> void
+
+  def foo: () -> void
+
+  def bar: () -> void
+end
+EOF
+
+      manager.build do |env|
+        p = Runtime.new(patterns: ["Ruby::Signature::RuntimePrototypeTest::*"], env: env, missing_only: true)
+
+        assert_write p.decls, <<-EOF
+module Ruby::Signature::RuntimePrototypeTest::Foo
+  include Enumerable
+end
+
+class Ruby::Signature::RuntimePrototypeTest::Test < String
+  include Foo
+
+  def self.b: () -> untyped
+
+  private
+
+  def a: () -> untyped
+end
+
+Ruby::Signature::RuntimePrototypeTest::Test::NAME: String
+        EOF
+      end
+    end
   end
 end

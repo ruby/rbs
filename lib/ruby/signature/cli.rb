@@ -417,17 +417,33 @@ module Ruby
         when "rbi", "rb"
           decls = run_prototype_file(format, args)
         when "runtime"
-          libs = []
+          require_libs = []
+          relative_libs = []
+          missing_only = false
 
           OptionParser.new do |opts|
-            opts.on("-r [LIB]") do |lib|
-              libs << lib
+            opts.on("--require=[LIB]") do |lib|
+              require_libs << lib
+            end
+            opts.on("--require-relative=[LIB]") do |lib|
+              relative_libs << lib
+            end
+            opts.on("--missing-only") do
+              missing_only = true
             end
           end.parse!(args)
 
-          require(*libs)
+          loader = EnvironmentLoader.new()
 
-          decls = Prototype::Runtime.new(patterns: args).decls
+          options.setup(loader)
+
+          env = Environment.new()
+          loader.load(env: env)
+
+          require(*require_libs) unless require_libs.empty?
+          require_relative(*relative_libs) unless relative_libs.empty?
+
+          decls = Prototype::Runtime.new(patterns: args, missing_only: missing_only, env: env).decls
         else
           stdout.puts "Supported formats: rbi, rb, runtime"
           exit 1
