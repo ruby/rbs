@@ -34,7 +34,12 @@ require "ruby/signature/prototype/rb"
 require "ruby/signature/prototype/runtime"
 require "ruby/signature/environment_walker"
 
-require "ruby/signature/parser"
+begin
+  require "ruby/signature/parser"
+rescue LoadError
+  STDERR.puts "Missing parser Ruby code? Running `rake parser` may solve the issue"
+  raise
+end
 
 module Ruby::Signature
   class <<self
