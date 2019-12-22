@@ -52,6 +52,8 @@ class Module < Object
   # ```
   def self.nesting: () -> ::Array[Module]
 
+  def self.used_modules: () -> ::Array[Module]
+
   def <: (Module other) -> bool?
 
   def <=: (Module other) -> bool?
