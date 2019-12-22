@@ -141,28 +141,61 @@ module Ruby
             end
           end
 
-          mod.instance_methods(false).sort.each do |name|
-            method = mod.instance_method(name)
+          unless mod.public_instance_methods(false).empty?
+            members << AST::Members::Public.new(location: nil)
 
-            if method.name == method.original_name
-              members << AST::Members::MethodDefinition.new(
-                name: method.name,
-                types: [method_type(method)],
-                kind: :instance,
-                location: nil,
-                comment: nil,
-                annotations: [],
-                attributes: []
-              )
-            else
-              members << AST::Members::Alias.new(
-                new_name: method.name,
-                old_name: method.original_name,
-                kind: :instance,
-                location: nil,
-                comment: nil,
-                annotations: [],
+            mod.public_instance_methods(false).sort.each do |name|
+              method = mod.instance_method(name)
+
+              if method.name == method.original_name
+                members << AST::Members::MethodDefinition.new(
+                  name: method.name,
+                  types: [method_type(method)],
+                  kind: :instance,
+                  location: nil,
+                  comment: nil,
+                  annotations: [],
+                  attributes: []
                 )
+              else
+                members << AST::Members::Alias.new(
+                  new_name: method.name,
+                  old_name: method.original_name,
+                  kind: :instance,
+                  location: nil,
+                  comment: nil,
+                  annotations: [],
+                  )
+              end
+            end
+          end
+
+          unless mod.private_instance_methods(false).empty?
+            members << AST::Members::Private.new(location: nil)
+
+            mod.private_instance_methods(false).sort.each do |name|
+              method = mod.instance_method(name)
+
+              if method.name == method.original_name
+                members << AST::Members::MethodDefinition.new(
+                  name: method.name,
+                  types: [method_type(method)],
+                  kind: :instance,
+                  location: nil,
+                  comment: nil,
+                  annotations: [],
+                  attributes: []
+                )
+              else
+                members << AST::Members::Alias.new(
+                  new_name: method.name,
+                  old_name: method.original_name,
+                  kind: :instance,
+                  location: nil,
+                  comment: nil,
+                  annotations: [],
+                  )
+              end
             end
           end
         end

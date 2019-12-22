@@ -19,6 +19,11 @@ class Ruby::Signature::RuntimePrototypeTest < Minitest::Test
 
     alias bar foo
 
+    private
+
+    def a()
+    end
+
     def self.baz(&block)
     end
   end
@@ -36,9 +41,15 @@ class Ruby::Signature::RuntimePrototypeTest::Test < String
 
   def self.baz: () { (*untyped) -> untyped } -> untyped
 
+  public
+
   alias bar foo
 
   def foo: (untyped foo, ?untyped bar, *untyped baz, untyped a, b: untyped, ?c: untyped, **untyped) -> untyped
+
+  private
+
+  def a: () -> untyped
 end
 
 Ruby::Signature::RuntimePrototypeTest::Test::NAME: String
