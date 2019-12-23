@@ -302,7 +302,8 @@ module Ruby
                     method_types: method_types,
                     accessibility: :public,
                     attributes: [:incompatible],
-                    annotations: []
+                    annotations: [],
+                    comment: nil
                   )
                 end
               end
@@ -376,7 +377,8 @@ module Ruby
                                                                     implemented_in: decl,
                                                                     accessibility: accessibility,
                                                                     attributes: attrs,
-                                                                    annotations: member.annotations)
+                                                                    annotations: member.annotations,
+                                                                    comment: member.comment)
                 end
               when AST::Members::AttrReader, AST::Members::AttrAccessor, AST::Members::AttrWriter
                 name = member.name
@@ -403,7 +405,8 @@ module Ruby
                     implemented_in: decl,
                     accessibility: accessibility,
                     attributes: [],
-                    annotations: member.annotations
+                    annotations: member.annotations,
+                    comment: member.comment
                   )
                 end
 
@@ -429,7 +432,8 @@ module Ruby
                     implemented_in: decl,
                     accessibility: accessibility,
                     attributes: [],
-                    annotations: member.annotations
+                    annotations: member.annotations,
+                    comment: member.comment
                   )
                 end
 
@@ -495,7 +499,8 @@ module Ruby
                       implemented_in: decl,
                       accessibility: method.accessibility,
                       attributes: [],
-                      annotations: method.annotations
+                      annotations: method.annotations,
+                      comment: member.comment
                     )
                   end
                 end
@@ -644,7 +649,8 @@ module Ruby
                                                                   implemented_in: decl,
                                                                   accessibility: accessibility,
                                                                   attributes: member.attributes,
-                                                                  annotations: member.annotations)
+                                                                  annotations: member.annotations,
+                                                                  comment: member.comment)
               end
             when AST::Members::Alias
               if member.singleton?
@@ -700,7 +706,8 @@ module Ruby
                     implemented_in: decl,
                     accessibility: method.accessibility,
                     attributes: method.attributes,
-                    annotations: method.annotations
+                    annotations: method.annotations,
+                    comment: member.comment
                   )
                 end
               end
@@ -774,7 +781,8 @@ module Ruby
           implemented_in: method.implemented_in,
           accessibility: method.accessibility,
           attributes: method.attributes,
-          annotations: method.annotations
+          annotations: method.annotations,
+          comment: method.comment
         )
       end
 
@@ -844,7 +852,8 @@ module Ruby
                 implemented_in: nil,
                 accessibility: :public,
                 attributes: member.attributes,
-                annotations: member.annotations
+                annotations: member.annotations,
+                comment: member.comment
               )
               definition.methods[member.name] = method
             when AST::Members::Alias

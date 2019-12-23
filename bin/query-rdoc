@@ -84,7 +84,9 @@ end
 
 if comment
   STDERR.puts "Printing document..."
-  puts comment
+  comment.each_line do |line|
+    puts "# #{line}"
+  end
 else
   STDERR.puts "Nothing to print; failed to query the document..."
   exit 1

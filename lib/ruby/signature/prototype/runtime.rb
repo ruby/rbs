@@ -5,12 +5,14 @@ module Ruby
         attr_reader :patterns
         attr_reader :missing_only
         attr_reader :env
+        attr_reader :merge
 
-        def initialize(patterns:, env:, missing_only:)
+        def initialize(patterns:, env:, missing_only:, merge:)
           @patterns = patterns
           @decls = nil
           @missing_only = missing_only
           @env = env
+          @merge = merge
         end
 
         def target?(const)
@@ -146,6 +148,46 @@ module Ruby
           )
         end
 
+        def merge_rbs(module_name, members, instance: nil, singleton: nil)
+          if merge
+            if env.class?(module_name.absolute!)
+              case
+              when instance
+                method = builder.build_instance(module_name.absolute!).methods[instance]
+                method_name = instance
+                kind = :instance
+              when singleton
+                method = builder.build_singleton(module_name.absolute!).methods[singleton]
+                method_name = singleton
+                kind = :singleton
+              end
+
+              if method
+                members << AST::Members::MethodDefinition.new(
+                  name: method_name,
+                  types: method.method_types.map {|type|
+                    type.update.tap do |ty|
+                      def ty.to_s
+                        location.source
+                      end
+                    end
+                  },
+                  kind: kind,
+                  location: nil,
+                  comment: method.comment,
+                  annotations: method.annotations,
+                  attributes: method.attributes
+                )
+                return
+              end
+            end
+
+            yield
+          else
+            yield
+          end
+        end
+
         def generate_methods(mod, module_name, members)
           mod.singleton_methods(false).sort.each do |name|
             next unless print_definition?(module_name, singleton: name)
@@ -153,15 +195,17 @@ module Ruby
             method = mod.singleton_method(name)
 
             if method.name == method.original_name
-              members << AST::Members::MethodDefinition.new(
-                name: method.name,
-                types: [method_type(method)],
-                kind: :singleton,
-                location: nil,
-                comment: nil,
-                annotations: [],
-                attributes: []
-              )
+              merge_rbs(module_name, members, singleton: name) do
+                members << AST::Members::MethodDefinition.new(
+                  name: method.name,
+                  types: [method_type(method)],
+                  kind: :singleton,
+                  location: nil,
+                  comment: nil,
+                  annotations: [],
+                  attributes: []
+                )
+              end
             else
               members << AST::Members::Alias.new(
                 new_name: method.name,
@@ -184,15 +228,17 @@ module Ruby
               method = mod.instance_method(name)
 
               if method.name == method.original_name
-                members << AST::Members::MethodDefinition.new(
-                  name: method.name,
-                  types: [method_type(method)],
-                  kind: :instance,
-                  location: nil,
-                  comment: nil,
-                  annotations: [],
-                  attributes: []
-                )
+                merge_rbs(module_name, members, instance: name) do
+                  members << AST::Members::MethodDefinition.new(
+                    name: method.name,
+                    types: [method_type(method)],
+                    kind: :instance,
+                    location: nil,
+                    comment: nil,
+                    annotations: [],
+                    attributes: []
+                  )
+                end
               else
                 members << AST::Members::Alias.new(
                   new_name: method.name,
@@ -214,15 +260,17 @@ module Ruby
               method = mod.instance_method(name)
 
               if method.name == method.original_name
-                members << AST::Members::MethodDefinition.new(
-                  name: method.name,
-                  types: [method_type(method)],
-                  kind: :instance,
-                  location: nil,
-                  comment: nil,
-                  annotations: [],
-                  attributes: []
-                )
+                merge_rbs(module_name, members, instance: name) do
+                  members << AST::Members::MethodDefinition.new(
+                    name: method.name,
+                    types: [method_type(method)],
+                    kind: :instance,
+                    location: nil,
+                    comment: nil,
+                    annotations: [],
+                    attributes: []
+                  )
+                end
               else
                 members << AST::Members::Alias.new(
                   new_name: method.name,
