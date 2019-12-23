@@ -12,7 +12,7 @@ _type_ ::= _class-name_ _type-arguments_                (Class instance type)
          | _type_ `&` _type_                            (Intersection type)
          | _type_ `?`                                   (Optional type)
          | `{` _record-name_ `:` _type_ `,` ... `}`     (Record type)
-         | `[` _type_ `,` _type_ `,` ... `]`            (Tuples)
+         | `[]` | `[` _type_ `,` _type_ `,` ... `]`     (Tuples)
          | _type-variable_                              (Type variables)
          | `^(` _parameters_ `) ->` _type_              (Proc type)
          | `self`
