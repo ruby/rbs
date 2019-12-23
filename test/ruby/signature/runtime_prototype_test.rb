@@ -131,7 +131,7 @@ class Ruby::Signature::RuntimePrototypeTest::Test < String
   alias bar foo
 
   def foo: (String) -> Integer
-         | (String, bool) { () -> void } -> [ Symbol ]
+         | (String, bool) { () -> void } -> [Symbol]
 
   private
 

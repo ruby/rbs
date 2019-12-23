@@ -166,7 +166,11 @@ module Ruby
                 members << AST::Members::MethodDefinition.new(
                   name: method_name,
                   types: method.method_types.map {|type|
-                    Parser.parse_method_type(type.location.source, variables: type.type_params)
+                    type.update.tap do |ty|
+                      def ty.to_s
+                        location.source
+                      end
+                    end
                   },
                   kind: kind,
                   location: nil,
