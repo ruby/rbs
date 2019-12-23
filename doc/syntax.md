@@ -12,7 +12,7 @@ _type_ ::= _class-name_ _type-arguments_                (Class instance type)
          | _type_ `&` _type_                            (Intersection type)
          | _type_ `?`                                   (Optional type)
          | `{` _record-name_ `:` _type_ `,` ... `}`     (Record type)
-         | `[]` | `[` _type_ `,` _type_ `,` ... `]`     (Tuples)
+         | `[]` | `[` _type_ `,` ... `]`                (Tuples)
          | _type-variable_                              (Type variables)
          | `^(` _parameters_ `) ->` _type_              (Proc type)
          | `self`
@@ -134,7 +134,7 @@ Records are `Hash` objects, fixed set of keys, and heterogeneous.
 
 ### Tuple type
 
-Tuples are `Array` objects, fixed size, and heterogeneous.
+Tuples are `Array` objects, fixed size and heterogeneous.
 
 ```
 [ ]                               # Empty like `[]`
@@ -142,6 +142,8 @@ Tuples are `Array` objects, fixed size, and heterogeneous.
 [Integer, Integer]                # Pair of integers like `[1, 2]`
 [Symbol, Integer, Integer]        # Tuple of Symbol, Integer, and Integer like `[:pair, 30, 22]`
 ```
+
+*Empty tuple* or *1-tuple* sound strange, but RBS allows these types.
 
 ### Type variable
 
