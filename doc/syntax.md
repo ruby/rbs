@@ -143,8 +143,6 @@ Tuples are `Array` objects, fixed size, and heterogeneous.
 [Symbol, Integer, Integer]        # Tuple of Symbol, Integer, and Integer like `[:pair, 30, 22]`
 ```
 
-Tuple type requires more than one types.
-
 ### Type variable
 
 ```
