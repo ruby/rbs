@@ -1,0 +1,9 @@
+module Find
+  def self.find: (*(String | _ToPath) paths, ?ignore_error: bool) -> Enumerator[String, nil]
+               | (*(String | _ToPath) paths, ?ignore_error: bool) { (String arg0) -> void} -> nil
+  def self.prune: () -> bot
+end
+
+interface _ToPath
+  def to_path: () -> String
+end
