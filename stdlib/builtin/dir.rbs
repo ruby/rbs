@@ -143,4 +143,6 @@ class Dir < Object
              | (String | ::Array[String] pattern, ?Integer flags) { (String arg0) -> untyped } -> NilClass
 
   def self.children: (String dirname, ?encoding: String | Encoding enc) -> Array[String]
+
+  def children: () -> Array[String]
 end

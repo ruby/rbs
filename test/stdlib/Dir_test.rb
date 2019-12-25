@@ -8,5 +8,6 @@ class DirTest < StdlibTest
     Dir.children('.')
     Dir.children('.', encoding: 'UTF-8')
     Dir.children('.', encoding: Encoding::UTF_8)
+    Dir.new('.').children
   end
 end
