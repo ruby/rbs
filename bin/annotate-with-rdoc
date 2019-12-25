@@ -48,7 +48,17 @@ def comment_for_method(klass, method, stores:)
   method = store_for_class(klass, stores: stores)&.load_method(klass, method)
 
   if method&.documented?
-    string = format_comment(method.comment)
+    out = RDoc::Markup::Document.new
+
+    out << method.comment
+
+    if method.arglists
+      out << RDoc::Markup::Heading.new(1, "arglists")
+      arglists = method.arglists.chomp.split("\n").map {|line| line + "\n" }
+      out << RDoc::Markup::Verbatim.new(*arglists)
+    end
+
+    string = out.accept(RDoc::Markup::ToMarkdown.new)
     Ruby::Signature::AST::Comment.new(location: nil, string: string)
   end
 
