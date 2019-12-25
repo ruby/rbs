@@ -196,6 +196,8 @@ module Ruby
 
             if method.name == method.original_name
               merge_rbs(module_name, members, singleton: name) do
+                Signature.logger.info "missing #{module_name}.#{name} #{method.source_location}"
+                
                 members << AST::Members::MethodDefinition.new(
                   name: method.name,
                   types: [method_type(method)],
@@ -229,6 +231,8 @@ module Ruby
 
               if method.name == method.original_name
                 merge_rbs(module_name, members, instance: name) do
+                  Signature.logger.info "missing #{module_name}##{name} #{method.source_location}"
+
                   members << AST::Members::MethodDefinition.new(
                     name: method.name,
                     types: [method_type(method)],
@@ -261,6 +265,8 @@ module Ruby
 
               if method.name == method.original_name
                 merge_rbs(module_name, members, instance: name) do
+                  Signature.logger.info "missing #{module_name}##{name} #{method.source_location}"
+
                   members << AST::Members::MethodDefinition.new(
                     name: method.name,
                     types: [method_type(method)],
