@@ -19,4 +19,9 @@ class DirTest < StdlibTest
     Dir.new('.').each_child
     # Dir.new('.').each_child { |filename| }
   end
+
+  def test_empty_p
+    Dir.empty?('.')
+    Dir.empty?(__FILE__)
+  end
 end

@@ -147,6 +147,8 @@ class Dir < Object
   def self.each_child: (String dirname, ?encoding: String | Encoding enc) -> Enumerator[Array[String], self]
                      | (String dirname, ?encoding: String | Encoding enc) { (String filename) -> void } -> nil
 
+  def self.empty?: (String path_name) -> (true | false)
+
   def children: () -> Array[String]
   def each_child: () -> Enumerator[Array[String], self]
                 | () { (String filename) -> void } -> Enumerator[Array[String], self]
