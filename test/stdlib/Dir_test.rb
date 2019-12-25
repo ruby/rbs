@@ -10,4 +10,11 @@ class DirTest < StdlibTest
     Dir.children('.', encoding: Encoding::UTF_8)
     Dir.new('.').children
   end
+
+  def test_each_child
+    Dir.each_child('.')
+    Dir.each_child('.') { }
+    Dir.each_child('.', encoding: 'UTF-8')
+    Dir.each_child('.', encoding: Encoding::UTF_8)
+  end
 end
