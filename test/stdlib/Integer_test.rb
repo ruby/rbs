@@ -1,4 +1,5 @@
 require_relative "test_helper"
+require "bigdecimal"
 
 class IntegerTest < StdlibTest
   target Integer
