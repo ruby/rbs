@@ -148,4 +148,6 @@ class Dir < Object
                      | (String dirname, ?encoding: String | Encoding enc) { (String filename) -> void } -> nil
 
   def children: () -> Array[String]
+  def each_child: () -> Enumerator[Array[String], self]
+                | () { (String filename) -> void } -> Enumerator[Array[String], self]
 end

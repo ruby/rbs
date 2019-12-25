@@ -16,5 +16,7 @@ class DirTest < StdlibTest
     Dir.each_child('.') { }
     Dir.each_child('.', encoding: 'UTF-8')
     Dir.each_child('.', encoding: Encoding::UTF_8)
+    Dir.new('.').each_child
+    # Dir.new('.').each_child { |filename| }
   end
 end
