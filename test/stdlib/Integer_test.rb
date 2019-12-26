@@ -1,8 +1,15 @@
 require_relative "test_helper"
+require "bigdecimal"
 
 class IntegerTest < StdlibTest
   target Integer
   using hook.refinement
+
+  def test_sqrt
+    Integer.sqrt(4)
+    Integer.sqrt(4.0)
+    Integer.sqrt(4/1r)
+  end
 
   def test_to_s
     1.to_s

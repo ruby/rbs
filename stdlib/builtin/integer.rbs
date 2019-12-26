@@ -3,6 +3,8 @@
 # any attempt to do so will raise a
 # [TypeError](https://ruby-doc.org/core-2.6.3/TypeError.html).
 class Integer < Numeric
+  def self.sqrt: (Numeric n) -> Integer
+
   def %: (Integer arg0) -> Integer
        | (Float arg0) -> Float
        | (Rational arg0) -> Rational
