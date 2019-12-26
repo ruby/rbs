@@ -141,4 +141,15 @@ class Dir < Object
 
   def self.[]: (String | ::Array[String] pattern, ?Integer flags) -> ::Array[String]
              | (String | ::Array[String] pattern, ?Integer flags) { (String arg0) -> untyped } -> NilClass
+
+  def self.children: (String dirname, ?encoding: String | Encoding enc) -> Array[String]
+
+  def self.each_child: (String dirname, ?encoding: String | Encoding enc) -> Enumerator[Array[String], self]
+                     | (String dirname, ?encoding: String | Encoding enc) { (String filename) -> void } -> nil
+
+  def self.empty?: (String path_name) -> (true | false)
+
+  def children: () -> Array[String]
+  def each_child: () -> Enumerator[Array[String], self]
+                | () { (String filename) -> void } -> Enumerator[Array[String], self]
 end
