@@ -330,7 +330,11 @@ module Ruby
         end
 
         def to_s(level = 0)
-          "[ #{types.join(", ")} ]"
+          if types.empty?
+            "[ ]"
+          else
+            "[ #{types.join(", ")} ]"
+          end
         end
 
         def each_type(&block)
@@ -426,7 +430,11 @@ module Ruby
         end
 
         def to_s(level = 0)
-          "#{type.to_s(1)}?"
+          if type.is_a?(Ruby::Signature::Types::Literal) && type.literal.is_a?(Symbol)
+            "#{type.to_s(1)} ?"
+          else
+            "#{type.to_s(1)}?"
+          end
         end
 
         def each_type
