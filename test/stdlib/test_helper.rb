@@ -2,7 +2,30 @@ require "ruby/signature"
 require "ruby/signature/test"
 require "minitest/autorun"
 
+require "minitest/reporters"
+Minitest::Reporters.use!
+
 class StdlibTest < Minitest::Test
+  class ToInt
+    def initialize(value = 3)
+      @value = value
+    end
+
+    def to_int
+      @value
+    end
+  end
+
+  class ToStr
+    def initialize(value = "")
+      @value = value
+    end
+
+    def to_str
+      @value
+    end
+  end
+
   RUBY_27_OR_LATER = Gem::Version.new(RUBY_VERSION) >= Gem::Version.new('2.7.0')
 
   DEFAULT_LOGGER = Logger.new(STDERR)

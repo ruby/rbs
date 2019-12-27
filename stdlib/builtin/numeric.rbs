@@ -80,31 +80,19 @@ class Numeric
   # 
   # See Numeric#divmod.
   # 
-  # # arglists
-  #     num.modulo(numeric)  ->  real
-  #
-  def %: (Numeric arg0) -> Numeric
+  def %: (Numeric) -> Numeric
 
   # Unary Plus---Returns the receiver.
   # 
-  # # arglists
-  #     +num  ->  num
-  #
   def +@: () -> Numeric
 
   # Unary Minus---Returns the receiver, negated.
   # 
-  # # arglists
-  #     -num  ->  numeric
-  #
   def -@: () -> Numeric
 
   # Returns zero if `number` equals `other`, otherwise returns `nil`.
   # 
-  # # arglists
-  #     number <=> other  ->  0 or nil
-  #
-  def <=>: (Numeric arg0) -> Integer
+  def <=>: (Numeric other) -> Integer
 
   # Returns the absolute value of `num`.
   # 
@@ -114,31 +102,19 @@ class Numeric
   # 
   # Numeric#magnitude is an alias for Numeric#abs.
   # 
-  # # arglists
-  #     num.abs        ->  numeric
-  #
   def abs: () -> Numeric
 
   # Returns square of self.
   # 
-  # # arglists
-  #     num.abs2  ->  real
-  #
   def abs2: () -> Numeric
 
   # Returns 0 if the value is positive, pi otherwise.
-  # 
-  # # arglists
-  #     num.angle  ->  0 or float
   # 
   def angle: () -> Numeric
 
   # Returns 0 if the value is positive, pi otherwise.
   # 
-  # # arglists
-  #     num.arg    ->  0 or float
-  # 
-  def arg: () -> Numeric
+  alias arg angle
 
   # Returns the smallest number greater than or equal to `num` with a precision of
   # `ndigits` decimal digits (default: 0).
@@ -146,11 +122,8 @@ class Numeric
   # Numeric implements this by converting its value to a Float and invoking
   # Float#ceil.
   # 
-  # # arglists
-  #     num.ceil([ndigits])  ->  integer or float
-  # 
   def ceil: () -> Integer
-          | (?Integer digits) -> Numeric
+          | (Integer digits) -> (Integer | Numeric)
 
   # If `numeric` is the same type as `num`, returns an array `[numeric, num]`.
   # Otherwise, returns an array with both `numeric` and `num` represented as Float
@@ -164,30 +137,17 @@ class Numeric
   #     1.2.coerce(3)   #=> [3.0, 1.2]
   #     1.coerce(2)     #=> [2, 1]
   # 
-  # # arglists
-  #     num.coerce(numeric)  ->  array
-  # 
-  def coerce: (Numeric arg0) -> [ Numeric, Numeric ]
+  def coerce: (Numeric) -> [ Numeric, Numeric ]
 
   # Returns self.
-  # 
-  # # arglists
-  #     num.conj       ->  self
-  #     num.conjugate  ->  self
   # 
   def conj: () -> Numeric
 
   # Returns self.
   # 
-  # # arglists
-  #     num.conjugate  ->  self
-  # 
   def conjugate: () -> Numeric
 
   # Returns the denominator (always positive).
-  # 
-  # # arglists
-  #     num.denominator  ->  integer
   # 
   def denominator: () -> Integer
 
@@ -198,10 +158,7 @@ class Numeric
   # 
   # See Numeric#divmod.
   # 
-  # # arglists
-  #     num.div(numeric)  ->  integer
-  # 
-  def div: (Numeric arg0) -> Integer
+  def div: (Numeric) -> Integer
 
   # Returns an array containing the quotient and modulus obtained by dividing
   # `num` by `numeric`.
@@ -240,10 +197,7 @@ class Numeric
   #     (-11).divmod(3.5)   #=> [-4, 3.0]
   #     11.5.divmod(3.5)    #=> [3, 1.0]
   # 
-  # # arglists
-  #     num.divmod(numeric)  ->  array
-  # 
-  def divmod: (Numeric arg0) -> [ Numeric, Numeric ]
+  def divmod: (Numeric) -> [ Numeric, Numeric ]
 
   # Returns `true` if `num` and `numeric` are the same type and have equal values.
   #  Contrast this with Numeric#==, which performs type conversions.
@@ -252,22 +206,13 @@ class Numeric
   #     1.eql?(1.0)     #=> false
   #     1.0.eql?(1.0)   #=> true
   # 
-  # # arglists
-  #     num.eql?(numeric)  ->  true or false
-  # 
-  def eql?: (untyped arg0) -> bool
+  def eql?: (untyped) -> bool
 
   # Returns float division.
   # 
-  # # arglists
-  #     num.fdiv(numeric)  ->  float
-  # 
-  def fdiv: (Numeric arg0) -> Numeric
+  def fdiv: (Numeric) -> Numeric
 
   # Returns `true` if `num` is a finite number, otherwise returns `false`.
-  # 
-  # # arglists
-  #     num.finite?  ->  true or false
   # 
   def finite?: () -> bool
 
@@ -277,42 +222,26 @@ class Numeric
   # Numeric implements this by converting its value to a Float and invoking
   # Float#floor.
   # 
-  # # arglists
-  #     num.floor([ndigits])  ->  integer or float
-  # 
   def floor: () -> Integer
-           | (?Integer digits) -> Numeric
+           | (Integer digits) -> Numeric
 
   # Returns the corresponding imaginary number. Not available for complex numbers.
   # 
   #     -42.i  #=> (0-42i)
   #     2.0.i  #=> (0+2.0i)
   # 
-  # # arglists
-  #     num.i  ->  Complex(0, num)
-  # 
   def i: () -> Complex
 
   # Returns zero.
-  # 
-  # # arglists
-  #     num.imag       ->  0
-  #     num.imaginary  ->  0
   # 
   def imag: () -> Numeric
 
   # Returns zero.
   # 
-  # # arglists
-  #     num.imaginary  ->  0
-  # 
   def imaginary: () -> Numeric
 
   # Returns `nil`, -1, or 1 depending on whether the value is finite, `-Infinity`,
   # or `+Infinity`.
-  # 
-  # # arglists
-  #     num.infinite?  ->  -1, 1, or nil
   # 
   def infinite?: () -> Integer?
 
@@ -320,9 +249,6 @@ class Numeric
   # 
   #     1.0.integer?   #=> false
   #     1.integer?     #=> true
-  # 
-  # # arglists
-  #     num.integer?  ->  true or false
   # 
   def integer?: () -> bool
 
@@ -334,10 +260,7 @@ class Numeric
   # 
   # Numeric#magnitude is an alias for Numeric#abs.
   # 
-  # # arglists
-  #     num.magnitude  ->  numeric
-  # 
-  def magnitude: () -> Numeric
+  alias magnitude abs
 
   # `x.modulo(y)` means `x-y*(x/y).floor`.
   # 
@@ -345,15 +268,9 @@ class Numeric
   # 
   # See Numeric#divmod.
   # 
-  # # arglists
-  #     num.modulo(numeric)  ->  real
-  # 
-  def modulo: (Numeric arg0) -> (Integer | Float | Rational | BigDecimal)
+  def modulo: (Numeric) -> Numeric
 
   # Returns `true` if `num` is less than 0.
-  # 
-  # # arglists
-  #     num.negative?  ->  true or false
   # 
   def negative?: () -> bool
 
@@ -365,84 +282,49 @@ class Numeric
   #     b = a.sort {|a,b| (a.downcase <=> b.downcase).nonzero? || a <=> b }
   #     b   #=> ["A", "a", "AA", "Aa", "aA", "BB", "Bb", "bB", "bb", "z"]
   # 
-  # # arglists
-  #     num.nonzero?  ->  self or nil
-  # 
   def nonzero?: () -> self?
 
   # Returns the numerator.
   # 
-  # # arglists
-  #     num.numerator  ->  integer
-  # 
-  def numerator: () -> Integer
+  def numerator: () -> Numeric
 
   # Returns 0 if the value is positive, pi otherwise.
   # 
-  # # arglists
-  #     num.phase  ->  0 or float
-  # 
-  def phase: () -> Numeric
+  alias phase angle
 
   # Returns an array; [num.abs, num.arg].
-  # 
-  # # arglists
-  #     num.polar  ->  array
   # 
   def polar: () -> [ Numeric, Numeric ]
 
   # Returns `true` if `num` is greater than 0.
   # 
-  # # arglists
-  #     num.positive?  ->  true or false
-  # 
   def positive?: () -> bool
 
   # Returns the most exact division (rational for integers, float for floats).
   # 
-  # # arglists
-  #     num.quo(int_or_rat)   ->  rat
-  #     num.quo(flo)          ->  flo
-  # 
-  def quo: (Numeric arg0) -> Numeric
+  def quo: (Numeric) -> Numeric
 
   # Returns self.
-  # 
-  # # arglists
-  #     num.real  ->  self
   # 
   def real: () -> Numeric
 
   # Returns `true` if `num` is a real number (i.e. not Complex).
   # 
-  # # arglists
-  #     num.real?  ->  true or false
-  # 
-  def real?: () -> Numeric
+  def real?: () -> bool
 
   # Returns an array; [num, 0].
-  # 
-  # # arglists
-  #     num.rect  ->  array
-  #     num.rectangular  ->  array
   # 
   def rect: () -> [ Numeric, Numeric ]
 
   # Returns an array; [num, 0].
   # 
-  # # arglists
-  #     num.rectangular  ->  array
-  # 
-  def rectangular: () -> [ Numeric, Numeric ]
+  alias rectangular rect
 
   # `x.remainder(y)` means `x-y*(x/y).truncate`.
   # 
   # See Numeric#divmod.
   # 
-  # # arglists
-  #     num.remainder(numeric)  ->  real
-  # 
-  def remainder: (Numeric arg0) -> (Integer | Float | Rational | BigDecimal)
+  def remainder: (Numeric) -> Numeric
 
   # Returns `num` rounded to the nearest value with a precision of `ndigits`
   # decimal digits (default: 0).
@@ -450,10 +332,8 @@ class Numeric
   # Numeric implements this by converting its value to a Float and invoking
   # Float#round.
   # 
-  # # arglists
-  #     num.round([ndigits])  ->  integer or float
-  # 
-  def round: (Numeric arg0) -> Numeric
+  def round: () -> Integer
+           | (Integer digits) -> Numeric
 
   # Invokes the given block with the sequence of numbers starting at `num`,
   # incremented by `step` (defaulted to `1`) on each call.
@@ -497,21 +377,12 @@ class Numeric
   #     1 3 5 7 9
   #     2.718281828459045 2.9182818284590453 3.118281828459045
   # 
-  # # arglists
-  #     num.step(by: step, to: limit) {|i| block }   ->  self
-  #     num.step(by: step, to: limit)                ->  an_enumerator
-  #     num.step(by: step, to: limit)                ->  an_arithmetic_sequence
-  #     num.step(limit=nil, step=1) {|i| block }     ->  self
-  #     num.step(limit=nil, step=1)                  ->  an_enumerator
-  #     num.step(limit=nil, step=1)                  ->  an_arithmetic_sequence
-  # 
-  def step: (?Numeric? limit, ?Numeric step) { (Numeric arg0) -> untyped } -> Numeric
-          | (?Numeric? limit, ?Numeric step) -> ::Enumerator[Numeric, self]
+  def step: (?Numeric limit, ?Numeric step) { (Numeric) -> void } -> self
+          | (?Numeric limit, ?Numeric step) -> Enumerator[Numeric, self]
+          | (?by: Numeric, ?to: Numeric) { (Numeric) -> void } -> self
+          | (?by: Numeric, ?to: Numeric) -> Enumerator[Numeric, self]
 
   # Returns the value as a complex.
-  # 
-  # # arglists
-  #     num.to_c  ->  complex
   # 
   def to_c: () -> Complex
 
@@ -521,9 +392,6 @@ class Numeric
   #     1.0.to_int.class   #=> Integer
   #     1.0.to_i.class     #=> Integer
   # 
-  # # arglists
-  #     num.to_int  ->  integer
-  # 
   def to_int: () -> Integer
 
   # Returns `num` truncated (toward zero) to a precision of `ndigits` decimal
@@ -532,15 +400,10 @@ class Numeric
   # Numeric implements this by converting its value to a Float and invoking
   # Float#truncate.
   # 
-  # # arglists
-  #     num.truncate([ndigits])  ->  integer or float
-  # 
   def truncate: () -> Integer
+              | (Integer ndigits) -> (Integer | Numeric)
 
   # Returns `true` if `num` has a zero value.
-  # 
-  # # arglists
-  #     num.zero?  ->  true or false
   # 
   def zero?: () -> bool
 end

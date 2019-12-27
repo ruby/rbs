@@ -21,10 +21,7 @@ class Integer < Numeric
   # If `n` is not an Integer, it is converted to an Integer first. If `n` is
   # negative, a Math::DomainError is raised.
   # 
-  # # arglists
-  #     Integer.sqrt(n)  ->  integer
-  # 
-  def self.sqrt: (Numeric n) -> Integer
+  def self.sqrt: (int n) -> Integer
 
   public
 
@@ -32,32 +29,23 @@ class Integer < Numeric
   # 
   # See Numeric#divmod for more information.
   # 
-  # # arglists
-  #     int % other        ->  real
-  # 
-  def %: (Integer arg0) -> Integer
-       | (Float arg0) -> Float
-       | (Rational arg0) -> Rational
-       | (BigDecimal arg0) -> BigDecimal
+  def %: (Float) -> Float
+       | (Rational) -> Rational
+       | (Integer) -> Integer
+       | (Numeric) -> Numeric
 
   # Bitwise AND.
   # 
-  # # arglists
-  #     int & other_int  ->  integer
-  # 
-  def &: (Integer arg0) -> Integer
+  def &: (Integer) -> Integer
 
   # Performs multiplication: the class of the resulting object depends on the
   # class of `numeric`.
   # 
-  # # arglists
-  #     int * numeric  ->  numeric_result
-  # 
-  def *: (Integer arg0) -> Integer
-       | (Float arg0) -> Float
-       | (Rational arg0) -> Rational
-       | (BigDecimal arg0) -> BigDecimal
-       | (Complex arg0) -> Complex
+  def *: (Float) -> Float
+       | (Rational) -> Rational
+       | (Complex) -> Complex
+       | (Integer) -> Integer
+       | (Numeric) -> Numeric
 
   # Raises `int` to the power of `numeric`, which may be negative or fractional.
   # The result may be an Integer, a Float, a Rational, or a complex number.
@@ -71,86 +59,56 @@ class Integer < Numeric
   #     123456789 ** 1.2   #=> 5126464716.0993185
   #     123456789 ** -2    #=> (1/15241578750190521)
   # 
-  # # arglists
-  #     int ** numeric  ->  numeric_result
-  # 
-  def **: (Integer arg0) -> Numeric
-        | (Float arg0) -> Numeric
-        | (Rational arg0) -> Numeric
-        | (BigDecimal arg0) -> BigDecimal
-        | (Complex arg0) -> Complex
+  def **: (Integer) -> Numeric
+        | (Float) -> Numeric
+        | (Rational) -> Numeric
+        | (Complex) -> Complex
+        | (Numeric) -> Numeric
 
   # Performs addition: the class of the resulting object depends on the class of
   # `numeric`.
   # 
-  # # arglists
-  #     int + numeric  ->  numeric_result
-  # 
-  def +: (Integer arg0) -> Integer
-       | (Float arg0) -> Float
-       | (Rational arg0) -> Rational
-       | (BigDecimal arg0) -> BigDecimal
-       | (Complex arg0) -> Complex
+  def +: (Integer) -> Integer
+       | (Float) -> Float
+       | (Rational) -> Rational
+       | (Complex) -> Complex
+       | (Numeric) -> Numeric
 
   def +@: () -> Integer
 
   # Performs subtraction: the class of the resulting object depends on the class
   # of `numeric`.
   # 
-  # # arglists
-  #     int - numeric  ->  numeric_result
-  # 
-  def -: (Integer arg0) -> Integer
-       | (Float arg0) -> Float
-       | (Rational arg0) -> Rational
-       | (BigDecimal arg0) -> BigDecimal
-       | (Complex arg0) -> Complex
+  def -: (Integer) -> Integer
+       | (Float) -> Float
+       | (Rational) -> Rational
+       | (Complex) -> Complex
+       | (Numeric) -> Numeric
 
   # Returns `int`, negated.
-  # 
-  # # arglists
-  #     -int  ->  integer
   # 
   def -@: () -> Integer
 
   # Performs division: the class of the resulting object depends on the class of
   # `numeric`.
   # 
-  # # arglists
-  #     int / numeric  ->  numeric_result
-  # 
-  def /: (Integer arg0) -> Integer
-       | (Float arg0) -> Float
-       | (Rational arg0) -> Rational
-       | (BigDecimal arg0) -> BigDecimal
-       | (Complex arg0) -> Complex
+  def /: (Integer) -> Integer
+       | (Float) -> Float
+       | (Rational) -> Rational
+       | (Complex) -> Complex
+       | (Numeric) -> Numeric
 
   # Returns `true` if the value of `int` is less than that of `real`.
   # 
-  # # arglists
-  #     int < real  ->  true or false
-  # 
-  def <: (Integer arg0) -> bool
-       | (Float arg0) -> bool
-       | (Rational arg0) -> bool
-       | (BigDecimal arg0) -> bool
+  def <: (Numeric) -> bool
 
   # Returns `int` shifted left `count` positions, or right if `count` is negative.
   # 
-  # # arglists
-  #     int << count  ->  integer
-  # 
-  def <<: (Integer arg0) -> Integer
+  def <<: (int) -> Integer
 
   # Returns `true` if the value of `int` is less than or equal to that of `real`.
   # 
-  # # arglists
-  #     int <= real  ->  true or false
-  # 
-  def <=: (Integer arg0) -> bool
-        | (Float arg0) -> bool
-        | (Rational arg0) -> bool
-        | (BigDecimal arg0) -> bool
+  def <=: (Numeric) -> bool
 
   # Comparison---Returns -1, 0, or +1 depending on whether `int` is less than,
   # equal to, or greater than `numeric`.
@@ -159,13 +117,7 @@ class Integer < Numeric
   # 
   # `nil` is returned if the two values are incomparable.
   # 
-  # # arglists
-  #     int <=> numeric  ->  -1, 0, +1, or nil
-  # 
-  def <=>: (Integer arg0) -> Integer
-         | (Float arg0) -> Integer
-         | (Rational arg0) -> Integer
-         | (BigDecimal arg0) -> Integer
+  def <=>: (Numeric) -> Integer?
 
   # Returns `true` if `int` equals `other` numerically. Contrast this with
   # Integer#eql?, which requires `other` to be an Integer.
@@ -173,10 +125,7 @@ class Integer < Numeric
   #     1 == 2     #=> false
   #     1 == 1.0   #=> true
   # 
-  # # arglists
-  #     int == other  ->  true or false
-  # 
-  def ==: (Object arg0) -> bool
+  def ==: (untyped) -> bool
 
   # Returns `true` if `int` equals `other` numerically. Contrast this with
   # Integer#eql?, which requires `other` to be an Integer.
@@ -184,38 +133,20 @@ class Integer < Numeric
   #     1 == 2     #=> false
   #     1 == 1.0   #=> true
   # 
-  # # arglists
-  #     int == other  ->  true or false
-  # 
-  def ===: (Object arg0) -> bool
+  def ===: (untyped) -> bool
 
   # Returns `true` if the value of `int` is greater than that of `real`.
   # 
-  # # arglists
-  #     int > real  ->  true or false
-  # 
-  def >: (Integer arg0) -> bool
-       | (Float arg0) -> bool
-       | (Rational arg0) -> bool
-       | (BigDecimal arg0) -> bool
+  def >: (Numeric) -> bool
 
   # Returns `true` if the value of `int` is greater than or equal to that of
   # `real`.
   # 
-  # # arglists
-  #     int >= real  ->  true or false
-  # 
-  def >=: (Integer arg0) -> bool
-        | (Float arg0) -> bool
-        | (Rational arg0) -> bool
-        | (BigDecimal arg0) -> bool
+  def >=: (Numeric) -> bool
 
   # Returns `int` shifted right `count` positions, or left if `count` is negative.
   # 
-  # # arglists
-  #     int >> count  ->  integer
-  # 
-  def >>: (Integer arg0) -> Integer
+  def >>: (int) -> Integer
 
   # Bit Reference---Returns the `n`th bit in the binary representation of `int`,
   # where `int[0]` is the least significant bit.
@@ -248,22 +179,13 @@ class Integer < Numeric
   # Note that range operation may exhaust memory. For example, `-1[0,
   # 1000000000000]` will raise NoMemoryError.
   # 
-  # # arglists
-  #     int[n]    -> 0, 1
-  #     int[n, m] -> num
-  #     int[range] -> num
-  # 
-  def []: (Integer arg0) -> Integer
-        | (Rational arg0) -> Integer
-        | (Float arg0) -> Integer
-        | (BigDecimal arg0) -> Integer
+  def []: (int) -> Integer
+        | (int i, int len) -> Integer
+        | (Range[int]) -> Integer
 
   # Bitwise EXCLUSIVE OR.
   # 
-  # # arglists
-  #     int ^ other_int  ->  integer
-  # 
-  def ^: (Integer arg0) -> Integer
+  def ^: (Integer) -> Integer
 
   # Returns the absolute value of `int`.
   # 
@@ -273,30 +195,21 @@ class Integer < Numeric
   # 
   # Integer#magnitude is an alias for Integer#abs.
   # 
-  # # arglists
-  #     int.abs        ->  integer
-  # 
   def abs: () -> Integer
 
   def abs2: () -> Integer
 
   # Returns `true` if all bits of `int & mask` are 1.
   # 
-  # # arglists
-  #     int.allbits?(mask)  ->  true or false
-  # 
-  def allbits?: (_ToInt mask) -> bool
+  def allbits?: (int mask) -> bool
 
-  def angle: () -> Numeric
+  def angle: () -> (Integer | Float)
 
   # Returns `true` if any bits of `int & mask` are 1.
   # 
-  # # arglists
-  #     int.anybits?(mask)  ->  true or false
-  # 
-  def anybits?: (_ToInt mask) -> bool
+  def anybits?: (int mask) -> bool
 
-  def arg: () -> Numeric
+  alias arg angle
 
   # Returns the number of bits of the value of `int`.
   # 
@@ -336,9 +249,6 @@ class Integer < Numeric
   #       raise "overflow"
   #     end
   # 
-  # # arglists
-  #     int.bit_length  ->  integer
-  # 
   def bit_length: () -> Integer
 
   # Returns the smallest number greater than or equal to `int` with a precision of
@@ -354,11 +264,8 @@ class Integer < Numeric
   #     18.ceil(-1)      #=> 20
   #     (-18).ceil(-1)   #=> -10
   # 
-  # # arglists
-  #     int.ceil([ndigits])  ->  integer or float
-  # 
   def ceil: () -> Integer
-          | (?Integer digits) -> Numeric
+          | (int digits) -> (Integer | Float)
 
   # Returns a string containing the character represented by the `int`'s value
   # according to `encoding`.
@@ -367,11 +274,7 @@ class Integer < Numeric
   #     230.chr   #=> "\xE6"
   #     255.chr(Encoding::UTF_8)   #=> "\u00FF"
   # 
-  # # arglists
-  #     int.chr([encoding])  ->  string
-  # 
-  def chr: () -> String
-         | (?Encoding | String arg0) -> String
+  def chr: (?Encoding | string) -> String
 
   def clone: (?freeze: bool) -> self
 
@@ -384,19 +287,13 @@ class Integer < Numeric
   # 
   #     (0x3FFFFFFFFFFFFFFF+1).coerce(42)   #=> [42, 4611686018427387904]
   # 
-  # # arglists
-  #     big.coerce(numeric)  ->  array
-  # 
-  def coerce: (Numeric arg0) -> [ Integer | Float | Rational | BigDecimal, Integer | Float | Rational | BigDecimal ]
+  def coerce: (Numeric) -> [Numeric, Numeric]
 
   def conj: () -> Integer
 
   def conjugate: () -> Integer
 
   # Returns 1.
-  # 
-  # # arglists
-  #     int.denominator  ->  1
   # 
   def denominator: () -> Integer
 
@@ -412,29 +309,18 @@ class Integer < Numeric
   # 
   #     -12345.digits(7)  #=> Math::DomainError
   # 
-  # # arglists
-  #     int.digits        ->  array
-  #     int.digits(base)  ->  array
-  # 
-  def digits: (?Integer base) -> ::Array[Integer]
+  def digits: (?int base) -> ::Array[Integer]
 
   # Performs integer division: returns the integer result of dividing `int` by
   # `numeric`.
   # 
-  # # arglists
-  #     int.div(numeric)  ->  integer
-  # 
-  def div: (Integer arg0) -> Integer
-         | (Float arg0) -> Integer
-         | (Rational arg0) -> Integer
-         | (BigDecimal arg0) -> Integer
+  def div: (Numeric) -> Integer
 
   # See Numeric#divmod.
   # 
-  # # arglists
-  #     int.divmod(numeric)  ->  array
-  # 
-  def divmod: (Integer | Float | Rational | BigDecimal arg0) -> [ Integer | Float | Rational | BigDecimal, Integer | Float | Rational | BigDecimal ]
+  def divmod: (Integer) -> [Integer, Integer]
+            | (Float) -> [Float, Float]
+            | (Numeric) -> [Numeric, Numeric]
 
   # Iterates the given block, passing in decreasing values from `int` down to and
   # including `limit`.
@@ -445,21 +331,14 @@ class Integer < Numeric
   #     puts "Liftoff!"
   #     #=> "5.. 4.. 3.. 2.. 1.. Liftoff!"
   # 
-  # # arglists
-  #     int.downto(limit) {|i| block }  ->  self
-  #     int.downto(limit)               ->  an_enumerator
-  # 
-  def downto: (Integer limit) { (Integer arg0) -> untyped } -> Integer
-            | (Integer limit) -> ::Enumerator[Integer, self]
+  def downto: (int limit) { (Integer) -> void } -> Integer
+            | (int limit) -> ::Enumerator[Integer, self]
 
   def dup: () -> self
 
-  def eql?: (Object arg0) -> bool
+  def eql?: (untyped) -> bool
 
   # Returns `true` if `int` is an even number.
-  # 
-  # # arglists
-  #     int.even?  ->  true or false
   # 
   def even?: () -> bool
 
@@ -469,14 +348,7 @@ class Integer < Numeric
   #     654321.fdiv(13731.24)   #=> 47.65199646936475
   #     -654321.fdiv(13731)     #=> -47.652829364212366
   # 
-  # # arglists
-  #     int.fdiv(numeric)  ->  float
-  # 
-  def fdiv: (Integer arg0) -> Float
-          | (Float arg0) -> Float
-          | (Rational arg0) -> Float
-          | (BigDecimal arg0) -> BigDecimal
-          | (Complex arg0) -> Complex
+  def fdiv: (Numeric) -> Float
 
   def finite?: () -> bool
 
@@ -493,11 +365,8 @@ class Integer < Numeric
   #     18.floor(-1)      #=> 10
   #     (-18).floor(-1)   #=> -20
   # 
-  # # arglists
-  #     int.floor([ndigits])  ->  integer or float
-  # 
   def floor: () -> Integer
-           | (?Integer digits) -> Numeric
+           | (int digits) -> (Integer | Float)
 
   # Returns the greatest common divisor of the two integers. The result is always
   # positive. 0.gcd(x) and x.gcd(0) return x.abs.
@@ -507,10 +376,7 @@ class Integer < Numeric
   #     3.gcd(-7)                   #=> 1
   #     ((1<<31)-1).gcd((1<<61)-1)  #=> 1
   # 
-  # # arglists
-  #     int.gcd(other_int)  ->  integer
-  # 
-  def gcd: (Integer arg0) -> Integer
+  def gcd: (Integer) -> Integer
 
   # Returns an array with the greatest common divisor and the least common
   # multiple of the two integers, [gcd, lcm].
@@ -520,10 +386,7 @@ class Integer < Numeric
   #     3.gcdlcm(-7)                   #=> [1, 21]
   #     ((1<<31)-1).gcdlcm((1<<61)-1)  #=> [1, 4951760154835678088235319297]
   # 
-  # # arglists
-  #     int.gcdlcm(other_int)  ->  array
-  # 
-  def gcdlcm: (Integer arg0) -> [ Integer, Integer ]
+  def gcdlcm: (Integer) -> [ Integer, Integer ]
 
   def i: () -> Complex
 
@@ -533,17 +396,11 @@ class Integer < Numeric
 
   def infinite?: () -> Integer?
 
-  # # arglists
-  #     inspect(*args)
-  # 
   alias inspect to_s
 
   # Since `int` is already an Integer, this always returns `true`.
   # 
-  # # arglists
-  #     int.integer?  ->  true
-  # 
-  def integer?: () -> TrueClass
+  def integer?: () -> true
 
   # Returns the least common multiple of the two integers. The result is always
   # positive. 0.lcm(x) and x.lcm(0) return zero.
@@ -553,10 +410,7 @@ class Integer < Numeric
   #     3.lcm(-7)                   #=> 21
   #     ((1<<31)-1).lcm((1<<61)-1)  #=> 4951760154835678088235319297
   # 
-  # # arglists
-  #     int.lcm(other_int)  ->  integer
-  # 
-  def lcm: (Integer arg0) -> Integer
+  def lcm: (Integer) -> Integer
 
   # Returns the absolute value of `int`.
   # 
@@ -566,22 +420,13 @@ class Integer < Numeric
   # 
   # Integer#magnitude is an alias for Integer#abs.
   # 
-  # # arglists
-  #     int.magnitude  ->  integer
-  # 
   def magnitude: () -> Integer
 
   # Returns `int` modulo `other`.
   # 
   # See Numeric#divmod for more information.
   # 
-  # # arglists
-  #     int.modulo(other)  ->  real
-  # 
-  def modulo: (Integer arg0) -> Integer
-            | (Float arg0) -> Float
-            | (Rational arg0) -> Rational
-            | (BigDecimal arg0) -> BigDecimal
+  alias modulo `%`
 
   def negative?: () -> bool
 
@@ -592,31 +437,19 @@ class Integer < Numeric
   #     1.succ      #=> 2
   #     (-1).succ   #=> 0
   # 
-  # # arglists
-  #     int.next  ->  integer
-  # 
   def next: () -> Integer
 
   # Returns `true` if no bits of `int & mask` are 1.
   # 
-  # # arglists
-  #     int.nobits?(mask)  ->  true or false
-  # 
-  def nobits?: (_ToInt mask) -> bool
+  def nobits?: (int mask) -> bool
 
   def nonzero?: () -> self?
 
   # Returns self.
   # 
-  # # arglists
-  #     int.numerator  ->  self
-  # 
   def numerator: () -> Integer
 
   # Returns `true` if `int` is an odd number.
-  # 
-  # # arglists
-  #     int.odd?  ->  true or false
   # 
   def odd?: () -> bool
 
@@ -628,14 +461,11 @@ class Integer < Numeric
   # 
   # For example, `?a.ord` returns 97 both in 1.8 and 1.9.
   # 
-  # # arglists
-  #     int.ord  ->  self
-  # 
   def ord: () -> Integer
 
-  def phase: () -> Numeric
+  alias phase angle
 
-  def polar: () -> [ Numeric, Numeric ]
+  def polar: () -> [ Integer, Integer | Float ]
 
   def positive?: () -> bool
 
@@ -644,45 +474,34 @@ class Integer < Numeric
   #     a.pow(b)     #=> same as a**b
   #     a.pow(b, m)  #=> same as (a**b) % m, but avoids huge temporary values
   # 
-  # # arglists
-  #     integer.pow(numeric)           ->  numeric
-  #     integer.pow(integer, integer)  ->  integer
-  # 
-  def pow: (Numeric numeric) -> Numeric
-         | (Integer other, Integer modulo) -> Integer
+  def pow: (Integer other, ?Integer modulo) -> Integer
+         | (Numeric numeric) -> Numeric
 
   # Returns the predecessor of `int`, i.e. the Integer equal to `int-1`.
   # 
   #     1.pred      #=> 0
   #     (-1).pred   #=> -2
   # 
-  # # arglists
-  #     int.pred  ->  integer
-  # 
   def pred: () -> Integer
 
-  def quo: (Integer arg0) -> Rational
-         | (Float arg0) -> Float
-         | (Rational arg0) -> Rational
-         | (BigDecimal arg0) -> BigDecimal
-         | (Complex arg0) -> Complex
+  def quo: (Integer) -> Rational
+         | (Float) -> Float
+         | (Rational) -> Rational
+         | (Complex) -> Complex
+         | (Numeric) -> Numeric
 
   # Returns the value as a rational.  The optional argument `eps` is always
   # ignored.
   # 
-  # # arglists
-  #     int.rationalize([eps])  ->  rational
-  # 
-  def rationalize: () -> Rational
-                 | (?Numeric arg0) -> Rational
+  def rationalize: (?Numeric eps) -> Rational
 
-  def real: () -> Integer
+  def real: () -> self
 
-  def real?: () -> TrueClass
+  def real?: () -> true
 
-  def rect: () -> [ Numeric, Numeric ]
+  def rect: () -> [ Integer, Numeric ]
 
-  def rectangular: () -> [ Numeric, Numeric ]
+  alias rectangular rect
 
   # Returns the remainder after dividing `int` by `numeric`.
   # 
@@ -696,13 +515,10 @@ class Integer < Numeric
   # 
   # See Numeric#divmod.
   # 
-  # # arglists
-  #     int.remainder(numeric)  ->  real
-  # 
-  def remainder: (Integer arg0) -> Integer
-               | (Float arg0) -> Float
-               | (Rational arg0) -> Rational
-               | (BigDecimal arg0) -> BigDecimal
+  def remainder: (Integer) -> Integer
+               | (Float) -> Float
+               | (Rational) -> Rational
+               | (Numeric) -> Numeric
 
   # Returns `int` rounded to the nearest value with a precision of `ndigits`
   # decimal digits (default: 0).
@@ -729,13 +545,8 @@ class Integer < Numeric
   #     (-25).round(-1, half: :down) #=> -20
   #     (-25).round(-1, half: :even) #=> -20
   # 
-  # # arglists
-  #     int.round([ndigits] [, half: mode])  ->  integer or float
-  # 
-  def round: () -> Integer
-           | (?Numeric arg0) -> Numeric
-
-  def singleton_method_added: (Symbol) -> void
+  def round: (?half: :up | :down | :even) -> Integer
+           | (int digits, ?half: :up | :down | :even) -> (Integer | Float)
 
   # Returns the number of bytes in the machine representation of `int` (machine
   # dependent).
@@ -747,15 +558,18 @@ class Integer < Numeric
   #     (256**20 - 1).size   #=> 20
   #     (256**40 - 1).size   #=> 40
   # 
-  # # arglists
-  #     int.size  ->  int
-  # 
   def size: () -> Integer
 
-  def step: (?Numeric? limit, ?Numeric step) { (Numeric arg0) -> void } -> self
-          | (?to: Numeric, ?by: Numeric) { (Numeric arg0) -> void } -> self
-          | (?Numeric? limit, ?Numeric step) -> ::Enumerator[Numeric, self]
-          | (?to: Numeric, ?by: Numeric) -> ::Enumerator[Numeric, self]
+  def step: () { (Integer) -> void } -> self
+          | (Numeric limit, ?Integer step) { (Integer) -> void } -> self
+          | (Numeric limit, ?Numeric step) { (Numeric) -> void } -> self
+          | (to: Numeric, ?by: Integer) { (Integer) -> void } -> self
+          | (?to: Numeric, by: Numeric) { (Numeric) -> void } -> self
+          | () -> Enumerator[Integer, self]
+          | (Numeric limit, ?Integer step) -> Enumerator[Integer, self]
+          | (Numeric limit, ?Numeric step) -> Enumerator[Numeric, self]
+          | (to: Numeric, ?by: Integer) -> Enumerator[Integer, self]
+          | (?to: Numeric, by: Numeric) -> Enumerator[Numeric, self]
 
   # Returns the successor of `int`, i.e. the Integer equal to `int+1`.
   # 
@@ -763,9 +577,6 @@ class Integer < Numeric
   #     (-1).next   #=> 0
   #     1.succ      #=> 2
   #     (-1).succ   #=> 0
-  # 
-  # # arglists
-  #     int.succ  ->  integer
   # 
   def succ: () -> Integer
 
@@ -776,11 +587,7 @@ class Integer < Numeric
   # 
   #     5.times {|i| print i, " " }   #=> 0 1 2 3 4
   # 
-  # # arglists
-  #     int.times {|i| block }  ->  self
-  #     int.times               ->  an_enumerator
-  # 
-  def times: () { (Integer arg0) -> untyped } -> Integer
+  def times: () { (Integer) -> void } -> self
            | () -> ::Enumerator[Integer, self]
 
   def to_c: () -> Complex
@@ -788,18 +595,11 @@ class Integer < Numeric
   # Converts `int` to a Float.  If `int` doesn't fit in a Float, the result is
   # infinity.
   # 
-  # # arglists
-  #     int.to_f  ->  float
-  # 
   def to_f: () -> Float
 
   # Since `int` is already an Integer, returns `self`.
   # 
   # #to_int is an alias for #to_i.
-  # 
-  # # arglists
-  #     int.to_i    ->  integer
-  #     int.to_int  ->  integer
   # 
   def to_i: () -> Integer
 
@@ -807,18 +607,12 @@ class Integer < Numeric
   # 
   # #to_int is an alias for #to_i.
   # 
-  # # arglists
-  #     int.to_int  ->  integer
-  # 
-  def to_int: () -> Integer
+  alias to_int to_i
 
   # Returns the value as a rational.
   # 
   #     1.to_r        #=> (1/1)
   #     (1<<64).to_r  #=> (18446744073709551616/1)
-  # 
-  # # arglists
-  #     int.to_r  ->  rational
   # 
   def to_r: () -> Rational
 
@@ -832,9 +626,6 @@ class Integer < Numeric
   #     12345.to_s(16)   #=> "3039"
   #     12345.to_s(36)   #=> "9ix"
   #     78546939656932.to_s(36)  #=> "rubyrules"
-  # 
-  # # arglists
-  #     int.to_s(base=10)  ->  string
   # 
   def to_s: () -> String
           | (2) -> String
@@ -872,6 +663,7 @@ class Integer < Numeric
           | (34) -> String
           | (35) -> String
           | (36) -> String
+          | (int base) -> String
 
   # Returns `int` truncated (toward zero) to a precision of `ndigits` decimal
   # digits (default: 0).
@@ -886,10 +678,8 @@ class Integer < Numeric
   #     18.truncate(-1)      #=> 10
   #     (-18).truncate(-1)   #=> -10
   # 
-  # # arglists
-  #     int.truncate([ndigits])  ->  integer or float
-  # 
   def truncate: () -> Integer
+              | (int ndigits) -> Integer
 
   # Iterates the given block, passing in integer values from `int` up to and
   # including `limit`.
@@ -898,21 +688,14 @@ class Integer < Numeric
   # 
   #     5.upto(10) {|i| print i, " " }   #=> 5 6 7 8 9 10
   # 
-  # # arglists
-  #     int.upto(limit) {|i| block }  ->  self
-  #     int.upto(limit)               ->  an_enumerator
-  # 
-  def upto: (Integer arg0) { (Integer arg0) -> untyped } -> Integer
-          | (Integer arg0) -> ::Enumerator[Integer, self]
+  def upto: (Integer limit) { (Integer) -> void } -> Integer
+          | (Integer limit) -> ::Enumerator[Integer, self]
 
   def zero?: () -> bool
 
   # Bitwise OR.
   # 
-  # # arglists
-  #     int | other_int  ->  integer
-  # 
-  def |: (Integer arg0) -> Integer
+  def |: (Integer) -> Integer
 
   # One's complement: returns a number where each bit is flipped.
   # 
@@ -922,9 +705,6 @@ class Integer < Numeric
   # the digits.
   # 
   #     sprintf("%X", ~0x1122334455)    #=> "..FEEDDCCBBAA"
-  # 
-  # # arglists
-  #     ~int  ->  integer
   # 
   def ~: () -> Integer
 end

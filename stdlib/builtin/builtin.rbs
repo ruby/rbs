@@ -20,3 +20,8 @@ end
 
 class BigDecimal
 end
+
+type int = Integer | _ToInt
+type real = Integer | Float | Rational
+
+type string = String | _ToStr

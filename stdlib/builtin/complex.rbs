@@ -36,29 +36,19 @@ class Complex < Numeric
   #     Complex.polar(3, Math::PI)     #=> (-3.0+3.673819061467132e-16i)
   #     Complex.polar(3, -Math::PI/2)  #=> (1.836909530733566e-16-3.0i)
   # 
-  # # arglists
-  #     Complex.polar(abs[, arg])  ->  complex
-  # 
-  def self.polar: (*untyped) -> untyped
+  def self.polar: (Numeric, ?Numeric) -> Complex
 
   # Returns a complex object which denotes the given rectangular form.
   # 
   #     Complex.rectangular(1, 2)  #=> (1+2i)
   # 
-  # # arglists
-  #     Complex.rect(real[, imag])         ->  complex
-  #     Complex.rectangular(real[, imag])  ->  complex
-  # 
-  def self.rect: (*untyped) -> untyped
+  def self.rect: (Numeric, ?Numeric) -> Complex
 
   # Returns a complex object which denotes the given rectangular form.
   # 
   #     Complex.rectangular(1, 2)  #=> (1+2i)
   # 
-  # # arglists
-  #     Complex.rectangular(real[, imag])  ->  complex
-  # 
-  def self.rectangular: (*untyped) -> untyped
+  alias self.rectangular self.rect
 
   public
 
@@ -70,28 +60,14 @@ class Complex < Numeric
   #     Complex(9, 8)  * 4               #=> (36+32i)
   #     Complex(20, 9) * 9.8             #=> (196.0+88.2i)
   # 
-  # # arglists
-  #     cmp * numeric  ->  complex
-  # 
-  def *: (Integer arg0) -> Complex
-       | (Float arg0) -> Complex
-       | (Rational arg0) -> Complex
-       | (BigDecimal arg0) -> Complex
-       | (Complex arg0) -> Complex
+  def *: (Numeric) -> Complex
 
   # Performs exponentiation.
   # 
   #     Complex('i') ** 2              #=> (-1+0i)
   #     Complex(-8) ** Rational(1, 3)  #=> (1.0000000000000002+1.7320508075688772i)
   # 
-  # # arglists
-  #     cmp ** numeric  ->  complex
-  # 
-  def **: (Integer arg0) -> Complex
-        | (Float arg0) -> Complex
-        | (Rational arg0) -> Complex
-        | (BigDecimal arg0) -> Complex
-        | (Complex arg0) -> Complex
+  def **: (Numeric) -> Complex
 
   # Performs addition.
   # 
@@ -101,14 +77,7 @@ class Complex < Numeric
   #     Complex(9, 8)  + 4               #=> (13+8i)
   #     Complex(20, 9) + 9.8             #=> (29.8+9i)
   # 
-  # # arglists
-  #     cmp + numeric  ->  complex
-  # 
-  def +: (Integer arg0) -> Complex
-       | (Float arg0) -> Complex
-       | (Rational arg0) -> Complex
-       | (BigDecimal arg0) -> Complex
-       | (Complex arg0) -> Complex
+  def +: (Numeric) -> Complex
 
   def +@: () -> Complex
 
@@ -120,21 +89,11 @@ class Complex < Numeric
   #     Complex(9, 8)  - 4               #=> (5+8i)
   #     Complex(20, 9) - 9.8             #=> (10.2+9i)
   # 
-  # # arglists
-  #     cmp - numeric  ->  complex
-  # 
-  def -: (Integer arg0) -> Complex
-       | (Float arg0) -> Complex
-       | (Rational arg0) -> Complex
-       | (BigDecimal arg0) -> Complex
-       | (Complex arg0) -> Complex
+  def -: (Numeric) -> Complex
 
   # Returns negation of the value.
   # 
   #     -Complex(1, 2)  #=> (-1-2i)
-  # 
-  # # arglists
-  #     -cmp  ->  complex
   # 
   def -@: () -> Complex
 
@@ -146,15 +105,11 @@ class Complex < Numeric
   #     Complex(9, 8)  / 4               #=> ((9/4)+(2/1)*i)
   #     Complex(20, 9) / 9.8             #=> (2.0408163265306123+0.9183673469387754i)
   # 
-  # # arglists
-  #     cmp / numeric     ->  complex
-  #     cmp.quo(numeric)  ->  complex
-  # 
-  def /: (Integer arg0) -> Complex
-       | (Float arg0) -> Complex
-       | (Rational arg0) -> Complex
-       | (BigDecimal arg0) -> Complex
-       | (Complex arg0) -> Complex
+  def /: (Numeric) -> Complex
+
+  def <: (Numeric) -> bot
+
+  def <=: (Numeric) -> bot
 
   # If `cmp`'s imaginary part is zero, and `object` is also a real number (or a
   # Complex number where the imaginary part is zero), compare the real part of
@@ -166,10 +121,7 @@ class Complex < Numeric
   #     Complex(2)     <=> 2               #=> 0
   #     Complex(2)     <=> 3               #=> -1
   # 
-  # # arglists
-  #     cmp <=> object  ->  0, 1, -1, or nil
-  # 
-  def <=>: (Numeric arg0) -> Integer
+  def <=>: (Numeric) -> Integer?
 
   # Returns true if cmp equals object numerically.
   # 
@@ -179,18 +131,16 @@ class Complex < Numeric
   #     Complex('1/3') == 0.33            #=> false
   #     Complex('1/2') == '1/2'           #=> false
   # 
-  # # arglists
-  #     cmp == object  ->  true or false
-  # 
-  def ==: (Object arg0) -> bool
+  def ==: (untyped) -> bool
+
+  def >: (Numeric) -> bot
+
+  def >=: (Numeric) -> bot
 
   # Returns the absolute part of its polar form.
   # 
   #     Complex(-1).abs         #=> 1
   #     Complex(3.0, -4.0).abs  #=> 5.0
-  # 
-  # # arglists
-  #     cmp.abs        ->  real
   # 
   def abs: () -> Numeric
 
@@ -199,17 +149,11 @@ class Complex < Numeric
   #     Complex(-1).abs2         #=> 1
   #     Complex(3.0, -4.0).abs2  #=> 25.0
   # 
-  # # arglists
-  #     cmp.abs2  ->  real
-  # 
   def abs2: () -> Numeric
 
   # Returns the angle part of its polar form.
   # 
   #     Complex.polar(3, Math::PI/2).arg  #=> 1.5707963267948966
-  # 
-  # # arglists
-  #     cmp.angle  ->  float
   # 
   def angle: () -> Float
 
@@ -217,22 +161,17 @@ class Complex < Numeric
   # 
   #     Complex.polar(3, Math::PI/2).arg  #=> 1.5707963267948966
   # 
-  # # arglists
-  #     cmp.arg    ->  float
-  # 
-  def arg: () -> Float
+  alias arg angle
+
+  def ceil: (*untyped) -> bot
 
   def clone: (?freeze: bool) -> self
 
-  def coerce: (Numeric arg0) -> [ Complex, Complex ]
+  def coerce: (Numeric) -> [ Complex, Complex ]
 
   # Returns the complex conjugate.
   # 
   #     Complex(1, 2).conjugate  #=> (1-2i)
-  # 
-  # # arglists
-  #     cmp.conj       ->  complex
-  #     cmp.conjugate  ->  complex
   # 
   def conj: () -> Complex
 
@@ -240,63 +179,52 @@ class Complex < Numeric
   # 
   #     Complex(1, 2).conjugate  #=> (1-2i)
   # 
-  # # arglists
-  #     cmp.conjugate  ->  complex
-  # 
   def conjugate: () -> Complex
 
   # Returns the denominator (lcm of both denominator - real and imag).
   # 
   # See numerator.
   # 
-  # # arglists
-  #     cmp.denominator  ->  integer
-  # 
   def denominator: () -> Integer
+
+  def div: (Numeric) -> bot
+
+  def divmod: (Numeric) -> bot
 
   def dup: () -> self
 
-  def eql?: (Object arg0) -> bool
+  def eql?: (untyped) -> bool
 
   # Performs division as each part is a float, never returns a float.
   # 
   #     Complex(11, 22).fdiv(3)  #=> (3.6666666666666665+7.333333333333333i)
   # 
-  # # arglists
-  #     cmp.fdiv(numeric)  ->  complex
-  # 
-  def fdiv: (Numeric arg0) -> Complex
+  def fdiv: (Numeric) -> Complex
 
   # Returns `true` if `cmp`'s real and imaginary parts are both finite numbers,
   # otherwise returns `false`.
   # 
-  # # arglists
-  #     cmp.finite?  ->  true or false
-  # 
   def finite?: () -> bool
+
+  def floor: (?Integer) -> bot
 
   def hash: () -> Integer
 
-  # Returns the imaginary part.
-  # 
-  #     Complex(7).imaginary      #=> 0
-  #     Complex(9, -4).imaginary  #=> -4
-  # 
-  # # arglists
-  #     cmp.imag       ->  real
-  #     cmp.imaginary  ->  real
-  # 
-  def imag: () -> (Integer | Float | Rational | BigDecimal)
+  def i: () -> bot
 
   # Returns the imaginary part.
   # 
   #     Complex(7).imaginary      #=> 0
   #     Complex(9, -4).imaginary  #=> -4
   # 
-  # # arglists
-  #     cmp.imaginary  ->  real
+  def imag: () -> Numeric
+
+  # Returns the imaginary part.
   # 
-  def imaginary: () -> (Integer | Float | Rational | BigDecimal)
+  #     Complex(7).imaginary      #=> 0
+  #     Complex(9, -4).imaginary  #=> -4
+  # 
+  def imaginary: () -> Numeric
 
   # Returns `1` if `cmp`'s real or imaginary part is an infinite number, otherwise
   # returns `nil`.
@@ -305,9 +233,6 @@ class Complex < Numeric
   # 
   #        (1+1i).infinite?                   #=> nil
   #        (Float::INFINITY + 1i).infinite?   #=> 1
-  # 
-  # # arglists
-  #     cmp.infinite?  ->  nil or 1
   # 
   def infinite?: () -> Integer?
 
@@ -319,9 +244,6 @@ class Complex < Numeric
   #     Complex(0, Float::INFINITY).inspect      #=> "(0+Infinity*i)"
   #     Complex(Float::NAN, Float::NAN).inspect  #=> "(NaN+NaN*i)"
   # 
-  # # arglists
-  #     cmp.inspect  ->  string
-  # 
   def inspect: () -> String
 
   def integer?: () -> bool
@@ -331,10 +253,11 @@ class Complex < Numeric
   #     Complex(-1).abs         #=> 1
   #     Complex(3.0, -4.0).abs  #=> 5.0
   # 
-  # # arglists
-  #     cmp.magnitude  ->  real
-  # 
-  def magnitude: () -> (Integer | Float | Rational | BigDecimal)
+  alias magnitude abs
+
+  def modulo: (Numeric) -> bot
+
+  def negative?: () -> bot
 
   def nonzero?: () -> self?
 
@@ -353,28 +276,21 @@ class Complex < Numeric
   # 
   # See denominator.
   # 
-  # # arglists
-  #     cmp.numerator  ->  numeric
-  # 
   def numerator: () -> Complex
 
   # Returns the angle part of its polar form.
   # 
   #     Complex.polar(3, Math::PI/2).arg  #=> 1.5707963267948966
   # 
-  # # arglists
-  #     cmp.phase  ->  float
-  # 
-  def phase: () -> Float
+  alias phase angle
 
   # Returns an array; [cmp.abs, cmp.arg].
   # 
   #     Complex(1, 2).polar  #=> [2.23606797749979, 1.1071487177940904]
   # 
-  # # arglists
-  #     cmp.polar  ->  array
-  # 
-  def polar: () -> [ Integer | Float | Rational | BigDecimal, Integer | Float | Rational | BigDecimal ]
+  def polar: () -> [Numeric, Float]
+
+  def positive?: () -> bot
 
   # Performs division.
   # 
@@ -384,15 +300,7 @@ class Complex < Numeric
   #     Complex(9, 8)  / 4               #=> ((9/4)+(2/1)*i)
   #     Complex(20, 9) / 9.8             #=> (2.0408163265306123+0.9183673469387754i)
   # 
-  # # arglists
-  #     cmp / numeric     ->  complex
-  #     cmp.quo(numeric)  ->  complex
-  # 
-  def quo: (Integer arg0) -> Complex
-         | (Float arg0) -> Complex
-         | (Rational arg0) -> Complex
-         | (BigDecimal arg0) -> BigDecimal
-         | (Complex arg0) -> Complex
+  def quo: (Numeric) -> Complex
 
   # Returns the value as a rational if possible (the imaginary part should be
   # exactly zero).
@@ -403,57 +311,41 @@ class Complex < Numeric
   # 
   # See to_r.
   # 
-  # # arglists
-  #     cmp.rationalize([eps])  ->  rational
-  # 
-  def rationalize: () -> Rational
-                 | (?Numeric arg0) -> Rational
+  def rationalize: (?Numeric eps) -> Rational
 
   # Returns the real part.
   # 
   #     Complex(7).real      #=> 7
   #     Complex(9, -4).real  #=> 9
   # 
-  # # arglists
-  #     cmp.real  ->  real
-  # 
-  def real: () -> (Integer | Float | Rational | BigDecimal)
+  def real: () -> Numeric
 
   # Returns false, even if the complex number has no imaginary part.
   # 
-  # # arglists
-  #     Complex(1).real?     ->  false
-  #     Complex(1, 2).real?  ->  false
-  # 
-  def real?: () -> FalseClass
+  def real?: () -> false
 
   # Returns an array; [cmp.real, cmp.imag].
   # 
   #     Complex(1, 2).rectangular  #=> [1, 2]
   # 
-  # # arglists
-  #     cmp.rect         ->  array
-  #     cmp.rectangular  ->  array
-  # 
-  def rect: () -> [ Integer | Float | Rational | BigDecimal, Integer | Float | Rational | BigDecimal ]
+  def rect: () -> [Numeric, Numeric]
 
   # Returns an array; [cmp.real, cmp.imag].
   # 
   #     Complex(1, 2).rectangular  #=> [1, 2]
   # 
-  # # arglists
-  #     cmp.rect         ->  array
-  #     cmp.rectangular  ->  array
-  # 
-  def rectangular: () -> [ Integer | Float | Rational | BigDecimal, Integer | Float | Rational | BigDecimal ]
+  alias rectangular rect
+
+  def reminder: (Numeric) -> bot
+
+  def round: (*untyped) -> bot
+
+  def step: (*untyped) ?{ (*untyped) -> untyped } -> bot
 
   # Returns self.
   # 
   #     Complex(2).to_c      #=> (2+0i)
   #     Complex(-8, 6).to_c  #=> (-8+6i)
-  # 
-  # # arglists
-  #     complex.to_c  ->  self
   # 
   def to_c: () -> Complex
 
@@ -464,9 +356,6 @@ class Complex < Numeric
   #     Complex(1, 0.0).to_f  # RangeError
   #     Complex(1, 2).to_f    # RangeError
   # 
-  # # arglists
-  #     cmp.to_f  ->  float
-  # 
   def to_f: () -> Float
 
   # Returns the value as an integer if possible (the imaginary part should be
@@ -476,12 +365,9 @@ class Complex < Numeric
   #     Complex(1, 0.0).to_i  # RangeError
   #     Complex(1, 2).to_i    # RangeError
   # 
-  # # arglists
-  #     cmp.to_i  ->  integer
-  # 
   def to_i: () -> Integer
 
-  def to_int: () -> Integer
+  alias to_int to_i
 
   # Returns the value as a rational if possible (the imaginary part should be
   # exactly zero).
@@ -491,9 +377,6 @@ class Complex < Numeric
   #     Complex(1, 2).to_r    # RangeError
   # 
   # See rationalize.
-  # 
-  # # arglists
-  #     cmp.to_r  ->  rational
   # 
   def to_r: () -> Rational
 
@@ -505,10 +388,9 @@ class Complex < Numeric
   #     Complex(0, Float::INFINITY).to_s      #=> "0+Infinity*i"
   #     Complex(Float::NAN, Float::NAN).to_s  #=> "NaN+NaN*i"
   # 
-  # # arglists
-  #     cmp.to_s  ->  string
-  # 
   def to_s: () -> String
+
+  def truncate: (?Integer) -> bot
 
   def zero?: () -> bool
 end

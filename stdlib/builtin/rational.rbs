@@ -41,10 +41,10 @@
 class Rational < Numeric
   public
 
-  def %: (Integer arg0) -> Rational
-       | (Float arg0) -> Float
-       | (Rational arg0) -> Rational
-       | (BigDecimal arg0) -> BigDecimal
+  def %: (Integer) -> Rational
+       | (Float) -> Float
+       | (Rational) -> Rational
+       | (Numeric) -> Numeric
 
   # Performs multiplication.
   # 
@@ -54,14 +54,9 @@ class Rational < Numeric
   #     Rational(9, 8)  * 4                #=> (9/2)
   #     Rational(20, 9) * 9.8              #=> 21.77777777777778
   # 
-  # # arglists
-  #     rat * numeric  ->  numeric
-  # 
-  def *: (Integer arg0) -> Rational
-       | (Float arg0) -> Float
-       | (Rational arg0) -> Rational
-       | (BigDecimal arg0) -> BigDecimal
-       | (Complex arg0) -> Complex
+  def *: (Float) -> Float
+       | (Complex) -> Complex
+       | (Numeric) -> Numeric
 
   # Performs exponentiation.
   # 
@@ -72,14 +67,8 @@ class Rational < Numeric
   #     Rational(1, 2) ** 0               #=> (1/1)
   #     Rational(1, 2) ** 0.0             #=> 1.0
   # 
-  # # arglists
-  #     rat ** numeric  ->  numeric
-  # 
-  def **: (Integer arg0) -> Numeric
-        | (Float arg0) -> Numeric
-        | (Rational arg0) -> Numeric
-        | (BigDecimal arg0) -> BigDecimal
-        | (Complex arg0) -> Complex
+  def **: (Complex) -> Complex
+        | (Numeric) -> Numeric
 
   # Performs addition.
   # 
@@ -89,14 +78,9 @@ class Rational < Numeric
   #     Rational(9, 8)  + 4                #=> (41/8)
   #     Rational(20, 9) + 9.8              #=> 12.022222222222222
   # 
-  # # arglists
-  #     rat + numeric  ->  numeric
-  # 
-  def +: (Integer arg0) -> Rational
-       | (Float arg0) -> Float
-       | (Rational arg0) -> Rational
-       | (BigDecimal arg0) -> BigDecimal
-       | (Complex arg0) -> Complex
+  def +: (Float) -> Float
+       | (Complex) -> Complex
+       | (Numeric) -> Rational
 
   def +@: () -> Rational
 
@@ -108,19 +92,11 @@ class Rational < Numeric
   #     Rational(9, 8)  - 4                #=> (-23/8)
   #     Rational(20, 9) - 9.8              #=> -7.577777777777778
   # 
-  # # arglists
-  #     rat - numeric  ->  numeric
-  # 
-  def -: (Integer arg0) -> Rational
-       | (Float arg0) -> Float
-       | (Rational arg0) -> Rational
-       | (BigDecimal arg0) -> BigDecimal
-       | (Complex arg0) -> Complex
+  def -: (Float) -> Float
+       | (Complex) -> Complex
+       | (Numeric) -> Rational
 
   # Negates `rat`.
-  # 
-  # # arglists
-  #     -rat  ->  rational
   # 
   def -@: () -> Rational
 
@@ -132,14 +108,9 @@ class Rational < Numeric
   #     Rational(9, 8)  / 4                #=> (9/32)
   #     Rational(20, 9) / 9.8              #=> 0.22675736961451246
   # 
-  # # arglists
-  #     rat / numeric     ->  numeric
-  # 
-  def /: (Integer arg0) -> Rational
-       | (Float arg0) -> Float
-       | (Rational arg0) -> Rational
-       | (BigDecimal arg0) -> BigDecimal
-       | (Complex arg0) -> Complex
+  def /: (Float) -> Float
+       | (Complex) -> Complex
+       | (Numeric) -> Rational
 
   # Returns -1, 0, or +1 depending on whether `rational` is less than, equal to,
   # or greater than `numeric`.
@@ -154,13 +125,7 @@ class Rational < Numeric
   # 
   #     Rational(1, 3) <=> "0.3"           #=> nil
   # 
-  # # arglists
-  #     rational <=> numeric  ->  -1, 0, +1, or nil
-  # 
-  def <=>: (Integer arg0) -> Integer
-         | (Float arg0) -> Integer
-         | (Rational arg0) -> Integer
-         | (BigDecimal arg0) -> Integer
+  def <=>: (Numeric) -> Integer?
 
   # Returns `true` if `rat` equals `object` numerically.
   # 
@@ -170,10 +135,7 @@ class Rational < Numeric
   #     Rational('1/3') == 0.33             #=> false
   #     Rational('1/2') == '1/2'            #=> false
   # 
-  # # arglists
-  #     rat == object  ->  true or false
-  # 
-  def ==: (Object arg0) -> bool
+  def ==: (untyped) -> bool
 
   # Returns the absolute value of `rat`.
   # 
@@ -182,16 +144,13 @@ class Rational < Numeric
   # 
   # Rational#magnitude is an alias for Rational#abs.
   # 
-  # # arglists
-  #     rat.abs        ->  rational
-  # 
   def abs: () -> Rational
 
   def abs2: () -> Rational
 
-  def angle: () -> Numeric
+  def angle: () -> (Integer | Float)
 
-  def arg: () -> Numeric
+  alias arg angle
 
   # Returns the smallest number greater than or equal to `rat` with a precision of
   # `ndigits` decimal digits (default: 0).
@@ -212,18 +171,12 @@ class Rational < Numeric
   #     Rational('-123.456').ceil(+1).to_f  #=> -123.4
   #     Rational('-123.456').ceil(-1)       #=> -120
   # 
-  # # arglists
-  #     rat.ceil([ndigits])  ->  integer or rational
-  # 
   def ceil: () -> Integer
-          | (?Integer digits) -> Numeric
+          | (Integer digits) -> (Integer | Rational)
 
   def clone: (?freeze: bool) -> self
 
-  def coerce: (Integer arg0) -> [ Rational, Rational ]
-            | (Float arg0) -> [ Float, Float ]
-            | (Rational arg0) -> [ Rational, Rational ]
-            | (Complex arg0) -> [ Numeric, Numeric ]
+  def coerce: (Numeric) -> [Numeric, Numeric]
 
   def conj: () -> Rational
 
@@ -236,21 +189,15 @@ class Rational < Numeric
   #     Rational(9, -4).denominator         #=> 4
   #     Rational(-2, -10).denominator       #=> 5
   # 
-  # # arglists
-  #     rat.denominator  ->  integer
-  # 
   def denominator: () -> Integer
 
-  def div: (Integer arg0) -> Integer
-         | (Float arg0) -> Integer
-         | (Rational arg0) -> Integer
-         | (BigDecimal arg0) -> Integer
+  def div: (Numeric) -> Integer
 
-  def divmod: (Integer | Float | Rational | BigDecimal arg0) -> [ Integer | Float | Rational | BigDecimal, Integer | Float | Rational | BigDecimal ]
+  def divmod: (Numeric) -> [Numeric, Numeric]
 
   def dup: () -> self
 
-  def eql?: (untyped arg0) -> bool
+  def eql?: (untyped) -> bool
 
   # Performs division and returns the value as a Float.
   # 
@@ -258,14 +205,7 @@ class Rational < Numeric
   #     Rational(2, 3).fdiv(0.5)     #=> 1.3333333333333333
   #     Rational(2).fdiv(3)          #=> 0.6666666666666666
   # 
-  # # arglists
-  #     rat.fdiv(numeric)  ->  float
-  # 
-  def fdiv: (Integer arg0) -> Float
-          | (Float arg0) -> Float
-          | (Rational arg0) -> Float
-          | (BigDecimal arg0) -> Float
-          | (Complex arg0) -> Float
+  def fdiv: (Numeric) -> Float
 
   def finite?: () -> bool
 
@@ -288,11 +228,8 @@ class Rational < Numeric
   #     Rational('-123.456').floor(+1).to_f  #=> -123.5
   #     Rational('-123.456').floor(-1)       #=> -130
   # 
-  # # arglists
-  #     rat.floor([ndigits])  ->  integer or rational
-  # 
   def floor: () -> Integer
-           | (?Integer digits) -> Numeric
+           | (Integer digits) -> (Integer | Rational)
 
   def hash: () -> Integer
 
@@ -310,9 +247,6 @@ class Rational < Numeric
   #     Rational(-8, 6).inspect  #=> "(-4/3)"
   #     Rational('1/2').inspect  #=> "(1/2)"
   # 
-  # # arglists
-  #     rat.inspect  ->  string
-  # 
   def inspect: () -> String
 
   def integer?: () -> bool
@@ -324,20 +258,12 @@ class Rational < Numeric
   # 
   # Rational#magnitude is an alias for Rational#abs.
   # 
-  # # arglists
-  #     rat.magnitude  ->  rational
-  # 
-  def magnitude: () -> Numeric
+  alias magnitude abs
 
-  def modulo: (Integer arg0) -> Rational
-            | (Float arg0) -> Float
-            | (Rational arg0) -> Rational
-            | (BigDecimal arg0) -> BigDecimal
+  def modulo: (Float) -> Float
+            | (Numeric) -> Rational
 
   # Returns `true` if `rat` is less than 0.
-  # 
-  # # arglists
-  #     rat.negative?  ->  true or false
   # 
   def negative?: () -> bool
 
@@ -350,19 +276,13 @@ class Rational < Numeric
   #     Rational(9, -4).numerator    #=> -9
   #     Rational(-2, -10).numerator  #=> 1
   # 
-  # # arglists
-  #     rat.numerator  ->  integer
-  # 
   def numerator: () -> Integer
 
-  def phase: () -> Numeric
+  alias phase angle
 
-  def polar: () -> [ Numeric, Numeric ]
+  def polar: () -> [ Rational, Integer | Float ]
 
   # Returns `true` if `rat` is greater than 0.
-  # 
-  # # arglists
-  #     rat.positive?  ->  true or false
   # 
   def positive?: () -> bool
 
@@ -374,14 +294,9 @@ class Rational < Numeric
   #     Rational(9, 8)  / 4                #=> (9/32)
   #     Rational(20, 9) / 9.8              #=> 0.22675736961451246
   # 
-  # # arglists
-  #     rat.quo(numeric)  ->  numeric
-  # 
-  def quo: (Integer arg0) -> Rational
-         | (Float arg0) -> Float
-         | (Rational arg0) -> Rational
-         | (BigDecimal arg0) -> BigDecimal
-         | (Complex arg0) -> Complex
+  def quo: (Float) -> Float
+         | (Complex) -> Complex
+         | (Numeric) -> Rational
 
   # Returns a simpler approximation of the value if the optional argument `eps` is
   # given (rat-|eps| <= result <= rat+|eps|), self otherwise.
@@ -391,22 +306,18 @@ class Rational < Numeric
   #     r.rationalize(Rational('0.01'))  #=> (3/10)
   #     r.rationalize(Rational('0.1'))   #=> (1/3)
   # 
-  # # arglists
-  #     rat.rationalize       ->  self
-  #     rat.rationalize(eps)  ->  rational
-  # 
-  def rationalize: () -> Rational
-                 | (?Numeric arg0) -> Rational
+  def rationalize: (?Numeric eps) -> Rational
 
   def real: () -> Rational
 
-  def real?: () -> TrueClass
+  def real?: () -> true
 
-  def rect: () -> [ Numeric, Numeric ]
+  def rect: () -> [ Rational, Numeric ]
 
-  def rectangular: () -> [ Numeric, Numeric ]
+  alias rectangular rect
 
-  def remainder: (Numeric arg0) -> Numeric
+  def remainder: (Float) -> Float
+               | (Numeric) -> Rational
 
   # Returns `rat` rounded to the nearest value with a precision of `ndigits`
   # decimal digits (default: 0).
@@ -439,16 +350,13 @@ class Rational < Numeric
   #     Rational(-25, 100).round(1, half: :down) #=> (-1/5)
   #     Rational(-25, 100).round(1, half: :even) #=> (-1/5)
   # 
-  # # arglists
-  #     rat.round([ndigits] [, half: mode])  ->  integer or rational
-  # 
-  def round: () -> Integer
-           | (?Integer arg0) -> Numeric
+  def round: (?half: :up | :down | :even) -> Integer
+           | (Integer digits, ?half: :up | :down | :even) -> (Integer | Rational)
 
-  def step: (?Numeric? limit, ?Numeric step) { (Numeric arg0) -> void } -> self
-          | (?to: Numeric, ?by: Numeric) { (Numeric arg0) -> void } -> self
-          | (?Numeric? limit, ?Numeric step) -> ::Enumerator[Numeric, self]
-          | (?to: Numeric, ?by: Numeric) -> ::Enumerator[Numeric, self]
+  def step: (?Numeric limit, ?Numeric step) { (Rational) -> void } -> self
+          | (?Numeric limit, ?Numeric step) -> Enumerator[Rational, self]
+          | (?by: Numeric, ?to: Numeric) { (Rational) -> void } -> self
+          | (?by: Numeric, ?to: Numeric) -> Enumerator[Rational, self]
 
   def to_c: () -> Complex
 
@@ -458,9 +366,6 @@ class Rational < Numeric
   #     Rational(9, 4).to_f   #=> 2.25
   #     Rational(-3, 4).to_f  #=> -0.75
   #     Rational(20, 3).to_f  #=> 6.666666666666667
-  # 
-  # # arglists
-  #     rat.to_f  ->  float
   # 
   def to_f: () -> Float
 
@@ -474,20 +379,14 @@ class Rational < Numeric
   #     Rational(98, 71).to_i  #=> 1
   #     Rational(-31, 2).to_i  #=> -15
   # 
-  # # arglists
-  #     rat.to_i  ->  integer
-  # 
   def to_i: () -> Integer
 
-  def to_int: () -> Integer
+  alias to_int to_i
 
   # Returns self.
   # 
   #     Rational(2).to_r      #=> (2/1)
   #     Rational(-8, 6).to_r  #=> (-4/3)
-  # 
-  # # arglists
-  #     rat.to_r  ->  self
   # 
   def to_r: () -> Rational
 
@@ -496,9 +395,6 @@ class Rational < Numeric
   #     Rational(2).to_s      #=> "2/1"
   #     Rational(-8, 6).to_s  #=> "-4/3"
   #     Rational('1/2').to_s  #=> "1/2"
-  # 
-  # # arglists
-  #     rat.to_s  ->  string
   # 
   def to_s: () -> String
 
@@ -521,11 +417,8 @@ class Rational < Numeric
   #     Rational('-123.456').truncate(+1).to_f  #=> -123.4
   #     Rational('-123.456').truncate(-1)       #=> -120
   # 
-  # # arglists
-  #     rat.truncate([ndigits])  ->  integer or rational
-  # 
   def truncate: () -> Integer
-              | (?Integer arg0) -> Rational
+              | (Integer ndigits) -> (Integer | Rational)
 
   def zero?: () -> bool
 end
