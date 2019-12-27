@@ -1,31 +1,91 @@
-# Holds [Integer](Integer) values. You cannot add a
-# singleton method to an [Integer](Integer) object,
-# any attempt to do so will raise a
-# [TypeError](https://ruby-doc.org/core-2.6.3/TypeError.html).
+# Holds Integer values.  You cannot add a singleton method to an Integer object,
+# any attempt to do so will raise a TypeError.
+# 
 class Integer < Numeric
+  # Returns the integer square root of the non-negative integer `n`, i.e. the
+  # largest non-negative integer less than or equal to the square root of `n`.
+  # 
+  #     Integer.sqrt(0)        #=> 0
+  #     Integer.sqrt(1)        #=> 1
+  #     Integer.sqrt(24)       #=> 4
+  #     Integer.sqrt(25)       #=> 5
+  #     Integer.sqrt(10**400)  #=> 10**200
+  # 
+  # Equivalent to `Math.sqrt(n).floor`, except that the result of the latter code
+  # may differ from the true value due to the limited precision of floating point
+  # arithmetic.
+  # 
+  #     Integer.sqrt(10**46)     #=> 100000000000000000000000
+  #     Math.sqrt(10**46).floor  #=>  99999999999999991611392 (!)
+  # 
+  # If `n` is not an Integer, it is converted to an Integer first. If `n` is
+  # negative, a Math::DomainError is raised.
+  # 
+  # # arglists
+  #     Integer.sqrt(n)  ->  integer
+  # 
   def self.sqrt: (Numeric n) -> Integer
 
   public
 
+  # Returns `int` modulo `other`.
+  # 
+  # See Numeric#divmod for more information.
+  # 
+  # # arglists
+  #     int % other        ->  real
+  # 
   def %: (Integer arg0) -> Integer
        | (Float arg0) -> Float
        | (Rational arg0) -> Rational
        | (BigDecimal arg0) -> BigDecimal
 
+  # Bitwise AND.
+  # 
+  # # arglists
+  #     int & other_int  ->  integer
+  # 
   def &: (Integer arg0) -> Integer
 
+  # Performs multiplication: the class of the resulting object depends on the
+  # class of `numeric`.
+  # 
+  # # arglists
+  #     int * numeric  ->  numeric_result
+  # 
   def *: (Integer arg0) -> Integer
        | (Float arg0) -> Float
        | (Rational arg0) -> Rational
        | (BigDecimal arg0) -> BigDecimal
        | (Complex arg0) -> Complex
 
+  # Raises `int` to the power of `numeric`, which may be negative or fractional.
+  # The result may be an Integer, a Float, a Rational, or a complex number.
+  # 
+  #     2 ** 3        #=> 8
+  #     2 ** -1       #=> (1/2)
+  #     2 ** 0.5      #=> 1.4142135623730951
+  #     (-1) ** 0.5   #=> (0.0+1.0i)
+  # 
+  #     123456789 ** 2     #=> 15241578750190521
+  #     123456789 ** 1.2   #=> 5126464716.0993185
+  #     123456789 ** -2    #=> (1/15241578750190521)
+  # 
+  # # arglists
+  #     int ** numeric  ->  numeric_result
+  # 
   def **: (Integer arg0) -> Numeric
         | (Float arg0) -> Numeric
         | (Rational arg0) -> Numeric
         | (BigDecimal arg0) -> BigDecimal
         | (Complex arg0) -> Complex
 
+  # Performs addition: the class of the resulting object depends on the class of
+  # `numeric`.
+  # 
+  # # arglists
+  #     int + numeric  ->  numeric_result
+  # 
   def +: (Integer arg0) -> Integer
        | (Float arg0) -> Float
        | (Rational arg0) -> Rational
@@ -34,158 +94,299 @@ class Integer < Numeric
 
   def +@: () -> Integer
 
+  # Performs subtraction: the class of the resulting object depends on the class
+  # of `numeric`.
+  # 
+  # # arglists
+  #     int - numeric  ->  numeric_result
+  # 
   def -: (Integer arg0) -> Integer
        | (Float arg0) -> Float
        | (Rational arg0) -> Rational
        | (BigDecimal arg0) -> BigDecimal
        | (Complex arg0) -> Complex
 
+  # Returns `int`, negated.
+  # 
+  # # arglists
+  #     -int  ->  integer
+  # 
   def -@: () -> Integer
 
+  # Performs division: the class of the resulting object depends on the class of
+  # `numeric`.
+  # 
+  # # arglists
+  #     int / numeric  ->  numeric_result
+  # 
   def /: (Integer arg0) -> Integer
        | (Float arg0) -> Float
        | (Rational arg0) -> Rational
        | (BigDecimal arg0) -> BigDecimal
        | (Complex arg0) -> Complex
 
+  # Returns `true` if the value of `int` is less than that of `real`.
+  # 
+  # # arglists
+  #     int < real  ->  true or false
+  # 
   def <: (Integer arg0) -> bool
        | (Float arg0) -> bool
        | (Rational arg0) -> bool
        | (BigDecimal arg0) -> bool
 
+  # Returns `int` shifted left `count` positions, or right if `count` is negative.
+  # 
+  # # arglists
+  #     int << count  ->  integer
+  # 
   def <<: (Integer arg0) -> Integer
 
+  # Returns `true` if the value of `int` is less than or equal to that of `real`.
+  # 
+  # # arglists
+  #     int <= real  ->  true or false
+  # 
   def <=: (Integer arg0) -> bool
         | (Float arg0) -> bool
         | (Rational arg0) -> bool
         | (BigDecimal arg0) -> bool
 
+  # Comparison---Returns -1, 0, or +1 depending on whether `int` is less than,
+  # equal to, or greater than `numeric`.
+  # 
+  # This is the basis for the tests in the Comparable module.
+  # 
+  # `nil` is returned if the two values are incomparable.
+  # 
+  # # arglists
+  #     int <=> numeric  ->  -1, 0, +1, or nil
+  # 
   def <=>: (Integer arg0) -> Integer
          | (Float arg0) -> Integer
          | (Rational arg0) -> Integer
          | (BigDecimal arg0) -> Integer
 
+  # Returns `true` if `int` equals `other` numerically. Contrast this with
+  # Integer#eql?, which requires `other` to be an Integer.
+  # 
+  #     1 == 2     #=> false
+  #     1 == 1.0   #=> true
+  # 
+  # # arglists
+  #     int == other  ->  true or false
+  # 
   def ==: (Object arg0) -> bool
 
+  # Returns `true` if `int` equals `other` numerically. Contrast this with
+  # Integer#eql?, which requires `other` to be an Integer.
+  # 
+  #     1 == 2     #=> false
+  #     1 == 1.0   #=> true
+  # 
+  # # arglists
+  #     int == other  ->  true or false
+  # 
   def ===: (Object arg0) -> bool
 
+  # Returns `true` if the value of `int` is greater than that of `real`.
+  # 
+  # # arglists
+  #     int > real  ->  true or false
+  # 
   def >: (Integer arg0) -> bool
        | (Float arg0) -> bool
        | (Rational arg0) -> bool
        | (BigDecimal arg0) -> bool
 
+  # Returns `true` if the value of `int` is greater than or equal to that of
+  # `real`.
+  # 
+  # # arglists
+  #     int >= real  ->  true or false
+  # 
   def >=: (Integer arg0) -> bool
         | (Float arg0) -> bool
         | (Rational arg0) -> bool
         | (BigDecimal arg0) -> bool
 
+  # Returns `int` shifted right `count` positions, or left if `count` is negative.
+  # 
+  # # arglists
+  #     int >> count  ->  integer
+  # 
   def >>: (Integer arg0) -> Integer
 
+  # Bit Reference---Returns the `n`th bit in the binary representation of `int`,
+  # where `int[0]` is the least significant bit.
+  # 
+  #     a = 0b11001100101010
+  #     30.downto(0) {|n| print a[n] }
+  #     #=> 0000000000000000011001100101010
+  # 
+  #     a = 9**15
+  #     50.downto(0) {|n| print a[n] }
+  #     #=> 000101110110100000111000011110010100111100010111001
+  # 
+  # In principle, `n[i]` is equivalent to `(n >> i) & 1`. Thus, any negative index
+  # always returns zero:
+  # 
+  #     p 255[-1] #=> 0
+  # 
+  # Range operations `n[i, len]` and `n[i..j]` are naturally extended.
+  # 
+  # *   `n[i, len]` equals to `(n >> i) & ((1 << len) - 1)`.
+  # *   `n[i..j]` equals to `(n >> i) & ((1 << (j - i + 1)) - 1)`.
+  # *   `n[i...j]` equals to `(n >> i) & ((1 << (j - i)) - 1)`.
+  # *   `n[i..]` equals to `(n >> i)`.
+  # *   `n[..j]` is zero if `n & ((1 << (j + 1)) - 1)` is zero.  Otherwise, raises
+  #     an ArgumentError.
+  # *   `n[...j]` is zero if `n & ((1 << j) - 1)` is zero.  Otherwise, raises an
+  #     ArgumentError.
+  # 
+  # 
+  # Note that range operation may exhaust memory. For example, `-1[0,
+  # 1000000000000]` will raise NoMemoryError.
+  # 
+  # # arglists
+  #     int[n]    -> 0, 1
+  #     int[n, m] -> num
+  #     int[range] -> num
+  # 
   def []: (Integer arg0) -> Integer
         | (Rational arg0) -> Integer
         | (Float arg0) -> Integer
         | (BigDecimal arg0) -> Integer
 
+  # Bitwise EXCLUSIVE OR.
+  # 
+  # # arglists
+  #     int ^ other_int  ->  integer
+  # 
   def ^: (Integer arg0) -> Integer
 
-  # Returns the absolute value of `int` .
-  #
-  # ```ruby
-  # (-12345).abs   #=> 12345
-  # -12345.abs     #=> 12345
-  # 12345.abs      #=> 12345
-  # ```
-  #
-  # [\#magnitude](Integer.downloaded.ruby_doc#method-i-magnitude) is an
-  # alias for [\#abs](Integer.downloaded.ruby_doc#method-i-abs).
+  # Returns the absolute value of `int`.
+  # 
+  #     (-12345).abs   #=> 12345
+  #     -12345.abs     #=> 12345
+  #     12345.abs      #=> 12345
+  # 
+  # Integer#magnitude is an alias for Integer#abs.
+  # 
+  # # arglists
+  #     int.abs        ->  integer
+  # 
   def abs: () -> Integer
 
   def abs2: () -> Integer
 
+  # Returns `true` if all bits of `int & mask` are 1.
+  # 
+  # # arglists
+  #     int.allbits?(mask)  ->  true or false
+  # 
   def allbits?: (_ToInt mask) -> bool
 
   def angle: () -> Numeric
 
+  # Returns `true` if any bits of `int & mask` are 1.
+  # 
+  # # arglists
+  #     int.anybits?(mask)  ->  true or false
+  # 
   def anybits?: (_ToInt mask) -> bool
 
   def arg: () -> Numeric
 
-  # Returns the number of bits of the value of `int` .
-  #
-  # "Number of bits" means the bit position of the highest bit which is
-  # different from the sign bit (where the least significant bit has bit
-  # position 1). If there is no such bit (zero or minus one), zero is
-  # returned.
-  #
-  # I.e. this method returns *ceil(log2(int \< 0 ? -int : int+1))* .
-  #
-  # ```ruby
-  # (-2**1000-1).bit_length   #=> 1001
-  # (-2**1000).bit_length     #=> 1000
-  # (-2**1000+1).bit_length   #=> 1000
-  # (-2**12-1).bit_length     #=> 13
-  # (-2**12).bit_length       #=> 12
-  # (-2**12+1).bit_length     #=> 12
-  # -0x101.bit_length         #=> 9
-  # -0x100.bit_length         #=> 8
-  # -0xff.bit_length          #=> 8
-  # -2.bit_length             #=> 1
-  # -1.bit_length             #=> 0
-  # 0.bit_length              #=> 0
-  # 1.bit_length              #=> 1
-  # 0xff.bit_length           #=> 8
-  # 0x100.bit_length          #=> 9
-  # (2**12-1).bit_length      #=> 12
-  # (2**12).bit_length        #=> 13
-  # (2**12+1).bit_length      #=> 13
-  # (2**1000-1).bit_length    #=> 1000
-  # (2**1000).bit_length      #=> 1001
-  # (2**1000+1).bit_length    #=> 1001
-  # ```
-  #
-  # This method can be used to detect overflow in
-  # [Array\#pack](https://ruby-doc.org/core-2.6.3/Array.html#method-i-pack)
-  # as follows:
-  #
-  # ```ruby
-  # if n.bit_length < 32
-  #   [n].pack("l") # no overflow
-  # else
-  #   raise "overflow"
-  # end
-  # ```
+  # Returns the number of bits of the value of `int`.
+  # 
+  # "Number of bits" means the bit position of the highest bit which is different
+  # from the sign bit (where the least significant bit has bit position 1). If
+  # there is no such bit (zero or minus one), zero is returned.
+  # 
+  # I.e. this method returns *ceil(log2(int < 0 ? -int : int+1))*.
+  # 
+  #     (-2**1000-1).bit_length   #=> 1001
+  #     (-2**1000).bit_length     #=> 1000
+  #     (-2**1000+1).bit_length   #=> 1000
+  #     (-2**12-1).bit_length     #=> 13
+  #     (-2**12).bit_length       #=> 12
+  #     (-2**12+1).bit_length     #=> 12
+  #     -0x101.bit_length         #=> 9
+  #     -0x100.bit_length         #=> 8
+  #     -0xff.bit_length          #=> 8
+  #     -2.bit_length             #=> 1
+  #     -1.bit_length             #=> 0
+  #     0.bit_length              #=> 0
+  #     1.bit_length              #=> 1
+  #     0xff.bit_length           #=> 8
+  #     0x100.bit_length          #=> 9
+  #     (2**12-1).bit_length      #=> 12
+  #     (2**12).bit_length        #=> 13
+  #     (2**12+1).bit_length      #=> 13
+  #     (2**1000-1).bit_length    #=> 1000
+  #     (2**1000).bit_length      #=> 1001
+  #     (2**1000+1).bit_length    #=> 1001
+  # 
+  # This method can be used to detect overflow in Array#pack as follows:
+  # 
+  #     if n.bit_length < 32
+  #       [n].pack("l") # no overflow
+  #     else
+  #       raise "overflow"
+  #     end
+  # 
+  # # arglists
+  #     int.bit_length  ->  integer
+  # 
   def bit_length: () -> Integer
 
-  # Returns the smallest number greater than or equal to `int` with a
-  # precision of `ndigits` decimal digits (default: 0).
-  #
-  # When the precision is negative, the returned value is an integer with at
-  # least `ndigits.abs` trailing zeros.
-  #
+  # Returns the smallest number greater than or equal to `int` with a precision of
+  # `ndigits` decimal digits (default: 0).
+  # 
+  # When the precision is negative, the returned value is an integer with at least
+  # `ndigits.abs` trailing zeros.
+  # 
   # Returns `self` when `ndigits` is zero or positive.
-  #
-  # ```ruby
-  # 1.ceil           #=> 1
-  # 1.ceil(2)        #=> 1
-  # 18.ceil(-1)      #=> 20
-  # (-18).ceil(-1)   #=> -10
-  # ```
+  # 
+  #     1.ceil           #=> 1
+  #     1.ceil(2)        #=> 1
+  #     18.ceil(-1)      #=> 20
+  #     (-18).ceil(-1)   #=> -10
+  # 
+  # # arglists
+  #     int.ceil([ndigits])  ->  integer or float
+  # 
   def ceil: () -> Integer
           | (?Integer digits) -> Numeric
 
-  # Returns a string containing the character represented by the `int` 's
-  # value according to `encoding` .
-  #
-  # ```ruby
-  # 65.chr    #=> "A"
-  # 230.chr   #=> "\xE6"
-  # 255.chr(Encoding::UTF_8)   #=> "\u00FF"
-  # ```
+  # Returns a string containing the character represented by the `int`'s value
+  # according to `encoding`.
+  # 
+  #     65.chr    #=> "A"
+  #     230.chr   #=> "\xE6"
+  #     255.chr(Encoding::UTF_8)   #=> "\u00FF"
+  # 
+  # # arglists
+  #     int.chr([encoding])  ->  string
+  # 
   def chr: () -> String
          | (?Encoding | String arg0) -> String
 
   def clone: (?freeze: bool) -> self
 
+  # Returns an array with both a `numeric` and a `big` represented as Bignum
+  # objects.
+  # 
+  # This is achieved by converting `numeric` to a Bignum.
+  # 
+  # A TypeError is raised if the `numeric` is not a Fixnum or Bignum type.
+  # 
+  #     (0x3FFFFFFFFFFFFFFF+1).coerce(42)   #=> [42, 4611686018427387904]
+  # 
+  # # arglists
+  #     big.coerce(numeric)  ->  array
+  # 
   def coerce: (Numeric arg0) -> [ Integer | Float | Rational | BigDecimal, Integer | Float | Rational | BigDecimal ]
 
   def conj: () -> Integer
@@ -193,17 +394,61 @@ class Integer < Numeric
   def conjugate: () -> Integer
 
   # Returns 1.
+  # 
+  # # arglists
+  #     int.denominator  ->  1
+  # 
   def denominator: () -> Integer
 
+  # Returns the digits of `int`'s place-value representation with radix `base`
+  # (default: 10). The digits are returned as an array with the least significant
+  # digit as the first array element.
+  # 
+  # `base` must be greater than or equal to 2.
+  # 
+  #     12345.digits      #=> [5, 4, 3, 2, 1]
+  #     12345.digits(7)   #=> [4, 6, 6, 0, 5]
+  #     12345.digits(100) #=> [45, 23, 1]
+  # 
+  #     -12345.digits(7)  #=> Math::DomainError
+  # 
+  # # arglists
+  #     int.digits        ->  array
+  #     int.digits(base)  ->  array
+  # 
   def digits: (?Integer base) -> ::Array[Integer]
 
+  # Performs integer division: returns the integer result of dividing `int` by
+  # `numeric`.
+  # 
+  # # arglists
+  #     int.div(numeric)  ->  integer
+  # 
   def div: (Integer arg0) -> Integer
          | (Float arg0) -> Integer
          | (Rational arg0) -> Integer
          | (BigDecimal arg0) -> Integer
 
+  # See Numeric#divmod.
+  # 
+  # # arglists
+  #     int.divmod(numeric)  ->  array
+  # 
   def divmod: (Integer | Float | Rational | BigDecimal arg0) -> [ Integer | Float | Rational | BigDecimal, Integer | Float | Rational | BigDecimal ]
 
+  # Iterates the given block, passing in decreasing values from `int` down to and
+  # including `limit`.
+  # 
+  # If no block is given, an Enumerator is returned instead.
+  # 
+  #     5.downto(1) { |n| print n, ".. " }
+  #     puts "Liftoff!"
+  #     #=> "5.. 4.. 3.. 2.. 1.. Liftoff!"
+  # 
+  # # arglists
+  #     int.downto(limit) {|i| block }  ->  self
+  #     int.downto(limit)               ->  an_enumerator
+  # 
   def downto: (Integer limit) { (Integer arg0) -> untyped } -> Integer
             | (Integer limit) -> ::Enumerator[Integer, self]
 
@@ -212,145 +457,208 @@ class Integer < Numeric
   def eql?: (Object arg0) -> bool
 
   # Returns `true` if `int` is an even number.
+  # 
+  # # arglists
+  #     int.even?  ->  true or false
+  # 
   def even?: () -> bool
 
+  # Returns the floating point result of dividing `int` by `numeric`.
+  # 
+  #     654321.fdiv(13731)      #=> 47.652829364212366
+  #     654321.fdiv(13731.24)   #=> 47.65199646936475
+  #     -654321.fdiv(13731)     #=> -47.652829364212366
+  # 
+  # # arglists
+  #     int.fdiv(numeric)  ->  float
+  # 
   def fdiv: (Integer arg0) -> Float
           | (Float arg0) -> Float
           | (Rational arg0) -> Float
           | (BigDecimal arg0) -> BigDecimal
           | (Complex arg0) -> Complex
 
-  # Returns `true` if `num` is a finite number, otherwise returns `false`.
-  #
   def finite?: () -> bool
 
-  # Returns the largest number less than or equal to `int` with a precision
-  # of `ndigits` decimal digits (default: 0).
-  #
-  # When the precision is negative, the returned value is an integer with at
-  # least `ndigits.abs` trailing zeros.
-  #
+  # Returns the largest number less than or equal to `int` with a precision of
+  # `ndigits` decimal digits (default: 0).
+  # 
+  # When the precision is negative, the returned value is an integer with at least
+  # `ndigits.abs` trailing zeros.
+  # 
   # Returns `self` when `ndigits` is zero or positive.
-  #
-  # ```ruby
-  # 1.floor           #=> 1
-  # 1.floor(2)        #=> 1
-  # 18.floor(-1)      #=> 10
-  # (-18).floor(-1)   #=> -20
-  # ```
+  # 
+  #     1.floor           #=> 1
+  #     1.floor(2)        #=> 1
+  #     18.floor(-1)      #=> 10
+  #     (-18).floor(-1)   #=> -20
+  # 
+  # # arglists
+  #     int.floor([ndigits])  ->  integer or float
+  # 
   def floor: () -> Integer
            | (?Integer digits) -> Numeric
 
+  # Returns the greatest common divisor of the two integers. The result is always
+  # positive. 0.gcd(x) and x.gcd(0) return x.abs.
+  # 
+  #     36.gcd(60)                  #=> 12
+  #     2.gcd(2)                    #=> 2
+  #     3.gcd(-7)                   #=> 1
+  #     ((1<<31)-1).gcd((1<<61)-1)  #=> 1
+  # 
+  # # arglists
+  #     int.gcd(other_int)  ->  integer
+  # 
   def gcd: (Integer arg0) -> Integer
 
+  # Returns an array with the greatest common divisor and the least common
+  # multiple of the two integers, [gcd, lcm].
+  # 
+  #     36.gcdlcm(60)                  #=> [12, 180]
+  #     2.gcdlcm(2)                    #=> [2, 2]
+  #     3.gcdlcm(-7)                   #=> [1, 21]
+  #     ((1<<31)-1).gcdlcm((1<<61)-1)  #=> [1, 4951760154835678088235319297]
+  # 
+  # # arglists
+  #     int.gcdlcm(other_int)  ->  array
+  # 
   def gcdlcm: (Integer arg0) -> [ Integer, Integer ]
 
-  # Returns the corresponding imaginary number. Not available for complex numbers.
-  #
-  #     -42.i  #=> (0-42i)
-  #     2.0.i  #=> (0+2.0i)
-  #
   def i: () -> Complex
 
   def imag: () -> Integer
 
   def imaginary: () -> Integer
 
-  # Returns `nil`, -1, or 1 depending on whether the value is finite, `-Infinity`,
-  # or `+Infinity`.
-  #
   def infinite?: () -> Integer?
 
+  # # arglists
+  #     inspect(*args)
+  # 
   alias inspect to_s
 
-  # Since `int` is already an [Integer](Integer.downloaded.ruby_doc), this
-  # always returns `true` .
+  # Since `int` is already an Integer, this always returns `true`.
+  # 
+  # # arglists
+  #     int.integer?  ->  true
+  # 
   def integer?: () -> TrueClass
 
+  # Returns the least common multiple of the two integers. The result is always
+  # positive. 0.lcm(x) and x.lcm(0) return zero.
+  # 
+  #     36.lcm(60)                  #=> 180
+  #     2.lcm(2)                    #=> 2
+  #     3.lcm(-7)                   #=> 21
+  #     ((1<<31)-1).lcm((1<<61)-1)  #=> 4951760154835678088235319297
+  # 
+  # # arglists
+  #     int.lcm(other_int)  ->  integer
+  # 
   def lcm: (Integer arg0) -> Integer
 
-  # Returns the absolute value of `int` .
-  #
-  # ```ruby
-  # (-12345).abs   #=> 12345
-  # -12345.abs     #=> 12345
-  # 12345.abs      #=> 12345
-  # ```
-  #
-  # [\#magnitude](Integer.downloaded.ruby_doc#method-i-magnitude) is an
-  # alias for [\#abs](Integer.downloaded.ruby_doc#method-i-abs).
+  # Returns the absolute value of `int`.
+  # 
+  #     (-12345).abs   #=> 12345
+  #     -12345.abs     #=> 12345
+  #     12345.abs      #=> 12345
+  # 
+  # Integer#magnitude is an alias for Integer#abs.
+  # 
+  # # arglists
+  #     int.magnitude  ->  integer
+  # 
   def magnitude: () -> Integer
 
+  # Returns `int` modulo `other`.
+  # 
+  # See Numeric#divmod for more information.
+  # 
+  # # arglists
+  #     int.modulo(other)  ->  real
+  # 
   def modulo: (Integer arg0) -> Integer
             | (Float arg0) -> Float
             | (Rational arg0) -> Rational
             | (BigDecimal arg0) -> BigDecimal
 
-  # Returns `true` if `num` is less than 0.
-  #
   def negative?: () -> bool
 
-  # Returns the successor of `int`, i.e. the
-  # [Integer](Integer.downloaded.ruby_doc) equal to `int+1` .
-  #
-  # ```ruby
-  # 1.next      #=> 2
-  # (-1).next   #=> 0
-  # 1.succ      #=> 2
-  # (-1).succ   #=> 0
-  # ```
+  # Returns the successor of `int`, i.e. the Integer equal to `int+1`.
+  # 
+  #     1.next      #=> 2
+  #     (-1).next   #=> 0
+  #     1.succ      #=> 2
+  #     (-1).succ   #=> 0
+  # 
+  # # arglists
+  #     int.next  ->  integer
+  # 
   def next: () -> Integer
 
+  # Returns `true` if no bits of `int & mask` are 1.
+  # 
+  # # arglists
+  #     int.nobits?(mask)  ->  true or false
+  # 
   def nobits?: (_ToInt mask) -> bool
 
-  # Returns `self` if `num` is not zero, `nil` otherwise.
-  #
-  # This behavior is useful when chaining comparisons:
-  #
-  #     a = %w( z Bb bB bb BB a aA Aa AA A )
-  #     b = a.sort {|a,b| (a.downcase <=> b.downcase).nonzero? || a <=> b }
-  #     b   #=> ["A", "a", "AA", "Aa", "aA", "BB", "Bb", "bB", "bb", "z"]
-  #
   def nonzero?: () -> self?
 
   # Returns self.
+  # 
+  # # arglists
+  #     int.numerator  ->  self
+  # 
   def numerator: () -> Integer
 
   # Returns `true` if `int` is an odd number.
+  # 
+  # # arglists
+  #     int.odd?  ->  true or false
+  # 
   def odd?: () -> bool
 
   # Returns the `int` itself.
-  #
-  # ```ruby
-  # 97.ord   #=> 97
-  # ```
-  #
-  # This method is intended for compatibility to character literals in Ruby
-  # 1.9.
-  #
+  # 
+  #     97.ord   #=> 97
+  # 
+  # This method is intended for compatibility to character literals in Ruby 1.9.
+  # 
   # For example, `?a.ord` returns 97 both in 1.8 and 1.9.
+  # 
+  # # arglists
+  #     int.ord  ->  self
+  # 
   def ord: () -> Integer
 
   def phase: () -> Numeric
 
-  # Returns an array; [num.abs, num.arg].
-  #
   def polar: () -> [ Numeric, Numeric ]
 
-  # Returns `true` if `num` is greater than 0.
-  #
   def positive?: () -> bool
 
+  # Returns (modular) exponentiation as:
+  # 
+  #     a.pow(b)     #=> same as a**b
+  #     a.pow(b, m)  #=> same as (a**b) % m, but avoids huge temporary values
+  # 
+  # # arglists
+  #     integer.pow(numeric)           ->  numeric
+  #     integer.pow(integer, integer)  ->  integer
+  # 
   def pow: (Numeric numeric) -> Numeric
          | (Integer other, Integer modulo) -> Integer
 
-  # Returns the predecessor of `int`, i.e. the
-  # [Integer](Integer.downloaded.ruby_doc) equal to `int-1` .
-  #
-  # ```ruby
-  # 1.pred      #=> 0
-  # (-1).pred   #=> -2
-  # ```
+  # Returns the predecessor of `int`, i.e. the Integer equal to `int-1`.
+  # 
+  #     1.pred      #=> 0
+  #     (-1).pred   #=> -2
+  # 
+  # # arglists
+  #     int.pred  ->  integer
+  # 
   def pred: () -> Integer
 
   def quo: (Integer arg0) -> Rational
@@ -359,8 +667,12 @@ class Integer < Numeric
          | (BigDecimal arg0) -> BigDecimal
          | (Complex arg0) -> Complex
 
-  # Returns the value as a rational. The optional argument `eps` is always
+  # Returns the value as a rational.  The optional argument `eps` is always
   # ignored.
+  # 
+  # # arglists
+  #     int.rationalize([eps])  ->  rational
+  # 
   def rationalize: () -> Rational
                  | (?Numeric arg0) -> Rational
 
@@ -368,14 +680,25 @@ class Integer < Numeric
 
   def real?: () -> TrueClass
 
-  # Returns an array; [num, 0].
-  #
   def rect: () -> [ Numeric, Numeric ]
 
-  # Returns an array; [num, 0].
-  #
   def rectangular: () -> [ Numeric, Numeric ]
 
+  # Returns the remainder after dividing `int` by `numeric`.
+  # 
+  # `x.remainder(y)` means `x-y*(x/y).truncate`.
+  # 
+  #     5.remainder(3)     #=> 2
+  #     -5.remainder(3)    #=> -2
+  #     5.remainder(-3)    #=> 2
+  #     -5.remainder(-3)   #=> -2
+  #     5.remainder(1.5)   #=> 0.5
+  # 
+  # See Numeric#divmod.
+  # 
+  # # arglists
+  #     int.remainder(numeric)  ->  real
+  # 
   def remainder: (Integer arg0) -> Integer
                | (Float arg0) -> Float
                | (Rational arg0) -> Rational
@@ -383,184 +706,136 @@ class Integer < Numeric
 
   # Returns `int` rounded to the nearest value with a precision of `ndigits`
   # decimal digits (default: 0).
-  #
-  # When the precision is negative, the returned value is an integer with at
-  # least `ndigits.abs` trailing zeros.
-  #
+  # 
+  # When the precision is negative, the returned value is an integer with at least
+  # `ndigits.abs` trailing zeros.
+  # 
   # Returns `self` when `ndigits` is zero or positive.
-  #
-  # ```ruby
-  # 1.round           #=> 1
-  # 1.round(2)        #=> 1
-  # 15.round(-1)      #=> 20
-  # (-15).round(-1)   #=> -20
-  # ```
-  #
-  # The optional `half` keyword argument is available similar to
-  # [Float\#round](https://ruby-doc.org/core-2.6.3/Float.html#method-i-round)
-  # .
-  #
-  # ```ruby
-  # 25.round(-1, half: :up)      #=> 30
-  # 25.round(-1, half: :down)    #=> 20
-  # 25.round(-1, half: :even)    #=> 20
-  # 35.round(-1, half: :up)      #=> 40
-  # 35.round(-1, half: :down)    #=> 30
-  # 35.round(-1, half: :even)    #=> 40
-  # (-25).round(-1, half: :up)   #=> -30
-  # (-25).round(-1, half: :down) #=> -20
-  # (-25).round(-1, half: :even) #=> -20
-  # ```
+  # 
+  #     1.round           #=> 1
+  #     1.round(2)        #=> 1
+  #     15.round(-1)      #=> 20
+  #     (-15).round(-1)   #=> -20
+  # 
+  # The optional `half` keyword argument is available similar to Float#round.
+  # 
+  #     25.round(-1, half: :up)      #=> 30
+  #     25.round(-1, half: :down)    #=> 20
+  #     25.round(-1, half: :even)    #=> 20
+  #     35.round(-1, half: :up)      #=> 40
+  #     35.round(-1, half: :down)    #=> 30
+  #     35.round(-1, half: :even)    #=> 40
+  #     (-25).round(-1, half: :up)   #=> -30
+  #     (-25).round(-1, half: :down) #=> -20
+  #     (-25).round(-1, half: :even) #=> -20
+  # 
+  # # arglists
+  #     int.round([ndigits] [, half: mode])  ->  integer or float
+  # 
   def round: () -> Integer
            | (?Numeric arg0) -> Numeric
 
-  # Invoked as a callback whenever a singleton method is added to the receiver.
-  #
-  #     module Chatty
-  #       def Chatty.singleton_method_added(id)
-  #         puts "Adding #{id.id2name}"
-  #       end
-  #       def self.one()     end
-  #       def two()          end
-  #       def Chatty.three() end
-  #     end
-  #
-  # *produces:*
-  #
-  #     Adding singleton_method_added
-  #     Adding one
-  #     Adding three
-  #
   def singleton_method_added: (Symbol) -> void
 
-  # Returns the number of bytes in the machine representation of `int`
-  # (machine dependent).
-  #
-  # ```ruby
-  # 1.size               #=> 8
-  # -1.size              #=> 8
-  # 2147483647.size      #=> 8
-  # (256**10 - 1).size   #=> 10
-  # (256**20 - 1).size   #=> 20
-  # (256**40 - 1).size   #=> 40
-  # ```
+  # Returns the number of bytes in the machine representation of `int` (machine
+  # dependent).
+  # 
+  #     1.size               #=> 8
+  #     -1.size              #=> 8
+  #     2147483647.size      #=> 8
+  #     (256**10 - 1).size   #=> 10
+  #     (256**20 - 1).size   #=> 20
+  #     (256**40 - 1).size   #=> 40
+  # 
+  # # arglists
+  #     int.size  ->  int
+  # 
   def size: () -> Integer
 
-  # Invokes the given block with the sequence of numbers starting at `num`,
-  # incremented by `step` (defaulted to `1`) on each call.
-  #
-  # The loop finishes when the value to be passed to the block is greater than
-  # `limit` (if `step` is positive) or less than `limit` (if `step` is negative),
-  # where `limit` is defaulted to infinity.
-  #
-  # In the recommended keyword argument style, either or both of `step` and
-  # `limit` (default infinity) can be omitted.  In the fixed position argument
-  # style, zero as a step (i.e. `num.step(limit, 0)`) is not allowed for
-  # historical compatibility reasons.
-  #
-  # If all the arguments are integers, the loop operates using an integer counter.
-  #
-  # If any of the arguments are floating point numbers, all are converted to
-  # floats, and the loop is executed *floor(n + n*Float::EPSILON) + 1* times,
-  # where *n = (limit - num)/step*.
-  #
-  # Otherwise, the loop starts at `num`, uses either the less-than (`<`) or
-  # greater-than (`>`) operator to compare the counter against `limit`, and
-  # increments itself using the `+` operator.
-  #
-  # If no block is given, an Enumerator is returned instead. Especially, the
-  # enumerator is an Enumerator::ArithmeticSequence if both `limit` and `step` are
-  # kind of Numeric or `nil`.
-  #
-  # For example:
-  #
-  #     p 1.step.take(4)
-  #     p 10.step(by: -1).take(4)
-  #     3.step(to: 5) {|i| print i, " " }
-  #     1.step(10, 2) {|i| print i, " " }
-  #     Math::E.step(to: Math::PI, by: 0.2) {|f| print f, " " }
-  #
-  # Will produce:
-  #
-  #     [1, 2, 3, 4]
-  #     [10, 9, 8, 7]
-  #     3 4 5
-  #     1 3 5 7 9
-  #     2.718281828459045 2.9182818284590453 3.118281828459045
-  #
-  # # arglists
-  #     num.step(by: step, to: limit) {|i| block }   ->  self
-  #     num.step(by: step, to: limit)                ->  an_enumerator
-  #     num.step(by: step, to: limit)                ->  an_arithmetic_sequence
-  #     num.step(limit=nil, step=1) {|i| block }     ->  self
-  #     num.step(limit=nil, step=1)                  ->  an_enumerator
-  #     num.step(limit=nil, step=1)                  ->  an_arithmetic_sequence
-  #
   def step: (?Numeric? limit, ?Numeric step) { (Numeric arg0) -> void } -> self
-          | (?by: Numeric, ?to: Numeric) { (Numeric arg0) -> void } -> self
+          | (?to: Numeric, ?by: Numeric) { (Numeric arg0) -> void } -> self
           | (?Numeric? limit, ?Numeric step) -> ::Enumerator[Numeric, self]
-          | (?by: Numeric, ?to: Numeric) -> ::Enumerator[Numeric, self]
+          | (?to: Numeric, ?by: Numeric) -> ::Enumerator[Numeric, self]
 
-  # Returns the successor of `int`, i.e. the
-  # [Integer](Integer.downloaded.ruby_doc) equal to `int+1` .
-  #
-  # ```ruby
-  # 1.next      #=> 2
-  # (-1).next   #=> 0
-  # 1.succ      #=> 2
-  # (-1).succ   #=> 0
-  # ```
+  # Returns the successor of `int`, i.e. the Integer equal to `int+1`.
+  # 
+  #     1.next      #=> 2
+  #     (-1).next   #=> 0
+  #     1.succ      #=> 2
+  #     (-1).succ   #=> 0
+  # 
+  # # arglists
+  #     int.succ  ->  integer
+  # 
   def succ: () -> Integer
 
+  # Iterates the given block `int` times, passing in values from zero to `int -
+  # 1`.
+  # 
+  # If no block is given, an Enumerator is returned instead.
+  # 
+  #     5.times {|i| print i, " " }   #=> 0 1 2 3 4
+  # 
+  # # arglists
+  #     int.times {|i| block }  ->  self
+  #     int.times               ->  an_enumerator
+  # 
   def times: () { (Integer arg0) -> untyped } -> Integer
            | () -> ::Enumerator[Integer, self]
 
   def to_c: () -> Complex
 
-  # Converts `int` to a [Float](https://ruby-doc.org/core-2.6.3/Float.html)
-  # . If `int` doesn't fit in a
-  # [Float](https://ruby-doc.org/core-2.6.3/Float.html), the result is
+  # Converts `int` to a Float.  If `int` doesn't fit in a Float, the result is
   # infinity.
+  # 
+  # # arglists
+  #     int.to_f  ->  float
+  # 
   def to_f: () -> Float
 
-  # Since `int` is already an [Integer](Integer.downloaded.ruby_doc),
-  # returns `self` .
-  #
-  # [to\_int](Integer.downloaded.ruby_doc#method-i-to_int) is an alias for
-  # [to\_i](Integer.downloaded.ruby_doc#method-i-to_i).
+  # Since `int` is already an Integer, returns `self`.
+  # 
+  # #to_int is an alias for #to_i.
+  # 
+  # # arglists
+  #     int.to_i    ->  integer
+  #     int.to_int  ->  integer
+  # 
   def to_i: () -> Integer
 
-  # Since `int` is already an [Integer](Integer.downloaded.ruby_doc),
-  # returns `self` .
-  #
-  # [to\_int](Integer.downloaded.ruby_doc#method-i-to_int) is an alias for
-  # [to\_i](Integer.downloaded.ruby_doc#method-i-to_i).
+  # Since `int` is already an Integer, returns `self`.
+  # 
+  # #to_int is an alias for #to_i.
+  # 
+  # # arglists
+  #     int.to_int  ->  integer
+  # 
   def to_int: () -> Integer
 
   # Returns the value as a rational.
-  #
-  # ```ruby
-  # 1.to_r        #=> (1/1)
-  # (1<<64).to_r  #=> (18446744073709551616/1)
-  # ```
+  # 
+  #     1.to_r        #=> (1/1)
+  #     (1<<64).to_r  #=> (18446744073709551616/1)
+  # 
+  # # arglists
+  #     int.to_r  ->  rational
+  # 
   def to_r: () -> Rational
 
-  # Returns a string containing the place-value representation of `int` with
-  # radix `base` (between 2 and 36).
-  #
-  # ```ruby
-  # 12345.to_s       #=> "12345"
-  # 12345.to_s(2)    #=> "11000000111001"
-  # 12345.to_s(8)    #=> "30071"
-  # 12345.to_s(10)   #=> "12345"
-  # 12345.to_s(16)   #=> "3039"
-  # 12345.to_s(36)   #=> "9ix"
-  # 78546939656932.to_s(36)  #=> "rubyrules"
-  # ```
-  #
-  #
-  #
-  # Also aliased as: [inspect](Integer.downloaded.ruby_doc#method-i-inspect)
+  # Returns a string containing the place-value representation of `int` with radix
+  # `base` (between 2 and 36).
+  # 
+  #     12345.to_s       #=> "12345"
+  #     12345.to_s(2)    #=> "11000000111001"
+  #     12345.to_s(8)    #=> "30071"
+  #     12345.to_s(10)   #=> "12345"
+  #     12345.to_s(16)   #=> "3039"
+  #     12345.to_s(36)   #=> "9ix"
+  #     78546939656932.to_s(36)  #=> "rubyrules"
+  # 
+  # # arglists
+  #     int.to_s(base=10)  ->  string
+  # 
   def to_s: () -> String
           | (2) -> String
           | (3) -> String
@@ -598,29 +873,58 @@ class Integer < Numeric
           | (35) -> String
           | (36) -> String
 
-  # Returns `int` truncated (toward zero) to a precision of `ndigits`
-  # decimal digits (default: 0).
-  #
-  # When the precision is negative, the returned value is an integer with at
-  # least `ndigits.abs` trailing zeros.
-  #
+  # Returns `int` truncated (toward zero) to a precision of `ndigits` decimal
+  # digits (default: 0).
+  # 
+  # When the precision is negative, the returned value is an integer with at least
+  # `ndigits.abs` trailing zeros.
+  # 
   # Returns `self` when `ndigits` is zero or positive.
-  #
-  # ```ruby
-  # 1.truncate           #=> 1
-  # 1.truncate(2)        #=> 1
-  # 18.truncate(-1)      #=> 10
-  # (-18).truncate(-1)   #=> -10
-  # ```
+  # 
+  #     1.truncate           #=> 1
+  #     1.truncate(2)        #=> 1
+  #     18.truncate(-1)      #=> 10
+  #     (-18).truncate(-1)   #=> -10
+  # 
+  # # arglists
+  #     int.truncate([ndigits])  ->  integer or float
+  # 
   def truncate: () -> Integer
 
+  # Iterates the given block, passing in integer values from `int` up to and
+  # including `limit`.
+  # 
+  # If no block is given, an Enumerator is returned instead.
+  # 
+  #     5.upto(10) {|i| print i, " " }   #=> 5 6 7 8 9 10
+  # 
+  # # arglists
+  #     int.upto(limit) {|i| block }  ->  self
+  #     int.upto(limit)               ->  an_enumerator
+  # 
   def upto: (Integer arg0) { (Integer arg0) -> untyped } -> Integer
           | (Integer arg0) -> ::Enumerator[Integer, self]
 
   def zero?: () -> bool
 
+  # Bitwise OR.
+  # 
+  # # arglists
+  #     int | other_int  ->  integer
+  # 
   def |: (Integer arg0) -> Integer
 
+  # One's complement: returns a number where each bit is flipped.
+  # 
+  # Inverts the bits in an Integer. As integers are conceptually of infinite
+  # length, the result acts as if it had an infinite number of one bits to the
+  # left. In hex representations, this is displayed as two periods to the left of
+  # the digits.
+  # 
+  #     sprintf("%X", ~0x1122334455)    #=> "..FEEDDCCBBAA"
+  # 
+  # # arglists
+  #     ~int  ->  integer
+  # 
   def ~: () -> Integer
 end
-

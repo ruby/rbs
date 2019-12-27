@@ -1,12 +1,9 @@
-# A complex number can be represented as a paired real number with
-# imaginary unit; a+bi. Where a is real part, b is imaginary part and i is
-# imaginary unit. Real a equals complex a+0i mathematically.
+# A complex number can be represented as a paired real number with imaginary
+# unit; a+bi.  Where a is real part, b is imaginary part and i is imaginary
+# unit.  Real a equals complex a+0i mathematically.
 # 
-# [Complex](Complex) object can be created as literal,
-# and also by using Kernel\#Complex,
-# [::rect](Complex#method-c-rect),
-# [::polar](Complex#method-c-polar) or
-# [\#to\_c](Complex#method-i-to_c) method.
+# Complex object can be created as literal, and also by using Kernel#Complex,
+# Complex::rect, Complex::polar or to_c method.
 # 
 #     2+1i                 #=> (2+1i)
 #     Complex(1)           #=> (1+0i)
@@ -14,48 +11,99 @@
 #     Complex.polar(2, 3)  #=> (-1.9799849932008908+0.2822400161197344i)
 #     3.to_c               #=> (3+0i)
 # 
-# You can also create complex object from floating-point numbers or
-# strings.
+# You can also create complex object from floating-point numbers or strings.
 # 
-# ```ruby
-# Complex(0.3)         #=> (0.3+0i)
-# Complex('0.3-0.5i')  #=> (0.3-0.5i)
-# Complex('2/3+3/4i')  #=> ((2/3)+(3/4)*i)
-# Complex('1@2')       #=> (-0.4161468365471424+0.9092974268256817i)
+#     Complex(0.3)         #=> (0.3+0i)
+#     Complex('0.3-0.5i')  #=> (0.3-0.5i)
+#     Complex('2/3+3/4i')  #=> ((2/3)+(3/4)*i)
+#     Complex('1@2')       #=> (-0.4161468365471424+0.9092974268256817i)
 # 
-# 0.3.to_c             #=> (0.3+0i)
-# '0.3-0.5i'.to_c      #=> (0.3-0.5i)
-# '2/3+3/4i'.to_c      #=> ((2/3)+(3/4)*i)
-# '1@2'.to_c           #=> (-0.4161468365471424+0.9092974268256817i)
-# ```
+#     0.3.to_c             #=> (0.3+0i)
+#     '0.3-0.5i'.to_c      #=> (0.3-0.5i)
+#     '2/3+3/4i'.to_c      #=> ((2/3)+(3/4)*i)
+#     '1@2'.to_c           #=> (-0.4161468365471424+0.9092974268256817i)
 # 
 # A complex object is either an exact or an inexact number.
 # 
-# ```ruby
-# Complex(1, 1) / 2    #=> ((1/2)+(1/2)*i)
-# Complex(1, 1) / 2.0  #=> (0.5+0.5i)
-# ```
+#     Complex(1, 1) / 2    #=> ((1/2)+(1/2)*i)
+#     Complex(1, 1) / 2.0  #=> (0.5+0.5i)
+# 
 class Complex < Numeric
+  # Returns a complex object which denotes the given polar form.
+  # 
+  #     Complex.polar(3, 0)            #=> (3.0+0.0i)
+  #     Complex.polar(3, Math::PI/2)   #=> (1.836909530733566e-16+3.0i)
+  #     Complex.polar(3, Math::PI)     #=> (-3.0+3.673819061467132e-16i)
+  #     Complex.polar(3, -Math::PI/2)  #=> (1.836909530733566e-16-3.0i)
+  # 
+  # # arglists
+  #     Complex.polar(abs[, arg])  ->  complex
+  # 
   def self.polar: (*untyped) -> untyped
 
+  # Returns a complex object which denotes the given rectangular form.
+  # 
+  #     Complex.rectangular(1, 2)  #=> (1+2i)
+  # 
+  # # arglists
+  #     Complex.rect(real[, imag])         ->  complex
+  #     Complex.rectangular(real[, imag])  ->  complex
+  # 
   def self.rect: (*untyped) -> untyped
 
+  # Returns a complex object which denotes the given rectangular form.
+  # 
+  #     Complex.rectangular(1, 2)  #=> (1+2i)
+  # 
+  # # arglists
+  #     Complex.rectangular(real[, imag])  ->  complex
+  # 
   def self.rectangular: (*untyped) -> untyped
 
   public
 
+  # Performs multiplication.
+  # 
+  #     Complex(2, 3)  * Complex(2, 3)   #=> (-5+12i)
+  #     Complex(900)   * Complex(1)      #=> (900+0i)
+  #     Complex(-2, 9) * Complex(-9, 2)  #=> (0-85i)
+  #     Complex(9, 8)  * 4               #=> (36+32i)
+  #     Complex(20, 9) * 9.8             #=> (196.0+88.2i)
+  # 
+  # # arglists
+  #     cmp * numeric  ->  complex
+  # 
   def *: (Integer arg0) -> Complex
        | (Float arg0) -> Complex
        | (Rational arg0) -> Complex
        | (BigDecimal arg0) -> Complex
        | (Complex arg0) -> Complex
 
+  # Performs exponentiation.
+  # 
+  #     Complex('i') ** 2              #=> (-1+0i)
+  #     Complex(-8) ** Rational(1, 3)  #=> (1.0000000000000002+1.7320508075688772i)
+  # 
+  # # arglists
+  #     cmp ** numeric  ->  complex
+  # 
   def **: (Integer arg0) -> Complex
         | (Float arg0) -> Complex
         | (Rational arg0) -> Complex
         | (BigDecimal arg0) -> Complex
         | (Complex arg0) -> Complex
 
+  # Performs addition.
+  # 
+  #     Complex(2, 3)  + Complex(2, 3)   #=> (4+6i)
+  #     Complex(900)   + Complex(1)      #=> (901+0i)
+  #     Complex(-2, 9) + Complex(-9, 2)  #=> (-11+11i)
+  #     Complex(9, 8)  + 4               #=> (13+8i)
+  #     Complex(20, 9) + 9.8             #=> (29.8+9i)
+  # 
+  # # arglists
+  #     cmp + numeric  ->  complex
+  # 
   def +: (Integer arg0) -> Complex
        | (Float arg0) -> Complex
        | (Rational arg0) -> Complex
@@ -64,336 +112,407 @@ class Complex < Numeric
 
   def +@: () -> Complex
 
+  # Performs subtraction.
+  # 
+  #     Complex(2, 3)  - Complex(2, 3)   #=> (0+0i)
+  #     Complex(900)   - Complex(1)      #=> (899+0i)
+  #     Complex(-2, 9) - Complex(-9, 2)  #=> (7+7i)
+  #     Complex(9, 8)  - 4               #=> (5+8i)
+  #     Complex(20, 9) - 9.8             #=> (10.2+9i)
+  # 
+  # # arglists
+  #     cmp - numeric  ->  complex
+  # 
   def -: (Integer arg0) -> Complex
        | (Float arg0) -> Complex
        | (Rational arg0) -> Complex
        | (BigDecimal arg0) -> Complex
        | (Complex arg0) -> Complex
 
+  # Returns negation of the value.
+  # 
+  #     -Complex(1, 2)  #=> (-1-2i)
+  # 
+  # # arglists
+  #     -cmp  ->  complex
+  # 
   def -@: () -> Complex
 
+  # Performs division.
+  # 
+  #     Complex(2, 3)  / Complex(2, 3)   #=> ((1/1)+(0/1)*i)
+  #     Complex(900)   / Complex(1)      #=> ((900/1)+(0/1)*i)
+  #     Complex(-2, 9) / Complex(-9, 2)  #=> ((36/85)-(77/85)*i)
+  #     Complex(9, 8)  / 4               #=> ((9/4)+(2/1)*i)
+  #     Complex(20, 9) / 9.8             #=> (2.0408163265306123+0.9183673469387754i)
+  # 
+  # # arglists
+  #     cmp / numeric     ->  complex
+  #     cmp.quo(numeric)  ->  complex
+  # 
   def /: (Integer arg0) -> Complex
        | (Float arg0) -> Complex
        | (Rational arg0) -> Complex
        | (BigDecimal arg0) -> Complex
        | (Complex arg0) -> Complex
 
-  # Returns zero if `number` equals `other`, otherwise returns `nil`.
-  #
+  # If `cmp`'s imaginary part is zero, and `object` is also a real number (or a
+  # Complex number where the imaginary part is zero), compare the real part of
+  # `cmp` to object.  Otherwise, return nil.
+  # 
+  #     Complex(2, 3)  <=> Complex(2, 3)   #=> nil
+  #     Complex(2, 3)  <=> 1               #=> nil
+  #     Complex(2)     <=> 1               #=> 1
+  #     Complex(2)     <=> 2               #=> 0
+  #     Complex(2)     <=> 3               #=> -1
+  # 
+  # # arglists
+  #     cmp <=> object  ->  0, 1, -1, or nil
+  # 
   def <=>: (Numeric arg0) -> Integer
 
+  # Returns true if cmp equals object numerically.
+  # 
+  #     Complex(2, 3)  == Complex(2, 3)   #=> true
+  #     Complex(5)     == 5               #=> true
+  #     Complex(0)     == 0.0             #=> true
+  #     Complex('1/3') == 0.33            #=> false
+  #     Complex('1/2') == '1/2'           #=> false
+  # 
+  # # arglists
+  #     cmp == object  ->  true or false
+  # 
   def ==: (Object arg0) -> bool
 
   # Returns the absolute part of its polar form.
-  #
-  # ```ruby
-  # Complex(-1).abs         #=> 1
-  # Complex(3.0, -4.0).abs  #=> 5.0
-  # ```
+  # 
+  #     Complex(-1).abs         #=> 1
+  #     Complex(3.0, -4.0).abs  #=> 5.0
+  # 
+  # # arglists
+  #     cmp.abs        ->  real
+  # 
   def abs: () -> Numeric
 
   # Returns square of the absolute value.
-  #
-  # ```ruby
-  # Complex(-1).abs2         #=> 1
-  # Complex(3.0, -4.0).abs2  #=> 25.0
-  # ```
+  # 
+  #     Complex(-1).abs2         #=> 1
+  #     Complex(3.0, -4.0).abs2  #=> 25.0
+  # 
+  # # arglists
+  #     cmp.abs2  ->  real
+  # 
   def abs2: () -> Numeric
 
   # Returns the angle part of its polar form.
-  #
-  # ```ruby
-  # Complex.polar(3, Math::PI/2).arg  #=> 1.5707963267948966
-  # ```
+  # 
+  #     Complex.polar(3, Math::PI/2).arg  #=> 1.5707963267948966
+  # 
+  # # arglists
+  #     cmp.angle  ->  float
+  # 
   def angle: () -> Float
 
   # Returns the angle part of its polar form.
-  #
-  # ```ruby
-  # Complex.polar(3, Math::PI/2).arg  #=> 1.5707963267948966
-  # ```
+  # 
+  #     Complex.polar(3, Math::PI/2).arg  #=> 1.5707963267948966
+  # 
+  # # arglists
+  #     cmp.arg    ->  float
+  # 
   def arg: () -> Float
 
-  # Produces a shallow copy of *obj*---the instance variables of *obj* are copied,
-  # but not the objects they reference. `clone` copies the frozen (unless :freeze
-  # keyword argument is given with a false value) and tainted state of *obj*. See
-  # also the discussion under `Object#dup`.
-  #
-  #     class Klass
-  #        attr_accessor :str
-  #     end
-  #     s1 = Klass.new      #=> #<Klass:0x401b3a38>
-  #     s1.str = "Hello"    #=> "Hello"
-  #     s2 = s1.clone       #=> #<Klass:0x401b3998 @str="Hello">
-  #     s2.str[1,4] = "i"   #=> "i"
-  #     s1.inspect          #=> "#<Klass:0x401b3a38 @str=\"Hi\">"
-  #     s2.inspect          #=> "#<Klass:0x401b3998 @str=\"Hi\">"
-  #
-  # This method may have class-specific behavior.  If so, that behavior will be
-  # documented under the #`initialize_copy` method of the class.
-  #
   def clone: (?freeze: bool) -> self
 
   def coerce: (Numeric arg0) -> [ Complex, Complex ]
 
   # Returns the complex conjugate.
-  #
-  # ```ruby
-  # Complex(1, 2).conjugate  #=> (1-2i)
-  # ```
+  # 
+  #     Complex(1, 2).conjugate  #=> (1-2i)
+  # 
+  # # arglists
+  #     cmp.conj       ->  complex
+  #     cmp.conjugate  ->  complex
+  # 
   def conj: () -> Complex
 
   # Returns the complex conjugate.
-  #
-  # ```ruby
-  # Complex(1, 2).conjugate  #=> (1-2i)
-  # ```
+  # 
+  #     Complex(1, 2).conjugate  #=> (1-2i)
+  # 
+  # # arglists
+  #     cmp.conjugate  ->  complex
+  # 
   def conjugate: () -> Complex
 
   # Returns the denominator (lcm of both denominator - real and imag).
-  #
+  # 
   # See numerator.
+  # 
+  # # arglists
+  #     cmp.denominator  ->  integer
+  # 
   def denominator: () -> Integer
 
-  # Produces a shallow copy of *obj*---the instance variables of *obj* are copied,
-  # but not the objects they reference. `dup` copies the tainted state of *obj*.
-  #
-  # This method may have class-specific behavior.  If so, that behavior will be
-  # documented under the #`initialize_copy` method of the class.
-  #
-  # ### on dup vs clone
-  #
-  # In general, `clone` and `dup` may have different semantics in descendant
-  # classes. While `clone` is used to duplicate an object, including its internal
-  # state, `dup` typically uses the class of the descendant object to create the
-  # new instance.
-  #
-  # When using #dup, any modules that the object has been extended with will not
-  # be copied.
-  #
-  #     class Klass
-  #       attr_accessor :str
-  #     end
-  #
-  #     module Foo
-  #       def foo; 'foo'; end
-  #     end
-  #
-  #     s1 = Klass.new #=> #<Klass:0x401b3a38>
-  #     s1.extend(Foo) #=> #<Klass:0x401b3a38>
-  #     s1.foo #=> "foo"
-  #
-  #     s2 = s1.clone #=> #<Klass:0x401b3a38>
-  #     s2.foo #=> "foo"
-  #
-  #     s3 = s1.dup #=> #<Klass:0x401b3a38>
-  #     s3.foo #=> NoMethodError: undefined method `foo' for #<Klass:0x401b3a38>
-  #
   def dup: () -> self
 
   def eql?: (Object arg0) -> bool
 
+  # Performs division as each part is a float, never returns a float.
+  # 
+  #     Complex(11, 22).fdiv(3)  #=> (3.6666666666666665+7.333333333333333i)
+  # 
+  # # arglists
+  #     cmp.fdiv(numeric)  ->  complex
+  # 
   def fdiv: (Numeric arg0) -> Complex
 
-  # Returns `true` if `num` is a finite number, otherwise returns `false`.
-  #
+  # Returns `true` if `cmp`'s real and imaginary parts are both finite numbers,
+  # otherwise returns `false`.
+  # 
+  # # arglists
+  #     cmp.finite?  ->  true or false
+  # 
   def finite?: () -> bool
 
   def hash: () -> Integer
 
   # Returns the imaginary part.
-  #
-  # ```ruby
-  # Complex(7).imaginary      #=> 0
-  # Complex(9, -4).imaginary  #=> -4
-  # ```
+  # 
+  #     Complex(7).imaginary      #=> 0
+  #     Complex(9, -4).imaginary  #=> -4
+  # 
+  # # arglists
+  #     cmp.imag       ->  real
+  #     cmp.imaginary  ->  real
+  # 
   def imag: () -> (Integer | Float | Rational | BigDecimal)
 
   # Returns the imaginary part.
-  #
-  # ```ruby
-  # Complex(7).imaginary      #=> 0
-  # Complex(9, -4).imaginary  #=> -4
-  # ```
+  # 
+  #     Complex(7).imaginary      #=> 0
+  #     Complex(9, -4).imaginary  #=> -4
+  # 
+  # # arglists
+  #     cmp.imaginary  ->  real
+  # 
   def imaginary: () -> (Integer | Float | Rational | BigDecimal)
 
-  # Returns `nil`, -1, or 1 depending on whether the value is finite, `-Infinity`,
-  # or `+Infinity`.
-  #
+  # Returns `1` if `cmp`'s real or imaginary part is an infinite number, otherwise
+  # returns `nil`.
+  # 
+  #     For example:
+  # 
+  #        (1+1i).infinite?                   #=> nil
+  #        (Float::INFINITY + 1i).infinite?   #=> 1
+  # 
+  # # arglists
+  #     cmp.infinite?  ->  nil or 1
+  # 
   def infinite?: () -> Integer?
 
   # Returns the value as a string for inspection.
-  #
-  # ```ruby
-  # Complex(2).inspect                       #=> "(2+0i)"
-  # Complex('-8/6').inspect                  #=> "((-4/3)+0i)"
-  # Complex('1/2i').inspect                  #=> "(0+(1/2)*i)"
-  # Complex(0, Float::INFINITY).inspect      #=> "(0+Infinity*i)"
-  # Complex(Float::NAN, Float::NAN).inspect  #=> "(NaN+NaN*i)"
-  # ```
+  # 
+  #     Complex(2).inspect                       #=> "(2+0i)"
+  #     Complex('-8/6').inspect                  #=> "((-4/3)+0i)"
+  #     Complex('1/2i').inspect                  #=> "(0+(1/2)*i)"
+  #     Complex(0, Float::INFINITY).inspect      #=> "(0+Infinity*i)"
+  #     Complex(Float::NAN, Float::NAN).inspect  #=> "(NaN+NaN*i)"
+  # 
+  # # arglists
+  #     cmp.inspect  ->  string
+  # 
   def inspect: () -> String
 
-  # Returns `true` if `num` is an Integer.
-  #
-  #     1.0.integer?   #=> false
-  #     1.integer?     #=> true
-  #
   def integer?: () -> bool
 
   # Returns the absolute part of its polar form.
-  #
-  # ```ruby
-  # Complex(-1).abs         #=> 1
-  # Complex(3.0, -4.0).abs  #=> 5.0
-  # ```
+  # 
+  #     Complex(-1).abs         #=> 1
+  #     Complex(3.0, -4.0).abs  #=> 5.0
+  # 
+  # # arglists
+  #     cmp.magnitude  ->  real
+  # 
   def magnitude: () -> (Integer | Float | Rational | BigDecimal)
 
-  # Returns `self` if `num` is not zero, `nil` otherwise.
-  #
-  # This behavior is useful when chaining comparisons:
-  #
-  #     a = %w( z Bb bB bb BB a aA Aa AA A )
-  #     b = a.sort {|a,b| (a.downcase <=> b.downcase).nonzero? || a <=> b }
-  #     b   #=> ["A", "a", "AA", "Aa", "aA", "BB", "Bb", "bB", "bb", "z"]
-  #
   def nonzero?: () -> self?
 
   # Returns the numerator.
-  #
-  # ```
-  #     1   2       3+4i  <-  numerator
-  #     - + -i  ->  ----
-  #     2   3        6    <-  denominator
-  #
-  # c = Complex('1/2+2/3i')  #=> ((1/2)+(2/3)*i)
-  # n = c.numerator          #=> (3+4i)
-  # d = c.denominator        #=> 6
-  # n / d                    #=> ((1/2)+(2/3)*i)
-  # Complex(Rational(n.real, d), Rational(n.imag, d))
-  #                          #=> ((1/2)+(2/3)*i)
-  # ```
-  #
+  # 
+  #         1   2       3+4i  <-  numerator
+  #         - + -i  ->  ----
+  #         2   3        6    <-  denominator
+  # 
+  #     c = Complex('1/2+2/3i')  #=> ((1/2)+(2/3)*i)
+  #     n = c.numerator          #=> (3+4i)
+  #     d = c.denominator        #=> 6
+  #     n / d                    #=> ((1/2)+(2/3)*i)
+  #     Complex(Rational(n.real, d), Rational(n.imag, d))
+  #                              #=> ((1/2)+(2/3)*i)
+  # 
   # See denominator.
+  # 
+  # # arglists
+  #     cmp.numerator  ->  numeric
+  # 
   def numerator: () -> Complex
 
   # Returns the angle part of its polar form.
-  #
-  # ```ruby
-  # Complex.polar(3, Math::PI/2).arg  #=> 1.5707963267948966
-  # ```
+  # 
+  #     Complex.polar(3, Math::PI/2).arg  #=> 1.5707963267948966
+  # 
+  # # arglists
+  #     cmp.phase  ->  float
+  # 
   def phase: () -> Float
 
-  # Returns an array; \[cmp.abs, cmp.arg\].
-  #
-  # ```ruby
-  # Complex(1, 2).polar  #=> [2.23606797749979, 1.1071487177940904]
-  # ```
+  # Returns an array; [cmp.abs, cmp.arg].
+  # 
+  #     Complex(1, 2).polar  #=> [2.23606797749979, 1.1071487177940904]
+  # 
+  # # arglists
+  #     cmp.polar  ->  array
+  # 
   def polar: () -> [ Integer | Float | Rational | BigDecimal, Integer | Float | Rational | BigDecimal ]
 
+  # Performs division.
+  # 
+  #     Complex(2, 3)  / Complex(2, 3)   #=> ((1/1)+(0/1)*i)
+  #     Complex(900)   / Complex(1)      #=> ((900/1)+(0/1)*i)
+  #     Complex(-2, 9) / Complex(-9, 2)  #=> ((36/85)-(77/85)*i)
+  #     Complex(9, 8)  / 4               #=> ((9/4)+(2/1)*i)
+  #     Complex(20, 9) / 9.8             #=> (2.0408163265306123+0.9183673469387754i)
+  # 
+  # # arglists
+  #     cmp / numeric     ->  complex
+  #     cmp.quo(numeric)  ->  complex
+  # 
   def quo: (Integer arg0) -> Complex
          | (Float arg0) -> Complex
          | (Rational arg0) -> Complex
          | (BigDecimal arg0) -> BigDecimal
          | (Complex arg0) -> Complex
 
-  # Returns the value as a rational if possible (the imaginary part should
-  # be exactly zero).
-  #
-  # ```ruby
-  # Complex(1.0/3, 0).rationalize  #=> (1/3)
-  # Complex(1, 0.0).rationalize    # RangeError
-  # Complex(1, 2).rationalize      # RangeError
-  # ```
-  #
-  # See to\_r.
+  # Returns the value as a rational if possible (the imaginary part should be
+  # exactly zero).
+  # 
+  #     Complex(1.0/3, 0).rationalize  #=> (1/3)
+  #     Complex(1, 0.0).rationalize    # RangeError
+  #     Complex(1, 2).rationalize      # RangeError
+  # 
+  # See to_r.
+  # 
+  # # arglists
+  #     cmp.rationalize([eps])  ->  rational
+  # 
   def rationalize: () -> Rational
                  | (?Numeric arg0) -> Rational
 
   # Returns the real part.
-  #
-  # ```ruby
-  # Complex(7).real      #=> 7
-  # Complex(9, -4).real  #=> 9
-  # ```
+  # 
+  #     Complex(7).real      #=> 7
+  #     Complex(9, -4).real  #=> 9
+  # 
+  # # arglists
+  #     cmp.real  ->  real
+  # 
   def real: () -> (Integer | Float | Rational | BigDecimal)
 
-  # Returns false.
+  # Returns false, even if the complex number has no imaginary part.
+  # 
+  # # arglists
+  #     Complex(1).real?     ->  false
+  #     Complex(1, 2).real?  ->  false
+  # 
   def real?: () -> FalseClass
 
-  # Returns an array; \[cmp.real, cmp.imag\].
-  #
-  # ```ruby
-  # Complex(1, 2).rectangular  #=> [1, 2]
-  # ```
+  # Returns an array; [cmp.real, cmp.imag].
+  # 
+  #     Complex(1, 2).rectangular  #=> [1, 2]
+  # 
+  # # arglists
+  #     cmp.rect         ->  array
+  #     cmp.rectangular  ->  array
+  # 
   def rect: () -> [ Integer | Float | Rational | BigDecimal, Integer | Float | Rational | BigDecimal ]
 
-  # Returns an array; \[cmp.real, cmp.imag\].
-  #
-  # ```ruby
-  # Complex(1, 2).rectangular  #=> [1, 2]
-  # ```
+  # Returns an array; [cmp.real, cmp.imag].
+  # 
+  #     Complex(1, 2).rectangular  #=> [1, 2]
+  # 
+  # # arglists
+  #     cmp.rect         ->  array
+  #     cmp.rectangular  ->  array
+  # 
   def rectangular: () -> [ Integer | Float | Rational | BigDecimal, Integer | Float | Rational | BigDecimal ]
 
   # Returns self.
-  #
-  # ```ruby
-  # Complex(2).to_c      #=> (2+0i)
-  # Complex(-8, 6).to_c  #=> (-8+6i)
-  # ```
+  # 
+  #     Complex(2).to_c      #=> (2+0i)
+  #     Complex(-8, 6).to_c  #=> (-8+6i)
+  # 
+  # # arglists
+  #     complex.to_c  ->  self
+  # 
   def to_c: () -> Complex
 
-  # Returns the value as a float if possible (the imaginary part should be
-  # exactly zero).
-  #
-  # ```ruby
-  # Complex(1, 0).to_f    #=> 1.0
-  # Complex(1, 0.0).to_f  # RangeError
-  # Complex(1, 2).to_f    # RangeError
-  # ```
+  # Returns the value as a float if possible (the imaginary part should be exactly
+  # zero).
+  # 
+  #     Complex(1, 0).to_f    #=> 1.0
+  #     Complex(1, 0.0).to_f  # RangeError
+  #     Complex(1, 2).to_f    # RangeError
+  # 
+  # # arglists
+  #     cmp.to_f  ->  float
+  # 
   def to_f: () -> Float
 
-  # Returns the value as an integer if possible (the imaginary part should
-  # be exactly zero).
-  #
-  # ```ruby
-  # Complex(1, 0).to_i    #=> 1
-  # Complex(1, 0.0).to_i  # RangeError
-  # Complex(1, 2).to_i    # RangeError
-  # ```
+  # Returns the value as an integer if possible (the imaginary part should be
+  # exactly zero).
+  # 
+  #     Complex(1, 0).to_i    #=> 1
+  #     Complex(1, 0.0).to_i  # RangeError
+  #     Complex(1, 2).to_i    # RangeError
+  # 
+  # # arglists
+  #     cmp.to_i  ->  integer
+  # 
   def to_i: () -> Integer
 
-  # Invokes the child class's `to_i` method to convert `num` to an integer.
-  #
-  #     1.0.class          #=> Float
-  #     1.0.to_int.class   #=> Integer
-  #     1.0.to_i.class     #=> Integer
-  #
   def to_int: () -> Integer
 
-  # Returns the value as a rational if possible (the imaginary part should
-  # be exactly zero).
-  #
-  # ```ruby
-  # Complex(1, 0).to_r    #=> (1/1)
-  # Complex(1, 0.0).to_r  # RangeError
-  # Complex(1, 2).to_r    # RangeError
-  # ```
-  #
+  # Returns the value as a rational if possible (the imaginary part should be
+  # exactly zero).
+  # 
+  #     Complex(1, 0).to_r    #=> (1/1)
+  #     Complex(1, 0.0).to_r  # RangeError
+  #     Complex(1, 2).to_r    # RangeError
+  # 
   # See rationalize.
+  # 
+  # # arglists
+  #     cmp.to_r  ->  rational
+  # 
   def to_r: () -> Rational
 
   # Returns the value as a string.
-  #
-  # ```ruby
-  # Complex(2).to_s                       #=> "2+0i"
-  # Complex('-8/6').to_s                  #=> "-4/3+0i"
-  # Complex('1/2i').to_s                  #=> "0+1/2i"
-  # Complex(0, Float::INFINITY).to_s      #=> "0+Infinity*i"
-  # Complex(Float::NAN, Float::NAN).to_s  #=> "NaN+NaN*i"
-  # ```
+  # 
+  #     Complex(2).to_s                       #=> "2+0i"
+  #     Complex('-8/6').to_s                  #=> "-4/3+0i"
+  #     Complex('1/2i').to_s                  #=> "0+1/2i"
+  #     Complex(0, Float::INFINITY).to_s      #=> "0+Infinity*i"
+  #     Complex(Float::NAN, Float::NAN).to_s  #=> "NaN+NaN*i"
+  # 
+  # # arglists
+  #     cmp.to_s  ->  string
+  # 
   def to_s: () -> String
 
   def zero?: () -> bool
 end
 
+# The imaginary unit.
+# 
 Complex::I: Complex
