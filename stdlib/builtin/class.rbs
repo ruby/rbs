@@ -76,14 +76,7 @@ class Class < Module
   # Assign the class to a constant (name starting uppercase) if you want to treat
   # it like a regular class.
   # 
-  # # arglists
-  #     Class.new(super_class=Object)               -> a_class
-  #     Class.new(super_class=Object) { |mod| ... } -> a_class
-  # 
-  def initialize: () -> void
-                | (?Class superclass) -> void
-                | () { (Class arg0) -> untyped } -> void
-                | (?Class superclass) { (Class arg0) -> untyped } -> void
+  def initialize: (?Class superclass) ?{ (Class newclass) -> void } -> void
 
   # Allocates space for a new object of *class*'s class and does not call
   # initialize on the new instance. The returned object must be an instance of
@@ -100,9 +93,6 @@ class Class < Module
   #     end
   # 
   #     klass.allocate.initialized? #=> false
-  # 
-  # # arglists
-  #     class.allocate()   ->   obj
   # 
   def allocate: () -> untyped
 
@@ -127,23 +117,13 @@ class Class < Module
   #     New subclass: Bar
   #     New subclass: Baz
   # 
-  # # arglists
-  #     inherited(subclass)
-  # 
   def inherited: (Class arg0) -> untyped
-
-  def instance_methods: (?bool arg0) -> ::Array[Symbol]
-
-  def name: () -> String?
 
   # Calls #allocate to create a new object of *class*'s class, then invokes that
   # object's #initialize method, passing it *args*.  This is the method that ends
   # up getting called whenever an object is constructed using `.new`.
   # 
-  # # arglists
-  #     class.new(args, ...)    ->  obj
-  # 
-  def new: (*untyped args) -> untyped
+  def new: () -> untyped
 
   # Returns the superclass of *class*, or `nil`.
   # 
@@ -162,5 +142,4 @@ class Class < Module
   #     class.superclass -> a_super_class or nil
   # 
   def `superclass`: () -> Class?
-                  | () -> Class
 end
