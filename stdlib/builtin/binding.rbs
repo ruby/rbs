@@ -41,9 +41,6 @@ class Binding
   #     b = get_binding("hello")
   #     b.eval("param")   #=> "hello"
   # 
-  # # arglists
-  #     binding.eval(string [, filename [,lineno]])  -> obj
-  # 
   def eval: (String arg0, ?String filename, ?Integer lineno) -> untyped
 
   # Opens an IRB session where `binding.irb` is called which allows for
@@ -102,9 +99,6 @@ class Binding
   # 
   # See IRB@IRB+Usage for more information.
   # 
-  # # arglists
-  #     irb()
-  # 
   def irb: () -> void
 
   # Returns `true` if a local variable `symbol` exists.
@@ -119,9 +113,6 @@ class Binding
   # 
   #     binding.eval("defined?(#{symbol}) == 'local-variable'")
   # 
-  # # arglists
-  #     binding.local_variable_defined?(symbol) -> obj
-  # 
   def local_variable_defined?: (String | Symbol symbol) -> bool
 
   # Returns the value of the local variable `symbol`.
@@ -135,9 +126,6 @@ class Binding
   # This method is the short version of the following code:
   # 
   #     binding.eval("#{symbol}")
-  # 
-  # # arglists
-  #     binding.local_variable_get(symbol) -> obj
   # 
   def local_variable_get: (String | Symbol symbol) -> untyped
 
@@ -162,9 +150,6 @@ class Binding
   # 
   # if `obj` can be dumped in Ruby code.
   # 
-  # # arglists
-  #     binding.local_variable_set(symbol, obj) -> obj
-  # 
   def local_variable_set: [U] (String | Symbol symbol, U obj) -> U
 
   # Returns the names of the binding's local variables as symbols.
@@ -180,22 +165,13 @@ class Binding
   # 
   #     binding.eval("local_variables")
   # 
-  # # arglists
-  #     binding.local_variables -> Array
-  # 
-  def local_variables: () -> ::Array[Symbol]
+  def local_variables: () -> Array[Symbol]
 
   # Returns the bound receiver of the binding object.
-  # 
-  # # arglists
-  #     binding.receiver    -> object
   # 
   def receiver: () -> untyped
 
   # Returns the Ruby source filename and line number of the binding object.
-  # 
-  # # arglists
-  #     binding.source_location  -> [String, Integer]
   # 
   def source_location: () -> [ String, Integer ]
 end
