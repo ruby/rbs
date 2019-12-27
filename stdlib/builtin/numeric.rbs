@@ -81,42 +81,28 @@
 # puts tally * 2            #=> "||||"
 # puts tally > 1            #=> true
 # ```
-class Numeric < Object
+class Numeric
   include Comparable
 
+  public
+
   def %: (Numeric arg0) -> Numeric
-
-  def *: (Numeric arg0) -> Numeric
-
-  def +: (Numeric arg0) -> Numeric
 
   # Unary Plus—Returns the receiver.
   def +@: () -> Numeric
 
-  def -: (Numeric arg0) -> Numeric
-
   def -@: () -> Numeric
-
-  def /: (Numeric arg0) -> Numeric
-
-  def <: (Numeric arg0) -> bool
-
-  def <=: (Numeric arg0) -> bool
 
   def <=>: (Numeric arg0) -> Integer
 
-  def >: (Numeric arg0) -> bool
-
-  def >=: (Numeric arg0) -> bool
-
   # Returns the absolute value of `num` .
-  # 
+  #
   # ```ruby
   # 12.abs         #=> 12
   # (-34.56).abs   #=> 34.56
   # -34.56.abs     #=> 34.56
   # ```
-  # 
+  #
   # [\#magnitude](Numeric.downloaded.ruby_doc#method-i-magnitude) is an
   # alias for [\#abs](Numeric.downloaded.ruby_doc#method-i-abs).
   def abs: () -> Numeric
@@ -132,7 +118,7 @@ class Numeric < Object
 
   # Returns the smallest number greater than or equal to `num` with a
   # precision of `ndigits` decimal digits (default: 0).
-  # 
+  #
   # [Numeric](Numeric.downloaded.ruby_doc) implements this by converting its
   # value to a [Float](https://ruby-doc.org/core-2.6.3/Float.html) and
   # invoking
@@ -165,7 +151,7 @@ class Numeric < Object
 
   # Returns the largest number less than or equal to `num` with a precision
   # of `ndigits` decimal digits (default: 0).
-  # 
+  #
   # [Numeric](Numeric.downloaded.ruby_doc) implements this by converting its
   # value to a [Float](https://ruby-doc.org/core-2.6.3/Float.html) and
   # invoking
@@ -176,7 +162,7 @@ class Numeric < Object
 
   # Returns the corresponding imaginary number. Not available for complex
   # numbers.
-  # 
+  #
   # ```ruby
   # -42.i  #=> (0-42i)
   # 2.0.i  #=> (0+2.0i)
@@ -195,7 +181,7 @@ class Numeric < Object
 
   # Returns `true` if `num` is an
   # [Integer](https://ruby-doc.org/core-2.6.3/Integer.html).
-  # 
+  #
   # ```ruby
   # 1.0.integer?   #=> false
   # 1.integer?     #=> true
@@ -203,13 +189,13 @@ class Numeric < Object
   def integer?: () -> bool
 
   # Returns the absolute value of `num` .
-  # 
+  #
   # ```ruby
   # 12.abs         #=> 12
   # (-34.56).abs   #=> 34.56
   # -34.56.abs     #=> 34.56
   # ```
-  # 
+  #
   # [\#magnitude](Numeric.downloaded.ruby_doc#method-i-magnitude) is an
   # alias for [\#abs](Numeric.downloaded.ruby_doc#method-i-abs).
   def magnitude: () -> Numeric
@@ -220,9 +206,9 @@ class Numeric < Object
   def negative?: () -> bool
 
   # Returns `self` if `num` is not zero, `nil` otherwise.
-  # 
+  #
   # This behavior is useful when chaining comparisons:
-  # 
+  #
   # ```ruby
   # a = %w( z Bb bB bb BB a aA Aa AA A )
   # b = a.sort {|a,b| (a.downcase <=> b.downcase).nonzero? || a <=> b }
@@ -261,17 +247,11 @@ class Numeric < Object
 
   def round: (Numeric arg0) -> Numeric
 
-  def singleton_method_added: (Symbol arg0) -> TypeError
-
   def step: (?Numeric? limit, ?Numeric step) { (Numeric arg0) -> untyped } -> Numeric
           | (?Numeric? limit, ?Numeric step) -> ::Enumerator[Numeric, self]
 
   # Returns the value as a complex.
   def to_c: () -> Complex
-
-  def to_f: () -> Float
-
-  def to_i: () -> Integer
 
   # Invokes the child class’s `to_i` method to convert `num` to an integer.
   # 
