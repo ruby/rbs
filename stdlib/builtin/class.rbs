@@ -63,6 +63,11 @@
 # obj--->OtherClass---------->(OtherClass)-----------...
 # ```
 class Class < Module
+  def initialize: () -> void
+                | (?Class superclass) -> void
+                | () { (Class arg0) -> untyped } -> void
+                | (?Class superclass) { (Class arg0) -> untyped } -> void
+
   # Allocates space for a new object of *class* ’s class and does not call
   # initialize on the new instance. The returned object must be an instance
   # of *class* .
@@ -82,6 +87,12 @@ class Class < Module
   # ```
   def allocate: () -> untyped
 
+  def inherited: (Class arg0) -> untyped
+
+  def instance_methods: (?bool arg0) -> ::Array[Symbol]
+
+  def name: () -> String?
+
   # Sorbet hijacks Class#new to re-use the sig from MyClass#initialize when creating new instances of a class.
   # This method must be here so that all calls to MyClass.new aren't forced to take 0 arguments.
   # Calls `allocate` to create a new object of *class* ’s class, then
@@ -89,12 +100,6 @@ class Class < Module
   # the method that ends up getting called whenever an object is constructed
   # using .new.
   def new: (*untyped args) -> untyped
-
-  def inherited: (Class arg0) -> untyped
-
-  def instance_methods: (?bool arg0) -> ::Array[Symbol]
-
-  def name: () -> String?
 
   # Returns the superclass of *class* , or `nil` .
   # 
@@ -114,9 +119,4 @@ class Class < Module
   # ```
   def `superclass`: () -> Class?
                   | () -> Class
-
-  def initialize: () -> void
-                | (?Class superclass) -> void
-                | () { (Class arg0) -> untyped } -> void
-                | (?Class superclass) { (Class arg0) -> untyped } -> void
 end
