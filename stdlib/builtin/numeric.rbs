@@ -86,6 +86,8 @@ class Numeric < Object
 
   def %: (Numeric arg0) -> Numeric
 
+  def *: (Numeric arg0) -> Numeric
+
   def +: (Numeric arg0) -> Numeric
 
   # Unary Plus—Returns the receiver.
@@ -93,11 +95,9 @@ class Numeric < Object
 
   def -: (Numeric arg0) -> Numeric
 
-  def *: (Numeric arg0) -> Numeric
+  def -@: () -> Numeric
 
   def /: (Numeric arg0) -> Numeric
-
-  def -@: () -> Numeric
 
   def <: (Numeric arg0) -> bool
 

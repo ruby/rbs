@@ -100,7 +100,11 @@ class Integer < Numeric
 
   def abs2: () -> Integer
 
+  def allbits?: (_ToInt mask) -> bool
+
   def angle: () -> Numeric
+
+  def anybits?: (_ToInt mask) -> bool
 
   def arg: () -> Numeric
 
@@ -186,6 +190,8 @@ class Integer < Numeric
 
   # Returns 1.
   def denominator: () -> Integer
+
+  def digits: (?Integer base) -> ::Array[Integer]
 
   def div: (Integer arg0) -> Integer
          | (Float arg0) -> Integer
@@ -274,6 +280,8 @@ class Integer < Numeric
   # ```
   def next: () -> Integer
 
+  def nobits?: (_ToInt mask) -> bool
+
   # Returns self.
   def numerator: () -> Integer
 
@@ -293,6 +301,9 @@ class Integer < Numeric
   def ord: () -> Integer
 
   def phase: () -> Numeric
+
+  def pow: (Numeric numeric) -> Numeric
+         | (Integer other, Integer modulo) -> Integer
 
   # Returns the predecessor of `int`, i.e. the
   # [Integer](Integer.downloaded.ruby_doc) equal to `int-1` .
@@ -465,6 +476,7 @@ class Integer < Numeric
           | (34) -> String
           | (35) -> String
           | (36) -> String
+
   # Returns `int` truncated (toward zero) to a precision of `ndigits`
   # decimal digits (default: 0).
   # 
@@ -489,15 +501,4 @@ class Integer < Numeric
   def |: (Integer arg0) -> Integer
 
   def ~: () -> Integer
-
-  def digits: (?Integer base) -> ::Array[Integer]
-
-  def allbits?: (_ToInt mask) -> bool
-
-  def anybits?: (_ToInt mask) -> bool
-
-  def nobits?: (_ToInt mask) -> bool
-
-  def pow: (Numeric numeric) -> Numeric
-         | (Integer other, Integer modulo) -> Integer
 end
