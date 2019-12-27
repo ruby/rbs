@@ -32,6 +32,10 @@
 # [Binding](Binding) objects have no class-specific
 # methods.
 class Binding < Object
+  def eval: (String arg0, ?String filename, ?Integer lineno) -> untyped
+
+  def irb: () -> void
+
   # Returns `true` if a local variable `symbol` exists.
   # 
   # ```ruby
@@ -92,15 +96,11 @@ class Binding < Object
   # if `obj` can be dumped in Ruby code.
   def local_variable_set: [U] (String | Symbol symbol, U obj) -> U
 
+  def local_variables: () -> ::Array[Symbol]
+
   # Returns the bound receiver of the binding object.
   def receiver: () -> untyped
 
   # Returns the Ruby source filename and line number of the binding object.
   def source_location: () -> [ String, Integer ]
-
-  def eval: (String arg0, ?String filename, ?Integer lineno) -> untyped
-
-  def irb: () -> void
-
-  def local_variables: () -> ::Array[Symbol]
 end
