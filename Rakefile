@@ -9,7 +9,11 @@ Rake::TestTask.new(:test) do |t|
   end
 end
 
-task :default => [:test, :stdlib_test, :rubocop]
+task :default => [:test, :stdlib_test, :rubocop, :validate]
+
+task :validate do
+  sh "rbs validate"
+end
 
 task :stdlib_test do
   sh "ruby bin/test_runner.rb"
