@@ -33,9 +33,11 @@ class Ruby::Signature::RuntimePrototypeTest < Minitest::Test
   end
 
   def test_1
-    p = Runtime.new(patterns: ["Ruby::Signature::RuntimePrototypeTest::*"], env: nil, missing_only: false, merge: false)
+    SignatureManager.new do |manager|
+      manager.build do |env|
+        p = Runtime.new(patterns: ["Ruby::Signature::RuntimePrototypeTest::*"], env: env, merge: false)
 
-    assert_write p.decls, <<-EOF
+        assert_write p.decls, <<-EOF
 module Ruby::Signature::RuntimePrototypeTest::Foo
   include Enumerable
 end
@@ -60,42 +62,8 @@ end
 
 Ruby::Signature::RuntimePrototypeTest::Test::NAME: String
     EOF
-  end
-
-  def test_missing_only
-    SignatureManager.new do |manager|
-      manager.files[Pathname("foo.rbs")] = <<EOF
-class Ruby::Signature::RuntimePrototypeTest::Test
-  def self.baz: () -> void
-
-  def foo: () -> void
-
-  def bar: () -> void
-end
-EOF
-
-      manager.build do |env|
-        p = Runtime.new(patterns: ["Ruby::Signature::RuntimePrototypeTest::*"], env: env, missing_only: true, merge: false)
-
-        assert_write p.decls, <<-EOF
-module Ruby::Signature::RuntimePrototypeTest::Foo
-  include Enumerable
-end
-
-class Ruby::Signature::RuntimePrototypeTest::Test < String
-  include Foo
-
-  def self.b: () -> untyped
-
-  private
-
-  def a: () -> untyped
-end
-
-Ruby::Signature::RuntimePrototypeTest::Test::NAME: String
-        EOF
       end
-    end
+    end 
   end
 
   def test_merge_types
@@ -112,7 +80,7 @@ end
 EOF
 
       manager.build do |env|
-        p = Runtime.new(patterns: ["Ruby::Signature::RuntimePrototypeTest::*"], env: env, missing_only: false, merge: true)
+        p = Runtime.new(patterns: ["Ruby::Signature::RuntimePrototypeTest::*"], env: env, merge: true)
 
         assert_write p.decls, <<-EOF
 module Ruby::Signature::RuntimePrototypeTest::Foo

@@ -3,14 +3,12 @@ module Ruby
     module Prototype
       class Runtime
         attr_reader :patterns
-        attr_reader :missing_only
         attr_reader :env
         attr_reader :merge
 
-        def initialize(patterns:, env:, missing_only:, merge:)
+        def initialize(patterns:, env:, merge:)
           @patterns = patterns
           @decls = nil
-          @missing_only = missing_only
           @env = env
           @merge = merge
         end
@@ -27,29 +25,6 @@ module Ruby
 
         def builder
           @builder ||= DefinitionBuilder.new(env: env)
-        end
-
-        def print_definition?(module_name, instance: nil, singleton: nil)
-          return true unless missing_only
-
-          definition = if env.class?(module_name.absolute!)
-                         case
-                         when instance
-                           builder.build_instance(module_name.absolute!)
-                         when singleton
-                           builder.build_singleton(module_name.absolute!)
-                         else
-                           raise
-                         end
-                       end
-
-          method_name = instance || singleton
-
-          if definition
-            !definition.methods.key?(method_name)
-          else
-            true
-          end
         end
 
         def parse(file)
@@ -190,8 +165,6 @@ module Ruby
 
         def generate_methods(mod, module_name, members)
           mod.singleton_methods(false).sort.each do |name|
-            next unless print_definition?(module_name, singleton: name)
-
             method = mod.singleton_method(name)
 
             if method.name == method.original_name
@@ -220,13 +193,11 @@ module Ruby
             end
           end
 
-          public_instance_methods = mod.public_instance_methods(false).select {|name| print_definition?(module_name, instance: name) }
+          public_instance_methods = mod.public_instance_methods(false)
           unless public_instance_methods.empty?
             members << AST::Members::Public.new(location: nil)
 
             public_instance_methods.sort.each do |name|
-              next unless print_definition?(module_name, instance: name)
-
               method = mod.instance_method(name)
 
               if method.name == method.original_name
@@ -256,7 +227,7 @@ module Ruby
             end
           end
 
-          private_instance_methods = mod.private_instance_methods(false).select {|name| print_definition?(module_name, instance: name) }
+          private_instance_methods = mod.private_instance_methods(false)
           unless private_instance_methods.empty?
             members << AST::Members::Private.new(location: nil)
 

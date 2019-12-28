@@ -419,7 +419,6 @@ module Ruby
         when "runtime"
           require_libs = []
           relative_libs = []
-          missing_only = false
           merge = false
 
           OptionParser.new do |opts|
@@ -428,9 +427,6 @@ module Ruby
             end
             opts.on("--require-relative=[LIB]") do |lib|
               relative_libs << lib
-            end
-            opts.on("--missing-only") do
-              missing_only = true
             end
             opts.on("--merge") do
               merge = true
@@ -447,7 +443,7 @@ module Ruby
           require(*require_libs) unless require_libs.empty?
           require_relative(*relative_libs) unless relative_libs.empty?
 
-          decls = Prototype::Runtime.new(patterns: args, missing_only: missing_only, env: env, merge: merge).decls
+          decls = Prototype::Runtime.new(patterns: args, env: env, merge: merge).decls
         else
           stdout.puts "Supported formats: rbi, rb, runtime"
           exit 1
