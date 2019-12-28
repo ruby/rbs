@@ -420,6 +420,7 @@ module Ruby
           require_libs = []
           relative_libs = []
           merge = false
+          owners_included = []
 
           OptionParser.new do |opts|
             opts.on("--require=[LIB]") do |lib|
@@ -430,6 +431,9 @@ module Ruby
             end
             opts.on("--merge") do
               merge = true
+            end
+            opts.on("--method-owner=[CLASS]") do |klass|
+              owners_included << klass
             end
           end.parse!(args)
 
@@ -443,7 +447,7 @@ module Ruby
           require(*require_libs) unless require_libs.empty?
           require_relative(*relative_libs) unless relative_libs.empty?
 
-          decls = Prototype::Runtime.new(patterns: args, env: env, merge: merge).decls
+          decls = Prototype::Runtime.new(patterns: args, env: env, merge: merge, owners_included: owners_included).decls
         else
           stdout.puts "Supported formats: rbi, rb, runtime"
           exit 1
