@@ -6,43 +6,45 @@ class Ruby::Signature::RuntimePrototypeTest < Minitest::Test
 
   include TestHelper
 
-  module Foo
-    include Enumerable
-  end
-
-  class Test < String
-    include Foo
-
-    NAME = "Hello"
-
-    def foo(foo, bar=1, *baz, a, b:, c: nil, **d)
+  module TestTargets
+    module Foo
+      include Enumerable
     end
 
-    alias bar foo
+    class Test < String
+      include Foo
 
-    private
+      NAME = "Hello"
 
-    def a()
-    end
+      def foo(foo, bar=1, *baz, a, b:, c: nil, **d)
+      end
 
-    def self.baz(&block)
-    end
+      alias bar foo
 
-    def self.b()
+      private
+
+      def a()
+      end
+
+      def self.baz(&block)
+      end
+
+      def self.b()
+      end
     end
   end
 
   def test_1
     SignatureManager.new do |manager|
       manager.build do |env|
-        p = Runtime.new(patterns: ["Ruby::Signature::RuntimePrototypeTest::*"], env: env, merge: false)
+        p = Runtime.new(patterns: ["Ruby::Signature::RuntimePrototypeTest::TestTargets::*"], env: env, merge: false)
 
         assert_write p.decls, <<-EOF
-module Ruby::Signature::RuntimePrototypeTest::Foo
+module Ruby::Signature::RuntimePrototypeTest::TestTargets::Foo
   include Enumerable
 end
 
-class Ruby::Signature::RuntimePrototypeTest::Test < String
+class Ruby::Signature::RuntimePrototypeTest::TestTargets::Test < String
   include Foo
 
   def self.b: () -> untyped
@@ -60,7 +62,7 @@ class Ruby::Signature::RuntimePrototypeTest::Test < String
   def a: () -> untyped
 end
 
-Ruby::Signature::RuntimePrototypeTest::Test::NAME: String
+Ruby::Signature::RuntimePrototypeTest::TestTargets::Test::NAME: String
     EOF
       end
     end 
@@ -69,7 +71,7 @@ Ruby::Signature::RuntimePrototypeTest::Test::NAME: String
   def test_merge_types
     SignatureManager.new do |manager|
       manager.files[Pathname("foo.rbs")] = <<EOF
-class Ruby::Signature::RuntimePrototypeTest::Test
+class Ruby::Signature::RuntimePrototypeTest::TestTargets::Test
   def self.baz: () -> void
 
   def foo: (String) -> Integer
@@ -80,14 +82,14 @@ end
 EOF
 
       manager.build do |env|
-        p = Runtime.new(patterns: ["Ruby::Signature::RuntimePrototypeTest::*"], env: env, merge: true)
+        p = Runtime.new(patterns: ["Ruby::Signature::RuntimePrototypeTest::TestTargets::*"], env: env, merge: true)
 
         assert_write p.decls, <<-EOF
-module Ruby::Signature::RuntimePrototypeTest::Foo
+module Ruby::Signature::RuntimePrototypeTest::TestTargets::Foo
   include Enumerable
 end
 
-class Ruby::Signature::RuntimePrototypeTest::Test < String
+class Ruby::Signature::RuntimePrototypeTest::TestTargets::Test < String
   include Foo
 
   def self.b: () -> untyped
@@ -106,7 +108,7 @@ class Ruby::Signature::RuntimePrototypeTest::Test < String
   def a: () -> untyped
 end
 
-Ruby::Signature::RuntimePrototypeTest::Test::NAME: String
+Ruby::Signature::RuntimePrototypeTest::TestTargets::Test::NAME: String
         EOF
       end
     end
