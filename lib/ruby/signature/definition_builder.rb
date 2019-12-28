@@ -342,6 +342,8 @@ module Ruby
           end
 
           Definition.new(declaration: decl, self_type: self_type, ancestors: ancestors).tap do |definition|
+            alias_members = []
+
             each_member_with_accessibility(decl.members) do |member, accessibility|
               case member
               when AST::Members::MethodDefinition
@@ -447,22 +449,7 @@ module Ruby
 
               when AST::Members::Alias
                 if member.instance?
-                  UnknownMethodAliasError.check!(
-                    methods: definition.methods,
-                    original_name: member.old_name,
-                    aliased_name: member.new_name,
-                    location: member.location
-                  )
-
-                  DuplicatedMethodDefinitionError.check!(
-                    decl: decl,
-                    methods: definition.methods,
-                    name: member.new_name,
-                    location: member.location
-                  )
-
-                  # FIXME: may cause a problem if #old_name has super type
-                  definition.methods[member.new_name] = definition.methods[member.old_name]
+                  alias_members << member
                 end
               when AST::Members::Include
                 if member.name.interface?
@@ -517,6 +504,25 @@ module Ruby
                   declared_in: decl
                 )
               end
+            end
+
+            alias_members.each do |member|
+              UnknownMethodAliasError.check!(
+                methods: definition.methods,
+                original_name: member.old_name,
+                aliased_name: member.new_name,
+                location: member.location
+              )
+
+              DuplicatedMethodDefinitionError.check!(
+                decl: decl,
+                methods: definition.methods,
+                name: member.new_name,
+                location: member.location
+              )
+
+              # FIXME: may cause a problem if #old_name has super type
+              definition.methods[member.new_name] = definition.methods[member.old_name]
             end
 
             validate_parameter_variance(
@@ -625,6 +631,8 @@ module Ruby
         end
 
         Definition.new(declaration: decl, self_type: self_type, ancestors: ancestors).tap do |definition|
+          alias_members = []
+
           each_member_with_accessibility(decl.members) do |member, accessibility|
             case member
             when AST::Members::MethodDefinition
@@ -654,22 +662,7 @@ module Ruby
               end
             when AST::Members::Alias
               if member.singleton?
-                UnknownMethodAliasError.check!(
-                  methods: definition.methods,
-                  original_name: member.old_name,
-                  aliased_name: member.new_name,
-                  location: member.location
-                )
-
-                DuplicatedMethodDefinitionError.check!(
-                  decl: decl,
-                  methods: definition.methods,
-                  name: member.new_name,
-                  location: member.location
-                )
-
-                # FIXME: may cause a problem if #old_name has super type
-                definition.methods[member.new_name] = definition.methods[member.old_name]
+                alias_members << member
               end
             when AST::Members::Extend
               if member.name.interface?
@@ -724,6 +717,25 @@ module Ruby
                 declared_in: decl
               )
             end
+          end
+
+          alias_members.each do |member|
+            UnknownMethodAliasError.check!(
+              methods: definition.methods,
+              original_name: member.old_name,
+              aliased_name: member.new_name,
+              location: member.location
+            )
+
+            DuplicatedMethodDefinitionError.check!(
+              decl: decl,
+              methods: definition.methods,
+              name: member.new_name,
+              location: member.location
+            )
+
+            # FIXME: may cause a problem if #old_name has super type
+            definition.methods[member.new_name] = definition.methods[member.old_name]
           end
         end
       end
@@ -810,6 +822,8 @@ module Ruby
         namespace = type_name.to_namespace
 
         Definition.new(declaration: declaration, self_type: self_type, ancestors: []).tap do |definition|
+          alias_members = []
+
           declaration.members.each do |member|
             case member
             when AST::Members::Include
@@ -857,23 +871,27 @@ module Ruby
               )
               definition.methods[member.name] = method
             when AST::Members::Alias
-              UnknownMethodAliasError.check!(
-                methods: definition.methods,
-                original_name: member.old_name,
-                aliased_name: member.new_name,
-                location: member.location
-              )
-
-              DuplicatedMethodDefinitionError.check!(
-                decl: declaration,
-                methods: definition.methods,
-                name: member.new_name,
-                location: member.location
-              )
-
-              # FIXME: may cause a problem if #old_name has super type
-              definition.methods[member.new_name] = definition.methods[member.old_name]
+              alias_members << member
             end
+          end
+
+          alias_members.each do |member|
+            UnknownMethodAliasError.check!(
+              methods: definition.methods,
+              original_name: member.old_name,
+              aliased_name: member.new_name,
+              location: member.location
+            )
+
+            DuplicatedMethodDefinitionError.check!(
+              decl: declaration,
+              methods: definition.methods,
+              name: member.new_name,
+              location: member.location
+            )
+
+            # FIXME: may cause a problem if #old_name has super type
+            definition.methods[member.new_name] = definition.methods[member.old_name]
           end
         end
       end
