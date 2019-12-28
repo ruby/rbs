@@ -113,4 +113,46 @@ Ruby::Signature::RuntimePrototypeTest::TestTargets::Test::NAME: String
       end
     end
   end
+
+  module IncludeTests
+    class SuperClass
+      def foo; end
+      def self.foo; end
+    end
+
+    class ChildClass < SuperClass
+      def bar; end
+    end
+  end
+
+  def test_include_owner
+    SignatureManager.new do |manager|
+      manager.build do |env|
+        p = Runtime.new(patterns: ["Ruby::Signature::RuntimePrototypeTest::IncludeTests::*"],
+                        env: env,
+                        merge: true,
+                        owners_included: ["Ruby::Signature::RuntimePrototypeTest::IncludeTests::SuperClass"])
+
+        assert_write p.decls, <<-EOF
+class Ruby::Signature::RuntimePrototypeTest::IncludeTests::ChildClass < Ruby::Signature::RuntimePrototypeTest::IncludeTests::SuperClass
+  def self.foo: () -> untyped
+
+  public
+
+  def bar: () -> untyped
+
+  def foo: () -> untyped
+end
+
+class Ruby::Signature::RuntimePrototypeTest::IncludeTests::SuperClass
+  def self.foo: () -> untyped
+
+  public
+
+  def foo: () -> untyped
+end
+        EOF
+      end
+    end
+  end
 end

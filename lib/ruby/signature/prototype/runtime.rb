@@ -5,12 +5,16 @@ module Ruby
         attr_reader :patterns
         attr_reader :env
         attr_reader :merge
+        attr_reader :owners_included
 
-        def initialize(patterns:, env:, merge:)
+        def initialize(patterns:, env:, merge:, owners_included: [])
           @patterns = patterns
           @decls = nil
           @env = env
           @merge = merge
+          @owners_included = owners_included.map do |name|
+            Object.const_get(name)
+          end
         end
 
         def target?(const)
@@ -167,16 +171,16 @@ module Ruby
           case
           when instance
             method = mod.instance_method(instance)
-            method.owner == mod
+            method.owner == mod || owners_included.any? {|m| method.owner == m }
           when singleton
             method = mod.singleton_class.instance_method(singleton)
-            method.owner == mod.singleton_class
+            method.owner == mod.singleton_class || owners_included.any? {|m| method.owner == m.singleton_class }
           end
         end
 
         def generate_methods(mod, module_name, members)
           mod.singleton_methods.select {|name| target_method?(mod, singleton: name) }.sort.each do |name|
-            method = mod.singleton_method(name)
+            method = mod.singleton_class.instance_method(name)
 
             if method.name == method.original_name
               merge_rbs(module_name, members, singleton: name) do
