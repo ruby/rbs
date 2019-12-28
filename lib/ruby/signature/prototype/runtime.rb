@@ -163,8 +163,19 @@ module Ruby
           end
         end
 
+        def target_method?(mod, instance: nil, singleton: nil)
+          case
+          when instance
+            method = mod.instance_method(instance)
+            method.owner == mod
+          when singleton
+            method = mod.singleton_class.instance_method(singleton)
+            method.owner == mod.singleton_class
+          end
+        end
+
         def generate_methods(mod, module_name, members)
-          mod.singleton_methods(false).sort.each do |name|
+          mod.singleton_methods.select {|name| target_method?(mod, singleton: name) }.sort.each do |name|
             method = mod.singleton_method(name)
 
             if method.name == method.original_name
@@ -193,7 +204,7 @@ module Ruby
             end
           end
 
-          public_instance_methods = mod.public_instance_methods(false)
+          public_instance_methods = mod.public_instance_methods.select {|name| target_method?(mod, instance: name) }
           unless public_instance_methods.empty?
             members << AST::Members::Public.new(location: nil)
 
@@ -227,7 +238,7 @@ module Ruby
             end
           end
 
-          private_instance_methods = mod.private_instance_methods(false)
+          private_instance_methods = mod.private_instance_methods.select {|name| target_method?(mod, instance: name) }
           unless private_instance_methods.empty?
             members << AST::Members::Private.new(location: nil)
 
