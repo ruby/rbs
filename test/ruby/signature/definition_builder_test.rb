@@ -1023,4 +1023,46 @@ EOF
       end
     end
   end
+
+  def test_build_alias
+    SignatureManager.new do |manager|
+      manager.files[Pathname("foo.rbs")] = <<EOF
+class Hello
+  alias foo bar
+  def bar: () -> Integer
+
+  alias self.hoge self.huga
+  def self.huga: () -> void
+end
+
+interface _Person
+  alias first_name name
+  def name: () -> String
+end
+EOF
+
+      manager.build do |env|
+        builder = DefinitionBuilder.new(env: env)
+
+        builder.build_instance(type_name("::Hello")).yield_self do |definition|
+          assert_instance_of Definition, definition
+
+          assert_method_definition definition.methods[:foo], ["() -> ::Integer"]
+        end
+
+        builder.build_singleton(type_name("::Hello")).yield_self do |definition|
+          assert_instance_of Definition, definition
+
+          assert_method_definition definition.methods[:hoge], ["() -> void"]
+        end
+
+        interface_name = type_name("::_Person")
+        builder.build_interface(interface_name, env.find_type_decl(interface_name)).yield_self do |definition|
+          assert_instance_of Definition, definition
+
+          assert_method_definition definition.methods[:first_name], ["() -> ::String"]
+        end
+      end
+    end
+  end
 end
