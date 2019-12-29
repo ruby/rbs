@@ -193,9 +193,7 @@ class Prime::PseudoPrimeGenerator
   #
   def succ: () -> Integer
 
-  def upper_bound: () -> Integer?
-
-  def upper_bound=: (Integer?) -> void
+  attr_accessor upper_bound (): Integer?
 end
 
 class EratosthenesGenerator < PseudoPrimeGenerator
