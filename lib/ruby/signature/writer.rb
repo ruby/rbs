@@ -37,11 +37,8 @@ module Ruby
       end
 
       def write(decls)
-        decls.each.with_index do |decl, index|
-          if index > 0
-            out.puts
-          end
-
+        [nil, *decls].each_cons(2) do |prev, decl|
+          preserve_empty_line(prev, decl)
           write_decl decl
         end
       end
@@ -56,10 +53,8 @@ module Ruby
           write_annotation decl.annotations, level: 0
           out.puts "class #{name_and_params(decl.name, decl.type_params)}#{super_class}"
 
-          decl.members.each.with_index do |member, index|
-            if index > 0
-              out.puts
-            end
+          [nil, *decl.members].each_cons(2) do |prev, member|
+            preserve_empty_line prev, member
             write_member member
           end
 
@@ -250,6 +245,24 @@ module Ruby
                 "(#{attr.ivar_name})"
               end
         "attr_#{kind} #{attr.name}#{var}: #{attr.type}"
+      end
+
+      def preserve_empty_line(prev, decl)
+        return unless prev
+
+        # When the signature is not constructed by the parser,
+        # it always inserts an empty line.
+        unless prev.location
+          out.puts
+          return
+        end
+
+        prev_end_line = prev.location.end_line
+        decl = decl.comment if decl.respond_to?(:comment) && decl.comment
+        start_line = decl.location.start_line
+        if start_line - prev_end_line > 1
+          out.puts
+        end
       end
     end
   end
