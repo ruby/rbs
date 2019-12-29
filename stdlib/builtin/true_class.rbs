@@ -7,7 +7,9 @@ class TrueClass
   def !: () -> false
 
   # And—Returns `false` if *obj* is `nil` or `false`, `true` otherwise.
-  def &: (bool obj) -> bool
+  def &: (nil) -> false
+       | (false) -> false
+       | (untyped obj) -> true
 
   def ===: (true) -> true
          | (untyped obj) -> false

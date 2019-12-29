@@ -8,6 +8,12 @@ class TrueClassTest < StdlibTest
     !true
   end
 
+  def test_and
+    true.&(nil)
+    true.&(false)
+    true.&(42)
+  end
+
   def test_eqq
     true === true
     true === false
