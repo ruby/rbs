@@ -4,7 +4,7 @@
 class TrueClass
   public
 
-  def !: () -> bool
+  def !: () -> false
 
   # And—Returns `false` if *obj* is `nil` or `false`, `true` otherwise.
   def &: (bool obj) -> bool

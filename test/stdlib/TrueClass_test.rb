@@ -4,6 +4,10 @@ class TrueClassTest < StdlibTest
   target TrueClass
   using hook.refinement
 
+  def test_not
+    !true
+  end
+
   def test_eqq
     true === true
     true === false
