@@ -20,4 +20,8 @@ class TrueClassTest < StdlibTest
   def test_to_s
     true.to_s
   end
+
+  def test_or
+    true.|(nil)
+  end
 end
