@@ -13,6 +13,12 @@ class TrueClassTest < StdlibTest
     true === false
   end
 
+  def test_xor
+    true.^(nil)
+    true.^(false)
+    true.^(42)
+  end
+
   def test_inspect
     true.inspect
   end

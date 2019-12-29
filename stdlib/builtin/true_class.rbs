@@ -14,7 +14,9 @@ class TrueClass
 
   # Exclusive Or—Returns `true` if *obj* is `nil` or `false`, `false`
   # otherwise.
-  def ^: (bool obj) -> bool
+  def ^: (nil) -> true
+       | (false) -> true
+       | (untyped obj) -> false
 
   alias inspect to_s
 
