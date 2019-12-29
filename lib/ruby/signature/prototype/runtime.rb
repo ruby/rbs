@@ -3,16 +3,18 @@ module Ruby
     module Prototype
       class Runtime
         attr_reader :patterns
-        attr_reader :missing_only
         attr_reader :env
         attr_reader :merge
+        attr_reader :owners_included
 
-        def initialize(patterns:, env:, missing_only:, merge:)
+        def initialize(patterns:, env:, merge:, owners_included: [])
           @patterns = patterns
           @decls = nil
-          @missing_only = missing_only
           @env = env
           @merge = merge
+          @owners_included = owners_included.map do |name|
+            Object.const_get(name)
+          end
         end
 
         def target?(const)
@@ -27,29 +29,6 @@ module Ruby
 
         def builder
           @builder ||= DefinitionBuilder.new(env: env)
-        end
-
-        def print_definition?(module_name, instance: nil, singleton: nil)
-          return true unless missing_only
-
-          definition = if env.class?(module_name.absolute!)
-                         case
-                         when instance
-                           builder.build_instance(module_name.absolute!)
-                         when singleton
-                           builder.build_singleton(module_name.absolute!)
-                         else
-                           raise
-                         end
-                       end
-
-          method_name = instance || singleton
-
-          if definition
-            !definition.methods.key?(method_name)
-          else
-            true
-          end
         end
 
         def parse(file)
@@ -188,11 +167,20 @@ module Ruby
           end
         end
 
-        def generate_methods(mod, module_name, members)
-          mod.singleton_methods(false).sort.each do |name|
-            next unless print_definition?(module_name, singleton: name)
+        def target_method?(mod, instance: nil, singleton: nil)
+          case
+          when instance
+            method = mod.instance_method(instance)
+            method.owner == mod || owners_included.any? {|m| method.owner == m }
+          when singleton
+            method = mod.singleton_class.instance_method(singleton)
+            method.owner == mod.singleton_class || owners_included.any? {|m| method.owner == m.singleton_class }
+          end
+        end
 
-            method = mod.singleton_method(name)
+        def generate_methods(mod, module_name, members)
+          mod.singleton_methods.select {|name| target_method?(mod, singleton: name) }.sort.each do |name|
+            method = mod.singleton_class.instance_method(name)
 
             if method.name == method.original_name
               merge_rbs(module_name, members, singleton: name) do
@@ -220,13 +208,11 @@ module Ruby
             end
           end
 
-          public_instance_methods = mod.public_instance_methods(false).select {|name| print_definition?(module_name, instance: name) }
+          public_instance_methods = mod.public_instance_methods.select {|name| target_method?(mod, instance: name) }
           unless public_instance_methods.empty?
             members << AST::Members::Public.new(location: nil)
 
             public_instance_methods.sort.each do |name|
-              next unless print_definition?(module_name, instance: name)
-
               method = mod.instance_method(name)
 
               if method.name == method.original_name
@@ -256,7 +242,7 @@ module Ruby
             end
           end
 
-          private_instance_methods = mod.private_instance_methods(false).select {|name| print_definition?(module_name, instance: name) }
+          private_instance_methods = mod.private_instance_methods.select {|name| target_method?(mod, instance: name) }
           unless private_instance_methods.empty?
             members << AST::Members::Private.new(location: nil)
 
