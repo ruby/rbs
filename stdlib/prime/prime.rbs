@@ -6,14 +6,10 @@ extension Integer (Prime)
 end
 
 class Prime
-  def self.each: (?Integer ubound, ?Prime::PseudoPrimeGenerator generator) { (Integer) -> void } -> void
-  def      each: (?Integer ubound, ?Prime::PseudoPrimeGenerator generator) { (Integer) -> void } -> void
-  def self.prime?: (Integer value, ?Prime::PseudoPrimeGenerator generator) -> bool
-  def      prime?: (Integer value, ?Prime::PseudoPrimeGenerator generator) -> bool
-  def self.int_from_prime_division: (Array[[Integer, Integer]]) -> Integer
-  def      int_from_prime_division: (Array[[Integer, Integer]]) -> Integer
-  def self.prime_division: (Integer, ?Prime::PseudoPrimeGenerator generator) -> Array[[Integer, Integer]]
-  def      prime_division: (Integer, ?Prime::PseudoPrimeGenerator generator) -> Array[[Integer, Integer]]
+  def self?.each: (?Integer ubound, ?Prime::PseudoPrimeGenerator generator) { (Integer) -> void } -> void
+  def self?.prime?: (Integer value, ?Prime::PseudoPrimeGenerator generator) -> bool
+  def self?.int_from_prime_division: (Array[[Integer, Integer]]) -> Integer
+  def self?.prime_division: (Integer, ?Prime::PseudoPrimeGenerator generator) -> Array[[Integer, Integer]]
 end
 
 class Prime::PseudoPrimeGenerator
