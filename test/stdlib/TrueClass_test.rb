@@ -9,6 +9,10 @@ class TrueClassTest < StdlibTest
     true === false
   end
 
+  def test_inspect
+    true.inspect
+  end
+
   def test_to_s
     true.to_s
   end

@@ -16,6 +16,8 @@ class TrueClass
   # otherwise.
   def ^: (bool obj) -> bool
 
+  alias inspect to_s
+
   # The string representation of `true` is "true".
   def to_s: () -> "true"
 
