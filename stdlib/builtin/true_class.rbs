@@ -16,6 +16,9 @@ class TrueClass
   # otherwise.
   def ^: (bool obj) -> bool
 
+  # The string representation of `true` is "true".
+  def to_s: () -> "true"
+
   # Or—Returns `true` . As *obj* is an argument to a method call, it is
   # always evaluated; there is no short-circuit evaluation in this case.
   def |: (bool obj) -> bool

@@ -8,4 +8,8 @@ class TrueClassTest < StdlibTest
     true === true
     true === false
   end
+
+  def test_to_s
+    true.to_s
+  end
 end
