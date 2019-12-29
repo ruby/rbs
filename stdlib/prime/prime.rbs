@@ -1,29 +1,41 @@
 extension Integer (Prime)
-  def self.from_prime_division: (Array[[String]]) -> Integer
-  def prime_division: (?Prime::PseudoPrimeGenerator) -> Array[[Integer, Integer]]
-  def prime?: -> bool
+  def self.from_prime_division: (Array[[ String ]]) -> Integer
+
+  def prime_division: (?Prime::PseudoPrimeGenerator) -> Array[[ Integer, Integer ]]
+
+  def prime?: () -> bool
+
   def self.each_prime: (Integer) { (Integer) -> void } -> void
 end
 
 class Prime
   def self?.each: (?Integer ubound, ?Prime::PseudoPrimeGenerator generator) { (Integer) -> void } -> void
+
+  def self?.int_from_prime_division: (Array[[ Integer, Integer ]]) -> Integer
+
   def self?.prime?: (Integer value, ?Prime::PseudoPrimeGenerator generator) -> bool
-  def self?.int_from_prime_division: (Array[[Integer, Integer]]) -> Integer
-  def self?.prime_division: (Integer, ?Prime::PseudoPrimeGenerator generator) -> Array[[Integer, Integer]]
+
+  def self?.prime_division: (Integer, ?Prime::PseudoPrimeGenerator generator) -> Array[[ Integer, Integer ]]
 end
 
 class Prime::PseudoPrimeGenerator
-  def initialize: (?Integer?) -> void
-  def upper_bound=: (Integer?) -> void
-  def upper_bound: -> (Integer?)
-
-  def succ: -> Integer
-  def next: -> Integer
-  def rewind: -> void
-
-  def each: { (Integer) -> void } -> void
-  def size: -> Float
   include Enumerable
+
+  def initialize: (?Integer?) -> void
+
+  def each: () { (Integer) -> void } -> void
+
+  def next: () -> Integer
+
+  def rewind: () -> void
+
+  def size: () -> Float
+
+  def succ: () -> Integer
+
+  def upper_bound: () -> Integer?
+
+  def upper_bound=: (Integer?) -> void
 end
 
 class EratosthenesGenerator < PseudoPrimeGenerator
