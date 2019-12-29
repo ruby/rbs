@@ -80,6 +80,7 @@ $ ruby-signature -I sig list
 
 ## Guides
 
+- [Standard library signature contribution guide](doc/signatures-contribution.md)
 - [Writing signatures guide](doc/sigs.md)
 - [Stdlib signatures guide](doc/stdlib.md)
 - [Syntax](doc/syntax.md)
