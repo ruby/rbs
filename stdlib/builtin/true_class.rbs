@@ -9,6 +9,9 @@ class TrueClass
   # And—Returns `false` if *obj* is `nil` or `false`, `true` otherwise.
   def &: (bool obj) -> bool
 
+  def ===: (true) -> true
+         | (untyped obj) -> false
+
   # Exclusive Or—Returns `true` if *obj* is `nil` or `false`, `false`
   # otherwise.
   def ^: (bool obj) -> bool
