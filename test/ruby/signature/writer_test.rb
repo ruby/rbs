@@ -200,6 +200,7 @@ end
     SIG
 
     assert_equal expected, format(src)
+
   end
 
   def test_smoke
