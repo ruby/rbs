@@ -2,6 +2,8 @@
 # represents a logically true value in boolean expressions. The class
 # provides operators allowing `true` to be used in logical expressions.
 class TrueClass
+  public
+
   def !: () -> bool
 
   # And—Returns `false` if *obj* is `nil` or `false`, `true` otherwise.
