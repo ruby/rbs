@@ -335,7 +335,7 @@ module Ruby
           alias eql? ==
 
           def hash
-            self.class.hash ^ new_name.hash ^ old_name.hash ^ kind
+            self.class.hash ^ new_name.hash ^ old_name.hash ^ kind.hash
           end
 
           def to_json(*a)
