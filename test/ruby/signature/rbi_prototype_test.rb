@@ -367,11 +367,11 @@ end
 
     assert_write parser.decls, <<-EOF
 # This is a class.
-# 
+#
 #   It is super useful.
 class Foo
   # This is useful method.
-  # 
+  #
   # Another comment.
   def foo: () -> void
          | () -> Integer
