@@ -30,4 +30,10 @@ class FalseClassTest < StdlibTest
   def test_to_s
     false.to_s
   end
+
+  def test_or
+    false | false
+    false | nil
+    false | 42
+  end
 end

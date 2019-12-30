@@ -26,5 +26,7 @@ class FalseClass
   def to_s: () -> "false"
 
   # Or—Returns `false` if *obj* is `nil` or `false` ; `true` otherwise.
-  def |: (untyped obj) -> bool
+  def |: (nil) -> false
+       | (false) -> false
+       | (untyped obj) -> true
 end
