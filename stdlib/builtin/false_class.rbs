@@ -3,6 +3,8 @@
 # provides operators allowing `false` to participate correctly in logical
 # expressions.
 class FalseClass
+  public
+
   def !: () -> TrueClass
 
   # And—Returns `false` . *obj* is always evaluated as it is the argument to
