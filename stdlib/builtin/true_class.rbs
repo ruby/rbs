@@ -5,45 +5,30 @@
 class TrueClass
   public
 
-  def !: () -> false
+  def !: () -> bool
 
   # And---Returns `false` if *obj* is `nil` or `false`, `true` otherwise.
   # 
-  # # arglists
-  #     true & obj    -> true or false
-  # 
   def &: (nil) -> false
        | (false) -> false
-       | (untyped obj) -> true
+       | (untyped obj) -> bool
 
   # Case Equality -- For class Object, effectively the same as calling `#==`, but
   # typically overridden by descendants to provide meaningful semantics in `case`
   # statements.
   # 
-  # # arglists
-  #     obj === other   -> true or false
-  # 
   def ===: (true) -> true
-         | (untyped obj) -> false
+         | (untyped obj) -> bool
 
   # Exclusive Or---Returns `true` if *obj* is `nil` or `false`, `false` otherwise.
   # 
-  # # arglists
-  #     true ^ obj   -> !obj
-  # 
   def ^: (nil) -> true
        | (false) -> true
-       | (untyped obj) -> false
+       | (untyped obj) -> bool
 
-  # # arglists
-  #     inspect()
-  # 
   alias inspect to_s
 
   # The string representation of `true` is "true".
-  # 
-  # # arglists
-  #     true.to_s   ->  "true"
   # 
   def to_s: () -> "true"
 
@@ -57,8 +42,5 @@ class TrueClass
   # 
   #     or
   # 
-  # # arglists
-  #     true | obj   -> true
-  # 
-  def |: (bool obj) -> true
+  def |: (bool obj) -> bool
 end
