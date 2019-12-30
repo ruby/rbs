@@ -8,11 +8,10 @@ It consists of a parser, the syntax, and class definition interpreter, the seman
 ## Build
 
 We haven't published a gem yet.
-You need to install the dependencies, and build its parser.
+You need to install the dependencies, and build its parser with `bin/setup`.
 
 ```
-$ bundle
-$ bundle exec rake parser
+$ bin/setup
 $ bundle exec exe/ruby-signature
 ```
 
@@ -31,7 +30,7 @@ $ ruby-signature method ::Object tap
 $ ruby-signature list
 ```
 
-This command lists all of the classes/modules/interfaes defined in `.rbs` files.
+This command lists all of the classes/modules/interfaces defined in `.rbs` files.
 
 ### ruby-signature ancestors [--singleton|--instance] CLASS
 
