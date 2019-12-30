@@ -11,4 +11,9 @@ class FalseClassTest < StdlibTest
   def test_and
     false & true
   end
+
+  def test_eqq
+    false === false
+    false === true
+  end
 end

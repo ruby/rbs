@@ -11,6 +11,9 @@ class FalseClass
   # a method call—there is no short-circuit evaluation in this case.
   def &: (untyped obj) -> false
 
+  def ===: (false) -> true
+         | (untyped obj) -> false
+
   # Exclusive Or—If *obj* is `nil` or `false`, returns `false` ; otherwise,
   # returns `true` .
   def ^: (untyped obj) -> bool
