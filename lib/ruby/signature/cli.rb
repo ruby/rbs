@@ -70,22 +70,23 @@ module Ruby
       def run(args)
         options = LibraryOptions.new
 
-        OptionParser.new do |opts|
-          library_parse(opts, options: options)
-          parse_logging_options(opts)
-        end.order!(args)
+        opts = OptionParser.new
+        opts.banner = <<~USAGE
+          Usage: rbs [options] COMMAND
+          Available commands: #{COMMANDS.join(", ")}
+        USAGE
+        library_parse(opts, options: options)
+        parse_logging_options(opts)
+
+        opts.order!(args)
 
         command = args.shift&.to_sym
 
         if COMMANDS.include?(command)
           __send__ :"run_#{command}", args, options
         else
-          run_help()
+          stdout.puts opts.help
         end
-      end
-
-      def run_help
-        stdout.puts "Available commands: #{COMMANDS.join(", ")}"
       end
 
       def run_ast(args, options)
