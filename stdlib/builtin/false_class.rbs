@@ -5,7 +5,7 @@
 class FalseClass
   public
 
-  def !: () -> TrueClass
+  def !: () -> true
 
   # And—Returns `false` . *obj* is always evaluated as it is the argument to
   # a method call—there is no short-circuit evaluation in this case.
