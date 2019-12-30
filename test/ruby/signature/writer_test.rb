@@ -6,13 +6,17 @@ class Ruby::Signature::WriterTest < Minitest::Test
   Parser = Ruby::Signature::Parser
   Writer = Ruby::Signature::Writer
 
-  def assert_writer(sig)
-    Parser.parse_signature(sig).tap do |decls|
+  def format(sig)
+    Parser.parse_signature(sig).then do |decls|
       writer = Writer.new(out: StringIO.new)
       writer.write(decls)
 
-      assert_equal sig, writer.out.string
+      writer.out.string
     end
+  end
+
+  def assert_writer(sig)
+    assert_equal sig, format(sig)
   end
 
   def test_const_decl
@@ -135,5 +139,80 @@ end
 class Foo[out A, unchecked B, in C] < Bar[A, C, B]
 end
     SIG
+  end
+
+  def test_preserve_empty_line
+    assert_writer <<-SIG
+class Foo
+  def initialize: () -> void
+  def foo: () -> void
+
+  def bar: () -> void
+  # comment
+  def self.foo: () -> void
+
+  # comment
+  def baz: () -> void
+end
+module Bar
+end
+
+class OneEmptyLine
+end
+
+# comment
+class C
+end
+# comment
+class D
+end
+    SIG
+  end
+
+  def test_remove_double_empty_lines
+    src = <<-SIG
+class Foo
+
+  def foo: () -> void
+
+
+  def bar: () -> void
+end
+
+
+module Bar
+
+
+  def foo: () -> void
+end
+    SIG
+
+    expected = <<-SIG
+class Foo
+  def foo: () -> void
+
+  def bar: () -> void
+end
+
+module Bar
+  def foo: () -> void
+end
+    SIG
+
+    assert_equal expected, format(src)
+
+  end
+
+  def test_smoke
+    Pathname.glob('stdlib/**/*.rbs').each do |path|
+      orig_decls = Ruby::Signature::Parser.parse_signature(path.read)
+
+      io = StringIO.new
+      w = Ruby::Signature::Writer.new(out: io)
+      w.write(orig_decls)
+      decls = Ruby::Signature::Parser.parse_signature(io.string)
+
+      assert_equal orig_decls, decls
+    end
   end
 end
