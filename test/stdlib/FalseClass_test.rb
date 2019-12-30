@@ -17,6 +17,12 @@ class FalseClassTest < StdlibTest
     false === true
   end
 
+  def test_xor
+    false ^ false
+    false ^ nil
+    false ^ 42
+  end
+
   def test_inspect
     false.inspect
   end

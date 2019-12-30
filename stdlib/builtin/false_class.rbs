@@ -16,7 +16,9 @@ class FalseClass
 
   # Exclusive Or—If *obj* is `nil` or `false`, returns `false` ; otherwise,
   # returns `true` .
-  def ^: (untyped obj) -> bool
+  def ^: (nil) -> false
+       | (false) -> false
+       | (untyped obj) -> true
 
   alias inspect to_s
 
