@@ -133,7 +133,7 @@ module Ruby
           when :FCALL
             if current_module
               # Inside method definition cannot reach here.
-              args = node.children[1].children
+              args = node.children[1]&.children || []
 
               case node.children[0]
               when :include
