@@ -7,4 +7,8 @@ class FalseClassTest < StdlibTest
   def test_not
     !false
   end
+
+  def test_and
+    false & true
+  end
 end
