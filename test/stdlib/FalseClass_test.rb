@@ -17,6 +17,10 @@ class FalseClassTest < StdlibTest
     false === true
   end
 
+  def test_inspect
+    false.inspect
+  end
+
   def test_to_s
     false.to_s
   end

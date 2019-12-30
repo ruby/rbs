@@ -18,6 +18,8 @@ class FalseClass
   # returns `true` .
   def ^: (untyped obj) -> bool
 
+  alias inspect to_s
+
   # The string representation of `false` is "false".
   def to_s: () -> "false"
 
