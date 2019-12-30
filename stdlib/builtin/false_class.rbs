@@ -18,6 +18,9 @@ class FalseClass
   # returns `true` .
   def ^: (untyped obj) -> bool
 
+  # The string representation of `false` is "false".
+  def to_s: () -> "false"
+
   # Or—Returns `false` if *obj* is `nil` or `false` ; `true` otherwise.
   def |: (untyped obj) -> bool
 end

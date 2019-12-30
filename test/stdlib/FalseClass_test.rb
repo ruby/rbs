@@ -16,4 +16,8 @@ class FalseClassTest < StdlibTest
     false === false
     false === true
   end
+
+  def test_to_s
+    false.to_s
+  end
 end
