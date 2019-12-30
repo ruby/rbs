@@ -3,6 +3,8 @@
 # provides operators allowing `false` to participate correctly in logical
 # expressions.
 class FalseClass
+  def !: () -> TrueClass
+
   # And—Returns `false` . *obj* is always evaluated as it is the argument to
   # a method call—there is no short-circuit evaluation in this case.
   def &: (untyped obj) -> FalseClass
@@ -13,6 +15,4 @@ class FalseClass
 
   # Or—Returns `false` if *obj* is `nil` or `false` ; `true` otherwise.
   def |: (untyped obj) -> bool
-
-  def !: () -> TrueClass
 end
