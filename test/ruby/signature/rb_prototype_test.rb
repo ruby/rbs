@@ -42,6 +42,7 @@ class Hello
   end
 
   def self.world
+    yield
     yield 1, x: 3
     yield 1, 2, x: 3, y: 2
     yield 1, 2, 'hello' => world 

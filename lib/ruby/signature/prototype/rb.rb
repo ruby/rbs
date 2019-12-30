@@ -337,7 +337,7 @@ module Ruby
               )
 
               yields.each do |yield_node|
-                array_content = yield_node.children[0].children.compact
+                array_content = yield_node.children[0]&.children&.compact || []
 
                 positionals, keywords = if keyword_hash?(array_content.last)
                                           [array_content.take(array_content.size - 1), array_content.last]
