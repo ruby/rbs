@@ -603,7 +603,11 @@ module Ruby
 
           def to_s
             if name
-              "#{type} #{name}"
+              if /\A#{Parser::KEYWORDS_RE}\z/.match?(name)
+                "#{type} `#{name}`"
+              else
+                "#{type} #{name}"
+              end
             else
               "#{type}"
             end

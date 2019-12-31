@@ -114,6 +114,8 @@ interface _Each[X, Y]
 
   def `def`: () -> Symbol
 
+  def timeout: () -> Integer
+
   def `: (String) -> untyped
 end
     SIG

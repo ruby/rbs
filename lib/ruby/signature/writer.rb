@@ -203,7 +203,7 @@ module Ruby
       def method_name(name)
         s = name.to_s
 
-        if s =~ Parser::KEYWORDS_RE
+        if /\A#{Parser::KEYWORDS_RE}\z/.match?(s)
           "`#{s}`"
         else
           s
