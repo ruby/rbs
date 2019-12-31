@@ -148,6 +148,9 @@ EOF
   def test_type_check
     SignatureManager.new do |manager|
       manager.files[Pathname("foo.rbs")] = <<EOF
+class Array[Elem]
+end
+
 type foo = String | Integer | [String, String] | ::Array[Integer]
 type M::t = Integer
 type M::s = t
