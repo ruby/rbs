@@ -61,6 +61,26 @@ end
     EOF
   end
 
+  def test_sclass
+    parser = RB.new
+
+    rb = <<-EOR
+class Hello
+  class << self
+    def hello() end
+  end
+end
+    EOR
+
+    parser.parse(rb)
+
+    assert_write parser.decls, <<-EOF
+class Hello
+  def self.hello: () -> untyped
+end
+    EOF
+  end
+
   def test_meta_programming
     parser = RB.new
 

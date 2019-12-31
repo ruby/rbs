@@ -52,14 +52,14 @@ module Ruby
             end
           end
 
-          process RubyVM::AbstractSyntaxTree.parse(string), namespace: Namespace.empty, current_module: nil, comments: comments
+          process RubyVM::AbstractSyntaxTree.parse(string), namespace: Namespace.empty, current_module: nil, comments: comments, singleton: false
         end
 
         def nested_name(name)
           (current_namespace + const_to_name(name).to_namespace).to_type_name.relative!
         end
 
-        def process(node, namespace:, current_module:, comments:)
+        def process(node, namespace:, current_module:, comments:, singleton:)
           case node.type
           when :CLASS
             class_name, super_class, *class_body = node.children
@@ -76,7 +76,7 @@ module Ruby
             source_decls.push kls
 
             each_node class_body do |child|
-              process child, namespace: kls.name.to_namespace, current_module: kls, comments: comments
+              process child, namespace: kls.name.to_namespace, current_module: kls, comments: comments, singleton: false
             end
           when :MODULE
             module_name, *module_body = node.children
@@ -94,13 +94,22 @@ module Ruby
             source_decls.push mod
 
             each_node module_body do |child|
-              process child, namespace: mod.name.to_namespace, current_module: mod, comments: comments
+              process child, namespace: mod.name.to_namespace, current_module: mod, comments: comments, singleton: false
+            end
+          when :SCLASS
+            this = node.children[0]
+            if this.type != :SELF
+              Signature.logger.warn "`class <<` syntax with not-self may be compiled to incorrect code: #{this}"
             end
 
+            body = node.children[1]
+            each_child(body) do |child|
+              process child, namespace: namespace, current_module: current_module, comments: comments, singleton: true
+            end
           when :DEFN, :DEFS
               if node.type == :DEFN
                 def_name, def_body = node.children
-                kind = :instance
+                kind = singleton ? :singleton : :instance
               else
                 _, def_name, def_body = node.children
                 kind = :singleton
@@ -228,7 +237,7 @@ module Ruby
             )
           else
             each_child node do |child|
-              process child, namespace: namespace, current_module: current_module, comments: comments
+              process child, namespace: namespace, current_module: current_module, comments: comments, singleton: singleton
             end
           end
         end
