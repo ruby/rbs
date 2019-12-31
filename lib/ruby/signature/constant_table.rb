@@ -90,7 +90,7 @@ module Ruby
         decl.members.each do |member|
           case member
           when AST::Members::Include
-            constant_scopes_module absolute_type_name(name, namespace: namespace),
+            constant_scopes_module absolute_type_name(member.name, namespace: namespace),
                                    scopes: scopes
           end
         end
