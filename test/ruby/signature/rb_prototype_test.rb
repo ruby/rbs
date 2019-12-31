@@ -42,6 +42,7 @@ class Hello
   end
 
   def self.world
+    yield
     yield 1, x: 3
     yield 1, 2, x: 3, y: 2
     yield 1, 2, 'hello' => world 
@@ -231,6 +232,25 @@ F: bool
 G: ::Array[untyped]
 
 H: ::Hash[untyped, untyped]
+    EOF
+  end
+
+  def test_argumentless_fcall
+    parser = RB.new
+
+    rb = <<-'EOR'
+class C
+  included do
+    do_something
+  end
+end
+    EOR
+
+    parser.parse(rb)
+
+    assert_write parser.decls, <<-EOF
+class C
+end
     EOF
   end
 end

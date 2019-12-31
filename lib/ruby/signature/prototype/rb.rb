@@ -133,7 +133,7 @@ module Ruby
           when :FCALL
             if current_module
               # Inside method definition cannot reach here.
-              args = node.children[1].children
+              args = node.children[1]&.children || []
 
               case node.children[0]
               when :include
@@ -337,7 +337,7 @@ module Ruby
               )
 
               yields.each do |yield_node|
-                array_content = yield_node.children[0].children.compact
+                array_content = yield_node.children[0]&.children&.compact || []
 
                 positionals, keywords = if keyword_hash?(array_content.last)
                                           [array_content.take(array_content.size - 1), array_content.last]
