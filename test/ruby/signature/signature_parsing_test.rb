@@ -753,6 +753,7 @@ end
       <<-EOS
 class X
   def foo: (type: untyped, class: untyped, module: untyped, if: untyped, include: untyped, yield: untyped, def: untyped, self: untyped, instance: untyped, any: untyped, void: void) -> untyped
+  def bar: (untyped `type`, void: untyped `void`) -> untyped
 end
       EOS
     end
