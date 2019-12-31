@@ -127,7 +127,12 @@ EOF
 class Set
 end
 
+module Baz
+end
+Baz::X: Integer
+
 module Foo::Bar
+  include Baz
 end
 EOF
       manager.build do |env|
@@ -138,6 +143,12 @@ EOF
           assert_instance_of Constant, constant
           assert_equal "::Set", constant.name.to_s
           assert_equal 'singleton(::Set)', constant.type.to_s
+        end
+
+        table.resolve_constant_reference(TypeName.new(name: :X, namespace: Namespace.empty), context: Namespace.parse("::Foo::Bar")).tap do |constant|
+          assert_instance_of Constant, constant
+          assert_equal "::Baz::X", constant.name.to_s
+          assert_equal '::Integer', constant.type.to_s
         end
       end
     end
