@@ -53,7 +53,7 @@ def comment_for_method(klass, method, stores:)
     out << method.comment
 
     if method.arglists
-      out << RDoc::Markup::Heading.new(1, "arglists")
+      out << RDoc::Markup::Heading.new(1, "arglists 💪👽🚨 << Delete this section")
       arglists = method.arglists.chomp.split("\n").map {|line| line + "\n" }
       out << RDoc::Markup::Verbatim.new(*arglists)
     end
