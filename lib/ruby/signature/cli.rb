@@ -23,7 +23,7 @@ module Ruby
             loader.add(path: Pathname(dir))
           end
 
-          loader.stdlib_root = nil if no_stdlib
+          loader.no_builtin! nil if no_stdlib
 
           loader
         end

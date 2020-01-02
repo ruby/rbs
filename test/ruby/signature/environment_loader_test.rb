@@ -60,7 +60,8 @@ end
 
   def test_loading_without_stdlib
     with_signatures do |path|
-      loader = EnvironmentLoader.new(stdlib_root: nil)
+      loader = EnvironmentLoader.new()
+      loader.no_builtin!
 
       env = Environment.new
       loader.load(env: env)
@@ -98,6 +99,26 @@ end
       assert_raises EnvironmentLoader::UnknownLibraryNameError do
         loader.add(library: "racc:0.0.0")
       end
+    end
+  end
+
+  def test_gem_path_vendored
+    with_signatures do |path|
+      gem_root = path + "gems"
+      gem_root.mkdir
+
+      vendor_racc_path = gem_root + "racc"
+      vendor_racc_path.mkdir
+      (vendor_racc_path + "racc.rbs").write <<-CONTENT
+DUMMY: String
+      CONTENT
+
+      loader = EnvironmentLoader.new(gem_vendor_path: gem_root)
+
+      loader.add(library: "racc:0.0.0")
+
+      racc_path = loader.paths.find {|path| path.name == "racc" }
+      assert_equal gem_root + "racc", racc_path.path
     end
   end
 end
