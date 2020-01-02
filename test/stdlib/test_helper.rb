@@ -1,9 +1,37 @@
+RUBY_27_OR_LATER = Gem::Version.new(RUBY_VERSION) >= Gem::Version.new('2.7.0')
+unless RUBY_27_OR_LATER
+  STDERR.puts "🚨🚨🚨 stdlib test requires Ruby 2.7 but RUBY_VERSION==#{RUBY_VERSION}, exiting... 🚨🚨🚨"
+  exit
+end
+
 require "ruby/signature"
 require "ruby/signature/test"
 require "minitest/autorun"
 
+require "minitest/reporters"
+Minitest::Reporters.use!
+
 class StdlibTest < Minitest::Test
-  RUBY_27_OR_LATER = Gem::Version.new(RUBY_VERSION) >= Gem::Version.new('2.7.0')
+  class ToInt
+    def initialize(value = 3)
+      @value = value
+    end
+
+    def to_int
+      @value
+    end
+  end
+
+  class ToStr
+    def initialize(value = "")
+      @value = value
+    end
+
+    def to_str
+      @value
+    end
+  end
+
 
   DEFAULT_LOGGER = Logger.new(STDERR)
   DEFAULT_LOGGER.level = ENV["RBS_TEST_LOGLEVEL"] || "info"
