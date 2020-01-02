@@ -47,6 +47,8 @@ class Hello
     yield 1, 2, x: 3, y: 2
     yield 1, 2, 'hello' => world 
   end
+
+  def kw_req(a:) end
 end
     EOR
 
@@ -57,6 +59,8 @@ class Hello
   def hello: (untyped a, ?::Integer b, *untyped c, untyped d, e: untyped e, ?f: ::Integer f, **untyped g) { () -> untyped } -> untyped
 
   def self.world: () { (untyped, untyped, untyped, x: untyped, y: untyped) -> untyped } -> untyped
+
+  def kw_req: (a: untyped a) -> untyped
 end
     EOF
   end
