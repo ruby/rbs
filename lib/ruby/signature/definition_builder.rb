@@ -808,7 +808,12 @@ module Ruby
           raise
         when nil
           cache[type_name] = false
-          cache[type_name] = yield
+          begin
+            cache[type_name] = yield
+          rescue => ex
+            cache[type_name] = nil
+            raise ex
+          end
         end
       end
 
