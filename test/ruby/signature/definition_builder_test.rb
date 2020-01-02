@@ -1024,7 +1024,7 @@ EOF
     end
   end
 
-  def test_build_alias
+  def test_build_alias_forward
     SignatureManager.new do |manager|
       manager.files[Pathname("foo.rbs")] = <<EOF
 class Hello
