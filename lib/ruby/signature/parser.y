@@ -7,7 +7,7 @@ class Ruby::Signature::Parser
         kVOID kNIL kTRUE kFALSE kANY kUNTYPED kTOP kBOT kSELF kSELFQ kINSTANCE kCLASS kBOOL kSINGLETON kTYPE kDEF kMODULE kSUPER
         kPRIVATE kPUBLIC kALIAS
         kCOLON kCOLON2 kCOMMA kBAR kAMP kHAT kARROW kQUESTION kEXCLAMATION kSTAR kSTAR2 kFATARROW kEQ kDOT kLT
-        kINTERFACE kEND kINCLUDE kEXTEND kATTRREADER kATTRWRITER kATTRACCESSOR tOPERATOR tQUOTEDMETHOD
+        kINTERFACE kEND kINCLUDE kEXTEND kATTRREADER kATTRWRITER kATTRACCESSOR tOPERATOR tQUOTEDMETHOD tQUOTEDIDENT
         kPREPEND kEXTENSION kINCOMPATIBLE
         type_TYPE type_SIGNATURE type_METHODTYPE tEOF
         kOUT kIN kUNCHECKED
@@ -497,6 +497,7 @@ rule
                                   location: val[0].location + val[1].location)
       }
     | tQUOTEDMETHOD
+    | tQUOTEDIDENT
     | tWRITE_ATTR
 
   method_name0: tUIDENT | tLIDENT | identifier_keywords
@@ -941,7 +942,7 @@ rule
       }
 
   var_name_opt:
-    | tLIDENT | tINTERFACEIDENT
+    | tLIDENT | tINTERFACEIDENT | tQUOTEDIDENT
 
   qualified_name:
       namespace simple_name {
@@ -1261,6 +1262,9 @@ def next_token
   when eof_re && input.scan(eof_re)
     @eof = true
     [:tEOF, input.matched]
+  when input.scan(/`[a-zA-Z_]\w*`/)
+    s = input.matched.yield_self {|s| s[1, s.length-2] }
+    new_token(:tQUOTEDIDENT, s)
   when input.scan(/`(\\`|[^` :])+`/)
     s = input.matched.yield_self {|s| s[1, s.length-2] }.gsub(/\\`/, '`')
     new_token(:tQUOTEDMETHOD, s)
