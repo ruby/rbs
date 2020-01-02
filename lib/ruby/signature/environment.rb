@@ -137,7 +137,7 @@ module Ruby
         raise "Namespace should be absolute: #{namespace}" unless namespace.absolute?
 
         if name.absolute?
-          name
+          name if environment.key?(name)
         else
           absolute_name = name.with_prefix(namespace)
 
