@@ -315,7 +315,7 @@ module Ruby
             end
           end
 
-          if kwrest
+          if kwrest && kwrest.children.any?
             fun = fun.update(rest_keywords: Types::Function::Param.new(name: kwrest.children[0], type: untyped))
           end
 
