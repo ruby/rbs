@@ -3,6 +3,8 @@ require "test_helper"
 require "ruby/signature/test"
 require "logger"
 
+return unless Gem::Version.new(RUBY_VERSION) >= Gem::Version.new('2.7.0')
+
 class Ruby::Signature::TestTest < Minitest::Test
   include TestHelper
 
