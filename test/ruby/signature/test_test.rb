@@ -189,7 +189,7 @@ EOF
           hook.typecheck_args "#foo",
                               method_type,
                               method_type.type,
-                              Test::Hook::ArgsReturn.new(arguments: [1], return_value: "1"),
+                              Test::Hook::ArgsReturn.new(arguments: [1], keyword_arguments: {}, return_value: "1"),
                               errors,
                               type_error: Test::Hook::Errors::ArgumentTypeError,
                               argument_error: Test::Hook::Errors::ArgumentError
@@ -199,7 +199,7 @@ EOF
           hook.typecheck_args "#foo",
                               method_type,
                               method_type.type,
-                              Test::Hook::ArgsReturn.new(arguments: ["1"], return_value: "1"),
+                              Test::Hook::ArgsReturn.new(arguments: ["1"], keyword_arguments: {}, return_value: "1"),
                               errors,
                               type_error: Test::Hook::Errors::ArgumentTypeError,
                               argument_error: Test::Hook::Errors::ArgumentError
@@ -209,7 +209,7 @@ EOF
           hook.typecheck_args "#foo",
                               method_type,
                               method_type.type,
-                              Test::Hook::ArgsReturn.new(arguments: [1, 2], return_value: "1"),
+                              Test::Hook::ArgsReturn.new(arguments: [1, 2], keyword_arguments: {}, return_value: "1"),
                               errors,
                               type_error: Test::Hook::Errors::ArgumentTypeError,
                               argument_error: Test::Hook::Errors::ArgumentError
@@ -219,7 +219,7 @@ EOF
           hook.typecheck_args "#foo",
                               method_type,
                               method_type.type,
-                              Test::Hook::ArgsReturn.new(arguments: [{ hello: :world }], return_value: "1"),
+                              Test::Hook::ArgsReturn.new(arguments: [], keyword_arguments: { hello: :world }, return_value: "1"),
                               errors,
                               type_error: Test::Hook::Errors::ArgumentTypeError,
                               argument_error: Test::Hook::Errors::ArgumentError
@@ -231,7 +231,7 @@ EOF
           hook.typecheck_args "#foo",
                               method_type,
                               method_type.type,
-                              Test::Hook::ArgsReturn.new(arguments: [{ foo: 31, baz: :baz }], return_value: "1"),
+                              Test::Hook::ArgsReturn.new(arguments: [], keyword_arguments: { foo: 31, baz: :baz }, return_value: "1"),
                               errors,
                               type_error: Test::Hook::Errors::ArgumentTypeError,
                               argument_error: Test::Hook::Errors::ArgumentError
@@ -241,7 +241,7 @@ EOF
           hook.typecheck_args "#foo",
                               method_type,
                               method_type.type,
-                              Test::Hook::ArgsReturn.new(arguments: [{ foo: "foo" }], return_value: "1"),
+                              Test::Hook::ArgsReturn.new(arguments: [], keyword_arguments: { foo: "foo" }, return_value: "1"),
                               errors,
                               type_error: Test::Hook::Errors::ArgumentTypeError,
                               argument_error: Test::Hook::Errors::ArgumentError
@@ -251,7 +251,7 @@ EOF
           hook.typecheck_args "#foo",
                               method_type,
                               method_type.type,
-                              Test::Hook::ArgsReturn.new(arguments: [{ bar: "bar" }], return_value: "1"),
+                              Test::Hook::ArgsReturn.new(arguments: [], keyword_arguments: { bar: "bar" }, return_value: "1"),
                               errors,
                               type_error: Test::Hook::Errors::ArgumentTypeError,
                               argument_error: Test::Hook::Errors::ArgumentError
@@ -263,7 +263,7 @@ EOF
           hook.typecheck_args "#foo",
                               method_type,
                               method_type.type,
-                              Test::Hook::ArgsReturn.new(arguments: [{ encoding: "ASCII-8BIT" }], return_value: "foo"),
+                              Test::Hook::ArgsReturn.new(arguments: [], keyword_arguments: { encoding: "ASCII-8BIT" }, return_value: "foo"),
                               errors,
                               type_error: Test::Hook::Errors::ArgumentTypeError,
                               argument_error: Test::Hook::Errors::ArgumentError
@@ -275,7 +275,7 @@ EOF
           hook.typecheck_args "#foo",
                               method_type,
                               method_type.type,
-                              Test::Hook::ArgsReturn.new(arguments: [{ parent: nil, type: nil }], return_value: nil),
+                              Test::Hook::ArgsReturn.new(arguments: [], keyword_arguments: { parent: nil, type: nil }, return_value: nil),
                               errors,
                               type_error: Test::Hook::Errors::ArgumentTypeError,
                               argument_error: Test::Hook::Errors::ArgumentError
@@ -287,7 +287,7 @@ EOF
           hook.typecheck_args "#foo",
                               method_type,
                               method_type.type,
-                              Test::Hook::ArgsReturn.new(arguments: [1], return_value: "1"),
+                              Test::Hook::ArgsReturn.new(arguments: [1], keyword_arguments: {}, return_value: "1"),
                               errors,
                               type_error: Test::Hook::Errors::ArgumentTypeError,
                               argument_error: Test::Hook::Errors::ArgumentError
@@ -296,7 +296,7 @@ EOF
           hook.typecheck_args "#foo",
                               method_type,
                               method_type.type,
-                              Test::Hook::ArgsReturn.new(arguments: [1, ''], return_value: "1"),
+                              Test::Hook::ArgsReturn.new(arguments: [1, ''], keyword_arguments: {}, return_value: "1"),
                               errors,
                               type_error: Test::Hook::Errors::ArgumentTypeError,
                               argument_error: Test::Hook::Errors::ArgumentError
@@ -305,7 +305,7 @@ EOF
           hook.typecheck_args "#foo",
                               method_type,
                               method_type.type,
-                              Test::Hook::ArgsReturn.new(arguments: [1, '', ''], return_value: "1"),
+                              Test::Hook::ArgsReturn.new(arguments: [1, '', ''], keyword_arguments: {}, return_value: "1"),
                               errors,
                               type_error: Test::Hook::Errors::ArgumentTypeError,
                               argument_error: Test::Hook::Errors::ArgumentError

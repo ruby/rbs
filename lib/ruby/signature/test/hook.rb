@@ -93,7 +93,7 @@ module Ruby
         attr_reader :klass
         attr_reader :errors
 
-        ArgsReturn = Struct.new(:arguments, :return_value, keyword_init: true)
+        ArgsReturn = Struct.new(:arguments, :keyword_arguments, :return_value, keyword_init: true)
         Call = Struct.new(:method_call, :block_call, :block_given, keyword_init: true)
 
         def builder
@@ -192,8 +192,8 @@ module Ruby
         def delegation(name, method_types, method_name)
           hook = self
 
-          proc do |*args, &block|
-            hook.logger.debug { "#{method_name} receives arguments: #{hook.inspect_(args)}" }
+          proc do |*args, **kwargs, &block|
+            hook.logger.debug { "#{method_name} receives arguments: #{hook.inspect_(args)} keyword arguments: #{hook.inspect_(kwargs)}" }
 
             block_calls = []
 
@@ -201,16 +201,17 @@ module Ruby
               original_block = block
 
               block = hook.call(Object.new, INSTANCE_EVAL) do |fresh_obj|
-                proc do |*as|
-                  hook.logger.debug { "#{method_name} receives block arguments: #{hook.inspect_(as)}" }
+                lambda do |*as|
+                  kwas = hook.keyword?(as.last) ? as.pop : {}
+                  hook.logger.debug { "#{method_name} receives block arguments: #{hook.inspect_(as)} keyword arguments: #{hook.inspect_(kwas)}" }
 
                   ret = if self.equal?(fresh_obj)
-                          original_block[*as]
+                          original_block[*as, **kwas]
                         else
-                          hook.call(self, INSTANCE_EXEC, *as, &original_block)
+                          hook.call(self, INSTANCE_EXEC, *as, **kwas, &original_block)
                         end
 
-                  block_calls << ArgsReturn.new(arguments: as, return_value: ret)
+                  block_calls << ArgsReturn.new(arguments: as, keyword_arguments: kwas, return_value: ret)
 
                   hook.logger.debug { "#{method_name} returns from block: #{hook.inspect_(ret)}" }
 
@@ -228,21 +229,21 @@ module Ruby
             end
             prepended = klass.ancestors.include?(hook.instance_module) || singleton_klass&.ancestors&.include?(hook.singleton_module)
             result = if prepended
-                       method.super_method.call(*args, &block)
+                       method.super_method.call(*args, **kwargs, &block)
                      else
                        # Using refinement
-                       method.call(*args, &block)
+                       method.call(*args, **kwargs, &block)
                      end
 
             hook.logger.debug { "#{method_name} returns: #{hook.inspect_(result)}" }
 
             calls = if block_calls.empty?
-                      [Call.new(method_call: ArgsReturn.new(arguments: args, return_value: result),
+                      [Call.new(method_call: ArgsReturn.new(arguments: args, keyword_arguments: kwargs, return_value: result),
                                 block_call: nil,
                                 block_given: block != nil)]
                     else
                       block_calls.map do |block_call|
-                        Call.new(method_call: ArgsReturn.new(arguments: args, return_value: result),
+                        Call.new(method_call: ArgsReturn.new(arguments: args, keyword_arguments: kwargs, return_value: result),
                                  block_call: block_call,
                                  block_given: block != nil)
                       end
@@ -375,8 +376,8 @@ module Ruby
           disable
         end
 
-        def call(receiver, method, *args, &block)
-          method.bind(receiver).call(*args, &block)
+        def call(receiver, method, *args, **kwargs, &block)
+          method.bind(receiver).call(*args, **kwargs, &block)
         end
 
         def inspect_(obj)
@@ -396,7 +397,7 @@ module Ruby
         end
 
         def typecheck_args(method_name, method_type, fun, value, errors, type_error:, argument_error:)
-          test = zip_args(value.arguments, fun) do |value, param|
+          test = zip_args(value.arguments, value.keyword_arguments, fun) do |value, param|
             unless type_check(value, param.type)
               errors << type_error.new(klass: klass,
                                        method_name: method_name,
@@ -424,7 +425,7 @@ module Ruby
         end
 
         def keyword?(value)
-          value.is_a?(Hash) && value.keys.all? {|key| key.is_a?(Symbol) }
+          call(value, IS_AP, Hash) && value.keys.all? {|key| call(key, IS_AP, Symbol) }
         end
 
         def zip_keyword_args(hash, fun)
@@ -456,9 +457,9 @@ module Ruby
           true
         end
 
-        def zip_args(args, fun, &block)
+        def zip_args(args, kwargs, fun, &block)
           case
-          when args.empty?
+          when args.empty? && kwargs.empty?
             if fun.required_positionals.empty? && fun.trailing_positionals.empty? && fun.required_keywords.empty?
               true
             else
@@ -468,39 +469,32 @@ module Ruby
             yield_self do
               param, fun_ = fun.drop_head
               yield(args.first, param)
-              zip_args(args.drop(1), fun_, &block)
+              zip_args(args.drop(1), kwargs, fun_, &block)
             end
           when fun.has_keyword?
             yield_self do
-              hash = args.last
-              if keyword?(hash)
-                zip_keyword_args(hash, fun, &block) &&
-                  zip_args(args.take(args.size - 1),
-                           fun.update(required_keywords: {}, optional_keywords: {}, rest_keywords: nil),
-                           &block)
-              else
-                fun.required_keywords.empty? &&
-                  zip_args(args,
-                           fun.update(required_keywords: {}, optional_keywords: {}, rest_keywords: nil),
-                           &block)
-              end
+              zip_keyword_args(kwargs, fun, &block) &&
+                zip_args(args,
+                          {},
+                          fun.update(required_keywords: {}, optional_keywords: {}, rest_keywords: nil),
+                          &block)
             end
           when !fun.trailing_positionals.empty?
             yield_self do
               param, fun_ = fun.drop_tail
               yield(args.last, param)
-              zip_args(args.take(args.size - 1), fun_, &block)
+              zip_args(args.take(args.size - 1), kwargs, fun_, &block)
             end
           when !fun.optional_positionals.empty?
             yield_self do
               param, fun_ = fun.drop_head
               yield(args.first, param)
-              zip_args(args.drop(1), fun_, &block)
+              zip_args(args.drop(1), kwargs, fun_, &block)
             end
           when fun.rest_positionals
             yield_self do
               yield(args.first, fun.rest_positionals)
-              zip_args(args.drop(1), fun, &block)
+              zip_args(args.drop(1), kwargs, fun, &block)
             end
           else
             false
