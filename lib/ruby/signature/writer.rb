@@ -250,15 +250,16 @@ module Ruby
       def preserve_empty_line(prev, decl)
         return unless prev
 
+        decl = decl.comment if decl.respond_to?(:comment) && decl.comment
+
         # When the signature is not constructed by the parser,
         # it always inserts an empty line.
-        unless prev.location
+        if !prev.location || !decl.location
           out.puts
           return
         end
 
         prev_end_line = prev.location.end_line
-        decl = decl.comment if decl.respond_to?(:comment) && decl.comment
         start_line = decl.location.start_line
         if start_line - prev_end_line > 1
           out.puts
