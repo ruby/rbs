@@ -6,11 +6,7 @@ class NilClass
   # And---Returns `false`. *obj* is always evaluated as it is the argument to a
   # method call---there is no short-circuit evaluation in this case.
   # 
-  # # arglists 💪👽🚨 << Delete this section
-  #     false & obj   -> false
-  #     nil & obj     -> false
-  # 
-  def &: (untyped obj) -> false
+  def &: (untyped obj) -> bool
 
   # Case Equality -- For class Object, effectively the same as calling `#==`, but
   # typically overridden by descendants to provide meaningful semantics in `case`
