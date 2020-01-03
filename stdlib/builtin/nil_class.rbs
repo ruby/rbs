@@ -32,10 +32,7 @@ class NilClass
 
   # Only the object *nil* responds `true` to `nil?`.
   # 
-  # # arglists 💪👽🚨 << Delete this section
-  #     nil.nil?               -> true
-  # 
-  def nil?: () -> true
+  def nil?: () -> bool
 
   # Returns zero as a rational.  The optional argument `eps` is always ignored.
   # 
