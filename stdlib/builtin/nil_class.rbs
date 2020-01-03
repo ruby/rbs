@@ -68,9 +68,6 @@ class NilClass
 
   # Returns zero as a rational.
   # 
-  # # arglists 💪👽🚨 << Delete this section
-  #     nil.to_r  ->  (0/1)
-  # 
   def to_r: () -> Rational
 
   # Always returns the empty string.

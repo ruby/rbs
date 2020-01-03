@@ -55,4 +55,8 @@ class NilClassTest < StdlibTest
   def test_to_i
     nil.to_i
   end
+
+  def test_to_r
+    nil.to_r
+  end
 end
