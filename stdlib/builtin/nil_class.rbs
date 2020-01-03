@@ -1,93 +1,125 @@
+# The class of the singleton object `nil`.
+# 
 class NilClass
   public
 
+  # And---Returns `false`. *obj* is always evaluated as it is the argument to a
+  # method call---there is no short-circuit evaluation in this case.
+  # 
+  # # arglists 💪👽🚨 << Delete this section
+  #     false & obj   -> false
+  #     nil & obj     -> false
+  # 
   def &: (untyped obj) -> false
 
   # Case Equality -- For class Object, effectively the same as calling `#==`, but
   # typically overridden by descendants to provide meaningful semantics in `case`
   # statements.
   # 
+  # # arglists 💪👽🚨 << Delete this section
+  #     obj === other   -> true or false
+  # 
   def ===: (untyped) -> bool
 
-  # This method is deprecated.
+  # Dummy pattern matching -- always returns nil.
   # 
-  # This is not only unuseful but also troublesome because it may hide a type
-  # error.
+  # # arglists 💪👽🚨 << Delete this section
+  #     nil =~ other  -> nil
   # 
   def =~: (untyped) -> bool
 
+  # Exclusive Or---If *obj* is `nil` or `false`, returns `false`; otherwise,
+  # returns `true`.
+  # 
+  # # arglists 💪👽🚨 << Delete this section
+  #     false ^ obj    -> true or false
+  #     nil   ^ obj    -> true or false
+  # 
   def ^: (untyped obj) -> bool
 
-  # Returns a string containing a human-readable representation of *obj*. The
-  # default `inspect` shows the object's class name, an encoding of the object id,
-  # and a list of the instance variables and their values (by calling #inspect on
-  # each of them). User defined classes should override this method to provide a
-  # better representation of *obj*.  When overriding this method, it should return
-  # a string whose encoding is compatible with the default external encoding.
+  # Always returns the string "nil".
   # 
-  #     [ 1, 2, 3..4, 'five' ].inspect   #=> "[1, 2, 3..4, \"five\"]"
-  #     Time.new.inspect                 #=> "2008-03-08 19:43:39 +0900"
-  # 
-  #     class Foo
-  #     end
-  #     Foo.new.inspect                  #=> "#<Foo:0x0300c868>"
-  # 
-  #     class Bar
-  #       def initialize
-  #         @bar = 1
-  #       end
-  #     end
-  #     Bar.new.inspect                  #=> "#<Bar:0x0300c868 @bar=1>"
+  # # arglists 💪👽🚨 << Delete this section
+  #     nil.inspect  -> "nil"
   # 
   def inspect: () -> String
 
-  # Only the object *nil* responds `true` to `nil?` .
+  # Only the object *nil* responds `true` to `nil?`.
+  # 
+  # # arglists 💪👽🚨 << Delete this section
+  #     nil.nil?               -> true
+  # 
   def nil?: () -> true
 
-  # Returns zero as a rational. The optional argument `eps` is always
-  # ignored.
+  # Returns zero as a rational.  The optional argument `eps` is always ignored.
+  # 
+  # # arglists 💪👽🚨 << Delete this section
+  #     nil.rationalize([eps])  ->  (0/1)
+  # 
   def rationalize: () -> Rational
 
   # Always returns an empty array.
   # 
-  # ```ruby
-  # nil.to_a   #=> []
-  # ```
+  #     nil.to_a   #=> []
+  # 
+  # # arglists 💪👽🚨 << Delete this section
+  #     nil.to_a    -> []
+  # 
   def to_a: () -> untyped
 
   # Returns zero as a complex.
+  # 
+  # # arglists 💪👽🚨 << Delete this section
+  #     nil.to_c  ->  (0+0i)
+  # 
   def to_c: () -> Complex
 
   # Always returns zero.
   # 
-  # ```ruby
-  # nil.to_f   #=> 0.0
-  # ```
+  #     nil.to_f   #=> 0.0
+  # 
+  # # arglists 💪👽🚨 << Delete this section
+  #     nil.to_f    -> 0.0
+  # 
   def to_f: () -> Float
 
   # Always returns an empty hash.
   # 
-  # ```ruby
-  # nil.to_h   #=> {}
-  # ```
+  #     nil.to_h   #=> {}
+  # 
+  # # arglists 💪👽🚨 << Delete this section
+  #     nil.to_h    -> {}
+  # 
   def to_h: () -> ::Hash[untyped, untyped]
 
   # Always returns zero.
   # 
-  # ```ruby
-  # nil.to_i   #=> 0
-  # ```
+  #     nil.to_i   #=> 0
+  # 
+  # # arglists 💪👽🚨 << Delete this section
+  #     nil.to_i -> 0
+  # 
   def to_i: () -> 0
 
   # Returns zero as a rational.
+  # 
+  # # arglists 💪👽🚨 << Delete this section
+  #     nil.to_r  ->  (0/1)
+  # 
   def to_r: () -> Rational
 
-  # Returns a string representing *obj*. The default `to_s` prints the object's
-  # class and an encoding of the object id. As a special case, the top-level
-  # object that is the initial execution context of Ruby programs returns
-  # ``main''.
+  # Always returns the empty string.
+  # 
+  # # arglists 💪👽🚨 << Delete this section
+  #     nil.to_s    -> ""
   # 
   def to_s: () -> String
 
+  # Or---Returns `false` if *obj* is `nil` or `false`; `true` otherwise.
+  # 
+  # # arglists 💪👽🚨 << Delete this section
+  #     false | obj   ->   true or false
+  #     nil   | obj   ->   true or false
+  # 
   def |: (untyped obj) -> bool
 end
