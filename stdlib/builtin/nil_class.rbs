@@ -36,10 +36,7 @@ class NilClass
 
   # Returns zero as a rational.  The optional argument `eps` is always ignored.
   # 
-  # # arglists 💪👽🚨 << Delete this section
-  #     nil.rationalize([eps])  ->  (0/1)
-  # 
-  def rationalize: () -> Rational
+  def rationalize: (?untyped eps) -> Rational
 
   # Always returns an empty array.
   # 

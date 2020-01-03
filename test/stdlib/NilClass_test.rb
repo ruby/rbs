@@ -31,6 +31,11 @@ class NilClassTest < StdlibTest
     nil.nil?
   end
 
+  def test_rationalize
+    nil.rationalize
+    nil.rationalize(0.01)
+  end
+
   def test_to_i
     nil.to_i
   end
