@@ -4,7 +4,7 @@ class ComplexTest < StdlibTest
   target Complex
   using hook.refinement
 
-  def test_polar
+  def test_singleton_polar
     Complex.polar(10)
     Complex.polar(3, 0)
     Complex.polar(3, Math::PI)
@@ -110,7 +110,7 @@ class ComplexTest < StdlibTest
     a.numerator
   end
 
-  def test_polar
+  def test_instance_polar
     Complex.rect(1.11, 2r).polar
     Complex.polar(1.11, 2r).polar
   end
