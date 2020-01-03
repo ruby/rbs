@@ -112,7 +112,7 @@ SIG
         end
 
         loader = Ruby::Signature::EnvironmentLoader.new()
-        loader.stdlib_root = nil
+        loader.no_builtin!
         loader.add path: tmppath
 
         env = Ruby::Signature::Environment.new()

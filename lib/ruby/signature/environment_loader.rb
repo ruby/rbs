@@ -14,11 +14,22 @@ module Ruby
       GemPath = Struct.new(:name, :version, :path, keyword_init: true)
 
       attr_reader :paths
-      attr_accessor :stdlib_root
+      attr_reader :stdlib_root
+      attr_reader :gem_vendor_path
 
-      def initialize(stdlib_root: Pathname(__dir__) + "../../../stdlib")
+      STDLIB_ROOT = Pathname(__dir__) + "../../../stdlib"
+
+      def self.gem_sig_path(name, version)
+        Pathname(Gem::Specification.find_by_name(name, version).gem_dir) + "sig"
+      rescue Gem::MissingSpecError
+        nil
+      end
+
+      def initialize(stdlib_root: STDLIB_ROOT, gem_vendor_path: nil)
         @stdlib_root = stdlib_root
+        @gem_vendor_path = gem_vendor_path
         @paths = []
+        @no_builtin = false
       end
 
       def add(path: nil, library: nil)
@@ -26,7 +37,7 @@ module Ruby
         when path
           @paths << path
         when library
-          name, version = parse_library(library)
+          name, version = self.class.parse_library(library)
 
           case
           when !version && path = stdlib?(name)
@@ -39,7 +50,7 @@ module Ruby
         end
       end
 
-      def parse_library(lib)
+      def self.parse_library(lib)
         lib.split(/:/)
       end
 
@@ -53,9 +64,16 @@ module Ruby
       end
 
       def gem?(name, version)
-        Pathname(Gem::Specification.find_by_name(name, version).gem_dir) + "sig"
-      rescue Gem::MissingSpecError
-        nil
+        if gem_vendor_path
+          # Try vendored RBS first
+          gem_dir = gem_vendor_path + name
+          if gem_dir.directory?
+            return gem_dir
+          end
+        end
+
+        # Try ruby gem library
+        self.class.gem_sig_path(name, version)
       end
 
       def each_signature(path = nil, immediate: true, &block)
@@ -88,10 +106,18 @@ module Ruby
         end
       end
 
+      def no_builtin!
+        @no_builtin = true
+      end
+
+      def no_builtin?
+        @no_builtin
+      end
+
       def load(env:)
         signature_files = []
 
-        if stdlib_root
+        unless no_builtin?
           signature_files.push(*each_signature(stdlib_root + "builtin"))
         end
 
