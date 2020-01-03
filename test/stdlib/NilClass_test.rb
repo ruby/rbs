@@ -8,6 +8,11 @@ class NilClassTest < StdlibTest
     nil & true
   end
 
+  def test_eqq
+    nil === nil
+    nil === false
+  end
+
   def test_to_i
     nil.to_i
   end

@@ -12,10 +12,8 @@ class NilClass
   # typically overridden by descendants to provide meaningful semantics in `case`
   # statements.
   # 
-  # # arglists 💪👽🚨 << Delete this section
-  #     obj === other   -> true or false
-  # 
-  def ===: (untyped) -> bool
+  def ===: (nil) -> true
+         | (untyped obj) -> bool
 
   # Dummy pattern matching -- always returns nil.
   # 
