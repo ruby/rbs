@@ -58,9 +58,6 @@ class NilClass
   # 
   #     nil.to_h   #=> {}
   # 
-  # # arglists 💪👽🚨 << Delete this section
-  #     nil.to_h    -> {}
-  # 
   def to_h: () -> ::Hash[untyped, untyped]
 
   # Always returns zero.
