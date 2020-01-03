@@ -17,6 +17,12 @@ class NilClassTest < StdlibTest
     nil =~ 42
   end
 
+  def test_xor
+    nil ^ nil
+    nil ^ false
+    nil ^ 42
+  end
+
   def test_to_i
     nil.to_i
   end

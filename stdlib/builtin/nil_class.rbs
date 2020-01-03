@@ -22,11 +22,9 @@ class NilClass
   # Exclusive Or---If *obj* is `nil` or `false`, returns `false`; otherwise,
   # returns `true`.
   # 
-  # # arglists 💪👽🚨 << Delete this section
-  #     false ^ obj    -> true or false
-  #     nil   ^ obj    -> true or false
-  # 
-  def ^: (untyped obj) -> bool
+  def ^: (nil) -> false
+       | (false) -> false
+       | (untyped obj) -> bool
 
   # Always returns the string "nil".
   # 
