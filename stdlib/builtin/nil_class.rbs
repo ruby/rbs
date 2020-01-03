@@ -64,9 +64,6 @@ class NilClass
   # 
   #     nil.to_i   #=> 0
   # 
-  # # arglists 💪👽🚨 << Delete this section
-  #     nil.to_i -> 0
-  # 
   def to_i: () -> 0
 
   # Returns zero as a rational.
