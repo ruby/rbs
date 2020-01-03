@@ -46,9 +46,6 @@ class NilClass
 
   # Returns zero as a complex.
   # 
-  # # arglists 💪👽🚨 << Delete this section
-  #     nil.to_c  ->  (0+0i)
-  # 
   def to_c: () -> Complex
 
   # Always returns zero.
