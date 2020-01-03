@@ -28,10 +28,7 @@ class NilClass
 
   # Always returns the string "nil".
   # 
-  # # arglists 💪👽🚨 << Delete this section
-  #     nil.inspect  -> "nil"
-  # 
-  def inspect: () -> String
+  def inspect: () -> "nil"
 
   # Only the object *nil* responds `true` to `nil?`.
   # 
