@@ -42,10 +42,7 @@ class NilClass
   # 
   #     nil.to_a   #=> []
   # 
-  # # arglists 💪👽🚨 << Delete this section
-  #     nil.to_a    -> []
-  # 
-  def to_a: () -> untyped
+  def to_a: () -> [ ]
 
   # Returns zero as a complex.
   # 

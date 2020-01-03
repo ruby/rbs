@@ -36,6 +36,10 @@ class NilClassTest < StdlibTest
     nil.rationalize(0.01)
   end
 
+  def test_to_a
+    nil.to_a
+  end
+
   def test_to_i
     nil.to_i
   end
