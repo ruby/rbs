@@ -17,7 +17,15 @@ module Ruby
       attr_reader :stdlib_root
       attr_reader :gem_vendor_path
 
-      def initialize(stdlib_root: Pathname(__dir__) + "../../../stdlib", gem_vendor_path: nil)
+      STDLIB_ROOT = Pathname(__dir__) + "../../../stdlib"
+
+      def self.gem_sig_path(name, version)
+        Pathname(Gem::Specification.find_by_name(name, version).gem_dir) + "sig"
+      rescue Gem::MissingSpecError
+        nil
+      end
+
+      def initialize(stdlib_root: STDLIB_ROOT, gem_vendor_path: nil)
         @stdlib_root = stdlib_root
         @gem_vendor_path = gem_vendor_path
         @paths = []
@@ -29,7 +37,7 @@ module Ruby
         when path
           @paths << path
         when library
-          name, version = parse_library(library)
+          name, version = self.class.parse_library(library)
 
           case
           when !version && path = stdlib?(name)
@@ -42,7 +50,7 @@ module Ruby
         end
       end
 
-      def parse_library(lib)
+      def self.parse_library(lib)
         lib.split(/:/)
       end
 
@@ -65,11 +73,7 @@ module Ruby
         end
 
         # Try ruby gem library
-        begin
-          Pathname(Gem::Specification.find_by_name(name, version).gem_dir) + "sig"
-        rescue Gem::MissingSpecError
-          nil
-        end
+        self.class.gem_sig_path(name, version)
       end
 
       def each_signature(path = nil, immediate: true, &block)
