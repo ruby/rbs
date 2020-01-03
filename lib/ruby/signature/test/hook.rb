@@ -289,7 +289,7 @@ module Ruby
             end
 
             result
-          end
+          end.ruby2_keywords
         end
 
         def verify(instance_method: nil, singleton_method: nil, types:)
