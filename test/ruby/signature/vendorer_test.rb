@@ -1,7 +1,7 @@
 require "test_helper"
 require "open3"
 
-class Ruby::Signature::EnvironmentLoaderTest < Minitest::Test
+class Ruby::Signature::VendorerTest < Minitest::Test
   Environment = Ruby::Signature::Environment
   EnvironmentLoader = Ruby::Signature::EnvironmentLoader
   Declarations = Ruby::Signature::AST::Declarations
