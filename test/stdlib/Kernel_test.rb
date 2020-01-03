@@ -303,7 +303,7 @@ class KernelTest < StdlibTest
     Float('1.4', exception: true)
   end
 
-  def test_hash
+  def test_Hash
     Hash(nil)
     Hash([])
     Hash({key: 1})
@@ -365,7 +365,7 @@ class KernelTest < StdlibTest
     autoload :FooBar, 'fname'
   end
 
-  def test_autoload
+  def test_autoload?
     autoload? 'FooBar'
     autoload? :FooBarBaz
   end

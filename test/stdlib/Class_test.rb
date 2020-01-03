@@ -4,7 +4,7 @@ class ClassTest < StdlibTest
   target Class
   using hook.refinement
 
-  def test_new
+  def test_singleton_new
     Class.new()
     Class.new(Integer)
     Class.new { }
@@ -14,7 +14,7 @@ class ClassTest < StdlibTest
     Class.new.allocate
   end
 
-  def test_new
+  def test_instance_new
     Class.new.new
   end
 

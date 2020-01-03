@@ -137,11 +137,6 @@ class IntegerTest < StdlibTest
     3.abs2
   end
 
-  def test_digits
-    1.digits
-    1.digits(2)
-  end
-
   def test_allbits?
     1.allbits?(1)
     2.allbits?(1)
