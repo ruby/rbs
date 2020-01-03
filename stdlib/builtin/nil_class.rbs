@@ -52,9 +52,6 @@ class NilClass
   # 
   #     nil.to_f   #=> 0.0
   # 
-  # # arglists 💪👽🚨 << Delete this section
-  #     nil.to_f    -> 0.0
-  # 
   def to_f: () -> Float
 
   # Always returns an empty hash.
