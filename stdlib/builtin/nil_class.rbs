@@ -4,6 +4,8 @@ class NilClass < Object
 
   def ^: (untyped obj) -> bool
 
+  # Only the object *nil* responds `true` to `nil?` .
+  def nil?: () -> true
   # Returns zero as a rational. The optional argument `eps` is always
   # ignored.
   def rationalize: () -> Rational
@@ -43,7 +45,4 @@ class NilClass < Object
   def to_r: () -> Rational
 
   def |: (untyped obj) -> bool
-
-  # Only the object *nil* responds `true` to `nil?` .
-  def `nil?`: () -> true
 end
