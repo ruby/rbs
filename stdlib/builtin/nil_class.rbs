@@ -17,10 +17,7 @@ class NilClass
 
   # Dummy pattern matching -- always returns nil.
   # 
-  # # arglists 💪👽🚨 << Delete this section
-  #     nil =~ other  -> nil
-  # 
-  def =~: (untyped) -> bool
+  def =~: (untyped obj) -> nil
 
   # Exclusive Or---If *obj* is `nil` or `false`, returns `false`; otherwise,
   # returns `true`.

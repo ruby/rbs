@@ -13,6 +13,10 @@ class NilClassTest < StdlibTest
     nil === false
   end
 
+  def test_match
+    nil =~ 42
+  end
+
   def test_to_i
     nil.to_i
   end
