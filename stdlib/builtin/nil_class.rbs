@@ -76,9 +76,7 @@ class NilClass
 
   # Or---Returns `false` if *obj* is `nil` or `false`; `true` otherwise.
   # 
-  # # arglists 💪👽🚨 << Delete this section
-  #     false | obj   ->   true or false
-  #     nil   | obj   ->   true or false
-  # 
-  def |: (untyped obj) -> bool
+  def |: (nil) -> false
+       | (false) -> false
+       | (untyped obj) -> bool
 end

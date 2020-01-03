@@ -63,4 +63,10 @@ class NilClassTest < StdlibTest
   def test_to_s
     nil.to_s
   end
+
+  def test_or
+    nil | nil
+    nil | false
+    nil | 42
+  end
 end
