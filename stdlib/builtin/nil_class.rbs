@@ -72,10 +72,7 @@ class NilClass
 
   # Always returns the empty string.
   # 
-  # # arglists 💪👽🚨 << Delete this section
-  #     nil.to_s    -> ""
-  # 
-  def to_s: () -> String
+  def to_s: () -> ""
 
   # Or---Returns `false` if *obj* is `nil` or `false`; `true` otherwise.
   # 
