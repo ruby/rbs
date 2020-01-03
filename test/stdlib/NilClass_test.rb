@@ -27,11 +27,11 @@ class NilClassTest < StdlibTest
     nil.inspect
   end
 
-  def test_to_i
-    nil.to_i
-  end
-
   def test_nil?
     nil.nil?
+  end
+
+  def test_to_i
+    nil.to_i
   end
 end
