@@ -37,7 +37,7 @@ module Ruby
         @stderr = stderr
       end
 
-      COMMANDS = [:ast, :list, :ancestors, :methods, :method, :validate, :constant, :paths, :prototype, :version]
+      COMMANDS = [:ast, :list, :ancestors, :methods, :method, :validate, :constant, :paths, :prototype, :vendor, :version]
 
       def library_parse(opts, options:)
         opts.on("-r LIBRARY") do |lib|
@@ -471,6 +471,56 @@ module Ruby
         end
 
         parser.decls
+      end
+
+      def run_vendor(args, options)
+        clean = false
+        vendor_stdlib = false
+        vendor_dir = Pathname("vendor/sigs")
+
+        OptionParser.new do |opts|
+          opts.banner = <<~EOB
+          Usage: rbs vendor [options] GEMS...
+          Vendor signatures in the project directory.
+          EOB
+
+          opts.on("--[no-]clean", "Clean vendor directory (default: no)") do |v|
+            clean = v
+          end
+
+          opts.on("--[no-]stdlib", "Vendor stdlib signatures or not (default: no)") do |v|
+            vendor_stdlib = v
+          end
+
+          opts.on("--vendor-dir [DIR]", "Specify the directory for vendored signatures (default: vendor/sigs)") do |path|
+            vendor_dir = Pathname(path)
+          end
+        end.parse!(args)
+
+        stdout.puts "Vendoring signatures to #{vendor_dir}..."
+
+        vendorer = Vendorer.new(vendor_dir: vendor_dir)
+
+        if clean
+          stdout.puts "  Deleting #{vendor_dir}..."
+          vendorer.clean!
+        end
+
+        if vendor_stdlib
+          stdout.puts "  Vendoring standard libraries..."
+          vendorer.stdlib!
+        end
+
+        args.each do |gem|
+          name, version = EnvironmentLoader.parse_library(gem)
+
+          unless EnvironmentLoader.gem_sig_path(name, version)
+            stdout.puts "  ⚠️ Cannot find rubygem: name=#{name}, version=#{version} 🚨"
+          else
+            stdout.puts "  Vendoring gem: name=#{name}, version=#{version}..."
+            vendorer.gem!(name, version)
+          end
+        end
       end
 
       def parse_type_name(string)
