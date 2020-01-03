@@ -1,11 +1,49 @@
-# The class of the singleton object `nil` .
-class NilClass < Object
+class NilClass
+  public
+
   def &: (untyped obj) -> false
+
+  # Case Equality -- For class Object, effectively the same as calling `#==`, but
+  # typically overridden by descendants to provide meaningful semantics in `case`
+  # statements.
+  # 
+  def ===: (untyped) -> bool
+
+  # This method is deprecated.
+  # 
+  # This is not only unuseful but also troublesome because it may hide a type
+  # error.
+  # 
+  def =~: (untyped) -> bool
 
   def ^: (untyped obj) -> bool
 
+  # Returns a string containing a human-readable representation of *obj*. The
+  # default `inspect` shows the object's class name, an encoding of the object id,
+  # and a list of the instance variables and their values (by calling #inspect on
+  # each of them). User defined classes should override this method to provide a
+  # better representation of *obj*.  When overriding this method, it should return
+  # a string whose encoding is compatible with the default external encoding.
+  # 
+  #     [ 1, 2, 3..4, 'five' ].inspect   #=> "[1, 2, 3..4, \"five\"]"
+  #     Time.new.inspect                 #=> "2008-03-08 19:43:39 +0900"
+  # 
+  #     class Foo
+  #     end
+  #     Foo.new.inspect                  #=> "#<Foo:0x0300c868>"
+  # 
+  #     class Bar
+  #       def initialize
+  #         @bar = 1
+  #       end
+  #     end
+  #     Bar.new.inspect                  #=> "#<Bar:0x0300c868 @bar=1>"
+  # 
+  def inspect: () -> String
+
   # Only the object *nil* responds `true` to `nil?` .
   def nil?: () -> true
+
   # Returns zero as a rational. The optional argument `eps` is always
   # ignored.
   def rationalize: () -> Rational
@@ -43,6 +81,13 @@ class NilClass < Object
 
   # Returns zero as a rational.
   def to_r: () -> Rational
+
+  # Returns a string representing *obj*. The default `to_s` prints the object's
+  # class and an encoding of the object id. As a special case, the top-level
+  # object that is the initial execution context of Ruby programs returns
+  # ``main''.
+  # 
+  def to_s: () -> String
 
   def |: (untyped obj) -> bool
 end
