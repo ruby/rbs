@@ -1,8 +1,5 @@
 require_relative "test_helper"
 
-# Currently, require "prime" fails due to .new handling
-return
-
 require "prime"
 
 class PrimeTest < StdlibTest
