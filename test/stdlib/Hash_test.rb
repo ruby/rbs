@@ -15,12 +15,12 @@ class HashTest < StdlibTest
   end
 
   # test_>
-  def test_less_than
+  def test_greater_than
     { a: 1 } > { a: 1, b: 2 }
   end
 
   # test_>=
-  def test_less_than_equal
+  def test_greater_than_equal
     { a: 1 } >= { a: 1, b: 2 }
   end
 
@@ -28,7 +28,7 @@ class HashTest < StdlibTest
     { a: nil }.compact
   end
 
-  def test_compact
+  def test_compact!
     { a: nil }.compact!
     { a: 1 }.compact!
   end
