@@ -133,7 +133,7 @@ end
 class Prime::PseudoPrimeGenerator
   def initialize: (?Integer?) -> void
 
-  include Enumerable
+  include Enumerable[Integer, void]
 
   attr_accessor upper_bound (): Integer?
 
@@ -160,11 +160,24 @@ class Prime::PseudoPrimeGenerator
   def succ: () -> Integer
 end
 
-class EratosthenesGenerator < PseudoPrimeGenerator
+# An implementation of `PseudoPrimeGenerator`.
+# 
+# Uses `EratosthenesSieve`.
+# 
+class Prime::EratosthenesGenerator < PseudoPrimeGenerator
 end
 
-class TrialDivisionGenerator < PseudoPrimeGenerator
+# An implementation of `PseudoPrimeGenerator` which uses a prime table generated
+# by trial division.
+# 
+class Prime::TrialDivisionGenerator < PseudoPrimeGenerator
 end
 
-class Generator23 < PseudoPrimeGenerator
+# Generates all integers which are greater than 2 and are not divisible by
+# either 2 or 3.
+# 
+# This is a pseudo-prime generator, suitable on checking primality of an integer
+# by brute force method.
+# 
+class Prime::Generator23 < PseudoPrimeGenerator
 end
