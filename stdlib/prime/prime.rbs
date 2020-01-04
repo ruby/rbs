@@ -1,13 +1,3 @@
-extension Integer (Prime)
-  def self.from_prime_division: (Array[[ String ]]) -> Integer
-
-  def prime_division: (?Prime::PseudoPrimeGenerator) -> Array[[ Integer, Integer ]]
-
-  def prime?: () -> bool
-
-  def self.each_prime: (Integer) { (Integer) -> void } -> void
-end
-
 # The set of all prime numbers.
 #
 # ## Example
