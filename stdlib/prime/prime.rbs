@@ -76,10 +76,6 @@ class Prime
   # :   Upper bound of prime numbers. The iterator stops after it yields all prime
   #     numbers p <= `ubound`.
   #
-  #
-  # # arglists
-  #     each(ubound = nil, generator = EratosthenesGenerator.new, &block)
-  #
   def self?.each: (?Integer ubound, ?Prime::PseudoPrimeGenerator generator) { (Integer) -> void } -> void
 
   # Re-composes a prime factorization and returns the product.
@@ -97,9 +93,6 @@ class Prime
   #
   #     Prime.int_from_prime_division([[2,2], [3,1]])  #=> 12
   #
-  # # arglists
-  #     int_from_prime_division(pd)
-  #
   def self?.int_from_prime_division: (Array[[ Integer, Integer ]]) -> Integer
 
   # Returns true if `value` is a prime number, else returns false.
@@ -110,10 +103,6 @@ class Prime
   # :   an arbitrary integer to be checked.
   # `generator`
   # :   optional. A pseudo-prime generator.
-  #
-  #
-  # # arglists
-  #     prime?(value, generator = Prime::Generator23.new)
   #
   def self?.prime?: (Integer value, ?Prime::PseudoPrimeGenerator generator) -> bool
 
@@ -144,9 +133,6 @@ class Prime
   #
   #     Prime.prime_division(12) #=> [[2,2], [3,1]]
   #
-  # # arglists
-  #     prime_division(value, generator = Prime::Generator23.new)
-  #
   def self?.prime_division: (Integer, ?Prime::PseudoPrimeGenerator generator) -> Array[[ Integer, Integer ]]
 end
 
@@ -155,30 +141,23 @@ end
 # Concrete subclasses should override succ, next, rewind.
 #
 class Prime::PseudoPrimeGenerator
-  include Enumerable
-
   def initialize: (?Integer?) -> void
 
+  include Enumerable
+
+  attr_accessor upper_bound (): Integer?
+
   # Iterates the given block for each prime number.
-  #
-  # # arglists
-  #     each() { |prime| ... }
   #
   def each: () { (Integer) -> void } -> void
 
   # alias of `succ`.
-  #
-  # # arglists
-  #     next()
   #
   def next: () -> Integer
 
   # Rewinds the internal position for enumeration.
   #
   # See `Enumerator`#rewind.
-  #
-  # # arglists
-  #     rewind()
   #
   def rewind: () -> void
 
@@ -188,12 +167,7 @@ class Prime::PseudoPrimeGenerator
   #
   # `PseudoPrimeGenerator`#succ raises `NotImplementedError`.
   #
-  # # arglists
-  #     succ()
-  #
   def succ: () -> Integer
-
-  attr_accessor upper_bound (): Integer?
 end
 
 class EratosthenesGenerator < PseudoPrimeGenerator
