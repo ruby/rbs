@@ -66,7 +66,8 @@ class Prime
   # :   Upper bound of prime numbers. The iterator stops after it yields all prime
   #     numbers p <= `ubound`.
   #
-  def self?.each: (?Integer ubound, ?Prime::PseudoPrimeGenerator generator) { (Integer) -> void } -> void
+  def self?.each: (?Integer? ubound, ?PseudoPrimeGenerator generator) { (Integer) -> void } -> void
+                | (?Integer? ubound, ?PseudoPrimeGenerator generator) -> PseudoPrimeGenerator
 
   # Re-composes a prime factorization and returns the product.
   #
@@ -94,7 +95,7 @@ class Prime
   # `generator`
   # :   optional. A pseudo-prime generator.
   #
-  def self?.prime?: (Integer value, ?Prime::PseudoPrimeGenerator generator) -> bool
+  def self?.prime?: (Integer value, ?PseudoPrimeGenerator generator) -> bool
 
   # Returns the factorization of `value`.
   #
@@ -123,7 +124,11 @@ class Prime
   #
   #     Prime.prime_division(12) #=> [[2,2], [3,1]]
   #
-  def self?.prime_division: (Integer, ?Prime::PseudoPrimeGenerator generator) -> Array[[ Integer, Integer ]]
+  def self?.prime_division: (Integer, ?PseudoPrimeGenerator generator) -> Array[[ Integer, Integer ]]
+
+  # Returns the singleton instance.
+  #
+  def self.instance: () -> Prime
 end
 
 # An abstract class for enumerating pseudo-prime numbers.

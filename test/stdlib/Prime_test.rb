@@ -11,6 +11,7 @@ class PrimeTest < StdlibTest
   def test_each
     Prime.each { break }
     Prime.each(10) { }
+    Prime.each(100, Prime::TrialDivisionGenerator.new)
   end
 
   def test_prime?
@@ -24,5 +25,9 @@ class PrimeTest < StdlibTest
 
   def test_prime_division
     Prime.prime_division(6)
+  end
+
+  def test_instance
+    Prime.instance.prime?(100)
   end
 end
