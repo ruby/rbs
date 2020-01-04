@@ -16,7 +16,9 @@ task :validate do
 end
 
 task :stdlib_test do
-  sh "ruby bin/test_runner.rb"
+  FileList["test/stdlib/*_test.rb"].each do |test|
+    sh "ruby bin/test_runner.rb #{test}"
+  end
 end
 
 task :rubocop do
