@@ -1,0 +1,5 @@
+extension Dir (tmpdir)
+  def self.tmpdir: () -> String
+  def self.mktmpdir: (?(String | [ String, String ] | nil), ?String?, ?max_try: Integer?) -> String
+                   | [X] (?(String | [ String, String ] | nil), ?String?, ?max_try: Integer?) { (String) -> X } -> X
+end
