@@ -120,12 +120,9 @@ class Hash[unchecked out K, unchecked out V] < Object
   #     Hash[ [ ["a", 100], ["b", 200] ] ]   #=> {"a"=>100, "b"=>200}
   #     Hash["a" => 100, "b" => 200]         #=> {"a"=>100, "b"=>200}
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     Hash[ key, value, ... ]         -> new_hash
-  #     Hash[ [ [key, value], ... ] ]   -> new_hash
-  #     Hash[ object ]                  -> new_hash
-  #
-  def self.[]: [U, V] (*::Array[[ U, V ]] arg0) -> ::Hash[U, V]
+  def self.[]: [U, V] (_ToHash[U, V]) -> ::Hash[U, V]
+             | [U, V] (*[ U, V ]) -> ::Hash[U, V]
+             | (*untyped) -> ::Hash[untyped, untyped]
 
   # Try to convert *obj* into a hash, using to_hash method. Returns converted hash
   # or nil if *obj* cannot be converted for any reason.
@@ -133,10 +130,8 @@ class Hash[unchecked out K, unchecked out V] < Object
   #     Hash.try_convert({1=>2})   # => {1=>2}
   #     Hash.try_convert("1=>2")   # => nil
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     Hash.try_convert(obj) -> hash or nil
-  #
-  def self.try_convert: (untyped) -> untyped
+  def self.try_convert: [U, V] (_ToHash[U, V]) -> ::Hash[U, V]
+                      | (untyped) -> (::Hash | nil)
 
   public
 
@@ -148,9 +143,6 @@ class Hash[unchecked out K, unchecked out V] < Object
   #     h2 < h1    #=> false
   #     h1 < h1    #=> false
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     hash < other -> true or false
-  #
   def <: (::Hash[K, V]) -> bool
 
   # Returns `true` if *hash* is subset of *other* or equals to *other*.
@@ -160,9 +152,6 @@ class Hash[unchecked out K, unchecked out V] < Object
   #     h1 <= h2   #=> true
   #     h2 <= h1   #=> false
   #     h1 <= h1   #=> true
-  #
-  # # arglists 💪👽🚨 << Delete this section
-  #     hash <= other -> true or false
   #
   def <=: (::Hash[K, V]) -> bool
 
@@ -184,9 +173,6 @@ class Hash[unchecked out K, unchecked out V] < Object
   #     h2 = { "c" => 2, "a" => 1 }
   #     h1 == h2   #=> true
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     hsh == other_hash    -> true or false
-  #
   def ==: (untyped other) -> bool
 
   # Returns `true` if *other* is subset of *hash*.
@@ -196,9 +182,6 @@ class Hash[unchecked out K, unchecked out V] < Object
   #     h1 > h2    #=> false
   #     h2 > h1    #=> true
   #     h1 > h1    #=> false
-  #
-  # # arglists 💪👽🚨 << Delete this section
-  #     hash > other -> true or false
   #
   def >: (::Hash[K, V]) -> bool
 
@@ -210,9 +193,6 @@ class Hash[unchecked out K, unchecked out V] < Object
   #     h2 >= h1   #=> true
   #     h1 >= h1   #=> true
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     hash >= other -> true or false
-  #
   def >=: (::Hash[K, V]) -> bool
 
   # Element Reference---Retrieves the *value* object corresponding to the *key*
@@ -221,9 +201,6 @@ class Hash[unchecked out K, unchecked out V] < Object
   #     h = { "a" => 100, "b" => 200 }
   #     h["a"]   #=> 100
   #     h["c"]   #=> nil
-  #
-  # # arglists 💪👽🚨 << Delete this section
-  #     hsh[key]    ->  value
   #
   def []: (K arg0) -> V?
 
@@ -247,19 +224,13 @@ class Hash[unchecked out K, unchecked out V] < Object
   #     h.key(100).equal? a #=> false
   #     h.key(200).equal? b #=> true
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     hsh[key] = value        -> value
-  #
   def []=: (K arg0, V arg1) -> V
 
   # See also Enumerable#any?
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     hsh.any? [{ |(key, value)| block }]   -> true or false
-  #     hsh.any?(pattern)                     -> true or false
-  #
   def any?: () -> bool
-          | () { (K, V) -> untyped } -> bool
+          | (untyped pattern) -> bool
+          | () { (K, V) -> bool } -> bool
 
   # Searches through the hash comparing *obj* with the key using `==`. Returns the
   # key-value pair (two elements array) or `nil` if no match is found.  See
@@ -270,20 +241,14 @@ class Hash[unchecked out K, unchecked out V] < Object
   #     h.assoc("letters")  #=> ["letters", ["a", "b", "c"]]
   #     h.assoc("foo")      #=> nil
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     hash.assoc(obj)   ->  an_array  or  nil
-  #
-  def assoc: (K arg0) -> ::Array[K | V]
+  def assoc: (K arg0) -> [K, V]?
 
   # Removes all key-value pairs from *hsh*.
   #
   #     h = { "a" => 100, "b" => 200 }   #=> {"a"=>100, "b"=>200}
   #     h.clear                          #=> {}
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     hsh.clear -> hsh
-  #
-  def clear: () -> ::Hash[K, V]
+  def clear: () -> self
 
   # Returns a new hash with the nil values/key pairs removed
   #
@@ -291,10 +256,7 @@ class Hash[unchecked out K, unchecked out V] < Object
   #     h.compact     #=> { a: 1, b: false }
   #     h             #=> { a: 1, b: false, c: nil }
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     hsh.compact -> new_hash
-  #
-  def compact: () -> ::Hash[K, V]
+  def compact: () -> self
 
   # Removes all nil values from the hash. Returns nil if no changes were made,
   # otherwise returns the hash.
@@ -302,10 +264,7 @@ class Hash[unchecked out K, unchecked out V] < Object
   #     h = { a: 1, b: false, c: nil }
   #     h.compact!     #=> { a: 1, b: false }
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     hsh.compact! -> hsh or nil
-  #
-  def compact!: () -> ::Hash[K, V]?
+  def compact!: () -> self?
 
   # Makes *hsh* compare its keys by their identity, i.e. it will consider exact
   # same objects as same keys.
@@ -317,20 +276,14 @@ class Hash[unchecked out K, unchecked out V] < Object
   #     h1["a".dup]    #=> nil  # different objects.
   #     h1[:c]         #=> "c"  # same symbols are all same.
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     hsh.compare_by_identity -> hsh
-  #
-  def compare_by_identity: () -> ::Hash[K, V]
+  def compare_by_identity: () -> self
 
   # Returns `true` if *hsh* will compare its keys by their identity.  Also see
   # Hash#compare_by_identity.
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     hsh.compare_by_identity? -> true or false
-  #
-  def compare_by_identity?: () -> bool
+  def compare_by_identity?: () -> (true | false)
 
-  def deconstruct_keys: (untyped) -> untyped
+  def deconstruct_keys: (Array[K]) -> self
 
   # Returns the default value, the value that would be returned by *[hsh](key)* if
   # *key* did not exist in *hsh*. See also Hash::new and Hash#default=.
@@ -347,11 +300,7 @@ class Hash[unchecked out K, unchecked out V] < Object
   #     h.default                               #=> nil
   #     h.default(2)                            #=> 20
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     hsh.default(key=nil)   -> obj
-  #
   def default: (?K arg0) -> V?
-             | (?K arg0) { (K arg0) -> V } -> V?
 
   # Sets the default value, the value returned for a key that does not exist in
   # the hash. It is not possible to set the default to a Proc that will be
@@ -368,9 +317,6 @@ class Hash[unchecked out K, unchecked out V] < Object
   #     h[2]       #=> #<Proc:0x401b3948@-:6>
   #     h["cat"]   #=> #<Proc:0x401b3948@-:6>
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     hsh.default = obj     -> obj
-  #
   def default=: (V arg0) -> V
 
   # If Hash::new was invoked with a block, return that block, otherwise return
@@ -382,10 +328,7 @@ class Hash[unchecked out K, unchecked out V] < Object
   #     p.call(a, 2)
   #     a                                  #=> [nil, nil, 4]
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     hsh.default_proc -> anObject
-  #
-  def default_proc: () -> untyped
+  def default_proc: () -> (Proc | nil)
 
   # Sets the default proc to be executed on each failed key lookup.
   #
@@ -395,10 +338,7 @@ class Hash[unchecked out K, unchecked out V] < Object
   #     h[2]       #=> 4
   #     h["cat"]   #=> "catcat"
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     hsh.default_proc = proc_obj or nil
-  #
-  def default_proc=: (untyped) -> untyped
+  def default_proc=: (Proc | _ToProc | nil) -> (Proc | _ToProc | nil)
 
   # Deletes the key-value pair and returns the value from *hsh* whose key is equal
   # to *key*. If the key is not found, it returns *nil*. If the optional code
@@ -410,10 +350,6 @@ class Hash[unchecked out K, unchecked out V] < Object
   #     h.delete("z")                              #=> nil
   #     h.delete("z") { |el| "#{el} not found" }   #=> "z not found"
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     hsh.delete(key)                   -> value
-  #     hsh.delete(key) {| key | block }  -> value
-  #
   def delete: (K arg0) -> V?
             | [U] (K arg0) { (K arg0) -> U } -> (U | V)
 
@@ -424,11 +360,7 @@ class Hash[unchecked out K, unchecked out V] < Object
   #     h = { "a" => 100, "b" => 200, "c" => 300 }
   #     h.delete_if {|key, value| key >= "b" }   #=> {"a"=>100}
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     hsh.delete_if {| key, value | block }  -> hsh
-  #     hsh.delete_if                          -> an_enumerator
-  #
-  def delete_if: () { (K arg0, V arg1) -> untyped } -> ::Hash[K, V]
+  def delete_if: () { (K arg0, V arg1) -> bool } -> self
                | () -> ::Enumerator[[ K, V ], self]
 
   # Extracts the nested value specified by the sequence of *key* objects by
@@ -443,9 +375,6 @@ class Hash[unchecked out K, unchecked out V] < Object
   #     g.dig(:foo, 1)              #=> 11
   #     g.dig(:foo, 1, 0)           #=> TypeError: Integer does not have #dig method
   #     g.dig(:foo, :bar)           #=> TypeError: no implicit conversion of Symbol into Integer
-  #
-  # # arglists 💪👽🚨 << Delete this section
-  #     hsh.dig(key, ...)                 -> object
   #
   def dig: (*untyped) -> untyped
 
@@ -462,13 +391,7 @@ class Hash[unchecked out K, unchecked out V] < Object
   #     a is 100
   #     b is 200
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     hsh.each      {| key, value | block } -> hsh
-  #     hsh.each_pair {| key, value | block } -> hsh
-  #     hsh.each                              -> an_enumerator
-  #     hsh.each_pair                         -> an_enumerator
-  #
-  def each: () { ([ K, V ] arg0) -> untyped } -> ::Hash[K, V]
+  def each: () { ([ K, V ] arg0) -> untyped } -> self
           | () -> ::Enumerator[[ K, V ], self]
 
   # Calls *block* once for each key in *hsh*, passing the key as a parameter.
@@ -483,12 +406,8 @@ class Hash[unchecked out K, unchecked out V] < Object
   #     a
   #     b
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     hsh.each_key {| key | block } -> hsh
-  #     hsh.each_key                  -> an_enumerator
-  #
   def each_key: () { (K arg0) -> untyped } -> ::Hash[K, V]
-              | () -> ::Enumerator[[ K, V ], self]
+              | () -> ::Enumerator[K, self]
 
   # Calls *block* once for each key in *hsh*, passing the key-value pair as
   # parameters.
@@ -503,12 +422,7 @@ class Hash[unchecked out K, unchecked out V] < Object
   #     a is 100
   #     b is 200
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     hsh.each_pair {| key, value | block } -> hsh
-  #     hsh.each_pair                         -> an_enumerator
-  #
-  def each_pair: () { (K arg0, V arg1) -> untyped } -> ::Hash[K, V]
-               | () -> ::Enumerator[[ K, V ], self]
+  alias each_pair each
 
   # Calls *block* once for each key in *hsh*, passing the value as a parameter.
   #
@@ -522,27 +436,17 @@ class Hash[unchecked out K, unchecked out V] < Object
   #     100
   #     200
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     hsh.each_value {| value | block } -> hsh
-  #     hsh.each_value                    -> an_enumerator
-  #
-  def each_value: () { (V arg0) -> untyped } -> ::Hash[K, V]
-                | () -> ::Enumerator[[ K, V ], self]
+  def each_value: () { (V arg0) -> untyped } -> self
+                | () -> ::Enumerator[V, self]
 
   # Returns `true` if *hsh* contains no key-value pairs.
   #
   #     {}.empty?   #=> true
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     hsh.empty?    -> true or false
-  #
   def empty?: () -> bool
 
   # Returns `true` if *hash* and *other* are both hashes with the same content.
   # The orders of each hashes are not compared.
-  #
-  # # arglists 💪👽🚨 << Delete this section
-  #     hash.eql?(other)  -> true or false
   #
   def eql?: (untyped) -> bool
 
@@ -567,12 +471,8 @@ class Hash[unchecked out K, unchecked out V] < Object
   #     prog.rb:2:in `fetch': key not found (KeyError)
   #      from prog.rb:2
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     hsh.fetch(key [, default] )       -> obj
-  #     hsh.fetch(key) {| key | block }   -> obj
-  #
   def fetch: (K arg0) -> V
-           | [X] (K arg0, ?X arg1) -> (V | X)
+           | [X] (K arg0, X arg1) -> (V | X)
            | [X] (K arg0) { (K arg0) -> X } -> (V | X)
 
   # Returns an array containing the values associated with the given keys but also
@@ -585,11 +485,8 @@ class Hash[unchecked out K, unchecked out V] < Object
   #     h.fetch_values("cow", "bird")                  # raises KeyError
   #     h.fetch_values("cow", "bird") { |k| k.upcase } #=> ["bovine", "BIRD"]
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     hsh.fetch_values(key, ...)                 -> array
-  #     hsh.fetch_values(key, ...) { |key| block } -> array
-  #
-  def fetch_values: (*untyped) -> untyped
+  def fetch_values: (*K) -> Array[V]
+                  | [X] (*K) { (K) -> X } -> (V | X)
 
   # Returns a new hash consisting of entries for which the block returns true.
   #
@@ -601,23 +498,15 @@ class Hash[unchecked out K, unchecked out V] < Object
   #
   # Hash#filter is an alias for Hash#select.
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     hsh.filter {|key, value| block}   -> a_hash
-  #     hsh.filter                        -> an_enumerator
-  #
-  def filter: () { (K arg0, V arg1) -> untyped } -> ::Hash[K, V]
+  def filter: () { (K arg0, V arg1) -> bool } -> self
             | () -> ::Enumerator[[ K, V ], self]
 
   # Equivalent to Hash#keep_if, but returns `nil` if no changes were made.
   #
   # Hash#filter! is an alias for Hash#select!.
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     hsh.filter! {| key, value | block }  -> hsh or nil
-  #     hsh.filter!                          -> an_enumerator
-  #
-  def filter!: () { (K arg0, V arg1) -> untyped } -> ::Hash[K, V]?
-             | () -> ::Enumerator[[ K, V ], self]
+  def filter!: () { (K arg0, V arg1) -> bool } -> self?
+             | () -> ::Enumerator[[ K, V ], self?]
 
   # Returns a new array that is a one-dimensional flattening of this hash. That
   # is, for every key or value that is an array, extract its elements into the new
@@ -629,11 +518,9 @@ class Hash[unchecked out K, unchecked out V] < Object
   #     a.flatten    # => [1, "one", 2, [2, "two"], 3, "three"]
   #     a.flatten(2) # => [1, "one", 2, 2, "two", 3, "three"]
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     hash.flatten -> an_array
-  #     hash.flatten(level) -> an_array
-  #
-  def flatten: (?Integer level) -> ::Array[untyped]
+  def flatten: () -> ::Array[K | V]
+             | (1 level) -> ::Array[K | V]
+             | (Integer level) -> Array[untyped]
 
   # Returns `true` if the given key is present in *hsh*.
   #
@@ -646,9 +533,6 @@ class Hash[unchecked out K, unchecked out V] < Object
   #
   # See also Enumerable#include?
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     hsh.has_key?(key)    -> true or false
-  #
   def has_key?: (K arg0) -> bool
 
   # Returns `true` if the given value is present for some key in *hsh*.
@@ -657,18 +541,12 @@ class Hash[unchecked out K, unchecked out V] < Object
   #     h.value?(100)   #=> true
   #     h.value?(999)   #=> false
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     hsh.has_value?(value)    -> true or false
-  #
   def has_value?: (V arg0) -> bool
 
   # Compute a hash-code for this hash. Two hashes with the same content will have
   # the same hash code (and will compare using `eql?`).
   #
   # See also Object#hash.
-  #
-  # # arglists 💪👽🚨 << Delete this section
-  #     hsh.hash   -> integer
   #
   def hash: () -> Integer
 
@@ -683,21 +561,14 @@ class Hash[unchecked out K, unchecked out V] < Object
   #
   # See also Enumerable#include?
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     hsh.include?(key)    -> true or false
-  #
-  def include?: (untyped arg0) -> bool
+  alias include? has_key?
 
-  def index: (untyped) -> untyped
+  def index: (V) -> K?
 
   # Return the contents of this hash as a string.
   #
   #     h = { "c" => 300, "a" => 100, "d" => 400, "c" => 300  }
   #     h.to_s   #=> "{\"c\"=>300, \"a\"=>100, \"d\"=>400}"
-  #
-  # # arglists 💪👽🚨 << Delete this section
-  #     hsh.to_s     -> string
-  #     hsh.inspect  -> string
   #
   def inspect: () -> String
 
@@ -724,9 +595,6 @@ class Hash[unchecked out K, unchecked out V] < Object
   #     h = { a: 1, b: 3, c: 1 }
   #     h.size == h.invert.size #=> false
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     hsh.invert -> new_hash
-  #
   def invert: () -> ::Hash[V, K]
 
   # Deletes every key-value pair from *hsh* for which *block* evaluates to
@@ -736,11 +604,7 @@ class Hash[unchecked out K, unchecked out V] < Object
   #
   # See also Hash#select!.
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     hsh.keep_if {| key, value | block }  -> hsh
-  #     hsh.keep_if                          -> an_enumerator
-  #
-  def keep_if: () { (K arg0, V arg1) -> untyped } -> ::Hash[K, V]
+  def keep_if: () { (K arg0, V arg1) -> untyped } -> self
              | () -> ::Enumerator[[ K, V ], self]
 
   # Returns the key of an occurrence of a given value. If the value is not found,
@@ -751,10 +615,7 @@ class Hash[unchecked out K, unchecked out V] < Object
   #     h.key(300)   #=> "c"
   #     h.key(999)   #=> nil
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     hsh.key(value)    -> key
-  #
-  def key: (V arg0) -> K?
+  alias key index
 
   # Returns `true` if the given key is present in *hsh*.
   #
@@ -767,19 +628,13 @@ class Hash[unchecked out K, unchecked out V] < Object
   #
   # See also Enumerable#include?
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     hsh.key?(key)        -> true or false
-  #
-  def key?: (K arg0) -> bool
+  alias key? has_key?
 
   # Returns a new array populated with the keys from this hash. See also
   # Hash#values.
   #
   #     h = { "a" => 100, "b" => 200, "c" => 300, "d" => 400 }
   #     h.keys   #=> ["a", "b", "c", "d"]
-  #
-  # # arglists 💪👽🚨 << Delete this section
-  #     hsh.keys    -> array
   #
   def keys: () -> ::Array[K]
 
@@ -792,9 +647,6 @@ class Hash[unchecked out K, unchecked out V] < Object
   #     h.length        #=> 3
   #
   # Hash#length is an alias for Hash#size.
-  #
-  # # arglists 💪👽🚨 << Delete this section
-  #     hsh.length    ->  integer
   #
   def length: () -> Integer
 
@@ -809,10 +661,7 @@ class Hash[unchecked out K, unchecked out V] < Object
   #
   # See also Enumerable#include?
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     hsh.member?(key)     -> true or false
-  #
-  def member?: (K arg0) -> bool
+  alias member? has_key?
 
   # Returns a new hash that combines the contents of the receiver and the contents
   # of the given hashes.
@@ -836,13 +685,8 @@ class Hash[unchecked out K, unchecked out V] < Object
   #                       #=> {"a"=>100, "b"=>311, "c"=>300, "d"=>400}
   #     h1                #=> {"a"=>100, "b"=>200}
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     hsh.merge(other_hash1, other_hash2, ...)           -> new_hash
-  #     hsh.merge(other_hash1, other_hash2, ...) {|key, oldval, newval| block}
-  #     -> new_hash
-  #
-  def merge: [A, B] (*::Hash[A, B] arg0) -> ::Hash[A | K, B | V]
-           | [A, B] (*::Hash[A, B] arg0) { (K arg0, V arg1, B arg2) -> (V | B) } -> ::Hash[A | K, B | V]
+  def merge: [A, B] (*::Hash[A, B] other_hashes) -> ::Hash[A | K, B | V]
+           | [A, B, C] (*::Hash[A, B] other_hashes) { (K key, V oldval, B newval) -> (C) } -> ::Hash[A | K, B | V | C]
 
   # Adds the contents of the given hashes to the receiver.
   #
@@ -876,15 +720,12 @@ class Hash[unchecked out K, unchecked out V] < Object
   #
   # Hash#update is an alias for Hash#merge!.
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     hsh.merge!(other_hash1, other_hash2, ...)              -> hsh
-  #     hsh.merge!(other_hash1, other_hash2, ...) {|key, oldval, newval| block}
-  #
-  def merge!: (*untyped) -> untyped
+  def merge!: [A, B] (*::Hash[A, B] other_hashes) -> ::Hash[A | K, B | V]
+            | [A, B, C] (*::Hash[A, B] other_hashes) { (K key, V oldval, B newval) -> (C) } -> ::Hash[A | K, B | V | C]
 
-  def pretty_print: (untyped q) -> untyped
+  def pretty_print: (untyped pp) -> untyped
 
-  def pretty_print_cycle: (untyped q) -> untyped
+  def pretty_print_cycle: (untyped pp) -> untyped
 
   # Searches through the hash comparing *obj* with the value using `==`. Returns
   # the first key-value pair (two-element array) that matches. See also
@@ -894,10 +735,7 @@ class Hash[unchecked out K, unchecked out V] < Object
   #     a.rassoc("two")    #=> [2, "two"]
   #     a.rassoc("four")   #=> nil
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     hash.rassoc(obj) -> an_array or nil
-  #
-  def rassoc: (K arg0) -> ::Array[K | V]
+  def rassoc: (K arg0) -> [K, V]?
 
   # Rebuilds the hash based on the current hash values for each key. If values of
   # key objects have changed since they were inserted, this method will reindex
@@ -913,10 +751,7 @@ class Hash[unchecked out K, unchecked out V] < Object
   #     h.rehash   #=> {["z", "b"]=>100, ["c", "d"]=>300}
   #     h[a]       #=> 100
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     hsh.rehash -> hsh
-  #
-  def rehash: () -> ::Hash[K, V]
+  def rehash: () -> self
 
   # Returns a new hash consisting of entries for which the block returns false.
   #
@@ -926,30 +761,20 @@ class Hash[unchecked out K, unchecked out V] < Object
   #     h.reject {|k,v| k < "b"}  #=> {"b" => 200, "c" => 300}
   #     h.reject {|k,v| v > 100}  #=> {"a" => 100}
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     hsh.reject {|key, value| block}   -> a_hash
-  #     hsh.reject                        -> an_enumerator
-  #
   def reject: () -> ::Enumerator[[ K, V ], self]
-            | () { (K arg0, V arg1) -> untyped } -> ::Hash[K, V]
+            | () { (K arg0, V arg1) -> bool } -> self
 
   # Equivalent to Hash#delete_if, but returns `nil` if no changes were made.
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     hsh.reject! {| key, value | block }  -> hsh or nil
-  #     hsh.reject!                          -> an_enumerator
-  #
-  def reject!: () { (K arg0, V arg1) -> untyped } -> ::Hash[K, V]
+  def reject!: () -> ::Enumerator[[ K, V ], self?]
+            | () { (K arg0, V arg1) -> bool } -> self?
 
   # Replaces the contents of *hsh* with the contents of *other_hash*.
   #
   #     h = { "a" => 100, "b" => 200 }
   #     h.replace({ "c" => 300, "d" => 400 })   #=> {"c"=>300, "d"=>400}
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     hsh.replace(other_hash) -> hsh
-  #
-  def replace: (::Hash[K, V]) -> ::Hash[K, V]
+  def replace: [A, B] (Hash[A, B] | _ToHash[A, B]) -> Hash[A, B]
 
   # Returns a new hash consisting of entries for which the block returns true.
   #
@@ -961,23 +786,13 @@ class Hash[unchecked out K, unchecked out V] < Object
   #
   # Hash#filter is an alias for Hash#select.
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     hsh.select {|key, value| block}   -> a_hash
-  #     hsh.select                        -> an_enumerator
-  #
-  def select: () { (K arg0, V arg1) -> untyped } -> ::Hash[K, V]
-            | () -> ::Enumerator[[ K, V ], self]
+  alias select filter
 
   # Equivalent to Hash#keep_if, but returns `nil` if no changes were made.
   #
   # Hash#filter! is an alias for Hash#select!.
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     hsh.select! {| key, value | block }  -> hsh or nil
-  #     hsh.select!                          -> an_enumerator
-  #
-  def select!: () { (K arg0, V arg1) -> untyped } -> ::Hash[K, V]?
-             | () -> ::Enumerator[[ K, V ], self]
+  alias select! filter!
 
   # Removes a key-value pair from *hsh* and returns it as the two-item array `[`
   # *key, value* `]`, or the hash's default value if the hash is empty.
@@ -986,10 +801,7 @@ class Hash[unchecked out K, unchecked out V] < Object
   #     h.shift   #=> [1, "a"]
   #     h         #=> {2=>"b", 3=>"c"}
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     hsh.shift -> anArray or obj
-  #
-  def shift: () -> ::Array[K | V]
+  def shift: () -> [ K, V ]?
 
   # Returns the number of key-value pairs in the hash.
   #
@@ -1001,10 +813,7 @@ class Hash[unchecked out K, unchecked out V] < Object
   #
   # Hash#length is an alias for Hash#size.
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     hsh.size      ->  integer
-  #
-  def size: () -> Integer
+  alias size length
 
   # Returns a hash containing only the given keys and their values.
   #
@@ -1012,10 +821,7 @@ class Hash[unchecked out K, unchecked out V] < Object
   #     h.slice(:a)           #=> {:a=>100}
   #     h.slice(:b, :c, :d)   #=> {:b=>200, :c=>300}
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     hsh.slice(*keys) -> a_hash
-  #
-  def slice: (*untyped) -> untyped
+  def slice: (*K) -> self
 
   # ## Element Assignment
   #
@@ -1037,18 +843,12 @@ class Hash[unchecked out K, unchecked out V] < Object
   #     h.key(100).equal? a #=> false
   #     h.key(200).equal? b #=> true
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     hsh.store(key, value)   -> value
-  #
-  def store: (K arg0, V arg1) -> V
+  alias store []=
 
   # Converts *hsh* to a nested array of `[` *key, value* `]` arrays.
   #
   #     h = { "c" => 300, "a" => 100, "d" => 400, "c" => 300  }
   #     h.to_a   #=> [["c", 300], ["a", 100], ["d", 400]]
-  #
-  # # arglists 💪👽🚨 << Delete this section
-  #     hsh.to_a -> array
   #
   def to_a: () -> ::Array[[ K, V ]]
 
@@ -1058,16 +858,10 @@ class Hash[unchecked out K, unchecked out V] < Object
   # If a block is given, the results of the block on each pair of the receiver
   # will be used as pairs.
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     hsh.to_h                         -> hsh or new_hash
-  #     hsh.to_h {|key, value| block }   -> new_hash
-  #
-  def to_h: () -> ::Hash[untyped, untyped]
+  def to_h: () -> Hash[K, V]
+          | [A, B] () { (K, V) -> [ A, B ] } -> Hash[A, B]
 
   # Returns `self`.
-  #
-  # # arglists 💪👽🚨 << Delete this section
-  #     hsh.to_hash   => hsh
   #
   def to_hash: () -> ::Hash[K, V]
 
@@ -1080,14 +874,8 @@ class Hash[unchecked out K, unchecked out V] < Object
   #     hp.call(:c)          #=> nil
   #     [:a, :b, :c].map(&h) #=> [1, 2, nil]
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     hash.to_proc -> proc
-  #
-  def to_proc: () -> ^(K) -> V
+  def to_proc: () -> ^(K) -> V?
 
-  # # arglists 💪👽🚨 << Delete this section
-  #     to_s()
-  #
   alias to_s inspect
 
   # Returns a new hash with the results of running the block once for every key.
@@ -1101,11 +889,8 @@ class Hash[unchecked out K, unchecked out V] < Object
   #
   # If no block is given, an enumerator is returned instead.
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     hsh.transform_keys {|key| block } -> new_hash
-  #     hsh.transform_keys                -> an_enumerator
-  #
-  def transform_keys: (*untyped) -> untyped
+  def transform_keys: () -> Enumerator[[ K, V ], Hash[untyped, V]]
+                    | [A] () { (K) -> A } -> Hash[A, V]
 
   # Invokes the given block once for each key in *hsh*, replacing it with the new
   # key returned by the block, and then returns *hsh*. This method does not change
@@ -1119,11 +904,8 @@ class Hash[unchecked out K, unchecked out V] < Object
   #
   # If no block is given, an enumerator is returned instead.
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     hsh.transform_keys! {|key| block } -> hsh
-  #     hsh.transform_keys!                -> an_enumerator
-  #
-  def transform_keys!: (*untyped) -> untyped
+  def transform_keys!: () -> Enumerator[[ K, V ], Hash[untyped, V]]
+                     | [A] () { (K) -> A } -> Hash[A, V]
 
   # Returns a new hash with the results of running the block once for every value.
   # This method does not change the keys.
@@ -1136,11 +918,8 @@ class Hash[unchecked out K, unchecked out V] < Object
   #
   # If no block is given, an enumerator is returned instead.
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     hsh.transform_values {|value| block } -> new_hash
-  #     hsh.transform_values                  -> an_enumerator
-  #
-  def transform_values: () -> untyped
+  def transform_values: () -> Enumerator[[ K, V ], Hash[K, untyped]]
+                      | [A] () { (V) -> A } -> Hash[K, A]
 
   # Invokes the given block once for each value in *hsh*, replacing it with the
   # new value returned by the block, and then returns *hsh*. This method does not
@@ -1154,11 +933,8 @@ class Hash[unchecked out K, unchecked out V] < Object
   #
   # If no block is given, an enumerator is returned instead.
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     hsh.transform_values! {|value| block } -> hsh
-  #     hsh.transform_values!                  -> an_enumerator
-  #
-  def transform_values!: () -> untyped
+  def transform_values!: () -> Enumerator[[ K, V ], Hash[K, untyped]]
+                       | [A] () { (V) -> A } -> Hash[K, A]
 
   # Adds the contents of the given hashes to the receiver.
   #
@@ -1192,11 +968,7 @@ class Hash[unchecked out K, unchecked out V] < Object
   #
   # Hash#update is an alias for Hash#merge!.
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     hsh.update(other_hash1, other_hash2, ...)              -> hsh
-  #     hsh.update(other_hash1, other_hash2, ...) {|key, oldval, newval| block}
-  #
-  def update: (*untyped) -> untyped
+  alias update merge!
 
   # Returns `true` if the given value is present for some key in *hsh*.
   #
@@ -1204,18 +976,12 @@ class Hash[unchecked out K, unchecked out V] < Object
   #     h.value?(100)   #=> true
   #     h.value?(999)   #=> false
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     hsh.value?(value)        -> true or false
-  #
-  def value?: (V arg0) -> bool
+  alias value? has_value?
 
   # Returns a new array populated with the values from *hsh*. See also Hash#keys.
   #
   #     h = { "a" => 100, "b" => 200, "c" => 300 }
   #     h.values   #=> [100, 200, 300]
-  #
-  # # arglists 💪👽🚨 << Delete this section
-  #     hsh.values    -> array
   #
   def values: () -> ::Array[V]
 
@@ -1225,10 +991,7 @@ class Hash[unchecked out K, unchecked out V] < Object
   #     h = { "cat" => "feline", "dog" => "canine", "cow" => "bovine" }
   #     h.values_at("cow", "cat")  #=> ["bovine", "feline"]
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     hsh.values_at(key, ...)   -> array
-  #
-  def values_at: (*K arg0) -> ::Array[V]
+  def values_at: (*K arg0) -> ::Array[V?]
 
   private
 
@@ -1257,22 +1020,14 @@ class Hash[unchecked out K, unchecked out V] < Object
   #     h["d"]           #=> "Go Fish: d"
   #     h.keys           #=> ["c", "d"]
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     Hash.new                          -> new_hash
-  #     Hash.new(obj)                     -> new_hash
-  #     Hash.new {|hash, key| block }     -> new_hash
-  #
   incompatible def initialize: () -> void
-                             | (?untyped default) -> void
-                             | () { (Hash[untyped, untyped] hash, untyped key) -> untyped } -> void
+                             | (untyped default) -> void
+                             | [A, B] () { (Hash[A, B] hash, A key) -> B } -> void
 
   # Replaces the contents of *hsh* with the contents of *other_hash*.
   #
   #     h = { "a" => 100, "b" => 200 }
   #     h.replace({ "c" => 300, "d" => 400 })   #=> {"c"=>300, "d"=>400}
-  #
-  # # arglists 💪👽🚨 << Delete this section
-  #     hsh.replace(other_hash) -> hsh
   #
   def initialize_copy: (self object) -> self
 end
