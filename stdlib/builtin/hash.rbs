@@ -1,157 +1,73 @@
-# A [Hash](Hash) is a dictionary-like collection of
-# unique keys and their values. Also called associative arrays, they are
-# similar to Arrays, but where an
-# [Array](https://ruby-doc.org/core-2.6.3/Array.html) uses integers as its
-# index, a [Hash](Hash) allows you to use any object
-# type.
-# 
-# Hashes enumerate their values in the order that the corresponding keys
-# were inserted.
-# 
-# A [Hash](Hash) can be easily created by using its
-# implicit form:
-# 
-# ```ruby
-# grades = { "Jane Doe" => 10, "Jim Doe" => 6 }
-# ```
-# 
-# Hashes allow an alternate syntax for keys that are symbols. Instead of
-# 
-# ```ruby
-# options = { :font_size => 10, :font_family => "Arial" }
-# ```
-# 
-# You could write it as:
-# 
-# ```ruby
-# options = { font_size: 10, font_family: "Arial" }
-# ```
-# 
-# Each named key is a symbol you can access in hash:
-# 
-# ```ruby
-# options[:font_size]  # => 10
-# ```
-# 
-# A [Hash](Hash) can also be created through its
-# [::new](Hash#method-c-new) method:
-# 
-# ```ruby
-# grades = Hash.new
-# grades["Dorothy Doe"] = 9
-# ```
-# 
-# Hashes have a *default value* that is returned when accessing keys that
-# do not exist in the hash. If no default is set `nil` is used. You can
-# set the default value by sending it as an argument to
-# [::new](Hash#method-c-new):
-# 
-# ```ruby
-# grades = Hash.new(0)
-# ```
-# 
-# Or by using the [default=](Hash#method-i-default-3D)
-# method:
-# 
-# ```ruby
-# grades = {"Timmy Doe" => 8}
-# grades.default = 0
-# ```
-# 
-# Accessing a value in a [Hash](Hash) requires using
-# its key:
-# 
-# ```ruby
-# puts grades["Jane Doe"] # => 0
-# ```
-# 
-# 
-# Hashes are an easy way to represent data structures, such as
-# 
-# ```ruby
-# books         = {}
-# books[:matz]  = "The Ruby Programming Language"
-# books[:black] = "The Well-Grounded Rubyist"
-# ```
-# 
-# Hashes are also commonly used as a way to have named parameters in
-# functions. Note that no brackets are used below. If a hash is the last
-# argument on a method call, no braces are needed, thus creating a really
-# clean interface:
-# 
-# ```ruby
-# Person.create(name: "John Doe", age: 27)
-# 
-# def self.create(params)
-#   @name = params[:name]
-#   @age  = params[:age]
-# end
-# ```
-# 
-# 
-# Two objects refer to the same hash key when their `hash` value is
-# identical and the two objects are `eql?` to each other.
-# 
-# A user-defined class may be used as a hash key if the `hash` and `eql?`
-# methods are overridden to provide meaningful behavior. By default,
-# separate instances refer to separate hash keys.
-# 
-# A typical implementation of `hash` is based on the object’s data while
-# `eql?` is usually aliased to the overridden `==` method:
-# 
-# ```ruby
-# class Book
-#   attr_reader :author, :title
-# 
-#   def initialize(author, title)
-#     @author = author
-#     @title = title
-#   end
-# 
-#   def ==(other)
-#     self.class === other and
-#       other.author == @author and
-#       other.title == @title
-#   end
-# 
-#   alias eql? ==
-# 
-#   def hash
-#     @author.hash ^ @title.hash # XOR
-#   end
-# end
-# 
-# book1 = Book.new 'matz', 'Ruby in a Nutshell'
-# book2 = Book.new 'matz', 'Ruby in a Nutshell'
-# 
-# reviews = {}
-# 
-# reviews[book1] = 'Great reference!'
-# reviews[book2] = 'Nice and compact!'
-# 
-# reviews.length #=> 1
-# ```
-# 
-# See also Object\#hash and
-# [Object\#eql?](https://ruby-doc.org/core-2.6.3/Object.html#method-i-eql-3F)
-class Hash[unchecked out K, unchecked out V] < Object
-  include Enumerable[[ K, V ], Hash[K, V]]
+class Hash
+  include JSON::Ext::Generator::GeneratorMethods::Hash
 
-  def initialize: () -> void
-                | (?untyped default) -> void
-                | () { (Hash[untyped, untyped] hash, untyped key) -> untyped } -> void
+  include Enumerable
+
   def self.[]: [U, V] (*::Array[[ U, V ]] arg0) -> ::Hash[U, V]
+
+  def self.try_convert: (untyped) -> untyped
+
+  public
 
   def <: (::Hash[K, V]) -> bool
 
   def <=: (::Hash[K, V]) -> bool
 
+  # Equality --- At the `Object` level, `==` returns `true` only if `obj` and
+  # `other` are the same object. Typically, this method is overridden in
+  # descendant classes to provide class-specific meaning.
+  # 
+  # Unlike `==`, the `equal?` method should never be overridden by subclasses as
+  # it is used to determine object identity (that is, `a.equal?(b)` if and only if
+  # `a` is the same object as `b`):
+  # 
+  #     obj = "a"
+  #     other = obj.dup
+  # 
+  #     obj == other      #=> true
+  #     obj.equal? other  #=> false
+  #     obj.equal? obj    #=> true
+  # 
+  # The `eql?` method returns `true` if `obj` and `other` refer to the same hash
+  # key.  This is used by Hash to test members for equality.  For objects of class
+  # `Object`, `eql?` is synonymous with `==`.  Subclasses normally continue this
+  # tradition by aliasing `eql?` to their overridden `==` method, but there are
+  # exceptions.  `Numeric` types, for example, perform type conversion across
+  # `==`, but not across `eql?`, so:
+  # 
+  #     1 == 1.0     #=> true
+  #     1.eql? 1.0   #=> false
+  # 
+  def ==: (untyped other) -> bool
+
   def >: (::Hash[K, V]) -> bool
 
   def >=: (::Hash[K, V]) -> bool
+
   def []: (K arg0) -> V?
 
   def []=: (K arg0, V arg1) -> V
+
+  # Passes each element of the collection to the given block. The method
+  # returns `true` if the block ever returns a value other than `false` or
+  # `nil` . If the block is not given, Ruby adds an implicit block of `{
+  # |obj| obj }` that will cause
+  # [any?](Enumerable.downloaded.ruby_doc#method-i-any-3F) to return `true`
+  # if at least one of the collection members is not `false` or `nil` .
+  # 
+  # If instead a pattern is supplied, the method returns whether `pattern
+  # === element` for any collection member.
+  # 
+  # ```ruby
+  # %w[ant bear cat].any? { |word| word.length >= 3 } #=> true
+  # %w[ant bear cat].any? { |word| word.length >= 4 } #=> true
+  # %w[ant bear cat].any?(/d/)                        #=> false
+  # [nil, true, 99].any?(Integer)                     #=> true
+  # [nil, true, 99].any?                              #=> true
+  # [].any?                                           #=> false
+  # ```
+  def any?: () -> bool
+          | () { (Elem arg0) -> untyped } -> bool
 
   def assoc: (K arg0) -> ::Array[K | V]
 
@@ -184,16 +100,24 @@ class Hash[unchecked out K, unchecked out V] < Object
   # see `Hash#compare_by_identity` .
   def compare_by_identity?: () -> bool
 
+  def deconstruct_keys: (untyped) -> untyped
+
   def default: (?K arg0) -> V?
              | (?K arg0) { (K arg0) -> V } -> V?
 
   def default=: (V arg0) -> V
+
+  def default_proc: () -> untyped
+
+  def default_proc=: (untyped) -> untyped
 
   def delete: (K arg0) -> V?
             | [U] (K arg0) { (K arg0) -> U } -> (U | V)
 
   def delete_if: () { (K arg0, V arg1) -> untyped } -> ::Hash[K, V]
                | () -> ::Enumerator[[ K, V ], self]
+
+  def dig: (*untyped) -> untyped
 
   def each: () { ([ K, V ] arg0) -> untyped } -> ::Hash[K, V]
           | () -> ::Enumerator[[ K, V ], self]
@@ -214,9 +138,38 @@ class Hash[unchecked out K, unchecked out V] < Object
   # ```
   def empty?: () -> bool
 
+  # Equality --- At the `Object` level, `==` returns `true` only if `obj` and
+  # `other` are the same object. Typically, this method is overridden in
+  # descendant classes to provide class-specific meaning.
+  # 
+  # Unlike `==`, the `equal?` method should never be overridden by subclasses as
+  # it is used to determine object identity (that is, `a.equal?(b)` if and only if
+  # `a` is the same object as `b`):
+  # 
+  #     obj = "a"
+  #     other = obj.dup
+  # 
+  #     obj == other      #=> true
+  #     obj.equal? other  #=> false
+  #     obj.equal? obj    #=> true
+  # 
+  # The `eql?` method returns `true` if `obj` and `other` refer to the same hash
+  # key.  This is used by Hash to test members for equality.  For objects of class
+  # `Object`, `eql?` is synonymous with `==`.  Subclasses normally continue this
+  # tradition by aliasing `eql?` to their overridden `==` method, but there are
+  # exceptions.  `Numeric` types, for example, perform type conversion across
+  # `==`, but not across `eql?`, so:
+  # 
+  #     1 == 1.0     #=> true
+  #     1.eql? 1.0   #=> false
+  # 
+  def eql?: (untyped) -> bool
+
   def fetch: (K arg0) -> V
            | [X] (K arg0, ?X arg1) -> (V | X)
            | [X] (K arg0) { (K arg0) -> X } -> (V | X)
+
+  def fetch_values: (*untyped) -> untyped
 
   def filter: () { (K arg0, V arg1) -> untyped } -> ::Hash[K, V]
             | () -> ::Enumerator[[ K, V ], self]
@@ -229,6 +182,12 @@ class Hash[unchecked out K, unchecked out V] < Object
   def has_key?: (K arg0) -> bool
 
   def has_value?: (V arg0) -> bool
+
+  def hash: () -> Integer
+
+  def include?: (untyped arg0) -> bool
+
+  def index: (untyped) -> untyped
 
   # Return the contents of this hash as a string.
   # 
@@ -309,6 +268,12 @@ class Hash[unchecked out K, unchecked out V] < Object
   def merge: [A, B] (*::Hash[A, B] arg0) -> ::Hash[A | K, B | V]
            | [A, B] (*::Hash[A, B] arg0) { (K arg0, V arg1, B arg2) -> (V | B) } -> ::Hash[A | K, B | V]
 
+  def merge!: (*untyped) -> untyped
+
+  def pretty_print: (untyped q) -> untyped
+
+  def pretty_print_cycle: (untyped q) -> untyped
+
   def rassoc: (K arg0) -> ::Array[K | V]
 
   # Rebuilds the hash based on the current hash values for each key. If
@@ -375,6 +340,8 @@ class Hash[unchecked out K, unchecked out V] < Object
   # [\#size](Hash.downloaded.ruby_doc#method-i-size).
   def size: () -> Integer
 
+  def slice: (*untyped) -> untyped
+
   def store: (K arg0, V arg1) -> V
 
   # Converts *hsh* to a nested array of `[` *key, value* `]` arrays.
@@ -385,13 +352,38 @@ class Hash[unchecked out K, unchecked out V] < Object
   # ```
   def to_a: () -> ::Array[[ K, V ]]
 
+  # Implemented in C++
+  # Returns the result of interpreting *enum* as a list of `[key, value]`
+  # pairs.
+  # 
+  #     %i[hello world].each_with_index.to_h
+  #       # => {:hello => 0, :world => 1}
+  # 
+  # If a block is given, the results of the block on each element of the
+  # enum will be used as pairs.
+  # 
+  # ```ruby
+  # (1..5).to_h {|x| [x, x ** 2]}
+  #   #=> {1=>1, 2=>4, 3=>9, 4=>16, 5=>25}
+  # ```
+  def to_h: () -> ::Hash[untyped, untyped]
+
   # Returns `self`.
   def to_hash: () -> ::Hash[K, V]
 
   def to_proc: () -> ^(K) -> V
 
-  # Alias for: [inspect](Hash.downloaded.ruby_doc#method-i-inspect)
-  def to_s: () -> String
+  alias to_s inspect
+
+  def transform_keys: (*untyped) -> untyped
+
+  def transform_keys!: (*untyped) -> untyped
+
+  def transform_values: () -> untyped
+
+  def transform_values!: () -> untyped
+
+  def update: (*untyped) -> untyped
 
   def value?: (V arg0) -> bool
 
@@ -405,4 +397,12 @@ class Hash[unchecked out K, unchecked out V] < Object
   def values: () -> ::Array[V]
 
   def values_at: (*K arg0) -> ::Array[V]
+
+  private
+
+  incompatible def initialize: () -> void
+                             | (?untyped default) -> void
+                             | () { (Hash[untyped, untyped] hash, untyped key) -> untyped } -> void
+
+  def initialize_copy: (self object) -> self
 end
