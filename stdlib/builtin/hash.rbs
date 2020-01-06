@@ -105,10 +105,8 @@
 #
 # See also Object#hash and Object#eql?
 #
-class Hash
-  include JSON::Ext::Generator::GeneratorMethods::Hash
-
-  include Enumerable
+class Hash[unchecked out K, unchecked out V] < Object
+  include Enumerable[[K, V], Hash[K, V]]
 
   # Creates a new hash populated with the given objects.
   #
@@ -261,7 +259,7 @@ class Hash
   #     hsh.any?(pattern)                     -> true or false
   #
   def any?: () -> bool
-          | () { (Elem arg0) -> untyped } -> bool
+          | () { (K, V) -> untyped } -> bool
 
   # Searches through the hash comparing *obj* with the key using `==`. Returns the
   # key-value pair (two elements array) or `nil` if no match is found.  See
