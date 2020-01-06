@@ -1,0 +1,15 @@
+class Tempfile
+  # < Delegate(File) ???
+  def initialize : (String?, ?String?, mode: Integer, max_try: Integer?, **) # the same as File.open
+  def open : -> File
+  def close : ((TrueClass | FalseClass)?) -> void
+  def close! : -> void
+  def unlink : -> void
+  def delete : -> void
+  def path : -> String?
+  def size : -> Integer
+  def length : -> Integer
+  def self.open : (String?, ?String?, mode: Integer, max_try: Integer?, **) # the same as File.open
+  def self.create : (String?, ?String?, mode: Integer, max_try: Integer?, **) -> File
+                  | [X] (String?, ?String?, mode: Integer, max_try: Integer?, **) { (File) -> X } -> X
+end
