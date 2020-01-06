@@ -398,6 +398,9 @@ module Kernel
   def p: [T] (T arg0) -> T
        | (*untyped arg0) -> Array[untyped]
 
+  def pp: [T] (T arg0) -> T
+        | (*untyped arg0) -> Array[untyped]
+
   # If called without an argument, or if `max.to_i.abs == 0`, rand returns
   # a pseudo-random floating point number between 0.0 and 1.0, including 0.0
   # and excluding 1.0.
