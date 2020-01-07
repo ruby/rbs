@@ -11,19 +11,19 @@
 1. Pick the class/library you will work for.
 2. Assign yourself on the [work spreadsheet](https://docs.google.com/spreadsheets/d/199rRB93I16H0k4TGZS3EGojns2R0W1oCsN8UPJzOpyU/edit#gid=1383307992) (optional but recommended to avoid duplication).
 3. Sort RBS members (if there is RBS files for the classes).
-  - Use `bin/sort` command and confirm it does not break definitions.
-  - Commiting the sorted RBSs is recommended.
+    - Use `bin/sort` command and confirm it does not break definitions.
+    - Commiting the sorted RBSs is recommended.
 4. Add method prototypes.
-  - Use `rbs prototype runtime --merged` command to generate the missing method definitions.
-  - Commiting the auto generated signatures is recommended.
+    - Use `rbs prototype runtime --merged` command to generate the missing method definitions.
+    - Commiting the auto generated signatures is recommended.
 5. Annotate with RDoc.
-  - Use `bin/annotate-with-rdoc` to annotate the RBS files.
-  - Commiting the generated annotations is recommended.
+    - Use `bin/annotate-with-rdoc` to annotate the RBS files.
+    - Commiting the generated annotations is recommended.
 6. Fix method types and comments.
-  - The auto generated RDoc comments include `argslist` section, which we don't expect to be included the RBS files.
-  - Delete the `argslist` sections.
-  - Give methods correct types.
-  - Write tests, if possible. (If it is too difficult to write test, skip it.)
+    - The auto generated RDoc comments include `argslist` section, which we don't expect to be included the RBS files.
+    - Delete the `argslist` sections.
+    - Give methods correct types.
+    - Write tests, if possible. (If it is too difficult to write test, skip it.)
 
 ## The Target Version
 
