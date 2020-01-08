@@ -47,10 +47,8 @@ class Symbol
   # 
   # See String#<=> for more information.
   # 
-  # # arglists 💪👽🚨 << Delete this section
-  #     symbol <=> other_symbol       -> -1, 0, +1, or nil
-  # 
-  def <=>: (Symbol other) -> Integer?
+  def <=>: (Symbol other) -> Integer
+         | (untyped other) -> Integer?
 
   # Equality---If *sym* and *obj* are exactly the same symbol, returns `true`.
   # 
