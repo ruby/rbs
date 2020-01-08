@@ -72,6 +72,46 @@ if ARGV.empty?
   exit
 end
 
+def print_members(stores, klass_name, members)
+  members.each do |member|
+    case member
+    when Ruby::Signature::AST::Members::MethodDefinition
+      puts "    Processing #{member.name}..."
+
+      method_name = case
+                    when member.instance?
+                      "##{member.name}"
+                    when member.singleton?
+                      "::#{member.name}"
+                    end
+
+      comment = comment_for_method(klass_name, method_name, stores: stores)
+
+      unless comment
+        if member.instance? && member.name == :initialize
+          comment = comment_for_method(klass_name, '::new', stores: stores)
+        end
+      end
+
+      member.instance_variable_set(:@comment, comment)
+    when Ruby::Signature::AST::Members::AttrReader, Ruby::Signature::AST::Members::AttrAccessor, Ruby::Signature::AST::Members::AttrWriter
+      puts "    👻 Attributes not supported (#{klass_name})"
+    when Ruby::Signature::AST::Members::Alias
+      puts "    Processing #{member.new_name}(alias)..."
+      prefix = case
+               when member.instance?
+                 "#"
+               when member.singleton?
+                 "."
+               end
+      name = "#{prefix}#{member.new_name}"
+
+      comment = comment_for_method(klass_name, name, stores: stores)
+      member.instance_variable_set(:@comment, comment)
+    end
+  end
+end
+
 stores = []
 RDoc::RI::Paths.each true, true, false, false do |path, type|
   puts "Loading store from #{path}..."
@@ -97,43 +137,11 @@ ARGV.map {|f| Pathname(f) }.each do |path|
       comment = comment_for_class(decl, stores: stores)
       decl.instance_variable_set(:@comment, comment)
 
-      decl.members.each do |member|
-        case member
-        when Ruby::Signature::AST::Members::MethodDefinition
-          puts "    Processing #{member.name}..."
+      print_members stores, decl.name.to_s, decl.members
+    when Ruby::Signature::AST::Declarations::Extension
+      puts "  Importing documentation for #{decl.name} (#{decl.extension_name})"
 
-          method_name = case
-                        when member.instance?
-                          "##{member.name}"
-                        when member.singleton?
-                          "::#{member.name}"
-                        end
-
-          comment = comment_for_method(decl.name.to_s, method_name, stores: stores)
-
-          unless comment
-            if member.instance? && member.name == :initialize
-              comment = comment_for_method(decl.name.to_s, '::new', stores: stores)
-            end
-          end
-
-          member.instance_variable_set(:@comment, comment)
-        when Ruby::Signature::AST::Members::AttrReader, Ruby::Signature::AST::Members::AttrAccessor, Ruby::Signature::AST::Members::AttrWriter
-          puts "    👻 Attributes not supported (#{decl.name})"
-        when Ruby::Signature::AST::Members::Alias
-          puts "    Processing #{member.new_name}(alias)..."
-          prefix = case
-                   when member.instance?
-                     "#"
-                   when member.singleton?
-                     "."
-                   end
-          name = "#{prefix}#{member.new_name}"
-
-          comment = comment_for_method(decl.name.to_s, name, stores: stores)
-          member.instance_variable_set(:@comment, comment)
-        end
-      end
+      print_members stores, decl.name.to_s, decl.members
     end
   end
 
