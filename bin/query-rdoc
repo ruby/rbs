@@ -86,7 +86,7 @@ when match = subject.match(/(?<constant_name>[^#]+)#(?<method_name>.+)/)
   comment = comment_for_method(match[:constant_name], "##{match[:method_name]}", stores: stores)
 when match = subject.match(/(?<constant_name>[^.]+)\.(?<method_name>.+)/)
   STDERR.puts "Finding singleton method #{match[:constant_name]} . #{match[:method_name]} ..."
-  comment = comment_for_method(match[:constant_name], ".#{match[:method_name]}", stores: stores)
+  comment = comment_for_method(match[:constant_name], "::#{match[:method_name]}", stores: stores)
 else
   STDERR.puts "Finding class/module/constant #{subject} ..."
   comment = comment_for_class(subject, stores: stores) || comment_for_constant(subject, stores: stores)
