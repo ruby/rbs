@@ -1,3 +1,27 @@
+# Symbol objects represent names inside the Ruby interpreter. They are generated
+# using the `:name` and `:"string"` literals syntax, and by the various `to_sym`
+# methods. The same Symbol object will be created for a given name or string for
+# the duration of a program's execution, regardless of the context or meaning of
+# that name. Thus if `Fred` is a constant in one context, a method in another,
+# and a class in a third, the Symbol `:Fred` will be the same object in all
+# three contexts.
+# 
+#     module One
+#       class Fred
+#       end
+#       $f1 = :Fred
+#     end
+#     module Two
+#       Fred = 1
+#       $f2 = :Fred
+#     end
+#     def Fred()
+#     end
+#     $f3 = :Fred
+#     $f1.object_id   #=> 2514190
+#     $f2.object_id   #=> 2514190
+#     $f3.object_id   #=> 2514190
+# 
 class Symbol
   include Comparable
 
@@ -10,108 +34,277 @@ class Symbol
   #                                     :default_proc, :compact, :extend,
   #                                     :Tms, :getwd, :$=, :ThreadGroup,
   #                                     :wait2, :$>]
+  # 
+  # # arglists 💪👽🚨 << Delete this section
+  #     Symbol.all_symbols    => array
+  # 
   def self.all_symbols: () -> ::Array[Symbol]
 
   public
 
+  # Compares `symbol` with `other_symbol` after calling #to_s on each of the
+  # symbols. Returns -1, 0, +1, or `nil` depending on whether `symbol` is less
+  # than, equal to, or greater than `other_symbol`.
+  # 
+  # `nil` is returned if the two values are incomparable.
+  # 
+  # See String#<=> for more information.
+  # 
+  # # arglists 💪👽🚨 << Delete this section
+  #     symbol <=> other_symbol       -> -1, 0, +1, or nil
+  # 
   def <=>: (Symbol other) -> Integer?
 
+  # Equality---If *sym* and *obj* are exactly the same symbol, returns `true`.
+  # 
+  # # arglists 💪👽🚨 << Delete this section
+  #     sym == obj   -> true or false
+  # 
   def ==: (untyped obj) -> bool
 
-  # Case Equality -- For class Object, effectively the same as calling `#==`, but
-  # typically overridden by descendants to provide meaningful semantics in `case`
-  # statements.
+  # Equality---If *sym* and *obj* are exactly the same symbol, returns `true`.
+  # 
+  # # arglists 💪👽🚨 << Delete this section
+  #     sym == obj   -> true or false
   # 
   def ===: (untyped) -> bool
 
+  # Returns `sym.to_s =~ obj`.
+  # 
+  # # arglists 💪👽🚨 << Delete this section
+  #     sym =~ obj   -> integer or nil
+  # 
   def =~: (untyped obj) -> Integer?
 
+  # Returns `sym.to_s[]`.
+  # 
+  # # arglists 💪👽🚨 << Delete this section
+  #     sym[idx]      -> char
+  #     sym[b, n]     -> string
+  # 
   def []: (Integer idx_or_range) -> String
         | (Integer idx_or_range, ?Integer n) -> String
         | (::Range[Integer] idx_or_range) -> String
 
-  # Same as `sym.to_s.capitalize.intern` .
+  # Same as `sym.to_s.capitalize.intern`.
+  # 
+  # # arglists 💪👽🚨 << Delete this section
+  #     sym.capitalize              -> symbol
+  #     sym.capitalize([options])   -> symbol
+  # 
   def capitalize: () -> Symbol
 
+  # Case-insensitive version of Symbol#<=>. Currently, case-insensitivity only
+  # works on characters A-Z/a-z, not all of Unicode. This is different from
+  # Symbol#casecmp?.
+  # 
+  #     :aBcDeF.casecmp(:abcde)     #=> 1
+  #     :aBcDeF.casecmp(:abcdef)    #=> 0
+  #     :aBcDeF.casecmp(:abcdefg)   #=> -1
+  #     :abcdef.casecmp(:ABCDEF)    #=> 0
+  # 
+  # `nil` is returned if the two symbols have incompatible encodings, or if
+  # `other_symbol` is not a symbol.
+  # 
+  #     :foo.casecmp(2)   #=> nil
+  #     "\u{e4 f6 fc}".encode("ISO-8859-1").to_sym.casecmp(:"\u{c4 d6 dc}")   #=> nil
+  # 
+  # # arglists 💪👽🚨 << Delete this section
+  #     sym.casecmp(other_symbol)   -> -1, 0, +1, or nil
+  # 
   def casecmp: (Symbol other) -> Integer?
 
+  # Returns `true` if `sym` and `other_symbol` are equal after Unicode case
+  # folding, `false` if they are not equal.
+  # 
+  #     :aBcDeF.casecmp?(:abcde)     #=> false
+  #     :aBcDeF.casecmp?(:abcdef)    #=> true
+  #     :aBcDeF.casecmp?(:abcdefg)   #=> false
+  #     :abcdef.casecmp?(:ABCDEF)    #=> true
+  #     :"\u{e4 f6 fc}".casecmp?(:"\u{c4 d6 dc}")   #=> true
+  # 
+  # `nil` is returned if the two symbols have incompatible encodings, or if
+  # `other_symbol` is not a symbol.
+  # 
+  #     :foo.casecmp?(2)   #=> nil
+  #     "\u{e4 f6 fc}".encode("ISO-8859-1").to_sym.casecmp?(:"\u{c4 d6 dc}")   #=> nil
+  # 
+  # # arglists 💪👽🚨 << Delete this section
+  #     sym.casecmp?(other_symbol)   -> true, false, or nil
+  # 
   def casecmp?: (Symbol other) -> bool?
 
-  # Same as `sym.to_s.downcase.intern` .
+  # Same as `sym.to_s.downcase.intern`.
+  # 
+  # # arglists 💪👽🚨 << Delete this section
+  #     sym.downcase              -> symbol
+  #     sym.downcase([options])   -> symbol
+  # 
   def downcase: () -> Symbol
 
-  # Returns whether *sym* is :“” or not.
+  # Returns whether *sym* is :"" or not.
+  # 
+  # # arglists 💪👽🚨 << Delete this section
+  #     sym.empty?   -> true or false
+  # 
   def empty?: () -> bool
 
-  # Returns the [Encoding](https://ruby-doc.org/core-2.6.3/Encoding.html)
-  # object that represents the encoding of *sym* .
+  # Returns the Encoding object that represents the encoding of *sym*.
+  # 
+  # # arglists 💪👽🚨 << Delete this section
+  #     sym.encoding   -> encoding
+  # 
   def encoding: () -> Encoding
 
+  # Returns true if `sym` ends with one of the `suffixes` given.
+  # 
+  #     :hello.end_with?("ello")               #=> true
+  # 
+  #     # returns true if one of the +suffixes+ matches.
+  #     :hello.end_with?("heaven", "ello")     #=> true
+  #     :hello.end_with?("heaven", "paradise") #=> false
+  # 
+  # # arglists 💪👽🚨 << Delete this section
+  #     sym.end_with?([suffixes]+)   -> true or false
+  # 
   def end_with?: (String str) -> bool
 
-  # Returns the name or string corresponding to *sym* .
+  # Returns the name or string corresponding to *sym*.
   # 
-  # ```ruby
-  # :fred.id2name   #=> "fred"
-  # :ginger.to_s    #=> "ginger"
-  # ```
+  #     :fred.id2name   #=> "fred"
+  #     :ginger.to_s    #=> "ginger"
+  # 
+  # # arglists 💪👽🚨 << Delete this section
+  #     sym.id2name   -> string
+  # 
   def id2name: () -> String
 
   # Returns the representation of *sym* as a symbol literal.
   # 
-  # ```ruby
-  # :fred.inspect   #=> ":fred"
-  # ```
+  #     :fred.inspect   #=> ":fred"
+  # 
+  # # arglists 💪👽🚨 << Delete this section
+  #     sym.inspect    -> string
+  # 
   def inspect: () -> String
 
-  # In general, `to_sym` returns the `Symbol` corresponding to an object. As
-  # *sym* is already a symbol, `self` is returned in this case.
+  # In general, `to_sym` returns the Symbol corresponding to an object. As *sym*
+  # is already a symbol, `self` is returned in this case.
+  # 
+  # # arglists 💪👽🚨 << Delete this section
+  #     sym.intern   -> sym
+  # 
   def intern: () -> self
 
-  # Same as `sym.to_s.length` .
+  # Same as `sym.to_s.length`.
+  # 
+  # # arglists 💪👽🚨 << Delete this section
+  #     sym.length   -> integer
+  # 
   def length: () -> Integer
 
+  # Returns `sym.to_s.match`.
+  # 
+  # # arglists 💪👽🚨 << Delete this section
+  #     sym.match(pattern)        -> matchdata or nil
+  #     sym.match(pattern, pos)   -> matchdata or nil
+  # 
   def match: (untyped obj) -> Integer?
 
+  # Returns `sym.to_s.match?`.
+  # 
+  # # arglists 💪👽🚨 << Delete this section
+  #     sym.match?(pattern)        -> true or false
+  #     sym.match?(pattern, pos)   -> true or false
+  # 
   def match?: (*untyped args) -> untyped
 
-  # Same as `sym.to_s.succ.intern` .
+  # Same as `sym.to_s.succ.intern`.
+  # 
+  # # arglists 💪👽🚨 << Delete this section
+  #     sym.succ
+  # 
   def next: () -> Symbol
 
-  # Same as `sym.to_s.length` .
+  # Same as `sym.to_s.length`.
+  # 
+  # # arglists 💪👽🚨 << Delete this section
+  #     sym.size     -> integer
+  # 
   def size: () -> Integer
 
+  # Returns `sym.to_s[]`.
+  # 
+  # # arglists 💪👽🚨 << Delete this section
+  #     sym.slice(idx)      -> char
+  #     sym.slice(b, n)     -> string
+  # 
   def slice: (Integer idx_or_range) -> String
            | (Integer idx_or_range, ?Integer n) -> String
            | (::Range[Integer] idx_or_range) -> String
 
+  # Returns true if `sym` starts with one of the `prefixes` given. Each of the
+  # `prefixes` should be a String or a Regexp.
+  # 
+  #     :hello.start_with?("hell")               #=> true
+  #     :hello.start_with?(/H/i)                 #=> true
+  # 
+  #     # returns true if one of the prefixes matches.
+  #     :hello.start_with?("heaven", "hell")     #=> true
+  #     :hello.start_with?("heaven", "paradise") #=> false
+  # 
+  # # arglists 💪👽🚨 << Delete this section
+  #     sym.start_with?([prefixes]+)   -> true or false
+  # 
   def start_with?: (String str) -> bool
 
-  # Same as `sym.to_s.succ.intern` .
+  # Same as `sym.to_s.succ.intern`.
+  # 
+  # # arglists 💪👽🚨 << Delete this section
+  #     sym.succ
+  # 
   def succ: () -> Symbol
 
-  # Same as `sym.to_s.swapcase.intern` .
+  # Same as `sym.to_s.swapcase.intern`.
+  # 
+  # # arglists 💪👽🚨 << Delete this section
+  #     sym.swapcase              -> symbol
+  #     sym.swapcase([options])   -> symbol
+  # 
   def swapcase: () -> Symbol
 
-  # Returns a *Proc* object which responds to the given method by *sym* .
+  # Returns a *Proc* object which responds to the given method by *sym*.
   # 
-  # ```ruby
-  # (1..3).collect(&:to_s)  #=> ["1", "2", "3"]
-  # ```
+  #     (1..3).collect(&:to_s)  #=> ["1", "2", "3"]
+  # 
+  # # arglists 💪👽🚨 << Delete this section
+  #     sym.to_proc
+  # 
   def to_proc: () -> Proc
 
-  # Returns the name or string corresponding to *sym* .
+  # Returns the name or string corresponding to *sym*.
   # 
-  # ```ruby
-  # :fred.id2name   #=> "fred"
-  # :ginger.to_s    #=> "ginger"
-  # ```
+  #     :fred.id2name   #=> "fred"
+  #     :ginger.to_s    #=> "ginger"
+  # 
+  # # arglists 💪👽🚨 << Delete this section
+  #     sym.to_s      -> string
+  # 
   def to_s: () -> String
 
-  # In general, `to_sym` returns the `Symbol` corresponding to an object. As
-  # *sym* is already a symbol, `self` is returned in this case.
+  # In general, `to_sym` returns the Symbol corresponding to an object. As *sym*
+  # is already a symbol, `self` is returned in this case.
+  # 
+  # # arglists 💪👽🚨 << Delete this section
+  #     sym.to_sym   -> sym
+  # 
   def to_sym: () -> self
 
-  # Same as `sym.to_s.upcase.intern` .
+  # Same as `sym.to_s.upcase.intern`.
+  # 
+  # # arglists 💪👽🚨 << Delete this section
+  #     sym.upcase              -> symbol
+  #     sym.upcase([options])   -> symbol
+  # 
   def upcase: () -> Symbol
 end
