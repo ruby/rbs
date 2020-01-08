@@ -11,14 +11,14 @@
 1. Pick the class/library you will work for.
 2. Assign yourself on the [work spreadsheet](https://docs.google.com/spreadsheets/d/199rRB93I16H0k4TGZS3EGojns2R0W1oCsN8UPJzOpyU/edit#gid=1383307992) (optional but recommended to avoid duplication).
 3. Sort RBS members (if there is RBS files for the classes).
-    - Use `bin/sort` command and confirm it does not break definitions.
-    - Commiting the sorted RBSs is recommended.
+    - Use `bin/sort stdlib/path/to/signature.rbs` command and confirm it does not break definitions.
+    - Committing the sorted RBSs is recommended.
 4. Add method prototypes.
-    - Use `rbs prototype runtime --merged` command to generate the missing method definitions.
-    - Commiting the auto generated signatures is recommended.
+    - Use `rbs prototype runtime --merge CLASS_NAME` command to generate the missing method definitions.
+    - Committing the auto generated signatures is recommended.
 5. Annotate with RDoc.
-    - Use `bin/annotate-with-rdoc` to annotate the RBS files.
-    - Commiting the generated annotations is recommended.
+    - Use `bin/annotate-with-rdoc stdlib/path/to/signature.rbs` to annotate the RBS files.
+    - Committing the generated annotations is recommended.
 6. Fix method types and comments.
     - The auto generated RDoc comments include `argslist` section, which we don't expect to be included the RBS files.
     - Delete the `argslist` sections.
@@ -39,14 +39,14 @@ You can find the list of classes/libraries:
 Assign yourself when you start working for a class or library.
 After reviewing and merging your pull request, I will update the status of the library.
 
-You may find the *Good for first contributor* column where you can find some classes are recommended for new contributers (👍), and some classes are not-recommended (👎).
+You may find the *Good for first contributor* column where you can find some classes are recommended for new contributors (👍), and some classes are not-recommended (👎).
 
 ## Useful Tools
 
-* `rbs prototype runtime --merged String`
+* `rbs prototype runtime --merge String`
   * Generate a prototype using runtime API.
-  * `--merged` tells to use the method types in RBS if exists.
-* `rbs prototype runtime --merged --method-owner=Numeric Integer`
+  * `--merge` tells to use the method types in RBS if exists.
+* `rbs prototype runtime --merge --method-owner=Numeric Integer`
   * You can use --method-owner if you want to print method of other classes too, for documentation purpose.
 * `bin/annotate-with-rdoc stdlib/builtin/string.rbs`
   * Write comments using RDoc.
