@@ -35,9 +35,6 @@ class Symbol
   #                                     :Tms, :getwd, :$=, :ThreadGroup,
   #                                     :wait2, :$>]
   # 
-  # # arglists 💪👽🚨 << Delete this section
-  #     Symbol.all_symbols    => array
-  # 
   def self.all_symbols: () -> ::Array[Symbol]
 
   public

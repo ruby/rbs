@@ -4,6 +4,10 @@ class SymbolTest < StdlibTest
   target Symbol
   using hook.refinement
 
+  def test_all_symbols
+    Symbol.all_symbols
+  end
+
   if RUBY_27_OR_LATER
     def test_end_with?
       :a.end_with?("a")
