@@ -25,6 +25,11 @@ class SymbolTest < StdlibTest
     :a === 42
   end
 
+  def test_match
+    :a =~ /a/
+    :a =~ nil
+  end
+
   if RUBY_27_OR_LATER
     def test_end_with?
       :a.end_with?("a")

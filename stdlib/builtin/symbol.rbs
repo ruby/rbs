@@ -60,9 +60,6 @@ class Symbol
 
   # Returns `sym.to_s =~ obj`.
   # 
-  # # arglists 💪👽🚨 << Delete this section
-  #     sym =~ obj   -> integer or nil
-  # 
   def =~: (untyped obj) -> Integer?
 
   # Returns `sym.to_s[]`.
