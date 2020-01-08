@@ -131,7 +131,7 @@ class Hash[unchecked out K, unchecked out V] < Object
   #     Hash.try_convert("1=>2")   # => nil
   #
   def self.try_convert: [U, V] (_ToHash[U, V]) -> ::Hash[U, V]
-                      | (untyped) -> (::Hash | nil)
+                      | (untyped) -> (::Hash[untyped, untyped] | nil)
 
   public
 

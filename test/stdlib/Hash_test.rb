@@ -192,7 +192,7 @@ class HashTest < StdlibTest
     hash.fetch(:b) { |key| key }
   end
 
-  def test_fetch
+  def test_fetch_values
     hash = { a: 1, b: 42 }
     hash.fetch_values(:a)
     hash.fetch_values(:a, :b)
