@@ -65,6 +65,7 @@ class Symbol < Object
   # object that represents the encoding of *sym* .
   def encoding: () -> Encoding
 
+  def end_with?: (String str) -> bool
   # Returns the name or string corresponding to *sym* .
   # 
   # ```ruby
@@ -94,6 +95,14 @@ class Symbol < Object
   # Same as `sym.to_s.succ.intern` .
   def next: () -> Symbol
 
+  # Same as `sym.to_s.length` .
+  def size: () -> Integer
+
+  def slice: (Integer idx_or_range) -> String
+           | (Integer idx_or_range, ?Integer n) -> String
+           | (::Range[Integer] idx_or_range) -> String
+
+  def start_with?: (String str) -> bool
   # Same as `sym.to_s.succ.intern` .
   def succ: () -> Symbol
 
@@ -107,16 +116,6 @@ class Symbol < Object
   # ```
   def to_proc: () -> Proc
 
-  # Same as `sym.to_s.upcase.intern` .
-  def upcase: () -> Symbol
-
-  # Same as `sym.to_s.length` .
-  def size: () -> Integer
-
-  def slice: (Integer idx_or_range) -> String
-           | (Integer idx_or_range, ?Integer n) -> String
-           | (::Range[Integer] idx_or_range) -> String
-
   # Returns the name or string corresponding to *sym* .
   # 
   # ```ruby
@@ -128,7 +127,6 @@ class Symbol < Object
   # In general, `to_sym` returns the `Symbol` corresponding to an object. As
   # *sym* is already a symbol, `self` is returned in this case.
   def to_sym: () -> self
-
-  def start_with?: (String str) -> bool
-  def end_with?: (String str) -> bool
+  # Same as `sym.to_s.upcase.intern` .
+  def upcase: () -> Symbol
 end
