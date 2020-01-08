@@ -1,30 +1,4 @@
-# `Symbol` objects represent names and some strings inside the Ruby
-# interpreter. They are generated using the `:name` and `:"string"`
-# literals syntax, and by the various `to_sym` methods. The same `Symbol`
-# object will be created for a given name or string for the duration of a
-# program's execution, regardless of the context or meaning of that name.
-# Thus if `Fred` is a constant in one context, a method in another, and a
-# class in a third, the `Symbol` `:Fred` will be the same object in all
-# three contexts.
-# 
-# ```ruby
-# module One
-#   class Fred
-#   end
-#   $f1 = :Fred
-# end
-# module Two
-#   Fred = 1
-#   $f2 = :Fred
-# end
-# def Fred()
-# end
-# $f3 = :Fred
-# $f1.object_id   #=> 2514190
-# $f2.object_id   #=> 2514190
-# $f3.object_id   #=> 2514190
-# ```
-class Symbol < Object
+class Symbol
   include Comparable
 
   # Returns an array of all the symbols currently in Ruby's symbol table.
@@ -38,9 +12,17 @@ class Symbol < Object
   #                                     :wait2, :$>]
   def self.all_symbols: () -> ::Array[Symbol]
 
+  public
+
   def <=>: (Symbol other) -> Integer?
 
   def ==: (untyped obj) -> bool
+
+  # Case Equality -- For class Object, effectively the same as calling `#==`, but
+  # typically overridden by descendants to provide meaningful semantics in `case`
+  # statements.
+  # 
+  def ===: (untyped) -> bool
 
   def =~: (untyped obj) -> Integer?
 
@@ -66,6 +48,7 @@ class Symbol < Object
   def encoding: () -> Encoding
 
   def end_with?: (String str) -> bool
+
   # Returns the name or string corresponding to *sym* .
   # 
   # ```ruby
@@ -103,6 +86,7 @@ class Symbol < Object
            | (::Range[Integer] idx_or_range) -> String
 
   def start_with?: (String str) -> bool
+
   # Same as `sym.to_s.succ.intern` .
   def succ: () -> Symbol
 
@@ -127,6 +111,7 @@ class Symbol < Object
   # In general, `to_sym` returns the `Symbol` corresponding to an object. As
   # *sym* is already a symbol, `self` is returned in this case.
   def to_sym: () -> self
+
   # Same as `sym.to_s.upcase.intern` .
   def upcase: () -> Symbol
 end
