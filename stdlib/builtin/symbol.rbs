@@ -52,9 +52,6 @@ class Symbol
 
   # Equality---If *sym* and *obj* are exactly the same symbol, returns `true`.
   # 
-  # # arglists 💪👽🚨 << Delete this section
-  #     sym == obj   -> true or false
-  # 
   def ==: (untyped obj) -> bool
 
   # Equality---If *sym* and *obj* are exactly the same symbol, returns `true`.
