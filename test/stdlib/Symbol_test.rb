@@ -30,6 +30,30 @@ class SymbolTest < StdlibTest
     :a =~ nil
   end
 
+  def test_aref
+    :a[0] == "a" or raise
+    :a[1] == nil or raise
+    :a[0, 1] == "a" or raise
+    :a[2, 1] == nil or raise
+    :a[0..1] == "a" or raise
+    :a[2..1] == nil or raise
+    :a[0...] == "a" or raise
+    :a[2...] == nil or raise
+    if RUBY_27_OR_LATER
+      eval(<<~RUBY)
+        :a[...0] == "" or raise
+      RUBY
+    end
+    :a[/a/] == "a" or raise
+    :a[/b/] == nil or raise
+    :a[/a/, 0] == "a" or raise
+    :a[/b/, 0] == nil or raise
+    :a[/(?<a>a)/, "a"] == "a" or raise
+    :a[/(?<b>b)/, "b"] == nil or raise
+    :a["a"] == "a" or raise
+    :a["b"] == nil or raise
+  end
+
   if RUBY_27_OR_LATER
     def test_end_with?
       :a.end_with?("a")

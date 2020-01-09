@@ -64,13 +64,12 @@ class Symbol
 
   # Returns `sym.to_s[]`.
   # 
-  # # arglists 💪👽🚨 << Delete this section
-  #     sym[idx]      -> char
-  #     sym[b, n]     -> string
-  # 
-  def []: (Integer idx_or_range) -> String
-        | (Integer idx_or_range, ?Integer n) -> String
-        | (::Range[Integer] idx_or_range) -> String
+  def []: (Integer index) -> String?
+        | (Integer start, Integer length) -> String?
+        | (Range[Integer] range) -> String?
+        | (Regexp regexp) -> String?
+        | (Regexp regexp, Integer | String capture) -> String?
+        | (String match_str) -> String?
 
   # Same as `sym.to_s.capitalize.intern`.
   # 
