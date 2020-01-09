@@ -73,11 +73,10 @@ class Symbol
 
   # Same as `sym.to_s.capitalize.intern`.
   # 
-  # # arglists 💪👽🚨 << Delete this section
-  #     sym.capitalize              -> symbol
-  #     sym.capitalize([options])   -> symbol
-  # 
   def capitalize: () -> Symbol
+                | (:ascii | :lithuanian | :turkic) -> Symbol
+                | (:lithuanian, :turkic) -> Symbol
+                | (:turkic, :lithuanian) -> Symbol
 
   # Case-insensitive version of Symbol#<=>. Currently, case-insensitivity only
   # works on characters A-Z/a-z, not all of Unicode. This is different from
