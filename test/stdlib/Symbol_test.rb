@@ -194,4 +194,8 @@ class SymbolTest < StdlibTest
   def test_to_proc
     :a.to_proc
   end
+
+  def test_to_sym
+    :a.to_sym
+  end
 end

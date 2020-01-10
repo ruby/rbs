@@ -224,10 +224,7 @@ class Symbol
   # In general, `to_sym` returns the Symbol corresponding to an object. As *sym*
   # is already a symbol, `self` is returned in this case.
   # 
-  # # arglists 💪👽🚨 << Delete this section
-  #     sym.to_sym   -> sym
-  # 
-  def to_sym: () -> self
+  alias to_sym intern
 
   # Same as `sym.to_s.upcase.intern`.
   # 
