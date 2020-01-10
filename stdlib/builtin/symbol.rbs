@@ -158,9 +158,6 @@ class Symbol
 
   # Same as `sym.to_s.length`.
   # 
-  # # arglists 💪👽🚨 << Delete this section
-  #     sym.length   -> integer
-  # 
   def length: () -> Integer
 
   # Returns `sym.to_s.match`.

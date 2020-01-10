@@ -117,6 +117,10 @@ class SymbolTest < StdlibTest
     :a.intern
   end
 
+  def test_length
+    :a.length
+  end
+
   if RUBY_27_OR_LATER
     def test_start_with?
       :a.start_with?("a")
