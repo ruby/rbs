@@ -178,13 +178,7 @@ class Symbol
 
   # Returns `sym.to_s[]`.
   # 
-  # # arglists 💪👽🚨 << Delete this section
-  #     sym.slice(idx)      -> char
-  #     sym.slice(b, n)     -> string
-  # 
-  def slice: (Integer idx_or_range) -> String
-           | (Integer idx_or_range, ?Integer n) -> String
-           | (::Range[Integer] idx_or_range) -> String
+  alias slice `[]`
 
   # Returns true if `sym` starts with one of the `prefixes` given. Each of the
   # `prefixes` should be a String or a Regexp.

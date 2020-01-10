@@ -146,6 +146,30 @@ class SymbolTest < StdlibTest
     :a.size
   end
 
+  def test_slice
+    :a.slice(0) == "a" or raise
+    :a.slice(1) == nil or raise
+    :a.slice(0, 1) == "a" or raise
+    :a.slice(2, 1) == nil or raise
+    :a.slice(0..1) == "a" or raise
+    :a.slice(2..1) == nil or raise
+    :a.slice(0...) == "a" or raise
+    :a.slice(2...) == nil or raise
+    if RUBY_27_OR_LATER
+      eval(<<~RUBY)
+        :a.slice(...0) == "" or raise
+      RUBY
+    end
+    :a.slice(/a/) == "a" or raise
+    :a.slice(/b/) == nil or raise
+    :a.slice(/a/, 0) == "a" or raise
+    :a.slice(/b/, 0) == nil or raise
+    :a.slice(/(?<a>a)/, "a") == "a" or raise
+    :a.slice(/(?<b>b)/, "b") == nil or raise
+    :a.slice("a") == "a" or raise
+    :a.slice("b") == nil or raise
+  end
+
   if RUBY_27_OR_LATER
     def test_start_with?
       :a.start_with?("a")
