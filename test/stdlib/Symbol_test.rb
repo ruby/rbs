@@ -177,4 +177,8 @@ class SymbolTest < StdlibTest
       :a.start_with?("b", "a")
     end
   end
+
+  def test_succ
+    :a.succ
+  end
 end

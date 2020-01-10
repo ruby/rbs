@@ -196,10 +196,7 @@ class Symbol
 
   # Same as `sym.to_s.succ.intern`.
   # 
-  # # arglists 💪👽🚨 << Delete this section
-  #     sym.succ
-  # 
-  def succ: () -> Symbol
+  alias succ next
 
   # Same as `sym.to_s.swapcase.intern`.
   # 
