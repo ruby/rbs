@@ -71,6 +71,13 @@ class SymbolTest < StdlibTest
     :a.casecmp(42)
   end
 
+  def test_casecmp_p
+    :a.casecmp(:A)
+    :a.casecmp(:B)
+    "\u{e4 f6 fc}".encode("ISO-8859-1").to_sym.casecmp(:"\u{c4 d6 dc}")
+    :a.casecmp(42)
+  end
+
   if RUBY_27_OR_LATER
     def test_end_with?
       :a.end_with?("a")

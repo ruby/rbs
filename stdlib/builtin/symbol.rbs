@@ -111,10 +111,7 @@ class Symbol
   #     :foo.casecmp?(2)   #=> nil
   #     "\u{e4 f6 fc}".encode("ISO-8859-1").to_sym.casecmp?(:"\u{c4 d6 dc}")   #=> nil
   # 
-  # # arglists 💪👽🚨 << Delete this section
-  #     sym.casecmp?(other_symbol)   -> true, false, or nil
-  # 
-  def casecmp?: (Symbol other) -> bool?
+  def casecmp?: (Symbol other) -> bool
 
   # Same as `sym.to_s.downcase.intern`.
   # 
