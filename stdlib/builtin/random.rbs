@@ -30,8 +30,9 @@ class Random < Object
 
   def initialize: (?Integer seed) -> void
 
-  def rand: (?Integer | ::Range[Integer] max) -> Integer
-          | (?Float | ::Range[Float] max) -> Float
+  def rand: () -> Float
+          | (Integer | ::Range[Integer] max) -> Integer
+          | (Float | ::Range[Float] max) -> Float
 
   # Returns the seed value used to initialize the generator. This may be
   # used to initialize another generator with the same state at a later

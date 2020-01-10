@@ -437,9 +437,9 @@ module Kernel
   # [Random\#rand](https://ruby-doc.org/core-2.6.3/Random.html#method-i-rand)
   # .
   def rand: () -> Float
-          | (?Integer arg0) -> Integer
-          | (?::Range[Integer] arg0) -> Integer
-          | (?::Range[Float] arg0) -> Float
+          | (Integer arg0) -> Integer
+          | (::Range[Integer] arg0) -> Integer
+          | (::Range[Float] arg0) -> Float
 
   def readline: (?String arg0, ?Integer arg1) -> String
 
