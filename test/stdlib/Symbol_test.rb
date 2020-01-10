@@ -101,8 +101,11 @@ class SymbolTest < StdlibTest
     def test_end_with?
       :a.end_with?("a")
       :a.end_with?("b")
+      :a.end_with?("a", "b")
     end
+  end
 
+  if RUBY_27_OR_LATER
     def test_start_with?
       :a.start_with?("a")
       :a.start_with?("b")
