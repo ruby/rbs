@@ -174,10 +174,7 @@ class Symbol
 
   # Same as `sym.to_s.length`.
   # 
-  # # arglists 💪👽🚨 << Delete this section
-  #     sym.size     -> integer
-  # 
-  def size: () -> Integer
+  alias size length
 
   # Returns `sym.to_s[]`.
   # 
