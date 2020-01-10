@@ -198,4 +198,13 @@ class SymbolTest < StdlibTest
   def test_to_sym
     :a.to_sym
   end
+
+  def test_upcase
+    :a.upcase
+    :a.upcase(:ascii)
+    :a.upcase(:lithuanian)
+    :a.upcase(:turkic)
+    :a.upcase(:lithuanian, :turkic)
+    :a.upcase(:turkic, :lithuanian)
+  end
 end

@@ -228,9 +228,8 @@ class Symbol
 
   # Same as `sym.to_s.upcase.intern`.
   # 
-  # # arglists 💪👽🚨 << Delete this section
-  #     sym.upcase              -> symbol
-  #     sym.upcase([options])   -> symbol
-  # 
   def upcase: () -> Symbol
+            | (:ascii | :lithuanian | :turkic) -> Symbol
+            | (:lithuanian, :turkic) -> Symbol
+            | (:turkic, :lithuanian) -> Symbol
 end
