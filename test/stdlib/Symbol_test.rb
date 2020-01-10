@@ -181,4 +181,13 @@ class SymbolTest < StdlibTest
   def test_succ
     :a.succ
   end
+
+  def test_swapcase
+    :a.swapcase
+    :a.swapcase(:ascii)
+    :a.swapcase(:lithuanian)
+    :a.swapcase(:turkic)
+    :a.swapcase(:lithuanian, :turkic)
+    :a.swapcase(:turkic, :lithuanian)
+  end
 end

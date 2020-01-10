@@ -200,11 +200,10 @@ class Symbol
 
   # Same as `sym.to_s.swapcase.intern`.
   # 
-  # # arglists 💪👽🚨 << Delete this section
-  #     sym.swapcase              -> symbol
-  #     sym.swapcase([options])   -> symbol
-  # 
   def swapcase: () -> Symbol
+              | (:ascii | :lithuanian | :turkic) -> Symbol
+              | (:lithuanian, :turkic) -> Symbol
+              | (:turkic, :lithuanian) -> Symbol
 
   # Returns a *Proc* object which responds to the given method by *sym*.
   # 
