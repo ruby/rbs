@@ -149,9 +149,6 @@ class Symbol
   # 
   #     :fred.inspect   #=> ":fred"
   # 
-  # # arglists 💪👽🚨 << Delete this section
-  #     sym.inspect    -> string
-  # 
   def inspect: () -> String
 
   # In general, `to_sym` returns the Symbol corresponding to an object. As *sym*
