@@ -190,4 +190,8 @@ class SymbolTest < StdlibTest
     :a.swapcase(:lithuanian, :turkic)
     :a.swapcase(:turkic, :lithuanian)
   end
+
+  def test_to_proc
+    :a.to_proc
+  end
 end
