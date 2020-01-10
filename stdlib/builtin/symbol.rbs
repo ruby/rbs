@@ -166,11 +166,7 @@ class Symbol
 
   # Returns `sym.to_s.match?`.
   # 
-  # # arglists 💪👽🚨 << Delete this section
-  #     sym.match?(pattern)        -> true or false
-  #     sym.match?(pattern, pos)   -> true or false
-  # 
-  def match?: (*untyped args) -> untyped
+  def match?: (Regexp | String pattern, ?Integer pos) -> bool
 
   # Same as `sym.to_s.succ.intern`.
   # 

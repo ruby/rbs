@@ -130,6 +130,14 @@ class SymbolTest < StdlibTest
     :a.match(/a/) {|_m| }
   end
 
+  def test_match?
+    :a.match?(/a/)
+    :a.match?(/b/)
+    :a.match?(/a/, 0)
+    :a.match?("a")
+    :a.match?("a", 0)
+  end
+
   if RUBY_27_OR_LATER
     def test_start_with?
       :a.start_with?("a")
