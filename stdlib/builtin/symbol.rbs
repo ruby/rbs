@@ -143,9 +143,6 @@ class Symbol
   #     :fred.id2name   #=> "fred"
   #     :ginger.to_s    #=> "ginger"
   # 
-  # # arglists 💪👽🚨 << Delete this section
-  #     sym.id2name   -> string
-  # 
   def id2name: () -> String
 
   # Returns the representation of *sym* as a symbol literal.

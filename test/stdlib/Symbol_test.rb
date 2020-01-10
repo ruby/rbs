@@ -105,6 +105,10 @@ class SymbolTest < StdlibTest
     end
   end
 
+  def test_id2name
+    :a.id2name
+  end
+
   if RUBY_27_OR_LATER
     def test_start_with?
       :a.start_with?("a")
