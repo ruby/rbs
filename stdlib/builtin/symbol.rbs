@@ -170,9 +170,6 @@ class Symbol
 
   # Same as `sym.to_s.succ.intern`.
   # 
-  # # arglists 💪👽🚨 << Delete this section
-  #     sym.succ
-  # 
   def next: () -> Symbol
 
   # Same as `sym.to_s.length`.

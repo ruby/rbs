@@ -138,6 +138,10 @@ class SymbolTest < StdlibTest
     :a.match?("a", 0)
   end
 
+  def test_next
+    :a.next
+  end
+
   if RUBY_27_OR_LATER
     def test_start_with?
       :a.start_with?("a")
