@@ -162,11 +162,7 @@ class Symbol
 
   # Returns `sym.to_s.match`.
   # 
-  # # arglists 💪👽🚨 << Delete this section
-  #     sym.match(pattern)        -> matchdata or nil
-  #     sym.match(pattern, pos)   -> matchdata or nil
-  # 
-  def match: (untyped obj) -> Integer?
+  def match: (Regexp | String pattern, ?Integer pos) ?{ (MatchData) -> void } -> MatchData?
 
   # Returns `sym.to_s.match?`.
   # 

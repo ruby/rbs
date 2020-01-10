@@ -25,7 +25,7 @@ class SymbolTest < StdlibTest
     :a === 42
   end
 
-  def test_match
+  def test_match_op
     :a =~ /a/
     :a =~ nil
   end
@@ -119,6 +119,15 @@ class SymbolTest < StdlibTest
 
   def test_length
     :a.length
+  end
+
+  def test_match
+    :a.match(/a/)
+    :a.match(/b/)
+    :a.match(/a/, 0)
+    :a.match("a")
+    :a.match("a", 0)
+    :a.match(/a/) {|_m| }
   end
 
   if RUBY_27_OR_LATER
