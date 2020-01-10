@@ -126,9 +126,6 @@ class Symbol
 
   # Returns the Encoding object that represents the encoding of *sym*.
   # 
-  # # arglists 💪👽🚨 << Delete this section
-  #     sym.encoding   -> encoding
-  # 
   def encoding: () -> Encoding
 
   # Returns true if `sym` ends with one of the `suffixes` given.

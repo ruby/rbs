@@ -93,6 +93,10 @@ class SymbolTest < StdlibTest
     :a.empty?
   end
 
+  def test_encoding
+    :a.encoding
+  end
+
   if RUBY_27_OR_LATER
     def test_end_with?
       :a.end_with?("a")
