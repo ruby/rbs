@@ -190,10 +190,9 @@ class Symbol
   #     :hello.start_with?("heaven", "hell")     #=> true
   #     :hello.start_with?("heaven", "paradise") #=> false
   # 
-  # # arglists 💪👽🚨 << Delete this section
-  #     sym.start_with?([prefixes]+)   -> true or false
-  # 
-  def start_with?: (String str) -> bool
+  # variadic type parameter is not supported yet
+  # https://github.com/ruby/ruby-signature/issues/21
+  def start_with?: (String str, *String str) -> bool
 
   # Same as `sym.to_s.succ.intern`.
   # 
