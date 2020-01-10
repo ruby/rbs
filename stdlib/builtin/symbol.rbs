@@ -115,11 +115,10 @@ class Symbol
 
   # Same as `sym.to_s.downcase.intern`.
   # 
-  # # arglists 💪👽🚨 << Delete this section
-  #     sym.downcase              -> symbol
-  #     sym.downcase([options])   -> symbol
-  # 
   def downcase: () -> Symbol
+              | (:ascii | :fold | :lithuanian | :turkic) -> Symbol
+              | (:lithuanian, :turkic) -> Symbol
+              | (:turkic, :lithuanian) -> Symbol
 
   # Returns whether *sym* is :"" or not.
   # 

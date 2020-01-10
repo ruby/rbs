@@ -78,6 +78,16 @@ class SymbolTest < StdlibTest
     :a.casecmp(42)
   end
 
+  def test_downcase
+    :a.downcase
+    :a.downcase(:ascii)
+    :a.downcase(:fold)
+    :a.downcase(:lithuanian)
+    :a.downcase(:turkic)
+    :a.downcase(:lithuanian, :turkic)
+    :a.downcase(:turkic, :lithuanian)
+  end
+
   if RUBY_27_OR_LATER
     def test_end_with?
       :a.end_with?("a")
