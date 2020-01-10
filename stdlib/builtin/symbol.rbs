@@ -93,10 +93,8 @@ class Symbol
   #     :foo.casecmp(2)   #=> nil
   #     "\u{e4 f6 fc}".encode("ISO-8859-1").to_sym.casecmp(:"\u{c4 d6 dc}")   #=> nil
   # 
-  # # arglists 💪👽🚨 << Delete this section
-  #     sym.casecmp(other_symbol)   -> -1, 0, +1, or nil
-  # 
   def casecmp: (Symbol other) -> Integer?
+             | (untyped other) -> Integer?
 
   # Returns `true` if `sym` and `other_symbol` are equal after Unicode case
   # folding, `false` if they are not equal.
