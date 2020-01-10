@@ -122,9 +122,6 @@ class Symbol
 
   # Returns whether *sym* is :"" or not.
   # 
-  # # arglists 💪👽🚨 << Delete this section
-  #     sym.empty?   -> true or false
-  # 
   def empty?: () -> bool
 
   # Returns the Encoding object that represents the encoding of *sym*.

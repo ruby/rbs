@@ -88,6 +88,11 @@ class SymbolTest < StdlibTest
     :a.downcase(:turkic, :lithuanian)
   end
 
+  def test_empty_p
+    :"".empty?
+    :a.empty?
+  end
+
   if RUBY_27_OR_LATER
     def test_end_with?
       :a.end_with?("a")
