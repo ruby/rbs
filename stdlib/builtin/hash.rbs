@@ -121,7 +121,7 @@ class Hash[unchecked out K, unchecked out V] < Object
   #     Hash["a" => 100, "b" => 200]         #=> {"a"=>100, "b"=>200}
   #
   def self.[]: [U, V] (_ToHash[U, V]) -> ::Hash[U, V]
-             | [U, V] (*[ U, V ]) -> ::Hash[U, V]
+             | [U, V] (Array[[ U, V ]]) -> ::Hash[U, V]
              | (*untyped) -> ::Hash[untyped, untyped]
 
   # Try to convert *obj* into a hash, using to_hash method. Returns converted hash
@@ -202,7 +202,7 @@ class Hash[unchecked out K, unchecked out V] < Object
   #     h["a"]   #=> 100
   #     h["c"]   #=> nil
   #
-  def []: (K arg0) -> V?
+  def []: (K arg0) -> V
 
   # ## Element Assignment
   #
@@ -281,9 +281,9 @@ class Hash[unchecked out K, unchecked out V] < Object
   # Returns `true` if *hsh* will compare its keys by their identity.  Also see
   # Hash#compare_by_identity.
   #
-  def compare_by_identity?: () -> (true | false)
+  def compare_by_identity?: () -> bool
 
-  def deconstruct_keys: (Array[K]) -> self
+  def deconstruct_keys: (Array[K] | nil) -> self
 
   # Returns the default value, the value that would be returned by *[hsh](key)* if
   # *key* did not exist in *hsh*. See also Hash::new and Hash#default=.
@@ -604,7 +604,7 @@ class Hash[unchecked out K, unchecked out V] < Object
   #
   # See also Hash#select!.
   #
-  def keep_if: () { (K arg0, V arg1) -> untyped } -> self
+  def keep_if: () { (K, V) -> bool } -> self
              | () -> ::Enumerator[[ K, V ], self]
 
   # Returns the key of an occurrence of a given value. If the value is not found,
@@ -723,10 +723,6 @@ class Hash[unchecked out K, unchecked out V] < Object
   def merge!: [A, B] (*::Hash[A, B] other_hashes) -> ::Hash[A | K, B | V]
             | [A, B, C] (*::Hash[A, B] other_hashes) { (K key, V oldval, B newval) -> (C) } -> ::Hash[A | K, B | V | C]
 
-  def pretty_print: (untyped pp) -> untyped
-
-  def pretty_print_cycle: (untyped pp) -> untyped
-
   # Searches through the hash comparing *obj* with the value using `==`. Returns
   # the first key-value pair (two-element array) that matches. See also
   # Array#rassoc.
@@ -735,7 +731,7 @@ class Hash[unchecked out K, unchecked out V] < Object
   #     a.rassoc("two")    #=> [2, "two"]
   #     a.rassoc("four")   #=> nil
   #
-  def rassoc: (K arg0) -> [K, V]?
+  def rassoc: (V) -> [K, V]?
 
   # Rebuilds the hash based on the current hash values for each key. If values of
   # key objects have changed since they were inserted, this method will reindex
@@ -905,7 +901,7 @@ class Hash[unchecked out K, unchecked out V] < Object
   # If no block is given, an enumerator is returned instead.
   #
   def transform_keys!: () -> Enumerator[[ K, V ], Hash[untyped, V]]
-                     | [A] () { (K) -> A } -> Hash[A, V]
+                     | () { (K) -> K } -> Hash[K, V]
 
   # Returns a new hash with the results of running the block once for every value.
   # This method does not change the keys.
@@ -934,7 +930,7 @@ class Hash[unchecked out K, unchecked out V] < Object
   # If no block is given, an enumerator is returned instead.
   #
   def transform_values!: () -> Enumerator[[ K, V ], Hash[K, untyped]]
-                       | [A] () { (V) -> A } -> Hash[K, A]
+                       | () { (V) -> V } -> Hash[K, V]
 
   # Adds the contents of the given hashes to the receiver.
   #

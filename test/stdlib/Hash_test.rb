@@ -7,7 +7,7 @@ class HashTest < StdlibTest
   # Hash[]
   def test_singleton_aref
     Hash[a: 42, b: 43]
-    Hash[[:a, 1], [:b, 3]]
+    Hash[[[:a, 1], [:b, 3]]]
     Hash[:a, 1, :b, 3]
   end
 
@@ -98,6 +98,7 @@ class HashTest < StdlibTest
   def test_deconstruct_keys
     { a: 1 }.deconstruct_keys([])
     { a: 1 }.deconstruct_keys([:a])
+    { a: 1 }.deconstruct_keys(nil)
   end
 
   # default and default=
