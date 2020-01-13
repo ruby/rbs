@@ -14,6 +14,14 @@ interface _ToStr
   def to_str: () -> String
 end
 
+interface _ToHash[K, V]
+  def to_hash: () -> Hash[K, V]
+end
+
+interface _ToProc
+  def to_proc: () -> untyped
+end
+
 interface _Each[out A, out B]
   def each: { (A) -> void } -> B
 end
