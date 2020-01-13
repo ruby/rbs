@@ -189,9 +189,6 @@ class Symbol
   #     # returns true if one of the prefixes matches.
   #     :hello.start_with?("heaven", "hell")     #=> true
   #     :hello.start_with?("heaven", "paradise") #=> false
-  # 
-  # variadic type parameter is not supported yet
-  # https://github.com/ruby/ruby-signature/issues/21
   def start_with?: (String str, *String str) -> bool
 
   # Same as `sym.to_s.succ.intern`.
