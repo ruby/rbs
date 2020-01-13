@@ -213,10 +213,7 @@ class Symbol
   #     :fred.id2name   #=> "fred"
   #     :ginger.to_s    #=> "ginger"
   # 
-  # # arglists 💪👽🚨 << Delete this section
-  #     sym.to_s      -> string
-  # 
-  def to_s: () -> String
+  alias to_s id2name
 
   # In general, `to_sym` returns the Symbol corresponding to an object. As *sym*
   # is already a symbol, `self` is returned in this case.
