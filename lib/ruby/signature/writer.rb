@@ -31,7 +31,8 @@ module Ruby
         if comment
           prefix = " " * level
           comment.string.lines.each do |line|
-            out.puts "#{prefix}# #{line}"
+            line = " #{line}" unless line.chomp.empty?
+            out.puts "#{prefix}##{line}"
           end
         end
       end
