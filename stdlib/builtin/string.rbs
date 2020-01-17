@@ -1,7 +1,7 @@
 # A `String` object holds and manipulates an arbitrary sequence of bytes,
 # typically representing characters. [String](String)
 # objects may be created using `String::new` or as literals.
-# 
+#
 # Because of aliasing issues, users of strings should be aware of the
 # methods that modify the contents of a `String` object. Typically,
 # methods with names ending in “\!” modify their receiver, while those
@@ -10,12 +10,18 @@
 class String < Object
   include Comparable
 
+  def initialize: (?String str, ?capacity: Integer, ?encoding: Encoding | String) -> void
+
+  def self.try_convert: (Object obj) -> String?
   def %: (Object arg0) -> String
 
   def *: (Integer arg0) -> String
 
   def +: (String arg0) -> String
 
+  def +@: () -> String
+
+  def -@: () -> String
   def <<: (Object arg0) -> String
 
   def <=>: (String other) -> Integer?
@@ -33,8 +39,15 @@ class String < Object
         | (Regexp arg0, ?String arg1) -> String?
         | (String arg0) -> String?
 
+  def []=: (Integer pos, String new_str) -> String
+         | (Integer begin_pos, Integer end_pos, String new_str) -> String
+         | (::Range[Integer] range, String new_str) -> String
+         | (Regexp regexp, String new_str) -> String
+         | (Regexp regexp, Integer capture, String new_str) -> String
+         | (Regexp regexp, String name, String new_str) -> String
+         | (String other_str, String new_str) -> String
   # Returns true for a string which has only ASCII characters.
-  # 
+  #
   # ```ruby
   # "abc".force_encoding("UTF-8").ascii_only?          #=> true
   # "abc\u{6666}".force_encoding("UTF-8").ascii_only?  #=> false
@@ -46,13 +59,13 @@ class String < Object
 
   # Returns an array of bytes in *str* . This is a shorthand for
   # `str.each_byte.to_a` .
-  # 
+  #
   # If a block is given, which is a deprecated form, works the same as
   # `each_byte` .
   def bytes: () -> Array[String]
 
   # Returns the length of `str` in bytes.
-  # 
+  #
   #     "\x80\u3042".bytesize  #=> 4
   #     "hello".bytesize       #=> 5
   def bytesize: () -> Integer
@@ -62,10 +75,10 @@ class String < Object
 
   # Returns a copy of *str* with the first character converted to uppercase
   # and the remainder to lowercase.
-  # 
+  #
   # See [\#downcase](String.downloaded.ruby_doc#method-i-downcase) for
   # meaning of `options` and use with different encodings.
-  # 
+  #
   # ```ruby
   # "hello".capitalize    #=> "Hello"
   # "HELLO".capitalize    #=> "Hello"
@@ -79,10 +92,10 @@ class String < Object
   # is the same as for
   # [\#downcase](String.downloaded.ruby_doc#method-i-downcase), to avoid
   # mixed case.
-  # 
+  #
   # See [\#downcase](String.downloaded.ruby_doc#method-i-downcase) for
   # meaning of `options` and use with different encodings.
-  # 
+  #
   # ```ruby
   # a = "hello"
   # a.capitalize!   #=> "Hello"
@@ -93,11 +106,13 @@ class String < Object
 
   def casecmp: (String arg0) -> Integer?
 
+  def casecmp?: (String other) -> bool
+              | (untyped other) -> nil
   def center: (Integer arg0, ?String arg1) -> String
 
   # Returns an array of characters in *str* . This is a shorthand for
   # `str.each_char.to_a` .
-  # 
+  #
   # If a block is given, which is a deprecated form, works the same as
   # `each_char` .
   def chars: () -> Array[String]
@@ -111,7 +126,7 @@ class String < Object
   # empty string returns an empty string. `String#chomp` is often a safer
   # alternative, as it leaves the string unchanged if it doesn’t end in a
   # record separator.
-  # 
+  #
   # ```ruby
   # "string\r\n".chop   #=> "string"
   # "string\n\r".chop   #=> "string\n"
@@ -126,7 +141,7 @@ class String < Object
   def chop!: () -> String?
 
   # Returns a one-character string at the beginning of the string.
-  # 
+  #
   # ```ruby
   # a = "abcde"
   # a.chr    #=> "a"
@@ -134,7 +149,7 @@ class String < Object
   def chr: () -> String
 
   # Makes string empty.
-  # 
+  #
   # ```ruby
   # a = "abcde"
   # a.clear    #=> ""
@@ -143,7 +158,7 @@ class String < Object
 
   # Returns an array of the `Integer` ordinals of the characters in *str* .
   # This is a shorthand for `str.each_codepoint.to_a` .
-  # 
+  #
   # If a block is given, which is a deprecated form, works the same as
   # `each_codepoint` .
   def codepoints: () -> ::Array[Integer]
@@ -158,7 +173,7 @@ class String < Object
   def delete: (String arg0, *String arg1) -> String
 
   def delete!: (String arg0, *String arg1) -> String?
-  
+
   def delete_prefix: (String) -> String
 
   def delete_prefix!: (String) -> String?
@@ -171,36 +186,36 @@ class String < Object
   # lowercase counterparts. Which letters exactly are replaced, and by which
   # other letters, depends on the presence or absence of options, and on the
   # `encoding` of the string.
-  # 
+  #
   # The meaning of the `options` is as follows:
-  # 
+  #
   #   - No option
   #     Full Unicode case mapping, suitable for most languages (see :turkic
   #     and :lithuanian options below for exceptions). Context-dependent
   #     case mapping as described in Table 3-14 of the Unicode standard is
   #     currently not supported.
-  # 
+  #
   #   - :ascii
   #     Only the ASCII region, i.e. the characters “A” to “Z” and “a” to
   #     “z”, are affected. This option cannot be combined with any other
   #     option.
-  # 
+  #
   #   - :turkic
   #     Full Unicode case mapping, adapted for Turkic languages (Turkish,
   #     Azerbaijani, …). This means that upper case I is mapped to lower
   #     case dotless i, and so on.
-  # 
+  #
   #   - :lithuanian
   #     Currently, just full Unicode case mapping. In the future, full
   #     Unicode case mapping adapted for Lithuanian (keeping the dot on the
   #     lower case i even if there is an accent on top).
-  # 
+  #
   #   - :fold
   #     Only available on `downcase` and `downcase!` . Unicode case
   #     **folding** , which is more far-reaching than Unicode case mapping.
   #     This option currently cannot be combined with any other option (i.e.
   #     there is currently no variant for turkic languages).
-  # 
+  #
   # Please note that several assumptions that are valid for ASCII-only case
   # conversions do not hold for more general case conversions. For example,
   # the length of the result may not be the same as the length of the input
@@ -209,11 +224,11 @@ class String < Object
   # normalization (i.e.
   # [\#unicode\_normalize](String.downloaded.ruby_doc#method-i-unicode_normalize)
   # ) is not necessarily maintained by case mapping operations.
-  # 
+  #
   # Non-ASCII case mapping/folding is currently supported for UTF-8,
   # UTF-16BE/LE, UTF-32BE/LE, and ISO-8859-1\~16 Strings/Symbols. This
   # support will be extended to other encodings.
-  # 
+  #
   # ```ruby
   # "hEllO".downcase   #=> "hello"
   # ```
@@ -221,14 +236,14 @@ class String < Object
 
   # Downcases the contents of *str* , returning `nil` if no changes were
   # made.
-  # 
+  #
   # See [\#downcase](String.downloaded.ruby_doc#method-i-downcase) for
   # meaning of `options` and use with different encodings.
   def downcase!: () -> String?
 
   # Produces a version of `str` with all non-printing characters replaced by
   # `\nnn` notation and all special characters escaped.
-  # 
+  #
   # ```ruby
   # "hello \n ''".dump  #=> "\"hello \\n ''\""
   # ```
@@ -243,11 +258,13 @@ class String < Object
   def each_codepoint: () { (Integer arg0) -> untyped } -> String
                     | () -> ::Enumerator[Integer, self]
 
+  def each_grapheme_cluster: () { (String grapheme) -> untyped } -> self
+                           | () -> ::Enumerator[String, self]
   def each_line: (?String arg0) { (String arg0) -> untyped } -> String
                | (?String arg0) -> ::Enumerator[String, self]
 
   # Returns `true` if *str* has a length of zero.
-  # 
+  #
   # ```ruby
   # "hello".empty?   #=> false
   # " ".empty?       #=> false
@@ -255,6 +272,9 @@ class String < Object
   # ```
   def empty?: () -> bool
 
+  def encode: (?Encoding | String encoding, ?Encoding | String from_encoding, ?crlf_newline: TrueClass, ?cr_newline: TrueClass, ?universal_newline: TrueClass, ?xml: :text | :attr, ?fallback: Hash[String, String] | Proc | Method, ?replace: String, ?undef: :replace ?, ?invalid: :replace ?) -> String
+
+  def encode!: (?Encoding | String encoding, ?Encoding | String from_encoding, ?crlf_newline: TrueClass, ?cr_newline: TrueClass, ?universal_newline: TrueClass, ?xml: :text | :attr, ?fallback: Hash[String, String] | Proc | Method, ?replace: String, ?undef: :replace ?, ?invalid: :replace ?) -> self
   # Returns the [Encoding](https://ruby-doc.org/core-2.6.3/Encoding.html)
   # object that represents the encoding of obj.
   def encoding: () -> Encoding
@@ -267,6 +287,7 @@ class String < Object
 
   def getbyte: (Integer arg0) -> Integer?
 
+  def grapheme_clusters: () -> ::Array[::String]
   def gsub: (Regexp | String arg0, ?String arg1) -> String
           | (Regexp | String arg0, ?Hash[String, String] arg1) -> String
           | (Regexp | String arg0) { (String arg0) -> untyped } -> String
@@ -278,14 +299,14 @@ class String < Object
            | (Regexp | String arg0) -> ::Enumerator[String, self]
 
   # Returns a hash based on the string’s length, content and encoding.
-  # 
+  #
   # See also Object\#hash.
   def hash: () -> Integer
 
   # Treats leading characters from *str* as a string of hexadecimal digits
   # (with an optional sign and an optional `0x` ) and returns the
   # corresponding number. Zero is returned on error.
-  # 
+  #
   # ```ruby
   # "0x0a".hex     #=> 10
   # "-1234".hex    #=> -4660
@@ -294,17 +315,15 @@ class String < Object
   # ```
   def hex: () -> Integer
 
-  def `include?`: (String arg0) -> bool
+  def include?: (String arg0) -> bool
 
   def index: (Regexp | String arg0, ?Integer arg1) -> Integer?
-
-  def initialize: (?String str, ?encoding: Encoding | String, ?capacity: Integer) -> void
 
   def insert: (Integer arg0, String arg1) -> String
 
   # Returns a printable version of *str* , surrounded by quote marks, with
   # special characters escaped.
-  # 
+  #
   # ```ruby
   # str = "hello"
   # str[3] = "\b"
@@ -314,7 +333,7 @@ class String < Object
 
   # Returns the `Symbol` corresponding to *str* , creating the symbol if it
   # did not previously exist. See `Symbol#id2name` .
-  # 
+  #
   # ```ruby
   # "Koala".intern         #=> :Koala
   # s = 'cat'.to_sym       #=> :cat
@@ -322,10 +341,10 @@ class String < Object
   # s = '@cat'.to_sym      #=> :@cat
   # s == :@cat             #=> true
   # ```
-  # 
+  #
   # This can also be used to create symbols that cannot be represented using
   # the `:xxx` notation.
-  # 
+  #
   # ```ruby
   # 'cat and dog'.to_sym   #=> :"cat and dog"
   # ```
@@ -341,10 +360,10 @@ class String < Object
   # Returns a copy of the receiver with leading whitespace removed. See also
   # [\#rstrip](String.downloaded.ruby_doc#method-i-rstrip) and
   # [\#strip](String.downloaded.ruby_doc#method-i-strip).
-  # 
+  #
   # Refer to [\#strip](String.downloaded.ruby_doc#method-i-strip) for the
   # definition of whitespace.
-  # 
+  #
   # ```ruby
   # "  hello  ".lstrip   #=> "hello  "
   # "hello".lstrip       #=> "hello"
@@ -355,10 +374,10 @@ class String < Object
   # receiver, or `nil` if no change was made. See also
   # [\#rstrip\!](String.downloaded.ruby_doc#method-i-rstrip-21) and
   # [\#strip\!](String.downloaded.ruby_doc#method-i-strip-21).
-  # 
+  #
   # Refer to [\#strip](String.downloaded.ruby_doc#method-i-strip) for the
   # definition of whitespace.
-  # 
+  #
   # ```ruby
   # "  hello  ".lstrip!  #=> "hello  "
   # "hello  ".lstrip!    #=> nil
@@ -378,11 +397,11 @@ class String < Object
   # Incrementing a digit always results in another digit, and incrementing a
   # letter results in another letter of the same case. Incrementing
   # nonalphanumerics uses the underlying character set’s collating sequence.
-  # 
+  #
   # If the increment generates a “carry,” the character to the left of it is
   # incremented. This process repeats until there is no carry, adding an
   # additional character if necessary.
-  # 
+  #
   # ```ruby
   # "abcd".succ        #=> "abce"
   # "THX1138".succ     #=> "THX1139"
@@ -399,20 +418,20 @@ class String < Object
   # Treats leading characters of *str* as a string of octal digits (with an
   # optional sign) and returns the corresponding number. Returns 0 if the
   # conversion fails.
-  # 
+  #
   # ```ruby
   # "123".oct       #=> 83
   # "-377".oct      #=> -255
   # "bad".oct       #=> 0
   # "0377bad".oct   #=> 255
   # ```
-  # 
+  #
   # If `str` starts with `0`, radix indicators are honored. See
   # Kernel\#Integer.
   def oct: () -> Integer
 
   # Returns the `Integer` ordinal of a one-character string.
-  # 
+  #
   # ```ruby
   # "a".ord         #=> 97
   # ```
@@ -425,12 +444,13 @@ class String < Object
   def replace: (String arg0) -> String
 
   # Returns a new string with the characters from *str* in reverse order.
-  # 
+  #
   # ```ruby
   # "stressed".reverse   #=> "desserts"
   # ```
   def reverse: () -> String
 
+  def reverse!: () -> String
   def rindex: (String | Regexp arg0, ?Integer arg1) -> Integer?
 
   def rjust: (Integer arg0, ?String arg1) -> String
@@ -440,10 +460,10 @@ class String < Object
   # Returns a copy of the receiver with trailing whitespace removed. See
   # also [\#lstrip](String.downloaded.ruby_doc#method-i-lstrip) and
   # [\#strip](String.downloaded.ruby_doc#method-i-strip).
-  # 
+  #
   # Refer to [\#strip](String.downloaded.ruby_doc#method-i-strip) for the
   # definition of whitespace.
-  # 
+  #
   # ```ruby
   # "  hello  ".rstrip   #=> "  hello"
   # "hello".rstrip       #=> "hello"
@@ -454,10 +474,10 @@ class String < Object
   # receiver, or `nil` if no change was made. See also
   # [\#lstrip\!](String.downloaded.ruby_doc#method-i-lstrip-21) and
   # [\#strip\!](String.downloaded.ruby_doc#method-i-strip-21).
-  # 
+  #
   # Refer to [\#strip](String.downloaded.ruby_doc#method-i-strip) for the
   # definition of whitespace.
-  # 
+  #
   # ```ruby
   # "  hello  ".rstrip!  #=> "  hello"
   # "  hello".rstrip!    #=> nil
@@ -479,6 +499,11 @@ class String < Object
   # Returns the character length of *str* .
   def size: () -> Integer
 
+  def slice: (Integer arg0, ?Integer arg1) -> String?
+           | (::Range[Integer] | Regexp arg0) -> String?
+           | (Regexp arg0, ?Integer arg1) -> String?
+           | (Regexp arg0, ?String arg1) -> String?
+           | (String arg0) -> String?
   def slice!: (Integer arg0, ?Integer arg1) -> String?
             | (::Range[Integer] | Regexp arg0) -> String?
             | (Regexp arg0, ?Integer arg1) -> String?
@@ -496,11 +521,11 @@ class String < Object
 
   # Returns a copy of the receiver with leading and trailing whitespace
   # removed.
-  # 
+  #
   # Whitespace is defined as any of the following characters: null,
   # horizontal tab, line feed, vertical tab, form feed, carriage return,
   # space.
-  # 
+  #
   # ```ruby
   # "    hello    ".strip   #=> "hello"
   # "\tgoodbye\r\n".strip   #=> "goodbye"
@@ -511,10 +536,10 @@ class String < Object
 
   # Removes leading and trailing whitespace from the receiver. Returns the
   # altered receiver, or `nil` if there was no change.
-  # 
+  #
   # Refer to [\#strip](String.downloaded.ruby_doc#method-i-strip) for the
   # definition of whitespace.
-  # 
+  #
   # ```ruby
   # "  hello  ".strip!  #=> "hello"
   # "hello".strip!      #=> nil
@@ -533,11 +558,11 @@ class String < Object
   # Incrementing a digit always results in another digit, and incrementing a
   # letter results in another letter of the same case. Incrementing
   # nonalphanumerics uses the underlying character set’s collating sequence.
-  # 
+  #
   # If the increment generates a “carry,” the character to the left of it is
   # incremented. This process repeats until there is no carry, adding an
   # additional character if necessary.
-  # 
+  #
   # ```ruby
   # "abcd".succ        #=> "abce"
   # "THX1138".succ     #=> "THX1139"
@@ -554,10 +579,10 @@ class String < Object
 
   # Returns a copy of *str* with uppercase alphabetic characters converted
   # to lowercase and lowercase characters converted to uppercase.
-  # 
+  #
   # See [\#downcase](String.downloaded.ruby_doc#method-i-downcase) for
   # meaning of `options` and use with different encodings.
-  # 
+  #
   # ```ruby
   # "Hello".swapcase          #=> "hELLO"
   # "cYbEr_PuNk11".swapcase   #=> "CyBeR_pUnK11"
@@ -566,7 +591,7 @@ class String < Object
 
   # Equivalent to `String#swapcase`, but modifies the receiver in place,
   # returning *str* , or `nil` if no changes were made.
-  # 
+  #
   # See [\#downcase](String.downloaded.ruby_doc#method-i-downcase) for
   # meaning of `options` and use with different encodings.
   def swapcase!: () -> String?
@@ -574,7 +599,7 @@ class String < Object
   # Returns a complex which denotes the string form. The parser ignores
   # leading whitespaces and trailing garbage. Any digit sequences can be
   # separated by an underscore. Returns zero for null or garbage string.
-  # 
+  #
   # ```ruby
   # '9'.to_c           #=> (9+0i)
   # '2.5'.to_c         #=> (2.5+0i)
@@ -588,7 +613,7 @@ class String < Object
   # '1/2+3/4i'.to_c    #=> ((1/2)+(3/4)*i)
   # 'ruby'.to_c        #=> (0+0i)
   # ```
-  # 
+  #
   # See [Kernel](https://ruby-doc.org/core-2.6.3/Kernel.html).Complex.
   def to_c: () -> Complex
 
@@ -596,7 +621,7 @@ class String < Object
   # floating point number. Extraneous characters past the end of a valid
   # number are ignored. If there is not a valid number at the start of *str*
   # , `0.0` is returned. This method never raises an exception.
-  # 
+  #
   # ```ruby
   # "123.45e1".to_f        #=> 1234.5
   # "45.67 degrees".to_f   #=> 45.67
@@ -611,7 +636,7 @@ class String < Object
   # valid number are ignored. Digit sequences can be separated by an
   # underscore. If there is not a valid number at the start of `str`, zero
   # is returned. This method never raises an exception.
-  # 
+  #
   # ```ruby
   # '  2  '.to_r       #=> (2/1)
   # '300/2'.to_r       #=> (150/1)
@@ -622,31 +647,31 @@ class String < Object
   # '21/06/09'.to_r    #=> (7/2)
   # 'BWV 1079'.to_r    #=> (0/1)
   # ```
-  # 
+  #
   # NOTE: “0.3”.to\_r isn’t the same as 0.3.to\_r. The former is equivalent
   # to “3/10”.to\_r, but the latter isn’t so.
-  # 
+  #
   #     "0.3".to_r == 3/10r  #=> true
   #     0.3.to_r   == 3/10r  #=> false
-  # 
+  #
   # See also Kernel\#Rational.
   def to_r: () -> Rational
 
   # Returns `self` .
-  # 
+  #
   # If called on a subclass of [String](String.downloaded.ruby_doc),
   # converts the receiver to a [String](String.downloaded.ruby_doc) object.
   def to_s: () -> String
 
   # Returns `self` .
-  # 
+  #
   # If called on a subclass of [String](String.downloaded.ruby_doc),
   # converts the receiver to a [String](String.downloaded.ruby_doc) object.
   def to_str: () -> String
 
   # Returns the `Symbol` corresponding to *str* , creating the symbol if it
   # did not previously exist. See `Symbol#id2name` .
-  # 
+  #
   # ```ruby
   # "Koala".intern         #=> :Koala
   # s = 'cat'.to_sym       #=> :cat
@@ -654,10 +679,10 @@ class String < Object
   # s = '@cat'.to_sym      #=> :@cat
   # s == :@cat             #=> true
   # ```
-  # 
+  #
   # This can also be used to create symbols that cannot be represented using
   # the `:xxx` notation.
-  # 
+  #
   # ```ruby
   # 'cat and dog'.to_sym   #=> :"cat and dog"
   # ```
@@ -671,21 +696,28 @@ class String < Object
 
   def tr_s!: (String arg0, String arg1) -> String?
 
+  def undump: () -> String
+  def unicode_normalize: (?:nfc | :nfd | :nfkc | :nfkd) -> String
+
+  def unicode_normalize!: (?:nfc | :nfd | :nfkc | :nfkd) -> String
+
+  def unicode_normalized?: (?:nfc | :nfd | :nfkc | :nfkd) -> bool
   def unpack: (String arg0) -> ::Array[(Integer | Float | String)?]
 
+  def unpack1: (String format) -> (Integer | Float | String | nil)
   # Returns a copy of *str* with all lowercase letters replaced with their
   # uppercase counterparts.
-  # 
+  #
   # See [\#downcase](String.downloaded.ruby_doc#method-i-downcase) for
   # meaning of `options` and use with different encodings.
-  # 
+  #
   # ```ruby
   # "hEllO".upcase   #=> "HELLO"
   # ```
   def upcase: () -> String
 
   # Upcases the contents of *str* , returning `nil` if no changes were made.
-  # 
+  #
   # See [\#downcase](String.downloaded.ruby_doc#method-i-downcase) for
   # meaning of `options` and use with different encodings.
   def upcase!: () -> String?
@@ -694,77 +726,11 @@ class String < Object
           | [Bool] (String arg0, ?Bool arg1) { (String arg0) -> untyped } -> String
 
   # Returns true for a string which is encoded correctly.
-  # 
+  #
   # ```ruby
   # "\xc2\xa1".force_encoding("UTF-8").valid_encoding?  #=> true
   # "\xc2".force_encoding("UTF-8").valid_encoding?      #=> false
   # "\x80".force_encoding("UTF-8").valid_encoding?      #=> false
   # ```
   def valid_encoding?: () -> bool
-
-  def self.try_convert: (Object obj) -> String?
-
-  def slice: (Integer arg0, ?Integer arg1) -> String?
-           | (::Range[Integer] | Regexp arg0) -> String?
-           | (Regexp arg0, ?Integer arg1) -> String?
-           | (Regexp arg0, ?String arg1) -> String?
-           | (String arg0) -> String?
-
-  def encode: (
-    ?(Encoding | String) encoding,
-    ?(Encoding | String) from_encoding,
-    ?invalid: :replace ?,
-    ?undef: :replace ?,
-    ?replace: String,
-    ?fallback: Hash[String, String] | Proc | Method,
-    ?xml: :text | :attr,
-    ?universal_newline: TrueClass,
-    ?cr_newline: TrueClass,
-    ?crlf_newline: TrueClass
-  ) -> String
-
-  def encode!: (
-    ?(Encoding | String) encoding,
-    ?(Encoding | String) from_encoding,
-    ?invalid: :replace ?,
-    ?undef: :replace ?,
-    ?replace: String,
-    ?fallback: Hash[String, String] | Proc | Method,
-    ?xml: :text | :attr,
-    ?universal_newline: TrueClass,
-    ?cr_newline: TrueClass,
-    ?crlf_newline: TrueClass
-  ) -> self
-
-  def +@: () -> String
-
-  def -@: () -> String
-
-  def unicode_normalize: (?(:nfc | :nfd | :nfkc | :nfkd)) -> String
-
-  def unicode_normalize!: (?(:nfc | :nfd | :nfkc | :nfkd)) -> String
-
-  def casecmp?: (String other) -> bool
-              | (untyped other) -> nil
-
-  def []=: (Integer pos, String new_str) -> String
-         | (Integer begin_pos, Integer end_pos, String new_str) -> String
-         | (::Range[Integer] range, String new_str) -> String
-         | (Regexp regexp, String new_str) -> String
-         | (Regexp regexp, Integer capture, String new_str) -> String
-         | (Regexp regexp, String name, String new_str) -> String
-         | (String other_str, String new_str) -> String
-
-  def undump: () -> String
-
-  def grapheme_clusters: () -> ::Array[::String]
-
-  def reverse!: () -> String
-
-  def each_grapheme_cluster: () { (String grapheme) -> untyped } -> self
-                           | () -> ::Enumerator[String, self]
-
-  def unpack1: (String format) -> (Integer | Float | String | nil)
-
-  def unicode_normalized?: (?(:nfc | :nfd | :nfkc | :nfkd)) -> bool
 end
