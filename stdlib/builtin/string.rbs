@@ -29,10 +29,7 @@ class String
   #     "%-5s: %016x" % [ "ID", self.object_id ]  #=> "ID   : 00002b054ec93168"
   #     "foo = %{foo}" % { :foo => 'bar' }        #=> "foo = bar"
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     str % arg   -> new_str
-  #
-  def %: (Object arg0) -> String
+  def %: (untyped arg) -> String
 
   # Copy --- Returns a new String containing `integer` copies of the receiver.
   # `integer` must be greater than or equal to 0.

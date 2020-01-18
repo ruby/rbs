@@ -9,6 +9,12 @@ class StringTest < StdlibTest
     String.try_convert(/re/)
   end
 
+  def test_format_m
+    "%05d" % 123
+    "%-5s: %016x" % [ "ID", self.object_id ]
+    "foo = %{foo}" % { :foo => 'bar' }
+  end
+
   def test_unary_plus
     +''
   end
