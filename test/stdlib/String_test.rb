@@ -19,20 +19,20 @@ class StringTest < StdlibTest
     s.bytesize
   end
 
-  def delete_prefix
+  def test_delete_prefix
     "foo".delete_prefix("f")
   end
 
-  def delete_prefix!
+  def test_delete_prefix!
     "foo".delete_prefix! "f"
     "foo".delete_prefix! "a"
   end
 
-  def delete_suffix
+  def test_delete_suffix
     "foo".delete_suffix "o"
   end
 
-  def delete_suffix!
+  def test_delete_suffix!
     "foo".delete_suffix! "o"
     "foo".delete_suffix! "a"
   end
