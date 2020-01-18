@@ -15,6 +15,11 @@ class StringTest < StdlibTest
     "foo = %{foo}" % { :foo => 'bar' }
   end
 
+  def test_times
+    "Ho! " * 3
+    "Ho! " * 0
+  end
+
   def test_unary_plus
     +''
   end

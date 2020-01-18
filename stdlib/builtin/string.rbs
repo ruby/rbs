@@ -37,10 +37,7 @@ class String
   #     "Ho! " * 3   #=> "Ho! Ho! Ho! "
   #     "Ho! " * 0   #=> ""
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     str * integer   -> new_str
-  #
-  def *: (Integer arg0) -> String
+  def *: (Integer n) -> String
 
   # Concatenation---Returns a new String containing *other_str* concatenated to
   # *str*.
