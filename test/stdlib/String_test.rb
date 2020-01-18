@@ -32,6 +32,12 @@ class StringTest < StdlibTest
     -''
   end
 
+  def test_concat
+    a = "hello "
+    a << "world"
+    a << 33
+  end
+
   def test_aset_m
     "foo"[0] = "b"
     "foo"[0, 3] = "bar"

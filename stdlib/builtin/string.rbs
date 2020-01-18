@@ -68,11 +68,7 @@ class String
   #
   # See also String#concat, which takes multiple arguments.
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     str << obj      -> str
-  #     str << integer  -> str
-  #
-  def <<: (Object arg0) -> String
+  def <<: (String | Integer str_or_codepoint) -> String
 
   # Comparison---Returns -1, 0, +1, or `nil` depending on whether `string` is less
   # than, equal to, or greater than `other_string`.
