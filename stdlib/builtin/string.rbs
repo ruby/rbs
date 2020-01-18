@@ -57,9 +57,6 @@ class String
   # The string will be deduplicated as long as it does not have any instance
   # variables set on it.
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     -str  -> str (frozen)
-  #
   def -@: () -> String
 
   # Appends the given object to *str*. If the object is an Integer, it is
