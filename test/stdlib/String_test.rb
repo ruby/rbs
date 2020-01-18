@@ -20,6 +20,10 @@ class StringTest < StdlibTest
     "Ho! " * 0
   end
 
+  def test_plus
+    "Hello from " + self.to_s
+  end
+
   def test_unary_plus
     +''
   end

@@ -44,10 +44,7 @@ class String
   #
   #     "Hello from " + self.to_s   #=> "Hello from main"
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     str + other_str   -> new_str
-  #
-  def +: (String arg0) -> String
+  def +: (String other_str) -> String
 
   # If the string is frozen, then return duplicated mutable string.
   #
