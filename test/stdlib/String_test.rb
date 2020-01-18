@@ -4,19 +4,33 @@ class StringTest < StdlibTest
   target String
   using hook.refinement
 
-  def test_gsub
-    s = "string"
-    s.gsub(/./, "")
-    s.gsub("a", "b")
-    s.gsub(/./) {|x| "" }
-    s.gsub(/./, {"foo" => "bar"})
-    s.gsub(/./)
-    s.gsub("")
+  def test_unary_plus
+    +''
+  end
+
+  def test_unary_minus
+    -''
+  end
+
+  def test_aset_m
+    "foo"[0] = "b"
+    "foo"[0, 3] = "bar"
+    "foo"[0..3] = "bar"
+    "foo"[/foo/] = "bar"
+    "foo"[/(foo)/, 1] = "bar"
+    "foo"[/(?<foo>foo)/, "foo"] = "bar"
+    "foo"["foo"] = "bar"
   end
 
   def test_bytesize
     s = "string"
     s.bytesize
+  end
+
+  def test_casecmp?
+    "aBcDeF".casecmp?("abcde")
+    "aBcDeF".casecmp?("abcdef")
+    "foo".casecmp?(2)
   end
 
   def test_delete_prefix
@@ -37,36 +51,9 @@ class StringTest < StdlibTest
     "foo".delete_suffix! "a"
   end
 
-  def test_endwith
-    s = "string"
-    s.end_with?
-    s.end_with?("foo")
-  end
-
-  def test_force_encoding
-    s = ""
-    s.force_encoding "ASCII-8BIT"
-    s.force_encoding Encoding::ASCII_8BIT
-  end
-
-  def test_include
-    "".include?("")
-  end
-
-  def test_initialize
-    String.new
-    String.new("")
-    String.new("", encoding: Encoding::ASCII_8BIT)
-    String.new("", encoding: Encoding::ASCII_8BIT, capacity: 123)
-    String.new(encoding: Encoding::ASCII_8BIT, capacity: 123)
-  end
-
-  def test_succ
-    "".succ
-  end
-
-  def test_succ!
-    "".succ
+  def test_each_grapheme_cluster
+    "test".each_grapheme_cluster
+    "test".each_grapheme_cluster { |c| nil }
   end
 
   def test_encode
@@ -107,12 +94,50 @@ class StringTest < StdlibTest
     s.encode!(crlf_newline: true)
   end
 
-  def test_unary_plus
-    +''
+  def test_endwith
+    s = "string"
+    s.end_with?
+    s.end_with?("foo")
   end
 
-  def test_unary_minus
-    -''
+  def test_force_encoding
+    s = ""
+    s.force_encoding "ASCII-8BIT"
+    s.force_encoding Encoding::ASCII_8BIT
+  end
+
+  def test_grapheme_clusters
+    "\u{1F1EF}\u{1F1F5}".grapheme_clusters
+  end
+
+  def test_gsub
+    s = "string"
+    s.gsub(/./, "")
+    s.gsub("a", "b")
+    s.gsub(/./) {|x| "" }
+    s.gsub(/./, {"foo" => "bar"})
+    s.gsub(/./)
+    s.gsub("")
+  end
+
+  def test_include
+    "".include?("")
+  end
+
+  def test_reverse!
+    "test".reverse!
+  end
+
+  def test_succ
+    "".succ
+  end
+
+  def test_succ!
+    "".succ
+  end
+
+  def test_undump
+    "\"hello \\n ''\"".undump
   end
 
   def test_unicode_normalize
@@ -131,37 +156,12 @@ class StringTest < StdlibTest
     "a\u0300".unicode_normalize!(:nfkd)
   end
 
-  def test_casecmp?
-    "aBcDeF".casecmp?("abcde")
-    "aBcDeF".casecmp?("abcdef")
-    "foo".casecmp?(2)
-  end
-
-  def test_aset_m
-    "foo"[0] = "b"
-    "foo"[0, 3] = "bar"
-    "foo"[0..3] = "bar"
-    "foo"[/foo/] = "bar"
-    "foo"[/(foo)/, 1] = "bar"
-    "foo"[/(?<foo>foo)/, "foo"] = "bar"
-    "foo"["foo"] = "bar"
-  end
-
-  def test_undump
-    "\"hello \\n ''\"".undump
-  end
-
-  def test_grapheme_clusters
-    "\u{1F1EF}\u{1F1F5}".grapheme_clusters
-  end
-
-  def test_reverse!
-    "test".reverse!
-  end
-
-  def test_each_grapheme_cluster
-    "test".each_grapheme_cluster
-    "test".each_grapheme_cluster { |c| nil }
+  def test_unicode_normalized?
+    "a\u0300".unicode_normalized?
+    "a\u0300".unicode_normalized?(:nfc)
+    "a\u0300".unicode_normalized?(:nfd)
+    "a\u0300".unicode_normalized?(:nfkc)
+    "a\u0300".unicode_normalized?(:nfkd)
   end
 
   def test_unpack1
@@ -171,11 +171,11 @@ class StringTest < StdlibTest
     "\x00\x00\x00\x00".unpack1("f")
   end
 
-  def test_unicode_normalized?
-    "a\u0300".unicode_normalized?
-    "a\u0300".unicode_normalized?(:nfc)
-    "a\u0300".unicode_normalized?(:nfd)
-    "a\u0300".unicode_normalized?(:nfkc)
-    "a\u0300".unicode_normalized?(:nfkd)
+  def test_initialize
+    String.new
+    String.new("")
+    String.new("", encoding: Encoding::ASCII_8BIT)
+    String.new("", encoding: Encoding::ASCII_8BIT, capacity: 123)
+    String.new(encoding: Encoding::ASCII_8BIT, capacity: 123)
   end
 end
