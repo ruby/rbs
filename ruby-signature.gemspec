@@ -12,6 +12,7 @@ Gem::Specification.new do |spec|
   spec.summary       = %q{Type signature for Ruby classes.}
   spec.description   = %q{Type signature for Ruby classes.}
   spec.homepage      = "https://github.com/ruby/ruby-signature"
+  spec.licenses      = ['BSD-2-Clause', 'Ruby']
 
   # Prevent pushing this gem to RubyGems.org. To allow pushes either set the 'allowed_push_host'
   # to allow pushing to a single host or delete this section to allow pushing to any host.
