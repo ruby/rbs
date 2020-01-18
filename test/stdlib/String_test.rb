@@ -4,6 +4,11 @@ class StringTest < StdlibTest
   target String
   using hook.refinement
 
+  def test_try_convert
+    String.try_convert("str")
+    String.try_convert(/re/)
+  end
+
   def test_unary_plus
     +''
   end

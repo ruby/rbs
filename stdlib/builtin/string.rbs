@@ -16,9 +16,6 @@ class String
   #     String.try_convert("str")     #=> "str"
   #     String.try_convert(/re/)      #=> nil
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     String.try_convert(obj) -> string or nil
-  #
   def self.try_convert: (Object obj) -> String?
 
   public
