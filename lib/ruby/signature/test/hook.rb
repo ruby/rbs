@@ -174,36 +174,18 @@ module Ruby
 
             hook.logger.debug { "#{method_name} returns: #{hook.inspect_(result)}" }
 
-            calls = if block_calls.empty?
-                      [CallTrace.new(method_call: ArgumentsReturn.new(arguments: args, keywords: kwargs, return_value: result, exception: nil),
-                                     block_calls: [],
-                                     block_given: block != nil)]
-                    else
-                      block_calls.map do |block_call|
-                        CallTrace.new(method_call: ArgumentsReturn.new(arguments: args, keywords: kwargs, return_value: result, exception: nil),
-                                      block_calls: [block_call],
-                                      block_given: block != nil)
-                      end
-                    end
+            call = CallTrace.new(method_call: ArgumentsReturn.new(arguments: args, keywords: kwargs, return_value: result, exception: nil),
+                                 block_calls: block_calls,
+                                 block_given: block != nil)
 
-            errorss = []
-
-            method_types.each do |method_type|
-              yield_errors = calls.map do |call|
-                hook.test(method_name, method_type, call)
-              end.reject(&:empty?)
-
-              if yield_errors.empty?
-                errorss << []
-              else
-                errorss.push(*yield_errors)
-              end
+            method_type_errors = method_types.map do |method_type|
+              hook.typecheck.method_call(method_name, method_type, call, errors: [])
             end
 
             new_errors = []
 
-            if errorss.none?(&:empty?)
-              if (best_errors = hook.find_best_errors(errorss))
+            if method_type_errors.none?(&:empty?)
+              if (best_errors = hook.find_best_errors(method_type_errors))
                 new_errors.push(*best_errors)
               else
                 new_errors << TypeCheck::Errors::UnresolvedOverloadingError.new(
@@ -275,35 +257,6 @@ module Ruby
           raise
         rescue => exn
           exn.backtrace.drop(skip)
-        end
-
-        def test(method_name, method_type, call)
-          errors = []
-
-          typecheck.args(method_name, method_type, method_type.type, call.method_call, errors, type_error: Errors::ArgumentTypeError, argument_error: Errors::ArgumentError)
-          typecheck.return(method_name, method_type, method_type.type, call.method_call, errors, return_error: Errors::ReturnTypeError)
-
-          if method_type.block
-            case
-            when !call.block_calls.empty?
-              # Block is yielded
-              typecheck.args(method_name, method_type, method_type.block.type, call.block_calls[0], errors, type_error: Errors::BlockArgumentTypeError, argument_error: Errors::BlockArgumentError)
-              typecheck.return(method_name, method_type, method_type.block.type, call.block_calls[0], errors, return_error: Errors::BlockReturnTypeError)
-            when !call.block_given
-              # Block is not given
-              if method_type.block.required
-                errors << Errors::MissingBlockError.new(klass: klass, method_name: method_name, method_type: method_type)
-              end
-            else
-              # Block is given, but not yielded
-            end
-          else
-            if call.block_given
-              errors << Errors::UnexpectedBlockError.new(klass: klass, method_name: method_name, method_type: method_type)
-            end
-          end
-
-          errors
         end
 
         def run

@@ -10,6 +10,34 @@ module Ruby
           @builder = builder
         end
 
+        def method_call(method_name, method_type, call, errors:)
+          args(method_name, method_type, method_type.type, call.method_call, errors, type_error: Errors::ArgumentTypeError, argument_error: Errors::ArgumentError)
+          self.return(method_name, method_type, method_type.type, call.method_call, errors, return_error: Errors::ReturnTypeError)
+
+          if method_type.block
+            case
+            when !call.block_calls.empty?
+              call.block_calls.each do |block_call|
+                args(method_name, method_type, method_type.block.type, block_call, errors, type_error: Errors::BlockArgumentTypeError, argument_error: Errors::BlockArgumentError)
+                self.return(method_name, method_type, method_type.block.type, block_call, errors, return_error: Errors::BlockReturnTypeError)
+              end
+            when !call.block_given
+              # Block is not given
+              if method_type.block.required
+                errors << Errors::MissingBlockError.new(klass: self_class, method_name: method_name, method_type: method_type)
+              end
+            else
+              # Block is given, but not yielded
+            end
+          else
+            if call.block_given
+              errors << Errors::UnexpectedBlockError.new(klass: self_class, method_name: method_name, method_type: method_type)
+            end
+          end
+
+          errors
+        end
+
         def args(method_name, method_type, fun, call, errors, type_error:, argument_error:)
           test = zip_args(call.arguments, call.keywords, fun) do |val, param|
             unless self.value(val, param.type)
