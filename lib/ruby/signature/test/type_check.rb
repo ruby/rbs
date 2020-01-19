@@ -10,7 +10,7 @@ module Ruby
           @builder = builder
         end
 
-        def check(value, type)
+        def value(val, type)
           case type
           when Types::Bases::Any
             true
@@ -23,44 +23,44 @@ module Ruby
           when Types::Bases::Void
             true
           when Types::Bases::Self
-            Test.call(value, IS_AP, self_class)
+            Test.call(val, IS_AP, self_class)
           when Types::Bases::Nil
-            Test.call(value, IS_AP, ::NilClass)
+            Test.call(val, IS_AP, ::NilClass)
           when Types::Bases::Class
-            Test.call(value, IS_AP, Class)
+            Test.call(val, IS_AP, Class)
           when Types::Bases::Instance
-            Test.call(value, IS_AP, self_class)
+            Test.call(val, IS_AP, self_class)
           when Types::ClassInstance
             klass = Object.const_get(type.name.to_s)
             if klass == ::Array
-              Test.call(value, IS_AP, klass) && value.all? {|v| check(v, type.args[0]) }
+              Test.call(val, IS_AP, klass) && val.all? {|v| value(v, type.args[0]) }
             elsif klass == ::Hash
-              Test.call(value, IS_AP, klass) && value.all? {|k, v| check(k, type.args[0]) && check(v, type.args[1]) }
+              Test.call(val, IS_AP, klass) && val.all? {|k, v| value(k, type.args[0]) && value(v, type.args[1]) }
             else
-              Test.call(value, IS_AP, klass)
+              Test.call(val, IS_AP, klass)
             end
           when Types::ClassSingleton
             klass = Object.const_get(type.name.to_s)
-            value == klass
+            val == klass
           when Types::Interface, Types::Variable
             true
           when Types::Literal
-            value == type.literal
+            val == type.literal
           when Types::Union
-            type.types.any? {|type| check(value, type) }
+            type.types.any? {|type| value(val, type) }
           when Types::Intersection
-            type.types.all? {|type| check(value, type) }
+            type.types.all? {|type| value(val, type) }
           when Types::Optional
-            Test.call(value, IS_AP, ::NilClass) || check(value, type.type)
+            Test.call(val, IS_AP, ::NilClass) || value(val, type.type)
           when Types::Alias
-            check(value, builder.expand_alias(type.name))
+            value(val, builder.expand_alias(type.name))
           when Types::Tuple
-            Test.call(value, IS_AP, ::Array) &&
-              type.types.map.with_index {|ty, index| check(value[index], ty) }.all?
+            Test.call(val, IS_AP, ::Array) &&
+              type.types.map.with_index {|ty, index| value(val[index], ty) }.all?
           when Types::Record
-            Test::call(value, IS_AP, ::Hash)
+            Test::call(val, IS_AP, ::Hash)
           when Types::Proc
-            Test::call(value, IS_AP, ::Proc)
+            Test::call(val, IS_AP, ::Proc)
           else
             false
           end

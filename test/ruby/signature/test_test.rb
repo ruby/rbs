@@ -161,20 +161,20 @@ EOF
       manager.build do |env|
         typecheck = Ruby::Signature::Test::TypeCheck.new(self_class: Integer, builder: DefinitionBuilder.new(env: env))
 
-        assert typecheck.check(3, parse_type("::foo"))
-        assert typecheck.check("3", parse_type("::foo"))
-        assert typecheck.check(["foo", "bar"], parse_type("::foo"))
-        assert typecheck.check([1, 2, 3], parse_type("::foo"))
-        refute typecheck.check(:foo, parse_type("::foo"))
-        refute typecheck.check(["foo", 3], parse_type("::foo"))
-        refute typecheck.check([1, 2, "3"], parse_type("::foo"))
+        assert typecheck.value(3, parse_type("::foo"))
+        assert typecheck.value("3", parse_type("::foo"))
+        assert typecheck.value(["foo", "bar"], parse_type("::foo"))
+        assert typecheck.value([1, 2, 3], parse_type("::foo"))
+        refute typecheck.value(:foo, parse_type("::foo"))
+        refute typecheck.value(["foo", 3], parse_type("::foo"))
+        refute typecheck.value([1, 2, "3"], parse_type("::foo"))
 
-        assert typecheck.check(Object, parse_type("singleton(::Object)"))
-        assert typecheck.check(Object, parse_type("::Class"))
-        refute typecheck.check(Object, parse_type("singleton(::String)"))
+        assert typecheck.value(Object, parse_type("singleton(::Object)"))
+        assert typecheck.value(Object, parse_type("::Class"))
+        refute typecheck.value(Object, parse_type("singleton(::String)"))
 
-        assert typecheck.check(3, parse_type("::M::t"))
-        assert typecheck.check(3, parse_type("::M::s"))
+        assert typecheck.value(3, parse_type("::M::t"))
+        assert typecheck.value(3, parse_type("::M::s"))
       end
     end
   end

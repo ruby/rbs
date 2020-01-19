@@ -333,7 +333,7 @@ module Ruby
 
         def typecheck_args(method_name, method_type, fun, value, errors, type_error:, argument_error:)
           test = zip_args(value.arguments, fun) do |value, param|
-            unless typecheck.check(value, param.type)
+            unless typecheck.value(value, param.type)
               errors << type_error.new(klass: klass,
                                        method_name: method_name,
                                        method_type: method_type,
@@ -350,7 +350,7 @@ module Ruby
         end
 
         def typecheck_return(method_name, method_type, fun, value, errors, return_error:)
-          unless typecheck.check(value.return_value, fun.return_type)
+          unless typecheck.value(value.return_value, fun.return_type)
             errors << return_error.new(klass: klass,
                                        method_name: method_name,
                                        method_type: method_type,
