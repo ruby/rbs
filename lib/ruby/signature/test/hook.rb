@@ -14,74 +14,6 @@ module Ruby
           end
         end
 
-        IS_AP = Kernel.instance_method(:is_a?)
-        DEFINE_METHOD = Module.instance_method(:define_method)
-        INSTANCE_EVAL = BasicObject.instance_method(:instance_eval)
-        INSTANCE_EXEC = BasicObject.instance_method(:instance_exec)
-        METHOD = Kernel.instance_method(:method)
-        CLASS = Kernel.instance_method(:class)
-        SINGLETON_CLASS = Kernel.instance_method(:singleton_class)
-        PP = Kernel.instance_method(:pp)
-        INSPECT = Kernel.instance_method(:inspect)
-
-        module Errors
-          ArgumentTypeError =
-            Struct.new(:klass, :method_name, :method_type, :param, :value, keyword_init: true)
-          BlockArgumentTypeError =
-            Struct.new(:klass, :method_name, :method_type, :param, :value, keyword_init: true)
-          ArgumentError =
-            Struct.new(:klass, :method_name, :method_type, keyword_init: true)
-          BlockArgumentError =
-            Struct.new(:klass, :method_name, :method_type, keyword_init: true)
-          ReturnTypeError =
-            Struct.new(:klass, :method_name, :method_type, :type, :value, keyword_init: true)
-          BlockReturnTypeError =
-            Struct.new(:klass, :method_name, :method_type, :type, :value, keyword_init: true)
-
-          UnexpectedBlockError = Struct.new(:klass, :method_name, :method_type, keyword_init: true)
-          MissingBlockError = Struct.new(:klass, :method_name, :method_type, keyword_init: true)
-
-          UnresolvedOverloadingError = Struct.new(:klass, :method_name, :method_types, keyword_init: true)
-
-          def self.format_param(param)
-            if param.name
-              "`#{param.type}` (#{param.name})"
-            else
-              "`#{param.type}`"
-            end
-          end
-
-          def self.inspect_(obj)
-            Hook.inspect_(obj)
-          end
-
-          def self.to_string(error)
-            method = "#{error.klass.name}#{error.method_name}"
-            case error
-            when ArgumentTypeError
-              "[#{method}] ArgumentTypeError: expected #{format_param error.param} but given `#{inspect_(error.value)}`"
-            when BlockArgumentTypeError
-              "[#{method}] BlockArgumentTypeError: expected #{format_param error.param} but given `#{inspect_(error.value)}`"
-            when ArgumentError
-              "[#{method}] ArgumentError: expected method type #{error.method_type}"
-            when BlockArgumentError
-              "[#{method}] BlockArgumentError: expected method type #{error.method_type}"
-            when ReturnTypeError
-              "[#{method}] ReturnTypeError: expected `#{error.type}` but returns `#{inspect_(error.value)}`"
-            when BlockReturnTypeError
-              "[#{method}] BlockReturnTypeError: expected `#{error.type}` but returns `#{inspect_(error.value)}`"
-            when UnexpectedBlockError
-              "[#{method}] UnexpectedBlockError: unexpected block is given for `#{error.method_type}`"
-            when MissingBlockError
-              "[#{method}] MissingBlockError: required block is missing for `#{error.method_type}`"
-            when UnresolvedOverloadingError
-              "[#{method}] UnresolvedOverloadingError: couldn't find a suitable overloading"
-            else
-              raise "Unexpected error: #{inspect_(error)}"
-            end
-          end
-        end
-
         attr_reader :env
         attr_reader :logger
 
@@ -98,6 +30,10 @@ module Ruby
 
         def builder
           @builder ||= DefinitionBuilder.new(env: env)
+        end
+
+        def typecheck
+          @typecheck ||= TypeCheck.new(self_class: klass, builder: builder)
         end
 
         def initialize(env, klass, logger:, raise_on_error: false)
@@ -268,7 +204,7 @@ module Ruby
               if (best_errors = hook.find_best_errors(errorss))
                 new_errors.push(*best_errors)
               else
-                new_errors << Errors::UnresolvedOverloadingError.new(
+                new_errors << TypeCheck::Errors::UnresolvedOverloadingError.new(
                   klass: hook.klass,
                   method_name: method_name,
                   method_types: method_types
@@ -319,10 +255,10 @@ module Ruby
           else
             no_arity_errors = errorss.select do |errors|
               errors.none? do |error|
-                error.is_a?(Errors::ArgumentError) ||
-                  error.is_a?(Errors::BlockArgumentError) ||
-                  error.is_a?(Errors::MissingBlockError) ||
-                  error.is_a?(Errors::UnexpectedBlockError)
+                error.is_a?(TypeCheck::Errors::ArgumentError) ||
+                  error.is_a?(TypeCheck::Errors::BlockArgumentError) ||
+                  error.is_a?(TypeCheck::Errors::MissingBlockError) ||
+                  error.is_a?(TypeCheck::Errors::UnexpectedBlockError)
               end
             end
 
@@ -397,7 +333,7 @@ module Ruby
 
         def typecheck_args(method_name, method_type, fun, value, errors, type_error:, argument_error:)
           test = zip_args(value.arguments, fun) do |value, param|
-            unless type_check(value, param.type)
+            unless typecheck.check(value, param.type)
               errors << type_error.new(klass: klass,
                                        method_name: method_name,
                                        method_type: method_type,
@@ -414,7 +350,7 @@ module Ruby
         end
 
         def typecheck_return(method_name, method_type, fun, value, errors, return_error:)
-          unless type_check(value.return_value, fun.return_type)
+          unless typecheck.check(value.return_value, fun.return_type)
             errors << return_error.new(klass: klass,
                                        method_name: method_name,
                                        method_type: method_type,
@@ -502,62 +438,6 @@ module Ruby
               yield(args.first, fun.rest_positionals)
               zip_args(args.drop(1), fun, &block)
             end
-          else
-            false
-          end
-        end
-
-        def type_check(value, type)
-          case type
-          when Types::Bases::Any
-            true
-          when Types::Bases::Bool
-            true
-          when Types::Bases::Top
-            true
-          when Types::Bases::Bottom
-            false
-          when Types::Bases::Void
-            true
-          when Types::Bases::Self
-            call(value, IS_AP, klass)
-          when Types::Bases::Nil
-            call(value, IS_AP, NilClass)
-          when Types::Bases::Class
-            call(value, IS_AP, Class)
-          when Types::Bases::Instance
-            call(value, IS_AP, klass)
-          when Types::ClassInstance
-            klass = Object.const_get(type.name.to_s)
-            if klass == ::Array
-              call(value, IS_AP, klass) && value.all? {|v| type_check(v, type.args[0]) }
-            elsif klass == ::Hash
-              call(value, IS_AP, klass) && value.all? {|k, v| type_check(k, type.args[0]) && type_check(v, type.args[1]) }
-            else
-              call(value, IS_AP, klass)
-            end
-          when Types::ClassSingleton
-            klass = Object.const_get(type.name.to_s)
-            value == klass
-          when Types::Interface, Types::Variable
-            true
-          when Types::Literal
-            value == type.literal
-          when Types::Union
-            type.types.any? {|type| type_check(value, type) }
-          when Types::Intersection
-            type.types.all? {|type| type_check(value, type) }
-          when Types::Optional
-            call(value, IS_AP, NilClass) || type_check(value, type.type)
-          when Types::Alias
-            type_check(value, builder.expand_alias(type.name))
-          when Types::Tuple
-            call(value, IS_AP, ::Array) &&
-              type.types.map.with_index {|ty, index| type_check(value[index], ty) }.all?
-          when Types::Record
-            call(value, IS_AP, ::Hash)
-          when Types::Proc
-            call(value, IS_AP, ::Proc)
           else
             false
           end
