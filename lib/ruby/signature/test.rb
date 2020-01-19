@@ -15,6 +15,9 @@ module Ruby
       PP = Kernel.instance_method(:pp)
       INSPECT = Kernel.instance_method(:inspect)
 
+      ArgumentsReturn = Struct.new(:arguments, :keywords, :return_value, :exception, keyword_init: true)
+      CallTrace = Struct.new(:method_name, :method_call, :block_calls, :block_given, keyword_init: true)
+
       def self.call(receiver, method, *args, **kwargs, &block)
         method.bind_call(receiver, *args, **kwargs, &block)
       end

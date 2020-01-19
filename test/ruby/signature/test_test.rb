@@ -192,7 +192,7 @@ EOF
           hook.typecheck_args "#foo",
                               method_type,
                               method_type.type,
-                              Test::Hook::ArgsReturn.new(arguments: [1], return_value: "1"),
+                              Test::ArgumentsReturn.new(arguments: [1], keywords: {}, return_value: "1", exception: nil),
                               errors,
                               type_error: Test::Errors::ArgumentTypeError,
                               argument_error: Test::Errors::ArgumentError
@@ -202,7 +202,7 @@ EOF
           hook.typecheck_args "#foo",
                               method_type,
                               method_type.type,
-                              Test::Hook::ArgsReturn.new(arguments: ["1"], return_value: "1"),
+                              Test::ArgumentsReturn.new(arguments: ["1"], keywords: {}, return_value: "1", exception: nil),
                               errors,
                               type_error: Test::Errors::ArgumentTypeError,
                               argument_error: Test::Errors::ArgumentError
@@ -212,7 +212,7 @@ EOF
           hook.typecheck_args "#foo",
                               method_type,
                               method_type.type,
-                              Test::Hook::ArgsReturn.new(arguments: [1, 2], return_value: "1"),
+                              Test::ArgumentsReturn.new(arguments: [1, 2], keywords: {}, return_value: "1", exception: nil),
                               errors,
                               type_error: Test::Errors::ArgumentTypeError,
                               argument_error: Test::Errors::ArgumentError
@@ -222,7 +222,7 @@ EOF
           hook.typecheck_args "#foo",
                               method_type,
                               method_type.type,
-                              Test::Hook::ArgsReturn.new(arguments: [{ hello: :world }], return_value: "1"),
+                              Test::ArgumentsReturn.new(arguments: [], keywords: { hello: :world }, return_value: "1", exception: nil),
                               errors,
                               type_error: Test::Errors::ArgumentTypeError,
                               argument_error: Test::Errors::ArgumentError
@@ -234,7 +234,12 @@ EOF
           hook.typecheck_args "#foo",
                               method_type,
                               method_type.type,
-                              Test::Hook::ArgsReturn.new(arguments: [{ foo: 31, baz: :baz }], return_value: "1"),
+                              Test::ArgumentsReturn.new(
+                                arguments: [],
+                                keywords: { foo: 31, baz: :baz },
+                                return_value: "1",
+                                exception: nil
+                              ),
                               errors,
                               type_error: Test::Errors::ArgumentTypeError,
                               argument_error: Test::Errors::ArgumentError
@@ -244,7 +249,12 @@ EOF
           hook.typecheck_args "#foo",
                               method_type,
                               method_type.type,
-                              Test::Hook::ArgsReturn.new(arguments: [{ foo: "foo" }], return_value: "1"),
+                              Test::ArgumentsReturn.new(
+                                arguments: [],
+                                keywords: { foo: "foo" },
+                                return_value: "1",
+                                exception: nil
+                              ),
                               errors,
                               type_error: Test::Errors::ArgumentTypeError,
                               argument_error: Test::Errors::ArgumentError
@@ -254,7 +264,12 @@ EOF
           hook.typecheck_args "#foo",
                               method_type,
                               method_type.type,
-                              Test::Hook::ArgsReturn.new(arguments: [{ bar: "bar" }], return_value: "1"),
+                              Test::ArgumentsReturn.new(
+                                arguments: [],
+                                keywords: { bar: "bar" },
+                                return_value: "1",
+                                exception: nil
+                              ),
                               errors,
                               type_error: Test::Errors::ArgumentTypeError,
                               argument_error: Test::Errors::ArgumentError
@@ -266,7 +281,12 @@ EOF
           hook.typecheck_args "#foo",
                               method_type,
                               method_type.type,
-                              Test::Hook::ArgsReturn.new(arguments: [{ encoding: "ASCII-8BIT" }], return_value: "foo"),
+                              Test::ArgumentsReturn.new(
+                                arguments: [],
+                                keywords: { encoding: "ASCII-8BIT" },
+                                return_value: "foo",
+                                exception: nil
+                              ),
                               errors,
                               type_error: Test::Errors::ArgumentTypeError,
                               argument_error: Test::Errors::ArgumentError
@@ -278,7 +298,12 @@ EOF
           hook.typecheck_args "#foo",
                               method_type,
                               method_type.type,
-                              Test::Hook::ArgsReturn.new(arguments: [{ parent: nil, type: nil }], return_value: nil),
+                              Test::ArgumentsReturn.new(
+                                arguments: [],
+                                keywords: { parent: nil, type: nil },
+                                return_value: nil,
+                                exception: nil
+                              ),
                               errors,
                               type_error: Test::Errors::ArgumentTypeError,
                               argument_error: Test::Errors::ArgumentError
@@ -290,7 +315,12 @@ EOF
           hook.typecheck_args "#foo",
                               method_type,
                               method_type.type,
-                              Test::Hook::ArgsReturn.new(arguments: [1], return_value: "1"),
+                              Test::ArgumentsReturn.new(
+                                arguments: [1],
+                                keywords: {},
+                                return_value: "1",
+                                exception: nil
+                              ),
                               errors,
                               type_error: Test::Errors::ArgumentTypeError,
                               argument_error: Test::Errors::ArgumentError
@@ -299,7 +329,12 @@ EOF
           hook.typecheck_args "#foo",
                               method_type,
                               method_type.type,
-                              Test::Hook::ArgsReturn.new(arguments: [1, ''], return_value: "1"),
+                              Test::ArgumentsReturn.new(
+                                arguments: [1, ''],
+                                keywords: {},
+                                return_value: "1",
+                                exception: nil
+                              ),
                               errors,
                               type_error: Test::Errors::ArgumentTypeError,
                               argument_error: Test::Errors::ArgumentError
@@ -308,7 +343,12 @@ EOF
           hook.typecheck_args "#foo",
                               method_type,
                               method_type.type,
-                              Test::Hook::ArgsReturn.new(arguments: [1, '', ''], return_value: "1"),
+                              Test::ArgumentsReturn.new(
+                                arguments: [1, '', ''],
+                                keywords: {},
+                                return_value: "1",
+                                exception: nil
+                              ),
                               errors,
                               type_error: Test::Errors::ArgumentTypeError,
                               argument_error: Test::Errors::ArgumentError
@@ -318,7 +358,7 @@ EOF
     end
   end
 
-  def test_verify_block
+  def test_verify_block_once
     SignatureManager.new do |manager|
       manager.build do |env|
         klass = Class.new do
