@@ -185,11 +185,11 @@ EOF
 type foo = String | Integer
 EOF
       manager.build do |env|
-        hook = Ruby::Signature::Test::Hook.new(env, Object, logger: logger)
+        typecheck = Ruby::Signature::Test::TypeCheck.new(self_class: Object, builder: DefinitionBuilder.new(env: env))
 
         parse_method_type("(Integer) -> String").tap do |method_type|
           errors = []
-          hook.typecheck_args "#foo",
+          typecheck.args "#foo",
                               method_type,
                               method_type.type,
                               Test::ArgumentsReturn.new(arguments: [1], keywords: {}, return_value: "1", exception: nil),
@@ -199,7 +199,7 @@ EOF
           assert_empty errors
 
           errors = []
-          hook.typecheck_args "#foo",
+          typecheck.args "#foo",
                               method_type,
                               method_type.type,
                               Test::ArgumentsReturn.new(arguments: ["1"], keywords: {}, return_value: "1", exception: nil),
@@ -209,7 +209,7 @@ EOF
           assert errors.any? {|error| error.is_a?(Test::Errors::ArgumentTypeError) }
 
           errors = []
-          hook.typecheck_args "#foo",
+          typecheck.args "#foo",
                               method_type,
                               method_type.type,
                               Test::ArgumentsReturn.new(arguments: [1, 2], keywords: {}, return_value: "1", exception: nil),
@@ -219,7 +219,7 @@ EOF
           assert errors.any? {|error| error.is_a?(Test::Errors::ArgumentError) }
 
           errors = []
-          hook.typecheck_args "#foo",
+          typecheck.args "#foo",
                               method_type,
                               method_type.type,
                               Test::ArgumentsReturn.new(arguments: [], keywords: { hello: :world }, return_value: "1", exception: nil),
@@ -231,7 +231,7 @@ EOF
 
         parse_method_type("(foo: Integer, ?bar: String, **Symbol) -> String").tap do |method_type|
           errors = []
-          hook.typecheck_args "#foo",
+          typecheck.args "#foo",
                               method_type,
                               method_type.type,
                               Test::ArgumentsReturn.new(
@@ -246,7 +246,7 @@ EOF
           assert_empty errors
 
           errors = []
-          hook.typecheck_args "#foo",
+          typecheck.args "#foo",
                               method_type,
                               method_type.type,
                               Test::ArgumentsReturn.new(
@@ -261,7 +261,7 @@ EOF
           assert errors.any? {|error| error.is_a?(Test::Errors::ArgumentTypeError) }
 
           errors = []
-          hook.typecheck_args "#foo",
+          typecheck.args "#foo",
                               method_type,
                               method_type.type,
                               Test::ArgumentsReturn.new(
@@ -278,7 +278,7 @@ EOF
 
         parse_method_type("(?String, ?encoding: String) -> String").tap do |method_type|
           errors = []
-          hook.typecheck_args "#foo",
+          typecheck.args "#foo",
                               method_type,
                               method_type.type,
                               Test::ArgumentsReturn.new(
@@ -295,7 +295,7 @@ EOF
 
         parse_method_type("(parent: untyped, type: untyped) -> untyped").tap do |method_type|
           errors = []
-          hook.typecheck_args "#foo",
+          typecheck.args "#foo",
                               method_type,
                               method_type.type,
                               Test::ArgumentsReturn.new(
@@ -312,7 +312,7 @@ EOF
 
         parse_method_type("(Integer?, *String) -> String").tap do |method_type|
           errors = []
-          hook.typecheck_args "#foo",
+          typecheck.args "#foo",
                               method_type,
                               method_type.type,
                               Test::ArgumentsReturn.new(
@@ -326,7 +326,7 @@ EOF
                               argument_error: Test::Errors::ArgumentError
           assert_empty errors
 
-          hook.typecheck_args "#foo",
+          typecheck.args "#foo",
                               method_type,
                               method_type.type,
                               Test::ArgumentsReturn.new(
@@ -340,7 +340,7 @@ EOF
                               argument_error: Test::Errors::ArgumentError
           assert_empty errors
 
-          hook.typecheck_args "#foo",
+          typecheck.args "#foo",
                               method_type,
                               method_type.type,
                               Test::ArgumentsReturn.new(

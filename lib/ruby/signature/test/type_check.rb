@@ -10,6 +10,115 @@ module Ruby
           @builder = builder
         end
 
+        def args(method_name, method_type, fun, call, errors, type_error:, argument_error:)
+          test = zip_args(call.arguments, call.keywords, fun) do |val, param|
+            unless self.value(val, param.type)
+              errors << type_error.new(klass: self_class,
+                                       method_name: method_name,
+                                       method_type: method_type,
+                                       param: param,
+                                       value: val)
+            end
+          end
+
+          unless test
+            errors << argument_error.new(klass: self_class,
+                                         method_name: method_name,
+                                         method_type: method_type)
+          end
+        end
+
+        def return(method_name, method_type, fun, call, errors, return_error:)
+          unless value(call.return_value, fun.return_type)
+            errors << return_error.new(klass: self_class,
+                                       method_name: method_name,
+                                       method_type: method_type,
+                                       type: fun.return_type,
+                                       value: call.return_value)
+          end
+        end
+
+        def zip_keyword_args(hash, fun)
+          fun.required_keywords.each do |name, param|
+            if hash.key?(name)
+              yield(hash[name], param)
+            else
+              return false
+            end
+          end
+
+          fun.optional_keywords.each do |name, param|
+            if hash.key?(name)
+              yield(hash[name], param)
+            end
+          end
+
+          hash.each do |name, value|
+            next if fun.required_keywords.key?(name)
+            next if fun.optional_keywords.key?(name)
+
+            if fun.rest_keywords
+              yield value, fun.rest_keywords
+            else
+              return false
+            end
+          end
+
+          true
+        end
+
+        def zip_args(args, kwargs, fun, &block)
+          case
+          when args.empty? && kwargs.empty?
+            if fun.required_positionals.empty? && fun.trailing_positionals.empty? && fun.required_keywords.empty?
+              true
+            else
+              false
+            end
+          when !fun.required_positionals.empty?
+            yield_self do
+              param, fun_ = fun.drop_head
+              yield(args.first, param)
+              zip_args(args.drop(1), kwargs, fun_, &block)
+            end
+          when fun.has_keyword?
+            yield_self do
+              if !kwargs.empty?
+                zip_keyword_args(kwargs, fun, &block) &&
+                  zip_args(args,
+                           {},
+                           fun.update(required_keywords: {}, optional_keywords: {}, rest_keywords: nil),
+                           &block)
+              else
+                fun.required_keywords.empty? &&
+                  zip_args(args,
+                           kwargs,
+                           fun.update(required_keywords: {}, optional_keywords: {}, rest_keywords: nil),
+                           &block)
+              end
+            end
+          when !fun.trailing_positionals.empty?
+            yield_self do
+              param, fun_ = fun.drop_tail
+              yield(args.last, param)
+              zip_args(args.take(args.size - 1), kwargs, fun_, &block)
+            end
+          when !fun.optional_positionals.empty?
+            yield_self do
+              param, fun_ = fun.drop_head
+              yield(args.first, param)
+              zip_args(args.drop(1), kwargs, fun_, &block)
+            end
+          when fun.rest_positionals
+            yield_self do
+              yield(args.first, fun.rest_positionals)
+              zip_args(args.drop(1), kwargs, fun, &block)
+            end
+          else
+            false
+          end
+        end
+
         def value(val, type)
           case type
           when Types::Bases::Any
