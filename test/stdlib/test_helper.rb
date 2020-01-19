@@ -74,6 +74,6 @@ class StdlibTest < Minitest::Test
 
   def teardown
     super
-    assert_empty self.hook.errors.map {|x| Ruby::Signature::Test::Hook::Errors.to_string(x) }
+    assert_empty self.hook.errors.map {|x| Ruby::Signature::Test::Errors.to_string(x) }
   end
 end

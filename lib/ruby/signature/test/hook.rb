@@ -125,7 +125,7 @@ module Ruby
         def delegation(name, method_types, method_name)
           hook = self
 
-          proc do |*args, **kwargs, &block|
+          -> (*args, &block) do
             hook.logger.debug { "#{method_name} receives arguments: #{hook.inspect_(args)}" }
 
             block_calls = []
@@ -134,18 +134,17 @@ module Ruby
               original_block = block
 
               block = hook.call(Object.new, INSTANCE_EVAL) do |fresh_obj|
-                ->(*as, **kws) do
-                  hook.logger.debug { "#{method_name} receives block arguments: #{hook.inspect_(as)}, #{hook.inspect_(kws)}" }
+                ->(*as) do
+                  hook.logger.debug { "#{method_name} receives block arguments: #{hook.inspect_(as)}" }
 
                   ret = if self.equal?(fresh_obj)
-                          original_block[*as, **kws]
+                          original_block[*as]
                         else
-                          hook.call(self, INSTANCE_EXEC, *as, **kws, &original_block)
+                          hook.call(self, INSTANCE_EXEC, *as, &original_block)
                         end
 
                   block_calls << ArgumentsReturn.new(
                     arguments: as,
-                    keywords: kws,
                     return_value: ret,
                     exception: nil
                   )
@@ -153,7 +152,7 @@ module Ruby
                   hook.logger.debug { "#{method_name} returns from block: #{hook.inspect_(ret)}" }
 
                   ret
-                end
+                end.ruby2_keywords
               end
             end
 
@@ -166,15 +165,15 @@ module Ruby
             end
             prepended = klass.ancestors.include?(hook.instance_module) || singleton_klass&.ancestors&.include?(hook.singleton_module)
             result = if prepended
-                       method.super_method.call(*args, **kwargs, &block)
+                       method.super_method.call(*args, &block)
                      else
                        # Using refinement
-                       method.call(*args, **kwargs, &block)
+                       method.call(*args, &block)
                      end
 
             hook.logger.debug { "#{method_name} returns: #{hook.inspect_(result)}" }
 
-            call = CallTrace.new(method_call: ArgumentsReturn.new(arguments: args, keywords: kwargs, return_value: result, exception: nil),
+            call = CallTrace.new(method_call: ArgumentsReturn.new(arguments: args, return_value: result, exception: nil),
                                  block_calls: block_calls,
                                  block_given: block != nil)
 
@@ -209,7 +208,7 @@ module Ruby
             end
 
             result
-          end
+          end.ruby2_keywords
         end
 
         def verify(instance_method: nil, singleton_method: nil, types:)

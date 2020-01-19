@@ -190,168 +190,160 @@ EOF
         parse_method_type("(Integer) -> String").tap do |method_type|
           errors = []
           typecheck.args "#foo",
-                              method_type,
-                              method_type.type,
-                              Test::ArgumentsReturn.new(arguments: [1], keywords: {}, return_value: "1", exception: nil),
-                              errors,
-                              type_error: Test::Errors::ArgumentTypeError,
-                              argument_error: Test::Errors::ArgumentError
+                         method_type,
+                         method_type.type,
+                         Test::ArgumentsReturn.new(arguments: [1], return_value: "1", exception: nil),
+                         errors,
+                         type_error: Test::Errors::ArgumentTypeError,
+                         argument_error: Test::Errors::ArgumentError
           assert_empty errors
 
           errors = []
           typecheck.args "#foo",
-                              method_type,
-                              method_type.type,
-                              Test::ArgumentsReturn.new(arguments: ["1"], keywords: {}, return_value: "1", exception: nil),
-                              errors,
-                              type_error: Test::Errors::ArgumentTypeError,
-                              argument_error: Test::Errors::ArgumentError
+                         method_type,
+                         method_type.type,
+                         Test::ArgumentsReturn.new(arguments: ["1"], return_value: "1", exception: nil),
+                         errors,
+                         type_error: Test::Errors::ArgumentTypeError,
+                         argument_error: Test::Errors::ArgumentError
           assert errors.any? {|error| error.is_a?(Test::Errors::ArgumentTypeError) }
 
           errors = []
           typecheck.args "#foo",
-                              method_type,
-                              method_type.type,
-                              Test::ArgumentsReturn.new(arguments: [1, 2], keywords: {}, return_value: "1", exception: nil),
-                              errors,
-                              type_error: Test::Errors::ArgumentTypeError,
-                              argument_error: Test::Errors::ArgumentError
+                         method_type,
+                         method_type.type,
+                         Test::ArgumentsReturn.new(arguments: [1, 2], return_value: "1", exception: nil),
+                         errors,
+                         type_error: Test::Errors::ArgumentTypeError,
+                         argument_error: Test::Errors::ArgumentError
           assert errors.any? {|error| error.is_a?(Test::Errors::ArgumentError) }
 
           errors = []
           typecheck.args "#foo",
-                              method_type,
-                              method_type.type,
-                              Test::ArgumentsReturn.new(arguments: [], keywords: { hello: :world }, return_value: "1", exception: nil),
-                              errors,
-                              type_error: Test::Errors::ArgumentTypeError,
-                              argument_error: Test::Errors::ArgumentError
+                         method_type,
+                         method_type.type,
+                         Test::ArgumentsReturn.new(arguments: [{ hello: :world }], return_value: "1", exception: nil),
+                         errors,
+                         type_error: Test::Errors::ArgumentTypeError,
+                         argument_error: Test::Errors::ArgumentError
           assert errors.any? {|error| error.is_a?(Test::Errors::ArgumentTypeError) }
         end
 
         parse_method_type("(foo: Integer, ?bar: String, **Symbol) -> String").tap do |method_type|
           errors = []
           typecheck.args "#foo",
-                              method_type,
-                              method_type.type,
-                              Test::ArgumentsReturn.new(
-                                arguments: [],
-                                keywords: { foo: 31, baz: :baz },
-                                return_value: "1",
-                                exception: nil
-                              ),
-                              errors,
-                              type_error: Test::Errors::ArgumentTypeError,
-                              argument_error: Test::Errors::ArgumentError
+                         method_type,
+                         method_type.type,
+                         Test::ArgumentsReturn.new(
+                           arguments: [{ foo: 31, baz: :baz }],
+                           return_value: "1",
+                           exception: nil
+                         ),
+                         errors,
+                         type_error: Test::Errors::ArgumentTypeError,
+                         argument_error: Test::Errors::ArgumentError
           assert_empty errors
 
           errors = []
           typecheck.args "#foo",
-                              method_type,
-                              method_type.type,
-                              Test::ArgumentsReturn.new(
-                                arguments: [],
-                                keywords: { foo: "foo" },
-                                return_value: "1",
-                                exception: nil
-                              ),
-                              errors,
-                              type_error: Test::Errors::ArgumentTypeError,
-                              argument_error: Test::Errors::ArgumentError
+                         method_type,
+                         method_type.type,
+                         Test::ArgumentsReturn.new(
+                           arguments: [{ foo: "foo" }],
+                           return_value: "1",
+                           exception: nil
+                         ),
+                         errors,
+                         type_error: Test::Errors::ArgumentTypeError,
+                         argument_error: Test::Errors::ArgumentError
           assert errors.any? {|error| error.is_a?(Test::Errors::ArgumentTypeError) }
 
           errors = []
           typecheck.args "#foo",
-                              method_type,
-                              method_type.type,
-                              Test::ArgumentsReturn.new(
-                                arguments: [],
-                                keywords: { bar: "bar" },
-                                return_value: "1",
-                                exception: nil
-                              ),
-                              errors,
-                              type_error: Test::Errors::ArgumentTypeError,
-                              argument_error: Test::Errors::ArgumentError
+                         method_type,
+                         method_type.type,
+                         Test::ArgumentsReturn.new(
+                           arguments: [{ bar: "bar" }],
+                           return_value: "1",
+                           exception: nil
+                         ),
+                         errors,
+                         type_error: Test::Errors::ArgumentTypeError,
+                         argument_error: Test::Errors::ArgumentError
           assert errors.any? {|error| error.is_a?(Test::Errors::ArgumentError) }
         end
 
         parse_method_type("(?String, ?encoding: String) -> String").tap do |method_type|
           errors = []
           typecheck.args "#foo",
-                              method_type,
-                              method_type.type,
-                              Test::ArgumentsReturn.new(
-                                arguments: [],
-                                keywords: { encoding: "ASCII-8BIT" },
-                                return_value: "foo",
-                                exception: nil
-                              ),
-                              errors,
-                              type_error: Test::Errors::ArgumentTypeError,
-                              argument_error: Test::Errors::ArgumentError
+                         method_type,
+                         method_type.type,
+                         Test::ArgumentsReturn.new(
+                           arguments: [{ encoding: "ASCII-8BIT" }],
+                           return_value: "foo",
+                           exception: nil
+                         ),
+                         errors,
+                         type_error: Test::Errors::ArgumentTypeError,
+                         argument_error: Test::Errors::ArgumentError
           assert_empty errors
         end
 
         parse_method_type("(parent: untyped, type: untyped) -> untyped").tap do |method_type|
           errors = []
           typecheck.args "#foo",
-                              method_type,
-                              method_type.type,
-                              Test::ArgumentsReturn.new(
-                                arguments: [],
-                                keywords: { parent: nil, type: nil },
-                                return_value: nil,
-                                exception: nil
-                              ),
-                              errors,
-                              type_error: Test::Errors::ArgumentTypeError,
-                              argument_error: Test::Errors::ArgumentError
+                         method_type,
+                         method_type.type,
+                         Test::ArgumentsReturn.new(
+                           arguments: [{ parent: nil, type: nil }],
+                           return_value: nil,
+                           exception: nil
+                         ),
+                         errors,
+                         type_error: Test::Errors::ArgumentTypeError,
+                         argument_error: Test::Errors::ArgumentError
           assert_empty errors.map {|e| Test::Errors.to_string(e) }
         end
 
         parse_method_type("(Integer?, *String) -> String").tap do |method_type|
           errors = []
           typecheck.args "#foo",
-                              method_type,
-                              method_type.type,
-                              Test::ArgumentsReturn.new(
-                                arguments: [1],
-                                keywords: {},
-                                return_value: "1",
-                                exception: nil
-                              ),
-                              errors,
-                              type_error: Test::Errors::ArgumentTypeError,
-                              argument_error: Test::Errors::ArgumentError
+                         method_type,
+                         method_type.type,
+                         Test::ArgumentsReturn.new(
+                           arguments: [1],
+                           return_value: "1",
+                           exception: nil
+                         ),
+                         errors,
+                         type_error: Test::Errors::ArgumentTypeError,
+                         argument_error: Test::Errors::ArgumentError
           assert_empty errors
 
           typecheck.args "#foo",
-                              method_type,
-                              method_type.type,
-                              Test::ArgumentsReturn.new(
-                                arguments: [1, ''],
-                                keywords: {},
-                                return_value: "1",
-                                exception: nil
-                              ),
-                              errors,
-                              type_error: Test::Errors::ArgumentTypeError,
-                              argument_error: Test::Errors::ArgumentError
+                         method_type,
+                         method_type.type,
+                         Test::ArgumentsReturn.new(
+                           arguments: [1, ''],
+                           return_value: "1",
+                           exception: nil
+                         ),
+                         errors,
+                         type_error: Test::Errors::ArgumentTypeError,
+                         argument_error: Test::Errors::ArgumentError
           assert_empty errors
 
           typecheck.args "#foo",
-                              method_type,
-                              method_type.type,
-                              Test::ArgumentsReturn.new(
-                                arguments: [1, '', ''],
-                                keywords: {},
-                                return_value: "1",
-                                exception: nil
-                              ),
-                              errors,
-                              type_error: Test::Errors::ArgumentTypeError,
-                              argument_error: Test::Errors::ArgumentError
+                         method_type,
+                         method_type.type,
+                         Test::ArgumentsReturn.new(
+                           arguments: [1, '', ''],
+                           return_value: "1",
+                           exception: nil
+                         ),
+                         errors,
+                         type_error: Test::Errors::ArgumentTypeError,
+                         argument_error: Test::Errors::ArgumentError
           assert_empty errors
         end
       end

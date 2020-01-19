@@ -39,7 +39,7 @@ module Ruby
         end
 
         def args(method_name, method_type, fun, call, errors, type_error:, argument_error:)
-          test = zip_args(call.arguments, call.keywords, fun) do |val, param|
+          test = zip_args(call.arguments, fun) do |val, param|
             unless self.value(val, param.type)
               errors << type_error.new(klass: self_class,
                                        method_name: method_name,
@@ -95,9 +95,13 @@ module Ruby
           true
         end
 
-        def zip_args(args, kwargs, fun, &block)
+        def keyword?(value)
+          value.is_a?(Hash) && value.keys.all? {|key| key.is_a?(Symbol) }
+        end
+
+        def zip_args(args, fun, &block)
           case
-          when args.empty? && kwargs.empty?
+          when args.empty?
             if fun.required_positionals.empty? && fun.trailing_positionals.empty? && fun.required_keywords.empty?
               true
             else
@@ -107,20 +111,19 @@ module Ruby
             yield_self do
               param, fun_ = fun.drop_head
               yield(args.first, param)
-              zip_args(args.drop(1), kwargs, fun_, &block)
+              zip_args(args.drop(1), fun_, &block)
             end
           when fun.has_keyword?
             yield_self do
-              if !kwargs.empty?
-                zip_keyword_args(kwargs, fun, &block) &&
-                  zip_args(args,
-                           {},
+              hash = args.last
+              if keyword?(hash)
+                zip_keyword_args(hash, fun, &block) &&
+                  zip_args(args.take(args.size - 1),
                            fun.update(required_keywords: {}, optional_keywords: {}, rest_keywords: nil),
                            &block)
               else
                 fun.required_keywords.empty? &&
                   zip_args(args,
-                           kwargs,
                            fun.update(required_keywords: {}, optional_keywords: {}, rest_keywords: nil),
                            &block)
               end
@@ -129,18 +132,18 @@ module Ruby
             yield_self do
               param, fun_ = fun.drop_tail
               yield(args.last, param)
-              zip_args(args.take(args.size - 1), kwargs, fun_, &block)
+              zip_args(args.take(args.size - 1), fun_, &block)
             end
           when !fun.optional_positionals.empty?
             yield_self do
               param, fun_ = fun.drop_head
               yield(args.first, param)
-              zip_args(args.drop(1), kwargs, fun_, &block)
+              zip_args(args.drop(1), fun_, &block)
             end
           when fun.rest_positionals
             yield_self do
               yield(args.first, fun.rest_positionals)
-              zip_args(args.drop(1), kwargs, fun, &block)
+              zip_args(args.drop(1), fun, &block)
             end
           else
             false
