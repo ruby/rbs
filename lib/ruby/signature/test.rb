@@ -1,3 +1,4 @@
+require "ruby/signature/test/spy"
 require "ruby/signature/test/errors"
 require "ruby/signature/test/type_check"
 require "ruby/signature/test/hook"
