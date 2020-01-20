@@ -1280,6 +1280,8 @@ def next_token
   when input.scan(/:((@{,2}|\$)?\w+(\?|\!)?|\+|\-)\b?/)
     s = input.matched.yield_self {|s| s[1, s.length] }.to_sym
     new_token(:tSYMBOL, s)
+  when input.scan(/[+-]?\d[\d_]*/)
+    new_token(:tINTEGER, input.matched.to_i)
   when input.scan(PUNCTS_RE)
     new_token(PUNCTS[input.matched])
   when input.scan(/(::)?([A-Z]\w*::)+/)
@@ -1306,8 +1308,6 @@ def next_token
   when input.scan(/'(\\'|[^'])*'/)
     s = input.matched.yield_self {|s| s[1, s.length - 2] }.gsub(/\\'/, "'")
     new_token(:tSTRING, s)
-  when input.scan(/[+-]?\d[\d_]*/)
-    new_token(:tINTEGER, input.matched.to_i)
   else
     raise "Unexpected token: #{input.peek(10)}..."
   end
