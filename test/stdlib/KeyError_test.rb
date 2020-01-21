@@ -4,6 +4,14 @@ class KeyErrorTest < StdlibTest
   target KeyError
   using hook.refinement
 
+  def test_initialize
+    KeyError.new
+    KeyError.new('')
+    KeyError.new('', key: 42)
+    KeyError.new('', receiver: 42)
+    KeyError.new('', key: 42, receiver: 42)
+  end
+
   def test_key
     begin
       {}.fetch(:foo)

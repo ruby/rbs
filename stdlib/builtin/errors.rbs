@@ -128,9 +128,10 @@ end
 # h.fetch("foo") #=> :bar
 # h.fetch("baz") #=> KeyError: key not found: "baz"
 # ```
-class KeyError < IndexError
-  def key: () -> untyped
-  def receiver: () -> untyped
+class KeyError[K, R] < IndexError
+  def initialize: (?String msg, ?key: K, ?receiver: R) -> void
+  def key: () -> K?
+  def receiver: () -> R?
 end
 
 # Raised when a file required (a Ruby script, extension library, ...)
@@ -196,7 +197,9 @@ end
 # *raises the exception:*
 # 
 #     NameError: wrong constant name answer
-class NameError < StandardError
+class NameError[T] < StandardError
+  def initialize: (?String msg, ?receiver: T) -> void
+  def receiver: () -> T?
 end
 
 # Raised when memory allocation fails.
@@ -213,7 +216,7 @@ end
 # *raises the exception:*
 # 
 #     NoMethodError: undefined method `to_ary' for "hello":String
-class NoMethodError < NameError
+class NoMethodError[T] < NameError[T]
 end
 
 # Raised when a feature is not implemented on the current platform. For
