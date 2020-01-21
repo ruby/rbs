@@ -484,9 +484,9 @@ class Array[unchecked out Elem] < Object
   # ```
   def flatten: (?Integer depth) -> ::Array[untyped]
 
-  def `include?`: [U] (U arg0) -> bool
+  def `include?`: (Elem arg0) -> bool
 
-  def index: [U] (?U arg0) -> Integer?
+  def index: (Elem arg0) -> Integer?
            | () { (Elem arg0) -> untyped } -> Integer?
            | () -> ::Enumerator[Elem, self]
 
@@ -552,7 +552,7 @@ class Array[unchecked out Elem] < Object
 
   def push: (*Elem arg0) -> ::Array[Elem]
 
-  def rassoc: [U] (U arg0) -> Elem?
+  def rassoc: (Elem arg0) -> Elem?
 
   def reject: () { (Elem arg0) -> bool } -> ::Array[Elem]
             | () -> ::Enumerator[Elem, self]
