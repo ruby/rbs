@@ -57,12 +57,14 @@ module Ruby
         end
 
         def return(method_name, method_type, fun, call, errors, return_error:)
-          unless value(call.return_value, fun.return_type)
-            errors << return_error.new(klass: self_class,
-                                       method_name: method_name,
-                                       method_type: method_type,
-                                       type: fun.return_type,
-                                       value: call.return_value)
+          unless call.exception
+            unless value(call.return_value, fun.return_type)
+              errors << return_error.new(klass: self_class,
+                                         method_name: method_name,
+                                         method_type: method_type,
+                                         type: fun.return_type,
+                                         value: call.return_value)
+            end
           end
         end
 

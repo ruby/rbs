@@ -179,6 +179,57 @@ EOF
     end
   end
 
+  def test_typecheck_return
+    SignatureManager.new do |manager|
+      manager.files[Pathname("foo.rbs")] = <<EOF
+type foo = String | Integer
+EOF
+      manager.build do |env|
+        typecheck = Ruby::Signature::Test::TypeCheck.new(self_class: Object, builder: DefinitionBuilder.new(env: env))
+
+        parse_method_type("(Integer) -> String").tap do |method_type|
+          errors = []
+          typecheck.return "#foo",
+                           method_type,
+                           method_type.type,
+                           Test::ArgumentsReturn.new(arguments: [1], return_value: nil, exception: RuntimeError.new("test")),
+                           errors,
+                           return_error: Test::Errors::ReturnTypeError
+          assert_empty errors
+
+          errors.clear
+          typecheck.return "#foo",
+                           method_type,
+                           method_type.type,
+                           Test::ArgumentsReturn.new(arguments: [1], return_value: "5", exception: nil),
+                           errors,
+                           return_error: Test::Errors::ReturnTypeError
+          assert_empty errors
+        end
+
+        parse_method_type("(Integer) -> bot").tap do |method_type|
+          errors = []
+          typecheck.return "#foo",
+                           method_type,
+                           method_type.type,
+                           Test::ArgumentsReturn.new(arguments: [1], return_value: nil, exception: RuntimeError.new("test")),
+                           errors,
+                           return_error: Test::Errors::ReturnTypeError
+          assert_empty errors
+
+          errors.clear
+          typecheck.return "#foo",
+                           method_type,
+                           method_type.type,
+                           Test::ArgumentsReturn.new(arguments: [1], return_value: "5", exception: nil),
+                           errors,
+                           return_error: Test::Errors::ReturnTypeError
+          assert errors.any? {|error| error.is_a?(Test::Errors::ReturnTypeError) }
+        end
+      end
+    end
+  end
+
   def test_typecheck_args
     SignatureManager.new do |manager|
       manager.files[Pathname("foo.rbs")] = <<EOF
