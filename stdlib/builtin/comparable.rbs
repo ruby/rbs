@@ -36,40 +36,25 @@ module Comparable
   # Compares two objects based on the receiver's `<=>` method, returning true if
   # it returns a value less than 0.
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     obj < other    -> true or false
-  #
   def <: (untyped other) -> bool
 
   # Compares two objects based on the receiver's `<=>` method, returning true if
   # it returns a value less than or equal to 0.
-  #
-  # # arglists 💪👽🚨 << Delete this section
-  #     obj <= other    -> true or false
   #
   def <=: (untyped other) -> bool
 
   # Compares two objects based on the receiver's `<=>` method, returning true if
   # it returns 0. Also returns true if *obj* and *other* are the same object.
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     obj == other    -> true or false
-  #
   def ==: (untyped other) -> bool
 
   # Compares two objects based on the receiver's `<=>` method, returning true if
   # it returns a value greater than 0.
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     obj > other    -> true or false
-  #
   def >: (untyped other) -> bool
 
   # Compares two objects based on the receiver's `<=>` method, returning true if
   # it returns a value greater than or equal to 0.
-  #
-  # # arglists 💪👽🚨 << Delete this section
-  #     obj >= other    -> true or false
   #
   def >=: (untyped other) -> bool
 
@@ -80,9 +65,6 @@ module Comparable
   #     6.between?(1, 5)               #=> false
   #     'cat'.between?('ant', 'dog')   #=> true
   #     'gnu'.between?('ant', 'dog')   #=> false
-  #
-  # # arglists 💪👽🚨 << Delete this section
-  #     obj.between?(min, max)    -> true or false
   #
   def between?: (untyped min, untyped max) -> bool
 
@@ -117,9 +99,6 @@ module Comparable
   #
   #     100.clamp(0...100)       # ArgumentError
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     obj.clamp(min, max) ->  obj
-  #     obj.clamp(range)    ->  obj
-  #
-  def clamp: (untyped min, untyped max) -> untyped
+  def clamp: [A, B] (A min, B max) -> (self | A | B)
+           | [A] (Range[A]) -> (self | A)
 end
