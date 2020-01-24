@@ -32,7 +32,7 @@
 #     s4.between?(s3, s5)           #=> true
 #     [ s3, s2, s5, s4, s1 ].sort   #=> [Z, YY, XXX, WWWW, VVVVV]
 #
-module Comparable
+module Comparable : _WithSpaceshipOperator
   # Compares two objects based on the receiver's `<=>` method, returning true if
   # it returns a value less than 0.
   #
@@ -101,4 +101,16 @@ module Comparable
   #
   def clamp: [A, B] (A min, B max) -> (self | A | B)
            | [A] (Range[A]) -> (self | A)
+end
+
+# This interface defines the condition for Comparable mixin.
+#
+interface Comparable::_WithSpaceshipOperator
+  # `<=>` operator must return Integer or `nil`.
+  # If `other` is greater than `self`, it returns a positive Integer.
+  # If `other` equals to `self`, it returns zero.
+  # If `other` is less than `self`, it returns a positive Integer.
+  # If no comparison is defined with `other` and `self`, it returns `nil`.
+  #
+  def <=>: (untyped other) -> Integer?
 end
