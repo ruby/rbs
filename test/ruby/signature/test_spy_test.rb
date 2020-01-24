@@ -34,7 +34,7 @@ class Ruby::Signature::TestSpyTest < Minitest::Test
       end
 
       def instance_evaling(&block)
-        instance_eval &block
+        instance_eval(&block)
         30
       end
     end
@@ -235,7 +235,7 @@ class Ruby::Signature::TestSpyTest < Minitest::Test
       end
 
       def instance_evaling(&block)
-        instance_eval &block
+        instance_eval(&block)
         30
       end
     end
@@ -435,7 +435,7 @@ class Ruby::Signature::TestSpyTest < Minitest::Test
       end
 
       def instance_evaling(&block)
-        instance_eval &block
+        instance_eval(&block)
         30
       end
     end
