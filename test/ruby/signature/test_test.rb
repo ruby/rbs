@@ -8,6 +8,7 @@ return unless Gem::Version.new(RUBY_VERSION) >= Gem::Version.new('2.7.0')
 class Ruby::Signature::TestTest < Minitest::Test
   include TestHelper
 
+  DefinitionBuilder = Ruby::Signature::DefinitionBuilder
   Test = Ruby::Signature::Test
 
   def io
@@ -158,22 +159,73 @@ type M::t = Integer
 type M::s = t
 EOF
       manager.build do |env|
-        hook = Ruby::Signature::Test::Hook.new(env, Object, logger: logger)
+        typecheck = Ruby::Signature::Test::TypeCheck.new(self_class: Integer, builder: DefinitionBuilder.new(env: env))
 
-        assert hook.type_check(3, parse_type("::foo"))
-        assert hook.type_check("3", parse_type("::foo"))
-        assert hook.type_check(["foo", "bar"], parse_type("::foo"))
-        assert hook.type_check([1, 2, 3], parse_type("::foo"))
-        refute hook.type_check(:foo, parse_type("::foo"))
-        refute hook.type_check(["foo", 3], parse_type("::foo"))
-        refute hook.type_check([1, 2, "3"], parse_type("::foo"))
+        assert typecheck.value(3, parse_type("::foo"))
+        assert typecheck.value("3", parse_type("::foo"))
+        assert typecheck.value(["foo", "bar"], parse_type("::foo"))
+        assert typecheck.value([1, 2, 3], parse_type("::foo"))
+        refute typecheck.value(:foo, parse_type("::foo"))
+        refute typecheck.value(["foo", 3], parse_type("::foo"))
+        refute typecheck.value([1, 2, "3"], parse_type("::foo"))
 
-        assert hook.type_check(Object, parse_type("singleton(::Object)"))
-        assert hook.type_check(Object, parse_type("::Class"))
-        refute hook.type_check(Object, parse_type("singleton(::String)"))
+        assert typecheck.value(Object, parse_type("singleton(::Object)"))
+        assert typecheck.value(Object, parse_type("::Class"))
+        refute typecheck.value(Object, parse_type("singleton(::String)"))
 
-        assert hook.type_check(3, parse_type("::M::t"))
-        assert hook.type_check(3, parse_type("::M::s"))
+        assert typecheck.value(3, parse_type("::M::t"))
+        assert typecheck.value(3, parse_type("::M::s"))
+      end
+    end
+  end
+
+  def test_typecheck_return
+    SignatureManager.new do |manager|
+      manager.files[Pathname("foo.rbs")] = <<EOF
+type foo = String | Integer
+EOF
+      manager.build do |env|
+        typecheck = Ruby::Signature::Test::TypeCheck.new(self_class: Object, builder: DefinitionBuilder.new(env: env))
+
+        parse_method_type("(Integer) -> String").tap do |method_type|
+          errors = []
+          typecheck.return "#foo",
+                           method_type,
+                           method_type.type,
+                           Test::ArgumentsReturn.new(arguments: [1], return_value: nil, exception: RuntimeError.new("test")),
+                           errors,
+                           return_error: Test::Errors::ReturnTypeError
+          assert_empty errors
+
+          errors.clear
+          typecheck.return "#foo",
+                           method_type,
+                           method_type.type,
+                           Test::ArgumentsReturn.new(arguments: [1], return_value: "5", exception: nil),
+                           errors,
+                           return_error: Test::Errors::ReturnTypeError
+          assert_empty errors
+        end
+
+        parse_method_type("(Integer) -> bot").tap do |method_type|
+          errors = []
+          typecheck.return "#foo",
+                           method_type,
+                           method_type.type,
+                           Test::ArgumentsReturn.new(arguments: [1], return_value: nil, exception: RuntimeError.new("test")),
+                           errors,
+                           return_error: Test::Errors::ReturnTypeError
+          assert_empty errors
+
+          errors.clear
+          typecheck.return "#foo",
+                           method_type,
+                           method_type.type,
+                           Test::ArgumentsReturn.new(arguments: [1], return_value: "5", exception: nil),
+                           errors,
+                           return_error: Test::Errors::ReturnTypeError
+          assert errors.any? {|error| error.is_a?(Test::Errors::ReturnTypeError) }
+        end
       end
     end
   end
@@ -184,140 +236,172 @@ EOF
 type foo = String | Integer
 EOF
       manager.build do |env|
-        hook = Ruby::Signature::Test::Hook.new(env, Object, logger: logger)
+        typecheck = Ruby::Signature::Test::TypeCheck.new(self_class: Object, builder: DefinitionBuilder.new(env: env))
 
         parse_method_type("(Integer) -> String").tap do |method_type|
           errors = []
-          hook.typecheck_args "#foo",
-                              method_type,
-                              method_type.type,
-                              Test::Hook::ArgsReturn.new(arguments: [1], return_value: "1"),
-                              errors,
-                              type_error: Test::Hook::Errors::ArgumentTypeError,
-                              argument_error: Test::Hook::Errors::ArgumentError
+          typecheck.args "#foo",
+                         method_type,
+                         method_type.type,
+                         Test::ArgumentsReturn.new(arguments: [1], return_value: "1", exception: nil),
+                         errors,
+                         type_error: Test::Errors::ArgumentTypeError,
+                         argument_error: Test::Errors::ArgumentError
           assert_empty errors
 
           errors = []
-          hook.typecheck_args "#foo",
-                              method_type,
-                              method_type.type,
-                              Test::Hook::ArgsReturn.new(arguments: ["1"], return_value: "1"),
-                              errors,
-                              type_error: Test::Hook::Errors::ArgumentTypeError,
-                              argument_error: Test::Hook::Errors::ArgumentError
-          assert errors.any? {|error| error.is_a?(Test::Hook::Errors::ArgumentTypeError) }
+          typecheck.args "#foo",
+                         method_type,
+                         method_type.type,
+                         Test::ArgumentsReturn.new(arguments: ["1"], return_value: "1", exception: nil),
+                         errors,
+                         type_error: Test::Errors::ArgumentTypeError,
+                         argument_error: Test::Errors::ArgumentError
+          assert errors.any? {|error| error.is_a?(Test::Errors::ArgumentTypeError) }
 
           errors = []
-          hook.typecheck_args "#foo",
-                              method_type,
-                              method_type.type,
-                              Test::Hook::ArgsReturn.new(arguments: [1, 2], return_value: "1"),
-                              errors,
-                              type_error: Test::Hook::Errors::ArgumentTypeError,
-                              argument_error: Test::Hook::Errors::ArgumentError
-          assert errors.any? {|error| error.is_a?(Test::Hook::Errors::ArgumentError) }
+          typecheck.args "#foo",
+                         method_type,
+                         method_type.type,
+                         Test::ArgumentsReturn.new(arguments: [1, 2], return_value: "1", exception: nil),
+                         errors,
+                         type_error: Test::Errors::ArgumentTypeError,
+                         argument_error: Test::Errors::ArgumentError
+          assert errors.any? {|error| error.is_a?(Test::Errors::ArgumentError) }
 
           errors = []
-          hook.typecheck_args "#foo",
-                              method_type,
-                              method_type.type,
-                              Test::Hook::ArgsReturn.new(arguments: [{ hello: :world }], return_value: "1"),
-                              errors,
-                              type_error: Test::Hook::Errors::ArgumentTypeError,
-                              argument_error: Test::Hook::Errors::ArgumentError
-          assert errors.any? {|error| error.is_a?(Test::Hook::Errors::ArgumentTypeError) }
+          typecheck.args "#foo",
+                         method_type,
+                         method_type.type,
+                         Test::ArgumentsReturn.new(arguments: [{ hello: :world }], return_value: "1", exception: nil),
+                         errors,
+                         type_error: Test::Errors::ArgumentTypeError,
+                         argument_error: Test::Errors::ArgumentError
+          assert errors.any? {|error| error.is_a?(Test::Errors::ArgumentTypeError) }
         end
 
         parse_method_type("(foo: Integer, ?bar: String, **Symbol) -> String").tap do |method_type|
           errors = []
-          hook.typecheck_args "#foo",
-                              method_type,
-                              method_type.type,
-                              Test::Hook::ArgsReturn.new(arguments: [{ foo: 31, baz: :baz }], return_value: "1"),
-                              errors,
-                              type_error: Test::Hook::Errors::ArgumentTypeError,
-                              argument_error: Test::Hook::Errors::ArgumentError
+          typecheck.args "#foo",
+                         method_type,
+                         method_type.type,
+                         Test::ArgumentsReturn.new(
+                           arguments: [{ foo: 31, baz: :baz }],
+                           return_value: "1",
+                           exception: nil
+                         ),
+                         errors,
+                         type_error: Test::Errors::ArgumentTypeError,
+                         argument_error: Test::Errors::ArgumentError
           assert_empty errors
 
           errors = []
-          hook.typecheck_args "#foo",
-                              method_type,
-                              method_type.type,
-                              Test::Hook::ArgsReturn.new(arguments: [{ foo: "foo" }], return_value: "1"),
-                              errors,
-                              type_error: Test::Hook::Errors::ArgumentTypeError,
-                              argument_error: Test::Hook::Errors::ArgumentError
-          assert errors.any? {|error| error.is_a?(Test::Hook::Errors::ArgumentTypeError) }
+          typecheck.args "#foo",
+                         method_type,
+                         method_type.type,
+                         Test::ArgumentsReturn.new(
+                           arguments: [{ foo: "foo" }],
+                           return_value: "1",
+                           exception: nil
+                         ),
+                         errors,
+                         type_error: Test::Errors::ArgumentTypeError,
+                         argument_error: Test::Errors::ArgumentError
+          assert errors.any? {|error| error.is_a?(Test::Errors::ArgumentTypeError) }
 
           errors = []
-          hook.typecheck_args "#foo",
-                              method_type,
-                              method_type.type,
-                              Test::Hook::ArgsReturn.new(arguments: [{ bar: "bar" }], return_value: "1"),
-                              errors,
-                              type_error: Test::Hook::Errors::ArgumentTypeError,
-                              argument_error: Test::Hook::Errors::ArgumentError
-          assert errors.any? {|error| error.is_a?(Test::Hook::Errors::ArgumentError) }
+          typecheck.args "#foo",
+                         method_type,
+                         method_type.type,
+                         Test::ArgumentsReturn.new(
+                           arguments: [{ bar: "bar" }],
+                           return_value: "1",
+                           exception: nil
+                         ),
+                         errors,
+                         type_error: Test::Errors::ArgumentTypeError,
+                         argument_error: Test::Errors::ArgumentError
+          assert errors.any? {|error| error.is_a?(Test::Errors::ArgumentError) }
         end
 
         parse_method_type("(?String, ?encoding: String) -> String").tap do |method_type|
           errors = []
-          hook.typecheck_args "#foo",
-                              method_type,
-                              method_type.type,
-                              Test::Hook::ArgsReturn.new(arguments: [{ encoding: "ASCII-8BIT" }], return_value: "foo"),
-                              errors,
-                              type_error: Test::Hook::Errors::ArgumentTypeError,
-                              argument_error: Test::Hook::Errors::ArgumentError
+          typecheck.args "#foo",
+                         method_type,
+                         method_type.type,
+                         Test::ArgumentsReturn.new(
+                           arguments: [{ encoding: "ASCII-8BIT" }],
+                           return_value: "foo",
+                           exception: nil
+                         ),
+                         errors,
+                         type_error: Test::Errors::ArgumentTypeError,
+                         argument_error: Test::Errors::ArgumentError
           assert_empty errors
         end
 
         parse_method_type("(parent: untyped, type: untyped) -> untyped").tap do |method_type|
           errors = []
-          hook.typecheck_args "#foo",
-                              method_type,
-                              method_type.type,
-                              Test::Hook::ArgsReturn.new(arguments: [{ parent: nil, type: nil }], return_value: nil),
-                              errors,
-                              type_error: Test::Hook::Errors::ArgumentTypeError,
-                              argument_error: Test::Hook::Errors::ArgumentError
-          assert_empty errors.map {|e| Test::Hook::Errors.to_string(e) }
+          typecheck.args "#foo",
+                         method_type,
+                         method_type.type,
+                         Test::ArgumentsReturn.new(
+                           arguments: [{ parent: nil, type: nil }],
+                           return_value: nil,
+                           exception: nil
+                         ),
+                         errors,
+                         type_error: Test::Errors::ArgumentTypeError,
+                         argument_error: Test::Errors::ArgumentError
+          assert_empty errors.map {|e| Test::Errors.to_string(e) }
         end
 
         parse_method_type("(Integer?, *String) -> String").tap do |method_type|
           errors = []
-          hook.typecheck_args "#foo",
-                              method_type,
-                              method_type.type,
-                              Test::Hook::ArgsReturn.new(arguments: [1], return_value: "1"),
-                              errors,
-                              type_error: Test::Hook::Errors::ArgumentTypeError,
-                              argument_error: Test::Hook::Errors::ArgumentError
+          typecheck.args "#foo",
+                         method_type,
+                         method_type.type,
+                         Test::ArgumentsReturn.new(
+                           arguments: [1],
+                           return_value: "1",
+                           exception: nil
+                         ),
+                         errors,
+                         type_error: Test::Errors::ArgumentTypeError,
+                         argument_error: Test::Errors::ArgumentError
           assert_empty errors
 
-          hook.typecheck_args "#foo",
-                              method_type,
-                              method_type.type,
-                              Test::Hook::ArgsReturn.new(arguments: [1, ''], return_value: "1"),
-                              errors,
-                              type_error: Test::Hook::Errors::ArgumentTypeError,
-                              argument_error: Test::Hook::Errors::ArgumentError
+          typecheck.args "#foo",
+                         method_type,
+                         method_type.type,
+                         Test::ArgumentsReturn.new(
+                           arguments: [1, ''],
+                           return_value: "1",
+                           exception: nil
+                         ),
+                         errors,
+                         type_error: Test::Errors::ArgumentTypeError,
+                         argument_error: Test::Errors::ArgumentError
           assert_empty errors
 
-          hook.typecheck_args "#foo",
-                              method_type,
-                              method_type.type,
-                              Test::Hook::ArgsReturn.new(arguments: [1, '', ''], return_value: "1"),
-                              errors,
-                              type_error: Test::Hook::Errors::ArgumentTypeError,
-                              argument_error: Test::Hook::Errors::ArgumentError
+          typecheck.args "#foo",
+                         method_type,
+                         method_type.type,
+                         Test::ArgumentsReturn.new(
+                           arguments: [1, '', ''],
+                           return_value: "1",
+                           exception: nil
+                         ),
+                         errors,
+                         type_error: Test::Errors::ArgumentTypeError,
+                         argument_error: Test::Errors::ArgumentError
           assert_empty errors
         end
       end
     end
   end
 
-  def test_verify_block
+  def test_verify_block_once
     SignatureManager.new do |manager|
       manager.build do |env|
         klass = Class.new do
@@ -345,8 +429,8 @@ EOF
           klass.new.world { }
         end
 
-        refute_empty hook.errors.select {|e| e.method_name == "#hello" }.map {|e| Test::Hook::Errors.to_string(e) }
-        refute_empty hook.errors.select {|e| e.method_name == "#world" }.map {|e| Test::Hook::Errors.to_string(e) }
+        refute_empty hook.errors.select {|e| e.method_name == "#hello" }.map {|e| Test::Errors.to_string(e) }
+        refute_empty hook.errors.select {|e| e.method_name == "#world" }.map {|e| Test::Errors.to_string(e) }
       end
     end
   end
@@ -370,7 +454,7 @@ EOF
           klass.new.hello { }
         end
 
-        assert_empty hook.errors.map {|e| Test::Hook::Errors.to_string(e) }
+        assert_empty hook.errors.map {|e| Test::Errors.to_string(e) }
       end
     end
   end
@@ -394,7 +478,7 @@ EOF
           klass.new.hello { }
         end
 
-        assert_empty hook.errors.map {|e| Test::Hook::Errors.to_string(e) }
+        assert_empty hook.errors.map {|e| Test::Errors.to_string(e) }
       end
     end
   end
@@ -418,7 +502,7 @@ EOF
           klass.new.hello
         end
 
-        refute_empty hook.errors.map {|e| Test::Hook::Errors.to_string(e) }
+        refute_empty hook.errors.map {|e| Test::Errors.to_string(e) }
       end
     end
   end
@@ -444,7 +528,7 @@ EOF
           klass.new.hello {}
         end
 
-        refute_empty hook.errors.map {|e| Test::Hook::Errors.to_string(e) }
+        refute_empty hook.errors.map {|e| Test::Errors.to_string(e) }
       end
     end
   end

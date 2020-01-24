@@ -14,74 +14,6 @@ module Ruby
           end
         end
 
-        IS_AP = Kernel.instance_method(:is_a?)
-        DEFINE_METHOD = Module.instance_method(:define_method)
-        INSTANCE_EVAL = BasicObject.instance_method(:instance_eval)
-        INSTANCE_EXEC = BasicObject.instance_method(:instance_exec)
-        METHOD = Kernel.instance_method(:method)
-        CLASS = Kernel.instance_method(:class)
-        SINGLETON_CLASS = Kernel.instance_method(:singleton_class)
-        PP = Kernel.instance_method(:pp)
-        INSPECT = Kernel.instance_method(:inspect)
-
-        module Errors
-          ArgumentTypeError =
-            Struct.new(:klass, :method_name, :method_type, :param, :value, keyword_init: true)
-          BlockArgumentTypeError =
-            Struct.new(:klass, :method_name, :method_type, :param, :value, keyword_init: true)
-          ArgumentError =
-            Struct.new(:klass, :method_name, :method_type, keyword_init: true)
-          BlockArgumentError =
-            Struct.new(:klass, :method_name, :method_type, keyword_init: true)
-          ReturnTypeError =
-            Struct.new(:klass, :method_name, :method_type, :type, :value, keyword_init: true)
-          BlockReturnTypeError =
-            Struct.new(:klass, :method_name, :method_type, :type, :value, keyword_init: true)
-
-          UnexpectedBlockError = Struct.new(:klass, :method_name, :method_type, keyword_init: true)
-          MissingBlockError = Struct.new(:klass, :method_name, :method_type, keyword_init: true)
-
-          UnresolvedOverloadingError = Struct.new(:klass, :method_name, :method_types, keyword_init: true)
-
-          def self.format_param(param)
-            if param.name
-              "`#{param.type}` (#{param.name})"
-            else
-              "`#{param.type}`"
-            end
-          end
-
-          def self.inspect_(obj)
-            Hook.inspect_(obj)
-          end
-
-          def self.to_string(error)
-            method = "#{error.klass.name}#{error.method_name}"
-            case error
-            when ArgumentTypeError
-              "[#{method}] ArgumentTypeError: expected #{format_param error.param} but given `#{inspect_(error.value)}`"
-            when BlockArgumentTypeError
-              "[#{method}] BlockArgumentTypeError: expected #{format_param error.param} but given `#{inspect_(error.value)}`"
-            when ArgumentError
-              "[#{method}] ArgumentError: expected method type #{error.method_type}"
-            when BlockArgumentError
-              "[#{method}] BlockArgumentError: expected method type #{error.method_type}"
-            when ReturnTypeError
-              "[#{method}] ReturnTypeError: expected `#{error.type}` but returns `#{inspect_(error.value)}`"
-            when BlockReturnTypeError
-              "[#{method}] BlockReturnTypeError: expected `#{error.type}` but returns `#{inspect_(error.value)}`"
-            when UnexpectedBlockError
-              "[#{method}] UnexpectedBlockError: unexpected block is given for `#{error.method_type}`"
-            when MissingBlockError
-              "[#{method}] MissingBlockError: required block is missing for `#{error.method_type}`"
-            when UnresolvedOverloadingError
-              "[#{method}] UnresolvedOverloadingError: couldn't find a suitable overloading"
-            else
-              raise "Unexpected error: #{inspect_(error)}"
-            end
-          end
-        end
-
         attr_reader :env
         attr_reader :logger
 
@@ -93,11 +25,12 @@ module Ruby
         attr_reader :klass
         attr_reader :errors
 
-        ArgsReturn = Struct.new(:arguments, :return_value, keyword_init: true)
-        Call = Struct.new(:method_call, :block_call, :block_given, keyword_init: true)
-
         def builder
           @builder ||= DefinitionBuilder.new(env: env)
+        end
+
+        def typecheck
+          @typecheck ||= TypeCheck.new(self_class: klass, builder: builder)
         end
 
         def initialize(env, klass, logger:, raise_on_error: false)
@@ -192,7 +125,7 @@ module Ruby
         def delegation(name, method_types, method_name)
           hook = self
 
-          proc do |*args, &block|
+          -> (*args, &block) do
             hook.logger.debug { "#{method_name} receives arguments: #{hook.inspect_(args)}" }
 
             block_calls = []
@@ -201,7 +134,7 @@ module Ruby
               original_block = block
 
               block = hook.call(Object.new, INSTANCE_EVAL) do |fresh_obj|
-                proc do |*as|
+                ->(*as) do
                   hook.logger.debug { "#{method_name} receives block arguments: #{hook.inspect_(as)}" }
 
                   ret = if self.equal?(fresh_obj)
@@ -210,12 +143,16 @@ module Ruby
                           hook.call(self, INSTANCE_EXEC, *as, &original_block)
                         end
 
-                  block_calls << ArgsReturn.new(arguments: as, return_value: ret)
+                  block_calls << ArgumentsReturn.new(
+                    arguments: as,
+                    return_value: ret,
+                    exception: nil
+                  )
 
                   hook.logger.debug { "#{method_name} returns from block: #{hook.inspect_(ret)}" }
 
                   ret
-                end
+                end.ruby2_keywords
               end
             end
 
@@ -236,39 +173,21 @@ module Ruby
 
             hook.logger.debug { "#{method_name} returns: #{hook.inspect_(result)}" }
 
-            calls = if block_calls.empty?
-                      [Call.new(method_call: ArgsReturn.new(arguments: args, return_value: result),
-                                block_call: nil,
-                                block_given: block != nil)]
-                    else
-                      block_calls.map do |block_call|
-                        Call.new(method_call: ArgsReturn.new(arguments: args, return_value: result),
-                                 block_call: block_call,
+            call = CallTrace.new(method_call: ArgumentsReturn.new(arguments: args, return_value: result, exception: nil),
+                                 block_calls: block_calls,
                                  block_given: block != nil)
-                      end
-                    end
 
-            errorss = []
-
-            method_types.each do |method_type|
-              yield_errors = calls.map do |call|
-                hook.test(method_name, method_type, call)
-              end.reject(&:empty?)
-
-              if yield_errors.empty?
-                errorss << []
-              else
-                errorss.push(*yield_errors)
-              end
+            method_type_errors = method_types.map do |method_type|
+              hook.typecheck.method_call(method_name, method_type, call, errors: [])
             end
 
             new_errors = []
 
-            if errorss.none?(&:empty?)
-              if (best_errors = hook.find_best_errors(errorss))
+            if method_type_errors.none?(&:empty?)
+              if (best_errors = hook.find_best_errors(method_type_errors))
                 new_errors.push(*best_errors)
               else
-                new_errors << Errors::UnresolvedOverloadingError.new(
+                new_errors << TypeCheck::Errors::UnresolvedOverloadingError.new(
                   klass: hook.klass,
                   method_name: method_name,
                   method_types: method_types
@@ -319,10 +238,10 @@ module Ruby
           else
             no_arity_errors = errorss.select do |errors|
               errors.none? do |error|
-                error.is_a?(Errors::ArgumentError) ||
-                  error.is_a?(Errors::BlockArgumentError) ||
-                  error.is_a?(Errors::MissingBlockError) ||
-                  error.is_a?(Errors::UnexpectedBlockError)
+                error.is_a?(TypeCheck::Errors::ArgumentError) ||
+                  error.is_a?(TypeCheck::Errors::BlockArgumentError) ||
+                  error.is_a?(TypeCheck::Errors::MissingBlockError) ||
+                  error.is_a?(TypeCheck::Errors::UnexpectedBlockError)
               end
             end
 
@@ -337,35 +256,6 @@ module Ruby
           raise
         rescue => exn
           exn.backtrace.drop(skip)
-        end
-
-        def test(method_name, method_type, call)
-          errors = []
-
-          typecheck_args(method_name, method_type, method_type.type, call.method_call, errors, type_error: Errors::ArgumentTypeError, argument_error: Errors::ArgumentError)
-          typecheck_return(method_name, method_type, method_type.type, call.method_call, errors, return_error: Errors::ReturnTypeError)
-
-          if method_type.block
-            case
-            when call.block_call
-              # Block is yielded
-              typecheck_args(method_name, method_type, method_type.block.type, call.block_call, errors, type_error: Errors::BlockArgumentTypeError, argument_error: Errors::BlockArgumentError)
-              typecheck_return(method_name, method_type, method_type.block.type, call.block_call, errors, return_error: Errors::BlockReturnTypeError)
-            when !call.block_given
-              # Block is not given
-              if method_type.block.required
-                errors << Errors::MissingBlockError.new(klass: klass, method_name: method_name, method_type: method_type)
-              end
-            else
-              # Block is given, but not yielded
-            end
-          else
-            if call.block_given
-              errors << Errors::UnexpectedBlockError.new(klass: klass, method_name: method_name, method_type: method_type)
-            end
-          end
-
-          errors
         end
 
         def run
@@ -393,174 +283,6 @@ module Ruby
           self.instance_module.remove_method(*instance_methods)
           self.singleton_module.remove_method(*singleton_methods)
           self
-        end
-
-        def typecheck_args(method_name, method_type, fun, value, errors, type_error:, argument_error:)
-          test = zip_args(value.arguments, fun) do |value, param|
-            unless type_check(value, param.type)
-              errors << type_error.new(klass: klass,
-                                       method_name: method_name,
-                                       method_type: method_type,
-                                       param: param,
-                                       value: value)
-            end
-          end
-
-          unless test
-            errors << argument_error.new(klass: klass,
-                                         method_name: method_name,
-                                         method_type: method_type)
-          end
-        end
-
-        def typecheck_return(method_name, method_type, fun, value, errors, return_error:)
-          unless type_check(value.return_value, fun.return_type)
-            errors << return_error.new(klass: klass,
-                                       method_name: method_name,
-                                       method_type: method_type,
-                                       type: fun.return_type,
-                                       value: value.return_value)
-          end
-        end
-
-        def keyword?(value)
-          value.is_a?(Hash) && value.keys.all? {|key| key.is_a?(Symbol) }
-        end
-
-        def zip_keyword_args(hash, fun)
-          fun.required_keywords.each do |name, param|
-            if hash.key?(name)
-              yield(hash[name], param)
-            else
-              return false
-            end
-          end
-
-          fun.optional_keywords.each do |name, param|
-            if hash.key?(name)
-              yield(hash[name], param)
-            end
-          end
-
-          hash.each do |name, value|
-            next if fun.required_keywords.key?(name)
-            next if fun.optional_keywords.key?(name)
-
-            if fun.rest_keywords
-              yield value, fun.rest_keywords
-            else
-              return false
-            end
-          end
-
-          true
-        end
-
-        def zip_args(args, fun, &block)
-          case
-          when args.empty?
-            if fun.required_positionals.empty? && fun.trailing_positionals.empty? && fun.required_keywords.empty?
-              true
-            else
-              false
-            end
-          when !fun.required_positionals.empty?
-            yield_self do
-              param, fun_ = fun.drop_head
-              yield(args.first, param)
-              zip_args(args.drop(1), fun_, &block)
-            end
-          when fun.has_keyword?
-            yield_self do
-              hash = args.last
-              if keyword?(hash)
-                zip_keyword_args(hash, fun, &block) &&
-                  zip_args(args.take(args.size - 1),
-                           fun.update(required_keywords: {}, optional_keywords: {}, rest_keywords: nil),
-                           &block)
-              else
-                fun.required_keywords.empty? &&
-                  zip_args(args,
-                           fun.update(required_keywords: {}, optional_keywords: {}, rest_keywords: nil),
-                           &block)
-              end
-            end
-          when !fun.trailing_positionals.empty?
-            yield_self do
-              param, fun_ = fun.drop_tail
-              yield(args.last, param)
-              zip_args(args.take(args.size - 1), fun_, &block)
-            end
-          when !fun.optional_positionals.empty?
-            yield_self do
-              param, fun_ = fun.drop_head
-              yield(args.first, param)
-              zip_args(args.drop(1), fun_, &block)
-            end
-          when fun.rest_positionals
-            yield_self do
-              yield(args.first, fun.rest_positionals)
-              zip_args(args.drop(1), fun, &block)
-            end
-          else
-            false
-          end
-        end
-
-        def type_check(value, type)
-          case type
-          when Types::Bases::Any
-            true
-          when Types::Bases::Bool
-            true
-          when Types::Bases::Top
-            true
-          when Types::Bases::Bottom
-            false
-          when Types::Bases::Void
-            true
-          when Types::Bases::Self
-            call(value, IS_AP, klass)
-          when Types::Bases::Nil
-            call(value, IS_AP, NilClass)
-          when Types::Bases::Class
-            call(value, IS_AP, Class)
-          when Types::Bases::Instance
-            call(value, IS_AP, klass)
-          when Types::ClassInstance
-            klass = Object.const_get(type.name.to_s)
-            if klass == ::Array
-              call(value, IS_AP, klass) && value.all? {|v| type_check(v, type.args[0]) }
-            elsif klass == ::Hash
-              call(value, IS_AP, klass) && value.all? {|k, v| type_check(k, type.args[0]) && type_check(v, type.args[1]) }
-            else
-              call(value, IS_AP, klass)
-            end
-          when Types::ClassSingleton
-            klass = Object.const_get(type.name.to_s)
-            value == klass
-          when Types::Interface, Types::Variable
-            true
-          when Types::Literal
-            value == type.literal
-          when Types::Union
-            type.types.any? {|type| type_check(value, type) }
-          when Types::Intersection
-            type.types.all? {|type| type_check(value, type) }
-          when Types::Optional
-            call(value, IS_AP, NilClass) || type_check(value, type.type)
-          when Types::Alias
-            type_check(value, builder.expand_alias(type.name))
-          when Types::Tuple
-            call(value, IS_AP, ::Array) &&
-              type.types.map.with_index {|ty, index| type_check(value[index], ty) }.all?
-          when Types::Record
-            call(value, IS_AP, ::Hash)
-          when Types::Proc
-            call(value, IS_AP, ::Proc)
-          else
-            false
-          end
         end
       end
     end
