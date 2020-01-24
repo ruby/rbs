@@ -103,8 +103,8 @@ module Ruby
                            definition.methods[method].method_types
                          end
 
-          all_errors = method_types.map { typecheck.method_call(method, _1, trace.last, errors: []) }
-          assert all_errors.any? { _1.empty? }, "Call trace does not match one of method definitions:\n  #{trace.last.inspect}\n  #{method_types.join(" | ")}"
+          all_errors = method_types.map {|t| typecheck.method_call(method, t, trace.last, errors: []) }
+          assert all_errors.any? {|es| esempty? }, "Call trace does not match one of method definitions:\n  #{trace.last.inspect}\n  #{method_types.join(" | ")}"
         end
 
         def refute_send_type(method_type, receiver, method, *args, &block)

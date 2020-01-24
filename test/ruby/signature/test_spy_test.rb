@@ -26,8 +26,8 @@ class Ruby::Signature::TestSpyTest < Minitest::Test
       end
 
       def yielding(x)
-        x.times do
-          yield _1
+        x.times do |i|
+          yield i
         end
 
         :foo
@@ -87,9 +87,9 @@ class Ruby::Signature::TestSpyTest < Minitest::Test
       )
     end
 
-    Test::Spy.singleton_method(obj, :raising) do
+    Test::Spy.singleton_method(obj, :raising) do |spy|
       trace = []
-      _1.callback = -> (result) { trace << result }
+      spy.callback = -> (result) { trace << result }
 
       exn = assert_raises RuntimeError do
         obj.raising(1, foo: :bar)
@@ -113,9 +113,9 @@ class Ruby::Signature::TestSpyTest < Minitest::Test
       )
     end
 
-    Test::Spy.singleton_method(obj, :yielding) do
+    Test::Spy.singleton_method(obj, :yielding) do |spy|
       trace = []
-      _1.callback = -> (result) { trace << result }
+      spy.callback = -> (result) { trace << result }
 
       obj.yielding(2) { }
 
@@ -148,9 +148,9 @@ class Ruby::Signature::TestSpyTest < Minitest::Test
       )
     end
 
-    Test::Spy.singleton_method(obj, :yielding) do
+    Test::Spy.singleton_method(obj, :yielding) do |spy|
       trace = []
-      _1.callback = -> (result) { trace << result }
+      spy.callback = -> (result) { trace << result }
 
       exn = assert_raises RuntimeError do
         obj.yielding(2) {|i| raise "given #{i}" }
@@ -180,9 +180,9 @@ class Ruby::Signature::TestSpyTest < Minitest::Test
       )
     end
 
-    Test::Spy.singleton_method(obj, :instance_evaling) do
+    Test::Spy.singleton_method(obj, :instance_evaling) do |spy|
       trace = []
-      _1.callback = -> (result) { trace << result }
+      spy.callback = -> (result) { trace << result }
 
       obj.instance_evaling { self }
 
@@ -227,8 +227,8 @@ class Ruby::Signature::TestSpyTest < Minitest::Test
       end
 
       def yielding(x)
-        x.times do
-          yield _1
+        x.times do |i|
+          yield i
         end
 
         :foo
@@ -286,9 +286,9 @@ class Ruby::Signature::TestSpyTest < Minitest::Test
       )
     end
 
-    Test::Spy.instance_method(klass, :raising) do
+    Test::Spy.instance_method(klass, :raising) do |spy|
       trace = []
-      _1.callback = -> (result) { trace << result }
+      spy.callback = -> (result) { trace << result }
 
       exn = assert_raises RuntimeError do
         klass.new.raising(1, foo: :bar)
@@ -312,9 +312,9 @@ class Ruby::Signature::TestSpyTest < Minitest::Test
       )
     end
 
-    Test::Spy.instance_method(klass, :yielding) do
+    Test::Spy.instance_method(klass, :yielding) do |spy|
       trace = []
-      _1.callback = -> (result) { trace << result }
+      spy.callback = -> (result) { trace << result }
 
       klass.new.yielding(2) { }
 
@@ -347,9 +347,9 @@ class Ruby::Signature::TestSpyTest < Minitest::Test
       )
     end
 
-    Test::Spy.instance_method(klass, :yielding) do
+    Test::Spy.instance_method(klass, :yielding) do |spy|
       trace = []
-      _1.callback = -> (result) { trace << result }
+      spy.callback = -> (result) { trace << result }
 
       exn = assert_raises RuntimeError do
         klass.new.yielding(2) {|i| raise "given #{i}" }
@@ -379,9 +379,9 @@ class Ruby::Signature::TestSpyTest < Minitest::Test
       )
     end
 
-    Test::Spy.instance_method(klass, :instance_evaling) do
+    Test::Spy.instance_method(klass, :instance_evaling) do |spy|
       trace = []
-      _1.callback = -> (result) { trace << result }
+      spy.callback = -> (result) { trace << result }
 
       obj = klass.new
       obj.instance_evaling { self }
@@ -427,8 +427,8 @@ class Ruby::Signature::TestSpyTest < Minitest::Test
       end
 
       def yielding(x)
-        x.times do
-          yield _1
+        x.times do |i|
+          yield i
         end
 
         :foo
