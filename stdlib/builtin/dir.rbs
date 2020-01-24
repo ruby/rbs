@@ -5,7 +5,7 @@
 # The directory used in these examples contains the two regular files (
 # `config.h` and `main.rb` ), the parent directory ( `..` ), and the
 # directory itself ( `.` ).
-class Dir < Object
+class Dir
   include Enumerable[String, Dir]
 
   def initialize: (String arg0, ?Encoding arg1) -> void
@@ -30,6 +30,8 @@ class Dir < Object
   def self.entries: (String arg0, ?Encoding arg1) -> ::Array[String]
 
   def self.exist?: (String file) -> bool
+
+  def self.exists?: (untyped) -> untyped
 
   def self.foreach: (String dir, ?Encoding arg0) { (String arg0) -> untyped } -> NilClass
                   | (String dir, ?Encoding arg0) -> ::Enumerator[String, self]
@@ -68,7 +70,10 @@ class Dir < Object
 
   def self.unlink: (String arg0) -> Integer
 
+  public
+
   def children: () -> Array[String]
+
   # Closes the directory stream. Calling this method on closed
   # [Dir](Dir.downloaded.ruby_doc) object is ignored since Ruby 2.3.
   #
@@ -83,6 +88,7 @@ class Dir < Object
 
   def each_child: () -> Enumerator[Array[String], self]
                 | () { (String filename) -> void } -> Enumerator[Array[String], self]
+
   # Returns the file descriptor used in *dir* .
   #
   # ```ruby
