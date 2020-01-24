@@ -11,27 +11,27 @@ require "minitest/autorun"
 require "minitest/reporters"
 Minitest::Reporters.use!
 
+class ToInt
+  def initialize(value = 3)
+    @value = value
+  end
+
+  def to_int
+    @value
+  end
+end
+
+class ToStr
+  def initialize(value = "")
+    @value = value
+  end
+
+  def to_str
+    @value
+  end
+end
+
 class StdlibTest < Minitest::Test
-  class ToInt
-    def initialize(value = 3)
-      @value = value
-    end
-
-    def to_int
-      @value
-    end
-  end
-
-  class ToStr
-    def initialize(value = "")
-      @value = value
-    end
-
-    def to_str
-      @value
-    end
-  end
-
 
   DEFAULT_LOGGER = Logger.new(STDERR)
   DEFAULT_LOGGER.level = ENV["RBS_TEST_LOGLEVEL"] || "info"
