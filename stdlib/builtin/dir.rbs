@@ -1,19 +1,31 @@
 # Objects of class `Dir` are directory streams representing directories in
 # the underlying file system. They provide a variety of ways to list
 # directories and their contents. See also `File` .
-# 
+#
 # The directory used in these examples contains the two regular files (
 # `config.h` and `main.rb` ), the parent directory ( `..` ), and the
 # directory itself ( `.` ).
 class Dir < Object
   include Enumerable[String, Dir]
 
+  def initialize: (String arg0, ?Encoding arg1) -> void
+
+  def self.[]: (String | ::Array[String] pattern, ?Integer flags) -> ::Array[String]
+             | (String | ::Array[String] pattern, ?Integer flags) { (String arg0) -> untyped } -> NilClass
+
   def self.chdir: (?_ToStr arg0) -> Integer
                 | [U] (?_ToStr arg0) { (String arg0) -> U } -> U
+
+  def self.children: (String dirname, ?encoding: String | Encoding enc) -> Array[String]
 
   def self.chroot: (String arg0) -> Integer
 
   def self.delete: (String arg0) -> Integer
+
+  def self.each_child: (String dirname, ?encoding: String | Encoding enc) -> Enumerator[Array[String], self]
+                     | (String dirname, ?encoding: String | Encoding enc) { (String filename) -> void } -> nil
+
+  def self.empty?: (String path_name) -> (true | false)
 
   def self.entries: (String arg0, ?Encoding arg1) -> ::Array[String]
 
@@ -24,7 +36,7 @@ class Dir < Object
 
   # Returns the path to the current working directory of this process as a
   # string.
-  # 
+  #
   # ```ruby
   # Dir.chdir("/tmp")   #=> 0
   # Dir.getwd           #=> "/tmp"
@@ -44,7 +56,7 @@ class Dir < Object
 
   # Returns the path to the current working directory of this process as a
   # string.
-  # 
+  #
   # ```ruby
   # Dir.chdir("/tmp")   #=> 0
   # Dir.getwd           #=> "/tmp"
@@ -56,9 +68,10 @@ class Dir < Object
 
   def self.unlink: (String arg0) -> Integer
 
+  def children: () -> Array[String]
   # Closes the directory stream. Calling this method on closed
   # [Dir](Dir.downloaded.ruby_doc) object is ignored since Ruby 2.3.
-  # 
+  #
   # ```ruby
   # d = Dir.new("testdir")
   # d.close   #=> nil
@@ -68,26 +81,26 @@ class Dir < Object
   def each: () { (String arg0) -> untyped } -> self
           | () -> ::Enumerator[String, self]
 
+  def each_child: () -> Enumerator[Array[String], self]
+                | () { (String filename) -> void } -> Enumerator[Array[String], self]
   # Returns the file descriptor used in *dir* .
-  # 
+  #
   # ```ruby
   # d = Dir.new("..")
   # d.fileno   #=> 8
   # ```
-  # 
+  #
   # This method uses dirfd() function defined by POSIX 2008.
   # [NotImplementedError](https://ruby-doc.org/core-2.6.3/NotImplementedError.html)
   # is raised on other platforms, such as Windows, which doesn’t provide the
   # function.
   def fileno: () -> Integer
 
-  def initialize: (String arg0, ?Encoding arg1) -> void
-
   # Return a string describing this [Dir](Dir.downloaded.ruby_doc) object.
   def inspect: () -> String
 
   # Returns the path parameter passed to *dir* ’s constructor.
-  # 
+  #
   # ```ruby
   # d = Dir.new("..")
   # d.path   #=> ".."
@@ -95,7 +108,7 @@ class Dir < Object
   def path: () -> String?
 
   # Returns the current position in *dir* . See also `Dir#seek` .
-  # 
+  #
   # ```ruby
   # d = Dir.new("testdir")
   # d.tell   #=> 0
@@ -108,7 +121,7 @@ class Dir < Object
 
   # Reads the next entry from *dir* and returns it as a string. Returns
   # `nil` at the end of the stream.
-  # 
+  #
   # ```ruby
   # d = Dir.new("testdir")
   # d.read   #=> "."
@@ -122,7 +135,7 @@ class Dir < Object
   def seek: (Integer arg0) -> self
 
   # Returns the current position in *dir* . See also `Dir#seek` .
-  # 
+  #
   # ```ruby
   # d = Dir.new("testdir")
   # d.tell   #=> 0
@@ -132,24 +145,10 @@ class Dir < Object
   def tell: () -> Integer
 
   # Returns the path parameter passed to *dir* ’s constructor.
-  # 
+  #
   # ```ruby
   # d = Dir.new("..")
   # d.path   #=> ".."
   # ```
   def to_path: () -> String?
-
-  def self.[]: (String | ::Array[String] pattern, ?Integer flags) -> ::Array[String]
-             | (String | ::Array[String] pattern, ?Integer flags) { (String arg0) -> untyped } -> NilClass
-
-  def self.children: (String dirname, ?encoding: String | Encoding enc) -> Array[String]
-
-  def self.each_child: (String dirname, ?encoding: String | Encoding enc) -> Enumerator[Array[String], self]
-                     | (String dirname, ?encoding: String | Encoding enc) { (String filename) -> void } -> nil
-
-  def self.empty?: (String path_name) -> (true | false)
-
-  def children: () -> Array[String]
-  def each_child: () -> Enumerator[Array[String], self]
-                | () { (String filename) -> void } -> Enumerator[Array[String], self]
 end
