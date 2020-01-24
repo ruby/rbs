@@ -75,7 +75,7 @@ module Ruby
 
           begin
             spy.wrapped_object.__send__(method, *args, &block)
-          rescue => exn
+          rescue
             # nop
           end
 
