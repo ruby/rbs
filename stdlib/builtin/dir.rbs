@@ -14,19 +14,11 @@ class Dir
   # The optional *encoding* keyword argument specifies the encoding of the
   # directory. If not specified, the filesystem encoding is used.
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     Dir.new( string ) -> aDir
-  #     Dir.new( string, encoding: enc ) -> aDir
-  #
-  def initialize: (String arg0, ?Encoding arg1) -> void
+  def initialize: (string, ?encoding: Encoding | string | nil) -> void
 
   # Equivalent to calling `Dir.glob([string,...], 0)`.
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     Dir[ string [, string ...] [, base: path] ] -> array
-  #
-  def self.[]: (String | ::Array[String] pattern, ?Integer flags) -> ::Array[String]
-             | (String | ::Array[String] pattern, ?Integer flags) { (String arg0) -> untyped } -> NilClass
+  def self.[]: (*string patterns, ?base: string) ?{ (String path) -> void } -> Array[String]
 
   # Changes the current working directory of the process to the given string. When
   # called without an argument, changes the directory to the value of the
@@ -59,12 +51,8 @@ class Dir
   #     /tmp
   #     /var/spool/mail
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     Dir.chdir( [ string] ) -> 0
-  #     Dir.chdir( [ string] ) {| path | block }  -> anObject
-  #
-  def self.chdir: (?_ToStr arg0) -> Integer
-                | [U] (?_ToStr arg0) { (String arg0) -> U } -> U
+  def self.chdir: (?string) -> void
+                | [U] (?string) { (String) -> U } -> U
 
   # Returns an array containing all of the filenames except for "." and ".." in
   # the given directory. Will raise a SystemCallError if the named directory
@@ -75,28 +63,18 @@ class Dir
   #
   #     Dir.children("testdir")   #=> ["config.h", "main.rb"]
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     Dir.children( dirname )                -> array
-  #     Dir.children( dirname, encoding: enc ) -> array
-  #
-  def self.children: (String dirname, ?encoding: String | Encoding enc) -> Array[String]
+  def self.children: (string dirname, ?encoding: string | Encoding | nil enc) -> Array[String]
 
   # Changes this process's idea of the file system root. Only a privileged process
   # may make this call. Not available on all platforms. On Unix systems, see
   # `chroot(2)` for more information.
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     Dir.chroot( string ) -> 0
-  #
-  def self.chroot: (String arg0) -> Integer
+  def self.chroot: (string) -> void
 
   # Deletes the named directory. Raises a subclass of SystemCallError if the
   # directory isn't empty.
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     Dir.delete( string ) -> 0
-  #
-  def self.delete: (String arg0) -> Integer
+  def self.delete: (string) -> void
 
   # Calls the block once for each entry except for "." and ".." in the named
   # directory, passing the filename of each entry as a parameter to the block.
@@ -110,22 +88,13 @@ class Dir
   #     Got config.h
   #     Got main.rb
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     Dir.each_child( dirname ) {| filename | block }                 -> nil
-  #     Dir.each_child( dirname, encoding: enc ) {| filename | block }  -> nil
-  #     Dir.each_child( dirname )                                       -> an_enumerator
-  #     Dir.each_child( dirname, encoding: enc )                        -> an_enumerator
-  #
-  def self.each_child: (String dirname, ?encoding: String | Encoding enc) -> Enumerator[Array[String], self]
-                     | (String dirname, ?encoding: String | Encoding enc) { (String filename) -> void } -> nil
+  def self.each_child: (string dirname, ?encoding: string | Encoding | nil enc) -> Enumerator[Array[String], void]
+                     | (string dirname, ?encoding: string | Encoding | nil enc) { (String filename) -> void } -> void
 
   # Returns `true` if the named file is an empty directory, `false` if it is not a
   # directory or non-empty.
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     Dir.empty?(path_name)  ->  true or false
-  #
-  def self.empty?: (String path_name) -> (true | false)
+  def self.empty?: (string path_name) -> bool
 
   # Returns an array containing all of the filenames in the given directory. Will
   # raise a SystemCallError if the named directory doesn't exist.
@@ -135,25 +104,15 @@ class Dir
   #
   #     Dir.entries("testdir")   #=> [".", "..", "config.h", "main.rb"]
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     Dir.entries( dirname )                -> array
-  #     Dir.entries( dirname, encoding: enc ) -> array
-  #
-  def self.entries: (String arg0, ?Encoding arg1) -> ::Array[String]
+  def self.entries: (string dirname, ?Encoding | string | nil enc) -> ::Array[String]
 
   # Returns `true` if the named file is a directory, `false` otherwise.
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     Dir.exist?(file_name)   ->  true or false
-  #
-  def self.exist?: (String file) -> bool
+  def self.exist?: (string file) -> bool
 
   # Deprecated method. Don't use.
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     Dir.exists?(file_name)  ->  true or false
-  #
-  def self.exists?: (untyped) -> untyped
+  def self.exists?: (string file) -> bool
 
   # Calls the block once for each entry in the named directory, passing the
   # filename of each entry as a parameter to the block.
@@ -169,23 +128,13 @@ class Dir
   #     Got config.h
   #     Got main.rb
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     Dir.foreach( dirname ) {| filename | block }                 -> nil
-  #     Dir.foreach( dirname, encoding: enc ) {| filename | block }  -> nil
-  #     Dir.foreach( dirname )                                       -> an_enumerator
-  #     Dir.foreach( dirname, encoding: enc )                        -> an_enumerator
-  #
-  def self.foreach: (String dir, ?Encoding arg0) { (String arg0) -> untyped } -> NilClass
-                  | (String dir, ?Encoding arg0) -> ::Enumerator[String, self]
+  alias self.foreach self.each_child
 
   # Returns the path to the current working directory of this process as a string.
   #
   #     Dir.chdir("/tmp")   #=> 0
   #     Dir.getwd           #=> "/tmp"
   #     Dir.pwd             #=> "/tmp"
-  #
-  # # arglists 💪👽🚨 << Delete this section
-  #     Dir.getwd -> string
   #
   def self.getwd: () -> String
 
@@ -276,20 +225,12 @@ class Dir
   #     librbfiles = File.join("**", "lib", "*.rb")
   #     Dir.glob(librbfiles)                #=> ["lib/song.rb"]
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     Dir.glob( pattern, [flags], [base: path] )                       -> array
-  #     Dir.glob( pattern, [flags], [base: path] ) { |filename| block }  -> nil
-  #
-  def self.glob: (String | ::Array[String] pattern, ?Integer flags) -> ::Array[String]
-               | (String | ::Array[String] pattern, ?Integer flags) { (String arg0) -> untyped } -> NilClass
+  def self.glob: (string | ::Array[string] pattern, ?Integer flags, ?base: string) -> ::Array[String]
+               | (string | ::Array[string] pattern, ?Integer flags, ?base: string) { (String) -> void } -> void
 
   # Returns the home directory of the current user or the named user if given.
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     Dir.home()       -> "/home/me"
-  #     Dir.home("root") -> "/root"
-  #
-  def self.home: (?String arg0) -> String
+  def self.home: (?string user) -> String
 
   # Makes a new directory named by *string*, with permissions specified by the
   # optional parameter *anInteger*. The permissions may be modified by the value
@@ -299,10 +240,7 @@ class Dir
   #
   #     Dir.mkdir(File.join(Dir.home, ".foo"), 0700) #=> 0
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     Dir.mkdir( string [, integer] ) -> 0
-  #
-  def self.mkdir: (String arg0, ?Integer arg1) -> Integer
+  def self.mkdir: (string, ?Integer permissions) -> void
 
   # The optional *encoding* keyword argument specifies the encoding of the
   # directory. If not specified, the filesystem encoding is used.
@@ -317,8 +255,8 @@ class Dir
   #     Dir.open( string ) {| aDir | block } -> anObject
   #     Dir.open( string, encoding: enc ) {| aDir | block } -> anObject
   #
-  def self.open: (String arg0, ?Encoding arg1) -> Dir
-               | [U] (String arg0, ?Encoding arg1) { (Dir arg0) -> U } -> U
+  def self.open: (string, ?encoding: Encoding | string | nil) -> Dir
+               | [U] (string, ?encoding: Encoding) { (Dir) -> U } -> U
 
   # Returns the path to the current working directory of this process as a string.
   #
@@ -326,26 +264,17 @@ class Dir
   #     Dir.getwd           #=> "/tmp"
   #     Dir.pwd             #=> "/tmp"
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     Dir.pwd -> string
-  #
   def self.pwd: () -> String
 
   # Deletes the named directory. Raises a subclass of SystemCallError if the
   # directory isn't empty.
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     Dir.rmdir( string ) -> 0
-  #
-  def self.rmdir: (String arg0) -> Integer
+  alias self.rmdir self.delete
 
   # Deletes the named directory. Raises a subclass of SystemCallError if the
   # directory isn't empty.
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     Dir.unlink( string ) -> 0
-  #
-  def self.unlink: (String arg0) -> Integer
+  alias self.unlink self.delete
 
   public
 
@@ -355,9 +284,6 @@ class Dir
   #     d = Dir.new("testdir")
   #     d.children   #=> ["config.h", "main.rb"]
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     dir.children  -> array
-  #
   def children: () -> Array[String]
 
   # Closes the directory stream. Calling this method on closed Dir object is
@@ -366,10 +292,7 @@ class Dir
   #     d = Dir.new("testdir")
   #     d.close   #=> nil
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     dir.close -> nil
-  #
-  def close: () -> NilClass
+  def close: () -> void
 
   # Calls the block once for each entry in this directory, passing the filename of
   # each entry as a parameter to the block.
@@ -386,11 +309,7 @@ class Dir
   #     Got config.h
   #     Got main.rb
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     dir.each { |filename| block }  -> dir
-  #     dir.each                       -> an_enumerator
-  #
-  def each: () { (String arg0) -> untyped } -> self
+  def each: () { (String) -> void } -> self
           | () -> ::Enumerator[String, self]
 
   # Calls the block once for each entry except for "." and ".." in this directory,
@@ -406,12 +325,8 @@ class Dir
   #     Got config.h
   #     Got main.rb
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     dir.each_child {| filename | block }  -> nil
-  #     dir.each_child                        -> an_enumerator
-  #
-  def each_child: () -> Enumerator[Array[String], self]
-                | () { (String filename) -> void } -> Enumerator[Array[String], self]
+  def each_child: () { (String) -> void } -> self
+                | () -> ::Enumerator[String, self]
 
   # Returns the file descriptor used in *dir*.
   #
@@ -422,15 +337,9 @@ class Dir
   # is raised on other platforms, such as Windows, which doesn't provide the
   # function.
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     dir.fileno -> integer
-  #
   def fileno: () -> Integer
 
   # Return a string describing this Dir object.
-  #
-  # # arglists 💪👽🚨 << Delete this section
-  #     dir.inspect -> string
   #
   def inspect: () -> String
 
@@ -438,9 +347,6 @@ class Dir
   #
   #     d = Dir.new("..")
   #     d.path   #=> ".."
-  #
-  # # arglists 💪👽🚨 << Delete this section
-  #     dir.path -> string or nil
   #
   def path: () -> String?
 
@@ -450,9 +356,6 @@ class Dir
   #     d.tell   #=> 0
   #     d.read   #=> "."
   #     d.tell   #=> 12
-  #
-  # # arglists 💪👽🚨 << Delete this section
-  #     dir.pos -> integer
   #
   def pos: () -> Integer
 
@@ -465,10 +368,7 @@ class Dir
   #     d.pos = i                #=> 12
   #     d.read                   #=> ".."
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     dir.pos = integer  -> integer
-  #
-  def pos=: (Integer arg0) -> Integer
+  def pos=: (Integer pos) -> Integer
 
   # Reads the next entry from *dir* and returns it as a string. Returns `nil` at
   # the end of the stream.
@@ -478,9 +378,6 @@ class Dir
   #     d.read   #=> ".."
   #     d.read   #=> "config.h"
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     dir.read -> string or nil
-  #
   def read: () -> String?
 
   # Repositions *dir* to the first entry.
@@ -489,9 +386,6 @@ class Dir
   #     d.read     #=> "."
   #     d.rewind   #=> #<Dir:0x401b3fb0>
   #     d.read     #=> "."
-  #
-  # # arglists 💪👽🚨 << Delete this section
-  #     dir.rewind -> dir
   #
   def rewind: () -> self
 
@@ -505,10 +399,7 @@ class Dir
   #     d.seek(i)                #=> #<Dir:0x401b3c40>
   #     d.read                   #=> ".."
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     dir.seek( integer ) -> dir
-  #
-  def seek: (Integer arg0) -> self
+  def seek: (Integer) -> self
 
   # Returns the current position in *dir*. See also Dir#seek.
   #
@@ -517,9 +408,6 @@ class Dir
   #     d.read   #=> "."
   #     d.tell   #=> 12
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     dir.tell -> integer
-  #
   def tell: () -> Integer
 
   # Returns the path parameter passed to *dir*'s constructor.
@@ -527,8 +415,5 @@ class Dir
   #     d = Dir.new("..")
   #     d.path   #=> ".."
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     dir.to_path -> string or nil
-  #
-  def to_path: () -> String?
+  alias to_path path
 end
