@@ -22,13 +22,15 @@ def comment_for_constant(decl, stores:)
     store.find_class_named(class_name) || store.find_module_named(class_name)
   }
 
-  constant = klass.constants.find do |const|
-    const.name == decl.name.name.to_s
-  end
+  if klass
+    constant = klass.constants.find do |const|
+      const.name == decl.name.name.to_s
+    end
 
-  if constant&.documented?
-    string = format_comment(constant.comment)
-    Ruby::Signature::AST::Comment.new(location: nil, string: string)
+    if constant&.documented?
+      string = format_comment(constant.comment)
+      Ruby::Signature::AST::Comment.new(location: nil, string: string)
+    end
   end
 end
 
