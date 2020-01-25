@@ -37,7 +37,7 @@ class ComparableTest < Minitest::Test
       assert_send_type "(::ComparableTest::Test, ::ComparableTest::Test) -> ::ComparableTest::Test",
                        obj, :clamp, obj, obj
       assert_send_type "(::Range[::Integer]) -> (::ComparableTest::Test | ::Integer)",
-                       obj, :clamp, 1...3
+                       obj, :clamp, 1..3
     end
   end
 end
