@@ -64,15 +64,15 @@ end
 
 Errno::EAGAIN::Errno: Integer
 
-class Errno::EWOULDBLOCK < SystemCallError
-end
-
-Errno::EWOULDBLOCK::Errno: Integer
-
 class Errno::EALREADY < SystemCallError
 end
 
 Errno::EALREADY::Errno: Integer
+
+class Errno::EAUTH < SystemCallError
+end
+
+Errno::EAUTH::Errno: Integer
 
 class Errno::EBADE < SystemCallError
 end
@@ -99,6 +99,11 @@ end
 
 Errno::EBADR::Errno: Integer
 
+class Errno::EBADRPC < SystemCallError
+end
+
+Errno::EBADRPC::Errno: Integer
+
 class Errno::EBADRQC < SystemCallError
 end
 
@@ -123,6 +128,11 @@ class Errno::ECANCELED < SystemCallError
 end
 
 Errno::ECANCELED::Errno: Integer
+
+class Errno::ECAPMODE < SystemCallError
+end
+
+Errno::ECAPMODE::Errno: Integer
 
 class Errno::ECHILD < SystemCallError
 end
@@ -159,6 +169,11 @@ end
 
 Errno::EDEADLK::Errno: Integer
 
+class Errno::EDEADLOCK < SystemCallError
+end
+
+Errno::EDEADLOCK::Errno: Integer
+
 class Errno::EDESTADDRREQ < SystemCallError
 end
 
@@ -168,6 +183,11 @@ class Errno::EDOM < SystemCallError
 end
 
 Errno::EDOM::Errno: Integer
+
+class Errno::EDOOFUS < SystemCallError
+end
+
+Errno::EDOOFUS::Errno: Integer
 
 class Errno::EDOTDOT < SystemCallError
 end
@@ -193,6 +213,11 @@ class Errno::EFBIG < SystemCallError
 end
 
 Errno::EFBIG::Errno: Integer
+
+class Errno::EFTYPE < SystemCallError
+end
+
+Errno::EFTYPE::Errno: Integer
 
 class Errno::EHOSTDOWN < SystemCallError
 end
@@ -238,6 +263,11 @@ class Errno::EIO < SystemCallError
 end
 
 Errno::EIO::Errno: Integer
+
+class Errno::EIPSEC < SystemCallError
+end
+
+Errno::EIPSEC::Errno: Integer
 
 class Errno::EISCONN < SystemCallError
 end
@@ -359,6 +389,11 @@ end
 
 Errno::ENAVAIL::Errno: Integer
 
+class Errno::ENEEDAUTH < SystemCallError
+end
+
+Errno::ENEEDAUTH::Errno: Integer
+
 class Errno::ENETDOWN < SystemCallError
 end
 
@@ -383,6 +418,11 @@ class Errno::ENOANO < SystemCallError
 end
 
 Errno::ENOANO::Errno: Integer
+
+class Errno::ENOATTR < SystemCallError
+end
+
+Errno::ENOATTR::Errno: Integer
 
 class Errno::ENOBUFS < SystemCallError
 end
@@ -484,6 +524,11 @@ end
 
 Errno::ENOTBLK::Errno: Integer
 
+class Errno::ENOTCAPABLE < SystemCallError
+end
+
+Errno::ENOTCAPABLE::Errno: Integer
+
 class Errno::ENOTCONN < SystemCallError
 end
 
@@ -513,6 +558,11 @@ class Errno::ENOTSOCK < SystemCallError
 end
 
 Errno::ENOTSOCK::Errno: Integer
+
+class Errno::ENOTSUP < SystemCallError
+end
+
+Errno::ENOTSUP::Errno: Integer
 
 class Errno::ENOTTY < SystemCallError
 end
@@ -558,6 +608,26 @@ class Errno::EPIPE < SystemCallError
 end
 
 Errno::EPIPE::Errno: Integer
+
+class Errno::EPROCLIM < SystemCallError
+end
+
+Errno::EPROCLIM::Errno: Integer
+
+class Errno::EPROCUNAVAIL < SystemCallError
+end
+
+Errno::EPROCUNAVAIL::Errno: Integer
+
+class Errno::EPROGMISMATCH < SystemCallError
+end
+
+Errno::EPROGMISMATCH::Errno: Integer
+
+class Errno::EPROGUNAVAIL < SystemCallError
+end
+
+Errno::EPROGUNAVAIL::Errno: Integer
 
 class Errno::EPROTO < SystemCallError
 end
@@ -608,6 +678,11 @@ class Errno::EROFS < SystemCallError
 end
 
 Errno::EROFS::Errno: Integer
+
+class Errno::ERPCMISMATCH < SystemCallError
+end
+
+Errno::ERPCMISMATCH::Errno: Integer
 
 class Errno::ESHUTDOWN < SystemCallError
 end
@@ -679,6 +754,11 @@ end
 
 Errno::EUSERS::Errno: Integer
 
+class Errno::EWOULDBLOCK < SystemCallError
+end
+
+Errno::EWOULDBLOCK::Errno: Integer
+
 class Errno::EXDEV < SystemCallError
 end
 
@@ -688,8 +768,3 @@ class Errno::EXFULL < SystemCallError
 end
 
 Errno::EXFULL::Errno: Integer
-
-class Errno::NOERROR < SystemCallError
-end
-
-Errno::NOERROR::Errno: Integer
