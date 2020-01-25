@@ -97,6 +97,7 @@ end
 # 
 #     Note: You will typically use Signal.trap instead.
 class Interrupt < SignalException
+  def initialize: (?String) -> void
 end
 
 # Raised when an [IO](https://ruby-doc.org/core-2.6.3/IO.html) operation
@@ -176,6 +177,9 @@ end
 # 
 #     LocalJumpError: unexpected return
 class LocalJumpError < StandardError
+  def exit_value: () -> untyped
+
+  def reason: () -> untyped
 end
 
 # Raised when a given name is invalid or undefined.
@@ -199,6 +203,13 @@ end
 #     NameError: wrong constant name answer
 class NameError[T] < StandardError
   def initialize: (?String msg, ?receiver: T) -> void
+
+  public
+
+  def local_variables: () -> ::Array[Symbol]
+
+  def name: () -> untyped
+
   def receiver: () -> T?
 end
 
@@ -217,6 +228,13 @@ end
 # 
 #     NoMethodError: undefined method `to_ary' for "hello":String
 class NoMethodError[T] < NameError[T]
+  def initialize: (?String msg, ?receiver: T) -> void
+
+  public
+
+  def args: () -> untyped
+
+  def private_call?: () -> untyped
 end
 
 # Raised when a feature is not implemented on the current platform. For
@@ -312,7 +330,12 @@ end
 # received Exception SIGHUP
 # ```
 class SignalException < Exception
-  def signm: () -> String
+  def initialize: (?String arg0) -> void
+
+  public
+
+  alias signm message
+
   def signo: () -> Integer
 end
 
@@ -363,6 +386,7 @@ end
 # Done!
 # ```
 class StopIteration < IndexError
+  def result: () -> untyped
 end
 
 # Raised when encountering Ruby code with an invalid syntax.
@@ -375,6 +399,7 @@ end
 # 
 #     SyntaxError: (eval):1: syntax error, unexpected '=', expecting $end
 class SyntaxError < ScriptError
+  def initialize: (?String arg0) -> void
 end
 
 # [SystemCallError](SystemCallError) is the base class
@@ -393,14 +418,25 @@ end
 #     Errno::ENOENT: No such file or directory - does/not/exist
 class SystemCallError < StandardError
   def initialize: (String msg, ?Integer errno, ?String location) -> SystemCallError
+
+  def self.===: (untyped other) -> bool
+
+  public
+
   def errno: () -> Integer?
 end
 
 # Raised by `exit` to initiate the termination of the script.
 class SystemExit < Exception
+  def initialize: (?String arg0) -> void
+
+  public
+
   def status: () -> Integer
+
   def success?: () -> bool
 end
+
 
 # Raised in case of a stack overflow.
 # 
@@ -455,7 +491,16 @@ end
 # 
 #     UncaughtThrowError: uncaught throw "foo"
 class UncaughtThrowError < ArgumentError
+  def initialize: (?String arg0) -> void
+
+  public
+
   def tag: () -> untyped
+
+  # Returns exception’s message (or the name of the exception if no message
+  # is set).
+  def to_s: () -> String
+
   def value: () -> untyped
 end
 
@@ -477,5 +522,6 @@ end
 
 class FrozenError[T] < RuntimeError
   def initialize: (?String msg, ?receiver: T) -> void
+  
   def receiver: () -> T?
 end
