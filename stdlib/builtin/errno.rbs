@@ -1,31 +1,35 @@
-# Ruby exception objects are subclasses of `Exception` . However,
-# operating systems typically report errors using plain integers.
-# [Module](https://ruby-doc.org/core-2.6.3/Module.html) `Errno` is created
-# dynamically to map these operating system errors to Ruby classes, with
-# each error number generating its own subclass of `SystemCallError` . As
-# the subclass is created in module `Errno`, its name will start
-# `Errno::` .
-# 
-# The names of the `Errno::` classes depend on the environment in which
-# Ruby runs. On a typical Unix or Windows platform, there are `Errno`
-# classes such as `Errno::EACCES`, `Errno::EAGAIN`, `Errno::EINTR`, and
-# so on.
-# 
-# The integer operating system error number corresponding to a particular
-# error is available as the class constant `Errno::` *error* `::Errno` .
-# 
-# ```ruby
-# Errno::EACCES::Errno   #=> 13
-# Errno::EAGAIN::Errno   #=> 11
-# Errno::EINTR::Errno    #=> 4
-# ```
-# 
+# Ruby exception objects are subclasses of Exception.  However, operating
+# systems typically report errors using plain integers. Module Errno is created
+# dynamically to map these operating system errors to Ruby classes, with each
+# error number generating its own subclass of SystemCallError.  As the subclass
+# is created in module Errno, its name will start `Errno::`.
+#
+# The names of the `Errno::` classes depend on the environment in which Ruby
+# runs. On a typical Unix or Windows platform, there are Errno classes such as
+# Errno::EACCES, Errno::EAGAIN, Errno::EINTR, and so on.
+#
+# The integer operating system error number corresponding to a particular error
+# is available as the class constant `Errno::`*error*`::Errno`.
+#
+#     Errno::EACCES::Errno   #=> 13
+#     Errno::EAGAIN::Errno   #=> 11
+#     Errno::EINTR::Errno    #=> 4
+#
 # The full list of operating system errors on your particular platform are
-# available as the constants of `Errno` .
-# 
-# ```ruby
-# Errno.constants   #=> :E2BIG, :EACCES, :EADDRINUSE, :EADDRNOTAVAIL, ...
-# ```
+# available as the constants of Errno.
+#
+#     Errno.constants   #=> :E2BIG, :EACCES, :EADDRINUSE, :EADDRNOTAVAIL, ...
+# System call error module used by webrick for cross platform compatibility.
+#
+# EPROTO
+# :   protocol error
+# ECONNRESET
+# :   remote host reset the connection request
+# ECONNABORTED
+# :   Client sent TCP reset (RST) before server has accepted the connection
+#     requested by client.
+#
+#
 module Errno
 end
 
@@ -64,15 +68,15 @@ end
 
 Errno::EAGAIN::Errno: Integer
 
-class Errno::EWOULDBLOCK < SystemCallError
-end
-
-Errno::EWOULDBLOCK::Errno: Integer
-
 class Errno::EALREADY < SystemCallError
 end
 
 Errno::EALREADY::Errno: Integer
+
+class Errno::EAUTH < SystemCallError
+end
+
+Errno::EAUTH::Errno: Integer
 
 class Errno::EBADE < SystemCallError
 end
@@ -99,6 +103,11 @@ end
 
 Errno::EBADR::Errno: Integer
 
+class Errno::EBADRPC < SystemCallError
+end
+
+Errno::EBADRPC::Errno: Integer
+
 class Errno::EBADRQC < SystemCallError
 end
 
@@ -124,6 +133,11 @@ end
 
 Errno::ECANCELED::Errno: Integer
 
+class Errno::ECAPMODE < SystemCallError
+end
+
+Errno::ECAPMODE::Errno: Integer
+
 class Errno::ECHILD < SystemCallError
 end
 
@@ -139,6 +153,9 @@ end
 
 Errno::ECOMM::Errno: Integer
 
+# Client sent TCP reset (RST) before server has accepted the connection
+# requested by client.
+#
 class Errno::ECONNABORTED < SystemCallError
 end
 
@@ -149,6 +166,8 @@ end
 
 Errno::ECONNREFUSED::Errno: Integer
 
+# Remote host reset the connection request.
+#
 class Errno::ECONNRESET < SystemCallError
 end
 
@@ -159,6 +178,11 @@ end
 
 Errno::EDEADLK::Errno: Integer
 
+class Errno::EDEADLOCK < SystemCallError
+end
+
+Errno::EDEADLOCK::Errno: Integer
+
 class Errno::EDESTADDRREQ < SystemCallError
 end
 
@@ -168,6 +192,11 @@ class Errno::EDOM < SystemCallError
 end
 
 Errno::EDOM::Errno: Integer
+
+class Errno::EDOOFUS < SystemCallError
+end
+
+Errno::EDOOFUS::Errno: Integer
 
 class Errno::EDOTDOT < SystemCallError
 end
@@ -193,6 +222,11 @@ class Errno::EFBIG < SystemCallError
 end
 
 Errno::EFBIG::Errno: Integer
+
+class Errno::EFTYPE < SystemCallError
+end
+
+Errno::EFTYPE::Errno: Integer
 
 class Errno::EHOSTDOWN < SystemCallError
 end
@@ -238,6 +272,11 @@ class Errno::EIO < SystemCallError
 end
 
 Errno::EIO::Errno: Integer
+
+class Errno::EIPSEC < SystemCallError
+end
+
+Errno::EIPSEC::Errno: Integer
 
 class Errno::EISCONN < SystemCallError
 end
@@ -359,6 +398,11 @@ end
 
 Errno::ENAVAIL::Errno: Integer
 
+class Errno::ENEEDAUTH < SystemCallError
+end
+
+Errno::ENEEDAUTH::Errno: Integer
+
 class Errno::ENETDOWN < SystemCallError
 end
 
@@ -383,6 +427,11 @@ class Errno::ENOANO < SystemCallError
 end
 
 Errno::ENOANO::Errno: Integer
+
+class Errno::ENOATTR < SystemCallError
+end
+
+Errno::ENOATTR::Errno: Integer
 
 class Errno::ENOBUFS < SystemCallError
 end
@@ -484,6 +533,11 @@ end
 
 Errno::ENOTBLK::Errno: Integer
 
+class Errno::ENOTCAPABLE < SystemCallError
+end
+
+Errno::ENOTCAPABLE::Errno: Integer
+
 class Errno::ENOTCONN < SystemCallError
 end
 
@@ -513,6 +567,11 @@ class Errno::ENOTSOCK < SystemCallError
 end
 
 Errno::ENOTSOCK::Errno: Integer
+
+class Errno::ENOTSUP < SystemCallError
+end
+
+Errno::ENOTSUP::Errno: Integer
 
 class Errno::ENOTTY < SystemCallError
 end
@@ -559,6 +618,28 @@ end
 
 Errno::EPIPE::Errno: Integer
 
+class Errno::EPROCLIM < SystemCallError
+end
+
+Errno::EPROCLIM::Errno: Integer
+
+class Errno::EPROCUNAVAIL < SystemCallError
+end
+
+Errno::EPROCUNAVAIL::Errno: Integer
+
+class Errno::EPROGMISMATCH < SystemCallError
+end
+
+Errno::EPROGMISMATCH::Errno: Integer
+
+class Errno::EPROGUNAVAIL < SystemCallError
+end
+
+Errno::EPROGUNAVAIL::Errno: Integer
+
+# Protocol error.
+#
 class Errno::EPROTO < SystemCallError
 end
 
@@ -608,6 +689,11 @@ class Errno::EROFS < SystemCallError
 end
 
 Errno::EROFS::Errno: Integer
+
+class Errno::ERPCMISMATCH < SystemCallError
+end
+
+Errno::ERPCMISMATCH::Errno: Integer
 
 class Errno::ESHUTDOWN < SystemCallError
 end
@@ -679,6 +765,11 @@ end
 
 Errno::EUSERS::Errno: Integer
 
+class Errno::EWOULDBLOCK < SystemCallError
+end
+
+Errno::EWOULDBLOCK::Errno: Integer
+
 class Errno::EXDEV < SystemCallError
 end
 
@@ -688,8 +779,3 @@ class Errno::EXFULL < SystemCallError
 end
 
 Errno::EXFULL::Errno: Integer
-
-class Errno::NOERROR < SystemCallError
-end
-
-Errno::NOERROR::Errno: Integer
