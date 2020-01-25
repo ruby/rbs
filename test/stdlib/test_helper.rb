@@ -1,9 +1,3 @@
-RUBY_27_OR_LATER = Gem::Version.new(RUBY_VERSION) >= Gem::Version.new('2.7.0')
-unless RUBY_27_OR_LATER
-  STDERR.puts "🚨🚨🚨 stdlib test requires Ruby 2.7 but RUBY_VERSION==#{RUBY_VERSION}, exiting... 🚨🚨🚨"
-  exit
-end
-
 require "ruby/signature"
 require "ruby/signature/test"
 require "minitest/autorun"
