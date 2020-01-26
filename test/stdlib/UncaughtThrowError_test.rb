@@ -4,6 +4,10 @@ class UncaughtThrowErrorTest < StdlibTest
   target UncaughtThrowError
   using hook.refinement
 
+  def test_new
+    UncaughtThrowError.new(1, 2)
+  end
+
   def test_tag
     begin
       throw :a

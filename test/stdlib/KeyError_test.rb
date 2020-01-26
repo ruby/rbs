@@ -7,9 +7,11 @@ class KeyErrorTest < StdlibTest
   def test_initialize
     KeyError.new
     KeyError.new('')
+    KeyError.new(ToStr.new(''))
     KeyError.new('', key: 42)
     KeyError.new('', receiver: 42)
     KeyError.new('', key: 42, receiver: 42)
+    KeyError.new("", key: nil, receiver: nil)
   end
 
   def test_key

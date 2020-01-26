@@ -5,9 +5,10 @@ class SystemCallErrorTest < StdlibTest
   using hook.refinement
 
   def test_initialize
-    SystemCallError.new('hi')
     SystemCallError.new('hi', 0)
-    SystemCallError.new('hi', 0, 'loc')
+    a = SystemCallError.new(ToStr.new('hi'), 0)
+    a.errno
+    a.message
   end
 
   def test_errno
@@ -18,7 +19,7 @@ class SystemCallErrorTest < StdlibTest
     end
 
     begin
-      raise SystemCallError, 'test'
+      raise SystemCallError.new('test', 3)
     rescue SystemCallError => exception
       exception.errno
     end
