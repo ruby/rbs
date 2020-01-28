@@ -1081,7 +1081,7 @@ class Array[unchecked out Elem] < Object
   #     ary.filter                  -> Enumerator
   #
   def filter: () { (Elem arg0) -> untyped } -> ::Array[Elem]
-            | () -> ::Enumerator[Elem, Return]
+            | () -> ::Enumerator[Elem, Array[Elem]]
 
   # Invokes the given block passing in successive elements from `self`, deleting
   # elements for which the block returns a `false` value.
@@ -1125,7 +1125,7 @@ class Array[unchecked out Elem] < Object
   #
   def find_index: (?untyped value) -> Integer?
                 | () { (Elem arg0) -> untyped } -> Integer?
-                | () -> ::Enumerator[Elem, Return]
+                | () -> ::Enumerator[Elem, Integer?]
 
   # Returns the first element, or the first `n` elements, of the array. If the
   # array is empty, the first form returns `nil`, and the second form returns an
