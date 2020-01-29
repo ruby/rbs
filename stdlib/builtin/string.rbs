@@ -299,10 +299,8 @@ class String
   #     "foo".casecmp(2)   #=> nil
   #     "\u{e4 f6 fc}".encode("ISO-8859-1").casecmp("\u{c4 d6 dc}")   #=> nil
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     str.casecmp(other_str)   -> -1, 0, +1, or nil
-  #
-  def casecmp: (String arg0) -> Integer?
+  def casecmp: (String other) -> Integer?
+             | (untyped other) -> Integer?
 
   # Returns `true` if `str` and `other_str` are equal after Unicode case folding,
   # `false` if they are not equal.

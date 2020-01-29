@@ -150,6 +150,14 @@ class StringTest < StdlibTest
     "".capitalize!(:turkic, :lithuanian)
   end
 
+  def test_casecmp
+    "a".casecmp("A")
+    "a".casecmp("B")
+    "b".casecmp("A")
+    "\u{e4 f6 fc}".encode("ISO-8859-1").to_sym.casecmp("\u{c4 d6 dc}")
+    "a".casecmp(42)
+  end
+
   def test_delete_prefix
     "foo".delete_prefix("f")
   end
