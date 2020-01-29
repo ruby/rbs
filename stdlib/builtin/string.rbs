@@ -328,10 +328,7 @@ class String
   #     "hello".center(20)        #=> "       hello        "
   #     "hello".center(20, '123') #=> "1231231hello12312312"
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     str.center(width, padstr=' ')   -> new_str
-  #
-  def center: (Integer arg0, ?String arg1) -> String
+  def center: (Integer width, ?String padstr) -> String
 
   # Returns an array of characters in *str*.  This is a shorthand for
   # `str.each_char.to_a`.

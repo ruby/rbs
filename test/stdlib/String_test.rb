@@ -165,6 +165,11 @@ class StringTest < StdlibTest
     "a".casecmp?(42)
   end
 
+  def test_center
+    "hello".center(4)
+    "hello".center(20, '123')
+  end
+
   def test_delete_prefix
     "foo".delete_prefix("f")
   end
