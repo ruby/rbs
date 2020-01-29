@@ -200,15 +200,6 @@ class String
   # RangeError, and the Regexp and String will raise an IndexError on negative
   # match.
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     str[integer] = new_str
-  #     str[integer, integer] = new_str
-  #     str[range] = aString
-  #     str[regexp] = new_str
-  #     str[regexp, integer] = new_str
-  #     str[regexp, name] = new_str
-  #     str[other_str] = new_str
-  #
   def []=: (Integer pos, String new_str) -> String
          | (Integer begin_pos, Integer end_pos, String new_str) -> String
          | (::Range[Integer] range, String new_str) -> String
