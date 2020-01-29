@@ -175,6 +175,11 @@ class StringTest < StdlibTest
     "a".chars {|c| c }
   end
 
+  def test_chomp
+    "a".chomp
+    "a".chomp("")
+  end
+
   def test_delete_prefix
     "foo".delete_prefix("f")
   end

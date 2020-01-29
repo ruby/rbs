@@ -355,10 +355,7 @@ class String
   #     "hello\r\n\r\n".chomp('')    #=> "hello"
   #     "hello\r\n\r\r\n".chomp('')  #=> "hello\r\n\r"
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     str.chomp(separator=$/)   -> new_str
-  #
-  def chomp: (?String arg0) -> String
+  def chomp: (?String separator) -> String
 
   # Modifies *str* in place as described for String#chomp, returning *str*, or
   # `nil` if no modifications were made.
