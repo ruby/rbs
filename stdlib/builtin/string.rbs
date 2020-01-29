@@ -181,19 +181,12 @@ class String
   #     a["lo"]                #=> "lo"
   #     a["bye"]               #=> nil
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     str[index]                 -> new_str or nil
-  #     str[start, length]         -> new_str or nil
-  #     str[range]                 -> new_str or nil
-  #     str[regexp]                -> new_str or nil
-  #     str[regexp, capture]       -> new_str or nil
-  #     str[match_str]             -> new_str or nil
-  #
-  def []: (Integer arg0, ?Integer arg1) -> String?
-        | (::Range[Integer] | Regexp arg0) -> String?
-        | (Regexp arg0, ?Integer arg1) -> String?
-        | (Regexp arg0, ?String arg1) -> String?
-        | (String arg0) -> String?
+  def []: (Integer index) -> String?
+        | (Integer start, Integer length) -> String?
+        | (Range[Integer?] range) -> String?
+        | (Regexp regexp) -> String?
+        | (Regexp regexp, Integer | String capture) -> String?
+        | (String match_str) -> String?
 
   # Element Assignment---Replaces some or all of the content of *str*. The portion
   # of the string affected is determined using the same criteria as String#[]. If
