@@ -250,13 +250,8 @@ class String
   #     "\x80\u3042".byteslice(1, 3) #=> "\u3042"
   #     "\x03\u3042\xff".byteslice(1..3) #=> "\u3042"
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     str.byteslice(integer)           -> new_str or nil
-  #     str.byteslice(integer, integer)   -> new_str or nil
-  #     str.byteslice(range)            -> new_str or nil
-  #
-  def byteslice: (Integer arg0, ?Integer arg1) -> String?
-               | (::Range[Integer] arg0) -> String?
+  def byteslice: (Integer start, ?Integer length) -> String?
+               | (::Range[Integer] range) -> String?
 
   # Returns a copy of *str* with the first character converted to uppercase and
   # the remainder to lowercase.

@@ -111,6 +111,15 @@ class StringTest < StdlibTest
     s.bytesize
   end
 
+  def test_byteslice
+    "hello".byteslice(1)
+    "hello".byteslice(10)
+    "hello".byteslice(1, 2)
+    "hello".byteslice(10, 2)
+    "\x03\u3042\xff".byteslice(1..3)
+    "\x03\u3042\xff".byteslice(11..13)
+  end
+
   def test_casecmp?
     "aBcDeF".casecmp?("abcde")
     "aBcDeF".casecmp?("abcdef")
