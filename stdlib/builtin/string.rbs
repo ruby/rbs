@@ -378,9 +378,6 @@ class String
   # Processes *str* as for String#chop, returning *str*, or `nil` if *str* is the
   # empty string.  See also String#chomp!.
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     str.chop!   -> str or nil
-  #
   def chop!: () -> String?
 
   # Returns a one-character string at the beginning of the string.
