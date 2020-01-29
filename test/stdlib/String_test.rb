@@ -92,6 +92,11 @@ class StringTest < StdlibTest
     "foo"["foo"] = "bar"
   end
 
+  def test_ascii_only?
+    "abc".force_encoding("UTF-8").ascii_only?
+    "abc\u{6666}".force_encoding("UTF-8").ascii_only?
+  end
+
   def test_bytesize
     s = "string"
     s.bytesize

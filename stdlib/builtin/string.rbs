@@ -213,9 +213,6 @@ class String
   #     "abc".force_encoding("UTF-8").ascii_only?          #=> true
   #     "abc\u{6666}".force_encoding("UTF-8").ascii_only?  #=> false
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     str.ascii_only?  -> true or false
-  #
   def ascii_only?: () -> bool
 
   # Returns a copied string whose encoding is ASCII-8BIT.
