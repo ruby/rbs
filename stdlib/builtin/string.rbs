@@ -385,9 +385,6 @@ class String
   #     a = "abcde"
   #     a.chr    #=> "a"
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     string.chr    ->  string
-  #
   def chr: () -> String
 
   # Makes string empty.
