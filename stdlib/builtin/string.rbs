@@ -373,9 +373,6 @@ class String
   #     "string".chop       #=> "strin"
   #     "x".chop.chop       #=> ""
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     str.chop   -> new_str
-  #
   def chop: () -> String
 
   # Processes *str* as for String#chop, returning *str*, or `nil` if *str* is the
