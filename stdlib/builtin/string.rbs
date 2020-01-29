@@ -262,11 +262,10 @@ class String
   #     "HELLO".capitalize    #=> "Hello"
   #     "123ABC".capitalize   #=> "123abc"
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     str.capitalize              -> new_str
-  #     str.capitalize([options])   -> new_str
-  #
   def capitalize: () -> String
+                | (:ascii | :lithuanian | :turkic) -> String
+                | (:lithuanian, :turkic) -> String
+                | (:turkic, :lithuanian) -> String
 
   # Modifies *str* by converting the first character to uppercase and the
   # remainder to lowercase. Returns `nil` if no changes are made. There is an

@@ -126,6 +126,15 @@ class StringTest < StdlibTest
     "foo".casecmp?(2)
   end
 
+  def test_capitalize
+    "a".capitalize
+    "a".capitalize(:ascii)
+    "a".capitalize(:lithuanian)
+    "a".capitalize(:turkic)
+    "a".capitalize(:lithuanian, :turkic)
+    "a".capitalize(:turkic, :lithuanian)
+  end
+
   def test_delete_prefix
     "foo".delete_prefix("f")
   end
