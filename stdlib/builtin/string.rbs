@@ -127,11 +127,7 @@ class String
   #     /(?<number>\d+)/ =~ "no. 9"
   #     number                        #=> "9"
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     str =~ obj   -> integer or nil
-  #
-  %a{rbs:test:skip}
-  def =~: (Object arg0) -> Integer?
+  def =~: (untyped obj) -> Integer?
 
   # Element Reference --- If passed a single `index`, returns a substring of one
   # character at that index. If passed a `start` index and a `length`, returns a
