@@ -202,6 +202,11 @@ class StringTest < StdlibTest
     "a".clear
   end
 
+  def test_codepoints
+    "a".codepoints
+    "a".codepoints {|cp| cp }
+  end
+
   def test_delete_prefix
     "foo".delete_prefix("f")
   end

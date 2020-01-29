@@ -400,11 +400,8 @@ class String
   # If a block is given, which is a deprecated form, works the same as
   # `each_codepoint`.
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     str.codepoints   -> an_array
-  #
   def codepoints: () -> ::Array[Integer]
-                | () { () -> untyped } -> ::Array[Integer]
+                | () { (Integer codepoint) -> void } -> String
 
   # Concatenates the given object(s) to *str*. If an object is an Integer, it is
   # considered a codepoint and converted to a character before concatenation.
