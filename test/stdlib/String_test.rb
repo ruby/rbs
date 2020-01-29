@@ -170,6 +170,11 @@ class StringTest < StdlibTest
     "hello".center(20, '123')
   end
 
+  def test_chars
+    "a".chars
+    "a".chars {|c| c }
+  end
+
   def test_delete_prefix
     "foo".delete_prefix("f")
   end

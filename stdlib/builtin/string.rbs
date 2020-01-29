@@ -336,10 +336,8 @@ class String
   # If a block is given, which is a deprecated form, works the same as
   # `each_char`.
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     str.chars    -> an_array
-  #
   def chars: () -> Array[String]
+           | () { (String char) -> void } -> String
 
   # Returns a new String with the given record separator removed from the end of
   # *str* (if present). If `$/` has not been changed from the default Ruby record
