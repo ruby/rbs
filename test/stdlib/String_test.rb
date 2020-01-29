@@ -135,6 +135,21 @@ class StringTest < StdlibTest
     "a".capitalize(:turkic, :lithuanian)
   end
 
+  def test_capitalize!
+    "a".capitalize!
+    "a".capitalize!(:ascii)
+    "a".capitalize!(:lithuanian)
+    "a".capitalize!(:turkic)
+    "a".capitalize!(:lithuanian, :turkic)
+    "a".capitalize!(:turkic, :lithuanian)
+    "".capitalize!
+    "".capitalize!(:ascii)
+    "".capitalize!(:lithuanian)
+    "".capitalize!(:turkic)
+    "".capitalize!(:lithuanian, :turkic)
+    "".capitalize!(:turkic, :lithuanian)
+  end
+
   def test_delete_prefix
     "foo".delete_prefix("f")
   end

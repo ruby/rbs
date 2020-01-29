@@ -279,11 +279,10 @@ class String
   #     a               #=> "Hello"
   #     a.capitalize!   #=> nil
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     str.capitalize!              -> str or nil
-  #     str.capitalize!([options])   -> str or nil
-  #
   def capitalize!: () -> String?
+                 | (:ascii | :lithuanian | :turkic) -> String?
+                 | (:lithuanian, :turkic) -> String?
+                 | (:turkic, :lithuanian) -> String?
 
   # Case-insensitive version of String#<=>. Currently, case-insensitivity only
   # works on characters A-Z/a-z, not all of Unicode. This is different from
