@@ -43,6 +43,11 @@ class StringTest < StdlibTest
     "abcdef" <=> 1
   end
 
+  def test_eq
+    "a" == "a"
+    "a" == nil
+  end
+
   def test_aset_m
     "foo"[0] = "b"
     "foo"[0, 3] = "bar"

@@ -99,10 +99,7 @@ class String
   #
   # Otherwise, returns similarly to String#eql?, comparing length and content.
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     str == obj    -> true or false
-  #
-  def ==: (untyped arg0) -> bool
+  def ==: (untyped obj) -> bool
 
   # Equality---Returns whether `str` == `obj`, similar to Object#==.
   #
