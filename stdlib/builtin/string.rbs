@@ -89,10 +89,8 @@ class String
   #     "abcdef" <=> "ABCDEF"    #=> 1
   #     "abcdef" <=> 1           #=> nil
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     string <=> other_string   -> -1, 0, +1, or nil
-  #
-  def <=>: (String other) -> Integer?
+  def <=>: (String other) -> Integer
+         | (untyped other) -> Integer?
 
   # Equality---Returns whether `str` == `obj`, similar to Object#==.
   #

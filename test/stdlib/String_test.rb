@@ -38,6 +38,11 @@ class StringTest < StdlibTest
     a << 33
   end
 
+  def test_cmp
+    "abcdef" <=> "abcde"
+    "abcdef" <=> 1
+  end
+
   def test_aset_m
     "foo"[0] = "b"
     "foo"[0, 3] = "bar"
