@@ -97,6 +97,10 @@ class StringTest < StdlibTest
     "abc\u{6666}".force_encoding("UTF-8").ascii_only?
   end
 
+  def test_b
+    "a".b
+  end
+
   def test_bytesize
     s = "string"
     s.bytesize

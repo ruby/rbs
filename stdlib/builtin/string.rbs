@@ -217,9 +217,6 @@ class String
 
   # Returns a copied string whose encoding is ASCII-8BIT.
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     str.b   -> str
-  #
   def b: () -> String
 
   # Returns an array of bytes in *str*.  This is a shorthand for
