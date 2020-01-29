@@ -180,6 +180,11 @@ class StringTest < StdlibTest
     "a".chomp("")
   end
 
+  def test_chomp!
+    "a\n".chomp!
+    "a\n".chomp!("\r")
+  end
+
   def test_delete_prefix
     "foo".delete_prefix("f")
   end

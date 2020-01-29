@@ -360,10 +360,7 @@ class String
   # Modifies *str* in place as described for String#chomp, returning *str*, or
   # `nil` if no modifications were made.
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     str.chomp!(separator=$/)   -> str or nil
-  #
-  def chomp!: (?String arg0) -> String?
+  def chomp!: (?String separator) -> String?
 
   # Returns a new String with the last character removed.  If the string ends with
   # `\r\n`, both characters are removed. Applying `chop` to an empty string
