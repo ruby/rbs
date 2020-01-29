@@ -392,9 +392,6 @@ class String
   #     a = "abcde"
   #     a.clear    #=> ""
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     string.clear    ->  string
-  #
   def clear: () -> String
 
   # Returns an array of the Integer ordinals of the characters in *str*.  This is

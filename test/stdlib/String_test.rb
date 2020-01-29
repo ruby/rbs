@@ -198,6 +198,10 @@ class StringTest < StdlibTest
     "a".chr
   end
 
+  def test_clear
+    "a".clear
+  end
+
   def test_delete_prefix
     "foo".delete_prefix("f")
   end
