@@ -233,9 +233,6 @@ class String
   #     "\x80\u3042".bytesize  #=> 4
   #     "hello".bytesize       #=> 5
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     str.bytesize  -> integer
-  #
   def bytesize: () -> Integer
 
   # Byte Reference---If passed a single Integer, returns a substring of one byte
