@@ -101,6 +101,11 @@ class StringTest < StdlibTest
     "a".b
   end
 
+  def test_bytes
+    "a".bytes
+    "a".bytes {|b| b }
+  end
+
   def test_bytesize
     s = "string"
     s.bytesize

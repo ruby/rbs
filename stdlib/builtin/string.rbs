@@ -225,10 +225,8 @@ class String
   # If a block is given, which is a deprecated form, works the same as
   # `each_byte`.
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     str.bytes    -> an_array
-  #
-  def bytes: () -> Array[String]
+  def bytes: () -> Array[Integer]
+           | () { (Integer byte) -> void } -> String
 
   # Returns the length of `str` in bytes.
   #
