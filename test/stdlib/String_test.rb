@@ -32,7 +32,7 @@ class StringTest < StdlibTest
     -''
   end
 
-  def test_concat
+  def test_concat_op
     a = "hello "
     a << "world"
     a << 33
@@ -205,6 +205,13 @@ class StringTest < StdlibTest
   def test_codepoints
     "a".codepoints
     "a".codepoints {|cp| cp }
+  end
+
+  def test_concat
+    a = "hello"
+    a.concat
+    a.concat(" ")
+    a.concat("world", 33)
   end
 
   def test_delete_prefix

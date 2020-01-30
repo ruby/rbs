@@ -418,10 +418,7 @@ class String
   #
   # See also String#<<, which takes a single argument.
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     str.concat(obj1, obj2, ...)          -> str
-  #
-  def concat: (Integer | Object arg0) -> String
+  def concat: (*String | Integer str_or_codepoint) -> String
 
   # Each `other_str` parameter defines a set of characters to count.  The
   # intersection of these sets defines the characters to count in `str`.  Any
