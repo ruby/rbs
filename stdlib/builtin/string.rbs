@@ -608,9 +608,6 @@ class String
   #
   # See also String#undump.
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     str.dump   -> new_str
-  #
   def dump: () -> String
 
   # Passes each byte in *str* to the given block, or returns an enumerator if no

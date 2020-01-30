@@ -281,6 +281,10 @@ class StringTest < StdlibTest
     "A".downcase!(:turkic, :lithuanian)
   end
 
+  def test_dump
+    "foo".dump
+  end
+
   def test_each_grapheme_cluster
     "test".each_grapheme_cluster
     "test".each_grapheme_cluster { |c| nil }
