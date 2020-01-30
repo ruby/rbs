@@ -504,10 +504,7 @@ class String
   #     "hello".delete "aeiou", "^e"   #=> "hell"
   #     "hello".delete "ej-m"          #=> "ho"
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     str.delete([other_str]+)   -> new_str
-  #
-  def delete: (String arg0, *String arg1) -> String
+  def delete: (String other_str, *String other_strs) -> String
 
   # Performs a `delete` operation in place, returning *str*, or `nil` if *str* was
   # not modified.

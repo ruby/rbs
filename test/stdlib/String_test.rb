@@ -225,6 +225,11 @@ class StringTest < StdlibTest
     "foo".crypt("bar")
   end
 
+  def test_delete
+    "hello".delete("l", "lo")
+    "hello".delete("lo")
+  end
+
   def test_delete_prefix
     "foo".delete_prefix("f")
   end
