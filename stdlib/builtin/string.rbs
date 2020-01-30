@@ -530,10 +530,7 @@ class String
   #     "hello".delete_suffix("llo") #=> "he"
   #     "hello".delete_suffix("hel") #=> "hello"
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     str.delete_suffix(suffix) -> new_str
-  #
-  def delete_suffix: (String) -> String
+  def delete_suffix: (String suffix) -> String
 
   # Deletes trailing `suffix` from *str*, returning `nil` if no change was made.
   #
