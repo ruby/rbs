@@ -214,6 +214,13 @@ class StringTest < StdlibTest
     a.concat("world", 33)
   end
 
+  def test_count
+    a = "hello world"
+    a.count("lo")
+    a.count("lo", "o")
+    a.count("lo", "o", "o")
+  end
+
   def test_delete_prefix
     "foo".delete_prefix("f")
   end
