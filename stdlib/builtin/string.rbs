@@ -523,10 +523,7 @@ class String
   #     "hello".delete_prefix!("hel") #=> "lo"
   #     "hello".delete_prefix!("llo") #=> nil
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     str.delete_prefix!(prefix) -> self or nil
-  #
-  def delete_prefix!: (String) -> String?
+  def delete_prefix!: (String prefix) -> String?
 
   # Returns a copy of *str* with trailing `suffix` deleted.
   #
