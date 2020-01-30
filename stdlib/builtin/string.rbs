@@ -583,11 +583,10 @@ class String
   #
   #     "hEllO".downcase   #=> "hello"
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     str.downcase              -> new_str
-  #     str.downcase([options])   -> new_str
-  #
   def downcase: () -> String
+              | (:ascii | :fold | :lithuanian | :turkic) -> String
+              | (:lithuanian, :turkic) -> String
+              | (:turkic, :lithuanian) -> String
 
   # Downcases the contents of *str*, returning `nil` if no changes were made.
   #
