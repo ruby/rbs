@@ -230,6 +230,12 @@ class StringTest < StdlibTest
     "hello".delete("lo")
   end
 
+  def test_delete!
+    "hello".delete!("l", "lo")
+    "hello".delete!("lo")
+    "hello".delete!("a")
+  end
+
   def test_delete_prefix
     "foo".delete_prefix("f")
   end
