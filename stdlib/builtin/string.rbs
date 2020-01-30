@@ -592,11 +592,10 @@ class String
   #
   # See String#downcase for meaning of `options` and use with different encodings.
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     str.downcase!             -> str or nil
-  #     str.downcase!([options])  -> str or nil
-  #
   def downcase!: () -> String?
+               | (:ascii | :fold | :lithuanian | :turkic) -> String?
+               | (:lithuanian, :turkic) -> String?
+               | (:turkic, :lithuanian) -> String?
 
   # Returns a quoted version of the string with all non-printing characters
   # replaced by `\xHH` notation and all special characters escaped.

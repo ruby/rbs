@@ -264,6 +264,23 @@ class StringTest < StdlibTest
     "a".downcase(:turkic, :lithuanian)
   end
 
+  def test_downcase!
+    "a".downcase!
+    "a".downcase!(:ascii)
+    "a".downcase!(:fold)
+    "a".downcase!(:lithuanian)
+    "a".downcase!(:turkic)
+    "a".downcase!(:lithuanian, :turkic)
+    "a".downcase!(:turkic, :lithuanian)
+    "A".downcase!
+    "A".downcase!(:ascii)
+    "A".downcase!(:fold)
+    "A".downcase!(:lithuanian)
+    "A".downcase!(:turkic)
+    "A".downcase!(:lithuanian, :turkic)
+    "A".downcase!(:turkic, :lithuanian)
+  end
+
   def test_each_grapheme_cluster
     "test".each_grapheme_cluster
     "test".each_grapheme_cluster { |c| nil }
