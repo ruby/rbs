@@ -221,6 +221,10 @@ class StringTest < StdlibTest
     a.count("lo", "o", "o")
   end
 
+  def test_crypt
+    "foo".crypt("bar")
+  end
+
   def test_delete_prefix
     "foo".delete_prefix("f")
   end
