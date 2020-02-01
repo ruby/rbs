@@ -290,6 +290,11 @@ class StringTest < StdlibTest
     "hello".each_byte { |c| c }
   end
 
+  def test_each_char
+    "hello".each_char
+    "hello".each_char { |c| c }
+  end
+
   def test_each_grapheme_cluster
     "test".each_grapheme_cluster
     "test".each_grapheme_cluster { |c| nil }

@@ -631,11 +631,7 @@ class String
   #
   #     h e l l o
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     str.each_char {|cstr| block }    -> str
-  #     str.each_char                    -> an_enumerator
-  #
-  def each_char: () { (String arg0) -> untyped } -> String
+  def each_char: () { (String char) -> void } -> String
                | () -> ::Enumerator[String, self]
 
   # Passes the Integer ordinal of each character in *str*, also known as a
