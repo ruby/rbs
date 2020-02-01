@@ -647,11 +647,7 @@ class String
   #
   #     104 101 108 108 111 1593
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     str.each_codepoint {|integer| block }    -> str
-  #     str.each_codepoint                       -> an_enumerator
-  #
-  def each_codepoint: () { (Integer arg0) -> untyped } -> String
+  def each_codepoint: () { (Integer codepoint) -> void } -> String
                     | () -> ::Enumerator[Integer, self]
 
   # Passes each grapheme cluster in *str* to the given block, or returns an

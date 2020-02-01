@@ -295,6 +295,11 @@ class StringTest < StdlibTest
     "hello".each_char { |c| c }
   end
 
+  def test_each_codepoint
+    "hello".each_codepoint
+    "hello".each_codepoint { |codepoint| codepoint }
+  end
+
   def test_each_grapheme_cluster
     "test".each_grapheme_cluster
     "test".each_grapheme_cluster { |c| nil }
