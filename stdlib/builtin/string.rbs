@@ -755,12 +755,7 @@ class String
   # :   Replaces CRLF ("r\n") and CR ("r") with LF ("n") if value is true.
   #
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     str.encode(encoding [, options] )   -> str
-  #     str.encode(dst_encoding, src_encoding [, options] )   -> str
-  #     str.encode([options])   -> str
-  #
-  def encode: (?Encoding | String encoding, ?Encoding | String from_encoding, ?invalid: :replace ?, ?undef: :replace ?, ?replace: String, ?fallback: Hash[String, String] | Proc | Method, ?xml: :text | :attr, ?universal_newline: TrueClass, ?cr_newline: TrueClass, ?crlf_newline: TrueClass) -> String
+  def encode: (?Encoding | String encoding, ?Encoding | String from_encoding, ?invalid: :replace ?, ?undef: :replace ?, ?replace: String, ?fallback: Hash[String, String] | Proc | Method, ?xml: :text | :attr, ?universal_newline: true, ?cr_newline: true, ?crlf_newline: true) -> String
 
   # The first form transcodes the contents of *str* from str.encoding to
   # `encoding`. The second form transcodes the contents of *str* from src_encoding
