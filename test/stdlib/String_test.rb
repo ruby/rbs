@@ -320,6 +320,11 @@ class StringTest < StdlibTest
     "hello".each_line('l', chomp: false) { |line| line }
   end
 
+  def test_empty?
+    "".empty?
+    " ".empty?
+  end
+
   def test_encode
     s = "string"
     s.encode("ascii")

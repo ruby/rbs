@@ -708,9 +708,6 @@ class String
   #     " ".empty?       #=> false
   #     "".empty?        #=> true
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     str.empty?   -> true or false
-  #
   def empty?: () -> bool
 
   # The first form returns a copy of `str` transcoded to encoding `encoding`. The
