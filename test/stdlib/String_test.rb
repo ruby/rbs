@@ -369,6 +369,10 @@ class StringTest < StdlibTest
     s.encode!(crlf_newline: true)
   end
 
+  def test_encoding
+    "test".encoding
+  end
+
   def test_endwith
     s = "string"
     s.end_with?

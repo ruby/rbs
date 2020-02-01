@@ -766,9 +766,6 @@ class String
 
   # Returns the Encoding object that represents the encoding of obj.
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     obj.encoding   -> encoding
-  #
   def encoding: () -> Encoding
 
   # Returns true if `str` ends with one of the `suffixes` given.
