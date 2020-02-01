@@ -798,9 +798,6 @@ class String
   # If a block is given, which is a deprecated form, works the same as
   # `each_grapheme_cluster`.
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     str.grapheme_clusters   -> an_array
-  #
   def grapheme_clusters: () -> ::Array[::String]
 
   # Returns a copy of *str* with *all* occurrences of *pattern* substituted for
