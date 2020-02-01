@@ -658,11 +658,7 @@ class String
   #     "a\u0300".each_char.to_a.size #=> 2
   #     "a\u0300".each_grapheme_cluster.to_a.size #=> 1
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     str.each_grapheme_cluster {|cstr| block }    -> str
-  #     str.each_grapheme_cluster                    -> an_enumerator
-  #
-  def each_grapheme_cluster: () { (String grapheme) -> untyped } -> self
+  def each_grapheme_cluster: () { (String grapheme) -> void } -> self
                            | () -> ::Enumerator[String, self]
 
   # Splits *str* using the supplied parameter as the record separator (`$/` by
