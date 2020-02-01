@@ -396,6 +396,11 @@ class StringTest < StdlibTest
     "test".freeze
   end
 
+  def test_getbyte
+    "a".getbyte(0)
+    "a".getbyte(1)
+  end
+
   def test_grapheme_clusters
     "\u{1F1EF}\u{1F1F5}".grapheme_clusters
   end
