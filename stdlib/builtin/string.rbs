@@ -780,10 +780,7 @@ class String
 
   # Two strings are equal if they have the same length and content.
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     str.eql?(other)   -> true or false
-  #
-  def eql?: (String arg0) -> bool
+  def eql?: (untyped other) -> bool
 
   # Changes the encoding to `encoding` and returns self.
   #

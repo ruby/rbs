@@ -380,6 +380,12 @@ class StringTest < StdlibTest
     s.end_with?("foo", "bar")
   end
 
+  def test_eql?
+    s = "string"
+    s.eql?(s)
+    s.eql?(42)
+  end
+
   def test_force_encoding
     s = ""
     s.force_encoding "ASCII-8BIT"
