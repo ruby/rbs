@@ -784,10 +784,7 @@ class String
 
   # Changes the encoding to `encoding` and returns self.
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     str.force_encoding(encoding)   -> str
-  #
-  def force_encoding: (String | Encoding arg0) -> String
+  def force_encoding: (String | Encoding encoding) -> self
 
   def freeze: () -> self
 
