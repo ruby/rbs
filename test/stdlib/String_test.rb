@@ -362,6 +362,9 @@ class StringTest < StdlibTest
       xml: :text,
       universal_newline: true,
     )
+    s.encode!(xml: :attr)
+    s.encode!(fallback: proc { |s| s })
+    s.encode!(fallback: "test".method(:+))
     s.encode!(cr_newline: true)
     s.encode!(crlf_newline: true)
   end
