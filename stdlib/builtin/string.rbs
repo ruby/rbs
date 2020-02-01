@@ -776,10 +776,7 @@ class String
   #     "hello".end_with?("heaven", "ello")     #=> true
   #     "hello".end_with?("heaven", "paradise") #=> false
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     str.end_with?([suffixes]+)   -> true or false
-  #
-  def end_with?: (*String arg0) -> bool
+  def end_with?: (*String suffixes) -> bool
 
   # Two strings are equal if they have the same length and content.
   #

@@ -373,10 +373,11 @@ class StringTest < StdlibTest
     "test".encoding
   end
 
-  def test_endwith
+  def test_end_with?
     s = "string"
     s.end_with?
-    s.end_with?("foo")
+    s.end_with?("string")
+    s.end_with?("foo", "bar")
   end
 
   def test_force_encoding
