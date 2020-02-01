@@ -619,11 +619,7 @@ class String
   #
   #     104 101 108 108 111
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     str.each_byte {|integer| block }    -> str
-  #     str.each_byte                      -> an_enumerator
-  #
-  def each_byte: () { (Integer arg0) -> untyped } -> String
+  def each_byte: () { (Integer byte) -> void } -> String
                | () -> ::Enumerator[Integer, self]
 
   # Passes each character in *str* to the given block, or returns an enumerator if

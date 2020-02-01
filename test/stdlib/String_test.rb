@@ -285,6 +285,11 @@ class StringTest < StdlibTest
     "foo".dump
   end
 
+  def test_each_byte
+    "hello".each_byte
+    "hello".each_byte { |c| c }
+  end
+
   def test_each_grapheme_cluster
     "test".each_grapheme_cluster
     "test".each_grapheme_cluster { |c| nil }
