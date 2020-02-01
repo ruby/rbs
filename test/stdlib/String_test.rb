@@ -305,6 +305,21 @@ class StringTest < StdlibTest
     "test".each_grapheme_cluster { |c| nil }
   end
 
+  def test_each_line
+    "hello".each_line
+    "hello".each_line { |line| line }
+    "hello".each_line('l')
+    "hello".each_line('l') { |line| line }
+    "hello".each_line(chomp: true)
+    "hello".each_line(chomp: false)
+    "hello".each_line(chomp: true) { |line| line }
+    "hello".each_line(chomp: false) { |line| line }
+    "hello".each_line('l', chomp: true)
+    "hello".each_line('l', chomp: false)
+    "hello".each_line('l', chomp: true) { |line| line }
+    "hello".each_line('l', chomp: false) { |line| line }
+  end
+
   def test_encode
     s = "string"
     s.encode("ascii")

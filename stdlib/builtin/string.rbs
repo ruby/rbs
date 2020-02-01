@@ -699,12 +699,8 @@ class String
   #     #   "o\nwor"
   #     #   "d"
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     str.each_line(separator=$/, chomp: false) {|substr| block } -> str
-  #     str.each_line(separator=$/, chomp: false)                   -> an_enumerator
-  #
-  def each_line: (?String arg0) { (String arg0) -> untyped } -> String
-               | (?String arg0) -> ::Enumerator[String, self]
+  def each_line: (?String separator, ?chomp: bool) { (String line) -> void } -> String
+               | (?String separator, ?chomp: bool) -> ::Enumerator[String, self]
 
   # Returns `true` if *str* has a length of zero.
   #
