@@ -392,6 +392,10 @@ class StringTest < StdlibTest
     s.force_encoding Encoding::ASCII_8BIT
   end
 
+  def test_freeze
+    "test".freeze
+  end
+
   def test_grapheme_clusters
     "\u{1F1EF}\u{1F1F5}".grapheme_clusters
   end
