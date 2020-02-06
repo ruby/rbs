@@ -187,7 +187,7 @@ module Ruby
               if (best_errors = hook.find_best_errors(method_type_errors))
                 new_errors.push(*best_errors)
               else
-                new_errors << TypeCheck::Errors::UnresolvedOverloadingError.new(
+                new_errors << Errors::UnresolvedOverloadingError.new(
                   klass: hook.klass,
                   method_name: method_name,
                   method_types: method_types
@@ -238,10 +238,10 @@ module Ruby
           else
             no_arity_errors = errorss.select do |errors|
               errors.none? do |error|
-                error.is_a?(TypeCheck::Errors::ArgumentError) ||
-                  error.is_a?(TypeCheck::Errors::BlockArgumentError) ||
-                  error.is_a?(TypeCheck::Errors::MissingBlockError) ||
-                  error.is_a?(TypeCheck::Errors::UnexpectedBlockError)
+                error.is_a?(Errors::ArgumentError) ||
+                  error.is_a?(Errors::BlockArgumentError) ||
+                  error.is_a?(Errors::MissingBlockError) ||
+                  error.is_a?(Errors::UnexpectedBlockError)
               end
             end
 
