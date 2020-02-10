@@ -99,7 +99,7 @@ module Ruby
           end
         end
 
-        def assert_send_type(method_type, receiver, method, *args, &block)
+        ruby2_keywords def assert_send_type(method_type, receiver, method, *args, &block)
           trace = []
           spy = Spy.wrap(receiver, method)
           spy.callback = -> (result) { trace << result }
@@ -144,7 +144,7 @@ module Ruby
           end
         end
 
-        def refute_send_type(method_type, receiver, method, *args, &block)
+        ruby2_keywords def refute_send_type(method_type, receiver, method, *args, &block)
           trace = []
           spy = Spy.wrap(receiver, method)
           spy.callback = -> (result) { trace << result }
@@ -176,32 +176,6 @@ module Ruby
 
           assert_operator exception, :is_a?, ::Exception
           assert_empty errors.map {|x| Ruby::Signature::Test::Errors.to_string(x) }
-
-          type, definition = target
-          method_types = case
-                         when definition.instance_type?
-                           subst = Substitution.build(definition.declaration.type_params.each.map(&:name),
-                                                      type.args)
-                           definition.methods[method].method_types.map do |method_type|
-                             method_type.sub(subst)
-                           end
-                         when definition.class_type?
-                           definition.methods[method].method_types
-                         end
-
-          method_types = method_types.map do |ty|
-            ty.update(
-              block: if ty.block
-                       MethodType::Block.new(
-                         type: ty.block.type.with_return_type(Types::Bases::Any.new(location: nil)),
-                         required: ty.block.required
-                       )
-                     end,
-              type: ty.type.with_return_type(Types::Bases::Any.new(location: nil))
-            )
-          end
-          all_errors = method_types.map {|t| typecheck.method_call(method, t, trace.last, errors: []) }
-          assert all_errors.any? {|es| es.empty? }, "Call trace does not match one of method definitions:\n  #{trace.last.inspect}\n  #{method_types.join(" | ")}"
 
           exception
         end

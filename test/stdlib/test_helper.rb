@@ -25,6 +25,28 @@ class ToStr
   end
 end
 
+class ToArray
+  def initialize(*args)
+    @args = args
+  end
+
+  def to_ary
+    @args
+  end
+end
+
+class Enum
+  def initialize(*args)
+    @args = args
+  end
+
+  include Enumerable
+
+  def each(&block)
+    @args.each(&block)
+  end
+end
+
 class StdlibTest < Minitest::Test
 
   DEFAULT_LOGGER = Logger.new(STDERR)
