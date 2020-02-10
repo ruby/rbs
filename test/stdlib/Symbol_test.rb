@@ -37,13 +37,9 @@ class SymbolTest < StdlibTest
     :a[2, 1] == nil or raise
     :a[0..1] == "a" or raise
     :a[2..1] == nil or raise
-    :a[0...] == "a" or raise
+    :a[0...]
     :a[2...] == nil or raise
-    if RUBY_27_OR_LATER
-      eval(<<~RUBY)
-        :a[...0] == "" or raise
-      RUBY
-    end
+    :a[...0] == "" or raise
     :a[/a/] == "a" or raise
     :a[/b/] == nil or raise
     :a[/a/, 0] == "a" or raise
@@ -97,12 +93,10 @@ class SymbolTest < StdlibTest
     :a.encoding
   end
 
-  if RUBY_27_OR_LATER
-    def test_end_with?
-      :a.end_with?("a")
-      :a.end_with?("b")
-      :a.end_with?("a", "b")
-    end
+  def test_end_with?
+    :a.end_with?("a")
+    :a.end_with?("b")
+    :a.end_with?("a", "b")
   end
 
   def test_id2name
@@ -155,11 +149,7 @@ class SymbolTest < StdlibTest
     :a.slice(2..1) == nil or raise
     :a.slice(0...) == "a" or raise
     :a.slice(2...) == nil or raise
-    if RUBY_27_OR_LATER
-      eval(<<~RUBY)
-        :a.slice(...0) == "" or raise
-      RUBY
-    end
+    :a.slice(...0) == "" or raise
     :a.slice(/a/) == "a" or raise
     :a.slice(/b/) == nil or raise
     :a.slice(/a/, 0) == "a" or raise
@@ -170,12 +160,10 @@ class SymbolTest < StdlibTest
     :a.slice("b") == nil or raise
   end
 
-  if RUBY_27_OR_LATER
-    def test_start_with?
-      :a.start_with?("a")
-      :a.start_with?("b")
-      :a.start_with?("b", "a")
-    end
+  def test_start_with?
+    :a.start_with?("a")
+    :a.start_with?("b")
+    :a.start_with?("b", "a")
   end
 
   def test_succ

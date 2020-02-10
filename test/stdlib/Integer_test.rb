@@ -205,7 +205,6 @@ class IntegerTest < StdlibTest
 
   def test_down_to
     30.downto(1) {}
-    30.downto(ToInt.new)
     30.downto(31)
   end
 

@@ -92,14 +92,15 @@ class KernelTest < StdlibTest
     1.dup
   end
 
+  def each(*args)
+
+  end
+
   def test_enum_for
-    enum_for
-    to_enum
-
     enum_for :then
-    enum_for :then, 1
 
-    enum_for(:then, 1) { 2 }
+    enum_for :each, 1
+    enum_for(:each, 1) { 2 }
   end
 
   def test_eql?

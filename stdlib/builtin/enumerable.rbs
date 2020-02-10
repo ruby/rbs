@@ -390,15 +390,15 @@ module Enumerable[unchecked out Elem, out Return]: _Each[Elem, Return]
          | [U, Elem2, Return2] (::Enumerable[Elem2, Return2]) { ([Elem, Elem2 | nil]) -> U } -> nil
 
   def chunk: () -> ::Enumerator[Elem, Return]
-           | [U] () { (Elem elt) -> U } -> ::Enumerator[[U, ::Array[Elem]], ::Enumerator::Generator[Elem, Return]]
+           | [U] () { (Elem elt) -> U } -> ::Enumerator[[U, Array[Elem]], void]
 
-  def chunk_while: () { (Elem elt_before, Elem elt_after) -> bool } -> ::Enumerator[::Array[Elem], ::Enumerator::Generator[Elem, Return]]
+  def chunk_while: () { (Elem elt_before, Elem elt_after) -> bool } -> ::Enumerator[::Array[Elem], void]
 
-  def slice_when: () { (Elem elt_before, Elem elt_after) -> bool } -> ::Enumerator[::Array[Elem], ::Enumerator::Generator[Elem, Return]]
+  def slice_when: () { (Elem elt_before, Elem elt_after) -> bool } -> ::Enumerator[::Array[Elem], void]
 
-  def slice_after: (untyped pattern) -> ::Enumerator[::Array[Elem], ::Enumerator::Generator[Elem, Return]]
-                 | () { (Elem elt) -> bool } -> ::Enumerator[::Array[Elem], ::Enumerator::Generator[Elem, Return]]
+  def slice_after: (untyped pattern) -> ::Enumerator[::Array[Elem], void]
+                 | () { (Elem elt) -> bool } -> ::Enumerator[::Array[Elem], void]
 
-  def slice_before: (untyped pattern) -> ::Enumerator[::Array[Elem], ::Enumerator::Generator[Elem, Return]]
-                  | () { (Elem elt) -> bool } -> ::Enumerator[::Array[Elem], ::Enumerator::Generator[Elem, Return]]
+  def slice_before: (untyped pattern) -> ::Enumerator[::Array[Elem], void]
+                  | () { (Elem elt) -> bool } -> ::Enumerator[::Array[Elem], void]
 end

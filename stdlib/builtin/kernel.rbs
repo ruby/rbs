@@ -83,8 +83,8 @@ module Kernel
 
   def dup: () -> self
 
-  def enum_for: (?Symbol method, *untyped args) -> ::Enumerator[untyped, untyped]
-              | (?Symbol method, *untyped args) { () -> untyped } -> ::Enumerator[untyped, untyped]
+  def enum_for: (Symbol method, *untyped args) -> ::Enumerator[untyped, untyped]
+              | (Symbol method, *untyped args) { (*untyped args) -> (Integer|Float|nil) } -> ::Enumerator[untyped, untyped]
   alias to_enum enum_for
 
   def eql?: (untyped other) -> bool
@@ -359,8 +359,8 @@ module Kernel
   #   puts enum.next
   # } #=> :ok
   # ```
-  def loop: () { () -> untyped } -> bot
-          | () -> ::Enumerator[untyped, bot]
+  def loop: () { (nil) -> untyped } -> bot
+          | () -> ::Enumerator[nil, bot]
 
   def open: (String name, ?String mode, ?Integer perm) -> IO?
           | [T] (String name, ?String mode, ?Integer perm) { (IO) -> T } -> T

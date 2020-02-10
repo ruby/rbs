@@ -174,17 +174,60 @@ module Ruby
             Test.call(val, IS_AP, self_class)
           when Types::ClassInstance
             klass = Object.const_get(type.name.to_s)
-            if klass == ::Array
+            case
+            when klass == ::Array
               Test.call(val, IS_AP, klass) && val.all? {|v| value(v, type.args[0]) }
-            elsif klass == ::Hash
+            when klass == ::Hash
               Test.call(val, IS_AP, klass) && val.all? {|k, v| value(k, type.args[0]) && value(v, type.args[1]) }
+            when klass == ::Range
+              Test.call(val, IS_AP, klass) && value(val.begin, type.args[0]) && value(val.end, type.args[0])
+            when klass == ::Enumerator
+              if Test.call(val, IS_AP, klass)
+                case val.size
+                when Float::INFINITY
+                  values = []
+                  ret = self
+                  val.lazy.take(10).each do |*args|
+                    values << args
+                    nil
+                  end
+                else
+                  values = []
+                  ret = val.each do |*args|
+                    values << args
+                    nil
+                  end
+                end
+
+                values.all? do |v|
+                  if v.size == 1
+                    # Only one block argument.
+                    value(v[0], type.args[0]) || value(v, type.args[0])
+                  else
+                    value(v, type.args[0])
+                  end
+                end &&
+                  if ret.equal?(self)
+                    type.args[1].is_a?(Types::Bases::Bottom)
+                  else
+                    value(ret, type.args[1])
+                  end
+              end
             else
               Test.call(val, IS_AP, klass)
             end
           when Types::ClassSingleton
             klass = Object.const_get(type.name.to_s)
             val == klass
-          when Types::Interface, Types::Variable
+          when Types::Interface
+            methods = Set.new(Test.call(val, METHODS))
+            decl = builder.env.find_class(type.name)
+            if (definition = builder.build_interface(type.name, decl))
+              definition.methods.each_key.all? do |method_name|
+                methods.member?(method_name)
+              end
+            end
+          when Types::Variable
             true
           when Types::Literal
             val == type.literal

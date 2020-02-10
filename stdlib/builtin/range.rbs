@@ -4,46 +4,46 @@
 # Ranges constructed using `..` run from the beginning to the end
 # inclusively. Those created using `...` exclude the end value. When used
 # as an iterator, ranges return each value in the sequence.
-# 
+#
 # ```ruby
 # (-1..-5).to_a      #=> []
 # (-5..-1).to_a      #=> [-5, -4, -3, -2, -1]
 # ('a'..'e').to_a    #=> ["a", "b", "c", "d", "e"]
 # ('a'...'e').to_a   #=> ["a", "b", "c", "d"]
 # ```
-# 
-# 
+#
+#
 # An “endless range” represents a semi-infinite range. Literal notation
 # for an endless range is:
-# 
+#
 #     (1..)
 #     # or similarly
 #     (1...)
-# 
+#
 # Which is equivalent to
-# 
+#
 # ```ruby
 # (1..nil)  # or similarly (1...nil)
 # Range.new(1, nil) # or Range.new(1, nil, true)
 # ```
-# 
+#
 # Endless ranges are useful, for example, for idiomatic slicing of arrays:
-# 
+#
 #     [1, 2, 3, 4, 5][2...]   # => [3, 4, 5]
-# 
+#
 # Some implementation details:
-# 
+#
 #   - `end` of endless range is `nil` ;
-# 
+#
 #   - `each` of endless range enumerates infinite sequence (may be useful
 #     in combination with
 #     [Enumerable\#take\_while](https://ruby-doc.org/core-2.6.3/Enumerable.html#method-i-take_while)
 #     or similar methods);
-# 
+#
 #   - `(1..)` and `(1...)` are not equal, although technically
 #     representing the same sequence.
-# 
-# 
+#
+#
 # Ranges can be constructed using any objects that can be compared using
 # the `<=>` operator. Methods that treat the range as a sequence (\#each
 # and methods inherited from
@@ -52,12 +52,12 @@
 # in sequence. The [step](Range#method-i-step) and
 # [include?](Range#method-i-include-3F) methods
 # require the begin object to implement `succ` or to be numeric.
-# 
+#
 # In the `Xs` class below both `<=>` and `succ` are implemented so `Xs`
 # can be used to construct ranges. Note that the
 # [Comparable](https://ruby-doc.org/core-2.6.3/Comparable.html) module is
 # included so the `==` method is defined in terms of `<=>` .
-# 
+#
 # ```ruby
 # class Xs                # represent a string of 'x's
 #   include Comparable
@@ -79,9 +79,9 @@
 #   end
 # end
 # ```
-# 
+#
 # An example of using `Xs` to construct a range:
-# 
+#
 # ```ruby
 # r = Xs.new(3)..Xs.new(6)   #=> xxx..xxxxxx
 # r.to_a                     #=> [xxx, xxxx, xxxxx, xxxxxx]
@@ -97,7 +97,7 @@ class Range[Elem] < Object
   def ===: (untyped obj) -> bool
 
   # Returns the object that defines the beginning of the range.
-  # 
+  #
   # ```ruby
   # (1..10).begin   #=> 1
   # ```
@@ -111,7 +111,7 @@ class Range[Elem] < Object
           | () -> ::Enumerator[Elem, self]
 
   # Returns the object that defines the end of the range.
-  # 
+  #
   # ```ruby
   # (1..10).end    #=> 10
   # (1...10).end   #=> 10
@@ -119,7 +119,7 @@ class Range[Elem] < Object
   def `end`: () -> Elem
 
   # Returns `true` if the range excludes its end value.
-  # 
+  #
   # ```ruby
   # (1..5).exclude_end?     #=> false
   # (1...5).exclude_end?    #=> true
@@ -128,7 +128,7 @@ class Range[Elem] < Object
 
   # Returns the first object in the range, or an array of the first `n`
   # elements.
-  # 
+  #
   # ```ruby
   # (10..20).first     #=> 10
   # (10..20).first(3)  #=> [10, 11, 12]
@@ -140,7 +140,7 @@ class Range[Elem] < Object
   # points (using `eql?` ), and the same
   # [exclude\_end?](Range.downloaded.ruby_doc#method-i-exclude_end-3F) value
   # will generate the same hash-code.
-  # 
+  #
   # See also Object\#hash.
   def hash: () -> Integer
 
@@ -154,12 +154,12 @@ class Range[Elem] < Object
 
   # Returns the last object in the range, or an array of the last `n`
   # elements.
-  # 
+  #
   # Note that with no arguments `last` will return the object that defines
   # the end of the range even if
   # [exclude\_end?](Range.downloaded.ruby_doc#method-i-exclude_end-3F) is
   # `true` .
-  # 
+  #
   # ```ruby
   # (10..20).last      #=> 20
   # (10...20).last     #=> 20
@@ -172,10 +172,10 @@ class Range[Elem] < Object
   # Returns the maximum value in the range. Returns `nil` if the begin value
   # of the range larger than the end value. Returns `nil` if the begin value
   # of an exclusive range is equal to the end value.
-  # 
+  #
   # Can be given an optional block to override the default comparison method
   # `a <=> b` .
-  # 
+  #
   # ```ruby
   # (10..20).max    #=> 20
   # ```
@@ -187,10 +187,10 @@ class Range[Elem] < Object
   # Returns the minimum value in the range. Returns `nil` if the begin value
   # of the range is larger than the end value. Returns `nil` if the begin
   # value of an exclusive range is equal to the end value.
-  # 
+  #
   # Can be given an optional block to override the default comparison method
   # `a <=> b` .
-  # 
+  #
   # ```ruby
   # (10..20).min    #=> 10
   # ```
@@ -203,7 +203,7 @@ class Range[Elem] < Object
   # of the [Range](Range.downloaded.ruby_doc) must be
   # [Numeric](https://ruby-doc.org/core-2.6.3/Numeric.html), otherwise nil
   # is returned.
-  # 
+  #
   # ```ruby
   # (10..20).size    #=> 11
   # ('a'..'z').size  #=> nil
@@ -213,7 +213,7 @@ class Range[Elem] < Object
           | () -> Float?
 
   def step: (?Integer n) { (Elem arg0) -> untyped } -> self
-          | (?Integer n) -> ::Enumerator[Elem, self]
+          | (?Integer n) -> ::Enumerator[Elem, void]
 
   # Convert this range object to a printable form (using
   # [to\_s](Range.downloaded.ruby_doc#method-i-to_s) to convert the begin
