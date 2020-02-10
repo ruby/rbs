@@ -157,6 +157,10 @@ end
 type foo = String | Integer | [String, String] | ::Array[Integer]
 type M::t = Integer
 type M::s = t
+
+interface _ToInt
+  def to_int: () -> Integer
+end
 EOF
       manager.build do |env|
         typecheck = Ruby::Signature::Test::TypeCheck.new(self_class: Integer, builder: DefinitionBuilder.new(env: env))
@@ -175,6 +179,12 @@ EOF
 
         assert typecheck.value(3, parse_type("::M::t"))
         assert typecheck.value(3, parse_type("::M::s"))
+
+        assert typecheck.value(3, parse_type("::_ToInt"))
+        refute typecheck.value("3", parse_type("::_ToInt"))
+
+        assert typecheck.value([1,2,3].each, parse_type("Enumerator[Integer, Array[Integer]]"))
+        assert typecheck.value(loop, parse_type("Enumerator[nil, bot]"))
       end
     end
   end

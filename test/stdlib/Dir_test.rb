@@ -75,7 +75,7 @@ class DirSingletonTest < Minitest::Test
     assert_send_type "(::ToStr, encoding: nil) { (::String) -> 3 } -> nil",
                      Dir, :each_child, ToStr.new("."), encoding: nil do 3 end
 
-    assert_send_type "(::String) -> ::Enumerator[::Array[::String], void]",
+    assert_send_type "(::String) -> ::Enumerator[::String, void]",
                      Dir, :each_child, "."
   end
 
@@ -90,7 +90,9 @@ class DirSingletonTest < Minitest::Test
     assert_send_type "(::String) -> ::Array[::String]",
                      Dir, :entries, ".."
     assert_send_type "(::ToStr, encoding: ::Encoding) -> ::Array[::String]",
-                     Dir, :entries, ToStr.new(".."), encoding: Encoding::EUC_JP
+                     Dir, :entries, ToStr.new(".."), encoding: Encoding::UTF_8
+    assert_send_type "(::ToStr, encoding: ::Encoding) -> ::Array[::String]",
+                     Dir, :entries, ToStr.new(".."), encoding: Encoding::UTF_8
   end
 
   def test_exist?
@@ -104,7 +106,7 @@ class DirSingletonTest < Minitest::Test
     assert_send_type "(::ToStr, encoding: nil) { (::String) -> 3 } -> nil",
                      Dir, :foreach, ToStr.new("."), encoding: nil do 3 end
 
-    assert_send_type "(::String) -> ::Enumerator[::Array[::String], void]",
+    assert_send_type "(::String) -> ::Enumerator[::String, nil]",
                      Dir, :foreach, "."
   end
 

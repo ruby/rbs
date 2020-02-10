@@ -43,13 +43,13 @@ class ObjectTest < StdlibTest
   def test_enum_for
     obj = Object.new
 
-    obj.enum_for()
-    obj.enum_for(:each, 1,2,3)
-    obj.enum_for(:foo, 1,2,3) { |x,y,z| x + y + z }
+    obj.enum_for(:instance_exec)
+    obj.enum_for(:instance_exec, 1,2,3)
+    obj.enum_for(:instance_exec, 1,2,3) { |x,y,z| x + y + z }
 
-    obj.to_enum()
-    obj.to_enum(:each, 1, 2, 3)
-    obj.to_enum(:foo) { 3 }
+    obj.to_enum(:instance_exec)
+    obj.to_enum(:instance_exec, 1, 2, 3)
+    obj.to_enum(:instance_exec, 1, 2, 3) { |x, y, z| x + y + z }
   end
 
   def test_eql

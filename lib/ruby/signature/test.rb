@@ -15,6 +15,7 @@ module Ruby
       SINGLETON_CLASS = Kernel.instance_method(:singleton_class)
       PP = Kernel.instance_method(:pp)
       INSPECT = Kernel.instance_method(:inspect)
+      METHODS = Kernel.instance_method(:methods)
 
       ArgumentsReturn = Struct.new(:arguments, :return_value, :exception, keyword_init: true)
       CallTrace = Struct.new(:method_name, :method_call, :block_calls, :block_given, keyword_init: true)

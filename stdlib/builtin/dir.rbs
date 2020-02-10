@@ -88,7 +88,7 @@ class Dir
   #     Got config.h
   #     Got main.rb
   #
-  def self.each_child: (string dirname, ?encoding: string | Encoding | nil enc) -> Enumerator[Array[String], void]
+  def self.each_child: (string dirname, ?encoding: string | Encoding | nil enc) -> Enumerator[String, void]
                      | (string dirname, ?encoding: string | Encoding | nil enc) { (String filename) -> void } -> void
 
   # Returns `true` if the named file is an empty directory, `false` if it is not a
@@ -104,7 +104,7 @@ class Dir
   #
   #     Dir.entries("testdir")   #=> [".", "..", "config.h", "main.rb"]
   #
-  def self.entries: (string dirname, ?Encoding | string | nil enc) -> ::Array[String]
+  def self.entries: (string dirname, ?encoding: Encoding | string | nil enc) -> ::Array[String]
 
   # Returns `true` if the named file is a directory, `false` otherwise.
   #
