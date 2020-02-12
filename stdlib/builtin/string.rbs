@@ -46,7 +46,7 @@ class String
   #
   #     "Hello from " + self.to_s   #=> "Hello from main"
   #
-  def +: (String other_str) -> String
+  def +: (string other_str) -> String
 
   # If the string is frozen, then return duplicated mutable string.
   #
