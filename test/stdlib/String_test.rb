@@ -429,6 +429,10 @@ class StringTest < StdlibTest
     s.gsub!("t")
   end
 
+  def test_hash
+    "".hash
+  end
+
   def test_include
     "".include?("")
   end

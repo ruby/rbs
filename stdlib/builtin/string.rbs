@@ -861,9 +861,6 @@ class String
   #
   # See also Object#hash.
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     str.hash   -> integer
-  #
   def hash: () -> Integer
 
   # Treats leading characters from *str* as a string of hexadecimal digits (with
