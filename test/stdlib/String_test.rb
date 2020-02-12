@@ -29,16 +29,18 @@ class StringInstanceTest < Minitest::Test
     assert_send_type "(Hash[Symbol, untyped]) -> String",
                      "foo = %{foo}", :%, { :foo => 'bar' }
   end
+
+  def test_times
+    assert_send_type "(Integer) -> String",
+                     "Ho! ", :*, 3
+    assert_send_type "(ToInt) -> String",
+                     "Ho! ", :*, ToInt.new(0)
+  end
 end
 
 class StringTest < StdlibTest
   target String
   using hook.refinement
-
-  def test_times
-    "Ho! " * 3
-    "Ho! " * 0
-  end
 
   def test_plus
     "Hello from " + self.to_s

@@ -39,7 +39,7 @@ class String
   #     "Ho! " * 3   #=> "Ho! Ho! Ho! "
   #     "Ho! " * 0   #=> ""
   #
-  def *: (Integer n) -> String
+  def *: (int n) -> String
 
   # Concatenation---Returns a new String containing *other_str* concatenated to
   # *str*.
