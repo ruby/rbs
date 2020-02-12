@@ -48,15 +48,16 @@ class StringInstanceTest < Minitest::Test
     assert_send_type "() -> String",
                      '', :+@
   end
+
+  def test_unary_minus
+    assert_send_type "() -> String",
+                     '', :-@
+  end
 end
 
 class StringTest < StdlibTest
   target String
   using hook.refinement
-
-  def test_unary_minus
-    -''
-  end
 
   def test_concat_op
     a = "hello "
