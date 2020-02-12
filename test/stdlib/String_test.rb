@@ -1,13 +1,24 @@
 require_relative "test_helper"
+require "ruby/signature/test/test_helper"
+
+class StringSingletonTest < Minitest::Test
+  include Ruby::Signature::Test::TypeAssertions
+
+  testing "singleton(::String)"
+
+  def test_try_convert
+    assert_send_type "(String) -> String",
+                     String, :try_convert, "str"
+    assert_send_type "(ToStr) -> String",
+                     String, :try_convert, ToStr.new("str")
+    assert_send_type "(Regexp) -> nil",
+                     String, :try_convert, /re/
+  end
+end
 
 class StringTest < StdlibTest
   target String
   using hook.refinement
-
-  def test_try_convert
-    String.try_convert("str")
-    String.try_convert(/re/)
-  end
 
   def test_format_m
     "%05d" % 123

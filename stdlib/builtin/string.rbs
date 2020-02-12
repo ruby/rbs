@@ -16,7 +16,7 @@ class String
   #     String.try_convert("str")     #=> "str"
   #     String.try_convert(/re/)      #=> nil
   #
-  def self.try_convert: (Object obj) -> String?
+  def self.try_convert: (untyped obj) -> String?
 
   public
 
