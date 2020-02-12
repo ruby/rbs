@@ -63,16 +63,18 @@ class StringInstanceTest < Minitest::Test
     assert_send_type "(Integer) -> String",
                      a, :<<, 33
   end
+
+  def test_cmp
+    assert_send_type "(String) -> Integer",
+                     "abcdef", :<=>, "abcde"
+    assert_send_type "(Integer) -> nil",
+                     "abcdef", :<=>, 1
+  end
 end
 
 class StringTest < StdlibTest
   target String
   using hook.refinement
-
-  def test_cmp
-    "abcdef" <=> "abcde"
-    "abcdef" <=> 1
-  end
 
   def test_eq
     "a" == "a"
