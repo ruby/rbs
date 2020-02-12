@@ -304,16 +304,20 @@ class StringInstanceTest < Minitest::Test
     assert_send_type "() { (String) -> void } -> String",
                      "a", :chars do |c| c end
   end
+
+  def test_chomp
+    assert_send_type "() -> String",
+                     "a", :chomp
+    assert_send_type "(String) -> String",
+                     "a", :chomp, ""
+    assert_send_type "(ToStr) -> String",
+                     "a", :chomp, ToStr.new("")
+  end
 end
 
 class StringTest < StdlibTest
   target String
   using hook.refinement
-
-  def test_chomp
-    "a".chomp
-    "a".chomp("")
-  end
 
   def test_chomp!
     "a\n".chomp!

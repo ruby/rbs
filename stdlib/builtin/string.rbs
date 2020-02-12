@@ -354,7 +354,7 @@ class String
   #     "hello\r\n\r\n".chomp('')    #=> "hello"
   #     "hello\r\n\r\r\n".chomp('')  #=> "hello\r\n\r"
   #
-  def chomp: (?String separator) -> String
+  def chomp: (?string separator) -> String
 
   # Modifies *str* in place as described for String#chomp, returning *str*, or
   # `nil` if no modifications were made.
