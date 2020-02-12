@@ -84,16 +84,18 @@ class StringInstanceTest < Minitest::Test
     assert_send_type "(nil) -> false",
                      "a", :===, nil
   end
+
+  def test_match_op
+    assert_send_type "(Regexp) -> Integer",
+                     "a", :=~, /a/
+    assert_send_type "(nil) -> nil",
+                     "a", :=~, nil
+  end
 end
 
 class StringTest < StdlibTest
   target String
   using hook.refinement
-
-  def test_match_op
-    "a" =~ /a/
-    "a" =~ nil
-  end
 
   def test_aref
     "a"[0] == "a" or raise
