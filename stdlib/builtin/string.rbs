@@ -182,11 +182,11 @@ class String
   #     a["lo"]                #=> "lo"
   #     a["bye"]               #=> nil
   #
-  def []: (Integer index) -> String?
-        | (Integer start, Integer length) -> String?
-        | (Range[Integer?] range) -> String?
+  def []: (int index) -> String?
+        | (int start, int length) -> String?
+        | (Range[Integer] | Range[Integer?] range) -> String?
         | (Regexp regexp) -> String?
-        | (Regexp regexp, Integer | String capture) -> String?
+        | (Regexp regexp, int | String capture) -> String?
         | (String match_str) -> String?
 
   # Element Assignment---Replaces some or all of the content of *str*. The portion
