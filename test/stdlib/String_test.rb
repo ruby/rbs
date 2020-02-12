@@ -262,6 +262,19 @@ class StringInstanceTest < Minitest::Test
     assert_send_type "(:turkic, :lithuanian) -> nil",
                      "", :capitalize!, :turkic, :lithuanian
   end
+
+  def test_casecmp
+    assert_send_type "(String) -> 0",
+                     "a", :casecmp, "A"
+    assert_send_type "(String) -> -1",
+                     "a", :casecmp, "B"
+    assert_send_type "(String) -> 1",
+                     "b", :casecmp, "A"
+    assert_send_type "(String) -> nil",
+                     "\u{e4 f6 fc}".encode("ISO-8859-1"), :casecmp, "\u{c4 d6 dc}"
+    assert_send_type "(Integer) -> nil",
+                     "a", :casecmp , 42
+  end
 end
 
 class StringTest < StdlibTest
@@ -272,14 +285,6 @@ class StringTest < StdlibTest
     "aBcDeF".casecmp?("abcde")
     "aBcDeF".casecmp?("abcdef")
     "foo".casecmp?(2)
-  end
-
-  def test_casecmp
-    "a".casecmp("A")
-    "a".casecmp("B")
-    "b".casecmp("A")
-    "\u{e4 f6 fc}".encode("ISO-8859-1").to_sym.casecmp("\u{c4 d6 dc}")
-    "a".casecmp(42)
   end
 
   def test_casecmp_p
