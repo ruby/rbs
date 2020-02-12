@@ -415,6 +415,20 @@ class StringTest < StdlibTest
     s.gsub("")
   end
 
+  def test_gsub!
+    s = "string"
+    s.gsub!(/z/, "s")
+    s.gsub!(/s/, "s")
+    s.gsub!("z", "s")
+    s.gsub!("s", "s")
+    s.gsub!(/z/) {|x| "s" }
+    s.gsub!(/s/) {|x| "s" }
+    s.gsub!(/z/, {"z" => "s"})
+    s.gsub!(/s/, {"s" => "s"})
+    s.gsub!(/s/)
+    s.gsub!("t")
+  end
+
   def test_include
     "".include?("")
   end

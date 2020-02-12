@@ -852,15 +852,10 @@ class String
   # if no substitutions were performed.  If no block and no *replacement* is
   # given, an enumerator is returned instead.
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     str.gsub!(pattern, replacement)        -> str or nil
-  #     str.gsub!(pattern, hash)               -> str or nil
-  #     str.gsub!(pattern) {|match| block }    -> str or nil
-  #     str.gsub!(pattern)                     -> an_enumerator
-  #
-  def gsub!: (Regexp | String arg0, ?String arg1) -> String?
-           | (Regexp | String arg0) { (String arg0) -> untyped } -> String?
-           | (Regexp | String arg0) -> ::Enumerator[String, self]
+  def gsub!: (Regexp | String pattern, ?String replacement) -> String?
+           | (Regexp | String pattern, ?Hash[String, String] hash) -> String?
+           | (Regexp | String pattern) { (String match) -> untyped } -> String?
+           | (Regexp | String pattern) -> ::Enumerator[String, self]
 
   # Returns a hash based on the string's length, content and encoding.
   #
