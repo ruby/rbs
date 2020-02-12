@@ -286,16 +286,22 @@ class StringInstanceTest < Minitest::Test
     assert_send_type "(Integer) -> nil",
                      "foo", :casecmp?, 2
   end
+
+  def test_center
+    assert_send_type "(Integer) -> String",
+                     "hello", :center, 4
+    assert_send_type "(ToInt) -> String",
+                     "hello", :center, ToInt.new(4)
+    assert_send_type "(Integer, String) -> String",
+                     "hello", :center, 20, '123'
+    assert_send_type "(ToInt, ToStr) -> String",
+                     "hello", :center, ToInt.new(20), ToStr.new('123')
+  end
 end
 
 class StringTest < StdlibTest
   target String
   using hook.refinement
-
-  def test_center
-    "hello".center(4)
-    "hello".center(20, '123')
-  end
 
   def test_chars
     "a".chars
