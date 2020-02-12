@@ -275,24 +275,22 @@ class StringInstanceTest < Minitest::Test
     assert_send_type "(Integer) -> nil",
                      "a", :casecmp , 42
   end
+
+  def test_casecmp?
+    assert_send_type "(String) -> false",
+                     "aBcDeF", :casecmp?, "abcde"
+    assert_send_type "(String) -> true",
+                     "aBcDeF", :casecmp?, "abcdef"
+    assert_send_type "(String) -> nil",
+                     "\u{e4 f6 fc}".encode("ISO-8859-1"), :casecmp?, "\u{c4 d6 dc}"
+    assert_send_type "(Integer) -> nil",
+                     "foo", :casecmp?, 2
+  end
 end
 
 class StringTest < StdlibTest
   target String
   using hook.refinement
-
-  def test_casecmp?
-    "aBcDeF".casecmp?("abcde")
-    "aBcDeF".casecmp?("abcdef")
-    "foo".casecmp?(2)
-  end
-
-  def test_casecmp_p
-    "a".casecmp?("A")
-    "a".casecmp?("B")
-    "\u{e4 f6 fc}".encode("ISO-8859-1").to_sym.casecmp?("\u{c4 d6 dc}")
-    "a".casecmp?(42)
-  end
 
   def test_center
     "hello".center(4)
