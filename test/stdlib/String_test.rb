@@ -181,16 +181,18 @@ class StringInstanceTest < Minitest::Test
     assert_send_type "() -> String",
                      "a", :b
   end
+
+  def test_bytes
+    assert_send_type "() -> Array[Integer]",
+                     "a", :bytes
+    assert_send_type "() { (Integer) -> void } -> String",
+                     "a", :bytes do |b| b end
+  end
 end
 
 class StringTest < StdlibTest
   target String
   using hook.refinement
-
-  def test_bytes
-    "a".bytes
-    "a".bytes {|b| b }
-  end
 
   def test_bytesize
     s = "string"
