@@ -43,15 +43,16 @@ class StringInstanceTest < Minitest::Test
     assert_send_type "(ToStr) -> String",
                      "Hello from ", :+, ToStr.new(self.to_s)
   end
+
+  def test_unary_plus
+    assert_send_type "() -> String",
+                     '', :+@
+  end
 end
 
 class StringTest < StdlibTest
   target String
   using hook.refinement
-
-  def test_unary_plus
-    +''
-  end
 
   def test_unary_minus
     -''
