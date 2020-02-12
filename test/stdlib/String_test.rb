@@ -77,16 +77,18 @@ class StringInstanceTest < Minitest::Test
     assert_send_type "(nil) -> false",
                      "a", :==, nil
   end
+
+  def test_eqq
+    assert_send_type "(String) -> true",
+                     "a", :===, "a"
+    assert_send_type "(nil) -> false",
+                     "a", :===, nil
+  end
 end
 
 class StringTest < StdlibTest
   target String
   using hook.refinement
-
-  def test_eqq
-    "a" === "a"
-    "a" === nil
-  end
 
   def test_match_op
     "a" =~ /a/
