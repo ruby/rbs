@@ -176,15 +176,16 @@ class StringInstanceTest < Minitest::Test
     assert_send_type "() -> false",
                      "abc\u{6666}".force_encoding("UTF-8"), :ascii_only?
   end
+
+  def test_b
+    assert_send_type "() -> String",
+                     "a", :b
+  end
 end
 
 class StringTest < StdlibTest
   target String
   using hook.refinement
-
-  def test_b
-    "a".b
-  end
 
   def test_bytes
     "a".bytes
