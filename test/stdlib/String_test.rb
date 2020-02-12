@@ -220,6 +220,21 @@ class StringInstanceTest < Minitest::Test
     assert_send_type "(Range[Integer?]) -> nil",
                      "\x03\u3042\xff", :byteslice, (11..)
   end
+
+  def test_capitalize
+    assert_send_type "() -> String",
+                     "a", :capitalize
+    assert_send_type "(:ascii) -> String",
+                     "a", :capitalize, :ascii
+    assert_send_type "(:lithuanian) -> String",
+                     "a", :capitalize, :lithuanian
+    assert_send_type "(:turkic) -> String",
+                     "a", :capitalize, :turkic
+    assert_send_type "(:lithuanian, :turkic) -> String",
+                     "a", :capitalize, :lithuanian, :turkic
+    assert_send_type "(:turkic, :lithuanian) -> String",
+                     "a", :capitalize, :turkic, :lithuanian
+  end
 end
 
 class StringTest < StdlibTest
@@ -230,15 +245,6 @@ class StringTest < StdlibTest
     "aBcDeF".casecmp?("abcde")
     "aBcDeF".casecmp?("abcdef")
     "foo".casecmp?(2)
-  end
-
-  def test_capitalize
-    "a".capitalize
-    "a".capitalize(:ascii)
-    "a".capitalize(:lithuanian)
-    "a".capitalize(:turkic)
-    "a".capitalize(:lithuanian, :turkic)
-    "a".capitalize(:turkic, :lithuanian)
   end
 
   def test_capitalize!
