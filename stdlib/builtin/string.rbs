@@ -70,7 +70,7 @@ class String
   #
   # See also String#concat, which takes multiple arguments.
   #
-  def <<: (String | Integer str_or_codepoint) -> String
+  def <<: (string | Integer str_or_codepoint) -> String
 
   # Comparison---Returns -1, 0, +1, or `nil` depending on whether `string` is less
   # than, equal to, or greater than `other_string`.
