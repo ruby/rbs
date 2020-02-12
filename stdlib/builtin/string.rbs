@@ -201,11 +201,11 @@ class String
   # RangeError, and the Regexp and String will raise an IndexError on negative
   # match.
   #
-  def []=: (Integer pos, String new_str) -> String
-         | (Integer begin_pos, Integer end_pos, String new_str) -> String
-         | (::Range[Integer] range, String new_str) -> String
+  def []=: (int pos, String new_str) -> String
+         | (int begin_pos, int end_pos, String new_str) -> String
+         | (Range[Integer] | Range[Integer?] range, String new_str) -> String
          | (Regexp regexp, String new_str) -> String
-         | (Regexp regexp, Integer capture, String new_str) -> String
+         | (Regexp regexp, int capture, String new_str) -> String
          | (Regexp regexp, String name, String new_str) -> String
          | (String other_str, String new_str) -> String
 

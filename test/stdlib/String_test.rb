@@ -144,21 +144,36 @@ class StringInstanceTest < Minitest::Test
     assert_send_type "(String) -> nil",
                      "a", :[], "b"
   end
+
+  def test_aset_m
+    assert_send_type "(Integer, String) -> String",
+                     "foo", :[]=, 0, "bar"
+    assert_send_type "(ToInt, String) -> String",
+                     "foo", :[]=, ToInt.new(0), "bar"
+    assert_send_type "(Integer, Integer, String) -> String",
+                     "foo", :[]=, 0, 3, "bar"
+    assert_send_type "(ToInt, ToInt, String) -> String",
+                     "foo", :[]=, ToInt.new(0), ToInt.new(3), "bar"
+    assert_send_type "(Range[Integer], String) -> String",
+                     "foo", :[]=, 0..3, "bar"
+    assert_send_type "(Range[Integer?], String) -> String",
+                    "foo", :[]=, (0..), "bar"
+    assert_send_type "(Regexp, String) -> String",
+                     "foo", :[]=, /foo/, "bar"
+    assert_send_type "(Regexp, Integer, String) -> String",
+                     "foo", :[]=, /(foo)/, 1, "bar"
+    assert_send_type "(Regexp, ToInt, String) -> String",
+                     "foo", :[]=, /(foo)/, ToInt.new(1), "bar"
+    assert_send_type "(Regexp, String, String) -> String",
+                     "foo", :[]=, /(?<foo>foo)/, "foo", "bar"
+    assert_send_type "(String, String) -> String",
+                     "foo", :[]=, "foo", "bar"
+  end
 end
 
 class StringTest < StdlibTest
   target String
   using hook.refinement
-
-  def test_aset_m
-    "foo"[0] = "b"
-    "foo"[0, 3] = "bar"
-    "foo"[0..3] = "bar"
-    "foo"[/foo/] = "bar"
-    "foo"[/(foo)/, 1] = "bar"
-    "foo"[/(?<foo>foo)/, "foo"] = "bar"
-    "foo"["foo"] = "bar"
-  end
 
   def test_ascii_only?
     "abc".force_encoding("UTF-8").ascii_only?
