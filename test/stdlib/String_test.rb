@@ -16,15 +16,24 @@ class StringSingletonTest < Minitest::Test
   end
 end
 
+class StringInstanceTest < Minitest::Test
+  include Ruby::Signature::Test::TypeAssertions
+
+  testing "::String"
+
+  def test_format_m
+    assert_send_type "(Integer) -> String",
+                     "%05d", :%, 123
+    assert_send_type "(Array[String | Integer]) -> String",
+                     "%-5s: %016x", :%, [ "ID", self.object_id ]
+    assert_send_type "(Hash[Symbol, untyped]) -> String",
+                     "foo = %{foo}", :%, { :foo => 'bar' }
+  end
+end
+
 class StringTest < StdlibTest
   target String
   using hook.refinement
-
-  def test_format_m
-    "%05d" % 123
-    "%-5s: %016x" % [ "ID", self.object_id ]
-    "foo = %{foo}" % { :foo => 'bar' }
-  end
 
   def test_times
     "Ho! " * 3
