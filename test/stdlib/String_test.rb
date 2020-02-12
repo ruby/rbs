@@ -193,20 +193,38 @@ class StringInstanceTest < Minitest::Test
     assert_send_type "() -> Integer",
                      "string", :bytesize
   end
+
+  def test_byteslice
+    assert_send_type "(Integer) -> String",
+                     "hello", :byteslice, 1
+    assert_send_type "(ToInt) -> String",
+                     "hello", :byteslice, ToInt.new(1)
+    assert_send_type "(Integer) -> nil",
+                     "hello", :byteslice, 10
+    assert_send_type "(ToInt) -> nil",
+                     "hello", :byteslice, ToInt.new(10)
+    assert_send_type "(Integer, Integer) -> String",
+                     "hello", :byteslice, 1, 2
+    assert_send_type "(ToInt, ToInt) -> String",
+                     "hello", :byteslice, ToInt.new(1), ToInt.new(2)
+    assert_send_type "(Integer, Integer) -> nil",
+                     "hello", :byteslice, 10, 2
+    assert_send_type "(ToInt, ToInt) -> nil",
+                     "hello", :byteslice, ToInt.new(10), ToInt.new(2)
+    assert_send_type "(Range[Integer]) -> String",
+                     "\x03\u3042\xff", :byteslice, 1..3
+    assert_send_type "(Range[Integer?]) -> String",
+                     "\x03\u3042\xff", :byteslice, (1..)
+    assert_send_type "(Range[Integer]) -> nil",
+                     "\x03\u3042\xff", :byteslice, 11..13
+    assert_send_type "(Range[Integer?]) -> nil",
+                     "\x03\u3042\xff", :byteslice, (11..)
+  end
 end
 
 class StringTest < StdlibTest
   target String
   using hook.refinement
-
-  def test_byteslice
-    "hello".byteslice(1)
-    "hello".byteslice(10)
-    "hello".byteslice(1, 2)
-    "hello".byteslice(10, 2)
-    "\x03\u3042\xff".byteslice(1..3)
-    "\x03\u3042\xff".byteslice(11..13)
-  end
 
   def test_casecmp?
     "aBcDeF".casecmp?("abcde")
