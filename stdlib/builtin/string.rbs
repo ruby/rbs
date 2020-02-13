@@ -515,7 +515,7 @@ class String
   #     "hello".delete_prefix("hel") #=> "lo"
   #     "hello".delete_prefix("llo") #=> "hello"
   #
-  def delete_prefix: (String prefix) -> String
+  def delete_prefix: (string prefix) -> String
 
   # Deletes leading `prefix` from *str*, returning `nil` if no change was made.
   #
