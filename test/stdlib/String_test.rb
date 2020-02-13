@@ -577,33 +577,44 @@ class StringInstanceTest < Minitest::Test
     assert_send_type "() -> false",
                      " ", :empty?
   end
+
+  def test_encode
+    assert_send_type "(String) -> String",
+                     "string", :encode, "ascii"
+    assert_send_type "(String, Encoding) -> String",
+                     "string", :encode, "ascii", Encoding::ASCII_8BIT
+    assert_send_type "(Encoding, String) -> String",
+                     "string", :encode, Encoding::ASCII_8BIT, "ascii"
+    assert_send_type "(String, invalid: :replace) -> String",
+                     "string", :encode, "ascii", invalid: :replace
+    assert_send_type "(Encoding, Encoding, undef: nil) -> String",
+                     "string", :encode, Encoding::ASCII_8BIT, Encoding::ASCII_8BIT, undef: nil
+    assert_send_type "(invalid: nil, undef: :replace, replace: String, fallback: Hash[String, String], xml: :text, universal_newline: true) -> String",
+                     "string", :encode,
+                     invalid: nil,
+                     undef: :replace,
+                     replace: "foo",
+                     fallback: {"a" => "a"},
+                     xml: :text,
+                     universal_newline: true
+    assert_send_type "(xml: :attr) -> String",
+                     "string", :encode, xml: :attr
+    assert_send_type "(fallback: Proc) -> String",
+                     "string", :encode, fallback: proc { |s| s }
+    assert_send_type "(fallback: Method) -> String",
+                     "string", :encode, fallback: "test".method(:+)
+    assert_send_type "(cr_newline: true) -> String",
+                     "string", :encode, cr_newline: true
+    assert_send_type "(crlf_newline: true) -> String",
+                     "string", :encode, crlf_newline: true
+    assert_send_type "(ToStr, ToStr) -> String",
+                     "string", :encode, ToStr.new("ascii"), ToStr.new("ascii")
+  end
 end
 
 class StringTest < StdlibTest
   target String
   using hook.refinement
-
-  def test_encode
-    s = "string"
-    s.encode("ascii")
-    s.encode("ascii", Encoding::ASCII_8BIT)
-    s.encode(Encoding::ASCII_8BIT, "ascii")
-    s.encode("ascii", invalid: :replace)
-    s.encode(Encoding::ASCII_8BIT, Encoding::ASCII_8BIT, undef: nil)
-    s.encode(
-      invalid: nil,
-      undef: :replace,
-      replace: "foo",
-      fallback: {"a" => "a"},
-      xml: :text,
-      universal_newline: true,
-    )
-    s.encode(xml: :attr)
-    s.encode(fallback: proc { |s| s })
-    s.encode(fallback: "test".method(:+))
-    s.encode(cr_newline: true)
-    s.encode(crlf_newline: true)
-  end
 
   def test_encode!
     s = "string"
