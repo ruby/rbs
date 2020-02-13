@@ -366,18 +366,26 @@ class StringInstanceTest < Minitest::Test
     assert_send_type "(String, Integer) -> String",
                      "hello", :concat, "world", 33
   end
+
+  def test_count
+    assert_send_type "(String) -> Integer",
+                     "hello world", :count, "lo"
+    assert_send_type "(ToStr) -> Integer",
+                     "hello world", :count, ToStr.new("lo")
+    assert_send_type "(String, String) -> Integer",
+                     "hello world", :count, "lo", "o"
+    assert_send_type "(ToStr, ToStr) -> Integer",
+                     "hello world", :count, ToStr.new("lo"), ToStr.new("o")
+    assert_send_type "(String, String, String) -> Integer",
+                     "hello world", :count, "lo", "o", "o"
+    assert_send_type "(ToStr, ToStr, ToStr) -> Integer",
+                     "hello world", :count, ToStr.new("lo"), ToStr.new("o"), ToStr.new("o")
+  end
 end
 
 class StringTest < StdlibTest
   target String
   using hook.refinement
-
-  def test_count
-    a = "hello world"
-    a.count("lo")
-    a.count("lo", "o")
-    a.count("lo", "o", "o")
-  end
 
   def test_crypt
     "foo".crypt("bar")
