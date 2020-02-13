@@ -432,15 +432,18 @@ class StringInstanceTest < Minitest::Test
     assert_send_type "(ToStr) -> nil",
                      "foo", :delete_prefix!, ToStr.new("a")
   end
+
+  def test_delete_suffix
+    assert_send_type "(String) -> String",
+                     "foo", :delete_suffix, "o"
+    assert_send_type "(ToStr) -> String",
+                     "foo", :delete_suffix, ToStr.new("o")
+  end
 end
 
 class StringTest < StdlibTest
   target String
   using hook.refinement
-
-  def test_delete_suffix
-    "foo".delete_suffix "o"
-  end
 
   def test_delete_suffix!
     "foo".delete_suffix! "o"
