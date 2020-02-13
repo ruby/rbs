@@ -753,15 +753,22 @@ class StringInstanceTest < Minitest::Test
     assert_send_type "() -> Integer",
                      "0x0a", :hex
   end
+
+  def test_include?
+    assert_send_type "(String) -> true",
+                     "", :include?, ""
+    assert_send_type "(String) -> false",
+                     "", :include?, "a"
+    assert_send_type "(ToStr) -> true",
+                     "", :include?, ToStr.new("")
+    assert_send_type "(ToStr) -> false",
+                     "", :include?, ToStr.new("a")
+  end
 end
 
 class StringTest < StdlibTest
   target String
   using hook.refinement
-
-  def test_include
-    "".include?("")
-  end
 
   def test_reverse!
     "test".reverse!

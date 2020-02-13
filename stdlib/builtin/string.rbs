@@ -879,10 +879,7 @@ class String
   #     "hello".include? "ol"   #=> false
   #     "hello".include? ?h     #=> true
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     str.include? other_str   -> true or false
-  #
-  def include?: (String arg0) -> bool
+  def include?: (string other_str) -> bool
 
   # Returns the index of the first occurrence of the given *substring* or pattern
   # (*regexp*) in *str*. Returns `nil` if not found. If the second parameter is
