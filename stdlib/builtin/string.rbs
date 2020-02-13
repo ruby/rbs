@@ -842,10 +842,10 @@ class String
   # `"..\\\\\\\\&.."`. You may want to use the block form to avoid a lot of
   # backslashes.
   #
-  def gsub: (Regexp | String pattern, ?String replacement) -> String
-          | (Regexp | String pattern, ?Hash[String, String] hash) -> String
-          | (Regexp | String pattern) { (String match) -> untyped } -> String
-          | (Regexp | String pattern) -> ::Enumerator[String, self]
+  def gsub: (Regexp | string pattern, ?string replacement) -> String
+          | (Regexp | string pattern, ?Hash[String, String] hash) -> String
+          | (Regexp | string pattern) { (String match) -> _ToS } -> String
+          | (Regexp | string pattern) -> ::Enumerator[String, self]
 
   # Performs the substitutions of String#gsub in place, returning *str*, or `nil`
   # if no substitutions were performed.  If no block and no *replacement* is

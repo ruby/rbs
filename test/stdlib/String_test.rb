@@ -697,21 +697,30 @@ class StringInstanceTest < Minitest::Test
     assert_send_type "() -> Array[String]",
                      "\u{1F1EF}\u{1F1F5}", :grapheme_clusters
   end
+
+  def test_gsub
+    assert_send_type "(Regexp, String) -> String",
+                     "string", :gsub, /./, ""
+    assert_send_type "(String, String) -> String",
+                     "string", :gsub, "a", "b"
+    assert_send_type "(Regexp) { (String) -> String } -> String",
+                     "string", :gsub, /./ do |x| "" end
+    assert_send_type "(Regexp) { (String) -> ToS } -> String",
+                     "string", :gsub, /./ do |x| ToS.new("") end
+    assert_send_type "(Regexp, Hash[String, String]) -> String",
+                     "string", :gsub, /./, {"foo" => "bar"}
+    assert_send_type "(Regexp) -> Enumerator[String, self]",
+                     "string", :gsub, /./
+    assert_send_type "(String) -> Enumerator[String, self]",
+                     "string", :gsub, ""
+    assert_send_type "(ToStr, ToStr) -> String",
+                     "string", :gsub, ToStr.new("a"), ToStr.new("b")
+  end
 end
 
 class StringTest < StdlibTest
   target String
   using hook.refinement
-
-  def test_gsub
-    s = "string"
-    s.gsub(/./, "")
-    s.gsub("a", "b")
-    s.gsub(/./) {|x| "" }
-    s.gsub(/./, {"foo" => "bar"})
-    s.gsub(/./)
-    s.gsub("")
-  end
 
   def test_gsub!
     s = "string"
