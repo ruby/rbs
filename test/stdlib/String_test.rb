@@ -507,21 +507,21 @@ class StringInstanceTest < Minitest::Test
   def test_each_byte
     assert_send_type "() -> Enumerator[Integer, String]",
                      "hello", :each_byte
-    assert_send_type "() { (Integer) -> void } -> String",
+    assert_send_type "() { (Integer) -> void } -> self",
                      "hello", :each_byte do |c| c end
   end
 
   def test_each_char
     assert_send_type "() -> Enumerator[String, String]",
                      "hello", :each_char
-    assert_send_type "() { (String) -> void } -> String",
+    assert_send_type "() { (String) -> void } -> self",
                      "hello", :each_char do |c| c end
   end
 
   def test_each_codepoint
     assert_send_type "() -> Enumerator[Integer, String]",
                      "hello", :each_codepoint
-    assert_send_type "() { (Integer) -> void } -> String",
+    assert_send_type "() { (Integer) -> void } -> self",
                      "hello", :each_codepoint do |c| c end
   end
 end

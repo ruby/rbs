@@ -618,7 +618,7 @@ class String
   #
   #     104 101 108 108 111
   #
-  def each_byte: () { (Integer byte) -> void } -> String
+  def each_byte: () { (Integer byte) -> void } -> self
                | () -> ::Enumerator[Integer, self]
 
   # Passes each character in *str* to the given block, or returns an enumerator if
@@ -630,7 +630,7 @@ class String
   #
   #     h e l l o
   #
-  def each_char: () { (String char) -> void } -> String
+  def each_char: () { (String char) -> void } -> self
                | () -> ::Enumerator[String, self]
 
   # Passes the Integer ordinal of each character in *str*, also known as a
@@ -646,7 +646,7 @@ class String
   #
   #     104 101 108 108 111 1593
   #
-  def each_codepoint: () { (Integer codepoint) -> void } -> String
+  def each_codepoint: () { (Integer codepoint) -> void } -> self
                     | () -> ::Enumerator[Integer, self]
 
   # Passes each grapheme cluster in *str* to the given block, or returns an
@@ -698,7 +698,7 @@ class String
   #     #   "o\nwor"
   #     #   "d"
   #
-  def each_line: (?String separator, ?chomp: bool) { (String line) -> void } -> String
+  def each_line: (?String separator, ?chomp: bool) { (String line) -> void } -> self
                | (?String separator, ?chomp: bool) -> ::Enumerator[String, self]
 
   # Returns `true` if *str* has a length of zero.
