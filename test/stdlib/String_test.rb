@@ -743,15 +743,16 @@ class StringInstanceTest < Minitest::Test
     assert_send_type "(ToStr, ToStr) -> String",
                      "string", :gsub!, ToStr.new("s"), ToStr.new("s")
   end
+
+  def test_hash
+    assert_send_type "() -> Integer",
+                     "", :hash
+  end
 end
 
 class StringTest < StdlibTest
   target String
   using hook.refinement
-
-  def test_hash
-    "".hash
-  end
 
   def test_include
     "".include?("")
