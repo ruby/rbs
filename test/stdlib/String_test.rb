@@ -570,16 +570,18 @@ class StringInstanceTest < Minitest::Test
     assert_send_type "(ToStr, chomp: false) { (String) -> void } -> self",
                      "hello", :each_line, ToStr.new("l"), chomp: false do |line| line end
   end
+
+  def test_empty?
+    assert_send_type "() -> true",
+                     "", :empty?
+    assert_send_type "() -> false",
+                     " ", :empty?
+  end
 end
 
 class StringTest < StdlibTest
   target String
   using hook.refinement
-
-  def test_empty?
-    "".empty?
-    " ".empty?
-  end
 
   def test_encode
     s = "string"
