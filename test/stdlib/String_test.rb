@@ -667,17 +667,20 @@ class StringInstanceTest < Minitest::Test
     assert_send_type "(Integer) -> false",
                      "string", :eql?, 42
   end
+
+  def test_force_encoding
+    assert_send_type "(String) -> self",
+                     "", :force_encoding, "ASCII-8BIT"
+    assert_send_type "(Encoding) -> self",
+                     "", :force_encoding, Encoding::ASCII_8BIT
+    assert_send_type "(ToStr) -> self",
+                     "", :force_encoding, ToStr.new("ASCII-8BIT")
+  end
 end
 
 class StringTest < StdlibTest
   target String
   using hook.refinement
-
-  def test_force_encoding
-    s = ""
-    s.force_encoding "ASCII-8BIT"
-    s.force_encoding Encoding::ASCII_8BIT
-  end
 
   def test_freeze
     "test".freeze

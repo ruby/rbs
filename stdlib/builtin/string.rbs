@@ -783,7 +783,7 @@ class String
 
   # Changes the encoding to `encoding` and returns self.
   #
-  def force_encoding: (String | Encoding encoding) -> self
+  def force_encoding: (string | Encoding encoding) -> self
 
   def freeze: () -> self
 
