@@ -716,25 +716,38 @@ class StringInstanceTest < Minitest::Test
     assert_send_type "(ToStr, ToStr) -> String",
                      "string", :gsub, ToStr.new("a"), ToStr.new("b")
   end
+
+  def test_gsub!
+    assert_send_type "(Regexp, String) -> nil",
+                     "string", :gsub!, /z/, "s"
+    assert_send_type "(Regexp, String) -> self",
+                     "string", :gsub!, /s/, "s"
+    assert_send_type "(String, String) -> nil",
+                     "string", :gsub!, "z", "s"
+    assert_send_type "(String, String) -> self",
+                     "string", :gsub!, "s", "s"
+    assert_send_type "(Regexp) { (String) -> String } -> nil",
+                     "string", :gsub!, /z/ do |x| "s" end
+    assert_send_type "(Regexp) { (String) -> String } -> self",
+                     "string", :gsub!, /s/ do |x| "s" end
+    assert_send_type "(Regexp) { (String) -> ToS } -> self",
+                     "string", :gsub!, /s/ do |x| ToS.new("s") end
+    assert_send_type "(Regexp, Hash[String, String]) -> nil",
+                     "string", :gsub!, /z/, {"z" => "s"}
+    assert_send_type "(Regexp, Hash[String, String]) -> self",
+                     "string", :gsub!, /s/, {"s" => "s"}
+    # assert_send_type "(Regexp) -> Enumerator[String, self]",
+    #                  "string", :gsub!, /s/
+    # assert_send_type "(String) -> Enumerator[String, self]",
+    #                  "string", :gsub!, "s"
+    assert_send_type "(ToStr, ToStr) -> String",
+                     "string", :gsub!, ToStr.new("s"), ToStr.new("s")
+  end
 end
 
 class StringTest < StdlibTest
   target String
   using hook.refinement
-
-  def test_gsub!
-    s = "string"
-    s.gsub!(/z/, "s")
-    s.gsub!(/s/, "s")
-    s.gsub!("z", "s")
-    s.gsub!("s", "s")
-    s.gsub!(/z/) {|x| "s" }
-    s.gsub!(/s/) {|x| "s" }
-    s.gsub!(/z/, {"z" => "s"})
-    s.gsub!(/s/, {"s" => "s"})
-    s.gsub!(/s/)
-    s.gsub!("t")
-  end
 
   def test_hash
     "".hash
