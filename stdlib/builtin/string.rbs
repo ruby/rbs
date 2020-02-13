@@ -761,7 +761,7 @@ class String
   # to dst_encoding. The options Hash gives details for conversion. See
   # String#encode for details. Returns the string even if no changes were made.
   #
-  def encode!: (?Encoding | String encoding, ?Encoding | String from_encoding, ?invalid: :replace ?, ?undef: :replace ?, ?replace: String, ?fallback: Hash[String, String] | Proc | Method, ?xml: :text | :attr, ?universal_newline: true, ?cr_newline: true, ?crlf_newline: true) -> self
+  def encode!: (?Encoding | string encoding, ?Encoding | string from_encoding, ?invalid: :replace ?, ?undef: :replace ?, ?replace: String, ?fallback: Hash[String, String] | Proc | Method, ?xml: :text | :attr, ?universal_newline: true, ?cr_newline: true, ?crlf_newline: true) -> self
 
   # Returns the Encoding object that represents the encoding of obj.
   #
