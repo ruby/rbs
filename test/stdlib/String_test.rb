@@ -692,15 +692,16 @@ class StringInstanceTest < Minitest::Test
     assert_send_type "(ToInt) -> nil",
                      "a", :getbyte, ToInt.new(1)
   end
+
+  def test_grapheme_clusters
+    assert_send_type "() -> Array[String]",
+                     "\u{1F1EF}\u{1F1F5}", :grapheme_clusters
+  end
 end
 
 class StringTest < StdlibTest
   target String
   using hook.refinement
-
-  def test_grapheme_clusters
-    "\u{1F1EF}\u{1F1F5}".grapheme_clusters
-  end
 
   def test_gsub
     s = "string"
