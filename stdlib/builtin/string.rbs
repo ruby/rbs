@@ -417,7 +417,7 @@ class String
   #
   # See also String#<<, which takes a single argument.
   #
-  def concat: (*String | Integer str_or_codepoint) -> String
+  def concat: (*string | Integer str_or_codepoint) -> String
 
   # Each `other_str` parameter defines a set of characters to count.  The
   # intersection of these sets defines the characters to count in `str`.  Any

@@ -355,18 +355,22 @@ class StringInstanceTest < Minitest::Test
     assert_send_type "() { (Integer) -> void } -> String",
                      "a", :codepoints do |cp| cp end
   end
+
+  def test_concat
+    assert_send_type "() -> String",
+                     "hello", :concat
+    assert_send_type "(String) -> String",
+                     "hello", :concat, " "
+    assert_send_type "(ToStr) -> String",
+                     "hello", :concat, ToStr.new(" ")
+    assert_send_type "(String, Integer) -> String",
+                     "hello", :concat, "world", 33
+  end
 end
 
 class StringTest < StdlibTest
   target String
   using hook.refinement
-
-  def test_concat
-    a = "hello"
-    a.concat
-    a.concat(" ")
-    a.concat("world", 33)
-  end
 
   def test_count
     a = "hello world"
