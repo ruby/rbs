@@ -531,26 +531,50 @@ class StringInstanceTest < Minitest::Test
     assert_send_type "() { (String) -> void } -> self",
                      "hello", :each_grapheme_cluster do |c| c end
   end
+
+  def test_each_line
+    assert_send_type "() -> Enumerator[String, self]",
+                     "hello", :each_line
+    assert_send_type "() { (String) -> void } -> self",
+                     "hello", :each_line do |line| line end
+    assert_send_type "(String) -> Enumerator[String, self]",
+                     "hello", :each_line, "l"
+    assert_send_type "(ToStr) -> Enumerator[String, self]",
+                     "hello", :each_line, ToStr.new("l")
+    assert_send_type "(String) { (String) -> void } -> self",
+                     "hello", :each_line, "l" do |line| line end
+    assert_send_type "(ToStr) { (String) -> void } -> self",
+                     "hello", :each_line, ToStr.new("l") do |line| line end
+    assert_send_type "(chomp: true) -> Enumerator[String, self]",
+                     "hello", :each_line, chomp: true
+    assert_send_type "(chomp: false) -> Enumerator[String, self]",
+                     "hello", :each_line, chomp: false
+    assert_send_type "(chomp: true) { (String) -> void } -> self",
+                     "hello", :each_line, chomp: true do |line| line end
+    assert_send_type "(chomp: false){ (String)  -> void } -> self",
+                     "hello", :each_line, chomp: false do |line| line end
+    assert_send_type "(String, chomp: true) -> Enumerator[String, self]",
+                     "hello", :each_line, "l", chomp: true
+    assert_send_type "(ToStr, chomp: true) -> Enumerator[String, self]",
+                     "hello", :each_line, ToStr.new("l"), chomp: true
+    assert_send_type "(String, chomp: false) -> Enumerator[String, self]",
+                     "hello", :each_line, "l", chomp: false
+    assert_send_type "(ToStr, chomp: false) -> Enumerator[String, self]",
+                     "hello", :each_line, ToStr.new("l"), chomp: false
+    assert_send_type "(String, chomp: true) { (String) -> void } -> self",
+                     "hello", :each_line, "l", chomp: true do |line| line end
+    assert_send_type "(ToStr, chomp: true) { (String) -> void } -> self",
+                     "hello", :each_line, ToStr.new("l"), chomp: true do |line| line end
+    assert_send_type "(String, chomp: false) { (String) -> void } -> self",
+                     "hello", :each_line, "l", chomp: false do |line| line end
+    assert_send_type "(ToStr, chomp: false) { (String) -> void } -> self",
+                     "hello", :each_line, ToStr.new("l"), chomp: false do |line| line end
+  end
 end
 
 class StringTest < StdlibTest
   target String
   using hook.refinement
-
-  def test_each_line
-    "hello".each_line
-    "hello".each_line { |line| line }
-    "hello".each_line('l')
-    "hello".each_line('l') { |line| line }
-    "hello".each_line(chomp: true)
-    "hello".each_line(chomp: false)
-    "hello".each_line(chomp: true) { |line| line }
-    "hello".each_line(chomp: false) { |line| line }
-    "hello".each_line('l', chomp: true)
-    "hello".each_line('l', chomp: false)
-    "hello".each_line('l', chomp: true) { |line| line }
-    "hello".each_line('l', chomp: false) { |line| line }
-  end
 
   def test_empty?
     "".empty?

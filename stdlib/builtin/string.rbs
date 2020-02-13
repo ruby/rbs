@@ -698,8 +698,8 @@ class String
   #     #   "o\nwor"
   #     #   "d"
   #
-  def each_line: (?String separator, ?chomp: bool) { (String line) -> void } -> self
-               | (?String separator, ?chomp: bool) -> ::Enumerator[String, self]
+  def each_line: (?string separator, ?chomp: bool) { (String line) -> void } -> self
+               | (?string separator, ?chomp: bool) -> Enumerator[String, self]
 
   # Returns `true` if *str* has a length of zero.
   #
