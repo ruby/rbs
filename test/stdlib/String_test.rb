@@ -381,15 +381,18 @@ class StringInstanceTest < Minitest::Test
     assert_send_type "(ToStr, ToStr, ToStr) -> Integer",
                      "hello world", :count, ToStr.new("lo"), ToStr.new("o"), ToStr.new("o")
   end
+
+  def test_crypt
+    assert_send_type "(String) -> String",
+                     "foo", :crypt, "bar"
+    assert_send_type "(ToStr) -> String",
+                     "foo", :crypt, ToStr.new("bar")
+  end
 end
 
 class StringTest < StdlibTest
   target String
   using hook.refinement
-
-  def test_crypt
-    "foo".crypt("bar")
-  end
 
   def test_delete
     "hello".delete("l", "lo")

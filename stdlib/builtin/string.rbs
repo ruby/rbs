@@ -492,7 +492,7 @@ class String
   # hashing algorithms, install the string-crypt gem and `require 'string/crypt'`
   # to continue using it.
   #
-  def crypt: (String salt_str) -> String
+  def crypt: (string salt_str) -> String
 
   # Returns a copy of *str* with all characters in the intersection of its
   # arguments deleted. Uses the same rules for building the set of characters as
