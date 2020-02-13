@@ -775,7 +775,7 @@ class String
   #     "hello".end_with?("heaven", "ello")     #=> true
   #     "hello".end_with?("heaven", "paradise") #=> false
   #
-  def end_with?: (*String suffixes) -> bool
+  def end_with?: (*string suffixes) -> bool
 
   # Two strings are equal if they have the same length and content.
   #

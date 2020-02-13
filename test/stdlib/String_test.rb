@@ -648,18 +648,22 @@ class StringInstanceTest < Minitest::Test
     assert_send_type "() -> Encoding",
                      "test", :encoding
   end
+
+  def test_end_with?
+    assert_send_type "() -> false",
+                     "string", :end_with?
+    assert_send_type "(String) -> true",
+                     "string", :end_with?, "string"
+    assert_send_type "(String, String) -> false",
+                     "string", :end_with?, "foo", "bar"
+    assert_send_type "(ToStr) -> true",
+                     "string", :end_with?, ToStr.new("string")
+  end
 end
 
 class StringTest < StdlibTest
   target String
   using hook.refinement
-
-  def test_end_with?
-    s = "string"
-    s.end_with?
-    s.end_with?("string")
-    s.end_with?("foo", "bar")
-  end
 
   def test_eql?
     s = "string"
