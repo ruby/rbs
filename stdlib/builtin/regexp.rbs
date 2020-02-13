@@ -1,12 +1,21 @@
 class Regexp < Object
+  def initialize: (String arg0, ?untyped options, ?String kcode) -> Object
+                | (Regexp arg0) -> void
+
+  def self.compile: (String arg0, ?untyped options, ?String kcode) -> Regexp
+                  | (Regexp arg0) -> Regexp
   def self.escape: (String | Symbol arg0) -> String
 
   def self.last_match: () -> MatchData?
                      | (Integer n) -> String?
                      | (Symbol | String n) -> String?
 
+  def self.quote: (String | Symbol arg0) -> String
   def self.try_convert: (untyped obj) -> Regexp?
 
+  def self.union: () -> Regexp
+                | (String | Regexp arg0, *String | Regexp args) -> Regexp
+                | (::Array[String | Regexp]) -> Regexp
   def ==: (untyped other) -> bool
 
   def ===: (untyped other) -> bool
@@ -26,15 +35,13 @@ class Regexp < Object
   # object that represents the encoding of obj.
   def encoding: () -> Encoding
 
+  def eql?: (untyped other) -> bool
   def fixed_encoding?: () -> bool
 
   # Produce a hash based on the text and options of this regular expression.
   #
   # See also Object\#hash.
   def hash: () -> Integer
-
-  def initialize: (String arg0, ?untyped options, ?String kcode) -> Object
-                | (Regexp arg0) -> void
 
   # Produce a nicely formatted string-version of *rxp* . Perhaps
   # surprisingly, `#inspect` actually produces the more natural version of
@@ -107,17 +114,6 @@ class Regexp < Object
   def to_s: () -> String
 
   def ~: () -> Integer?
-
-  def self.compile: (String arg0, ?untyped options, ?String kcode) -> Regexp
-                  | (Regexp arg0) -> Regexp
-
-  def self.quote: (String | Symbol arg0) -> String
-
-  def self.union: () -> Regexp
-                | (String | Regexp arg0, *String | Regexp args) -> Regexp
-                | (::Array[String | Regexp]) -> Regexp
-
-  def eql?: (untyped other) -> bool
 end
 
 Regexp::EXTENDED: Integer
