@@ -450,21 +450,28 @@ class StringInstanceTest < Minitest::Test
     assert_send_type "(ToStr) -> nil",
                      "foo", :delete_suffix!, ToStr.new("a")
   end
+
+  def test_downcase
+    assert_send_type "() -> String",
+                     "a", :downcase
+    assert_send_type "(:ascii) -> String",
+                     "a", :downcase, :ascii
+    assert_send_type "(:fold) -> String",
+                     "a", :downcase, :fold
+    assert_send_type "(:lithuanian) -> String",
+                     "a", :downcase, :lithuanian
+    assert_send_type "(:turkic) -> String",
+                     "a", :downcase, :turkic
+    assert_send_type "(:lithuanian, :turkic) -> String",
+                     "a", :downcase, :lithuanian, :turkic
+    assert_send_type "(:turkic, :lithuanian) -> String",
+                     "a", :downcase, :turkic, :lithuanian
+  end
 end
 
 class StringTest < StdlibTest
   target String
   using hook.refinement
-
-  def test_downcase
-    "a".downcase
-    "a".downcase(:ascii)
-    "a".downcase(:fold)
-    "a".downcase(:lithuanian)
-    "a".downcase(:turkic)
-    "a".downcase(:lithuanian, :turkic)
-    "a".downcase(:turkic, :lithuanian)
-  end
 
   def test_downcase!
     "a".downcase!
