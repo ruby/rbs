@@ -399,17 +399,26 @@ class StringInstanceTest < Minitest::Test
     assert_send_type "(ToStr) -> String",
                      "hello", :delete, ToStr.new("lo")
   end
+
+  def test_delete!
+    assert_send_type "(String, String) -> String",
+                     "hello", :delete!, "l", "lo"
+    assert_send_type "(ToStr, ToStr) -> String",
+                     "hello", :delete!, ToStr.new("l"), ToStr.new("lo")
+    assert_send_type "(String) -> String",
+                     "hello", :delete!, "lo"
+    assert_send_type "(ToStr) -> String",
+                     "hello", :delete!, ToStr.new("lo")
+    assert_send_type "(String) -> nil",
+                     "hello", :delete!, "a"
+    assert_send_type "(ToStr) -> nil",
+                     "hello", :delete!, ToStr.new("a")
+  end
 end
 
 class StringTest < StdlibTest
   target String
   using hook.refinement
-
-  def test_delete!
-    "hello".delete!("l", "lo")
-    "hello".delete!("lo")
-    "hello".delete!("a")
-  end
 
   def test_delete_prefix
     "foo".delete_prefix("f")

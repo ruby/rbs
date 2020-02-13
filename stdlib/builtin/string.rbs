@@ -508,7 +508,7 @@ class String
   # Performs a `delete` operation in place, returning *str*, or `nil` if *str* was
   # not modified.
   #
-  def delete!: (String other_str, *String other_strs) -> String?
+  def delete!: (string other_str, *string other_strs) -> String?
 
   # Returns a copy of *str* with leading `prefix` deleted.
   #
