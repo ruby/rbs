@@ -748,6 +748,11 @@ class StringInstanceTest < Minitest::Test
     assert_send_type "() -> Integer",
                      "", :hash
   end
+
+  def test_hex
+    assert_send_type "() -> Integer",
+                     "0x0a", :hex
+  end
 end
 
 class StringTest < StdlibTest

@@ -871,9 +871,6 @@ class String
   #     "0".hex        #=> 0
   #     "wombat".hex   #=> 0
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     str.hex   -> integer
-  #
   def hex: () -> Integer
 
   # Returns `true` if *str* contains the given string or character.
