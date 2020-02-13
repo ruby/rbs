@@ -643,15 +643,16 @@ class StringInstanceTest < Minitest::Test
     assert_send_type "(ToStr, ToStr) -> self",
                      "string", :encode!, ToStr.new("ascii"), ToStr.new("ascii")
   end
+
+  def test_encoding
+    assert_send_type "() -> Encoding",
+                     "test", :encoding
+  end
 end
 
 class StringTest < StdlibTest
   target String
   using hook.refinement
-
-  def test_encoding
-    "test".encoding
-  end
 
   def test_end_with?
     s = "string"
