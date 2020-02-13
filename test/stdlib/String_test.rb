@@ -505,28 +505,28 @@ class StringInstanceTest < Minitest::Test
   end
 
   def test_each_byte
-    assert_send_type "() -> Enumerator[Integer, String]",
+    assert_send_type "() -> Enumerator[Integer, self]",
                      "hello", :each_byte
     assert_send_type "() { (Integer) -> void } -> self",
                      "hello", :each_byte do |c| c end
   end
 
   def test_each_char
-    assert_send_type "() -> Enumerator[String, String]",
+    assert_send_type "() -> Enumerator[String, self]",
                      "hello", :each_char
     assert_send_type "() { (String) -> void } -> self",
                      "hello", :each_char do |c| c end
   end
 
   def test_each_codepoint
-    assert_send_type "() -> Enumerator[Integer, String]",
+    assert_send_type "() -> Enumerator[Integer, self]",
                      "hello", :each_codepoint
     assert_send_type "() { (Integer) -> void } -> self",
                      "hello", :each_codepoint do |c| c end
   end
 
   def test_each_grapheme_cluster
-    assert_send_type "() -> Enumerator[String, String]",
+    assert_send_type "() -> Enumerator[String, self]",
                      "hello", :each_grapheme_cluster
     assert_send_type "() { (String) -> void } -> self",
                      "hello", :each_grapheme_cluster do |c| c end
