@@ -498,15 +498,16 @@ class StringInstanceTest < Minitest::Test
     assert_send_type "(:turkic, :lithuanian) -> String",
                      "A", :downcase!, :turkic, :lithuanian
   end
+
+  def test_dump
+    assert_send_type "() -> String",
+                     "foo", :dump
+  end
 end
 
 class StringTest < StdlibTest
   target String
   using hook.refinement
-
-  def test_dump
-    "foo".dump
-  end
 
   def test_each_byte
     "hello".each_byte
