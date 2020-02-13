@@ -522,7 +522,7 @@ class String
   #     "hello".delete_prefix!("hel") #=> "lo"
   #     "hello".delete_prefix!("llo") #=> nil
   #
-  def delete_prefix!: (String prefix) -> String?
+  def delete_prefix!: (string prefix) -> String?
 
   # Returns a copy of *str* with trailing `suffix` deleted.
   #
