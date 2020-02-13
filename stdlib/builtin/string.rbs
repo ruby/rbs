@@ -536,7 +536,7 @@ class String
   #     "hello".delete_suffix!("llo") #=> "he"
   #     "hello".delete_suffix!("hel") #=> nil
   #
-  def delete_suffix!: (String suffix) -> String?
+  def delete_suffix!: (string suffix) -> String?
 
   # Returns a copy of *str* with all uppercase letters replaced with their
   # lowercase counterparts. Which letters exactly are replaced, and by which other
