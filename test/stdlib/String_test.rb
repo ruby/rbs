@@ -348,16 +348,18 @@ class StringInstanceTest < Minitest::Test
     assert_send_type "() -> String",
                      "a", :clear
   end
+
+  def test_codepoints
+    assert_send_type "() -> Array[Integer]",
+                     "a", :codepoints
+    assert_send_type "() { (Integer) -> void } -> String",
+                     "a", :codepoints do |cp| cp end
+  end
 end
 
 class StringTest < StdlibTest
   target String
   using hook.refinement
-
-  def test_codepoints
-    "a".codepoints
-    "a".codepoints {|cp| cp }
-  end
 
   def test_concat
     a = "hello"
