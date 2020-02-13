@@ -467,28 +467,42 @@ class StringInstanceTest < Minitest::Test
     assert_send_type "(:turkic, :lithuanian) -> String",
                      "a", :downcase, :turkic, :lithuanian
   end
+
+  def test_downcase!
+    assert_send_type "() -> nil",
+                     "a", :downcase!
+    assert_send_type "(:ascii) -> nil",
+                     "a", :downcase!, :ascii
+    assert_send_type "(:fold) -> nil",
+                     "a", :downcase!, :fold
+    assert_send_type "(:lithuanian) -> nil",
+                     "a", :downcase!, :lithuanian
+    assert_send_type "(:turkic) -> nil",
+                     "a", :downcase!, :turkic
+    assert_send_type "(:lithuanian, :turkic) -> nil",
+                     "a", :downcase!, :lithuanian, :turkic
+    assert_send_type "(:turkic, :lithuanian) -> nil",
+                     "a", :downcase!, :turkic, :lithuanian
+    assert_send_type "() -> String",
+                     "A", :downcase!
+    assert_send_type "(:ascii) -> String",
+                     "A", :downcase!, :ascii
+    assert_send_type "(:fold) -> String",
+                     "A", :downcase!, :fold
+    assert_send_type "(:lithuanian) -> String",
+                     "A", :downcase!, :lithuanian
+    assert_send_type "(:turkic) -> String",
+                     "A", :downcase!, :turkic
+    assert_send_type "(:lithuanian, :turkic) -> String",
+                     "A", :downcase!, :lithuanian, :turkic
+    assert_send_type "(:turkic, :lithuanian) -> String",
+                     "A", :downcase!, :turkic, :lithuanian
+  end
 end
 
 class StringTest < StdlibTest
   target String
   using hook.refinement
-
-  def test_downcase!
-    "a".downcase!
-    "a".downcase!(:ascii)
-    "a".downcase!(:fold)
-    "a".downcase!(:lithuanian)
-    "a".downcase!(:turkic)
-    "a".downcase!(:lithuanian, :turkic)
-    "a".downcase!(:turkic, :lithuanian)
-    "A".downcase!
-    "A".downcase!(:ascii)
-    "A".downcase!(:fold)
-    "A".downcase!(:lithuanian)
-    "A".downcase!(:turkic)
-    "A".downcase!(:lithuanian, :turkic)
-    "A".downcase!(:turkic, :lithuanian)
-  end
 
   def test_dump
     "foo".dump
