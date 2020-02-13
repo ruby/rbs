@@ -326,15 +326,16 @@ class StringInstanceTest < Minitest::Test
     assert_send_type "(ToStr) -> nil",
                      "a\n", :chomp!, ToStr.new("\r")
   end
+
+  def test_chop
+    assert_send_type "() -> String",
+                     "a", :chop
+  end
 end
 
 class StringTest < StdlibTest
   target String
   using hook.refinement
-
-  def test_chop
-    "a".chop
-  end
 
   def test_chop!
     "a".chop!
