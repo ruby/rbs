@@ -338,15 +338,16 @@ class StringInstanceTest < Minitest::Test
     assert_send_type "() -> nil",
                      "", :chop!
   end
+
+  def test_chr
+    assert_send_type "() -> String",
+                     "a", :chr
+  end
 end
 
 class StringTest < StdlibTest
   target String
   using hook.refinement
-
-  def test_chr
-    "a".chr
-  end
 
   def test_clear
     "a".clear
