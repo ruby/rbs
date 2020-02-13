@@ -681,16 +681,22 @@ class StringInstanceTest < Minitest::Test
     assert_send_type "() -> self",
                      "test", :freeze
   end
+
+  def test_getbyte
+    assert_send_type "(Integer) -> Integer",
+                     "a", :getbyte, 0
+    assert_send_type "(Integer) -> nil",
+                     "a", :getbyte, 1
+    assert_send_type "(ToInt) -> Integer",
+                     "a", :getbyte, ToInt.new(0)
+    assert_send_type "(ToInt) -> nil",
+                     "a", :getbyte, ToInt.new(1)
+  end
 end
 
 class StringTest < StdlibTest
   target String
   using hook.refinement
-
-  def test_getbyte
-    "a".getbyte(0)
-    "a".getbyte(1)
-  end
 
   def test_grapheme_clusters
     "\u{1F1EF}\u{1F1F5}".grapheme_clusters
