@@ -510,16 +510,18 @@ class StringInstanceTest < Minitest::Test
     assert_send_type "() { (Integer) -> void } -> String",
                      "hello", :each_byte do |c| c end
   end
+
+  def test_each_char
+    assert_send_type "() -> Enumerator[String, String]",
+                     "hello", :each_char
+    assert_send_type "() { (String) -> void } -> String",
+                     "hello", :each_char do |c| c end
+  end
 end
 
 class StringTest < StdlibTest
   target String
   using hook.refinement
-
-  def test_each_char
-    "hello".each_char
-    "hello".each_char { |c| c }
-  end
 
   def test_each_codepoint
     "hello".each_codepoint
