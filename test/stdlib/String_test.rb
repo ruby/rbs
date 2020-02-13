@@ -659,17 +659,19 @@ class StringInstanceTest < Minitest::Test
     assert_send_type "(ToStr) -> true",
                      "string", :end_with?, ToStr.new("string")
   end
+
+  def test_eql?
+    str = "string"
+    assert_send_type "(String) -> true",
+                     str, :eql?, str
+    assert_send_type "(Integer) -> false",
+                     "string", :eql?, 42
+  end
 end
 
 class StringTest < StdlibTest
   target String
   using hook.refinement
-
-  def test_eql?
-    s = "string"
-    s.eql?(s)
-    s.eql?(42)
-  end
 
   def test_force_encoding
     s = ""
