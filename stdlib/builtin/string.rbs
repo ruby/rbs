@@ -968,9 +968,6 @@ class String
   #     "  hello  ".lstrip   #=> "hello  "
   #     "hello".lstrip       #=> "hello"
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     str.lstrip   -> new_str
-  #
   def lstrip: () -> String
 
   # Removes leading whitespace from the receiver. Returns the altered receiver, or

@@ -827,6 +827,11 @@ class StringInstanceTest < Minitest::Test
     assert_send_type "(ToInt, ToStr) -> String",
                      "hello", :ljust, ToInt.new(20), ToStr.new(" ")
   end
+
+  def test_lstrip
+    assert_send_type "() -> String",
+                     "", :lstrip
+  end
 end
 
 class StringTest < StdlibTest
