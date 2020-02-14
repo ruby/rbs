@@ -786,6 +786,11 @@ class StringInstanceTest < Minitest::Test
     assert_send_type "(ToInt, ToStr) -> String",
                      "abcd", :insert, ToInt.new(0), ToStr.new("X")
   end
+
+  def test_inspect
+    assert_send_type "() -> String",
+                     "", :inspect
+  end
 end
 
 class StringTest < StdlibTest

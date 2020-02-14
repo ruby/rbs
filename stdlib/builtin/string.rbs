@@ -913,9 +913,6 @@ class String
   #     str[3] = "\b"
   #     str.inspect       #=> "\"hel\\bo\""
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     str.inspect   -> string
-  #
   def inspect: () -> String
 
   # Returns the Symbol corresponding to *str*, creating the symbol if it did not
