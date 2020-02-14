@@ -929,9 +929,6 @@ class String
   #
   #     'cat and dog'.to_sym   #=> :"cat and dog"
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     str.intern   -> symbol
-  #
   def intern: () -> Symbol
 
   # Returns the character length of *str*.

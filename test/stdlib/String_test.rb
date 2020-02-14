@@ -791,6 +791,11 @@ class StringInstanceTest < Minitest::Test
     assert_send_type "() -> String",
                      "", :inspect
   end
+
+  def test_intern
+    assert_send_type "() -> Symbol",
+                     "", :intern
+  end
 end
 
 class StringTest < StdlibTest
