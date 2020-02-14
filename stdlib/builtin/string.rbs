@@ -1096,10 +1096,7 @@ class String
 
   # Reverses *str* in place.
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     str.reverse!   -> str
-  #
-  def reverse!: () -> String
+  def reverse!: () -> self
 
   # Returns the index of the last occurrence of the given *substring* or pattern
   # (*regexp*) in *str*. Returns `nil` if not found. If the second parameter is

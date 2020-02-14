@@ -971,15 +971,16 @@ class StringInstanceTest < Minitest::Test
     assert_send_type "() -> String",
                      "test", :reverse
   end
+
+  def test_reverse!
+    assert_send_type "() -> self",
+                     "test", :reverse!
+  end
 end
 
 class StringTest < StdlibTest
   target String
   using hook.refinement
-
-  def test_reverse!
-    "test".reverse!
-  end
 
   def test_succ
     "".succ
