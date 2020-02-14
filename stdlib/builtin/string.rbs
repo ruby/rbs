@@ -1016,12 +1016,7 @@ class String
   #     "Ruby".match?(/P.../)    #=> false
   #     $&                       #=> nil
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     str.match?(pattern)        -> true or false
-  #     str.match?(pattern, pos)   -> true or false
-  #
-  def match?: (Regexp | String arg0) -> bool
-            | (Regexp | String arg0, ?Integer arg1) -> bool
+  def match?: (Regexp | string pattern, ?int pos) -> bool
 
   # Returns the successor to *str*. The successor is calculated by incrementing
   # characters starting from the rightmost alphanumeric (or the rightmost

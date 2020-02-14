@@ -878,6 +878,45 @@ class StringInstanceTest < Minitest::Test
     assert_send_type "(ToStr, ToInt) -> nil",
                      "a", :match, ToStr.new("a"), ToInt.new(1)
   end
+
+  def test_match?
+    assert_send_type "(Regexp) -> true",
+                     "a", :match?, /a/
+    assert_send_type "(Regexp) -> false",
+                     "a", :match?, /b/
+    assert_send_type "(String) -> true",
+                     "a", :match?, "a"
+    assert_send_type "(String) -> false",
+                     "a", :match?, "b"
+    assert_send_type "(ToStr) -> true",
+                     "a", :match?, ToStr.new("a")
+    assert_send_type "(ToStr) -> false",
+                     "a", :match?, ToStr.new("b")
+    assert_send_type "(Regexp, Integer) -> true",
+                     "a", :match?, /a/, 0
+    assert_send_type "(Regexp, Integer) -> false",
+                     "a", :match?, /a/, 1
+    assert_send_type "(String, Integer) -> true",
+                     "a", :match?, "a", 0
+    assert_send_type "(String, Integer) -> false",
+                     "a", :match?, "a", 1
+    assert_send_type "(ToStr, Integer) -> true",
+                     "a", :match?, ToStr.new("a"), 0
+    assert_send_type "(ToStr, Integer) -> false",
+                     "a", :match?, ToStr.new("a"), 1
+    assert_send_type "(Regexp, ToInt) -> true",
+                     "a", :match?, /a/, ToInt.new(0)
+    assert_send_type "(Regexp, ToInt) -> false",
+                     "a", :match?, /a/, ToInt.new(1)
+    assert_send_type "(String, ToInt) -> true",
+                     "a", :match?, "a", ToInt.new(0)
+    assert_send_type "(String, ToInt) -> false",
+                     "a", :match?, "a", ToInt.new(1)
+    assert_send_type "(ToStr, ToInt) -> true",
+                     "a", :match?, ToStr.new("a"), ToInt.new(0)
+    assert_send_type "(ToStr, ToInt) -> false",
+                     "a", :match?, ToStr.new("a"), ToInt.new(1)
+  end
 end
 
 class StringTest < StdlibTest
