@@ -891,11 +891,7 @@ class String
   #     "hello".index(?e)              #=> 1
   #     "hello".index(/[aeiou]/, -3)   #=> 4
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     str.index(substring [, offset])   -> integer or nil
-  #     str.index(regexp [, offset])      -> integer or nil
-  #
-  def index: (Regexp | String arg0, ?Integer arg1) -> Integer?
+  def index: (Regexp | string substr_or_regexp, ?Integer offset) -> Integer?
 
   # Inserts *other_str* before the character at the given *index*, modifying
   # *str*. Negative indices count from the end of the string, and insert *after*

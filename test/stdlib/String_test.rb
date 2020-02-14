@@ -764,6 +764,21 @@ class StringInstanceTest < Minitest::Test
     assert_send_type "(ToStr) -> false",
                      "", :include?, ToStr.new("a")
   end
+
+  def test_index
+    assert_send_type "(String) -> Integer",
+                     "a", :index, "a"
+    assert_send_type "(String, Integer) -> Integer",
+                     "a", :index, "a", 0
+    assert_send_type "(String) -> nil",
+                     "a", :index, "b"
+    assert_send_type "(Regexp) -> Integer",
+                     "a", :index, /a/
+    assert_send_type "(Regexp, Integer) -> Integer",
+                     "a", :index, /a/, 0
+    assert_send_type "(ToStr) -> Integer",
+                     "a", :index, ToStr.new("a")
+  end
 end
 
 class StringTest < StdlibTest
