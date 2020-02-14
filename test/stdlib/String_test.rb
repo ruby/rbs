@@ -995,6 +995,17 @@ class StringInstanceTest < Minitest::Test
     assert_send_type "(ToStr, ToInt) -> nil",
                      "a", :rindex, ToStr.new("a"), ToInt.new(-2)
   end
+
+  def test_rjust
+    assert_send_type "(Integer) -> String",
+                     "hello", :rjust, 20
+    assert_send_type "(ToInt) -> String",
+                     "hello", :rjust, ToInt.new(20)
+    assert_send_type "(Integer, String) -> String",
+                     "hello", :rjust, 20, " "
+    assert_send_type "(ToInt, ToStr) -> String",
+                     "hello", :rjust, ToInt.new(20), ToStr.new(" ")
+  end
 end
 
 class StringTest < StdlibTest

@@ -1119,10 +1119,7 @@ class String
   #     "hello".rjust(20)           #=> "               hello"
   #     "hello".rjust(20, '1234')   #=> "123412341234123hello"
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     str.rjust(integer, padstr=' ')   -> new_str
-  #
-  def rjust: (Integer arg0, ?String arg1) -> String
+  def rjust: (int integer, ?string padstr) -> String
 
   # Searches *sep* or pattern (*regexp*) in the string from the end of the string,
   # and returns the part before it, the match, and the part after it. If it is not
