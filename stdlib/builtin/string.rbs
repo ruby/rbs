@@ -1053,9 +1053,6 @@ class String
   #
   # If `str` starts with `0`, radix indicators are honored. See Kernel#Integer.
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     str.oct   -> integer
-  #
   def oct: () -> Integer
 
   # Returns the Integer ordinal of a one-character string.

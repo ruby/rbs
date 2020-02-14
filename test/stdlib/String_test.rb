@@ -927,6 +927,11 @@ class StringInstanceTest < Minitest::Test
     assert_send_type "() -> self",
                      "a", :next!
   end
+
+  def test_oct
+    assert_send_type "() -> Integer",
+                     "123", :oct
+  end
 end
 
 class StringTest < StdlibTest
