@@ -978,6 +978,23 @@ class StringInstanceTest < Minitest::Test
     assert_send_type "() -> self",
                      "test", :reverse!
   end
+
+  def test_rindex
+    assert_send_type "(String) -> Integer",
+                     "a", :rindex, "a"
+    assert_send_type "(String, Integer) -> Integer",
+                     "a", :rindex, "a", 0
+    assert_send_type "(String) -> nil",
+                     "a", :rindex, "b"
+    assert_send_type "(Regexp) -> Integer",
+                     "a", :rindex, /a/
+    assert_send_type "(Regexp, Integer) -> Integer",
+                     "a", :rindex, /a/, 0
+    assert_send_type "(ToStr) -> Integer",
+                     "a", :rindex, ToStr.new("a")
+    assert_send_type "(ToStr, ToInt) -> nil",
+                     "a", :rindex, ToStr.new("a"), ToInt.new(-2)
+  end
 end
 
 class StringTest < StdlibTest

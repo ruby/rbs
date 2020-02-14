@@ -1109,11 +1109,7 @@ class String
   #     "hello".rindex(?e)              #=> 1
   #     "hello".rindex(/[aeiou]/, -2)   #=> 1
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     str.rindex(substring [, integer])   -> integer or nil
-  #     str.rindex(regexp [, integer])   -> integer or nil
-  #
-  def rindex: (String | Regexp arg0, ?Integer arg1) -> Integer?
+  def rindex: (string | Regexp substr_or_regexp, ?int pos) -> Integer?
 
   # If *integer* is greater than the length of *str*, returns a new String of
   # length *integer* with *str* right justified and padded with *padstr*;
