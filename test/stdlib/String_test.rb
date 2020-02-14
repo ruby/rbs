@@ -1020,6 +1020,13 @@ class StringInstanceTest < Minitest::Test
     assert_send_type "() -> String",
                      " hello ", :rstrip
   end
+
+  def test_rstrip!
+    assert_send_type "() -> self",
+                     " hello ", :rstrip!
+    assert_send_type "() -> nil",
+                     "", :rstrip!
+  end
 end
 
 class StringTest < StdlibTest

@@ -1150,10 +1150,7 @@ class String
   #     "  hello".rstrip!    #=> nil
   #     "hello".rstrip!      #=> nil
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     str.rstrip!   -> self or nil
-  #
-  def rstrip!: () -> String
+  def rstrip!: () -> self?
 
   # Both forms iterate through *str*, matching the pattern (which may be a Regexp
   # or a String). For each match, a result is generated and either added to the
