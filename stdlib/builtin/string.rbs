@@ -933,9 +933,6 @@ class String
 
   # Returns the character length of *str*.
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     str.length   -> integer
-  #
   def length: () -> Integer
 
   # Returns an array of lines in *str* split using the supplied record separator
