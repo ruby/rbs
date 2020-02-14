@@ -801,6 +801,23 @@ class StringInstanceTest < Minitest::Test
     assert_send_type "() -> Integer",
                      "", :length
   end
+
+  def test_lines
+    assert_send_type "() -> Array[String]",
+                     "", :lines
+    assert_send_type "(chomp: true) -> Array[String]",
+                     "", :lines, chomp: true
+    assert_send_type "(chomp: false) -> Array[String]",
+                     "", :lines, chomp: false
+    assert_send_type "(String) -> Array[String]",
+                     "", :lines, "\n"
+    assert_send_type "(String, chomp: true) -> Array[String]",
+                     "", :lines, "\n", chomp: true
+    assert_send_type "(String, chomp: false) -> Array[String]",
+                     "", :lines, "\n", chomp: false
+    assert_send_type "(ToStr) -> Array[String]",
+                     "", :lines, ToStr.new("\n")
+  end
 end
 
 class StringTest < StdlibTest

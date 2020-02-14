@@ -948,10 +948,7 @@ class String
   # If a block is given, which is a deprecated form, works the same as
   # `each_line`.
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     str.lines(separator=$/, chomp: false)  -> an_array
-  #
-  def lines: (?String arg0) -> ::Array[String]
+  def lines: (?string separator, ?chomp: bool) -> Array[String]
 
   # If *integer* is greater than the length of *str*, returns a new String of
   # length *integer* with *str* left justified and padded with *padstr*;
