@@ -917,6 +917,11 @@ class StringInstanceTest < Minitest::Test
     assert_send_type "(ToStr, ToInt) -> false",
                      "a", :match?, ToStr.new("a"), ToInt.new(1)
   end
+
+  def test_next
+    assert_send_type "() -> String",
+                     "a", :next
+  end
 end
 
 class StringTest < StdlibTest

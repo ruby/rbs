@@ -1036,9 +1036,6 @@ class String
   #     "ZZZ9999".succ     #=> "AAAA0000"
   #     "***".succ         #=> "**+"
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     str.next   -> new_str
-  #
   def next: () -> String
 
   # Equivalent to String#succ, but modifies the receiver in place.
