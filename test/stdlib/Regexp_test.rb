@@ -5,10 +5,19 @@ class RegexpTest < StdlibTest
   using hook.refinement
 
   def test_new
-    r1 = Regexp.new('^a-z+:\\s+\w+') #=> /^a-z+:\s+\w+/
-    r2 = Regexp.new('cat', true)     #=> /cat/i
-    r3 = Regexp.new(r2)              #=> /cat/i
-    r4 = Regexp.new('dog', Regexp::EXTENDED | Regexp::IGNORECASE) #=> /dog/ix
+    Regexp.new('dog')
+    Regexp.new('dog', option = Regexp::IGNORECASE)
+    Regexp.new('dog', code = 'n')
+    Regexp.new('dog', option = Regexp::IGNORECASE, code = 'n')
+    Regexp.new(/^a-z+:\\s+\w+/)
+  end
+
+  def test_compile
+    Regexp.compile('dog')
+    Regexp.compile('dog', option = Regexp::IGNORECASE)
+    Regexp.compile('dog', code = 'n')
+    Regexp.compile('dog', option = Regexp::IGNORECASE, code = 'n')
+    Regexp.compile(/^a-z+:\\s+\w+/)
   end
 
   def test_escape
@@ -23,13 +32,6 @@ class RegexpTest < StdlibTest
     Regexp.try_convert(o)       #=> nil
     def o.to_regexp() /foo/ end
     Regexp.try_convert(o)       #=> /foo/
-  end
-
-  def test_compile
-    r1 = Regexp.compile('^a-z+:\\s+\w+') #=> /^a-z+:\s+\w+/
-    r2 = Regexp.compile('cat', true)     #=> /cat/i
-    r3 = Regexp.compile(r2)              #=> /cat/i
-    r4 = Regexp.compile('dog', Regexp::EXTENDED | Regexp::IGNORECASE) #=> /dog/ix
   end
 
   def test_quote

@@ -714,19 +714,10 @@ class Regexp < Object
   #     r3 = Regexp.new(r2)              #=> /cat/i
   #     r4 = Regexp.new('dog', Regexp::EXTENDED | Regexp::IGNORECASE) #=> /dog/ix
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     Regexp.new(string, [options])       -> regexp
-  #     Regexp.new(regexp)                  -> regexp
-  #     Regexp.compile(string, [options])   -> regexp
-  #     Regexp.compile(regexp)              -> regexp
-  #
   def initialize: (String arg0, ?untyped options, ?String kcode) -> Object
                 | (Regexp arg0) -> void
 
   # Alias for Regexp.new
-  #
-  # # arglists 💪👽🚨 << Delete this section
-  #     compile(*args)
   #
   def self.compile: (String arg0, ?untyped options, ?String kcode) -> Regexp
                   | (Regexp arg0) -> Regexp
