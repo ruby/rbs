@@ -946,6 +946,19 @@ class StringInstanceTest < Minitest::Test
     assert_send_type "(Regexp) -> [ String, String, String ]",
                      "hello", :partition, /.l/
   end
+
+  def test_prepend
+    assert_send_type "() -> String",
+                     "a", :prepend
+    assert_send_type "(String) -> String",
+                     "a", :prepend, "b"
+    assert_send_type "(String, String) -> String",
+                     "a", :prepend, "b", "c"
+    assert_send_type "(ToStr) -> String",
+                     "a", :prepend, ToStr.new("b")
+    assert_send_type "(ToStr, ToStr) -> String",
+                     "a", :prepend, ToStr.new("b"), ToStr.new("c")
+  end
 end
 
 class StringTest < StdlibTest

@@ -1079,10 +1079,7 @@ class String
   #
   # See also String#concat.
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     str.prepend(other_str1, other_str2, ...)  -> str
-  #
-  def `prepend`: (String arg0) -> String
+  def prepend: (*string other_strs) -> String
 
   # Replaces the contents of *str* with the corresponding values in *other_str*.
   #
