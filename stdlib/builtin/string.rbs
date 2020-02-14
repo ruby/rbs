@@ -1129,11 +1129,7 @@ class String
   #     "hello".rpartition("x")         #=> ["", "", "hello"]
   #     "hello".rpartition(/.l/)        #=> ["he", "ll", "o"]
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     str.rpartition(sep)             -> [head, sep, tail]
-  #     str.rpartition(regexp)          -> [head, match, tail]
-  #
-  def rpartition: (String | Regexp arg0) -> [ String, String, String ]
+  def rpartition: (string | Regexp sep_or_regexp) -> [ String, String, String ]
 
   # Returns a copy of the receiver with trailing whitespace removed. See also
   # String#lstrip and String#strip.

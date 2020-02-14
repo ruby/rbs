@@ -1006,6 +1006,15 @@ class StringInstanceTest < Minitest::Test
     assert_send_type "(ToInt, ToStr) -> String",
                      "hello", :rjust, ToInt.new(20), ToStr.new(" ")
   end
+
+  def test_rpartition
+    assert_send_type "(String) -> [ String, String, String ]",
+                     "hello", :rpartition, "l"
+    assert_send_type "(ToStr) -> [ String, String, String ]",
+                     "hello", :rpartition, ToStr.new("l")
+    assert_send_type "(Regexp) -> [ String, String, String ]",
+                     "hello", :rpartition, /.l/
+  end
 end
 
 class StringTest < StdlibTest
