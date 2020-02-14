@@ -1139,9 +1139,6 @@ class String
   #     "  hello  ".rstrip   #=> "  hello"
   #     "hello".rstrip       #=> "hello"
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     str.rstrip   -> new_str
-  #
   def rstrip: () -> String
 
   # Removes trailing whitespace from the receiver. Returns the altered receiver,

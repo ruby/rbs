@@ -1015,6 +1015,11 @@ class StringInstanceTest < Minitest::Test
     assert_send_type "(Regexp) -> [ String, String, String ]",
                      "hello", :rpartition, /.l/
   end
+
+  def test_rstrip
+    assert_send_type "() -> String",
+                     " hello ", :rstrip
+  end
 end
 
 class StringTest < StdlibTest
