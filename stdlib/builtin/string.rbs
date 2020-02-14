@@ -1069,11 +1069,7 @@ class String
   #     "hello".partition("x")         #=> ["hello", "", ""]
   #     "hello".partition(/.l/)        #=> ["h", "el", "lo"]
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     str.partition(sep)              -> [head, sep, tail]
-  #     str.partition(regexp)           -> [head, match, tail]
-  #
-  def partition: (Regexp | String arg0) -> [ String, String, String ]
+  def partition: (Regexp | string sep_or_regexp) -> [ String, String, String ]
 
   # Prepend---Prepend the given strings to *str*.
   #

@@ -937,6 +937,15 @@ class StringInstanceTest < Minitest::Test
     assert_send_type "() -> Integer",
                      "a", :ord
   end
+
+  def test_partition
+    assert_send_type "(String) -> [ String, String, String ]",
+                     "hello", :partition, "l"
+    assert_send_type "(ToStr) -> [ String, String, String ]",
+                     "hello", :partition, ToStr.new("l")
+    assert_send_type "(Regexp) -> [ String, String, String ]",
+                     "hello", :partition, /.l/
+  end
 end
 
 class StringTest < StdlibTest
