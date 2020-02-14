@@ -24,6 +24,15 @@ class RegexpTest < StdlibTest
     Regexp.escape('\*?{}.')
   end
 
+  def test_last_match
+    /c(.)t/ =~ 'cat'
+    Regexp.last_match
+    Regexp.last_match(0)
+    /(?<lhs>\w+)\s*=\s*(?<rhs>\w+)/ =~ "var = val"
+    Regexp.last_match(:lhs)
+    Regexp.last_match('rhs')
+  end
+
   def test_try_convert
     Regexp.try_convert(/re/)    #=> /re/
     Regexp.try_convert("re")    #=> nil
