@@ -1040,10 +1040,7 @@ class String
 
   # Equivalent to String#succ, but modifies the receiver in place.
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     str.next!   -> str
-  #
-  def next!: () -> String
+  def next!: () -> self
 
   # Treats leading characters of *str* as a string of octal digits (with an
   # optional sign) and returns the corresponding number.  Returns 0 if the
