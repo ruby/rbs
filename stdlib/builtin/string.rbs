@@ -1086,10 +1086,7 @@ class String
   #     s = "hello"         #=> "hello"
   #     s.replace "world"   #=> "world"
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     str.replace(other_str)   -> str
-  #
-  def replace: (String arg0) -> String
+  def replace: (string other_str) -> String
 
   # Returns a new string with the characters from *str* in reverse order.
   #

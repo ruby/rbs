@@ -959,6 +959,13 @@ class StringInstanceTest < Minitest::Test
     assert_send_type "(ToStr, ToStr) -> String",
                      "a", :prepend, ToStr.new("b"), ToStr.new("c")
   end
+
+  def test_replace
+    assert_send_type "(String) -> String",
+                     "a", :replace, "b"
+    assert_send_type "(ToStr) -> String",
+                     "a", :replace, ToStr.new("b")
+  end
 end
 
 class StringTest < StdlibTest
