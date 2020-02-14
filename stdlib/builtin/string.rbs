@@ -958,10 +958,7 @@ class String
   #     "hello".ljust(20)           #=> "hello               "
   #     "hello".ljust(20, '1234')   #=> "hello123412341234123"
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     str.ljust(integer, padstr=' ')   -> new_str
-  #
-  def ljust: (Integer arg0, ?String arg1) -> String
+  def ljust: (int integer, ?string padstr) -> String
 
   # Returns a copy of the receiver with leading whitespace removed. See also
   # String#rstrip and String#strip.

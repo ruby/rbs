@@ -818,6 +818,15 @@ class StringInstanceTest < Minitest::Test
     assert_send_type "(ToStr) -> Array[String]",
                      "", :lines, ToStr.new("\n")
   end
+
+  def test_ljust
+    assert_send_type "(Integer) -> String",
+                     "hello", :ljust, 20
+    assert_send_type "(Integer, String) -> String",
+                     "hello", :ljust, 20, " "
+    assert_send_type "(ToInt, ToStr) -> String",
+                     "hello", :ljust, ToInt.new(20), ToStr.new(" ")
+  end
 end
 
 class StringTest < StdlibTest
