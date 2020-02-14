@@ -1059,9 +1059,6 @@ class String
   #
   #     "a".ord         #=> 97
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     str.ord   -> integer
-  #
   def ord: () -> Integer
 
   # Searches *sep* or pattern (*regexp*) in the string and returns the part before
