@@ -1004,12 +1004,7 @@ class String
   #
   # The return value in this case is the value from block execution.
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     str.match(pattern)        -> matchdata or nil
-  #     str.match(pattern, pos)   -> matchdata or nil
-  #
-  def match: (Regexp | String arg0) -> MatchData?
-           | (Regexp | String arg0, ?Integer arg1) -> MatchData?
+  def match: (Regexp | string pattern, ?int pos) -> MatchData?
 
   # Converts *pattern* to a `Regexp` (if it isn't already one), then returns a
   # `true` or `false` indicates whether the regexp is matched *str* or not without
