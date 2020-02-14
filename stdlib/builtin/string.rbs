@@ -1177,12 +1177,8 @@ class String
   #     <<cruel>> <<world>>
   #     rceu lowlr
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     str.scan(pattern)                         -> array
-  #     str.scan(pattern) {|match, ...| block }   -> str
-  #
-  def scan: (Regexp | String arg0) -> ::Array[String | ::Array[String]]
-          | (Regexp | String arg0) { () -> untyped } -> ::Array[String | ::Array[String]]
+  def scan: (Regexp | string pattern) -> Array[String | Array[String]]
+          | (Regexp | string pattern) { (String | Array[String]) -> void } -> self
 
   # If the string is invalid byte sequence then replace invalid bytes with given
   # replacement character, else returns self. If block is given, replace invalid

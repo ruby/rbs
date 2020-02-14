@@ -1027,6 +1027,25 @@ class StringInstanceTest < Minitest::Test
     assert_send_type "() -> nil",
                      "", :rstrip!
   end
+
+  def test_scan
+    assert_send_type "(Regexp) -> Array[String]",
+                     "a", :scan, /a/
+    assert_send_type "(Regexp) -> Array[Array[String]]",
+                     "a", :scan, /(a)/
+    assert_send_type "(String) -> Array[String]",
+                     "a", :scan, "a"
+    assert_send_type "(ToStr) -> Array[String]",
+                     "a", :scan, ToStr.new("a")
+    assert_send_type "(Regexp) { (String) -> void } -> self",
+                     "a", :scan, /a/ do |arg| arg end
+    assert_send_type "(Regexp) { (Array[String]) -> void } -> self",
+                     "a", :scan, /(a)/ do |arg| arg end
+    assert_send_type "(String) { (String) -> void } -> self",
+                     "a", :scan, "a" do |arg| arg end
+    assert_send_type "(ToStr) { (String) -> void } -> self",
+                     "a", :scan, ToStr.new("a") do |arg| arg end
+  end
 end
 
 class StringTest < StdlibTest
