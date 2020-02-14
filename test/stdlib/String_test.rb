@@ -966,6 +966,11 @@ class StringInstanceTest < Minitest::Test
     assert_send_type "(ToStr) -> String",
                      "a", :replace, ToStr.new("b")
   end
+
+  def test_reverse
+    assert_send_type "() -> String",
+                     "test", :reverse
+  end
 end
 
 class StringTest < StdlibTest

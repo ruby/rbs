@@ -1092,9 +1092,6 @@ class String
   #
   #     "stressed".reverse   #=> "desserts"
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     str.reverse   -> new_str
-  #
   def reverse: () -> String
 
   # Reverses *str* in place.
