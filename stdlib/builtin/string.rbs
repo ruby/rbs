@@ -904,10 +904,7 @@ class String
   #     "abcd".insert(-3, 'X')   #=> "abXcd"
   #     "abcd".insert(-1, 'X')   #=> "abcdX"
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     str.insert(index, other_str)   -> str
-  #
-  def insert: (Integer arg0, String arg1) -> String
+  def insert: (int index, string other_str) -> String
 
   # Returns a printable version of *str*, surrounded by quote marks, with special
   # characters escaped.
