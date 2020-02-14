@@ -979,10 +979,7 @@ class String
   #     "hello  ".lstrip!    #=> nil
   #     "hello".lstrip!      #=> nil
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     str.lstrip!   -> self or nil
-  #
-  def lstrip!: () -> String?
+  def lstrip!: () -> self?
 
   # Converts *pattern* to a Regexp (if it isn't already one), then invokes its
   # `match` method on the receiver. If the second parameter is present, it
