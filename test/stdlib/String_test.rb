@@ -1373,6 +1373,11 @@ class StringInstanceTest < Minitest::Test
     assert_send_type "() -> Complex",
                      "ruby", :to_c
   end
+
+  def test_to_f
+    assert_send_type "() -> Float",
+                     "ruby", :to_f
+  end
 end
 
 class StringTest < StdlibTest

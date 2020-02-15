@@ -1512,9 +1512,6 @@ class String
   #     "45.67 degrees".to_f   #=> 45.67
   #     "thx1138".to_f         #=> 0.0
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     str.to_f   -> float
-  #
   def to_f: () -> Float
 
   # Returns the result of interpreting leading characters in *str* as an integer
