@@ -1199,13 +1199,8 @@ class String
   #     "abc\u3042\x81".scrub!("*") #=> "abc\u3042*"
   #     "abc\u3042\xE3\x80".scrub!{|bytes| '<'+bytes.unpack('H*')[0]+'>' } #=> "abc\u3042<e380>"
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     str.scrub! -> str
-  #     str.scrub!(repl) -> str
-  #     str.scrub!{|bytes|} -> str
-  #
-  def scrub!: (?String arg0) -> String
-            | (?String arg0) { (untyped arg0) -> untyped } -> String
+  def scrub!: (?string repl) -> self
+            | () { (String bytes) -> string } -> self
 
   # modifies the *index*th byte as *integer*.
   #
