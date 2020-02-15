@@ -1397,6 +1397,11 @@ class StringInstanceTest < Minitest::Test
     assert_send_type "() -> String",
                      "ruby", :to_s
   end
+
+  def test_to_str
+    assert_send_type "() -> String",
+                     "ruby", :to_str
+  end
 end
 
 class StringTest < StdlibTest
