@@ -917,9 +917,6 @@ class Regexp < Object
   #
   # See also Object#hash.
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     rxp.hash   -> integer
-  #
   def hash: () -> Integer
 
   # Produce a nicely formatted string-version of *rxp*. Perhaps surprisingly,
