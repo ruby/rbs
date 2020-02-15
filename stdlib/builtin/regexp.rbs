@@ -1040,9 +1040,6 @@ class Regexp < Object
   #     r1.source               #=> "ab+c"
   #     r2.source               #=> "(?ix-m:ab+c)"
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     rxp.to_s   -> str
-  #
   def to_s: () -> String
 
   # Match---Matches *rxp* against the contents of `$_`. Equivalent to *`rxp* =~
