@@ -1639,9 +1639,6 @@ class String
   #
   #     "\"hello \\n ''\"".undump #=> "hello \n ''"
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     str.undump   -> new_str
-  #
   def undump: () -> String
 
   # Unicode Normalization---Returns a normalized form of `str`, using Unicode

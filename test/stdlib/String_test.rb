@@ -1443,15 +1443,16 @@ class StringInstanceTest < Minitest::Test
     assert_send_type "(ToStr, ToStr) -> nil",
                      "", :tr_s!, ToStr.new("r"), ToStr.new("j")
   end
+
+  def test_undump
+    assert_send_type "() -> String",
+                     "\"hello \\n ''\"", :undump
+  end
 end
 
 class StringTest < StdlibTest
   target String
   using hook.refinement
-
-  def test_undump
-    "\"hello \\n ''\"".undump
-  end
 
   def test_unicode_normalize
     "a\u0300".unicode_normalize
