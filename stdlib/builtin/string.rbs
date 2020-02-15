@@ -1632,10 +1632,7 @@ class String
   # Performs String#tr_s processing on *str* in place, returning *str*, or `nil`
   # if no changes were made.
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     str.tr_s!(from_str, to_str)   -> str or nil
-  #
-  def tr_s!: (String arg0, String arg1) -> String?
+  def tr_s!: (string from_str, string to_str) -> String?
 
   # Returns an unescaped version of the string. This does the inverse of
   # String#dump.

@@ -1432,6 +1432,17 @@ class StringInstanceTest < Minitest::Test
     assert_send_type "(ToStr, ToStr) -> String",
                      "ruby", :tr_s, ToStr.new("r"), ToStr.new("j")
   end
+
+  def test_tr_s!
+    assert_send_type "(String, String) -> self",
+                     "ruby", :tr_s!, "r", "j"
+    assert_send_type "(ToStr, ToStr) -> self",
+                     "ruby", :tr_s!, ToStr.new("r"), ToStr.new("j")
+    assert_send_type "(String, String) -> nil",
+                     "", :tr_s!, "r", "j"
+    assert_send_type "(ToStr, ToStr) -> nil",
+                     "", :tr_s!, ToStr.new("r"), ToStr.new("j")
+  end
 end
 
 class StringTest < StdlibTest
