@@ -925,9 +925,6 @@ class Regexp < Object
   #
   #     /ab+c/ix.inspect        #=> "/ab+c/ix"
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     rxp.inspect   -> string
-  #
   def inspect: () -> String
 
   # Returns a MatchData object describing the match, or `nil` if there was no
