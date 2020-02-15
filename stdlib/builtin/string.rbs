@@ -1323,12 +1323,8 @@ class String
   #
   # If a block is given, invoke the block with each split substring.
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     str.split(pattern=nil, [limit])                -> an_array
-  #     str.split(pattern=nil, [limit]) {|sub| block } -> str
-  #
-  def split: (?Regexp | String arg0, ?Integer arg1) -> ::Array[String]
-           | (?Integer arg0) -> ::Array[String]
+  def split: (?Regexp | string pattern, ?int limit) -> Array[String]
+           | (?Regexp | string pattern, ?int limit) { (String) -> void } -> self
 
   # Builds a set of characters from the *other_str* parameter(s) using the
   # procedure described for String#count. Returns a new string where runs of the

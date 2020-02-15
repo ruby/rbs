@@ -1120,6 +1120,49 @@ class StringInstanceTest < Minitest::Test
     assert_send_type "(String) -> nil",
                      "a", :slice!, "b"
   end
+
+  def test_split
+    assert_send_type "() -> Array[String]",
+                     "a b c", :split
+    assert_send_type "(String) -> Array[String]",
+                     "a b c", :split, " "
+    assert_send_type "(ToStr) -> Array[String]",
+                     "a b c", :split, ToStr.new(" ")
+    assert_send_type "(Regexp) -> Array[String]",
+                     "a b c", :split, / /
+    assert_send_type "(String, Integer) -> Array[String]",
+                     "a b c", :split, " ", 2
+    assert_send_type "(ToStr, Integer) -> Array[String]",
+                     "a b c", :split, ToStr.new(" "), 2
+    assert_send_type "(Regexp, Integer) -> Array[String]",
+                     "a b c", :split, / /, 2
+    assert_send_type "(String, ToInt) -> Array[String]",
+                     "a b c", :split, " ", ToInt.new(2)
+    assert_send_type "(ToStr, ToInt) -> Array[String]",
+                     "a b c", :split, ToStr.new(" "), ToInt.new(2)
+    assert_send_type "(Regexp, ToInt) -> Array[String]",
+                     "a b c", :split, / /, ToInt.new(2)
+    assert_send_type "() { (String) -> void } -> self",
+                     "a b c", :split do |str| str end
+    assert_send_type "(String) { (String) -> void } -> self",
+                     "a b c", :split, " " do |str| str end
+    assert_send_type "(ToStr) { (String) -> void } -> self",
+                     "a b c", :split, ToStr.new(" ") do |str| str end
+    assert_send_type "(Regexp) { (String) -> void } -> self",
+                     "a b c", :split, / / do |str| str end
+    assert_send_type "(String, Integer) { (String) -> void } -> self",
+                     "a b c", :split, " ", 2 do |str| str end
+    assert_send_type "(ToStr, Integer) { (String) -> void } -> self",
+                     "a b c", :split, ToStr.new(" "), 2 do |str| str end
+    assert_send_type "(Regexp, Integer) { (String) -> void } -> self",
+                     "a b c", :split, / /, 2 do |str| str end
+    assert_send_type "(String, ToInt) { (String) -> void } -> self",
+                     "a b c", :split, " ", ToInt.new(2) do |str| str end
+    assert_send_type "(ToStr, ToInt) { (String) -> void } -> self",
+                     "a b c", :split, ToStr.new(" "), ToInt.new(2) do |str| str end
+    assert_send_type "(Regexp, ToInt) { (String) -> void } -> self",
+                     "a b c", :split, / /, ToInt.new(2) do |str| str end
+  end
 end
 
 class StringTest < StdlibTest
