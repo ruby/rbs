@@ -761,9 +761,6 @@ class Regexp < Object
   #
   #     Regexp.escape('\*?{}.')   #=> \\\*\?\{\}\.
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     Regexp.quote(str)    -> string
-  #
   def self.quote: (String | Symbol arg0) -> String
 
   # Try to convert *obj* into a Regexp, using to_regexp method. Returns converted
@@ -776,9 +773,6 @@ class Regexp < Object
   #     Regexp.try_convert(o)            #=> nil
   #     def o.to_regexp() /foo/ end
   #     Regexp.try_convert(o)            #=> /foo/
-  #
-  # # arglists 💪👽🚨 << Delete this section
-  #     Regexp.try_convert(obj) -> re or nil
   #
   def self.try_convert: (untyped obj) -> Regexp?
 
