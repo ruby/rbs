@@ -1255,6 +1255,58 @@ class StringInstanceTest < Minitest::Test
     assert_send_type "(ToStr) { (String) -> ToS } -> String",
                      "a", :sub, ToStr.new("a") do |str| ToS.new(str) end
   end
+
+
+  def test_sub!
+    assert_send_type "(Regexp, String) -> self",
+                     "a", :sub!, /a/, "a"
+    assert_send_type "(String, String) -> self",
+                     "a", :sub!, "a", "a"
+    assert_send_type "(ToStr, String) -> self",
+                     "a", :sub!, ToStr.new("a"), "a"
+    assert_send_type "(Regexp, ToStr) -> self",
+                     "a", :sub!, /a/, ToStr.new("a")
+    assert_send_type "(String, ToStr) -> self",
+                     "a", :sub!, "a", ToStr.new("a")
+    assert_send_type "(ToStr, ToStr) -> self",
+                     "a", :sub!, ToStr.new("a"), ToStr.new("a")
+    assert_send_type "(Regexp, Hash[String, String]) -> self",
+                     "a", :sub!, /a/, { "a" => "a" }
+    assert_send_type "(String, Hash[String, String]) -> self",
+                     "a", :sub!, "a", { "a" => "a" }
+    assert_send_type "(ToStr, Hash[String, String]) -> self",
+                     "a", :sub!, ToStr.new("a"), { "a" => "a" }
+    assert_send_type "(Regexp) { (String) -> ToS } -> self",
+                     "a", :sub!, /a/ do |str| ToS.new(str) end
+    assert_send_type "(String) { (String) -> ToS } -> self",
+                     "a", :sub!, "a" do |str| ToS.new(str) end
+    assert_send_type "(ToStr) { (String) -> ToS } -> self",
+                     "a", :sub!, ToStr.new("a") do |str| ToS.new(str) end
+    assert_send_type "(Regexp, String) -> nil",
+                     "a", :sub!, /b/, "a"
+    assert_send_type "(String, String) -> nil",
+                     "a", :sub!, "b", "a"
+    assert_send_type "(ToStr, String) -> nil",
+                     "a", :sub!, ToStr.new("b"), "a"
+    assert_send_type "(Regexp, ToStr) -> nil",
+                     "a", :sub!, /b/, ToStr.new("a")
+    assert_send_type "(String, ToStr) -> nil",
+                     "a", :sub!, "b", ToStr.new("a")
+    assert_send_type "(ToStr, ToStr) -> nil",
+                     "a", :sub!, ToStr.new("b"), ToStr.new("a")
+    assert_send_type "(Regexp, Hash[String, String]) -> nil",
+                     "a", :sub!, /b/, { "a" => "a" }
+    assert_send_type "(String, Hash[String, String]) -> nil",
+                     "a", :sub!, "b", { "a" => "a" }
+    assert_send_type "(ToStr, Hash[String, String]) -> nil",
+                     "a", :sub!, ToStr.new("b"), { "a" => "a" }
+    assert_send_type "(Regexp) { (String) -> ToS } -> nil",
+                     "a", :sub!, /b/ do |str| ToS.new(str) end
+    assert_send_type "(String) { (String) -> ToS } -> nil",
+                     "a", :sub!, "b" do |str| ToS.new(str) end
+    assert_send_type "(ToStr) { (String) -> ToS } -> nil",
+                     "a", :sub!, ToStr.new("b") do |str| ToS.new(str) end
+  end
 end
 
 class StringTest < StdlibTest

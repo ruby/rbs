@@ -1426,12 +1426,8 @@ class String
   # Returns `str` if a substitution was performed or `nil` if no substitution was
   # performed.
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     str.sub!(pattern, replacement)          -> str or nil
-  #     str.sub!(pattern) {|match| block }      -> str or nil
-  #
-  def sub!: (Regexp | String arg0, ?String arg1) -> String
-          | (Regexp | String arg0) { (String arg0) -> untyped } -> String
+  def sub!: (Regexp | string pattern, ?string | Hash[String, String] replacement) -> self?
+          | (Regexp | string pattern) { (String match) -> _ToS } -> String?
 
   # Returns the successor to *str*. The successor is calculated by incrementing
   # characters starting from the rightmost alphanumeric (or the rightmost
