@@ -1560,10 +1560,6 @@ class String
   #
   # If called on a subclass of String, converts the receiver to a String object.
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     str.to_s     -> str
-  #     str.to_str   -> str
-  #
   def to_s: () -> String
 
   # Returns `self`.

@@ -1392,6 +1392,11 @@ class StringInstanceTest < Minitest::Test
     assert_send_type "() -> Rational",
                      "ruby", :to_r
   end
+
+  def test_to_s
+    assert_send_type "() -> String",
+                     "ruby", :to_s
+  end
 end
 
 class StringTest < StdlibTest
