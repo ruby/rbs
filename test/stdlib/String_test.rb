@@ -1402,6 +1402,11 @@ class StringInstanceTest < Minitest::Test
     assert_send_type "() -> String",
                      "ruby", :to_str
   end
+
+  def test_to_sym
+    assert_send_type "() -> Symbol",
+                     "ruby", :to_sym
+  end
 end
 
 class StringTest < StdlibTest

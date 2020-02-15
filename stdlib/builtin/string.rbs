@@ -1582,9 +1582,6 @@ class String
   #
   #     'cat and dog'.to_sym   #=> :"cat and dog"
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     str.to_sym   -> symbol
-  #
   def to_sym: () -> Symbol
 
   # Returns a copy of `str` with the characters in `from_str` replaced by the
