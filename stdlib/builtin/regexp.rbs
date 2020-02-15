@@ -864,9 +864,6 @@ class Regexp < Object
   #     "  x = y  " =~ /(?<lhs>\w+)\s*=\s*(?<rhs>\w+)/
   #     p lhs, rhs # undefined local variable
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     rxp =~ str    -> integer or nil
-  #
   def =~: (String? str) -> Integer?
 
   # Returns the value of the case-insensitive flag.
