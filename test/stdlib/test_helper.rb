@@ -25,6 +25,16 @@ class ToStr
   end
 end
 
+class ToS
+  def initialize(value = "")
+    @value = value
+  end
+
+  def to_s
+    @value
+  end
+end
+
 class ToArray
   def initialize(*args)
     @args = args
