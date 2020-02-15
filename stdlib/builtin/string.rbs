@@ -1478,11 +1478,10 @@ class String
   #
   # See String#downcase for meaning of `options` and use with different encodings.
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     str.swapcase!              -> str or nil
-  #     str.swapcase!([options])   -> str or nil
-  #
-  def swapcase!: () -> String?
+  def swapcase!: () -> self?
+               | (:ascii | :lithuanian | :turkic) -> self?
+               | (:lithuanian, :turkic) -> self?
+               | (:turkic, :lithuanian) -> self?
 
   # Returns a complex which denotes the string form.  The parser ignores leading
   # whitespaces and trailing garbage.  Any digit sequences can be separated by an

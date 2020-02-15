@@ -1341,6 +1341,33 @@ class StringInstanceTest < Minitest::Test
     assert_send_type "(Symbol, Symbol) -> String",
                      "a", :swapcase, :turkic, :lithuanian
   end
+
+  def test_swapcase!
+    assert_send_type "() -> self",
+                     "a", :swapcase!
+    assert_send_type "(Symbol) -> self",
+                     "a", :swapcase!, :ascii
+    assert_send_type "(Symbol) -> self",
+                     "a", :swapcase!, :lithuanian
+    assert_send_type "(Symbol) -> self",
+                     "a", :swapcase!, :turkic
+    assert_send_type "(Symbol, Symbol) -> self",
+                     "a", :swapcase!, :lithuanian, :turkic
+    assert_send_type "(Symbol, Symbol) -> self",
+                     "a", :swapcase!, :turkic, :lithuanian
+    assert_send_type "() -> nil",
+                     "", :swapcase!
+    assert_send_type "(Symbol) -> nil",
+                     "", :swapcase!, :ascii
+    assert_send_type "(Symbol) -> nil",
+                     "", :swapcase!, :lithuanian
+    assert_send_type "(Symbol) -> nil",
+                     "", :swapcase!, :turkic
+    assert_send_type "(Symbol, Symbol) -> nil",
+                     "", :swapcase!, :lithuanian, :turkic
+    assert_send_type "(Symbol, Symbol) -> nil",
+                     "", :swapcase!, :turkic, :lithuanian
+  end
 end
 
 class StringTest < StdlibTest
