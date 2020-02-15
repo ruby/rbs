@@ -1317,6 +1317,15 @@ class StringInstanceTest < Minitest::Test
     assert_send_type "() -> self",
                      "", :succ!
   end
+
+  def test_sum
+    assert_send_type "() -> Integer",
+                     " ", :sum
+    assert_send_type "(Integer) -> Integer",
+                     " ", :sum, 16
+    assert_send_type "(ToInt) -> Integer",
+                     " ", :sum, ToInt.new(16)
+  end
 end
 
 class StringTest < StdlibTest

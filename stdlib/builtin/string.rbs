@@ -1458,10 +1458,7 @@ class String
   # the binary value of each byte in *str* modulo `2**n - 1`. This is not a
   # particularly good checksum.
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     str.sum(n=16)   -> integer
-  #
-  def sum: (?Integer arg0) -> Integer
+  def sum: (?int n) -> Integer
 
   # Returns a copy of *str* with uppercase alphabetic characters converted to
   # lowercase and lowercase characters converted to uppercase.
