@@ -40,25 +40,27 @@ class RegexpTest < StdlibTest
   end
 
   def test_try_convert
-    Regexp.try_convert(/re/)    #=> /re/
-    Regexp.try_convert("re")    #=> nil
+    Regexp.try_convert(/re/)
+    Regexp.try_convert("re")
 
     o = Object.new
-    Regexp.try_convert(o)       #=> nil
+    Regexp.try_convert(o)
     def o.to_regexp() /foo/ end
-    Regexp.try_convert(o)       #=> /foo/
+    Regexp.try_convert(o)
   end
 
   def test_union
-    Regexp.union                              #=> /(?!)/
-    Regexp.union("penzance")                  #=> /penzance/
-    Regexp.union("a+b*c")                     #=> /a\+b\*c/
-    Regexp.union("skiing", "sledding")        #=> /skiing|sledding/
-    Regexp.union("skiing", "sledding", "sky") #=> /skiing|sledding/
-    Regexp.union(["skiing", "sledding"])      #=> /skiing|sledding/
-    Regexp.union(/dogs/, /cats/i)             #=> /(?-mix:dogs)|(?i-mx:cats)/
-    Regexp.union("dogs", /cats/i)             #=> /dogs|(?i-mx:cats)/
-    Regexp.union(["dogs", /cats/i])           #=> /dogs|(?i-mx:cats)/
+    Regexp.union
+    Regexp.union("penzance")
+    Regexp.union(/penzance/i)
+    Regexp.union("skiing", "sledding")
+    Regexp.union("dogs", /cats/i)
+    Regexp.union(/cats/i, "dogs")
+    Regexp.union(/dogs/, /cats/i)
+    Regexp.union("skiing", "sledding", "sky")
+    Regexp.union([/dogs/i, /cats/i])
+    Regexp.union(["skiing", "sledding"])
+    Regexp.union(["dogs", /cats/i])
   end
 
   # test_==

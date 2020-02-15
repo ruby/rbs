@@ -792,10 +792,6 @@ class Regexp < Object
   # Note: the arguments for ::union will try to be converted into a regular
   # expression literal via #to_regexp.
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     Regexp.union(pat1, pat2, ...)            -> new_regexp
-  #     Regexp.union(pats_ary)                   -> new_regexp
-  #
   def self.union: () -> Regexp
                 | (String | Regexp arg0, *String | Regexp args) -> Regexp
                 | (::Array[String | Regexp]) -> Regexp
