@@ -128,12 +128,10 @@ class RegexpTest < StdlibTest
     o = Class.new { def to_str; "object"; end }.new
     /R.../.match(o)         #=> nil
     /R.../.match("Ruby", 1) #=> nil
-    /M(.*)/.match("Matz") do |m|
-      # nop
-    end
-    /M(.*)/.match("Matz", 1) do |m|
-      # nop
-    end
+    /M(.*)/.match("Matz") { |m| 'match' }
+    /M(.*)/.match("Matz", 1) { |m| 'match' }
+    /N(.*)/.match("Matz") { |m| 'match' }
+    /N(.*)/.match("Matz", 1) { |m| 'match' }
   end
 
   def test_match?

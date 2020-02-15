@@ -952,12 +952,8 @@ class Regexp < Object
   #
   # The return value is a value from block execution in this case.
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     rxp.match(str)       -> matchdata or nil
-  #     rxp.match(str,pos)   -> matchdata or nil
-  #
   def match: (String? | Symbol | _ToStr arg0, ?Integer arg1) -> MatchData?
-           | (String? | Symbol | _ToStr arg0, ?Integer arg1) { (MatchData) -> untyped } -> untyped
+           | (String? | Symbol | _ToStr arg0, ?Integer arg1) { (MatchData) -> T } -> T?
 
   # Returns a `true` or `false` indicates whether the regexp is matched or not
   # without updating $~ and other related variables. If the second parameter is
