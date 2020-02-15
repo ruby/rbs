@@ -1811,9 +1811,6 @@ class String
   # Thus unpack1 is convenient, makes clear the intention and signals the expected
   # return value to those reading the code.
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     str.unpack1(format)    ->  obj
-  #
   def unpack1: (String format) -> (Integer | Float | String | nil)
 
   # Returns a copy of *str* with all lowercase letters replaced with their

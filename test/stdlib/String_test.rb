@@ -1500,18 +1500,24 @@ class StringInstanceTest < Minitest::Test
     assert_send_type "(String) -> Array[Float]",
                      "\x00\x00\x00\x00", :unpack, "f"
   end
+
+  def test_unpack1
+    assert_send_type "(String) -> nil",
+                     "a", :unpack1, ""
+    assert_send_type "(String) -> nil",
+                     "", :unpack1, "f"
+    assert_send_type "(String) -> Integer",
+                     "a", :unpack1, "c"
+    assert_send_type "(String) -> String",
+                     "a", :unpack1, "A"
+    assert_send_type "(String) -> Float",
+                     "\x00\x00\x00\x00", :unpack1, "f"
+  end
 end
 
 class StringTest < StdlibTest
   target String
   using hook.refinement
-
-  def test_unpack1
-    "a".unpack1("")
-    "a".unpack1("c")
-    "a".unpack1("A")
-    "\x00\x00\x00\x00".unpack1("f")
-  end
 
   def test_initialize
     String.new
