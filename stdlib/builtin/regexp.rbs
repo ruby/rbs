@@ -982,9 +982,6 @@ class Regexp < Object
   #     /(.)(.)/.named_captures
   #     #=> {}
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     rxp.named_captures  -> hash
-  #
   def named_captures: () -> ::Hash[String, ::Array[Integer]]
 
   # Returns a list of names of captures as an array of strings.
