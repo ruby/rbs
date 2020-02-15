@@ -171,4 +171,11 @@ class RegexpTest < StdlibTest
   def test_to_s
     /ab+c/ix.to_s #=> "(?ix-m:ab+c)"
   end
+
+  # test_~
+  def test_tilde
+    $_ = "input data"
+    ~ /at/
+    ~ /b/
+  end
 end
