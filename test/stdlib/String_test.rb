@@ -1387,6 +1387,11 @@ class StringInstanceTest < Minitest::Test
     assert_send_type "(ToInt) -> Integer",
                      "ruby", :to_i, ToInt.new(10)
   end
+
+  def test_to_r
+    assert_send_type "() -> Rational",
+                     "ruby", :to_r
+  end
 end
 
 class StringTest < StdlibTest

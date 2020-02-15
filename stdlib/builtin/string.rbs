@@ -1554,9 +1554,6 @@ class String
   #
   # See also Kernel#Rational.
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     str.to_r  ->  rational
-  #
   def to_r: () -> Rational
 
   # Returns `self`.
