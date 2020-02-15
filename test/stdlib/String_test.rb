@@ -1326,6 +1326,21 @@ class StringInstanceTest < Minitest::Test
     assert_send_type "(ToInt) -> Integer",
                      " ", :sum, ToInt.new(16)
   end
+
+  def test_swapcase
+    assert_send_type "() -> String",
+                     "a", :swapcase
+    assert_send_type "(Symbol) -> String",
+                     "a", :swapcase, :ascii
+    assert_send_type "(Symbol) -> String",
+                     "a", :swapcase, :lithuanian
+    assert_send_type "(Symbol) -> String",
+                     "a", :swapcase, :turkic
+    assert_send_type "(Symbol, Symbol) -> String",
+                     "a", :swapcase, :lithuanian, :turkic
+    assert_send_type "(Symbol, Symbol) -> String",
+                     "a", :swapcase, :turkic, :lithuanian
+  end
 end
 
 class StringTest < StdlibTest
