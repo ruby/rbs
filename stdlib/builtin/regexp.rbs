@@ -1048,9 +1048,6 @@ class Regexp < Object
   #     $_ = "input data"
   #     ~ /at/   #=> 7
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     ~ rxp   -> integer or nil
-  #
   def ~: () -> Integer?
 end
 
