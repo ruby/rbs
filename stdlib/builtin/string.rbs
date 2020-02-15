@@ -1451,9 +1451,6 @@ class String
 
   # Equivalent to String#succ, but modifies the receiver in place.
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     str.succ!   -> str
-  #
   def succ!: () -> String
 
   # Returns a basic *n*-bit checksum of the characters in *str*, where *n* is the
