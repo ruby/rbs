@@ -1555,6 +1555,25 @@ class StringInstanceTest < Minitest::Test
     assert_send_type "(:turkic, :lithuanian) -> nil",
                      "", :upcase!, :turkic, :lithuanian
   end
+
+  def test_upto
+    assert_send_type "(String) -> Enumerator[String, self]",
+                     "1", :upto, "2"
+    assert_send_type "(String, true) -> Enumerator[String, self]",
+                     "1", :upto, "2", true
+    assert_send_type "(String, false) -> Enumerator[String, self]",
+                     "1", :upto, "2", false
+    assert_send_type "(String) { (String) -> void } -> self",
+                     "1", :upto, "2" do |s| s end
+    assert_send_type "(String, true) { (String) -> void } -> self",
+                     "1", :upto, "2", true do |s| s end
+    assert_send_type "(String, false) { (String) -> void } -> self",
+                     "1", :upto, "2", false do |s| s end
+    assert_send_type "(ToStr) -> Enumerator[String, self]",
+                     "1", :upto, ToStr.new("2")
+    assert_send_type "(ToStr) { (String) -> void } -> self",
+                     "1", :upto, ToStr.new("2") do |s| s end
+  end
 end
 
 class StringTest < StdlibTest

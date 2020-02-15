@@ -1860,12 +1860,8 @@ class String
   #     "25".upto("5").to_a   #=> []
   #     "07".upto("11").to_a  #=> ["07", "08", "09", "10", "11"]
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     str.upto(other_str, exclusive=false) {|s| block }   -> str
-  #     str.upto(other_str, exclusive=false)                -> an_enumerator
-  #
-  def upto: [Bool] (String arg0, ?Bool arg1) -> ::Enumerator[String, self]
-          | [Bool] (String arg0, ?Bool arg1) { (String arg0) -> untyped } -> String
+  def upto: (string other_str, ?bool exclusive) -> Enumerator[String, self]
+          | (string other_str, ?bool exclusive) { (String s) -> void } -> self
 
   # Returns true for a string which is encoded correctly.
   #
