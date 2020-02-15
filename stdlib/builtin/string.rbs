@@ -1273,18 +1273,10 @@ class String
   #     string.slice!("r")      #=> "r"
   #     string                  #=> "thing"
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     str.slice!(integer)           -> new_str or nil
-  #     str.slice!(integer, integer)   -> new_str or nil
-  #     str.slice!(range)            -> new_str or nil
-  #     str.slice!(regexp)           -> new_str or nil
-  #     str.slice!(other_str)        -> new_str or nil
-  #
-  def slice!: (Integer arg0, ?Integer arg1) -> String?
-            | (::Range[Integer] | Regexp arg0) -> String?
-            | (Regexp arg0, ?Integer arg1) -> String?
-            | (Regexp arg0, ?String arg1) -> String?
-            | (String arg0) -> String?
+  def slice!: (int integer, ?int integer) -> String?
+            | (Range[Integer] | Range[Integer?] range) -> String?
+            | (Regexp regexp, ?int | String capture) -> String?
+            | (String other_str) -> String?
 
   # Divides *str* into substrings based on a delimiter, returning an array of
   # these substrings.

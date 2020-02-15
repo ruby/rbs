@@ -1079,6 +1079,47 @@ class StringInstanceTest < Minitest::Test
     assert_send_type "(ToInt, ToInt) -> ToInt",
                      " ", :setbyte, ToInt.new(0), ToInt.new(0x20)
   end
+
+  def test_slice!
+    assert_send_type "(Integer) -> String",
+                     "a", :slice!, 0
+    assert_send_type "(ToInt) -> String",
+                     "a", :slice!, ToInt.new(0)
+    assert_send_type "(Integer) -> nil",
+                     "a", :slice!, 1
+    assert_send_type "(ToInt) -> nil",
+                     "a", :slice!, ToInt.new(1)
+    assert_send_type "(Integer, Integer) -> String",
+                     "a", :slice!, 0, 1
+    assert_send_type "(ToInt, ToInt) -> String",
+                     "a", :slice!, ToInt.new(0), ToInt.new(1)
+    assert_send_type "(Integer, Integer) -> nil",
+                     "a", :slice!, 2, 1
+    assert_send_type "(ToInt, ToInt) -> nil",
+                     "a", :slice!, ToInt.new(2), ToInt.new(1)
+    assert_send_type "(Range[Integer]) -> String",
+                     "a", :slice!, 0..1
+    assert_send_type "(Range[Integer]) -> nil",
+                     "a", :slice!, 2..3
+    assert_send_type "(Range[Integer?]) -> String",
+                     "a", :slice!, (0..)
+    assert_send_type "(Range[Integer?]) -> String",
+                     "a", :slice!, (..1)
+    assert_send_type "(Regexp) -> String",
+                     "a", :slice!, /a/
+    assert_send_type "(Regexp, Integer) -> String",
+                     "a", :slice!, /(a)/, 1
+    assert_send_type "(Regexp, ToInt) -> String",
+                     "a", :slice!, /(a)/, ToInt.new(1)
+    assert_send_type "(Regexp, String) -> String",
+                     "a", :slice!, /(?<a>a)/, "a"
+    assert_send_type "(Regexp) -> nil",
+                     "a", :slice!, /b/
+    assert_send_type "(String) -> String",
+                     "a", :slice!, "a"
+    assert_send_type "(String) -> nil",
+                     "a", :slice!, "b"
+  end
 end
 
 class StringTest < StdlibTest
