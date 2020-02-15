@@ -1072,6 +1072,13 @@ class StringInstanceTest < Minitest::Test
     assert_send_type "() { (String) -> ToStr } -> self",
                      "\x81", :scrub! do |s| ToStr.new("*") end
   end
+
+  def test_setbyte
+    assert_send_type "(Integer, Integer) -> Integer",
+                     " ", :setbyte, 0, 0x20
+    assert_send_type "(ToInt, ToInt) -> ToInt",
+                     " ", :setbyte, ToInt.new(0), ToInt.new(0x20)
+  end
 end
 
 class StringTest < StdlibTest

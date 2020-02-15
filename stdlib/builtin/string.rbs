@@ -1204,10 +1204,7 @@ class String
 
   # modifies the *index*th byte as *integer*.
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     str.setbyte(index, integer) -> integer
-  #
-  def setbyte: (Integer arg0, Integer arg1) -> Integer
+  def setbyte: (int index, int integer) -> int
 
   # Returns the character length of *str*.
   #
