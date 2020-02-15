@@ -1353,10 +1353,7 @@ class String
   #     "hello".start_with?("heaven", "hell")     #=> true
   #     "hello".start_with?("heaven", "paradise") #=> false
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     str.start_with?([prefixes]+)   -> true or false
-  #
-  def start_with?: (*String arg0) -> bool
+  def start_with?: (*string prefixes) -> bool
 
   # Returns a copy of the receiver with leading and trailing whitespace removed.
   #
