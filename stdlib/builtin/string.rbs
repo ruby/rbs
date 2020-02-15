@@ -1208,10 +1208,7 @@ class String
 
   # Returns the character length of *str*.
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     str.size     -> integer
-  #
-  def size: () -> Integer
+  alias size length
 
   # Element Reference --- If passed a single `index`, returns a substring of one
   # character at that index. If passed a `start` index and a `length`, returns a
