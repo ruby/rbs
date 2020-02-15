@@ -1513,6 +1513,21 @@ class StringInstanceTest < Minitest::Test
     assert_send_type "(String) -> Float",
                      "\x00\x00\x00\x00", :unpack1, "f"
   end
+
+  def test_upcase
+    assert_send_type "() -> String",
+                     "a", :upcase
+    assert_send_type "(:ascii) -> String",
+                     "a", :upcase, :ascii
+    assert_send_type "(:lithuanian) -> String",
+                     "a", :upcase, :lithuanian
+    assert_send_type "(:turkic) -> String",
+                     "a", :upcase, :turkic
+    assert_send_type "(:lithuanian, :turkic) -> String",
+                     "a", :upcase, :lithuanian, :turkic
+    assert_send_type "(:turkic, :lithuanian) -> String",
+                     "a", :upcase, :turkic, :lithuanian
+  end
 end
 
 class StringTest < StdlibTest

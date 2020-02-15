@@ -1820,11 +1820,10 @@ class String
   #
   #     "hEllO".upcase   #=> "HELLO"
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     str.upcase              -> new_str
-  #     str.upcase([options])   -> new_str
-  #
   def upcase: () -> String
+            | (:ascii | :lithuanian | :turkic) -> String
+            | (:lithuanian, :turkic) -> String
+            | (:turkic, :lithuanian) -> String
 
   # Upcases the contents of *str*, returning `nil` if no changes were made.
   #
