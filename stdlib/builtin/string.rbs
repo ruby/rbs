@@ -1662,9 +1662,6 @@ class String
   # Destructive version of String#unicode_normalize, doing Unicode normalization
   # in place.
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     str.unicode_normalize!(form=:nfc)
-  #
   def unicode_normalize!: (?:nfc | :nfd | :nfkc | :nfkd) -> String
 
   # Checks whether `str` is in Unicode normalization form `form`, which can be any
