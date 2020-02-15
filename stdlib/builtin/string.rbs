@@ -1341,10 +1341,7 @@ class String
   # Squeezes *str* in place, returning either *str*, or `nil` if no changes were
   # made.
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     str.squeeze!([other_str]*)   -> str or nil
-  #
-  def squeeze!: (?String arg0) -> String
+  def squeeze!: (*string other_str) -> self?
 
   # Returns true if `str` starts with one of the `prefixes` given. Each of the
   # `prefixes` should be a String or a Regexp.

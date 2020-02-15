@@ -1176,6 +1176,29 @@ class StringInstanceTest < Minitest::Test
     assert_send_type "(ToStr, ToStr) -> String",
                      "aa  bb  cc", :squeeze, ToStr.new("a-z"), ToStr.new("b")
   end
+
+  def test_squeeze!
+    assert_send_type "() -> self",
+                     "aa  bb  cc", :squeeze!
+    assert_send_type "(String) -> self",
+                     "aa  bb  cc", :squeeze!, " "
+    assert_send_type "(ToStr) -> self",
+                     "aa  bb  cc", :squeeze!, ToStr.new(" ")
+    assert_send_type "(String, String) -> self",
+                     "aa  bb  cc", :squeeze!, "a-z", "b"
+    assert_send_type "(ToStr, ToStr) -> self",
+                     "aa  bb  cc", :squeeze!, ToStr.new("a-z"), ToStr.new("b")
+    assert_send_type "() -> nil",
+                     "", :squeeze!
+    assert_send_type "(String) -> nil",
+                     "", :squeeze!, " "
+    assert_send_type "(ToStr) -> nil",
+                     "", :squeeze!, ToStr.new(" ")
+    assert_send_type "(String, String) -> nil",
+                     "", :squeeze!, "a-z", "b"
+    assert_send_type "(ToStr, ToStr) -> nil",
+                     "", :squeeze!, ToStr.new("a-z"), ToStr.new("b")
+  end
 end
 
 class StringTest < StdlibTest
