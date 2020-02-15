@@ -1528,6 +1528,33 @@ class StringInstanceTest < Minitest::Test
     assert_send_type "(:turkic, :lithuanian) -> String",
                      "a", :upcase, :turkic, :lithuanian
   end
+
+  def test_upcase!
+    assert_send_type "() -> String",
+                     "a", :upcase!
+    assert_send_type "(:ascii) -> String",
+                     "a", :upcase!, :ascii
+    assert_send_type "(:lithuanian) -> String",
+                     "a", :upcase!, :lithuanian
+    assert_send_type "(:turkic) -> String",
+                     "a", :upcase!, :turkic
+    assert_send_type "(:lithuanian, :turkic) -> String",
+                     "a", :upcase!, :lithuanian, :turkic
+    assert_send_type "(:turkic, :lithuanian) -> String",
+                     "a", :upcase!, :turkic, :lithuanian
+    assert_send_type "() -> nil",
+                     "", :upcase!
+    assert_send_type "(:ascii) -> nil",
+                     "", :upcase!, :ascii
+    assert_send_type "(:lithuanian) -> nil",
+                     "", :upcase!, :lithuanian
+    assert_send_type "(:turkic) -> nil",
+                     "", :upcase!, :turkic
+    assert_send_type "(:lithuanian, :turkic) -> nil",
+                     "", :upcase!, :lithuanian, :turkic
+    assert_send_type "(:turkic, :lithuanian) -> nil",
+                     "", :upcase!, :turkic, :lithuanian
+  end
 end
 
 class StringTest < StdlibTest

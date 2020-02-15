@@ -1829,11 +1829,10 @@ class String
   #
   # See String#downcase for meaning of `options` and use with different encodings.
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     str.upcase!              -> str or nil
-  #     str.upcase!([options])   -> str or nil
-  #
-  def upcase!: () -> String?
+  def upcase!: () -> self?
+             | (:ascii | :lithuanian | :turkic) -> self?
+             | (:lithuanian, :turkic) -> self?
+             | (:turkic, :lithuanian) -> self?
 
   # Iterates through successive values, starting at *str* and ending at
   # *other_str* inclusive, passing each value in turn to the block. The
