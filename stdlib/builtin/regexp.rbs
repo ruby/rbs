@@ -1014,9 +1014,6 @@ class Regexp < Object
   #     r = /cat/ix
   #     Regexp.new(r.source, r.options)     #=> /cat/ix
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     rxp.options   -> integer
-  #
   def options: () -> Integer
 
   # Returns the original string of the pattern.
