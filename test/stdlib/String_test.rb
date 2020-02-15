@@ -1216,6 +1216,11 @@ class StringInstanceTest < Minitest::Test
     assert_send_type "(ToStr, ToStr) -> true",
                      "a", :start_with?, ToStr.new("b"), ToStr.new("a")
   end
+
+  def test_strip
+    assert_send_type "() -> String",
+                     " a ", :strip
+  end
 end
 
 class StringTest < StdlibTest

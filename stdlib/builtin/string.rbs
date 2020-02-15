@@ -1365,9 +1365,6 @@ class String
   #     "\x00\t\n\v\f\r ".strip #=> ""
   #     "hello".strip           #=> "hello"
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     str.strip   -> new_str
-  #
   def strip: () -> String
 
   # Removes leading and trailing whitespace from the receiver. Returns the altered
