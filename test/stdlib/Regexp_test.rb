@@ -22,6 +22,7 @@ class RegexpTest < StdlibTest
 
   def test_escape
     Regexp.escape('\*?{}.')
+    Regexp.escape(:[])
   end
 
   def test_last_match
