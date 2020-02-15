@@ -1618,10 +1618,7 @@ class String
   # Translates *str* in place, using the same rules as String#tr. Returns *str*,
   # or `nil` if no changes were made.
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     str.tr!(from_str, to_str)   -> str or nil
-  #
-  def tr!: (String arg0, String arg1) -> String?
+  def tr!: (string from_str, string to_str) -> String?
 
   # Processes a copy of *str* as described under String#tr, then removes duplicate
   # characters in regions that were affected by the translation.
