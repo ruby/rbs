@@ -100,6 +100,13 @@ class RegexpTest < StdlibTest
     /(?i:a)/.encoding
   end
 
+  def test_eql?
+    /abc/.eql?(/abc/x)  #=> false
+    /abc/.eql?(/abc/i)  #=> false
+    /abc/.eql?(/abc/u)  #=> false
+    /abc/u.eql?(/abc/n) #=> false
+  end
+
   def test_fixed_encoding?
     /a/.fixed_encoding?  #=> false
     /a/u.fixed_encoding? #=> true
@@ -165,12 +172,5 @@ class RegexpTest < StdlibTest
 
   def test_to_s
     /ab+c/ix.to_s #=> "(?ix-m:ab+c)"
-  end
-
-  def test_eql?
-    /abc/.eql?(/abc/x)  #=> false
-    /abc/.eql?(/abc/i)  #=> false
-    /abc/.eql?(/abc/u)  #=> false
-    /abc/u.eql?(/abc/n) #=> false
   end
 end
