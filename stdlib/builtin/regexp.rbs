@@ -822,9 +822,6 @@ class Regexp < Object
   #     /^[a-z]*$/ === "HELLO" #=> false
   #     /^[A-Z]*$/ === "HELLO" #=> true
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     rxp === str   -> true or false
-  #
   def ===: (untyped other) -> bool
 
   # Match---Matches *rxp* against *str*.
