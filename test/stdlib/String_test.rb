@@ -1228,6 +1228,33 @@ class StringInstanceTest < Minitest::Test
     assert_send_type "() -> nil",
                      "a", :strip!
   end
+
+  def test_sub
+    assert_send_type "(Regexp, String) -> String",
+                     "a", :sub, /a/, "a"
+    assert_send_type "(String, String) -> String",
+                     "a", :sub, "a", "a"
+    assert_send_type "(ToStr, String) -> String",
+                     "a", :sub, ToStr.new("a"), "a"
+    assert_send_type "(Regexp, ToStr) -> String",
+                     "a", :sub, /a/, ToStr.new("a")
+    assert_send_type "(String, ToStr) -> String",
+                     "a", :sub, "a", ToStr.new("a")
+    assert_send_type "(ToStr, ToStr) -> String",
+                     "a", :sub, ToStr.new("a"), ToStr.new("a")
+    assert_send_type "(Regexp, Hash[String, String]) -> String",
+                     "a", :sub, /a/, { "a" => "a" }
+    assert_send_type "(String, Hash[String, String]) -> String",
+                     "a", :sub, "a", { "a" => "a" }
+    assert_send_type "(ToStr, Hash[String, String]) -> String",
+                     "a", :sub, ToStr.new("a"), { "a" => "a" }
+    assert_send_type "(Regexp) { (String) -> ToS } -> String",
+                     "a", :sub, /a/ do |str| ToS.new(str) end
+    assert_send_type "(String) { (String) -> ToS } -> String",
+                     "a", :sub, "a" do |str| ToS.new(str) end
+    assert_send_type "(ToStr) { (String) -> ToS } -> String",
+                     "a", :sub, ToStr.new("a") do |str| ToS.new(str) end
+  end
 end
 
 class StringTest < StdlibTest

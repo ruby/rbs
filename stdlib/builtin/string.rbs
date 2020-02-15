@@ -1418,13 +1418,8 @@ class String
   # `"..\\\\\\\\&.."`. You may want to use the block form to avoid a lot of
   # backslashes.
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     str.sub(pattern, replacement)         -> new_str
-  #     str.sub(pattern, hash)                -> new_str
-  #     str.sub(pattern) {|match| block }     -> new_str
-  #
-  def sub: (Regexp | String arg0, ?String | Hash[String, String] arg1) -> String
-         | (Regexp | String arg0) { (String arg0) -> untyped } -> String
+  def sub: (Regexp | string pattern, ?string | Hash[String, String] replacement) -> String
+         | (Regexp | string pattern) { (String match) -> _ToS } -> String
 
   # Performs the same substitution as String#sub in-place.
   #
