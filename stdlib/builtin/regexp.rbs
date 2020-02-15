@@ -995,9 +995,6 @@ class Regexp < Object
   #     /(.)(.)/.names
   #     #=> []
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     rxp.names   -> [name1, name2, ...]
-  #
   def names: () -> ::Array[String]
 
   # Returns the set of bits corresponding to the options used when creating this
