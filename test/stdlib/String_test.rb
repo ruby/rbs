@@ -1307,15 +1307,16 @@ class StringInstanceTest < Minitest::Test
     assert_send_type "(ToStr) { (String) -> ToS } -> nil",
                      "a", :sub!, ToStr.new("b") do |str| ToS.new(str) end
   end
+
+  def test_succ
+    assert_send_type "() -> String",
+                     "", :succ
+  end
 end
 
 class StringTest < StdlibTest
   target String
   using hook.refinement
-
-  def test_succ
-    "".succ
-  end
 
   def test_succ!
     "".succ
