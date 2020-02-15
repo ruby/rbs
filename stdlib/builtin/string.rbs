@@ -1375,10 +1375,7 @@ class String
   #     "  hello  ".strip!  #=> "hello"
   #     "hello".strip!      #=> nil
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     str.strip!   -> self or nil
-  #
-  def strip!: () -> String
+  def strip!: () -> self?
 
   # Returns a copy of `str` with the *first* occurrence of `pattern` replaced by
   # the second argument. The `pattern` is typically a Regexp; if given as a
