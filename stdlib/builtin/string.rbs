@@ -1869,9 +1869,6 @@ class String
   #     "\xc2".force_encoding("UTF-8").valid_encoding?      #=> false
   #     "\x80".force_encoding("UTF-8").valid_encoding?      #=> false
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     str.valid_encoding?  -> true or false
-  #
   def valid_encoding?: () -> bool
 
   private

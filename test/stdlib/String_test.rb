@@ -1574,6 +1574,13 @@ class StringInstanceTest < Minitest::Test
     assert_send_type "(ToStr) { (String) -> void } -> self",
                      "1", :upto, ToStr.new("2") do |s| s end
   end
+
+  def test_valid_encoding?
+    assert_send_type "() -> true",
+                     "", :valid_encoding?
+    assert_send_type "() -> false",
+                     "あ".force_encoding(Encoding::Shift_JIS), :valid_encoding?
+  end
 end
 
 class StringTest < StdlibTest
