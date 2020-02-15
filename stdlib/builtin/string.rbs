@@ -1336,10 +1336,7 @@ class String
   #     "  now   is  the".squeeze(" ")         #=> " now is the"
   #     "putters shoot balls".squeeze("m-z")   #=> "puters shot balls"
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     str.squeeze([other_str]*)    -> new_str
-  #
-  def squeeze: (?String arg0) -> String
+  def squeeze: (*string other_str) -> String
 
   # Squeezes *str* in place, returning either *str*, or `nil` if no changes were
   # made.

@@ -1163,6 +1163,19 @@ class StringInstanceTest < Minitest::Test
     assert_send_type "(Regexp, ToInt) { (String) -> void } -> self",
                      "a b c", :split, / /, ToInt.new(2) do |str| str end
   end
+
+  def test_squeeze
+    assert_send_type "() -> String",
+                     "aa  bb  cc", :squeeze
+    assert_send_type "(String) -> String",
+                     "aa  bb  cc", :squeeze, " "
+    assert_send_type "(ToStr) -> String",
+                     "aa  bb  cc", :squeeze, ToStr.new(" ")
+    assert_send_type "(String, String) -> String",
+                     "aa  bb  cc", :squeeze, "a-z", "b"
+    assert_send_type "(ToStr, ToStr) -> String",
+                     "aa  bb  cc", :squeeze, ToStr.new("a-z"), ToStr.new("b")
+  end
 end
 
 class StringTest < StdlibTest
