@@ -1188,13 +1188,8 @@ class String
   #     "abc\u3042\x81".scrub("*") #=> "abc\u3042*"
   #     "abc\u3042\xE3\x80".scrub{|bytes| '<'+bytes.unpack('H*')[0]+'>' } #=> "abc\u3042<e380>"
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     str.scrub -> new_str
-  #     str.scrub(repl) -> new_str
-  #     str.scrub{|bytes|} -> new_str
-  #
-  def scrub: (?String arg0) -> String
-           | (?String arg0) { (untyped arg0) -> untyped } -> String
+  def scrub: (?string repl) -> String
+           | () { (String bytes) -> string } -> String
 
   # If the string is invalid byte sequence then replace invalid bytes with given
   # replacement character, else returns self. If block is given, replace invalid

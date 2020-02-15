@@ -1046,6 +1046,19 @@ class StringInstanceTest < Minitest::Test
     assert_send_type "(ToStr) { (String) -> void } -> self",
                      "a", :scan, ToStr.new("a") do |arg| arg end
   end
+
+  def test_scrub
+    assert_send_type "() -> String",
+                     "\x81", :scrub
+    assert_send_type "(String) -> String",
+                     "\x81", :scrub, "*"
+    assert_send_type "(ToStr) -> String",
+                     "\x81", :scrub, ToStr.new("*")
+    assert_send_type "() { (String) -> String } -> String",
+                     "\x81", :scrub do |s| "*" end
+    assert_send_type "() { (String) -> ToStr } -> String",
+                     "\x81", :scrub do |s| ToStr.new("*") end
+  end
 end
 
 class StringTest < StdlibTest
