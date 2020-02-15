@@ -1657,9 +1657,6 @@ class String
   #     "\xE0".force_encoding('ISO-8859-1').unicode_normalize(:nfd)
   #                                        #=> Encoding::CompatibilityError raised
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     str.unicode_normalize(form=:nfc)
-  #
   def unicode_normalize: (?:nfc | :nfd | :nfkc | :nfkd) -> String
 
   # Destructive version of String#unicode_normalize, doing Unicode normalization

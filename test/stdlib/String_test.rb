@@ -1448,19 +1448,24 @@ class StringInstanceTest < Minitest::Test
     assert_send_type "() -> String",
                      "\"hello \\n ''\"", :undump
   end
+
+  def test_unicode_normalize
+    assert_send_type "() -> String",
+                     "a\u0300", :unicode_normalize
+    assert_send_type "(:nfc) -> String",
+                     "a\u0300", :unicode_normalize, :nfc
+    assert_send_type "(:nfd) -> String",
+                     "a\u0300", :unicode_normalize, :nfd
+    assert_send_type "(:nfkc) -> String",
+                     "a\u0300", :unicode_normalize, :nfkc
+    assert_send_type "(:nfkd) -> String",
+                     "a\u0300", :unicode_normalize, :nfkd
+  end
 end
 
 class StringTest < StdlibTest
   target String
   using hook.refinement
-
-  def test_unicode_normalize
-    "a\u0300".unicode_normalize
-    "a\u0300".unicode_normalize(:nfc)
-    "a\u0300".unicode_normalize(:nfd)
-    "a\u0300".unicode_normalize(:nfkc)
-    "a\u0300".unicode_normalize(:nfkd)
-  end
 
   def test_unicode_normalize!
     "a\u0300".unicode_normalize!
