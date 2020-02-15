@@ -1474,19 +1474,24 @@ class StringInstanceTest < Minitest::Test
     assert_send_type "(:nfkd) -> String",
                      "a\u0300", :unicode_normalize!, :nfkd
   end
+
+  def test_unicode_normalized?
+    assert_send_type "() -> false",
+                     "a\u0300", :unicode_normalized?
+    assert_send_type "(:nfc) -> false",
+                     "a\u0300", :unicode_normalized?, :nfc
+    assert_send_type "(:nfd) -> true",
+                     "a\u0300", :unicode_normalized?, :nfd
+    assert_send_type "(:nfkc) -> false",
+                     "a\u0300", :unicode_normalized?, :nfkc
+    assert_send_type "(:nfkd) -> true",
+                     "a\u0300", :unicode_normalized?, :nfkd
+  end
 end
 
 class StringTest < StdlibTest
   target String
   using hook.refinement
-
-  def test_unicode_normalized?
-    "a\u0300".unicode_normalized?
-    "a\u0300".unicode_normalized?(:nfc)
-    "a\u0300".unicode_normalized?(:nfd)
-    "a\u0300".unicode_normalized?(:nfkc)
-    "a\u0300".unicode_normalized?(:nfkd)
-  end
 
   def test_unpack1
     "a".unpack1("")

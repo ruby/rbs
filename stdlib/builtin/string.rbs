@@ -1677,9 +1677,6 @@ class String
   #     "\xE0".force_encoding('ISO-8859-1').unicode_normalized?
   #                                          #=> Encoding::CompatibilityError raised
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     str.unicode_normalized?(form=:nfc)
-  #
   def unicode_normalized?: (?:nfc | :nfd | :nfkc | :nfkd) -> bool
 
   # Decodes *str* (which may contain binary data) according to the format string,
