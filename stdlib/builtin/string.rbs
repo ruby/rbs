@@ -1792,10 +1792,7 @@ class String
   # *   I!<, i!<, I!>, and i!> are available since Ruby 1.9.3.
   #
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     str.unpack(format)    ->  anArray
-  #
-  def unpack: (String arg0) -> ::Array[(Integer | Float | String)?]
+  def unpack: (String format) -> Array[Integer | Float | String | nil]
 
   # Decodes *str* (which may contain binary data) according to the format string,
   # returning the first value extracted. See also String#unpack, Array#pack.

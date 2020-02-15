@@ -1487,6 +1487,19 @@ class StringInstanceTest < Minitest::Test
     assert_send_type "(:nfkd) -> true",
                      "a\u0300", :unicode_normalized?, :nfkd
   end
+
+  def test_unpack
+    assert_send_type "(String) -> [ ]",
+                     "a", :unpack, ""
+    assert_send_type "(String) -> [ nil ]",
+                     "", :unpack, "f"
+    assert_send_type "(String) -> Array[Integer]",
+                     "a", :unpack, "c"
+    assert_send_type "(String) -> Array[String]",
+                     "a", :unpack, "A"
+    assert_send_type "(String) -> Array[Float]",
+                     "\x00\x00\x00\x00", :unpack, "f"
+  end
 end
 
 class StringTest < StdlibTest
