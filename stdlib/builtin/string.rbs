@@ -1529,10 +1529,7 @@ class String
   #     "1100101".to_i(10)       #=> 1100101
   #     "1100101".to_i(16)       #=> 17826049
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     str.to_i(base=10)   -> integer
-  #
-  def to_i: (?Integer arg0) -> Integer
+  def to_i: (?int base) -> Integer
 
   # Returns the result of interpreting leading characters in `str` as a rational. 
   # Leading whitespace and extraneous characters past the end of a valid number

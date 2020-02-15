@@ -1378,6 +1378,15 @@ class StringInstanceTest < Minitest::Test
     assert_send_type "() -> Float",
                      "ruby", :to_f
   end
+
+  def test_to_i
+    assert_send_type "() -> Integer",
+                     "ruby", :to_i
+    assert_send_type "(Integer) -> Integer",
+                     "ruby", :to_i, 10
+    assert_send_type "(ToInt) -> Integer",
+                     "ruby", :to_i, ToInt.new(10)
+  end
 end
 
 class StringTest < StdlibTest
