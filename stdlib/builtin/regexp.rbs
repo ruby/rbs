@@ -911,9 +911,6 @@ class Regexp < Object
   #     r =~ "\xa1\xa2".force_encoding("euc-jp")        #=> Encoding::CompatibilityError
   #     r =~ "abc".force_encoding("euc-jp")             #=> nil
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     rxp.fixed_encoding?   -> true or false
-  #
   def fixed_encoding?: () -> bool
 
   # Produce a hash based on the text and options of this regular expression.
