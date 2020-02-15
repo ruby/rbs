@@ -34,6 +34,11 @@ class RegexpTest < StdlibTest
     Regexp.last_match('rhs')
   end
 
+  def test_quote
+    Regexp.quote('\*?{}.')
+    Regexp.quote(:[])
+  end
+
   def test_try_convert
     Regexp.try_convert(/re/)    #=> /re/
     Regexp.try_convert("re")    #=> nil
@@ -42,11 +47,6 @@ class RegexpTest < StdlibTest
     Regexp.try_convert(o)       #=> nil
     def o.to_regexp() /foo/ end
     Regexp.try_convert(o)       #=> /foo/
-  end
-
-  def test_quote
-    Regexp.quote('\*?{}.')
-    Regexp.quote(:[])
   end
 
   def test_union
