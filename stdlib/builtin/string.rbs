@@ -1262,19 +1262,7 @@ class String
   #     a["lo"]                #=> "lo"
   #     a["bye"]               #=> nil
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     str.slice(index)           -> new_str or nil
-  #     str.slice(start, length)   -> new_str or nil
-  #     str.slice(range)           -> new_str or nil
-  #     str.slice(regexp)          -> new_str or nil
-  #     str.slice(regexp, capture) -> new_str or nil
-  #     str.slice(match_str)       -> new_str or nil
-  #
-  def slice: (Integer arg0, ?Integer arg1) -> String?
-           | (::Range[Integer] | Regexp arg0) -> String?
-           | (Regexp arg0, ?Integer arg1) -> String?
-           | (Regexp arg0, ?String arg1) -> String?
-           | (String arg0) -> String?
+  alias slice []
 
   # Deletes the specified portion from *str*, and returns the portion deleted.
   #
