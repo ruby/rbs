@@ -1024,9 +1024,6 @@ class Regexp < Object
   #
   #     /\x20\+/.source  #=> "\\x20\\+"
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     rxp.source   -> str
-  #
   def source: () -> String
 
   # Returns a string containing the regular expression and its options (using the
