@@ -872,9 +872,6 @@ class Regexp < Object
   #     /a/i.casefold?          #=> true
   #     /(?i:a)/.casefold?      #=> false
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     rxp.casefold?   -> true or false
-  #
   def casefold?: () -> bool
 
   # Returns the Encoding object that represents the encoding of obj.
