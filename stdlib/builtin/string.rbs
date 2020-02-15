@@ -1627,10 +1627,7 @@ class String
   #     "hello".tr_s('el', '*')    #=> "h*o"
   #     "hello".tr_s('el', 'hx')   #=> "hhxo"
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     str.tr_s(from_str, to_str)   -> new_str
-  #
-  def tr_s: (String arg0, String arg1) -> String
+  def tr_s: (string from_str, string to_str) -> String
 
   # Performs String#tr_s processing on *str* in place, returning *str*, or `nil`
   # if no changes were made.
