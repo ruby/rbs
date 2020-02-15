@@ -964,10 +964,6 @@ class Regexp < Object
   #     /P.../.match?("Ruby")    #=> false
   #     $&                       #=> nil
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     rxp.match?(str)       -> true or false
-  #     rxp.match?(str,pos)   -> true or false
-  #
   def match?: (String? | Symbol | _ToStr arg0, ?Integer arg1) -> bool
 
   # Returns a hash representing information about named captures of *rxp*.
