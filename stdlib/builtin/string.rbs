@@ -1501,9 +1501,6 @@ class String
   #
   # See Kernel.Complex.
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     str.to_c  ->  complex
-  #
   def to_c: () -> Complex
 
   # Returns the result of interpreting leading characters in *str* as a floating

@@ -1368,6 +1368,11 @@ class StringInstanceTest < Minitest::Test
     assert_send_type "(Symbol, Symbol) -> nil",
                      "", :swapcase!, :turkic, :lithuanian
   end
+
+  def test_to_c
+    assert_send_type "() -> Complex",
+                     "ruby", :to_c
+  end
 end
 
 class StringTest < StdlibTest
