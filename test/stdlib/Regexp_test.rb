@@ -46,6 +46,7 @@ class RegexpTest < StdlibTest
 
   def test_quote
     Regexp.quote('\*?{}.')
+    Regexp.quote(:[])
   end
 
   def test_union
