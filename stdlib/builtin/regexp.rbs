@@ -804,9 +804,6 @@ class Regexp < Object
   #     /abc/  == /abc/u   #=> false
   #     /abc/u == /abc/n   #=> false
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     rxp == other_rxp      -> true or false
-  #
   def ==: (untyped other) -> bool
 
   # Case Equality---Used in case statements.
