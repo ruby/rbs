@@ -480,7 +480,7 @@ class Ruby::Signature::TypeParsingTest < Minitest::Test
 
     Parser.parse_type("-1").yield_self do |type|
       assert_instance_of Types::Literal, type
-      assert_equal -1, type.literal
+      assert_equal(-1, type.literal)
       assert_equal "-1", type.location.source
     end
 
