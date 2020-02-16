@@ -1890,8 +1890,5 @@ class String
   #     s = "hello"         #=> "hello"
   #     s.replace "world"   #=> "world"
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     str.replace(other_str)   -> str
-  #
-  def initialize_copy: (self object) -> self
+  alias initialize_copy replace
 end
