@@ -6,6 +6,25 @@ class StringSingletonTest < Minitest::Test
 
   testing "singleton(::String)"
 
+  def test_initialize
+    assert_send_type "() -> String",
+                     String, :new
+    assert_send_type "(String) -> String",
+                     String, :new, ""
+    assert_send_type "(String, encoding: Encoding) -> String",
+                     String, :new, "", encoding: Encoding::ASCII_8BIT
+    assert_send_type "(String, encoding: Encoding, capacity: Integer) -> String",
+                     String, :new, "", encoding: Encoding::ASCII_8BIT, capacity: 123
+    assert_send_type "(encoding: Encoding, capacity: Integer) -> String",
+                     String, :new, encoding: Encoding::ASCII_8BIT, capacity: 123
+    assert_send_type "(ToStr) -> String",
+                     String, :new, ToStr.new("")
+    assert_send_type "(encoding: ToStr) -> String",
+                     String, :new, encoding: ToStr.new('Shift_JIS')
+    assert_send_type "(capacity: ToInt) -> String",
+                     String, :new, capacity: ToInt.new(123)
+  end
+
   def test_try_convert
     assert_send_type "(String) -> String",
                      String, :try_convert, "str"
@@ -1580,18 +1599,5 @@ class StringInstanceTest < Minitest::Test
                      "", :valid_encoding?
     assert_send_type "() -> false",
                      "あ".force_encoding(Encoding::Shift_JIS), :valid_encoding?
-  end
-end
-
-class StringTest < StdlibTest
-  target String
-  using hook.refinement
-
-  def test_initialize
-    String.new
-    String.new("")
-    String.new("", encoding: Encoding::ASCII_8BIT)
-    String.new("", encoding: Encoding::ASCII_8BIT, capacity: 123)
-    String.new(encoding: Encoding::ASCII_8BIT, capacity: 123)
   end
 end
