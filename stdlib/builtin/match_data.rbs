@@ -1,4 +1,6 @@
-class MatchData < Object
+class MatchData
+  public
+
   def ==: (untyped arg0) -> bool
 
   def []: (Integer i_or_start_or_range_or_name) -> String?
@@ -63,7 +65,7 @@ class MatchData < Object
 
   def names: () -> ::Array[String]
 
-  def offset: (Integer | Symbol | String n) -> ([ Integer, Integer ] | [ nil, nil ])
+  def offset: (Integer | Symbol | String n) -> ([Integer, Integer] | [nil, nil])
 
   # Returns the portion of the original string after the current match.
   # Equivalent to the special variable `$'` .
@@ -82,6 +84,8 @@ class MatchData < Object
   # m.pre_match   #=> "T"
   # ```
   def pre_match: () -> String
+
+  def pretty_print: (untyped q) -> untyped
 
   # Returns the regexp.
   #
@@ -138,4 +142,8 @@ class MatchData < Object
   def to_s: () -> String
 
   def values_at: (*Integer | Symbol | String indexes) -> ::Array[String?]
+
+  private
+
+  def initialize_copy: (self object) -> self
 end
