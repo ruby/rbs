@@ -9,16 +9,17 @@ Rake::TestTask.new(:test) do |t|
   end
 end
 
-task :default => [:test, :stdlib_test, :rubocop, :validate]
+multitask :default => [:test, :stdlib_test, :rubocop, :validate]
 
-task :validate do
+task :validate => :parser do
   sh "rbs validate"
 end
 
-task :stdlib_test do
-  FileList["test/stdlib/*_test.rb"].each do |test|
+FileList["test/stdlib/*_test.rb"].each do |test|
+  multitask test => :parser do
     sh "ruby bin/test_runner.rb #{test}"
   end
+  multitask stdlib_test: test
 end
 
 task :rubocop do
