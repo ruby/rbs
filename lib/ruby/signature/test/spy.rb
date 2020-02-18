@@ -59,6 +59,7 @@ module Ruby
             spy = self
 
             object.singleton_class.class_eval do
+              remove_method spy.method_name
               define_method spy.method_name, spy.spy()
             end
           end
@@ -154,6 +155,7 @@ module Ruby
             spy = self
 
             mod.class_eval do
+              remove_method spy.method_name
               define_method spy.method_name, spy.spy()
             end
           end
@@ -162,6 +164,7 @@ module Ruby
             spy = self
 
             mod.class_eval do
+              remove_method spy.method_name
               define_method spy.method_name, spy.original_method
             end
           end

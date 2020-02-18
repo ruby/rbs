@@ -40,6 +40,10 @@ class Ruby::Signature::TestSpyTest < Minitest::Test
     end
 
     obj = klass.new
+    def obj.fib; end
+    def obj.instance_evaling; end
+    def obj.raising; end
+    def obj.yielding; end
 
     Test::Spy.singleton_method(obj, :fib) do |spy|
       trace = []
