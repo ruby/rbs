@@ -109,10 +109,7 @@ class MatchData
   #     p m.end(:foo)    #=> 1
   #     p m.end(:bar)    #=> 3
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     mtch.end(n)   -> integer
-  #
-  def `end`: (Integer | String | Symbol n) -> Integer?
+  def `end`: (Integer | String | Symbol n_or_name) -> Integer?
 
   # Equality---Two matchdata are equal if their target strings, patterns, and
   # matched positions are identical.
