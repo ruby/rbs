@@ -32,4 +32,9 @@ class MatchDataTest < StdlibTest
     $~.begin :first
     $~.begin :third
   end
+
+  def test_caputres
+    /(?<first>foo)(?<second>bar)(?<third>Baz)?/ =~ "foobarbaz"
+    $~.captures
+  end
 end
