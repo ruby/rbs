@@ -61,4 +61,8 @@ class MatchDataTest < StdlibTest
   def test_inspect
     'foo'.match('f').inspect
   end
+
+  def test_length
+    'foo'.match('f').length
+  end
 end

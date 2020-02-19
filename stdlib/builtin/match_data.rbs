@@ -145,9 +145,6 @@ class MatchData
   #     m.length   #=> 5
   #     m.size     #=> 5
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     mtch.length   -> integer
-  #
   def length: () -> Integer
 
   # Returns a Hash using named capture.
