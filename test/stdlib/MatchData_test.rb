@@ -11,11 +11,15 @@ class MatchDataTest < StdlibTest
 
   # test_[]
   def test_square_bracket
-    /(?<lft>foo)(?<rgt>bar)/ =~ "foobarbaz"
+    /(?<first>foo)(?<second>bar)(?<third>Baz)?/ =~ "foobarbaz"
     $~[0]
+    $~[3]
     $~[0..2]
     $~[0, 3]
-    $~[:rgt]
+    $~['first']
+    $~['third']
+    $~[:first]
+    $~[:third]
   end
 
   # test_begin
