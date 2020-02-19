@@ -6,7 +6,8 @@ class MatchDataTest < StdlibTest
 
   # test_==
   def test_equal
-    /re/ == /re/
+    foo = 'foo'
+    foo.match('f') == foo.match('f')
   end
 
   # test_[]
@@ -46,5 +47,10 @@ class MatchDataTest < StdlibTest
     $~.end 'third'
     $~.end :first
     $~.end :third 
+  end
+
+  def test_eql?
+    foo = 'foo'
+    foo.match('f').eql? foo.match('f')
   end
 end
