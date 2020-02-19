@@ -228,9 +228,6 @@ class MatchData
   #     m = /(.)(.)(\d+)(\d)/.match("THX1138.")
   #     m.string   #=> "THX1138."
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     mtch.string   -> str
-  #
   def string: () -> String
 
   # Returns the array of matches.
