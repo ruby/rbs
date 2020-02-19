@@ -224,9 +224,6 @@ class MatchData
   #     m.length   #=> 5
   #     m.size     #=> 5
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     mtch.size     -> integer
-  #
   def size: () -> Integer
 
   # Returns a frozen copy of the string passed in to `match`.

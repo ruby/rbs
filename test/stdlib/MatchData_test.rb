@@ -91,4 +91,8 @@ class MatchDataTest < StdlibTest
   def test_pre_match
     'foo'.match('o').pre_match
   end
+
+  def test_size
+    'foo'.match('f').size
+  end
 end
