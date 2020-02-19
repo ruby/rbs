@@ -114,9 +114,6 @@ class MatchData
   # Equality---Two matchdata are equal if their target strings, patterns, and
   # matched positions are identical.
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     mtch.eql?(mtch2)   -> true or false
-  #
   def eql?: (untyped other) -> bool
 
   # Produce a hash based on the target string, regexp and matched positions of
