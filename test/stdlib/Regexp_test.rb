@@ -5,47 +5,62 @@ class RegexpTest < StdlibTest
   using hook.refinement
 
   def test_new
-    r1 = Regexp.new('^a-z+:\\s+\w+') #=> /^a-z+:\s+\w+/
-    r2 = Regexp.new('cat', true)     #=> /cat/i
-    r3 = Regexp.new(r2)              #=> /cat/i
-    r4 = Regexp.new('dog', Regexp::EXTENDED | Regexp::IGNORECASE) #=> /dog/ix
+    Regexp.new('dog')
+    Regexp.new('dog', option = Regexp::IGNORECASE)
+    Regexp.new('dog', code = 'n')
+    Regexp.new('dog', option = Regexp::IGNORECASE, code = 'n')
+    Regexp.new(/^a-z+:\\s+\w+/)
+  end
+
+  def test_compile
+    Regexp.compile('dog')
+    Regexp.compile('dog', option = Regexp::IGNORECASE)
+    Regexp.compile('dog', code = 'n')
+    Regexp.compile('dog', option = Regexp::IGNORECASE, code = 'n')
+    Regexp.compile(/^a-z+:\\s+\w+/)
   end
 
   def test_escape
     Regexp.escape('\*?{}.')
+    Regexp.escape(:[])
   end
 
-  def test_try_convert
-    Regexp.try_convert(/re/)    #=> /re/
-    Regexp.try_convert("re")    #=> nil
-
-    o = Object.new
-    Regexp.try_convert(o)       #=> nil
-    def o.to_regexp() /foo/ end
-    Regexp.try_convert(o)       #=> /foo/
-  end
-
-  def test_compile
-    r1 = Regexp.compile('^a-z+:\\s+\w+') #=> /^a-z+:\s+\w+/
-    r2 = Regexp.compile('cat', true)     #=> /cat/i
-    r3 = Regexp.compile(r2)              #=> /cat/i
-    r4 = Regexp.compile('dog', Regexp::EXTENDED | Regexp::IGNORECASE) #=> /dog/ix
+  def test_last_match
+    /c(.)t/ =~ 'cat'
+    Regexp.last_match
+    Regexp.last_match(0)
+    /(?<lhs>\w+)\s*=\s*(?<rhs>\w+)/ =~ "var = val"
+    Regexp.last_match(:lhs)
+    Regexp.last_match('rhs')
   end
 
   def test_quote
     Regexp.quote('\*?{}.')
+    Regexp.quote(:[])
+  end
+
+  def test_try_convert
+    Regexp.try_convert(/re/)
+    Regexp.try_convert("re")
+
+    o = Object.new
+    Regexp.try_convert(o)
+    def o.to_regexp() /foo/ end
+    Regexp.try_convert(o)
   end
 
   def test_union
-    Regexp.union                              #=> /(?!)/
-    Regexp.union("penzance")                  #=> /penzance/
-    Regexp.union("a+b*c")                     #=> /a\+b\*c/
-    Regexp.union("skiing", "sledding")        #=> /skiing|sledding/
-    Regexp.union("skiing", "sledding", "sky") #=> /skiing|sledding/
-    Regexp.union(["skiing", "sledding"])      #=> /skiing|sledding/
-    Regexp.union(/dogs/, /cats/i)             #=> /(?-mix:dogs)|(?i-mx:cats)/
-    Regexp.union("dogs", /cats/i)             #=> /dogs|(?i-mx:cats)/
-    Regexp.union(["dogs", /cats/i])           #=> /dogs|(?i-mx:cats)/
+    Regexp.union
+    Regexp.union("penzance")
+    Regexp.union(/penzance/i)
+    Regexp.union("skiing", "sledding")
+    Regexp.union("dogs", /cats/i)
+    Regexp.union(/cats/i, "dogs")
+    Regexp.union(/dogs/, /cats/i)
+    Regexp.union("skiing", "sledding", "sky")
+    Regexp.union([/dogs/i, /cats/i])
+    Regexp.union(["skiing", "sledding"])
+    Regexp.union(["dogs", /cats/i])
   end
 
   # test_==
@@ -85,6 +100,13 @@ class RegexpTest < StdlibTest
     /(?i:a)/.encoding
   end
 
+  def test_eql?
+    /abc/.eql?(/abc/x)  #=> false
+    /abc/.eql?(/abc/i)  #=> false
+    /abc/.eql?(/abc/u)  #=> false
+    /abc/u.eql?(/abc/n) #=> false
+  end
+
   def test_fixed_encoding?
     /a/.fixed_encoding?  #=> false
     /a/u.fixed_encoding? #=> true
@@ -106,12 +128,10 @@ class RegexpTest < StdlibTest
     o = Class.new { def to_str; "object"; end }.new
     /R.../.match(o)         #=> nil
     /R.../.match("Ruby", 1) #=> nil
-    /M(.*)/.match("Matz") do |m|
-      # nop
-    end
-    /M(.*)/.match("Matz", 1) do |m|
-      # nop
-    end
+    /M(.*)/.match("Matz") { |m| 'match' }
+    /M(.*)/.match("Matz", 1) { |m| 'match' }
+    /N(.*)/.match("Matz") { |m| 'match' }
+    /N(.*)/.match("Matz", 1) { |m| 'match' }
   end
 
   def test_match?
@@ -152,10 +172,10 @@ class RegexpTest < StdlibTest
     /ab+c/ix.to_s #=> "(?ix-m:ab+c)"
   end
 
-  def test_eql?
-    /abc/.eql?(/abc/x)  #=> false
-    /abc/.eql?(/abc/i)  #=> false
-    /abc/.eql?(/abc/u)  #=> false
-    /abc/u.eql?(/abc/n) #=> false
+  # test_~
+  def test_tilde
+    $_ = "input data"
+    ~ /at/
+    ~ /b/
   end
 end
