@@ -87,4 +87,8 @@ class MatchDataTest < StdlibTest
   def test_post_match
     'foo'.match('f').post_match
   end
+
+  def test_pre_match
+    'foo'.match('o').pre_match
+  end
 end

@@ -204,9 +204,6 @@ class MatchData
   #     m = /(.)(.)(\d+)(\d)/.match("THX1138.")
   #     m.pre_match   #=> "T"
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     mtch.pre_match   -> str
-  #
   def pre_match: () -> String
 
   def pretty_print: (untyped q) -> untyped
