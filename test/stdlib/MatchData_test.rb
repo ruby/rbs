@@ -69,4 +69,8 @@ class MatchDataTest < StdlibTest
   def test_named_captures
     'foo'.match('(?<a>foo)').named_captures
   end
+
+  def test_names
+    'foo'.match('(?<a>foo)').names
+  end
 end

@@ -175,9 +175,6 @@ class MatchData
   #     m = /(?<x>.)(?<y>.)?/.match("a") #=> #<MatchData "a" x:"a" y:nil>
   #     m.names                          #=> ["x", "y"]
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     mtch.names   -> [name1, name2, ...]
-  #
   def names: () -> ::Array[String]
 
   # Returns a two-element array containing the beginning and ending offsets of the
