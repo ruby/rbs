@@ -81,6 +81,8 @@ class StringInstanceTest < Minitest::Test
                      a, :<<, ToStr.new("world")
     assert_send_type "(Integer) -> String",
                      a, :<<, 33
+    refute_send_type "(ToInt) -> String",
+                     a, :<<, ToInt.new(33)
   end
 
   def test_cmp
