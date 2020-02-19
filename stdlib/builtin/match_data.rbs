@@ -137,9 +137,6 @@ class MatchData
   #     puts /(?<foo>.)(?<bar>.)(?<baz>.)/.match("hoge").inspect
   #     #=> #<MatchData "hog" foo:"h" bar:"o" baz:"g">
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     mtch.inspect   -> str
-  #
   def inspect: () -> String
 
   # Returns the number of elements in the match array.

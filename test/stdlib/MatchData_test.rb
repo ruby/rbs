@@ -57,4 +57,8 @@ class MatchDataTest < StdlibTest
   def test_hash
     'foo'.match('f').hash
   end
+
+  def test_inspect
+    'foo'.match('f').inspect
+  end
 end
