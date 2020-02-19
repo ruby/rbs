@@ -1,43 +1,11 @@
-# A `File` is an abstraction of any file object accessible by the program
-# and is closely associated with class `IO` . `File` includes the methods
-# of module `FileTest` as class methods, allowing you to write (for
-# example) `File.exist?("foo")` .
-#
-# In the description of [File](File) methods,
-# *permission bits* are a platform-specific set of bits that indicate
-# permissions of a file. On Unix-based systems, permissions are viewed as
-# a set of three octets, for the owner, the group, and the rest of the
-# world. For each of these entities, permissions may be set to read,
-# write, or execute the file:
-#
-# The permission bits `0644` (in octal) would thus be interpreted as
-# read/write for owner, and read-only for group and other. Higher-order
-# bits may also be used to indicate the type of file (plain, directory,
-# pipe, socket, and so on) and various other special features. If the
-# permissions are for a directory, the meaning of the execute bit changes;
-# when set the directory can be searched.
-#
-# On non-Posix operating systems, there may be only the ability to make a
-# file read-only or read-write. In this case, the remaining permission
-# bits will be synthesized to resemble typical values. For instance, on
-# Windows NT the default permission bits are `0644`, which means
-# read/write for owner, read-only for all others. The only change that can
-# be made is to make the file read-only, which is reported as `0444` .
-#
-# Various constants for the methods in [File](File)
-# can be found in
-# [File::Constants](https://ruby-doc.org/core-2.6.3/File/Constants.html).
 class File < IO
-  def initialize: (String file, ?String mode, ?String perm, ?Integer opt) -> void
   def self.absolute_path: (String file, ?String dir) -> String
+
+  def self.absolute_path?: (untyped) -> untyped
 
   def self.atime: (untyped file) -> Time
 
   def self.basename: (String file, ?String suffix) -> String
-
-  def self.binread: (String arg0) -> String
-                  | (String arg0, ?Integer arg1) -> String
-                  | (String arg0, ?Integer arg1, ?Integer arg2) -> String
 
   def self.birthtime: (untyped file) -> Time
 
@@ -57,11 +25,15 @@ class File < IO
 
   def self.dirname: (String file) -> String
 
+  def self.empty?: (untyped) -> untyped
+
   def self.executable?: (String file) -> bool
 
   def self.executable_real?: (String file) -> bool
 
   def self.exist?: (untyped file) -> bool
+
+  def self.exists?: (untyped) -> untyped
 
   def self.expand_path: (untyped file, ?untyped dir) -> String
 
@@ -72,6 +44,7 @@ class File < IO
   def self.fnmatch: (String pattern, String path, ?Integer flags) -> bool
 
   def self.fnmatch?: (String pattern, String path, ?Integer flags) -> bool
+
   def self.ftype: (String file) -> String
 
   def self.grpowned?: (String | IO file) -> bool
@@ -87,6 +60,10 @@ class File < IO
   def self.link: (String old, String new) -> Integer
 
   def self.lstat: (String file) -> File::Stat
+
+  def self.lutime: (*untyped) -> untyped
+
+  def self.mkfifo: (*untyped) -> untyped
 
   def self.mtime: (untyped file) -> Time
 
@@ -133,6 +110,7 @@ class File < IO
   def self.umask: (?Integer arg0) -> Integer
 
   def self.unlink: (*String files) -> Integer
+
   def self.utime: (Time atime, Time mtime, *String files) -> Integer
 
   def self.world_readable?: (String | IO file) -> Integer?
@@ -144,6 +122,8 @@ class File < IO
   def self.writable_real?: (String file) -> Integer?
 
   def self.zero?: (String | IO file) -> Integer?
+
+  public
 
   # Returns the last access time (a `Time` object) for *file* , or epoch if
   # *file* has not been accessed.
@@ -237,84 +217,21 @@ class File < IO
   # File.new("/tmp/../tmp/xxx", "w").path   #=> "/tmp/../tmp/xxx"
   # ```
   def to_path: () -> String
+
   def truncate: (Integer arg0) -> Integer
+
+  private
+
+  incompatible def initialize: (String file, ?String mode, ?String perm, ?Integer opt) -> void
 end
 
-File::ALT_SEPARATOR: NilClass
-
-File::APPEND: Integer
-
-File::BINARY: Integer
-
-File::CREAT: Integer
-
-File::DIRECT: Integer
-
-File::DSYNC: Integer
-
-File::EXCL: Integer
-
-File::FNM_CASEFOLD: Integer
-
-File::FNM_DOTMATCH: Integer
-
-File::FNM_EXTGLOB: Integer
-
-File::FNM_NOESCAPE: Integer
-
-File::FNM_PATHNAME: Integer
-
-File::FNM_SHORTNAME: Integer
-
-File::FNM_SYSCASE: Integer
-
-File::LOCK_EX: Integer
-
-File::LOCK_NB: Integer
-
-File::LOCK_SH: Integer
-
-File::LOCK_UN: Integer
-
-File::NOATIME: Integer
-
-File::NOCTTY: Integer
-
-File::NOFOLLOW: Integer
-
-File::NONBLOCK: Integer
-
-File::NULL: String
+File::ALT_SEPARATOR: untyped?
 
 File::PATH_SEPARATOR: String
 
-File::RDONLY: Integer
-
-File::RDWR: Integer
-
-File::RSYNC: Integer
-
-File::SEEK_CUR: Integer
-
-File::SEEK_DATA: Integer
-
-File::SEEK_END: Integer
-
-File::SEEK_HOLE: Integer
-
-File::SEEK_SET: Integer
-
 File::SEPARATOR: String
 
-File::SHARE_DELETE: Integer
-
-File::SYNC: Integer
-
-File::TMPFILE: Integer
-
-File::TRUNC: Integer
-
-File::WRONLY: Integer
+File::Separator: String
 
 module File::Constants
 end
