@@ -73,4 +73,14 @@ class MatchDataTest < StdlibTest
   def test_names
     'foo'.match('(?<a>foo)').names
   end
+
+  def test_offset
+    /(?<first>foo)(?<second>bar)(?<third>Baz)?/ =~ "foobarbaz"
+    $~.offset 0
+    $~.offset 3
+    $~.offset 'first'
+    $~.offset 'third'
+    $~.offset :first
+    $~.offset :third 
+  end
 end
