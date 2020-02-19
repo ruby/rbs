@@ -85,10 +85,7 @@ class MatchData
   #     p m.begin(:foo)  #=> 0
   #     p m.begin(:bar)  #=> 2
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     mtch.begin(n)   -> integer
-  #
-  def begin: (Integer | String | Symbol n) -> Integer?
+  def begin: (Integer | String | Symbol n_or_name) -> Integer?
 
   # Returns the array of captures; equivalent to `mtch.to_a[1..-1]`.
   #
