@@ -121,9 +121,6 @@ class MatchData
   #
   # See also Object#hash.
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     mtch.hash   -> integer
-  #
   def hash: () -> Integer
 
   # Returns a printable version of *mtch*.

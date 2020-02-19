@@ -53,4 +53,8 @@ class MatchDataTest < StdlibTest
     foo = 'foo'
     foo.match('f').eql? foo.match('f')
   end
+
+  def test_hash
+    'foo'.match('f').hash
+  end
 end
