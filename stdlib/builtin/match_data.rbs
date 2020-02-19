@@ -49,10 +49,7 @@ class MatchData
   # Equality---Two matchdata are equal if their target strings, patterns, and
   # matched positions are identical.
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     mtch == mtch2   -> true or false
-  #
-  def ==: (untyped arg0) -> bool
+  def ==: (untyped other) -> bool
 
   # Match Reference -- MatchData acts as an array, and may be accessed using the
   # normal array indexing techniques.  `mtch[0]` is equivalent to the special
