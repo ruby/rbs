@@ -65,4 +65,8 @@ class MatchDataTest < StdlibTest
   def test_length
     'foo'.match('f').length
   end
+
+  def test_named_captures
+    'foo'.match('(?<a>foo)').named_captures
+  end
 end

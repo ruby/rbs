@@ -164,9 +164,6 @@ class MatchData
   #     m = /(?<a>x)|(?<a>y)/.match("x")
   #     m.named_captures #=> {"a" => "x"}
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     mtch.named_captures -> hash
-  #
   def named_captures: () -> ::Hash[String, String?]
 
   # Returns a list of names of captures as an array of strings. It is same as
