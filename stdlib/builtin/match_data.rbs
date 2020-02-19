@@ -188,10 +188,7 @@ class MatchData
   #     p m.offset(:foo) #=> [0, 1]
   #     p m.offset(:bar) #=> [2, 3]
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     mtch.offset(n)   -> array
-  #
-  def offset: (Integer | Symbol | String n) -> ([ Integer, Integer ] | [ nil, nil ])
+  def offset: (Integer | Symbol | String n_or_name) -> ([ Integer, Integer ] | [ nil, nil ])
 
   # Returns the portion of the original string after the current match. Equivalent
   # to the special variable `$'`.
