@@ -213,9 +213,6 @@ class MatchData
   #     m = /a.*b/.match("abc")
   #     m.regexp #=> /a.*b/
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     mtch.regexp   -> regexp
-  #
   def regexp: () -> Regexp
 
   # Returns the number of elements in the match array.
