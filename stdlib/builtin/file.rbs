@@ -2,32 +2,33 @@
 # and is closely associated with class `IO` . `File` includes the methods
 # of module `FileTest` as class methods, allowing you to write (for
 # example) `File.exist?("foo")` .
-# 
+#
 # In the description of [File](File) methods,
 # *permission bits* are a platform-specific set of bits that indicate
 # permissions of a file. On Unix-based systems, permissions are viewed as
 # a set of three octets, for the owner, the group, and the rest of the
 # world. For each of these entities, permissions may be set to read,
 # write, or execute the file:
-# 
+#
 # The permission bits `0644` (in octal) would thus be interpreted as
 # read/write for owner, and read-only for group and other. Higher-order
 # bits may also be used to indicate the type of file (plain, directory,
 # pipe, socket, and so on) and various other special features. If the
 # permissions are for a directory, the meaning of the execute bit changes;
 # when set the directory can be searched.
-# 
+#
 # On non-Posix operating systems, there may be only the ability to make a
 # file read-only or read-write. In this case, the remaining permission
 # bits will be synthesized to resemble typical values. For instance, on
 # Windows NT the default permission bits are `0644`, which means
 # read/write for owner, read-only for all others. The only change that can
 # be made is to make the file read-only, which is reported as `0444` .
-# 
+#
 # Various constants for the methods in [File](File)
 # can be found in
 # [File::Constants](https://ruby-doc.org/core-2.6.3/File/Constants.html).
 class File < IO
+  def initialize: (String file, ?String mode, ?String perm, ?Integer opt) -> void
   def self.absolute_path: (String file, ?String dir) -> String
 
   def self.atime: (untyped file) -> Time
@@ -70,7 +71,8 @@ class File < IO
 
   def self.fnmatch: (String pattern, String path, ?Integer flags) -> bool
 
-  def self.`ftype`: (String file) -> String
+  def self.fnmatch?: (String pattern, String path, ?Integer flags) -> bool
+  def self.ftype: (String file) -> String
 
   def self.grpowned?: (String | IO file) -> bool
 
@@ -130,6 +132,7 @@ class File < IO
 
   def self.umask: (?Integer arg0) -> Integer
 
+  def self.unlink: (*String files) -> Integer
   def self.utime: (Time atime, Time mtime, *String files) -> Integer
 
   def self.world_readable?: (String | IO file) -> Integer?
@@ -144,18 +147,18 @@ class File < IO
 
   # Returns the last access time (a `Time` object) for *file* , or epoch if
   # *file* has not been accessed.
-  # 
+  #
   # ```ruby
   # File.new("testfile").atime   #=> Wed Dec 31 18:00:00 CST 1969
   # ```
   def atime: () -> Time
 
   # Returns the birth time for *file* .
-  # 
+  #
   # ```ruby
   # File.new("testfile").birthtime   #=> Wed Apr 09 08:53:14 CDT 2003
   # ```
-  # 
+  #
   # If the platform doesn’t have birthtime, raises
   # [NotImplementedError](https://ruby-doc.org/core-2.6.3/NotImplementedError.html)
   # .
@@ -167,9 +170,9 @@ class File < IO
 
   # Returns the change time for *file* (that is, the time directory
   # information about the file was changed, not the file itself).
-  # 
+  #
   # Note that on Windows (NTFS), returns creation time (birth time).
-  # 
+  #
   # ```ruby
   # File.new("testfile").ctime   #=> Wed Apr 09 08:53:14 CDT 2003
   # ```
@@ -177,11 +180,9 @@ class File < IO
 
   def flock: (Integer arg0) -> (Integer | TrueClass | FalseClass)
 
-  def initialize: (String file, ?String mode, ?String perm, ?Integer opt) -> void
-
   # Same as `IO#stat`, but does not follow the last symbolic link. Instead,
   # reports on the link itself.
-  # 
+  #
   # ```ruby
   # File.symlink("testfile", "link2test")   #=> 0
   # File.stat("testfile").size              #=> 66
@@ -192,7 +193,7 @@ class File < IO
   def lstat: () -> File::Stat
 
   # Returns the modification time for *file* .
-  # 
+  #
   # ```ruby
   # File.new("testfile").mtime   #=> Wed Apr 09 08:53:14 CDT 2003
   # ```
@@ -200,14 +201,14 @@ class File < IO
 
   # Returns the pathname used to create *file* as a string. Does not
   # normalize the name.
-  # 
+  #
   # The pathname may not point to the file corresponding to *file* . For
   # instance, the pathname becomes void when the file has been moved or
   # deleted.
-  # 
+  #
   # This method raises `IOError` for a *file* created using
   # `File::Constants::TMPFILE` because they don’t have a pathname.
-  # 
+  #
   # ```ruby
   # File.new("testfile").path               #=> "testfile"
   # File.new("/tmp/../tmp/xxx", "w").path   #=> "/tmp/../tmp/xxx"
@@ -215,33 +216,28 @@ class File < IO
   def path: () -> String
 
   # Returns the size of *file* in bytes.
-  # 
+  #
   # ```ruby
   # File.new("testfile").size   #=> 66
   # ```
   def size: () -> Integer
 
-  def truncate: (Integer arg0) -> Integer
-
-  def self.fnmatch?: (String pattern, String path, ?Integer flags) -> bool
-
-  def self.unlink: (*String files) -> Integer
-
   # Returns the pathname used to create *file* as a string. Does not
   # normalize the name.
-  # 
+  #
   # The pathname may not point to the file corresponding to *file* . For
   # instance, the pathname becomes void when the file has been moved or
   # deleted.
-  # 
+  #
   # This method raises `IOError` for a *file* created using
   # `File::Constants::TMPFILE` because they don’t have a pathname.
-  # 
+  #
   # ```ruby
   # File.new("testfile").path               #=> "testfile"
   # File.new("/tmp/../tmp/xxx", "w").path   #=> "/tmp/../tmp/xxx"
   # ```
   def to_path: () -> String
+  def truncate: (Integer arg0) -> Integer
 end
 
 File::ALT_SEPARATOR: NilClass
@@ -386,6 +382,7 @@ File::Constants::WRONLY: Integer
 class File::Stat < Object
   include Comparable
 
+  def initialize: (String file) -> Object
   def <=>: (File::Stat other) -> Integer?
 
   def atime: () -> Time
@@ -416,13 +413,11 @@ class File::Stat < Object
 
   def file?: () -> bool
 
-  def `ftype`: () -> String
+  def ftype: () -> String
 
   def gid: () -> Integer
 
   def grpowned?: () -> bool
-
-  def initialize: (String file) -> Object
 
   def ino: () -> Integer
 
