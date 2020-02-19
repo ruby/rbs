@@ -17,4 +17,15 @@ class MatchDataTest < StdlibTest
     $~[0, 3]
     $~[:rgt]
   end
+
+  # test_begin
+  def test_begin
+    /(?<first>foo)(?<second>bar)(?<third>Baz)?/ =~ "foobarbaz"
+    $~.begin 0
+    $~.begin 3
+    $~.begin 'first'
+    $~.begin 'third'
+    $~.begin :first
+    $~.begin :third
+  end
 end
