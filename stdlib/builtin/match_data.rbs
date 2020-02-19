@@ -70,7 +70,7 @@ class MatchData
   #     m[:foo]    #=> "aaa"
   #
   def []: (Integer idx) -> String?
-        | (Integer start, ?Integer length) -> ::Array[String]
+        | (Integer start, Integer length) -> ::Array[String]
         | (::Range[Integer] range) -> ::Array[String]
         | (String | Symbol name) -> String?
 
