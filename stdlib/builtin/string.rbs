@@ -842,8 +842,8 @@ class String
   # `"..\\\\\\\\&.."`. You may want to use the block form to avoid a lot of
   # backslashes.
   #
-  def gsub: (Regexp | string pattern, ?string replacement) -> String
-          | (Regexp | string pattern, ?Hash[String, String] hash) -> String
+  def gsub: (Regexp | string pattern, string replacement) -> String
+          | (Regexp | string pattern, Hash[String, String] hash) -> String
           | (Regexp | string pattern) { (String match) -> _ToS } -> String
           | (Regexp | string pattern) -> ::Enumerator[String, self]
 
@@ -851,8 +851,8 @@ class String
   # if no substitutions were performed.  If no block and no *replacement* is
   # given, an enumerator is returned instead.
   #
-  def gsub!: (Regexp | string pattern, ?string replacement) -> String?
-           | (Regexp | string pattern, ?Hash[String, String] hash) -> String?
+  def gsub!: (Regexp | string pattern, string replacement) -> String?
+           | (Regexp | string pattern, Hash[String, String] hash) -> String?
            | (Regexp | string pattern) { (String match) -> _ToS } -> String?
            | (Regexp | string pattern) -> ::Enumerator[String, self]
 
@@ -1418,7 +1418,7 @@ class String
   # `"..\\\\\\\\&.."`. You may want to use the block form to avoid a lot of
   # backslashes.
   #
-  def sub: (Regexp | string pattern, ?string | Hash[String, String] replacement) -> String
+  def sub: (Regexp | string pattern, string | Hash[String, String] replacement) -> String
          | (Regexp | string pattern) { (String match) -> _ToS } -> String
 
   # Performs the same substitution as String#sub in-place.
@@ -1426,7 +1426,7 @@ class String
   # Returns `str` if a substitution was performed or `nil` if no substitution was
   # performed.
   #
-  def sub!: (Regexp | string pattern, ?string | Hash[String, String] replacement) -> self?
+  def sub!: (Regexp | string pattern, string | Hash[String, String] replacement) -> self?
           | (Regexp | string pattern) { (String match) -> _ToS } -> String?
 
   # Returns the successor to *str*. The successor is calculated by incrementing
