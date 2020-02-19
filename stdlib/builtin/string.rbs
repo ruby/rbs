@@ -1883,7 +1883,7 @@ class String
   # buffer. This may improve performance, when the string will be concatenated
   # many times (causing many realloc calls).
   #
-  incompatible def initialize: (?string str, ?encoding: Encoding | string, ?capacity: int) -> void
+  def initialize: (?string str, ?encoding: Encoding | string, ?capacity: int) -> void
 
   # Replaces the contents of *str* with the corresponding values in *other_str*.
   #
