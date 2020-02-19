@@ -196,9 +196,6 @@ class MatchData
   #     m = /(.)(.)(\d+)(\d)/.match("THX1138: The Movie")
   #     m.post_match   #=> ": The Movie"
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     mtch.post_match   -> str
-  #
   def post_match: () -> String
 
   # Returns the portion of the original string before the current match.

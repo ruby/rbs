@@ -83,4 +83,8 @@ class MatchDataTest < StdlibTest
     $~.offset :first
     $~.offset :third 
   end
+
+  def test_post_match
+    'foo'.match('f').post_match
+  end
 end
