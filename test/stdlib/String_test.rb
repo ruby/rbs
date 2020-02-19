@@ -386,6 +386,8 @@ class StringInstanceTest < Minitest::Test
                      "hello", :concat, ToStr.new(" ")
     assert_send_type "(String, Integer) -> String",
                      "hello", :concat, "world", 33
+    refute_send_type "(ToInt) -> String",
+                     "hello", :concat, ToInt.new
   end
 
   def test_count
