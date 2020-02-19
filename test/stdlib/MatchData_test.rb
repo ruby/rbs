@@ -37,4 +37,14 @@ class MatchDataTest < StdlibTest
     /(?<first>foo)(?<second>bar)(?<third>Baz)?/ =~ "foobarbaz"
     $~.captures
   end
+
+  def test_end
+    /(?<first>foo)(?<second>bar)(?<third>Baz)?/ =~ "foobarbaz"
+    $~.end 0
+    $~.end 3
+    $~.end 'first'
+    $~.end 'third'
+    $~.end :first
+    $~.end :third 
+  end
 end
