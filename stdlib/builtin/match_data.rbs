@@ -69,16 +69,10 @@ class MatchData
   #     m["foo"]   #=> "aaa"
   #     m[:foo]    #=> "aaa"
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     mtch[i]               -> str or nil
-  #     mtch[start, length]   -> array
-  #     mtch[range]           -> array
-  #     mtch[name]            -> str or nil
-  #
-  def []: (Integer i_or_start_or_range_or_name) -> String?
-        | (Integer i_or_start_or_range_or_name, ?Integer length) -> ::Array[String]
-        | (::Range[Integer] i_or_start_or_range_or_name) -> ::Array[String]
-        | (String | Symbol i_or_start_or_range_or_name) -> String?
+  def []: (Integer idx) -> String?
+        | (Integer start, ?Integer length) -> ::Array[String]
+        | (::Range[Integer] range) -> ::Array[String]
+        | (String | Symbol name) -> String?
 
   # Returns the offset of the start of the *n*th element of the match array in the
   # string. *n* can be a string or symbol to reference a named capture.
