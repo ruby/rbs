@@ -164,4 +164,34 @@ singleton(::BasicObject)
       end
     end
   end
+
+  def test_check
+    Dir.mktmpdir do |dir|
+      dir = Pathname(dir)
+      dir.join('syntax_error.rbs').write(<<~RBS)
+        class C
+          def foo: () ->
+        end
+      RBS
+      dir.join('semantics_error.rbs').write(<<~RBS)
+        interface _I
+          def self.foo: () -> void
+        end
+      RBS
+      dir.join('no_error.rbs').write(<<~RBS)
+        class C
+          def foo: () -> void
+        end
+      RBS
+
+      with_cli do |cli|
+        assert_raises(SystemExit) { cli.run(%W(check #{dir})) }
+
+        assert_equal [
+          "#{dir}/semantics_error.rbs:2:2: Interface cannot have singleton method",
+          "#{dir}/syntax_error.rbs:3:0: parse error on value: (kEND)",
+        ], stdout.string.split("\n").sort
+      end
+    end
+  end
 end

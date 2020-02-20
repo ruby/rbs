@@ -37,7 +37,7 @@ module Ruby
         @stderr = stderr
       end
 
-      COMMANDS = [:ast, :list, :ancestors, :methods, :method, :validate, :constant, :paths, :prototype, :vendor, :version]
+      COMMANDS = [:ast, :list, :ancestors, :methods, :method, :validate, :constant, :paths, :prototype, :vendor, :version, :check]
 
       def library_parse(opts, options:)
         opts.on("-r LIBRARY") do |lib|
@@ -521,6 +521,27 @@ module Ruby
             vendorer.gem!(name, version)
           end
         end
+      end
+
+      def run_check(args, options)
+        loader = EnvironmentLoader.new()
+
+        syntax_error = false
+        args.each do |path|
+          path = Pathname(path)
+          loader.each_signature(path) do |sig_path|
+            Parser.parse_signature(sig_path.read)
+          rescue Ruby::Signature::Parser::SyntaxError => ex
+            loc = ex.error_value.location
+            stdout.puts "#{sig_path}:#{loc.start_line}:#{loc.start_column}: parse error on value: (#{ex.token_str})"
+            syntax_error = true
+          rescue Ruby::Signature::Parser::SemanticsError => ex
+            loc = ex.location
+            stdout.puts "#{sig_path}:#{loc.start_line}:#{loc.start_column}: #{ex.original_message}"
+            syntax_error = true
+          end
+        end
+        exit 1 if syntax_error
       end
 
       def parse_type_name(string)
