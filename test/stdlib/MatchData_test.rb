@@ -103,4 +103,8 @@ class MatchDataTest < StdlibTest
   def test_string
     'foo'.match('f').string
   end
+
+  def test_to_a
+    'foo'.match('f').to_a
+  end
 end

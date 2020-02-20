@@ -245,9 +245,6 @@ class MatchData
   #     f2    #=> "X"
   #     f3    #=> "113"
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     mtch.to_a   -> anArray
-  #
   def to_a: () -> ::Array[String]
 
   # Returns the entire matched string.
