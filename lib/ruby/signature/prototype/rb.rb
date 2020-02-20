@@ -210,6 +210,9 @@ module Ruby
                 end
               end
             end
+            each_child node do |child|
+              process child, namespace: namespace, current_module: current_module, comments: comments, singleton: singleton
+            end
 
           when :CDECL
             type_name = case
