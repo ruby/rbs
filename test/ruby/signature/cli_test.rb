@@ -30,6 +30,14 @@ class Ruby::Signature::CliTest < Minitest::Test
     end
   end
 
+  def test_no_stdlib_option
+    with_cli do |cli|
+      cli.run(%w(--no-stdlib ast))
+
+      assert_equal '[]', stdout.string
+    end
+  end
+
   def test_list
     with_cli do |cli|
       cli.run(%w(-r pathname list))
