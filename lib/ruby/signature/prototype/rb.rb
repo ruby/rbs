@@ -279,9 +279,9 @@ module Ruby
 
           pre_num, _pre_init, opt, _first_post, post_num, _post_init, rest, kw, kwrest, _block = args_node.children
 
-          untyped = Types::Bases::Any.new(location: nil)
+          return_type = function_return_type_from_body(node)
 
-          fun = Types::Function.empty(untyped)
+          fun = Types::Function.empty(return_type)
 
           table_node.take(pre_num).each do |name|
             fun.required_positionals << Types::Function::Param.new(name: name, type: untyped)
@@ -325,12 +325,111 @@ module Ruby
           fun
         end
 
+        def function_return_type_from_body(node)
+          body = node.children[2]
+          return Types::Bases::Nil.new(location: nil) unless body
+
+          literal_to_type(body)
+        end
+
+        def literal_to_type(node)
+          case node.type
+          when :STR
+            lit = node.children[0]
+            if lit.match?(/\A[ -~]+\z/)
+              Types::Literal.new(literal: lit, location: nil)
+            else
+              Types::ClassInstance.new(name: '::String', args: [], location: nil)
+            end
+          when :DSTR, :XSTR
+            Types::ClassInstance.new(name: '::String', args: [], location: nil)
+          when :DSYM
+            Types::ClassInstance.new(name: '::Symbol', args: [], location: nil)
+          when :DREGX
+            Types::ClassInstance.new(name: '::Regexp', args: [], location: nil)
+          when :TRUE
+            Types::ClassInstance.new(name: '::TrueClass', args: [], location: nil)
+          when :FALSE
+            Types::ClassInstance.new(name: '::FalseClass', args: [], location: nil)
+          when :NIL
+            Types::Bases::Nil.new(location: nil)
+          when :LIT
+            lit = node.children[0]
+            name = lit.class.name
+            case lit
+            when Symbol
+              if lit.match?(/\A[ -~]+\z/)
+                Types::Literal.new(literal: lit, location: nil)
+              else
+                Types::ClassInstance.new(name: "::#{name}", args: [], location: nil)
+              end
+            when Integer
+              Types::Literal.new(literal: lit, location: nil)
+            else
+              Types::ClassInstance.new(name: "::#{name}", args: [], location: nil)
+            end
+          when :ZLIST, :ZARRAY
+            Types::ClassInstance.new(name: "::Array", args: [untyped], location: nil)
+          when :LIST, :ARRAY
+            elem_types = node.children.compact.map { |e| literal_to_type(e) }
+            t = types_to_union_type(elem_types)
+            Types::ClassInstance.new(name: "::Array", args: [t], location: nil)
+          when :DOT2, :DOT3
+            types = node.children.map { |c| literal_to_type(c) }.reject { }
+            type = range_element_type(types)
+            Types::ClassInstance.new(name: '::Range', args: [type], location: nil)
+          when :HASH
+            list = node.children[0]
+            if list
+              children = list.children.compact
+            else
+              children = []
+            end
+
+            key_types = []
+            value_types = []
+            children.each_slice(2) do |k, v|
+              key_types << literal_to_type(k)
+              value_types << literal_to_type(v)
+            end
+
+            if key_types.all? { |t| t.is_a?(Types::Literal) }
+              fields = key_types.map { |t| t.literal }.zip(value_types).to_h
+              Types::Record.new(fields: fields, location: nil)
+            else
+              key_type = types_to_union_type(key_types)
+              value_type = types_to_union_type(value_types)
+              Types::ClassInstance.new(name: "::Hash", args: [key_type, value_type], location: nil)
+            end
+          else
+            untyped
+          end
+        end
+
+        def types_to_union_type(types)
+          return untyped if types.empty?
+          return untyped if types.include?(untyped)
+
+          Types::Union.new(types: types.uniq, location: nil)
+        end
+
+        def range_element_type(types)
+          types = types.reject { |t| t == untyped }
+          return untyped if types.empty?
+
+          type_names = types.map { |t| t.is_a?(Types::ClassInstance) ? t.name : "::#{t.literal.class.name}" }.uniq
+
+          if type_names.size == 1
+            Types::ClassInstance.new(name: type_names.first, args: [], location: nil)
+          else
+            untyped
+          end
+        end
+
         def block_from_body(node)
           _, args_node, body_node = node.children
 
           _pre_num, _pre_init, _opt, _first_post, _post_num, _post_init, _rest, _kw, _kwrest, block = args_node.children
-
-          untyped = Types::Bases::Any.new(location: nil)
 
           method_block = nil
 
@@ -437,6 +536,10 @@ module Ruby
           else
             default
           end
+        end
+
+        def untyped
+          @untyped ||= Types::Bases::Any.new(location: nil)
         end
       end
     end

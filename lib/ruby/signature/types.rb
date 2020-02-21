@@ -383,8 +383,14 @@ module Ruby
         end
 
         def to_s(level = 0)
+          return "{ }" if self.fields.empty?
+
           fields = self.fields.map do |key, type|
-            "#{key}: #{type}"
+            if key.is_a?(Symbol) && key.match?(/\A[A-Za-z_][A-Za-z_]*\z/) && !key.match?(Parser::KEYWORDS_RE)
+              "#{key}: #{type}"
+            else
+              "#{key.inspect} => #{type}"
+            end
           end
           "{ #{fields.join(", ")} }"
         end
