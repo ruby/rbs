@@ -111,4 +111,14 @@ class MatchDataTest < StdlibTest
   def test_to_s
     'foo'.match('f').to_s
   end
+
+  def test_values_at
+    /(?<first>foo)(?<second>bar)(?<third>Baz)?/ =~ "foobarbaz"
+    $~.values_at 0
+    $~.values_at 3
+    $~.values_at 'first'
+    $~.values_at 'third'
+    $~.values_at :first
+    $~.values_at :third
+  end
 end

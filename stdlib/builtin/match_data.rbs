@@ -265,10 +265,7 @@ class MatchData
   #     m.to_a               #=> ["1 + 2", "1", "+", "2"]
   #     m.values_at(:a, :b, :op) #=> ["1", "2", "+"]
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     mtch.values_at(index, ...)   -> array
-  #
-  def values_at: (*Integer | Symbol | String indexes) -> ::Array[String?]
+  def values_at: (*Integer | Symbol | String n_or_name) -> ::Array[String?]
 
   private
 
