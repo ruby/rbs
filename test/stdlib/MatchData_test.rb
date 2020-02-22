@@ -15,8 +15,8 @@ class MatchDataTest < StdlibTest
     /(?<first>foo)(?<second>bar)(?<third>Baz)?/ =~ "foobarbaz"
     $~[0]
     $~[3]
-    $~[0..2]
-    $~[0, 3]
+    $~[0..3]
+    $~[0, 4]
     $~['first']
     $~['third']
     $~[:first]
@@ -105,7 +105,8 @@ class MatchDataTest < StdlibTest
   end
 
   def test_to_a
-    'foo'.match('f').to_a
+    /(?<first>foo)(?<second>bar)(?<third>Baz)?/ =~ "foobarbaz"
+    $~.to_a
   end
 
   def test_to_s
