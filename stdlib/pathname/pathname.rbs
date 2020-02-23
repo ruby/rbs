@@ -1,26 +1,238 @@
 class Pathname
-  def self.glob: (Pathname, ?Integer) -> Array[Pathname]
-  def +: (Pathname) -> Pathname
-       | (String) -> Pathname
+  def self.getwd: () -> untyped
 
-  def cleanpath: () -> self
-  def directory?: () -> bool
-  def file?: () -> bool
+  def self.glob: (*untyped) -> untyped
 
-  def join: (String) -> self
+  def self.pwd: () -> untyped
 
-  def mkpath: () -> void
-  def open: [X] (?String) { (IO) -> X } -> X
+  public
 
-  def read: () -> String
-  def realpath: () -> self
+  def +: (untyped other) -> untyped
 
-  def relative?: () -> bool
-  def relative_path_from: (Pathname) -> Pathname
+  alias / +
 
-  def sub_ext: (String) -> self
-  def write: (String) -> void
+  def <=>: (untyped) -> untyped
+
+  def ==: (untyped) -> untyped
+
+  def ===: (untyped) -> untyped
+
+  def absolute?: () -> untyped
+
+  def ascend: () -> untyped
+
+  def atime: () -> untyped
+
+  def basename: (*untyped) -> untyped
+
+  def binread: (*untyped) -> untyped
+
+  def binwrite: (*untyped) -> untyped
+
+  def birthtime: () -> untyped
+
+  def blockdev?: () -> untyped
+
+  def chardev?: () -> untyped
+
+  def children: (?untyped with_directory) -> untyped
+
+  def chmod: (untyped) -> untyped
+
+  def chown: (untyped, untyped) -> untyped
+
+  def cleanpath: (?untyped consider_symlink) -> untyped
+
+  def ctime: () -> untyped
+
+  def delete: () -> untyped
+
+  def descend: () -> untyped
+
+  def directory?: () -> untyped
+
+  def dirname: () -> untyped
+
+  def each_child: (?untyped with_directory) { (*untyped) -> untyped } -> untyped
+
+  def each_entry: () -> untyped
+
+  def each_filename: () -> untyped
+
+  def each_line: (*untyped) -> untyped
+
+  def empty?: () -> untyped
+
+  def entries: () -> untyped
+
+  def eql?: (untyped) -> untyped
+
+  def executable?: () -> untyped
+
+  def executable_real?: () -> untyped
+
+  def exist?: () -> untyped
+
+  def expand_path: (*untyped) -> untyped
+
+  def extname: () -> untyped
+
+  def file?: () -> untyped
+
+  def find: (?ignore_error: untyped) -> untyped
+
+  def fnmatch: (*untyped) -> untyped
+
+  def fnmatch?: (*untyped) -> untyped
+
+  def freeze: () -> untyped
+
+  def ftype: () -> untyped
+
+  def glob: (*untyped) -> untyped
+
+  def grpowned?: () -> untyped
+
+  def hash: () -> untyped
+
+  def inspect: () -> untyped
+
+  def join: (*untyped args) -> untyped
+
+  def lchmod: (untyped) -> untyped
+
+  def lchown: (untyped, untyped) -> untyped
+
+  def lstat: () -> untyped
+
+  def make_link: (untyped) -> untyped
+
+  def make_symlink: (untyped) -> untyped
+
+  def mkdir: (*untyped) -> untyped
+
+  def mkpath: () -> untyped
+
+  def mountpoint?: () -> untyped
+
+  def mtime: () -> untyped
+
+  def open: (*untyped) -> untyped
+
+  def opendir: () -> untyped
+
+  def owned?: () -> untyped
+
+  def parent: () -> untyped
+
+  def pipe?: () -> untyped
+
+  def read: (*untyped) -> untyped
+
+  def readable?: () -> untyped
+
+  def readable_real?: () -> untyped
+
+  def readlines: (*untyped) -> untyped
+
+  def readlink: () -> untyped
+
+  def realdirpath: (*untyped) -> untyped
+
+  def realpath: (*untyped) -> untyped
+
+  def relative?: () -> untyped
+
+  def relative_path_from: (untyped base_directory) -> untyped
+
+  def rename: (untyped) -> untyped
+
+  def rmdir: () -> untyped
+
+  def rmtree: () -> untyped
+
+  def root?: () -> untyped
+
+  def setgid?: () -> untyped
+
+  def setuid?: () -> untyped
+
+  def size: () -> untyped
+
+  def size?: () -> untyped
+
+  def socket?: () -> untyped
+
+  def split: () -> untyped
+
+  def stat: () -> untyped
+
+  def sticky?: () -> untyped
+
+  def sub: (*untyped) -> untyped
+
+  def sub_ext: (untyped) -> untyped
+
+  def symlink?: () -> untyped
+
+  def sysopen: (*untyped) -> untyped
+
+  def taint: () -> untyped
+
+  def to_path: () -> untyped
+
+  def to_s: () -> untyped
+
+  def truncate: (untyped) -> untyped
+
+  def unlink: () -> untyped
+
+  def untaint: () -> untyped
+
+  def utime: (untyped, untyped) -> untyped
+
+  def world_readable?: () -> untyped
+
+  def world_writable?: () -> untyped
+
+  def writable?: () -> untyped
+
+  def writable_real?: () -> untyped
+
+  def write: (*untyped) -> untyped
+
+  def zero?: () -> untyped
+
+  private
+
+  def add_trailing_separator: (untyped path) -> untyped
+
+  def chop_basename: (untyped path) -> untyped
+
+  def cleanpath_aggressive: () -> untyped
+
+  def cleanpath_conservative: () -> untyped
+
+  def del_trailing_separator: (untyped path) -> untyped
+
+  def has_trailing_separator?: (untyped path) -> untyped
+
+  def initialize: (untyped) -> untyped
+
+  def plus: (untyped path1, untyped path2) -> untyped
+
+  def prepend_prefix: (untyped prefix, untyped relpath) -> untyped
+
+  def split_names: (untyped path) -> untyped
 end
+
+Pathname::SAME_PATHS: Proc
+
+Pathname::SEPARATOR_LIST: String
+
+Pathname::SEPARATOR_PAT: Regexp
+
+Pathname::TO_PATH: Symbol
 
 extension Kernel (Pathname)
   def Pathname: (String) -> Pathname
