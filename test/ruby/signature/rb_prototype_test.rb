@@ -277,4 +277,23 @@ class C
 end
     EOF
   end
+
+  def test_method_definition_in_fcall
+    parser = RB.new
+
+    rb = <<-'EOR'
+class C
+  private def foo
+  end
+end
+    EOR
+
+    parser.parse(rb)
+
+    assert_write parser.decls, <<-EOF
+class C
+  def foo: () -> untyped
+end
+    EOF
+  end
 end
