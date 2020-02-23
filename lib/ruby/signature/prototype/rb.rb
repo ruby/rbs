@@ -339,12 +339,12 @@ module Ruby
             if lit.match?(/\A[ -~]+\z/)
               Types::Literal.new(literal: lit, location: nil)
             else
-              Types::ClassInstance.new(name: '::String', args: [], location: nil)
+              BuiltinNames::String.instance_type
             end
           when :DSTR, :XSTR
-            Types::ClassInstance.new(name: '::String', args: [], location: nil)
+            BuiltinNames::String.instance_type
           when :DSYM
-            Types::ClassInstance.new(name: '::Symbol', args: [], location: nil)
+            BuiltinNames::Symbol.instance_type
           when :DREGX
             Types::ClassInstance.new(name: '::Regexp', args: [], location: nil)
           when :TRUE
@@ -361,7 +361,7 @@ module Ruby
               if lit.match?(/\A[ -~]+\z/)
                 Types::Literal.new(literal: lit, location: nil)
               else
-                Types::ClassInstance.new(name: "::#{name}", args: [], location: nil)
+                BuiltinNames::Symbol.instance_type
               end
             when Integer
               Types::Literal.new(literal: lit, location: nil)
@@ -369,15 +369,15 @@ module Ruby
               Types::ClassInstance.new(name: "::#{name}", args: [], location: nil)
             end
           when :ZLIST, :ZARRAY
-            Types::ClassInstance.new(name: "::Array", args: [untyped], location: nil)
+            BuiltinNames::Array.instance_type([untyped])
           when :LIST, :ARRAY
             elem_types = node.children.compact.map { |e| literal_to_type(e) }
             t = types_to_union_type(elem_types)
-            Types::ClassInstance.new(name: "::Array", args: [t], location: nil)
+            BuiltinNames::Array.instance_type([t])
           when :DOT2, :DOT3
             types = node.children.map { |c| literal_to_type(c) }.reject { }
             type = range_element_type(types)
-            Types::ClassInstance.new(name: '::Range', args: [type], location: nil)
+            BuiltinNames::Range.instance_type([type])
           when :HASH
             list = node.children[0]
             if list
@@ -399,7 +399,7 @@ module Ruby
             else
               key_type = types_to_union_type(key_types)
               value_type = types_to_union_type(value_types)
-              Types::ClassInstance.new(name: "::Hash", args: [key_type, value_type], location: nil)
+              BuiltinNames::Hash.instance_type([key_type, value_type])
             end
           else
             untyped
