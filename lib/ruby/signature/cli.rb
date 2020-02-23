@@ -37,7 +37,7 @@ module Ruby
         @stderr = stderr
       end
 
-      COMMANDS = [:ast, :list, :ancestors, :methods, :method, :validate, :constant, :paths, :prototype, :vendor, :version, :check]
+      COMMANDS = [:ast, :list, :ancestors, :methods, :method, :validate, :constant, :paths, :prototype, :vendor, :version, :parse]
 
       def library_parse(opts, options:)
         opts.on("-r LIBRARY") do |lib|
@@ -523,7 +523,7 @@ module Ruby
         end
       end
 
-      def run_check(args, options)
+      def run_parse(args, options)
         loader = EnvironmentLoader.new()
 
         syntax_error = false

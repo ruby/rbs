@@ -165,7 +165,7 @@ singleton(::BasicObject)
     end
   end
 
-  def test_check
+  def test_parse
     Dir.mktmpdir do |dir|
       dir = Pathname(dir)
       dir.join('syntax_error.rbs').write(<<~RBS)
@@ -185,7 +185,7 @@ singleton(::BasicObject)
       RBS
 
       with_cli do |cli|
-        assert_raises(SystemExit) { cli.run(%W(check #{dir})) }
+        assert_raises(SystemExit) { cli.run(%W(parse #{dir})) }
 
         assert_equal [
           "#{dir}/semantics_error.rbs:2:2: Interface cannot have singleton method",
