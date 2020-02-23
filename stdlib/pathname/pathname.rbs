@@ -1,19 +1,25 @@
 class Pathname
   def self.glob: (Pathname, ?Integer) -> Array[Pathname]
-  def `+`: (Pathname) -> Pathname
-         | (String) -> Pathname
-  def file?: -> bool
-  def relative_path_from: (Pathname) -> Pathname
-  def open: [X] (?String) { (IO) -> X } -> X
+  def +: (Pathname) -> Pathname
+       | (String) -> Pathname
+
+  def cleanpath: () -> self
+  def directory?: () -> bool
+  def file?: () -> bool
+
   def join: (String) -> self
-  def realpath: -> self
-  def directory?: -> bool
-  def relative?: -> bool
-  def cleanpath: -> self
-  def read: -> String
-  def mkpath: -> void
-  def write: (String) -> void
+
+  def mkpath: () -> void
+  def open: [X] (?String) { (IO) -> X } -> X
+
+  def read: () -> String
+  def realpath: () -> self
+
+  def relative?: () -> bool
+  def relative_path_from: (Pathname) -> Pathname
+
   def sub_ext: (String) -> self
+  def write: (String) -> void
 end
 
 extension Kernel (Pathname)
