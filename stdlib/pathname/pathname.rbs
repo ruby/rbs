@@ -1,206 +1,1231 @@
+# Pathname represents the name of a file or directory on the filesystem, but not
+# the file itself.
+#
+# The pathname depends on the Operating System: Unix, Windows, etc. This library
+# works with pathnames of local OS, however non-Unix pathnames are supported
+# experimentally.
+#
+# A Pathname can be relative or absolute.  It's not until you try to reference
+# the file that it even matters whether the file exists or not.
+#
+# Pathname is immutable.  It has no method for destructive update.
+#
+# The goal of this class is to manipulate file path information in a neater way
+# than standard Ruby provides.  The examples below demonstrate the difference.
+#
+# **All** functionality from File, FileTest, and some from Dir and FileUtils is
+# included, in an unsurprising way.  It is essentially a facade for all of
+# these, and more.
+#
+# ## Examples
+#
+# ### Example 1: Using Pathname
+#
+#     require 'pathname'
+#     pn = Pathname.new("/usr/bin/ruby")
+#     size = pn.size              # 27662
+#     isdir = pn.directory?       # false
+#     dir  = pn.dirname           # Pathname:/usr/bin
+#     base = pn.basename          # Pathname:ruby
+#     dir, base = pn.split        # [Pathname:/usr/bin, Pathname:ruby]
+#     data = pn.read
+#     pn.open { |f| _ }
+#     pn.each_line { |line| _ }
+#
+# ### Example 2: Using standard Ruby
+#
+#     pn = "/usr/bin/ruby"
+#     size = File.size(pn)        # 27662
+#     isdir = File.directory?(pn) # false
+#     dir  = File.dirname(pn)     # "/usr/bin"
+#     base = File.basename(pn)    # "ruby"
+#     dir, base = File.split(pn)  # ["/usr/bin", "ruby"]
+#     data = File.read(pn)
+#     File.open(pn) { |f| _ }
+#     File.foreach(pn) { |line| _ }
+#
+# ### Example 3: Special features
+#
+#     p1 = Pathname.new("/usr/lib")   # Pathname:/usr/lib
+#     p2 = p1 + "ruby/1.8"            # Pathname:/usr/lib/ruby/1.8
+#     p3 = p1.parent                  # Pathname:/usr
+#     p4 = p2.relative_path_from(p3)  # Pathname:lib/ruby/1.8
+#     pwd = Pathname.pwd              # Pathname:/home/gavin
+#     pwd.absolute?                   # true
+#     p5 = Pathname.new "."           # Pathname:.
+#     p5 = p5 + "music/../articles"   # Pathname:music/../articles
+#     p5.cleanpath                    # Pathname:articles
+#     p5.realpath                     # Pathname:/home/gavin/articles
+#     p5.children                     # [Pathname:/home/gavin/articles/linux, ...]
+#
+# ## Breakdown of functionality
+#
+# ### Core methods
+#
+# These methods are effectively manipulating a String, because that's all a path
+# is.  None of these access the file system except for #mountpoint?, #children,
+# #each_child, #realdirpath and #realpath.
+#
+# *   +
+# *   #join
+# *   #parent
+# *   #root?
+# *   #absolute?
+# *   #relative?
+# *   #relative_path_from
+# *   #each_filename
+# *   #cleanpath
+# *   #realpath
+# *   #realdirpath
+# *   #children
+# *   #each_child
+# *   #mountpoint?
+#
+#
+# ### File status predicate methods
+#
+# These methods are a facade for FileTest:
+# *   #blockdev?
+# *   #chardev?
+# *   #directory?
+# *   #executable?
+# *   #executable_real?
+# *   #exist?
+# *   #file?
+# *   #grpowned?
+# *   #owned?
+# *   #pipe?
+# *   #readable?
+# *   #world_readable?
+# *   #readable_real?
+# *   #setgid?
+# *   #setuid?
+# *   #size
+# *   #size?
+# *   #socket?
+# *   #sticky?
+# *   #symlink?
+# *   #writable?
+# *   #world_writable?
+# *   #writable_real?
+# *   #zero?
+#
+#
+# ### File property and manipulation methods
+#
+# These methods are a facade for File:
+# *   #atime
+# *   #birthtime
+# *   #ctime
+# *   #mtime
+# *   #chmod(mode)
+# *   #lchmod(mode)
+# *   #chown(owner, group)
+# *   #lchown(owner, group)
+# *   #fnmatch(pattern, *args)
+# *   #fnmatch?(pattern, *args)
+# *   #ftype
+# *   #make_link(old)
+# *   #open(*args, &block)
+# *   #readlink
+# *   #rename(to)
+# *   #stat
+# *   #lstat
+# *   #make_symlink(old)
+# *   #truncate(length)
+# *   #utime(atime, mtime)
+# *   #basename(*args)
+# *   #dirname
+# *   #extname
+# *   #expand_path(*args)
+# *   #split
+#
+#
+# ### Directory methods
+#
+# These methods are a facade for Dir:
+# *   Pathname.glob(*args)
+# *   Pathname.getwd / Pathname.pwd
+# *   #rmdir
+# *   #entries
+# *   #each_entry(&block)
+# *   #mkdir(*args)
+# *   #opendir(*args)
+#
+#
+# ### IO
+#
+# These methods are a facade for IO:
+# *   #each_line(*args, &block)
+# *   #read(*args)
+# *   #binread(*args)
+# *   #readlines(*args)
+# *   #sysopen(*args)
+#
+#
+# ### Utilities
+#
+# These methods are a mixture of Find, FileUtils, and others:
+# *   #find(&block)
+# *   #mkpath
+# *   #rmtree
+# *   #unlink / #delete
+#
+#
+# ## Method documentation
+#
+# As the above section shows, most of the methods in Pathname are facades.  The
+# documentation for these methods generally just says, for instance, "See
+# FileTest.writable?", as you should be familiar with the original method
+# anyway, and its documentation (e.g. through `ri`) will contain more
+# information.  In some cases, a brief description will follow.
+#
 class Pathname
+  # Returns the current working directory as a Pathname.
+  #
+  #     Pathname.getwd
+  #         #=> #<Pathname:/home/zzak/projects/ruby>
+  #
+  # See Dir.getwd.
+  #
+  # # arglists 💪👽🚨 << Delete this section
+  #     getwd()
+  #
   def self.getwd: () -> untyped
 
+  # Returns or yields Pathname objects.
+  #
+  #     Pathname.glob("lib/i*.rb")
+  #         #=> [#<Pathname:lib/ipaddr.rb>, #<Pathname:lib/irb.rb>]
+  #
+  # See Dir.glob.
+  #
+  # # arglists 💪👽🚨 << Delete this section
+  #     glob(p1, p2 = v2, p3 = v3)
+  #
   def self.glob: (*untyped) -> untyped
 
+  # Returns the current working directory as a Pathname.
+  #
+  #     Pathname.getwd
+  #         #=> #<Pathname:/home/zzak/projects/ruby>
+  #
+  # See Dir.getwd.
+  #
+  # # arglists 💪👽🚨 << Delete this section
+  #     pwd()
+  #
   def self.pwd: () -> untyped
 
   public
 
+  # Appends a pathname fragment to `self` to produce a new Pathname object.
+  #
+  #     p1 = Pathname.new("/usr")      # Pathname:/usr
+  #     p2 = p1 + "bin/ruby"           # Pathname:/usr/bin/ruby
+  #     p3 = p1 + "/etc/passwd"        # Pathname:/etc/passwd
+  #
+  #     # / is aliased to +.
+  #     p4 = p1 / "bin/ruby"           # Pathname:/usr/bin/ruby
+  #     p5 = p1 / "/etc/passwd"        # Pathname:/etc/passwd
+  #
+  # This method doesn't access the file system; it is pure string manipulation.
+  #
+  # # arglists 💪👽🚨 << Delete this section
+  #     +(other)
+  #
   def +: (untyped other) -> untyped
 
+  # # arglists 💪👽🚨 << Delete this section
+  #     /(other)
+  #
   alias / +
 
+  # Provides a case-sensitive comparison operator for pathnames.
+  #
+  #     Pathname.new('/usr') <=> Pathname.new('/usr/bin')
+  #         #=> -1
+  #     Pathname.new('/usr/bin') <=> Pathname.new('/usr/bin')
+  #         #=> 0
+  #     Pathname.new('/usr/bin') <=> Pathname.new('/USR/BIN')
+  #         #=> 1
+  #
+  # It will return `-1`, `0` or `1` depending on the value of the left argument
+  # relative to the right argument. Or it will return `nil` if the arguments are
+  # not comparable.
+  #
+  # # arglists 💪👽🚨 << Delete this section
+  #     <=>(p1)
+  #
   def <=>: (untyped) -> untyped
 
+  # Compare this pathname with `other`.  The comparison is string-based. Be aware
+  # that two different paths (`foo.txt` and `./foo.txt`) can refer to the same
+  # file.
+  #
+  # # arglists 💪👽🚨 << Delete this section
+  #     ==(p1)
+  #
   def ==: (untyped) -> untyped
 
+  # Compare this pathname with `other`.  The comparison is string-based. Be aware
+  # that two different paths (`foo.txt` and `./foo.txt`) can refer to the same
+  # file.
+  #
+  # # arglists 💪👽🚨 << Delete this section
+  #     ===(p1)
+  #
   def ===: (untyped) -> untyped
 
+  # Predicate method for testing whether a path is absolute.
+  #
+  # It returns `true` if the pathname begins with a slash.
+  #
+  #     p = Pathname.new('/im/sure')
+  #     p.absolute?
+  #         #=> true
+  #
+  #     p = Pathname.new('not/so/sure')
+  #     p.absolute?
+  #         #=> false
+  #
+  # # arglists 💪👽🚨 << Delete this section
+  #     absolute?()
+  #
   def absolute?: () -> untyped
 
+  # Iterates over and yields a new Pathname object for each element in the given
+  # path in ascending order.
+  #
+  #     Pathname.new('/path/to/some/file.rb').ascend {|v| p v}
+  #        #<Pathname:/path/to/some/file.rb>
+  #        #<Pathname:/path/to/some>
+  #        #<Pathname:/path/to>
+  #        #<Pathname:/path>
+  #        #<Pathname:/>
+  #
+  #     Pathname.new('path/to/some/file.rb').ascend {|v| p v}
+  #        #<Pathname:path/to/some/file.rb>
+  #        #<Pathname:path/to/some>
+  #        #<Pathname:path/to>
+  #        #<Pathname:path>
+  #
+  # Returns an Enumerator if no block was given.
+  #
+  #     enum = Pathname.new("/usr/bin/ruby").ascend
+  #       # ... do stuff ...
+  #     enum.each { |e| ... }
+  #       # yields Pathnames /usr/bin/ruby, /usr/bin, /usr, and /.
+  #
+  # It doesn't access the filesystem.
+  #
+  # # arglists 💪👽🚨 << Delete this section
+  #     ascend() { |self| ... }
+  #
   def ascend: () -> untyped
 
+  # Returns the last access time for the file.
+  #
+  # See File.atime.
+  #
+  # # arglists 💪👽🚨 << Delete this section
+  #     pathname.atime     -> time
+  #
   def atime: () -> untyped
 
+  # Returns the last component of the path.
+  #
+  # See File.basename.
+  #
+  # # arglists 💪👽🚨 << Delete this section
+  #     basename(p1 = v1)
+  #
   def basename: (*untyped) -> untyped
 
+  # Returns all the bytes from the file, or the first `N` if specified.
+  #
+  # See File.binread.
+  #
+  # # arglists 💪👽🚨 << Delete this section
+  #     pathname.binread([length [, offset]]) -> string
+  #
   def binread: (*untyped) -> untyped
 
+  # Writes `contents` to the file, opening it in binary mode.
+  #
+  # See File.binwrite.
+  #
+  # # arglists 💪👽🚨 << Delete this section
+  #     pathname.binwrite(string, [offset] )   => fixnum
+  #     pathname.binwrite(string, [offset], open_args )   => fixnum
+  #
   def binwrite: (*untyped) -> untyped
 
+  # Returns the birth time for the file. If the platform doesn't have birthtime,
+  # raises NotImplementedError.
+  #
+  # See File.birthtime.
+  #
+  # # arglists 💪👽🚨 << Delete this section
+  #     pathname.birthtime -> time
+  #
   def birthtime: () -> untyped
 
+  # See FileTest.blockdev?.
+  #
+  # # arglists 💪👽🚨 << Delete this section
+  #     blockdev?()
+  #
   def blockdev?: () -> untyped
 
+  # See FileTest.chardev?.
+  #
+  # # arglists 💪👽🚨 << Delete this section
+  #     chardev?()
+  #
   def chardev?: () -> untyped
 
+  # Returns the children of the directory (files and subdirectories, not
+  # recursive) as an array of Pathname objects.
+  #
+  # By default, the returned pathnames will have enough information to access the
+  # files. If you set `with_directory` to `false`, then the returned pathnames
+  # will contain the filename only.
+  #
+  # For example:
+  #     pn = Pathname("/usr/lib/ruby/1.8")
+  #     pn.children
+  #         # -> [ Pathname:/usr/lib/ruby/1.8/English.rb,
+  #                Pathname:/usr/lib/ruby/1.8/Env.rb,
+  #                Pathname:/usr/lib/ruby/1.8/abbrev.rb, ... ]
+  #     pn.children(false)
+  #         # -> [ Pathname:English.rb, Pathname:Env.rb, Pathname:abbrev.rb, ... ]
+  #
+  # Note that the results never contain the entries `.` and `..` in the directory
+  # because they are not children.
+  #
+  # # arglists 💪👽🚨 << Delete this section
+  #     children(with_directory=true)
+  #
   def children: (?untyped with_directory) -> untyped
 
+  # Changes file permissions.
+  #
+  # See File.chmod.
+  #
+  # # arglists 💪👽🚨 << Delete this section
+  #     pathname.chmod(mode_int)   -> integer
+  #
   def chmod: (untyped) -> untyped
 
+  # Change owner and group of the file.
+  #
+  # See File.chown.
+  #
+  # # arglists 💪👽🚨 << Delete this section
+  #     pathname.chown(owner_int, group_int)       -> integer
+  #
   def chown: (untyped, untyped) -> untyped
 
+  # Returns clean pathname of `self` with consecutive slashes and useless dots
+  # removed.  The filesystem is not accessed.
+  #
+  # If `consider_symlink` is `true`, then a more conservative algorithm is used to
+  # avoid breaking symbolic linkages.  This may retain more `..` entries than
+  # absolutely necessary, but without accessing the filesystem, this can't be
+  # avoided.
+  #
+  # See Pathname#realpath.
+  #
+  # # arglists 💪👽🚨 << Delete this section
+  #     cleanpath(consider_symlink=false)
+  #
   def cleanpath: (?untyped consider_symlink) -> untyped
 
+  # Returns the last change time, using directory information, not the file
+  # itself.
+  #
+  # See File.ctime.
+  #
+  # # arglists 💪👽🚨 << Delete this section
+  #     pathname.ctime     -> time
+  #
   def ctime: () -> untyped
 
+  # Removes a file or directory, using File.unlink if `self` is a file, or
+  # Dir.unlink as necessary.
+  #
+  # # arglists 💪👽🚨 << Delete this section
+  #     delete()
+  #
   def delete: () -> untyped
 
+  # Iterates over and yields a new Pathname object for each element in the given
+  # path in descending order.
+  #
+  #     Pathname.new('/path/to/some/file.rb').descend {|v| p v}
+  #        #<Pathname:/>
+  #        #<Pathname:/path>
+  #        #<Pathname:/path/to>
+  #        #<Pathname:/path/to/some>
+  #        #<Pathname:/path/to/some/file.rb>
+  #
+  #     Pathname.new('path/to/some/file.rb').descend {|v| p v}
+  #        #<Pathname:path>
+  #        #<Pathname:path/to>
+  #        #<Pathname:path/to/some>
+  #        #<Pathname:path/to/some/file.rb>
+  #
+  # Returns an Enumerator if no block was given.
+  #
+  #     enum = Pathname.new("/usr/bin/ruby").descend
+  #       # ... do stuff ...
+  #     enum.each { |e| ... }
+  #       # yields Pathnames /, /usr, /usr/bin, and /usr/bin/ruby.
+  #
+  # It doesn't access the filesystem.
+  #
+  # # arglists 💪👽🚨 << Delete this section
+  #     descend() { |v| ... }
+  #
   def descend: () -> untyped
 
+  # See FileTest.directory?.
+  #
+  # # arglists 💪👽🚨 << Delete this section
+  #     directory?()
+  #
   def directory?: () -> untyped
 
+  # Returns all but the last component of the path.
+  #
+  # See File.dirname.
+  #
+  # # arglists 💪👽🚨 << Delete this section
+  #     dirname()
+  #
   def dirname: () -> untyped
 
+  # Iterates over the children of the directory (files and subdirectories, not
+  # recursive).
+  #
+  # It yields Pathname object for each child.
+  #
+  # By default, the yielded pathnames will have enough information to access the
+  # files.
+  #
+  # If you set `with_directory` to `false`, then the returned pathnames will
+  # contain the filename only.
+  #
+  #     Pathname("/usr/local").each_child {|f| p f }
+  #     #=> #<Pathname:/usr/local/share>
+  #     #   #<Pathname:/usr/local/bin>
+  #     #   #<Pathname:/usr/local/games>
+  #     #   #<Pathname:/usr/local/lib>
+  #     #   #<Pathname:/usr/local/include>
+  #     #   #<Pathname:/usr/local/sbin>
+  #     #   #<Pathname:/usr/local/src>
+  #     #   #<Pathname:/usr/local/man>
+  #
+  #     Pathname("/usr/local").each_child(false) {|f| p f }
+  #     #=> #<Pathname:share>
+  #     #   #<Pathname:bin>
+  #     #   #<Pathname:games>
+  #     #   #<Pathname:lib>
+  #     #   #<Pathname:include>
+  #     #   #<Pathname:sbin>
+  #     #   #<Pathname:src>
+  #     #   #<Pathname:man>
+  #
+  # Note that the results never contain the entries `.` and `..` in the directory
+  # because they are not children.
+  #
+  # See Pathname#children
+  #
+  # # arglists 💪👽🚨 << Delete this section
+  #     each_child(with_directory=true, &b)
+  #
   def each_child: (?untyped with_directory) { (*untyped) -> untyped } -> untyped
 
+  # Iterates over the entries (files and subdirectories) in the directory,
+  # yielding a Pathname object for each entry.
+  #
+  # # arglists 💪👽🚨 << Delete this section
+  #     each_entry()
+  #
   def each_entry: () -> untyped
 
+  # Iterates over each component of the path.
+  #
+  #     Pathname.new("/usr/bin/ruby").each_filename {|filename| ... }
+  #       # yields "usr", "bin", and "ruby".
+  #
+  # Returns an Enumerator if no block was given.
+  #
+  #     enum = Pathname.new("/usr/bin/ruby").each_filename
+  #       # ... do stuff ...
+  #     enum.each { |e| ... }
+  #       # yields "usr", "bin", and "ruby".
+  #
+  # # arglists 💪👽🚨 << Delete this section
+  #     each_filename() { |filename| ... }
+  #
   def each_filename: () -> untyped
 
+  # Iterates over each line in the file and yields a String object for each.
+  #
+  # # arglists 💪👽🚨 << Delete this section
+  #     pathname.each_line {|line| ... }
+  #     pathname.each_line(sep=$/ [, open_args]) {|line| block }     -> nil
+  #     pathname.each_line(limit [, open_args]) {|line| block }      -> nil
+  #     pathname.each_line(sep, limit [, open_args]) {|line| block } -> nil
+  #     pathname.each_line(...)                                      -> an_enumerator
+  #
   def each_line: (*untyped) -> untyped
 
+  # Tests the file is empty.
+  #
+  # See Dir#empty? and FileTest.empty?.
+  #
+  # # arglists 💪👽🚨 << Delete this section
+  #     empty?()
+  #
   def empty?: () -> untyped
 
+  # Return the entries (files and subdirectories) in the directory, each as a
+  # Pathname object.
+  #
+  # The results contains just the names in the directory, without any trailing
+  # slashes or recursive look-up.
+  #
+  #     pp Pathname.new('/usr/local').entries
+  #     #=> [#<Pathname:share>,
+  #     #    #<Pathname:lib>,
+  #     #    #<Pathname:..>,
+  #     #    #<Pathname:include>,
+  #     #    #<Pathname:etc>,
+  #     #    #<Pathname:bin>,
+  #     #    #<Pathname:man>,
+  #     #    #<Pathname:games>,
+  #     #    #<Pathname:.>,
+  #     #    #<Pathname:sbin>,
+  #     #    #<Pathname:src>]
+  #
+  # The result may contain the current directory `#<Pathname:.>` and the parent
+  # directory `#<Pathname:..>`.
+  #
+  # If you don't want `.` and `..` and want directories, consider
+  # Pathname#children.
+  #
+  # # arglists 💪👽🚨 << Delete this section
+  #     entries()
+  #
   def entries: () -> untyped
 
+  # Compare this pathname with `other`.  The comparison is string-based. Be aware
+  # that two different paths (`foo.txt` and `./foo.txt`) can refer to the same
+  # file.
+  #
+  # # arglists 💪👽🚨 << Delete this section
+  #     eql?(p1)
+  #
   def eql?: (untyped) -> untyped
 
+  # See FileTest.executable?.
+  #
+  # # arglists 💪👽🚨 << Delete this section
+  #     executable?()
+  #
   def executable?: () -> untyped
 
+  # See FileTest.executable_real?.
+  #
+  # # arglists 💪👽🚨 << Delete this section
+  #     executable_real?()
+  #
   def executable_real?: () -> untyped
 
+  # See FileTest.exist?.
+  #
+  # # arglists 💪👽🚨 << Delete this section
+  #     exist?()
+  #
   def exist?: () -> untyped
 
+  # Returns the absolute path for the file.
+  #
+  # See File.expand_path.
+  #
+  # # arglists 💪👽🚨 << Delete this section
+  #     expand_path(p1 = v1)
+  #
   def expand_path: (*untyped) -> untyped
 
+  # Returns the file's extension.
+  #
+  # See File.extname.
+  #
+  # # arglists 💪👽🚨 << Delete this section
+  #     extname()
+  #
   def extname: () -> untyped
 
+  # See FileTest.file?.
+  #
+  # # arglists 💪👽🚨 << Delete this section
+  #     file?()
+  #
   def file?: () -> untyped
 
+  # Iterates over the directory tree in a depth first manner, yielding a Pathname
+  # for each file under "this" directory.
+  #
+  # Returns an Enumerator if no block is given.
+  #
+  # Since it is implemented by the standard library module Find, Find.prune can be
+  # used to control the traversal.
+  #
+  # If `self` is `.`, yielded pathnames begin with a filename in the current
+  # directory, not `./`.
+  #
+  # See Find.find
+  #
+  # # arglists 💪👽🚨 << Delete this section
+  #     find(ignore_error: true) { |pathname| ... }
+  #
   def find: (?ignore_error: untyped) -> untyped
 
+  # Return `true` if the receiver matches the given pattern.
+  #
+  # See File.fnmatch.
+  #
+  # # arglists 💪👽🚨 << Delete this section
+  #     pathname.fnmatch(pattern, [flags])        -> string
+  #     pathname.fnmatch?(pattern, [flags])       -> string
+  #
   def fnmatch: (*untyped) -> untyped
 
+  # Return `true` if the receiver matches the given pattern.
+  #
+  # See File.fnmatch.
+  #
+  # # arglists 💪👽🚨 << Delete this section
+  #     pathname.fnmatch?(pattern, [flags])       -> string
+  #
   def fnmatch?: (*untyped) -> untyped
 
+  # Freezes this Pathname.
+  #
+  # See Object.freeze.
+  #
+  # # arglists 💪👽🚨 << Delete this section
+  #     pathname.freeze -> obj
+  #
   def freeze: () -> untyped
 
+  # Returns "type" of file ("file", "directory", etc).
+  #
+  # See File.ftype.
+  #
+  # # arglists 💪👽🚨 << Delete this section
+  #     pathname.ftype     -> string
+  #
   def ftype: () -> untyped
 
+  # Returns or yields Pathname objects.
+  #
+  #     Pathname("ruby-2.4.2").glob("R*.md")
+  #     #=> [#<Pathname:ruby-2.4.2/README.md>, #<Pathname:ruby-2.4.2/README.ja.md>]
+  #
+  # See Dir.glob. This method uses the `base` keyword argument of Dir.glob.
+  #
+  # # arglists 💪👽🚨 << Delete this section
+  #     glob(p1, p2 = v2)
+  #
   def glob: (*untyped) -> untyped
 
+  # See FileTest.grpowned?.
+  #
+  # # arglists 💪👽🚨 << Delete this section
+  #     grpowned?()
+  #
   def grpowned?: () -> untyped
 
   def hash: () -> untyped
 
   def inspect: () -> untyped
 
+  # Joins the given pathnames onto `self` to create a new Pathname object.
+  #
+  #     path0 = Pathname.new("/usr")                # Pathname:/usr
+  #     path0 = path0.join("bin/ruby")              # Pathname:/usr/bin/ruby
+  #         # is the same as
+  #     path1 = Pathname.new("/usr") + "bin/ruby"   # Pathname:/usr/bin/ruby
+  #     path0 == path1
+  #         #=> true
+  #
+  # # arglists 💪👽🚨 << Delete this section
+  #     join(*args)
+  #
   def join: (*untyped args) -> untyped
 
+  # Same as Pathname.chmod, but does not follow symbolic links.
+  #
+  # See File.lchmod.
+  #
+  # # arglists 💪👽🚨 << Delete this section
+  #     pathname.lchmod(mode_int)  -> integer
+  #
   def lchmod: (untyped) -> untyped
 
+  # Same as Pathname.chown, but does not follow symbolic links.
+  #
+  # See File.lchown.
+  #
+  # # arglists 💪👽🚨 << Delete this section
+  #     pathname.lchown(owner_int, group_int)      -> integer
+  #
   def lchown: (untyped, untyped) -> untyped
 
+  # See File.lstat.
+  #
+  # # arglists 💪👽🚨 << Delete this section
+  #     lstat()
+  #
   def lstat: () -> untyped
 
+  # Creates a hard link at *pathname*.
+  #
+  # See File.link.
+  #
+  # # arglists 💪👽🚨 << Delete this section
+  #     pathname.make_link(old)
+  #
   def make_link: (untyped) -> untyped
 
+  # Creates a symbolic link.
+  #
+  # See File.symlink.
+  #
+  # # arglists 💪👽🚨 << Delete this section
+  #     pathname.make_symlink(old)
+  #
   def make_symlink: (untyped) -> untyped
 
+  # Create the referenced directory.
+  #
+  # See Dir.mkdir.
+  #
+  # # arglists 💪👽🚨 << Delete this section
+  #     mkdir(p1 = v1)
+  #
   def mkdir: (*untyped) -> untyped
 
+  # Creates a full path, including any intermediate directories that don't yet
+  # exist.
+  #
+  # See FileUtils.mkpath and FileUtils.mkdir_p
+  #
+  # # arglists 💪👽🚨 << Delete this section
+  #     mkpath()
+  #
   def mkpath: () -> untyped
 
+  # Returns `true` if `self` points to a mountpoint.
+  #
+  # # arglists 💪👽🚨 << Delete this section
+  #     mountpoint?()
+  #
   def mountpoint?: () -> untyped
 
+  # Returns the last modified time of the file.
+  #
+  # See File.mtime.
+  #
+  # # arglists 💪👽🚨 << Delete this section
+  #     pathname.mtime     -> time
+  #
   def mtime: () -> untyped
 
+  # Opens the file for reading or writing.
+  #
+  # See File.open.
+  #
+  # # arglists 💪👽🚨 << Delete this section
+  #     pathname.open()
+  #     pathname.open(mode="r" [, opt])                        -> file
+  #     pathname.open([mode [, perm]] [, opt])                 -> file
+  #     pathname.open(mode="r" [, opt]) {|file| block }        -> obj
+  #     pathname.open([mode [, perm]] [, opt]) {|file| block } -> obj
+  #
   def open: (*untyped) -> untyped
 
+  # Opens the referenced directory.
+  #
+  # See Dir.open.
+  #
+  # # arglists 💪👽🚨 << Delete this section
+  #     opendir()
+  #
   def opendir: () -> untyped
 
+  # See FileTest.owned?.
+  #
+  # # arglists 💪👽🚨 << Delete this section
+  #     owned?()
+  #
   def owned?: () -> untyped
 
+  # Returns the parent directory.
+  #
+  # This is same as `self + '..'`.
+  #
+  # # arglists 💪👽🚨 << Delete this section
+  #     parent()
+  #
   def parent: () -> untyped
 
+  # See FileTest.pipe?.
+  #
+  # # arglists 💪👽🚨 << Delete this section
+  #     pipe?()
+  #
   def pipe?: () -> untyped
 
+  # Returns all data from the file, or the first `N` bytes if specified.
+  #
+  # See File.read.
+  #
+  # # arglists 💪👽🚨 << Delete this section
+  #     pathname.read([length [, offset]]) -> string
+  #     pathname.read([length [, offset]], open_args) -> string
+  #
   def read: (*untyped) -> untyped
 
+  # See FileTest.readable?.
+  #
+  # # arglists 💪👽🚨 << Delete this section
+  #     readable?()
+  #
   def readable?: () -> untyped
 
+  # See FileTest.readable_real?.
+  #
+  # # arglists 💪👽🚨 << Delete this section
+  #     readable_real?()
+  #
   def readable_real?: () -> untyped
 
+  # Returns all the lines from the file.
+  #
+  # See File.readlines.
+  #
+  # # arglists 💪👽🚨 << Delete this section
+  #     pathname.readlines(sep=$/ [, open_args])     -> array
+  #     pathname.readlines(limit [, open_args])      -> array
+  #     pathname.readlines(sep, limit [, open_args]) -> array
+  #
   def readlines: (*untyped) -> untyped
 
+  # Read symbolic link.
+  #
+  # See File.readlink.
+  #
+  # # arglists 💪👽🚨 << Delete this section
+  #     readlink()
+  #
   def readlink: () -> untyped
 
+  # Returns the real (absolute) pathname of `self` in the actual filesystem.
+  #
+  # Does not contain symlinks or useless dots, `..` and `.`.
+  #
+  # The last component of the real pathname can be nonexistent.
+  #
+  # # arglists 💪👽🚨 << Delete this section
+  #     realdirpath(p1 = v1)
+  #
   def realdirpath: (*untyped) -> untyped
 
+  # Returns the real (absolute) pathname for `self` in the actual filesystem.
+  #
+  # Does not contain symlinks or useless dots, `..` and `.`.
+  #
+  # All components of the pathname must exist when this method is called.
+  #
+  # # arglists 💪👽🚨 << Delete this section
+  #     realpath(p1 = v1)
+  #
   def realpath: (*untyped) -> untyped
 
+  # The opposite of Pathname#absolute?
+  #
+  # It returns `false` if the pathname begins with a slash.
+  #
+  #     p = Pathname.new('/im/sure')
+  #     p.relative?
+  #         #=> false
+  #
+  #     p = Pathname.new('not/so/sure')
+  #     p.relative?
+  #         #=> true
+  #
+  # # arglists 💪👽🚨 << Delete this section
+  #     relative?()
+  #
   def relative?: () -> untyped
 
+  # Returns a relative path from the given `base_directory` to the receiver.
+  #
+  # If `self` is absolute, then `base_directory` must be absolute too.
+  #
+  # If `self` is relative, then `base_directory` must be relative too.
+  #
+  # This method doesn't access the filesystem.  It assumes no symlinks.
+  #
+  # ArgumentError is raised when it cannot find a relative path.
+  #
+  # # arglists 💪👽🚨 << Delete this section
+  #     relative_path_from(base_directory)
+  #
   def relative_path_from: (untyped base_directory) -> untyped
 
+  # Rename the file.
+  #
+  # See File.rename.
+  #
+  # # arglists 💪👽🚨 << Delete this section
+  #     rename(p1)
+  #
   def rename: (untyped) -> untyped
 
+  # Remove the referenced directory.
+  #
+  # See Dir.rmdir.
+  #
+  # # arglists 💪👽🚨 << Delete this section
+  #     rmdir()
+  #
   def rmdir: () -> untyped
 
+  # Recursively deletes a directory, including all directories beneath it.
+  #
+  # See FileUtils.rm_r
+  #
+  # # arglists 💪👽🚨 << Delete this section
+  #     rmtree()
+  #
   def rmtree: () -> untyped
 
+  # Predicate method for root directories.  Returns `true` if the pathname
+  # consists of consecutive slashes.
+  #
+  # It doesn't access the filesystem.  So it may return `false` for some pathnames
+  # which points to roots such as `/usr/..`.
+  #
+  # # arglists 💪👽🚨 << Delete this section
+  #     root?()
+  #
   def root?: () -> untyped
 
+  # See FileTest.setgid?.
+  #
+  # # arglists 💪👽🚨 << Delete this section
+  #     setgid?()
+  #
   def setgid?: () -> untyped
 
+  # See FileTest.setuid?.
+  #
+  # # arglists 💪👽🚨 << Delete this section
+  #     setuid?()
+  #
   def setuid?: () -> untyped
 
+  # See FileTest.size.
+  #
+  # # arglists 💪👽🚨 << Delete this section
+  #     size()
+  #
   def size: () -> untyped
 
+  # See FileTest.size?.
+  #
+  # # arglists 💪👽🚨 << Delete this section
+  #     size?()
+  #
   def size?: () -> untyped
 
+  # See FileTest.socket?.
+  #
+  # # arglists 💪👽🚨 << Delete this section
+  #     socket?()
+  #
   def socket?: () -> untyped
 
+  # Returns the #dirname and the #basename in an Array.
+  #
+  # See File.split.
+  #
+  # # arglists 💪👽🚨 << Delete this section
+  #     split()
+  #
   def split: () -> untyped
 
+  # Returns a File::Stat object.
+  #
+  # See File.stat.
+  #
+  # # arglists 💪👽🚨 << Delete this section
+  #     stat()
+  #
   def stat: () -> untyped
 
+  # See FileTest.sticky?.
+  #
+  # # arglists 💪👽🚨 << Delete this section
+  #     sticky?()
+  #
   def sticky?: () -> untyped
 
+  # Return a pathname which is substituted by String#sub.
+  #
+  #     path1 = Pathname.new('/usr/bin/perl')
+  #     path1.sub('perl', 'ruby')
+  #         #=> #<Pathname:/usr/bin/ruby>
+  #
+  # # arglists 💪👽🚨 << Delete this section
+  #     sub(*args)
+  #
   def sub: (*untyped) -> untyped
 
+  # Return a pathname with `repl` added as a suffix to the basename.
+  #
+  # If self has no extension part, `repl` is appended.
+  #
+  #     Pathname.new('/usr/bin/shutdown').sub_ext('.rb')
+  #         #=> #<Pathname:/usr/bin/shutdown.rb>
+  #
+  # # arglists 💪👽🚨 << Delete this section
+  #     sub_ext(p1)
+  #
   def sub_ext: (untyped) -> untyped
 
+  # See FileTest.symlink?.
+  #
+  # # arglists 💪👽🚨 << Delete this section
+  #     symlink?()
+  #
   def symlink?: () -> untyped
 
+  # See IO.sysopen.
+  #
+  # # arglists 💪👽🚨 << Delete this section
+  #     pathname.sysopen([mode, [perm]])  -> fixnum
+  #
   def sysopen: (*untyped) -> untyped
 
+  # Returns pathname.  This method is deprecated and will be removed in Ruby 3.2.
+  #
+  # # arglists 💪👽🚨 << Delete this section
+  #     pathname.taint -> obj
+  #
   def taint: () -> untyped
 
+  # Return the path as a String.
+  #
+  # to_path is implemented so Pathname objects are usable with File.open, etc.
+  #
+  # # arglists 💪👽🚨 << Delete this section
+  #     pathname.to_path          -> string
+  #
   def to_path: () -> untyped
 
+  # Return the path as a String.
+  #
+  # to_path is implemented so Pathname objects are usable with File.open, etc.
+  #
+  # # arglists 💪👽🚨 << Delete this section
+  #     pathname.to_s             -> string
+  #
   def to_s: () -> untyped
 
+  # Truncates the file to `length` bytes.
+  #
+  # See File.truncate.
+  #
+  # # arglists 💪👽🚨 << Delete this section
+  #     truncate(p1)
+  #
   def truncate: (untyped) -> untyped
 
+  # Removes a file or directory, using File.unlink if `self` is a file, or
+  # Dir.unlink as necessary.
+  #
+  # # arglists 💪👽🚨 << Delete this section
+  #     unlink()
+  #
   def unlink: () -> untyped
 
+  # Returns pathname.  This method is deprecated and will be removed in Ruby 3.2.
+  #
+  # # arglists 💪👽🚨 << Delete this section
+  #     pathname.untaint -> obj
+  #
   def untaint: () -> untyped
 
+  # Update the access and modification times of the file.
+  #
+  # See File.utime.
+  #
+  # # arglists 💪👽🚨 << Delete this section
+  #     utime(p1, p2)
+  #
   def utime: (untyped, untyped) -> untyped
 
+  # See FileTest.world_readable?.
+  #
+  # # arglists 💪👽🚨 << Delete this section
+  #     world_readable?()
+  #
   def world_readable?: () -> untyped
 
+  # See FileTest.world_writable?.
+  #
+  # # arglists 💪👽🚨 << Delete this section
+  #     world_writable?()
+  #
   def world_writable?: () -> untyped
 
+  # See FileTest.writable?.
+  #
+  # # arglists 💪👽🚨 << Delete this section
+  #     writable?()
+  #
   def writable?: () -> untyped
 
+  # See FileTest.writable_real?.
+  #
+  # # arglists 💪👽🚨 << Delete this section
+  #     writable_real?()
+  #
   def writable_real?: () -> untyped
 
+  # Writes `contents` to the file.
+  #
+  # See File.write.
+  #
+  # # arglists 💪👽🚨 << Delete this section
+  #     pathname.write(string, [offset] )   => fixnum
+  #     pathname.write(string, [offset], open_args )   => fixnum
+  #
   def write: (*untyped) -> untyped
 
+  # See FileTest.zero?.
+  #
+  # # arglists 💪👽🚨 << Delete this section
+  #     zero?()
+  #
   def zero?: () -> untyped
 
   private
@@ -217,6 +1242,12 @@ class Pathname
 
   def has_trailing_separator?: (untyped path) -> untyped
 
+  # Create a Pathname object from the given String (or String-like object). If
+  # `path` contains a NULL character (`\0`), an ArgumentError is raised.
+  #
+  # # arglists 💪👽🚨 << Delete this section
+  #     new(p1)
+  #
   def initialize: (untyped) -> untyped
 
   def plus: (untyped path1, untyped path2) -> untyped
@@ -235,5 +1266,20 @@ Pathname::SEPARATOR_PAT: Regexp
 Pathname::TO_PATH: Symbol
 
 extension Kernel (Pathname)
+  # Creates a new Pathname object from the given string, `path`, and returns
+  # pathname object.
+  #
+  # In order to use this constructor, you must first require the Pathname standard
+  # library extension.
+  #
+  #     require 'pathname'
+  #     Pathname("/home/zzak")
+  #     #=> #<Pathname:/home/zzak>
+  #
+  # See also Pathname::new for more information.
+  #
+  # # arglists 💪👽🚨 << Delete this section
+  #     Pathname(path)  -> pathname
+  #
   def Pathname: (String) -> Pathname
 end
