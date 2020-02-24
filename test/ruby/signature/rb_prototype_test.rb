@@ -389,7 +389,7 @@ end
 
     assert_write parser.decls, <<-EOF
 class C
-  def foo: () -> untyped
+  def foo: () -> nil
 end
     EOF
   end
