@@ -1330,11 +1330,12 @@ class SyntaxError < StandardError
 end
 
 class SemanticsError < StandardError
-  attr_reader :subject
+  attr_reader :subject, :location, :original_message
 
   def initialize(message, subject:, location:)
     @subject = subject
     @location = location
+    @original_message = message
 
     super "parse error on #{location}: #{message}"
   end
