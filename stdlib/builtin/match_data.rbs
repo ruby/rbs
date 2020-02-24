@@ -206,8 +206,6 @@ class MatchData
   #
   def pre_match: () -> String
 
-  def pretty_print: (untyped q) -> untyped
-
   # Returns the regexp.
   #
   #     m = /a.*b/.match("abc")
