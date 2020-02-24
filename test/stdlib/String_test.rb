@@ -626,6 +626,8 @@ class StringInstanceTest < Minitest::Test
                      "string", :encode, fallback: proc { |s| s }
     assert_send_type "(fallback: Method) -> String",
                      "string", :encode, fallback: "test".method(:+)
+    assert_send_type "(fallback: ArefFromStringToString) -> String",
+                     "string", :encode, fallback: ArefFromStringToString.new
     assert_send_type "(cr_newline: true) -> String",
                      "string", :encode, cr_newline: true
     assert_send_type "(crlf_newline: true) -> String",
@@ -659,6 +661,8 @@ class StringInstanceTest < Minitest::Test
                      "string", :encode!, fallback: proc { |s| s }
     assert_send_type "(fallback: Method) -> self",
                      "string", :encode!, fallback: "test".method(:+)
+    assert_send_type "(fallback: ArefFromStringToString) -> String",
+                     "string", :encode, fallback: ArefFromStringToString.new
     assert_send_type "(cr_newline: true) -> self",
                      "string", :encode!, cr_newline: true
     assert_send_type "(crlf_newline: true) -> self",
