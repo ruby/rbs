@@ -267,5 +267,5 @@ class MatchData
 
   private
 
-  def initialize_copy: (self object) -> self
+  def initialize_copy: (self object) -> void
 end
