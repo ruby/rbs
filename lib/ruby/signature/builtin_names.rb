@@ -49,6 +49,9 @@ module Ruby
       Symbol = Name.define(:Symbol)
       Integer = Name.define(:Integer)
       Float = Name.define(:Float)
+      Regexp = Name.define(:Regexp)
+      TrueClass = Name.define(:TrueClass)
+      FalseClass = Name.define(:FalseClass)
     end
   end
 end

@@ -346,11 +346,11 @@ module Ruby
           when :DSYM
             BuiltinNames::Symbol.instance_type
           when :DREGX
-            Types::ClassInstance.new(name: '::Regexp', args: [], location: nil)
+            BuiltinNames::Regexp.instance_type
           when :TRUE
-            Types::ClassInstance.new(name: '::TrueClass', args: [], location: nil)
+            BuiltinNames::TrueClass.instance_type
           when :FALSE
-            Types::ClassInstance.new(name: '::FalseClass', args: [], location: nil)
+            BuiltinNames::FalseClass.instance_type
           when :NIL
             Types::Bases::Nil.new(location: nil)
           when :LIT
@@ -366,7 +366,8 @@ module Ruby
             when Integer
               Types::Literal.new(literal: lit, location: nil)
             else
-              Types::ClassInstance.new(name: "::#{name}", args: [], location: nil)
+              type_name = TypeName.new(name: name, namespace: Namespace.root)
+              Types::ClassInstance.new(name: type_name, args: [], location: nil)
             end
           when :ZLIST, :ZARRAY
             BuiltinNames::Array.instance_type([untyped])
@@ -375,7 +376,7 @@ module Ruby
             t = types_to_union_type(elem_types)
             BuiltinNames::Array.instance_type([t])
           when :DOT2, :DOT3
-            types = node.children.map { |c| literal_to_type(c) }.reject { }
+            types = node.children.map { |c| literal_to_type(c) }
             type = range_element_type(types)
             BuiltinNames::Range.instance_type([type])
           when :HASH
@@ -417,10 +418,17 @@ module Ruby
           types = types.reject { |t| t == untyped }
           return untyped if types.empty?
 
-          type_names = types.map { |t| t.is_a?(Types::ClassInstance) ? t.name : "::#{t.literal.class.name}" }.uniq
+          types = types.map do |t|
+            if t.is_a?(Types::Literal)
+              type_name = TypeName.new(name: t.literal.class.name, namespace: Namespace.root)
+              Types::ClassInstance.new(name: type_name, args: [], location: nil)
+            else
+              t
+            end
+          end.uniq
 
-          if type_names.size == 1
-            Types::ClassInstance.new(name: type_names.first, args: [], location: nil)
+          if types.size == 1
+            types.first
           else
             untyped
           end
