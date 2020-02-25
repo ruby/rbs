@@ -389,6 +389,11 @@ module Ruby
             if (type = vars[block])
               if type.is_a?(Types::Proc)
                 method_block = MethodType::Block.new(required: true, type: type.type)
+              elsif type.is_a?(Types::Bases::Any)
+                method_block = MethodType::Block.new(
+                  required: true,
+                  type: Types::Function.empty(Types::Bases::Any.new(location: nil))
+                )
               else
                 STDERR.puts "Unexpected block type: #{type}"
                 PP.pp args_node, STDERR
