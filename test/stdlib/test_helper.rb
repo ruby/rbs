@@ -57,6 +57,12 @@ class Enum
   end
 end
 
+class ArefFromStringToString
+  def [](str)
+    "!"
+  end
+end
+
 class StdlibTest < Minitest::Test
 
   DEFAULT_LOGGER = Logger.new(STDERR)
