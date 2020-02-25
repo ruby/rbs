@@ -169,7 +169,7 @@ end
     parser.parse(<<-EOF)
 class File
   sig { params(blk: T.untyped).void }
-  def self.split; end
+  def self.split(&blk); end
 end
     EOF
 
