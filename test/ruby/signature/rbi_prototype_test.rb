@@ -163,6 +163,23 @@ end
     EOF
   end
 
+  def test_untyped_block
+    parser = RBI.new
+
+    parser.parse(<<-EOF)
+class File
+  sig { params(blk: T.untyped).void }
+  def self.split(&blk); end
+end
+    EOF
+
+    assert_write parser.decls, <<-EOF
+class File
+  def self.split: () { () -> untyped } -> void
+end
+    EOF
+  end
+
   def test_overloading
     parser = RBI.new
 
