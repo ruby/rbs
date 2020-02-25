@@ -143,10 +143,14 @@ class DirSingletonTest < Minitest::Test
   def test_open
     assert_send_type "(::String) -> ::Dir",
                      Dir, :open, "."
+    assert_send_type "(::String, encoding: String) -> ::Dir",
+                     Dir, :open, ".", encoding: 'UTF-8'
     assert_send_type "(::ToStr, encoding: Encoding) -> ::Dir",
                      Dir, :open, ToStr.new("."), encoding: Encoding::UTF_8
     assert_send_type "(::ToStr) { (::Dir) -> 31 } -> 31",
                      Dir, :open, ToStr.new(".") do 31 end
+    assert_send_type "(::String, encoding: String) { (::Dir) -> 31 } -> 31",
+                     Dir, :open, ".", encoding: 'UTF-8' do 31 end
   end
 
   def test_pwd
