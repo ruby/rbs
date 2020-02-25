@@ -460,6 +460,8 @@ module Ruby
             Types::Optional.new(type: type, location: nil)
           when call_node?(type_node, name: :self_type)
             Types::Bases::Self.new(location: nil)
+          when call_node?(type_node, name: :attached_class)
+            Types::Bases::Instance.new(location: nil)
           when call_node?(type_node, name: :noreturn)
             Types::Bases::Bottom.new(location: nil)
           when call_node?(type_node, name: :class_of)

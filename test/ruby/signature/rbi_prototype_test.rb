@@ -247,6 +247,40 @@ end
     EOF
   end
 
+  def test_self_type
+    parser = RBI.new
+
+    parser.parse(<<-EOF)
+class File
+  sig { returns(T.self_type) }
+  def self.split; end
+end
+    EOF
+
+    assert_write parser.decls, <<-EOF
+class File
+  def self.split: () -> self
+end
+    EOF
+  end
+
+  def test_attached_class
+    parser = RBI.new
+
+    parser.parse(<<-EOF)
+class File
+  sig { returns(T.attached_class) }
+  def self.split; end
+end
+    EOF
+
+    assert_write parser.decls, <<-EOF
+class File
+  def self.split: () -> instance
+end
+    EOF
+  end
+
   def test_noreturn
     parser = RBI.new
 
