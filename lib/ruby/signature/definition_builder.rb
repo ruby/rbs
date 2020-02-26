@@ -817,7 +817,7 @@ module Ruby
         end
       end
 
-      def build_interface(type_name, declaration)
+      def build_interface(type_name, declaration = env.find_class(type_name))
         self_type = Types::Interface.new(
           name: type_name,
           args: declaration.type_params.each.map {|p| Types::Variable.new(name: p.name, location: nil) },
