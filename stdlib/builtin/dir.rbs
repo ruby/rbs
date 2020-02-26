@@ -256,7 +256,7 @@ class Dir
   #     Dir.open( string, encoding: enc ) {| aDir | block } -> anObject
   #
   def self.open: (string, ?encoding: Encoding | string | nil) -> Dir
-               | [U] (string, ?encoding: Encoding) { (Dir) -> U } -> U
+               | [U] (string, ?encoding: Encoding | string | nil) { (Dir) -> U } -> U
 
   # Returns the path to the current working directory of this process as a string.
   #
