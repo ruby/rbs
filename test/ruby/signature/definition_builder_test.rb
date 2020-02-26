@@ -276,7 +276,7 @@ EOF
         foo = type_name("::_Foo")
         baz = type_name("::_Baz")
 
-        builder.build_interface(foo, env.find_type_decl(foo)).yield_self do |definition|
+        builder.build_interface(foo).yield_self do |definition|
           assert_instance_of Definition, definition
 
           assert_equal [:bar, :hash, :eql?].sort, definition.methods.keys.sort
@@ -287,7 +287,7 @@ EOF
         end
 
         assert_raises InvalidTypeApplicationError do
-          builder.build_interface(baz, env.find_type_decl(baz))
+          builder.build_interface(baz)
         end
       end
     end
@@ -813,7 +813,7 @@ EOF
           assert_method_definition definition.methods[:bar], ["(::String) -> void"]
         end
 
-        builder.build_interface(type_name("::_World"), env.find_class(type_name("::_World"))).tap do |definition|
+        builder.build_interface(type_name("::_World")).tap do |definition|
           assert_instance_of Definition, definition
           assert_method_definition definition.methods[:hello], ["() -> bool"]
           assert_method_definition definition.methods[:world], ["() -> bool"]
@@ -1057,7 +1057,7 @@ EOF
         end
 
         interface_name = type_name("::_Person")
-        builder.build_interface(interface_name, env.find_type_decl(interface_name)).yield_self do |definition|
+        builder.build_interface(interface_name).yield_self do |definition|
           assert_instance_of Definition, definition
 
           assert_method_definition definition.methods[:first_name], ["() -> ::String"]
