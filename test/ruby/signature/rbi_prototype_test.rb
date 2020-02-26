@@ -180,6 +180,23 @@ end
     EOF
   end
 
+  def test_optional_block
+    parser = RBI.new
+
+    parser.parse(<<-EOF)
+class File
+  sig { params(blk: T.nilable(T.proc.void)).void }
+  def self.split(&blk); end
+end
+    EOF
+
+    assert_write parser.decls, <<-EOF
+class File
+  def self.split: () ?{ () -> void } -> void
+end
+    EOF
+  end
+
   def test_overloading
     parser = RBI.new
 
