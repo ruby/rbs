@@ -34,10 +34,7 @@ class File < IO
   #
   #     File.absolute_path("~oracle/bin")       #=> "<relative_path>/~oracle/bin"
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     File.absolute_path(file_name [, dir_string] )  ->  abs_file_name
-  #
-  def self.absolute_path: (String file, ?String dir) -> String
+  def self.absolute_path: (string | _ToPath file_name, ?(string | _ToPath) dir_string) -> String
 
   # Returns `true` if `file_name` is an absolute path, and `false` otherwise.
   #
