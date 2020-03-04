@@ -45,6 +45,16 @@ class ToArray
   end
 end
 
+class ToPath
+  def initialize(value = "")
+    @value = value
+  end
+
+  def to_path
+    @value
+  end
+end
+
 class Enum
   def initialize(*args)
     @args = args

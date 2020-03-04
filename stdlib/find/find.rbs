@@ -38,7 +38,3 @@ module Find
   # 
   def self?.prune: () -> void
 end
-
-interface _ToPath
-  def to_path: () -> String
-end

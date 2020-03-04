@@ -22,6 +22,10 @@ interface _ToProc
   def to_proc: () -> untyped
 end
 
+interface _ToPath
+  def to_path: () -> String
+end
+
 interface _Each[out A, out B]
   def each: { (A) -> void } -> B
 end
