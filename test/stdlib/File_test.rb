@@ -29,4 +29,15 @@ class FileSingletonTest < Minitest::Test
     assert_send_type "(ToPath) -> bool",
                      File, :absolute_path?, ToPath.new(__FILE__)
   end
+
+  def test_atime
+    assert_send_type "(String) -> Time",
+                     File, :atime, __FILE__
+    assert_send_type "(ToStr) -> Time",
+                     File, :atime, ToStr.new(__FILE__)
+    assert_send_type "(ToPath) -> Time",
+                     File, :atime, ToPath.new(__FILE__)
+    assert_send_type "(IO) -> Time",
+                     File, :atime, IO.new(IO.sysopen(__FILE__))
+  end
 end

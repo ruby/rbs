@@ -51,10 +51,7 @@ class File < IO
   #
   #     File.atime("testfile")   #=> Wed Apr 09 08:51:48 CDT 2003
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     File.atime(file_name)  ->  time
-  #
-  def self.atime: (untyped file) -> Time
+  def self.atime: (string | _ToPath | IO file_name) -> Time
 
   # Returns the last component of the filename given in *file_name* (after first
   # stripping trailing separators), which can be formed using both File::SEPARATOR
