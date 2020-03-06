@@ -65,7 +65,7 @@ class File < IO
   #
   def self.basename: (string | _ToPath file_name, ?string suffix) -> String
 
-  def self.birthtime: (untyped file) -> Time
+  def self.birthtime: (string | _ToPath | IO file_name) -> Time
 
   # Returns `true` if the named file is a block device.
   #
