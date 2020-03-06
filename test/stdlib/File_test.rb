@@ -75,4 +75,16 @@ class FileSingletonTest < Minitest::Test
     assert_send_type "(IO) -> bool",
                      File, :blockdev?, IO.new(IO.sysopen(__FILE__))
   end
+
+  def test_chardev?
+    assert_send_type "(String) -> bool",
+                     File, :chardev?, __FILE__
+    assert_send_type "(ToStr) -> bool",
+                     File, :chardev?, ToStr.new(__FILE__)
+    assert_send_type "(ToPath) -> bool",
+                     File, :chardev?, ToPath.new(__FILE__)
+    assert_send_type "(IO) -> bool",
+                     File, :chardev?, IO.new(IO.sysopen(__FILE__))
+  end
+
 end

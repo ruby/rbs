@@ -77,10 +77,7 @@ class File < IO
   #
   # *file_name* can be an IO object.
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     File.chardev?(file_name)   ->  true or false
-  #
-  def self.chardev?: (String | IO file) -> bool
+  def self.chardev?: (string | _ToPath | IO file_name) -> bool
 
   # Changes permission bits on the named file(s) to the bit pattern represented by
   # *mode_int*. Actual effects are operating system dependent (see the beginning
