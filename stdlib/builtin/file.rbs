@@ -63,10 +63,7 @@ class File < IO
   #     File.basename("/home/gumby/work/ruby.rb", ".rb")   #=> "ruby"
   #     File.basename("/home/gumby/work/ruby.rb", ".*")    #=> "ruby"
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     File.basename(file_name [, suffix] )  ->  base_name
-  #
-  def self.basename: (String file, ?String suffix) -> String
+  def self.basename: (string | _ToPath file_name, ?string suffix) -> String
 
   def self.birthtime: (untyped file) -> Time
 

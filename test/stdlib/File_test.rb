@@ -40,4 +40,17 @@ class FileSingletonTest < Minitest::Test
     assert_send_type "(IO) -> Time",
                      File, :atime, IO.new(IO.sysopen(__FILE__))
   end
+
+  def test_basename
+    assert_send_type "(String) -> String",
+                     File, :basename, __FILE__
+    assert_send_type "(ToStr) -> String",
+                     File, :basename, ToStr.new(__FILE__)
+    assert_send_type "(ToPath) -> String",
+                     File, :basename, ToPath.new(__FILE__)
+    assert_send_type "(String, String) -> String",
+                     File, :basename, __FILE__, '.rb'
+    assert_send_type "(String, ToStr) -> String",
+                     File, :basename, __FILE__, ToStr.new('.rb')
+  end
 end
