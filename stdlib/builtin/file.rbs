@@ -71,10 +71,7 @@ class File < IO
   #
   # *file_name* can be an IO object.
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     File.blockdev?(file_name)   ->  true or false
-  #
-  def self.blockdev?: (String | IO file) -> bool
+  def self.blockdev?: (string | _ToPath | IO file_name) -> bool
 
   # Returns `true` if the named file is a character device.
   #
