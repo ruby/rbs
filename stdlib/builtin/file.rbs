@@ -107,10 +107,7 @@ class File < IO
   #
   #     File.ctime("testfile")   #=> Wed Apr 09 08:53:13 CDT 2003
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     File.ctime(file_name)  -> time
-  #
-  def self.ctime: (untyped file) -> Time
+  def self.ctime: (string | _ToPath | IO file_name) -> Time
 
   # Deletes the named files, returning the number of names passed as arguments.
   # Raises an exception on any error. Since the underlying implementation relies

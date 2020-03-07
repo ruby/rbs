@@ -121,4 +121,15 @@ class FileSingletonTest < Minitest::Test
     assert_send_type "(Integer, nil, String, String) -> Integer",
                      File, :chown, Process.uid, nil, __FILE__, __FILE__
   end
+
+  def test_ctime
+    assert_send_type "(String) -> Time",
+                     File, :ctime, __FILE__
+    assert_send_type "(ToStr) -> Time",
+                     File, :ctime, ToStr.new(__FILE__)
+    assert_send_type "(ToPath) -> Time",
+                     File, :ctime, ToPath.new(__FILE__)
+    assert_send_type "(IO) -> Time",
+                     File, :ctime, IO.new(IO.sysopen(__FILE__))
+  end
 end
