@@ -102,4 +102,23 @@ class FileSingletonTest < Minitest::Test
                       File, :chmod, 0644, "#{dir}/chmod", "#{dir}/chmod"
     end
   end
+
+  def test_chown
+    assert_send_type "(Integer, Integer, String) -> Integer",
+                     File, :chown, Process.uid, Process.gid, __FILE__
+    assert_send_type "(ToInt, Integer, String) -> Integer",
+                     File, :chown, ToInt.new(Process.uid), Process.gid, __FILE__
+    assert_send_type "(nil, Integer, String) -> Integer",
+                     File, :chown, nil, Process.gid, __FILE__
+    assert_send_type "(Integer, ToInt, String) -> Integer",
+                     File, :chown, Process.uid, ToInt.new(Process.gid), __FILE__
+    assert_send_type "(Integer, nil, String) -> Integer",
+                     File, :chown, Process.uid, nil, __FILE__
+    assert_send_type "(Integer, Integer, ToStr) -> Integer",
+                     File, :chown, Process.uid, Process.gid, ToStr.new(__FILE__)
+    assert_send_type "(Integer, Integer, ToPath) -> Integer",
+                     File, :chown, Process.uid, Process.gid, ToPath.new(__FILE__)
+    assert_send_type "(Integer, nil, String, String) -> Integer",
+                     File, :chown, Process.uid, nil, __FILE__, __FILE__
+  end
 end

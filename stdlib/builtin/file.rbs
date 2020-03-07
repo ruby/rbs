@@ -96,10 +96,7 @@ class File < IO
   #
   #     File.chown(nil, 100, "testfile")
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     File.chown(owner_int, group_int, file_name, ...)  ->  integer
-  #
-  def self.chown: (Integer owner, Integer group, *String files) -> Integer
+  def self.chown: (int? owner, int? group, *(string | _ToPath) file_name) -> Integer
 
   # Returns the change time for the named file (the time at which directory
   # information about the file was changed, not the file itself).
