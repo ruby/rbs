@@ -86,10 +86,7 @@ class File < IO
   #
   #     File.chmod(0644, "testfile", "out")   #=> 2
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     File.chmod(mode_int, file_name, ... )  ->  integer
-  #
-  def self.chmod: (Integer mode, *String files) -> Integer
+  def self.chmod: (int mode, *(string | _ToPath) file_name) -> Integer
 
   # Changes the owner and group of the named file(s) to the given numeric owner
   # and group id's. Only a process with superuser privileges may change the owner

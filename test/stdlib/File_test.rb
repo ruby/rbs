@@ -87,4 +87,19 @@ class FileSingletonTest < Minitest::Test
                      File, :chardev?, IO.new(IO.sysopen(__FILE__))
   end
 
+  def test_chmod
+    Dir.mktmpdir do |dir|
+      File.open("#{dir}/chmod", "w"){}
+      assert_send_type "(Integer, String) -> Integer",
+                       File, :chmod, 0644, "#{dir}/chmod"
+      assert_send_type "(ToInt, String) -> Integer",
+                      File, :chmod, ToInt.new(0644), "#{dir}/chmod"
+      assert_send_type "(Integer, ToStr) -> Integer",
+                      File, :chmod, 0644, ToStr.new("#{dir}/chmod")
+      assert_send_type "(Integer, ToPath) -> Integer",
+                      File, :chmod, 0644, ToPath.new("#{dir}/chmod")
+      assert_send_type "(Integer, String, String) -> Integer",
+                      File, :chmod, 0644, "#{dir}/chmod", "#{dir}/chmod"
+    end
+  end
 end
