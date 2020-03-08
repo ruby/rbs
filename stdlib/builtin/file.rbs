@@ -126,10 +126,7 @@ class File < IO
   #
   #     File.directory?(".")
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     File.directory?(file_name)   ->  true or false
-  #
-  def self.directory?: (String | IO file) -> bool
+  def self.directory?: (string | _ToPath | IO path) -> bool
 
   # Returns all components of the filename given in *file_name* except the last
   # one (after first stripping trailing separators). The filename can be formed

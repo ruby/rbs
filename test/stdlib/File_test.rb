@@ -149,4 +149,15 @@ class FileSingletonTest < Minitest::Test
       assert_send_type "(String, String) -> Integer", File, :delete, "#{dir}/d", "#{dir}/e"
     end
   end
+
+  def test_directory?
+    assert_send_type "(String) -> bool",
+                     File, :directory?, __dir__
+    assert_send_type "(ToStr) -> bool",
+                     File, :directory?, ToStr.new(__dir__)
+    assert_send_type "(ToPath) -> bool",
+                     File, :directory?, ToPath.new(__dir__)
+    assert_send_type "(IO) -> bool",
+                     File, :directory?, IO.new(IO.sysopen(__dir__))
+  end
 end
