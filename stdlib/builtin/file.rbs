@@ -165,10 +165,7 @@ class File < IO
   # Note that some OS-level security features may cause this to return true even
   # though the file is not executable by the real user/group.
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     File.executable_real?(file_name)   -> true or false
-  #
-  def self.executable_real?: (String file) -> bool
+  def self.executable_real?: (string | _ToPath file_name) -> bool
 
   # Return `true` if the named file exists.
   #

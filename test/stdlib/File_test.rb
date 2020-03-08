@@ -189,4 +189,13 @@ class FileSingletonTest < Minitest::Test
     assert_send_type "(ToPath) -> bool",
                      File, :executable?, ToPath.new(__FILE__)
   end
+
+  def test_executable_real?
+    assert_send_type "(String) -> bool",
+                     File, :executable_real?, __FILE__
+    assert_send_type "(ToStr) -> bool",
+                     File, :executable_real?, ToStr.new(__FILE__)
+    assert_send_type "(ToPath) -> bool",
+                     File, :executable_real?, ToPath.new(__FILE__)
+  end
 end
