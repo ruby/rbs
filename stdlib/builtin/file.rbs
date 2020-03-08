@@ -141,10 +141,7 @@ class File < IO
   #
   # *file_name* can be an IO object.
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     File.zero?(file_name)   -> true or false
-  #
-  def self.empty?: (untyped) -> untyped
+  def self.empty?: (string | _ToPath | IO file_name) -> bool
 
   # Returns `true` if the named file is executable by the effective user and group
   # id of this process. See eaccess(3).
