@@ -198,4 +198,15 @@ class FileSingletonTest < Minitest::Test
     assert_send_type "(ToPath) -> bool",
                      File, :executable_real?, ToPath.new(__FILE__)
   end
+
+  def test_exist?
+    assert_send_type "(String) -> bool",
+                     File, :exist?, __FILE__
+    assert_send_type "(ToStr) -> bool",
+                     File, :exist?, ToStr.new(__FILE__)
+    assert_send_type "(ToPath) -> bool",
+                     File, :exist?, ToPath.new(__FILE__)
+    assert_send_type "(IO) -> bool",
+                     File, :exist?, IO.new(IO.sysopen(__FILE__))
+  end
 end

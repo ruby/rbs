@@ -173,10 +173,7 @@ class File < IO
   #
   # "file exists" means that stat() or fstat() system call is successful.
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     File.exist?(file_name)    ->  true or false
-  #
-  def self.exist?: (untyped file) -> bool
+  def self.exist?: (string | _ToPath | IO file_name) -> bool
 
   # Deprecated method. Don't use.
   #
