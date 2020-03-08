@@ -117,10 +117,7 @@ class File < IO
   #
   # See also Dir::rmdir.
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     File.delete(file_name, ...)  -> integer
-  #
-  def self.delete: (*String files) -> Integer
+  def self.delete: (*(string | _ToPath) file_name) -> Integer
 
   # Returns `true` if the named file is a directory, or a symlink that points at a
   # directory, and `false` otherwise.

@@ -132,4 +132,21 @@ class FileSingletonTest < Minitest::Test
     assert_send_type "(IO) -> Time",
                      File, :ctime, IO.new(IO.sysopen(__FILE__))
   end
+
+  def test_delete
+    Dir.mktmpdir do |dir|
+      File.open("#{dir}/a", "w"){}
+      assert_send_type "(String) -> Integer", File, :delete, "#{dir}/a"
+
+      File.open("#{dir}/b", "w"){}
+      assert_send_type "(ToStr) -> Integer", File, :delete, ToStr.new("#{dir}/b")
+
+      File.open("#{dir}/c", "w"){}
+      assert_send_type "(ToPath) -> Integer", File, :delete, ToPath.new("#{dir}/c")
+
+      File.open("#{dir}/d", "w"){}
+      File.open("#{dir}/e", "w"){}
+      assert_send_type "(String, String) -> Integer", File, :delete, "#{dir}/d", "#{dir}/e"
+    end
+  end
 end
