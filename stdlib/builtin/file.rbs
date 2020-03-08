@@ -135,10 +135,7 @@ class File < IO
   #
   #     File.dirname("/home/gumby/work/ruby.rb")   #=> "/home/gumby/work"
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     File.dirname(file_name)  ->  dir_name
-  #
-  def self.dirname: (String file) -> String
+  def self.dirname: (string | _ToPath file_name) -> String
 
   # Returns `true` if the named file exists and has a zero size.
   #
