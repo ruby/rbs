@@ -153,10 +153,7 @@ class File < IO
   # Note that some OS-level security features may cause this to return true even
   # though the file is not executable by the effective user/group.
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     File.executable?(file_name)   -> true or false
-  #
-  def self.executable?: (String file) -> bool
+  def self.executable?: (string | _ToPath file_name) -> bool
 
   # Returns `true` if the named file is executable by the real user and group id
   # of this process. See access(3).
