@@ -177,10 +177,7 @@ class File < IO
 
   # Deprecated method. Don't use.
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     File.exists?(file_name)   ->  true or false
-  #
-  def self.exists?: (untyped) -> untyped
+  alias self.exists? self.exist?
 
   # Converts a pathname to an absolute pathname. Relative paths are referenced
   # from the current working directory of the process unless `dir_string` is

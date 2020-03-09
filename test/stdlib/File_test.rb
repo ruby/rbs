@@ -209,4 +209,9 @@ class FileSingletonTest < Minitest::Test
     assert_send_type "(IO) -> bool",
                      File, :exist?, IO.new(IO.sysopen(__FILE__))
   end
+
+  def test_exists?
+    assert_send_type "(String) -> bool",
+                     File, :exists?, __FILE__
+  end
 end
