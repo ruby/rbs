@@ -269,4 +269,13 @@ class FileSingletonTest < Minitest::Test
     assert_send_type "(String, String) -> bool",
                      File, :fnmatch?, "File_test", __FILE__
   end
+
+  def test_ftype
+    assert_send_type "(String) -> String",
+                     File, :ftype, __FILE__
+    assert_send_type "(ToStr) -> String",
+                     File, :ftype, ToStr.new(__FILE__)
+    assert_send_type "(ToPath) -> String",
+                     File, :ftype, ToPath.new(__FILE__)
+  end
 end

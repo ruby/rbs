@@ -435,10 +435,7 @@ class File < IO
   #     File.ftype("/dev/tty")            #=> "characterSpecial"
   #     File.ftype("/tmp/.X11-unix/X0")   #=> "socket"
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     File.ftype(file_name)   -> string
-  #
-  def self.ftype: (String file) -> String
+  def self.ftype: (string | _ToPath file_name) -> String
 
   # Returns `true` if the named file exists and the effective group id of the
   # calling process is the owner of the file. Returns `false` on Windows.
