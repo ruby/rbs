@@ -315,4 +315,17 @@ class FileSingletonTest < Minitest::Test
     assert_send_type "(String, String) -> String",
                      File, :join, "foo", "bar"
   end
+
+  def test_lchmod
+    assert_send_type "(Integer, String) -> Integer",
+                     File, :lchmod, 0644, __FILE__
+    assert_send_type "(ToInt, String) -> Integer",
+                     File, :lchmod, ToInt.new(0644), __FILE__
+    assert_send_type "(Integer, ToStr) -> Integer",
+                     File, :lchmod, 0644, ToStr.new(__FILE__)
+    assert_send_type "(Integer, ToPath) -> Integer",
+                     File, :lchmod, 0644, ToPath.new(__FILE__)
+    assert_send_type "(Integer, String, String) -> Integer",
+                     File, :lchmod, 0644, __FILE__, __FILE__
+  end
 end

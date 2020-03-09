@@ -470,10 +470,7 @@ class File < IO
   # change the permissions associated with the link, not the file referenced by
   # the link). Often not available.
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     File.lchmod(mode_int, file_name, ...)  -> integer
-  #
-  def self.lchmod: (Integer mode, *String files) -> Integer
+  def self.lchmod: (int mode, *(string | _ToPath) file_name) -> Integer
 
   # Equivalent to File::chown, but does not follow symbolic links (so it will
   # change the owner associated with the link, not the file referenced by the
