@@ -264,4 +264,9 @@ class FileSingletonTest < Minitest::Test
     assert_send_type "(String, String, ToInt) -> bool",
                      File, :fnmatch, 'File_test', __FILE__, ToInt.new(File::FNM_CASEFOLD)
   end
+
+  def test_fnmatch?
+    assert_send_type "(String, String) -> bool",
+                     File, :fnmatch?, "File_test", __FILE__
+  end
 end
