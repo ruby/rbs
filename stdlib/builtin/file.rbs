@@ -231,10 +231,7 @@ class File < IO
   # If the `file` argument is a symbolic link, it will resolve the symbolic link
   # and use the file referenced by the link.
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     File.file?(file) -> true or false
-  #
-  def self.file?: (String | IO file) -> bool
+  def self.file?: (string | _ToPath | IO file) -> bool
 
   # Returns true if `path` matches against `pattern`.  The pattern is not a
   # regular expression; instead it follows rules similar to shell filename
