@@ -222,10 +222,7 @@ class File < IO
   #     File.extname(".profile")        #=> ""
   #     File.extname(".profile.sh")     #=> ".sh"
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     File.extname(path)  ->  string
-  #
-  def self.extname: (String path) -> String
+  def self.extname: (string | _ToPath path) -> String
 
   # Returns `true` if the named `file` exists and is a regular file.
   #
