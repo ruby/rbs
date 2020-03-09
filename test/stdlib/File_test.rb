@@ -306,4 +306,13 @@ class FileSingletonTest < Minitest::Test
     assert_send_type "(String, IO) -> bool",
                      File, :identical?, __FILE__, IO.new(IO.sysopen(__FILE__))
   end
+
+  def test_join
+    assert_send_type "(String) -> String",
+                     File, :join, "foo"
+    assert_send_type "(ToStr) -> String",
+                     File, :join, ToStr.new("foo")
+    assert_send_type "(String, String) -> String",
+                     File, :join, "foo", "bar"
+  end
 end

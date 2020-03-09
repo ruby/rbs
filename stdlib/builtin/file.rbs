@@ -464,10 +464,7 @@ class File < IO
   #
   #     File.join("usr", "mail", "gumby")   #=> "usr/mail/gumby"
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     File.join(string, ...)  ->  string
-  #
-  def self.join: (*untyped arg0) -> String
+  def self.join: (*string) -> String
 
   # Equivalent to File::chmod, but does not follow symbolic links (so it will
   # change the permissions associated with the link, not the file referenced by
