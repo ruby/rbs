@@ -249,4 +249,19 @@ class FileSingletonTest < Minitest::Test
     assert_send_type "(IO) -> bool",
                      File, :file?, IO.new(IO.sysopen(__FILE__))
   end
+
+  def test_fnmatch
+    assert_send_type "(String, String) -> bool",
+                     File, :fnmatch, 'File_test', __FILE__
+    assert_send_type "(ToStr, String) -> bool",
+                     File, :fnmatch, ToStr.new('File_test'), __FILE__
+    assert_send_type "(String, ToStr) -> bool",
+                     File, :fnmatch, 'File_test', ToStr.new(__FILE__)
+    assert_send_type "(String, ToPath) -> bool",
+                     File, :fnmatch, 'File_test', ToPath.new(__FILE__)
+    assert_send_type "(String, String, Integer) -> bool",
+                     File, :fnmatch, 'File_test', __FILE__, File::FNM_CASEFOLD
+    assert_send_type "(String, String, ToInt) -> bool",
+                     File, :fnmatch, 'File_test', __FILE__, ToInt.new(File::FNM_CASEFOLD)
+  end
 end

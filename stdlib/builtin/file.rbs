@@ -328,11 +328,7 @@ class File < IO
   #     File.fnmatch(pattern, 'a/.b/c/foo', File::FNM_PATHNAME)    #=> false
   #     File.fnmatch(pattern, 'a/.b/c/foo', File::FNM_PATHNAME | File::FNM_DOTMATCH) #=> true
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     File.fnmatch( pattern, path, [flags] ) -> (true or false)
-  #     File.fnmatch?( pattern, path, [flags] ) -> (true or false)
-  #
-  def self.fnmatch: (String pattern, String path, ?Integer flags) -> bool
+  def self.fnmatch: (string pattern, string | _ToPath path, ?int flags) -> bool
 
   # Returns true if `path` matches against `pattern`.  The pattern is not a
   # regular expression; instead it follows rules similar to shell filename
