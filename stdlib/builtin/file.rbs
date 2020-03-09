@@ -442,10 +442,7 @@ class File < IO
   #
   # *file_name* can be an IO object.
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     File.grpowned?(file_name)   -> true or false
-  #
-  def self.grpowned?: (String | IO file) -> bool
+  def self.grpowned?: (string | _ToPath | IO file_name) -> bool
 
   # Returns `true` if the named files are identical.
   #

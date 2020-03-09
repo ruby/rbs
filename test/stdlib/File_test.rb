@@ -278,4 +278,15 @@ class FileSingletonTest < Minitest::Test
     assert_send_type "(ToPath) -> String",
                      File, :ftype, ToPath.new(__FILE__)
   end
+
+  def test_grpowned?
+    assert_send_type "(String) -> bool",
+                     File, :grpowned?, __FILE__
+    assert_send_type "(ToStr) -> bool",
+                     File, :grpowned?, ToStr.new(__FILE__)
+    assert_send_type "(ToPath) -> bool",
+                     File, :grpowned?, ToPath.new(__FILE__)
+    assert_send_type "(IO) -> bool",
+                     File, :grpowned?, IO.new(IO.sysopen(__FILE__))
+  end
 end
