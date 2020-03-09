@@ -458,10 +458,7 @@ class File < IO
   #     open("d", "w") {}
   #     p File.identical?("a", "d")      #=> false
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     File.identical?(file_1, file_2)   ->  true or false
-  #
-  def self.identical?: (String | IO file_1, String | IO file_2) -> bool
+  def self.identical?: (string | _ToPath | IO file_1, string | _ToPath | IO file_2) -> bool
 
   # Returns a new string formed by joining the strings using `"/"`.
   #

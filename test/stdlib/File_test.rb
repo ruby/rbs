@@ -289,4 +289,21 @@ class FileSingletonTest < Minitest::Test
     assert_send_type "(IO) -> bool",
                      File, :grpowned?, IO.new(IO.sysopen(__FILE__))
   end
+
+  def test_identical?
+    assert_send_type "(String, String) -> bool",
+                     File, :identical?, __FILE__, __FILE__
+    assert_send_type "(ToStr, String) -> bool",
+                     File, :identical?, ToStr.new(__FILE__), __FILE__
+    assert_send_type "(ToPath, String) -> bool",
+                     File, :identical?, ToPath.new(__FILE__), __FILE__
+    assert_send_type "(IO, String) -> bool",
+                     File, :identical?, IO.new(IO.sysopen(__FILE__)), __FILE__
+    assert_send_type "(String, ToStr) -> bool",
+                     File, :identical?, __FILE__, ToStr.new(__FILE__)
+    assert_send_type "(String, ToPath) -> bool",
+                     File, :identical?, __FILE__, ToPath.new(__FILE__)
+    assert_send_type "(String, IO) -> bool",
+                     File, :identical?, __FILE__, IO.new(IO.sysopen(__FILE__))
+  end
 end
