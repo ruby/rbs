@@ -347,4 +347,18 @@ class FileSingletonTest < Minitest::Test
     assert_send_type "(Integer, nil, String, String) -> Integer",
                      File, :lchown, Process.uid, nil, __FILE__, __FILE__
   end
+
+  def test_link
+    assert_send_type "(String, String) -> 0",
+                     File, :link, __FILE__, "new_name"
+    File.unlink("new_name")
+
+    assert_send_type "(ToStr, ToStr) -> 0",
+                     File, :link, ToStr.new(__FILE__), ToStr.new("new_name")
+    File.unlink("new_name")
+
+    assert_send_type "(ToPath, ToPath) -> 0",
+                     File, :link, ToPath.new(__FILE__), ToPath.new("new_name")
+    File.unlink("new_name")
+  end
 end

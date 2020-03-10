@@ -485,10 +485,7 @@ class File < IO
   #     File.link("testfile", ".testfile")   #=> 0
   #     IO.readlines(".testfile")[0]         #=> "This is line one\n"
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     File.link(old_name, new_name)    -> 0
-  #
-  def self.link: (String old, String new) -> Integer
+  def self.link: (string | _ToPath old_name, string | _ToPath new_name) -> 0
 
   # Same as File::stat, but does not follow the last symbolic link. Instead,
   # reports on the link itself.
