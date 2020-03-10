@@ -476,10 +476,7 @@ class File < IO
   # change the owner associated with the link, not the file referenced by the
   # link). Often not available. Returns number of files in the argument list.
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     File.lchown(owner_int, group_int, file_name,..) -> integer
-  #
-  def self.lchown: (Integer owner, Integer group, *String files) -> Integer
+  def self.lchown: (int? owner, int? group, *(string | _ToPath) file_name) -> Integer
 
   # Creates a new name for an existing file using a hard link. Will not overwrite
   # *new_name* if it already exists (raising a subclass of SystemCallError). Not

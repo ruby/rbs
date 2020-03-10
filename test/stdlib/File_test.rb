@@ -328,4 +328,23 @@ class FileSingletonTest < Minitest::Test
     assert_send_type "(Integer, String, String) -> Integer",
                      File, :lchmod, 0644, __FILE__, __FILE__
   end
+
+  def test_lchown
+    assert_send_type "(Integer, Integer, String) -> Integer",
+                     File, :lchown, Process.uid, Process.gid, __FILE__
+    assert_send_type "(ToInt, Integer, String) -> Integer",
+                     File, :lchown, ToInt.new(Process.uid), Process.gid, __FILE__
+    assert_send_type "(nil, Integer, String) -> Integer",
+                     File, :lchown, nil, Process.gid, __FILE__
+    assert_send_type "(Integer, ToInt, String) -> Integer",
+                     File, :lchown, Process.uid, ToInt.new(Process.gid), __FILE__
+    assert_send_type "(Integer, nil, String) -> Integer",
+                     File, :lchown, Process.uid, nil, __FILE__
+    assert_send_type "(Integer, Integer, ToStr) -> Integer",
+                     File, :lchown, Process.uid, Process.gid, ToStr.new(__FILE__)
+    assert_send_type "(Integer, Integer, ToPath) -> Integer",
+                     File, :lchown, Process.uid, Process.gid, ToPath.new(__FILE__)
+    assert_send_type "(Integer, nil, String, String) -> Integer",
+                     File, :lchown, Process.uid, nil, __FILE__, __FILE__
+  end
 end
