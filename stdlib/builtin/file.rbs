@@ -495,10 +495,7 @@ class File < IO
   #     File.lstat("link2test").size            #=> 8
   #     File.stat("link2test").size             #=> 66
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     File.lstat(file_name)   -> stat
-  #
-  def self.lstat: (String file) -> File::Stat
+  def self.lstat: (string | _ToPath file_name) -> File::Stat
 
   # Sets the access and modification times of each named file to the first two
   # arguments. If a file is a symlink, this method acts upon the link itself as

@@ -361,4 +361,13 @@ class FileSingletonTest < Minitest::Test
                      File, :link, ToPath.new(__FILE__), ToPath.new("new_name")
     File.unlink("new_name")
   end
+
+  def test_lstat
+    assert_send_type "(String) -> File::Stat",
+                     File, :lstat, __FILE__
+    assert_send_type "(ToStr) -> File::Stat",
+                     File, :lstat, ToStr.new(__FILE__)
+    assert_send_type "(ToPath) -> File::Stat",
+                     File, :lstat, ToPath.new(__FILE__)
+  end
 end
