@@ -386,4 +386,13 @@ class FileSingletonTest < Minitest::Test
                        File, :lutime, File.atime(__FILE__), File.atime(__FILE__), "#{dir}/a", "#{dir}/b"
     end
   end
+
+  def test_mkfifo
+    Dir.mktmpdir do |dir|
+      assert_send_type "(String) -> 0", File, :mkfifo, "#{dir}/a"
+      assert_send_type "(ToPath) -> 0", File, :mkfifo, ToPath.new("#{dir}/b")
+      assert_send_type "(String, Integer) -> 0", File, :mkfifo, "#{dir}/c", 0666
+      assert_send_type "(String, ToInt) -> 0", File, :mkfifo, "#{dir}/d", ToInt.new(0666)
+    end
+  end
 end

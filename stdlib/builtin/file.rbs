@@ -508,10 +508,7 @@ class File < IO
   # FIFO's permissions. It is modified by the process's umask in the usual way:
   # the permissions of the created file are (mode & ~umask).
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     File.mkfifo(file_name, mode=0666)  => 0
-  #
-  def self.mkfifo: (*untyped) -> untyped
+  def self.mkfifo: ((string | _ToPath) file_name, ?int mode) -> 0
 
   # Returns the modification time for the named file as a Time object.
   #
