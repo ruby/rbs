@@ -502,10 +502,7 @@ class File < IO
   # opposed to its referent; for the inverse behavior, see File.utime. Returns the
   # number of file names in the argument list.
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     File.lutime(atime, mtime, file_name, ...)   ->  integer
-  #
-  def self.lutime: (*untyped) -> untyped
+  def self.lutime: ((Time | Numeric) atime, (Time | Numeric) mtime, *(string | _ToPath) file_name) -> Integer
 
   # Creates a FIFO special file with name *file_name*.  *mode* specifies the
   # FIFO's permissions. It is modified by the process's umask in the usual way:

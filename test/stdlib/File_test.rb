@@ -370,4 +370,20 @@ class FileSingletonTest < Minitest::Test
     assert_send_type "(ToPath) -> File::Stat",
                      File, :lstat, ToPath.new(__FILE__)
   end
+
+  def test_lutime
+    Dir.mktmpdir do |dir|
+      File.open("#{dir}/a", "w"){}
+      assert_send_type "(Time, Time, String) -> Integer",
+                       File, :lutime, File.atime(__FILE__), File.atime(__FILE__), "#{dir}/a"
+      assert_send_type "(Numeric, Numeric, ToStr) -> Integer",
+                       File, :lutime, 1, 2, ToStr.new("#{dir}/a")
+      assert_send_type "(Numeric, Numeric, ToPath) -> Integer",
+                       File, :lutime, 2.5, 3/2r, ToPath.new("#{dir}/a")
+
+      File.open("#{dir}/b", "w"){}
+      assert_send_type "(Time, Time, String, String) -> Integer",
+                       File, :lutime, File.atime(__FILE__), File.atime(__FILE__), "#{dir}/a", "#{dir}/b"
+    end
+  end
 end
