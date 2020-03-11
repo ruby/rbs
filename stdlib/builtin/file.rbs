@@ -516,10 +516,7 @@ class File < IO
   #
   #     File.mtime("testfile")   #=> Tue Apr 08 12:58:04 CDT 2003
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     File.mtime(file_name)  ->  time
-  #
-  def self.mtime: (untyped file) -> Time
+  def self.mtime: (string | _ToPath | IO file_name) -> Time
 
   # Returns `true` if the named file exists and the effective used id of the
   # calling process is the owner of the file.

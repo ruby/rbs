@@ -395,4 +395,15 @@ class FileSingletonTest < Minitest::Test
       assert_send_type "(String, ToInt) -> 0", File, :mkfifo, "#{dir}/d", ToInt.new(0666)
     end
   end
+
+  def test_mtime
+    assert_send_type "(String) -> Time",
+                     File, :mtime, __FILE__
+    assert_send_type "(ToStr) -> Time",
+                     File, :mtime, ToStr.new(__FILE__)
+    assert_send_type "(ToPath) -> Time",
+                     File, :mtime, ToPath.new(__FILE__)
+    assert_send_type "(IO) -> Time",
+                     File, :mtime, IO.new(IO.sysopen(__FILE__))
+  end
 end
