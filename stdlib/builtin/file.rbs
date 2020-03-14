@@ -530,10 +530,7 @@ class File < IO
   #     File.path("/dev/null")          #=> "/dev/null"
   #     File.path(Pathname.new("/tmp")) #=> "/tmp"
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     File.path(path)  ->  string
-  #
-  def self.path: (String path) -> String
+  def self.path: (string | _ToPath path) -> String
 
   # Returns `true` if the named file is a pipe.
   #
