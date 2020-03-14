@@ -406,4 +406,15 @@ class FileSingletonTest < Minitest::Test
     assert_send_type "(IO) -> Time",
                      File, :mtime, IO.new(IO.sysopen(__FILE__))
   end
+
+  def test_owned?
+    assert_send_type "(String) -> bool",
+                     File, :owned?, __FILE__
+    assert_send_type "(ToStr) -> bool",
+                     File, :owned?, ToStr.new(__FILE__)
+    assert_send_type "(ToPath) -> bool",
+                     File, :owned?, ToPath.new(__FILE__)
+    assert_send_type "(IO) -> bool",
+                     File, :owned?, IO.new(IO.sysopen(__FILE__))
+  end
 end

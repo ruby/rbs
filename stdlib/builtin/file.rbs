@@ -523,10 +523,7 @@ class File < IO
   #
   # *file_name* can be an IO object.
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     File.owned?(file_name)   -> true or false
-  #
-  def self.owned?: (String file) -> bool
+  def self.owned?: (string | _ToPath | IO file_name) -> bool
 
   # Returns the string representation of the path
   #
