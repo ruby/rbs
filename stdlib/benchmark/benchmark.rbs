@@ -234,10 +234,31 @@ Benchmark::CAPTION: String
 #
 Benchmark::FORMAT: String
 
-class Benchmark::Job < Object
+class Benchmark::Job
+  # Prints the `label` and measured time for the block,
+  # formatted by `format`. See Tms#format for the
+  # formatting rules.
+  def item: (?String label) { () -> void } -> self
+
+  # An array of 2-element arrays, consisting of label and block pairs.
+  def list: () -> ::Array[untyped]
+
+  alias report item
+
+  # Length of the widest label in the #list.
+  def width: () -> Integer
 end
 
-class Benchmark::Report < Object
+class Benchmark::Report
+  # Prints the `label` and measured time for the block,
+  # formatted by `format`. See Tms#format for the
+  # formatting rules.
+  def item: (?String label, *untyped format) { () -> void } -> self
+
+  # An array of Benchmark::Tms objects representing each item.
+  def list: () -> ::Array[Benchmark::Tms]
+
+  alias report item
 end
 
 # A data object, representing the times associated with a benchmark measurement.
