@@ -54,17 +54,6 @@ class FileSingletonTest < Minitest::Test
                      File, :basename, __FILE__, ToStr.new('.rb')
   end
 
-  def test_birthtime
-    assert_send_type "(String) -> Time",
-                     File, :birthtime, __FILE__
-    assert_send_type "(ToStr) -> Time",
-                     File, :birthtime, ToStr.new(__FILE__)
-    assert_send_type "(ToPath) -> Time",
-                     File, :birthtime, ToPath.new(__FILE__)
-    assert_send_type "(IO) -> Time",
-                     File, :birthtime, IO.new(IO.sysopen(__FILE__))
-  end
-
   def test_blockdev?
     assert_send_type "(String) -> bool",
                      File, :blockdev?, __FILE__
@@ -314,19 +303,6 @@ class FileSingletonTest < Minitest::Test
                      File, :join, ToStr.new("foo")
     assert_send_type "(String, String) -> String",
                      File, :join, "foo", "bar"
-  end
-
-  def test_lchmod
-    assert_send_type "(Integer, String) -> Integer",
-                     File, :lchmod, 0644, __FILE__
-    assert_send_type "(ToInt, String) -> Integer",
-                     File, :lchmod, ToInt.new(0644), __FILE__
-    assert_send_type "(Integer, ToStr) -> Integer",
-                     File, :lchmod, 0644, ToStr.new(__FILE__)
-    assert_send_type "(Integer, ToPath) -> Integer",
-                     File, :lchmod, 0644, ToPath.new(__FILE__)
-    assert_send_type "(Integer, String, String) -> Integer",
-                     File, :lchmod, 0644, __FILE__, __FILE__
   end
 
   def test_lchown
