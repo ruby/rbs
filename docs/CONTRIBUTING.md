@@ -57,7 +57,7 @@ You may find the *Good for first contributor* column where you can find some cla
   * Sort declarations members in RBS files.
 * `rbs validate -r LIB`
   Validate the syntax and some of the semantics.
-* `rake generate::stdlib_test[String]`
+* `rake generate:stdlib_test[String]`
   Scaffold the stdlib test.
 
 ## Standard STDLIB Members Order
