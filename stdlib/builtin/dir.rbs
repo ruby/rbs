@@ -249,12 +249,6 @@ class Dir
   # passed *aDir* as a parameter. The directory is closed at the end of the block,
   # and Dir::open returns the value of the block.
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     Dir.open( string ) -> aDir
-  #     Dir.open( string, encoding: enc ) -> aDir
-  #     Dir.open( string ) {| aDir | block } -> anObject
-  #     Dir.open( string, encoding: enc ) {| aDir | block } -> anObject
-  #
   def self.open: (string, ?encoding: Encoding | string | nil) -> Dir
                | [U] (string, ?encoding: Encoding | string | nil) { (Dir) -> U } -> U
 
