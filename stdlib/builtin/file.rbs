@@ -570,10 +570,7 @@ class File < IO
   #
   # The last component of the real pathname can be nonexistent.
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     File.realdirpath(pathname [, dir_string])  ->  real_pathname
-  #
-  def self.realdirpath: (String pathname, ?String dir) -> String
+  def self.realdirpath: (string | _ToPath pathname, ?(string | _ToPath) dir_string) -> String
 
   # Returns the real (absolute) pathname of *pathname* in the actual filesystem
   # not containing symlinks or useless dots.

@@ -445,4 +445,19 @@ class FileSingletonTest < Minitest::Test
                       File, :readlink, ToPath.new("#{dir}/readlink")
     end
   end
+
+  def test_realdirpath
+    assert_send_type "(String) -> String",
+                     File, :realdirpath , __FILE__
+    assert_send_type "(ToStr) -> String",
+                     File, :realdirpath, ToStr.new(__FILE__)
+    assert_send_type "(ToPath) -> String",
+                     File, :realdirpath, ToPath.new(__FILE__)
+    assert_send_type "(String, String) -> String",
+                     File, :realdirpath, "..", __dir__
+    assert_send_type "(String, ToStr) -> String",
+                     File, :realdirpath, "..", ToStr.new(__dir__)
+    assert_send_type "(String, ToPath) -> String",
+                     File, :realdirpath, "..", ToPath.new(__dir__)
+  end
 end
