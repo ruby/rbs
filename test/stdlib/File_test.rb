@@ -413,4 +413,13 @@ class FileSingletonTest < Minitest::Test
     assert_send_type "(IO) -> bool",
                      File, :pipe?, IO.new(IO.sysopen(__FILE__))
   end
+
+  def test_readable?
+    assert_send_type "(String) -> bool",
+                     File, :readable?, __FILE__
+    assert_send_type "(ToStr) -> bool",
+                     File, :readable?, ToStr.new(__FILE__)
+    assert_send_type "(ToPath) -> bool",
+                     File, :readable?, ToPath.new(__FILE__)
+  end
 end

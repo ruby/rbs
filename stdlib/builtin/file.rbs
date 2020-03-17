@@ -544,10 +544,7 @@ class File < IO
   # Note that some OS-level security features may cause this to return true even
   # though the file is not readable by the effective user/group.
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     File.readable?(file_name)   -> true or false
-  #
-  def self.readable?: (String file) -> bool
+  def self.readable?: (string | _ToPath file_name) -> bool
 
   # Returns `true` if the named file is readable by the real user and group id of
   # this process. See access(3).
