@@ -431,4 +431,18 @@ class FileSingletonTest < Minitest::Test
     assert_send_type "(ToPath) -> bool",
                      File, :readable_real?, ToPath.new(__FILE__)
   end
+
+  def test_readlink
+    Dir.mktmpdir do |dir|
+      File.open("#{dir}/a", "w"){}
+      File.symlink("#{dir}/a", "#{dir}/readlink")
+
+      assert_send_type "(String) -> String",
+                      File, :readlink, "#{dir}/readlink"
+      assert_send_type "(ToStr) -> String",
+                      File, :readlink, ToStr.new("#{dir}/readlink")
+      assert_send_type "(ToPath) -> String",
+                      File, :readlink, ToPath.new("#{dir}/readlink")
+    end
+  end
 end

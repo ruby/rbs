@@ -560,10 +560,7 @@ class File < IO
   #     File.symlink("testfile", "link2test")   #=> 0
   #     File.readlink("link2test")              #=> "testfile"
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     File.readlink(link_name)  ->  file_name
-  #
-  def self.readlink: (String link) -> String
+  def self.readlink: (string | _ToPath link_name) -> String
 
   # Returns the real (absolute) pathname of *pathname* in the actual filesystem.
   # The real pathname doesn't contain symlinks or useless dots.
