@@ -552,10 +552,7 @@ class File < IO
   # Note that some OS-level security features may cause this to return true even
   # though the file is not readable by the real user/group.
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     File.readable_real?(file_name)   -> true or false
-  #
-  def self.readable_real?: (String file) -> bool
+  def self.readable_real?: (string | _ToPath file_name) -> bool
 
   # Returns the name of the file referenced by the given link. Not available on
   # all platforms.
