@@ -460,4 +460,19 @@ class FileSingletonTest < Minitest::Test
     assert_send_type "(String, ToPath) -> String",
                      File, :realdirpath, "..", ToPath.new(__dir__)
   end
+
+  def test_realpath
+    assert_send_type "(String) -> String",
+                     File, :realpath , __FILE__
+    assert_send_type "(ToStr) -> String",
+                     File, :realpath, ToStr.new(__FILE__)
+    assert_send_type "(ToPath) -> String",
+                     File, :realpath, ToPath.new(__FILE__)
+    assert_send_type "(String, String) -> String",
+                     File, :realpath, "..", __dir__
+    assert_send_type "(String, ToStr) -> String",
+                     File, :realpath, "..", ToStr.new(__dir__)
+    assert_send_type "(String, ToPath) -> String",
+                     File, :realpath, "..", ToPath.new(__dir__)
+  end
 end

@@ -580,10 +580,7 @@ class File < IO
   #
   # All components of the pathname must exist when this method is called.
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     File.realpath(pathname [, dir_string])  ->  real_pathname
-  #
-  def self.realpath: (String pathname, ?String dir) -> String
+  def self.realpath: (string | _ToPath pathname, ?(string | _ToPath) dir_string) -> String
 
   # Renames the given file to the new name. Raises a SystemCallError if the file
   # cannot be renamed.
