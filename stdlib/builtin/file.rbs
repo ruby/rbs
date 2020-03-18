@@ -587,10 +587,7 @@ class File < IO
   #
   #     File.rename("afile", "afile.bak")   #=> 0
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     File.rename(old_name, new_name)   -> 0
-  #
-  def self.rename: (String old, String new) -> Integer
+  def self.rename: (string | _ToPath old_name, string | _ToPath new_name) -> 0
 
   # Returns `true` if the named file has the setgid bit set.
   #

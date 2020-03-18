@@ -475,4 +475,20 @@ class FileSingletonTest < Minitest::Test
     assert_send_type "(String, ToPath) -> String",
                      File, :realpath, "..", ToPath.new(__dir__)
   end
+
+  def test_rename
+    Dir.mktmpdir do |dir|
+      File.open("#{dir}/rename1", "w"){}
+      assert_send_type "(String, String) -> 0",
+                      File, :rename, "#{dir}/rename1", "#{dir}/new_rename1"
+
+      File.open("#{dir}/rename2", "w"){}
+      assert_send_type "(ToStr, ToStr) -> 0",
+                      File, :rename, ToStr.new("#{dir}/rename2"), ToStr.new("#{dir}/new_rename2")
+
+      File.open("#{dir}/rename3", "w"){}
+      assert_send_type "(ToPath, ToPath) -> 0",
+                      File, :rename, ToPath.new("#{dir}/rename3"), ToPath.new("#{dir}/new_rename3")
+    end
+  end
 end
