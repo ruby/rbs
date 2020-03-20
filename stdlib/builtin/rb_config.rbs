@@ -18,7 +18,7 @@ module RbConfig
 
   def self.fire_update!: (untyped key, untyped val, ?untyped mkconf, ?untyped conf) -> untyped
 
-  def self.ruby: () -> untyped
+  def self.ruby: () -> String
 end
 
 # The hash configurations stored.
