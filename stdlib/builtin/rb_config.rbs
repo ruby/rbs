@@ -1,10 +1,15 @@
 module RbConfig
+  def self.expand: (untyped val, ?untyped config) -> untyped
+
+  def self.fire_update!: (untyped key, untyped val, ?untyped mkconf, ?untyped conf) -> untyped
+
+  def self.ruby: () -> untyped
 end
 
-RbConfig::CONFIG: Hash[String, String]
+RbConfig::CONFIG: Hash
 
 RbConfig::DESTDIR: String
 
-RbConfig::MAKEFILE_CONFIG: Hash[String, String]
+RbConfig::MAKEFILE_CONFIG: Hash
 
 RbConfig::TOPDIR: String
