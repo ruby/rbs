@@ -14,7 +14,7 @@ module RbConfig
   #     RbConfig.expand(val)         -> string
   #     RbConfig.expand(val, config) -> string
   #
-  def self.expand: (untyped val, ?untyped config) -> untyped
+  def self.expand: (String val, ?Hash[String, String] config) -> String
 
   def self.fire_update!: (untyped key, untyped val, ?untyped mkconf, ?untyped conf) -> untyped
 
