@@ -7,6 +7,10 @@ class RbConfigTest < StdlibTest
 
   using hook.refinement
 
+  def test_ruby
+    RbConfig.ruby
+  end
+
   def test_config
     RbConfig::CONFIG
   end
