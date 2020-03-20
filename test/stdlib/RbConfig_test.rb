@@ -11,4 +11,8 @@ class RbConfigTest < StdlibTest
   def test_config
     RbConfig::CONFIG
   end
+
+  def test_destdir
+    RbConfig::DESTDIR
+  end
 end
