@@ -593,10 +593,7 @@ class File < IO
   #
   # *file_name* can be an IO object.
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     File.setgid?(file_name)   ->  true or false
-  #
-  def self.setgid?: (String file) -> bool
+  def self.setgid?: (string | _ToPath | IO file_name) -> bool
 
   # Returns `true` if the named file has the setuid bit set.
   #

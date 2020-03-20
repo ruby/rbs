@@ -491,4 +491,23 @@ class FileSingletonTest < Minitest::Test
                       File, :rename, ToPath.new("#{dir}/rename3"), ToPath.new("#{dir}/new_rename3")
     end
   end
+
+  def test_setgid?
+    Dir.mktmpdir do |dir|
+      File.open("#{dir}/setgid", "w"){}
+      system "chmod g+s #{dir}/setgid"
+
+      assert_send_type "(String) -> true",
+                      File, :setgid?, "#{dir}/setgid"
+      assert_send_type "(ToStr) -> true",
+                      File, :setgid?, ToStr.new("#{dir}/setgid")
+      assert_send_type "(ToPath) -> true",
+                      File, :setgid?, ToPath.new("#{dir}/setgid")
+      assert_send_type "(IO) -> true",
+                      File, :setgid?, IO.new(IO.sysopen("#{dir}/setgid"))
+    end
+
+    assert_send_type "(String) -> false",
+                File, :setgid?, __FILE__
+  end
 end
