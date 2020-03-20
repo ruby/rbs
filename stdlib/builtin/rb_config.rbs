@@ -23,7 +23,7 @@ end
 
 # The hash configurations stored.
 #
-RbConfig::CONFIG: Hash
+RbConfig::CONFIG: Hash[String, String]
 
 # DESTDIR on make install.
 #
@@ -54,7 +54,7 @@ RbConfig::DESTDIR: String
 #     p Config.expand(Config::MAKEFILE_CONFIG["bindir"])
 #     # => "/usr/local/bin"
 #
-RbConfig::MAKEFILE_CONFIG: Hash
+RbConfig::MAKEFILE_CONFIG: Hash[String, String]
 
 # Ruby installed directory.
 #
