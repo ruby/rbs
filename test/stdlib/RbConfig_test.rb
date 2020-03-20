@@ -1,6 +1,6 @@
 require_relative "test_helper"
 
-require 'rbconfig'
+require "rbconfig"
 
 class RbConfigTest < StdlibTest
   target RbConfig
