@@ -15,4 +15,8 @@ class RbConfigTest < StdlibTest
   def test_destdir
     RbConfig::DESTDIR
   end
+
+  def test_topdir
+    RbConfig::TOPDIR
+  end
 end
