@@ -4,7 +4,6 @@ require 'rbconfig'
 
 class RbConfigTest < StdlibTest
   target RbConfig
-  library "rb_config"
 
   using hook.refinement
 
