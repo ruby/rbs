@@ -16,7 +16,7 @@ module RbConfig
   #
   def self.expand: (String val, ?Hash[String, String] config) -> String
 
-  def self.fire_update!: (untyped key, untyped val, ?untyped mkconf, ?untyped conf) -> untyped
+  def self.fire_update!: (String key, String val, ?Hash[String, String] mkconf, ?Hash[String, String] conf) -> Array[String]
 
   def self.ruby: () -> String
 end

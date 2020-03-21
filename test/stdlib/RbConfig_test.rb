@@ -10,6 +10,12 @@ class RbConfigTest < StdlibTest
     RbConfig.expand("/home/userName/.rbenv/versions/2.7.0/bin", "UNICODE_VERSION"=>"12.1.0")
   end
 
+  def test_fire_update!
+    RbConfig.fire_update!("CC", "gcc-8")
+    RbConfig.fire_update!("CC", "gcc-8", "UNICODE_VERSION"=>"12.1.0")
+    RbConfig.fire_update!("CC", "gcc-8", "UNICODE_VERSION"=>"12.1.0", "PATH_SEPARATOR"=>":")
+  end
+
   def test_ruby
     RbConfig.ruby
   end
