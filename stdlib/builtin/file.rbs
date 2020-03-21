@@ -599,10 +599,7 @@ class File < IO
   #
   # *file_name* can be an IO object.
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     File.setuid?(file_name)   ->  true or false
-  #
-  def self.setuid?: (String file) -> bool
+  def self.setuid?: (string | _ToPath | IO file_name) -> bool
 
   # Returns the size of `file_name`.
   #

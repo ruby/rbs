@@ -510,4 +510,23 @@ class FileSingletonTest < Minitest::Test
     assert_send_type "(String) -> false",
                 File, :setgid?, __FILE__
   end
+
+  def test_setuid?
+    Dir.mktmpdir do |dir|
+      File.open("#{dir}/setuid", "w"){}
+      system "chmod u+s #{dir}/setuid"
+
+      assert_send_type "(String) -> true",
+                      File, :setuid?, "#{dir}/setuid"
+      assert_send_type "(ToStr) -> true",
+                      File, :setuid?, ToStr.new("#{dir}/setuid")
+      assert_send_type "(ToPath) -> true",
+                      File, :setuid?, ToPath.new("#{dir}/setuid")
+      assert_send_type "(IO) -> true",
+                      File, :setuid?, IO.new(IO.sysopen("#{dir}/setuid"))
+    end
+
+    assert_send_type "(String) -> false",
+                File, :setuid?, __FILE__
+  end
 end
