@@ -540,4 +540,21 @@ class FileSingletonTest < Minitest::Test
     assert_send_type "(IO) -> Integer",
                      File, :size, IO.new(IO.sysopen(__FILE__))
   end
+
+  def test_size?
+    assert_send_type "(String) -> Integer",
+                     File, :size?, __FILE__
+    assert_send_type "(ToStr) -> Integer",
+                     File, :size?, ToStr.new(__FILE__)
+    assert_send_type "(ToPath) -> Integer",
+                     File, :size?, ToPath.new(__FILE__)
+    assert_send_type "(IO) -> Integer",
+                     File, :size?, IO.new(IO.sysopen(__FILE__))
+
+    Dir.mktmpdir do |dir|
+      File.open("#{dir}/size", "w"){}
+      assert_send_type "(String) -> nil",
+                      File, :size?, "#{dir}/size"
+    end
+  end
 end

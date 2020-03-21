@@ -612,10 +612,7 @@ class File < IO
   #
   # *file_name* can be an IO object.
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     File.size?(file_name)   -> Integer or nil
-  #
-  def self.size?: (String | IO file) -> Integer?
+  def self.size?: (string | _ToPath | IO file_name) -> Integer?
 
   # Returns `true` if the named file is a socket.
   #
