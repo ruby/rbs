@@ -625,10 +625,7 @@ class File < IO
   #
   #     File.split("/home/gumby/.profile")   #=> ["/home/gumby", ".profile"]
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     File.split(file_name)   -> array
-  #
-  def self.split: (String file) -> [ String, String ]
+  def self.split: (string | _ToPath file_name) -> [String, String]
 
   # Returns a File::Stat object for the named file (see File::Stat).
   #
