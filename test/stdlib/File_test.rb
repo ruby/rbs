@@ -1,5 +1,6 @@
 require_relative "test_helper"
 require "ruby/signature/test/test_helper"
+require "socket"
 
 class FileSingletonTest < Minitest::Test
   include Ruby::Signature::Test::TypeAssertions
@@ -555,6 +556,22 @@ class FileSingletonTest < Minitest::Test
       File.open("#{dir}/size", "w"){}
       assert_send_type "(String) -> nil",
                       File, :size?, "#{dir}/size"
+    end
+  end
+
+  def test_socket?
+    assert_send_type "(String) -> false",
+                     File, :socket?, __FILE__
+    assert_send_type "(ToStr) -> false",
+                     File, :socket?, ToStr.new(__FILE__)
+    assert_send_type "(ToPath) -> false",
+                     File, :socket?, ToPath.new(__FILE__)
+    assert_send_type "(IO) -> false",
+                     File, :socket?, IO.new(IO.sysopen(__FILE__))
+
+    Socket.unix_server_socket('testsocket') do
+      assert_send_type "(String) -> true",
+                      File, :socket?, "testsocket"
     end
   end
 end

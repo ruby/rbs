@@ -618,10 +618,7 @@ class File < IO
   #
   # *file_name* can be an IO object.
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     File.socket?(file_name)   ->  true or false
-  #
-  def self.socket?: (String | IO file) -> bool
+  def self.socket?: (string | _ToPath | IO file_name) -> bool
 
   # Splits the given string into a directory and a file component and returns them
   # in a two-element array. See also File::dirname and File::basename.
