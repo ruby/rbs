@@ -41,14 +41,6 @@
 #     - Akinori MUSHA <knu@iDaemons.org> (current maintainer)
 #
 class Set[A]
-  # Creates a new set containing the given objects.
-  #
-  #     Set[1, 2]                   # => #<Set: {1, 2}>
-  #     Set[1, 2, 1]                # => #<Set: {1, 2}>
-  #     Set[1, 'c', :s]             # => #<Set: {1, "c", :s}>
-  #
-  def self.[]: [X] (*X) -> Set[X]
-
   # Creates a new set containing the elements of the given enumerable object.
   #
   # If a block is given, the elements of enum are preprocessed by the given block.
@@ -62,6 +54,14 @@ class Set[A]
   def initialize: (_Each[A, untyped]) -> untyped
                 | [X] (_Each[X, untyped]) { (X) -> A } -> untyped
                 | (?nil) -> untyped
+
+  # Creates a new set containing the given objects.
+  #
+  #     Set[1, 2]                   # => #<Set: {1, 2}>
+  #     Set[1, 2, 1]                # => #<Set: {1, 2}>
+  #     Set[1, 'c', :s]             # => #<Set: {1, "c", :s}>
+  #
+  def self.[]: [X] (*X) -> Set[X]
 
   # Returns a new set containing elements common to the set and the given
   # enumerable object.
