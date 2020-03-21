@@ -11,6 +11,7 @@ class RbConfigTest < StdlibTest
   end
 
   def test_fire_update!
+    # Add test on nothing changed
     RbConfig.fire_update!("CC", "gcc-8")
     RbConfig.fire_update!("CC", "gcc-8", "UNICODE_VERSION"=>"12.1.0")
     RbConfig.fire_update!("CC", "gcc-8", "UNICODE_VERSION"=>"12.1.0", "PATH_SEPARATOR"=>":")
