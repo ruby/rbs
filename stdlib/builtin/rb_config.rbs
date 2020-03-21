@@ -10,10 +10,6 @@ module RbConfig
   #
   #     RbConfig.expand("$(bindir)") # => /home/foobar/all-ruby/ruby19x/bin
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     RbConfig.expand(val)         -> string
-  #     RbConfig.expand(val, config) -> string
-  #
   def self.expand: (String val, ?Hash[String, String] config) -> String
 
   def self.fire_update!: (String key, String val, ?Hash[String, String] mkconf, ?Hash[String, String] conf) -> Array[String]
