@@ -583,4 +583,13 @@ class FileSingletonTest < Minitest::Test
     assert_send_type "(ToPath) -> [String, String]",
                      File, :split, ToPath.new(__FILE__)
   end
+
+  def test_stat
+    assert_send_type "(String) -> File::Stat",
+                     File, :stat, __FILE__
+    assert_send_type "(ToStr) -> File::Stat",
+                     File, :stat, ToStr.new(__FILE__)
+    assert_send_type "(ToPath) -> File::Stat",
+                     File, :stat, ToPath.new(__FILE__)
+  end
 end

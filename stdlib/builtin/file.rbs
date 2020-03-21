@@ -631,10 +631,7 @@ class File < IO
   #
   #     File.stat("testfile").mtime   #=> Tue Apr 08 12:58:04 CDT 2003
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     File.stat(file_name)   ->  stat
-  #
-  def self.stat: (untyped file) -> File::Stat
+  def self.stat: (string | _ToPath file_name) -> File::Stat
 
   # Returns `true` if the named file has the sticky bit set.
   #
