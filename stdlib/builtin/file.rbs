@@ -645,10 +645,7 @@ class File < IO
   #
   #     File.symlink("testfile", "link2test")   #=> 0
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     File.symlink(old_name, new_name)   -> 0
-  #
-  def self.symlink: (String old, String new) -> Integer
+  def self.symlink: (string | _ToPath old_name, string | _ToPath new_name) -> 0
 
   # Returns `true` if the named file is a symbolic link.
   #
