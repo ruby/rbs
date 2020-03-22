@@ -626,4 +626,20 @@ class FileSingletonTest < Minitest::Test
                        File, :symlink, __FILE__, ToPath.new("#{dir}/symlink_e")
     end
   end
+
+  def test_symlink?
+    Dir.mktmpdir do |dir|
+      File.symlink(__FILE__, "#{dir}/symlink")
+
+      assert_send_type "(String) -> true",
+                       File, :symlink?, "#{dir}/symlink"
+      assert_send_type "(ToStr) -> true",
+                       File, :symlink?, ToStr.new("#{dir}/symlink")
+      assert_send_type "(ToPath) -> true",
+                       File, :symlink?, ToPath.new("#{dir}/symlink")
+    end
+
+    assert_send_type "(String) -> false",
+                     File, :symlink?, __FILE__
+  end
 end

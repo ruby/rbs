@@ -649,10 +649,7 @@ class File < IO
 
   # Returns `true` if the named file is a symbolic link.
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     File.symlink?(file_name)   ->  true or false
-  #
-  def self.symlink?: (String file) -> bool
+  def self.symlink?: (string | _ToPath file_name) -> bool
 
   # Truncates the file *file_name* to be at most *integer* bytes long. Not
   # available on all platforms.
