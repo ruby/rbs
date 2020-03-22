@@ -592,4 +592,23 @@ class FileSingletonTest < Minitest::Test
     assert_send_type "(ToPath) -> File::Stat",
                      File, :stat, ToPath.new(__FILE__)
   end
+
+  def test_sticky?
+    Dir.mktmpdir do |dir|
+      File.open("#{dir}/sticky", "w"){}
+      system "chmod +t #{dir}/sticky"
+
+      assert_send_type "(String) -> true",
+                      File, :sticky?, "#{dir}/sticky"
+      assert_send_type "(ToStr) -> true",
+                      File, :sticky?, ToStr.new("#{dir}/sticky")
+      assert_send_type "(ToPath) -> true",
+                      File, :sticky?, ToPath.new("#{dir}/sticky")
+      assert_send_type "(IO) -> true",
+                      File, :sticky?, IO.new(IO.sysopen("#{dir}/sticky"))
+    end
+
+    assert_send_type "(String) -> false",
+                    File, :sticky?, __FILE__
+  end
 end
