@@ -642,4 +642,21 @@ class FileSingletonTest < Minitest::Test
     assert_send_type "(String) -> false",
                      File, :symlink?, __FILE__
   end
+
+  def test_truncate
+    Dir.mktmpdir do |dir|
+      File.open("#{dir}/truncate", "w") do |f|
+        f.write("1234567890")
+      end
+
+      assert_send_type "(String, Integer) -> 0",
+                       File, :truncate, "#{dir}/truncate", 1
+      assert_send_type "(ToStr, Integer) -> 0",
+                       File, :truncate, ToStr.new("#{dir}/truncate"), 1
+      assert_send_type "(ToPath, Integer) -> 0",
+                       File, :truncate, ToPath.new("#{dir}/truncate"), 1
+      assert_send_type "(String, ToInt) -> 0",
+                       File, :truncate, "#{dir}/truncate", ToInt.new(1)
+    end
+  end
 end

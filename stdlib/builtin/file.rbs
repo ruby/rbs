@@ -660,10 +660,7 @@ class File < IO
   #     File.truncate("out", 5)   #=> 0
   #     File.size("out")          #=> 5
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     File.truncate(file_name, integer)  -> 0
-  #
-  def self.truncate: (String file, Integer arg0) -> Integer
+  def self.truncate: (string | _ToPath file_name, int length) -> 0
 
   # Returns the current umask value for this process. If the optional argument is
   # given, set the umask to that value and return the previous value. Umask values
