@@ -670,11 +670,7 @@ class File < IO
   #     File.umask(0006)   #=> 18
   #     File.umask         #=> 6
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     File.umask()          -> integer
-  #     File.umask(integer)   -> integer
-  #
-  def self.umask: (?Integer arg0) -> Integer
+  def self.umask: (?int umask) -> Integer
 
   # Deletes the named files, returning the number of names passed as arguments.
   # Raises an exception on any error. Since the underlying implementation relies

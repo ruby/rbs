@@ -659,4 +659,15 @@ class FileSingletonTest < Minitest::Test
                        File, :truncate, "#{dir}/truncate", ToInt.new(1)
     end
   end
+
+  def test_umask
+    assert_send_type "() -> Integer",
+                     File, :umask
+
+    umask = File.umask
+    assert_send_type "(Integer) -> Integer",
+                     File, :umask, umask
+    assert_send_type "(ToInt) -> Integer",
+                     File, :umask, ToInt.new(umask)
+  end
 end
