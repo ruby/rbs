@@ -680,10 +680,7 @@ class File < IO
   #
   # See also Dir::rmdir.
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     File.unlink(file_name, ...)  -> integer
-  #
-  def self.unlink: (*String files) -> Integer
+  def self.unlink: (*(string | _ToPath) file_name) -> Integer
 
   # Sets the access and modification times of each named file to the first two
   # arguments. If a file is a symlink, this method acts upon its referent rather

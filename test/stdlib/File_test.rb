@@ -670,4 +670,21 @@ class FileSingletonTest < Minitest::Test
     assert_send_type "(ToInt) -> Integer",
                      File, :umask, ToInt.new(umask)
   end
+
+  def test_unlink
+    Dir.mktmpdir do |dir|
+      File.open("#{dir}/a", "w"){}
+      assert_send_type "(String) -> Integer", File, :unlink, "#{dir}/a"
+
+      File.open("#{dir}/b", "w"){}
+      assert_send_type "(ToStr) -> Integer", File, :unlink, ToStr.new("#{dir}/b")
+
+      File.open("#{dir}/c", "w"){}
+      assert_send_type "(ToPath) -> Integer", File, :unlink, ToPath.new("#{dir}/c")
+
+      File.open("#{dir}/d", "w"){}
+      File.open("#{dir}/e", "w"){}
+      assert_send_type "(String, String) -> Integer", File, :unlink, "#{dir}/d", "#{dir}/e"
+    end
+  end
 end
