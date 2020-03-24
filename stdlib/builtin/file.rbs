@@ -117,7 +117,7 @@ class File < IO
   #
   # See also Dir::rmdir.
   #
-  def self.delete: (*(string | _ToPath) file_name) -> Integer
+  alias self.delete self.unlink
 
   # Returns `true` if the named file is a directory, or a symlink that points at a
   # directory, and `false` otherwise.
