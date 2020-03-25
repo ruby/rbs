@@ -727,10 +727,7 @@ class File < IO
   # Note that some OS-level security features may cause this to return true even
   # though the file is not writable by the real user/group.
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     File.writable_real?(file_name)   -> true or false
-  #
-  def self.writable_real?: (String file) -> Integer?
+  def self.writable_real?: (string | _ToPath file_name) -> bool
 
   # Returns `true` if the named file exists and has a zero size.
   #
