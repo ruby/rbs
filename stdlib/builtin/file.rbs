@@ -699,10 +699,7 @@ class File < IO
   #     m = File.world_readable?("/etc/passwd")
   #     sprintf("%o", m)                              #=> "644"
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     File.world_readable?(file_name)   -> integer or nil
-  #
-  def self.world_readable?: (String | IO file) -> Integer?
+  def self.world_readable?: (string | _ToPath | IO file_name) -> Integer?
 
   # If *file_name* is writable by others, returns an integer representing the file
   # permission bits of *file_name*. Returns `nil` otherwise. The meaning of the

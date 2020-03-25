@@ -703,4 +703,23 @@ class FileSingletonTest < Minitest::Test
                        File, :utime, File.atime(__FILE__), File.atime(__FILE__), "#{dir}/a", "#{dir}/b"
     end
   end
+
+  def test_world_readable?
+    assert_send_type "(String) -> Integer",
+                     File, :world_readable?, __FILE__
+    assert_send_type "(ToStr) -> Integer",
+                     File, :world_readable?, ToStr.new(__FILE__)
+    assert_send_type "(ToPath) -> Integer",
+                     File, :world_readable?, ToPath.new(__FILE__)
+    assert_send_type "(IO) -> Integer",
+                     File, :world_readable?, IO.new(IO.sysopen(__FILE__))
+
+    Dir.mktmpdir do |dir|
+      File.open("#{dir}/unreadable", "w"){}
+      system "chmod o-r #{dir}/unreadable"
+
+      assert_send_type "(String) -> nil",
+                       File, :world_readable?, "#{dir}/unreadable"
+    end
+  end
 end
