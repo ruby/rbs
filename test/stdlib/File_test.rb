@@ -722,4 +722,26 @@ class FileSingletonTest < Minitest::Test
                        File, :world_readable?, "#{dir}/unreadable"
     end
   end
+
+  def test_world_writable?
+    Dir.mktmpdir do |dir|
+      File.open("#{dir}/writable", "w"){}
+      system "chmod a+w #{dir}/writable"
+
+      assert_send_type "(String) -> Integer",
+                      File, :world_writable?, "#{dir}/writable"
+      assert_send_type "(ToStr) -> Integer",
+                      File, :world_writable?, ToStr.new("#{dir}/writable")
+      assert_send_type "(ToPath) -> Integer",
+                      File, :world_writable?, ToPath.new("#{dir}/writable")
+      assert_send_type "(IO) -> Integer",
+                      File, :world_writable?, IO.new(IO.sysopen("#{dir}/writable"))
+
+      File.open("#{dir}/unwritable", "w"){}
+      system "chmod o-w #{dir}/unwritable"
+
+      assert_send_type "(String) -> nil",
+                       File, :world_writable?, "#{dir}/unwritable"
+    end
+  end
 end

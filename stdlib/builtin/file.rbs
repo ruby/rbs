@@ -711,10 +711,7 @@ class File < IO
   #     m = File.world_writable?("/tmp")
   #     sprintf("%o", m)                              #=> "777"
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     File.world_writable?(file_name)   -> integer or nil
-  #
-  def self.world_writable?: (String | IO file) -> Integer?
+  def self.world_writable?: (string | _ToPath | IO file_name) -> Integer?
 
   # Returns `true` if the named file is writable by the effective user and group
   # id of this process. See eaccess(3).
