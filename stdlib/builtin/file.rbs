@@ -719,10 +719,7 @@ class File < IO
   # Note that some OS-level security features may cause this to return true even
   # though the file is not writable by the effective user/group.
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     File.writable?(file_name)   -> true or false
-  #
-  def self.writable?: (String file) -> Integer?
+  def self.writable?: (string | _ToPath file_name) -> bool
 
   # Returns `true` if the named file is writable by the real user and group id of
   # this process. See access(3).

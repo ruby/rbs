@@ -744,4 +744,13 @@ class FileSingletonTest < Minitest::Test
                        File, :world_writable?, "#{dir}/unwritable"
     end
   end
+
+  def test_writable?
+    assert_send_type "(String) -> bool",
+                     File, :writable?, __FILE__
+    assert_send_type "(ToStr) -> bool",
+                     File, :writable?, ToStr.new(__FILE__)
+    assert_send_type "(ToPath) -> bool",
+                     File, :writable?, ToPath.new(__FILE__)
+  end
 end
