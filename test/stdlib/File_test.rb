@@ -762,4 +762,15 @@ class FileSingletonTest < Minitest::Test
     assert_send_type "(ToPath) -> bool",
                      File, :writable_real?, ToPath.new(__FILE__)
   end
+
+  def test_zero?
+    assert_send_type "(String) -> bool",
+                     File, :zero?, __FILE__
+    assert_send_type "(ToStr) -> bool",
+                     File, :zero?, ToStr.new(__FILE__)
+    assert_send_type "(ToPath) -> bool",
+                     File, :zero?, ToPath.new(__FILE__)
+    assert_send_type "(IO) -> bool",
+                     File, :zero?, IO.new(IO.sysopen(__FILE__))
+  end
 end

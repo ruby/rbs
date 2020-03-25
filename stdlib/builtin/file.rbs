@@ -733,10 +733,7 @@ class File < IO
   #
   # *file_name* can be an IO object.
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     File.zero?(file_name)   -> true or false
-  #
-  def self.zero?: (String | IO file) -> Integer?
+  def self.zero?: (string | _ToPath | IO file_name) -> bool
 
   public
 
