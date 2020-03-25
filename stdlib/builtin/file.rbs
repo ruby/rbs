@@ -141,7 +141,7 @@ class File < IO
   #
   # *file_name* can be an IO object.
   #
-  def self.empty?: (string | _ToPath | IO file_name) -> bool
+  alias self.empty? self.zero?
 
   # Returns `true` if the named file is executable by the effective user and group
   # id of this process. See eaccess(3).
