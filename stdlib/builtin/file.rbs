@@ -687,10 +687,7 @@ class File < IO
   # than the link itself; for the inverse behavior see File.lutime. Returns the
   # number of file names in the argument list.
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     File.utime(atime, mtime, file_name, ...)   ->  integer
-  #
-  def self.utime: (Time atime, Time mtime, *String files) -> Integer
+  def self.utime: ((Time | Numeric) atime, (Time | Numeric) mtime, *(string | _ToPath) file_name) -> Integer
 
   # If *file_name* is readable by others, returns an integer representing the file
   # permission bits of *file_name*. Returns `nil` otherwise. The meaning of the

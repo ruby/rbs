@@ -687,4 +687,20 @@ class FileSingletonTest < Minitest::Test
       assert_send_type "(String, String) -> Integer", File, :unlink, "#{dir}/d", "#{dir}/e"
     end
   end
+
+  def test_utime
+    Dir.mktmpdir do |dir|
+      File.open("#{dir}/a", "w"){}
+      assert_send_type "(Time, Time, String) -> Integer",
+                       File, :utime, File.atime(__FILE__), File.atime(__FILE__), "#{dir}/a"
+      assert_send_type "(Numeric, Numeric, ToStr) -> Integer",
+                       File, :utime, 1, 2, ToStr.new("#{dir}/a")
+      assert_send_type "(Numeric, Numeric, ToPath) -> Integer",
+                       File, :utime, 2.5, 3/2r, ToPath.new("#{dir}/a")
+
+      File.open("#{dir}/b", "w"){}
+      assert_send_type "(Time, Time, String, String) -> Integer",
+                       File, :utime, File.atime(__FILE__), File.atime(__FILE__), "#{dir}/a", "#{dir}/b"
+    end
+  end
 end
