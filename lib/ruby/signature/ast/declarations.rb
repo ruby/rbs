@@ -20,6 +20,12 @@ module Ruby
             other.is_a?(ModuleTypeParams) && other.params == params
           end
 
+          alias eql? ==
+
+          def hash
+            params.hash
+          end
+
           def [](name)
             params.find {|p| p.name == name }
           end
