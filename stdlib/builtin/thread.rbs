@@ -927,7 +927,7 @@ end
 class Thread::Mutex < Object
   # Attempts to grab the lock and waits if it isn’t available. Raises
   # `ThreadError` if `mutex` was locked by the current thread.
-  def lock: () -> untyped
+  def lock: () -> self
 
   # Returns `true` if this lock is currently held by some thread.
   def locked?: () -> bool
@@ -937,7 +937,7 @@ class Thread::Mutex < Object
 
   # Obtains a lock, runs the block, and releases the lock when the block
   # completes. See the example under `Mutex` .
-  def synchronize: () -> untyped
+  def synchronize: [X] () { () -> X } -> X
 
   # Attempts to obtain the lock and returns immediately. Returns `true` if
   # the lock was granted.
@@ -945,7 +945,7 @@ class Thread::Mutex < Object
 
   # Releases the lock. Raises `ThreadError` if `mutex` wasn’t locked by the
   # current thread.
-  def unlock: () -> untyped
+  def unlock: () -> self
 end
 
 # The [Queue](Queue) class implements multi-producer,
