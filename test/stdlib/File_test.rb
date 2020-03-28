@@ -807,4 +807,9 @@ class FileInstanceTest < Minitest::Test
     assert_send_type "(Integer, nil) -> 0",
                      File.open(__FILE__), :chown, Process.uid, nil
   end
+
+  def test_ctime
+    assert_send_type "() -> Time",
+                     File.open(__FILE__), :ctime
+  end
 end

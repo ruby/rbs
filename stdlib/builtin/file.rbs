@@ -778,9 +778,6 @@ class File < IO
   #
   #     File.new("testfile").ctime   #=> Wed Apr 09 08:53:14 CDT 2003
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     file.ctime  ->  time
-  #
   def ctime: () -> Time
 
   # Locks or unlocks a file according to *locking_constant* (a logical *or* of the
