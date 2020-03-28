@@ -750,9 +750,6 @@ class File < IO
   #
   # If the platform doesn't have birthtime, raises NotImplementedError.
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     file.birthtime  ->  time
-  #
   def birthtime: () -> Time
 
   # Changes permission bits on *file* to the bit pattern represented by
