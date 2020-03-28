@@ -29,118 +29,174 @@
 # [File::Constants](https://ruby-doc.org/core-2.6.3/File/Constants.html).
 class File < IO
   def self.absolute_path: (String file, ?String dir) -> String
+                        | (nil) -> ArgumentError
 
   def self.atime: (untyped file) -> Time
+                | (nil) -> ArgumentError
 
   def self.basename: (String file, ?String suffix) -> String
+                   | (nil) -> ArgumentError
 
   def self.binread: (String arg0) -> String
                   | (String arg0, ?Integer arg1) -> String
                   | (String arg0, ?Integer arg1, ?Integer arg2) -> String
+                  (nil) -> ArgumentError
 
   def self.birthtime: (untyped file) -> Time
+                    | (nil) -> ArgumentError
 
   def self.blockdev?: (String | IO file) -> bool
+                    | (nil) -> ArgumentError
 
   def self.chardev?: (String | IO file) -> bool
+                   | (nil) -> ArgumentError
 
   def self.chmod: (Integer mode, *String files) -> Integer
+                | (nil) -> ArgumentError
 
   def self.chown: (Integer owner, Integer group, *String files) -> Integer
+                | (nil) -> ArgumentError
 
   def self.ctime: (untyped file) -> Time
+                | (nil) -> ArgumentError
 
   def self.delete: (*String files) -> Integer
+                 | (nil) -> ArgumentError
 
   def self.directory?: (String | IO file) -> bool
+                     | (nil) -> ArgumentError
 
   def self.dirname: (String file) -> String
+                  | (nil) -> ArgumentError
 
   def self.executable?: (String file) -> bool
+                      | (nil) -> ArgumentError
 
   def self.executable_real?: (String file) -> bool
+                           | (nil) -> ArgumentError
 
   def self.exist?: (untyped file) -> bool
+                 | (nil) -> ArgumentError
 
   def self.expand_path: (untyped file, ?untyped dir) -> String
+                      | (nil) -> ArgumentError
 
   def self.extname: (String path) -> String
+                  | (nil) -> ArgumentError
 
   def self.file?: (String | IO file) -> bool
+                | (nil) -> ArgumentError
 
   def self.fnmatch: (String pattern, String path, ?Integer flags) -> bool
+                  | (nil) -> ArgumentError
 
   def self.`ftype`: (String file) -> String
+                  | (nil) -> ArgumentError
 
   def self.grpowned?: (String | IO file) -> bool
+                    | (nil) -> ArgumentError
 
   def self.identical?: (String | IO file_1, String | IO file_2) -> bool
+                     | (nil) -> ArgumentError
 
   def self.join: (*untyped arg0) -> String
+               | (nil) -> ArgumentError
 
   def self.lchmod: (Integer mode, *String files) -> Integer
+                 | (nil) -> ArgumentError
 
   def self.lchown: (Integer owner, Integer group, *String files) -> Integer
+                 | (nil) -> ArgumentError
 
   def self.link: (String old, String new) -> Integer
+               | (nil) -> ArgumentError
 
   def self.lstat: (String file) -> File::Stat
+                | (nil) -> ArgumentError
 
   def self.mtime: (untyped file) -> Time
+                | (nil) -> ArgumentError
 
   def self.owned?: (String file) -> bool
+                 | (nil) -> ArgumentError
 
   def self.path: (String path) -> String
+               | (nil) -> ArgumentError
 
   def self.pipe?: (String file) -> bool
+                | (nil) -> ArgumentError
 
   def self.readable?: (String file) -> bool
+                    | (nil) -> ArgumentError
 
   def self.readable_real?: (String file) -> bool
+                         | (nil) -> ArgumentError
 
   def self.readlink: (String link) -> String
+                   | (nil) -> ArgumentError
 
   def self.realdirpath: (String pathname, ?String dir) -> String
+                      | (nil) -> ArgumentError
 
   def self.realpath: (String pathname, ?String dir) -> String
+                   | (nil) -> ArgumentError
 
   def self.rename: (String old, String new) -> Integer
+                 | (nil) -> ArgumentError
 
   def self.setgid?: (String file) -> bool
+                  | (nil) -> ArgumentError
 
   def self.setuid?: (String file) -> bool
+                  | (nil) -> ArgumentError
 
   def self.size: (String | IO file) -> Integer
+               | (nil) -> ArgumentError
 
   def self.size?: (String | IO file) -> Integer?
+                | (nil) -> ArgumentError
 
   def self.socket?: (String | IO file) -> bool
+                  | (nil) -> ArgumentError
 
   def self.split: (String file) -> [ String, String ]
+                | (nil) -> ArgumentError
 
   def self.stat: (untyped file) -> File::Stat
+               | (nil) -> ArgumentError
 
   def self.sticky?: (String file) -> bool
+                  | (nil) -> ArgumentError
 
   def self.symlink: (String old, String new) -> Integer
+                  | (nil) -> ArgumentError
 
   def self.symlink?: (String file) -> bool
+                   | (nil) -> ArgumentError
 
   def self.truncate: (String file, Integer arg0) -> Integer
+                   | (nil) -> ArgumentError
 
   def self.umask: (?Integer arg0) -> Integer
+                | (nil) -> ArgumentError
 
   def self.utime: (Time atime, Time mtime, *String files) -> Integer
+                | (nil) -> ArgumentError
 
   def self.world_readable?: (String | IO file) -> Integer?
+                          | (nil) -> ArgumentError
 
   def self.world_writable?: (String | IO file) -> Integer?
+                          | (nil) -> ArgumentError
 
   def self.writable?: (String file) -> Integer?
+                    | (nil) -> ArgumentError
 
   def self.writable_real?: (String file) -> Integer?
+                         | (nil) -> ArgumentError
 
   def self.zero?: (String | IO file) -> Integer?
+                | (nil) -> ArgumentError
 
   # Returns the last access time (a `Time` object) for *file* , or epoch if
   # *file* has not been accessed.

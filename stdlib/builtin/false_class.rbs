@@ -37,4 +37,13 @@ class FalseClass
   def |: (nil) -> false
        | (false) -> false
        | (untyped obj) -> bool
+
+  # Left shift---Returns `false` if *obj* is `nil` or `false`; `true` otherwise.
+  def <<: (nil) -< false
+        | (false) -> false
+        | (untyped obj) -> bool
+  # Right shift---Returns `false` if *obj* is `nil` or `false`; `true` otherwise.
+  def >>: (nil) -< false
+        | (false) -> false
+        | (untyped obj) -> bool
 end
