@@ -784,4 +784,14 @@ class FileInstanceTest < Minitest::Test
     assert_send_type "() -> Time",
                      File.open(__FILE__), :atime
   end
+
+  def test_chmod
+    Dir.mktmpdir do |dir|
+      File.open("#{dir}/chmod", "w"){}
+      assert_send_type "(Integer) -> 0",
+                       File.open("#{dir}/chmod"), :chmod, 0644
+      assert_send_type "(ToInt) -> 0",
+                       File.open("#{dir}/chmod"), :chmod, ToInt.new(0644)
+    end
+  end
 end

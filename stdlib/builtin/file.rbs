@@ -759,10 +759,7 @@ class File < IO
   #     f = File.new("out", "w");
   #     f.chmod(0644)   #=> 0
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     file.chmod(mode_int)   -> 0
-  #
-  def chmod: (Integer mode) -> Integer
+  def chmod: (int mode) -> (0 | nil)
 
   # Changes the owner and group of *file* to the given numeric owner and group
   # id's. Only a process with superuser privileges may change the owner of a file.
