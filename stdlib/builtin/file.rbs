@@ -40,7 +40,7 @@ class File < IO
   def self.binread: (String arg0) -> String
                   | (String arg0, ?Integer arg1) -> String
                   | (String arg0, ?Integer arg1, ?Integer arg2) -> String
-                  (nil) -> ArgumentError
+                  | (nil) -> ArgumentError
 
   def self.birthtime: (untyped file) -> Time
                     | (nil) -> ArgumentError
