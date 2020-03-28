@@ -742,9 +742,6 @@ class File < IO
   #
   #     File.new("testfile").atime   #=> Wed Dec 31 18:00:00 CST 1969
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     file.atime    -> time
-  #
   def atime: () -> Time
 
   # Returns the birth time for *file*.

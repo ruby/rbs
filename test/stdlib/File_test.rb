@@ -774,3 +774,14 @@ class FileSingletonTest < Minitest::Test
                      File, :zero?, IO.new(IO.sysopen(__FILE__))
   end
 end
+
+class FileInstanceTest < Minitest::Test
+  include Ruby::Signature::Test::TypeAssertions
+
+  testing "::File"
+
+  def test_atime
+    assert_send_type "() -> Time",
+                     File.open(__FILE__), :atime
+  end
+end
