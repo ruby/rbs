@@ -794,4 +794,17 @@ class FileInstanceTest < Minitest::Test
                        File.open("#{dir}/chmod"), :chmod, ToInt.new(0644)
     end
   end
+
+  def test_chown
+    assert_send_type "(Integer, Integer) -> 0",
+                     File.open(__FILE__), :chown, Process.uid, Process.gid
+    assert_send_type "(ToInt, Integer) -> 0",
+                     File.open(__FILE__), :chown, ToInt.new(Process.uid), Process.gid
+    assert_send_type "(nil, Integer) -> 0",
+                     File.open(__FILE__), :chown, nil, Process.gid
+    assert_send_type "(Integer, ToInt) -> 0",
+                     File.open(__FILE__), :chown, Process.uid, ToInt.new(Process.gid)
+    assert_send_type "(Integer, nil) -> 0",
+                     File.open(__FILE__), :chown, Process.uid, nil
+  end
 end
