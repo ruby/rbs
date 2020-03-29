@@ -50,9 +50,6 @@ class IPAddr
   # as &, |, include? and ==, accept a string, or a packed in_addr value instead
   # of an IPAddr object.
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     new(addr = '::', family = Socket::AF_UNSPEC)
-  #
   def initialize: (?String addr, ?untyped family) -> IPAddr
 
   # Returns a new ipaddr built by bitwise AND.
@@ -212,6 +209,29 @@ class IPAddr
   # Returns a new ipaddr built by bitwise negation.
   #
   def ~: () -> IPAddr
+end
+
+# Generic IPAddr related error. Exceptions raised in this class should inherit
+# from Error.
+#
+class IPAddr::Error < ArgumentError
+end
+
+# Raised when the provided IP address is an invalid address.
+#
+class IPAddr::InvalidAddressError < IPAddr::Error
+end
+
+# Raised when the address family is invalid such as an address with an
+# unsupported family, an address with an inconsistent family, or an address
+# who's family cannot be determined.
+#
+class IPAddr::AddressFamilyError < IPAddr::Error
+end
+
+# Raised when the address is an invalid length.
+#
+class IPAddr::InvalidPrefixError < IPAddr::InvalidAddressError
 end
 
 # 32 bit mask for IPv4
