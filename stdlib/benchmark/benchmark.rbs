@@ -139,7 +139,7 @@ module Benchmark
   #     >total:   2.930000   0.000000   2.930000 (  2.932889)
   #     >avg:     0.976667   0.000000   0.976667 (  0.977630)
   #
-  def self?.benchmark: (String caption, ?Integer? label_width, ?String? format, *String labels) { (Report report) -> void } -> ::Array[Benchmark::Tms]
+  def self?.benchmark: (String caption, ?Integer? label_width, ?String? format, *String labels) { (Report report) -> (Array[Tms] | void) } -> ::Array[Benchmark::Tms]
 
   # A simple interface to the #benchmark method, #bm generates sequential reports
   # with labels. `label_width` and `labels` parameters have the same meaning as
