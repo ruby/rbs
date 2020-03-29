@@ -28,7 +28,7 @@ module Ruby
             decls << top
           end
 
-          decls
+          decls.uniq
         end
 
         def parse(string)

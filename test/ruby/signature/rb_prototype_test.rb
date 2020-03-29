@@ -393,4 +393,33 @@ class C
 end
     EOF
   end
+
+  def test_multiple_nested_class
+    parser = RB.new
+
+    rb = <<-'EOR'
+module Foo
+  class Bar
+  end
+end
+
+module Foo
+  class Baz
+  end
+end
+    EOR
+
+    parser.parse(rb)
+
+    assert_write parser.decls, <<-EOF
+module Foo
+end
+
+class Foo::Bar
+end
+
+class Foo::Baz
+end
+    EOF
+  end
 end
