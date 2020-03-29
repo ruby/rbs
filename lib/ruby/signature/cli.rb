@@ -424,16 +424,16 @@ module Ruby
           owners_included = []
 
           OptionParser.new do |opts|
-            opts.on("--require=[LIB]") do |lib|
+            opts.on("--require LIB") do |lib|
               require_libs << lib
             end
-            opts.on("--require-relative=[LIB]") do |lib|
+            opts.on("--require-relative LIB") do |lib|
               relative_libs << lib
             end
             opts.on("--merge") do
               merge = true
             end
-            opts.on("--method-owner=[CLASS]") do |klass|
+            opts.on("--method-owner CLASS") do |klass|
               owners_included << klass
             end
           end.parse!(args)
@@ -445,8 +445,13 @@ module Ruby
           env = Environment.new()
           loader.load(env: env)
 
-          require(*require_libs) unless require_libs.empty?
-          require_relative(*relative_libs) unless relative_libs.empty?
+          require_libs.each do |lib|
+            require(lib)
+          end
+
+          relative_libs.each do |lib|
+            require(lib)
+          end
 
           decls = Prototype::Runtime.new(patterns: args, env: env, merge: merge, owners_included: owners_included).decls
         else
