@@ -982,10 +982,10 @@ end
 # ```
 class Thread::Queue < Object
   # Alias for: [push](Queue.downloaded.ruby_doc#method-i-push)
-  def <<: (untyped obj) -> untyped
+  alias << push
 
   # Removes all objects from the queue.
-  def clear: () -> untyped
+  def clear: () -> void
 
   # Closes the queue. A closed queue cannot be re-opened.
   # 
@@ -1017,19 +1017,19 @@ class Thread::Queue < Object
   #           end
   #         }
   #         q.close
-  def close: () -> untyped
+  def close: () -> self
 
   # Returns `true` if the queue is closed.
   def closed?: () -> bool
 
   # Alias for: [pop](Queue.downloaded.ruby_doc#method-i-pop)
-  def deq: (*untyped args) -> untyped
+  alias deq pop
 
   # Returns `true` if the queue is empty.
   def empty?: () -> bool
 
   # Alias for: [push](Queue.downloaded.ruby_doc#method-i-push)
-  def enq: (untyped obj) -> untyped
+  alias enq push
 
   # Returns the length of the queue.
   # 
@@ -1038,10 +1038,8 @@ class Thread::Queue < Object
   # Also aliased as: [size](Queue.downloaded.ruby_doc#method-i-size)
   def length: () -> Integer
 
-  def marshal_dump: () -> untyped
-
   # Returns the number of threads waiting on the queue.
-  def num_waiting: () -> untyped
+  def num_waiting: () -> Integer
 
   # Retrieves data from the queue.
   # 
@@ -1053,7 +1051,7 @@ class Thread::Queue < Object
   # 
   # Also aliased as: [deq](Queue.downloaded.ruby_doc#method-i-deq),
   # [shift](Queue.downloaded.ruby_doc#method-i-shift)
-  def pop: (*untyped args) -> untyped
+  def pop: (?bool non_block) -> untyped
 
   # Pushes the given `object` to the queue.
   # 
@@ -1061,13 +1059,13 @@ class Thread::Queue < Object
   # 
   # Also aliased as: [enq](Queue.downloaded.ruby_doc#method-i-enq),
   # [\<\<](Queue.downloaded.ruby_doc#method-i-3C-3C)
-  def push: (untyped obj) -> untyped
+  def push: (untyped obj) -> void
 
   # Alias for: [pop](Queue.downloaded.ruby_doc#method-i-pop)
-  def shift: (*untyped args) -> untyped
+  alias shift pop
 
   # Alias for: [length](Queue.downloaded.ruby_doc#method-i-length)
-  def size: () -> Integer
+  alias size length
 end
 
 # This class represents queues of specified size capacity. The push
