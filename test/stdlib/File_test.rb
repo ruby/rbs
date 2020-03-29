@@ -812,4 +812,18 @@ class FileInstanceTest < Minitest::Test
     assert_send_type "() -> Time",
                      File.open(__FILE__), :ctime
   end
+
+  def test_flock
+    Dir.mktmpdir do |dir|
+      File.open("#{dir}/flock", "w+") do |f|
+        assert_send_type "(Integer) -> 0",
+                         f, :flock, File::LOCK_EX
+        f.flock(File::LOCK_UN)
+
+        assert_send_type "(ToInt) -> 0",
+                         f, :flock, ToInt.new(File::LOCK_SH)
+        f.flock(File::LOCK_UN)
+      end
+    end
+  end
 end

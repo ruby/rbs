@@ -816,10 +816,7 @@ class File < IO
   #       p f.read
   #     }
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     file.flock(locking_constant) -> 0 or false
-  #
-  def flock: (Integer arg0) -> (Integer | TrueClass | FalseClass)
+  def flock: (int locking_constant) -> (0 | false)
 
   # Same as IO#stat, but does not follow the last symbolic link. Instead, reports
   # on the link itself.
