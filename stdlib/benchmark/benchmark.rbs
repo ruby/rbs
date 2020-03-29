@@ -253,7 +253,7 @@ class Benchmark::Report
   # Prints the `label` and measured time for the block,
   # formatted by `format`. See Tms#format for the
   # formatting rules.
-  def item: (?String label, *untyped format) { () -> void } -> self
+  def item: (?String label, *untyped format) { () -> void } -> Tms
 
   # An array of Benchmark::Tms objects representing each item.
   def list: () -> ::Array[Benchmark::Tms]
