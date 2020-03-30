@@ -847,10 +847,6 @@ class File < IO
   #     File.new("testfile").path               #=> "testfile"
   #     File.new("/tmp/../tmp/xxx", "w").path   #=> "/tmp/../tmp/xxx"
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     file.path  ->  filename
-  #     file.to_path  ->  filename
-  #
   def path: () -> String
 
   # Returns the size of *file* in bytes.
