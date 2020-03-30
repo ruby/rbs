@@ -1075,18 +1075,18 @@ end
 # of how a [SizedQueue](SizedQueue) works.
 class Thread::SizedQueue < Thread::Queue
   # Alias for: [push](SizedQueue.downloaded.ruby_doc#method-i-push)
-  def <<: (*untyped args) -> untyped
+  alias << push
 
   # Alias for: [push](SizedQueue.downloaded.ruby_doc#method-i-push)
-  def enq: (*untyped args) -> untyped
+  alias enq push
 
-  def initialize: (untyped max) -> SizedQueue
+  def initialize: (Integer max) -> SizedQueue
 
   # Returns the maximum size of the queue.
   def max: () -> Integer
 
   # Sets the maximum size of the queue to the given `number` .
-  def max=: (Integer max) -> untyped
+  def max=: (Integer max) -> void
 
   # Pushes `object` to the queue.
   # 
@@ -1098,7 +1098,7 @@ class Thread::SizedQueue < Thread::Queue
   # 
   # Also aliased as: [enq](SizedQueue.downloaded.ruby_doc#method-i-enq),
   # [\<\<](SizedQueue.downloaded.ruby_doc#method-i-3C-3C)
-  def push: (*untyped args) -> untyped
+  def push: (untyped obj, ?bool non_block) -> void
 end
 
 ConditionVariable: untyped
