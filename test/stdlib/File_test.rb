@@ -831,4 +831,9 @@ class FileInstanceTest < Minitest::Test
     assert_send_type "() -> File::Stat",
                      File.open(__FILE__), :lstat
   end
+
+  def test_mtime
+    assert_send_type "() -> Time",
+                     File.open(__FILE__), :mtime
+  end
 end
