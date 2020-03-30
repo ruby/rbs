@@ -853,9 +853,6 @@ class File < IO
   #
   #     File.new("testfile").size   #=> 66
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     file.size    -> integer
-  #
   def size: () -> Integer
 
   # Returns the pathname used to create *file* as a string. Does not normalize the

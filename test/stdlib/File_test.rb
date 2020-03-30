@@ -842,6 +842,11 @@ class FileInstanceTest < Minitest::Test
                      File.open(__FILE__), :path
   end
 
+  def test_size
+    assert_send_type "() -> Integer",
+                     File.open(__FILE__), :size
+  end
+
   def test_to_path
     assert_send_type "() -> String",
                      File.open(__FILE__), :to_path
