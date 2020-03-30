@@ -827,10 +827,7 @@ class File < IO
   #     f.lstat.size                            #=> 8
   #     f.stat.size                             #=> 66
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     file.lstat   ->  stat
-  #
-  def lstat: () -> File::Stat
+  def lstat: () -> (File::Stat | nil)
 
   # Returns the modification time for *file*.
   #

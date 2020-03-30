@@ -826,4 +826,9 @@ class FileInstanceTest < Minitest::Test
       end
     end
   end
+
+  def test_lstat
+    assert_send_type "() -> File::Stat",
+                     File.open(__FILE__), :lstat
+  end
 end
