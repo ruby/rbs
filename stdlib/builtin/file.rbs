@@ -870,10 +870,7 @@ class File < IO
   #     File.new("testfile").path               #=> "testfile"
   #     File.new("/tmp/../tmp/xxx", "w").path   #=> "/tmp/../tmp/xxx"
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     file.to_path  ->  filename
-  #
-  def to_path: () -> String
+  alias to_path path
 
   # Truncates *file* to at most *integer* bytes. The file must be opened for
   # writing. Not available on all platforms.
