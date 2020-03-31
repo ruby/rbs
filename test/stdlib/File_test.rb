@@ -851,4 +851,17 @@ class FileInstanceTest < Minitest::Test
     assert_send_type "() -> String",
                      File.open(__FILE__), :to_path
   end
+
+  def test_truncate
+    Dir.mktmpdir do |dir|
+      File.open("#{dir}/truncate", "w") do |f|
+        f.write("1234567890")
+      end
+
+      assert_send_type "(Integer) -> 0",
+                       File.open("#{dir}/truncate", "w"), :truncate, 1
+      assert_send_type "(ToInt) -> 0",
+                       File.open("#{dir}/truncate", "w"), :truncate, ToInt.new(1)
+    end
+  end
 end

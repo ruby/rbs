@@ -878,10 +878,7 @@ class File < IO
   #     f.close()                  #=> nil
   #     File.size("out")           #=> 5
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     file.truncate(integer)    -> 0
-  #
-  def truncate: (Integer arg0) -> Integer
+  def truncate: (int length) -> 0
 
   private
 
