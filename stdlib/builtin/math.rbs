@@ -31,7 +31,7 @@ module Math
 
   def self.exp: (Integer | Float | Rational | BigDecimal x) -> Float
 
-  def self.frexp: (Integer | Float | Rational | BigDecimal x) -> [ Integer | Float | Rational | BigDecimal, Integer | Float | Rational | BigDecimal ]
+  def self.frexp: (Integer | Float | Rational | BigDecimal x) -> [ Float, Integer ]
 
   def self.gamma: (Integer | Float | Rational | BigDecimal x) -> Float
 
@@ -39,7 +39,7 @@ module Math
 
   def self.ldexp: (Integer | Float | Rational | BigDecimal fraction, Integer | Float | Rational | BigDecimal exponent) -> Float
 
-  def self.lgamma: (Integer | Float | Rational | BigDecimal x) -> (Integer | Float)
+  def self.lgamma: (Integer | Float | Rational | BigDecimal x) -> [ Float, Integer ]
 
   def self.log: (Integer | Float | Rational | BigDecimal x, ?Integer | Float | Rational | BigDecimal base) -> Float
 
