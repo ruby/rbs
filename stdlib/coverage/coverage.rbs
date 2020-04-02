@@ -58,5 +58,5 @@ module Coverage
 
   # Enables coverage measurement.
   #
-  def self.start: (?lines: bool lines, ?branches: bool branches, ?methods: bool methods, ?oneshot_lines: bool oneshot_lines) -> NilClass
+  def self.start: (?lines: bool lines, ?branches: bool branches, ?methods: bool methods, ?oneshot_lines: bool oneshot_lines) -> nil
 end
