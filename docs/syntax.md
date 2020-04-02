@@ -459,7 +459,7 @@ module Enumerable[A, B] : _Each[A, B]
 end
 ```
 
-The `Enumerable` method above requires `each` method for enumerating objects.
+The `Enumerable` module above requires `each` method for enumerating objects.
 
 ### Interface declaration
 
