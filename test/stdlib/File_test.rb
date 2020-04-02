@@ -7,6 +7,31 @@ class FileSingletonTest < Minitest::Test
 
   testing "singleton(::File)"
 
+  def test_new
+    assert_send_type "(String) -> File",
+                     File, :new, __FILE__
+    assert_send_type "(ToStr) -> File",
+                     File, :new, ToStr.new(__FILE__)
+    assert_send_type "(ToPath) -> File",
+                     File, :new, ToPath.new(__FILE__)
+    assert_send_type "(Integer) -> File",
+                     File, :new, IO.sysopen(__FILE__)
+    assert_send_type "(ToInt) -> File",
+                     File, :new, ToInt.new(IO.sysopen(__FILE__))
+    assert_send_type "(String, String) -> File",
+                     File, :new, __FILE__, "r"
+    assert_send_type "(String, ToStr) -> File",
+                     File, :new, __FILE__, ToStr.new("r")
+    assert_send_type "(String, Integer) -> File",
+                     File, :new, __FILE__, File::RDONLY
+    assert_send_type "(String, ToInt) -> File",
+                     File, :new, __FILE__, ToInt.new(File::RDONLY)
+    assert_send_type "(String, String, Integer) -> File",
+                     File, :new, __FILE__, "r", 0644
+    assert_send_type "(String, String, ToInt) -> File",
+                     File, :new, __FILE__, "r", ToInt.new(0644)
+  end
+
   def test_absolute_path
     assert_send_type "(String) -> String",
                      File, :absolute_path, __FILE__
