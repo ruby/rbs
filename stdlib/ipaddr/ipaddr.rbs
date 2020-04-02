@@ -72,23 +72,23 @@ class IPAddr
 
   # Returns a new ipaddr built by bitwise right-shift.
   #
-  def >>: (untyped num) -> untyped
+  def >>: (untyped num) -> IPAddr
 
   # Checks equality used by Hash.
   #
-  def eql?: (untyped other) -> untyped
+  def eql?: (untyped other) -> bool
 
   # Returns the address family of this IP address.
   #
-  def family: () -> untyped
+  attr_reader family: Integer
 
   # Returns a hash value used by Hash, Set, and Array classes
   #
-  def hash: () -> untyped
+  def hash: () -> Integer
 
   # Returns a network byte ordered string form of the IP address.
   #
-  def hton: () -> untyped
+  def hton: () -> String
 
   # Returns true if the given ipaddr is in the range.
   #
@@ -154,7 +154,7 @@ class IPAddr
   # Returns a new ipaddr built by masking IP address with the given
   # prefixlen/netmask. (e.g. 8, 64, "255.255.255.0", etc.)
   #
-  def mask: (untyped prefixlen) -> IPAddr
+  def mask: (String | Integer prefixlen) -> IPAddr
 
   # Returns a new ipaddr built by converting the IPv6 address into a native IPv4
   # address.  If the IP address is not an IPv4-mapped or IPv4-compatible IPv6
@@ -184,7 +184,7 @@ class IPAddr
 
   # Returns the successor to the ipaddr.
   #
-  def succ: () -> untyped
+  def succ: () -> IPAddr
 
   # Returns the integer representation of the ipaddr.
   #
