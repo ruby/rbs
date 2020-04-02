@@ -888,19 +888,17 @@ end
 # ```
 class Thread::ConditionVariable < Object
   # Wakes up all threads waiting for this lock.
-  def broadcast: () -> untyped
-
-  def marshal_dump: () -> untyped
+  def broadcast: () -> self
 
   # Wakes up the first thread in line waiting for this lock.
-  def signal: () -> untyped
+  def signal: () -> self
 
   # Releases the lock held in `mutex` and waits; reacquires the lock on
   # wakeup.
   # 
   # If `timeout` is given, this method returns after `timeout` seconds
   # passed, even if no other thread doesn't signal.
-  def wait: (*untyped _) -> untyped
+  def wait: (Mutex mutex, ?Integer timeout) -> self
 end
 
 # [Mutex](Mutex) implements a simple semaphore that
