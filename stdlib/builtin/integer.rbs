@@ -45,7 +45,6 @@ class Integer < Numeric
        | (Rational) -> Rational
        | (Complex) -> Complex
        | (Integer) -> Integer
-       | (Numeric) -> Numeric
 
   # Raises `int` to the power of `numeric`, which may be negative or fractional.
   # The result may be an Integer, a Float, a Rational, or a complex number.
@@ -63,7 +62,6 @@ class Integer < Numeric
         | (Float) -> Numeric
         | (Rational) -> Numeric
         | (Complex) -> Complex
-        | (Numeric) -> Numeric
 
   # Performs addition: the class of the resulting object depends on the class of
   # `numeric`.
@@ -72,7 +70,6 @@ class Integer < Numeric
        | (Float) -> Float
        | (Rational) -> Rational
        | (Complex) -> Complex
-       | (Numeric) -> Numeric
 
   def +@: () -> Integer
 
@@ -83,7 +80,6 @@ class Integer < Numeric
        | (Float) -> Float
        | (Rational) -> Rational
        | (Complex) -> Complex
-       | (Numeric) -> Numeric
 
   # Returns `int`, negated.
   #
@@ -96,7 +92,6 @@ class Integer < Numeric
        | (Float) -> Float
        | (Rational) -> Rational
        | (Complex) -> Complex
-       | (Numeric) -> Numeric
 
   # Returns `true` if the value of `int` is less than that of `real`.
   #
@@ -475,7 +470,6 @@ class Integer < Numeric
   #     a.pow(b, m)  #=> same as (a**b) % m, but avoids huge temporary values
   #
   def pow: (Integer other, ?Integer modulo) -> Integer
-         | (Numeric numeric) -> Numeric
 
   # Returns the predecessor of `int`, i.e. the Integer equal to `int-1`.
   #
