@@ -506,7 +506,7 @@ rule
       kCLASS | kVOID | kNIL | kTRUE | kFALSE | kANY | kUNTYPED | kTOP | kBOT | kINSTANCE | kBOOL | kSINGLETON
     | kTYPE | kMODULE | kPRIVATE | kPUBLIC | kEND | kINCLUDE | kEXTEND | kPREPEND
     | kATTRREADER | kATTRACCESSOR | kATTRWRITER | kDEF | kEXTENSION | kSELF | kINCOMPATIBLE
-    | kUNCHECKED
+    | kUNCHECKED | kINTERFACE | kSUPER | kALIAS | kIN | kOUT
 
   module_type_params:
       { result = nil }

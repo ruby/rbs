@@ -424,6 +424,31 @@ class Ruby::Signature::SignatureParsingTest < Minitest::Test
     end
   end
 
+  Parser::KEYWORDS.each_key do |keyword|
+    define_method "test_#{keyword}_keyword" do
+      Parser.parse_signature(<<~SIG).yield_self do |decls|
+        class Foo
+          def #{keyword}: (#{keyword}: Integer) -> void
+        end
+      SIG
+
+        decls[0].yield_self do |decl|
+          assert_instance_of Declarations::Class, decl
+
+          assert_instance_of Members::MethodDefinition, decl.members[0]
+          decl.members[0].yield_self do |m|
+            assert_equal :"#{keyword}", m.name
+
+            m.types[0].yield_self do |ty|
+              assert_equal 1, ty.type.required_keywords.length
+              assert_equal [:"#{keyword}"], ty.type.required_keywords.keys
+            end
+          end
+        end
+      end
+    end
+  end
+
   def test_incompatible_method_definition
     Parser.parse_signature(<<~SIG).yield_self do |decls|
       class Foo
