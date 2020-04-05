@@ -191,8 +191,6 @@ class Complex < Numeric
   #
   def finite?: () -> bool
 
-  def floor: (?Integer) -> bot
-
   def hash: () -> Integer
 
   def i: () -> bot
