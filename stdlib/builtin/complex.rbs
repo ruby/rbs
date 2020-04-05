@@ -216,9 +216,6 @@ class Complex < Numeric
   #        (1+1i).infinite?                   #=> nil
   #        (Float::INFINITY + 1i).infinite?   #=> 1
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     cmp.infinite?  ->  nil or 1
-  #
   def infinite?: () -> Integer?
 
   # Returns the value as a string for inspection.
