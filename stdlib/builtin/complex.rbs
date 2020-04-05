@@ -171,9 +171,6 @@ class Complex < Numeric
   #
   # See numerator.
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     cmp.denominator  ->  integer
-  #
   def denominator: () -> Integer
 
   def div: (Numeric) -> bot
