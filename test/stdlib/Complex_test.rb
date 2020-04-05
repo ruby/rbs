@@ -144,9 +144,15 @@ class ComplexTest < StdlibTest
   end
 
   def test_inspect
-    a = Complex.rect(2, 3)
+    a = Complex.rect(2,3)
 
     a.inspect
+  end
+
+  def test_integer?
+    a = Complex.rect(2,3)
+
+    a.integer?
   end
 
   def test_numerator
