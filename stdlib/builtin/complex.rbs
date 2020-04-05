@@ -103,8 +103,6 @@ class Complex < Numeric
   #
   def /: (Numeric) -> Complex
 
-  def <=: (Numeric) -> bot
-
   # If `cmp`'s imaginary part is zero, and `object` is also a real number (or a
   # Complex number where the imaginary part is zero), compare the real part of
   # `cmp` to object.  Otherwise, return nil.
