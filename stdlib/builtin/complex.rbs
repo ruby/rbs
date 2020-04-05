@@ -38,9 +38,6 @@ class Complex < Numeric
   #     Complex.polar(3, Math::PI)     #=> (-3.0+3.673819061467132e-16i)
   #     Complex.polar(3, -Math::PI/2)  #=> (1.836909530733566e-16-3.0i)
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     Complex.polar(abs[, arg])  ->  complex
-  #
   def self.polar: (Numeric, ?Numeric) -> Complex
 
   # Returns a complex object which denotes the given rectangular form.
