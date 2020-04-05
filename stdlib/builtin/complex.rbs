@@ -206,9 +206,6 @@ class Complex < Numeric
   #     Complex(7).imaginary      #=> 0
   #     Complex(9, -4).imaginary  #=> -4
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     cmp.imaginary  ->  real
-  #
   def imaginary: () -> Numeric
 
   # Returns `1` if `cmp`'s real or imaginary part is an infinite number, otherwise
