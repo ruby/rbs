@@ -44,10 +44,6 @@ class Complex < Numeric
   #
   #     Complex.rectangular(1, 2)  #=> (1+2i)
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     Complex.rect(real[, imag])         ->  complex
-  #     Complex.rectangular(real[, imag])  ->  complex
-  #
   def self.rect: (Numeric, ?Numeric) -> Complex
 
   alias self.rectangular self.rect

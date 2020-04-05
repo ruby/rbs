@@ -12,6 +12,7 @@ class ComplexTest < StdlibTest
   end
 
   def test_rect
+    Complex.rect(10)
     Complex.rect(10, 20)
     Complex.rect(Complex.polar(1), Complex.rect(1))
 
