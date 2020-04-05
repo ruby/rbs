@@ -272,7 +272,7 @@ class Complex < Numeric
   # # arglists 💪👽🚨 << Delete this section
   #     cmp.polar  ->  array
   #
-  def polar: () -> [ Numeric, Float ]
+  def polar: () -> [ Float, Float ]
 
   def positive?: () -> bot
 
