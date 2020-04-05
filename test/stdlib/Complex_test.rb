@@ -85,6 +85,12 @@ class ComplexTest < StdlibTest
     a.clone
   end
 
+  def test_coerce
+    a = Complex.rect(1,2)
+
+    a.coerce(2)
+  end
+
   def test_conj
     a = Complex.rect(1,2)
 
