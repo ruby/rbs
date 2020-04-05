@@ -143,17 +143,11 @@ class Complex < Numeric
   #
   #     Complex.polar(3, Math::PI/2).arg  #=> 1.5707963267948966
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     cmp.angle  ->  float
-  #
   def angle: () -> Float
 
   # Returns the angle part of its polar form.
   #
   #     Complex.polar(3, Math::PI/2).arg  #=> 1.5707963267948966
-  #
-  # # arglists 💪👽🚨 << Delete this section
-  #     cmp.arg    ->  float
   #
   alias arg angle
 
