@@ -63,9 +63,6 @@ class Complex < Numeric
   #     Complex('i') ** 2              #=> (-1+0i)
   #     Complex(-8) ** Rational(1, 3)  #=> (1.0000000000000002+1.7320508075688772i)
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     cmp ** numeric  ->  complex
-  #
   def **: (Numeric) -> Complex
 
   # Performs addition.
