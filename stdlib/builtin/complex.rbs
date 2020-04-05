@@ -151,7 +151,7 @@ class Complex < Numeric
   #
   alias arg angle
 
-  def clone: (?freeze: bool) -> self
+  def clone: -> self
 
   def coerce: (Numeric) -> [ Complex, Complex ]
 

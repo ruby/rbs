@@ -79,6 +79,12 @@ class ComplexTest < StdlibTest
     a.phase
   end
 
+  def test_clone
+    a = Complex.rect(1,2)
+
+    a.clone
+  end
+
   def test_conj
     a = Complex.rect(1,2)
 
