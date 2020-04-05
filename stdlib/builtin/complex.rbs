@@ -240,10 +240,6 @@ class Complex < Numeric
   #
   alias magnitude abs
 
-  def modulo: (Numeric) -> bot
-
-  def negative?: () -> bot
-
   def nonzero?: () -> self?
 
   # Returns the numerator.
