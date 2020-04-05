@@ -190,8 +190,6 @@ class Complex < Numeric
 
   def hash: () -> Integer
 
-  def i: () -> bot
-
   # Returns the imaginary part.
   #
   #     Complex(7).imaginary      #=> 0
