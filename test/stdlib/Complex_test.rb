@@ -104,6 +104,13 @@ class ComplexTest < StdlibTest
     a.denominator
   end
 
+  def test_eql?
+    a = Complex.rect(1,2)
+    b = Complex.rect(2, 1)
+
+    a.eql?(b)
+  end
+
   def test_fdiv
     a = Complex.rect(1.11,2r)
 

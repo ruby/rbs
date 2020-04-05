@@ -175,7 +175,7 @@ class Complex < Numeric
 
   def dup: () -> self
 
-  def eql?: (untyped) -> bool
+  def eql?: (any) -> bool
 
   # Performs division as each part is a float, never returns a float.
   #
