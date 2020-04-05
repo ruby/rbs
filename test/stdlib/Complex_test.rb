@@ -48,6 +48,7 @@ class ComplexTest < StdlibTest
     c / c
 
     +c
+    -c
   end
 
   def test_compare
