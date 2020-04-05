@@ -125,10 +125,6 @@ class Complex < Numeric
   #
   def ==: (any) -> bool
 
-  def >: (Numeric) -> bot
-
-  def >=: (Numeric) -> bot
-
   # Returns the absolute part of its polar form.
   #
   #     Complex(-1).abs         #=> 1
