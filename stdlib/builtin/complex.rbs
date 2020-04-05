@@ -263,9 +263,6 @@ class Complex < Numeric
   #
   #     Complex.polar(3, Math::PI/2).arg  #=> 1.5707963267948966
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     cmp.phase  ->  float
-  #
   alias phase angle
 
   # Returns an array; [cmp.abs, cmp.arg].
