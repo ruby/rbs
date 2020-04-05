@@ -143,6 +143,12 @@ class ComplexTest < StdlibTest
     (Float::INFINITY + 1i).infinite?
   end
 
+  def test_inspect
+    a = Complex.rect(2, 3)
+
+    a.inspect
+  end
+
   def test_numerator
     a = Complex.rect(1.11, 2r)
 

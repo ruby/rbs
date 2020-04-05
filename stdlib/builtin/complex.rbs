@@ -226,9 +226,6 @@ class Complex < Numeric
   #     Complex(0, Float::INFINITY).inspect      #=> "(0+Infinity*i)"
   #     Complex(Float::NAN, Float::NAN).inspect  #=> "(NaN+NaN*i)"
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     cmp.inspect  ->  string
-  #
   def inspect: () -> String
 
   def integer?: () -> bool
