@@ -113,9 +113,6 @@ class Complex < Numeric
   #     Complex(2)     <=> 2               #=> 0
   #     Complex(2)     <=> 3               #=> -1
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     cmp <=> object  ->  0, 1, -1, or nil
-  #
   def <=>: (Numeric) -> Integer?
 
   # Returns true if cmp equals object numerically.
