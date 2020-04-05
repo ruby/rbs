@@ -1244,7 +1244,7 @@ def next_token
     case
     when input.scan(/\s+/)
       # skip
-    when input.scan(/#(( *)|( (?<string>.*)))\n/)
+    when input.scan(/#(( *)|( ?(?<string>.*)))\n/)
       start_index = input.charpos - input.matched.size
       end_index = input.charpos-1
 

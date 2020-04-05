@@ -875,6 +875,32 @@ EOF
     end
   end
 
+  def test_comment_without_leading_space
+    Parser.parse_signature(<<-EOF).yield_self do |foo_decl,|
+#This is a class.
+class Foo
+  #This is a method.
+  def bar: () -> void
+
+  #def baz: () -> void
+end
+EOF
+
+      assert_instance_of Declarations::Class, foo_decl
+
+      assert_equal <<EOF, foo_decl.comment.string
+This is a class.
+EOF
+
+      foo_decl.members[0].tap do |member|
+        assert_instance_of Members::MethodDefinition, member
+        assert_equal <<EOF, member.comment.string
+This is a method.
+EOF
+      end
+    end
+  end
+
   def test_parsing_quoted_method_name
     Parser.parse_signature(<<-EOF).yield_self do |foo_decl,|
 module Kernel
