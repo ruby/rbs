@@ -145,8 +145,10 @@ class UnboundMethod
   # def foo(bar, baz, *args, &blk); end
   # method(:foo).parameters #=> [[:req, :bar], [:req, :baz], [:rest, :args], [:block, :blk]]
   # ```
-  def parameters: () -> ::Array[[ Symbol, Symbol ]]
-                | () -> ::Array[[ Symbol ]]
+  def parameters: () -> ::Array[
+    [:req | :opt | :rest | :keyreq | :key | :keyrest | :block, Symbol] |
+    [:rest | :keyrest]
+  ]
 
   # Returns the Ruby source filename and line number containing this method
   # or nil if this method was not defined in Ruby (i.e. native).
