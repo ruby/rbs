@@ -186,9 +186,6 @@ class Complex < Numeric
   # Returns `true` if `cmp`'s real and imaginary parts are both finite numbers,
   # otherwise returns `false`.
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     cmp.finite?  ->  true or false
-  #
   def finite?: () -> bool
 
   def hash: () -> Integer
