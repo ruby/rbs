@@ -1,13 +1,61 @@
+# Pseudo I/O on String object, with interface corresponding to IO.
+#
+# Commonly used to simulate `$stdio` or `$stderr`
+#
+# ### Examples
+#
+#     require 'stringio'
+#
+#     # Writing stream emulation
+#     io = StringIO.new
+#     io.puts "Hello World"
+#     io.string #=> "Hello World\n"
+#
+#     # Reading stream emulation
+#     io = StringIO.new "first\nsecond\nlast\n"
+#     io.getc #=> "f"
+#     io.gets #=> "irst\n"
+#     io.read #=> "second\nlast\n"
+#
 class StringIO
+  # Creates new StringIO instance from with *string* and *mode*.
+  #
   def initialize: (?String, ?String) -> untyped
+
+  # Closes the read end of a StringIO.  Will raise an `IOError` if the receiver is
+  # not readable.
+  #
+  def close_read: () -> nil
+
+  # Returns `true` if the stream is not readable, `false` otherwise.
+  #
+  def closed_read?: () -> bool
+
+  # Closes the write end of a StringIO.  Will raise an  `IOError` if the receiver
+  # is not writeable.
+  #
+  def close_write: () -> nil
+
+  # Returns `true` if the stream is not writable, `false` otherwise.
+  #
+  def closed_write?: () -> bool
+
+  # Returns an object itself.  Just for compatibility to IO.
+  #
+  def flush: () -> void
+
   def puts: (*untyped) -> void
+
   def readline: () -> String
               | (String) -> String
+
+  # Returns underlying String object, the subject of IO.
+  #
+  def string: () -> String
+
+  # Appends the given string to the underlying buffer string. The stream must be
+  # opened for writing.  If the argument is not a string, it will be converted to
+  # a string using `to_s`. Returns the number of bytes written.  See IO#write.
+  #
   def write: (String) -> void
-  def flush: () -> void
-  def string: -> String
-  def close_read: -> nil
-  def closed_read?: -> bool
-  def close_write: -> nil
-  def closed_write?: -> bool
 end
