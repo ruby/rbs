@@ -125,6 +125,12 @@ class ComplexTest < StdlibTest
     (Float::INFINITY + 1i).finite?
   end
 
+  def test_hash
+    a = Complex.rect(1,2)
+
+    a.hash
+  end
+
   def test_imag
     a = Complex.rect(1.11,2r)
 
