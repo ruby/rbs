@@ -137,9 +137,6 @@ class Complex < Numeric
   #     Complex(-1).abs2         #=> 1
   #     Complex(3.0, -4.0).abs2  #=> 25.0
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     cmp.abs2  ->  real
-  #
   def abs2: () -> Numeric
 
   # Returns the angle part of its polar form.
