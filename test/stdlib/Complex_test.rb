@@ -156,6 +156,11 @@ class ComplexTest < StdlibTest
     a.integer?
   end
 
+  def test_nonzero?
+    (0 + 0i).nonzero?
+    (2 + 3i).nonzero?
+  end
+
   def test_numerator
     a = Complex.rect(1.11, 2r)
 
