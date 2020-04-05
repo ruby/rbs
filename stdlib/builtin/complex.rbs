@@ -123,10 +123,7 @@ class Complex < Numeric
   #     Complex('1/3') == 0.33            #=> false
   #     Complex('1/2') == '1/2'           #=> false
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     cmp == object  ->  true or false
-  #
-  def ==: (untyped) -> bool
+  def ==: (any) -> bool
 
   def >: (Numeric) -> bot
 
