@@ -73,9 +73,6 @@ class Complex < Numeric
   #     Complex(9, 8)  + 4               #=> (13+8i)
   #     Complex(20, 9) + 9.8             #=> (29.8+9i)
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     cmp + numeric  ->  complex
-  #
   def +: (Numeric) -> Complex
 
   def +@: () -> Complex
