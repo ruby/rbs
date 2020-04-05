@@ -120,6 +120,11 @@ class ComplexTest < StdlibTest
     a.fdiv(a)
   end
 
+  def test_finite?
+    (1 + 1i).finite?
+    (Float::INFINITY + 1i).finite?
+  end
+
   def test_imag
     a = Complex.rect(1.11,2r)
 
