@@ -25,12 +25,12 @@ class IPAddr
   # Creates a new ipaddr containing the given network byte ordered string form of
   # an IP address.
   #
-  def self.new_ntoh: (untyped addr) -> IPAddr
+  def self.new_ntoh: (String addr) -> IPAddr
 
   # Convert a network byte ordered string form of an IP address into human
   # readable form.
   #
-  def self.ntop: (untyped addr) -> String
+  def self.ntop: (String addr) -> String
 
   # Creates a new ipaddr object either from a human readable IP address
   # representation in string, or from a packed in_addr value followed by an
@@ -58,7 +58,7 @@ class IPAddr
 
   # Returns a new ipaddr built by bitwise left shift.
   #
-  def <<: (untyped num) -> IPAddr
+  def <<: (Integer num) -> IPAddr
 
   # Compares the ipaddr with another.
   #
@@ -72,7 +72,7 @@ class IPAddr
 
   # Returns a new ipaddr built by bitwise right-shift.
   #
-  def >>: (untyped num) -> IPAddr
+  def >>: (Integer num) -> IPAddr
 
   # Checks equality used by Hash.
   #
