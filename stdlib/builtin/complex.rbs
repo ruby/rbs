@@ -101,10 +101,6 @@ class Complex < Numeric
   #     Complex(9, 8)  / 4               #=> ((9/4)+(2/1)*i)
   #     Complex(20, 9) / 9.8             #=> (2.0408163265306123+0.9183673469387754i)
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     cmp / numeric     ->  complex
-  #     cmp.quo(numeric)  ->  complex
-  #
   def /: (Numeric) -> Complex
 
   def <: (Numeric) -> bot
