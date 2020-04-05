@@ -37,7 +37,7 @@ _namespace_ ::=                                         (Empty namespace)
 
 _type-arguments_ ::=                                    (No application)
                    | `[` _type_ `,` ... `]`             (Type application)
-                   
+
 _literal_ ::= _string-literal_
             | _symbol-literal_
             | _integer-literal_
@@ -159,7 +159,7 @@ They are scoped in _class/module/interface declaration_ or _generic method types
 
 ```
 class Ref[T]              # Object is scoped in the class declaration.
-  @value: T               # Type variable `T`  
+  @value: T               # Type variable `T`
   def map: [X] { (T) -> X } -> Ref[X]   # X is a type variable scoped in the method type.
 end
 ```
@@ -209,7 +209,7 @@ They are all equivalent for the type system; they are all _top type_.
 _method-type_ ::= `(` _parameters_ `) ->` _type_                                       # Method without block
                 | `(` _parameters_ `) { (` _parameters_ `) -> ` _type_ `} ->` _type_   # Method with required block
                 | `(` _parameters_ `) ?{ (` _parameters_ `) -> ` _type_ `} ->` _type_  # Method with optional block
-                
+
 _parameters_ ::= _required-positionals_ _optional-positionals_ _rest-positional_ _trailing-positionals_ _keywords_
 
 _paramater_ ::= _type_ _var-name_                                  # Parameter with var name
@@ -263,7 +263,7 @@ _member_ ::= _ivar-member_                # Ivar definition
            | _alias-member_               # Alias
            | `public`                     # Public
            | `private`                    # Private
-           
+
 _ivar-member_ ::= _ivar-name_ `:` _type_
 
 _method-member_ ::= `def` _method-name_ `:` _method-types_            # Instance method
@@ -291,7 +291,7 @@ _prepend-member_ ::= `prepend` _class-name_ _type-arguments_
 
 _alias-member_ ::= `alias` _method-name_ _method-name_
                  | `alias self.` _method-name_ `self.` _method-name_
-                 
+
 _ivar-name_ ::= /@\w+/
 _method-name_ ::= ...
                 | /`[^`]+`/
@@ -406,16 +406,16 @@ _decl_ ::= _class-decl_                         # Class declaration
 
 _class-decl_ ::= `class` _class-name_ _module-type-parameters_ _members_ `end`
                | `class` _class-name_ _module-type-parameters_ `<` _class-name_ _type-arguments_ _members_ `end`
- 
+
 _module-decl_ ::= `module` _module-name_ _module-type-parameters_ _members_ `end`
                 | `module` _module-name_ _module-type-parameters_ `:` _class-name_ _type-arguments_ _members_ `end`
 
 _interface-decl_ ::= `interface` _interface-name_ _module-type-parameters_ _interface-members_ `end`
 
-_interface-members_ ::= _method-member_              # Method 
+_interface-members_ ::= _method-member_              # Method
                       | _include-member_             # Mixin (include)
                       | _alias-member_               # Alias
-                      
+
 _extension-decl_ ::= `extension` _class-name_ _type-parameters_ `(` _extension-name_ `)` _members_ `end`
 
 _type-alias-decl_ ::= `type` _alias-name_ `=` _type_
@@ -459,7 +459,7 @@ module Enumerable[A, B] : _Each[A, B]
 end
 ```
 
-The `Enumerable` method above requires `each` method for enumerating objects.
+The `Enumerable` module above requires `each` method for enumerating objects.
 
 ### Interface declaration
 
