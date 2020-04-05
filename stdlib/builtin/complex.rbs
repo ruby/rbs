@@ -257,9 +257,6 @@ class Complex < Numeric
   #
   # See denominator.
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     cmp.numerator  ->  numeric
-  #
   def numerator: () -> Complex
 
   # Returns the angle part of its polar form.
