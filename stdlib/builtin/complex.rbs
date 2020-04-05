@@ -151,8 +151,6 @@ class Complex < Numeric
   #
   alias arg angle
 
-  def ceil: (*untyped) -> bot
-
   def clone: (?freeze: bool) -> self
 
   def coerce: (Numeric) -> [ Complex, Complex ]
