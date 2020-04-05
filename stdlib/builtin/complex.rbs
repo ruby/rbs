@@ -159,18 +159,11 @@ class Complex < Numeric
   #
   #     Complex(1, 2).conjugate  #=> (1-2i)
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     cmp.conj       ->  complex
-  #     cmp.conjugate  ->  complex
-  #
   def conj: () -> Complex
 
   # Returns the complex conjugate.
   #
   #     Complex(1, 2).conjugate  #=> (1-2i)
-  #
-  # # arglists 💪👽🚨 << Delete this section
-  #     cmp.conjugate  ->  complex
   #
   def conjugate: () -> Complex
 
