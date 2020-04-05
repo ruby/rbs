@@ -130,9 +130,6 @@ class Complex < Numeric
   #     Complex(-1).abs         #=> 1
   #     Complex(3.0, -4.0).abs  #=> 5.0
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     cmp.abs        ->  real
-  #
   def abs: () -> Numeric
 
   # Returns square of the absolute value.
