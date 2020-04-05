@@ -56,9 +56,6 @@ class Complex < Numeric
   #     Complex(9, 8)  * 4               #=> (36+32i)
   #     Complex(20, 9) * 9.8             #=> (196.0+88.2i)
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     cmp * numeric  ->  complex
-  #
   def *: (Numeric) -> Complex
 
   # Performs exponentiation.
