@@ -68,6 +68,7 @@ class ComplexTest < StdlibTest
     a = Complex.rect(1,2)
 
     a.abs
+    a.magnitude
     a.abs2
   end
 
