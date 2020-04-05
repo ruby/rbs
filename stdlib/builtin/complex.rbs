@@ -274,8 +274,6 @@ class Complex < Numeric
   #
   def polar: () -> [ Float, Float ]
 
-  def positive?: () -> bot
-
   # Performs division.
   #
   #     Complex(2, 3)  / Complex(2, 3)   #=> ((1/1)+(0/1)*i)
