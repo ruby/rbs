@@ -173,10 +173,6 @@ class Complex < Numeric
   #
   def denominator: () -> Integer
 
-  def div: (Numeric) -> bot
-
-  def divmod: (Numeric) -> bot
-
   def dup: () -> self
 
   def eql?: (untyped) -> bool
