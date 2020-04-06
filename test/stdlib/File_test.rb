@@ -75,9 +75,9 @@ class FileSingletonTest < Minitest::Test
     assert_send_type "(ToPath) -> String",
                      File, :basename, ToPath.new(__FILE__)
     assert_send_type "(String, String) -> String",
-                     File, :basename, __FILE__, '.rb'
+                     File, :basename, __FILE__, ".rb"
     assert_send_type "(String, ToStr) -> String",
-                     File, :basename, __FILE__, ToStr.new('.rb')
+                     File, :basename, __FILE__, ToStr.new(".rb")
   end
 
   def test_blockdev?
@@ -108,13 +108,13 @@ class FileSingletonTest < Minitest::Test
       assert_send_type "(Integer, String) -> Integer",
                        File, :chmod, 0644, "#{dir}/chmod"
       assert_send_type "(ToInt, String) -> Integer",
-                      File, :chmod, ToInt.new(0644), "#{dir}/chmod"
+                       File, :chmod, ToInt.new(0644), "#{dir}/chmod"
       assert_send_type "(Integer, ToStr) -> Integer",
-                      File, :chmod, 0644, ToStr.new("#{dir}/chmod")
+                       File, :chmod, 0644, ToStr.new("#{dir}/chmod")
       assert_send_type "(Integer, ToPath) -> Integer",
-                      File, :chmod, 0644, ToPath.new("#{dir}/chmod")
+                       File, :chmod, 0644, ToPath.new("#{dir}/chmod")
       assert_send_type "(Integer, String, String) -> Integer",
-                      File, :chmod, 0644, "#{dir}/chmod", "#{dir}/chmod"
+                       File, :chmod, 0644, "#{dir}/chmod", "#{dir}/chmod"
     end
   end
 
@@ -151,17 +151,21 @@ class FileSingletonTest < Minitest::Test
   def test_delete
     Dir.mktmpdir do |dir|
       File.open("#{dir}/a", "w"){}
-      assert_send_type "(String) -> Integer", File, :delete, "#{dir}/a"
+      assert_send_type "(String) -> Integer",
+                       File, :delete, "#{dir}/a"
 
       File.open("#{dir}/b", "w"){}
-      assert_send_type "(ToStr) -> Integer", File, :delete, ToStr.new("#{dir}/b")
+      assert_send_type "(ToStr) -> Integer",
+                       File, :delete, ToStr.new("#{dir}/b")
 
       File.open("#{dir}/c", "w"){}
-      assert_send_type "(ToPath) -> Integer", File, :delete, ToPath.new("#{dir}/c")
+      assert_send_type "(ToPath) -> Integer",
+                       File, :delete, ToPath.new("#{dir}/c")
 
       File.open("#{dir}/d", "w"){}
       File.open("#{dir}/e", "w"){}
-      assert_send_type "(String, String) -> Integer", File, :delete, "#{dir}/d", "#{dir}/e"
+      assert_send_type "(String, String) -> Integer",
+                       File, :delete, "#{dir}/d", "#{dir}/e"
     end
   end
 
@@ -267,17 +271,17 @@ class FileSingletonTest < Minitest::Test
 
   def test_fnmatch
     assert_send_type "(String, String) -> bool",
-                     File, :fnmatch, 'File_test', __FILE__
+                     File, :fnmatch, "File_test", __FILE__
     assert_send_type "(ToStr, String) -> bool",
-                     File, :fnmatch, ToStr.new('File_test'), __FILE__
+                     File, :fnmatch, ToStr.new("File_test"), __FILE__
     assert_send_type "(String, ToStr) -> bool",
-                     File, :fnmatch, 'File_test', ToStr.new(__FILE__)
+                     File, :fnmatch, "File_test", ToStr.new(__FILE__)
     assert_send_type "(String, ToPath) -> bool",
-                     File, :fnmatch, 'File_test', ToPath.new(__FILE__)
+                     File, :fnmatch, "File_test", ToPath.new(__FILE__)
     assert_send_type "(String, String, Integer) -> bool",
-                     File, :fnmatch, 'File_test', __FILE__, File::FNM_CASEFOLD
+                     File, :fnmatch, "File_test", __FILE__, File::FNM_CASEFOLD
     assert_send_type "(String, String, ToInt) -> bool",
-                     File, :fnmatch, 'File_test', __FILE__, ToInt.new(File::FNM_CASEFOLD)
+                     File, :fnmatch, "File_test", __FILE__, ToInt.new(File::FNM_CASEFOLD)
   end
 
   def test_fnmatch?
@@ -391,10 +395,14 @@ class FileSingletonTest < Minitest::Test
 
   def test_mkfifo
     Dir.mktmpdir do |dir|
-      assert_send_type "(String) -> 0", File, :mkfifo, "#{dir}/a"
-      assert_send_type "(ToPath) -> 0", File, :mkfifo, ToPath.new("#{dir}/b")
-      assert_send_type "(String, Integer) -> 0", File, :mkfifo, "#{dir}/c", 0666
-      assert_send_type "(String, ToInt) -> 0", File, :mkfifo, "#{dir}/d", ToInt.new(0666)
+      assert_send_type "(String) -> 0",
+                       File, :mkfifo, "#{dir}/a"
+      assert_send_type "(ToPath) -> 0",
+                       File, :mkfifo, ToPath.new("#{dir}/b")
+      assert_send_type "(String, Integer) -> 0",
+                       File, :mkfifo, "#{dir}/c", 0666
+      assert_send_type "(String, ToInt) -> 0",
+                       File, :mkfifo, "#{dir}/d", ToInt.new(0666)
     end
   end
 
@@ -464,11 +472,11 @@ class FileSingletonTest < Minitest::Test
       File.symlink("#{dir}/a", "#{dir}/readlink")
 
       assert_send_type "(String) -> String",
-                      File, :readlink, "#{dir}/readlink"
+                       File, :readlink, "#{dir}/readlink"
       assert_send_type "(ToStr) -> String",
-                      File, :readlink, ToStr.new("#{dir}/readlink")
+                       File, :readlink, ToStr.new("#{dir}/readlink")
       assert_send_type "(ToPath) -> String",
-                      File, :readlink, ToPath.new("#{dir}/readlink")
+                       File, :readlink, ToPath.new("#{dir}/readlink")
     end
   end
 
@@ -506,15 +514,15 @@ class FileSingletonTest < Minitest::Test
     Dir.mktmpdir do |dir|
       File.open("#{dir}/rename1", "w"){}
       assert_send_type "(String, String) -> 0",
-                      File, :rename, "#{dir}/rename1", "#{dir}/new_rename1"
+                       File, :rename, "#{dir}/rename1", "#{dir}/new_rename1"
 
       File.open("#{dir}/rename2", "w"){}
       assert_send_type "(ToStr, ToStr) -> 0",
-                      File, :rename, ToStr.new("#{dir}/rename2"), ToStr.new("#{dir}/new_rename2")
+                       File, :rename, ToStr.new("#{dir}/rename2"), ToStr.new("#{dir}/new_rename2")
 
       File.open("#{dir}/rename3", "w"){}
       assert_send_type "(ToPath, ToPath) -> 0",
-                      File, :rename, ToPath.new("#{dir}/rename3"), ToPath.new("#{dir}/new_rename3")
+                       File, :rename, ToPath.new("#{dir}/rename3"), ToPath.new("#{dir}/new_rename3")
     end
   end
 
@@ -524,17 +532,17 @@ class FileSingletonTest < Minitest::Test
       system "chmod g+s #{dir}/setgid"
 
       assert_send_type "(String) -> true",
-                      File, :setgid?, "#{dir}/setgid"
+                       File, :setgid?, "#{dir}/setgid"
       assert_send_type "(ToStr) -> true",
-                      File, :setgid?, ToStr.new("#{dir}/setgid")
+                       File, :setgid?, ToStr.new("#{dir}/setgid")
       assert_send_type "(ToPath) -> true",
-                      File, :setgid?, ToPath.new("#{dir}/setgid")
+                       File, :setgid?, ToPath.new("#{dir}/setgid")
       assert_send_type "(IO) -> true",
-                      File, :setgid?, IO.new(IO.sysopen("#{dir}/setgid"))
+                       File, :setgid?, IO.new(IO.sysopen("#{dir}/setgid"))
     end
 
     assert_send_type "(String) -> false",
-                File, :setgid?, __FILE__
+                     File, :setgid?, __FILE__
   end
 
   def test_setuid?
@@ -543,17 +551,17 @@ class FileSingletonTest < Minitest::Test
       system "chmod u+s #{dir}/setuid"
 
       assert_send_type "(String) -> true",
-                      File, :setuid?, "#{dir}/setuid"
+                       File, :setuid?, "#{dir}/setuid"
       assert_send_type "(ToStr) -> true",
-                      File, :setuid?, ToStr.new("#{dir}/setuid")
+                       File, :setuid?, ToStr.new("#{dir}/setuid")
       assert_send_type "(ToPath) -> true",
-                      File, :setuid?, ToPath.new("#{dir}/setuid")
+                       File, :setuid?, ToPath.new("#{dir}/setuid")
       assert_send_type "(IO) -> true",
-                      File, :setuid?, IO.new(IO.sysopen("#{dir}/setuid"))
+                       File, :setuid?, IO.new(IO.sysopen("#{dir}/setuid"))
     end
 
     assert_send_type "(String) -> false",
-                File, :setuid?, __FILE__
+                     File, :setuid?, __FILE__
   end
 
   def test_size
@@ -580,7 +588,7 @@ class FileSingletonTest < Minitest::Test
     Dir.mktmpdir do |dir|
       File.open("#{dir}/size", "w"){}
       assert_send_type "(String) -> nil",
-                      File, :size?, "#{dir}/size"
+                       File, :size?, "#{dir}/size"
     end
   end
 
@@ -594,9 +602,9 @@ class FileSingletonTest < Minitest::Test
     assert_send_type "(IO) -> false",
                      File, :socket?, IO.new(IO.sysopen(__FILE__))
 
-    Socket.unix_server_socket('testsocket') do
+    Socket.unix_server_socket("testsocket") do
       assert_send_type "(String) -> true",
-                      File, :socket?, "testsocket"
+                       File, :socket?, "testsocket"
     end
   end
 
@@ -624,17 +632,17 @@ class FileSingletonTest < Minitest::Test
       system "chmod +t #{dir}/sticky"
 
       assert_send_type "(String) -> true",
-                      File, :sticky?, "#{dir}/sticky"
+                       File, :sticky?, "#{dir}/sticky"
       assert_send_type "(ToStr) -> true",
-                      File, :sticky?, ToStr.new("#{dir}/sticky")
+                       File, :sticky?, ToStr.new("#{dir}/sticky")
       assert_send_type "(ToPath) -> true",
-                      File, :sticky?, ToPath.new("#{dir}/sticky")
+                       File, :sticky?, ToPath.new("#{dir}/sticky")
       assert_send_type "(IO) -> true",
-                      File, :sticky?, IO.new(IO.sysopen("#{dir}/sticky"))
+                       File, :sticky?, IO.new(IO.sysopen("#{dir}/sticky"))
     end
 
     assert_send_type "(String) -> false",
-                    File, :sticky?, __FILE__
+                     File, :sticky?, __FILE__
   end
 
   def test_symlink
@@ -699,17 +707,21 @@ class FileSingletonTest < Minitest::Test
   def test_unlink
     Dir.mktmpdir do |dir|
       File.open("#{dir}/a", "w"){}
-      assert_send_type "(String) -> Integer", File, :unlink, "#{dir}/a"
+      assert_send_type "(String) -> Integer",
+                       File, :unlink, "#{dir}/a"
 
       File.open("#{dir}/b", "w"){}
-      assert_send_type "(ToStr) -> Integer", File, :unlink, ToStr.new("#{dir}/b")
+      assert_send_type "(ToStr) -> Integer",
+                       File, :unlink, ToStr.new("#{dir}/b")
 
       File.open("#{dir}/c", "w"){}
-      assert_send_type "(ToPath) -> Integer", File, :unlink, ToPath.new("#{dir}/c")
+      assert_send_type "(ToPath) -> Integer",
+                       File, :unlink, ToPath.new("#{dir}/c")
 
       File.open("#{dir}/d", "w"){}
       File.open("#{dir}/e", "w"){}
-      assert_send_type "(String, String) -> Integer", File, :unlink, "#{dir}/d", "#{dir}/e"
+      assert_send_type "(String, String) -> Integer",
+                       File, :unlink, "#{dir}/d", "#{dir}/e"
     end
   end
 
@@ -754,13 +766,13 @@ class FileSingletonTest < Minitest::Test
       system "chmod a+w #{dir}/writable"
 
       assert_send_type "(String) -> Integer",
-                      File, :world_writable?, "#{dir}/writable"
+                       File, :world_writable?, "#{dir}/writable"
       assert_send_type "(ToStr) -> Integer",
-                      File, :world_writable?, ToStr.new("#{dir}/writable")
+                       File, :world_writable?, ToStr.new("#{dir}/writable")
       assert_send_type "(ToPath) -> Integer",
-                      File, :world_writable?, ToPath.new("#{dir}/writable")
+                       File, :world_writable?, ToPath.new("#{dir}/writable")
       assert_send_type "(IO) -> Integer",
-                      File, :world_writable?, IO.new(IO.sysopen("#{dir}/writable"))
+                       File, :world_writable?, IO.new(IO.sysopen("#{dir}/writable"))
 
       File.open("#{dir}/unwritable", "w"){}
       system "chmod o-w #{dir}/unwritable"
