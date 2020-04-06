@@ -27,7 +27,7 @@ task :rubocop do
 end
 
 rule ".rb" => ".y" do |t|
-  sh "racc -v -o #{t.name} #{t.source}"
+  sh "bundle exec racc -v -o #{t.name} #{t.source}"
 end
 
 task :parser => "lib/ruby/signature/parser.rb"
