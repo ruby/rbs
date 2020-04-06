@@ -904,7 +904,7 @@ end
 # platform specific alternative separator
 #
 #
-File::ALT_SEPARATOR: untyped?
+File::ALT_SEPARATOR: String?
 
 # path list separator
 #
