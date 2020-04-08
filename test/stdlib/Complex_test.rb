@@ -207,4 +207,9 @@ class ComplexTest < StdlibTest
   def test_to_f
     (1 + 0i).to_f
   end
+
+  def test_to_integer
+    (1 + 0i).to_i
+    (1 + 0i).to_int
+  end
 end

@@ -331,9 +331,6 @@ class Complex < Numeric
   #     Complex(1, 0.0).to_i  # RangeError
   #     Complex(1, 2).to_i    # RangeError
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     cmp.to_i  ->  integer
-  #
   def to_i: () -> Integer
 
   alias to_int to_i
