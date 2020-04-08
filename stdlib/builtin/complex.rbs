@@ -283,9 +283,6 @@ class Complex < Numeric
   #
   # See to_r.
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     cmp.rationalize([eps])  ->  rational
-  #
   def rationalize: (?Numeric eps) -> Rational
 
   # Returns the real part.
