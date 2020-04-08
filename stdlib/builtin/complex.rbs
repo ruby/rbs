@@ -359,8 +359,6 @@ class Complex < Numeric
   #
   def to_s: () -> String
 
-  def truncate: (?Integer) -> bot
-
   def zero?: () -> bool
 end
 
