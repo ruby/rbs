@@ -290,9 +290,6 @@ class Complex < Numeric
   #     Complex(7).real      #=> 7
   #     Complex(9, -4).real  #=> 9
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     cmp.real  ->  real
-  #
   def real: () -> Numeric
 
   # Returns false, even if the complex number has no imaginary part.

@@ -187,4 +187,10 @@ class ComplexTest < StdlibTest
     a.rationalize
     a.rationalize(3.11)
   end
+
+  def test_real
+    a = Complex.rect(2,3)
+
+    a.real
+  end
 end
