@@ -306,10 +306,6 @@ class Complex < Numeric
   #
   #     Complex(1, 2).rectangular  #=> [1, 2]
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     cmp.rect         ->  array
-  #     cmp.rectangular  ->  array
-  #
   alias rectangular rect
 
   def reminder: (Numeric) -> bot
