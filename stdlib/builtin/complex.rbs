@@ -308,12 +308,6 @@ class Complex < Numeric
   #
   alias rectangular rect
 
-  def reminder: (Numeric) -> bot
-
-  def round: (*untyped) -> bot
-
-  def step: (*untyped) ?{ (*untyped) -> untyped } -> bot
-
   # Returns self.
   #
   #     Complex(2).to_c      #=> (2+0i)
