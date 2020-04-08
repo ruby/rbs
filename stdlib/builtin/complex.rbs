@@ -262,9 +262,6 @@ class Complex < Numeric
   #
   #     Complex(1, 2).polar  #=> [2.23606797749979, 1.1071487177940904]
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     cmp.polar  ->  array
-  #
   def polar: () -> [ Float, Float ]
 
   # Performs division.
