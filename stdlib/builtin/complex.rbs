@@ -357,9 +357,6 @@ class Complex < Numeric
   #     Complex(0, Float::INFINITY).to_s      #=> "0+Infinity*i"
   #     Complex(Float::NAN, Float::NAN).to_s  #=> "NaN+NaN*i"
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     cmp.to_s  ->  string
-  #
   def to_s: () -> String
 
   def truncate: (?Integer) -> bot

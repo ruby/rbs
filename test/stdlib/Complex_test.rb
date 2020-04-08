@@ -212,4 +212,8 @@ class ComplexTest < StdlibTest
     (1 + 0i).to_i
     (1 + 0i).to_int
   end
+
+  def test_to_s
+    (1 + 0i).to_s
+  end
 end
