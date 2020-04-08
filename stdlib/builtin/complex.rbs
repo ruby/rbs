@@ -195,10 +195,6 @@ class Complex < Numeric
   #     Complex(7).imaginary      #=> 0
   #     Complex(9, -4).imaginary  #=> -4
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     cmp.imag       ->  real
-  #     cmp.imaginary  ->  real
-  #
   def imag: () -> Numeric
 
   # Returns the imaginary part.
