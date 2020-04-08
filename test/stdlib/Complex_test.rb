@@ -216,4 +216,9 @@ class ComplexTest < StdlibTest
   def test_to_s
     (1 + 0i).to_s
   end
+
+  def test_zero?
+    (2 + 3i).zero?
+    (0 + 0i).zero?
+  end
 end
