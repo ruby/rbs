@@ -300,10 +300,6 @@ class Complex < Numeric
   #
   #     Complex(1, 2).rectangular  #=> [1, 2]
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     cmp.rect         ->  array
-  #     cmp.rectangular  ->  array
-  #
   def rect: () -> [ Numeric, Numeric ]
 
   # Returns an array; [cmp.real, cmp.imag].
