@@ -193,4 +193,9 @@ class ComplexTest < StdlibTest
 
     a.real
   end
+
+  def test_real?
+    (1 + 2i).real?
+    (1 + 0i).real?
+  end
 end

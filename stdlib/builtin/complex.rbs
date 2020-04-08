@@ -294,10 +294,6 @@ class Complex < Numeric
 
   # Returns false, even if the complex number has no imaginary part.
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     Complex(1).real?     ->  false
-  #     Complex(1, 2).real?  ->  false
-  #
   def real?: () -> false
 
   # Returns an array; [cmp.real, cmp.imag].
