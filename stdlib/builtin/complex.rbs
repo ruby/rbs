@@ -313,10 +313,7 @@ class Complex < Numeric
   #     Complex(2).to_c      #=> (2+0i)
   #     Complex(-8, 6).to_c  #=> (-8+6i)
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     complex.to_c  ->  self
-  #
-  def to_c: () -> Complex
+  def to_c: () -> self
 
   # Returns the value as a float if possible (the imaginary part should be exactly
   # zero).
