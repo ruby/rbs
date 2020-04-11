@@ -547,7 +547,7 @@ class Time < Object
   #     t = Time.utc(1999,12,31, 23,59,59)
   #     (t + 0.123456789).round(4).iso8601(6)  #=> "1999-12-31T23:59:59.123500Z"
   #
-  def round: (Integer arg0) -> Time
+  def round: (?Integer arg0) -> Time
 
   # Returns `true` if *time* represents Saturday.
   #
