@@ -121,18 +121,22 @@ class SymbolInstanceTest < Minitest::Test
     assert_send_type "(Integer) -> nil",
                      :a, :casecmp, 42
   end
+
+  def test_casecmp_p
+    assert_send_type "(Symbol) -> true",
+                     :a, :casecmp?, :A
+    assert_send_type "(Symbol) -> false",
+                     :a, :casecmp?, :B
+    assert_send_type "(Symbol) ->nil",
+                     "\u{e4 f6 fc}".encode("ISO-8859-1").to_sym, :casecmp?, :"\u{c4 d6 dc}"
+    assert_send_type "(Integer) -> nil",
+                     :a, :casecmp?, 42
+  end
 end
 
 class SymbolTest < StdlibTest
   target Symbol
   using hook.refinement
-
-  def test_casecmp_p
-    :a.casecmp?(:A)
-    :a.casecmp?(:B)
-    "\u{e4 f6 fc}".encode("ISO-8859-1").to_sym.casecmp?(:"\u{c4 d6 dc}")
-    :a.casecmp?(42)
-  end
 
   def test_downcase
     :a.downcase
