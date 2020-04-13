@@ -149,16 +149,18 @@ class SymbolInstanceTest < Minitest::Test
     assert_send_type "(:turkic, :lithuanian) -> Symbol",
                      :a, :downcase, :turkic, :lithuanian
   end
+
+  def test_empty_p
+    assert_send_type "() -> true",
+                     :"", :empty?
+    assert_send_type "() -> false",
+                     :a, :empty?
+  end
 end
 
 class SymbolTest < StdlibTest
   target Symbol
   using hook.refinement
-
-  def test_empty_p
-    :"".empty?
-    :a.empty?
-  end
 
   def test_encoding
     :a.encoding
