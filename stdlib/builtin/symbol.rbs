@@ -188,7 +188,7 @@ class Symbol
   #     # returns true if one of the prefixes matches.
   #     :hello.start_with?("heaven", "hell")     #=> true
   #     :hello.start_with?("heaven", "paradise") #=> false
-  def start_with?: (String str, *String str) -> bool
+  def start_with?: (*string prefixes) -> bool
 
   # Same as `sym.to_s.succ.intern`.
   #

@@ -284,17 +284,28 @@ class SymbolInstanceTest < Minitest::Test
     assert_send_type "() -> Integer",
                      :a, :size
   end
+
+  def test_start_with?
+    assert_send_type "() -> false",
+                     :a, :start_with?
+    assert_send_type "(String) -> true",
+                     :a, :start_with?, "a"
+    assert_send_type "(String) -> false",
+                     :a, :start_with?, "b"
+    assert_send_type "(String, String) -> true",
+                     :a, :start_with?, "b", "a"
+    assert_send_type "(ToStr) -> true",
+                     :a, :start_with?, ToStr.new("a")
+    assert_send_type "(ToStr) -> false",
+                     :a, :start_with?, ToStr.new("b")
+    assert_send_type "(ToStr, ToStr) -> true",
+                     :a, :start_with?, ToStr.new("b"), ToStr.new("a")
+  end
 end
 
 class SymbolTest < StdlibTest
   target Symbol
   using hook.refinement
-
-  def test_start_with?
-    :a.start_with?("a")
-    :a.start_with?("b")
-    :a.start_with?("b", "a")
-  end
 
   def test_succ
     :a.succ
