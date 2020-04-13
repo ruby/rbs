@@ -470,6 +470,9 @@ class Integer < Numeric
   #     a.pow(b, m)  #=> same as (a**b) % m, but avoids huge temporary values
   #
   def pow: (Integer other, ?Integer modulo) -> Integer
+         | (Float) -> Float
+         | (Rational) -> Rational
+         | (Complex) -> Complex
 
   # Returns the predecessor of `int`, i.e. the Integer equal to `int-1`.
   #
