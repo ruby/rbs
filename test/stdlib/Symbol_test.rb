@@ -306,21 +306,26 @@ class SymbolInstanceTest < Minitest::Test
     assert_send_type "() -> Symbol",
                      :a, :succ
   end
+
+  def test_swapcase
+    assert_send_type "() -> Symbol",
+                     :a, :swapcase
+    assert_send_type "(:ascii) -> Symbol",
+                     :a, :swapcase, :ascii
+    assert_send_type "(:lithuanian) -> Symbol",
+                     :a, :swapcase, :lithuanian
+    assert_send_type "(:turkic) -> Symbol",
+                     :a, :swapcase, :turkic
+    assert_send_type "(:lithuanian, :turkic) -> Symbol",
+                     :a, :swapcase, :lithuanian, :turkic
+    assert_send_type "(:turkic, :lithuanian) -> Symbol",
+                     :a, :swapcase, :turkic, :lithuanian
+  end
 end
 
 class SymbolTest < StdlibTest
   target Symbol
   using hook.refinement
-
-
-  def test_swapcase
-    :a.swapcase
-    :a.swapcase(:ascii)
-    :a.swapcase(:lithuanian)
-    :a.swapcase(:turkic)
-    :a.swapcase(:lithuanian, :turkic)
-    :a.swapcase(:turkic, :lithuanian)
-  end
 
   def test_to_proc
     :a.to_proc
