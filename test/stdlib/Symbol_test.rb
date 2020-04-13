@@ -161,17 +161,24 @@ class SymbolInstanceTest < Minitest::Test
     assert_send_type "() -> Encoding",
                      :a, :encoding
   end
+
+  def test_end_with?
+    assert_send_type "() -> false",
+                     :a, :end_with?
+    assert_send_type "(String) -> true",
+                     :a, :end_with?, "a"
+    assert_send_type "(String) -> false",
+                     :a, :end_with?, "b"
+    assert_send_type "(String, String) -> true",
+                     :a, :end_with?, "a", "b"
+    assert_send_type "(ToStr) -> true",
+                     :a, :end_with?, ToStr.new("a")
+  end
 end
 
 class SymbolTest < StdlibTest
   target Symbol
   using hook.refinement
-
-  def test_end_with?
-    :a.end_with?("a")
-    :a.end_with?("b")
-    :a.end_with?("a", "b")
-  end
 
   def test_id2name
     :a.id2name

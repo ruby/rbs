@@ -134,7 +134,7 @@ class Symbol
   #     :hello.end_with?("heaven", "ello")     #=> true
   #     :hello.end_with?("heaven", "paradise") #=> false
   #
-  def end_with?: (String str, *String str) -> bool
+  def end_with?: (*string suffixes) -> bool
 
   # Returns the name or string corresponding to *sym*.
   #
