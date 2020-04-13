@@ -1,12 +1,20 @@
 require_relative "test_helper"
+require "ruby/signature/test/test_helper"
+
+class SymbolSingletonTest < Minitest::Test
+  include Ruby::Signature::Test::TypeAssertions
+
+  testing "singleton(::Symbol)"
+
+  def test_all_symbols
+    assert_send_type "() -> Array[Symbol]",
+                     Symbol, :all_symbols
+  end
+end
 
 class SymbolTest < StdlibTest
   target Symbol
   using hook.refinement
-
-  def test_all_symbols
-    Symbol.all_symbols
-  end
 
   def test_cmp
     :a <=> :a
