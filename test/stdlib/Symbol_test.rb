@@ -331,15 +331,16 @@ class SymbolInstanceTest < Minitest::Test
     assert_send_type "() -> String",
                      :a, :to_s
   end
+
+  def test_to_sym
+    assert_send_type "() -> Symbol",
+                     :a, :to_sym
+  end
 end
 
 class SymbolTest < StdlibTest
   target Symbol
   using hook.refinement
-
-  def test_to_sym
-    :a.to_sym
-  end
 
   def test_upcase
     :a.upcase
