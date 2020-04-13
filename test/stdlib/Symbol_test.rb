@@ -279,15 +279,16 @@ class SymbolInstanceTest < Minitest::Test
     assert_send_type "() -> Symbol",
                      :a, :next
   end
+
+  def test_size
+    assert_send_type "() -> Integer",
+                     :a, :size
+  end
 end
 
 class SymbolTest < StdlibTest
   target Symbol
   using hook.refinement
-
-  def test_size
-    :a.size
-  end
 
   def test_slice
     :a.slice(0) == "a" or raise
