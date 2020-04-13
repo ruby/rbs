@@ -455,6 +455,7 @@ class KernelTest < StdlibTest
     #   printf 's'
     #   printf '%d', 2
     #   printf '%d%s', 2, 1
+    #   printf
   ensure
     $stdout = STDOUT
   end

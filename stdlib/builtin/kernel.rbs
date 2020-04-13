@@ -384,7 +384,9 @@ module Kernel
   #     cat, 1, 2, 3, 99
   def print: (*Kernel args) -> nil
 
-  def printf: (?IO arg0, ?String arg1, *untyped arg2) -> nil
+  def printf: (IO arg0, String arg1, *untyped args) -> nil
+            | (String arg1, *untyped args) -> nil
+            | -> nil
 
   def proc: () { () -> untyped } -> Proc
 
