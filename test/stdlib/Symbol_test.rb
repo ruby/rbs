@@ -44,31 +44,60 @@ class SymbolInstanceTest < Minitest::Test
     assert_send_type "(nil) -> nil",
                      :a, :=~, nil
   end
+
+  def test_aref
+    assert_send_type "(Integer) -> String",
+                     :a, :[], 0
+    assert_send_type "(ToInt) -> String",
+                     :a, :[], ToInt.new(0)
+    assert_send_type "(Integer) -> nil",
+                     :a, :[], 1
+    assert_send_type "(ToInt) -> nil",
+                     :a, :[], ToInt.new(1)
+    assert_send_type "(Integer, Integer) -> String",
+                     :a, :[], 0, 1
+    assert_send_type "(Integer, Integer) -> nil",
+                     :a, :[], 2, 1
+    assert_send_type "(ToInt, ToInt) -> String",
+                     :a, :[], ToInt.new(0), ToInt.new(1)
+    assert_send_type "(ToInt, ToInt) -> nil",
+                     :a, :[], ToInt.new(2), ToInt.new(1)
+    assert_send_type "(Range[Integer]) -> String",
+                     :a, :[], 0..1
+    assert_send_type "(Range[Integer]) -> nil",
+                     :a, :[], 2..1
+    assert_send_type "(Range[Integer?]) -> String",
+                     :a, :[], (0...)
+    assert_send_type "(Range[Integer?]) -> nil",
+                     :a, :[], (2...)
+    assert_send_type "(Range[Integer?]) -> String",
+                     :a, :[], (...0)
+    assert_send_type "(Regexp) -> String",
+                     :a, :[], /a/
+    assert_send_type "(Regexp) -> nil",
+                     :a, :[], /b/
+    assert_send_type "(Regexp, Integer) -> String",
+                     :a, :[], /a/, 0
+    assert_send_type "(Regexp, Integer) -> nil",
+                     :a, :[], /b/, 0
+    assert_send_type "(Regexp, ToInt) -> String",
+                     :a, :[], /a/, ToInt.new(0)
+    assert_send_type "(Regexp, ToInt) -> nil",
+                     :a, :[], /b/, ToInt.new(0)
+    assert_send_type "(Regexp, String) -> String",
+                     :a, :[], /(?<a>a)/, "a"
+    assert_send_type "(Regexp, String) -> nil",
+                     :a, :[], /(?<b>b)/, "b"
+    assert_send_type "(String) -> String",
+                     :a, :[], "a"
+    assert_send_type "(String) -> nil",
+                     :a, :[], "b"
+  end
 end
 
 class SymbolTest < StdlibTest
   target Symbol
   using hook.refinement
-
-  def test_aref
-    :a[0] == "a" or raise
-    :a[1] == nil or raise
-    :a[0, 1] == "a" or raise
-    :a[2, 1] == nil or raise
-    :a[0..1] == "a" or raise
-    :a[2..1] == nil or raise
-    :a[0...]
-    :a[2...] == nil or raise
-    :a[...0] == "" or raise
-    :a[/a/] == "a" or raise
-    :a[/b/] == nil or raise
-    :a[/a/, 0] == "a" or raise
-    :a[/b/, 0] == nil or raise
-    :a[/(?<a>a)/, "a"] == "a" or raise
-    :a[/(?<b>b)/, "b"] == nil or raise
-    :a["a"] == "a" or raise
-    :a["b"] == nil or raise
-  end
 
   def test_capitalize
     :a.capitalize

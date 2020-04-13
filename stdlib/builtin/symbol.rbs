@@ -63,11 +63,11 @@ class Symbol
 
   # Returns `sym.to_s[]`.
   #
-  def []: (Integer index) -> String?
-        | (Integer start, Integer length) -> String?
+  def []: (int index) -> String?
+        | (int start, int length) -> String?
         | (Range[Integer?] range) -> String?
         | (Regexp regexp) -> String?
-        | (Regexp regexp, Integer | String capture) -> String?
+        | (Regexp regexp, int | String capture) -> String?
         | (String match_str) -> String?
 
   # Same as `sym.to_s.capitalize.intern`.
