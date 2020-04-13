@@ -165,7 +165,7 @@ class Symbol
 
   # Returns `sym.to_s.match?`.
   #
-  def match?: (Regexp | String pattern, ?Integer pos) -> bool
+  def match?: (Regexp | string pattern, ?int pos) -> bool
 
   # Same as `sym.to_s.succ.intern`.
   #
