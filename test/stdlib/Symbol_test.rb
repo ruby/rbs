@@ -93,20 +93,26 @@ class SymbolInstanceTest < Minitest::Test
     assert_send_type "(String) -> nil",
                      :a, :[], "b"
   end
+
+  def test_capitalize
+    assert_send_type "() -> Symbol",
+                     :a, :capitalize
+    assert_send_type "(:ascii) -> Symbol",
+                     :a, :capitalize, :ascii
+    assert_send_type "(:lithuanian) -> Symbol",
+                     :a, :capitalize, :lithuanian
+    assert_send_type "(:turkic) -> Symbol",
+                     :a, :capitalize, :turkic
+    assert_send_type "(:lithuanian, :turkic) -> Symbol",
+                     :a, :capitalize, :lithuanian, :turkic
+    assert_send_type "(:turkic, :lithuanian) -> Symbol",
+                     :a, :capitalize, :turkic, :lithuanian
+  end
 end
 
 class SymbolTest < StdlibTest
   target Symbol
   using hook.refinement
-
-  def test_capitalize
-    :a.capitalize
-    :a.capitalize(:ascii)
-    :a.capitalize(:lithuanian)
-    :a.capitalize(:turkic)
-    :a.capitalize(:lithuanian, :turkic)
-    :a.capitalize(:turkic, :lithuanian)
-  end
 
   def test_casecmp
     :a.casecmp(:A)
