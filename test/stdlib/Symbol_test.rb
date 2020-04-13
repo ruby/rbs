@@ -12,16 +12,22 @@ class SymbolSingletonTest < Minitest::Test
   end
 end
 
+class SymbolInstanceTest < Minitest::Test
+  include Ruby::Signature::Test::TypeAssertions
+
+  testing "::Symbol"
+
+  def test_cmp
+    assert_send_type "(Symbol) -> Integer",
+                     :a, :<=>, :a
+    assert_send_type "(Integer) -> nil",
+                     :a, :<=>, 42
+  end
+end
+
 class SymbolTest < StdlibTest
   target Symbol
   using hook.refinement
-
-  def test_cmp
-    :a <=> :a
-    :a <=> :b
-    :b <=> :a
-    :a <=> 42
-  end
 
   def test_eq
     :a == :a
