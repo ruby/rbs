@@ -132,21 +132,28 @@ class SymbolInstanceTest < Minitest::Test
     assert_send_type "(Integer) -> nil",
                      :a, :casecmp?, 42
   end
+
+  def test_downcase
+    assert_send_type "() -> Symbol",
+                     :a, :downcase
+    assert_send_type "(:ascii) -> Symbol",
+                     :a, :downcase, :ascii
+    assert_send_type "(:fold) -> Symbol",
+                     :a, :downcase, :fold
+    assert_send_type "(:lithuanian) -> Symbol",
+                     :a, :downcase, :lithuanian
+    assert_send_type "(:turkic) -> Symbol",
+                     :a, :downcase, :turkic
+    assert_send_type "(:lithuanian, :turkic) -> Symbol",
+                     :a, :downcase, :lithuanian, :turkic
+    assert_send_type "(:turkic, :lithuanian) -> Symbol",
+                     :a, :downcase, :turkic, :lithuanian
+  end
 end
 
 class SymbolTest < StdlibTest
   target Symbol
   using hook.refinement
-
-  def test_downcase
-    :a.downcase
-    :a.downcase(:ascii)
-    :a.downcase(:fold)
-    :a.downcase(:lithuanian)
-    :a.downcase(:turkic)
-    :a.downcase(:lithuanian, :turkic)
-    :a.downcase(:turkic, :lithuanian)
-  end
 
   def test_empty_p
     :"".empty?
