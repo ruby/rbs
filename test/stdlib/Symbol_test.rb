@@ -301,15 +301,17 @@ class SymbolInstanceTest < Minitest::Test
     assert_send_type "(ToStr, ToStr) -> true",
                      :a, :start_with?, ToStr.new("b"), ToStr.new("a")
   end
+
+  def test_succ
+    assert_send_type "() -> Symbol",
+                     :a, :succ
+  end
 end
 
 class SymbolTest < StdlibTest
   target Symbol
   using hook.refinement
 
-  def test_succ
-    :a.succ
-  end
 
   def test_swapcase
     :a.swapcase
