@@ -184,15 +184,16 @@ class SymbolInstanceTest < Minitest::Test
     assert_send_type "() -> String",
                      :a, :inspect
   end
+
+  def test_intern
+    assert_send_type "() -> self",
+                     :a, :intern
+  end
 end
 
 class SymbolTest < StdlibTest
   target Symbol
   using hook.refinement
-
-  def test_intern
-    :a.intern
-  end
 
   def test_length
     :a.length
