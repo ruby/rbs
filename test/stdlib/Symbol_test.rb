@@ -321,15 +321,16 @@ class SymbolInstanceTest < Minitest::Test
     assert_send_type "(:turkic, :lithuanian) -> Symbol",
                      :a, :swapcase, :turkic, :lithuanian
   end
+
+  def test_to_proc
+    assert_send_type "() -> Proc",
+                     :a, :to_proc
+  end
 end
 
 class SymbolTest < StdlibTest
   target Symbol
   using hook.refinement
-
-  def test_to_proc
-    :a.to_proc
-  end
 
   def test_to_s
     :a.to_s
