@@ -124,7 +124,7 @@
 class Exception < Object
   def self.to_tty?: () -> bool
 
-  def self.exception: (?String msg) -> self
+  def self.exception: (?String msg) -> Exception
 
   def ==: (untyped arg0) -> bool
 
@@ -172,7 +172,8 @@ class Exception < Object
   # original exception information.
   def cause: () -> Exception?
 
-  def exception: (?String arg0) -> Exception
+  def exception: () -> self
+               | (String arg0) -> Exception
 
   def initialize: (?String arg0) -> void
 
