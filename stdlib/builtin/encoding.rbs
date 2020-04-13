@@ -86,10 +86,11 @@ class Encoding < Object
   # 
   # [::default\_internal](Encoding.downloaded.ruby_doc#method-c-default_internal)
   # is initialized by the source file's internal\_encoding or -E option.
-  def self.default_internal: () -> Encoding
+  def self.default_internal: () -> Encoding?
 
   def self.default_internal=: (String arg0) -> String?
                             | (Encoding arg0) -> Encoding?
+                            | (nil arg0) -> nil
 
   def self.find: (String | Encoding arg0) -> Encoding
 
