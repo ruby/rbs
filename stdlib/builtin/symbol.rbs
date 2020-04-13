@@ -160,7 +160,8 @@ class Symbol
 
   # Returns `sym.to_s.match`.
   #
-  def match: (Regexp | String pattern, ?Integer pos) ?{ (MatchData) -> void } -> MatchData?
+  def match: (Regexp | string pattern, ?int pos) -> MatchData?
+           | (Regexp | string pattern, ?int pos) { (MatchData) -> void } -> untyped
 
   # Returns `sym.to_s.match?`.
   #

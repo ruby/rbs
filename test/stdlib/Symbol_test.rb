@@ -194,20 +194,52 @@ class SymbolInstanceTest < Minitest::Test
     assert_send_type "() -> Integer",
                      :a, :length
   end
+
+  def test_match
+    assert_send_type "(Regexp) -> MatchData",
+                     :a, :match, /a/
+    assert_send_type "(Regexp) -> nil",
+                     :a, :match, /b/
+    assert_send_type "(String) -> MatchData",
+                     :a, :match, "a"
+    assert_send_type "(String) -> nil",
+                     :a, :match, "b"
+    assert_send_type "(ToStr) -> MatchData",
+                     :a, :match, ToStr.new("a")
+    assert_send_type "(ToStr) -> nil",
+                     :a, :match, ToStr.new("b")
+    assert_send_type "(Regexp, Integer) -> MatchData",
+                     :a, :match, /a/, 0
+    assert_send_type "(Regexp, Integer) -> nil",
+                     :a, :match, /a/, 1
+    assert_send_type "(String, Integer) -> MatchData",
+                     :a, :match, "a", 0
+    assert_send_type "(String, Integer) -> nil",
+                     :a, :match, "a", 1
+    assert_send_type "(ToStr, Integer) -> MatchData",
+                     :a, :match, ToStr.new("a"), 0
+    assert_send_type "(ToStr, Integer) -> nil",
+                     :a, :match, ToStr.new("a"), 1
+    assert_send_type "(Regexp, ToInt) -> MatchData",
+                     :a, :match, /a/, ToInt.new(0)
+    assert_send_type "(Regexp, ToInt) -> nil",
+                     :a, :match, /a/, ToInt.new(1)
+    assert_send_type "(String, ToInt) -> MatchData",
+                     :a, :match, "a", ToInt.new(0)
+    assert_send_type "(String, ToInt) -> nil",
+                     :a, :match, "a", ToInt.new(1)
+    assert_send_type "(ToStr, ToInt) -> MatchData",
+                     :a, :match, ToStr.new("a"), ToInt.new(0)
+    assert_send_type "(ToStr, ToInt) -> nil",
+                     :a, :match, ToStr.new("a"), ToInt.new(1)
+    assert_send_type "(Regexp) { (MatchData) -> void } -> untyped",
+                     :a, :match, /a/ do |_m| end
+  end
 end
 
 class SymbolTest < StdlibTest
   target Symbol
   using hook.refinement
-
-  def test_match
-    :a.match(/a/)
-    :a.match(/b/)
-    :a.match(/a/, 0)
-    :a.match("a")
-    :a.match("a", 0)
-    :a.match(/a/) {|_m| }
-  end
 
   def test_match?
     :a.match?(/a/)
