@@ -290,26 +290,6 @@ class SymbolTest < StdlibTest
   target Symbol
   using hook.refinement
 
-  def test_slice
-    :a.slice(0) == "a" or raise
-    :a.slice(1) == nil or raise
-    :a.slice(0, 1) == "a" or raise
-    :a.slice(2, 1) == nil or raise
-    :a.slice(0..1) == "a" or raise
-    :a.slice(2..1) == nil or raise
-    :a.slice(0...) == "a" or raise
-    :a.slice(2...) == nil or raise
-    :a.slice(...0) == "" or raise
-    :a.slice(/a/) == "a" or raise
-    :a.slice(/b/) == nil or raise
-    :a.slice(/a/, 0) == "a" or raise
-    :a.slice(/b/, 0) == nil or raise
-    :a.slice(/(?<a>a)/, "a") == "a" or raise
-    :a.slice(/(?<b>b)/, "b") == nil or raise
-    :a.slice("a") == "a" or raise
-    :a.slice("b") == nil or raise
-  end
-
   def test_start_with?
     :a.start_with?("a")
     :a.start_with?("b")
