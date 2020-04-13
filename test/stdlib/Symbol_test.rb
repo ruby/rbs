@@ -30,16 +30,18 @@ class SymbolInstanceTest < Minitest::Test
     assert_send_type "(Integer) -> false",
                      :a, :==, 42
   end
+
+  def test_eqq
+    assert_send_type "(Symbol) -> true",
+                     :a, :===, :a
+    assert_send_type "(Integer) -> false",
+                     :a, :===, 42
+  end
 end
 
 class SymbolTest < StdlibTest
   target Symbol
   using hook.refinement
-
-  def test_eqq
-    :a === :a
-    :a === 42
-  end
 
   def test_match_op
     :a =~ /a/
