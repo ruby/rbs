@@ -336,18 +336,19 @@ class SymbolInstanceTest < Minitest::Test
     assert_send_type "() -> Symbol",
                      :a, :to_sym
   end
-end
-
-class SymbolTest < StdlibTest
-  target Symbol
-  using hook.refinement
 
   def test_upcase
-    :a.upcase
-    :a.upcase(:ascii)
-    :a.upcase(:lithuanian)
-    :a.upcase(:turkic)
-    :a.upcase(:lithuanian, :turkic)
-    :a.upcase(:turkic, :lithuanian)
+    assert_send_type "() -> Symbol",
+                     :a, :upcase
+    assert_send_type "(:ascii) -> Symbol",
+                     :a, :upcase, :ascii
+    assert_send_type "(:lithuanian) -> Symbol",
+                     :a, :upcase, :lithuanian
+    assert_send_type "(:turkic) -> Symbol",
+                     :a, :upcase, :turkic
+    assert_send_type "(:lithuanian, :turkic) -> Symbol",
+                     :a, :upcase, :lithuanian, :turkic
+    assert_send_type "(:turkic, :lithuanian) -> Symbol",
+                     :a, :upcase, :turkic, :lithuanian
   end
 end
