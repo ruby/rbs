@@ -37,16 +37,18 @@ class SymbolInstanceTest < Minitest::Test
     assert_send_type "(Integer) -> false",
                      :a, :===, 42
   end
+
+  def test_match_op
+    assert_send_type "(Regexp) -> Integer",
+                     :a, :=~, /a/
+    assert_send_type "(nil) -> nil",
+                     :a, :=~, nil
+  end
 end
 
 class SymbolTest < StdlibTest
   target Symbol
   using hook.refinement
-
-  def test_match_op
-    :a =~ /a/
-    :a =~ nil
-  end
 
   def test_aref
     :a[0] == "a" or raise
