@@ -326,15 +326,16 @@ class SymbolInstanceTest < Minitest::Test
     assert_send_type "() -> Proc",
                      :a, :to_proc
   end
+
+  def test_to_s
+    assert_send_type "() -> String",
+                     :a, :to_s
+  end
 end
 
 class SymbolTest < StdlibTest
   target Symbol
   using hook.refinement
-
-  def test_to_s
-    :a.to_s
-  end
 
   def test_to_sym
     :a.to_sym
