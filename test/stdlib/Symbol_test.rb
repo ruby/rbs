@@ -274,15 +274,16 @@ class SymbolInstanceTest < Minitest::Test
     assert_send_type "(ToStr, ToInt) -> false",
                      :a, :match?, ToStr.new("a"), ToInt.new(1)
   end
+
+  def test_next
+    assert_send_type "() -> Symbol",
+                     :a, :next
+  end
 end
 
 class SymbolTest < StdlibTest
   target Symbol
   using hook.refinement
-
-  def test_next
-    :a.next
-  end
 
   def test_size
     :a.size
