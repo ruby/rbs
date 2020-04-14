@@ -1005,7 +1005,7 @@ class String
   # The return value in this case is the value from block execution.
   #
   def match: (Regexp | string pattern, ?int pos) -> MatchData?
-           | (Regexp | string pattern, ?int pos) { (MatchData) -> void } -> untyped
+           | [A] (Regexp | string pattern, ?int pos) { (MatchData) -> A } -> A
 
   # Converts *pattern* to a `Regexp` (if it isn't already one), then returns a
   # `true` or `false` indicates whether the regexp is matched *str* or not without
