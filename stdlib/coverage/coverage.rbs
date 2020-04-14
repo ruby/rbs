@@ -33,7 +33,7 @@
 #     p Coverage.result  #=> {"foo.rb"=>[1, 1, 10, nil, nil, 1, 1, nil, 0, nil]}
 #
 module Coverage
-  def self.line_stub: () -> untyped
+  def self.line_stub: () -> Array[Integer?]
 
   # Returns a hash that contains filename as key and coverage array as value. This
   # is the same as `Coverage.result(stop: false, clear: false)`.
@@ -43,13 +43,13 @@ module Coverage
   #       ...
   #     }
   #
-  def self.peek_result: () -> Hash[String, Array[Integer?]]
+  def self.peek_result: () -> Hash[String, untyped]
 
   # Returns a hash that contains filename as key and coverage array as value. If
   # `clear` is true, it clears the counters to zero. If `stop` is true, it
   # disables coverage measurement.
   #
-  def self.result: (?stop: bool stop, ?clear: bool clear) -> Hash[String, Array[Integer?]]
+  def self.result: (?stop: bool, ?clear: bool) -> Hash[String, untyped]
 
   # Returns true if coverage stats are currently being collected (after
   # Coverage.start call, but before Coverage.result call)
@@ -58,5 +58,5 @@ module Coverage
 
   # Enables coverage measurement.
   #
-  def self.start: (?lines: bool lines, ?branches: bool branches, ?methods: bool methods, ?oneshot_lines: bool oneshot_lines) -> nil
+  def self.start: (?lines: bool, ?branches: bool, ?methods: bool, ?oneshot_lines: bool) -> nil
 end
