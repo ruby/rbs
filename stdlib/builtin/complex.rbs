@@ -374,9 +374,6 @@ class Complex < Numeric
   #
   # See rationalize.
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     cmp.to_r  ->  rational
-  #
   def to_r: () -> Rational
 
   # Returns the value as a string.
