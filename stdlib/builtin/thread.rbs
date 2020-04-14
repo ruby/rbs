@@ -1099,10 +1099,10 @@ class Thread::SizedQueue < Thread::Queue
   def push: (untyped obj, ?bool non_block) -> void
 end
 
-ConditionVariable: untyped
+ConditionVariable: singleton(Thread::ConditionVariable)
 
-Mutex: untyped
+Mutex: singleton(Thread::Mutex)
 
-Queue: untyped
+Queue: singleton(Thread::Queue)
 
-SizedQueue: untyped
+SizedQueue: singleton(Thread::SizedQueue)
