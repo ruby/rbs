@@ -284,26 +284,3 @@ class StringIO
   def lines: (?String sep, ?Integer limit) { (String arg0) -> untyped } -> self
            | (?String sep, ?Integer limit) -> ::Enumerator[String]
 end
-
-# Pseudo I/O on String object, with interface corresponding to IO.
-#
-# Commonly used to simulate `$stdio` or `$stderr`
-#
-# ### Examples
-#
-#     require 'stringio'
-#
-#     # Writing stream emulation
-#     io = StringIO.new
-#     io.puts "Hello World"
-#     io.string #=> "Hello World\n"
-#
-#     # Reading stream emulation
-#     io = StringIO.new "first\nsecond\nlast\n"
-#     io.getc #=> "f"
-#     io.gets #=> "irst\n"
-#     io.read #=> "second\nlast\n"
-#
-class StringIO < Data
-  include Enumerable
-end
