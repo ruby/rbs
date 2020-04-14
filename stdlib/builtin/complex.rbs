@@ -103,6 +103,10 @@ class Complex < Numeric
   #
   def /: (Numeric) -> Complex
 
+  def <: (Numeric) -> bot
+
+  def <=: (Numeric) -> bot
+
   # If `cmp`'s imaginary part is zero, and `object` is also a real number (or a
   # Complex number where the imaginary part is zero), compare the real part of
   # `cmp` to object.  Otherwise, return nil.
@@ -124,6 +128,10 @@ class Complex < Numeric
   #     Complex('1/2') == '1/2'           #=> false
   #
   def ==: (any) -> bool
+
+  def >: (Numeric) -> bot
+
+  def >=: (Numeric) -> bot
 
   # Returns the absolute part of its polar form.
   #
@@ -151,6 +159,8 @@ class Complex < Numeric
   #
   alias arg angle
 
+  def ceil: (*untyped) -> bot
+
   def clone: -> self
 
   def coerce: (Numeric) -> [ Complex, self ]
@@ -173,6 +183,10 @@ class Complex < Numeric
   #
   def denominator: () -> Integer
 
+  def div: (Numeric) -> bot
+
+  def divmod: (Numeric) -> bot
+
   def dup: () -> self
 
   def eql?: (any) -> bool
@@ -188,7 +202,11 @@ class Complex < Numeric
   #
   def finite?: () -> bool
 
+  def floor: (?Integer) -> bot
+
   def hash: () -> Integer
+
+  def i: () -> bot
 
   # Returns the imaginary part.
   #
@@ -233,6 +251,10 @@ class Complex < Numeric
   #
   alias magnitude abs
 
+  def modulo: (Numeric) -> bot
+
+  def negative?: () -> bot
+
   def nonzero?: () -> self?
 
   # Returns the numerator.
@@ -263,6 +285,8 @@ class Complex < Numeric
   #     Complex(1, 2).polar  #=> [2.23606797749979, 1.1071487177940904]
   #
   def polar: () -> [ Float, Float ]
+
+  def positive?: () -> bot
 
   # Performs division.
   #
@@ -307,6 +331,12 @@ class Complex < Numeric
   #     Complex(1, 2).rectangular  #=> [1, 2]
   #
   alias rectangular rect
+
+  def reminder: (Numeric) -> bot
+
+  def round: (*untyped) -> bot
+
+  def step: (*untyped) ?{ (*untyped) -> untyped } -> bot
 
   # Returns self.
   #
@@ -358,6 +388,8 @@ class Complex < Numeric
   #     Complex(Float::NAN, Float::NAN).to_s  #=> "NaN+NaN*i"
   #
   def to_s: () -> String
+
+  def truncate: (?Integer) -> bot
 
   def zero?: () -> bool
 end
