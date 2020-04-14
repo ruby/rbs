@@ -18,8 +18,6 @@
 #     io.read #=> "second\nlast\n"
 #
 class StringIO
-  include Enumerable
-
   # Creates new StringIO instance from with *string* and *mode*.
   #
   def initialize: (?String string, ?String? mode) -> void
