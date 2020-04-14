@@ -64,22 +64,22 @@ class StringIO
   # See IO#each.
   #
   def each: (?String sep, ?Integer limit, ?chomp: bool) { (String arg0) -> untyped } -> self
-          | (?String sep, ?Integer limit, ?chomp: bool) -> ::Enumerator[String]
+          | (?String sep, ?Integer limit, ?chomp: bool) -> ::Enumerator[String, self]
 
   # See IO#each_byte.
   #
   def each_byte: () { (Integer arg0) -> untyped } -> self
-               | () -> ::Enumerator[Integer]
+               | () -> ::Enumerator[Integer, self]
 
   # See IO#each_char.
   #
   def each_char: () { (String arg0) -> untyped } -> self
-               | () -> ::Enumerator[String]
+               | () -> ::Enumerator[String, self]
 
   # See IO#each_codepoint.
   #
   def each_codepoint: () { (Integer arg0) -> untyped } -> self
-                    | () -> ::Enumerator[Integer]
+                    | () -> ::Enumerator[Integer, self]
 
   # Returns true if the stream is at the end of the data (underlying string). The
   # stream must be opened for reading or an `IOError` will be raised.
@@ -255,22 +255,22 @@ class StringIO
   # This is a deprecated alias for #each_byte.
   #
   def bytes: () { (Integer arg0) -> untyped } -> self
-           | () -> ::Enumerator[Integer]
+           | () -> ::Enumerator[Integer, self]
 
   # This is a deprecated alias for #each_char.
   #
   def chars: () { (String arg0) -> untyped } -> self
-           | () -> ::Enumerator[String]
+           | () -> ::Enumerator[String, self]
 
   # This is a deprecated alias for #each_codepoint.
   #
   def codepoints: () { (Integer arg0) -> untyped } -> self
-                | () -> ::Enumerator[Integer]
+                | () -> ::Enumerator[Integer, self]
 
   # See IO#each.
   #
   def each_line: (?String sep, ?Integer limit, ?chomp: bool) { (String arg0) -> untyped } -> self
-               | (?String sep, ?Integer limit, ?chomp: bool) -> ::Enumerator[String]
+               | (?String sep, ?Integer limit, ?chomp: bool) -> ::Enumerator[String, self]
 
   # Returns true if the stream is at the end of the data (underlying string). The
   # stream must be opened for reading or an `IOError` will be raised.
@@ -280,5 +280,5 @@ class StringIO
   # This is a deprecated alias for #each_line.
   #
   def lines: (?String sep, ?Integer limit) { (String arg0) -> untyped } -> self
-           | (?String sep, ?Integer limit) -> ::Enumerator[String]
+           | (?String sep, ?Integer limit) -> ::Enumerator[String, self]
 end
