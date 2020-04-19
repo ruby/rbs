@@ -30,6 +30,11 @@ interface _Each[out A, out B]
   def each: { (A) -> void } -> B
 end
 
+interface _Exception
+  def exception: () -> Exception
+               | (String arg0) -> Exception
+end
+
 class BigDecimal
 end
 

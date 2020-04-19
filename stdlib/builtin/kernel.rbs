@@ -302,19 +302,19 @@ module Kernel
   # The optional second parameter sets the message associated with the
   # exception, and the third parameter is an array of callback information.
   # Exceptions are caught by the `rescue` clause of `begin...end` blocks.
-  # 
+  #
   # ```ruby
   # raise "Failed to create socket"
   # raise ArgumentError, "No parameters", caller
   # ```
-  # 
+  #
   # The `cause` of the generated exception is automatically set to the
   # “current” exception ( `$!` ) if any. An alternative value, either an
   # `Exception` object or `nil`, can be specified via the `:cause`
   # argument.
   def fail: () -> bot
           | (String arg0) -> bot
-          | (?Exception arg0, ?String arg1, ?::Array[String] arg2) -> bot
+          | (_Exception arg0, ?untyped arg1, ?::Array[String] arg2) -> bot
   alias raise fail
 
   def format: (String format, *untyped args) -> String

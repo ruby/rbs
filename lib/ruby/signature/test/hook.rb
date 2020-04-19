@@ -164,16 +164,22 @@ module Ruby
               nil
             end
             prepended = klass.ancestors.include?(hook.instance_module) || singleton_klass&.ancestors&.include?(hook.singleton_module)
-            result = if prepended
-                       method.super_method.call(*args, &block)
-                     else
-                       # Using refinement
-                       method.call(*args, &block)
-                     end
+            exception = nil
+            result = begin
+               if prepended
+                 method.super_method.call(*args, &block)
+               else
+                 # Using refinement
+                 method.call(*args, &block)
+               end
+            rescue Exception => e
+              exception = e
+              nil
+            end
 
             hook.logger.debug { "#{method_name} returns: #{hook.inspect_(result)}" }
 
-            call = CallTrace.new(method_call: ArgumentsReturn.new(arguments: args, return_value: result, exception: nil),
+            call = CallTrace.new(method_call: ArgumentsReturn.new(arguments: args, return_value: result, exception: exception),
                                  block_calls: block_calls,
                                  block_given: block != nil)
 
