@@ -1,0 +1,105 @@
+module JSON
+  def self.[]: (untyped object, ?untyped opts) -> untyped
+
+  def self.create_id: () -> untyped
+
+  def self.create_id=: (untyped) -> untyped
+
+  def self.deep_const_get: (untyped path) -> untyped
+
+  def self.dump: (untyped obj, ?untyped anIO, ?untyped limit) -> untyped
+
+  def self.dump_default_options: () -> untyped
+
+  def self.dump_default_options=: (untyped) -> untyped
+
+  def self.fast_generate: (untyped obj, ?untyped opts) -> untyped
+
+  alias self.fast_unparse self.fast_generate
+
+  def self.generate: (untyped obj, ?untyped opts) -> untyped
+
+  def self.generator: () -> untyped
+
+  def self.generator=: (untyped generator) -> untyped
+
+  def self.iconv: (untyped to, untyped from, untyped string) -> untyped
+
+  def self.load: (untyped source, ?untyped proc, ?untyped options) -> untyped
+
+  def self.load_default_options: () -> untyped
+
+  def self.load_default_options=: (untyped) -> untyped
+
+  def self.parse: (untyped source, ?untyped opts) -> untyped
+
+  def self.parse!: (untyped source, ?untyped opts) -> untyped
+
+  def self.parser: () -> untyped
+
+  def self.parser=: (untyped parser) -> untyped
+
+  def self.pretty_generate: (untyped obj, ?untyped opts) -> untyped
+
+  alias self.pretty_unparse self.pretty_generate
+
+  def self.recurse_proc: (untyped result) { (*untyped) -> untyped } -> untyped
+
+  alias self.restore self.load
+
+  def self.state: () -> untyped
+
+  def self.state=: (untyped) -> untyped
+
+  alias self.unparse self.generate
+
+  private
+
+  def dump: (untyped obj, ?untyped anIO, ?untyped limit) -> untyped
+
+  def fast_generate: (untyped obj, ?untyped opts) -> untyped
+
+  alias fast_unparse fast_generate
+
+  def generate: (untyped obj, ?untyped opts) -> untyped
+
+  def load: (untyped source, ?untyped proc, ?untyped options) -> untyped
+
+  def parse: (untyped source, ?untyped opts) -> untyped
+
+  def parse!: (untyped source, ?untyped opts) -> untyped
+
+  def pretty_generate: (untyped obj, ?untyped opts) -> untyped
+
+  alias pretty_unparse pretty_generate
+
+  def recurse_proc: (untyped result) { (*untyped) -> untyped } -> untyped
+
+  alias restore load
+
+  alias unparse generate
+end
+
+JSON::FAST_STATE_PROTOTYPE: JSON::Ext::Generator::State
+
+JSON::Infinity: Float
+
+JSON::JSON_LOADED: bool
+
+JSON::MinusInfinity: Float
+
+JSON::NaN: Float
+
+JSON::PRETTY_STATE_PROTOTYPE: JSON::Ext::Generator::State
+
+JSON::SAFE_STATE_PROTOTYPE: JSON::Ext::Generator::State
+
+JSON::VERSION: String
+
+JSON::VERSION_ARRAY: Array
+
+JSON::VERSION_BUILD: Integer
+
+JSON::VERSION_MAJOR: Integer
+
+JSON::VERSION_MINOR: Integer
