@@ -906,6 +906,8 @@ class StringInstanceTest < Minitest::Test
                      "a", :match, ToStr.new("a"), ToInt.new(0)
     assert_send_type "(ToStr, ToInt) -> nil",
                      "a", :match, ToStr.new("a"), ToInt.new(1)
+    assert_send_type "(Regexp) { (MatchData) -> void } -> untyped",
+                     "a", :match, /a/ do |_m| end
   end
 
   def test_match?
