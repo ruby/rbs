@@ -55,6 +55,32 @@ class ToPath
   end
 end
 
+class ToJson
+end
+
+class JsonWrite
+  def write(_str)
+  end
+end
+
+class JsonToWritableIO
+  def to_io
+    JsonWrite.new
+  end
+end
+
+class JsonRead
+  def read
+    "42"
+  end
+end
+
+class JsonToReadableIO
+  def to_io
+    JsonRead.new
+  end
+end
+
 class Enum
   def initialize(*args)
     @args = args

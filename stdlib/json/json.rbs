@@ -1,3 +1,60 @@
+interface _ToJson
+  def to_json: (?JSON::State state) -> String
+end
+
+interface _JsonToWritableIO
+  def to_io: () -> _JsonWrite
+end
+
+interface _JsonWrite
+  def write: (String json) -> void
+end
+
+interface _JsonReadableIO
+  def to_io: () -> _JsonRead
+end
+
+interface _JsonRead
+  def read: () -> string
+end
+
+type json_options = Hash[Symbol, untyped]
+
+class JSON::State
+end
+
+# This module holds all the modules/classes that implement JSON's functionality
+# as C extensions.
+#
+module JSON::Ext
+end
+
+# This is the JSON generator implemented as a C extension. It can be configured
+# to be used by setting
+#
+#     JSON.generator = JSON::Ext::Generator
+#
+# with the method generator= in JSON.
+#
+module JSON::Ext::Generator
+end
+
+class JSON::Ext::Generator::State
+end
+
+module JSON::Pure
+end
+
+module JSON::Pure::Generator
+end
+
+class JSON::Pure::Generator::State
+end
+
+type json_generator = singleton(::JSON::Ext::Generator) | singleton(::JSON::Pure::Generator)
+type json_parser = singleton(::JSON::Ext::Parser) | singleton(::JSON::Pure::Parser)
+type json_state = singleton(JSON::Ext::Generator::State) | singleton(JSON::Pure::Generator::State)
+
 # # JavaScript Object Notation (JSON)
 #
 # JSON is a lightweight data-interchange format. It is easy for us humans to
@@ -55,87 +112,83 @@ module JSON
   # The *opts* argument is passed through to generate/parse respectively. See
   # generate and parse for their documentation.
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     [](object, opts = {})
-  #
-  def self.[]: (untyped object, ?untyped opts) -> untyped
+  def self.[]: (untyped object, ?json_options opts) -> untyped
 
   # This is create identifier, which is used to decide if the *json_create* hook
   # of a class should be called. It defaults to 'json_class'.
   #
-  def self.create_id: () -> untyped
+  def self.create_id: () -> _ToS
 
-  def self.create_id=: (untyped) -> untyped
+  def self.create_id=: (_ToS create_id) -> _ToS
 
-  def self.deep_const_get: (untyped path) -> untyped
+  def self.deep_const_get: (_ToS path) -> untyped
 
-  def self.dump: (untyped obj, ?untyped anIO, ?untyped limit) -> untyped
+  def self.dump: (_ToJson obj, ?Integer limit) -> String
+               | (_ToJson obj, _JsonToWritableIO anIO) -> _JsonWrite
+               | (_ToJson obj, _JsonWrite anIO, ?Integer limit) -> _JsonWrite
 
   # The global default options for the JSON.dump method:
   #     :max_nesting: false
   #     :allow_nan: true
   #     :allow_blank: true
   #
-  def self.dump_default_options: () -> untyped
+  def self.dump_default_options: () -> json_options
 
-  def self.dump_default_options=: (untyped) -> untyped
+  def self.dump_default_options=: (json_options) -> json_options
 
-  def self.fast_generate: (untyped obj, ?untyped opts) -> untyped
+  def self.fast_generate: (_ToJson obj, ?json_options opts) -> String
 
   alias self.fast_unparse self.fast_generate
 
-  def self.generate: (untyped obj, ?untyped opts) -> untyped
+  def self.generate: (_ToJson obj, ?json_options opts) -> String
 
   # Returns the JSON generator module that is used by JSON. This is either
   # JSON::Ext::Generator or JSON::Pure::Generator.
   #
-  def self.generator: () -> untyped
+  def self.generator: () -> json_generator
 
-  def self.generator=: (untyped generator) -> untyped
+  def self.generator=: (json_generator generator) -> void
 
   # Encodes string using Ruby's *String.encode*
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     iconv(to, from, string)
-  #
-  def self.iconv: (untyped to, untyped from, untyped string) -> untyped
+  def self.iconv: (encoding to, encoding from, String string) -> String
 
-  def self.load: (untyped source, ?untyped proc, ?untyped options) -> untyped
+  def self.load: (string | _JsonReadableIO | _JsonRead source, ?Proc proc, ?json_options options) -> untyped
 
   # The global default options for the JSON.load method:
   #     :max_nesting: false
   #     :allow_nan: true
   #     :allow_blank: true
   #
-  def self.load_default_options: () -> untyped
+  def self.load_default_options: () -> json_options
 
-  def self.load_default_options=: (untyped) -> untyped
+  def self.load_default_options=: (json_options) -> json_options
 
-  def self.parse: (untyped source, ?untyped opts) -> untyped
+  def self.parse: (string source, ?json_options opts) -> untyped
 
-  def self.parse!: (untyped source, ?untyped opts) -> untyped
+  def self.parse!: (string source, ?json_options opts) -> untyped
 
   # Returns the JSON parser class that is used by JSON. This is either
   # JSON::Ext::Parser or JSON::Pure::Parser.
   #
-  def self.parser: () -> untyped
+  def self.parser: () -> json_parser
 
-  def self.parser=: (untyped parser) -> untyped
+  def self.parser=: (json_parser parser) -> void
 
-  def self.pretty_generate: (untyped obj, ?untyped opts) -> untyped
+  def self.pretty_generate: (_ToJson obj, ?json_options opts) -> untyped
 
   alias self.pretty_unparse self.pretty_generate
 
-  def self.recurse_proc: (untyped result) { (*untyped) -> untyped } -> untyped
+  def self.recurse_proc: (untyped result) { (*untyped) -> void } -> void
 
   alias self.restore self.load
 
   # Returns the JSON generator state class that is used by JSON. This is either
   # JSON::Ext::Generator::State or JSON::Pure::Generator::State.
   #
-  def self.state: () -> untyped
+  def self.state: () -> json_state
 
-  def self.state=: (untyped) -> untyped
+  def self.state=: (json_state) -> json_state
 
   alias self.unparse self.generate
 
@@ -157,10 +210,9 @@ module JSON
   # This method is part of the implementation of the load/dump interface of
   # Marshal and YAML.
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     dump(obj, anIO = nil, limit = nil)
-  #
-  def dump: (untyped obj, ?untyped anIO, ?untyped limit) -> untyped
+  def dump: (_ToJson obj, ?Integer limit) -> String
+          | (_ToJson obj, _JsonToWritableIO anIO) -> _JsonWrite
+          | (_ToJson obj, _JsonWrite anIO, ?Integer limit) -> _JsonWrite
 
   # Generate a JSON document from the Ruby data structure *obj* and return it.
   # This method disables the checks for circles in Ruby objects.
@@ -168,10 +220,7 @@ module JSON
   # **WARNING**: Be careful not to pass any Ruby data structures with circles as
   # *obj* argument because this will cause JSON to go into an infinite loop.
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     fast_generate(obj, opts = nil)
-  #
-  def fast_generate: (untyped obj, ?untyped opts) -> untyped
+  def fast_generate: (_ToJson obj, ?json_options opts) -> String
 
   alias fast_unparse fast_generate
 
@@ -207,10 +256,7 @@ module JSON
   # amount of sanity checks, and the pretty_generate method for some defaults for
   # pretty output.
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     generate(obj, opts = nil)
-  #
-  def generate: (untyped obj, ?untyped opts) -> untyped
+  def generate: (_ToJson obj, ?json_options opts) -> String
 
   # Load a ruby data structure from a JSON *source* and return it. A source can
   # either be a string-like object, an IO-like object, or an object responding to
@@ -226,10 +272,7 @@ module JSON
   # This method is part of the implementation of the load/dump interface of
   # Marshal and YAML.
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     load(source, proc = nil, options = {})
-  #
-  def load: (untyped source, ?untyped proc, ?untyped options) -> untyped
+  def load: (string | _JsonReadableIO | _JsonRead source, ?Proc proc, ?json_options options) -> untyped
 
   # Parse the JSON document *source* into a Ruby data structure and return it.
   #
@@ -249,10 +292,7 @@ module JSON
   # *   **array_class**: Defaults to Array
   #
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     parse(source, opts = {})
-  #
-  def parse: (untyped source, ?untyped opts) -> untyped
+  def parse: (string source, ?json_options opts) -> untyped
 
   # Parse the JSON document *source* into a Ruby data structure and return it. The
   # bang version of the parse method defaults to the more dangerous values for the
@@ -271,10 +311,7 @@ module JSON
   #     false.
   #
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     parse!(source, opts = {})
-  #
-  def parse!: (untyped source, ?untyped opts) -> untyped
+  def parse!: (string source, ?json_options opts) -> untyped
 
   # Generate a JSON document from the Ruby data structure *obj* and return it. The
   # returned document is a prettier form of the document returned by #unparse.
@@ -282,30 +319,21 @@ module JSON
   # The *opts* argument can be used to configure the generator. See the generate
   # method for a more detailed explanation.
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     pretty_generate(obj, opts = nil)
-  #
-  def pretty_generate: (untyped obj, ?untyped opts) -> untyped
+  def pretty_generate: (_ToJson obj, ?json_options opts) -> untyped
 
   alias pretty_unparse pretty_generate
 
   # Recursively calls passed *Proc* if the parsed data structure is an *Array* or
   # *Hash*
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     recurse_proc(result, &proc)
-  #
-  def recurse_proc: (untyped result) { (*untyped) -> untyped } -> untyped
+  def recurse_proc: (untyped result) { (*untyped) -> void } -> void
 
-  # # arglists 💪👽🚨 << Delete this section
-  #     restore(source, proc = nil, options = {})
-  #
   alias restore load
 
   alias unparse generate
 end
 
-JSON::FAST_STATE_PROTOTYPE: JSON::Ext::Generator::State
+JSON::FAST_STATE_PROTOTYPE: json_state
 
 JSON::Infinity: Float
 
@@ -315,9 +343,9 @@ JSON::MinusInfinity: Float
 
 JSON::NaN: Float
 
-JSON::PRETTY_STATE_PROTOTYPE: JSON::Ext::Generator::State
+JSON::PRETTY_STATE_PROTOTYPE: json_state
 
-JSON::SAFE_STATE_PROTOTYPE: JSON::Ext::Generator::State
+JSON::SAFE_STATE_PROTOTYPE: json_state
 
 # JSON version
 #
