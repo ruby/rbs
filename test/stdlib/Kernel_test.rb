@@ -402,7 +402,52 @@ class KernelTest < StdlibTest
   end
 
   def test_fail
-    # TODO
+    begin
+      fail
+    rescue RuntimeError
+    end
+
+    begin
+      fail 'error'
+    rescue RuntimeError
+    end
+
+    test_error = Class.new(StandardError)
+    begin
+      fail test_error
+    rescue test_error
+    end
+
+    begin
+      fail test_error, 'a'
+    rescue test_error
+    end
+
+    begin
+      fail test_error, 'a', ['1.rb, 2.rb']
+    rescue test_error
+    end
+
+    begin
+      fail test_error.new('a')
+    rescue test_error
+    end
+
+    exception_container = Class.new do
+      def exception(arg: 'a')
+        test_error.new(arg)
+      end
+    end
+
+    begin
+      fail exception_container.new
+    rescue test_error
+    end
+
+    begin
+      fail exception_container.new, 14
+    rescue test_error
+    end
   end
 
   def test_format
