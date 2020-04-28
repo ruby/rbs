@@ -47,8 +47,7 @@ class Symbol
   #
   # See String#<=> for more information.
   #
-  def <=>: (Symbol other) -> Integer
-         | (untyped other) -> Integer?
+  def <=>: (untyped other) -> Integer?
 
   # Equality---If *sym* and *obj* are exactly the same symbol, returns `true`.
   #
@@ -64,11 +63,11 @@ class Symbol
 
   # Returns `sym.to_s[]`.
   #
-  def []: (Integer index) -> String?
-        | (Integer start, Integer length) -> String?
+  def []: (int index) -> String?
+        | (int start, int length) -> String?
         | (Range[Integer?] range) -> String?
         | (Regexp regexp) -> String?
-        | (Regexp regexp, Integer | String capture) -> String?
+        | (Regexp regexp, int | String capture) -> String?
         | (String match_str) -> String?
 
   # Same as `sym.to_s.capitalize.intern`.
@@ -93,8 +92,7 @@ class Symbol
   #     :foo.casecmp(2)   #=> nil
   #     "\u{e4 f6 fc}".encode("ISO-8859-1").to_sym.casecmp(:"\u{c4 d6 dc}")   #=> nil
   #
-  def casecmp: (Symbol other) -> Integer?
-             | (untyped other) -> Integer?
+  def casecmp: (untyped other) -> Integer?
 
   # Returns `true` if `sym` and `other_symbol` are equal after Unicode case
   # folding, `false` if they are not equal.
@@ -111,8 +109,7 @@ class Symbol
   #     :foo.casecmp?(2)   #=> nil
   #     "\u{e4 f6 fc}".encode("ISO-8859-1").to_sym.casecmp?(:"\u{c4 d6 dc}")   #=> nil
   #
-  def casecmp?: (Symbol other) -> bool
-              | (untyped other) -> bool
+  def casecmp?: (untyped other) -> bool
 
   # Same as `sym.to_s.downcase.intern`.
   #
@@ -137,7 +134,7 @@ class Symbol
   #     :hello.end_with?("heaven", "ello")     #=> true
   #     :hello.end_with?("heaven", "paradise") #=> false
   #
-  def end_with?: (String str, *String str) -> bool
+  def end_with?: (*string suffixes) -> bool
 
   # Returns the name or string corresponding to *sym*.
   #
@@ -163,11 +160,12 @@ class Symbol
 
   # Returns `sym.to_s.match`.
   #
-  def match: (Regexp | String pattern, ?Integer pos) ?{ (MatchData) -> void } -> MatchData?
+  def match: (Regexp | string pattern, ?int pos) -> MatchData?
+           | (Regexp | string pattern, ?int pos) { (MatchData) -> void } -> untyped
 
   # Returns `sym.to_s.match?`.
   #
-  def match?: (Regexp | String pattern, ?Integer pos) -> bool
+  def match?: (Regexp | string pattern, ?int pos) -> bool
 
   # Same as `sym.to_s.succ.intern`.
   #
@@ -190,7 +188,7 @@ class Symbol
   #     # returns true if one of the prefixes matches.
   #     :hello.start_with?("heaven", "hell")     #=> true
   #     :hello.start_with?("heaven", "paradise") #=> false
-  def start_with?: (String str, *String str) -> bool
+  def start_with?: (*string prefixes) -> bool
 
   # Same as `sym.to_s.succ.intern`.
   #
