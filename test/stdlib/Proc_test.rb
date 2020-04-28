@@ -33,6 +33,11 @@ class ProcTest < StdlibTest
     proc {}.hash
   end
 
+  def test_initialize
+    Proc.new { |a| a }
+    Proc.new
+  end
+
   def test_lambda?
     proc {}.lambda?
     lambda {}.lambda?
