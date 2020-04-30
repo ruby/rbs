@@ -138,12 +138,8 @@ class StringInstanceTest < Minitest::Test
                      "a", :[], (0...)
     assert_send_type "(Range[Integer?]) -> nil",
                      "a", :[], (2...)
-    if ::RUBY_27_OR_LATER
-      eval(<<~RUBY)
-        assert_send_type "(Range[Integer?]) -> String",
-                         "a", :[], (...0)
-      RUBY
-    end
+    assert_send_type "(Range[Integer?]) -> String",
+                     "a", :[], (...0)
     assert_send_type "(Regexp) -> String",
                      "a", :[], /a/
     assert_send_type "(Regexp) -> nil",
