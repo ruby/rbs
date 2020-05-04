@@ -26,14 +26,12 @@ class GCTest < StdlibTest
     GC.start(immediate_sweep: false)
   end
 
-  if RUBY_27_OR_LATER
-    def test_compact
-      GC.compact
-    end
+  def test_compact
+    GC.compact
+  end
 
-    def test_verify_compaction_references
-      GC.verify_compaction_references
-    end
+  def test_verify_compaction_references
+    GC.verify_compaction_references
   end
 
   def test_verify_internal_consistency
