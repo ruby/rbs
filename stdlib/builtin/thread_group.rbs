@@ -11,7 +11,7 @@
 class ThreadGroup < Object
   def add: (Thread thread) -> ThreadGroup
 
-  def enclose: () -> ThreadGroup
+  def enclose: () -> self
 
   # Returns `true` if the `thgrp` is enclosed. See also
   # [\#enclose](ThreadGroup.downloaded.ruby_doc#method-i-enclose).
