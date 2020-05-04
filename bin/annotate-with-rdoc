@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 
 require "bundler/setup"
-require "ruby/signature"
+require "rbs"
 require "rdoc"
 
 def store_for_class(name, stores:)
@@ -30,7 +30,7 @@ def comment_for_constant(decl, stores:)
 
     if constant&.documented?
       string = format_comment(constant.comment)
-      Ruby::Signature::AST::Comment.new(location: nil, string: string)
+      RBS::AST::Comment.new(location: nil, string: string)
     end
   end
 end
@@ -43,7 +43,7 @@ def comment_for_class(decl, stores:)
 
   if klass&.documented?
     string = format_comment(klass.comment)
-    Ruby::Signature::AST::Comment.new(location: nil, string: string)
+    RBS::AST::Comment.new(location: nil, string: string)
   end
 end
 
@@ -62,7 +62,7 @@ def comment_for_method(klass, method, stores:)
     end
 
     string = out.accept(RDoc::Markup::ToMarkdown.new)
-    Ruby::Signature::AST::Comment.new(location: nil, string: string)
+    RBS::AST::Comment.new(location: nil, string: string)
   end
 
 rescue RDoc::Store::MissingFileError
@@ -78,7 +78,7 @@ end
 def print_members(stores, klass_name, members)
   members.each do |member|
     case member
-    when Ruby::Signature::AST::Members::MethodDefinition
+    when RBS::AST::Members::MethodDefinition
       puts "    Processing #{member.name}..."
 
       method_name = case
@@ -97,9 +97,9 @@ def print_members(stores, klass_name, members)
       end
 
       member.instance_variable_set(:@comment, comment)
-    when Ruby::Signature::AST::Members::AttrReader, Ruby::Signature::AST::Members::AttrAccessor, Ruby::Signature::AST::Members::AttrWriter
+    when RBS::AST::Members::AttrReader, RBS::AST::Members::AttrAccessor, RBS::AST::Members::AttrWriter
       puts "    👻 Attributes not supported (#{klass_name})"
-    when Ruby::Signature::AST::Members::Alias
+    when RBS::AST::Members::Alias
       puts "    Processing #{member.new_name}(alias)..."
       prefix = case
                when member.instance?
@@ -126,22 +126,22 @@ end
 ARGV.map {|f| Pathname(f) }.each do |path|
   puts "Opening #{path}..."
 
-  buffer = Ruby::Signature::Buffer.new(name: path, content: path.read)
-  sigs = Ruby::Signature::Parser.parse_signature(buffer)
+  buffer = RBS::Buffer.new(name: path, content: path.read)
+  sigs = RBS::Parser.parse_signature(buffer)
 
   sigs.each do |decl|
     case decl
-    when Ruby::Signature::AST::Declarations::Constant
+    when RBS::AST::Declarations::Constant
       puts "  Importing documentation for #{decl.name}..."
       comment = comment_for_constant(decl, stores: stores)
       decl.instance_variable_set(:@comment, comment)
-    when Ruby::Signature::AST::Declarations::Class, Ruby::Signature::AST::Declarations::Module
+    when RBS::AST::Declarations::Class, RBS::AST::Declarations::Module
       puts "  Importing documentation for #{decl.name}..."
       comment = comment_for_class(decl, stores: stores)
       decl.instance_variable_set(:@comment, comment)
 
       print_members stores, decl.name.to_s, decl.members
-    when Ruby::Signature::AST::Declarations::Extension
+    when RBS::AST::Declarations::Extension
       puts "  Importing documentation for #{decl.name} (#{decl.extension_name})"
 
       print_members stores, decl.name.to_s, decl.members
@@ -150,7 +150,7 @@ ARGV.map {|f| Pathname(f) }.each do |path|
 
   puts "Writing #{path}..."
   path.open('w') do |out|
-    writer = Ruby::Signature::Writer.new(out: out)
+    writer = RBS::Writer.new(out: out)
     writer.write sigs
   end
 end

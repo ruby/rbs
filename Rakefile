@@ -30,7 +30,7 @@ rule ".rb" => ".y" do |t|
   sh "racc -v -o #{t.name} #{t.source}"
 end
 
-task :parser => "lib/ruby/signature/parser.rb"
+task :parser => "lib/rbs/parser.rb"
 task :test => :parser
 task :stdlib_test => :parser
 task :build => :parser
@@ -64,4 +64,4 @@ namespace :generate do
   end
 end
 
-CLEAN.include("lib/ruby/signature/parser.rb")
+CLEAN.include("lib/rbs/parser.rb")

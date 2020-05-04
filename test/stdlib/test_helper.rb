@@ -1,5 +1,5 @@
-require "ruby/signature"
-require "ruby/signature/test"
+require "rbs"
+require "rbs/test"
 require "minitest/autorun"
 
 require "minitest/reporters"
@@ -78,8 +78,8 @@ class StdlibTest < Minitest::Test
   DEFAULT_LOGGER = Logger.new(STDERR)
   DEFAULT_LOGGER.level = ENV["RBS_TEST_LOGLEVEL"] || "info"
 
-  loader = Ruby::Signature::EnvironmentLoader.new
-  DEFAULT_ENV = Ruby::Signature::Environment.new
+  loader = RBS::EnvironmentLoader.new
+  DEFAULT_ENV = RBS::Environment.new
   loader.load(env: DEFAULT_ENV)
 
   def self.target(klass)
@@ -91,17 +91,17 @@ class StdlibTest < Minitest::Test
   end
 
   def self.library(*libs)
-    loader = Ruby::Signature::EnvironmentLoader.new
+    loader = RBS::EnvironmentLoader.new
     libs.each do |lib|
       loader.add library: lib
     end
 
-    @env = Ruby::Signature::Environment.new
+    @env = RBS::Environment.new
     loader.load(env: @env)
   end
 
   def self.hook
-    @hook ||= Ruby::Signature::Test::Hook.new(env, @target, logger: DEFAULT_LOGGER).verify_all
+    @hook ||= RBS::Test::Hook.new(env, @target, logger: DEFAULT_LOGGER).verify_all
   end
 
   def hook
@@ -116,6 +116,6 @@ class StdlibTest < Minitest::Test
 
   def teardown
     super
-    assert_empty self.hook.errors.map {|x| Ruby::Signature::Test::Errors.to_string(x) }
+    assert_empty self.hook.errors.map {|x| RBS::Test::Errors.to_string(x) }
   end
 end

@@ -1,8 +1,8 @@
 require_relative "test_helper"
-require "ruby/signature/test/test_helper"
+require "rbs/test/test_helper"
 
 class ArraySingletonTest < Minitest::Test
-  include Ruby::Signature::Test::TypeAssertions
+  include RBS::Test::TypeAssertions
 
   testing "singleton(::Array)"
 
@@ -37,7 +37,7 @@ class ArraySingletonTest < Minitest::Test
 end
 
 class ArrayInstanceTest < Minitest::Test
-  include Ruby::Signature::Test::TypeAssertions
+  include RBS::Test::TypeAssertions
 
   testing "::Array[::Integer]"
 

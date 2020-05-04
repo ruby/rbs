@@ -1,9 +1,9 @@
 #!/usr/bin/env ruby
 
 require "bundler/setup"
-require "ruby/signature"
+require "rbs"
 
-Members = Ruby::Signature::AST::Members
+Members = RBS::AST::Members
 
 def group(member)
   case member
@@ -62,12 +62,12 @@ end
 ARGV.map {|f| Pathname(f) }.each do |path|
   puts "Opening #{path}..."
 
-  buffer = Ruby::Signature::Buffer.new(name: path, content: path.read)
-  sigs = Ruby::Signature::Parser.parse_signature(buffer)
+  buffer = RBS::Buffer.new(name: path, content: path.read)
+  sigs = RBS::Parser.parse_signature(buffer)
 
   sigs.each do |sig|
     case sig
-    when Ruby::Signature::AST::Declarations::Class, Ruby::Signature::AST::Declarations::Module, Ruby::Signature::AST::Declarations::Interface
+    when RBS::AST::Declarations::Class, RBS::AST::Declarations::Module, RBS::AST::Declarations::Interface
       sig.members.sort! do |m1, m2|
         group1 = group(m1)
         group2 = group(m2)
@@ -83,7 +83,7 @@ ARGV.map {|f| Pathname(f) }.each do |path|
 
   puts "Writing #{path}..."
   path.open('w') do |out|
-    writer = Ruby::Signature::Writer.new(out: out)
+    writer = RBS::Writer.new(out: out)
     writer.write sigs
   end
 end

@@ -1,8 +1,8 @@
 require_relative "test_helper"
-require "ruby/signature/test/test_helper"
+require "rbs/test/test_helper"
 
 class ComparableTest < Minitest::Test
-  include Ruby::Signature::Test::TypeAssertions
+  include RBS::Test::TypeAssertions
 
   class Test
     include Comparable
