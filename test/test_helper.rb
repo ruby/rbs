@@ -1,5 +1,5 @@
-$LOAD_PATH.unshift File.expand_path("../../lib", __FILE__)
-require "ruby/signature"
+$LOAD_PATH.unshift File.expand_path("../lib", __FILE__)
+require "rbs"
 require "tmpdir"
 require 'minitest/reporters'
 require "stringio"
@@ -8,22 +8,22 @@ Minitest::Reporters.use! [Minitest::Reporters::DefaultReporter.new]
 
 module TestHelper
   def parse_type(string, variables: Set.new)
-    Ruby::Signature::Parser.parse_type(string, variables: variables)
+    RBS::Parser.parse_type(string, variables: variables)
   end
 
   def parse_method_type(string, variables: Set.new)
-    Ruby::Signature::Parser.parse_method_type(string, variables: variables)
+    RBS::Parser.parse_method_type(string, variables: variables)
   end
 
   def type_name(string)
-    Ruby::Signature::Namespace.parse(string).yield_self do |namespace|
+    RBS::Namespace.parse(string).yield_self do |namespace|
       last = namespace.path.last
-      Ruby::Signature::TypeName.new(name: last, namespace: namespace.parent)
+      RBS::TypeName.new(name: last, namespace: namespace.parent)
     end
   end
 
   def silence_warnings
-    Ruby::Signature.logger.stub :warn, nil do
+    RBS.logger.stub :warn, nil do
       yield
     end
   end
@@ -111,11 +111,11 @@ SIG
           absolute_path.write(content)
         end
 
-        loader = Ruby::Signature::EnvironmentLoader.new()
+        loader = RBS::EnvironmentLoader.new()
         loader.no_builtin!
         loader.add path: tmppath
 
-        env = Ruby::Signature::Environment.new()
+        env = RBS::Environment.new()
         loader.load(env: env)
 
         yield env
@@ -124,7 +124,7 @@ SIG
   end
 
   def assert_write(decls, string)
-    writer = Ruby::Signature::Writer.new(out: StringIO.new)
+    writer = RBS::Writer.new(out: StringIO.new)
     writer.write(decls)
 
     assert_equal string, writer.out.string

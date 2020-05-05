@@ -1,8 +1,8 @@
 require_relative "test_helper"
-require "ruby/signature/test/test_helper"
+require "rbs/test/test_helper"
 
 class DirSingletonTest < Minitest::Test
-  include Ruby::Signature::Test::TypeAssertions
+  include RBS::Test::TypeAssertions
 
   testing "singleton(::Dir)"
 
@@ -160,7 +160,7 @@ class DirSingletonTest < Minitest::Test
 end
 
 class DirInstanceTest < Minitest::Test
-  include Ruby::Signature::Test::TypeAssertions
+  include RBS::Test::TypeAssertions
 
   testing "::Dir"
 

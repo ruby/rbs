@@ -19,7 +19,7 @@ When you finish writing signature, you may want to test the signature.
 ruby-signature provides a feature to test your signature.
 
 ```
-$ RBS_TEST_TARGET='Foo::*' bundle exec ruby -r ruby/signature/test/setup test/foo_test.rb
+$ RBS_TEST_TARGET='Foo::*' bundle exec ruby -r rbs/test/setup test/foo_test.rb
 ```
 
 The test installs instrumentations to spy the method calls and check if arguments/return values are correct with respect to the type of the method in signature.
@@ -79,11 +79,11 @@ The design of the signature testing aims to be non-intrusive. The setup is done 
 
 ### Loading the library
 
-You need to require `ruby/signature/test/setup` for signature testing.
+You need to require `rbs/test/setup` for signature testing.
 You can do it using `-r` option through command line argument or the `RUBYOPT` environment variable.
 
 ```
-$ ruby -r ruby/signature/test/setup run_tests.rb
+$ ruby -r rbs/test/setup run_tests.rb
 $ RUBYOPT='-rruby/signature/test/setup' rake test
 ```
 

@@ -1,3 +1,7 @@
 #!/usr/bin/env ruby
 
-load File.join(__dir__, "ruby-signature")
+$LOAD_PATH << File.join(__dir__, "../lib")
+require "rbs"
+require "rbs/cli"
+
+RBS::CLI.new(stdout: STDOUT, stderr: STDERR).run(ARGV.dup)

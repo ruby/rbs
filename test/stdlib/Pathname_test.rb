@@ -1,9 +1,9 @@
 require_relative "test_helper"
-require "ruby/signature/test/test_helper"
+require "rbs/test/test_helper"
 require 'pathname'
 
 class PathnameSingletonTest < Minitest::Test
-  include Ruby::Signature::Test::TypeAssertions
+  include RBS::Test::TypeAssertions
   library 'pathname'
   testing 'singleton(::Pathname)'
 
@@ -39,7 +39,7 @@ class PathnameSingletonTest < Minitest::Test
 end
 
 class PathnameInstanceTest < Minitest::Test
-  include Ruby::Signature::Test::TypeAssertions
+  include RBS::Test::TypeAssertions
   library 'pathname'
   testing '::Pathname'
 

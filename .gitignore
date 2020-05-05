@@ -7,6 +7,6 @@
 /tmp/
 /Gemfile.lock
 /.ruby-version
-/lib/ruby/signature/parser.rb
-/lib/ruby/signature/parser.output
+/lib/rbs/parser.rb
+/lib/rbs/parser.output
 /vendor/sigs

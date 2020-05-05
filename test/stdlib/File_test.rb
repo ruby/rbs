@@ -1,9 +1,9 @@
 require_relative "test_helper"
-require "ruby/signature/test/test_helper"
+require "rbs/test/test_helper"
 require "socket"
 
 class FileSingletonTest < Minitest::Test
-  include Ruby::Signature::Test::TypeAssertions
+  include RBS::Test::TypeAssertions
 
   testing "singleton(::File)"
 
@@ -813,7 +813,7 @@ class FileSingletonTest < Minitest::Test
 end
 
 class FileInstanceTest < Minitest::Test
-  include Ruby::Signature::Test::TypeAssertions
+  include RBS::Test::TypeAssertions
 
   testing "::File"
 
