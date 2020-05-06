@@ -10,51 +10,51 @@ You need to install the dependencies, and build its parser with `bin/setup`.
 
 ```
 $ bin/setup
-$ bundle exec exe/ruby-signature
+$ bundle exec exe/rbs
 ```
 
 ## Usage
 
 ```
-$ ruby-signature list
-$ ruby-signature ancestors ::Object
-$ ruby-signature methods ::Object
-$ ruby-signature method ::Object tap
+$ rbs list
+$ rbs ancestors ::Object
+$ rbs methods ::Object
+$ rbs method ::Object tap
 ```
 
-### ruby-signature [--class|--module|interface] list
+### rbs [--class|--module|interface] list
 
 ```
-$ ruby-signature list
+$ rbs list
 ```
 
 This command lists all of the classes/modules/interfaces defined in `.rbs` files.
 
-### ruby-signature ancestors [--singleton|--instance] CLASS
+### rbs ancestors [--singleton|--instance] CLASS
 
 ```
-$ ruby-signature ancestors Array                    # ([].class.ancestors)
-$ ruby-signature ancestors --singleton Array        # (Array.class.ancestors)
+$ rbs ancestors Array                    # ([].class.ancestors)
+$ rbs ancestors --singleton Array        # (Array.class.ancestors)
 ```
 
 This command prints the _ancestors_ of the class.
 The name of the command is borrowed from `Class#ancestors`, but the semantics is a bit different.
 The `ancestors` command is more precise (I believe).
 
-### ruby-signature methods [--singleton|--instance] CLASS
+### rbs methods [--singleton|--instance] CLASS
 
 ```
-$ ruby-signature methods ::Integer                  # 1.methods
-$ ruby-signature methods --singleton ::Object       # Object.methods
+$ rbs methods ::Integer                  # 1.methods
+$ rbs methods --singleton ::Object       # Object.methods
 ```
 
 This command prints all methods provided for the class.
 
-### ruby-signature method [--singleton|--instance] CLASS METHOD
+### rbs method [--singleton|--instance] CLASS METHOD
 
 ```
-$ ruby-signature method ::Integer '+'               # 1+2
-$ ruby-signature method --singleton ::Object tap    # Object.tap { ... }
+$ rbs method ::Integer '+'               # 1+2
+$ rbs method --singleton ::Object tap    # Object.tap { ... }
 ```
 
 This command prints type and properties of the method.
@@ -66,13 +66,13 @@ It accepts two global options, `-r` and `-I`.
 `-r` is for libraries. You can specify the names of libraries.
 
 ```
-$ ruby-signature -r set list
+$ rbs -r set list
 ```
 
 `-I` is for application signatures. You can specify the name of directory.
 
 ```
-$ ruby-signature -I sig list
+$ rbs -I sig list
 ```
 
 ## Guides
