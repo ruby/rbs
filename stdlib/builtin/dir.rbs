@@ -14,7 +14,7 @@ class Dir
   # The optional *encoding* keyword argument specifies the encoding of the
   # directory. If not specified, the filesystem encoding is used.
   #
-  def initialize: (string, ?encoding: Encoding | string | nil) -> void
+  def initialize: (string, ?encoding: encoding | nil) -> void
 
   # Equivalent to calling `Dir.glob([string,...], 0)`.
   #
@@ -104,7 +104,7 @@ class Dir
   #
   #     Dir.entries("testdir")   #=> [".", "..", "config.h", "main.rb"]
   #
-  def self.entries: (string dirname, ?encoding: Encoding | string | nil enc) -> ::Array[String]
+  def self.entries: (string dirname, ?encoding: encoding | nil enc) -> ::Array[String]
 
   # Returns `true` if the named file is a directory, `false` otherwise.
   #
@@ -249,8 +249,8 @@ class Dir
   # passed *aDir* as a parameter. The directory is closed at the end of the block,
   # and Dir::open returns the value of the block.
   #
-  def self.open: (string, ?encoding: Encoding | string | nil) -> Dir
-               | [U] (string, ?encoding: Encoding | string | nil) { (Dir) -> U } -> U
+  def self.open: (string, ?encoding: encoding | nil) -> Dir
+               | [U] (string, ?encoding: encoding | nil) { (Dir) -> U } -> U
 
   # Returns the path to the current working directory of this process as a string.
   #

@@ -269,7 +269,7 @@ class Integer < Numeric
   #     230.chr   #=> "\xE6"
   #     255.chr(Encoding::UTF_8)   #=> "\u00FF"
   #
-  def chr: (?Encoding | string) -> String
+  def chr: (?encoding) -> String
 
   def clone: (?freeze: bool) -> self
 
