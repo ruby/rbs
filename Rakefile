@@ -15,7 +15,7 @@ task :validate => :parser do
   sh "rbs validate"
 end
 
-FileList["test/stdlib/*_test.rb"].each do |test|
+FileList["test/stdlib/**/*_test.rb"].each do |test|
   multitask test => :parser do
     sh "ruby bin/test_runner.rb #{test}"
   end
