@@ -1034,7 +1034,7 @@ class Module < Object
   # Removes the method identified by *symbol* from the current class. For an
   # example, see Module#undef_method. String arguments are converted to symbols.
   #
-  def remove_method: (Symbol | String arg0) -> self
+  def remove_method: (*Symbol | String arg0) -> self
 
   # Returns `true` if *mod* is a singleton class or `false` if it is an ordinary
   # class or module.
@@ -1087,7 +1087,7 @@ class Module < Object
   #     In parent
   #     prog.rb:23: undefined method `hello' for #<Child:0x401b3bb4> (NoMethodError)
   #
-  def undef_method: (Symbol | String arg0) -> self
+  def undef_method: (*Symbol | String arg0) -> self
 
   # Import class refinements from *module* into the current class or module
   # definition.
