@@ -133,7 +133,7 @@ module Enumerable[unchecked out Elem, out Return]: _Each[Elem, Return]
 
   def inject: (untyped init, Symbol method) -> untyped
             | (Symbol method) -> untyped
-            | [A] (A initial) { (Elem, A) -> A } -> Elem
+            | [A] (A initial) { (A, Elem) -> A } -> A
             | () { (Elem, Elem) -> Elem } -> Elem
 
   # Returns the object in *enum* with the maximum value. The first form

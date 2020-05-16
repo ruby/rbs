@@ -1,4 +1,5 @@
 require_relative "test_helper"
+require "rbs/test/test_helper"
 
 class EnumerableTest < StdlibTest
   target Enumerable
@@ -104,5 +105,33 @@ class EnumerableTest < StdlibTest
 
       include Enumerable
     }.new
+  end
+end
+
+class EnumerableTest2 < Minitest::Test
+  include RBS::Test::TypeAssertions
+
+  class TestEnumerable
+    include Enumerable
+
+    def each
+      yield '1'
+      yield '2'
+      yield '3'
+      self
+    end
+  end
+
+  testing "::Enumerable[String, TestEnumerable]"
+
+  def test_inject
+    assert_send_type "(String init, Symbol method) -> untyped", TestEnumerable.new, :inject, '', :<<
+    assert_send_type "(Symbol method) -> String", TestEnumerable.new, :inject, :+
+    assert_send_type("(Integer initial) { (Integer, String) -> Integer } -> Integer", TestEnumerable.new, :inject, 0) do |memo, item|
+      memo ^ item.hash
+    end
+    assert_send_type("() { (String, String) -> String } -> String", TestEnumerable.new, :inject) do |memo, item|
+      memo + item
+    end
   end
 end
