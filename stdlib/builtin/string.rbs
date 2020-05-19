@@ -754,14 +754,14 @@ class String
   # :   Replaces CRLF ("r\n") and CR ("r") with LF ("n") if value is true.
   #
   #
-  def encode: (?Encoding | string encoding, ?Encoding | string from_encoding, ?invalid: :replace ?, ?undef: :replace ?, ?replace: String, ?fallback: String::encode_fallback, ?xml: :text | :attr, ?universal_newline: true, ?cr_newline: true, ?crlf_newline: true) -> String
+  def encode: (?encoding encoding, ?encoding from_encoding, ?invalid: :replace ?, ?undef: :replace ?, ?replace: String, ?fallback: String::encode_fallback, ?xml: :text | :attr, ?universal_newline: true, ?cr_newline: true, ?crlf_newline: true) -> String
 
   # The first form transcodes the contents of *str* from str.encoding to
   # `encoding`. The second form transcodes the contents of *str* from src_encoding
   # to dst_encoding. The options Hash gives details for conversion. See
   # String#encode for details. Returns the string even if no changes were made.
   #
-  def encode!: (?Encoding | string encoding, ?Encoding | string from_encoding, ?invalid: :replace ?, ?undef: :replace ?, ?replace: String, ?fallback: String::encode_fallback, ?xml: :text | :attr, ?universal_newline: true, ?cr_newline: true, ?crlf_newline: true) -> self
+  def encode!: (?encoding encoding, ?encoding from_encoding, ?invalid: :replace ?, ?undef: :replace ?, ?replace: String, ?fallback: String::encode_fallback, ?xml: :text | :attr, ?universal_newline: true, ?cr_newline: true, ?crlf_newline: true) -> self
 
   # Returns the Encoding object that represents the encoding of obj.
   #
@@ -1884,7 +1884,7 @@ class String
   # buffer. This may improve performance, when the string will be concatenated
   # many times (causing many realloc calls).
   #
-  def initialize: (?string str, ?encoding: Encoding | string, ?capacity: int) -> void
+  def initialize: (?string str, ?encoding: encoding, ?capacity: int) -> void
 
   # Replaces the contents of *str* with the corresponding values in *other_str*.
   #
