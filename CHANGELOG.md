@@ -2,6 +2,8 @@
 
 ## master
 
+## 0.2.0
+
 * The first release of RBS gem.
 
 ## 0.1.0
