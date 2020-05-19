@@ -23,5 +23,6 @@ jobs:
       run: |
         ruby -v
         gem install bundler
-        bundle install --jobs 4 --retry 3
+        bin/setup
         bundle exec rake
+        bundle exec rake build
