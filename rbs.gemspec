@@ -9,17 +9,17 @@ Gem::Specification.new do |spec|
   spec.authors       = ["Soutaro Matsumoto"]
   spec.email         = ["matsumoto@soutaro.com"]
 
-  spec.summary       = %q{Type signature for Ruby classes.}
-  spec.description   = %q{Type signature for Ruby classes.}
-  spec.homepage      = "https://github.com/ruby/ruby-signature"
+  spec.summary       = %q{Type signature for Ruby.}
+  spec.description   = %q{RBS is the language for type signatures for Ruby and standard library definitions.}
+  spec.homepage      = "https://github.com/ruby/rbs"
   spec.licenses      = ['BSD-2-Clause', 'Ruby']
 
   # Prevent pushing this gem to RubyGems.org. To allow pushes either set the 'allowed_push_host'
   # to allow pushing to a single host or delete this section to allow pushing to any host.
   if spec.respond_to?(:metadata)
     spec.metadata["homepage_uri"] = spec.homepage
-    spec.metadata["source_code_uri"] = "https://github.com/ruby/ruby-signature.git"
-    # spec.metadata["changelog_uri"] = "TODO: Put your gem's CHANGELOG.md URL here."
+    spec.metadata["source_code_uri"] = "https://github.com/ruby/rbs.git"
+    spec.metadata["changelog_uri"] = "https://github.com/ruby/rbs/blob/master/CHANGELOG.md"
   else
     raise "RubyGems 2.0 or newer is required to protect against " \
       "public gem pushes."
