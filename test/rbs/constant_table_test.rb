@@ -43,13 +43,19 @@ EOF
         builder = DefinitionBuilder.new(env: env)
         table = ConstantTable.new(builder: builder)
 
-        table.resolve_constant_reference(TypeName.new(name: :Name, namespace: Namespace.empty), context: nil).tap do |constant|
+        table.resolve_constant_reference(
+          TypeName.new(name: :Name, namespace: Namespace.empty),
+          context: [Namespace.root]
+        ).tap do |constant|
           assert_instance_of Constant, constant
           assert_equal "::Name", constant.name.to_s
           assert_equal "::String", constant.type.to_s
         end
 
-        table.resolve_constant_reference(TypeName.new(name: :ABC, namespace: Namespace.empty), context: nil).tap do |constant|
+        table.resolve_constant_reference(
+          TypeName.new(name: :ABC, namespace: Namespace.empty),
+          context: [Namespace.root]
+        ).tap do |constant|
           assert_nil constant
         end
       end
@@ -68,18 +74,55 @@ EOF
       manager.build do |env|
         builder = DefinitionBuilder.new(env: env)
         table = ConstantTable.new(builder: builder)
-        context = Namespace.parse("::Foo")
+        namespace = Namespace.parse("::Foo")
 
-        table.resolve_constant_reference(TypeName.new(name: :Name, namespace: Namespace.empty), context: context).tap do |constant|
+        table.resolve_constant_reference(
+          TypeName.new(name: :Name, namespace: Namespace.empty),
+          context: namespace.ascend.to_a
+        ).tap do |constant|
           assert_instance_of Constant, constant
           assert_equal "::Foo::Name", constant.name.to_s
           assert_equal '"Foo::Name"', constant.type.to_s
         end
 
-        table.resolve_constant_reference(TypeName.new(name: :Name, namespace: Namespace.root), context: context).tap do |constant|
+        table.resolve_constant_reference(
+          TypeName.new(name: :Name, namespace: Namespace.root),
+          context: namespace.ascend.to_a
+        ).tap do |constant|
           assert_instance_of Constant, constant
           assert_equal "::Name", constant.name.to_s
           assert_equal '"::Name"', constant.type.to_s
+        end
+      end
+    end
+  end
+
+  def test_reference_constant_nested_context
+    SignatureManager.new do |manager|
+      manager.files[Pathname("foo.rbs")] = <<EOF
+class Foo
+end
+
+class Foo::Bar
+end
+
+class Foo::Bar::Baz
+end
+
+Foo::Bar::X: "Foo::Bar::X"
+X: "::X"
+EOF
+      manager.build do |env|
+        builder = DefinitionBuilder.new(env: env)
+        table = ConstantTable.new(builder: builder)
+
+        table.resolve_constant_reference(
+          TypeName.new(name: :X, namespace: Namespace.empty),
+          context: [Namespace.parse("::Foo"), Namespace.parse("::Foo::Bar::Baz")]
+        ).tap do |constant|
+          assert_instance_of Constant, constant
+          assert_equal "::X", constant.name.to_s
+          assert_equal '"::X"', constant.type.to_s
         end
       end
     end
@@ -106,13 +149,19 @@ EOF
         builder = DefinitionBuilder.new(env: env)
         table = ConstantTable.new(builder: builder)
 
-        table.resolve_constant_reference(TypeName.new(name: :MAX, namespace: Namespace.empty), context: Namespace.parse("::Child")).tap do |constant|
+        table.resolve_constant_reference(
+          TypeName.new(name: :MAX, namespace: Namespace.empty),
+          context: Namespace.parse("::Child").ascend.to_a
+        ).tap do |constant|
           assert_instance_of Constant, constant
           assert_equal "::Parent::MAX", constant.name.to_s
           assert_equal "10000", constant.type.to_s
         end
 
-        table.resolve_constant_reference(TypeName.new(name: :MIN, namespace: Namespace.empty), context: Namespace.parse("::Child")).tap do |constant|
+        table.resolve_constant_reference(
+          TypeName.new(name: :MIN, namespace: Namespace.empty),
+          context: Namespace.parse("::Child").ascend.to_a
+        ).tap do |constant|
           assert_instance_of Constant, constant
           assert_equal "::Mix::MIN", constant.name.to_s
           assert_equal '0', constant.type.to_s
@@ -139,13 +188,19 @@ EOF
         builder = DefinitionBuilder.new(env: env)
         table = ConstantTable.new(builder: builder)
 
-        table.resolve_constant_reference(TypeName.new(name: :Set, namespace: Namespace.empty), context: Namespace.parse("::Foo::Bar")).tap do |constant|
+        table.resolve_constant_reference(
+          TypeName.new(name: :Set, namespace: Namespace.empty),
+          context: Namespace.parse("::Foo::Bar").ascend.to_a
+        ).tap do |constant|
           assert_instance_of Constant, constant
           assert_equal "::Set", constant.name.to_s
           assert_equal 'singleton(::Set)', constant.type.to_s
         end
 
-        table.resolve_constant_reference(TypeName.new(name: :X, namespace: Namespace.empty), context: Namespace.parse("::Foo::Bar")).tap do |constant|
+        table.resolve_constant_reference(
+          TypeName.new(name: :X, namespace: Namespace.empty),
+          context: Namespace.parse("::Foo::Bar").ascend.to_a
+        ).tap do |constant|
           assert_instance_of Constant, constant
           assert_equal "::Baz::X", constant.name.to_s
           assert_equal '::Integer', constant.type.to_s
@@ -166,7 +221,10 @@ EOF
         builder = DefinitionBuilder.new(env: env)
         table = ConstantTable.new(builder: builder)
 
-        table.resolve_constant_reference(TypeName.new(name: :Name, namespace: Namespace.parse("Foo")), context: Namespace.parse("::Foo")).tap do |constant|
+        table.resolve_constant_reference(
+          TypeName.new(name: :Name, namespace: Namespace.parse("Foo")),
+          context: Namespace.parse("::Foo").ascend.to_a
+        ).tap do |constant|
           assert_instance_of Constant, constant
           assert_equal "::Foo::Name", constant.name.to_s
           assert_equal '"Foo::Name"', constant.type.to_s
@@ -190,21 +248,33 @@ EOF
         builder = DefinitionBuilder.new(env: env)
         table = ConstantTable.new(builder: builder)
 
-        table.resolve_constant_reference(TypeName.new(name: :ONE, namespace: Namespace.parse("Stuff")), context: nil).tap do |constant|
+        table.resolve_constant_reference(
+          TypeName.new(name: :ONE, namespace: Namespace.parse("Stuff")),
+          context: [Namespace.root]
+        ).tap do |constant|
           assert_nil constant
         end
 
-        table.resolve_constant_reference(TypeName.new(name: :TWO, namespace: Namespace.parse("Stuff")), context: nil).tap do |constant|
+        table.resolve_constant_reference(
+          TypeName.new(name: :TWO, namespace: Namespace.parse("Stuff")),
+          context: [Namespace.root]
+        ).tap do |constant|
           assert_nil constant
         end
 
-        table.resolve_constant_reference(TypeName.new(name: :THREE, namespace: Namespace.parse("Stuff")), context: nil).tap do |constant|
+        table.resolve_constant_reference(
+          TypeName.new(name: :THREE, namespace: Namespace.parse("Stuff")),
+          context: [Namespace.root]
+        ).tap do |constant|
           assert_instance_of Constant, constant
           assert_equal "::Kernel::THREE", constant.name.to_s
           assert_equal "3", constant.type.to_s
         end
 
-        table.resolve_constant_reference(TypeName.new(name: :FOUR, namespace: Namespace.parse("Stuff")), context: nil).tap do |constant|
+        table.resolve_constant_reference(
+          TypeName.new(name: :FOUR, namespace: Namespace.parse("Stuff")),
+          context: [Namespace.root]
+        ).tap do |constant|
           assert_instance_of Constant, constant
           assert_equal "::BasicObject::FOUR", constant.name.to_s
           assert_equal "4", constant.type.to_s

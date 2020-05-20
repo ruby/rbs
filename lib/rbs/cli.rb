@@ -362,7 +362,7 @@ module RBS
       name = Namespace.parse(args[0]).to_type_name
       stdout.puts "Constant name: #{name}"
 
-      constant = table.resolve_constant_reference(name, context: namespace)
+      constant = table.resolve_constant_reference(name, context: namespace.ascend.to_a)
 
       if constant
         stdout.puts " => #{constant.name}: #{constant.type}"

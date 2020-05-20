@@ -30,17 +30,18 @@ module RBS
     end
 
     def resolve_constant_reference(name, context:)
+      raise "Context cannot be empty: Specify `[Namespace.root]`" if context.empty?
+
       head, *tail = split_name(name)
 
       head_constant = case
                       when name.absolute?
                         name_to_constant(TypeName.new(name: head, namespace: Namespace.root))
-                      when !context || context.empty?
+                      when context == [Namespace.root]
                         name_to_constant(TypeName.new(name: head, namespace: Namespace.root))
                       else
                         resolve_constant_reference_context(head, context: context) ||
-                          resolve_constant_reference_inherit(head,
-                                                             scopes: constant_scopes(context.to_type_name))
+                          resolve_constant_reference_inherit(head, scopes: constant_scopes(context.first.to_type_name))
                       end
 
       if head_constant
@@ -53,11 +54,11 @@ module RBS
     end
 
     def resolve_constant_reference_context(name, context:)
-      if context.empty?
-        nil
-      else
-        name_to_constant(TypeName.new(name: name, namespace: context)) ||
-          resolve_constant_reference_context(name, context: context.parent)
+      head, *tail = context
+
+      if head
+        name_to_constant(TypeName.new(name: name, namespace: head)) ||
+          resolve_constant_reference_context(name, context: tail)
       end
     end
 
@@ -125,7 +126,7 @@ module RBS
 
         scopes.unshift namespace
       else
-        raise "Unexpected declaration: #{name}"
+        raise "Unexpected declaration: #{name} (#{decl.class})"
       end
 
       env.each_extension(name).sort_by {|e| e.extension_name.to_s }.each do |extension|

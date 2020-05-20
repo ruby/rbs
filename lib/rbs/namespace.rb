@@ -87,5 +87,23 @@ module RBS
         new(path: string.split("::").map(&:to_sym), absolute: false)
       end
     end
+
+
+    def ascend
+      if block_given?
+        current = self
+
+        until current.empty?
+          yield current
+          current = current.parent
+        end
+
+        yield current
+
+        self
+      else
+        enum_for(:ascend)
+      end
+    end
   end
 end

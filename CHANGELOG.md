@@ -2,6 +2,8 @@
 
 ## master
 
+* Fix constant resolution [#288](https://github.com/ruby/rbs/pull/288)
+
 ## 0.2.0
 
 * The first release of RBS gem.
