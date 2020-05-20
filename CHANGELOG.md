@@ -2,6 +2,8 @@
 
 ## master
 
+## 0.3.0 (2020-05-20)
+
 * Fix constant resolution [#288](https://github.com/ruby/rbs/pull/288)
 
 ## 0.2.0
