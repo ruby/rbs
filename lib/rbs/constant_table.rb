@@ -57,8 +57,12 @@ module RBS
       head, *tail = context
 
       if head
-        name_to_constant(TypeName.new(name: name, namespace: head)) ||
-          resolve_constant_reference_context(name, context: tail)
+        if head.path.last == name
+          name_to_constant(head.to_type_name)
+        else
+          name_to_constant(TypeName.new(name: name, namespace: head)) ||
+            resolve_constant_reference_context(name, context: tail)
+        end
       end
     end
 
