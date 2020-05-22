@@ -97,6 +97,41 @@ EOF
     end
   end
 
+  def test_reference_constant_context_self
+    SignatureManager.new do |manager|
+      manager.files[Pathname("foo.rbs")] = <<EOF
+class Foo
+end
+
+class Foo::Bar
+end
+
+class Bar
+end
+EOF
+      manager.build do |env|
+        builder = DefinitionBuilder.new(env: env)
+        table = ConstantTable.new(builder: builder)
+
+        table.resolve_constant_reference(
+          TypeName.new(name: :Bar, namespace: Namespace.empty),
+          context: [Namespace.parse("::Foo")]
+        ).tap do |constant|
+          assert_instance_of Constant, constant
+          assert_equal "::Foo::Bar", constant.name.to_s
+        end
+
+        table.resolve_constant_reference(
+          TypeName.new(name: :Bar, namespace: Namespace.empty),
+          context: [Namespace.parse("::Foo::Bar")]
+        ).tap do |constant|
+          assert_instance_of Constant, constant
+          assert_equal "::Foo::Bar", constant.name.to_s
+        end
+      end
+    end
+  end
+
   def test_reference_constant_nested_context
     SignatureManager.new do |manager|
       manager.files[Pathname("foo.rbs")] = <<EOF
