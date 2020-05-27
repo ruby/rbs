@@ -173,6 +173,8 @@ Encoding::Big5_HKSCS_2008: Encoding
 
 Encoding::Big5_UAO: Encoding
 
+Encoding::CESU_8: Encoding
+
 Encoding::CP1250: Encoding
 
 Encoding::CP1251: Encoding
