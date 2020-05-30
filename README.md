@@ -22,7 +22,7 @@ $ rbs methods ::Object
 $ rbs method ::Object tap
 ```
 
-### rbs [--class|--module|interface] list
+### rbs list [--class|--module|--interface]
 
 ```
 $ rbs list
