@@ -54,25 +54,12 @@
 #     1000000
 #     FiberError: dead fiber called
 #
-class Fiber
+extension Fiber (Fiber)
   # Returns the current fiber. You need to `require 'fiber'` before using this
   # method. If you are not running in the context of a fiber this method will
   # return the root fiber.
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     Fiber.current() -> fiber
-  #
-  def self.current: () -> untyped
-
-  # Yields control back to the context that resumed the fiber, passing along any
-  # arguments that were passed to it. The fiber will resume processing at this
-  # point when #resume is called next. Any arguments passed to the next #resume
-  # will be the value that this Fiber.yield expression evaluates to.
-  #
-  # # arglists 💪👽🚨 << Delete this section
-  #     Fiber.yield(args, ...) -> obj
-  #
-  def self.yield: (*untyped) -> untyped
+  def self.current: () -> Fiber
 
   public
 
@@ -80,59 +67,7 @@ class Fiber
   # finishing execution of the fiber block this method will always return false.
   # You need to `require 'fiber'` before using this method.
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     fiber.alive? -> true or false
-  #
-  def alive?: () -> untyped
-
-  def blocking?: () -> untyped
-
-  # Returns fiber information string.
-  #
-  # # arglists 💪👽🚨 << Delete this section
-  #     inspect()
-  #
-  alias inspect to_s
-
-  # Raises an exception in the fiber at the point at which the last `Fiber.yield`
-  # was called. If the fiber has not been started or has already run to
-  # completion, raises `FiberError`.
-  #
-  # With no arguments, raises a `RuntimeError`. With a single `String` argument,
-  # raises a `RuntimeError` with the string as a message.  Otherwise, the first
-  # parameter should be the name of an `Exception` class (or an object that
-  # returns an `Exception` object when sent an `exception` message). The optional
-  # second parameter sets the message associated with the exception, and the third
-  # parameter is an array of callback information. Exceptions are caught by the
-  # `rescue` clause of `begin...end` blocks.
-  #
-  # # arglists 💪👽🚨 << Delete this section
-  #     fiber.raise                                 -> obj
-  #     fiber.raise(string)                         -> obj
-  #     fiber.raise(exception [, string [, array]]) -> obj
-  #
-  def raise: (*untyped) -> untyped
-
-  # Resumes the fiber from the point at which the last Fiber.yield was called, or
-  # starts running it if it is the first call to #resume. Arguments passed to
-  # resume will be the value of the Fiber.yield expression or will be passed as
-  # block parameters to the fiber's block if this is the first #resume.
-  #
-  # Alternatively, when resume is called it evaluates to the arguments passed to
-  # the next Fiber.yield statement inside the fiber's block or to the block value
-  # if it runs to completion without any Fiber.yield
-  #
-  # # arglists 💪👽🚨 << Delete this section
-  #     fiber.resume(args, ...) -> obj
-  #
-  def resume: (*untyped) -> untyped
-
-  # Returns fiber information string.
-  #
-  # # arglists 💪👽🚨 << Delete this section
-  #     fiber.to_s   -> string
-  #
-  def to_s: () -> untyped
+  def alive?: () -> bool
 
   # Transfer control to another fiber, resuming it from where it last stopped or
   # starting it if it was not resumed before. The calling fiber will be suspended
@@ -178,12 +113,5 @@ class Fiber
   #     #<FiberError: cannot resume transferred Fiber>
   #     In Fiber 1 again
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     fiber.transfer(args, ...) -> obj
-  #
   def transfer: (*untyped) -> untyped
-
-  private
-
-  def initialize: (*untyped) -> untyped
 end
