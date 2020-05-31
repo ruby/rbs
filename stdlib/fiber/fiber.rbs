@@ -1,0 +1,25 @@
+class Fiber
+  def self.current: () -> untyped
+
+  def self.yield: (*untyped) -> untyped
+
+  public
+
+  def alive?: () -> untyped
+
+  def blocking?: () -> untyped
+
+  alias inspect to_s
+
+  def raise: (*untyped) -> untyped
+
+  def resume: (*untyped) -> untyped
+
+  def to_s: () -> untyped
+
+  def transfer: (*untyped) -> untyped
+
+  private
+
+  def initialize: (*untyped) -> untyped
+end
