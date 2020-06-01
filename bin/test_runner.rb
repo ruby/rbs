@@ -9,8 +9,6 @@ unless RUBY_27
   exit
 end
 
-require "pathname"
-
 ARGV.each do |arg|
   load arg
 end
