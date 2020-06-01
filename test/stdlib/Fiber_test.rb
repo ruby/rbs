@@ -71,3 +71,46 @@ class FiberTest < Minitest::Test
                      f, :raise, StandardError, 'Error!', caller
   end
 end
+
+require 'fiber'
+
+class FiberSingletonExtTest < Minitest::Test
+  include RBS::Test::TypeAssertions
+
+  library 'fiber'
+  testing 'singleton(::Fiber)'
+
+  def test_current
+    assert_send_type "() -> Fiber",
+                     Fiber, :current
+  end
+end
+
+class FiberExtTest < Minitest::Test
+  include RBS::Test::TypeAssertions
+
+  library 'fiber'
+  testing '::Fiber'
+
+  def test_alive?
+    f = Fiber.new {}
+    assert_send_type "() -> true",
+                     f, :alive?
+    f.resume
+    assert_send_type "() -> false",
+                     f, :alive?
+  end
+
+  def test_transfer
+    f = Fiber.new do
+      loop { Fiber.yield }
+    end
+
+    assert_send_type '() -> untyped',
+                     f, :transfer
+    assert_send_type '(untyped) -> untyped',
+                     f, :transfer, 1
+    assert_send_type '(untyped, untyped) -> untyped',
+                     f, :transfer, 1, 'foo'
+  end
+end
