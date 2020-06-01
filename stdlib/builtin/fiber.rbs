@@ -62,7 +62,11 @@
 class Fiber < Object
   def self.yield: (*untyped args) -> untyped
 
-  def initialize: () { () -> void } -> Fiber
+  def initialize: () { () -> untyped } -> void
 
   def resume: (*untyped args) -> untyped
+
+  def raise: () -> untyped
+           | (string message) -> untyped
+           | (_Exception exception, ?string message, ?Array[String] backtrace) -> untyped
 end
