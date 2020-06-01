@@ -250,9 +250,11 @@ class Enumerator::Lazy[out Elem, out Return] < Enumerator[Elem, Return]
 end
 
 class Enumerator::Yielder < Object
-  def <<: (*untyped arg0) -> void
+  def <<: (untyped arg0) -> void
 
   def yield: (*untyped arg0) -> void
+
+  def to_proc: () -> Proc
 end
 
 class Enumerator::Chain[out Elem, out Return] < Object
