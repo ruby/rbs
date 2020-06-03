@@ -186,7 +186,7 @@ class SymbolInstanceTest < Minitest::Test
   end
 
   def test_intern
-    assert_send_type "() -> self",
+    assert_send_type "() -> Symbol",
                      :a, :intern
   end
 
