@@ -45,7 +45,7 @@ namespace :generate do
     raise "#{path} already exists!" if path.exist?
 
     require "erb"
-    require "ruby/signature"
+    require "rbs"
 
     class TestTemplateBuilder
       attr_reader :klass, :env

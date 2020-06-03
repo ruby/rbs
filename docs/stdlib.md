@@ -1,6 +1,6 @@
 # Stdlib Signatures Guide
 
-This is a guide for contributing to `ruby-signature` by writing/revising stdlib signatures.
+This is a guide for contributing to `rbs` by writing/revising stdlib signatures.
 
 The typical steps of writing signatures will be like the following:
 
@@ -17,7 +17,7 @@ To write signatures see [syntax guide](syntax.md).
 
 ## Generating prototypes
 
-`ruby-signature` provides a tool to generate a prototype of signatures, `rbs prototype`.
+`rbs` provides a tool to generate a prototype of signatures, `rbs prototype`.
 It provides several options, `rbi` from Sorbet RBI files, `rb` from Ruby code, and `runtime` from runtime API.
 `runtime` should be the best option for standard libraries because they may be implemented in C, no Ruby source code.
 

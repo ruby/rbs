@@ -372,7 +372,7 @@ module RBS
     end
 
     def run_version(args, options)
-      stdout.puts "ruby-signature #{VERSION}"
+      stdout.puts "rbs #{VERSION}"
     end
 
     def run_paths(args, options)

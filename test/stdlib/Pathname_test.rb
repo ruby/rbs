@@ -120,7 +120,7 @@ class PathnameInstanceTest < Minitest::Test
   end
 
   def test_binwrite
-    Tempfile.create('ruby-signature-pathname-binwrite-test') do |f|
+    Tempfile.create('rbs-pathname-binwrite-test') do |f|
       f.close
       path = Pathname(f.path)
 
@@ -163,7 +163,7 @@ class PathnameInstanceTest < Minitest::Test
   end
 
   def test_chmod
-    Tempfile.create('ruby-signature-pathname-chmod-test') do |f|
+    Tempfile.create('rbs-pathname-chmod-test') do |f|
       path = Pathname(f.path)
 
       assert_send_type '(Integer) -> Integer',
@@ -172,7 +172,7 @@ class PathnameInstanceTest < Minitest::Test
   end
 
   def test_chown
-    Tempfile.create('ruby-signature-pathname-chown-test') do |f|
+    Tempfile.create('rbs-pathname-chown-test') do |f|
       path = Pathname(f.path)
 
       assert_send_type '(Integer, Integer) -> Integer',
@@ -193,7 +193,7 @@ class PathnameInstanceTest < Minitest::Test
   end
 
   def test_delete
-    Tempfile.create('ruby-signature-pathname-delete-test') do |f|
+    Tempfile.create('rbs-pathname-delete-test') do |f|
       path = Pathname(f.path)
 
       assert_send_type '() -> Integer',
@@ -390,7 +390,7 @@ class PathnameInstanceTest < Minitest::Test
   end
 
   def test_lchmod
-    Tempfile.create('ruby-signature-pathname-lchmod-test') do |f|
+    Tempfile.create('rbs-pathname-lchmod-test') do |f|
       path = Pathname(f.path)
 
       assert_send_type '(Integer) -> Integer',
@@ -400,7 +400,7 @@ class PathnameInstanceTest < Minitest::Test
   end
 
   def test_lchown
-    Tempfile.create('ruby-signature-pathname-lchown-test') do |f|
+    Tempfile.create('rbs-pathname-lchown-test') do |f|
       path = Pathname(f.path)
 
       assert_send_type '(Integer, Integer) -> Integer',
@@ -476,7 +476,7 @@ class PathnameInstanceTest < Minitest::Test
   end
 
   def test_open
-    Tempfile.create('ruby-signature-pathname-binwrite-test') do |f|
+    Tempfile.create('rbs-pathname-binwrite-test') do |f|
       path = Pathname(f.path)
 
       assert_send_type '() -> File',
@@ -738,7 +738,7 @@ class PathnameInstanceTest < Minitest::Test
   end
 
   def test_truncate
-    Tempfile.create('ruby-signature-pathname-truncate-test') do |f|
+    Tempfile.create('rbs-pathname-truncate-test') do |f|
       path = Pathname(f.path)
 
       assert_send_type '(Integer) -> 0',
@@ -747,7 +747,7 @@ class PathnameInstanceTest < Minitest::Test
   end
 
   def test_unlink
-    Tempfile.create('ruby-signature-pathname-unlink-test') do |f|
+    Tempfile.create('rbs-pathname-unlink-test') do |f|
       path = Pathname(f.path)
 
       assert_send_type '() -> Integer',
@@ -761,7 +761,7 @@ class PathnameInstanceTest < Minitest::Test
   end
 
   def test_utime
-    Tempfile.create('ruby-signature-pathname-unlink-test') do |f|
+    Tempfile.create('rbs-pathname-unlink-test') do |f|
       path = Pathname(f.path)
       now = Time.now
       assert_send_type '(Time, Time) -> Integer',
@@ -793,7 +793,7 @@ class PathnameInstanceTest < Minitest::Test
   end
 
   def test_write
-    Tempfile.create('ruby-signature-pathname-write-test') do |f|
+    Tempfile.create('rbs-pathname-write-test') do |f|
       path = Pathname(f.path)
       assert_send_type '(String) -> Integer',
                        path, :write, 'foo'

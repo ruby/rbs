@@ -50,10 +50,10 @@ class RBS::VendorerTest < Minitest::Test
       vendorer = Vendorer.new(vendor_dir: vendor_dir)
 
       vendorer.stdlib!
-      vendorer.gem! "ruby-signature-amber", nil
+      vendorer.gem! "rbs-amber", nil
 
       assert_operator vendor_dir + "stdlib", :directory?
-      assert_operator vendor_dir + "gems/ruby-signature-amber", :directory?
+      assert_operator vendor_dir + "gems/rbs-amber", :directory?
     end
   end
 end
