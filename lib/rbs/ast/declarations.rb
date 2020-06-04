@@ -4,7 +4,15 @@ module RBS
       class ModuleTypeParams
         attr_reader :params
 
-        TypeParam = Struct.new(:name, :variance, :skip_validation, keyword_init: true)
+        TypeParam = Struct.new(:name, :variance, :skip_validation, keyword_init: true) do
+          def to_json(*a)
+            {
+              name: name,
+              variance: variance,
+              skip_validation: skip_validation,
+            }.to_json(*a)
+          end
+        end
 
         def initialize()
           @params = []
