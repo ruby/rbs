@@ -281,6 +281,11 @@ module RBS
           value = mod.const_get(name)
 
           next if value.is_a?(Class) || value.is_a?(Module)
+          unless value.class.name
+            RBS.logger.warn("Skipping constant #{name} #{value} of #{mod} as an instance of anonymous class")
+            next
+          end
+
           type = case value
                  when true, false
                    Types::Bases::Bool.new(location: nil)
@@ -306,6 +311,9 @@ module RBS
         type_name = to_type_name(mod.name)
         super_class = if mod.superclass == ::Object
                         nil
+                      elsif mod.superclass.name.nil?
+                        RBS.logger.warn("Skipping anonymous superclass #{mod.superclass} of #{mod}")
+                        nil
                       else
                         AST::Declarations::Class::Super.new(name: to_type_name(mod.superclass.name), args: [])
                       end
@@ -321,6 +329,11 @@ module RBS
         )
 
         each_mixin(mod.included_modules, *mod.superclass.included_modules, *mod.included_modules.flat_map(&:included_modules)) do |included_module|
+          unless included_module.name
+            RBS.logger.warn("Skipping anonymous module #{included_module} included in #{mod}")
+            next
+          end
+
           module_name = to_type_name(included_module.name)
           if module_name.namespace == type_name.namespace
             module_name = TypeName.new(name: module_name.name, namespace: Namespace.empty)
@@ -343,6 +356,11 @@ module RBS
       end
 
       def generate_module(mod)
+        unless mod.name
+          RBS.logger.warn("Skipping anonymous module #{mod}")
+          return
+        end
+
         type_name = to_type_name(mod.name)
 
         decl = AST::Declarations::Module.new(
@@ -356,6 +374,11 @@ module RBS
         )
 
         each_mixin(mod.included_modules, *mod.included_modules.flat_map(&:included_modules), namespace: type_name.namespace) do |included_module|
+          unless included_module.name
+            RBS.logger.warn("Skipping anonymous module #{included_module} included in #{mod}")
+            next
+          end
+
           module_name = to_type_name(included_module.name)
           if module_name.namespace == type_name.namespace
             module_name = TypeName.new(name: module_name.name, namespace: Namespace.empty)
