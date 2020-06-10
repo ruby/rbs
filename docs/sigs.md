@@ -16,7 +16,7 @@ See [syntax guide](syntax.md).
 ## Testing signatures
 
 When you finish writing signature, you may want to test the signature.
-ruby-signature provides a feature to test your signature.
+rbs provides a feature to test your signature.
 
 ```
 $ RBS_TEST_TARGET='Foo::*' bundle exec ruby -r rbs/test/setup test/foo_test.rb
@@ -68,7 +68,7 @@ ERROR -- : [Kaigi::Conference#speakers] UnexpectedBlockError: unexpected block i
 ### UnresolvedOverloadingError
 
 The error means there is a type error on overloaded methods.
-The `ruby-signature` test framework tries to the best error message for overloaded methods too, but it reports the `UnresolvedOverloadingError` when it fails.
+The `rbs` test framework tries to the best error message for overloaded methods too, but it reports the `UnresolvedOverloadingError` when it fails.
 
 ## Setting up the test
 
@@ -84,13 +84,13 @@ You can do it using `-r` option through command line argument or the `RUBYOPT` e
 
 ```
 $ ruby -r rbs/test/setup run_tests.rb
-$ RUBYOPT='-rruby/signature/test/setup' rake test
+$ RUBYOPT='-rrbs/test/setup' rake test
 ```
 
 When you are using Bundler, you may need to require `bundler/setup` explicitly.
 
 ```
-$ RUBYOPT='-rbundler/setup -rruby/signature/test/setup' bundle exec rake test
+$ RUBYOPT='-rbundler/setup -rrbs/test/setup' bundle exec rake test
 ```
 
 ### Environment variables
@@ -109,7 +109,7 @@ You need to specify `RBS_TEST_TARGET` to run the test, and you can customize the
 
 `RBS_TEST_SKIP` is to skip some of the classes which matches with `RBS_TEST_TARGET`.
 
-`RBS_TEST_OPT` is to pass the options for ruby signature handling.
+`RBS_TEST_OPT` is to pass the options for rbs handling.
 You may need to specify `-r` or `-I` to load signatures.
 The default is `-I sig`.
 
@@ -131,7 +131,7 @@ $ RBS_TEST_LOGLEVEL=error \
   RBS_TEST_SKIP='Kaigi::MonkeyPatch' \
   RBS_TEST_OPT='-rset -rpathname -Isig -Iprivate' \
   RBS_TEST_RAISE=true \
-  RUBYOPT='-rbundler/setup -rruby/signature/test/setup' \
+  RUBYOPT='-rbundler/setup -rrbs/test/setup' \
   bundle exec rake test
 ```
 

@@ -385,7 +385,7 @@ module Enumerable[unchecked out Elem, out Return]: _Each[Elem, Return]
                 | () { (Elem arg0) -> untyped } -> self
 
   # variadic type parameter is not supported yet
-  # https://github.com/ruby/ruby-signature/issues/21
+  # https://github.com/ruby/rbs/issues/21
   def zip: [Elem2, Return2] (::Enumerable[Elem2, Return2] enum) -> ::Array[[Elem, Elem2 | nil]]
          | [U, Elem2, Return2] (::Enumerable[Elem2, Return2]) { ([Elem, Elem2 | nil]) -> U } -> nil
 

@@ -6,7 +6,7 @@ class LoadErrorTest < StdlibTest
   using hook.refinement
 
   def test_path
-    Tempfile.open(['ruby-signature', 'rb']) do |tf|
+    Tempfile.open(['rbs', 'rb']) do |tf|
       path = tf.path
       tf.unlink
       require path

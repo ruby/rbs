@@ -162,11 +162,11 @@ singleton(::BasicObject)
     Dir.mktmpdir do |d|
       Dir.chdir(d) do
         with_cli do |cli|
-          cli.run(%w(vendor --vendor-dir=dir1 --stdlib ruby-signature-amber racc))
+          cli.run(%w(vendor --vendor-dir=dir1 --stdlib rbs-amber racc))
 
           assert_operator Pathname(d) + "dir1/stdlib", :directory?
           assert_operator Pathname(d) + "dir1/gems", :directory?
-          assert_operator Pathname(d) + "dir1/gems/ruby-signature-amber", :directory?
+          assert_operator Pathname(d) + "dir1/gems/rbs-amber", :directory?
           refute_operator Pathname(d) + "dir1/gems/racc", :directory?
         end
       end
