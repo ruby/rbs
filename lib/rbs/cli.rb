@@ -449,7 +449,7 @@ module RBS
         end
 
         relative_libs.each do |lib|
-          require(lib)
+          eval("require_relative(lib)", binding, "rbs")
         end
 
         decls = Prototype::Runtime.new(patterns: args, env: env, merge: merge, owners_included: owners_included).decls
