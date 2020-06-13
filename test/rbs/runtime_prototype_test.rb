@@ -155,4 +155,30 @@ end
       end
     end
   end
+
+  module TestForAnonymous
+    class C < Class.new
+    end
+
+    class C2
+      include Module.new
+    end
+
+    module M
+      CONST = Class.new.new
+    end
+
+    module M2
+      include Module.new
+    end
+  end
+
+  def test_decls_for_anonymous_class_or_module
+    p = Runtime.new(patterns: ["RBS::RuntimePrototypeTest::TestForAnonymous::*"],
+                    env: nil, merge: false)
+    silence_warnings do
+      p.decls
+    end
+    assert(true) # nothing raised above
+  end
 end
