@@ -128,6 +128,9 @@ SIG
     writer.write(decls)
 
     assert_equal string, writer.out.string
+
+    # Check syntax error
+    RBS::Parser.parse_signature(writer.out.string)
   end
 end
 

@@ -145,7 +145,7 @@ class Hello
 
   def list1: () -> ::Array[1 | "2" | :x]
 
-  def list2: () -> ::Array[untyped]
+  def list2: () -> ::Array[1 | 2 | untyped]
 
   def range1: () -> ::Range[::Integer]
 
@@ -153,11 +153,65 @@ class Hello
 
   def range3: () -> ::Range[untyped]
 
-  def hash1: () -> { }
+  def hash1: () -> ::Hash[untyped, untyped]
 
   def hash2: () -> { foo: 1 }
 
   def hash3: () -> { foo: { bar: 42 }, x: { y: untyped } }
+end
+    EOF
+  end
+
+  def test_defs_return_type_with_block
+    parser = RB.new
+
+    rb = <<-'EOR'
+class Hello
+  def with_return
+    if cond
+      return 1
+    elsif cond2
+      return '2'
+    end
+    :x
+  end
+
+  def with_untyped_return
+    return foo if cond
+    :x
+  end
+
+  def with_return_same_types
+    return 1 if cond
+    return 1 if cond2
+    1
+  end
+
+  def with_return_without_value
+    return if cond
+    42
+  end
+
+  def when_last_is_nil
+    foo
+    nil
+  end
+end
+    EOR
+
+    parser.parse(rb)
+
+    assert_write parser.decls, <<-EOF
+class Hello
+  def with_return: () -> (1 | "2" | :x)
+
+  def with_untyped_return: () -> (untyped | :x)
+
+  def with_return_same_types: () -> 1
+
+  def with_return_without_value: () -> (nil | 42)
+
+  def when_last_is_nil: () -> nil
 end
     EOF
   end

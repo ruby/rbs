@@ -328,7 +328,19 @@ module RBS
         body = node.children[2]
         return Types::Bases::Nil.new(location: nil) unless body
 
-        literal_to_type(body)
+        if body.type == :BLOCK
+          return_stmts = any_node?(body) do |n|
+            n.type == :RETURN
+          end&.map do |return_node|
+            returned_value = return_node.children[0]
+            returned_value ? literal_to_type(returned_value) : Types::Bases::Nil.new(location: nil)
+          end || []
+          last_node = body.children.last
+          last_evaluated =  last_node ? literal_to_type(last_node) : Types::Bases::Nil.new(location: nil)
+          types_to_union_type([*return_stmts, last_evaluated])
+        else
+          literal_to_type(body)
+        end
       end
 
       def literal_to_type(node)
@@ -393,7 +405,7 @@ module RBS
             value_types << literal_to_type(v)
           end
 
-          if key_types.all? { |t| t.is_a?(Types::Literal) }
+          if !key_types.empty? && key_types.all? { |t| t.is_a?(Types::Literal) }
             fields = key_types.map { |t| t.literal }.zip(value_types).to_h
             Types::Record.new(fields: fields, location: nil)
           else
@@ -408,9 +420,11 @@ module RBS
 
       def types_to_union_type(types)
         return untyped if types.empty?
-        return untyped if types.include?(untyped)
 
-        Types::Union.new(types: types.uniq, location: nil)
+        uniq = types.uniq
+        return uniq.first if uniq.size == 1
+
+        Types::Union.new(types: uniq, location: nil)
       end
 
       def range_element_type(types)
