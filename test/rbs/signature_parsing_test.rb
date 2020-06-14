@@ -533,6 +533,11 @@ class RBS::SignatureParsingTest < Minitest::Test
         def module: -> String
         def private: -> String
         def public: -> untyped
+        def interface: -> untyped
+        def super: -> untyped
+        def alias: -> untyped
+        def in: -> untyped
+        def out: -> untyped
         def &: (untyped) -> untyped
         def ^: (untyped) -> untyped
         def *: (untyped) -> untyped
@@ -571,6 +576,11 @@ class RBS::SignatureParsingTest < Minitest::Test
         :module,
         :private,
         :public,
+        :interface,
+        :super,
+        :alias,
+        :in,
+        :out,
         :&,
         :^,
         :*,
