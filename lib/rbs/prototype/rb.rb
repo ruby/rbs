@@ -405,7 +405,7 @@ module RBS
             value_types << literal_to_type(v)
           end
 
-          if key_types.all? { |t| t.is_a?(Types::Literal) }
+          if !key_types.empty? && key_types.all? { |t| t.is_a?(Types::Literal) }
             fields = key_types.map { |t| t.literal }.zip(value_types).to_h
             Types::Record.new(fields: fields, location: nil)
           else

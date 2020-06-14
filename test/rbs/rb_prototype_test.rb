@@ -153,7 +153,7 @@ class Hello
 
   def range3: () -> ::Range[untyped]
 
-  def hash1: () -> { }
+  def hash1: () -> ::Hash[untyped, untyped]
 
   def hash2: () -> { foo: 1 }
 
