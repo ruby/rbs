@@ -533,6 +533,11 @@ class RBS::SignatureParsingTest < Minitest::Test
         def module: -> String
         def private: -> String
         def public: -> untyped
+        def interface: -> untyped
+        def super: -> untyped
+        def alias: -> untyped
+        def in: -> untyped
+        def out: -> untyped
         def &: (untyped) -> untyped
         def ^: (untyped) -> untyped
         def *: (untyped) -> untyped
@@ -550,6 +555,8 @@ class RBS::SignatureParsingTest < Minitest::Test
         def `\\``: -> untyped
         def def!: -> untyped
         def !: -> untyped
+        def _foo?: -> untyped
+        def _foo!: -> untyped
       end
     SIG
       expected_names = [
@@ -569,6 +576,11 @@ class RBS::SignatureParsingTest < Minitest::Test
         :module,
         :private,
         :public,
+        :interface,
+        :super,
+        :alias,
+        :in,
+        :out,
         :&,
         :^,
         :*,
@@ -585,7 +597,9 @@ class RBS::SignatureParsingTest < Minitest::Test
         :attr_writer,
         :`,
         :def!,
-        :!
+        :!,
+        :_foo?,
+        :_foo!,
       ]
 
       assert_equal expected_names, decls[0].members.map(&:name)
