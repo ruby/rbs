@@ -500,7 +500,7 @@ rule
     | tQUOTEDIDENT
     | tWRITE_ATTR
 
-  method_name0: tUIDENT | tLIDENT | identifier_keywords
+  method_name0: tUIDENT | tLIDENT | tINTERFACEIDENT | identifier_keywords
 
   identifier_keywords:
       kCLASS | kVOID | kNIL | kTRUE | kFALSE | kANY | kUNTYPED | kTOP | kBOT | kINSTANCE | kBOOL | kSINGLETON

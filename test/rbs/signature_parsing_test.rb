@@ -550,6 +550,8 @@ class RBS::SignatureParsingTest < Minitest::Test
         def `\\``: -> untyped
         def def!: -> untyped
         def !: -> untyped
+        def _foo?: -> untyped
+        def _foo!: -> untyped
       end
     SIG
       expected_names = [
@@ -585,7 +587,9 @@ class RBS::SignatureParsingTest < Minitest::Test
         :attr_writer,
         :`,
         :def!,
-        :!
+        :!,
+        :_foo?,
+        :_foo!,
       ]
 
       assert_equal expected_names, decls[0].members.map(&:name)
