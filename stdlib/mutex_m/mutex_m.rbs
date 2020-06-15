@@ -27,11 +27,11 @@
 #     # this obj can be handled like Mutex
 #
 module Mutex_m
-  def self.append_features: (untyped cl) -> untyped
+  def self.append_features: (Module cl) -> untyped
 
-  def self.define_aliases: (untyped cl) -> untyped
+  def self.define_aliases: (Module cl) -> untyped
 
-  def self.extend_object: (untyped obj) -> untyped
+  def self.extend_object: (Object obj) -> untyped
 
   public
 
@@ -39,45 +39,27 @@ module Mutex_m
 
   # See Mutex#lock
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     mu_lock()
-  #
-  def mu_lock: () -> untyped
+  def mu_lock: () -> Thread::Mutex
 
   # See Mutex#locked?
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     mu_locked?()
-  #
-  def mu_locked?: () -> untyped
+  def mu_locked?: () -> bool
 
   # See Mutex#synchronize
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     mu_synchronize(&block)
-  #
-  def mu_synchronize: () { (*untyped) -> untyped } -> untyped
+  def mu_synchronize: [T] () { () -> T } -> T
 
   # See Mutex#try_lock
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     mu_try_lock()
-  #
-  def mu_try_lock: () -> untyped
+  def mu_try_lock: () -> bool
 
   # See Mutex#unlock
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     mu_unlock()
-  #
-  def mu_unlock: () -> untyped
+  def mu_unlock: () -> Thread::Mutex
 
   # See Mutex#sleep
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     sleep(timeout = nil)
-  #
-  def sleep: (?untyped timeout) -> untyped
+  def sleep: (?Numeric timeout) -> Integer
 
   private
 
