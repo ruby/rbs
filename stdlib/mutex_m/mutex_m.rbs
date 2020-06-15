@@ -61,6 +61,12 @@ module Mutex_m
   #
   def sleep: (?Numeric timeout) -> Integer
 
+  alias locked? mu_locked?
+  alias lock mu_lock
+  alias unlock mu_unlock
+  alias try_lock mu_try_lock
+  alias synchronize mu_synchronize
+
   private
 
   def initialize: (*untyped args) -> untyped
