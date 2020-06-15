@@ -1,0 +1,31 @@
+module Mutex_m
+  def self.append_features: (untyped cl) -> untyped
+
+  def self.define_aliases: (untyped cl) -> untyped
+
+  def self.extend_object: (untyped obj) -> untyped
+
+  public
+
+  def mu_extended: () -> untyped
+
+  def mu_lock: () -> untyped
+
+  def mu_locked?: () -> untyped
+
+  def mu_synchronize: () { (*untyped) -> untyped } -> untyped
+
+  def mu_try_lock: () -> untyped
+
+  def mu_unlock: () -> untyped
+
+  def sleep: (?untyped timeout) -> untyped
+
+  private
+
+  def initialize: (*untyped args) -> untyped
+
+  def mu_initialize: () -> untyped
+end
+
+Mutex_m::VERSION: String
