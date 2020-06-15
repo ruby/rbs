@@ -1,3 +1,31 @@
+# # mutex_m.rb
+#
+# When 'mutex_m' is required, any object that extends or includes Mutex_m will
+# be treated like a Mutex.
+#
+# Start by requiring the standard library Mutex_m:
+#
+#     require "mutex_m.rb"
+#
+# From here you can extend an object with Mutex instance methods:
+#
+#     obj = Object.new
+#     obj.extend Mutex_m
+#
+# Or mixin Mutex_m into your module to your class inherit Mutex instance methods
+# --- remember to call super() in your class initialize method.
+#
+#     class Foo
+#       include Mutex_m
+#       def initialize
+#         # ...
+#         super()
+#       end
+#       # ...
+#     end
+#     obj = Foo.new
+#     # this obj can be handled like Mutex
+#
 module Mutex_m
   def self.append_features: (untyped cl) -> untyped
 
@@ -9,16 +37,46 @@ module Mutex_m
 
   def mu_extended: () -> untyped
 
+  # See Mutex#lock
+  #
+  # # arglists 💪👽🚨 << Delete this section
+  #     mu_lock()
+  #
   def mu_lock: () -> untyped
 
+  # See Mutex#locked?
+  #
+  # # arglists 💪👽🚨 << Delete this section
+  #     mu_locked?()
+  #
   def mu_locked?: () -> untyped
 
+  # See Mutex#synchronize
+  #
+  # # arglists 💪👽🚨 << Delete this section
+  #     mu_synchronize(&block)
+  #
   def mu_synchronize: () { (*untyped) -> untyped } -> untyped
 
+  # See Mutex#try_lock
+  #
+  # # arglists 💪👽🚨 << Delete this section
+  #     mu_try_lock()
+  #
   def mu_try_lock: () -> untyped
 
+  # See Mutex#unlock
+  #
+  # # arglists 💪👽🚨 << Delete this section
+  #     mu_unlock()
+  #
   def mu_unlock: () -> untyped
 
+  # See Mutex#sleep
+  #
+  # # arglists 💪👽🚨 << Delete this section
+  #     sleep(timeout = nil)
+  #
   def sleep: (?untyped timeout) -> untyped
 
   private
