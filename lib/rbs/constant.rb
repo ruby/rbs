@@ -4,23 +4,23 @@ module RBS
     attr_reader :type
     attr_reader :declaration
 
-    def initialize(name:, type:, declaration:)
+    def initialize(name:, type:, entry:)
       @name = name
       @type = type
-      @declaration = declaration
+      @entry = entry
     end
 
     def ==(other)
       other.is_a?(Constant) &&
         other.name == name &&
         other.type == type &&
-        other.declaration == declaration
+        other.entry == entry
     end
 
     alias eql? ==
 
     def hash
-      self.class.hash ^ name.hash ^ type.hash ^ declaration.hash
+      self.class.hash ^ name.hash ^ type.hash ^ entry.hash
     end
   end
 end

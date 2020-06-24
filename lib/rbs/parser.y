@@ -10,7 +10,7 @@ class RBS::Parser
         kINTERFACE kEND kINCLUDE kEXTEND kATTRREADER kATTRWRITER kATTRACCESSOR tOPERATOR tQUOTEDMETHOD tQUOTEDIDENT
         kPREPEND kEXTENSION kINCOMPATIBLE
         type_TYPE type_SIGNATURE type_METHODTYPE tEOF
-        kOUT kIN kUNCHECKED
+        kOUT kIN kUNCHECKED kOVERLOAD
 
   prechigh
   nonassoc kQUESTION
@@ -161,6 +161,7 @@ rule
         result = Members::Private.new(location: val[0].location)
       }
     | alias_member
+    | signature
 
   attribute_member:
       annotations kATTRREADER keyword type {
@@ -386,10 +387,12 @@ rule
                                       comment: leading_comment(val[0].first&.location || location))
       }
 
+  overload: { result = nil } | kOVERLOAD
+
   method_member:
-      annotations attributes kDEF method_kind def_name method_types {
-        location = val[2].location + val[5].last.location
-        types = val[5].map do |type|
+      annotations attributes overload kDEF method_kind def_name method_types {
+        location = val[3].location + val[6].last.location
+        types = val[6].map do |type|
           case type
           when LocatedValue
             type.value
@@ -398,13 +401,14 @@ rule
           end
         end
         result = Members::MethodDefinition.new(
-          name: val[4].value,
-          kind: val[3],
+          name: val[5].value,
+          kind: val[4],
           types: types,
           annotations: val[0],
           location: location,
-          comment: leading_comment(val[0].first&.location || val[1].first&.location || val[2].location),
-          attributes: val[1].map(&:value)
+          comment: leading_comment(val[0].first&.location || val[1].first&.location || val[2]&.location || val[3].location),
+          attributes: val[1].map(&:value),
+          overload: !!val[2]
         )
       }
 
@@ -506,7 +510,7 @@ rule
       kCLASS | kVOID | kNIL | kTRUE | kFALSE | kANY | kUNTYPED | kTOP | kBOT | kINSTANCE | kBOOL | kSINGLETON
     | kTYPE | kMODULE | kPRIVATE | kPUBLIC | kEND | kINCLUDE | kEXTEND | kPREPEND
     | kATTRREADER | kATTRACCESSOR | kATTRWRITER | kDEF | kEXTENSION | kSELF | kINCOMPATIBLE
-    | kUNCHECKED | kINTERFACE | kSUPER | kALIAS | kOUT | kIN
+    | kUNCHECKED | kINTERFACE | kSUPER | kALIAS | kOUT | kIN | kOVERLOAD
 
   module_type_params:
       { result = nil }
@@ -1173,6 +1177,7 @@ KEYWORDS = {
   "extension" => :kEXTENSION,
   "incompatible" => :kINCOMPATIBLE,
   "unchecked" => :kUNCHECKED,
+  "overload" => :kOVERLOAD,
   "out" => :kOUT,
   "in" => :kIN,
 }

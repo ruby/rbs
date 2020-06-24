@@ -54,7 +54,7 @@
 #     1000000
 #     FiberError: dead fiber called
 #
-extension Fiber (Fiber)
+class Fiber
   # Returns the current fiber. You need to `require 'fiber'` before using this
   # method. If you are not running in the context of a fiber this method will
   # return the root fiber.

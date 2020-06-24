@@ -3,7 +3,7 @@ require "rbs/test"
 require "minitest/autorun"
 
 require "minitest/reporters"
-Minitest::Reporters.use!
+Minitest::Reporters.use! [Minitest::Reporters::DefaultReporter.new]
 
 class ToInt
   def initialize(value = 3)
@@ -105,8 +105,10 @@ class StdlibTest < Minitest::Test
   DEFAULT_LOGGER.level = ENV["RBS_TEST_LOGLEVEL"] || "info"
 
   loader = RBS::EnvironmentLoader.new
-  DEFAULT_ENV = RBS::Environment.new
-  loader.load(env: DEFAULT_ENV)
+  DEFAULT_ENV = RBS::Environment.new.yield_self do |env|
+    loader.load(env: env)
+    env.resolve_type_names
+  end
 
   def self.target(klass)
     @target = klass
@@ -122,8 +124,10 @@ class StdlibTest < Minitest::Test
       loader.add library: lib
     end
 
-    @env = RBS::Environment.new
-    loader.load(env: @env)
+    @env = RBS::Environment.new.yield_self do |env|
+      loader.load(env: env)
+      env.resolve_type_names
+    end
   end
 
   def self.hook

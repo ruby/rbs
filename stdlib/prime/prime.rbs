@@ -129,60 +129,60 @@ class Prime
   # Returns the singleton instance.
   #
   def self.instance: () -> Prime
-end
 
-# An abstract class for enumerating pseudo-prime numbers.
-#
-# Concrete subclasses should override succ, next, rewind.
-#
-class Prime::PseudoPrimeGenerator
-  def initialize: (?Integer?) -> void
-
-  include Enumerable[Integer, void]
-
-  attr_accessor upper_bound (): Integer?
-
-  # Iterates the given block for each prime number.
+  # An abstract class for enumerating pseudo-prime numbers.
   #
-  def each: () { (Integer) -> void } -> void
-
-  # alias of `succ`.
+  # Concrete subclasses should override succ, next, rewind.
   #
-  def next: () -> Integer
+  class PseudoPrimeGenerator
+    def initialize: (?Integer?) -> void
 
-  # Rewinds the internal position for enumeration.
+    include Enumerable[Integer, void]
+
+    attr_accessor upper_bound (): Integer?
+
+    # Iterates the given block for each prime number.
+    #
+    def each: () { (Integer) -> void } -> void
+
+    # alias of `succ`.
+    #
+    def next: () -> Integer
+
+    # Rewinds the internal position for enumeration.
+    #
+    # See `Enumerator`#rewind.
+    #
+    def rewind: () -> void
+
+    def size: () -> Float
+
+    # returns the next pseudo-prime number, and move the internal position forward.
+    #
+    # `PseudoPrimeGenerator`#succ raises `NotImplementedError`.
+    #
+    def succ: () -> Integer
+  end
+
+  # An implementation of `PseudoPrimeGenerator`.
   #
-  # See `Enumerator`#rewind.
+  # Uses `EratosthenesSieve`.
   #
-  def rewind: () -> void
+  class EratosthenesGenerator < PseudoPrimeGenerator
+  end
 
-  def size: () -> Float
-
-  # returns the next pseudo-prime number, and move the internal position forward.
+  # An implementation of `PseudoPrimeGenerator` which uses a prime table generated
+  # by trial division.
   #
-  # `PseudoPrimeGenerator`#succ raises `NotImplementedError`.
+  class TrialDivisionGenerator < PseudoPrimeGenerator
+  end
+
+  # Generates all integers which are greater than 2 and are not divisible by
+  # either 2 or 3.
   #
-  def succ: () -> Integer
-end
-
-# An implementation of `PseudoPrimeGenerator`.
-# 
-# Uses `EratosthenesSieve`.
-# 
-class Prime::EratosthenesGenerator < PseudoPrimeGenerator
-end
-
-# An implementation of `PseudoPrimeGenerator` which uses a prime table generated
-# by trial division.
-# 
-class Prime::TrialDivisionGenerator < PseudoPrimeGenerator
-end
-
-# Generates all integers which are greater than 2 and are not divisible by
-# either 2 or 3.
-# 
-# This is a pseudo-prime generator, suitable on checking primality of an integer
-# by brute force method.
-# 
-class Prime::Generator23 < PseudoPrimeGenerator
+  # This is a pseudo-prime generator, suitable on checking primality of an integer
+  # by brute force method.
+  #
+  class Generator23 < PseudoPrimeGenerator
+  end
 end

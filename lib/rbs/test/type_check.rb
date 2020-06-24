@@ -220,8 +220,7 @@ module RBS
           val == klass
         when Types::Interface
           methods = Set.new(Test.call(val, METHODS))
-          decl = builder.env.find_class(type.name)
-          if (definition = builder.build_interface(type.name, decl))
+          if (definition = builder.build_interface(type.name))
             definition.methods.each_key.all? do |method_name|
               methods.member?(method_name)
             end

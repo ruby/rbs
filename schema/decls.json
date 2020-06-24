@@ -116,6 +116,21 @@
         },
         {
           "$ref": "members.json#/definitions/alias"
+        },
+        {
+          "$ref": "#/definitions/alias"
+        },
+        {
+          "$ref": "#/definitions/constant"
+        },
+        {
+          "$ref": "#/definitions/class"
+        },
+        {
+          "$ref": "#/definitions/module"
+        },
+        {
+          "$ref": "#/definitions/interface"
         }
       ]
     },

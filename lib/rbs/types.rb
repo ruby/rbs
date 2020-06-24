@@ -12,6 +12,12 @@ module RBS
       end
     end
 
+    module NoTypeName
+      def map_type_name
+        self
+      end
+    end
+
     module EmptyEachType
       def each_type
         if block_given?
@@ -43,6 +49,7 @@ module RBS
         include NoFreeVariables
         include NoSubst
         include EmptyEachType
+        include NoTypeName
 
         def to_json(*a)
           klass = to_s.to_sym
@@ -82,13 +89,19 @@ module RBS
       class Top < Base; end
       class Bottom < Base; end
       class Self < Base; end
-      class Instance < Base; end
+      class Instance < Base
+        def sub(s)
+          s.apply(self)
+        end
+      end
       class Class < Base; end
     end
 
     class Variable
       attr_reader :name
       attr_reader :location
+
+      include NoTypeName
 
       def initialize(name:, location:)
         @name = name
@@ -174,6 +187,13 @@ module RBS
       end
 
       include EmptyEachType
+
+      def map_type_name
+        ClassSingleton.new(
+          name: yield(name, location, self),
+          location: location
+        )
+      end
     end
 
     module Application
@@ -235,6 +255,14 @@ module RBS
                        args: args.map {|ty| ty.sub(s) },
                        location: location)
       end
+
+      def map_type_name(&block)
+        Interface.new(
+          name: yield(name, location, self),
+          args: args.map {|type| type.map_type_name(&block) },
+          location: location
+        )
+      end
     end
 
     class ClassInstance
@@ -256,6 +284,14 @@ module RBS
         self.class.new(name: name,
                        args: args.map {|ty| ty.sub(s) },
                        location: location)
+      end
+
+      def map_type_name(&block)
+        ClassInstance.new(
+          name: yield(name, location, self),
+          args: args.map {|type| type.map_type_name(&block) },
+          location: location
+        )
       end
     end
 
@@ -290,6 +326,13 @@ module RBS
       end
 
       include EmptyEachType
+
+      def map_type_name
+        Alias.new(
+          name: yield(name, location, self),
+          location: location
+        )
+      end
     end
 
     class Tuple
@@ -342,6 +385,13 @@ module RBS
         else
           enum_for :each_type
         end
+      end
+
+      def map_type_name(&block)
+        Tuple.new(
+          types: types.map {|type| type.map_type_name(&block) },
+          location: location
+        )
       end
     end
 
@@ -401,6 +451,13 @@ module RBS
           enum_for :each_type
         end
       end
+
+      def map_type_name(&block)
+        Record.new(
+          fields: fields.transform_values {|ty| ty.map_type_name(&block) },
+          location: location
+        )
+      end
     end
 
     class Optional
@@ -448,6 +505,13 @@ module RBS
         else
           enum_for :each_type
         end
+      end
+
+      def map_type_name(&block)
+        Optional.new(
+          type: type.map_type_name(&block),
+          location: location
+        )
       end
     end
 
@@ -510,6 +574,13 @@ module RBS
           enum_for :map_type
         end
       end
+
+      def map_type_name(&block)
+        Union.new(
+          types: types.map {|type| type.map_type_name(&block) },
+          location: location
+        )
+      end
     end
 
     class Intersection
@@ -571,6 +642,13 @@ module RBS
         else
           enum_for :map_type
         end
+      end
+
+      def map_type_name(&block)
+        Intersection.new(
+          types: types.map {|type| type.map_type_name(&block) },
+          location: location
+        )
       end
     end
 
@@ -648,7 +726,7 @@ module RBS
           other.required_keywords == required_keywords &&
           other.optional_keywords == optional_keywords &&
           other.rest_keywords == rest_keywords &&
-          return_type == return_type
+          other.return_type == return_type
       end
 
       alias eql? ==
@@ -707,6 +785,12 @@ module RBS
           )
         else
           enum_for :map_type
+        end
+      end
+
+      def map_type_name(&block)
+        map_type do |type|
+          type.map_type_name(&block)
         end
       end
 
@@ -899,6 +983,13 @@ module RBS
           enum_for :each_type
         end
       end
+
+      def map_type_name(&block)
+        Proc.new(
+          type: type.map_type_name(&block),
+          location: location
+        )
+      end
     end
 
     class Literal
@@ -923,6 +1014,7 @@ module RBS
       include NoFreeVariables
       include NoSubst
       include EmptyEachType
+      include NoTypeName
 
       def to_json(*a)
         { class: :literal, literal: literal.inspect, location: location }.to_json(*a)

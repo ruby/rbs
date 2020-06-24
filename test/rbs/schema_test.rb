@@ -147,7 +147,7 @@ class Foo
   # Hello
   %a{foo:bar:baz}
   def self?.foo: () -> Integer
-  
+
   @foo: Integer
   self.@bar: String
   @@baz: Symbol
@@ -195,7 +195,7 @@ class Foo[A] < String
   # Hello
   %a{foo:bar:baz}
   def self?.foo: () -> Integer
-  
+
   @foo: Integer
   self.@bar: String
   @@baz: Symbol
@@ -261,5 +261,18 @@ end
 EOF
 
     assert_decl decl, :interface
+  end
+
+  def test_nested
+    decl, = RBS::Parser.parse_signature(<<EOF)
+module RBS
+  VERSION: String
+
+  class Namespace
+  end
+end
+EOF
+
+    assert_decl decl, :module
   end
 end

@@ -155,8 +155,11 @@ class Array[Elem]
 end
 
 type foo = String | Integer | [String, String] | ::Array[Integer]
-type M::t = Integer
-type M::s = t
+
+module M
+  type t = Integer
+  type s = t
+end
 
 interface _ToInt
   def to_int: () -> Integer

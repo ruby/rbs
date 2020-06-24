@@ -10,6 +10,14 @@ module RBS
         @type = type
         @declared_in = declared_in
       end
+
+      def sub(s)
+        self.class.new(
+          parent_variable: parent_variable,
+          type: type.sub(s),
+          declared_in: declared_in
+        )
+      end
     end
 
     class Method
@@ -20,9 +28,9 @@ module RBS
       attr_reader :accessibility
       attr_reader :attributes
       attr_reader :annotations
-      attr_reader :comment
+      attr_reader :comments
 
-      def initialize(super_method:, method_types:, defined_in:, implemented_in:, accessibility:, attributes:, annotations:, comment:)
+      def initialize(super_method:, method_types:, defined_in:, implemented_in:, accessibility:, attributes:, annotations:, comments:)
         @super_method = super_method
         @method_types = method_types
         @defined_in = defined_in
@@ -30,7 +38,7 @@ module RBS
         @accessibility = accessibility
         @attributes = attributes
         @annotations = annotations
-        @comment = comment
+        @comments = comments
       end
 
       def public?
@@ -50,7 +58,7 @@ module RBS
           accessibility: @accessibility,
           attributes: attributes,
           annotations: annotations,
-          comment: comment
+          comments: comments
         )
       end
 
@@ -65,7 +73,20 @@ module RBS
           accessibility: @accessibility,
           attributes: attributes,
           annotations: annotations,
-          comment: comment
+          comments: comments
+        )
+      end
+
+      def map_method_type(&block)
+        self.class.new(
+          super_method: super_method,
+          method_types: method_types.map(&block),
+          defined_in: defined_in,
+          implemented_in: implemented_in,
+          accessibility: @accessibility,
+          attributes: attributes,
+          annotations: annotations,
+          comments: comments
         )
       end
     end
@@ -73,78 +94,149 @@ module RBS
     module Ancestor
       Instance = Struct.new(:name, :args, keyword_init: true)
       Singleton = Struct.new(:name, keyword_init: true)
-      ExtensionInstance = Struct.new(:name, :extension_name, :args, keyword_init: true)
-      ExtensionSingleton = Struct.new(:name, :extension_name, keyword_init: true)
     end
 
-    attr_reader :declaration
+    class InstanceAncestors
+      attr_reader :type_name
+      attr_reader :params
+      attr_reader :ancestors
+
+      def initialize(type_name:, params:, ancestors:)
+        @type_name = type_name
+        @params = params
+        @ancestors = ancestors
+      end
+
+      def apply(args, location:)
+        InvalidTypeApplicationError.check!(
+          type_name: type_name,
+          args: args,
+          params: params,
+          location: location
+        )
+
+        subst = Substitution.build(params, args)
+
+        ancestors.map do |ancestor|
+          case ancestor
+          when Ancestor::Instance
+            if ancestor.args.empty?
+              ancestor
+            else
+              Ancestor::Instance.new(
+                name: ancestor.name,
+                args: ancestor.args.map {|type| type.sub(subst) }
+              )
+            end
+          when Ancestor::Singleton
+            ancestor
+          end
+        end
+      end
+    end
+
+    class SingletonAncestors
+      attr_reader :type_name
+      attr_reader :ancestors
+
+      def initialize(type_name:, ancestors:)
+        @type_name = type_name
+        @ancestors = ancestors
+      end
+    end
+
+    attr_reader :type_name
+    attr_reader :entry
+    attr_reader :ancestors
     attr_reader :self_type
     attr_reader :methods
     attr_reader :instance_variables
     attr_reader :class_variables
-    attr_reader :ancestors
 
-    def initialize(declaration:, self_type:, ancestors:)
-      unless declaration.is_a?(AST::Declarations::Class) ||
-        declaration.is_a?(AST::Declarations::Module) ||
-        declaration.is_a?(AST::Declarations::Interface) ||
-        declaration.is_a?(AST::Declarations::Extension)
-        raise "Declaration should be a class, module, or interface: #{declaration.name}"
+    def initialize(type_name:, entry:, self_type:, ancestors:)
+      case entry
+      when Environment::ClassEntry, Environment::ModuleEntry
+        # ok
+      else
+        unless entry.decl.is_a?(AST::Declarations::Interface)
+          raise "Declaration should be a class, module, or interface: #{type_name}"
+        end
       end
 
-      unless (self_type.is_a?(Types::ClassSingleton) || self_type.is_a?(Types::Interface) || self_type.is_a?(Types::ClassInstance)) && self_type.name == declaration.name.absolute!
+      unless self_type.is_a?(Types::ClassSingleton) || self_type.is_a?(Types::Interface) || self_type.is_a?(Types::ClassInstance)
         raise "self_type should be the type of declaration: #{self_type}"
       end
 
+      @type_name = type_name
       @self_type = self_type
-      @declaration = declaration
+      @entry = entry
       @methods = {}
       @instance_variables = {}
       @class_variables = {}
       @ancestors = ancestors
     end
 
-    def name
-      declaration.name
-    end
-
     def class?
-      declaration.is_a?(AST::Declarations::Class)
+      entry.is_a?(Environment::ClassEntry)
     end
 
     def module?
-      declaration.is_a?(AST::Declarations::Module)
+      entry.is_a?(Environment::ModuleEntry)
+    end
+
+    def interface?
+      entry.is_a?(Environment::SingleEntry) && entry.decl.is_a?(AST::Declarations::Interface)
     end
 
     def class_type?
-      @self_type.is_a?(Types::ClassSingleton)
+      self_type.is_a?(Types::ClassSingleton)
     end
 
     def instance_type?
-      @self_type.is_a?(Types::ClassInstance)
+      self_type.is_a?(Types::ClassInstance)
     end
 
     def interface_type?
-      @self_type.is_a?(Types::Interface)
+      self_type.is_a?(Types::Interface)
     end
 
     def type_params
-      @self_type.args.map(&:name)
+      type_params_decl.each.map(&:name)
     end
 
     def type_params_decl
-      case declaration
-      when AST::Declarations::Extension
-        nil
-      else
-        declaration.type_params
+      case entry
+      when Environment::ClassEntry, Environment::ModuleEntry
+        entry.type_params
+      when Environment::SingleEntry
+        entry.decl.type_params
       end
+    end
+
+    def sub(s)
+      definition = self.class.new(type_name: type_name, self_type: self_type.sub(s), ancestors: ancestors, entry: entry)
+
+      definition.methods.merge!(methods.transform_values {|method| method.sub(s) })
+      definition.instance_variables.merge!(instance_variables.transform_values {|v| v.sub(s) })
+      definition.class_variables.merge!(class_variables.transform_values {|v| v.sub(s) })
+
+      definition
+    end
+
+    def map_method_type(&block)
+      definition = self.class.new(type_name: type_name, self_type: self_type, ancestors: ancestors, entry: entry)
+
+      definition.methods.merge!(methods.transform_values {|method| method.map_method_type(&block) })
+      definition.instance_variables.merge!(instance_variables)
+      definition.class_variables.merge!(class_variables)
+
+      definition
     end
 
     def each_type(&block)
       if block_given?
         methods.each_value do |method|
-          if method.defined_in == self.declaration
+          if method.defined_in == type_name
             method.method_types.each do |method_type|
               method_type.each_type(&block)
             end
@@ -152,13 +244,13 @@ module RBS
         end
 
         instance_variables.each_value do |var|
-          if var.declared_in == self.declaration
+          if var.declared_in == type_name
             yield var.type
           end
         end
 
         class_variables.each_value do |var|
-          if var.declared_in == self.declaration
+          if var.declared_in == type_name
             yield var.type
           end
         end

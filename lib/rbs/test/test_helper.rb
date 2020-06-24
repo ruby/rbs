@@ -17,8 +17,9 @@ module RBS
                        loader.add library: lib
                      end
 
-                     RBS::Environment.new.tap do |env|
+                     RBS::Environment.new.yield_self do |env|
                        loader.load(env: env)
+                       env.resolve_type_names
                      end
                    end
         end
@@ -126,8 +127,7 @@ module RBS
         type, definition = target
         method_types = case
                        when definition.instance_type?
-                         subst = Substitution.build(definition.declaration.type_params.each.map(&:name),
-                                                    type.args)
+                         subst = Substitution.build(definition.type_params, type.args)
                          definition.methods[method].method_types.map do |method_type|
                            method_type.sub(subst)
                          end

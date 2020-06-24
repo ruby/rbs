@@ -57,7 +57,7 @@ end
 
 class Object < BasicObject
   include Kernel
- 
+
   public
   def __id__: -> Integer
 
@@ -79,7 +79,6 @@ end
 
 class String
   include Comparable
-  prepend Enumerable[String, void]
 
   def self.try_convert: (untyped) -> String?
 end
@@ -118,7 +117,7 @@ SIG
         env = RBS::Environment.new()
         loader.load(env: env)
 
-        yield env
+        yield env.resolve_type_names
       end
     end
   end

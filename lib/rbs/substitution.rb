@@ -1,6 +1,7 @@
 module RBS
   class Substitution
     attr_reader :mapping
+    attr_accessor :instance_type
 
     def initialize()
       @mapping = {}
@@ -10,7 +11,7 @@ module RBS
       mapping[from] = to
     end
 
-    def self.build(variables, types, &block)
+    def self.build(variables, types, instance_type: Types::Bases::Instance.new(location: nil), &block)
       unless variables.size == types.size
         raise "Broken substitution: variables=#{variables}, types=#{types}"
       end
@@ -22,6 +23,8 @@ module RBS
           type = block_given? ? yield(t) : t
           subst.add(from: v, to: type)
         end
+
+        subst.instance_type = instance_type
       end
     end
 
@@ -29,6 +32,8 @@ module RBS
       case ty
       when Types::Variable
         mapping[ty.name] || ty
+      when Types::Bases::Instance
+        instance_type
       else
         ty
       end
@@ -40,6 +45,8 @@ module RBS
         vars.each do |var|
           subst.mapping.delete(var)
         end
+
+        subst.instance_type = self.instance_type
       end
     end
   end

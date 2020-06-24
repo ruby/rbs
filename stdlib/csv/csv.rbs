@@ -159,7 +159,7 @@
 # with it.
 #
 class CSV < Object
-  include Enumerable
+  include Enumerable[untyped, untyped]
 
   # This method is intended as the primary interface for reading CSV files. You
   # pass a `path` and any `options` you wish to set for the read. Each row of file
@@ -407,7 +407,7 @@ CSV::VERSION: String
 # processing is activated.
 #
 class CSV::Row < Object
-  include Enumerable
+  include Enumerable[untyped, untyped]
 
   # If a two-element Array is provided, it is assumed to be a header and field and
   # the pair is appended. A Hash works the same way with the key being the header
@@ -544,8 +544,6 @@ class CSV::Row < Object
 
   def size: (*untyped args) { (*untyped) -> untyped } -> untyped
 
-  alias to_ary to_a
-
   # Returns the row as a CSV String. Headers are not used. Equivalent to:
   #
   #     csv_row.fields.to_csv( options )
@@ -564,7 +562,7 @@ class CSV::Row < Object
   alias values_at fields
 end
 
-class CSV::FieldInfo < Struct
+class CSV::FieldInfo < Struct[untyped]
 end
 
 # The error thrown when the parser encounters illegal CSV formatting.
@@ -580,7 +578,7 @@ end
 # processing is activated.
 #
 class CSV::Table[out Elem] < Object
-  include Enumerable
+  include Enumerable[untyped, untyped]
 
   # Constructs a new CSV::Table from `array_of_rows`, which are expected to be
   # CSV::Row objects. All rows are assumed to have the same headers.

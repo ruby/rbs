@@ -7,21 +7,34 @@ module RBS
       definition_builder.env
     end
 
+    def resolver
+      @resolver ||= TypeNameResolver.from_env(env)
+    end
+
     def initialize(builder:)
       @definition_builder = builder
       @constant_scopes_cache = {}
     end
 
+    def absolute_type(type, context:)
+      type.map_type_name do |type_name, location|
+        absolute_type_name(type_name, context: context, location: location)
+      end
+    end
+
+    def absolute_type_name(type_name, context:, location:)
+      resolver.resolve(type_name, context: context) or
+        raise NoTypeFoundError.new(type_name: type_name, location: location)
+    end
+
     def name_to_constant(name)
       case
-      when env.name_to_constant.key?(name)
-        decl = env.name_to_constant[name]
-        type = env.absolute_type(decl.type, namespace: name.namespace) {|type| type.name.absolute! }
-        Constant.new(name: name, type: type, declaration: decl)
-      when env.class?(name)
-        decl = env.name_to_decl[name]
+      when entry = env.constant_decls[name]
+        type = absolute_type(entry.decl.type, context: entry.context)
+        Constant.new(name: name, type: type, entry: entry)
+      when entry = env.class_decls[name]
         type = Types::ClassSingleton.new(name: name, location: nil)
-        Constant.new(name: name, type: type, declaration: decl)
+        Constant.new(name: name, type: type, entry: entry)
       end
     end
 
@@ -88,14 +101,18 @@ module RBS
     end
 
     def constant_scopes_module(name, scopes:)
-      decl = env.find_class(name)
+      entry = env.class_decls[name]
       namespace = name.to_namespace
 
-      decl.members.each do |member|
-        case member
-        when AST::Members::Include
-          constant_scopes_module absolute_type_name(member.name, namespace: namespace),
-                                 scopes: scopes
+      entry.decls.each do |d|
+        d.decl.members.each do |member|
+          case member
+          when AST::Members::Include
+            if member.name.class?
+              constant_scopes_module absolute_type_name(member.name, context: d.context, location: member.location),
+                                     scopes: scopes
+            end
+          end
         end
       end
 
@@ -103,53 +120,42 @@ module RBS
     end
 
     def constant_scopes0(name, scopes: [])
-      decl = env.find_class(name)
+      entry = env.class_decls[name]
       namespace = name.to_namespace
 
-      case decl
-      when AST::Declarations::Module
-        constant_scopes0 BuiltinNames::Module.name, scopes: scopes
-        constant_scopes_module name, scopes: scopes
-
-      when AST::Declarations::Class
+      case entry
+      when Environment::ClassEntry
         unless name == BuiltinNames::BasicObject.name
-          super_name = decl.super_class&.yield_self {|super_class|
-            absolute_type_name(super_class.name, namespace: namespace)
-          } || BuiltinNames::Object.name
+          super_name = entry.primary.decl.super_class&.yield_self do |super_class|
+            absolute_type_name(super_class.name, context: entry.primary.context, location: entry.primary.decl.location)
+          end || BuiltinNames::Object.name
 
           constant_scopes0 super_name, scopes: scopes
         end
 
-        decl.members.each do |member|
-          case member
-          when AST::Members::Include
-            constant_scopes_module absolute_type_name(member.name, namespace: namespace),
-                                   scopes: scopes
+        entry.decls.each do |d|
+          d.decl.members.each do |member|
+            case member
+            when AST::Members::Include
+              if member.name.class?
+                constant_scopes_module absolute_type_name(member.name, context: d.context, location: member.location),
+                                       scopes: scopes
+              end
+            end
           end
         end
 
         scopes.unshift namespace
+
+      when Environment::ModuleEntry
+        constant_scopes0 BuiltinNames::Module.name, scopes: scopes
+        constant_scopes_module name, scopes: scopes
+
       else
         raise "Unexpected declaration: #{name} (#{decl.class})"
       end
 
-      env.each_extension(name).sort_by {|e| e.extension_name.to_s }.each do |extension|
-        extension.members.each do |member|
-          case member
-          when AST::Members::Include
-            constant_scopes_module absolute_type_name(member.name, namespace: namespace),
-                                   scopes: []
-          end
-        end
-      end
-
       scopes
-    end
-
-    def absolute_type_name(name, namespace:)
-      env.absolute_type_name(name, namespace: namespace) do
-        raise
-      end
     end
   end
 end

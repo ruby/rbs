@@ -1,4 +1,4 @@
-extension Integer (Prime)
+class Integer
   # Iterates the given block over all prime numbers.
   #
   # See Prime#each for more details.

@@ -1066,17 +1066,17 @@ class Pathname
   def prepend_prefix: (untyped prefix, untyped relpath) -> untyped
 
   def split_names: (untyped path) -> untyped
+
+  SAME_PATHS: Proc
+
+  SEPARATOR_LIST: String
+
+  SEPARATOR_PAT: Regexp
+
+  TO_PATH: Symbol
 end
 
-Pathname::SAME_PATHS: Proc
-
-Pathname::SEPARATOR_LIST: String
-
-Pathname::SEPARATOR_PAT: Regexp
-
-Pathname::TO_PATH: Symbol
-
-extension Kernel (Pathname)
+module Kernel
   # Creates a new Pathname object from the given string, `path`, and returns
   # pathname object.
   #

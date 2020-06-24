@@ -101,7 +101,7 @@ class RBS::SignatureParsingTest < Minitest::Test
       interface _Each[A, B]
         #
         # Yield all elements included in `self`.
-        #  
+        #
         def count: -> Integer
                  | (untyped) -> Integer
                  | [X] { (A) -> X } -> Integer
@@ -611,7 +611,7 @@ class RBS::SignatureParsingTest < Minitest::Test
       %a(foo)
       %a[hello world]
       class Hello end
-      
+
       %a{Lorem Ipsum}
       module Foo end
 
@@ -924,7 +924,7 @@ module Kernel
   # at the point of call. This object can be used when calling `eval` to
   # execute the evaluated command in this environment. See also the
   # description of class `Binding` .
-  # 
+  #
   # ```ruby
   # def get_binding(param)
   #   binding
@@ -972,6 +972,57 @@ end
 EOF
 
       assert_equal "class Exception < Object", decls[0].location.source.lines[0].chomp
+    end
+  end
+
+  def test_decl_in_module
+    Parser.parse_signature(<<EOF).yield_self do |decls|
+module Steep
+  VERSION: String
+  type t = AST::Types::Base | AST::Types::Proc
+
+  def self.logger: () -> Logger
+
+  class Foo end
+  module Bar end
+  interface _Baz end
+end
+EOF
+
+      mod = decls[0]
+
+      assert_instance_of Declarations::Module, mod
+
+      assert_equal 6, mod.members.size
+
+      assert_instance_of Declarations::Constant, mod.members[0]
+      assert_instance_of Declarations::Alias, mod.members[1]
+      assert_instance_of Members::MethodDefinition, mod.members[2]
+      assert_instance_of Declarations::Class, mod.members[3]
+      assert_instance_of Declarations::Module, mod.members[4]
+      assert_instance_of Declarations::Interface, mod.members[5]
+
+      assert_equal 1, mod.each_member.count
+      assert_equal 5, mod.each_decl.count
+    end
+  end
+
+  def test_overload_def
+    Parser.parse_signature(<<EOF).yield_self do |decls|
+module Steep
+  overload def to_s: (Integer) -> String
+  def to_i: () -> Integer
+end
+EOF
+      decls[0].members[0].tap do |member|
+        assert_instance_of Members::MethodDefinition, member
+        assert_operator member, :overload?
+      end
+
+      decls[0].members[1].tap do |member|
+        assert_instance_of Members::MethodDefinition, member
+        refute_operator member, :overload?
+      end
     end
   end
 end

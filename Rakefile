@@ -13,6 +13,11 @@ multitask :default => [:test, :stdlib_test, :rubocop, :validate]
 
 task :validate => :parser do
   sh "rbs validate"
+
+  FileList["stdlib/*"].each do |path|
+    next if path =~ %r{stdlib/builtin}
+    sh "rbs -r#{File.basename(path)} validate"
+  end
 end
 
 FileList["test/stdlib/**/*_test.rb"].each do |test|
@@ -53,8 +58,10 @@ namespace :generate do
       def initialize(klass)
         @klass = klass
 
-        @env = Ruby::Signature::Environment.new
-        Ruby::Signature::EnvironmentLoader.new.load(env: @env)
+        @env = Ruby::Signature::Environment.new.yield_self do |env|
+          Ruby::Signature::EnvironmentLoader.new.load(env: env)
+          env.resolve_type_names
+        end
       end
 
       def call
@@ -122,13 +129,13 @@ namespace :generate do
 
       def class_methods
         @class_methods ||= Ruby::Signature::DefinitionBuilder.new(env: env).build_singleton(type_name).methods.select {|_, definition|
-          definition.implemented_in.name.absolute! == type_name
+          definition.implemented_in == type_name
         }
       end
 
       def instance_methods
         @instance_methods ||= Ruby::Signature::DefinitionBuilder.new(env: env).build_instance(type_name).methods.select {|_, definition|
-          definition.implemented_in.name.absolute! == type_name
+          definition.implemented_in == type_name
         }
       end
     end
