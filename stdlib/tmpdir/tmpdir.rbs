@@ -1,4 +1,4 @@
-extension Dir (tmpdir)
+class Dir
   # Returns the operating system's temporary file path.
   # 
   def self.tmpdir: () -> String

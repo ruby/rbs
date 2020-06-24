@@ -898,7 +898,7 @@ class Thread::ConditionVariable < Object
   # 
   # If `timeout` is given, this method returns after `timeout` seconds
   # passed, even if no other thread doesn't signal.
-  def wait: (Mutex mutex, ?Integer timeout) -> self
+  def wait: (Thread::Mutex mutex, ?Integer timeout) -> self
 end
 
 # [Mutex](Mutex) implements a simple semaphore that
@@ -1078,7 +1078,7 @@ class Thread::SizedQueue < Thread::Queue
   # Alias for: [push](SizedQueue.downloaded.ruby_doc#method-i-push)
   alias enq push
 
-  def initialize: (Integer max) -> SizedQueue
+  def initialize: (Integer max) -> void
 
   # Returns the maximum size of the queue.
   def max: () -> Integer

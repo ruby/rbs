@@ -139,7 +139,7 @@ module Benchmark
   #     >total:   2.930000   0.000000   2.930000 (  2.932889)
   #     >avg:     0.976667   0.000000   0.976667 (  0.977630)
   #
-  def self?.benchmark: (String caption, ?Integer? label_width, ?String? format, *String labels) { (Report report) -> (Array[Tms] | void) } -> ::Array[Benchmark::Tms]
+  def self?.benchmark: (String caption, ?Integer? label_width, ?String? format, *String labels) { (Report report) -> (Array[Tms] | void) } -> Array[Tms]
 
   # A simple interface to the #benchmark method, #bm generates sequential reports
   # with labels. `label_width` and `labels` parameters have the same meaning as
@@ -161,7 +161,7 @@ module Benchmark
   #     times:    0.960000   0.000000   0.960000 (  0.960423)
   #     upto:     0.950000   0.000000   0.950000 (  0.954864)
   #
-  def self?.bm: (?Integer label_width, *String labels) { (Report report) -> void } -> ::Array[Benchmark::Tms]
+  def self?.bm: (?Integer label_width, *String labels) { (Report report) -> void } -> Array[Tms]
 
   # Sometimes benchmark results are skewed because code executed earlier
   # encounters different garbage collection overheads than that run later. #bmbm
@@ -198,7 +198,7 @@ module Benchmark
   # #bmbm yields a Benchmark::Job object and returns an array of Benchmark::Tms
   # objects.
   #
-  def self?.bmbm: (?Integer width) { (Job job) -> void } -> ::Array[Benchmark::Tms]
+  def self?.bmbm: (?Integer width) { (Job job) -> void } -> Array[Tms]
 
   # Returns the time used to execute the given block as a Benchmark::Tms object.
   # Takes `label` option.
@@ -216,157 +216,157 @@ module Benchmark
   #
   #     0.220000   0.000000   0.220000 (  0.227313)
   #
-  def self?.measure: (?String label) { () -> void } -> Benchmark::Tms
+  def self?.measure: (?String label) { () -> void } -> Tms
 
   # Returns the elapsed real time used to execute the given block.
   #
   def self?.realtime: () { () -> void } -> Float
+
+  BENCHMARK_VERSION: String
+
+  # The default caption string (heading above the output times).
+  #
+  CAPTION: String
+
+  # The default format string used to display times.  See also
+  # Benchmark::Tms#format.
+  #
+  FORMAT: String
+
+  class Job
+    # Prints the `label` and measured time for the block,
+    # formatted by `format`. See Tms#format for the
+    # formatting rules.
+    def item: (?String label) { () -> void } -> self
+
+    # An array of 2-element arrays, consisting of label and block pairs.
+    def list: () -> Array[untyped]
+
+    alias report item
+
+    # Length of the widest label in the #list.
+    def width: () -> Integer
+  end
+
+  class Report
+    # Prints the `label` and measured time for the block,
+    # formatted by `format`. See Tms#format for the
+    # formatting rules.
+    def item: (?String label, *untyped format) { () -> void } -> Tms
+
+    # An array of Benchmark::Tms objects representing each item.
+    def list: () -> Array[Tms]
+
+    alias report item
+  end
+
+  # A data object, representing the times associated with a benchmark measurement.
+  #
+  class Tms
+    # Returns a new Tms object obtained by memberwise multiplication of the
+    # individual times for this Tms object by `x`.
+    #
+    def *: (untyped x) -> untyped
+
+    # Returns a new Tms object obtained by memberwise summation of the individual
+    # times for this Tms object with those of the `other` Tms object. This method
+    # and #/() are useful for taking statistics.
+    #
+    def +: (untyped other) -> untyped
+
+    # Returns a new Tms object obtained by memberwise subtraction of the individual
+    # times for the `other` Tms object from those of this Tms object.
+    #
+    def -: (untyped other) -> untyped
+
+    # Returns a new Tms object obtained by memberwise division of the individual
+    # times for this Tms object by `x`. This method and #+() are useful for taking
+    # statistics.
+    #
+    def /: (untyped x) -> untyped
+
+    # Returns a new Tms object whose times are the sum of the times for this Tms
+    # object, plus the time required to execute the code block (`blk`).
+    #
+    def add: () { (*untyped) -> untyped } -> untyped
+
+    # An in-place version of #add. Changes the times of this Tms object by making it
+    # the sum of the times for this Tms object, plus the time required to execute
+    # the code block (`blk`).
+    #
+    def add!: () { (*untyped) -> untyped } -> untyped
+
+    # System CPU time of children
+    #
+    def cstime: () -> Float
+
+    # User CPU time of children
+    #
+    def cutime: () -> Float
+
+    # Returns the contents of this Tms object as a formatted string, according to a
+    # `format` string like that passed to Kernel.format. In addition, #format
+    # accepts the following extensions:
+    #
+    # `%u`
+    # :   Replaced by the user CPU time, as reported by Tms#utime.
+    # `%y`
+    # :   Replaced by the system CPU time, as reported by #stime (Mnemonic: y of
+    #     "s*y*stem")
+    # `%U`
+    # :   Replaced by the children's user CPU time, as reported by Tms#cutime
+    # `%Y`
+    # :   Replaced by the children's system CPU time, as reported by Tms#cstime
+    # `%t`
+    # :   Replaced by the total CPU time, as reported by Tms#total
+    # `%r`
+    # :   Replaced by the elapsed real time, as reported by Tms#real
+    # `%n`
+    # :   Replaced by the label string, as reported by Tms#label (Mnemonic: n of
+    #     "*n*ame")
+    #
+    #
+    # If `format` is not given, FORMAT is used as default value, detailing the user,
+    # system and real elapsed time.
+    #
+    def format: (?String format, *untyped args) -> String
+
+    # Label
+    #
+    def label: () -> String
+
+    # Elapsed real time
+    #
+    def real: () -> Float
+
+    # System CPU time
+    #
+    def stime: () -> Float
+
+    # Returns a new 6-element array, consisting of the label, user CPU time, system
+    # CPU time, children's user CPU time, children's system CPU time and elapsed
+    # real time.
+    #
+    def to_a: () -> untyped
+
+    # Same as #format.
+    #
+    def to_s: () -> String
+
+    # Total time, that is `utime` + `stime` + `cutime` + `cstime`
+    #
+    def total: () -> Float
+
+    # User CPU time
+    #
+    def utime: () -> Float
+
+    # Default caption, see also Benchmark::CAPTION
+    #
+    CAPTION: String
+
+    # Default format string, see also Benchmark::FORMAT
+    #
+    FORMAT: String
+  end
 end
-
-Benchmark::BENCHMARK_VERSION: String
-
-# The default caption string (heading above the output times).
-#
-Benchmark::CAPTION: String
-
-# The default format string used to display times.  See also
-# Benchmark::Tms#format.
-#
-Benchmark::FORMAT: String
-
-class Benchmark::Job
-  # Prints the `label` and measured time for the block,
-  # formatted by `format`. See Tms#format for the
-  # formatting rules.
-  def item: (?String label) { () -> void } -> self
-
-  # An array of 2-element arrays, consisting of label and block pairs.
-  def list: () -> ::Array[untyped]
-
-  alias report item
-
-  # Length of the widest label in the #list.
-  def width: () -> Integer
-end
-
-class Benchmark::Report
-  # Prints the `label` and measured time for the block,
-  # formatted by `format`. See Tms#format for the
-  # formatting rules.
-  def item: (?String label, *untyped format) { () -> void } -> Tms
-
-  # An array of Benchmark::Tms objects representing each item.
-  def list: () -> ::Array[Benchmark::Tms]
-
-  alias report item
-end
-
-# A data object, representing the times associated with a benchmark measurement.
-#
-class Benchmark::Tms
-  # Returns a new Tms object obtained by memberwise multiplication of the
-  # individual times for this Tms object by `x`.
-  #
-  def *: (untyped x) -> untyped
-
-  # Returns a new Tms object obtained by memberwise summation of the individual
-  # times for this Tms object with those of the `other` Tms object. This method
-  # and #/() are useful for taking statistics.
-  #
-  def +: (untyped other) -> untyped
-
-  # Returns a new Tms object obtained by memberwise subtraction of the individual
-  # times for the `other` Tms object from those of this Tms object.
-  #
-  def -: (untyped other) -> untyped
-
-  # Returns a new Tms object obtained by memberwise division of the individual
-  # times for this Tms object by `x`. This method and #+() are useful for taking
-  # statistics.
-  #
-  def /: (untyped x) -> untyped
-
-  # Returns a new Tms object whose times are the sum of the times for this Tms
-  # object, plus the time required to execute the code block (`blk`).
-  #
-  def add: () { (*untyped) -> untyped } -> untyped
-
-  # An in-place version of #add. Changes the times of this Tms object by making it
-  # the sum of the times for this Tms object, plus the time required to execute
-  # the code block (`blk`).
-  #
-  def add!: () { (*untyped) -> untyped } -> untyped
-
-  # System CPU time of children
-  #
-  def cstime: () -> Float
-
-  # User CPU time of children
-  #
-  def cutime: () -> Float
-
-  # Returns the contents of this Tms object as a formatted string, according to a
-  # `format` string like that passed to Kernel.format. In addition, #format
-  # accepts the following extensions:
-  #
-  # `%u`
-  # :   Replaced by the user CPU time, as reported by Tms#utime.
-  # `%y`
-  # :   Replaced by the system CPU time, as reported by #stime (Mnemonic: y of
-  #     "s*y*stem")
-  # `%U`
-  # :   Replaced by the children's user CPU time, as reported by Tms#cutime
-  # `%Y`
-  # :   Replaced by the children's system CPU time, as reported by Tms#cstime
-  # `%t`
-  # :   Replaced by the total CPU time, as reported by Tms#total
-  # `%r`
-  # :   Replaced by the elapsed real time, as reported by Tms#real
-  # `%n`
-  # :   Replaced by the label string, as reported by Tms#label (Mnemonic: n of
-  #     "*n*ame")
-  #
-  #
-  # If `format` is not given, FORMAT is used as default value, detailing the user,
-  # system and real elapsed time.
-  #
-  def format: (?String format, *untyped args) -> String
-
-  # Label
-  #
-  def label: () -> String
-
-  # Elapsed real time
-  #
-  def real: () -> Float
-
-  # System CPU time
-  #
-  def stime: () -> Float
-
-  # Returns a new 6-element array, consisting of the label, user CPU time, system
-  # CPU time, children's user CPU time, children's system CPU time and elapsed
-  # real time.
-  #
-  def to_a: () -> untyped
-
-  # Same as #format.
-  #
-  def to_s: () -> String
-
-  # Total time, that is `utime` + `stime` + `cutime` + `cstime`
-  #
-  def total: () -> Float
-
-  # User CPU time
-  #
-  def utime: () -> Float
-end
-
-# Default caption, see also Benchmark::CAPTION
-#
-Benchmark::Tms::CAPTION: String
-
-# Default format string, see also Benchmark::FORMAT
-#
-Benchmark::Tms::FORMAT: String
