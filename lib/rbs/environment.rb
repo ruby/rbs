@@ -3,278 +3,401 @@ module RBS
     attr_reader :buffers
     attr_reader :declarations
 
-    attr_reader :name_to_decl
-    attr_reader :name_to_extensions
-    attr_reader :name_to_constant
-    attr_reader :name_to_global
-    attr_reader :name_to_alias
+    attr_reader :class_decls
+    attr_reader :interface_decls
+    attr_reader :alias_decls
+    attr_reader :constant_decls
+    attr_reader :global_decls
+
+    module ContextUtil
+      def context
+        @context ||= begin
+                       (outer + [decl]).each.with_object([Namespace.root]) do |decl, array|
+                         array.unshift(array.first + decl.name.to_namespace)
+                       end
+                     end
+      end
+    end
+
+    class MultiEntry
+      D = Struct.new(:decl, :outer, keyword_init: true) do
+        include ContextUtil
+      end
+
+      attr_reader :name
+      attr_reader :decls
+
+      def initialize(name:)
+        @name = name
+        @decls = []
+      end
+
+      def insert(decl:, outer:)
+        decls << D.new(decl: decl, outer: outer)
+      end
+
+      def type_params
+        primary.decl.type_params
+      end
+    end
+
+    class ModuleEntry < MultiEntry
+      def insert(decl:, outer:)
+        unless decl.is_a?(AST::Declarations::Module)
+          raise MixedClassModuleDeclarationError.new(name: name, decl: decl)
+        end
+
+        unless decls.empty?
+          names = decls[0].decl.type_params.each.map(&:name)
+          unless names.size == decl.type_params.each.size && decls[0].decl.type_params == decl.type_params.rename_to(names)
+            raise GenericParameterMismatchError.new(name: name, decl: decl)
+          end
+        end
+
+        super(decl: decl, outer: outer)
+      end
+
+      def primary
+        @primary ||= decls.find {|d| d.decl.self_type } || decls.first
+      end
+
+      def self_type
+        primary.decl.self_type
+      end
+    end
+
+    class ClassEntry < MultiEntry
+      def insert(decl:, outer:)
+        unless decl.is_a?(AST::Declarations::Class)
+          raise MixedClassModuleDeclarationError.new(name: name, decl: decl)
+        end
+
+        unless decls.empty?
+          names = decls[0].decl.type_params.each.map(&:name)
+          unless names.size == decl.type_params.each.size && decls[0].decl.type_params == decl.type_params.rename_to(names)
+            raise GenericParameterMismatchError.new(name: name, decl: decl)
+          end
+        end
+
+        super(decl: decl, outer: outer)
+      end
+
+      def primary
+        @primary ||= begin
+                       decls.find {|d| d.decl.super_class } || decls.first
+                     end
+      end
+    end
+
+    class SingleEntry
+      include ContextUtil
+
+      attr_reader :name
+      attr_reader :outer
+      attr_reader :decl
+
+      def initialize(name:, decl:, outer:)
+        @name = name
+        @decl = decl
+        @outer = outer
+      end
+    end
 
     def initialize
       @buffers = []
       @declarations = []
 
-      @name_to_decl = {}
-      @name_to_extensions = {}
-      @name_to_constant = {}
-      @name_to_global = {}
-      @name_to_alias = {}
+      @class_decls = {}
+      @interface_decls = {}
+      @alias_decls = {}
+      @constant_decls = {}
+      @global_decls = {}
     end
 
     def initialize_copy(other)
       @buffers = other.buffers.dup
       @declarations = other.declarations.dup
 
-      @name_to_decl = other.name_to_decl.dup
-      @name_to_extensions = other.name_to_extensions.dup
-      @name_to_constant = other.name_to_constant.dup
-      @name_to_global = other.name_to_global.dup
-      @name_to_alias = other.name_to_alias.dup
+      @class_decls = other.class_decls.dup
+      @interface_decls = other.interface_decls.dup
+      @alias_decls = other.alias_decls.dup
+      @constant_decls = other.constant_decls.dup
+      @global_decls = other.global_decls.dup
     end
 
-    def cache_name(cache, name:, decl:)
+    def cache_name(cache, name:, decl:, outer:)
       if cache.key?(name)
         raise DuplicatedDeclarationError.new(name, decl, cache[name])
       end
-      cache[name] = decl
+
+      cache[name] = SingleEntry.new(name: name, decl: decl, outer: outer)
+    end
+
+    def insert_decl(decl, outer:, namespace:)
+      case decl
+      when AST::Declarations::Class, AST::Declarations::Module
+        name = decl.name.with_prefix(namespace)
+
+        if constant_decls.key?(name)
+          raise DuplicatedDeclarationError.new(name, decl, constant_decls[name].decl)
+        end
+
+        unless class_decls.key?(name)
+          case decl
+          when AST::Declarations::Class
+            class_decls[name] ||= ClassEntry.new(name: name)
+          when AST::Declarations::Module
+            class_decls[name] ||= ModuleEntry.new(name: name)
+          end
+        end
+
+        class_decls[name].insert(decl: decl, outer: outer)
+
+        prefix = outer + [decl]
+        ns = name.to_namespace
+        decl.each_decl do |d|
+          insert_decl(d, outer: prefix, namespace: ns)
+        end
+
+      when AST::Declarations::Interface
+        cache_name interface_decls, name: decl.name.with_prefix(namespace), decl: decl, outer: outer
+
+      when AST::Declarations::Alias
+        cache_name alias_decls, name: decl.name.with_prefix(namespace), decl: decl, outer: outer
+
+      when AST::Declarations::Constant
+        name = decl.name.with_prefix(namespace)
+
+        if class_decls.key?(name)
+          raise DuplicatedDeclarationError.new(name, decl, class_decls[name].decls[0].decl)
+        end
+
+        cache_name constant_decls, name: name, decl: decl, outer: outer
+
+      when AST::Declarations::Global
+        cache_name global_decls, name: decl.name, decl: decl, outer: outer
+
+      when AST::Declarations::Extension
+        RBS.logger.warn "#{Location.to_string decl.location} Extension construct is deprecated: use class/module syntax instead"
+      end
     end
 
     def <<(decl)
       declarations << decl
+      insert_decl(decl, outer: [], namespace: Namespace.root)
+      self
+    end
+
+    def resolve_type_names
+      resolver = TypeNameResolver.from_env(self)
+      env = Environment.new()
+
+      declarations.each do |decl|
+        env << resolve_declaration(resolver, decl, outer: [], prefix: Namespace.root)
+      end
+
+      env
+    end
+
+    def resolve_declaration(resolver, decl, outer:, prefix:)
+      if decl.is_a?(AST::Declarations::Global)
+        return AST::Declarations::Global.new(
+          name: decl.name,
+          type: absolute_type(resolver, decl.type, context: [Namespace.root]),
+          location: decl.location,
+          comment: decl.comment
+        )
+      end
+
+      context = (outer + [decl]).each.with_object([Namespace.root]) do |decl, array|
+        array.unshift(array.first + decl.name.to_namespace)
+      end
+
       case decl
-      when AST::Declarations::Class, AST::Declarations::Module, AST::Declarations::Interface
-        cache_name name_to_decl, name: decl.name.absolute!, decl: decl
-      when AST::Declarations::Extension
-        yield_self do
-          name = decl.name.absolute!
-          exts = name_to_extensions.fetch(name) do
-            name_to_extensions[name] = []
-          end
-          exts << decl
-        end
+      when AST::Declarations::Class
+        outer_ = outer + [decl]
+        prefix_ = prefix + decl.name.to_namespace
+        AST::Declarations::Class.new(
+          name: decl.name.with_prefix(prefix),
+          type_params: decl.type_params,
+          super_class: decl.super_class&.yield_self do |super_class|
+            AST::Declarations::Class::Super.new(
+              name: absolute_type_name(resolver, super_class.name, context: context),
+              args: super_class.args.map {|type| absolute_type(resolver, type, context: context) }
+            )
+          end,
+          members: decl.members.map do |member|
+            case member
+            when AST::Members::Base
+              resolve_member(resolver, member, context: context)
+            when AST::Declarations::Base
+              resolve_declaration(
+                resolver,
+                member,
+                outer: outer_,
+                prefix: prefix_
+              )
+            end
+          end,
+          location: decl.location,
+          annotations: decl.annotations,
+          comment: decl.comment
+        )
+      when AST::Declarations::Module
+        outer_ = outer + [decl]
+        prefix_ = prefix + decl.name.to_namespace
+        AST::Declarations::Module.new(
+          name: decl.name.with_prefix(prefix),
+          type_params: decl.type_params,
+          self_type: decl.self_type&.yield_self do |self_type|
+            absolute_type(resolver, self_type, context: context)
+          end,
+          members: decl.members.map do |member|
+            case member
+            when AST::Members::Base
+              resolve_member(resolver, member, context: context)
+            when AST::Declarations::Base
+              resolve_declaration(
+                resolver,
+                member,
+                outer: outer_,
+                prefix: prefix_
+              )
+            end
+          end,
+          location: decl.location,
+          annotations: decl.annotations,
+          comment: decl.comment
+        )
+      when AST::Declarations::Interface
+        AST::Declarations::Interface.new(
+          name: decl.name.with_prefix(prefix),
+          type_params: decl.type_params,
+          members: decl.members.map do |member|
+            resolve_member(resolver, member, context: context)
+          end,
+          comment: decl.comment,
+          location: decl.location,
+          annotations: decl.annotations
+        )
       when AST::Declarations::Alias
-        cache_name name_to_alias, name: decl.name.absolute!, decl: decl
+        AST::Declarations::Alias.new(
+          name: decl.name.with_prefix(prefix),
+          type: absolute_type(resolver, decl.type, context: context),
+          location: decl.location,
+          annotations: decl.annotations,
+          comment: decl.comment
+        )
+
       when AST::Declarations::Constant
-        cache_name name_to_constant, name: decl.name.absolute!, decl: decl
-      when AST::Declarations::Global
-        cache_name name_to_global, name: decl.name, decl: decl
-      end
-    end
-
-    def find_class(type_name)
-      name_to_decl[type_name]
-    end
-
-    def each_decl
-      if block_given?
-        name_to_decl.each do |name, decl|
-          yield name, decl
-        end
-      else
-        enum_for :each_decl
-      end
-    end
-
-    def each_constant
-      if block_given?
-        name_to_constant.each do |name, decl|
-          yield name, decl
-        end
-      else
-        enum_for :each_constant
-      end
-    end
-
-    def each_global
-      if block_given?
-        name_to_global.each do |name, global|
-          yield name, global
-        end
-      else
-        enum_for :each_global
-      end
-    end
-
-    def each_alias(&block)
-      if block_given?
-        name_to_alias.each(&block)
-      else
-        enum_for :each_alias
-      end
-    end
-
-    def each_class_name(&block)
-      each_decl.select {|name,| class?(name) }.each(&block)
-    end
-
-    def class?(type_name)
-      find_class(type_name)&.yield_self do |decl|
-        decl.is_a?(AST::Declarations::Class) || decl.is_a?(AST::Declarations::Module)
-      end
-    end
-
-    def find_type_decl(type_name)
-      name_to_decl[type_name]
-    end
-
-    def find_extensions(type_name)
-      name_to_extensions[type_name] || []
-    end
-
-    def find_alias(type_name)
-      name_to_alias[type_name]
-    end
-
-    def each_extension(type_name, &block)
-      if block_given?
-        (name_to_extensions[type_name] || []).each(&block)
-      else
-        enum_for :each_extension, type_name
-      end
-    end
-
-    def absolute_type_name_in(environment, name:, namespace:)
-      raise "Namespace should be absolute: #{namespace}" unless namespace.absolute?
-
-      if name.absolute?
-        name if environment.key?(name)
-      else
-        absolute_name = name.with_prefix(namespace)
-
-        if environment.key?(absolute_name)
-          absolute_name
-        else
-          if namespace.empty?
-            nil
-          else
-            parent = namespace.parent
-            absolute_type_name_in environment, name: name, namespace: parent
-          end
-        end
-      end
-    end
-
-    def absolute_class_name(name, namespace:)
-      raise "Class name expected: #{name}" unless name.class?
-      absolute_type_name_in name_to_decl, name: name, namespace: namespace
-    end
-
-    def absolute_interface_name(name, namespace:)
-      raise "Interface name expected: #{name}" unless name.interface?
-      absolute_type_name_in name_to_decl, name: name, namespace: namespace
-    end
-
-    def absolute_alias_name(name, namespace:)
-      raise "Alias name expected: #{name}" unless name.alias?
-      absolute_type_name_in name_to_alias, name: name, namespace: namespace
-    end
-
-    def absolute_type_name(type_name, namespace:)
-      absolute_name = case
-                      when type_name.class?
-                        absolute_class_name(type_name, namespace: namespace)
-                      when type_name.alias?
-                        absolute_alias_name(type_name, namespace: namespace)
-                      when type_name.interface?
-                        absolute_interface_name(type_name, namespace: namespace)
-                      end
-
-      absolute_name || yield(type_name)
-    end
-
-    def absolute_name_or(name, type)
-      if name.absolute?
-        type
-      else
-        yield
-      end
-    end
-
-    def absolute_type(type, namespace:, &block)
-      case type
-      when Types::ClassSingleton
-        absolute_name_or(type.name, type) do
-          absolute_name = absolute_type_name(type.name, namespace: namespace) { yield(type) }
-          Types::ClassSingleton.new(name: absolute_name, location: type.location)
-        end
-      when Types::ClassInstance
-        absolute_name = absolute_type_name(type.name, namespace: namespace) { yield(type) }
-        Types::ClassInstance.new(name: absolute_name,
-                                 args: type.args.map {|ty|
-                                   absolute_type(ty, namespace: namespace, &block)
-                                 },
-                                 location: type.location)
-      when Types::Interface
-        absolute_name = absolute_type_name(type.name, namespace: namespace) { yield(type) }
-        Types::Interface.new(name: absolute_name,
-                             args: type.args.map {|ty|
-                               absolute_type(ty, namespace: namespace, &block)
-                             },
-                             location: type.location)
-      when Types::Alias
-        absolute_name_or(type.name, type) do
-          absolute_name = absolute_type_name(type.name, namespace: namespace) { yield(type) }
-          Types::Alias.new(name: absolute_name, location: type.location)
-        end
-      when Types::Tuple
-        Types::Tuple.new(
-          types: type.types.map {|ty| absolute_type(ty, namespace: namespace, &block) },
-          location: type.location
-        )
-      when Types::Record
-        Types::Record.new(
-          fields: type.fields.transform_values {|ty| absolute_type(ty, namespace: namespace, &block) },
-          location: type.location
-        )
-      when Types::Union
-        Types::Union.new(
-          types: type.types.map {|ty| absolute_type(ty, namespace: namespace, &block) },
-          location: type.location
-        )
-      when Types::Intersection
-        Types::Intersection.new(
-          types: type.types.map {|ty| absolute_type(ty, namespace: namespace, &block) },
-          location: type.location
-        )
-      when Types::Optional
-        Types::Optional.new(
-          type: absolute_type(type.type, namespace: namespace, &block),
-          location: type.location
-        )
-      when Types::Proc
-        Types::Proc.new(
-          type: type.type.map_type {|ty| absolute_type(ty, namespace: namespace, &block) },
-          location: type.location
-        )
-      else
-        type
-      end
-    end
-
-    # Validates presence of the relative type, and application arity match.
-    def validate(type, namespace:)
-      case type
-      when Types::ClassInstance, Types::Interface
-        if type.name.namespace.relative?
-          type = absolute_type(type, namespace: namespace) do |type|
-            NoTypeFoundError.check!(type.name.absolute!, env: self, location: type.location)
-          end
-        end
-
-        decl = find_class(type.name)
-        unless decl
-          raise NoTypeFoundError.new(type_name: type.name, location: type.location)
-        end
-
-        InvalidTypeApplicationError.check!(
-          type_name: type.name,
-          args: type.args,
-          params: decl.type_params,
-          location: type.location
+        AST::Declarations::Constant.new(
+          name: decl.name.with_prefix(prefix),
+          type: absolute_type(resolver, decl.type, context: context),
+          location: decl.location,
+          comment: decl.comment
         )
       end
+    end
 
-      type.each_type do |type_|
-        validate(type_, namespace: namespace)
+    def resolve_member(resolver, member, context:)
+      case member
+      when AST::Members::MethodDefinition
+        AST::Members::MethodDefinition.new(
+          name: member.name,
+          kind: member.kind,
+          types: member.types.map do |type|
+            type.map_type {|ty| absolute_type(resolver, ty, context: context) }
+          end,
+          comment: member.comment,
+          overload: member.overload?,
+          annotations: member.annotations,
+          attributes: member.attributes,
+          location: member.location
+        )
+      when AST::Members::AttrAccessor
+        AST::Members::AttrAccessor.new(
+          name: member.name,
+          type: absolute_type(resolver, member.type, context: context),
+          annotations: member.annotations,
+          comment: member.comment,
+          location: member.location,
+          ivar_name: member.ivar_name
+        )
+      when AST::Members::AttrReader
+        AST::Members::AttrReader.new(
+          name: member.name,
+          type: absolute_type(resolver, member.type, context: context),
+          annotations: member.annotations,
+          comment: member.comment,
+          location: member.location,
+          ivar_name: member.ivar_name
+        )
+      when AST::Members::AttrWriter
+        AST::Members::AttrWriter.new(
+          name: member.name,
+          type: absolute_type(resolver, member.type, context: context),
+          annotations: member.annotations,
+          comment: member.comment,
+          location: member.location,
+          ivar_name: member.ivar_name
+        )
+      when AST::Members::InstanceVariable
+        AST::Members::InstanceVariable.new(
+          name: member.name,
+          type: absolute_type(resolver, member.type, context: context),
+          comment: member.comment,
+          location: member.location
+        )
+      when AST::Members::ClassInstanceVariable
+        AST::Members::ClassInstanceVariable.new(
+          name: member.name,
+          type: absolute_type(resolver, member.type, context: context),
+          comment: member.comment,
+          location: member.location
+        )
+      when AST::Members::ClassVariable
+        AST::Members::ClassVariable.new(
+          name: member.name,
+          type: absolute_type(resolver, member.type, context: context),
+          comment: member.comment,
+          location: member.location
+        )
+      when AST::Members::Include
+        AST::Members::Include.new(
+          name: absolute_type_name(resolver, member.name, context: context),
+          args: member.args.map {|type| absolute_type(resolver, type, context: context) },
+          comment: member.comment,
+          location: member.location,
+          annotations: member.annotations
+        )
+      when AST::Members::Extend
+        AST::Members::Extend.new(
+          name: absolute_type_name(resolver, member.name, context: context),
+          args: member.args.map {|type| absolute_type(resolver, type, context: context) },
+          comment: member.comment,
+          location: member.location,
+          annotations: member.annotations
+        )
+      when AST::Members::Prepend
+        AST::Members::Prepend.new(
+          name: absolute_type_name(resolver, member.name, context: context),
+          args: member.args.map {|type| absolute_type(resolver, type, context: context) },
+          comment: member.comment,
+          location: member.location,
+          annotations: member.annotations
+        )
+      else
+        member
+      end
+    end
+
+    def absolute_type_name(resolver, type_name, context:)
+      resolver.resolve(type_name, context: context) || type_name
+    end
+
+    def absolute_type(resolver, type, context:)
+      type.map_type_name do |name|
+        absolute_type_name(resolver, name, context: context)
       end
     end
   end

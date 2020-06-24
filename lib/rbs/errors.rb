@@ -1,4 +1,19 @@
 module RBS
+  module MethodNameHelper
+    def method_name_string()
+      separator = case kind
+                  when :instance
+                    "#"
+                  when :singleton
+                    "."
+                  else
+                    raise
+                  end
+
+      "#{type_name}#{separator}#{method_name}"
+    end
+  end
+
   class InvalidTypeApplicationError < StandardError
     attr_reader :type_name
     attr_reader :args
@@ -10,7 +25,7 @@ module RBS
       @args = args
       @params = params
       @location = location
-      super "#{Location.to_string location}: #{type_name} expects parameters [#{params.each.map(&:name).join(", ")}], but given args [#{args.join(", ")}]"
+      super "#{Location.to_string location}: #{type_name} expects parameters [#{params.join(", ")}], but given args [#{args.join(", ")}]"
     end
 
     def self.check!(type_name:, args:, params:, location:)
@@ -93,8 +108,18 @@ module RBS
     end
 
     def self.check!(type_name, env:, location:)
-      env.find_type_decl(type_name) or
-        raise new(type_name: type_name, location: location)
+      dic = case
+            when type_name.class?
+              env.class_decls
+            when type_name.alias?
+              env.alias_decls
+            when type_name.interface?
+              env.interface_decls
+            else
+              raise
+            end
+
+      dic.key?(type_name) or raise new(type_name: type_name, location: location)
 
       type_name
     end
@@ -122,6 +147,26 @@ module RBS
     end
   end
 
+  class MethodDefinitionConflictWithInterfaceMixinError < StandardError
+    include MethodNameHelper
+
+    attr_reader :type_name
+    attr_reader :method_name
+    attr_reader :kind
+    attr_reader :mixin_member
+    attr_reader :entries
+
+    def initialize(type_name:, method_name:, kind:, mixin_member:, entries:)
+      @type_name = type_name
+      @method_name = method_name
+      @kind = kind
+      @mixin_member = mixin_member
+      @entries = entries
+
+      super "#{entries[0].decl.location}: Duplicated method with interface mixin: #{method_name_string}"
+    end
+  end
+
   class UnknownMethodAliasError < StandardError
     attr_reader :original_name
     attr_reader :aliased_name
@@ -139,6 +184,99 @@ module RBS
       unless methods.key?(original_name)
         raise new(original_name: original_name, aliased_name: aliased_name, location: location)
       end
+    end
+  end
+
+  class MixedClassModuleDeclarationError < StandardError
+    attr_reader :name
+    attr_reader :decl
+
+    def initialize(name:, decl:)
+      @name = name
+      @decl = decl
+      super "#{Location.to_string decl.location}: Both class and module declarations: #{name}"
+    end
+  end
+
+  class SuperclassMismatchError < StandardError
+    attr_reader :name
+    attr_reader :entry
+
+    def initialize(name:, super_classes:, entry:)
+      @name = name
+      @entry = entry
+      super "#{Location.to_string entry.primary.decl.location}: Superclass mismatch: #{name}"
+    end
+  end
+
+  class ModuleSelfTypeMismatchError < StandardError
+    attr_reader :name
+    attr_reader :entry
+    attr_reader :location
+
+    def initialize(name:, entry:, location:)
+      @name = name
+      @entry = entry
+      @location = location
+
+      super "#{Location.to_string location}: Module self type mismatch: #{name}"
+    end
+  end
+
+  class InconsistentMethodVisibilityError < StandardError
+    attr_reader :type_name
+    attr_reader :method_name
+    attr_reader :kind
+    attr_reader :member_pairs
+
+    def initialize(type_name:, method_name:, kind:, member_pairs:)
+      @type_name = type_name
+      @method_name = method_name
+      @kind = kind
+      @member_pairs = member_pairs
+
+      delimiter = case kind
+                  when :instance
+                    "#"
+                  when :singleton
+                    "."
+                  end
+
+      super "#{Location.to_string member_pairs[0][0].location}: Inconsistent method visibility: #{type_name}#{delimiter}#{method_name}"
+    end
+  end
+
+  class InvalidOverloadMethodError < StandardError
+    attr_reader :type_name
+    attr_reader :method_name
+    attr_reader :kind
+    attr_reader :members
+
+    def initialize(type_name:, method_name:, kind:, members:)
+      @type_name = type_name
+      @method_name = method_name
+      @kind = kind
+      @members = members
+
+      delimiter = case kind
+                  when :instance
+                    "#"
+                  when :singleton
+                    "."
+                  end
+
+      super "#{Location.to_string members[0].location}: Invalid method overloading: #{type_name}#{delimiter}#{method_name}"
+    end
+  end
+
+  class GenericParameterMismatchError < StandardError
+    attr_reader :name
+    attr_reader :decl
+
+    def initialize(name:, decl:)
+      @name = name
+      @decl = decl
+      super "#{Location.to_string decl.location}: Generic parameters mismatch: #{name}"
     end
   end
 

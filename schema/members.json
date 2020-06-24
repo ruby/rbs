@@ -34,6 +34,9 @@
         },
         "location": {
           "$ref": "location.json"
+        },
+        "overload": {
+          "type": "boolean"
         }
       },
       "required": ["member", "kind", "types", "comment", "annotations", "location"]

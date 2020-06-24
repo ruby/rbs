@@ -1,7 +1,10 @@
 module RBS
   module AST
     module Members
-      class MethodDefinition
+      class Base
+      end
+
+      class MethodDefinition < Base
         attr_reader :name
         attr_reader :kind
         attr_reader :types
@@ -9,8 +12,9 @@ module RBS
         attr_reader :location
         attr_reader :comment
         attr_reader :attributes
+        attr_reader :overload
 
-        def initialize(name:, kind:, types:, annotations:, location:, comment:, attributes:)
+        def initialize(name:, kind:, types:, annotations:, location:, comment:, attributes:, overload:)
           @name = name
           @kind = kind
           @types = types
@@ -18,6 +22,7 @@ module RBS
           @location = location
           @comment = comment
           @attributes = attributes
+          @overload = overload
         end
 
         def ==(other)
@@ -25,13 +30,14 @@ module RBS
             other.name == name &&
             other.kind == kind &&
             other.types == types &&
-            other.attributes == attributes
+            other.attributes == attributes &&
+            other.overload == overload
         end
 
         alias eql? ==
 
         def hash
-          self.class.hash ^ name.hash ^ kind.hash ^ types.hash ^ attributes.hash
+          self.class.hash ^ name.hash ^ kind.hash ^ types.hash ^ attributes.hash ^ overload.hash
         end
 
         def instance?
@@ -42,6 +48,23 @@ module RBS
           kind == :singleton || kind == :singleton_instance
         end
 
+        def overload?
+          overload
+        end
+
+        def update(name: self.name, kind: self.kind, types: self.types, annotations: self.annotations, location: self.location, comment: self.comment, attributes: self.attributes, overload: self.overload)
+          self.class.new(
+            name: name,
+            kind: kind,
+            types: types,
+            annotations: annotations,
+            location: location,
+            comment: comment,
+            attributes: attributes,
+            overload: overload
+          )
+        end
+
         def to_json(*a)
           {
             member: :method_definition,
@@ -50,7 +73,8 @@ module RBS
             annotations: annotations,
             location: location,
             comment: comment,
-            attributes: attributes
+            attributes: attributes,
+            overload: overload
           }.to_json(*a)
         end
       end
@@ -79,7 +103,7 @@ module RBS
         end
       end
 
-      class InstanceVariable
+      class InstanceVariable < Base
         include Var
 
         def to_json(*a)
@@ -93,7 +117,7 @@ module RBS
         end
       end
 
-      class ClassInstanceVariable
+      class ClassInstanceVariable < Base
         include Var
 
         def to_json(*a)
@@ -107,7 +131,7 @@ module RBS
         end
       end
 
-      class ClassVariable
+      class ClassVariable < Base
         include Var
 
         def to_json(*a)
@@ -149,7 +173,7 @@ module RBS
         end
       end
 
-      class Include
+      class Include < Base
         include Mixin
 
         def to_json(*a)
@@ -164,7 +188,7 @@ module RBS
         end
       end
 
-      class Extend
+      class Extend < Base
         include Mixin
 
         def to_json(*a)
@@ -179,7 +203,7 @@ module RBS
         end
       end
 
-      class Prepend
+      class Prepend < Base
         include Mixin
 
         def to_json(*a)
@@ -225,7 +249,7 @@ module RBS
         end
       end
 
-      class AttrReader
+      class AttrReader < Base
         include Attribute
 
         def to_json(*a)
@@ -241,7 +265,7 @@ module RBS
         end
       end
 
-      class AttrAccessor
+      class AttrAccessor < Base
         include Attribute
 
         def to_json(*a)
@@ -257,7 +281,7 @@ module RBS
         end
       end
 
-      class AttrWriter
+      class AttrWriter < Base
         include Attribute
 
         def to_json(*a)
@@ -291,7 +315,7 @@ module RBS
         end
       end
 
-      class Public
+      class Public < Base
         include LocationOnly
 
         def to_json(*a)
@@ -299,7 +323,7 @@ module RBS
         end
       end
 
-      class Private
+      class Private < Base
         include LocationOnly
 
         def to_json(*a)
@@ -307,7 +331,7 @@ module RBS
         end
       end
 
-      class Alias
+      class Alias < Base
         attr_reader :new_name
         attr_reader :old_name
         attr_reader :kind

@@ -107,9 +107,19 @@ module RBS
           end
         end
       when Types::ClassInstance, Types::Interface
-        decl = env.find_class(type.name)
+        NoTypeFoundError.check!(type.name,
+                                env: env,
+                                location: type.location)
+
+        type_params = case type
+                      when Types::ClassInstance
+                        env.class_decls[type.name]&.type_params
+                      when Types::Interface
+                        env.interface_decls[type.name]&.decl&.type_params
+                      end
+
         type.args.each.with_index do |ty, i|
-          var = decl.type_params.params[i]
+          var = type_params.params[i]
           case var.variance
           when :invariant
             type(ty, result: result, context: :invariant)

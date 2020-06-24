@@ -128,7 +128,7 @@ module RBS
 
       def merge_rbs(module_name, members, instance: nil, singleton: nil)
         if merge
-          if env.class?(module_name.absolute!)
+          if env.class_decls[module_name.absolute!]
             case
             when instance
               method = builder.build_instance(module_name.absolute!).methods[instance]
@@ -152,9 +152,10 @@ module RBS
                 },
                 kind: kind,
                 location: nil,
-                comment: method.comment,
+                comment: method.comments[0],
                 annotations: method.annotations,
-                attributes: method.attributes
+                attributes: method.attributes,
+                overload: false
               )
               return
             end
@@ -192,7 +193,8 @@ module RBS
                 location: nil,
                 comment: nil,
                 annotations: [],
-                attributes: []
+                attributes: [],
+                overload: false
               )
             end
           else
@@ -225,7 +227,8 @@ module RBS
                   location: nil,
                   comment: nil,
                   annotations: [],
-                  attributes: []
+                  attributes: [],
+                  overload: false
                 )
               end
             else
@@ -259,7 +262,8 @@ module RBS
                   location: nil,
                   comment: nil,
                   annotations: [],
-                  attributes: []
+                  attributes: [],
+                  overload: false
                 )
               end
             else

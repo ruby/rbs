@@ -15,9 +15,9 @@ module RBS
         decls.push(*source_decls)
 
         unless toplevel_members.empty?
-          top = AST::Declarations::Extension.new(
+          top = AST::Declarations::Class.new(
             name: TypeName.new(name: :Object, namespace: Namespace.empty),
-            extension_name: :Toplevel,
+            super_class: nil,
             members: toplevel_members,
             annotations: [],
             comment: nil,
@@ -130,7 +130,8 @@ module RBS
               types: types,
               kind: kind,
               comment: comments[node.first_lineno - 1],
-              attributes: []
+              attributes: [],
+              overload: false
             )
 
             if current_module

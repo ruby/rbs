@@ -173,7 +173,8 @@ module RBS
               types: types,
               kind: :singleton,
               comment: comment,
-              attributes: []
+              attributes: [],
+              overload: false
             )
           end
 
@@ -193,7 +194,8 @@ module RBS
               types: types,
               kind: :instance,
               comment: comment,
-              attributes: []
+              attributes: [],
+              overload: false
             )
           end
 

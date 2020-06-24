@@ -32,8 +32,10 @@ require "rbs/writer"
 require "rbs/prototype/rbi"
 require "rbs/prototype/rb"
 require "rbs/prototype/runtime"
+require "rbs/type_name_resolver"
 require "rbs/environment_walker"
 require "rbs/vendorer"
+require "rbs/validator"
 
 begin
   require "rbs/parser"

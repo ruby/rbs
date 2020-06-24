@@ -94,13 +94,6 @@ end
     SIG
   end
 
-  def test_extension_decl
-    assert_writer <<-SIG
-extension Each[X, Y] (Foo)
-end
-    SIG
-  end
-
   def test_escape
     assert_writer <<-SIG
 interface _Each[X, Y]
@@ -139,6 +132,28 @@ end
   def test_variance
     assert_writer <<-SIG
 class Foo[out A, unchecked B, in C] < Bar[A, C, B]
+end
+    SIG
+  end
+
+  def test_overload
+    assert_writer <<-SIG
+class Foo
+  overload def foo: (Integer) -> String
+
+  def foo: () -> String
+end
+    SIG
+  end
+
+  def test_nested
+    assert_writer <<-SIG
+module RBS
+  VERSION: String
+
+  class TypeName
+    type t = Symbol | String
+  end
 end
     SIG
   end
@@ -202,12 +217,13 @@ end
     SIG
 
     assert_equal expected, format(src)
-
   end
 
   def test_smoke
     Pathname.glob('stdlib/**/*.rbs').each do |path|
-      orig_decls = RBS::Parser.parse_signature(path.read)
+      orig_decls = RBS::Parser.parse_signature(path.read).reject do |decl|
+        decl.is_a?(RBS::AST::Declarations::Extension)
+      end
 
       io = StringIO.new
       w = RBS::Writer.new(out: io)

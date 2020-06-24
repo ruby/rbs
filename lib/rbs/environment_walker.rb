@@ -23,13 +23,9 @@ module RBS
     include TSort
 
     def tsort_each_node(&block)
-      env.each_decl do |name|
-        yield name.absolute!
-      end
-
-      env.each_alias do |name, _|
-        yield name.absolute!
-      end
+      env.class_decls.each_key(&block)
+      env.interface_decls.each_key(&block)
+      env.alias_decls.each_key(&block)
     end
 
     def tsort_each_child(name, &block)
@@ -46,31 +42,26 @@ module RBS
           definitions << builder.build_instance(name)
           definitions << builder.build_singleton(name)
         when name.interface?
-          definitions << builder.build_interface(name, env.find_class(name))
+          definitions << builder.build_interface(name)
         end
 
         definitions.each do |definition|
-          definition.ancestors.each do |ancestor|
-            yield ancestor.name
+          if ancestors = definition.ancestors
+            ancestors.ancestors.each do |ancestor|
+              yield ancestor.name
 
-            case ancestor
-            when Definition::Ancestor::Instance, Definition::Ancestor::ExtensionInstance
-              ancestor.args.each do |type|
-                each_type_name type, &block
+              case ancestor
+              when Definition::Ancestor::Instance
+                ancestor.args.each do |type|
+                  each_type_name type, &block
+                end
               end
             end
           end
 
           unless only_ancestors?
-            definition.methods.each do |_, method|
-              method.method_types.each do |method_type|
-                method_type.type.each_type do |type|
-                  each_type_name type, &block
-                end
-                method_type.block&.type&.each_type do |type|
-                  each_type_name type, &block
-                end
-              end
+            definition.each_type do |type|
+              each_type_name type, &block
             end
           end
         end

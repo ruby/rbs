@@ -60,7 +60,7 @@ EOF
     env = Environment.new
     loader.load(env: env)
 
-    walker = EnvironmentWalker.new(env: env).only_ancestors!
+    walker = EnvironmentWalker.new(env: env.resolve_type_names).only_ancestors!
 
     walker.each_strongly_connected_component do |component|
       # pp component.map(&:to_s)

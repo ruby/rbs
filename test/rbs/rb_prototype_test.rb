@@ -45,7 +45,7 @@ class Hello
     yield
     yield 1, x: 3
     yield 1, 2, x: 3, y: 2
-    yield 1, 2, 'hello' => world 
+    yield 1, 2, 'hello' => world
   end
 
   def kw_req(a:) end
@@ -347,7 +347,7 @@ end
     parser.parse(rb)
 
     assert_write parser.decls, <<-EOF
-extension Object (Toplevel)
+class Object
   def hello: () -> nil
 end
     EOF

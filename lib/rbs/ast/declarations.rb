@@ -1,6 +1,9 @@
 module RBS
   module AST
     module Declarations
+      class Base
+      end
+
       class ModuleTypeParams
         attr_reader :params
 
@@ -77,7 +80,53 @@ module RBS
         end
       end
 
-      class Class
+      module NestedDeclarationHelper
+        def each_member
+          if block_given?
+            members.each do |member|
+              if member.is_a?(Members::Base)
+                yield member
+              end
+            end
+          else
+            enum_for :each_member
+          end
+        end
+
+        def each_decl
+          if block_given?
+            members.each do |member|
+              if member.is_a?(Declarations::Base)
+                yield member
+              end
+            end
+          else
+            enum_for :each_decl
+          end
+        end
+      end
+
+      module MixinHelper
+        def each_mixin(&block)
+          if block_given?
+            @mixins ||= begin
+                          members.select do |member|
+                            case member
+                            when Members::Include, Members::Extend, Members::Prepend
+                              true
+                            else
+                              false
+                            end
+                          end
+                        end
+            @mixins.each(&block)
+          else
+            enum_for :each_mixin
+          end
+        end
+      end
+
+      class Class < Base
         class Super
           attr_reader :name
           attr_reader :args
@@ -104,6 +153,9 @@ module RBS
             }.to_json(*a)
           end
         end
+
+        include NestedDeclarationHelper
+        include MixinHelper
 
         attr_reader :name
         attr_reader :type_params
@@ -151,7 +203,10 @@ module RBS
         end
       end
 
-      class Module
+      class Module < Base
+        include NestedDeclarationHelper
+        include MixinHelper
+
         attr_reader :name
         attr_reader :type_params
         attr_reader :members
@@ -198,7 +253,7 @@ module RBS
         end
       end
 
-      class Extension
+      class Extension < Base
         attr_reader :name
         attr_reader :type_params
         attr_reader :extension_name
@@ -245,7 +300,7 @@ module RBS
         end
       end
 
-      class Interface
+      class Interface < Base
         attr_reader :name
         attr_reader :type_params
         attr_reader :members
@@ -288,7 +343,7 @@ module RBS
         end
       end
 
-      class Alias
+      class Alias < Base
         attr_reader :name
         attr_reader :type
         attr_reader :annotations
@@ -327,7 +382,7 @@ module RBS
         end
       end
 
-      class Constant
+      class Constant < Base
         attr_reader :name
         attr_reader :type
         attr_reader :location
@@ -363,7 +418,7 @@ module RBS
         end
       end
 
-      class Global
+      class Global < Base
         attr_reader :name
         attr_reader :type
         attr_reader :location

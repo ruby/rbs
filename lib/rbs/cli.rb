@@ -93,15 +93,17 @@ module RBS
 
       options.setup(loader)
 
-      env = Environment.new()
-      loader.load(env: env)
+      env = Environment.new().yield_self do |env|
+        loader.load(env: env)
+        env.resolve_type_names
+      end
 
       stdout.print JSON.generate(env.declarations)
       stdout.flush
     end
 
     def run_list(args, options)
-      list = []
+      list = Set[]
 
       OptionParser.new do |opts|
         opts.on("--class") { list << :class }
@@ -109,29 +111,35 @@ module RBS
         opts.on("--interface") { list << :interface }
       end.order!(args)
 
-      list.push(:class, :module, :interface) if list.empty?
+      list.merge([:class, :module, :interface]) if list.empty?
 
       loader = EnvironmentLoader.new()
 
       options.setup(loader)
 
-      env = Environment.new()
-      loader.load(env: env)
+      env = Environment.new().yield_self do |env|
+        loader.load(env: env)
+        env.resolve_type_names
+      end
 
-      env.each_decl.sort_by {|name,| name.to_s }.each do |type_name, decl|
-        case decl
-        when AST::Declarations::Class
-          if list.include?(:class)
-            stdout.puts "#{type_name} (class)"
+      if list.include?(:class) || list.include?(:module)
+        env.class_decls.each do |name, entry|
+          case entry
+          when Environment::ModuleEntry
+            if list.include?(:module)
+              stdout.puts "#{name} (module)"
+            end
+          when Environment::ClassEntry
+            if list.include?(:class)
+              stdout.puts "#{name} (class)"
+            end
           end
-        when AST::Declarations::Module
-          if list.include?(:module)
-            stdout.puts "#{type_name} (module)"
-          end
-        when AST::Declarations::Interface
-          if list.include?(:interface)
-            stdout.puts "#{type_name} (interface)"
-          end
+        end
+      end
+
+      if list.include?(:interface)
+        env.interface_decls.each do |name, entry|
+          stdout.puts "#{name} (interface)"
         end
       end
     end
@@ -148,41 +156,31 @@ module RBS
 
       options.setup(loader)
 
-      env = Environment.new()
-      loader.load(env: env)
+      env = Environment.new().yield_self do |env|
+        loader.load(env: env)
+        env.resolve_type_names
+      end
 
       builder = DefinitionBuilder.new(env: env)
       type_name = parse_type_name(args[0]).absolute!
 
-      if env.class?(type_name)
-        ancestor = case kind
-                   when :instance
-                     decl = env.find_class(type_name)
-                     Definition::Ancestor::Instance.new(name: type_name,
-                                                        args: Types::Variable.build(decl.type_params.each.map(&:name)))
-                   when :singleton
-                     Definition::Ancestor::Singleton.new(name: type_name)
-                   end
+      if env.class_decls.key?(type_name)
+        ancestors = case kind
+                    when :instance
+                      builder.instance_ancestors(type_name)
+                    when :singleton
+                      builder.singleton_ancestors(type_name)
+                    end
 
-        ancestors = builder.build_ancestors(ancestor)
-
-        ancestors.each do |ancestor|
+        ancestors.ancestors.each do |ancestor|
           case ancestor
           when Definition::Ancestor::Singleton
             stdout.puts "singleton(#{ancestor.name})"
-          when Definition::Ancestor::ExtensionSingleton
-            stdout.puts "singleton(#{ancestor.name} (#{ancestor.extension_name}))"
           when Definition::Ancestor::Instance
             if ancestor.args.empty?
               stdout.puts ancestor.name.to_s
             else
               stdout.puts "#{ancestor.name}[#{ancestor.args.join(", ")}]"
-            end
-          when Definition::Ancestor::ExtensionInstance
-            if ancestor.args.empty?
-              stdout.puts "#{ancestor.name} (#{ancestor.extension_name})"
-            else
-              stdout.puts "#{ancestor.name}[#{ancestor.args.join(", ")}] (#{ancestor.extension_name})"
             end
           end
         end
@@ -208,16 +206,17 @@ module RBS
       end
 
       loader = EnvironmentLoader.new()
-
       options.setup(loader)
 
-      env = Environment.new()
-      loader.load(env: env)
+      env = Environment.new().yield_self do |env|
+        loader.load(env: env)
+        env.resolve_type_names
+      end
 
       builder = DefinitionBuilder.new(env: env)
       type_name = parse_type_name(args[0]).absolute!
 
-      if env.class?(type_name)
+      if env.class_decls.key?(type_name)
         definition = case kind
                      when :instance
                        builder.build_instance(type_name)
@@ -227,7 +226,7 @@ module RBS
 
         definition.methods.keys.sort.each do |name|
           method = definition.methods[name]
-          if inherit || method.implemented_in == definition.declaration
+          if inherit || method.implemented_in == type_name
             stdout.puts "#{name} (#{method.accessibility})"
           end
         end
@@ -250,17 +249,18 @@ module RBS
       end
 
       loader = EnvironmentLoader.new()
-
       options.setup(loader)
 
-      env = Environment.new()
-      loader.load(env: env)
+      env = Environment.new().yield_self do |env|
+        loader.load(env: env)
+        env.resolve_type_names
+      end
 
       builder = DefinitionBuilder.new(env: env)
       type_name = parse_type_name(args[0]).absolute!
       method_name = args[1].to_sym
 
-      unless env.class?(type_name)
+      unless env.class_decls.key?(type_name)
         stdout.puts "Cannot find class: #{type_name}"
         return
       end
@@ -280,8 +280,8 @@ module RBS
       end
 
       stdout.puts "#{type_name}#{kind == :instance ? "#" : "."}#{method_name}"
-      stdout.puts "  defined_in: #{method.defined_in&.name&.absolute!}"
-      stdout.puts "  implementation: #{method.implemented_in.name.absolute!}"
+      stdout.puts "  defined_in: #{method.defined_in}"
+      stdout.puts "  implementation: #{method.implemented_in}"
       stdout.puts "  accessibility: #{method.accessibility}"
       stdout.puts "  types:"
       separator = " "
@@ -296,42 +296,44 @@ module RBS
 
       options.setup(loader)
 
-      env = Environment.new()
-      loader.load(env: env)
+      env = Environment.new().yield_self do |env|
+        loader.load(env: env)
+        env.resolve_type_names
+      end
 
       builder = DefinitionBuilder.new(env: env)
+      validator = Validator.new(env: env, resolver: TypeNameResolver.from_env(env))
 
-      env.each_decl do |name, decl|
-        case decl
-        when AST::Declarations::Class, AST::Declarations::Module
-          stdout.puts "#{Location.to_string decl.location}:\tValidating class/module definition: `#{name}`..."
-          builder.build_instance(decl.name.absolute!).each_type do |type|
-            env.validate type, namespace: Namespace.root
-          end
-          builder.build_singleton(decl.name.absolute!).each_type do |type|
-            env.validate type, namespace: Namespace.root
-          end
-        when AST::Declarations::Interface
-          stdout.puts "#{Location.to_string decl.location}:\tValidating interface: `#{name}`..."
-          builder.build_interface(decl.name.absolute!, decl).each_type do |type|
-            env.validate type, namespace: Namespace.root
-          end
+      env.class_decls.each_key do |name|
+        stdout.puts "Validating class/module definition: `#{name}`..."
+        builder.build_instance(name).each_type do |type|
+          validator.validate_type type, context: [Namespace.root]
+        end
+        builder.build_singleton(name).each_type do |type|
+          validator.validate_type type, context: [Namespace.root]
         end
       end
 
-      env.each_constant do |name, const|
-        stdout.puts "#{Location.to_string const.location}:\tValidating constant: `#{name}`..."
-        env.validate const.type, namespace: name.namespace
+      env.interface_decls.each_key do |name|
+        stdout.puts "Validating interface: `#{name}`..."
+        builder.build_interface(name).each_type do |type|
+          validator.validate_type type, context: [Namespace.root]
+        end
       end
 
-      env.each_global do |name, global|
-        stdout.puts "#{Location.to_string global.location}:\tValidating global: `#{name}`..."
-        env.validate global.type, namespace: Namespace.root
+      env.constant_decls.each do |name, const|
+        stdout.puts "Validating constant: `#{name}`..."
+        validator.validate_type const.decl.type, context: const.context
       end
 
-      env.each_alias do |name, decl|
-        stdout.puts "#{Location.to_string decl.location}:\tValidating alias: `#{name}`..."
-        env.validate decl.type, namespace: name.namespace
+      env.global_decls.each do |name, global|
+        stdout.puts "Validating global: `#{name}`..."
+        validator.validate_type global.decl.type, context: [Namespace.root]
+      end
+
+      env.alias_decls.each do |name, decl|
+        stdout.puts "Validating alias: `#{name}`..."
+        validator.validate_type decl.decl.type, context: decl.context
       end
     end
 
@@ -351,8 +353,10 @@ module RBS
 
       options.setup(loader)
 
-      env = Environment.new()
-      loader.load(env: env)
+      env = Environment.new().yield_self do |env|
+        loader.load(env: env)
+        env.resolve_type_names
+      end
 
       builder = DefinitionBuilder.new(env: env)
       table = ConstantTable.new(builder: builder)
@@ -441,8 +445,10 @@ module RBS
 
         options.setup(loader)
 
-        env = Environment.new()
-        loader.load(env: env)
+        env = Environment.new().yield_self do |env|
+          loader.load(env: env)
+          env.resolve_type_names
+        end
 
         require_libs.each do |lib|
           require(lib)
