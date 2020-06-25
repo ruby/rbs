@@ -36,18 +36,18 @@ module RBS
       @stderr = stderr
     end
 
-    COMMANDS = [:ast, :list, :ancestors, :methods, :method, :validate, :constant, :paths, :prototype, :vendor, :version, :parse]
+    COMMANDS = [:ast, :list, :ancestors, :methods, :method, :validate, :constant, :paths, :prototype, :vendor, :parse]
 
     def library_parse(opts, options:)
-      opts.on("-r LIBRARY") do |lib|
+      opts.on("-r LIBRARY", "Load RBS files of the library") do |lib|
         options.libs << lib
       end
 
-      opts.on("-I DIR") do |dir|
+      opts.on("-I DIR", "Load RBS files from the directory") do |dir|
         options.dirs << dir
       end
 
-      opts.on("--no-stdlib") do
+      opts.on("--no-stdlib", "Skip loading standard library signatures") do
         options.no_stdlib = true
       end
 
@@ -55,11 +55,11 @@ module RBS
     end
 
     def parse_logging_options(opts)
-      opts.on("--log-level=LEVEL", "Specify log level (defaults to `warn`)") do |level|
+      opts.on("--log-level LEVEL", "Specify log level (defaults to `warn`)") do |level|
         RBS.logger_level = level
       end
 
-      opts.on("--log-output=OUTPUT", "Specify the file to output log (defaults to stderr)") do |output|
+      opts.on("--log-output OUTPUT", "Specify the file to output log (defaults to stderr)") do |output|
         RBS.logger_output = File.open(output, "a")
       end
 
@@ -71,17 +71,24 @@ module RBS
 
       opts = OptionParser.new
       opts.banner = <<~USAGE
-        Usage: rbs [options] COMMAND
-        Available commands: #{COMMANDS.join(", ")}
+        Usage: rbs [options...] [command...]
+
+        Available commands: #{COMMANDS.join(", ")}, version, help.
+
+        Options:
       USAGE
       library_parse(opts, options: options)
       parse_logging_options(opts)
+      opts.version = RBS::VERSION
 
       opts.order!(args)
 
       command = args.shift&.to_sym
 
-      if COMMANDS.include?(command)
+      case command
+      when :version
+        stdout.puts opts.ver
+      when *COMMANDS
         __send__ :"run_#{command}", args, options
       else
         stdout.puts opts.help
@@ -89,6 +96,18 @@ module RBS
     end
 
     def run_ast(args, options)
+      OptionParser.new do |opts|
+        opts.banner = <<EOB
+Usage: rbs ast
+
+Print JSON AST of loaded environment.
+
+Examples:
+
+  $ rbs ast
+EOB
+      end.order!(args)
+
       loader = EnvironmentLoader.new()
 
       options.setup(loader)
@@ -106,9 +125,21 @@ module RBS
       list = Set[]
 
       OptionParser.new do |opts|
-        opts.on("--class") { list << :class }
-        opts.on("--module") { list << :module }
-        opts.on("--interface") { list << :interface }
+        opts.banner = <<EOB
+Usage: rbs list [options...]
+
+List classes, modules, and interfaces.
+
+Examples:
+
+  $ rbs list
+  $ rbs list --class --module --interface
+
+Options:
+EOB
+        opts.on("--class", "List classes") { list << :class }
+        opts.on("--module", "List modules") { list << :module }
+        opts.on("--interface", "List interfaces") { list << :interface }
       end.order!(args)
 
       list.merge([:class, :module, :interface]) if list.empty?
@@ -148,8 +179,20 @@ module RBS
       kind = :instance
 
       OptionParser.new do |opts|
-        opts.on("--instance") { kind = :instance }
-        opts.on("--singleton") { kind = :singleton }
+        opts.banner = <<EOU
+Usage: rbs ancestors [options...] [type_name]
+
+Show ancestors of the given class or module.
+
+Examples:
+
+  $ rbs ancestors --instance String
+  $ rbs ancestors --singleton Array
+
+Options:
+EOU
+        opts.on("--instance", "Ancestors of instance of the given type_name (default)") { kind = :instance }
+        opts.on("--singleton", "Ancestors of singleton of the given type_name") { kind = :singleton }
       end.order!(args)
 
       loader = EnvironmentLoader.new()
@@ -194,10 +237,21 @@ module RBS
       inherit = true
 
       OptionParser.new do |opts|
-        opts.on("--instance") { kind = :instance }
-        opts.on("--singleton") { kind = :singleton }
-        opts.on("--inherit") { inherit = true }
-        opts.on("--no-inherit") { inherit = false }
+        opts.banner = <<EOU
+Usage: rbs methods [options...] [type_name]
+
+Show methods defined in the class or module.
+
+Examples:
+
+  $ rbs methods --instance Kernel
+  $ rbs methods --singleton --no-inherit String
+
+Options:
+EOU
+        opts.on("--instance", "Show instance methods (default)") { kind = :instance }
+        opts.on("--singleton", "Show singleton methods") { kind = :singleton }
+        opts.on("--[no-]inherit", "Show methods defined in super class and mixed modules too") {|v| inherit = v }
       end.order!(args)
 
       unless args.size == 1
@@ -239,8 +293,20 @@ module RBS
       kind = :instance
 
       OptionParser.new do |opts|
-        opts.on("--instance") { kind = :instance }
-        opts.on("--singleton") { kind = :singleton }
+        opts.banner = <<EOU
+Usage: rbs method [options...] [type_name] [method_name]
+
+Show the information of the method specified by type_name and method_name.
+
+Examples:
+
+  $ rbs method --instance Kernel puts
+  $ rbs method --singleton String try_convert
+
+Options:
+EOU
+        opts.on("--instance", "Show an instance method (default)") { kind = :instance }
+        opts.on("--singleton", "Show a singleton method") { kind = :singleton }
       end.order!(args)
 
       unless args.size == 2
@@ -292,6 +358,18 @@ module RBS
     end
 
     def run_validate(args, options)
+      OptionParser.new do |opts|
+        opts.banner = <<EOU
+Usage: rbs validate
+
+Validate RBS files. It ensures the type names in RBS files are present and the type applications have correct arity.
+
+Examples:
+
+  $ rbs validate
+EOU
+      end.parse!(args)
+
       loader = EnvironmentLoader.new()
 
       options.setup(loader)
@@ -341,7 +419,20 @@ module RBS
       context = nil
 
       OptionParser.new do |opts|
-        opts.on("--context CONTEXT") {|c| context = c }
+        opts.banner = <<EOU
+Usage: rbs constant [options...] [name]
+
+Resolve constant based on RBS.
+
+Examples:
+
+  $ rbs constant ::Object
+  $ rbs constant UTF_8
+  $ rbs constant --context=::Encoding UTF_8
+
+Options:
+EOU
+        opts.on("--context CONTEXT", "Name of the module where the constant resolution starts") {|c| context = c }
       end.order!(args)
 
       unless args.size == 1
@@ -375,11 +466,20 @@ module RBS
       end
     end
 
-    def run_version(args, options)
-      stdout.puts "rbs #{VERSION}"
-    end
-
     def run_paths(args, options)
+      OptionParser.new do |opts|
+        opts.banner = <<EOU
+Usage: rbs paths
+
+Show paths to directories where the RBS files are loaded from.
+
+Examples:
+
+  $ rbs paths
+  $ tbs -r set paths
+EOU
+      end.parse!(args)
+
       loader = EnvironmentLoader.new()
 
       options.setup(loader)
@@ -427,16 +527,30 @@ module RBS
         owners_included = []
 
         OptionParser.new do |opts|
-          opts.on("--require LIB") do |lib|
+          opts.banner = <<EOU
+Usage: rbs prototype runtime [options...] [pattern...]
+
+Generate RBS prototype based on runtime introspection.
+It loads Ruby code specified in [options] and generates RBS prototypes for classes matches to [pattern]. 
+
+Examples:
+
+  $ rbs prototype runtime String
+  $ rbs prototype runtime --require set Set
+  $ rbs prototype runtime -R lib/rbs RBS::*
+
+Options:
+EOU
+          opts.on("-r", "--require LIB", "Load library using `require`") do |lib|
             require_libs << lib
           end
-          opts.on("--require-relative LIB") do |lib|
+          opts.on("-R", "--require-relative LIB", "Load library using `require_relative`") do |lib|
             relative_libs << lib
           end
-          opts.on("--merge") do
+          opts.on("--merge", "Merge generated prototype RBS with existing RBS") do
             merge = true
           end
-          opts.on("--method-owner CLASS") do |klass|
+          opts.on("--method-owner CLASS", "Generate method prototypes if the owner of the method is [CLASS]") do |klass|
             owners_included << klass
           end
         end.parse!(args)
@@ -460,15 +574,49 @@ module RBS
 
         decls = Prototype::Runtime.new(patterns: args, env: env, merge: merge, owners_included: owners_included).decls
       else
-        stdout.puts "Supported formats: rbi, rb, runtime"
+        stdout.puts <<EOU
+Usage: rbs prototype [generator...] [args...]
+
+Generate prototype of RBS files.
+Supported generators are rb, rbi, runtime.
+
+Examples:
+
+  $ rbs prototype rb foo.rb
+  $ rbs prototype rbi foo.rbi
+  $ rbs prototype runtime String
+EOU
         exit 1
       end
 
-      writer = Writer.new(out: stdout)
-      writer.write decls
+      if decls
+        writer = Writer.new(out: stdout)
+        writer.write decls
+      else
+        exit 1
+      end
     end
 
     def run_prototype_file(format, args)
+      opts = OptionParser.new
+      opts.banner = <<EOU
+Usage: rbs prototype #{format} [options...] [files...]
+
+Generate RBS prototype from source code.
+It parses specified Ruby code and and generates RBS prototypes. 
+
+Examples:
+
+  $ rbs prototype rb lib/foo.rb
+  $ rbs prototype rbi sorbet/rbi/foo.rbi
+EOU
+      opts.parse!(args)
+
+      if args.empty?
+        stdout.puts opts
+        return nil
+      end
+
       parser = case format
                when "rbi"
                  Prototype::RBI.new()
@@ -489,9 +637,19 @@ module RBS
       vendor_dir = Pathname("vendor/sigs")
 
       OptionParser.new do |opts|
-        opts.banner = <<~EOB
-        Usage: rbs vendor [options] GEMS...
-        Vendor signatures in the project directory.
+        opts.banner = <<-EOB
+Usage: rbs vendor [options...] [gems...]
+
+Vendor signatures in the project directory.
+This command ignores the RBS loading global options, `-r` and `-I`.
+
+Examples:
+
+  $ rbs vendor
+  $ rbs vendor --vendor-dir=sig
+  $ rbs vendor --no-stdlib
+
+Options:
         EOB
 
         opts.on("--[no-]clean", "Clean vendor directory (default: no)") do |v|
@@ -534,6 +692,18 @@ module RBS
     end
 
     def run_parse(args, options)
+      OptionParser.new do |opts|
+        opts.banner = <<-EOB
+Usage: rbs parse [files...]
+
+Parse given RBS files and print syntax errors.
+
+Examples:
+
+  $ rbs parse sig/app/models.rbs sig/app/controllers.rbs
+        EOB
+      end.parse!(args)
+
       loader = EnvironmentLoader.new()
 
       syntax_error = false
@@ -551,6 +721,7 @@ module RBS
           syntax_error = true
         end
       end
+
       exit 1 if syntax_error
     end
 
