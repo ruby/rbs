@@ -374,7 +374,7 @@ module Enumerable[unchecked out Elem, out Return]: _Each[Elem, Return]
          | [T] (?T arg0) -> (Elem | T)
          | [U] (?U arg0) { (Elem arg0) -> U } -> U
 
-  def filter_map: [U] () { (Elem arg0) -> U? } -> ::Array[U]
+  def filter_map: [U] () { (Elem elem) -> (nil | false | U) } -> ::Array[U]
                 | () -> ::Enumerator[Elem, Return]
 
   def chain: (*self enumerables) -> ::Enumerator::Chain[Elem, ::Array[self]]
