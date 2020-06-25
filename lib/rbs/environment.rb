@@ -125,6 +125,12 @@ module RBS
       @global_decls = other.global_decls.dup
     end
 
+    def self.from_loader(loader)
+      self.new.tap do |env|
+        loader.load(env: env)
+      end
+    end
+
     def cache_name(cache, name:, decl:, outer:)
       if cache.key?(name)
         raise DuplicatedDeclarationError.new(name, decl, cache[name])

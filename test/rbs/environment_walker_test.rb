@@ -55,10 +55,7 @@ EOF
   end
 
   def test_stdlib
-    loader = EnvironmentLoader.new
-
-    env = Environment.new
-    loader.load(env: env)
+    env = Environment.from_loader(EnvironmentLoader.new).resolve_type_names
 
     walker = EnvironmentWalker.new(env: env.resolve_type_names).only_ancestors!
 

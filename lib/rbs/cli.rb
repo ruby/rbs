@@ -109,13 +109,9 @@ EOB
       end.order!(args)
 
       loader = EnvironmentLoader.new()
-
       options.setup(loader)
 
-      env = Environment.new().yield_self do |env|
-        loader.load(env: env)
-        env.resolve_type_names
-      end
+      env = Environment.from_loader(loader).resolve_type_names
 
       stdout.print JSON.generate(env.declarations)
       stdout.flush
@@ -145,13 +141,9 @@ EOB
       list.merge([:class, :module, :interface]) if list.empty?
 
       loader = EnvironmentLoader.new()
-
       options.setup(loader)
 
-      env = Environment.new().yield_self do |env|
-        loader.load(env: env)
-        env.resolve_type_names
-      end
+      env = Environment.from_loader(loader).resolve_type_names
 
       if list.include?(:class) || list.include?(:module)
         env.class_decls.each do |name, entry|
@@ -196,13 +188,9 @@ EOU
       end.order!(args)
 
       loader = EnvironmentLoader.new()
-
       options.setup(loader)
 
-      env = Environment.new().yield_self do |env|
-        loader.load(env: env)
-        env.resolve_type_names
-      end
+      env = Environment.from_loader(loader).resolve_type_names
 
       builder = DefinitionBuilder.new(env: env)
       type_name = parse_type_name(args[0]).absolute!
@@ -262,10 +250,7 @@ EOU
       loader = EnvironmentLoader.new()
       options.setup(loader)
 
-      env = Environment.new().yield_self do |env|
-        loader.load(env: env)
-        env.resolve_type_names
-      end
+      env = Environment.from_loader(loader).resolve_type_names
 
       builder = DefinitionBuilder.new(env: env)
       type_name = parse_type_name(args[0]).absolute!
@@ -317,10 +302,7 @@ EOU
       loader = EnvironmentLoader.new()
       options.setup(loader)
 
-      env = Environment.new().yield_self do |env|
-        loader.load(env: env)
-        env.resolve_type_names
-      end
+      env = Environment.from_loader(loader).resolve_type_names
 
       builder = DefinitionBuilder.new(env: env)
       type_name = parse_type_name(args[0]).absolute!
@@ -374,10 +356,7 @@ EOU
 
       options.setup(loader)
 
-      env = Environment.new().yield_self do |env|
-        loader.load(env: env)
-        env.resolve_type_names
-      end
+      env = Environment.from_loader(loader).resolve_type_names
 
       builder = DefinitionBuilder.new(env: env)
       validator = Validator.new(env: env, resolver: TypeNameResolver.from_env(env))
@@ -444,10 +423,7 @@ EOU
 
       options.setup(loader)
 
-      env = Environment.new().yield_self do |env|
-        loader.load(env: env)
-        env.resolve_type_names
-      end
+      env = Environment.from_loader(loader).resolve_type_names
 
       builder = DefinitionBuilder.new(env: env)
       table = ConstantTable.new(builder: builder)
@@ -559,10 +535,7 @@ EOU
 
         options.setup(loader)
 
-        env = Environment.new().yield_self do |env|
-          loader.load(env: env)
-          env.resolve_type_names
-        end
+        env = Environment.from_loader(loader).resolve_type_names
 
         require_libs.each do |lib|
           require(lib)
