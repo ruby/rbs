@@ -9,7 +9,15 @@ Rake::TestTask.new(:test) do |t|
   end
 end
 
-multitask :default => [:test, :stdlib_test, :rubocop, :validate]
+multitask :default => [:test, :stdlib_test, :rubocop, :validate, :test_doc]
+
+task :test_doc => :parser do
+  files = Dir.chdir(File.expand_path('..', __FILE__)) do
+    `git ls-files -z`.split("\x0").select do |file| Pathname(file).extname == ".md" end
+  end
+
+  sh "ruby bin/run_in_md.rb #{files.join(" ")}"
+end
 
 task :validate => :parser do
   sh "rbs validate"
