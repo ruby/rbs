@@ -1,79 +1,118 @@
 # RBS
 
-RBS provides syntax and semantics definition for the `Ruby Signature` language, `.rbs` files.
-It consists of a parser, the syntax, and class definition interpreter, the semantics.
+RBS is a language to describe the structure of Ruby programs.
+You can write down the definition of a class or module: methods defined in the class, instance variables and their types, and inheritance/mix-in relations.
+It also allows declaring constants and global variables.
 
-## Build
+The following is a small example of RBS for a chat app.
 
-We haven't published a gem yet.
-You need to install the dependencies, and build its parser with `bin/setup`.
+<!-- run-start:a.rbs:bundle exec rbs -I a.rbs validate -->
+```rbs
+module ChatApp
+  VERSION: String
 
+  class User
+    attr_reader login: String
+    attr_reader email: String
+
+    def initialize: (login: String, email: String) -> void
+  end
+
+  class Bot
+    attr_reader name: String
+    attr_reader email: String
+    attr_reader owner: User
+
+    def initialize: (name: String, owner: User) -> void
+  end
+
+  class Message
+    attr_reader id: String
+    attr_reader string: String
+    attr_reader from: User | Bot                     # `|` means union types: `#from` can be `User` or `Bot`
+    attr_reader reply_to: Message?                   # `?` means optional type: `#reply_to` can be `nil`
+
+    def initialize: (from: User | Bot, string: String) -> void
+
+    def reply: (from: User | Bot, string: String) -> Message
+  end
+
+  class Channel
+    attr_reader name: String
+    attr_reader messages: Array[Message]
+    attr_reader users: Array[User]
+    attr_reader bots: Array[Bot]
+
+    def initialize: (name: String) -> void
+
+    def each_member: () { (User | Bot) -> void } -> void  # `{` and `}` means block.
+                   | () -> Enumerable[User | Bot, void]   # Method can be overloaded.
+  end
+end
 ```
-$ bin/setup
-$ bundle exec exe/rbs
+<!-- run-end -->
+
+## Installation
+
+Install the `rbs` gem. `$ gem install rbs` from the command line, or add a line in your `Gemfile`.
+
+```rb
+gem "rbs"
 ```
 
-## Usage
+## CLI
 
-```
+The gem ships with the `rbs` command line tool to demonstrate what it can do and help develop RBS.
+
+```bash
+$ rbs version
 $ rbs list
 $ rbs ancestors ::Object
 $ rbs methods ::Object
-$ rbs method ::Object tap
+$ rbs method Object then
 ```
 
-### rbs list [--class|--module|--interface]
+## Library
 
+There are two important concepts, _environment_ and _definition_. 
+
+An _environment_ is a dictionary that keeps track of all declarations. What is the declaration associated with `String` class? An _environment_ will give you the answer.
+
+A _definition_ gives you the detail of the class. What is the type of the return value of `gsub` method of the `String` class? The _definition_ for `String` class knows the list of methods it provides and their types.
+
+The following is a small code to retrieve the definition of the `String#gsub` method.
+
+<!-- run-start:a.rb:bundle exec ruby a.rb -->
+```rb
+require "rbs"
+
+loader = RBS::EnvironmentLoader.new()
+
+# loader.add(path: Pathname("sig"))   # Load .rbs files from `sig` directory
+# loader.add(library: "pathname")     # Load pathname library
+
+environment = RBS::Environment.from_loader(loader).resolve_type_names
+
+# ::String
+string = RBS::TypeName.new(name: :String, namespace: RBS::Namespace.root)
+
+# Class declaration for ::String
+decl = environment.class_decls[string]
+
+# Builder provides the translation from `declaration` to `definition`
+builder = RBS::DefinitionBuilder.new(env: environment)
+
+# Definition of instance of String
+instance = builder.build_instance(string)
+# Print the types of `gsub` method
+puts instance.methods[:gsub].method_types.join("\n")
+
+# Definition of singleton of String
+singleton = builder.build_singleton(string)
+# No `gsub` method for String singleton
+puts singleton.methods[:gsub]
 ```
-$ rbs list
-```
-
-This command lists all of the classes/modules/interfaces defined in `.rbs` files.
-
-### rbs ancestors [--singleton|--instance] CLASS
-
-```
-$ rbs ancestors Array                    # ([].class.ancestors)
-$ rbs ancestors --singleton Array        # (Array.class.ancestors)
-```
-
-This command prints the _ancestors_ of the class.
-The name of the command is borrowed from `Class#ancestors`, but the semantics is a bit different.
-The `ancestors` command is more precise (I believe).
-
-### rbs methods [--singleton|--instance] CLASS
-
-```
-$ rbs methods ::Integer                  # 1.methods
-$ rbs methods --singleton ::Object       # Object.methods
-```
-
-This command prints all methods provided for the class.
-
-### rbs method [--singleton|--instance] CLASS METHOD
-
-```
-$ rbs method ::Integer '+'               # 1+2
-$ rbs method --singleton ::Object tap    # Object.tap { ... }
-```
-
-This command prints type and properties of the method.
-
-### Options
-
-It accepts two global options, `-r` and `-I`.
-
-`-r` is for libraries. You can specify the names of libraries.
-
-```
-$ rbs -r set list
-```
-
-`-I` is for application signatures. You can specify the name of directory.
-
-```
-$ rbs -I sig list
-```
+<!-- run-end -->
 
 ## Guides
 
