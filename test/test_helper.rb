@@ -114,10 +114,7 @@ SIG
         loader.no_builtin!
         loader.add path: tmppath
 
-        env = RBS::Environment.new()
-        loader.load(env: env)
-
-        yield env.resolve_type_names
+        yield RBS::Environment.from_loader(loader).resolve_type_names
       end
     end
   end

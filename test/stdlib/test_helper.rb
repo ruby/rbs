@@ -124,10 +124,7 @@ class StdlibTest < Minitest::Test
       loader.add library: lib
     end
 
-    @env = RBS::Environment.new.yield_self do |env|
-      loader.load(env: env)
-      env.resolve_type_names
-    end
+    @env = RBS::Environment.from_loader(loader).resolve_type_names
   end
 
   def self.hook

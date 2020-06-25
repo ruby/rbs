@@ -58,10 +58,7 @@ namespace :generate do
       def initialize(klass)
         @klass = klass
 
-        @env = Ruby::Signature::Environment.new.yield_self do |env|
-          Ruby::Signature::EnvironmentLoader.new.load(env: env)
-          env.resolve_type_names
-        end
+        @env = Environment.from_loader(Ruby::Signature::EnvironmentLoader.new).resolve_type_names
       end
 
       def call

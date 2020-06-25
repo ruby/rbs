@@ -17,10 +17,7 @@ module RBS
                        loader.add library: lib
                      end
 
-                     RBS::Environment.new.yield_self do |env|
-                       loader.load(env: env)
-                       env.resolve_type_names
-                     end
+                     RBS::Environment.from_loader(loader).resolve_type_names
                    end
         end
 
