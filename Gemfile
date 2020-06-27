@@ -12,6 +12,7 @@ gem "rubocop-rubycw"
 gem "minitest-reporters"
 gem "json"
 gem "json-schema"
+gem 'stackprof'
 
 # Test gems
 gem "rbs-amber", path: "test/assets/test-gem"
