@@ -1,0 +1,81 @@
+class Logger
+  include Logger::Severity
+
+  public
+
+  def <<: (untyped msg) -> untyped
+
+  def add: (untyped severity, ?untyped message, ?untyped progname) -> untyped
+
+  def close: () -> untyped
+
+  def datetime_format: () -> untyped
+
+  def datetime_format=: (untyped datetime_format) -> untyped
+
+  def debug: (?untyped progname) { (*untyped) -> untyped } -> untyped
+
+  def debug!: () -> untyped
+
+  def debug?: () -> untyped
+
+  def error: (?untyped progname) { (*untyped) -> untyped } -> untyped
+
+  def error!: () -> untyped
+
+  def error?: () -> untyped
+
+  def fatal: (?untyped progname) { (*untyped) -> untyped } -> untyped
+
+  def fatal!: () -> untyped
+
+  def fatal?: () -> untyped
+
+  def formatter: () -> untyped
+
+  def formatter=: (untyped) -> untyped
+
+  def info: (?untyped progname) { (*untyped) -> untyped } -> untyped
+
+  def info!: () -> untyped
+
+  def info?: () -> untyped
+
+  def level: () -> untyped
+
+  def level=: (untyped severity) -> untyped
+
+  alias log add
+
+  def progname: () -> untyped
+
+  def progname=: (untyped) -> untyped
+
+  def reopen: (?untyped logdev) -> untyped
+
+  alias sev_threshold level
+
+  alias sev_threshold= level=
+
+  def unknown: (?untyped progname) { (*untyped) -> untyped } -> untyped
+
+  def warn: (?untyped progname) { (*untyped) -> untyped } -> untyped
+
+  def warn!: () -> untyped
+
+  def warn?: () -> untyped
+
+  private
+
+  def format_message: (untyped severity, untyped datetime, untyped progname, untyped msg) -> untyped
+
+  def format_severity: (untyped severity) -> untyped
+
+  def initialize: (untyped logdev, ?untyped shift_age, ?untyped shift_size, ?level: untyped, ?progname: untyped, ?formatter: untyped, ?datetime_format: untyped, ?binmode: untyped, ?shift_period_suffix: untyped) -> untyped
+end
+
+Logger::ProgName: String
+
+Logger::SEV_LABEL: Array
+
+Logger::VERSION: String
