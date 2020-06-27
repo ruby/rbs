@@ -5,7 +5,6 @@
 /pkg/
 /spec/reports/
 /tmp/
-/Gemfile.lock
 /.ruby-version
 /lib/rbs/parser.rb
 /lib/rbs/parser.output

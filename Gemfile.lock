@@ -1,0 +1,66 @@
+PATH
+  remote: .
+  specs:
+    rbs (0.4.0)
+
+PATH
+  remote: test/assets/test-gem
+  specs:
+    rbs-amber (1.0.0)
+
+GEM
+  remote: https://rubygems.org/
+  specs:
+    addressable (2.7.0)
+      public_suffix (>= 2.0.2, < 5.0)
+    ansi (1.5.0)
+    ast (2.4.0)
+    builder (3.2.4)
+    jaro_winkler (1.5.4)
+    json (2.3.0)
+    json-schema (2.8.1)
+      addressable (>= 2.4)
+    minitest (5.13.0)
+    minitest-reporters (1.3.8)
+      ansi
+      builder
+      minitest (>= 5.0)
+      ruby-progressbar
+    parallel (1.19.1)
+    parser (2.7.0.2)
+      ast (~> 2.4.0)
+    public_suffix (4.0.5)
+    racc (1.4.16)
+    rainbow (3.0.0)
+    rake (13.0.1)
+    rubocop (0.79.0)
+      jaro_winkler (~> 1.5.1)
+      parallel (~> 1.10)
+      parser (>= 2.7.0.1)
+      rainbow (>= 2.2.2, < 4.0)
+      ruby-progressbar (~> 1.7)
+      unicode-display_width (>= 1.4.0, < 1.7)
+    rubocop-rubycw (0.1.3)
+      rubocop
+    ruby-progressbar (1.10.1)
+    stackprof (0.2.15)
+    unicode-display_width (1.6.1)
+
+PLATFORMS
+  ruby
+
+DEPENDENCIES
+  json
+  json-schema
+  minitest
+  minitest-reporters
+  racc
+  rake
+  rbs!
+  rbs-amber!
+  rubocop
+  rubocop-rubycw
+  stackprof
+
+BUNDLED WITH
+   2.1.2
