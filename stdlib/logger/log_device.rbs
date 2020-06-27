@@ -1,0 +1,37 @@
+class Logger::LogDevice
+  include MonitorMixin
+
+  include Period
+
+  public
+
+  def close: () -> untyped
+
+  def dev: () -> untyped
+
+  def filename: () -> untyped
+
+  def reopen: (?untyped log) -> untyped
+
+  def write: (untyped message) -> untyped
+
+  private
+
+  def add_log_header: (untyped file) -> untyped
+
+  def check_shift_log: () -> untyped
+
+  def create_logfile: (untyped filename) -> untyped
+
+  def initialize: (?untyped log, ?binmode: untyped, ?shift_period_suffix: untyped, ?shift_size: untyped, ?shift_age: untyped) -> untyped
+
+  def lock_shift_log: () -> untyped
+
+  def open_logfile: (untyped filename) -> untyped
+
+  def set_dev: (untyped log) -> untyped
+
+  def shift_log_age: () -> untyped
+
+  def shift_log_period: (untyped period_end) -> untyped
+end
