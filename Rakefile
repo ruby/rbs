@@ -54,7 +54,7 @@ namespace :generate do
       raise "Class name is necessary. e.g. rake 'generate:stdlib_test[String]'"
     end
 
-    path = Pathname("test/stdlib/#{klass}_test.rb")
+    path = Pathname(ENV["RBS_GENERATE_TEST_PATH"] || "test/stdlib/#{klass}_test.rb")
     raise "#{path} already exists!" if path.exist?
 
     require "erb"
@@ -66,34 +66,55 @@ namespace :generate do
       def initialize(klass)
         @klass = klass
 
-        @env = Environment.from_loader(Ruby::Signature::EnvironmentLoader.new).resolve_type_names
+        loader = RBS::EnvironmentLoader.new
+        Dir['stdlib/*'].each do |lib|
+          next if lib.end_with?('builtin')
+
+          loader.add(library: File.basename(lib))
+        end
+        @env = RBS::Environment.from_loader(loader).resolve_type_names
       end
 
       def call
         ERB.new(<<~ERB, trim_mode: "-").result(binding)
           require_relative "test_helper"
+          require 'rbs/test/test_helper'
 
-          class <%= klass %>Test < StdlibTest
-            target <%= klass %>
+          <%- unless class_methods.empty? -%>
+          class <%= klass %>SingletonTest < Minitest::Test
+            include RBS::Test::TypeAssertions
+
             # library "pathname", "set", "securerandom"     # Declare library signatures to load
-            using hook.refinement
+            testing "singleton(::<%= klass %>)"
+
           <%- class_methods.each do |method_name, definition| %>
-            def test_class_method_<%= test_name_for(method_name) %>
-            <%- definition.method_types.each do |method_type| -%>
-              # <%= method_type %>
-              <%= klass %>.<%= method_name %>
-            <%- end -%>
-            end
-          <%- end -%>
-          <%- instance_methods.each do |method_name, definition| %>
             def test_<%= test_name_for(method_name) %>
-            <%- definition.method_types.each do |method_type| -%>
-              # <%= method_type %>
-              <%= klass %>.new.<%= method_name %>
-            <%- end -%>
+          <%- definition.method_types.each do |method_type| -%>
+              assert_send_type  "<%= method_type %>",
+                                <%= klass %>, :<%= method_name %>
+          <%- end -%>
             end
           <%- end -%>
           end
+          <%- end -%>
+
+          <%- unless instance_methods.empty? -%>
+          class <%= klass %>Test < Minitest::Test
+            include RBS::Test::TypeAssertions
+
+            # library "pathname", "set", "securerandom"     # Declare library signatures to load
+            testing "::<%= klass %>"
+
+          <%- instance_methods.each do |method_name, definition| %>
+            def test_<%= test_name_for(method_name) %>
+          <%- definition.method_types.each do |method_type| -%>
+              assert_send_type  "<%= method_type %>",
+                                <%= klass %>.new, :<%= method_name %>
+          <%- end -%>
+            end
+          <%- end -%>
+          end
+          <%- end -%>
         ERB
       end
 
@@ -129,17 +150,17 @@ namespace :generate do
       end
 
       def type_name
-        @type_name ||= Ruby::Signature::TypeName.new(name: klass.to_sym, namespace: Ruby::Signature::Namespace.new(path: [], absolute: true))
+        @type_name ||= RBS::TypeName.new(name: klass.to_sym, namespace: RBS::Namespace.new(path: [], absolute: true))
       end
 
       def class_methods
-        @class_methods ||= Ruby::Signature::DefinitionBuilder.new(env: env).build_singleton(type_name).methods.select {|_, definition|
+        @class_methods ||= RBS::DefinitionBuilder.new(env: env).build_singleton(type_name).methods.select {|_, definition|
           definition.implemented_in == type_name
         }
       end
 
       def instance_methods
-        @instance_methods ||= Ruby::Signature::DefinitionBuilder.new(env: env).build_instance(type_name).methods.select {|_, definition|
+        @instance_methods ||= RBS::DefinitionBuilder.new(env: env).build_instance(type_name).methods.select {|_, definition|
           definition.implemented_in == type_name
         }
       end
