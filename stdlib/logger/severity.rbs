@@ -1,0 +1,14 @@
+module Logger::Severity
+end
+
+Logger::Severity::DEBUG: Integer
+
+Logger::Severity::ERROR: Integer
+
+Logger::Severity::FATAL: Integer
+
+Logger::Severity::INFO: Integer
+
+Logger::Severity::UNKNOWN: Integer
+
+Logger::Severity::WARN: Integer
