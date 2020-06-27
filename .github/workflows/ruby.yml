@@ -26,3 +26,5 @@ jobs:
         bin/setup
         bundle exec rake
         bundle exec rake build
+        RBS_GENERATE_TEST_PATH=/tmp/Array_test.rb bundle exec rake 'generate:stdlib_test[Array]'
+        ruby -c /tmp/Array_test.rb

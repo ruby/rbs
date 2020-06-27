@@ -54,7 +54,7 @@ namespace :generate do
       raise "Class name is necessary. e.g. rake 'generate:stdlib_test[String]'"
     end
 
-    path = Pathname("test/stdlib/#{klass}_test.rb")
+    path = Pathname(ENV["RBS_GENERATE_TEST_PATH"] || "test/stdlib/#{klass}_test.rb")
     raise "#{path} already exists!" if path.exist?
 
     require "erb"
