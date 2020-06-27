@@ -6,19 +6,20 @@ module RBS
 
       def initialize
         @source_decls = []
-        @toplevel_members = []
       end
 
       def decls
         decls = []
 
-        decls.push(*source_decls)
+        top_decls, top_members = source_decls.partition {|decl| decl.is_a?(AST::Declarations::Base) }
 
-        unless toplevel_members.empty?
+        decls.push(*top_decls)
+
+        unless top_members.empty?
           top = AST::Declarations::Class.new(
             name: TypeName.new(name: :Object, namespace: Namespace.empty),
             super_class: nil,
-            members: toplevel_members,
+            members: top_members,
             annotations: [],
             comment: nil,
             location: nil,
@@ -27,7 +28,7 @@ module RBS
           decls << top
         end
 
-        decls.uniq
+        decls
       end
 
       def parse(string)
@@ -51,19 +52,15 @@ module RBS
           end
         end
 
-        process RubyVM::AbstractSyntaxTree.parse(string), namespace: Namespace.empty, current_module: nil, comments: comments, singleton: false
+        process RubyVM::AbstractSyntaxTree.parse(string), decls: source_decls, comments: comments, singleton: false
       end
 
-      def nested_name(name)
-        (current_namespace + const_to_name(name).to_namespace).to_type_name.relative!
-      end
-
-      def process(node, namespace:, current_module:, comments:, singleton:)
+      def process(node, decls:, comments:, singleton:)
         case node.type
         when :CLASS
           class_name, super_class, *class_body = node.children
           kls = AST::Declarations::Class.new(
-            name: const_to_name(class_name).with_prefix(namespace).relative!,
+            name: const_to_name(class_name),
             super_class: super_class && AST::Declarations::Class::Super.new(name: const_to_name(super_class), args: []),
             type_params: AST::Declarations::ModuleTypeParams.empty,
             members: [],
@@ -72,16 +69,17 @@ module RBS
             comment: comments[node.first_lineno - 1]
           )
 
-          source_decls.push kls
+          decls.push kls
 
           each_node class_body do |child|
-            process child, namespace: kls.name.to_namespace, current_module: kls, comments: comments, singleton: false
+            process child, decls: kls.members, comments: comments, singleton: false
           end
+
         when :MODULE
           module_name, *module_body = node.children
 
           mod = AST::Declarations::Module.new(
-            name: const_to_name(module_name).with_prefix(namespace).relative!,
+            name: const_to_name(module_name),
             type_params: AST::Declarations::ModuleTypeParams.empty,
             self_type: nil,
             members: [],
@@ -90,21 +88,23 @@ module RBS
             comment: comments[node.first_lineno - 1]
           )
 
-          source_decls.push mod
+          decls.push mod
 
           each_node module_body do |child|
-            process child, namespace: mod.name.to_namespace, current_module: mod, comments: comments, singleton: false
+            process child, decls: mod.members, comments: comments, singleton: false
           end
+
         when :SCLASS
-          this = node.children[0]
+          this, body = node.children
+
           if this.type != :SELF
             RBS.logger.warn "`class <<` syntax with not-self may be compiled to incorrect code: #{this}"
           end
 
-          body = node.children[1]
           each_child(body) do |child|
-            process child, namespace: namespace, current_module: current_module, comments: comments, singleton: true
+            process child, decls: decls, comments: comments, singleton: true
           end
+
         when :DEFN, :DEFS
             if node.type == :DEFN
               def_name, def_body = node.children
@@ -134,113 +134,100 @@ module RBS
               overload: false
             )
 
-            if current_module
-              current_module.members.push member
-            else
-              toplevel_members.push member
-            end
-        when :FCALL
-          if current_module
-            # Inside method definition cannot reach here.
-            args = node.children[1]&.children || []
+            decls.push member
 
-            case node.children[0]
-            when :include
-              args.each do |arg|
-                if (name = const_to_name(arg))
-                  current_module.members << AST::Members::Include.new(
-                    name: name,
-                    args: [],
-                    annotations: [],
-                    location: nil,
-                    comment: comments[node.first_lineno - 1]
-                  )
-                end
+        when :FCALL
+          # Inside method definition cannot reach here.
+          args = node.children[1]&.children || []
+
+          case node.children[0]
+          when :include
+            args.each do |arg|
+              if (name = const_to_name(arg))
+                decls << AST::Members::Include.new(
+                  name: name,
+                  args: [],
+                  annotations: [],
+                  location: nil,
+                  comment: comments[node.first_lineno - 1]
+                )
               end
-            when :extend
-              args.each do |arg|
-                if (name = const_to_name(arg))
-                  current_module.members << AST::Members::Extend.new(
-                    name: name,
-                    args: [],
-                    annotations: [],
-                    location: nil,
-                    comment: comments[node.first_lineno - 1]
-                  )
-                end
+            end
+          when :extend
+            args.each do |arg|
+              if (name = const_to_name(arg))
+                decls << AST::Members::Extend.new(
+                  name: name,
+                  args: [],
+                  annotations: [],
+                  location: nil,
+                  comment: comments[node.first_lineno - 1]
+                )
               end
-            when :attr_reader
-              args.each do |arg|
-                if arg&.type == :LIT && arg.children[0].is_a?(Symbol)
-                  current_module.members << AST::Members::AttrReader.new(
-                    name: arg.children[0],
-                    ivar_name: nil,
-                    type: Types::Bases::Any.new(location: nil),
-                    location: nil,
-                    comment: comments[node.first_lineno - 1],
-                    annotations: []
-                  )
-                end
+            end
+          when :attr_reader
+            args.each do |arg|
+              if arg&.type == :LIT && arg.children[0].is_a?(Symbol)
+                decls << AST::Members::AttrReader.new(
+                  name: arg.children[0],
+                  ivar_name: nil,
+                  type: Types::Bases::Any.new(location: nil),
+                  location: nil,
+                  comment: comments[node.first_lineno - 1],
+                  annotations: []
+                )
               end
-            when :attr_accessor
-              args.each do |arg|
-                if arg&.type == :LIT && arg.children[0].is_a?(Symbol)
-                  current_module.members << AST::Members::AttrAccessor.new(
-                    name: arg.children[0],
-                    ivar_name: nil,
-                    type: Types::Bases::Any.new(location: nil),
-                    location: nil,
-                    comment: comments[node.first_lineno - 1],
-                    annotations: []
-                  )
-                end
+            end
+          when :attr_accessor
+            args.each do |arg|
+              if arg&.type == :LIT && arg.children[0].is_a?(Symbol)
+                decls << AST::Members::AttrAccessor.new(
+                  name: arg.children[0],
+                  ivar_name: nil,
+                  type: Types::Bases::Any.new(location: nil),
+                  location: nil,
+                  comment: comments[node.first_lineno - 1],
+                  annotations: []
+                )
               end
-            when :attr_writer
-              args.each do |arg|
-                if arg&.type == :LIT && arg.children[0].is_a?(Symbol)
-                  current_module.members << AST::Members::AttrWriter.new(
-                    name: arg.children[0],
-                    ivar_name: nil,
-                    type: Types::Bases::Any.new(location: nil),
-                    location: nil,
-                    comment: comments[node.first_lineno - 1],
-                    annotations: []
-                  )
-                end
+            end
+          when :attr_writer
+            args.each do |arg|
+              if arg&.type == :LIT && arg.children[0].is_a?(Symbol)
+                decls << AST::Members::AttrWriter.new(
+                  name: arg.children[0],
+                  ivar_name: nil,
+                  type: Types::Bases::Any.new(location: nil),
+                  location: nil,
+                  comment: comments[node.first_lineno - 1],
+                  annotations: []
+                )
               end
             end
           end
+
           each_child node do |child|
-            process child, namespace: namespace, current_module: current_module, comments: comments, singleton: singleton
+            process child, decls: decls, comments: comments, singleton: singleton
           end
 
         when :CDECL
-          type_name = case
-                      when node.children[0].is_a?(Symbol)
-                        ns = if current_module
-                               current_module.name.to_namespace
-                             else
-                               Namespace.empty
-                             end
-                        TypeName.new(name: node.children[0], namespace: ns)
-                      else
-                        name = const_to_name(node.children[0])
-                        if current_module
-                          name.with_prefix current_module.name.to_namespace
-                        else
-                          name
-                        end.relative!
-                      end
+          const_name = case
+                       when node.children[0].is_a?(Symbol)
+                         TypeName.new(name: node.children[0], namespace: Namespace.empty)
+                       else
+                         const_to_name(node.children[0])
+                       end
 
-          source_decls << AST::Declarations::Constant.new(
-            name: type_name,
+          decls << AST::Declarations::Constant.new(
+            name: const_name,
             type: node_type(node.children.last),
             location: nil,
             comment: comments[node.first_lineno - 1]
           )
+
         else
           each_child node do |child|
-            process child, namespace: namespace, current_module: current_module, comments: comments, singleton: singleton
+            process child, decls: decls, comments: comments, singleton: singleton
           end
         end
       end
