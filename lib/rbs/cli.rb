@@ -98,22 +98,50 @@ module RBS
     def run_ast(args, options)
       OptionParser.new do |opts|
         opts.banner = <<EOB
-Usage: rbs ast
+Usage: rbs ast [patterns...]
 
 Print JSON AST of loaded environment.
+You can specify patterns to filter declarations with the file names.
 
 Examples:
 
   $ rbs ast
+  $ rbs ast 'basic_object.rbs'
+  $ rbs -I ./sig ast ./sig
+  $ rbs -I ./sig ast '*/models/*.rbs'
 EOB
       end.order!(args)
+
+      patterns = args.map do |arg|
+        path = Pathname(arg)
+        if path.exist?
+          # Pathname means a directory or a file
+          path
+        else
+          # String means a `fnmatch` pattern
+          arg
+        end
+      end
 
       loader = EnvironmentLoader.new()
       options.setup(loader)
 
       env = Environment.from_loader(loader).resolve_type_names
 
-      stdout.print JSON.generate(env.declarations)
+      decls = env.declarations.select do |decl|
+        name = decl.location.buffer.name
+
+        patterns.empty? || patterns.any? do |pat|
+          case pat
+          when Pathname
+            Pathname(name).ascend.any? {|p| p == pat }
+          when String
+            name.end_with?(pat) || File.fnmatch(pat, name, File::FNM_EXTGLOB)
+          end
+        end
+      end
+
+      stdout.print JSON.generate(decls)
       stdout.flush
     end
 
