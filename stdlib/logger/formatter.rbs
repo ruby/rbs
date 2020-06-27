@@ -1,0 +1,19 @@
+class Logger::Formatter
+  public
+
+  def call: (untyped severity, untyped time, untyped progname, untyped msg) -> untyped
+
+  def datetime_format: () -> untyped
+
+  def datetime_format=: (untyped) -> untyped
+
+  private
+
+  def format_datetime: (untyped time) -> untyped
+
+  def initialize: () -> untyped
+
+  def msg2str: (untyped msg) -> untyped
+end
+
+Logger::Formatter::Format: String
