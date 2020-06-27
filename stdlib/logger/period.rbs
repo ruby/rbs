@@ -1,13 +1,7 @@
 module Logger::Period
-  def self.next_rotate_time: (untyped now, untyped shift_age) -> untyped
+  def self?.next_rotate_time: (Time now, String shift_age) -> untyped
 
-  def self.previous_period_end: (untyped now, untyped shift_age) -> untyped
+  def self?.previous_period_end: (Time now, String shift_age) -> untyped
 
-  private
-
-  def next_rotate_time: (untyped now, untyped shift_age) -> untyped
-
-  def previous_period_end: (untyped now, untyped shift_age) -> untyped
+  SiD: Integer
 end
-
-Logger::Period::SiD: Integer

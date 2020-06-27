@@ -1,37 +1,39 @@
-class Logger::LogDevice
-  include MonitorMixin
+class Logger
+  class LogDevice
+    # TODO: Write type signature for MonitorMixin
+    # include MonitorMixin
 
-  include Period
+    include Period
 
-  public
+    attr_reader dev: _WriteCloser
+    attr_reader filename: String?
 
-  def close: () -> untyped
+    public
 
-  def dev: () -> untyped
+    def close: () -> nil
 
-  def filename: () -> untyped
+    def reopen: (?logdev log) -> self
 
-  def reopen: (?untyped log) -> untyped
+    def write: (untyped message) -> untyped
 
-  def write: (untyped message) -> untyped
+    private
 
-  private
+    def add_log_header: (IO file) -> untyped
 
-  def add_log_header: (untyped file) -> untyped
+    def check_shift_log: () -> untyped
 
-  def check_shift_log: () -> untyped
+    def create_logfile: (String filename) -> File
 
-  def create_logfile: (untyped filename) -> untyped
+    def initialize: (?untyped logdev, ?binmode: bool, ?shift_period_suffix: String, ?shift_size: Integer, ?shift_age: Numeric | String) -> void
 
-  def initialize: (?untyped log, ?binmode: untyped, ?shift_period_suffix: untyped, ?shift_size: untyped, ?shift_age: untyped) -> untyped
+    def lock_shift_log: () { () -> untyped } -> untyped
 
-  def lock_shift_log: () -> untyped
+    def open_logfile: (String filename) -> File
 
-  def open_logfile: (untyped filename) -> untyped
+    def set_dev: (logdev log) -> untyped
 
-  def set_dev: (untyped log) -> untyped
+    def shift_log_age: () -> true
 
-  def shift_log_age: () -> untyped
-
-  def shift_log_period: (untyped period_end) -> untyped
+    def shift_log_period: (Time period_end) -> true
+  end
 end
