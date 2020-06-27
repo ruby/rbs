@@ -367,11 +367,10 @@ end
 
     assert_write parser.decls, <<-EOF
 module Foo
+  VERSION: ::String
+
+  ::Hello::World: ::Symbol
 end
-
-Foo::VERSION: ::String
-
-Hello::World: ::Symbol
     EOF
   end
 
@@ -467,12 +466,13 @@ end
 
     assert_write parser.decls, <<-EOF
 module Foo
+  class Bar
+  end
 end
 
-class Foo::Bar
-end
-
-class Foo::Baz
+module Foo
+  class Baz
+  end
 end
     EOF
   end
