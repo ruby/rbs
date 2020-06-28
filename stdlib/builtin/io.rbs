@@ -480,7 +480,7 @@ class IO < Object
 
   def sysseek: (Integer amount, ?Integer whence) -> Integer
 
-  def syswrite: (String arg0) -> Integer
+  def syswrite: (_ToS arg0) -> Integer
 
   # Returns the current offset (in bytes) of *ios* .
   # 
@@ -508,11 +508,11 @@ class IO < Object
 
   def ungetc: (String arg0) -> NilClass
 
-  def write: (String arg0) -> Integer
+  def write: (*_ToS arg0) -> Integer
 
   def self.binread: (String name, ?Integer length, ?Integer offset) -> String
 
-  def self.binwrite: (String name, String arg0, ?Integer offset, ?external_encoding: String external_encoding, ?internal_encoding: String internal_encoding, ?encoding: String encoding, ?textmode: untyped textmode, ?binmode: untyped binmode, ?autoclose: untyped autoclose, ?mode: String mode) -> Integer
+  def self.binwrite: (String name, _ToS arg0, ?Integer offset, ?external_encoding: String external_encoding, ?internal_encoding: String internal_encoding, ?encoding: String encoding, ?textmode: untyped textmode, ?binmode: untyped binmode, ?autoclose: untyped autoclose, ?mode: String mode) -> Integer
 
   def self.copy_stream: (String | IO src, String | IO dst, ?Integer copy_length, ?Integer src_offset) -> Integer
 
@@ -528,7 +528,7 @@ class IO < Object
 
   def self.try_convert: (untyped arg0) -> IO?
 
-  def self.write: (String name, String arg0, ?Integer offset, ?external_encoding: String external_encoding, ?internal_encoding: String internal_encoding, ?encoding: String encoding, ?textmode: untyped textmode, ?binmode: untyped binmode, ?autoclose: untyped autoclose, ?mode: String mode) -> Integer
+  def self.write: (String name, _ToS arg0, ?Integer offset, ?external_encoding: String external_encoding, ?internal_encoding: String internal_encoding, ?encoding: String encoding, ?textmode: untyped textmode, ?binmode: untyped binmode, ?autoclose: untyped autoclose, ?mode: String mode) -> Integer
 
   def self.for_fd: (Integer fd, ?Integer mode, ?Integer opt) -> self
 
