@@ -453,40 +453,31 @@ module RBS
             m = if method_def
                   Definition::Method.new(
                     super_method: nil,
-                    method_types: method_def.method_types,
-                    defined_in: method_def.defined_in,
-                    implemented_in: type_name,
                     accessibility: visibility,
-                    attributes: method_def.attributes, # deprecated
-                    annotations: method_def.annotations,
-                    comments: method_def.comments
+                    defs: method_def.defs.map {|defn| defn.update(implemented_in: type_name) }
                   )
                 else
                   Definition::Method.new(
                     super_method: nil,
-                    method_types: [],
-                    defined_in: type_name,
-                    implemented_in: type_name,
                     accessibility: visibility,
-                    attributes: [],  # deprecated
-                    annotations: [],
-                    comments: []
+                    defs: []
                   )
                 end
-            definition.methods[method_name] = members.inject(m) do |original, new|
+
+            definition.methods[method_name] = members.inject(m) do |original, member|
+              defs = member.types.map do |method_type|
+                Definition::Method::TypeDef.new(
+                  type: method_type,
+                  member: member,
+                  implemented_in: type_name,
+                  defined_in: type_name
+                )
+              end
+
               Definition::Method.new(
                 super_method: nil,
-                method_types: new.types + original.method_types,
-                defined_in: original.defined_in,
-                implemented_in: original.implemented_in,
-                accessibility: original.accessibility,
-                attributes: original.attributes,
-                annotations: original.annotations + new.annotations,
-                comments: if new.comment
-                            original.comments + [new.comment]
-                          else
-                            original.comments
-                          end
+                defs: defs + original.defs,
+                accessibility: original.accessibility
               )
             end
           end
@@ -508,42 +499,42 @@ module RBS
                 if member.is_a?(AST::Members::AttrReader) || member.is_a?(AST::Members::AttrAccessor)
                   definition.methods[name] = Definition::Method.new(
                     super_method: nil,
-                    method_types: [
-                      MethodType.new(
-                        type_params: [],
-                        type: Types::Function.empty(type),
-                        block: nil,
-                        location: nil
+                    defs: [
+                      Definition::Method::TypeDef.new(
+                        type: MethodType.new(
+                          type_params: [],
+                          type: Types::Function.empty(type),
+                          block: nil,
+                          location: nil
+                        ),
+                        member: member,
+                        defined_in: type_name,
+                        implemented_in: type_name
                       )
                     ],
-                    defined_in: type_name,
-                    implemented_in: type_name,
-                    accessibility: accessibility,
-                    attributes: [],
-                    annotations: member.annotations,
-                    comments: [member.comment]
+                    accessibility: accessibility
                   )
                 end
 
                 if member.is_a?(AST::Members::AttrWriter) || member.is_a?(AST::Members::AttrAccessor)
                   definition.methods[:"#{name}="] = Definition::Method.new(
                     super_method: nil,
-                    method_types: [
-                      MethodType.new(
-                        type_params: [],
-                        type: Types::Function.empty(type).update(
-                          required_positionals: [Types::Function::Param.new(name: name, type: type)]
+                    defs: [
+                      Definition::Method::TypeDef.new(
+                        type: MethodType.new(
+                          type_params: [],
+                          type: Types::Function.empty(type).update(
+                            required_positionals: [Types::Function::Param.new(name: name, type: type)]
+                          ),
+                          block: nil,
+                          location: nil
                         ),
-                        block: nil,
-                        location: nil
-                      )
+                        member: member,
+                        defined_in: type_name,
+                        implemented_in: type_name
+                      ),
                     ],
-                    defined_in: type_name,
-                    implemented_in: type_name,
-                    accessibility: accessibility,
-                    attributes: [],
-                    annotations: member.annotations,
-                    comments: [member.comment]
+                    accessibility: accessibility
                   )
                 end
 
@@ -690,28 +681,24 @@ module RBS
 
             m = Definition::Method.new(
               super_method: nil,
-              method_types: method_def&.method_types || [],
-              defined_in: method_def&.defined_in || type_name,
-              implemented_in: type_name,
-              accessibility: visibility,
-              attributes: method_def&.attributes || [],  # deprecated
-              annotations: method_def&.annotations || [],
-              comments: method_def&.comments || []
+              defs: method_def&.yield_self do |method_def|
+                method_def.defs.map {|defn| defn.update(implemented_in: type_name) }
+              end || [],
+              accessibility: visibility
             )
             definition.methods[method_name] = members.inject(m) do |original, new|
+              defs = new.types.map do |type|
+                Definition::Method::TypeDef.new(
+                  type: type,
+                  member: new,
+                  defined_in: type_name,
+                  implemented_in: type_name
+                )
+              end
               Definition::Method.new(
                 super_method: nil,
-                method_types: new.types + original.method_types,
-                defined_in: original.defined_in,
-                implemented_in: original.implemented_in,
-                accessibility: original.accessibility,
-                attributes: original.attributes,
-                annotations: original.annotations + new.annotations,
-                comments: if new.comment
-                            original.comments + [new.comment]
-                          else
-                            original.comments
-                          end
+                defs: defs + original.defs,
+                accessibility: original.accessibility
               )
             end
           end
@@ -748,10 +735,12 @@ module RBS
             if initialize
               class_params = entry.type_params.each.map(&:name)
 
-              types = initialize.method_types
+              initialize_defs = initialize.defs
               definition.methods[:new] = Definition::Method.new(
                 super_method: nil,
-                method_types: types.map do |method_type|
+                defs: initialize_defs.map do |initialize_def|
+                  method_type = initialize_def.type
+
                   class_type_param_vars = Set.new(class_params)
                   method_type_param_vars = Set.new(method_type.type_params)
 
@@ -772,17 +761,19 @@ module RBS
                   end
 
                   method_type = method_type.map_type {|ty| ty.sub(sub) }
-                  method_type.update(
+                  method_type = method_type.update(
                     type_params: method_params,
                     type: method_type.type.with_return_type(Types::Bases::Instance.new(location: nil))
                   )
+
+                  Definition::Method::TypeDef.new(
+                    type: method_type,
+                    member: initialize_def.member,
+                    defined_in: nil,
+                    implemented_in: nil
+                  )
                 end,
-                defined_in: nil,
-                implemented_in: nil,
-                accessibility: :public,
-                attributes: [],
-                annotations: [],
-                comments: initialize.comments
+                accessibility: :public
               )
             end
           end
@@ -849,14 +840,9 @@ module RBS
       super_method = methods[name]
 
       methods[name] = Definition::Method.new(
-        method_types: method.method_types.map {|method_type| method_type.sub(sub) },
         super_method: super_method,
-        defined_in: method.defined_in,
-        implemented_in: method.implemented_in,
         accessibility: method.accessibility,
-        attributes: method.attributes,
-        annotations: method.annotations,
-        comments: method.comments
+        defs: method.defs.map {|defn| defn.update(type: defn.type.sub(sub)) }
       )
     end
 
@@ -935,13 +921,15 @@ module RBS
 
             method = Definition::Method.new(
               super_method: nil,
-              method_types: member.types,
-              defined_in: type_name,
-              implemented_in: nil,
-              accessibility: :public,
-              attributes: member.attributes,
-              annotations: member.annotations,
-              comments: [member.comment]
+              defs: member.types.map do |method_type|
+                Definition::Method::TypeDef.new(
+                  type: method_type,
+                  member: member,
+                  defined_in: type_name,
+                  implemented_in: nil
+                )
+              end,
+              accessibility: :public
             )
             definition.methods[member.name] = method
           end

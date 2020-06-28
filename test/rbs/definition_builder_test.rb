@@ -1258,4 +1258,116 @@ EOF
       end
     end
   end
+
+  def test_definition_method_type_def
+    SignatureManager.new do |manager|
+      manager.files.merge!(Pathname("foo.rbs") => <<-EOF)
+class Hello
+  # doc1
+  %a{hello}
+  def foo: () -> String
+         | (Integer) -> String
+end
+
+class Hello
+  # doc2
+  %a{world}
+  overload def foo: (String) -> String
+end
+      EOF
+      manager.build do |env|
+        builder = DefinitionBuilder.new(env: env)
+
+        builder.build_one_instance(type_name("::Hello")).tap do |definition|
+          foo = definition.methods[:foo]
+
+          assert_nil foo.super_method
+          assert_equal [parse_method_type("(::String) -> ::String"),
+                        parse_method_type("() -> ::String"),
+                        parse_method_type("(::Integer) -> ::String")], foo.method_types
+          assert_equal type_name("::Hello"), foo.defined_in
+          assert_equal type_name("::Hello"), foo.implemented_in
+          assert_includes foo.annotations, AST::Annotation.new(string: "hello", location: nil)
+          assert_includes foo.annotations, AST::Annotation.new(string: "world", location: nil)
+          assert_includes foo.comments, AST::Comment.new(string: "doc1\n", location: nil)
+          assert_includes foo.comments, AST::Comment.new(string: "doc2\n", location: nil)
+
+          assert_equal 3, foo.defs.size
+
+          foo.defs[0].tap do |defn|
+            assert_equal parse_method_type("(::String) -> ::String"), defn.type
+            assert_equal "doc2\n", defn.comment.string
+            assert_equal ["world"], defn.annotations.map(&:string)
+            assert_equal type_name("::Hello"), defn.defined_in
+            assert_equal type_name("::Hello"), defn.implemented_in
+          end
+
+          foo.defs[1].tap do |defn|
+            assert_equal parse_method_type("() -> ::String"), defn.type
+            assert_equal "doc1\n", defn.comment.string
+            assert_equal ["hello"], defn.annotations.map(&:string)
+            assert_equal type_name("::Hello"), defn.defined_in
+            assert_equal type_name("::Hello"), defn.implemented_in
+          end
+
+          foo.defs[2].tap do |defn|
+            assert_equal parse_method_type("(::Integer) -> ::String"), defn.type
+            assert_equal "doc1\n", defn.comment.string
+            assert_equal ["hello"], defn.annotations.map(&:string)
+            assert_equal type_name("::Hello"), defn.defined_in
+            assert_equal type_name("::Hello"), defn.implemented_in
+          end
+        end
+      end
+    end
+  end
+
+  def test_definition_method_type_def_interface
+    SignatureManager.new do |manager|
+      manager.files.merge!(Pathname("foo.rbs") => <<-EOF)
+interface _Hello
+  # _Hello#foo
+  %a{_Hello#foo}
+  def foo: () -> String
+end
+
+class Hello
+  include _Hello
+
+  # Hello#foo
+  %a{Hello#foo}
+  overload def foo: (Integer) -> String
+end
+      EOF
+      manager.build do |env|
+        builder = DefinitionBuilder.new(env: env)
+
+        builder.build_one_instance(type_name("::Hello")).tap do |definition|
+          foo = definition.methods[:foo]
+
+          assert_nil foo.super_method
+          assert_equal [parse_method_type("(::Integer) -> ::String"),
+                        parse_method_type("() -> ::String")], foo.method_types
+
+          assert_equal 2, foo.defs.size
+
+          foo.defs[0].tap do |defn|
+            assert_equal parse_method_type("(::Integer) -> ::String"), defn.type
+            assert_equal "Hello#foo\n", defn.comment.string
+            assert_equal ["Hello#foo"], defn.annotations.map(&:string)
+            assert_equal type_name("::Hello"), defn.defined_in
+            assert_equal type_name("::Hello"), defn.implemented_in
+          end
+
+          foo.defs[1].tap do |defn|
+            assert_equal parse_method_type("() -> ::String"), defn.type
+            assert_equal "_Hello#foo\n", defn.comment.string
+            assert_equal ["_Hello#foo"], defn.annotations.map(&:string)
+            assert_equal type_name("::_Hello"), defn.defined_in
+            assert_equal type_name("::Hello"), defn.implemented_in
+          end
+        end
+      end
+    end
+  end
 end
