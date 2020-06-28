@@ -21,24 +21,65 @@ module RBS
     end
 
     class Method
-      attr_reader :super_method
-      attr_reader :method_types
-      attr_reader :defined_in
-      attr_reader :implemented_in
-      attr_reader :accessibility
-      attr_reader :attributes
-      attr_reader :annotations
-      attr_reader :comments
+      class TypeDef
+        attr_reader :type
+        attr_reader :member
+        attr_reader :defined_in
+        attr_reader :implemented_in
 
-      def initialize(super_method:, method_types:, defined_in:, implemented_in:, accessibility:, attributes:, annotations:, comments:)
+        def initialize(type:, member:, defined_in:, implemented_in:)
+          @type = type
+          @member = member
+          @defined_in = defined_in
+          @implemented_in = implemented_in
+        end
+
+        def comment
+          member.comment
+        end
+
+        def annotations
+          member.annotations
+        end
+
+        def update(type: self.type, member: self.member, defined_in: self.defined_in, implemented_in: self.implemented_in)
+          TypeDef.new(type: type, member: member, defined_in: defined_in, implemented_in: implemented_in)
+        end
+      end
+
+      attr_reader :super_method
+      attr_reader :defs
+      attr_reader :accessibility
+
+      def initialize(super_method:, defs:, accessibility:)
         @super_method = super_method
-        @method_types = method_types
-        @defined_in = defined_in
-        @implemented_in = implemented_in
+        @defs = defs
         @accessibility = accessibility
-        @attributes = attributes
-        @annotations = annotations
-        @comments = comments
+      end
+
+      def defined_in
+        @defined_in ||= defs.last.defined_in
+      end
+
+      def implemented_in
+        @implemented_in ||= defs.last.implemented_in
+      end
+
+      def method_types
+        @method_types ||= defs.map(&:type)
+      end
+
+      def comments
+        @comments ||= defs.map(&:comment).compact
+      end
+
+      def annotations
+        @annotations ||= defs.flat_map(&:annotations)
+      end
+
+      # @deprecated
+      def attributes
+        []
       end
 
       def public?
@@ -52,41 +93,24 @@ module RBS
       def sub(s)
         self.class.new(
           super_method: super_method&.sub(s),
-          method_types: method_types.map {|ty| ty.sub(s) },
-          defined_in: defined_in,
-          implemented_in: implemented_in,
-          accessibility: @accessibility,
-          attributes: attributes,
-          annotations: annotations,
-          comments: comments
+          defs: defs.map {|defn| defn.update(type: defn.type.sub(s)) },
+          accessibility: @accessibility
         )
       end
 
       def map_type(&block)
         self.class.new(
           super_method: super_method&.map_type(&block),
-          method_types: method_types.map do |ty|
-            ty.map_type(&block)
-          end,
-          defined_in: defined_in,
-          implemented_in: implemented_in,
-          accessibility: @accessibility,
-          attributes: attributes,
-          annotations: annotations,
-          comments: comments
+          defs: defs.map {|defn| defn.update(type: defn.type.map_type(&block)) },
+          accessibility: @accessibility
         )
       end
 
       def map_method_type(&block)
         self.class.new(
           super_method: super_method,
-          method_types: method_types.map(&block),
-          defined_in: defined_in,
-          implemented_in: implemented_in,
-          accessibility: @accessibility,
-          attributes: attributes,
-          annotations: annotations,
-          comments: comments
+          defs: defs.map {|defn| defn.update(type: yield(defn.type)) },
+          accessibility: @accessibility
         )
       end
     end
