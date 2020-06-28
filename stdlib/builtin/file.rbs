@@ -60,9 +60,6 @@ class File < IO
   #
   #     File.absolute_path?("c:/foo")     #=> false (on Linux), true (on Windows)
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     File.absolute_path?(file_name)  ->  true or false
-  #
   def self.absolute_path?: (string | _ToPath file_name) -> bool
 
   # Returns the last access time for the named file as a Time object.
