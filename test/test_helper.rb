@@ -3,6 +3,7 @@ require "rbs"
 require "tmpdir"
 require 'minitest/reporters'
 require "stringio"
+require "open3"
 
 Minitest::Reporters.use! [Minitest::Reporters::DefaultReporter.new]
 
@@ -30,15 +31,17 @@ module TestHelper
 
   class SignatureManager
     attr_reader :files
+    attr_reader :system_builtin
 
-    def initialize
+    def initialize(system_builtin: false)
       @files = {}
+      @system_buildin = system_builtin
 
-      files[Pathname("builtin.rbs")] = BUILTINS
+      files[Pathname("builtin.rbs")] = BUILTINS unless system_builtin
     end
 
-    def self.new
-      instance = super
+    def self.new(**kw)
+      instance = super(**kw)
 
       if block_given?
         yield instance
@@ -111,10 +114,10 @@ SIG
         end
 
         loader = RBS::EnvironmentLoader.new()
-        loader.no_builtin!
+        loader.no_builtin! unless system_builtin
         loader.add path: tmppath
 
-        yield RBS::Environment.from_loader(loader).resolve_type_names
+        yield RBS::Environment.from_loader(loader).resolve_type_names, tmppath
       end
     end
   end
