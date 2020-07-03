@@ -4,9 +4,10 @@ module RBS
       attr_reader :self_class
       attr_reader :builder
 
-      def initialize(self_class:, builder:)
+      def initialize(self_class:, builder:, array_no_sample:)
         @self_class = self_class
         @builder = builder
+        @array_no_sample = array_no_sample
       end
 
       def overloaded_call(method, method_name, call, errors:)
@@ -175,6 +176,10 @@ module RBS
         end
       end
 
+      def values(vals, type)
+        (@array_no_sample ? vals : vals.sample(10)).all? {|v| value(v, type.args[0]) }
+      end
+
       def value(val, type)
         case type
         when Types::Bases::Any
@@ -199,8 +204,7 @@ module RBS
           klass = Object.const_get(type.name.to_s)
           case
           when klass == ::Array
-            Test.call(val, IS_AP, klass) &&
-              (val.size > 100 ? val.sample(50) : val).all? {|v| value(v, type.args[0]) }
+            Test.call(val, IS_AP, klass) && values(val, type)
           when klass == ::Hash
             Test.call(val, IS_AP, klass) && val.all? {|k, v| value(k, type.args[0]) && value(v, type.args[1]) }
           when klass == ::Range

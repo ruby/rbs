@@ -17,6 +17,7 @@ rescue
   STDERR.puts "  [OPTIONAL] RBS_TEST_SKIP: skip testing classes"
   STDERR.puts "  [OPTIONAL] RBS_TEST_OPT: options for signatures (`-r` for libraries or `-I` for signatures)"
   STDERR.puts "  [OPTIONAL] RBS_TEST_LOGLEVEL: one of debug|info|warn|error|fatal (defaults to info)"
+  STDERR.puts "  [OPTIONAL] RBS_TEST_ARRAY_NO_SAMPLE: if set, all the values of the array would be type-checked"
   exit 1
 end
 
@@ -36,6 +37,10 @@ def match(filter, name)
   end
 end
 
+def true? obj
+  !!obj || obj == "false"
+end
+
 factory = RBS::Factory.new()
 tester = RBS::Test::Tester.new(env: env)
 
@@ -48,6 +53,7 @@ TracePoint.trace :end do |tp|
         if env.class_decls.key?(class_name)
           logger.info "Setting up hooks for #{class_name}"
           tester.install!(tp.self)
+          # hooks << RBS::Test::Hook.install(env, tp.self, logger: logger, array_no_sample: true?(ENV['RBS_TEST_ARRAY_NO_SAMPLE']) ).verify_all.raise_on_error!(raise_on_error)
         end
       end
     end
