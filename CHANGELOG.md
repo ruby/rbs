@@ -2,6 +2,13 @@
 
 ## master
 
+## 0.5.0 (2020-07-04)
+
+* Signature updates for `Mutex_m`, `IO`, and `Enumerable`.
+* Syntax update. [#307](https://github.com/ruby/rbs/pull/307)
+* AST command prints _absolute_ type names with file name filtering. [#312](https://github.com/ruby/rbs/pull/312)
+* Improve CLI message. [#309](https://github.com/ruby/rbs/pull/309)
+
 ## 0.4.0 (2020-06-15)
 
 * Signature update for `Fiber`, `Encoding`, and `Enumerator`.
