@@ -13,6 +13,8 @@ gem "minitest-reporters"
 gem "json"
 gem "json-schema"
 gem 'stackprof'
+gem "goodcheck"
 
 # Test gems
 gem "rbs-amber", path: "test/assets/test-gem"
+
