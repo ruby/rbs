@@ -48,6 +48,14 @@ end
 factory = RBS::Factory.new()
 tester = RBS::Test::Tester.new(env: env)
 
+def get_sampling_options
+  {
+    Array: true?(ENV['RBS_TEST_ARRAY_NO_SAMPLE']) || true?(ENV['RBS_TEST_NO_SAMPLING']),
+    Enumerator: true?(ENV['RBS_TEST_ENUMERATOR_NO_SAMPLE']) || true?(ENV['RBS_TEST_NO_SAMPLING']),
+    Hash: true?(ENV['RBS_TEST_HASH_NO_SAMPLE']) || true?(ENV['RBS_TEST_NO_SAMPLING']),
+  }
+end
+
 TracePoint.trace :end do |tp|
   class_name = tp.self.name&.yield_self {|name| factory.type_name(name).absolute! }
 
@@ -57,7 +65,7 @@ TracePoint.trace :end do |tp|
         if env.class_decls.key?(class_name)
           logger.info "Setting up hooks for #{class_name}"
           tester.install!(tp.self)
-          # hooks << RBS::Test::Hook.install(env, tp.self, logger: logger, array_no_sample: true?(ENV['RBS_TEST_ARRAY_NO_SAMPLE']) ).verify_all.raise_on_error!(raise_on_error)
+          hooks << RBS::Test::Hook.install(env, tp.self, logger: logger, sampling_options: get_sampling_options ).verify_all.raise_on_error!(raise_on_error)
         end
       end
     end

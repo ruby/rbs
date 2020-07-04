@@ -4,10 +4,10 @@ module RBS
       attr_reader :self_class
       attr_reader :builder
 
-      def initialize(self_class:, builder:, array_no_sample:)
+      def initialize(self_class:, builder:, sampling_options:)
         @self_class = self_class
         @builder = builder
-        @array_no_sample = array_no_sample
+        @sampling_options = sampling_options
       end
 
       def overloaded_call(method, method_name, call, errors:)
@@ -176,8 +176,9 @@ module RBS
         end
       end
 
-      def values(vals, type)
-        (@array_no_sample ? vals : vals.sample(10)).all? {|v| value(v, type.args[0]) }
+      def type_check_sampled_values(vals, type, collection_type)
+        vals.all? yield
+        # (@sampling_options[collection_type.to_s.to_sym] ? vals : vals.sample(100)).all? yield
       end
 
       def value(val, type)
@@ -204,9 +205,9 @@ module RBS
           klass = Object.const_get(type.name.to_s)
           case
           when klass == ::Array
-            Test.call(val, IS_AP, klass) && values(val, type)
+            Test.call(val, IS_AP, klass) && type_check_sampled_values(val, type, klass) {|v| value(v, type.args[0]) }
           when klass == ::Hash
-            Test.call(val, IS_AP, klass) && val.all? {|k, v| value(k, type.args[0]) && value(v, type.args[1]) }
+            Test.call(val, IS_AP, klass) && type_check_sampled_values(val, type, klass) {|k, v| value(k, type.args[0]) && value(v, type.args[1]) }
           when klass == ::Range
             Test.call(val, IS_AP, klass) && value(val.begin, type.args[0]) && value(val.end, type.args[0])
           when klass == ::Enumerator
@@ -227,7 +228,7 @@ module RBS
                 end
               end
 
-              values.all? do |v|
+              type_check_sampled_values(val,type,klass) do |v|
                 if v.size == 1
                   # Only one block argument.
                   value(v[0], type.args[0]) || value(v, type.args[0])
