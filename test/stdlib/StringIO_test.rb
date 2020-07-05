@@ -2,7 +2,6 @@ require_relative "test_helper"
 
 class StringIOTest < StdlibTest
   target StringIO
-  using hook.refinement
 
   def test_close_read
     io = StringIO.new('example')

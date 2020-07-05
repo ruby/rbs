@@ -2,7 +2,6 @@ require_relative "test_helper"
 
 class RangeTest < StdlibTest
   target Range
-  using hook.refinement
 
   def test_new
     Range.new(1, 10)

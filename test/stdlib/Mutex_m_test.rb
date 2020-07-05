@@ -1,10 +1,8 @@
 require_relative "test_helper"
-require "rbs/test/test_helper"
-
 require 'mutex_m'
 
 class Mutex_mInstanceTest < Minitest::Test
-  include RBS::Test::TypeAssertions
+  include TypeAssertions
 
   library 'mutex_m'
   testing "::Mutex_m"

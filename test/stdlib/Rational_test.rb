@@ -2,7 +2,6 @@ require_relative "test_helper"
 
 class RationalTest < StdlibTest
   target Rational
-  using hook.refinement
 
   def test_calc
     10r % 10

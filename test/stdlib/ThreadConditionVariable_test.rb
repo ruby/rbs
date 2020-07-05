@@ -2,7 +2,6 @@ require_relative "test_helper"
 
 class ThreadConditionVariableTest < StdlibTest
   target Thread::ConditionVariable
-  using hook.refinement
 
   def test_broadcast
     cv = Thread::ConditionVariable.new

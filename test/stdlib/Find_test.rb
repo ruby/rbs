@@ -5,8 +5,6 @@ class FindTest < StdlibTest
   target Find
   library "find"
 
-  using hook.refinement
-
   def test_find
     Dir.mktmpdir do |dir|
       File.open("#{dir}/a", "w"){}

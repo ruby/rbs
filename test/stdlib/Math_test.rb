@@ -4,7 +4,6 @@ require "bigdecimal"
 
 class MathTest < StdlibTest
   target Math
-  using hook.refinement
 
   %w(
     acos

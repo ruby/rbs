@@ -2,7 +2,6 @@ require_relative "test_helper"
 
 class GCTest < StdlibTest
   target GC
-  using hook.refinement
 
   include GC
 

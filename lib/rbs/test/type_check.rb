@@ -199,7 +199,8 @@ module RBS
           klass = Object.const_get(type.name.to_s)
           case
           when klass == ::Array
-            Test.call(val, IS_AP, klass) && val.all? {|v| value(v, type.args[0]) }
+            Test.call(val, IS_AP, klass) &&
+              (val.size > 100 ? val.sample(50) : val).all? {|v| value(v, type.args[0]) }
           when klass == ::Hash
             Test.call(val, IS_AP, klass) && val.all? {|k, v| value(k, type.args[0]) && value(v, type.args[1]) }
           when klass == ::Range

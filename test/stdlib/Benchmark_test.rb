@@ -5,8 +5,6 @@ class BenchmarkTest < StdlibTest
   target Benchmark
   library "benchmark"
 
-  using hook.refinement
-
   def test_benchmark
     n = 10
 
@@ -41,8 +39,6 @@ end
 class BenchmarkReportTest < StdlibTest
   target Benchmark::Report
   library "benchmark"
-
-  using hook.refinement
 
   def test_benchmark
     n = 10

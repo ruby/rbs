@@ -2,7 +2,6 @@ require_relative "test_helper"
 
 class ComplexTest < StdlibTest
   target Complex
-  using hook.refinement
 
   def test_singleton_polar
     Complex.polar(10)

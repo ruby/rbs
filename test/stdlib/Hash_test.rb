@@ -2,7 +2,6 @@ require_relative "test_helper"
 
 class HashTest < StdlibTest
   target Hash
-  using hook.refinement
 
   # Hash[]
   def test_singleton_aref

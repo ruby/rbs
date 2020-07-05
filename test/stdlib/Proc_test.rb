@@ -2,8 +2,6 @@ require_relative "test_helper"
 
 class ProcTest < StdlibTest
   target Proc
-  # library "pathname", "set", "securerandom"     # Declare library signatures to load
-  using hook.refinement
 
   def test_arity
     proc {}.arity
@@ -35,7 +33,6 @@ class ProcTest < StdlibTest
 
   def test_initialize
     Proc.new { |a| a }
-    Proc.new
   end
 
   def test_lambda?

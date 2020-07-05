@@ -1,8 +1,7 @@
 require_relative "test_helper"
-require "rbs/test/test_helper"
 
 class StringSingletonTest < Minitest::Test
-  include RBS::Test::TypeAssertions
+  include TypeAssertions
 
   testing "singleton(::String)"
 
@@ -36,7 +35,7 @@ class StringSingletonTest < Minitest::Test
 end
 
 class StringInstanceTest < Minitest::Test
-  include RBS::Test::TypeAssertions
+  include TypeAssertions
 
   testing "::String"
 

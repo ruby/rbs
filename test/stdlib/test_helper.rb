@@ -5,6 +5,296 @@ require "minitest/autorun"
 require "minitest/reporters"
 Minitest::Reporters.use! [Minitest::Reporters::DefaultReporter.new]
 
+module Spy
+  def self.wrap(object, method_name)
+    spy = WrapSpy.new(object: object, method_name: method_name)
+
+    if block_given?
+      begin
+        yield spy, spy.wrapped_object
+      end
+    else
+      spy
+    end
+  end
+
+  class WrapSpy
+    attr_accessor :callback
+    attr_reader :object
+    attr_reader :method_name
+
+    def initialize(object:, method_name:)
+      @callback = -> (_) { }
+      @object = object
+      @method_name = method_name
+    end
+
+    def wrapped_object
+      spy = self
+
+      Class.new(BasicObject) do
+        define_method(:method_missing) do |name, *args, &block|
+          spy.object.__send__(name, *args, &block)
+        end
+
+        define_method(spy.method_name, -> (*args, &block) {
+          return_value = nil
+          exception = nil
+          block_calls = []
+
+          spy_block = if block
+                        Object.new.instance_eval do |fresh|
+                          -> (*block_args) do
+                            block_exn = nil
+                            block_return = nil
+
+                            begin
+                              block_return = if self.equal?(fresh)
+                                               # no instance eval
+                                               block.call(*block_args)
+                                             else
+                                               self.instance_exec(*block_args, &block)
+                                             end
+                            rescue Exception => exn
+                              block_exn = exn
+                            end
+
+                            if block_exn
+                              block_calls << RBS::Test::ArgumentsReturn.exception(
+                                arguments: block_args,
+                                exception: block_exn
+                              )
+                            else
+                              block_calls << RBS::Test::ArgumentsReturn.return(
+                                arguments: block_args,
+                                value: block_return
+                              )
+                            end
+
+                            if block_exn
+                              raise block_exn
+                            else
+                              block_return
+                            end
+                          end.ruby2_keywords
+                        end
+                      end
+
+          begin
+            return_value = spy.object.__send__(spy.method_name, *args, &spy_block)
+          rescue ::Exception => exn
+            exception = exn
+          end
+
+          call = if exception
+                   RBS::Test::ArgumentsReturn.exception(
+                     arguments: args,
+                     exception: exception
+                   )
+                 else
+                   RBS::Test::ArgumentsReturn.return(
+                     arguments: args,
+                     value: return_value
+                   )
+                 end
+          trace = RBS::Test::CallTrace.new(
+            method_name: spy.method_name,
+            method_call: call,
+            block_calls: block_calls,
+            block_given: block != nil
+          )
+
+          spy.callback.call(trace)
+
+          if exception
+            spy.object.__send__(:raise, exception)
+          else
+            return_value
+          end
+        }.ruby2_keywords)
+      end.new()
+    end
+  end
+end
+
+module TypeAssertions
+  module ClassMethods
+    attr_reader :target
+
+    def library(*libs)
+      @libs = libs
+      @env = nil
+      @target = nil
+    end
+
+    def env
+      @env ||= begin
+                 loader = RBS::EnvironmentLoader.new
+                 (@libs || []).each do |lib|
+                   loader.add library: lib
+                 end
+
+                 RBS::Environment.from_loader(loader).resolve_type_names
+               end
+    end
+
+    def builder
+      @builder ||= RBS::DefinitionBuilder.new(env: env)
+    end
+
+    def testing(type_or_string)
+      type = case type_or_string
+             when String
+               RBS::Parser.parse_type(type_or_string, variables: [])
+             else
+               type_or_string
+             end
+
+      definition = case type
+                   when RBS::Types::ClassInstance
+                     builder.build_instance(type.name)
+                   when RBS::Types::ClassSingleton
+                     builder.build_singleton(type.name)
+                   else
+                     raise "Test target should be class instance or class singleton: #{type}"
+                   end
+
+      @target = [type, definition]
+    end
+  end
+
+  def self.included(base)
+    base.extend ClassMethods
+  end
+
+  def env
+    self.class.env
+  end
+
+  def builder
+    self.class.builder
+  end
+
+  def targets
+    @targets ||= []
+  end
+
+  def target
+    targets.last || self.class.target
+  end
+
+  def testing(type_or_string)
+    type = case type_or_string
+           when String
+             RBS::Parser.parse_type(type_or_string, variables: [])
+           else
+             type_or_string
+           end
+
+    definition = case type
+                 when RBS::Types::ClassInstance
+                   builder.build_instance(type.name)
+                 when RBS::Types::ClassSingleton
+                   builder.build_singleton(type.name)
+                 else
+                   raise "Test target should be class instance or class singleton: #{type}"
+                 end
+
+    targets.push [type, definition]
+
+    if block_given?
+      begin
+        yield
+      ensure
+        targets.pop
+      end
+    else
+      [type, definition]
+    end
+  end
+
+  ruby2_keywords def assert_send_type(method_type, receiver, method, *args, &block)
+    trace = []
+    spy = Spy.wrap(receiver, method)
+    spy.callback = -> (result) { trace << result }
+
+    exception = nil
+
+    begin
+      spy.wrapped_object.__send__(method, *args, &block)
+    rescue => exn
+      exception = exn
+      raise
+    end
+
+    mt = case method_type
+         when String
+           RBS::Parser.parse_method_type(method_type, variables: [])
+         when RBS::MethodType
+           method_type
+         end
+
+    typecheck = RBS::Test::TypeCheck.new(self_class: receiver.class, builder: builder)
+    errors = typecheck.method_call(method, mt, trace.last, errors: [])
+
+    assert_empty errors.map {|x| RBS::Test::Errors.to_string(x) }, "Call trace does not match with given method type: #{trace.last.inspect}"
+
+    type, definition = target
+    method_types = case
+                   when definition.instance_type?
+                     subst = RBS::Substitution.build(definition.type_params, type.args)
+                     definition.methods[method].method_types.map do |method_type|
+                       method_type.sub(subst)
+                     end
+                   when definition.class_type?
+                     definition.methods[method].method_types
+                   end
+
+    all_errors = method_types.map {|t| typecheck.method_call(method, t, trace.last, errors: []) }
+    assert all_errors.any? {|es| es.empty? }, "Call trace does not match one of method definitions:\n  #{trace.last.inspect}\n  #{method_types.join(" | ")}"
+
+    if exception
+      raise exception
+    end
+  end
+
+  ruby2_keywords def refute_send_type(method_type, receiver, method, *args, &block)
+    trace = []
+    spy = Spy.wrap(receiver, method)
+    spy.callback = -> (result) { trace << result }
+
+    exception = nil
+    begin
+      spy.wrapped_object.__send__(method, *args, &block)
+    rescue Exception => exn
+      exception = exn
+    end
+
+    mt = case method_type
+         when String
+           RBS::Parser.parse_method_type(method_type, variables: [])
+         when RBS::MethodType
+           method_type
+         end
+
+    mt = mt.update(block: if mt.block
+                            RBS::MethodType::Block.new(
+                              type: mt.block.type.with_return_type(RBS::Types::Bases::Any.new(location: nil)),
+                              required: mt.block.required
+                            )
+                          end,
+                   type: mt.type.with_return_type(RBS::Types::Bases::Any.new(location: nil)))
+
+    typecheck = RBS::Test::TypeCheck.new(self_class: receiver.class, builder: builder)
+    errors = typecheck.method_call(method, mt, trace.last, errors: [])
+
+    assert_operator exception, :is_a?, ::Exception
+    assert_empty errors.map {|x| RBS::Test::Errors.to_string(x) }
+
+    exception
+  end
+end
+
 class ToInt
   def initialize(value = 3)
     @value = value
@@ -100,9 +390,7 @@ class ArefFromStringToString
 end
 
 class StdlibTest < Minitest::Test
-
-  DEFAULT_LOGGER = Logger.new(STDERR)
-  DEFAULT_LOGGER.level = ENV["RBS_TEST_LOGLEVEL"] || "info"
+  RBS.logger_level = ENV["RBS_TEST_LOGLEVEL"] || "info"
 
   loader = RBS::EnvironmentLoader.new
   DEFAULT_ENV = RBS::Environment.new.yield_self do |env|
@@ -128,21 +416,14 @@ class StdlibTest < Minitest::Test
   end
 
   def self.hook
-    @hook ||= RBS::Test::Hook.new(env, @target, logger: DEFAULT_LOGGER).verify_all
+    @hook ||= begin
+                RBS::Test::Tester.new(env: env).tap do |tester|
+                  tester.install!(@target)
+                end
+              end
   end
 
   def hook
     self.class.hook
-  end
-
-  def setup
-    super
-    self.hook.errors.clear
-    @assert = true
-  end
-
-  def teardown
-    super
-    assert_empty self.hook.errors.map {|x| RBS::Test::Errors.to_string(x) }
   end
 end

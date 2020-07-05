@@ -2,7 +2,6 @@ require_relative "test_helper"
 
 class NameErrorTest < StdlibTest
   target NameError
-  using hook.refinement
 
   def test_initialize
     NameError.new

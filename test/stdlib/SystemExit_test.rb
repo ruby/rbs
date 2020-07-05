@@ -2,7 +2,6 @@ require_relative "test_helper"
 
 class SystemExitTest < StdlibTest
   target SystemExit
-  using hook.refinement
 
   def test_new
     SystemExit.new()

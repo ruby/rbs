@@ -1,8 +1,7 @@
 require_relative "test_helper"
-require "rbs/test/test_helper"
 
 class FiberSingletonTest < Minitest::Test
-  include RBS::Test::TypeAssertions
+  include TypeAssertions
 
   testing "singleton(::Fiber)"
 
@@ -30,7 +29,7 @@ class FiberSingletonTest < Minitest::Test
 end
 
 class FiberTest < Minitest::Test
-  include RBS::Test::TypeAssertions
+  include TypeAssertions
 
   testing "::Fiber"
 
@@ -75,7 +74,7 @@ end
 require 'fiber'
 
 class FiberSingletonExtTest < Minitest::Test
-  include RBS::Test::TypeAssertions
+  include TypeAssertions
 
   library 'fiber'
   testing 'singleton(::Fiber)'
@@ -87,7 +86,7 @@ class FiberSingletonExtTest < Minitest::Test
 end
 
 class FiberExtTest < Minitest::Test
-  include RBS::Test::TypeAssertions
+  include TypeAssertions
 
   library 'fiber'
   testing '::Fiber'

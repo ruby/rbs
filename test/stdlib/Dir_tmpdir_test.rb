@@ -4,7 +4,6 @@ require "tmpdir"
 class Dir_tmpdirTest < StdlibTest
   target Dir
   library "tmpdir"
-  using hook.refinement
 
   def test_tmpdir
     Dir.tmpdir()

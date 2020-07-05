@@ -2,7 +2,6 @@ require_relative "test_helper"
 
 class FloatTest < StdlibTest
   target Float
-  using hook.refinement
 
   def test_calc
     10.0 % 3

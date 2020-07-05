@@ -1,8 +1,7 @@
 require_relative "test_helper"
-require "rbs/test/test_helper"
 
 class ArraySingletonTest < Minitest::Test
-  include RBS::Test::TypeAssertions
+  include TypeAssertions
 
   testing "singleton(::Array)"
 
@@ -37,7 +36,7 @@ class ArraySingletonTest < Minitest::Test
 end
 
 class ArrayInstanceTest < Minitest::Test
-  include RBS::Test::TypeAssertions
+  include TypeAssertions
 
   testing "::Array[::Integer]"
 

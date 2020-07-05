@@ -2,7 +2,6 @@ require_relative "test_helper"
 
 class NoMethodErrorTest < StdlibTest
   target NoMethodError
-  using hook.refinement
 
   def test_new
     NoMethodError.new()

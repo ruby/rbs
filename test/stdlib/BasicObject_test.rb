@@ -2,7 +2,6 @@ require_relative "test_helper"
 
 class BasicObjectTest < StdlibTest
   target BasicObject
-  using hook.refinement
 
   def test_not
     BasicObject.new.!

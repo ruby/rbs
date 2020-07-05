@@ -2,7 +2,6 @@ require_relative "test_helper"
 
 class UncaughtThrowErrorTest < StdlibTest
   target UncaughtThrowError
-  using hook.refinement
 
   def test_new
     UncaughtThrowError.new(1, 2)

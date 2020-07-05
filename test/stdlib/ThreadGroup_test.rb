@@ -2,7 +2,6 @@ require_relative "test_helper"
 
 class ThreadGroupTest < StdlibTest
   target ThreadGroup
-  using hook.refinement
 
   def test_add
     tg = ThreadGroup.new

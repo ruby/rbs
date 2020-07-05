@@ -1,9 +1,8 @@
 require_relative "../test_helper"
-require "rbs/test/test_helper"
 require "json"
 
 class JSONSingletonTest < Minitest::Test
-  include RBS::Test::TypeAssertions
+  include TypeAssertions
 
   library "json"
   testing "singleton(::JSON)"
@@ -155,7 +154,7 @@ class JSONSingletonTest < Minitest::Test
 end
 
 class JSONInstanceTest < Minitest::Test
-  include RBS::Test::TypeAssertions
+  include TypeAssertions
 
   class MyJSON
     include JSON

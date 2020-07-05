@@ -2,7 +2,6 @@ require_relative "test_helper"
 
 class ObjectTest < StdlibTest
   target Object
-  using hook.refinement
 
   def test_operators
     Object.new !~ 123

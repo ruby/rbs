@@ -2,7 +2,6 @@ require_relative "test_helper"
 
 class ThreadSizedQueueTest < StdlibTest
   target Thread::SizedQueue
-  using hook.refinement
 
   def test_lshift
     q = Thread::SizedQueue.new(3)

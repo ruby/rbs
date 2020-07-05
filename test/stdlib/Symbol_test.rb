@@ -1,8 +1,7 @@
 require_relative "test_helper"
-require "rbs/test/test_helper"
 
 class SymbolSingletonTest < Minitest::Test
-  include RBS::Test::TypeAssertions
+  include TypeAssertions
 
   testing "singleton(::Symbol)"
 
@@ -13,7 +12,7 @@ class SymbolSingletonTest < Minitest::Test
 end
 
 class SymbolInstanceTest < Minitest::Test
-  include RBS::Test::TypeAssertions
+  include TypeAssertions
 
   testing "::Symbol"
 

@@ -2,7 +2,6 @@ require_relative "test_helper"
 
 class ExceptionTest < StdlibTest
   target Exception
-  using hook.refinement
 
   def test_full_message
     Exception.new.full_message

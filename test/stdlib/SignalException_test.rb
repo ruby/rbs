@@ -2,7 +2,6 @@ require_relative "test_helper"
 
 class SignalExceptionTest < StdlibTest
   target SignalException
-  using hook.refinement
 
   def test_new
     SignalException.new("INT")
