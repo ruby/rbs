@@ -9,6 +9,30 @@ module RBS
         @builder = builder
       end
 
+      def overloaded_call(method, method_name, call, errors:)
+        es = method.method_types.map do |method_type|
+          es = method_call(method_name, method_type, call, errors: [])
+
+          if es.empty?
+            return errors
+          else
+            es
+          end
+        end
+
+        if es.size == 1
+          errors.push(*es[0])
+        else
+          errors << Errors::UnresolvedOverloadingError.new(
+            klass: self_class,
+            method_name: method_name,
+            method_types: method.method_types
+          )
+        end
+
+        errors
+      end
+
       def method_call(method_name, method_type, call, errors:)
         args(method_name, method_type, method_type.type, call.method_call, errors, type_error: Errors::ArgumentTypeError, argument_error: Errors::ArgumentError)
         self.return(method_name, method_type, method_type.type, call.method_call, errors, return_error: Errors::ReturnTypeError)
@@ -56,7 +80,7 @@ module RBS
       end
 
       def return(method_name, method_type, fun, call, errors, return_error:)
-        unless call.exception
+        if call.return?
           unless value(call.return_value, fun.return_type)
             errors << return_error.new(klass: self_class,
                                        method_name: method_name,

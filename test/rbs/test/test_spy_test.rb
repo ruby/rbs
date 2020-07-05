@@ -5,7 +5,7 @@ require "logger"
 
 return unless Gem::Version.new(RUBY_VERSION) >= Gem::Version.new('2.7.0')
 
-class RBS::TestSpyTest < Minitest::Test
+class RBS::Test::SpyTest < Minitest::Test
   include TestHelper
 
   Test = RBS::Test

@@ -36,6 +36,7 @@ require "rbs/type_name_resolver"
 require "rbs/environment_walker"
 require "rbs/vendorer"
 require "rbs/validator"
+require "rbs/factory"
 
 begin
   require "rbs/parser"
