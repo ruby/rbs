@@ -166,7 +166,7 @@ end
 
 ### Proc type
 
-Proc type denots type of procedures, `Proc` instances.
+Proc type denotes type of procedures, `Proc` instances.
 
 ```
 ^(Integer) -> String                  # A procedure with an `Integer` parameter and returns `String`
@@ -348,7 +348,7 @@ attr_reader id: Integer
 # @id: Integer
 # def id: () -> Integer
 
-# Defines `name=` method and `raw_name` instance variable.
+# Defines `name=` method and `@raw_name` instance variable.
 attr_writer name (@raw_name) : String
 # @raw_name: String
 # def name=: (String) -> String
