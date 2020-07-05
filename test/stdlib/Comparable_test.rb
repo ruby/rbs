@@ -1,8 +1,7 @@
 require_relative "test_helper"
-require "rbs/test/test_helper"
 
 class ComparableTest < Minitest::Test
-  include RBS::Test::TypeAssertions
+  include TypeAssertions
 
   class Test
     include Comparable

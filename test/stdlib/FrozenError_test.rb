@@ -2,7 +2,6 @@ require_relative "test_helper"
 
 class FrozenErrorTest < StdlibTest
   target FrozenError
-  using hook.refinement
 
   def test_initialize
     FrozenError.new

@@ -5,7 +5,7 @@ require "logger"
 
 return unless Gem::Version.new(RUBY_VERSION) >= Gem::Version.new('2.7.0')
 
-class RBS::RuntimeTestTest < Minitest::Test
+class RBS::Test::RuntimeTestTest < Minitest::Test
   include TestHelper
 
   def test_runtime_test
@@ -38,17 +38,22 @@ end
 
 hello = Hello.new(x: 0, y: 10)
 hello.move(y: -10)
+hello.move(10, -20)
 RUBY
 
         env = {
-          "RBS_TEST_TARGET" => "Hello",
-          "BUNDLE_GEMFILE" => File.join(__dir__, "../../Gemfile"),
+          "BUNDLE_GEMFILE" => File.join(__dir__, "../../../Gemfile"),
+          "RBS_TEST_TARGET" => "::Hello",
           "RBS_TEST_OPT" => "-I./foo.rbs"
         }
-        out, status = Open3.capture2e(env, "ruby", "-rbundler/setup", "-rrbs/test/setup", "sample.rb", chdir: path.to_s)
+        _out, err, status = Open3.capture3(env, "ruby", "-rbundler/setup", "-rrbs/test/setup", "sample.rb", chdir: path.to_s)
 
-        assert_operator status, :success?
-        assert_match /Setting up hooks for Hello$/, out
+        # STDOUT.puts _out
+        # STDERR.puts err
+
+        refute_operator status, :success?
+        assert_match(/Setting up hooks for ::Hello$/, err)
+        assert_match(/TypeError: \[Hello#move\] ArgumentError:/, err)
       end
     end
   end

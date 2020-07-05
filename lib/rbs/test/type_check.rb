@@ -9,6 +9,30 @@ module RBS
         @builder = builder
       end
 
+      def overloaded_call(method, method_name, call, errors:)
+        es = method.method_types.map do |method_type|
+          es = method_call(method_name, method_type, call, errors: [])
+
+          if es.empty?
+            return errors
+          else
+            es
+          end
+        end
+
+        if es.size == 1
+          errors.push(*es[0])
+        else
+          errors << Errors::UnresolvedOverloadingError.new(
+            klass: self_class,
+            method_name: method_name,
+            method_types: method.method_types
+          )
+        end
+
+        errors
+      end
+
       def method_call(method_name, method_type, call, errors:)
         args(method_name, method_type, method_type.type, call.method_call, errors, type_error: Errors::ArgumentTypeError, argument_error: Errors::ArgumentError)
         self.return(method_name, method_type, method_type.type, call.method_call, errors, return_error: Errors::ReturnTypeError)
@@ -56,7 +80,7 @@ module RBS
       end
 
       def return(method_name, method_type, fun, call, errors, return_error:)
-        unless call.exception
+        if call.return?
           unless value(call.return_value, fun.return_type)
             errors << return_error.new(klass: self_class,
                                        method_name: method_name,
@@ -175,7 +199,8 @@ module RBS
           klass = Object.const_get(type.name.to_s)
           case
           when klass == ::Array
-            Test.call(val, IS_AP, klass) && val.all? {|v| value(v, type.args[0]) }
+            Test.call(val, IS_AP, klass) &&
+              (val.size > 100 ? val.sample(50) : val).all? {|v| value(v, type.args[0]) }
           when klass == ::Hash
             Test.call(val, IS_AP, klass) && val.all? {|k, v| value(k, type.args[0]) && value(v, type.args[1]) }
           when klass == ::Range

@@ -3,7 +3,6 @@ require "tempfile"
 
 class LoadErrorTest < StdlibTest
   target LoadError
-  using hook.refinement
 
   def test_path
     Tempfile.open(['rbs', 'rb']) do |tf|

@@ -1,9 +1,7 @@
 require_relative "test_helper"
-require "rbs/test/test_helper"
 
 class EnumerableTest < StdlibTest
   target Enumerable
-  using hook.refinement
 
   def test_find_all
     enumerable.find_all
@@ -109,7 +107,7 @@ class EnumerableTest < StdlibTest
 end
 
 class EnumerableTest2 < Minitest::Test
-  include RBS::Test::TypeAssertions
+  include TypeAssertions
 
   class TestEnumerable
     include Enumerable

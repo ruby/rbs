@@ -1,8 +1,7 @@
 require_relative "test_helper"
-require "rbs/test/test_helper"
 
 class DirSingletonTest < Minitest::Test
-  include RBS::Test::TypeAssertions
+  include TypeAssertions
 
   testing "singleton(::Dir)"
 
@@ -160,7 +159,7 @@ class DirSingletonTest < Minitest::Test
 end
 
 class DirInstanceTest < Minitest::Test
-  include RBS::Test::TypeAssertions
+  include TypeAssertions
 
   testing "::Dir"
 

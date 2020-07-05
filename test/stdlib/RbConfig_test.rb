@@ -3,8 +3,6 @@ require_relative "test_helper"
 class RbConfigTest < StdlibTest
   target RbConfig
 
-  using hook.refinement
-
   def test_expand
     RbConfig.expand("/home/userName/.rbenv/versions/2.7.0/bin")
     RbConfig.expand("/home/userName/.rbenv/versions/2.7.0/bin", "UNICODE_VERSION"=>"12.1.0")

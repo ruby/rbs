@@ -5,8 +5,6 @@ class Base64Test < StdlibTest
   target Base64
   library "base64"
 
-  using hook.refinement
-
   include Base64
 
   def test_encode64_decode64

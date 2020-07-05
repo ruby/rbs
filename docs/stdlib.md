@@ -120,7 +120,6 @@ The test scripts would look like the following:
 ```rb
 class StringTest < StdlibTest
   target String
-  using hook.refinement
 
   def test_gsub
     s = "string"
@@ -136,7 +135,6 @@ end
 
 You need two method calls, `target` and `using`.
 `target` method call tells which class is the subject of the class.
-`using hook.refinement` installs a special instrumentation for stdlib, based on refinements.
 And you write the sample programs which calls all of the patterns of overloads.
 
 Note that the instrumentation is based on refinements and you need to write all method calls in the unit class definitions.

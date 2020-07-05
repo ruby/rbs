@@ -3,7 +3,6 @@ require_relative "test_helper"
 class IPAddrTest < StdlibTest
   target IPAddr
   library "ipaddr"
-  using hook.refinement
 
   def test_hash
     IPAddr.new("192.168.2.0/24").hash

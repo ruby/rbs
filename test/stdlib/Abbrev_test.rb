@@ -5,8 +5,6 @@ class AbbrevTest < StdlibTest
   target Abbrev
   library "abbrev"
 
-  using hook.refinement
-
   def test_abbrev
     Abbrev.abbrev([])
     Abbrev.abbrev(%w(abbrev))

@@ -2,7 +2,6 @@ require_relative "test_helper"
 
 class TimeTest < StdlibTest
   target Time
-  using hook.refinement
 
   def test_class_method_at
     Time.at(100)

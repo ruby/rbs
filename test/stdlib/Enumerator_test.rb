@@ -1,8 +1,7 @@
 require_relative "test_helper"
-require "rbs/test/test_helper"
 
 class EnumeratorYielderTest < Minitest::Test
-  include RBS::Test::TypeAssertions
+  include TypeAssertions
 
   testing "::Enumerator::Yielder"
 

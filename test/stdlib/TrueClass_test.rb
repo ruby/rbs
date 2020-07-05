@@ -2,7 +2,6 @@ require_relative "test_helper"
 
 class TrueClassTest < StdlibTest
   target TrueClass
-  using hook.refinement
 
   def test_not
     !true

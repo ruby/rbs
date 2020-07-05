@@ -2,7 +2,6 @@ require_relative "test_helper"
 
 class RegexpTest < StdlibTest
   target Regexp
-  using hook.refinement
 
   def test_new
     Regexp.new('dog')

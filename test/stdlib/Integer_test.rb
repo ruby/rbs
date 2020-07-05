@@ -2,7 +2,6 @@ require_relative "test_helper"
 
 class IntegerTest < StdlibTest
   target Integer
-  using hook.refinement
 
   def test_sqrt
     Integer.sqrt(4)

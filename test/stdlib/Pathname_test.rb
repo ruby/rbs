@@ -1,9 +1,8 @@
 require_relative "test_helper"
-require "rbs/test/test_helper"
 require 'pathname'
 
 class PathnameSingletonTest < Minitest::Test
-  include RBS::Test::TypeAssertions
+  include TypeAssertions
   library 'pathname'
   testing 'singleton(::Pathname)'
 
@@ -39,7 +38,7 @@ class PathnameSingletonTest < Minitest::Test
 end
 
 class PathnameInstanceTest < Minitest::Test
-  include RBS::Test::TypeAssertions
+  include TypeAssertions
   library 'pathname'
   testing '::Pathname'
 

@@ -2,7 +2,6 @@ require_relative "test_helper"
 
 class ThreadMutexTest < StdlibTest
   target Thread::Mutex
-  using hook.refinement
 
   def test_lock
     m = Thread::Mutex.new

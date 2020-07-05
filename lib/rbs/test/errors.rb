@@ -28,7 +28,7 @@ module RBS
       end
 
       def self.inspect_(obj)
-        Hook.inspect_(obj)
+        Test::INSPECT.bind(obj).call
       end
 
       def self.to_string(error)

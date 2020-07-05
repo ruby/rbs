@@ -2,7 +2,6 @@ require_relative "test_helper"
 
 class NilClassTest < StdlibTest
   target NilClass
-  using hook.refinement
 
   def test_and
     nil & true

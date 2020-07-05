@@ -1,9 +1,8 @@
 require_relative "test_helper"
-require "rbs/test/test_helper"
 require "socket"
 
 class FileSingletonTest < Minitest::Test
-  include RBS::Test::TypeAssertions
+  include TypeAssertions
 
   testing "singleton(::File)"
 
@@ -813,7 +812,7 @@ class FileSingletonTest < Minitest::Test
 end
 
 class FileInstanceTest < Minitest::Test
-  include RBS::Test::TypeAssertions
+  include TypeAssertions
 
   testing "::File"
 

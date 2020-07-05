@@ -2,7 +2,6 @@ require_relative "test_helper"
 
 class BindingTest < StdlibTest
   target Binding
-  using hook.refinement
 
   def test_eval
     binding.eval('1', '(eval)', 1)

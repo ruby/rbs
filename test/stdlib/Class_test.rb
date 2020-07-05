@@ -2,7 +2,6 @@ require_relative "test_helper"
 
 class ClassTest < StdlibTest
   target Class
-  using hook.refinement
 
   def test_singleton_new
     Class.new()

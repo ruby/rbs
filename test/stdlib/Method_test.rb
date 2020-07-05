@@ -2,7 +2,6 @@ require_relative "test_helper"
 
 class MethodTest < StdlibTest
   target Method
-  using hook.refinement
 
   class Foo
     def foo

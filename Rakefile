@@ -78,11 +78,10 @@ namespace :generate do
       def call
         ERB.new(<<~ERB, trim_mode: "-").result(binding)
           require_relative "test_helper"
-          require 'rbs/test/test_helper'
 
           <%- unless class_methods.empty? -%>
           class <%= klass %>SingletonTest < Minitest::Test
-            include RBS::Test::TypeAssertions
+            include TypeAssertions
 
             # library "pathname", "set", "securerandom"     # Declare library signatures to load
             testing "singleton(::<%= klass %>)"
@@ -100,7 +99,7 @@ namespace :generate do
 
           <%- unless instance_methods.empty? -%>
           class <%= klass %>Test < Minitest::Test
-            include RBS::Test::TypeAssertions
+            include TypeAssertions
 
             # library "pathname", "set", "securerandom"     # Declare library signatures to load
             testing "::<%= klass %>"

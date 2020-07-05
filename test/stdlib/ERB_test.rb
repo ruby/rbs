@@ -6,8 +6,6 @@ class ERBTest < StdlibTest
   target ERB
   library "erb"
 
-  using hook.refinement
-
   def test_version
     ERB.version
   end

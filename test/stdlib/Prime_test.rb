@@ -6,8 +6,6 @@ class PrimeTest < StdlibTest
   target Prime
   library "prime"
 
-  using hook.refinement
-
   def test_each
     Prime.each { break }
     Prime.each(10) { }

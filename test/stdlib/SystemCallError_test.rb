@@ -2,7 +2,6 @@ require_relative "test_helper"
 
 class SystemCallErrorTest < StdlibTest
   target SystemCallError
-  using hook.refinement
 
   def test_initialize
     SystemCallError.new('hi', 0)

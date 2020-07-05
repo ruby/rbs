@@ -4,7 +4,6 @@ require "securerandom"
 
 class KernelTest < StdlibTest
   target Kernel
-  using hook.refinement
 
   def test_caller
     caller(1, 2)
@@ -434,7 +433,7 @@ class KernelTest < StdlibTest
     end
 
     exception_container = Class.new do
-      def exception(arg: 'a')
+      define_method :exception do |arg = 'a'|
         test_error.new(arg)
       end
     end

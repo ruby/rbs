@@ -2,7 +2,6 @@ require_relative "test_helper"
 
 class EncodingTest < StdlibTest
   target Encoding
-  using hook.refinement
 
   def test_class_method_aliases
     Encoding.aliases
