@@ -10,7 +10,7 @@ rules:
         #    File.absolute_path?(file_name)  ->  true or false    
         #
 
-  - id: rbs.no_args
+  - id: rbs.no_arg
     pattern: 
       regexp: arg\d+
     message: |
@@ -27,3 +27,39 @@ rules:
       - "def `send`: (String | Symbol arg0, *untyped arg1) -> untyped"
     pass:
       - "def `send`: (String | Symbol, *untyped) -> untyped"
+
+  - id: deprecate_stdlib_test
+    pattern:
+      token: < StdlibTest
+    message: |
+      StdlibTest is deprecated
+
+      We recommend writing tests based on `TypeAssertions` and `#assert_send_type`.
+    justification:
+      - When you are updating existing tests.
+      - When you are writing tests for callback, which cannot be done with `#assert_send_type`.
+    glob:
+      - "test/stdlib/**/*_test.rb"
+    fail:
+      - |
+        class IntegerTest < StdlibTest
+          target Integer
+
+          def test_plus
+            1 + 2
+          end
+        end
+    pass:
+      - |
+        class IntegerTest < Minitest::Test
+          include TypeAssertions
+
+          testing "Integer"
+
+          def test_plus
+            assert_send_type "(::Integer) -> ::Integer",
+                             1, :+, 2
+          end
+        end
+
+
