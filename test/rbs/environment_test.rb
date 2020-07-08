@@ -123,7 +123,7 @@ class Foo
 end
 EOF
 
-    assert_raises RBS::MixedClassModuleDeclarationError do
+    assert_raises RBS::DuplicatedDeclarationError do
       env << decls[0]
       env << decls[1]
     end

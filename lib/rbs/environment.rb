@@ -43,10 +43,6 @@ module RBS
 
     class ModuleEntry < MultiEntry
       def insert(decl:, outer:)
-        unless decl.is_a?(AST::Declarations::Module)
-          raise MixedClassModuleDeclarationError.new(name: name, decl: decl)
-        end
-
         unless decls.empty?
           names = decls[0].decl.type_params.each.map(&:name)
           unless names.size == decl.type_params.each.size && decls[0].decl.type_params == decl.type_params.rename_to(names)
@@ -55,6 +51,8 @@ module RBS
         end
 
         super(decl: decl, outer: outer)
+
+        @primary = nil
       end
 
       def primary
@@ -68,10 +66,6 @@ module RBS
 
     class ClassEntry < MultiEntry
       def insert(decl:, outer:)
-        unless decl.is_a?(AST::Declarations::Class)
-          raise MixedClassModuleDeclarationError.new(name: name, decl: decl)
-        end
-
         unless decls.empty?
           names = decls[0].decl.type_params.each.map(&:name)
           unless names.size == decl.type_params.each.size && decls[0].decl.type_params == decl.type_params.rename_to(names)
@@ -80,6 +74,8 @@ module RBS
         end
 
         super(decl: decl, outer: outer)
+
+        @primary = nil
       end
 
       def primary
@@ -157,7 +153,18 @@ module RBS
           end
         end
 
-        class_decls[name].insert(decl: decl, outer: outer)
+        existing_entry = class_decls[name]
+
+        case
+        when decl.is_a?(AST::Declarations::Module) && existing_entry.is_a?(ModuleEntry)
+          # OK
+        when decl.is_a?(AST::Declarations::Class) && existing_entry.is_a?(ClassEntry)
+          # OK
+        else
+          raise DuplicatedDeclarationError.new(name, decl, existing_entry.primary.decl)
+        end
+
+        existing_entry.insert(decl: decl, outer: outer)
 
         prefix = outer + [decl]
         ns = name.to_namespace
