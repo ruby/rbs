@@ -22,7 +22,7 @@ if ENV["RUNTIME_TEST"]
   test_classes << RBS::Buffer
   test_classes << RBS::Location
   test_classes.each do |klass|
-    tester.install!(klass)
+    tester.install!(klass, sampling: sampling)
   end
 end
 
