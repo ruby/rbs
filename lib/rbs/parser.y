@@ -1030,6 +1030,7 @@ def initialize(type, buffer:, eof_re:)
   @eof = false
   @bound_variables_stack = []
   @comments = {}
+  @ascii_only = buffer.content.ascii_only?
 end
 
 def start_merged_variables_scope
@@ -1123,14 +1124,23 @@ def push_comment(string, location)
 end
 
 def new_token(type, value = input.matched)
-  start_index = input.charpos - input.matched.size
-  end_index = input.charpos
+  charpos = charpos(input)
+  start_index = charpos - input.matched.size
+  end_index = charpos
 
   location = RBS::Location.new(buffer: buffer,
                                            start_pos: start_index,
                                            end_pos: end_index)
 
   [type, LocatedValue.new(location: location, value: value)]
+end
+
+def charpos(scanner)
+  if @ascii_only
+    scanner.pos
+  else
+    scanner.charpos
+  end
 end
 
 def empty_params_result
@@ -1250,8 +1260,9 @@ def next_token
     when input.scan(/\s+/)
       # skip
     when input.scan(/#(( *)|( ?(?<string>.*)))\n/)
-      start_index = input.charpos - input.matched.size
-      end_index = input.charpos-1
+      charpos = charpos(input)
+      start_index = charpos - input.matched.size
+      end_index = charpos-1
 
       location = RBS::Location.new(buffer: buffer,
                                                start_pos: start_index,
