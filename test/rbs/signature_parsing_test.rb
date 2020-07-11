@@ -167,7 +167,7 @@ class RBS::SignatureParsingTest < Minitest::Test
   end
 
   def test_module
-    Parser.parse_signature("module Enumerable[A, B] : _Each end").yield_self do |decls|
+    Parser.parse_signature("module Enumerable[A, B] end").yield_self do |decls|
       assert_equal 1, decls.size
 
       module_decl = decls[0]
@@ -175,9 +175,9 @@ class RBS::SignatureParsingTest < Minitest::Test
       assert_instance_of Declarations::Module, module_decl
       assert_equal TypeName.new(name: :Enumerable, namespace: Namespace.empty), module_decl.name
       assert_equal [:A, :B], module_decl.type_params.each.map(&:name)
-      assert_equal parse_type("_Each"), module_decl.self_type
+      assert_equal [], module_decl.self_types
       assert_equal [], module_decl.members
-      assert_equal "module Enumerable[A, B] : _Each end", module_decl.location.source
+      assert_equal "module Enumerable[A, B] end", module_decl.location.source
     end
 
     Parser.parse_signature(<<~SIG).yield_self do |decls|
@@ -353,6 +353,27 @@ class RBS::SignatureParsingTest < Minitest::Test
         assert_equal false, m.ivar_name
         assert_equal parse_type("bool"), m.type
       end
+    end
+  end
+
+  def test_module_selfs
+    Parser.parse_signature(<<-RBS).yield_self do |decls|
+module Enumerable[A, B] : _Each, Object
+end
+    RBS
+      assert_equal 1, decls.size
+
+      module_decl = decls[0]
+
+      assert_instance_of Declarations::Module, module_decl
+      assert_equal TypeName.new(name: :Enumerable, namespace: Namespace.empty), module_decl.name
+      assert_equal [:A, :B], module_decl.type_params.each.map(&:name)
+      assert_equal [
+                     Declarations::Module::Self.new(name: type_name("_Each"), args: [], location: nil),
+                     Declarations::Module::Self.new(name: type_name("Object"), args: [], location: nil)
+                   ], module_decl.self_types
+      assert_equal [], module_decl.members
+      assert_equal "module Enumerable[A, B] : _Each, Object\nend", module_decl.location.source
     end
   end
 

@@ -69,7 +69,7 @@ module RBS
           members: [],
           annotations: [],
           location: nil,
-          self_type: nil,
+          self_types: [],
           comment: comment
         )
 

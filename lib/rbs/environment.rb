@@ -59,14 +59,16 @@ module RBS
     end
 
     class ModuleEntry < MultiEntry
-      def self_type
-        primary.decl.self_type
+      def self_types
+        decls.flat_map do |d|
+          d.decl.self_types
+        end.uniq
       end
 
       def primary
         @primary ||= begin
                        validate_type_params
-                       decls.find {|d| d.decl.self_type } || decls.first
+                       decls.first
                      end
       end
     end
@@ -257,8 +259,12 @@ module RBS
         AST::Declarations::Module.new(
           name: decl.name.with_prefix(prefix),
           type_params: decl.type_params,
-          self_type: decl.self_type&.yield_self do |self_type|
-            absolute_type(resolver, self_type, context: context)
+          self_types: decl.self_types.map do |module_self|
+            AST::Declarations::Module::Self.new(
+              name: absolute_type_name(resolver, module_self.name, context: context),
+              args: module_self.args.map {|type| absolute_type(resolver, type, context: context) },
+              location: module_self.location
+            )
           end,
           members: decl.members.map do |member|
             case member

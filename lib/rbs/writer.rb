@@ -85,8 +85,8 @@ module RBS
         puts "end"
 
       when AST::Declarations::Module
-        self_type = if decl.self_type
-                      " : #{decl.self_type}"
+        self_type = unless decl.self_types.empty?
+                      " : #{decl.self_types.join(", ")}"
                     end
 
         write_comment decl.comment

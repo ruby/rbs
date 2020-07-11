@@ -243,11 +243,9 @@ module RBS
           end
 
           if entry.is_a?(Environment::ModuleEntry)
-            if self_type_ancestor = module_self_ancestor(type_name, entry)
-              definition_pairs.push [
-                                      self_type_ancestor,
-                                      build_interface(self_type_ancestor.name)
-                                    ]
+            entry.self_types.each do |module_self|
+              ancestor = Definition::Ancestor::Instance.new(name: module_self.name, args: module_self.args)
+              definition_pairs.push [ancestor, build_interface(module_self.name)]
             end
           end
 
@@ -257,29 +255,6 @@ module RBS
           raise
         end
       end
-    end
-
-    def module_self_ancestor(type_name, entry)
-      self_decls = entry.decls.select {|d| d.decl.self_type }
-
-      return if self_decls.empty?
-
-      selfs = self_decls.map do |d|
-        Definition::Ancestor::Instance.new(
-          name: d.decl.self_type.name,
-          args: d.decl.self_type.args
-        )
-      end
-
-      selfs.uniq!
-
-      return selfs[0] if selfs.size == 1
-
-      raise ModuleSelfTypeMismatchError.new(
-        name: type_name,
-        entry: entry,
-        location: self_decls[0].decl.location
-      )
     end
 
     def build_singleton(type_name)

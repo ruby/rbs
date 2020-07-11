@@ -651,42 +651,6 @@ end
     end
   end
 
-  def test_build_instance_module_self_type
-    SignatureManager.new do |manager|
-      manager.files.merge!(Pathname("foo.rbs") => <<-EOF)
-interface _A
-end
-
-interface _B
-end
-
-module M : _A
-end
-
-module M : _B
-end
-
-module N : _A
-end
-
-module N
-end
-      EOF
-
-      manager.build do |env|
-        builder = DefinitionBuilder.new(env: env)
-
-        error = assert_raises RBS::ModuleSelfTypeMismatchError do
-          builder.build_instance(type_name("::M"))
-        end
-
-        assert_equal type_name("::M"), error.name
-
-        builder.build_instance(type_name("::N"))
-      end
-    end
-  end
-
   def test_build_one_instance_mixin
     SignatureManager.new do |manager|
       manager.files.merge!(Pathname("foo.rbs") => <<-EOF)
