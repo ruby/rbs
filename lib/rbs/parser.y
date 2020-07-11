@@ -106,28 +106,28 @@ rule
       }
 
   module_decl:
-      annotations kMODULE start_new_scope class_name module_type_params module_self_type class_members kEND {
+      annotations kMODULE start_new_scope class_name module_type_params colon_module_self_types class_members kEND {
         reset_variable_scope
 
         location = val[1].location + val[7].location
         result = Declarations::Module.new(
           name: val[3].value,
           type_params: val[4]&.value || Declarations::ModuleTypeParams.empty,
-          self_type: val[5],
+          self_types: val[5],
           members: val[6],
           annotations: val[0],
           location: location,
           comment: leading_comment(val[0].first&.location || location)
         )
       }
-    | annotations kMODULE start_new_scope tUKEYWORD type class_members kEND {
+    | annotations kMODULE start_new_scope tUKEYWORD module_self_types class_members kEND {
         reset_variable_scope
 
         location = val[1].location + val[6].location
         result = Declarations::Module.new(
           name: val[3].value,
           type_params: Declarations::ModuleTypeParams.empty,
-          self_type: val[4],
+          self_types: val[4],
           members: val[5],
           annotations: val[0],
           location: location,
@@ -135,10 +135,48 @@ rule
         )
       }
 
-  module_self_type:
-      { result = nil }
-    | kCOLON type {
+  colon_module_self_types:
+      { result = [] }
+    | kCOLON module_self_types {
         result = val[1]
+      }
+
+  module_self_types:
+      module_self_type {
+        result = [val[0]]
+      }
+    | module_self_types kCOMMA module_self_type {
+        result = val[0].push(val[2])
+      }
+
+  module_self_type:
+      qualified_name kLBRACKET type_list kRBRACKET {
+        name = val[0].value
+        args = val[2]
+        location = val[0].location + val[3].location
+
+        case
+        when name.class?
+          result = Declarations::Module::Self.new(name: name, args: args, location: location)
+        when name.interface?
+          result = Declarations::Module::Self.new(name: name, args: args, location: location)
+        else
+          raise SemanticsError.new("Module self type should be instance or interface", subject: val[0], location: val[0].location)
+        end
+      }
+    | qualified_name {
+        name = val[0].value
+        args = []
+        location = val[0].location
+
+        case
+        when name.class?
+          result = Declarations::Module::Self.new(name: name, args: args, location: location)
+        when name.interface?
+          result = Declarations::Module::Self.new(name: name, args: args, location: location)
+        else
+          raise SemanticsError.new("Module self type should be instance or interface", subject: val[0], location: val[0].location)
+        end
       }
 
   class_members:

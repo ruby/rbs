@@ -214,11 +214,11 @@ interface _Animal
   def bark: () -> void
 end
 
-module Foo
+module Foo : _Animal
   def foo: () -> void
 end
 
-module Foo : _Animal
+module Foo : Object
   def bar: () -> void
 end
 
@@ -236,8 +236,19 @@ EOF
 
       foo = env.class_decls[type_name("::Foo")]
 
-      assert_equal decls[2], foo.primary.decl
-      assert_equal parse_type("_Animal"), foo.self_type
+      assert_equal decls[1], foo.primary.decl
+      assert_equal [
+                     RBS::AST::Declarations::Module::Self.new(
+                       name: type_name("_Animal"),
+                       args: [],
+                       location: nil
+                     ),
+                     RBS::AST::Declarations::Module::Self.new(
+                       name: type_name("Object"),
+                       args: [],
+                       location: nil
+                     ),
+                   ], foo.self_types
     end
 
     Environment.new.tap do |env|

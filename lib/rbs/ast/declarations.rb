@@ -204,6 +204,44 @@ module RBS
       end
 
       class Module < Base
+        class Self
+          attr_reader :name
+          attr_reader :args
+          attr_reader :location
+
+          def initialize(name:, args:, location:)
+            @name = name
+            @args = args
+            @location = location
+          end
+
+          def ==(other)
+            other.is_a?(Self) && other.name == name && other.args == args
+          end
+
+          alias eql? ==
+
+          def hash
+            self.class.hash ^ name.hash ^ args.hash ^ location.hash
+          end
+
+          def to_json(*a)
+            {
+              name: name,
+              args: args,
+              location: location
+            }.to_json(*a)
+          end
+
+          def to_s
+            if args.empty?
+              name.to_s
+            else
+              "#{name}[#{args.join(", ")}]"
+            end
+          end
+        end
+
         include NestedDeclarationHelper
         include MixinHelper
 
@@ -212,13 +250,13 @@ module RBS
         attr_reader :members
         attr_reader :location
         attr_reader :annotations
-        attr_reader :self_type
+        attr_reader :self_types
         attr_reader :comment
 
-        def initialize(name:, type_params:, members:, self_type:, annotations:, location:, comment:)
+        def initialize(name:, type_params:, members:, self_types:, annotations:, location:, comment:)
           @name = name
           @type_params = type_params
-          @self_type = self_type
+          @self_types = self_types
           @members = members
           @annotations = annotations
           @location = location
@@ -229,14 +267,14 @@ module RBS
           other.is_a?(Module) &&
             other.name == name &&
             other.type_params == type_params &&
-            other.self_type == self_type &&
+            other.self_types == self_types &&
             other.members == members
         end
 
         alias eql? ==
 
         def hash
-          self.class.hash ^ name.hash ^ type_params.hash ^ self_type.hash ^ members.hash
+          self.class.hash ^ name.hash ^ type_params.hash ^ self_types.hash ^ members.hash
         end
 
         def to_json(*a)
@@ -245,7 +283,7 @@ module RBS
             name: name,
             type_params: type_params,
             members: members,
-            self_type: self_type,
+            self_types: self_types,
             annotations: annotations,
             location: location,
             comment: comment

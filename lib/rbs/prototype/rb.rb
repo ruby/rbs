@@ -81,7 +81,7 @@ module RBS
           mod = AST::Declarations::Module.new(
             name: const_to_name(module_name),
             type_params: AST::Declarations::ModuleTypeParams.empty,
-            self_type: nil,
+            self_types: [],
             members: [],
             annotations: [],
             location: nil,

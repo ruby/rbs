@@ -408,7 +408,10 @@ _class-decl_ ::= `class` _class-name_ _module-type-parameters_ _members_ `end`
                | `class` _class-name_ _module-type-parameters_ `<` _class-name_ _type-arguments_ _members_ `end`
 
 _module-decl_ ::= `module` _module-name_ _module-type-parameters_ _members_ `end`
-                | `module` _module-name_ _module-type-parameters_ `:` _class-name_ _type-arguments_ _members_ `end`
+                | `module` _module-name_ _module-type-parameters_ `:` _module-self-types_ _members_ `end`
+
+_module-self-types_ ::= _class-name_ _type-arguments_ `,` _module-self-types_            (Class instance)
+                      | _interface-name_ _type-arguments_ `,` _module-self-types_        (Interface)
 
 _interface-decl_ ::= `interface` _interface-name_ _module-type-parameters_ _interface-members_ `end`
 

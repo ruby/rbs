@@ -198,20 +198,6 @@ module RBS
     end
   end
 
-  class ModuleSelfTypeMismatchError < StandardError
-    attr_reader :name
-    attr_reader :entry
-    attr_reader :location
-
-    def initialize(name:, entry:, location:)
-      @name = name
-      @entry = entry
-      @location = location
-
-      super "#{Location.to_string location}: Module self type mismatch: #{name}"
-    end
-  end
-
   class InconsistentMethodVisibilityError < StandardError
     attr_reader :type_name
     attr_reader :method_name

@@ -370,7 +370,7 @@ module RBS
         decl = AST::Declarations::Module.new(
           name: type_name,
           type_params: AST::Declarations::ModuleTypeParams.empty,
-          self_type: nil,
+          self_types: [],
           members: [],
           annotations: [],
           location: nil,

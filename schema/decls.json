@@ -226,15 +226,11 @@
             "$ref": "#/definitions/classMember"
           }
         },
-        "self_type": {
-          "oneOf": [
-            {
-              "$ref": "types.json"
-            },
-            {
-              "type": "null"
-            }
-          ]
+        "self_types": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/moduleSelf"
+          }
         },
         "annotations": {
           "type": "array",
@@ -249,7 +245,22 @@
           "$ref": "location.json"
         }
       },
-      "required": ["declaration", "name", "type_params", "members", "self_type", "annotations", "location", "comment"]
+      "required": ["declaration", "name", "type_params", "members", "self_types", "annotations", "location", "comment"]
+    },
+    "moduleSelf": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "args": {
+          "type": "array",
+          "items": {
+            "$ref": "types.json"
+          }
+        }
+      },
+      "required": ["name", "args"]
     },
     "interfaceMember": {
       "oneOf": [
