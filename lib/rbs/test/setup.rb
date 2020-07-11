@@ -10,6 +10,7 @@ begin
   opts = Shellwords.shellsplit(ENV["RBS_TEST_OPT"] || "-I sig")
   filter = ENV.fetch("RBS_TEST_TARGET").split(",")
   skips = (ENV["RBS_TEST_SKIP"] || "").split(",")
+  sampling = !ENV.key?("RBS_TEST_NO_SAMPLE")
   RBS.logger_level = (ENV["RBS_TEST_LOGLEVEL"] || "info")
 rescue
   STDERR.puts "rbs/test/setup handles the following environment variables:"
@@ -17,6 +18,7 @@ rescue
   STDERR.puts "  [OPTIONAL] RBS_TEST_SKIP: skip testing classes"
   STDERR.puts "  [OPTIONAL] RBS_TEST_OPT: options for signatures (`-r` for libraries or `-I` for signatures)"
   STDERR.puts "  [OPTIONAL] RBS_TEST_LOGLEVEL: one of debug|info|warn|error|fatal (defaults to info)"
+  STDERR.puts "  [OPTIONAL] RBS_TEST_NO_SAMPLE: if set, the type checker tests all the values of a collection"
   exit 1
 end
 
@@ -47,7 +49,7 @@ TracePoint.trace :end do |tp|
       if tester.checkers.none? {|hook| hook.klass == tp.self }
         if env.class_decls.key?(class_name)
           logger.info "Setting up hooks for #{class_name}"
-          tester.install!(tp.self)
+          tester.install!(tp.self, sampling: sampling)
         end
       end
     end

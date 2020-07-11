@@ -27,7 +27,11 @@ interface _ToInt
 end
 EOF
       manager.build do |env|
-        typecheck = Test::TypeCheck.new(self_class: Integer, builder: DefinitionBuilder.new(env: env))
+        typecheck = Test::TypeCheck.new(
+          self_class: Integer,
+          builder: DefinitionBuilder.new(env: env),
+          sampling: false
+        )
 
         assert typecheck.value(3, parse_type("::foo"))
         assert typecheck.value("3", parse_type("::foo"))
@@ -53,13 +57,98 @@ EOF
     end
   end
 
+  def test_type_check_array_sampling
+    SignatureManager.new do |manager|
+      manager.build do |env|
+        builder = DefinitionBuilder.new(env: env)
+
+        typecheck = Test::TypeCheck.new(self_class: Integer, builder: builder, sampling: true)
+
+        assert typecheck.value([], parse_type("::Array[::Integer]"))
+        assert typecheck.value([1], parse_type("::Array[::Integer]"))
+        refute typecheck.value([1,2,3] + ["a"], parse_type("::Array[::Integer]"))
+
+        assert typecheck.value(Array.new(500, 1), parse_type("::Array[::Integer]"))
+        refute typecheck.value(Array.new(99, 1) + Array.new(401, "a"), parse_type("::Array[::Integer]"))
+      end
+    end
+  end
+
+  def test_type_check_hash_sampling
+    SignatureManager.new do |manager|
+      manager.build do |env|
+        builder = DefinitionBuilder.new(env: env)
+
+        typecheck = Test::TypeCheck.new(self_class: Integer, builder: builder, sampling: true)
+
+        # hash = Array.new(100) {|i| [i, i.to_s] }.to_h
+
+        assert typecheck.value({}, parse_type("::Hash[::Integer, ::String]"))
+        assert typecheck.value(Array.new(100) {|i| [i, i.to_s] }.to_h, parse_type("::Hash[::Integer, ::String]"))
+        
+        assert typecheck.value(Array.new(1000) {|i| [i, i.to_s] }.to_h, parse_type("::Hash[::Integer, ::String]"))
+        refute typecheck.value(
+          Array.new(99) {|i| [i, i.to_s] }.to_h.merge({ foo: 'bar', bar: 'baz', baz: 'foo' }),
+          parse_type("::Hash[::Integer, ::String]")
+        )
+        refute typecheck.value(
+          Array.new(99) {|i| [i, i.to_s] }.to_h.merge({ 1001 => :bar, 1002 => :baz, 1003 => :foo }),
+          parse_type("::Hash[::Integer, ::String]")
+        )
+      end
+    end
+  end
+
+  def test_type_check_enumerator_sampling
+    SignatureManager.new do |manager|
+      manager.build do |env|
+        builder = DefinitionBuilder.new(env: env)
+
+        typecheck = Test::TypeCheck.new(self_class: Integer, builder: builder, sampling: true)
+
+        assert typecheck.value([1,2,3].each, parse_type("Enumerator[Integer, Array[Integer]]"))
+        assert typecheck.value(Array.new(400, 3).each, parse_type("Enumerator[Integer, Array[Integer]]"))
+
+        refute typecheck.value((Array.new(99, 1) + Array.new(401, "a")).each, parse_type("Enumerator[Integer, Array[Integer]]"))
+
+        assert typecheck.value(loop, parse_type("Enumerator[nil, bot]"))
+      end
+    end
+  end
+
+  def test_sampling_handling
+    SignatureManager.new do |manager|
+      manager.build do |env|
+        builder = DefinitionBuilder.new(env: env)
+
+        no_sampling_check = Test::TypeCheck.new(self_class: Integer, builder: builder, sampling: false)
+        assert_equal [1,2,3,4], no_sampling_check.sample([1,2,3,4])
+        Array.new(400) {|i| i.to_s }.tap do |a|
+          assert_equal a, no_sampling_check.sample(a)
+        end
+
+        sampling_check = Test::TypeCheck.new(self_class: Integer, builder: builder, sampling: true)
+        assert_equal [1,2,3,4], sampling_check.sample([1,2,3,4])
+        Array.new(400) {|i| i.to_s }.tap do |a|
+          refute_equal a, sampling_check.sample(a)
+          assert_equal 100, sampling_check.sample(a).size
+          assert_empty (sampling_check.sample(a) - a)
+        end
+      end
+    end
+  end
+
   def test_typecheck_return
     SignatureManager.new do |manager|
       manager.files[Pathname("foo.rbs")] = <<EOF
 type foo = String | Integer
 EOF
       manager.build do |env|
-        typecheck = Test::TypeCheck.new(self_class: Object, builder: DefinitionBuilder.new(env: env))
+        typecheck = Test::TypeCheck.new(
+          self_class: Object,
+          builder: DefinitionBuilder.new(env: env),
+          sampling: false
+        )
 
         parse_method_type("(Integer) -> String").tap do |method_type|
           errors = []
@@ -110,7 +199,11 @@ EOF
 type foo = String | Integer
 EOF
       manager.build do |env|
-        typecheck = Test::TypeCheck.new(self_class: Object, builder: DefinitionBuilder.new(env: env))
+        typecheck = Test::TypeCheck.new(
+          self_class: Object,
+          builder: DefinitionBuilder.new(env: env),
+          sampling: false
+        )
 
         parse_method_type("(Integer) -> String").tap do |method_type|
           errors = []
@@ -256,7 +349,7 @@ EOF
       manager.build do |env|
         builder = DefinitionBuilder.new(env: env)
 
-        typecheck = Test::TypeCheck.new(self_class: Object, builder: builder)
+        typecheck = Test::TypeCheck.new(self_class: Object, builder: builder, sampling: false)
 
         builder.build_instance(type_name("::Foo")).tap do |foo|
           typecheck.overloaded_call(

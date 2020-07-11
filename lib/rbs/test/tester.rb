@@ -17,14 +17,14 @@ module RBS
         @builder ||= DefinitionBuilder.new(env: env)
       end
 
-      def install!(klass)
+      def install!(klass, sampling:)
         RBS.logger.info { "Installing runtime type checker in #{klass}..." }
 
         type_name = factory.type_name(klass.name).absolute!
 
         builder.build_instance(type_name).tap do |definition|
           instance_key = new_key(type_name, "InstanceChecker")
-          Observer.register(instance_key, MethodCallTester.new(klass, builder, definition, kind: :instance))
+          Observer.register(instance_key, MethodCallTester.new(klass, builder, definition, kind: :instance, sampling: sampling))
 
           definition.methods.each do |name, method|
             if method.implemented_in == type_name
@@ -36,7 +36,7 @@ module RBS
 
         builder.build_singleton(type_name).tap do |definition|
           singleton_key = new_key(type_name, "SingletonChecker")
-          Observer.register(singleton_key, MethodCallTester.new(klass.singleton_class, builder, definition, kind: :singleton))
+          Observer.register(singleton_key, MethodCallTester.new(klass.singleton_class, builder, definition, kind: :singleton, sampling: sampling))
 
           definition.methods.each do |name, method|
             if method.implemented_in == type_name || name == :new
@@ -66,12 +66,14 @@ module RBS
         attr_reader :definition
         attr_reader :builder
         attr_reader :kind
+        attr_reader :sampling
 
-        def initialize(self_class, builder, definition, kind:)
+        def initialize(self_class, builder, definition, kind:, sampling:)
           @self_class = self_class
           @definition = definition
           @builder = builder
           @kind = kind
+          @sampling = sampling
         end
 
         def env
@@ -79,7 +81,7 @@ module RBS
         end
 
         def check
-          @check ||= TypeCheck.new(self_class: self_class, builder: builder)
+          @check ||= TypeCheck.new(self_class: self_class, builder: builder, sampling: sampling)
         end
 
         def format_method_name(name)
