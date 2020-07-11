@@ -48,7 +48,7 @@ module RBS
     def instance_ancestors(type_name, building_ancestors: [])
       as = instance_ancestors_cache[type_name] and return as
 
-      entry = env.class_decls[type_name]
+      entry = env.class_decls[type_name] or raise "Unknown name for instance_ancestors: #{type_name}"
       params = entry.type_params.each.map(&:name)
       args = Types::Variable.build(params)
       self_ancestor = Definition::Ancestor::Instance.new(name: type_name, args: args)
@@ -100,7 +100,7 @@ module RBS
     def singleton_ancestors(type_name, building_ancestors: [])
       as = singleton_ancestor_cache[type_name] and return as
 
-      entry = env.class_decls[type_name]
+      entry = env.class_decls[type_name] or raise "Unknown name for singleton_ancestors: #{type_name}"
       self_ancestor = Definition::Ancestor::Singleton.new(name: type_name)
 
       RecursiveAncestorError.check!(self_ancestor,
@@ -222,7 +222,7 @@ module RBS
 
     def build_instance(type_name)
       try_cache type_name, cache: instance_cache do
-        entry = env.class_decls[type_name]
+        entry = env.class_decls[type_name] or raise "Unknown name for build_instance: #{type_name}"
 
         case entry
         when Environment::ClassEntry, Environment::ModuleEntry
@@ -284,7 +284,7 @@ module RBS
 
     def build_singleton(type_name)
       try_cache type_name, cache: singleton_cache do
-        entry = env.class_decls[type_name]
+        entry = env.class_decls[type_name] or raise "Unknown name for build_singleton: #{type_name}"
 
         case entry
         when Environment::ClassEntry, Environment::ModuleEntry
@@ -867,7 +867,7 @@ module RBS
 
     def build_interface(type_name)
       try_cache(type_name, cache: interface_cache) do
-        entry = env.interface_decls[type_name]
+        entry = env.interface_decls[type_name] or raise "Unknown name for build_interface: #{type_name}"
         declaration = entry.decl
 
         self_type = Types::Interface.new(
@@ -957,7 +957,8 @@ module RBS
     end
 
     def expand_alias(type_name)
-      env.alias_decls[type_name].decl.type
+      entry = env.alias_decls[type_name] or raise "Unknown name for expand_alias: #{type_name}"
+      entry.decl.type
     end
   end
 end

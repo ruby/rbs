@@ -187,17 +187,6 @@ module RBS
     end
   end
 
-  class MixedClassModuleDeclarationError < StandardError
-    attr_reader :name
-    attr_reader :decl
-
-    def initialize(name:, decl:)
-      @name = name
-      @decl = decl
-      super "#{Location.to_string decl.location}: Both class and module declarations: #{name}"
-    end
-  end
-
   class SuperclassMismatchError < StandardError
     attr_reader :name
     attr_reader :entry
