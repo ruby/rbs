@@ -146,15 +146,53 @@ module Foo[X, in Y]      # Variance mismatch
 end
 EOF
 
+    # The GenericParameterMismatchError raises on #type_params call
     env << decls[0]
     env << decls[1]
+    env << decls[2]
+    env << decls[3]
+  end
 
-    assert_raises RBS::GenericParameterMismatchError do
-      env << decls[2]
+  def test_generic_class_error
+    env = Environment.new
+
+    decls = RBS::Parser.parse_signature(<<EOF)
+module Foo[A, out B]
+end
+
+module Foo[X, out Y]
+end
+
+module Foo[A]
+end
+
+module Foo[X, in Y]
+end
+EOF
+
+    Environment::ModuleEntry.new(name: type_name("::Foo")).tap do |entry|
+      entry.insert(decl: decls[0], outer: [])
+      entry.insert(decl: decls[1], outer: [])
+
+      assert_instance_of RBS::AST::Declarations::ModuleTypeParams, entry.type_params
     end
 
-    assert_raises RBS::GenericParameterMismatchError do
-      env << decls[3]
+    Environment::ModuleEntry.new(name: type_name("::Foo")).tap do |entry|
+      entry.insert(decl: decls[0], outer: [])
+      entry.insert(decl: decls[2], outer: [])
+
+      assert_raises RBS::GenericParameterMismatchError do
+        entry.type_params
+      end
+    end
+
+    Environment::ModuleEntry.new(name: type_name("::Foo")).tap do |entry|
+      entry.insert(decl: decls[0], outer: [])
+      entry.insert(decl: decls[3], outer: [])
+
+      assert_raises RBS::GenericParameterMismatchError do
+        entry.type_params
+      end
     end
   end
 

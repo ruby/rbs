@@ -34,6 +34,23 @@ module RBS
 
       def insert(decl:, outer:)
         decls << D.new(decl: decl, outer: outer)
+        @primary = nil
+      end
+
+      def validate_type_params
+        unless decls.empty?
+          hd_decl, *tl_decls = decls
+          hd_params = hd_decl.decl.type_params
+          hd_names = hd_params.params.map(&:name)
+
+          tl_decls.each do |tl_decl|
+            tl_params = tl_decl.decl.type_params
+
+            unless hd_params.size == tl_params.size && hd_params == tl_params.rename_to(hd_names)
+              raise GenericParameterMismatchError.new(name: name, decl: tl_decl.decl)
+            end
+          end
+        end
       end
 
       def type_params
@@ -42,44 +59,22 @@ module RBS
     end
 
     class ModuleEntry < MultiEntry
-      def insert(decl:, outer:)
-        unless decls.empty?
-          names = decls[0].decl.type_params.each.map(&:name)
-          unless names.size == decl.type_params.each.size && decls[0].decl.type_params == decl.type_params.rename_to(names)
-            raise GenericParameterMismatchError.new(name: name, decl: decl)
-          end
-        end
-
-        super(decl: decl, outer: outer)
-
-        @primary = nil
-      end
-
-      def primary
-        @primary ||= decls.find {|d| d.decl.self_type } || decls.first
-      end
-
       def self_type
         primary.decl.self_type
-      end
-    end
-
-    class ClassEntry < MultiEntry
-      def insert(decl:, outer:)
-        unless decls.empty?
-          names = decls[0].decl.type_params.each.map(&:name)
-          unless names.size == decl.type_params.each.size && decls[0].decl.type_params == decl.type_params.rename_to(names)
-            raise GenericParameterMismatchError.new(name: name, decl: decl)
-          end
-        end
-
-        super(decl: decl, outer: outer)
-
-        @primary = nil
       end
 
       def primary
         @primary ||= begin
+                       validate_type_params
+                       decls.find {|d| d.decl.self_type } || decls.first
+                     end
+      end
+    end
+
+    class ClassEntry < MultiEntry
+      def primary
+        @primary ||= begin
+                       validate_type_params
                        decls.find {|d| d.decl.super_class } || decls.first
                      end
       end
