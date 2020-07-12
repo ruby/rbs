@@ -245,7 +245,16 @@ module RBS
           if entry.is_a?(Environment::ModuleEntry)
             entry.self_types.each do |module_self|
               ancestor = Definition::Ancestor::Instance.new(name: module_self.name, args: module_self.args)
-              definition_pairs.push [ancestor, build_interface(module_self.name)]
+              definition_pairs.push(
+                [
+                  ancestor,
+                  if module_self.name.interface?
+                    build_interface(module_self.name)
+                  else
+                    build_instance(module_self.name)
+                  end
+                ]
+              )
             end
           end
 
