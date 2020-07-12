@@ -77,6 +77,8 @@ module RBS
             super_args = []
           end
 
+          NoSuperclassFoundError.check!(super_name, env: env, location: primary.decl.location)
+
           super_ancestors = instance_ancestors(super_name, building_ancestors: building_ancestors)
           ancestors.unshift(*super_ancestors.apply(super_args, location: primary.decl.location))
         end
@@ -123,6 +125,8 @@ module RBS
             super_name = BuiltinNames::Object.name
           end
 
+          NoSuperclassFoundError.check!(super_name, env: env, location: primary.decl.location)
+
           super_ancestors = singleton_ancestors(super_name, building_ancestors: building_ancestors)
           ancestors.unshift(*super_ancestors.ancestors)
         else
@@ -143,6 +147,8 @@ module RBS
           case member
           when AST::Members::Extend
             if member.name.class?
+              NoMixinFoundError.check!(member.name, env: env, member: member)
+
               module_ancestors = instance_ancestors(member.name, building_ancestors: building_ancestors)
               ancestors.unshift(*module_ancestors.apply(member.args, location: member.location))
             end
@@ -174,6 +180,8 @@ module RBS
           case member
           when AST::Members::Include
             if member.name.class?
+              NoMixinFoundError.check!(member.name, env: env, member: member)
+
               module_name = member.name
               module_args = member.args.map {|type| type.sub(align_params) }
 
@@ -197,6 +205,8 @@ module RBS
         decl.each_mixin do |member|
           case member
           when AST::Members::Prepend
+            NoMixinFoundError.check!(member.name, env: env, member: member)
+
             module_name = member.name
             module_args = member.args.map {|type| type.sub(align_params) }
 
@@ -334,6 +344,8 @@ module RBS
           when AST::Members::Include, AST::Members::Extend
             if member.name.interface?
               if (kind == :instance && member.is_a?(AST::Members::Include)) || (kind == :singleton && member.is_a?(AST::Members::Extend))
+                NoMixinFoundError.check!(member.name, env: env, member: member)
+
                 interface_name = member.name
                 interface_args = member.args
 
@@ -877,6 +889,8 @@ module RBS
           end
 
           include_members.each do |member|
+            NoMixinFoundError.check!(member.name, env: env, member: member)
+
             mixin = build_interface(member.name)
 
             args = member.args
