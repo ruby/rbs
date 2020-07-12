@@ -133,7 +133,6 @@ end
     end
   end
 
-
   def test_singleton_ancestors
     SignatureManager.new do |manager|
       manager.files[Pathname("foo.rbs")] = <<EOF
@@ -1330,6 +1329,69 @@ end
             assert_equal type_name("::_Hello"), defn.defined_in
             assert_equal type_name("::Hello"), defn.implemented_in
           end
+        end
+      end
+    end
+  end
+
+  def test_build_with_unknown_super_class
+    SignatureManager.new do |manager|
+      manager.files.merge!(Pathname("foo.rbs") => <<-EOF)
+class A < B
+end
+      EOF
+
+      manager.build do |env|
+        builder = DefinitionBuilder.new(env: env)
+
+        error = assert_raises RBS::NoSuperclassFoundError do
+          builder.build_instance(type_name("::A"))
+        end
+        assert_equal type_name("B"), error.type_name
+
+        assert_raises RBS::NoSuperclassFoundError do
+          builder.build_singleton(type_name("::A"))
+        end
+      end
+    end
+  end
+
+  def test_build_instance_with_unknown_mixin
+    SignatureManager.new do |manager|
+      manager.files.merge!(Pathname("foo.rbs") => <<-EOF)
+class A
+  include _Foo
+end
+
+class C
+  extend Bar
+end
+
+class D
+  prepend Baz
+end
+      EOF
+
+      manager.build do |env|
+        builder = DefinitionBuilder.new(env: env)
+
+        assert_raises RBS::NoMixinFoundError do
+          builder.build_instance(type_name("::A"))
+        end.tap do |error|
+          assert_equal type_name("_Foo"), error.type_name
+          assert_instance_of RBS::AST::Members::Include, error.member
+        end
+
+        assert_raises RBS::NoMixinFoundError do
+          builder.build_singleton(type_name("::C"))
+        end.tap do |error|
+          assert_equal type_name("Bar"), error.type_name
+        end
+
+        assert_raises RBS::NoMixinFoundError do
+          builder.build_instance(type_name("::D"))
+        end.tap do |error|
+          assert_equal type_name("Baz"), error.type_name
         end
       end
     end

@@ -125,6 +125,49 @@ module RBS
     end
   end
 
+  class NoSuperclassFoundError < StandardError
+    attr_reader :type_name
+    attr_reader :location
+
+    def initialize(type_name:, location:)
+      @type_name = type_name
+      @location = location
+
+      super "#{Location.to_string location}: Could not find super class: #{type_name}"
+    end
+
+    def self.check!(type_name, env:, location:)
+      env.class_decls.key?(type_name) or raise new(type_name: type_name, location: location)
+    end
+  end
+
+  class NoMixinFoundError < StandardError
+    attr_reader :type_name
+    attr_reader :member
+
+    def initialize(type_name:, member:)
+      @type_name = type_name
+      @member = member
+
+      super "#{Location.to_string location}: Could not find mixin: #{type_name}"
+    end
+
+    def location
+      member.location
+    end
+
+    def self.check!(type_name, env:, member:)
+      dic = case
+            when type_name.class?
+              env.class_decls
+            when type_name.interface?
+              env.interface_decls
+            end
+
+      dic.key?(type_name) or raise new(type_name: type_name, member: member)
+    end
+  end
+
   class DuplicatedMethodDefinitionError < StandardError
     attr_reader :decl
     attr_reader :location
