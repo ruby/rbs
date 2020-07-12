@@ -414,5 +414,10 @@ module RBS
         absolute_type_name(resolver, name, context: context)
       end
     end
+
+    def inspect
+      ivars = %i[@buffers @declarations @class_decls @interface_decls @alias_decls @constant_decls @global_decls]
+      "\#<RBS::Environment #{ivars.map { |iv| "#{iv}=(#{instance_variable_get(iv).size} items)"}.join(' ')}>"
+    end
   end
 end
