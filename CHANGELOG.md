@@ -2,6 +2,15 @@
 
 ## master
 
+## 0.6.0 (2020-07-12)
+
+* Signature update for `Logger`.
+* Clean `Environment#inspect`. [#331](https://github.com/ruby/rbs/pull/331)
+* Module self type syntax update. [#329](https://github.com/ruby/rbs/pull/329)
+* Better validation. [#328](https://github.com/ruby/rbs/pull/328)
+* Parser performance improvement. [#327](https://github.com/ruby/rbs/pull/327)
+* Runtime type checking performance improvements with sampling [#323](https://github.com/ruby/rbs/pull/323)
+
 ## 0.5.0 (2020-07-04)
 
 * Signature updates for `Mutex_m`, `IO`, and `Enumerable`.
