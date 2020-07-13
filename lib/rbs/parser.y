@@ -520,7 +520,7 @@ rule
 
   method_name:
       tOPERATOR
-    | kAMP | kHAT | kSTAR | kLT | kEXCLAMATION | kSTAR2 | kBAR | kOUT | kIN
+    | kAMP | kHAT | kSTAR | kLT | kEXCLAMATION | kSTAR2 | kBAR
     | method_name0
     | method_name0 kQUESTION {
         unless val[0].location.pred?(val[1].location)
