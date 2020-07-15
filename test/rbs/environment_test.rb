@@ -129,6 +129,20 @@ EOF
     end
   end
 
+  def test_const_twice_duplication_error
+    env = Environment.new
+
+    decls = RBS::Parser.parse_signature(<<EOF)
+Foo: String
+Foo: String
+EOF
+
+    assert_raises RBS::DuplicatedDeclarationError do
+      env << decls[0]
+      env << decls[1]
+    end
+  end
+
   def test_generic_class
     env = Environment.new
 
@@ -154,8 +168,6 @@ EOF
   end
 
   def test_generic_class_error
-    env = Environment.new
-
     decls = RBS::Parser.parse_signature(<<EOF)
 module Foo[A, out B]
 end
