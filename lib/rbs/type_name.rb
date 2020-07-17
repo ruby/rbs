@@ -66,5 +66,23 @@ module RBS
     def with_prefix(namespace)
       self.class.new(namespace: namespace + self.namespace, name: name)
     end
+
+    def relative_name_from(namespace)
+      raise "#relative_name_from with relative type name: #{self}" unless absolute?
+      raise "#relative_name_from with relative namespace: #{namespace}" unless namespace.absolute?
+
+      common_prefix = self.namespace.path.drop_while.with_index do |a, i|
+        a == namespace.path[i]
+      end
+
+      if common_prefix.size == self.namespace.path.size
+        self
+      else
+        self.class.new(
+          namespace: Namespace.new(path: common_prefix, absolute: false),
+          name: name
+        )
+      end
+    end
   end
 end
