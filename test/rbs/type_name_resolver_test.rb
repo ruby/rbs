@@ -1,6 +1,6 @@
 require "test_helper"
 
-class RBS::DefinitionBuilderTest < Minitest::Test
+class RBS::TypeNameResolverTest < Minitest::Test
   include TestHelper
   include RBS
 
