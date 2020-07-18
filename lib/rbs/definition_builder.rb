@@ -838,7 +838,7 @@ module RBS
       methods[name] = Definition::Method.new(
         super_method: super_method,
         accessibility: method.accessibility,
-        defs: method.defs.map {|defn| defn.update(type: defn.type.sub(sub)) }
+        defs: sub.mapping.empty? ? method.defs : method.defs.map {|defn| defn.update(type: defn.type.sub(sub)) }
       )
     end
 
