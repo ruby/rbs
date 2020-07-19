@@ -35,6 +35,18 @@ module RBS
         @extended_modules = extended_modules
       end
 
+      def each_ancestor(&block)
+        if block_given?
+          yield super_class if super_class
+          self_types&.each(&block)
+          included_modules&.each(&block)
+          prepended_modules&.each(&block)
+          extended_modules&.each(&block)
+        else
+          enum_for :each_ancestor
+        end
+      end
+
       def self.class_instance(type_name:, params:, super_class:)
         new(
           type_name: type_name,
