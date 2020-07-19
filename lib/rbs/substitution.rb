@@ -11,7 +11,7 @@ module RBS
       mapping[from] = to
     end
 
-    def self.build(variables, types, instance_type: Types::Bases::Instance.new(location: nil), &block)
+    def self.build(variables, types, instance_type: nil, &block)
       unless variables.size == types.size
         raise "Broken substitution: variables=#{variables}, types=#{types}"
       end
@@ -33,7 +33,11 @@ module RBS
       when Types::Variable
         mapping[ty.name] || ty
       when Types::Bases::Instance
-        instance_type
+        if instance_type
+          instance_type
+        else
+          ty
+        end
       else
         ty
       end
