@@ -476,4 +476,30 @@ module Foo
 end
     EOF
   end
+
+  def test_duplicate_methods
+    parser = RB.new
+
+    rb = <<-'EOR'
+class C
+  if RUBY_VERSION >= '2.7'
+    def foo(x, y, z)
+      do_something_27
+    end
+  else
+    def foo(x, y, z)
+      do_something
+    end
+  end
+end
+    EOR
+
+    parser.parse(rb)
+
+    assert_write parser.decls, <<-EOF
+class C
+  def foo: (untyped x, untyped y, untyped z) -> untyped
+end
+    EOF
+  end
 end

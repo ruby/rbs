@@ -134,7 +134,7 @@ module RBS
               overload: false
             )
 
-            decls.push member
+            decls.push member unless decls.include?(member)
 
         when :FCALL
           # Inside method definition cannot reach here.
