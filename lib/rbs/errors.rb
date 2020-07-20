@@ -141,6 +141,31 @@ module RBS
     end
   end
 
+  class NoSelfTypeFoundError < StandardError
+    attr_reader :type_name
+    attr_reader :location
+
+    def initialize(type_name:, location:)
+      @type_name = type_name
+      @location = location
+
+      super "#{Location.to_string location}: Could not find self type: #{type_name}"
+    end
+
+    def self.check!(self_type, env:)
+      type_name = self_type.name
+
+      dic = case
+            when type_name.class?
+              env.class_decls
+            when type_name.interface?
+              env.interface_decls
+            end
+
+      dic.key?(type_name) or raise new(type_name: type_name, location: self_type.location)
+    end
+  end
+
   class NoMixinFoundError < StandardError
     attr_reader :type_name
     attr_reader :member

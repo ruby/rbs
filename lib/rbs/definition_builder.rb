@@ -13,6 +13,77 @@ module RBS
     attr_reader :instance_ancestors_cache
     attr_reader :singleton_ancestor_cache
 
+    attr_reader :one_instance_ancestors_cache
+    attr_reader :one_singleton_ancestors_cache
+
+    class OneAncestors
+      attr_reader :type_name
+      attr_reader :params
+      attr_reader :super_class
+      attr_reader :self_types
+      attr_reader :included_modules
+      attr_reader :prepended_modules
+      attr_reader :extended_modules
+
+      def initialize(type_name:, params:, super_class:, self_types:, included_modules:, prepended_modules:, extended_modules:)
+        @type_name = type_name
+        @params = params
+        @super_class = super_class
+        @self_types = self_types
+        @included_modules = included_modules
+        @prepended_modules = prepended_modules
+        @extended_modules = extended_modules
+      end
+
+      def each_ancestor(&block)
+        if block_given?
+          yield super_class if super_class
+          self_types&.each(&block)
+          included_modules&.each(&block)
+          prepended_modules&.each(&block)
+          extended_modules&.each(&block)
+        else
+          enum_for :each_ancestor
+        end
+      end
+
+      def self.class_instance(type_name:, params:, super_class:)
+        new(
+          type_name: type_name,
+          params: params,
+          super_class: super_class,
+          self_types: nil,
+          included_modules: [],
+          prepended_modules: [],
+          extended_modules: nil
+        )
+      end
+
+      def self.singleton(type_name:, super_class:)
+        new(
+          type_name: type_name,
+          params: nil,
+          super_class: super_class,
+          self_types: nil,
+          included_modules: nil,
+          prepended_modules: nil,
+          extended_modules: []
+        )
+      end
+
+      def self.module_instance(type_name:, params:)
+        new(
+          type_name: type_name,
+          params: params,
+          self_types: [],
+          included_modules: [],
+          prepended_modules: [],
+          super_class: nil,
+          extended_modules: nil
+        )
+      end
+    end
+
     def initialize(env:)
       @env = env
       @type_name_resolver = TypeNameResolver.from_env(env)
@@ -26,6 +97,9 @@ module RBS
 
       @instance_ancestors_cache = {}
       @singleton_ancestor_cache = {}
+
+      @one_instance_ancestors_cache = {}
+      @one_singleton_ancestors_cache = {}
     end
 
     def validate_super_class!(type_name, entry)
@@ -45,6 +119,153 @@ module RBS
       raise SuperclassMismatchError.new(name: type_name, super_classes: super_types, entry: entry)
     end
 
+    def one_instance_ancestors(type_name)
+      as = one_instance_ancestors_cache[type_name] and return as
+
+      entry = env.class_decls[type_name] or raise "Unknown name for one_instance_ancestors: #{type_name}"
+      params = entry.type_params.each.map(&:name)
+
+      case entry
+      when Environment::ClassEntry
+        validate_super_class!(type_name, entry)
+        primary = entry.primary
+        super_class = primary.decl.super_class
+
+        if type_name != BuiltinNames::BasicObject.name
+          if super_class
+            super_name = super_class.name
+            super_args = super_class.args
+          else
+            super_name = BuiltinNames::Object.name
+            super_args = []
+          end
+
+          NoSuperclassFoundError.check!(super_name, env: env, location: primary.decl.location)
+
+          ancestors = OneAncestors.class_instance(
+            type_name: type_name,
+            params: params,
+            super_class: Definition::Ancestor::Instance.new(name: super_name, args: super_args)
+          )
+        else
+          ancestors = OneAncestors.class_instance(
+            type_name: type_name,
+            params: params,
+            super_class: nil
+          )
+        end
+      when Environment::ModuleEntry
+        ancestors = OneAncestors.module_instance(type_name: type_name, params: params)
+
+        entry.self_types.each do |module_self|
+          NoSelfTypeFoundError.check!(module_self, env: env)
+          ancestors.self_types.push Definition::Ancestor::Instance.new(name: module_self.name, args: module_self.args)
+        end
+      else
+        raise "Unexpected entry for: #{type_name}"
+      end
+
+      mixin_ancestors(entry,
+                      included_modules: ancestors.included_modules,
+                      prepended_modules: ancestors.prepended_modules,
+                      extended_modules: nil)
+
+      one_instance_ancestors_cache[type_name] = ancestors
+    end
+
+    def one_singleton_ancestors(type_name)
+      as = one_singleton_ancestors_cache[type_name] and return as
+
+      entry = env.class_decls[type_name] or raise "Unknown name for one_singleton_ancestors: #{type_name}"
+
+      case entry
+      when Environment::ClassEntry
+        validate_super_class!(type_name, entry)
+        primary = entry.primary
+        super_class = primary.decl.super_class
+
+        if type_name != BuiltinNames::BasicObject.name
+          if super_class
+            super_name = super_class.name
+          else
+            super_name = BuiltinNames::Object.name
+          end
+
+          NoSuperclassFoundError.check!(super_name, env: env, location: primary.decl.location)
+
+          ancestors = OneAncestors.singleton(
+            type_name: type_name,
+            super_class: Definition::Ancestor::Singleton.new(name: super_name)
+          )
+        else
+          ancestors = OneAncestors.singleton(
+            type_name: type_name,
+            super_class: Definition::Ancestor::Instance.new(name: BuiltinNames::Class.name, args: [])
+          )
+        end
+      when Environment::ModuleEntry
+        ancestors = OneAncestors.singleton(
+          type_name: type_name,
+          super_class: Definition::Ancestor::Instance.new(name: BuiltinNames::Module.name, args: [])
+        )
+
+      else
+        raise "Unexpected entry for: #{type_name}"
+      end
+
+      mixin_ancestors(entry,
+                      included_modules: nil,
+                      prepended_modules: nil,
+                      extended_modules: ancestors.extended_modules)
+
+      one_singleton_ancestors_cache[type_name] = ancestors
+    end
+
+    def mixin_ancestors(entry, included_modules:, extended_modules:, prepended_modules:)
+      entry.decls.each do |d|
+        decl = d.decl
+
+        align_params = Substitution.build(
+          decl.type_params.each.map(&:name),
+          Types::Variable.build(entry.type_params.each.map(&:name))
+        )
+
+        decl.each_mixin do |member|
+          case member
+          when AST::Members::Include
+            if included_modules
+              NoMixinFoundError.check!(member.name, env: env, member: member)
+
+              module_name = member.name
+              module_args = member.args.map {|type| type.sub(align_params) }
+
+              included_modules << Definition::Ancestor::Instance.new(name: module_name, args: module_args)
+            end
+
+          when AST::Members::Prepend
+            if prepended_modules
+              NoMixinFoundError.check!(member.name, env: env, member: member)
+
+              module_name = member.name
+              module_args = member.args.map {|type| type.sub(align_params) }
+
+              prepended_modules << Definition::Ancestor::Instance.new(name: module_name, args: module_args)
+            end
+
+          when AST::Members::Extend
+            if extended_modules
+              NoMixinFoundError.check!(member.name, env: env, member: member)
+
+              module_name = member.name
+              module_args = member.args
+
+              extended_modules << Definition::Ancestor::Instance.new(name: module_name, args: module_args)
+            end
+          end
+        end
+      end
+    end
+
     def instance_ancestors(type_name, building_ancestors: [])
       as = instance_ancestors_cache[type_name] and return as
 
@@ -58,36 +279,39 @@ module RBS
                                     location: entry.primary.decl.location)
       building_ancestors.push self_ancestor
 
+      one_ancestors = one_instance_ancestors(type_name)
+
       ancestors = []
 
       case entry
       when Environment::ClassEntry
-        validate_super_class!(type_name, entry)
-
-        # Super class comes last
-        if self_ancestor.name != BuiltinNames::BasicObject.name
-          primary = entry.primary
-          super_class = primary.decl.super_class
-
-          if super_class
-            super_name = super_class.name
-            super_args = super_class.args
-          else
-            super_name = BuiltinNames::Object.name
-            super_args = []
-          end
-
-          NoSuperclassFoundError.check!(super_name, env: env, location: primary.decl.location)
+        if one_ancestors.super_class
+          super_name = one_ancestors.super_class.name
+          super_args = one_ancestors.super_class.args
 
           super_ancestors = instance_ancestors(super_name, building_ancestors: building_ancestors)
-          ancestors.unshift(*super_ancestors.apply(super_args, location: primary.decl.location))
+          ancestors.unshift(*super_ancestors.apply(super_args, location: entry.primary.decl.location))
         end
+      end
 
-        build_ancestors_mixin_self(self_ancestor, entry, ancestors: ancestors, building_ancestors: building_ancestors)
+      one_ancestors.included_modules.each do |mod|
+        if mod.name.class?
+          name = mod.name
+          args = mod.args
+          mod_ancestors = instance_ancestors(name, building_ancestors: building_ancestors)
+          ancestors.unshift(*mod_ancestors.apply(args, location: entry.primary.decl.location))
+        end
+      end
 
-      when Environment::ModuleEntry
-        build_ancestors_mixin_self(self_ancestor, entry, ancestors: ancestors, building_ancestors: building_ancestors)
+      ancestors.unshift(self_ancestor)
 
+      one_ancestors.prepended_modules.each do |mod|
+        if mod.name.class?
+          name = mod.name
+          args = mod.args
+          mod_ancestors = instance_ancestors(name, building_ancestors: building_ancestors)
+          ancestors.unshift(*mod_ancestors.apply(args, location: entry.primary.decl.location))
+        end
       end
 
       building_ancestors.pop
@@ -110,53 +334,35 @@ module RBS
                                     location: entry.primary.decl.location)
       building_ancestors.push self_ancestor
 
+      one_ancestors = one_singleton_ancestors(type_name)
+
       ancestors = []
 
-      case entry
-      when Environment::ClassEntry
-        # Super class comes last
-        if self_ancestor.name != BuiltinNames::BasicObject.name
-          primary = entry.primary
-          super_class = primary.decl.super_class
+      case one_ancestors.super_class
+      when Definition::Ancestor::Instance
+        super_name = one_ancestors.super_class.name
+        super_args = one_ancestors.super_class.args
 
-          if super_class
-            super_name = super_class.name
-          else
-            super_name = BuiltinNames::Object.name
-          end
+        super_ancestors = instance_ancestors(super_name, building_ancestors: building_ancestors)
+        ancestors.unshift(*super_ancestors.apply(super_args, location: entry.primary.decl.location))
 
-          NoSuperclassFoundError.check!(super_name, env: env, location: primary.decl.location)
+      when Definition::Ancestor::Singleton
+        super_name = one_ancestors.super_class.name
 
-          super_ancestors = singleton_ancestors(super_name, building_ancestors: building_ancestors)
-          ancestors.unshift(*super_ancestors.ancestors)
-        else
-          as = instance_ancestors(BuiltinNames::Class.name, building_ancestors: building_ancestors)
-          ancestors.unshift(*as.apply([], location: entry.primary.decl.location))
-        end
-
-      when Environment::ModuleEntry
-        as = instance_ancestors(BuiltinNames::Module.name, building_ancestors: building_ancestors)
-        ancestors.unshift(*as.apply([], location: entry.primary.decl.location))
+        super_ancestors = singleton_ancestors(super_name, building_ancestors: [])
+        ancestors.unshift(*super_ancestors.ancestors)
       end
 
-      # Extend comes next
-      entry.decls.each do |d|
-        decl = d.decl
-
-        decl.each_mixin do |member|
-          case member
-          when AST::Members::Extend
-            if member.name.class?
-              NoMixinFoundError.check!(member.name, env: env, member: member)
-
-              module_ancestors = instance_ancestors(member.name, building_ancestors: building_ancestors)
-              ancestors.unshift(*module_ancestors.apply(member.args, location: member.location))
-            end
-          end
+      one_ancestors.extended_modules.each do |mod|
+        if mod.name.class?
+          name = mod.name
+          args = mod.args
+          mod_ancestors = instance_ancestors(name, building_ancestors: building_ancestors)
+          ancestors.unshift(*mod_ancestors.apply(args, location: entry.primary.decl.location))
         end
       end
 
-      ancestors.unshift self_ancestor
+      ancestors.unshift(self_ancestor)
 
       building_ancestors.pop
 
@@ -164,57 +370,6 @@ module RBS
         type_name: type_name,
         ancestors: ancestors
       )
-    end
-
-    def build_ancestors_mixin_self(self_ancestor, entry, ancestors:, building_ancestors:)
-      # Include comes next
-      entry.decls.each do |d|
-        decl = d.decl
-
-        align_params = Substitution.build(
-          decl.type_params.each.map(&:name),
-          Types::Variable.build(entry.type_params.each.map(&:name))
-        )
-
-        decl.each_mixin do |member|
-          case member
-          when AST::Members::Include
-            if member.name.class?
-              NoMixinFoundError.check!(member.name, env: env, member: member)
-
-              module_name = member.name
-              module_args = member.args.map {|type| type.sub(align_params) }
-
-              module_ancestors = instance_ancestors(module_name, building_ancestors: building_ancestors)
-              ancestors.unshift(*module_ancestors.apply(module_args, location: member.location))
-            end
-          end
-        end
-      end
-
-      # Self
-      ancestors.unshift(self_ancestor)
-
-      # Prepends
-      entry.decls.each do |d|
-        decl = d.decl
-
-        align_params = Substitution.build(decl.type_params.each.map(&:name),
-                                          Types::Variable.build(entry.type_params.each.map(&:name)))
-
-        decl.each_mixin do |member|
-          case member
-          when AST::Members::Prepend
-            NoMixinFoundError.check!(member.name, env: env, member: member)
-
-            module_name = member.name
-            module_args = member.args.map {|type| type.sub(align_params) }
-
-            module_ancestors = instance_ancestors(module_name, building_ancestors: building_ancestors)
-            ancestors.unshift(*module_ancestors.apply(module_args))
-          end
-        end
-      end
     end
 
     def each_member_with_accessibility(members, accessibility: :public)
