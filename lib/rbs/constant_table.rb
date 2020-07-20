@@ -152,7 +152,7 @@ module RBS
         constant_scopes_module name, scopes: scopes
 
       else
-        raise "Unexpected declaration: #{name} (#{decl.class})"
+        raise "Unexpected declaration: #{name} (#{entry.class})"
       end
 
       scopes
