@@ -8,8 +8,8 @@ logger = Logger.new(STDERR)
 
 begin
   opts = Shellwords.shellsplit(ENV["RBS_TEST_OPT"] || "-I sig")
-  filter = ENV.fetch("RBS_TEST_TARGET").split(",")
-  skips = (ENV["RBS_TEST_SKIP"] || "").split(",")
+  filter = ENV.fetch('RBS_TEST_TARGET').split(',').map! { |e| e.strip }
+  skips = (ENV['RBS_TEST_SKIP'] || '').split(',').map! { |e| e.strip }
   sampling = !ENV.key?("RBS_TEST_NO_SAMPLE")
   RBS.logger_level = (ENV["RBS_TEST_LOGLEVEL"] || "info")
 rescue
