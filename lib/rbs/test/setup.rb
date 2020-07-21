@@ -38,14 +38,17 @@ def match(filter, name)
   end
 end
 
-factory = RBS::Factory.new()
+def to_absolute_typename(type_name)
+  RBS::Factory.new().type_name(type_name).absolute!
+end
+
 tester = RBS::Test::Tester.new(env: env)
 
 TracePoint.trace :end do |tp|
-  class_name = tp.self.name&.yield_self {|name| factory.type_name(name).absolute! }
+  class_name = tp.self.name&.yield_self {|name| to_absolute_typename name }
 
   if class_name
-    if filter.any? {|f| match(f, class_name.to_s) } && skips.none? {|f| match(f, class_name.to_s) }
+    if filter.any? {|f| match(to_absolute_typename(f).to_s, class_name.to_s) } && skips.none? {|f| match(f, class_name.to_s) }
       if tester.checkers.none? {|hook| hook.klass == tp.self }
         if env.class_decls.key?(class_name)
           logger.info "Setting up hooks for #{class_name}"
@@ -55,3 +58,4 @@ TracePoint.trace :end do |tp|
     end
   end
 end
+ 
