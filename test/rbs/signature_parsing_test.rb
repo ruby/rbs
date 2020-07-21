@@ -465,18 +465,13 @@ end
   end
 
   def test_method_super
-    Parser.parse_signature(<<~SIG).yield_self do |decls|
+    assert_raises Parser::SyntaxError do
+      Parser.parse_signature(<<~SIG)
       class Foo
         def foo: -> void
                | super
       end
-    SIG
-      type1, type2 = decls[0].members[0].types
-
-      assert_instance_of MethodType, type1
-      assert_equal "-> void", type1.location.source
-
-      assert_equal :super, type2
+      SIG
     end
   end
 
@@ -1031,7 +1026,7 @@ EOF
   def test_overload_def
     Parser.parse_signature(<<EOF).yield_self do |decls|
 module Steep
-  overload def to_s: (Integer) -> String
+  def to_s: (Integer) -> String | ...
   def to_i: () -> Integer
 end
 EOF
@@ -1043,6 +1038,19 @@ EOF
       decls[0].members[1].tap do |member|
         assert_instance_of Members::MethodDefinition, member
         refute_operator member, :overload?
+      end
+    end
+  end
+
+  def test_overload_def_deprecated
+    Parser.parse_signature(<<EOF).yield_self do |decls|
+module Steep
+  overload def to_s: (Integer) -> String
+end
+EOF
+      decls[0].members[0].tap do |member|
+        assert_instance_of Members::MethodDefinition, member
+        assert_operator member, :overload?
       end
     end
   end
