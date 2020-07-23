@@ -58,4 +58,11 @@ TracePoint.trace :end do |tp|
     end
   end
 end
+
+at_exit do
+  if $!.nil? || $!.is_a?(SystemExit) && $!.success?
+    logger.warn "No type checker was installed! " if tester.checkers.empty?
+  end
+end
+
  
