@@ -424,7 +424,7 @@ end
 
 module Baz
   class ::Bar
-    overload def foo: (Integer) -> String
+    def foo: (Integer) -> String | ...
   end
 
   class String
@@ -436,11 +436,11 @@ class VisibilityError
   def foo: () -> void
 
   private
-  overload def foo: () -> void
+  def foo: () -> void | ...
 end
 
 class InvalidOverloadError
-  overload def foo: () -> void
+  def foo: () -> void | ...
 end
 
 interface _TestInterface
@@ -451,7 +451,7 @@ end
 class UsingTestInterface
   include _TestInterface
 
-  overload def test2: (Integer) -> String
+  def test2: (Integer) -> String | ...
 end
 EOF
       manager.build do |env|
@@ -546,7 +546,7 @@ end
 class Hello
   # doc2
   %a{world}
-  overload def foo: (String) -> String
+  def foo: (String) -> String | ...
 end
       EOF
       manager.build do |env|
@@ -580,7 +580,7 @@ end
 class Hello
   include _Hello
 
-  overload def hello: (Integer) -> String
+  def hello: (Integer) -> String | ...
 end
       EOF
       manager.build do |env|
@@ -830,7 +830,7 @@ class Hello
 end
 
 class Hello
-  overload def self.bar: (Symbol) -> String
+  def self.bar: (Symbol) -> String | ...
 end
 EOF
 
@@ -871,7 +871,7 @@ class Hello
 end
 
 class Hello
-  overload def self.world: (Symbol) -> Integer
+  def self.world: (Symbol) -> Integer | ...
 end
 EOF
 
@@ -1337,7 +1337,7 @@ end
 class Hello
   # doc2
   %a{world}
-  overload def foo: (String) -> String
+  def foo: (String) -> String | ...
 end
       EOF
       manager.build do |env|
@@ -1401,7 +1401,7 @@ class Hello
 
   # Hello#foo
   %a{Hello#foo}
-  overload def foo: (Integer) -> String
+  def foo: (Integer) -> String | ...
 end
       EOF
       manager.build do |env|

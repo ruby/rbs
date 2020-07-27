@@ -4,9 +4,9 @@ class RBS::Parser
         tANNOTATION
         tSTRING tSYMBOL tINTEGER tWRITE_ATTR
         kLPAREN kRPAREN kLBRACKET kRBRACKET kLBRACE kRBRACE
-        kVOID kNIL kTRUE kFALSE kANY kUNTYPED kTOP kBOT kSELF kSELFQ kINSTANCE kCLASS kBOOL kSINGLETON kTYPE kDEF kMODULE kSUPER
+        kVOID kNIL kTRUE kFALSE kANY kUNTYPED kTOP kBOT kSELF kSELFQ kINSTANCE kCLASS kBOOL kSINGLETON kTYPE kDEF kMODULE
         kPRIVATE kPUBLIC kALIAS
-        kCOLON kCOLON2 kCOMMA kBAR kAMP kHAT kARROW kQUESTION kEXCLAMATION kSTAR kSTAR2 kFATARROW kEQ kDOT kLT
+        kCOLON kCOLON2 kCOMMA kBAR kAMP kHAT kARROW kQUESTION kEXCLAMATION kSTAR kSTAR2 kFATARROW kEQ kDOT kDOT3 kLT
         kINTERFACE kEND kINCLUDE kEXTEND kATTRREADER kATTRWRITER kATTRACCESSOR tOPERATOR tQUOTEDMETHOD tQUOTEDIDENT
         kPREPEND kEXTENSION kINCOMPATIBLE
         type_TYPE type_SIGNATURE type_METHODTYPE tEOF
@@ -425,7 +425,12 @@ rule
                                       comment: leading_comment(val[0].first&.location || location))
       }
 
-  overload: { result = nil } | kOVERLOAD
+  overload:
+        { result = nil }
+    | kOVERLOAD {
+        RBS.logger.warn "`overload def` syntax is deprecated. Use `...` syntax instead."
+        result = val[0]
+      }
 
   method_member:
       annotations attributes overload kDEF method_kind def_name method_types {
@@ -438,15 +443,24 @@ rule
             type
           end
         end
+
+        last_type = val[6].last
+        if last_type.is_a?(LocatedValue) && last_type.value == :dot3
+          overload = true
+          val[6].pop
+        else
+          overload = false
+        end
+
         result = Members::MethodDefinition.new(
           name: val[5].value,
           kind: val[4],
-          types: types,
+          types: val[6],
           annotations: val[0],
           location: location,
           comment: leading_comment(val[0].first&.location || val[1].first&.location || val[2]&.location || val[3].location),
           attributes: val[1].map(&:value),
-          overload: !!val[2]
+          overload: overload || !!val[2]
         )
       }
 
@@ -463,7 +477,7 @@ rule
 
   method_types:
       method_type { result = [val[0]] }
-    | kSUPER { result = [LocatedValue.new(value: :super, location: val[0].location)] }
+    | kDOT3 { result = [LocatedValue.new(value: :dot3, location: val[0].location)] }
     | method_type kBAR method_types {
         result = val[2].unshift(val[0])
       }
@@ -548,7 +562,7 @@ rule
       kCLASS | kVOID | kNIL | kTRUE | kFALSE | kANY | kUNTYPED | kTOP | kBOT | kINSTANCE | kBOOL | kSINGLETON
     | kTYPE | kMODULE | kPRIVATE | kPUBLIC | kEND | kINCLUDE | kEXTEND | kPREPEND
     | kATTRREADER | kATTRACCESSOR | kATTRWRITER | kDEF | kEXTENSION | kSELF | kINCOMPATIBLE
-    | kUNCHECKED | kINTERFACE | kSUPER | kALIAS | kOUT | kIN | kOVERLOAD
+    | kUNCHECKED | kINTERFACE | kALIAS | kOUT | kIN | kOVERLOAD
 
   module_type_params:
       { result = nil }
@@ -1218,7 +1232,6 @@ KEYWORDS = {
   "attr_reader" => :kATTRREADER,
   "attr_writer" => :kATTRWRITER,
   "attr_accessor" => :kATTRACCESSOR,
-  "super" => :kSUPER,
   "public" => :kPUBLIC,
   "private" => :kPRIVATE,
   "alias" => :kALIAS,
@@ -1267,6 +1280,7 @@ PUNCTS = {
   "!" => :kEXCLAMATION,
   "**" => :kSTAR2,
   "*" => :kSTAR,
+  "..." => :kDOT3,
   "." => :kDOT,
   "<" => :kLT,
   "-@" => :tOPERATOR,
