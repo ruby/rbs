@@ -42,6 +42,12 @@ module TestHelper
     end
   end
 
+  def silence_errors
+    RBS.logger.stub :error, nil do
+      yield
+    end
+  end
+
   def silence_warnings
     RBS.logger.stub :warn, nil do
       yield
@@ -149,6 +155,16 @@ SIG
 
     # Check syntax error
     RBS::Parser.parse_signature(writer.out.string)
+  end
+
+  def assert_sampling_check(builder, sample_size, array)
+    checker = RBS::Test::TypeCheck.new(self_class: Integer, builder: builder, sample_size: sample_size)
+    
+    sample = checker.sample(array)
+    
+    assert_operator(sample.size, :<=, array.size)
+    assert_operator(sample.size, :<=, sample_size) unless sample_size.nil?
+    assert_empty(sample - array)
   end
 end
 

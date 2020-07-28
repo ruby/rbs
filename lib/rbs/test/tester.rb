@@ -17,14 +17,14 @@ module RBS
         @builder ||= DefinitionBuilder.new(env: env)
       end
 
-      def install!(klass, sampling:)
+      def install!(klass, sample_size:)
         RBS.logger.info { "Installing runtime type checker in #{klass}..." }
 
         type_name = factory.type_name(klass.name).absolute!
 
         builder.build_instance(type_name).tap do |definition|
           instance_key = new_key(type_name, "InstanceChecker")
-          Observer.register(instance_key, MethodCallTester.new(klass, builder, definition, kind: :instance, sampling: sampling))
+          Observer.register(instance_key, MethodCallTester.new(klass, builder, definition, kind: :instance, sample_size: sample_size))
 
           definition.methods.each do |name, method|
             if method.implemented_in == type_name
@@ -36,7 +36,7 @@ module RBS
 
         builder.build_singleton(type_name).tap do |definition|
           singleton_key = new_key(type_name, "SingletonChecker")
-          Observer.register(singleton_key, MethodCallTester.new(klass.singleton_class, builder, definition, kind: :singleton, sampling: sampling))
+          Observer.register(singleton_key, MethodCallTester.new(klass.singleton_class, builder, definition, kind: :singleton, sample_size: sample_size))
 
           definition.methods.each do |name, method|
             if method.implemented_in == type_name || name == :new
@@ -66,14 +66,14 @@ module RBS
         attr_reader :definition
         attr_reader :builder
         attr_reader :kind
-        attr_reader :sampling
+        attr_reader :sample_size
 
-        def initialize(self_class, builder, definition, kind:, sampling:)
+        def initialize(self_class, builder, definition, kind:, sample_size:)
           @self_class = self_class
           @definition = definition
           @builder = builder
           @kind = kind
-          @sampling = sampling
+          @sample_size = sample_size
         end
 
         def env
@@ -81,7 +81,7 @@ module RBS
         end
 
         def check
-          @check ||= TypeCheck.new(self_class: self_class, builder: builder, sampling: sampling)
+          @check ||= TypeCheck.new(self_class: self_class, builder: builder, sample_size: sample_size)
         end
 
         def format_method_name(name)

@@ -28,7 +28,11 @@ module RBS
       end
 
       def self.inspect_(obj)
-        Test::INSPECT.bind(obj).call
+        if obj.respond_to?(:inspect)
+          obj.inspect
+        else
+          Test::INSPECT.bind(obj).call     # For the case inspect is not defined (like BasicObject)
+        end
       end
 
       def self.to_string(error)
