@@ -1,0 +1,15 @@
+module PTY
+  def self.check: (*untyped) -> untyped
+
+  def self.getpty: (*untyped) -> untyped
+
+  def self.open: () -> untyped
+
+  def self.spawn: (*untyped) -> untyped
+
+  private
+
+  def getpty: (*untyped) -> untyped
+
+  def spawn: (*untyped) -> untyped
+end
