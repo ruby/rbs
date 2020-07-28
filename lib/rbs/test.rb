@@ -5,6 +5,7 @@ require "rbs/test/errors"
 require "rbs/test/type_check"
 require "rbs/test/tester"
 require "rbs/test/hook"
+require "rbs/test/setup_helper"
 
 module RBS
   module Test
