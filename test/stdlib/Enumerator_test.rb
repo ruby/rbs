@@ -1,5 +1,19 @@
 require_relative "test_helper"
 
+class EnumeratorTest < Minitest::Test
+  include TypeAssertions
+
+  testing "::Enumerator[::Integer, Array[::Integer]]"
+
+  def test_map
+    g = [1,2,3].to_enum
+    assert_send_type "() { (Integer) -> String } -> Array[String]",
+                     g, :map do |x| x.to_s end
+    assert_send_type "() -> Enumerator[Integer, Array[untyped]]",
+                     g, :map
+  end
+end
+
 class EnumeratorYielderTest < Minitest::Test
   include TypeAssertions
 
