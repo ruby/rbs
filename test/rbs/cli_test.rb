@@ -202,4 +202,25 @@ singleton(::BasicObject)
       end
     end
   end
+
+  def test_prototype_no_parser
+    Dir.mktmpdir do |dir|
+      with_cli do |cli|
+        def cli.has_parser?
+          false
+        end
+
+        assert_raises SystemExit do
+          cli.run(%w(prototype rb))
+        end
+
+        assert_raises SystemExit do
+          cli.run(%w(prototype rbi))
+        end
+
+        assert_equal "Not supported on this interpreter (ruby).\n", stdout.string.lines[0]
+        assert_equal "Not supported on this interpreter (ruby).\n", stdout.string.lines[1]
+      end
+    end
+  end
 end
