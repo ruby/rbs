@@ -2,6 +2,13 @@
 
 ## master
 
+## 0.8.0 (2020-08-01)
+
+* Signature updates for `Enumerator` and `PTY`
+* Fix prototype rb/rbi error handling [#349](https://github.com/ruby/rbs/pull/349)
+* Runtime test improvements [#344](https://github.com/ruby/rbs/pull/344), [#343](https://github.com/ruby/rbs/pull/343)
+* Add `...` syntax [#342](https://github.com/ruby/rbs/pull/342)
+
 ## 0.7.0 (2020-07-20)
 
 * Add `DefinitionBuilder#one_instance_ancestors` and `DefinitionBuilder#one_singleton_ancestors` [#341](https://github.com/ruby/rbs/pull/341)
