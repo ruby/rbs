@@ -66,6 +66,10 @@ module RBS
       opts
     end
 
+    def has_parser?
+      defined?(RubyVM::AbstractSyntaxTree)
+    end
+
     def run(args)
       options = LibraryOptions.new
 
@@ -599,12 +603,18 @@ EOU
     end
 
     def run_prototype_file(format, args)
+      availability = unless has_parser?
+                       "\n** This command does not work on this interpreter (#{RUBY_ENGINE}) **\n"
+                     end
+
       opts = OptionParser.new
       opts.banner = <<EOU
 Usage: rbs prototype #{format} [options...] [files...]
-
+#{availability}
 Generate RBS prototype from source code.
-It parses specified Ruby code and and generates RBS prototypes. 
+It parses specified Ruby code and and generates RBS prototypes.
+
+It only works on MRI because it parses Ruby code with `RubyVM::AbstractSyntaxTree`.
 
 Examples:
 
@@ -612,6 +622,11 @@ Examples:
   $ rbs prototype rbi sorbet/rbi/foo.rbi
 EOU
       opts.parse!(args)
+
+      unless has_parser?
+        stdout.puts "Not supported on this interpreter (#{RUBY_ENGINE})."
+        exit 1
+      end
 
       if args.empty?
         stdout.puts opts
