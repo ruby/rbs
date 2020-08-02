@@ -1164,15 +1164,13 @@ def leading_comment(location)
 end
 
 def push_comment(string, location)
-  new_comment = AST::Comment.new(string: string+"\n", location: location)
-
-  if (prev_comment = leading_comment(location)) && prev_comment.location.start_column == location.start_column
-    @comments.delete prev_comment.location.end_line
-    new_comment = AST::Comment.new(string: prev_comment.string + new_comment.string,
-                                   location: prev_comment.location + new_comment.location)
+  if (comment = leading_comment(location)) && comment.location.start_column == location.start_column
+    comment.concat(string: "#{string}\n", location: location)
+    @comments[comment.location.end_line] = comment
+  else
+    new_comment = AST::Comment.new(string: "#{string}\n", location: location)
+    @comments[new_comment.location.end_line] = new_comment
   end
-
-  @comments[new_comment.location.end_line] = new_comment
 end
 
 def new_token(type, value = input.matched)

@@ -22,6 +22,12 @@ module RBS
       def to_json(*a)
         { string: string, location: location }.to_json(*a)
       end
+
+      def concat(string:, location:)  
+        @string.concat string
+        @location.concat location
+        self
+      end
     end
   end
 end
