@@ -18,6 +18,8 @@ end
 
 class Foo
 end
+
+type Foo::Bar::Baz::t = Integer
       EOF
 
       manager.build do |env|
