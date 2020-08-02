@@ -1498,4 +1498,38 @@ end
       end
     end
   end
+
+  def test_build_absent_namespace
+    SignatureManager.new do |manager|
+      manager.files.merge!(Pathname("foo.rbs") => <<-EOF)
+class Hello::World
+end
+
+interface Hello::_World
+end
+
+type Hello::world = 30
+      EOF
+
+      manager.build do |env|
+        builder = DefinitionBuilder.new(env: env)
+
+        assert_raises RBS::NoTypeFoundError do
+          builder.build_instance(type_name("::Hello::World"))
+        end
+
+        assert_raises RBS::NoTypeFoundError do
+          builder.build_singleton(type_name("::Hello::World"))
+        end
+
+        assert_raises RBS::NoTypeFoundError do
+          builder.build_interface(type_name("::Hello::_World"))
+        end
+
+        assert_raises RBS::NoTypeFoundError do
+          builder.expand_alias(type_name("::Hello::world"))
+        end
+      end
+    end
+  end
 end

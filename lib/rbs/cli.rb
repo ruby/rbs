@@ -413,6 +413,7 @@ EOU
       env.constant_decls.each do |name, const|
         stdout.puts "Validating constant: `#{name}`..."
         validator.validate_type const.decl.type, context: const.context
+        builder.ensure_namespace!(name.namespace, location: const.decl.location)
       end
 
       env.global_decls.each do |name, global|
@@ -422,7 +423,9 @@ EOU
 
       env.alias_decls.each do |name, decl|
         stdout.puts "Validating alias: `#{name}`..."
-        validator.validate_type decl.decl.type, context: decl.context
+        builder.expand_alias(name).tap do |type|
+          validator.validate_type type, context: [Namespace.root]
+        end
       end
     end
 

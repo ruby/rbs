@@ -133,6 +133,49 @@ singleton(::BasicObject)
     with_cli do |cli|
       cli.run(%w(-r set validate))
     end
+
+    with_cli do |cli|
+      Dir.mktmpdir do |dir|
+        (Pathname(dir) + 'a.rbs').write(<<~RBS)
+        class Hello::World
+        end
+        RBS
+
+        error = assert_raises RBS::NoTypeFoundError do
+          cli.run(["-I", dir, "validate"])
+        end
+
+        assert_equal "::Hello", error.type_name.to_s
+      end
+    end
+
+    with_cli do |cli|
+      Dir.mktmpdir do |dir|
+        (Pathname(dir) + 'a.rbs').write(<<~RBS)
+        Hello::World: Integer
+        RBS
+
+        error = assert_raises RBS::NoTypeFoundError do
+          cli.run(["-I", dir, "validate"])
+        end
+
+        assert_equal "::Hello", error.type_name.to_s
+      end
+    end
+
+    with_cli do |cli|
+      Dir.mktmpdir do |dir|
+        (Pathname(dir) + 'a.rbs').write(<<~RBS)
+        type Hello::t = Integer
+        RBS
+
+        error = assert_raises RBS::NoTypeFoundError do
+          cli.run(["-I", dir, "validate"])
+        end
+
+        assert_equal "::Hello", error.type_name.to_s
+      end
+    end
   end
 
   def test_constant

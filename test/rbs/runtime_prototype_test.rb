@@ -71,6 +71,13 @@ RBS::RuntimePrototypeTest::TestTargets::Test::NAME: String
   def test_merge_types
     SignatureManager.new do |manager|
       manager.files[Pathname("foo.rbs")] = <<EOF
+class RBS
+  class RuntimePrototypeTest
+    class TestTargets
+    end
+  end
+end
+
 class RBS::RuntimePrototypeTest::TestTargets::Test
   def self.baz: () -> void
 
