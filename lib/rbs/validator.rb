@@ -41,6 +41,10 @@ module RBS
           params: type_params.each.map(&:name),
           location: type.location
         )
+
+      when Types::Alias, Types::ClassSingleton
+        type = absolute_type(type, context: context) { type.name.absolute! }
+        NoTypeFoundError.check!(type.name, env: env, location: type.location)
       end
 
       type.each_type do |type|

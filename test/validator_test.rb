@@ -20,6 +20,8 @@ class Foo
 end
 
 type Foo::Bar::Baz::t = Integer
+
+type ty = String | Integer
       EOF
 
       manager.build do |env|
@@ -39,6 +41,20 @@ type Foo::Bar::Baz::t = Integer
 
         assert_raises InvalidTypeApplicationError do
           validator.validate_type(parse_type("Array[1,2,3]"), context: root)
+        end
+
+        validator.validate_type(parse_type("::ty"), context: root)
+
+        assert_raises RBS::NoTypeFoundError do
+          validator.validate_type(parse_type("::ty2"), context: root)
+        end
+
+        assert_raises RBS::NoTypeFoundError do
+          validator.validate_type(parse_type("catcat"), context: root)
+        end
+
+        assert_raises RBS::NoTypeFoundError do
+          validator.validate_type(parse_type("::_NoSuchInterface"), context: root)
         end
       end
     end
