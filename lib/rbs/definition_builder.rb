@@ -385,9 +385,18 @@ module RBS
       end
     end
 
+    def ensure_namespace!(namespace, location:)
+      namespace.ascend do |ns|
+        unless ns.empty?
+          NoTypeFoundError.check!(ns.to_type_name, env: env, location: location)
+        end
+      end
+    end
+
     def build_instance(type_name)
       try_cache type_name, cache: instance_cache do
         entry = env.class_decls[type_name] or raise "Unknown name for build_instance: #{type_name}"
+        ensure_namespace!(type_name.namespace, location: entry.decls[0].decl.location)
 
         case entry
         when Environment::ClassEntry, Environment::ModuleEntry
@@ -434,6 +443,7 @@ module RBS
     def build_singleton(type_name)
       try_cache type_name, cache: singleton_cache do
         entry = env.class_decls[type_name] or raise "Unknown name for build_singleton: #{type_name}"
+        ensure_namespace!(type_name.namespace, location: entry.decls[0].decl.location)
 
         case entry
         when Environment::ClassEntry, Environment::ModuleEntry
@@ -1020,6 +1030,7 @@ module RBS
       try_cache(type_name, cache: interface_cache) do
         entry = env.interface_decls[type_name] or raise "Unknown name for build_interface: #{type_name}"
         declaration = entry.decl
+        ensure_namespace!(type_name.namespace, location: declaration.location)
 
         self_type = Types::Interface.new(
           name: type_name,
@@ -1111,6 +1122,7 @@ module RBS
 
     def expand_alias(type_name)
       entry = env.alias_decls[type_name] or raise "Unknown name for expand_alias: #{type_name}"
+      ensure_namespace!(type_name.namespace, location: entry.decl.location)
       entry.decl.type
     end
   end
