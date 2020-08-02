@@ -2,6 +2,11 @@
 
 ## master
 
+## 0.9.0 (2020-08-03)
+
+* Fix signature validation [#351](https://github.com/ruby/rbs/pull/351), [#352](https://github.com/ruby/rbs/pull/352)
+* Parsing performance improvement [#350](https://github.com/ruby/rbs/pull/350)
+
 ## 0.8.0 (2020-08-01)
 
 * Signature updates for `Enumerator` and `PTY`
