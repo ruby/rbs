@@ -42,6 +42,9 @@ end
 class JSON::Ext::Generator::State
 end
 
+class JSON::Ext::Parser
+end
+
 module JSON::Pure
 end
 
@@ -49,6 +52,9 @@ module JSON::Pure::Generator
 end
 
 class JSON::Pure::Generator::State
+end
+
+class JSON::Pure::Parser
 end
 
 type json_generator = singleton(::JSON::Ext::Generator) | singleton(::JSON::Pure::Generator)
