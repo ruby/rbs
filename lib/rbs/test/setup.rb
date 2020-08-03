@@ -9,15 +9,16 @@ logger = Logger.new(STDERR)
 
 begin
   opts = Shellwords.shellsplit(ENV["RBS_TEST_OPT"] || "-I sig")
-  filter = ENV.fetch('RBS_TEST_TARGET').split(',').map! { |e| e.strip }
+  filter = ENV.fetch('RBS_TEST_TARGET', "").split(',').map! { |e| e.strip }
   skips = (ENV['RBS_TEST_SKIP'] || '').split(',').map! { |e| e.strip }
   RBS.logger_level = (ENV["RBS_TEST_LOGLEVEL"] || "info")
   sample_size = get_sample_size(ENV['RBS_TEST_SAMPLE_SIZE'] || '')
 rescue InvalidSampleSizeError => exception
   RBS.logger.error exception.message
   exit 1
-rescue Exception => e
-  raise e.message
+end
+
+if filter.empty?
   STDERR.puts "rbs/test/setup handles the following environment variables:"
   STDERR.puts "  [REQUIRED] RBS_TEST_TARGET: test target class name, `Foo::Bar,Foo::Baz` for each class or `Foo::*` for all classes under `Foo`"
   STDERR.puts "  [OPTIONAL] RBS_TEST_SKIP: skip testing classes"
@@ -55,7 +56,7 @@ TracePoint.trace :end do |tp|
 
   if class_name
     if filter.any? {|f| match(to_absolute_typename(f).to_s, class_name.to_s) } && skips.none? {|f| match(f, class_name.to_s) }
-      if tester.checkers.none? {|hook| hook.klass == tp.self }
+      unless tester.targets.include?(tp.self)
         if env.class_decls.key?(class_name)
           logger.info "Setting up hooks for #{class_name}"
           tester.install!(tp.self, sample_size: sample_size)
@@ -67,8 +68,8 @@ end
 
 at_exit do
   if $!.nil? || $!.is_a?(SystemExit) && $!.success?
-    logger.warn "No type checker was installed! " if tester.checkers.empty?
+    if tester.targets.empty?
+      logger.warn "No type checker was installed!"
+    end
   end
 end
-
- 

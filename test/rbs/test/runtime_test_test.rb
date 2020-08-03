@@ -8,7 +8,12 @@ class RBS::Test::RuntimeTestTest < Minitest::Test
   include TestHelper
 
   def test_runtime_success
-    assert_test_success
+    output = assert_test_success()
+    assert_match "Setting up hooks for ::Hello", output
+    refute_match "No type checker was installed!", output
+  end
+
+  def test_runtime_test_with_sample_size
     assert_test_success(other_env: {"RBS_TEST_SAMPLE_SIZE" => '30'})
     assert_test_success(other_env: {"RBS_TEST_SAMPLE_SIZE" => '100'})
     assert_test_success(other_env: {"RBS_TEST_SAMPLE_SIZE" => 'ALL'})
@@ -69,13 +74,25 @@ RUBY
   end
 
   def assert_test_success(other_env: {})
-    result = run_runtime_test(other_env: other_env)
-    assert_operator result[1], :success?
+    err, status = run_runtime_test(other_env: other_env)
+    assert_operator status, :success?
+    err
   end
 
   def refute_test_success(other_env: {})
     err, status = run_runtime_test(other_env: other_env)
     refute_operator status, :success?
     err
+  end
+
+  def test_test_target
+    output = refute_test_success(other_env: { "RBS_TEST_TARGET" => nil })
+    assert_match "rbs/test/setup handles the following environment variables:", output
+  end
+
+  def test_no_test_install
+    output = assert_test_success(other_env: { "RBS_TEST_TARGET" => "NO_SUCH_CLASS" })
+    refute_match "Setting up hooks for ::Hello", output
+    assert_match "No type checker was installed!", output
   end
 end
