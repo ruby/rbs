@@ -2,11 +2,11 @@ module RBS
   module Test
     class Tester
       attr_reader :env
-      attr_reader :checkers
+      attr_reader :targets
 
       def initialize(env:)
         @env = env
-        @checkers = []
+        @targets = []
       end
 
       def factory
@@ -45,6 +45,8 @@ module RBS
             end
           end
         end
+
+        targets << klass
       end
 
       def new_key(type_name, prefix)
