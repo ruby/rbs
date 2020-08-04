@@ -51,8 +51,10 @@ end
 
 tester = RBS::Test::Tester.new(env: env)
 
+module_name = Module.instance_method(:name)
+
 TracePoint.trace :end do |tp|
-  class_name = tp.self.name&.yield_self {|name| to_absolute_typename name }
+  class_name = module_name.bind(tp.self).call&.yield_self {|name| to_absolute_typename name }
 
   if class_name
     if filter.any? {|f| match(to_absolute_typename(f).to_s, class_name.to_s) } && skips.none? {|f| match(f, class_name.to_s) }
