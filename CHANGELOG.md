@@ -2,6 +2,11 @@
 
 ## master
 
+## 0.9.1 (2020-08-04)
+
+* Ensure using Module#name [#354](https://github.com/ruby/rbs/pull/354)
+* Fix runtime test setup [#353](https://github.com/ruby/rbs/pull/353)
+
 ## 0.9.0 (2020-08-03)
 
 * Fix signature validation [#351](https://github.com/ruby/rbs/pull/351), [#352](https://github.com/ruby/rbs/pull/352)
