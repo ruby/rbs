@@ -81,13 +81,15 @@ module Zlib
   #     puts "Adler32 checksum: #{Zlib.adler32(data).to_s(16)}"
   #     #=> Adler32 checksum: 2820145
   #
-  def self.adler32: (*untyped) -> untyped
+  def self.adler32: () -> Integer
+                  | (String)  -> Integer
+                  | (String, Integer) -> Integer
 
   # Combine two Adler-32 check values in to one.  `alder1` is the first Adler-32
   # value, `adler2` is the second Adler-32 value.  `len2` is the length of the
   # string used to generate `adler2`.
   #
-  def self.adler32_combine: (untyped, untyped, untyped) -> untyped
+  def self.adler32_combine: (Integer, Integer, Integer) -> Integer
 
   # Calculates CRC checksum for `string`, and returns updated value of `crc`. If
   # `string` is omitted, it returns the CRC initial value. If `crc` is omitted, it
@@ -95,17 +97,19 @@ module Zlib
   #
   # FIXME: expression.
   #
-  def self.crc32: (*untyped) -> untyped
+  def self.crc32: () -> Integer
+                | (String) -> Integer
+                | (String, Integer) -> Integer
 
   # Combine two CRC-32 check values in to one.  `crc1` is the first CRC-32 value,
   # `crc2` is the second CRC-32 value.  `len2` is the length of the string used to
   # generate `crc2`.
   #
-  def self.crc32_combine: (untyped, untyped, untyped) -> untyped
+  def self.crc32_combine: (Integer, Integer, Integer) -> Integer
 
   # Returns the table for calculating CRC checksum as an array.
   #
-  def self.crc_table: () -> untyped
+  def self.crc_table: () -> Array[Integer]
 
   # Compresses the given `string`. Valid values of level are Zlib::NO_COMPRESSION,
   # Zlib::BEST_SPEED, Zlib::BEST_COMPRESSION, Zlib::DEFAULT_COMPRESSION, or an
@@ -122,8 +126,8 @@ module Zlib
   #
   # See also Zlib.inflate
   #
-  def self.deflate: (*untyped) -> untyped
-
+  def self.deflate: (String) -> String
+                  | (String, Integer) -> String
   # Decode the given gzipped `string`.
   #
   # This method is almost equivalent to the following code:
@@ -138,7 +142,7 @@ module Zlib
   #
   # See also Zlib.gzip
   #
-  def self.gunzip: (untyped) -> untyped
+  def self.gunzip: (String) -> String
 
   # Gzip the given `string`. Valid values of level are Zlib::NO_COMPRESSION,
   # Zlib::BEST_SPEED, Zlib::BEST_COMPRESSION, Zlib::DEFAULT_COMPRESSION (default),
@@ -157,8 +161,10 @@ module Zlib
   #
   # See also Zlib.gunzip
   #
-  def self.gzip: (*untyped) -> untyped
-
+  def self.gzip: (String) -> String
+               | (String, level: Integer) -> String
+               | (String, strategy: Integer) -> String
+               | (String, level: Integer, strategy: Integer) -> String
   # Decompresses `string`. Raises a Zlib::NeedDict exception if a preset
   # dictionary is needed for decompression.
   #
@@ -174,11 +180,11 @@ module Zlib
   #
   # See also Zlib.deflate
   #
-  def self.inflate: (untyped) -> untyped
+  def self.inflate: (String) -> String
 
   # Returns the string which represents the version of zlib library.
   #
-  def self.zlib_version: () -> untyped
+  def self.zlib_version: () -> String
 end
 
 # Represents text data as guessed by deflate.
