@@ -30,9 +30,9 @@ class RBS::Test::RuntimeTestTest < Minitest::Test
     assert_match(/E, .+ ERROR -- rbs: Sample size should be a positive integer: `.+`\n/, negative_err_msg)
   end
 
-  def run_runtime_test(other_env:)
+  def run_runtime_test(other_env:, rbs_content: nil, ruby_content: nil)
     SignatureManager.new(system_builtin: true) do |manager|
-      manager.files[Pathname("foo.rbs")] = <<EOF
+      manager.files[Pathname("foo.rbs")] = rbs_content || <<EOF
 class Hello
   attr_reader x: Integer
   attr_reader y: Integer
@@ -42,8 +42,9 @@ class Hello
   def move: (?x: Integer, ?y: Integer) -> void
 end
 EOF
+
       manager.build do |env, path|
-        (path + "sample.rb").write(<<RUBY)
+        (path + "sample.rb").write(ruby_content || <<RUBY)
 class Hello
   attr_reader :x, :y
 
@@ -73,14 +74,14 @@ RUBY
     end
   end
 
-  def assert_test_success(other_env: {})
-    err, status = run_runtime_test(other_env: other_env)
+  def assert_test_success(other_env: {}, rbs_content: nil, ruby_content: nil)
+    err, status = run_runtime_test(other_env: other_env, rbs_content: rbs_content, ruby_content: ruby_content)
     assert_operator status, :success?
     err
   end
 
-  def refute_test_success(other_env: {})
-    err, status = run_runtime_test(other_env: other_env)
+  def refute_test_success(other_env: {}, rbs_content: nil, ruby_content: nil)
+    err, status = run_runtime_test(other_env: other_env, rbs_content: rbs_content, ruby_content: ruby_content)
     refute_operator status, :success?
     err
   end
@@ -94,5 +95,15 @@ RUBY
     output = assert_test_success(other_env: { "RBS_TEST_TARGET" => "NO_SUCH_CLASS" })
     refute_match "Setting up hooks for ::Hello", output
     assert_match "No type checker was installed!", output
+  end
+
+  def test_name_override
+    output = assert_test_success(ruby_content: <<RUBY)
+class TestClass
+  def self.name
+    raise
+  end
+end
+RUBY
   end
 end
