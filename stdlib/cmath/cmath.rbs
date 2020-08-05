@@ -3,121 +3,42 @@ module CMath
 
   RealMath: untyped
 
-  #
-  # Math::E raised to the +z+ power
-  #
-  #   CMath.exp(1.i * Math::PI) #=> (-1.0+1.2246467991473532e-16i)
   def exp: (untyped z) -> untyped
 
-  #
-  # Returns the natural logarithm of Complex. If a second argument is given,
-  # it will be the base of logarithm.
-  #
-  #   CMath.log(1 + 4i)     #=> (1.416606672028108+1.3258176636680326i)
-  #   CMath.log(1 + 4i, 10) #=> (0.6152244606891369+0.5757952953408879i)
   def log: (untyped z, ?untyped b) -> untyped
 
-  #
-  # Returns the base 2 logarithm of +z+
-  #
-  #   CMath.log2(-1) => (0.0+4.532360141827194i)
   def log2: (untyped z) -> untyped
 
-  #
-  # Returns the base 10 logarithm of +z+
-  #
-  #   CMath.log10(-1) #=> (0.0+1.3643763538418412i)
   def log10: (untyped z) -> untyped
 
-  #
-  # Returns the non-negative square root of Complex.
-  #
-  #   CMath.sqrt(-1 + 0i) #=> 0.0+1.0i
   def sqrt: (untyped z) -> untyped
 
-  #
-  # Returns the principal value of the cube root of +z+
-  #
-  #   CMath.cbrt(1 + 4i) #=> (1.449461632813119+0.6858152562177092i)
   def cbrt: (untyped z) -> untyped
 
-  #
-  # Returns the sine of +z+, where +z+ is given in radians
-  #
-  #   CMath.sin(1 + 1i) #=> (1.2984575814159773+0.6349639147847361i)
   def sin: (untyped z) -> untyped
 
-  #
-  # Returns the cosine of +z+, where +z+ is given in radians
-  #
-  #   CMath.cos(1 + 1i) #=> (0.8337300251311491-0.9888977057628651i)
   def cos: (untyped z) -> untyped
 
-  #
-  # Returns the tangent of +z+, where +z+ is given in radians
-  #
-  #   CMath.tan(1 + 1i) #=> (0.27175258531951174+1.0839233273386943i)
   def tan: (untyped z) -> untyped
 
-  #
-  # Returns the hyperbolic sine of +z+, where +z+ is given in radians
-  #
-  #   CMath.sinh(1 + 1i) #=> (0.6349639147847361+1.2984575814159773i)
   def sinh: (untyped z) -> untyped
 
-  #
-  # Returns the hyperbolic cosine of +z+, where +z+ is given in radians
-  #
-  #   CMath.cosh(1 + 1i) #=> (0.8337300251311491+0.9888977057628651i)
   def cosh: (untyped z) -> untyped
 
-  #
-  # Returns the hyperbolic tangent of +z+, where +z+ is given in radians
-  #
-  #   CMath.tanh(1 + 1i) #=> (1.0839233273386943+0.27175258531951174i)
   def tanh: (untyped z) -> untyped
 
-  #
-  # Returns the arc sine of +z+
-  #
-  #   CMath.asin(1 + 1i) #=> (0.6662394324925153+1.0612750619050355i)
   def asin: (untyped z) -> untyped
 
-  #
-  # Returns the arc cosine of +z+
-  #
-  #   CMath.acos(1 + 1i) #=> (0.9045568943023813-1.0612750619050357i)
   def acos: (untyped z) -> untyped
 
-  #
-  # Returns the arc tangent of +z+
-  #
-  #   CMath.atan(1 + 1i) #=> (1.0172219678978514+0.4023594781085251i)
   def atan: (untyped z) -> untyped
 
-  #
-  # returns the arc tangent of +y+ divided by +x+ using the signs of +y+ and
-  # +x+ to determine the quadrant
-  #
-  #   CMath.atan2(1 + 1i, 0) #=> (1.5707963267948966+0.0i)
   def atan2: (untyped y, untyped x) -> untyped
 
-  #
-  # returns the inverse hyperbolic sine of +z+
-  #
-  #   CMath.asinh(1 + 1i) #=> (1.0612750619050357+0.6662394324925153i)
   def asinh: (untyped z) -> untyped
 
-  #
-  # returns the inverse hyperbolic cosine of +z+
-  #
-  #   CMath.acosh(1 + 1i) #=> (1.0612750619050357+0.9045568943023813i)
   def acosh: (untyped z) -> untyped
 
-  #
-  # returns the inverse hyperbolic tangent of +z+
-  #
-  #   CMath.atanh(1 + 1i) #=> (0.4023594781085251+1.0172219678978514i)
   def atanh: (untyped z) -> untyped
 
   def handle_no_method_error: () -> untyped
