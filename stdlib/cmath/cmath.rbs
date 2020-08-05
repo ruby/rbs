@@ -2,78 +2,16 @@ module CMath
   include Math
 
   #
-  # Math::E raised to the +z+ power
+  # Returns the arc cosine of +z+
   #
-  #   CMath.exp(1.i * Math::PI) #=> (-1.0+1.2246467991473532e-16i)
-  def exp: (Numeric z) -> Numeric
+  #   CMath.acos(1 + 1i) #=> (0.9045568943023813-1.0612750619050357i)
+  def acos: (Numeric z) -> Numeric
 
   #
-  # Returns the natural logarithm of Complex. If a second argument is given,
-  # it will be the base of logarithm.
+  # returns the inverse hyperbolic cosine of +z+
   #
-  #   CMath.log(1 + 4i)     #=> (1.416606672028108+1.3258176636680326i)
-  #   CMath.log(1 + 4i, 10) #=> (0.6152244606891369+0.5757952953408879i)
-  def log: (Numeric z, ?Numeric b) -> Numeric
-
-  #
-  # Returns the base 2 logarithm of +z+
-  #
-  #   CMath.log2(-1) => (0.0+4.532360141827194i)
-  def log2: (Numeric z) -> Numeric
-
-  #
-  # Returns the base 10 logarithm of +z+
-  #
-  #   CMath.log10(-1) #=> (0.0+1.3643763538418412i)
-  def log10: (Numeric z) -> Numeric
-
-  #
-  # Returns the non-negative square root of Complex.
-  #
-  #   CMath.sqrt(-1 + 0i) #=> 0.0+1.0i
-  def sqrt: (Numeric z) -> Numeric
-
-  #
-  # Returns the principal value of the cube root of +z+
-  #
-  #   CMath.cbrt(1 + 4i) #=> (1.449461632813119+0.6858152562177092i)
-  def cbrt: (Numeric z) -> Numeric
-
-  #
-  # Returns the sine of +z+, where +z+ is given in radians
-  #
-  #   CMath.sin(1 + 1i) #=> (1.2984575814159773+0.6349639147847361i)
-  def sin: (Numeric z) -> Numeric
-
-  #
-  # Returns the cosine of +z+, where +z+ is given in radians
-  #
-  #   CMath.cos(1 + 1i) #=> (0.8337300251311491-0.9888977057628651i)
-  def cos: (Numeric z) -> Numeric
-
-  #
-  # Returns the tangent of +z+, where +z+ is given in radians
-  #
-  #   CMath.tan(1 + 1i) #=> (0.27175258531951174+1.0839233273386943i)
-  def tan: (Numeric z) -> Numeric
-
-  #
-  # Returns the hyperbolic sine of +z+, where +z+ is given in radians
-  #
-  #   CMath.sinh(1 + 1i) #=> (0.6349639147847361+1.2984575814159773i)
-  def sinh: (Numeric z) -> Numeric
-
-  #
-  # Returns the hyperbolic cosine of +z+, where +z+ is given in radians
-  #
-  #   CMath.cosh(1 + 1i) #=> (0.8337300251311491+0.9888977057628651i)
-  def cosh: (Numeric z) -> Numeric
-
-  #
-  # Returns the hyperbolic tangent of +z+, where +z+ is given in radians
-  #
-  #   CMath.tanh(1 + 1i) #=> (1.0839233273386943+0.27175258531951174i)
-  def tanh: (Numeric z) -> Numeric
+  #   CMath.acosh(1 + 1i) #=> (1.0612750619050357+0.9045568943023813i)
+  def acosh: (Numeric z) -> Numeric
 
   #
   # Returns the arc sine of +z+
@@ -82,10 +20,10 @@ module CMath
   def asin: (Numeric z) -> Numeric
 
   #
-  # Returns the arc cosine of +z+
+  # returns the inverse hyperbolic sine of +z+
   #
-  #   CMath.acos(1 + 1i) #=> (0.9045568943023813-1.0612750619050357i)
-  def acos: (Numeric z) -> Numeric
+  #   CMath.asinh(1 + 1i) #=> (1.0612750619050357+0.6662394324925153i)
+  def asinh: (Numeric z) -> Numeric
 
   #
   # Returns the arc tangent of +z+
@@ -101,20 +39,82 @@ module CMath
   def atan2: (Numeric y, Numeric x) -> Numeric
 
   #
-  # returns the inverse hyperbolic sine of +z+
-  #
-  #   CMath.asinh(1 + 1i) #=> (1.0612750619050357+0.6662394324925153i)
-  def asinh: (Numeric z) -> Numeric
-
-  #
-  # returns the inverse hyperbolic cosine of +z+
-  #
-  #   CMath.acosh(1 + 1i) #=> (1.0612750619050357+0.9045568943023813i)
-  def acosh: (Numeric z) -> Numeric
-
-  #
   # returns the inverse hyperbolic tangent of +z+
   #
   #   CMath.atanh(1 + 1i) #=> (0.4023594781085251+1.0172219678978514i)
   def atanh: (Numeric z) -> Numeric
+
+  #
+  # Returns the principal value of the cube root of +z+
+  #
+  #   CMath.cbrt(1 + 4i) #=> (1.449461632813119+0.6858152562177092i)
+  def cbrt: (Numeric z) -> Numeric
+
+  #
+  # Returns the cosine of +z+, where +z+ is given in radians
+  #
+  #   CMath.cos(1 + 1i) #=> (0.8337300251311491-0.9888977057628651i)
+  def cos: (Numeric z) -> Numeric
+
+  #
+  # Returns the hyperbolic cosine of +z+, where +z+ is given in radians
+  #
+  #   CMath.cosh(1 + 1i) #=> (0.8337300251311491+0.9888977057628651i)
+  def cosh: (Numeric z) -> Numeric
+
+  #
+  # Math::E raised to the +z+ power
+  #
+  #   CMath.exp(1.i * Math::PI) #=> (-1.0+1.2246467991473532e-16i)
+  def exp: (Numeric z) -> Numeric
+
+  #
+  # Returns the natural logarithm of Complex. If a second argument is given,
+  # it will be the base of logarithm.
+  #
+  #   CMath.log(1 + 4i)     #=> (1.416606672028108+1.3258176636680326i)
+  #   CMath.log(1 + 4i, 10) #=> (0.6152244606891369+0.5757952953408879i)
+  def log: (Numeric z, ?Numeric b) -> Numeric
+
+  #
+  # Returns the base 10 logarithm of +z+
+  #
+  #   CMath.log10(-1) #=> (0.0+1.3643763538418412i)
+  def log10: (Numeric z) -> Numeric
+
+  #
+  # Returns the base 2 logarithm of +z+
+  #
+  #   CMath.log2(-1) => (0.0+4.532360141827194i)
+  def log2: (Numeric z) -> Numeric
+
+  #
+  # Returns the sine of +z+, where +z+ is given in radians
+  #
+  #   CMath.sin(1 + 1i) #=> (1.2984575814159773+0.6349639147847361i)
+  def sin: (Numeric z) -> Numeric
+
+  #
+  # Returns the hyperbolic sine of +z+, where +z+ is given in radians
+  #
+  #   CMath.sinh(1 + 1i) #=> (0.6349639147847361+1.2984575814159773i)
+  def sinh: (Numeric z) -> Numeric
+
+  #
+  # Returns the non-negative square root of Complex.
+  #
+  #   CMath.sqrt(-1 + 0i) #=> 0.0+1.0i
+  def sqrt: (Numeric z) -> Numeric
+
+  #
+  # Returns the tangent of +z+, where +z+ is given in radians
+  #
+  #   CMath.tan(1 + 1i) #=> (0.27175258531951174+1.0839233273386943i)
+  def tan: (Numeric z) -> Numeric
+
+  #
+  # Returns the hyperbolic tangent of +z+, where +z+ is given in radians
+  #
+  #   CMath.tanh(1 + 1i) #=> (1.0839233273386943+0.27175258531951174i)
+  def tanh: (Numeric z) -> Numeric
 end
