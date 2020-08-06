@@ -17,6 +17,22 @@ module RBS
         @builder ||= DefinitionBuilder.new(env: env)
       end
 
+      def skip_method?(type_name, method)
+        if method.implemented_in == type_name
+          if method.annotations.any? {|a| a.string == "rbs:test:skip" }
+            :skip
+          else
+            false
+          end
+        else
+          if method.annotations.any? {|a| a.string == "rbs:test:target" }
+            false
+          else
+            :implemented_in
+          end
+        end
+      end
+
       def install!(klass, sample_size:)
         RBS.logger.info { "Installing runtime type checker in #{klass}..." }
 
@@ -27,7 +43,11 @@ module RBS
           Observer.register(instance_key, MethodCallTester.new(klass, builder, definition, kind: :instance, sample_size: sample_size))
 
           definition.methods.each do |name, method|
-            if method.implemented_in == type_name
+            if reason = skip_method?(type_name, method)
+              unless reason == :implemented_in
+                RBS.logger.info { "Skipping ##{name} because of `#{reason}`..." }
+              end
+            else
               RBS.logger.info { "Setting up method hook in ##{name}..." }
               Hook.hook_instance_method klass, name, key: instance_key
             end
@@ -39,7 +59,11 @@ module RBS
           Observer.register(singleton_key, MethodCallTester.new(klass.singleton_class, builder, definition, kind: :singleton, sample_size: sample_size))
 
           definition.methods.each do |name, method|
-            if method.implemented_in == type_name || name == :new
+            if reason = skip_method?(type_name, method)
+              unless reason == :implemented_in
+                RBS.logger.info { "Skipping .#{name} because of `#{reason}`..." }
+              end
+            else
               RBS.logger.info { "Setting up method hook in .#{name}..." }
               Hook.hook_singleton_method klass, name, key: singleton_key
             end
