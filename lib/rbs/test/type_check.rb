@@ -179,8 +179,21 @@ module RBS
         end
       end
 
-      def sample(array)
-        sample_size && (array.size > sample_size) ? array.sample(sample_size) : array
+      def each_sample(array, &block)
+        if block
+          if sample_size && array.size > sample_size
+            if sample_size > 0
+              size = array.size
+              sample_size.times do
+                yield array[rand(size)]
+              end
+            end
+          else
+            array.each(&block)
+          end
+        else
+          enum_for :each_sample, array
+        end
       end
 
       def value(val, type)
@@ -207,14 +220,10 @@ module RBS
           klass = Object.const_get(type.name.to_s)
           case
           when klass == ::Array
-            Test.call(val, IS_AP, klass) && sample(val).yield_self do |val|
-              val.all? {|v| value(v, type.args[0]) }
-            end
+            Test.call(val, IS_AP, klass) && each_sample(val).all? {|v| value(v, type.args[0]) }
           when klass == ::Hash
-            Test.call(val, IS_AP, klass) && sample(val.keys).yield_self do |keys|
-              values = val.values_at(*keys)
-              keys.all? {|key| value(key, type.args[0]) } && values.all? {|v| value(v, type.args[1]) }
-            end 
+            Test.call(val, IS_AP, klass) && each_sample(val.keys).all? do |key|
+              value(key, type.args[0]) && value(val[key], type.args[1])
           when klass == ::Range
             Test.call(val, IS_AP, klass) && value(val.begin, type.args[0]) && value(val.end, type.args[0])
           when klass == ::Enumerator
@@ -235,7 +244,7 @@ module RBS
                 end
               end
 
-              sample(values).all? do |v|
+              each_sample(values).all? do |v|
                 if v.size == 1
                   # Only one block argument.
                   value(v[0], type.args[0]) || value(v, type.args[0])
