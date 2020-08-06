@@ -934,7 +934,8 @@ module RBS
                     implemented_in: nil
                   )
                 end,
-                accessibility: :public
+                accessibility: :public,
+                annotations: [AST::Annotation.new(location: nil, string: "rbs:test:target")]
               )
             end
           end

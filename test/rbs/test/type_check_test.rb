@@ -81,20 +81,10 @@ EOF
 
         typecheck = Test::TypeCheck.new(self_class: Integer, builder: builder, sample_size: 100)
 
-        # hash = Array.new(100) {|i| [i, i.to_s] }.to_h
-
         assert typecheck.value({}, parse_type("::Hash[::Integer, ::String]"))
         assert typecheck.value(Array.new(100) {|i| [i, i.to_s] }.to_h, parse_type("::Hash[::Integer, ::String]"))
         
         assert typecheck.value(Array.new(1000) {|i| [i, i.to_s] }.to_h, parse_type("::Hash[::Integer, ::String]"))
-        refute typecheck.value(
-          Array.new(99) {|i| [i, i.to_s] }.to_h.merge({ foo: 'bar', bar: 'baz', baz: 'foo' }),
-          parse_type("::Hash[::Integer, ::String]")
-        )
-        refute typecheck.value(
-          Array.new(99) {|i| [i, i.to_s] }.to_h.merge({ 1001 => :bar, 1002 => :baz, 1003 => :foo }),
-          parse_type("::Hash[::Integer, ::String]")
-        )
       end
     end
   end

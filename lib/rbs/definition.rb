@@ -50,11 +50,13 @@ module RBS
       attr_reader :super_method
       attr_reader :defs
       attr_reader :accessibility
+      attr_reader :extra_annotations
 
-      def initialize(super_method:, defs:, accessibility:)
+      def initialize(super_method:, defs:, accessibility:, annotations: [])
         @super_method = super_method
         @defs = defs
         @accessibility = accessibility
+        @extra_annotations = annotations
       end
 
       def defined_in
@@ -74,7 +76,7 @@ module RBS
       end
 
       def annotations
-        @annotations ||= defs.flat_map(&:annotations)
+        @annotations ||= @extra_annotations + defs.flat_map(&:annotations)
       end
 
       # @deprecated

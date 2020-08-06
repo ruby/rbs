@@ -7,6 +7,7 @@ module RBS
       OPERATORS = {
         :== => "eqeq",
         :=== => "eqeqeq",
+        :!= => "noteq",
         :+ => "plus",
         :- => "minus",
         :* => "star",

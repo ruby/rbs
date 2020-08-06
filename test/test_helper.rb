@@ -160,7 +160,7 @@ SIG
   def assert_sampling_check(builder, sample_size, array)
     checker = RBS::Test::TypeCheck.new(self_class: Integer, builder: builder, sample_size: sample_size)
     
-    sample = checker.sample(array)
+    sample = checker.each_sample(array).to_a
     
     assert_operator(sample.size, :<=, array.size)
     assert_operator(sample.size, :<=, sample_size) unless sample_size.nil?
