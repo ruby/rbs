@@ -58,11 +58,9 @@ TracePoint.trace :end do |tp|
 
   if class_name
     if filter.any? {|f| match(to_absolute_typename(f).to_s, class_name.to_s) } && skips.none? {|f| match(f, class_name.to_s) }
-      unless tester.targets.include?(tp.self)
-        if env.class_decls.key?(class_name)
-          logger.info "Setting up hooks for #{class_name}"
-          tester.install!(tp.self, sample_size: sample_size)
-        end
+      if env.class_decls.key?(class_name)
+        logger.info "Setting up hooks for #{class_name}"
+        tester.install!(tp.self, sample_size: sample_size)
       end
     end
   end
