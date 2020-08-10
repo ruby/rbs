@@ -139,7 +139,8 @@ end
   def test_overload
     assert_writer <<-SIG
 class Foo
-  overload def foo: (Integer) -> String
+  def foo: (Integer) -> String
+         | ...
 
   def foo: () -> String
 end
