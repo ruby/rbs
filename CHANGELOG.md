@@ -2,6 +2,14 @@
 
 ## master
 
+## 0.10.0 (2020-08-10)
+
+* Signature update for `Zlib`
+* Make "no type checker installed" message a debug print [#363](https://github.com/ruby/rbs/pull/363)
+* Print `...` for overloading method definitions [#362](https://github.com/ruby/rbs/pull/362)
+* Allow missing method implementation in Ruby code [#359](https://github.com/ruby/rbs/pull/359)
+* Runtime testing improvements [#356](https://github.com/ruby/rbs/pull/356)
+
 ## 0.9.1 (2020-08-04)
 
 * Ensure using Module#name [#354](https://github.com/ruby/rbs/pull/354)
