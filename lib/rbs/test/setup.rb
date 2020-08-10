@@ -69,7 +69,7 @@ end
 at_exit do
   if $!.nil? || $!.is_a?(SystemExit) && $!.success?
     if tester.targets.empty?
-      logger.warn "No type checker was installed!"
+      logger.debug { "No type checker was installed!" }
     end
   end
 end
