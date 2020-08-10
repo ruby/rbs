@@ -251,8 +251,7 @@ module RBS
       string = ""
 
       attrs = member.attributes.empty? ? "" : member.attributes.join(" ") + " "
-      overload = member.overload? ? "overload " : ""
-      prefix = "#{overload}#{attrs}def #{name}:"
+      prefix = "#{attrs}def #{name}:"
       padding = " " * (prefix.size-1)
 
       string << prefix
@@ -264,6 +263,12 @@ module RBS
         end
 
         string << " #{type}\n"
+      end
+
+      if member.overload
+        string << padding
+        string << "|"
+        string << " ...\n"
       end
 
       string.each_line do |line|
