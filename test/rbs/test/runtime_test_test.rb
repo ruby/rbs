@@ -76,13 +76,13 @@ RUBY
 
   def assert_test_success(other_env: {}, rbs_content: nil, ruby_content: nil)
     err, status = run_runtime_test(other_env: other_env, rbs_content: rbs_content, ruby_content: ruby_content)
-    assert_operator status, :success?
+    assert_predicate status, :success?, err
     err
   end
 
   def refute_test_success(other_env: {}, rbs_content: nil, ruby_content: nil)
     err, status = run_runtime_test(other_env: other_env, rbs_content: rbs_content, ruby_content: ruby_content)
-    refute_operator status, :success?
+    refute_predicate status, :success?, err
     err
   end
 
@@ -105,5 +105,25 @@ class TestClass
   end
 end
 RUBY
+  end
+
+  def test_open_decls
+    output = refute_test_success(ruby_content: <<RUBY, rbs_content: <<RBS)
+class Hello
+end
+
+class Hello
+  def world
+  end
+end
+
+Hello.new.world(3)
+RUBY
+class Hello
+  def world: () -> void
+end
+RBS
+
+    assert_match /TypeError: \[Hello#world\]/, output
   end
 end

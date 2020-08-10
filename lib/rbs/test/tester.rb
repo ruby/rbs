@@ -3,10 +3,14 @@ module RBS
     class Tester
       attr_reader :env
       attr_reader :targets
+      attr_reader :instance_testers
+      attr_reader :singleton_testers
 
       def initialize(env:)
         @env = env
         @targets = []
+        @instance_testers = {}
+        @singleton_testers = {}
       end
 
       def factory
@@ -40,7 +44,11 @@ module RBS
 
         builder.build_instance(type_name).tap do |definition|
           instance_key = new_key(type_name, "InstanceChecker")
-          Observer.register(instance_key, MethodCallTester.new(klass, builder, definition, kind: :instance, sample_size: sample_size))
+          tester, set = instance_testers[klass] ||= [
+            MethodCallTester.new(klass, builder, definition, kind: :instance, sample_size: sample_size),
+            Set[]
+          ]
+          Observer.register(instance_key, tester)
 
           definition.methods.each do |name, method|
             if reason = skip_method?(type_name, method)
@@ -48,15 +56,22 @@ module RBS
                 RBS.logger.info { "Skipping ##{name} because of `#{reason}`..." }
               end
             else
-              RBS.logger.info { "Setting up method hook in ##{name}..." }
-              Hook.hook_instance_method klass, name, key: instance_key
+              if klass.instance_methods(false).include?(name) && !set.include?(name)
+                RBS.logger.info { "Setting up method hook in ##{name}..." }
+                Hook.hook_instance_method klass, name, key: instance_key
+                set << name
+              end
             end
           end
         end
 
         builder.build_singleton(type_name).tap do |definition|
           singleton_key = new_key(type_name, "SingletonChecker")
-          Observer.register(singleton_key, MethodCallTester.new(klass.singleton_class, builder, definition, kind: :singleton, sample_size: sample_size))
+          tester, set = singleton_testers[klass] ||= [
+            MethodCallTester.new(klass.singleton_class, builder, definition, kind: :singleton, sample_size: sample_size),
+            Set[]
+          ]
+          Observer.register(singleton_key, tester)
 
           definition.methods.each do |name, method|
             if reason = skip_method?(type_name, method)
@@ -64,8 +79,11 @@ module RBS
                 RBS.logger.info { "Skipping .#{name} because of `#{reason}`..." }
               end
             else
-              RBS.logger.info { "Setting up method hook in .#{name}..." }
-              Hook.hook_singleton_method klass, name, key: singleton_key
+              if klass.methods(false).include?(name) && !set.include?(name)
+                RBS.logger.info { "Setting up method hook in .#{name}..." }
+                Hook.hook_singleton_method klass, name, key: singleton_key
+                set << name
+              end
             end
           end
         end
