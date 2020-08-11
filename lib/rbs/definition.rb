@@ -45,6 +45,15 @@ module RBS
         def update(type: self.type, member: self.member, defined_in: self.defined_in, implemented_in: self.implemented_in)
           TypeDef.new(type: type, member: member, defined_in: defined_in, implemented_in: implemented_in)
         end
+
+        def overload?
+          case member
+          when AST::Members::MethodDefinition
+            member.overload?
+          else
+            false
+          end
+        end
       end
 
       attr_reader :super_method
@@ -77,6 +86,10 @@ module RBS
 
       def annotations
         @annotations ||= @extra_annotations + defs.flat_map(&:annotations)
+      end
+
+      def members
+        @members ||= defs.map(&:member).uniq
       end
 
       # @deprecated
