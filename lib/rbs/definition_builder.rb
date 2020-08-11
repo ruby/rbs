@@ -569,7 +569,7 @@ module RBS
             member, visibility = array[0]
             result[method_name] = [visibility, nil, member]
 
-          when array.count {|pair| !pair[0].overload? } == 1
+          else
             visibilities = array.group_by {|pair| pair[1] }
 
             if visibilities.size > 1
@@ -583,14 +583,6 @@ module RBS
 
             overloads, primary = array.map(&:first).partition(&:overload?)
             result[method_name] = [array[0][1], nil, *primary, *overloads]
-
-          else
-            raise InvalidOverloadMethodError.new(
-              type_name: type_name,
-              method_name: method_name,
-              kind: :instance,
-              members: array.map(&:first)
-            )
           end
         end
       end
@@ -973,8 +965,15 @@ module RBS
                   Substitution.build([], [])
                 end
 
+          kind = case ancestor
+                 when Definition::Ancestor::Instance
+                   :instance
+                 when Definition::Ancestor::Singleton
+                   :singleton
+                 end
+
           current_definition.methods.each do |name, method|
-            merge_method definition.methods, name, method, sub
+            merge_method type_name, definition.methods, name, method, sub, kind: kind
           end
 
           current_definition.instance_variables.each do |name, variable|
@@ -998,13 +997,20 @@ module RBS
       )
     end
 
-    def merge_method(methods, name, method, sub)
+    def merge_method(type_name, methods, name, method, sub, kind:)
       super_method = methods[name]
+
+      defs = if method.defs.all? {|d| d.overload? }
+               raise InvalidOverloadMethodError.new(type_name: type_name, method_name: name, kind: kind, members: method.members) unless super_method
+               method.defs + super_method.defs
+             else
+               method.defs
+             end
 
       methods[name] = Definition::Method.new(
         super_method: super_method,
         accessibility: method.accessibility,
-        defs: sub.mapping.empty? ? method.defs : method.defs.map {|defn| defn.update(type: defn.type.sub(sub)) }
+        defs: sub.mapping.empty? ? defs : defs.map {|defn| defn.update(type: defn.type.sub(sub)) }
       )
     end
 

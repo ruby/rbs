@@ -499,14 +499,8 @@ EOF
         end
 
         env.class_decls[type_name("::InvalidOverloadError")].tap do |entry|
-          error = assert_raises RBS::InvalidOverloadMethodError do
-            builder.method_definition_members(type_name("::InvalidOverloadError"), entry, kind: :instance)
-          end
-
-          assert_equal type_name("::InvalidOverloadError"), error.type_name
-          assert_equal :foo, error.method_name
-          assert_equal :instance, error.kind
-          assert_equal 1, error.members.size
+          # Only overloading `...` method definitions (without non-overloading) is allowed
+          builder.method_definition_members(type_name("::InvalidOverloadError"), entry, kind: :instance)
         end
 
         env.class_decls[type_name("::UsingTestInterface")].tap do |entry|
@@ -1528,6 +1522,45 @@ type Hello::world = 30
 
         assert_raises RBS::NoTypeFoundError do
           builder.expand_alias(type_name("::Hello::world"))
+        end
+      end
+    end
+  end
+
+  def test_definition_method_type_def_overload_from_super
+    SignatureManager.new do |manager|
+      manager.files.merge!(Pathname("foo.rbs") => <<-EOF)
+class World
+  def foo: () -> String
+end
+
+class Hello < World
+  def foo: (Integer) -> String | ...
+end
+      EOF
+      manager.build do |env|
+        builder = DefinitionBuilder.new(env: env)
+
+        builder.build_instance(type_name("::Hello")).tap do |definition|
+          foo = definition.methods[:foo]
+          assert_equal ["(::Integer) -> ::String", "() -> ::String"], foo.method_types.map(&:to_s)
+        end
+      end
+    end
+  end
+
+  def test_definition_method_type_def_overload_from_super_no_super
+    SignatureManager.new do |manager|
+      manager.files.merge!(Pathname("foo.rbs") => <<-EOF)
+class Hello
+  def foo: (Integer) -> String | ...
+end
+      EOF
+      manager.build do |env|
+        builder = DefinitionBuilder.new(env: env)
+
+        assert_raises RBS::InvalidOverloadMethodError do
+          builder.build_instance(type_name("::Hello"))
         end
       end
     end
