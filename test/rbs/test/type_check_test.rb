@@ -177,6 +177,43 @@ EOF
     end
   end
 
+  def test_type_check_record
+    SignatureManager.new do |manager|
+      manager.files[Pathname("foo.rbs")] = <<EOF
+type outer_record_type = {
+  inner_record: {
+    innermost_record: {
+      string: String
+    }
+  }
+}
+EOF
+      manager.build do |env|
+        builder = DefinitionBuilder.new(env: env)
+
+        typecheck = Test::TypeCheck.new(self_class: Integer, builder: builder, sample_size: 100)
+
+        assert typecheck.value({foo: 'foo', bar: 0, baz: :baz }, parse_type("{:foo => String, :bar => Integer, :baz => Symbol}"))
+        assert typecheck.value({foo: 'foo', bar: 0, baz: :baz }, parse_type("{foo: String, bar: Integer, baz: Symbol}"))
+        refute typecheck.value({}, parse_type("{:foo => String, :bar => Integer, :baz => Symbol}"))
+
+
+        assert typecheck.value({}, parse_type("{foo: String?, bar: Integer?, baz: Symbol?}"))
+        assert typecheck.value({}, parse_type("{:foo => String?, :bar => Integer?, :baz => Symbol?}"))
+        assert typecheck.value({foo: 'foo', bar: 0}, parse_type("{foo: String?, bar: Integer?, baz: Symbol?}"))
+        assert typecheck.value({foo: 'foo', bar: 0 }, parse_type("{:foo => String?, :bar => Integer?, :baz => Symbol?}"))
+
+        outer_record = {
+          inner_record: {
+            innermost_record: {string: "string"}
+          }
+        }
+
+        assert typecheck.value(outer_record, parse_type('::outer_record_type'))
+      end
+    end
+  end
+
   def test_typecheck_args
     SignatureManager.new do |manager|
       manager.files[Pathname("foo.rbs")] = <<EOF
