@@ -1,135 +1,161 @@
 require_relative "test_helper"
+require "date"
 
 class DateSingletonTest < Minitest::Test
   include TypeAssertions
 
-  # library "pathname", "set", "securerandom"     # Declare library signatures to load
+  library "date"
   testing "singleton(::Date)"
-
 
   def test_new
     assert_send_type  "(?::Integer year, ?::Integer month, ?::Integer mday, ?::Integer start) -> ::Date",
                       Date, :new
+    assert_send_type  "(?::Integer year, ?::Integer month, ?::Integer mday, ?::Integer start) -> ::Date",
+                      Date, :new, 2020
+    assert_send_type  "(?::Integer year, ?::Integer month, ?::Integer mday, ?::Integer start) -> ::Date",
+                      Date, :new, 2020, 8
+    assert_send_type  "(?::Integer year, ?::Integer month, ?::Integer mday, ?::Integer start) -> ::Date",
+                      Date, :new, 2020, 8, 15
   end
 
   def test__httpdate
-    assert_send_type  "(::String str) -> ::Hash",
-                      Date, :_httpdate
+    assert_send_type  "(::String str) -> ::Hash[Symbol, Integer]",
+                      Date, :_httpdate, "Sat Aug 15 00:00:00 2020"
   end
 
   def test__iso8601
-    assert_send_type  "(::String str) -> ::Hash",
-                      Date, :_iso8601
+    assert_send_type  "(::String str) -> ::Hash[Symbol, Integer]",
+                      Date, :_iso8601, "2020-08-15"
   end
 
   def test__jisx0301
-    assert_send_type  "(::String str) -> ::Hash",
-                      Date, :_jisx0301
+    assert_send_type  "(::String str) -> ::Hash[Symbol, Integer]",
+                      Date, :_jisx0301, "2020-08-15"
   end
 
   def test__parse
-    assert_send_type  "(::String str, ?bool complete) -> ::Hash",
-                      Date, :_parse
+    assert_send_type  "(::String str, ?bool complete) -> ::Hash[Symbol, Integer]",
+                      Date, :_parse, "2020-08-15"
+    assert_send_type  "(::String str, ?bool complete) -> ::Hash[Symbol, Integer]",
+                      Date, :_parse, "2020-08-15", true
   end
 
   def test__rfc2822
-    assert_send_type  "(::String str) -> ::Hash",
-                      Date, :_rfc2822
+    assert_send_type  "(::String str) -> ::Hash[Symbol, Integer | String]",
+                      Date, :_rfc2822, "Sat Aug 15 2020 00:00:00 +09:00"
   end
 
   def test__rfc3339
-    assert_send_type  "(::String str) -> ::Hash",
-                      Date, :_rfc3339
+    assert_send_type  "(::String str) -> ::Hash[Symbol, Integer | String]",
+                      Date, :_rfc3339, "2020-08-15T00:00:00+09:00"
   end
 
   def test__rfc822
-    assert_send_type  "(::String str) -> ::Hash",
-                      Date, :_rfc822
+    assert_send_type  "(::String str) -> ::Hash[Symbol, Integer | String]",
+                      Date, :_rfc822, "Sat Aug 15 2020 00:00:00 +09:00"
   end
 
   def test__strptime
-    assert_send_type  "(::String str, ?::String format) -> ::Hash",
-                      Date, :_strptime
+    assert_send_type  "(::String str, ?::String format) -> ::Hash[Symbol, Integer]",
+                      Date, :_strptime, "2020-08-15"
   end
 
   def test__xmlschema
-    assert_send_type  "(::String str) -> ::Hash",
-                      Date, :_xmlschema
+    assert_send_type  "(::String str) -> ::Hash[Symbol, Integer]",
+                      Date, :_xmlschema, "2020-08-15"
   end
 
   def test_civil
     assert_send_type  "(?::Integer year, ?::Integer month, ?::Integer mday, ?::Integer start) -> ::Date",
                       Date, :civil
+    assert_send_type  "(?::Integer year, ?::Integer month, ?::Integer mday, ?::Integer start) -> ::Date",
+                      Date, :civil, 2020
+    assert_send_type  "(?::Integer year, ?::Integer month, ?::Integer mday, ?::Integer start) -> ::Date",
+                      Date, :civil, 2020, 8
+    assert_send_type  "(?::Integer year, ?::Integer month, ?::Integer mday, ?::Integer start) -> ::Date",
+                      Date, :civil, 2020, 8, 15
   end
 
   def test_commercial
-    assert_send_type  "(?::Integer cwyear, ?::Integer cweek, ?::Integer cwday, ?::Integer start) -> ::Date",
+    assert_send_type  "(?::Integer year, ?::Integer month, ?::Integer mday, ?::Integer start) -> ::Date",
                       Date, :commercial
+    assert_send_type  "(?::Integer year, ?::Integer month, ?::Integer mday, ?::Integer start) -> ::Date",
+                      Date, :commercial, 2020
+    assert_send_type  "(?::Integer year, ?::Integer month, ?::Integer mday, ?::Integer start) -> ::Date",
+                      Date, :commercial, 2020, 1
+    assert_send_type  "(?::Integer year, ?::Integer month, ?::Integer mday, ?::Integer start) -> ::Date",
+                      Date, :commercial, 2020, 1, 1
   end
 
   def test_gregorian_leap?
     assert_send_type  "(::Integer year) -> bool",
-                      Date, :gregorian_leap?
+                      Date, :gregorian_leap?, 2020
   end
 
   def test_httpdate
     assert_send_type  "(::String str, ?::Integer start) -> ::Date",
-                      Date, :httpdate
+                      Date, :httpdate, "Sat Aug 15 00:00:00 2020"
   end
 
   def test_iso8601
     assert_send_type  "(::String str, ?::Integer start) -> ::Date",
-                      Date, :iso8601
+                      Date, :iso8601, "2020-08-15"
   end
 
   def test_jd
     assert_send_type  "(::Integer jd, ?::Integer start) -> ::Date",
-                      Date, :jd
+                      Date, :jd, 2020
   end
 
   def test_jisx0301
     assert_send_type  "(::String str, ?::Integer start) -> ::Date",
-                      Date, :jisx0301
+                      Date, :jisx0301, "2020-08-15"
   end
 
   def test_julian_leap?
     assert_send_type  "(::Integer year) -> bool",
-                      Date, :julian_leap?
+                      Date, :julian_leap?, 2020
   end
 
   def test_leap?
     assert_send_type  "(::Integer year) -> bool",
-                      Date, :leap?
+                      Date, :leap?, 2020
   end
 
   def test_ordinal
     assert_send_type  "(?::Integer year, ?::Integer yday, ?::Integer start) -> ::Date",
                       Date, :ordinal
+    assert_send_type  "(?::Integer year, ?::Integer yday, ?::Integer start) -> ::Date",
+                      Date, :ordinal, 2020
+    assert_send_type  "(?::Integer year, ?::Integer yday, ?::Integer start) -> ::Date",
+                      Date, :ordinal, 2020, 1
   end
 
   def test_parse
     assert_send_type  "(::String str, ?bool complete, ?::Integer start) -> ::Date",
-                      Date, :parse
+                      Date, :parse, "2020-08-15"
+    assert_send_type  "(::String str, ?bool complete, ?::Integer start) -> ::Date",
+                      Date, :parse, "2020-08-15", true
   end
 
   def test_rfc2822
     assert_send_type  "(::String str, ?::Integer start) -> ::Date",
-                      Date, :rfc2822
+                      Date, :rfc2822, "Sat, 15 Aug 2020 00:00:00 +0900"
   end
 
   def test_rfc3339
     assert_send_type  "(::String str, ?::Integer start) -> ::Date",
-                      Date, :rfc3339
+                      Date, :rfc3339, "2020-08-15T00:00:00+09:00"
   end
 
   def test_rfc822
     assert_send_type  "(::String str, ?::Integer start) -> ::Date",
-                      Date, :rfc822
+                      Date, :rfc822, "Sat, 15 Aug 2020 00:00:00 +0900"
   end
 
   def test_strptime
     assert_send_type  "(::String str, ?::String format, ?::Integer start) -> ::Date",
-                      Date, :strptime
+                      Date, :strptime, "2020-08-15"
   end
 
   def test_today
@@ -139,85 +165,79 @@ class DateSingletonTest < Minitest::Test
 
   def test_valid_civil?
     assert_send_type  "(::Integer year, ::Integer month, ::Integer mday, ?::Integer start) -> bool",
-                      Date, :valid_civil?
+                      Date, :valid_civil?, 2020, 8, 15
   end
 
   def test_valid_commercial?
     assert_send_type  "(::Integer cwyear, ::Integer cweek, ::Integer cwday, ?::Integer start) -> bool",
-                      Date, :valid_commercial?
+                      Date, :valid_commercial?, 2020, 1, 1
   end
 
   def test_valid_date?
     assert_send_type  "(::Integer year, ::Integer month, ::Integer mday, ?::Integer start) -> bool",
-                      Date, :valid_date?
+                      Date, :valid_date?, 2020, 8, 15
   end
 
   def test_valid_jd?
     assert_send_type  "(::Integer jd, ?::Integer start) -> bool",
-                      Date, :valid_jd?
+                      Date, :valid_jd?, 2020
   end
 
   def test_valid_ordinal?
     assert_send_type  "(::Integer year, ::Integer yday, ?::Integer start) -> bool",
-                      Date, :valid_ordinal?
+                      Date, :valid_ordinal?, 2020, 1
   end
 
   def test_xmlschema
     assert_send_type  "(::String str, ?::Integer start) -> ::Date",
-                      Date, :xmlschema
+                      Date, :xmlschema, "2020-08-15"
   end
 end
 
 class DateTest < Minitest::Test
   include TypeAssertions
 
-  # library "pathname", "set", "securerandom"     # Declare library signatures to load
+  library "date"
   testing "::Date"
-
-
-  def test_initialize
-    assert_send_type  "(*untyped) -> untyped",
-                      Date.new, :initialize
-  end
 
   def test_spaceship
     assert_send_type  "(::Date | ::Rational | ::Object other) -> ::Integer?",
-                      Date.new, :<=>
+                      Date.new, :<=>, Date.new(2020, 8, 15)
+    assert_send_type  "(::Date | ::Rational | ::Object other) -> ::Integer?",
+                      Date.new, :<=>, Rational(1, 2)
+    assert_send_type  "(::Date | ::Rational | ::Object other) -> ::Integer?",
+                      Date.new, :<=>, {}
   end
 
   def test_triple_equal
     assert_send_type  "(::Date other) -> bool",
-                      Date.new, :===
-  end
-
-  def test_inspect
-    assert_send_type  "() -> ::String",
-                      Date.new, :inspect
-  end
-
-  def test_to_s
-    assert_send_type  "() -> ::String",
-                      Date.new, :to_s
+                      Date.new, :===, Date.new
   end
 
   def test_plus
-    assert_send_type  "(::Integer | ::Date | ::Rational arg0) -> ::Date",
-                      Date.new, :+
+    assert_send_type  "(::Integer | ::Date | ::Rational other) -> ::Date",
+                      Date.new, :+, 1
+    assert_send_type  "(::Integer | ::Date | ::Rational other) -> ::Date",
+                      Date.new, :+, Rational(1, 2)
   end
 
   def test_minus
-    assert_send_type  "(::Integer | ::Date | ::Rational arg0) -> ::Date",
-                      Date.new, :-
+    assert_send_type  "(::Integer | ::Rational other) -> ::Date",
+                      Date.new, :-, 1
+    assert_send_type  "(::Integer | ::Rational other) -> ::Date",
+                      Date.new, :-, Rational(1, 2)
+    assert_send_type  "(::Date other) -> ::Rational",
+                      Date.new, :-, Date.new
   end
 
   def test_left_shift
     assert_send_type  "(::Integer month) -> ::Date",
-                      Date.new, :<<
+                      Date.new, :<<, 1
   end
 
   def test_right_shift
     assert_send_type  "(::Integer month) -> ::Date",
-                      Date.new, :>>
+                      Date.new, :>>, 1
   end
 
   def test_ajd
@@ -260,16 +280,11 @@ class DateTest < Minitest::Test
                       Date.new, :day
   end
 
-  def test_day_fraction
-    assert_send_type  "() -> ::Rational",
-                      Date.new, :day_fraction
-  end
-
   def test_downto
-    assert_send_type  "(::Date min) { (::Date) -> untyped } -> nil",
-                      Date.new, :downto
-    assert_send_type  "(::Date min) -> ::Enumerator[::Date, nil]",
-                      Date.new, :downto
+    assert_send_type  "(::Date min) { (::Date) -> untyped } -> ::Date",
+                      Date.new, :downto, Date.new do end
+    assert_send_type  "(::Date min) -> ::Enumerator[::Date, ::Date]",
+                      Date.new, :downto, Date.new
   end
 
   def test_england
@@ -295,6 +310,11 @@ class DateTest < Minitest::Test
   def test_httpdate
     assert_send_type  "() -> ::String",
                       Date.new, :httpdate
+  end
+
+  def test_inspect
+    assert_send_type  "() -> ::String",
+                      Date.new, :inspect
   end
 
   def test_iso8601
@@ -375,31 +395,43 @@ class DateTest < Minitest::Test
   def test_next_day
     assert_send_type  "(?::Integer day) -> ::Date",
                       Date.new, :next_day
+    assert_send_type  "(?::Integer day) -> ::Date",
+                      Date.new, :next_day, 1
   end
 
   def test_next_month
     assert_send_type  "(?::Integer month) -> ::Date",
                       Date.new, :next_month
+    assert_send_type  "(?::Integer month) -> ::Date",
+                      Date.new, :next_month, 1
   end
 
   def test_next_year
     assert_send_type  "(?::Integer year) -> ::Date",
                       Date.new, :next_year
+    assert_send_type  "(?::Integer year) -> ::Date",
+                      Date.new, :next_year, 1
   end
 
   def test_prev_day
     assert_send_type  "(?::Integer day) -> ::Date",
                       Date.new, :prev_day
+    assert_send_type  "(?::Integer day) -> ::Date",
+                      Date.new, :prev_day, 1
   end
 
   def test_prev_month
     assert_send_type  "(?::Integer month) -> ::Date",
                       Date.new, :prev_month
+    assert_send_type  "(?::Integer month) -> ::Date",
+                      Date.new, :prev_month, 1
   end
 
   def test_prev_year
     assert_send_type  "(?::Integer year) -> ::Date",
                       Date.new, :prev_year
+    assert_send_type  "(?::Integer year) -> ::Date",
+                      Date.new, :prev_year, 1
   end
 
   def test_rfc2822
@@ -423,20 +455,22 @@ class DateTest < Minitest::Test
   end
 
   def test_start
-    assert_send_type  "() -> ::Integer",
+    assert_send_type  "() -> ::Float",
                       Date.new, :start
   end
 
   def test_step
-    assert_send_type  "(::Date limit, ?::Integer step) { (::Date) -> untyped } -> nil",
-                      Date.new, :step
-    assert_send_type  "(::Date limit, ?::Integer step) -> ::Enumerator[::Date, nil]",
-                      Date.new, :step
+    assert_send_type  "(::Date limit, ?::Integer step) { (::Date) -> untyped } -> Date",
+                      Date.new, :step, Date.new do end
+    assert_send_type  "(::Date limit, ?::Integer step) -> ::Enumerator[::Date, ::Date]",
+                      Date.new, :step, Date.new
   end
 
   def test_strftime
     assert_send_type  "(?::String format) -> ::String",
                       Date.new, :strftime
+    assert_send_type  "(?::String format) -> ::String",
+                      Date.new, :strftime, "%Y-%M"
   end
 
   def test_succ
@@ -464,6 +498,11 @@ class DateTest < Minitest::Test
                       Date.new, :to_datetime
   end
 
+  def test_to_s
+    assert_send_type  "() -> ::String",
+                      Date.new, :to_s
+  end
+
   def test_to_time
     assert_send_type  "() -> ::Time",
                       Date.new, :to_time
@@ -475,10 +514,10 @@ class DateTest < Minitest::Test
   end
 
   def test_upto
-    assert_send_type  "(::Date max) { (::Date) -> untypd } -> nil",
-                      Date.new, :upto
-    assert_send_type  "(::Date max) -> ::Enumerator[::Date, nil]",
-                      Date.new, :upto
+    assert_send_type  "(::Date max) { (::Date) -> untyped } -> Date",
+                      Date.new, :upto, Date.new do end
+    assert_send_type  "(::Date max) -> ::Enumerator[::Date, ::Date]",
+                      Date.new, :upto, Date.new
   end
 
   def test_wday

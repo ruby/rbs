@@ -447,7 +447,7 @@ class Date
   #     DateTime.jd(0,12) + DateTime.new(2001,2,3).ajd
   #                               #=> #<DateTime: 2001-02-03T00:00:00+00:00 ...>
   #
-  def +: (Integer | Date | Rational other) -> Date
+  def +: (Integer | Rational other) -> Date
 
   # Returns the difference between the two dates if the other is a date object. 
   # If the other is a numeric value, returns a date object pointing `other` days
@@ -462,7 +462,8 @@ class Date
   #     DateTime.new(2001,2,3) - DateTime.new(2001,2,2,12)
   #                              #=> (1/2)
   #
-  def -: (Integer | Date | Rational other) ->Date
+  def -: (Integer | Rational other) -> Date
+       | (Date other) -> Rational
 
   # Returns a date object pointing `n` months before self. The argument `n` should
   # be a numeric value.
@@ -589,16 +590,10 @@ class Date
   #
   def day: () -> Integer
 
-  # Returns the fractional part of the day.
-  #
-  #     DateTime.new(2001,2,3,12).day_fraction    #=> (1/2)
-  #
-  def day_fraction: () -> Rational
-
   # This method is equivalent to step(min, -1){|date| ...}.
   #
-  def downto: (Date min) { (Date) -> untyped } -> nil
-            | (Date min) -> Enumerator[Date, nil]
+  def downto: (Date min) { (Date) -> untyped } -> Date
+            | (Date min) -> Enumerator[Date, Date]
 
   # This method is equivalent to new_start(Date::ENGLAND).
   #
@@ -774,7 +769,7 @@ class Date
   #     Date.new(2001,2,3).start                  #=> 2299161.0
   #     Date.new(2001,2,3,Date::GREGORIAN).start  #=> -Infinity
   #
-  def start: () -> Integer
+  def start: () -> Float
 
   # Iterates evaluation of the given block, which takes a date object. The limit
   # should be a date object.
@@ -782,8 +777,8 @@ class Date
   #     Date.new(2001).step(Date.new(2001,-1,-1)).select{|d| d.sunday?}.size
   #                               #=> 52
   #
-  def step: (Date limit, ?Integer step) { (Date) -> untyped } -> nil
-          | (Date limit, ?Integer step) -> ::Enumerator[Date, nil]
+  def step: (Date limit, ?Integer step) { (Date) -> untyped } -> Date
+          | (Date limit, ?Integer step) -> ::Enumerator[Date, Date]
 
   # Formats date according to the directives in the given format string. The
   # directives begin with a percent (%) character. Any text not listed as a
@@ -992,8 +987,8 @@ class Date
 
   # This method is equivalent to step(max, 1){|date| ...}.
   #
-  def upto: (Date max) { (Date) -> untyped } -> nil
-          | (Date max) -> ::Enumerator[Date, nil]
+  def upto: (Date max) { (Date) -> untyped } -> Date
+          | (Date max) -> ::Enumerator[Date, Date]
 
   # Returns the day of week (0-6, Sunday is zero).
   #
