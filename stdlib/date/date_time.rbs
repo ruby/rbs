@@ -145,7 +145,7 @@ class DateTime < Date
   #
   # See also strptime(3) and #strftime.
   #
-  def self._strptime: (String str, ?String format) -> Hash
+  def self._strptime: (String str, ?String format) -> Hash[Symbol, Integer | String]
 
   # Creates a DateTime object denoting the given calendar date.
   #

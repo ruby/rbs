@@ -161,15 +161,15 @@ class Date
 
   # Returns a hash of parsed elements.
   #
-  def self._httpdate: (String str) -> Hash
+  def self._httpdate: (String str) -> Hash[Symbol, Integer]
 
   # Returns a hash of parsed elements.
   #
-  def self._iso8601: (String str) -> Hash
+  def self._iso8601: (String str) -> Hash[Symbol, Integer]
 
   # Returns a hash of parsed elements.
   #
-  def self._jisx0301: (String str) -> Hash
+  def self._jisx0301: (String str) -> Hash[Symbol, Integer]
 
   # Parses the given representation of date and time, and returns a hash of parsed
   # elements.  This method does not function as a validator.
@@ -179,19 +179,19 @@ class Date
   #
   #     Date._parse('2001-02-03') #=> {:year=>2001, :mon=>2, :mday=>3}
   #
-  def self._parse: (String str, ?bool complete) -> Hash
+  def self._parse: (String str, ?bool complete) -> Hash[Symbol, Integer]
 
   # Returns a hash of parsed elements.
   #
-  def self._rfc2822: (String str) -> Hash
+  def self._rfc2822: (String str) -> Hash[Symbol, Integer | String]
 
   # Returns a hash of parsed elements.
   #
-  def self._rfc3339: (String str) -> Hash
+  def self._rfc3339: (String str) -> Hash[Symbol, Integer | String]
 
   # Returns a hash of parsed elements.
   #
-  def self._rfc822: (String str) -> Hash
+  def self._rfc822: (String str) -> Hash[Symbol, Integer | String]
 
   # Parses the given representation of date and time with the given template, and
   # returns a hash of parsed elements.  _strptime does not support specification
@@ -202,11 +202,11 @@ class Date
   #
   # See also strptime(3) and #strftime.
   #
-  def self._strptime: (String str, ?String format) -> Hash
+  def self._strptime: (String str, ?String format) -> Hash[Symbol, Integer]
 
   # Returns a hash of parsed elements.
   #
-  def self._xmlschema: (String str) -> Hash
+  def self._xmlschema: (String str) -> Hash[Symbol, Integer]
 
   # Creates a date object denoting the given calendar date.
   #
@@ -992,7 +992,7 @@ class Date
 
   # This method is equivalent to step(max, 1){|date| ...}.
   #
-  def upto: (Date max) { (Date) -> untypd } -> nil
+  def upto: (Date max) { (Date) -> untyped } -> nil
           | (Date max) -> ::Enumerator[Date, nil]
 
   # Returns the day of week (0-6, Sunday is zero).
