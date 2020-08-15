@@ -136,7 +136,27 @@
 class Date
   include Comparable
 
-  def initialize: (*untyped) -> untyped
+  # Creates a date object denoting the given calendar date.
+  #
+  # In this class, BCE years are counted astronomically.  Thus, the year before
+  # the year 1 is the year zero, and the year preceding the year zero is the year
+  # -1.  The month and the day of month should be a negative or a positive number
+  # (as a relative month/day from the end of year/month when negative).  They
+  # should not be zero.
+  #
+  # The last argument should be a Julian day number which denotes the day of
+  # calendar reform.  Date::ITALY (2299161=1582-10-15), Date::ENGLAND
+  # (2361222=1752-09-14), Date::GREGORIAN (the proleptic Gregorian calendar) and
+  # Date::JULIAN (the proleptic Julian calendar) can be specified as a day of
+  # calendar reform.
+  #
+  #     Date.new(2001)            #=> #<Date: 2001-01-01 ...>
+  #     Date.new(2001,2,3)        #=> #<Date: 2001-02-03 ...>
+  #     Date.new(2001,2,-1)       #=> #<Date: 2001-02-28 ...>
+  #
+  # See also ::jd.
+  #
+  def self.new: (?Integer year, ?Integer month, ?Integer mday, ?Integer start) -> Date
 
   # Returns a hash of parsed elements.
   #
@@ -953,7 +973,7 @@ class Date
 
   # Returns a DateTime object which denotes self.
   #
-  def to_datetime: () -> untyped
+  def to_datetime: () -> DateTime
 
   # Returns a string in an ISO 8601 format. (This method doesn't use the expanded
   # representations.)

@@ -7,6 +7,11 @@ class DateSingletonTest < Minitest::Test
   testing "singleton(::Date)"
 
 
+  def test_new
+    assert_send_type  "(?::Integer year, ?::Integer month, ?::Integer mday, ?::Integer start) -> ::Date",
+                      Date, :new
+  end
+
   def test__httpdate
     assert_send_type  "(::String str) -> ::Hash",
                       Date, :_httpdate
