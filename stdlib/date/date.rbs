@@ -447,7 +447,7 @@ class Date
   #     DateTime.jd(0,12) + DateTime.new(2001,2,3).ajd
   #                               #=> #<DateTime: 2001-02-03T00:00:00+00:00 ...>
   #
-  def +: (Integer | Date | Rational arg0) -> Date
+  def +: (Integer | Date | Rational other) -> Date
 
   # Returns the difference between the two dates if the other is a date object. 
   # If the other is a numeric value, returns a date object pointing `other` days
@@ -462,7 +462,7 @@ class Date
   #     DateTime.new(2001,2,3) - DateTime.new(2001,2,2,12)
   #                              #=> (1/2)
   #
-  def -: (Integer | Date | Rational arg0) ->Date
+  def -: (Integer | Date | Rational other) ->Date
 
   # Returns a date object pointing `n` months before self. The argument `n` should
   # be a numeric value.
@@ -781,10 +781,6 @@ class Date
   #
   #     Date.new(2001).step(Date.new(2001,-1,-1)).select{|d| d.sunday?}.size
   #                               #=> 52
-  #
-  # # arglists 💪👽🚨 << Delete this section
-  #     d.step(limit[, step=1])              ->  enumerator
-  #     d.step(limit[, step=1]){|date| ...}  ->  self
   #
   def step: (Date limit, ?Integer step) { (Date) -> untyped } -> nil
           | (Date limit, ?Integer step) -> ::Enumerator[Date, nil]
