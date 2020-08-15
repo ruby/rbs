@@ -134,8 +134,6 @@
 #     d.strftime('%a %d %b %Y')    #=> "Sun 04 Feb 2001"
 #
 class Date
-  include Comparable
-
   # Creates a date object denoting the given calendar date.
   #
   # In this class, BCE years are counted astronomically.  Thus, the year before
@@ -157,6 +155,9 @@ class Date
   # See also ::jd.
   #
   def self.new: (?Integer year, ?Integer month, ?Integer mday, ?Integer start) -> Date
+  def initialize: (?Integer year, ?Integer month, ?Integer mday, ?Integer start) -> Date
+
+  include Comparable
 
   # Returns a hash of parsed elements.
   #
@@ -431,6 +432,8 @@ class Date
   #     Date.xmlschema('2001-02-03')      #=> #<Date: 2001-02-03 ...>
   #
   def self.xmlschema: (String str, ?Integer start) -> Date
+
+  public
 
   # Returns a date object pointing `other` days after self.  The other should be a
   # numeric value.  If the other is a fractional number, assumes its precision is

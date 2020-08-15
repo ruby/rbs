@@ -128,8 +128,6 @@
 # eventually timezones.
 #
 class DateTime < Date
-  public
-
   # Creates a DateTime object denoting the given calendar date.
   #
   #     DateTime.new(2001,2,3)    #=> #<DateTime: 2001-02-03T00:00:00+00:00 ...>
@@ -139,6 +137,7 @@ class DateTime < Date
   #                               #=> #<DateTime: 2001-02-03T04:05:06+07:00 ...>
   #
   def self.new: (?Integer year, ?Integer month, ?Integer mday, ?Integer hour, ?Integer minute, ?Integer second, ?Integer offset, ?Integer start) -> DateTime
+  def initialize: (?Integer year, ?Integer month, ?Integer mday, ?Integer hour, ?Integer minute, ?Integer second, ?Integer offset, ?Integer start) -> DateTime
 
   # Parses the given representation of date and time with the given template, and
   # returns a hash of parsed elements.  _strptime does not support specification
@@ -296,6 +295,8 @@ class DateTime < Date
   #                               #=> #<DateTime: 2001-02-03T04:05:06+07:00 ...>
   #
   def self.xmlschema: (String str, ?Integer start) -> DateTime
+
+  public
 
   # Returns the hour (0-23).
   #
