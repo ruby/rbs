@@ -295,7 +295,8 @@ module RBS
           Test.call(val, IS_AP, ::Array) &&
             type.types.map.with_index {|ty, index| value(val[index], ty) }.all?
         when Types::Record
-          Test::call(val, IS_AP, ::Hash)
+          Test::call(val, IS_AP, ::Hash) && 
+            type.fields.map {|key, type| value(val[key], type) }.all?
         when Types::Proc
           Test::call(val, IS_AP, ::Proc)
         else
