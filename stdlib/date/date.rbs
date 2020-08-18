@@ -154,8 +154,7 @@ class Date
   #
   # See also ::jd.
   #
-  def self.new: (?Integer year, ?Integer month, ?Integer mday, ?Integer start) -> Date
-  def initialize: (?Integer year, ?Integer month, ?Integer mday, ?Integer start) -> Date
+  def initialize: (?Integer year, ?Integer month, ?Integer mday, ?Integer start) -> void
 
   include Comparable
 

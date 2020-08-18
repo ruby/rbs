@@ -136,8 +136,7 @@ class DateTime < Date
   #     DateTime.new(2001,-11,-26,-20,-55,-54,'+7')
   #                               #=> #<DateTime: 2001-02-03T04:05:06+07:00 ...>
   #
-  def self.new: (?Integer year, ?Integer month, ?Integer mday, ?Integer hour, ?Integer minute, ?Integer second, ?Integer offset, ?Integer start) -> DateTime
-  def initialize: (?Integer year, ?Integer month, ?Integer mday, ?Integer hour, ?Integer minute, ?Integer second, ?Integer offset, ?Integer start) -> DateTime
+  def initialize: (?Integer year, ?Integer month, ?Integer mday, ?Integer hour, ?Integer minute, ?Integer second, ?Integer offset, ?Integer start) -> void
 
   # Parses the given representation of date and time with the given template, and
   # returns a hash of parsed elements.  _strptime does not support specification
