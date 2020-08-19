@@ -212,7 +212,7 @@ _method-type_ ::= `(` _parameters_ `) ->` _type_                                
 
 _parameters_ ::= _required-positionals_ _optional-positionals_ _rest-positional_ _trailing-positionals_ _keywords_
 
-_paramater_ ::= _type_ _var-name_                                  # Parameter with var name
+_parameter_ ::= _type_ _var-name_                                  # Parameter with var name
               | _type_                                             # Parameter without var name
 _required-positionals_ ::= _parameter_ `,` ...
 _optional-positionals_ ::= `?` _parameter_ `,` ...
