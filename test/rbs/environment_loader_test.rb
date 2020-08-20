@@ -114,4 +114,50 @@ DUMMY: String
       assert_equal gem_root + "racc", racc_path.path
     end
   end
+
+  def test_load_twice
+    env = Environment.new
+
+    with_signatures do |path|
+      EnvironmentLoader.new().tap do |loader|
+        loadeds = loader.load(env: env)
+
+        loadeds.each do |(decl, file_path, lib_path)|
+          assert_operator decl, :is_a?, Declarations::Base
+          assert_instance_of Pathname, file_path
+          assert_equal :stdlib, lib_path
+        end
+      end
+
+      assert env.declarations.any? {|decl| decl.is_a?(Declarations::Class) && decl.name.name == :BasicObject }
+
+      EnvironmentLoader.new().no_builtin!.tap do |loader|
+        loader.add(library: "pathname")
+        loadeds = loader.load(env: env)
+
+        assert env.declarations.any? {|decl| decl.is_a?(Declarations::Class) && decl.name.name == :Pathname }
+
+        loadeds.each do |(decl, file_path, lib_path)|
+          assert_operator decl, :is_a?, Declarations::Base
+          assert_instance_of Pathname, file_path
+          assert_instance_of EnvironmentLoader::LibraryPath, lib_path
+          assert_equal 'pathname', lib_path.name
+        end
+      end
+
+      EnvironmentLoader.new.no_builtin!.tap do |loader|
+        loader.add(path: path)
+        loadeds = loader.load(env: env)
+
+        assert env.declarations.any? {|decl| decl.is_a?(Declarations::Class) && decl.name.name == :PeopleController }
+
+        loadeds.each do |(decl, file_path, lib_path)|
+          assert_operator decl, :is_a?, Declarations::Base
+          assert_instance_of Pathname, file_path
+          assert_instance_of Pathname, lib_path
+          assert_equal path, lib_path
+        end
+      end
+    end
+  end
 end
