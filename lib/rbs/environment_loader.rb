@@ -105,31 +105,42 @@ module RBS
       end
     end
 
-    def no_builtin!
-      @no_builtin = true
+    def no_builtin!(skip = true)
+      @no_builtin = skip
+      self
     end
 
     def no_builtin?
       @no_builtin
     end
 
-    def load(env:)
-      signature_files = []
+    def each_decl
+      if block_given?
+        signature_files = []
 
-      unless no_builtin?
-        signature_files.push(*each_signature(stdlib_root + "builtin"))
-      end
-
-      each_signature do |path|
-        signature_files.push path
-      end
-
-      signature_files.each do |file|
-        buffer = Buffer.new(name: file.to_s, content: file.read)
-        env.buffers.push(buffer)
-        Parser.parse_signature(buffer).each do |decl|
-          env << decl
+        unless no_builtin?
+          signature_files.push(*each_signature(stdlib_root + "builtin"))
         end
+
+        each_signature do |path|
+          signature_files.push path
+        end
+
+        signature_files.each do |file|
+          buffer = Buffer.new(name: file.to_s, content: file.read)
+          env.buffers.push(buffer)
+          Parser.parse_signature(buffer).each do |decl|
+            yield decl, path
+          end
+        end
+      else
+        enum_for :each_decl
+      end
+    end
+
+    def load(env:)
+      each_decl do |decl|
+        env << decl
       end
     end
   end
