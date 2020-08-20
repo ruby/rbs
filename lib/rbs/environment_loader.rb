@@ -75,29 +75,16 @@ module RBS
       self.class.gem_sig_path(name, version)
     end
 
-    def each_signature(path = nil, immediate: true, &block)
+    def each_signature(path, immediate: true, &block)
       if block_given?
-        if path
-          case
-          when path.file?
-            if path.extname == ".rbs" || immediate
-              yield path
-            end
-          when path.directory?
-            path.children.each do |child|
-              each_signature child, immediate: false, &block
-            end
+        case
+        when path.file?
+          if path.extname == ".rbs" || immediate
+            yield path
           end
-        else
-          paths.each do |path|
-            case path
-            when Pathname
-              each_signature path, immediate: immediate, &block
-            when LibraryPath
-              each_signature path.path, immediate: immediate, &block
-            when GemPath
-              each_signature path.path, immediate: immediate, &block
-            end
+        when path.directory?
+          path.children.each do |child|
+            each_signature child, immediate: false, &block
           end
         end
       else
@@ -105,32 +92,65 @@ module RBS
       end
     end
 
-    def no_builtin!
-      @no_builtin = true
+    def each_library_path
+      paths.each do |path|
+        case path
+        when Pathname
+          yield path, path
+        when LibraryPath
+          yield path, path.path
+        when GemPath
+          yield path, path.path
+        end
+      end
+    end
+
+    def no_builtin!(skip = true)
+      @no_builtin = skip
+      self
     end
 
     def no_builtin?
       @no_builtin
     end
 
-    def load(env:)
-      signature_files = []
+    def each_decl
+      if block_given?
+        signature_files = []
 
-      unless no_builtin?
-        signature_files.push(*each_signature(stdlib_root + "builtin"))
-      end
-
-      each_signature do |path|
-        signature_files.push path
-      end
-
-      signature_files.each do |file|
-        buffer = Buffer.new(name: file.to_s, content: file.read)
-        env.buffers.push(buffer)
-        Parser.parse_signature(buffer).each do |decl|
-          env << decl
+        unless no_builtin?
+          each_signature(stdlib_root + "builtin") do |path|
+            signature_files << [:stdlib, path]
+          end
         end
+
+        each_library_path do |library_path, pathname|
+          each_signature(pathname) do |path|
+            signature_files << [library_path, path]
+          end
+        end
+
+        signature_files.each do |lib_path, file_path|
+          buffer = Buffer.new(name: file_path.to_s, content: file_path.read)
+          Parser.parse_signature(buffer).each do |decl|
+            yield decl, buffer, file_path, lib_path
+          end
+        end
+      else
+        enum_for :each_decl
       end
+    end
+
+    def load(env:)
+      loadeds = []
+
+      each_decl do |decl, buffer, file_path, lib_path|
+        env.buffers.push(buffer)
+        env << decl
+        loadeds << [decl, file_path, lib_path]
+      end
+
+      loadeds
     end
   end
 end
