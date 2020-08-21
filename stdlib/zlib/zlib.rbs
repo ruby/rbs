@@ -82,7 +82,7 @@ module Zlib
   #     #=> Adler32 checksum: 2820145
   #
   def self.adler32: () -> Integer
-                  | (String)  -> Integer
+                  | (String) -> Integer
                   | (String, Integer) -> Integer
 
   # Combine two Adler-32 check values in to one.  `alder1` is the first Adler-32
