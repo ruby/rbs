@@ -67,6 +67,6 @@ class Fiber < Object
   def resume: (*untyped args) -> untyped
 
   def raise: () -> untyped
-           | (string message) -> untyped
-           | (_Exception exception, ?string message, ?Array[String] backtrace) -> untyped
+           | (String message) -> untyped
+           | (_Exception exception, ?String message, ?Array[String] backtrace) -> untyped
 end
