@@ -760,6 +760,7 @@ Examples:
     def run_test(args, options)
       targets = []
       sample_size = nil
+      double_suite = nil
 
       (opts = OptionParser.new do |opts|
         opts.banner = <<EOB
@@ -787,13 +788,13 @@ EOB
         exit 1
       end
 
-      env_hash = {
-        'RBS_TEST_OPT' => test_opt(options),
-        'RBS_TEST_TARGET' => (targets.join(',') unless targets.empty?),
-        'RBS_TEST_SAMPLE_SIZE' => sample_size,
-        'RBS_TEST_LOGLEVEL' => RBS.logger_level,
-        'RUBYOPT' => "#{ENV['RUBYOPT']} -rrbs/test/setup"
-      }
+    env_hash = {
+      'RBS_TEST_OPT' => test_opt(options),
+      'RBS_TEST_TARGET' => (targets_string unless targets_string.empty?),
+      'RBS_TEST_SAMPLE_SIZE' => sample_size,
+      'RBS_TEST_LOGLEVEL' => RBS.logger_level
+      'RUBYOPT' => "#{ENV['RUBYOPT']} -rrbs/test/setup"
+    }
 
       system(env_hash, *args)
       $?

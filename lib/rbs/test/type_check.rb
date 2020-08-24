@@ -4,15 +4,17 @@ module RBS
       attr_reader :self_class
       attr_reader :builder
       attr_reader :sample_size
+      attr_reader :double_suite
 
       attr_reader :const_cache
 
       DEFAULT_SAMPLE_SIZE = 100
 
-      def initialize(self_class:, builder:, sample_size:)
+      def initialize(self_class:, builder:, sample_size:, double_suite:)
         @self_class = self_class
         @builder = builder
         @sample_size = sample_size
+        @double_suite = double_suite
         @const_cache = {}
       end
 
@@ -203,7 +205,16 @@ module RBS
         const_cache[type_name] ||= Object.const_get(type_name.to_s)
       end
 
+      def is_double?(value)
+        double_suite && Test.call(value, IS_AP, Object.const_get(double_suite))
+      end
+
       def value(val, type)
+        if is_double?(val)
+          RBS.logger.info("A double (#{val.inspect}) is detected!")
+          return true 
+        end
+
         case type
         when Types::Bases::Any
           true
