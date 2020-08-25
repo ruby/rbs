@@ -529,3 +529,16 @@ You can declare a global variable.
 $LOAD_PATH: Array[String]
 ```
 
+### Comments
+
+You can write single line comments. Comments must be on their own line. Comments can lead with whitespace.
+
+```
+# This if interface Foo
+# Usage of Foo is bar
+interface _Foo
+  # New foo is a method
+  # it will return foo.
+  def new: () -> Foo
+end
+```
