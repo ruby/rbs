@@ -24,7 +24,7 @@ EOF
         builder = RBS::DefinitionBuilder.new(env: env)
         definition = builder.build_instance(type_name("::Hello"))
 
-        checker = RBS::Test::Tester::MethodCallTester.new(Object, builder, definition, kind: :instance, sample_size: 100, double_suite: nil)
+        checker = RBS::Test::Tester::MethodCallTester.new(Object, builder, definition, kind: :instance, sample_size: 100, unchecked_classes: [])
 
         # No type error detected
         checker.call(

@@ -13,8 +13,8 @@ begin
   skips = (ENV['RBS_TEST_SKIP'] || '').split(',').map! { |e| e.strip }
   RBS.logger_level = (ENV["RBS_TEST_LOGLEVEL"] || "info")
   sample_size = get_sample_size(ENV['RBS_TEST_SAMPLE_SIZE'] || '')
-  double_class = ENV['RBS_TEST_DOUBLE_CLASS'] || to_double_class(ENV['RBS_TEST_DOUBLE_SUITE'])
-
+  double_class = to_double_class(ENV['RBS_TEST_DOUBLE_SUITE'])
+  unchecked_classes = (ENV['RBS_TEST_UNCHECKED_CLASSES'] || '').split(',').map! { |unchecked_class| unchecked_class.strip }.push(*double_class)
 rescue InvalidSampleSizeError => exception
   RBS.logger.error exception.message
   exit 1
@@ -27,8 +27,8 @@ if filter.empty?
   STDERR.puts "  [OPTIONAL] RBS_TEST_OPT: options for signatures (`-r` for libraries or `-I` for signatures)"
   STDERR.puts "  [OPTIONAL] RBS_TEST_LOGLEVEL: one of debug|info|warn|error|fatal (defaults to info)"
   STDERR.puts "  [OPTIONAL] RBS_TEST_SAMPLE_SIZE: sets the amount of values in a collection to be type-checked (Set to `ALL` to type check all the values)"
-  STDERR.puts "  [OPTIONAL] RBS_TEST_DOUBLE_SUITE: sets the double suite in use (currently supported"
-  STDERR.puts "  [OPTIONAL] RBS_TEST_DOUBLE_CLASS: sets the double suite in use"
+  STDERR.puts "  [OPTIONAL] RBS_TEST_DOUBLE_SUITE: sets the double suite in use (currently supported: minitest | rspec)"
+  STDERR.puts "  [OPTIONAL] RBS_TEST_UNCHECKED_CLASSES: sets the classes that would not be checked"
   exit 1
 end
 
@@ -64,7 +64,7 @@ TracePoint.trace :end do |tp|
     if filter.any? {|f| match(to_absolute_typename(f).to_s, class_name.to_s) } && skips.none? {|f| match(f, class_name.to_s) }
       if env.class_decls.key?(class_name)
         logger.info "Setting up hooks for #{class_name}"
-        tester.install!(tp.self, sample_size: sample_size, double_suite: double_class)
+        tester.install!(tp.self, sample_size: sample_size, unchecked_classes: unchecked_classes)
       end
     end
   end

@@ -4,17 +4,17 @@ module RBS
       attr_reader :self_class
       attr_reader :builder
       attr_reader :sample_size
-      attr_reader :double_suite
+      attr_reader :unchecked_classes
 
       attr_reader :const_cache
 
       DEFAULT_SAMPLE_SIZE = 100
 
-      def initialize(self_class:, builder:, sample_size:, double_suite:)
+      def initialize(self_class:, builder:, sample_size:, unchecked_classes:)
         @self_class = self_class
         @builder = builder
         @sample_size = sample_size
-        @double_suite = double_suite
+        @unchecked_classes = unchecked_classes.uniq
         @const_cache = {}
       end
 
@@ -206,7 +206,7 @@ module RBS
       end
 
       def is_double?(value)
-        double_suite && Test.call(value, IS_AP, Object.const_get(double_suite))
+        unchecked_classes.any? { |unchecked_class| Test.call(value, IS_AP, Object.const_get(unchecked_class))}
       end
 
       def value(val, type)

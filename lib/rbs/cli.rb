@@ -758,6 +758,7 @@ Examples:
     end
 
     def run_test(args, options)
+      unchecked_classes = []
       targets = []
       sample_size = nil
       double_suite = nil
@@ -781,6 +782,15 @@ EOB
         opts.on("--sample-size SAMPLE_SIZE", "Sets the sample size") do |size|
           sample_size = size
         end
+
+        opts.on("--unchecked-class UNCHECKED_CLASS", "Sets the class that would not be checked") do |unchecked_class|
+          unchecked_classes << unchecked_class
+        end
+
+        opts.on("--double-suite DOUBLE_SUITE", "Sets the double suite in use (currently supported: rspec | minitest)") do |suite|
+          double_suite = suite
+        end
+
       end).order!(args)
 
       if args.length.zero?
@@ -788,13 +798,15 @@ EOB
         exit 1
       end
 
-    env_hash = {
-      'RBS_TEST_OPT' => test_opt(options),
-      'RBS_TEST_TARGET' => (targets_string unless targets_string.empty?),
-      'RBS_TEST_SAMPLE_SIZE' => sample_size,
-      'RBS_TEST_LOGLEVEL' => RBS.logger_level
-      'RUBYOPT' => "#{ENV['RUBYOPT']} -rrbs/test/setup"
-    }
+      env_hash = {
+        'RUBYOPT' => "#{ENV['RUBYOPT']} -rrbs/test/setup",
+        'RBS_TEST_OPT' => test_opt(options),
+        'RBS_TEST_LOGLEVEL' => RBS.logger_level,
+        'RBS_TEST_SAMPLE_SIZE' => sample_size,
+        'RBS_TEST_DOUBLE_SUITE' => double_suite,
+        'RBS_TEST_UNCHECKED_CLASSES' => (unchecked_classes.join(',') unless unchecked_classes.empty?),
+        'RBS_TEST_TARGET' => (targets.join(',') unless targets.empty?)
+      }
 
       system(env_hash, *args)
       $?
