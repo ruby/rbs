@@ -1,6 +1,5 @@
 require "test_helper"
 require "stringio"
-
 require "rbs/cli"
 
 class RBS::CliTest < Minitest::Test
@@ -265,5 +264,39 @@ singleton(::BasicObject)
         assert_equal "Not supported on this interpreter (ruby).\n", stdout.string.lines[1]
       end
     end
+  end
+
+  def test_test
+    Dir.mktmpdir do |dir|
+      dir = Pathname(dir)
+      dir.join('foo.rbs').write(<<~RBS)
+        class Foo
+          def foo: () -> void
+        end
+        
+        module Bar
+          class Baz
+            def foo: () -> void
+          end
+        end
+      RBS
+
+      with_cli do |cli|
+        assert_raises(SystemExit) { cli.run(%w(test)) }
+        assert_raises(SystemExit) { cli.run(%W(-I #{dir} test)) }
+        assert_raises(SystemExit) { cli.run(%W(-I #{dir} test --target ::Foo)) }
+
+        assert_rbs_test_no_errors(cli, dir, %w(--target ::Foo ls))
+        assert_rbs_test_no_errors(cli, dir, %w(--target ::Bar ruby -v))
+        assert_rbs_test_no_errors(cli, dir, %w(--target Bar::Baz rbs version))
+        assert_rbs_test_no_errors(cli, dir, %w(--target ::Bar::Baz rake stdlib_test))
+        assert_rbs_test_no_errors(cli, dir, %w(--target ::Foo --target Bar::* rbs test --target ::Bar::Baz rbs version))
+      end
+    end
+  end
+
+  def assert_rbs_test_no_errors cli, dir, arg_array
+    args = ['-I', dir.to_s, 'test', *arg_array] 
+    assert_instance_of Process::Status, cli.run(args)
   end
 end
