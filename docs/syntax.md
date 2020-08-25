@@ -316,6 +316,7 @@ You can write `self.` or `self?.` before the name of the method to specify the k
 def to_s: () -> String                        # Defines a instance method
 def self.new: () -> AnObject                  # Defines singleton method
 def self?.sqrt: (Numeric) -> Numeric          # self? is for `module_function`s
+incompatible def to_s: () -> String           # Defines a method incompatbile with super. More here https://github.com/ruby/rbs/pull/10
 ```
 
 The method type can be connected with `|`s to define an overloaded method.
