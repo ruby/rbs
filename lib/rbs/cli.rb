@@ -1,4 +1,5 @@
 require "optparse"
+require "shellwords"
 
 module RBS
   class CLI
@@ -36,7 +37,7 @@ module RBS
       @stderr = stderr
     end
 
-    COMMANDS = [:ast, :list, :ancestors, :methods, :method, :validate, :constant, :paths, :prototype, :vendor, :parse]
+    COMMANDS = [:ast, :list, :ancestors, :methods, :method, :validate, :constant, :paths, :prototype, :vendor, :parse, :test]
 
     def library_parse(opts, options:)
       opts.on("-r LIBRARY", "Load RBS files of the library") do |lib|
@@ -749,6 +750,53 @@ Examples:
         last = namespace.path.last
         TypeName.new(name: last, namespace: namespace.parent)
       end
+    end
+
+    def test_opt options
+      opt_string = options.dirs.map { |dir| "-I #{Shellwords.escape(dir)}"}.concat(options.libs.map { |lib| "-r#{Shellwords.escape(lib)}"}).join(' ')
+      opt_string.empty? ? nil : opt_string
+    end
+
+    def run_test(args, options)
+      targets = []
+      sample_size = nil
+
+      (opts = OptionParser.new do |opts|
+        opts.banner = <<EOB
+Usage: rbs [rbs options...] test [test options...] COMMAND
+
+Examples:
+
+  $ rbs test rake test
+  $ rbs --log-level=debug test --target SomeModule::* rspec
+  $ rbs test --target SomeModule::* --target AnotherModule::* --target SomeClass rake test
+
+Options:
+EOB
+        opts.on("--target TARGET", "Sets the runtime test target") do |target|
+          targets << target
+        end
+
+        opts.on("--sample-size SAMPLE_SIZE", "Sets the sample size") do |size|
+          sample_size = size
+        end
+      end).order!(args)
+
+      if args.length.zero?
+        stdout.puts opts.help
+        exit 1
+      end
+
+      env_hash = {
+        'RBS_TEST_OPT' => test_opt(options),
+        'RBS_TEST_TARGET' => (targets.join(',') unless targets.empty?),
+        'RBS_TEST_SAMPLE_SIZE' => sample_size,
+        'RBS_TEST_LOGLEVEL' => RBS.logger_level,
+        'RUBYOPT' => "#{ENV['RUBYOPT']} -rrbs/test/setup"
+      }
+
+      system(env_hash, *args)
+      $?
     end
   end
 end
