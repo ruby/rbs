@@ -154,7 +154,6 @@ module RBS
                 location: nil,
                 comment: method.comments[0],
                 annotations: method.annotations,
-                attributes: method.attributes,
                 overload: false
               )
               return
@@ -193,7 +192,6 @@ module RBS
                 location: nil,
                 comment: nil,
                 annotations: [],
-                attributes: [],
                 overload: false
               )
             end
@@ -227,7 +225,6 @@ module RBS
                   location: nil,
                   comment: nil,
                   annotations: [],
-                  attributes: [],
                   overload: false
                 )
               end
@@ -262,7 +259,6 @@ module RBS
                   location: nil,
                   comment: nil,
                   annotations: [],
-                  attributes: [],
                   overload: false
                 )
               end

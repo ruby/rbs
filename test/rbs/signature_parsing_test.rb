@@ -446,6 +446,7 @@ end
   end
 
   def test_incompatible_method_definition
+    # `incompatible` is ignored with warning message.
     Parser.parse_signature(<<~SIG).yield_self do |decls|
       class Foo
         incompatible def foo: () -> Integer
@@ -457,9 +458,6 @@ end
         assert_instance_of Declarations::Class, decl
 
         assert_instance_of Members::MethodDefinition, decl.members[0]
-        decl.members[0].yield_self do |m|
-          assert_equal [:incompatible], m.attributes
-        end
       end
     end
   end

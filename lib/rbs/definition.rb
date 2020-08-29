@@ -92,11 +92,6 @@ module RBS
         @members ||= defs.map(&:member).uniq
       end
 
-      # @deprecated
-      def attributes
-        []
-      end
-
       def public?
         @accessibility == :public
       end

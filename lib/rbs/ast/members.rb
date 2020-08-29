@@ -11,17 +11,15 @@ module RBS
         attr_reader :annotations
         attr_reader :location
         attr_reader :comment
-        attr_reader :attributes
         attr_reader :overload
 
-        def initialize(name:, kind:, types:, annotations:, location:, comment:, attributes:, overload:)
+        def initialize(name:, kind:, types:, annotations:, location:, comment:, overload:)
           @name = name
           @kind = kind
           @types = types
           @annotations = annotations
           @location = location
           @comment = comment
-          @attributes = attributes
           @overload = overload
         end
 
@@ -30,14 +28,13 @@ module RBS
             other.name == name &&
             other.kind == kind &&
             other.types == types &&
-            other.attributes == attributes &&
             other.overload == overload
         end
 
         alias eql? ==
 
         def hash
-          self.class.hash ^ name.hash ^ kind.hash ^ types.hash ^ attributes.hash ^ overload.hash
+          self.class.hash ^ name.hash ^ kind.hash ^ types.hash ^ overload.hash
         end
 
         def instance?
@@ -52,7 +49,7 @@ module RBS
           overload
         end
 
-        def update(name: self.name, kind: self.kind, types: self.types, annotations: self.annotations, location: self.location, comment: self.comment, attributes: self.attributes, overload: self.overload)
+        def update(name: self.name, kind: self.kind, types: self.types, annotations: self.annotations, location: self.location, comment: self.comment, overload: self.overload)
           self.class.new(
             name: name,
             kind: kind,
@@ -60,7 +57,6 @@ module RBS
             annotations: annotations,
             location: location,
             comment: comment,
-            attributes: attributes,
             overload: overload
           )
         end
@@ -73,7 +69,6 @@ module RBS
             annotations: annotations,
             location: location,
             comment: comment,
-            attributes: attributes,
             overload: overload
           }.to_json(*a)
         end

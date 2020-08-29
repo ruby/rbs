@@ -325,7 +325,6 @@ module RBS
           comment: member.comment,
           overload: member.overload?,
           annotations: member.annotations,
-          attributes: member.attributes,
           location: member.location
         )
       when AST::Members::AttrAccessor

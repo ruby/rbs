@@ -250,8 +250,7 @@ module RBS
 
       string = ""
 
-      attrs = member.attributes.empty? ? "" : member.attributes.join(" ") + " "
-      prefix = "#{attrs}def #{name}:"
+      prefix = "def #{name}:"
       padding = " " * (prefix.size-1)
 
       string << prefix

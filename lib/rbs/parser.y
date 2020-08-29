@@ -458,16 +458,14 @@ rule
           types: val[6],
           annotations: val[0],
           location: location,
-          comment: leading_comment(val[0].first&.location || val[1].first&.location || val[2]&.location || val[3].location),
-          attributes: val[1].map(&:value),
+          comment: leading_comment(val[0].first&.location || val[2]&.location || val[3].location),
           overload: overload || !!val[2]
         )
       }
 
   attributes:
-      { result = [] }
     | attributes kINCOMPATIBLE {
-        result = val[0].push(val[1])
+        RBS.logger.warn "`incompatible` method attribute is deprecated and ignored."
       }
 
   method_kind:
