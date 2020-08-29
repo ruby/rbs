@@ -114,21 +114,6 @@ end
     SIG
   end
 
-  def test_attributes
-    assert_writer <<-SIG
-class Foo
-  def initialize: () -> void
-
-  incompatible def foo: () -> String
-                      | () -> nil
-end
-
-class Bar
-  def self.new: (String) -> Bar
-end
-    SIG
-  end
-
   def test_variance
     assert_writer <<-SIG
 class Foo[out A, unchecked B, in C] < Bar[A, C, B]

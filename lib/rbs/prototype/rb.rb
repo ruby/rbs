@@ -130,7 +130,6 @@ module RBS
               types: types,
               kind: kind,
               comment: comments[node.first_lineno - 1],
-              attributes: [],
               overload: false
             )
 
