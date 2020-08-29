@@ -1016,7 +1016,7 @@ class Hash[unchecked out K, unchecked out V] < Object
   #     h["d"]           #=> "Go Fish: d"
   #     h.keys           #=> ["c", "d"]
   #
-  incompatible def initialize: () -> void
+  def initialize: () -> void
                              | (untyped default) -> void
                              | [A, B] () { (Hash[A, B] hash, A key) -> B } -> void
 
