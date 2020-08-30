@@ -158,7 +158,7 @@ SIG
   end
 
   def assert_sampling_check(builder, sample_size, array)
-    checker = RBS::Test::TypeCheck.new(self_class: Integer, builder: builder, sample_size: sample_size)
+    checker = RBS::Test::TypeCheck.new(self_class: Integer, builder: builder, sample_size: sample_size, double_suite: nil)
     
     sample = checker.each_sample(array).to_a
     
