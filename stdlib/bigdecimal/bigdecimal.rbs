@@ -1,0 +1,179 @@
+class BigDecimal < Numeric
+  def self._load: (untyped) -> untyped
+
+  def self.double_fig: () -> untyped
+
+  def self.interpret_loosely: (untyped) -> untyped
+
+  def self.limit: (*untyped) -> untyped
+
+  def self.mode: (*untyped) -> untyped
+
+  def self.save_exception_mode: () -> untyped
+
+  def self.save_limit: () -> untyped
+
+  def self.save_rounding_mode: () -> untyped
+
+  public
+
+  def %: (untyped) -> untyped
+
+  def *: (untyped) -> untyped
+
+  def **: (untyped) -> untyped
+
+  def +: (untyped) -> untyped
+
+  def +@: () -> untyped
+
+  def -: (untyped) -> untyped
+
+  def -@: () -> untyped
+
+  def /: (untyped) -> untyped
+
+  def <: (untyped) -> untyped
+
+  def <=: (untyped) -> untyped
+
+  def <=>: (untyped) -> untyped
+
+  def ==: (untyped) -> untyped
+
+  def ===: (untyped) -> untyped
+
+  def >: (untyped) -> untyped
+
+  def >=: (untyped) -> untyped
+
+  def _dump: (*untyped) -> untyped
+
+  def abs: () -> untyped
+
+  def add: (untyped, untyped) -> untyped
+
+  def ceil: (*untyped) -> untyped
+
+  def clone: () -> untyped
+
+  def coerce: (untyped) -> untyped
+
+  def div: (*untyped) -> untyped
+
+  def divmod: (untyped) -> untyped
+
+  def dup: () -> untyped
+
+  def eql?: (untyped) -> untyped
+
+  def exponent: () -> untyped
+
+  def finite?: () -> untyped
+
+  def fix: () -> untyped
+
+  def floor: (*untyped) -> untyped
+
+  def frac: () -> untyped
+
+  def hash: () -> untyped
+
+  def infinite?: () -> untyped
+
+  def inspect: () -> untyped
+
+  def modulo: (untyped) -> untyped
+
+  def mult: (untyped, untyped) -> untyped
+
+  def nan?: () -> untyped
+
+  def nonzero?: () -> untyped
+
+  def power: (*untyped) -> untyped
+
+  def precs: () -> untyped
+
+  def quo: (untyped) -> untyped
+
+  def remainder: (untyped) -> untyped
+
+  def round: (*untyped) -> untyped
+
+  def sign: () -> untyped
+
+  def split: () -> untyped
+
+  def sqrt: (untyped) -> untyped
+
+  def sub: (untyped, untyped) -> untyped
+
+  def to_f: () -> untyped
+
+  def to_i: () -> untyped
+
+  def to_int: () -> untyped
+
+  def to_r: () -> untyped
+
+  def to_s: (*untyped) -> untyped
+
+  def truncate: (*untyped) -> untyped
+
+  def zero?: () -> untyped
+
+  private
+
+  def initialize_copy: (untyped) -> untyped
+end
+
+BigDecimal::BASE: Integer
+
+BigDecimal::EXCEPTION_ALL: Integer
+
+BigDecimal::EXCEPTION_INFINITY: Integer
+
+BigDecimal::EXCEPTION_NaN: Integer
+
+BigDecimal::EXCEPTION_OVERFLOW: Integer
+
+BigDecimal::EXCEPTION_UNDERFLOW: Integer
+
+BigDecimal::EXCEPTION_ZERODIVIDE: Integer
+
+BigDecimal::INFINITY: BigDecimal
+
+BigDecimal::NAN: BigDecimal
+
+BigDecimal::ROUND_CEILING: Integer
+
+BigDecimal::ROUND_DOWN: Integer
+
+BigDecimal::ROUND_FLOOR: Integer
+
+BigDecimal::ROUND_HALF_DOWN: Integer
+
+BigDecimal::ROUND_HALF_EVEN: Integer
+
+BigDecimal::ROUND_HALF_UP: Integer
+
+BigDecimal::ROUND_MODE: Integer
+
+BigDecimal::ROUND_UP: Integer
+
+BigDecimal::SIGN_NEGATIVE_FINITE: Integer
+
+BigDecimal::SIGN_NEGATIVE_INFINITE: Integer
+
+BigDecimal::SIGN_NEGATIVE_ZERO: Integer
+
+BigDecimal::SIGN_NaN: Integer
+
+BigDecimal::SIGN_POSITIVE_FINITE: Integer
+
+BigDecimal::SIGN_POSITIVE_INFINITE: Integer
+
+BigDecimal::SIGN_POSITIVE_ZERO: Integer
+
+BigDecimal::VERSION: String
