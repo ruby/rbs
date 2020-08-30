@@ -123,18 +123,12 @@
 class BigDecimal < Numeric
   # Internal method used to provide marshalling support. See the Marshal module.
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     _load(p1)
-  #
-  def self._load: (untyped) -> untyped
+  def self._load: (String) -> BigDecimal
 
   # The BigDecimal.double_fig class method returns the number of digits a Float
   # number is allowed to have. The result depends upon the CPU and OS in use.
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     BigDecimal.double_fig
-  #
-  def self.double_fig: () -> untyped
+  def self.double_fig: () -> Integer
 
   def self.interpret_loosely: (untyped) -> untyped
 
@@ -147,10 +141,7 @@ class BigDecimal < Numeric
   # The limit specified by this method takes less priority over any limit
   # specified to instance methods such as ceil, floor, truncate, or round.
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     BigDecimal.limit(digits)
-  #
-  def self.limit: (*untyped) -> untyped
+  def self.limit: (?Integer? digits) -> Integer
 
   # Controls handling of arithmetic exceptions and rounding. If no value is
   # supplied, the current value is returned.
@@ -199,11 +190,7 @@ class BigDecimal < Numeric
   # ROUND_FLOOR, :floor
   # :   round towards negative infinity (floor)
   #
-  #
-  # # arglists 💪👽🚨 << Delete this section
-  #     BigDecimal.mode(mode, value)
-  #
-  def self.mode: (*untyped) -> untyped
+  def self.mode: (Integer mode, ?Integer? value) -> Integer?
 
   # Execute the provided block, but preserve the exception mode
   #
@@ -220,10 +207,7 @@ class BigDecimal < Numeric
   #
   # See BigDecimal.mode
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     BigDecimal.save_exception_mode { ... }
-  #
-  def self.save_exception_mode: () -> untyped
+  def self.save_exception_mode: () { () -> void } -> void
 
   # Execute the provided block, but preserve the precision limit
   #
@@ -235,10 +219,7 @@ class BigDecimal < Numeric
   #     end
   #     puts BigDecimal.limit
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     BigDecimal.save_limit { ... }
-  #
-  def self.save_limit: () -> untyped
+  def self.save_limit: () { () -> void } -> void
 
   # Execute the provided block, but preserve the rounding mode
   #
@@ -251,10 +232,7 @@ class BigDecimal < Numeric
   #
   # See BigDecimal.mode
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     BigDecimal.save_rounding_mode { ... }
-  #
-  def self.save_rounding_mode: () -> untyped
+  def self.save_rounding_mode: () { () -> void } -> void
 
   public
 
@@ -262,10 +240,7 @@ class BigDecimal < Numeric
   #
   # See BigDecimal#divmod.
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     a % b
-  #
-  def %: (untyped) -> untyped
+  def %: (Numeric) -> BigDecimal
 
   # Multiply by the specified value.
   #
@@ -278,20 +253,13 @@ class BigDecimal < Numeric
   #     the result is rounded to that number of digits, according to
   #     BigDecimal.mode.
   #
-  #
-  # # arglists 💪👽🚨 << Delete this section
-  #     mult(value, digits)
-  #
-  def *: (untyped) -> untyped
+  def *: (Numeric) -> BigDecimal
 
   # Returns the value raised to the power of n.
   #
   # See BigDecimal#power.
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     a ** n  -> bigdecimal
-  #
-  def **: (untyped) -> untyped
+  def **: (Numeric) -> BigDecimal
 
   # Add the specified value.
   #
@@ -304,20 +272,13 @@ class BigDecimal < Numeric
   #     the result is rounded to that number of digits, according to
   #     BigDecimal.mode.
   #
-  #
-  # # arglists 💪👽🚨 << Delete this section
-  #     add(value, digits)
-  #
-  def +: (untyped) -> untyped
+  def +: (Numeric) -> BigDecimal
 
   # Return self.
   #
   #     +BigDecimal('5')  #=> 0.5e1
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     +big_decimal  ->  big_decimal
-  #
-  def +@: () -> untyped
+  def +@: () -> BigDecimal
 
   # Subtract the specified value.
   #
@@ -332,53 +293,35 @@ class BigDecimal < Numeric
   # internal representation from platform. So, it's return value is platform
   # dependent.
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     a - b   -> bigdecimal
-  #
-  def -: (untyped) -> untyped
+  def -: (Numeric) -> BigDecimal
 
   # Return the negation of self.
   #
   #     -BigDecimal('5')  #=> -0.5e1
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     -big_decimal  ->  big_decimal
-  #
-  def -@: () -> untyped
+  def -@: () -> BigDecimal
 
   # Divide by the specified value.
   #
   # See BigDecimal#div.
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     a / b       -> bigdecimal
-  #
-  def /: (untyped) -> untyped
+  def /: (Numeric) -> BigDecimal
 
   # Returns true if a is less than b.
   #
   # Values may be coerced to perform the comparison (see ==, BigDecimal#coerce).
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     a < b
-  #
-  def <: (untyped) -> untyped
+  def <: (Numeric) -> bool
 
   # Returns true if a is less than or equal to b.
   #
   # Values may be coerced to perform the comparison (see ==, BigDecimal#coerce).
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     a <= b
-  #
-  def <=: (untyped) -> untyped
+  def <=: (Numeric) -> bool
 
   # The comparison operator. a <=> b is 0 if a == b, 1 if a > b, -1 if a < b.
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     <=>(p1)
-  #
-  def <=>: (untyped) -> untyped
+  def <=>: (Numeric) -> Integer?
 
   # Tests for value equality; returns true if the values are equal.
   #
@@ -389,10 +332,7 @@ class BigDecimal < Numeric
   #
   #     BigDecimal('1.0') == 1.0  #=> true
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     ==(p1)
-  #
-  def ==: (untyped) -> untyped
+  def ==: (untyped) -> bool
 
   # Tests for value equality; returns true if the values are equal.
   #
@@ -403,28 +343,19 @@ class BigDecimal < Numeric
   #
   #     BigDecimal('1.0') == 1.0  #=> true
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     ===(p1)
-  #
-  def ===: (untyped) -> untyped
+  def ===: (untyped) -> bool
 
   # Returns true if a is greater than b.
   #
   # Values may be coerced to perform the comparison (see ==, BigDecimal#coerce).
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     a > b
-  #
-  def >: (untyped) -> untyped
+  def >: (Numeric) -> bool
 
   # Returns true if a is greater than or equal to b.
   #
   # Values may be coerced to perform the comparison (see ==, BigDecimal#coerce)
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     a >= b
-  #
-  def >=: (untyped) -> untyped
+  def >=: (Numeric) -> bool
 
   # Method used to provide marshalling support.
   #
@@ -445,10 +376,7 @@ class BigDecimal < Numeric
   #     BigDecimal('5').abs  #=> 0.5e1
   #     BigDecimal('-3').abs #=> 0.3e1
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     big_decimal.abs  ->  big_decimal
-  #
-  def abs: () -> untyped
+  def abs: () -> BigDecimal
 
   # Add the specified value.
   #
@@ -461,11 +389,7 @@ class BigDecimal < Numeric
   #     the result is rounded to that number of digits, according to
   #     BigDecimal.mode.
   #
-  #
-  # # arglists 💪👽🚨 << Delete this section
-  #     add(value, digits)
-  #
-  def add: (untyped, untyped) -> untyped
+  def add: (Numeric value, Integer digits) -> BigDecimal
 
   # Return the smallest integer greater than or equal to the value, as a
   # BigDecimal.
@@ -482,12 +406,10 @@ class BigDecimal < Numeric
   #     BigDecimal('3.14159').ceil(3) #=> 3.142
   #     BigDecimal('13345.234').ceil(-2) #=> 13400.0
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     ceil(n)
-  #
-  def ceil: (*untyped) -> untyped
+  def ceil: () -> Integer
+          | (int n) -> BigDecimal
 
-  def clone: () -> untyped
+  def clone: () -> self
 
   # The coerce method provides support for Ruby type coercion. It is not enabled
   # by default.
@@ -503,10 +425,7 @@ class BigDecimal < Numeric
   # Note that coercing a String to a BigDecimal is not supported by default; it
   # requires a special compile-time option when building Ruby.
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     coerce(p1)
-  #
-  def coerce: (untyped) -> untyped
+  def coerce: (Numeric) -> [BigDecimal, BigDecimal]
 
   # Divide by the specified value.
   #
@@ -534,10 +453,8 @@ class BigDecimal < Numeric
   #
   #     a.div(b)     # => 1
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     div(value, digits)  -> bigdecimal or integer
-  #
-  def div: (*untyped) -> untyped
+  def div: (Numeric value) -> Integer
+         | (Numeric value, int digits) -> BigDecimal
 
   # Divides by the specified value, and returns the quotient and modulus as
   # BigDecimal numbers. The quotient is rounded towards negative infinity.
@@ -558,12 +475,9 @@ class BigDecimal < Numeric
   # The quotient q is (a/b).floor, and the modulus is the amount that must be
   # added to q * b to get a.
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     divmod(value)
-  #
-  def divmod: (untyped) -> untyped
+  def divmod: (Numeric) -> [BigDecimal, BigDecimal]
 
-  def dup: () -> untyped
+  def dup: () -> self
 
   # Tests for value equality; returns true if the values are equal.
   #
@@ -574,35 +488,22 @@ class BigDecimal < Numeric
   #
   #     BigDecimal('1.0') == 1.0  #=> true
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     eql?(p1)
-  #
-  def eql?: (untyped) -> untyped
+  def eql?: (untyped) -> bool
 
   # Returns the exponent of the BigDecimal number, as an Integer.
   #
   # If the number can be represented as 0.xxxxxx*10**n where xxxxxx is a string of
   # digits with no leading zeros, then n is the exponent.
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     exponent()
-  #
-  def exponent: () -> untyped
+  def exponent: () -> Integer
 
   # Returns True if the value is finite (not NaN or infinite).
   #
-  #
-  # # arglists 💪👽🚨 << Delete this section
-  #     finite?()
-  #
-  def finite?: () -> untyped
+  def finite?: () -> bool
 
   # Return the integer part of the number, as a BigDecimal.
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     fix()
-  #
-  def fix: () -> untyped
+  def fix: () -> BigDecimal
 
   # Return the largest integer less than or equal to the value, as a BigDecimal.
   #
@@ -618,54 +519,37 @@ class BigDecimal < Numeric
   #     BigDecimal('3.14159').floor(3) #=> 3.141
   #     BigDecimal('13345.234').floor(-2) #=> 13300.0
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     floor(n)
-  #
-  def floor: (*untyped) -> untyped
+  def floor: () -> Integer
+           | (int n) -> BigDecimal
 
   # Return the fractional part of the number, as a BigDecimal.
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     frac()
-  #
-  def frac: () -> untyped
+  def frac: () -> BigDecimal
 
   # Creates a hash for this BigDecimal.
   #
   # Two BigDecimals with equal sign, fractional part and exponent have the same
   # hash.
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     hash
-  #
-  def hash: () -> untyped
+  def hash: () -> Integer
 
   # Returns nil, -1, or +1 depending on whether the value is finite, -Infinity, or
   # +Infinity.
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     infinite?()
-  #
-  def infinite?: () -> untyped
+  def infinite?: () -> Integer?
 
   # Returns a string representation of self.
   #
   #     BigDecimal("1234.5678").inspect
   #       #=> "0.12345678e4"
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     inspect()
-  #
-  def inspect: () -> untyped
+  def inspect: () -> String
 
   # Returns the modulus from dividing by b.
   #
   # See BigDecimal#divmod.
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     a.modulo(b)
-  #
-  def modulo: (untyped) -> untyped
+  def modulo: (Numeric b) -> BigDecimal
 
   # Multiply by the specified value.
   #
@@ -678,27 +562,15 @@ class BigDecimal < Numeric
   #     the result is rounded to that number of digits, according to
   #     BigDecimal.mode.
   #
-  #
-  # # arglists 💪👽🚨 << Delete this section
-  #     mult(value, digits)
-  #
-  def mult: (untyped, untyped) -> untyped
+  def mult: (Numeric value, int digits) -> BigDecimal
 
   # Returns True if the value is Not a Number.
   #
-  #
-  # # arglists 💪👽🚨 << Delete this section
-  #     nan?()
-  #
-  def nan?: () -> untyped
+  def nan?: () -> bool
 
   # Returns self if the value is non-zero, nil otherwise.
   #
-  #
-  # # arglists 💪👽🚨 << Delete this section
-  #     nonzero?()
-  #
-  def nonzero?: () -> untyped
+  def nonzero?: () -> self?
 
   # Returns the value raised to the power of n.
   #
@@ -706,11 +578,7 @@ class BigDecimal < Numeric
   #
   # Also available as the operator **.
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     power(n)
-  #     power(n, prec)
-  #
-  def power: (*untyped) -> untyped
+  def power: (Numeric n, int prec) -> BigDecimal
 
   # Returns an Array of two Integer values.
   #
@@ -720,28 +588,19 @@ class BigDecimal < Numeric
   #
   #     BigDecimal('5').precs #=> [9, 18]
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     big_decimal.precs  ->  array
-  #
-  def precs: () -> untyped
+  def precs: () -> [Integer, Integer]
 
   # Divide by the specified value.
   #
   # See BigDecimal#div.
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     quo(value)  -> bigdecimal
-  #
-  def quo: (untyped) -> untyped
+  def quo: (Numeric) -> BigDecimal
 
   # Returns the remainder from dividing by the value.
   #
   # x.remainder(y) means x-y*(x/y).truncate
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     remainder(value)
-  #
-  def remainder: (untyped) -> untyped
+  def remainder: (Numeric) -> BigDecimal
 
   # Round to the nearest integer (by default), returning the result as a
   # BigDecimal if n is specified, or as an Integer if it isn't.
@@ -765,10 +624,8 @@ class BigDecimal < Numeric
   # The value of the optional mode argument can be used to determine how rounding
   # is performed; see BigDecimal.mode.
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     round(n, mode)
-  #
-  def round: (*untyped) -> untyped
+  def round: () -> Integer
+           | (Numeric n, ?Integer mode) -> BigDecimal
 
   # Returns the sign of the value.
   #
@@ -792,11 +649,7 @@ class BigDecimal < Numeric
   # BigDecimal::SIGN_NEGATIVE_FINITE
   # :   value is negative
   #
-  #
-  # # arglists 💪👽🚨 << Delete this section
-  #     sign()
-  #
-  def sign: () -> untyped
+  def sign: () -> Integer
 
   # Splits a BigDecimal number into four parts, returned as an array of values.
   #
@@ -822,19 +675,13 @@ class BigDecimal < Numeric
   # (Note that the to_f method is provided as a more convenient way to translate a
   # BigDecimal to a Float.)
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     split()
-  #
-  def split: () -> untyped
+  def split: () -> [Integer, String, Integer, Integer]
 
   # Returns the square root of the value.
   #
   # Result has at least n significant digits.
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     sqrt(n)
-  #
-  def sqrt: (untyped) -> untyped
+  def sqrt: (int n) -> BigDecimal
 
   # Subtract the specified value.
   #
@@ -846,45 +693,29 @@ class BigDecimal < Numeric
   #     the result is rounded to that number of digits, according to
   #     BigDecimal.mode.
   #
-  #
-  # # arglists 💪👽🚨 << Delete this section
-  #     sub(value, digits)  -> bigdecimal
-  #
-  def sub: (untyped, untyped) -> untyped
+  def sub: (Numeric value, int digits) -> BigDecimal
 
   # Returns a new Float object having approximately the same value as the
   # BigDecimal number. Normal accuracy limits and built-in errors of binary Float
   # arithmetic apply.
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     to_f()
-  #
-  def to_f: () -> untyped
+  def to_f: () -> Float
 
   # Returns the value as an Integer.
   #
   # If the BigDecimal is infinity or NaN, raises FloatDomainError.
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     to_i()
-  #
-  def to_i: () -> untyped
+  def to_i: () -> Integer
 
   # Returns the value as an Integer.
   #
   # If the BigDecimal is infinity or NaN, raises FloatDomainError.
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     to_int()
-  #
-  def to_int: () -> untyped
+  def to_int: () -> Integer
 
   # Converts a BigDecimal to a Rational.
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     to_r()
-  #
-  def to_r: () -> untyped
+  def to_r: () -> Rational
 
   # Converts the value to a string.
   #
@@ -916,10 +747,7 @@ class BigDecimal < Numeric
   #     BigDecimal('123.45678901234567890').to_s(' F')
   #       #=> ' 123.4567890123456789'
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     to_s(s)
-  #
-  def to_s: (*untyped) -> untyped
+  def to_s: (?(String | int) s) -> String
 
   # Truncate to the nearest integer (by default), returning the result as a
   # BigDecimal.
@@ -937,22 +765,16 @@ class BigDecimal < Numeric
   #     BigDecimal('3.14159').truncate(3) #=> 3.141
   #     BigDecimal('13345.234').truncate(-2) #=> 13300.0
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     truncate(n)
-  #
-  def truncate: (*untyped) -> untyped
+  def truncate: () -> Integer
+              | (int n) -> BigDecimal
 
   # Returns True if the value is zero.
   #
-  #
-  # # arglists 💪👽🚨 << Delete this section
-  #     zero?()
-  #
-  def zero?: () -> untyped
+  def zero?: () -> bool
 
   private
 
-  def initialize_copy: (untyped) -> untyped
+  def initialize_copy: (self) -> self
 end
 
 # Base value used in internal calculations.  On a 32 bit system, BASE is 10000,
