@@ -384,4 +384,74 @@ module ::Enumerable[A]
 end
 RBS
   end
+
+  def test_absolute_type_unknown
+    env = Environment.new
+
+    decls = RBS::Parser.parse_signature(<<EOF)
+# Integer is undefined and the type is translated to untyped.
+# Super classes and mixin modules are exception.
+#
+class Hello < Integer
+  def hello: (String) -> Integer
+end
+
+module Foo : _Each[Integer]
+  attr_accessor size: Integer
+  @created_at: Integer
+
+  include Enumerable[Integer]
+  include Integer
+  prepend Integer
+
+  module Operator : Integer
+  end
+end
+
+class String end
+class Time end
+module Enumerable[A] end
+EOF
+
+    decls.each do |decl|
+      env << decl
+    end
+
+    env_ = env.resolve_type_names(unknown_to_untyped: Set[])
+
+    writer = RBS::Writer.new(out: StringIO.new)
+
+    writer.write(env_.declarations)
+
+    assert_equal <<RBS, writer.out.string
+# Integer is undefined and the type is translated to untyped.
+# Super classes and mixin modules are exception.
+#
+class ::Hello < Integer
+  def hello: (::String) -> untyped
+end
+
+module ::Foo : _Each[untyped]
+  attr_accessor size: untyped
+
+  @created_at: untyped
+
+  include ::Enumerable[untyped]
+
+  include Integer
+
+  prepend Integer
+
+  module ::Foo::Operator : Integer
+  end
+end
+
+class ::String
+end
+class ::Time
+end
+module ::Enumerable[A]
+end
+RBS
+  end
 end

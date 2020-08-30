@@ -198,22 +198,26 @@ module RBS
       self
     end
 
-    def resolve_type_names
+    def resolve_type_names(unknown_to_untyped: nil)
       resolver = TypeNameResolver.from_env(self)
       env = Environment.new()
 
       declarations.each do |decl|
-        env << resolve_declaration(resolver, decl, outer: [], prefix: Namespace.root)
+        env << resolve_declaration(resolver,
+                                   decl,
+                                   outer: [],
+                                   prefix: Namespace.root,
+                                   unknown_to_untyped: unknown_to_untyped)
       end
 
       env
     end
 
-    def resolve_declaration(resolver, decl, outer:, prefix:)
+    def resolve_declaration(resolver, decl, outer:, prefix:, unknown_to_untyped:)
       if decl.is_a?(AST::Declarations::Global)
         return AST::Declarations::Global.new(
           name: decl.name,
-          type: absolute_type(resolver, decl.type, context: [Namespace.root]),
+          type: absolute_type(resolver, decl.type, context: [Namespace.root], unknown_to_untyped: unknown_to_untyped),
           location: decl.location,
           comment: decl.comment
         )
@@ -233,19 +237,20 @@ module RBS
           super_class: decl.super_class&.yield_self do |super_class|
             AST::Declarations::Class::Super.new(
               name: absolute_type_name(resolver, super_class.name, context: context),
-              args: super_class.args.map {|type| absolute_type(resolver, type, context: context) }
+              args: super_class.args.map {|type| absolute_type(resolver, type, context: context, unknown_to_untyped: unknown_to_untyped) }
             )
           end,
           members: decl.members.map do |member|
             case member
             when AST::Members::Base
-              resolve_member(resolver, member, context: context)
+              resolve_member(resolver, member, context: context, unknown_to_untyped: unknown_to_untyped)
             when AST::Declarations::Base
               resolve_declaration(
                 resolver,
                 member,
                 outer: outer_,
-                prefix: prefix_
+                prefix: prefix_,
+                unknown_to_untyped: unknown_to_untyped
               )
             end
           end,
@@ -262,20 +267,21 @@ module RBS
           self_types: decl.self_types.map do |module_self|
             AST::Declarations::Module::Self.new(
               name: absolute_type_name(resolver, module_self.name, context: context),
-              args: module_self.args.map {|type| absolute_type(resolver, type, context: context) },
+              args: module_self.args.map {|type| absolute_type(resolver, type, context: context, unknown_to_untyped: unknown_to_untyped) },
               location: module_self.location
             )
           end,
           members: decl.members.map do |member|
             case member
             when AST::Members::Base
-              resolve_member(resolver, member, context: context)
+              resolve_member(resolver, member, context: context, unknown_to_untyped: unknown_to_untyped)
             when AST::Declarations::Base
               resolve_declaration(
                 resolver,
                 member,
                 outer: outer_,
-                prefix: prefix_
+                prefix: prefix_,
+                unknown_to_untyped: unknown_to_untyped
               )
             end
           end,
@@ -288,7 +294,7 @@ module RBS
           name: decl.name.with_prefix(prefix),
           type_params: decl.type_params,
           members: decl.members.map do |member|
-            resolve_member(resolver, member, context: context)
+            resolve_member(resolver, member, context: context, unknown_to_untyped: unknown_to_untyped)
           end,
           comment: decl.comment,
           location: decl.location,
@@ -297,7 +303,7 @@ module RBS
       when AST::Declarations::Alias
         AST::Declarations::Alias.new(
           name: decl.name.with_prefix(prefix),
-          type: absolute_type(resolver, decl.type, context: context),
+          type: absolute_type(resolver, decl.type, context: context, unknown_to_untyped: unknown_to_untyped),
           location: decl.location,
           annotations: decl.annotations,
           comment: decl.comment
@@ -306,21 +312,21 @@ module RBS
       when AST::Declarations::Constant
         AST::Declarations::Constant.new(
           name: decl.name.with_prefix(prefix),
-          type: absolute_type(resolver, decl.type, context: context),
+          type: absolute_type(resolver, decl.type, context: context, unknown_to_untyped: unknown_to_untyped),
           location: decl.location,
           comment: decl.comment
         )
       end
     end
 
-    def resolve_member(resolver, member, context:)
+    def resolve_member(resolver, member, context:, unknown_to_untyped:)
       case member
       when AST::Members::MethodDefinition
         AST::Members::MethodDefinition.new(
           name: member.name,
           kind: member.kind,
           types: member.types.map do |type|
-            type.map_type {|ty| absolute_type(resolver, ty, context: context) }
+            type.map_type {|ty| absolute_type(resolver, ty, context: context, unknown_to_untyped: unknown_to_untyped) }
           end,
           comment: member.comment,
           overload: member.overload?,
@@ -330,7 +336,7 @@ module RBS
       when AST::Members::AttrAccessor
         AST::Members::AttrAccessor.new(
           name: member.name,
-          type: absolute_type(resolver, member.type, context: context),
+          type: absolute_type(resolver, member.type, context: context, unknown_to_untyped: unknown_to_untyped),
           annotations: member.annotations,
           comment: member.comment,
           location: member.location,
@@ -339,7 +345,7 @@ module RBS
       when AST::Members::AttrReader
         AST::Members::AttrReader.new(
           name: member.name,
-          type: absolute_type(resolver, member.type, context: context),
+          type: absolute_type(resolver, member.type, context: context, unknown_to_untyped: unknown_to_untyped),
           annotations: member.annotations,
           comment: member.comment,
           location: member.location,
@@ -348,7 +354,7 @@ module RBS
       when AST::Members::AttrWriter
         AST::Members::AttrWriter.new(
           name: member.name,
-          type: absolute_type(resolver, member.type, context: context),
+          type: absolute_type(resolver, member.type, context: context, unknown_to_untyped: unknown_to_untyped),
           annotations: member.annotations,
           comment: member.comment,
           location: member.location,
@@ -357,28 +363,28 @@ module RBS
       when AST::Members::InstanceVariable
         AST::Members::InstanceVariable.new(
           name: member.name,
-          type: absolute_type(resolver, member.type, context: context),
+          type: absolute_type(resolver, member.type, context: context, unknown_to_untyped: unknown_to_untyped),
           comment: member.comment,
           location: member.location
         )
       when AST::Members::ClassInstanceVariable
         AST::Members::ClassInstanceVariable.new(
           name: member.name,
-          type: absolute_type(resolver, member.type, context: context),
+          type: absolute_type(resolver, member.type, context: context, unknown_to_untyped: unknown_to_untyped),
           comment: member.comment,
           location: member.location
         )
       when AST::Members::ClassVariable
         AST::Members::ClassVariable.new(
           name: member.name,
-          type: absolute_type(resolver, member.type, context: context),
+          type: absolute_type(resolver, member.type, context: context, unknown_to_untyped: unknown_to_untyped),
           comment: member.comment,
           location: member.location
         )
       when AST::Members::Include
         AST::Members::Include.new(
           name: absolute_type_name(resolver, member.name, context: context),
-          args: member.args.map {|type| absolute_type(resolver, type, context: context) },
+          args: member.args.map {|type| absolute_type(resolver, type, context: context, unknown_to_untyped: unknown_to_untyped) },
           comment: member.comment,
           location: member.location,
           annotations: member.annotations
@@ -386,7 +392,7 @@ module RBS
       when AST::Members::Extend
         AST::Members::Extend.new(
           name: absolute_type_name(resolver, member.name, context: context),
-          args: member.args.map {|type| absolute_type(resolver, type, context: context) },
+          args: member.args.map {|type| absolute_type(resolver, type, context: context, unknown_to_untyped: unknown_to_untyped) },
           comment: member.comment,
           location: member.location,
           annotations: member.annotations
@@ -394,7 +400,7 @@ module RBS
       when AST::Members::Prepend
         AST::Members::Prepend.new(
           name: absolute_type_name(resolver, member.name, context: context),
-          args: member.args.map {|type| absolute_type(resolver, type, context: context) },
+          args: member.args.map {|type| absolute_type(resolver, type, context: context, unknown_to_untyped: unknown_to_untyped) },
           comment: member.comment,
           location: member.location,
           annotations: member.annotations
@@ -408,9 +414,86 @@ module RBS
       resolver.resolve(type_name, context: context) || type_name
     end
 
-    def absolute_type(resolver, type, context:)
-      type.map_type_name do |name|
+    def absolute_type(resolver, type, context:, unknown_to_untyped:)
+      absolute_type = type.map_type_name do |name|
         absolute_type_name(resolver, name, context: context)
+      end
+
+      if unknown_to_untyped
+        unknown_to_untyped(absolute_type, type_set: unknown_to_untyped)
+      else
+        absolute_type
+      end
+    end
+
+    def valid_name?(type_name)
+      if type_name.absolute?
+        class_decls.key?(type_name) ||
+          interface_decls.key?(type_name) ||
+          alias_decls.key?(type_name)
+      end
+    end
+
+    def fallback_untyped(type, type_set:)
+      unless type_set.member?(type)
+        RBS.logger.warn { "Converted an unknown type `#{type}` to `untyped`..." }
+        type_set << type
+      end
+      Types::Bases::Any.new(location: type.location)
+    end
+
+    def unknown_to_untyped(type, type_set:)
+      case type
+      when Types::Bases::Base, Types::Variable, Types::Literal
+        type
+      when Types::Optional
+        Types::Optional.new(
+          type: unknown_to_untyped(type.type, type_set: type_set),
+          location: type.location
+        )
+      when Types::Alias, Types::ClassSingleton
+        if valid_name?(type.name)
+          type
+        else
+          fallback_untyped(type, type_set: type_set)
+        end
+      when Types::ClassInstance
+        if valid_name?(type.name)
+          Types::ClassInstance.new(
+            name: type.name,
+            args: type.args.map {|ty| unknown_to_untyped(ty, type_set: type_set) },
+            location: type.location
+          )
+        else
+          fallback_untyped(type, type_set: type_set)
+        end
+      when Types::Interface
+        if valid_name?(type.name)
+          Types::Interface.new(
+            name: type.name,
+            args: type.args.map {|ty| unknown_to_untyped(ty, type_set: type_set) },
+            location: type.location
+          )
+        else
+          fallback_untyped(type, type_set: type_set)
+        end
+      when Types::Union, Types::Intersection
+        type.map_type {|ty| unknown_to_untyped(ty, type_set: type_set) }
+      when Types::Proc
+        Types::Proc.new(
+          type: type.type.map_type {|ty| unknown_to_untyped(ty, type_set: type_set) },
+          location: type.location
+        )
+      when Types::Tuple
+        Types::Tuple.new(
+          types: type.types.map {|ty| unknown_to_untyped(ty, type_set: type_set) },
+          location: type.location
+        )
+      when Types::Record
+        Types::Record.new(
+          fields: type.fields.transform_values {|ty| unknown_to_untyped(ty, type_set: type_set) },
+          location: type.location
+        )
       end
     end
 
