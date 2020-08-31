@@ -2,8 +2,11 @@ require "test_helper"
 
 require "rbs/test"
 require "logger"
+require "rspec/mocks/standalone"
 
 return unless Gem::Version.new(RUBY_VERSION) >= Gem::Version.new('2.7.0')
+
+RSPEC_MOCK = double('foo')
 
 class RBS::Test::TypeCheckTest < Minitest::Test
   include TestHelper
@@ -30,7 +33,8 @@ EOF
         typecheck = Test::TypeCheck.new(
           self_class: Integer,
           builder: DefinitionBuilder.new(env: env),
-          sample_size: 100
+          sample_size: 100,
+          unchecked_classes: []
         )
 
         assert typecheck.value(3, parse_type("::foo"))
@@ -62,7 +66,7 @@ EOF
       manager.build do |env|
         builder = DefinitionBuilder.new(env: env)
 
-        typecheck = Test::TypeCheck.new(self_class: Integer, builder: builder, sample_size: 100)
+        typecheck = Test::TypeCheck.new(self_class: Integer, builder: builder, sample_size: 100, unchecked_classes: [])
 
         assert typecheck.value([], parse_type("::Array[::Integer]"))
         assert typecheck.value([1], parse_type("::Array[::Integer]"))
@@ -79,7 +83,7 @@ EOF
       manager.build do |env|
         builder = DefinitionBuilder.new(env: env)
 
-        typecheck = Test::TypeCheck.new(self_class: Integer, builder: builder, sample_size: 100)
+        typecheck = Test::TypeCheck.new(self_class: Integer, builder: builder, sample_size: 100, unchecked_classes: [])
 
         assert typecheck.value({}, parse_type("::Hash[::Integer, ::String]"))
         assert typecheck.value(Array.new(100) {|i| [i, i.to_s] }.to_h, parse_type("::Hash[::Integer, ::String]"))
@@ -94,7 +98,7 @@ EOF
       manager.build do |env|
         builder = DefinitionBuilder.new(env: env)
 
-        typecheck = Test::TypeCheck.new(self_class: Integer, builder: builder, sample_size: 100)
+        typecheck = Test::TypeCheck.new(self_class: Integer, builder: builder, sample_size: 100, unchecked_classes: [])
 
         assert typecheck.value([1,2,3].each, parse_type("Enumerator[Integer, Array[Integer]]"))
         assert typecheck.value(Array.new(400, 3).each, parse_type("Enumerator[Integer, Array[Integer]]"))
@@ -131,7 +135,8 @@ EOF
         typecheck = Test::TypeCheck.new(
           self_class: Object,
           builder: DefinitionBuilder.new(env: env),
-          sample_size: 100
+          sample_size: 100,
+          unchecked_classes: []
         )
 
         parse_method_type("(Integer) -> String").tap do |method_type|
@@ -191,7 +196,7 @@ EOF
       manager.build do |env|
         builder = DefinitionBuilder.new(env: env)
 
-        typecheck = Test::TypeCheck.new(self_class: Integer, builder: builder, sample_size: 100)
+        typecheck = Test::TypeCheck.new(self_class: Integer, builder: builder, sample_size: 100, unchecked_classes: [])
 
         assert typecheck.value({foo: 'foo', bar: 0, baz: :baz }, parse_type("{:foo => String, :bar => Integer, :baz => Symbol}"))
         assert typecheck.value({foo: 'foo', bar: 0, baz: :baz }, parse_type("{foo: String, bar: Integer, baz: Symbol}"))
@@ -223,7 +228,8 @@ EOF
         typecheck = Test::TypeCheck.new(
           self_class: Object,
           builder: DefinitionBuilder.new(env: env),
-          sample_size: 100
+          sample_size: 100,
+          unchecked_classes: []
         )
 
         parse_method_type("(Integer) -> String").tap do |method_type|
@@ -357,6 +363,54 @@ EOF
     end
   end
 
+  def test_is_double
+    SignatureManager.new do |manager|
+      manager.build do |env|
+        minitest_typecheck = Test::TypeCheck.new(
+          self_class: Integer,
+          builder: DefinitionBuilder.new(env: env),
+          sample_size: 100,
+          unchecked_classes: ['Minitest::Mock']
+        )
+
+        rspec_typecheck = Test::TypeCheck.new(
+          self_class: Integer,
+          builder: DefinitionBuilder.new(env: env),
+          sample_size: 100,
+          unchecked_classes: ['RSpec::Mocks::Double']
+        )
+
+        no_mock_typecheck = Test::TypeCheck.new(
+          self_class: Integer,
+          builder: DefinitionBuilder.new(env: env),
+          sample_size: 100,
+          unchecked_classes: []
+        )
+
+        minitest_mock = ::Minitest::Mock.new
+        rspec_mock = RSPEC_MOCK
+
+        assert minitest_typecheck.is_double? minitest_mock
+        assert rspec_typecheck.is_double? rspec_mock
+
+        refute minitest_typecheck.is_double? rspec_mock
+        refute rspec_typecheck.is_double? minitest_mock
+
+        refute minitest_typecheck.is_double? 1
+        refute minitest_typecheck.is_double? 'hi'
+        refute minitest_typecheck.is_double? nil
+
+        refute rspec_typecheck.is_double? 1
+        refute rspec_typecheck.is_double? 'hi'
+        refute rspec_typecheck.is_double? nil
+
+        refute no_mock_typecheck.is_double? minitest_mock
+        refute no_mock_typecheck.is_double? minitest_mock
+
+      end
+    end
+  end
+
   def test_type_overload
     SignatureManager.new do |manager|
       manager.files[Pathname("foo.rbs")] = <<EOF
@@ -370,7 +424,7 @@ EOF
       manager.build do |env|
         builder = DefinitionBuilder.new(env: env)
 
-        typecheck = Test::TypeCheck.new(self_class: Object, builder: builder, sample_size: 100)
+        typecheck = Test::TypeCheck.new(self_class: Object, builder: builder, sample_size: 100, unchecked_classes: [])
 
         builder.build_instance(type_name("::Foo")).tap do |foo|
           typecheck.overloaded_call(

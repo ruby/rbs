@@ -6,6 +6,7 @@ gemspec
 # Development dependencies
 gem "rake"
 gem "minitest"
+gem "rspec"
 gem "racc"
 gem "rubocop"
 gem "rubocop-rubycw"

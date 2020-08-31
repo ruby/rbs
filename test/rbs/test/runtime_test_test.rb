@@ -126,4 +126,66 @@ RBS
 
     assert_match /TypeError: \[Hello#world\]/, output
   end
+
+  def test_minitest
+    assert_test_success(other_env: { 'RBS_TEST_TARGET' => 'Foo', 'RBS_TEST_DOUBLE_SUITE' => 'minitest' }, rbs_content: <<RBS, ruby_content: <<RUBY)
+class Foo
+  def foo: (Integer) -> void
+end
+RBS
+
+class Foo
+  def foo(integer)
+  end
+end
+
+require "minitest/autorun"
+
+class FooTest < Minitest::Test
+  def test_foo_mock
+    # Confirm if mock is correctly ignored.
+    Foo.new.foo(::Minitest::Mock.new)
+  end
+
+  def test_no_foo
+    # Confirm if RBS runtime test raises errors when unexpected object is given.
+    assert_raises RBS::Test::Tester::TypeError do
+      Foo.new.foo("")
+    end
+  end
+end
+RUBY
+  end
+
+  def test_rspec
+    assert_test_success(other_env: { "RBS_TEST_TARGET" => 'Foo', "RBS_TEST_DOUBLE_SUITE" => 'rspec' }, rbs_content: <<RBS, ruby_content: <<RUBY)
+class Foo
+  def foo: (Integer) -> void
+end
+RBS
+
+class Foo
+  def foo(integer)
+  end
+end
+
+require 'rspec'
+
+RSpec::Core::Runner.autorun
+
+describe 'Foo' do
+  describe "#foo" do
+    it "accepts doubles" do
+      # Confirm if double is correctly ignored.
+      Foo.new.foo(double('foo'))    
+    end
+
+    it "does not accept non_integers" do
+      # Confirm if RBS runtime test raises errors when unexpected object is given.
+      expect { Foo.new.foo("") }.to raise_error(RBS::Test::Tester::TypeError)
+    end
+  end
+end
+RUBY
+  end
 end

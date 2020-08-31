@@ -24,6 +24,21 @@ module RBS
           int_size
         end
       end
+
+      def to_double_class(double_suite)
+        return nil unless double_suite
+
+        case double_suite.downcase.strip
+        when 'rspec'
+          ['::RSpec::Mocks::Double']
+        when 'minitest'
+          ['::Minitest::Mock'] 
+        else
+          RBS.logger.warn "Unknown test suite - defaults to nil"
+          nil
+        end
+      end
+
     end
   end
 end

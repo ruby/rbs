@@ -3,6 +3,7 @@ require "rbs/test"
 
 class SetupHelperTest < Minitest::Test
   include RBS::Test::SetupHelper
+  include TestHelper
 
   def test_get_valid_sample_size
     assert_equal 100, get_sample_size("100")
@@ -24,6 +25,19 @@ class SetupHelperTest < Minitest::Test
     assert_raises InvalidSampleSizeError do
       get_sample_size(invalid_value)
     end    
+  end
+
+  def test_to_double_class
+    assert '::RSpec::Mocks::Double', to_double_class('rspec')
+    assert '::Minitest::Mock', to_double_class('rspec')
+
+    silence_warnings do
+      assert_nil to_double_class('rr')
+      assert_nil to_double_class('foo')
+      assert_nil to_double_class('bar')
+      assert_nil to_double_class('mocha')
+      assert_nil to_double_class(nil)
+    end
   end
 end
 
