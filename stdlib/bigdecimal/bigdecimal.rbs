@@ -130,7 +130,7 @@ class BigDecimal < Numeric
   #
   def self.double_fig: () -> Integer
 
-  def self.interpret_loosely: (untyped) -> untyped
+  def self.interpret_loosely: (string) -> BigDecimal
 
   # Limit the number of significant digits in newly created BigDecimal numbers to
   # the specified value. Rounding is performed as necessary, as specified by
@@ -207,7 +207,7 @@ class BigDecimal < Numeric
   #
   # See BigDecimal.mode
   #
-  def self.save_exception_mode: () { () -> void } -> void
+  def self.save_exception_mode: () { (?nil) -> void } -> void
 
   # Execute the provided block, but preserve the precision limit
   #
@@ -219,7 +219,7 @@ class BigDecimal < Numeric
   #     end
   #     puts BigDecimal.limit
   #
-  def self.save_limit: () { () -> void } -> void
+  def self.save_limit: () { (?nil) -> void } -> void
 
   # Execute the provided block, but preserve the rounding mode
   #
@@ -232,7 +232,7 @@ class BigDecimal < Numeric
   #
   # See BigDecimal.mode
   #
-  def self.save_rounding_mode: () { () -> void } -> void
+  def self.save_rounding_mode: () { (?nil) -> void } -> void
 
   public
 
@@ -366,10 +366,7 @@ class BigDecimal < Numeric
   #
   # See the Marshal module.
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     _dump
-  #
-  def _dump: (*untyped) -> untyped
+  def _dump: (?untyped) -> String
 
   # Returns the absolute value, as a BigDecimal.
   #
@@ -816,16 +813,13 @@ BigDecimal::EXCEPTION_ZERODIVIDE: Integer
 
 # Positive infinity value.
 #
-#
 BigDecimal::INFINITY: BigDecimal
 
 # 'Not a Number' value.
 #
-#
 BigDecimal::NAN: BigDecimal
 
 # Round towards +Infinity. See BigDecimal.mode.
-#
 #
 BigDecimal::ROUND_CEILING: Integer
 
@@ -834,7 +828,6 @@ BigDecimal::ROUND_CEILING: Integer
 BigDecimal::ROUND_DOWN: Integer
 
 # Round towards -Infinity. See BigDecimal.mode.
-#
 #
 BigDecimal::ROUND_FLOOR: Integer
 
@@ -845,12 +838,10 @@ BigDecimal::ROUND_HALF_DOWN: Integer
 
 # Round towards the even neighbor. See BigDecimal.mode.
 #
-#
 BigDecimal::ROUND_HALF_EVEN: Integer
 
 # Indicates that digits >= 5 should be rounded up, others rounded down. See
 # BigDecimal.mode.
-#
 #
 BigDecimal::ROUND_HALF_UP: Integer
 
@@ -865,36 +856,29 @@ BigDecimal::ROUND_UP: Integer
 
 # Indicates that a value is negative and finite. See BigDecimal.sign.
 #
-#
 BigDecimal::SIGN_NEGATIVE_FINITE: Integer
 
 # Indicates that a value is negative and infinite. See BigDecimal.sign.
-#
 #
 BigDecimal::SIGN_NEGATIVE_INFINITE: Integer
 
 # Indicates that a value is -0. See BigDecimal.sign.
 #
-#
 BigDecimal::SIGN_NEGATIVE_ZERO: Integer
 
 # Indicates that a value is not a number. See BigDecimal.sign.
-#
 #
 BigDecimal::SIGN_NaN: Integer
 
 # Indicates that a value is positive and finite. See BigDecimal.sign.
 #
-#
 BigDecimal::SIGN_POSITIVE_FINITE: Integer
 
 # Indicates that a value is positive and infinite. See BigDecimal.sign.
 #
-#
 BigDecimal::SIGN_POSITIVE_INFINITE: Integer
 
 # Indicates that a value is +0. See BigDecimal.sign.
-#
 #
 BigDecimal::SIGN_POSITIVE_ZERO: Integer
 
