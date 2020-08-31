@@ -2,6 +2,15 @@
 
 ## master
 
+## 0.11.0 (2020-08-31)
+
+* Signature update for `date/datetime` [#367](https://github.com/ruby/rbs/pull/367)
+* Add test double support for runtime type checker [#380](https://github.com/ruby/rbs/pull/380)
+* Add `rbs test` command for runtime type checking [#366](https://github.com/ruby/rbs/pull/366)
+* Fix runtime type checking for record types [#365](https://github.com/ruby/rbs/pull/365)
+* Improve EnvironmentLoader API [#370](https://github.com/ruby/rbs/pull/370)
+* Allow overloading from super methods [#364](https://github.com/ruby/rbs/pull/364)
+
 ## 0.10.0 (2020-08-10)
 
 * Signature update for `Zlib`
