@@ -216,15 +216,12 @@ class URIGenericInstanceTest < Minitest::Test
                       generic, :fragment
   end
 
-  # def test_parser
-  #   assert_send_type '() -> URI::Parser',
-  #                     generic, :parser
-  # end
-
-  # def test_replace!
-  #   assert_send_type '(URI::Generic oth) -> URI::Generic',
-  #                     generic, :replace!, other
-  # end
+  def test_replace!
+    assert_raises URI::InvalidURIError do
+      assert_send_type '(URI::Generic oth) -> URI::Generic',
+                        generic, :replace!, other
+    end
+  end
 
   def test_component
     assert_send_type  '() -> Array[Symbol]',
@@ -459,11 +456,6 @@ class URIGenericInstanceTest < Minitest::Test
                       generic, :merge_path, 'nested', 'path'
   end
 
-  # def test_merge!
-  #   assert_send_type  '(String oth) -> String',
-  #                     generic, :merge!, '/extra'
-  # end
-
   def test_merge
     assert_send_type  '(String oth) -> URI::Generic',
                       generic, :merge, '/extra'
@@ -488,16 +480,6 @@ class URIGenericInstanceTest < Minitest::Test
     assert_send_type  '(String oth) -> URI::Generic',
                       generic, :route_to, 'http://localhost/foo/bar'
   end
-
-  # def test_normalize
-  #   assert_send_type  '() -> (URI::HTTP | nil)',
-  #                     generic, :normalize
-  # end
-
-  # def test_normalize!
-  #   assert_send_type  '() -> (URI::HTTP | nil)',
-  #                     generic, :normalize!
-  # end
 
   def test_to_s
     assert_send_type  '() -> String',
@@ -540,41 +522,8 @@ class URIGenericInstanceTest < Minitest::Test
                       generic, :inspect
   end
 
-  # def test_coerce
-  #   assert_send_type  '((URI::Generic | String) oth) -> Array[URI::Generic]',
-  #                     generic, :coerce, 'http://localhost'
-
-  #   assert_send_type  '((URI::Generic | String) oth) -> Array[URI::Generic]',
-  #                     generic, :coerce, mail
-  # end
-
   def test_find_proxy
     assert_send_type  '(?String env) -> (nil | URI::Generic)',
                       generic, :find_proxy, 'http_proxy=proxy'
   end
 end
-
-# class URIWSSingletonTest < Minitest::Test
-#   include TypeAssertions
-#   library 'uri'
-#   testing 'singleton(::URI::WS)'
-
-#   def test_build
-#     assert_send_type  '(Array[nil | String | Integer]) -> URI::WS',
-#                       URI::WS, :build, [nil, nil, nil, nil, nil, nil, nil, nil, nil]
-
-#     assert_send_type  '(Array[nil | String | Integer]) -> URI::WS',
-#                       URI::WS, :build, ['http', 'user:pass', 'localhost', 80, nil, '/foo/bar', nil, '?t=1', 'baz']
-
-#     assert_send_type '({ scheme: String, userinfo: String, host: String, port: Integer, path: String, query: String }) -> URI::WS',
-#                       URI::WS, :build,
-#                       {
-#                         scheme: 'http',
-#                         userinfo: 'user:pass',
-#                         host: 'localhost',
-#                         port: 80,
-#                         path: '/foo/bar',
-#                         query: '?t=1',
-#                       }
-#   end
-# end
