@@ -67,7 +67,13 @@ RUBY
           "RBS_TEST_TARGET" => "::Hello",
           "RBS_TEST_OPT" => "-I./foo.rbs"
         }
-        _out, err, status = Open3.capture3(env.merge(other_env), "ruby", "-rbundler/setup", "-rrbs/test/setup", "sample.rb", chdir: path.to_s)
+        command_line = if defined?(Bundler)
+                         ["ruby", "-rbundler/setup", "-rrbs/test/setup", "sample.rb"]
+                       else
+                         ["ruby", "-I#{__dir__}/../../lib", "-rrbs/test/setup", "sample.rb"]
+                       end
+
+        _out, err, status = Open3.capture3(env.merge(other_env), *command_line, chdir: path.to_s)
 
         return [err, status]
       end
@@ -128,6 +134,8 @@ RBS
   end
 
   def test_minitest
+    skip unless has_gem?("minitest")
+
     assert_test_success(other_env: { 'RBS_TEST_TARGET' => 'Foo', 'RBS_TEST_DOUBLE_SUITE' => 'minitest' }, rbs_content: <<RBS, ruby_content: <<RUBY)
 class Foo
   def foo: (Integer) -> void
@@ -158,6 +166,8 @@ RUBY
   end
 
   def test_rspec
+    skip unless has_gem?("rspec")
+
     assert_test_success(other_env: { "RBS_TEST_TARGET" => 'Foo', "RBS_TEST_DOUBLE_SUITE" => 'rspec' }, rbs_content: <<RBS, ruby_content: <<RUBY)
 class Foo
   def foo: (Integer) -> void
@@ -177,7 +187,7 @@ describe 'Foo' do
   describe "#foo" do
     it "accepts doubles" do
       # Confirm if double is correctly ignored.
-      Foo.new.foo(double('foo'))    
+      Foo.new.foo(double('foo'))
     end
 
     it "does not accept non_integers" do
