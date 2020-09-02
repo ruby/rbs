@@ -1,6 +1,83 @@
 require_relative 'test_helper'
 require 'uri'
 
+class URIFileSingletonTest < Minitest::Test
+  include TypeAssertions
+  library 'uri'
+  testing 'singleton(::URI::File)'
+
+  def test_build
+    assert_send_type  '(Array[String] args) -> URI::File',
+                      URI::File, :build, ['localhost', '/path/to/file']
+
+    assert_send_type  '({ host: String, path: String }) -> URI::File',
+                      URI::File, :build,
+                      {
+                        host: 'localhost',
+                        path: '/path/to/file'
+                      }
+  end
+end
+
+class URIFileInstanceTest < Minitest::Test
+  include TypeAssertions
+  library 'uri'
+  testing '::URI::File'
+
+  def file
+    ::URI::File.build({ host: 'test.org', path: '/path' })
+  end
+
+  def test_set_host
+    assert_send_type  '(String? v) -> String',
+                      file, :set_host, nil
+
+    assert_send_type  '(String? v) -> String',
+                      file, :set_host, "localhost"
+  end
+
+  def test_set_port
+    assert_send_type  '(Integer v) -> nil',
+                      file, :set_port, 80
+  end
+
+  def test_check_userinfo
+    assert_raises URI::InvalidURIError do
+      assert_send_type  '(String v) -> nil',
+                        file, :check_userinfo, 'user:pass'
+    end
+  end
+
+  def test_check_user
+    assert_raises URI::InvalidURIError do
+      assert_send_type  '(String v) -> nil',
+                        file, :check_user, 'user'
+    end
+  end
+
+  def test_check_password
+    assert_raises URI::InvalidURIError do
+      assert_send_type  '(String v) -> nil',
+                        file, :check_password, 'pass'
+    end
+  end
+
+  def test_set_userinfo
+    assert_send_type  '(String v) -> nil',
+                      file, :set_userinfo, 'user:pass'
+  end
+
+  def test_set_user
+    assert_send_type  '(String v) -> nil',
+                      file, :set_user, 'user'
+  end
+
+  def test_set_password
+    assert_send_type  '(String v) -> nil',
+                      file, :set_password, 'pass'
+  end
+end
+
 class URIGenericSingletonTest < Minitest::Test
   include TypeAssertions
   library 'uri'
@@ -476,3 +553,28 @@ class URIGenericInstanceTest < Minitest::Test
                       generic, :find_proxy, 'http_proxy=proxy'
   end
 end
+
+# class URIWSSingletonTest < Minitest::Test
+#   include TypeAssertions
+#   library 'uri'
+#   testing 'singleton(::URI::WS)'
+
+#   def test_build
+#     assert_send_type  '(Array[nil | String | Integer]) -> URI::WS',
+#                       URI::WS, :build, [nil, nil, nil, nil, nil, nil, nil, nil, nil]
+
+#     assert_send_type  '(Array[nil | String | Integer]) -> URI::WS',
+#                       URI::WS, :build, ['http', 'user:pass', 'localhost', 80, nil, '/foo/bar', nil, '?t=1', 'baz']
+
+#     assert_send_type '({ scheme: String, userinfo: String, host: String, port: Integer, path: String, query: String }) -> URI::WS',
+#                       URI::WS, :build,
+#                       {
+#                         scheme: 'http',
+#                         userinfo: 'user:pass',
+#                         host: 'localhost',
+#                         port: 80,
+#                         path: '/foo/bar',
+#                         query: '?t=1',
+#                       }
+#   end
+# end
