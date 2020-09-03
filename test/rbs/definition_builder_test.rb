@@ -1238,7 +1238,7 @@ EOF
         builder.build_singleton(type_name("::Hello")).yield_self do |definition|
           assert_instance_of Definition, definition
 
-          assert_method_definition definition.methods[:new], ["() -> ::Hello[untyped]"]
+          assert_method_definition definition.methods[:new], ["[A] () -> ::Hello[A]"]
         end
       end
     end
@@ -1561,6 +1561,33 @@ end
 
         assert_raises RBS::InvalidOverloadMethodError do
           builder.build_instance(type_name("::Hello"))
+        end
+      end
+    end
+  end
+
+  def test_new_from_included_initialize
+    SignatureManager.new do |manager|
+      manager.files.merge!(Pathname("foo.rbs") => <<-EOF)
+class Hello
+  include World
+end
+
+module World
+  def initialize: (String, Integer) -> void
+end
+      EOF
+      manager.build do |env|
+        builder = DefinitionBuilder.new(env: env)
+
+        builder.build_instance(type_name("::Hello")).tap do |definition|
+          initalize = definition.methods[:initialize]
+          assert_equal ["(::String, ::Integer) -> void"], initalize.method_types.map(&:to_s)
+        end
+
+        builder.build_singleton(type_name("::Hello")).tap do |definition|
+          new = definition.methods[:new]
+          assert_equal ["(::String, ::Integer) -> ::Hello"], new.method_types.map(&:to_s)
         end
       end
     end

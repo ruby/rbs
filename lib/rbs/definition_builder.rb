@@ -882,7 +882,7 @@ module RBS
           end
 
           unless definition.methods.key?(:new)
-            instance = build_one_instance(type_name)
+            instance = build_instance(type_name)
             initialize = instance.methods[:initialize]
 
             if initialize
