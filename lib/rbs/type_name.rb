@@ -1,3 +1,4 @@
+
 module RBS
   class TypeName
     attr_reader :namespace
@@ -14,13 +15,15 @@ module RBS
                 :alias
               when "_"
                 :interface
+              else
+                raise
               end
     end
 
     def ==(other)
       other.is_a?(self.class) && other.namespace == namespace && other.name == name
     end
-
+    
     alias eql? ==
 
     def hash
@@ -66,5 +69,19 @@ module RBS
     def with_prefix(namespace)
       self.class.new(namespace: namespace + self.namespace, name: name)
     end
+  end
+end
+
+module Kernel
+  def TypeName(string)
+    absolute = string.start_with?("::")
+
+    *path, name = string.delete_prefix("::").split("::").map(&:to_sym)
+    raise unless name
+
+    RBS::TypeName.new(
+      name: name,
+      namespace: RBS::Namespace.new(path: path, absolute: absolute)
+    )
   end
 end

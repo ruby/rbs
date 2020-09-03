@@ -36,8 +36,11 @@ module RBS
       end
 
       def each_ancestor(&block)
-        if block_given?
-          yield super_class if super_class
+        if block
+          if s = super_class
+            yield s
+          end
+          
           self_types&.each(&block)
           included_modules&.each(&block)
           prepended_modules&.each(&block)
@@ -108,7 +111,7 @@ module RBS
       return if with_super_classes.size <= 1
 
       super_types = with_super_classes.map do |d|
-        super_class = d.decl.super_class
+        super_class = d.decl.super_class or raise
         Types::ClassInstance.new(name: super_class.name, args: super_class.args, location: nil)
       end
 
@@ -159,10 +162,10 @@ module RBS
 
         entry.self_types.each do |module_self|
           NoSelfTypeFoundError.check!(module_self, env: env)
-          ancestors.self_types.push Definition::Ancestor::Instance.new(name: module_self.name, args: module_self.args)
+
+          self_types = ancestors.self_types or raise
+          self_types.push Definition::Ancestor::Instance.new(name: module_self.name, args: module_self.args)
         end
-      else
-        raise "Unexpected entry for: #{type_name}"
       end
 
       mixin_ancestors(entry,
@@ -208,9 +211,6 @@ module RBS
           type_name: type_name,
           super_class: Definition::Ancestor::Instance.new(name: BuiltinNames::Module.name, args: [])
         )
-
-      else
-        raise "Unexpected entry for: #{type_name}"
       end
 
       mixin_ancestors(entry,
@@ -285,33 +285,38 @@ module RBS
 
       case entry
       when Environment::ClassEntry
-        if one_ancestors.super_class
-          super_name = one_ancestors.super_class.name
-          super_args = one_ancestors.super_class.args
+        if super_class = one_ancestors.super_class
+          # @type var super_class: Definition::Ancestor::Instance
+          super_name = super_class.name
+          super_args = super_class.args
 
           super_ancestors = instance_ancestors(super_name, building_ancestors: building_ancestors)
           ancestors.unshift(*super_ancestors.apply(super_args, location: entry.primary.decl.location))
         end
       end
 
-      one_ancestors.included_modules.each do |mod|
-        if mod.name.class?
-          name = mod.name
-          args = mod.args
-          mod_ancestors = instance_ancestors(name, building_ancestors: building_ancestors)
-          ancestors.unshift(*mod_ancestors.apply(args, location: entry.primary.decl.location))
-        end
+      if included_modules = one_ancestors.included_modules
+        included_modules.each do |mod|
+          if mod.name.class?
+            name = mod.name
+            arg_types = mod.args
+            mod_ancestors = instance_ancestors(name, building_ancestors: building_ancestors)
+            ancestors.unshift(*mod_ancestors.apply(arg_types, location: entry.primary.decl.location))
+          end
+        end  
       end
 
       ancestors.unshift(self_ancestor)
 
-      one_ancestors.prepended_modules.each do |mod|
-        if mod.name.class?
-          name = mod.name
-          args = mod.args
-          mod_ancestors = instance_ancestors(name, building_ancestors: building_ancestors)
-          ancestors.unshift(*mod_ancestors.apply(args, location: entry.primary.decl.location))
-        end
+      if prepended_modules = one_ancestors.prepended_modules
+        prepended_modules.each do |mod|
+          if mod.name.class?
+            name = mod.name
+            arg_types = mod.args
+            mod_ancestors = instance_ancestors(name, building_ancestors: building_ancestors)
+            ancestors.unshift(*mod_ancestors.apply(arg_types, location: entry.primary.decl.location))
+          end
+        end  
       end
 
       building_ancestors.pop
@@ -338,22 +343,23 @@ module RBS
 
       ancestors = []
 
-      case one_ancestors.super_class
+      case super_class = one_ancestors.super_class
       when Definition::Ancestor::Instance
-        super_name = one_ancestors.super_class.name
-        super_args = one_ancestors.super_class.args
+        super_name = super_class.name
+        super_args = super_class.args
 
         super_ancestors = instance_ancestors(super_name, building_ancestors: building_ancestors)
         ancestors.unshift(*super_ancestors.apply(super_args, location: entry.primary.decl.location))
 
       when Definition::Ancestor::Singleton
-        super_name = one_ancestors.super_class.name
+        super_name = super_class.name
 
         super_ancestors = singleton_ancestors(super_name, building_ancestors: [])
         ancestors.unshift(*super_ancestors.ancestors)
       end
 
-      one_ancestors.extended_modules.each do |mod|
+      extended_modules = one_ancestors.extended_modules or raise
+      extended_modules.each do |mod|
         if mod.name.class?
           name = mod.name
           args = mod.args
@@ -406,17 +412,17 @@ module RBS
                                                location: nil)
 
           definition_pairs = ancestors.ancestors.map do |ancestor|
+            # @type block: [Definition::Ancestor::t, Definition]
             case ancestor
             when Definition::Ancestor::Instance
               [ancestor, build_one_instance(ancestor.name)]
             when Definition::Ancestor::Singleton
               [ancestor, build_one_singleton(ancestor.name)]
-            else
-              raise
             end
           end
 
-          if entry.is_a?(Environment::ModuleEntry)
+          case entry
+          when Environment::ModuleEntry
             entry.self_types.each do |module_self|
               ancestor = Definition::Ancestor::Instance.new(name: module_self.name, args: module_self.args)
               definition_pairs.push(
@@ -433,9 +439,6 @@ module RBS
           end
 
           merge_definitions(type_name, definition_pairs, entry: entry, self_type: self_type, ancestors: ancestors)
-
-        else
-          raise
         end
       end
     end
@@ -456,6 +459,7 @@ module RBS
           )
 
           definition_pairs = ancestors.ancestors.map do |ancestor|
+            # @type block: [Definition::Ancestor::t, Definition]
             case ancestor
             when Definition::Ancestor::Instance
               [ancestor, build_one_instance(ancestor.name)]
@@ -474,20 +478,18 @@ module RBS
                 ancestor,
                 definition
               ]
-            else
-              raise
             end
           end
 
           merge_definitions(type_name, definition_pairs, entry: entry, self_type: self_type, ancestors: ancestors)
-        else
-          raise
         end
       end
     end
 
     def method_definition_members(type_name, entry, kind:)
+      # @type var interface_methods: Hash[Symbol, [Definition::Method, AST::Members::t]]
       interface_methods = {}
+      # @type var methods: Hash[Symbol, Array[[AST::Members::MethodDefinition, Definition::accessibility]]]
       methods = {}
 
       entry.decls.each do |d|
@@ -534,11 +536,14 @@ module RBS
         end
       end
 
+      # @type var result: Hash[Symbol, member_detail]
       result = {}
 
       interface_methods.each do |name, pair|
         method_definition, _ = pair
-        result[name] = [:public, method_definition]
+        # @type var detail: member_detail
+        detail = [:public, method_definition, nil, []]
+        result[name] = detail
       end
 
       methods.each do |method_name, array|
@@ -562,12 +567,12 @@ module RBS
             )
           end
 
-          result[method_name] += array.map(&:first)
+          result[method_name][3].push(*array.map(&:first))
         else
           case
           when array.size == 1 && !array[0][0].overload?
             member, visibility = array[0]
-            result[method_name] = [visibility, nil, member]
+            result[method_name] = [visibility, nil, member, []]
 
           else
             visibilities = array.group_by {|pair| pair[1] }
@@ -582,7 +587,7 @@ module RBS
             end
 
             overloads, primary = array.map(&:first).partition(&:overload?)
-            result[method_name] = [array[0][1], nil, *primary, *overloads]
+            result[method_name] = [array[0][1], nil, primary[0], overloads]
           end
         end
       end
@@ -601,7 +606,13 @@ module RBS
 
         Definition.new(type_name: type_name, entry: entry, self_type: self_type, ancestors: ancestors).tap do |definition|
           method_definition_members(type_name, entry, kind: :instance).each do |method_name, array|
-            visibility, method_def, *members = array
+            visibility, method_def, primary_member, overload_members = array
+
+            members = if primary_member
+              [primary_member, *overload_members]
+            else
+              overload_members
+            end
 
             m = if method_def
                   Definition::Method.new(
@@ -770,9 +781,9 @@ module RBS
 
       errors = []
 
-      if decl.is_a?(AST::Declarations::Class)
-        if decl.super_class
-          super_class = decl.super_class
+      case decl
+      when AST::Declarations::Class
+        if super_class = decl.super_class
           result = calculator.in_inherit(name: super_class.name, args: super_class.args, variables: param_names)
 
           validate_params_with type_params, result: result do |param|
@@ -782,6 +793,8 @@ module RBS
           end
         end
       end
+
+      # @type var result: VarianceCalculator::Result
 
       decl.members.each do |member|
         case member
@@ -830,7 +843,13 @@ module RBS
 
         Definition.new(type_name: type_name, entry: entry, self_type: self_type, ancestors: ancestors).tap do |definition|
           method_definition_members(type_name, entry, kind: :singleton).each do |method_name, array|
-            visibility, method_def, *members = array
+            visibility, method_def, primary_member, overload_members = array
+
+            members = if primary_member
+              [primary_member, *overload_members]
+            else
+              overload_members
+            end
 
             m = Definition::Method.new(
               super_method: nil,
@@ -957,7 +976,7 @@ module RBS
 
     def merge_definitions(type_name, pairs, entry:, self_type:, ancestors:)
       Definition.new(type_name: type_name, entry: entry, self_type: self_type, ancestors: ancestors).tap do |definition|
-        pairs.reverse_each do |(ancestor, current_definition)|
+        pairs.reverse_each do |ancestor, current_definition|
           sub = case ancestor
                 when Definition::Ancestor::Instance
                   Substitution.build(current_definition.type_params, ancestor.args)
@@ -965,6 +984,7 @@ module RBS
                   Substitution.build([], [])
                 end
 
+          # @type var kind: method_kind
           kind = case ancestor
                  when Definition::Ancestor::Instance
                    :instance
@@ -1015,7 +1035,7 @@ module RBS
     end
 
     def try_cache(type_name, cache:)
-      cached = cache[type_name]
+      cached = _ = cache[type_name]
 
       case cached
       when Definition
@@ -1027,9 +1047,11 @@ module RBS
         begin
           cache[type_name] = yield
         rescue => ex
-          cache[type_name] = nil
+          cache.delete(type_name)
           raise ex
         end
+      else
+        raise
       end
     end
 
@@ -1067,7 +1089,9 @@ module RBS
             mixin = build_interface(member.name)
 
             args = member.args
-            type_params = mixin.entry.decl.type_params
+            # @type var interface_entry: Environment::SingleEntry[TypeName, AST::Declarations::Interface]
+            interface_entry = _ = mixin.entry
+            type_params = interface_entry.decl.type_params
 
             InvalidTypeApplicationError.check!(
               type_name: type_name,

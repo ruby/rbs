@@ -7,7 +7,7 @@ module RBS
       class ModuleTypeParams
         attr_reader :params
 
-        TypeParam = Struct.new(:name, :variance, :skip_validation, keyword_init: true) do
+        TypeParam = _ = Struct.new(:name, :variance, :skip_validation, keyword_init: true) do
           def to_json(*a)
             {
               name: name,
@@ -47,7 +47,11 @@ module RBS
         end
 
         def each(&block)
-          params.each(&block)
+          if block
+            params.each(&block)
+          else
+            params.each
+          end
         end
 
         def self.empty
@@ -55,11 +59,13 @@ module RBS
         end
 
         def variance(name)
-          self[name].variance
+          var = self[name] or raise
+          var.variance
         end
 
         def skip_validation?(name)
-          self[name].skip_validation
+          var = self[name] or raise
+          var.skip_validation
         end
 
         def empty?
@@ -85,7 +91,7 @@ module RBS
           if block_given?
             members.each do |member|
               if member.is_a?(Members::Base)
-                yield member
+                yield(_ = member)
               end
             end
           else
@@ -96,8 +102,8 @@ module RBS
         def each_decl
           if block_given?
             members.each do |member|
-              if member.is_a?(Declarations::Base)
-                yield member
+              if member.is_a?(Base)
+                yield(_ = member)
               end
             end
           else
@@ -108,9 +114,9 @@ module RBS
 
       module MixinHelper
         def each_mixin(&block)
-          if block_given?
+          if block
             @mixins ||= begin
-                          members.select do |member|
+                          _ = members.select do |member|
                             case member
                             when Members::Include, Members::Extend, Members::Prepend
                               true

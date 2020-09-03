@@ -1,6 +1,6 @@
 module RBS
   class TypeNameResolver
-    Query = Struct.new(:type_name, :context, keyword_init: true)
+    Query = _ = Struct.new(:type_name, :context, keyword_init: true)
 
     attr_reader :all_names
     attr_reader :cache
@@ -36,15 +36,22 @@ module RBS
       query = Query.new(type_name: type_name, context: context)
       try_cache(query) do
         path_head, *path_tail = type_name.to_namespace.path
+        raise unless path_head
+
         name_head = TypeName.new(name: path_head, namespace: Namespace.empty)
 
-        absolute_head = context.each.find do |namespace|
+        absolute_head = context.find do |namespace|
+          # @type break: TypeName
           full_name = name_head.with_prefix(namespace)
           has_name?(full_name) and break full_name
         end
 
-        if absolute_head
+        case absolute_head
+        when TypeName
           has_name?(Namespace.new(path: absolute_head.to_namespace.path.push(*path_tail), absolute: true).to_type_name)
+        when Namespace
+          # This cannot happen because the `context.find` doesn't return a Namespace.
+          raise
         end
       end
     end

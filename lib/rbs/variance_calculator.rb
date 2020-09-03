@@ -73,11 +73,11 @@ module RBS
         type(param.type, result: result, context: :contravariant)
       end
 
-      if method_type.block
-        method_type.block.type.each_param do |param|
+      if block = method_type.block
+        block.type.each_param do |param|
           type(param.type, result: result, context: :covariant)
         end
-        type(method_type.block.type.return_type, result: result, context: :contravariant)
+        type(block.type.return_type, result: result, context: :contravariant)
       end
 
       type(method_type.type.return_type, result: result, context: :covariant)
@@ -113,9 +113,9 @@ module RBS
 
         type_params = case type
                       when Types::ClassInstance
-                        env.class_decls[type.name]&.type_params
+                        env.class_decls[type.name].type_params
                       when Types::Interface
-                        env.interface_decls[type.name]&.decl&.type_params
+                        env.interface_decls[type.name].decl.type_params
                       end
 
         type.args.each.with_index do |ty, i|
@@ -126,6 +126,7 @@ module RBS
           when :covariant
             type(ty, result: result, context: context)
           when :contravariant
+            # @type var con: variance
             con = case context
                   when :invariant
                     :invariant
@@ -133,6 +134,8 @@ module RBS
                     :contravariant
                   when :contravariant
                     :covariant
+                  else
+                    raise                    
                   end
             type(ty, result: result, context: con)
           end

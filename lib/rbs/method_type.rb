@@ -93,7 +93,7 @@ module RBS
     end
 
     def each_type(&block)
-      if block_given?
+      if block
         type.each_type(&block)
         self.block&.yield_self do |b|
           b.type.each_type(&block)
@@ -105,10 +105,10 @@ module RBS
 
     def to_s
       s = case
-          when block && block.required
-            "(#{type.param_to_s}) { (#{block.type.param_to_s}) -> #{block.type.return_to_s} } -> #{type.return_to_s}"
-          when block
-            "(#{type.param_to_s}) ?{ (#{block.type.param_to_s}) -> #{block.type.return_to_s} } -> #{type.return_to_s}"
+          when (b = block) && b.required
+            "(#{type.param_to_s}) { (#{b.type.param_to_s}) -> #{b.type.return_to_s} } -> #{type.return_to_s}"
+          when b = block
+            "(#{type.param_to_s}) ?{ (#{b.type.param_to_s}) -> #{b.type.return_to_s} } -> #{type.return_to_s}"
           else
             "(#{type.param_to_s}) -> #{type.return_to_s}"
           end

@@ -1,0 +1,4 @@
+module RBS
+  class EnvironmentLoader
+  end
+end

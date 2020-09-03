@@ -47,9 +47,9 @@ module RBS
         end
 
         def overload?
-          case member
+          case mem = member
           when AST::Members::MethodDefinition
-            member.overload?
+            mem.overload?
           else
             false
           end
@@ -69,11 +69,17 @@ module RBS
       end
 
       def defined_in
-        @defined_in ||= defs.last.defined_in
+        @defined_in ||= begin
+          last_def = defs.last or raise
+          last_def.defined_in
+        end
       end
 
       def implemented_in
-        @implemented_in ||= defs.last.implemented_in
+        @implemented_in ||= begin
+          last_def = defs.last or raise
+          last_def.implemented_in
+        end
       end
 
       def method_types
@@ -81,7 +87,7 @@ module RBS
       end
 
       def comments
-        @comments ||= defs.map(&:comment).compact
+        @comments ||= _ = defs.map(&:comment).compact
       end
 
       def annotations
@@ -126,8 +132,8 @@ module RBS
     end
 
     module Ancestor
-      Instance = Struct.new(:name, :args, keyword_init: true)
-      Singleton = Struct.new(:name, keyword_init: true)
+      Instance = _ = Struct.new(:name, :args, keyword_init: true)
+      Singleton = _ = Struct.new(:name, keyword_init: true)
     end
 
     class InstanceAncestors
@@ -219,7 +225,10 @@ module RBS
     end
 
     def interface?
-      entry.is_a?(Environment::SingleEntry) && entry.decl.is_a?(AST::Declarations::Interface)
+      case en = entry
+      when Environment::SingleEntry
+        en.decl.is_a?(AST::Declarations::Interface)
+      end
     end
 
     def class_type?
@@ -239,16 +248,16 @@ module RBS
     end
 
     def type_params_decl
-      case entry
+      case en = entry
       when Environment::ClassEntry, Environment::ModuleEntry
-        entry.type_params
+        en.type_params
       when Environment::SingleEntry
-        entry.decl.type_params
+        en.decl.type_params
       end
     end
 
     def sub(s)
-      definition = self.class.new(type_name: type_name, self_type: self_type.sub(s), ancestors: ancestors, entry: entry)
+      definition = self.class.new(type_name: type_name, self_type: _ = self_type.sub(s), ancestors: ancestors, entry: entry)
 
       definition.methods.merge!(methods.transform_values {|method| method.sub(s) })
       definition.instance_variables.merge!(instance_variables.transform_values {|v| v.sub(s) })
@@ -268,7 +277,7 @@ module RBS
     end
 
     def each_type(&block)
-      if block_given?
+      if block
         methods.each_value do |method|
           if method.defined_in == type_name
             method.method_types.each do |method_type|
