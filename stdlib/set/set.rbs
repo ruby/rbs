@@ -232,7 +232,7 @@ class Set[A]
   #     Set[1, 2, 3].intersect? Set[4, 5]   #=> false
   #     Set[1, 2, 3].intersect? Set[3, 4]   #=> true
   #
-  def intersect?: () -> bool
+  def intersect?: (self) -> bool
 
   # Deletes every element of the set for which block evaluates to false, and
   # returns self. Returns an enumerator if no block is given.
