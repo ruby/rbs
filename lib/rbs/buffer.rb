@@ -23,7 +23,7 @@ module RBS
 
     def pos_to_loc(pos)
       index = ranges.bsearch_index do |range|
-        pos < range.end
+        pos < range.end ? true : false
       end
 
       if index
