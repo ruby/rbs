@@ -43,7 +43,7 @@ module RBS
     end
 
     def source
-      @source ||= buffer.content[start_pos...end_pos]
+      @source ||= buffer.content[start_pos...end_pos] or raise
     end
 
     def to_s
@@ -71,10 +71,6 @@ module RBS
       else
         self
       end
-    end
-
-    def self.concat(*locations)
-      locations.inject {|l1, l2| l1 + l2 }
     end
 
     def concat(*others)

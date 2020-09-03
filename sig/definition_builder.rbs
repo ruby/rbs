@@ -1,0 +1,95 @@
+module RBS
+  class DefinitionBuilder
+    class OneAncestors
+      attr_reader type_name: TypeName
+      attr_reader params: Array[Symbol]?
+      attr_reader super_class: Definition::Ancestor::t?
+      attr_reader self_types: Array[Definition::Ancestor::Instance]?
+      attr_reader included_modules: Array[Definition::Ancestor::Instance]?
+      attr_reader prepended_modules: Array[Definition::Ancestor::Instance]?
+      attr_reader extended_modules: Array[Definition::Ancestor::Instance]?
+
+      def initialize: (type_name: TypeName,
+                          params: Array[Symbol]?,
+                     super_class: Definition::Ancestor::t?,
+                      self_types: Array[Definition::Ancestor::Instance]?,
+                included_modules: Array[Definition::Ancestor::Instance]?,
+               prepended_modules: Array[Definition::Ancestor::Instance]?,
+                extended_modules: Array[Definition::Ancestor::Instance]?) -> void
+
+      def each_ancestor: { (Definition::Ancestor::t) -> void } -> void
+                       | -> Enumerator[Definition::Ancestor::t, void]
+
+      def self.class_instance: (type_name: TypeName, params: Array[Symbol], super_class: Definition::Ancestor::t?) -> instance
+
+      def self.singleton: (type_name: TypeName, super_class: Definition::Ancestor::t?) -> instance
+
+      def self.module_instance: (type_name: TypeName, params: Array[Symbol]) -> instance
+    end
+
+    attr_reader env: Environment
+    attr_reader type_name_resolver: TypeNameResolver
+    
+    attr_reader instance_cache: Hash[TypeName, Definition | false | nil]
+    attr_reader singleton_cache: Hash[TypeName, Definition | false | nil]
+    attr_reader interface_cache: Hash[TypeName, Definition | false | nil]
+
+    attr_reader one_instance_cache: Hash[TypeName, Definition]
+    attr_reader one_singleton_cache: Hash[TypeName, Definition]
+    
+    attr_reader instance_ancestors_cache: Hash[TypeName, Definition::InstanceAncestors]
+    attr_reader singleton_ancestor_cache: Hash[TypeName, Definition::SingletonAncestors]
+
+    attr_reader one_instance_ancestors_cache: Hash[TypeName, OneAncestors]
+    attr_reader one_singleton_ancestors_cache: Hash[TypeName, OneAncestors]
+
+    def initialize: (env: Environment) -> void
+
+    def validate_super_class!: (TypeName, Environment::ClassEntry) -> void
+
+    def one_instance_ancestors: (TypeName) -> OneAncestors
+                                
+    def one_singleton_ancestors: (TypeName) -> OneAncestors
+
+    def instance_ancestors: (TypeName, ?building_ancestors: Array[Definition::Ancestor::t]) -> Definition::InstanceAncestors
+
+    def singleton_ancestors: (TypeName, ?building_ancestors: Array[Definition::Ancestor::t]) -> Definition::SingletonAncestors
+
+    def mixin_ancestors: (Environment::ClassEntry | Environment::ModuleEntry, included_modules: Array[Definition::Ancestor::Instance]?, prepended_modules: Array[Definition::Ancestor::Instance]?, extended_modules: Array[Definition::Ancestor::Instance]?) -> void
+
+    def each_member_with_accessibility: (Array[AST::Members::t | AST::Declarations::t], ?accessibility: Definition::accessibility) { (AST::Members::t | AST::Declarations::t, Definition::accessibility) -> void } -> void
+
+    def ensure_namespace!: (Namespace, location: Location?) -> void
+
+    def build_instance: (TypeName) -> Definition
+
+    def build_interface: (TypeName) -> Definition
+
+    def build_one_instance: (TypeName) -> Definition
+
+    def build_one_singleton: (TypeName) -> Definition
+
+    def merge_definitions: (TypeName, 
+                            Array[[Definition::Ancestor::t, Definition]],
+                            entry: Environment::ModuleEntry | Environment::ClassEntry,
+                            self_type: Definition::self_type,
+                            ancestors: Array[Definition::Ancestor::t]) -> Definition
+
+    type method_kind = :instance | :singleton
+    def merge_method: (TypeName, Hash[Symbol, Definition::Method], Symbol, Definition::Method, Substitution, kind: method_kind) -> void
+
+    def merge_variable: (Hash[Symbol, Definition::Variable], Symbol, Definition::Variable) -> void
+
+    def try_cache: (TypeName, cache: Hash[TypeName, Definition | false | nil]) { () -> Definition } -> Definition
+
+    type member_detail = [Definition::accessibility, Definition::Method?, AST::Members::MethodDefinition?, Array[AST::Members::MethodDefinition]]
+    def method_definition_members: (TypeName, Environment::ClassEntry | Environment::ModuleEntry, kind: :singleton | :instance) -> Hash[Symbol, member_detail]
+
+    def validate_params_with: (AST::Declarations::ModuleTypeParams, result: VarianceCalculator::Result) { (AST::Declarations::ModuleTypeParams::TypeParam) -> void } -> void
+
+    def validate_parameter_variance: (decl: AST::Declarations::Class | AST::Declarations::Module | AST::Declarations::Interface, methods: Hash[Symbol, Definition::Method]) -> void
+
+    def expand_alias: (TypeName) -> Types::t
+  end
+end
+

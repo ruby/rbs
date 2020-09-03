@@ -483,7 +483,7 @@ EOF
             assert_equal :public, foo[0]
             assert_nil foo[1]
             assert_equal [parse_method_type("() -> ::String")], foo[2].types
-            assert_equal [parse_method_type("(::Integer) -> ::Baz::String")], foo[3].types
+            assert_equal [parse_method_type("(::Integer) -> ::Baz::String")], foo[3][0].types
           end
         end
 
@@ -519,8 +519,10 @@ EOF
             assert_instance_of Definition::Method, test2[1]
             assert_equal [parse_method_type("() -> ::Integer")], test2[1].method_types
 
-            assert_instance_of AST::Members::MethodDefinition, test2[2]
-            assert_equal [parse_method_type("(::Integer) -> ::String")], test2[2].types
+            assert_nil test2[2]
+
+            assert_instance_of AST::Members::MethodDefinition, test2[3][0]
+            assert_equal [parse_method_type("(::Integer) -> ::String")], test2[3][0].types
           end
         end
       end

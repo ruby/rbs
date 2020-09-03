@@ -16,7 +16,7 @@ module RBS
           tokens.each.with_object({}) do |token, hash|
             if token[1] == :on_comment
               line = token[0][0]
-              body = token[2][2..]
+              body = token[2][2..-1]
 
               body = "\n" if body.empty?
 
@@ -500,7 +500,6 @@ module RBS
         else
           type_node.type == :CALL && proc_type?(type_node.children[0])
         end
-
       end
 
       def call_node?(node, name:, receiver: -> (node) { node.type == :CONST && node.children[0] == :T }, args: -> (node) { true })

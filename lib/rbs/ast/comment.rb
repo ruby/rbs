@@ -25,7 +25,13 @@ module RBS
 
       def concat(string:, location:)  
         @string.concat string
-        @location.concat location
+
+        if loc = @location
+          loc.concat location
+        else
+          @location = location
+        end
+
         self
       end
     end

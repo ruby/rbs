@@ -63,7 +63,9 @@ module RBS
     end
 
     def split
-      [parent, path.last]
+      last = path.last or return
+      parent = self.parent
+      [parent, last]
     end
 
     def to_s
@@ -77,6 +79,10 @@ module RBS
 
     def to_type_name
       parent, name = split
+
+      raise unless name
+      raise unless parent
+
       TypeName.new(name: name, namespace: parent)
     end
 
@@ -88,14 +94,13 @@ module RBS
       end
     end
 
-
     def ascend
       if block_given?
         current = self
 
         until current.empty?
           yield current
-          current = current.parent
+          current = _ = current.parent 
         end
 
         yield current
@@ -105,5 +110,11 @@ module RBS
         enum_for(:ascend)
       end
     end
+  end
+end
+
+module Kernel
+  def Namespace(name)
+    RBS::Namespace.parse(name)
   end
 end

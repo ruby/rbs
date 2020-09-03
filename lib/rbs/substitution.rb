@@ -31,10 +31,11 @@ module RBS
     def apply(ty)
       case ty
       when Types::Variable
+        # @type var ty: Types::Variable
         mapping[ty.name] || ty
       when Types::Bases::Instance
-        if instance_type
-          instance_type
+        if t = instance_type
+          t
         else
           ty
         end
@@ -44,7 +45,7 @@ module RBS
     end
 
     def without(*vars)
-      self.class.new.tap do |subst|
+      Substitution.new.tap do |subst|
         subst.mapping.merge!(mapping)
         vars.each do |var|
           subst.mapping.delete(var)

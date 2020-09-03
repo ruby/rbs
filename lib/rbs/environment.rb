@@ -13,14 +13,15 @@ module RBS
       def context
         @context ||= begin
                        (outer + [decl]).each.with_object([Namespace.root]) do |decl, array|
-                         array.unshift(array.first + decl.name.to_namespace)
+                         first = array.first or raise 
+                         array.unshift(first + decl.name.to_namespace)
                        end
                      end
       end
     end
 
     class MultiEntry
-      D = Struct.new(:decl, :outer, keyword_init: true) do
+      D = _ = Struct.new(:decl, :outer, keyword_init: true) do
         include ContextUtil
       end
 
@@ -40,6 +41,8 @@ module RBS
       def validate_type_params
         unless decls.empty?
           hd_decl, *tl_decls = decls
+          raise unless hd_decl
+
           hd_params = hd_decl.decl.type_params
           hd_names = hd_params.params.map(&:name)
 
@@ -56,6 +59,10 @@ module RBS
       def type_params
         primary.decl.type_params
       end
+
+      def primary
+        raise "Not implemented"
+      end
     end
 
     class ModuleEntry < MultiEntry
@@ -68,7 +75,7 @@ module RBS
       def primary
         @primary ||= begin
                        validate_type_params
-                       decls.first
+                       decls.first or raise("decls cannot be empty")
                      end
       end
     end
@@ -77,7 +84,7 @@ module RBS
       def primary
         @primary ||= begin
                        validate_type_params
-                       decls.find {|d| d.decl.super_class } || decls.first
+                       decls.find {|d| d.decl.super_class } || decls.first or raise("decls cannot be empty")
                      end
       end
     end
@@ -154,14 +161,16 @@ module RBS
 
         case
         when decl.is_a?(AST::Declarations::Module) && existing_entry.is_a?(ModuleEntry)
-          # OK
+          # @type var existing_entry: ModuleEntry
+          # @type var decl: AST::Declarations::Module
+          existing_entry.insert(decl: decl, outer: outer)
         when decl.is_a?(AST::Declarations::Class) && existing_entry.is_a?(ClassEntry)
-          # OK
+          # @type var existing_entry: ClassEntry
+          # @type var decl: AST::Declarations::Class
+          existing_entry.insert(decl: decl, outer: outer)
         else
           raise DuplicatedDeclarationError.new(name, decl, existing_entry.primary.decl)
         end
-
-        existing_entry.insert(decl: decl, outer: outer)
 
         prefix = outer + [decl]
         ns = name.to_namespace
@@ -211,6 +220,7 @@ module RBS
 
     def resolve_declaration(resolver, decl, outer:, prefix:)
       if decl.is_a?(AST::Declarations::Global)
+        # @type var decl: AST::Declarations::Global
         return AST::Declarations::Global.new(
           name: decl.name,
           type: absolute_type(resolver, decl.type, context: [Namespace.root]),
@@ -220,7 +230,8 @@ module RBS
       end
 
       context = (outer + [decl]).each.with_object([Namespace.root]) do |decl, array|
-        array.unshift(array.first + decl.name.to_namespace)
+        head = array.first or raise
+        array.unshift(head + decl.name.to_namespace)
       end
 
       case decl
@@ -310,6 +321,9 @@ module RBS
           location: decl.location,
           comment: decl.comment
         )
+
+      else
+        raise
       end
     end
 
@@ -409,7 +423,7 @@ module RBS
     end
 
     def absolute_type(resolver, type, context:)
-      type.map_type_name do |name|
+      type.map_type_name do |name, _, _|
         absolute_type_name(resolver, name, context: context)
       end
     end
