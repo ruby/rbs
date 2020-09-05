@@ -1,0 +1,31 @@
+module BigMath
+  def self.E: (untyped prec) -> untyped
+
+  def self.PI: (untyped prec) -> untyped
+
+  def self.atan: (untyped x, untyped prec) -> untyped
+
+  def self.cos: (untyped x, untyped prec) -> untyped
+
+  def self.exp: (untyped, untyped) -> untyped
+
+  def self.log: (untyped, untyped) -> untyped
+
+  def self.sin: (untyped x, untyped prec) -> untyped
+
+  def self.sqrt: (untyped x, untyped prec) -> untyped
+
+  private
+
+  def E: (untyped prec) -> untyped
+
+  def PI: (untyped prec) -> untyped
+
+  def atan: (untyped x, untyped prec) -> untyped
+
+  def cos: (untyped x, untyped prec) -> untyped
+
+  def sin: (untyped x, untyped prec) -> untyped
+
+  def sqrt: (untyped x, untyped prec) -> untyped
+end
