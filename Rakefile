@@ -1,5 +1,10 @@
 require "bundler/gem_tasks"
 require "rake/testtask"
+require "rbconfig"
+
+ruby = ENV["RUBY"] || RbConfig.ruby
+rbs = File.join(__dir__, "exe/rbs")
+bin = File.join(__dir__, "bin")
 
 Rake::TestTask.new(:test) do |t|
   t.libs << "test"
@@ -16,21 +21,21 @@ task :test_doc => :parser do
     `git ls-files -z`.split("\x0").select do |file| Pathname(file).extname == ".md" end
   end
 
-  sh "ruby bin/run_in_md.rb #{files.join(" ")}"
+  sh "#{ruby} #{__dir__}/bin/run_in_md.rb #{files.join(" ")}"
 end
 
 task :validate => :parser do
-  sh "rbs validate"
+  sh "#{ruby} #{rbs} validate"
 
   FileList["stdlib/*"].each do |path|
     next if path =~ %r{stdlib/builtin}
-    sh "rbs -r#{File.basename(path)} validate"
+    sh "#{ruby} #{rbs} -r#{File.basename(path)} validate"
   end
 end
 
 FileList["test/stdlib/**/*_test.rb"].each do |test|
   multitask test => :parser do
-    sh "ruby bin/test_runner.rb #{test}"
+    sh "#{ruby} -Ilib #{bin}/test_runner.rb #{test}"
   end
   multitask stdlib_test: test
 end
