@@ -67,10 +67,11 @@ RUBY
           "RBS_TEST_TARGET" => "::Hello",
           "RBS_TEST_OPT" => "-I./foo.rbs"
         }
+        ruby = ENV['RUBY'] || RbConfig.ruby
         command_line = if defined?(Bundler)
-                         ["ruby", "-rbundler/setup", "-rrbs/test/setup", "sample.rb"]
+                         [ruby, "-rbundler/setup", "-rrbs/test/setup", "sample.rb"]
                        else
-                         ["ruby", "-I#{__dir__}/../../lib", "-rrbs/test/setup", "sample.rb"]
+                         [ruby, "-I#{__dir__}/../../../lib", "-EUTF-8", "-rrbs/test/setup", "sample.rb"]
                        end
 
         _out, err, status = Open3.capture3(env.merge(other_env), *command_line, chdir: path.to_s)
