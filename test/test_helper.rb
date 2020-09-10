@@ -5,7 +5,9 @@ require 'minitest/reporters'
 require "stringio"
 require "open3"
 
-Minitest::Reporters.use! [Minitest::Reporters::DefaultReporter.new]
+if defined?(Minitest::Reporters)
+  Minitest::Reporters.use! [Minitest::Reporters::DefaultReporter.new]
+end
 
 # RBS.logger.level = Logger::DEBUG
 
