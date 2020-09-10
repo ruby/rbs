@@ -435,14 +435,6 @@ rule
   method_member:
       annotations attributes overload kDEF method_kind def_name method_types {
         location = val[3].location + val[6].last.location
-        types = val[6].map do |type|
-          case type
-          when LocatedValue
-            type.value
-          else
-            type
-          end
-        end
 
         last_type = val[6].last
         if last_type.is_a?(LocatedValue) && last_type.value == :dot3
