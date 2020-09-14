@@ -35,9 +35,6 @@ interface _Exception
                | (String arg0) -> Exception
 end
 
-class BigDecimal
-end
-
 type int = Integer | _ToInt
 type real = Integer | Float | Rational
 
