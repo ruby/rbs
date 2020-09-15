@@ -132,7 +132,7 @@ class Hello
 end
 RBS
 
-    assert_match /TypeError: \[Hello#world\]/, output
+    assert_match(/TypeError: \[Hello#world\]/, output)
   end
 
   def test_minitest
