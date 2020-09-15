@@ -176,4 +176,9 @@ namespace :generate do
   end
 end
 
+task :test_generate_stdlib do
+  sh "RBS_GENERATE_TEST_PATH=/tmp/Array_test.rb rake 'generate:stdlib_test[Array]'"
+  sh "ruby -c /tmp/Array_test.rb"
+end
+
 CLEAN.include("lib/rbs/parser.rb")

@@ -15,20 +15,20 @@ jobs:
         - master-nightly-bionic 
         - 2.6.5-bionic
         - 2.7.0-bionic
+        job:
+        - test
+        - stdlib_test
+        - rubocop validate test_doc build test_generate_stdlib
     container:
       image: rubylang/ruby:${{ matrix.container_tag }}
     steps:
     - uses: actions/checkout@v1
-    - name: Run test
+    - name: Install
       run: |
         ruby -v
         gem install bundler
         bin/setup
-        bundle exec rake test
-        bundle exec rake stdlib_test
-        bundle exec rake rubocop
-        bundle exec rake validate
-        bundle exec rake test_doc
-        bundle exec rake build
-        RBS_GENERATE_TEST_PATH=/tmp/Array_test.rb bundle exec rake 'generate:stdlib_test[Array]'
-        ruby -c /tmp/Array_test.rb
+    - name: Run test
+      run: |
+        bundle exec rake ${{ matrix.job }}
+      if: "!(matrix.job == 'stdlib_test' && contains(matrix.container_tag, '2.6.5'))"
