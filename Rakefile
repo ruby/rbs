@@ -34,10 +34,10 @@ task :validate => :parser do
 end
 
 FileList["test/stdlib/**/*_test.rb"].each do |test|
-  multitask test => :parser do
+  task test => :parser do
     sh "#{ruby} -Ilib #{bin}/test_runner.rb #{test}"
   end
-  multitask stdlib_test: test
+  task stdlib_test: test
 end
 
 task :rubocop do
