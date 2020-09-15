@@ -34,10 +34,10 @@ task :validate => :parser do
 end
 
 FileList["test/stdlib/**/*_test.rb"].each do |test|
-  multitask test => :parser do
+  task test => :parser do
     sh "#{ruby} -Ilib #{bin}/test_runner.rb #{test}"
   end
-  multitask stdlib_test: test
+  task stdlib_test: test
 end
 
 task :rubocop do
@@ -174,6 +174,11 @@ namespace :generate do
 
     puts "Created: #{path}"
   end
+end
+
+task :test_generate_stdlib do
+  sh "RBS_GENERATE_TEST_PATH=/tmp/Array_test.rb rake 'generate:stdlib_test[Array]'"
+  sh "ruby -c /tmp/Array_test.rb"
 end
 
 CLEAN.include("lib/rbs/parser.rb")
