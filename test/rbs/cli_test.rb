@@ -313,7 +313,7 @@ singleton(::BasicObject)
         assert_rbs_test_no_errors(cli, dir, %w(--target ::Foo ls))
         assert_rbs_test_no_errors(cli, dir, %w(--target ::Bar ruby -v))
         assert_rbs_test_no_errors(cli, dir, %w(--target Bar::Baz rbs version))
-        assert_rbs_test_no_errors(cli, dir, %w(--target ::Bar::Baz rake stdlib_test))
+        assert_rbs_test_no_errors(cli, dir, %w(--target ::Bar::Baz rake -T))
         assert_rbs_test_no_errors(cli, dir, %w(--target ::Foo --target Bar::* rbs test --target ::Bar::Baz rbs version))
       end
     end
