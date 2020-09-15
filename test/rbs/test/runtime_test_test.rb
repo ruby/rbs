@@ -112,6 +112,7 @@ class TestClass
   end
 end
 RUBY
+    assert_match "No type checker was installed!", output
   end
 
   def test_open_decls
