@@ -2,8 +2,11 @@ require "rbs"
 require "rbs/test"
 require "minitest/autorun"
 
-require "minitest/reporters"
-Minitest::Reporters.use! [Minitest::Reporters::DefaultReporter.new]
+begin
+  require 'minitest/reporters'
+  Minitest::Reporters.use! [Minitest::Reporters::DefaultReporter.new]
+rescue LoadError
+end
 
 module Spy
   def self.wrap(object, method_name)
