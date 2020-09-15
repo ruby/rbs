@@ -447,17 +447,19 @@ end
 
   def test_incompatible_method_definition
     # `incompatible` is ignored with warning message.
-    Parser.parse_signature(<<~SIG).yield_self do |decls|
+    silence_warnings do
+      Parser.parse_signature(<<~SIG).yield_self do |decls|
       class Foo
         incompatible def foo: () -> Integer
       end
      SIG
-      assert_equal 1, decls.size
+        assert_equal 1, decls.size
 
-      decls[0].yield_self do |decl|
-        assert_instance_of Declarations::Class, decl
+        decls[0].yield_self do |decl|
+          assert_instance_of Declarations::Class, decl
 
-        assert_instance_of Members::MethodDefinition, decl.members[0]
+          assert_instance_of Members::MethodDefinition, decl.members[0]
+        end
       end
     end
   end
@@ -1041,14 +1043,16 @@ EOF
   end
 
   def test_overload_def_deprecated
-    Parser.parse_signature(<<EOF).yield_self do |decls|
+    silence_warnings do
+      Parser.parse_signature(<<EOF).yield_self do |decls|
 module Steep
   overload def to_s: (Integer) -> String
 end
 EOF
-      decls[0].members[0].tap do |member|
-        assert_instance_of Members::MethodDefinition, member
-        assert_operator member, :overload?
+        decls[0].members[0].tap do |member|
+          assert_instance_of Members::MethodDefinition, member
+          assert_operator member, :overload?
+        end
       end
     end
   end
