@@ -3,6 +3,8 @@ require "stringio"
 require "rbs/cli"
 
 class RBS::CliTest < Minitest::Test
+  include TestHelper
+
   CLI = RBS::CLI
 
   def stdout
@@ -192,11 +194,20 @@ singleton(::BasicObject)
 
   def test_paths
     with_cli do |cli|
-      cli.run(%w(-r set -r racc -I sig/test paths))
+      cli.run(%w(-r set -I sig/test paths))
       assert_match %r{/stdlib/builtin \(dir, stdlib\)$}, stdout.string
       assert_match %r{/stdlib/set \(dir, library, name=set\)$}, stdout.string
-      assert_match %r{/racc-\d\.\d\.\d+/sig \(absent, gem, name=racc, version=\)$}, stdout.string
       assert_match %r{^sig/test \(absent\)$}, stdout.string
+    end
+  end
+
+  def test_paths_with_gem
+    skip unless has_gem?("racc", "rbs-amber")
+
+    with_cli do |cli|
+      cli.run(%w(-r racc paths))
+      assert_match %r{/stdlib/builtin \(dir, stdlib\)$}, stdout.string
+      assert_match %r{/racc-\d\.\d\.\d+/sig \(absent, gem, name=racc, version=\)$}, stdout.string
     end
   end
 
@@ -204,9 +215,22 @@ singleton(::BasicObject)
     Dir.mktmpdir do |d|
       Dir.chdir(d) do
         with_cli do |cli|
-          cli.run(%w(vendor --vendor-dir=dir1 --stdlib rbs-amber racc))
+          cli.run(%w(vendor --vendor-dir=dir1 --stdlib))
 
           assert_operator Pathname(d) + "dir1/stdlib", :directory?
+        end
+      end
+    end
+  end
+
+  def test_vendor_gem
+    skip unless has_gem?("racc", "rbs-amber")
+
+    Dir.mktmpdir do |d|
+      Dir.chdir(d) do
+        with_cli do |cli|
+          cli.run(%w(vendor --vendor-dir=dir1 rbs-amber racc))
+
           assert_operator Pathname(d) + "dir1/gems", :directory?
           assert_operator Pathname(d) + "dir1/gems/rbs-amber", :directory?
           refute_operator Pathname(d) + "dir1/gems/racc", :directory?
@@ -273,7 +297,7 @@ singleton(::BasicObject)
         class Foo
           def foo: () -> void
         end
-        
+
         module Bar
           class Baz
             def foo: () -> void
@@ -289,14 +313,14 @@ singleton(::BasicObject)
         assert_rbs_test_no_errors(cli, dir, %w(--target ::Foo ls))
         assert_rbs_test_no_errors(cli, dir, %w(--target ::Bar ruby -v))
         assert_rbs_test_no_errors(cli, dir, %w(--target Bar::Baz rbs version))
-        assert_rbs_test_no_errors(cli, dir, %w(--target ::Bar::Baz rake stdlib_test))
+        assert_rbs_test_no_errors(cli, dir, %w(--target ::Bar::Baz rake -T))
         assert_rbs_test_no_errors(cli, dir, %w(--target ::Foo --target Bar::* rbs test --target ::Bar::Baz rbs version))
       end
     end
   end
 
   def assert_rbs_test_no_errors cli, dir, arg_array
-    args = ['-I', dir.to_s, 'test', *arg_array] 
+    args = ['-I', dir.to_s, 'test', *arg_array]
     assert_instance_of Process::Status, cli.run(args)
   end
 end

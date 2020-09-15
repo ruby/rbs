@@ -5,7 +5,9 @@ require 'minitest/reporters'
 require "stringio"
 require "open3"
 
-Minitest::Reporters.use! [Minitest::Reporters::DefaultReporter.new]
+if defined?(Minitest::Reporters)
+  Minitest::Reporters.use! [Minitest::Reporters::DefaultReporter.new]
+end
 
 # RBS.logger.level = Logger::DEBUG
 
@@ -27,6 +29,16 @@ if ENV["RUNTIME_TEST"]
 end
 
 module TestHelper
+  def has_gem?(*gems)
+    gems.each do |gem|
+      Gem::Specification.find_by_name(gem)
+    end
+
+    true
+  rescue Gem::MissingSpecError
+    false
+  end
+
   def parse_type(string, variables: Set.new)
     RBS::Parser.parse_type(string, variables: variables)
   end
@@ -159,9 +171,9 @@ SIG
 
   def assert_sampling_check(builder, sample_size, array)
     checker = RBS::Test::TypeCheck.new(self_class: Integer, builder: builder, sample_size: sample_size, unchecked_classes: [])
-    
+
     sample = checker.each_sample(array).to_a
-    
+
     assert_operator(sample.size, :<=, array.size)
     assert_operator(sample.size, :<=, sample_size) unless sample_size.nil?
     assert_empty(sample - array)

@@ -2,6 +2,8 @@ require "test_helper"
 require "open3"
 
 class RBS::VendorerTest < Minitest::Test
+  include TestHelper
+
   Environment = RBS::Environment
   EnvironmentLoader = RBS::EnvironmentLoader
   Declarations = RBS::AST::Declarations
@@ -45,6 +47,8 @@ class RBS::VendorerTest < Minitest::Test
   end
 
   def test_vendor_gem
+    skip unless has_gem?("rbs-amber")
+
     mktmpdir do |path|
       vendor_dir = path + "vendor"
       vendorer = Vendorer.new(vendor_dir: vendor_dir)

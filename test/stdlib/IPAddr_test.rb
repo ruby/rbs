@@ -1,4 +1,5 @@
 require_relative "test_helper"
+require "ipaddr"
 
 class IPAddrTest < StdlibTest
   target IPAddr
