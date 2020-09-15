@@ -93,11 +93,6 @@ class BigDecimalTest < Minitest::Test
                       BigDecimal("1.23"), :hash
   end
 
-  def test_initialize_copy
-    assert_send_type  "(self) -> self",
-                      BigDecimal("1.23"), :initialize_copy, BigDecimal("1.234")
-  end
-
   def test_inspect
     assert_send_type  "() -> ::String",
                       BigDecimal("1.23"), :inspect

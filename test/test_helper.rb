@@ -1,12 +1,13 @@
 $LOAD_PATH.unshift File.expand_path("../lib", __FILE__)
 require "rbs"
 require "tmpdir"
-require 'minitest/reporters'
 require "stringio"
 require "open3"
 
-if defined?(Minitest::Reporters)
+begin
+  require 'minitest/reporters'
   Minitest::Reporters.use! [Minitest::Reporters::DefaultReporter.new]
+rescue LoadError
 end
 
 # RBS.logger.level = Logger::DEBUG
