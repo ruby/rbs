@@ -2,6 +2,11 @@
 
 ## master
 
+## 0.12.0 (2020-09-15)
+
+* Signature updates for `forwardable`, `struct`, `set`, `URI::Generic`, `URI::File`, and `BigDecimal`.
+* Define `.new` methods from `initialize` included from modules [#390](https://github.com/ruby/rbs/pull/390)
+
 ## 0.11.0 (2020-08-31)
 
 * Signature update for `date/datetime` [#367](https://github.com/ruby/rbs/pull/367)
