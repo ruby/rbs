@@ -221,13 +221,13 @@ module TypeAssertions
     spy = Spy.wrap(receiver, method)
     spy.callback = -> (result) { trace << result }
 
+    result = nil
     exception = nil
 
     begin
-      spy.wrapped_object.__send__(method, *args, &block)
-    rescue => exn
+      result = spy.wrapped_object.__send__(method, *args, &block)
+    rescue Exception => exn
       exception = exn
-      raise
     end
 
     mt = case method_type
@@ -256,9 +256,9 @@ module TypeAssertions
     all_errors = method_types.map {|t| typecheck.method_call(method, t, trace.last, errors: []) }
     assert all_errors.any? {|es| es.empty? }, "Call trace does not match one of method definitions:\n  #{trace.last.inspect}\n  #{method_types.join(" | ")}"
 
-    if exception
-      raise exception
-    end
+    raise exception if exception
+
+    result
   end
 
   ruby2_keywords def refute_send_type(method_type, receiver, method, *args, &block)
@@ -266,9 +266,11 @@ module TypeAssertions
     spy = Spy.wrap(receiver, method)
     spy.callback = -> (result) { trace << result }
 
+    result = nil
     exception = nil
+
     begin
-      spy.wrapped_object.__send__(method, *args, &block)
+      result = spy.wrapped_object.__send__(method, *args, &block)
     rescue Exception => exn
       exception = exn
     end
@@ -294,7 +296,7 @@ module TypeAssertions
     assert_operator exception, :is_a?, ::Exception
     assert_empty errors.map {|x| RBS::Test::Errors.to_string(x) }
 
-    exception
+    result
   end
 end
 
