@@ -2,6 +2,11 @@
 
 ## master
 
+## 0.12.2 (2020-09-17)
+
+* Minor signature update for `pty`
+* Fix `PTY` stdlib test
+
 ## 0.12.1 (2020-09-16)
 
 This version is to improve Ruby 3 testing compatibility. Nothing changed for users.
