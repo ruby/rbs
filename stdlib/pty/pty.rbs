@@ -65,34 +65,10 @@ module PTY
   # `raise`
   # :   If `true` and the process identified by `pid` is no longer alive a
   #     PTY::ChildExited is raised.
-  def self.check: (Integer pid) -> (Process::Status | nil)
-                | (Integer pid, FalseClass raise) -> (Process::Status | nil)
-                | (Integer pid, TrueClass raise) -> nil
+  #
+  def self.check: (Integer pid, ?bool raise) -> Process::Status?
 
-  # Spawns the specified command on a newly allocated pty. You can also use the
-  # alias ::getpty.
-  #
-  # The command's controlling tty is set to the slave device of the pty and its
-  # standard input/output/error is redirected to the slave device.
-  #
-  # `command` and `command_line` are the full commands to run, given a String. Any
-  # additional `arguments` will be passed to the command.
-  #
-  # ### Return values
-  #
-  # In the non-block form this returns an array of size three, `[r, w, pid]`.
-  #
-  # In the block form these same values will be yielded to the block:
-  #
-  # `r`
-  # :   A readable IO that contains the command's standard output and standard
-  #     error
-  # `w`
-  # :   A writable IO that is the command's standard input
-  # `pid`
-  # :   The process identifier for the command.
-  def self.getpty: (*String command) -> [ IO, IO, Integer ]
-                 | (*String command) { ([ IO ,IO , Integer ]) -> untyped } -> untyped
+  alias self.getpty self.spawn
 
   # Allocates a pty (pseudo-terminal).
   #
@@ -130,7 +106,7 @@ module PTY
   #       ...
   #     }
   def self.open: () -> [ IO, File ]
-               | () { ([ IO , File ]) -> untyped } -> untyped
+               | [A] () { ([ IO , File ]) -> A } -> A
 
   # Spawns the specified command on a newly allocated pty. You can also use the
   # alias ::getpty.
@@ -155,5 +131,5 @@ module PTY
   # `pid`
   # :   The process identifier for the command.
   def self.spawn: (*String command) -> [ IO, IO, Integer ]
-                | (*String command) {([ IO , IO , Integer ]) -> untyped } -> untyped
+                | (*String command) {([ IO , IO , Integer ]) -> void } -> void
 end
