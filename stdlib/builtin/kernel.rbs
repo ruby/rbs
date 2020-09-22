@@ -11,6 +11,8 @@
 # sprintf "%.1f", 1.234 #=> "1.2"
 # ```
 module Kernel
+  private
+  
   def caller: (?Integer start_or_range, ?Integer length) -> ::Array[String]?
             | (?::Range[Integer] start_or_range) -> ::Array[String]?
             | () -> ::Array[String]
