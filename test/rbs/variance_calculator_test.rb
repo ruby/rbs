@@ -46,6 +46,10 @@ EOF
         calculator.in_method_type(method_type: parse_method_type("(A&B) -> void", variables: Set[:A, :B]), variables: [:A, :B]).tap do |result|
           assert_equal({ A: :contravariant, B: :contravariant }, result.result)
         end
+
+        calculator.in_method_type(method_type: parse_method_type("() -> ::Foo[A, B, C, D]", variables: Set[:A, :B, :C, :D]), variables: [:A, :B, :C, :D]).tap do |result|
+          assert_equal({ A: :covariant, B: :contravariant, C: :invariant, D: :unused }, result.result)
+        end
       end
     end
   end

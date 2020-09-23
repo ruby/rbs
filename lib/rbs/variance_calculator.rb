@@ -120,7 +120,7 @@ module RBS
 
         type.args.each.with_index do |ty, i|
           var = type_params.params[i]
-          case var.variance
+          case var&.variance
           when :invariant
             type(ty, result: result, context: :invariant)
           when :covariant
