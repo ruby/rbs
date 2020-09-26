@@ -1,0 +1,25 @@
+class YAML::Store < PStore
+  # :call-seq:
+  #   initialize( file_name, yaml_opts = {} )
+  #   initialize( file_name, thread_safe = false, yaml_opts = {} )
+  #
+  # Creates a new YAML::Store object, which will store data in +file_name+.
+  # If the file does not already exist, it will be created.
+  #
+  # YAML::Store objects are always reentrant. But if _thread_safe_ is set to true,
+  # then it will become thread-safe at the cost of a minor performance hit.
+  #
+  # Options passed in through +yaml_opts+ will be used when converting the
+  # store to YAML via Hash#to_yaml().
+  def initialize: (*untyped o) -> untyped
+
+  def dump: (untyped table) -> untyped
+
+  def load: (untyped content) -> untyped
+
+  def marshal_dump_supports_canonical_option?: () -> ::FalseClass
+
+  def empty_marshal_data: () -> untyped
+
+  def empty_marshal_checksum: () -> untyped
+end
