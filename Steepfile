@@ -3,7 +3,6 @@ target :lib do
   check "lib"
   ignore "lib/rbs/parser.rb"
 
-  vendor stdlib: "stdlib"
   library "set", "pathname", "json", "logger"
 end
 
