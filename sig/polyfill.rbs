@@ -1,3 +1,19 @@
 module Kernel
   def to_json: (*untyped) -> String
 end
+
+module Gem
+  class Version
+    def self.correct?: (String) -> bool
+
+    def self.create: (String?) -> instance?
+
+    include Comparable
+
+    def prerelease?: () -> bool
+
+    def release: () -> self
+
+    def version: () -> String
+  end
+end
