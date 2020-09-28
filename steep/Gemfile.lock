@@ -1,19 +1,7 @@
-PATH
-  remote: ../../steep
-  specs:
-    steep (0.27.0)
-      activesupport (>= 5.1)
-      ast_utils (~> 0.3.0)
-      language_server-protocol (~> 3.14.0.2)
-      listen (~> 3.1)
-      parser (~> 2.7.0)
-      rainbow (>= 2.2.2, < 4.0)
-      rbs (~> 0.11.0)
-
 GEM
   remote: https://rubygems.org/
   specs:
-    activesupport (6.0.3.2)
+    activesupport (6.0.3.3)
       concurrent-ruby (~> 1.0, >= 1.0.2)
       i18n (>= 0.7, < 2)
       minitest (~> 5.1)
@@ -32,13 +20,21 @@ GEM
       rb-fsevent (~> 0.10, >= 0.10.3)
       rb-inotify (~> 0.9, >= 0.9.10)
     minitest (5.14.2)
-    parser (2.7.1.4)
+    parser (2.7.1.5)
       ast (~> 2.4.1)
     rainbow (3.0.0)
     rb-fsevent (0.10.4)
     rb-inotify (0.10.1)
       ffi (~> 1.0)
-    rbs (0.11.0)
+    rbs (0.12.2)
+    steep (0.28.0)
+      activesupport (>= 5.1)
+      ast_utils (~> 0.3.0)
+      language_server-protocol (~> 3.14.0.2)
+      listen (~> 3.1)
+      parser (~> 2.7.0)
+      rainbow (>= 2.2.2, < 4.0)
+      rbs (~> 0.12.0)
     thor (1.0.1)
     thread_safe (0.3.6)
     tzinfo (1.2.7)
@@ -49,7 +45,7 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
-  steep!
+  steep
 
 BUNDLED WITH
-   2.1.3
+   2.1.4
