@@ -10,25 +10,6 @@ begin
 rescue LoadError
 end
 
-# RBS.logger.level = Logger::DEBUG
-
-if ENV["RUNTIME_TEST"]
-  require "rbs/test"
-
-  loader = RBS::EnvironmentLoader.new
-  loader.add(path: Pathname(__dir__)+"../sig")
-
-  env = RBS::Environment.from_loader(loader).resolve_type_names
-  tester = RBS::Test::Tester.new(env: env)
-
-  test_classes = []
-  test_classes << RBS::Buffer
-  test_classes << RBS::Location
-  test_classes.each do |klass|
-    tester.install!(klass, sampling: sampling)
-  end
-end
-
 module TestHelper
   def has_gem?(*gems)
     gems.each do |gem|
