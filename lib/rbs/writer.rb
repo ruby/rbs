@@ -60,6 +60,8 @@ module RBS
 
     def write(decls)
       [nil, *decls].each_cons(2) do |prev, decl|
+        raise unless decl
+
         preserve_empty_line(prev, decl)
         write_decl decl
       end
@@ -68,8 +70,8 @@ module RBS
     def write_decl(decl)
       case decl
       when AST::Declarations::Class
-        super_class = if decl.super_class
-                        " < #{name_and_args(decl.super_class.name, decl.super_class.args)}"
+        super_class = if super_class = decl.super_class
+                        " < #{name_and_args(super_class.name, super_class.args)}"
                       end
         write_comment decl.comment
         write_annotation decl.annotations
@@ -77,6 +79,8 @@ module RBS
 
         indent do
           [nil, *decl.members].each_cons(2) do |prev, member|
+            raise unless member
+
             preserve_empty_line prev, member
             write_member member
           end
@@ -133,9 +137,6 @@ module RBS
         end
 
         puts "end"
-
-      when AST::Declarations::Extension
-        RBS.logger.warn "Extension is ignored: #{decl.name}"
 
       end
     end
@@ -288,20 +289,29 @@ module RBS
     end
 
     def preserve_empty_line(prev, decl)
+      # @type var decl: _Located
+
       return unless prev
 
-      decl = decl.comment if decl.respond_to?(:comment) && decl.comment
-
-      # When the signature is not constructed by the parser,
-      # it always inserts an empty line.
-      if !prev.location || !decl.location
-        puts
-        return
+      if (_ = decl).respond_to?(:comment)
+        if comment = (_ = decl).comment
+          decl = comment
+        end
       end
 
-      prev_end_line = prev.location.end_line
-      start_line = decl.location.start_line
-      if start_line - prev_end_line > 1
+      prev_loc = prev.location
+      decl_loc = decl.location
+
+      if prev_loc && decl_loc
+        prev_end_line = prev_loc.end_line
+        start_line = decl_loc.start_line
+  
+        if start_line - prev_end_line > 1
+          puts
+        end
+      else
+        # When the signature is not constructed by the parser,
+        # it always inserts an empty line.
         puts
       end
     end

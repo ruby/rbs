@@ -29,14 +29,14 @@ module RBS
 
     attr_reader env: Environment
     attr_reader type_name_resolver: TypeNameResolver
-    
+
     attr_reader instance_cache: Hash[TypeName, Definition | false | nil]
     attr_reader singleton_cache: Hash[TypeName, Definition | false | nil]
     attr_reader interface_cache: Hash[TypeName, Definition | false | nil]
 
     attr_reader one_instance_cache: Hash[TypeName, Definition]
     attr_reader one_singleton_cache: Hash[TypeName, Definition]
-    
+
     attr_reader instance_ancestors_cache: Hash[TypeName, Definition::InstanceAncestors]
     attr_reader singleton_ancestor_cache: Hash[TypeName, Definition::SingletonAncestors]
 
@@ -48,7 +48,7 @@ module RBS
     def validate_super_class!: (TypeName, Environment::ClassEntry) -> void
 
     def one_instance_ancestors: (TypeName) -> OneAncestors
-                                
+
     def one_singleton_ancestors: (TypeName) -> OneAncestors
 
     def instance_ancestors: (TypeName, ?building_ancestors: Array[Definition::Ancestor::t]) -> Definition::InstanceAncestors
@@ -69,7 +69,7 @@ module RBS
 
     def build_one_singleton: (TypeName) -> Definition
 
-    def merge_definitions: (TypeName, 
+    def merge_definitions: (TypeName,
                             Array[[Definition::Ancestor::t, Definition]],
                             entry: Environment::ModuleEntry | Environment::ClassEntry,
                             self_type: Definition::self_type,
@@ -92,4 +92,3 @@ module RBS
     def expand_alias: (TypeName) -> Types::t
   end
 end
-
