@@ -1,3 +1,4 @@
+require "open3"
 require "optparse"
 require "shellwords"
 
@@ -808,8 +809,10 @@ EOB
         'RBS_TEST_TARGET' => (targets.join(',') unless targets.empty?)
       }
 
-      system(env_hash, *args)
-      $?
+      out, err, status = Open3.capture3(env_hash, *args)
+      stdout.print(out)
+      stderr.print(err)
+      status
     end
   end
 end

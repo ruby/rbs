@@ -112,6 +112,7 @@ class TestClass
   end
 end
 RUBY
+    assert_match "No type checker was installed!", output
   end
 
   def test_open_decls
@@ -131,7 +132,7 @@ class Hello
 end
 RBS
 
-    assert_match /TypeError: \[Hello#world\]/, output
+    assert_match(/TypeError: \[Hello#world\]/, output)
   end
 
   def test_minitest
