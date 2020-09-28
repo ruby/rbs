@@ -488,7 +488,7 @@ Show paths to directories where the RBS files are loaded from.
 Examples:
 
   $ rbs paths
-  $ tbs -r set paths
+  $ rbs -r set paths
 EOU
       end.parse!(args)
 
