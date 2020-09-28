@@ -6,6 +6,7 @@ class RBS::VendorerTest < Minitest::Test
 
   Environment = RBS::Environment
   EnvironmentLoader = RBS::EnvironmentLoader
+  Repository = RBS::Repository
   Declarations = RBS::AST::Declarations
   TypeName = RBS::TypeName
   Namespace = RBS::Namespace
@@ -17,47 +18,35 @@ class RBS::VendorerTest < Minitest::Test
     end
   end
 
-  def test_vendor_stdlib
+  def test_vendor_core
     mktmpdir do |path|
-      vendor_dir = path + "vendor"
-      vendorer = Vendorer.new(vendor_dir: vendor_dir)
+      vendor_dir = path + "vendor/rbs"
 
-      vendorer.stdlib!
+      loader = EnvironmentLoader.new()
+      vendorer = Vendorer.new(vendor_dir: vendor_dir, loader: loader)
 
-      assert_operator vendor_dir + "stdlib/builtin", :directory?
-      assert_operator vendor_dir + "stdlib/builtin/basic_object.rbs", :file?
-      assert_operator vendor_dir + "stdlib/set", :directory?
-      assert_operator vendor_dir + "stdlib/set/set.rbs", :file?
+      vendorer.copy!
+
+      assert_predicate vendor_dir, :directory?
+      assert_predicate vendor_dir + "core", :directory?
+      assert_predicate vendor_dir + "core/object.rbs", :file?
     end
   end
 
-  def test_vendor_clean
+  def test_vendor_library
     mktmpdir do |path|
-      vendor_dir = path + "vendor"
-      vendorer = Vendorer.new(vendor_dir: vendor_dir)
+      vendor_dir = path + "vendor/rbs"
 
-      vendorer.stdlib!
+      loader = EnvironmentLoader.new()
+      loader.add(library: "set")
 
-      assert_operator vendor_dir, :directory?
+      vendorer = Vendorer.new(vendor_dir: vendor_dir, loader: loader)
 
-      vendorer.clean!
+      vendorer.copy!
 
-      refute_operator vendor_dir, :directory?
-    end
-  end
-
-  def test_vendor_gem
-    skip unless has_gem?("rbs-amber")
-
-    mktmpdir do |path|
-      vendor_dir = path + "vendor"
-      vendorer = Vendorer.new(vendor_dir: vendor_dir)
-
-      vendorer.stdlib!
-      vendorer.gem! "rbs-amber", nil
-
-      assert_operator vendor_dir + "stdlib", :directory?
-      assert_operator vendor_dir + "gems/rbs-amber", :directory?
+      assert_predicate vendor_dir, :directory?
+      assert_predicate vendor_dir + "set-0", :directory?
+      assert_predicate vendor_dir + "set-0/set.rbs", :file?
     end
   end
 end
