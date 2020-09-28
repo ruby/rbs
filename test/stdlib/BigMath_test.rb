@@ -4,7 +4,7 @@ require "bigdecimal/math"
 
 class BigMathSingletonTest < Minitest::Test
   include TypeAssertions
-  library "bigdecimal", "bigdecimal/math"
+  library "bigdecimal", "bigdecimal-math"
   testing "singleton(::BigMath)"
 
   def test_E
@@ -50,7 +50,7 @@ end
 
 class BigMathTest < Minitest::Test
   include TypeAssertions
-  library "bigdecimal", "bigdecimal/math"
+  library "bigdecimal", "bigdecimal-math"
   testing "::BigMath"
 
   class TestClass
