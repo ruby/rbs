@@ -5,26 +5,36 @@ require "shellwords"
 module RBS
   class CLI
     class LibraryOptions
+      attr_accessor :core_root
+      attr_reader :repos
       attr_reader :libs
       attr_reader :dirs
-      attr_accessor :no_stdlib
 
       def initialize()
+        @core_root = EnvironmentLoader::DEFAULT_CORE_ROOT
+        @repos = []
+
         @libs = []
         @dirs = []
-        @no_stdlib = false
       end
 
-      def setup(loader)
-        libs.each do |lib|
-          loader.add(library: lib)
+      def loader
+        repository = Repository.new(no_stdlib: core_root.nil?)
+        repos.each do |repo|
+          repository.add(Pathname(repo))
         end
 
+        loader = EnvironmentLoader.new(core_root: core_root, repository: repository)
+        
         dirs.each do |dir|
           loader.add(path: Pathname(dir))
         end
 
-        loader.no_builtin! if no_stdlib
+        libs.each do |lib|
+          name, version = lib.split(/:/, 2)
+          next unless name
+          loader.add(library: name, version: version)
+        end
 
         loader
       end
@@ -50,7 +60,11 @@ module RBS
       end
 
       opts.on("--no-stdlib", "Skip loading standard library signatures") do
-        options.no_stdlib = true
+        options.core_root = nil
+      end
+
+      opts.on("--repo DIR", "Add RBS repository") do |dir|
+        options.repos << dir
       end
 
       opts
@@ -62,7 +76,8 @@ module RBS
       end
 
       opts.on("--log-output OUTPUT", "Specify the file to output log (defaults to stderr)") do |output|
-        RBS.logger_output = File.open(output, "a")
+        io = File.open(output, "a") or raise
+        RBS.logger_output = io
       end
 
       opts
@@ -129,13 +144,14 @@ EOB
         end
       end
 
-      loader = EnvironmentLoader.new()
-      options.setup(loader)
+      loader = options.loader()
 
       env = Environment.from_loader(loader).resolve_type_names
 
       decls = env.declarations.select do |decl|
-        name = decl.location.buffer.name
+        loc = decl.location or raise
+        # @type var name: String
+        name = loc.buffer.name
 
         patterns.empty? || patterns.any? do |pat|
           case pat
@@ -152,6 +168,7 @@ EOB
     end
 
     def run_list(args, options)
+      # @type var list: Set[:class | :module | :interface]
       list = Set[]
 
       OptionParser.new do |opts|
@@ -172,10 +189,9 @@ EOB
         opts.on("--interface", "List interfaces") { list << :interface }
       end.order!(args)
 
-      list.merge([:class, :module, :interface]) if list.empty?
+      list.merge(_ = [:class, :module, :interface]) if list.empty?
 
-      loader = EnvironmentLoader.new()
-      options.setup(loader)
+      loader = options.loader()
 
       env = Environment.from_loader(loader).resolve_type_names
 
@@ -202,6 +218,7 @@ EOB
     end
 
     def run_ancestors(args, options)
+      # @type var kind: :instance | :singleton
       kind = :instance
 
       OptionParser.new do |opts|
@@ -221,13 +238,12 @@ EOU
         opts.on("--singleton", "Ancestors of singleton of the given type_name") { kind = :singleton }
       end.order!(args)
 
-      loader = EnvironmentLoader.new()
-      options.setup(loader)
+      loader = options.loader()
 
       env = Environment.from_loader(loader).resolve_type_names
 
       builder = DefinitionBuilder.new(env: env)
-      type_name = parse_type_name(args[0]).absolute!
+      type_name = TypeName(args[0]).absolute!
 
       if env.class_decls.key?(type_name)
         ancestors = case kind
@@ -235,6 +251,8 @@ EOU
                       builder.instance_ancestors(type_name)
                     when :singleton
                       builder.singleton_ancestors(type_name)
+                    else
+                      raise
                     end
 
         ancestors.ancestors.each do |ancestor|
@@ -255,6 +273,7 @@ EOU
     end
 
     def run_methods(args, options)
+      # @type var kind: :instance | :singleton
       kind = :instance
       inherit = true
 
@@ -281,13 +300,12 @@ EOU
         return
       end
 
-      loader = EnvironmentLoader.new()
-      options.setup(loader)
+      loader = options.loader()
 
       env = Environment.from_loader(loader).resolve_type_names
 
       builder = DefinitionBuilder.new(env: env)
-      type_name = parse_type_name(args[0]).absolute!
+      type_name = TypeName(args[0]).absolute!
 
       if env.class_decls.key?(type_name)
         definition = case kind
@@ -295,6 +313,8 @@ EOU
                        builder.build_instance(type_name)
                      when :singleton
                        builder.build_singleton(type_name)
+                     else
+                       raise
                      end
 
         definition.methods.keys.sort.each do |name|
@@ -309,6 +329,7 @@ EOU
     end
 
     def run_method(args, options)
+      # @type var kind: :instance | :singleton
       kind = :instance
 
       OptionParser.new do |opts|
@@ -333,13 +354,11 @@ EOU
         return
       end
 
-      loader = EnvironmentLoader.new()
-      options.setup(loader)
-
+      loader = options.loader()
       env = Environment.from_loader(loader).resolve_type_names
 
       builder = DefinitionBuilder.new(env: env)
-      type_name = parse_type_name(args[0]).absolute!
+      type_name = TypeName(args[0]).absolute!
       method_name = args[1].to_sym
 
       unless env.class_decls.key?(type_name)
@@ -352,6 +371,8 @@ EOU
                      builder.build_instance(type_name)
                    when :singleton
                      builder.build_singleton(type_name)
+                   else
+                     raise
                    end
 
       method = definition.methods[method_name]
@@ -391,10 +412,7 @@ EOU
         end
       end.parse!(args)
 
-      loader = EnvironmentLoader.new()
-
-      options.setup(loader)
-
+      loader = options.loader()
       env = Environment.from_loader(loader).resolve_type_names
 
       builder = DefinitionBuilder.new(env: env)
@@ -437,6 +455,7 @@ EOU
     end
 
     def run_constant(args, options)
+      # @type var context: String?
       context = nil
 
       OptionParser.new do |opts|
@@ -461,10 +480,7 @@ EOU
         return
       end
 
-      loader = EnvironmentLoader.new()
-
-      options.setup(loader)
-
+      loader = options.loader()
       env = Environment.from_loader(loader).resolve_type_names
 
       builder = DefinitionBuilder.new(env: env)
@@ -498,11 +514,10 @@ Examples:
 EOU
       end.parse!(args)
 
-      loader = EnvironmentLoader.new()
-
-      options.setup(loader)
+      loader = options.loader()
 
       kind_of = -> (path) {
+        # @type var path: Pathname
         case
         when path.file?
           "file"
@@ -515,19 +530,14 @@ EOU
         end
       }
 
-      if loader.stdlib_root
-        path = loader.stdlib_root
-        stdout.puts "#{path}/builtin (#{kind_of[path]}, stdlib)"
-      end
-
-      loader.paths.each do |path|
-        case path
+      loader.each_dir do |source, dir|
+        case source
+        when :core
+          stdout.puts "#{dir} (#{kind_of[dir]}, core)"
         when Pathname
-          stdout.puts "#{path} (#{kind_of[path]})"
-        when EnvironmentLoader::GemPath
-          stdout.puts "#{path.path} (#{kind_of[path.path]}, gem, name=#{path.name}, version=#{path.version})"
-        when EnvironmentLoader::LibraryPath
-          stdout.puts "#{path.path} (#{kind_of[path.path]}, library, name=#{path.name})"
+          stdout.puts "#{dir} (#{kind_of[dir]})"
+        when EnvironmentLoader::Library
+          stdout.puts "#{dir} (#{kind_of[dir]}, library, name=#{source.name})"
         end
       end
     end
@@ -573,10 +583,7 @@ EOU
           end
         end.parse!(args)
 
-        loader = EnvironmentLoader.new()
-
-        options.setup(loader)
-
+        loader = options.loader()
         env = Environment.from_loader(loader).resolve_type_names
 
         require_libs.each do |lib|
@@ -659,7 +666,6 @@ EOU
 
     def run_vendor(args, options)
       clean = false
-      vendor_stdlib = false
       vendor_dir = Pathname("vendor/sigs")
 
       OptionParser.new do |opts|
@@ -682,10 +688,6 @@ Options:
           clean = v
         end
 
-        opts.on("--[no-]stdlib", "Vendor stdlib signatures or not (default: no)") do |v|
-          vendor_stdlib = v
-        end
-
         opts.on("--vendor-dir [DIR]", "Specify the directory for vendored signatures (default: vendor/sigs)") do |path|
           vendor_dir = Pathname(path)
         end
@@ -693,28 +695,26 @@ Options:
 
       stdout.puts "Vendoring signatures to #{vendor_dir}..."
 
-      vendorer = Vendorer.new(vendor_dir: vendor_dir)
+      loader = options.loader()
+
+      args.each do |gem|
+        name, version = gem.split(/:/, 2)
+
+        next unless name
+
+        stdout.puts "  Loading library: #{name}, version=#{version}..."
+        loader.add(library: name, version: version)
+      end
+
+      vendorer = Vendorer.new(vendor_dir: vendor_dir, loader: loader)
 
       if clean
         stdout.puts "  Deleting #{vendor_dir}..."
         vendorer.clean!
       end
 
-      if vendor_stdlib
-        stdout.puts "  Vendoring standard libraries..."
-        vendorer.stdlib!
-      end
-
-      args.each do |gem|
-        name, version = EnvironmentLoader.parse_library(gem)
-
-        unless EnvironmentLoader.gem_sig_path(name, version)
-          stdout.puts "  ⚠️ Cannot find rubygem: name=#{name}, version=#{version} 🚨"
-        else
-          stdout.puts "  Vendoring gem: name=#{name}, version=#{version}..."
-          vendorer.gem!(name, version)
-        end
-      end
+      stdout.puts "  Copying RBS files..."
+      vendorer.copy!
     end
 
     def run_parse(args, options)
@@ -730,32 +730,25 @@ Examples:
         EOB
       end.parse!(args)
 
-      loader = EnvironmentLoader.new()
+      loader = options.loader()
 
       syntax_error = false
       args.each do |path|
         path = Pathname(path)
-        loader.each_signature(path) do |sig_path|
-          Parser.parse_signature(sig_path.read)
+        loader.each_file(path, skip_hidden: false, immediate: true) do |file_path| 
+          Parser.parse_signature(file_path.read)
         rescue RBS::Parser::SyntaxError => ex
           loc = ex.error_value.location
-          stdout.puts "#{sig_path}:#{loc.start_line}:#{loc.start_column}: parse error on value: (#{ex.token_str})"
+          stdout.puts "#{file_path}:#{loc.start_line}:#{loc.start_column}: parse error on value: (#{ex.token_str})"
           syntax_error = true
         rescue RBS::Parser::SemanticsError => ex
           loc = ex.location
-          stdout.puts "#{sig_path}:#{loc.start_line}:#{loc.start_column}: #{ex.original_message}"
+          stdout.puts "#{file_path}:#{loc.start_line}:#{loc.start_column}: #{ex.original_message}"
           syntax_error = true
         end
       end
 
       exit 1 if syntax_error
-    end
-
-    def parse_type_name(string)
-      Namespace.parse(string).yield_self do |namespace|
-        last = namespace.path.last
-        TypeName.new(name: last, namespace: namespace.parent)
-      end
     end
 
     def test_opt options
@@ -764,9 +757,13 @@ Examples:
     end
 
     def run_test(args, options)
+      # @type var unchecked_classes: Array[String]
       unchecked_classes = []
+      # @type var targets: Array[String]
       targets = []
+      # @type var sample_size: String?
       sample_size = nil
+      # @type var double_suite: String?
       double_suite = nil
 
       (opts = OptionParser.new do |opts|
@@ -796,7 +793,6 @@ EOB
         opts.on("--double-suite DOUBLE_SUITE", "Sets the double suite in use (currently supported: rspec | minitest)") do |suite|
           double_suite = suite
         end
-
       end).order!(args)
 
       if args.length.zero?
@@ -804,6 +800,7 @@ EOB
         exit 1
       end
 
+      # @type var env_hash: Hash[String, String?]
       env_hash = {
         'RUBYOPT' => "#{ENV['RUBYOPT']} -rrbs/test/setup",
         'RBS_TEST_OPT' => test_opt(options),

@@ -16,7 +16,8 @@ module RBS
               when "_"
                 :interface
               else
-                raise
+                # Defaults to :class
+                :class
               end
     end
 

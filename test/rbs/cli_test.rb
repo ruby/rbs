@@ -201,19 +201,19 @@ singleton(::BasicObject)
   def test_paths
     with_cli do |cli|
       cli.run(%w(-r set -I sig/test paths))
-      assert_match %r{/stdlib/builtin \(dir, stdlib\)$}, stdout.string
-      assert_match %r{/stdlib/set \(dir, library, name=set\)$}, stdout.string
+      assert_match %r{/rbs/core \(dir, core\)$}, stdout.string
+      assert_match %r{/rbs/stdlib/set/0 \(dir, library, name=set\)$}, stdout.string
       assert_match %r{^sig/test \(absent\)$}, stdout.string
     end
   end
 
   def test_paths_with_gem
-    skip unless has_gem?("racc", "rbs-amber")
+    skip unless has_gem?("rbs-amber")
 
     with_cli do |cli|
-      cli.run(%w(-r racc paths))
-      assert_match %r{/stdlib/builtin \(dir, stdlib\)$}, stdout.string
-      assert_match %r{/racc-\d\.\d\.\d+/sig \(absent, gem, name=racc, version=\)$}, stdout.string
+      cli.run(%w(-r rbs-amber paths))
+      assert_match %r{/rbs/core \(dir, core\)$}, stdout.string
+      assert_match %r{/sig \(dir, library, name=rbs-amber\)$}, stdout.string
     end
   end
 
@@ -221,25 +221,23 @@ singleton(::BasicObject)
     Dir.mktmpdir do |d|
       Dir.chdir(d) do
         with_cli do |cli|
-          cli.run(%w(vendor --vendor-dir=dir1 --stdlib))
+          cli.run(%w(vendor --vendor-dir=dir1))
 
-          assert_operator Pathname(d) + "dir1/stdlib", :directory?
+          assert_operator Pathname(d) + "dir1/core", :directory?
         end
       end
     end
   end
 
   def test_vendor_gem
-    skip unless has_gem?("racc", "rbs-amber")
+    skip unless has_gem?("rbs-amber")
 
     Dir.mktmpdir do |d|
       Dir.chdir(d) do
         with_cli do |cli|
-          cli.run(%w(vendor --vendor-dir=dir1 rbs-amber racc))
+          cli.run(%w(-r rbs-amber vendor --vendor-dir=dir1))
 
-          assert_operator Pathname(d) + "dir1/gems", :directory?
-          assert_operator Pathname(d) + "dir1/gems/rbs-amber", :directory?
-          refute_operator Pathname(d) + "dir1/gems/racc", :directory?
+          assert_predicate Pathname(d) + "dir1/rbs-amber-1.0.0", :directory?
         end
       end
     end
