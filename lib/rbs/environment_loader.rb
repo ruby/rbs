@@ -9,14 +9,14 @@ module RBS
       end
     end
 
-    LibraryPath = Struct.new(:name, :path, keyword_init: true)
-    GemPath = Struct.new(:name, :version, :path, keyword_init: true)
+    LibraryPath = _ = Struct.new(:name, :path, keyword_init: true)
+    GemPath = _ = Struct.new(:name, :version, :path, keyword_init: true)
 
     attr_reader :paths
     attr_reader :stdlib_root
     attr_reader :gem_vendor_path
 
-    STDLIB_ROOT = Pathname(__dir__) + "../../stdlib"
+    STDLIB_ROOT = Pathname(_ = __dir__) + "../../stdlib"
 
     def self.gem_sig_path(name, version)
       Pathname(Gem::Specification.find_by_name(name, version).gem_dir) + "sig"
@@ -50,22 +50,20 @@ module RBS
     end
 
     def self.parse_library(lib)
-      lib.split(/:/)
+      _ = lib.split(/:/)
     end
 
     def stdlib?(name)
-      if stdlib_root
-        path = stdlib_root + name
-        if path.directory?
-          path
-        end
+      path = stdlib_root + name
+      if path.directory?
+        path
       end
     end
 
     def gem?(name, version)
-      if gem_vendor_path
+      if path = gem_vendor_path
         # Try vendored RBS first
-        gem_dir = gem_vendor_path + name
+        gem_dir = path + name
         if gem_dir.directory?
           return gem_dir
         end
@@ -76,7 +74,7 @@ module RBS
     end
 
     def each_signature(path, immediate: true, &block)
-      if block_given?
+      if block
         case
         when path.file?
           if path.extname == ".rbs" || immediate
@@ -116,6 +114,7 @@ module RBS
 
     def each_decl
       if block_given?
+        # @type var signature_files: Array[[path | :stdlib, Pathname]]
         signature_files = []
 
         unless no_builtin?
@@ -142,6 +141,7 @@ module RBS
     end
 
     def load(env:)
+      # @type var loadeds: Array[[AST::Declarations::t, Pathname, path | :stdlib]]
       loadeds = []
 
       each_decl do |decl, buffer, file_path, lib_path|

@@ -258,6 +258,8 @@ module RBS
                 outer: outer_,
                 prefix: prefix_
               )
+            else
+              raise
             end
           end,
           location: decl.location,
@@ -288,6 +290,8 @@ module RBS
                 outer: outer_,
                 prefix: prefix_
               )
+            else
+              raise
             end
           end,
           location: decl.location,

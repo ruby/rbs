@@ -1,4 +1,58 @@
 module RBS
   class EnvironmentLoader
+    class UnknownLibraryNameError < StandardError
+      attr_reader name: String
+
+      def initialize: (name: String) -> void
+    end
+
+    class LibraryPath
+      attr_reader name: String
+      attr_reader path: Pathname
+
+      def initialize: (name: String, path: Pathname) -> void
+    end
+
+    class GemPath
+      attr_reader name: String
+      attr_reader version: String?
+      attr_reader path: Pathname
+
+      def initialize: (name: String, version: String?, path: Pathname) -> void
+    end
+
+    STDLIB_ROOT: Pathname
+
+    type path = Pathname | LibraryPath | GemPath
+
+    attr_reader paths: Array[path]
+    attr_reader stdlib_root: Pathname
+    attr_reader gem_vendor_path: Pathname?
+
+    def self.gem_sig_path: (String, String?) -> Pathname?
+
+    def initialize: (?stdlib_root: Pathname, ?gem_vendor_path: Pathname?) -> void
+
+    def add: (path: Pathname?) -> void
+           | (library: String?) -> void
+
+    def self.parse_library: (String) -> [String, String?]
+
+    def stdlib?: (String) -> Pathname?
+
+    def gem?: (String, String?) -> Pathname?
+
+    def each_signature: (Pathname, ?immediate: bool) { (Pathname) -> void } -> void
+                      | (Pathname, ?immediate: bool) -> Enumerator[Pathname, void]
+
+    def each_library_path: { (path, Pathname) -> void } -> void
+
+    def no_builtin!: (?bool) -> self
+
+    def no_builtin?: () -> bool
+
+    def each_decl: () { (AST::Declarations::t, Buffer, Pathname, path | :stdlib) -> void } -> void
+
+    def load: (env: Environment) -> Array[[AST::Declarations::t, Pathname, path | :stdlib]]
   end
 end

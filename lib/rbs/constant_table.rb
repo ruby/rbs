@@ -47,6 +47,8 @@ module RBS
 
       head, *tail = split_name(name)
 
+      raise unless head
+
       head_constant = case
                       when name.absolute?
                         name_to_constant(TypeName.new(name: head, namespace: Namespace.root))
@@ -57,11 +59,13 @@ module RBS
                           resolve_constant_reference_inherit(head, scopes: constant_scopes(context.first.to_type_name))
                       end
 
-      if head_constant
-        tail.inject(head_constant) do |constant, name|
-          resolve_constant_reference_inherit name,
-                                             scopes: constant_scopes(constant.name),
-                                             no_object: constant.name != BuiltinNames::Object.name
+      tail.inject(head_constant) do |constant, name|
+        if constant
+          resolve_constant_reference_inherit(
+            name,
+            scopes: constant_scopes(constant.name),
+            no_object: constant.name != BuiltinNames::Object.name
+          )
         end
       end
     end
@@ -150,9 +154,6 @@ module RBS
       when Environment::ModuleEntry
         constant_scopes0 BuiltinNames::Module.name, scopes: scopes
         constant_scopes_module name, scopes: scopes
-
-      else
-        raise "Unexpected declaration: #{name} (#{entry.class})"
       end
 
       scopes

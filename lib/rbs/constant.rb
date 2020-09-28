@@ -2,7 +2,7 @@ module RBS
   class Constant
     attr_reader :name
     attr_reader :type
-    attr_reader :declaration
+    attr_reader :entry
 
     def initialize(name:, type:, entry:)
       @name = name
