@@ -39,10 +39,6 @@ class YAML::Store < ::PStore
   # Options passed in through `yaml_opts` will be used when converting the store
   # to YAML via Hash#to_yaml().
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     initialize( file_name, yaml_opts = {} )
-  #     initialize( file_name, thread_safe = false, yaml_opts = {} )
-  #
   def initialize: (*untyped o) -> YAML::Store
 
   def dump: (untyped table) -> String
