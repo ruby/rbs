@@ -69,7 +69,7 @@ module YAML
     # Returns +nil+ if there is no such +key+.
     #
     # See #fetch for more information.
-    def []: (untyped key) -> untyped
+    def []: (String key) -> untyped
 
     # :call-seq:
     #   ydbm[key] = value
@@ -79,7 +79,7 @@ module YAML
     # +value+ will be converted to YAML before storage.
     #
     # See #store for more information.
-    def []=: (untyped key, untyped val) -> untyped
+    def []=: (String key, untyped val) -> untyped
 
     # :call-seq:
     #   ydbm.fetch( key, ifnone = nil )
@@ -92,7 +92,7 @@ module YAML
     # Otherwise, calls block passing in the given +key+.
     #
     # See ::DBM#fetch for more information.
-    def fetch: (untyped keystr, ?untyped? ifnone) { (untyped) -> untyped } -> untyped
+    def fetch: (String keystr, ?untyped? ifnone) { (untyped) -> untyped } -> untyped
 
     # Deprecated, used YAML::DBM#key instead.
     # ----
@@ -101,19 +101,19 @@ module YAML
     # It says 'DBM#index is deprecated; use DBM#key', but DBM#key
     # behaves not same as DBM#index.
     #
-    def index: (untyped keystr) -> untyped
+    def index: (String keystr) -> untyped
 
     # :call-seq:
     #   ydbm.key(value) -> string
     #
     # Returns the key for the specified value.
-    def key: (untyped keystr) -> untyped
+    def key: (String keystr) -> String
 
     # :call-seq:
     #   ydbm.values_at(*keys)
     #
     # Returns an array containing the values associated with the given keys.
-    def values_at: (*untyped keys) -> untyped
+    def values_at: (*untyped keys) -> Array[untyped]
 
     # :call-seq:
     #   ydbm.delete(key)
@@ -121,7 +121,7 @@ module YAML
     # Deletes value from database associated with +key+.
     #
     # Returns value or +nil+.
-    def delete: (untyped key) -> untyped
+    def delete: (String key) -> untyped
 
     def delete_if: () { (untyped, untyped) -> untyped } -> untyped
 
@@ -130,7 +130,7 @@ module YAML
     #
     # Converts the contents of the database to an in-memory Hash, then calls
     # Hash#reject with the specified code block, returning a new Hash.
-    def reject: () { (untyped, untyped) -> untyped } -> untyped
+    def reject: () { (untyped, untyped) -> untyped } -> Hash[untyped, untyped]
 
     def each_pair: () { (untyped, untyped) -> untyped } -> untyped
 
@@ -156,7 +156,7 @@ module YAML
     #
     # Note that all values in the hash will be Strings, but the keys will be
     # actual objects.
-    def invert: () -> untyped
+    def invert: () -> Hash[untyped, untyped]
 
     # :call-seq:
     #   ydbm.replace(hash) -> ydbm
@@ -164,7 +164,7 @@ module YAML
     # Replaces the contents of the database with the contents of the specified
     # object. Takes any object which implements the each_pair method, including
     # Hash and DBM objects.
-    def replace: (untyped hsh) -> untyped
+    def replace: (Hash[untyped, untyped] | DBM hsh) -> YAML::DBM
 
     # :call-seq:
     #   ydbm.shift -> [key, value]
@@ -173,7 +173,7 @@ module YAML
     # If the database is empty, returns +nil+.
     #
     # The order in which values are removed/returned is not guaranteed.
-    def shift: () -> untyped
+    def shift: () -> (Array[untyped] | untyped)
 
     # :call-seq:
     #   ydbm.select { |key, value| ... }
@@ -183,7 +183,7 @@ module YAML
     # for which the block returns true.
     #
     # Otherwise, same as #values_at
-    def select: (*untyped keys) { (untyped, untyped) -> untyped } -> untyped
+    def select: (*untyped keys) { (untyped, untyped) -> untyped } -> Array[untyped]
 
     # :call-seq:
     #   ydbm.store(key, value) -> value
@@ -192,7 +192,7 @@ module YAML
     # to YAML before being stored.
     #
     # Returns +value+
-    def store: (untyped key, untyped val) -> untyped
+    def store: (String key, untyped val) -> untyped
 
     # :call-seq:
     #   ydbm.update(hash) -> ydbm
@@ -202,20 +202,20 @@ module YAML
     # Hash and DBM objects.
     #
     # Returns +self+.
-    def update: (untyped hsh) -> untyped
+    def update: (Hash[untyped, untyped]) -> YAML::DBM
 
     # :call-seq:
     #   ydbm.to_a -> array
     #
     # Converts the contents of the database to an array of [key, value] arrays,
     # and returns it.
-    def to_a: () -> untyped
+    def to_a: () -> Array [untyped]
 
     # :call-seq:
     #   ydbm.to_hash -> hash
     #
     # Converts the contents of the database to an in-memory Hash object, and
     # returns it.
-    def to_hash: () -> untyped
+    def to_hash: () -> Hash[untyped, untyped]
   end
 end

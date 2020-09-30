@@ -43,15 +43,15 @@ class YAML::Store < ::PStore
   #     initialize( file_name, yaml_opts = {} )
   #     initialize( file_name, thread_safe = false, yaml_opts = {} )
   #
-  def initialize: (*untyped o) -> untyped
+  def initialize: (*untyped o) -> YAML::Store
 
-  def dump: (untyped table) -> untyped
+  def dump: (untyped table) -> String
 
-  def load: (untyped content) -> untyped
+  def empty_marshal_checksum: () -> String
+
+  def empty_marshal_data: () -> String
+
+  def load: (String) -> untyped
 
   def marshal_dump_supports_canonical_option?: () -> ::FalseClass
-
-  def empty_marshal_data: () -> untyped
-
-  def empty_marshal_checksum: () -> untyped
 end
