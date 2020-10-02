@@ -39,7 +39,7 @@ class URILDAPSingletonTest < Minitest::Test
                         URI::LDAP, :new, 'ldap', nil, 'ldap.example.com', 80, nil, '/dc=example;dc=com?foo,bar,baz?sub?(t=1)?t=2', nil, 'query', 'foo'
     end
 
-    # fragement is missing
+    # fragment is missing
     assert_send_type  '(String schema, String? userinfo, String host, Integer? port, String? registry, String? path, String? opaque, String query, String? fragment) -> URI::LDAP',
                       URI::LDAP, :new, 'ldap', nil, 'ldap.example.com', 80, nil, '/dc=example;dc=com?foo,bar,baz?sub?(t=1)?t=2', nil, 'query', nil
   end
