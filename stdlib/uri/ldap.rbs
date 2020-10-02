@@ -117,7 +117,7 @@ module URI
     #   not including any entries under this
     # * SCOPE_SUB  - subtrees, all entries at all levels
     #
-    SCOPE: Array[Constant]
+    SCOPE: Array[String]
 
     #
     # == Description
