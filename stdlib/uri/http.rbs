@@ -153,6 +153,6 @@ module URI
     #     uri = URI::HTTP.build(path: '/foo/bar', query: 'test=true')
     #     uri.request_uri #  => "/foo/bar?test=true"
     #
-    def request_uri: () -> (nil | String)
+    def request_uri: () -> String
   end
 end

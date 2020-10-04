@@ -41,7 +41,7 @@ class URIHTTPInstanceTest < Minitest::Test
   end
 
   def test_request_uri
-    assert_send_type  '() -> (nil | String)',
+    assert_send_type  '() -> String',
                       http, :request_uri
   end
 end
