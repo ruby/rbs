@@ -851,7 +851,7 @@ module URI
     #   uri.coerce("http://foo.com")
     #   #=> [#<URI::HTTP http://foo.com>, #<URI::HTTP http://my.example.com>]
     #
-    def coerce: ((URI::Generic | String) oth) -> Array[URI::Generic]
+    def coerce: (URI::Generic | String oth) -> Array[URI::Generic]
 
     # Returns a proxy URI.
     # The proxy URI is obtained from environment variables such as http_proxy,
