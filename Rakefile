@@ -25,11 +25,11 @@ task :test_doc => :parser do
 end
 
 task :validate => :parser do
-  sh "#{ruby} #{rbs} validate"
+  sh "#{ruby} #{rbs} validate --silent"
 
   FileList["stdlib/*"].each do |path|
     next if path =~ %r{stdlib/builtin}
-    sh "#{ruby} #{rbs} -r#{File.basename(path)} validate"
+    sh "#{ruby} #{rbs} -r#{File.basename(path)} validate --silent"
   end
 end
 

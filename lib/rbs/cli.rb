@@ -384,6 +384,11 @@ Examples:
 
   $ rbs validate
 EOU
+
+        opts.on("--silent") do
+          require "stringio"
+          @stdout = StringIO.new
+        end
       end.parse!(args)
 
       loader = EnvironmentLoader.new()
@@ -544,7 +549,7 @@ EOU
 Usage: rbs prototype runtime [options...] [pattern...]
 
 Generate RBS prototype based on runtime introspection.
-It loads Ruby code specified in [options] and generates RBS prototypes for classes matches to [pattern]. 
+It loads Ruby code specified in [options] and generates RBS prototypes for classes matches to [pattern].
 
 Examples:
 
