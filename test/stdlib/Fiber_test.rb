@@ -101,14 +101,13 @@ class FiberExtTest < Minitest::Test
   end
 
   def test_transfer
-    f = Fiber.new do
-      loop { Fiber.yield }
-    end
-
+    f = Fiber.new{}
     assert_send_type '() -> untyped',
                      f, :transfer
+    f = Fiber.new{}
     assert_send_type '(untyped) -> untyped',
                      f, :transfer, 1
+    f = Fiber.new{}
     assert_send_type '(untyped, untyped) -> untyped',
                      f, :transfer, 1, 'foo'
   end
