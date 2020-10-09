@@ -2,6 +2,12 @@
 
 ## master
 
+## 0.13.0 (2020-09-09)
+
+* Signature updates for `URI` classes.
+* Fix tests ([#410](https://github.com/ruby/rbs/pull/410))
+* Add `--silent` option for `rbs validate` ([#411](https://github.com/ruby/rbs/pull/411))
+
 ## 0.12.2 (2020-09-17)
 
 * Minor signature update for `pty`
