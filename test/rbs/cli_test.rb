@@ -312,15 +312,12 @@ singleton(::BasicObject)
       RBS
 
       with_cli do |cli|
+        # Assumes there is `ls` command.
+        assert_rbs_test_no_errors(cli, dir, %w(--target ::Foo ls))
+
         assert_raises(SystemExit) { cli.run(%w(test)) }
         assert_raises(SystemExit) { cli.run(%W(-I #{dir} test)) }
         assert_raises(SystemExit) { cli.run(%W(-I #{dir} test --target ::Foo)) }
-
-        assert_rbs_test_no_errors(cli, dir, %w(--target ::Foo ls))
-        assert_rbs_test_no_errors(cli, dir, %w(--target ::Bar ruby -v))
-        assert_rbs_test_no_errors(cli, dir, %w(--target Bar::Baz rbs version))
-        assert_rbs_test_no_errors(cli, dir, %w(--target ::Bar::Baz rake -T))
-        assert_rbs_test_no_errors(cli, dir, %w(--target ::Foo --target Bar::* rbs test --target ::Bar::Baz rbs version))
       end
     end
   end
