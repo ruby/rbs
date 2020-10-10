@@ -88,9 +88,6 @@ class PStore
   # **WARNING**:  This method is only valid in a PStore#transaction.  It will
   # raise PStore::Error if called at any other time.
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     [](name)
-  #
   def []: (untyped name) -> untyped
 
   # Stores an individual Ruby object or a hierarchy of Ruby objects in the data
@@ -112,9 +109,6 @@ class PStore
   # **WARNING**:  This method is only valid in a PStore#transaction and it cannot
   # be read-only.  It will raise PStore::Error if called at any other time.
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     []=(name, value)
-  #
   def []=: (untyped name, untyped value) -> untyped
 
   # Ends the current PStore#transaction, discarding any changes to the data store.
@@ -135,9 +129,6 @@ class PStore
   #
   # **WARNING**:  This method is only valid in a PStore#transaction.  It will
   # raise PStore::Error if called at any other time.
-  #
-  # # arglists 💪👽🚨 << Delete this section
-  #     abort()
   #
   def abort: () -> untyped
 
@@ -162,18 +153,12 @@ class PStore
   # **WARNING**:  This method is only valid in a PStore#transaction.  It will
   # raise PStore::Error if called at any other time.
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     commit()
-  #
   def commit: () -> untyped
 
   # Removes an object hierarchy from the data store, by *name*.
   #
   # **WARNING**:  This method is only valid in a PStore#transaction and it cannot
   # be read-only.  It will raise PStore::Error if called at any other time.
-  #
-  # # arglists 💪👽🚨 << Delete this section
-  #     delete(name)
   #
   def delete: (untyped name) -> untyped
 
@@ -185,15 +170,9 @@ class PStore
   # **WARNING**:  This method is only valid in a PStore#transaction.  It will
   # raise PStore::Error if called at any other time.
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     fetch(name, default=PStore::Error)
-  #
   def fetch: (untyped name, ?untyped default) -> untyped
 
   # Returns the path to the data store file.
-  #
-  # # arglists 💪👽🚨 << Delete this section
-  #     path()
   #
   def path: () -> untyped
 
@@ -202,18 +181,12 @@ class PStore
   # **WARNING**:  This method is only valid in a PStore#transaction.  It will
   # raise PStore::Error if called at any other time.
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     root?(name)
-  #
   def root?: (untyped name) -> untyped
 
   # Returns the names of all object hierarchies currently in the store.
   #
   # **WARNING**:  This method is only valid in a PStore#transaction.  It will
   # raise PStore::Error if called at any other time.
-  #
-  # # arglists 💪👽🚨 << Delete this section
-  #     roots()
   #
   def roots: () -> untyped
 
@@ -231,9 +204,6 @@ class PStore
   # raise a PStore::Error.
   #
   # Note that PStore does not support nested transactions.
-  #
-  # # arglists 💪👽🚨 << Delete this section
-  #     transaction(read_only = false) { |pstore| ... }
   #
   def transaction: (?untyped read_only) -> untyped
 
@@ -260,16 +230,10 @@ class PStore
 
   # Raises PStore::Error if the calling code is not in a PStore#transaction.
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     in_transaction()
-  #
   def in_transaction: () -> untyped
 
   # Raises PStore::Error if the calling code is not in a PStore#transaction or if
   # the code is in a read-only PStore#transaction.
-  #
-  # # arglists 💪👽🚨 << Delete this section
-  #     in_transaction_wr()
   #
   def in_transaction_wr: () -> untyped
 
@@ -279,9 +243,6 @@ class PStore
   # PStore objects are always reentrant. But if *thread_safe* is set to true, then
   # it will become thread-safe at the cost of a minor performance hit.
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     new(file, thread_safe = false)
-  #
   def initialize: (untyped file, ?untyped thread_safe) -> untyped
 
   def load: (untyped content) -> untyped
@@ -289,9 +250,6 @@ class PStore
   # Load the given PStore file. If `read_only` is true, the unmarshalled Hash will
   # be returned. If `read_only` is false, a 3-tuple will be returned: the
   # unmarshalled Hash, a checksum of the data, and the size of the data.
-  #
-  # # arglists 💪👽🚨 << Delete this section
-  #     load_data(file, read_only)
   #
   def load_data: (untyped file, untyped read_only) -> untyped
 
@@ -304,9 +262,6 @@ class PStore
   # does not exist, then nil will be returned.
   #
   # All exceptions are propagated.
-  #
-  # # arglists 💪👽🚨 << Delete this section
-  #     open_and_lock_file(filename, read_only)
   #
   def open_and_lock_file: (untyped filename, untyped read_only) -> untyped
 
