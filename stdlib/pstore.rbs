@@ -1,0 +1,69 @@
+class PStore
+  public
+
+  def []: (untyped name) -> untyped
+
+  def []=: (untyped name, untyped value) -> untyped
+
+  def abort: () -> untyped
+
+  def commit: () -> untyped
+
+  def delete: (untyped name) -> untyped
+
+  def fetch: (untyped name, ?untyped default) -> untyped
+
+  def path: () -> untyped
+
+  def root?: (untyped name) -> untyped
+
+  def roots: () -> untyped
+
+  def transaction: (?untyped read_only) -> untyped
+
+  def ultra_safe: () -> untyped
+
+  def ultra_safe=: (untyped) -> untyped
+
+  private
+
+  def dump: (untyped table) -> untyped
+
+  def empty_marshal_checksum: () -> untyped
+
+  def empty_marshal_data: () -> untyped
+
+  def in_transaction: () -> untyped
+
+  def in_transaction_wr: () -> untyped
+
+  def initialize: (untyped file, ?untyped thread_safe) -> untyped
+
+  def load: (untyped content) -> untyped
+
+  def load_data: (untyped file, untyped read_only) -> untyped
+
+  def on_windows?: () -> untyped
+
+  def open_and_lock_file: (untyped filename, untyped read_only) -> untyped
+
+  def save_data: (untyped original_checksum, untyped original_file_size, untyped file) -> untyped
+
+  def save_data_with_atomic_file_rename_strategy: (untyped data, untyped file) -> untyped
+
+  def save_data_with_fast_strategy: (untyped data, untyped file) -> untyped
+end
+
+PStore::EMPTY_MARSHAL_CHECKSUM: String
+
+PStore::EMPTY_MARSHAL_DATA: String
+
+PStore::EMPTY_STRING: String
+
+PStore::RDWR_ACCESS: Hash[untyped]
+
+PStore::RD_ACCESS: Hash[untyped]
+
+PStore::VERSION: String
+
+PStore::WR_ACCESS: Hash[untyped]
