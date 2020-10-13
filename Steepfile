@@ -1,6 +1,7 @@
 target :lib do
   signature "sig"
   check "lib"
+  ignore "lib/rbs/parser.rb"
 
   vendor stdlib: "stdlib"
   library "set", "pathname", "json", "logger"
