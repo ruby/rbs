@@ -19,3 +19,6 @@ gem "goodcheck"
 # Test gems
 gem "rbs-amber", path: "test/assets/test-gem"
 
+group :ide, optional: true do
+  gem "ruby-debug-ide"
+end
