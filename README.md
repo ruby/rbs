@@ -104,8 +104,14 @@ builder = RBS::DefinitionBuilder.new(env: environment)
 
 # Definition of instance of String
 instance = builder.build_instance(string)
-# Print the types of `gsub` method
+
+# Print the types of `gsub` method:
 puts instance.methods[:gsub].method_types.join("\n")
+# Ouputs => 
+#  (::Regexp | ::string pattern, ::string replacement) -> ::String
+#  (::Regexp | ::string pattern, ::Hash[::String, ::String] hash) -> ::String
+#  (::Regexp | ::string pattern) { (::String match) -> ::_ToS } -> ::String
+#  (::Regexp | ::string pattern) -> ::Enumerator[::String, self]
 
 # Definition of singleton of String
 singleton = builder.build_singleton(string)
