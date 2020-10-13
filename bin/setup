@@ -6,5 +6,3 @@ set -vx
 bundle install --jobs 4 --retry 3
 
 # Do any other automated setup that you need to do here
-
-bundle exec rake parser
