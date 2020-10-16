@@ -1594,4 +1594,20 @@ end
       end
     end
   end
+
+  def test_definition_variance_initialize
+    SignatureManager.new do |manager|
+      manager.files.merge!(Pathname("foo.rbs") => <<-EOF)
+class Hello[out T]
+  def get: () -> T
+
+  def initialize: (T value) -> void
+end
+      EOF
+      manager.build do |env|
+        builder = DefinitionBuilder.new(env: env)
+        builder.build_instance(type_name("::Hello"))
+      end
+    end
+  end
 end
