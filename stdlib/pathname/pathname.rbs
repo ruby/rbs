@@ -1078,7 +1078,7 @@ end
 
 module Kernel
   private
-  
+
   # Creates a new Pathname object from the given string, `path`, and returns
   # pathname object.
   #

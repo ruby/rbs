@@ -456,7 +456,7 @@ class String
   #
   # *   On some OSes such as Mac OS, `crypt(3)` is not thread safe.
   #
-  # *   So-called "traditional" usage of `crypt(3)` is very very very weak. 
+  # *   So-called "traditional" usage of `crypt(3)` is very very very weak.
   #     According to its manpage, Linux's traditional `crypt(3)` output has only
   #     2**56 variations; too easy to brute force today.  And this is the default
   #     behaviour.
@@ -735,7 +735,7 @@ class String
   # :   Sets the replacement string to the given value. The default replacement
   #     string is "uFFFD" for Unicode encoding forms, and "?" otherwise.
   # :fallback
-  # :   Sets the replacement string by the given object for undefined character. 
+  # :   Sets the replacement string by the given object for undefined character.
   #     The object should be a Hash, a Proc, a Method, or an object which has []
   #     method. Its key is an undefined character encoded in the source encoding
   #     of current transcoder. Its value can be any encoding until it can be
@@ -1532,7 +1532,7 @@ class String
   #
   def to_i: (?int base) -> Integer
 
-  # Returns the result of interpreting leading characters in `str` as a rational. 
+  # Returns the result of interpreting leading characters in `str` as a rational.
   # Leading whitespace and extraneous characters past the end of a valid number
   # are ignored. Digit sequences can be separated by an underscore. If there is
   # not a valid number at the start of `str`, zero is returned.  This method never
@@ -1806,7 +1806,7 @@ class String
   # In that case data would be lost but often it's the case that the array only
   # holds one value, especially when unpacking binary data. For instance:
   #
-  # "xffx00x00x00".unpack("l")         #=>  [255] "xffx00x00x00".unpack1("l")     
+  # "xffx00x00x00".unpack("l")         #=>  [255] "xffx00x00x00".unpack1("l")
   #   #=>  255
   #
   # Thus unpack1 is convenient, makes clear the intention and signals the expected

@@ -642,8 +642,8 @@ class StringInstanceTest < Minitest::Test
                      "string", :encode!, "ascii", invalid: :replace
     assert_send_type "(Encoding, Encoding, undef: nil) -> self",
                      "string", :encode!, Encoding::ASCII_8BIT, Encoding::ASCII_8BIT, undef: nil
-    assert_send_type "(invalid: nil, undef: :replace, replace: String, fallback: Hash[String, String], xml: :text, universal_newline: true) -> self",                 
-                     "string", :encode!, 
+    assert_send_type "(invalid: nil, undef: :replace, replace: String, fallback: Hash[String, String], xml: :text, universal_newline: true) -> self",
+                     "string", :encode!,
                      invalid: nil,
                      undef: :replace,
                      replace: "foo",

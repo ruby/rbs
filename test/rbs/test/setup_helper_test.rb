@@ -24,7 +24,7 @@ class SetupHelperTest < Minitest::Test
   def assert_raises_invalid_sample_size_error(invalid_value)
     assert_raises InvalidSampleSizeError do
       get_sample_size(invalid_value)
-    end    
+    end
   end
 
   def test_to_double_class

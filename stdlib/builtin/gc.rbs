@@ -221,7 +221,7 @@ module GC::Profiler
   # `:HEAP_LIVE_OBJECTS`
   # `:HEAP_FREE_OBJECTS`
   # `:HAVE_FINALIZE`
-  # :   
+  # :
   #
   def self.raw_data: () -> ::Array[::Hash[Symbol, untyped]]
 

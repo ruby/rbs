@@ -45,7 +45,7 @@ class MatchDataTest < StdlibTest
     $~.end 'first'
     $~.end 'third'
     $~.end :first
-    $~.end :third 
+    $~.end :third
   end
 
   def test_eql?
@@ -80,7 +80,7 @@ class MatchDataTest < StdlibTest
     $~.offset 'first'
     $~.offset 'third'
     $~.offset :first
-    $~.offset :third 
+    $~.offset :third
   end
 
   def test_post_match

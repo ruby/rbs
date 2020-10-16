@@ -212,7 +212,7 @@ module RBS
       def value(val, type)
         if is_double?(val)
           RBS.logger.info("A double (#{val.inspect}) is detected!")
-          return true 
+          return true
         end
 
         case type
@@ -306,7 +306,7 @@ module RBS
           Test.call(val, IS_AP, ::Array) &&
             type.types.map.with_index {|ty, index| value(val[index], ty) }.all?
         when Types::Record
-          Test::call(val, IS_AP, ::Hash) && 
+          Test::call(val, IS_AP, ::Hash) &&
             type.fields.map {|key, type| value(val[key], type) }.all?
         when Types::Proc
           Test::call(val, IS_AP, ::Proc)

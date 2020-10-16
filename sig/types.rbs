@@ -154,7 +154,7 @@ module RBS
 
       include NoFreeVariables
       include NoSubst
-      include EmptyEachType      
+      include EmptyEachType
     end
 
     module Application

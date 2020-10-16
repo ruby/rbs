@@ -13,7 +13,7 @@ module RBS
       def context
         @context ||= begin
                        (outer + [decl]).each.with_object([Namespace.root]) do |decl, array|
-                         first = array.first or raise 
+                         first = array.first or raise
                          array.unshift(first + decl.name.to_namespace)
                        end
                      end

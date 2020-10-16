@@ -28,7 +28,7 @@ module RBS
         def annotations: () -> Array[AST::Annotation]
 
         def update: (?type: MethodType, ?member: method_member, ?defined_in: TypeName?, ?implemented_in: TypeName?) -> TypeDef
-        
+
         def overload?: () -> bool
       end
 

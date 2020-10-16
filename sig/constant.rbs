@@ -11,9 +11,9 @@ module RBS
     attr_reader entry: constant_entry
 
     def initialize: (name: TypeName, type: Types::t, entry: constant_entry) -> void
-                  
+
     def ==: (untyped other) -> bool
-          
+
     alias eql? ==
 
     def hash: () -> Integer

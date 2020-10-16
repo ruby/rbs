@@ -1,6 +1,6 @@
 module RBS
   # Substitution from type variables to types.
-  # 
+  #
   # The substitution construction is in _destructive_ manner.
   #
   #    sub = Substitution.new
@@ -25,7 +25,7 @@ module RBS
     # Utility method to construct a substitution.
     # Raises an error when `variables.size != types.size`.
     # `instance_type` defaults to `nil`.
-    # 
+    #
     # Yields types in `types` and the block value is used if block is given.
     #
     def self.build: (Array[Symbol] variables, Array[Types::t] types, ?instance_type: Types::t?) ?{ (Types::t) -> Types::t } -> instance

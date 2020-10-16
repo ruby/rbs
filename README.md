@@ -74,7 +74,7 @@ $ rbs method Object then
 
 ## Library
 
-There are two important concepts, _environment_ and _definition_. 
+There are two important concepts, _environment_ and _definition_.
 
 An _environment_ is a dictionary that keeps track of all declarations. What is the declaration associated with `String` class? An _environment_ will give you the answer.
 
@@ -107,7 +107,7 @@ instance = builder.build_instance(string)
 
 # Print the types of `gsub` method:
 puts instance.methods[:gsub].method_types.join("\n")
-# Ouputs => 
+# Ouputs =>
 #  (::Regexp | ::string pattern, ::string replacement) -> ::String
 #  (::Regexp | ::string pattern, ::Hash[::String, ::String] hash) -> ::String
 #  (::Regexp | ::string pattern) { (::String match) -> ::_ToS } -> ::String

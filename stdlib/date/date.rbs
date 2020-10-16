@@ -318,7 +318,7 @@ class Date
   #
   def self.ordinal: (?Integer year, ?Integer yday, ?Integer start) -> Date
 
-  # Parses the given representation of date and time, and creates a date object. 
+  # Parses the given representation of date and time, and creates a date object.
   # This method does not function as a validator.
   #
   # If the optional second argument is true and the detected year is in the range
@@ -448,7 +448,7 @@ class Date
   #
   def +: (Integer | Rational other) -> Date
 
-  # Returns the difference between the two dates if the other is a date object. 
+  # Returns the difference between the two dates if the other is a date object.
   # If the other is a numeric value, returns a date object pointing `other` days
   # before self.  If the other is a fractional number, assumes its precision is at
   # most nanosecond.

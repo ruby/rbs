@@ -227,7 +227,7 @@ class TimeTest < StdlibTest
 
   def test_utc?
     t = Time.utc(2000, "jan", 1, 20, 15, 1)
-    t.utc? 
+    t.utc?
   end
 
   def test_utc_offset
