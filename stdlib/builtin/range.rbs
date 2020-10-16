@@ -87,10 +87,8 @@
 # r.to_a                     #=> [xxx, xxxx, xxxxx, xxxxxx]
 # r.member?(Xs.new(5))       #=> true
 # ```
-class Range[Elem] < Object
+class Range[out Elem] < Object
   include Enumerable[Elem, Range[Elem]]
-
-  def self.new: [U] (U from, U to, ?bool exclude_end) -> ::Range[U]
 
   def ==: (untyped obj) -> bool
 
@@ -146,7 +144,7 @@ class Range[Elem] < Object
 
   def `include?`: (untyped obj) -> bool
 
-  def initialize: (Elem _begin, Elem _end, ?bool exclude_end) -> void
+  def initialize: (Elem from, Elem to, ?bool exclude_end) -> void
 
   # Convert this range object to a printable form (using `inspect` to
   # convert the begin and end objects).
