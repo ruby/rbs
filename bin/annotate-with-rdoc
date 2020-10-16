@@ -14,7 +14,7 @@ def format_comment(comment)
   out = RDoc::Markup::Document.new
   out << comment
   formatter = RDoc::Markup::ToMarkdown.new
-  out.accept(formatter)
+  out.accept(formatter).lines.map(&:rstrip).join("\n")
 end
 
 def comment_for_constant(decl, stores:)
