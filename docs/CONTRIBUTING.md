@@ -17,6 +17,7 @@
     - Use `rbs prototype runtime --merge CLASS_NAME` command to generate the missing method definitions.
     - Committing the auto generated signatures is recommended.
 5. Annotate with RDoc.
+    - You'll need RDoc installed. Rvm users should use `rvm docs generate` first.
     - Use `bin/annotate-with-rdoc stdlib/path/to/signature.rbs` to annotate the RBS files.
     - Committing the generated annotations is recommended.
 6. Fix method types and comments.
