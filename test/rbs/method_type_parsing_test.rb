@@ -11,6 +11,9 @@ class RBS::MethodTypeParsingTest < Minitest::Test
     Parser.parse_method_type("()->void").yield_self do |type|
       assert_equal "() -> void", type.to_s
     end
+
+    Parser.parse_method_type("(foo?: Integer, bar!: String)->void")
+    Parser.parse_method_type("(?foo?: Integer, ?bar!: String)->void")
   end
 
   def test_method_type_eof_re

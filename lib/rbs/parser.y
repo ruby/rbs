@@ -1,5 +1,6 @@
 class RBS::Parser
-  token tUIDENT tLIDENT tNAMESPACE tINTERFACEIDENT tLKEYWORD tUKEYWORD tGLOBALIDENT
+  token tUIDENT tLIDENT tNAMESPACE tINTERFACEIDENT tGLOBALIDENT
+        tLKEYWORD tUKEYWORD tLKEYWORD_Q_E tUKEYWORD_Q_E
         tIVAR tCLASSVAR
         tANNOTATION
         tSTRING tSYMBOL tINTEGER tWRITE_ATTR
@@ -846,7 +847,7 @@ rule
         result = val[0]
       }
 
-  keyword: tLKEYWORD | tUKEYWORD
+  keyword: tLKEYWORD | tUKEYWORD | tLKEYWORD_Q_E | tUKEYWORD_Q_E
 
   function_type:
       kLPAREN params kRPAREN kARROW simple_type {
@@ -1344,8 +1345,12 @@ def next_token
     new_token(:tNAMESPACE)
   when input.scan(/[a-z_]\w*:/)
     new_token(:tLKEYWORD, input.matched.chop.to_sym)
+  when input.scan(/[a-z_]\w*[?!]:/)
+    new_token(:tLKEYWORD_Q_E, input.matched.chop.to_sym)
   when input.scan(/[A-Z]\w*:/)
     new_token(:tUKEYWORD, input.matched.chop.to_sym)
+  when input.scan(/[A-Z]\w*[?!]:/)
+    new_token(:tUKEYWORD_Q_E, input.matched.chop.to_sym)
   when input.scan(/\$[A-Za-z_]\w*/)
     new_token(:tGLOBALIDENT)
   when input.scan(/@[a-zA-Z_]\w*/)
