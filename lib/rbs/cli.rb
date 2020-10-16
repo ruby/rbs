@@ -38,6 +38,26 @@ module RBS
 
         loader
       end
+
+      def setup_library_options(opts)
+        opts.on("-r LIBRARY", "Load RBS files of the library") do |lib|
+          libs << lib
+        end
+  
+        opts.on("-I DIR", "Load RBS files from the directory") do |dir|
+          dirs << dir
+        end
+  
+        opts.on("--no-stdlib", "Skip loading standard library signatures") do
+          self.core_root = nil
+        end
+  
+        opts.on("--repo DIR", "Add RBS repository") do |dir|
+          repos << dir
+        end
+  
+        opts
+      end  
     end
 
     attr_reader :stdout
@@ -49,26 +69,6 @@ module RBS
     end
 
     COMMANDS = [:ast, :list, :ancestors, :methods, :method, :validate, :constant, :paths, :prototype, :vendor, :parse, :test]
-
-    def library_parse(opts, options:)
-      opts.on("-r LIBRARY", "Load RBS files of the library") do |lib|
-        options.libs << lib
-      end
-
-      opts.on("-I DIR", "Load RBS files from the directory") do |dir|
-        options.dirs << dir
-      end
-
-      opts.on("--no-stdlib", "Skip loading standard library signatures") do
-        options.core_root = nil
-      end
-
-      opts.on("--repo DIR", "Add RBS repository") do |dir|
-        options.repos << dir
-      end
-
-      opts
-    end
 
     def parse_logging_options(opts)
       opts.on("--log-level LEVEL", "Specify log level (defaults to `warn`)") do |level|
@@ -98,7 +98,7 @@ module RBS
 
         Options:
       USAGE
-      library_parse(opts, options: options)
+      options.setup_library_options(opts)
       parse_logging_options(opts)
       opts.version = RBS::VERSION
 
@@ -752,8 +752,13 @@ Examples:
     end
 
     def test_opt options
-      opt_string = options.dirs.map { |dir| "-I #{Shellwords.escape(dir)}"}.concat(options.libs.map { |lib| "-r#{Shellwords.escape(lib)}"}).join(' ')
-      opt_string.empty? ? nil : opt_string
+      opts = []
+
+      opts.push(*options.repos.map {|dir| "--repo #{Shellwords.escape(dir)}"})
+      opts.push(*options.dirs.map {|dir| "-I #{Shellwords.escape(dir)}"})
+      opts.push(*options.libs.map {|lib| "-r#{Shellwords.escape(lib)}"})
+      
+      opts.empty? ? nil : opts.join(" ")
     end
 
     def run_test(args, options)
