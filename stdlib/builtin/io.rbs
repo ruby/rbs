@@ -514,7 +514,7 @@ class IO < Object
 
   def self.binwrite: (String name, _ToS arg0, ?Integer offset, ?external_encoding: String external_encoding, ?internal_encoding: String internal_encoding, ?encoding: String encoding, ?textmode: untyped textmode, ?binmode: untyped binmode, ?autoclose: untyped autoclose, ?mode: String mode) -> Integer
 
-  def self.copy_stream: (String | IO src, String | IO dst, ?Integer copy_length, ?Integer src_offset) -> Integer
+  def self.copy_stream: (_Reader src, _Writer dst, ?Integer copy_length, ?Integer src_offset) -> Integer
 
   def self.popen: (*untyped args) -> untyped
 
@@ -522,7 +522,7 @@ class IO < Object
 
   def self.readlines: (String name, ?String sep, ?Integer limit, ?external_encoding: String external_encoding, ?internal_encoding: String internal_encoding, ?encoding: String encoding, ?textmode: untyped textmode, ?binmode: untyped binmode, ?autoclose: untyped autoclose, ?mode: String mode) -> ::Array[String]
 
-  def self.select: (::Array[IO]? read_array, ?::Array[IO]? write_array, ?::Array[IO]? error_array, ?Integer? timeout) -> ::Array[::Array[IO]]?
+  def self.select: (::Array[io]? read_array, ?::Array[io]? write_array, ?::Array[io]? error_array, ?Integer? timeout) -> ::Array[::Array[io]]?
 
   def self.sysopen: (String path, ?String mode, ?String perm) -> Integer
 
