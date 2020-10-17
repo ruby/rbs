@@ -2,6 +2,11 @@
 
 ## master
 
+## 0.14.0 (2020-10-17)
+
+* Allow keyword names ending with `?` and `!` ([#417](https://github.com/ruby/rbs/pull/417))
+* Make `Range[T]` covariant ([#418](https://github.com/ruby/rbs/pull/418))
+
 ## 0.13.1 (2020-10-09)
 
 * Fix test for CI of ruby/ruby ([#412](https://github.com/ruby/rbs/pull/412))
