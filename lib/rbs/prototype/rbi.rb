@@ -428,7 +428,7 @@ module RBS
         when type.is_a?(Types::ClassInstance) && type.name.name == BuiltinNames::BasicObject.name.name
           Types::Bases::Any.new(location: nil)
         when type.is_a?(Types::ClassInstance) && type.name.to_s == "T::Boolean"
-          Types::Bases::Bool.new(location: nil)
+          Types::Bases::StrictBool.new(location: nil)
         else
           type
         end

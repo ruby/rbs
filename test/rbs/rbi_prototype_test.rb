@@ -404,7 +404,7 @@ end
 
     assert_write parser.decls, <<-EOF
 class Foo
-  def hello: () -> bool
+  def hello: () -> bool!
 end
     EOF
   end
