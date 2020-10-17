@@ -2,11 +2,11 @@
 
 ## master
 
-## 0.13.1 (2020-09-09)
+## 0.13.1 (2020-10-09)
 
 * Fix test for CI of ruby/ruby ([#412](https://github.com/ruby/rbs/pull/412))
 
-## 0.13.0 (2020-09-09)
+## 0.13.0 (2020-10-09)
 
 * Signature updates for `URI` classes.
 * Fix tests ([#410](https://github.com/ruby/rbs/pull/410))
