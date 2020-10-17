@@ -19,6 +19,7 @@ _type_ ::= _class-name_ _type-arguments_                (Class instance type)
          | `instance`
          | `class`
          | `bool`
+         | `bool!`
          | `untyped`
          | `nil`
          | `top`
@@ -179,7 +180,7 @@ Proc type denotes type of procedures, `Proc` instances.
 
 `instance` denotes the type of instance of the class. `class` is the singleton of the class.
 
-`bool` is an abstract type for truth value.
+`bool` and `bool!` is an abstract type for truth value.
 
 `untyped` is for _a type without type checking_. It is `?` in gradual typing, _dynamic_ in some languages like C#, and _any_ in TypeScript. It is both subtype _and_ supertype of all of the types. (The type was `any` but renamed to `untyped`.)
 
@@ -193,9 +194,13 @@ Proc type denotes type of procedures, `Proc` instances.
 
 We recommend using `nil`.
 
-#### `bool` or `TrueClass | FalseClass`
+#### `bool` or `bool!`
 
-We recommend using `bool` because it is more close to Ruby's semantics. If the type of a parameter of a method is `bool`, we usually pass `true` and `false`, and also `nil` or any other values. `TrueClass | FalseClass` rejects other values than `true` and `false`.
+`bool` is a type of values that is used only as conditions. `bool!` is equivalent to `true | false`.
+
+We recommend using `bool` because it is more close to Ruby's semantics. If the type of a parameter of a method is `bool`, we usually pass `true` and `false`, and also `nil` or any other values.
+
+`bool!` rejects other values than `true` and `false`. We assume the type is for the case the two values are strictly required. This often happens if the value is serialized to be stored in files or transmitted over network.
 
 #### `void`, `bool`, or `top`?
 
