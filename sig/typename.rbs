@@ -1,6 +1,6 @@
 module RBS
   # TypeName represents name of types in RBS.
-  # 
+  #
   # TypeNames are one of the three kind, class, alias, and interface.
   # *class* type names corresponds to Ruby classes and modules.
   # There are no corresponding Ruby value to *alias* and *interface* type names.

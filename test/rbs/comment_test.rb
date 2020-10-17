@@ -10,12 +10,12 @@ class RBS::CommentTest < Minitest::Test
       string: 'foo',
       location: RBS::Location.new(buffer: buffer, start_pos: 0, end_pos: 3)
     )
-    
+
     comment.concat(
       string: 'bar',
       location: RBS::Location.new(buffer: buffer, start_pos: 4, end_pos: 7)
     )
-    
+
     assert_equal "foobar", comment.string
     assert_equal 0, comment.location.start_pos
     assert_equal 7, comment.location.end_pos

@@ -23,7 +23,7 @@ module RBS
     def ==(other)
       other.is_a?(self.class) && other.namespace == namespace && other.name == name
     end
-    
+
     alias eql? ==
 
     def hash

@@ -2,7 +2,7 @@
 # output in Ruby. An I/O stream may be *duplexed* (that is,
 # bidirectional), and so may use more than one native operating system
 # stream.
-# 
+#
 # Many of the examples in this section use the
 # [File](https://ruby-doc.org/core-2.6.3/File.html) class, the only
 # standard subclass of [IO](IO). The two classes are
@@ -10,47 +10,47 @@
 # [File](https://ruby-doc.org/core-2.6.3/File.html) class, the Socket
 # library subclasses from [IO](IO) (such as TCPSocket
 # or UDPSocket).
-# 
+#
 # The
 # [Kernel\#open](https://ruby-doc.org/core-2.6.3/Kernel.html#method-i-open)
 # method can create an [IO](IO) (or
 # [File](https://ruby-doc.org/core-2.6.3/File.html) ) object for these
 # types of arguments:
-# 
+#
 #   - A plain string represents a filename suitable for the underlying
 #     operating system.
-# 
+#
 #   - A string starting with `"|"` indicates a subprocess. The remainder
 #     of the string following the `"|"` is invoked as a process with
 #     appropriate input/output channels connected to it.
-# 
+#
 #   - A string equal to `"|-"` will create another Ruby instance as a
 #     subprocess.
-# 
+#
 # The [IO](IO) may be opened with different file modes
 # (read-only, write-only) and encodings for proper conversion. See
 # [::new](IO#method-c-new) for these options. See
 # [Kernel\#open](https://ruby-doc.org/core-2.6.3/Kernel.html#method-i-open)
 # for details of the various command formats described above.
-# 
+#
 # [::popen](IO#method-c-popen), the Open3 library, or
 # Process\#spawn may also be used to communicate with subprocesses through
 # an [IO](IO).
-# 
+#
 # Ruby will convert pathnames between different operating system
 # conventions if possible. For instance, on a Windows system the filename
 # `"/gumby/ruby/test.rb"` will be opened as `"\gumby\ruby\test.rb"` . When
 # specifying a Windows-style filename in a Ruby string, remember to escape
 # the backslashes:
-# 
+#
 # ```ruby
 # "C:\\gumby\\ruby\\test.rb"
 # ```
-# 
+#
 # Our examples here will use the Unix-style forward slashes;
 # File::ALT\_SEPARATOR can be used to get the platform-specific separator
 # character.
-# 
+#
 # The global constant [ARGF](https://ruby-doc.org/core-2.6.3/ARGF.html)
 # (also accessible as `$<` ) provides an IO-like stream which allows
 # access to all files mentioned on the command line (or STDIN if no files
@@ -59,44 +59,44 @@
 # and its alias
 # [ARGF\#filename](https://ruby-doc.org/core-2.6.3/ARGF.html#method-i-filename)
 # are provided to access the name of the file currently being read.
-# 
-# 
+#
+#
 # The io/console extension provides methods for interacting with the
 # console. The console can be accessed from IO.console or the standard
 # input/output/error [IO](IO) objects.
-# 
+#
 # Requiring io/console adds the following methods:
-# 
+#
 #   - IO::console
-# 
+#
 #   - IO\#raw
-# 
+#
 #   - IO\#raw\!
-# 
+#
 #   - IO\#cooked
-# 
+#
 #   - IO\#cooked\!
-# 
+#
 #   - IO\#getch
-# 
+#
 #   - IO\#echo=
-# 
+#
 #   - IO\#echo?
-# 
+#
 #   - IO\#noecho
-# 
+#
 #   - IO\#winsize
-# 
+#
 #   - IO\#winsize=
-# 
+#
 #   - IO\#iflush
-# 
+#
 #   - IO\#ioflush
-# 
+#
 #   - IO\#oflush
-# 
+#
 # Example:
-# 
+#
 # ```ruby
 # require 'io/console'
 # rows, columns = $stdout.winsize
@@ -119,11 +119,11 @@ class IO < Object
 
   # Puts *ios* into binary mode. Once a stream is in binary mode, it cannot
   # be reset to nonbinary mode.
-  # 
+  #
   #   - newline conversion disabled
-  # 
+  #
   #   - encoding conversion disabled
-  # 
+  #
   #   - content is treated as ASCII-8BIT
   def binmode: () -> self
 
@@ -134,9 +134,9 @@ class IO < Object
   # stream is unavailable for any further data operations; an `IOError` is
   # raised if such an attempt is made. I/O streams are automatically closed
   # when they are claimed by the garbage collector.
-  # 
+  #
   # If *ios* is opened by `IO.popen`, `close` sets `$?` .
-  # 
+  #
   # Calling this method on closed [IO](IO.downloaded.ruby_doc) object is
   # just ignored since Ruby 2.3.
   def close: () -> NilClass
@@ -144,7 +144,7 @@ class IO < Object
   def close_on_exec=: (bool arg0) -> bool
 
   # Returns `true` if *ios* will be closed on exec.
-  # 
+  #
   # ```ruby
   # f = open("/dev/null")
   # f.close_on_exec?                 #=> false
@@ -158,18 +158,18 @@ class IO < Object
   # Closes the read end of a duplex I/O stream (i.e., one that contains both
   # a read and a write stream, such as a pipe). Will raise an `IOError` if
   # the stream is not duplexed.
-  # 
+  #
   # ```ruby
   # f = IO.popen("/bin/sh","r+")
   # f.close_read
   # f.readlines
   # ```
-  # 
+  #
   # *produces:*
-  # 
+  #
   #     prog.rb:3:in `readlines': not opened for reading (IOError)
   #      from prog.rb:3
-  # 
+  #
   # Calling this method on closed [IO](IO.downloaded.ruby_doc) object is
   # just ignored since Ruby 2.3.
   def close_read: () -> NilClass
@@ -177,26 +177,26 @@ class IO < Object
   # Closes the write end of a duplex I/O stream (i.e., one that contains
   # both a read and a write stream, such as a pipe). Will raise an `IOError`
   # if the stream is not duplexed.
-  # 
+  #
   # ```ruby
   # f = IO.popen("/bin/sh","r+")
   # f.close_write
   # f.print "nowhere"
   # ```
-  # 
+  #
   # *produces:*
-  # 
+  #
   #     prog.rb:3:in `write': not opened for writing (IOError)
   #      from prog.rb:3:in `print'
   #      from prog.rb:3
-  # 
+  #
   # Calling this method on closed [IO](IO.downloaded.ruby_doc) object is
   # just ignored since Ruby 2.3.
   def close_write: () -> NilClass
 
   # Returns `true` if *ios* is completely closed (for duplex streams, both
   # reader and writer), `false` otherwise.
-  # 
+  #
   # ```ruby
   # f = File.new("testfile")
   # f.close         #=> nil
@@ -224,29 +224,29 @@ class IO < Object
   # Returns true if *ios* is at end of file that means there are no more
   # data to read. The stream must be opened for reading or an `IOError` will
   # be raised.
-  # 
+  #
   # ```ruby
   # f = File.new("testfile")
   # dummy = f.readlines
   # f.eof   #=> true
   # ```
-  # 
+  #
   # If *ios* is a stream such as pipe or socket, `IO#eof?` blocks until the
   # other end sends some data or closes it.
-  # 
+  #
   # ```ruby
   # r, w = IO.pipe
   # Thread.new { sleep 1; w.close }
   # r.eof?  #=> true after 1 second blocking
-  # 
+  #
   # r, w = IO.pipe
   # Thread.new { sleep 1; w.puts "a" }
   # r.eof?  #=> false after 1 second blocking
-  # 
+  #
   # r, w = IO.pipe
   # r.eof?  # blocks forever
   # ```
-  # 
+  #
   # Note that `IO#eof?` reads data to the input byte buffer. So `IO#sysread`
   # may not behave as you intend with `IO#eof?`, unless you call
   # `IO#rewind` first (which is not available for some streams).
@@ -255,35 +255,35 @@ class IO < Object
   def fcntl: (Integer integer_cmd, String | Integer arg) -> Integer
 
   # Immediately writes all buffered data in *ios* to disk.
-  # 
+  #
   # If the underlying operating system does not support *fdatasync(2)* ,
   # `IO#fsync` is called instead (which might raise a `NotImplementedError`
   # ).
   def fdatasync: () -> Integer?
 
   # Returns an integer representing the numeric file descriptor for *ios* .
-  # 
+  #
   # ```ruby
   # $stdin.fileno    #=> 0
   # $stdout.fileno   #=> 1
   # ```
-  # 
-  # 
-  # 
+  #
+  #
+  #
   # Also aliased as: [to\_i](IO.downloaded.ruby_doc#method-i-to_i)
   def fileno: () -> Integer
 
   # Flushes any buffered data within *ios* to the underlying operating
   # system (note that this is Ruby internal buffering only; the OS may
   # buffer the data as well).
-  # 
+  #
   # ```ruby
   # $stdout.print "no newline"
   # $stdout.flush
   # ```
-  # 
+  #
   # *produces:*
-  # 
+  #
   # ```ruby
   # no newline
   # ```
@@ -293,14 +293,14 @@ class IO < Object
   # differs from using `IO#sync=` . The latter ensures that data is flushed
   # from Ruby’s buffers, but does not guarantee that the underlying
   # operating system actually writes it to disk.
-  # 
+  #
   # `NotImplementedError` is raised if the underlying operating system does
   # not support *fsync(2)* .
   def fsync: () -> Integer?
 
   # Gets the next 8-bit byte (0..255) from *ios* . Returns `nil` if called
   # at end of file.
-  # 
+  #
   # ```ruby
   # f = File.new("testfile")
   # f.getbyte   #=> 84
@@ -310,7 +310,7 @@ class IO < Object
 
   # Reads a one-character string from *ios* . Returns `nil` if called at end
   # of file.
-  # 
+  #
   # ```ruby
   # f = File.new("testfile")
   # f.getc   #=> "h"
@@ -334,7 +334,7 @@ class IO < Object
 
   # Returns `true` if *ios* is associated with a terminal device (tty),
   # `false` otherwise.
-  # 
+  #
   # ```ruby
   # File.new("testfile").isatty   #=> false
   # File.new("/dev/tty").isatty   #=> true
@@ -347,14 +347,14 @@ class IO < Object
   # number of newlines encountered. The two values will differ if
   # [gets](IO.downloaded.ruby_doc#method-i-gets) is called with a separator
   # other than newline.
-  # 
+  #
   # Methods that use `$/` like [each](IO.downloaded.ruby_doc#method-i-each)
   # , [lines](IO.downloaded.ruby_doc#method-i-lines) and
   # [readline](IO.downloaded.ruby_doc#method-i-readline) will also increment
   # `lineno` .
-  # 
+  #
   # See also the `$.` variable.
-  # 
+  #
   # ```ruby
   # f = File.new("testfile")
   # f.lineno   #=> 0
@@ -369,7 +369,7 @@ class IO < Object
 
   # Returns the process ID of a child process associated with *ios* . This
   # will be set by `IO.popen` .
-  # 
+  #
   # ```ruby
   # pipe = IO.popen("-")
   # if pipe
@@ -378,15 +378,15 @@ class IO < Object
   #   $stderr.puts "In child, pid is #{$$}"
   # end
   # ```
-  # 
+  #
   # *produces:*
-  # 
+  #
   #     In child, pid is 26209
   #     In parent, child pid is 26209
   def pid: () -> Integer
 
   # Returns the current offset (in bytes) of *ios* .
-  # 
+  #
   # ```ruby
   # f = File.new("testfile")
   # f.pos    #=> 0
@@ -416,7 +416,7 @@ class IO < Object
 
   # Reads a one-character string from *ios* . Raises an `EOFError` on end of
   # file.
-  # 
+  #
   # ```ruby
   # f = File.new("testfile")
   # f.readchar   #=> "h"
@@ -435,7 +435,7 @@ class IO < Object
             | (String other_IO_or_path, ?String mode_str) -> IO
 
   # Positions *ios* to the beginning of input, resetting `lineno` to zero.
-  # 
+  #
   # ```ruby
   # f = File.new("testfile")
   # f.readline   #=> "This is line one\n"
@@ -443,7 +443,7 @@ class IO < Object
   # f.lineno     #=> 0
   # f.readline   #=> "This is line one\n"
   # ```
-  # 
+  #
   # Note that it cannot be used with streams such as pipes, ttys, and
   # sockets.
   def rewind: () -> Integer
@@ -454,7 +454,7 @@ class IO < Object
                   | (?String | Encoding ext_or_ext_int_enc, ?String | Encoding int_enc) -> self
 
   # Returns status information for *ios* as an object of type `File::Stat` .
-  # 
+  #
   # ```ruby
   # f = File.new("testfile")
   # s = f.stat
@@ -467,7 +467,7 @@ class IO < Object
   # Returns the current “sync mode” of *ios* . When sync mode is true, all
   # output is immediately flushed to the underlying operating system and is
   # not buffered by Ruby internally. See also `IO#fsync` .
-  # 
+  #
   # ```ruby
   # f = File.new("testfile")
   # f.sync   #=> false
@@ -483,7 +483,7 @@ class IO < Object
   def syswrite: (_ToS arg0) -> Integer
 
   # Returns the current offset (in bytes) of *ios* .
-  # 
+  #
   # ```ruby
   # f = File.new("testfile")
   # f.pos    #=> 0
@@ -497,7 +497,7 @@ class IO < Object
 
   # Returns `true` if *ios* is associated with a terminal device (tty),
   # `false` otherwise.
-  # 
+  #
   # ```ruby
   # File.new("testfile").isatty   #=> false
   # File.new("/dev/tty").isatty   #=> true
@@ -547,29 +547,29 @@ class IO < Object
   # Returns true if *ios* is at end of file that means there are no more
   # data to read. The stream must be opened for reading or an `IOError` will
   # be raised.
-  # 
+  #
   # ```ruby
   # f = File.new("testfile")
   # dummy = f.readlines
   # f.eof   #=> true
   # ```
-  # 
+  #
   # If *ios* is a stream such as pipe or socket, `IO#eof?` blocks until the
   # other end sends some data or closes it.
-  # 
+  #
   # ```ruby
   # r, w = IO.pipe
   # Thread.new { sleep 1; w.close }
   # r.eof?  #=> true after 1 second blocking
-  # 
+  #
   # r, w = IO.pipe
   # Thread.new { sleep 1; w.puts "a" }
   # r.eof?  #=> false after 1 second blocking
-  # 
+  #
   # r, w = IO.pipe
   # r.eof?  # blocks forever
   # ```
-  # 
+  #
   # Note that `IO#eof?` reads data to the input byte buffer. So `IO#sysread`
   # may not behave as you intend with `IO#eof?`, unless you call
   # `IO#rewind` first (which is not available for some streams).

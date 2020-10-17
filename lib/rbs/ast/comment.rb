@@ -23,7 +23,7 @@ module RBS
         { string: string, location: location }.to_json(*a)
       end
 
-      def concat(string:, location:)  
+      def concat(string:, location:)
         @string.concat string
 
         if loc = @location

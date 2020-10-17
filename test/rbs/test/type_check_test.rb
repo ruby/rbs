@@ -86,7 +86,7 @@ EOF
 
         assert typecheck.value({}, parse_type("::Hash[::Integer, ::String]"))
         assert typecheck.value(Array.new(100) {|i| [i, i.to_s] }.to_h, parse_type("::Hash[::Integer, ::String]"))
-        
+
         assert typecheck.value(Array.new(1000) {|i| [i, i.to_s] }.to_h, parse_type("::Hash[::Integer, ::String]"))
       end
     end
@@ -113,7 +113,7 @@ EOF
     SignatureManager.new do |manager|
       manager.build do |env|
         builder = DefinitionBuilder.new(env: env)
-        
+
           assert_sampling_check(builder, 1, [0,1,2,3,4])
           assert_sampling_check(builder, 3, [1,2,3,4,5])
           assert_sampling_check(builder, 3, [1,2,3,4,'a'])

@@ -53,9 +53,9 @@
 #     times:    1.000000   0.000000   1.000000 (  1.003611)
 #     upto:     1.030000   0.000000   1.030000 (  1.028098)
 #
-# *   The times for some benchmarks depend on the order in which items are run. 
+# *   The times for some benchmarks depend on the order in which items are run.
 #     These differences are due to the cost of memory allocation and garbage
-#     collection. To avoid these discrepancies, the #bmbm method is provided. 
+#     collection. To avoid these discrepancies, the #bmbm method is provided.
 #     For example, to compare ways to sort an array of floats:
 #
 #         require 'benchmark'

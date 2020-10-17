@@ -305,7 +305,7 @@ module RBS
       if prev_loc && decl_loc
         prev_end_line = prev_loc.end_line
         start_line = decl_loc.start_line
-  
+
         if start_line - prev_end_line > 1
           puts
         end

@@ -1,6 +1,6 @@
 module RBS
   # Namespace instance represents a _prefix of module names_.
-  # 
+  #
   #    vvvvvvvvvvvvvv  TypeName
   #    RBS::Namespace
   #    ^^^^^           Namespace
@@ -44,7 +44,7 @@ module RBS
     # If `other` is an absolute namespace, it returns `other`.
     #
     #   Namespace("Foo::") + Namespace("::Bar::")  # =>  ::Bar::
-    # 
+    #
     def +: (Namespace other) -> Namespace
 
     # Add one path component to self.
@@ -62,7 +62,7 @@ module RBS
 
     # Returns true if self is absolute namespace.
     def absolute?: () -> bool
-    
+
     # Returns true if self is relative namespace.
     def relative?: () -> bool
 

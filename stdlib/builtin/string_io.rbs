@@ -114,7 +114,7 @@ class StringIO
   #
   def gets: (?String sep, ?Integer limit, ?chomp: bool) -> String?
 
-  # Returns the Encoding of the internal string if conversion is specified. 
+  # Returns the Encoding of the internal string if conversion is specified.
   # Otherwise returns `nil`.
   #
   def internal_encoding: () -> Encoding

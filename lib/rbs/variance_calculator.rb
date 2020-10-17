@@ -135,7 +135,7 @@ module RBS
                   when :contravariant
                     :covariant
                   else
-                    raise                    
+                    raise
                   end
             type(ty, result: result, context: con)
           end

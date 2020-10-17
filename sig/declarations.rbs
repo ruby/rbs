@@ -2,7 +2,7 @@ module RBS
   module AST
     module Declarations
       type t = Class | Module | Interface | Constant | Global | Alias
-      
+
       class Base
       end
 

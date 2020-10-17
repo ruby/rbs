@@ -11,10 +11,10 @@ module Enumerable[unchecked out Elem, out Return]: _Each[Elem, Return]
   # block is not given, Ruby adds an implicit block of `{ |obj| obj }` which
   # will cause [all?](Enumerable.downloaded.ruby_doc#method-i-all-3F) to
   # return `true` when none of the collection members are `false` or `nil` .
-  # 
+  #
   # If instead a pattern is supplied, the method returns whether `pattern
   # === element` for every collection member.
-  # 
+  #
   #     %w[ant bear cat].all? { |word| word.length >= 3 } #=> true
   #     %w[ant bear cat].all? { |word| word.length >= 4 } #=> false
   #     %w[ant bear cat].all?(/t/)                        #=> false
@@ -30,10 +30,10 @@ module Enumerable[unchecked out Elem, out Return]: _Each[Elem, Return]
   # |obj| obj }` that will cause
   # [any?](Enumerable.downloaded.ruby_doc#method-i-any-3F) to return `true`
   # if at least one of the collection members is not `false` or `nil` .
-  # 
+  #
   # If instead a pattern is supplied, the method returns whether `pattern
   # === element` for any collection member.
-  # 
+  #
   # ```ruby
   # %w[ant bear cat].any? { |word| word.length >= 3 } #=> true
   # %w[ant bear cat].any? { |word| word.length >= 4 } #=> true
@@ -54,7 +54,7 @@ module Enumerable[unchecked out Elem, out Return]: _Each[Elem, Return]
   # argument is given, the number of items in `enum` that are equal to
   # `item` are counted. If a block is given, it counts the number of
   # elements yielding a true value.
-  # 
+  #
   # ```ruby
   # ary = [1, 2, 4, 2]
   # ary.count               #=> 4
@@ -86,11 +86,11 @@ module Enumerable[unchecked out Elem, out Return]: _Each[Elem, Return]
                       | [U] (U arg0) -> ::Enumerator[[ Elem, U ], Return]
 
   # Returns an array containing the items in *enum* .
-  # 
+  #
   # ```ruby
   # (1..7).to_a                       #=> [1, 2, 3, 4, 5, 6, 7]
   # { 'a'=>1, 'b'=>2, 'c'=>3 }.to_a   #=> [["a", 1], ["b", 2], ["c", 3]]
-  # 
+  #
   # require 'prime'
   # Prime.entries 10                  #=> [2, 3, 5, 7]
   # ```
@@ -109,7 +109,7 @@ module Enumerable[unchecked out Elem, out Return]: _Each[Elem, Return]
   # Returns the first element, or the first `n` elements, of the enumerable.
   # If the enumerable is empty, the first form returns `nil`, and the
   # second form returns an empty array.
-  # 
+  #
   # ```ruby
   # %w[foo bar baz].first     #=> "foo"
   # %w[foo bar baz].first(2)  #=> ["foo", "bar"]
@@ -139,16 +139,16 @@ module Enumerable[unchecked out Elem, out Return]: _Each[Elem, Return]
   # Returns the object in *enum* with the maximum value. The first form
   # assumes all objects implement `Comparable` ; the second uses the block
   # to return *a \<=\> b* .
-  # 
+  #
   # ```ruby
   # a = %w(albatross dog horse)
   # a.max                                   #=> "horse"
   # a.max { |a, b| a.length <=> b.length }  #=> "albatross"
   # ```
-  # 
+  #
   # If the `n` argument is given, maximum `n` elements are returned as an
   # array, sorted in descending order.
-  # 
+  #
   # ```ruby
   # a = %w[albatross dog horse]
   # a.max(2)                                  #=> ["horse", "dog"]
@@ -168,16 +168,16 @@ module Enumerable[unchecked out Elem, out Return]: _Each[Elem, Return]
   # Returns the object in *enum* with the minimum value. The first form
   # assumes all objects implement `Comparable` ; the second uses the block
   # to return *a \<=\> b* .
-  # 
+  #
   # ```ruby
   # a = %w(albatross dog horse)
   # a.min                                   #=> "albatross"
   # a.min { |a, b| a.length <=> b.length }  #=> "dog"
   # ```
-  # 
+  #
   # If the `n` argument is given, minimum `n` elements are returned as a
   # sorted array.
-  # 
+  #
   # ```ruby
   # a = %w[albatross dog horse]
   # a.min(2)                                  #=> ["albatross", "dog"]
@@ -197,7 +197,7 @@ module Enumerable[unchecked out Elem, out Return]: _Each[Elem, Return]
   # Returns a two element array which contains the minimum and the maximum
   # value in the enumerable. The first form assumes all objects implement
   # `Comparable` ; the second uses the block to return *a \<=\> b* .
-  # 
+  #
   # ```ruby
   # a = %w(albatross dog horse)
   # a.minmax                                  #=> ["albatross", "horse"]
@@ -213,10 +213,10 @@ module Enumerable[unchecked out Elem, out Return]: _Each[Elem, Return]
   # returns `true` if the block never returns `true` for all elements. If
   # the block is not given, `none?` will return `true` only if none of the
   # collection members is true.
-  # 
+  #
   # If instead a pattern is supplied, the method returns whether `pattern
   # === element` for none of the collection members.
-  # 
+  #
   # ```ruby
   # %w{ant bear cat}.none? { |word| word.length == 5 } #=> true
   # %w{ant bear cat}.none? { |word| word.length >= 4 } #=> false
@@ -234,10 +234,10 @@ module Enumerable[unchecked out Elem, out Return]: _Each[Elem, Return]
   # returns `true` if the block returns `true` exactly once. If the block is
   # not given, `one?` will return `true` only if exactly one of the
   # collection members is true.
-  # 
+  #
   # If instead a pattern is supplied, the method returns whether `pattern
   # === element` for exactly one collection member.
-  # 
+  #
   # ```ruby
   # %w{ant bear cat}.one? { |word| word.length == 4 }  #=> true
   # %w{ant bear cat}.one? { |word| word.length > 4 }   #=> false
@@ -261,22 +261,22 @@ module Enumerable[unchecked out Elem, out Return]: _Each[Elem, Return]
                   | () -> ::Enumerator[Elem, Return]
 
   # Returns an array containing the items in *enum* sorted.
-  # 
+  #
   # Comparisons for the sort will be done using the items’ own `<=>`
   # operator or using an optional code block.
-  # 
+  #
   # The block must implement a comparison between `a` and `b` and return an
   # integer less than 0 when `b` follows `a`, `0` when `a` and `b` are
   # equivalent, or an integer greater than 0 when `a` follows `b` .
-  # 
+  #
   # The result is not guaranteed to be stable. When the comparison of two
   # elements returns `0`, the order of the elements is unpredictable.
-  # 
+  #
   # ```ruby
   # %w(rhea kea flea).sort           #=> ["flea", "kea", "rhea"]
   # (1..10).sort { |a, b| b <=> a }  #=> [10, 9, 8, 7, 6, 5, 4, 3, 2, 1]
   # ```
-  # 
+  #
   # See also [\#sort\_by](Enumerable.downloaded.ruby_doc#method-i-sort_by).
   # It implements a Schwartzian transform which is useful when key
   # computation or comparison is expensive.
@@ -294,13 +294,13 @@ module Enumerable[unchecked out Elem, out Return]: _Each[Elem, Return]
   # Implemented in C++
   # Returns the result of interpreting *enum* as a list of `[key, value]`
   # pairs.
-  # 
+  #
   #     %i[hello world].each_with_index.to_h
   #       # => {:hello => 0, :world => 1}
-  # 
+  #
   # If a block is given, the results of the block on each element of the
   # enum will be used as pairs.
-  # 
+  #
   # ```ruby
   # (1..5).to_h {|x| [x, x ** 2]}
   #   #=> {1=>1, 2=>4, 3=>9, 4=>16, 5=>25}
@@ -324,11 +324,11 @@ module Enumerable[unchecked out Elem, out Return]: _Each[Elem, Return]
   alias reduce inject
 
   # Returns an array containing the items in *enum* .
-  # 
+  #
   # ```ruby
   # (1..7).to_a                       #=> [1, 2, 3, 4, 5, 6, 7]
   # { 'a'=>1, 'b'=>2, 'c'=>3 }.to_a   #=> [["a", 1], ["b", 2], ["c", 3]]
-  # 
+  #
   # require 'prime'
   # Prime.entries 10                  #=> [2, 3, 5, 7]
   # ```
@@ -342,10 +342,10 @@ module Enumerable[unchecked out Elem, out Return]: _Each[Elem, Return]
   # [\#drop\_while](Enumerable.downloaded.ruby_doc#method-i-drop_while)
   # enumerate values only on an as-needed basis. However, if a block is
   # given to zip, values are enumerated immediately.
-  # 
-  # 
+  #
+  #
   # The following program finds pythagorean triples:
-  # 
+  #
   # ```ruby
   # def pythagorean_triples
   #   (1..Float::INFINITY).lazy.flat_map {|z|

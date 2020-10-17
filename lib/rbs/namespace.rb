@@ -100,7 +100,7 @@ module RBS
 
         until current.empty?
           yield current
-          current = _ = current.parent 
+          current = _ = current.parent
         end
 
         yield current

@@ -95,7 +95,7 @@ class MatchData
   #     f3    #=> "113"
   #     f4    #=> "8"
   #
-  def captures: () -> ::Array[String?] 
+  def captures: () -> ::Array[String?]
 
   # Returns the offset of the character immediately following the end of the *n*th
   # element of the match array in the string. *n* can be a string or symbol to

@@ -40,7 +40,7 @@ module RBS
           if s = super_class
             yield s
           end
-          
+
           self_types&.each(&block)
           included_modules&.each(&block)
           prepended_modules&.each(&block)
@@ -303,7 +303,7 @@ module RBS
             mod_ancestors = instance_ancestors(name, building_ancestors: building_ancestors)
             ancestors.unshift(*mod_ancestors.apply(arg_types, location: entry.primary.decl.location))
           end
-        end  
+        end
       end
 
       ancestors.unshift(self_ancestor)
@@ -316,7 +316,7 @@ module RBS
             mod_ancestors = instance_ancestors(name, building_ancestors: building_ancestors)
             ancestors.unshift(*mod_ancestors.apply(arg_types, location: entry.primary.decl.location))
           end
-        end  
+        end
       end
 
       building_ancestors.pop

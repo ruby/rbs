@@ -65,7 +65,7 @@ end
 RBS::RuntimePrototypeTest::TestTargets::Test::NAME: String
     EOF
       end
-    end 
+    end
   end
 
   def test_merge_types
