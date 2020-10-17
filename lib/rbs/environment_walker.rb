@@ -79,6 +79,7 @@ module RBS
       when RBS::Types::Bases::Top
       when RBS::Types::Bases::Bottom
       when RBS::Types::Bases::Bool
+      when RBS::Types::Bases::StrictBool
       when RBS::Types::Bases::Void
       when RBS::Types::Bases::Nil
       when RBS::Types::Variable

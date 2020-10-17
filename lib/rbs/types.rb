@@ -61,6 +61,8 @@ module RBS
           case self
           when Types::Bases::Bool
             'bool'
+          when Types::Bases::StrictBool
+            'bool!'
           when Types::Bases::Void
             'void'
           when Types::Bases::Any
@@ -96,6 +98,8 @@ module RBS
         end
       end
       class Class < Base; end
+
+      class StrictBool < Base; end
     end
 
     class Variable

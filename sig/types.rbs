@@ -46,7 +46,7 @@ module RBS
 
     # t represents union of all possible types.
     #
-    type t = Bases::Bool | Bases::Void | Bases::Any | Bases::Nil | Bases::Top | Bases::Bottom | Bases::Self | Bases::Instance | Bases::Class
+    type t = Bases::Bool | Bases::StrictBool | Bases::Void | Bases::Any | Bases::Nil | Bases::Top | Bases::Bottom | Bases::Self | Bases::Instance | Bases::Class
            | Variable | ClassSingleton | Interface | ClassInstance | Alias | Tuple | Record | Optional | Union | Intersection | Proc | Literal
 
     module NoFreeVariables
@@ -85,6 +85,9 @@ module RBS
       end
 
       class Bool < Base
+      end
+
+      class StrictBool < Base
       end
 
       class Void < Base

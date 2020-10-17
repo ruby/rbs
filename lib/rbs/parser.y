@@ -5,7 +5,7 @@ class RBS::Parser
         tANNOTATION
         tSTRING tSYMBOL tINTEGER tWRITE_ATTR
         kLPAREN kRPAREN kLBRACKET kRBRACKET kLBRACE kRBRACE
-        kVOID kNIL kTRUE kFALSE kANY kUNTYPED kTOP kBOT kSELF kSELFQ kINSTANCE kCLASS kBOOL kSINGLETON kTYPE kDEF kMODULE
+        kVOID kNIL kTRUE kFALSE kANY kUNTYPED kTOP kBOT kSELF kSELFQ kINSTANCE kCLASS kBOOL kBOOL_BANG kSINGLETON kTYPE kDEF kMODULE
         kPRIVATE kPUBLIC kALIAS
         kCOLON kCOLON2 kCOMMA kBAR kAMP kHAT kARROW kQUESTION kEXCLAMATION kSTAR kSTAR2 kFATARROW kEQ kDOT kDOT3 kLT
         kINTERFACE kEND kINCLUDE kEXTEND kATTRREADER kATTRWRITER kATTRACCESSOR tOPERATOR tQUOTEDMETHOD tQUOTEDIDENT
@@ -550,7 +550,7 @@ rule
   method_name0: tUIDENT | tLIDENT | tINTERFACEIDENT | identifier_keywords
 
   identifier_keywords:
-      kCLASS | kVOID | kNIL | kTRUE | kFALSE | kANY | kUNTYPED | kTOP | kBOT | kINSTANCE | kBOOL | kSINGLETON
+      kCLASS | kVOID | kNIL | kTRUE | kFALSE | kANY | kUNTYPED | kTOP | kBOT | kINSTANCE | kBOOL | kBOOL_BANG | kSINGLETON
     | kTYPE | kMODULE | kPRIVATE | kPUBLIC | kEND | kINCLUDE | kEXTEND | kPREPEND
     | kATTRREADER | kATTRACCESSOR | kATTRWRITER | kDEF | kEXTENSION | kSELF | kINCOMPATIBLE
     | kUNCHECKED | kINTERFACE | kALIAS | kOUT | kIN | kOVERLOAD
@@ -702,6 +702,9 @@ rule
       }
     | kBOOL {
         result = Types::Bases::Bool.new(location: val[0].location)
+      }
+    | kBOOL_BANG {
+        result = Types::Bases::StrictBool.new(location: val[0].location)
       }
     | kNIL {
         result = Types::Bases::Nil.new(location: val[0].location)
@@ -1328,6 +1331,8 @@ def next_token
   when input.scan(ANNOTATION_RE)
     s = input.matched.yield_self {|s| s[3, s.length-4] }.strip
     new_token(:tANNOTATION, s)
+  when input.scan(/bool\!/)
+    new_token(:kBOOL_BANG, "bool!")
   when input.scan(/self\?/)
     new_token(:kSELFQ, "self?")
   when input.scan(/(([a-zA-Z]\w*)|(_\w+))=/)

@@ -32,6 +32,11 @@ class RBS::TypeParsingTest < Minitest::Test
       assert_equal "bool", type.location.source
     end
 
+    Parser.parse_type("bool!").yield_self do |type|
+      assert_instance_of Types::Bases::StrictBool, type
+      assert_equal "bool!", type.location.source
+    end
+
     Parser.parse_type("nil").yield_self do |type|
       assert_instance_of Types::Bases::Nil, type
       assert_equal "nil", type.location.source
