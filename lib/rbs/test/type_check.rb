@@ -220,6 +220,8 @@ module RBS
           true
         when Types::Bases::Bool
           true
+        when Types::Bases::StrictBool
+          val.is_a?(TrueClass) || val.is_a?(FalseClass)
         when Types::Bases::Top
           true
         when Types::Bases::Bottom
