@@ -233,8 +233,8 @@
 #     arr                       #=> [1, 2, 3]
 # for pack.c
 #
-class ::Array[unchecked out Elem] < Object
-  include Enumerable[Elem, ::Array[Elem]]
+class Array[unchecked out Elem] < Object
+  include Enumerable[Elem, self]
 
   # Returns a new array.
   #
@@ -334,7 +334,7 @@ class ::Array[unchecked out Elem] < Object
   #     [ 1, 2, 3 ] * 3    #=> [ 1, 2, 3, 1, 2, 3, 1, 2, 3 ]
   #     [ 1, 2, 3 ] * ","  #=> "1,2,3"
   #
-  def *: (string str) -> String
+  def *: (string str) -> ::String
        | (int int) -> ::Array[Elem]
 
   # Concatenation --- Returns a new array built by concatenating the two arrays
@@ -388,7 +388,7 @@ class ::Array[unchecked out Elem] < Object
   #     a
   #             #=>  [ 1, 2, "c", "d", [ 3, 4 ] ]
   #
-  def <<: (Elem) -> ::Array[Elem]
+  def <<: (Elem) -> self
 
   # Comparison --- Returns an integer (`-1`, `0`, or `+1`) if this array is less
   # than, equal to, or greater than `other_ary`.
@@ -665,7 +665,7 @@ class ::Array[unchecked out Elem] < Object
   #     [ "a", nil, "b", nil, "c" ].compact! #=> [ "a", "b", "c" ]
   #     [ "a", "b", "c" ].compact!           #=> nil
   #
-  def compact!: () -> ::Array[Elem]?
+  def compact!: () -> self?
 
   # Appends the elements of `other_ary`s to `self`.
   #
@@ -716,7 +716,7 @@ class ::Array[unchecked out Elem] < Object
   def cycle: (?int? n) { (Elem) -> void } -> nil
            | (?int? n) -> ::Enumerator[Elem, nil]
 
-  def deconstruct: () -> ::Array[::Integer]
+  def deconstruct: () -> self
 
   # Deletes all items from `self` that are equal to `obj`.
   #
@@ -759,7 +759,7 @@ class ::Array[unchecked out Elem] < Object
   #     scores = [ 97, 42, 75 ]
   #     scores.delete_if {|score| score < 80 }   #=> [97]
   #
-  def delete_if: () { (Elem item) -> bool } -> ::Array[Elem]
+  def delete_if: () { (Elem item) -> bool } -> self
                | () -> ::Enumerator[Elem, self]
 
   # Array Difference
@@ -839,8 +839,8 @@ class ::Array[unchecked out Elem] < Object
   #
   #     a -- b -- c --
   #
-  def each: () -> ::Enumerator[Elem, ::Array[Elem]]
-          | () { (Elem item) -> void } -> ::Array[Elem]
+  def each: () -> ::Enumerator[Elem, self]
+          | () { (Elem item) -> void } -> self
 
   # Same as Array#each, but passes the `index` of the element instead of the
   # element itself.
@@ -854,8 +854,8 @@ class ::Array[unchecked out Elem] < Object
   #
   #     0 -- 1 -- 2 --
   #
-  def each_index: () { (::Integer index) -> void } -> ::Array[Elem]
-                | () -> ::Enumerator[Elem, ::Array[Elem]]
+  def each_index: () { (::Integer index) -> void } -> self
+                | () -> ::Enumerator[Elem, self]
 
   # Returns `true` if `self` contains no elements.
   #
@@ -945,8 +945,8 @@ class ::Array[unchecked out Elem] < Object
   #
   # Array#filter! is an alias for Array#select!.
   #
-  def filter!: () { (Elem item) -> bool } -> ::Array[Elem]?
-             | () -> ::Enumerator[Elem, ::Array[Elem]?]
+  def filter!: () { (Elem item) -> bool } -> self?
+             | () -> ::Enumerator[Elem, self?]
 
   # Returns the *index* of the first object in `ary` such that the object is `==`
   # to `obj`.
@@ -1010,7 +1010,7 @@ class ::Array[unchecked out Elem] < Object
   #     a = [ 1, 2, [3, [4, 5] ] ]
   #     a.flatten!(1) #=> [1, 2, 3, [4, 5]]
   #
-  def flatten!: (?int level) -> ::Array[untyped]?
+  def flatten!: (?int level) -> self?
 
   # Compute a hash-code for this array.
   #
@@ -1059,7 +1059,7 @@ class ::Array[unchecked out Elem] < Object
   #     a.insert(2, 99)         #=> ["a", "b", 99, "c", "d"]
   #     a.insert(-2, 1, 2, 3)   #=> ["a", "b", 99, "c", 1, 2, 3, "d"]
   #
-  def insert: (int index, *Elem obj) -> ::Array[Elem]
+  def insert: (int index, *Elem obj) -> self
 
   # Creates a string representation of `self`, by calling #inspect on each
   # element.
@@ -1106,8 +1106,8 @@ class ::Array[unchecked out Elem] < Object
   #
   # See also Array#select!.
   #
-  def keep_if: () { (Elem item) -> bool } -> ::Array[Elem]
-             | () -> ::Enumerator[Elem, ::Array[Elem]]
+  def keep_if: () { (Elem item) -> bool } -> self
+             | () -> ::Enumerator[Elem, self]
 
   # Returns the last element(s) of `self`. If the array is empty, the first form
   # returns `nil`.
@@ -1402,7 +1402,7 @@ class ::Array[unchecked out Elem] < Object
   #     [1, 2, 3].push(4).push(5)
   #             #=> [1, 2, 3, 4, 5]
   #
-  def push: (*Elem obj) -> ::Array[Elem]
+  def push: (*Elem obj) -> self
 
   # Searches through the array whose elements are also arrays.
   #
@@ -1436,8 +1436,8 @@ class ::Array[unchecked out Elem] < Object
   #
   # If no block is given, an Enumerator is returned instead.
   #
-  def reject!: () { (Elem item) -> bool } -> ::Array[Elem]?
-             | () -> ::Enumerator[Elem, ::Array[Elem]?]
+  def reject!: () { (Elem item) -> bool } -> self?
+             | () -> ::Enumerator[Elem, self?]
 
   # When invoked with a block, yields all repeated combinations of length `n` of
   # elements from the array and then returns the array itself.
@@ -1515,8 +1515,8 @@ class ::Array[unchecked out Elem] < Object
   #
   #     c b a
   #
-  def reverse_each: () { (Elem item) -> void } -> ::Array[Elem]
-                  | () -> ::Enumerator[Elem, ::Array[Elem]]
+  def reverse_each: () { (Elem item) -> void } -> self
+                  | () -> ::Enumerator[Elem, self]
 
   # Returns the *index* of the last object in `self` `==` to `obj`.
   #
@@ -1564,7 +1564,7 @@ class ::Array[unchecked out Elem] < Object
   #     a.rotate!(2)     #=> ["d", "a", "b", "c"]
   #     a.rotate!(-3)    #=> ["a", "b", "c", "d"]
   #
-  def rotate!: (?int count) -> ::Array[Elem]
+  def rotate!: (?int count) -> self
 
   # Choose a random element or `n` random elements from the array.
   #
@@ -1617,8 +1617,8 @@ class ::Array[unchecked out Elem] < Object
   #
   # Array#filter! is an alias for Array#select!.
   #
-  def select!: () { (Elem item) -> bool } -> ::Array[Elem]?
-             | () -> ::Enumerator[Elem, ::Array[Elem]?]
+  def select!: () { (Elem item) -> bool } -> self?
+             | () -> ::Enumerator[Elem, self?]
 
   # Removes the first element of `self` and returns it (shifting all other
   # elements down by one). Returns `nil` if the array is empty.
@@ -1661,7 +1661,7 @@ class ::Array[unchecked out Elem] < Object
   #
   #     a.shuffle!(random: Random.new(1))  #=> [1, 3, 2]
   #
-  def shuffle!: (?random: Random rng) -> ::Array[Elem]
+  def shuffle!: (?random: Random rng) -> self
 
   alias size length
 
@@ -1756,8 +1756,8 @@ class ::Array[unchecked out Elem] < Object
   #
   # See also Enumerable#sort_by.
   #
-  def sort!: () -> ::Array[Elem]
-           | () { (Elem a, Elem b) -> ::Integer? } -> ::Array[Elem]
+  def sort!: () -> self
+           | () { (Elem a, Elem b) -> ::Integer? } -> self
 
   # Sorts `self` in place using a set of keys generated by mapping the values in
   # `self` through the given block.
@@ -1915,8 +1915,8 @@ class ::Array[unchecked out Elem] < Object
   #     c = [["student","sam"], ["student","george"], ["teacher","matz"]]
   #     c.uniq! {|s| s.first}   # => [["student", "sam"], ["teacher", "matz"]]
   #
-  def uniq!: () -> ::Array[Elem]?
-           | () { (Elem) -> untyped } -> ::Array[Elem]?
+  def uniq!: () -> self?
+           | () { (Elem) -> untyped } -> self?
 
   # Prepends objects to the front of `self`, moving other elements upwards. See
   # also Array#shift for the opposite effect.
@@ -1925,7 +1925,7 @@ class ::Array[unchecked out Elem] < Object
   #     a.unshift("a")   #=> ["a", "b", "c", "d"]
   #     a.unshift(1, 2)  #=> [ 1, 2, "a", "b", "c", "d"]
   #
-  def unshift: (*Elem obj) -> ::Array[Elem]
+  def unshift: (*Elem obj) -> self
 
   # Returns an array containing the elements in `self` corresponding to the given
   # `selector`(s).
