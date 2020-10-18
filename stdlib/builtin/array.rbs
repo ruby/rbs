@@ -887,7 +887,7 @@ class Array[unchecked out Elem] < Object
   #
   def fetch: (int index) -> Elem
            | [T] (int index, T default) -> (Elem | T)
-           | [T] (::Integer index) { (::Integer index) -> T } -> (Elem | T)
+           | [T] (int index) { (int index) -> T } -> (Elem | T)
 
   # The first three forms set the selected elements of `self` (which may be the
   # entire array) to `obj`.
@@ -1352,8 +1352,8 @@ class Array[unchecked out Elem] < Object
   #     a.permutation(0).to_a #=> [[]] # one permutation of length 0
   #     a.permutation(4).to_a #=> []   # no permutations of length 4
   #
-  def permutation: (?::Integer n) -> ::Enumerator[::Array[Elem], ::Array[Elem]]
-                 | (?::Integer n) { (::Array[Elem] p) -> void } -> ::Array[Elem]
+  def permutation: (?int n) -> ::Enumerator[::Array[Elem], ::Array[Elem]]
+                 | (?int n) { (::Array[Elem] p) -> void } -> ::Array[Elem]
 
   # Removes the last element from `self` and returns it, or `nil` if the array is
   # empty.
