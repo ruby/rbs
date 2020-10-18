@@ -307,11 +307,17 @@ module Enumerable[unchecked out Elem, out Return]: _Each[Elem, Return]
   # ```
   def to_h: () -> ::Hash[untyped, untyped]
 
-  def each_slice: (Integer n) { (::Array[Elem] arg0) -> untyped } -> NilClass
+  def each_slice: (Integer n) { (::Array[Elem]) -> untyped } -> NilClass
                 | (Integer n) -> ::Enumerator[::Array[Elem], Return]
 
-  def find: (?Proc ifnone) { (Elem arg0) -> bool } -> Elem?
-          | (?Proc ifnone) -> ::Enumerator[Elem, Return]
+  interface _NotFound[T]
+    def call: () -> T
+  end
+
+  def find: () { (Elem) -> bool } -> Elem?
+          | () -> ::Enumerator[Elem, Elem?]
+          | [T] (_NotFound[T] ifnone) { (Elem) -> bool } -> (Elem | T)
+          | [T] (_NotFound[T] ifnone) -> ::Enumerator[Elem, Elem | T]
 
   def flat_map: [U] () { (Elem arg0) -> U } -> U
               | () -> ::Enumerator[Elem, Return]
