@@ -1989,6 +1989,10 @@ class Array[unchecked out Elem] < Object
   def initialize_copy: (self other_ary) -> void
 end
 
+interface _ToA[T]
+  def to_a: () -> Array[T]
+end
+
 interface _ToAry[T]
   def to_ary: () -> Array[T]
 end
