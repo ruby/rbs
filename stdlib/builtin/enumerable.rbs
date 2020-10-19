@@ -310,6 +310,10 @@ module Enumerable[unchecked out Elem, out Return]: _Each[Elem, Return]
   def each_slice: (Integer n) { (::Array[Elem] arg0) -> untyped } -> NilClass
                 | (Integer n) -> ::Enumerator[::Array[Elem], Return]
 
+  interface _NotFound[T]
+    def call: () -> T
+  end
+
   def find: () { (Elem arg0) -> bool } -> Elem?
           | () -> ::Enumerator[Elem, Elem?]
           | [T] (_NotFound[T] ifnone) { (Elem arg0) -> bool } -> (Elem | T)
@@ -403,8 +407,4 @@ module Enumerable[unchecked out Elem, out Return]: _Each[Elem, Return]
 
   def slice_before: (untyped pattern) -> ::Enumerator[::Array[Elem], void]
                   | () { (Elem elt) -> bool } -> ::Enumerator[::Array[Elem], void]
-end
-
-interface Enumerable::_NotFound[T]
-  def call: () -> T
 end
