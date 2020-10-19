@@ -1056,4 +1056,21 @@ EOF
       end
     end
   end
+
+  def test_generics_type_parameter
+    Parser.parse_signature(<<EOF).yield_self do |decls|
+module A[T]
+  module B
+    def foo: () -> void
+  end
+
+  def bar: () -> T
+end
+EOF
+      decls[0].members[1].tap do |member|
+        assert_instance_of Members::MethodDefinition, member
+        assert_instance_of Types::Variable, member.types[0].type.return_type
+      end
+    end
+  end
 end

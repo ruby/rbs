@@ -475,6 +475,8 @@ rule
 
   method_type:
       start_merged_scope type_params params_opt block_opt kARROW simple_type {
+        reset_variable_scope
+
         location = (val[1] || val[2] || val[3] || val[4]).location + val[5].location
         type_params = val[1]&.value || []
 
