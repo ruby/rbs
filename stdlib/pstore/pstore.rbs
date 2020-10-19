@@ -153,7 +153,7 @@ class PStore
   # **WARNING**:  This method is only valid in a PStore#transaction.  It will
   # raise PStore::Error if called at any other time.
   #
-  def commit: () -> untyped
+  def commit: () -> nil
 
   # Removes an object hierarchy from the data store, by *name*.
   #
@@ -181,14 +181,14 @@ class PStore
   # **WARNING**:  This method is only valid in a PStore#transaction.  It will
   # raise PStore::Error if called at any other time.
   #
-  def root?: (untyped name) -> untyped
+  def root?: (untyped name) -> bool
 
   # Returns the names of all object hierarchies currently in the store.
   #
   # **WARNING**:  This method is only valid in a PStore#transaction.  It will
   # raise PStore::Error if called at any other time.
   #
-  def roots: () -> untyped
+  def roots: () -> Array[untyped]
 
   # Opens a new transaction for the data store.  Code executed inside a block
   # passed to this method may read and write data to and from the data store file.
@@ -243,7 +243,7 @@ class PStore
   # PStore objects are always reentrant. But if *thread_safe* is set to true, then
   # it will become thread-safe at the cost of a minor performance hit.
   #
-  def initialize: (untyped file, ?untyped thread_safe) -> untyped
+  def initialize: (untyped file, ?bool thread_safe) -> untyped
 
   def load: (untyped content) -> untyped
 
@@ -253,7 +253,7 @@ class PStore
   #
   def load_data: (untyped file, untyped read_only) -> untyped
 
-  def on_windows?: () -> untyped
+  def on_windows?: () -> bool
 
   # Open the specified filename (either in read-only mode or in read-write mode)
   # and lock it for reading or writing.
@@ -278,10 +278,10 @@ PStore::EMPTY_MARSHAL_DATA: String
 
 PStore::EMPTY_STRING: String
 
-PStore::RDWR_ACCESS: Hash[untyped]
+PStore::RDWR_ACCESS: Hash[untyped, untyped]
 
-PStore::RD_ACCESS: Hash[untyped]
+PStore::RD_ACCESS: Hash[untyped, untyped]
 
 PStore::VERSION: String
 
-PStore::WR_ACCESS: Hash[untyped]
+PStore::WR_ACCESS: Hash[untyped, untyped]
