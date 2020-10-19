@@ -56,7 +56,10 @@ module RBS
                 RBS.logger.info { "Skipping ##{name} because of `#{reason}`..." }
               end
             else
-              if klass.instance_methods(false).include?(name) && !set.include?(name)
+              if !set.include?(name) && (
+                  name == :initialize ||
+                  klass.instance_methods(false).include?(name) ||
+                  klass.private_instance_methods(false).include?(name))
                 RBS.logger.info { "Setting up method hook in ##{name}..." }
                 Hook.hook_instance_method klass, name, key: instance_key
                 set << name
