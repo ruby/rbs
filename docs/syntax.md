@@ -433,8 +433,10 @@ _global-name_ ::= /$[a-zA-Z]\w+/ | ...
 _module-type-parameters_ ::=                                                  # Empty
                            | `[` _module-type-parameter_ `,` ... `]`
 
-_module-type-parameter_ ::= _variance_ _type-variable_
+_module-type-parameter_ ::= _check_ _variance_ _type-variable_
 _variance_ ::= `out` | `in`
+_check_ ::= # Empty
+          | `unchecked`
 ```
 
 ### Class declaration
