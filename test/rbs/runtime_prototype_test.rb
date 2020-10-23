@@ -178,6 +178,12 @@ end
     module M2
       include Module.new
     end
+
+    module M3
+      def self.name
+        raise
+      end
+    end
   end
 
   def test_decls_for_anonymous_class_or_module

@@ -17,11 +17,13 @@ module RBS
       end
 
       def target?(const)
+        name = const_name(const)
+
         patterns.any? do |pattern|
           if pattern.end_with?("*")
-            (const.name || "").start_with?(pattern.chop)
+            (name || "").start_with?(pattern.chop)
           else
-            const.name == pattern
+            name == pattern
           end
         end
       end
@@ -37,7 +39,7 @@ module RBS
       def decls
         unless @decls
           @decls = []
-          ObjectSpace.each_object(Module).select {|mod| target?(mod) }.sort_by(&:name).each do |mod|
+          ObjectSpace.each_object(Module).select {|mod| target?(mod) }.sort_by{|mod| const_name(mod) }.each do |mod|
             case mod
             when Class
               generate_class mod
@@ -356,12 +358,14 @@ module RBS
       end
 
       def generate_module(mod)
-        unless mod.name
+        name = const_name(mod)
+
+        unless name
           RBS.logger.warn("Skipping anonymous module #{mod}")
           return
         end
 
-        type_name = to_type_name(mod.name)
+        type_name = to_type_name(name)
 
         decl = AST::Declarations::Module.new(
           name: type_name,
@@ -374,12 +378,13 @@ module RBS
         )
 
         each_mixin(mod.included_modules, *mod.included_modules.flat_map(&:included_modules), namespace: type_name.namespace) do |included_module|
-          unless included_module.name
+          included_module_name = const_name(included_module)
+          unless included_module_name
             RBS.logger.warn("Skipping anonymous module #{included_module} included in #{mod}")
             next
           end
 
-          module_name = to_type_name(included_module.name)
+          module_name = to_type_name(included_module_name)
           if module_name.namespace == type_name.namespace
             module_name = TypeName.new(name: module_name.name, namespace: Namespace.empty)
           end
@@ -398,6 +403,11 @@ module RBS
         @decls << decl
 
         generate_constants mod
+      end
+
+      def const_name(const)
+        @module_name_method ||= Module.instance_method(:name)
+        @module_name_method.bind(const).call
       end
     end
   end
