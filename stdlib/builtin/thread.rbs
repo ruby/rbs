@@ -214,7 +214,7 @@ class Thread < Object
   # [Thread](Thread.downloaded.ruby_doc).
   #
   # If this is the main thread, or the last thread, exits the process.
-  def kill: () -> Thread?
+  def kill: () -> self
 
   # Returns the status of the thread-local “abort on exception” condition
   # for this `thr` .
@@ -240,7 +240,7 @@ class Thread < Object
   # There is also a class level method to set this for all threads, see
   # [::abort\_on\_exception=](Thread.downloaded.ruby_doc#method-c-abort_on_exception-3D)
   # .
-  def abort_on_exception=: (bool abort_on_exception) -> untyped
+  def abort_on_exception=: (bool abort_on_exception) -> void
 
   # Adds *proc* as a handler for tracing.
   #
@@ -249,10 +249,10 @@ class Thread < Object
   # and
   # [Kernel\#set\_trace\_func](https://ruby-doc.org/core-2.6.3/Kernel.html#method-i-set_trace_func)
   # .
-  def add_trace_func: (untyped proc) -> untyped
+  def add_trace_func: (Proc proc) -> Proc
 
   # Returns the current backtrace of the target thread.
-  def backtrace: (*untyped args) -> ::Array[untyped]
+  def backtrace: () -> ::Array[String]?
 
   # Returns the execution stack for the target thread—an array containing
   # backtrace location objects.
@@ -264,7 +264,8 @@ class Thread < Object
   # This method behaves similarly to
   # [Kernel\#caller\_locations](https://ruby-doc.org/core-2.6.3/Kernel.html#method-i-caller_locations)
   # except it applies to a specific thread.
-  def backtrace_locations: (*untyped args) -> ::Array[untyped]?
+  def backtrace_locations: (?Integer start, ?Integer length) -> Array[Thread::Backtrace::Location]?
+                         | (Range[Integer] range) -> Array[Thread::Backtrace::Location]?
 
   # Terminates `thr` and schedules another thread to be run.
   #
@@ -273,7 +274,7 @@ class Thread < Object
   # [Thread](Thread.downloaded.ruby_doc).
   #
   # If this is the main thread, or the last thread, exits the process.
-  def exit: () -> Thread?
+  def exit: () -> self
 
   # Returns a fiber-local for the given key. If the key can’t be found,
   # there are several options: With no other arguments, it will raise a
@@ -283,7 +284,7 @@ class Thread < Object
   # and
   # [Hash\#fetch](https://ruby-doc.org/core-2.6.3/Hash.html#method-i-fetch)
   # .
-  def fetch: (*untyped sym) -> untyped
+  def fetch: [X] (String | Symbol name, ?X default) -> X
 
   def group: () -> ThreadGroup?
 
@@ -326,7 +327,7 @@ class Thread < Object
   #     Waiting
   #     tick...
   #     tick...
-  def join: (*untyped limit) -> Thread
+  def join: (?Integer limit) -> Thread
 
   # Returns `true` if the given string (or symbol) exists as a fiber-local
   # variable.
@@ -337,12 +338,12 @@ class Thread < Object
   # me.key?(:oliver)    #=> true
   # me.key?(:stanley)   #=> false
   # ```
-  def key?: (Symbol sym) -> bool
+  def key?: (String | Symbol sym) -> bool
 
   def keys: () -> ::Array[Symbol]
 
   # show the name of the thread.
-  def name: () -> String
+  def name: () -> String?
 
   # set given name to the ruby thread. On some platform, it may set the name
   # to pthread and/or kernel.
@@ -393,7 +394,7 @@ class Thread < Object
   # count1    #=> 622504
   # count2    #=> 5832
   # ```
-  def priority=: (Integer priority) -> untyped
+  def priority=: (Integer priority) -> void
 
   # Returns the status of the thread-local “report on exception” condition
   # for this `thr` .
@@ -454,7 +455,7 @@ class Thread < Object
   # check $SAFE.
   def safe_level: () -> Integer
 
-  def status: () -> (String | bool)?
+  def status: () -> ("run" | "sleep" | "aborting" | false | nil)
 
   # Returns `true` if `thr` is dead or sleeping.
   #
@@ -519,14 +520,14 @@ class Thread < Object
   # The value “bar” is returned for the thread local, where nil is returned
   # for the fiber local. The fiber is executed in the same thread, so the
   # thread local values are available.
-  def thread_variable_get: (untyped key) -> untyped
+  def thread_variable_get: (String | Symbol key) -> untyped
 
   # Sets a thread local with `key` to `value` . Note that these are local to
   # threads, and not to fibers. Please see
   # [\#thread\_variable\_get](Thread.downloaded.ruby_doc#method-i-thread_variable_get)
   # and [\#\[\]](Thread.downloaded.ruby_doc#method-i-5B-5D) for more
   # information.
-  def thread_variable_set: (untyped key, untyped value) -> untyped
+  def thread_variable_set: (String | Symbol key, untyped value) -> void
 
   def thread_variables: () -> ::Array[Symbol]
 
@@ -556,7 +557,7 @@ class Thread < Object
   # c.join
   # #=> "hey!"
   # ```
-  def wakeup: () -> Thread
+  def wakeup: () -> self
 
   # Returns the status of the global “abort on exception” condition.
   #
@@ -608,14 +609,14 @@ class Thread < Object
   # thread, see
   # [abort\_on\_exception=](Thread.downloaded.ruby_doc#method-i-abort_on_exception-3D)
   # .
-  def self.abort_on_exception=: (untyped abort_on_exception) -> untyped
+  def self.abort_on_exception=: (bool abort_on_exception) -> void
 
   # Wraps the block in a single, VM-global
   # [Mutex\#synchronize](https://ruby-doc.org/core-2.6.3/Mutex.html#method-i-synchronize)
   # , returning the value of the block. A thread executing inside the
   # exclusive section will only block other threads which also use the
   # [::exclusive](Thread.downloaded.ruby_doc#method-c-exclusive) mechanism.
-  def self.exclusive: () { () -> untyped } -> untyped
+  def self.exclusive: [X] () { () -> X } -> X
 
   # Terminates the currently running thread and schedules another thread to
   # be run.
@@ -625,13 +626,13 @@ class Thread < Object
   # [Thread](Thread.downloaded.ruby_doc).
   #
   # If this is the main thread, or the last thread, exit the process.
-  def self.exit: () -> untyped
+  def self.exit: () -> void
 
   # Basically the same as [::new](Thread.downloaded.ruby_doc#method-c-new).
   # However, if class [Thread](Thread.downloaded.ruby_doc) is subclassed,
   # then calling `start` in that subclass will not invoke the subclass’s
   # `initialize` method.
-  def self.fork: (*untyped args) -> untyped
+  def self.fork: [X] (*X args) { (*X args) -> void } -> Thread
 
   # Changes asynchronous interrupt timing.
   #
@@ -754,15 +755,15 @@ class Thread < Object
   #   # all exceptions inherited from Exception are prohibited.
   # }
   # ```
-  def self.handle_interrupt: (untyped hash) -> untyped
+  def self.handle_interrupt: [X] (Hash[untyped, Symbol] hash) { (nil arg) -> X } -> X
 
-  def self.kill: (Thread thread) -> untyped
+  def self.kill: (Thread thread) -> Thread
 
-  def self.list: () -> untyped
+  def self.list: () -> Array[Thread]
 
   # Give the thread scheduler a hint to pass execution to another thread. A
   # running thread may or may not switch, it depends on OS and processor.
-  def self.pass: () -> untyped
+  def self.pass: () -> nil
 
   # Returns whether or not the asynchronous queue is empty.
   #
@@ -819,17 +820,18 @@ class Thread < Object
   #     }
   #     ...
   #     flag = false # stop thread
-  def self.pending_interrupt?: (*untyped args) -> bool
+  def self.pending_interrupt?: (?untyped error) -> bool
 
-  def self.report_on_exception: () -> untyped
+  def self.report_on_exception: () -> bool
 
-  def self.report_on_exception=: (untyped report_on_exception) -> untyped
+  def self.report_on_exception=: (bool report_on_exception) -> void
 
   # Basically the same as [::new](Thread.downloaded.ruby_doc#method-c-new).
   # However, if class [Thread](Thread.downloaded.ruby_doc) is subclassed,
   # then calling `start` in that subclass will not invoke the subclass’s
   # `initialize` method.
-  def self.start: (*untyped args) -> untyped
+  def self.start: [X] (*X args) { (*X args) -> void } -> Thread
+  def self.new: [X] (*X args) { (*X args) -> void } -> Thread
 
   # Stops execution of the current thread, putting it into a “sleep” state,
   # and schedules execution of another thread.
@@ -842,7 +844,7 @@ class Thread < Object
   # a.join
   # #=> "abc"
   # ```
-  def self.`stop`: () -> untyped
+  def self.`stop`: () -> nil
 end
 
 class Thread::Backtrace < Object
