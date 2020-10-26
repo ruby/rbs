@@ -71,28 +71,6 @@ module Kernel
 
   def srand: (?Numeric number) -> Numeric
 
-  def !~: (untyped other) -> bool
-
-  def <=>: (untyped other) -> Integer?
-
-  def ===: (untyped other) -> bool
-
-  def =~: (untyped other) -> NilClass
-
-  def clone: (?freeze: (TrueClass | FalseClass)) -> self
-
-  def display: (?IO port) -> NilClass
-
-  def dup: () -> self
-
-  def enum_for: (Symbol method, *untyped args) -> ::Enumerator[untyped, untyped]
-              | (Symbol method, *untyped args) { (*untyped args) -> (Integer|Float|nil) } -> ::Enumerator[untyped, untyped]
-  alias to_enum enum_for
-
-  def eql?: (untyped other) -> bool
-
-  def `extend`: (*Module mod) -> self
-
   # Creates a subprocess. If a block is specified, that block is run in the
   # subprocess, and the subprocess terminates with a status of zero.
   # Otherwise, the `fork` call returns twice, once in the parent, returning
@@ -113,69 +91,7 @@ module Kernel
   def fork: () -> Integer?
           | () { () -> untyped } -> Integer?
 
-  def freeze: () -> self
-
-  def frozen?: () -> bool
-
-  def hash: () -> Integer
-
   def initialize_copy: (self object) -> self
-
-  def inspect: () -> String
-
-  def instance_of?: (Class arg0) -> bool
-
-  def instance_variable_defined?: (Symbol | String arg0) -> bool
-
-  def instance_variable_get: (Symbol | String arg0) -> untyped
-
-  def instance_variable_set: [T] (Symbol | String arg0, T arg1) -> T
-
-  def instance_variables: () -> ::Array[Symbol]
-
-  def is_a?: (Class | Module arg0) -> bool
-  alias kind_of? is_a?
-
-  def method: (Symbol | String arg0) -> Method
-
-  def methods: (?bool regular) -> ::Array[Symbol]
-
-  def `nil?`: () -> FalseClass
-
-  def private_methods: (?bool all) -> ::Array[Symbol]
-
-  def protected_methods: (?bool all) -> ::Array[Symbol]
-
-  def public_method: (Symbol | String arg0) -> Method
-
-  def public_methods: (?bool all) -> ::Array[Symbol]
-
-  def `public_send`: (Symbol | String arg0, *untyped args) -> untyped
-                   | (Symbol | String arg0, *untyped args) { (*untyped) -> untyped } -> untyped
-
-  def remove_instance_variable: (Symbol | String arg0) -> untyped
-
-  def `send`: (String | Symbol arg0, *untyped arg1) -> untyped
-            | (String | Symbol arg0, *untyped arg1) { (*untyped) -> untyped } -> untyped
-
-  def `singleton_class`: () -> Class
-
-  def singleton_method: (Symbol | String arg0) -> Method
-
-  def singleton_methods: (?bool all) -> ::Array[Symbol]
-
-  def taint: () -> self
-  alias untrust taint
-
-  def tainted?: () -> bool
-  alias untrusted? tainted?
-
-  def tap: () { (untyped x) -> void } -> self
-
-  def to_s: () -> String
-
-  def untaint: () -> self
-  alias trust untaint
 
   # Returns `arg` as an [Array](https://ruby-doc.org/core-2.6.3/Array.html)
   # .
