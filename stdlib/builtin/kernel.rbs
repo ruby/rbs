@@ -85,8 +85,8 @@ module Kernel
 
   def dup: () -> self
 
-  def enum_for: (Symbol method, *untyped args) -> ::Enumerator[untyped, untyped]
-              | (Symbol method, *untyped args) { (*untyped args) -> (Integer|Float|nil) } -> ::Enumerator[untyped, untyped]
+  def enum_for: (?Symbol method, *untyped args) -> ::Enumerator[untyped, untyped]
+              | (?Symbol method, *untyped args) { (*untyped args) -> (Integer|Float|nil) } -> ::Enumerator[untyped, untyped]
   alias to_enum enum_for
 
   def eql?: (untyped other) -> bool
