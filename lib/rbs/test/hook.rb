@@ -5,6 +5,8 @@ module RBS
   module Test
     module Hook
       OPERATORS = {
+        :[] => "indexlookup",
+        :[]= => "indexset",
         :== => "eqeq",
         :=== => "eqeqeq",
         :!= => "noteq",
