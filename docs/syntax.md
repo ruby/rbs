@@ -433,8 +433,10 @@ _global-name_ ::= /$[a-zA-Z]\w+/ | ...
 _module-type-parameters_ ::=                                                  # Empty
                            | `[` _module-type-parameter_ `,` ... `]`
 
-_module-type-parameter_ ::= _variance_ _type-variable_
+_module-type-parameter_ ::= _check_ _variance_ _type-variable_
 _variance_ ::= `out` | `in`
+_check_ ::= # Empty
+          | `unchecked`
 ```
 
 ### Class declaration
@@ -447,6 +449,29 @@ class Ref[A] < Object
   def initialize: (value: A) -> void
 end
 ```
+
+For classes with type parameters, you may specify if they are "invariant" (default), "covariant" (`out`) or "contravariant" (`in`). See [this definition of covariance and contravariance](https://en.wikipedia.org/wiki/Covariance_and_contravariance_(computer_science)).
+
+For example, an `Array` of `String` can almost be considered to be an `Array` of `Object`, but not the reverse, so we can think of:
+
+```
+class Array[out T]
+  # ...
+end
+```
+
+There's a limitation with this is for mutable objects (like arrays): a mutation could invalidate this.
+If an array of String is passed to a method as an array of Objects, and that method adds an Integer to the array, the promise is broken.
+
+In those cases, one must use the `unchecked` keyword:
+
+```
+class Array[unchecked out T]
+  # ...
+end
+```
+
+This is how `Array` is actually defined in RBS.
 
 ### Module declaration
 
