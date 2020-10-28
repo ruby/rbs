@@ -1073,4 +1073,21 @@ EOF
       end
     end
   end
+
+  def test_proc
+    Parser.parse_signature(<<EOF).tap do |decls|
+module A
+  def bar: () -> ^->Integer
+end
+EOF
+
+      decls[0].members[0].tap do |member|
+        assert_instance_of Members::MethodDefinition, member
+        member.types[0].type.return_type.tap do |return_type|
+          assert_instance_of Types::Proc, return_type
+          assert_instance_of Types::ClassInstance, return_type.type.return_type
+        end
+      end
+    end
+  end
 end

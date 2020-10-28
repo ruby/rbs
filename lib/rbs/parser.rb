@@ -2856,7 +2856,7 @@ module_eval(<<'.,.,', 'parser.y', 870)
           required_keywords: {},
           optional_keywords: {},
           rest_keywords: nil,
-          return_type: val[2]
+          return_type: val[1]
         )
 
         result = LocatedValue.new(value: type, location: location)
