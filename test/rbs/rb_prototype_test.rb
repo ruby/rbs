@@ -246,7 +246,7 @@ class Hello
 
   attr_reader :x
   attr_accessor :y, :z
-  attr_writer foo, :a
+  attr_writer foo, :a, 'b'
 end
     EOR
 
@@ -265,6 +265,8 @@ class Hello
   attr_accessor z: untyped
 
   attr_writer a: untyped
+
+  attr_writer b: untyped
 end
     EOF
   end

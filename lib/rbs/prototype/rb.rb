@@ -178,9 +178,9 @@ module RBS
             end
           when :attr_reader
             args.each do |arg|
-              if arg&.type == :LIT && arg.children[0].is_a?(Symbol)
+              if arg && (name = literal_to_symbol(arg))
                 decls << AST::Members::AttrReader.new(
-                  name: arg.children[0],
+                  name: name,
                   ivar_name: nil,
                   type: Types::Bases::Any.new(location: nil),
                   location: nil,
@@ -191,9 +191,9 @@ module RBS
             end
           when :attr_accessor
             args.each do |arg|
-              if arg&.type == :LIT && arg.children[0].is_a?(Symbol)
+              if arg && (name = literal_to_symbol(arg))
                 decls << AST::Members::AttrAccessor.new(
-                  name: arg.children[0],
+                  name: name,
                   ivar_name: nil,
                   type: Types::Bases::Any.new(location: nil),
                   location: nil,
@@ -204,9 +204,9 @@ module RBS
             end
           when :attr_writer
             args.each do |arg|
-              if arg&.type == :LIT && arg.children[0].is_a?(Symbol)
+              if arg && (name = literal_to_symbol(arg))
                 decls << AST::Members::AttrWriter.new(
-                  name: arg.children[0],
+                  name: name,
                   ivar_name: nil,
                   type: Types::Bases::Any.new(location: nil),
                   location: nil,
