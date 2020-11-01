@@ -61,3 +61,10 @@ type string = String | _ToStr
 type encoding = Encoding | string
 
 type io = IO | _ToIO
+
+# `boolish` is a type for documentation.
+# It means the value of this type is only for testing a condition.
+# Unlike `bool` type, it doesn't require the value is one of `true` or `false`.
+# Any Ruby object can have `boolish` type.
+#
+type boolish = top
