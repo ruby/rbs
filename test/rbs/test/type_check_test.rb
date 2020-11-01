@@ -60,6 +60,26 @@ EOF
     end
   end
 
+  def test_type_check_absent
+    SignatureManager.new do |manager|
+      manager.files[Pathname("foo.rbs")] = <<EOF
+class Bar
+end
+EOF
+      manager.build do |env|
+        typecheck = Test::TypeCheck.new(
+          self_class: Integer,
+          builder: DefinitionBuilder.new(env: env),
+          sample_size: 100,
+          unchecked_classes: []
+        )
+
+        refute typecheck.value(3, parse_type("::Bar"))
+        assert typecheck.value(nil, parse_type("::Bar | nil"))
+      end
+    end
+  end
+
   def test_type_check_array_sampling
     SignatureManager.new do |manager|
       manager.build do |env|

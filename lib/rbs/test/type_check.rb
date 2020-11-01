@@ -202,11 +202,17 @@ module RBS
       end
 
       def get_class(type_name)
-        const_cache[type_name] ||= Object.const_get(type_name.to_s)
+        const_cache[type_name] ||= begin
+                                     Object.const_get(type_name.to_s)
+                                   rescue NameError
+                                     nil
+                                   end
       end
 
       def is_double?(value)
         unchecked_classes.any? { |unchecked_class| Test.call(value, IS_AP, Object.const_get(unchecked_class))}
+      rescue NameError
+        false
       end
 
       def value(val, type)
@@ -235,7 +241,7 @@ module RBS
         when Types::Bases::Instance
           Test.call(val, IS_AP, self_class)
         when Types::ClassInstance
-          klass = get_class(type.name)
+          klass = get_class(type.name) or return false
           case
           when klass == ::Array
             Test.call(val, IS_AP, klass) && each_sample(val).all? {|v| value(v, type.args[0]) }
@@ -281,7 +287,7 @@ module RBS
             Test.call(val, IS_AP, klass)
           end
         when Types::ClassSingleton
-          klass = get_class(type.name)
+          klass = get_class(type.name) or return false
           val == klass
         when Types::Interface
           methods = Set.new(Test.call(val, METHODS))
