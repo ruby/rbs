@@ -26,4 +26,15 @@ class StringIOTest < StdlibTest
     io.close_write
     io.closed_write?
   end
+
+  def test_each
+    io = StringIO.new("")
+    io.each(chomp: 3) do end
+    io.each(chomp: 3)
+  end
+
+  def test_gets
+    io = StringIO.new("")
+    io.gets(chomp: :true)
+  end
 end

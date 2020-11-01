@@ -111,7 +111,7 @@ class IO < Object
 
   def advise: (Symbol arg0, ?Integer offset, ?Integer len) -> NilClass
 
-  def autoclose=: (bool arg0) -> bool
+  def autoclose=: (boolish) -> bool
 
   # Returns `true` if the underlying file descriptor of *ios* will be closed
   # automatically at its finalization, otherwise `false` .
@@ -141,7 +141,7 @@ class IO < Object
   # just ignored since Ruby 2.3.
   def close: () -> NilClass
 
-  def close_on_exec=: (bool arg0) -> bool
+  def close_on_exec=: (boolish) -> bool
 
   # Returns `true` if *ios* will be closed on exec.
   #
@@ -474,7 +474,7 @@ class IO < Object
   # ```
   def sync: () -> bool
 
-  def sync=: (bool arg0) -> bool
+  def sync=: (boolish) -> bool
 
   def sysread: (Integer maxlen, String outbuf) -> String
 

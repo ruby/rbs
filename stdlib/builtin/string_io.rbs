@@ -63,8 +63,8 @@ class StringIO
 
   # See IO#each.
   #
-  def each: (?String sep, ?Integer limit, ?chomp: bool) { (String arg0) -> untyped } -> self
-          | (?String sep, ?Integer limit, ?chomp: bool) -> ::Enumerator[String, self]
+  def each: (?String sep, ?Integer limit, ?chomp: boolish) { (String) -> untyped } -> self
+          | (?String sep, ?Integer limit, ?chomp: boolish) -> ::Enumerator[String, self]
 
   # See IO#each_byte.
   #
@@ -112,7 +112,7 @@ class StringIO
 
   # See IO#gets.
   #
-  def gets: (?String sep, ?Integer limit, ?chomp: bool) -> String?
+  def gets: (?String sep, ?Integer limit, ?chomp: boolish) -> String?
 
   # Returns the Encoding of the internal string if conversion is specified.
   # Otherwise returns `nil`.
@@ -177,7 +177,7 @@ class StringIO
 
   # See IO#readlines.
   #
-  def readlines: (?String sep, ?Integer limit, ?chomp: bool) -> ::Array[String]
+  def readlines: (?String sep, ?Integer limit, ?chomp: boolish) -> ::Array[String]
 
   def readpartial: (Integer maxlen) -> String
                  | (Integer maxlen, ?String outbuf) -> String
@@ -222,7 +222,7 @@ class StringIO
 
   # Returns the argument unchanged.  Just for compatibility to IO.
   #
-  def sync=: (bool arg0) -> bool
+  def sync=: (boolish) -> bool
 
   def sysread: (Integer maxlen, String outbuf) -> String
 
@@ -269,8 +269,8 @@ class StringIO
 
   # See IO#each.
   #
-  def each_line: (?String sep, ?Integer limit, ?chomp: bool) { (String arg0) -> untyped } -> self
-               | (?String sep, ?Integer limit, ?chomp: bool) -> ::Enumerator[String, self]
+  def each_line: (?String sep, ?Integer limit, ?chomp: boolish) { (String) -> untyped } -> self
+               | (?String sep, ?Integer limit, ?chomp: boolish) -> ::Enumerator[String, self]
 
   # Returns true if the stream is at the end of the data (underlying string). The
   # stream must be opened for reading or an `IOError` will be raised.

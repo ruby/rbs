@@ -19,7 +19,7 @@ module RBS
 
     def resolve_constant_reference_context: (Symbol, context: Array[Namespace]) -> Constant?
 
-    def resolve_constant_reference_inherit: (Symbol, scopes: Array[Namespace], ?no_object: bool) -> Constant?
+    def resolve_constant_reference_inherit: (Symbol, scopes: Array[Namespace], ?no_object: boolish) -> Constant?
 
     def constant_scopes: (TypeName) -> Array[Namespace]
 

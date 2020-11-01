@@ -101,7 +101,7 @@ class Range[out Elem] < Object
   # ```
   def begin: () -> Elem
 
-  def bsearch: [U] () { (Elem arg0) -> bool } -> U?
+  def bsearch: [U] () { (Elem) -> boolish } -> U?
 
   def cover?: (untyped obj) -> bool
 
@@ -144,7 +144,7 @@ class Range[out Elem] < Object
 
   def `include?`: (untyped obj) -> bool
 
-  def initialize: (Elem from, Elem to, ?bool exclude_end) -> void
+  def initialize: (Elem from, Elem to, ?boolish exclude_end) -> void
 
   # Convert this range object to a printable form (using `inspect` to
   # convert the begin and end objects).

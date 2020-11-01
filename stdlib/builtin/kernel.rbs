@@ -247,7 +247,7 @@ module Kernel
   # ```
   def global_variables: () -> ::Array[Symbol]
 
-  def load: (String filename, ?bool arg0) -> bool
+  def load: (String filename, ?boolish) -> bool
 
   # Repeatedly executes the block.
   #

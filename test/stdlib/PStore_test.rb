@@ -9,5 +9,7 @@ class PStoreSingletonTest < Minitest::Test
   def test_initialize
     assert_send_type  "(untyped file, ?bool thread_safe) -> PStore",
                       PStore, :new, "file_name", false
+    assert_send_type  "(untyped file, ?Symbol) -> PStore",
+                      PStore, :new, "file_name", :false
   end
 end

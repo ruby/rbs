@@ -14,7 +14,7 @@ module RBS
           attr_reader variance: variance
           attr_reader skip_validation: bool
 
-          def initialize: (name: Symbol, variance: variance, skip_validation: bool) -> void
+          def initialize: (name: Symbol, variance: variance, skip_validation: boolish) -> void
 
           include _ToJson
         end

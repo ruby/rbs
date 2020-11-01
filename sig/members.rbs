@@ -23,7 +23,7 @@ module RBS
         attr_reader comment: Comment?
         attr_reader overload: bool
 
-        def initialize: (name: Symbol, kind: kind, types: Array[MethodType], annotations: Array[Annotation], location: Location?, comment: Comment?, overload: bool) -> void
+        def initialize: (name: Symbol, kind: kind, types: Array[MethodType], annotations: Array[Annotation], location: Location?, comment: Comment?, overload: boolish) -> void
 
         include _HashEqual
         include _ToJson
@@ -34,7 +34,7 @@ module RBS
 
         def overload?: () -> bool
 
-        def update: (?name: Symbol, ?kind: kind, ?types: Array[MethodType], ?annotations: Array[Annotation], ?location: Location?, ?comment: Comment?, ?overload: bool) -> MethodDefinition
+        def update: (?name: Symbol, ?kind: kind, ?types: Array[MethodType], ?annotations: Array[Annotation], ?location: Location?, ?comment: Comment?, ?overload: boolish) -> MethodDefinition
       end
 
       module Var

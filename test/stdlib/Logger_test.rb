@@ -22,6 +22,8 @@ class LoggerSingletonTest < Minitest::Test
                       Logger, :new, '/dev/null', 1, 1
     assert_send_type  "(String logdev, Integer shift_age, Integer shift_size, shift_period_suffix: String, binmode: bool, datetime_format: String, formatter: Proc, progname: String, level: Integer) -> void",
                       Logger, :new, '/dev/null', 1, 1, shift_period_suffix: '%Y', binmode: true, datetime_format: '%Y', formatter: proc { '' }, progname: 'foo', level: Logger::INFO
+    assert_send_type  "(String logdev, Integer shift_age, Integer shift_size, shift_period_suffix: String, binmode: Symbol, datetime_format: String, formatter: Proc, progname: String, level: Integer) -> void",
+                      Logger, :new, '/dev/null', 1, 1, shift_period_suffix: '%Y', binmode: :true, datetime_format: '%Y', formatter: proc { '' }, progname: 'foo', level: Logger::INFO
   end
 end
 

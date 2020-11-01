@@ -236,7 +236,7 @@ class DateTime < Date
   #     DateTime.parse('3rd Feb 2001 04:05:06 PM')
   #                               #=> #<DateTime: 2001-02-03T16:05:06+00:00 ...>
   #
-  def self.parse: (String str, ?bool complete, ?Integer start) -> DateTime
+  def self.parse: (String str, ?boolish complete, ?Integer start) -> DateTime
 
   # Creates a new DateTime object by parsing from a string according to some
   # typical RFC 2822 formats.

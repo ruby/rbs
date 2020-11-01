@@ -698,8 +698,8 @@ class String
   #     #   "o\nwor"
   #     #   "d"
   #
-  def each_line: (?string separator, ?chomp: bool) { (String line) -> void } -> self
-               | (?string separator, ?chomp: bool) -> Enumerator[String, self]
+  def each_line: (?string separator, ?chomp: boolish) { (String line) -> void } -> self
+               | (?string separator, ?chomp: boolish) -> Enumerator[String, self]
 
   # Returns `true` if *str* has a length of zero.
   #
@@ -948,7 +948,7 @@ class String
   # If a block is given, which is a deprecated form, works the same as
   # `each_line`.
   #
-  def lines: (?string separator, ?chomp: bool) -> Array[String]
+  def lines: (?string separator, ?chomp: boolish) -> Array[String]
 
   # If *integer* is greater than the length of *str*, returns a new String of
   # length *integer* with *str* left justified and padded with *padstr*;
@@ -1861,8 +1861,8 @@ class String
   #     "25".upto("5").to_a   #=> []
   #     "07".upto("11").to_a  #=> ["07", "08", "09", "10", "11"]
   #
-  def upto: (string other_str, ?bool exclusive) -> Enumerator[String, self]
-          | (string other_str, ?bool exclusive) { (String s) -> void } -> self
+  def upto: (string other_str, ?boolish exclusive) -> Enumerator[String, self]
+          | (string other_str, ?boolish exclusive) { (String s) -> void } -> self
 
   # Returns true for a string which is encoded correctly.
   #

@@ -243,7 +243,7 @@ class PStore
   # PStore objects are always reentrant. But if *thread_safe* is set to true, then
   # it will become thread-safe at the cost of a minor performance hit.
   #
-  def initialize: (untyped file, ?bool thread_safe) -> untyped
+  def initialize: (untyped file, ?boolish thread_safe) -> untyped
 
   def load: (untyped content) -> untyped
 

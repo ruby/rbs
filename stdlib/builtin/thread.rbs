@@ -240,7 +240,7 @@ class Thread < Object
   # There is also a class level method to set this for all threads, see
   # [::abort\_on\_exception=](Thread.downloaded.ruby_doc#method-c-abort_on_exception-3D)
   # .
-  def abort_on_exception=: (bool abort_on_exception) -> untyped
+  def abort_on_exception=: (boolish abort_on_exception) -> untyped
 
   # Adds *proc* as a handler for tracing.
   #
@@ -424,7 +424,7 @@ class Thread < Object
   # There is also a class level method to set this for all new threads, see
   # [::report\_on\_exception=](Thread.downloaded.ruby_doc#method-c-report_on_exception-3D)
   # .
-  def report_on_exception=: (bool report_on_exception) -> untyped
+  def report_on_exception=: (boolish report_on_exception) -> untyped
 
   # Wakes up `thr`, making it eligible for scheduling.
   #
@@ -1049,7 +1049,7 @@ class Thread::Queue < Object
   #
   # Also aliased as: [deq](Queue.downloaded.ruby_doc#method-i-deq),
   # [shift](Queue.downloaded.ruby_doc#method-i-shift)
-  def pop: (?bool non_block) -> untyped
+  def pop: (?boolish non_block) -> untyped
 
   # Pushes the given `object` to the queue.
   #
@@ -1096,7 +1096,7 @@ class Thread::SizedQueue < Thread::Queue
   #
   # Also aliased as: [enq](SizedQueue.downloaded.ruby_doc#method-i-enq),
   # [\<\<](SizedQueue.downloaded.ruby_doc#method-i-3C-3C)
-  def push: (untyped obj, ?bool non_block) -> void
+  def push: (untyped obj, ?boolish non_block) -> void
 end
 
 ConditionVariable: singleton(Thread::ConditionVariable)

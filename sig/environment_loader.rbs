@@ -42,12 +42,12 @@ module RBS
 
     def gem?: (String, String?) -> Pathname?
 
-    def each_signature: (Pathname, ?immediate: bool) { (Pathname) -> void } -> void
-                      | (Pathname, ?immediate: bool) -> Enumerator[Pathname, void]
+    def each_signature: (Pathname, ?immediate: boolish) { (Pathname) -> void } -> void
+                      | (Pathname, ?immediate: boolish) -> Enumerator[Pathname, void]
 
     def each_library_path: { (path, Pathname) -> void } -> void
 
-    def no_builtin!: (?bool) -> self
+    def no_builtin!: (?boolish) -> self
 
     def no_builtin?: () -> bool
 

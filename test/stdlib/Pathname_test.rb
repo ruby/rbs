@@ -127,6 +127,8 @@ class PathnameInstanceTest < Minitest::Test
                        path, :binwrite, 'foo'
       assert_send_type '(String, Integer) -> Integer',
                        path, :binwrite, 'foo', 42
+      assert_send_type '(String, Integer, textmode: String) -> Integer',
+                       path, :binwrite, 'foo', 42, textmode: "true"
     end
   end
 
@@ -317,6 +319,8 @@ class PathnameInstanceTest < Minitest::Test
                      Pathname(__dir__), :find do end
     assert_send_type '(ignore_error: bool) -> Enumerator[Pathname, nil]',
                      Pathname(__dir__), :find, ignore_error: true
+    assert_send_type '(ignore_error: Symbol) -> Enumerator[Pathname, nil]',
+                     Pathname(__dir__), :find, ignore_error: :true
     assert_send_type '() -> Enumerator[Pathname, nil]',
                      Pathname(__dir__), :find
   end

@@ -154,6 +154,8 @@ class DateSingletonTest < Minitest::Test
                       Date, :parse, "2020-08-15"
     assert_send_type  "(::String str, bool complete) -> ::Date",
                       Date, :parse, "2020-08-15", true
+    assert_send_type  "(::String str, Symbol) -> ::Date",
+                      Date, :parse, "2020-08-15", :true
     assert_send_type  "(::String str, bool complete, ::Integer start) -> ::Date",
                       Date, :parse, "2020-08-15", true, Date::ITALY
   end

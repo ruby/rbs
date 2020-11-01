@@ -237,7 +237,7 @@ class Module < Object
   #     B.autoload?(:CONST)          #=> "const.rb", found in A (ancestor)
   #     B.autoload?(:CONST, false)   #=> nil, not found in B itself
   #
-  def autoload?: (Symbol name, ?bool inherit) -> String?
+  def autoload?: (Symbol name, ?boolish inherit) -> String?
 
   # Evaluates the string or block in the context of *mod*, except that when a
   # block is given, constant/class variable lookup is not affected. This can be
@@ -329,7 +329,7 @@ class Module < Object
   #     Two.class_variables          #=> [:@@var2, :@@var1]
   #     Two.class_variables(false)   #=> [:@@var2]
   #
-  def class_variables: (?bool inherit) -> ::Array[Symbol]
+  def class_variables: (?boolish inherit) -> ::Array[Symbol]
 
   # Says whether *mod* or its ancestors have a constant with the given name:
   #
@@ -364,7 +364,7 @@ class Module < Object
   #
   #     Hash.const_defined? 'foobar'   #=> NameError: wrong constant name foobar
   #
-  def const_defined?: (Symbol | String arg0, ?bool inherit) -> bool
+  def const_defined?: (Symbol | String name, ?boolish inherit) -> bool
 
   # Checks for a constant with the given name in *mod*. If `inherit` is set, the
   # lookup will also search the ancestors (and `Object` if *mod* is a `Module`).
@@ -398,7 +398,7 @@ class Module < Object
   #
   #     Object.const_get 'foobar' #=> NameError: wrong constant name foobar
   #
-  def const_get: (Symbol | String arg0, ?bool inherit) -> untyped
+  def const_get: (Symbol | String name, ?boolish inherit) -> untyped
 
   # Invoked when a reference is made to an undefined constant in *mod*. It is
   # passed a symbol for the undefined constant, and returns a value to be used for
@@ -455,7 +455,7 @@ class Module < Object
   #
   # Also see Module#const_defined?.
   #
-  def constants: (?bool inherit) -> ::Array[Symbol]
+  def constants: (?boolish inherit) -> ::Array[Symbol]
 
   # Defines an instance method in the receiver. The *method* parameter can be a
   # `Proc`, a `Method` or an `UnboundMethod` object. If a block is specified, it
@@ -662,7 +662,7 @@ class Module < Object
   #     C.instance_methods(false)                   #=> [:method3]
   #     C.instance_methods.include?(:method2)       #=> true
   #
-  def instance_methods: (?bool include_super) -> ::Array[Symbol]
+  def instance_methods: (?boolish include_super) -> ::Array[Symbol]
 
   # Invoked as a callback whenever an instance method is added to the receiver.
   #
@@ -709,7 +709,7 @@ class Module < Object
   #     C.method_defined? "method4"             #=> false
   #     C.method_defined? "private_method2"     #=> false
   #
-  def method_defined?: (Symbol | String arg0, ?bool inherit) -> bool
+  def method_defined?: (Symbol | String name, ?boolish inherit) -> bool
 
   # Invoked as a callback whenever an instance method is removed from the
   # receiver.
@@ -881,7 +881,7 @@ class Module < Object
   #     Mod.instance_methods           #=> [:method2]
   #     Mod.private_instance_methods   #=> [:method1]
   #
-  def private_instance_methods: (?bool include_super) -> ::Array[Symbol]
+  def private_instance_methods: (?boolish include_super) -> ::Array[Symbol]
 
   # Returns `true` if the named private method is defined by *mod*.  If *inherit*
   # is set, the lookup will also search *mod*'s ancestors. String arguments are
@@ -906,7 +906,7 @@ class Module < Object
   #     C.private_method_defined? "method2", false   #=> false
   #     C.method_defined? "method2"                  #=> false
   #
-  def private_method_defined?: (Symbol | String arg0, ?bool inherit) -> bool
+  def private_method_defined?: (Symbol | String name, ?boolish inherit) -> bool
 
   # With no arguments, sets the default visibility for subsequently defined
   # methods to protected. With arguments, sets the named methods to have protected
@@ -926,7 +926,7 @@ class Module < Object
   # Returns a list of the protected instance methods defined in *mod*. If the
   # optional parameter is `false`, the methods of any ancestors are not included.
   #
-  def protected_instance_methods: (?bool include_super) -> ::Array[Symbol]
+  def protected_instance_methods: (?boolish include_super) -> ::Array[Symbol]
 
   # Returns `true` if the named protected method is defined *mod*.  If *inherit*
   # is set, the lookup will also search *mod*'s ancestors. String arguments are
@@ -951,7 +951,7 @@ class Module < Object
   #     C.protected_method_defined? "method2", false  #=> false
   #     C.method_defined? "method2"                   #=> true
   #
-  def protected_method_defined?: (Symbol | String arg0, ?bool inherit) -> bool
+  def protected_method_defined?: (Symbol | String name, ?boolish inherit) -> bool
 
   # With no arguments, sets the default visibility for subsequently defined
   # methods to public. With arguments, sets the named methods to have public
@@ -976,7 +976,7 @@ class Module < Object
   # Returns a list of the public instance methods defined in *mod*. If the
   # optional parameter is `false`, the methods of any ancestors are not included.
   #
-  def public_instance_methods: (?bool include_super) -> ::Array[Symbol]
+  def public_instance_methods: (?boolish include_super) -> ::Array[Symbol]
 
   # Returns `true` if the named public method is defined by *mod*.  If *inherit*
   # is set, the lookup will also search *mod*'s ancestors. String arguments are
@@ -1001,7 +1001,7 @@ class Module < Object
   #     C.public_method_defined? "method2"         #=> false
   #     C.method_defined? "method2"                #=> true
   #
-  def public_method_defined?: (Symbol | String arg0, ?bool inherit) -> bool
+  def public_method_defined?: (Symbol | String name, ?boolish inherit) -> bool
 
   # Refine *mod* in the receiver.
   #

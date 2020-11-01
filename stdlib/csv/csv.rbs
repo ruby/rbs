@@ -755,7 +755,7 @@ class CSV::Table[out Elem] < Object
   # This method assumes you want the Table.headers(), unless you explicitly pass
   # `:write_headers => false`.
   #
-  def to_csv: (?write_headers: bool, **untyped) -> untyped
+  def to_csv: (?write_headers: boolish, **untyped) -> untyped
 
   alias to_s to_csv
 

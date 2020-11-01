@@ -42,7 +42,7 @@ module GC
   # are not guaranteed to be future-compatible, and may be ignored if the
   # underlying implementation does not support them.
   #
-  def self.start: (?immediate_sweep: bool immediate_sweep, ?immediate_mark: bool immediate_mark, ?full_mark: bool full_mark) -> nil
+  def self.start: (?immediate_sweep: boolish immediate_sweep, ?immediate_mark: boolish immediate_mark, ?full_mark: boolish full_mark) -> nil
 
   # Returns a Hash containing information about the GC.
   #
@@ -132,7 +132,7 @@ module GC
                          | [K] (?Hash[K, untyped] hash) -> ::Hash[::Symbol | K, untyped]
                          | (Symbol key) -> untyped
 
-  def garbage_collect: (?immediate_sweep: bool immediate_sweep, ?immediate_mark: bool immediate_mark, ?full_mark: bool full_mark) -> nil
+  def garbage_collect: (?immediate_sweep: boolish immediate_sweep, ?immediate_mark: boolish immediate_mark, ?full_mark: boolish full_mark) -> nil
 end
 
 # internal constants

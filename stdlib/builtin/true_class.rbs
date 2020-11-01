@@ -42,5 +42,5 @@ class TrueClass
   #
   #     or
   #
-  def |: (bool obj) -> bool
+  def |: (boolish obj) -> bool
 end

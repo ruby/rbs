@@ -230,7 +230,7 @@ class Hash[unchecked out K, unchecked out V] < Object
   #
   def any?: () -> bool
           | (untyped pattern) -> bool
-          | () { (K, V) -> bool } -> bool
+          | () { (K, V) -> boolish } -> bool
 
   # Searches through the hash comparing *obj* with the key using `==`. Returns the
   # key-value pair (two elements array) or `nil` if no match is found.  See
@@ -360,7 +360,7 @@ class Hash[unchecked out K, unchecked out V] < Object
   #     h = { "a" => 100, "b" => 200, "c" => 300 }
   #     h.delete_if {|key, value| key >= "b" }   #=> {"a"=>100}
   #
-  def delete_if: () { (K arg0, V arg1) -> bool } -> self
+  def delete_if: () { (K, V) -> boolish } -> self
                | () -> ::Enumerator[[ K, V ], self]
 
   # Extracts the nested value specified by the sequence of *key* objects by
@@ -498,14 +498,14 @@ class Hash[unchecked out K, unchecked out V] < Object
   #
   # Hash#filter is an alias for Hash#select.
   #
-  def filter: () { (K arg0, V arg1) -> bool } -> self
+  def filter: () { (K, V) -> boolish } -> self
             | () -> ::Enumerator[[ K, V ], self]
 
   # Equivalent to Hash#keep_if, but returns `nil` if no changes were made.
   #
   # Hash#filter! is an alias for Hash#select!.
   #
-  def filter!: () { (K arg0, V arg1) -> bool } -> self?
+  def filter!: () { (K, V) -> boolish } -> self?
              | () -> ::Enumerator[[ K, V ], self?]
 
   # Returns a new array that is a one-dimensional flattening of this hash. That
@@ -604,7 +604,7 @@ class Hash[unchecked out K, unchecked out V] < Object
   #
   # See also Hash#select!.
   #
-  def keep_if: () { (K, V) -> bool } -> self
+  def keep_if: () { (K, V) -> boolish } -> self
              | () -> ::Enumerator[[ K, V ], self]
 
   # Returns the key of an occurrence of a given value. If the value is not found,
@@ -758,12 +758,12 @@ class Hash[unchecked out K, unchecked out V] < Object
   #     h.reject {|k,v| v > 100}  #=> {"a" => 100}
   #
   def reject: () -> ::Enumerator[[ K, V ], self]
-            | () { (K arg0, V arg1) -> bool } -> self
+            | () { (K, V) -> boolish } -> self
 
   # Equivalent to Hash#delete_if, but returns `nil` if no changes were made.
   #
   def reject!: () -> ::Enumerator[[ K, V ], self?]
-            | () { (K arg0, V arg1) -> bool } -> self?
+            | () { (K, V) -> boolish } -> self?
 
   # Replaces the contents of *hsh* with the contents of *other_hash*.
   #

@@ -494,7 +494,7 @@ class Array[unchecked out Elem] < Object
   #
   def all?: () -> bool
           | (_Pattern[Elem] pattern) -> bool
-          | () { (Elem obj) -> bool } -> bool
+          | () { (Elem obj) -> boolish } -> bool
 
   # See also Enumerable#any?
   #
@@ -699,7 +699,7 @@ class Array[unchecked out Elem] < Object
   #
   def count: () -> ::Integer
            | (untyped obj) -> ::Integer
-           | () { (Elem) -> bool } -> ::Integer
+           | () { (Elem) -> boolish } -> ::Integer
 
   # Calls the given block for each element `n` times or forever if `nil` is given.
   #
@@ -759,7 +759,7 @@ class Array[unchecked out Elem] < Object
   #     scores = [ 97, 42, 75 ]
   #     scores.delete_if {|score| score < 80 }   #=> [97]
   #
-  def delete_if: () { (Elem item) -> bool } -> self
+  def delete_if: () { (Elem item) -> boolish } -> self
                | () -> ::Enumerator[Elem, self]
 
   # Array Difference
@@ -824,7 +824,7 @@ class Array[unchecked out Elem] < Object
   #     a = [1, 2, 3, 4, 5, 0]
   #     a.drop_while {|i| i < 3 }   #=> [3, 4, 5, 0]
   #
-  def drop_while: () { (Elem obj) -> bool } -> ::Array[Elem]
+  def drop_while: () { (Elem obj) -> boolish } -> ::Array[Elem]
                 | () -> ::Enumerator[Elem, ::Array[Elem]]
 
   # Calls the given block once for each element in `self`, passing that element as
@@ -929,7 +929,7 @@ class Array[unchecked out Elem] < Object
   #
   # Array#filter is an alias for Array#select.
   #
-  def filter: () { (Elem item) -> bool } -> ::Array[Elem]
+  def filter: () { (Elem item) -> boolish } -> ::Array[Elem]
             | () -> ::Enumerator[Elem, ::Array[Elem]]
 
   # Invokes the given block passing in successive elements from `self`, deleting
@@ -945,7 +945,7 @@ class Array[unchecked out Elem] < Object
   #
   # Array#filter! is an alias for Array#select!.
   #
-  def filter!: () { (Elem item) -> bool } -> self?
+  def filter!: () { (Elem item) -> boolish } -> self?
              | () -> ::Enumerator[Elem, self?]
 
   # Returns the *index* of the first object in `ary` such that the object is `==`
@@ -965,7 +965,7 @@ class Array[unchecked out Elem] < Object
   #     a.index {|x| x == "b"}    #=> 1
   #
   def find_index: (untyped obj) -> ::Integer?
-                | () { (Elem item) -> bool } -> ::Integer?
+                | () { (Elem item) -> boolish } -> ::Integer?
                 | () -> ::Enumerator[Elem, ::Integer?]
 
   # Returns the first element, or the first `n` elements, of the array. If the
@@ -1106,7 +1106,7 @@ class Array[unchecked out Elem] < Object
   #
   # See also Array#select!.
   #
-  def keep_if: () { (Elem item) -> bool } -> self
+  def keep_if: () { (Elem item) -> boolish } -> self
              | () -> ::Enumerator[Elem, self]
 
   # Returns the last element(s) of `self`. If the array is empty, the first form
@@ -1436,7 +1436,7 @@ class Array[unchecked out Elem] < Object
   #
   # If no block is given, an Enumerator is returned instead.
   #
-  def reject!: () { (Elem item) -> bool } -> self?
+  def reject!: () { (Elem item) -> boolish } -> self?
              | () -> ::Enumerator[Elem, self?]
 
   # When invoked with a block, yields all repeated combinations of length `n` of
@@ -1535,7 +1535,7 @@ class Array[unchecked out Elem] < Object
   #     a.rindex {|x| x == "b"}   #=> 3
   #
   def rindex: (untyped obj) -> ::Integer?
-            | () { (Elem item) -> bool } -> ::Integer?
+            | () { (Elem item) -> boolish } -> ::Integer?
             | () -> ::Enumerator[Elem, ::Integer?]
 
   # Returns a new array by rotating `self` so that the element at `count` is the
@@ -1601,7 +1601,7 @@ class Array[unchecked out Elem] < Object
   #
   # Array#filter is an alias for Array#select.
   #
-  def select: () { (Elem item) -> bool } -> ::Array[Elem]
+  def select: () { (Elem item) -> boolish } -> ::Array[Elem]
             | () -> ::Enumerator[Elem, ::Array[Elem]]
 
   # Invokes the given block passing in successive elements from `self`, deleting
@@ -1617,7 +1617,7 @@ class Array[unchecked out Elem] < Object
   #
   # Array#filter! is an alias for Array#select!.
   #
-  def select!: () { (Elem item) -> bool } -> self?
+  def select!: () { (Elem item) -> boolish } -> self?
              | () -> ::Enumerator[Elem, self?]
 
   # Removes the first element of `self` and returns it (shifting all other
@@ -1828,7 +1828,7 @@ class Array[unchecked out Elem] < Object
   #     a = [1, 2, 3, 4, 5, 0]
   #     a.take_while {|i| i < 3}    #=> [1, 2]
   #
-  def take_while: () { (Elem obj) -> bool } -> ::Array[Elem]
+  def take_while: () { (Elem obj) -> boolish } -> ::Array[Elem]
                 | () -> ::Enumerator[Elem, ::Array[Elem]]
 
   # Returns `self`.

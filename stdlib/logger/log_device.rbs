@@ -24,7 +24,7 @@ class Logger
 
     def create_logfile: (String filename) -> File
 
-    def initialize: (?untyped logdev, ?binmode: bool, ?shift_period_suffix: String, ?shift_size: Integer, ?shift_age: Numeric | String) -> void
+    def initialize: (?untyped logdev, ?binmode: boolish, ?shift_period_suffix: String, ?shift_size: Integer, ?shift_age: Numeric | String) -> void
 
     def lock_shift_log: () { () -> untyped } -> untyped
 

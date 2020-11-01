@@ -266,7 +266,7 @@ class NoMethodError[T] < NameError[T]
   #
   # *receiver* argument stores an object whose method was called.
   #
-  def initialize: (?string? msg, ?String? name, ?Array[untyped] args, ?bool `private`, ?receiver: T?) -> void
+  def initialize: (?string? msg, ?String? name, ?Array[untyped] args, ?boolish `private`, ?receiver: T?) -> void
 
   public
 

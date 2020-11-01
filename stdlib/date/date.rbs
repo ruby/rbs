@@ -178,7 +178,7 @@ class Date
   #
   #     Date._parse('2001-02-03') #=> {:year=>2001, :mon=>2, :mday=>3}
   #
-  def self._parse: (String str, ?bool complete) -> Hash[Symbol, Integer]
+  def self._parse: (String str, ?boolish complete) -> Hash[Symbol, Integer]
 
   # Returns a hash of parsed elements.
   #
@@ -328,7 +328,7 @@ class Date
   #     Date.parse('20010203')            #=> #<Date: 2001-02-03 ...>
   #     Date.parse('3rd Feb 2001')        #=> #<Date: 2001-02-03 ...>
   #
-  def self.parse: (String str, ?bool complete, ?Integer start) -> Date
+  def self.parse: (String str, ?boolish complete, ?Integer start) -> Date
 
   # Creates a new Date object by parsing from a string according to some typical
   # RFC 2822 formats.
