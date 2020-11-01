@@ -269,6 +269,39 @@ end
     EOF
   end
 
+  def test_aliases
+    parser = RB.new
+
+    rb = <<-EOR
+class Hello
+  alias a b
+  alias_method :c, 'd'
+
+  # Ignore global variable alias
+  alias $a $b
+
+  class << self
+    alias e f
+    alias_method 'g', :h
+  end
+end
+    EOR
+
+    parser.parse(rb)
+
+    assert_write parser.decls, <<-EOF
+class Hello
+  alias a b
+
+  alias c d
+
+  alias self.e self.f
+
+  alias self.g self.h
+end
+    EOF
+  end
+
   def test_comments
     parser = RB.new
 

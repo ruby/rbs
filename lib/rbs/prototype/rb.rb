@@ -135,6 +135,18 @@ module RBS
 
             decls.push member unless decls.include?(member)
 
+        when :ALIAS
+          new_name, old_name = node.children.map { |c| literal_to_symbol(c) }
+          member = AST::Members::Alias.new(
+            new_name: new_name,
+            old_name: old_name,
+            kind: singleton ? :singleton : :instance,
+            annotations: [],
+            location: nil,
+            comment: comments[node.first_lineno - 1],
+          )
+          decls.push member unless decls.include?(member)
+
         when :FCALL
           # Inside method definition cannot reach here.
           args = node.children[1]&.children || []
@@ -203,6 +215,17 @@ module RBS
                 )
               end
             end
+          when :alias_method
+            if args[0] && args[1] && (new_name = literal_to_symbol(args[0])) && (old_name = literal_to_symbol(args[1]))
+              decls << AST::Members::Alias.new(
+                new_name: new_name,
+                old_name: old_name,
+                kind: singleton ? :singleton : :instance,
+                annotations: [],
+                location: nil,
+                comment: comments[node.first_lineno - 1],
+              )
+            end
           end
 
           each_child node do |child|
@@ -245,6 +268,15 @@ module RBS
           TypeName.new(name: node.children[1], namespace: namespace)
         when :COLON3
           TypeName.new(name: node.children[0], namespace: Namespace.root)
+        end
+      end
+
+      def literal_to_symbol(node)
+        case node.type
+        when :LIT
+          node.children[0] if node.children[0].is_a?(Symbol)
+        when :STR
+          node.children[0].to_sym
         end
       end
 
