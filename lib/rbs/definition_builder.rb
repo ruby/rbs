@@ -940,8 +940,8 @@ module RBS
                   Definition::Method::TypeDef.new(
                     type: method_type,
                     member: initialize_def.member,
-                    defined_in: nil,
-                    implemented_in: nil
+                    defined_in: initialize_def.defined_in,
+                    implemented_in: initialize_def.implemented_in
                   )
                 end,
                 accessibility: :public,

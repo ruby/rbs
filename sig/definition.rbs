@@ -18,7 +18,7 @@ module RBS
       class TypeDef
         attr_reader type: MethodType
         attr_reader member: method_member
-        attr_reader defined_in: TypeName?
+        attr_reader defined_in: TypeName
         attr_reader implemented_in: TypeName?
 
         def initialize: (type: MethodType, member: method_member, defined_in: TypeName?, implemented_in: TypeName?) -> void
