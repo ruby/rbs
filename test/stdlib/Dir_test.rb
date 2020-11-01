@@ -96,7 +96,7 @@ class DirSingletonTest < Minitest::Test
 
   def test_exist?
     assert_send_type "(::ToStr) -> bool",
-                     Dir, :entries, ToStr.new(__dir__)
+                     Dir, :exist?, ToStr.new(__dir__)
   end
 
   def test_foreach
