@@ -135,6 +135,18 @@ module RBS
 
             decls.push member unless decls.include?(member)
 
+        when :ALIAS
+          new_name, old_name = node.children.map { |c| literal_to_symbol(c) }
+          member = AST::Members::Alias.new(
+            new_name: new_name,
+            old_name: old_name,
+            kind: singleton ? :singleton : :instance,
+            annotations: [],
+            location: nil,
+            comment: comments[node.first_lineno - 1],
+          )
+          decls.push member unless decls.include?(member)
+
         when :FCALL
           # Inside method definition cannot reach here.
           args = node.children[1]&.children || []
@@ -166,9 +178,9 @@ module RBS
             end
           when :attr_reader
             args.each do |arg|
-              if arg&.type == :LIT && arg.children[0].is_a?(Symbol)
+              if arg && (name = literal_to_symbol(arg))
                 decls << AST::Members::AttrReader.new(
-                  name: arg.children[0],
+                  name: name,
                   ivar_name: nil,
                   type: Types::Bases::Any.new(location: nil),
                   location: nil,
@@ -179,9 +191,9 @@ module RBS
             end
           when :attr_accessor
             args.each do |arg|
-              if arg&.type == :LIT && arg.children[0].is_a?(Symbol)
+              if arg && (name = literal_to_symbol(arg))
                 decls << AST::Members::AttrAccessor.new(
-                  name: arg.children[0],
+                  name: name,
                   ivar_name: nil,
                   type: Types::Bases::Any.new(location: nil),
                   location: nil,
@@ -192,9 +204,9 @@ module RBS
             end
           when :attr_writer
             args.each do |arg|
-              if arg&.type == :LIT && arg.children[0].is_a?(Symbol)
+              if arg && (name = literal_to_symbol(arg))
                 decls << AST::Members::AttrWriter.new(
-                  name: arg.children[0],
+                  name: name,
                   ivar_name: nil,
                   type: Types::Bases::Any.new(location: nil),
                   location: nil,
@@ -202,6 +214,17 @@ module RBS
                   annotations: []
                 )
               end
+            end
+          when :alias_method
+            if args[0] && args[1] && (new_name = literal_to_symbol(args[0])) && (old_name = literal_to_symbol(args[1]))
+              decls << AST::Members::Alias.new(
+                new_name: new_name,
+                old_name: old_name,
+                kind: singleton ? :singleton : :instance,
+                annotations: [],
+                location: nil,
+                comment: comments[node.first_lineno - 1],
+              )
             end
           end
 
@@ -245,6 +268,15 @@ module RBS
           TypeName.new(name: node.children[1], namespace: namespace)
         when :COLON3
           TypeName.new(name: node.children[0], namespace: Namespace.root)
+        end
+      end
+
+      def literal_to_symbol(node)
+        case node.type
+        when :LIT
+          node.children[0] if node.children[0].is_a?(Symbol)
+        when :STR
+          node.children[0].to_sym
         end
       end
 

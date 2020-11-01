@@ -246,7 +246,7 @@ class Hello
 
   attr_reader :x
   attr_accessor :y, :z
-  attr_writer foo, :a
+  attr_writer foo, :a, 'b'
 end
     EOR
 
@@ -265,6 +265,41 @@ class Hello
   attr_accessor z: untyped
 
   attr_writer a: untyped
+
+  attr_writer b: untyped
+end
+    EOF
+  end
+
+  def test_aliases
+    parser = RB.new
+
+    rb = <<-EOR
+class Hello
+  alias a b
+  alias_method :c, 'd'
+
+  # Ignore global variable alias
+  alias $a $b
+
+  class << self
+    alias e f
+    alias_method 'g', :h
+  end
+end
+    EOR
+
+    parser.parse(rb)
+
+    assert_write parser.decls, <<-EOF
+class Hello
+  alias a b
+
+  alias c d
+
+  alias self.e self.f
+
+  alias self.g self.h
 end
     EOF
   end
