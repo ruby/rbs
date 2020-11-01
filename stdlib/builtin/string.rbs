@@ -317,7 +317,7 @@ class String
   #     "foo".casecmp?(2)   #=> nil
   #     "\u{e4 f6 fc}".encode("ISO-8859-1").casecmp?("\u{c4 d6 dc}")   #=> nil
   #
-  def casecmp?: (untyped other) -> bool
+  def casecmp?: (untyped other) -> bool?
 
   # Centers `str` in `width`.  If `width` is greater than the length of `str`,
   # returns a new String of length `width` with `str` centered and padded with
