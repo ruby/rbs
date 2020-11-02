@@ -2,6 +2,17 @@
 
 ## master
 
+## 0.15.0 (2020-11-2)
+
+* Signature updates for `Kernel`, `PStore`, `Enumerable`, and `Array` ([#450](https://github.com/ruby/rbs/pull/450), [#443](https://github.com/ruby/rbs/pull/443), [#438](https://github.com/ruby/rbs/pull/438), [#437](https://github.com/ruby/rbs/pull/437), [#433](https://github.com/ruby/rbs/pull/433), [#432](https://github.com/ruby/rbs/pull/432))
+* Add helper interfaces ([#434](https://github.com/ruby/rbs/pull/434), [#428](https://github.com/ruby/rbs/pull/428))
+* Change `bool` type semantics ([#456](https://github.com/ruby/rbs/pull/456))
+* Support alias in `rbs prototype rb` ([#457](https://github.com/ruby/rbs/pull/457))
+* Runtime testing improvements ([#455](https://github.com/ruby/rbs/pull/455), [#447](https://github.com/ruby/rbs/pull/447), [#444](https://github.com/ruby/rbs/pull/444), [#431](https://github.com/ruby/rbs/pull/431))
+* Fix proc type parsing ([#451](https://github.com/ruby/rbs/pull/451))
+* Fix type variable parsing ([#442](https://github.com/ruby/rbs/pull/442))
+
+
 ## 0.14.0 (2020-10-17)
 
 * Allow keyword names ending with `?` and `!` ([#417](https://github.com/ruby/rbs/pull/417))
