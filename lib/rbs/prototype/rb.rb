@@ -1,9 +1,19 @@
 module RBS
   module Prototype
     class RB
-      Context = Struct.new(:module_function_in_ruby, :module_function_in_rbs, :singleton, keyword_init: true) do
+      Context = Struct.new(:module_function, :singleton, keyword_init: true) do
         def self.initial
-          self.new(module_function_in_ruby: false, module_function_in_rbs: false, singleton: false)
+          self.new(module_function: false, singleton: false)
+        end
+
+        def method_kind
+          if singleton
+            :singleton
+          elsif module_function
+            :singleton_instance
+          else
+            :instance
+          end
         end
       end
 
@@ -115,7 +125,7 @@ module RBS
         when :DEFN, :DEFS
             if node.type == :DEFN
               def_name, def_body = node.children
-              kind = context.singleton ? :singleton : :instance
+              kind = context.method_kind
             else
               _, def_name, def_body = node.children
               kind = :singleton
@@ -154,7 +164,7 @@ module RBS
           )
           decls.push member unless decls.include?(member)
 
-        when :FCALL
+        when :FCALL, :VCALL
           # Inside method definition cannot reach here.
           args = node.children[1]&.children || []
 
@@ -232,6 +242,18 @@ module RBS
                 location: nil,
                 comment: comments[node.first_lineno - 1],
               )
+            end
+          when :module_function
+            if args.compact.empty?
+              context.module_function = true
+            else
+              args.each do |arg|
+                if arg && (name = literal_to_symbol(arg))
+                  i = decls.find_index { |decl| decl.is_a?(AST::Members::MethodDefinition) && decl.name == name }
+                  decls[i] = decls[i].update(kind: :singleton_instance)
+                end
+              end
+              context = context.dup.tap { |ctx| ctx.module_function = true }
             end
           end
 

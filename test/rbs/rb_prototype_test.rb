@@ -274,6 +274,40 @@ end
     EOF
   end
 
+  def test_module_function
+    parser = RB.new
+
+    rb = <<-EOR
+module Hello
+  def foo() end
+
+  def bar() end
+  module_function :bar
+
+  module_function def baz() end
+
+  module_function
+
+  def foobar() end
+
+end
+    EOR
+
+    parser.parse(rb)
+
+    assert_write parser.decls, <<-EOF
+module Hello
+  def foo: () -> nil
+
+  def self?.bar: () -> nil
+
+  def self?.baz: () -> nil
+
+  def self?.foobar: () -> nil
+end
+    EOF
+  end
+
   def test_aliases
     parser = RB.new
 
