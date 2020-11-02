@@ -1,6 +1,12 @@
 module RBS
   module Prototype
     class RB
+      Context = Struct.new(:module_function_in_ruby, :module_function_in_rbs, :singleton, keyword_init: true) do
+        def self.initial
+          self.new(module_function_in_ruby: false, module_function_in_rbs: false, singleton: false)
+        end
+      end
+
       attr_reader :source_decls
       attr_reader :toplevel_members
 
@@ -52,10 +58,10 @@ module RBS
           end
         end
 
-        process RubyVM::AbstractSyntaxTree.parse(string), decls: source_decls, comments: comments, singleton: false
+        process RubyVM::AbstractSyntaxTree.parse(string), decls: source_decls, comments: comments, context: Context.initial
       end
 
-      def process(node, decls:, comments:, singleton:)
+      def process(node, decls:, comments:, context:)
         case node.type
         when :CLASS
           class_name, super_class, *class_body = node.children
@@ -72,7 +78,7 @@ module RBS
           decls.push kls
 
           each_node class_body do |child|
-            process child, decls: kls.members, comments: comments, singleton: false
+            process child, decls: kls.members, comments: comments, context: Context.initial
           end
 
         when :MODULE
@@ -91,7 +97,7 @@ module RBS
           decls.push mod
 
           each_node module_body do |child|
-            process child, decls: mod.members, comments: comments, singleton: false
+            process child, decls: mod.members, comments: comments, context: Context.initial
           end
 
         when :SCLASS
@@ -101,14 +107,15 @@ module RBS
             RBS.logger.warn "`class <<` syntax with not-self may be compiled to incorrect code: #{this}"
           end
 
+          ctx = Context.initial.tap { |ctx| ctx.singleton = true}
           each_child(body) do |child|
-            process child, decls: decls, comments: comments, singleton: true
+            process child, decls: decls, comments: comments, context: ctx
           end
 
         when :DEFN, :DEFS
             if node.type == :DEFN
               def_name, def_body = node.children
-              kind = singleton ? :singleton : :instance
+              kind = context.singleton ? :singleton : :instance
             else
               _, def_name, def_body = node.children
               kind = :singleton
@@ -140,7 +147,7 @@ module RBS
           member = AST::Members::Alias.new(
             new_name: new_name,
             old_name: old_name,
-            kind: singleton ? :singleton : :instance,
+            kind: context.singleton ? :singleton : :instance,
             annotations: [],
             location: nil,
             comment: comments[node.first_lineno - 1],
@@ -220,7 +227,7 @@ module RBS
               decls << AST::Members::Alias.new(
                 new_name: new_name,
                 old_name: old_name,
-                kind: singleton ? :singleton : :instance,
+                kind: context.singleton ? :singleton : :instance,
                 annotations: [],
                 location: nil,
                 comment: comments[node.first_lineno - 1],
@@ -229,7 +236,7 @@ module RBS
           end
 
           each_child node do |child|
-            process child, decls: decls, comments: comments, singleton: singleton
+            process child, decls: decls, comments: comments, context: context
           end
 
         when :CDECL
@@ -249,7 +256,7 @@ module RBS
 
         else
           each_child node do |child|
-            process child, decls: decls, comments: comments, singleton: singleton
+            process child, decls: decls, comments: comments, context: context
           end
         end
       end
