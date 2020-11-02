@@ -246,7 +246,7 @@ module Random::Formatter
   #
   # See RFC 3548 for the definition of URL-safe base64.
   #
-  def urlsafe_base64: (?Integer? n, ?bool padding) -> String
+  def urlsafe_base64: (?Integer? n, ?boolish padding) -> String
 
   # SecureRandom.uuid generates a random v4 UUID (Universally Unique IDentifier).
   #

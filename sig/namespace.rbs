@@ -28,7 +28,7 @@ module RBS
   class Namespace
     attr_reader path: Array[Symbol]
 
-    def initialize: (path: Array[Symbol], absolute: bool) -> void
+    def initialize: (path: Array[Symbol], absolute: boolish) -> void
 
     # Returns new _empty_ namespace.
     def self.empty: () -> Namespace

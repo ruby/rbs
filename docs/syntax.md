@@ -179,7 +179,7 @@ Proc type denotes type of procedures, `Proc` instances.
 
 `instance` denotes the type of instance of the class. `class` is the singleton of the class.
 
-`bool` is an abstract type for truth value.
+`bool` is an alias of `true | false`.
 
 `untyped` is for _a type without type checking_. It is `?` in gradual typing, _dynamic_ in some languages like C#, and _any_ in TypeScript. It is both subtype _and_ supertype of all of the types. (The type was `any` but renamed to `untyped`.)
 
@@ -193,15 +193,34 @@ Proc type denotes type of procedures, `Proc` instances.
 
 We recommend using `nil`.
 
-#### `bool` or `TrueClass | FalseClass`
+#### `bool` or `boolish`
 
-We recommend using `bool` because it is more close to Ruby's semantics. If the type of a parameter of a method is `bool`, we usually pass `true` and `false`, and also `nil` or any other values. `TrueClass | FalseClass` rejects other values than `true` and `false`.
+We have a builtin type alias called `boolish`.
+It is an alias of `top` type, and you can use `boolish` if we want to allow any object of any type.
 
-#### `void`, `bool`, or `top`?
+We can see an example at the definition of `Enumerable#find`:
+
+```
+module Enumerable[Elem, Return]
+  def find: () { (Elem) -> boolish } -> Elem?
+  ...
+end
+```
+
+We want to write something like:
+
+```
+array.find {|x| x && x.some_test? }               # The block will return (bool | nil)
+```
+
+We recommend using `boolish` for method arguments and block return values, if you only use the values for conditions.
+You can write `bool` if you strictly want `true | false`.
+
+#### `void`, `boolish`, or `top`?
 
 They are all equivalent for the type system; they are all _top type_.
 
-`void` tells developers a hint that _the value should not be used_. `bool` implies the value is used as a truth value. `top` is anything else.
+`void` tells developers a hint that _the value should not be used_. `boolish` implies the value is used as a truth value. `top` is anything else.
 
 ## Method Types
 

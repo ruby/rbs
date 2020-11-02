@@ -324,9 +324,9 @@ class Pathname
                  ?external_encoding: encoding,
                  ?internal_encoding: encoding,
                  ?encoding: encoding,
-                 ?textmode: bool,
-                 ?binmode: bool,
-                 ?autoclose: bool,
+                 ?textmode: boolish,
+                 ?binmode: boolish,
+                 ?autoclose: boolish,
 
                  # From String#encode
                  ?invalid: :replace ?,
@@ -373,7 +373,7 @@ class Pathname
   # Note that the results never contain the entries `.` and `..` in the directory
   # because they are not children.
   #
-  def children: (?bool with_directory) -> untyped
+  def children: (?boolish with_directory) -> untyped
 
   # Changes file permissions.
   #
@@ -397,7 +397,7 @@ class Pathname
   #
   # See Pathname#realpath.
   #
-  def cleanpath: (?bool consider_symlink) -> Pathname
+  def cleanpath: (?boolish consider_symlink) -> Pathname
 
   # Returns the last change time, using directory information, not the file
   # itself.
@@ -485,8 +485,8 @@ class Pathname
   #
   # See Pathname#children
   #
-  def each_child: (?bool with_directory) { (Pathname) -> void } -> Array[Pathname]
-                | (?bool with_directory) -> Enumerator[Pathname, Array[Pathname]]
+  def each_child: (?boolish with_directory) { (Pathname) -> void } -> Array[Pathname]
+                | (?boolish with_directory) -> Enumerator[Pathname, Array[Pathname]]
 
   # Iterates over the entries (files and subdirectories) in the directory,
   # yielding a Pathname object for each entry.
@@ -517,11 +517,11 @@ class Pathname
                   ?external_encoding: encoding,
                   ?internal_encoding: encoding,
                   ?encoding: encoding,
-                  ?textmode: bool,
-                  ?binmode: bool,
-                  ?autoclose: bool,
+                  ?textmode: boolish,
+                  ?binmode: boolish,
+                  ?autoclose: boolish,
                   # getline_args
-                  ?chomp: bool,
+                  ?chomp: boolish,
                  ) { (String) -> untyped } -> nil
                | (Integer limit,
                   # open_args
@@ -530,11 +530,11 @@ class Pathname
                   ?external_encoding: encoding,
                   ?internal_encoding: encoding,
                   ?encoding: encoding,
-                  ?textmode: bool,
-                  ?binmode: bool,
-                  ?autoclose: bool,
+                  ?textmode: boolish,
+                  ?binmode: boolish,
+                  ?autoclose: boolish,
                   # getline_args
-                  ?chomp: bool,
+                  ?chomp: boolish,
                  ) { (String) -> untyped } -> nil
                | (?String sep, ?Integer limit,
                   # open_args
@@ -543,11 +543,11 @@ class Pathname
                   ?external_encoding: encoding,
                   ?internal_encoding: encoding,
                   ?encoding: encoding,
-                  ?textmode: bool,
-                  ?binmode: bool,
-                  ?autoclose: bool,
+                  ?textmode: boolish,
+                  ?binmode: boolish,
+                  ?autoclose: boolish,
                   # getline_args
-                  ?chomp: bool,
+                  ?chomp: boolish,
                  ) -> Enumerator[String, nil]
                | (Integer limit,
                   # open_args
@@ -556,11 +556,11 @@ class Pathname
                   ?external_encoding: encoding,
                   ?internal_encoding: encoding,
                   ?encoding: encoding,
-                  ?textmode: bool,
-                  ?binmode: bool,
-                  ?autoclose: bool,
+                  ?textmode: boolish,
+                  ?binmode: boolish,
+                  ?autoclose: boolish,
                   # getline_args
-                  ?chomp: bool,
+                  ?chomp: boolish,
                  ) -> Enumerator[String, nil]
 
   # Tests the file is empty.
@@ -643,8 +643,8 @@ class Pathname
   #
   # See Find.find
   #
-  def find: (?ignore_error: bool) { (Pathname) -> untyped } -> nil
-          | (?ignore_error: bool) -> Enumerator[Pathname, nil]
+  def find: (?ignore_error: boolish) { (Pathname) -> untyped } -> nil
+          | (?ignore_error: boolish) -> Enumerator[Pathname, nil]
 
   # Return `true` if the receiver matches the given pattern.
   #
@@ -789,9 +789,9 @@ class Pathname
              ?external_encoding: encoding,
              ?internal_encoding: encoding,
              ?encoding: encoding,
-             ?textmode: bool,
-             ?binmode: bool,
-             ?autoclose: bool,
+             ?textmode: boolish,
+             ?binmode: boolish,
+             ?autoclose: boolish,
             ) -> String
 
   # See FileTest.readable?.
@@ -813,11 +813,11 @@ class Pathname
                   ?external_encoding: encoding,
                   ?internal_encoding: encoding,
                   ?encoding: encoding,
-                  ?textmode: bool,
-                  ?binmode: bool,
-                  ?autoclose: bool,
+                  ?textmode: boolish,
+                  ?binmode: boolish,
+                  ?autoclose: boolish,
                   # getline_args
-                  ?chomp: bool,
+                  ?chomp: boolish,
                  ) -> Array[String]
                | (Integer limit,
                   # open_args
@@ -826,11 +826,11 @@ class Pathname
                   ?external_encoding: encoding,
                   ?internal_encoding: encoding,
                   ?encoding: encoding,
-                  ?textmode: bool,
-                  ?binmode: bool,
-                  ?autoclose: bool,
+                  ?textmode: boolish,
+                  ?binmode: boolish,
+                  ?autoclose: boolish,
                   # getline_args
-                  ?chomp: bool,
+                  ?chomp: boolish,
                  ) -> Array[String]
 
   # Read symbolic link.
@@ -1033,9 +1033,9 @@ class Pathname
               ?external_encoding: encoding,
               ?internal_encoding: encoding,
               ?encoding: encoding,
-              ?textmode: bool,
-              ?binmode: bool,
-              ?autoclose: bool,
+              ?textmode: boolish,
+              ?binmode: boolish,
+              ?autoclose: boolish,
              ) -> Integer
 
   # See FileTest.zero?.

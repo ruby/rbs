@@ -631,7 +631,7 @@ class Object < BasicObject
   # When the method name parameter is given as a string, the string is converted
   # to a symbol.
   #
-  def respond_to?: (name name, ?bool include_all) -> bool
+  def respond_to?: (name name, ?boolish include_all) -> bool
 
   # Invokes the method identified by *symbol*, passing it any arguments specified.
   # You can use `__send__` if the name `send` clashes with an existing method in

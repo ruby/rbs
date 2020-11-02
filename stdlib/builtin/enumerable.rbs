@@ -22,7 +22,7 @@ module Enumerable[unchecked out Elem, out Return]: _Each[Elem, Return]
   #     [nil, true, 99].all?                              #=> false
   #     [].all?                                           #=> true
   def all?: () -> bool
-          | () { (Elem arg0) -> bool } -> bool
+          | () { (Elem) -> boolish } -> bool
 
   # Passes each element of the collection to the given block. The method
   # returns `true` if the block ever returns a value other than `false` or
@@ -43,7 +43,7 @@ module Enumerable[unchecked out Elem, out Return]: _Each[Elem, Return]
   # [].any?                                           #=> false
   # ```
   def `any?`: () -> bool
-            | () { (Elem arg0) -> bool } -> bool
+            | () { (Elem) -> boolish } -> bool
 
   def collect: [U] () { (Elem arg0) -> U } -> ::Array[U]
              | () -> ::Enumerator[Elem, ::Array[untyped]]
@@ -62,18 +62,18 @@ module Enumerable[unchecked out Elem, out Return]: _Each[Elem, Return]
   # ary.count{ |x| x%2==0 } #=> 3
   # ```
   def count: () -> Integer
-           | (?untyped arg0) -> Integer
-           | () { (Elem arg0) -> bool } -> Integer
+           | (?untyped) -> Integer
+           | () { (Elem) -> boolish } -> Integer
 
   def cycle: (?Integer n) { (Elem arg0) -> untyped } -> NilClass
            | (?Integer n) -> ::Enumerator[Elem, Return]
 
-  def detect: (?Proc ifnone) { (Elem arg0) -> bool } -> Elem?
+  def detect: (?Proc ifnone) { (Elem) -> boolish } -> Elem?
             | (?Proc ifnone) -> ::Enumerator[Elem, Return]
 
   def drop: (Integer n) -> ::Array[Elem]
 
-  def drop_while: () { (Elem arg0) -> bool } -> ::Array[Elem]
+  def drop_while: () { (Elem) -> boolish } -> ::Array[Elem]
                 | () -> ::Enumerator[Elem, Return]
 
   def each_cons: (Integer n) { (::Array[Elem] arg0) -> untyped } -> NilClass
@@ -96,14 +96,14 @@ module Enumerable[unchecked out Elem, out Return]: _Each[Elem, Return]
   # ```
   def entries: () -> ::Array[Elem]
 
-  def find_all: () { (Elem arg0) -> bool } -> ::Array[Elem]
+  def find_all: () { (Elem) -> boolish } -> ::Array[Elem]
               | () -> ::Enumerator[Elem, Return]
 
   alias select find_all
   alias filter find_all
 
   def find_index: (?untyped value) -> Integer?
-                | () { (Elem arg0) -> bool } -> Integer?
+                | () { (Elem) -> boolish } -> Integer?
                 | () -> ::Enumerator[Elem, Return]
 
   # Returns the first element, or the first `n` elements, of the enumerable.
@@ -228,7 +228,7 @@ module Enumerable[unchecked out Elem, out Return]: _Each[Elem, Return]
   # [nil, false, true].none?                           #=> false
   # ```
   def none?: () -> bool
-           | () { (Elem arg0) -> bool } -> bool
+           | () { (Elem) -> boolish } -> bool
 
   # Passes each element of the collection to the given block. The method
   # returns `true` if the block returns `true` exactly once. If the block is
@@ -249,12 +249,12 @@ module Enumerable[unchecked out Elem, out Return]: _Each[Elem, Return]
   # [].one?                                            #=> false
   # ```
   def one?: () -> bool
-          | () { (Elem arg0) -> bool } -> bool
+          | () { (Elem) -> boolish } -> bool
 
-  def partition: () { (Elem arg0) -> bool } -> [ ::Array[Elem], ::Array[Elem] ]
+  def partition: () { (Elem) -> boolish } -> [ ::Array[Elem], ::Array[Elem] ]
                | () -> ::Enumerator[Elem, Return]
 
-  def reject: () { (Elem arg0) -> bool } -> ::Array[Elem]
+  def reject: () { (Elem) -> boolish } -> ::Array[Elem]
             | () -> ::Enumerator[Elem, Return]
 
   def reverse_each: () { (Elem arg0) -> untyped } -> ::Enumerator[Elem, Return]
@@ -288,7 +288,7 @@ module Enumerable[unchecked out Elem, out Return]: _Each[Elem, Return]
 
   def take: (Integer n) -> ::Array[Elem]?
 
-  def take_while: () { (Elem arg0) -> bool } -> ::Array[Elem]
+  def take_while: () { (Elem) -> boolish } -> ::Array[Elem]
                 | () -> ::Enumerator[Elem, Return]
 
   # Implemented in C++
@@ -314,9 +314,9 @@ module Enumerable[unchecked out Elem, out Return]: _Each[Elem, Return]
     def call: () -> T
   end
 
-  def find: () { (Elem) -> bool } -> Elem?
+  def find: () { (Elem) -> boolish } -> Elem?
           | () -> ::Enumerator[Elem, Elem?]
-          | [T] (_NotFound[T] ifnone) { (Elem) -> bool } -> (Elem | T)
+          | [T] (_NotFound[T] ifnone) { (Elem) -> boolish } -> (Elem | T)
           | [T] (_NotFound[T] ifnone) -> ::Enumerator[Elem, Elem | T]
 
   def flat_map: [U] () { (Elem arg0) -> U } -> U
@@ -398,13 +398,13 @@ module Enumerable[unchecked out Elem, out Return]: _Each[Elem, Return]
   def chunk: () -> ::Enumerator[Elem, Return]
            | [U] () { (Elem elt) -> U } -> ::Enumerator[[U, Array[Elem]], void]
 
-  def chunk_while: () { (Elem elt_before, Elem elt_after) -> bool } -> ::Enumerator[::Array[Elem], void]
+  def chunk_while: () { (Elem elt_before, Elem elt_after) -> boolish } -> ::Enumerator[::Array[Elem], void]
 
-  def slice_when: () { (Elem elt_before, Elem elt_after) -> bool } -> ::Enumerator[::Array[Elem], void]
+  def slice_when: () { (Elem elt_before, Elem elt_after) -> boolish } -> ::Enumerator[::Array[Elem], void]
 
   def slice_after: (untyped pattern) -> ::Enumerator[::Array[Elem], void]
-                 | () { (Elem elt) -> bool } -> ::Enumerator[::Array[Elem], void]
+                 | () { (Elem elt) -> boolish } -> ::Enumerator[::Array[Elem], void]
 
   def slice_before: (untyped pattern) -> ::Enumerator[::Array[Elem], void]
-                  | () { (Elem elt) -> bool } -> ::Enumerator[::Array[Elem], void]
+                  | () { (Elem elt) -> boolish } -> ::Enumerator[::Array[Elem], void]
 end

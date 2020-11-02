@@ -67,5 +67,5 @@ module Base64
   # 64 Encoding with URL and Filename Safe Alphabet'' in RFC 4648. The alphabet
   # uses '-' instead of '+' and '_' instead of '/'. Note that the result can still
   # contain '='. You can remove the padding by setting `padding` as false.
-  def self?.urlsafe_encode64: (String bin, ?padding: bool) -> String
+  def self?.urlsafe_encode64: (String bin, ?padding: boolish) -> String
 end

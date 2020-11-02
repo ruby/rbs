@@ -180,11 +180,11 @@ class FileSingletonTest < Minitest::Test
   end
 
   def test_dirname
-    assert_send_type "(String) -> bool",
+    assert_send_type "(String) -> String",
                      File, :dirname, __FILE__
-    assert_send_type "(ToStr) -> bool",
+    assert_send_type "(ToStr) -> String",
                      File, :dirname, ToStr.new(__FILE__)
-    assert_send_type "(ToPath) -> bool",
+    assert_send_type "(ToPath) -> String",
                      File, :dirname, ToPath.new(__FILE__)
   end
 

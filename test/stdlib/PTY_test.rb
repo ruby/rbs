@@ -19,6 +19,8 @@ class PTYSingletonTest < Minitest::Test
 
     assert_send_type  "(::Integer pid) -> (::Process::Status | nil)",
                       PTY, :check, pid
+    assert_send_type  "(::Integer pid, Symbol) -> (::Process::Status | nil)",
+                      PTY, :check, pid, :true
     assert_send_type  "(::Integer pid, ::FalseClass raise) -> nil",
                       PTY, :check, pid, false
     assert_send_type  "(::Integer pid, ::TrueClass raise) -> nil",

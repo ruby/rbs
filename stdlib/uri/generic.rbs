@@ -193,7 +193,7 @@ module URI
     #
     # Creates a new URI::Generic instance from ``generic'' components without check.
     #
-    def initialize: (String scheme, String userinfo, String host, Integer port, String? registry, String path, String? opaque, String query, String fragment, ?untyped parser, ?bool arg_check) -> URI::Generic
+    def initialize: (String scheme, String userinfo, String host, Integer port, String? registry, String path, String? opaque, String query, String fragment, ?untyped parser, ?boolish arg_check) -> URI::Generic
 
     #
     # Returns the scheme component of the URI.

@@ -495,7 +495,7 @@ class Logger
   #
   # Create an instance.
   #
-  def initialize: (logdev logdev, ?Numeric | String shift_age, ?Integer shift_size, ?shift_period_suffix: String, ?binmode: bool, ?datetime_format: String, ?formatter: _Formatter, ?progname: String, ?level: Integer) -> void
+  def initialize: (logdev logdev, ?Numeric | String shift_age, ?Integer shift_size, ?shift_period_suffix: String, ?binmode: boolish, ?datetime_format: String, ?formatter: _Formatter, ?progname: String, ?level: Integer) -> void
 end
 
 Logger::ProgName: String

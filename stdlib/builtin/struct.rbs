@@ -31,7 +31,7 @@ class Struct[Elem] < Object
 
   type attribute_name = Symbol | String
 
-  def initialize: (attribute_name, *attribute_name, ?keyword_init: bool) ?{ () -> void } -> void
+  def initialize: (attribute_name, *attribute_name, ?keyword_init: boolish) ?{ () -> void } -> void
 
   def each: () { (Elem) -> untyped } -> untyped
 

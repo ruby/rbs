@@ -14,10 +14,12 @@ class FindTest < StdlibTest
       Find.find("#{dir}/a", "#{dir}/b")
       Find.find(to_path_class.new(dir))
       Find.find(dir, ignore_error: true)
+      Find.find(dir, ignore_error: :true)
       Find.find(dir){}
       Find.find("#{dir}/a", "#{dir}/b"){}
       Find.find(to_path_class.new(dir)){}
       Find.find(dir, ignore_error: true){}
+      Find.find(dir, ignore_error: :true){}
     end
   end
 

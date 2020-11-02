@@ -225,7 +225,7 @@ module RBS
         when Types::Bases::Any
           true
         when Types::Bases::Bool
-          true
+          val.is_a?(TrueClass) || val.is_a?(FalseClass)
         when Types::Bases::Top
           true
         when Types::Bases::Bottom

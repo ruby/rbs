@@ -4,7 +4,7 @@ module RBS
       attr_reader type: Types::Function
       attr_reader required: bool
 
-      def initialize: (type: Types::Function, required: bool) -> void
+      def initialize: (type: Types::Function, required: boolish) -> void
 
       def ==: (untyped other) -> bool
 

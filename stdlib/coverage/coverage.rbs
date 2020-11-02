@@ -49,7 +49,7 @@ module Coverage
   # `clear` is true, it clears the counters to zero. If `stop` is true, it
   # disables coverage measurement.
   #
-  def self.result: (?stop: bool, ?clear: bool) -> Hash[String, untyped]
+  def self.result: (?stop: boolish, ?clear: boolish) -> Hash[String, untyped]
 
   # Returns true if coverage stats are currently being collected (after
   # Coverage.start call, but before Coverage.result call)
@@ -58,5 +58,5 @@ module Coverage
 
   # Enables coverage measurement.
   #
-  def self.start: (?lines: bool, ?branches: bool, ?methods: bool, ?oneshot_lines: bool) -> nil
+  def self.start: (?lines: boolish, ?branches: boolish, ?methods: boolish, ?oneshot_lines: boolish) -> nil
 end

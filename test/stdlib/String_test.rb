@@ -583,6 +583,8 @@ class StringInstanceTest < Minitest::Test
                      "hello", :each_line, "l", chomp: true do |line| line end
     assert_send_type "(ToStr, chomp: true) { (String) -> void } -> self",
                      "hello", :each_line, ToStr.new("l"), chomp: true do |line| line end
+    assert_send_type "(ToStr, chomp: Symbol) { (String) -> void } -> self",
+                     "hello", :each_line, ToStr.new("l"), chomp: :true do |line| line end
     assert_send_type "(String, chomp: false) { (String) -> void } -> self",
                      "hello", :each_line, "l", chomp: false do |line| line end
     assert_send_type "(ToStr, chomp: false) { (String) -> void } -> self",
@@ -837,6 +839,8 @@ class StringInstanceTest < Minitest::Test
                      "", :lines, "\n"
     assert_send_type "(String, chomp: true) -> Array[String]",
                      "", :lines, "\n", chomp: true
+    assert_send_type "(String, chomp: Symbol) -> Array[String]",
+                     "", :lines, "\n", chomp: :true
     assert_send_type "(String, chomp: false) -> Array[String]",
                      "", :lines, "\n", chomp: false
     assert_send_type "(ToStr) -> Array[String]",

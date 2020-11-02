@@ -139,6 +139,8 @@ class DateTimeSingletonTest < Minitest::Test
                       DateTime, :parse, "2020-08-15T00:00:00+0900"
     assert_send_type  "(::String str, bool complete) -> ::DateTime",
                       DateTime, :parse, "2020-08-15T00:00:00+0900", true
+    assert_send_type  "(::String str, Symbol complete) -> ::DateTime",
+                      DateTime, :parse, "2020-08-15T00:00:00+0900", :true
     assert_send_type  "(::String str, bool complete, ::Integer start) -> ::DateTime",
                       DateTime, :parse, "2020-08-15T00:00:00+0900", true, Date::ITALY
   end
