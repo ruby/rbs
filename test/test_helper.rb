@@ -10,6 +10,11 @@ begin
 rescue LoadError
 end
 
+begin
+  require "amber"
+rescue LoadError
+end
+
 module TestHelper
   def has_gem?(*gems)
     gems.each do |gem|
@@ -132,9 +137,15 @@ SIG
           absolute_path.write(content)
         end
 
-        loader = RBS::EnvironmentLoader.new()
-        loader.no_builtin! unless system_builtin
-        loader.add path: tmppath
+        root = 
+          if system_builtin
+            RBS::EnvironmentLoader::DEFAULT_CORE_ROOT
+          else
+            nil
+          end
+
+        loader = RBS::EnvironmentLoader.new(core_root: root)
+        loader.add(path: tmppath)
 
         yield RBS::Environment.from_loader(loader).resolve_type_names, tmppath
       end
