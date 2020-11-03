@@ -23,6 +23,10 @@ jobs:
       image: rubylang/ruby:${{ matrix.container_tag }}
     steps:
     - uses: actions/checkout@v1
+    - name: Install dependencies
+      run: |
+        apt-get update
+        apt-get install -y libdb-dev
     - name: Install
       run: |
         ruby -v
