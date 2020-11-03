@@ -13,8 +13,8 @@ jobs:
       matrix:
         container_tag:
         - master-nightly-bionic
-        - 2.6.5-bionic
-        - 2.7.0-bionic
+        - 2.6-bionic
+        - 2.7-bionic
         job:
         - test
         - stdlib_test
@@ -23,6 +23,10 @@ jobs:
       image: rubylang/ruby:${{ matrix.container_tag }}
     steps:
     - uses: actions/checkout@v1
+    - name: Install dependencies
+      run: |
+        apt-get update
+        apt-get install -y libdb-dev
     - name: Install
       run: |
         ruby -v
@@ -31,4 +35,4 @@ jobs:
     - name: Run test
       run: |
         bundle exec rake ${{ matrix.job }}
-      if: "!(matrix.job == 'stdlib_test' && contains(matrix.container_tag, '2.6.5'))"
+      if: "!(matrix.job == 'stdlib_test' && contains(matrix.container_tag, '2.6'))"
