@@ -2,6 +2,7 @@ require "rbs"
 require "rbs/test"
 require "optparse"
 require "shellwords"
+require "rbs/cli"
 
 include RBS::Test::SetupHelper
 
@@ -32,12 +33,13 @@ if filter.empty?
   exit 1
 end
 
-loader = RBS::EnvironmentLoader.new
+options = RBS::CLI::LibraryOptions.new()
+
 OptionParser.new do |opts|
-  opts.on("-r [LIB]") do |name| loader.add(library: name) end
-  opts.on("-I [DIR]") do |dir| loader.add(path: Pathname(dir)) end
+  options.setup_library_options(opts)
 end.parse!(opts)
 
+loader = options.loader
 env = RBS::Environment.from_loader(loader).resolve_type_names
 
 def match(filter, name)

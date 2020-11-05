@@ -1,156 +1,130 @@
 module RBS
   class EnvironmentLoader
-    class UnknownLibraryNameError < StandardError
-      attr_reader :name
+    class UnknownLibraryError < StandardError
+      attr_reader :library
 
-      def initialize(name:)
-        @name = name
-        super "Cannot find a library or gem: `#{name}`"
+      def initialize(lib:)
+        @library = lib
+
+        super("Cannot find type definitions for library: #{lib.name} (#{lib.version || "[nil]"})")
       end
     end
 
-    LibraryPath = _ = Struct.new(:name, :path, keyword_init: true)
-    GemPath = _ = Struct.new(:name, :version, :path, keyword_init: true)
+    Library = _ = Struct.new(:name, :version, keyword_init: true)
 
-    attr_reader :paths
-    attr_reader :stdlib_root
-    attr_reader :gem_vendor_path
+    attr_reader :core_root
+    attr_reader :repository
 
-    STDLIB_ROOT = Pathname(_ = __dir__) + "../../stdlib"
+    attr_reader :libs
+    attr_reader :dirs
+
+    DEFAULT_CORE_ROOT = Pathname(_ = __dir__) + "../../core"
 
     def self.gem_sig_path(name, version)
-      Pathname(Gem::Specification.find_by_name(name, version).gem_dir) + "sig"
+      spec = Gem::Specification.find_by_name(name, version)
+      path = Pathname(spec.gem_dir) + "sig"
+      if path.directory?
+        [spec, path]
+      end
     rescue Gem::MissingSpecError
       nil
     end
 
-    def initialize(stdlib_root: STDLIB_ROOT, gem_vendor_path: nil)
-      @stdlib_root = stdlib_root
-      @gem_vendor_path = gem_vendor_path
-      @paths = []
-      @no_builtin = false
+    def initialize(core_root: DEFAULT_CORE_ROOT, repository: Repository.new)
+      @core_root = core_root
+      @repository = repository
+
+      @libs = []
+      @dirs = []
     end
 
-    def add(path: nil, library: nil)
+    def add(path: nil, library: nil, version: nil)
       case
       when path
-        @paths << path
+        dirs << path
       when library
-        name, version = self.class.parse_library(library)
-
-        case
-        when !version && path = stdlib?(name)
-          @paths << LibraryPath.new(name: name, path: path)
-        when (path = gem?(name, version))
-          @paths << GemPath.new(name: name, version: version, path: path)
-        else
-          raise UnknownLibraryNameError.new(name: library)
-        end
+        libs << Library.new(name: library, version: version)
       end
     end
 
-    def self.parse_library(lib)
-      _ = lib.split(/:/)
-    end
-
-    def stdlib?(name)
-      path = stdlib_root + name
-      if path.directory?
-        path
-      end
-    end
-
-    def gem?(name, version)
-      if path = gem_vendor_path
-        # Try vendored RBS first
-        gem_dir = path + name
-        if gem_dir.directory?
-          return gem_dir
-        end
-      end
-
-      # Try ruby gem library
-      self.class.gem_sig_path(name, version)
-    end
-
-    def each_signature(path, immediate: true, &block)
-      if block
-        case
-        when path.file?
-          if path.extname == ".rbs" || immediate
-            yield path
-          end
-        when path.directory?
-          path.children.each do |child|
-            each_signature child, immediate: false, &block
-          end
-        end
-      else
-        enum_for :each_signature, path, immediate: immediate
-      end
-    end
-
-    def each_library_path
-      paths.each do |path|
-        case path
-        when Pathname
-          yield path, path
-        when LibraryPath
-          yield path, path.path
-        when GemPath
-          yield path, path.path
-        end
-      end
-    end
-
-    def no_builtin!(skip = true)
-      @no_builtin = skip
-      self
-    end
-
-    def no_builtin?
-      @no_builtin
-    end
-
-    def each_decl
-      if block_given?
-        # @type var signature_files: Array[[path | :stdlib, Pathname]]
-        signature_files = []
-
-        unless no_builtin?
-          each_signature(stdlib_root + "builtin") do |path|
-            signature_files << [:stdlib, path]
-          end
-        end
-
-        each_library_path do |library_path, pathname|
-          each_signature(pathname) do |path|
-            signature_files << [library_path, path]
-          end
-        end
-
-        signature_files.each do |lib_path, file_path|
-          buffer = Buffer.new(name: file_path.to_s, content: file_path.read)
-          Parser.parse_signature(buffer).each do |decl|
-            yield decl, buffer, file_path, lib_path
-          end
-        end
-      else
-        enum_for :each_decl
-      end
+    def has_library?(library:, version:)
+      self.class.gem_sig_path(library, version) || repository.lookup(library, version)
     end
 
     def load(env:)
-      # @type var loadeds: Array[[AST::Declarations::t, Pathname, path | :stdlib]]
-      loadeds = []
+      # @type var loaded: Array[[AST::Declarations::t, Pathname, source]]
+      loaded = []
 
-      each_decl do |decl, buffer, file_path, lib_path|
-        env.buffers.push(buffer)
+      each_decl do |decl, buf, source, path|
         env << decl
-        loadeds << [decl, file_path, lib_path]
+        loaded << [decl, path, source]
       end
 
-      loadeds
+      loaded
+    end
+
+    def each_dir
+      if root = core_root
+        yield :core, root
+      end
+
+      libs.each do |lib|
+        unless has_library?(version: lib.version, library: lib.name)
+          raise UnknownLibraryError.new(lib: lib) 
+        end
+
+        case
+        when from_gem = self.class.gem_sig_path(lib.name, lib.version)
+          yield lib, from_gem[1]
+        when from_repo = repository.lookup(lib.name, lib.version)
+          yield lib, from_repo
+        end
+      end
+
+      dirs.each do |dir|
+        yield dir, dir
+      end
+    end
+
+    def each_file(path, immediate:, skip_hidden:, &block)
+      case
+      when path.file?
+        if path.extname == ".rbs" || immediate
+          yield path
+        end
+
+      when path.directory?
+        if path.basename.to_s.start_with?("_")
+          if skip_hidden
+            unless immediate
+              return 
+            end
+          end
+        end
+
+        path.each_child do |child|
+          each_file(child, immediate: false, skip_hidden: skip_hidden, &block)
+        end
+      end
+    end
+
+    def each_decl
+      files = Set[]
+
+      each_dir do |source, dir|
+        skip_hidden = !source.is_a?(Pathname)
+
+        each_file(dir, skip_hidden: skip_hidden, immediate: true) do |path|
+          next if files.include?(path)
+
+          files << path
+          buffer = Buffer.new(name: path.to_s, content: path.read)
+
+          Parser.parse_signature(buffer).each do |decl|
+            yield decl, buffer, source, path
+          end
+        end
+      end
     end
   end
 end

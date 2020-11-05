@@ -29,7 +29,14 @@ task :validate => :parser do
 
   FileList["stdlib/*"].each do |path|
     next if path =~ %r{stdlib/builtin}
-    sh "#{ruby} #{rbs} -r#{File.basename(path)} validate --silent"
+    
+    lib = [File.basename(path).to_s]
+
+    if lib == ["bigdecimal-math"]
+      lib << "bigdecimal"
+    end
+
+    sh "#{ruby} #{rbs} #{lib.map {|l| "-r #{l}"}.join(" ")} validate --silent"
   end
 end
 

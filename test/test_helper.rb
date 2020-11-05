@@ -10,23 +10,9 @@ begin
 rescue LoadError
 end
 
-# RBS.logger.level = Logger::DEBUG
-
-if ENV["RUNTIME_TEST"]
-  require "rbs/test"
-
-  loader = RBS::EnvironmentLoader.new
-  loader.add(path: Pathname(__dir__)+"../sig")
-
-  env = RBS::Environment.from_loader(loader).resolve_type_names
-  tester = RBS::Test::Tester.new(env: env)
-
-  test_classes = []
-  test_classes << RBS::Buffer
-  test_classes << RBS::Location
-  test_classes.each do |klass|
-    tester.install!(klass, sampling: sampling)
-  end
+begin
+  require "amber"
+rescue LoadError
 end
 
 module TestHelper
@@ -151,9 +137,15 @@ SIG
           absolute_path.write(content)
         end
 
-        loader = RBS::EnvironmentLoader.new()
-        loader.no_builtin! unless system_builtin
-        loader.add path: tmppath
+        root = 
+          if system_builtin
+            RBS::EnvironmentLoader::DEFAULT_CORE_ROOT
+          else
+            nil
+          end
+
+        loader = RBS::EnvironmentLoader.new(core_root: root)
+        loader.add(path: tmppath)
 
         yield RBS::Environment.from_loader(loader).resolve_type_names, tmppath
       end

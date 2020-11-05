@@ -61,6 +61,8 @@ module RBS
 
     def ensure_namespace!: (Namespace, location: Location?) -> void
 
+    def build_singleton: (TypeName) -> Definition
+                       
     def build_instance: (TypeName) -> Definition
 
     def build_interface: (TypeName) -> Definition

@@ -37,6 +37,7 @@ require "rbs/environment_walker"
 require "rbs/vendorer"
 require "rbs/validator"
 require "rbs/factory"
+require "rbs/repository"
 
 begin
   require "rbs/parser"

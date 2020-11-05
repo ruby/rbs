@@ -15,154 +15,152 @@ class RBS::EnvironmentLoaderTest < Minitest::Test
     end
   end
 
-  def with_signatures
-    mktmpdir do |path|
-      path.join("models").mkdir
-      path.join("models/person.rbs").write(<<-EOF)
+  def write_signatures(path:)
+    path.join("models").mkdir
+    path.join("models/person.rbs").write(<<-RBS)
 class Person
 end
-      EOF
+    RBS
 
-      path.join("controllers").mkdir
-      path.join("controllers/people_controller.rbs").write(<<-EOF)
+    path.join("controllers").mkdir
+    path.join("controllers/people_controller.rbs").write(<<-RBS)
 class PeopleController
 end
+    RBS
 
-class Object
+    path.join("_private").mkdir
+    path.join("_private/person.rbs").write(<<-RBS)
+class Person::Internal
 end
-      EOF
-
-      yield path
-    end
+    RBS
   end
 
-  def test_loading_builtin_and_library_and_directory
-    with_signatures do |path|
-      loader = EnvironmentLoader.new()
+  def test_loading_empty
+    loader = EnvironmentLoader.new
 
-      loader.add(library: "pathname")
+    env = Environment.new
+    loaded = loader.load(env: env)
+
+    assert loaded.all? {|_, _, path_type| path_type == :core }
+  end
+
+  def test_loading_no_core
+    loader = EnvironmentLoader.new(core_root: nil)
+
+    env = Environment.new()
+    loaded = loader.load(env: env)
+
+    assert_empty loaded
+  end
+
+  def test_loading_dir
+    mktmpdir do |path|
+      write_signatures(path: path)
+
+      loader = EnvironmentLoader.new
       loader.add(path: path)
 
       env = Environment.new
-      loader.load(env: env)
+      loaded = loader.load(env: env)
 
-      assert env.declarations.any? {|decl| decl.is_a?(Declarations::Class) && decl.name.name == :BasicObject }
-      assert env.declarations.any? {|decl| decl.is_a?(Declarations::Class) && decl.name.name == :Pathname }
-      assert env.declarations.any? {|decl| decl.is_a?(Declarations::Class) && decl.name.name == :Person }
-      assert env.declarations.any? {|decl| decl.is_a?(Declarations::Class) && decl.name.name == :PeopleController }
+      assert_operator env.class_decls, :key?, TypeName("::Person")
+      assert_operator env.class_decls, :key?, TypeName("::PeopleController")
+      assert_operator env.class_decls, :key?, TypeName("::Person::Internal")
     end
   end
 
-  def test_loading_without_stdlib
-    with_signatures do |path|
-      loader = EnvironmentLoader.new()
-      loader.no_builtin!
+  def test_loading_stdlib
+    mktmpdir do |path|
+      loader = EnvironmentLoader.new
+      loader.add(library: "set")
 
       env = Environment.new
-      loader.load(env: env)
+      loaded = loader.load(env: env)
 
-      refute env.declarations.any? {|decl| decl.is_a?(Declarations::Class) && decl.name.name == :BasicObject }
-      refute env.declarations.any? {|decl| decl.is_a?(Declarations::Class) && decl.name.name == :Pathname }
+      assert_operator env.class_decls, :key?, TypeName("::Set")
     end
   end
 
-  def test_loading_gem
-    skip unless has_gem?("racc")
+  def test_loading_library_from_gem_repo
+    mktmpdir do |path|
+      (path + "gems").mkdir
+      (path + "gems/gem1").mkdir
+      (path + "gems/gem1/1.2.3").mkdir
 
-    with_signatures do |path|
-      loader = EnvironmentLoader.new()
+      write_signatures(path: path + "gems/gem1/1.2.3")
 
-      # We have racc gem as development dependency
+      repo = RBS::Repository.new()
+      repo.add(path + "gems")
 
-      loader.add(library: "racc")
+      loader = EnvironmentLoader.new(repository: repo)
+      loader.add(library: "gem1", version: "1.2.3")
 
-      assert_equal 1, loader.paths.size
-      loader.paths[0].tap do |path|
-        assert_instance_of EnvironmentLoader::GemPath, path
-        assert_nil path.version
-        assert_match %r{racc-\d.\d.\d+/sig$}, path.path.to_s
-      end
+      env = Environment.new
+      loaded = loader.load(env: env)
+
+      assert_operator env.class_decls, :key?, TypeName("::Person")
+      assert_operator env.class_decls, :key?, TypeName("::PeopleController")
+      refute_operator env.class_decls, :key?, TypeName("::Person::Internal")
     end
   end
 
   def test_loading_unknown_library
-    skip unless has_gem?("racc")
+    repo = RBS::Repository.new()
 
-    with_signatures do |path|
-      loader = EnvironmentLoader.new()
+    loader = EnvironmentLoader.new(repository: repo)
+    loader.add(library: "gem1", version: "1.2.3")
 
-      assert_raises EnvironmentLoader::UnknownLibraryNameError do
-        loader.add(library: "no_such_library")
-      end
-
-      assert_raises EnvironmentLoader::UnknownLibraryNameError do
-        loader.add(library: "racc:0.0.0")
-      end
-    end
-  end
-
-  def test_gem_path_vendored
-    with_signatures do |path|
-      gem_root = path + "gems"
-      gem_root.mkdir
-
-      vendor_racc_path = gem_root + "racc"
-      vendor_racc_path.mkdir
-      (vendor_racc_path + "racc.rbs").write <<-CONTENT
-DUMMY: String
-      CONTENT
-
-      loader = EnvironmentLoader.new(gem_vendor_path: gem_root)
-
-      loader.add(library: "racc:0.0.0")
-
-      racc_path = loader.paths.find {|path| path.name == "racc" }
-      assert_equal gem_root + "racc", racc_path.path
-    end
-  end
-
-  def test_load_twice
     env = Environment.new
 
-    with_signatures do |path|
-      EnvironmentLoader.new().tap do |loader|
-        loadeds = loader.load(env: env)
+    assert_raises EnvironmentLoader::UnknownLibraryError do
+      loader.load(env: env)
+    end
+  end
 
-        loadeds.each do |(decl, file_path, lib_path)|
-          assert_operator decl, :is_a?, Declarations::Base
-          assert_instance_of Pathname, file_path
-          assert_equal :stdlib, lib_path
-        end
-      end
+  def test_loading_twice
+    mktmpdir do |path|
+      write_signatures(path: path)
 
-      assert env.declarations.any? {|decl| decl.is_a?(Declarations::Class) && decl.name.name == :BasicObject }
+      loader = EnvironmentLoader.new
+      loader.add(path: path)
+      loader.add(path: path + "models")
 
-      EnvironmentLoader.new().no_builtin!.tap do |loader|
-        loader.add(library: "pathname")
-        loadeds = loader.load(env: env)
+      env = Environment.new
+      loaded = loader.load(env: env)
 
-        assert env.declarations.any? {|decl| decl.is_a?(Declarations::Class) && decl.name.name == :Pathname }
+      assert_equal 1, loaded.count {|decl, _, _| decl.name == TypeName("Person") }
+    end
+  end
 
-        loadeds.each do |(decl, file_path, lib_path)|
-          assert_operator decl, :is_a?, Declarations::Base
-          assert_instance_of Pathname, file_path
-          assert_instance_of EnvironmentLoader::LibraryPath, lib_path
-          assert_equal 'pathname', lib_path.name
-        end
-      end
+  def test_loading_from_gem
+    skip unless has_gem?("rbs-amber")
 
-      EnvironmentLoader.new.no_builtin!.tap do |loader|
-        loader.add(path: path)
-        loadeds = loader.load(env: env)
+    mktmpdir do |path|
+      repo = RBS::Repository.new()
 
-        assert env.declarations.any? {|decl| decl.is_a?(Declarations::Class) && decl.name.name == :PeopleController }
+      loader = EnvironmentLoader.new(repository: repo)
+      loader.add(library: "rbs-amber", version: nil)
 
-        loadeds.each do |(decl, file_path, lib_path)|
-          assert_operator decl, :is_a?, Declarations::Base
-          assert_instance_of Pathname, file_path
-          assert_instance_of Pathname, lib_path
-          assert_equal path, lib_path
-        end
+      env = Environment.new
+      loaded = loader.load(env: env)
+
+      assert_operator env.class_decls, :key?, TypeName("::Amber")
+    end
+  end
+
+  def test_loading_from_gem_without_rbs
+    skip unless has_gem?("minitest")
+
+    mktmpdir do |path|
+      repo = RBS::Repository.new()
+
+      loader = EnvironmentLoader.new(repository: repo)
+      loader.add(library: "minitest", version: nil)
+
+      env = Environment.new
+
+      assert_raises EnvironmentLoader::UnknownLibraryError do
+        loader.load(env: env)
       end
     end
   end
