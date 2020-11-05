@@ -2,7 +2,13 @@
 
 ## master
 
-## 0.15.0 (2020-11-2)
+## 0.16.0 (2020-11-05)
+
+* Signature update for `DBM` ([#441](https://github.com/ruby/rbs/pull/441))
+* RBS repository ([#405](https://github.com/ruby/rbs/pull/405))
+* Support `alias` in `rbs prototype rb` ([#457](https://github.com/ruby/rbs/pull/457))
+
+## 0.15.0 (2020-11-02)
 
 * Signature updates for `Kernel`, `PStore`, `Enumerable`, and `Array` ([#450](https://github.com/ruby/rbs/pull/450), [#443](https://github.com/ruby/rbs/pull/443), [#438](https://github.com/ruby/rbs/pull/438), [#437](https://github.com/ruby/rbs/pull/437), [#433](https://github.com/ruby/rbs/pull/433), [#432](https://github.com/ruby/rbs/pull/432))
 * Add helper interfaces ([#434](https://github.com/ruby/rbs/pull/434), [#428](https://github.com/ruby/rbs/pull/428))
