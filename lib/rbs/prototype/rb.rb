@@ -90,6 +90,7 @@ module RBS
           each_node class_body do |child|
             process child, decls: kls.members, comments: comments, context: Context.initial
           end
+          remove_unnecessary_accessibility_methods! kls.members
 
         when :MODULE
           module_name, *module_body = node.children
@@ -109,6 +110,7 @@ module RBS
           each_node module_body do |child|
             process child, decls: mod.members, comments: comments, context: Context.initial
           end
+          remove_unnecessary_accessibility_methods! mod.members
 
         when :SCLASS
           this, body = node.children
@@ -244,21 +246,48 @@ module RBS
               )
             end
           when :module_function
-            if args.compact.empty?
+            if args.empty?
               context.module_function = true
+            else
+              module_func_context = context.dup.tap { |ctx| ctx.module_function = true }
+              args.each do |arg|
+                if arg && (name = literal_to_symbol(arg))
+                  i = find_def_index_by_name(decls, name)
+                  decls[i] = decls[i].update(kind: :singleton_instance)
+                elsif arg
+                  process arg, decls: decls, comments: comments, context: module_func_context
+                end
+              end
+            end
+          when :public, :private
+            accessibility = __send__(node.children[0])
+            if args.empty?
+              decls << accessibility
             else
               args.each do |arg|
                 if arg && (name = literal_to_symbol(arg))
-                  i = decls.find_index { |decl| decl.is_a?(AST::Members::MethodDefinition) && decl.name == name }
-                  decls[i] = decls[i].update(kind: :singleton_instance)
+                  if i = find_def_index_by_name(decls, name)
+                    current = current_accessibility(decls, i)
+                    if current != accessibility
+                      decls.insert(i + 1, current)
+                      decls.insert(i, accessibility)
+                    end
+                  end
                 end
               end
-              context = context.dup.tap { |ctx| ctx.module_function = true }
-            end
-          end
 
-          each_child node do |child|
-            process child, decls: decls, comments: comments, context: context
+              # For `private def foo` syntax
+              current = current_accessibility(decls)
+              decls << accessibility
+              each_child node do |child|
+                process child, decls: decls, comments: comments, context: context
+              end
+              decls << current
+            end
+          else
+            each_child node do |child|
+              process child, decls: decls, comments: comments, context: context
+            end
           end
 
         when :CDECL
@@ -614,6 +643,59 @@ module RBS
 
       def untyped
         @untyped ||= Types::Bases::Any.new(location: nil)
+      end
+
+      def private
+        @private ||= AST::Members::Private.new(location: nil)
+      end
+
+      def public
+        @public ||= AST::Members::Public.new(location: nil)
+      end
+
+      def current_accessibility(decls, index = [0, decls.size - 1].max)
+        idx = decls.slice(0, index).rindex { |decl| decl == private || decl == public }
+        (idx && decls[idx]) || public
+      end
+
+      def remove_unnecessary_accessibility_methods!(decls)
+        current = public
+        idx = 0
+
+        loop do
+          decl = decls[idx] or break
+          if current == decl
+            decls.delete_at(idx)
+            next
+          end
+
+          if 0 < idx && is_accessibility?(decls[idx - 1]) && is_accessibility?(decl)
+            decls.delete_at(idx - 1)
+            idx -= 1
+            current = current_accessibility(decls, idx)
+            next
+          end
+
+          current = decl if is_accessibility?(decl)
+          idx += 1
+        end
+
+        decls.pop while decls.last && is_accessibility?(decls.last)
+      end
+
+      def is_accessibility?(decl)
+        decl == public || decl == private
+      end
+
+      def find_def_index_by_name(decls, name)
+        decls.find_index do |decl|
+          case decl
+          when AST::Members::MethodDefinition, AST::Members::AttrReader
+            decl.name == name
+          when AST::Members::AttrWriter
+            decl.name == :"#{name}="
+          end
+        end
       end
     end
   end
