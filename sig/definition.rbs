@@ -21,13 +21,13 @@ module RBS
         attr_reader defined_in: TypeName
         attr_reader implemented_in: TypeName?
 
-        def initialize: (type: MethodType, member: method_member, defined_in: TypeName?, implemented_in: TypeName?) -> void
+        def initialize: (type: MethodType, member: method_member, defined_in: TypeName, implemented_in: TypeName?) -> void
 
         def comment: () -> AST::Comment?
 
         def annotations: () -> Array[AST::Annotation]
 
-        def update: (?type: MethodType, ?member: method_member, ?defined_in: TypeName?, ?implemented_in: TypeName?) -> TypeDef
+        def update: (?type: MethodType, ?member: method_member, ?defined_in: TypeName, ?implemented_in: TypeName?) -> TypeDef
 
         def overload?: () -> bool
       end
@@ -42,8 +42,13 @@ module RBS
       attr_reader comments: Array[AST::Comment]
       attr_reader annotations: Array[AST::Annotation]
       attr_reader members: Array[method_member]
+      attr_reader alias_of: Method?
 
-      def initialize: (super_method: Method?, defs: Array[TypeDef], accessibility: accessibility, ?annotations: Array[AST::Annotation]) -> void
+      def initialize: (super_method: Method?,
+                       defs: Array[TypeDef],
+                       accessibility: accessibility,
+                       alias_of: Method?,
+                       ?annotations: Array[AST::Annotation]) -> void
 
       def public?: () -> bool
 

@@ -599,10 +599,15 @@ module RBS
       try_cache(type_name, cache: one_instance_cache) do
         entry = env.class_decls[type_name]
 
+        param_names = entry.type_params.each.map(&:name)
         self_type = Types::ClassInstance.new(name: type_name,
-                                             args: Types::Variable.build(entry.type_params.each.map(&:name)),
+                                             args: Types::Variable.build(param_names),
                                              location: nil)
-        ancestors = [Definition::Ancestor::Instance.new(name: type_name, args: self_type.args)]
+        ancestors = Definition::InstanceAncestors.new(
+          type_name: type_name,
+          params: param_names,
+          ancestors: [Definition::Ancestor::Instance.new(name: type_name, args: self_type.args)]
+        )
 
         Definition.new(type_name: type_name, entry: entry, self_type: self_type, ancestors: ancestors).tap do |definition|
           method_definition_members(type_name, entry, kind: :instance).each do |method_name, array|
@@ -618,13 +623,15 @@ module RBS
                   Definition::Method.new(
                     super_method: nil,
                     accessibility: visibility,
-                    defs: method_def.defs.map {|defn| defn.update(implemented_in: type_name) }
+                    defs: method_def.defs.map {|defn| defn.update(implemented_in: type_name) },
+                    alias_of: nil
                   )
                 else
                   Definition::Method.new(
                     super_method: nil,
                     accessibility: visibility,
-                    defs: []
+                    defs: [],
+                    alias_of: nil
                   )
                 end
 
@@ -641,7 +648,8 @@ module RBS
               Definition::Method.new(
                 super_method: nil,
                 defs: defs + original.defs,
-                accessibility: original.accessibility
+                accessibility: original.accessibility,
+                alias_of: nil
               )
             end
           end
@@ -676,7 +684,8 @@ module RBS
                         implemented_in: type_name
                       )
                     ],
-                    accessibility: accessibility
+                    accessibility: accessibility,
+                    alias_of: nil
                   )
                 end
 
@@ -698,7 +707,8 @@ module RBS
                         implemented_in: type_name
                       ),
                     ],
-                    accessibility: accessibility
+                    accessibility: accessibility,
+                    alias_of: nil
                   )
                 end
 
@@ -747,7 +757,15 @@ module RBS
                     location: member.location
                   )
 
-                  definition.methods[member.new_name] = definition.methods[member.old_name]
+                  original_method = definition.methods[member.old_name]
+
+                  definition.methods[member.new_name] = Definition::Method.new(
+                    super_method: original_method.super_method,
+                    defs: original_method.defs,
+                    accessibility: original_method.accessibility,
+                    alias_of: original_method,
+                    annotations: original_method.annotations
+                  )
                 end
               end
             end
@@ -838,7 +856,10 @@ module RBS
         entry = env.class_decls[type_name]
 
         self_type = Types::ClassSingleton.new(name: type_name, location: nil)
-        ancestors = [Definition::Ancestor::Singleton.new(name: type_name)]
+        ancestors = Definition::SingletonAncestors.new(
+          type_name: type_name,
+          ancestors: [Definition::Ancestor::Singleton.new(name: type_name)]
+        )
 
         Definition.new(type_name: type_name, entry: entry, self_type: self_type, ancestors: ancestors).tap do |definition|
           method_definition_members(type_name, entry, kind: :singleton).each do |method_name, array|
@@ -855,7 +876,8 @@ module RBS
               defs: method_def&.yield_self do |method_def|
                 method_def.defs.map {|defn| defn.update(implemented_in: type_name) }
               end || [],
-              accessibility: visibility
+              accessibility: visibility,
+              alias_of: nil
             )
             definition.methods[method_name] = members.inject(m) do |original, new|
               defs = new.types.map do |type|
@@ -869,7 +891,8 @@ module RBS
               Definition::Method.new(
                 super_method: nil,
                 defs: defs + original.defs,
-                accessibility: original.accessibility
+                accessibility: original.accessibility,
+                alias_of: nil
               )
             end
           end
@@ -893,7 +916,14 @@ module RBS
                     location: member.location
                   )
 
-                  definition.methods[member.new_name] = definition.methods[member.old_name]
+                  original_method = definition.methods[member.old_name]
+                  definition.methods[member.new_name] = Definition::Method.new(
+                    super_method: original_method.super_method,
+                    defs: original_method.defs,
+                    accessibility: original_method.accessibility,
+                    alias_of: original_method,
+                    annotations: original_method.annotations
+                  )
                 end
               end
             end
@@ -945,7 +975,8 @@ module RBS
                   )
                 end,
                 accessibility: :public,
-                annotations: [AST::Annotation.new(location: nil, string: "rbs:test:target")]
+                annotations: [AST::Annotation.new(location: nil, string: "rbs:test:target")],
+                alias_of: nil
               )
             end
           end
@@ -1029,7 +1060,8 @@ module RBS
       methods[name] = Definition::Method.new(
         super_method: super_method,
         accessibility: method.accessibility,
-        defs: sub.mapping.empty? ? defs : defs.map {|defn| defn.update(type: defn.type.sub(sub)) }
+        defs: sub.mapping.empty? ? defs : defs.map {|defn| defn.update(type: defn.type.sub(sub)) },
+        alias_of: nil
       )
     end
 
@@ -1123,7 +1155,8 @@ module RBS
                   implemented_in: nil
                 )
               end,
-              accessibility: :public
+              accessibility: :public,
+              alias_of: nil
             )
             definition.methods[member.name] = method
           end
