@@ -411,7 +411,8 @@ module RBS
         when :HASH
           list = node.children[0]
           if list
-            children = list.children.compact
+            children = list.children
+            children.pop
           else
             children = []
           end
@@ -419,8 +420,13 @@ module RBS
           key_types = []
           value_types = []
           children.each_slice(2) do |k, v|
-            key_types << literal_to_type(k)
-            value_types << literal_to_type(v)
+            if k
+              key_types << literal_to_type(k)
+              value_types << literal_to_type(v)
+            else
+              key_types << untyped
+              value_types << untyped
+            end
           end
 
           if !key_types.empty? && key_types.all? { |t| t.is_a?(Types::Literal) }
