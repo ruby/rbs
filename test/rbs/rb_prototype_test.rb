@@ -102,6 +102,7 @@ class Hello
   def hash1() {} end
   def hash2() { foo: 1 } end
   def hash3() { foo: { bar: 42 }, x: { y: z } } end
+  def hash4() { foo: 1, **({ bar: x}).compact } end
 end
     EOR
 
@@ -158,6 +159,8 @@ class Hello
   def hash2: () -> { foo: 1 }
 
   def hash3: () -> { foo: { bar: 42 }, x: { y: untyped } }
+
+  def hash4: () -> ::Hash[:foo | untyped, 1 | untyped]
 end
     EOF
   end
