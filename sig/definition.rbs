@@ -42,8 +42,13 @@ module RBS
       attr_reader comments: Array[AST::Comment]
       attr_reader annotations: Array[AST::Annotation]
       attr_reader members: Array[method_member]
+      attr_reader alias_of: Method?
 
-      def initialize: (super_method: Method?, defs: Array[TypeDef], accessibility: accessibility, ?annotations: Array[AST::Annotation]) -> void
+      def initialize: (super_method: Method?,
+                       defs: Array[TypeDef],
+                       accessibility: accessibility,
+                       alias_of: Method?,
+                       ?annotations: Array[AST::Annotation]) -> void
 
       def public?: () -> bool
 

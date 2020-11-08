@@ -60,12 +60,14 @@ module RBS
       attr_reader :defs
       attr_reader :accessibility
       attr_reader :extra_annotations
+      attr_reader :alias_of
 
-      def initialize(super_method:, defs:, accessibility:, annotations: [])
+      def initialize(super_method:, defs:, accessibility:, annotations: [], alias_of:)
         @super_method = super_method
         @defs = defs
         @accessibility = accessibility
         @extra_annotations = annotations
+        @alias_of = alias_of
       end
 
       def defined_in
@@ -110,7 +112,8 @@ module RBS
         self.class.new(
           super_method: super_method&.sub(s),
           defs: defs.map {|defn| defn.update(type: defn.type.sub(s)) },
-          accessibility: @accessibility
+          accessibility: @accessibility,
+          alias_of: alias_of
         )
       end
 
@@ -118,7 +121,8 @@ module RBS
         self.class.new(
           super_method: super_method&.map_type(&block),
           defs: defs.map {|defn| defn.update(type: defn.type.map_type(&block)) },
-          accessibility: @accessibility
+          accessibility: @accessibility,
+          alias_of: alias_of
         )
       end
 
@@ -126,7 +130,8 @@ module RBS
         self.class.new(
           super_method: super_method,
           defs: defs.map {|defn| defn.update(type: yield(defn.type)) },
-          accessibility: @accessibility
+          accessibility: @accessibility,
+          alias_of: alias_of
         )
       end
     end
