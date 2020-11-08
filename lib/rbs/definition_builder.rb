@@ -599,10 +599,15 @@ module RBS
       try_cache(type_name, cache: one_instance_cache) do
         entry = env.class_decls[type_name]
 
+        param_names = entry.type_params.each.map(&:name)
         self_type = Types::ClassInstance.new(name: type_name,
-                                             args: Types::Variable.build(entry.type_params.each.map(&:name)),
+                                             args: Types::Variable.build(param_names),
                                              location: nil)
-        ancestors = [Definition::Ancestor::Instance.new(name: type_name, args: self_type.args)]
+        ancestors = Definition::InstanceAncestors.new(
+          type_name: type_name,
+          params: param_names,
+          ancestors: [Definition::Ancestor::Instance.new(name: type_name, args: self_type.args)]
+        )
 
         Definition.new(type_name: type_name, entry: entry, self_type: self_type, ancestors: ancestors).tap do |definition|
           method_definition_members(type_name, entry, kind: :instance).each do |method_name, array|
@@ -851,7 +856,10 @@ module RBS
         entry = env.class_decls[type_name]
 
         self_type = Types::ClassSingleton.new(name: type_name, location: nil)
-        ancestors = [Definition::Ancestor::Singleton.new(name: type_name)]
+        ancestors = Definition::SingletonAncestors.new(
+          type_name: type_name,
+          ancestors: [Definition::Ancestor::Singleton.new(name: type_name)]
+        )
 
         Definition.new(type_name: type_name, entry: entry, self_type: self_type, ancestors: ancestors).tap do |definition|
           method_definition_members(type_name, entry, kind: :singleton).each do |method_name, array|

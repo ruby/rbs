@@ -62,7 +62,7 @@ module RBS
     def ensure_namespace!: (Namespace, location: Location?) -> void
 
     def build_singleton: (TypeName) -> Definition
-                       
+
     def build_instance: (TypeName) -> Definition
 
     def build_interface: (TypeName) -> Definition
@@ -71,11 +71,12 @@ module RBS
 
     def build_one_singleton: (TypeName) -> Definition
 
+    type ancestors = Definition::InstanceAncestors | Definition::SingletonAncestors | nil
     def merge_definitions: (TypeName,
                             Array[[Definition::Ancestor::t, Definition]],
                             entry: Environment::ModuleEntry | Environment::ClassEntry,
                             self_type: Definition::self_type,
-                            ancestors: Array[Definition::Ancestor::t]) -> Definition
+                            ancestors: ancestors) -> Definition
 
     type method_kind = :instance | :singleton
     def merge_method: (TypeName, Hash[Symbol, Definition::Method], Symbol, Definition::Method, Substitution, kind: method_kind) -> void
