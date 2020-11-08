@@ -1294,10 +1294,10 @@ def next_token
     return [:"type_#{type}", nil]
   end
 
-  return if @eof
+  return new_token(false, '') if @eof
 
   while true
-    return if input.eos?
+    return new_token(false, '') if input.eos?
 
     case
     when input.scan(/\s+/)

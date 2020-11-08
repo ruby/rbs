@@ -1090,4 +1090,15 @@ EOF
       end
     end
   end
+
+  def test_syntax_error_on_eof
+    ex = assert_raises Parser::SyntaxError do
+      Parser.parse_signature(<<~SIG)
+      class Foo
+      SIG
+    end
+    loc = ex.error_value.location
+    assert_equal 1, loc.start_line
+    assert_equal 9, loc.start_column
+  end
 end
