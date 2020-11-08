@@ -58,6 +58,20 @@ class EnumerableTest < StdlibTest
     end
   end
 
+  def test_to_h
+    enumerable = Class.new {
+      def each
+        yield [1, 2]
+        yield [2, 3]
+        yield [3, 4]
+      end
+
+      include Enumerable
+    }.new
+    enumerable.to_h
+    enumerable.to_h { |obj| obj }
+  end
+
   def test_each_entry
     enumerable.each_entry
     enumerable.each_entry { |x| x }

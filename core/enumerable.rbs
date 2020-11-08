@@ -306,6 +306,7 @@ module Enumerable[unchecked out Elem, out Return]: _Each[Elem, Return]
   #   #=> {1=>1, 2=>4, 3=>9, 4=>16, 5=>25}
   # ```
   def to_h: () -> ::Hash[untyped, untyped]
+          | [T, U] () { (Elem) -> [T, U] } -> ::Hash[T, U]
 
   def each_slice: (Integer n) { (::Array[Elem]) -> untyped } -> NilClass
                 | (Integer n) -> ::Enumerator[::Array[Elem], Return]
