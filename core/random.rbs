@@ -21,6 +21,43 @@
 class Random < Object
   include Random::Formatter
 
+  # Creates a new PRNG using `seed` to set the initial state. If `seed` is
+  # omitted, the generator is initialized with Random.new_seed.
+  #
+  # See Random.srand for more information on the use of seed values.
+  #
+  def initialize: (?Integer seed) -> void
+
+  # Returns an arbitrary seed value. This is used by Random.new when no seed value
+  # is specified as an argument.
+  #
+  #     Random.new_seed  #=> 115032730400174366788466674494640623225
+  #
+  def self.new_seed: () -> Integer
+
+  # Alias of Random::DEFAULT.rand.
+  #
+  def self.rand: (?Integer max) -> Numeric
+
+  # Seeds the system pseudo-random number generator, Random::DEFAULT, with
+  # `number`.  The previous seed value is returned.
+  #
+  # If `number` is omitted, seeds the generator using a source of entropy provided
+  # by the operating system, if available (/dev/urandom on Unix systems or the RSA
+  # cryptographic provider on Windows), which is then combined with the time, the
+  # process id, and a sequence number.
+  #
+  # srand may be used to ensure repeatable sequences of pseudo-random numbers
+  # between different runs of the program. By setting the seed to a known value,
+  # programs can be made deterministic during testing.
+  #
+  #     srand 1234               # => 268519324636777531569100071560086917274
+  #     [ rand, rand ]           # => [0.1915194503788923, 0.6221087710398319]
+  #     [ rand(10), rand(1000) ] # => [4, 664]
+  #     srand 1234               # => 1234
+  #     [ rand, rand ]           # => [0.1915194503788923, 0.6221087710398319]
+  #
+  def self.srand: (?Integer number) -> Numeric
   # Returns true if the two generators have the same internal state, otherwise
   # false.  Equivalent generators will return the same sequence of pseudo-random
   # numbers.  Two generators will generally have the same state only if they were
@@ -49,13 +86,6 @@ class Random < Object
   #     random_string.size                   # => 10
   #
   def bytes: (Integer size) -> String
-
-  # Creates a new PRNG using `seed` to set the initial state. If `seed` is
-  # omitted, the generator is initialized with Random.new_seed.
-  #
-  # See Random.srand for more information on the use of seed values.
-  #
-  def initialize: (?Integer seed) -> void
 
   # When `max` is an Integer, `rand` returns a random integer greater than or
   # equal to zero and less than `max`. Unlike Kernel.rand, when `max` is a
@@ -96,37 +126,6 @@ class Random < Object
   #     prng2.rand(100)  #=> 47
   #
   def seed: () -> Integer
-
-  # Returns an arbitrary seed value. This is used by Random.new when no seed value
-  # is specified as an argument.
-  #
-  #     Random.new_seed  #=> 115032730400174366788466674494640623225
-  #
-  def self.new_seed: () -> Integer
-
-  # Alias of Random::DEFAULT.rand.
-  #
-  def self.rand: (?Integer max) -> Numeric
-
-  # Seeds the system pseudo-random number generator, Random::DEFAULT, with
-  # `number`.  The previous seed value is returned.
-  #
-  # If `number` is omitted, seeds the generator using a source of entropy provided
-  # by the operating system, if available (/dev/urandom on Unix systems or the RSA
-  # cryptographic provider on Windows), which is then combined with the time, the
-  # process id, and a sequence number.
-  #
-  # srand may be used to ensure repeatable sequences of pseudo-random numbers
-  # between different runs of the program. By setting the seed to a known value,
-  # programs can be made deterministic during testing.
-  #
-  #     srand 1234               # => 268519324636777531569100071560086917274
-  #     [ rand, rand ]           # => [0.1915194503788923, 0.6221087710398319]
-  #     [ rand(10), rand(1000) ] # => [4, 664]
-  #     srand 1234               # => 1234
-  #     [ rand, rand ]           # => [0.1915194503788923, 0.6221087710398319]
-  #
-  def self.srand: (?Integer number) -> Numeric
 end
 
 # The default Pseudorandom number generator.  Used by class methods of Random.
