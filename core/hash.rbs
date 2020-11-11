@@ -720,8 +720,8 @@ class Hash[unchecked out K, unchecked out V] < Object
   #
   # Hash#update is an alias for Hash#merge!.
   #
-  def merge!: [A, B] (*::Hash[A, B] other_hashes) -> ::Hash[A | K, B | V]
-            | [A, B, C] (*::Hash[A, B] other_hashes) { (K key, V oldval, B newval) -> (C) } -> ::Hash[A | K, B | V | C]
+  def merge!: (*::Hash[K, V] other_hashes) -> self
+            | (*::Hash[K, V] other_hashes) { (K key, V oldval, V newval) -> (V) } -> self
 
   # Searches through the hash comparing *obj* with the value using `==`. Returns
   # the first key-value pair (two-element array) that matches. See also
@@ -770,7 +770,7 @@ class Hash[unchecked out K, unchecked out V] < Object
   #     h = { "a" => 100, "b" => 200 }
   #     h.replace({ "c" => 300, "d" => 400 })   #=> {"c"=>300, "d"=>400}
   #
-  def replace: [A, B] (Hash[A, B] | _ToHash[A, B]) -> Hash[A, B]
+  def replace: (Hash[K, V]) -> self
 
   # Returns a new hash consisting of entries for which the block returns true.
   #
