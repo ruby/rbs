@@ -46,7 +46,7 @@ module ChatApp
     def initialize: (name: String) -> void
 
     def each_member: () { (User | Bot) -> void } -> void  # `{` and `}` means block.
-                   | () -> Enumerable[User | Bot, void]   # Method can be overloaded.
+                   | () -> Enumerator[User | Bot, void]   # Method can be overloaded.
   end
 end
 ```

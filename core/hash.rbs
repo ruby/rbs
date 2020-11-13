@@ -106,7 +106,7 @@
 # See also Object#hash and Object#eql?
 #
 class Hash[unchecked out K, unchecked out V] < Object
-  include Enumerable[[K, V], Hash[K, V]]
+  include Enumerable[[K, V]]
 
   # Creates a new hash populated with the given objects.
   #

@@ -88,7 +88,7 @@
 # r.member?(Xs.new(5))       #=> true
 # ```
 class Range[out Elem] < Object
-  include Enumerable[Elem, Range[Elem]]
+  include Enumerable[Elem]
 
   def ==: (untyped obj) -> bool
 

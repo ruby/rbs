@@ -7,7 +7,7 @@
 # itself (`.`).
 #
 class Dir
-  include Enumerable[String, Dir]
+  include Enumerable[String]
 
   # Returns a new directory object for the named directory.
   #

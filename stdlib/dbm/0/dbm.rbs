@@ -61,7 +61,7 @@
 #     puts db['822']
 #
 class DBM
-  include Enumerable[untyped, untyped]
+  include Enumerable[untyped]
 
   # Open a dbm database and yields it if a block is given. See also `DBM.new`.
   #

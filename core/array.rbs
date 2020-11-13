@@ -234,7 +234,7 @@
 # for pack.c
 #
 class Array[unchecked out Elem] < Object
-  include Enumerable[Elem, self]
+  include Enumerable[Elem]
 
   # Returns a new array.
   #

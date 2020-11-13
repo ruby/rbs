@@ -96,7 +96,7 @@
 # # => [], [:b], [1], [:b, 1], [1, 2], [:b, 1, 2], 3
 # ```
 class Enumerator[unchecked out Elem, out Return] < Object
-  include Enumerable[Elem, Return]
+  include Enumerable[Elem]
 
   def each: () { (Elem arg0) -> untyped } -> Return
           | () -> self
@@ -242,8 +242,8 @@ class Enumerator[unchecked out Elem, out Return] < Object
                  | [U] (U arg0) -> ::Enumerator[[ Elem, U ], Return]
 end
 
-class Enumerator::Generator[out Elem, out Return] < Object
-  include Enumerable[Elem, Return]
+class Enumerator::Generator[out Elem] < Object
+  include Enumerable[Elem]
 end
 
 class Enumerator::Lazy[out Elem, out Return] < Enumerator[Elem, Return]
@@ -257,6 +257,6 @@ class Enumerator::Yielder < Object
   def to_proc: () -> Proc
 end
 
-class Enumerator::Chain[out Elem, out Return] < Object
-  include Enumerable[Elem, Return]
+class Enumerator::Chain[out Elem] < Object
+  include Enumerable[Elem]
 end

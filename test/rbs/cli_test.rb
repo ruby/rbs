@@ -74,7 +74,7 @@ class RBS::CliTest < Minitest::Test
       cli.run(%w(-r set ancestors ::Set))
       assert_equal <<-EOF, stdout.string
 ::Set[A]
-::Enumerable[A, self]
+::Enumerable[A]
 ::Object
 ::Kernel
 ::BasicObject
@@ -85,7 +85,7 @@ class RBS::CliTest < Minitest::Test
       cli.run(%w(-r set ancestors --instance ::Set))
       assert_equal <<-EOF, stdout.string
 ::Set[A]
-::Enumerable[A, self]
+::Enumerable[A]
 ::Object
 ::Kernel
 ::BasicObject

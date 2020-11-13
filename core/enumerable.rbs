@@ -5,7 +5,7 @@
 # objects in the collection must also implement a meaningful `<=>`
 # operator, as these methods rely on an ordering between members of the
 # collection.
-module Enumerable[unchecked out Elem, out Return]: _Each[Elem, Return]
+module Enumerable[unchecked out Elem]: _Each[Elem]
   # Passes each element of the collection to the given block. The method
   # returns `true` if the block never returns `false` or `nil` . If the
   # block is not given, Ruby adds an implicit block of `{ |obj| obj }` which
@@ -66,24 +66,24 @@ module Enumerable[unchecked out Elem, out Return]: _Each[Elem, Return]
            | () { (Elem) -> boolish } -> Integer
 
   def cycle: (?Integer n) { (Elem arg0) -> untyped } -> NilClass
-           | (?Integer n) -> ::Enumerator[Elem, Return]
+           | (?Integer n) -> ::Enumerator[Elem, NilClass]
 
   def detect: (?Proc ifnone) { (Elem) -> boolish } -> Elem?
-            | (?Proc ifnone) -> ::Enumerator[Elem, Return]
+            | (?Proc ifnone) -> ::Enumerator[Elem, Elem?]
 
   def drop: (Integer n) -> ::Array[Elem]
 
   def drop_while: () { (Elem) -> boolish } -> ::Array[Elem]
-                | () -> ::Enumerator[Elem, Return]
+                | () -> ::Enumerator[Elem, ::Array[Elem]]
 
   def each_cons: (Integer n) { (::Array[Elem] arg0) -> untyped } -> NilClass
-               | (Integer n) -> ::Enumerator[::Array[Elem], Return]
+               | (Integer n) -> ::Enumerator[::Array[Elem], NilClass]
 
-  def each_with_index: () { (Elem arg0, Integer arg1) -> untyped } -> ::Enumerable[Elem, Return]
-                     | () -> ::Enumerator[[ Elem, Integer ], Return]
+  def each_with_index: () { (Elem arg0, Integer arg1) -> untyped } -> void
+                     | () -> ::Enumerator[[ Elem, Integer ], void]
 
   def each_with_object: [U] (U arg0) { (Elem arg0, untyped arg1) -> untyped } -> U
-                      | [U] (U arg0) -> ::Enumerator[[ Elem, U ], Return]
+                      | [U] (U arg0) -> ::Enumerator[[ Elem, U ], U]
 
   # Returns an array containing the items in *enum* .
   #
@@ -97,14 +97,14 @@ module Enumerable[unchecked out Elem, out Return]: _Each[Elem, Return]
   def entries: () -> ::Array[Elem]
 
   def find_all: () { (Elem) -> boolish } -> ::Array[Elem]
-              | () -> ::Enumerator[Elem, Return]
+              | () -> ::Enumerator[Elem, ::Array[Elem]]
 
   alias select find_all
   alias filter find_all
 
   def find_index: (?untyped value) -> Integer?
                 | () { (Elem) -> boolish } -> Integer?
-                | () -> ::Enumerator[Elem, Return]
+                | () -> ::Enumerator[Elem, Integer?]
 
   # Returns the first element, or the first `n` elements, of the enumerable.
   # If the enumerable is empty, the first form returns `nil`, and the
@@ -127,7 +127,7 @@ module Enumerable[unchecked out Elem, out Return]: _Each[Elem, Return]
             | [U] (untyped arg0) { (Elem arg0) -> U } -> ::Array[U]
 
   def group_by: [U] () { (Elem arg0) -> U } -> ::Hash[U, ::Array[Elem]]
-              | () -> ::Enumerator[Elem, Return]
+              | () -> ::Enumerator[Elem, ::Array[Elem]]
 
   def `include?`: (untyped arg0) -> bool
 
@@ -160,9 +160,9 @@ module Enumerable[unchecked out Elem, out Return]: _Each[Elem, Return]
          | (Integer arg0) -> ::Array[Elem]
          | (Integer arg0) { (Elem arg0, Elem arg1) -> Integer } -> ::Array[Elem]
 
-  def max_by: () -> ::Enumerator[Elem, Return]
+  def max_by: () -> ::Enumerator[Elem, Elem?]
             | () { (Elem arg0) -> (Comparable | ::Array[untyped]) } -> Elem?
-            | (Integer arg0) -> ::Enumerator[Elem, Return]
+            | (Integer arg0) -> ::Enumerator[Elem, ::Array[Elem]]
             | (Integer arg0) { (Elem arg0) -> (Comparable | ::Array[untyped]) } -> ::Array[Elem]
 
   # Returns the object in *enum* with the minimum value. The first form
@@ -189,9 +189,9 @@ module Enumerable[unchecked out Elem, out Return]: _Each[Elem, Return]
          | (Integer arg0) -> ::Array[Elem]
          | (Integer arg0) { (Elem arg0, Elem arg1) -> Integer } -> ::Array[Elem]
 
-  def min_by: () -> ::Enumerator[Elem, Return]
+  def min_by: () -> ::Enumerator[Elem, Elem?]
             | () { (Elem arg0) -> (Comparable | ::Array[untyped]) } -> Elem?
-            | (Integer arg0) -> ::Enumerator[Elem, Return]
+            | (Integer arg0) -> ::Enumerator[Elem, ::Array[Elem]]
             | (Integer arg0) { (Elem arg0) -> (Comparable | ::Array[untyped]) } -> ::Array[Elem]
 
   # Returns a two element array which contains the minimum and the maximum
@@ -207,7 +207,7 @@ module Enumerable[unchecked out Elem, out Return]: _Each[Elem, Return]
             | () { (Elem arg0, Elem arg1) -> Integer } -> [ Elem?, Elem? ]
 
   def minmax_by: () -> [ Elem?, Elem? ]
-               | () { (Elem arg0) -> (Comparable | ::Array[untyped]) } -> ::Enumerator[Elem, Return]
+               | () { (Elem arg0) -> (Comparable | ::Array[untyped]) } -> [ Elem?, Elem? ]
 
   # Passes each element of the collection to the given block. The method
   # returns `true` if the block never returns `true` for all elements. If
@@ -252,13 +252,13 @@ module Enumerable[unchecked out Elem, out Return]: _Each[Elem, Return]
           | () { (Elem) -> boolish } -> bool
 
   def partition: () { (Elem) -> boolish } -> [ ::Array[Elem], ::Array[Elem] ]
-               | () -> ::Enumerator[Elem, Return]
+               | () -> ::Enumerator[Elem, [ ::Array[Elem], ::Array[Elem] ]]
 
   def reject: () { (Elem) -> boolish } -> ::Array[Elem]
-            | () -> ::Enumerator[Elem, Return]
+            | () -> ::Enumerator[Elem, ::Array[Elem]]
 
-  def reverse_each: () { (Elem arg0) -> untyped } -> ::Enumerator[Elem, Return]
-                  | () -> ::Enumerator[Elem, Return]
+  def reverse_each: () { (Elem arg0) -> untyped } -> void
+                  | () -> ::Enumerator[Elem, void]
 
   # Returns an array containing the items in *enum* sorted.
   #
@@ -284,12 +284,12 @@ module Enumerable[unchecked out Elem, out Return]: _Each[Elem, Return]
           | () { (Elem arg0, Elem arg1) -> Integer } -> ::Array[Elem]
 
   def sort_by: () { (Elem arg0) -> (Comparable | ::Array[untyped]) } -> ::Array[Elem]
-             | () -> ::Enumerator[Elem, Return]
+             | () -> ::Enumerator[Elem, ::Array[Elem]]
 
   def take: (Integer n) -> ::Array[Elem]?
 
   def take_while: () { (Elem) -> boolish } -> ::Array[Elem]
-                | () -> ::Enumerator[Elem, Return]
+                | () -> ::Enumerator[Elem, ::Array[Elem]]
 
   # Implemented in C++
   # Returns the result of interpreting *enum* as a list of `[key, value]`
@@ -309,7 +309,7 @@ module Enumerable[unchecked out Elem, out Return]: _Each[Elem, Return]
           | [T, U] () { (Elem) -> [T, U] } -> ::Hash[T, U]
 
   def each_slice: (Integer n) { (::Array[Elem]) -> untyped } -> NilClass
-                | (Integer n) -> ::Enumerator[::Array[Elem], Return]
+                | (Integer n) -> ::Enumerator[::Array[Elem], NilClass]
 
   interface _NotFound[T]
     def call: () -> T
@@ -320,8 +320,8 @@ module Enumerable[unchecked out Elem, out Return]: _Each[Elem, Return]
           | [T] (_NotFound[T] ifnone) { (Elem) -> boolish } -> (Elem | T)
           | [T] (_NotFound[T] ifnone) -> ::Enumerator[Elem, Elem | T]
 
-  def flat_map: [U] () { (Elem arg0) -> U } -> U
-              | () -> ::Enumerator[Elem, Return]
+  def flat_map: [U] () { (Elem) -> (Array[U] | U) } -> Array[U]
+              | () -> ::Enumerator[Elem, Array[untyped]]
 
   def map: [U] () { (Elem arg0) -> U } -> ::Array[U]
          | () -> ::Enumerator[Elem, ::Array[untyped]]
@@ -371,7 +371,7 @@ module Enumerable[unchecked out Elem, out Return]: _Each[Elem, Return]
   # # show pythagorean triples less than 100
   # p pythagorean_triples.take_while { |*, z| z < 100 }.force
   # ```
-  def lazy: () -> Enumerator::Lazy[Elem, Return]
+  def lazy: () -> Enumerator::Lazy[Elem, void]
 
   def uniq: () -> ::Array[Elem]
           | () { (Elem item) -> untyped } -> ::Array[Elem]
@@ -382,22 +382,22 @@ module Enumerable[unchecked out Elem, out Return]: _Each[Elem, Return]
          | [U] (?U arg0) { (Elem arg0) -> U } -> U
 
   def filter_map: [U] () { (Elem elem) -> (nil | false | U) } -> ::Array[U]
-                | () -> ::Enumerator[Elem, Return]
+                | () -> ::Enumerator[Elem, ::Array[untyped]]
 
-  def chain: (*self enumerables) -> ::Enumerator::Chain[Elem, ::Array[self]]
+  def chain: (*self enumerables) -> ::Enumerator::Chain[Elem]
 
   def tally: () -> ::Hash[Elem, Integer]
 
-  def each_entry: () -> ::Enumerator[Elem, Return]
+  def each_entry: () -> ::Enumerator[Elem, self]
                 | () { (Elem arg0) -> untyped } -> self
 
   # variadic type parameter is not supported yet
   # https://github.com/ruby/rbs/issues/21
-  def zip: [Elem2, Return2] (::Enumerable[Elem2, Return2] enum) -> ::Array[[Elem, Elem2 | nil]]
-         | [U, Elem2, Return2] (::Enumerable[Elem2, Return2]) { ([Elem, Elem2 | nil]) -> U } -> nil
+  def zip: [Elem2] (::Enumerable[Elem2] enum) -> ::Array[[Elem, Elem2 | nil]]
+         | [U, Elem2] (::Enumerable[Elem2]) { ([Elem, Elem2 | nil]) -> U } -> nil
 
-  def chunk: () -> ::Enumerator[Elem, Return]
-           | [U] () { (Elem elt) -> U } -> ::Enumerator[[U, Array[Elem]], void]
+  def chunk: [U] () { (Elem elt) -> U } -> ::Enumerator[[U, Array[Elem]], void]
+           | () -> ::Enumerator[Elem, Enumerator[untyped, untyped]]
 
   def chunk_while: () { (Elem elt_before, Elem elt_after) -> boolish } -> ::Enumerator[::Array[Elem], void]
 

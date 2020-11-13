@@ -51,8 +51,8 @@ class Set[A]
   #     Set.new(1..5)                         #=> #<Set: {1, 2, 3, 4, 5}>
   #     Set.new([1, 2, 3]) { |x| x * x }      #=> #<Set: {1, 4, 9}>
   #
-  def initialize: (_Each[A, untyped]) -> untyped
-                | [X] (_Each[X, untyped]) { (X) -> A } -> untyped
+  def initialize: (_Each[A]) -> untyped
+                | [X] (_Each[X]) { (X) -> A } -> untyped
                 | (?nil) -> untyped
 
   # Creates a new set containing the given objects.
@@ -69,7 +69,7 @@ class Set[A]
   #     Set[1, 3, 5] & Set[3, 2, 1]             #=> #<Set: {3, 1}>
   #     Set['a', 'b', 'z'] & ['a', 'b', 'c']    #=> #<Set: {"a", "b"}>
   #
-  def &: (_Each[A, untyped]) -> self
+  def &: (_Each[A]) -> self
 
   alias intersection &
 
@@ -79,7 +79,7 @@ class Set[A]
   #     Set[1, 2, 3] | Set[2, 4, 5]         #=> #<Set: {1, 2, 3, 4, 5}>
   #     Set[1, 5, 'z'] | (1..6)             #=> #<Set: {1, 5, "z", 2, 3, 4, 6}>
   #
-  def |: (_Each[A, untyped]) -> self
+  def |: (_Each[A]) -> self
 
   alias union |
 
@@ -91,7 +91,7 @@ class Set[A]
   #     Set[1, 3, 5] - Set[1, 5]                #=> #<Set: {3}>
   #     Set['a', 'b', 'z'] - ['a', 'c']         #=> #<Set: {"b", "z"}>
   #
-  def -: (_Each[A, untyped]) -> self
+  def -: (_Each[A]) -> self
 
   alias difference -
 
@@ -133,7 +133,7 @@ class Set[A]
   #     Set[1, 2] ^ Set[2, 3]                   #=> #<Set: {3, 1}>
   #     Set[1, 'b', 'c'] ^ ['b', 'd']           #=> #<Set: {"d", 1, "c"}>
   #
-  def ^: (_Each[A, untyped]) -> self
+  def ^: (_Each[A]) -> self
 
   # Classifies the set by the return value of the given block and returns a hash
   # of {value => set of elements} pairs.  The block is called once for each
@@ -248,7 +248,7 @@ class Set[A]
   # Merges the elements of the given enumerable object to the set and returns
   # self.
   #
-  def merge: (_Each[A, untyped]) -> self
+  def merge: (_Each[A]) -> self
 
   # Returns true if the set is a subset of the given set.
   #
@@ -271,7 +271,7 @@ class Set[A]
   #     set.replace([1, 2])               #=> #<Set: {1, 2}>
   #     set                               #=> #<Set: {1, 2}>
   #
-  def replace: (_Each[A, untyped]) -> self
+  def replace: (_Each[A]) -> self
 
   # Resets the internal state after modification to existing elements and returns
   # self.
@@ -288,7 +288,7 @@ class Set[A]
   # Deletes every element that appears in the given enumerable object and returns
   # self.
   #
-  def subtract: (_Each[A, untyped]) -> self
+  def subtract: (_Each[A]) -> self
 
   # Converts the set to an array.  The order of elements is uncertain.
   #
@@ -297,5 +297,5 @@ class Set[A]
   #
   def to_a: () -> Array[A]
 
-  include Enumerable[A, self]
+  include Enumerable[A]
 end
