@@ -26,8 +26,8 @@ interface _ToPath
   def to_path: () -> String
 end
 
-interface _Each[out A, out B]
-  def each: { (A) -> void } -> B
+interface _Each[out A]
+  def each: { (A) -> void } -> void
 end
 
 interface _Reader
