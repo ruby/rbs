@@ -134,7 +134,7 @@ class EnumerableTest2 < Minitest::Test
     end
   end
 
-  testing "::Enumerable[String, TestEnumerable]"
+  testing "::Enumerable[String]"
 
   def test_inject
     assert_send_type "(String init, Symbol method) -> untyped", TestEnumerable.new, :inject, '', :<<

@@ -384,7 +384,7 @@ module Enumerable[unchecked out Elem]: _Each[Elem]
   def filter_map: [U] () { (Elem elem) -> (nil | false | U) } -> ::Array[U]
                 | () -> ::Enumerator[Elem, ::Array[untyped]]
 
-  def chain: (*self enumerables) -> ::Enumerator::Chain[Elem, ::Array[self]]
+  def chain: (*self enumerables) -> ::Enumerator::Chain[Elem]
 
   def tally: () -> ::Hash[Elem, Integer]
 

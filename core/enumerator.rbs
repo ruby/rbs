@@ -242,7 +242,7 @@ class Enumerator[unchecked out Elem, out Return] < Object
                  | [U] (U arg0) -> ::Enumerator[[ Elem, U ], Return]
 end
 
-class Enumerator::Generator[out Elem, out Return] < Object
+class Enumerator::Generator[out Elem] < Object
   include Enumerable[Elem]
 end
 
@@ -257,6 +257,6 @@ class Enumerator::Yielder < Object
   def to_proc: () -> Proc
 end
 
-class Enumerator::Chain[out Elem, out Return] < Object
+class Enumerator::Chain[out Elem] < Object
   include Enumerable[Elem]
 end
