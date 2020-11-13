@@ -118,7 +118,7 @@ module Enumerable[unchecked out Elem, out Return]: _Each[Elem, Return]
   # [].first(10)              #=> []
   # ```
   def first: () -> Elem?
-           | (?Integer n) -> ::Array[Elem]?
+           | (Integer n) -> ::Array[Elem]?
 
   def grep: (untyped arg0) -> ::Array[Elem]
           | [U] (untyped arg0) { (Elem arg0) -> U } -> ::Array[U]
@@ -157,13 +157,13 @@ module Enumerable[unchecked out Elem, out Return]: _Each[Elem, Return]
   # ```
   def max: () -> Elem?
          | () { (Elem arg0, Elem arg1) -> Integer } -> Elem?
-         | (?Integer arg0) -> ::Array[Elem]
-         | (?Integer arg0) { (Elem arg0, Elem arg1) -> Integer } -> ::Array[Elem]
+         | (Integer arg0) -> ::Array[Elem]
+         | (Integer arg0) { (Elem arg0, Elem arg1) -> Integer } -> ::Array[Elem]
 
   def max_by: () -> ::Enumerator[Elem, Return]
             | () { (Elem arg0) -> (Comparable | ::Array[untyped]) } -> Elem?
-            | (?Integer arg0) -> ::Enumerator[Elem, Return]
-            | (?Integer arg0) { (Elem arg0) -> (Comparable | ::Array[untyped]) } -> ::Array[Elem]
+            | (Integer arg0) -> ::Enumerator[Elem, Return]
+            | (Integer arg0) { (Elem arg0) -> (Comparable | ::Array[untyped]) } -> ::Array[Elem]
 
   # Returns the object in *enum* with the minimum value. The first form
   # assumes all objects implement `Comparable` ; the second uses the block
@@ -186,13 +186,13 @@ module Enumerable[unchecked out Elem, out Return]: _Each[Elem, Return]
   # ```
   def min: () -> Elem?
          | () { (Elem arg0, Elem arg1) -> Integer } -> Elem?
-         | (?Integer arg0) -> ::Array[Elem]
-         | (?Integer arg0) { (Elem arg0, Elem arg1) -> Integer } -> ::Array[Elem]
+         | (Integer arg0) -> ::Array[Elem]
+         | (Integer arg0) { (Elem arg0, Elem arg1) -> Integer } -> ::Array[Elem]
 
   def min_by: () -> ::Enumerator[Elem, Return]
             | () { (Elem arg0) -> (Comparable | ::Array[untyped]) } -> Elem?
-            | (?Integer arg0) -> ::Enumerator[Elem, Return]
-            | (?Integer arg0) { (Elem arg0) -> (Comparable | ::Array[untyped]) } -> ::Array[Elem]
+            | (Integer arg0) -> ::Enumerator[Elem, Return]
+            | (Integer arg0) { (Elem arg0) -> (Comparable | ::Array[untyped]) } -> ::Array[Elem]
 
   # Returns a two element array which contains the minimum and the maximum
   # value in the enumerable. The first form assumes all objects implement
