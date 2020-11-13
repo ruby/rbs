@@ -5,7 +5,7 @@
 # objects in the collection must also implement a meaningful `<=>`
 # operator, as these methods rely on an ordering between members of the
 # collection.
-module Enumerable[unchecked out Elem, out Return]: _Each[Elem]
+module Enumerable[unchecked out Elem]: _Each[Elem]
   # Passes each element of the collection to the given block. The method
   # returns `true` if the block never returns `false` or `nil` . If the
   # block is not given, Ruby adds an implicit block of `{ |obj| obj }` which
@@ -79,8 +79,8 @@ module Enumerable[unchecked out Elem, out Return]: _Each[Elem]
   def each_cons: (Integer n) { (::Array[Elem] arg0) -> untyped } -> NilClass
                | (Integer n) -> ::Enumerator[::Array[Elem], NilClass]
 
-  def each_with_index: () { (Elem arg0, Integer arg1) -> untyped } -> Return
-                     | () -> ::Enumerator[[ Elem, Integer ], Return]
+  def each_with_index: () { (Elem arg0, Integer arg1) -> untyped } -> void
+                     | () -> ::Enumerator[[ Elem, Integer ], void]
 
   def each_with_object: [U] (U arg0) { (Elem arg0, untyped arg1) -> untyped } -> U
                       | [U] (U arg0) -> ::Enumerator[[ Elem, U ], U]
@@ -257,8 +257,8 @@ module Enumerable[unchecked out Elem, out Return]: _Each[Elem]
   def reject: () { (Elem) -> boolish } -> ::Array[Elem]
             | () -> ::Enumerator[Elem, ::Array[Elem]]
 
-  def reverse_each: () { (Elem arg0) -> untyped } -> Return
-                  | () -> ::Enumerator[Elem, Return]
+  def reverse_each: () { (Elem arg0) -> untyped } -> void
+                  | () -> ::Enumerator[Elem, void]
 
   # Returns an array containing the items in *enum* sorted.
   #
@@ -371,7 +371,7 @@ module Enumerable[unchecked out Elem, out Return]: _Each[Elem]
   # # show pythagorean triples less than 100
   # p pythagorean_triples.take_while { |*, z| z < 100 }.force
   # ```
-  def lazy: () -> Enumerator::Lazy[Elem, Return]
+  def lazy: () -> Enumerator::Lazy[Elem, void]
 
   def uniq: () -> ::Array[Elem]
           | () { (Elem item) -> untyped } -> ::Array[Elem]
@@ -393,8 +393,8 @@ module Enumerable[unchecked out Elem, out Return]: _Each[Elem]
 
   # variadic type parameter is not supported yet
   # https://github.com/ruby/rbs/issues/21
-  def zip: [Elem2, Return2] (::Enumerable[Elem2, Return2] enum) -> ::Array[[Elem, Elem2 | nil]]
-         | [U, Elem2, Return2] (::Enumerable[Elem2, Return2]) { ([Elem, Elem2 | nil]) -> U } -> nil
+  def zip: [Elem2] (::Enumerable[Elem2] enum) -> ::Array[[Elem, Elem2 | nil]]
+         | [U, Elem2] (::Enumerable[Elem2]) { ([Elem, Elem2 | nil]) -> U } -> nil
 
   def chunk: [U] () { (Elem elt) -> U } -> ::Enumerator[[U, Array[Elem]], void]
            | () -> ::Enumerator[Elem, Enumerator[untyped, untyped]]

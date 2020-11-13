@@ -137,7 +137,7 @@ class Prime
   class PseudoPrimeGenerator
     def initialize: (?Integer?) -> void
 
-    include Enumerable[Integer, void]
+    include Enumerable[Integer]
 
     attr_accessor upper_bound (): Integer?
 

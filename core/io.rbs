@@ -105,7 +105,7 @@
 class IO < Object
   include File::Constants
 
-  include Enumerable[String, IO]
+  include Enumerable[String]
 
   def <<: (untyped arg0) -> self
 
