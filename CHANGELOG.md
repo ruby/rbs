@@ -2,6 +2,12 @@
 
 ## master
 
+## 0.17.0 (2020-11-14)
+
+* Signature updates for `Enumerable`, `Hash`, and `TSort` ([#462](https://github.com/ruby/rbs/pull/462), [#468](https://github.com/ruby/rbs/pull/468), [#471](https://github.com/ruby/rbs/pull/471), [#472](https://github.com/ruby/rbs/pull/472), [#473](https://github.com/ruby/rbs/pull/473), [#474](https://github.com/ruby/rbs/pull/474))
+* Parser error handling improvement ([#463](https://github.com/ruby/rbs/pull/463), [#475](https://github.com/ruby/rbs/pull/475))
+* Hash spread syntax handling improvement with `prototype rb` ([#465](https://github.com/ruby/rbs/pull/465))
+
 ## 0.16.0 (2020-11-05)
 
 * Signature update for `DBM` ([#441](https://github.com/ruby/rbs/pull/441))
