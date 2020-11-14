@@ -1101,4 +1101,10 @@ EOF
     assert_equal 1, loc.start_line
     assert_equal 9, loc.start_column
   end
+
+  def test_empty
+    Parser.parse_signature("").tap do |decls|
+      assert_empty decls
+    end
+  end
 end
