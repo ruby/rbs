@@ -29,7 +29,7 @@ task :validate => :parser do
 
   FileList["stdlib/*"].each do |path|
     next if path =~ %r{stdlib/builtin}
-    
+
     lib = [File.basename(path).to_s]
 
     if lib == ["bigdecimal-math"]
@@ -59,6 +59,12 @@ task :parser => "lib/rbs/parser.rb"
 task :test => :parser
 task :stdlib_test => :parser
 task :build => :parser
+
+task :confirm_parser do
+  puts "Testing if parser.rb is updated with respect to parser.y"
+  sh "racc -v -o lib/rbs/parser.rb lib/rbs/parser.y"
+  sh "git diff --exit-code lib/rbs/parser.rb"
+end
 
 namespace :generate do
   task :stdlib_test, [:class] do |_task, args|
