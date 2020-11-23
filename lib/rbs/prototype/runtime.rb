@@ -94,6 +94,7 @@ module RBS
             optional_positionals << Types::Function::Param.new(name: name, type: untyped)
           when :rest
             requireds = trailing_positionals
+            name = nil if name == :* # For `def f(...) end` syntax
             rest = Types::Function::Param.new(name: name, type: untyped)
           when :keyreq
             required_keywords[name] = Types::Function::Param.new(name: nil, type: untyped)
