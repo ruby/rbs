@@ -200,4 +200,24 @@ describe 'Foo' do
 end
 RUBY
   end
+
+  def test_instance_eval
+    assert_test_success(other_env: { 'RBS_TEST_TARGET' => 'Foo' }, rbs_content: <<RBS, ruby_content: <<RUBY)
+class Foo
+  def foo: (Integer) { (Integer) -> Integer } -> Integer
+end
+RBS
+
+class Foo
+  def foo(integer, &block)
+    integer.instance_eval(&block)
+  end
+end
+
+Foo.new.foo(10) do
+  self + 3
+end
+RUBY
+
+  end
 end

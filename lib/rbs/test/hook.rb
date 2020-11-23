@@ -70,7 +70,7 @@ module RBS
         full_method_name = "#{prefix}#{method_name}"
 
         [__LINE__ + 1, <<RUBY]
-def #{with_name}(*args)
+def #{with_name}(*args, &block)
   ::RBS.logger.debug { "#{full_method_name} with arguments: [" + args.map(&:inspect).join(", ") + "]" }
 
   begin
@@ -78,11 +78,17 @@ def #{with_name}(*args)
     block_calls = []
 
     if block_given?
+      receiver = self
       result = __send__(:"#{without_name}", *args) do |*block_args|
         return_from_block = false
 
         begin
-          block_result = yield(*block_args)
+          block_result = if receiver.equal?(self)
+                           yield(*block_args)
+                         else
+                           instance_exec(*block_args, &block)
+                         end
+
           return_from_block = true
         ensure
           exn = $!
