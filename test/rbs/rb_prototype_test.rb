@@ -274,6 +274,87 @@ end
     EOF
   end
 
+  def test_module_function
+    parser = RB.new
+
+    rb = <<-EOR
+module Hello
+  def foo() end
+
+  def bar() end
+  module_function :bar
+
+  module_function def baz() end
+
+  module_function
+
+  def foobar() end
+end
+    EOR
+
+    parser.parse(rb)
+
+    assert_write parser.decls, <<-EOF
+module Hello
+  def foo: () -> nil
+
+  def self?.bar: () -> nil
+
+  def self?.baz: () -> nil
+
+  def self?.foobar: () -> nil
+end
+    EOF
+  end
+
+  def test_accessibility
+    parser = RB.new
+
+    rb = <<-EOR
+class Hello
+  attr_reader :private_attr
+
+  private :private_attr
+
+  private def foo() end
+
+  private
+
+  def bar() end
+
+  public
+
+  def baz() end
+
+  def foobar() end
+
+  private :foobar
+end
+    EOR
+
+    parser.parse(rb)
+
+    assert_write parser.decls, <<-EOF
+class Hello
+  private
+
+  attr_reader private_attr: untyped
+
+  def foo: () -> nil
+
+  def bar: () -> nil
+
+  public
+
+  def baz: () -> nil
+
+  private
+
+  def foobar: () -> nil
+end
+    EOF
+  end
+
   def test_aliases
     parser = RB.new
 
@@ -471,7 +552,7 @@ end
 
     rb = <<-'EOR'
 class C
-  private def foo
+  some_method_takes_method_name def foo
   end
 end
     EOR

@@ -1,6 +1,22 @@
 module RBS
   module Prototype
     class RB
+      Context = Struct.new(:module_function, :singleton, keyword_init: true) do
+        def self.initial
+          self.new(module_function: false, singleton: false)
+        end
+
+        def method_kind
+          if singleton
+            :singleton
+          elsif module_function
+            :singleton_instance
+          else
+            :instance
+          end
+        end
+      end
+
       attr_reader :source_decls
       attr_reader :toplevel_members
 
@@ -52,10 +68,10 @@ module RBS
           end
         end
 
-        process RubyVM::AbstractSyntaxTree.parse(string), decls: source_decls, comments: comments, singleton: false
+        process RubyVM::AbstractSyntaxTree.parse(string), decls: source_decls, comments: comments, context: Context.initial
       end
 
-      def process(node, decls:, comments:, singleton:)
+      def process(node, decls:, comments:, context:)
         case node.type
         when :CLASS
           class_name, super_class, *class_body = node.children
@@ -72,8 +88,9 @@ module RBS
           decls.push kls
 
           each_node class_body do |child|
-            process child, decls: kls.members, comments: comments, singleton: false
+            process child, decls: kls.members, comments: comments, context: Context.initial
           end
+          remove_unnecessary_accessibility_methods! kls.members
 
         when :MODULE
           module_name, *module_body = node.children
@@ -91,8 +108,9 @@ module RBS
           decls.push mod
 
           each_node module_body do |child|
-            process child, decls: mod.members, comments: comments, singleton: false
+            process child, decls: mod.members, comments: comments, context: Context.initial
           end
+          remove_unnecessary_accessibility_methods! mod.members
 
         when :SCLASS
           this, body = node.children
@@ -101,14 +119,15 @@ module RBS
             RBS.logger.warn "`class <<` syntax with not-self may be compiled to incorrect code: #{this}"
           end
 
+          ctx = Context.initial.tap { |ctx| ctx.singleton = true}
           each_child(body) do |child|
-            process child, decls: decls, comments: comments, singleton: true
+            process child, decls: decls, comments: comments, context: ctx
           end
 
         when :DEFN, :DEFS
             if node.type == :DEFN
               def_name, def_body = node.children
-              kind = singleton ? :singleton : :instance
+              kind = context.method_kind
             else
               _, def_name, def_body = node.children
               kind = :singleton
@@ -140,14 +159,14 @@ module RBS
           member = AST::Members::Alias.new(
             new_name: new_name,
             old_name: old_name,
-            kind: singleton ? :singleton : :instance,
+            kind: context.singleton ? :singleton : :instance,
             annotations: [],
             location: nil,
             comment: comments[node.first_lineno - 1],
           )
           decls.push member unless decls.include?(member)
 
-        when :FCALL
+        when :FCALL, :VCALL
           # Inside method definition cannot reach here.
           args = node.children[1]&.children || []
 
@@ -220,16 +239,55 @@ module RBS
               decls << AST::Members::Alias.new(
                 new_name: new_name,
                 old_name: old_name,
-                kind: singleton ? :singleton : :instance,
+                kind: context.singleton ? :singleton : :instance,
                 annotations: [],
                 location: nil,
                 comment: comments[node.first_lineno - 1],
               )
             end
-          end
+          when :module_function
+            if args.empty?
+              context.module_function = true
+            else
+              module_func_context = context.dup.tap { |ctx| ctx.module_function = true }
+              args.each do |arg|
+                if arg && (name = literal_to_symbol(arg))
+                  i = find_def_index_by_name(decls, name)
+                  decls[i] = decls[i].update(kind: :singleton_instance)
+                elsif arg
+                  process arg, decls: decls, comments: comments, context: module_func_context
+                end
+              end
+            end
+          when :public, :private
+            accessibility = __send__(node.children[0])
+            if args.empty?
+              decls << accessibility
+            else
+              args.each do |arg|
+                if arg && (name = literal_to_symbol(arg))
+                  if i = find_def_index_by_name(decls, name)
+                    current = current_accessibility(decls, i)
+                    if current != accessibility
+                      decls.insert(i + 1, current)
+                      decls.insert(i, accessibility)
+                    end
+                  end
+                end
+              end
 
-          each_child node do |child|
-            process child, decls: decls, comments: comments, singleton: singleton
+              # For `private def foo` syntax
+              current = current_accessibility(decls)
+              decls << accessibility
+              each_child node do |child|
+                process child, decls: decls, comments: comments, context: context
+              end
+              decls << current
+            end
+          else
+            each_child node do |child|
+              process child, decls: decls, comments: comments, context: context
+            end
           end
 
         when :CDECL
@@ -249,7 +307,7 @@ module RBS
 
         else
           each_child node do |child|
-            process child, decls: decls, comments: comments, singleton: singleton
+            process child, decls: decls, comments: comments, context: context
           end
         end
       end
@@ -585,6 +643,59 @@ module RBS
 
       def untyped
         @untyped ||= Types::Bases::Any.new(location: nil)
+      end
+
+      def private
+        @private ||= AST::Members::Private.new(location: nil)
+      end
+
+      def public
+        @public ||= AST::Members::Public.new(location: nil)
+      end
+
+      def current_accessibility(decls, index = [0, decls.size - 1].max)
+        idx = decls.slice(0, index).rindex { |decl| decl == private || decl == public }
+        (idx && decls[idx]) || public
+      end
+
+      def remove_unnecessary_accessibility_methods!(decls)
+        current = public
+        idx = 0
+
+        loop do
+          decl = decls[idx] or break
+          if current == decl
+            decls.delete_at(idx)
+            next
+          end
+
+          if 0 < idx && is_accessibility?(decls[idx - 1]) && is_accessibility?(decl)
+            decls.delete_at(idx - 1)
+            idx -= 1
+            current = current_accessibility(decls, idx)
+            next
+          end
+
+          current = decl if is_accessibility?(decl)
+          idx += 1
+        end
+
+        decls.pop while decls.last && is_accessibility?(decls.last)
+      end
+
+      def is_accessibility?(decl)
+        decl == public || decl == private
+      end
+
+      def find_def_index_by_name(decls, name)
+        decls.find_index do |decl|
+          case decl
+          when AST::Members::MethodDefinition, AST::Members::AttrReader
+            decl.name == name
+          when AST::Members::AttrWriter
+            decl.name == :"#{name}="
+          end
+        end
       end
     end
   end
