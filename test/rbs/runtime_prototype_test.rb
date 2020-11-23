@@ -194,4 +194,29 @@ end
     end
     assert(true) # nothing raised above
   end
+
+  if RUBY_VERSION >= '2.7'
+    class TestForArgumentForwarding
+      eval <<~RUBY
+        def foo(...)
+        end
+      RUBY
+    end
+
+    def test_argument_forwarding
+      SignatureManager.new do |manager|
+        manager.build do |env|
+          p = Runtime.new(patterns: ["RBS::RuntimePrototypeTest::TestForArgumentForwarding"], env: env, merge: true)
+
+          assert_write p.decls, <<-EOF
+class RBS::RuntimePrototypeTest::TestForArgumentForwarding
+  public
+
+  def foo: (*untyped) { (*untyped) -> untyped } -> untyped
+end
+          EOF
+        end
+      end
+    end
+  end
 end
