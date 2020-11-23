@@ -1,5 +1,9 @@
 module RBS
   class EnvironmentWalker
+    InstanceNode = Struct.new(:type_name, keyword_init: true)
+    SingletonNode = Struct.new(:type_name, keyword_init: true)
+    TypeNameNode = Struct.new(:type_name, keyword_init: true)
+
     attr_reader :env
 
     def initialize(env:)
@@ -23,50 +27,70 @@ module RBS
     include TSort
 
     def tsort_each_node(&block)
-      env.class_decls.each_key(&block)
-      env.interface_decls.each_key(&block)
-      env.alias_decls.each_key(&block)
+      env.class_decls.each_key do |type_name|
+        yield InstanceNode.new(type_name: type_name)
+        yield SingletonNode.new(type_name: type_name)
+      end
+      env.interface_decls.each_key do |type_name|
+        yield TypeNameNode.new(type_name: type_name)
+      end
+      env.alias_decls.each_key do |type_name|
+        yield TypeNameNode.new(type_name: type_name)
+      end
     end
 
-    def tsort_each_child(name, &block)
+    def tsort_each_child(node, &block)
+      name = node.type_name
+
       unless name.namespace.empty?
-        yield name.namespace.to_type_name
+        yield SingletonNode.new(type_name: name.namespace.to_type_name)
       end
 
-      case
-      when name.class?, name.interface?
-        definitions = []
-
+      case node
+      when TypeNameNode
         case
-        when name.class?
-          definitions << builder.build_instance(name)
-          definitions << builder.build_singleton(name)
         when name.interface?
-          definitions << builder.build_interface(name)
-        end
-
-        definitions.each do |definition|
-          if ancestors = definition.ancestors
-            ancestors.ancestors.each do |ancestor|
-              yield ancestor.name
-
-              case ancestor
-              when Definition::Ancestor::Instance
-                ancestor.args.each do |type|
-                  each_type_name type, &block
-                end
-              end
-            end
-          end
-
+          definition = builder.build_interface(name)
           unless only_ancestors?
             definition.each_type do |type|
               each_type_name type, &block
             end
           end
+        when name.alias?
+          each_type_name builder.expand_alias(name), &block
+        else
+          raise "Unexpected TypeNameNode with type_name=#{name}"
         end
-      when name.alias?
-        each_type_name builder.expand_alias(name), &block
+
+      when InstanceNode, SingletonNode
+        definition = if node.is_a?(InstanceNode)
+                       builder.build_instance(name)
+                     else
+                       builder.build_singleton(name)
+                     end
+
+        if ancestors = definition.ancestors
+          ancestors.ancestors.each do |ancestor|
+            case ancestor
+            when Definition::Ancestor::Instance
+              yield InstanceNode.new(type_name: ancestor.name)
+
+              unless only_ancestors?
+                ancestor.args.each do |type|
+                  each_type_name type, &block
+                end
+              end
+            when Definition::Ancestor::Singleton
+              yield SingletonNode.new(type_name: ancestor.name)
+            end
+          end
+        end
+
+        unless only_ancestors?
+          definition.each_type do |type|
+            each_type_name type, &block
+          end
+        end
       end
     end
 
@@ -83,14 +107,19 @@ module RBS
       when RBS::Types::Bases::Nil
       when RBS::Types::Variable
       when RBS::Types::ClassSingleton
-        yield type.name
-      when RBS::Types::ClassInstance, RBS::Types::Interface
-        yield type.name
+        yield SingletonNode.new(type_name: type.name)
+      when RBS::Types::ClassInstance
+        yield InstanceNode.new(type_name: type.name)
+        type.args.each do |ty|
+          each_type_name(ty, &block)
+        end
+      when RBS::Types::Interface
+        yield TypeNameNode.new(type_name: type.name)
         type.args.each do |ty|
           each_type_name(ty, &block)
         end
       when RBS::Types::Alias
-        yield type.name
+        yield TypeNameNode.new(type_name: type.name)
       when RBS::Types::Union, RBS::Types::Intersection, RBS::Types::Tuple
         type.types.each do |ty|
           each_type_name ty, &block
