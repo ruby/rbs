@@ -1,0 +1,13 @@
+module Singleton
+  def self.__init__: (untyped klass) -> untyped
+
+  public
+
+  def _dump: (?untyped depth) -> untyped
+
+  def clone: () -> untyped
+
+  def dup: () -> untyped
+end
+
+Singleton::VERSION: String
