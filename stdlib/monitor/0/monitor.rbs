@@ -1,33 +1,33 @@
 class Monitor
   public
 
-  def enter: () -> untyped
+  def enter: () -> nil
 
-  def exit: () -> untyped
+  def exit: () -> nil
 
-  def mon_check_owner: () -> untyped
+  def mon_check_owner: () -> nil
 
   alias mon_enter enter
 
   alias mon_exit exit
 
-  def mon_locked?: () -> untyped
+  def mon_locked?: () -> bool
 
-  def mon_owned?: () -> untyped
+  def mon_owned?: () -> bool
 
   alias mon_synchronize synchronize
 
   alias mon_try_enter try_enter
 
-  def new_cond: () -> untyped
+  def new_cond: () -> ::MonitorMixin::ConditionVariable
 
-  def synchronize: () -> untyped
+  def synchronize: [T] () { () -> T } -> T
 
-  def try_enter: () -> untyped
+  def try_enter: () -> bool
 
   alias try_mon_enter try_enter
 
-  def wait_for_cond: (untyped, untyped) -> untyped
+  def wait_for_cond: (::MonitorMixin::ConditionVariable, Numeric? timeout) -> untyped
 end
 
 module MonitorMixin
@@ -35,19 +35,19 @@ module MonitorMixin
 
   public
 
-  def mon_enter: () -> untyped
+  def mon_enter: () -> nil
 
-  def mon_exit: () -> untyped
+  def mon_exit: () -> nil
 
-  def mon_locked?: () -> untyped
+  def mon_locked?: () -> bool
 
-  def mon_owned?: () -> untyped
+  def mon_owned?: () -> bool
 
-  def mon_synchronize: () { (*untyped) -> untyped } -> untyped
+  def mon_synchronize: [T] () { () -> T } -> T
 
-  def mon_try_enter: () -> untyped
+  def mon_try_enter: () -> bool
 
-  def new_cond: () -> untyped
+  def new_cond: () -> ::MonitorMixin::ConditionVariable
 
   alias synchronize mon_synchronize
 
@@ -55,9 +55,9 @@ module MonitorMixin
 
   private
 
-  def initialize: (*untyped) { (*untyped) -> untyped } -> untyped
+  def initialize: (*untyped) { (*untyped) -> untyped } -> void
 
-  def mon_check_owner: () -> untyped
+  def mon_check_owner: () -> nil
 
   def mon_initialize: () -> untyped
 end
@@ -65,17 +65,17 @@ end
 class MonitorMixin::ConditionVariable
   public
 
-  def broadcast: () -> untyped
+  def broadcast: () -> Thread::ConditionVariable
 
-  def signal: () -> untyped
+  def signal: () -> Thread::ConditionVariable
 
-  def wait: (?untyped timeout) -> untyped
+  def wait: (?Numeric? timeout) -> untyped
 
-  def wait_until: () -> untyped
+  def wait_until: () { () -> boolish } -> untyped
 
-  def wait_while: () -> untyped
+  def wait_while: () { () -> boolish } -> untyped
 
   private
 
-  def initialize: (untyped monitor) -> untyped
+  def initialize: (Monitor monitor) -> void
 end
