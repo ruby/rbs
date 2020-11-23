@@ -120,9 +120,7 @@ module RBS
           end
 
           ctx = Context.initial.tap { |ctx| ctx.singleton = true}
-          each_child(body) do |child|
-            process child, decls: decls, comments: comments, context: ctx
-          end
+          process_children(body, decls: decls, comments: comments, context: ctx)
 
         when :DEFN, :DEFS
             if node.type == :DEFN
@@ -279,15 +277,20 @@ module RBS
               # For `private def foo` syntax
               current = current_accessibility(decls)
               decls << accessibility
-              each_child node do |child|
-                process child, decls: decls, comments: comments, context: context
-              end
+              process_children(node, decls: decls, comments: comments, context: context)
               decls << current
             end
           else
-            each_child node do |child|
-              process child, decls: decls, comments: comments, context: context
-            end
+            process_children(node, decls: decls, comments: comments, context: context)
+          end
+
+        when :ITER
+          method_name = node.children.first.children.first
+          case method_name
+          when :refine
+            # ignore
+          else
+            process_children(node, decls: decls, comments: comments, context: context)
           end
 
         when :CDECL
@@ -306,9 +309,13 @@ module RBS
           )
 
         else
-          each_child node do |child|
-            process child, decls: decls, comments: comments, context: context
-          end
+          process_children(node, decls: decls, comments: comments, context: context)
+        end
+      end
+
+      def process_children(node, decls:, comments:, context:)
+        each_child node do |child|
+          process child, decls: decls, comments: comments, context: context
         end
       end
 

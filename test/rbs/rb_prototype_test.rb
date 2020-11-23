@@ -621,4 +621,28 @@ class C
 end
     EOF
   end
+
+  def test_refinements
+    parser = RB.new
+
+    rb = <<~'RUBY'
+module M
+  def not_refinements
+  end
+
+  refine Array do
+    def by_refinements
+    end
+  end
+end
+    RUBY
+
+    parser.parse(rb)
+
+    assert_write parser.decls, <<~RBS
+module M
+  def not_refinements: () -> nil
+end
+    RBS
+  end
 end
