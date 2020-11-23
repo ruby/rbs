@@ -1,0 +1,81 @@
+class Monitor
+  public
+
+  def enter: () -> untyped
+
+  def exit: () -> untyped
+
+  def mon_check_owner: () -> untyped
+
+  alias mon_enter enter
+
+  alias mon_exit exit
+
+  def mon_locked?: () -> untyped
+
+  def mon_owned?: () -> untyped
+
+  alias mon_synchronize synchronize
+
+  alias mon_try_enter try_enter
+
+  def new_cond: () -> untyped
+
+  def synchronize: () -> untyped
+
+  def try_enter: () -> untyped
+
+  alias try_mon_enter try_enter
+
+  def wait_for_cond: (untyped, untyped) -> untyped
+end
+
+module MonitorMixin
+  def self.extend_object: (untyped obj) -> untyped
+
+  public
+
+  def mon_enter: () -> untyped
+
+  def mon_exit: () -> untyped
+
+  def mon_locked?: () -> untyped
+
+  def mon_owned?: () -> untyped
+
+  def mon_synchronize: () { (*untyped) -> untyped } -> untyped
+
+  def mon_try_enter: () -> untyped
+
+  def new_cond: () -> untyped
+
+  alias synchronize mon_synchronize
+
+  alias try_mon_enter mon_try_enter
+
+  private
+
+  def initialize: (*untyped *) { (*untyped) -> untyped } -> untyped
+
+  def mon_check_owner: () -> untyped
+
+  def mon_initialize: () -> untyped
+end
+
+class MonitorMixin::ConditionVariable
+  public
+
+  def broadcast: () -> untyped
+
+  def signal: () -> untyped
+
+  def wait: (?untyped timeout) -> untyped
+
+  def wait_until: () -> untyped
+
+  def wait_while: () -> untyped
+
+  private
+
+  def initialize: (untyped monitor) -> untyped
+end
