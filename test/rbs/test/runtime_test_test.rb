@@ -218,6 +218,35 @@ Foo.new.foo(10) do
   self + 3
 end
 RUBY
+  end
 
+  def test_super
+    assert_test_success(other_env: { 'RBS_TEST_TARGET' => 'Foo,Bar' }, rbs_content: <<RBS, ruby_content: <<'RUBY')
+class Foo
+  def foo: (Integer) -> void
+end
+
+class Bar
+  def foo: (Integer) -> void
+end
+RBS
+
+class Foo
+  def foo(x)
+    ::RBS.logger.error("Foo#foo")
+    puts "Foo#foo: x=#{x}"
+  end
+end
+
+class Bar < Foo
+  def foo(x)
+    ::RBS.logger.error("Bar#foo")
+    puts "Bar#foo: x=#{x}"
+    super
+  end
+end
+
+Bar.new.foo(30)
+RUBY
   end
 end
