@@ -55,7 +55,7 @@ module MonitorMixin
 
   private
 
-  def initialize: (*untyped *) { (*untyped) -> untyped } -> untyped
+  def initialize: (*untyped) { (*untyped) -> untyped } -> untyped
 
   def mon_check_owner: () -> untyped
 
