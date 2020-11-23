@@ -289,6 +289,8 @@ module Hello
   module_function
 
   def foobar() end
+
+  module_function :unknown_method
 end
     EOR
 

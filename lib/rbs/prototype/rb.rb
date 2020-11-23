@@ -252,8 +252,9 @@ module RBS
               module_func_context = context.dup.tap { |ctx| ctx.module_function = true }
               args.each do |arg|
                 if arg && (name = literal_to_symbol(arg))
-                  i = find_def_index_by_name(decls, name)
-                  decls[i] = decls[i].update(kind: :singleton_instance)
+                  if i = find_def_index_by_name(decls, name)
+                    decls[i] = decls[i].update(kind: :singleton_instance)
+                  end
                 elsif arg
                   process arg, decls: decls, comments: comments, context: module_func_context
                 end
