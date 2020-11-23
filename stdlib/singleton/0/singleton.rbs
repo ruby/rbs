@@ -89,30 +89,23 @@
 #     p a.keep  #  => "keep this"
 #     p a.strip #  => nil
 module Singleton
-  def self.__init__: (untyped klass) -> untyped
+  def self.__init__: (Class klass) -> Class
+
+  def self.instance: () -> instance
 
   public
 
   # By default, do not retain any state when marshalling.
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     _dump(depth = -1)
-  #
-  def _dump: (?untyped depth) -> untyped
+  def _dump: (?Integer depth) -> String
 
   # Raises a TypeError to prevent cloning.
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     clone()
-  #
-  def clone: () -> untyped
+  def clone: () -> bot
 
   # Raises a TypeError to prevent duping.
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     dup()
-  #
-  def dup: () -> untyped
+  def dup: () -> bot
 end
 
 Singleton::VERSION: String
