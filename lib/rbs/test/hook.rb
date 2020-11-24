@@ -27,26 +27,28 @@ module RBS
         :>> => "rshift",
         :~ => "tilda"
       }
-      def self.alias_names(target)
+      def self.alias_names(target, random)
+        suffix = "#{RBS::Test.suffix}_#{random}"
+
         case target
         when *OPERATORS.keys
           name = OPERATORS[target]
           [
-            "#{name}____with__#{Test.suffix}",
-            "#{name}____without__#{Test.suffix}"
+            "#{name}____with__#{suffix}",
+            "#{name}____without__#{suffix}"
           ]
         else
           aliased_target, punctuation = target.to_s.sub(/([?!=])$/, ''), $1
 
           [
-            "#{aliased_target}__with__#{Test.suffix}#{punctuation}",
-            "#{aliased_target}__without__#{Test.suffix}#{punctuation}"
+            "#{aliased_target}__with__#{suffix}#{punctuation}",
+            "#{aliased_target}__without__#{suffix}#{punctuation}"
           ]
         end
       end
 
-      def self.setup_alias_method_chain(klass, target)
-        with_method, without_method = alias_names(target)
+      def self.setup_alias_method_chain(klass, target, random:)
+        with_method, without_method = alias_names(target, random)
 
         RBS.logger.debug "alias name: #{target}, #{with_method}, #{without_method}"
 
@@ -65,8 +67,8 @@ module RBS
         end
       end
 
-      def self.hook_method_source(prefix, method_name, key)
-        with_name, without_name = alias_names(method_name)
+      def self.hook_method_source(prefix, method_name, key, random:)
+        with_name, without_name = alias_names(method_name, random)
         full_method_name = "#{prefix}#{method_name}"
 
         [__LINE__ + 1, <<RUBY]
@@ -160,17 +162,19 @@ RUBY
       end
 
       def self.hook_instance_method(klass, method, key:)
-        line, source = hook_method_source("#{klass}#", method, key)
+        random = SecureRandom.hex(4)
+        line, source = hook_method_source("#{klass}#", method, key, random: random)
 
         klass.module_eval(source, __FILE__, line)
-        setup_alias_method_chain klass, method
+        setup_alias_method_chain klass, method, random: random
       end
 
       def self.hook_singleton_method(klass, method, key:)
-        line, source = hook_method_source("#{klass}.",method, key)
+        random = SecureRandom.hex(4)
+        line, source = hook_method_source("#{klass}.",method, key, random: random)
 
         klass.singleton_class.module_eval(source, __FILE__, line)
-        setup_alias_method_chain klass.singleton_class, method
+        setup_alias_method_chain klass.singleton_class, method, random: random
       end
     end
   end
