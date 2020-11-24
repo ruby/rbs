@@ -48,6 +48,10 @@ EOF
         assert typecheck.value(Object, parse_type("::Class"))
         refute typecheck.value(Object, parse_type("singleton(::String)"))
 
+        assert typecheck.value(String, parse_type("singleton(::String)"))
+        assert typecheck.value(String, parse_type("singleton(::Object)"))
+        refute typecheck.value(String, parse_type("singleton(::Integer)"))
+
         assert typecheck.value(3, parse_type("::M::t"))
         assert typecheck.value(3, parse_type("::M::s"))
 
