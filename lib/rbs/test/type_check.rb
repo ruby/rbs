@@ -288,7 +288,12 @@ module RBS
           end
         when Types::ClassSingleton
           klass = get_class(type.name) or return false
-          val == klass
+          singleton_class = begin
+                              klass.singleton_class
+                            rescue TypeError
+                              return false
+                            end
+          val.is_a?(singleton_class)
         when Types::Interface
           methods = Set.new(Test.call(val, METHODS))
           if (definition = builder.build_interface(type.name))
