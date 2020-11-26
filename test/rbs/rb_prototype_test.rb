@@ -251,6 +251,14 @@ class Hello
   attr_accessor :y, :z
   attr_writer foo, :a, 'b'
 end
+
+module Mod
+  extend self
+
+  module Mod2
+    extend self
+  end
+end
     EOR
 
     parser.parse(rb)
@@ -270,6 +278,14 @@ class Hello
   attr_writer a: untyped
 
   attr_writer b: untyped
+end
+
+module Mod
+  extend ::Mod
+
+  module Mod2
+    extend ::Mod::Mod2
+  end
 end
     EOF
   end
