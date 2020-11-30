@@ -36,6 +36,11 @@ task :validate => :parser do
       lib << "bigdecimal"
     end
 
+    if lib == ["yaml"]
+      lib << "dbm"
+      lib << "pstore"
+    end
+
     sh "#{ruby} #{rbs} #{lib.map {|l| "-r #{l}"}.join(" ")} validate --silent"
   end
 end
