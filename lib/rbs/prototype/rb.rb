@@ -1,9 +1,9 @@
 module RBS
   module Prototype
     class RB
-      Context = Struct.new(:module_function, :singleton, keyword_init: true) do
-        def self.initial
-          self.new(module_function: false, singleton: false)
+      Context = Struct.new(:module_function, :singleton, :namespace, keyword_init: true) do
+        def self.initial(namespace: Namespace.root)
+          self.new(module_function: false, singleton: false, namespace: namespace)
         end
 
         def method_kind
@@ -87,8 +87,9 @@ module RBS
 
           decls.push kls
 
+          new_ctx = Context.initial(namespace: context.namespace + kls.name.to_namespace)
           each_node class_body do |child|
-            process child, decls: kls.members, comments: comments, context: Context.initial
+            process child, decls: kls.members, comments: comments, context: new_ctx
           end
           remove_unnecessary_accessibility_methods! kls.members
 
@@ -107,8 +108,9 @@ module RBS
 
           decls.push mod
 
+          new_ctx = Context.initial(namespace: context.namespace + mod.name.to_namespace)
           each_node module_body do |child|
-            process child, decls: mod.members, comments: comments, context: Context.initial
+            process child, decls: mod.members, comments: comments, context: new_ctx
           end
           remove_unnecessary_accessibility_methods! mod.members
 
@@ -119,7 +121,7 @@ module RBS
             RBS.logger.warn "`class <<` syntax with not-self may be compiled to incorrect code: #{this}"
           end
 
-          ctx = Context.initial.tap { |ctx| ctx.singleton = true}
+          ctx = Context.initial.tap { |ctx| ctx.singleton = true }
           process_children(body, decls: decls, comments: comments, context: ctx)
 
         when :DEFN, :DEFS
@@ -183,7 +185,7 @@ module RBS
             end
           when :extend
             args.each do |arg|
-              if (name = const_to_name(arg))
+              if (name = const_to_name(arg, context: context))
                 decls << AST::Members::Extend.new(
                   name: name,
                   args: [],
@@ -320,7 +322,7 @@ module RBS
         end
       end
 
-      def const_to_name(node)
+      def const_to_name(node, context: nil)
         case node&.type
         when :CONST
           TypeName.new(name: node.children[0], namespace: Namespace.empty)
@@ -334,6 +336,8 @@ module RBS
           TypeName.new(name: node.children[1], namespace: namespace)
         when :COLON3
           TypeName.new(name: node.children[0], namespace: Namespace.root)
+        when :SELF
+          context&.then { |c| c.namespace.to_type_name }
         end
       end
 
