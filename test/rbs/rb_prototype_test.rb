@@ -318,19 +318,23 @@ class Hello
 
   private :private_attr
 
-  private def foo() end
+  private def prv1() end
+
+  private def prv2() end
+
+  def pub1() end
 
   private
 
-  def bar() end
+  def prv3() end
 
   public
 
-  def baz() end
+  def pub2() end
 
-  def foobar() end
+  def prv4() end
 
-  private :foobar
+  private :prv4
 end
     EOR
 
@@ -342,17 +346,25 @@ class Hello
 
   attr_reader private_attr: untyped
 
-  def foo: () -> nil
+  def prv1: () -> nil
 
-  def bar: () -> nil
+  def prv2: () -> nil
 
   public
 
-  def baz: () -> nil
+  def pub1: () -> nil
 
   private
 
-  def foobar: () -> nil
+  def prv3: () -> nil
+
+  public
+
+  def pub2: () -> nil
+
+  private
+
+  def prv4: () -> nil
 end
     EOF
   end

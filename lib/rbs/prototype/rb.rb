@@ -661,7 +661,7 @@ module RBS
         @public ||= AST::Members::Public.new(location: nil)
       end
 
-      def current_accessibility(decls, index = [0, decls.size - 1].max)
+      def current_accessibility(decls, index = decls.size)
         idx = decls.slice(0, index).rindex { |decl| decl == private || decl == public }
         (idx && decls[idx]) || public
       end
