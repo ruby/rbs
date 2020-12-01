@@ -2,6 +2,10 @@
 
 ## master
 
+## 0.18.1 (2020-12-01)
+
+* Fix `EnvironmentWalker#each_type_name` ([#494](https://github.com/ruby/rbs/pull/494))
+
 ## 0.18.0 (2020-12-01)
 
 * Signature updates for `YAML`, `ObjectSpace`, and `Singleton` ([#408](https://github.com/ruby/rbs/pull/408), [#477](https://github.com/ruby/rbs/pull/477), [#482](https://github.com/ruby/rbs/pull/482))
