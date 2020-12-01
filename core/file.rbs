@@ -192,10 +192,6 @@ class File < IO
   #
   def self.exist?: (string | _ToPath | IO file_name) -> bool
 
-  # Deprecated method. Don't use.
-  #
-  alias self.exists? self.exist?
-
   # Converts a pathname to an absolute pathname. Relative paths are referenced
   # from the current working directory of the process unless `dir_string` is
   # given, in which case it will be used as the starting point. The given pathname
