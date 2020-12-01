@@ -53,11 +53,11 @@ module RBS
           definition = builder.build_interface(name)
           unless only_ancestors?
             definition.each_type do |type|
-              each_type_name type, &block
+              each_type_node type, &block
             end
           end
         when name.alias?
-          each_type_name builder.expand_alias(name), &block
+          each_type_node builder.expand_alias(name), &block
         else
           raise "Unexpected TypeNameNode with type_name=#{name}"
         end
@@ -77,7 +77,7 @@ module RBS
 
               unless only_ancestors?
                 ancestor.args.each do |type|
-                  each_type_name type, &block
+                  each_type_node type, &block
                 end
               end
             when Definition::Ancestor::Singleton
@@ -88,13 +88,19 @@ module RBS
 
         unless only_ancestors?
           definition.each_type do |type|
-            each_type_name type, &block
+            each_type_node type, &block
           end
         end
       end
     end
 
     def each_type_name(type, &block)
+      each_type_node(type) do |node|
+        yield node.type_name
+      end
+    end
+
+    def each_type_node(type, &block)
       case type
       when RBS::Types::Bases::Any
       when RBS::Types::Bases::Class
@@ -111,30 +117,30 @@ module RBS
       when RBS::Types::ClassInstance
         yield InstanceNode.new(type_name: type.name)
         type.args.each do |ty|
-          each_type_name(ty, &block)
+          each_type_node(ty, &block)
         end
       when RBS::Types::Interface
         yield TypeNameNode.new(type_name: type.name)
         type.args.each do |ty|
-          each_type_name(ty, &block)
+          each_type_node(ty, &block)
         end
       when RBS::Types::Alias
         yield TypeNameNode.new(type_name: type.name)
       when RBS::Types::Union, RBS::Types::Intersection, RBS::Types::Tuple
         type.types.each do |ty|
-          each_type_name ty, &block
+          each_type_node ty, &block
         end
       when RBS::Types::Optional
-        each_type_name type.type, &block
+        each_type_node type.type, &block
       when RBS::Types::Literal
         # nop
       when RBS::Types::Record
         type.fields.each_value do |ty|
-          each_type_name ty, &block
+          each_type_node ty, &block
         end
       when RBS::Types::Proc
         type.each_type do |ty|
-          each_type_name ty, &block
+          each_type_node ty, &block
         end
       else
         raise "Unexpected type given: #{type}"
