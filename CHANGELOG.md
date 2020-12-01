@@ -2,6 +2,14 @@
 
 ## master
 
+## 0.18.0 (2020-12-01)
+
+* Signature updates for `YAML`, `ObjectSpace`, and `Singleton` ([#408](https://github.com/ruby/rbs/pull/408), [#477](https://github.com/ruby/rbs/pull/477), [#482](https://github.com/ruby/rbs/pull/482))
+* `prototype rb` improvements ([#492](https://github.com/ruby/rbs/pull/492), [#487](https://github.com/ruby/rbs/pull/487), [#486](https://github.com/ruby/rbs/pull/486), [#481](https://github.com/ruby/rbs/pull/481))
+* Runtime type checker improvements ([#488](https://github.com/ruby/rbs/pull/488), [#489](https://github.com/ruby/rbs/pull/489), [#490](https://github.com/ruby/rbs/pull/490))
+* Update `DependencyWalker` API to receive _Node_ objects instead of `TypeName` ([#484](https://github.com/ruby/rbs/pull/484))
+* Assume encoding of RBS files to be UTF-8 ([#493](https://github.com/ruby/rbs/pull/493))
+
 ## 0.17.0 (2020-11-14)
 
 * Signature updates for `Enumerable`, `Hash`, and `TSort` ([#462](https://github.com/ruby/rbs/pull/462), [#468](https://github.com/ruby/rbs/pull/468), [#471](https://github.com/ruby/rbs/pull/471), [#472](https://github.com/ruby/rbs/pull/472), [#473](https://github.com/ruby/rbs/pull/473), [#474](https://github.com/ruby/rbs/pull/474))
