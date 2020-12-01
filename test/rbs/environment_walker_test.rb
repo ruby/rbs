@@ -93,4 +93,14 @@ EOF
       # pp type_name.to_s
     end
   end
+
+  def test_each_type_name
+    env = Environment.from_loader(EnvironmentLoader.new).resolve_type_names
+
+    walker = EnvironmentWalker.new(env: env.resolve_type_names).only_ancestors!
+
+    walker.each_type_name(parse_type("::String")) do |type_name|
+      # pp type_name.to_s
+    end
+  end
 end
