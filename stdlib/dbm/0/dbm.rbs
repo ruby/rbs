@@ -138,8 +138,6 @@ class DBM
   #
   def include?: (String) -> bool
 
-  def index: (untyped) -> (String | NilClass)
-
   # Returns a Hash (not a DBM database) created by using each value in the
   # database as a key, with the corresponding key as its value.
   #

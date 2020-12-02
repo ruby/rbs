@@ -80,12 +80,6 @@ class DBMTest < Minitest::Test
     assert_send_type "() -> Hash[untyped, String]", @dbm, :invert
   end
 
-  def test_index
-    @dbm["key3"] = 1
-    assert_send_type "(untyped) -> (String | NilClass)", @dbm, :index, "key1"
-    assert_send_type "(untyped) -> (String | NilClass)", @dbm, :index, "keaaaay1"
-  end
-
   def test_key
     @dbm["key_key"] = 1
     assert_send_type "(untyped) -> (String | NilClass)", @dbm, :key, "key_key"
