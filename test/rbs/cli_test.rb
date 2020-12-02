@@ -133,7 +133,7 @@ singleton(::BasicObject)
   def test_validate
     with_cli do |cli|
       cli.run(%w(-r set validate))
-      assert_match /Validating/, stdout.string
+      assert_match(/Validating/, stdout.string)
     end
 
     with_cli do |cli|

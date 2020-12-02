@@ -61,7 +61,7 @@ end
       loader.add(path: path)
 
       env = Environment.new
-      loaded = loader.load(env: env)
+      loader.load(env: env)
 
       assert_operator env.class_decls, :key?, TypeName("::Person")
       assert_operator env.class_decls, :key?, TypeName("::PeopleController")
@@ -75,7 +75,7 @@ end
       loader.add(library: "set")
 
       env = Environment.new
-      loaded = loader.load(env: env)
+      loader.load(env: env)
 
       assert_operator env.class_decls, :key?, TypeName("::Set")
     end
@@ -96,7 +96,7 @@ end
       loader.add(library: "gem1", version: "1.2.3")
 
       env = Environment.new
-      loaded = loader.load(env: env)
+      loader.load(env: env)
 
       assert_operator env.class_decls, :key?, TypeName("::Person")
       assert_operator env.class_decls, :key?, TypeName("::PeopleController")
@@ -142,7 +142,7 @@ end
       loader.add(library: "rbs-amber", version: nil)
 
       env = Environment.new
-      loaded = loader.load(env: env)
+      loader.load(env: env)
 
       assert_operator env.class_decls, :key?, TypeName("::Amber")
     end
