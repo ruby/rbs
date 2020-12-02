@@ -563,8 +563,6 @@ class Hash[unchecked out K, unchecked out V] < Object
   #
   alias include? has_key?
 
-  def index: (V) -> K?
-
   # Return the contents of this hash as a string.
   #
   #     h = { "c" => 300, "a" => 100, "d" => 400, "c" => 300  }
@@ -615,7 +613,7 @@ class Hash[unchecked out K, unchecked out V] < Object
   #     h.key(300)   #=> "c"
   #     h.key(999)   #=> nil
   #
-  alias key index
+  def key: (V) -> K?
 
   # Returns `true` if the given key is present in *hsh*.
   #
