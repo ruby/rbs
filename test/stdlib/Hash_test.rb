@@ -245,13 +245,6 @@ class HashTest < StdlibTest
     { a: 1 }.hash
   end
 
-  def test_index
-    hash = { a: 1 }
-    hash.index(1)
-    hash.index(42)
-    hash.key(3)
-  end
-
   def test_inspect
     { a: 1 }.inspect
     { a: 1 }.to_s
@@ -265,6 +258,12 @@ class HashTest < StdlibTest
     hash = { a: 1, b: 2 }
     hash.keep_if
     hash.keep_if { |k, v| k == :a }
+  end
+
+  def test_key
+    hash = { a: 1 }
+    hash.key(1)
+    hash.key(3)
   end
 
   def test_keys
