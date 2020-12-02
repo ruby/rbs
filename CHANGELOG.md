@@ -2,6 +2,10 @@
 
 ## master
 
+## 0.19.0 (2020-12-02)
+
+* Signature updates for `Monitor` and File ([#485](https://github.com/ruby/rbs/pull/485), [#495](https://github.com/ruby/rbs/pull/495))
+
 ## 0.18.1 (2020-12-01)
 
 * Fix `EnvironmentWalker#each_type_name` ([#494](https://github.com/ruby/rbs/pull/494))
