@@ -757,18 +757,6 @@ class Time < Object
   #
   def subsec: () -> Numeric
 
-  # Returns a new Time object, one second later than *time*. Time#succ is obsolete
-  # since 1.9.2 for time is not a discrete value.
-  #
-  #     t = Time.now       #=> 2007-11-19 08:23:57 -0600
-  #     t.succ             #=> 2007-11-19 08:23:58 -0600
-  #
-  # Use instead `time + 1`
-  #
-  #     t + 1              #=> 2007-11-19 08:23:58 -0600
-  #
-  def succ: () -> Time
-
   # Returns `true` if *time* represents Sunday.
   #
   #     t = Time.local(1990, 4, 1)       #=> 1990-04-01 00:00:00 -0600

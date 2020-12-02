@@ -173,10 +173,6 @@ class TimeTest < StdlibTest
     Time.new.subsec
   end
 
-  def test_succ
-    Time.new.succ
-  end
-
   def test_sunday?
     Time.local(1991, 2, 24).sunday?
   end
