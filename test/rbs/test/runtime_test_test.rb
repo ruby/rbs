@@ -249,4 +249,21 @@ end
 Bar.new.foo(30)
 RUBY
   end
+
+  def test_block_keywords
+    assert_test_success(other_env: { 'RBS_TEST_TARGET' => 'A' }, rbs_content: <<RBS, ruby_content: <<'RUBY')
+class A
+  def call: (untyped) { (untyped) -> void } -> void
+end
+RBS
+
+class A
+  def call(val, &block)
+    yield(value: val)
+  end
+end
+
+A.new.call("foo") {|value:| puts value }
+RUBY
+  end
 end
