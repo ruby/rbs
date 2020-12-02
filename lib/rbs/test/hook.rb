@@ -81,7 +81,8 @@ def #{with_name}(*args, &block)
 
     if block_given?
       receiver = self
-      result = __send__(:"#{without_name}", *args) do |*block_args|
+
+      wrapped_block = proc do |*block_args|
         return_from_block = false
 
         begin
@@ -117,7 +118,9 @@ def #{with_name}(*args, &block)
         end
 
         block_result
-      end
+      end.ruby2_keywords
+
+      result = __send__(:"#{without_name}", *args, &wrapped_block)
     else
       result = __send__(:"#{without_name}", *args)
     end
