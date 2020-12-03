@@ -262,6 +262,10 @@ ANNOTATION_RE = Regexp.union(/%a\{.*?\}/,
                              /%a\(.*?\)/,
                              /%a\<.*?\>/,
                              /%a\|.*?\|/)
+
+escape_sequences = %w[a b e f n r s t v "].map { |l| "\\\\#{l}" }
+DBL_QUOTE_STR_ESCAPE_SEQUENCES_RE = /(#{escape_sequences.join("|")})/
+
 def next_token
   if @type
     type = @type
@@ -341,7 +345,21 @@ def next_token
   when input.scan(/[a-z_]\w*\b/)
     new_token(:tLIDENT)
   when input.scan(/"(\\"|[^"])*"/)
-    s = input.matched.yield_self {|s| s[1, s.length - 2] }.gsub(/\\"/, '"')
+    s = input.matched.yield_self {|s| s[1, s.length - 2] }
+                     .gsub(DBL_QUOTE_STR_ESCAPE_SEQUENCES_RE) do |match|
+                       case match
+                       when '\\a' then "\a"
+                       when '\\b' then "\b"
+                       when '\\e' then "\e"
+                       when '\\f' then "\f"
+                       when '\\n' then "\n"
+                       when '\\r' then "\r"
+                       when '\\s' then "\s"
+                       when '\\t' then "\t"
+                       when '\\v' then "\v"
+                       when '\\"' then '"'
+                       end
+                     end
     new_token(:tSTRING, s)
   when input.scan(/'(\\'|[^'])*'/)
     s = input.matched.yield_self {|s| s[1, s.length - 2] }.gsub(/\\'/, "'")

@@ -536,6 +536,16 @@ class RBS::TypeParsingTest < Minitest::Test
       assert_instance_of Types::Literal, type
       assert_equal "super \" duper", type.literal
     end
+
+    Parser.parse_type('"escape sequences \a\b\e\f\n\r\s\t\v\""').yield_self do |type|
+      assert_instance_of Types::Literal, type
+      assert_equal "escape sequences \a\b\e\f\n\r\s\t\v\"", type.literal
+    end
+
+    Parser.parse_type(%q{'not escape sequences \a\b\e\f\n\r\s\t\v\"'}).yield_self do |type|
+      assert_instance_of Types::Literal, type
+      assert_equal 'not escape sequences \a\b\e\f\n\r\s\t\v\"', type.literal
+    end
   end
 
   def test_record
