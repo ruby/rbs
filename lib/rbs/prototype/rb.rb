@@ -202,6 +202,7 @@ module RBS
                   name: name,
                   ivar_name: nil,
                   type: Types::Bases::Any.new(location: nil),
+                  kind: :instance,
                   location: nil,
                   comment: comments[node.first_lineno - 1],
                   annotations: []
@@ -215,6 +216,7 @@ module RBS
                   name: name,
                   ivar_name: nil,
                   type: Types::Bases::Any.new(location: nil),
+                  kind: :instance,
                   location: nil,
                   comment: comments[node.first_lineno - 1],
                   annotations: []
@@ -228,6 +230,7 @@ module RBS
                   name: name,
                   ivar_name: nil,
                   type: Types::Bases::Any.new(location: nil),
+                  kind: :instance,
                   location: nil,
                   comment: comments[node.first_lineno - 1],
                   annotations: []

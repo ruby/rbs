@@ -91,14 +91,17 @@ module RBS
       end
 
       module Attribute
+        type kind = :instance | :singleton
+
         attr_reader name: Symbol
         attr_reader type: Types::t
+        attr_reader kind: kind
         attr_reader ivar_name: Symbol | false | nil
         attr_reader annotations: Array[Annotation]
         attr_reader location: Location?
         attr_reader comment: Comment?
 
-        def initialize: (name: Symbol, type: Types::t, ivar_name: Symbol | false | nil, annotations: Array[Annotation], location: Location?, comment: Comment?) -> void
+        def initialize: (name: Symbol, type: Types::t, ivar_name: Symbol | false | nil, kind: kind, annotations: Array[Annotation], location: Location?, comment: Comment?) -> void
 
         include _HashEqual
       end

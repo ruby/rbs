@@ -1170,6 +1170,35 @@ EOF
     end
   end
 
+  def test_singleton_attributes
+    SignatureManager.new do |manager|
+      manager.files[Pathname("foo.rbs")] = <<EOF
+class Hello
+  attr_reader self.reader: String
+  attr_writer self.writer(@writer): Integer
+  attr_accessor self.accessor(): Symbol
+end
+EOF
+      manager.build do |env|
+        builder = DefinitionBuilder.new(env: env)
+
+        builder.build_singleton(type_name("::Hello")).yield_self do |definition|
+          assert_instance_of Definition, definition
+
+          assert_method_definition definition.methods[:reader], ["() -> ::String"]
+          assert_ivar_definitioin definition.instance_variables[:@reader], "::String"
+
+          assert_method_definition definition.methods[:writer=], ["(::Integer writer) -> ::Integer"]
+          assert_ivar_definitioin definition.instance_variables[:@writer], "::Integer"
+
+          assert_method_definition definition.methods[:accessor], ["() -> ::Symbol"]
+          assert_method_definition definition.methods[:accessor=], ["(::Symbol accessor) -> ::Symbol"]
+          assert_nil definition.instance_variables[:@accessor]
+        end
+      end
+    end
+  end
+
   def test_initialize_new
     SignatureManager.new do |manager|
       manager.files[Pathname("foo.rbs")] = <<EOF

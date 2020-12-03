@@ -55,6 +55,12 @@ class Foo::Bar[X] < Array[String]
 
   attr_writer email(@foo): String?
 
+  attr_accessor self.name: String
+
+  attr_reader self.age(): Integer
+
+  attr_writer self.email(@foo): String?
+
   public
 
   private

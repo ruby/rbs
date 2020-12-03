@@ -216,31 +216,34 @@ module RBS
       module Attribute
         attr_reader :name
         attr_reader :type
+        attr_reader :kind
         attr_reader :ivar_name
         attr_reader :annotations
         attr_reader :location
         attr_reader :comment
 
-        def initialize(name:, type:, ivar_name:, annotations:, location:, comment:)
+        def initialize(name:, type:, ivar_name:, kind:, annotations:, location:, comment:)
           @name = name
           @type = type
           @ivar_name = ivar_name
           @annotations = annotations
           @location = location
           @comment = comment
+          @kind = kind
         end
 
         def ==(other)
           other.is_a?(self.class) &&
             other.name == name &&
             other.type == type &&
-            other.ivar_name == ivar_name
+            other.ivar_name == ivar_name &&
+            other.kind == kind
         end
 
         alias eql? ==
 
         def hash
-          self.class.hash ^ name.hash ^ type.hash ^ ivar_name.hash
+          self.class.hash ^ name.hash ^ type.hash ^ ivar_name.hash ^ kind.hash
         end
       end
 
@@ -253,6 +256,7 @@ module RBS
             name: name,
             type: type,
             ivar_name: ivar_name,
+            kind: kind,
             annotations: annotations,
             location: location,
             comment: comment
@@ -269,6 +273,7 @@ module RBS
             name: name,
             type: type,
             ivar_name: ivar_name,
+            kind: kind,
             annotations: annotations,
             location: location,
             comment: comment
@@ -285,6 +290,7 @@ module RBS
             name: name,
             type: type,
             ivar_name: ivar_name,
+            kind: kind,
             annotations: annotations,
             location: location,
             comment: comment

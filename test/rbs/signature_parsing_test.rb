@@ -671,6 +671,77 @@ end
     end
   end
 
+  def test_attributes
+    Parser.parse_signature(<<~SIG).tap do |decls|
+      class Hello
+        attr_reader a: Integer
+        attr_writer b(@B): String
+        attr_accessor c(): bool
+
+        attr_reader self.x: Integer
+        attr_writer self.y(@Y): String
+        attr_accessor self.z(): bool
+      end
+    SIG
+
+      decls[0].tap do |module_decl|
+        module_decl.members[0].tap do |m|
+          assert_equal "attr_reader a: Integer", m.location.source
+          assert_instance_of Members::AttrReader, m
+          assert_equal :a, m.name
+          assert_nil m.ivar_name
+          assert_equal :instance, m.kind
+          assert_equal parse_type("Integer"), m.type
+        end
+
+        module_decl.members[1].tap do |m|
+          assert_equal "attr_writer b(@B): String", m.location.source
+          assert_instance_of Members::AttrWriter, m
+          assert_equal :b, m.name
+          assert_equal :@B, m.ivar_name
+          assert_equal :instance, m.kind
+          assert_equal parse_type("String"), m.type
+        end
+
+        module_decl.members[2].tap do |m|
+          assert_equal "attr_accessor c(): bool", m.location.source
+          assert_instance_of Members::AttrAccessor, m
+          assert_equal :c, m.name
+          assert_equal false, m.ivar_name
+          assert_equal :instance, m.kind
+          assert_equal parse_type("bool"), m.type
+        end
+
+        module_decl.members[3].tap do |m|
+          assert_equal "attr_reader self.x: Integer", m.location.source
+          assert_instance_of Members::AttrReader, m
+          assert_equal :x, m.name
+          assert_nil m.ivar_name
+          assert_equal :singleton, m.kind
+          assert_equal parse_type("Integer"), m.type
+        end
+
+        module_decl.members[4].tap do |m|
+          assert_equal "attr_writer self.y(@Y): String", m.location.source
+          assert_instance_of Members::AttrWriter, m
+          assert_equal :y, m.name
+          assert_equal :@Y, m.ivar_name
+          assert_equal :singleton, m.kind
+          assert_equal parse_type("String"), m.type
+        end
+
+        module_decl.members[5].tap do |m|
+          assert_equal "attr_accessor self.z(): bool", m.location.source
+          assert_instance_of Members::AttrAccessor, m
+          assert_equal :z, m.name
+          assert_equal false, m.ivar_name
+          assert_equal :singleton, m.kind
+          assert_equal parse_type("bool"), m.type
+        end
+      end
+    end
+  end
+
   def test_annotations_on_members
     Parser.parse_signature(<<~SIG).yield_self do |decls|
       class Hello

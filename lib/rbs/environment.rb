@@ -349,6 +349,7 @@ module RBS
         AST::Members::AttrAccessor.new(
           name: member.name,
           type: absolute_type(resolver, member.type, context: context),
+          kind: member.kind,
           annotations: member.annotations,
           comment: member.comment,
           location: member.location,
@@ -358,6 +359,7 @@ module RBS
         AST::Members::AttrReader.new(
           name: member.name,
           type: absolute_type(resolver, member.type, context: context),
+          kind: member.kind,
           annotations: member.annotations,
           comment: member.comment,
           location: member.location,
@@ -367,6 +369,7 @@ module RBS
         AST::Members::AttrWriter.new(
           name: member.name,
           type: absolute_type(resolver, member.type, context: context),
+          kind: member.kind,
           annotations: member.annotations,
           comment: member.comment,
           location: member.location,
