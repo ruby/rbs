@@ -387,19 +387,19 @@ module RBS
         if block
           if (type = vars[block])
             if type.is_a?(Types::Proc)
-              method_block = MethodType::Block.new(required: true, type: type.type)
+              method_block = Types::Block.new(required: true, type: type.type)
             elsif type.is_a?(Types::Bases::Any)
-              method_block = MethodType::Block.new(
+              method_block = Types::Block.new(
                 required: true,
                 type: Types::Function.empty(Types::Bases::Any.new(location: nil))
               )
             # Handle an optional block like `T.nilable(T.proc.void)`.
             elsif type.is_a?(Types::Optional) && type.type.is_a?(Types::Proc)
-              method_block = MethodType::Block.new(required: false, type: type.type.type)
+              method_block = Types::Block.new(required: false, type: type.type.type)
             else
               STDERR.puts "Unexpected block type: #{type}"
               PP.pp args_node, STDERR
-              method_block = MethodType::Block.new(
+              method_block = Types::Block.new(
                 required: true,
                 type: Types::Function.empty(Types::Bases::Any.new(location: nil))
               )

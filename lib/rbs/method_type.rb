@@ -1,35 +1,5 @@
 module RBS
   class MethodType
-    class Block
-      attr_reader :type
-      attr_reader :required
-
-      def initialize(type:, required:)
-        @type = type
-        @required = required
-      end
-
-      def ==(other)
-        other.is_a?(Block) &&
-          other.type == type &&
-          other.required == required
-      end
-
-      def to_json(*a)
-        {
-          type: type,
-          required: required
-        }.to_json(*a)
-      end
-
-      def sub(s)
-        self.class.new(
-          type: type.sub(s),
-          required: required
-        )
-      end
-    end
-
     attr_reader :type_params
     attr_reader :type
     attr_reader :block
@@ -86,7 +56,7 @@ module RBS
         type_params: type_params,
         type: type.map_type(&block),
         block: self.block&.yield_self do |b|
-          Block.new(type: b.type.map_type(&block), required: b.required)
+          Types::Block.new(type: b.type.map_type(&block), required: b.required)
         end,
         location: location
       )

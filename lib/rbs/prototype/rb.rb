@@ -552,7 +552,7 @@ module RBS
         method_block = nil
 
         if block
-          method_block = MethodType::Block.new(
+          method_block = Types::Block.new(
             required: true,
             type: Types::Function.empty(untyped)
           )
@@ -560,7 +560,7 @@ module RBS
 
         if body_node
           if (yields = any_node?(body_node) {|n| n.type == :YIELD })
-            method_block = MethodType::Block.new(
+            method_block = Types::Block.new(
               required: true,
               type: Types::Function.empty(untyped)
             )

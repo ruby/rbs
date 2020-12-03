@@ -520,11 +520,11 @@ rule
   block_opt:
       { result = nil }
     | kLBRACE function_type kRBRACE {
-        block = MethodType::Block.new(type: val[1].value, required: true)
+        block = Types::Block.new(type: val[1].value, required: true)
         result = LocatedValue.new(value: block, location: val[0].location + val[2].location)
       }
     | kQUESTION kLBRACE function_type kRBRACE {
-        block = MethodType::Block.new(type: val[2].value, required: false)
+        block = Types::Block.new(type: val[2].value, required: false)
         result = LocatedValue.new(value: block, location: val[0].location + val[3].location)
       }
 

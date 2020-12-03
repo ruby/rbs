@@ -947,6 +947,36 @@ module RBS
       end
     end
 
+    class Block
+      attr_reader :type
+      attr_reader :required
+
+      def initialize(type:, required:)
+        @type = type
+        @required = required
+      end
+
+      def ==(other)
+        other.is_a?(Block) &&
+          other.type == type &&
+          other.required == required
+      end
+
+      def to_json(*a)
+        {
+          type: type,
+          required: required
+        }.to_json(*a)
+      end
+
+      def sub(s)
+        self.class.new(
+          type: type.sub(s),
+          required: required
+        )
+      end
+    end
+
     class Proc
       attr_reader :type
       attr_reader :location

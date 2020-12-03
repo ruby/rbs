@@ -334,6 +334,19 @@ module RBS
       def has_keyword?: () -> bool
     end
 
+    class Block
+      attr_reader type: Types::Function
+      attr_reader required: boolish
+
+      def initialize: (type: Types::Function, required: boolish) -> void
+
+      def ==: (untyped other) -> bool
+
+      def to_json: (*untyped) -> String
+
+      def sub: (Substitution) -> Block
+    end
+
     class Proc
       attr_reader type: Function
       attr_reader location: Location?

@@ -2169,7 +2169,7 @@ module_eval(<<'.,.,', 'parser.y', 520)
 
 module_eval(<<'.,.,', 'parser.y', 522)
   def _reduce_87(val, _values, result)
-            block = MethodType::Block.new(type: val[1].value, required: true)
+            block = Types::Block.new(type: val[1].value, required: true)
         result = LocatedValue.new(value: block, location: val[0].location + val[2].location)
 
     result
@@ -2178,7 +2178,7 @@ module_eval(<<'.,.,', 'parser.y', 522)
 
 module_eval(<<'.,.,', 'parser.y', 526)
   def _reduce_88(val, _values, result)
-            block = MethodType::Block.new(type: val[2].value, required: false)
+            block = Types::Block.new(type: val[2].value, required: false)
         result = LocatedValue.new(value: block, location: val[0].location + val[3].location)
 
     result
