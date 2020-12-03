@@ -8,7 +8,7 @@ require 'racc/parser.rb'
 module RBS
   class Parser < Racc::Parser
 
-module_eval(<<'...end parser.y/module_eval...', 'parser.y', 1044)
+module_eval(<<'...end parser.y/module_eval...', 'parser.y', 1050)
 
 Types = RBS::Types
 Namespace = RBS::Namespace
@@ -1673,6 +1673,7 @@ module_eval(<<'.,.,', 'parser.y', 206)
         result = Members::AttrReader.new(name: val[2].value,
                                          ivar_name: nil,
                                          type: val[3],
+                                         kind: :instance,
                                          annotations: val[0],
                                          location: location,
                                          comment: leading_comment(val[0].first&.location || location))
@@ -1681,12 +1682,13 @@ module_eval(<<'.,.,', 'parser.y', 206)
   end
 .,.,
 
-module_eval(<<'.,.,', 'parser.y', 215)
+module_eval(<<'.,.,', 'parser.y', 216)
   def _reduce_47(val, _values, result)
             location = val[1].location + val[5].location
         result = Members::AttrReader.new(name: val[2].value.to_sym,
                                          ivar_name: val[3],
                                          type: val[5],
+                                         kind: :instance,
                                          annotations: val[0],
                                          location: location,
                                          comment: leading_comment(val[0].first&.location || location))
@@ -1695,11 +1697,12 @@ module_eval(<<'.,.,', 'parser.y', 215)
   end
 .,.,
 
-module_eval(<<'.,.,', 'parser.y', 224)
+module_eval(<<'.,.,', 'parser.y', 226)
   def _reduce_48(val, _values, result)
             location = val[1].location + val[3].location
         result = Members::AttrWriter.new(name: val[2].value,
                                          ivar_name: nil,
+                                         kind: :instance,
                                          type: val[3],
                                          annotations: val[0],
                                          location: location,
@@ -1709,11 +1712,12 @@ module_eval(<<'.,.,', 'parser.y', 224)
   end
 .,.,
 
-module_eval(<<'.,.,', 'parser.y', 233)
+module_eval(<<'.,.,', 'parser.y', 236)
   def _reduce_49(val, _values, result)
             location = val[1].location + val[5].location
         result = Members::AttrWriter.new(name: val[2].value.to_sym,
                                          ivar_name: val[3],
+                                         kind: :instance,
                                          type: val[5],
                                          annotations: val[0],
                                          location: location,
@@ -1723,11 +1727,12 @@ module_eval(<<'.,.,', 'parser.y', 233)
   end
 .,.,
 
-module_eval(<<'.,.,', 'parser.y', 242)
+module_eval(<<'.,.,', 'parser.y', 246)
   def _reduce_50(val, _values, result)
             location = val[1].location + val[3].location
         result = Members::AttrAccessor.new(name: val[2].value,
                                            ivar_name: nil,
+                                           kind: :instance,
                                            type: val[3],
                                            annotations: val[0],
                                            location: location,
@@ -1737,11 +1742,12 @@ module_eval(<<'.,.,', 'parser.y', 242)
   end
 .,.,
 
-module_eval(<<'.,.,', 'parser.y', 251)
+module_eval(<<'.,.,', 'parser.y', 256)
   def _reduce_51(val, _values, result)
             location = val[1].location + val[5].location
         result = Members::AttrAccessor.new(name: val[2].value.to_sym,
                                            ivar_name: val[3],
+                                           kind: :instance,
                                            type: val[5],
                                            annotations: val[0],
                                            location: location,
@@ -1751,28 +1757,28 @@ module_eval(<<'.,.,', 'parser.y', 251)
   end
 .,.,
 
-module_eval(<<'.,.,', 'parser.y', 261)
+module_eval(<<'.,.,', 'parser.y', 267)
   def _reduce_52(val, _values, result)
      result = nil
     result
   end
 .,.,
 
-module_eval(<<'.,.,', 'parser.y', 262)
+module_eval(<<'.,.,', 'parser.y', 268)
   def _reduce_53(val, _values, result)
      result = false
     result
   end
 .,.,
 
-module_eval(<<'.,.,', 'parser.y', 263)
+module_eval(<<'.,.,', 'parser.y', 269)
   def _reduce_54(val, _values, result)
      result = val[1].value
     result
   end
 .,.,
 
-module_eval(<<'.,.,', 'parser.y', 267)
+module_eval(<<'.,.,', 'parser.y', 273)
   def _reduce_55(val, _values, result)
             location = val[0].location + val[2].location
         result = Members::InstanceVariable.new(
@@ -1786,7 +1792,7 @@ module_eval(<<'.,.,', 'parser.y', 267)
   end
 .,.,
 
-module_eval(<<'.,.,', 'parser.y', 276)
+module_eval(<<'.,.,', 'parser.y', 282)
   def _reduce_56(val, _values, result)
             type = val[2]
 
@@ -1810,7 +1816,7 @@ module_eval(<<'.,.,', 'parser.y', 276)
   end
 .,.,
 
-module_eval(<<'.,.,', 'parser.y', 295)
+module_eval(<<'.,.,', 'parser.y', 301)
   def _reduce_57(val, _values, result)
           type = val[4]
 
@@ -1834,7 +1840,7 @@ module_eval(<<'.,.,', 'parser.y', 295)
   end
 .,.,
 
-module_eval(<<'.,.,', 'parser.y', 316)
+module_eval(<<'.,.,', 'parser.y', 322)
   def _reduce_58(val, _values, result)
             reset_variable_scope
 
@@ -1852,14 +1858,14 @@ module_eval(<<'.,.,', 'parser.y', 316)
   end
 .,.,
 
-module_eval(<<'.,.,', 'parser.y', 330)
+module_eval(<<'.,.,', 'parser.y', 336)
   def _reduce_59(val, _values, result)
      result = []
     result
   end
 .,.,
 
-module_eval(<<'.,.,', 'parser.y', 332)
+module_eval(<<'.,.,', 'parser.y', 338)
   def _reduce_60(val, _values, result)
             result = val[0].push(val[1])
 
@@ -1867,7 +1873,7 @@ module_eval(<<'.,.,', 'parser.y', 332)
   end
 .,.,
 
-module_eval(<<'.,.,', 'parser.y', 337)
+module_eval(<<'.,.,', 'parser.y', 343)
   def _reduce_61(val, _values, result)
             unless val[0].kind == :instance
           raise SemanticsError.new("Interface cannot have singleton method", subject: val[0], location: val[0].location)
@@ -1883,7 +1889,7 @@ module_eval(<<'.,.,', 'parser.y', 337)
   end
 .,.,
 
-module_eval(<<'.,.,', 'parser.y', 348)
+module_eval(<<'.,.,', 'parser.y', 354)
   def _reduce_62(val, _values, result)
             unless val[0].name.interface?
           raise SemanticsError.new("Interface should include an interface", subject: val[0], location: val[0].location)
@@ -1897,7 +1903,7 @@ module_eval(<<'.,.,', 'parser.y', 348)
 
 # reduce 63 omitted
 
-module_eval(<<'.,.,', 'parser.y', 358)
+module_eval(<<'.,.,', 'parser.y', 364)
   def _reduce_64(val, _values, result)
             if val[2].value.alias?
           raise SemanticsError.new("Should include module or interface", subject: val[2].value, location: val[2].location)
@@ -1913,7 +1919,7 @@ module_eval(<<'.,.,', 'parser.y', 358)
   end
 .,.,
 
-module_eval(<<'.,.,', 'parser.y', 369)
+module_eval(<<'.,.,', 'parser.y', 375)
   def _reduce_65(val, _values, result)
             if val[2].value.alias?
           raise SemanticsError.new("Should include module or interface", subject: val[2].value, location: val[2].location)
@@ -1929,7 +1935,7 @@ module_eval(<<'.,.,', 'parser.y', 369)
   end
 .,.,
 
-module_eval(<<'.,.,', 'parser.y', 382)
+module_eval(<<'.,.,', 'parser.y', 388)
   def _reduce_66(val, _values, result)
             if val[2].value.alias?
           raise SemanticsError.new("Should extend module or interface", subject: val[2].value, location: val[2].location)
@@ -1945,7 +1951,7 @@ module_eval(<<'.,.,', 'parser.y', 382)
   end
 .,.,
 
-module_eval(<<'.,.,', 'parser.y', 393)
+module_eval(<<'.,.,', 'parser.y', 399)
   def _reduce_67(val, _values, result)
             if val[2].value.alias?
           raise SemanticsError.new("Should extend module or interface", subject: val[2].value, location: val[2].location)
@@ -1961,7 +1967,7 @@ module_eval(<<'.,.,', 'parser.y', 393)
   end
 .,.,
 
-module_eval(<<'.,.,', 'parser.y', 406)
+module_eval(<<'.,.,', 'parser.y', 412)
   def _reduce_68(val, _values, result)
             unless val[2].value.class?
           raise SemanticsError.new("Should prepend module", subject: val[2].value, location: val[2].location)
@@ -1977,7 +1983,7 @@ module_eval(<<'.,.,', 'parser.y', 406)
   end
 .,.,
 
-module_eval(<<'.,.,', 'parser.y', 417)
+module_eval(<<'.,.,', 'parser.y', 423)
   def _reduce_69(val, _values, result)
             unless val[2].value.class?
           raise SemanticsError.new("Should prepend module", subject: val[2].value, location: val[2].location)
@@ -1993,14 +1999,14 @@ module_eval(<<'.,.,', 'parser.y', 417)
   end
 .,.,
 
-module_eval(<<'.,.,', 'parser.y', 429)
+module_eval(<<'.,.,', 'parser.y', 435)
   def _reduce_70(val, _values, result)
      result = nil
     result
   end
 .,.,
 
-module_eval(<<'.,.,', 'parser.y', 431)
+module_eval(<<'.,.,', 'parser.y', 437)
   def _reduce_71(val, _values, result)
             RBS.logger.warn "`overload def` syntax is deprecated. Use `...` syntax instead."
         result = val[0]
@@ -2009,7 +2015,7 @@ module_eval(<<'.,.,', 'parser.y', 431)
   end
 .,.,
 
-module_eval(<<'.,.,', 'parser.y', 437)
+module_eval(<<'.,.,', 'parser.y', 443)
   def _reduce_72(val, _values, result)
             location = val[3].location + val[6].last.location
 
@@ -2037,7 +2043,7 @@ module_eval(<<'.,.,', 'parser.y', 437)
 
 # reduce 73 omitted
 
-module_eval(<<'.,.,', 'parser.y', 460)
+module_eval(<<'.,.,', 'parser.y', 466)
   def _reduce_74(val, _values, result)
             RBS.logger.warn "`incompatible` method attribute is deprecated and ignored."
 
@@ -2045,42 +2051,42 @@ module_eval(<<'.,.,', 'parser.y', 460)
   end
 .,.,
 
-module_eval(<<'.,.,', 'parser.y', 464)
+module_eval(<<'.,.,', 'parser.y', 470)
   def _reduce_75(val, _values, result)
      result = :instance
     result
   end
 .,.,
 
-module_eval(<<'.,.,', 'parser.y', 465)
+module_eval(<<'.,.,', 'parser.y', 471)
   def _reduce_76(val, _values, result)
      result = :singleton
     result
   end
 .,.,
 
-module_eval(<<'.,.,', 'parser.y', 466)
+module_eval(<<'.,.,', 'parser.y', 472)
   def _reduce_77(val, _values, result)
      result = :singleton_instance
     result
   end
 .,.,
 
-module_eval(<<'.,.,', 'parser.y', 469)
+module_eval(<<'.,.,', 'parser.y', 475)
   def _reduce_78(val, _values, result)
      result = [val[0]]
     result
   end
 .,.,
 
-module_eval(<<'.,.,', 'parser.y', 470)
+module_eval(<<'.,.,', 'parser.y', 476)
   def _reduce_79(val, _values, result)
      result = [LocatedValue.new(value: :dot3, location: val[0].location)]
     result
   end
 .,.,
 
-module_eval(<<'.,.,', 'parser.y', 472)
+module_eval(<<'.,.,', 'parser.y', 478)
   def _reduce_80(val, _values, result)
             result = val[2].unshift(val[0])
 
@@ -2088,7 +2094,7 @@ module_eval(<<'.,.,', 'parser.y', 472)
   end
 .,.,
 
-module_eval(<<'.,.,', 'parser.y', 477)
+module_eval(<<'.,.,', 'parser.y', 483)
   def _reduce_81(val, _values, result)
             reset_variable_scope
 
@@ -2119,14 +2125,14 @@ module_eval(<<'.,.,', 'parser.y', 477)
   end
 .,.,
 
-module_eval(<<'.,.,', 'parser.y', 504)
+module_eval(<<'.,.,', 'parser.y', 510)
   def _reduce_82(val, _values, result)
      result = nil
     result
   end
 .,.,
 
-module_eval(<<'.,.,', 'parser.y', 506)
+module_eval(<<'.,.,', 'parser.y', 512)
   def _reduce_83(val, _values, result)
             result = LocatedValue.new(value: val[1], location: val[0].location + val[2].location)
 
@@ -2134,14 +2140,14 @@ module_eval(<<'.,.,', 'parser.y', 506)
   end
 .,.,
 
-module_eval(<<'.,.,', 'parser.y', 510)
+module_eval(<<'.,.,', 'parser.y', 516)
   def _reduce_84(val, _values, result)
      result = nil
     result
   end
 .,.,
 
-module_eval(<<'.,.,', 'parser.y', 512)
+module_eval(<<'.,.,', 'parser.y', 518)
   def _reduce_85(val, _values, result)
             block = MethodType::Block.new(type: val[1].value, required: true)
         result = LocatedValue.new(value: block, location: val[0].location + val[2].location)
@@ -2150,7 +2156,7 @@ module_eval(<<'.,.,', 'parser.y', 512)
   end
 .,.,
 
-module_eval(<<'.,.,', 'parser.y', 516)
+module_eval(<<'.,.,', 'parser.y', 522)
   def _reduce_86(val, _values, result)
             block = MethodType::Block.new(type: val[2].value, required: false)
         result = LocatedValue.new(value: block, location: val[0].location + val[3].location)
@@ -2161,7 +2167,7 @@ module_eval(<<'.,.,', 'parser.y', 516)
 
 # reduce 87 omitted
 
-module_eval(<<'.,.,', 'parser.y', 523)
+module_eval(<<'.,.,', 'parser.y', 529)
   def _reduce_88(val, _values, result)
             result = LocatedValue.new(value: val[0].value.to_sym,
                                   location: val[0].location + val[1].location)
@@ -2188,7 +2194,7 @@ module_eval(<<'.,.,', 'parser.y', 523)
 
 # reduce 97 omitted
 
-module_eval(<<'.,.,', 'parser.y', 532)
+module_eval(<<'.,.,', 'parser.y', 538)
   def _reduce_98(val, _values, result)
             unless val[0].location.pred?(val[1].location)
           raise SyntaxError.new(token_str: "kQUESTION", error_value: val[1])
@@ -2201,7 +2207,7 @@ module_eval(<<'.,.,', 'parser.y', 532)
   end
 .,.,
 
-module_eval(<<'.,.,', 'parser.y', 540)
+module_eval(<<'.,.,', 'parser.y', 546)
   def _reduce_99(val, _values, result)
             unless val[0].location.pred?(val[1].location)
           raise SyntaxError.new(token_str: "kEXCLAMATION", error_value: val[1])
@@ -2294,14 +2300,14 @@ module_eval(<<'.,.,', 'parser.y', 540)
 
 # reduce 139 omitted
 
-module_eval(<<'.,.,', 'parser.y', 560)
+module_eval(<<'.,.,', 'parser.y', 566)
   def _reduce_140(val, _values, result)
      result = nil
     result
   end
 .,.,
 
-module_eval(<<'.,.,', 'parser.y', 562)
+module_eval(<<'.,.,', 'parser.y', 568)
   def _reduce_141(val, _values, result)
             val[1].each {|p| insert_bound_variable(p.name) }
 
@@ -2311,7 +2317,7 @@ module_eval(<<'.,.,', 'parser.y', 562)
   end
 .,.,
 
-module_eval(<<'.,.,', 'parser.y', 569)
+module_eval(<<'.,.,', 'parser.y', 575)
   def _reduce_142(val, _values, result)
             result = Declarations::ModuleTypeParams.new()
         result.add(val[0])
@@ -2320,7 +2326,7 @@ module_eval(<<'.,.,', 'parser.y', 569)
   end
 .,.,
 
-module_eval(<<'.,.,', 'parser.y', 573)
+module_eval(<<'.,.,', 'parser.y', 579)
   def _reduce_143(val, _values, result)
             result = val[0].add(val[2])
 
@@ -2328,7 +2334,7 @@ module_eval(<<'.,.,', 'parser.y', 573)
   end
 .,.,
 
-module_eval(<<'.,.,', 'parser.y', 578)
+module_eval(<<'.,.,', 'parser.y', 584)
   def _reduce_144(val, _values, result)
             result = Declarations::ModuleTypeParams::TypeParam.new(name: val[2].value.to_sym,
                                                                variance: val[1],
@@ -2338,49 +2344,49 @@ module_eval(<<'.,.,', 'parser.y', 578)
   end
 .,.,
 
-module_eval(<<'.,.,', 'parser.y', 584)
+module_eval(<<'.,.,', 'parser.y', 590)
   def _reduce_145(val, _values, result)
      result = :invariant
     result
   end
 .,.,
 
-module_eval(<<'.,.,', 'parser.y', 585)
+module_eval(<<'.,.,', 'parser.y', 591)
   def _reduce_146(val, _values, result)
      result = :covariant
     result
   end
 .,.,
 
-module_eval(<<'.,.,', 'parser.y', 586)
+module_eval(<<'.,.,', 'parser.y', 592)
   def _reduce_147(val, _values, result)
      result = :contravariant
     result
   end
 .,.,
 
-module_eval(<<'.,.,', 'parser.y', 589)
+module_eval(<<'.,.,', 'parser.y', 595)
   def _reduce_148(val, _values, result)
      result = false
     result
   end
 .,.,
 
-module_eval(<<'.,.,', 'parser.y', 590)
+module_eval(<<'.,.,', 'parser.y', 596)
   def _reduce_149(val, _values, result)
      result = true
     result
   end
 .,.,
 
-module_eval(<<'.,.,', 'parser.y', 593)
+module_eval(<<'.,.,', 'parser.y', 599)
   def _reduce_150(val, _values, result)
      result = nil
     result
   end
 .,.,
 
-module_eval(<<'.,.,', 'parser.y', 595)
+module_eval(<<'.,.,', 'parser.y', 601)
   def _reduce_151(val, _values, result)
             val[1].each {|var| insert_bound_variable(var) }
 
@@ -2391,7 +2397,7 @@ module_eval(<<'.,.,', 'parser.y', 595)
   end
 .,.,
 
-module_eval(<<'.,.,', 'parser.y', 603)
+module_eval(<<'.,.,', 'parser.y', 609)
   def _reduce_152(val, _values, result)
             result = [val[0].value.to_sym]
 
@@ -2399,7 +2405,7 @@ module_eval(<<'.,.,', 'parser.y', 603)
   end
 .,.,
 
-module_eval(<<'.,.,', 'parser.y', 606)
+module_eval(<<'.,.,', 'parser.y', 612)
   def _reduce_153(val, _values, result)
             result = val[0].push(val[2].value.to_sym)
 
@@ -2407,7 +2413,7 @@ module_eval(<<'.,.,', 'parser.y', 606)
   end
 .,.,
 
-module_eval(<<'.,.,', 'parser.y', 611)
+module_eval(<<'.,.,', 'parser.y', 617)
   def _reduce_154(val, _values, result)
             location = val[1].location + val[3].location
         result = Members::Alias.new(
@@ -2423,7 +2429,7 @@ module_eval(<<'.,.,', 'parser.y', 611)
   end
 .,.,
 
-module_eval(<<'.,.,', 'parser.y', 622)
+module_eval(<<'.,.,', 'parser.y', 628)
   def _reduce_155(val, _values, result)
             location = val[1].location + val[7].location
         result = Members::Alias.new(
@@ -2439,7 +2445,7 @@ module_eval(<<'.,.,', 'parser.y', 622)
   end
 .,.,
 
-module_eval(<<'.,.,', 'parser.y', 635)
+module_eval(<<'.,.,', 'parser.y', 641)
   def _reduce_156(val, _values, result)
             location = val[1].location + val[4].location
         result = Declarations::Alias.new(name: val[2].value,
@@ -2452,7 +2458,7 @@ module_eval(<<'.,.,', 'parser.y', 635)
   end
 .,.,
 
-module_eval(<<'.,.,', 'parser.y', 645)
+module_eval(<<'.,.,', 'parser.y', 651)
   def _reduce_157(val, _values, result)
             location = val[0].location + val[2].location
         result = Declarations::Constant.new(name: val[0].value,
@@ -2464,7 +2470,7 @@ module_eval(<<'.,.,', 'parser.y', 645)
   end
 .,.,
 
-module_eval(<<'.,.,', 'parser.y', 652)
+module_eval(<<'.,.,', 'parser.y', 658)
   def _reduce_158(val, _values, result)
             location = (val[0] || val[1]).location + val[2].location
         name = TypeName.new(name: val[1].value, namespace: val[0]&.value || Namespace.empty)
@@ -2477,7 +2483,7 @@ module_eval(<<'.,.,', 'parser.y', 652)
   end
 .,.,
 
-module_eval(<<'.,.,', 'parser.y', 662)
+module_eval(<<'.,.,', 'parser.y', 668)
   def _reduce_159(val, _values, result)
             location = val[0].location + val[2].location
         result = Declarations::Global.new(name: val[0].value.to_sym,
@@ -2491,7 +2497,7 @@ module_eval(<<'.,.,', 'parser.y', 662)
 
 # reduce 160 omitted
 
-module_eval(<<'.,.,', 'parser.y', 672)
+module_eval(<<'.,.,', 'parser.y', 678)
   def _reduce_161(val, _values, result)
             types = case l = val[0]
                 when Types::Union
@@ -2506,7 +2512,7 @@ module_eval(<<'.,.,', 'parser.y', 672)
   end
 .,.,
 
-module_eval(<<'.,.,', 'parser.y', 682)
+module_eval(<<'.,.,', 'parser.y', 688)
   def _reduce_162(val, _values, result)
             types = case l = val[0]
                 when Types::Intersection
@@ -2522,7 +2528,7 @@ module_eval(<<'.,.,', 'parser.y', 682)
   end
 .,.,
 
-module_eval(<<'.,.,', 'parser.y', 695)
+module_eval(<<'.,.,', 'parser.y', 701)
   def _reduce_163(val, _values, result)
             result = Types::Bases::Void.new(location: val[0].location)
 
@@ -2530,7 +2536,7 @@ module_eval(<<'.,.,', 'parser.y', 695)
   end
 .,.,
 
-module_eval(<<'.,.,', 'parser.y', 698)
+module_eval(<<'.,.,', 'parser.y', 704)
   def _reduce_164(val, _values, result)
             RBS.logger.warn "`any` type is deprecated. Use `untyped` instead. (#{val[0].location.to_s})"
         result = Types::Bases::Any.new(location: val[0].location)
@@ -2539,7 +2545,7 @@ module_eval(<<'.,.,', 'parser.y', 698)
   end
 .,.,
 
-module_eval(<<'.,.,', 'parser.y', 702)
+module_eval(<<'.,.,', 'parser.y', 708)
   def _reduce_165(val, _values, result)
             result = Types::Bases::Any.new(location: val[0].location)
 
@@ -2547,7 +2553,7 @@ module_eval(<<'.,.,', 'parser.y', 702)
   end
 .,.,
 
-module_eval(<<'.,.,', 'parser.y', 705)
+module_eval(<<'.,.,', 'parser.y', 711)
   def _reduce_166(val, _values, result)
             result = Types::Bases::Bool.new(location: val[0].location)
 
@@ -2555,7 +2561,7 @@ module_eval(<<'.,.,', 'parser.y', 705)
   end
 .,.,
 
-module_eval(<<'.,.,', 'parser.y', 708)
+module_eval(<<'.,.,', 'parser.y', 714)
   def _reduce_167(val, _values, result)
             result = Types::Bases::Nil.new(location: val[0].location)
 
@@ -2563,7 +2569,7 @@ module_eval(<<'.,.,', 'parser.y', 708)
   end
 .,.,
 
-module_eval(<<'.,.,', 'parser.y', 711)
+module_eval(<<'.,.,', 'parser.y', 717)
   def _reduce_168(val, _values, result)
             result = Types::Bases::Top.new(location: val[0].location)
 
@@ -2571,7 +2577,7 @@ module_eval(<<'.,.,', 'parser.y', 711)
   end
 .,.,
 
-module_eval(<<'.,.,', 'parser.y', 714)
+module_eval(<<'.,.,', 'parser.y', 720)
   def _reduce_169(val, _values, result)
             result = Types::Bases::Bottom.new(location: val[0].location)
 
@@ -2579,7 +2585,7 @@ module_eval(<<'.,.,', 'parser.y', 714)
   end
 .,.,
 
-module_eval(<<'.,.,', 'parser.y', 717)
+module_eval(<<'.,.,', 'parser.y', 723)
   def _reduce_170(val, _values, result)
             result = Types::Bases::Self.new(location: val[0].location)
 
@@ -2587,7 +2593,7 @@ module_eval(<<'.,.,', 'parser.y', 717)
   end
 .,.,
 
-module_eval(<<'.,.,', 'parser.y', 720)
+module_eval(<<'.,.,', 'parser.y', 726)
   def _reduce_171(val, _values, result)
             result = Types::Optional.new(type: Types::Bases::Self.new(location: val[0].location),
                                      location: val[0].location)
@@ -2596,7 +2602,7 @@ module_eval(<<'.,.,', 'parser.y', 720)
   end
 .,.,
 
-module_eval(<<'.,.,', 'parser.y', 724)
+module_eval(<<'.,.,', 'parser.y', 730)
   def _reduce_172(val, _values, result)
             result = Types::Bases::Instance.new(location: val[0].location)
 
@@ -2604,7 +2610,7 @@ module_eval(<<'.,.,', 'parser.y', 724)
   end
 .,.,
 
-module_eval(<<'.,.,', 'parser.y', 727)
+module_eval(<<'.,.,', 'parser.y', 733)
   def _reduce_173(val, _values, result)
             result = Types::Bases::Class.new(location: val[0].location)
 
@@ -2612,7 +2618,7 @@ module_eval(<<'.,.,', 'parser.y', 727)
   end
 .,.,
 
-module_eval(<<'.,.,', 'parser.y', 730)
+module_eval(<<'.,.,', 'parser.y', 736)
   def _reduce_174(val, _values, result)
             result = Types::Literal.new(literal: true, location: val[0].location)
 
@@ -2620,7 +2626,7 @@ module_eval(<<'.,.,', 'parser.y', 730)
   end
 .,.,
 
-module_eval(<<'.,.,', 'parser.y', 733)
+module_eval(<<'.,.,', 'parser.y', 739)
   def _reduce_175(val, _values, result)
             result = Types::Literal.new(literal: false, location: val[0].location)
 
@@ -2628,7 +2634,7 @@ module_eval(<<'.,.,', 'parser.y', 733)
   end
 .,.,
 
-module_eval(<<'.,.,', 'parser.y', 736)
+module_eval(<<'.,.,', 'parser.y', 742)
   def _reduce_176(val, _values, result)
             result = Types::Literal.new(literal: val[0].value, location: val[0].location)
 
@@ -2636,7 +2642,7 @@ module_eval(<<'.,.,', 'parser.y', 736)
   end
 .,.,
 
-module_eval(<<'.,.,', 'parser.y', 739)
+module_eval(<<'.,.,', 'parser.y', 745)
   def _reduce_177(val, _values, result)
             result = Types::Literal.new(literal: val[0].value, location: val[0].location)
 
@@ -2644,7 +2650,7 @@ module_eval(<<'.,.,', 'parser.y', 739)
   end
 .,.,
 
-module_eval(<<'.,.,', 'parser.y', 742)
+module_eval(<<'.,.,', 'parser.y', 748)
   def _reduce_178(val, _values, result)
             result = Types::Literal.new(literal: val[0].value, location: val[0].location)
 
@@ -2652,7 +2658,7 @@ module_eval(<<'.,.,', 'parser.y', 742)
   end
 .,.,
 
-module_eval(<<'.,.,', 'parser.y', 745)
+module_eval(<<'.,.,', 'parser.y', 751)
   def _reduce_179(val, _values, result)
             name = val[0].value
         args = []
@@ -2675,7 +2681,7 @@ module_eval(<<'.,.,', 'parser.y', 745)
   end
 .,.,
 
-module_eval(<<'.,.,', 'parser.y', 763)
+module_eval(<<'.,.,', 'parser.y', 769)
   def _reduce_180(val, _values, result)
             name = val[0].value
         args = val[2]
@@ -2697,7 +2703,7 @@ module_eval(<<'.,.,', 'parser.y', 763)
   end
 .,.,
 
-module_eval(<<'.,.,', 'parser.y', 780)
+module_eval(<<'.,.,', 'parser.y', 786)
   def _reduce_181(val, _values, result)
             location = val[0].location + val[1].location
         result = Types::Tuple.new(types: [], location: location)
@@ -2706,7 +2712,7 @@ module_eval(<<'.,.,', 'parser.y', 780)
   end
 .,.,
 
-module_eval(<<'.,.,', 'parser.y', 784)
+module_eval(<<'.,.,', 'parser.y', 790)
   def _reduce_182(val, _values, result)
             location = val[0].location + val[2].location
         types = val[1]
@@ -2716,7 +2722,7 @@ module_eval(<<'.,.,', 'parser.y', 784)
   end
 .,.,
 
-module_eval(<<'.,.,', 'parser.y', 789)
+module_eval(<<'.,.,', 'parser.y', 795)
   def _reduce_183(val, _values, result)
             type = val[1].dup
         type.instance_eval do
@@ -2728,7 +2734,7 @@ module_eval(<<'.,.,', 'parser.y', 789)
   end
 .,.,
 
-module_eval(<<'.,.,', 'parser.y', 796)
+module_eval(<<'.,.,', 'parser.y', 802)
   def _reduce_184(val, _values, result)
             result = Types::ClassSingleton.new(name: val[2].value,
                                            location: val[0].location + val[3].location)
@@ -2737,7 +2743,7 @@ module_eval(<<'.,.,', 'parser.y', 796)
   end
 .,.,
 
-module_eval(<<'.,.,', 'parser.y', 800)
+module_eval(<<'.,.,', 'parser.y', 806)
   def _reduce_185(val, _values, result)
             result = Types::Proc.new(type: val[1].value, location: val[0].location + val[1].location)
 
@@ -2745,7 +2751,7 @@ module_eval(<<'.,.,', 'parser.y', 800)
   end
 .,.,
 
-module_eval(<<'.,.,', 'parser.y', 803)
+module_eval(<<'.,.,', 'parser.y', 809)
   def _reduce_186(val, _values, result)
             result = Types::Optional.new(type: val[0], location: val[0].location + val[1].location)
 
@@ -2755,7 +2761,7 @@ module_eval(<<'.,.,', 'parser.y', 803)
 
 # reduce 187 omitted
 
-module_eval(<<'.,.,', 'parser.y', 809)
+module_eval(<<'.,.,', 'parser.y', 815)
   def _reduce_188(val, _values, result)
             result = [val[0]]
 
@@ -2763,7 +2769,7 @@ module_eval(<<'.,.,', 'parser.y', 809)
   end
 .,.,
 
-module_eval(<<'.,.,', 'parser.y', 812)
+module_eval(<<'.,.,', 'parser.y', 818)
   def _reduce_189(val, _values, result)
             result = val[0] + [val[2]]
 
@@ -2771,7 +2777,7 @@ module_eval(<<'.,.,', 'parser.y', 812)
   end
 .,.,
 
-module_eval(<<'.,.,', 'parser.y', 817)
+module_eval(<<'.,.,', 'parser.y', 823)
   def _reduce_190(val, _values, result)
             result = Types::Record.new(
           fields: val[1],
@@ -2782,7 +2788,7 @@ module_eval(<<'.,.,', 'parser.y', 817)
   end
 .,.,
 
-module_eval(<<'.,.,', 'parser.y', 825)
+module_eval(<<'.,.,', 'parser.y', 831)
   def _reduce_191(val, _values, result)
             result = val[0]
 
@@ -2790,7 +2796,7 @@ module_eval(<<'.,.,', 'parser.y', 825)
   end
 .,.,
 
-module_eval(<<'.,.,', 'parser.y', 828)
+module_eval(<<'.,.,', 'parser.y', 834)
   def _reduce_192(val, _values, result)
             result = val[0].merge!(val[2])
 
@@ -2798,7 +2804,7 @@ module_eval(<<'.,.,', 'parser.y', 828)
   end
 .,.,
 
-module_eval(<<'.,.,', 'parser.y', 833)
+module_eval(<<'.,.,', 'parser.y', 839)
   def _reduce_193(val, _values, result)
             result = { val[0].value => val[2] }
 
@@ -2806,7 +2812,7 @@ module_eval(<<'.,.,', 'parser.y', 833)
   end
 .,.,
 
-module_eval(<<'.,.,', 'parser.y', 836)
+module_eval(<<'.,.,', 'parser.y', 842)
   def _reduce_194(val, _values, result)
             result = { val[0].value => val[2] }
 
@@ -2814,7 +2820,7 @@ module_eval(<<'.,.,', 'parser.y', 836)
   end
 .,.,
 
-module_eval(<<'.,.,', 'parser.y', 839)
+module_eval(<<'.,.,', 'parser.y', 845)
   def _reduce_195(val, _values, result)
             result = { val[0].value => val[2] }
 
@@ -2822,7 +2828,7 @@ module_eval(<<'.,.,', 'parser.y', 839)
   end
 .,.,
 
-module_eval(<<'.,.,', 'parser.y', 842)
+module_eval(<<'.,.,', 'parser.y', 848)
   def _reduce_196(val, _values, result)
             result = { val[0].value => val[1] }
 
@@ -2832,7 +2838,7 @@ module_eval(<<'.,.,', 'parser.y', 842)
 
 # reduce 197 omitted
 
-module_eval(<<'.,.,', 'parser.y', 848)
+module_eval(<<'.,.,', 'parser.y', 854)
   def _reduce_198(val, _values, result)
             result = val[0]
 
@@ -2848,7 +2854,7 @@ module_eval(<<'.,.,', 'parser.y', 848)
 
 # reduce 202 omitted
 
-module_eval(<<'.,.,', 'parser.y', 855)
+module_eval(<<'.,.,', 'parser.y', 861)
   def _reduce_203(val, _values, result)
             location = val[0].location + val[4].location
         type = Types::Function.new(
@@ -2868,7 +2874,7 @@ module_eval(<<'.,.,', 'parser.y', 855)
   end
 .,.,
 
-module_eval(<<'.,.,', 'parser.y', 870)
+module_eval(<<'.,.,', 'parser.y', 876)
   def _reduce_204(val, _values, result)
             location = val[0].location + val[1].location
         type = Types::Function.new(
@@ -2888,7 +2894,7 @@ module_eval(<<'.,.,', 'parser.y', 870)
   end
 .,.,
 
-module_eval(<<'.,.,', 'parser.y', 887)
+module_eval(<<'.,.,', 'parser.y', 893)
   def _reduce_205(val, _values, result)
             result = val[2]
         result[0].unshift(val[0])
@@ -2897,7 +2903,7 @@ module_eval(<<'.,.,', 'parser.y', 887)
   end
 .,.,
 
-module_eval(<<'.,.,', 'parser.y', 891)
+module_eval(<<'.,.,', 'parser.y', 897)
   def _reduce_206(val, _values, result)
             result = empty_params_result
         result[0].unshift(val[0])
@@ -2908,7 +2914,7 @@ module_eval(<<'.,.,', 'parser.y', 891)
 
 # reduce 207 omitted
 
-module_eval(<<'.,.,', 'parser.y', 898)
+module_eval(<<'.,.,', 'parser.y', 904)
   def _reduce_208(val, _values, result)
             result = val[2]
         result[1].unshift(val[0])
@@ -2917,7 +2923,7 @@ module_eval(<<'.,.,', 'parser.y', 898)
   end
 .,.,
 
-module_eval(<<'.,.,', 'parser.y', 902)
+module_eval(<<'.,.,', 'parser.y', 908)
   def _reduce_209(val, _values, result)
             result = empty_params_result
         result[1].unshift(val[0])
@@ -2928,7 +2934,7 @@ module_eval(<<'.,.,', 'parser.y', 902)
 
 # reduce 210 omitted
 
-module_eval(<<'.,.,', 'parser.y', 909)
+module_eval(<<'.,.,', 'parser.y', 915)
   def _reduce_211(val, _values, result)
             result = val[2]
         result[2] = val[0]
@@ -2937,7 +2943,7 @@ module_eval(<<'.,.,', 'parser.y', 909)
   end
 .,.,
 
-module_eval(<<'.,.,', 'parser.y', 913)
+module_eval(<<'.,.,', 'parser.y', 919)
   def _reduce_212(val, _values, result)
             result = empty_params_result
         result[2] = val[0]
@@ -2948,7 +2954,7 @@ module_eval(<<'.,.,', 'parser.y', 913)
 
 # reduce 213 omitted
 
-module_eval(<<'.,.,', 'parser.y', 920)
+module_eval(<<'.,.,', 'parser.y', 926)
   def _reduce_214(val, _values, result)
             result = val[2]
         result[3].unshift(val[0])
@@ -2957,7 +2963,7 @@ module_eval(<<'.,.,', 'parser.y', 920)
   end
 .,.,
 
-module_eval(<<'.,.,', 'parser.y', 924)
+module_eval(<<'.,.,', 'parser.y', 930)
   def _reduce_215(val, _values, result)
             result = empty_params_result
         result[3].unshift(val[0])
@@ -2968,7 +2974,7 @@ module_eval(<<'.,.,', 'parser.y', 924)
 
 # reduce 216 omitted
 
-module_eval(<<'.,.,', 'parser.y', 931)
+module_eval(<<'.,.,', 'parser.y', 937)
   def _reduce_217(val, _values, result)
             result = empty_params_result
 
@@ -2976,7 +2982,7 @@ module_eval(<<'.,.,', 'parser.y', 931)
   end
 .,.,
 
-module_eval(<<'.,.,', 'parser.y', 934)
+module_eval(<<'.,.,', 'parser.y', 940)
   def _reduce_218(val, _values, result)
             result = val[2]
         result[4].merge!(val[0])
@@ -2985,7 +2991,7 @@ module_eval(<<'.,.,', 'parser.y', 934)
   end
 .,.,
 
-module_eval(<<'.,.,', 'parser.y', 938)
+module_eval(<<'.,.,', 'parser.y', 944)
   def _reduce_219(val, _values, result)
             result = empty_params_result
         result[4].merge!(val[0])
@@ -2994,7 +3000,7 @@ module_eval(<<'.,.,', 'parser.y', 938)
   end
 .,.,
 
-module_eval(<<'.,.,', 'parser.y', 942)
+module_eval(<<'.,.,', 'parser.y', 948)
   def _reduce_220(val, _values, result)
             result = val[2]
         result[5].merge!(val[0])
@@ -3003,7 +3009,7 @@ module_eval(<<'.,.,', 'parser.y', 942)
   end
 .,.,
 
-module_eval(<<'.,.,', 'parser.y', 946)
+module_eval(<<'.,.,', 'parser.y', 952)
   def _reduce_221(val, _values, result)
             result = empty_params_result
         result[5].merge!(val[0])
@@ -3012,7 +3018,7 @@ module_eval(<<'.,.,', 'parser.y', 946)
   end
 .,.,
 
-module_eval(<<'.,.,', 'parser.y', 950)
+module_eval(<<'.,.,', 'parser.y', 956)
   def _reduce_222(val, _values, result)
             result = empty_params_result
         result[6] = val[0]
@@ -3021,7 +3027,7 @@ module_eval(<<'.,.,', 'parser.y', 950)
   end
 .,.,
 
-module_eval(<<'.,.,', 'parser.y', 956)
+module_eval(<<'.,.,', 'parser.y', 962)
   def _reduce_223(val, _values, result)
             result = Types::Function::Param.new(type: val[0],
                                             name: val[1]&.value&.to_sym)
@@ -3030,7 +3036,7 @@ module_eval(<<'.,.,', 'parser.y', 956)
   end
 .,.,
 
-module_eval(<<'.,.,', 'parser.y', 962)
+module_eval(<<'.,.,', 'parser.y', 968)
   def _reduce_224(val, _values, result)
             result = Types::Function::Param.new(type: val[1],
                                             name: val[2]&.value&.to_sym)
@@ -3039,7 +3045,7 @@ module_eval(<<'.,.,', 'parser.y', 962)
   end
 .,.,
 
-module_eval(<<'.,.,', 'parser.y', 968)
+module_eval(<<'.,.,', 'parser.y', 974)
   def _reduce_225(val, _values, result)
             result = Types::Function::Param.new(type: val[1],
                                             name: val[2]&.value&.to_sym)
@@ -3048,7 +3054,7 @@ module_eval(<<'.,.,', 'parser.y', 968)
   end
 .,.,
 
-module_eval(<<'.,.,', 'parser.y', 974)
+module_eval(<<'.,.,', 'parser.y', 980)
   def _reduce_226(val, _values, result)
             param = Types::Function::Param.new(type: val[1],
                                            name: val[2]&.value&.to_sym)
@@ -3058,7 +3064,7 @@ module_eval(<<'.,.,', 'parser.y', 974)
   end
 .,.,
 
-module_eval(<<'.,.,', 'parser.y', 981)
+module_eval(<<'.,.,', 'parser.y', 987)
   def _reduce_227(val, _values, result)
             param = Types::Function::Param.new(type: val[2],
                                            name: val[3]&.value&.to_sym)
@@ -3068,7 +3074,7 @@ module_eval(<<'.,.,', 'parser.y', 981)
   end
 .,.,
 
-module_eval(<<'.,.,', 'parser.y', 988)
+module_eval(<<'.,.,', 'parser.y', 994)
   def _reduce_228(val, _values, result)
             result = Types::Function::Param.new(type: val[1],
                                             name: val[2]&.value&.to_sym)
@@ -3085,7 +3091,7 @@ module_eval(<<'.,.,', 'parser.y', 988)
 
 # reduce 232 omitted
 
-module_eval(<<'.,.,', 'parser.y', 997)
+module_eval(<<'.,.,', 'parser.y', 1003)
   def _reduce_233(val, _values, result)
             namespace = val[0]&.value || Namespace.empty
         name = val[1].value.to_sym
@@ -3103,7 +3109,7 @@ module_eval(<<'.,.,', 'parser.y', 997)
 
 # reduce 236 omitted
 
-module_eval(<<'.,.,', 'parser.y', 1009)
+module_eval(<<'.,.,', 'parser.y', 1015)
   def _reduce_237(val, _values, result)
             namespace = val[0]&.value || Namespace.empty
         name = val[1].value.to_sym
@@ -3115,7 +3121,7 @@ module_eval(<<'.,.,', 'parser.y', 1009)
   end
 .,.,
 
-module_eval(<<'.,.,', 'parser.y', 1018)
+module_eval(<<'.,.,', 'parser.y', 1024)
   def _reduce_238(val, _values, result)
             namespace = val[0]&.value || Namespace.empty
         name = val[1].value.to_sym
@@ -3127,7 +3133,7 @@ module_eval(<<'.,.,', 'parser.y', 1018)
   end
 .,.,
 
-module_eval(<<'.,.,', 'parser.y', 1027)
+module_eval(<<'.,.,', 'parser.y', 1033)
   def _reduce_239(val, _values, result)
             result = nil
 
@@ -3135,7 +3141,7 @@ module_eval(<<'.,.,', 'parser.y', 1027)
   end
 .,.,
 
-module_eval(<<'.,.,', 'parser.y', 1030)
+module_eval(<<'.,.,', 'parser.y', 1036)
   def _reduce_240(val, _values, result)
             result = LocatedValue.new(value: Namespace.root, location: val[0].location)
 
@@ -3143,7 +3149,7 @@ module_eval(<<'.,.,', 'parser.y', 1030)
   end
 .,.,
 
-module_eval(<<'.,.,', 'parser.y', 1033)
+module_eval(<<'.,.,', 'parser.y', 1039)
   def _reduce_241(val, _values, result)
             namespace = Namespace.parse(val[1].value).absolute!
         result = LocatedValue.new(value: namespace, location: val[0].location + val[1].location)
@@ -3152,7 +3158,7 @@ module_eval(<<'.,.,', 'parser.y', 1033)
   end
 .,.,
 
-module_eval(<<'.,.,', 'parser.y', 1037)
+module_eval(<<'.,.,', 'parser.y', 1043)
   def _reduce_242(val, _values, result)
             namespace = Namespace.parse(val[0].value)
         result = LocatedValue.new(value: namespace, location: val[0].location)

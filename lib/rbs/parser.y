@@ -208,6 +208,7 @@ rule
         result = Members::AttrReader.new(name: val[2].value,
                                          ivar_name: nil,
                                          type: val[3],
+                                         kind: :instance,
                                          annotations: val[0],
                                          location: location,
                                          comment: leading_comment(val[0].first&.location || location))
@@ -217,6 +218,7 @@ rule
         result = Members::AttrReader.new(name: val[2].value.to_sym,
                                          ivar_name: val[3],
                                          type: val[5],
+                                         kind: :instance,
                                          annotations: val[0],
                                          location: location,
                                          comment: leading_comment(val[0].first&.location || location))
@@ -225,6 +227,7 @@ rule
         location = val[1].location + val[3].location
         result = Members::AttrWriter.new(name: val[2].value,
                                          ivar_name: nil,
+                                         kind: :instance,
                                          type: val[3],
                                          annotations: val[0],
                                          location: location,
@@ -234,6 +237,7 @@ rule
         location = val[1].location + val[5].location
         result = Members::AttrWriter.new(name: val[2].value.to_sym,
                                          ivar_name: val[3],
+                                         kind: :instance,
                                          type: val[5],
                                          annotations: val[0],
                                          location: location,
@@ -243,6 +247,7 @@ rule
         location = val[1].location + val[3].location
         result = Members::AttrAccessor.new(name: val[2].value,
                                            ivar_name: nil,
+                                           kind: :instance,
                                            type: val[3],
                                            annotations: val[0],
                                            location: location,
@@ -252,6 +257,7 @@ rule
         location = val[1].location + val[5].location
         result = Members::AttrAccessor.new(name: val[2].value.to_sym,
                                            ivar_name: val[3],
+                                           kind: :instance,
                                            type: val[5],
                                            annotations: val[0],
                                            location: location,
