@@ -30,9 +30,13 @@ class ObjectTest < StdlibTest
   end
 
   def test_display
+    stdout = STDOUT.dup
+    STDOUT.reopen(IO::NULL)
     Object.new.display()
     Object.new.display(STDOUT)
     Object.new.display(StringIO.new)
+  ensure
+    STDOUT.reopen(stdout)
   end
 
   def test_dup

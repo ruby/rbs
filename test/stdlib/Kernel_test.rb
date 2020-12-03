@@ -351,8 +351,11 @@ class KernelTest < StdlibTest
     end
 
     begin
+      $stderr = StringIO.new
       abort 'foo'
     rescue SystemExit
+    ensure
+      $stderr = STDERR
     end
   end
 
