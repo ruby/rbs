@@ -20,7 +20,7 @@ class RBS::Parser
   nonassoc kARROW
   preclow
 
-  expect 2
+  expect 5
 
 rule
 
@@ -202,63 +202,67 @@ rule
     | alias_member
     | signature
 
+  attribute_kind:
+      { result = :instance }
+    | kSELF kDOT { result = :singleton }
+
   attribute_member:
-      annotations kATTRREADER keyword type {
-        location = val[1].location + val[3].location
-        result = Members::AttrReader.new(name: val[2].value,
+      annotations kATTRREADER attribute_kind keyword type {
+        location = val[1].location + val[4].location
+        result = Members::AttrReader.new(name: val[3].value,
                                          ivar_name: nil,
-                                         type: val[3],
-                                         kind: :instance,
+                                         type: val[4],
+                                         kind: val[2],
                                          annotations: val[0],
                                          location: location,
                                          comment: leading_comment(val[0].first&.location || location))
       }
-    | annotations kATTRREADER method_name attr_var_opt kCOLON type {
-        location = val[1].location + val[5].location
-        result = Members::AttrReader.new(name: val[2].value.to_sym,
-                                         ivar_name: val[3],
-                                         type: val[5],
-                                         kind: :instance,
+    | annotations kATTRREADER attribute_kind method_name attr_var_opt kCOLON type {
+        location = val[1].location + val[6].location
+        result = Members::AttrReader.new(name: val[3].value.to_sym,
+                                         ivar_name: val[4],
+                                         type: val[6],
+                                         kind: val[2],
                                          annotations: val[0],
                                          location: location,
                                          comment: leading_comment(val[0].first&.location || location))
       }
-    | annotations kATTRWRITER keyword type {
-        location = val[1].location + val[3].location
-        result = Members::AttrWriter.new(name: val[2].value,
+    | annotations kATTRWRITER attribute_kind keyword type {
+        location = val[1].location + val[4].location
+        result = Members::AttrWriter.new(name: val[3].value,
                                          ivar_name: nil,
-                                         kind: :instance,
-                                         type: val[3],
+                                         kind: val[2],
+                                         type: val[4],
                                          annotations: val[0],
                                          location: location,
                                          comment: leading_comment(val[0].first&.location || location))
       }
-    | annotations kATTRWRITER method_name attr_var_opt kCOLON type {
-        location = val[1].location + val[5].location
-        result = Members::AttrWriter.new(name: val[2].value.to_sym,
-                                         ivar_name: val[3],
-                                         kind: :instance,
-                                         type: val[5],
+    | annotations kATTRWRITER attribute_kind method_name attr_var_opt kCOLON type {
+        location = val[1].location + val[6].location
+        result = Members::AttrWriter.new(name: val[3].value.to_sym,
+                                         ivar_name: val[4],
+                                         kind: val[2],
+                                         type: val[6],
                                          annotations: val[0],
                                          location: location,
                                          comment: leading_comment(val[0].first&.location || location))
       }
-    | annotations kATTRACCESSOR keyword type {
-        location = val[1].location + val[3].location
-        result = Members::AttrAccessor.new(name: val[2].value,
+    | annotations kATTRACCESSOR attribute_kind keyword type {
+        location = val[1].location + val[4].location
+        result = Members::AttrAccessor.new(name: val[3].value,
                                            ivar_name: nil,
-                                           kind: :instance,
-                                           type: val[3],
+                                           kind: val[2],
+                                           type: val[4],
                                            annotations: val[0],
                                            location: location,
                                            comment: leading_comment(val[0].first&.location || location))
       }
-    | annotations kATTRACCESSOR method_name attr_var_opt kCOLON type {
-        location = val[1].location + val[5].location
-        result = Members::AttrAccessor.new(name: val[2].value.to_sym,
-                                           ivar_name: val[3],
-                                           kind: :instance,
-                                           type: val[5],
+    | annotations kATTRACCESSOR attribute_kind method_name attr_var_opt kCOLON type {
+        location = val[1].location + val[6].location
+        result = Members::AttrAccessor.new(name: val[3].value.to_sym,
+                                           ivar_name: val[4],
+                                           kind: val[2],
+                                           type: val[6],
                                            annotations: val[0],
                                            location: location,
                                            comment: leading_comment(val[0].first&.location || location))

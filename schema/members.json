@@ -167,7 +167,7 @@
         },
         "kind": {
           "type": "string",
-          "enum": ["instance"]
+          "enum": ["instance", "singleton"]
         },
         "type": {
           "$ref": "types.json"

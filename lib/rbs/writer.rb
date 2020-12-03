@@ -285,7 +285,15 @@ module RBS
             else
               "(#{attr.ivar_name})"
             end
-      "attr_#{kind} #{attr.name}#{var}: #{attr.type}"
+
+      receiver = case attr.kind
+                 when :singleton
+                   "self."
+                 when :instance
+                   ""
+                 end
+
+      "attr_#{kind} #{receiver}#{attr.name}#{var}: #{attr.type}"
     end
 
     def preserve_empty_line(prev, decl)

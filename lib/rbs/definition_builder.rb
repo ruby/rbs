@@ -658,67 +658,10 @@ module RBS
             each_member_with_accessibility(d.decl.members) do |member, accessibility|
               case member
               when AST::Members::AttrReader, AST::Members::AttrAccessor, AST::Members::AttrWriter
-                name = member.name
-                type = member.type
-
-                ivar_name = case member.ivar_name
-                            when false
-                              nil
-                            else
-                              member.ivar_name || :"@#{member.name}"
-                            end
-
-                if member.is_a?(AST::Members::AttrReader) || member.is_a?(AST::Members::AttrAccessor)
-                  definition.methods[name] = Definition::Method.new(
-                    super_method: nil,
-                    defs: [
-                      Definition::Method::TypeDef.new(
-                        type: MethodType.new(
-                          type_params: [],
-                          type: Types::Function.empty(type),
-                          block: nil,
-                          location: nil
-                        ),
-                        member: member,
-                        defined_in: type_name,
-                        implemented_in: type_name
-                      )
-                    ],
-                    accessibility: accessibility,
-                    alias_of: nil
-                  )
-                end
-
-                if member.is_a?(AST::Members::AttrWriter) || member.is_a?(AST::Members::AttrAccessor)
-                  definition.methods[:"#{name}="] = Definition::Method.new(
-                    super_method: nil,
-                    defs: [
-                      Definition::Method::TypeDef.new(
-                        type: MethodType.new(
-                          type_params: [],
-                          type: Types::Function.empty(type).update(
-                            required_positionals: [Types::Function::Param.new(name: name, type: type)]
-                          ),
-                          block: nil,
-                          location: nil
-                        ),
-                        member: member,
-                        defined_in: type_name,
-                        implemented_in: type_name
-                      ),
-                    ],
-                    accessibility: accessibility,
-                    alias_of: nil
-                  )
-                end
-
-                if ivar_name
-                  definition.instance_variables[ivar_name] = Definition::Variable.new(
-                    parent_variable: nil,
-                    type: type,
-                    declared_in: type_name
-                  )
-                end
+                build_attribute(type_name: type_name,
+                                definition: definition,
+                                member: member,
+                                accessibility: accessibility)
 
               when AST::Members::InstanceVariable
                 definition.instance_variables[member.name] = Definition::Variable.new(
@@ -982,8 +925,14 @@ module RBS
           end
 
           entry.decls.each do |d|
-            each_member_with_accessibility(d.decl.members) do |member, _|
+            each_member_with_accessibility(d.decl.members) do |member, accessibility|
               case member
+              when AST::Members::AttrReader, AST::Members::AttrAccessor, AST::Members::AttrWriter
+                build_attribute(type_name: type_name,
+                                definition: definition,
+                                member: member,
+                                accessibility: accessibility)
+
               when AST::Members::ClassInstanceVariable
                 definition.instance_variables[member.name] = Definition::Variable.new(
                   parent_variable: nil,
@@ -1001,6 +950,70 @@ module RBS
             end
           end
         end
+      end
+    end
+
+    def build_attribute(type_name:, definition:, member:, accessibility:)
+      name = member.name
+      type = member.type
+
+      ivar_name = case member.ivar_name
+                  when false
+                    nil
+                  else
+                    member.ivar_name || :"@#{member.name}"
+                  end
+
+      if member.is_a?(AST::Members::AttrReader) || member.is_a?(AST::Members::AttrAccessor)
+        definition.methods[name] = Definition::Method.new(
+          super_method: nil,
+          defs: [
+            Definition::Method::TypeDef.new(
+              type: MethodType.new(
+                type_params: [],
+                type: Types::Function.empty(type),
+                block: nil,
+                location: nil
+              ),
+              member: member,
+              defined_in: type_name,
+              implemented_in: type_name
+            )
+          ],
+          accessibility: accessibility,
+          alias_of: nil
+        )
+      end
+
+      if member.is_a?(AST::Members::AttrWriter) || member.is_a?(AST::Members::AttrAccessor)
+        definition.methods[:"#{name}="] = Definition::Method.new(
+          super_method: nil,
+          defs: [
+            Definition::Method::TypeDef.new(
+              type: MethodType.new(
+                type_params: [],
+                type: Types::Function.empty(type).update(
+                  required_positionals: [Types::Function::Param.new(name: name, type: type)]
+                ),
+                block: nil,
+                location: nil
+              ),
+              member: member,
+              defined_in: type_name,
+              implemented_in: type_name
+            ),
+          ],
+          accessibility: accessibility,
+          alias_of: nil
+        )
+      end
+
+      if ivar_name
+        definition.instance_variables[ivar_name] = Definition::Variable.new(
+          parent_variable: nil,
+          type: type,
+          declared_in: type_name
+        )
       end
     end
 

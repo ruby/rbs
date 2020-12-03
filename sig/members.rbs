@@ -91,7 +91,7 @@ module RBS
       end
 
       module Attribute
-        type kind = :instance
+        type kind = :instance | :singleton
 
         attr_reader name: Symbol
         attr_reader type: Types::t
