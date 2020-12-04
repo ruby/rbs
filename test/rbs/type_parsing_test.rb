@@ -428,6 +428,27 @@ class RBS::TypeParsingTest < Minitest::Test
 
       assert_equal "^(?_bar: nil, **untyped rest) -> void", type.location.source
     end
+
+    Parser.parse_type("^-> void").yield_self do |type|
+      assert_instance_of Types::Proc, type
+    end
+  end
+
+  def test_proc_with_block
+    Parser.parse_type("^() { () -> void } -> void").tap do |type|
+      assert_instance_of Types::Proc, type
+      assert_instance_of Types::Block, type.block
+    end
+
+    Parser.parse_type("^() { -> void } -> void").tap do |type|
+      assert_instance_of Types::Proc, type
+      assert_instance_of Types::Block, type.block
+    end
+
+    Parser.parse_type("^{ -> void } -> void").tap do |type|
+      assert_instance_of Types::Proc, type
+      assert_instance_of Types::Block, type.block
+    end
   end
 
   def test_optional
