@@ -103,7 +103,7 @@ module RBS
           when :keyrest
             rest_keywords = Types::Function::Param.new(name: nil, type: untyped)
           when :block
-            block = MethodType::Block.new(
+            block = Types::Block.new(
               type: Types::Function.empty(untyped).update(rest_positionals: Types::Function::Param.new(name: nil, type: untyped)),
               required: true
             )

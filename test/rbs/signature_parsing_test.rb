@@ -135,7 +135,7 @@ class RBS::SignatureParsingTest < Minitest::Test
           assert_equal "(untyped) -> Integer", t2.location.source
 
           assert_equal [:X], t3.type_params
-          assert_instance_of MethodType::Block, t3.block
+          assert_instance_of Types::Block, t3.block
           assert_instance_of Types::Variable, t3.block.type.required_positionals[0].type
           assert_instance_of Types::Variable, t3.block.type.return_type
           assert_equal "[X] { (A) -> X } -> Integer", t3.location.source
@@ -430,14 +430,14 @@ end
           m.types[1].yield_self do |ty|
             assert_instance_of MethodType, ty
             assert_equal "?{ -> void } -> Integer", ty.location.source
-            assert_instance_of MethodType::Block, ty.block
+            assert_instance_of Types::Block, ty.block
             refute ty.block.required
           end
 
           m.types[2].yield_self do |ty|
             assert_instance_of MethodType, ty
             assert_equal "[A] () { (String, ?Object, *Float, Symbol, foo: bool, ?bar: untyped, **Y) -> X } -> A", ty.location.source
-            assert_instance_of MethodType::Block, ty.block
+            assert_instance_of Types::Block, ty.block
             assert ty.block.required
           end
         end

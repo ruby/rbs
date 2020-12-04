@@ -283,7 +283,7 @@ module TypeAssertions
          end
 
     mt = mt.update(block: if mt.block
-                            RBS::MethodType::Block.new(
+                            RBS::Types::Block.new(
                               type: mt.block.type.with_return_type(RBS::Types::Bases::Any.new(location: nil)),
                               required: mt.block.required
                             )

@@ -484,26 +484,13 @@ rule
       }
 
   method_type:
-      start_merged_scope type_params params_opt block_opt kARROW simple_type {
+      start_merged_scope type_params proc_type {
         reset_variable_scope
 
-        location = (val[1] || val[2] || val[3] || val[4]).location + val[5].location
+        location = (val[1] || val[2]).location + val[2].location
         type_params = val[1]&.value || []
 
-        params = val[2]&.value || empty_params_result
-
-        type = Types::Function.new(
-          required_positionals: params[0],
-          optional_positionals: params[1],
-          rest_positionals: params[2],
-          trailing_positionals: params[3],
-          required_keywords: params[4],
-          optional_keywords: params[5],
-          rest_keywords: params[6],
-          return_type: val[5]
-        )
-
-        block = val[3]&.value
+        type, block = val[2].value
 
         result = MethodType.new(type_params: type_params,
                                 type: type,
@@ -517,14 +504,13 @@ rule
         result = LocatedValue.new(value: val[1], location: val[0].location + val[2].location)
       }
 
-  block_opt:
-      { result = nil }
-    | kLBRACE function_type kRBRACE {
-        block = MethodType::Block.new(type: val[1].value, required: true)
+  block:
+      kLBRACE simple_function_type kRBRACE {
+        block = Types::Block.new(type: val[1].value, required: true)
         result = LocatedValue.new(value: block, location: val[0].location + val[2].location)
       }
-    | kQUESTION kLBRACE function_type kRBRACE {
-        block = MethodType::Block.new(type: val[2].value, required: false)
+    | kQUESTION kLBRACE simple_function_type kRBRACE {
+        block = Types::Block.new(type: val[2].value, required: false)
         result = LocatedValue.new(value: block, location: val[0].location + val[3].location)
       }
 
@@ -807,8 +793,9 @@ rule
         result = Types::ClassSingleton.new(name: val[2].value,
                                            location: val[0].location + val[3].location)
       }
-    | kHAT function_type {
-        result = Types::Proc.new(type: val[1].value, location: val[0].location + val[1].location)
+    | kHAT proc_type {
+        type, block = val[1].value
+        result = Types::Proc.new(type: type, block: block, location: val[0].location + val[1].location)
       }
     | simple_type kQUESTION {
         result = Types::Optional.new(type: val[0], location: val[0].location + val[1].location)
@@ -861,7 +848,32 @@ rule
 
   keyword: tLKEYWORD | tUKEYWORD | tLKEYWORD_Q_E | tUKEYWORD_Q_E
 
-  function_type:
+  proc_type:
+      params_opt block kARROW simple_type {
+        location = (val[0] || val[1] || val[2]).location + val[3].location
+
+        params = val[0]&.value || [[], [], nil, [], {}, {}, nil]
+
+        type = Types::Function.new(
+          required_positionals: params[0],
+          optional_positionals: params[1],
+          rest_positionals: params[2],
+          trailing_positionals: params[3],
+          required_keywords: params[4],
+          optional_keywords: params[5],
+          rest_keywords: params[6],
+          return_type: val[3]
+        )
+
+        block = val[1].value
+
+        result = LocatedValue.new(value: [type, block], location: location)
+      }
+    | simple_function_type {
+        result = LocatedValue.new(value: [val[0].value, nil], location: val[0].location)
+      }
+
+  simple_function_type:
       kLPAREN params kRPAREN kARROW simple_type {
         location = val[0].location + val[4].location
         type = Types::Function.new(
@@ -893,7 +905,7 @@ rule
         result = LocatedValue.new(value: type, location: location)
       }
 
-    params:
+  params:
       required_positional kCOMMA params {
         result = val[2]
         result[0].unshift(val[0])
