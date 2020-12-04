@@ -484,26 +484,13 @@ rule
       }
 
   method_type:
-      start_merged_scope type_params params_opt block_opt kARROW simple_type {
+      start_merged_scope type_params proc_type {
         reset_variable_scope
 
-        location = (val[1] || val[2] || val[3] || val[4]).location + val[5].location
+        location = (val[1] || val[2]).location + val[2].location
         type_params = val[1]&.value || []
 
-        params = val[2]&.value || empty_params_result
-
-        type = Types::Function.new(
-          required_positionals: params[0],
-          optional_positionals: params[1],
-          rest_positionals: params[2],
-          trailing_positionals: params[3],
-          required_keywords: params[4],
-          optional_keywords: params[5],
-          rest_keywords: params[6],
-          return_type: val[5]
-        )
-
-        block = val[3]&.value
+        type, block = val[2].value
 
         result = MethodType.new(type_params: type_params,
                                 type: type,
@@ -516,10 +503,6 @@ rule
     | kLPAREN params kRPAREN {
         result = LocatedValue.new(value: val[1], location: val[0].location + val[2].location)
       }
-
-  block_opt:
-      { result = nil }
-    | block { result = val[0] }
 
   block:
       kLBRACE simple_function_type kRBRACE {
