@@ -975,46 +975,72 @@ module RBS
           required: required
         )
       end
+
+      def map_type(&block)
+        Block.new(
+          required: required,
+          type: type.map_type(&block)
+        )
+      end
     end
 
     class Proc
       attr_reader :type
+      attr_reader :block
       attr_reader :location
 
-      def initialize(location:, type:)
+      def initialize(location:, type:, block:)
         @type = type
+        @block = block
         @location = location
       end
 
       def ==(other)
-        other.is_a?(Proc) && other.type == type
+        other.is_a?(Proc) && other.type == type && other.block == block
       end
 
       alias eql? ==
 
       def hash
-        self.class.hash ^ type.hash
+        self.class.hash ^ type.hash ^ block.hash
       end
 
       def free_variables(set = Set[])
         type.free_variables(set)
+        block&.type&.free_variables(set)
+        set
       end
 
       def to_json(*a)
-        { class: :proc, type: type, location: location }.to_json(*a)
+        {
+          class: :proc,
+          type: type,
+          block: block,
+          location: location
+        }.to_json(*a)
       end
 
       def sub(s)
-        self.class.new(type: type.sub(s), location: location)
+        self.class.new(type: type.sub(s), block: block&.sub(s), location: location)
       end
 
       def to_s(level = 0)
-        "^(#{type.param_to_s}) -> #{type.return_to_s}".lstrip
+        case
+        when b = block
+          if b.required
+            "^(#{type.param_to_s}) { #{b.type.param_to_s} -> #{b.type.return_to_s} } -> #{type.return_to_s}"
+          else
+            "^(#{type.param_to_s}) ?{ #{b.type.param_to_s} -> #{b.type.return_to_s} } -> #{type.return_to_s}"
+          end
+        else
+          "^(#{type.param_to_s}) -> #{type.return_to_s}"
+        end
       end
 
       def each_type(&block)
         if block
           type.each_type(&block)
+          self.block&.type&.each_type(&block)
         else
           enum_for :each_type
         end
@@ -1023,6 +1049,7 @@ module RBS
       def map_type_name(&block)
         Proc.new(
           type: type.map_type_name(&block),
+          block: self.block&.map_type {|type| type.map_type_name(&block) },
           location: location
         )
       end

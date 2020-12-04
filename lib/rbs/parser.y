@@ -808,7 +808,7 @@ rule
                                            location: val[0].location + val[3].location)
       }
     | kHAT function_type {
-        result = Types::Proc.new(type: val[1].value, location: val[0].location + val[1].location)
+        result = Types::Proc.new(type: val[1].value, block: nil, location: val[0].location + val[1].location)
       }
     | simple_type kQUESTION {
         result = Types::Optional.new(type: val[0], location: val[0].location + val[1].location)

@@ -345,13 +345,16 @@ module RBS
       def to_json: (*untyped) -> String
 
       def sub: (Substitution) -> Block
+
+      def map_type: () { (Types::t) -> Types::t } -> Block
     end
 
     class Proc
       attr_reader type: Function
+      attr_reader block: Block?
       attr_reader location: Location?
 
-      def initialize: (location: Location?, type: Function) -> void
+      def initialize: (location: Location?, type: Function, block: Block?) -> void
 
       include _TypeBase
     end

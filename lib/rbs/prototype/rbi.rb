@@ -485,7 +485,7 @@ module RBS
           Types::Tuple.new(types: types, location: nil)
         else
           if proc_type?(type_node)
-            Types::Proc.new(type: method_type(nil, type_node, variables: variables).type, location: nil)
+            Types::Proc.new(type: method_type(nil, type_node, variables: variables).type, block: nil, location: nil)
           else
             STDERR.puts "Unexpected type_node:"
             PP.pp type_node, STDERR

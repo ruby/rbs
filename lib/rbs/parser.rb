@@ -2765,7 +2765,7 @@ module_eval(<<'.,.,', 'parser.y', 806)
 
 module_eval(<<'.,.,', 'parser.y', 810)
   def _reduce_187(val, _values, result)
-            result = Types::Proc.new(type: val[1].value, location: val[0].location + val[1].location)
+            result = Types::Proc.new(type: val[1].value, block: nil, location: val[0].location + val[1].location)
 
     result
   end
