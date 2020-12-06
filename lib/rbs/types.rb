@@ -1028,9 +1028,9 @@ module RBS
         case
         when b = block
           if b.required
-            "^(#{type.param_to_s}) { #{b.type.param_to_s} -> #{b.type.return_to_s} } -> #{type.return_to_s}"
+            "^(#{type.param_to_s}) { (#{b.type.param_to_s}) -> #{b.type.return_to_s} } -> #{type.return_to_s}"
           else
-            "^(#{type.param_to_s}) ?{ #{b.type.param_to_s} -> #{b.type.return_to_s} } -> #{type.return_to_s}"
+            "^(#{type.param_to_s}) ?{ (#{b.type.param_to_s}) -> #{b.type.return_to_s} } -> #{type.return_to_s}"
           end
         else
           "^(#{type.param_to_s}) -> #{type.return_to_s}"
