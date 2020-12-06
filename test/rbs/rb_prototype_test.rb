@@ -250,6 +250,12 @@ class Hello
   attr_reader :x
   attr_accessor :y, :z
   attr_writer foo, :a, 'b'
+
+  class << self
+    attr_reader :x2
+    attr_accessor :y2, :z2
+    attr_writer foo2, :a2, 'b2'
+  end
 end
 
 module Mod
@@ -278,6 +284,16 @@ class Hello
   attr_writer a: untyped
 
   attr_writer b: untyped
+
+  attr_reader self.x2: untyped
+
+  attr_accessor self.y2: untyped
+
+  attr_accessor self.z2: untyped
+
+  attr_writer self.a2: untyped
+
+  attr_writer self.b2: untyped
 end
 
 module Mod
