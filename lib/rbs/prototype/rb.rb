@@ -15,6 +15,14 @@ module RBS
             :instance
           end
         end
+
+        def attribute_kind
+          if singleton
+            :singleton
+          else
+            :instance
+          end
+        end
       end
 
       attr_reader :source_decls
@@ -202,7 +210,7 @@ module RBS
                   name: name,
                   ivar_name: nil,
                   type: Types::Bases::Any.new(location: nil),
-                  kind: :instance,
+                  kind: context.attribute_kind,
                   location: nil,
                   comment: comments[node.first_lineno - 1],
                   annotations: []
@@ -216,7 +224,7 @@ module RBS
                   name: name,
                   ivar_name: nil,
                   type: Types::Bases::Any.new(location: nil),
-                  kind: :instance,
+                  kind: context.attribute_kind,
                   location: nil,
                   comment: comments[node.first_lineno - 1],
                   annotations: []
@@ -230,7 +238,7 @@ module RBS
                   name: name,
                   ivar_name: nil,
                   type: Types::Bases::Any.new(location: nil),
-                  kind: :instance,
+                  kind: context.attribute_kind,
                   location: nil,
                   comment: comments[node.first_lineno - 1],
                   annotations: []
