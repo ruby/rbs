@@ -2,6 +2,10 @@
 
 ## master
 
+## 0.20.1 (2020-12-06)
+
+* Make the order of RBS load reproducible ([#508](https://github.com/ruby/rbs/pull/508))
+
 ## 0.20.0 (2020-12-06)
 
 * Signature updates for `TSort`, `DBM`, `Time`, and `Hash` ([#496](https://github.com/ruby/rbs/pull/496), [#497](https://github.com/ruby/rbs/pull/497), [#499](https://github.com/ruby/rbs/pull/499), [#507](https://github.com/ruby/rbs/pull/507))
