@@ -558,7 +558,7 @@ module RBS
             )
           end
 
-          unless array.all? {|pair| pair[1] == :public}
+          unless array.all? {|pair| pair[1] == :public }
             raise InconsistentMethodVisibilityError.new(
               type_name: type_name,
               method_name: method_name,
@@ -658,10 +658,14 @@ module RBS
             each_member_with_accessibility(d.decl.members) do |member, accessibility|
               case member
               when AST::Members::AttrReader, AST::Members::AttrAccessor, AST::Members::AttrWriter
-                build_attribute(type_name: type_name,
-                                definition: definition,
-                                member: member,
-                                accessibility: accessibility)
+                if member.kind == :instance
+                  build_attribute(
+                    type_name: type_name,
+                    definition: definition,
+                    member: member,
+                    accessibility: accessibility
+                  )
+                end
 
               when AST::Members::InstanceVariable
                 definition.instance_variables[member.name] = Definition::Variable.new(
@@ -928,10 +932,12 @@ module RBS
             each_member_with_accessibility(d.decl.members) do |member, accessibility|
               case member
               when AST::Members::AttrReader, AST::Members::AttrAccessor, AST::Members::AttrWriter
-                build_attribute(type_name: type_name,
-                                definition: definition,
-                                member: member,
-                                accessibility: accessibility)
+                if member.kind == :singleton
+                  build_attribute(type_name: type_name,
+                                  definition: definition,
+                                  member: member,
+                                  accessibility: accessibility)
+                end
 
               when AST::Members::ClassInstanceVariable
                 definition.instance_variables[member.name] = Definition::Variable.new(

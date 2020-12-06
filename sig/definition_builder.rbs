@@ -93,5 +93,8 @@ module RBS
     def validate_parameter_variance: (decl: AST::Declarations::Class | AST::Declarations::Module | AST::Declarations::Interface, methods: Hash[Symbol, Definition::Method]) -> void
 
     def expand_alias: (TypeName) -> Types::t
+
+    type attributes = AST::Members::AttrReader | AST::Members::AttrWriter | AST::Members::AttrAccessor
+    def build_attribute: (type_name: TypeName, definition: Definition, member: attributes, accessibility: Definition::accessibility) -> void
   end
 end
