@@ -2,6 +2,14 @@
 
 ## master
 
+## 0.20.0 (2020-12-06)
+
+* Signature updates for `TSort`, `DBM`, `Time`, and `Hash` ([#496](https://github.com/ruby/rbs/pull/496), [#497](https://github.com/ruby/rbs/pull/497), [#499](https://github.com/ruby/rbs/pull/499), [#507](https://github.com/ruby/rbs/pull/507))
+* Add _singleton attribute_ syntax ([#502](https://github.com/ruby/rbs/pull/502), [#506](https://github.com/ruby/rbs/pull/506), [#505](https://github.com/ruby/rbs/pull/505))
+* Proc types with blocks ([#503](https://github.com/ruby/rbs/pull/503))
+* Add support for escape sequences in string literal types ([#501](https://github.com/ruby/rbs/pull/501))
+* Fix runtime type checking of blocks with keyword args ([#500](https://github.com/ruby/rbs/pull/500))
+
 ## 0.19.0 (2020-12-02)
 
 * Signature updates for `Monitor` and File ([#485](https://github.com/ruby/rbs/pull/485), [#495](https://github.com/ruby/rbs/pull/495))
