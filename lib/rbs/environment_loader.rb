@@ -102,7 +102,7 @@ module RBS
           end
         end
 
-        path.each_child do |child|
+        path.children.sort.each do |child|
           each_file(child, immediate: false, skip_hidden: skip_hidden, &block)
         end
       end
