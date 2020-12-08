@@ -100,6 +100,8 @@ end
 
 unless ::Proc.instance_methods.include?(:ruby2_keywords)
   class Proc
-    def ruby2_keywords; end
+    def ruby2_keywords
+      self
+    end
   end
 end
