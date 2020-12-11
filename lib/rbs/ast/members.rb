@@ -20,7 +20,7 @@ module RBS
           @annotations = annotations
           @location = location
           @comment = comment
-          @overload = overload
+          @overload = overload ? true : false
         end
 
         def ==(other)
