@@ -521,7 +521,7 @@ module RBS
                 InvalidTypeApplicationError.check!(
                   type_name: interface_name,
                   args: interface_args,
-                  params: interface_definition.type_params_decl,
+                  params: interface_definition.type_params_decl.each.map(&:name),
                   location: member.location
                 )
 

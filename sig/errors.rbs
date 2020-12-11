@@ -1,0 +1,20 @@
+module RBS
+  interface _Kinded
+    def kind: () -> (:instance | :singleton)
+  end
+
+  module MethodNameHelper : _Kinded
+    def method_name_string: () -> String
+  end
+
+  class InvalidTypeApplicationError < StandardError
+    attr_reader type_name: TypeName
+    attr_reader args: Array[Types::t]
+    attr_reader params: Array[Symbol]
+    attr_reader location: Location?
+
+    def initialize: (type_name: TypeName, args: Array[Types::t], params: Array[Symbol], location: Location?) -> void
+
+    def self.check!: (type_name: TypeName, args: Array[Types::t], params: Array[Symbol], location: Location?) -> void
+  end
+end

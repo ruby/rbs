@@ -18,8 +18,9 @@ module RBS
     def validate_type(type, context:)
       case type
       when Types::ClassInstance, Types::Interface
+        # @type var type: Types::ClassInstance | Types::Interface
         if type.name.namespace.relative?
-          type = absolute_type(type, context: context) do |type|
+          type = _ = absolute_type(type, context: context) do |_|
             NoTypeFoundError.check!(type.name.absolute!, env: env, location: type.location)
           end
         end
@@ -43,7 +44,8 @@ module RBS
         )
 
       when Types::Alias, Types::ClassSingleton
-        type = absolute_type(type, context: context) { type.name.absolute! }
+        # @type var type: Types::Alias | Types::ClassSingleton
+        type = _ = absolute_type(type, context: context) { type.name.absolute! }
         NoTypeFoundError.check!(type.name, env: env, location: type.location)
       end
 
