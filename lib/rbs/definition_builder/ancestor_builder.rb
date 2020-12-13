@@ -70,6 +70,18 @@ module RBS
             extended_modules: nil
           )
         end
+
+        def self.interface(type_name:, params:)
+          new(
+            type_name: type_name,
+            params: params,
+            self_types: nil,
+            included_modules: [],
+            prepended_modules: nil,
+            super_class: nil,
+            extended_modules: nil
+          )
+        end
       end
 
       attr_reader :env
@@ -80,6 +92,9 @@ module RBS
       attr_reader :one_singleton_ancestors_cache
       attr_reader :singleton_ancestors_cache
 
+      attr_reader :one_interface_ancestors_cache
+      attr_reader :interface_ancestors_cache
+
       def initialize(env:)
         @env = env
 
@@ -88,6 +103,9 @@ module RBS
 
         @one_singleton_ancestors_cache = {}
         @singleton_ancestors_cache = {}
+
+        @one_interface_ancestors_cache = {}
+        @interface_ancestors_cache = {}
       end
 
       def validate_super_class!(type_name, entry)
@@ -206,6 +224,58 @@ module RBS
         one_singleton_ancestors_cache[type_name] = ancestors
       end
 
+      def one_interface_ancestors(type_name)
+        one_interface_ancestors_cache[type_name] ||=
+          begin
+            entry = env.interface_decls[type_name] or raise "Unknown name for one_interface_ancestors: #{type_name}"
+            params = entry.decl.type_params.each.map(&:name)
+
+            OneAncestors.interface(type_name: type_name, params: params).tap do |ancestors|
+              mixin_ancestors0(entry.decl,
+                               align_params: nil,
+                               included_modules: ancestors.included_modules,
+                               prepended_modules: nil,
+                               extended_modules: nil)
+            end
+          end
+      end
+
+      def mixin_ancestors0(decl, align_params:, included_modules:, extended_modules:, prepended_modules:)
+        decl.each_mixin do |member|
+          case member
+          when AST::Members::Include
+            if included_modules
+              NoMixinFoundError.check!(member.name, env: env, member: member)
+
+              module_name = member.name
+              module_args = member.args.map {|type| align_params ? type.sub(align_params) : type }
+
+              included_modules << Definition::Ancestor::Instance.new(name: module_name, args: module_args)
+            end
+
+          when AST::Members::Prepend
+            if prepended_modules
+              NoMixinFoundError.check!(member.name, env: env, member: member)
+
+              module_name = member.name
+              module_args = member.args.map {|type| align_params ? type.sub(align_params) : type }
+
+              prepended_modules << Definition::Ancestor::Instance.new(name: module_name, args: module_args)
+            end
+
+          when AST::Members::Extend
+            if extended_modules
+              NoMixinFoundError.check!(member.name, env: env, member: member)
+
+              module_name = member.name
+              module_args = member.args
+
+              extended_modules << Definition::Ancestor::Instance.new(name: module_name, args: module_args)
+            end
+          end
+        end
+      end
+
       def mixin_ancestors(entry, included_modules:, extended_modules:, prepended_modules:)
         entry.decls.each do |d|
           decl = d.decl
@@ -215,39 +285,11 @@ module RBS
             Types::Variable.build(entry.type_params.each.map(&:name))
           )
 
-          decl.each_mixin do |member|
-            case member
-            when AST::Members::Include
-              if included_modules
-                NoMixinFoundError.check!(member.name, env: env, member: member)
-
-                module_name = member.name
-                module_args = member.args.map {|type| type.sub(align_params) }
-
-                included_modules << Definition::Ancestor::Instance.new(name: module_name, args: module_args)
-              end
-
-            when AST::Members::Prepend
-              if prepended_modules
-                NoMixinFoundError.check!(member.name, env: env, member: member)
-
-                module_name = member.name
-                module_args = member.args.map {|type| type.sub(align_params) }
-
-                prepended_modules << Definition::Ancestor::Instance.new(name: module_name, args: module_args)
-              end
-
-            when AST::Members::Extend
-              if extended_modules
-                NoMixinFoundError.check!(member.name, env: env, member: member)
-
-                module_name = member.name
-                module_args = member.args
-
-                extended_modules << Definition::Ancestor::Instance.new(name: module_name, args: module_args)
-              end
-            end
-          end
+          mixin_ancestors0(decl,
+                           align_params: align_params,
+                           included_modules: included_modules,
+                           extended_modules: extended_modules,
+                           prepended_modules: prepended_modules)
         end
       end
 
@@ -359,6 +401,37 @@ module RBS
 
         singleton_ancestors_cache[type_name] = Definition::SingletonAncestors.new(
           type_name: type_name,
+          ancestors: ancestors
+        )
+      end
+
+      def interface_ancestors(type_name, building_ancestors: [])
+        as = interface_ancestors_cache[type_name] and return as
+
+        entry = env.interface_decls[type_name] or raise "Unknown name for interface_ancestors: #{type_name}"
+        params = entry.decl.type_params.each.map(&:name)
+        args = Types::Variable.build(params)
+        self_ancestor = Definition::Ancestor::Instance.new(name: type_name, args: args)
+
+        RecursiveAncestorError.check!(self_ancestor,
+                                      ancestors: building_ancestors,
+                                      location: entry.decl.location)
+        building_ancestors.push self_ancestor
+
+        one_ancestors = one_interface_ancestors(type_name)
+        ancestors = []
+
+        one_ancestors.included_modules.each do |a|
+          included_ancestors = interface_ancestors(a.name, building_ancestors: building_ancestors)
+          ancestors.unshift(*included_ancestors.apply(a.args, location: entry.decl.location))
+        end
+
+        ancestors.unshift(self_ancestor)
+        building_ancestors.pop
+
+        interface_ancestors_cache[type_name] = Definition::InstanceAncestors.new(
+          type_name: type_name,
+          params: params,
           ancestors: ancestors
         )
       end

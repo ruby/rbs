@@ -14,31 +14,172 @@ class RBS::AncestorBuilderTest < Minitest::Test
   RecursiveAncestorError = RBS::RecursiveAncestorError
   SuperclassMismatchError = RBS::SuperclassMismatchError
 
-  def test_one_ancestors
+  def test_one_ancestors_class
     SignatureManager.new(system_builtin: true) do |manager|
       manager.files[Pathname("foo.rbs")] = <<EOF
 module Foo[X]
 end
 
-interface _Bar[X, Y]
+module Bar[X]
+end
+
+interface _Baz[X]
 end
 
 class Hello[X] < Array[Integer]
-  prepend Foo[Integer]
-  include _Bar[X, Integer]
+  prepend Foo[X]
+
+  include Bar[X]
+  include _Baz[X]
 
   extend Foo[String]
-  extend _Bar[String, String]
-end
-
-module World[X] : Array[String]
-  prepend Foo[Integer]
-  include _Bar[X, Integer]
-
-  extend Foo[String]
-  extend _Bar[String, String]
+  extend _Baz[String]
 end
 EOF
+      manager.build do |env|
+        builder = DefinitionBuilder::AncestorBuilder.new(env: env)
+
+        builder.one_instance_ancestors(type_name("::Hello")).tap do |a|
+          assert_equal type_name("::Hello"), a.type_name
+          assert_equal [:X], a.params
+          assert_equal Definition::Ancestor::Instance.new(name: type_name("::Array"), args: [parse_type("::Integer")]),
+                       a.super_class
+          assert_equal [
+                         Definition::Ancestor::Instance.new(name: type_name("::Bar"), args: [parse_type("X", variables: [:X])]),
+                         Definition::Ancestor::Instance.new(name: type_name("::_Baz"), args: [parse_type("X", variables: [:X])])
+                       ],
+                       a.included_modules
+          assert_equal [
+                         Definition::Ancestor::Instance.new(name: type_name("::Foo"), args: [parse_type("X", variables: [:X])]),
+                       ], a.prepended_modules
+          assert_nil a.extended_modules
+          assert_nil a.self_types
+        end
+
+        builder.one_singleton_ancestors(type_name("::Hello")).tap do |a|
+          assert_equal type_name("::Hello"), a.type_name
+          assert_nil a.params
+
+          assert_equal Definition::Ancestor::Singleton.new(name: type_name("::Array")),
+                       a.super_class
+          assert_nil a.included_modules
+          assert_nil a.prepended_modules
+          assert_equal [
+                         Definition::Ancestor::Instance.new(name: type_name("::Foo"), args: [parse_type("::String")]),
+                         Definition::Ancestor::Instance.new(name: type_name("::_Baz"), args: [parse_type("::String")])
+                       ], a.extended_modules
+          assert_nil a.self_types
+        end
+      end
+    end
+  end
+
+  def test_one_ancestors_module
+    SignatureManager.new(system_builtin: true) do |manager|
+      manager.files[Pathname("foo.rbs")] = <<EOF
+module M1[X]
+end
+
+module M2[X]
+end
+
+interface _I1[X]
+end
+
+interface _I2[X]
+end
+
+module Hello[X] : _I1[Array[X]]
+  prepend M1[X]
+
+  include M2[X]
+  include _I2[X]
+
+  extend M1[String]
+  extend _I1[String]
+end
+EOF
+      manager.build do |env|
+        builder = DefinitionBuilder::AncestorBuilder.new(env: env)
+
+        builder.one_instance_ancestors(type_name("::Hello")).tap do |a|
+          assert_equal type_name("::Hello"), a.type_name
+          assert_equal [:X], a.params
+          assert_nil a.super_class
+          assert_equal [
+                         Definition::Ancestor::Instance.new(name: type_name("::_I1"), args: [parse_type("::Array[X]", variables: [:X])])
+                       ],
+                       a.self_types
+          assert_equal [
+                         Definition::Ancestor::Instance.new(name: type_name("::M2"), args: [parse_type("X", variables: [:X])]),
+                         Definition::Ancestor::Instance.new(name: type_name("::_I2"), args: [parse_type("X", variables: [:X])])
+                       ],
+                       a.included_modules
+          assert_equal [
+                         Definition::Ancestor::Instance.new(name: type_name("::M1"), args: [parse_type("X", variables: [:X])]),
+                       ],
+                       a.prepended_modules
+          assert_nil a.extended_modules
+        end
+
+        builder.one_singleton_ancestors(type_name("::Hello")).tap do |a|
+          assert_equal type_name("::Hello"), a.type_name
+          assert_nil a.params
+          assert_equal Definition::Ancestor::Instance.new(name: type_name("::Module"), args: []), a.super_class
+          assert_nil a.self_types
+          assert_nil a.included_modules
+          assert_nil a.prepended_modules
+          assert_equal [
+                         Definition::Ancestor::Instance.new(name: type_name("::M1"), args: [parse_type("::String")]),
+                         Definition::Ancestor::Instance.new(name: type_name("::_I1"), args: [parse_type("::String")])
+                       ],
+                       a.extended_modules
+        end
+      end
+    end
+  end
+
+  def test_one_ancestors_interface
+    SignatureManager.new(system_builtin: true) do |manager|
+      manager.files[Pathname("foo.rbs")] = <<EOF
+interface _I1[X]
+end
+
+interface _I2[X]
+  include _I1[Array[X]]
+end
+EOF
+      manager.build do |env|
+        builder = DefinitionBuilder::AncestorBuilder.new(env: env)
+
+        builder.one_interface_ancestors(type_name("::_I1")).tap do |a|
+          assert_equal type_name("::_I1"), a.type_name
+          assert_equal [:X], a.params
+          assert_nil a.super_class
+          assert_nil a.self_types
+          assert_equal [], a.included_modules
+          assert_nil a.prepended_modules
+          assert_nil a.extended_modules
+        end
+
+        builder.one_interface_ancestors(type_name("::_I2")).tap do |a|
+          assert_equal type_name("::_I2"), a.type_name
+          assert_equal [:X], a.params
+          assert_nil a.super_class
+          assert_nil a.self_types
+          assert_equal [
+                         Definition::Ancestor::Instance.new(name: type_name("::_I1"), args: [parse_type("::Array[X]", variables: [:X])])
+                       ],
+                       a.included_modules
+          assert_nil a.prepended_modules
+          assert_nil a.extended_modules
+        end
+      end
+    end
+  end
+
+  def test_one_ancestors_basic_object
+    SignatureManager.new(system_builtin: true) do |manager|
       manager.build do |env|
         builder = DefinitionBuilder::AncestorBuilder.new(env: env)
 
@@ -50,67 +191,10 @@ EOF
           assert_empty a.prepended_modules
         end
 
-        builder.one_instance_ancestors(type_name("::Hello")).tap do |a|
-          assert_equal type_name("::Hello"), a.type_name
-          assert_equal [:X], a.params
-          assert_equal Definition::Ancestor::Instance.new(name: type_name("::Array"), args: [parse_type("::Integer")]), a.super_class
-          assert_equal [
-                         Definition::Ancestor::Instance.new(name: type_name("::_Bar"),
-                                                            args: [
-                                                              parse_type("X", variables: [:X]),
-                                                              parse_type("::Integer")
-                                                            ])
-                       ],
-                       a.included_modules
-          assert_equal [
-                         Definition::Ancestor::Instance.new(name: type_name("::Foo"), args: [parse_type("::Integer")]),
-                       ],
-                       a.prepended_modules
-        end
-
-        builder.one_instance_ancestors(type_name("::World")).tap do |a|
-          assert_equal type_name("::World"), a.type_name
-          assert_equal [:X], a.params
-          assert_equal [Definition::Ancestor::Instance.new(name: type_name("::Array"), args: [parse_type("::String")])],
-                       a.self_types
-          assert_equal [
-                         Definition::Ancestor::Instance.new(name: type_name("::_Bar"),
-                                                            args: [
-                                                              parse_type("X", variables: [:X]),
-                                                              parse_type("::Integer")
-                                                            ])
-                       ],
-                       a.included_modules
-          assert_equal [
-                         Definition::Ancestor::Instance.new(name: type_name("::Foo"), args: [parse_type("::Integer")]),
-                       ],
-                       a.prepended_modules
-        end
-
         builder.one_singleton_ancestors(type_name("::BasicObject")).tap do |a|
           assert_equal type_name("::BasicObject"), a.type_name
           assert_equal Definition::Ancestor::Instance.new(name: type_name("::Class"), args: []), a.super_class
           assert_empty a.extended_modules
-        end
-
-        builder.one_singleton_ancestors(type_name("::Hello")).tap do |a|
-          assert_equal type_name("::Hello"), a.type_name
-          assert_equal Definition::Ancestor::Singleton.new(name: type_name("::Array")), a.super_class
-          assert_equal [
-                         Definition::Ancestor::Instance.new(name: type_name("::Foo"), args: [parse_type("::String")]),
-                         Definition::Ancestor::Instance.new(name: type_name("::_Bar"), args: [parse_type("::String"), parse_type("::String")])
-                       ],
-                       a.extended_modules
-        end
-
-        builder.one_singleton_ancestors(type_name("::World")).tap do |a|
-          assert_equal type_name("::World"), a.type_name
-          assert_equal Definition::Ancestor::Instance.new(name: type_name("::Module"), args: []), a.super_class
-          assert_equal [
-                         Definition::Ancestor::Instance.new(name: type_name("::Foo"), args: [parse_type("::String")]),
-                         Definition::Ancestor::Instance.new(name: type_name("::_Bar"), args: [parse_type("::String"), parse_type("::String")])
-                       ],
-                       a.extended_modules
         end
       end
     end
@@ -286,6 +370,38 @@ EOF
                          Definition::Ancestor::Instance.new(name: BuiltinNames::Kernel.name, args: []),
                          Definition::Ancestor::Instance.new(name: BuiltinNames::BasicObject.name, args: []),
                        ], a.ancestors
+        end
+      end
+    end
+  end
+
+  def test_interface_ancestors
+    SignatureManager.new(system_builtin: true) do |manager|
+      manager.files[Pathname("foo.rbs")] = <<EOF
+interface _I1[X]
+end
+
+interface _I2[X, Y]
+  include _I1[Hash[X, Y]]
+end
+
+interface _I3[X]
+  include _I2[Integer, X]
+end
+EOF
+      manager.build do |env|
+        builder = DefinitionBuilder::AncestorBuilder.new(env: env)
+
+        builder.interface_ancestors(type_name("::_I3")).tap do |a|
+          assert_instance_of Definition::InstanceAncestors, a
+          assert_equal type_name("::_I3"), a.type_name
+          assert_equal [:X], a.params
+          assert_equal [
+                         Definition::Ancestor::Instance.new(name: type_name("::_I3"), args: [parse_type("X", variables: [:X])]),
+                         Definition::Ancestor::Instance.new(name: type_name("::_I2"), args: [parse_type("::Integer"), parse_type("X", variables: [:X])]),
+                         Definition::Ancestor::Instance.new(name: type_name("::_I1"), args: [parse_type("::Hash[::Integer, X]", variables: [:X])])
+                       ],
+                       a.ancestors
         end
       end
     end

@@ -352,6 +352,8 @@ module RBS
         attr_reader :location
         attr_reader :comment
 
+        include MixinHelper
+
         def initialize(name:, type_params:, members:, annotations:, location:, comment:)
           @name = name
           @type_params = type_params
