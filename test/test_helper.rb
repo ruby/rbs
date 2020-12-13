@@ -152,6 +152,33 @@ SIG
     end
   end
 
+  def assert_any(collection, size: nil)
+    assert_any!(collection, size: size) do |item|
+      assert yield(item)
+    end
+  end
+
+  def assert_any!(collection, size: nil)
+    assert_equal size, collection.size if size
+
+    *items, last = collection
+
+    if last
+      items.each do |item|
+        begin
+          yield item
+        rescue Minitest::Assertion
+          next
+        else
+          # Pass test
+          return
+        end
+      end
+
+      yield last
+    end
+  end
+
   def assert_write(decls, string)
     writer = RBS::Writer.new(out: StringIO.new)
     writer.write(decls)
