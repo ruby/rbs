@@ -455,8 +455,6 @@ end
   end
 
   def test_build_instance_method_variance
-    skip
-
     SignatureManager.new do |manager|
       manager.files.merge!(Pathname("foo.rbs") => <<-EOF)
 class A[out X, unchecked out Y]
@@ -479,34 +477,102 @@ end
       manager.build do |env|
         builder = DefinitionBuilder.new(env: env)
 
-        assert_raises(InvalidVarianceAnnotationError) { builder.build_instance(type_name("::A")) }.tap do |error|
-          assert_equal [
-                         InvalidVarianceAnnotationError::MethodTypeError.new(
-                           method_name: :bar,
-                           method_type: parse_method_type("(X) -> void", variables: [:X]),
-                           param: Declarations::ModuleTypeParams::TypeParam.new(name: :X, variance: :covariant, skip_validation: false)
-                         )
-                       ], error.errors
-        end
-
-        assert_raises(InvalidVarianceAnnotationError) { builder.build_instance(type_name("::B")) }.tap do|error|
-          assert_equal [
-                         InvalidVarianceAnnotationError::MethodTypeError.new(
-                           method_name: :bar,
-                           method_type: parse_method_type("() -> X", variables: [:X]),
-                           param: Declarations::ModuleTypeParams::TypeParam.new(name: :X, variance: :contravariant, skip_validation: false)
-                         )
-                       ], error.errors
-        end
+        assert_raises(InvalidVarianceAnnotationError) { builder.build_instance(type_name("::A")) }
+        assert_raises(InvalidVarianceAnnotationError) { builder.build_instance(type_name("::B")) }
 
         builder.build_instance(type_name("::C"))
       end
     end
   end
 
-  def test_build_one_instance_variance_inheritance
-    skip
+  def test_variance_check_ancestors
+    SignatureManager.new do |manager|
+      manager.files.merge!(Pathname("foo.rbs") => <<-EOF)
+class C[out X]
+end
 
+module M[out X]
+end
+
+interface _I[out X]
+end
+
+class Test0[out X]
+end
+
+class Test1[in X] < C[X]
+end
+
+class Test2[in X]
+  include M[X]
+end
+
+class Test3[in X]
+  include _I[X]
+end
+      EOF
+
+      manager.build do |env|
+        builder = DefinitionBuilder.new(env: env)
+
+        builder.build_instance(type_name("::Test0"))
+
+        assert_raises(InvalidVarianceAnnotationError) { builder.build_instance(type_name("::Test1")) }.tap do |error|
+          assert_equal :X, error.param.name
+          assert_equal "C[X]", error.location.source
+        end
+
+        assert_raises(InvalidVarianceAnnotationError) { builder.build_instance(type_name("::Test2")) }.tap do |error|
+          assert_equal :X, error.param.name
+          assert_equal "include M[X]", error.location.source
+        end
+
+        assert_raises(InvalidVarianceAnnotationError) { builder.build_instance(type_name("::Test3")) }.tap do |error|
+          assert_equal :X, error.param.name
+          assert_equal "include _I[X]", error.location.source
+        end
+      end
+    end
+  end
+
+  def test_variance_check_methods
+    SignatureManager.new do |manager|
+      manager.files.merge!(Pathname("foo.rbs") => <<-EOF)
+class Test0[out X, in Y, Z]
+  def foo: (Y, Z) -> [X, Z]
+
+  attr_reader x: X
+  attr_accessor z: Z
+end
+
+class Test1[out X]
+  def foo: (X) -> void
+end
+
+class Test2[in X]
+  attr_reader x: X
+end
+      EOF
+
+      manager.build do |env|
+        builder = DefinitionBuilder.new(env: env)
+
+        builder.build_instance(type_name("::Test0"))
+
+        assert_raises(InvalidVarianceAnnotationError) { builder.build_instance(type_name("::Test1")) }.tap do |error|
+          assert_equal :X, error.param.name
+          assert_equal "(X) -> void", error.location.source
+        end
+
+        assert_raises(InvalidVarianceAnnotationError) { builder.build_instance(type_name("::Test2")) }.tap do |error|
+          assert_equal :X, error.param.name
+          assert_equal "attr_reader x: X", error.location.source
+        end
+      end
+    end
+  end
+
+  def test_build_one_instance_variance_inheritance
     SignatureManager.new do |manager|
       manager.files.merge!(Pathname("foo.rbs") => <<-EOF)
 class Base[out X]
@@ -528,20 +594,12 @@ end
         builder.build_instance(type_name("::A"))
         builder.build_instance(type_name("::C"))
 
-        assert_raises(InvalidVarianceAnnotationError) { builder.build_instance(type_name("::B")) }.tap do|error|
-          assert_equal [
-                         InvalidVarianceAnnotationError::InheritanceError.new(
-                           param: Declarations::ModuleTypeParams::TypeParam.new(name: :X, variance: :contravariant, skip_validation: false)
-                         )
-                       ], error.errors
-        end
+        assert_raises(InvalidVarianceAnnotationError) { builder.build_instance(type_name("::B")) }
       end
     end
   end
 
   def test_build_variance_validation
-    skip
-
     SignatureManager.new do |manager|
       manager.files.merge!(Pathname("foo.rbs") => <<-EOF)
 module M[out X]
@@ -563,17 +621,10 @@ end
       manager.build do |env|
         builder = DefinitionBuilder.new(env: env)
 
-        builder.build_one_instance(type_name("::A"))
-        builder.build_one_instance(type_name("::C"))
+        builder.build_instance(type_name("::A"))
+        builder.build_instance(type_name("::C"))
 
-        assert_raises(InvalidVarianceAnnotationError) { builder.build_one_instance(type_name("::B")) }.tap do|error|
-          assert_equal [
-                         InvalidVarianceAnnotationError::MixinError.new(
-                           include_member: ::Object.new.tap {|x| x.define_singleton_method(:==) {|x| true } },
-                           param: Declarations::ModuleTypeParams::TypeParam.new(name: :X, variance: :contravariant, skip_validation: false)
-                         )
-                       ], error.errors
-        end
+        assert_raises(InvalidVarianceAnnotationError) { builder.build_instance(type_name("::B")) }
       end
     end
   end

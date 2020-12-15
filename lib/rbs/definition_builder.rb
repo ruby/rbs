@@ -135,6 +135,8 @@ module RBS
             one_ancestors = ancestor_builder.one_instance_ancestors(type_name)
             methods = method_builder.build_instance(type_name)
 
+            validate_type_params definition, methods: methods, ancestors: one_ancestors
+
             if super_class = one_ancestors.super_class
               defn = build_instance(super_class.name)
               merge_definition(src: defn,
@@ -389,125 +391,85 @@ module RBS
       end
     end
 
-    def validate_parameter_variance(decl:, methods:)
-      # type_params = decl.type_params
-      #
-      # calculator = VarianceCalculator.new(builder: self)
-      # param_names = type_params.each.map(&:name)
-      #
-      # errors = []
-      #
-      # case decl
-      # when AST::Declarations::Class
-      #   if super_class = decl.super_class
-      #     result = calculator.in_inherit(name: super_class.name, args: super_class.args, variables: param_names)
-      #
-      #     validate_params_with type_params, result: result do |param|
-      #       errors.push InvalidVarianceAnnotationError::InheritanceError.new(
-      #         param: param
-      #       )
-      #     end
-      #   end
-      # end
-      #
-      # # @type var result: VarianceCalculator::Result
-      #
-      # decl.members.each do |member|
-      #   case member
-      #   when AST::Members::Include
-      #     if member.name.class?
-      #       result = calculator.in_inherit(name: member.name, args: member.args, variables: param_names)
-      #
-      #       validate_params_with type_params, result: result do |param|
-      #         errors.push InvalidVarianceAnnotationError::MixinError.new(
-      #           include_member: member,
-      #           param: param
-      #         )
-      #       end
-      #     end
-      #   end
-      # end
-      #
-      # methods.each do |name, method|
-      #   method.method_types.each do |method_type|
-      #     unless name == :initialize
-      #       result = calculator.in_method_type(method_type: method_type, variables: param_names)
-      #
-      #       validate_params_with type_params, result: result do |param|
-      #         errors.push InvalidVarianceAnnotationError::MethodTypeError.new(
-      #           method_name: name,
-      #           method_type: method_type,
-      #           param: param
-      #         )
-      #       end
-      #     end
-      #   end
-      # end
-      #
-      # unless errors.empty?
-      #   raise InvalidVarianceAnnotationError.new(decl: decl, errors: errors)
-      # end
-    end
-
     def validate_type_params(definition, ancestors:, methods:)
       type_params = definition.type_params_decl
 
       calculator = VarianceCalculator.new(builder: self)
       param_names = type_params.each.map(&:name)
 
-      errors = []
-
       ancestors.each_ancestor do |ancestor|
         case ancestor
         when Definition::Ancestor::Instance
-          pp ancestor.args
           result = calculator.in_inherit(name: ancestor.name, args: ancestor.args, variables: param_names)
           validate_params_with(type_params, result: result) do |param|
-            pp param
-            errors.push InvalidVarianceAnnotationError::MixinError.new(
-              include_member: member,
-              param: param
+            location = case source = ancestor.source
+                       when nil
+                         definition.entry.primary.decl.location
+                       when :super
+                         definition.entry.primary.decl.super_class.location
+                       else
+                         source.location
+                       end
+
+            raise InvalidVarianceAnnotationError.new(
+              type_name: definition.type_name,
+              param: param,
+              location: location
             )
           end
         end
       end
 
-      # @type var result: VarianceCalculator::Result
+      methods.each do |defn|
+        next if defn.name == :initialize
 
-      # decl.members.each do |member|
-      #   case member
-      #   when AST::Members::Include
-      #     if member.name.class?
-      #       result = calculator.in_inherit(name: member.name, args: member.args, variables: param_names)
-      #
-      #       validate_params_with type_params, result: result do |param|
-      #         errors.push InvalidVarianceAnnotationError::MixinError.new(
-      #           include_member: member,
-      #           param: param
-      #         )
-      #       end
-      #     end
-      #   end
-      # end
-      #
-      # methods.each do |name, method|
-      #   method.method_types.each do |method_type|
-      #     unless name == :initialize
-      #       result = calculator.in_method_type(method_type: method_type, variables: param_names)
-      #
-      #       validate_params_with type_params, result: result do |param|
-      #         errors.push InvalidVarianceAnnotationError::MethodTypeError.new(
-      #           method_name: name,
-      #           method_type: method_type,
-      #           param: param
-      #         )
-      #       end
-      #     end
-      #   end
-      # end
+        method_types = case original = defn.original
+                       when AST::Members::MethodDefinition
+                         original.types
+                       when AST::Members::AttrWriter, AST::Members::AttrReader, AST::Members::AttrAccessor
+                         if defn.name.to_s.end_with?("=")
+                           [
+                             MethodType.new(
+                               type_params: [],
+                               type: Types::Function.empty(original.type).update(
+                                 required_positionals: [
+                                   Types::Function::Param.new(type: original.type, name: original.name)
+                                 ]
+                               ),
+                               block: nil,
+                               location: original.location
+                             )
+                           ]
+                         else
+                           [
+                             MethodType.new(
+                               type_params: [],
+                               type: Types::Function.empty(original.type),
+                               block: nil,
+                               location: original.location
+                             )
+                           ]
+                         end
+                       when AST::Members::Alias
+                         nil
+                       when nil
+                         nil
+                       else
+                         raise
+                       end
 
-      unless errors.empty?
-        raise InvalidVarianceAnnotationError.new(decl: decl, errors: errors)
+        if method_types
+          method_types.each do |method_type|
+            result = calculator.in_method_type(method_type: method_type, variables: param_names)
+            validate_params_with(type_params, result: result) do |param|
+              raise InvalidVarianceAnnotationError.new(
+                type_name: definition.type_name,
+                param: param,
+                location: method_type.location
+              )
+            end
+          end
+        end
       end
     end
 

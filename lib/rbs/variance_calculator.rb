@@ -86,7 +86,11 @@ module RBS
     end
 
     def in_inherit(name:, args:, variables:)
-      type = Types::ClassInstance.new(name: name, args: args, location: nil)
+      type = if name.class?
+               Types::ClassInstance.new(name: name, args: args, location: nil)
+             else
+               Types::Interface.new(name: name, args: args, location: nil)
+             end
 
       Result.new(variables: variables).tap do |result|
         type(type, result: result, context: :covariant)

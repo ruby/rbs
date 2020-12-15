@@ -341,33 +341,16 @@ module RBS
   end
 
   class InvalidVarianceAnnotationError < StandardError
-    MethodTypeError = Struct.new(:method_name, :method_type, :param, keyword_init: true)
-    InheritanceError = Struct.new(:super_class, :param, keyword_init: true)
-    MixinError = Struct.new(:include_member, :param, keyword_init: true)
+    attr_reader :type_name
+    attr_reader :param
+    attr_reader :location
 
-    attr_reader :decl
-    attr_reader :errors
+    def initialize(type_name:, param:, location:)
+      @type_name = type_name
+      @param = param
+      @location = location
 
-    def initialize(decl:, errors:)
-      @decl = decl
-      @errors = errors
-
-      message = [
-        "#{Location.to_string decl.location}: Invalid variance annotation: #{decl.name}"
-      ]
-
-      errors.each do |error|
-        case error
-        when MethodTypeError
-          message << "  MethodTypeError (#{error.param.name}): on `#{error.method_name}` #{error.method_type.to_s} (#{error.method_type.location&.start_line})"
-        when InheritanceError
-          message << "  InheritanceError: #{error.super_class}"
-        when MixinError
-          message << "  MixinError: #{error.include_member.name} (#{error.include_member.location&.start_line})"
-        end
-      end
-
-      super message.join("\n")
+      super "#{Location.to_string location}: Type parameter variance error: #{param.name} is #{param.variance} but used as incompatible variance"
     end
   end
 
