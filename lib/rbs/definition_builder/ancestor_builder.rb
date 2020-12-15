@@ -151,7 +151,7 @@ module RBS
             ancestors = OneAncestors.class_instance(
               type_name: type_name,
               params: params,
-              super_class: Definition::Ancestor::Instance.new(name: super_name, args: super_args)
+              super_class: Definition::Ancestor::Instance.new(name: super_name, args: super_args, source: :super)
             )
           else
             ancestors = OneAncestors.class_instance(
@@ -167,7 +167,7 @@ module RBS
             NoSelfTypeFoundError.check!(module_self, env: env)
 
             self_types = ancestors.self_types or raise
-            self_types.push Definition::Ancestor::Instance.new(name: module_self.name, args: module_self.args)
+            self_types.push Definition::Ancestor::Instance.new(name: module_self.name, args: module_self.args, source: module_self)
           end
         end
 
@@ -206,13 +206,13 @@ module RBS
           else
             ancestors = OneAncestors.singleton(
               type_name: type_name,
-              super_class: Definition::Ancestor::Instance.new(name: BuiltinNames::Class.name, args: [])
+              super_class: Definition::Ancestor::Instance.new(name: BuiltinNames::Class.name, args: [], source: :super)
             )
           end
         when Environment::ModuleEntry
           ancestors = OneAncestors.singleton(
             type_name: type_name,
-            super_class: Definition::Ancestor::Instance.new(name: BuiltinNames::Module.name, args: [])
+            super_class: Definition::Ancestor::Instance.new(name: BuiltinNames::Module.name, args: [], source: :super)
           )
         end
 
@@ -250,7 +250,7 @@ module RBS
               module_name = member.name
               module_args = member.args.map {|type| align_params ? type.sub(align_params) : type }
 
-              included_modules << Definition::Ancestor::Instance.new(name: module_name, args: module_args)
+              included_modules << Definition::Ancestor::Instance.new(name: module_name, args: module_args, source: member)
             end
 
           when AST::Members::Prepend
@@ -260,7 +260,7 @@ module RBS
               module_name = member.name
               module_args = member.args.map {|type| align_params ? type.sub(align_params) : type }
 
-              prepended_modules << Definition::Ancestor::Instance.new(name: module_name, args: module_args)
+              prepended_modules << Definition::Ancestor::Instance.new(name: module_name, args: module_args, source: member)
             end
 
           when AST::Members::Extend
@@ -270,7 +270,7 @@ module RBS
               module_name = member.name
               module_args = member.args
 
-              extended_modules << Definition::Ancestor::Instance.new(name: module_name, args: module_args)
+              extended_modules << Definition::Ancestor::Instance.new(name: module_name, args: module_args, source: member)
             end
           end
         end
@@ -299,7 +299,7 @@ module RBS
         entry = env.class_decls[type_name] or raise "Unknown name for instance_ancestors: #{type_name}"
         params = entry.type_params.each.map(&:name)
         args = Types::Variable.build(params)
-        self_ancestor = Definition::Ancestor::Instance.new(name: type_name, args: args)
+        self_ancestor = Definition::Ancestor::Instance.new(name: type_name, args: args, source: nil)
 
         RecursiveAncestorError.check!(self_ancestor,
                                       ancestors: building_ancestors,
@@ -411,7 +411,7 @@ module RBS
         entry = env.interface_decls[type_name] or raise "Unknown name for interface_ancestors: #{type_name}"
         params = entry.decl.type_params.each.map(&:name)
         args = Types::Variable.build(params)
-        self_ancestor = Definition::Ancestor::Instance.new(name: type_name, args: args)
+        self_ancestor = Definition::Ancestor::Instance.new(name: type_name, args: args, source: nil)
 
         RecursiveAncestorError.check!(self_ancestor,
                                       ancestors: building_ancestors,

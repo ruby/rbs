@@ -137,8 +137,43 @@ module RBS
     end
 
     module Ancestor
-      Instance = _ = Struct.new(:name, :args, keyword_init: true)
-      Singleton = _ = Struct.new(:name, keyword_init: true)
+      class Instance
+        attr_reader :name, :args, :source
+
+        def initialize(name:, args:, source:)
+          @name = name
+          @args = args
+          @source = source
+        end
+
+        def ==(other)
+          other.is_a?(Instance) && other.name == name && other.args == args
+        end
+
+        alias eql? ==
+
+        def hash
+          self.class.hash ^ name.hash ^ args.hash
+        end
+      end
+
+      class Singleton
+        attr_reader :name
+
+        def initialize(name:)
+          @name = name
+        end
+
+        def ==(other)
+          other.is_a?(Singleton) && other.name == name
+        end
+
+        alias eql? ==
+
+        def hash
+          self.class.hash ^ name.hash
+        end
+      end
     end
 
     class InstanceAncestors
@@ -170,7 +205,8 @@ module RBS
             else
               Ancestor::Instance.new(
                 name: ancestor.name,
-                args: ancestor.args.map {|type| type.sub(subst) }
+                args: ancestor.args.map {|type| type.sub(subst) },
+                source: ancestor.source
               )
             end
           when Ancestor::Singleton
@@ -233,6 +269,8 @@ module RBS
       case en = entry
       when Environment::SingleEntry
         en.decl.is_a?(AST::Declarations::Interface)
+      else
+        false
       end
     end
 

@@ -8,6 +8,7 @@ class RBS::AncestorBuilderTest < Minitest::Test
   EnvironmentLoader = RBS::EnvironmentLoader
   DefinitionBuilder = RBS::DefinitionBuilder
   Definition = RBS::Definition
+  Ancestor = Definition::Ancestor
   BuiltinNames = RBS::BuiltinNames
   Types = RBS::Types
   InvalidTypeApplicationError = RBS::InvalidTypeApplicationError
@@ -42,15 +43,15 @@ EOF
         builder.one_instance_ancestors(type_name("::Hello")).tap do |a|
           assert_equal type_name("::Hello"), a.type_name
           assert_equal [:X], a.params
-          assert_equal Definition::Ancestor::Instance.new(name: type_name("::Array"), args: [parse_type("::Integer")]),
+          assert_equal Ancestor::Instance.new(name: type_name("::Array"), args: [parse_type("::Integer")], source: nil),
                        a.super_class
           assert_equal [
-                         Definition::Ancestor::Instance.new(name: type_name("::Bar"), args: [parse_type("X", variables: [:X])]),
-                         Definition::Ancestor::Instance.new(name: type_name("::_Baz"), args: [parse_type("X", variables: [:X])])
+                         Ancestor::Instance.new(name: type_name("::Bar"), args: [parse_type("X", variables: [:X])], source: nil),
+                         Ancestor::Instance.new(name: type_name("::_Baz"), args: [parse_type("X", variables: [:X])], source: nil)
                        ],
                        a.included_modules
           assert_equal [
-                         Definition::Ancestor::Instance.new(name: type_name("::Foo"), args: [parse_type("X", variables: [:X])]),
+                         Ancestor::Instance.new(name: type_name("::Foo"), args: [parse_type("X", variables: [:X])], source: nil),
                        ], a.prepended_modules
           assert_nil a.extended_modules
           assert_nil a.self_types
@@ -60,13 +61,13 @@ EOF
           assert_equal type_name("::Hello"), a.type_name
           assert_nil a.params
 
-          assert_equal Definition::Ancestor::Singleton.new(name: type_name("::Array")),
+          assert_equal Ancestor::Singleton.new(name: type_name("::Array")),
                        a.super_class
           assert_nil a.included_modules
           assert_nil a.prepended_modules
           assert_equal [
-                         Definition::Ancestor::Instance.new(name: type_name("::Foo"), args: [parse_type("::String")]),
-                         Definition::Ancestor::Instance.new(name: type_name("::_Baz"), args: [parse_type("::String")])
+                         Ancestor::Instance.new(name: type_name("::Foo"), args: [parse_type("::String")], source: nil),
+                         Ancestor::Instance.new(name: type_name("::_Baz"), args: [parse_type("::String")], source: nil)
                        ], a.extended_modules
           assert_nil a.self_types
         end
@@ -107,16 +108,16 @@ EOF
           assert_equal [:X], a.params
           assert_nil a.super_class
           assert_equal [
-                         Definition::Ancestor::Instance.new(name: type_name("::_I1"), args: [parse_type("::Array[X]", variables: [:X])])
+                         Ancestor::Instance.new(name: type_name("::_I1"), args: [parse_type("::Array[X]", variables: [:X])], source: nil)
                        ],
                        a.self_types
           assert_equal [
-                         Definition::Ancestor::Instance.new(name: type_name("::M2"), args: [parse_type("X", variables: [:X])]),
-                         Definition::Ancestor::Instance.new(name: type_name("::_I2"), args: [parse_type("X", variables: [:X])])
+                         Ancestor::Instance.new(name: type_name("::M2"), args: [parse_type("X", variables: [:X])], source: nil),
+                         Ancestor::Instance.new(name: type_name("::_I2"), args: [parse_type("X", variables: [:X])], source: nil)
                        ],
                        a.included_modules
           assert_equal [
-                         Definition::Ancestor::Instance.new(name: type_name("::M1"), args: [parse_type("X", variables: [:X])]),
+                         Ancestor::Instance.new(name: type_name("::M1"), args: [parse_type("X", variables: [:X])], source: nil),
                        ],
                        a.prepended_modules
           assert_nil a.extended_modules
@@ -125,13 +126,14 @@ EOF
         builder.one_singleton_ancestors(type_name("::Hello")).tap do |a|
           assert_equal type_name("::Hello"), a.type_name
           assert_nil a.params
-          assert_equal Definition::Ancestor::Instance.new(name: type_name("::Module"), args: []), a.super_class
+          assert_equal Ancestor::Instance.new(name: type_name("::Module"), args: [], source: nil),
+                       a.super_class
           assert_nil a.self_types
           assert_nil a.included_modules
           assert_nil a.prepended_modules
           assert_equal [
-                         Definition::Ancestor::Instance.new(name: type_name("::M1"), args: [parse_type("::String")]),
-                         Definition::Ancestor::Instance.new(name: type_name("::_I1"), args: [parse_type("::String")])
+                         Ancestor::Instance.new(name: type_name("::M1"), args: [parse_type("::String")], source: nil),
+                         Ancestor::Instance.new(name: type_name("::_I1"), args: [parse_type("::String")], source: nil)
                        ],
                        a.extended_modules
         end
@@ -168,7 +170,11 @@ EOF
           assert_nil a.super_class
           assert_nil a.self_types
           assert_equal [
-                         Definition::Ancestor::Instance.new(name: type_name("::_I1"), args: [parse_type("::Array[X]", variables: [:X])])
+                         Ancestor::Instance.new(
+                           name: type_name("::_I1"),
+                           args: [parse_type("::Array[X]", variables: [:X])],
+                           source: nil
+                         )
                        ],
                        a.included_modules
           assert_nil a.prepended_modules
@@ -193,7 +199,7 @@ EOF
 
         builder.one_singleton_ancestors(type_name("::BasicObject")).tap do |a|
           assert_equal type_name("::BasicObject"), a.type_name
-          assert_equal Definition::Ancestor::Instance.new(name: type_name("::Class"), args: []), a.super_class
+          assert_equal Ancestor::Instance.new(name: type_name("::Class"), args: [], source: nil), a.super_class
           assert_empty a.extended_modules
         end
       end
@@ -219,14 +225,25 @@ EOF
         builder.instance_ancestors(type_name("::BasicObject")).tap do |a|
           assert_equal type_name("::BasicObject"), a.type_name
           assert_equal [], a.params
-          assert_equal [Definition::Ancestor::Instance.new(name: BuiltinNames::BasicObject.name, args: [])],
+          assert_equal [
+                         Ancestor::Instance.new(
+                           name: BuiltinNames::BasicObject.name,
+                           args: [],
+                           source: nil)
+                       ],
                        a.ancestors
         end
 
         builder.instance_ancestors(type_name("::Kernel")).tap do |a|
           assert_equal type_name("::Kernel"), a.type_name
           assert_equal [], a.params
-          assert_equal [Definition::Ancestor::Instance.new(name: BuiltinNames::Kernel.name, args: [])],
+          assert_equal [
+                         Ancestor::Instance.new(
+                           name: BuiltinNames::Kernel.name,
+                           args: [],
+                           source: nil
+                         )
+                       ],
                        a.ancestors
         end
 
@@ -234,9 +251,9 @@ EOF
           assert_equal type_name("::Object"), a.type_name
           assert_equal [], a.params
           assert_equal [
-                         Definition::Ancestor::Instance.new(name: BuiltinNames::Object.name, args: []),
-                         Definition::Ancestor::Instance.new(name: BuiltinNames::Kernel.name, args: []),
-                         Definition::Ancestor::Instance.new(name: BuiltinNames::BasicObject.name, args: [])
+                         Ancestor::Instance.new(name: BuiltinNames::Object.name, args: [], source: nil),
+                         Ancestor::Instance.new(name: BuiltinNames::Kernel.name, args: [], source: nil),
+                         Ancestor::Instance.new(name: BuiltinNames::BasicObject.name, args: [], source: nil)
                        ],
                        a.ancestors
         end
@@ -245,11 +262,11 @@ EOF
           assert_equal type_name("::String"), a.type_name
           assert_equal [], a.params
           assert_equal [
-                         Definition::Ancestor::Instance.new(name: BuiltinNames::String.name, args: []),
-                         Definition::Ancestor::Instance.new(name: BuiltinNames::Comparable.name, args: []),
-                         Definition::Ancestor::Instance.new(name: BuiltinNames::Object.name, args: []),
-                         Definition::Ancestor::Instance.new(name: BuiltinNames::Kernel.name, args: []),
-                         Definition::Ancestor::Instance.new(name: BuiltinNames::BasicObject.name, args: [])
+                         Ancestor::Instance.new(name: BuiltinNames::String.name, args: [], source: nil),
+                         Ancestor::Instance.new(name: BuiltinNames::Comparable.name, args: [], source: nil),
+                         Ancestor::Instance.new(name: BuiltinNames::Object.name, args: [], source: nil),
+                         Ancestor::Instance.new(name: BuiltinNames::Kernel.name, args: [], source: nil),
+                         Ancestor::Instance.new(name: BuiltinNames::BasicObject.name, args: [], source: nil)
                        ],
                        a.ancestors
         end
@@ -258,11 +275,11 @@ EOF
           assert_equal type_name("::Foo"), a.type_name
           assert_equal [:X], a.params
           assert_equal [
-                         Definition::Ancestor::Instance.new(name: type_name("::Foo"), args: [Types::Variable.build(:X)]),
-                         Definition::Ancestor::Instance.new(name: type_name("::Bar"), args: [Types::Variable.build(:X), parse_type("::String")]),
-                         Definition::Ancestor::Instance.new(name: BuiltinNames::Object.name, args: []),
-                         Definition::Ancestor::Instance.new(name: BuiltinNames::Kernel.name, args: []),
-                         Definition::Ancestor::Instance.new(name: BuiltinNames::BasicObject.name, args: [])
+                         Ancestor::Instance.new(name: type_name("::Foo"), args: [Types::Variable.build(:X)], source: nil),
+                         Ancestor::Instance.new(name: type_name("::Bar"), args: [Types::Variable.build(:X), parse_type("::String")], source: nil),
+                         Ancestor::Instance.new(name: BuiltinNames::Object.name, args: [], source: nil),
+                         Ancestor::Instance.new(name: BuiltinNames::Kernel.name, args: [], source: nil),
+                         Ancestor::Instance.new(name: BuiltinNames::BasicObject.name, args: [], source: nil)
                        ],
                        a.ancestors
         end
@@ -324,51 +341,51 @@ EOF
         builder.singleton_ancestors(type_name("::BasicObject")).tap do |a|
           assert_equal type_name("::BasicObject"), a.type_name
           assert_equal [
-                         Definition::Ancestor::Singleton.new(name: BuiltinNames::BasicObject.name),
-                         Definition::Ancestor::Instance.new(name: BuiltinNames::Class.name, args: []),
-                         Definition::Ancestor::Instance.new(name: BuiltinNames::Module.name, args: []),
-                         Definition::Ancestor::Instance.new(name: BuiltinNames::Object.name, args: []),
-                         Definition::Ancestor::Instance.new(name: BuiltinNames::Kernel.name, args: []),
-                         Definition::Ancestor::Instance.new(name: BuiltinNames::BasicObject.name, args: []),
+                         Ancestor::Singleton.new(name: BuiltinNames::BasicObject.name),
+                         Ancestor::Instance.new(name: BuiltinNames::Class.name, args: [], source: nil),
+                         Ancestor::Instance.new(name: BuiltinNames::Module.name, args: [], source: nil),
+                         Ancestor::Instance.new(name: BuiltinNames::Object.name, args: [], source: nil),
+                         Ancestor::Instance.new(name: BuiltinNames::Kernel.name, args: [], source: nil),
+                         Ancestor::Instance.new(name: BuiltinNames::BasicObject.name, args: [], source: nil),
                        ], a.ancestors
         end
 
         builder.singleton_ancestors(type_name("::Object")).tap do |a|
           assert_equal type_name("::Object"), a.type_name
           assert_equal [
-                         Definition::Ancestor::Singleton.new(name: BuiltinNames::Object.name),
-                         Definition::Ancestor::Singleton.new(name: BuiltinNames::BasicObject.name),
-                         Definition::Ancestor::Instance.new(name: BuiltinNames::Class.name, args: []),
-                         Definition::Ancestor::Instance.new(name: BuiltinNames::Module.name, args: []),
-                         Definition::Ancestor::Instance.new(name: BuiltinNames::Object.name, args: []),
-                         Definition::Ancestor::Instance.new(name: BuiltinNames::Kernel.name, args: []),
-                         Definition::Ancestor::Instance.new(name: BuiltinNames::BasicObject.name, args: []),
+                         Ancestor::Singleton.new(name: BuiltinNames::Object.name),
+                         Ancestor::Singleton.new(name: BuiltinNames::BasicObject.name),
+                         Ancestor::Instance.new(name: BuiltinNames::Class.name, args: [], source: nil),
+                         Ancestor::Instance.new(name: BuiltinNames::Module.name, args: [], source: nil),
+                         Ancestor::Instance.new(name: BuiltinNames::Object.name, args: [], source: nil),
+                         Ancestor::Instance.new(name: BuiltinNames::Kernel.name, args: [], source: nil),
+                         Ancestor::Instance.new(name: BuiltinNames::BasicObject.name, args: [], source: nil),
                        ], a.ancestors
         end
 
         builder.singleton_ancestors(type_name("::Kernel")).tap do |a|
           assert_equal type_name("::Kernel"), a.type_name
           assert_equal [
-                         Definition::Ancestor::Singleton.new(name: BuiltinNames::Kernel.name),
-                         Definition::Ancestor::Instance.new(name: BuiltinNames::Module.name, args: []),
-                         Definition::Ancestor::Instance.new(name: BuiltinNames::Object.name, args: []),
-                         Definition::Ancestor::Instance.new(name: BuiltinNames::Kernel.name, args: []),
-                         Definition::Ancestor::Instance.new(name: BuiltinNames::BasicObject.name, args: []),
+                         Ancestor::Singleton.new(name: BuiltinNames::Kernel.name),
+                         Ancestor::Instance.new(name: BuiltinNames::Module.name, args: [], source: nil),
+                         Ancestor::Instance.new(name: BuiltinNames::Object.name, args: [], source: nil),
+                         Ancestor::Instance.new(name: BuiltinNames::Kernel.name, args: [], source: nil),
+                         Ancestor::Instance.new(name: BuiltinNames::BasicObject.name, args: [], source: nil),
                        ], a.ancestors
         end
 
         builder.singleton_ancestors(type_name("::Foo")).tap do |a|
           assert_equal type_name("::Foo"), a.type_name
           assert_equal [
-                         Definition::Ancestor::Singleton.new(name: type_name("::Foo")),
-                         Definition::Ancestor::Instance.new(name: type_name("::Bar"), args: [parse_type("::String"), parse_type("::Symbol")]),
-                         Definition::Ancestor::Singleton.new(name: BuiltinNames::Object.name),
-                         Definition::Ancestor::Singleton.new(name: BuiltinNames::BasicObject.name),
-                         Definition::Ancestor::Instance.new(name: BuiltinNames::Class.name, args: []),
-                         Definition::Ancestor::Instance.new(name: BuiltinNames::Module.name, args: []),
-                         Definition::Ancestor::Instance.new(name: BuiltinNames::Object.name, args: []),
-                         Definition::Ancestor::Instance.new(name: BuiltinNames::Kernel.name, args: []),
-                         Definition::Ancestor::Instance.new(name: BuiltinNames::BasicObject.name, args: []),
+                         Ancestor::Singleton.new(name: type_name("::Foo")),
+                         Ancestor::Instance.new(name: type_name("::Bar"), args: [parse_type("::String"), parse_type("::Symbol")], source: nil),
+                         Ancestor::Singleton.new(name: BuiltinNames::Object.name),
+                         Ancestor::Singleton.new(name: BuiltinNames::BasicObject.name),
+                         Ancestor::Instance.new(name: BuiltinNames::Class.name, args: [], source: nil),
+                         Ancestor::Instance.new(name: BuiltinNames::Module.name, args: [], source: nil),
+                         Ancestor::Instance.new(name: BuiltinNames::Object.name, args: [], source: nil),
+                         Ancestor::Instance.new(name: BuiltinNames::Kernel.name, args: [], source: nil),
+                         Ancestor::Instance.new(name: BuiltinNames::BasicObject.name, args: [], source: nil),
                        ], a.ancestors
         end
       end
@@ -397,9 +414,9 @@ EOF
           assert_equal type_name("::_I3"), a.type_name
           assert_equal [:X], a.params
           assert_equal [
-                         Definition::Ancestor::Instance.new(name: type_name("::_I3"), args: [parse_type("X", variables: [:X])]),
-                         Definition::Ancestor::Instance.new(name: type_name("::_I2"), args: [parse_type("::Integer"), parse_type("X", variables: [:X])]),
-                         Definition::Ancestor::Instance.new(name: type_name("::_I1"), args: [parse_type("::Hash[::Integer, X]", variables: [:X])])
+                         Ancestor::Instance.new(name: type_name("::_I3"), args: [parse_type("X", variables: [:X])], source: nil),
+                         Ancestor::Instance.new(name: type_name("::_I2"), args: [parse_type("::Integer"), parse_type("X", variables: [:X])], source: nil),
+                         Ancestor::Instance.new(name: type_name("::_I1"), args: [parse_type("::Hash[::Integer, X]", variables: [:X])], source: nil)
                        ],
                        a.ancestors
         end

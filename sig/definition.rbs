@@ -65,10 +65,15 @@ module RBS
       type t = Instance | Singleton
 
       class Instance
+        type source = :super | nil
+                    | AST::Members::Include | AST::Members::Extend | AST::Members::Prepend
+                    | AST::Declarations::Module::Self
+
         attr_reader name: TypeName
         attr_reader args: Array[Types::t]
+        attr_reader source: source
 
-        def initialize: (name: TypeName, args: Array[Types::t]) -> void
+        def initialize: (name: TypeName, args: Array[Types::t], source: source) -> void
       end
 
       class Singleton
