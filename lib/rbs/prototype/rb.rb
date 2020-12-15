@@ -85,7 +85,7 @@ module RBS
           class_name, super_class, *class_body = node.children
           kls = AST::Declarations::Class.new(
             name: const_to_name(class_name),
-            super_class: super_class && AST::Declarations::Class::Super.new(name: const_to_name(super_class), args: []),
+            super_class: super_class && AST::Declarations::Class::Super.new(name: const_to_name(super_class), args: [], location: nil),
             type_params: AST::Declarations::ModuleTypeParams.empty,
             members: [],
             annotations: [],

@@ -99,11 +99,13 @@ rule
       { result = nil }
     | kLT class_name {
         result = Declarations::Class::Super.new(name: val[1].value,
-                                                args: [])
+                                                args: [],
+                                                location: val[1].location)
       }
     | kLT class_name kLBRACKET type_list kRBRACKET {
         result = Declarations::Class::Super.new(name: val[1].value,
-                                                args: val[3])
+                                                args: val[3],
+                                                location: val[1].location + val[4].location)
       }
 
   module_decl:

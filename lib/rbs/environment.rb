@@ -244,7 +244,8 @@ module RBS
           super_class: decl.super_class&.yield_self do |super_class|
             AST::Declarations::Class::Super.new(
               name: absolute_type_name(resolver, super_class.name, context: context),
-              args: super_class.args.map {|type| absolute_type(resolver, type, context: context) }
+              args: super_class.args.map {|type| absolute_type(resolver, type, context: context) },
+              location: super_class.location
             )
           end,
           members: decl.members.map do |member|
