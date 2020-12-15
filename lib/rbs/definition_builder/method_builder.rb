@@ -1,69 +1,10 @@
 module RBS
   class DefinitionBuilder
     class MethodBuilder
-      class DuplicatedOriginalMethodDefinitionError < StandardError
-        attr_reader :type
-        attr_reader :method
-        attr_reader :members
-
-        def initialize(type:, method:, members:)
-          @type = type
-          @method = method
-          @members = members
-
-          qualified_method = case type
-                             when Types::ClassInstance, Types::Interface
-                               "#{type.name}##{method}"
-                             when Types::ClassSingleton
-                               "#{type.name}.#{method}"
-                             else
-                               raise
-                             end
-
-          super "Detected duplicated definitions of #{qualified_method}"
-        end
-      end
-
-      class RecursiveAliasDefinitionError < StandardError
-        attr_reader :type
-        attr_reader :defs
-
-        def initialize(type:, defs:)
-          @type = type
-          @defs = defs
-
-          super "Recursive aliases: #{defs.map(&:name).join(", ")}"
-        end
-      end
-
-      class UnknownInterfaceAliasError < StandardError
-        attr_reader :type
-        attr_reader :member
-
-        def initialize(type:, member:)
-          @type = type
-          @member = member
-
-          super "Interface cannot have an alias to undefined method: #{type}##{member.new_name}"
-        end
-      end
-
       class Methods
         Definition = Struct.new(:name, :type, :originals, :overloads, :accessibilities, keyword_init: true) do
           def original
             originals[0]
-          end
-
-          def validate!
-            if originals.size > 1
-              raise DuplicatedOriginalMethodDefinitionError.new(
-                type: type,
-                method: name,
-                members: originals
-              )
-            end
-
-            true
           end
 
           def accessibility
@@ -85,19 +26,12 @@ module RBS
 
         def validate!
           methods.each_value do |defn|
-            defn.validate!
-          end
-
-          if type.is_a?(Types::Interface)
-            methods.each_value do |defn|
-              if defn.original.is_a?(AST::Members::Alias)
-                unless methods.key?(defn.original.old_name)
-                  raise UnknownInterfaceAliasError.new(
-                    type: type,
-                    member: defn.original
-                  )
-                end
-              end
+            if defn.originals.size > 1
+              raise DuplicatedMethodDefinitionError.new(
+                type: type,
+                method_name: defn.name,
+                members: defn.originals
+              )
             end
           end
 

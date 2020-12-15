@@ -194,24 +194,29 @@ module RBS
   end
 
   class DuplicatedMethodDefinitionError < StandardError
-    attr_reader :decl
-    attr_reader :location
+    attr_reader :type
+    attr_reader :method_name
+    attr_reader :members
 
-    def initialize(decl:, name:, location:)
-      decl_str = case decl
-                 when AST::Declarations::Interface, AST::Declarations::Class, AST::Declarations::Module
-                   decl.name.to_s
-                 when AST::Declarations::Extension
-                   "#{decl.name} (#{decl.extension_name})"
-                 end
+    def initialize(type:, method_name:, members:)
+      @type = type
+      @method_name = method_name
+      @members = members
 
-      super "#{Location.to_string location}: #{decl_str} has duplicated method definition: #{name}"
+      super "#{Location.to_string location}: #{qualified_method_name} has duplicated definitions"
     end
 
-    def self.check!(decl:, methods:, name:, location:)
-      if methods.key?(name)
-        raise new(decl: decl, name: name, location: location)
+    def qualified_method_name
+      case type
+      when Types::ClassSingleton
+        "#{type.name}.#{method_name}"
+      else
+        "#{type.name}##{method_name}"
       end
+    end
+
+    def location
+      members[0].location
     end
   end
 
@@ -363,6 +368,22 @@ module RBS
       end
 
       super message.join("\n")
+    end
+  end
+
+  class RecursiveAliasDefinitionError < StandardError
+    attr_reader :type
+    attr_reader :defs
+
+    def initialize(type:, defs:)
+      @type = type
+      @defs = defs
+
+      super "#{Location.to_string location}: Recursive aliases in #{type}: #{defs.map(&:name).join(", ")}"
+    end
+
+    def location
+      defs[0].original.location
     end
   end
 end

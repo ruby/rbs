@@ -310,25 +310,6 @@ EOF
     end
   end
 
-  def test_interface_alias_no_original
-    SignatureManager.new(system_builtin: true) do |manager|
-      manager.files[Pathname("foo.rbs")] = <<EOF
-interface _Foo
-  alias world hello
-end
-EOF
-      manager.build do |env|
-        builder = MethodBuilder.new(env: env)
-
-        exn = assert_raises MethodBuilder::UnknownInterfaceAliasError do
-          builder.build_interface(type_name("::_Foo"))
-        end
-
-        assert_equal parse_type("::_Foo"), exn.type
-      end
-    end
-  end
-
   def test_methods_alias_def_error
     SignatureManager.new(system_builtin: true) do |manager|
       manager.files[Pathname("foo.rbs")] = <<EOF
@@ -341,12 +322,12 @@ EOF
       manager.build do |env|
         builder = MethodBuilder.new(env: env)
 
-        exn = assert_raises MethodBuilder::DuplicatedOriginalMethodDefinitionError do
+        exn = assert_raises RBS::DuplicatedMethodDefinitionError do
           builder.build_instance(type_name("::Foo"))
         end
 
         assert_equal parse_type("::Foo[A, B]", variables: [:A, :B]), exn.type
-        assert_equal :bar, exn.method
+        assert_equal :bar, exn.method_name
       end
     end
   end
@@ -387,7 +368,7 @@ EOF
         builder.build_instance(type_name("::Foo")).tap do |methods|
           assert_equal parse_type("::Foo[A, B]", variables: [:A, :B]), methods.type
 
-          exn = assert_raises MethodBuilder::RecursiveAliasDefinitionError do
+          exn = assert_raises RBS::RecursiveAliasDefinitionError do
             methods.each.to_a
           end
 

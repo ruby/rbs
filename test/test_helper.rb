@@ -88,6 +88,8 @@ class Object < BasicObject
   public
   def __id__: -> Integer
 
+  def to_i: -> Integer
+
   private
   def respond_to_missing?: (Symbol, bool) -> bool
 end
@@ -95,10 +97,10 @@ end
 module Kernel
   private
   def puts: (*untyped) -> nil
-  def to_i: -> Integer
 end
 
 class Class < Module
+  def new: (*untyped, **untyped) ?{ (*untyped, **untyped) -> untyped } -> untyped
 end
 
 class Module
