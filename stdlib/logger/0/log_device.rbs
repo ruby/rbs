@@ -1,7 +1,6 @@
 class Logger
   class LogDevice
-    # TODO: Write type signature for MonitorMixin
-    # include MonitorMixin
+    include MonitorMixin
 
     include Period
 
