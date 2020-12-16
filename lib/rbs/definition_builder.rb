@@ -495,10 +495,16 @@ module RBS
                    )
                  end
 
+                 accessibility = if method_def.name == :initialize
+                                   :private
+                                 else
+                                   method_def.accessibility
+                                 end
+
                  Definition::Method.new(
                    super_method: existing_method,
                    defs: defs,
-                   accessibility: method_def.accessibility,
+                   accessibility: accessibility,
                    alias_of: nil
                  )
                when AST::Members::Alias

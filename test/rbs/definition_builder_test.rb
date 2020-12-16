@@ -1025,12 +1025,12 @@ EOF
 
         builder.build_instance(type_name("::Hello")).tap do |definition|
           assert_instance_of Definition, definition
-          assert_method_definition definition.methods[:initialize], ["(::String) -> void"]
+          assert_method_definition definition.methods[:initialize], ["(::String) -> void"], accessibility: :private
         end
 
         builder.build_singleton(type_name("::Hello")).yield_self do |definition|
           assert_instance_of Definition, definition
-          assert_method_definition definition.methods[:new], ["(::String) -> ::Hello"]
+          assert_method_definition definition.methods[:new], ["(::String) -> ::Hello"], accessibility: :public
         end
       end
     end
