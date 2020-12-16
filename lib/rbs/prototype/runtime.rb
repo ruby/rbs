@@ -318,7 +318,7 @@ module RBS
                         RBS.logger.warn("Skipping anonymous superclass #{mod.superclass} of #{mod}")
                         nil
                       else
-                        AST::Declarations::Class::Super.new(name: to_type_name(mod.superclass.name), args: [])
+                        AST::Declarations::Class::Super.new(name: to_type_name(mod.superclass.name), args: [], location: nil)
                       end
 
         decl = AST::Declarations::Class.new(

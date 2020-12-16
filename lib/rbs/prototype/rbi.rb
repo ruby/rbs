@@ -47,7 +47,7 @@ module RBS
       def push_class(name, super_class, comment:)
         modules.push AST::Declarations::Class.new(
           name: nested_name(name),
-          super_class: super_class && AST::Declarations::Class::Super.new(name: const_to_name(super_class), args: []),
+          super_class: super_class && AST::Declarations::Class::Super.new(name: const_to_name(super_class), args: [], location: nil),
           type_params: AST::Declarations::ModuleTypeParams.empty,
           members: [],
           annotations: [],

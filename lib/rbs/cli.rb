@@ -25,7 +25,7 @@ module RBS
         end
 
         loader = EnvironmentLoader.new(core_root: core_root, repository: repository)
-        
+
         dirs.each do |dir|
           loader.add(path: Pathname(dir))
         end
@@ -43,21 +43,21 @@ module RBS
         opts.on("-r LIBRARY", "Load RBS files of the library") do |lib|
           libs << lib
         end
-  
+
         opts.on("-I DIR", "Load RBS files from the directory") do |dir|
           dirs << dir
         end
-  
+
         opts.on("--no-stdlib", "Skip loading standard library signatures") do
           self.core_root = nil
         end
-  
+
         opts.on("--repo DIR", "Add RBS repository") do |dir|
           repos << dir
         end
-  
+
         opts
-      end  
+      end
     end
 
     attr_reader :stdout
@@ -242,7 +242,7 @@ EOU
 
       env = Environment.from_loader(loader).resolve_type_names
 
-      builder = DefinitionBuilder.new(env: env)
+      builder = DefinitionBuilder::AncestorBuilder.new(env: env)
       type_name = TypeName(args[0]).absolute!
 
       if env.class_decls.key?(type_name)
@@ -735,7 +735,7 @@ Examples:
       syntax_error = false
       args.each do |path|
         path = Pathname(path)
-        loader.each_file(path, skip_hidden: false, immediate: true) do |file_path| 
+        loader.each_file(path, skip_hidden: false, immediate: true) do |file_path|
           Parser.parse_signature(file_path.read)
         rescue RBS::Parser::SyntaxError => ex
           loc = ex.error_value.location
@@ -757,7 +757,7 @@ Examples:
       opts.push(*options.repos.map {|dir| "--repo #{Shellwords.escape(dir)}"})
       opts.push(*options.dirs.map {|dir| "-I #{Shellwords.escape(dir)}"})
       opts.push(*options.libs.map {|lib| "-r#{Shellwords.escape(lib)}"})
-      
+
       opts.empty? ? nil : opts.join(" ")
     end
 

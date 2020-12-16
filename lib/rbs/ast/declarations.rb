@@ -136,10 +136,12 @@ module RBS
         class Super
           attr_reader :name
           attr_reader :args
+          attr_reader :location
 
-          def initialize(name:, args:)
+          def initialize(name:, args:, location:)
             @name = name
             @args = args
+            @location = location
           end
 
           def ==(other)
@@ -155,7 +157,8 @@ module RBS
           def to_json(*a)
             {
               name: name,
-              args: args
+              args: args,
+              location: location
             }.to_json(*a)
           end
         end
@@ -351,6 +354,8 @@ module RBS
         attr_reader :annotations
         attr_reader :location
         attr_reader :comment
+
+        include MixinHelper
 
         def initialize(name:, type_params:, members:, annotations:, location:, comment:)
           @name = name

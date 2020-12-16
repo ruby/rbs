@@ -194,24 +194,29 @@ module RBS
   end
 
   class DuplicatedMethodDefinitionError < StandardError
-    attr_reader :decl
-    attr_reader :location
+    attr_reader :type
+    attr_reader :method_name
+    attr_reader :members
 
-    def initialize(decl:, name:, location:)
-      decl_str = case decl
-                 when AST::Declarations::Interface, AST::Declarations::Class, AST::Declarations::Module
-                   decl.name.to_s
-                 when AST::Declarations::Extension
-                   "#{decl.name} (#{decl.extension_name})"
-                 end
+    def initialize(type:, method_name:, members:)
+      @type = type
+      @method_name = method_name
+      @members = members
 
-      super "#{Location.to_string location}: #{decl_str} has duplicated method definition: #{name}"
+      super "#{Location.to_string location}: #{qualified_method_name} has duplicated definitions"
     end
 
-    def self.check!(decl:, methods:, name:, location:)
-      if methods.key?(name)
-        raise new(decl: decl, name: name, location: location)
+    def qualified_method_name
+      case type
+      when Types::ClassSingleton
+        "#{type.name}.#{method_name}"
+      else
+        "#{type.name}##{method_name}"
       end
+    end
+
+    def location
+      members[0].location
     end
   end
 
@@ -336,33 +341,32 @@ module RBS
   end
 
   class InvalidVarianceAnnotationError < StandardError
-    MethodTypeError = Struct.new(:method_name, :method_type, :param, keyword_init: true)
-    InheritanceError = Struct.new(:super_class, :param, keyword_init: true)
-    MixinError = Struct.new(:include_member, :param, keyword_init: true)
+    attr_reader :type_name
+    attr_reader :param
+    attr_reader :location
 
-    attr_reader :decl
-    attr_reader :errors
+    def initialize(type_name:, param:, location:)
+      @type_name = type_name
+      @param = param
+      @location = location
 
-    def initialize(decl:, errors:)
-      @decl = decl
-      @errors = errors
+      super "#{Location.to_string location}: Type parameter variance error: #{param.name} is #{param.variance} but used as incompatible variance"
+    end
+  end
 
-      message = [
-        "#{Location.to_string decl.location}: Invalid variance annotation: #{decl.name}"
-      ]
+  class RecursiveAliasDefinitionError < StandardError
+    attr_reader :type
+    attr_reader :defs
 
-      errors.each do |error|
-        case error
-        when MethodTypeError
-          message << "  MethodTypeError (#{error.param.name}): on `#{error.method_name}` #{error.method_type.to_s} (#{error.method_type.location&.start_line})"
-        when InheritanceError
-          message << "  InheritanceError: #{error.super_class}"
-        when MixinError
-          message << "  MixinError: #{error.include_member.name} (#{error.include_member.location&.start_line})"
-        end
-      end
+    def initialize(type:, defs:)
+      @type = type
+      @defs = defs
 
-      super message.join("\n")
+      super "#{Location.to_string location}: Recursive aliases in #{type}: #{defs.map(&:name).join(", ")}"
+    end
+
+    def location
+      defs[0].original.location
     end
   end
 end

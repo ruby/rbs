@@ -3,6 +3,10 @@ module RBS
     attr_reader :mapping
     attr_accessor :instance_type
 
+    def empty?
+      mapping.empty? && instance_type.nil?
+    end
+
     def initialize()
       @mapping = {}
     end

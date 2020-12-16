@@ -88,6 +88,8 @@ class Object < BasicObject
   public
   def __id__: -> Integer
 
+  def to_i: -> Integer
+
   private
   def respond_to_missing?: (Symbol, bool) -> bool
 end
@@ -95,10 +97,10 @@ end
 module Kernel
   private
   def puts: (*untyped) -> nil
-  def to_i: -> Integer
 end
 
 class Class < Module
+  def new: (*untyped, **untyped) ?{ (*untyped, **untyped) -> untyped } -> untyped
 end
 
 class Module
@@ -149,6 +151,33 @@ SIG
 
         yield RBS::Environment.from_loader(loader).resolve_type_names, tmppath
       end
+    end
+  end
+
+  def assert_any(collection, size: nil)
+    assert_any!(collection, size: size) do |item|
+      assert yield(item)
+    end
+  end
+
+  def assert_any!(collection, size: nil)
+    assert_equal size, collection.size if size
+
+    *items, last = collection
+
+    if last
+      items.each do |item|
+        begin
+          yield item
+        rescue Minitest::Assertion
+          next
+        else
+          # Pass test
+          return
+        end
+      end
+
+      yield last
     end
   end
 
