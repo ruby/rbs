@@ -405,7 +405,63 @@ class IO < Object
 
   def puts: (*untyped arg0) -> NilClass
 
-  def read: (?Integer length, ?String outbuf) -> String?
+  # Reads *length* bytes from the I/O stream.
+  #
+  # *length* must be a non-negative integer or `nil`.
+  #
+  # If *length* is a positive integer, `read` tries to read *length* bytes without
+  # any conversion (binary mode). It returns `nil` if an EOF is encountered before
+  # anything can be read. Fewer than *length* bytes are returned if an EOF is
+  # encountered during the read. In the case of an integer *length*, the resulting
+  # string is always in ASCII-8BIT encoding.
+  #
+  # If *length* is omitted or is `nil`, it reads until EOF and the encoding
+  # conversion is applied, if applicable. A string is returned even if EOF is
+  # encountered before any data is read.
+  #
+  # If *length* is zero, it returns an empty string (`""`).
+  #
+  # If the optional *outbuf* argument is present, it must reference a String,
+  # which will receive the data. The *outbuf* will contain only the received data
+  # after the method call even if it is not empty at the beginning.
+  #
+  # When this method is called at end of file, it returns `nil` or `""`, depending
+  # on *length*: `read`, `read(nil)`, and `read(0)` return `""`,
+  # `read(*positive_integer*)` returns `nil`.
+  #
+  #     f = File.new("testfile")
+  #     f.read(16)   #=> "This is line one"
+  #
+  #     # read whole file
+  #     open("file") do |f|
+  #       data = f.read   # This returns a string even if the file is empty.
+  #       # ...
+  #     end
+  #
+  #     # iterate over fixed length records
+  #     open("fixed-record-file") do |f|
+  #       while record = f.read(256)
+  #         # ...
+  #       end
+  #     end
+  #
+  #     # iterate over variable length records,
+  #     # each record is prefixed by its 32-bit length
+  #     open("variable-record-file") do |f|
+  #       while len = f.read(4)
+  #         len = len.unpack("N")[0]   # 32-bit length
+  #         record = f.read(len)       # This returns a string even if len is 0.
+  #       end
+  #     end
+  #
+  # Note that this method behaves like the fread() function in C. This means it
+  # retries to invoke read(2) system calls to read data with the specified length
+  # (or until EOF). This behavior is preserved even if *ios* is in non-blocking
+  # mode. (This method is non-blocking flag insensitive as other methods.) If you
+  # need the behavior like a single read(2) system call, consider #readpartial,
+  # #read_nonblock, and #sysread.
+  #
+  def read: (?Integer? length, ?String outbuf) -> String?
 
   def read_nonblock: (Integer len) -> String
                    | (Integer len, ?String buf) -> String
@@ -428,8 +484,63 @@ class IO < Object
 
   def readlines: (?String sep, ?Integer limit) -> ::Array[String]
 
-  def readpartial: (Integer maxlen) -> String
-                 | (Integer maxlen, ?String outbuf) -> String
+  # Reads at most *maxlen* bytes from the I/O stream. It blocks only if *ios* has
+  # no data immediately available. It doesn't block if some data available.
+  #
+  # If the optional *outbuf* argument is present, it must reference a String,
+  # which will receive the data. The *outbuf* will contain only the received data
+  # after the method call even if it is not empty at the beginning.
+  #
+  # It raises EOFError on end of file.
+  #
+  # readpartial is designed for streams such as pipe, socket, tty, etc. It blocks
+  # only when no data immediately available. This means that it blocks only when
+  # following all conditions hold.
+  # *   the byte buffer in the IO object is empty.
+  # *   the content of the stream is empty.
+  # *   the stream is not reached to EOF.
+  #
+  #
+  # When readpartial blocks, it waits data or EOF on the stream. If some data is
+  # reached, readpartial returns with the data. If EOF is reached, readpartial
+  # raises EOFError.
+  #
+  # When readpartial doesn't blocks, it returns or raises immediately. If the byte
+  # buffer is not empty, it returns the data in the buffer. Otherwise if the
+  # stream has some content, it returns the data in the stream. Otherwise if the
+  # stream is reached to EOF, it raises EOFError.
+  #
+  #     r, w = IO.pipe           #               buffer          pipe content
+  #     w << "abc"               #               ""              "abc".
+  #     r.readpartial(4096)      #=> "abc"       ""              ""
+  #     r.readpartial(4096)      # blocks because buffer and pipe is empty.
+  #
+  #     r, w = IO.pipe           #               buffer          pipe content
+  #     w << "abc"               #               ""              "abc"
+  #     w.close                  #               ""              "abc" EOF
+  #     r.readpartial(4096)      #=> "abc"       ""              EOF
+  #     r.readpartial(4096)      # raises EOFError
+  #
+  #     r, w = IO.pipe           #               buffer          pipe content
+  #     w << "abc\ndef\n"        #               ""              "abc\ndef\n"
+  #     r.gets                   #=> "abc\n"     "def\n"         ""
+  #     w << "ghi\n"             #               "def\n"         "ghi\n"
+  #     r.readpartial(4096)      #=> "def\n"     ""              "ghi\n"
+  #     r.readpartial(4096)      #=> "ghi\n"     ""              ""
+  #
+  # Note that readpartial behaves similar to sysread. The differences are:
+  # *   If the byte buffer is not empty, read from the byte buffer instead of
+  #     "sysread for buffered IO (IOError)".
+  # *   It doesn't cause Errno::EWOULDBLOCK and Errno::EINTR.  When readpartial
+  #     meets EWOULDBLOCK and EINTR by read system call, readpartial retry the
+  #     system call.
+  #
+  #
+  # The latter means that readpartial is nonblocking-flag insensitive. It blocks
+  # on the situation IO#sysread causes Errno::EWOULDBLOCK as if the fd is blocking
+  # mode.
+  #
+  def readpartial: (Integer maxlen, ?String outbuf) -> String
 
   def reopen: (IO other_IO_or_path) -> IO
             | (String other_IO_or_path, ?String mode_str) -> IO
@@ -508,7 +619,19 @@ class IO < Object
 
   def ungetc: (String arg0) -> NilClass
 
-  def write: (*_ToS arg0) -> Integer
+  # Writes the given strings to *ios*. The stream must be opened for writing.
+  # Arguments that are not a string will be converted to a string using `to_s`.
+  # Returns the number of bytes written in total.
+  #
+  #     count = $stdout.write("This is", " a test\n")
+  #     puts "That was #{count} bytes of data"
+  #
+  # *produces:*
+  #
+  #     This is a test
+  #     That was 15 bytes of data
+  #
+  def write: (*_ToS string) -> Integer
 
   # Opens the file, optionally seeks to the given *offset*, then returns *length*
   # bytes (defaulting to the rest of the file). #binread ensures the file is
@@ -525,7 +648,26 @@ class IO < Object
   #
   def self.binwrite: (String name, _ToS string, ?Integer offset, ?mode: String mode) -> Integer
 
-  def self.copy_stream: (_Reader src, _Writer dst, ?Integer copy_length, ?Integer src_offset) -> Integer
+  # IO.copy_stream copies *src* to *dst*. *src* and *dst* is either a filename or
+  # an IO-like object. IO-like object for *src* should have #readpartial or #read
+  # method.  IO-like object for *dst* should have #write method. (Specialized
+  # mechanisms, such as sendfile system call, may be used on appropriate
+  # situation.)
+  #
+  # This method returns the number of bytes copied.
+  #
+  # If optional arguments are not given, the start position of the copy is the
+  # beginning of the filename or the current file offset of the IO. The end
+  # position of the copy is the end of file.
+  #
+  # If *copy_length* is given, No more than *copy_length* bytes are copied.
+  #
+  # If *src_offset* is given, it specifies the start position of the copy.
+  #
+  # When *src_offset* is specified and *src* is an IO, IO.copy_stream doesn't move
+  # the current file offset.
+  #
+  def self.copy_stream: ((String | _Reader | _ReaderPartial) src, (String | _Writer) dst, ?Integer copy_length, ?Integer src_offset) -> Integer
 
   def self.popen: (*untyped args) -> untyped
 
