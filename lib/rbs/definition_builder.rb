@@ -44,7 +44,7 @@ module RBS
 
         ancestors = ancestor_builder.interface_ancestors(type_name)
         Definition.new(type_name: type_name, entry: entry, self_type: self_type, ancestors: ancestors).tap do |definition|
-          ancestor_builder.one_interface_ancestors(type_name).included_modules.each do |mod|
+          ancestor_builder.one_interface_ancestors(type_name).included_interfaces.each do |mod|
             defn = build_interface(mod.name)
             subst = Substitution.build(defn.type_params, mod.args)
 
@@ -156,19 +156,18 @@ module RBS
             end
 
             one_ancestors.included_modules.each do |mod|
-              case
-              when mod.name.interface?
-                defn = build_interface(mod.name)
-                merge_definition(src: defn,
-                                 dest: definition,
-                                 subst: Substitution.build(defn.type_params, mod.args),
-                                 implemented_in: type_name)
-              when mod.name.class?
-                defn = build_instance(mod.name)
-                merge_definition(src: defn,
-                                 dest: definition,
-                                 subst: Substitution.build(defn.type_params, mod.args))
-              end
+              defn = build_instance(mod.name)
+              merge_definition(src: defn,
+                               dest: definition,
+                               subst: Substitution.build(defn.type_params, mod.args))
+            end
+
+            one_ancestors.included_interfaces.each do |mod|
+              defn = build_interface(mod.name)
+              merge_definition(src: defn,
+                               dest: definition,
+                               subst: Substitution.build(defn.type_params, mod.args),
+                               implemented_in: type_name)
             end
 
             methods.each do |method_def|
@@ -242,19 +241,18 @@ module RBS
             end
 
             one_ancestors.extended_modules.each do |mod|
-              case
-              when mod.name.interface?
-                defn = build_interface(mod.name)
-                merge_definition(src: defn,
-                                 dest: definition,
-                                 subst: Substitution.build(defn.type_params, mod.args),
-                                 implemented_in: type_name)
-              when mod.name.class?
-                defn = build_instance(mod.name)
-                merge_definition(src: defn,
-                                 dest: definition,
-                                 subst: Substitution.build(defn.type_params, mod.args))
-              end
+              defn = build_instance(mod.name)
+              merge_definition(src: defn,
+                               dest: definition,
+                               subst: Substitution.build(defn.type_params, mod.args))
+            end
+
+            one_ancestors.extended_interfaces.each do |mod|
+              defn = build_interface(mod.name)
+              merge_definition(src: defn,
+                               dest: definition,
+                               subst: Substitution.build(defn.type_params, mod.args),
+                               implemented_in: type_name)
             end
 
             methods = method_builder.build_singleton(type_name)

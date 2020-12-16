@@ -7,17 +7,21 @@ module RBS
         attr_reader :super_class
         attr_reader :self_types
         attr_reader :included_modules
+        attr_reader :included_interfaces
         attr_reader :prepended_modules
         attr_reader :extended_modules
+        attr_reader :extended_interfaces
 
-        def initialize(type_name:, params:, super_class:, self_types:, included_modules:, prepended_modules:, extended_modules:)
+        def initialize(type_name:, params:, super_class:, self_types:, included_modules:, included_interfaces:, prepended_modules:, extended_modules:, extended_interfaces:)
           @type_name = type_name
           @params = params
           @super_class = super_class
           @self_types = self_types
           @included_modules = included_modules
+          @included_interfaces = included_interfaces
           @prepended_modules = prepended_modules
           @extended_modules = extended_modules
+          @extended_interfaces = extended_interfaces
         end
 
         def each_ancestor(&block)
@@ -28,8 +32,10 @@ module RBS
 
             self_types&.each(&block)
             included_modules&.each(&block)
+            included_interfaces&.each(&block)
             prepended_modules&.each(&block)
             extended_modules&.each(&block)
+            extended_interfaces&.each(&block)
           else
             enum_for :each_ancestor
           end
@@ -42,8 +48,10 @@ module RBS
             super_class: super_class,
             self_types: nil,
             included_modules: [],
+            included_interfaces: [],
             prepended_modules: [],
-            extended_modules: nil
+            extended_modules: nil,
+            extended_interfaces: nil
           )
         end
 
@@ -54,8 +62,10 @@ module RBS
             super_class: super_class,
             self_types: nil,
             included_modules: nil,
+            included_interfaces: nil,
             prepended_modules: nil,
-            extended_modules: []
+            extended_modules: [],
+            extended_interfaces: []
           )
         end
 
@@ -65,9 +75,11 @@ module RBS
             params: params,
             self_types: [],
             included_modules: [],
+            included_interfaces: [],
             prepended_modules: [],
             super_class: nil,
-            extended_modules: nil
+            extended_modules: nil,
+            extended_interfaces: nil
           )
         end
 
@@ -76,10 +88,12 @@ module RBS
             type_name: type_name,
             params: params,
             self_types: nil,
-            included_modules: [],
+            included_modules: nil,
+            included_interfaces: [],
             prepended_modules: nil,
             super_class: nil,
-            extended_modules: nil
+            extended_modules: nil,
+            extended_interfaces: nil
           )
         end
       end
@@ -173,8 +187,10 @@ module RBS
 
         mixin_ancestors(entry,
                         included_modules: ancestors.included_modules,
+                        included_interfaces: ancestors.included_interfaces,
                         prepended_modules: ancestors.prepended_modules,
-                        extended_modules: nil)
+                        extended_modules: nil,
+                        extended_interfaces: nil)
 
         one_instance_ancestors_cache[type_name] = ancestors
       end
@@ -218,8 +234,10 @@ module RBS
 
         mixin_ancestors(entry,
                         included_modules: nil,
+                        included_interfaces: nil,
                         prepended_modules: nil,
-                        extended_modules: ancestors.extended_modules)
+                        extended_modules: ancestors.extended_modules,
+                        extended_interfaces: ancestors.extended_interfaces)
 
         one_singleton_ancestors_cache[type_name] = ancestors
       end
@@ -233,24 +251,30 @@ module RBS
             OneAncestors.interface(type_name: type_name, params: params).tap do |ancestors|
               mixin_ancestors0(entry.decl,
                                align_params: nil,
-                               included_modules: ancestors.included_modules,
+                               included_modules: nil,
+                               included_interfaces: ancestors.included_interfaces,
                                prepended_modules: nil,
-                               extended_modules: nil)
+                               extended_modules: nil,
+                               extended_interfaces: nil)
             end
           end
       end
 
-      def mixin_ancestors0(decl, align_params:, included_modules:, extended_modules:, prepended_modules:)
+      def mixin_ancestors0(decl, align_params:, included_modules:, included_interfaces:, extended_modules:, prepended_modules:, extended_interfaces:)
         decl.each_mixin do |member|
           case member
           when AST::Members::Include
-            if included_modules
+            module_name = member.name
+            module_args = member.args.map {|type| align_params ? type.sub(align_params) : type }
+            ancestor = Definition::Ancestor::Instance.new(name: module_name, args: module_args, source: member)
+
+            case
+            when member.name.class? && included_modules
               NoMixinFoundError.check!(member.name, env: env, member: member)
-
-              module_name = member.name
-              module_args = member.args.map {|type| align_params ? type.sub(align_params) : type }
-
-              included_modules << Definition::Ancestor::Instance.new(name: module_name, args: module_args, source: member)
+              included_modules << ancestor
+            when member.name.interface? && included_interfaces
+              NoMixinFoundError.check!(member.name, env: env, member: member)
+              included_interfaces << ancestor
             end
 
           when AST::Members::Prepend
@@ -264,19 +288,23 @@ module RBS
             end
 
           when AST::Members::Extend
-            if extended_modules
+            module_name = member.name
+            module_args = member.args
+            ancestor = Definition::Ancestor::Instance.new(name: module_name, args: module_args, source: member)
+
+            case
+            when member.name.class? && extended_modules
               NoMixinFoundError.check!(member.name, env: env, member: member)
-
-              module_name = member.name
-              module_args = member.args
-
-              extended_modules << Definition::Ancestor::Instance.new(name: module_name, args: module_args, source: member)
+              extended_modules << ancestor
+            when member.name.interface? && extended_interfaces
+              NoMixinFoundError.check!(member.name, env: env, member: member)
+              extended_interfaces << ancestor
             end
           end
         end
       end
 
-      def mixin_ancestors(entry, included_modules:, extended_modules:, prepended_modules:)
+      def mixin_ancestors(entry, included_modules:, included_interfaces:, extended_modules:, prepended_modules:, extended_interfaces:)
         entry.decls.each do |d|
           decl = d.decl
 
@@ -288,8 +316,10 @@ module RBS
           mixin_ancestors0(decl,
                            align_params: align_params,
                            included_modules: included_modules,
+                           included_interfaces: included_interfaces,
                            extended_modules: extended_modules,
-                           prepended_modules: prepended_modules)
+                           prepended_modules: prepended_modules,
+                           extended_interfaces: extended_interfaces)
         end
       end
 
@@ -324,12 +354,10 @@ module RBS
 
         if included_modules = one_ancestors.included_modules
           included_modules.each do |mod|
-            if mod.name.class?
-              name = mod.name
-              arg_types = mod.args
-              mod_ancestors = instance_ancestors(name, building_ancestors: building_ancestors)
-              ancestors.unshift(*mod_ancestors.apply(arg_types, location: entry.primary.decl.location))
-            end
+            name = mod.name
+            arg_types = mod.args
+            mod_ancestors = instance_ancestors(name, building_ancestors: building_ancestors)
+            ancestors.unshift(*mod_ancestors.apply(arg_types, location: entry.primary.decl.location))
           end
         end
 
@@ -337,12 +365,10 @@ module RBS
 
         if prepended_modules = one_ancestors.prepended_modules
           prepended_modules.each do |mod|
-            if mod.name.class?
-              name = mod.name
-              arg_types = mod.args
-              mod_ancestors = instance_ancestors(name, building_ancestors: building_ancestors)
-              ancestors.unshift(*mod_ancestors.apply(arg_types, location: entry.primary.decl.location))
-            end
+            name = mod.name
+            arg_types = mod.args
+            mod_ancestors = instance_ancestors(name, building_ancestors: building_ancestors)
+            ancestors.unshift(*mod_ancestors.apply(arg_types, location: entry.primary.decl.location))
           end
         end
 
@@ -387,12 +413,10 @@ module RBS
 
         extended_modules = one_ancestors.extended_modules or raise
         extended_modules.each do |mod|
-          if mod.name.class?
-            name = mod.name
-            args = mod.args
-            mod_ancestors = instance_ancestors(name, building_ancestors: building_ancestors)
-            ancestors.unshift(*mod_ancestors.apply(args, location: entry.primary.decl.location))
-          end
+          name = mod.name
+          args = mod.args
+          mod_ancestors = instance_ancestors(name, building_ancestors: building_ancestors)
+          ancestors.unshift(*mod_ancestors.apply(args, location: entry.primary.decl.location))
         end
 
         ancestors.unshift(self_ancestor)
@@ -421,7 +445,7 @@ module RBS
         one_ancestors = one_interface_ancestors(type_name)
         ancestors = []
 
-        one_ancestors.included_modules.each do |a|
+        one_ancestors.included_interfaces.each do |a|
           included_ancestors = interface_ancestors(a.name, building_ancestors: building_ancestors)
           ancestors.unshift(*included_ancestors.apply(a.args, location: entry.decl.location))
         end
