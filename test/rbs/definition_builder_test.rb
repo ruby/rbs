@@ -1570,4 +1570,94 @@ end
       end
     end
   end
+
+  def test_duplicated_methods_from_interfaces
+    SignatureManager.new do |manager|
+      manager.files.merge!(Pathname("foo.rbs") => <<-EOF)
+interface _I1
+  def foo: () -> void
+end
+
+interface _I2
+  def foo: () -> String
+end
+
+class Hello
+  include _I1
+  include _I2
+end
+      EOF
+      manager.build do |env|
+        builder = DefinitionBuilder.new(env: env)
+
+        assert_raises RBS::DuplicatedInterfaceMethodDefinitionError do
+          builder.build_instance(type_name("::Hello"))
+        end
+      end
+    end
+  end
+
+  def test_duplicated_methods_from_interfaces2
+    SignatureManager.new do |manager|
+      manager.files.merge!(Pathname("foo.rbs") => <<-EOF)
+interface _I1
+  def foo: () -> void
+end
+
+class Hello
+  include _I1
+
+  def foo: () -> String
+end
+      EOF
+      manager.build do |env|
+        builder = DefinitionBuilder.new(env: env)
+
+        assert_raises RBS::DuplicatedMethodDefinitionError do
+          builder.build_instance(type_name("::Hello"))
+        end
+      end
+    end
+  end
+
+  def test_include_interface_super
+    SignatureManager.new do |manager|
+      manager.files.merge!(Pathname("foo.rbs") => <<-EOF)
+interface _I1
+  def foo: () -> void
+end
+
+class C0
+  include _I1
+end
+
+class C1
+  def foo: () -> void
+end
+
+class C2 < C1
+  include _I1
+end
+      EOF
+      manager.build do |env|
+        builder = DefinitionBuilder.new(env: env)
+
+        builder.build_instance(type_name("::C0")).tap do |defn|
+          defn.methods[:foo].tap do |foo|
+            assert_equal type_name("::_I1"), foo.defined_in
+            assert_equal type_name("::C0"), foo.implemented_in
+            assert_nil foo.super_method
+          end
+        end
+
+        builder.build_instance(type_name("::C2")).tap do |defn|
+          defn.methods[:foo].tap do |foo|
+            assert_equal type_name("::_I1"), foo.defined_in
+            assert_equal type_name("::C2"), foo.implemented_in
+            assert_equal type_name("::C1"), foo.super_method.defined_in
+          end
+        end
+      end
+    end
+  end
 end

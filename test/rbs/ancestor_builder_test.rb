@@ -45,15 +45,15 @@ EOF
           assert_equal [:X], a.params
           assert_equal Ancestor::Instance.new(name: type_name("::Array"), args: [parse_type("::Integer")], source: nil),
                        a.super_class
-          assert_equal [
-                         Ancestor::Instance.new(name: type_name("::Bar"), args: [parse_type("X", variables: [:X])], source: nil),
-                         Ancestor::Instance.new(name: type_name("::_Baz"), args: [parse_type("X", variables: [:X])], source: nil)
-                       ],
+          assert_equal [Ancestor::Instance.new(name: type_name("::Bar"), args: [parse_type("X", variables: [:X])], source: nil)],
                        a.included_modules
+          assert_equal [Ancestor::Instance.new(name: type_name("::_Baz"), args: [parse_type("X", variables: [:X])], source: nil)],
+                       a.included_interfaces
           assert_equal [
                          Ancestor::Instance.new(name: type_name("::Foo"), args: [parse_type("X", variables: [:X])], source: nil),
                        ], a.prepended_modules
           assert_nil a.extended_modules
+          assert_nil a.extended_interfaces
           assert_nil a.self_types
         end
 
@@ -64,11 +64,12 @@ EOF
           assert_equal Ancestor::Singleton.new(name: type_name("::Array")),
                        a.super_class
           assert_nil a.included_modules
+          assert_nil a.included_interfaces
           assert_nil a.prepended_modules
-          assert_equal [
-                         Ancestor::Instance.new(name: type_name("::Foo"), args: [parse_type("::String")], source: nil),
-                         Ancestor::Instance.new(name: type_name("::_Baz"), args: [parse_type("::String")], source: nil)
-                       ], a.extended_modules
+          assert_equal [Ancestor::Instance.new(name: type_name("::Foo"), args: [parse_type("::String")], source: nil)],
+                       a.extended_modules
+          assert_equal [Ancestor::Instance.new(name: type_name("::_Baz"), args: [parse_type("::String")], source: nil)],
+                       a.extended_interfaces
           assert_nil a.self_types
         end
       end
@@ -111,11 +112,10 @@ EOF
                          Ancestor::Instance.new(name: type_name("::_I1"), args: [parse_type("::Array[X]", variables: [:X])], source: nil)
                        ],
                        a.self_types
-          assert_equal [
-                         Ancestor::Instance.new(name: type_name("::M2"), args: [parse_type("X", variables: [:X])], source: nil),
-                         Ancestor::Instance.new(name: type_name("::_I2"), args: [parse_type("X", variables: [:X])], source: nil)
-                       ],
+          assert_equal [Ancestor::Instance.new(name: type_name("::M2"), args: [parse_type("X", variables: [:X])], source: nil)],
                        a.included_modules
+          assert_equal [Ancestor::Instance.new(name: type_name("::_I2"), args: [parse_type("X", variables: [:X])], source: nil)],
+                       a.included_interfaces
           assert_equal [
                          Ancestor::Instance.new(name: type_name("::M1"), args: [parse_type("X", variables: [:X])], source: nil),
                        ],
@@ -131,11 +131,10 @@ EOF
           assert_nil a.self_types
           assert_nil a.included_modules
           assert_nil a.prepended_modules
-          assert_equal [
-                         Ancestor::Instance.new(name: type_name("::M1"), args: [parse_type("::String")], source: nil),
-                         Ancestor::Instance.new(name: type_name("::_I1"), args: [parse_type("::String")], source: nil)
-                       ],
+          assert_equal [Ancestor::Instance.new(name: type_name("::M1"), args: [parse_type("::String")], source: nil)],
                        a.extended_modules
+          assert_equal [Ancestor::Instance.new(name: type_name("::_I1"), args: [parse_type("::String")], source: nil)],
+                       a.extended_interfaces
         end
       end
     end
@@ -159,9 +158,11 @@ EOF
           assert_equal [:X], a.params
           assert_nil a.super_class
           assert_nil a.self_types
-          assert_equal [], a.included_modules
+          assert_nil a.included_modules
+          assert_equal [], a.included_interfaces
           assert_nil a.prepended_modules
           assert_nil a.extended_modules
+          assert_nil a.extended_interfaces
         end
 
         builder.one_interface_ancestors(type_name("::_I2")).tap do |a|
@@ -169,6 +170,7 @@ EOF
           assert_equal [:X], a.params
           assert_nil a.super_class
           assert_nil a.self_types
+          assert_nil a.included_modules
           assert_equal [
                          Ancestor::Instance.new(
                            name: type_name("::_I1"),
@@ -176,9 +178,10 @@ EOF
                            source: nil
                          )
                        ],
-                       a.included_modules
+                       a.included_interfaces
           assert_nil a.prepended_modules
           assert_nil a.extended_modules
+          assert_nil a.extended_interfaces
         end
       end
     end

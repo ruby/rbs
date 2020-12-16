@@ -220,23 +220,28 @@ module RBS
     end
   end
 
-  class MethodDefinitionConflictWithInterfaceMixinError < StandardError
+  class DuplicatedInterfaceMethodDefinitionError < StandardError
     include MethodNameHelper
 
-    attr_reader :type_name
+    attr_reader :type
     attr_reader :method_name
-    attr_reader :kind
-    attr_reader :mixin_member
-    attr_reader :entries
+    attr_reader :member
 
-    def initialize(type_name:, method_name:, kind:, mixin_member:, entries:)
-      @type_name = type_name
+    def initialize(type:, method_name:, member:)
+      @type = type
       @method_name = method_name
-      @kind = kind
-      @mixin_member = mixin_member
-      @entries = entries
+      @member = member
 
-      super "#{entries[0].decl.location}: Duplicated method with interface mixin: #{method_name_string}"
+      super "#{member.location}: Duplicated method definition: #{qualified_method_name}"
+    end
+
+    def qualified_method_name
+      case type
+      when Types::ClassSingleton
+        "#{type.name}.#{method_name}"
+      else
+        "#{type.name}##{method_name}"
+      end
     end
   end
 
