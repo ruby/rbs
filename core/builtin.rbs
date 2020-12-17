@@ -34,6 +34,10 @@ interface _Reader
   def read: (?int length, ?string outbuf) -> String?
 end
 
+interface _ReaderPartial
+  def readpartial: (int maxlen, ?string outbuf) -> String
+end
+
 interface _Writer
   # Writes the +data+ string. Returns the number of bytes written
   def write: (*_ToS data) -> Integer
