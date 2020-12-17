@@ -73,17 +73,20 @@ module RBS
                          alias_of: nil
                        )
                      when AST::Members::Alias
-                       UnknownMethodAliasError.check!(
-                         methods: definition.methods,
-                         original_name: defn.original.old_name,
-                         aliased_name: defn.original.new_name,
-                         location: defn.original.location
-                       )
+                       unless definition.methods.key?(defn.original.old_name)
+                         raise UnknownMethodAliasError.new(
+                           original_name: defn.original.old_name,
+                           aliased_name: defn.original.new_name,
+                           location: defn.original.location
+                         )
+                       end
 
                        original_method = definition.methods[defn.original.old_name]
                        Definition::Method.new(
                          super_method: nil,
-                         defs: original_method.defs.dup,
+                         defs: original_method.defs.map do |defn|
+                           defn.update(implemented_in: nil, defined_in: type_name)
+                         end,
                          accessibility: :public,
                          alias_of: original_method
                        )
@@ -97,7 +100,7 @@ module RBS
                          )
                        end
 
-                       method = definition.methods[defn.name]
+                       definition.methods[defn.name]
                      end
 
             defn.overloads.each do |overload|
@@ -498,119 +501,131 @@ module RBS
     def define_methods(definition, interface_methods:, methods:)
       methods.each do |method_def|
         method_name = method_def.name
+        original = method_def.original
 
-        if interface_methods.key?(method_name)
-          if method_def.original
-            raise DuplicatedMethodDefinitionError.new(
-              type: definition.self_type,
-              method_name: method_name,
-              members: [method_def.original]
+        if original.is_a?(AST::Members::Alias)
+          existing_method = interface_methods[method_name] || definition.methods[method_name]
+          original_method = interface_methods[original.old_name] || definition.methods[original.old_name]
+
+          unless original_method
+            raise UnknownMethodAliasError.new(
+              original_name: original.old_name,
+              aliased_name: original.new_name,
+              location: original.location
             )
           end
 
-          definition.methods[method_name] = interface_methods[method_name]
+          method = Definition::Method.new(
+            super_method: existing_method,
+            defs: original_method.defs.map do |defn|
+              defn.update(defined_in: definition.type_name, implemented_in: definition.type_name)
+            end,
+            accessibility: method_def.accessibility,
+            alias_of: original_method
+          )
+        else
+          if interface_methods.key?(method_name)
+            interface_method = interface_methods[method_name]
+
+            if method_def.original
+              raise DuplicatedMethodDefinitionError.new(
+                type: definition.self_type,
+                method_name: method_name,
+                members: [method_def.original]
+              )
+            end
+
+            definition.methods[method_name] = interface_method
+          end
+
+          existing_method = definition.methods[method_name]
+
+          case original
+          when AST::Members::MethodDefinition
+            defs = original.types.map do |method_type|
+              Definition::Method::TypeDef.new(
+                type: method_type,
+                member: original,
+                defined_in: definition.type_name,
+                implemented_in: definition.type_name
+              )
+            end
+
+            accessibility = if method_name == :initialize
+                              :private
+                            else
+                              method_def.accessibility
+                            end
+
+            method = Definition::Method.new(
+              super_method: existing_method,
+              defs: defs,
+              accessibility: accessibility,
+              alias_of: nil
+            )
+
+          when AST::Members::AttrReader, AST::Members::AttrWriter, AST::Members::AttrAccessor
+            method_type = if method_name.to_s.end_with?("=")
+                            # setter
+                            MethodType.new(
+                              type_params: [],
+                              type: Types::Function.empty(original.type).update(
+                                required_positionals: [
+                                  Types::Function::Param.new(type: original.type, name: original.name)
+                                ]
+                              ),
+                              block: nil,
+                              location: nil
+                            )
+                          else
+                            # getter
+                            MethodType.new(
+                              type_params: [],
+                              type: Types::Function.empty(original.type),
+                              block: nil,
+                              location: nil
+                            )
+                          end
+            defs = [
+              Definition::Method::TypeDef.new(
+                type: method_type,
+                member: original,
+                defined_in: definition.type_name,
+                implemented_in: definition.type_name
+              )
+            ]
+
+            method = Definition::Method.new(
+              super_method: existing_method,
+              defs: defs,
+              accessibility: method_def.accessibility,
+              alias_of: nil
+            )
+
+          when nil
+            unless definition.methods.key?(method_name)
+              raise InvalidOverloadMethodError.new(
+                type_name: definition.type_name,
+                method_name: method_name,
+                kind: :instance,
+                members: method_def.overloads
+              )
+            end
+
+            if existing_method.defs.any? {|defn| defn.defined_in.interface? }
+              super_method = existing_method.super_method
+            else
+              super_method = existing_method
+            end
+
+            method = Definition::Method.new(
+              super_method: super_method,
+              defs: existing_method.defs.dup,
+              accessibility: existing_method.accessibility,
+              alias_of: existing_method.alias_of
+            )
+          end
         end
-
-        existing_method = definition.methods[method_name]
-
-        method = case (original = method_def.original)
-                 when AST::Members::MethodDefinition
-                   defs = original.types.map do |method_type|
-                     Definition::Method::TypeDef.new(
-                       type: method_type,
-                       member: original,
-                       defined_in: definition.type_name,
-                       implemented_in: definition.type_name
-                     )
-                   end
-
-                   accessibility = if method_name == :initialize
-                                     :private
-                                   else
-                                     method_def.accessibility
-                                   end
-
-                   Definition::Method.new(
-                     super_method: existing_method,
-                     defs: defs,
-                     accessibility: accessibility,
-                     alias_of: nil
-                   )
-                 when AST::Members::Alias
-                   UnknownMethodAliasError.check!(
-                     methods: definition.methods,
-                     original_name: original.old_name,
-                     aliased_name: original.new_name,
-                     location: original.location
-                   )
-
-                   original_method = definition.methods[original.old_name]
-                   Definition::Method.new(
-                     super_method: existing_method,
-                     defs: original_method.defs.dup,
-                     accessibility: method_def.accessibility,
-                     alias_of: original_method
-                   )
-                 when AST::Members::AttrReader, AST::Members::AttrWriter, AST::Members::AttrAccessor
-                   method_type = if method_name.to_s.end_with?("=")
-                                   # setter
-                                   MethodType.new(
-                                     type_params: [],
-                                     type: Types::Function.empty(original.type).update(
-                                       required_positionals: [
-                                         Types::Function::Param.new(type: original.type, name: original.name)
-                                       ]
-                                     ),
-                                     block: nil,
-                                     location: nil
-                                   )
-                                 else
-                                   # getter
-                                   MethodType.new(
-                                     type_params: [],
-                                     type: Types::Function.empty(original.type),
-                                     block: nil,
-                                     location: nil
-                                   )
-                                 end
-                   defs = [
-                     Definition::Method::TypeDef.new(
-                       type: method_type,
-                       member: original,
-                       defined_in: definition.type_name,
-                       implemented_in: definition.type_name
-                     )
-                   ]
-
-                   Definition::Method.new(
-                     super_method: existing_method,
-                     defs: defs,
-                     accessibility: method_def.accessibility,
-                     alias_of: nil
-                   )
-                 when nil
-                   unless definition.methods.key?(method_name)
-                     raise InvalidOverloadMethodError.new(
-                       type_name: definition.type_name,
-                       method_name: method_name,
-                       kind: :instance,
-                       members: method_def.overloads
-                     )
-                   end
-
-                   if existing_method.defs.any? {|defn| defn.defined_in.interface? }
-                     super_method = existing_method.super_method
-                   else
-                     super_method = existing_method
-                   end
-
-                   Definition::Method.new(
-                     super_method: super_method,
-                     defs: existing_method.defs.dup,
-                     accessibility: existing_method.accessibility,
-                     alias_of: existing_method.alias_of
-                   )
-                 end
 
         method_def.overloads.each do |overload|
           defs = overload.types.map do |method_type|

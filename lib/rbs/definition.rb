@@ -34,6 +34,20 @@ module RBS
           @implemented_in = implemented_in
         end
 
+        def ==(other)
+          other.is_a?(TypeDef) &&
+            other.type == type &&
+            other.member == member &&
+            other.defined_in == defined_in &&
+            other.implemented_in == implemented_in
+        end
+
+        alias eql? ==
+
+        def hash
+          self.class.hash ^ type.hash ^ member.hash ^ defined_in.hash ^ implemented_in.hash
+        end
+
         def comment
           member.comment
         end
@@ -68,6 +82,21 @@ module RBS
         @accessibility = accessibility
         @extra_annotations = annotations
         @alias_of = alias_of
+      end
+
+      def ==(other)
+        other.is_a?(Method) &&
+          other.super_method == super_method &&
+          other.defs == defs &&
+          other.accessibility == accessibility &&
+          other.annotations == annotations &&
+          other.alias_of == alias_of
+      end
+
+      alias eql? ==
+
+      def hash
+        self.class.hash ^ super_method.hash ^ defs.hash ^ accessibility.hash ^ annotations.hash ^ alias_of.hash
       end
 
       def defined_in

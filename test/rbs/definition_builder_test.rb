@@ -1660,4 +1660,32 @@ end
       end
     end
   end
+
+  def test_interface_alias
+    SignatureManager.new do |manager|
+      manager.files.merge!(Pathname("foo.rbs") => <<-EOF)
+interface _I1
+  def foo: () -> void
+end
+
+class C0
+  include _I1
+
+  alias bar foo
+end
+      EOF
+      manager.build do |env|
+        builder = DefinitionBuilder.new(env: env)
+
+        builder.build_instance(type_name("::C0")).tap do |defn|
+          defn.methods[:bar].tap do |bar|
+            assert_equal defn.methods[:foo], bar.alias_of
+            assert_equal type_name("::C0"), bar.defined_in
+            assert_equal type_name("::C0"), bar.implemented_in
+            assert_nil bar.super_method
+          end
+        end
+      end
+    end
+  end
 end
