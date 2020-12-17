@@ -616,4 +616,9 @@ class RBS::TypeParsingTest < Minitest::Test
       end
     end
   end
+
+  def test_record_escape
+    Parser.parse_type('{ `日本語`: Integer }')
+    Parser.parse_type('{ `🌼`: Integer }')
+  end
 end
