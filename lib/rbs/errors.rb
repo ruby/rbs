@@ -257,12 +257,6 @@ module RBS
 
       super "#{Location.to_string location}: Unknown method alias name: #{original_name} => #{aliased_name}"
     end
-
-    def self.check!(methods:, original_name:, aliased_name:, location:)
-      unless methods.key?(original_name)
-        raise new(original_name: original_name, aliased_name: aliased_name, location: location)
-      end
-    end
   end
 
   class SuperclassMismatchError < StandardError
