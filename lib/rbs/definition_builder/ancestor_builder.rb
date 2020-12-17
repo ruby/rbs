@@ -177,11 +177,14 @@ module RBS
         when Environment::ModuleEntry
           ancestors = OneAncestors.module_instance(type_name: type_name, params: params)
 
-          entry.self_types.each do |module_self|
-            NoSelfTypeFoundError.check!(module_self, env: env)
-
-            self_types = ancestors.self_types or raise
-            self_types.push Definition::Ancestor::Instance.new(name: module_self.name, args: module_self.args, source: module_self)
+          self_types = ancestors.self_types or raise
+          if entry.self_types.empty?
+            self_types.push Definition::Ancestor::Instance.new(name: BuiltinNames::Object.name, args: [], source: nil)
+          else
+            entry.self_types.each do |module_self|
+              NoSelfTypeFoundError.check!(module_self, env: env)
+              self_types.push Definition::Ancestor::Instance.new(name: module_self.name, args: module_self.args, source: module_self)
+            end
           end
         end
 
@@ -349,6 +352,15 @@ module RBS
 
             super_ancestors = instance_ancestors(super_name, building_ancestors: building_ancestors)
             ancestors.unshift(*super_ancestors.apply(super_args, location: entry.primary.decl.location))
+          end
+        end
+
+        if self_types = one_ancestors.self_types
+          self_types.each do |mod|
+            if mod.name.class?
+              # Ensure there is no loop in ancestors chain
+              instance_ancestors(mod.name, building_ancestors: building_ancestors)
+            end
           end
         end
 

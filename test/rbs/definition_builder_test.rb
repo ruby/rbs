@@ -264,7 +264,7 @@ EOF
           assert_equal parse_type("::Foo[X]", variables: [:X]), definition.self_type
           assert_equal [:X], definition.type_params
 
-          assert_equal Set[:get], Set.new(definition.methods.keys)
+          assert_operator Set[:get], :subset?, Set.new(definition.methods.keys)
           assert_method_definition definition.methods[:get], ["() -> X"], accessibility: :public
 
           assert_equal Set[:@value], Set.new(definition.instance_variables.keys)
@@ -298,7 +298,7 @@ EOF
           assert_equal parse_type("::M2"), definition.self_type
           assert_equal [], definition.type_params
 
-          assert_equal Set[:get], Set.new(definition.methods.keys)
+          assert_operator Set[:get], :subset?, Set.new(definition.methods.keys)
           assert_method_definition definition.methods[:get], ["(::Integer) -> ::String", "() -> ::String"], accessibility: :public
 
           assert_equal Set[:@value], Set.new(definition.instance_variables.keys)
@@ -331,7 +331,7 @@ EOF
           assert_equal parse_type("::M2"), definition.self_type
           assert_equal [], definition.type_params
 
-          assert_equal Set[:get], Set.new(definition.methods.keys)
+          assert_operator Set[:get], :subset?, Set.new(definition.methods.keys)
           assert_method_definition definition.methods[:get], ["(::Integer) -> ::String", "() -> ::String"], accessibility: :public
 
           assert definition.methods[:get].defs.all? {|td| td.implemented_in == TypeName("::M2") }
@@ -1683,6 +1683,109 @@ end
             assert_equal type_name("::C0"), bar.defined_in
             assert_equal type_name("::C0"), bar.implemented_in
             assert_nil bar.super_method
+          end
+        end
+      end
+    end
+  end
+
+  def test_self_type_interface_methods
+    SignatureManager.new do |manager|
+      manager.files.merge!(Pathname("foo.rbs") => <<-EOF)
+interface _I1
+  def a: () -> void
+end
+
+module M0 : _I1
+end
+      EOF
+      manager.build do |env|
+        builder = DefinitionBuilder.new(env: env)
+
+        builder.build_instance(type_name("::M0")).tap do |defn|
+          defn.methods[:a].tap do |a|
+            assert_equal type_name("::_I1"), a.defined_in
+            assert_nil a.implemented_in
+            assert_nil a.super_method
+          end
+        end
+      end
+    end
+  end
+
+  def test_self_type_interface_methods_error
+    SignatureManager.new do |manager|
+      manager.files.merge!(Pathname("foo.rbs") => <<-EOF)
+interface _I1
+  def a: () -> void
+end
+
+module M0 : _I1
+  def a: (Integer) -> String
+end
+      EOF
+      manager.build do |env|
+        builder = DefinitionBuilder.new(env: env)
+
+        builder.build_instance(type_name("::M0")).tap do |definition|
+          definition.methods[:a].tap do |a|
+            assert_equal type_name("::M0"), a.defined_in
+            assert_equal type_name("::M0"), a.implemented_in
+            assert_equal type_name("::_I1"), a.super_method.defined_in
+          end
+        end
+      end
+    end
+  end
+
+  def test_self_type_interface_methods_error2
+    SignatureManager.new do |manager|
+      manager.files.merge!(Pathname("foo.rbs") => <<-EOF)
+interface _I1
+  def a: () -> void
+end
+
+interface _I2
+  def a: () -> Integer
+end
+
+module M0 : _I1, _I2
+end
+      EOF
+      manager.build do |env|
+        builder = DefinitionBuilder.new(env: env)
+
+        builder.build_instance(type_name("::M0")).tap do |definition|
+          definition.methods[:a].tap do |a|
+            assert_equal type_name("::_I2"), a.defined_in
+            assert_nil a.implemented_in
+            assert_nil a.super_method
+            assert_method_definition a, ["() -> ::Integer"]
+          end
+        end
+      end
+    end
+  end
+
+  def test_self_type_interface_methods_overload
+    SignatureManager.new do |manager|
+      manager.files.merge!(Pathname("foo.rbs") => <<-EOF)
+interface _I1
+  def a: () -> void
+end
+
+module M0 : _I1
+  def a: (Integer) -> String | ...
+end
+      EOF
+      manager.build do |env|
+        builder = DefinitionBuilder.new(env: env)
+
+        builder.build_instance(type_name("::M0")).tap do |definition|
+          definition.methods[:a].tap do |a|
+            assert_equal [type_name("::M0"), type_name("::_I1")], a.defs.map(&:defined_in)
+            assert_equal [type_name("::M0"), type_name("::M0")], a.defs.map(&:implemented_in)
+            assert_equal type_name("::_I1"), a.super_method.defined_in
           end
         end
       end

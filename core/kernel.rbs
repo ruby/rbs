@@ -10,7 +10,7 @@
 # ```ruby
 # sprintf "%.1f", 1.234 #=> "1.2"
 # ```
-module Kernel
+module Kernel : BasicObject
   private
 
   def caller: (?Integer start_or_range, ?Integer length) -> ::Array[String]?
