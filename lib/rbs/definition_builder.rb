@@ -151,10 +151,12 @@ module RBS
             if one_ancestors.self_types
               one_ancestors.self_types.each do |ans|
                 defn = build_interface(ans.name)
+
+                # Successor interface method overwrites.
                 merge_definition(src: defn,
                                  dest: definition,
                                  subst: Substitution.build(defn.type_params, ans.args),
-                                 implemented_in: nil)
+                                 keep_super: true)
               end
             end
 
@@ -166,6 +168,7 @@ module RBS
             end
 
             interface_methods = {}
+
             one_ancestors.included_interfaces.each do |mod|
               defn = build_interface(mod.name)
               subst = Substitution.build(defn.type_params, mod.args)
@@ -183,7 +186,10 @@ module RBS
               end
             end
 
-            define_methods(definition, interface_methods: interface_methods, methods: methods)
+            define_methods(definition,
+                           interface_methods: interface_methods,
+                           methods: methods,
+                           super_interface_method: entry.is_a?(Environment::ModuleEntry))
 
             entry.decls.each do |d|
               d.decl.members.each do |member|
@@ -277,7 +283,7 @@ module RBS
             end
 
             methods = method_builder.build_singleton(type_name)
-            define_methods(definition, interface_methods: interface_methods, methods: methods)
+            define_methods(definition, interface_methods: interface_methods, methods: methods, super_interface_method: false)
 
             entry.decls.each do |d|
               d.decl.members.each do |member|
@@ -498,7 +504,7 @@ module RBS
       )
     end
 
-    def define_methods(definition, interface_methods:, methods:)
+    def define_methods(definition, interface_methods:, methods:, super_interface_method:)
       methods.each do |method_def|
         method_name = method_def.name
         original = method_def.original
@@ -612,7 +618,7 @@ module RBS
               )
             end
 
-            if existing_method.defs.any? {|defn| defn.defined_in.interface? }
+            if !super_interface_method && existing_method.defs.any? {|defn| defn.defined_in.interface? }
               super_method = existing_method.super_method
             else
               super_method = existing_method
@@ -620,7 +626,9 @@ module RBS
 
             method = Definition::Method.new(
               super_method: super_method,
-              defs: existing_method.defs.dup,
+              defs: existing_method.defs.map do |defn|
+                defn.update(implemented_in: definition.type_name)
+              end,
               accessibility: existing_method.accessibility,
               alias_of: existing_method.alias_of
             )
