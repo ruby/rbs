@@ -605,4 +605,15 @@ class RBS::TypeParsingTest < Minitest::Test
       Parser.parse_type("Array[A]", variables: [:A, :Array])
     end
   end
+
+  def test_record_keywords
+    keywords = %w(def class module alias type unchecked interface void nil true false any untyped top bot instance singleton private public attr_reader attr_writer attr_accessor include extend prepend extension incompatible)
+
+    keywords.each do |k|
+      Parser.parse_type("{ #{k}: Integer }").tap do |type|
+        assert_instance_of Types::Record, type
+        assert_equal [k.to_sym], type.fields.keys
+      end
+    end
+  end
 end
