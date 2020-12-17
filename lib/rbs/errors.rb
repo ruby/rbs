@@ -68,18 +68,20 @@ module RBS
     attr_reader :location
 
     def initialize(ancestors:, location:)
-      last = case last = ancestors.last
-             when Definition::Ancestor::Singleton
-               "singleton(#{last.name})"
-             when Definition::Ancestor::Instance
-               if last.args.empty?
-                 last.name.to_s
-               else
-                 "#{last.name}[#{last.args.join(", ")}]"
-               end
-             end
+      names = ancestors.map do |ancestor|
+        case ancestor
+        when Definition::Ancestor::Singleton
+          "singleton(#{ancestor.name})"
+        when Definition::Ancestor::Instance
+          if ancestor.args.empty?
+            ancestor.name.to_s
+          else
+            "#{ancestor.name}[#{ancestor.args.join(", ")}]"
+          end
+        end
+      end
 
-      super "#{Location.to_string location}: Detected recursive ancestors: #{last}"
+      super "#{Location.to_string location}: Detected recursive ancestors: #{names.join(" < ")}"
     end
 
     def self.check!(self_ancestor, ancestors:, location:)

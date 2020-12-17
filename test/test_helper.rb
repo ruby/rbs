@@ -94,7 +94,7 @@ class Object < BasicObject
   def respond_to_missing?: (Symbol, bool) -> bool
 end
 
-module Kernel
+module Kernel : BasicObject
   private
   def puts: (*untyped) -> nil
 end
@@ -139,7 +139,7 @@ SIG
           absolute_path.write(content)
         end
 
-        root = 
+        root =
           if system_builtin
             RBS::EnvironmentLoader::DEFAULT_CORE_ROOT
           else

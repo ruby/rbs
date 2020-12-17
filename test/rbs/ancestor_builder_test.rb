@@ -140,6 +140,26 @@ EOF
     end
   end
 
+  def test_one_ancestors_module_no_self_type
+    SignatureManager.new(system_builtin: true) do |manager|
+      manager.files[Pathname("foo.rbs")] = <<EOF
+module M
+end
+EOF
+      manager.build do |env|
+        builder = DefinitionBuilder::AncestorBuilder.new(env: env)
+
+        builder.one_instance_ancestors(type_name("::M")).tap do |a|
+          assert_equal type_name("::M"), a.type_name
+          assert_equal [], a.params
+          assert_nil a.super_class
+          assert_equal [Ancestor::Instance.new(name: type_name("::Object"), args: [], source: nil)],
+                       a.self_types
+        end
+      end
+    end
+  end
+
   def test_one_ancestors_interface
     SignatureManager.new(system_builtin: true) do |manager|
       manager.files[Pathname("foo.rbs")] = <<EOF
