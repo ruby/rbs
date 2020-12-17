@@ -264,7 +264,7 @@ EOF
           assert_equal parse_type("::Foo[X]", variables: [:X]), definition.self_type
           assert_equal [:X], definition.type_params
 
-          assert_equal Set[:get], Set.new(definition.methods.keys)
+          assert_operator Set[:get], :subset?, Set.new(definition.methods.keys)
           assert_method_definition definition.methods[:get], ["() -> X"], accessibility: :public
 
           assert_equal Set[:@value], Set.new(definition.instance_variables.keys)
@@ -298,7 +298,7 @@ EOF
           assert_equal parse_type("::M2"), definition.self_type
           assert_equal [], definition.type_params
 
-          assert_equal Set[:get], Set.new(definition.methods.keys)
+          assert_operator Set[:get], :subset?, Set.new(definition.methods.keys)
           assert_method_definition definition.methods[:get], ["(::Integer) -> ::String", "() -> ::String"], accessibility: :public
 
           assert_equal Set[:@value], Set.new(definition.instance_variables.keys)
@@ -331,7 +331,7 @@ EOF
           assert_equal parse_type("::M2"), definition.self_type
           assert_equal [], definition.type_params
 
-          assert_equal Set[:get], Set.new(definition.methods.keys)
+          assert_operator Set[:get], :subset?, Set.new(definition.methods.keys)
           assert_method_definition definition.methods[:get], ["(::Integer) -> ::String", "() -> ::String"], accessibility: :public
 
           assert definition.methods[:get].defs.all? {|td| td.implemented_in == TypeName("::M2") }

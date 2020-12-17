@@ -150,7 +150,11 @@ module RBS
 
             if one_ancestors.self_types
               one_ancestors.self_types.each do |ans|
-                defn = build_interface(ans.name)
+                defn = if ans.name.interface?
+                         build_interface(ans.name)
+                       else
+                         build_instance(ans.name)
+                       end
 
                 # Successor interface method overwrites.
                 merge_definition(src: defn,
