@@ -841,6 +841,9 @@ rule
     | keyword type {
         result = { val[0].value => val[1] }
       }
+    | identifier_keywords kCOLON type {
+        result = { val[0].value => val[2] }
+      }
 
   keyword_name:
       keyword
