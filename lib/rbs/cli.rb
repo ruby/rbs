@@ -626,7 +626,7 @@ EOU
 
       opts = OptionParser.new
       opts.banner = <<EOU
-Usage: rbs prototype #{format} [options...] [files...]
+Usage: rbs prototype #{format} [files...]
 #{availability}
 Generate RBS prototype from source code.
 It parses specified Ruby code and and generates RBS prototypes.
