@@ -81,13 +81,18 @@ def #{with_name}(*args, &block)
 
     if block_given?
       receiver = self
+      block_receives_block = block.parameters.last&.yield_self {|type, _| type == :block }
 
-      wrapped_block = proc do |*block_args|
+      wrapped_block = proc do |*block_args, &block2|
         return_from_block = false
 
         begin
           block_result = if receiver.equal?(self)
-                           yield(*block_args)
+                           if block_receives_block
+                             block.call(*block_args, &block2)
+                           else
+                             yield(*block_args)
+                           end
                          else
                            instance_exec(*block_args, &block)
                          end
