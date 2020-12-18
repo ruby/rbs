@@ -3,7 +3,7 @@ rules:
     pattern: 💪👽🚨
     message: Do you forget to delete `arglists` section?
     glob:
-      - "stdlib/**/*.rbs"
+      - "{core,stdlib}/**/*.rbs"
     fail:
       - |
         # arglists 💪👽🚨 << Delete this section
@@ -22,7 +22,7 @@ rules:
     justification:
       - Documents (comments) may contain that pattern.
     glob:
-      - "stdlib/**/*.rbs"
+      - "{core,stdlib}/**/*.rbs"
     fail:
       - "def `send`: (String | Symbol arg0, *untyped arg1) -> untyped"
     pass:
