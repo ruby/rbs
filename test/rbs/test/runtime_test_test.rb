@@ -266,4 +266,41 @@ end
 A.new.call("foo") {|value:| puts value }
 RUBY
   end
+
+  def test_method_callbacks
+    assert_test_success(other_env: { 'RBS_TEST_TARGET' => "Callbacks" }, rbs_content: <<RBS, ruby_content: <<'RUBY')
+module Callbacks
+  def on: (Symbol) { (*untyped) -> void } -> void
+  def emit: (Symbol event, *untyped args) ?{ (*untyped) -> void } -> void
+end
+RBS
+module Callbacks
+  def on(e, &block)
+    (@callbacks[e] ||= []) << block
+  end
+
+  def emit(e, *args, &block)
+    @callbacks[e].each do |callable|
+      callable.call(*args, &block)
+    end
+  end
+end
+
+class A
+  def initialize
+    @callbacks = {}
+  end
+
+  include Callbacks
+
+  def bar(&block)
+    emit(:bar, &block)
+  end
+end
+
+a = A.new
+a.on(:bar) { |*args, &block| puts "bar: #{args}"; block.call(self) }
+a.emit(:bar, 1, 2) { |a| "this is A: #{a}" }
+RUBY
+  end
 end
