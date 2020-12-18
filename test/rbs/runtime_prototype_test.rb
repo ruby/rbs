@@ -219,4 +219,47 @@ end
       end
     end
   end
+
+  module TestForOverrideModuleName
+    module M
+      def self.name() 'FakeNameM' end
+      def self.to_s() 'FakeToS' end
+      X = 1
+    end
+
+    class C
+      def self.name() 'FakeNameC' end
+      include M
+    end
+
+    class C2 < C
+    end
+  end
+
+  def test_for_overwritten_module_name
+    SignatureManager.new do |manager|
+      manager.build do |env|
+        p = Runtime.new(patterns: ["RBS::RuntimePrototypeTest::TestForOverrideModuleName::*"], env: env, merge: true)
+
+        assert_write p.decls, <<~RBS
+          class RBS::RuntimePrototypeTest::TestForOverrideModuleName::C
+            include M
+
+            def self.name: () -> untyped
+          end
+
+          class RBS::RuntimePrototypeTest::TestForOverrideModuleName::C2 < RBS::RuntimePrototypeTest::TestForOverrideModuleName::C
+          end
+
+          module RBS::RuntimePrototypeTest::TestForOverrideModuleName::M
+            def self.name: () -> untyped
+
+            def self.to_s: () -> untyped
+          end
+
+          RBS::RuntimePrototypeTest::TestForOverrideModuleName::M::X: Integer
+        RBS
+      end
+    end
+  end
 end

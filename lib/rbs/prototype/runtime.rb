@@ -302,7 +302,7 @@ module RBS
                  end
 
           @decls << AST::Declarations::Constant.new(
-            name: "#{mod.to_s}::#{name}",
+            name: "#{const_name(mod)}::#{name}",
             type: type,
             location: nil,
             comment: nil
@@ -311,14 +311,14 @@ module RBS
       end
 
       def generate_class(mod)
-        type_name = to_type_name(mod.name)
+        type_name = to_type_name(const_name(mod))
         super_class = if mod.superclass == ::Object
                         nil
-                      elsif mod.superclass.name.nil?
+                      elsif const_name(mod.superclass).nil?
                         RBS.logger.warn("Skipping anonymous superclass #{mod.superclass} of #{mod}")
                         nil
                       else
-                        AST::Declarations::Class::Super.new(name: to_type_name(mod.superclass.name), args: [], location: nil)
+                        AST::Declarations::Class::Super.new(name: to_type_name(const_name(mod.superclass)), args: [], location: nil)
                       end
 
         decl = AST::Declarations::Class.new(
@@ -332,12 +332,12 @@ module RBS
         )
 
         each_mixin(mod.included_modules, *mod.superclass.included_modules, *mod.included_modules.flat_map(&:included_modules)) do |included_module|
-          unless included_module.name
+          unless const_name(included_module)
             RBS.logger.warn("Skipping anonymous module #{included_module} included in #{mod}")
             next
           end
 
-          module_name = to_type_name(included_module.name)
+          module_name = to_type_name(const_name(included_module))
           if module_name.namespace == type_name.namespace
             module_name = TypeName.new(name: module_name.name, namespace: Namespace.empty)
           end
