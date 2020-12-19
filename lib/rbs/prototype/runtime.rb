@@ -80,12 +80,12 @@ module RBS
             unless const_name(mix)
               RBS.logger.warn("Skipping anonymous module #{mix} included in #{mod}")
             else
-              module_name = to_type_name(const_name(mix))
-              if module_name.namespace == type_name.namespace
-                module_name = TypeName.new(name: module_name.name, namespace: Namespace.empty)
+              module_name = module_full_name = to_type_name(const_name(mix))
+              if module_full_name.namespace == type_name.namespace
+                module_name = TypeName.new(name: module_full_name.name, namespace: Namespace.empty)
               end
 
-              yield module_name, mix
+              yield module_name, module_full_name, mix
             end
           end
         end
@@ -319,7 +319,9 @@ module RBS
                      location: nil
                    )
                  else
-                   Types::ClassInstance.new(name: to_type_name(const_name(value.class)), args: [], location: nil)
+                   value_type_name = to_type_name(const_name(value.class))
+                   args = type_args(value_type_name)
+                   Types::ClassInstance.new(name: value_type_name, args: args, location: nil)
                  end
 
           @decls << AST::Declarations::Constant.new(
@@ -339,7 +341,9 @@ module RBS
                         RBS.logger.warn("Skipping anonymous superclass #{mod.superclass} of #{mod}")
                         nil
                       else
-                        AST::Declarations::Class::Super.new(name: to_type_name(const_name(mod.superclass)), args: [], location: nil)
+                        super_name = to_type_name(const_name(mod.superclass))
+                        super_args = type_args(super_name)
+                        AST::Declarations::Class::Super.new(name: super_name, args: super_args, location: nil)
                       end
 
         decl = AST::Declarations::Class.new(
@@ -352,20 +356,22 @@ module RBS
           comment: nil
         )
 
-        each_included_module(type_name, mod) do |module_name, _|
+        each_included_module(type_name, mod) do |module_name, module_full_name, _|
+          args = type_args(module_full_name)
           decl.members << AST::Members::Include.new(
             name: module_name,
-            args: [],
+            args: args,
             location: nil,
             comment: nil,
             annotations: []
           )
         end
 
-        each_included_module(type_name, mod.singleton_class) do |module_name, _|
+        each_included_module(type_name, mod.singleton_class) do |module_name, module_full_name ,_|
+          args = type_args(module_full_name)
           decl.members << AST::Members::Extend.new(
             name: module_name,
-            args: [],
+            args: args,
             location: nil,
             comment: nil,
             annotations: []
@@ -399,20 +405,22 @@ module RBS
           comment: nil
         )
 
-        each_included_module(type_name, mod) do |module_name, _|
+        each_included_module(type_name, mod) do |module_name, module_full_name, _|
+          args = type_args(module_full_name)
           decl.members << AST::Members::Include.new(
             name: module_name,
-            args: [],
+            args: args,
             location: nil,
             comment: nil,
             annotations: []
           )
         end
 
-        each_included_module(type_name, mod.singleton_class) do |module_name, _|
+        each_included_module(type_name, mod.singleton_class) do |module_name, module_full_name, _|
+          args = type_args(module_full_name)
           decl.members << AST::Members::Extend.new(
             name: module_name,
-            args: [],
+            args: args,
             location: nil,
             comment: nil,
             annotations: []
@@ -429,6 +437,14 @@ module RBS
       def const_name(const)
         @module_name_method ||= Module.instance_method(:name)
         @module_name_method.bind(const).call
+      end
+
+      def type_args(type_name)
+        if class_decl = env.class_decls[type_name.absolute!]
+          class_decl.type_params.size.times.map { :untyped }
+        else
+          []
+        end
       end
     end
   end

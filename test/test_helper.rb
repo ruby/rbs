@@ -121,7 +121,11 @@ end
 module Comparable
 end
 
-module Enumerable[A, B]
+module Enumerable[A]
+end
+
+class Hash[unchecked out K, unchecked out V]
+  include Enumerable[[K, V]]
 end
 SIG
 

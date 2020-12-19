@@ -50,7 +50,7 @@ module RBS::RuntimePrototypeTest::TestTargets::Bar
 end
 
 module RBS::RuntimePrototypeTest::TestTargets::Foo
-  include Enumerable
+  include Enumerable[untyped]
 
   extend Comparable
 end
@@ -109,7 +109,7 @@ module RBS::RuntimePrototypeTest::TestTargets::Bar
 end
 
 module RBS::RuntimePrototypeTest::TestTargets::Foo
-  include Enumerable
+  include Enumerable[untyped]
 
   extend Comparable
 end
@@ -286,6 +286,41 @@ end
           end
 
           RBS::RuntimePrototypeTest::TestForOverrideModuleName::M::X: Integer
+        RBS
+      end
+    end
+  end
+
+  module TestForTypeParameters
+    module M
+      HASH = { foo: 42 }
+    end
+
+    class C < Hash
+    end
+
+    class C2
+      include Enumerable
+    end
+  end
+
+  def test_for_type_parameters
+    SignatureManager.new do |manager|
+      manager.build do |env|
+        p = Runtime.new(patterns: ["RBS::RuntimePrototypeTest::TestForTypeParameters::*"], env: env, merge: true)
+
+        assert_write p.decls, <<~RBS
+          class RBS::RuntimePrototypeTest::TestForTypeParameters::C < Hash[untyped, untyped]
+          end
+
+          class RBS::RuntimePrototypeTest::TestForTypeParameters::C2
+            include Enumerable[untyped]
+          end
+
+          module RBS::RuntimePrototypeTest::TestForTypeParameters::M
+          end
+
+          RBS::RuntimePrototypeTest::TestForTypeParameters::M::HASH: Hash[untyped, untyped]
         RBS
       end
     end
