@@ -298,7 +298,7 @@ module RBS
                      location: nil
                    )
                  else
-                   Types::ClassInstance.new(name: to_type_name(value.class.to_s), args: [], location: nil)
+                   Types::ClassInstance.new(name: to_type_name(const_name(value.class)), args: [], location: nil)
                  end
 
           @decls << AST::Declarations::Constant.new(

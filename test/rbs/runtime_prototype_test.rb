@@ -229,8 +229,12 @@ end
 
     class C
       def self.name() 'FakeNameC' end
+      def self.to_s() 'FakeToS2' end
       include M
+
+      INSTANCE = C.new
     end
+
 
     class C2 < C
     end
@@ -246,7 +250,11 @@ end
             include M
 
             def self.name: () -> untyped
+
+            def self.to_s: () -> untyped
           end
+
+          RBS::RuntimePrototypeTest::TestForOverrideModuleName::C::INSTANCE: RBS::RuntimePrototypeTest::TestForOverrideModuleName::C
 
           class RBS::RuntimePrototypeTest::TestForOverrideModuleName::C2 < RBS::RuntimePrototypeTest::TestForOverrideModuleName::C
           end
