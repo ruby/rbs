@@ -9,10 +9,16 @@ class RBS::RuntimePrototypeTest < Minitest::Test
   module TestTargets
     module Foo
       include Enumerable
+
+      extend Comparable
+    end
+
+    module Bar
     end
 
     class Test < String
       include Foo
+      extend Bar
 
       NAME = "Hello"
 
@@ -40,12 +46,19 @@ class RBS::RuntimePrototypeTest < Minitest::Test
         p = Runtime.new(patterns: ["RBS::RuntimePrototypeTest::TestTargets::*"], env: env, merge: false)
 
         assert_write p.decls, <<-EOF
+module RBS::RuntimePrototypeTest::TestTargets::Bar
+end
+
 module RBS::RuntimePrototypeTest::TestTargets::Foo
   include Enumerable
+
+  extend Comparable
 end
 
 class RBS::RuntimePrototypeTest::TestTargets::Test < String
   include Foo
+
+  extend Bar
 
   def self.b: () -> untyped
 
@@ -92,12 +105,19 @@ EOF
         p = Runtime.new(patterns: ["RBS::RuntimePrototypeTest::TestTargets::*"], env: env, merge: true)
 
         assert_write p.decls, <<-EOF
+module RBS::RuntimePrototypeTest::TestTargets::Bar
+end
+
 module RBS::RuntimePrototypeTest::TestTargets::Foo
   include Enumerable
+
+  extend Comparable
 end
 
 class RBS::RuntimePrototypeTest::TestTargets::Test < String
   include Foo
+
+  extend Bar
 
   def self.b: () -> untyped
 
