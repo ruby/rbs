@@ -2,6 +2,17 @@
 
 ## master
 
+## 1.0.0 (Pre released)
+
+* Signature updates for `URI`, `IO`, and `Time` ([#529](https://github.com/ruby/rbs/pull/529), [#521](https://github.com/ruby/rbs/pull/521), [#520](https://github.com/ruby/rbs/pull/520), [#511](https://github.com/ruby/rbs/pull/511), [#517](https://github.com/ruby/rbs/pull/517))
+* `rbs prototype runtime` generates `extend`s ([#535](https://github.com/ruby/rbs/pull/535))
+* `rbs prototype runtime` stability improvements ([#533](https://github.com/ruby/rbs/pull/533), [#526](https://github.com/ruby/rbs/pull/526))
+  * Improve runtime type checker compatibility ([#532](https://github.com/ruby/rbs/pull/532), [#528](https://github.com/ruby/rbs/pull/528), )
+* Better compatibility for record type attribute names ([#525](https://github.com/ruby/rbs/pull/525), [#524](https://github.com/ruby/rbs/pull/524))
+* Let module-self-types be classes ([#523](https://github.com/ruby/rbs/pull/523))
+* Method resolution improvements about `alias` and `.new` ([#522](https://github.com/ruby/rbs/pull/522), [#519](https://github.com/ruby/rbs/pull/519), [#516](https://github.com/ruby/rbs/pull/516))
+* Fix `ruby2_keywords` for `Proc` in Ruby <2.7 ([#513](https://github.com/ruby/rbs/pull/513))
+
 ## 0.20.1 (2020-12-06)
 
 * Make the order of RBS load reproducible ([#508](https://github.com/ruby/rbs/pull/508))
