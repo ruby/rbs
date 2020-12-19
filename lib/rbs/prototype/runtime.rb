@@ -61,11 +61,32 @@ module RBS
         end
       end
 
-      def each_mixin(mixins, *super_mixes)
-        supers = Set.new(super_mixes)
-        mixins.each do |mix|
+      def each_included_module(type_name, mod)
+        supers = Set[]
+
+        mod.included_modules.each do |mix|
+          supers.merge(mix.included_modules)
+        end
+
+        if mod.is_a?(Class)
+          mod.superclass.included_modules.each do |mix|
+            supers << mix
+            supers.merge(mix.included_modules)
+          end
+        end
+
+        mod.included_modules.each do |mix|
           unless supers.include?(mix)
-            yield mix
+            unless const_name(mix)
+              RBS.logger.warn("Skipping anonymous module #{mix} included in #{mod}")
+            else
+              module_name = to_type_name(const_name(mix))
+              if module_name.namespace == type_name.namespace
+                module_name = TypeName.new(name: module_name.name, namespace: Namespace.empty)
+              end
+
+              yield module_name, mix
+            end
           end
         end
       end
@@ -331,18 +352,18 @@ module RBS
           comment: nil
         )
 
-        each_mixin(mod.included_modules, *mod.superclass.included_modules, *mod.included_modules.flat_map(&:included_modules)) do |included_module|
-          unless const_name(included_module)
-            RBS.logger.warn("Skipping anonymous module #{included_module} included in #{mod}")
-            next
-          end
-
-          module_name = to_type_name(const_name(included_module))
-          if module_name.namespace == type_name.namespace
-            module_name = TypeName.new(name: module_name.name, namespace: Namespace.empty)
-          end
-
+        each_included_module(type_name, mod) do |module_name, _|
           decl.members << AST::Members::Include.new(
+            name: module_name,
+            args: [],
+            location: nil,
+            comment: nil,
+            annotations: []
+          )
+        end
+
+        each_included_module(type_name, mod.singleton_class) do |module_name, _|
+          decl.members << AST::Members::Extend.new(
             name: module_name,
             args: [],
             location: nil,
@@ -378,19 +399,18 @@ module RBS
           comment: nil
         )
 
-        each_mixin(mod.included_modules, *mod.included_modules.flat_map(&:included_modules), namespace: type_name.namespace) do |included_module|
-          included_module_name = const_name(included_module)
-          unless included_module_name
-            RBS.logger.warn("Skipping anonymous module #{included_module} included in #{mod}")
-            next
-          end
-
-          module_name = to_type_name(included_module_name)
-          if module_name.namespace == type_name.namespace
-            module_name = TypeName.new(name: module_name.name, namespace: Namespace.empty)
-          end
-
+        each_included_module(type_name, mod) do |module_name, _|
           decl.members << AST::Members::Include.new(
+            name: module_name,
+            args: [],
+            location: nil,
+            comment: nil,
+            annotations: []
+          )
+        end
+
+        each_included_module(type_name, mod.singleton_class) do |module_name, _|
+          decl.members << AST::Members::Extend.new(
             name: module_name,
             args: [],
             location: nil,
