@@ -28,6 +28,26 @@ rules:
     pass:
       - "def `send`: (String | Symbol, *untyped) -> untyped"
 
+  - id: rbs.prefer_boolish
+    pattern:
+      - regexp: '\([^(]*\bbool\b[^\n]*\)'
+      - token: "-> bool }"
+    message: |
+      Prefer `boolish` over `bool` for method arguments and block return values
+
+      See the doc below:
+      https://github.com/ruby/rbs/blob/78d04a2db0f1c4925d2b13c2939868edf9465d6c/docs/syntax.md#bool-or-boolish
+    glob:
+      - "**/*.rbs"
+    justification:
+      - When you strictly want `true | false`.
+    pass:
+      - "(arg: boolish)"
+      - "{ () -> boolish }"
+    fail:
+      - "(arg: bool)"
+      - "{ () -> bool }"
+
   - id: deprecate_stdlib_test
     pattern:
       token: < StdlibTest
