@@ -67,12 +67,19 @@ module RBS
         end
       end
 
-      def self.hook_method_source(prefix, method_name, key, random:)
+      def self.hook_method_source(prefix, method_name, key, random:, params:)
         with_name, without_name = alias_names(method_name, random)
         full_method_name = "#{prefix}#{method_name}"
 
+        param_source = params.take_while {|param| param[0] == :req }.map(&:last) + ["*rest_args_#{random}"]
+
+        RBS.logger.debug {
+          "Generating method definition: def #{with_name}(#{param_source.join(", ")}, &block) ..."
+        }
+
         [__LINE__ + 1, <<RUBY]
-def #{with_name}(*args, &block)
+def #{with_name}(#{param_source.join(", ")}, &block)
+  args = [#{param_source.join(", ")}]
   ::RBS.logger.debug { "#{full_method_name} with arguments: [" + args.map(&:inspect).join(", ") + "]" }
 
   begin
@@ -171,7 +178,8 @@ RUBY
 
       def self.hook_instance_method(klass, method, key:)
         random = SecureRandom.hex(4)
-        line, source = hook_method_source("#{klass}#", method, key, random: random)
+        params = klass.instance_method(method).parameters
+        line, source = hook_method_source("#{klass}#", method, key, random: random, params: params)
 
         klass.module_eval(source, __FILE__, line)
         setup_alias_method_chain klass, method, random: random
@@ -179,7 +187,8 @@ RUBY
 
       def self.hook_singleton_method(klass, method, key:)
         random = SecureRandom.hex(4)
-        line, source = hook_method_source("#{klass}.",method, key, random: random)
+        params = klass.method(method).parameters
+        line, source = hook_method_source("#{klass}.",method, key, random: random, params: params)
 
         klass.singleton_class.module_eval(source, __FILE__, line)
         setup_alias_method_chain klass.singleton_class, method, random: random

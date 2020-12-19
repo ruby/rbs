@@ -267,6 +267,40 @@ A.new.call("foo") {|value:| puts value }
 RUBY
   end
 
+  def test_method_curry
+    assert_test_success(other_env: { 'RBS_TEST_TARGET' => "A" }, rbs_content: <<RBS, ruby_content: <<'RUBY')
+class A
+  def on_object: (Integer, String) -> void
+end
+RBS
+class A
+  def on_object(x, y)
+    pp(x: x, y: y)
+  end
+end
+
+STDOUT.puts A.new.method(:on_object).curry[1][""]
+RUBY
+  end
+
+  def test_missing_required_args
+    output = refute_test_success(ruby_content: <<RUBY, rbs_content: <<RBS)
+class Hello
+  def world(x)
+  end
+end
+
+Hello.new.world()
+RUBY
+class Hello
+  def world: (Integer) -> void
+end
+RBS
+
+    # Ruby's standard ArgumentError is raised if required argument is not given.
+    assert_match(/\(ArgumentError\)/, output)
+  end
+
   def test_method_callbacks
     assert_test_success(other_env: { 'RBS_TEST_TARGET' => "Callbacks" }, rbs_content: <<RBS, ruby_content: <<'RUBY')
 module Callbacks
