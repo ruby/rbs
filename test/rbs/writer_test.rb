@@ -111,7 +111,11 @@ interface _Each[X, Y]
 
   def __id__: () -> Integer
 
-  def `def`: () -> Symbol
+  def def: () -> Symbol
+
+  def `self`: () -> void
+
+  def `self?`: () -> void
 
   def timeout: () -> Integer
 
