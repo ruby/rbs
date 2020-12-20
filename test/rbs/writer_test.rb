@@ -115,6 +115,8 @@ interface _Each[X, Y]
 
   def timeout: () -> Integer
 
+  def `foo!=`: () -> Integer
+
   def `: (String) -> untyped
 end
     SIG
