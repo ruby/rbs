@@ -111,9 +111,15 @@ interface _Each[X, Y]
 
   def __id__: () -> Integer
 
-  def `def`: () -> Symbol
+  def def: () -> Symbol
+
+  def `self`: () -> void
+
+  def `self?`: () -> void
 
   def timeout: () -> Integer
+
+  def `foo!=`: () -> Integer
 
   def `: (String) -> untyped
 end
