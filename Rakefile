@@ -45,6 +45,14 @@ task :validate => :parser do
       lib << "monitor"
     end
 
+    if lib == ["csv"]
+      lib << "forwardable"
+    end
+
+    if lib == ["prime"]
+      lib << "singleton"
+    end
+
     sh "#{ruby} #{rbs} #{lib.map {|l| "-r #{l}"}.join(" ")} validate --silent"
   end
 end
