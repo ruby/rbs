@@ -55,6 +55,10 @@ module RBS
           end
 
           methods = method_builder.build_interface(type_name)
+          one_ancestors = ancestor_builder.one_interface_ancestors(type_name)
+
+          validate_type_params(definition, methods: methods, ancestors: one_ancestors)
+
           methods.each do |defn|
             method = case original = defn.original
                      when AST::Members::MethodDefinition

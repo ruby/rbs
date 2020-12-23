@@ -485,6 +485,37 @@ end
     end
   end
 
+  def test_build_interface_method_variance
+    SignatureManager.new do |manager|
+      manager.files.merge!(Pathname("foo.rbs") => <<-EOF)
+interface _A[out X, unchecked out Y]
+  def foo: () -> X
+  def bar: (X) -> void
+  def baz: (Y) -> void
+end
+
+interface _B[in X, unchecked in Y]
+  def foo: (X) -> void
+  def bar: () -> X
+  def baz: () -> Y
+end
+
+interface _C[Z]
+  def foo: (Z) -> Z
+end
+      EOF
+
+      manager.build do |env|
+        builder = DefinitionBuilder.new(env: env)
+
+        assert_raises(InvalidVarianceAnnotationError) { builder.build_interface(type_name("::_A")) }
+        assert_raises(InvalidVarianceAnnotationError) { builder.build_interface(type_name("::_B")) }
+
+        builder.build_interface(type_name("::_C"))
+      end
+    end
+  end
+
   def test_variance_check_ancestors
     SignatureManager.new do |manager|
       manager.files.merge!(Pathname("foo.rbs") => <<-EOF)
