@@ -30,6 +30,19 @@ class IOSingletonTest < Minitest::Test
     end
   end
 
+  def test_open
+    Dir.mktmpdir do |dir|
+      fd = IO.sysopen(__FILE__)
+
+      assert_send_type "(Integer) -> IO",
+                       IO, :open, fd
+      assert_send_type "(ToInt, String) -> IO",
+                       IO, :open, ToInt.new(fd), "r"
+      assert_send_type "(Integer) { (IO) -> String } -> String",
+                       IO, :open, fd do |io| io.read end
+    end
+  end
+
   def test_copy_stream
     Dir.mktmpdir do |dir|
       src_name = File.join(dir, "src_file").tap { |f| IO.write(f, "foo") }

@@ -683,7 +683,12 @@ class IO < Object
 
   def self.write: (String name, _ToS arg0, ?Integer offset, ?external_encoding: String external_encoding, ?internal_encoding: String internal_encoding, ?encoding: String encoding, ?textmode: untyped textmode, ?binmode: untyped binmode, ?autoclose: untyped autoclose, ?mode: String mode) -> Integer
 
-  def self.for_fd: (Integer fd, ?Integer mode, ?Integer opt) -> self
+  def self.for_fd: (int fd, ?(string | int) mode, **untyped opt) -> instance
+
+  alias self.open self.for_fd
+
+  def self.open: [A] (int fd, ?(string | int) mode, **untyped opt) { (instance) -> A } -> A
+               | ...
 
   def bytes: () { (Integer arg0) -> untyped } -> self
            | () -> ::Enumerator[Integer, self]
