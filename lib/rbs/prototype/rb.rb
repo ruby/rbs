@@ -129,8 +129,12 @@ module RBS
             RBS.logger.warn "`class <<` syntax with not-self may be compiled to incorrect code: #{this}"
           end
 
+          accessibility = current_accessibility(decls)
+
           ctx = Context.initial.tap { |ctx| ctx.singleton = true }
           process_children(body, decls: decls, comments: comments, context: ctx)
+
+          decls << accessibility
 
         when :DEFN, :DEFS
             if node.type == :DEFN
