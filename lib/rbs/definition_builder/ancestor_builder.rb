@@ -184,7 +184,7 @@ module RBS
 
         return if super_types.size == 1
 
-        raise SuperclassMismatchError.new(name: type_name, super_classes: super_types, entry: entry)
+        raise SuperclassMismatchError.new(name: type_name, entry: entry)
       end
 
       def one_instance_ancestors(type_name)
