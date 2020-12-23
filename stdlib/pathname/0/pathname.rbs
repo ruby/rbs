@@ -373,7 +373,7 @@ class Pathname
   # Note that the results never contain the entries `.` and `..` in the directory
   # because they are not children.
   #
-  def children: (?boolish with_directory) -> untyped
+  def children: (?boolish with_directory) -> Array[Pathname]
 
   # Changes file permissions.
   #
