@@ -42,6 +42,12 @@
 #
 #
 class Prime
+  include Singleton
+
+  include Enumerable[Integer]
+
+  extend Enumerable[Integer]
+
   # Iterates the given block over all prime numbers.
   #
   # ## Parameters

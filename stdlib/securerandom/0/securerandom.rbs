@@ -1,4 +1,6 @@
 module SecureRandom
+  extend Random::Formatter
+
   def self.alphanumeric: (?Integer?) -> String
   def self.base64: (?Integer?) -> String
   def self.hex: (?Integer?) -> String
