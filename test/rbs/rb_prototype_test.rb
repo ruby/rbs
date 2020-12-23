@@ -401,6 +401,36 @@ end
     EOF
   end
 
+  def test_accessibility_and_sclass
+    parser = RB.new
+
+    rb = <<~RUBY
+      class C
+        class << self
+          private
+
+          def foo() end
+        end
+
+        def bar() end
+      end
+    RUBY
+
+    parser.parse(rb)
+
+    assert_write parser.decls, <<~RBS
+      class C
+        private
+
+        def self.foo: () -> nil
+
+        public
+
+        def bar: () -> nil
+      end
+    RBS
+  end
+
   def test_aliases
     parser = RB.new
 
