@@ -44,7 +44,8 @@ module RBS
 
         ancestors = ancestor_builder.interface_ancestors(type_name)
         Definition.new(type_name: type_name, entry: entry, self_type: self_type, ancestors: ancestors).tap do |definition|
-          ancestor_builder.one_interface_ancestors(type_name).included_interfaces.each do |mod|
+          included_interfaces = ancestor_builder.one_interface_ancestors(type_name).included_interfaces or raise
+          included_interfaces.each do |mod|
             defn = build_interface(mod.name)
             subst = Substitution.build(defn.type_params, mod.args)
 
@@ -55,12 +56,12 @@ module RBS
 
           methods = method_builder.build_interface(type_name)
           methods.each do |defn|
-            method = case defn.original
+            method = case original = defn.original
                      when AST::Members::MethodDefinition
-                       defs = defn.original.types.map do |method_type|
+                       defs = original.types.map do |method_type|
                          Definition::Method::TypeDef.new(
                            type: method_type,
-                           member: defn.original,
+                           member: original,
                            defined_in: type_name,
                            implemented_in: nil
                          )
@@ -73,15 +74,15 @@ module RBS
                          alias_of: nil
                        )
                      when AST::Members::Alias
-                       unless definition.methods.key?(defn.original.old_name)
+                       unless definition.methods.key?(original.old_name)
                          raise UnknownMethodAliasError.new(
-                           original_name: defn.original.old_name,
-                           aliased_name: defn.original.new_name,
-                           location: defn.original.location
+                           original_name: original.old_name,
+                           aliased_name: original.new_name,
+                           location: original.location
                          )
                        end
 
-                       original_method = definition.methods[defn.original.old_name]
+                       original_method = definition.methods[original.old_name]
                        Definition::Method.new(
                          super_method: nil,
                          defs: original_method.defs.map do |defn|
@@ -101,10 +102,14 @@ module RBS
                        end
 
                        definition.methods[defn.name]
+
+                     when AST::Members::AttrReader, AST::Members::AttrWriter, AST::Members::AttrAccessor
+                       raise
+
                      end
 
             defn.overloads.each do |overload|
-              defs = overload.types.map do |method_type|
+              overload_defs = overload.types.map do |method_type|
                 Definition::Method::TypeDef.new(
                   type: method_type,
                   member: overload,
@@ -113,7 +118,7 @@ module RBS
                 )
               end
 
-              method.defs.unshift(*defs)
+              method.defs.unshift(*overload_defs)
             end
 
             definition.methods[defn.name] = method
@@ -141,15 +146,21 @@ module RBS
             validate_type_params definition, methods: methods, ancestors: one_ancestors
 
             if super_class = one_ancestors.super_class
-              defn = build_instance(super_class.name)
-              merge_definition(src: defn,
-                               dest: definition,
-                               subst: Substitution.build(defn.type_params, super_class.args),
-                               keep_super: true)
+              case super_class
+              when Definition::Ancestor::Instance
+                build_instance(super_class.name).yield_self do |defn|
+                  merge_definition(src: defn,
+                                  dest: definition,
+                                  subst: Substitution.build(defn.type_params, super_class.args),
+                                  keep_super: true)
+                end
+              else
+                raise
+              end
             end
 
-            if one_ancestors.self_types
-              one_ancestors.self_types.each do |ans|
+            if self_types = one_ancestors.self_types
+              self_types.each do |ans|
                 defn = if ans.name.interface?
                          build_interface(ans.name)
                        else
@@ -164,7 +175,7 @@ module RBS
               end
             end
 
-            one_ancestors.included_modules.each do |mod|
+            one_ancestors.each_included_module do |mod|
               defn = build_instance(mod.name)
               merge_definition(src: defn,
                                dest: definition,
@@ -173,7 +184,7 @@ module RBS
 
             interface_methods = {}
 
-            one_ancestors.included_interfaces.each do |mod|
+            one_ancestors.each_included_interface do |mod|
               defn = build_interface(mod.name)
               subst = Substitution.build(defn.type_params, mod.args)
 
@@ -221,7 +232,7 @@ module RBS
               end
             end
 
-            one_ancestors.prepended_modules.each do |mod|
+            one_ancestors.each_prepended_module do |mod|
               defn = build_instance(mod.name)
               merge_definition(src: defn,
                                dest: definition,
@@ -261,19 +272,19 @@ module RBS
               end
             end
 
-            one_ancestors.extended_modules.each do |mod|
-              defn = build_instance(mod.name)
-              merge_definition(src: defn,
+            one_ancestors.each_extended_module do |mod|
+              mod_defn = build_instance(mod.name)
+              merge_definition(src: mod_defn,
                                dest: definition,
-                               subst: Substitution.build(defn.type_params, mod.args))
+                               subst: Substitution.build(mod_defn.type_params, mod.args))
             end
 
             interface_methods = {}
-            one_ancestors.extended_interfaces.each do |mod|
-              defn = build_interface(mod.name)
-              subst = Substitution.build(defn.type_params, mod.args)
+            one_ancestors.each_extended_interface do |mod|
+              mod_defn = build_interface(mod.name)
+              subst = Substitution.build(mod_defn.type_params, mod.args)
 
-              defn.methods.each do |name, method|
+              mod_defn.methods.each do |name, method|
                 if interface_methods.key?(name)
                   raise DuplicatedInterfaceMethodDefinitionError.new(
                     type: self_type,
@@ -481,8 +492,6 @@ module RBS
                          nil
                        when nil
                          nil
-                       else
-                         raise
                        end
 
         if method_types
@@ -561,6 +570,7 @@ module RBS
               )
             end
 
+            # @type var accessibility: RBS::Definition::accessibility
             accessibility = if method_name == :initialize
                               :private
                             else
@@ -640,7 +650,7 @@ module RBS
         end
 
         method_def.overloads.each do |overload|
-          defs = overload.types.map do |method_type|
+          type_defs = overload.types.map do |method_type|
             Definition::Method::TypeDef.new(
               type: method_type,
               member: overload,
@@ -649,7 +659,7 @@ module RBS
             )
           end
 
-          method.defs.unshift(*defs)
+          method.defs.unshift(*type_defs)
         end
 
         definition.methods[method_name] = method

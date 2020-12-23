@@ -48,7 +48,11 @@ module RBS
     end
 
     def has_library?(library:, version:)
-      self.class.gem_sig_path(library, version) || repository.lookup(library, version)
+      if self.class.gem_sig_path(library, version) || repository.lookup(library, version)
+        true
+      else
+        false
+      end
     end
 
     def load(env:)
@@ -70,7 +74,7 @@ module RBS
 
       libs.each do |lib|
         unless has_library?(version: lib.version, library: lib.name)
-          raise UnknownLibraryError.new(lib: lib) 
+          raise UnknownLibraryError.new(lib: lib)
         end
 
         case
@@ -97,7 +101,7 @@ module RBS
         if path.basename.to_s.start_with?("_")
           if skip_hidden
             unless immediate
-              return 
+              return
             end
           end
         end

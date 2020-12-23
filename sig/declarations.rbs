@@ -73,8 +73,9 @@ module RBS
         class Super
           attr_reader name: TypeName
           attr_reader args: Array[Types::t]
+          attr_reader location: Location?
 
-          def initialize: (name: TypeName, args: Array[Types::t]) -> void
+          def initialize: (name: TypeName, args: Array[Types::t], location: Location?) -> void
 
           include _HashEqual
           include _ToJson
@@ -156,6 +157,8 @@ module RBS
         attr_reader comment: Comment?
 
         def initialize: (name: TypeName, type_params: ModuleTypeParams, members: Array[member], annotations: Array[Annotation], location: Location?, comment: Comment?) -> void
+
+        include MixinHelper
 
         include _HashEqual
         include _ToJson

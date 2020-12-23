@@ -30,14 +30,62 @@ module RBS
               yield s
             end
 
-            self_types&.each(&block)
-            included_modules&.each(&block)
-            included_interfaces&.each(&block)
-            prepended_modules&.each(&block)
-            extended_modules&.each(&block)
-            extended_interfaces&.each(&block)
+            each_self_type(&block)
+            each_included_module(&block)
+            each_included_interface(&block)
+            each_prepended_module(&block)
+            each_extended_module(&block)
+            each_extended_interface(&block)
           else
             enum_for :each_ancestor
+          end
+        end
+
+        def each_self_type(&block)
+          if block
+            self_types&.each(&block)
+          else
+            enum_for :each_self_type
+          end
+        end
+
+        def each_included_module(&block)
+          if block
+            included_modules&.each(&block)
+          else
+            enum_for :each_included_module
+          end
+        end
+
+        def each_included_interface(&block)
+          if block
+            included_interfaces&.each(&block)
+          else
+            enum_for :each_included_interface
+          end
+        end
+
+        def each_prepended_module(&block)
+          if block
+            prepended_modules&.each(&block)
+          else
+            enum_for :each_prepended_module
+          end
+        end
+
+        def each_extended_module(&block)
+          if block
+            extended_modules&.each(&block)
+          else
+            enum_for :each_extended_module
+          end
+        end
+
+        def each_extended_interface(&block)
+          if block
+            extended_interfaces&.each(&block)
+          else
+            enum_for :each_extended_interface
           end
         end
 
@@ -457,7 +505,8 @@ module RBS
         one_ancestors = one_interface_ancestors(type_name)
         ancestors = []
 
-        one_ancestors.included_interfaces.each do |a|
+        included_interfaces = one_ancestors.included_interfaces or raise
+        included_interfaces.each do |a|
           included_ancestors = interface_ancestors(a.name, building_ancestors: building_ancestors)
           ancestors.unshift(*included_ancestors.apply(a.args, location: entry.decl.location))
         end

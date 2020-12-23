@@ -115,7 +115,6 @@ module RBS
 
     class Variable
       attr_reader name: Symbol
-      attr_reader location: Location?
 
       @@count: Integer
 
@@ -140,7 +139,6 @@ module RBS
 
     class ClassSingleton
       attr_reader name: TypeName
-      attr_reader location: Location?
 
       include _TypeBase
 
@@ -178,8 +176,6 @@ module RBS
     class Interface
       include Application
 
-      attr_reader location: Location?
-
       def initialize: (name: TypeName, args: Array[t], location: Location?) -> void
 
       include _TypeBase
@@ -194,15 +190,12 @@ module RBS
     class ClassInstance
       include Application
 
-      attr_reader location: Location?
-
       def initialize: (name: TypeName, args: Array[t], location: Location?) -> void
 
       include _TypeBase
     end
 
     class Alias
-      attr_reader location: Location?
       attr_reader name: TypeName
 
       def initialize: (name: TypeName, location: Location?) -> void
@@ -215,7 +208,6 @@ module RBS
 
     class Tuple
       attr_reader types: Array[t]
-      attr_reader location: Location?
 
       def initialize: (types: Array[t], location: Location?) -> void
 
@@ -224,7 +216,6 @@ module RBS
 
     class Record
       attr_reader fields: Hash[Symbol, t]
-      attr_reader location: Location?
 
       def initialize: (fields: Hash[Symbol, t], location: Location?) -> void
 
@@ -233,7 +224,6 @@ module RBS
 
     class Optional
       attr_reader type: t
-      attr_reader location: Location?
 
       def initialize: (type: t, location: Location?) -> void
 
@@ -242,7 +232,6 @@ module RBS
 
     class Union
       attr_reader types: Array[t]
-      attr_reader location: Location?
 
       def initialize: (types: Array[t], location: Location?) -> void
 
@@ -254,7 +243,6 @@ module RBS
 
     class Intersection
       attr_reader types: Array[t]
-      attr_reader location: Location?
 
       def initialize: (types: Array[t], location: Location?) -> void
 
@@ -336,7 +324,7 @@ module RBS
 
     class Block
       attr_reader type: Types::Function
-      attr_reader required: boolish
+      attr_reader required: bool
 
       def initialize: (type: Types::Function, required: boolish) -> void
 
@@ -352,7 +340,6 @@ module RBS
     class Proc
       attr_reader type: Function
       attr_reader block: Block?
-      attr_reader location: Location?
 
       def initialize: (location: Location?, type: Function, block: Block?) -> void
 
@@ -363,7 +350,6 @@ module RBS
       type literal = String | Integer | Symbol | TrueClass | FalseClass
 
       attr_reader literal: literal
-      attr_reader location: Location?
 
       def initialize: (literal: literal, location: Location?) -> void
 

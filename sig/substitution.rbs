@@ -35,5 +35,8 @@ module RBS
 
     # Returns a substitution without variables given in `vars`.
     def without: (*Symbol vars) -> Substitution
+
+    # Returns true if given substitution is identity.
+    def empty?: () -> bool
   end
 end
