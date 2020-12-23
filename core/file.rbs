@@ -531,6 +531,9 @@ class File < IO
   #
   def self.mtime: (string | _ToPath | IO file_name) -> Time
 
+  # Alias of `File.new`.
+  def self.open: (string | _ToPath | int file_name, ?(string | int) mode, ?int perm) -> instance
+
   # Returns `true` if the named file exists and the effective used id of the
   # calling process is the owner of the file.
   #
