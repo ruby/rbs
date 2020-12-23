@@ -194,10 +194,14 @@ module RBS
 
               defn.methods.each do |name, method|
                 if interface_methods.key?(name)
+                  include_member = mod.source
+
+                  raise unless include_member.is_a?(AST::Members::Include)
+
                   raise DuplicatedInterfaceMethodDefinitionError.new(
                     type: self_type,
                     method_name: name,
-                    member: mod.source
+                    member: include_member
                   )
                 end
 
@@ -290,10 +294,14 @@ module RBS
 
               mod_defn.methods.each do |name, method|
                 if interface_methods.key?(name)
+                  src_member = mod.source
+
+                  raise unless src_member.is_a?(AST::Members::Extend)
+
                   raise DuplicatedInterfaceMethodDefinitionError.new(
                     type: self_type,
                     method_name: name,
-                    member: mod.source
+                    member: src_member
                   )
                 end
 
@@ -562,11 +570,11 @@ module RBS
           if interface_methods.key?(method_name)
             interface_method = interface_methods[method_name]
 
-            if method_def.original
+            if original = method_def.original
               raise DuplicatedMethodDefinitionError.new(
                 type: definition.self_type,
                 method_name: method_name,
-                members: [method_def.original]
+                members: [original]
               )
             end
 

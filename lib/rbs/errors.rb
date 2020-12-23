@@ -35,34 +35,6 @@ module RBS
     end
   end
 
-  class InvalidExtensionParameterError < StandardError
-    attr_reader :type_name
-    attr_reader :extension_name
-    attr_reader :location
-    attr_reader :extension_params
-    attr_reader :class_params
-
-    def initialize(type_name:, extension_name:, extension_params:, class_params:, location:)
-      @type_name = type_name
-      @extension_name = extension_name
-      @extension_params = extension_params
-      @class_params = class_params
-      @location = location
-
-      super "#{Location.to_string location}: Expected #{class_params.size} parameters to #{type_name} (#{extension_name}) but has #{extension_params.size} parameters"
-    end
-
-    def self.check!(type_name:, extension_name:, extension_params:, class_params:, location:)
-      unless extension_params.size == class_params.size
-        raise new(type_name: type_name,
-                  extension_name: extension_name,
-                  extension_params: extension_params,
-                  class_params: class_params,
-                  location: location)
-      end
-    end
-  end
-
   class RecursiveAncestorError < StandardError
     attr_reader :ancestors
     attr_reader :location
@@ -162,6 +134,8 @@ module RBS
               env.class_decls
             when type_name.interface?
               env.interface_decls
+            else
+              raise
             end
 
       dic.key?(type_name) or raise new(type_name: type_name, location: self_type.location)
@@ -189,6 +163,8 @@ module RBS
               env.class_decls
             when type_name.interface?
               env.interface_decls
+            else
+              raise
             end
 
       dic.key?(type_name) or raise new(type_name: type_name, member: member)
@@ -226,13 +202,11 @@ module RBS
     end
 
     def other_locations
-      members[1..-1].map(&:location)
+      members.drop(1).map(&:location)
     end
   end
 
   class DuplicatedInterfaceMethodDefinitionError < StandardError
-    include MethodNameHelper
-
     attr_reader :type
     attr_reader :method_name
     attr_reader :member
@@ -273,33 +247,10 @@ module RBS
     attr_reader :name
     attr_reader :entry
 
-    def initialize(name:, super_classes:, entry:)
+    def initialize(name:, entry:)
       @name = name
       @entry = entry
       super "#{Location.to_string entry.primary.decl.location}: Superclass mismatch: #{name}"
-    end
-  end
-
-  class InconsistentMethodVisibilityError < StandardError
-    attr_reader :type_name
-    attr_reader :method_name
-    attr_reader :kind
-    attr_reader :member_pairs
-
-    def initialize(type_name:, method_name:, kind:, member_pairs:)
-      @type_name = type_name
-      @method_name = method_name
-      @kind = kind
-      @member_pairs = member_pairs
-
-      delimiter = case kind
-                  when :instance
-                    "#"
-                  when :singleton
-                    "."
-                  end
-
-      super "#{Location.to_string member_pairs[0][0].location}: Inconsistent method visibility: #{type_name}#{delimiter}#{method_name}"
     end
   end
 
@@ -345,7 +296,8 @@ module RBS
       @name = name
       @decls = decls
 
-      super "#{Location.to_string decls.last.location}: Duplicated declaration: #{name}"
+      last_decl = decls.last or raise
+      super "#{Location.to_string last_decl.location}: Duplicated declaration: #{name}"
     end
   end
 
@@ -375,7 +327,9 @@ module RBS
     end
 
     def location
-      defs[0].original.location
+      first_def = defs.first or raise
+      original = first_def.original or raise
+      original.location
     end
   end
 end

@@ -133,7 +133,7 @@ module RBS
 
     def cache_name(cache, name:, decl:, outer:)
       if cache.key?(name)
-        raise DuplicatedDeclarationError.new(name, decl, cache[name].decl)
+        raise DuplicatedDeclarationError.new(_ = name, _ = decl, _ = cache[name].decl)
       end
 
       cache[name] = SingleEntry.new(name: name, decl: decl, outer: outer)
