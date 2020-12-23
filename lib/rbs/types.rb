@@ -943,7 +943,11 @@ module RBS
       end
 
       def has_keyword?
-        !required_keywords.empty? || !optional_keywords.empty? || rest_keywords
+        if !required_keywords.empty? || !optional_keywords.empty? || rest_keywords
+          true
+        else
+          false
+        end
       end
     end
 
@@ -953,7 +957,7 @@ module RBS
 
       def initialize(type:, required:)
         @type = type
-        @required = required
+        @required = required ? true : false
       end
 
       def ==(other)
