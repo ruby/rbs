@@ -429,6 +429,20 @@ module RBS
       end
     end
 
+    def source_location(source, decl)
+      case source
+      when nil
+        decl.location
+      when :super
+        case decl
+        when AST::Declarations::Class
+          decl.super_class&.location
+        end
+      else
+        source.location
+      end
+    end
+
     def validate_type_params(definition, ancestors:, methods:)
       type_params = definition.type_params_decl
 
@@ -440,19 +454,17 @@ module RBS
         when Definition::Ancestor::Instance
           result = calculator.in_inherit(name: ancestor.name, args: ancestor.args, variables: param_names)
           validate_params_with(type_params, result: result) do |param|
-            location = case source = ancestor.source
-                       when nil
-                         definition.entry.primary.decl.location
-                       when :super
-                         definition.entry.primary.decl.super_class.location
-                       else
-                         source.location
-                       end
+            decl = case entry = definition.entry
+                   when Environment::ModuleEntry, Environment::ClassEntry
+                     entry.primary.decl
+                   when Environment::SingleEntry
+                     entry.decl
+                   end
 
             raise InvalidVarianceAnnotationError.new(
               type_name: definition.type_name,
               param: param,
-              location: location
+              location: source_location(ancestor.source, decl)
             )
           end
         end
