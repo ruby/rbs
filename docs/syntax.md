@@ -531,23 +531,6 @@ interface _Foo
 end
 ```
 
-### Extension declaration
-
-Extension is to model _open class_.
-
-```
-extension Kernel (Pathname)
-  def Pathname: (String) -> Pathname
-end
-
-extension Array[A] (ActiveSupport)
-  def to: (Integer) -> Array[A]
-  def from: (Integer) -> Array[A]
-  def second: () -> A?
-  def third: () -> A?
-end
-```
-
 ### Type alias declaration
 
 You can declare an alias of types.

@@ -131,21 +131,6 @@ module RBS
         include _ToJson
       end
 
-      class Extension < Base
-        attr_reader name: TypeName
-        attr_reader type_params: ModuleTypeParams
-        attr_reader extension_name: Symbol
-        attr_reader members: Array[Members::t]
-        attr_reader annotations: Array[Annotation]
-        attr_reader location: Location?
-        attr_reader comment: Comment?
-
-        def initialize: (name: TypeName, type_params: ModuleTypeParams, extension_name: Symbol, members: Array[Members::t], annotations: Array[Annotation], location: Location?, comment: Comment?) -> void
-
-        include _HashEqual
-        include _ToJson
-      end
-
       class Interface
         type member = Members::t
 

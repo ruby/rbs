@@ -195,9 +195,6 @@ module RBS
 
       when AST::Declarations::Global
         cache_name global_decls, name: decl.name, decl: decl, outer: outer
-
-      when AST::Declarations::Extension
-        RBS.logger.warn "#{Location.to_string decl.location} Extension construct is deprecated: use class/module syntax instead"
       end
     end
 
@@ -326,9 +323,6 @@ module RBS
           location: decl.location,
           comment: decl.comment
         )
-
-      else
-        raise
       end
     end
 

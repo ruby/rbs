@@ -141,10 +141,6 @@ ARGV.map {|f| Pathname(f) }.each do |path|
       decl.instance_variable_set(:@comment, comment)
 
       print_members stores, decl.name.to_s, decl.members
-    when RBS::AST::Declarations::Extension
-      puts "  Importing documentation for #{decl.name} (#{decl.extension_name})"
-
-      print_members stores, decl.name.to_s, decl.members
     end
   end
 
