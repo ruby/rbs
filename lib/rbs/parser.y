@@ -50,7 +50,6 @@ rule
     | interface_decl
     | module_decl
     | class_decl
-    | extension_decl
 
   start_new_scope: { start_new_variables_scope }
   start_merged_scope: { start_merged_variables_scope }
@@ -60,24 +59,6 @@ rule
     | tANNOTATION annotations {
         result = val[1].unshift(Annotation.new(string: val[0].value, location: val[0].location))
       }
-
-  extension_decl:
-      annotations kEXTENSION start_new_scope class_name type_params kLPAREN extension_name kRPAREN class_members kEND {
-        reset_variable_scope
-
-        location = val[1].location + val[9].location
-        result = Declarations::Extension.new(
-          name: val[3].value,
-          type_params: val[4]&.value || [],
-          extension_name: val[6].value.to_sym,
-          members: val[8],
-          annotations: val[0],
-          location: location,
-          comment: leading_comment(val[0].first&.location || location)
-        )
-      }
-
-  extension_name: tUIDENT | tLIDENT
 
   class_decl:
       annotations kCLASS start_new_scope class_name module_type_params super_class class_members kEND {
