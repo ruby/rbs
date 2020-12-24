@@ -337,4 +337,19 @@ a.on(:bar) { |*args, &block| puts "bar: #{args}"; block.call(self) }
 a.emit(:bar, 1, 2) { |a| "this is A: #{a}" }
 RUBY
   end
+
+  def test_block_arg
+    assert_test_success(ruby_content: <<RUBY, rbs_content: <<RBS)
+class Hello
+  def world(block)
+  end
+end
+
+Hello.new.world(123)
+RUBY
+class Hello
+  def world: (Integer) -> void
+end
+RBS
+  end
 end
