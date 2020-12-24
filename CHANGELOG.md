@@ -2,7 +2,7 @@
 
 ## master
 
-## 1.0.0 (Pre released)
+## 1.0.0 (2020-12-24)
 
 * Signature updates for `URI`, `IO`, `File`, `Pathname`, `Module`, and `Time` ([#529](https://github.com/ruby/rbs/pull/529), [#521](https://github.com/ruby/rbs/pull/521), [#520](https://github.com/ruby/rbs/pull/520), [#511](https://github.com/ruby/rbs/pull/511), [#517](https://github.com/ruby/rbs/pull/517), [#542](https://github.com/ruby/rbs/pull/542), [#546](https://github.com/ruby/rbs/pull/546), [#540](https://github.com/ruby/rbs/pull/540), [#538](https://github.com/ruby/rbs/pull/538))
 * `rbs prototype runtime` generates `extend`s ([#535](https://github.com/ruby/rbs/pull/535))
