@@ -71,14 +71,15 @@ module RBS
         with_name, without_name = alias_names(method_name, random)
         full_method_name = "#{prefix}#{method_name}"
 
-        param_source = params.take_while {|param| param[0] == :req }.map(&:last) + ["*rest_args_#{random}"]
+        param_source = params.take_while {|param| param[0] == :req }.map(&:last) + ["*rest_args__#{random}"]
+        block_param = "block__#{random}"
 
         RBS.logger.debug {
-          "Generating method definition: def #{with_name}(#{param_source.join(", ")}, &block) ..."
+          "Generating method definition: def #{with_name}(#{param_source.join(", ")}, &#{block_param}) ..."
         }
 
         [__LINE__ + 1, <<RUBY]
-def #{with_name}(#{param_source.join(", ")}, &block)
+def #{with_name}(#{param_source.join(", ")}, &#{block_param})
   args = [#{param_source.join(", ")}]
   ::RBS.logger.debug { "#{full_method_name} with arguments: [" + args.map(&:inspect).join(", ") + "]" }
 
@@ -88,7 +89,7 @@ def #{with_name}(#{param_source.join(", ")}, &block)
 
     if block_given?
       receiver = self
-      block_receives_block = block.parameters.last&.yield_self {|type, _| type == :block }
+      block_receives_block = #{block_param}.parameters.last&.yield_self {|type, _| type == :block }
 
       wrapped_block = proc do |*block_args, &block2|
         return_from_block = false
@@ -96,12 +97,12 @@ def #{with_name}(#{param_source.join(", ")}, &block)
         begin
           block_result = if receiver.equal?(self)
                            if block_receives_block
-                             block.call(*block_args, &block2)
+                             #{block_param}.call(*block_args, &block2)
                            else
                              yield(*block_args)
                            end
                          else
-                           instance_exec(*block_args, &block)
+                           instance_exec(*block_args, &#{block_param})
                          end
 
           return_from_block = true
