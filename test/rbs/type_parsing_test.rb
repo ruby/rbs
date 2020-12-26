@@ -530,14 +530,13 @@ class RBS::TypeParsingTest < Test::Unit::TestCase
       assert_equal :@@foo, type.literal
     end
 
-    Parser.parse_type(":+").yield_self do |type|
-      assert_instance_of Types::Literal, type
-      assert_equal :+, type.literal
-    end
+    operator_symbols = %i(| ^ & <=> == === =~ > >= < <= << >> + - * / % ** ~ +@ -@ [] []= ` ! != !~)
 
-    Parser.parse_type(":-").yield_self do |type|
-      assert_instance_of Types::Literal, type
-      assert_equal :-, type.literal
+    operator_symbols.each do |symbol|
+      Parser.parse_type(symbol.inspect).yield_self do |type|
+        assert_instance_of Types::Literal, type
+        assert_equal symbol, type.literal
+      end
     end
 
     assert_raises Parser::SyntaxError do
