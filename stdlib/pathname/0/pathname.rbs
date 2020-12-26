@@ -1091,5 +1091,5 @@ module Kernel
   #
   # See also Pathname::new for more information.
   #
-  def Pathname: (String | Pathname) -> Pathname
+  def self?.Pathname: (String | Pathname) -> Pathname
 end
