@@ -533,6 +533,7 @@ class File < IO
 
   # Alias of `File.new`.
   def self.open: (string | _ToPath | int file_name, ?(string | int) mode, ?int perm) -> instance
+               | [T] (string | _ToPath | int file_name, ?(string | int) mode, ?int perm) { (File) -> T } -> T
 
   # Returns `true` if the named file exists and the effective used id of the
   # calling process is the owner of the file.
