@@ -12,8 +12,7 @@ jobs:
     strategy:
       matrix:
         container_tag:
-        - master-nightly-bionic
-        - 2.6-bionic
+        - 3.0-focal
         - 2.7-bionic
         job:
         - test
