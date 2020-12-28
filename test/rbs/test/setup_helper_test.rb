@@ -28,8 +28,8 @@ class SetupHelperTest < Test::Unit::TestCase
   end
 
   def test_to_double_class
-    assert '::RSpec::Mocks::Double', to_double_class('rspec')
-    assert '::Minitest::Mock', to_double_class('rspec')
+    assert_equal ['::RSpec::Mocks::Double'], to_double_class('rspec')
+    assert_equal ['::Minitest::Mock'], to_double_class('minitest')
 
     silence_warnings do
       assert_nil to_double_class('rr')
