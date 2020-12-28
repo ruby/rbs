@@ -38,7 +38,6 @@ module RBS
           nil
         end
       end
-
     end
   end
 end
