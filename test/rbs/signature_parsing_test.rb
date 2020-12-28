@@ -1079,12 +1079,12 @@ end
 EOF
       decls[0].members[0].tap do |member|
         assert_instance_of Members::MethodDefinition, member
-        assert_operator member, :overload?
+        assert_predicate member, :overload?
       end
 
       decls[0].members[1].tap do |member|
         assert_instance_of Members::MethodDefinition, member
-        refute_operator member, :overload?
+        refute_predicate member, :overload?
       end
     end
   end
@@ -1098,7 +1098,7 @@ end
 EOF
         decls[0].members[0].tap do |member|
           assert_instance_of Members::MethodDefinition, member
-          assert_operator member, :overload?
+          assert_predicate member, :overload?
         end
       end
     end

@@ -223,7 +223,7 @@ singleton(::BasicObject)
         with_cli do |cli|
           cli.run(%w(vendor --vendor-dir=dir1))
 
-          assert_operator Pathname(d) + "dir1/core", :directory?
+          assert_predicate Pathname(d) + "dir1/core", :directory?
         end
       end
     end

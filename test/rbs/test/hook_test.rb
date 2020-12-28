@@ -54,7 +54,7 @@ class RBS::Test::HookTest < Test::Unit::TestCase
     traces[0].tap do |t|
       assert_instance_of RBS::Test::CallTrace, t
       assert_equal :+, t.method_name
-      assert_operator t.method_call, :return?
+      assert_predicate t.method_call, :return?
       assert_equal [30], t.method_call.arguments
       assert_equal :plus, t.method_call.return_value
     end
@@ -79,7 +79,7 @@ class RBS::Test::HookTest < Test::Unit::TestCase
     traces[0].tap do |t|
       assert_instance_of RBS::Test::CallTrace, t
       assert_equal :hello, t.method_name
-      assert_operator t.method_call, :return?
+      assert_predicate t.method_call, :return?
       assert_equal [1,2], t.method_call.arguments
       assert_equal 3, t.method_call.return_value
     end
@@ -107,7 +107,7 @@ class RBS::Test::HookTest < Test::Unit::TestCase
       assert_instance_of RBS::Test::CallTrace, t
       assert_equal :hello, t.method_name
       assert_equal [1, 0], t.method_call.arguments
-      assert_operator t.method_call, :exception?
+      assert_predicate t.method_call, :exception?
       assert_instance_of RuntimeError, t.method_call.exception
       assert_equal "Aborting", t.method_call.exception.message
     end
@@ -136,7 +136,7 @@ class RBS::Test::HookTest < Test::Unit::TestCase
 
       assert_equal :world, t.method_name
 
-      assert_operator t.method_call, :return?
+      assert_predicate t.method_call, :return?
       assert_equal [1,2], t.method_call.arguments
       assert_equal :world, t.method_call.return_value
 
@@ -205,10 +205,10 @@ class RBS::Test::HookTest < Test::Unit::TestCase
 
       assert_equal :foo, t.method_name
 
-      assert_operator t.method_call, :return?
+      assert_predicate t.method_call, :return?
       assert_equal [{ x: "x", hello: :world }], t.method_call.arguments
       assert_equal "x", t.method_call.return_value
-      assert_operator t, :block_given
+      assert_predicate t, :block_given
       assert_empty t.block_calls
     end
   end
