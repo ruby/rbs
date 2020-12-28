@@ -392,8 +392,8 @@ EOF
   end
 
   def test_is_double
-    skip unless has_gem?("rspec")
-    skip unless has_gem?("minitest")
+    omit unless has_gem?("rspec")
+    omit if skip_minitest?
 
     require "rspec/mocks/standalone"
     require "minitest/mock"

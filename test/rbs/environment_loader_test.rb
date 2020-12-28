@@ -133,7 +133,7 @@ end
   end
 
   def test_loading_from_gem
-    skip unless has_gem?("rbs-amber")
+    omit unless has_gem?("rbs-amber")
 
     mktmpdir do |path|
       repo = RBS::Repository.new()
@@ -149,7 +149,7 @@ end
   end
 
   def test_loading_from_gem_without_rbs
-    skip unless has_gem?("minitest")
+    omit if skip_minitest?
 
     mktmpdir do |path|
       repo = RBS::Repository.new()
