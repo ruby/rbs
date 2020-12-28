@@ -5,12 +5,11 @@ gemspec
 
 # Development dependencies
 gem "rake"
-gem "minitest"
+gem "test-unit"
 gem "rspec"
 gem "racc"
 gem "rubocop"
 gem "rubocop-rubycw"
-gem "minitest-reporters"
 gem "json"
 gem "json-schema"
 gem 'stackprof'
