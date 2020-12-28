@@ -4,6 +4,7 @@ require "tmpdir"
 require "stringio"
 require "open3"
 require "test/unit"
+require "test/unit/rr"
 
 begin
   require "amber"
@@ -37,13 +38,13 @@ module TestHelper
   end
 
   def silence_errors
-    RBS.logger.stub :error, nil do
+    stub(RBS.logger).error do
       yield
     end
   end
 
   def silence_warnings
-    RBS.logger.stub :warn, nil do
+    stub(RBS.logger).warn do
       yield
     end
   end
