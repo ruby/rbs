@@ -393,8 +393,10 @@ EOF
 
   def test_is_double
     skip unless has_gem?("rspec")
+    skip unless has_gem?("minitest")
 
     require "rspec/mocks/standalone"
+    require "minitest/mock"
 
     SignatureManager.new do |manager|
       manager.build do |env|

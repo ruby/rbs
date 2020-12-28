@@ -151,7 +151,7 @@ end
 
 require "minitest/autorun"
 
-class FooTest < Test::Unit::TestCase
+class FooTest < Minitest::Test
   def test_foo_mock
     # Confirm if mock is correctly ignored.
     Foo.new.foo(::Minitest::Mock.new)
