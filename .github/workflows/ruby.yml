@@ -33,8 +33,9 @@ jobs:
         gem install bundler
     - name: bundle config set with
       run: |
-        bundle config set --local with 'minitest'
-      if: "!contains(matrix.container_tag, 'master-nightly')"
+        echo "NO_MINITEST=true" >> $GITHUB_ENV
+        bundle config set --local without 'minitest'
+      if: "contains(matrix.container_tag, 'master-nightly')"
     - name: bin/setup
       run: |
         bin/setup

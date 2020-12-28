@@ -22,6 +22,10 @@ module TestHelper
     false
   end
 
+  def skip_minitest?
+    ENV.key?("NO_MINITEST")
+  end
+
   def parse_type(string, variables: Set.new)
     RBS::Parser.parse_type(string, variables: variables)
   end

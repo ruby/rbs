@@ -24,6 +24,6 @@ group :ide, optional: true do
   gem "ruby-debug-ide"
 end
 
-group :minitest, optional: true do
+group :minitest do
   gem "minitest"
 end
