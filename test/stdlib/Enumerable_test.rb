@@ -120,7 +120,7 @@ class EnumerableTest < StdlibTest
   end
 end
 
-class EnumerableTest2 < Minitest::Test
+class EnumerableTest2 < Test::Unit::TestCase
   include TypeAssertions
 
   class TestEnumerable

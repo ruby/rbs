@@ -1,7 +1,7 @@
 require "test_helper"
 require "json_validator"
 
-class RBS::SchemaTest < Minitest::Test
+class RBS::SchemaTest < Test::Unit::TestCase
   include TestHelper
 
   def test_location_schema

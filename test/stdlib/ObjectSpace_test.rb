@@ -1,6 +1,6 @@
 require_relative "test_helper"
 
-class ObjectSpaceTest < Minitest::Test
+class ObjectSpaceTest < Test::Unit::TestCase
   include TypeAssertions
 
   testing "singleton(::ObjectSpace)"

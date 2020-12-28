@@ -1,6 +1,6 @@
 require "test_helper"
 
-class RBS::MethodTypeParsingTest < Minitest::Test
+class RBS::MethodTypeParsingTest < Test::Unit::TestCase
   Parser = RBS::Parser
   Buffer = RBS::Buffer
   Types = RBS::Types

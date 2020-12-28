@@ -1,7 +1,7 @@
 require_relative "test_helper"
 require "socket"
 
-class FileSingletonTest < Minitest::Test
+class FileSingletonTest < Test::Unit::TestCase
   include TypeAssertions
 
   testing "singleton(::File)"
@@ -831,7 +831,7 @@ class FileSingletonTest < Minitest::Test
   end
 end
 
-class FileInstanceTest < Minitest::Test
+class FileInstanceTest < Test::Unit::TestCase
   include TypeAssertions
 
   testing "::File"

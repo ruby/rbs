@@ -3,12 +3,8 @@ require "rbs"
 require "tmpdir"
 require "stringio"
 require "open3"
-
-begin
-  require 'minitest/reporters'
-  Minitest::Reporters.use! [Minitest::Reporters::DefaultReporter.new]
-rescue LoadError
-end
+require "test/unit"
+require "test/unit/rr"
 
 begin
   require "amber"
@@ -24,6 +20,10 @@ module TestHelper
     true
   rescue Gem::MissingSpecError
     false
+  end
+
+  def skip_minitest?
+    ENV.key?("NO_MINITEST")
   end
 
   def parse_type(string, variables: Set.new)
@@ -42,13 +42,13 @@ module TestHelper
   end
 
   def silence_errors
-    RBS.logger.stub :error, nil do
+    stub(RBS.logger).error do
       yield
     end
   end
 
   def silence_warnings
-    RBS.logger.stub :warn, nil do
+    stub(RBS.logger).warn do
       yield
     end
   end
@@ -173,7 +173,7 @@ SIG
       items.each do |item|
         begin
           yield item
-        rescue Minitest::Assertion
+        rescue Test::Unit::AssertionFailedError
           next
         else
           # Pass test
@@ -205,5 +205,3 @@ SIG
     assert_empty(sample - array)
   end
 end
-
-require "minitest/autorun"

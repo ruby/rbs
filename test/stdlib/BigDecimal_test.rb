@@ -1,7 +1,7 @@
 require_relative "test_helper"
 require "bigdecimal"
 
-class BigDecimalSingletonTest < Minitest::Test
+class BigDecimalSingletonTest < Test::Unit::TestCase
   include TypeAssertions
   library "bigdecimal"
   testing "singleton(::BigDecimal)"
@@ -53,7 +53,7 @@ class BigDecimalSingletonTest < Minitest::Test
   end
 end
 
-class BigDecimalTest < Minitest::Test
+class BigDecimalTest < Test::Unit::TestCase
   include TypeAssertions
   library "bigdecimal"
   testing "::BigDecimal"

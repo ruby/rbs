@@ -1,7 +1,7 @@
 require_relative "test_helper"
 require "uri"
 
-class URISingletonTest < Minitest::Test
+class URISingletonTest < Test::Unit::TestCase
   include TypeAssertions
 
   library "uri"

@@ -1,6 +1,6 @@
 require "test_helper"
 
-class RBS::RbiPrototypeTest < Minitest::Test
+class RBS::RbiPrototypeTest < Test::Unit::TestCase
   RBI = RBS::Prototype::RBI
 
   include TestHelper

@@ -4,13 +4,13 @@ require "logger"
 
 return unless Gem::Version.new(RUBY_VERSION) >= Gem::Version.new('2.7.0')
 
-class RBS::Test::RuntimeTestTest < Minitest::Test
+class RBS::Test::RuntimeTestTest < Test::Unit::TestCase
   include TestHelper
 
   def test_runtime_success
     output = assert_test_success()
     assert_match "Setting up hooks for ::Hello", output
-    refute_match "No type checker was installed!", output
+    refute_match /#{Regexp.escape("No type checker was installed!")}/, output
   end
 
   def test_runtime_test_with_sample_size
@@ -100,8 +100,8 @@ RUBY
 
   def test_no_test_install
     output = assert_test_success(other_env: { "RBS_TEST_TARGET" => "NO_SUCH_CLASS" })
-    refute_match "Setting up hooks for ::Hello", output
-    assert_match "No type checker was installed!", output
+    refute_match /#{Regexp.escape("Setting up hooks for ::Hello")}/, output
+    assert_match /#{Regexp.escape("No type checker was installed!")}/, output
   end
 
   def test_name_override
@@ -136,7 +136,7 @@ RBS
   end
 
   def test_minitest
-    skip unless has_gem?("minitest")
+    omit if skip_minitest?
 
     assert_test_success(other_env: { 'RBS_TEST_TARGET' => 'Foo', 'RBS_TEST_DOUBLE_SUITE' => 'minitest' }, rbs_content: <<RBS, ruby_content: <<RUBY)
 class Foo
@@ -168,7 +168,7 @@ RUBY
   end
 
   def test_rspec
-    skip unless has_gem?("rspec")
+    omit unless has_gem?("rspec")
 
     assert_test_success(other_env: { "RBS_TEST_TARGET" => 'Foo', "RBS_TEST_DOUBLE_SUITE" => 'rspec' }, rbs_content: <<RBS, ruby_content: <<RUBY)
 class Foo

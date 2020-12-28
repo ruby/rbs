@@ -2,7 +2,7 @@ require "test_helper"
 require "stringio"
 require "rbs/cli"
 
-class RBS::CliTest < Minitest::Test
+class RBS::CliTest < Test::Unit::TestCase
   include TestHelper
 
   CLI = RBS::CLI
@@ -208,7 +208,7 @@ singleton(::BasicObject)
   end
 
   def test_paths_with_gem
-    skip unless has_gem?("rbs-amber")
+    omit unless has_gem?("rbs-amber")
 
     with_cli do |cli|
       cli.run(%w(-r rbs-amber paths))
@@ -223,14 +223,14 @@ singleton(::BasicObject)
         with_cli do |cli|
           cli.run(%w(vendor --vendor-dir=dir1))
 
-          assert_operator Pathname(d) + "dir1/core", :directory?
+          assert_predicate Pathname(d) + "dir1/core", :directory?
         end
       end
     end
   end
 
   def test_vendor_gem
-    skip unless has_gem?("rbs-amber")
+    omit unless has_gem?("rbs-amber")
 
     Dir.mktmpdir do |d|
       Dir.chdir(d) do

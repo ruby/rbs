@@ -115,7 +115,7 @@ namespace :generate do
           require_relative "test_helper"
 
           <%- unless class_methods.empty? -%>
-          class <%= klass %>SingletonTest < Minitest::Test
+          class <%= klass %>SingletonTest < Test::Unit::TestCase
             include TypeAssertions
 
             # library "pathname", "set", "securerandom"     # Declare library signatures to load
@@ -133,7 +133,7 @@ namespace :generate do
           <%- end -%>
 
           <%- unless instance_methods.empty? -%>
-          class <%= klass %>Test < Minitest::Test
+          class <%= klass %>Test < Test::Unit::TestCase
             include TypeAssertions
 
             # library "pathname", "set", "securerandom"     # Declare library signatures to load

@@ -5,12 +5,12 @@ gemspec
 
 # Development dependencies
 gem "rake"
-gem "minitest"
+gem "test-unit"
+gem "test-unit-rr"
 gem "rspec"
 gem "racc"
 gem "rubocop"
 gem "rubocop-rubycw"
-gem "minitest-reporters"
 gem "json"
 gem "json-schema"
 gem 'stackprof'
@@ -22,4 +22,8 @@ gem "rbs-amber", path: "test/assets/test-gem"
 
 group :ide, optional: true do
   gem "ruby-debug-ide"
+end
+
+group :minitest do
+  gem "minitest"
 end

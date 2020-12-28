@@ -1,6 +1,6 @@
 require_relative "test_helper"
 
-class ArraySingletonTest < Minitest::Test
+class ArraySingletonTest < Test::Unit::TestCase
   include TypeAssertions
 
   testing "singleton(::Array)"
@@ -35,7 +35,7 @@ class ArraySingletonTest < Minitest::Test
   end
 end
 
-class ArrayInstanceTest < Minitest::Test
+class ArrayInstanceTest < Test::Unit::TestCase
   include TypeAssertions
 
   testing "::Array[::Integer]"

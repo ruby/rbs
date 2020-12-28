@@ -1,7 +1,7 @@
 require_relative "../test_helper"
 require "json"
 
-class JSONSingletonTest < Minitest::Test
+class JSONSingletonTest < Test::Unit::TestCase
   include TypeAssertions
 
   library "json"
@@ -153,7 +153,7 @@ class JSONSingletonTest < Minitest::Test
   end
 end
 
-class JSONInstanceTest < Minitest::Test
+class JSONInstanceTest < Test::Unit::TestCase
   include TypeAssertions
 
   class MyJSON

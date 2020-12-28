@@ -3,7 +3,7 @@ require_relative "test_helper"
 require 'logger'
 require 'stringio'
 
-class LoggerSingletonTest < Minitest::Test
+class LoggerSingletonTest < Test::Unit::TestCase
   include TypeAssertions
 
   library 'logger'
@@ -27,7 +27,7 @@ class LoggerSingletonTest < Minitest::Test
   end
 end
 
-class LoggerTest < Minitest::Test
+class LoggerTest < Test::Unit::TestCase
   include TypeAssertions
 
   library 'logger'

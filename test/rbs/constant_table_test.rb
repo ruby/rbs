@@ -1,6 +1,6 @@
 require "test_helper"
 
-class RBS::ConstantTableTest < Minitest::Test
+class RBS::ConstantTableTest < Test::Unit::TestCase
   include TestHelper
 
   ConstantTable = RBS::ConstantTable

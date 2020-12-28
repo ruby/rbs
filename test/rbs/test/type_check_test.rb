@@ -7,7 +7,7 @@ return unless Gem::Version.new(RUBY_VERSION) >= Gem::Version.new('2.7.0')
 
 RSPEC_MOCK = -> { double('foo') }
 
-class RBS::Test::TypeCheckTest < Minitest::Test
+class RBS::Test::TypeCheckTest < Test::Unit::TestCase
   include TestHelper
   include RBS
 
@@ -392,9 +392,11 @@ EOF
   end
 
   def test_is_double
-    skip unless has_gem?("rspec")
+    omit unless has_gem?("rspec")
+    omit if skip_minitest?
 
     require "rspec/mocks/standalone"
+    require "minitest/mock"
 
     SignatureManager.new do |manager|
       manager.build do |env|

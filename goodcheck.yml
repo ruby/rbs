@@ -71,7 +71,7 @@ rules:
         end
     pass:
       - |
-        class IntegerTest < Minitest::Test
+        class IntegerTest < Test::Unit::TestCase
           include TypeAssertions
 
           testing "Integer"

@@ -4,13 +4,12 @@ $LOAD_PATH << File.join(__dir__, "../lib")
 
 require "set"
 
-IS_RUBY_27 = Gem::Version.new(RUBY_VERSION).yield_self do |ruby_version|
-  Gem::Version.new('2.7.0') <= ruby_version &&
-    ruby_version <= Gem::Version.new('2.8.0')
+IS_LATEST_RUBY = Gem::Version.new(RUBY_VERSION).yield_self do |ruby_version|
+  Gem::Version.new('3.0.0') <= ruby_version && ruby_version < Gem::Version.new('3.1.0')
 end
 
-unless IS_RUBY_27
-  STDERR.puts "⚠️⚠️⚠️⚠️ stdlib test assumes Ruby 2.7 but RUBY_VERSION==#{RUBY_VERSION} ⚠️⚠️⚠️⚠️"
+unless IS_LATEST_RUBY
+  STDERR.puts "⚠️⚠️⚠️⚠️ stdlib test assumes Ruby 3.0 but RUBY_VERSION==#{RUBY_VERSION} ⚠️⚠️⚠️⚠️"
 end
 
 KNOWN_FAILS = %w(dbm).map do |lib|

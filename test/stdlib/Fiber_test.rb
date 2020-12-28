@@ -1,6 +1,6 @@
 require_relative "test_helper"
 
-class FiberSingletonTest < Minitest::Test
+class FiberSingletonTest < Test::Unit::TestCase
   include TypeAssertions
 
   testing "singleton(::Fiber)"
@@ -28,7 +28,7 @@ class FiberSingletonTest < Minitest::Test
   end
 end
 
-class FiberTest < Minitest::Test
+class FiberTest < Test::Unit::TestCase
   include TypeAssertions
 
   testing "::Fiber"
@@ -73,7 +73,7 @@ end
 
 require 'fiber'
 
-class FiberSingletonExtTest < Minitest::Test
+class FiberSingletonExtTest < Test::Unit::TestCase
   include TypeAssertions
 
   library 'fiber'
@@ -85,7 +85,7 @@ class FiberSingletonExtTest < Minitest::Test
   end
 end
 
-class FiberExtTest < Minitest::Test
+class FiberExtTest < Test::Unit::TestCase
   include TypeAssertions
 
   library 'fiber'

@@ -1,6 +1,6 @@
 require_relative "test_helper"
 
-class SymbolSingletonTest < Minitest::Test
+class SymbolSingletonTest < Test::Unit::TestCase
   include TypeAssertions
 
   testing "singleton(::Symbol)"
@@ -11,7 +11,7 @@ class SymbolSingletonTest < Minitest::Test
   end
 end
 
-class SymbolInstanceTest < Minitest::Test
+class SymbolInstanceTest < Test::Unit::TestCase
   include TypeAssertions
 
   testing "::Symbol"

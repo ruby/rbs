@@ -1,12 +1,9 @@
 require "rbs"
 require "rbs/test"
-require "minitest/autorun"
-
-begin
-  require 'minitest/reporters'
-  Minitest::Reporters.use! [Minitest::Reporters::DefaultReporter.new]
-rescue LoadError
-end
+require "test/unit"
+require "tmpdir"
+require "stringio"
+require "tempfile"
 
 module Spy
   def self.wrap(object, method_name)
@@ -394,7 +391,7 @@ class ArefFromStringToString
   end
 end
 
-class StdlibTest < Minitest::Test
+class StdlibTest < Test::Unit::TestCase
   RBS.logger_level = ENV["RBS_TEST_LOGLEVEL"] || "info"
 
   loader = RBS::EnvironmentLoader.new

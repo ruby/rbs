@@ -1,7 +1,7 @@
 require_relative "test_helper"
 require 'mutex_m'
 
-class Mutex_mInstanceTest < Minitest::Test
+class Mutex_mInstanceTest < Test::Unit::TestCase
   include TypeAssertions
 
   library 'mutex_m'
