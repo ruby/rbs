@@ -42,4 +42,3 @@ jobs:
     - name: Run test
       run: |
         bundle exec rake ${{ matrix.job }}
-      if: "!(matrix.job == 'stdlib_test' && contains(matrix.container_tag, '2.6'))"
