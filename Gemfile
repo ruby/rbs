@@ -23,3 +23,7 @@ gem "rbs-amber", path: "test/assets/test-gem"
 group :ide, optional: true do
   gem "ruby-debug-ide"
 end
+
+group :minitest, optional: true do
+  gem "minitest"
+end
