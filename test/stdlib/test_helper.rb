@@ -1,6 +1,9 @@
 require "rbs"
 require "rbs/test"
 require "test/unit"
+require "tmpdir"
+require "stringio"
+require "tempfile"
 
 module Spy
   def self.wrap(object, method_name)
