@@ -73,10 +73,6 @@ class KernelTest < StdlibTest
     Object.new === Object.new
   end
 
-  def test_eq_tilde
-    Object.new =~ Object.new
-  end
-
   def test_clone
     Object.new.clone
     Object.new.clone(freeze: false)
