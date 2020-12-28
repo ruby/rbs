@@ -1,6 +1,6 @@
 require "test_helper"
 
-class RBS::BufferTest < Minitest::Test
+class RBS::BufferTest < Test::Unit::TestCase
   Buffer = RBS::Buffer
 
   def test_buffer

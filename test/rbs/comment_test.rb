@@ -1,6 +1,6 @@
 require "test_helper"
 
-class RBS::CommentTest < Minitest::Test
+class RBS::CommentTest < Test::Unit::TestCase
   include TestHelper
 
   def test_concat

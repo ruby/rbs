@@ -1,7 +1,7 @@
 require_relative "test_helper"
 require "date"
 
-class DateTimeSingletonTest < Minitest::Test
+class DateTimeSingletonTest < Test::Unit::TestCase
   include TypeAssertions
 
   library "date"
@@ -190,7 +190,7 @@ class DateTimeSingletonTest < Minitest::Test
   end
 end
 
-class DateTimeTest < Minitest::Test
+class DateTimeTest < Test::Unit::TestCase
   include TypeAssertions
 
   library "date"

@@ -1,7 +1,7 @@
 require_relative '../test_helper'
 require 'uri'
 
-class URIGenericSingletonTest < Minitest::Test
+class URIGenericSingletonTest < Test::Unit::TestCase
   include TypeAssertions
   library 'uri'
   testing 'singleton(::URI::Generic)'
@@ -82,7 +82,7 @@ class URIGenericSingletonTest < Minitest::Test
   end
 end
 
-class URIGenericInstanceTest < Minitest::Test
+class URIGenericInstanceTest < Test::Unit::TestCase
   include TypeAssertions
   library 'uri'
   testing '::URI::Generic'

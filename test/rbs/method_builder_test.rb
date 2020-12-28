@@ -1,6 +1,6 @@
 require "test_helper"
 
-class RBS::MethodBuilderTest < Minitest::Test
+class RBS::MethodBuilderTest < Test::Unit::TestCase
   include TestHelper
 
   AST = RBS::AST

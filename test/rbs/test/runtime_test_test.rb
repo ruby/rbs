@@ -4,7 +4,7 @@ require "logger"
 
 return unless Gem::Version.new(RUBY_VERSION) >= Gem::Version.new('2.7.0')
 
-class RBS::Test::RuntimeTestTest < Minitest::Test
+class RBS::Test::RuntimeTestTest < Test::Unit::TestCase
   include TestHelper
 
   def test_runtime_success
@@ -151,7 +151,7 @@ end
 
 require "minitest/autorun"
 
-class FooTest < Minitest::Test
+class FooTest < Test::Unit::TestCase
   def test_foo_mock
     # Confirm if mock is correctly ignored.
     Foo.new.foo(::Minitest::Mock.new)

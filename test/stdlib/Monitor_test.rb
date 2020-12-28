@@ -1,7 +1,7 @@
 require_relative "test_helper"
 require 'monitor'
 
-class MonitorInstanceTest < Minitest::Test
+class MonitorInstanceTest < Test::Unit::TestCase
   include TypeAssertions
 
   library 'monitor'
@@ -38,7 +38,7 @@ class MonitorInstanceTest < Minitest::Test
   end
 end
 
-class MonitorMixinInstanceTest < Minitest::Test
+class MonitorMixinInstanceTest < Test::Unit::TestCase
   include TypeAssertions
 
   library 'monitor'
@@ -92,7 +92,7 @@ class MonitorMixinInstanceTest < Minitest::Test
   end
 end
 
-class MonitorMixinConditionVariableInstanceTest < Minitest::Test
+class MonitorMixinConditionVariableInstanceTest < Test::Unit::TestCase
   include TypeAssertions
 
   library 'monitor'

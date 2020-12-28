@@ -1,7 +1,7 @@
 require_relative "test_helper"
 require "zlib"
 
-class ZlibSingletonTest < Minitest::Test
+class ZlibSingletonTest < Test::Unit::TestCase
   include TypeAssertions
 
   library "zlib"

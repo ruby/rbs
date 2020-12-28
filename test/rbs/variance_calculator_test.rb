@@ -1,6 +1,6 @@
 require "test_helper"
 
-class RBS::VarianceCalculatorTest < Minitest::Test
+class RBS::VarianceCalculatorTest < Test::Unit::TestCase
   include TestHelper
 
   DefinitionBuilder = RBS::DefinitionBuilder

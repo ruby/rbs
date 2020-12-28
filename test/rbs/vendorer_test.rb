@@ -1,7 +1,7 @@
 require "test_helper"
 require "open3"
 
-class RBS::VendorerTest < Minitest::Test
+class RBS::VendorerTest < Test::Unit::TestCase
   include TestHelper
 
   Environment = RBS::Environment

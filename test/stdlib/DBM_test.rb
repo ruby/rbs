@@ -1,7 +1,7 @@
 require_relative "test_helper"
 require "dbm"
 
-class DBMSingletonTest < Minitest::Test
+class DBMSingletonTest < Test::Unit::TestCase
   include TypeAssertions
   library "dbm"
   testing "singleton(::DBM)"
@@ -18,7 +18,7 @@ class DBMSingletonTest < Minitest::Test
   end
 end
 
-class DBMTest < Minitest::Test
+class DBMTest < Test::Unit::TestCase
   include TypeAssertions
   library "dbm"
   testing "::DBM"

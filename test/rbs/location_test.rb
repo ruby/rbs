@@ -1,6 +1,6 @@
 require "test_helper"
 
-class RBS::LocationTest < Minitest::Test
+class RBS::LocationTest < Test::Unit::TestCase
   Buffer = RBS::Buffer
   Location = RBS::Location
 

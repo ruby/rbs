@@ -1,6 +1,6 @@
 require "test_helper"
 
-class RBS::EnvironmentWalkerTest < Minitest::Test
+class RBS::EnvironmentWalkerTest < Test::Unit::TestCase
   include TestHelper
 
   Environment = RBS::Environment

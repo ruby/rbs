@@ -3,12 +3,7 @@ require "rbs"
 require "tmpdir"
 require "stringio"
 require "open3"
-
-begin
-  require 'minitest/reporters'
-  Minitest::Reporters.use! [Minitest::Reporters::DefaultReporter.new]
-rescue LoadError
-end
+require "test/unit"
 
 begin
   require "amber"
@@ -173,7 +168,7 @@ SIG
       items.each do |item|
         begin
           yield item
-        rescue Minitest::Assertion
+        rescue Test::Unit::AssertionFailedError
           next
         else
           # Pass test
@@ -205,5 +200,3 @@ SIG
     assert_empty(sample - array)
   end
 end
-
-require "minitest/autorun"

@@ -39,7 +39,7 @@ module Kaigi
   end
 end
 
-class Kaigi::ConferenceTest < Minitest::Test
+class Kaigi::ConferenceTest < Test::Unit::TestCase
   def test_1
     conference = Kaigi::Conference.new
 

@@ -1,6 +1,6 @@
 require_relative "test_helper"
 
-class IOSingletonTest < Minitest::Test
+class IOSingletonTest < Test::Unit::TestCase
   include TypeAssertions
 
   testing "singleton(::IO)"
@@ -87,7 +87,7 @@ class IOSingletonTest < Minitest::Test
   end
 end
 
-class IOInstanceTest < Minitest::Test
+class IOInstanceTest < Test::Unit::TestCase
   include TypeAssertions
 
   testing "::IO"

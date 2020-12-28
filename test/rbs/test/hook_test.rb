@@ -5,7 +5,7 @@ require "logger"
 
 return unless Gem::Version.new(RUBY_VERSION) >= Gem::Version.new('2.7.0')
 
-class RBS::Test::HookTest < Minitest::Test
+class RBS::Test::HookTest < Test::Unit::TestCase
   class Example
     def hello(x, y)
       raise "Aborting" if y == 0

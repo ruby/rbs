@@ -1,6 +1,6 @@
 require "test_helper"
 
-class RBS::RepositoryTest < Minitest::Test
+class RBS::RepositoryTest < Test::Unit::TestCase
   Repository = RBS::Repository
 
   def dir

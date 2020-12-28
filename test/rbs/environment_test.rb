@@ -1,6 +1,6 @@
 require "test_helper"
 
-class RBS::EnvironmentTest < Minitest::Test
+class RBS::EnvironmentTest < Test::Unit::TestCase
   include TestHelper
 
   Environment = RBS::Environment

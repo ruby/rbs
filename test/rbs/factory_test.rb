@@ -1,6 +1,6 @@
 require "test_helper"
 
-class RBS::FactoryTest < Minitest::Test
+class RBS::FactoryTest < Test::Unit::TestCase
   include TestHelper
 
   def test_type_name

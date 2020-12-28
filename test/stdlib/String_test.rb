@@ -1,6 +1,6 @@
 require_relative "test_helper"
 
-class StringSingletonTest < Minitest::Test
+class StringSingletonTest < Test::Unit::TestCase
   include TypeAssertions
 
   testing "singleton(::String)"
@@ -34,7 +34,7 @@ class StringSingletonTest < Minitest::Test
   end
 end
 
-class StringInstanceTest < Minitest::Test
+class StringInstanceTest < Test::Unit::TestCase
   include TypeAssertions
 
   testing "::String"

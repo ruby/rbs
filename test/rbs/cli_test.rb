@@ -2,7 +2,7 @@ require "test_helper"
 require "stringio"
 require "rbs/cli"
 
-class RBS::CliTest < Minitest::Test
+class RBS::CliTest < Test::Unit::TestCase
   include TestHelper
 
   CLI = RBS::CLI

@@ -1,7 +1,7 @@
 require "test_helper"
 require "rbs/test"
 
-class SetupHelperTest < Minitest::Test
+class SetupHelperTest < Test::Unit::TestCase
   include RBS::Test::SetupHelper
   include TestHelper
 

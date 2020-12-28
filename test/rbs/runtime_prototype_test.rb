@@ -1,6 +1,6 @@
 require "test_helper"
 
-class RBS::RuntimePrototypeTest < Minitest::Test
+class RBS::RuntimePrototypeTest < Test::Unit::TestCase
   Runtime = RBS::Prototype::Runtime
   DefinitionBuilder = RBS::DefinitionBuilder
 
