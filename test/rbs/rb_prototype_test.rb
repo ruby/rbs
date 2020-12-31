@@ -721,4 +721,24 @@ module M
 end
     RBS
   end
+
+  if RUBY_VERSION >= '2.7'
+    def test_argument_forwarding
+      parser = RB.new
+
+      rb = <<~'RUBY'
+module M
+  def foo(...) end
+end
+      RUBY
+
+      parser.parse(rb)
+
+      assert_write parser.decls, <<~RBS
+module M
+  def foo: (*untyped) ?{ () -> untyped } -> nil
+end
+      RBS
+    end
+  end
 end
