@@ -400,7 +400,8 @@ module RBS
         end
 
         if rest
-          fun = fun.update(rest_positionals: Types::Function::Param.new(name: rest, type: untyped))
+          rest_name = rest == :* ? nil : rest # # For `def f(...) end` syntax
+          fun = fun.update(rest_positionals: Types::Function::Param.new(name: rest_name, type: untyped))
         end
 
         table_node.drop(fun.required_positionals.size + fun.optional_positionals.size + (fun.rest_positionals ? 1 : 0)).take(post_num).each do |name|
@@ -565,7 +566,10 @@ module RBS
 
         if block
           method_block = Types::Block.new(
-            required: true,
+            # HACK: The `block` is :& on `def m(...)` syntax.
+            #       In this case the block looks optional in most cases, so it marks optional.
+            #       In other cases, we can't determine which is required or optional, so it marks required.
+            required: block != :&,
             type: Types::Function.empty(untyped)
           )
         end
