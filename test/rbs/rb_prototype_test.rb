@@ -741,4 +741,22 @@ end
       RBS
     end
   end
+
+  if RUBY_VERSION >= '3'
+    def test_endless_method_definition
+      parser = RB.new
+      rb = <<~'RUBY'
+module M
+  def foo = 42
+end
+      RUBY
+      parser.parse(rb)
+
+      assert_write parser.decls, <<~RBS
+module M
+  def foo: () -> 42
+end
+      RBS
+    end
+  end
 end

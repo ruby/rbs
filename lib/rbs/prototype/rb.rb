@@ -380,7 +380,7 @@ module RBS
       def function_type_from_body(node)
         table_node, args_node, *_ = node.children
 
-        pre_num, _pre_init, opt, _first_post, post_num, _post_init, rest, kw, kwrest, _block = args_node.children
+        pre_num, _pre_init, opt, _first_post, post_num, _post_init, rest, kw, kwrest, _block = args_from_node(args_node)
 
         return_type = function_return_type_from_body(node)
 
@@ -560,7 +560,7 @@ module RBS
       def block_from_body(node)
         _, args_node, body_node = node.children
 
-        _pre_num, _pre_init, _opt, _first_post, _post_num, _post_init, _rest, _kw, _kwrest, block = args_node.children
+        _pre_num, _pre_init, _opt, _first_post, _post_num, _post_init, _rest, _kw, _kwrest, block = args_from_node(args_node)
 
         method_block = nil
 
@@ -616,6 +616,12 @@ module RBS
         end
 
         method_block
+      end
+
+      # NOTE: args_node may be a nil by a bug
+      #       https://bugs.ruby-lang.org/issues/17495
+      def args_from_node(args_node)
+        args_node&.children || [0, nil, nil, nil, 0, nil, nil, nil, nil, nil]
       end
 
       def keyword_hash?(node)
