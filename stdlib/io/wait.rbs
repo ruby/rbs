@@ -1,0 +1,24 @@
+module IO
+  # Returns number of bytes that can be read without blocking.
+  # Returns zero if no information available.
+  def self.nread: () -> Integer
+
+  # Returns true if input available without blocking, or false.
+  def self.ready?: () -> bool
+
+  # Waits until IO is readable or writable without blocking and returns self, or nil when times out.
+  # Returns true immediately when buffered data is available.
+  # Optional parameter mode is one of :read, :write, or :read_write.
+  def self.wait: (?Integer timeout, ?Symbol mode) -> bool
+
+  # Waits until IO is readable without blocking and returns self, or nil when times out.
+  # Returns true immediately when buffered data is available.
+  def self.wait_readable: () -> bool
+
+  def self.wait_readable: (Integer timeout) -> bool
+
+  # Waits until IO is writable without blocking and returns self or nil when times out.
+  def self.wait_writable: () -> IO
+
+  def self.wait_writable: (Integer timeout) -> (IO | nil)
+end
