@@ -611,7 +611,7 @@ rule
       }
 
   type_decl:
-      annotations kTYPE qualified_name kEQ type {
+      annotations kTYPE type_alias_name kEQ type {
         location = val[1].location + val[4].location
         result = Declarations::Alias.new(name: val[2].value,
                                          type: val[4],
@@ -1036,6 +1036,16 @@ rule
         location = (loc0 = val[0]&.location) ? loc0 + val[1].location : val[1].location
         result = LocatedValue.new(value: type_name, location: location)
       }
+
+  type_alias_name:
+      namespace tLIDENT {
+        namespace = val[0]&.value || Namespace.empty
+        name = val[1].value.to_sym
+        type_name = TypeName.new(namespace: namespace, name: name)
+        location = (loc0 = val[0]&.location) ? loc0 + val[1].location : val[1].location
+        result = LocatedValue.new(value: type_name, location: location)
+      }
+
 
   namespace:
       {
