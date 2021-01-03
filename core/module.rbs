@@ -259,7 +259,7 @@ class Module < Object
   #         or method `code' for Thing:Class
   #
   def class_eval: (String arg0, ?String filename, ?Integer lineno) -> untyped
-                | [U] (untyped arg0) { (untyped m) -> U } -> U
+                | [U] { (self m) -> U } -> U
 
   # Evaluates the given block in the context of the class/module. The method
   # defined in the block will belong to the receiver. Any arguments passed to the
@@ -793,7 +793,7 @@ class Module < Object
   #         or method `code' for Thing:Class
   #
   def module_eval: (String arg0, ?String filename, ?Integer lineno) -> untyped
-                 | [U] (untyped arg0) { (untyped m) -> U } -> U
+                 | [U] { (self m) -> U } -> U
 
   # Evaluates the given block in the context of the class/module. The method
   # defined in the block will belong to the receiver. Any arguments passed to the

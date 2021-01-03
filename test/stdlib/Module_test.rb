@@ -42,4 +42,28 @@ class ModuleInstanceTest < Test::Unit::TestCase
     assert_send_type "(String, nil) -> nil",
                      Foo, :const_source_location, "String", nil
   end
+
+  def test_module_eval
+    assert_send_type "(String) -> nil",
+                     Foo, :module_eval, 'nil'
+    assert_send_type "(String, String) -> nil",
+                     Foo, :module_eval, 'nil', __FILE__
+    assert_send_type "(String, String, Integer) -> nil",
+                     Foo, :module_eval, 'nil', __FILE__, 42
+
+    assert_send_type "() { (Module) -> nil } -> nil",
+                     Foo, :module_eval do nil end
+  end
+
+  def test_class_eval
+    assert_send_type "(String) -> nil",
+                     Foo, :class_eval, 'nil'
+    assert_send_type "(String, String) -> nil",
+                     Foo, :class_eval, 'nil', __FILE__
+    assert_send_type "(String, String, Integer) -> nil",
+                     Foo, :class_eval, 'nil', __FILE__, 42
+
+    assert_send_type "() { (Module) -> nil } -> nil",
+                     Foo, :class_eval do nil end
+  end
 end
