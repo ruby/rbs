@@ -45,8 +45,7 @@ class KernelTest < StdlibTest
     eval "p", binding, "fname", 1
   end
 
-  def test_iterator?
-    iterator?
+  def test_block_given?
     block_given?
   end
 

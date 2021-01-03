@@ -41,7 +41,6 @@ module Kernel : BasicObject
   def eval: (String arg0, ?Binding arg1, ?String filename, ?Integer lineno) -> untyped
 
   # Returns `true` if `yield` would execute a block in the current context.
-  # The `iterator?` form is mildly deprecated.
   #
   # ```ruby
   # def try
@@ -55,8 +54,7 @@ module Kernel : BasicObject
   # try { "hello" }      #=> "hello"
   # try do "hello" end   #=> "hello"
   # ```
-  def iterator?: () -> bool
-  alias block_given? iterator?
+  def block_given?: () -> bool
 
   # Returns the names of the current local variables.
   #
