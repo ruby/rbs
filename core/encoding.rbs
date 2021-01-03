@@ -567,7 +567,7 @@ Encoding::Windows_31J: Encoding
 
 Encoding::Windows_874: Encoding
 
-class Encoding::Converter < Data
+class Encoding::Converter < Object
 end
 
 Encoding::Converter::AFTER_OUTPUT: Integer
