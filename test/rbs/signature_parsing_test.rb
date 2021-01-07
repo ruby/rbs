@@ -23,6 +23,12 @@ class RBS::SignatureParsingTest < Test::Unit::TestCase
       assert_equal Types::Bases::Any.new(location: nil), type_decl.type
       assert_equal "type Steep::foo = untyped", type_decl.location.source
     end
+
+    assert_raises Parser::SyntaxError do
+      Parser.parse_signature(<<~RBS)
+        type Foo = untyped
+      RBS
+    end
   end
 
   def test_constant
