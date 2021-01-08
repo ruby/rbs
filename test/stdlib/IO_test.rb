@@ -92,6 +92,54 @@ class IOInstanceTest < Test::Unit::TestCase
 
   testing "::IO"
 
+  def test_append_symbol
+    Dir.mktmpdir do |dir|
+      File.open(File.join(dir, "some_file"), "w") do |io|
+        assert_send_type "(String) -> self",
+                         io, :<<, "foo"
+        assert_send_type "(Object) -> self",
+                         io, :<<, Object.new
+      end
+    end
+  end
+
+  def test_advise
+    IO.open(IO.sysopen(__FILE__)) do |io|
+      assert_send_type "(Symbol) -> nil",
+                       io, :advise, :normal
+      assert_send_type "(Symbol) -> nil",
+                       io, :advise, :sequential
+      assert_send_type "(Symbol) -> nil",
+                       io, :advise, :random
+      assert_send_type "(Symbol) -> nil",
+                       io, :advise, :willneed
+      assert_send_type "(Symbol) -> nil",
+                       io, :advise, :dontneed
+      assert_send_type "(Symbol) -> nil",
+                       io, :advise, :noreuse
+      assert_send_type "(Symbol, Integer) -> nil",
+                       io, :advise, :normal, 1
+      assert_send_type "(Symbol, Integer, Integer) -> nil",
+                       io, :advise, :normal, 1, 2
+    end
+  end
+
+  def test_autoclose=
+    IO.open(IO.sysopen(__FILE__)) do |io|
+      assert_send_type "(bool) -> bool",
+                       io, :autoclose=, true
+      assert_send_type "(bool) -> bool",
+                       io, :autoclose=, false
+    end
+  end
+
+  def test_autoclose?
+    IO.open(IO.sysopen(__FILE__)) do |io|
+      assert_send_type "() -> bool",
+                       io, :autoclose?
+    end
+  end
+
   def test_read
     IO.open(IO.sysopen(__FILE__)) do |io|
       assert_send_type "() -> String",
