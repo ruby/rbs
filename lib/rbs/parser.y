@@ -1371,7 +1371,7 @@ def next_token
     new_token(:tWRITE_ATTR)
   when input.scan(KEYWORDS_RE)
     new_token(KEYWORDS[input.matched], input.matched.to_sym)
-  when input.scan(/:((@{,2}|\$)?\w+(\?|\!)?|\+|\-)\b?/)
+  when input.scan(/:((@{,2}|\$)?\w+(\?|\!)?|[|&\/%~`^]|<=>|={2,3}|=~|[<>]{2}|[<>]=?|[-+]@?|\*{1,2}|\[\]=?|![=~]?)\b?/)
     s = input.matched.yield_self {|s| s[1, s.length] }.to_sym
     new_token(:tSYMBOL, s)
   when input.scan(/[+-]?\d[\d_]*/)
