@@ -11,7 +11,7 @@ The typical steps of writing signatures will be like the following:
 
 ## Signatures
 
-Signatures for standard libraries are located in `stdlib` directory. `stdlib/builtin` is for builtin libraries. Other libraries have directories like `stdlib/set` or `stdlib/pathname`.
+Signatures for builtin libraries are located in `core` directory. Also, signatures for standard libraries are located in `stdlib` directory.
 
 To write signatures see [syntax guide](syntax.md).
 

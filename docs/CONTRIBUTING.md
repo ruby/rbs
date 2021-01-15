@@ -49,12 +49,12 @@ You may find the *Good for first contributor* column where you can find some cla
   * `--merge` tells to use the method types in RBS if exists.
 * `rbs prototype runtime --merge --method-owner=Numeric Integer`
   * You can use --method-owner if you want to print method of other classes too, for documentation purpose.
-* `bin/annotate-with-rdoc stdlib/builtin/string.rbs`
+* `bin/annotate-with-rdoc core/string.rbs`
   * Write comments using RDoc.
   * It contains arglists section, but I don't think we should have it in RBS files.
 * `bin/query-rdoc String#initialize`
   * Print RDoc documents in the format you can copy-and-paste to RBS.
-* `bin/sort stdlib/builtin/string.rbs`
+* `bin/sort core/string.rbs`
   * Sort declarations members in RBS files.
 * `rbs validate -r LIB`
   Validate the syntax and some of the semantics.
