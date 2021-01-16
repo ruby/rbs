@@ -131,8 +131,8 @@ module RBS
       end
     end
 
-    def build_instance(type_name)
-      try_cache(type_name, cache: instance_cache) do
+    def build_instance(type_name, no_self_types: false)
+      try_cache(type_name, cache: instance_cache, key: [type_name, no_self_types]) do
         entry = env.class_decls[type_name] or raise "Unknown name for build_instance: #{type_name}"
         ensure_namespace!(type_name.namespace, location: entry.decls[0].decl.location)
 
@@ -164,23 +164,25 @@ module RBS
             end
 
             if self_types = one_ancestors.self_types
-              self_types.each do |ans|
-                defn = if ans.name.interface?
-                         build_interface(ans.name)
-                       else
-                         build_instance(ans.name)
-                       end
+              unless no_self_types
+                self_types.each do |ans|
+                  defn = if ans.name.interface?
+                           build_interface(ans.name)
+                         else
+                           build_instance(ans.name)
+                         end
 
-                # Successor interface method overwrites.
-                merge_definition(src: defn,
-                                 dest: definition,
-                                 subst: Substitution.build(defn.type_params, ans.args),
-                                 keep_super: true)
+                  # Successor interface method overwrites.
+                  merge_definition(src: defn,
+                                   dest: definition,
+                                   subst: Substitution.build(defn.type_params, ans.args),
+                                   keep_super: true)
+                end
               end
             end
 
             one_ancestors.each_included_module do |mod|
-              defn = build_instance(mod.name)
+              defn = build_instance(mod.name, no_self_types: true)
               merge_definition(src: defn,
                                dest: definition,
                                subst: Substitution.build(defn.type_params, mod.args))
@@ -281,7 +283,7 @@ module RBS
             end
 
             one_ancestors.each_extended_module do |mod|
-              mod_defn = build_instance(mod.name)
+              mod_defn = build_instance(mod.name, no_self_types: true)
               merge_definition(src: mod_defn,
                                dest: definition,
                                subst: Substitution.build(mod_defn.type_params, mod.args))
@@ -751,8 +753,10 @@ module RBS
       )
     end
 
-    def try_cache(type_name, cache:)
-      cached = _ = cache[type_name]
+    def try_cache(type_name, cache:, key: type_name)
+      # @type var cc: Hash[untyped, Definition | false | nil]
+      cc = _ = cache
+      cached = cc[key]
 
       case cached
       when Definition
@@ -760,11 +764,11 @@ module RBS
       when false
         raise
       when nil
-        cache[type_name] = false
+        cc[key] = false
         begin
-          cache[type_name] = yield
+          cc[key] = yield
         rescue => ex
-          cache.delete(type_name)
+          cc.delete(key)
           raise ex
         end
       else

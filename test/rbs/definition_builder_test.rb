@@ -1822,4 +1822,35 @@ end
       end
     end
   end
+
+  def test_mixed_module_methods_building
+    SignatureManager.new do |manager|
+      manager.files.merge!(Pathname("foo.rbs") => <<-EOF)
+class Foo
+  def foo: () -> void
+end
+
+module M0 : Foo
+  def bar: () -> void
+end
+
+class Bar
+  include M0   # Broken include, but RBS cannot detect it.
+end
+      EOF
+      manager.build do |env|
+        builder = DefinitionBuilder.new(env: env)
+
+        builder.build_instance(type_name("::M0")).tap do |definition|
+          assert_operator definition.methods, :key?, :foo
+          assert_operator definition.methods, :key?, :bar
+        end
+
+        builder.build_instance(type_name("::Bar")).tap do |definition|
+          refute_operator definition.methods, :key?, :foo    # foo is not defined in M0
+          assert_operator definition.methods, :key?, :bar
+        end
+      end
+    end
+  end
 end

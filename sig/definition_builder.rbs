@@ -5,7 +5,7 @@ module RBS
     attr_reader ancestor_builder: AncestorBuilder
     attr_reader method_builder: MethodBuilder
 
-    attr_reader instance_cache: Hash[TypeName, Definition | false | nil]
+    attr_reader instance_cache: Hash[[TypeName, bool], Definition | false | nil]
     attr_reader singleton_cache: Hash[TypeName, Definition | false | nil]
     attr_reader singleton0_cache: Hash[TypeName, Definition | false | nil]
     attr_reader interface_cache: Hash[TypeName, Definition | false | nil]
@@ -18,7 +18,7 @@ module RBS
 
     def build_interface: (TypeName) -> Definition
 
-    def build_instance: (TypeName) -> Definition
+    def build_instance: (TypeName, ?no_self_types: bool) -> Definition
 
     def build_singleton0: (TypeName) -> Definition
 
@@ -31,6 +31,7 @@ module RBS
     def merge_variable: (Hash[Symbol, Definition::Variable], Symbol, Definition::Variable, Substitution, ?keep_super: bool) -> void
 
     def try_cache: (TypeName, cache: Hash[TypeName, Definition | false | nil]) { () -> Definition } -> Definition
+                 | [A] (TypeName, cache: Hash[A, Definition | false | nil], key: A) { () -> Definition } -> Definition
 
     def validate_params_with: (AST::Declarations::ModuleTypeParams, result: VarianceCalculator::Result) { (AST::Declarations::ModuleTypeParams::TypeParam) -> void } -> void
 
