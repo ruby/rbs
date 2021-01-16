@@ -54,6 +54,8 @@ class FileSingletonTest < Test::Unit::TestCase
                      File, :open, __FILE__, "r", 0644
     assert_send_type "(String, String, ToInt) -> File",
                      File, :open, __FILE__, "r", ToInt.new(0644)
+    assert_send_type "(String) { (File) -> String } -> String",
+                     File, :open, __FILE__ do |file| file.read end
   end
 
   def test_absolute_path
