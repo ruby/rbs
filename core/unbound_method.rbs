@@ -150,4 +150,20 @@ class UnboundMethod
   # if there is no method on superclass.
   #
   def super_method: () -> UnboundMethod?
+
+  # Returns the original name of the method.
+  #
+  #     class C
+  #       def foo; end
+  #       alias bar foo
+  #     end
+  #     C.instance_method(:bar).original_name # => :foo
+  #
+  def original_name: () -> Symbol
+
+  # Bind *umeth* to *recv* and then invokes the method with the specified
+  # arguments. This is semantically equivalent to `umeth.bind(recv).call(args,
+  # ...)`.
+  #
+  def bind_call: (untyped recv, *untyped args) ?{ (*untyped) -> untyped } -> untyped
 end
