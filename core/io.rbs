@@ -107,14 +107,85 @@ class IO < Object
 
   include Enumerable[String]
 
-  def <<: (untyped arg0) -> self
+  # String Output---Writes *obj* to *ios*. *obj* will be converted to a string
+  # using `to_s`.
+  #
+  #     $stdout << "Hello " << "world!\n"
+  #
+  # *produces:*
+  #
+  #     Hello world!
+  #
+  def <<: (_ToS obj) -> self
 
-  def advise: (Symbol arg0, ?Integer offset, ?Integer len) -> NilClass
+  # Announce an intention to access data from the current file in a specific
+  # pattern. On platforms that do not support the *posix_fadvise(2)* system call,
+  # this method is a no-op.
+  #
+  # *advice* is one of the following symbols:
+  #
+  # :normal
+  # :   No advice to give; the default assumption for an open file.
+  # :sequential
+  # :   The data will be accessed sequentially with lower offsets read before
+  #     higher ones.
+  # :random
+  # :   The data will be accessed in random order.
+  # :willneed
+  # :   The data will be accessed in the near future.
+  # :dontneed
+  # :   The data will not be accessed in the near future.
+  # :noreuse
+  # :   The data will only be accessed once.
+  #
+  #
+  # The semantics of a piece of advice are platform-dependent. See *man 2
+  # posix_fadvise* for details.
+  #
+  # "data" means the region of the current file that begins at *offset* and
+  # extends for *len* bytes. If *len* is 0, the region ends at the last byte of
+  # the file. By default, both *offset* and *len* are 0, meaning that the advice
+  # applies to the entire file.
+  #
+  # If an error occurs, one of the following exceptions will be raised:
+  #
+  # IOError
+  # :   The IO stream is closed.
+  # Errno::EBADF
+  # :   The file descriptor of the current file is invalid.
+  # Errno::EINVAL
+  # :   An invalid value for *advice* was given.
+  # Errno::ESPIPE
+  # :   The file descriptor of the current file refers to a FIFO or pipe. (Linux
+  #     raises Errno::EINVAL in this case).
+  # TypeError
+  # :   Either *advice* was not a Symbol, or one of the other arguments was not an
+  #     Integer.
+  # RangeError
+  # :   One of the arguments given was too big/small.
+  #
+  # This list is not exhaustive; other Errno
+  # :   exceptions are also possible.
+  #
+  def advise: ((:normal | :sequential | :random | :willneed | :dontneed | :noreuse) advise, ?Integer offset, ?Integer len) -> nil
 
-  def autoclose=: (boolish) -> bool
+  # Sets auto-close flag.
+  #
+  #     f = open("/dev/null")
+  #     IO.for_fd(f.fileno)
+  #     # ...
+  #     f.gets # may cause Errno::EBADF
+  #
+  #     f = open("/dev/null")
+  #     IO.for_fd(f.fileno).autoclose = false
+  #     # ...
+  #     f.gets # won't cause Errno::EBADF
+  #
+  def autoclose=: (bool) -> bool
 
   # Returns `true` if the underlying file descriptor of *ios* will be closed
-  # automatically at its finalization, otherwise `false` .
+  # automatically at its finalization, otherwise `false`.
+  #
   def autoclose?: () -> bool
 
   # Puts *ios* into binary mode. Once a stream is in binary mode, it cannot
