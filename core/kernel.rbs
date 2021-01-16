@@ -13,14 +13,14 @@
 module Kernel : BasicObject
   private
 
-  def caller: (?Integer start_or_range, ?Integer length) -> ::Array[String]?
+  def self?.caller: (?Integer start_or_range, ?Integer length) -> ::Array[String]?
             | (?::Range[Integer] start_or_range) -> ::Array[String]?
             | () -> ::Array[String]
 
-  def caller_locations: (?Integer start_or_range, ?Integer length) -> ::Array[Thread::Backtrace::Location]?
+  def self?.caller_locations: (?Integer start_or_range, ?Integer length) -> ::Array[Thread::Backtrace::Location]?
                       | (?::Range[Integer] start_or_range) -> ::Array[Thread::Backtrace::Location]?
 
-  def catch: [T] (T tag) { (T tag) -> untyped } -> untyped
+  def self?.catch: [T] (T tag) { (T tag) -> untyped } -> untyped
            | () { (Object tag) -> untyped } -> untyped
 
   # In a perfect world this should be:
@@ -38,7 +38,7 @@ module Kernel : BasicObject
   def define_singleton_method: (Symbol | String symbol, ?Proc | Method | UnboundMethod method) -> Symbol
                              | (Symbol | String symbol) { () -> untyped } -> Symbol
 
-  def eval: (String arg0, ?Binding arg1, ?String filename, ?Integer lineno) -> untyped
+  def self?.eval: (String arg0, ?Binding arg1, ?String filename, ?Integer lineno) -> untyped
 
   # Returns `true` if `yield` would execute a block in the current context.
   #
@@ -54,7 +54,7 @@ module Kernel : BasicObject
   # try { "hello" }      #=> "hello"
   # try do "hello" end   #=> "hello"
   # ```
-  def block_given?: () -> bool
+  def self.block_given?: () -> bool
 
   # Returns the names of the current local variables.
   #
@@ -65,9 +65,9 @@ module Kernel : BasicObject
   # end
   # local_variables   #=> [:fred, :i]
   # ```
-  def local_variables: () -> ::Array[Symbol]
+  def self?.local_variables: () -> ::Array[Symbol]
 
-  def srand: (?Numeric number) -> Numeric
+  def self?.srand: (?Numeric number) -> Numeric
 
   # Creates a subprocess. If a block is specified, that block is run in the
   # subprocess, and the subprocess terminates with a status of zero.
@@ -86,7 +86,7 @@ module Kernel : BasicObject
   #
   # Note that fork(2) is not available on some platforms like Windows and
   # NetBSD 4. Therefore you should use spawn() instead of fork().
-  def fork: () -> Integer?
+  def self?.fork: () -> Integer?
           | () { () -> untyped } -> Integer?
 
   def initialize_copy: (self object) -> self
@@ -110,50 +110,50 @@ module Kernel : BasicObject
   # Array(nil)         #=> []
   # Array(1)           #=> [1]
   # ```
-  def Array: (NilClass x) -> [ ]
+  def self?.Array: (NilClass x) -> [ ]
            | [T] (::Array[T] x) -> ::Array[T]
            | [T] (::Range[T] x) -> ::Array[T]
            | [K, V] (::Hash[K, V] x) -> ::Array[[K, V]]
            | [T] (T x) -> ::Array[T]
 
-  def Complex: (Numeric | String x, ?Numeric | String y, ?exception: bool exception) -> Complex
+  def self?.Complex: (Numeric | String x, ?Numeric | String y, ?exception: bool exception) -> Complex
 
-  def Float: (Numeric | String x, ?exception: bool exception) -> Float
+  def self?.Float: (Numeric | String x, ?exception: bool exception) -> Float
 
-  def Hash: [K, V] (Object x) -> ::Hash[K, V]
+  def self?.Hash: [K, V] (Object x) -> ::Hash[K, V]
 
-  def Integer: (Numeric | String arg, ?exception: bool exception) -> Integer
+  def self?.Integer: (Numeric | String arg, ?exception: bool exception) -> Integer
              | (String arg, ?Integer base, ?exception: bool exception) -> Integer
 
-  def Rational: (Numeric | String | Object x, ?Numeric | String y, ?exception: bool exception) -> Rational
+  def self?.Rational: (Numeric | String | Object x, ?Numeric | String y, ?exception: bool exception) -> Rational
 
-  def String: (Object x) -> String
+  def self?.String: (Object x) -> String
 
   # Returns the called name of the current method as a
   # [Symbol](https://ruby-doc.org/core-2.6.3/Symbol.html). If called
   # outside of a method, it returns `nil` .
-  def __callee__: () -> Symbol?
+  def self?.__callee__: () -> Symbol?
 
   # Returns the canonicalized absolute path of the directory of the file
   # from which this method is called. It means symlinks in the path is
   # resolved. If `__FILE__` is `nil`, it returns `nil` . The return value
   # equals to `File.dirname(File.realpath(__FILE__))` .
-  def __dir__: () -> String?
+  def self?.__dir__: () -> String?
 
   # Returns the name at the definition of the current method as a
   # [Symbol](https://ruby-doc.org/core-2.6.3/Symbol.html). If called
   # outside of a method, it returns `nil` .
-  def __method__: () -> Symbol?
+  def self?.__method__: () -> Symbol?
 
-  def `: (String arg0) -> String
+  def self?.`: (String arg0) -> String
 
-  def abort: (?String msg) -> bot
+  def self?.abort: (?String msg) -> bot
 
-  def at_exit: () { () -> untyped } -> Proc
+  def self?.at_exit: () { () -> untyped } -> Proc
 
-  def autoload: (String | Symbol _module, String filename) -> NilClass
+  def self?.autoload: (String | Symbol _module, String filename) -> NilClass
 
-  def autoload?: (Symbol | String name) -> String?
+  def self?.autoload?: (Symbol | String name) -> String?
 
   # Returns a `Binding` object, describing the variable and method bindings
   # at the point of call. This object can be used when calling `eval` to
@@ -167,7 +167,7 @@ module Kernel : BasicObject
   # b = get_binding("hello")
   # eval("param", b)   #=> "hello"
   # ```
-  def binding: () -> Binding
+  def self?.binding: () -> Binding
 
   # Initiates the termination of the Ruby script by raising the `SystemExit`
   # exception. This exception may be caught. The optional parameter is used
@@ -205,10 +205,10 @@ module Kernel : BasicObject
   #
   #     at_exit function
   #     in finalizer
-  def exit: () -> bot
+  def self?.exit: () -> bot
           | (?Integer | TrueClass | FalseClass status) -> bot
 
-  def exit!: (Integer | TrueClass | FalseClass status) -> bot
+  def self?.exit!: (Integer | TrueClass | FalseClass status) -> bot
 
   # With no arguments, raises the exception in `$!` or raises a
   # `RuntimeError` if `$!` is `nil` . With a single `String` argument,
@@ -228,24 +228,26 @@ module Kernel : BasicObject
   # “current” exception ( `$!` ) if any. An alternative value, either an
   # `Exception` object or `nil`, can be specified via the `:cause`
   # argument.
-  def fail: () -> bot
+  def self?.fail: () -> bot
           | (String arg0) -> bot
           | (_Exception arg0, ?untyped arg1, ?::Array[String] arg2) -> bot
   alias raise fail
+  alias self.raise self.fail
 
-  def format: (String format, *untyped args) -> String
+  def self?.format: (String format, *untyped args) -> String
   alias sprintf format
+  alias self.sprintf self.format
 
-  def gets: (?String arg0, ?Integer arg1) -> String?
+  def self?.gets: (?String arg0, ?Integer arg1) -> String?
 
   # Returns an array of the names of global variables.
   #
   # ```ruby
   # global_variables.grep /std/   #=> [:$stdin, :$stdout, :$stderr]
   # ```
-  def global_variables: () -> ::Array[Symbol]
+  def self?.global_variables: () -> ::Array[Symbol]
 
-  def load: (String filename, ?boolish) -> bool
+  def self?.load: (String filename, ?boolish) -> bool
 
   # Repeatedly executes the block.
   #
@@ -275,10 +277,10 @@ module Kernel : BasicObject
   #   puts enum.next
   # } #=> :ok
   # ```
-  def loop: () { (nil) -> untyped } -> bot
+  def self?.loop: () { (nil) -> untyped } -> bot
           | () -> ::Enumerator[nil, bot]
 
-  def open: (String name, ?String mode, ?Integer perm) -> IO?
+  def self?.open: (String name, ?String mode, ?Integer perm) -> IO?
           | [T] (String name, ?String mode, ?Integer perm) { (IO) -> T } -> T
 
   # Prints each object in turn to `$stdout` . If the output field separator
@@ -298,25 +300,25 @@ module Kernel : BasicObject
   #
   #     cat12399
   #     cat, 1, 2, 3, 99
-  def print: (*Kernel args) -> nil
+  def self?.print: (*Kernel args) -> nil
 
-  def printf: (IO arg0, String arg1, *untyped args) -> nil
+  def self?.printf: (IO arg0, String arg1, *untyped args) -> nil
             | (String arg1, *untyped args) -> nil
             | -> nil
 
-  def proc: () { () -> untyped } -> Proc
+  def self?.proc: () { () -> untyped } -> Proc
 
-  def lambda: () { () -> untyped } -> Proc
+  def self?.lambda: () { () -> untyped } -> Proc
 
-  def putc: (Integer arg0) -> Integer
+  def self?.putc: (Integer arg0) -> Integer
           | (String arg0) -> String
 
-  def puts: (*untyped arg0) -> NilClass
+  def self?.puts: (*untyped arg0) -> NilClass
 
-  def p: [T] (T arg0) -> T
+  def self?.p: [T] (T arg0) -> T
        | (*untyped arg0) -> Array[untyped]
 
-  def pp: [T] (T arg0) -> T
+  def self?.pp: [T] (T arg0) -> T
         | (*untyped arg0) -> Array[untyped]
 
   # If called without an argument, or if `max.to_i.abs == 0`, rand returns
@@ -354,31 +356,31 @@ module Kernel : BasicObject
   # See also
   # [Random\#rand](https://ruby-doc.org/core-2.6.3/Random.html#method-i-rand)
   # .
-  def rand: () -> Float
+  def self?.rand: () -> Float
           | (Integer arg0) -> Integer
           | (::Range[Integer] arg0) -> Integer
           | (::Range[Float] arg0) -> Float
 
-  def readline: (?String arg0, ?Integer arg1) -> String
+  def self?.readline: (?String arg0, ?Integer arg1) -> String
 
-  def readlines: (?String arg0, ?Integer arg1) -> ::Array[String]
+  def self?.readlines: (?String arg0, ?Integer arg1) -> ::Array[String]
 
-  def require: (String path) -> bool
+  def self?.require: (String path) -> bool
 
-  def require_relative: (String feature) -> bool
+  def self?.require_relative: (String feature) -> bool
 
-  def select: (::Array[IO] read, ?::Array[IO] write, ?::Array[IO] error, ?Integer timeout) -> ::Array[String]
+  def self?.select: (::Array[IO] read, ?::Array[IO] write, ?::Array[IO] error, ?Integer timeout) -> ::Array[String]
 
-  def sleep: () -> bot
+  def self?.sleep: () -> bot
            | (Numeric duration) -> Integer
 
-  def syscall: (Integer num, *untyped args) -> untyped
+  def self?.syscall: (Integer num, *untyped args) -> untyped
 
-  def test: (String | Integer cmd, String | IO file1, ?String | IO file2) -> (TrueClass | FalseClass | Time | nil | Integer)
+  def self?.test: (String | Integer cmd, String | IO file1, ?String | IO file2) -> (TrueClass | FalseClass | Time | nil | Integer)
 
-  def throw: (Object tag, ?untyped obj) -> bot
+  def self?.throw: (Object tag, ?untyped obj) -> bot
 
-  def warn: (*untyped msg, ?uplevel: Integer | nil) -> NilClass
+  def self?.warn: (*untyped msg, ?uplevel: Integer | nil) -> NilClass
 
   # Replaces the current process by running the given external *command* ,
   # which can take one of the following forms:
@@ -459,7 +461,7 @@ module Kernel : BasicObject
   # exec "echo", "*"    # echoes an asterisk
   # # never get here
   # ```
-  def exec: (*String args) -> bot
+  def self?.exec: (*String args) -> bot
 
   # Executes *command…* in a subshell. *command…* is one of following forms.
   #
@@ -486,7 +488,7 @@ module Kernel : BasicObject
   #     *
   #
   # See `Kernel.exec` for the standard shell.
-  def system: (*String args) -> (NilClass | FalseClass | TrueClass)
+  def self?.system: (*String args) -> (NilClass | FalseClass | TrueClass)
 end
 
 Kernel::RUBYGEMS_ACTIVATION_MONITOR: untyped

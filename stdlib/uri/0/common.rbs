@@ -397,5 +397,5 @@ module Kernel
 
   # Returns `uri` converted to an URI object.
   #
-  def URI: (URI::Generic | String uri) -> URI::Generic
+  def self?.URI: (URI::Generic | String uri) -> URI::Generic
 end
