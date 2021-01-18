@@ -1,8 +1,19 @@
 require_relative "test_helper"
 require "fileutils"
 
+module TmpdirHelper
+  private
+
+  def in_tmpdir(&block)
+    Dir.mktmpdir do |dir|
+      Dir.chdir(dir, &block)
+    end
+  end
+end
+
 class FileUtilsSingletonTest < Test::Unit::TestCase
   include TypeAssertions
+  include TmpdirHelper
 
   library "fileutils"
   testing "singleton(::FileUtils)"
@@ -170,7 +181,7 @@ class FileUtilsSingletonTest < Test::Unit::TestCase
     in_tmpdir do
       File.write "src", ""
       File.open("src") do |src|
-        File.open("dest", "a") do |dest|
+        File.open("dest", "w") do |dest|
           assert_send_type  "(IO, IO) -> void",
                             FileUtils, :copy_stream, src, dest
         end
@@ -196,10 +207,8 @@ class FileUtilsSingletonTest < Test::Unit::TestCase
 
   def test_copy
     in_tmpdir do
-      File.write "src", ""
-
-      assert_send_type  "(String, String, preserve: bool, noop: nil, verbose: bool) -> void",
-                        FileUtils, :copy, "src", "dest", preserve: true, noop: nil, verbose: false
+      assert_send_type  "(String, String, preserve: bool, noop: bool, verbose: nil) -> void",
+                        FileUtils, :copy, "src", "dest", preserve: true, noop: true, verbose: nil
     end
   end
 
@@ -578,12 +587,350 @@ class FileUtilsSingletonTest < Test::Unit::TestCase
     assert_send_type  "(ToPath, ToPath) -> bool",
                       FileUtils, :uptodate?, ToPath.new("foo"), ToPath.new("bar")
   end
+end
 
-  private
+class FileUtilsInstanceTest < Test::Unit::TestCase
+  include TypeAssertions
+  include TmpdirHelper
 
-  def in_tmpdir(&block)
-    Dir.mktmpdir do |dir|
-      Dir.chdir(dir, &block)
+  library "fileutils"
+  testing "::FileUtils"
+
+  class Foo
+    include FileUtils
+  end
+
+  def test_cd
+    assert_send_type  "(String) -> void",
+                      Foo.new, :cd, __dir__
+  end
+
+  def test_chdir
+    assert_send_type  "(String) -> void",
+                      Foo.new, :chdir, __dir__
+  end
+
+  def test_chmod
+    in_tmpdir do |dir|
+      assert_send_type  "(Integer, String) -> void",
+                        Foo.new, :chmod, 0755, dir
     end
+  end
+
+  def test_chmod_R
+    in_tmpdir do |dir|
+      assert_send_type  "(Integer, String) -> void",
+                        Foo.new, :chmod_R, 0755, dir
+    end
+  end
+
+  def test_chown
+    in_tmpdir do |dir|
+      assert_send_type  "(nil, nil, String) -> void",
+                        Foo.new, :chown, nil, nil, dir
+    end
+  end
+
+  def test_chown_R
+    in_tmpdir do |dir|
+      assert_send_type  "(nil, nil, String) -> void",
+                        Foo.new, :chown_R, nil, nil, dir
+    end
+  end
+
+  def test_compare_file
+    in_tmpdir do
+      File.write "foo", ""
+
+      assert_send_type  "(String, String) -> bool",
+                        Foo.new, :compare_file, "foo", "foo"
+    end
+  end
+
+  def test_cmp
+    in_tmpdir do
+      File.write "foo", ""
+
+      assert_send_type  "(String, String) -> bool",
+                        Foo.new, :cmp, "foo", "foo"
+    end
+  end
+
+  def test_identical?
+    in_tmpdir do
+      File.write "foo", ""
+
+      assert_send_type  "(String, String) -> bool",
+                        Foo.new, :identical?, "foo", "foo"
+    end
+  end
+
+  def test_compare_stream
+    in_tmpdir do
+      File.write "foo", ""
+      File.open("foo") do |io|
+        assert_send_type  "(IO, IO) -> bool",
+                          Foo.new, :compare_stream, io, io
+      end
+    end
+  end
+
+  def test_copy_entry
+    in_tmpdir do
+      File.write "src", ""
+
+      assert_send_type  "(String, String) -> void",
+                        Foo.new, :copy_entry, "src", "dest"
+    end
+  end
+
+  def test_copy_file
+    in_tmpdir do
+      File.write "src", ""
+
+      assert_send_type  "(String, String) -> void",
+                        Foo.new, :copy_file, "src", "dest"
+    end
+  end
+
+  def test_copy_stream
+    in_tmpdir do
+      File.write "src", ""
+      File.open("src") do |src|
+        File.open("dest", "w") do |dest|
+          assert_send_type  "(IO, IO) -> void",
+                            Foo.new, :copy_stream, src, dest
+        end
+      end
+    end
+  end
+
+  def test_cp
+    in_tmpdir do
+      assert_send_type  "(String, String, noop: bool) -> void",
+                        Foo.new, :cp, "src", "dest", noop: true
+    end
+  end
+
+  def test_copy
+    in_tmpdir do
+      assert_send_type  "(String, String, noop: bool) -> void",
+                        Foo.new, :copy, "src", "dest", noop: true
+    end
+  end
+
+  def test_cp_lr
+    in_tmpdir do
+      assert_send_type  "(String, String, noop: bool) -> void",
+                        Foo.new, :cp_lr, "src", "dest", noop: true
+    end
+  end
+
+  def test_cp_r
+    in_tmpdir do
+      Dir.mkdir "src"
+
+      assert_send_type  "(String, String) -> void",
+                        Foo.new, :cp_r, "src", "dest"
+    end
+  end
+
+  def test_install
+    in_tmpdir do
+      assert_send_type  "(String, String, noop: bool) -> void",
+                        Foo.new, :install, "src", "dest", noop: true
+    end
+  end
+
+  def test_link_entry
+    in_tmpdir do
+      File.write "src", ""
+
+      assert_send_type  "(String, String) -> void",
+                        Foo.new, :link_entry, "src", "dest"
+    end
+  end
+
+  def test_ln
+    in_tmpdir do |dir|
+      assert_send_type  "(String, String, noop: bool) -> void",
+                        Foo.new, :ln, "src", "dest", noop: true
+    end
+  end
+
+  def test_link
+    in_tmpdir do |dir|
+      assert_send_type  "(String, String, noop: bool) -> void",
+                        Foo.new, :link, "src", "dest", noop: true
+    end
+  end
+
+  def test_ln_s
+    in_tmpdir do
+      assert_send_type  "(String, String, noop: bool) -> void",
+                        Foo.new, :ln_s, "src", "dest", noop: true
+    end
+  end
+
+  def test_symlink
+    in_tmpdir do
+      assert_send_type  "(String, String, noop: bool) -> void",
+                        Foo.new, :symlink, "src", "dest", noop: true
+    end
+  end
+
+  def test_ln_sf
+    in_tmpdir do
+      assert_send_type  "(String, String, noop: bool) -> void",
+                        Foo.new, :ln_sf, "src", "dest", noop: true
+    end
+  end
+
+  def test_mkdir
+    in_tmpdir do
+      assert_send_type  "(String, noop: bool) -> void",
+                        Foo.new, :mkdir, "foo", noop: true
+    end
+  end
+
+  def test_mkdir_p
+    in_tmpdir do
+      assert_send_type  "(String, noop: bool) -> void",
+                        Foo.new, :mkdir_p, "foo", noop: true
+    end
+  end
+
+  def test_makedirs
+    in_tmpdir do
+      assert_send_type  "(String, noop: bool) -> void",
+                        Foo.new, :makedirs, "foo", noop: true
+    end
+  end
+
+  def test_mkpath
+    in_tmpdir do
+      assert_send_type  "(String, noop: bool) -> void",
+                        Foo.new, :mkpath, "foo", noop: true
+    end
+  end
+
+  def test_mv
+    in_tmpdir do
+      assert_send_type  "(String, String, noop: bool) -> void",
+                        Foo.new, :mv, "src", "dest", noop: true
+    end
+  end
+
+  def test_move
+    in_tmpdir do
+      assert_send_type  "(String, String, noop: bool) -> void",
+                        Foo.new, :move, "src", "dest", noop: true
+    end
+  end
+
+  def test_pwd
+    assert_send_type  "() -> String",
+                      Foo.new, :pwd
+  end
+
+  def test_getwd
+    assert_send_type  "() -> String",
+                      Foo.new, :getwd
+  end
+
+  def test_remove_dir
+    in_tmpdir do
+      assert_send_type  "(String, bool) -> void",
+                        Foo.new, :remove_dir, "foo", true
+    end
+  end
+
+  def test_remove_entry
+    in_tmpdir do
+      assert_send_type  "(String, bool) -> void",
+                        Foo.new, :remove_entry, "foo", true
+    end
+  end
+
+  def test_remove_entry_secure
+    in_tmpdir do
+      assert_send_type  "(String, bool) -> void",
+                        Foo.new, :remove_entry_secure, "foo", true
+    end
+  end
+
+  def test_remove_file
+    in_tmpdir do
+       assert_send_type  "(String, bool) -> void",
+                        Foo.new, :remove_file, "foo", true
+    end
+  end
+
+  def test_rm
+    in_tmpdir do
+      assert_send_type  "(String, noop: bool) -> void",
+                        Foo.new, :rm, "foo", noop: true
+    end
+  end
+
+  def test_remove
+    in_tmpdir do
+      assert_send_type  "(String, noop: bool) -> void",
+                        Foo.new, :remove, "foo", noop: true
+    end
+  end
+
+  def test_rm_f
+    in_tmpdir do
+      assert_send_type  "(String) -> void",
+                        Foo.new, :rm_f, "foo"
+    end
+  end
+
+  def test_safe_unlink
+    in_tmpdir do
+      assert_send_type  "(String) -> void",
+                        Foo.new, :safe_unlink, "foo"
+    end
+  end
+
+  def test_rm_r
+    in_tmpdir do
+      assert_send_type  "(String, noop: bool) -> void",
+                        Foo.new, :rm_r, "foo", noop: true
+    end
+  end
+
+  def test_rm_rf
+    in_tmpdir do
+      assert_send_type  "(String) -> void",
+                        Foo.new, :rm_rf, "foo"
+    end
+  end
+
+  def test_rmtree
+    in_tmpdir do
+      assert_send_type  "(String) -> void",
+                        Foo.new, :rmtree, "foo"
+    end
+  end
+
+  def test_rmdir
+    in_tmpdir do
+      assert_send_type  "(String, noop: bool) -> void",
+                        Foo.new, :rmdir, "foo", noop: true
+    end
+  end
+
+  def test_touch
+    in_tmpdir do
+      assert_send_type  "(String) -> void",
+                        Foo.new, :touch, "foo"
+    end
+  end
+
+  def test_uptodate?
+    assert_send_type  "(String, String) -> bool",
+                      Foo.new, :uptodate?, "foo", "bar"
   end
 end
