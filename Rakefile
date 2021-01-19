@@ -82,6 +82,7 @@ task :confirm_parser do
 end
 
 namespace :generate do
+  desc "Generate a test file for a stdlib class signatures"
   task :stdlib_test, [:class] do |_task, args|
     klass = args.fetch(:class) do
       raise "Class name is necessary. e.g. rake 'generate:stdlib_test[String]'"
