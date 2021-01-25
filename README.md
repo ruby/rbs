@@ -107,7 +107,7 @@ instance = builder.build_instance(string)
 
 # Print the types of `gsub` method:
 puts instance.methods[:gsub].method_types.join("\n")
-# Ouputs =>
+# Outputs =>
 #  (::Regexp | ::string pattern, ::string replacement) -> ::String
 #  (::Regexp | ::string pattern, ::Hash[::String, ::String] hash) -> ::String
 #  (::Regexp | ::string pattern) { (::String match) -> ::_ToS } -> ::String
