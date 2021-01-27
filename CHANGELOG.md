@@ -2,6 +2,11 @@
 
 ## master
 
+## 1.0.2 (2021-01-28)
+
+* Signature Updates
+  * Kernel([#582](https://github.com/ruby/rbs/pull/582))
+
 ## 1.0.1 (2021-01-27)
 
 * Signature Updates
