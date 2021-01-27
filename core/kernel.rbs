@@ -54,7 +54,7 @@ module Kernel : BasicObject
   # try { "hello" }      #=> "hello"
   # try do "hello" end   #=> "hello"
   # ```
-  def self.block_given?: () -> bool
+  def self?.block_given?: () -> bool
 
   # Returns the names of the current local variables.
   #
