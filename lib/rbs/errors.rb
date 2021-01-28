@@ -40,6 +40,9 @@ module RBS
     attr_reader :location
 
     def initialize(ancestors:, location:)
+      @ancestors = ancestors
+      @location = location
+
       names = ancestors.map do |ancestor|
         case ancestor
         when Definition::Ancestor::Singleton
