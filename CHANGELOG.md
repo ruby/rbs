@@ -2,6 +2,10 @@
 
 ## master
 
+## 1.0.4 (2021-01-31)
+
+* Unbundle `rr` to run test in `ruby/ruby` repo ([#585](https://github.com/ruby/rbs/pull/585))
+
 ## 1.0.3 (2021-01-28)
 
 * Set up `#ancestors` and `#location` of `RecursiveAncestorError` ([#583](https://github.com/ruby/rbs/pull/583))
