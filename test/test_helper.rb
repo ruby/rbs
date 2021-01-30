@@ -4,7 +4,6 @@ require "tmpdir"
 require "stringio"
 require "open3"
 require "test/unit"
-require "test/unit/rr"
 
 begin
   require "amber"
@@ -41,16 +40,19 @@ module TestHelper
     end
   end
 
-  def silence_errors
-    stub(RBS.logger).error do
-      yield
-    end
-  end
-
   def silence_warnings
-    stub(RBS.logger).warn do
-      yield
+    klass = RBS.logger.class
+    original_method = klass.instance_method(:warn)
+
+    klass.remove_method(:warn)
+    klass.define_method(:warn) do |*args, &block|
+      block&.call()
     end
+
+    yield
+  ensure
+    klass.remove_method(:warn)
+    klass.define_method(:warn, original_method)
   end
 
   class SignatureManager
