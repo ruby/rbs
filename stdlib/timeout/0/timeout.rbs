@@ -51,9 +51,6 @@ module Timeout
   # Timeout` into your classes so they have a #timeout method, as well as a module
   # method, so you can call it directly as Timeout.timeout().
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     timeout(sec, klass = nil, message = nil) { |sec| ... }
-  #
   def self.timeout: (Numeric? sec, ?singleton(Exception) klass, ?String message) { (Numeric sec) -> untyped } -> untyped
 
   private
@@ -84,9 +81,6 @@ module Timeout
   # Note that this is both a method of module Timeout, so you can `include
   # Timeout` into your classes so they have a #timeout method, as well as a module
   # method, so you can call it directly as Timeout.timeout().
-  #
-  # # arglists 💪👽🚨 << Delete this section
-  #     timeout(sec, klass = nil, message = nil) { |sec| ... }
   #
   def timeout: (Numeric? sec, ?singleton(Exception) klass, ?String message) { (Numeric sec) -> untyped } -> untyped
 end
