@@ -55,13 +55,8 @@ module RBS
       end
 
       def find_best_version(version)
-        return latest_version unless version
-
-        if v = version_names.reverse.bsearch {|v| v <= version ? true : false }
-          versions[v]
-        else
-          oldest_version
-        end
+        best_version = Repository.find_best_version(version, version_names)
+        versions[best_version]
       end
 
       def empty?
@@ -86,6 +81,17 @@ module RBS
     def self.default
       new().tap do |repo|
         repo.add(DEFAULT_STDLIB_ROOT)
+      end
+    end
+
+    def self.find_best_version(version, candidates)
+      candidates = candidates.sort
+      return candidates.last || raise unless version
+
+      if v = candidates.reverse.bsearch {|v| v <= version ? true : false }
+        v
+      else
+        candidates.first or raise
       end
     end
 

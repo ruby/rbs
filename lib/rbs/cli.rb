@@ -6,6 +6,7 @@ module RBS
   class CLI
     class LibraryOptions
       attr_accessor :core_root
+      attr_accessor :config_path
       attr_reader :repos
       attr_reader :libs
       attr_reader :dirs
@@ -16,13 +17,16 @@ module RBS
 
         @libs = []
         @dirs = []
+        @config_path = Collection::Config::PATH
       end
 
       def loader
+        lock = config_path&.then { |p| Collection::Config.lockfile_of(p) }
         repository = Repository.new(no_stdlib: core_root.nil?)
         repos.each do |repo|
           repository.add(Pathname(repo))
         end
+        repository.add(lock.repo_path) if lock
 
         loader = EnvironmentLoader.new(core_root: core_root, repository: repository)
 
@@ -34,6 +38,12 @@ module RBS
           name, version = lib.split(/:/, 2)
           next unless name
           loader.add(library: name, version: version)
+        end
+
+        if lock
+          lock.gems.each do |gem|
+            loader.add(library: gem['name'], version: gem['version'])
+          end
         end
 
         loader
@@ -52,6 +62,14 @@ module RBS
           self.core_root = nil
         end
 
+        opts.on('--collection PATH', "File path of collection configration (default: #{Collection::Config::PATH})") do |path|
+          self.config_path = Pathname(path)
+        end
+
+        opts.on('--no-collection', 'Ignore collection configration') do
+          self.config_path = nil
+        end
+
         opts.on("--repo DIR", "Add RBS repository") do |dir|
           repos << dir
         end
@@ -68,7 +86,7 @@ module RBS
       @stderr = stderr
     end
 
-    COMMANDS = [:ast, :list, :ancestors, :methods, :method, :validate, :constant, :paths, :prototype, :vendor, :parse, :test]
+    COMMANDS = [:ast, :list, :ancestors, :methods, :method, :validate, :constant, :paths, :prototype, :vendor, :parse, :test, :collection]
 
     def parse_logging_options(opts)
       opts.on("--log-level LEVEL", "Specify log level (defaults to `warn`)") do |level|
@@ -824,6 +842,79 @@ EOB
       stderr.print(err)
 
       status
+    end
+
+    def run_collection(args, options)
+      opts = collection_options(args)
+      params = {}
+      opts.order args[1..], into: params
+      config_path = options.config_path or raise
+      lock_path = Collection::Config.to_lockfile_path(config_path)
+
+      case args[0]
+      when 'install'
+        unless params[:frozen]
+          Collection::Config.generate_lockfile(config_path: config_path, gemfile_lock_path: Pathname('./Gemfile.lock'))
+        end
+        Collection::Installer.new(lockfile_path: lock_path, stdout: stdout).install_from_lockfile
+      when 'update'
+        # TODO: Be aware of argv to update only specified gem
+        Collection::Config.generate_lockfile(config_path: config_path, gemfile_lock_path: Pathname('./Gemfile.lock'), with_lockfile: false)
+        Collection::Installer.new(lockfile_path: lock_path, stdout: stdout).install_from_lockfile
+      when 'init'
+        if config_path.exist?
+          puts "#{config_path} already exists"
+          exit 1
+        end
+
+        config_path.write(<<~'YAML')
+          # Download sources
+          collections:
+            - name: ruby/gem_rbs_collection
+              remote: https://github.com/ruby/gem_rbs_collection.git
+              revision: main
+              repo_dir: gems
+
+          # A directory to install the downloaded RBSs
+          path: .gem_rbs_collection
+
+          gems: []
+        YAML
+        stdout.puts "created: #{config_path}"
+      when 'clean'
+        unless lock_path.exist?
+          puts "#{lock_path} should exist to clean"
+          exit 1
+        end
+        Collection::Cleaner.new(lockfile_path: lock_path)
+      when 'help'
+        puts opts.help
+      else
+        puts opts.help
+        exit 1
+      end
+    end
+
+    def collection_options(args)
+      OptionParser.new do |opts|
+        opts.banner = <<~HELP
+          Usage: rbs collection [install|update|init|clean|help]
+
+          Manage RBS collection, which contains third party RBS.
+
+          Examples:
+
+            # Initialize the configration file
+            $ rbs collection init
+
+            # Generate the lock file and install RBSs from the lock file
+            $ rbs collection install
+
+            # Update the RBSs
+            $ rbs collection update
+        HELP
+        opts.on('--frozen') if args[0] == 'install'
+      end
     end
   end
 end
