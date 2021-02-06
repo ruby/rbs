@@ -44,6 +44,7 @@ require "rbs/factory"
 require "rbs/repository"
 require "rbs/ancestor_graph"
 require "rbs/locator"
+require "rbs/collection"
 
 begin
   require "rbs/parser"

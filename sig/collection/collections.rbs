@@ -1,0 +1,58 @@
+module RBS
+  module Collection
+    module Collections
+      def self.from_config_entry: (untyped colletion_entry) -> _Collection
+
+      interface _Collection
+        def has?: (Config::gem_entry) -> bool
+        def versions: (Config::gem_entry) -> Array[String]
+        def name: () -> String
+        def install: (Pathname dest, Config::gem_entry) -> void
+      end
+
+      class Git
+        attr_reader name: String
+        attr_reader revision: String
+        attr_reader remote: String
+        attr_reader repo_dir: String
+
+        def initialize: (name: String, revision: String, remote: String, repo_dir: String?) -> untyped
+
+        def has?: (Config::gem_entry) -> bool
+
+        def versions: (Config::gem_entry) -> Array[String]
+
+        def install: (Pathname dest, Config::gem_entry) -> void
+
+        private
+
+        def setup!: () -> void
+
+        def git_dir: () -> Pathname
+
+        def gem_repo_dir: () -> Pathname
+
+        def with_revision: [T] (String revision) { () -> T } -> T
+
+        def resolve_revision: (String rev) -> String
+
+        def git: (*String cmd) -> String
+
+        def sh!: (*String cmd) -> String
+      end
+
+      # signatures that are bundled in rbs gem under the stdlib/ directory
+      class Stdlib
+        attr_reader name: untyped
+
+        def has?: (untyped config_name) -> bool
+
+        def versions: (untyped config_name) -> Array[String]
+      end
+
+      # sig/ directory
+      class Rubygems
+      end
+    end
+  end
+end

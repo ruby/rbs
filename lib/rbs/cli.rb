@@ -68,7 +68,7 @@ module RBS
       @stderr = stderr
     end
 
-    COMMANDS = [:ast, :list, :ancestors, :methods, :method, :validate, :constant, :paths, :prototype, :vendor, :parse, :test]
+    COMMANDS = [:ast, :list, :ancestors, :methods, :method, :validate, :constant, :paths, :prototype, :vendor, :parse, :test, :collection]
 
     def parse_logging_options(opts)
       opts.on("--log-level LEVEL", "Specify log level (defaults to `warn`)") do |level|
@@ -823,6 +823,23 @@ EOB
       stderr.print(err)
 
       status
+    end
+
+    def run_collection(args, options)
+      # TODO optparse
+      # TODO: path
+      case args[0]
+      when 'install'
+        Collection::Config.generate_lockfile(config_path: Pathname('./rbs_collection.yaml'), gemfile_lock_path: Pathname('./Gemfile.lock'))
+        Collection::Installer.new(lockfile_path: Pathname('./rbs_collection.lock.yaml')).install_from_lockfile
+      when 'update'
+        Collection::Config.generate_lockfile(config_path: Pathname('./rbs_collection.yaml'), gemfile_lock_path: Pathname('./Gemfile.lock'), with_lockfile: false)
+        Collection::Installer.new(lockfile_path: Pathname('./rbs_collection.lock.yaml')).install_from_lockfile
+      when 'clean'
+        # TODO
+      else
+        raise
+      end
     end
   end
 end

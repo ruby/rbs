@@ -1,0 +1,14 @@
+module RBS
+  module Collection
+    class Installer
+      attr_reader lockfile: Config
+
+      def initialize: (lockfile_path: Pathname) -> void
+      def self.install_from_lockfile: () -> void
+
+      private
+
+      def collection_for: (untyped) -> Collections::_Collection
+    end
+  end
+end
