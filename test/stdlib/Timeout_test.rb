@@ -12,13 +12,13 @@ class TimeoutSingletonTest < Test::Unit::TestCase
 
   def test_timeout
     proc = Proc.new { |sec| sec * sec }
-    assert_send_type  "(::Integer sec): [T] { (::Integer sec) -> T } -> T",
+    assert_send_type  "(::Integer sec) { (::Integer sec) -> ::Integer } -> ::Integer",
                       Timeout, :timeout, 5, &proc
-    assert_send_type  "(::Float sec): [T] { (::Float sec) -> T } -> T",
+    assert_send_type  "(::Float sec) { (::Float sec) -> ::Float } -> ::Float",
                       Timeout, :timeout, 1.2, &proc
-    assert_send_type  "(::Rational sec): [T] { (::Rational sec) -> T } -> T",
+    assert_send_type  "(::Rational sec)  { (::Rational sec) -> ::Rational } -> ::Rational",
                       Timeout, :timeout, Rational(5, 3), &proc
-    assert_send_type  "(::BigDecimal sec): [T] { (::BigDecimal sec) -> T } -> T",
+    assert_send_type  "(::BigDecimal sec) { (::BigDecimal sec) -> ::BigDecimal } -> ::BigDecimal",
                       Timeout, :timeout, BigDecimal("1.123456789123456789"), &proc
 
     hard_process = Proc.new { _calc_pi }
