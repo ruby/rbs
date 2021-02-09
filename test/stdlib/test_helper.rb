@@ -239,17 +239,7 @@ module TypeAssertions
 
     assert_empty errors.map {|x| RBS::Test::Errors.to_string(x) }, "Call trace does not match with given method type: #{trace.last.inspect}"
 
-    type, definition = target
-    method_types = case
-                   when definition.instance_type?
-                     subst = RBS::Substitution.build(definition.type_params, type.args)
-                     definition.methods[method].method_types.map do |method_type|
-                       method_type.sub(subst)
-                     end
-                   when definition.class_type?
-                     definition.methods[method].method_types
-                   end
-
+    method_types = method_types(method)
     all_errors = method_types.map {|t| typecheck.method_call(method, t, trace.last, errors: []) }
     assert all_errors.any? {|es| es.empty? }, "Call trace does not match one of method definitions:\n  #{trace.last.inspect}\n  #{method_types.join(" | ")}"
 
@@ -293,7 +283,24 @@ module TypeAssertions
     assert_operator exception, :is_a?, ::Exception
     assert_empty errors.map {|x| RBS::Test::Errors.to_string(x) }
 
+    method_types = method_types(method)
+    all_errors = method_types.map {|t| typecheck.method_call(method, t, trace.last, errors: []) }
+    assert all_errors.all? {|es| es.size > 0 }, "Call trace unexpectedly matches one of method definitions:\n  #{trace.last.inspect}\n  #{method_types.join(" | ")}"
+
     result
+  end
+
+  def method_types(method)
+    type, definition = target
+    case
+    when definition.instance_type?
+      subst = RBS::Substitution.build(definition.type_params, type.args)
+      definition.methods[method].method_types.map do |method_type|
+        method_type.sub(subst)
+      end
+    when definition.class_type?
+      definition.methods[method].method_types
+    end
   end
 end
 
