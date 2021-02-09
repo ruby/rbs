@@ -22,12 +22,14 @@ class TimeoutSingletonTest < Test::Unit::TestCase
                       Timeout, :timeout, BigDecimal("1.123456789123456789"), &proc
 
     hard_process = Proc.new { _calc_pi }
-    refute_send_type  "(::Numeric sec): [T] { (::Numeric sec) -> T } -> T",
-                      Timeout, :timeout, 0.001, &hard_process
-    refute_send_type  "(::Numeric sec, singleton(Exception) klass): [T] { (::Numeric sec) -> T } -> T",
-                      Timeout, :timeout, 0.001, TimeoutTestException, &hard_process
-    refute_send_type  "(::Numeric sec, singleton(Exception) klass, String message): [T] { (::Numeric sec) -> T } -> T",
-                      Timeout, :timeout, 0.001, TimeoutTestException, "timeout test error", &hard_process
+    exception = assert_raises(Timeout::Error) { Timeout.timeout 0.001, &hard_process }
+    assert_equal "execution expired", exception.message
+
+    exception = assert_raises(TimeoutTestException) { Timeout.timeout 0.001, TimeoutTestException, &hard_process }
+    assert_equal "execution expired", exception.message
+
+    exception = assert_raises(TimeoutTestException) { Timeout.timeout 0.001, TimeoutTestException, "timeout test error", &hard_process }
+    assert_equal "timeout test error", exception.message
   end
 
   def _calc_pi
