@@ -121,7 +121,7 @@ class Complex < Numeric
   #     Complex(2)     <=> 2               #=> 0
   #     Complex(2)     <=> 3               #=> -1
   #
-  def <=>: (Numeric) -> Integer?
+  def <=>: (untyped) -> Integer?
 
   # Returns true if cmp equals object numerically.
   #

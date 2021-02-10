@@ -125,7 +125,8 @@ class Rational < Numeric
   #
   #     Rational(1, 3) <=> "0.3"           #=> nil
   #
-  def <=>: (Numeric) -> Integer?
+  def <=>: (Integer | Rational) -> Integer
+         | (untyped) -> Integer?
 
   # Returns `true` if `rat` equals `object` numerically.
   #

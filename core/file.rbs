@@ -985,7 +985,8 @@ class File::Stat < Object
   include Comparable
 
   def initialize: (String file) -> Object
-  def <=>: (File::Stat other) -> Integer?
+  def <=>: (File::Stat other) -> Integer
+         | (untyped) -> nil
 
   def atime: () -> Time
 
