@@ -238,4 +238,49 @@ class JSONInstanceTest < Test::Unit::TestCase
     assert_send_type "(ToJson) -> String", MyJSON.new, :unparse, ToJson.new
     assert_send_type "(ToJson, indent: String) -> String", MyJSON.new, :unparse, ToJson.new, { indent: "\t" }
   end
+
+  def test_to_json_with_object
+    assert_send_type "() -> String", Object.new, :to_json
+    assert_send_type "(JSON::State) -> String",  Object.new, :to_json, JSON::State.new
+  end
+
+  def test_to_json_with_nil
+    assert_send_type "() -> String", nil, :to_json
+    assert_send_type "(JSON::State) -> String", nil, :to_json, JSON::State.new
+  end
+
+  def test_to_json_with_true
+    assert_send_type "() -> String", true, :to_json
+    assert_send_type "(JSON::State) -> String", true, :to_json, JSON::State.new
+  end
+
+  def test_to_json_with_false
+    assert_send_type "() -> String", false, :to_json
+    assert_send_type "(JSON::State) -> String", false, :to_json, JSON::State.new
+  end
+
+  def test_to_json_with_string
+    assert_send_type "() -> String", "foo", :to_json
+    assert_send_type "(JSON::State) -> String", "foo", :to_json, JSON::State.new
+  end
+
+  def test_to_json_with_integer
+    assert_send_type "() -> String", 123, :to_json
+    assert_send_type "(JSON::State) -> String", 123, :to_json, JSON::State.new
+  end
+
+  def test_to_json_with_float
+    assert_send_type "() -> String", 0.123, :to_json
+    assert_send_type "(JSON::State) -> String", 0.123, :to_json, JSON::State.new
+  end
+
+  def test_to_json_with_hash
+    assert_send_type "() -> String", { a: 1 }, :to_json
+    assert_send_type "(JSON::State) -> String", { a: 1 }, :to_json, JSON::State.new
+  end
+
+  def test_to_json_with_array
+    assert_send_type "() -> String", [], :to_json
+    assert_send_type "(JSON::State) -> String", [], :to_json, JSON::State.new
+  end
 end
