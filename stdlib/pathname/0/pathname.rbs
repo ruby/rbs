@@ -240,7 +240,8 @@ class Pathname
   # relative to the right argument. Or it will return `nil` if the arguments are
   # not comparable.
   #
-  def <=>: (untyped other) -> Integer?
+  def <=>: (Pathname other) -> Integer
+         | (untyped other) -> nil
 
   # Compare this pathname with `other`.  The comparison is string-based. Be aware
   # that two different paths (`foo.txt` and `./foo.txt`) can refer to the same

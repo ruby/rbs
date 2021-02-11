@@ -90,7 +90,7 @@ class Module < Object
   # Returns `nil` if `module` has no relationship with `other_module`, if
   # `other_module` is not a module, or if the two values are incomparable.
   #
-  def <=>: (Module other) -> Integer?
+  def <=>: (untyped other) -> Integer?
 
   # Equality --- At the Object level, #== returns `true` only if `obj` and `other`
   # are the same object.  Typically, this method is overridden in descendant

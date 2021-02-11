@@ -496,7 +496,7 @@ class Date
   #
   # See also Comparable.
   #
-  def <=>: (Date | Rational | Object other) -> Integer?
+  def <=>: (untyped other) -> Integer?
 
   # Returns true if they are the same day.
   #

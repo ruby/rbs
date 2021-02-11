@@ -112,7 +112,8 @@ class Integer < Numeric
   #
   # `nil` is returned if the two values are incomparable.
   #
-  def <=>: (Numeric) -> Integer?
+  def <=>: (Integer | Rational) -> Integer
+         | (untyped) -> Integer?
 
   # Returns `true` if `int` equals `other` numerically. Contrast this with
   # Integer#eql?, which requires `other` to be an Integer.

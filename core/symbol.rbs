@@ -47,7 +47,8 @@ class Symbol
   #
   # See String#<=> for more information.
   #
-  def <=>: (untyped other) -> Integer?
+  def <=>: (Symbol other) -> Integer
+         | (untyped other) -> Integer?
 
   # Equality---If *sym* and *obj* are exactly the same symbol, returns `true`.
   #

@@ -91,7 +91,8 @@ class String
   #     "abcdef" <=> "ABCDEF"    #=> 1
   #     "abcdef" <=> 1           #=> nil
   #
-  def <=>: (untyped other) -> Integer?
+  def <=>: (string other) -> Integer
+         | (untyped other) -> Integer?
 
   # Equality---Returns whether `str` == `obj`, similar to Object#==.
   #

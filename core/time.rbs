@@ -230,7 +230,8 @@ class Time < Object
   #     t2 <=> t           #=> 1
   #     t <=> t            #=> 0
   #
-  def <=>: (Time other) -> Integer?
+  def <=>: (Time other) -> Integer
+         | (untyped other) -> Integer?
 
   def >: (Time arg0) -> bool
 
