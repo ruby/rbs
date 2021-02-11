@@ -8,8 +8,6 @@ class TimeoutSingletonTest < Test::Unit::TestCase
   library "timeout"
   testing "singleton(::Timeout)"
 
-  class TimeoutTestException < Exception; end # exception class for test
-
   def test_timeout
     proc = Proc.new { |sec| sec * sec }
     assert_send_type  "(::Integer sec) { (::Integer sec) -> ::Integer } -> ::Integer",
