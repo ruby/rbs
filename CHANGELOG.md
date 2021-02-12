@@ -2,6 +2,18 @@
 
 ## master
 
+## 1.0.5 (2021-02-13)
+
+* Signature Updates
+  * Enumerable ([\#596](https://github.com/ruby/rbs/pull/596))
+  * Set ([\#595](https://github.com/ruby/rbs/pull/595))
+  * `#to_json` ([\#592](https://github.com/ruby/rbs/pull/592))
+  * `<=>` ([\#593](https://github.com/ruby/rbs/pull/593))
+  * Timeout ([\#586](https://github.com/ruby/rbs/pull/586))
+  * URI::RFC2396_Parser ([\#587](https://github.com/ruby/rbs/pull/587))
+* Rename generic class parameters on re-open ([\#594](https://github.com/ruby/rbs/pull/594))
+* Make `refute_send_type` check that method call doesn't match with types in RBS ([\#588](https://github.com/ruby/rbs/pull/588))
+
 ## 1.0.4 (2021-01-31)
 
 * Unbundle `rr` to run test in `ruby/ruby` repo ([#585](https://github.com/ruby/rbs/pull/585))
