@@ -339,3 +339,67 @@ JSON::VERSION_BUILD: Integer
 JSON::VERSION_MAJOR: Integer
 
 JSON::VERSION_MINOR: Integer
+
+class Object
+  # Converts this object to a string (calling #to_s), converts
+  # it to a JSON string, and returns the result. This is a fallback, if no
+  # special method #to_json was defined for some object.
+  #
+  def to_json: (?JSON::State state) -> String
+end
+
+class NilClass
+  # Returns a JSON string for nil: 'null'.
+  #
+  def to_json: (?JSON::State state) -> String
+end
+
+class TrueClass
+  # Returns a JSON string for true: 'true'.
+  #
+  def to_json: (?JSON::State state) -> String
+end
+
+class FalseClass
+  # Returns a JSON string for false: 'false'.
+  #
+  def to_json: (?JSON::State state) -> String
+end
+
+class String
+  # This string should be encoded with UTF-8 A call to this method
+  # returns a JSON string encoded with UTF16 big endian characters as
+  # \u????.
+  #
+  def to_json: (?JSON::State state) -> String
+end
+
+class Integer
+  # Returns a JSON string representation for this Integer number.
+  #
+  def to_json: (?JSON::State state) -> String
+end
+
+class Float
+  # Returns a JSON string representation for this Float number.
+  #
+  def to_json: (?JSON::State state) -> String
+end
+
+class Hash[unchecked out K, unchecked out V]
+  # Returns a JSON string containing a JSON object, that is generated from
+  # this Hash instance.
+  # _state_ is a JSON::State object, that can also be used to configure the
+  # produced JSON string output further.
+  #
+  def to_json: (?JSON::State state) -> String
+end
+
+class Array[unchecked out Elem]
+  # Returns a JSON string containing a JSON array, that is generated from
+  # this Array instance.
+  # _state_ is a JSON::State object, that can also be used to configure the
+  # produced JSON string output further.
+  #
+  def to_json: (?JSON::State state) -> String
+end
