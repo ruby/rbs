@@ -104,6 +104,8 @@ module RBS
         def initialize: (name: Symbol, type: Types::t, ivar_name: Symbol | false | nil, kind: kind, annotations: Array[Annotation], location: Location?, comment: Comment?) -> void
 
         include _HashEqual
+
+        def update: (?name: Symbol, ?type: Types::t, ?ivar_name: Symbol | false | nil, ?kind: kind, ?annotations: Array[Annotation], ?location: Location?, ?comment: Comment?) -> instance
       end
 
       class AttrReader < Base

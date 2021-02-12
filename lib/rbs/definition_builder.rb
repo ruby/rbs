@@ -139,9 +139,8 @@ module RBS
         case entry
         when Environment::ClassEntry, Environment::ModuleEntry
           ancestors = ancestor_builder.instance_ancestors(type_name)
-          self_type = Types::ClassInstance.new(name: type_name,
-                                               args: Types::Variable.build(entry.type_params.each.map(&:name)),
-                                               location: nil)
+          args = Types::Variable.build(entry.type_params.each.map(&:name))
+          self_type = Types::ClassInstance.new(name: type_name, args: args, location: nil)
 
           Definition.new(type_name: type_name, entry: entry, self_type: self_type, ancestors: ancestors).tap do |definition|
             one_ancestors = ancestor_builder.one_instance_ancestors(type_name)
@@ -217,6 +216,8 @@ module RBS
                            super_interface_method: entry.is_a?(Environment::ModuleEntry))
 
             entry.decls.each do |d|
+              subst = Substitution.build(d.decl.type_params.each.map(&:name), args)
+
               d.decl.members.each do |member|
                 case member
                 when AST::Members::AttrReader, AST::Members::AttrAccessor, AST::Members::AttrWriter
@@ -229,12 +230,18 @@ module RBS
                                 end
 
                     if ivar_name
-                      insert_variable(type_name, definition.instance_variables, name: ivar_name, type: member.type)
+                      insert_variable(type_name,
+                                      definition.instance_variables,
+                                      name: ivar_name,
+                                      type: member.type.sub(subst))
                     end
                   end
 
                 when AST::Members::InstanceVariable
-                  insert_variable(type_name, definition.instance_variables, name: member.name, type: member.type)
+                  insert_variable(type_name,
+                                  definition.instance_variables,
+                                  name: member.name,
+                                  type: member.type.sub(subst))
 
                 when AST::Members::ClassVariable
                   insert_variable(type_name, definition.class_variables, name: member.name, type: member.type)

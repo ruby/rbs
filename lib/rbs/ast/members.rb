@@ -245,6 +245,19 @@ module RBS
         def hash
           self.class.hash ^ name.hash ^ type.hash ^ ivar_name.hash ^ kind.hash
         end
+
+        def update(name: self.name, type: self.type, ivar_name: self.ivar_name, kind: self.kind, annotations: self.annotations, location: self.location, comment: self.comment)
+          klass = _ = self.class
+          klass.new(
+            name: name,
+            type: type,
+            ivar_name: ivar_name,
+            kind: kind,
+            annotations: annotations,
+            location: location,
+            comment: comment
+          )
+        end
       end
 
       class AttrReader < Base

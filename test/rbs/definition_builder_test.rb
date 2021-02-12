@@ -1853,4 +1853,98 @@ end
       end
     end
   end
+
+  def test_generic_class_open
+    SignatureManager.new do |manager|
+      manager.files.merge!(Pathname("foo.rbs") => <<-EOF)
+class Foo[A]
+  def foo: () -> A
+end
+
+class Foo[B]
+  def bar: () -> B
+  attr_reader Bar: B
+  @bar: B
+end
+      EOF
+      manager.build do |env|
+        builder = DefinitionBuilder.new(env: env)
+
+        builder.build_instance(type_name("::Foo")).tap do |definition|
+          assert_equal [parse_method_type("() -> A", variables: [:A])],
+                       definition.methods[:foo].method_types
+          assert_equal [parse_method_type("() -> A", variables: [:A])],
+                       definition.methods[:bar].method_types
+          assert_equal [parse_method_type("() -> A", variables: [:A])],
+                       definition.methods[:Bar].method_types
+
+          assert_equal Types::Variable.build(:A),
+                       definition.instance_variables[:@bar].type
+          assert_equal Types::Variable.build(:A),
+                       definition.instance_variables[:@Bar].type
+        end
+      end
+    end
+  end
+
+  def test_generic_class_interface
+    SignatureManager.new do |manager|
+      manager.files.merge!(Pathname("foo.rbs") => <<-EOF)
+class Foo[A]
+  def foo: () -> A
+end
+
+interface _Baz[Y]
+  def baz: () -> Y
+end
+
+class Foo[C]
+  include _Baz[C]
+end
+      EOF
+      manager.build do |env|
+        builder = DefinitionBuilder.new(env: env)
+
+        builder.build_instance(type_name("::Foo")).tap do |definition|
+          assert_equal [parse_method_type("() -> A", variables: [:A])],
+                       definition.methods[:foo].method_types
+          assert_equal [parse_method_type("() -> A", variables: [:A])],
+                       definition.methods[:baz].method_types
+        end
+      end
+    end
+  end
+
+  def test_generic_class_module
+    SignatureManager.new do |manager|
+      manager.files.merge!(Pathname("foo.rbs") => <<-EOF)
+class Foo[A]
+  def foo: () -> A
+end
+
+class Foo[B]
+  include Bar[B]
+end
+
+module Bar[Y]
+  def bar: () -> Y
+
+  @bar: Y
+end
+      EOF
+      manager.build do |env|
+        builder = DefinitionBuilder.new(env: env)
+
+        builder.build_instance(type_name("::Foo")).tap do |definition|
+          assert_equal [parse_method_type("() -> A", variables: [:A])],
+                       definition.methods[:foo].method_types
+          assert_equal [parse_method_type("() -> A", variables: [:A])],
+                       definition.methods[:bar].method_types
+
+          assert_equal Types::Variable.build(:A),
+                       definition.instance_variables[:@bar].type
+        end
+      end
+    end
+  end
 end
