@@ -403,3 +403,227 @@ class Array[unchecked out Elem]
   #
   def to_json: (?JSON::State state) -> String
 end
+
+class BigDecimal
+  # Import a JSON Marshalled object.
+  #
+  # method used for JSON marshalling support.
+  #
+  def self.json_create: (Hash[String, String] object) -> instance
+
+  # Marshal the object to JSON.
+  #
+  # method used for JSON marshalling support.
+  #
+  def as_json: (*untyped) -> Hash[String, String]
+
+  # return the JSON value
+  #
+  def to_json: (?JSON::State state) -> String
+end
+
+class Complex
+  # Deserializes JSON string by converting Real value `r`, imaginary value `i`, to
+  # a Complex object.
+  #
+  def self.json_create: (Hash[String, String | Numeric] object) -> instance
+
+  # Returns a hash, that will be turned into a JSON object and represent this
+  # object.
+  #
+  def as_json: (*untyped) -> Hash[String, String | Numeric]
+
+  # Stores class name (Complex) along with real value `r` and imaginary value `i`
+  # as JSON string
+  #
+  def to_json: (?JSON::State state) -> String
+end
+
+class Date
+  # Deserializes JSON string by converting Julian year `y`, month `m`, day `d` and
+  # Day of Calendar Reform `sg` to Date.
+  #
+  def self.json_create: (Hash[String, String | Integer | Float] object) -> instance
+
+  # Returns a hash, that will be turned into a JSON object and represent this
+  # object.
+  #
+  def as_json: (*untyped) -> Hash[String, String | Integer | Float]
+
+  # Stores class name (Date) with Julian year `y`, month `m`, day `d` and Day of
+  # Calendar Reform `sg` as JSON string
+  #
+  def to_json: (?JSON::State state) -> String
+end
+
+class DateTime
+  # Deserializes JSON string by converting year `y`, month `m`, day `d`, hour `H`,
+  # minute `M`, second `S`, offset `of` and Day of Calendar Reform `sg` to
+  # DateTime.
+  #
+  def self.json_create: (Hash[String, String | Integer | Float] object) -> instance
+
+  # Returns a hash, that will be turned into a JSON object and represent this
+  # object.
+  #
+  def as_json: (*untyped) -> Hash[String, String | Integer | Float]
+
+  # Stores class name (DateTime) with Julian year `y`, month `m`, day `d`, hour
+  # `H`, minute `M`, second `S`, offset `of` and Day of Calendar Reform `sg` as
+  # JSON string
+  #
+  def to_json: (?JSON::State state) -> String
+end
+
+class Exception
+  # Deserializes JSON string by constructing new Exception object with message `m`
+  # and backtrace `b` serialized with `to_json`
+  #
+  def self.json_create: (Hash[String, String | Array[String] | nil] object) -> instance
+
+  # Returns a hash, that will be turned into a JSON object and represent this
+  # object.
+  #
+  def as_json: (*untyped) -> Hash[String, String | Array[String] | nil]
+
+  # Stores class name (Exception) with message `m` and backtrace array `b` as JSON
+  # string
+  #
+  def to_json: (?JSON::State state) -> String
+end
+
+class OpenStruct
+  # Deserializes JSON string by constructing new Struct object with values `t`
+  # serialized by `to_json`.
+  #
+  def self.json_create: (Hash[String, String | Hash[Symbol, untyped]] object) -> instance
+
+  # Returns a hash, that will be turned into a JSON object and represent this
+  # object.
+  #
+  def as_json: (*untyped) -> Hash[String, String | Hash[Symbol, untyped]]
+
+  # Stores class name (OpenStruct) with this struct's values `t` as a JSON string.
+  #
+  def to_json: (?JSON::State state) -> String
+end
+
+class Range[out Elem]
+  # Deserializes JSON string by constructing new Range object with arguments `a`
+  # serialized by `to_json`.
+  #
+  def self.json_create: (Hash[String, String | [Elem, Elem, bool]] object) -> instance
+
+  # Returns a hash, that will be turned into a JSON object and represent this
+  # object.
+  #
+  def as_json: (*untyped) -> Hash[String, String | [Elem, Elem, bool]]
+
+  # Stores class name (Range) with JSON array of arguments `a` which include
+  # `first` (integer), `last` (integer), and `exclude_end?` (boolean) as JSON
+  # string.
+  #
+  def to_json: (?JSON::State state) -> String
+end
+
+class Rational
+  # Deserializes JSON string by converting numerator value `n`, denominator value
+  # `d`, to a Rational object.
+  #
+  def self.json_create: (Hash[String, String | Integer] object) -> instance
+
+  # Returns a hash, that will be turned into a JSON object and represent this
+  # object.
+  #
+  def as_json: (*untyped) -> Hash[String, String | Integer]
+
+  # Stores class name (Rational) along with numerator value `n` and denominator
+  # value `d` as JSON string
+  #
+  def to_json: (?JSON::State state) -> String
+end
+
+class Regexp
+  # Deserializes JSON string by constructing new Regexp object with source `s`
+  # (Regexp or String) and options `o` serialized by `to_json`
+  #
+  def self.json_create: (Hash[String, String | Integer] object) -> instance
+
+  # Returns a hash, that will be turned into a JSON object and represent this
+  # object.
+  #
+  def as_json: (*untyped) -> Hash[String, String | Integer]
+
+  # Stores class name (Regexp) with options `o` and source `s` (Regexp or String)
+  # as JSON string
+  #
+  def to_json: (?JSON::State state) -> String
+end
+
+class Set[A]
+  # Import a JSON Marshalled object.
+  #
+  # method used for JSON marshalling support.
+  #
+  def self.json_create: (Hash[String, String | Array[A]] object) -> instance
+
+  # Marshal the object to JSON.
+  #
+  # method used for JSON marshalling support.
+  #
+  def as_json: (*untyped) -> Hash[String, String | Array[A]]
+
+  # return the JSON value
+  #
+  def to_json: (?JSON::State state) -> String
+end
+
+class Struct[Elem]
+  # Deserializes JSON string by constructing new Struct object with values `v`
+  # serialized by `to_json`.
+  #
+  def self.json_create: (Hash[String, String | Array[Elem]] object) -> instance
+
+  # Returns a hash, that will be turned into a JSON object and represent this
+  # object.
+  #
+  def as_json: (*untyped) -> Hash[String, String | Array[Elem]]
+
+  # Stores class name (Struct) with Struct values `v` as a JSON string. Only named
+  # structs are supported.
+  #
+  def to_json: (?JSON::State state) -> String
+end
+
+class Symbol
+  # Deserializes JSON string by converting the `string` value stored in the object
+  # to a Symbol
+  #
+  def self.json_create: (Hash[String, String] object) -> instance
+
+  # Returns a hash, that will be turned into a JSON object and represent this
+  # object.
+  #
+  def as_json: (*untyped) -> Hash[String, String]
+
+  # Stores class name (Symbol) with String representation of Symbol as a JSON
+  # string.
+  #
+  def to_json: (?JSON::State state) -> String
+end
+
+class Time
+  # Deserializes JSON string by converting time since epoch to Time
+  #
+  def self.json_create: (Hash[String, String | Integer] object) -> instance
+
+  # Returns a hash, that will be turned into a JSON object and represent this
+  # object.
+  #
+  def as_json: (*untyped) -> Hash[String, String | Integer]
+
+  # Stores class name (Time) with number of seconds since epoch and number of
+  # microseconds for Time as JSON string
+  #
+  def to_json: (?JSON::State state) -> String
+end
