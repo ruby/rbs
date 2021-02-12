@@ -87,6 +87,8 @@ class StringInstanceTest < Test::Unit::TestCase
   def test_cmp
     assert_send_type "(String) -> Integer",
                      "abcdef", :<=>, "abcde"
+    assert_send_type "(ToStr) -> Integer",
+                     "abcdef", :<=>, ToStr.new('foo')
     assert_send_type "(Integer) -> nil",
                      "abcdef", :<=>, 1
   end

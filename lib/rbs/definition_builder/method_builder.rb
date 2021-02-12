@@ -96,15 +96,22 @@ module RBS
             type = Types::ClassInstance.new(name: type_name, args: args, location: nil)
             Methods.new(type: type).tap do |methods|
               entry.decls.each do |d|
+                subst = Substitution.build(d.decl.type_params.each.map(&:name), args)
                 each_member_with_accessibility(d.decl.members) do |member, accessibility|
                   case member
                   when AST::Members::MethodDefinition
                     if member.instance?
-                      build_method(methods, type, member: member, accessibility: accessibility)
+                      build_method(methods,
+                                   type,
+                                   member: member.update(types: member.types.map {|type| type.sub(subst) }),
+                                   accessibility: accessibility)
                     end
                   when AST::Members::AttrReader, AST::Members::AttrWriter, AST::Members::AttrAccessor
                     if member.kind == :instance
-                      build_attribute(methods, type, member: member, accessibility: accessibility)
+                      build_attribute(methods,
+                                      type,
+                                      member: member.update(type: member.type.sub(subst)),
+                                      accessibility: accessibility)
                     end
                   when AST::Members::Alias
                     if member.kind == :instance

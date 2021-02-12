@@ -809,7 +809,6 @@ class ArrayInstanceTest < Test::Unit::TestCase
     assert_send_type "() { (Integer, Integer) -> Integer } -> Array[Integer]",
                      [1,2,3], :sort do |a, b| b <=> a end
 
-    # returning nil from block type checks but causes an error
     refute_send_type "() { (Integer, Integer) -> nil } -> Array[Integer]",
                      [1,2,3], :sort do end
   end
@@ -821,7 +820,6 @@ class ArrayInstanceTest < Test::Unit::TestCase
     assert_send_type "() { (Integer, Integer) -> Integer } -> Array[Integer]",
                      [1,2,3], :sort! do |a, b| b <=> a end
 
-    # returning nil from block type checks but causes an error
     refute_send_type "() { (Integer, Integer) -> nil } -> Array[Integer]",
                      [1,2,3], :sort! do end
   end

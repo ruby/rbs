@@ -321,7 +321,7 @@ class BigDecimal < Numeric
 
   # The comparison operator. a <=> b is 0 if a == b, 1 if a > b, -1 if a < b.
   #
-  def <=>: (Numeric) -> Integer?
+  def <=>: (untyped) -> Integer?
 
   # Tests for value equality; returns true if the values are equal.
   #

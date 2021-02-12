@@ -2,6 +2,41 @@
 
 ## master
 
+## 1.0.4 (2021-01-31)
+
+* Unbundle `rr` to run test in `ruby/ruby` repo ([#585](https://github.com/ruby/rbs/pull/585))
+
+## 1.0.3 (2021-01-28)
+
+* Set up `#ancestors` and `#location` of `RecursiveAncestorError` ([#583](https://github.com/ruby/rbs/pull/583))
+
+## 1.0.2 (2021-01-28)
+
+* Signature Updates
+  * Kernel([#582](https://github.com/ruby/rbs/pull/582))
+
+## 1.0.1 (2021-01-27)
+
+* Signature Updates
+  * PrettyPrint ([\#573](https://github.com/ruby/rbs/pull/573))
+  * FileUtils ([\#576](https://github.com/ruby/rbs/pull/576))
+  * UnboundMethod ([\#555](https://github.com/ruby/rbs/pull/555))
+  * IO ([\#571](https://github.com/ruby/rbs/pull/571))
+  * Kernel ([\#549](https://github.com/ruby/rbs/pull/549), [\#569](https://github.com/ruby/rbs/pull/569))
+  * File ([\#552](https://github.com/ruby/rbs/pull/552))
+  * Data is removed ([\#570](https://github.com/ruby/rbs/pull/570))
+  * Module ([\#568](https://github.com/ruby/rbs/pull/568))
+  * Object ([\#557](https://github.com/ruby/rbs/pull/557))
+* Renew test sample code ([#581](https://github.com/ruby/rbs/pull/581))
+* Add description to `generate:stdlib_test` Rake task ([\#578](https://github.com/ruby/rbs/pull/578))
+* Declare supported ruby version >= 2.6 ([\#548](https://github.com/ruby/rbs/pull/548))
+* Fix module self-type override ([\#577](https://github.com/ruby/rbs/pull/577))
+* Fix parser to support all operator symbols ([\#550](https://github.com/ruby/rbs/pull/550))
+* Migrate from Minitest to Test::Unit ([\#556](https://github.com/ruby/rbs/pull/556))
+* Fix type alias parsing ([\#565](https://github.com/ruby/rbs/pull/565))
+* Support end-less method definition in `prototype rb` ([\#561](https://github.com/ruby/rbs/pull/561))
+* Support method argument forwarding in `prototype rb` ([\#560](https://github.com/ruby/rbs/pull/560))
+
 ## 1.0.0 (2020-12-24)
 
 * Signature updates for `URI`, `IO`, `File`, `Pathname`, `Module`, and `Time` ([#529](https://github.com/ruby/rbs/pull/529), [#521](https://github.com/ruby/rbs/pull/521), [#520](https://github.com/ruby/rbs/pull/520), [#511](https://github.com/ruby/rbs/pull/511), [#517](https://github.com/ruby/rbs/pull/517), [#542](https://github.com/ruby/rbs/pull/542), [#546](https://github.com/ruby/rbs/pull/546), [#540](https://github.com/ruby/rbs/pull/540), [#538](https://github.com/ruby/rbs/pull/538))
