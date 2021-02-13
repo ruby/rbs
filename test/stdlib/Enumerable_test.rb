@@ -52,6 +52,11 @@ class EnumerableTest < StdlibTest
     enumerable.chain([4, 5])
   end
 
+  def test_take
+    enumerable.take(10)
+    enumerable.take(0)
+  end
+
   if Enumerable.public_method_defined?(:tally)
     def test_tally
       enumerable.tally

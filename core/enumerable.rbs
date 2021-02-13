@@ -286,8 +286,22 @@ module Enumerable[unchecked out Elem]: _Each[Elem]
   def sort_by: () { (Elem arg0) -> (Comparable | ::Array[untyped]) } -> ::Array[Elem]
              | () -> ::Enumerator[Elem, ::Array[Elem]]
 
-  def take: (Integer n) -> ::Array[Elem]?
+  # Returns first n elements from *enum*.
+  #
+  #     a = [1, 2, 3, 4, 5, 0]
+  #     a.take(3)             #=> [1, 2, 3]
+  #     a.take(30)            #=> [1, 2, 3, 4, 5, 0]
+  #
+  def take: (Integer n) -> ::Array[Elem]
 
+  # Passes elements to the block until the block returns `nil` or `false`, then
+  # stops iterating and returns an array of all prior elements.
+  #
+  # If no block is given, an enumerator is returned instead.
+  #
+  #     a = [1, 2, 3, 4, 5, 0]
+  #     a.take_while { |i| i < 3 }   #=> [1, 2]
+  #
   def take_while: () { (Elem) -> boolish } -> ::Array[Elem]
                 | () -> ::Enumerator[Elem, ::Array[Elem]]
 
