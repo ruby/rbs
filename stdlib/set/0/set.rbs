@@ -299,3 +299,10 @@ class Set[A]
 
   include Enumerable[A]
 end
+
+module Enumerable[unchecked out Elem]
+  # Makes a set from the enumerable object with given arguments.
+  # Needs to `require "set"` to use this method.
+  #
+  def to_set: () -> Set[Elem]
+end
