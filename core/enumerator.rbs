@@ -244,6 +244,8 @@ end
 
 class Enumerator::Generator[out Elem] < Object
   include Enumerable[Elem]
+
+  def each: () { (Elem) -> void } -> void
 end
 
 class Enumerator::Lazy[out Elem, out Return] < Enumerator[Elem, Return]
@@ -259,4 +261,6 @@ end
 
 class Enumerator::Chain[out Elem] < Object
   include Enumerable[Elem]
+
+  def each: () { (Elem) -> void } -> void
 end
