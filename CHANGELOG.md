@@ -2,6 +2,12 @@
 
 ## master
 
+## 1.0.6 (2021-02-17)
+
+* Signature Updates
+  * `Enumerable` ([\#595](https://github.com/ruby/rbs/pull/595), [\#596](https://github.com/ruby/rbs/pull/596), [\#601](https://github.com/ruby/rbs/pull/601))
+  * `#as_json` ([\#597](https://github.com/ruby/rbs/pull/597))
+
 ## 1.0.5 (2021-02-13)
 
 * Signature Updates
