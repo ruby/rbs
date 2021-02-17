@@ -360,7 +360,8 @@ class CGI
   #       # {"name1" => ["value1", "value2", ...],
   #       #  "name2" => ["value1", "value2", ...], ... }
   #
-  def self.parse: [T] (String query) -> Hash[String, T]
+  def self.parse: (String query) -> Hash[String, String | Array[String]]   # Give precise type.
+  def self.parse: (String query) -> Hash[String, untyped]                  # This would be enough.
 
   public
 
