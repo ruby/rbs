@@ -550,7 +550,8 @@ class CGI
   #        #
   #        # string
   #
-  def out: (?String options) { () -> void } -> void
+  def out: (?String content_type_string) { () -> String } -> void
+         | (Hash[String | Symbol, untyped] headers_hash) { () -> String } -> void
            | [T] (?Hash[String | Symbol, T]) { () -> void } -> void
 
   # Print an argument or list of arguments to the default output stream
