@@ -3,6 +3,7 @@ require "rake/testtask"
 require "rbconfig"
 
 ruby = ENV["RUBY"] || RbConfig.ruby
+racc = ENV.fetch("RACC", "racc")
 rbs = File.join(__dir__, "exe/rbs")
 bin = File.join(__dir__, "bin")
 
@@ -67,7 +68,7 @@ task :rubocop do
 end
 
 rule ".rb" => ".y" do |t|
-  sh "racc -v -o #{t.name} #{t.source}"
+  sh "#{racc} -v -o #{t.name} #{t.source}"
 end
 
 task :parser => "lib/rbs/parser.rb"
@@ -77,7 +78,7 @@ task :build => :parser
 
 task :confirm_parser do
   puts "Testing if parser.rb is updated with respect to parser.y"
-  sh "racc -v -o lib/rbs/parser.rb lib/rbs/parser.y"
+  sh "#{racc} -v -o lib/rbs/parser.rb lib/rbs/parser.y"
   sh "git diff --exit-code lib/rbs/parser.rb"
 end
 
