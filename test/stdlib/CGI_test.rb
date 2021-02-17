@@ -9,15 +9,15 @@ class CGISingletonTest < Test::Unit::TestCase
 
   def test_new
     ARGV.replace(%w(abc=001 def=002))
-    assert_send_type  "() -> ::CGI",
+    assert_send_type  "() -> void",
                       CGI, :new
-    assert_send_type  "(?::String options) -> ::CGI",
+    assert_send_type  "(?::String options) -> void",
                       CGI, :new, 'html3'
-    assert_send_type  "[T] (?::String options) ?{ (::String name, ::String value) -> T } -> ::CGI",
+    assert_send_type  "(?::String options) ?{ (::String name, ::String value) -> void } -> void",
                       CGI, :new, 'html3' do |name, value| name + value end
-    assert_send_type  "[T, U] (?::Hash[::Symbol, T]) -> ::CGI",
+    assert_send_type  "(::Hash[::Symbol, untyped] options_hash) -> void",
                       CGI, :new, { tag_maker: 'html5', max_multipart_length: 2048 }
-    assert_send_type  "[T, U] (?::Hash[::Symbol, T]) ?{ (::String name, ::String value) -> U } -> ::CGI",
+    assert_send_type  "(::Hash[::Symbol, untyped] options_hash) ?{ (::String name, ::String value) -> void } -> void",
                       CGI, :new, { tag_maker: 'html5', max_multipart_length: 2048 } do |name, value| name + value end
   end
 
@@ -32,7 +32,7 @@ class CGISingletonTest < Test::Unit::TestCase
   end
 
   def test_parse
-    assert_send_type  "[T] (::String query) -> ::Hash[::String, T]",
+    assert_send_type  "(::String query) -> ::Hash[::String, String | Array[String]]",
                       CGI, :parse, 'a=hoge&b=1&c[]=test1&c[]=test2'
   end
 end
@@ -57,9 +57,9 @@ class CGITest < Test::Unit::TestCase
                       CGI.new, :http_header
     assert_send_type  "(::String options) -> ::String",
                       CGI.new, :http_header, 'text/csv'
-    assert_send_type  "[T] (::Hash[::String, T]) -> ::String",
+    assert_send_type  "(::Hash[::String, untyped] header_hash) -> ::String",
                       CGI.new, :http_header, { 'type' => 'text/csv', 'nph' => false, 'length' => 1024 }
-    assert_send_type  "[T] (::Hash[::Symbol, T]) -> ::String",
+    assert_send_type  "(::Hash[::Symbol, untyped] header_hash) -> ::String",
                       CGI.new, :http_header, { type: 'text/csv', nph: false, length: 1024 }
   end
 
@@ -68,9 +68,9 @@ class CGITest < Test::Unit::TestCase
                       CGI.new, :header
     assert_send_type  "(::String options) -> ::String",
                       CGI.new, :header, 'text/csv'
-    assert_send_type  "[T] (::Hash[::String, T]) -> ::String",
+    assert_send_type  "(::Hash[::String, untyped] header_hash) -> ::String",
                       CGI.new, :header, { 'type' => 'text/csv', 'nph' => false, 'length' => 1024 }
-    assert_send_type  "[T] (::Hash[::Symbol, T]) -> ::String",
+    assert_send_type  "(::Hash[::Symbol, untyped] header_hash) -> ::String",
                       CGI.new, :header, { type: 'text/csv', nph: false, length: 1024 }
   end
 
@@ -82,11 +82,11 @@ class CGITest < Test::Unit::TestCase
   def test_out
     assert_send_type  "() { () -> void } -> void",
                       CGI.new, :out do '' end
-    assert_send_type  "(::String options) { () -> void } -> void",
+    assert_send_type  "(::String content_type_string) { () -> String } -> void",
                       CGI.new, :out, 'text/csv' do '' end
-    assert_send_type  "[T] (::Hash[::String, T]) { () -> void } -> void",
+    assert_send_type  "(::Hash[::String, untyped] header_hash) { () -> String } -> void",
                       CGI.new, :out, { 'type' => 'text/csv', 'nph' => false, 'length' => 1024 } do '' end
-    assert_send_type  "[T] (::Hash[::String | ::Symbol, T]) { () -> void } -> void",
+    assert_send_type  "(::Hash[::String | ::Symbol, untyped] header_hash) { () -> String } -> void",
                       CGI.new, :out, { type: 'text/csv' } do '' end
   end
 
