@@ -342,7 +342,6 @@ class CGI
   #
   def initialize: (?String tag_maker) ?{ (String name, String value) -> void } -> void
                 | (Hash[Symbol, untyped] options_hash) ?{ (String name, String value) -> void } -> void
-                  | [T, U] (?Hash[Symbol, T]) ?{ (String name, String value) -> U } -> CGI
 
   attr_reader accept_charset: String
 
@@ -360,8 +359,7 @@ class CGI
   #       # {"name1" => ["value1", "value2", ...],
   #       #  "name2" => ["value1", "value2", ...], ... }
   #
-  def self.parse: (String query) -> Hash[String, String | Array[String]]   # Give precise type.
-  def self.parse: (String query) -> Hash[String, untyped]                  # This would be enough.
+  def self.parse: (String query) -> Hash[String, String | Array[String]]
 
   public
 
@@ -485,7 +483,7 @@ class CGI
   # This method does not perform charset conversion.
   #
   def http_header: (?String options) -> String
-                   | (?Hash[String | Symbol, untyped] header_hash) -> String
+                 | (?Hash[String | Symbol, untyped] header_hash) -> String
 
   def nph?: () -> boolish
 
@@ -552,7 +550,6 @@ class CGI
   #
   def out: (?String content_type_string) { () -> String } -> void
          | (Hash[String | Symbol, untyped] headers_hash) { () -> String } -> void
-           | [T] (?Hash[String | Symbol, T]) { () -> void } -> void
 
   # Print an argument or list of arguments to the default output stream
   #
