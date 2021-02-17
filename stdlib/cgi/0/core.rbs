@@ -485,7 +485,7 @@ class CGI
   # This method does not perform charset conversion.
   #
   def http_header: (?String options) -> String
-                   | [T] (?Hash[String | Symbol, T]) -> String
+                   | (?Hash[String | Symbol, untyped] header_hash) -> String
 
   def nph?: () -> boolish
 
