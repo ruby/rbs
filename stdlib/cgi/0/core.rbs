@@ -340,7 +340,8 @@ class CGI
   # parameters are parsed automatically from the standard CGI locations, which
   # varies according to the REQUEST_METHOD.
   #
-  def initialize: [T] (?String options) ?{ (String name, String value) -> T } -> CGI
+  def initialize: (?String tag_maker) ?{ (String name, String value) -> void } -> void
+                | (Hash[Symbol, untyped] options_hash) ?{ (String name, String value) -> void } -> void
                   | [T, U] (?Hash[Symbol, T]) ?{ (String name, String value) -> U } -> CGI
 
   attr_reader accept_charset: String
