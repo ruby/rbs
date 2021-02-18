@@ -324,9 +324,10 @@ module RBS
 
     class Block
       attr_reader type: Types::Function
+      attr_reader block: Types::Block?
       attr_reader required: bool
 
-      def initialize: (type: Types::Function, required: boolish) -> void
+      def initialize: (type: Types::Function, block: Types::Block?, required: boolish) -> void
 
       def ==: (untyped other) -> bool
 
