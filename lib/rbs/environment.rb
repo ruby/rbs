@@ -1,6 +1,5 @@
 module RBS
   class Environment
-    attr_reader :buffers
     attr_reader :declarations
 
     attr_reader :class_decls
@@ -431,8 +430,24 @@ module RBS
     end
 
     def inspect
-      ivars = %i[@buffers @declarations @class_decls @interface_decls @alias_decls @constant_decls @global_decls]
+      ivars = %i[@declarations @class_decls @interface_decls @alias_decls @constant_decls @global_decls]
       "\#<RBS::Environment #{ivars.map { |iv| "#{iv}=(#{instance_variable_get(iv).size} items)"}.join(' ')}>"
+    end
+
+    def buffers
+      buffers_decls.keys.compact
+    end
+
+    def buffers_decls
+      # @type var hash: Hash[Buffer, Array[AST::Declarations::t]]
+      hash = {}
+
+      declarations.each do |decl|
+        location = decl.location or next
+        (hash[location.buffer] ||= []) << decl
+      end
+
+      hash
     end
   end
 end

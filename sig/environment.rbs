@@ -58,7 +58,6 @@ module RBS
       def initialize: (name: N, decl: D, outer: Array[module_decl]) -> void
     end
 
-    attr_reader buffers: Array[Buffer]
     attr_reader declarations: Array[AST::Declarations::t]
 
     attr_reader class_decls: Hash[TypeName, ModuleEntry | ClassEntry]
@@ -90,5 +89,9 @@ module RBS
     def absolute_type_name: (TypeNameResolver, TypeName, context: Array[Namespace]) -> TypeName
 
     def inspect: () -> String
+
+    def buffers: () -> Array[Buffer]
+
+    def buffers_decls: () -> Hash[Buffer, Array[AST::Declarations::t]]
   end
 end
