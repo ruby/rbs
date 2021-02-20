@@ -42,5 +42,7 @@ module RBS
     def insert_variable: (TypeName, Hash[Symbol, Definition::Variable], name: Symbol, type: Types::t) -> void
 
     def define_methods: (Definition, interface_methods: Hash[Symbol, Definition::Method], methods: MethodBuilder::Methods, super_interface_method: bool) -> void
+
+    def expand_alias: (TypeName) -> Types::t
   end
 end
