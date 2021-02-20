@@ -93,5 +93,10 @@ module RBS
     def buffers: () -> Array[Buffer]
 
     def buffers_decls: () -> Hash[Buffer, Array[AST::Declarations::t]]
+
+    # Construct new environment without declarations tested `true` by block.
+    # Construction of new environment is done with `<<` so that nested declarations will work well.
+    # 
+    def reject: () { (AST::Declarations::t) -> boolish } -> Environment
   end
 end

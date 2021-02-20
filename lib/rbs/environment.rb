@@ -449,5 +449,17 @@ module RBS
 
       hash
     end
+
+    def reject
+      env = Environment.new
+
+      declarations.each do |decl|
+        unless yield(decl)
+          env << decl
+        end
+      end
+
+      env
+    end
   end
 end
