@@ -760,8 +760,8 @@ rule
         location = val[0].location + val[1].location
         result = Types::Tuple.new(types: [], location: location)
       }
-    | kLBRACKET type_list kRBRACKET {
-        location = val[0].location + val[2].location
+    | kLBRACKET type_list comma_opt kRBRACKET {
+        location = val[0].location + val[3].location
         types = val[1]
         result = Types::Tuple.new(types: types, location: location)
       }
@@ -794,10 +794,10 @@ rule
       }
 
   record_type:
-      kLBRACE record_fields kRBRACE {
+      kLBRACE record_fields comma_opt kRBRACE {
         result = Types::Record.new(
           fields: val[1],
-          location: val[0].location + val[2].location
+          location: val[0].location + val[3].location
         )
       }
 
@@ -805,7 +805,7 @@ rule
       record_field {
         result = val[0]
       }
-    | record_field kCOMMA record_fields {
+    | record_fields kCOMMA record_field {
         result = val[0].merge!(val[2])
       }
 
@@ -1062,6 +1062,10 @@ rule
         namespace = Namespace.parse(val[0].value)
         result = LocatedValue.new(value: namespace, location: val[0].location)
       }
+
+  comma_opt:
+      kCOMMA | # empty
+
 end
 
 ---- inner
