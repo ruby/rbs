@@ -80,6 +80,7 @@ module RBS
                      when AST::Members::Alias
                        unless definition.methods.key?(original.old_name)
                          raise UnknownMethodAliasError.new(
+                           type_name: type_name,
                            original_name: original.old_name,
                            aliased_name: original.new_name,
                            location: original.location
@@ -561,6 +562,7 @@ module RBS
 
           unless original_method
             raise UnknownMethodAliasError.new(
+              type_name: definition.type_name,
               original_name: original.old_name,
               aliased_name: original.new_name,
               location: original.location
