@@ -11,7 +11,27 @@ module RBS
     def method_name_string: () -> String
   end
 
-  class InvalidTypeApplicationError < StandardError
+  # Error class for errors defined in RBS.
+  #
+  class BaseError < StandardError
+  end
+
+  # Error class for errors raised during parsing.
+  #
+  class ParsingError < BaseError
+  end
+
+  # Error class for errors raised during loading environments.
+  #
+  class LoadingError < BaseError
+  end
+
+  # Error class for errors raised during building definitions.
+  #
+  class DefinitionError < BaseError
+  end
+
+  class InvalidTypeApplicationError < DefinitionError
     attr_reader type_name: TypeName
     attr_reader args: Array[Types::t]
     attr_reader params: Array[Symbol]
@@ -22,16 +42,16 @@ module RBS
     def self.check!: (type_name: TypeName, args: Array[Types::t], params: Array[Symbol], location: Location?) -> void
   end
 
-  class RecursiveAncestorError < StandardError
+  class RecursiveAncestorError < DefinitionError
     attr_reader ancestors: Array[Definition::Ancestor::t]
-    attr_reader location: Location
+    attr_reader location: Location?
 
     def initialize: (ancestors: Array[Definition::Ancestor::t], location: Location?) -> void
 
     def self.check!: (Definition::Ancestor::t, ancestors: Array[Definition::Ancestor::t], location: Location?) -> void
   end
 
-  class NoTypeFoundError < StandardError
+  class NoTypeFoundError < DefinitionError
     attr_reader type_name: TypeName
     attr_reader location: Location?
 
@@ -40,7 +60,7 @@ module RBS
     def self.check!: (TypeName, env: Environment, location: Location?) -> TypeName
   end
 
-  class NoSuperclassFoundError < StandardError
+  class NoSuperclassFoundError < DefinitionError
     attr_reader type_name: TypeName
     attr_reader location: Location?
 
@@ -49,7 +69,7 @@ module RBS
     def self.check!: (TypeName, env: Environment, location: Location?) -> void
   end
 
-  class NoSelfTypeFoundError < StandardError
+  class NoSelfTypeFoundError < DefinitionError
     attr_reader type_name: TypeName
     attr_reader location: Location?
 
@@ -58,7 +78,7 @@ module RBS
     def self.check!: (AST::Declarations::Module::Self, env: Environment) -> void
   end
 
-  class NoMixinFoundError < StandardError
+  class NoMixinFoundError < DefinitionError
     attr_reader type_name: TypeName
     attr_reader member: AST::Members::t
 
@@ -69,7 +89,7 @@ module RBS
     def self.check!: (TypeName, env: Environment, member: AST::Members::t) -> void
   end
 
-  class DuplicatedMethodDefinitionError < StandardError
+  class DuplicatedMethodDefinitionError < DefinitionError
     type ty = Types::ClassSingleton | Types::ClassInstance | Types::Interface
     type original = DefinitionBuilder::MethodBuilder::Methods::Definition::original
 
@@ -86,7 +106,7 @@ module RBS
     def other_locations: () -> Array[Location?]
   end
 
-  class DuplicatedInterfaceMethodDefinitionError < StandardError
+  class DuplicatedInterfaceMethodDefinitionError < DefinitionError
     type ty = Types::ClassSingleton | Types::ClassInstance | Types::Interface
     type mixin_member = AST::Members::Include | AST::Members::Extend
 
@@ -99,7 +119,7 @@ module RBS
     def qualified_method_name: () -> String
   end
 
-  class UnknownMethodAliasError < StandardError
+  class UnknownMethodAliasError < DefinitionError
     attr_reader original_name: Symbol
     attr_reader aliased_name: Symbol
     attr_reader location: Location?
@@ -107,14 +127,14 @@ module RBS
     def initialize: (original_name: Symbol, aliased_name: Symbol, location: Location?) -> void
   end
 
-  class SuperclassMismatchError < StandardError
+  class SuperclassMismatchError < DefinitionError
     attr_reader name: TypeName
     attr_reader entry: Environment::ClassEntry
 
     def initialize: (name: TypeName, entry: Environment::ClassEntry) -> void
   end
 
-  class InvalidOverloadMethodError < StandardError
+  class InvalidOverloadMethodError < DefinitionError
     attr_reader type_name: TypeName
     attr_reader method_name: Symbol
     attr_reader kind: :instance | :singleton
@@ -123,21 +143,21 @@ module RBS
     def initialize: (type_name: TypeName, method_name: Symbol, kind: :instance | :singleton, members: Array[AST::Members::MethodDefinition]) -> void
   end
 
-  class GenericParameterMismatchError < StandardError
+  class GenericParameterMismatchError < LoadingError
     attr_reader name: TypeName
     attr_reader decl: AST::Declarations::Class | AST::Declarations::Module
 
     def initialize: (name: TypeName, decl: AST::Declarations::Class | AST::Declarations::Module) -> void
   end
 
-  class DuplicatedDeclarationError < StandardError
+  class DuplicatedDeclarationError < LoadingError
     attr_reader name: TypeName | Symbol
     attr_reader decls: Array[AST::Declarations::t]
 
     def initialize: (TypeName | Symbol, *AST::Declarations::t) -> void
   end
 
-  class InvalidVarianceAnnotationError < StandardError
+  class InvalidVarianceAnnotationError < DefinitionError
     attr_reader type_name: TypeName
     attr_reader param: AST::Declarations::ModuleTypeParams::TypeParam
     attr_reader location: Location?
@@ -145,7 +165,7 @@ module RBS
     def initialize: (type_name: TypeName, param: AST::Declarations::ModuleTypeParams::TypeParam, location: Location?) -> void
   end
 
-  class RecursiveAliasDefinitionError < StandardError
+  class RecursiveAliasDefinitionError < DefinitionError
     type ty = Types::ClassInstance | Types::ClassSingleton | Types::Interface
     type defn = DefinitionBuilder::MethodBuilder::Methods::Definition
 
