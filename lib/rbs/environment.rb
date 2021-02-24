@@ -168,7 +168,7 @@ module RBS
           # @type var decl: AST::Declarations::Class
           existing_entry.insert(decl: decl, outer: outer)
         else
-          raise DuplicatedDeclarationError.new(name, decl, existing_entry.primary.decl)
+          raise DuplicatedDeclarationError.new(name, decl, existing_entry.decls[0].decl)
         end
 
         prefix = outer + [decl]
@@ -201,6 +201,12 @@ module RBS
       declarations << decl
       insert_decl(decl, outer: [], namespace: Namespace.root)
       self
+    end
+
+    def validate_type_params
+      class_decls.each_value do |decl|
+        decl.primary
+      end
     end
 
     def resolve_type_names

@@ -58,6 +58,7 @@ module RBS
       def initialize: (name: N, decl: D, outer: Array[module_decl]) -> void
     end
 
+    # Top level declarations.
     attr_reader declarations: Array[AST::Declarations::t]
 
     attr_reader class_decls: Hash[TypeName, ModuleEntry | ClassEntry]
@@ -76,7 +77,12 @@ module RBS
 
     def insert_decl: (AST::Declarations::t, outer: Array[module_decl], namespace: Namespace) -> void
 
+    # Insert a toplevel declaration into the env.
+    #
     def <<: (AST::Declarations::t decl) -> self
+
+    # Runs generics type params validation over each class definitions.
+    def validate_type_params: () -> void
 
     def resolve_type_names: () -> Environment
 
@@ -96,7 +102,7 @@ module RBS
 
     # Construct new environment without declarations tested `true` by block.
     # Construction of new environment is done with `<<` so that nested declarations will work well.
-    # 
+    #
     def reject: () { (AST::Declarations::t) -> boolish } -> Environment
   end
 end

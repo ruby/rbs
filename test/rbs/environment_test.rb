@@ -160,11 +160,14 @@ module Foo[X, in Y]      # Variance mismatch
 end
 EOF
 
-    # The GenericParameterMismatchError raises on #type_params call
     env << decls[0]
     env << decls[1]
     env << decls[2]
     env << decls[3]
+
+    assert_raises RBS::GenericParameterMismatchError do
+      env.validate_type_params()
+    end
   end
 
   def test_generic_class_error
