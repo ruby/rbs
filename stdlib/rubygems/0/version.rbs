@@ -1,0 +1,3 @@
+class Gem::Version
+  # TODO: Add sinatures...
+end

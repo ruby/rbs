@@ -27,10 +27,10 @@ jobs:
       run: |
         apt-get update
         apt-get install -y libdb-dev
-    - name: Install bundler
+    - name: Update rubygems & bundler
       run: |
         ruby -v
-        gem install bundler
+        gem update --system
     - name: bundle config set with
       run: |
         echo "NO_MINITEST=true" >> $GITHUB_ENV
