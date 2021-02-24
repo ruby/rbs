@@ -14,7 +14,12 @@ module RBS
     end
   end
 
-  class InvalidTypeApplicationError < StandardError
+  class ErrorBase < StandardError; end
+  class ParsingError < ErrorBase; end
+  class LoadingError < ErrorBase; end
+  class DefinitionError < ErrorBase; end
+
+  class InvalidTypeApplicationError < DefinitionError
     attr_reader :type_name
     attr_reader :args
     attr_reader :params
@@ -35,7 +40,7 @@ module RBS
     end
   end
 
-  class RecursiveAncestorError < StandardError
+  class RecursiveAncestorError < DefinitionError
     attr_reader :ancestors
     attr_reader :location
 
@@ -73,7 +78,7 @@ module RBS
     end
   end
 
-  class NoTypeFoundError < StandardError
+  class NoTypeFoundError < ErrorBase
     attr_reader :type_name
     attr_reader :location
 
@@ -102,7 +107,7 @@ module RBS
     end
   end
 
-  class NoSuperclassFoundError < StandardError
+  class NoSuperclassFoundError < DefinitionError
     attr_reader :type_name
     attr_reader :location
 
@@ -118,7 +123,7 @@ module RBS
     end
   end
 
-  class NoSelfTypeFoundError < StandardError
+  class NoSelfTypeFoundError < DefinitionError
     attr_reader :type_name
     attr_reader :location
 
@@ -145,7 +150,7 @@ module RBS
     end
   end
 
-  class NoMixinFoundError < StandardError
+  class NoMixinFoundError < DefinitionError
     attr_reader :type_name
     attr_reader :member
 
@@ -174,7 +179,7 @@ module RBS
     end
   end
 
-  class DuplicatedMethodDefinitionError < StandardError
+  class DuplicatedMethodDefinitionError < DefinitionError
     attr_reader :type
     attr_reader :method_name
     attr_reader :members
@@ -209,7 +214,7 @@ module RBS
     end
   end
 
-  class DuplicatedInterfaceMethodDefinitionError < StandardError
+  class DuplicatedInterfaceMethodDefinitionError < DefinitionError
     attr_reader :type
     attr_reader :method_name
     attr_reader :member
@@ -232,7 +237,7 @@ module RBS
     end
   end
 
-  class UnknownMethodAliasError < StandardError
+  class UnknownMethodAliasError < DefinitionError
     attr_reader :original_name
     attr_reader :aliased_name
     attr_reader :location
@@ -246,7 +251,7 @@ module RBS
     end
   end
 
-  class SuperclassMismatchError < StandardError
+  class SuperclassMismatchError < DefinitionError
     attr_reader :name
     attr_reader :entry
 
@@ -257,7 +262,7 @@ module RBS
     end
   end
 
-  class InvalidOverloadMethodError < StandardError
+  class InvalidOverloadMethodError < DefinitionError
     attr_reader :type_name
     attr_reader :method_name
     attr_reader :kind
@@ -280,7 +285,7 @@ module RBS
     end
   end
 
-  class GenericParameterMismatchError < StandardError
+  class GenericParameterMismatchError < LoadingError
     attr_reader :name
     attr_reader :decl
 
@@ -291,7 +296,7 @@ module RBS
     end
   end
 
-  class DuplicatedDeclarationError < StandardError
+  class DuplicatedDeclarationError < LoadingError
     attr_reader :name
     attr_reader :decls
 
@@ -304,7 +309,7 @@ module RBS
     end
   end
 
-  class InvalidVarianceAnnotationError < StandardError
+  class InvalidVarianceAnnotationError < DefinitionError
     attr_reader :type_name
     attr_reader :param
     attr_reader :location
@@ -318,7 +323,7 @@ module RBS
     end
   end
 
-  class RecursiveAliasDefinitionError < StandardError
+  class RecursiveAliasDefinitionError < DefinitionError
     attr_reader :type
     attr_reader :defs
 

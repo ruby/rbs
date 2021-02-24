@@ -1,6 +1,5 @@
 module RBS
   class Environment
-    attr_reader :buffers
     attr_reader :declarations
 
     attr_reader :class_decls
@@ -169,7 +168,7 @@ module RBS
           # @type var decl: AST::Declarations::Class
           existing_entry.insert(decl: decl, outer: outer)
         else
-          raise DuplicatedDeclarationError.new(name, decl, existing_entry.primary.decl)
+          raise DuplicatedDeclarationError.new(name, decl, existing_entry.decls[0].decl)
         end
 
         prefix = outer + [decl]
@@ -202,6 +201,12 @@ module RBS
       declarations << decl
       insert_decl(decl, outer: [], namespace: Namespace.root)
       self
+    end
+
+    def validate_type_params
+      class_decls.each_value do |decl|
+        decl.primary
+      end
     end
 
     def resolve_type_names
@@ -431,8 +436,36 @@ module RBS
     end
 
     def inspect
-      ivars = %i[@buffers @declarations @class_decls @interface_decls @alias_decls @constant_decls @global_decls]
+      ivars = %i[@declarations @class_decls @interface_decls @alias_decls @constant_decls @global_decls]
       "\#<RBS::Environment #{ivars.map { |iv| "#{iv}=(#{instance_variable_get(iv).size} items)"}.join(' ')}>"
+    end
+
+    def buffers
+      buffers_decls.keys.compact
+    end
+
+    def buffers_decls
+      # @type var hash: Hash[Buffer, Array[AST::Declarations::t]]
+      hash = {}
+
+      declarations.each do |decl|
+        location = decl.location or next
+        (hash[location.buffer] ||= []) << decl
+      end
+
+      hash
+    end
+
+    def reject
+      env = Environment.new
+
+      declarations.each do |decl|
+        unless yield(decl)
+          env << decl
+        end
+      end
+
+      env
     end
   end
 end

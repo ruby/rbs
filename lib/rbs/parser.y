@@ -1433,7 +1433,7 @@ def on_error(token_id, error_value, value_stack)
   raise SyntaxError.new(token_str: token_to_str(token_id), error_value: error_value, value_stack: value_stack)
 end
 
-class SyntaxError < StandardError
+class SyntaxError < ParsingError
   attr_reader :token_str, :error_value, :value_stack
 
   def initialize(token_str:, error_value:, value_stack: nil)
@@ -1445,7 +1445,7 @@ class SyntaxError < StandardError
   end
 end
 
-class SemanticsError < StandardError
+class SemanticsError < ParsingError
   attr_reader :subject, :location, :original_message
 
   def initialize(message, subject:, location:)

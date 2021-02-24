@@ -1,14 +1,14 @@
 module RBS
   class EnvironmentWalker
-    InstanceNode = Struct.new(:type_name, keyword_init: true)
-    SingletonNode = Struct.new(:type_name, keyword_init: true)
-    TypeNameNode = Struct.new(:type_name, keyword_init: true)
+    InstanceNode = _ = Struct.new(:type_name, keyword_init: true)
+    SingletonNode = _ = Struct.new(:type_name, keyword_init: true)
+    TypeNameNode = _ = Struct.new(:type_name, keyword_init: true)
 
     attr_reader :env
 
     def initialize(env:)
       @env = env
-      @only_ancestors = nil
+      @only_ancestors = false
     end
 
     def builder

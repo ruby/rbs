@@ -10,7 +10,7 @@ module RBS
     attr_reader singleton0_cache: Hash[TypeName, Definition | false | nil]
     attr_reader interface_cache: Hash[TypeName, Definition | false | nil]
 
-    def initialize: (env: Environment) -> void
+    def initialize: (env: Environment, ?ancestor_builder: AncestorBuilder?, ?method_builder: MethodBuilder?) -> void
 
     def validate_super_class!: (TypeName, Environment::ClassEntry) -> void
 
@@ -42,5 +42,9 @@ module RBS
     def insert_variable: (TypeName, Hash[Symbol, Definition::Variable], name: Symbol, type: Types::t) -> void
 
     def define_methods: (Definition, interface_methods: Hash[Symbol, Definition::Method], methods: MethodBuilder::Methods, super_interface_method: bool) -> void
+
+    def expand_alias: (TypeName) -> Types::t
+
+    def update: (env: Environment, ancestor_builder: AncestorBuilder, except: _Each[TypeName]) -> DefinitionBuilder
   end
 end

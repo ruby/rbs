@@ -219,6 +219,20 @@ module RBS
           end
         end
       end
+
+      def update(env:, except:)
+        MethodBuilder.new(env: env).tap do |copy|
+          copy.instance_methods.merge!(instance_methods)
+          copy.singleton_methods.merge!(singleton_methods)
+          copy.interface_methods.merge!(interface_methods)
+
+          except.each do |type_name|
+            copy.instance_methods.delete(type_name)
+            copy.singleton_methods.delete(type_name)
+            copy.interface_methods.delete(type_name)
+          end
+        end
+      end
     end
   end
 end

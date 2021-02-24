@@ -160,11 +160,14 @@ module Foo[X, in Y]      # Variance mismatch
 end
 EOF
 
-    # The GenericParameterMismatchError raises on #type_params call
     env << decls[0]
     env << decls[1]
     env << decls[2]
     env << decls[3]
+
+    assert_raises RBS::GenericParameterMismatchError do
+      env.validate_type_params()
+    end
   end
 
   def test_generic_class_error
@@ -383,5 +386,39 @@ end
 module ::Enumerable[A]
 end
 RBS
+  end
+
+  def test_reject
+    env = Environment.new
+
+    foo = RBS::Buffer.new(content: <<EOF, name: Pathname("foo.rbs"))
+class Hello < String
+  def hello: (String) -> Integer
+end
+EOF
+
+    RBS::Parser.parse_signature(foo).each do |decl|
+      env << decl
+    end
+
+    bar = RBS::Buffer.new(content: <<EOF, name: Pathname("bar.rbs"))
+class Hello
+  def world: () -> void
+end
+EOF
+
+    RBS::Parser.parse_signature(bar).each do |decl|
+      env << decl
+    end
+
+    assert env.buffers.any? {|buf| buf.name == Pathname("foo.rbs") }
+    assert env.buffers.any? {|buf| buf.name == Pathname("bar.rbs") }
+
+    env_ = env.reject do |decl|
+      decl.location.buffer.name == Pathname("foo.rbs")
+    end
+
+    assert env_.buffers.none? {|buf| buf.name == Pathname("foo.rbs") }
+    assert env_.buffers.any? {|buf| buf.name == Pathname("bar.rbs") }
   end
 end

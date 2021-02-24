@@ -40,6 +40,7 @@ require "rbs/vendorer"
 require "rbs/validator"
 require "rbs/factory"
 require "rbs/repository"
+require "rbs/ancestor_graph"
 
 begin
   require "rbs/parser"

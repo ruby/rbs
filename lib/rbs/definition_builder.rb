@@ -10,11 +10,11 @@ module RBS
     attr_reader :singleton0_cache
     attr_reader :interface_cache
 
-    def initialize(env:)
+    def initialize(env:, ancestor_builder: nil, method_builder: nil)
       @env = env
       @type_name_resolver = TypeNameResolver.from_env(env)
-      @ancestor_builder = AncestorBuilder.new(env: env)
-      @method_builder = MethodBuilder.new(env: env)
+      @ancestor_builder = ancestor_builder || AncestorBuilder.new(env: env)
+      @method_builder = method_builder || MethodBuilder.new(env: env)
 
       @instance_cache = {}
       @singleton_cache = {}
@@ -787,6 +787,25 @@ module RBS
       entry = env.alias_decls[type_name] or raise "Unknown name for expand_alias: #{type_name}"
       ensure_namespace!(type_name.namespace, location: entry.decl.location)
       entry.decl.type
+    end
+
+    def update(env:, except:, ancestor_builder:)
+      method_builder = self.method_builder.update(env: env, except: except)
+
+      DefinitionBuilder.new(env: env, ancestor_builder: ancestor_builder, method_builder: method_builder).tap do |builder|
+        builder.instance_cache.merge!(instance_cache)
+        builder.singleton_cache.merge!(singleton_cache)
+        builder.singleton0_cache.merge!(singleton0_cache)
+        builder.interface_cache.merge!(interface_cache)
+
+        except.each do |name|
+          builder.instance_cache.delete([name, true])
+          builder.instance_cache.delete([name, false])
+          builder.singleton_cache.delete(name)
+          builder.singleton0_cache.delete(name)
+          builder.interface_cache.delete(name)
+        end
+      end
     end
   end
 end
