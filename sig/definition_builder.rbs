@@ -10,7 +10,7 @@ module RBS
     attr_reader singleton0_cache: Hash[TypeName, Definition | false | nil]
     attr_reader interface_cache: Hash[TypeName, Definition | false | nil]
 
-    def initialize: (env: Environment) -> void
+    def initialize: (env: Environment, ?ancestor_builder: AncestorBuilder?, ?method_builder: MethodBuilder?) -> void
 
     def validate_super_class!: (TypeName, Environment::ClassEntry) -> void
 
