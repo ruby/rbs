@@ -488,12 +488,14 @@ rule
       }
 
   block:
-      kLBRACE simple_function_type kRBRACE {
-        block = Types::Block.new(type: val[1].value, required: true)
+      kLBRACE proc_type kRBRACE {
+        type, block = val[1].value
+        block = Types::Block.new(type: type, block: block, required: true)
         result = LocatedValue.new(value: block, location: val[0].location + val[2].location)
       }
-    | kQUESTION kLBRACE simple_function_type kRBRACE {
-        block = Types::Block.new(type: val[2].value, required: false)
+    | kQUESTION kLBRACE proc_type kRBRACE {
+        type, block = val[2].value
+        block = Types::Block.new(type: type, block: block, required: false)
         result = LocatedValue.new(value: block, location: val[0].location + val[3].location)
       }
 

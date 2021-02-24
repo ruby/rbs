@@ -953,22 +953,26 @@ module RBS
 
     class Block
       attr_reader :type
+      attr_reader :block
       attr_reader :required
 
-      def initialize(type:, required:)
+      def initialize(type:, block: nil, required:)
         @type = type
+        @block = block
         @required = required ? true : false
       end
 
       def ==(other)
         other.is_a?(Block) &&
           other.type == type &&
+          other.block == block &&
           other.required == required
       end
 
       def to_json(*a)
         {
           type: type,
+          block: block,
           required: required
         }.to_json(*a)
       end
@@ -976,14 +980,16 @@ module RBS
       def sub(s)
         self.class.new(
           type: type.sub(s),
+          block: block&.sub(s),
           required: required
         )
       end
 
-      def map_type(&block)
+      def map_type(&conv_block)
         Block.new(
           required: required,
-          type: type.map_type(&block)
+          block: block&.map_type(&conv_block),
+          type: type.map_type(&conv_block)
         )
       end
     end
