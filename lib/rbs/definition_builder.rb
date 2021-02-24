@@ -788,5 +788,24 @@ module RBS
       ensure_namespace!(type_name.namespace, location: entry.decl.location)
       entry.decl.type
     end
+
+    def update(env:, except:, ancestor_builder:)
+      method_builder = self.method_builder.update(env: env, except: except)
+
+      DefinitionBuilder.new(env: env, ancestor_builder: ancestor_builder, method_builder: method_builder).tap do |builder|
+        builder.instance_cache.merge!(instance_cache)
+        builder.singleton_cache.merge!(singleton_cache)
+        builder.singleton0_cache.merge!(singleton0_cache)
+        builder.interface_cache.merge!(interface_cache)
+
+        except.each do |name|
+          builder.instance_cache.delete([name, true])
+          builder.instance_cache.delete([name, false])
+          builder.singleton_cache.delete(name)
+          builder.singleton0_cache.delete(name)
+          builder.interface_cache.delete(name)
+        end
+      end
+    end
   end
 end

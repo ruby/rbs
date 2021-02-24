@@ -44,5 +44,7 @@ module RBS
     def define_methods: (Definition, interface_methods: Hash[Symbol, Definition::Method], methods: MethodBuilder::Methods, super_interface_method: bool) -> void
 
     def expand_alias: (TypeName) -> Types::t
+
+    def update: (env: Environment, ancestor_builder: AncestorBuilder, except: _Each[TypeName]) -> DefinitionBuilder
   end
 end
