@@ -99,6 +99,8 @@ module RBS
 
     def initialize: (type: ty, method_name: Symbol, members: Array[original]) -> void
 
+    def type_name: () -> TypeName
+
     def qualified_method_name: () -> String
 
     def location: () -> Location?
@@ -116,15 +118,18 @@ module RBS
 
     def initialize: (type: ty, method_name: Symbol, member: mixin_member) -> void
 
+    def type_name: () -> TypeName
+
     def qualified_method_name: () -> String
   end
 
   class UnknownMethodAliasError < DefinitionError
+    attr_reader type_name: TypeName
     attr_reader original_name: Symbol
     attr_reader aliased_name: Symbol
     attr_reader location: Location?
 
-    def initialize: (original_name: Symbol, aliased_name: Symbol, location: Location?) -> void
+    def initialize: (type_name: TypeName, original_name: Symbol, aliased_name: Symbol, location: Location?) -> void
   end
 
   class SuperclassMismatchError < DefinitionError

@@ -205,6 +205,10 @@ module RBS
       end
     end
 
+    def type_name
+      type.name
+    end
+
     def location
       members[0].location
     end
@@ -235,19 +239,25 @@ module RBS
         "#{type.name}##{method_name}"
       end
     end
+
+    def type_name
+      type.name
+    end
   end
 
   class UnknownMethodAliasError < DefinitionError
+    attr_reader :type_name
     attr_reader :original_name
     attr_reader :aliased_name
     attr_reader :location
 
-    def initialize(original_name:, aliased_name:, location:)
+    def initialize(type_name:, original_name:, aliased_name:, location:)
+      @type_name = type_name
       @original_name = original_name
       @aliased_name = aliased_name
       @location = location
 
-      super "#{Location.to_string location}: Unknown method alias name: #{original_name} => #{aliased_name}"
+      super "#{Location.to_string location}: Unknown method alias name: #{original_name} => #{aliased_name} (#{type_name})"
     end
   end
 
