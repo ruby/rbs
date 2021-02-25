@@ -1,8 +1,3 @@
-# TODO: Is this defined as a built-in type?
-interface _HashLike[K, V]
-  def each_pair: () { ([ K, V ]) -> untyped } -> self
-end
-
 # RubyGems is the Ruby standard for publishing and managing third party
 # libraries.
 #
@@ -99,6 +94,10 @@ end
 # -The RubyGems Team
 #
 module Gem
+  interface _HashLike[K, V]
+    def each_pair: () { ([ K, V ]) -> untyped } -> self
+  end
+
   DEFAULT_HOST: String
 
   GEM_DEP_FILES: Array[String]
