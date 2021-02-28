@@ -1,0 +1,18 @@
+module Minitest
+end
+
+MiniTest: Minitest
+
+module Minitest
+  class Unit
+    VERSION: String
+
+    class TestCase < Minitest::Test
+      def self.inherited: (untyped klass) -> untyped
+    end
+
+    def self.autorun: () -> TrueClass
+
+    def self.after_tests: () { () -> untyped } -> untyped
+  end
+end

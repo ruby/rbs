@@ -1,0 +1,114 @@
+# A Module is a collection of methods and constants. The methods in a module may
+# be instance methods or module methods. Instance methods appear as methods in a
+# class when the module is included, module methods do not. Conversely, module
+# methods may be called without creating an encapsulating object, while instance
+# methods may not. (See Module#module_function.)
+#
+# In the descriptions that follow, the parameter *sym* refers to a symbol, which
+# is either a quoted string or a Symbol (such as `:name`).
+#
+#     module Mod
+#       include Math
+#       CONST = 1
+#       def meth
+#         #  ...
+#       end
+#     end
+#     Mod.class              #=> Module
+#     Mod.constants          #=> [:CONST, :PI, :E]
+#     Mod.instance_methods   #=> [:meth]
+class Module
+  def infect_an_assertion: (untyped meth, untyped new_name, ?boolish dont_flip) -> untyped
+end
+
+Minitest::Expectation: Struct[untyped]
+
+# RubyGems adds the #gem method to allow activation of specific gem versions and
+# overrides the #require method on Kernel to make gems appear as if they live on
+# the `$LOAD_PATH`.  See the documentation of these methods for further detail.
+# The Kernel module is included by class Object, so its methods are available in
+# every Ruby object.
+#
+# The Kernel instance methods are documented in class Object while the module
+# methods are documented here.  These methods are called without a receiver and
+# thus can be called in functional form:
+#
+#     sprintf "%.1f", 1.234 #=> "1.2"
+module Kernel
+  private
+
+  def describe: (String desc, *String additional_desc) { () -> untyped } -> untyped
+end
+
+# require is not supported so writing this
+
+module Minitest
+  class Test
+  end
+
+  class Expectations
+  end
+end
+
+class Minitest::Spec < Minitest::Test
+  def self.current: () -> self
+
+  def initialize: (untyped name) -> void
+
+  module DSL
+    TYPES: ::Array[untyped]
+
+    def register_spec_type: (*Regexp | Minitest::Spec args) { () -> untyped } -> Array[untyped]
+
+    def spec_type: (String desc, *untyped additional) -> self
+
+    def describe_stack: () -> Array[self]
+
+    def children: () -> self
+
+    def nuke_test_methods!: () -> void
+
+    def before: (?untyped? _type) { () -> untyped } -> void
+
+    def after: (?untyped? _type) { () -> untyped } -> void
+
+    def it: (?String desc) { () -> untyped } -> String
+
+    def let: (String name) { () -> untyped } -> untyped
+
+    def subject: () { () -> untyped } -> untyped
+
+    def create: (String name, String desc) -> Class
+
+    def name: () -> String
+
+    def to_s: () -> String
+
+    attr_reader desc: untyped
+
+    # :nodoc:
+    alias specify it
+
+    module InstanceMethods
+      def _: (?untyped? value) { () -> untyped } -> Minitest::Expectations
+
+      alias value _
+
+      alias expect _
+
+      def before_setup: () -> void
+    end
+
+    def self.extended: (untyped obj) -> untyped
+  end
+
+  extend DSL
+
+  TYPES: ::Array[untyped]
+end
+
+# This line is causing an issue with RBS checks raising an RBS::RecursiveAncestorError
+# commenting it out
+class Object #nodoc
+#  include Minitest::Expectations
+end
