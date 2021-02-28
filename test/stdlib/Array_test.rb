@@ -27,7 +27,7 @@ class ArraySingletonTest < Test::Unit::TestCase
                      Array, :[], 1, "2"
   end
 
-  def test_try_connvert
+  def test_try_convert
     assert_send_type "(Integer) -> nil",
                      Array, :try_convert, 3
     assert_send_type "(ToArray) -> Array[Integer]",
