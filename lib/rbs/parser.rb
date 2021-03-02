@@ -365,7 +365,11 @@ def next_token
     s = input.matched.yield_self {|s| s[1, s.length - 2] }.gsub(/\\'/, "'")
     new_token(:tSTRING, s)
   else
-    raise "Unexpected token: #{input.peek(10)}..."
+    text = input.peek(10)
+    start_index = charpos(input)
+    end_index = start_index + text.length
+    location = RBS::Location.new(buffer: buffer, start_pos: start_index, end_pos: end_index)
+    raise LexerError.new(input: text, location: location)
   end
 end
 
@@ -394,6 +398,17 @@ class SemanticsError < ParsingError
     @original_message = message
 
     super "parse error on #{location}: #{message}"
+  end
+end
+
+class LexerError < ParsingError
+  attr_reader :location, :input
+
+  def initialize(input:, location:)
+    @input = input
+    @location = location
+
+    super "Unexpected string: #{input}..."
   end
 end
 

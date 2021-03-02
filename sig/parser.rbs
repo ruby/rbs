@@ -8,6 +8,13 @@ module RBS
       def initialize: (token_str: String, error_value: untyped, ?value_stack: untyped?) -> void
     end
 
+    class LexerError < ParsingError
+      attr_reader input: String
+      attr_reader location: Location
+
+      def initialize: (input: String, location: Location) -> void
+    end
+
     class SemanticsError < ParsingError
       attr_reader subject: untyped
       attr_reader location: Location
