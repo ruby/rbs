@@ -28,8 +28,6 @@ class LocatedValue
   end
 end
 
-require "strscan"
-
 attr_reader :input
 attr_reader :buffer
 attr_reader :eof_re
@@ -38,7 +36,7 @@ def initialize(type, buffer:, eof_re:)
   super()
   @type = type
   @buffer = buffer
-  @input = StringScanner.new(buffer.content)
+  @input = CharScanner.new(buffer.content)
   @eof_re = eof_re
   @eof = false
   @bound_variables_stack = []
@@ -154,11 +152,7 @@ def new_token(type, value = input.matched)
 end
 
 def charpos(scanner)
-  if @ascii_only
-    scanner.pos
-  else
-    scanner.charpos
-  end
+  scanner.charpos
 end
 
 def empty_params_result
