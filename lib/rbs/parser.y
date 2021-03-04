@@ -1088,8 +1088,6 @@ class LocatedValue
   end
 end
 
-require "strscan"
-
 attr_reader :input
 attr_reader :buffer
 attr_reader :eof_re

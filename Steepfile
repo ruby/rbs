@@ -5,6 +5,7 @@ target :lib do
   ignore "lib/rbs/prototype", "lib/rbs/test", "lib/rbs/test.rb"
 
   library "set", "pathname", "json", "logger", "monitor", "tsort"
+  signature "stdlib/strscan/0/"
 end
 
 # target :lib do
