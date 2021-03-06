@@ -209,12 +209,16 @@ module RBS
       end
     end
 
-    def resolve_type_names
+    def resolve_type_names(only: nil)
       resolver = TypeNameResolver.from_env(self)
       env = Environment.new()
 
       declarations.each do |decl|
-        env << resolve_declaration(resolver, decl, outer: [], prefix: Namespace.root)
+        if only && !only.member?(decl)
+          env << decl
+        else
+          env << resolve_declaration(resolver, decl, outer: [], prefix: Namespace.root)
+        end
       end
 
       env
