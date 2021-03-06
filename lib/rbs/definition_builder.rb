@@ -727,11 +727,13 @@ module RBS
     end
 
     def merge_method(type_name, methods, name, method, sub, implemented_in: :keep, keep_super: false)
-      defs = method.defs.yield_self do |defs|
+      if sub.empty? && implemented_in == :keep && keep_super
+        methods[name] = method
+      else
         if sub.empty? && implemented_in == :keep
-          defs
+          defs = method.defs
         else
-          defs.map do |defn|
+          defs = method.defs.map do |defn|
             defn.update(
               type: sub.empty? ? defn.type : defn.type.sub(sub),
               implemented_in: case implemented_in
@@ -745,16 +747,16 @@ module RBS
             )
           end
         end
+
+        super_method = methods[name]
+
+        methods[name] = Definition::Method.new(
+          super_method: keep_super ? method.super_method : super_method,
+          accessibility: method.accessibility,
+          defs: defs,
+          alias_of: method.alias_of
+        )
       end
-
-      super_method = methods[name]
-
-      methods[name] = Definition::Method.new(
-        super_method: keep_super ? method.super_method : super_method,
-        accessibility: method.accessibility,
-        defs: defs,
-        alias_of: method.alias_of
-      )
     end
 
     def try_cache(type_name, cache:, key: type_name)
