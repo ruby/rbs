@@ -84,7 +84,13 @@ module RBS
     # Runs generics type params validation over each class definitions.
     def validate_type_params: () -> void
 
-    def resolve_type_names: () -> Environment
+    # Resolve all type names in the environment to absolute type names.
+    # Relative type name will be left if absolute type name cannot be found.
+    #
+    # When `only` is given, it skips other _top-level_ declarations not included in the collection.
+    # This helps running resolution faster in the case of _partial updates_.
+    #
+    def resolve_type_names: (?only: Set[AST::Declarations::t]?) -> Environment
 
     def resolve_declaration: (TypeNameResolver resolver, AST::Declarations::t decl, outer: Array[module_decl], prefix: Namespace) -> AST::Declarations::t
 
