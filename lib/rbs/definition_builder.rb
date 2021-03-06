@@ -361,15 +361,10 @@ module RBS
         when Environment::ClassEntry, Environment::ModuleEntry
           ancestors = ancestor_builder.singleton_ancestors(type_name)
           self_type = Types::ClassSingleton.new(name: type_name, location: nil)
-          instance_type = Types::ClassInstance.new(
-            name: type_name,
-            args: entry.type_params.each.map { Types::Bases::Any.new(location: nil) },
-            location: nil
-          )
 
           Definition.new(type_name: type_name, entry: entry, self_type: self_type, ancestors: ancestors).tap do |definition|
             def0 = build_singleton0(type_name)
-            subst = Substitution.build([], [], instance_type: instance_type)
+            subst = Substitution.new
 
             merge_definition(src: def0, dest: definition, subst: subst, keep_super: true)
 
