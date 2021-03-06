@@ -213,6 +213,24 @@ module TypeAssertions
     end
   end
 
+  def instance_class
+    type, _ = target
+
+    case type
+    when RBS::Types::ClassSingleton, RBS::Types::ClassInstance
+      Object.const_get(type.name.to_s)
+    end
+  end
+
+  def class_class
+    type, _ = target
+
+    case type
+    when RBS::Types::ClassSingleton, RBS::Types::ClassInstance
+      Object.const_get(type.name.to_s).singleton_class
+    end
+  end
+
   ruby2_keywords def assert_send_type(method_type, receiver, method, *args, &block)
     trace = []
     spy = Spy.wrap(receiver, method)
@@ -234,7 +252,12 @@ module TypeAssertions
            method_type
          end
 
-    typecheck = RBS::Test::TypeCheck.new(self_class: receiver.class, builder: builder, sample_size: 100, unchecked_classes: [])
+    typecheck = RBS::Test::TypeCheck.new(
+      self_class: receiver.class,
+      builder: builder,
+      sample_size: 100,
+      unchecked_classes: []
+    )
     errors = typecheck.method_call(method, mt, trace.last, errors: [])
 
     assert_empty errors.map {|x| RBS::Test::Errors.to_string(x) }, "Call trace does not match with given method type: #{trace.last.inspect}"
@@ -277,7 +300,14 @@ module TypeAssertions
                           end,
                    type: mt.type.with_return_type(RBS::Types::Bases::Any.new(location: nil)))
 
-    typecheck = RBS::Test::TypeCheck.new(self_class: receiver.class, builder: builder, sample_size: 100, unchecked_classes: [])
+    typecheck = RBS::Test::TypeCheck.new(
+      self_class: receiver.class,
+      instance_class: instance_class,
+      class_class: class_class,
+      builder: builder,
+      sample_size: 100,
+      unchecked_classes: []
+    )
     errors = typecheck.method_call(method, mt, trace.last, errors: [])
 
     assert_operator exception, :is_a?, ::Exception

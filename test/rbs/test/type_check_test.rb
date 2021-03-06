@@ -69,6 +69,27 @@ EOF
     end
   end
 
+  def test_type_check_instance_class
+    SignatureManager.new do |manager|
+      manager.build do |env|
+        typecheck = Test::TypeCheck.new(
+          self_class: Integer,
+          instance_class: Integer,
+          class_class: Integer.singleton_class,
+          builder: DefinitionBuilder.new(env: env),
+          sample_size: 100,
+          unchecked_classes: []
+        )
+
+        assert typecheck.value(30, parse_type("instance"))
+        refute typecheck.value("30", parse_type("instance"))
+
+        assert typecheck.value(Integer, parse_type("class"))
+        refute typecheck.value(String, parse_type("class"))
+      end
+    end
+  end
+
   def test_type_check_absent
     SignatureManager.new do |manager|
       manager.files[Pathname("foo.rbs")] = <<EOF

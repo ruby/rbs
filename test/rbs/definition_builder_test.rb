@@ -854,6 +854,28 @@ EOF
     end
   end
 
+  def test_build_singleton_instance_with_class_instance
+    SignatureManager.new do |manager|
+      manager.files[Pathname("foo.rbs")] = <<EOF
+class Hello
+  def self?.foo: (instance) -> class
+end
+EOF
+
+      manager.build do |env|
+        builder = DefinitionBuilder.new(env: env)
+
+        builder.build_instance(TypeName("::Hello")).tap do |definition|
+          assert_equal ["(instance) -> class"], definition.methods[:foo].method_types.map(&:to_s)
+        end
+
+        builder.build_singleton(TypeName("::Hello")).tap do |definition|
+          assert_equal ["(instance) -> class"], definition.methods[:foo].method_types.map(&:to_s)
+        end
+      end
+    end
+  end
+
   def test_build_singleton_variables
     SignatureManager.new do |manager|
       manager.files[Pathname("foo.rbs")] = <<EOF
