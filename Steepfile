@@ -6,6 +6,7 @@ target :lib do
 
   library "set", "pathname", "json", "logger", "monitor", "tsort"
   signature "stdlib/strscan/0/"
+  signature "stdlib/rubygems/0/"
 end
 
 # target :lib do

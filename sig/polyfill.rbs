@@ -3,20 +3,6 @@ module Kernel
 end
 
 module Gem
-  class Version
-    def self.correct?: (String) -> bool
-
-    def self.create: (String?) -> instance?
-
-    include Comparable
-
-    def prerelease?: () -> bool
-
-    def release: () -> self
-
-    def version: () -> String
-  end
-
   class Specification
     attr_reader version (): Version
 
