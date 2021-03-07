@@ -724,11 +724,15 @@ class ArrayInstanceTest < Test::Unit::TestCase
                      [], :sample
     assert_send_type "(random: Random) -> Integer",
                      [1,2,3], :sample, random: Random.new(1)
+    assert_send_type "(random: Rand) -> Integer",
+                     [1,2,3], :sample, random: Rand.new
 
     assert_send_type "(Integer) -> Array[Integer]",
                      [1,2,3], :sample, 2
     assert_send_type "(ToInt, random: Random) -> Array[Integer]",
                      [1,2,3], :sample, ToInt.new(2), random: Random.new(2)
+    assert_send_type "(ToInt, random: Rand) -> Array[Integer]",
+                     [1,2,3], :sample, ToInt.new(2), random: Rand.new
   end
 
   def test_select
@@ -759,6 +763,8 @@ class ArrayInstanceTest < Test::Unit::TestCase
                      [1,2,3], :shuffle
     assert_send_type "(random: Random) -> Array[Integer]",
                      [1,2,3], :shuffle, random: Random.new(2)
+    assert_send_type "(random: Rand) -> Array[Integer]",
+                     [1,2,3], :shuffle, random: Rand.new
   end
 
   def test_shuffle!
@@ -766,6 +772,8 @@ class ArrayInstanceTest < Test::Unit::TestCase
                      [1,2,3], :shuffle!
     assert_send_type "(random: Random) -> Array[Integer]",
                      [1,2,3], :shuffle!, random: Random.new(2)
+    assert_send_type "(random: Rand) -> Array[Integer]",
+                     [1,2,3], :shuffle!, random: Rand.new
   end
 
   def test_slice

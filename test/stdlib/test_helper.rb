@@ -387,6 +387,12 @@ end
 class ToJson
 end
 
+class Rand
+  def rand(max)
+    max - 1
+  end
+end
+
 class JsonWrite
   def write(_str)
   end

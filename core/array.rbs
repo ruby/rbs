@@ -1584,8 +1584,8 @@ class Array[unchecked out Elem] < Object
   #     a.sample(random: Random.new(1))     #=> 6
   #     a.sample(4, random: Random.new(1))  #=> [6, 10, 9, 2]
   #
-  def sample: (?random: Random rng) -> Elem?
-            | (?int n, ?random: Random rng) -> ::Array[Elem]
+  def sample: (?random: _Rand rng) -> Elem?
+            | (?int n, ?random: _Rand rng) -> ::Array[Elem]
 
   # Returns a new array containing all elements of `ary` for which the given
   # `block` returns a true value.
@@ -1649,7 +1649,7 @@ class Array[unchecked out Elem] < Object
   #
   #     a.shuffle(random: Random.new(1))  #=> [1, 3, 2]
   #
-  def shuffle: (?random: Random rng) -> ::Array[Elem]
+  def shuffle: (?random: _Rand rng) -> ::Array[Elem]
 
   # Shuffles elements in `self` in place.
   #
@@ -1661,7 +1661,7 @@ class Array[unchecked out Elem] < Object
   #
   #     a.shuffle!(random: Random.new(1))  #=> [1, 3, 2]
   #
-  def shuffle!: (?random: Random rng) -> self
+  def shuffle!: (?random: _Rand rng) -> self
 
   alias size length
 
@@ -1995,6 +1995,10 @@ end
 
 interface _ToAry[T]
   def to_ary: () -> ::Array[T]
+end
+
+interface _Rand
+  def rand: (::Integer max) -> ::Integer
 end
 
 interface Array::_Pattern[T]
