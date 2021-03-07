@@ -300,8 +300,7 @@ class Thread < Object
   #
   # If you're going to subclass Thread, be sure to call super in your `initialize`
   # method, otherwise a ThreadError will be raised.
-  def initialize: () { () -> untyped } -> void
-                | (*untyped) { (*untyped) -> untyped } -> void
+  def initialize: (*untyped) { (*untyped) -> void } -> void
 
   # The calling thread will suspend execution and run this `thr` .
   #
