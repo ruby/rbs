@@ -9,8 +9,8 @@ class RBS::Test::RuntimeTestTest < Test::Unit::TestCase
 
   def test_runtime_success
     output = assert_test_success()
-    assert_match "Setting up hooks for ::Hello", output
-    refute_match /#{Regexp.escape("No type checker was installed!")}/, output
+    assert_match("Setting up hooks for ::Hello", output)
+    refute_match(/#{Regexp.escape("No type checker was installed!")}/, output)
   end
 
   def test_runtime_test_with_sample_size
@@ -100,8 +100,8 @@ RUBY
 
   def test_no_test_install
     output = assert_test_success(other_env: { "RBS_TEST_TARGET" => "NO_SUCH_CLASS" })
-    refute_match /#{Regexp.escape("Setting up hooks for ::Hello")}/, output
-    assert_match /#{Regexp.escape("No type checker was installed!")}/, output
+    refute_match(/#{Regexp.escape("Setting up hooks for ::Hello")}/, output)
+    assert_match(/#{Regexp.escape("No type checker was installed!")}/, output)
   end
 
   def test_name_override
