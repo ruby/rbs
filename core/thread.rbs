@@ -287,7 +287,20 @@ class Thread < Object
 
   def group: () -> ThreadGroup?
 
-  def initialize: (*untyped args) -> Thread
+  # Creates a new thread executing the given block.
+  #
+  # Any `args` given to ::new will be passed to the block:
+  #
+  #     arr = []
+  #     a, b, c = 1, 2, 3
+  #     Thread.new(a,b,c) { |d,e,f| arr << d << e << f }.join
+  #     arr #=> [1, 2, 3]
+  #
+  # A ThreadError exception is raised if ::new is called without a block.
+  #
+  # If you're going to subclass Thread, be sure to call super in your `initialize`
+  # method, otherwise a ThreadError will be raised.
+  def initialize: (*untyped) { (*untyped) -> void } -> void
 
   # The calling thread will suspend execution and run this `thr` .
   #
