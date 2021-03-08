@@ -2,6 +2,43 @@
 
 ## master
 
+## 1.1.0 (2021-03-08)
+
+### Summary
+
+Errors are now organized by `RBS::BaseError`, `RBS::ParsingError`, `RBS::LoadingError`, and `RBS::DefinitionError`.
+The library users can rescue RBS related errors with `RBS::BaseError`, parsing errors with `RBS::ParsingError`, and other errors with `RBS::LoadingError` and `RBS::DefinitionErrors`.
+
+Updating a part of environments are supported. Library users can remove declarations read from a set of files, adding new declarations, running name resolution related to the new decls, and deleting `DefinitionBuilder` caches related to the changes.
+See `RBS::Environment#reject`, `RBS::Environment#resolve_type_names`, `RBS::AncestorGraph`, and `RBS::DefinitionBuilder#update`.
+
+`RBS::DefinitionBuilder#build_singleton` now returns definitions containing `instance` type, which had returned resolved class instance types. This is a breaking change, but we consider it a bug fix because `RBS::DefinitionBuilder#build_instance` has returned `instance` types and `#build_singleton` has returned `class` type.
+
+### Signature updates
+
+* rubygem ([\#605](https://github.com/ruby/rbs/pull/605), [\#610](https://github.com/ruby/rbs/pull/610))
+* Array ([\#612](https://github.com/ruby/rbs/pull/612), [\#614](https://github.com/ruby/rbs/pull/614))
+* cgi/core ([\#599](https://github.com/ruby/rbs/pull/599))
+* Thread ([\#618](https://github.com/ruby/rbs/pull/618))
+
+### Language updates
+
+* Allow trailing comma for Record and Tuple types ([\#606](https://github.com/ruby/rbs/pull/606))
+
+### Library changes
+
+* Allow partial update of RBS declarations ([\#608](https://github.com/ruby/rbs/pull/608), [\#621](https://github.com/ruby/rbs/pull/621))
+* Let errors have `TypeName` ([\#611](https://github.com/ruby/rbs/pull/611))
+* Add `Parser::LexerError` ([\#615](https://github.com/ruby/rbs/pull/615))
+* Performance improvement ([\#617](https://github.com/ruby/rbs/pull/617), [\#620](https://github.com/ruby/rbs/pull/620))
+* No substitute `instance` types on `#build_singleton` ([\#619](https://github.com/ruby/rbs/pull/619))
+
+### Miscellaneous
+
+* Make racc name customizable by `RACC` environment variable ([\#602](https://github.com/ruby/rbs/pull/602))
+* Suppress warnings ([\#624](https://github.com/ruby/rbs/pull/624))
+* Remove needless `Gem::Version` polyfill ([\#622](https://github.com/ruby/rbs/pull/622))
+
 ## 1.0.6 (2021-02-17)
 
 * Signature Updates
