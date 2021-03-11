@@ -82,9 +82,19 @@ class Numeric
   #
   def %: (Numeric) -> Numeric
 
+  # Performs addition: the class of the resulting object depends on the class of
+  # `numeric`.
+  #
+  def +: (Numeric) -> Numeric
+
   # Unary Plus---Returns the receiver.
   #
   def +@: () -> Numeric
+
+  # Performs subtraction: the class of the resulting object depends on the class
+  # of `numeric`.
+  #
+  def -: (Numeric) -> Numeric
 
   # Unary Minus---Returns the receiver, negated.
   #
