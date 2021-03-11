@@ -338,7 +338,7 @@ module Gem
   #
   def self.find_unresolved_default_spec: (String path) -> Specification?
 
-  def self.finish_resolve: (?RequestSet request_set) -> Array[Specification]
+  def self.finish_resolve: (?RequestSet request_set) -> void
 
   # GemDependencyAPI object, which is set when .use_gemdeps is called. This
   # contains all the information from the Gemfile.
@@ -417,7 +417,7 @@ module Gem
   #
   def self.marshal_version: () -> String
 
-  def self.needs: () { (RequestSet) -> untyped } -> Array[Specification]
+  def self.needs: () { (RequestSet) -> void } -> void
 
   # Default options for gem commands for Ruby packagers.
   #

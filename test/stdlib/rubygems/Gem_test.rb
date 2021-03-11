@@ -235,10 +235,10 @@ class GemSingletonTest < Test::Unit::TestCase
   end
 
   def test_finish_resolve
-    assert_send_type  "() -> Array[Gem::Specification]",
+    assert_send_type  "() -> Array[untyped]",
                       Gem, :finish_resolve
-    assert_send_type  "(Gem::RequestSet) -> Array[Gem::Specification]",
-                      Gem, :finish_resolve, Gem::RequestSet.new(Gem::Dependency.new("pg"))
+    assert_send_type  "(Gem::RequestSet) -> Array[untyped]",
+                      Gem, :finish_resolve, Gem::RequestSet.new(Gem::Dependency.new("test-unit"))
   end
 
   def test_gemdeps
@@ -325,7 +325,7 @@ class GemSingletonTest < Test::Unit::TestCase
   end
 
   def test_needs
-    assert_send_type  "() { (Gem::RequestSet) -> Gem::RequestSet } -> Array[Gem::Specification]",
+    assert_send_type  "() { (Gem::RequestSet) -> Gem::RequestSet } -> Array[untyped]",
                       Gem, :needs do |rs| rs end
   end
 
@@ -564,7 +564,7 @@ class GemSingletonTest < Test::Unit::TestCase
     assert_send_type  "() -> nil",
                       Gem, :use_gemdeps
     assert_send_type  "(String) -> Array[Gem::Specification]",
-                      Gem, :use_gemdeps, "-"
+                      Gem, :use_gemdeps, "/"
   end
 
   def test_use_paths
