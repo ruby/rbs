@@ -2,6 +2,12 @@
 
 ## master
 
+## 1.1.1 (2021-03-12)
+
+### Signature updates
+
+* rubygem ([#630](https://github.com/ruby/rbs/pull/630))
+
 ## 1.1.0 (2021-03-08)
 
 ### Summary
