@@ -89,7 +89,7 @@ class GemSingletonTest < Test::Unit::TestCase
     assert_send_type  "(String) -> nil",
                       Gem, :datadir, ""
     assert_send_type  "(String) -> String",
-                      Gem, :datadir, "rake"
+                      Gem, :datadir, "test-unit"
   end
 
   def test_default_bindir
