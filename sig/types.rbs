@@ -134,7 +134,13 @@ module RBS
       def self.build: (Symbol) -> Variable
                     | (Array[Symbol]) -> Array[Variable]
 
-      def self.fresh: (?Symbol) -> Variable
+      # Returns fresh type variable with prefix (if given.)
+      #
+      #     Variable.fresh(:S)       # => S@1
+      #     Variable.fresh(:S)       # => S@2
+      #     Variable.fresh()         # => T@3
+      #
+      def self.fresh: (?Symbol prefix) -> Variable
     end
 
     class ClassSingleton
