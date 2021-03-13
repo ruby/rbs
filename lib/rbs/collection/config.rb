@@ -3,6 +3,8 @@ module RBS
 
     # This class represent the configration file.
     class Config
+      PATH = Pathname('rbs_collection.yaml')
+
       class GemfileLockLoader
         attr_reader :lock, :gemfile_lock
 

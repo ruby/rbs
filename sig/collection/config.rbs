@@ -2,6 +2,8 @@ module RBS
   module Collection
     # This class represent the configration file.
     class Config
+      PATH: Pathname
+
       type gemfile_lock = untyped
 
       type collection_entry = {

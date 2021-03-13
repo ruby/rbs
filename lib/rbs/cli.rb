@@ -828,15 +828,35 @@ EOB
     def run_collection(args, options)
       # TODO optparse
       # TODO: path
+
+      config_path = Collection::Config::PATH
+      lock_path = Collection::Config.to_lockfile_path(config_path)
       case args[0]
       when 'install'
-        Collection::Config.generate_lockfile(config_path: Pathname('./rbs_collection.yaml'), gemfile_lock_path: Pathname('./Gemfile.lock'))
-        Collection::Installer.new(lockfile_path: Pathname('./rbs_collection.lock.yaml')).install_from_lockfile
+        Collection::Config.generate_lockfile(config_path: config_path, gemfile_lock_path: Pathname('./Gemfile.lock'))
+        Collection::Installer.new(lockfile_path: lock_path).install_from_lockfile
       when 'update'
-        Collection::Config.generate_lockfile(config_path: Pathname('./rbs_collection.yaml'), gemfile_lock_path: Pathname('./Gemfile.lock'), with_lockfile: false)
-        Collection::Installer.new(lockfile_path: Pathname('./rbs_collection.lock.yaml')).install_from_lockfile
+        Collection::Config.generate_lockfile(config_path: config_path, gemfile_lock_path: Pathname('./Gemfile.lock'), with_lockfile: false)
+        Collection::Installer.new(lockfile_path: lock_path).install_from_lockfile
       when 'init'
-        # TODO
+        if config_path.exist?
+          puts "#{config_path} already exists"
+          exit 1
+        end
+
+        config_path.write(<<~'YAML')
+          # Donwload sources
+          collections:
+            - name: ruby/gem_rbs_collection
+              remote: https://github.com/ruby/gem_rbs_collection.git
+              revision: main
+              repo_dir: gems
+
+          # A directory to install the downloaded RBSs
+          path: .gem_rbs_collection
+
+          gems: []
+        YAML
       when 'clean'
         # TODO
       else
