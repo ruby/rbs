@@ -835,6 +835,8 @@ EOB
       when 'update'
         Collection::Config.generate_lockfile(config_path: Pathname('./rbs_collection.yaml'), gemfile_lock_path: Pathname('./Gemfile.lock'), with_lockfile: false)
         Collection::Installer.new(lockfile_path: Pathname('./rbs_collection.lock.yaml')).install_from_lockfile
+      when 'init'
+        # TODO
       when 'clean'
         # TODO
       else
