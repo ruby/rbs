@@ -450,6 +450,14 @@ class Hash[unchecked out K, unchecked out V] < Object
   #
   def eql?: (untyped) -> bool
 
+  # Returns a hash excluded given keys and the values.
+  #
+  #     h = { a: 100, b: 200, c: 300 }
+  #     h.except(:a)           #=> {:b=>200, :c=>300}
+  #     h.except(:b, :c, :d)   #=> {:a=>100}
+  #
+  def except: (*K) -> ::Hash[K, V]
+
   # Returns a value from the hash for the given key. If the key can't be found,
   # there are several options: With no other arguments, it will raise a KeyError
   # exception; if *default* is given, then that will be returned; if the optional
