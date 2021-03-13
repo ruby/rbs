@@ -26,7 +26,7 @@ The test installs instrumentations to spy the method calls and check if argument
 If errors are reported by the test, you will fix the signature.
 You will be sure that you ship a correct signature finally.
 
-The instrumentations are implemneted using `Module#prepend`.
+The instrumentations are implemented using `Module#prepend`.
 It defines a module with same name of methods, which asserts the type of arguments/return values and calls `super`.
 
 ## Type errors
