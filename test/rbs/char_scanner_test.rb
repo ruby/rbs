@@ -11,5 +11,5 @@ class RBS::CharScannerTest < Test::Unit::TestCase
     scanner.scan(/.../)
     assert_equal 12, scanner.pos
     assert_equal 6, scanner.charpos
-end
+  end
 end
