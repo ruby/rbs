@@ -202,9 +202,13 @@ class HashTest < StdlibTest
   def test_filter
     { a: 1, b: 2 }.filter
     { a: 1, b: 2 }.filter { |k, v| v == 1 }
+    Class.new(Hash)[:a, nil].filter.each { |k, v| k }
+    Class.new(Hash)[:a, nil].filter { |k, v| k }
 
     { a: 1, b: 2 }.select
     { a: 1, b: 2 }.select { |k, v| v == 1 }
+    Class.new(Hash)[:a, nil].select.each { |k, v| k }
+    Class.new(Hash)[:a, nil].select { |k, v| k }
   end
 
   def test_filter!
