@@ -857,7 +857,7 @@ class Hash[unchecked out K, unchecked out V] < Object
 
   # Returns `self`.
   #
-  def to_hash: () -> ::Hash[K, V]
+  def to_hash: () -> self
 
   # Returns a Proc which maps keys to values.
   #
