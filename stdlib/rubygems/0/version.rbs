@@ -170,7 +170,8 @@ module Gem
     #     ver2 = Version.create(ver1)       # -> (ver1)
     #     ver3 = Version.create(nil)        # -> nil
     #
-    def self.create: (_ToS | Version | nil input) -> instance?
+    def self.create: (_ToS | Version input) -> instance
+                   | (nil input) -> nil
 
     # Constructs a Version from the `version` string.  A version string is a series
     # of digits or ASCII letters separated by dots.
