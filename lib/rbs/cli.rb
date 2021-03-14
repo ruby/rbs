@@ -845,7 +845,7 @@ EOB
         end
 
         config_path.write(<<~'YAML')
-          # Donwload sources
+          # Download sources
           collections:
             - name: ruby/gem_rbs_collection
               remote: https://github.com/ruby/gem_rbs_collection.git
