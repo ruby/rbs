@@ -85,7 +85,7 @@ class HelloWorld[X]
 
   public                                                        # Public instance methods
 
-  def each: () { (A) -> void } -> void                          # Members are sorted dicionary order
+  def each: () { (A) -> void } -> void                          # Members are sorted dictionary order
 
   def to_s: (?Locale) -> String
 
