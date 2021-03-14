@@ -68,7 +68,7 @@ module RBS
         gemfile_lock = Bundler::LockfileParser.new(gemfile_lock_path.read)
 
         lock_path = to_lockfile_path(config_path)
-        lock = from_path(lock_path) if lock_path.exist?
+        lock = from_path(lock_path) if lock_path.exist? && with_lockfile
 
         GemfileLockLoader.new(lock: lock, gemfile_lock: gemfile_lock).load(config)
         config.dump_to(lock_path)

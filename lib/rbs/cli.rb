@@ -858,7 +858,11 @@ EOB
           gems: []
         YAML
       when 'clean'
-        # TODO
+        unless lock_path.exist?
+          puts "#{lock_path} should exist to clean"
+          exit 1
+        end
+        Collection::Cleaner.new(Collection::Config.from_path(lock_path))
       else
         raise
       end
