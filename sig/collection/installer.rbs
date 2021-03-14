@@ -1,6 +1,8 @@
 module RBS
   module Collection
     class Installer
+      METADATA_FILENAME: String
+
       attr_reader lockfile: Config
 
       def initialize: (lockfile_path: Pathname) -> void
@@ -8,7 +10,9 @@ module RBS
 
       private
 
-      def collection_for: (untyped) -> Collections::_Collection
+      def collection_for: (Config::gem_entry) -> Collections::_Collection
+
+      def format_config_entry: (Config::gem_entry) -> String
     end
   end
 end
