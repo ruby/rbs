@@ -340,6 +340,11 @@ class HashTest < StdlibTest
     { a: 42 }.to_h { |k, v| [k.to_s, v.to_f] }
   end
 
+  def test_to_hash
+    { a: 42 }.to_hash
+    Class.new(Hash)[:a, 42].to_hash
+  end
+
   def test_to_proc
     { a: 1 }.to_proc.call(:a)
     { a: 1 }.to_proc.call(:b)
