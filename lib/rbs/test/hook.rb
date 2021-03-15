@@ -25,7 +25,11 @@ module RBS
         :! => "not",
         :<< => "lshift",
         :>> => "rshift",
-        :~ => "tilda"
+        :~ => "tilda",
+        :=~ => "eqtilda",
+        :% => "percent",
+        :+@ => "unary_plus",
+        :-@ => "unary_minus"
       }
       def self.alias_names(target, random)
         suffix = "#{RBS::Test.suffix}_#{random}"
@@ -71,7 +75,9 @@ module RBS
         with_name, without_name = alias_names(method_name, random)
         full_method_name = "#{prefix}#{method_name}"
 
-        param_source = params.take_while {|param| param[0] == :req }.map(&:last) + ["*rest_args__#{random}"]
+        param_source = params.take_while {|param| param[0] == :req }
+                             .map.with_index {|pair, index| pair[1] || "__req__#{random}__#{index}" }
+        param_source.push("*rest_args__#{random}")
         block_param = "block__#{random}"
 
         RBS.logger.debug {
