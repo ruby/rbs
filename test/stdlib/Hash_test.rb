@@ -76,6 +76,7 @@ class HashTest < StdlibTest
     { a: nil }.compact
     { a: nil, b: 2 }.compact
     { b: 2 }.compact
+    Class.new(Hash)[:a, nil].compact
   end
 
   def test_compact!
