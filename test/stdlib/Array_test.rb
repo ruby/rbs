@@ -217,6 +217,8 @@ class ArrayInstanceTest < Test::Unit::TestCase
   def test_concat
     assert_send_type "(Array[Integer], Array[Integer]) -> Array[Integer]",
                      [1,2,3], :concat, [4,5,6], [7,8,9]
+    assert_send_type "(Array[Integer], Array[Integer]) -> self",
+                     Class.new(Array).new, :concat, [4,5,6], [7,8,9]
   end
 
   def test_count
