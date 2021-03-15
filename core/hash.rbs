@@ -498,8 +498,8 @@ class Hash[unchecked out K, unchecked out V] < Object
   #
   # Hash#filter is an alias for Hash#select.
   #
-  def filter: () { (K, V) -> boolish } -> self
-            | () -> ::Enumerator[[ K, V ], self]
+  def filter: () { (K, V) -> boolish } -> ::Hash[K, V]
+            | () -> ::Enumerator[[ K, V ], ::Hash[K, V]]
 
   # Equivalent to Hash#keep_if, but returns `nil` if no changes were made.
   #
