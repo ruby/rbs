@@ -14,6 +14,7 @@ jobs:
         container_tag:
         - master-nightly-focal
         - 3.0-focal
+        - 2.7-bionic
         job:
         - test
         - stdlib_test

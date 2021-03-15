@@ -1,6 +1,6 @@
 require: rubocop-rubycw
 AllCops:
-  TargetRubyVersion: 3.0
+  TargetRubyVersion: 2.7
   DisabledByDefault: true
   Exclude:
     - 'vendor/bundle/**/*'

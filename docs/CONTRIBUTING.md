@@ -29,7 +29,7 @@
 ## The Target Version
 
 * The standard library signatures targets Ruby 3.0 for now.
-* The library code targets Ruby 3.0.
+* The library code targets Ruby 2.7 and 3.0.
 
 ## Stdlib Worksheet
 
