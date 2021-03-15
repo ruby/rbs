@@ -113,8 +113,9 @@ class Range[out Elem] < Object
   # ```ruby
   # (1..10).end    #=> 10
   # (1...10).end   #=> 10
+  # (1..).end      #=> nil
   # ```
-  def `end`: () -> Elem
+  def `end`: () -> Elem?
 
   # Returns `true` if the range excludes its end value.
   #

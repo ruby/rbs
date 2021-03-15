@@ -125,3 +125,16 @@ class RangeTest < StdlibTest
     (1..).member?(-2)
   end
 end
+
+class RangeInstanceTest < Test::Unit::TestCase
+  include TypeAssertions
+
+  testing '::Range[::Integer]'
+
+  def test_end
+    assert_send_type '() -> nil',
+                      (1..), :end
+    assert_send_type '() -> ::Integer',
+                      (1..42), :end
+  end
+end
