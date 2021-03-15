@@ -352,4 +352,14 @@ class Hello
 end
 RBS
   end
+
+  def test_String
+    assert_test_success(
+      other_env: { "RBS_TEST_TARGET" => "String" },
+      ruby_content: <<RUBY
+class String
+end
+RUBY
+    )
+  end
 end
