@@ -60,6 +60,8 @@ You may find the *Good for first contributor* column where you can find some cla
   Validate the syntax and some of the semantics.
 * `rake generate:stdlib_test[String]`
   Scaffold the stdlib test.
+* `rake test/stdlib/Array_test.rb`
+  Run specific stdlib test with the path.
 
 ## Standard STDLIB Members Order
 
