@@ -815,7 +815,7 @@ class Hash[unchecked out K, unchecked out V] < Object
   #     h.slice(:a)           #=> {:a=>100}
   #     h.slice(:b, :c, :d)   #=> {:b=>200, :c=>300}
   #
-  def slice: (*K) -> self
+  def slice: (*K) -> ::Hash[K, V]
 
   # ## Element Assignment
   #

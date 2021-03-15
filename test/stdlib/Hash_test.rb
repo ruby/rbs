@@ -323,6 +323,7 @@ class HashTest < StdlibTest
   def test_slice
     { a: 42, b: 43, c: 44 }.slice(:a)
     { a: 42, b: 43, c: 44 }.slice(:a, :b)
+    Class.new(Hash)[:a, 42].slice(:a)
   end
 
   def test_to_a
