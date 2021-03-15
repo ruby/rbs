@@ -186,6 +186,12 @@ class HashTest < StdlibTest
     { a: 2 }.eql?({ a: 1 })
   end
 
+  def test_except
+    omit_if(!Hash.method_defined?(:except))
+    { a: 100, b: 200, c: 300 }.except(:a)
+    { a: 100, b: 200, c: 300 }.except(:b, :c, :d)
+  end
+
   def test_fetch
     hash = { a: 1 }
     hash.fetch(:a)
@@ -382,5 +388,19 @@ class HashTest < StdlibTest
     Hash.new
     Hash.new(10)
     Hash.new { |hash, key| key.to_s }
+  end
+end
+
+class HashInstanceTest < Test::Unit::TestCase
+  include TypeAssertions
+
+  testing "::Hash[::Symbol, ::Integer]"
+
+  def test_except
+    omit_if(!Hash.method_defined?(:except))
+    assert_send_type "() -> ::Hash[::Symbol, ::Integer]",
+                      { a: 100, b: 200, c: 300 }, :except
+    assert_send_type "(*Symbol keys) -> ::Hash[::Symbol, ::Integer]",
+                      { a: 100, b: 200, c: 300 }, :except, :a
   end
 end
