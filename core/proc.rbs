@@ -262,7 +262,7 @@ class Proc < Object
 
   def []: (*untyped arg0) -> untyped
 
-  def curry: (?Integer arity) -> Proc
+  def curry: (?_ToInt arity) -> Proc
 
   # Returns a hash value corresponding to proc body.
   #
