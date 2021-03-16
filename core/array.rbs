@@ -682,7 +682,7 @@ class Array[unchecked out Elem] < Object
   #
   # See also Array#+.
   #
-  def concat: (*::Array[Elem] arrays) -> ::Array[Elem]
+  def concat: (*::Array[Elem] arrays) -> self
 
   # Returns the number of elements.
   #
