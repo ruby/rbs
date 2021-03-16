@@ -99,7 +99,7 @@ class Range[out Elem] < Object
   # ```ruby
   # (1..10).begin   #=> 1
   # ```
-  def begin: () -> Elem
+  def begin: () -> Elem      # Begin-less ranges have type of Range[Integer?]
 
   def bsearch: [U] () { (Elem) -> boolish } -> U?
 
@@ -114,7 +114,7 @@ class Range[out Elem] < Object
   # (1..10).end    #=> 10
   # (1...10).end   #=> 10
   # ```
-  def `end`: () -> Elem
+  def `end`: () -> Elem      # End-less ranges have type of Range[Integer?]
 
   # Returns `true` if the range excludes its end value.
   #
