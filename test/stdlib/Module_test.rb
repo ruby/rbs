@@ -66,4 +66,17 @@ class ModuleInstanceTest < Test::Unit::TestCase
     assert_send_type "() { (Module) -> nil } -> nil",
                      Foo, :class_eval do nil end
   end
+
+  def test_alias_method
+    mod = Module.new do
+      def foo
+      end
+    end
+
+    omit_if(mod.alias_method(:bar, :foo).equal?(mod))
+    assert_send_type '(::Symbol new_name, ::Symbol old_name) -> ::Symbol',
+                     mod, :alias_method, :bar2, :foo
+    assert_send_type '(::String new_name, ::String old_name) -> ::Symbol',
+                     mod, :alias_method, 'bar3', 'foo'
+  end
 end

@@ -158,7 +158,7 @@ class Module < Object
   #
   #     Exiting with code 99
   #
-  def alias_method: (Symbol new_name, Symbol old_name) -> self
+  def alias_method: (::Symbol | ::String new_name, ::Symbol | ::String old_name) -> ::Symbol
 
   # Returns a list of modules included/prepended in *mod* (including *mod*
   # itself).
