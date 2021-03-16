@@ -15,4 +15,12 @@ class ThreadSingletonTest < Test::Unit::TestCase
     assert_send_type  "() { () -> untyped } -> Thread",
                       Thread, :new, &a_proc
   end
+
+  def test_start
+    assert_send_type  "() { () -> Integer } -> Thread",
+                      Thread, :start do 1 end
+
+    assert_send_type "() { () -> Integer } -> untyped",
+                     Class.new(Thread), :start do 1 end
+  end
 end
