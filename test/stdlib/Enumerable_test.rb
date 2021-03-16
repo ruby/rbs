@@ -139,6 +139,13 @@ class EnumerableTest2 < Test::Unit::TestCase
     end
   end
 
+  class TestEmptyEnumerable
+    include Enumerable
+
+    def each
+    end
+  end
+
   testing "::Enumerable[String]"
 
   def test_inject
@@ -150,5 +157,12 @@ class EnumerableTest2 < Test::Unit::TestCase
     assert_send_type("() { (String, String) -> String } -> String", TestEnumerable.new, :inject) do |memo, item|
       memo + item
     end
+  end
+
+  def test_first
+    assert_send_type '() -> ::String?' , TestEnumerable.new, :first
+    assert_send_type '() -> ::String?' , TestEmptyEnumerable.new, :first
+    assert_send_type '(ToInt n) -> ::Array[::String]' , TestEnumerable.new, :first, ToInt.new(42)
+    assert_send_type '(ToInt n) -> ::Array[::String]' , TestEmptyEnumerable.new, :first, ToInt.new(42)
   end
 end

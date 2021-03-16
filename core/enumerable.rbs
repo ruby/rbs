@@ -118,7 +118,7 @@ module Enumerable[unchecked out Elem]: _Each[Elem]
   # [].first(10)              #=> []
   # ```
   def first: () -> Elem?
-           | (Integer n) -> ::Array[Elem]?
+           | (_ToInt n) -> ::Array[Elem]
 
   def grep: (untyped arg0) -> ::Array[Elem]
           | [U] (untyped arg0) { (Elem arg0) -> U } -> ::Array[U]
