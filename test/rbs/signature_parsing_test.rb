@@ -1160,4 +1160,29 @@ EOF
       assert_empty decls
     end
   end
+
+  def test_module_self_syntax
+    Parser.parse_signature(<<EOF).tap do |decls|
+module Foo: Object
+end
+
+module ::Bar: Object
+end
+
+module Baz::Baz: Object
+end
+EOF
+      decls[0].tap do |decl|
+        assert_equal TypeName("Foo"), decl.name
+      end
+
+      decls[1].tap do |decl|
+        assert_equal TypeName("::Bar"), decl.name
+      end
+
+      decls[2].tap do |decl|
+        assert_equal TypeName("Baz::Baz"), decl.name
+      end
+    end
+  end
 end

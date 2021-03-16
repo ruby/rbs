@@ -104,15 +104,15 @@ rule
           comment: leading_comment(val[0].first&.location || location)
         )
       }
-    | annotations kMODULE start_new_scope tUKEYWORD module_self_types class_members kEND {
+    | annotations kMODULE start_new_scope namespace tUKEYWORD module_self_types class_members kEND {
         reset_variable_scope
 
-        location = val[1].location + val[6].location
+        location = val[1].location + val[7].location
         result = Declarations::Module.new(
-          name: val[3].value,
+          name: RBS::TypeName.new(name: val[4].value, namespace: val[3]&.value || RBS::Namespace.empty),
           type_params: Declarations::ModuleTypeParams.empty,
-          self_types: val[4],
-          members: val[5],
+          self_types: val[5],
+          members: val[6],
           annotations: val[0],
           location: location,
           comment: leading_comment(val[0].first&.location || location)
