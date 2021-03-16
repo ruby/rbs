@@ -842,7 +842,7 @@ class Thread < Object
   # However, if class [Thread](Thread.downloaded.ruby_doc) is subclassed,
   # then calling `start` in that subclass will not invoke the subclass’s
   # `initialize` method.
-  def self.start: (*untyped args) -> untyped
+  def self.start: (*untyped args) { (*untyped) -> void } -> instance
 
   # Stops execution of the current thread, putting it into a “sleep” state,
   # and schedules execution of another thread.
