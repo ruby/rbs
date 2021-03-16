@@ -61,3 +61,16 @@ class ProcTest < StdlibTest
     proc {}.inspect
   end
 end
+
+class ProcInstanceTest < Test::Unit::TestCase
+  include TypeAssertions
+
+  testing '::Proc'
+
+  def test_curry
+    assert_send_type '() -> ::Proc',
+                      Proc.new(){}, :curry
+    assert_send_type '(ToInt) -> ::Proc',
+                      Proc.new(){}, :curry, ToInt.new(42)
+  end
+end
