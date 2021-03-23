@@ -70,6 +70,23 @@ ERROR -- : [Kaigi::Conference#speakers] UnexpectedBlockError: unexpected block i
 The error means there is a type error on overloaded methods.
 The `rbs` test framework tries to the best error message for overloaded methods too, but it reports the `UnresolvedOverloadingError` when it fails.
 
+### DuplicatedMethodDefinitionError
+
+The error is reported when a method is defined multiple times, as RBS does not allow duplicate method definitions. When you need to overload a method, use the `...` syntax:
+
+```ruby
+# First definition
+class C
+  def foo: () -> untyped
+end
+
+# Second definition, use `...` syntax to tell RBS that we're overloading the method
+class C
+  def foo: () -> untyped
+         | ...
+end
+```
+
 ## Setting up the test
 
 The design of the signature testing aims to be non-intrusive. The setup is done in two steps:
