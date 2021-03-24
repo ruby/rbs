@@ -656,7 +656,7 @@ class IO < Object
   # ```
   def sync: () -> bool
 
-  def sync=: (boolish) -> bool
+  def sync=: (boolish) -> untyped
 
   def sysread: (Integer maxlen, String outbuf) -> String
 
