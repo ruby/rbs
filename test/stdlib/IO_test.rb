@@ -130,6 +130,10 @@ class IOInstanceTest < Test::Unit::TestCase
                        io, :autoclose=, true
       assert_send_type "(bool) -> bool",
                        io, :autoclose=, false
+      assert_send_type "(::Integer) -> ::Integer",
+                       io, :autoclose=, 42
+      assert_send_type "(nil) -> nil",
+                       io, :autoclose=, nil
     end
   end
 

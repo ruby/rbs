@@ -181,7 +181,7 @@ class IO < Object
   #     # ...
   #     f.gets # won't cause Errno::EBADF
   #
-  def autoclose=: (bool) -> bool
+  def autoclose=: (boolish) -> untyped
 
   # Returns `true` if the underlying file descriptor of *ios* will be closed
   # automatically at its finalization, otherwise `false`.
