@@ -212,7 +212,7 @@ class IO < Object
   # just ignored since Ruby 2.3.
   def close: () -> NilClass
 
-  def close_on_exec=: (boolish) -> bool
+  def close_on_exec=: (boolish) -> untyped
 
   # Returns `true` if *ios* will be closed on exec.
   #

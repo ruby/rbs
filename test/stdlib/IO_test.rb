@@ -180,4 +180,19 @@ class IOInstanceTest < Test::Unit::TestCase
       end
     end
   end
+
+  def test_close_on_exec
+    IO.open(IO.sysopen(__FILE__)) do |io|
+      assert_send_type '() -> bool',
+                       io, :close_on_exec?
+      assert_send_type '(::Integer) -> untyped',
+                       io, :close_on_exec=, 42
+      assert_send_type '() -> bool',
+                       io, :close_on_exec?
+      assert_send_type '(nil) -> nil',
+                       io, :close_on_exec=, nil
+      assert_send_type '() -> bool',
+                       io, :close_on_exec?
+    end
+  end
 end
