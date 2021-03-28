@@ -1,5 +1,5 @@
 require_relative "test_helper"
-require 'minitest/mock'
+require 'miniTest/mock'
 
 class MockTest < Test::Unit::TestCase
   include TypeAssertions
