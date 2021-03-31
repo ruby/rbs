@@ -508,6 +508,7 @@ module RBS
         included_interfaces = one_ancestors.included_interfaces or raise
         included_interfaces.each do |a|
           included_ancestors = interface_ancestors(a.name, building_ancestors: building_ancestors)
+
           ancestors.unshift(*included_ancestors.apply(a.args, location: entry.decl.location))
         end
 

@@ -9,7 +9,7 @@ module RBS
 
     def ==: (untyped other) -> bool
 
-    def to_json: (*untyped) -> String
+    include _ToJson
 
     def sub: (Substitution) -> MethodType
 

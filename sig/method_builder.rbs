@@ -20,7 +20,7 @@ module RBS
 
           def accessibility: () -> accessibility
 
-          def self.empty: (name: Symbol, type: instance_type) -> instance
+          def self.empty: (name: Symbol, type: instance_type) -> Definition
         end
 
         attr_reader type: instance_type

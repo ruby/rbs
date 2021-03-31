@@ -19,13 +19,13 @@ module RBS
         other.block == block
     end
 
-    def to_json(*a)
+    def to_json(state = _ = nil)
       {
         type_params: type_params,
         type: type,
         block: block,
         location: location
-      }.to_json(*a)
+      }.to_json(state)
     end
 
     def sub(s)

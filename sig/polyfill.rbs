@@ -1,5 +1,4 @@
 module Kernel
-  def to_json: (*untyped) -> String
 end
 
 module Gem
@@ -14,18 +13,20 @@ end
 
 class OptionParser
   def initialize: () ?{ (instance) -> void } -> void
-                
+
   def on: (*String) { (String) -> void } -> void
-        
+
   attr_accessor version: String
-  
+
   attr_accessor banner: String
 
   def order!: (Array[String]) -> void
-            
+
   def parse!: (Array[String]) -> void
-            
+
   def ver: () -> String
-         
+
   def help: () -> String
 end
+
+

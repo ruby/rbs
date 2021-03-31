@@ -1,4 +1,3 @@
-
 module RBS
   class TypeName
     attr_reader :namespace
@@ -35,8 +34,8 @@ module RBS
       "#{namespace.to_s}#{name}"
     end
 
-    def to_json(*a)
-      to_s.to_json(*a)
+    def to_json(state = _ = nil)
+      to_s.to_json(state)
     end
 
     def to_namespace
