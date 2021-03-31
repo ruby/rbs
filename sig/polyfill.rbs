@@ -14,7 +14,7 @@ end
 class OptionParser
   def initialize: () ?{ (instance) -> void } -> void
 
-  def on: (*String) { (String) -> void } -> void
+  def on: [T] (*String) { (T) -> void } -> void
 
   attr_accessor version: String
 

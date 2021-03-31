@@ -1,9 +1,15 @@
 module RBS
   class Writer
-    attr_reader out: IO
+    interface _IO
+      def puts: (*untyped) -> void
+
+      def flush: () -> void
+    end
+
+    attr_reader out: _IO
     attr_reader indentation: Array[String]
 
-    def initialize: (out: IO) -> void
+    def initialize: (out: _IO) -> void
 
     def indent: (?Integer size) { () -> void } -> void
 

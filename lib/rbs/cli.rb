@@ -816,9 +816,12 @@ EOB
         'RBS_TEST_TARGET' => (targets.join(',') unless targets.empty?)
       }
 
+      # @type var out: String
+      # @type var err: String
       out, err, status = Open3.capture3(env_hash, *args)
       stdout.print(out)
       stderr.print(err)
+
       status
     end
   end
