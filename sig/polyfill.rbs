@@ -29,4 +29,8 @@ class OptionParser
   def help: () -> String
 end
 
-
+module Enumerable[unchecked out Elem]
+  def flat_map: [U] () { (Elem) -> Array[U] } -> Array[U]
+              | [U] () { (Elem) -> U } -> Array[U]
+              | ...
+end

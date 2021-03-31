@@ -122,7 +122,7 @@ module RBS
       end
 
       def annotations
-        @annotations ||= @extra_annotations + defs.flat_map(&:annotations)
+        @annotations ||= @extra_annotations + defs.flat_map {|d| d.annotations }
       end
 
       def members
