@@ -65,10 +65,21 @@ rule
         reset_variable_scope
 
         location = val[1].location + val[7].location
+        location = location.with_children(
+          required: {
+            keyword: val[1].location,
+            name: val[3].location,
+            end: val[7].location
+          },
+          optional: {
+            type_params: val[4]&.location,
+            lt: val[5]&.location
+          }
+        )
         result = Declarations::Class.new(
           name: val[3].value,
           type_params: val[4]&.value || Declarations::ModuleTypeParams.empty,
-          super_class: val[5],
+          super_class: val[5]&.value,
           members: val[6],
           annotations: val[0],
           location: location,
@@ -79,25 +90,55 @@ rule
   super_class:
       { result = nil }
     | kLT class_name {
-        result = Declarations::Class::Super.new(name: val[1].value,
-                                                args: [],
-                                                location: val[1].location)
+        loc = val[1].location.with_children(
+          required: { name: val[1].location },
+          optional: { args: nil }
+        )
+        sup = Declarations::Class::Super.new(name: val[1].value, args: [], location: loc)
+        result = LocatedValue.new(value: sup, location: val[0].location)
       }
     | kLT class_name kLBRACKET type_list kRBRACKET {
-        result = Declarations::Class::Super.new(name: val[1].value,
-                                                args: val[3],
-                                                location: val[1].location + val[4].location)
+        loc = (val[1].location + val[4].location).with_children(
+          required: { name: val[1].location },
+          optional: { args: val[2].location + val[4].location }
+        )
+        sup = Declarations::Class::Super.new(name: val[1].value, args: val[3], location: loc)
+        result = LocatedValue.new(value: sup, location: val[0].location)
       }
 
   module_decl:
       annotations kMODULE start_new_scope class_name module_type_params colon_module_self_types class_members kEND {
         reset_variable_scope
 
+        colon_loc = val[5].location
+        self_loc = val[5].value.yield_self do |params|
+          case params.size
+          when 0
+            nil
+          when 1
+            params[0].location
+          else
+            params.first.location + params.last.location
+          end
+        end
+
         location = val[1].location + val[7].location
+        location = location.with_children(
+          required: {
+            keyword: val[1].location,
+            name: val[3].location,
+            end: val[7].location
+          },
+          optional: {
+            type_params: val[4]&.location,
+            colon: colon_loc,
+            self_types: self_loc
+          }
+        )
         result = Declarations::Module.new(
           name: val[3].value,
           type_params: val[4]&.value || Declarations::ModuleTypeParams.empty,
-          self_types: val[5],
+          self_types: val[5].value,
           members: val[6],
           annotations: val[0],
           location: location,
@@ -108,6 +149,20 @@ rule
         reset_variable_scope
 
         location = val[1].location + val[7].location
+        name_loc, colon_loc = split_kw_loc(val[4].location)
+        self_loc = case val[5].size
+                   when 0
+                     nil
+                   when 1
+                     val[5][0].location
+                   else
+                     val[5].first.location + val[5].last.location
+                   end
+        location = location.with_children(
+          required: { keyword: val[1].location, name: name_loc, end: val[7].location },
+          optional: { colon: colon_loc, type_params: nil, self_types: self_loc }
+        )
+
         result = Declarations::Module.new(
           name: RBS::TypeName.new(name: val[4].value, namespace: val[3]&.value || RBS::Namespace.empty),
           type_params: Declarations::ModuleTypeParams.empty,
@@ -120,9 +175,9 @@ rule
       }
 
   colon_module_self_types:
-      { result = [] }
+      { result = LocatedValue.new(value: [], location: nil) }
     | kCOLON module_self_types {
-        result = val[1]
+        result = LocatedValue.new(value: val[1], location: val[0].location)
       }
 
   module_self_types:
@@ -138,6 +193,10 @@ rule
         name = val[0].value
         args = val[2]
         location = val[0].location + val[3].location
+        location = location.with_children(
+          required: { name: val[0].location },
+          optional: { args: val[1].location + val[3].location }
+        )
 
         case
         when name.class?
@@ -151,7 +210,10 @@ rule
     | qualified_name {
         name = val[0].value
         args = []
-        location = val[0].location
+        location = val[0].location.with_children(
+          required: { name: val[0].location },
+          optional: { args: nil }
+        )
 
         case
         when name.class?
@@ -186,35 +248,61 @@ rule
     | signature
 
   attribute_kind:
-      { result = :instance }
-    | kSELF kDOT { result = :singleton }
+      { result = LocatedValue.new(value: :instance, location: nil) }
+    | kSELF kDOT { result = LocatedValue.new(value: :singleton, location: val[0].location + val[1].location) }
 
   attribute_member:
       annotations kATTRREADER attribute_kind keyword type {
         location = val[1].location + val[4].location
+        name_loc, colon_loc = split_kw_loc(val[3].location)
+        location = location.with_children(
+          required: { keyword: val[1].location, name: name_loc, colon: colon_loc },
+          optional: { ivar: nil, ivar_name: nil, kind: val[2].location }
+        )
         result = Members::AttrReader.new(name: val[3].value,
                                          ivar_name: nil,
                                          type: val[4],
-                                         kind: val[2],
+                                         kind: val[2].value,
                                          annotations: val[0],
                                          location: location,
                                          comment: leading_comment(val[0].first&.location || location))
       }
     | annotations kATTRREADER attribute_kind method_name attr_var_opt kCOLON type {
         location = val[1].location + val[6].location
+        ivar_loc = val[4]&.location
+        case name_value = val[4]&.value
+        when LocatedValue
+          ivar_name = name_value.value
+          ivar_name_loc = name_value.location
+        when false
+          ivar_name = false
+          ivar_name_loc = nil
+        else
+          ivar_name = nil
+          ivar_loc = nil
+        end
+        location = location.with_children(
+          required: { keyword: val[1].location, name: val[3].location, colon: val[5].location },
+          optional: { ivar: ivar_loc, ivar_name: ivar_name_loc, kind: val[2].location }
+        )
         result = Members::AttrReader.new(name: val[3].value.to_sym,
-                                         ivar_name: val[4],
+                                         ivar_name: ivar_name,
                                          type: val[6],
-                                         kind: val[2],
+                                         kind: val[2].value,
                                          annotations: val[0],
                                          location: location,
                                          comment: leading_comment(val[0].first&.location || location))
       }
     | annotations kATTRWRITER attribute_kind keyword type {
         location = val[1].location + val[4].location
+        name_loc, colon_loc = split_kw_loc(val[3].location)
+        location = location.with_children(
+          required: { keyword: val[1].location, name: name_loc, colon: colon_loc },
+          optional: { ivar: nil, ivar_name: nil, kind: val[2].location }
+        )
         result = Members::AttrWriter.new(name: val[3].value,
                                          ivar_name: nil,
-                                         kind: val[2],
+                                         kind: val[2].value,
                                          type: val[4],
                                          annotations: val[0],
                                          location: location,
@@ -222,9 +310,26 @@ rule
       }
     | annotations kATTRWRITER attribute_kind method_name attr_var_opt kCOLON type {
         location = val[1].location + val[6].location
+        ivar_loc = val[4]&.location
+        case name_value = val[4]&.value
+        when LocatedValue
+          ivar_name = name_value.value
+          ivar_name_loc = name_value.location
+        when false
+          ivar_name = false
+          ivar_name_loc = nil
+        else
+          ivar_name = nil
+          ivar_loc = nil
+        end
+        location = location.with_children(
+          required: { keyword: val[1].location, name: val[3].location, colon: val[5].location },
+          optional: { ivar: ivar_loc, ivar_name: ivar_name_loc, kind: val[2].location }
+        )
+
         result = Members::AttrWriter.new(name: val[3].value.to_sym,
-                                         ivar_name: val[4],
-                                         kind: val[2],
+                                         ivar_name: ivar_name,
+                                         kind: val[2].value,
                                          type: val[6],
                                          annotations: val[0],
                                          location: location,
@@ -232,9 +337,15 @@ rule
       }
     | annotations kATTRACCESSOR attribute_kind keyword type {
         location = val[1].location + val[4].location
+        name_loc, colon_loc = split_kw_loc(val[3].location)
+        location = location.with_children(
+          required: { keyword: val[1].location, name: name_loc, colon: colon_loc },
+          optional: { ivar: nil, ivar_name: nil, kind: val[2].location }
+        )
+
         result = Members::AttrAccessor.new(name: val[3].value,
                                            ivar_name: nil,
-                                           kind: val[2],
+                                           kind: val[2].value,
                                            type: val[4],
                                            annotations: val[0],
                                            location: location,
@@ -242,9 +353,26 @@ rule
       }
     | annotations kATTRACCESSOR attribute_kind method_name attr_var_opt kCOLON type {
         location = val[1].location + val[6].location
+        ivar_loc = val[4]&.location
+        case name_value = val[4]&.value
+        when LocatedValue
+          ivar_name = name_value.value
+          ivar_name_loc = name_value.location
+        when false
+          ivar_name = false
+          ivar_name_loc = nil
+        else
+          ivar_name = nil
+          ivar_loc = nil
+        end
+        location = location.with_children(
+          required: { keyword: val[1].location, name: val[3].location, colon: val[5].location },
+          optional: { ivar: ivar_loc, ivar_name: ivar_name_loc, kind: val[2].location }
+        )
+
         result = Members::AttrAccessor.new(name: val[3].value.to_sym,
-                                           ivar_name: val[4],
-                                           kind: val[2],
+                                           ivar_name: ivar_name,
+                                           kind: val[2].value,
                                            type: val[6],
                                            annotations: val[0],
                                            location: location,
@@ -253,12 +381,21 @@ rule
 
   attr_var_opt:
       { result = nil }
-    | kLPAREN kRPAREN { result = false }
-    | kLPAREN tIVAR kRPAREN { result = val[1].value }
+    | kLPAREN kRPAREN { result = LocatedValue.new(value: false, location: val[0].location + val[1].location) }
+    | kLPAREN tIVAR kRPAREN {
+        result = LocatedValue.new(
+          value: val[1],
+          location: val[0].location + val[2].location
+        )
+      }
 
   var_type_member:
       tIVAR kCOLON type {
-        location = val[0].location + val[2].location
+        location = (val[0].location + val[2].location).with_children(
+          required: { name: val[0].location, colon: val[1].location },
+          optional: { kind: nil }
+        )
+
         result = Members::InstanceVariable.new(
           name: val[0].value,
           type: val[2],
@@ -277,7 +414,11 @@ rule
           )
         end
 
-        location = val[0].location + val[2].location
+        location = (val[0].location + val[2].location).with_children(
+          required: { name: val[0].location, colon: val[1].location },
+          optional: { kind: nil }
+        )
+
         result = Members::ClassVariable.new(
           name: val[0].value,
           type: type,
@@ -296,7 +437,11 @@ rule
         )
       end
 
-      location = val[0].location + val[4].location
+      location = (val[0].location + val[4].location).with_children(
+        required: { name: val[2].location, colon: val[3].location },
+        optional: { kind: val[0].location + val[1].location }
+      )
+
       result = Members::ClassInstanceVariable.new(
         name: val[2].value,
         type: type,
@@ -310,6 +455,10 @@ rule
         reset_variable_scope
 
         location = val[1].location + val[6].location
+        location = location.with_children(
+          required: { keyword: val[1].location, name: val[3].location, end: val[6].location },
+          optional: { type_params: val[4]&.location }
+        )
         result = Declarations::Interface.new(
           name: val[3].value,
           type_params: val[4]&.value || Declarations::ModuleTypeParams.empty,
@@ -352,7 +501,12 @@ rule
         if val[2].value.alias?
           raise SemanticsError.new("Should include module or interface", subject: val[2].value, location: val[2].location)
         end
-        location = val[1].location + val[2].location
+
+        location = (val[1].location + val[2].location).with_children(
+          required: { keyword: val[1].location, name: val[2].location },
+          optional: { args: nil }
+        )
+
         result = Members::Include.new(name: val[2].value,
                                       args: [],
                                       annotations: val[0],
@@ -363,7 +517,12 @@ rule
         if val[2].value.alias?
           raise SemanticsError.new("Should include module or interface", subject: val[2].value, location: val[2].location)
         end
-        location = val[1].location + val[5].location
+
+        location = (val[1].location + val[5].location).with_children(
+          required: { keyword: val[1].location, name: val[2].location },
+          optional: { args: val[3].location + val[5].location }
+        )
+
         result = Members::Include.new(name: val[2].value,
                                       args: val[4],
                                       annotations: val[0],
@@ -376,7 +535,12 @@ rule
         if val[2].value.alias?
           raise SemanticsError.new("Should extend module or interface", subject: val[2].value, location: val[2].location)
         end
-        location = val[1].location + val[2].location
+
+        location = (val[1].location + val[2].location).with_children(
+          required: { keyword: val[1].location, name: val[2].location },
+          optional: { args: nil }
+        )
+
         result = Members::Extend.new(name: val[2].value,
                                      args: [],
                                      annotations: val[0],
@@ -387,7 +551,12 @@ rule
         if val[2].value.alias?
           raise SemanticsError.new("Should extend module or interface", subject: val[2].value, location: val[2].location)
         end
-        location = val[1].location + val[5].location
+
+        location = (val[1].location + val[5].location).with_children(
+          required: { keyword: val[1].location, name: val[2].location },
+          optional: { args: val[3].location + val[5].location }
+        )
+
         result = Members::Extend.new(name: val[2].value,
                                      args: val[4],
                                      annotations: val[0],
@@ -400,7 +569,12 @@ rule
         unless val[2].value.class?
           raise SemanticsError.new("Should prepend module", subject: val[2].value, location: val[2].location)
         end
-        location = val[1].location + val[2].location
+
+        location = (val[1].location + val[2].location).with_children(
+          required: { keyword: val[1].location, name: val[2].location },
+          optional: { args: nil }
+        )
+
         result = Members::Prepend.new(name: val[2].value,
                                       args: [],
                                       annotations: val[0],
@@ -411,7 +585,12 @@ rule
         unless val[2].value.class?
           raise SemanticsError.new("Should prepend module", subject: val[2].value, location: val[2].location)
         end
-        location = val[1].location + val[5].location
+
+        location = (val[1].location + val[5].location).with_children(
+          required: { keyword: val[1].location, name: val[2].location },
+          optional: { args: val[3].location + val[5].location }
+        )
+
         result = Members::Prepend.new(name: val[2].value,
                                       args: val[4],
                                       annotations: val[0],
@@ -429,10 +608,22 @@ rule
   method_member:
       annotations attributes overload kDEF method_kind def_name method_types {
         location = val[3].location + val[6].last.location
+        children = {}
+
+        required_children = { keyword: val[3].location, name: val[5].location }
+        optional_children = { kind: nil, overload: nil }
+
+        if val[4]
+          kind = val[4].value
+          optional_children[:kind] = val[4].location
+        else
+          kind = :instance
+        end
 
         last_type = val[6].last
         if last_type.is_a?(LocatedValue) && last_type.value == :dot3
           overload = true
+          optional_children[:overload] = last_type.location
           val[6].pop
         else
           overload = false
@@ -440,10 +631,10 @@ rule
 
         result = Members::MethodDefinition.new(
           name: val[5].value,
-          kind: val[4],
+          kind: kind,
           types: val[6],
           annotations: val[0],
-          location: location,
+          location: location.with_children(required: required_children, optional: optional_children),
           comment: leading_comment(val[0].first&.location || val[2]&.location || val[3].location),
           overload: overload || !!val[2]
         )
@@ -455,9 +646,9 @@ rule
       }
 
   method_kind:
-      { result = :instance }
-    | kSELF kDOT { result = :singleton }
-    | kSELFQ kDOT { result = :singleton_instance }
+      { result = nil }
+    | kSELF kDOT { result = LocatedValue.new(value: :singleton, location: val[0].location + val[1].location) }
+    | kSELFQ kDOT { result = LocatedValue.new(value: :singleton_instance, location: val[0].location + val[1].location) }
 
   method_types:
       method_type { result = [val[0]] }
@@ -498,7 +689,14 @@ rule
       }
 
   def_name:
-      keyword
+      keyword {
+        loc = val[0].location
+
+        result = LocatedValue.new(
+          value: val[0].value,
+          location: Location.new(buffer: loc.buffer, start_pos: loc.start_pos, end_pos: loc.end_pos - 1)
+        )
+      }
     | method_name kCOLON {
         result = LocatedValue.new(value: val[0].value.to_sym,
                                   location: val[0].location + val[1].location)
@@ -555,19 +753,34 @@ rule
 
   module_type_param:
       type_param_check type_param_variance tUIDENT {
-        result = Declarations::ModuleTypeParams::TypeParam.new(name: val[2].value.to_sym,
-                                                               variance: val[1],
-                                                               skip_validation: val[0])
+        loc = case
+              when l0 = val[0].location
+                l0 + val[2].location
+              when l1 = val[1].location
+                l1 + val[2].location
+              else
+                val[2].location
+              end
+        loc = loc.with_children(
+          required: { name: val[2].location },
+          optional: { variance: val[1].location, unchecked: val[0].location }
+        )
+        result = Declarations::ModuleTypeParams::TypeParam.new(
+          name: val[2].value.to_sym,
+          variance: val[1].value,
+          skip_validation: val[0].value,
+          location: loc
+        )
       }
 
   type_param_variance:
-      { result = :invariant }
-    | kOUT { result = :covariant }
-    | kIN { result = :contravariant }
+      { result = LocatedValue.new(value: :invariant, location: nil) }
+    | kOUT { result = LocatedValue.new(value: :covariant, location: val[0].location) }
+    | kIN { result = LocatedValue.new(value: :contravariant, location: val[0].location) }
 
   type_param_check:
-      { result = false }
-    | kUNCHECKED { result = true }
+      { result = LocatedValue.new(value: false, location: nil) }
+    | kUNCHECKED { result = LocatedValue.new(value: true, location: val[0].location) }
 
   type_params:
       { result = nil }
@@ -589,6 +802,10 @@ rule
   alias_member:
       annotations kALIAS method_name method_name {
         location = val[1].location + val[3].location
+        location = location.with_children(
+          required: { keyword: val[1].location, new_name: val[2].location, old_name: val[3].location },
+          optional: { new_kind: nil, old_kind: nil }
+        )
         result = Members::Alias.new(
           new_name: val[2].value.to_sym,
           old_name: val[3].value.to_sym,
@@ -600,6 +817,13 @@ rule
       }
     | annotations kALIAS kSELF kDOT method_name kSELF kDOT method_name {
         location = val[1].location + val[7].location
+        location = location.with_children(
+          required: { keyword: val[1].location, new_name: val[4].location, old_name: val[7].location },
+          optional: {
+            new_kind: val[2].location + val[3].location,
+            old_kind: val[5].location + val[6].location
+          }
+        )
         result = Members::Alias.new(
           new_name: val[4].value.to_sym,
           old_name: val[7].value.to_sym,
@@ -968,40 +1192,97 @@ rule
 
   required_positional:
       type var_name_opt {
-        result = Types::Function::Param.new(type: val[0],
-                                            name: val[1]&.value&.to_sym)
+        loc = val[0].location
+        if var_name = val[1]
+          loc = loc + var_name.location
+        end
+        loc = loc.with_children(optional: { name: var_name&.location })
+
+        result = Types::Function::Param.new(
+          type: val[0],
+          name: var_name&.value&.to_sym,
+          location: loc
+        )
       }
 
   optional_positional:
       kQUESTION type var_name_opt {
-        result = Types::Function::Param.new(type: val[1],
-                                            name: val[2]&.value&.to_sym)
+        loc = val[0].location + val[1].location
+        if var_name = val[2]
+          loc = loc + var_name.location
+        end
+        loc = loc.with_children(optional: { name: var_name&.location })
+
+        result = Types::Function::Param.new(
+          type: val[1],
+          name: val[2]&.value&.to_sym,
+          location: loc
+        )
       }
 
   rest_positional:
       kSTAR type var_name_opt {
-        result = Types::Function::Param.new(type: val[1],
-                                            name: val[2]&.value&.to_sym)
+        loc = val[0].location + val[1].location
+        if var_name = val[2]
+          loc = loc + var_name.location
+        end
+        loc = loc.with_children(optional: { name: var_name&.location })
+
+        result = Types::Function::Param.new(
+          type: val[1],
+          name: val[2]&.value&.to_sym,
+          location: loc
+        )
       }
 
   required_keyword:
       keyword_name type var_name_opt {
-        param = Types::Function::Param.new(type: val[1],
-                                           name: val[2]&.value&.to_sym)
+        loc = val[0].location + val[1].location
+        if var_name = val[2]
+          loc = loc + var_name.location
+        end
+
+        loc = loc.with_children(optional: { name: var_name&.location })
+
+        param = Types::Function::Param.new(
+          type: val[1],
+          name: val[2]&.value&.to_sym,
+          location: loc
+        )
         result = { val[0].value => param }
       }
 
   optional_keyword:
       kQUESTION keyword_name type var_name_opt {
-        param = Types::Function::Param.new(type: val[2],
-                                           name: val[3]&.value&.to_sym)
+        loc = val[0].location + val[2].location
+        if var_name = val[3]
+          loc = loc + var_name.location
+        end
+
+        loc = loc.with_children(optional: { name: var_name&.location })
+
+        param = Types::Function::Param.new(
+          type: val[2],
+          name: val[3]&.value&.to_sym,
+          location: loc
+        )
         result = { val[1].value => param }
       }
 
   rest_keyword:
       kSTAR2 type var_name_opt {
-        result = Types::Function::Param.new(type: val[1],
-                                            name: val[2]&.value&.to_sym)
+        loc = val[0].location + val[1].location
+        if var_name = val[2]
+          loc = loc + var_name.location
+        end
+
+        loc = loc.with_children(optional: { name: var_name&.location })
+
+        result = Types::Function::Param.new(
+          type: val[1],
+          name: val[2]&.value&.to_sym,
+          location: loc
+        )
       }
 
   var_name_opt:
@@ -1429,6 +1710,16 @@ end
 
 def on_error(token_id, error_value, value_stack)
   raise SyntaxError.new(token_str: token_to_str(token_id), error_value: error_value, value_stack: value_stack)
+end
+
+def split_kw_loc(loc)
+  buf = loc.buffer
+  start_pos = loc.start_pos
+  end_pos = loc.end_pos
+  [
+    Location.new(buffer: buf, start_pos: start_pos, end_pos: end_pos - 1),
+    Location.new(buffer: buf, start_pos: end_pos - 1, end_pos: end_pos)
+  ]
 end
 
 class SyntaxError < ParsingError

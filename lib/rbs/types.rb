@@ -659,10 +659,12 @@ module RBS
       class Param
         attr_reader :type
         attr_reader :name
+        attr_reader :location
 
-        def initialize(type:, name:)
+        def initialize(type:, name:, location: nil)
           @type = type
           @name = name
+          @location = location
         end
 
         def ==(other)
@@ -677,7 +679,7 @@ module RBS
 
         def map_type(&block)
           if block
-            Param.new(name: name, type: yield(type))
+            Param.new(name: name, type: yield(type), location: location)
           else
             enum_for :map_type
           end

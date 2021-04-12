@@ -10,11 +10,21 @@ module RBS
 
       class ModuleTypeParams
         class TypeParam
+          # Key
+          # ^^^ name
+          #
+          # unchecked out Elem
+          # ^^^^^^^^^          unchecked
+          #           ^^^      variance
+          #               ^^^^ name
+          type loc = Location::WithChildren[:name, :variance | :unchecked]
+
           attr_reader name: Symbol
           attr_reader variance: variance
           attr_reader skip_validation: bool
+          attr_reader location: loc?
 
-          def initialize: (name: Symbol, variance: variance, skip_validation: boolish) -> void
+          def initialize: (name: Symbol, variance: variance, skip_validation: boolish, location: loc?) -> void
 
           include _ToJson
         end
@@ -68,18 +78,41 @@ module RBS
       end
 
       class Class < Base
-        type member = Members::t | t
-
         class Super
+          # String
+          # ^^^^^^  name
+          #
+          # Array[String]
+          # ^^^^^         name
+          #      ^^^^^^^^ args
+          #
+          type loc = Location::WithChildren[:name, :args]
+
           attr_reader name: TypeName
           attr_reader args: Array[Types::t]
-          attr_reader location: Location?
+          attr_reader location: loc?
 
-          def initialize: (name: TypeName, args: Array[Types::t], location: Location?) -> void
+          def initialize: (name: TypeName, args: Array[Types::t], location: loc?) -> void
 
           include _HashEqual
           include _ToJson
         end
+
+        type member = Members::t | t
+
+        # class Foo end
+        # ^^^^^         keyword
+        #       ^^^     name
+        #           ^^^ end
+        #
+        # class Foo[A] < String end
+        # ^^^^^                     keyword
+        #       ^^^                 name
+        #          ^^^              type_params
+        #              ^            lt
+        #                       ^^^ end
+        #
+        type loc = Location::WithChildren[:keyword | :name | :end, :type_params | :lt]
 
         include NestedDeclarationHelper
         include MixinHelper
@@ -89,24 +122,28 @@ module RBS
         attr_reader members: Array[member]
         attr_reader super_class: Super?
         attr_reader annotations: Array[Annotation]
-        attr_reader location: Location?
+        attr_reader location: loc?
         attr_reader comment: Comment?
 
-        def initialize: (name: TypeName, type_params: ModuleTypeParams, members: Array[member], super_class: Super?, annotations: Array[Annotation], location: Location?, comment: Comment?) -> void
+        def initialize: (name: TypeName, type_params: ModuleTypeParams, members: Array[member], super_class: Super?, annotations: Array[Annotation], location: loc?, comment: Comment?) -> void
 
         include _HashEqual
         include _ToJson
       end
 
       class Module < Base
-        type member = Members::t | t
-
         class Self
+          # _Each[String]
+          # ^^^^^         name
+          #      ^^^^^^^^ args
+          #
+          type loc = Location::WithChildren[:name, :args]
+
           attr_reader name: TypeName
           attr_reader args: Array[Types::t]
-          attr_reader location: Location?
+          attr_reader location: loc?
 
-          def initialize: (name: TypeName, args: Array[Types::t], location: Location?) -> void
+          def initialize: (name: TypeName, args: Array[Types::t], location: loc?) -> void
 
           include _HashEqual
           include _ToJson
@@ -114,18 +151,35 @@ module RBS
           def to_s: () -> String
         end
 
+        type member = Members::t | t
+
+        # module Foo end
+        # ^^^^^^         keyword
+        #        ^^^     name
+        #            ^^^ end
+        #
+        # module Foo[A] : BasicObject end
+        # ^^^^^^                          keyword
+        #        ^^^                      name
+        #           ^^^                   type_params
+        #               ^                 colon
+        #                 ^^^^^^^^^^^     self_types
+        #                             ^^^ end
+        #
+        type loc = Location::WithChildren[:keyword | :name | :end, :type_params | :colon | :self_types]
+
         include NestedDeclarationHelper
         include MixinHelper
 
         attr_reader name: TypeName
         attr_reader type_params: ModuleTypeParams
         attr_reader members: Array[member]
-        attr_reader location: Location?
+        attr_reader location: loc?
         attr_reader annotations: Array[Annotation]
         attr_reader self_types: Array[Self]
         attr_reader comment: Comment?
 
-        def initialize: (name: TypeName, type_params: ModuleTypeParams, members: Array[member], location: Location?, annotations: Array[Annotation], self_types: Array[Self], comment: Comment?) -> void
+        def initialize: (name: TypeName, type_params: ModuleTypeParams, members: Array[member], location: loc?, annotations: Array[Annotation], self_types: Array[Self], comment: Comment?) -> void
 
         include _HashEqual
         include _ToJson
@@ -134,14 +188,27 @@ module RBS
       class Interface
         type member = Members::t
 
+        # interface _Foo end
+        # ^^^^^^^^^          keyword
+        #           ^^^^     name
+        #                ^^^ end
+        #
+        # interface _Bar[A, B] end
+        # ^^^^^^^^^                keyword
+        #           ^^^^           name
+        #               ^^^^^^     type_params
+        #                      ^^^ end
+        #
+        type loc = Location::WithChildren[:name | :keyword | :end, :type_params]
+
         attr_reader name: TypeName
         attr_reader type_params: ModuleTypeParams
         attr_reader members: Array[member]
         attr_reader annotations: Array[Annotation]
-        attr_reader location: Location?
+        attr_reader location: loc?
         attr_reader comment: Comment?
 
-        def initialize: (name: TypeName, type_params: ModuleTypeParams, members: Array[member], annotations: Array[Annotation], location: Location?, comment: Comment?) -> void
+        def initialize: (name: TypeName, type_params: ModuleTypeParams, members: Array[member], annotations: Array[Annotation], location: loc?, comment: Comment?) -> void
 
         include MixinHelper
 
@@ -150,37 +217,55 @@ module RBS
       end
 
       class Alias < Base
+        # type loc = Location
+        # ^^^^                keyword
+        #      ^^^            name
+        #          ^          eq
+        type loc = Location::WithChildren[:keyword | :name | :eq, bot]
+
         attr_reader name: TypeName
         attr_reader type: Types::t
         attr_reader annotations: Array[Annotation]
-        attr_reader location: Location?
+        attr_reader location: loc?
         attr_reader comment: Comment?
 
-        def initialize: (name: TypeName, type: Types::t, annotations: Array[Annotation], location: Location?, comment: Comment?) -> void
+        def initialize: (name: TypeName, type: Types::t, annotations: Array[Annotation], location: loc?, comment: Comment?) -> void
 
         include _HashEqual
         include _ToJson
       end
 
       class Constant < Base
+        # VERSION: String
+        # ^^^^^^^         name
+        #        ^        colon
+        #
+        type loc = Location::WithChildren[:name | :colon, bot]
+
         attr_reader name: TypeName
         attr_reader type: Types::t
-        attr_reader location: Location?
+        attr_reader location: loc?
         attr_reader comment: Comment?
 
-        def initialize: (name: TypeName, type: Types::t, location: Location?, comment: Comment?) -> void
+        def initialize: (name: TypeName, type: Types::t, location: loc?, comment: Comment?) -> void
 
         include _HashEqual
         include _ToJson
       end
 
       class Global < Base
+        # $SIZE: String
+        # ^^^^^         name
+        #      ^        colon
+        #
+        type loc = Location::WithChildren[:name | :colon, bot]
+
         attr_reader name: Symbol
         attr_reader type: Types::t
-        attr_reader location: Location?
+        attr_reader location: loc?
         attr_reader comment: Comment?
 
-        def initialize: (name: Symbol, type: Types::t, location: Location?, comment: Comment?) -> void
+        def initialize: (name: Symbol, type: Types::t, location: loc?, comment: Comment?) -> void
 
         include _HashEqual
         include _ToJson
