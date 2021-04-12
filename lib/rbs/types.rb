@@ -52,9 +52,9 @@ module RBS
         include EmptyEachType
         include NoTypeName
 
-        def to_json(*a)
+        def to_json(state = _ = nil)
           klass = to_s.to_sym
-          { class: klass, location: location }.to_json(*a)
+          { class: klass, location: location }.to_json(state)
         end
 
         def to_s(level = 0)
@@ -125,8 +125,8 @@ module RBS
         end
       end
 
-      def to_json(*a)
-        { class: :variable, name: name, location: location }.to_json(*a)
+      def to_json(state = _ = nil)
+        { class: :variable, name: name, location: location }.to_json(state)
       end
 
       def sub(s)
@@ -177,8 +177,8 @@ module RBS
       include NoFreeVariables
       include NoSubst
 
-      def to_json(*a)
-        { class: :class_singleton, name: name, location: location }.to_json(*a)
+      def to_json(state = _ = nil)
+        { class: :class_singleton, name: name, location: location }.to_json(state)
       end
 
       def to_s(level = 0)
@@ -245,8 +245,8 @@ module RBS
         @location = location
       end
 
-      def to_json(*a)
-        { class: :interface, name: name, args: args, location: location }.to_json(*a)
+      def to_json(state = _ = nil)
+        { class: :interface, name: name, args: args, location: location }.to_json(state)
       end
 
       def sub(s)
@@ -275,8 +275,8 @@ module RBS
         @location = location
       end
 
-      def to_json(*a)
-        { class: :class_instance, name: name, args: args, location: location }.to_json(*a)
+      def to_json(state = _ = nil)
+        { class: :class_instance, name: name, args: args, location: location }.to_json(state)
       end
 
       def sub(s)
@@ -316,8 +316,8 @@ module RBS
       include NoFreeVariables
       include NoSubst
 
-      def to_json(*a)
-        { class: :alias, name: name, location: location }.to_json(*a)
+      def to_json(state = _ = nil)
+        { class: :alias, name: name, location: location }.to_json(state)
       end
 
       def to_s(level = 0)
@@ -361,8 +361,8 @@ module RBS
         end
       end
 
-      def to_json(*a)
-        { class: :tuple, types: types, location: location }.to_json(*a)
+      def to_json(state = _ = nil)
+        { class: :tuple, types: types, location: location }.to_json(state)
       end
 
       def sub(s)
@@ -421,8 +421,8 @@ module RBS
         end
       end
 
-      def to_json(*a)
-        { class: :record, fields: fields, location: location }.to_json(*a)
+      def to_json(state = _ = nil)
+        { class: :record, fields: fields, location: location }.to_json(state)
       end
 
       def sub(s)
@@ -482,8 +482,8 @@ module RBS
         type.free_variables(set)
       end
 
-      def to_json(*a)
-        { class: :optional, type: type, location: location }.to_json(*a)
+      def to_json(state = _ = nil)
+        { class: :optional, type: type, location: location }.to_json(state)
       end
 
       def sub(s)
@@ -545,8 +545,8 @@ module RBS
         end
       end
 
-      def to_json(*a)
-        { class: :union, types: types, location: location }.to_json(*a)
+      def to_json(state = _ = nil)
+        { class: :union, types: types, location: location }.to_json(state)
       end
 
       def sub(s)
@@ -613,8 +613,8 @@ module RBS
         end
       end
 
-      def to_json(*a)
-        { class: :intersection, types: types, location: location }.to_json(*a)
+      def to_json(state = _ = nil)
+        { class: :intersection, types: types, location: location }.to_json(state)
       end
 
       def sub(s)
@@ -683,8 +683,8 @@ module RBS
           end
         end
 
-        def to_json(*a)
-          { type: type, name: name }.to_json(*a)
+        def to_json(state = _ = nil)
+          { type: type, name: name }.to_json(state)
         end
 
         def to_s
@@ -826,7 +826,7 @@ module RBS
         end
       end
 
-      def to_json(*a)
+      def to_json(state = _ = nil)
         {
           required_positionals: required_positionals,
           optional_positionals: optional_positionals,
@@ -836,7 +836,7 @@ module RBS
           optional_keywords: optional_keywords,
           rest_keywords: rest_keywords,
           return_type: return_type
-        }.to_json(*a)
+        }.to_json(state)
       end
 
       def sub(s)
@@ -966,11 +966,11 @@ module RBS
           other.required == required
       end
 
-      def to_json(*a)
+      def to_json(state = _ = nil)
         {
           type: type,
           required: required
-        }.to_json(*a)
+        }.to_json(state)
       end
 
       def sub(s)
@@ -1015,13 +1015,13 @@ module RBS
         set
       end
 
-      def to_json(*a)
+      def to_json(state = _ = nil)
         {
           class: :proc,
           type: type,
           block: block,
           location: location
-        }.to_json(*a)
+        }.to_json(state)
       end
 
       def sub(s)
@@ -1083,8 +1083,8 @@ module RBS
       include EmptyEachType
       include NoTypeName
 
-      def to_json(*a)
-        { class: :literal, literal: literal.inspect, location: location }.to_json(*a)
+      def to_json(state = _ = nil)
+        { class: :literal, literal: literal.inspect, location: location }.to_json(state)
       end
 
       def to_s(level = 0)

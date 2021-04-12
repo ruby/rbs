@@ -34,7 +34,7 @@ module RBS
 
     def to_s: () -> ::String
 
-    def to_json: (*untyped a) -> untyped
+    include _ToJson
 
     # Returns a namespace with same components of self.
     def to_namespace: () -> Namespace

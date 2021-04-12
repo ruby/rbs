@@ -61,7 +61,7 @@ module RBS
           )
         end
 
-        def to_json(*a)
+        def to_json(state = _ = nil)
           {
             member: :method_definition,
             kind: kind,
@@ -70,7 +70,7 @@ module RBS
             location: location,
             comment: comment,
             overload: overload
-          }.to_json(*a)
+          }.to_json(state)
         end
       end
 
@@ -101,42 +101,42 @@ module RBS
       class InstanceVariable < Base
         include Var
 
-        def to_json(*a)
+        def to_json(state = _ = nil)
           {
             member: :instance_variable,
             name: name,
             type: type,
             location: location,
             comment: comment
-          }.to_json(*a)
+          }.to_json(state)
         end
       end
 
       class ClassInstanceVariable < Base
         include Var
 
-        def to_json(*a)
+        def to_json(state = _ = nil)
           {
             member: :class_instance_variable,
             name: name,
             type: type,
             location: location,
             comment: comment
-          }.to_json(*a)
+          }.to_json(state)
         end
       end
 
       class ClassVariable < Base
         include Var
 
-        def to_json(*a)
+        def to_json(state = _ = nil)
           {
             member: :class_variable,
             name: name,
             type: type,
             location: location,
             comment: comment
-          }.to_json(*a)
+          }.to_json(state)
         end
       end
 
@@ -171,7 +171,7 @@ module RBS
       class Include < Base
         include Mixin
 
-        def to_json(*a)
+        def to_json(state = _ = nil)
           {
             member: :include,
             name: name,
@@ -179,14 +179,14 @@ module RBS
             annotations: annotations,
             location: location,
             comment: comment
-          }.to_json(*a)
+          }.to_json(state)
         end
       end
 
       class Extend < Base
         include Mixin
 
-        def to_json(*a)
+        def to_json(state = _ = nil)
           {
             member: :extend,
             name: name,
@@ -194,14 +194,14 @@ module RBS
             annotations: annotations,
             location: location,
             comment: comment
-          }.to_json(*a)
+          }.to_json(state)
         end
       end
 
       class Prepend < Base
         include Mixin
 
-        def to_json(*a)
+        def to_json(state = _ = nil)
           {
             member: :prepend,
             name: name,
@@ -209,7 +209,7 @@ module RBS
             annotations: annotations,
             location: location,
             comment: comment
-          }.to_json(*a)
+          }.to_json(state)
         end
       end
 
@@ -263,7 +263,7 @@ module RBS
       class AttrReader < Base
         include Attribute
 
-        def to_json(*a)
+        def to_json(state = _ = nil)
           {
             member: :attr_reader,
             name: name,
@@ -273,14 +273,14 @@ module RBS
             annotations: annotations,
             location: location,
             comment: comment
-          }.to_json(*a)
+          }.to_json(state)
         end
       end
 
       class AttrAccessor < Base
         include Attribute
 
-        def to_json(*a)
+        def to_json(state = _ = nil)
           {
             member: :attr_accessor,
             name: name,
@@ -290,14 +290,14 @@ module RBS
             annotations: annotations,
             location: location,
             comment: comment
-          }.to_json(*a)
+          }.to_json(state)
         end
       end
 
       class AttrWriter < Base
         include Attribute
 
-        def to_json(*a)
+        def to_json(state = _ = nil)
           {
             member: :attr_writer,
             name: name,
@@ -307,7 +307,7 @@ module RBS
             annotations: annotations,
             location: location,
             comment: comment
-          }.to_json(*a)
+          }.to_json(state)
         end
       end
 
@@ -332,16 +332,16 @@ module RBS
       class Public < Base
         include LocationOnly
 
-        def to_json(*a)
-          { member: :public, location: location }.to_json(*a)
+        def to_json(state = _ = nil)
+          { member: :public, location: location }.to_json(state)
         end
       end
 
       class Private < Base
         include LocationOnly
 
-        def to_json(*a)
-          { member: :private, location: location }.to_json(*a)
+        def to_json(state = _ = nil)
+          { member: :private, location: location }.to_json(state)
         end
       end
 
@@ -375,7 +375,7 @@ module RBS
           self.class.hash ^ new_name.hash ^ old_name.hash ^ kind.hash
         end
 
-        def to_json(*a)
+        def to_json(state = _ = nil)
           {
             member: :alias,
             new_name: new_name,
@@ -384,7 +384,7 @@ module RBS
             annotations: annotations,
             location: location,
             comment: comment
-          }.to_json(*a)
+          }.to_json(state)
         end
 
         def instance?

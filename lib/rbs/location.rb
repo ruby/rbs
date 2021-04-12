@@ -94,7 +94,7 @@ module RBS
         loc.start_pos == end_pos
     end
 
-    def to_json(*args)
+    def to_json(state = _ = nil)
       {
         start: {
           line: start_line,
@@ -107,7 +107,7 @@ module RBS
         buffer: {
           name: name&.to_s
         }
-      }.to_json(*args)
+      }.to_json(state)
     end
   end
 end

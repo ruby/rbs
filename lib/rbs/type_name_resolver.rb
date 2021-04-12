@@ -39,7 +39,7 @@ module RBS
         raise unless path_head
 
         name_head = TypeName.new(name: path_head, namespace: Namespace.empty)
-
+ 
         absolute_head = context.find do |namespace|
           # @type break: TypeName
           full_name = name_head.with_prefix(namespace)

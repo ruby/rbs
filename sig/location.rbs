@@ -41,7 +41,7 @@ module RBS
 
     def pred?: (Location loc) -> bool
 
-    def to_json: (*untyped args) -> untyped
+    include _ToJson
 
     # `<<` locations given as argument.
     def concat: (*Location?) -> Location

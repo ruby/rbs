@@ -32,7 +32,7 @@ module RBS
 
       # Returns a JSON representation.
       #
-      def to_json: (*untyped) -> String
+      include _ToJson
 
       # Returns a String representation.
       # `level` is used internally.
@@ -300,7 +300,7 @@ module RBS
       def each_param: () { (Param) -> void } -> void
                     | -> Enumerator[Param, void]
 
-      def to_json: (*untyped) -> String
+      include _ToJson
 
       def sub: (Substitution) -> Function
 
@@ -336,7 +336,7 @@ module RBS
 
       def ==: (untyped other) -> bool
 
-      def to_json: (*untyped) -> String
+      include _ToJson
 
       def sub: (Substitution) -> Block
 

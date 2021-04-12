@@ -8,12 +8,14 @@ module RBS
         attr_reader :params
 
         TypeParam = _ = Struct.new(:name, :variance, :skip_validation, keyword_init: true) do
-          def to_json(*a)
+          # @implements TypeParam
+
+          def to_json(state = _ = nil)
             {
               name: name,
               variance: variance,
               skip_validation: skip_validation,
-            }.to_json(*a)
+            }.to_json(state)
           end
         end
 
@@ -40,10 +42,10 @@ module RBS
           params.find {|p| p.name == name }
         end
 
-        def to_json(*a)
+        def to_json(state = _ = nil)
           {
             params: params
-          }.to_json(*a)
+          }.to_json(state)
         end
 
         def each(&block)
@@ -154,12 +156,12 @@ module RBS
             self.class.hash ^ name.hash ^ args.hash
           end
 
-          def to_json(*a)
+          def to_json(state = _ = nil)
             {
               name: name,
               args: args,
               location: location
-            }.to_json(*a)
+            }.to_json(state)
           end
         end
 
@@ -198,7 +200,7 @@ module RBS
           self.class.hash ^ name.hash ^ type_params.hash ^ super_class.hash ^ members.hash
         end
 
-        def to_json(*a)
+        def to_json(state = _ = nil)
           {
             declaration: :class,
             name: name,
@@ -208,7 +210,7 @@ module RBS
             annotations: annotations,
             location: location,
             comment: comment
-          }.to_json(*a)
+          }.to_json(state)
         end
       end
 
@@ -234,12 +236,12 @@ module RBS
             self.class.hash ^ name.hash ^ args.hash ^ location.hash
           end
 
-          def to_json(*a)
+          def to_json(state = _ = nil)
             {
               name: name,
               args: args,
               location: location
-            }.to_json(*a)
+            }.to_json(state)
           end
 
           def to_s
@@ -286,7 +288,7 @@ module RBS
           self.class.hash ^ name.hash ^ type_params.hash ^ self_types.hash ^ members.hash
         end
 
-        def to_json(*a)
+        def to_json(state = _ = nil)
           {
             declaration: :module,
             name: name,
@@ -296,7 +298,7 @@ module RBS
             annotations: annotations,
             location: location,
             comment: comment
-          }.to_json(*a)
+          }.to_json(state)
         end
       end
 
@@ -332,7 +334,7 @@ module RBS
           self.class.hash ^ type_params.hash ^ members.hash
         end
 
-        def to_json(*a)
+        def to_json(state = _ = nil)
           {
             declaration: :interface,
             name: name,
@@ -341,7 +343,7 @@ module RBS
             annotations: annotations,
             location: location,
             comment: comment
-          }.to_json(*a)
+          }.to_json(state)
         end
       end
 
@@ -372,7 +374,7 @@ module RBS
           self.class.hash ^ name.hash ^ type.hash
         end
 
-        def to_json(*a)
+        def to_json(state = _ = nil)
           {
             declaration: :alias,
             name: name,
@@ -380,7 +382,7 @@ module RBS
             annotations: annotations,
             location: location,
             comment: comment
-          }.to_json(*a)
+          }.to_json(state)
         end
       end
 
@@ -409,14 +411,14 @@ module RBS
           self.class.hash ^ name.hash ^ type.hash
         end
 
-        def to_json(*a)
+        def to_json(state = _ = nil)
           {
             declaration: :constant,
             name: name,
             type: type,
             location: location,
             comment: comment
-          }.to_json(*a)
+          }.to_json(state)
         end
       end
 
@@ -445,14 +447,14 @@ module RBS
           self.class.hash ^ name.hash ^ type.hash
         end
 
-        def to_json(*a)
+        def to_json(state = _ = nil)
           {
             declaration: :global,
             name: name,
             type: type,
             location: location,
             comment: comment
-          }.to_json(*a)
+          }.to_json(state)
         end
       end
     end

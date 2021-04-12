@@ -2,9 +2,11 @@ module RBS
   class DefinitionBuilder
     class MethodBuilder
       class Methods
-        Definition = Struct.new(:name, :type, :originals, :overloads, :accessibilities, keyword_init: true) do
+        Definition = _ = Struct.new(:name, :type, :originals, :overloads, :accessibilities, keyword_init: true) do
+          # @implements Definition
+
           def original
-            originals[0]
+            originals.first
           end
 
           def accessibility

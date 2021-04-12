@@ -746,6 +746,20 @@ module RBS
                               end
             )
           end
+
+          defs = method.defs.map do |defn|
+            defn.update(
+              type: sub.empty? ? defn.type : defn.type.sub(sub),
+              implemented_in: case implemented_in
+                              when :keep
+                                defn.implemented_in
+                              when nil
+                                nil
+                              else
+                                implemented_in
+                              end
+            )
+          end
         end
 
         super_method = methods[name]

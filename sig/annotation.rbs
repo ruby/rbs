@@ -20,7 +20,7 @@ module RBS
 
       def hash: () -> Integer
 
-      def to_json: (*untyped) -> String
+      include _ToJson
     end
   end
 end

@@ -19,8 +19,8 @@ module RBS
         self.class.hash ^ string.hash
       end
 
-      def to_json(*a)
-        { string: string, location: location }.to_json(*a)
+      def to_json(state = _ = nil)
+        { string: string, location: location }.to_json(state)
       end
 
       def concat(string:, location:)

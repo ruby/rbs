@@ -5,7 +5,7 @@ module RBS
     interface _WithContext
       def outer: () -> Array[module_decl]
 
-      def decl: () -> module_decl
+      def decl: () -> untyped
     end
 
     module ContextUtil : _WithContext
@@ -23,7 +23,7 @@ module RBS
       end
 
       attr_reader name: TypeName
-      attr_reader decls: Array[D[module_decl]]
+      attr_reader decls: Array[untyped]
 
       def initialize: (name: TypeName) -> void
 

@@ -18,7 +18,7 @@ module RBS
 
       def hash: () -> Integer
 
-      def to_json: (*untyped) -> String
+      include _ToJson
 
       def concat: (string: String, location: Location?) -> self
     end
