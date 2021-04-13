@@ -267,8 +267,10 @@ module RBS
       end
 
       if member.overload
-        string << padding
-        string << "|"
+        if member.types.size > 0
+          string << padding
+          string << "|"
+        end
         string << " ...\n"
       end
 

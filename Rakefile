@@ -2,6 +2,8 @@ require "bundler/gem_tasks"
 require "rake/testtask"
 require "rbconfig"
 
+$LOAD_PATH << File.join(__dir__, "test")
+
 ruby = ENV["RUBY"] || RbConfig.ruby
 racc = ENV.fetch("RACC", "racc")
 rbs = File.join(__dir__, "exe/rbs")

@@ -6,6 +6,7 @@ class RBS::MethodTypeParsingTest < Test::Unit::TestCase
   Types = RBS::Types
   TypeName = RBS::TypeName
   Namespace = RBS::Namespace
+  Location = RBS::Location
 
   def test_method_type
     Parser.parse_method_type("()->void").yield_self do |type|
@@ -32,5 +33,46 @@ class RBS::MethodTypeParsingTest < Test::Unit::TestCase
     end
 
     assert_equal "}", error.error_value
+  end
+
+  def test_method_parameter_location
+    Parser.parse_method_type("(untyped a, ?Integer b, *String c, Symbol d) -> void").tap do |type|
+      type.type.required_positionals[0].tap do |param|
+        assert_instance_of Location::WithChildren, param.location
+        assert_equal "a", param.location[:name].source
+      end
+
+      type.type.optional_positionals[0].tap do |param|
+        assert_instance_of Location::WithChildren, param.location
+        assert_equal "b", param.location[:name].source
+      end
+
+      type.type.rest_positionals.tap do |param|
+        assert_instance_of Location::WithChildren, param.location
+        assert_equal "c", param.location[:name].source
+      end
+
+      type.type.trailing_positionals[0].tap do |param|
+        assert_instance_of Location::WithChildren, param.location
+        assert_equal "d", param.location[:name].source
+      end
+    end
+
+    Parser.parse_method_type("(a: untyped a, ?b: Integer b, **String c) -> void").tap do |type|
+      type.type.required_keywords[:a].tap do |param|
+        assert_instance_of Location::WithChildren, param.location
+        assert_equal "a", param.location[:name].source
+      end
+
+      type.type.optional_keywords[:b].tap do |param|
+        assert_instance_of Location::WithChildren, param.location
+        assert_equal "b", param.location[:name].source
+      end
+
+      type.type.rest_keywords.tap do |param|
+        assert_instance_of Location::WithChildren, param.location
+        assert_equal "c", param.location[:name].source
+      end
+    end
   end
 end

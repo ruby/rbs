@@ -260,10 +260,13 @@ module RBS
 
     class Function
       class Param
+        type loc = Location::WithChildren[bot, :name]
+
         attr_reader type: t
         attr_reader name: Symbol?
+        attr_reader location: loc?
 
-        def initialize: (type: t, name: Symbol?) -> void
+        def initialize: (type: t, name: Symbol?, ?location: loc?) -> void
 
         def map_type: { (t) -> t } -> Param
                     | -> Enumerator[t, Param]

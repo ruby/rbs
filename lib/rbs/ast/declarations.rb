@@ -7,7 +7,7 @@ module RBS
       class ModuleTypeParams
         attr_reader :params
 
-        TypeParam = _ = Struct.new(:name, :variance, :skip_validation, keyword_init: true) do
+        TypeParam = _ = Struct.new(:name, :variance, :skip_validation, :location, keyword_init: true) do
           # @implements TypeParam
 
           def to_json(state = _ = nil)
@@ -16,6 +16,19 @@ module RBS
               variance: variance,
               skip_validation: skip_validation,
             }.to_json(state)
+          end
+
+          def ==(other)
+            other.is_a?(TypeParam) &&
+              other.name == name &&
+              other.variance == variance &&
+              other.skip_validation == skip_validation
+          end
+
+          alias eql? ==
+
+          def hash
+            self.class.hash ^ name.hash ^ variance.hash ^ skip_validation.hash
           end
         end
 
@@ -82,7 +95,7 @@ module RBS
           ModuleTypeParams.new().tap do |params|
             names.each.with_index do |new_name, index|
               param = self.params[index]
-              params.add(TypeParam.new(name: new_name, variance: param.variance, skip_validation: param.skip_validation))
+              params.add(TypeParam.new(name: new_name, variance: param.variance, skip_validation: param.skip_validation, location: param.location))
             end
           end
         end

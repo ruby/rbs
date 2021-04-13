@@ -42,6 +42,10 @@ module RBS
       @end_loc ||= buffer.pos_to_loc(end_pos)
     end
 
+    def range
+      start_pos...end_pos
+    end
+
     def source
       @source ||= buffer.content[start_pos...end_pos] or raise
     end
@@ -108,6 +112,106 @@ module RBS
           name: name&.to_s
         }
       }.to_json(state)
+    end
+
+    def with_children(required: {}, optional: {})
+      # @type var required: Hash[Symbol, Range[Integer] | Location]
+      # @type var optional: Hash[Symbol, Range[Integer] | Location | nil]
+
+      this = WithChildren.new(buffer: buffer, start_pos: start_pos, end_pos: end_pos)
+
+      req = required.transform_values do |value|
+        case value
+        when Location
+          value.range
+        else
+          value
+        end
+      end
+
+      opt = optional.transform_values do |value|
+        case value
+        when Location
+          value.range
+        else
+          value
+        end
+      end
+
+      this.required_children.merge!(req)
+      this.optional_children.merge!(opt)
+
+      this
+    end
+
+    class WithChildren < Location
+      attr_reader :required_children, :optional_children
+
+      def initialize(buffer:, start_pos:, end_pos:)
+        super(buffer: buffer, start_pos: start_pos, end_pos: end_pos)
+
+        @optional_children = {}
+        @required_children = {}
+      end
+
+      def initialize_copy(from)
+        required_children.merge!(from.required_children)
+        optional_children.merge!(from.optional_children)
+        self
+      end
+
+      def [](key)
+        case
+        when required_children.key?(_ = key)
+          range = required_children[_ = key]
+          Location.new(buffer: buffer, start_pos: range.begin, end_pos: range.end)
+        when optional_children.key?(_ = key)
+          range = required_children[_ = key] || optional_children[_ = key]
+          if range
+            Location.new(buffer: buffer, start_pos: range.begin, end_pos: range.end)
+          end
+        else
+          raise "Unknown key given: `#{key}`"
+        end
+      end
+
+      def merge_required(hash)
+        this = dup
+
+        h = hash.transform_values do |value|
+          case value
+          when Range
+            value
+          when Location
+            value.range
+          else
+            raise
+          end
+        end
+
+        this.required_children.merge!(h)
+
+        this
+      end
+
+      def merge_optional(hash)
+        this = dup
+
+        h = hash.transform_values do |value|
+          case value
+          when Range
+            value
+          when Location
+            value.range
+          else
+            nil
+          end
+        end
+
+        this.optional_children.merge!(h)
+
+        this
+      end
     end
   end
 end
