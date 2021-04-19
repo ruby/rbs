@@ -3,11 +3,6 @@ module RBS
     # _TypeBase interface represents the operations common to all of the types.
     #
     interface _TypeBase
-      # Location for types in the RBS source code.
-      # `nil` means there is no RBS source code for the type.
-      #
-      def location: () -> Location?
-
       # Returns names of free variables of a type.
       # You can pass a Set instance to add the free variables to the set to avoid Set object allocation.
       #
@@ -70,6 +65,8 @@ module RBS
       class Base
         include _TypeBase
 
+        attr_reader location: Location?
+
         def initialize: (location: Location?) -> void
 
         def ==: (untyped other) -> bool
@@ -119,11 +116,12 @@ module RBS
       @@count: Integer
 
       include _TypeBase
-
       include NoTypeName
       include EmptyEachType
 
       def initialize: (name: Symbol, location: Location?) -> void
+
+      attr_reader location: Location?
 
       def ==: (untyped other) -> bool
 
@@ -144,21 +142,26 @@ module RBS
     end
 
     class ClassSingleton
+      # singleton(::Foo)
+      #           ^^^^^  => name
+      type loc = Location::WithChildren[:name, bot]
+
+      def initialize: (name: TypeName, location: loc?) -> void
+
       attr_reader name: TypeName
 
-      include _TypeBase
+      attr_reader location: loc?
 
-      def initialize: (name: TypeName, location: Location?) -> void
+      include _TypeBase
+      include NoFreeVariables
+      include NoSubst
+      include EmptyEachType
 
       def ==: (untyped other) -> bool
 
       alias eql? ==
 
       def hash: () -> Integer
-
-      include NoFreeVariables
-      include NoSubst
-      include EmptyEachType
     end
 
     module Application
@@ -180,11 +183,20 @@ module RBS
     end
 
     class Interface
+      # _Foo
+      # ^^^^ => name
+      #
+      # _Foo[Bar, Baz]
+      # ^^^^           => name
+      #     ^^^^^^^^^^ => args
+      type loc = Location::WithChildren[:name, :args]
+
+      def initialize: (name: TypeName, args: Array[t], location: loc?) -> void
+
       include Application
-
-      def initialize: (name: TypeName, args: Array[t], location: Location?) -> void
-
       include _TypeBase
+
+      attr_reader location: loc?
     end
 
     # ClassInstance represents a type of an instance of a class.
@@ -196,7 +208,17 @@ module RBS
     class ClassInstance
       include Application
 
-      def initialize: (name: TypeName, args: Array[t], location: Location?) -> void
+      # Foo
+      # ^^^ => name
+      #
+      # Foo[Bar, Baz]
+      # ^^^           => name
+      #    ^^^^^^^^^^ => args
+      type loc = Location::WithChildren[:name, :args]
+
+      def initialize: (name: TypeName, args: Array[t], location: loc?) -> void
+
+      attr_reader location: loc?
 
       include _TypeBase
     end
@@ -210,6 +232,8 @@ module RBS
       include NoFreeVariables
       include NoSubst
       include EmptyEachType
+
+      attr_reader location: Location?
     end
 
     class Tuple
@@ -218,6 +242,8 @@ module RBS
       def initialize: (types: Array[t], location: Location?) -> void
 
       include _TypeBase
+
+      attr_reader location: Location?
     end
 
     class Record
@@ -226,6 +252,8 @@ module RBS
       def initialize: (fields: Hash[Symbol, t], location: Location?) -> void
 
       include _TypeBase
+
+      attr_reader location: Location?
     end
 
     class Optional
@@ -234,6 +262,8 @@ module RBS
       def initialize: (type: t, location: Location?) -> void
 
       include _TypeBase
+
+      attr_reader location: Location?
     end
 
     class Union
@@ -242,6 +272,8 @@ module RBS
       def initialize: (types: Array[t], location: Location?) -> void
 
       include _TypeBase
+
+      attr_reader location: Location?
 
       def map_type: () { (t) -> t } -> Union
                   | () -> Enumerator[t, Union]
@@ -253,6 +285,8 @@ module RBS
       def initialize: (types: Array[t], location: Location?) -> void
 
       include _TypeBase
+
+      attr_reader location: Location?
 
       def map_type: () { (t) -> t } -> Intersection
                   | () -> Enumerator[t, Intersection]
@@ -353,6 +387,8 @@ module RBS
       def initialize: (location: Location?, type: Function, block: Block?) -> void
 
       include _TypeBase
+
+      attr_reader location: Location?
     end
 
     class Literal
@@ -367,6 +403,8 @@ module RBS
       include NoSubst
       include EmptyEachType
       include NoTypeName
+
+      attr_reader location: Location?
     end
   end
 end
