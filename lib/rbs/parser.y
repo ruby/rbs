@@ -837,16 +837,24 @@ rule
   type_decl:
       annotations kTYPE type_alias_name kEQ type {
         location = val[1].location + val[4].location
-        result = Declarations::Alias.new(name: val[2].value,
-                                         type: val[4],
-                                         annotations: val[0],
-                                         location: location,
-                                         comment: leading_comment(val[0].first&.location || location))
+        location = location.with_children(
+          required: { keyword: val[1].location, name: val[2].location, eq: val[3].location }
+        )
+        result = Declarations::Alias.new(
+          name: val[2].value,
+          type: val[4],
+          annotations: val[0],
+          location: location,
+          comment: leading_comment(val[0].first&.location || location)
+        )
       }
 
   const_decl:
       class_name kCOLON type {
         location = val[0].location + val[2].location
+        location = location.with_children(
+          required: { name: val[0].location, colon: val[1].location }
+        )
         result = Declarations::Constant.new(name: val[0].value,
                                             type: val[2],
                                             location: location,
@@ -854,6 +862,13 @@ rule
       }
     | namespace tUKEYWORD type {
         location = (val[0] || val[1]).location + val[2].location
+
+        lhs_loc = (val[0] || val[1]).location + val[1].location
+        name_loc, colon_loc = split_kw_loc(lhs_loc)
+        location = location.with_children(
+          required: { name: name_loc, colon: colon_loc }
+        )
+
         name = TypeName.new(name: val[1].value, namespace: val[0]&.value || Namespace.empty)
         result = Declarations::Constant.new(name: name,
                                             type: val[2],
@@ -864,6 +879,9 @@ rule
   global_decl:
       tGLOBALIDENT kCOLON type {
         location = val[0].location + val[2].location
+        location = location.with_children(
+          required: { name: val[0].location, colon: val[1].location }
+        )
         result = Declarations::Global.new(name: val[0].value.to_sym,
                                           type: val[2],
                                           location: location,
@@ -955,11 +973,23 @@ rule
           if is_bound_variable?(name.name)
             result = Types::Variable.new(name: name.name, location: location)
           else
+            location = location.with_children(
+              required: { name: val[0].location },
+              optional: { args: nil }
+            )
             result = Types::ClassInstance.new(name: name, args: args, location: location)
           end
         when name.alias?
+          location = location.with_children(
+            required: { name: val[0].location },
+            optional: { args: nil }
+          )
           result = Types::Alias.new(name: name, location: location)
         when name.interface?
+          location = location.with_children(
+            required: { name: val[0].location },
+            optional: { args: nil }
+          )
           result = Types::Interface.new(name: name, args: args, location: location)
         end
       }
@@ -973,8 +1003,16 @@ rule
           if is_bound_variable?(name.name)
             raise SemanticsError.new("#{name.name} is type variable and cannot be applied", subject: name, location: location)
           end
+          location = location.with_children(
+            required: { name: val[0].location },
+            optional: { args: val[1].location + val[3].location }
+          )
           result = Types::ClassInstance.new(name: name, args: args, location: location)
         when name.interface?
+          location = location.with_children(
+            required: { name: val[0].location },
+            optional: { args: val[1].location + val[3].location }
+          )
           result = Types::Interface.new(name: name, args: args, location: location)
         else
           raise SyntaxError.new(token_str: "kLBRACKET", error_value: val[1])
@@ -997,8 +1035,11 @@ rule
         result = type
       }
     | kSINGLETON kLPAREN class_name kRPAREN {
-        result = Types::ClassSingleton.new(name: val[2].value,
-                                           location: val[0].location + val[3].location)
+        location = val[0].location + val[3].location
+        location = location.with_children(
+          required: { name: val[2].location }
+        )
+        result = Types::ClassSingleton.new(name: val[2].value, location: location)
       }
     | kHAT proc_type {
         type, block = val[1].value

@@ -1701,4 +1701,47 @@ end
       end
     end
   end
+
+  def test_constant_global_location
+    Parser.parse_signature(<<-EOF).tap do |decls|
+X: String
+A::B : String
+$B: Integer
+    EOF
+      decls[0].tap do |decl|
+        assert_instance_of Location::WithChildren, decl.location
+
+        assert_equal "X", decl.location[:name].source
+        assert_equal ":", decl.location[:colon].source
+      end
+
+      decls[1].tap do |decl|
+        assert_instance_of Location::WithChildren, decl.location
+
+        assert_equal "A::B", decl.location[:name].source
+        assert_equal ":", decl.location[:colon].source
+      end
+
+      decls[2].tap do |decl|
+        assert_instance_of Location::WithChildren, decl.location
+
+        assert_equal "$B", decl.location[:name].source
+        assert_equal ":", decl.location[:colon].source
+      end
+    end
+  end
+
+  def test_type_alias_location
+    Parser.parse_signature(<<-EOF).tap do |decls|
+type foo = Integer
+    EOF
+      decls[0].tap do |decl|
+        assert_instance_of Location::WithChildren, decl.location
+
+        assert_equal "type", decl.location[:keyword].source
+        assert_equal "foo", decl.location[:name].source
+        assert_equal "=", decl.location[:eq].source
+      end
+    end
+  end
 end
