@@ -43,6 +43,7 @@ require "rbs/validator"
 require "rbs/factory"
 require "rbs/repository"
 require "rbs/ancestor_graph"
+require "rbs/locator"
 
 begin
   require "rbs/parser"
