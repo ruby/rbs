@@ -11,8 +11,8 @@ _type_ ::= _class-name_ _type-arguments_                (Class instance type)
          | _type_ `|` _type_                            (Union type)
          | _type_ `&` _type_                            (Intersection type)
          | _type_ `?`                                   (Optional type)
-         | `{` _record-name_ `:` _type_ `,` ... `}`     (Record type)
-         | `[]` | `[` _type_ `,` ... `]`                (Tuples)
+         | `{` _record-name_ `:` _type_ `,` etc. `}`     (Record type)
+         | `[]` | `[` _type_ `,` etc. `]`                (Tuples)
          | _type-variable_                              (Type variables)
          | `^(` _parameters_ `) ->` _type_              (Proc type)
          | `self`
@@ -36,7 +36,7 @@ _namespace_ ::=                                         (Empty namespace)
               | _namespace_ /[A-Z]\w*/ `::`             (Namespace)
 
 _type-arguments_ ::=                                    (No application)
-                   | `[` _type_ `,` ... `]`             (Type application)
+                   | `[` _type_ `,` etc. `]`             (Type application)
 
 _literal_ ::= _string-literal_
             | _symbol-literal_
@@ -203,7 +203,6 @@ We can see an example at the definition of `Enumerable#find`:
 ```
 module Enumerable[Elem, Return]
   def find: () { (Elem) -> boolish } -> Elem?
-  ...
 end
 ```
 
@@ -233,11 +232,11 @@ _parameters_ ::= _required-positionals_ _optional-positionals_ _rest-positional_
 
 _parameter_ ::= _type_ _var-name_                                  # Parameter with var name
               | _type_                                             # Parameter without var name
-_required-positionals_ ::= _parameter_ `,` ...
-_optional-positionals_ ::= `?` _parameter_ `,` ...
+_required-positionals_ ::= _parameter_ `,` etc.
+_optional-positionals_ ::= `?` _parameter_ `,` etc.
 _rest-positional_ ::=                                              # Empty
                     | `*` _parameter_
-_trailing-positionals_ ::= _parameter_ `,` ...
+_trailing-positionals_ ::= _parameter_ `,` etc.
 _keywords_ ::=                                                     # Empty
              | `**` _parameter_                                    # Rest keyword
              | _keyword_ `:` _parameter_ `,` _keywords_            # Required keyword
@@ -292,9 +291,10 @@ _method-member_ ::= `def` _method-name_ `:` _method-types_            # Instance
 _method-types_ ::=                                                       # Empty
                  | `super`                                               # `super` overloading
                  | _type-parameters_ _method-type_ `|` _method-types_    # Overloading types
+                 | `...`                                                 # Overloading for duplicate definitions
 
 _type-parameters_ ::=                                                 # Empty
-                    | `[` _type-variable_ `,` ... `]`
+                    | `[` _type-variable_ `,` etc. `]`
 
 _attribute-member_ ::= _attribute-type_ _method-name_ `:` _type_                     # Attribute
                      | _attribute-type_ _method-name_ `(` _ivar-name_ `) :` _type_   # Attribute with variable name specification
@@ -450,7 +450,7 @@ _const-name_ ::= _namespace_ /[A-Z]\w*/
 _global-name_ ::= /$[a-zA-Z]\w+/ | ...
 
 _module-type-parameters_ ::=                                                  # Empty
-                           | `[` _module-type-parameter_ `,` ... `]`
+                           | `[` _module-type-parameter_ `,` etc. `]`
 
 _module-type-parameter_ ::= _check_ _variance_ _type-variable_
 _variance_ ::= `out` | `in`
@@ -475,7 +475,7 @@ For example, an `Array` of `String` can almost be considered to be an `Array` of
 
 ```
 class Array[out T]
-  # ...
+  # etc.
 end
 ```
 
@@ -486,7 +486,7 @@ In those cases, one must use the `unchecked` keyword:
 
 ```
 class Array[unchecked out T]
-  # ...
+  # etc.
 end
 ```
 
