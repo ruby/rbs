@@ -181,7 +181,7 @@ class IO < Object
   #     # ...
   #     f.gets # won't cause Errno::EBADF
   #
-  def autoclose=: (bool) -> bool
+  def autoclose=: (boolish) -> untyped
 
   # Returns `true` if the underlying file descriptor of *ios* will be closed
   # automatically at its finalization, otherwise `false`.
@@ -212,7 +212,7 @@ class IO < Object
   # just ignored since Ruby 2.3.
   def close: () -> NilClass
 
-  def close_on_exec=: (boolish) -> bool
+  def close_on_exec=: (boolish) -> untyped
 
   # Returns `true` if *ios* will be closed on exec.
   #
@@ -656,7 +656,7 @@ class IO < Object
   # ```
   def sync: () -> bool
 
-  def sync=: (boolish) -> bool
+  def sync=: (boolish) -> untyped
 
   def sysread: (Integer maxlen, String outbuf) -> String
 

@@ -130,6 +130,10 @@ class IOInstanceTest < Test::Unit::TestCase
                        io, :autoclose=, true
       assert_send_type "(bool) -> bool",
                        io, :autoclose=, false
+      assert_send_type "(::Integer) -> ::Integer",
+                       io, :autoclose=, 42
+      assert_send_type "(nil) -> nil",
+                       io, :autoclose=, nil
     end
   end
 
@@ -178,6 +182,36 @@ class IOInstanceTest < Test::Unit::TestCase
         assert_send_type "(String, Float) -> Integer",
                          io, :write, "foo", 1.5
       end
+    end
+  end
+
+  def test_close_on_exec
+    IO.open(IO.sysopen(__FILE__)) do |io|
+      assert_send_type '() -> bool',
+                       io, :close_on_exec?
+      assert_send_type '(::Integer) -> untyped',
+                       io, :close_on_exec=, 42
+      assert_send_type '() -> bool',
+                       io, :close_on_exec?
+      assert_send_type '(nil) -> nil',
+                       io, :close_on_exec=, nil
+      assert_send_type '() -> bool',
+                       io, :close_on_exec?
+    end
+  end
+
+  def test_sync
+    IO.open(IO.sysopen(__FILE__)) do |io|
+      assert_send_type '() -> bool',
+                       io, :sync
+      assert_send_type '(::Integer) -> ::Integer',
+                       io, :sync=, 42
+      assert_send_type '() -> bool',
+                       io, :sync
+      assert_send_type '(nil) -> nil',
+                       io, :sync=, nil
+      assert_send_type '() -> bool',
+                       io, :sync
     end
   end
 end
