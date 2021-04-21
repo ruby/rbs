@@ -106,7 +106,9 @@ class Random < Object
 
   # Alias of Random::DEFAULT.rand.
   #
-  def self.rand: (?Integer max) -> Numeric
+  def self.rand: () -> Float
+               | (Integer | ::Range[Integer] max) -> Integer
+               | (Float | ::Range[Float] max) -> Float
 
   # Seeds the system pseudo-random number generator, Random::DEFAULT, with
   # `number`.  The previous seed value is returned.
@@ -126,7 +128,7 @@ class Random < Object
   #     srand 1234               # => 1234
   #     [ rand, rand ]           # => [0.1915194503788923, 0.6221087710398319]
   #
-  def self.srand: (?Integer number) -> Numeric
+  def self.srand: (?Integer number) -> Integer
 end
 
 # The default Pseudorandom number generator.  Used by class methods of Random.
