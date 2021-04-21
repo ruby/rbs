@@ -2,6 +2,40 @@
 
 ## master
 
+## 1.2.0 (2021-04-21)
+
+### Summary
+
+RBS 1.2 ships with better support for AST/token locations and `Locator` utility class. The AST objects now keep the locations of tokens. The `Locator` class is to translate the text position (line and column) to semantic object at the location. The class allows to find if a text position is on the class name of a class declaration.
+
+### Signature updates
+
+* Hash ([#631](https://github.com/ruby/rbs/pull/631), [#632](https://github.com/ruby/rbs/pull/632), [\#637](https://github.com/ruby/rbs/pull/637), [\#638](https://github.com/ruby/rbs/pull/638), [\#639](https://github.com/ruby/rbs/pull/639), )
+* Module ([\#645](https://github.com/ruby/rbs/pull/645))
+* Enumerable ([\#647](https://github.com/ruby/rbs/pull/647))
+* Array ([\#648](https://github.com/ruby/rbs/pull/648))
+* Proc ([\#649](https://github.com/ruby/rbs/pull/649))
+* Struct ([\#650](https://github.com/ruby/rbs/pull/650), [\#668](https://github.com/ruby/rbs/pull/668))
+* Thread ([\#651](https://github.com/ruby/rbs/pull/651))
+* Random ([\#669](https://github.com/ruby/rbs/pull/669))
+* Shellwords ([\#665](https://github.com/ruby/rbs/pull/665))
+* IO ([\#659](https://github.com/ruby/rbs/pull/659))
+
+### Language updates
+
+* Module self type syntax update ([\#653](https://github.com/ruby/rbs/pull/653))
+
+### Library changes
+
+* Token locations ([\#666](https://github.com/ruby/rbs/pull/666))
+* Add RBS::Locator ([\#667](https://github.com/ruby/rbs/pull/667))
+* Fix runtime type checker ([\#644](https://github.com/ruby/rbs/pull/644))
+
+### Miscellaneous
+
+* Update documentation for overloading ([\#658](https://github.com/ruby/rbs/pull/658))
+* Update target ruby version ([\#633](https://github.com/ruby/rbs/pull/633))
+
 ## 1.1.1 (2021-03-12)
 
 ### Signature updates
