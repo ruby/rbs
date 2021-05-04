@@ -608,7 +608,6 @@ rule
   method_member:
       annotations attributes overload kDEF method_kind def_name method_types {
         location = val[3].location + val[6].last.location
-        children = {}
 
         required_children = { keyword: val[3].location, name: val[5].location }
         optional_children = { kind: nil, overload: nil }
