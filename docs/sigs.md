@@ -131,8 +131,10 @@ You may need to specify `-r` or `-I` to load signatures.
 The default is `-I sig`.
 
 ```
-RBS_TEST_OPT='-r set -r pathname -I sig'
+RBS_TEST_OPT='-r pathname -I sig'
 ```
+
+Replacing `pathname` with the `stdlib` you want to include. For example, if you need to load `Set` and `BigDecimal` in `stdlib`, you would need to have `RBS_TEST_OPT='-r set -r bigdecimal -I sig'`
 
 `RBS_TEST_LOGLEVEL` can be used to configure log level. Defaults to `info`.
 
