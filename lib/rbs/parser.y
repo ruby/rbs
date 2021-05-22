@@ -1,5 +1,5 @@
 class RBS::Parser
-  token tUIDENT tLIDENT tNAMESPACE tINTERFACEIDENT tGLOBALIDENT
+  token tUIDENT tLIDENT tUNDERSCOREIDENT tNAMESPACE tINTERFACEIDENT tGLOBALIDENT
         tLKEYWORD tUKEYWORD tLKEYWORD_Q_E tUKEYWORD_Q_E
         tIVAR tCLASSVAR
         tANNOTATION
@@ -1326,7 +1326,7 @@ rule
       }
 
   var_name_opt:
-    | tLIDENT | tINTERFACEIDENT | tQUOTEDIDENT
+    | tLIDENT | tINTERFACEIDENT | tQUOTEDIDENT | tUNDERSCOREIDENT
 
   qualified_name:
       namespace simple_name {
@@ -1713,12 +1713,14 @@ def next_token
     new_token(:tIVAR, input.matched.to_sym)
   when input.scan(/@@[a-zA-Z_]\w*/)
     new_token(:tCLASSVAR, input.matched.to_sym)
-  when input.scan(/_[a-zA-Z]\w*\b/)
+  when input.scan(/_[A-Z]\w*\b/)
     new_token(:tINTERFACEIDENT)
   when input.scan(/[A-Z]\w*\b/)
     new_token(:tUIDENT)
-  when input.scan(/[a-z_]\w*\b/)
+  when input.scan(/[a-z]\w*\b/)
     new_token(:tLIDENT)
+  when input.scan(/_[a-z]\w*\b/)
+    new_token(:tUNDERSCOREIDENT)
   when input.scan(/"(\\"|[^"])*"/)
     s = input.matched.yield_self {|s| s[1, s.length - 2] }
                      .gsub(DBL_QUOTE_STR_ESCAPE_SEQUENCES_RE) do |match|

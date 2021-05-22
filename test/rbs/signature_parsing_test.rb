@@ -1744,4 +1744,28 @@ type foo = Integer
       end
     end
   end
+
+  def test_interface_name
+    assert_raises RBS::Parser::SyntaxError do
+      Parser.parse_signature(<<-RBS)
+interface _foo end
+      RBS
+    end
+  end
+
+  def test_lident_param_name
+    Parser.parse_signature(<<-RBS)
+class Hello
+def hello: (String _name) -> void
+end
+    RBS
+  end
+
+  def test_underscore_type_name
+    assert_raises RBS::Parser::SyntaxError do
+      Parser.parse_signature(<<-RBS)
+type _foo = Integer
+      RBS
+    end
+  end
 end
