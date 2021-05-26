@@ -2,6 +2,15 @@
 
 ## master
 
+## 1.2.1 (2021-05-27)
+
+This release includes the following minor changes:
+
+* Fix test to run the tests in ruby repository. ([#679](https://github.com/ruby/rbs/pull/679))
+* Remove unnecessary files from the gem package. ([#675](https://github.com/ruby/rbs/pull/675))
+* Suppress unused variable warning ([#674](https://github.com/ruby/rbs/pull/674))
+* Update documents ([#672](https://github.com/ruby/rbs/pull/672))
+
 ## 1.2.0 (2021-04-21)
 
 ### Summary
