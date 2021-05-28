@@ -321,6 +321,7 @@ module RBS
 
             case
             when member.name.class? && included_modules
+              InvalidMixinClassError.check!(mixin_name: "include", env: env, member: member)
               NoMixinFoundError.check!(member.name, env: env, member: member)
               included_modules << ancestor
             when member.name.interface? && included_interfaces
@@ -330,6 +331,7 @@ module RBS
 
           when AST::Members::Prepend
             if prepended_modules
+              InvalidMixinClassError.check!(mixin_name: "perpend", env: env, member: member)
               NoMixinFoundError.check!(member.name, env: env, member: member)
 
               module_name = member.name
@@ -345,6 +347,7 @@ module RBS
 
             case
             when member.name.class? && extended_modules
+              InvalidMixinClassError.check!(mixin_name: "extend", env: env, member: member)
               NoMixinFoundError.check!(member.name, env: env, member: member)
               extended_modules << ancestor
             when member.name.interface? && extended_interfaces
