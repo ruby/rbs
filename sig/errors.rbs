@@ -192,7 +192,7 @@ module RBS
 
     def location: () -> Location?
 
-    def self.check!: (TypeName, env: Environment, member: member) -> void
+    def self.check!: (type_name: TypeName, env: Environment, member: member) -> void
 
     def mixin_name: () -> String
   end

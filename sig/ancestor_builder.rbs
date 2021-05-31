@@ -80,6 +80,7 @@ module RBS
       def interface_ancestors: (TypeName, ?building_ancestors: Array[Definition::Ancestor::t]) -> Definition::InstanceAncestors
 
       def mixin_ancestors: (Environment::ClassEntry | Environment::ModuleEntry,
+                            TypeName,
                             included_modules: Array[Definition::Ancestor::Instance]?,
                          included_interfaces:Array[Definition::Ancestor::Instance]?,
                            prepended_modules: Array[Definition::Ancestor::Instance]?,
@@ -87,6 +88,7 @@ module RBS
                          extended_interfaces: Array[Definition::Ancestor::Instance]?) -> void
 
       def mixin_ancestors0: (AST::Declarations::Class | AST::Declarations::Module | AST::Declarations::Interface,
+                             TypeName,
                              align_params: Substitution?,
                          included_modules: Array[Definition::Ancestor::Instance]?,
                       included_interfaces:Array[Definition::Ancestor::Instance]?,

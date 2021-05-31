@@ -355,8 +355,8 @@ module RBS
     attr_reader :type_name
     attr_reader :member
 
-    def initialize(member:)
-      @type_name = member.name
+    def initialize(type_name:, member:)
+      @type_name = type_name
       @member = member
 
       super "#{Location.to_string member.location}: Cannot #{mixin_name} a class `#{member.name}` in the definition of `#{type_name}`"
@@ -366,12 +366,10 @@ module RBS
       member.location
     end
 
-    def self.check!(env:, member:)
-      if member.name.class?
-        case env.class_decls[member.name]
-        when Environment::ClassEntry
-          raise new(member: member)
-        end
+    def self.check!(type_name:, env:, member:)
+      case env.class_decls[member.name]
+      when Environment::ClassEntry
+        raise new(type_name: type_name, member: member)
       end
     end
 
