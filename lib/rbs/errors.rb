@@ -359,7 +359,7 @@ module RBS
       @type_name = member.name
       @member = member
 
-      super "Cannot #{mixin_name} a class `#{member.name}` in the definition of `#{type_name}`"
+      super "#{Location.to_string member.location}: Cannot #{mixin_name} a class `#{member.name}` in the definition of `#{type_name}`"
     end
 
     def location
