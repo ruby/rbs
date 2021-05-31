@@ -351,27 +351,40 @@ module RBS
     end
   end
 
-  class InvalidMixinClassError < DefinitionError
+  class MixinClassError < DefinitionError
     attr_reader :type_name
     attr_reader :member
 
-    def initialize(mixin_name:, member:)
+    def initialize(member:)
       @type_name = member.name
       @member = member
 
-      super "#{Location.to_string location}: Not allow to #{mixin_name} #{type_name} class"
+      super "Cannot #{mixin_name} a class #{member.name} in the definition of #{type_name}"
     end
 
     def location
       member.location
     end
 
-    def self.check!(mixin_name:, env:, member:)
-      if member.name.class? && env.class_decls.key?(member.name)
+    def self.check!(env:, member:)
+      if member.name.class?
         case env.class_decls[member.name]
         when Environment::ClassEntry
-          raise new(mixin_name: mixin_name, member: member)
+          raise new(member: member)
         end
+      end
+    end
+
+    private
+
+    def mixin_name
+      case member
+      when AST::Members::Prepend
+        "prepend"
+      when AST::Members::Include
+        "include"
+      when AST::Members::Extend
+        "extend"
       end
     end
   end

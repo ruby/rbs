@@ -14,7 +14,7 @@ class RBS::AncestorBuilderTest < Test::Unit::TestCase
   InvalidTypeApplicationError = RBS::InvalidTypeApplicationError
   RecursiveAncestorError = RBS::RecursiveAncestorError
   SuperclassMismatchError = RBS::SuperclassMismatchError
-  InvalidMixinClassError = RBS::InvalidMixinClassError
+  MixinClassError = RBS::MixinClassError
 
   def test_one_ancestors_class
     SignatureManager.new(system_builtin: true) do |manager|
@@ -522,7 +522,7 @@ EOF
       manager.build do |env|
         builder = DefinitionBuilder::AncestorBuilder.new(env: env)
 
-        assert_raises InvalidMixinClassError do
+        assert_raises MixinClassError do
           builder.instance_ancestors(type_name("::Qux"))
         end
       end
@@ -545,7 +545,7 @@ EOF
         manager.build do |env|
           builder = DefinitionBuilder::AncestorBuilder.new(env: env)
 
-          assert_raises InvalidMixinClassError do
+          assert_raises MixinClassError do
             builder.instance_ancestors(type_name("::Qux"))
           end
         end
@@ -569,7 +569,7 @@ EOF
         manager.build do |env|
           builder = DefinitionBuilder::AncestorBuilder.new(env: env)
 
-          assert_raises InvalidMixinClassError do
+          assert_raises MixinClassError do
             builder.one_singleton_ancestors(type_name("::Qux"))
           end
         end
