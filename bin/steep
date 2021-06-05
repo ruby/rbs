@@ -1,4 +1,9 @@
 #!/bin/sh
 
 GEMFILE=$(cd $(dirname $0); pwd)/../steep/Gemfile
-bundle exec --gemfile=${GEMFILE} steep $*
+
+if type rbenv > /dev/null 2>&1; then
+  rbenv exec bundle exec --gemfile=${GEMFILE} steep $*
+else
+  bundle exec --gemfile=${GEMFILE} steep $*
+fi
