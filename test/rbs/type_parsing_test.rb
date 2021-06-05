@@ -131,11 +131,11 @@ class RBS::TypeParsingTest < Test::Unit::TestCase
   end
 
   def test_interface
-    Parser.parse_type("_foo").yield_self do |type|
+    Parser.parse_type("_Foo").yield_self do |type|
       assert_instance_of Types::Interface, type
-      assert_equal TypeName.new(namespace: Namespace.empty, name: :_foo), type.name
+      assert_equal TypeName.new(namespace: Namespace.empty, name: :_Foo), type.name
       assert_equal [], type.args
-      assert_equal "_foo", type.location.source
+      assert_equal "_Foo", type.location.source
     end
 
     Parser.parse_type("::_Foo").yield_self do |type|
@@ -145,11 +145,11 @@ class RBS::TypeParsingTest < Test::Unit::TestCase
       assert_equal "::_Foo", type.location.source
     end
 
-    Parser.parse_type("Foo::_foo").yield_self do |type|
+    Parser.parse_type("Foo::_Foo").yield_self do |type|
       assert_instance_of Types::Interface, type
-      assert_equal TypeName.new(namespace: Namespace.parse("Foo"), name: :_foo), type.name
+      assert_equal TypeName.new(namespace: Namespace.parse("Foo"), name: :_Foo), type.name
       assert_equal [], type.args
-      assert_equal "Foo::_foo", type.location.source
+      assert_equal "Foo::_Foo", type.location.source
     end
 
     Parser.parse_type("::Foo::_Foo").yield_self do |type|
