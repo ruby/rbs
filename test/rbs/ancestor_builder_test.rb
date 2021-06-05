@@ -14,6 +14,7 @@ class RBS::AncestorBuilderTest < Test::Unit::TestCase
   InvalidTypeApplicationError = RBS::InvalidTypeApplicationError
   RecursiveAncestorError = RBS::RecursiveAncestorError
   SuperclassMismatchError = RBS::SuperclassMismatchError
+  MixinClassError = RBS::MixinClassError
 
   def test_one_ancestors_class
     SignatureManager.new(system_builtin: true) do |manager|
@@ -502,6 +503,75 @@ EOF
 
         assert_raises InvalidTypeApplicationError do
           builder.singleton_ancestors(type_name("::C"))
+        end
+      end
+    end
+  end
+
+  def test_invalid_mixin_include
+    SignatureManager.new do |manager|
+      manager.files[Pathname("foo.rbs")] = <<EOF
+class Foo
+  def foo: () -> untyped
+end
+
+class Qux
+  include Foo
+end
+EOF
+      manager.build do |env|
+        builder = DefinitionBuilder::AncestorBuilder.new(env: env)
+
+        assert_raises MixinClassError do
+          builder.instance_ancestors(type_name("::Qux"))
+        end
+      end
+    end
+  end
+
+  def test_invalid_mixin_perpend
+    SignatureManager.new do |manager|
+      manager.files[Pathname("foo.rbs")] = <<EOF
+class Foo
+  def foo: () -> untyped
+end
+
+class Qux
+  prepend Foo
+end
+EOF
+
+  manager.build do |env|
+        manager.build do |env|
+          builder = DefinitionBuilder::AncestorBuilder.new(env: env)
+
+          assert_raises MixinClassError do
+            builder.instance_ancestors(type_name("::Qux"))
+          end
+        end
+      end
+    end
+  end
+
+  def test_invalid_mixin_extend
+    SignatureManager.new do |manager|
+      manager.files[Pathname("foo.rbs")] = <<EOF
+class Foo
+  def foo: () -> untyped
+end
+
+class Qux
+  extend Foo
+end
+EOF
+
+  manager.build do |env|
+        manager.build do |env|
+          builder = DefinitionBuilder::AncestorBuilder.new(env: env)
+
+          assert_raises MixinClassError do
+            builder.one_singleton_ancestors(type_name("::Qux"))
+          end
         end
       end
     end

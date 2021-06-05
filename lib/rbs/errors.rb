@@ -350,4 +350,40 @@ module RBS
       original.location
     end
   end
+
+  class MixinClassError < DefinitionError
+    attr_reader :type_name
+    attr_reader :member
+
+    def initialize(type_name:, member:)
+      @type_name = type_name
+      @member = member
+
+      super "#{Location.to_string member.location}: Cannot #{mixin_name} a class `#{member.name}` in the definition of `#{type_name}`"
+    end
+
+    def location
+      member.location
+    end
+
+    def self.check!(type_name:, env:, member:)
+      case env.class_decls[member.name]
+      when Environment::ClassEntry
+        raise new(type_name: type_name, member: member)
+      end
+    end
+
+    private
+
+    def mixin_name
+      case member
+      when AST::Members::Prepend
+        "prepend"
+      when AST::Members::Include
+        "include"
+      when AST::Members::Extend
+        "extend"
+      end
+    end
+  end
 end

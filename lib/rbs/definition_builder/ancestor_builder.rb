@@ -237,6 +237,7 @@ module RBS
         end
 
         mixin_ancestors(entry,
+                        type_name,
                         included_modules: ancestors.included_modules,
                         included_interfaces: ancestors.included_interfaces,
                         prepended_modules: ancestors.prepended_modules,
@@ -284,6 +285,7 @@ module RBS
         end
 
         mixin_ancestors(entry,
+                        type_name,
                         included_modules: nil,
                         included_interfaces: nil,
                         prepended_modules: nil,
@@ -301,6 +303,7 @@ module RBS
 
             OneAncestors.interface(type_name: type_name, params: params).tap do |ancestors|
               mixin_ancestors0(entry.decl,
+                               type_name,
                                align_params: nil,
                                included_modules: nil,
                                included_interfaces: ancestors.included_interfaces,
@@ -311,7 +314,7 @@ module RBS
           end
       end
 
-      def mixin_ancestors0(decl, align_params:, included_modules:, included_interfaces:, extended_modules:, prepended_modules:, extended_interfaces:)
+      def mixin_ancestors0(decl, type_name, align_params:, included_modules:, included_interfaces:, extended_modules:, prepended_modules:, extended_interfaces:)
         decl.each_mixin do |member|
           case member
           when AST::Members::Include
@@ -321,6 +324,7 @@ module RBS
 
             case
             when member.name.class? && included_modules
+              MixinClassError.check!(type_name: type_name, env: env, member: member)
               NoMixinFoundError.check!(member.name, env: env, member: member)
               included_modules << ancestor
             when member.name.interface? && included_interfaces
@@ -330,6 +334,7 @@ module RBS
 
           when AST::Members::Prepend
             if prepended_modules
+              MixinClassError.check!(type_name: type_name, env: env, member: member)
               NoMixinFoundError.check!(member.name, env: env, member: member)
 
               module_name = member.name
@@ -345,6 +350,7 @@ module RBS
 
             case
             when member.name.class? && extended_modules
+              MixinClassError.check!(type_name: type_name, env: env, member: member)
               NoMixinFoundError.check!(member.name, env: env, member: member)
               extended_modules << ancestor
             when member.name.interface? && extended_interfaces
@@ -355,7 +361,7 @@ module RBS
         end
       end
 
-      def mixin_ancestors(entry, included_modules:, included_interfaces:, extended_modules:, prepended_modules:, extended_interfaces:)
+      def mixin_ancestors(entry, type_name, included_modules:, included_interfaces:, extended_modules:, prepended_modules:, extended_interfaces:)
         entry.decls.each do |d|
           decl = d.decl
 
@@ -365,6 +371,7 @@ module RBS
           )
 
           mixin_ancestors0(decl,
+                           type_name,
                            align_params: align_params,
                            included_modules: included_modules,
                            included_interfaces: included_interfaces,

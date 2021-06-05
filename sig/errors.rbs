@@ -181,4 +181,19 @@ module RBS
 
     def location: () -> Location?
   end
+
+  class MixinClassError < DefinitionError
+    type member = AST::Members::Include | AST::Members::Prepend | AST::Members::Extend
+
+    attr_reader type_name: TypeName
+    attr_reader member: member
+
+    def initialize: (type_name: TypeName, member: member) -> void
+
+    def location: () -> Location?
+
+    def self.check!: (type_name: TypeName, env: Environment, member: member) -> void
+
+    def mixin_name: () -> String
+  end
 end
