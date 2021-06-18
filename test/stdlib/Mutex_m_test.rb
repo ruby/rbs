@@ -47,10 +47,9 @@ class Mutex_mInstanceTest < Test::Unit::TestCase
   def test_sleep
     mu = mu()
     mu.lock
-    return_type = "Integer#{'?' if RUBY_VERSION >= '3.1'}"
-    assert_send_type "(Integer) -> #{return_type}",
+    assert_send_type "(Integer) -> Integer?",
                      mu, :sleep, 0
-    assert_send_type "(Float) -> #{return_type}",
+    assert_send_type "(Float) -> Integer?",
                      mu, :sleep, 0.1
   end
 end
