@@ -131,6 +131,11 @@ module RBS
           end
         end
 
+        return_type = if method.name == :initialize
+                        Types::Bases::Void.new(location: nil)
+                      else
+                        untyped
+                      end
         method_type = Types::Function.new(
           required_positionals: required_positionals,
           optional_positionals: optional_positionals,
@@ -139,7 +144,7 @@ module RBS
           required_keywords: required_keywords,
           optional_keywords: optional_keywords,
           rest_keywords: rest_keywords,
-          return_type: untyped
+          return_type: return_type,
         )
 
         MethodType.new(

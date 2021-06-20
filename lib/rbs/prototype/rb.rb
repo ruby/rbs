@@ -148,7 +148,7 @@ module RBS
             types = [
               MethodType.new(
                 type_params: [],
-                type: function_type_from_body(def_body),
+                type: function_type_from_body(def_body, def_name),
                 block: block_from_body(def_body),
                 location: nil
               )
@@ -377,12 +377,16 @@ module RBS
         each_node node.children, &block
       end
 
-      def function_type_from_body(node)
+      def function_type_from_body(node, def_name)
         table_node, args_node, *_ = node.children
 
         pre_num, _pre_init, opt, _first_post, post_num, _post_init, rest, kw, kwrest, _block = args_from_node(args_node)
 
-        return_type = function_return_type_from_body(node)
+        return_type = if def_name == :initialize
+                        Types::Bases::Void.new(location: nil)
+                      else
+                        function_return_type_from_body(node)
+                      end
 
         fun = Types::Function.empty(return_type)
 
