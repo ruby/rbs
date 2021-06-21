@@ -59,7 +59,7 @@ module Mutex_m
 
   # See Mutex#sleep
   #
-  def sleep: (?Numeric timeout) -> Integer
+  def sleep: (?Numeric timeout) -> Integer?
 
   alias locked? mu_locked?
   alias lock mu_lock
