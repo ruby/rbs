@@ -325,4 +325,24 @@ end
       end
     end
   end
+
+  class TestForInitialize
+    def initialize() 'foo' end
+  end
+
+  def test_for_initialize_type
+    SignatureManager.new do |manager|
+      manager.build do |env|
+        p = Runtime.new(patterns: ["RBS::RuntimePrototypeTest::TestForInitialize"], env: env, merge: true)
+
+        assert_write p.decls, <<~RBS
+          class RBS::RuntimePrototypeTest::TestForInitialize
+            private
+
+            def initialize: () -> void
+          end
+        RBS
+      end
+    end
+  end
 end

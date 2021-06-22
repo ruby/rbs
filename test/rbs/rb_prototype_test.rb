@@ -70,6 +70,8 @@ end
 
     rb = <<-'EOR'
 class Hello
+  def initialize() 'foo' end
+
   def str() "foo\nbar" end
   def str_lit() "foo" end
   def dstr() "f#{x}oo" end
@@ -110,6 +112,8 @@ end
 
     assert_write parser.decls, <<-EOF
 class Hello
+  def initialize: () -> void
+
   def str: () -> ::String
 
   def str_lit: () -> "foo"
