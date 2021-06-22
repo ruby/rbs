@@ -1488,7 +1488,7 @@ module Net
     # 4xx
     HAS_BODY: bool
 
-    # EXCEPTION_TYPE: Net::HTTPClientException -> Change after introduciton of class/module alias
+    # EXCEPTION_TYPE: Net::HTTPClientException -> Change after introduction of class/module alias
     EXCEPTION_TYPE: untyped
   end
 
