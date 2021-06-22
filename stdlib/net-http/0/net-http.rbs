@@ -635,7 +635,7 @@ module Net
     # This flag must be set before starting session.
     # If you change use_ssl value after session started,
     # a Net::HTTP object raises IOError.
-    def use_ssl=: (bool flag) -> void
+    def use_ssl=: (boolish flag) -> void
 
     SSL_IVNAMES: Array[untyped]
 
@@ -934,36 +934,36 @@ module Net
 
   class HTTPGenericRequest
     include Net::HTTPHeader
-  
+
     def initialize: (String m, boolish reqbody, boolish resbody, uri_or_string uri_or_path, ?Hash[untyped, untyped]? initheader) -> instance
-  
+
     attr_reader method: String
-  
+
     attr_reader path: String
-  
+
     attr_reader uri: URI::Generic
-  
+
     # Automatically set to false if the user sets the Accept-Encoding header.
     # This indicates they wish to handle Content-encoding in responses
     # themselves.
     attr_reader decode_content: bool
-  
+
     def inspect: () -> String
-  
+
     def []=: (untyped key, untyped val) -> void
-  
+
     def request_body_permitted?: () -> bool
-  
+
     def response_body_permitted?: () -> bool
-  
+
     def body_exist?: () -> bool
-  
+
     attr_reader body: String
-  
+
     def body=: (String str) -> void
-  
+
     attr_reader body_stream: untyped
-  
+
     def body_stream=: (untyped input) -> untyped
   end
 
@@ -971,17 +971,17 @@ module Net
     def initialize_http_header: (Hash[untyped, untyped] initheader) -> void
 
     def size: () -> Integer
-  
+
     alias length size
-  
+
     type string_or_symbol = String | Symbol
     # Returns the header field corresponding to the case-insensitive key.
     # For example, a key of "Content-Type" might return "text/html"
     def []: (string_or_symbol key) -> (nil | String)
-  
+
     # Sets the header field corresponding to the case-insensitive key.
     def []=: (string_or_symbol key, untyped val) -> void
-  
+
     # [Ruby 1.8.3]
     # Adds a value to a named header field, instead of replacing its value.
     # Second argument +val+ must be a String.
@@ -998,15 +998,15 @@ module Net
     #   p request.get_fields('X-My-Header')   #=> ["a", "b", "c"]
     #
     def add_field: (string_or_symbol key, untyped val) -> void
-  
+
     private
-  
+
     def set_field: (string_or_symbol key, untyped val) -> void
-  
+
     def append_field_value: (untyped ary, untyped val) -> void
-  
+
     public
-  
+
     # [Ruby 1.8.3]
     # Returns an array of header field strings corresponding to the
     # case-insensitive +key+.  This method allows you to get duplicated
@@ -1019,7 +1019,7 @@ module Net
     #     #=> "session=al98axx; expires=Fri, 31-Dec-1999 23:58:23, query=rubyscript; expires=Fri, 31-Dec-1999 23:58:23"
     #
     def get_fields: (string_or_symbol key) -> (nil | Array[String])
-  
+
     # Returns the header field corresponding to the case-insensitive key.
     # Returns the default value +args+, or the result of the block, or
     # raises an IndexError if there's no header field named +key+
@@ -1028,33 +1028,33 @@ module Net
 
     def each_header: () { (String, Array[String]) -> untyped } -> Hash[String, Array[String]]
                    | () -> Enumerator[[String, Array[String]], Hash[String, Array[String]]]
-  
+
     alias each each_header
 
     def each_name: () { (String) -> untyped } -> Hash[String, Array[String]]
                  | () -> Enumerator[String, Hash[String, Array[String]]]
-  
+
     alias each_key each_name
 
     def each_capitalized_name: () { (String) -> untyped } -> Hash[String, Array[String]]
                              | () -> Enumerator[String, Hash[String, Array[String]]]
-  
+
     def each_value: () { (Array[String]) -> untyped } -> Hash[String, Array[String]]
                   | () -> Enumerator[Array[String], Hash[String, Array[String]]]
-  
+
     # Removes a header field, specified by case-insensitive key.
     def delete: (string_or_symbol key) -> Array[String]
 
     # true if +key+ header exists.
     def key?: (string_or_symbol key) -> bool
-  
+
     # Returns a Hash consisting of header names and array of values.
     # e.g.
     # {"cache-control" => ["private"],
     #  "content-type" => ["text/html"],
     #  "date" => ["Wed, 22 Jun 2005 22:11:50 GMT"]}
     def to_hash: () -> Hash[String, Array[String]]
-  
+
     # As for #each_header, except the keys are provided in capitalized form.
     #
     # Note that header names are capitalized systematically;
@@ -1064,19 +1064,19 @@ module Net
     # Returns an enumerator if no block is given.
     def each_capitalized: () { (String, String) -> untyped } -> Hash[String, Array[String]]
                         | () -> Enumerator[[String, String], Hash[String, Array[String]]]
-  
+
     alias canonical_each each_capitalized
-  
+
     private
-  
+
     def capitalize: (string_or_symbol name) -> String
-  
+
     public
-  
+
     # Returns an Array of Range objects which represent the Range:
     # HTTP header field, or +nil+ if there is no such header.
     def range: () -> (nil | Array[Range[Integer]])
-  
+
     # Sets the HTTP Range: header.
     # Accepts either a Range object as a single argument,
     # or a beginning index and a length from that index.
@@ -1086,56 +1086,56 @@ module Net
     #   req.set_range 0, 1023
     #
     def set_range: (Range[Integer] | Numeric r, ?Integer? e) -> Range[Integer]
-  
+
     alias range= set_range
-  
+
     # Returns an Integer object which represents the HTTP Content-Length:
     # header field, or +nil+ if that field was not provided.
     def content_length: () -> (nil | Integer)
-  
+
     def content_length=: (Integer len) -> void
-  
+
     # Returns "true" if the "transfer-encoding" header is present and
     # set to "chunked".  This is an HTTP/1.1 feature, allowing
     # the content to be sent in "chunks" without at the outset
     # stating the entire content length.
     def chunked?: () -> bool
-  
+
     # Returns a Range object which represents the value of the Content-Range:
     # header field.
     # For a partial entity body, this indicates where this fragment
     # fits inside the full entity body, as range of byte offsets.
     def content_range: () -> Range[Integer]
-  
+
     # The length of the range represented in Content-Range: header.
     def range_length: () -> (nil | Integer)
-  
+
     # Returns a content type string such as "text/html".
     # This method returns nil if Content-Type: header field does not exist.
     def content_type: () -> (nil | String)
-  
+
     # Returns a content type string such as "text".
     # This method returns nil if Content-Type: header field does not exist.
     def main_type: () -> (nil | String)
-  
+
     # Returns a content type string such as "html".
     # This method returns nil if Content-Type: header field does not exist
     # or sub-type is not given (e.g. "Content-Type: text").
     def sub_type: () -> (nil | String)
-  
+
     # Any parameters specified for the content type, returned as a Hash.
     # For example, a header of Content-Type: text/html; charset=EUC-JP
     # would result in type_params returning {'charset' => 'EUC-JP'}
     def type_params: () -> Hash[untyped, untyped]
-  
+
     # Sets the content type in an HTTP header.
     # The +type+ should be a full HTTP content type, e.g. "text/html".
     # The +params+ are an optional Hash of parameters to add after the
     # content type, e.g. {'charset' => 'iso-8859-1'}
     def set_content_type: (string_or_symbol `type`, ?Hash[untyped, untyped] params) -> void
-  
+
     alias content_type= set_content_type
-  
+
     # Set header fields and a body from HTML form data.
     # +params+ should be an Array of Arrays or
     # a Hash containing HTML form data.
@@ -1150,9 +1150,9 @@ module Net
     #    http.set_form_data({"q" => "ruby", "lang" => "en"}, ';')
     #
     def set_form_data: (Hash[untyped, untyped] params, ?String sep) -> void
-  
+
     alias form_data= set_form_data
-  
+
     # Set an HTML form data set.
     # +params+ :: The form data to set, which should be an enumerable.
     #             See below for more details.
@@ -1202,21 +1202,21 @@ module Net
     # See also RFC 2388, RFC 2616, HTML 4.01, and HTML5
     #
     def set_form: (Hash[untyped, untyped] params, ?String enctype, ?Hash[untyped, untyped] formopt) -> void
-  
+
     # Set the Authorization: header for "Basic" authorization.
     def basic_auth: (String account, String password) -> void
-  
+
     # Set Proxy-Authorization: header for "Basic" authorization.
     def proxy_basic_auth: (String account, String password) -> void
-  
+
     private
-  
+
     def basic_encode: (String account, String password) -> String
-  
+
     public
-  
+
     def connection_close?: () -> bool
-  
+
     def connection_keep_alive?: () -> bool
   end
 
@@ -1226,184 +1226,184 @@ module Net
 
   class HTTP::Get < HTTPRequest
     METHOD: String
-  
+
     REQUEST_HAS_BODY: bool
-  
+
     RESPONSE_HAS_BODY: bool
   end
-  
+
   # See Net::HTTPGenericRequest for attributes and methods.
   # See Net::HTTP for usage examples.
   class HTTP::Head < HTTPRequest
     METHOD: String
-  
+
     REQUEST_HAS_BODY: bool
-  
+
     RESPONSE_HAS_BODY: bool
   end
-  
+
   # See Net::HTTPGenericRequest for attributes and methods.
   # See Net::HTTP for usage examples.
   class HTTP::Post < HTTPRequest
     METHOD: String
-  
+
     REQUEST_HAS_BODY: bool
-  
+
     RESPONSE_HAS_BODY: bool
   end
-  
+
   # See Net::HTTPGenericRequest for attributes and methods.
   # See Net::HTTP for usage examples.
   class HTTP::Put < HTTPRequest
     METHOD: String
-  
+
     REQUEST_HAS_BODY: bool
-  
+
     RESPONSE_HAS_BODY: bool
   end
-  
+
   # See Net::HTTPGenericRequest for attributes and methods.
   # See Net::HTTP for usage examples.
   class HTTP::Delete < HTTPRequest
     METHOD: String
-  
+
     REQUEST_HAS_BODY: bool
-  
+
     RESPONSE_HAS_BODY: bool
   end
-  
+
   # See Net::HTTPGenericRequest for attributes and methods.
   class HTTP::Options < HTTPRequest
     METHOD: String
-  
+
     REQUEST_HAS_BODY: bool
-  
+
     RESPONSE_HAS_BODY: bool
   end
-  
+
   # See Net::HTTPGenericRequest for attributes and methods.
   class HTTP::Trace < HTTPRequest
     METHOD: String
-  
+
     REQUEST_HAS_BODY: bool
-  
+
     RESPONSE_HAS_BODY: bool
   end
-  
+
   # See Net::HTTPGenericRequest for attributes and methods.
   class HTTP::Patch < HTTPRequest
     METHOD: String
-  
+
     REQUEST_HAS_BODY: bool
-  
+
     RESPONSE_HAS_BODY: bool
   end
-  
+
   # See Net::HTTPGenericRequest for attributes and methods.
   class HTTP::Propfind < HTTPRequest
     METHOD: String
-  
+
     REQUEST_HAS_BODY: bool
-  
+
     RESPONSE_HAS_BODY: bool
   end
-  
+
   # See Net::HTTPGenericRequest for attributes and methods.
   class HTTP::Proppatch < HTTPRequest
     METHOD: String
-  
+
     REQUEST_HAS_BODY: bool
-  
+
     RESPONSE_HAS_BODY: bool
   end
-  
+
   # See Net::HTTPGenericRequest for attributes and methods.
   class HTTP::Mkcol < HTTPRequest
     METHOD: String
-  
+
     REQUEST_HAS_BODY: bool
-  
+
     RESPONSE_HAS_BODY: bool
   end
-  
+
   # See Net::HTTPGenericRequest for attributes and methods.
   class HTTP::Copy < HTTPRequest
     METHOD: String
-  
+
     REQUEST_HAS_BODY: bool
-  
+
     RESPONSE_HAS_BODY: bool
   end
-  
+
   # See Net::HTTPGenericRequest for attributes and methods.
   class HTTP::Move < HTTPRequest
     METHOD: String
-  
+
     REQUEST_HAS_BODY: bool
-  
+
     RESPONSE_HAS_BODY: bool
   end
-  
+
   # See Net::HTTPGenericRequest for attributes and methods.
   class HTTP::Lock < HTTPRequest
     METHOD: String
-  
+
     REQUEST_HAS_BODY: bool
-  
+
     RESPONSE_HAS_BODY: bool
   end
-  
+
   # See Net::HTTPGenericRequest for attributes and methods.
   class HTTP::Unlock < HTTPRequest
     METHOD: String
-  
+
     REQUEST_HAS_BODY: bool
-  
+
     RESPONSE_HAS_BODY: bool
   end
 
   class HTTPResponse
     # true if the response has a body.
     def self.body_permitted?: () -> bool
-  
+
     public
-  
+
     include Net::HTTPHeader
 
     # The HTTP version supported by the server.
     attr_reader http_version: String
-  
+
     # The HTTP result code string. For example, '302'.  You can also
     # determine the response type by examining which response subclass
     # the response object is an instance of.
     attr_reader code: String
-  
+
     # The HTTP result message sent by the server. For example, 'Not Found'.
     attr_reader message: String
-  
+
     alias msg message
-  
+
     # The URI used to fetch this response.  The response URI is only available
     # if a URI was used to create the request.
     attr_reader uri: URI::Generic
-  
+
     # Set to true automatically when the request did not contain an
     # Accept-Encoding header from the user.
     attr_accessor decode_content: bool
-  
+
     def inspect: () -> String
-  
+
     def code_type: () -> untyped
-  
+
     def error!: () -> untyped
-  
+
     def error_type: () -> untyped
-  
+
     # Raises an HTTP error if the response is not 2xx (success).
     def value: () -> (nil | untyped)
-  
+
     def uri=: (URI::Generic uri) -> void
- 
+
     # Gets the entity body returned by the remote HTTP server.
     #
     # If a block is given, the body is passed to the block, and
@@ -1433,7 +1433,7 @@ module Net
     #   }
     #
     def read_body: (?untyped? dest) { (String parameter) -> untyped } -> untyped
-  
+
     # Returns the full entity body.
     #
     # Calling this method a second or subsequent time will return the
@@ -1449,380 +1449,380 @@ module Net
     #   }
     #
     def body: () -> String
-  
+
     # Because it may be necessary to modify the body, Eg, decompression
     # this method facilitates that.
     def body=: (untyped value) -> void
-  
+
     alias entity body
   end
 
   class HTTPUnknownResponse < HTTPResponse
     HAS_BODY: bool
-  
+
     EXCEPTION_TYPE: Net::HTTPError
   end
-  
+
   class HTTPInformation < HTTPResponse
     # 1xx
     HAS_BODY: bool
-  
+
     EXCEPTION_TYPE: Net::HTTPError
   end
-  
+
   class HTTPSuccess < HTTPResponse
     # 2xx
     HAS_BODY: bool
-  
+
     EXCEPTION_TYPE: Net::HTTPError
   end
-  
+
   class HTTPRedirection < HTTPResponse
     # 3xx
     HAS_BODY: bool
-  
+
     EXCEPTION_TYPE:  Net::HTTPRetriableError
   end
-  
+
   class HTTPClientError < HTTPResponse
     # 4xx
     HAS_BODY: bool
-  
+
     # EXCEPTION_TYPE: Net::HTTPClientException -> Change after introduciton of class/module alias
     EXCEPTION_TYPE: untyped
   end
-  
+
   class HTTPServerError < HTTPResponse
     # 5xx
     HAS_BODY: bool
-  
+
     EXCEPTION_TYPE: Net::HTTPFatalError
   end
-  
+
   class HTTPContinue < HTTPInformation
     # 100
     HAS_BODY: bool
   end
-  
+
   class HTTPSwitchProtocol < HTTPInformation
     # 101
     HAS_BODY: bool
   end
-  
+
   class HTTPProcessing < HTTPInformation
     # 102
     HAS_BODY: bool
   end
-  
+
   class HTTPEarlyHints < HTTPInformation
     # 103 - RFC 8297
     HAS_BODY: bool
   end
-  
+
   class HTTPOK < HTTPSuccess
     # 200
     HAS_BODY: bool
   end
-  
+
   class HTTPCreated < HTTPSuccess
     # 201
     HAS_BODY: bool
   end
-  
+
   class HTTPAccepted < HTTPSuccess
     # 202
     HAS_BODY: bool
   end
-  
+
   class HTTPNonAuthoritativeInformation < HTTPSuccess
     # 203
     HAS_BODY: bool
   end
-  
+
   class HTTPNoContent < HTTPSuccess
     # 204
     HAS_BODY: bool
   end
-  
+
   class HTTPResetContent < HTTPSuccess
     # 205
     HAS_BODY: bool
   end
-  
+
   class HTTPPartialContent < HTTPSuccess
     # 206
     HAS_BODY: bool
   end
-  
+
   class HTTPMultiStatus < HTTPSuccess
     # 207 - RFC 4918
     HAS_BODY: bool
   end
-  
+
   class HTTPAlreadyReported < HTTPSuccess
     # 208 - RFC 5842
     HAS_BODY: bool
   end
-  
+
   class HTTPIMUsed < HTTPSuccess
     # 226 - RFC 3229
     HAS_BODY: bool
   end
-  
+
   class HTTPMultipleChoices < HTTPRedirection
     # 300
     HAS_BODY: bool
   end
-  
+
   HTTPMultipleChoice: HTTPMultipleChoices
-  
+
   class HTTPMovedPermanently < HTTPRedirection
     # 301
     HAS_BODY: bool
   end
-  
+
   class HTTPFound < HTTPRedirection
     # 302
     HAS_BODY: bool
   end
-  
+
   # HTTPMovedTemporarily: HTTPFound
-  
+
   class HTTPSeeOther < HTTPRedirection
     # 303
     HAS_BODY: bool
   end
-  
+
   class HTTPNotModified < HTTPRedirection
     # 304
     HAS_BODY: bool
   end
-  
+
   class HTTPUseProxy < HTTPRedirection
     # 305
     HAS_BODY: bool
   end
-  
+
   class HTTPTemporaryRedirect < HTTPRedirection
     # 306 Switch Proxy - no longer unused
     # 307
     HAS_BODY: bool
   end
-  
+
   class HTTPPermanentRedirect < HTTPRedirection
     # 308
     HAS_BODY: bool
   end
-  
+
   class HTTPBadRequest < HTTPClientError
     # 400
     HAS_BODY: bool
   end
-  
+
   class HTTPUnauthorized < HTTPClientError
     # 401
     HAS_BODY: bool
   end
-  
+
   class HTTPPaymentRequired < HTTPClientError
     # 402
     HAS_BODY: bool
   end
-  
+
   class HTTPForbidden < HTTPClientError
     # 403
     HAS_BODY: bool
   end
-  
+
   class HTTPNotFound < HTTPClientError
     # 404
     HAS_BODY: bool
   end
-  
+
   class HTTPMethodNotAllowed < HTTPClientError
     # 405
     HAS_BODY: bool
   end
-  
+
   class HTTPNotAcceptable < HTTPClientError
     # 406
     HAS_BODY: bool
   end
-  
+
   class HTTPProxyAuthenticationRequired < HTTPClientError
     # 407
     HAS_BODY: bool
   end
-  
+
   class HTTPRequestTimeout < HTTPClientError
     # 408
     HAS_BODY: bool
   end
-  
+
   # HTTPRequestTimeOut: HTTPRequestTimeout
-  
+
   class HTTPConflict < HTTPClientError
     # 409
     HAS_BODY: bool
   end
-  
+
   class HTTPGone < HTTPClientError
     # 410
     HAS_BODY: bool
   end
-  
+
   class HTTPLengthRequired < HTTPClientError
     # 411
     HAS_BODY: bool
   end
-  
+
   class HTTPPreconditionFailed < HTTPClientError
     # 412
     HAS_BODY: bool
   end
-  
+
   class HTTPPayloadTooLarge < HTTPClientError
     # 413
     HAS_BODY: bool
   end
-  
+
   # HTTPRequestEntityTooLarge: untyped
-  
+
   class HTTPURITooLong < HTTPClientError
     # 414
     HAS_BODY: bool
   end
-  
+
   # HTTPRequestURITooLong: untyped
-  
+
   # HTTPRequestURITooLarge: untyped
-  
+
   class HTTPUnsupportedMediaType < HTTPClientError
     # 415
     HAS_BODY: bool
   end
-  
+
   class HTTPRangeNotSatisfiable < HTTPClientError
     # 416
     HAS_BODY: bool
   end
-  
+
   # HTTPRequestedRangeNotSatisfiable: untyped
-  
+
   class HTTPExpectationFailed < HTTPClientError
     # 417
     HAS_BODY: bool
   end
-  
+
   class HTTPMisdirectedRequest < HTTPClientError
     # 418 I'm a teapot - RFC 2324; a joke RFC
     # 420 Enhance Your Calm - Twitter
     # 421 - RFC 7540
     HAS_BODY: bool
   end
-  
+
   class HTTPUnprocessableEntity < HTTPClientError
     # 422 - RFC 4918
     HAS_BODY: bool
   end
-  
+
   class HTTPLocked < HTTPClientError
     # 423 - RFC 4918
     HAS_BODY: bool
   end
-  
+
   class HTTPFailedDependency < HTTPClientError
     # 424 - RFC 4918
     HAS_BODY: bool
   end
-  
+
   class HTTPUpgradeRequired < HTTPClientError
     # 425 Unordered Collection - existed only in draft
     # 426 - RFC 2817
     HAS_BODY: bool
   end
-  
+
   class HTTPPreconditionRequired < HTTPClientError
     # 428 - RFC 6585
     HAS_BODY: bool
   end
-  
+
   class HTTPTooManyRequests < HTTPClientError
     # 429 - RFC 6585
     HAS_BODY: bool
   end
-  
+
   class HTTPRequestHeaderFieldsTooLarge < HTTPClientError
     # 431 - RFC 6585
     HAS_BODY: bool
   end
-  
+
   class HTTPUnavailableForLegalReasons < HTTPClientError
     # 451 - RFC 7725
     HAS_BODY: bool
   end
-  
+
   class HTTPInternalServerError < HTTPServerError
     # 500
     HAS_BODY: bool
   end
-  
+
   class HTTPNotImplemented < HTTPServerError
     # 501
     HAS_BODY: bool
   end
-  
+
   class HTTPBadGateway < HTTPServerError
     # 502
     HAS_BODY: bool
   end
-  
+
   class HTTPServiceUnavailable < HTTPServerError
     # 503
     HAS_BODY: bool
   end
-  
+
   class HTTPGatewayTimeout < HTTPServerError
     # 504
     HAS_BODY: bool
   end
-  
+
   # HTTPGatewayTimeOut: untyped
-  
+
   class HTTPVersionNotSupported < HTTPServerError
     # 505
     HAS_BODY: bool
   end
-  
+
   class HTTPVariantAlsoNegotiates < HTTPServerError
     # 506
     HAS_BODY: bool
   end
-  
+
   class HTTPInsufficientStorage < HTTPServerError
     # 507 - RFC 4918
     HAS_BODY: bool
   end
-  
+
   class HTTPLoopDetected < HTTPServerError
     # 508 - RFC 5842
     HAS_BODY: bool
   end
-  
+
   class HTTPNotExtended < HTTPServerError
     # 509 Bandwidth Limit Exceeded - Apache bw/limited extension
     # 510 - RFC 2774
     HAS_BODY: bool
   end
-  
+
   class HTTPNetworkAuthenticationRequired < HTTPServerError
     # 511 - RFC 6585
     HAS_BODY: bool
   end
-  
+
   class HTTPResponse
     CODE_CLASS_TO_OBJ: Hash[untyped, untyped]
-  
+
     CODE_TO_OBJ: Hash[untyped, untyped]
   end
 
@@ -1830,28 +1830,28 @@ module Net
 
   module HTTPExceptions
     def initialize: (untyped msg, untyped res) -> untyped
-  
+
     attr_reader response: untyped
-  
+
     alias data response
   end
-  
+
   class HTTPError < ProtocolError
     include Net::HTTPExceptions
   end
-  
+
   class HTTPRetriableError < ProtoRetriableError
     include Net::HTTPExceptions
   end
-  
+
   class HTTPServerException < ProtoServerError
     # We cannot use the name "HTTPServerError", it is the name of the response.
     include Net::HTTPExceptions
   end
-  
+
   # for compatibility
   # Net::HTTPClientException: untyped
-  
+
   class HTTPFatalError < ProtoFatalError
     include Net::HTTPExceptions
   end
