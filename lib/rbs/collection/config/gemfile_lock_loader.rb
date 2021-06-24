@@ -4,11 +4,15 @@ module RBS
       class GemfileLockLoader
         attr_reader :lock, :gemfile_lock
 
+        # `lock` is rbs_collection.lock.yaml.
+        # `gemfile_lock` is Gemfile.lock.
         def initialize(lock:, gemfile_lock:)
           @lock = lock
           @gemfile_lock = gemfile_lock
         end
 
+        # Makes RBS::Collection::Config instance from Gemfile.lock.
+        # TODO: When collection is not available but the rbs lockfile contains the gem. Should it warn?
         def load(config)
           gemfile_lock.specs.each do |spec|
             locked = lock&.gem(spec.name)
@@ -19,9 +23,11 @@ module RBS
             next if specified&.dig('ignore')
 
             if locked
+              # If rbs_collection.lock.yaml contain the gem, use it.
               # TODO: Check the collection equality
               config.add_gem(locked)
             else
+              # Else, find the gem from gem_collection.
               installed_version = spec.version
               best_version = find_best_version(version: installed_version, versions: collection.versions({ 'name' => spec.name }))
               # TODO: make gem entry

@@ -5,6 +5,8 @@ module RBS
     class Config
       PATH = Pathname('rbs_collection.yaml')
 
+      # Generate a rbs lockfile from Gemfile.lock to `config_path`.
+      # If `with_lockfile` is true, it respects existing rbs lockfile.
       def self.generate_lockfile(config_path:, gemfile_lock_path:, with_lockfile: true)
         config = from_path(config_path)
         gemfile_lock = Bundler::LockfileParser.new(gemfile_lock_path.read)
