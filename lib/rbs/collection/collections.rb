@@ -22,21 +22,21 @@ module RBS
         end
 
         def has?(config_entry)
-          with_revision(config_entry['revision']) do
+          with_revision do
             gem_name = config_entry['name']
             gem_repo_dir.join(gem_name).directory?
           end
         end
 
         def versions(config_entry)
-          with_revision(config_entry['revision']) do
+          with_revision do
             gem_name = config_entry['name']
             gem_repo_dir.join(gem_name).glob('*/').map { |path| path.basename.to_s }
           end
         end
 
         def install(dest, config_entry)
-          with_revision(config_entry['revision']) do
+          with_revision do
             gem_name = config_entry['name']
             version = config_entry['version']
             dest = dest.join(gem_name)
@@ -48,10 +48,10 @@ module RBS
           end
         end
 
-        def to_h
+        def to_lock_style
           {
             'name' => name,
-            'revision' => revision,
+            'revision' => resolved_revision,
             'remote' => remote,
             'repo_dir' => repo_dir,
           }
@@ -80,7 +80,7 @@ module RBS
           git_dir.join @repo_dir
         end
 
-        private def with_revision(revision, &block)
+        private def with_revision(&block)
           return block.call unless revision
 
           prev_revision = resolve_revision 'HEAD'
@@ -88,6 +88,12 @@ module RBS
           block.call
         ensure
           git 'checkout', prev_revision if prev_revision
+        end
+
+        private def resolved_revision
+          @resolved_revision ||= with_revision do
+            resolve_revision(revision)
+          end
         end
 
         private def resolve_revision(rev)

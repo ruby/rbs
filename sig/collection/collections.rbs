@@ -32,7 +32,9 @@ module RBS
 
         def gem_repo_dir: () -> Pathname
 
-        def with_revision: [T] (String revision) { () -> T } -> T
+        def with_revision: [T] () { () -> T } -> T
+
+        def resolved_revision: () -> String
 
         def resolve_revision: (String rev) -> String
 
