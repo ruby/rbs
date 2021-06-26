@@ -80,6 +80,7 @@ task :build => :parser
 
 task :confirm_parser do
   puts "Testing if parser.rb is updated with respect to parser.y"
+  sh "#{racc} --version"
   sh "#{racc} -v -o lib/rbs/parser.rb lib/rbs/parser.y"
   sh "git diff --exit-code lib/rbs/parser.rb"
 end
