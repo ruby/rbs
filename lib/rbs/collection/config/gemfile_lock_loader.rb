@@ -12,22 +12,22 @@ module RBS
         end
 
         # Makes RBS::Collection::Config instance from Gemfile.lock.
-        # TODO: When collection is not available but the rbs lockfile contains the gem. Should it warn?
         def load(config)
           gemfile_lock.specs.each do |spec|
             locked = lock&.gem(spec.name)
-            collection = find_collection(config: config, gem_name: spec.name)
-            next unless collection
 
             specified = config.gem(spec.name)
             next if specified&.dig('ignore')
 
             if locked
               # If rbs_collection.lock.yaml contain the gem, use it.
-              # TODO: Check the collection equality
+              # TODO: Warn collection nonexistence when collection in `locked` doesn't exist in the config.
               config.add_gem(locked)
             else
-              # Else, find the gem from gem_collection.
+              # Find the gem from gem_collection.
+              collection = find_collection(config: config, gem_name: spec.name)
+              next unless collection
+
               installed_version = spec.version
               best_version = find_best_version(version: installed_version, versions: collection.versions({ 'name' => spec.name }))
               # TODO: make gem entry
