@@ -18,7 +18,11 @@ jobs:
         job:
         - test
         - stdlib_test
-        - rubocop validate test_doc build test_generate_stdlib confirm_parser
+        - rubocop validate test_doc build test_generate_stdlib
+        - confirm_parser
+        exclude:
+        - container_tag: master-nightly-focal
+          job: confirm_parser
     container:
       image: rubylang/ruby:${{ matrix.container_tag }}
     steps:
