@@ -826,16 +826,18 @@ EOB
     end
 
     def run_collection(args, options)
-      # TODO optparse
-      # TODO: path
-
-      config_path = Collection::Config::PATH
+      _argv, params = parse_collection_options(args)
+      config_path = params[:config]
       lock_path = Collection::Config.to_lockfile_path(config_path)
+
       case args[0]
       when 'install'
-        Collection::Config.generate_lockfile(config_path: config_path, gemfile_lock_path: Pathname('./Gemfile.lock'))
+        unless params[:frozen]
+          Collection::Config.generate_lockfile(config_path: config_path, gemfile_lock_path: Pathname('./Gemfile.lock'))
+        end
         Collection::Installer.new(lockfile_path: lock_path).install_from_lockfile
       when 'update'
+        # TODO: Be aware of argv to update only specified gem
         Collection::Config.generate_lockfile(config_path: config_path, gemfile_lock_path: Pathname('./Gemfile.lock'), with_lockfile: false)
         Collection::Installer.new(lockfile_path: lock_path).install_from_lockfile
       when 'init'
@@ -866,6 +868,15 @@ EOB
       else
         raise
       end
+    end
+
+    def parse_collection_options(args)
+      opts = OptionParser.new do |opts|
+        opts.on("--config PATH")
+        opts.on('--frozen') if args[0] == 'install'
+      end
+      params = { config: Collection::Config::PATH }
+      return opts.order(args[1..], into: params), params
     end
   end
 end
