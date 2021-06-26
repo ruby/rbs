@@ -36,7 +36,6 @@ module RBS
         end
 
         def install(dest, config_entry)
-          # TODO: skip install if unnecessary
           with_revision(config_entry['revision']) do
             gem_name = config_entry['name']
             version = config_entry['version']
