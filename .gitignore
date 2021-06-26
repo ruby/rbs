@@ -1,4 +1,5 @@
 /.bundle/
+/steep/.bundle/
 /.yardoc
 /_yardoc/
 /coverage/
@@ -9,3 +10,4 @@
 /lib/rbs/parser.output
 /vendor/sigs
 /Gemfile.lock
+
