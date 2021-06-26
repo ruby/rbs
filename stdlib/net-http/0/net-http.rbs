@@ -542,7 +542,7 @@ module Net
     #   http.set_debug_output $stderr
     #   http.start { .... }
     #
-    def set_debug_output: (untyped output) -> untyped
+    def set_debug_output: (IO output) -> void
 
     # The DNS host name or IP address to connect to.
     attr_reader address: uri_or_string
@@ -551,14 +551,14 @@ module Net
     attr_reader port: Integer
 
     # The local host used to establish the connection.
-    attr_accessor local_host: URI::Generic | String
+    attr_accessor local_host: uri_or_string
 
     # The local port used to establish the connection.
     attr_accessor local_port: Integer
 
     attr_writer proxy_from_env: untyped
 
-    attr_writer proxy_address: URI::Generic | String
+    attr_writer proxy_address: uri_or_string
 
     attr_writer proxy_port: Integer
 
@@ -567,7 +567,7 @@ module Net
     attr_writer proxy_pass: String
 
     # The IP address to connect to/used to connect to
-    def ipaddr: () -> String
+    def ipaddr: () -> (String | nil)
 
     # Set the IP address to connect to
     def ipaddr=: (String addr) -> void
@@ -576,20 +576,20 @@ module Net
     # may be used, including Floats for fractional seconds. If the HTTP
     # object cannot open a connection in this many seconds, it raises a
     # Net::OpenTimeout exception. The default value is 60 seconds.
-    attr_accessor open_timeout: Float
+    attr_accessor open_timeout: (Float | Integer)
 
     # Number of seconds to wait for one block to be read (via one read(2)
     # call). Any number may be used, including Floats for fractional
     # seconds. If the HTTP object cannot read data in this many seconds,
     # it raises a Net::ReadTimeout exception. The default value is 60 seconds.
-    attr_reader read_timeout: Float
+    attr_reader read_timeout: (Float | Integer)
 
     # Number of seconds to wait for one block to be written (via one write(2)
     # call). Any number may be used, including Floats for fractional
     # seconds. If the HTTP object cannot write data in this many seconds,
     # it raises a Net::WriteTimeout exception. The default value is 60 seconds.
     # Net::WriteTimeout is not raised on Windows.
-    attr_reader write_timeout: Float
+    attr_reader write_timeout: (Float | Integer)
 
     # Maximum number of times to retry an idempotent request in case of
     # Net::ReadTimeout, IOError, EOFError, Errno::ECONNRESET,
@@ -602,24 +602,24 @@ module Net
     attr_reader max_retries: Integer
 
     # Setter for the read_timeout attribute.
-    def read_timeout=: (Float sec) -> void
+    def read_timeout=: ((Float | Integer) sec) -> void
 
     # Setter for the write_timeout attribute.
-    def write_timeout=: (Float sec) -> void
+    def write_timeout=: ((Float | Integer) sec) -> void
 
     # Seconds to wait for 100 Continue response. If the HTTP object does not
     # receive a response in this many seconds it sends the request body. The
     # default value is +nil+.
-    attr_reader continue_timeout: Float
+    attr_reader continue_timeout: (Float | Integer | nil)
 
     # Setter for the continue_timeout attribute.
-    def continue_timeout=: (Float sec) -> void
+    def continue_timeout=: ((Float | Integer) sec) -> void
 
     # Seconds to reuse the connection of the previous request.
     # If the idle time is less than this Keep-Alive Timeout,
     # Net::HTTP reuses the TCP/IP socket used by the previous communication.
     # The default value is 2 seconds.
-    attr_accessor keep_alive_timeout: Float
+    attr_accessor keep_alive_timeout: (Float | Integer)
 
     # Returns true if the HTTP session has been started.
     def started?: () -> bool
@@ -699,7 +699,8 @@ module Net
     # Returns the X.509 certificates the server presented.
     def peer_cert: () -> (nil | untyped)
 
-    def start: () { (untyped) -> untyped } -> instance
+    def start: () { (Net::HTTP) -> untyped } -> untyped
+             | () -> instance
 
     public
 
@@ -741,18 +742,18 @@ module Net
     def proxy_uri: () -> (nil | URI::Generic)
 
     # The address of the proxy server, if one is configured.
-    def proxy_address: () -> String
+    def proxy_address: () -> (String | nil)
 
     # The port of the proxy server, if one is configured.
-    def proxy_port: () -> Integer
+    def proxy_port: () -> (Integer | nil)
 
     ENVIRONMENT_VARIABLE_IS_MULTIUSER_SAFE: bool
 
     # The username of the proxy server, if one is configured.
-    def proxy_user: () -> String
+    def proxy_user: () -> (String | nil)
 
     # The password of the proxy server, if one is configured.
-    def proxy_pass: () -> String
+    def proxy_pass: () -> (String | nil)
 
     alias proxyaddr proxy_address
 
@@ -797,7 +798,8 @@ module Net
     #       end
     #     }
     #
-    def get: (uri_or_string path, ?Hash[untyped, untyped]? initheader, ?untyped? dest) { () -> untyped } -> Net::HTTPResponse
+    def get: (uri_or_string path, ?Hash[untyped, untyped]? initheader, ?untyped? dest) { (String body_segment) -> untyped } -> Net::HTTPResponse
+           | (uri_or_string path, ?Hash[untyped, untyped]? initheader, ?untyped? dest) -> Net::HTTPResponse
 
     # Gets only the header from +path+ on the connected-to host.
     # +header+ is a Hash like { 'Accept' => '*/*', ... }.
@@ -842,11 +844,13 @@ module Net
     # If no Content-Type: field given, this method uses
     # "application/x-www-form-urlencoded" by default.
     #
-    def post: (uri_or_string path, String data, ?Hash[untyped, untyped]? initheader, ?untyped? dest) { () -> untyped } -> Net::HTTPResponse
+    def post: (uri_or_string path, String data, ?Hash[untyped, untyped]? initheader, ?untyped? dest) { (String body_segment) -> untyped } -> Net::HTTPResponse
+            | (uri_or_string path, String data, ?Hash[untyped, untyped]? initheader, ?untyped? dest) -> Net::HTTPResponse
 
     # Sends a PATCH request to the +path+ and gets a response,
     # as an HTTPResponse object.
-    def patch: (uri_or_string path, String data, ?Hash[untyped, untyped]? initheader, ?untyped? dest) { () -> untyped } -> Net::HTTPResponse
+    def patch: (uri_or_string path, String data, ?Hash[untyped, untyped]? initheader, ?untyped? dest) { (String body_segment) -> untyped } -> Net::HTTPResponse
+             | (uri_or_string path, String data, ?Hash[untyped, untyped]? initheader, ?untyped? dest) -> Net::HTTPResponse
 
     def put: (uri_or_string path, String data, ?Hash[untyped, untyped]? initheader) -> Net::HTTPResponse
 
@@ -890,7 +894,8 @@ module Net
     # as an HTTPResponse object.
     def trace: (uri_or_string path, ?Hash[untyped, untyped]? initheader) -> Net::HTTPResponse
 
-    def request_get: (uri_or_string path, ?Hash[untyped, untyped]? initheader) { () -> untyped } -> Net::HTTPResponse
+    def request_get: (uri_or_string path, ?Hash[untyped, untyped]? initheader) { (Net::HTTPResponse response) -> untyped } -> Net::HTTPResponse
+                   | (uri_or_string path, ?Hash[untyped, untyped]? initheader) -> Net::HTTPResponse
 
     # Sends a HEAD request to the +path+ and returns the response
     # as a Net::HTTPResponse object.
@@ -902,11 +907,14 @@ module Net
     #     response = http.request_head('/index.html')
     #     p response['content-type']
     #
-    def request_head: (uri_or_string path, ?Hash[untyped, untyped]? initheader) { () -> untyped } -> Net::HTTPResponse
+    def request_head: (uri_or_string path, ?Hash[untyped, untyped]? initheader) { (Net::HTTPResponse response) -> untyped } -> Net::HTTPResponse
+                    | (uri_or_string path, ?Hash[untyped, untyped]? initheader) -> Net::HTTPResponse
 
-    def request_post: (uri_or_string path, String data, ?Hash[untyped, untyped]? initheader) { () -> untyped } -> Net::HTTPResponse
+    def request_post: (uri_or_string path, String data, ?Hash[untyped, untyped]? initheader) { (Net::HTTPResponse response) -> untyped } -> Net::HTTPResponse
+                    | (uri_or_string path, String data, ?Hash[untyped, untyped]? initheader) -> Net::HTTPResponse
 
-    def request_put: (uri_or_string path, String data, ?Hash[untyped, untyped]? initheader) { () -> untyped } -> Net::HTTPResponse
+    def request_put: (uri_or_string path, String data, ?Hash[untyped, untyped]? initheader) { (Net::HTTPResponse response) -> untyped } -> Net::HTTPResponse
+                   | (uri_or_string path, String data, ?Hash[untyped, untyped]? initheader) -> Net::HTTPResponse
 
     alias get2 request_get
 
@@ -928,7 +936,8 @@ module Net
     #
     def send_request: (String name, uri_or_string path, ?String? data, ?Hash[untyped, untyped]? header) -> Net::HTTPResponse
 
-    def request: (HTTPRequest req, ?String? body) { () -> untyped } -> Net::HTTPResponse
+    def request: (Net::HTTPRequest req, ?String? body) { (Net::HTTPResponse response) -> untyped } -> Net::HTTPResponse
+               | (Net::HTTPRequest req, ?String? body) -> Net::HTTPResponse
 
   end
 
@@ -958,7 +967,7 @@ module Net
 
     def body_exist?: () -> bool
 
-    attr_reader body: String
+    attr_reader body: (String | nil)
 
     def body=: (String str) -> void
 
@@ -1024,10 +1033,10 @@ module Net
     # Returns the default value +args+, or the result of the block, or
     # raises an IndexError if there's no header field named +key+
     # See Hash#fetch
-    def fetch: (string_or_symbol key, *untyped args) { (String) -> String } -> (String | Array[String])
+    def fetch: (string_or_symbol key, *untyped args) { (String) -> untyped } -> (String | Array[String])
 
-    def each_header: () { (String, Array[String]) -> untyped } -> Hash[String, Array[String]]
-                   | () -> Enumerator[[String, Array[String]], Hash[String, Array[String]]]
+    def each_header: () { (String, String) -> untyped } -> Hash[String, Array[String]]
+                   | () -> Enumerator[[String, String], Hash[String, Array[String]]]
 
     alias each each_header
 
@@ -1039,11 +1048,11 @@ module Net
     def each_capitalized_name: () { (String) -> untyped } -> Hash[String, Array[String]]
                              | () -> Enumerator[String, Hash[String, Array[String]]]
 
-    def each_value: () { (Array[String]) -> untyped } -> Hash[String, Array[String]]
-                  | () -> Enumerator[Array[String], Hash[String, Array[String]]]
+    def each_value: () { (String) -> untyped } -> Hash[String, Array[String]]
+                  | () -> Enumerator[String, Hash[String, Array[String]]]
 
     # Removes a header field, specified by case-insensitive key.
-    def delete: (string_or_symbol key) -> Array[String]
+    def delete: (string_or_symbol key) -> (Array[String] | nil)
 
     # true if +key+ header exists.
     def key?: (string_or_symbol key) -> bool
@@ -1105,7 +1114,7 @@ module Net
     # header field.
     # For a partial entity body, this indicates where this fragment
     # fits inside the full entity body, as range of byte offsets.
-    def content_range: () -> Range[Integer]
+    def content_range: () -> (Range[Integer] | nil)
 
     # The length of the range represented in Content-Range: header.
     def range_length: () -> (nil | Integer)
@@ -1385,7 +1394,7 @@ module Net
 
     # The URI used to fetch this response.  The response URI is only available
     # if a URI was used to create the request.
-    attr_reader uri: URI::Generic
+    attr_reader uri: (URI::Generic | nil)
 
     # Set to true automatically when the request did not contain an
     # Accept-Encoding header from the user.
@@ -1397,7 +1406,7 @@ module Net
 
     def error!: () -> untyped
 
-    def error_type: () -> untyped
+    def error_type: () -> (Net::HTTPError | Net::HTTPServerException | Net::HTTPRetriableError | Net::HTTPFatalError)
 
     # Raises an HTTP error if the response is not 2xx (success).
     def value: () -> (nil | untyped)
@@ -1432,7 +1441,8 @@ module Net
     #     end
     #   }
     #
-    def read_body: (?untyped? dest) { (String parameter) -> untyped } -> untyped
+    def read_body: (?untyped? dest) { (String parameter) -> untyped } -> String
+                 | (?untyped? dest) -> String
 
     # Returns the full entity body.
     #
