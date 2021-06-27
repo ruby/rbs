@@ -371,37 +371,38 @@
 # The above examples should be enough to learn how to use this class.  If you
 # have any questions, file a ticket at http://bugs.ruby-lang.org.
 class OptionParser
+  interface _Pattern
+    def match: (untyped other) -> boolish
+  end
+
+  interface _Intoable
+    def []=: (Symbol, untyped) -> untyped
+  end
+
+  interface _LtLtString
+    def <<: (String) -> untyped
+  end
+
   # See #accept.
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     accept(*args, &blk)
-  #
-  def self.accept: (*untyped args) { (*untyped) -> untyped } -> untyped
+  def self.accept: (Class t, ?_Pattern pat) ?{ (*untyped) -> untyped } -> void
 
   # See #getopts.
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     getopts(*args)
-  #
-  def self.getopts: (*untyped args) -> untyped
+  def self.getopts: (*String options) -> Hash[String, untyped]
+                  | (Array[String] args, *String options) -> Hash[String, untyped]
 
   # Returns an incremented value of `default` according to `arg`.
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     inc(arg, default = nil)
-  #
-  def self.inc: (untyped arg, ?untyped default) -> untyped
+  def self.inc: (untyped arg, ?_ToI default) -> Integer?
 
   # See #reject.
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     reject(*args, &blk)
-  #
-  def self.reject: (*untyped args) { (*untyped) -> untyped } -> untyped
+  def self.reject: (Class t) -> void
 
-  def self.terminate: (?untyped arg) -> untyped
+  def self.terminate: (?String arg) -> bot
 
-  def self.top: () -> untyped
+  def self.top: () -> OptionParser::List
 
   # Initializes a new instance and evaluates the optional block in context of the
   # instance. Arguments `args` are passed to #new, see there for description of
@@ -410,14 +411,11 @@ class OptionParser
   # This method is **deprecated**, its behavior corresponds to the older #new
   # method.
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     with(*args, &block)
-  #
-  def self.with: (*untyped args) { (*untyped) -> untyped } -> untyped
+  def self.with: (?String banner, ?Integer width, ?String indent) ?{ (instance opts) -> void } -> instance
 
   public
 
-  def abort: (?untyped mesg) -> untyped
+  def abort: (?_ToS mesg) -> bot
 
   # Directs to accept specified class `t`. The argument string is passed to the
   # block in which it should be converted to the desired class.
@@ -430,57 +428,35 @@ class OptionParser
   #
   #     accept(t, pat, &block)
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     accept(*args, &blk)
-  #
-  def accept: (*untyped args) { (*untyped) -> untyped } -> untyped
+  def accept: (Class t, ?_Pattern pat) ?{ (*untyped) -> untyped } -> void
 
-  def add_officious: () -> untyped
+  def add_officious: () -> void
 
   # Returns additional info.
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     additional_message(typ, opt)
-  #
-  def additional_message: (untyped typ, untyped opt) -> untyped
+  def additional_message: (untyped typ, untyped opt) -> String?
 
   # Heading banner preceding summary.
   #
-  def banner: () -> untyped
-
-  def banner=: (untyped) -> untyped
+  attr_accessor banner: String
 
   # Subject of #on_tail.
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     base()
-  #
-  def base: () -> untyped
+  def base: () -> List
 
-  def candidate: (untyped word) -> untyped
+  def candidate: (String word) -> Array[untyped]
 
   def compsys: (untyped to, ?untyped name) -> untyped
 
-  # # arglists 💪👽🚨 << Delete this section
-  #     def_head_option(*opts, &block)
-  #
   alias def_head_option define_head
 
-  # # arglists 💪👽🚨 << Delete this section
-  #     def_option(*opts, &block)
-  #
   alias def_option define
 
-  # # arglists 💪👽🚨 << Delete this section
-  #     def_tail_option(*opts, &block)
-  #
   alias def_tail_option define_tail
 
   # Strings to be parsed in default.
   #
-  def default_argv: () -> untyped
-
-  def default_argv=: (untyped) -> untyped
+  attr_accessor default_argv: Array[String]
 
   # Creates an option from the given parameters `params`. See [Parameters for New
   # Options](./option_params_rdoc.html).
@@ -490,10 +466,10 @@ class OptionParser
   # given for the option, if any. See [Option
   # Handlers](./option_params_rdoc.html#label-Option+Handlers).
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     define(*params, &block)
-  #
-  def define: (*untyped opts) { (*untyped) -> untyped } -> untyped
+  def define: (*String params) ?{ (*untyped) -> untyped } -> untyped
+            | (String params, Class | Array[String] | Hash[Symbol, untyped] | Regexp obj, ?String desc) ?{ (*untyped) -> untyped } -> untyped
+            | (*String params, Proc | Method handler) -> untyped
+            | (String params, Class | Array[String] | Hash[Symbol, untyped] | Regexp obj, ?String desc, Proc | Method handler) -> untyped
 
   # Creates an option from the given parameters `params`. See [Parameters for New
   # Options](./option_params_rdoc.html).
@@ -503,10 +479,10 @@ class OptionParser
   # given for the option, if any. See [Option
   # Handlers](./option_params_rdoc.html#label-Option+Handlers).
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     define_head(*params, &block)
-  #
-  def define_head: (*untyped opts) { (*untyped) -> untyped } -> untyped
+  def define_head: (*String params) ?{ (*untyped) -> untyped } -> untyped
+                 | (String params, Class | Array[String] | Hash[Symbol, untyped] | Regexp obj, ?String desc) ?{ (*untyped) -> untyped } -> untyped
+                 | (*String params, Proc | Method handler) -> untyped
+                 | (String params, Class | Array[String] | Hash[Symbol, untyped] | Regexp obj, ?String desc, Proc | Method handler) -> untyped
 
   # Creates an option from the given parameters `params`. See [Parameters for New
   # Options](./option_params_rdoc.html).
@@ -516,20 +492,17 @@ class OptionParser
   # given for the option, if any. See [Option
   # Handlers](./option_params_rdoc.html#label-Option+Handlers).
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     define_tail(*params, &block)
-  #
-  def define_tail: (*untyped opts) { (*untyped) -> untyped } -> untyped
+  def define_tail: (*String params) ?{ (*untyped) -> untyped } -> untyped
+                 | (String params, Class | Array[String] | Hash[Symbol, untyped] | Regexp obj, ?String desc) ?{ (*untyped) -> untyped } -> untyped
+                 | (*String params, Proc | Method handler) -> untyped
+                 | (String params, Class | Array[String] | Hash[Symbol, untyped] | Regexp obj, ?String desc, Proc | Method handler) -> untyped
 
   # Parses environment variable `env` or its uppercase with splitting like a
   # shell.
   #
   # `env` defaults to the basename of the program.
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     environment(env = File.basename($0, '.*'))
-  #
-  def environment: (?untyped env) -> untyped
+  def environment: (?String env) -> Array[String]?
 
   # Wrapper method for getopts.rb.
   #
@@ -540,17 +513,12 @@ class OptionParser
   #     # params["bar"] = "x"  # --bar x
   #     # params["zot"] = "z"  # --zot Z
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     getopts(*args)
-  #
-  def getopts: (*untyped args) -> untyped
+  def getopts: (*String options) -> Hash[String, untyped]
+               | (Array[String] args, *String options) -> Hash[String, untyped]
 
   # Returns option summary string.
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     help()
-  #
-  def help: () -> untyped
+  def help: () -> String
 
   def inc: (*untyped args) -> untyped
 
@@ -561,10 +529,7 @@ class OptionParser
   # ~/.options, then the basename with '.options' suffix under XDG and Haiku
   # standard places.
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     load(filename = nil)
-  #
-  def load: (?untyped filename) -> untyped
+  def load: (?String filename) -> bool
 
   # Creates an option from the given parameters `params`. See [Parameters for New
   # Options](./option_params_rdoc.html).
@@ -574,17 +539,12 @@ class OptionParser
   # given for the option, if any. See [Option
   # Handlers](./option_params_rdoc.html#label-Option+Handlers).
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     make_switch(params, block = nil)
-  #
-  def make_switch: (untyped opts, ?untyped block) -> untyped
+  def make_switch: (Array[untyped] opts, ?Proc block) -> [untyped, untyped, untyped, untyped, untyped]
 
   # Pushes a new List.
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     new() { |self| ... }
-  #
-  def new: () -> untyped
+  def new: () -> self
+         | [T] () { (self) -> T } -> T
 
   # Creates an option from the given parameters `params`. See [Parameters for New
   # Options](./option_params_rdoc.html).
@@ -594,10 +554,11 @@ class OptionParser
   # given for the option, if any. See [Option
   # Handlers](./option_params_rdoc.html#label-Option+Handlers).
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     on(*params, &block)
-  #
-  def on: (*untyped opts) { (*untyped) -> untyped } -> untyped
+  def on: (*String params) ?{ (*untyped) -> untyped } -> self
+        | (String params, Class | Array[String] | Hash[Symbol, untyped] | Regexp obj, ?String desc) ?{ (*untyped) -> untyped } -> self
+        | (*String params, Proc | Method handler) -> self
+        | (String params, Class | Array[String] | Hash[Symbol, untyped] | Regexp obj, ?String desc, Proc | Method handler) -> self
+
 
   # Creates an option from the given parameters `params`. See [Parameters for New
   # Options](./option_params_rdoc.html).
@@ -609,10 +570,10 @@ class OptionParser
   #
   # The new option is added at the head of the summary.
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     on_head(*params, &block)
-  #
-  def on_head: (*untyped opts) { (*untyped) -> untyped } -> untyped
+  def on_head: (*String params) ?{ (*untyped) -> untyped } -> self
+             | (String params, Class | Array[String] | Hash[Symbol, untyped] | Regexp obj, ?String desc) ?{ (*untyped) -> untyped } -> self
+             | (*String params, Proc | Method handler) -> self
+             | (String params, Class | Array[String] | Hash[Symbol, untyped] | Regexp obj, ?String desc, Proc | Method handler) -> self
 
   # Creates an option from the given parameters `params`. See [Parameters for New
   # Options](./option_params_rdoc.html).
@@ -624,10 +585,10 @@ class OptionParser
   #
   # The new option is added at the tail of the summary.
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     on_tail(*params, &block)
-  #
-  def on_tail: (*untyped opts) { (*untyped) -> untyped } -> untyped
+  def on_tail: (*String params) ?{ (*untyped) -> untyped } -> self
+             | (String params, Class | Array[String] | Hash[Symbol, untyped] | Regexp obj, ?String desc) ?{ (*untyped) -> untyped } -> self
+             | (*String params, Proc | Method handler) -> self
+             | (String params, Class | Array[String] | Hash[Symbol, untyped] | Regexp obj, ?String desc, Proc | Method handler) -> self
 
   # Parses command line arguments `argv` in order. When a block is given, each
   # non-option argument is yielded. When optional `into` keyword argument is
@@ -636,61 +597,44 @@ class OptionParser
   #
   # Returns the rest of `argv` left unparsed.
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     order(*argv, into: nil, &nonopt)
-  #
-  def order: (*untyped argv, ?into: untyped) { (*untyped) -> untyped } -> untyped
+  def order: (*String argv, ?into: _Intoable) ?{ (String) -> void } -> Array[String]
+           | (Array[String] argv, ?into: _Intoable) ?{ (String) -> void } -> Array[String]
 
   # Same as #order, but removes switches destructively. Non-option arguments
   # remain in `argv`.
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     order!(argv = default_argv, into: nil, &nonopt)
-  #
-  def order!: (?untyped argv, ?into: untyped) { (*untyped) -> untyped } -> untyped
+  def order!: (?Array[String] argv, ?into: _Intoable) ?{ (String) -> void } -> Array[String]
 
   # Parses command line arguments `argv` in order when environment variable
   # POSIXLY_CORRECT is set, and in permutation mode otherwise. When optional
   # `into` keyword argument is provided, the parsed option values are stored there
   # via `[]=` method (so it can be Hash, or OpenStruct, or other similar object).
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     parse(*argv, into: nil)
-  #
-  def parse: (*untyped argv, ?into: untyped) -> untyped
+  def parse: (*String argv, ?into: _Intoable) -> Array[String]
+           | (Array[String] argv, ?into: _Intoable) -> Array[String]
 
   # Same as #parse, but removes switches destructively. Non-option arguments
   # remain in `argv`.
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     parse!(argv = default_argv, into: nil)
-  #
-  def parse!: (?untyped argv, ?into: untyped) -> untyped
+  def parse!: (?Array[String] argv, ?into: _Intoable) -> Array[String]
 
   # Parses command line arguments `argv` in permutation mode and returns list of
   # non-option arguments. When optional `into` keyword argument is provided, the
   # parsed option values are stored there via `[]=` method (so it can be Hash, or
   # OpenStruct, or other similar object).
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     permute(*argv, into: nil)
-  #
-  def permute: (*untyped argv, ?into: untyped) -> untyped
+  def permute: (*String argv, ?into: _Intoable) -> Array[String]
+             | (Array[String] argv, ?into: _Intoable) -> Array[String]
 
   # Same as #permute, but removes switches destructively. Non-option arguments
   # remain in `argv`.
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     permute!(argv = default_argv, into: nil)
-  #
-  def permute!: (?untyped argv, ?into: untyped) -> untyped
+  def permute!: (?Array[String] argv, ?into: _Intoable) -> Array[String]
 
   # Program name to be emitted in error message and default banner, defaults to
   # $0.
   #
-  def program_name: () -> untyped
-
-  def program_name=: (untyped) -> untyped
+  attr_accessor program_name: String
 
   # Directs to reject specified class argument.
   #
@@ -700,10 +644,7 @@ class OptionParser
   #
   #     reject(t)
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     reject(*args, &blk)
-  #
-  def reject: (*untyped args) { (*untyped) -> untyped } -> untyped
+  def reject: (Class t) -> void
 
   # Release code
   #
@@ -713,24 +654,16 @@ class OptionParser
 
   # Removes the last List.
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     remove()
-  #
-  def remove: () -> untyped
+  def remove: () -> List?
 
   # Whether to require that options match exactly (disallows providing abbreviated
   # long option as short option).
   #
-  def require_exact: () -> untyped
-
-  def require_exact=: (untyped) -> untyped
+  attr_accessor require_exact: boolish
 
   # Add separator in summary.
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     separator(string)
-  #
-  def separator: (untyped string) -> untyped
+  def separator: (String string) -> void
 
   # Heading banner preceding summary.
   #
@@ -762,64 +695,40 @@ class OptionParser
   # :   Indentation, defaults to @summary_indent.
   #
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     summarize(to = [], width = @summary_width, max = width - 1, indent = @summary_indent, &blk)
-  #
-  def summarize: (?untyped to, ?untyped width, ?untyped max, ?untyped indent) { (*untyped) -> untyped } -> untyped
+  def summarize: (?_LtLtString to, ?Integer width, ?Integer max, ?String indent) ?{ (String line) -> void } -> _LtLtString
 
   # Indentation for summary. Must be String (or have + String method).
   #
-  def summary_indent: () -> untyped
-
-  def summary_indent=: (untyped) -> untyped
+  attr_accessor summary_indent: String
 
   # Width for option list portion of summary. Must be Numeric.
   #
-  def summary_width: () -> untyped
-
-  def summary_width=: (untyped) -> untyped
+  attr_accessor summary_width: Integer
 
   # Terminates option parsing. Optional parameter `arg` is a string pushed back to
   # be the first non-option argument.
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     terminate(arg = nil)
-  #
-  def terminate: (?untyped arg) -> untyped
+  def terminate: (?String arg) -> bot
 
   # Returns option summary list.
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     to_a()
-  #
-  def to_a: () -> untyped
+  def to_a: () -> Array[String]
 
-  # # arglists 💪👽🚨 << Delete this section
-  #     to_s()
-  #
   alias to_s help
 
   # Subject of #on / #on_head, #accept / #reject
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     top()
-  #
-  def top: () -> untyped
+  def top: () -> List
 
   # Returns version string from program_name, version and release.
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     ver()
-  #
-  def ver: () -> untyped
+  def ver: () -> String?
 
   # Version
   #
-  def version: () -> untyped
+  attr_accessor version: String?
 
-  def version=: (untyped) -> untyped
-
-  def warn: (?untyped mesg) -> untyped
+  def warn: (?_ToS mesg) -> void
 
   private
 
@@ -836,9 +745,6 @@ class OptionParser
   # :   Optional pattern for completion.
   #
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     complete(typ, opt, icase = false, *pat)
-  #
   def complete: (untyped typ, untyped opt, ?untyped icase, *untyped pat) -> untyped
 
   # Initializes the instance and yields itself if called with a block.
@@ -851,10 +757,7 @@ class OptionParser
   # :   Summary indent.
   #
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     new(banner = nil, width = 32, indent = ' ' * 4) { |self| ... }
-  #
-  def initialize: (?untyped banner, ?untyped width, ?untyped indent) -> void
+  def initialize: (?String banner, ?Integer width, ?String indent) ?{ (OptionParser) -> void } -> void
 
   # Checks if an argument is given twice, in which case an ArgumentError is
   # raised. Called from OptionParser#switch only.
@@ -867,24 +770,15 @@ class OptionParser
   # :   Exception message.
   #
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     notwice(obj, prv, msg)
-  #
   def notwice: (untyped obj, untyped prv, untyped msg) -> untyped
 
   def parse_in_order: (?untyped argv, ?untyped setter) { (*untyped) -> untyped } -> untyped
 
   # Searches `key` in @stack for `id` hash and returns or yields the result.
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     search(id, key) { |k| ... }
-  #
   def search: (untyped id, untyped key) -> untyped
 
   # Traverses @stack, sending each element method `id` with `args` and `block`.
-  #
-  # # arglists 💪👽🚨 << Delete this section
-  #     visit(id, *args, &block)
   #
   def visit: (untyped id, *untyped args) { (*untyped) -> untyped } -> untyped
 end
@@ -904,7 +798,7 @@ OptionParser::DefaultList: OptionParser::List
 
 OptionParser::NO_ARGUMENT: Symbol
 
-OptionParser::NoArgument: Array[untyped]
+OptionParser::NoArgument: [:NONE, nil]
 
 OptionParser::OPTIONAL_ARGUMENT: Symbol
 
@@ -951,9 +845,6 @@ OptionParser::AmbiguousOption::Reason: String
 module OptionParser::Arguable
   # Initializes instance variable.
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     extend_object(obj)
-  #
   def self.extend_object: (untyped obj) -> untyped
 
   public
@@ -967,10 +858,7 @@ module OptionParser::Arguable
   #     rescue OptionParser::ParseError
   #     end
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     getopts(*args)
-  #
-  def getopts: (*untyped args) -> untyped
+  def getopts: (*String args) -> Hash[String, untyped]
 
   # Actual OptionParser object, automatically created if nonexistent.
   #
@@ -978,60 +866,39 @@ module OptionParser::Arguable
   # of the block. If an OptionParser::ParseError exception occurs in the block, it
   # is rescued, a error message printed to STDERR and `nil` returned.
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     options() { |optparse| ... }
-  #
-  def options: () -> untyped
+  def options: () -> OptionParser
+             | [T] () { (OptionParser) -> T } -> T?
 
   # Sets OptionParser object, when `opt` is `false` or `nil`, methods
   # OptionParser::Arguable#options and OptionParser::Arguable#options= are
   # undefined. Thus, there is no ways to access the OptionParser object via the
   # receiver object.
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     options=(opt)
-  #
-  def options=: (untyped opt) -> untyped
+  def options=: (OptionParser? opt) -> untyped
 
   # Parses `self` destructively in order and returns `self` containing the rest
   # arguments left unparsed.
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     order!(&blk)
-  #
-  def order!: () { (*untyped) -> untyped } -> untyped
+  def order!: () ?{ (String) -> void } -> Array[String]
 
   # Parses `self` destructively and returns `self` containing the rest arguments
   # left unparsed.
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     parse!()
-  #
-  def parse!: () -> untyped
+  def parse!: () -> Array[String]
 
   # Parses `self` destructively in permutation mode and returns `self` containing
   # the rest arguments left unparsed.
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     permute!()
-  #
-  def permute!: () -> untyped
-
-  private
-
-  def initialize: (*untyped args) -> void
+  def permute!: () -> Array[String]
 end
 
 # Hash with completion search feature. See OptionParser::Completion.
 class OptionParser::CompletingHash < Hash[untyped, untyped]
-  include Completion
+  include OptionParser::Completion
 
   public
 
   # Completion for hash key.
-  #
-  # # arglists 💪👽🚨 << Delete this section
-  #     match(key)
   #
   def match: (untyped key) -> untyped
 end
@@ -1072,9 +939,6 @@ class OptionParser::List
 
   # See OptionParser.accept.
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     accept(t, pat = /.*/m, &block)
-  #
   def accept: (untyped t, ?untyped pat) { (*untyped) -> untyped } -> untyped
 
   def add_banner: (untyped to) -> untyped
@@ -1094,9 +958,6 @@ class OptionParser::List
   #
   #     append(switch, short_opts, long_opts, nolong_opts)
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     append(*args)
-  #
   def append: (*untyped args) -> untyped
 
   # Map from acceptable argument types to pattern and converter pairs.
@@ -1107,17 +968,11 @@ class OptionParser::List
   # If `icase` is true, the search is case insensitive. The result is returned or
   # yielded if a block is given. If it isn't found, nil is returned.
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     complete(id, opt, icase = false, *pat, &block)
-  #
   def complete: (untyped id, untyped opt, ?untyped icase, *untyped pat) { (*untyped) -> untyped } -> untyped
 
   def compsys: (*untyped args) { (*untyped) -> untyped } -> untyped
 
   # Iterates over each option, passing the option to the `block`.
-  #
-  # # arglists 💪👽🚨 << Delete this section
-  #     each_option(&block)
   #
   def each_option: () { (*untyped) -> untyped } -> untyped
 
@@ -1146,23 +1001,14 @@ class OptionParser::List
   #
   #     prepend(switch, short_opts, long_opts, nolong_opts)
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     prepend(*args)
-  #
   def prepend: (*untyped args) -> untyped
 
   # See OptionParser.reject.
-  #
-  # # arglists 💪👽🚨 << Delete this section
-  #     reject(t)
   #
   def reject: (untyped t) -> untyped
 
   # Searches `key` in `id` list. The result is returned or yielded if a block is
   # given. If it isn't found, nil is returned.
-  #
-  # # arglists 💪👽🚨 << Delete this section
-  #     search(id, key) { |val| ... }
   #
   def search: (untyped id, untyped key) -> untyped
 
@@ -1174,17 +1020,11 @@ class OptionParser::List
   # The arguments `args` are passed along to the summarize method which is called
   # on every option.
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     summarize(*args, &block)
-  #
   def summarize: (*untyped args) { (*untyped) -> untyped } -> untyped
 
   private
 
   # Just initializes all instance variables.
-  #
-  # # arglists 💪👽🚨 << Delete this section
-  #     new()
   #
   def initialize: () -> void
 
@@ -1199,9 +1039,6 @@ class OptionParser::List
   # `nlopts`
   # :   Negated long style options list.
   #
-  #
-  # # arglists 💪👽🚨 << Delete this section
-  #     update(sw, sopts, lopts, nsw = nil, nlopts = nil)
   #
   def update: (untyped sw, untyped sopts, untyped lopts, ?untyped nsw, ?untyped nlopts) -> untyped
 end
@@ -1220,7 +1057,7 @@ OptionParser::NeedlessArgument::Reason: String
 
 # Map from option/keyword string to object with completion.
 class OptionParser::OptionMap < Hash[untyped, untyped]
-  include Completion
+  include OptionParser::Completion
 end
 
 # Base class of exceptions from OptionParser.
@@ -1239,10 +1076,7 @@ class OptionParser::ParseError < RuntimeError
 
   # Default stringizing method to emit standard error message.
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     message()
-  #
-  def message: () -> untyped
+  def message: () -> String
 
   def reason: () -> untyped
 
@@ -1250,18 +1084,12 @@ class OptionParser::ParseError < RuntimeError
 
   # Pushes back erred argument(s) to `argv`.
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     recover(argv)
-  #
   def recover: (untyped argv) -> untyped
 
   def set_backtrace: (untyped array) -> untyped
 
   def set_option: (untyped opt, untyped eq) -> untyped
 
-  # # arglists 💪👽🚨 << Delete this section
-  #     to_s()
-  #
   alias to_s message
 
   private
@@ -1279,9 +1107,6 @@ OptionParser::ParseError::Reason: String
 class OptionParser::Switch
   # Guesses argument style from `arg`.  Returns corresponding OptionParser::Switch
   # class (OptionalArgument, etc.).
-  #
-  # # arglists 💪👽🚨 << Delete this section
-  #     guess(arg)
   #
   def self.guess: (untyped arg) -> untyped
 
@@ -1327,15 +1152,9 @@ class OptionParser::Switch
   # :   Prefix string indents all summarized lines.
   #
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     summarize(sdone = {}, ldone = {}, width = 1, max = width - 1, indent = "") { |indent| ... }
-  #
   def summarize: (?untyped sdone, ?untyped ldone, ?untyped width, ?untyped max, ?untyped indent) -> untyped
 
   # Main name of the switch.
-  #
-  # # arglists 💪👽🚨 << Delete this section
-  #     switch_name()
   #
   def switch_name: () -> untyped
 
@@ -1344,18 +1163,12 @@ class OptionParser::Switch
   # Parses argument, converts and returns `arg`, `block` and result of conversion.
   # Yields at semi-error condition instead of raising an exception.
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     conv_arg(arg, val = [])
-  #
   def conv_arg: (untyped arg, ?untyped val) -> untyped
 
   def initialize: (?untyped pattern, ?untyped conv, ?untyped short, ?untyped long, ?untyped arg, ?untyped desc, ?untyped block) { (*untyped) -> untyped } -> void
 
   # Parses `arg` and returns rest of `arg` and matched portion to the argument
   # pattern. Yields when the pattern doesn't match substring.
-  #
-  # # arglists 💪👽🚨 << Delete this section
-  #     parse_arg(arg) { |InvalidArgument, arg| ... }
   #
   def parse_arg: (untyped arg) -> untyped
 end
@@ -1370,9 +1183,6 @@ class OptionParser::Switch::NoArgument < OptionParser::Switch
 
   # Raises an exception if any arguments given.
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     parse(arg, argv) { |NeedlessArgument, arg| ... }
-  #
   def parse: (untyped arg, untyped argv) -> untyped
 end
 
@@ -1381,9 +1191,6 @@ class OptionParser::Switch::OptionalArgument < OptionParser::Switch
   public
 
   # Parses argument if given, or uses default value.
-  #
-  # # arglists 💪👽🚨 << Delete this section
-  #     parse(arg, argv, &error)
   #
   def parse: (untyped arg, untyped argv) { (*untyped) -> untyped } -> untyped
 end
@@ -1394,9 +1201,6 @@ class OptionParser::Switch::PlacedArgument < OptionParser::Switch
 
   # Returns nil if argument is not present or begins with '-'.
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     parse(arg, argv, &error)
-  #
   def parse: (untyped arg, untyped argv) { (*untyped) -> untyped } -> untyped
 end
 
@@ -1405,9 +1209,6 @@ class OptionParser::Switch::RequiredArgument < OptionParser::Switch
   public
 
   # Raises an exception if argument is not present.
-  #
-  # # arglists 💪👽🚨 << Delete this section
-  #     parse(arg, argv)
   #
   def parse: (untyped arg, untyped argv) -> untyped
 end
