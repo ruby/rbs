@@ -122,6 +122,10 @@ module TypeAssertions
     attr_reader :target
 
     def library(*libs)
+      if @libs
+        raise "Multiple #library calls are not allowed"
+      end
+
       @libs = libs
       @env = nil
       @target = nil

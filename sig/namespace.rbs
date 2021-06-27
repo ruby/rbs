@@ -13,7 +13,7 @@ module RBS
   #    RBS::Types::Union
   #    ^^^^^^^^^^^^         Namespace
   #
-  # Note that `Namespace` is a RBS specific concept and there is no corresponding concept in Ruby.
+  # Note that `Namespace` is an RBS specific concept and there is no corresponding concept in Ruby.
   #
   # There are _absolute_ and _relative_ namespaces.
   #

@@ -57,7 +57,7 @@ But it will help you to have an overview of the signatures you are trying to wri
 
 ### What to do with existing RBS files
 
-Generating prototypes will override everything, so the problem is if there is a RBS files already.
+Generating prototypes will overwrite existing RBS files, which might be undesirable.
 You can try to find missing parts, or you can start from the scratch.
 
 One non-trivial but absolutely better solution is to make a tool:
