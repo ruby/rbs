@@ -1,0 +1,410 @@
+class OptionParser
+  def self.accept: (*untyped args) { (*untyped) -> untyped } -> untyped
+
+  def self.getopts: (*untyped args) -> untyped
+
+  def self.inc: (untyped arg, ?untyped default) -> untyped
+
+  def self.reject: (*untyped args) { (*untyped) -> untyped } -> untyped
+
+  def self.terminate: (?untyped arg) -> untyped
+
+  def self.top: () -> untyped
+
+  def self.with: (*untyped args) { (*untyped) -> untyped } -> untyped
+
+  public
+
+  def abort: (?untyped mesg) -> untyped
+
+  def accept: (*untyped args) { (*untyped) -> untyped } -> untyped
+
+  def add_officious: () -> untyped
+
+  def additional_message: (untyped typ, untyped opt) -> untyped
+
+  def banner: () -> untyped
+
+  def banner=: (untyped) -> untyped
+
+  def base: () -> untyped
+
+  def candidate: (untyped word) -> untyped
+
+  def compsys: (untyped to, ?untyped name) -> untyped
+
+  alias def_head_option define_head
+
+  alias def_option define
+
+  alias def_tail_option define_tail
+
+  def default_argv: () -> untyped
+
+  def default_argv=: (untyped) -> untyped
+
+  def define: (*untyped opts) { (*untyped) -> untyped } -> untyped
+
+  def define_head: (*untyped opts) { (*untyped) -> untyped } -> untyped
+
+  def define_tail: (*untyped opts) { (*untyped) -> untyped } -> untyped
+
+  def environment: (?untyped env) -> untyped
+
+  def getopts: (*untyped args) -> untyped
+
+  def help: () -> untyped
+
+  def inc: (*untyped args) -> untyped
+
+  def load: (?untyped filename) -> untyped
+
+  def make_switch: (untyped opts, ?untyped block) -> untyped
+
+  def new: () -> untyped
+
+  def on: (*untyped opts) { (*untyped) -> untyped } -> untyped
+
+  def on_head: (*untyped opts) { (*untyped) -> untyped } -> untyped
+
+  def on_tail: (*untyped opts) { (*untyped) -> untyped } -> untyped
+
+  def order: (*untyped argv, ?into: untyped) { (*untyped) -> untyped } -> untyped
+
+  def order!: (?untyped argv, ?into: untyped) { (*untyped) -> untyped } -> untyped
+
+  def parse: (*untyped argv, ?into: untyped) -> untyped
+
+  def parse!: (?untyped argv, ?into: untyped) -> untyped
+
+  def permute: (*untyped argv, ?into: untyped) -> untyped
+
+  def permute!: (?untyped argv, ?into: untyped) -> untyped
+
+  def program_name: () -> untyped
+
+  def program_name=: (untyped) -> untyped
+
+  def reject: (*untyped args) { (*untyped) -> untyped } -> untyped
+
+  def release: () -> untyped
+
+  def release=: (untyped) -> untyped
+
+  def remove: () -> untyped
+
+  def require_exact: () -> untyped
+
+  def require_exact=: (untyped) -> untyped
+
+  def separator: (untyped string) -> untyped
+
+  alias set_banner banner=
+
+  alias set_program_name program_name=
+
+  alias set_summary_indent summary_indent=
+
+  alias set_summary_width summary_width=
+
+  def summarize: (?untyped to, ?untyped width, ?untyped max, ?untyped indent) { (*untyped) -> untyped } -> untyped
+
+  def summary_indent: () -> untyped
+
+  def summary_indent=: (untyped) -> untyped
+
+  def summary_width: () -> untyped
+
+  def summary_width=: (untyped) -> untyped
+
+  def terminate: (?untyped arg) -> untyped
+
+  def to_a: () -> untyped
+
+  alias to_s help
+
+  def top: () -> untyped
+
+  def ver: () -> untyped
+
+  def version: () -> untyped
+
+  def version=: (untyped) -> untyped
+
+  def warn: (?untyped mesg) -> untyped
+
+  private
+
+  def complete: (untyped typ, untyped opt, ?untyped icase, *untyped pat) -> untyped
+
+  def initialize: (?untyped banner, ?untyped width, ?untyped indent) -> void
+
+  def notwice: (untyped obj, untyped prv, untyped msg) -> untyped
+
+  def parse_in_order: (?untyped argv, ?untyped setter) { (*untyped) -> untyped } -> untyped
+
+  def search: (untyped id, untyped key) -> untyped
+
+  def visit: (untyped id, *untyped args) { (*untyped) -> untyped } -> untyped
+end
+
+OptionParser::ArgumentStyle: Hash[untyped, untyped]
+
+OptionParser::COMPSYS_HEADER: String
+
+OptionParser::DecimalInteger: Regexp
+
+OptionParser::DecimalNumeric: Regexp
+
+OptionParser::DefaultList: OptionParser::List
+
+OptionParser::NO_ARGUMENT: Symbol
+
+OptionParser::NoArgument: Array[untyped]
+
+OptionParser::OPTIONAL_ARGUMENT: Symbol
+
+OptionParser::OctalInteger: Regexp
+
+OptionParser::Officious: Hash[untyped, untyped]
+
+OptionParser::OptionalArgument: Array[untyped]
+
+OptionParser::REQUIRED_ARGUMENT: Symbol
+
+OptionParser::RequiredArgument: Array[untyped]
+
+OptionParser::SPLAT_PROC: Proc
+
+OptionParser::Version: String
+
+module OptionParser::Acceptables
+end
+
+OptionParser::Acceptables::DecimalInteger: Regexp
+
+OptionParser::Acceptables::DecimalNumeric: Regexp
+
+OptionParser::Acceptables::OctalInteger: Regexp
+
+class OptionParser::AmbiguousArgument < OptionParser::InvalidArgument
+end
+
+OptionParser::AmbiguousArgument::Reason: String
+
+class OptionParser::AmbiguousOption < OptionParser::ParseError
+end
+
+OptionParser::AmbiguousOption::Reason: String
+
+module OptionParser::Arguable
+  def self.extend_object: (untyped obj) -> untyped
+
+  public
+
+  def getopts: (*untyped args) -> untyped
+
+  def options: () -> untyped
+
+  def options=: (untyped opt) -> untyped
+
+  def order!: () { (*untyped) -> untyped } -> untyped
+
+  def parse!: () -> untyped
+
+  def permute!: () -> untyped
+
+  private
+
+  def initialize: (*untyped args) -> void
+end
+
+class OptionParser::CompletingHash < Hash[untyped, untyped]
+  include Completion
+
+  public
+
+  def match: (untyped key) -> untyped
+end
+
+module OptionParser::Completion
+  def self.candidate: (untyped key, ?untyped icase, ?untyped pat) { (*untyped) -> untyped } -> untyped
+
+  def self.regexp: (untyped key, untyped icase) -> untyped
+
+  public
+
+  def candidate: (untyped key, ?untyped icase, ?untyped pat) -> untyped
+
+  def complete: (untyped key, ?untyped icase, ?untyped pat) -> untyped
+
+  def convert: (?untyped opt, ?untyped val, *untyped) -> untyped
+end
+
+class OptionParser::InvalidArgument < OptionParser::ParseError
+end
+
+OptionParser::InvalidArgument::Reason: String
+
+class OptionParser::InvalidOption < OptionParser::ParseError
+end
+
+OptionParser::InvalidOption::Reason: String
+
+class OptionParser::List
+  public
+
+  def accept: (untyped t, ?untyped pat) { (*untyped) -> untyped } -> untyped
+
+  def add_banner: (untyped to) -> untyped
+
+  def append: (*untyped args) -> untyped
+
+  def atype: () -> untyped
+
+  def complete: (untyped id, untyped opt, ?untyped icase, *untyped pat) { (*untyped) -> untyped } -> untyped
+
+  def compsys: (*untyped args) { (*untyped) -> untyped } -> untyped
+
+  def each_option: () { (*untyped) -> untyped } -> untyped
+
+  def get_candidates: (untyped id) -> untyped
+
+  def list: () -> untyped
+
+  def long: () -> untyped
+
+  def prepend: (*untyped args) -> untyped
+
+  def reject: (untyped t) -> untyped
+
+  def search: (untyped id, untyped key) -> untyped
+
+  def short: () -> untyped
+
+  def summarize: (*untyped args) { (*untyped) -> untyped } -> untyped
+
+  private
+
+  def initialize: () -> void
+
+  def update: (untyped sw, untyped sopts, untyped lopts, ?untyped nsw, ?untyped nlopts) -> untyped
+end
+
+class OptionParser::MissingArgument < OptionParser::ParseError
+end
+
+OptionParser::MissingArgument::Reason: String
+
+class OptionParser::NeedlessArgument < OptionParser::ParseError
+end
+
+OptionParser::NeedlessArgument::Reason: String
+
+class OptionParser::OptionMap < Hash[untyped, untyped]
+  include Completion
+end
+
+class OptionParser::ParseError < RuntimeError
+  def self.filter_backtrace: (untyped array) -> untyped
+
+  public
+
+  def additional: () -> untyped
+
+  def additional=: (untyped) -> untyped
+
+  def args: () -> untyped
+
+  def inspect: () -> untyped
+
+  def message: () -> untyped
+
+  def reason: () -> untyped
+
+  def reason=: (untyped) -> untyped
+
+  def recover: (untyped argv) -> untyped
+
+  def set_backtrace: (untyped array) -> untyped
+
+  def set_option: (untyped opt, untyped eq) -> untyped
+
+  alias to_s message
+
+  private
+
+  def initialize: (*untyped args, ?additional: untyped) -> void
+end
+
+OptionParser::ParseError::Reason: String
+
+class OptionParser::Switch
+  def self.guess: (untyped arg) -> untyped
+
+  def self.incompatible_argument_styles: (untyped arg, untyped t) -> untyped
+
+  def self.pattern: () -> untyped
+
+  public
+
+  def add_banner: (untyped to) -> untyped
+
+  def arg: () -> untyped
+
+  def block: () -> untyped
+
+  def compsys: (untyped sdone, untyped ldone) -> untyped
+
+  def conv: () -> untyped
+
+  def desc: () -> untyped
+
+  def long: () -> untyped
+
+  def match_nonswitch?: (untyped str) -> untyped
+
+  def pattern: () -> untyped
+
+  def short: () -> untyped
+
+  def summarize: (?untyped sdone, ?untyped ldone, ?untyped width, ?untyped max, ?untyped indent) -> untyped
+
+  def switch_name: () -> untyped
+
+  private
+
+  def conv_arg: (untyped arg, ?untyped val) -> untyped
+
+  def initialize: (?untyped pattern, ?untyped conv, ?untyped short, ?untyped long, ?untyped arg, ?untyped desc, ?untyped block) { (*untyped) -> untyped } -> void
+
+  def parse_arg: (untyped arg) -> untyped
+end
+
+class OptionParser::Switch::NoArgument < OptionParser::Switch
+  def self.incompatible_argument_styles: (*untyped) -> untyped
+
+  def self.pattern: () -> untyped
+
+  public
+
+  def parse: (untyped arg, untyped argv) -> untyped
+end
+
+class OptionParser::Switch::OptionalArgument < OptionParser::Switch
+  public
+
+  def parse: (untyped arg, untyped argv) { (*untyped) -> untyped } -> untyped
+end
+
+class OptionParser::Switch::PlacedArgument < OptionParser::Switch
+  public
+
+  def parse: (untyped arg, untyped argv) { (*untyped) -> untyped } -> untyped
+end
+
+class OptionParser::Switch::RequiredArgument < OptionParser::Switch
+  public
+
+  def parse: (untyped arg, untyped argv) -> untyped
+end
