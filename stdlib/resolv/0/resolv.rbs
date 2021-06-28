@@ -1,0 +1,1036 @@
+class Resolv
+  def self.each_address: (untyped name) { (*untyped) -> untyped } -> untyped
+
+  def self.each_name: (untyped address) { (*untyped) -> untyped } -> untyped
+
+  def self.getaddress: (untyped name) -> untyped
+
+  def self.getaddresses: (untyped name) -> untyped
+
+  def self.getname: (untyped address) -> untyped
+
+  def self.getnames: (untyped address) -> untyped
+
+  public
+
+  def each_address: (untyped name) -> untyped
+
+  def each_name: (untyped address) -> untyped
+
+  def getaddress: (untyped name) -> untyped
+
+  def getaddresses: (untyped name) -> untyped
+
+  def getname: (untyped address) -> untyped
+
+  def getnames: (untyped address) -> untyped
+
+  private
+
+  def initialize: (?untyped resolvers) -> untyped
+end
+
+Resolv::AddressRegex: Regexp
+
+Resolv::DefaultResolver: Resolv
+
+class Resolv::DNS
+  def self.allocate_request_id: (untyped host, untyped port) -> untyped
+
+  def self.bind_random_port: (untyped udpsock, ?untyped bind_host) -> untyped
+
+  def self.free_request_id: (untyped host, untyped port, untyped id) -> untyped
+
+  def self.open: (*untyped args) -> untyped
+
+  def self.random: (untyped arg) -> untyped
+
+  public
+
+  def close: () -> untyped
+
+  def each_address: (untyped name) -> untyped
+
+  def each_name: (untyped address) -> untyped
+
+  def each_resource: (untyped name, untyped typeclass) { (*untyped) -> untyped } -> untyped
+
+  def extract_resources: (untyped msg, untyped name, untyped typeclass) -> untyped
+
+  def fetch_resource: (untyped name, untyped typeclass) -> untyped
+
+  def getaddress: (untyped name) -> untyped
+
+  def getaddresses: (untyped name) -> untyped
+
+  def getname: (untyped address) -> untyped
+
+  def getnames: (untyped address) -> untyped
+
+  def getresource: (untyped name, untyped typeclass) -> untyped
+
+  def getresources: (untyped name, untyped typeclass) -> untyped
+
+  def lazy_initialize: () -> untyped
+
+  def make_tcp_requester: (untyped host, untyped port) -> untyped
+
+  def make_udp_requester: () -> untyped
+
+  def timeouts=: (untyped values) -> untyped
+
+  private
+
+  def initialize: (?untyped config_info) -> untyped
+
+  def use_ipv6?: () -> untyped
+end
+
+Resolv::DNS::Port: Integer
+
+Resolv::DNS::RequestID: Hash[untyped, untyped]
+
+Resolv::DNS::RequestIDMutex: Thread::Mutex
+
+Resolv::DNS::UDPSize: Integer
+
+class Resolv::DNS::Config
+  def self.default_config_hash: (?untyped filename) -> untyped
+
+  def self.parse_resolv_conf: (untyped filename) -> untyped
+
+  public
+
+  def generate_candidates: (untyped name) -> untyped
+
+  def generate_timeouts: () -> untyped
+
+  def lazy_initialize: () -> untyped
+
+  def nameserver_port: () -> untyped
+
+  def resolv: (untyped name) -> untyped
+
+  def single?: () -> untyped
+
+  def timeouts=: (untyped values) -> untyped
+
+  private
+
+  def initialize: (?untyped config_info) -> untyped
+end
+
+Resolv::DNS::Config::InitialTimeout: Integer
+
+class Resolv::DNS::Config::NXDomain < Resolv::ResolvError
+end
+
+class Resolv::DNS::Config::OtherResolvError < Resolv::ResolvError
+end
+
+class Resolv::DNS::DecodeError < StandardError
+end
+
+class Resolv::DNS::EncodeError < StandardError
+end
+
+module Resolv::DNS::Label
+  def self.split: (untyped arg) -> untyped
+end
+
+class Resolv::DNS::Label::Str
+  public
+
+  def ==: (untyped other) -> untyped
+
+  def downcase: () -> untyped
+
+  def eql?: (untyped other) -> untyped
+
+  def hash: () -> untyped
+
+  def inspect: () -> untyped
+
+  def string: () -> untyped
+
+  def to_s: () -> untyped
+
+  private
+
+  def initialize: (untyped string) -> untyped
+end
+
+class Resolv::DNS::Message
+  def self.decode: (untyped m) -> untyped
+
+  public
+
+  def ==: (untyped other) -> untyped
+
+  def aa: () -> untyped
+
+  def aa=: (untyped) -> untyped
+
+  def add_additional: (untyped name, untyped ttl, untyped data) -> untyped
+
+  def add_answer: (untyped name, untyped ttl, untyped data) -> untyped
+
+  def add_authority: (untyped name, untyped ttl, untyped data) -> untyped
+
+  def add_question: (untyped name, untyped typeclass) -> untyped
+
+  def additional: () -> untyped
+
+  def answer: () -> untyped
+
+  def authority: () -> untyped
+
+  def each_additional: () -> untyped
+
+  def each_answer: () -> untyped
+
+  def each_authority: () -> untyped
+
+  def each_question: () -> untyped
+
+  def each_resource: () -> untyped
+
+  def encode: () -> untyped
+
+  def id: () -> untyped
+
+  def id=: (untyped) -> untyped
+
+  def opcode: () -> untyped
+
+  def opcode=: (untyped) -> untyped
+
+  def qr: () -> untyped
+
+  def qr=: (untyped) -> untyped
+
+  def question: () -> untyped
+
+  def ra: () -> untyped
+
+  def ra=: (untyped) -> untyped
+
+  def rcode: () -> untyped
+
+  def rcode=: (untyped) -> untyped
+
+  def rd: () -> untyped
+
+  def rd=: (untyped) -> untyped
+
+  def tc: () -> untyped
+
+  def tc=: (untyped) -> untyped
+
+  private
+
+  def initialize: (?untyped id) -> untyped
+end
+
+class Resolv::DNS::Message::MessageDecoder
+  public
+
+  def get_bytes: (?untyped len) -> untyped
+
+  def get_label: () -> untyped
+
+  def get_labels: () -> untyped
+
+  def get_length16: () -> untyped
+
+  def get_name: () -> untyped
+
+  def get_question: () -> untyped
+
+  def get_rr: () -> untyped
+
+  def get_string: () -> untyped
+
+  def get_string_list: () -> untyped
+
+  def get_unpack: (untyped template) -> untyped
+
+  def inspect: () -> untyped
+
+  private
+
+  def initialize: (untyped data) -> untyped
+end
+
+class Resolv::DNS::Message::MessageEncoder
+  public
+
+  def put_bytes: (untyped d) -> untyped
+
+  def put_label: (untyped d) -> untyped
+
+  def put_labels: (untyped d) -> untyped
+
+  def put_length16: () -> untyped
+
+  def put_name: (untyped d) -> untyped
+
+  def put_pack: (untyped template, *untyped d) -> untyped
+
+  def put_string: (untyped d) -> untyped
+
+  def put_string_list: (untyped ds) -> untyped
+
+  def to_s: () -> untyped
+
+  private
+
+  def initialize: () -> untyped
+end
+
+class Resolv::DNS::Name
+  def self.create: (untyped arg) -> untyped
+
+  public
+
+  def ==: (untyped other) -> untyped
+
+  def []: (untyped i) -> untyped
+
+  def absolute?: () -> untyped
+
+  alias eql? ==
+
+  def hash: () -> untyped
+
+  def inspect: () -> untyped
+
+  def length: () -> untyped
+
+  def subdomain_of?: (untyped other) -> untyped
+
+  def to_a: () -> untyped
+
+  def to_s: () -> untyped
+
+  private
+
+  def initialize: (untyped labels, ?untyped absolute) -> untyped
+end
+
+module Resolv::DNS::OpCode
+end
+
+Resolv::DNS::OpCode::IQuery: Integer
+
+Resolv::DNS::OpCode::Notify: Integer
+
+Resolv::DNS::OpCode::Query: Integer
+
+Resolv::DNS::OpCode::Status: Integer
+
+Resolv::DNS::OpCode::Update: Integer
+
+class Resolv::DNS::Query
+  def self.decode_rdata: (untyped msg) -> untyped
+
+  public
+
+  def encode_rdata: (untyped msg) -> untyped
+end
+
+module Resolv::DNS::RCode
+end
+
+Resolv::DNS::RCode::BADALG: Integer
+
+Resolv::DNS::RCode::BADKEY: Integer
+
+Resolv::DNS::RCode::BADMODE: Integer
+
+Resolv::DNS::RCode::BADNAME: Integer
+
+Resolv::DNS::RCode::BADSIG: Integer
+
+Resolv::DNS::RCode::BADTIME: Integer
+
+Resolv::DNS::RCode::BADVERS: Integer
+
+Resolv::DNS::RCode::FormErr: Integer
+
+Resolv::DNS::RCode::NXDomain: Integer
+
+Resolv::DNS::RCode::NXRRSet: Integer
+
+Resolv::DNS::RCode::NoError: Integer
+
+Resolv::DNS::RCode::NotAuth: Integer
+
+Resolv::DNS::RCode::NotImp: Integer
+
+Resolv::DNS::RCode::NotZone: Integer
+
+Resolv::DNS::RCode::Refused: Integer
+
+Resolv::DNS::RCode::ServFail: Integer
+
+Resolv::DNS::RCode::YXDomain: Integer
+
+Resolv::DNS::RCode::YXRRSet: Integer
+
+class Resolv::DNS::Requester
+  public
+
+  def close: () -> untyped
+
+  def request: (untyped sender, untyped tout) -> untyped
+
+  def sender_for: (untyped addr, untyped msg) -> untyped
+
+  private
+
+  def initialize: () -> untyped
+end
+
+class Resolv::DNS::Requester::ConnectedUDP < Resolv::DNS::Requester
+  public
+
+  def close: () -> untyped
+
+  def lazy_initialize: () -> untyped
+
+  def recv_reply: (untyped readable_socks) -> untyped
+
+  def sender: (untyped msg, untyped data, ?untyped host, ?untyped port) -> untyped
+
+  private
+
+  def initialize: (untyped host, ?untyped port) -> untyped
+end
+
+class Resolv::DNS::Requester::ConnectedUDP::Sender < Resolv::DNS::Requester::Sender
+  public
+
+  def data: () -> untyped
+
+  def send: () -> untyped
+end
+
+class Resolv::DNS::Requester::MDNSOneShot < Resolv::DNS::Requester::UnconnectedUDP
+  public
+
+  def sender: (untyped msg, untyped data, untyped host, ?untyped port) -> untyped
+
+  def sender_for: (untyped addr, untyped msg) -> untyped
+end
+
+class Resolv::DNS::Requester::RequestError < StandardError
+end
+
+class Resolv::DNS::Requester::Sender
+  private
+
+  def initialize: (untyped msg, untyped data, untyped sock) -> untyped
+end
+
+class Resolv::DNS::Requester::TCP < Resolv::DNS::Requester
+  public
+
+  def close: () -> untyped
+
+  def recv_reply: (untyped readable_socks) -> untyped
+
+  def sender: (untyped msg, untyped data, ?untyped host, ?untyped port) -> untyped
+
+  private
+
+  def initialize: (untyped host, ?untyped port) -> untyped
+end
+
+class Resolv::DNS::Requester::TCP::Sender < Resolv::DNS::Requester::Sender
+  public
+
+  def data: () -> untyped
+
+  def send: () -> untyped
+end
+
+class Resolv::DNS::Requester::UnconnectedUDP < Resolv::DNS::Requester
+  public
+
+  def close: () -> untyped
+
+  def lazy_initialize: () -> untyped
+
+  def recv_reply: (untyped readable_socks) -> untyped
+
+  def sender: (untyped msg, untyped data, untyped host, ?untyped port) -> untyped
+
+  private
+
+  def initialize: (*untyped nameserver_port) -> untyped
+end
+
+class Resolv::DNS::Requester::UnconnectedUDP::Sender < Resolv::DNS::Requester::Sender
+  public
+
+  def data: () -> untyped
+
+  def send: () -> untyped
+
+  private
+
+  def initialize: (untyped msg, untyped data, untyped sock, untyped host, untyped port) -> untyped
+end
+
+class Resolv::DNS::Resource < Resolv::DNS::Query
+  def self.decode_rdata: (untyped msg) -> untyped
+
+  def self.get_class: (untyped type_value, untyped class_value) -> untyped
+
+  public
+
+  def ==: (untyped other) -> untyped
+
+  def encode_rdata: (untyped msg) -> untyped
+
+  def eql?: (untyped other) -> untyped
+
+  def hash: () -> untyped
+
+  def ttl: () -> untyped
+end
+
+Resolv::DNS::Resource::ClassHash: Hash[untyped, untyped]
+
+Resolv::DNS::Resource::ClassInsensitiveTypes: Array[untyped]
+
+Resolv::DNS::Resource::ClassValue: untyped?
+
+class Resolv::DNS::Resource::ANY < Resolv::DNS::Query
+end
+
+Resolv::DNS::Resource::ANY::TypeValue: Integer
+
+class Resolv::DNS::Resource::CNAME < Resolv::DNS::Resource::DomainName
+end
+
+Resolv::DNS::Resource::CNAME::TypeValue: Integer
+
+class Resolv::DNS::Resource::DomainName < Resolv::DNS::Resource
+  def self.decode_rdata: (untyped msg) -> untyped
+
+  public
+
+  def encode_rdata: (untyped msg) -> untyped
+
+  def name: () -> untyped
+
+  private
+
+  def initialize: (untyped name) -> untyped
+end
+
+class Resolv::DNS::Resource::Generic < Resolv::DNS::Resource
+  def self.create: (untyped type_value, untyped class_value) -> untyped
+
+  def self.decode_rdata: (untyped msg) -> untyped
+
+  public
+
+  def data: () -> untyped
+
+  def encode_rdata: (untyped msg) -> untyped
+
+  private
+
+  def initialize: (untyped data) -> untyped
+end
+
+class Resolv::DNS::Resource::HINFO < Resolv::DNS::Resource
+  def self.decode_rdata: (untyped msg) -> untyped
+
+  public
+
+  def cpu: () -> untyped
+
+  def encode_rdata: (untyped msg) -> untyped
+
+  def os: () -> untyped
+
+  private
+
+  def initialize: (untyped cpu, untyped os) -> untyped
+end
+
+Resolv::DNS::Resource::HINFO::TypeValue: Integer
+
+module Resolv::DNS::Resource::IN
+end
+
+Resolv::DNS::Resource::IN::ClassValue: Integer
+
+class Resolv::DNS::Resource::IN::A < Resolv::DNS::Resource
+  def self.decode_rdata: (untyped msg) -> untyped
+
+  public
+
+  def address: () -> untyped
+
+  def encode_rdata: (untyped msg) -> untyped
+
+  private
+
+  def initialize: (untyped address) -> untyped
+end
+
+Resolv::DNS::Resource::IN::A::ClassValue: Integer
+
+Resolv::DNS::Resource::IN::A::TypeValue: Integer
+
+class Resolv::DNS::Resource::IN::AAAA < Resolv::DNS::Resource
+  def self.decode_rdata: (untyped msg) -> untyped
+
+  public
+
+  def address: () -> untyped
+
+  def encode_rdata: (untyped msg) -> untyped
+
+  private
+
+  def initialize: (untyped address) -> untyped
+end
+
+Resolv::DNS::Resource::IN::AAAA::ClassValue: Integer
+
+Resolv::DNS::Resource::IN::AAAA::TypeValue: Integer
+
+class Resolv::DNS::Resource::IN::ANY < Resolv::DNS::Resource::ANY
+end
+
+Resolv::DNS::Resource::IN::ANY::ClassValue: Integer
+
+Resolv::DNS::Resource::IN::ANY::TypeValue: Integer
+
+class Resolv::DNS::Resource::IN::CNAME < Resolv::DNS::Resource::CNAME
+end
+
+Resolv::DNS::Resource::IN::CNAME::ClassValue: Integer
+
+Resolv::DNS::Resource::IN::CNAME::TypeValue: Integer
+
+class Resolv::DNS::Resource::IN::HINFO < Resolv::DNS::Resource::HINFO
+end
+
+Resolv::DNS::Resource::IN::HINFO::ClassValue: Integer
+
+Resolv::DNS::Resource::IN::HINFO::TypeValue: Integer
+
+class Resolv::DNS::Resource::IN::LOC < Resolv::DNS::Resource::LOC
+end
+
+Resolv::DNS::Resource::IN::LOC::ClassValue: Integer
+
+Resolv::DNS::Resource::IN::LOC::TypeValue: Integer
+
+class Resolv::DNS::Resource::IN::MINFO < Resolv::DNS::Resource::MINFO
+end
+
+Resolv::DNS::Resource::IN::MINFO::ClassValue: Integer
+
+Resolv::DNS::Resource::IN::MINFO::TypeValue: Integer
+
+class Resolv::DNS::Resource::IN::MX < Resolv::DNS::Resource::MX
+end
+
+Resolv::DNS::Resource::IN::MX::ClassValue: Integer
+
+Resolv::DNS::Resource::IN::MX::TypeValue: Integer
+
+class Resolv::DNS::Resource::IN::NS < Resolv::DNS::Resource::NS
+end
+
+Resolv::DNS::Resource::IN::NS::ClassValue: Integer
+
+Resolv::DNS::Resource::IN::NS::TypeValue: Integer
+
+class Resolv::DNS::Resource::IN::PTR < Resolv::DNS::Resource::PTR
+end
+
+Resolv::DNS::Resource::IN::PTR::ClassValue: Integer
+
+Resolv::DNS::Resource::IN::PTR::TypeValue: Integer
+
+class Resolv::DNS::Resource::IN::SOA < Resolv::DNS::Resource::SOA
+end
+
+Resolv::DNS::Resource::IN::SOA::ClassValue: Integer
+
+Resolv::DNS::Resource::IN::SOA::TypeValue: Integer
+
+class Resolv::DNS::Resource::IN::SRV < Resolv::DNS::Resource
+  def self.decode_rdata: (untyped msg) -> untyped
+
+  public
+
+  def encode_rdata: (untyped msg) -> untyped
+
+  def port: () -> untyped
+
+  def priority: () -> untyped
+
+  def target: () -> untyped
+
+  def weight: () -> untyped
+
+  private
+
+  def initialize: (untyped priority, untyped weight, untyped port, untyped target) -> untyped
+end
+
+Resolv::DNS::Resource::IN::SRV::ClassValue: Integer
+
+Resolv::DNS::Resource::IN::SRV::TypeValue: Integer
+
+class Resolv::DNS::Resource::IN::TXT < Resolv::DNS::Resource::TXT
+end
+
+Resolv::DNS::Resource::IN::TXT::ClassValue: Integer
+
+Resolv::DNS::Resource::IN::TXT::TypeValue: Integer
+
+class Resolv::DNS::Resource::IN::WKS < Resolv::DNS::Resource
+  def self.decode_rdata: (untyped msg) -> untyped
+
+  public
+
+  def address: () -> untyped
+
+  def bitmap: () -> untyped
+
+  def encode_rdata: (untyped msg) -> untyped
+
+  def protocol: () -> untyped
+
+  private
+
+  def initialize: (untyped address, untyped protocol, untyped bitmap) -> untyped
+end
+
+Resolv::DNS::Resource::IN::WKS::ClassValue: Integer
+
+Resolv::DNS::Resource::IN::WKS::TypeValue: Integer
+
+class Resolv::DNS::Resource::LOC < Resolv::DNS::Resource
+  def self.decode_rdata: (untyped msg) -> untyped
+
+  public
+
+  def altitude: () -> untyped
+
+  def encode_rdata: (untyped msg) -> untyped
+
+  def hprecision: () -> untyped
+
+  def latitude: () -> untyped
+
+  def longitude: () -> untyped
+
+  def ssize: () -> untyped
+
+  def version: () -> untyped
+
+  def vprecision: () -> untyped
+
+  private
+
+  def initialize: (untyped version, untyped ssize, untyped hprecision, untyped vprecision, untyped latitude, untyped longitude, untyped altitude) -> untyped
+end
+
+Resolv::DNS::Resource::LOC::TypeValue: Integer
+
+class Resolv::DNS::Resource::MINFO < Resolv::DNS::Resource
+  def self.decode_rdata: (untyped msg) -> untyped
+
+  public
+
+  def emailbx: () -> untyped
+
+  def encode_rdata: (untyped msg) -> untyped
+
+  def rmailbx: () -> untyped
+
+  private
+
+  def initialize: (untyped rmailbx, untyped emailbx) -> untyped
+end
+
+Resolv::DNS::Resource::MINFO::TypeValue: Integer
+
+class Resolv::DNS::Resource::MX < Resolv::DNS::Resource
+  def self.decode_rdata: (untyped msg) -> untyped
+
+  public
+
+  def encode_rdata: (untyped msg) -> untyped
+
+  def exchange: () -> untyped
+
+  def preference: () -> untyped
+
+  private
+
+  def initialize: (untyped preference, untyped exchange) -> untyped
+end
+
+Resolv::DNS::Resource::MX::TypeValue: Integer
+
+class Resolv::DNS::Resource::NS < Resolv::DNS::Resource::DomainName
+end
+
+Resolv::DNS::Resource::NS::TypeValue: Integer
+
+class Resolv::DNS::Resource::PTR < Resolv::DNS::Resource::DomainName
+end
+
+Resolv::DNS::Resource::PTR::TypeValue: Integer
+
+class Resolv::DNS::Resource::SOA < Resolv::DNS::Resource
+  def self.decode_rdata: (untyped msg) -> untyped
+
+  public
+
+  def encode_rdata: (untyped msg) -> untyped
+
+  def expire: () -> untyped
+
+  def minimum: () -> untyped
+
+  def mname: () -> untyped
+
+  def refresh: () -> untyped
+
+  def retry: () -> untyped
+
+  def rname: () -> untyped
+
+  def serial: () -> untyped
+
+  private
+
+  def initialize: (untyped mname, untyped rname, untyped serial, untyped refresh, untyped retry_, untyped expire, untyped minimum) -> untyped
+end
+
+Resolv::DNS::Resource::SOA::TypeValue: Integer
+
+class Resolv::DNS::Resource::TXT < Resolv::DNS::Resource
+  def self.decode_rdata: (untyped msg) -> untyped
+
+  public
+
+  def data: () -> untyped
+
+  def encode_rdata: (untyped msg) -> untyped
+
+  def strings: () -> untyped
+
+  private
+
+  def initialize: (untyped first_string, *untyped rest_strings) -> untyped
+end
+
+Resolv::DNS::Resource::TXT::TypeValue: Integer
+
+class Resolv::Hosts
+  public
+
+  def each_address: (untyped name) { (*untyped) -> untyped } -> untyped
+
+  def each_name: (untyped address) { (*untyped) -> untyped } -> untyped
+
+  def getaddress: (untyped name) -> untyped
+
+  def getaddresses: (untyped name) -> untyped
+
+  def getname: (untyped address) -> untyped
+
+  def getnames: (untyped address) -> untyped
+
+  def lazy_initialize: () -> untyped
+
+  private
+
+  def initialize: (?untyped filename) -> untyped
+end
+
+Resolv::Hosts::DefaultFileName: String
+
+class Resolv::IPv4
+  def self.create: (untyped arg) -> untyped
+
+  public
+
+  def ==: (untyped other) -> untyped
+
+  def address: () -> untyped
+
+  def eql?: (untyped other) -> untyped
+
+  def hash: () -> untyped
+
+  def inspect: () -> untyped
+
+  def to_name: () -> untyped
+
+  def to_s: () -> untyped
+
+  private
+
+  def initialize: (untyped address) -> untyped
+end
+
+Resolv::IPv4::Regex: Regexp
+
+Resolv::IPv4::Regex256: Regexp
+
+class Resolv::IPv6
+  def self.create: (untyped arg) -> untyped
+
+  public
+
+  def ==: (untyped other) -> untyped
+
+  def address: () -> untyped
+
+  def eql?: (untyped other) -> untyped
+
+  def hash: () -> untyped
+
+  def inspect: () -> untyped
+
+  def to_name: () -> untyped
+
+  def to_s: () -> untyped
+
+  private
+
+  def initialize: (untyped address) -> untyped
+end
+
+Resolv::IPv6::Regex: Regexp
+
+Resolv::IPv6::Regex_6Hex4Dec: Regexp
+
+Resolv::IPv6::Regex_8Hex: Regexp
+
+Resolv::IPv6::Regex_8HexLinkLocal: Regexp
+
+Resolv::IPv6::Regex_CompressedHex: Regexp
+
+Resolv::IPv6::Regex_CompressedHex4Dec: Regexp
+
+Resolv::IPv6::Regex_CompressedHexLinkLocal: Regexp
+
+module Resolv::LOC
+end
+
+class Resolv::LOC::Alt
+  def self.create: (untyped arg) -> untyped
+
+  public
+
+  def ==: (untyped other) -> untyped
+
+  def altitude: () -> untyped
+
+  def eql?: (untyped other) -> untyped
+
+  def hash: () -> untyped
+
+  def inspect: () -> untyped
+
+  def to_s: () -> untyped
+
+  private
+
+  def initialize: (untyped altitude) -> untyped
+end
+
+Resolv::LOC::Alt::Regex: Regexp
+
+class Resolv::LOC::Coord
+  def self.create: (untyped arg) -> untyped
+
+  public
+
+  def ==: (untyped other) -> untyped
+
+  def coordinates: () -> untyped
+
+  def eql?: (untyped other) -> untyped
+
+  def hash: () -> untyped
+
+  def inspect: () -> untyped
+
+  def orientation: () -> untyped
+
+  def to_s: () -> untyped
+
+  private
+
+  def initialize: (untyped coordinates, untyped orientation) -> untyped
+end
+
+Resolv::LOC::Coord::Regex: Regexp
+
+class Resolv::LOC::Size
+  def self.create: (untyped arg) -> untyped
+
+  public
+
+  def ==: (untyped other) -> untyped
+
+  def eql?: (untyped other) -> untyped
+
+  def hash: () -> untyped
+
+  def inspect: () -> untyped
+
+  def scalar: () -> untyped
+
+  def to_s: () -> untyped
+
+  private
+
+  def initialize: (untyped scalar) -> untyped
+end
+
+Resolv::LOC::Size::Regex: Regexp
+
+class Resolv::MDNS < Resolv::DNS
+  public
+
+  def each_address: (untyped name) -> untyped
+
+  def make_udp_requester: () -> untyped
+
+  private
+
+  def initialize: (?untyped config_info) -> untyped
+end
+
+Resolv::MDNS::AddressV4: String
+
+Resolv::MDNS::AddressV6: String
+
+Resolv::MDNS::Addresses: Array[untyped]
+
+Resolv::MDNS::Port: Integer
+
+class Resolv::ResolvError < StandardError
+end
+
+class Resolv::ResolvTimeout < Timeout::Error
+end
