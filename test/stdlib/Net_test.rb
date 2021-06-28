@@ -9,18 +9,24 @@ class NetSingletonTest < Test::Unit::TestCase
   testing "singleton(::Net::HTTP)"
 
   def test_get
-    assert_send_type "(URI::Generic, nil, nil) -> nil",
-                     Net::HTTP, :get_print, URI("https://www.ruby-lang.org"), nil, nil
-    assert_send_type "(URI::Generic, Hash[String, String], Integer) -> nil",
-                     Net::HTTP, :get_print, URI("https://www.ruby-lang.org"), {"Accept" => "text/html"}, 443
-    assert_send_type "(URI::Generic, nil, nil) -> String",
-                     Net::HTTP, :get, URI("https://www.ruby-lang.org"), nil, nil
-    assert_send_type "(URI::Generic, Hash[String, String], Integer) -> String",
-                     Net::HTTP, :get, URI("https://www.ruby-lang.org"), {"Accept" => "text/html"}, 443
-    assert_send_type "(URI::Generic, nil, nil) -> Net::HTTPResponse",
-                     Net::HTTP, :get_response, URI("https://www.ruby-lang.org"), nil, nil
-    assert_send_type "(URI::Generic, Hash[String, String], Integer) -> Net::HTTPResponse",
-                     Net::HTTP, :get_response, URI("https://www.ruby-lang.org"), {"Accept" => "text/html"}, 443
+    assert_send_type "(URI::Generic) -> nil",
+                     Net::HTTP, :get_print, URI("https://www.ruby-lang.org")
+    assert_send_type "(String, String) -> nil",
+                     Net::HTTP, :get_print, 'www.ruby-lang.org', '/en'
+    assert_send_type "(URI::Generic, Hash[String, String]) -> nil",
+                     Net::HTTP, :get_print, URI("https://www.ruby-lang.org"), {"Accept" => "text/html"} if RUBY_VERSION > '2.7' && !RUBY_VERSION.include?('2.7')
+    assert_send_type "(URI::Generic) -> String",
+                     Net::HTTP, :get, URI("https://www.ruby-lang.org")
+    assert_send_type "(String, String) -> String",
+                     Net::HTTP, :get, 'www.ruby-lang.org', '/en'
+    assert_send_type "(URI::Generic, Hash[String, String]) -> String",
+                     Net::HTTP, :get, URI("https://www.ruby-lang.org"), {"Accept" => "text/html"} if RUBY_VERSION > '2.7' && !RUBY_VERSION.include?('2.7')
+    assert_send_type "(URI::Generic) -> Net::HTTPResponse",
+                     Net::HTTP, :get_response, URI("https://www.ruby-lang.org")
+    assert_send_type "(String, String) -> Net::HTTPResponse",
+                     Net::HTTP, :get_response, 'www.ruby-lang.org', '/en'
+    assert_send_type "(URI::Generic, Hash[String, String]) -> Net::HTTPResponse",
+                     Net::HTTP, :get_response, URI("https://www.ruby-lang.org"), {"Accept" => "text/html"} if RUBY_VERSION > '2.7' && !RUBY_VERSION.include?('2.7')
   end
 
   def test_post
@@ -32,7 +38,7 @@ class NetSingletonTest < Test::Unit::TestCase
 
   def test_new
     assert_send_type "(String, Integer, nil, nil, nil, nil, nil) -> Net::HTTP",
-                     Net::HTTP, :new, 'www.ruby-lang.org', 443, nil, nil, nil, nil, nil
+                     Net::HTTP, :new, 'www.ruby-lang.org', 80, nil, nil, nil, nil, nil
   end
 end
 
