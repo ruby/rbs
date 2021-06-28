@@ -34,42 +34,42 @@ class Resolv
   # # arglists 💪👽🚨 << Delete this section
   #     each_address(name, &block)
   #
-  def self.each_address: (untyped name) { (*untyped) -> untyped } -> untyped
+  def self.each_address: (String name) { (String) -> void } -> void 
 
   # Iterates over all hostnames for `address`.
   #
   # # arglists 💪👽🚨 << Delete this section
   #     each_name(address, &proc)
   #
-  def self.each_name: (untyped address) { (*untyped) -> untyped } -> untyped
+  def self.each_name: (String address) { (String) -> void } -> void
 
   # Looks up the first IP address for `name`.
   #
   # # arglists 💪👽🚨 << Delete this section
   #     getaddress(name)
   #
-  def self.getaddress: (untyped name) -> untyped
+  def self.getaddress: (String name) -> String
 
   # Looks up all IP address for `name`.
   #
   # # arglists 💪👽🚨 << Delete this section
   #     getaddresses(name)
   #
-  def self.getaddresses: (untyped name) -> untyped
+  def self.getaddresses: (String name) -> Array[String]
 
   # Looks up the hostname of `address`.
   #
   # # arglists 💪👽🚨 << Delete this section
   #     getname(address)
   #
-  def self.getname: (untyped address) -> untyped
+  def self.getname: (String address) -> String
 
   # Looks up all hostnames for `address`.
   #
   # # arglists 💪👽🚨 << Delete this section
   #     getnames(address)
   #
-  def self.getnames: (untyped address) -> untyped
+  def self.getnames: (String address) -> Array[String]
 
   public
 
@@ -78,42 +78,42 @@ class Resolv
   # # arglists 💪👽🚨 << Delete this section
   #     each_address(name) { |name| ... }
   #
-  def each_address: (untyped name) -> untyped
+  def each_address: (String name) { (String) -> void } -> void 
 
   # Iterates over all hostnames for `address`.
   #
   # # arglists 💪👽🚨 << Delete this section
   #     each_name(address) { |name| ... }
   #
-  def each_name: (untyped address) -> untyped
+  def each_name: (String name) { (String) -> void } -> void 
 
   # Looks up the first IP address for `name`.
   #
   # # arglists 💪👽🚨 << Delete this section
   #     getaddress(name)
   #
-  def getaddress: (untyped name) -> untyped
+  def getaddress: (String name) -> String
 
   # Looks up all IP address for `name`.
   #
   # # arglists 💪👽🚨 << Delete this section
   #     getaddresses(name)
   #
-  def getaddresses: (untyped name) -> untyped
+  def getaddresses: (String name) -> Array[String]
 
   # Looks up the hostname of `address`.
   #
   # # arglists 💪👽🚨 << Delete this section
   #     getname(address)
   #
-  def getname: (untyped address) -> untyped
+  def getname: (String address) -> String
 
   # Looks up all hostnames for `address`.
   #
   # # arglists 💪👽🚨 << Delete this section
   #     getnames(address)
   #
-  def getnames: (untyped address) -> untyped
+  def getnames: (String address) -> Array[String]
 
   private
 
@@ -122,7 +122,7 @@ class Resolv
   # # arglists 💪👽🚨 << Delete this section
   #     new(resolvers=[Hosts.new, DNS.new])
   #
-  def initialize: (?untyped resolvers) -> untyped
+  def initialize: (?(Resolv::Hosts | Resolv::DNS) resolvers) -> untyped
 end
 
 # Address Regexp to use for matching IP addresses.
