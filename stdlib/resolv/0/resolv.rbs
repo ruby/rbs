@@ -1373,34 +1373,34 @@ Resolv::Hosts::DefaultFileName: String
 
 # A Resolv::DNS IPv4 address.
 class Resolv::IPv4
-  def self.create: (untyped arg) -> untyped
+  def self.create: (String | instance arg) -> instance
 
   public
 
-  def ==: (untyped other) -> untyped
+  def ==: (instance other) -> bool
 
   # The raw IPv4 address as a String.
   #
-  def address: () -> untyped
+  def address: () -> String
 
-  def eql?: (untyped other) -> untyped
+  def eql?: (instance other) -> bool
 
-  def hash: () -> untyped
+  def hash: () -> Integer
 
-  def inspect: () -> untyped
+  def inspect: () -> String
 
   # Turns this IPv4 address into a Resolv::DNS::Name.
   #
   # # arglists 💪👽🚨 << Delete this section
   #     to_name()
   #
-  def to_name: () -> untyped
+  def to_name: () -> Resolv::DNS::Name
 
-  def to_s: () -> untyped
+  def to_s: () -> String
 
   private
 
-  def initialize: (untyped address) -> untyped
+  def initialize: (String address) -> untyped
 end
 
 Resolv::IPv4::Regex: Regexp
@@ -1421,30 +1421,30 @@ class Resolv::IPv6
   # # arglists 💪👽🚨 << Delete this section
   #     create(arg)
   #
-  def self.create: (untyped arg) -> untyped
+  def self.create: (String | instance arg) -> instance
 
   public
 
-  def ==: (untyped other) -> untyped
+  def ==: (instance other) -> bool 
 
   # The raw IPv6 address as a String.
   #
-  def address: () -> untyped
+  def address: () -> String
 
-  def eql?: (untyped other) -> untyped
+  def eql?: (instance other) -> bool
 
-  def hash: () -> untyped
+  def hash: () -> Integer
 
-  def inspect: () -> untyped
+  def inspect: () -> String
 
   # Turns this IPv6 address into a Resolv::DNS::Name.
   #
   # # arglists 💪👽🚨 << Delete this section
   #     to_name()
   #
-  def to_name: () -> untyped
+  def to_name: () -> Resolv::DNS::Name
 
-  def to_s: () -> untyped
+  def to_s: () -> String
 
   private
 
