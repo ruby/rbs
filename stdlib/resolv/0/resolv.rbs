@@ -424,75 +424,75 @@ class Resolv::DNS::Label::Str
 end
 
 class Resolv::DNS::Message
-  def self.decode: (untyped m) -> untyped
+  def self.decode: (String m) -> instance
 
   public
 
-  def ==: (untyped other) -> untyped
+  def ==: (instance other) -> bool
 
-  def aa: () -> untyped
+  def aa: () -> Integer
 
-  def aa=: (untyped) -> untyped
+  def aa=: (Integer) -> void
 
-  def add_additional: (untyped name, untyped ttl, untyped data) -> untyped
+  def add_additional: (String name, Integer ttl, Resolv::DNS::Resource data) -> void
 
-  def add_answer: (untyped name, untyped ttl, untyped data) -> untyped
+  def add_answer: (String name, Integer ttl, Resolv::DNS::Resource data) -> void
 
-  def add_authority: (untyped name, untyped ttl, untyped data) -> untyped
+  def add_authority: (String name, Integer ttl, Resolv::DNS::Resource data) -> void
 
-  def add_question: (untyped name, untyped typeclass) -> untyped
+  def add_question: (String name, singleton(Resolv::DNS::Query) typeclass) -> void
 
-  def additional: () -> untyped
+  def additional: () -> Array[[Resolv::DNS::Name, Integer, Resolv::DNS::Resource]]
 
-  def answer: () -> untyped
+  def answer: () -> Array[[Resolv::DNS::Name, Integer, Resolv::DNS::Resource]]
 
-  def authority: () -> untyped
+  def authority: () -> Array[[Resolv::DNS::Name, Integer, Resolv::DNS::Resource]]
 
-  def each_additional: () -> untyped
+  def each_additional: () { (Resolv::DNS::Name, Integer, Resolv::DNS::Resource) -> void } -> void
 
-  def each_answer: () -> untyped
+  def each_answer: () { (Resolv::DNS::Name, Integer, Resolv::DNS::Resource) -> void } -> void
 
-  def each_authority: () -> untyped
+  def each_authority: () { (Resolv::DNS::Name, Integer, Resolv::DNS::Resource) -> void } -> void
 
-  def each_question: () -> untyped
+  def each_question: () { (Resolv::DNS::Name, singleton(Resolv::DNS::Query)) -> void } -> void
 
-  def each_resource: () -> untyped
+  def each_resource: () { (Resolv::DNS::Name, Integer, Resolv::DNS::Resource) -> void } -> void
 
-  def encode: () -> untyped
+  def encode: () -> String
 
-  def id: () -> untyped
+  def id: () -> Integer
 
-  def id=: (untyped) -> untyped
+  def id=: (Integer) -> void
 
-  def opcode: () -> untyped
+  def opcode: () -> Integer
 
-  def opcode=: (untyped) -> untyped
+  def opcode=: (Integer) -> void
 
-  def qr: () -> untyped
+  def qr: () -> Integer
 
-  def qr=: (untyped) -> untyped
+  def qr=: (Integer) -> void
 
-  def question: () -> untyped
+  def question: () -> Array[[Resolv::DNS::Name, singleton(Resolv::DNS::Resource)]]
 
-  def ra: () -> untyped
+  def ra: () -> Integer
 
-  def ra=: (untyped) -> untyped
+  def ra=: (Integer) -> void
 
-  def rcode: () -> untyped
+  def rcode: () -> Integer
 
-  def rcode=: (untyped) -> untyped
+  def rcode=: (Integer) -> void
 
-  def rd: () -> untyped
+  def rd: () -> Integer
 
-  def rd=: (untyped) -> untyped
+  def rd=: (Integer) -> void
 
-  def tc: () -> untyped
+  def tc: () -> Integer
 
-  def tc=: (untyped) -> untyped
+  def tc=: (Integer) -> void
 
   private
 
-  def initialize: (?untyped id) -> untyped
+  def initialize: (?Integer id) -> untyped
 end
 
 class Resolv::DNS::Message::MessageDecoder
