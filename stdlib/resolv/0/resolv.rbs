@@ -29,12 +29,13 @@
 # *   /etc/nsswitch.conf is not supported.
 #
 class Resolv
+
   # Iterates over all IP addresses for `name`.
   #
   # # arglists 💪👽🚨 << Delete this section
   #     each_address(name, &block)
   #
-  def self.each_address: (String name) { (String) -> void } -> void 
+  def self.each_address: (String name) { (String) -> void } -> void
 
   # Iterates over all hostnames for `address`.
   #
@@ -78,14 +79,14 @@ class Resolv
   # # arglists 💪👽🚨 << Delete this section
   #     each_address(name) { |name| ... }
   #
-  def each_address: (String name) { (String) -> void } -> void 
+  def each_address: (String name) { (String) -> void } -> void
 
   # Iterates over all hostnames for `address`.
   #
   # # arglists 💪👽🚨 << Delete this section
   #     each_name(address) { |name| ... }
   #
-  def each_name: (String name) { (String) -> void } -> void 
+  def each_name: (String name) { (String) -> void } -> void
 
   # Looks up the first IP address for `name`.
   #
@@ -141,11 +142,15 @@ Resolv::DefaultResolver: Resolv
 # *   etc.
 #
 class Resolv::DNS
-  def self.allocate_request_id: (untyped host, untyped port) -> untyped
+  type ip_address = Resolv::IPv4 | Resolv::IPv6
 
-  def self.bind_random_port: (untyped udpsock, ?untyped bind_host) -> untyped
+  type dns_name = Name | String
 
-  def self.free_request_id: (untyped host, untyped port, untyped id) -> untyped
+  def self.allocate_request_id: (String host, Integer port) -> Integer
+
+  def self.bind_random_port: (UDPSocket udpsock, ?String bind_host) -> void
+
+  def self.free_request_id: (String host, Integer port, Integer id) -> void
 
   # Creates a new DNS resolver.  See Resolv::DNS.new for argument details.
   #
@@ -154,9 +159,10 @@ class Resolv::DNS
   # # arglists 💪👽🚨 << Delete this section
   #     open(*args) { |dns| ... }
   #
-  def self.open: (*untyped args) -> untyped
+  def self.open: (*untyped args) -> instance
+               | (*untyped args) { (instance) -> void } -> void
 
-  def self.random: (untyped arg) -> untyped
+  def self.random: (Integer arg) -> (Integer | Float)
 
   public
 
@@ -175,7 +181,7 @@ class Resolv::DNS
   # # arglists 💪👽🚨 << Delete this section
   #     each_address(name) { |address| ... }
   #
-  def each_address: (untyped name) -> untyped
+  def each_address: (dns_name name) { (ip_address) -> void } -> void
 
   # Iterates over all hostnames for `address` retrieved from the DNS resolver.
   #
@@ -185,7 +191,7 @@ class Resolv::DNS
   # # arglists 💪👽🚨 << Delete this section
   #     each_name(address) { |name| ... }
   #
-  def each_name: (untyped address) -> untyped
+  def each_name: (ip_address | dns_name address) { (Resolv::DNS::Name) -> void } -> void
 
   # Iterates over all `typeclass` DNS resources for `name`.  See #getresource for
   # argument details.
@@ -193,11 +199,11 @@ class Resolv::DNS
   # # arglists 💪👽🚨 << Delete this section
   #     each_resource(name, typeclass, &proc)
   #
-  def each_resource: (untyped name, untyped typeclass) { (*untyped) -> untyped } -> untyped
+  def each_resource: (dns_name name, singleton(Resolv::DNS::Query) typeclass) { (Resolv::DNS::Resource) -> void } -> void
 
-  def extract_resources: (untyped msg, untyped name, untyped typeclass) -> untyped
+  def extract_resources: (Resolv::DNS::Message msg, dns_name name, singleton(Resolv::DNS::Query) typeclass) { (Resolv::DNS::Resource) -> void } -> void
 
-  def fetch_resource: (untyped name, untyped typeclass) -> untyped
+  def fetch_resource: (Resolv::DNS::Name name, singleton(Resolv::DNS::Query) typeclass) { (Resolv::DNS::Message, Resolv::DNS::Name) -> void } -> void
 
   # Gets the IP address of `name` from the DNS resolver.
   #
@@ -207,7 +213,7 @@ class Resolv::DNS
   # # arglists 💪👽🚨 << Delete this section
   #     getaddress(name)
   #
-  def getaddress: (untyped name) -> untyped
+  def getaddress: (dns_name name) -> ip_address
 
   # Gets all IP addresses for `name` from the DNS resolver.
   #
@@ -217,7 +223,7 @@ class Resolv::DNS
   # # arglists 💪👽🚨 << Delete this section
   #     getaddresses(name)
   #
-  def getaddresses: (untyped name) -> untyped
+  def getaddresses: (dns_name name) -> Array[ip_address]
 
   # Gets the hostname for `address` from the DNS resolver.
   #
@@ -227,7 +233,7 @@ class Resolv::DNS
   # # arglists 💪👽🚨 << Delete this section
   #     getname(address)
   #
-  def getname: (untyped address) -> untyped
+  def getname: (ip_address | dns_name address) -> Resolv::DNS::Name
 
   # Gets all hostnames for `address` from the DNS resolver.
   #
@@ -237,7 +243,7 @@ class Resolv::DNS
   # # arglists 💪👽🚨 << Delete this section
   #     getnames(address)
   #
-  def getnames: (untyped address) -> untyped
+  def getnames: (ip_address | dns_name address) -> [Resolv::DNS::Name]
 
   # Look up the `typeclass` DNS resource of `name`.
   #
@@ -265,7 +271,7 @@ class Resolv::DNS
   # # arglists 💪👽🚨 << Delete this section
   #     getresource(name, typeclass)
   #
-  def getresource: (untyped name, untyped typeclass) -> untyped
+  def getresource: (dns_name name, singleton(Resolv::DNS::Query) typeclass) -> Resolv::DNS::Resource
 
   # Looks up all `typeclass` DNS resources for `name`.  See #getresource for
   # argument details.
@@ -273,13 +279,13 @@ class Resolv::DNS
   # # arglists 💪👽🚨 << Delete this section
   #     getresources(name, typeclass)
   #
-  def getresources: (untyped name, untyped typeclass) -> untyped
+  def getresources: (dns_name name, singleton(Resolv::DNS::Query) typeclass) -> Array[Resolv::DNS::Resource]
 
   def lazy_initialize: () -> untyped
 
-  def make_tcp_requester: (untyped host, untyped port) -> untyped
+  def make_tcp_requester: (String host, Integer port) -> Requester::TCP
 
-  def make_udp_requester: () -> untyped
+  def make_udp_requester: () -> (Requester::ConnectedUDP | Requester::UnconnectedUDP)
 
   # Sets the resolver timeouts.  This may be a single positive number or an array
   # of positive numbers representing timeouts in seconds. If an array is
@@ -295,7 +301,7 @@ class Resolv::DNS
   # # arglists 💪👽🚨 << Delete this section
   #     timeouts=(values)
   #
-  def timeouts=: (untyped values) -> untyped
+  def timeouts=: (Integer | Float | Array[Integer | Float] values) -> void
 
   private
 
@@ -332,7 +338,7 @@ class Resolv::DNS
   # # arglists 💪👽🚨 << Delete this section
   #     new(config_info=nil)
   #
-  def initialize: (?untyped config_info) -> untyped
+  def initialize: (?(String | Hash) config_info) -> untyped
 
   def use_ipv6?: () -> untyped
 end
@@ -348,29 +354,29 @@ Resolv::DNS::RequestIDMutex: Thread::Mutex
 Resolv::DNS::UDPSize: Integer
 
 class Resolv::DNS::Config
-  def self.default_config_hash: (?untyped filename) -> untyped
+  def self.default_config_hash: (?String filename) -> Hash[Symbol, untyped]
 
-  def self.parse_resolv_conf: (untyped filename) -> untyped
+  def self.parse_resolv_conf: (String filename) -> Hash[Symbol, untyped]
 
   public
 
-  def generate_candidates: (untyped name) -> untyped
+  def generate_candidates: (String name) -> Array[Resolv::DNS::Name]
 
-  def generate_timeouts: () -> untyped
+  def generate_timeouts: () -> Array[Integer | Float]
 
-  def lazy_initialize: () -> untyped
+  def lazy_initialize: () -> void
 
-  def nameserver_port: () -> untyped
+  def nameserver_port: () -> Array[[String, Integer]]
 
-  def resolv: (untyped name) -> untyped
+  def resolv: (String name) { (Resolv::DNS::Name, Integer, String, Integer) -> void } -> void
 
-  def single?: () -> untyped
+  def single?: () -> [String, Integer]?
 
-  def timeouts=: (untyped values) -> untyped
+  def timeouts=: (Integer | Float | Array[Integer | Float] values) -> void
 
   private
 
-  def initialize: (?untyped config_info) -> untyped
+  def initialize: (?(String | Hash) config_info) -> untyped
 end
 
 Resolv::DNS::Config::InitialTimeout: Integer
@@ -522,21 +528,21 @@ end
 class Resolv::DNS::Message::MessageEncoder
   public
 
-  def put_bytes: (untyped d) -> untyped
+  def put_bytes: (string d) -> void
 
-  def put_label: (untyped d) -> untyped
+  def put_label: (_ToS d) -> void
 
-  def put_labels: (untyped d) -> untyped
+  def put_labels: (Array[_ToS] d) -> void
 
-  def put_length16: () -> untyped
+  def put_length16: () { () -> void } -> void
 
-  def put_name: (untyped d) -> untyped
+  def put_name: (Resolv::DNS::Name d) -> void
 
-  def put_pack: (untyped template, *untyped d) -> untyped
+  def put_pack: (String template, *untyped d) -> void
 
-  def put_string: (untyped d) -> untyped
+  def put_string: (String d) -> void
 
-  def put_string_list: (untyped ds) -> untyped
+  def put_string_list: (_Each[String] ds) -> void
 
   def to_s: () -> untyped
 
@@ -1425,7 +1431,7 @@ class Resolv::IPv6
 
   public
 
-  def ==: (instance other) -> bool 
+  def ==: (instance other) -> bool
 
   # The raw IPv6 address as a String.
   #
