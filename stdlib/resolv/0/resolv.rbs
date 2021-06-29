@@ -1326,44 +1326,44 @@ class Resolv::Hosts
   # # arglists 💪👽🚨 << Delete this section
   #     each_address(name, &proc)
   #
-  def each_address: (untyped name) { (*untyped) -> untyped } -> untyped
+  def each_address: (String name) { (String) -> void } -> void
 
   # Iterates over all hostnames for `address` retrieved from the hosts file.
   #
   # # arglists 💪👽🚨 << Delete this section
   #     each_name(address, &proc)
   #
-  def each_name: (untyped address) { (*untyped) -> untyped } -> untyped
+  def each_name: (String address) { (String) -> void } -> void
 
   # Gets the IP address of `name` from the hosts file.
   #
   # # arglists 💪👽🚨 << Delete this section
   #     getaddress(name)
   #
-  def getaddress: (untyped name) -> untyped
+  def getaddress: (String name) -> String
 
   # Gets all IP addresses for `name` from the hosts file.
   #
   # # arglists 💪👽🚨 << Delete this section
   #     getaddresses(name)
   #
-  def getaddresses: (untyped name) -> untyped
+  def getaddresses: (String name) -> Array[String]
 
   # Gets the hostname of `address` from the hosts file.
   #
   # # arglists 💪👽🚨 << Delete this section
   #     getname(address)
   #
-  def getname: (untyped address) -> untyped
+  def getname: (String address) -> String
 
   # Gets all hostnames for `address` from the hosts file.
   #
   # # arglists 💪👽🚨 << Delete this section
   #     getnames(address)
   #
-  def getnames: (untyped address) -> untyped
+  def getnames: (String address) -> Array[String]
 
-  def lazy_initialize: () -> untyped
+  def lazy_initialize: () -> void
 
   private
 
@@ -1372,7 +1372,7 @@ class Resolv::Hosts
   # # arglists 💪👽🚨 << Delete this section
   #     new(filename = DefaultFileName)
   #
-  def initialize: (?untyped filename) -> untyped
+  def initialize: (?String filename) -> untyped
 end
 
 Resolv::Hosts::DefaultFileName: String
