@@ -21,7 +21,6 @@ module Net
   end
   # ProtocRetryError = ProtoRetriableError
 
-  type uri_or_string = URI::Generic | String
   # :stopdoc:
   class HTTPBadResponse < StandardError
   end
@@ -544,26 +543,26 @@ module Net
     def set_debug_output: (IO output) -> void
 
     # The DNS host name or IP address to connect to.
-    attr_reader address: uri_or_string
+    attr_reader address: String
 
     # The port number to connect to.
     attr_reader port: Integer
 
     # The local host used to establish the connection.
-    attr_accessor local_host: uri_or_string
+    attr_accessor local_host: String
 
     # The local port used to establish the connection.
     attr_accessor local_port: Integer
 
     attr_writer proxy_from_env: untyped
 
-    attr_writer proxy_address: uri_or_string
+    attr_accessor proxy_address: String?
 
-    attr_writer proxy_port: Integer
+    attr_accessor proxy_port: Integer?
 
-    attr_writer proxy_user: String
+    attr_accessor proxy_user: String?
 
-    attr_writer proxy_pass: String
+    attr_accessor proxy_pass: String?
 
     # The IP address to connect to/used to connect to
     # Set the IP address to connect to
@@ -713,23 +712,23 @@ module Net
     #
     # This class is obsolete.  You may pass these same parameters directly to
     # Net::HTTP.new.  See Net::HTTP.new for details of the arguments.
-    def self.Proxy: (?(Symbol | String) p_addr, ?Integer? p_port, ?String? p_user, ?String? p_pass) -> Net::HTTP
+    def self.Proxy: (?(Symbol | String) p_addr, ?Integer? p_port, ?String? p_user, ?String? p_pass) -> untyped
 
     # returns true if self is a class which was created by HTTP::Proxy.
     def self.proxy_class?: () -> bool
 
     # Address of proxy host. If Net::HTTP does not use a proxy, nil.
-    attr_reader self.proxy_address: uri_or_string
+    attr_reader self.proxy_address: String?
 
     # Port number of proxy host. If Net::HTTP does not use a proxy, nil.
-    attr_reader self.proxy_port: Integer
+    attr_reader self.proxy_port: Integer?
 
     # User name for accessing proxy. If Net::HTTP does not use a proxy, nil.
-    attr_reader self.proxy_user: String
+    attr_reader self.proxy_user: String?
 
     # User password for accessing proxy. If Net::HTTP does not use a proxy,
     # nil.
-    attr_reader self.proxy_pass: String
+    attr_reader self.proxy_pass: String?
 
     # True if requests for this connection will be proxied
     def proxy?: () -> bool
@@ -738,20 +737,6 @@ module Net
     def proxy_from_env?: () -> bool
 
     def proxy_uri: () -> (nil | URI::Generic)
-
-    # The address of the proxy server, if one is configured.
-    def proxy_address: () -> (String | nil)
-
-    # The port of the proxy server, if one is configured.
-    def proxy_port: () -> (Integer | nil)
-
-    ENVIRONMENT_VARIABLE_IS_MULTIUSER_SAFE: bool
-
-    # The username of the proxy server, if one is configured.
-    def proxy_user: () -> (String | nil)
-
-    # The password of the proxy server, if one is configured.
-    def proxy_pass: () -> (String | nil)
 
     alias proxyaddr proxy_address
 
@@ -796,7 +781,7 @@ module Net
     #       end
     #     }
     #
-    def get: (String path, ?Hash[String, untyped]? initheader, ?bot? dest) ?{ (String body_segment) -> void } -> Net::HTTPResponse
+    def get: (String path, ?Hash[String, untyped] initheader, ?bot dest) ?{ (String body_segment) -> void } -> Net::HTTPResponse
 
     # Gets only the header from +path+ on the connected-to host.
     # +header+ is a Hash like { 'Accept' => '*/*', ... }.
@@ -811,7 +796,7 @@ module Net
     #     }
     #     p response['content-type']
     #
-    def head: (String path, ?Hash[String, untyped]? initheader) -> Net::HTTPResponse
+    def head: (String path, ?Hash[String, untyped] initheader) -> Net::HTTPResponse
 
     # Posts +data+ (must be a String) to +path+. +header+ must be a Hash
     # like { 'Accept' => '*/*', ... }.
@@ -841,29 +826,29 @@ module Net
     # If no Content-Type: field given, this method uses
     # "application/x-www-form-urlencoded" by default.
     #
-    def post: (String path, String data, ?Hash[String, untyped]? initheader, ?bot? dest) ?{ (String body_segment) -> void } -> Net::HTTPResponse
+    def post: (String path, String data, ?Hash[String, untyped] initheader, ?bot dest) ?{ (String body_segment) -> void } -> Net::HTTPResponse
 
     # Sends a PATCH request to the +path+ and gets a response,
     # as an HTTPResponse object.
-    def patch: (String path, String data, ?Hash[String, untyped]? initheader, ?bot? dest) ?{ (String body_segment) -> void } -> Net::HTTPResponse
+    def patch: (String path, String data, ?Hash[String, untyped] initheader, ?bot dest) ?{ (String body_segment) -> void } -> Net::HTTPResponse
 
-    def put: (String path, String data, ?Hash[String, untyped]? initheader) -> Net::HTTPResponse
+    def put: (String path, String data, ?Hash[String, untyped] initheader) -> Net::HTTPResponse
 
     # Sends a PROPPATCH request to the +path+ and gets a response,
     # as an HTTPResponse object.
-    def proppatch: (String path, String body, ?Hash[String, untyped]? initheader) -> Net::HTTPResponse
+    def proppatch: (String path, String body, ?Hash[String, untyped] initheader) -> Net::HTTPResponse
 
     # Sends a LOCK request to the +path+ and gets a response,
     # as an HTTPResponse object.
-    def lock: (String path, String body, ?Hash[String, untyped]? initheader) -> Net::HTTPResponse
+    def lock: (String path, String body, ?Hash[String, untyped] initheader) -> Net::HTTPResponse
 
     # Sends a UNLOCK request to the +path+ and gets a response,
     # as an HTTPResponse object.
-    def unlock: (String path, String body, ?Hash[String, untyped]? initheader) -> Net::HTTPResponse
+    def unlock: (String path, String body, ?Hash[String, untyped] initheader) -> Net::HTTPResponse
 
     # Sends a OPTIONS request to the +path+ and gets a response,
     # as an HTTPResponse object.
-    def options: (String path, ?Hash[String, untyped]? initheader) -> Net::HTTPResponse
+    def options: (String path, ?Hash[String, untyped] initheader) -> Net::HTTPResponse
 
     # Sends a PROPFIND request to the +path+ and gets a response,
     # as an HTTPResponse object.
@@ -875,21 +860,21 @@ module Net
 
     # Sends a MOVE request to the +path+ and gets a response,
     # as an HTTPResponse object.
-    def move: (String path, ?Hash[String, untyped]? initheader) -> Net::HTTPResponse
+    def move: (String path, ?Hash[String, untyped] initheader) -> Net::HTTPResponse
 
     # Sends a COPY request to the +path+ and gets a response,
     # as an HTTPResponse object.
-    def copy: (String path, ?Hash[String, untyped]? initheader) -> Net::HTTPResponse
+    def copy: (String path, ?Hash[String, untyped] initheader) -> Net::HTTPResponse
 
     # Sends a MKCOL request to the +path+ and gets a response,
     # as an HTTPResponse object.
-    def mkcol: (String path, ?untyped? body, ?Hash[String, untyped]? initheader) -> Net::HTTPResponse
+    def mkcol: (String path, ?untyped? body, ?Hash[String, untyped] initheader) -> Net::HTTPResponse
 
     # Sends a TRACE request to the +path+ and gets a response,
     # as an HTTPResponse object.
-    def trace: (String path, ?Hash[String, untyped]? initheader) -> Net::HTTPResponse
+    def trace: (String path, ?Hash[String, untyped] initheader) -> Net::HTTPResponse
 
-    def request_get: (String path, ?Hash[String, untyped]? initheader) ?{ (Net::HTTPResponse response) -> void } -> Net::HTTPResponse
+    def request_get: (String path, ?Hash[String, untyped] initheader) ?{ (Net::HTTPResponse response) -> void } -> Net::HTTPResponse
 
     # Sends a HEAD request to the +path+ and returns the response
     # as a Net::HTTPResponse object.
@@ -901,11 +886,11 @@ module Net
     #     response = http.request_head('/index.html')
     #     p response['content-type']
     #
-    def request_head: (String path, ?Hash[String, untyped]? initheader) ?{ (Net::HTTPResponse response) -> void } -> Net::HTTPResponse
+    def request_head: (String path, ?Hash[String, untyped] initheader) ?{ (Net::HTTPResponse response) -> void } -> Net::HTTPResponse
 
-    def request_post: (String path, String data, ?Hash[String, untyped]? initheader) ?{ (Net::HTTPResponse response) -> void } -> Net::HTTPResponse
+    def request_post: (String path, String data, ?Hash[String, untyped] initheader) ?{ (Net::HTTPResponse response) -> void } -> Net::HTTPResponse
 
-    def request_put: (String path, String data, ?Hash[String, untyped]? initheader) ?{ (Net::HTTPResponse response) -> void } -> Net::HTTPResponse
+    def request_put: (String path, String data, ?Hash[String, untyped] initheader) ?{ (Net::HTTPResponse response) -> void } -> Net::HTTPResponse
 
     alias get2 request_get
 
@@ -934,7 +919,7 @@ module Net
   class HTTPGenericRequest
     include Net::HTTPHeader
 
-    def initialize: (String m, boolish reqbody, boolish resbody, uri_or_string uri_or_path, ?Hash[String, untyped]? initheader) -> Net::HTTP
+    def initialize: (String m, boolish reqbody, boolish resbody, (URI::Generic | String) uri_or_path, ?Hash[String, untyped] initheader) -> Net::HTTP
 
     attr_reader method: String
 
@@ -957,13 +942,9 @@ module Net
 
     def body_exist?: () -> bool
 
-    attr_reader body: (String | nil)
+    attr_accessor body: String?
 
-    def body=: (String str) -> void
-
-    attr_reader body_stream: untyped
-
-    def body_stream=: (untyped input) -> untyped
+    attr_accessor body_stream: untyped
   end
 
   module HTTPHeader
@@ -973,13 +954,13 @@ module Net
 
     alias length size
 
-    type string_or_symbol = String | Symbol
+    type key = String | Symbol
     # Returns the header field corresponding to the case-insensitive key.
     # For example, a key of "Content-Type" might return "text/html"
-    def []: (string_or_symbol key) -> (nil | String)
+    def []: (key key) -> (nil | String)
 
     # Sets the header field corresponding to the case-insensitive key.
-    def []=: (string_or_symbol key, untyped val) -> void
+    def []=: (key key, untyped val) -> void
 
     # [Ruby 1.8.3]
     # Adds a value to a named header field, instead of replacing its value.
@@ -996,11 +977,11 @@ module Net
     #   p request['X-My-Header']              #=> "a, b, c"
     #   p request.get_fields('X-My-Header')   #=> ["a", "b", "c"]
     #
-    def add_field: (string_or_symbol key, untyped val) -> void
+    def add_field: (key key, untyped val) -> void
 
     private
 
-    def set_field: (string_or_symbol key, untyped val) -> void
+    def set_field: (key key, untyped val) -> void
 
     def append_field_value: (untyped ary, untyped val) -> void
 
@@ -1017,13 +998,15 @@ module Net
     #   p response['Set-Cookie']
     #     #=> "session=al98axx; expires=Fri, 31-Dec-1999 23:58:23, query=rubyscript; expires=Fri, 31-Dec-1999 23:58:23"
     #
-    def get_fields: (string_or_symbol key) -> (nil | Array[String])
+    def get_fields: (key key) -> (nil | Array[String])
 
     # Returns the header field corresponding to the case-insensitive key.
     # Returns the default value +args+, or the result of the block, or
     # raises an IndexError if there's no header field named +key+
     # See Hash#fetch
-    def fetch: (string_or_symbol key, *untyped args) { (String) -> untyped } -> (String | Array[String])
+    def fetch: (key key) -> String
+             | (key key, untyped) -> untyped
+             | (key key) { (String) -> untyped } -> untyped
 
     def each_header: () { (String, String) -> untyped } -> Hash[String, Array[String]]
                    | () -> Enumerator[[String, String], Hash[String, Array[String]]]
@@ -1042,10 +1025,10 @@ module Net
                   | () -> Enumerator[String, Hash[String, Array[String]]]
 
     # Removes a header field, specified by case-insensitive key.
-    def delete: (string_or_symbol key) -> (Array[String] | nil)
+    def delete: (key key) -> (Array[String] | nil)
 
     # true if +key+ header exists.
-    def key?: (string_or_symbol key) -> bool
+    def key?: (key key) -> bool
 
     # Returns a Hash consisting of header names and array of values.
     # e.g.
@@ -1068,7 +1051,7 @@ module Net
 
     private
 
-    def capitalize: (string_or_symbol name) -> String
+    def capitalize: (key name) -> String
 
     public
 
@@ -1131,7 +1114,7 @@ module Net
     # The +type+ should be a full HTTP content type, e.g. "text/html".
     # The +params+ are an optional Hash of parameters to add after the
     # content type, e.g. {'charset' => 'iso-8859-1'}
-    def set_content_type: (string_or_symbol `type`, ?Hash[untyped, untyped] params) -> void
+    def set_content_type: (key `type`, ?Hash[untyped, untyped] params) -> void
 
     alias content_type= set_content_type
 
@@ -1220,7 +1203,7 @@ module Net
   end
 
   class HTTPRequest < HTTPGenericRequest
-    def initialize: (String path, ?Hash[String, untyped]? initheader) -> void
+    def initialize: (String path, ?Hash[String, untyped] initheader) -> void
   end
 
   class HTTP::Get < HTTPRequest

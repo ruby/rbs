@@ -14,19 +14,19 @@ class NetSingletonTest < Test::Unit::TestCase
     assert_send_type "(String, String) -> nil",
                      Net::HTTP, :get_print, 'www.ruby-lang.org', '/en'
     assert_send_type "(URI::Generic, Hash[String, String]) -> nil",
-                     Net::HTTP, :get_print, URI("https://www.ruby-lang.org"), {"Accept" => "text/html"} if RUBY_VERSION > '2.7' && !RUBY_VERSION.include?('2.7')
+                     Net::HTTP, :get_print, URI("https://www.ruby-lang.org"), {"Accept" => "text/html"} if RUBY_VERSION >= '3.0'
     assert_send_type "(URI::Generic) -> String",
                      Net::HTTP, :get, URI("https://www.ruby-lang.org")
     assert_send_type "(String, String) -> String",
                      Net::HTTP, :get, 'www.ruby-lang.org', '/en'
     assert_send_type "(URI::Generic, Hash[String, String]) -> String",
-                     Net::HTTP, :get, URI("https://www.ruby-lang.org"), {"Accept" => "text/html"} if RUBY_VERSION > '2.7' && !RUBY_VERSION.include?('2.7')
+                     Net::HTTP, :get, URI("https://www.ruby-lang.org"), {"Accept" => "text/html"} if RUBY_VERSION >= '3.0'
     assert_send_type "(URI::Generic) -> Net::HTTPResponse",
                      Net::HTTP, :get_response, URI("https://www.ruby-lang.org")
     assert_send_type "(String, String) -> Net::HTTPResponse",
                      Net::HTTP, :get_response, 'www.ruby-lang.org', '/en'
     assert_send_type "(URI::Generic, Hash[String, String]) -> Net::HTTPResponse",
-                     Net::HTTP, :get_response, URI("https://www.ruby-lang.org"), {"Accept" => "text/html"} if RUBY_VERSION > '2.7' && !RUBY_VERSION.include?('2.7')
+                     Net::HTTP, :get_response, URI("https://www.ruby-lang.org"), {"Accept" => "text/html"} if RUBY_VERSION >= '3.0'
   end
 
   def test_post
@@ -164,32 +164,32 @@ class NetInstanceTest < Test::Unit::TestCase
   def test_http_verbs
     assert_send_type "(String) -> Net::HTTPResponse",
                      Net::HTTP.start('www.ruby-lang.org', 443, use_ssl: true), :get, '/en'
-    assert_send_type "(String, Hash[String, String], nil) -> Net::HTTPResponse",
-                     Net::HTTP.start('www.ruby-lang.org', 443, use_ssl: true), :get, '/en', { "Accept" => "text/html" }, nil
+    assert_send_type "(String, Hash[String, String]) -> Net::HTTPResponse",
+                     Net::HTTP.start('www.ruby-lang.org', 443, use_ssl: true), :get, '/en', { "Accept" => "text/html" }
     assert_send_type "(String) { (String) -> untyped } -> Net::HTTPResponse",
                      Net::HTTP.start('www.ruby-lang.org', 443, use_ssl: true), :get, '/en' do |string| string end
-    assert_send_type "(String, Hash[String, String], nil) { (String) -> untyped } -> Net::HTTPResponse",
-                     Net::HTTP.start('www.ruby-lang.org', 443, use_ssl: true), :get, '/en', { "Accept" => "text/html" }, nil do |string| string end
+    assert_send_type "(String, Hash[String, String]) { (String) -> untyped } -> Net::HTTPResponse",
+                     Net::HTTP.start('www.ruby-lang.org', 443, use_ssl: true), :get, '/en', { "Accept" => "text/html" } do |string| string end
     assert_send_type "(String) -> Net::HTTPResponse",
                      Net::HTTP.start('www.ruby-lang.org', 443, use_ssl: true), :head, '/en'
     assert_send_type "(String, Hash[String, String]) -> Net::HTTPResponse",
                      Net::HTTP.start('www.ruby-lang.org', 443, use_ssl: true), :head, '/en', { "Accept" => "text/html" }
     assert_send_type "(String, String) -> Net::HTTPResponse",
                      Net::HTTP.start('reqres.in', 443, use_ssl: true), :post, '/api/users', "name=morpheus&job=leader"
-    assert_send_type "(String, String, Hash[String, String], nil) -> Net::HTTPResponse",
-                     Net::HTTP.start('reqres.in', 443, use_ssl: true), :post, '/api/users', "name=morpheus&job=leader", { "Accept" => "application/json" }, nil
+    assert_send_type "(String, String, Hash[String, String]) -> Net::HTTPResponse",
+                     Net::HTTP.start('reqres.in', 443, use_ssl: true), :post, '/api/users', "name=morpheus&job=leader", { "Accept" => "application/json" }
     assert_send_type "(String, String) { (String) -> untyped } -> Net::HTTPResponse",
                      Net::HTTP.start('reqres.in', 443, use_ssl: true), :post, '/api/users', "name=morpheus&job=leader" do |string| string end
-    assert_send_type "(String, String, Hash[String, String], nil) { (String) -> untyped } -> Net::HTTPResponse",
-                     Net::HTTP.start('reqres.in', 443, use_ssl: true), :post, '/api/users', "name=morpheus&job=leader", { "Accept" => "application/json" }, nil do |string| string end
+    assert_send_type "(String, String, Hash[String, String]) { (String) -> untyped } -> Net::HTTPResponse",
+                     Net::HTTP.start('reqres.in', 443, use_ssl: true), :post, '/api/users', "name=morpheus&job=leader", { "Accept" => "application/json" } do |string| string end
     assert_send_type "(String, String) -> Net::HTTPResponse",
                       Net::HTTP.start('reqres.in', 443, use_ssl: true), :patch, '/api/users/2', "name=morpheus&job=leader"
-    assert_send_type "(String, String, Hash[String, String], nil) -> Net::HTTPResponse",
-                      Net::HTTP.start('reqres.in', 443, use_ssl: true), :patch, '/api/users/2', "name=morpheus&job=leader", { "Accept" => "application/json" }, nil
+    assert_send_type "(String, String, Hash[String, String]) -> Net::HTTPResponse",
+                      Net::HTTP.start('reqres.in', 443, use_ssl: true), :patch, '/api/users/2', "name=morpheus&job=leader", { "Accept" => "application/json" }
     assert_send_type "(String, String) { (String) -> untyped } -> Net::HTTPResponse",
                       Net::HTTP.start('reqres.in', 443, use_ssl: true), :patch, '/api/users/2', "name=morpheus&job=leader" do |string| string end
-    assert_send_type "(String, String, Hash[String, String], nil) { (String) -> untyped } -> Net::HTTPResponse",
-                      Net::HTTP.start('reqres.in', 443, use_ssl: true), :patch, '/api/users/2', "name=morpheus&job=leader", { "Accept" => "application/json" }, nil do |string| string end
+    assert_send_type "(String, String, Hash[String, String]) { (String) -> untyped } -> Net::HTTPResponse",
+                      Net::HTTP.start('reqres.in', 443, use_ssl: true), :patch, '/api/users/2', "name=morpheus&job=leader", { "Accept" => "application/json" } do |string| string end
     assert_send_type "(String, String) -> Net::HTTPResponse",
                      Net::HTTP.start('reqres.in', 443, use_ssl: true), :put, '/api/users/users/2', "name=morpheus&job=leader"
     assert_send_type "(String, String, Hash[String, String]) -> Net::HTTPResponse",
@@ -218,8 +218,8 @@ class NetInstanceTest < Test::Unit::TestCase
                      Net::HTTP.start('reqres.in', 443, use_ssl: true), :copy, '/api/users/users/2'
     assert_send_type "(String, Hash[String, String]) -> Net::HTTPResponse",
                      Net::HTTP.start('reqres.in', 443, use_ssl: true), :copy, '/api/users/users/2', { "Accept" => "application/json" }
-    assert_send_type "(String, nil) -> Net::HTTPResponse",
-                     Net::HTTP.start('reqres.in', 443, use_ssl: true), :mkcol, '/api/users/users/2', nil
+    assert_send_type "(String) -> Net::HTTPResponse",
+                     Net::HTTP.start('reqres.in', 443, use_ssl: true), :mkcol, '/api/users/users/2'
     assert_send_type "(String, nil, Hash[String, String]) -> Net::HTTPResponse",
                      Net::HTTP.start('reqres.in', 443, use_ssl: true), :mkcol, '/api/users/users/2', nil, { "Accept" => "application/json" }
     assert_send_type "(String) -> Net::HTTPResponse",
