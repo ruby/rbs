@@ -22,30 +22,24 @@ module RBS
         end
 
         def has?(config_entry)
-          with_revision do
-            gem_name = config_entry['name']
-            gem_repo_dir.join(gem_name).directory?
-          end
+          gem_name = config_entry['name']
+          gem_repo_dir.join(gem_name).directory?
         end
 
         def versions(config_entry)
-          with_revision do
-            gem_name = config_entry['name']
-            gem_repo_dir.join(gem_name).glob('*/').map { |path| path.basename.to_s }
-          end
+          gem_name = config_entry['name']
+          gem_repo_dir.join(gem_name).glob('*/').map { |path| path.basename.to_s }
         end
 
         def install(dest, config_entry)
-          with_revision do
-            gem_name = config_entry['name']
-            version = config_entry['version'] or raise
-            dest = dest.join(gem_name)
-            dest.mkpath
-            src = gem_repo_dir.join(gem_name, version)
+          gem_name = config_entry['name']
+          version = config_entry['version'] or raise
+          dest = dest.join(gem_name)
+          dest.mkpath
+          src = gem_repo_dir.join(gem_name, version)
 
-            FileUtils.cp_r(src, dest)
-            dest.join(version, '.meta.yaml').write(YAML.dump(config_entry))
-          end
+          FileUtils.cp_r(src, dest)
+          dest.join(version, '.meta.yaml').write(YAML.dump(config_entry))
         end
 
         def to_lockfile
@@ -65,6 +59,8 @@ module RBS
           else
             git 'clone', remote, git_dir.to_s
           end
+
+          git 'checkout', revision
         end
 
         private def git_dir
@@ -80,20 +76,8 @@ module RBS
           git_dir.join @repo_dir
         end
 
-        private def with_revision(&block)
-          return block.call unless revision
-
-          prev_revision = resolve_revision 'HEAD'
-          git 'checkout', revision
-          block.call
-        ensure
-          git 'checkout', prev_revision if prev_revision
-        end
-
         private def resolved_revision
-          @resolved_revision ||= with_revision do
-            resolve_revision(revision)
-          end
+          @resolved_revision ||= resolve_revision(revision)
         end
 
         private def resolve_revision(rev)
