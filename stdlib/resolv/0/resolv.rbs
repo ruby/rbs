@@ -335,10 +335,7 @@ class Resolv::DNS
   #                     :search => ['ruby-lang.org'],
   #                     :ndots => 1)
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     new(config_info=nil)
-  #
-  def initialize: (?(String | Hash) config_info) -> untyped
+  def initialize: (?(String | Hash[Symbol, untyped]) config_info) -> untyped
 
   def use_ipv6?: () -> untyped
 end
@@ -376,7 +373,7 @@ class Resolv::DNS::Config
 
   private
 
-  def initialize: (?(String | Hash) config_info) -> untyped
+  def initialize: (?(String | Hash[Symbol, untyped]) config_info) -> untyped
 end
 
 Resolv::DNS::Config::InitialTimeout: Integer
@@ -404,23 +401,23 @@ end
 class Resolv::DNS::Label::Str
   public
 
-  def ==: (untyped other) -> untyped
+  def eql?: (Resolv::DNS::Label::Str other) -> bool
 
-  def downcase: () -> untyped
+  def downcase: () -> String
 
-  def eql?: (untyped other) -> untyped
+  alias == eql?
 
-  def hash: () -> untyped
+  def hash: () -> Integer
 
-  def inspect: () -> untyped
+  def inspect: () -> String
 
-  def string: () -> untyped
+  def string: () -> String
 
-  def to_s: () -> untyped
+  def to_s: () -> String
 
   private
 
-  def initialize: (untyped string) -> untyped
+  def initialize: (String string) -> untyped
 end
 
 class Resolv::DNS::Message
@@ -561,10 +558,7 @@ class Resolv::DNS::Name
   # :   Creates a new Name.
   #
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     create(arg)
-  #
-  def self.create: (dns_name arg) -> untyped
+  def self.create: (Resolv::DNS::dns_name arg) -> untyped
 
   public
 
@@ -641,11 +635,11 @@ Resolv::DNS::OpCode::Update: Integer
 
 # A DNS query abstract class.
 class Resolv::DNS::Query
-  def self.decode_rdata: (untyped msg) -> untyped
+  def self.decode_rdata: (Resolv::DNS::Message::MessageDecoder msg) -> instance
 
   public
 
-  def encode_rdata: (untyped msg) -> untyped
+  def encode_rdata: (Resolv::DNS::Message::MessageEncoder msg) -> void
 end
 
 module Resolv::DNS::RCode
@@ -690,11 +684,11 @@ Resolv::DNS::RCode::YXRRSet: Integer
 class Resolv::DNS::Requester
   public
 
-  def close: () -> untyped
+  def close: () -> void
 
-  def request: (untyped sender, untyped tout) -> untyped
+  def request: (Resolv::DNS::Requester::Sender sender, Numeric tout) -> [Resolv::DNS::Message, String]
 
-  def sender_for: (untyped addr, untyped msg) -> untyped
+  def sender_for: (String addr, Resolv::DNS::Message msg) -> Resolv::DNS::Requester::Sender
 
   private
 
@@ -704,33 +698,33 @@ end
 class Resolv::DNS::Requester::ConnectedUDP < Resolv::DNS::Requester
   public
 
-  def close: () -> untyped
+  def close: () -> void
 
-  def lazy_initialize: () -> untyped
+  def lazy_initialize: () -> void
 
-  def recv_reply: (untyped readable_socks) -> untyped
+  def recv_reply: (Array[UDPSocket] readable_socks) -> [String, String]
 
-  def sender: (untyped msg, untyped data, ?untyped host, ?untyped port) -> untyped
+  def sender: (Resolv::DNS::Message msg, String data, ?String host, ?Integer port) -> Resolv::DNS::Requester::Sender
 
   private
 
-  def initialize: (untyped host, ?untyped port) -> untyped
+  def initialize: (String host, ?Integer port) -> untyped
 end
 
 class Resolv::DNS::Requester::ConnectedUDP::Sender < Resolv::DNS::Requester::Sender
   public
 
-  def data: () -> untyped
+  def data: () -> String
 
-  def send: () -> untyped
+  def send: () -> void
 end
 
 class Resolv::DNS::Requester::MDNSOneShot < Resolv::DNS::Requester::UnconnectedUDP
   public
 
-  def sender: (untyped msg, untyped data, untyped host, ?untyped port) -> untyped
+  def sender: (Resolv::DNS::Message msg, String data, ?String host, ?Integer port) -> Resolv::DNS::Requester::Sender
 
-  def sender_for: (untyped addr, untyped msg) -> untyped
+  def recv_reply: (Array[UDPSocket] readable_socks) -> [String, String]
 end
 
 # Indicates a problem with the DNS request.
@@ -740,7 +734,7 @@ end
 class Resolv::DNS::Requester::Sender
   private
 
-  def initialize: (untyped msg, untyped data, untyped sock) -> untyped
+  def initialize: (Resolv::DNS::Message msg, String data, Socket sock) -> untyped
 end
 
 class Resolv::DNS::Requester::TCP < Resolv::DNS::Requester
@@ -748,77 +742,77 @@ class Resolv::DNS::Requester::TCP < Resolv::DNS::Requester
 
   def close: () -> untyped
 
-  def recv_reply: (untyped readable_socks) -> untyped
+  def recv_reply: (Array[TCPSocket] readable_socks) -> [String, String]
 
-  def sender: (untyped msg, untyped data, ?untyped host, ?untyped port) -> untyped
+  def sender: (Resolv::DNS::Message msg, String data, ?String host, ?Integer port) -> Resolv::DNS::Requester::Sender
 
   private
 
-  def initialize: (untyped host, ?untyped port) -> untyped
+  def initialize: (String host, ?Integer port) -> untyped
 end
 
 class Resolv::DNS::Requester::TCP::Sender < Resolv::DNS::Requester::Sender
   public
 
-  def data: () -> untyped
+  def data: () -> String
 
-  def send: () -> untyped
+  def send: () -> void
 end
 
 class Resolv::DNS::Requester::UnconnectedUDP < Resolv::DNS::Requester
   public
 
-  def close: () -> untyped
+  def close: () -> void
 
-  def lazy_initialize: () -> untyped
+  def lazy_initialize: () -> void
 
-  def recv_reply: (untyped readable_socks) -> untyped
+  def recv_reply: (Array[UDPSocket] readable_socks) -> [String, String]
 
-  def sender: (untyped msg, untyped data, untyped host, ?untyped port) -> untyped
+  def sender: (Resolv::DNS::Message msg, String data, ?String host, ?Integer port) -> Resolv::DNS::Requester::Sender
 
   private
 
-  def initialize: (*untyped nameserver_port) -> untyped
+  def initialize: (*[String, Integer] nameserver_port) -> untyped
 end
 
 class Resolv::DNS::Requester::UnconnectedUDP::Sender < Resolv::DNS::Requester::Sender
   public
 
-  def data: () -> untyped
+  def data: () -> String
 
-  def send: () -> untyped
+  def send: () -> void
 
   private
 
-  def initialize: (untyped msg, untyped data, untyped sock, untyped host, untyped port) -> untyped
+  def initialize: (Resolv::DNS::Message msg, String data, UDPSocket sock, String host, Integer port) -> untyped
 end
 
 # A DNS resource abstract class.
 class Resolv::DNS::Resource < Resolv::DNS::Query
-  def self.decode_rdata: (untyped msg) -> untyped
+  def self.decode_rdata: (Resolv::DNS::Message::MessageDecoder msg) -> instance
 
-  def self.get_class: (untyped type_value, untyped class_value) -> untyped
+  def self.get_class: (Integer type_value, Integer class_value) -> self
 
   public
 
-  def ==: (untyped other) -> untyped
+  def eql?: (Resolv::DNS::Resource other) -> bool
 
-  def encode_rdata: (untyped msg) -> untyped
+  def encode_rdata: (Resolv::DNS::Message::MessageEncoder msg) -> void
 
-  def eql?: (untyped other) -> untyped
+  alias == eql?
 
-  def hash: () -> untyped
+  def hash: () -> Integer
 
   # Remaining Time To Live for this Resource.
   #
-  def ttl: () -> untyped
+  def ttl: () -> Integer
 end
 
-Resolv::DNS::Resource::ClassHash: Hash[untyped, untyped]
+Resolv::DNS::Resource::ClassHash: Hash[[Integer, Integer], singleton(Resolv::DNS::Resource)]
 
-Resolv::DNS::Resource::ClassInsensitiveTypes: Array[untyped]
+Resolv::DNS::Resource::ClassInsensitiveTypes: Array[singleton(Resolv::DNS::Resource)]
 
-Resolv::DNS::Resource::ClassValue: untyped?
+Resolv::DNS::Resource::ClassValue: Integer?
 
 # A Query type requesting any RR.
 class Resolv::DNS::Resource::ANY < Resolv::DNS::Query
@@ -834,15 +828,15 @@ Resolv::DNS::Resource::CNAME::TypeValue: Integer
 
 # Domain Name resource abstract class.
 class Resolv::DNS::Resource::DomainName < Resolv::DNS::Resource
-  def self.decode_rdata: (untyped msg) -> untyped
+  def self.decode_rdata: (Resolv::DNS::Message::MessageDecoder msg) -> instance
 
   public
 
-  def encode_rdata: (untyped msg) -> untyped
+  def encode_rdata: (Resolv::DNS::Message::MessageEncoder msg) -> void
 
   # The name of this DomainName.
   #
-  def name: () -> untyped
+  def name: () -> String
 
   private
 
@@ -851,22 +845,22 @@ class Resolv::DNS::Resource::DomainName < Resolv::DNS::Resource
   # # arglists 💪👽🚨 << Delete this section
   #     new(name)
   #
-  def initialize: (untyped name) -> untyped
+  def initialize: (String name) -> untyped
 end
 
 # A generic resource abstract class.
 class Resolv::DNS::Resource::Generic < Resolv::DNS::Resource
-  def self.create: (untyped type_value, untyped class_value) -> untyped
+  def self.create: (Integer type_value, Integer class_value) -> instance
 
-  def self.decode_rdata: (untyped msg) -> untyped
+  def self.decode_rdata: (Resolv::DNS::Message::MessageDecoder msg) -> instance
 
   public
 
   # Data for this generic resource.
   #
-  def data: () -> untyped
+  def data: () -> String
 
-  def encode_rdata: (untyped msg) -> untyped
+  def encode_rdata: (Resolv::DNS::Message::MessageEncoder msg) -> void
 
   private
 
@@ -875,24 +869,24 @@ class Resolv::DNS::Resource::Generic < Resolv::DNS::Resource
   # # arglists 💪👽🚨 << Delete this section
   #     new(data)
   #
-  def initialize: (untyped data) -> untyped
+  def initialize: (String data) -> untyped
 end
 
 # Host Information resource.
 class Resolv::DNS::Resource::HINFO < Resolv::DNS::Resource
-  def self.decode_rdata: (untyped msg) -> untyped
+  def self.decode_rdata: (Resolv::DNS::Message::MessageDecoder msg) -> instance
 
   public
 
   # CPU architecture for this resource.
   #
-  def cpu: () -> untyped
+  def cpu: () -> String
 
-  def encode_rdata: (untyped msg) -> untyped
+  def encode_rdata: (Resolv::DNS::Message::MessageEncoder msg) -> void
 
   # Operating system for this resource.
   #
-  def os: () -> untyped
+  def os: () -> String
 
   private
 
@@ -901,7 +895,7 @@ class Resolv::DNS::Resource::HINFO < Resolv::DNS::Resource
   # # arglists 💪👽🚨 << Delete this section
   #     new(cpu, os)
   #
-  def initialize: (untyped cpu, untyped os) -> untyped
+  def initialize: (String cpu, String os) -> untyped
 end
 
 Resolv::DNS::Resource::HINFO::TypeValue: Integer
@@ -914,15 +908,15 @@ Resolv::DNS::Resource::IN::ClassValue: Integer
 
 # IPv4 Address resource
 class Resolv::DNS::Resource::IN::A < Resolv::DNS::Resource
-  def self.decode_rdata: (untyped msg) -> untyped
+  def self.decode_rdata: (Resolv::DNS::Message::MessageDecoder msg) -> instance
 
   public
 
   # The Resolv::IPv4 address for this A.
   #
-  def address: () -> untyped
+  def address: () -> Resolv::IPv4
 
-  def encode_rdata: (untyped msg) -> untyped
+  def encode_rdata: (Resolv::DNS::Message::MessageEncoder msg) -> void
 
   private
 
@@ -931,7 +925,7 @@ class Resolv::DNS::Resource::IN::A < Resolv::DNS::Resource
   # # arglists 💪👽🚨 << Delete this section
   #     new(address)
   #
-  def initialize: (untyped address) -> untyped
+  def initialize: (String | Resolv::IPv4 address) -> untyped
 end
 
 Resolv::DNS::Resource::IN::A::ClassValue: Integer
@@ -940,15 +934,15 @@ Resolv::DNS::Resource::IN::A::TypeValue: Integer
 
 # An IPv6 address record.
 class Resolv::DNS::Resource::IN::AAAA < Resolv::DNS::Resource
-  def self.decode_rdata: (untyped msg) -> untyped
+  def self.decode_rdata: (Resolv::DNS::Message::MessageDecoder msg) -> instance
 
   public
 
   # The Resolv::IPv6 address for this AAAA.
   #
-  def address: () -> untyped
+  def address: () -> Resolv::IPv6
 
-  def encode_rdata: (untyped msg) -> untyped
+  def encode_rdata: (Resolv::DNS::Message::MessageEncoder msg) -> void
 
   private
 
@@ -957,7 +951,7 @@ class Resolv::DNS::Resource::IN::AAAA < Resolv::DNS::Resource
   # # arglists 💪👽🚨 << Delete this section
   #     new(address)
   #
-  def initialize: (untyped address) -> untyped
+  def initialize: (String | Resolv::IPv6 address) -> untyped
 end
 
 Resolv::DNS::Resource::IN::AAAA::ClassValue: Integer
@@ -1031,17 +1025,17 @@ Resolv::DNS::Resource::IN::SOA::TypeValue: Integer
 #
 # These records identify the hostname and port that a service is available at.
 class Resolv::DNS::Resource::IN::SRV < Resolv::DNS::Resource
-  def self.decode_rdata: (untyped msg) -> untyped
+  def self.decode_rdata: (Resolv::DNS::Message::MessageDecoder msg) -> instance
 
   public
 
-  def encode_rdata: (untyped msg) -> untyped
+  def encode_rdata: (Resolv::DNS::Message::MessageEncoder msg) -> void
 
   # The port on this target host of this service.
   #
   # The range is 0-65535.
   #
-  def port: () -> untyped
+  def port: () -> Integer
 
   # The priority of this target host.
   #
@@ -1050,14 +1044,14 @@ class Resolv::DNS::Resource::IN::SRV < Resolv::DNS::Resource
   # an order defined by the weight field. The range is 0-65535.  Note that it is
   # not widely implemented and should be set to zero.
   #
-  def priority: () -> untyped
+  def priority: () -> Integer
 
   # The domain name of the target host.
   #
   # A target of "." means that the service is decidedly not available at this
   # domain.
   #
-  def target: () -> untyped
+  def target: () -> String
 
   # A server selection mechanism.
   #
@@ -1068,7 +1062,7 @@ class Resolv::DNS::Resource::IN::SRV < Resolv::DNS::Resource
   # RR easier to read for humans (less noisy). Note that it is not widely
   # implemented and should be set to zero.
   #
-  def weight: () -> untyped
+  def weight: () -> Integer
 
   private
 
@@ -1080,7 +1074,7 @@ class Resolv::DNS::Resource::IN::SRV < Resolv::DNS::Resource
   # # arglists 💪👽🚨 << Delete this section
   #     new(priority, weight, port, target)
   #
-  def initialize: (untyped priority, untyped weight, untyped port, untyped target) -> untyped
+  def initialize: (Integer priority, Integer weight, Integer port, String target) -> untyped
 end
 
 Resolv::DNS::Resource::IN::SRV::ClassValue: Integer
@@ -1096,13 +1090,13 @@ Resolv::DNS::Resource::IN::TXT::TypeValue: Integer
 
 # Well Known Service resource.
 class Resolv::DNS::Resource::IN::WKS < Resolv::DNS::Resource
-  def self.decode_rdata: (untyped msg) -> untyped
+  def self.decode_rdata: (Resolv::DNS::Message::MessageDecoder msg) -> instance
 
   public
 
   # The host these services run on.
   #
-  def address: () -> untyped
+  def address: () -> Resolv::IPv4
 
   # A bit map of enabled services on this host.
   #
@@ -1110,17 +1104,17 @@ class Resolv::DNS::Resource::IN::WKS < Resolv::DNS::Resource
   # 25).  If this bit is set, then an SMTP server should be listening on TCP port
   # 25; if zero, SMTP service is not supported.
   #
-  def bitmap: () -> untyped
+  def bitmap: () -> Integer
 
-  def encode_rdata: (untyped msg) -> untyped
+  def encode_rdata: (Resolv::DNS::Message::MessageEncoder msg) -> void
 
   # IP protocol number for these services.
   #
-  def protocol: () -> untyped
+  def protocol: () -> Integer
 
   private
 
-  def initialize: (untyped address, untyped protocol, untyped bitmap) -> untyped
+  def initialize: (String | Resolv::IPv4 address, Integer protocol, Integer bitmap) -> untyped
 end
 
 Resolv::DNS::Resource::IN::WKS::ClassValue: Integer
@@ -1129,91 +1123,91 @@ Resolv::DNS::Resource::IN::WKS::TypeValue: Integer
 
 # Location resource
 class Resolv::DNS::Resource::LOC < Resolv::DNS::Resource
-  def self.decode_rdata: (untyped msg) -> untyped
+  def self.decode_rdata: (Resolv::DNS::Message::MessageDecoder msg) -> instance
 
   public
 
   # The altitude of the LOC above a reference sphere whose surface sits 100km
   # below the WGS84 spheroid in centimeters as an unsigned 32bit integer
   #
-  def altitude: () -> untyped
+  def altitude: () -> Integer
 
-  def encode_rdata: (untyped msg) -> untyped
+  def encode_rdata: (Resolv::DNS::Message::MessageEncoder msg) -> void
 
   # The horizontal precision using ssize type values in meters using scientific
   # notation as 2 integers of XeY for precision use value/2 e.g. 2m = +/-1m
   #
-  def hprecision: () -> untyped
+  def hprecision: () -> Integer
 
   # The latitude for this LOC where 2**31 is the equator in thousandths of an arc
   # second as an unsigned 32bit integer
   #
-  def latitude: () -> untyped
+  def latitude: () -> Integer
 
   # The longitude for this LOC where 2**31 is the prime meridian in thousandths of
   # an arc second as an unsigned 32bit integer
   #
-  def longitude: () -> untyped
+  def longitude: () -> Integer
 
   # The spherical size of this LOC in meters using scientific notation as 2
   # integers of XeY
   #
-  def ssize: () -> untyped
+  def ssize: () -> Integer
 
   # Returns the version value for this LOC record which should always be 00
   #
-  def version: () -> untyped
+  def version: () -> Integer
 
   # The vertical precision using ssize type values in meters using scientific
   # notation as 2 integers of XeY for precision use value/2 e.g. 2m = +/-1m
   #
-  def vprecision: () -> untyped
+  def vprecision: () -> Integer
 
   private
 
-  def initialize: (untyped version, untyped ssize, untyped hprecision, untyped vprecision, untyped latitude, untyped longitude, untyped altitude) -> untyped
+  def initialize: (Integer version, Integer ssize, Integer hprecision, Integer vprecision, Integer latitude, Integer longitude, Integer altitude) -> untyped
 end
 
 Resolv::DNS::Resource::LOC::TypeValue: Integer
 
 # Mailing list or mailbox information.
 class Resolv::DNS::Resource::MINFO < Resolv::DNS::Resource
-  def self.decode_rdata: (untyped msg) -> untyped
+  def self.decode_rdata: (Resolv::DNS::Message::MessageDecoder msg) -> instance
 
   public
 
   # Mailbox to use for error messages related to the mail list or mailbox.
   #
-  def emailbx: () -> untyped
+  def emailbx: () -> String
 
-  def encode_rdata: (untyped msg) -> untyped
+  def encode_rdata: (Resolv::DNS::Message::MessageEncoder msg) -> void
 
   # Domain name responsible for this mail list or mailbox.
   #
-  def rmailbx: () -> untyped
+  def rmailbx: () -> String
 
   private
 
-  def initialize: (untyped rmailbx, untyped emailbx) -> untyped
+  def initialize: (String rmailbx, String emailbx) -> untyped
 end
 
 Resolv::DNS::Resource::MINFO::TypeValue: Integer
 
 # Mail Exchanger resource.
 class Resolv::DNS::Resource::MX < Resolv::DNS::Resource
-  def self.decode_rdata: (untyped msg) -> untyped
+  def self.decode_rdata: (Resolv::DNS::Message::MessageDecoder msg) -> instance
 
   public
 
-  def encode_rdata: (untyped msg) -> untyped
+  def encode_rdata: (Resolv::DNS::Message::MessageEncoder msg) -> void
 
   # The host of this MX.
   #
-  def exchange: () -> untyped
+  def exchange: () -> String
 
   # The preference for this MX.
   #
-  def preference: () -> untyped
+  def preference: () -> Integer
 
   private
 
@@ -1222,7 +1216,7 @@ class Resolv::DNS::Resource::MX < Resolv::DNS::Resource
   # # arglists 💪👽🚨 << Delete this section
   #     new(preference, exchange)
   #
-  def initialize: (untyped preference, untyped exchange) -> untyped
+  def initialize: (Integer preference, String exchange) -> untyped
 end
 
 Resolv::DNS::Resource::MX::TypeValue: Integer
@@ -1241,42 +1235,42 @@ Resolv::DNS::Resource::PTR::TypeValue: Integer
 
 # Start Of Authority resource.
 class Resolv::DNS::Resource::SOA < Resolv::DNS::Resource
-  def self.decode_rdata: (untyped msg) -> untyped
+  def self.decode_rdata: (Resolv::DNS::Message::MessageDecoder msg) -> instance
 
   public
 
-  def encode_rdata: (untyped msg) -> untyped
+  def encode_rdata: (Resolv::DNS::Message::MessageEncoder msg) -> void
 
   # Time in seconds that a secondary name server is to use the data before
   # refreshing from the primary name server.
   #
-  def expire: () -> untyped
+  def expire: () -> Integer
 
   # The minimum number of seconds to be used for TTL values in RRs.
   #
-  def minimum: () -> untyped
+  def minimum: () -> Integer
 
   # Name of the host where the master zone file for this zone resides.
   #
-  def mname: () -> untyped
+  def mname: () -> String
 
   # How often, in seconds, a secondary name server is to check for updates from
   # the primary name server.
   #
-  def refresh: () -> untyped
+  def refresh: () -> Integer
 
   # How often, in seconds, a secondary name server is to retry after a failure to
   # check for a refresh.
   #
-  def retry: () -> untyped
+  def retry: () -> Integer
 
   # The person responsible for this domain name.
   #
-  def rname: () -> untyped
+  def rname: () -> String
 
   # The version number of the zone file.
   #
-  def serial: () -> untyped
+  def serial: () -> Integer
 
   private
 
@@ -1286,14 +1280,14 @@ class Resolv::DNS::Resource::SOA < Resolv::DNS::Resource
   # # arglists 💪👽🚨 << Delete this section
   #     new(mname, rname, serial, refresh, retry_, expire, minimum)
   #
-  def initialize: (untyped mname, untyped rname, untyped serial, untyped refresh, untyped retry_, untyped expire, untyped minimum) -> untyped
+  def initialize: (String mname, String rname, Integer serial, Integer refresh, Integer retry_, Integer expire, Integer minimum) -> untyped
 end
 
 Resolv::DNS::Resource::SOA::TypeValue: Integer
 
 # Unstructured text resource.
 class Resolv::DNS::Resource::TXT < Resolv::DNS::Resource
-  def self.decode_rdata: (untyped msg) -> untyped
+  def self.decode_rdata: (Resolv::DNS::Message::MessageDecoder msg) -> instance
 
   public
 
@@ -1302,17 +1296,17 @@ class Resolv::DNS::Resource::TXT < Resolv::DNS::Resource
   # # arglists 💪👽🚨 << Delete this section
   #     data()
   #
-  def data: () -> untyped
+  def data: () -> String
 
-  def encode_rdata: (untyped msg) -> untyped
+  def encode_rdata: (Resolv::DNS::Message::MessageEncoder msg) -> void
 
   # Returns an Array of Strings for this TXT record.
   #
-  def strings: () -> untyped
+  def strings: () -> Array[String]
 
   private
 
-  def initialize: (untyped first_string, *untyped rest_strings) -> untyped
+  def initialize: (String first_string, *String rest_strings) -> untyped
 end
 
 Resolv::DNS::Resource::TXT::TypeValue: Integer
@@ -1494,33 +1488,35 @@ class Resolv::LOC::Alt
   # # arglists 💪👽🚨 << Delete this section
   #     create(arg)
   #
-  def self.create: (untyped arg) -> untyped
+  def self.create: (Resolv::LOC::Alt | String arg) -> instance
 
   public
 
-  def ==: (untyped other) -> untyped
+  def eql?: (Resolv::LOC::Alt other) -> bool
 
   # The raw altitude
   #
-  def altitude: () -> untyped
+  def altitude: () -> Integer
 
-  def eql?: (untyped other) -> untyped
+  alias == eql?
 
-  def hash: () -> untyped
+  def hash: () -> Integer
 
-  def inspect: () -> untyped
+  def inspect: () -> String
 
-  def to_s: () -> untyped
+  def to_s: () -> String
 
   private
 
-  def initialize: (untyped altitude) -> untyped
+  def initialize: (Integer altitude) -> untyped
 end
 
 Resolv::LOC::Alt::Regex: Regexp
 
 # A Resolv::LOC::Coord
 class Resolv::LOC::Coord
+  type orientation = "lat" | "lon"
+
   # Creates a new LOC::Coord from `arg` which may be:
   #
   # LOC::Coord
@@ -1532,31 +1528,31 @@ class Resolv::LOC::Coord
   # # arglists 💪👽🚨 << Delete this section
   #     create(arg)
   #
-  def self.create: (untyped arg) -> untyped
+  def self.create: (Resolv::LOC::Coord | String arg) -> instance
 
   public
 
-  def ==: (untyped other) -> untyped
+  def eql?: (Resolv::LOC::Coord other) -> bool
 
   # The raw coordinates
   #
-  def coordinates: () -> untyped
+  def coordinates: () -> String
 
-  def eql?: (untyped other) -> untyped
+  alias == eql?
 
-  def hash: () -> untyped
+  def hash: () -> Integer
 
-  def inspect: () -> untyped
+  def inspect: () -> String
 
   # The orientation of the hemisphere as 'lat' or 'lon'
   #
-  def orientation: () -> untyped
+  def orientation: () -> orientation
 
-  def to_s: () -> untyped
+  def to_s: () -> String
 
   private
 
-  def initialize: (untyped coordinates, untyped orientation) -> untyped
+  def initialize: (String coordinates, orientation orientation) -> untyped
 end
 
 Resolv::LOC::Coord::Regex: Regexp
@@ -1574,27 +1570,27 @@ class Resolv::LOC::Size
   # # arglists 💪👽🚨 << Delete this section
   #     create(arg)
   #
-  def self.create: (untyped arg) -> untyped
+  def self.create: (Resolv::LOC::Size | String arg) -> instance
 
   public
 
-  def ==: (untyped other) -> untyped
+  def eql?: (Resolv::LOC::Size other) -> bool
 
-  def eql?: (untyped other) -> untyped
+  alias == eql?
 
-  def hash: () -> untyped
+  def hash: () -> Integer
 
-  def inspect: () -> untyped
+  def inspect: () -> String
 
   # The raw size
   #
-  def scalar: () -> untyped
+  def scalar: () -> String
 
-  def to_s: () -> untyped
+  def to_s: () -> String
 
   private
 
-  def initialize: (untyped scalar) -> untyped
+  def initialize: (String scalar) -> untyped
 end
 
 Resolv::LOC::Size::Regex: Regexp
@@ -1617,12 +1613,9 @@ class Resolv::MDNS < Resolv::DNS
   # `name` can be a Resolv::DNS::Name or a String.  Retrieved addresses will be a
   # Resolv::IPv4 or Resolv::IPv6
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     each_address(name)
-  #
-  def each_address: (untyped name) -> untyped
+  def each_address: (Resolv::DNS::dns_name name) -> Resolv::DNS::ip_address
 
-  def make_udp_requester: () -> untyped
+  def make_udp_requester: () -> (Resolv::DNS::Requester::ConnectedUDP | Resolv::DNS::Requester::UnconnectedUDP)
 
   private
 
@@ -1640,7 +1633,7 @@ class Resolv::MDNS < Resolv::DNS
   # # arglists 💪👽🚨 << Delete this section
   #     new(config_info=nil)
   #
-  def initialize: (?untyped config_info) -> untyped
+  def initialize: (?(String | Hash[Symbol, untyped]) config_info) -> untyped
 end
 
 # Default IPv4 mDNS address
