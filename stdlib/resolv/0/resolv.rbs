@@ -498,31 +498,31 @@ end
 class Resolv::DNS::Message::MessageDecoder
   public
 
-  def get_bytes: (?untyped len) -> untyped
+  def get_bytes: (?Integer len) -> String
 
-  def get_label: () -> untyped
+  def get_label: () -> Resolv::DNS::Label::Str
 
-  def get_labels: () -> untyped
+  def get_labels: () -> Array[Resolv::DNS::Label::Str]
 
-  def get_length16: () -> untyped
+  def get_length16: () { (Integer) -> Integer } -> Integer
 
-  def get_name: () -> untyped
+  def get_name: () -> Resolv::DNS::Name
 
-  def get_question: () -> untyped
+  def get_question: () -> Resolv::DNS::Query
 
-  def get_rr: () -> untyped
+  def get_rr: () -> [Resolv::DNS::Name, Integer, Resolv::DNS::Resource]
 
-  def get_string: () -> untyped
+  def get_string: () -> String
 
-  def get_string_list: () -> untyped
+  def get_string_list: () -> Array[String]
 
-  def get_unpack: (untyped template) -> untyped
+  def get_unpack: (String template) -> Array[untyped]
 
-  def inspect: () -> untyped
+  def inspect: () -> String
 
   private
 
-  def initialize: (untyped data) -> untyped
+  def initialize: (String data) { (instance) -> void } -> untyped
 end
 
 class Resolv::DNS::Message::MessageEncoder
@@ -564,28 +564,28 @@ class Resolv::DNS::Name
   # # arglists 💪👽🚨 << Delete this section
   #     create(arg)
   #
-  def self.create: (untyped arg) -> untyped
+  def self.create: (dns_name arg) -> untyped
 
   public
 
-  def ==: (untyped other) -> untyped
+  def ==: (instance other) -> bool
 
-  def []: (untyped i) -> untyped
+  def []: (Integer i) -> Resolv::DNS::Label::Str?
 
   # True if this name is absolute.
   #
   # # arglists 💪👽🚨 << Delete this section
   #     absolute?()
   #
-  def absolute?: () -> untyped
+  def absolute?: () -> bool
 
   alias eql? ==
 
-  def hash: () -> untyped
+  def hash: () -> Integer
 
-  def inspect: () -> untyped
+  def inspect: () -> String
 
-  def length: () -> untyped
+  def length: () -> Integer
 
   # Returns true if `other` is a subdomain.
   #
@@ -602,9 +602,9 @@ class Resolv::DNS::Name
   # # arglists 💪👽🚨 << Delete this section
   #     subdomain_of?(other)
   #
-  def subdomain_of?: (untyped other) -> untyped
+  def subdomain_of?: (instance other) -> bool
 
-  def to_a: () -> untyped
+  def to_a: () -> Array[Resolv::DNS::Label::Str]
 
   # returns the domain name as a string.
   #
@@ -623,7 +623,7 @@ class Resolv::DNS::Name
 
   private
 
-  def initialize: (untyped labels, ?untyped absolute) -> untyped
+  def initialize: (Array[Resolv::DNS::Label::Str] labels, ?bool absolute) -> untyped
 end
 
 module Resolv::DNS::OpCode
