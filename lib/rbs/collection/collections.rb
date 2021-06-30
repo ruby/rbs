@@ -38,7 +38,7 @@ module RBS
         def install(dest, config_entry)
           with_revision do
             gem_name = config_entry['name']
-            version = config_entry['version']
+            version = config_entry['version'] or raise
             dest = dest.join(gem_name)
             dest.mkpath
             src = gem_repo_dir.join(gem_name, version)
@@ -48,7 +48,7 @@ module RBS
           end
         end
 
-        def to_lock_style
+        def to_lockfile
           {
             'name' => name,
             'revision' => resolved_revision,

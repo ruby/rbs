@@ -1,13 +1,14 @@
 module RBS
   module Collection
     module Collections
-      def self.from_config_entry: (untyped colletion_entry) -> _Collection
+      def self.from_config_entry: (Config::collection_entry) -> _Collection
 
       interface _Collection
         def has?: (Config::gem_entry) -> bool
         def versions: (Config::gem_entry) -> Array[String]
         def name: () -> String
         def install: (Pathname dest, Config::gem_entry) -> void
+        def to_lockfile: () -> Config::collection_entry
       end
 
       class Git
@@ -23,6 +24,8 @@ module RBS
         def versions: (Config::gem_entry) -> Array[String]
 
         def install: (Pathname dest, Config::gem_entry) -> void
+
+        def to_lockfile: () -> Config::collection_entry
 
         private
 

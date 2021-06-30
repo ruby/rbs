@@ -34,7 +34,7 @@ module RBS
               config.add_gem({
                 'name' => spec.name,
                 'version' => best_version.to_s,
-                'collection' => collection.to_h,
+                'collection' => collection.to_lockfile,
               })
             end
           end
