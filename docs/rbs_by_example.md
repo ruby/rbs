@@ -29,7 +29,7 @@ end
 
 ### Single argument methods
 
-**Example:** `String.include?`
+**Example:** `String#include?`
 
 ```ruby
 # .rb
@@ -125,7 +125,7 @@ end
 
 ### Union types
 
-**Example:** `String#partition`
+**Example:** `String#<<`
 
 ```ruby
 # .rb
