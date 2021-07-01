@@ -4,7 +4,7 @@ class BasicSocket < IO
   #
   #     BasicSocket.do_not_reverse_lookup  #=> false
   #
-  def self.do_not_reverse_lookup: () -> untyped
+  def self.do_not_reverse_lookup: () -> bool
 
   # Sets the global do_not_reverse_lookup flag.
   #
@@ -17,7 +17,7 @@ class BasicSocket < IO
   #     p s2.do_not_reverse_lookup                 #=> false
   #     p s1.do_not_reverse_lookup                 #=> true
   #
-  def self.do_not_reverse_lookup=: (untyped) -> untyped
+  def self.do_not_reverse_lookup=: (bool) -> void
 
   # Returns a socket object which contains the file descriptor, *fd*.
   #
@@ -25,7 +25,7 @@ class BasicSocket < IO
   #     STDIN_SOCK = Socket.for_fd(STDIN.fileno)
   #     p STDIN_SOCK.remote_address
   #
-  def self.for_fd: (untyped) -> untyped
+  def self.for_fd: (Integer fileno) -> BasicSocket
 
   public
 
@@ -35,7 +35,7 @@ class BasicSocket < IO
   #     s1.close_read
   #     s2.puts #=> Broken pipe (Errno::EPIPE)
   #
-  def close_read: () -> untyped
+  def close_read: () -> void
 
   # Disallows further write using shutdown system call.
   #
@@ -48,7 +48,7 @@ class BasicSocket < IO
   #       p s1.read        #=> "pong"
   #     }
   #
-  def close_write: () -> untyped
+  def close_write: () -> void
 
   # Returns an address of the socket suitable for connect in the local machine.
   #
@@ -71,7 +71,7 @@ class BasicSocket < IO
   #       }
   #     }
   #
-  def connect_address: () -> untyped
+  def connect_address: () -> Addrinfo
 
   # Gets the do_not_reverse_lookup flag of *basicsocket*.
   #
@@ -86,7 +86,7 @@ class BasicSocket < IO
   #       p sock.do_not_reverse_lookup      #=> true
   #     }
   #
-  def do_not_reverse_lookup: () -> untyped
+  def do_not_reverse_lookup: () -> bool
 
   # Sets the do_not_reverse_lookup flag of *basicsocket*.
   #
@@ -97,7 +97,7 @@ class BasicSocket < IO
   #       p sock.peeraddr                    #=> ["AF_INET", 80, "carbon.ruby-lang.org", "54.163.249.195"]
   #     }
   #
-  def do_not_reverse_lookup=: (untyped) -> untyped
+  def do_not_reverse_lookup=: (bool) -> void
 
   # Returns the user and group on the peer of the UNIX socket. The result is a two
   # element array which contains the effective uid and the effective gid.
@@ -116,7 +116,7 @@ class BasicSocket < IO
   #       end
   #     }
   #
-  def getpeereid: () -> untyped
+  def getpeereid: () -> [Integer, Integer]
 
   # Returns the remote address of the socket as a sockaddr string.
   #
@@ -129,7 +129,7 @@ class BasicSocket < IO
   # If Addrinfo object is preferred over the binary string, use
   # BasicSocket#remote_address.
   #
-  def getpeername: () -> untyped
+  def getpeername: () -> String
 
   # Returns the local address of the socket as a sockaddr string.
   #
@@ -140,7 +140,7 @@ class BasicSocket < IO
   # If Addrinfo object is preferred over the binary string, use
   # BasicSocket#local_address.
   #
-  def getsockname: () -> untyped
+  def getsockname: () -> String
 
   # Gets a socket option. These are protocol and system specific, see your local
   # system documentation for details. The option is returned as a Socket::Option
@@ -191,7 +191,7 @@ class BasicSocket < IO
   #     onoff, linger = optval.unpack "ii"
   #     onoff = onoff == 0 ? false : true
   #
-  def getsockopt: (untyped, untyped) -> untyped
+  def getsockopt: (Symbol | Integer, Symbol | Integer) -> (Integer | bool | String)
 
   # Returns an Addrinfo object for local address obtained by getsockname.
   #
@@ -205,7 +205,7 @@ class BasicSocket < IO
   #       p serv.local_address #=> #<Addrinfo: 127.0.0.1:1512 TCP>
   #     }
   #
-  def local_address: () -> untyped
+  def local_address: () -> Addrinfo
 
   # Receives a message.
   #
@@ -224,7 +224,8 @@ class BasicSocket < IO
   #       p s2.recv(10)                    #=> "rld\n"
   #     }
   #
-  def recv: (*untyped) -> untyped
+  def recv: (Integer maxlen, ?Integer flags, ?String outbuf) -> String
+          | (Integer maxlen, ?String outbuf) -> String
 
   # Receives up to *maxlen* bytes from `socket` using recvfrom(2) after O_NONBLOCK
   # is set for the underlying file descriptor. *flags* is zero or more of the
@@ -271,7 +272,7 @@ class BasicSocket < IO
   # *   Socket#recvfrom
   #
   #
-  def recv_nonblock: (untyped len, ?untyped flag, ?untyped str, ?exception: untyped) -> untyped
+  def recv_nonblock: (Integer maxlen, ?Integer flags, ?String buf, ?exception: bool) -> (String | :wait_readable)
 
   # recvmsg receives a message using recvmsg(2) system call in blocking manner.
   #
@@ -322,7 +323,7 @@ class BasicSocket < IO
   #       end
   #     }
   #
-  def recvmsg: (?untyped dlen, ?untyped flags, ?untyped clen, ?scm_rights: untyped) -> untyped
+  def recvmsg: (?Integer dlen, ?Integer flags, ?Integer clen, ?scm_rights: bool) -> [String, Addrinfo, Integer?, Array[Socket::AncillaryData]]
 
   # recvmsg receives a message using recvmsg(2) system call in non-blocking
   # manner.
@@ -334,7 +335,7 @@ class BasicSocket < IO
   # recvmsg_nonblock should not raise an IO::WaitReadable exception, but return
   # the symbol `:wait_readable` instead.
   #
-  def recvmsg_nonblock: (?untyped dlen, ?untyped flags, ?untyped clen, ?exception: untyped, ?scm_rights: untyped) -> untyped
+  def recvmsg_nonblock: (?Integer dlen, ?Integer flags, ?Integer clen, ?exception: bool, ?scm_rights: bool) -> ([String, Addrinfo, Integer?, Array[Socket::AncillaryData]] | :wait_readable)
 
   # Returns an Addrinfo object for remote address obtained by getpeername.
   #
@@ -350,7 +351,7 @@ class BasicSocket < IO
   #       p s.remote_address #=> #<Addrinfo: 127.0.0.1:36504 TCP>
   #     }
   #
-  def remote_address: () -> untyped
+  def remote_address: () -> Addrinfo
 
   # send *mesg* via *basicsocket*.
   #
@@ -365,7 +366,7 @@ class BasicSocket < IO
   #       p s.read
   #     }
   #
-  def send: (*untyped) -> untyped
+  def send: (String msg, ?Integer flags, ?(Addrinfo | String) dest_sockaddr) -> void
 
   # sendmsg sends a message using sendmsg(2) system call in blocking manner.
   #
@@ -394,7 +395,7 @@ class BasicSocket < IO
   #     ancdata = [:SOCKET, :RIGHTS, [io.fileno].pack("i!")]
   #     sock.sendmsg("\0", 0, nil, ancdata)
   #
-  def sendmsg: (untyped mesg, ?untyped flags, ?untyped dest_sockaddr, *untyped controls) -> untyped
+  def sendmsg: (String mesg, ?Integer flags, ?(Addrinfo | String) dest_sockaddr, *Socket::AncillaryData controls) -> Integer
 
   # sendmsg_nonblock sends a message using sendmsg(2) system call in non-blocking
   # manner.
@@ -406,7 +407,7 @@ class BasicSocket < IO
   # sendmsg_nonblock should not raise an IO::WaitWritable exception, but return
   # the symbol `:wait_writable` instead.
   #
-  def sendmsg_nonblock: (untyped mesg, ?untyped flags, ?untyped dest_sockaddr, *untyped controls, ?exception: untyped) -> untyped
+  def sendmsg_nonblock: (String mesg, ?Integer flags, ?(Addrinfo | String) dest_sockaddr, *Socket::AncillaryData controlss, ?exception: bool) -> (Integer | :wait_writable)
 
   # Sets a socket option. These are protocol and system specific, see your local
   # system documentation for details.
@@ -459,7 +460,7 @@ class BasicSocket < IO
   #     sock.setsockopt(Socket::IPPROTO_IP, Socket::IP_ADD_MEMBERSHIP, optval)
   #
   #
-  def setsockopt: (*untyped) -> untyped
+  def setsockopt: (*(Symbol | Integer), bool | Integer | String) -> void
 
   # Calls shutdown(2) system call.
   #
@@ -486,7 +487,7 @@ class BasicSocket < IO
   #     }
   #
   #
-  def shutdown: (*untyped) -> untyped
+  def shutdown: (Symbol | String | Integer flags) -> void
 
   private
 
@@ -624,7 +625,7 @@ class Socket < BasicSocket
   # is not accepted until the block returns. So concurrent mechanism, thread for
   # example, should be used to service multiple clients at a time.
   #
-  def self.accept_loop: (*untyped sockets) -> untyped
+  def self.accept_loop: (*_ToIO sockets) { (Socket) -> void } -> void
 
   # Obtains address information for *nodename*:*servname*.
   #
@@ -657,7 +658,7 @@ class Socket < BasicSocket
   #
   # If Addrinfo object is preferred, use Addrinfo.getaddrinfo.
   #
-  def self.getaddrinfo: (*untyped) -> untyped
+  def self.getaddrinfo: (String peer, String | Integer | nil protocol, ?(Integer | Symbol | nil) family, ?(Integer | Symbol | nil) socktype, ?(Integer | Symbol | nil) protocol, ?(Integer | nil) flags) -> [String, Integer, String, String, Integer, Integer1, Integer]
 
   # Use Addrinfo#getnameinfo instead. This method is deprecated for the following
   # reasons:
@@ -680,7 +681,7 @@ class Socket < BasicSocket
   #     #=> ["localhost", ["ip6-localhost", "ip6-loopback"], 10,
   #          "\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x01"]
   #
-  def self.gethostbyaddr: (*untyped) -> untyped
+  def self.gethostbyaddr: (String ip) -> [String, Array[String], Integer, String]
 
   # Use Addrinfo.getaddrinfo instead. This method is deprecated for the following
   # reasons:
@@ -698,7 +699,7 @@ class Socket < BasicSocket
   #
   #     p Socket.gethostbyname("hal") #=> ["localhost", ["hal"], 2, "\x7F\x00\x00\x01"]
   #
-  def self.gethostbyname: (untyped) -> untyped
+  def self.gethostbyname: (String name) -> [String, Array[String], Integer, String]
 
   # Returns the hostname.
   #
@@ -708,7 +709,7 @@ class Socket < BasicSocket
   # gethostbyname, getaddrinfo, etc. If you need local IP address, use
   # Socket.ip_address_list.
   #
-  def self.gethostname: () -> untyped
+  def self.gethostname: () -> String
 
   # Returns an array of interface addresses. An element of the array is an
   # instance of Socket::Ifaddr.
@@ -744,7 +745,7 @@ class Socket < BasicSocket
   #     #    #<Socket::Ifaddr lo0 UP,LOOPBACK,RUNNING,MULTICAST fe80:4::1 netmask=ffff:ffff:ffff:ffff::>,
   #     #    #<Socket::Ifaddr lo0 UP,LOOPBACK,RUNNING,MULTICAST 127.0.0.1 netmask=255.?.?.? (5 bytes for 16 bytes sockaddr_in)>]
   #
-  def self.getifaddrs: () -> untyped
+  def self.getifaddrs: () -> Array[Socket::Ifaddr]
 
   # Obtains name information for *sockaddr*.
   #
@@ -764,8 +765,9 @@ class Socket < BasicSocket
   #
   # If Addrinfo object is preferred, use Addrinfo#getnameinfo.
   #
-  def self.getnameinfo: (*untyped) -> untyped
-
+  def self.getnameinfo: ([String, Integer, String]) -> Array[String]
+                      | ([String, Integer, String, String]) -> Array[String]
+                      | (String sockaddr) -> Array[String]
   # Obtains the port number for *service_name*.
   #
   # If *protocol_name* is not given, "tcp" is assumed.
@@ -775,7 +777,8 @@ class Socket < BasicSocket
   #     Socket.getservbyname("syslog", "udp") #=> 514
   #
   #
-  def self.getservbyname: (*untyped) -> untyped
+  def self.getservbyname: (String service_proto) -> Integer
+                        | (String service_proto, String layer4_proto) -> Integer
 
   # Obtains the port number for *port*.
   #
@@ -785,7 +788,8 @@ class Socket < BasicSocket
   #     Socket.getservbyport(514, "tcp") #=> "shell"
   #     Socket.getservbyport(514, "udp") #=> "syslog"
   #
-  def self.getservbyport: (*untyped) -> untyped
+  def self.getservbyport: (Integer service_port) -> String
+                        | (Integer service_port, String layer4_proto) -> String
 
   # Returns local IP addresses as an array.
   #
@@ -797,7 +801,7 @@ class Socket < BasicSocket
   #          #<Addrinfo: ::1>,
   #          ...]
   #
-  def self.ip_address_list: () -> untyped
+  def self.ip_address_list: () -> Array[Addrinfo]
 
   # Packs *port* and *host* as an AF_INET/AF_INET6 sockaddr string.
   #
@@ -808,14 +812,14 @@ class Socket < BasicSocket
   #     #=> "\n\x00\x00P\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x01\x00\x00\x00\x00"
   #
   #
-  def self.pack_sockaddr_in: (untyped, untyped) -> untyped
+  def self.pack_sockaddr_in: (Integer port, String ip) -> String
 
   # Packs *path* as an AF_UNIX sockaddr string.
   #
   #     Socket.sockaddr_un("/tmp/sock") #=> "\x01\x00/tmp/sock\x00\x00..."
   #
   #
-  def self.pack_sockaddr_un: (untyped) -> untyped
+  def self.pack_sockaddr_un: (String sockpath) -> String
 
   # Creates a pair of sockets connected each other.
   #
@@ -841,7 +845,7 @@ class Socket < BasicSocket
   #     p s2.recv(10) #=> "b"
   #
   #
-  def self.pair: (*untyped) -> untyped
+  def self.pair: (Symbol sockdomain, Symbol socktype, Integer protocol) -> [instance, instance]
 
   # Packs *port* and *host* as an AF_INET/AF_INET6 sockaddr string.
   #
@@ -852,14 +856,14 @@ class Socket < BasicSocket
   #     #=> "\n\x00\x00P\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x01\x00\x00\x00\x00"
   #
   #
-  def self.sockaddr_in: (untyped, untyped) -> untyped
+  def self.sockaddr_in: (Integer port, String ip) -> String
 
   # Packs *path* as an AF_UNIX sockaddr string.
   #
   #     Socket.sockaddr_un("/tmp/sock") #=> "\x01\x00/tmp/sock\x00\x00..."
   #
   #
-  def self.sockaddr_un: (untyped) -> untyped
+  def self.sockaddr_un: (String sockpath) -> String
 
   # Creates a pair of sockets connected each other.
   #
@@ -885,7 +889,7 @@ class Socket < BasicSocket
   #     p s2.recv(10) #=> "b"
   #
   #
-  def self.socketpair: (*untyped) -> untyped
+  def self.socketpair: (Symbol sockdomain, Symbol socktype, Integer protocol) -> [instance, instance]
 
   # creates a new socket object connected to host:port using TCP/IP.
   #
@@ -912,7 +916,8 @@ class Socket < BasicSocket
   #     }
   #
   #
-  def self.tcp: (untyped host, untyped port, ?untyped local_host, ?untyped local_port, ?resolv_timeout: untyped, ?connect_timeout: untyped) -> untyped
+  def self.tcp: (String host, Integer port, ?String local_host, ?Integer local_port, ?resolv_timeout: Numeric, ?connect_timeout: Numeric) -> instance
+              | (String host, Integer port, ?String local_host, ?Integer local_port, ?resolv_timeout: Numeric, ?connect_timeout: Numeric) { (instance) -> void } -> void
 
   # creates a TCP/IP server on *port* and calls the block for each connection
   # accepted. The block is called with a socket and a client_address as an
@@ -956,7 +961,7 @@ class Socket < BasicSocket
   #       }
   #     }
   #
-  def self.tcp_server_loop: (?untyped host, untyped port) { (*untyped) -> untyped } -> untyped
+  def self.tcp_server_loop: (?String host, Integer port) { (instance, Addrinfo) -> void } -> void
 
   # creates TCP/IP server sockets for *host* and *port*. *host* is optional.
   #
@@ -988,7 +993,8 @@ class Socket < BasicSocket
   #       p sockets #=> [#<Socket:fd 3>, #<Socket:fd 4>]
   #     }
   #
-  def self.tcp_server_sockets: (?untyped host, untyped port) -> untyped
+  def self.tcp_server_sockets: (?String host, Integer port) -> Array[TCPServer]
+                             | (?String host, Integer port) { (Array[TCPServer]) -> void } -> void
 
   # creates a UDP/IP server on *port* and calls the block for each message
   # arrived. The block is called with the message and its source information.
@@ -1006,7 +1012,7 @@ class Socket < BasicSocket
   #     }
   #
   #
-  def self.udp_server_loop: (?untyped host, untyped port) { (*untyped) -> untyped } -> untyped
+  def self.udp_server_loop: (?String host, Integer port) { (String, Socket::UDPSource) -> void } -> void
 
   # Run UDP/IP server loop on the given sockets.
   #
@@ -1014,7 +1020,7 @@ class Socket < BasicSocket
   #
   # It calls the block for each message received.
   #
-  def self.udp_server_loop_on: (untyped sockets) { (*untyped) -> untyped } -> untyped
+  def self.udp_server_loop_on: (UDPSocket sockets) { (String, Socket::UDPSource) -> void } -> void
 
   # Receive UDP/IP packets from the given *sockets*. For each packet received, the
   # block is called.
@@ -1032,7 +1038,7 @@ class Socket < BasicSocket
   #       }
   #     }
   #
-  def self.udp_server_recv: (untyped sockets) -> untyped
+  def self.udp_server_recv: (Array[UDPSocket] sockets) { (String, Socket::UDPSource) -> void } -> void
 
   # Creates UDP/IP sockets for a UDP server.
   #
@@ -1052,7 +1058,7 @@ class Socket < BasicSocket
   #       }
   #     }
   #
-  def self.udp_server_sockets: (?untyped host, untyped port) -> untyped
+  def self.udp_server_sockets: (?String host, Integer port) { (UDPSocket) -> void } -> void
 
   # creates a new socket connected to path using UNIX socket socket.
   #
@@ -1068,7 +1074,8 @@ class Socket < BasicSocket
   #       t.join
   #     }
   #
-  def self.unix: (untyped path) -> untyped
+  def self.unix: (String path) -> UNIXSocket
+               | (String path) { (UNIXSocket) -> void } -> void
 
   # creates a UNIX socket server on *path*. It calls the block for each socket
   # accepted.
@@ -1094,7 +1101,7 @@ class Socket < BasicSocket
   #       end
   #     }
   #
-  def self.unix_server_loop: (untyped path) { (*untyped) -> untyped } -> untyped
+  def self.unix_server_loop: (String path) { (UNIXSocket, Addrinfo) -> void } -> void
 
   # creates a UNIX server socket on *path*
   #
@@ -1113,7 +1120,8 @@ class Socket < BasicSocket
   #       p s.local_address       #=> # #<Addrinfo: /tmp/sock SOCK_STREAM>
   #     }
   #
-  def self.unix_server_socket: (untyped path) -> untyped
+  def self.unix_server_socket: (String path) -> Socket
+                             | (String path) { (Socket) -> void } -> void
 
   # Unpacks *sockaddr* into port and ip_address.
   #
@@ -1123,7 +1131,7 @@ class Socket < BasicSocket
   #     p sockaddr #=> "\x02\x00\x00P\x7F\x00\x00\x01\x00\x00\x00\x00\x00\x00\x00\x00"
   #     p Socket.unpack_sockaddr_in(sockaddr) #=> [80, "127.0.0.1"]
   #
-  def self.unpack_sockaddr_in: (untyped) -> untyped
+  def self.unpack_sockaddr_in: (String | Addrinfo sockaddr) -> [Integer, String]
 
   # Unpacks *sockaddr* into path.
   #
@@ -1132,7 +1140,7 @@ class Socket < BasicSocket
   #     sockaddr = Socket.sockaddr_un("/tmp/sock")
   #     p Socket.unpack_sockaddr_un(sockaddr) #=> "/tmp/sock"
   #
-  def self.unpack_sockaddr_un: (untyped) -> untyped
+  def self.unpack_sockaddr_un: (String path) -> String
 
   public
 
@@ -1144,7 +1152,7 @@ class Socket < BasicSocket
   #     c.connect(serv.connect_address)
   #     p serv.accept #=> [#<Socket:fd 6>, #<Addrinfo: 127.0.0.1:48555 TCP>]
   #
-  def accept: () -> untyped
+  def accept: () -> [Socket, Addrinfo]
 
   # Accepts an incoming connection using accept(2) after O_NONBLOCK is set for the
   # underlying file descriptor. It returns an array containing the accepted socket
@@ -1197,7 +1205,7 @@ class Socket < BasicSocket
   # *   Socket#accept
   #
   #
-  def accept_nonblock: (?exception: untyped) -> untyped
+  def accept_nonblock: (?exception: bool) -> ([Socket, Addrinfo] | :wait_readable)
 
   # Binds to the given local address.
   #
@@ -1287,7 +1295,7 @@ class Socket < BasicSocket
   # *   bind function in Microsoft's Winsock functions reference
   #
   #
-  def bind: (untyped) -> untyped
+  def bind: (String | Addrinfo local_sockaddr) -> void
 
   # Requests a connection to be made on the given `remote_sockaddr`. Returns 0 if
   # successful, otherwise an exception is raised.
@@ -1404,7 +1412,7 @@ class Socket < BasicSocket
   # *   connect function in Microsoft's Winsock functions reference
   #
   #
-  def connect: (untyped) -> untyped
+  def connect: (String | Addrinfo remote_sockaddr) -> Integer
 
   # Requests a connection to be made on the given `remote_sockaddr` after
   # O_NONBLOCK is set for the underlying file descriptor. Returns 0 if successful,
@@ -1448,11 +1456,11 @@ class Socket < BasicSocket
   # ### See
   #     # Socket#connect
   #
-  def connect_nonblock: (untyped addr, ?exception: untyped) -> untyped
+  def connect_nonblock: (untyped addr, ?exception: untyped) -> (Integer | :wait_writable)
 
   # enable the socket option IPV6_V6ONLY if IPV6_V6ONLY is available.
   #
-  def ipv6only!: () -> untyped
+  def ipv6only!: () -> void
 
   # Listens for connections, using the specified `int` as the backlog. A call to
   # *listen* only applies if the `socket` is of type SOCK_STREAM or
@@ -1524,7 +1532,7 @@ class Socket < BasicSocket
   # *   listen function in Microsoft's Winsock functions reference
   #
   #
-  def listen: (untyped) -> untyped
+  def listen: (Integer backlog_len) -> void
 
   # Receives up to *maxlen* bytes from `socket`. *flags* is zero or more of the
   # `MSG_` options. The first element of the results, *mesg*, is the data
@@ -1632,7 +1640,7 @@ class Socket < BasicSocket
   #
   #
   #
-  def recvfrom: (*untyped) -> untyped
+  def recvfrom: (Integer maxlen, ?Integer flags) -> [String, Addrinfo]
 
   # Receives up to *maxlen* bytes from `socket` using recvfrom(2) after O_NONBLOCK
   # is set for the underlying file descriptor. *flags* is zero or more of the
@@ -1698,7 +1706,7 @@ class Socket < BasicSocket
   # *   Socket#recvfrom
   #
   #
-  def recvfrom_nonblock: (untyped len, ?untyped flag, ?untyped str, ?exception: untyped) -> untyped
+  def recvfrom_nonblock: (Integer maxlen, ?Integer flags, ?untyped outbuf, ?exception: bool) -> ([String, Addrinfo] | :wait_readable)
 
   # Accepts an incoming connection returning an array containing the (integer)
   # file descriptor for the incoming connection, *client_socket_fd*, and an
@@ -1735,7 +1743,7 @@ class Socket < BasicSocket
   # *   Socket#accept
   #
   #
-  def sysaccept: () -> untyped
+  def sysaccept: () -> [Integer, Addrinfo]
 
   private
 
@@ -1759,7 +1767,7 @@ class Socket < BasicSocket
   #     Socket.new(:UNIX, :STREAM) # UNIX stream socket
   #     Socket.new(:UNIX, :DGRAM)  # UNIX datagram socket
   #
-  def initialize: (*untyped) -> untyped
+  def initialize: (Symbol domain, Symbol socktype, ?Integer protocol) -> untyped
 end
 
 # AppleTalk protocol
@@ -2878,7 +2886,7 @@ class IPSocket < BasicSocket
   #     IPSocket.getaddress("localhost")     #=> "127.0.0.1"
   #     IPSocket.getaddress("ip6-localhost") #=> "::1"
   #
-  def self.getaddress: (untyped) -> untyped
+  def self.getaddress: (String host) -> String
 
   public
 
@@ -2898,11 +2906,11 @@ class IPSocket < BasicSocket
   #       p sock.addr(:numeric)   #=> ["AF_INET", 49429, "192.168.0.128", "192.168.0.128"]
   #     }
   #
-  def addr: (*untyped) -> untyped
+  def addr: (?(bool | :hostname | :numeric) reverse_lookup) -> [String, Integer, String, String]
 
   # Return a string describing this IPSocket object.
   #
-  def inspect: () -> untyped
+  def inspect: () -> String
 
   # Returns the remote address as an array which contains address_family, port,
   # hostname and numeric_address. It is defined for connection oriented socket
@@ -2921,7 +2929,7 @@ class IPSocket < BasicSocket
   #       p sock.peeraddr(:numeric)  #=> ["AF_INET", 80, "221.186.184.68", "221.186.184.68"]
   #     }
   #
-  def peeraddr: (*untyped) -> untyped
+  def peeraddr: (?(bool | :hostname | :numeric) reverse_lookup) -> [String, Integer, String, String]
 
   # Receives a message and return the message as a string and an address which the
   # message come from.
@@ -2939,7 +2947,7 @@ class IPSocket < BasicSocket
   #     p u1.recvfrom(10) #=> ["uuuu", ["AF_INET", 33230, "localhost", "127.0.0.1"]]
   #
   #
-  def recvfrom: (*untyped) -> untyped
+  def recvfrom: (Integer maxlen, ?Integer flags) -> [String, [String, Integer, String, String]]
 end
 
 # TCPSocket represents a TCP/IP client socket.
@@ -2971,11 +2979,11 @@ class TCPSocket < IPSocket
   #     TCPSocket.gethostbyname("localhost")
   #     #=> ["localhost", ["hal"], 2, "127.0.0.1"]
   #
-  def self.gethostbyname: (untyped) -> untyped
+  def self.gethostbyname: (String host) -> [String, Array[String], Integer, String]
 
   private
 
-  def initialize: (*untyped) -> untyped
+  def initialize: (String remote_host, Integer remote_port, ?String local_host, ?Integer local_port) -> untyped
 end
 
 # UDPSocket represents a UDP/IP socket.
@@ -2989,7 +2997,7 @@ class UDPSocket < IPSocket
   #     u1.send "message-to-self", 0, "127.0.0.1", 4913
   #     p u1.recvfrom(10) #=> ["message-to", ["AF_INET", 4913, "localhost", "127.0.0.1"]]
   #
-  def bind: (untyped, untyped) -> untyped
+  def bind: (String host, Integer port) -> void
 
   # Connects *udpsocket* to *host*:*port*.
   #
@@ -3002,7 +3010,7 @@ class UDPSocket < IPSocket
   #     u2.send "uuuu", 0
   #     p u1.recvfrom(10) #=> ["uuuu", ["AF_INET", 33230, "localhost", "127.0.0.1"]]
   #
-  def connect: (untyped, untyped) -> untyped
+  def connect: (String host, Integer port) -> void
 
   # Receives up to *maxlen* bytes from `udpsocket` using recvfrom(2) after
   # O_NONBLOCK is set for the underlying file descriptor. *flags* is zero or more
@@ -3054,7 +3062,7 @@ class UDPSocket < IPSocket
   # *   Socket#recvfrom
   #
   #
-  def recvfrom_nonblock: (untyped len, ?untyped flag, ?untyped outbuf, ?exception: untyped) -> untyped
+  def recvfrom_nonblock: (Integer len, ?Integer flag, ?String outbuf, ?exception: bool) -> [String, [String, Integer, String, String]]
 
   # Sends *mesg* via *udpsocket*.
   #
@@ -3071,7 +3079,7 @@ class UDPSocket < IPSocket
   #
   #     p u2.recv(100) #=> "hi"
   #
-  def send: (*untyped) -> untyped
+  def send: (String msg, ?Integer flags, ?String host, ?Integer port) -> Integer
 
   private
 
@@ -3087,7 +3095,7 @@ class UDPSocket < IPSocket
   #     UDPSocket.new                   #=> #<UDPSocket:fd 3>
   #     UDPSocket.new(Socket::AF_INET6) #=> #<UDPSocket:fd 4>
   #
-  def initialize: (*untyped) -> untyped
+  def initialize: (?Integer family) -> untyped
 end
 
 # UNIXSocket represents a UNIX domain stream client socket.
@@ -3104,7 +3112,7 @@ class UNIXSocket < BasicSocket
   #     s1.send "b", 0
   #     p s2.recv(10) #=> "ab"
   #
-  def self.pair: (*untyped) -> untyped
+  def self.pair: (?Symbol socktype, ?Integer protocol) -> [instance, instance]
 
   # Creates a pair of sockets connected to each other.
   #
@@ -3118,7 +3126,7 @@ class UNIXSocket < BasicSocket
   #     s1.send "b", 0
   #     p s2.recv(10) #=> "ab"
   #
-  def self.socketpair: (*untyped) -> untyped
+  def self.socketpair: (?Symbol socktype, ?Integer protocol) -> [instance, instance]
 
   public
 
@@ -3129,14 +3137,14 @@ class UNIXSocket < BasicSocket
   #     serv = UNIXServer.new("/tmp/sock")
   #     p serv.addr #=> ["AF_UNIX", "/tmp/sock"]
   #
-  def addr: () -> untyped
+  def addr: () -> [String, String]
 
   # Returns the path of the local address of unixsocket.
   #
   #     s = UNIXServer.new("/tmp/sock")
   #     p s.path #=> "/tmp/sock"
   #
-  def path: () -> untyped
+  def path: () -> String
 
   # Returns the remote address as an array which contains address_family and
   # unix_path.
@@ -3146,7 +3154,7 @@ class UNIXSocket < BasicSocket
   #     c = UNIXSocket.new("/tmp/sock")
   #     p c.peeraddr #=> ["AF_UNIX", "/tmp/sock"]
   #
-  def peeraddr: () -> untyped
+  def peeraddr: () -> [String, String]
 
   # Example
   #
@@ -3170,7 +3178,7 @@ class UNIXSocket < BasicSocket
   #
   # *mode* is the same as the argument passed to IO.for_fd
   #
-  def recv_io: (*untyped) -> untyped
+  def recv_io: (?singleton(BasicSocket), ?String mode) -> BasicSocket
 
   # Receives a message via *unixsocket*.
   #
@@ -3193,7 +3201,7 @@ class UNIXSocket < BasicSocket
   #     s1.send "a", 0, s2_ai
   #     p s3.recvfrom(10) #=> ["a", ["AF_UNIX", "/tmp/sock1"]]
   #
-  def recvfrom: (*untyped) -> untyped
+  def recvfrom: (Integer maxlen, ?Integer flags, ?String outbuf) -> [String, [String, String]]
 
   # Sends *io* as file descriptor passing.
   #
@@ -3209,7 +3217,7 @@ class UNIXSocket < BasicSocket
   #
   # *io* may be any kind of IO object or integer file descriptor.
   #
-  def send_io: (untyped) -> untyped
+  def send_io: (BasicSocket | Integer) -> void
 
   private
 
@@ -3220,7 +3228,7 @@ class UNIXSocket < BasicSocket
   #     s = UNIXSocket.new("/tmp/sock")
   #     s.send "hello", 0
   #
-  def initialize: (untyped) -> untyped
+  def initialize: (String path) -> untyped
 end
 
 # TCPServer represents a TCP/IP server socket.
@@ -3260,7 +3268,7 @@ class TCPServer < TCPSocket
   #       s.close
   #     }
   #
-  def accept: () -> untyped
+  def accept: () -> TCPSocket
 
   # Accepts an incoming connection using accept(2) after O_NONBLOCK is set for the
   # underlying file descriptor. It returns an accepted TCPSocket for the incoming
@@ -3296,7 +3304,7 @@ class TCPServer < TCPSocket
   # *   Socket#accept
   #
   #
-  def accept_nonblock: (?exception: untyped) -> untyped
+  def accept_nonblock: (?exception: bool) -> (TCPSocket | :wait_readable)
 
   # Listens for connections, using the specified `int` as the backlog. A call to
   # *listen* only applies if the `socket` is of type SOCK_STREAM or
@@ -3368,7 +3376,7 @@ class TCPServer < TCPSocket
   # *   listen function in Microsoft's Winsock functions reference
   #
   #
-  def listen: (untyped) -> untyped
+  def listen: (Integer backlog) -> void
 
   # Returns a file descriptor of a accepted connection.
   #
@@ -3379,7 +3387,7 @@ class TCPServer < TCPSocket
   #       s.close
   #     }
   #
-  def sysaccept: () -> untyped
+  def sysaccept: () -> Integer
 
   private
 
@@ -3398,7 +3406,7 @@ class TCPServer < TCPSocket
   # getaddrinfo() returns multiple addresses, TCPServer.new tries to create a
   # server socket for each address and returns first one that is successful.
   #
-  def initialize: (*untyped) -> untyped
+  def initialize: (?String host, Integer port) -> untyped
 end
 
 # UNIXServer represents a UNIX domain stream server socket.
@@ -3416,7 +3424,7 @@ class UNIXServer < UNIXSocket
   #       }
   #     }
   #
-  def accept: () -> untyped
+  def accept: () -> UNIXSocket
 
   # Accepts an incoming connection using accept(2) after O_NONBLOCK is set for the
   # underlying file descriptor. It returns an accepted UNIXSocket for the incoming
@@ -3452,7 +3460,7 @@ class UNIXServer < UNIXSocket
   # *   Socket#accept
   #
   #
-  def accept_nonblock: (?exception: untyped) -> untyped
+  def accept_nonblock: (?exception: bool) -> (UNIXSocket | :wait_readable)
 
   # Listens for connections, using the specified `int` as the backlog. A call to
   # *listen* only applies if the `socket` is of type SOCK_STREAM or
@@ -3524,7 +3532,7 @@ class UNIXServer < UNIXSocket
   # *   listen function in Microsoft's Winsock functions reference
   #
   #
-  def listen: (untyped) -> untyped
+  def listen: (Integer backlog) -> void
 
   # Accepts a new connection. It returns the new file descriptor which is an
   # integer.
@@ -3539,7 +3547,7 @@ class UNIXServer < UNIXSocket
   #       }
   #     }
   #
-  def sysaccept: () -> untyped
+  def sysaccept: () -> Integer
 
   private
 
@@ -3565,9 +3573,10 @@ class Addrinfo
   #     #   #<Addrinfo: [::1]:80 TCP (:80)>
   #     #   #<Addrinfo: [::1]:80 UDP (:80)>
   #
-  def self.foreach: (untyped nodename, untyped service, ?untyped family, ?untyped socktype, ?untyped protocol, ?untyped flags, ?timeout: untyped) { (*untyped) -> untyped } -> untyped
+  def self.foreach: (String? nodename, String | Integer service, ?Integer? family, ?Symbol socktype, ?(Symbol | Integer) protocol, ?Integer flags, ?timeout: Numeric) { (Addrinfo) -> void } -> void
+                  |(String? nodename, String | Integer service, ?Integer? family, ?Symbol socktype, ?(Symbol | Integer) protocol, ?Integer flags, ?timeout: Numeric) -> Enumerable[Addrinfo]
 
-  # returns a list of addrinfo objects as an array.
+                  # returns a list of addrinfo objects as an array.
   #
   # This method converts nodename (hostname) and service (port) to addrinfo. Since
   # the conversion is not unique, the result is a list of addrinfo objects.
@@ -3602,7 +3611,7 @@ class Addrinfo
   #     #=> [#<Addrinfo: 203.178.141.194:80 TCP (www.kame.net)>,
   #     #    #<Addrinfo: [2001:200:dff:fff1:216:3eff:feb1:44d7]:80 TCP (www.kame.net)>]
   #
-  def self.getaddrinfo: (*untyped) -> untyped
+  def self.getaddrinfo: (String nodename, ?(String | Integer) service, ?Symbol? family, ?(Symbol | Integer) protocol) -> Array[Addrinfo]
 
   # returns an addrinfo object for IP address.
   #
@@ -3611,19 +3620,19 @@ class Addrinfo
   #
   #     Addrinfo.ip("localhost") #=> #<Addrinfo: 127.0.0.1 (localhost)>
   #
-  def self.ip: (untyped) -> untyped
+  def self.ip: (String host) -> Addrinfo
 
   # returns an addrinfo object for TCP address.
   #
   #     Addrinfo.tcp("localhost", "smtp") #=> #<Addrinfo: 127.0.0.1:25 TCP (localhost:smtp)>
   #
-  def self.tcp: (untyped, untyped) -> untyped
+  def self.tcp: (String host, String | Integer service) -> Addrinfo
 
   # returns an addrinfo object for UDP address.
   #
   #     Addrinfo.udp("localhost", "daytime") #=> #<Addrinfo: 127.0.0.1:13 UDP (localhost:daytime)>
   #
-  def self.udp: (untyped, untyped) -> untyped
+  def self.udp: (String host, String | Integer service) -> Addrinfo
 
   # returns an addrinfo object for UNIX socket address.
   #
@@ -3632,7 +3641,7 @@ class Addrinfo
   #     Addrinfo.unix("/tmp/sock")         #=> #<Addrinfo: /tmp/sock SOCK_STREAM>
   #     Addrinfo.unix("/tmp/sock", :DGRAM) #=> #<Addrinfo: /tmp/sock SOCK_DGRAM>
   #
-  def self.unix: (*untyped) -> untyped
+  def self.unix: (String path, ?Symbol socktype) -> Addrinfo
 
   public
 
@@ -3640,7 +3649,7 @@ class Addrinfo
   #
   #     Addrinfo.tcp("localhost", 80).afamily == Socket::AF_INET #=> true
   #
-  def afamily: () -> untyped
+  def afamily: () -> Integer
 
   # creates a socket bound to self.
   #
@@ -3652,7 +3661,8 @@ class Addrinfo
   #       p s.recv(10) #=> "hello"
   #     }
   #
-  def bind: () -> untyped
+  def bind: () -> Socket
+          |  () { (Socket) -> void } -> void
 
   # returns the canonical name as a string.
   #
@@ -3665,7 +3675,7 @@ class Addrinfo
   #     p list[0] #=> #<Addrinfo: 221.186.184.68:80 TCP carbon.ruby-lang.org (www.ruby-lang.org)>
   #     p list[0].canonname #=> "carbon.ruby-lang.org"
   #
-  def canonname: () -> untyped
+  def canonname: () -> String
 
   # creates a socket connected to the address of self.
   #
@@ -3684,7 +3694,8 @@ class Addrinfo
   #       puts s.read
   #     }
   #
-  def connect: (?timeout: untyped) { (*untyped) -> untyped } -> untyped
+  def connect: (?timeout: Numeric) { (Socket) -> void } -> void
+             | (?timeout: Numeric) -> Socket
 
   # creates a socket connected to the address of self.
   #
@@ -3716,7 +3727,10 @@ class Addrinfo
   #       puts s.read
   #     }
   #
-  def connect_from: (*untyped args, ?timeout: untyped) { (*untyped) -> untyped } -> untyped
+  def connect_from: (String host, Integer port, ?timeout: Numeric) { (Socket) -> void } -> void
+                  | (String host, Integer port, ?timeout: Numeric)  -> Socket
+                  | (Addrinfo sockaddr, ?timeout: Numeric) { (Socket) -> void } -> void
+                  | (Addrinfo sockaddr, ?timeout: Numeric) -> Socket
 
   # creates a socket connected to *remote_addr_args* and bound to self.
   #
@@ -3735,7 +3749,10 @@ class Addrinfo
   #       puts s.read
   #     }
   #
-  def connect_to: (*untyped args, ?timeout: untyped) { (*untyped) -> untyped } -> untyped
+  def connect_to: (String host, Integer port, ?timeout: Numeric) { (Socket) -> void } -> void
+                | (String host, Integer port, ?timeout: Numeric)  -> Socket
+                | (Addrinfo sockaddr, ?timeout: Numeric) { (Socket) -> void } -> void
+                | (Addrinfo sockaddr, ?timeout: Numeric) -> Socket
 
   # creates an Addrinfo object from the arguments.
   #
@@ -3747,7 +3764,8 @@ class Addrinfo
   #     Addrinfo.unix("/tmp/sock").family_addrinfo("/tmp/sock2")
   #     #=> #<Addrinfo: /tmp/sock2 SOCK_STREAM>
   #
-  def family_addrinfo: (*untyped args) -> untyped
+  def family_addrinfo: (String host, Integer port) -> Addrinfo
+                     | (String path) -> Addrinfo
 
   # returns nodename and service as a pair of strings. This converts struct
   # sockaddr in addrinfo to textual representation.
@@ -3759,14 +3777,14 @@ class Addrinfo
   #     Addrinfo.tcp("127.0.0.1", 80).getnameinfo(Socket::NI_NUMERICSERV)
   #     #=> ["localhost", "80"]
   #
-  def getnameinfo: (*untyped) -> untyped
+  def getnameinfo: (?Integer flags) -> [String, Integer]
 
   # returns a string which shows addrinfo in human-readable form.
   #
   #     Addrinfo.tcp("localhost", 80).inspect #=> "#<Addrinfo: 127.0.0.1:80 TCP (localhost)>"
   #     Addrinfo.unix("/tmp/sock").inspect    #=> "#<Addrinfo: /tmp/sock SOCK_STREAM>"
   #
-  def inspect: () -> untyped
+  def inspect: () -> String
 
   # returns a string which shows the sockaddr in *addrinfo* with human-readable
   # form.
@@ -3775,7 +3793,7 @@ class Addrinfo
   #     Addrinfo.tcp("ip6-localhost", 80).inspect_sockaddr #=> "[::1]:80"
   #     Addrinfo.unix("/tmp/sock").inspect_sockaddr        #=> "/tmp/sock"
   #
-  def inspect_sockaddr: () -> untyped
+  def inspect_sockaddr: () -> String
 
   # returns true if addrinfo is internet (IPv4/IPv6) address. returns false
   # otherwise.
@@ -3784,28 +3802,28 @@ class Addrinfo
   #     Addrinfo.tcp("::1", 80).ip?       #=> true
   #     Addrinfo.unix("/tmp/sock").ip?    #=> false
   #
-  def ip?: () -> untyped
+  def ip?: () -> bool
 
   # Returns the IP address as a string.
   #
   #     Addrinfo.tcp("127.0.0.1", 80).ip_address    #=> "127.0.0.1"
   #     Addrinfo.tcp("::1", 80).ip_address          #=> "::1"
   #
-  def ip_address: () -> untyped
+  def ip_address: () -> String
 
   # Returns the port number as an integer.
   #
   #     Addrinfo.tcp("127.0.0.1", 80).ip_port    #=> 80
   #     Addrinfo.tcp("::1", 80).ip_port          #=> 80
   #
-  def ip_port: () -> untyped
+  def ip_port: () -> Integer
 
   # Returns the IP address and port number as 2-element array.
   #
   #     Addrinfo.tcp("127.0.0.1", 80).ip_unpack    #=> ["127.0.0.1", 80]
   #     Addrinfo.tcp("::1", 80).ip_unpack          #=> ["::1", 80]
   #
-  def ip_unpack: () -> untyped
+  def ip_unpack: () -> [String, Integer]
 
   # returns true if addrinfo is IPv4 address. returns false otherwise.
   #
@@ -3813,22 +3831,22 @@ class Addrinfo
   #     Addrinfo.tcp("::1", 80).ipv4?       #=> false
   #     Addrinfo.unix("/tmp/sock").ipv4?    #=> false
   #
-  def ipv4?: () -> untyped
+  def ipv4?: () -> bool
 
   # Returns true for IPv4 loopback address (127.0.0.0/8). It returns false
   # otherwise.
   #
-  def ipv4_loopback?: () -> untyped
+  def ipv4_loopback?: () -> bool
 
   # Returns true for IPv4 multicast address (224.0.0.0/4). It returns false
   # otherwise.
   #
-  def ipv4_multicast?: () -> untyped
+  def ipv4_multicast?: () -> bool
 
   # Returns true for IPv4 private address (10.0.0.0/8, 172.16.0.0/12,
   # 192.168.0.0/16). It returns false otherwise.
   #
-  def ipv4_private?: () -> untyped
+  def ipv4_private?: () -> bool
 
   # returns true if addrinfo is IPv6 address. returns false otherwise.
   #
@@ -3836,51 +3854,51 @@ class Addrinfo
   #     Addrinfo.tcp("::1", 80).ipv6?       #=> true
   #     Addrinfo.unix("/tmp/sock").ipv6?    #=> false
   #
-  def ipv6?: () -> untyped
+  def ipv6?: () -> bool
 
   # Returns true for IPv6 link local address (ff80::/10). It returns false
   # otherwise.
   #
-  def ipv6_linklocal?: () -> untyped
+  def ipv6_linklocal?: () -> bool
 
   # Returns true for IPv6 loopback address (::1). It returns false otherwise.
   #
-  def ipv6_loopback?: () -> untyped
+  def ipv6_loopback?: () -> bool
 
   # Returns true for IPv6 multicast global scope address. It returns false
   # otherwise.
   #
-  def ipv6_mc_global?: () -> untyped
+  def ipv6_mc_global?: () -> bool
 
   # Returns true for IPv6 multicast link-local scope address. It returns false
   # otherwise.
   #
-  def ipv6_mc_linklocal?: () -> untyped
+  def ipv6_mc_linklocal?: () -> bool
 
   # Returns true for IPv6 multicast node-local scope address. It returns false
   # otherwise.
   #
-  def ipv6_mc_nodelocal?: () -> untyped
+  def ipv6_mc_nodelocal?: () -> bool
 
   # Returns true for IPv6 multicast organization-local scope address. It returns
   # false otherwise.
   #
-  def ipv6_mc_orglocal?: () -> untyped
+  def ipv6_mc_orglocal?: () -> bool
 
   # Returns true for IPv6 multicast site-local scope address. It returns false
   # otherwise.
   #
-  def ipv6_mc_sitelocal?: () -> untyped
+  def ipv6_mc_sitelocal?: () -> bool
 
   # Returns true for IPv6 multicast address (ff00::/8). It returns false
   # otherwise.
   #
-  def ipv6_multicast?: () -> untyped
+  def ipv6_multicast?: () -> bool
 
   # Returns true for IPv6 site local address (ffc0::/10). It returns false
   # otherwise.
   #
-  def ipv6_sitelocal?: () -> untyped
+  def ipv6_sitelocal?: () -> bool
 
   # Returns IPv4 address of IPv4 mapped/compatible IPv6 address. It returns nil if
   # `self` is not IPv4 mapped/compatible IPv6 address.
@@ -3891,66 +3909,66 @@ class Addrinfo
   #     Addrinfo.ip("192.0.2.3").ipv6_to_ipv4        #=> nil
   #     Addrinfo.unix("/tmp/sock").ipv6_to_ipv4      #=> nil
   #
-  def ipv6_to_ipv4: () -> untyped
+  def ipv6_to_ipv4: () -> Addrinfo?
 
   # Returns true for IPv6 unique local address (fc00::/7, RFC4193). It returns
   # false otherwise.
   #
-  def ipv6_unique_local?: () -> untyped
+  def ipv6_unique_local?: () -> bool
 
   # Returns true for IPv6 unspecified address (::). It returns false otherwise.
   #
-  def ipv6_unspecified?: () -> untyped
+  def ipv6_unspecified?: () -> bool
 
   # Returns true for IPv4-compatible IPv6 address (::/80). It returns false
   # otherwise.
   #
-  def ipv6_v4compat?: () -> untyped
+  def ipv6_v4compat?: () -> bool
 
   # Returns true for IPv4-mapped IPv6 address (::ffff:0:0/80). It returns false
   # otherwise.
   #
-  def ipv6_v4mapped?: () -> untyped
+  def ipv6_v4mapped?: () -> bool
 
   # creates a listening socket bound to self.
   #
-  def listen: (?untyped backlog) -> untyped
+  def listen: (Integer backlog) -> void
 
-  def marshal_dump: () -> untyped
+  def marshal_dump: () -> String
 
-  def marshal_load: (untyped) -> untyped
+  def marshal_load: (String) -> instance
 
   # returns the protocol family as an integer.
   #
   #     Addrinfo.tcp("localhost", 80).pfamily == Socket::PF_INET #=> true
   #
-  def pfamily: () -> untyped
+  def pfamily: () -> Integer
 
   # returns the socket type as an integer.
   #
   #     Addrinfo.tcp("localhost", 80).protocol == Socket::IPPROTO_TCP #=> true
   #
-  def protocol: () -> untyped
+  def protocol: () -> Integer
 
   # returns the socket type as an integer.
   #
   #     Addrinfo.tcp("localhost", 80).socktype == Socket::SOCK_STREAM #=> true
   #
-  def socktype: () -> untyped
+  def socktype: () -> Integer
 
   # returns the socket address as packed struct sockaddr string.
   #
   #     Addrinfo.tcp("localhost", 80).to_sockaddr
   #     #=> "\x02\x00\x00P\x7F\x00\x00\x01\x00\x00\x00\x00\x00\x00\x00\x00"
   #
-  def to_s: () -> untyped
+  def to_s: () -> String
 
   # returns the socket address as packed struct sockaddr string.
   #
   #     Addrinfo.tcp("localhost", 80).to_sockaddr
   #     #=> "\x02\x00\x00P\x7F\x00\x00\x01\x00\x00\x00\x00\x00\x00\x00\x00"
   #
-  def to_sockaddr: () -> untyped
+  def to_sockaddr: () -> String
 
   # returns true if addrinfo is UNIX address. returns false otherwise.
   #
@@ -3958,13 +3976,13 @@ class Addrinfo
   #     Addrinfo.tcp("::1", 80).unix?       #=> false
   #     Addrinfo.unix("/tmp/sock").unix?    #=> true
   #
-  def unix?: () -> untyped
+  def unix?: () -> bool
 
   # Returns the socket path as a string.
   #
   #     Addrinfo.unix("/tmp/sock").unix_path       #=> "/tmp/sock"
   #
-  def unix_path: () -> untyped
+  def unix_path: () -> String
 
   private
 
@@ -4013,5 +4031,75 @@ class Addrinfo
   # omitted, 0 is assumed. Note that 0 is reasonable value for most protocols,
   # except raw socket.
   #
-  def initialize: (*untyped) -> untyped
+  def initialize: (String sockaddr, ?Symbol family, ?(Symbol | Integer)? socktype, ?Integer? protocol) -> untyped
+end
+
+# Socket::Ifaddr represents a result of getifaddrs() function.
+class Socket::Ifaddr
+  public
+
+  # Returns the address of *ifaddr*. nil is returned if address is not available
+  # in *ifaddr*.
+  #
+  def addr: () -> Addrinfo?
+
+  # Returns the broadcast address of *ifaddr*. nil is returned if the flags
+  # doesn't have IFF_BROADCAST.
+  #
+  def broadaddr: () -> Addrinfo?
+
+  # Returns the destination address of *ifaddr*. nil is returned if the flags
+  # doesn't have IFF_POINTOPOINT.
+  #
+  def dstaddr: () -> Addrinfo?
+
+  # Returns the flags of *ifaddr*.
+  #
+  def flags: () -> Integer
+
+  # Returns the interface index of *ifaddr*.
+  #
+  def ifindex: () -> Integer
+
+  # Returns a string to show contents of *ifaddr*.
+  #
+  def inspect: () -> String
+
+  # Returns the interface name of *ifaddr*.
+  #
+  def name: () -> String
+
+  # Returns the netmask address of *ifaddr*. nil is returned if netmask is not
+  # available in *ifaddr*.
+  #
+  def netmask: () -> Addrinfo?
+end
+
+# UDP/IP address information used by Socket.udp_server_loop.
+class Socket::UDPSource
+  public
+
+  def inspect: () -> String
+
+  # Local address
+  #
+  def local_address: () -> Addrinfo
+
+  # Address of the source
+  #
+  def remote_address: () -> Addrinfo
+
+  # Sends the String `msg` to the source
+  #
+  def reply: (String msg) -> void
+
+  private
+
+  # `remote_address` is an Addrinfo object.
+  #
+  # `local_address` is an Addrinfo object.
+  #
+  # `reply_proc` is a Proc used to send reply back to the source.
+  #
+  def initialize: (Addrinfo remote_address, Addrinfo local_address) { (String) -> void } -> void
 end
