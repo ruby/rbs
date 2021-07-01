@@ -17,7 +17,7 @@ class BasicSocket < IO
   #     p s2.do_not_reverse_lookup                 #=> false
   #     p s1.do_not_reverse_lookup                 #=> true
   #
-  def self.do_not_reverse_lookup=: (bool) -> void
+  def self.do_not_reverse_lookup=: (boolish) -> void
 
   # Returns a socket object which contains the file descriptor, *fd*.
   #
@@ -97,7 +97,7 @@ class BasicSocket < IO
   #       p sock.peeraddr                    #=> ["AF_INET", 80, "carbon.ruby-lang.org", "54.163.249.195"]
   #     }
   #
-  def do_not_reverse_lookup=: (bool) -> void
+  def do_not_reverse_lookup=: (boolish) -> void
 
   # Returns the user and group on the peer of the UNIX socket. The result is a two
   # element array which contains the effective uid and the effective gid.
@@ -191,7 +191,7 @@ class BasicSocket < IO
   #     onoff, linger = optval.unpack "ii"
   #     onoff = onoff == 0 ? false : true
   #
-  def getsockopt: (Symbol | Integer, Symbol | Integer) -> (Integer | bool | String)
+  def getsockopt: (Symbol | Integer, Symbol | Integer) -> (Integer | boolish | String)
 
   # Returns an Addrinfo object for local address obtained by getsockname.
   #
@@ -272,7 +272,7 @@ class BasicSocket < IO
   # *   Socket#recvfrom
   #
   #
-  def recv_nonblock: (Integer maxlen, ?Integer flags, ?String buf, ?exception: bool) -> (String | :wait_readable)
+  def recv_nonblock: (Integer maxlen, ?Integer flags, ?String buf, ?exception: boolish) -> (String | :wait_readable)
 
   # recvmsg receives a message using recvmsg(2) system call in blocking manner.
   #
@@ -323,7 +323,7 @@ class BasicSocket < IO
   #       end
   #     }
   #
-  def recvmsg: (?Integer dlen, ?Integer flags, ?Integer clen, ?scm_rights: bool) -> [String, Addrinfo, Integer?, Array[Socket::AncillaryData]]
+  def recvmsg: (?Integer dlen, ?Integer flags, ?Integer clen, ?scm_rights: boolish) -> [String, Addrinfo, Integer?, Array[Socket::AncillaryData]]
 
   # recvmsg receives a message using recvmsg(2) system call in non-blocking
   # manner.
@@ -335,7 +335,7 @@ class BasicSocket < IO
   # recvmsg_nonblock should not raise an IO::WaitReadable exception, but return
   # the symbol `:wait_readable` instead.
   #
-  def recvmsg_nonblock: (?Integer dlen, ?Integer flags, ?Integer clen, ?exception: bool, ?scm_rights: bool) -> ([String, Addrinfo, Integer?, Array[Socket::AncillaryData]] | :wait_readable)
+  def recvmsg_nonblock: (?Integer dlen, ?Integer flags, ?Integer clen, ?exception: boolish, ?scm_rights: boolish) -> ([String, Addrinfo, Integer?, Array[Socket::AncillaryData]] | :wait_readable)
 
   # Returns an Addrinfo object for remote address obtained by getpeername.
   #
@@ -407,7 +407,7 @@ class BasicSocket < IO
   # sendmsg_nonblock should not raise an IO::WaitWritable exception, but return
   # the symbol `:wait_writable` instead.
   #
-  def sendmsg_nonblock: (String mesg, ?Integer flags, ?(Addrinfo | String) dest_sockaddr, *Socket::AncillaryData controlss, ?exception: bool) -> (Integer | :wait_writable)
+  def sendmsg_nonblock: (String mesg, ?Integer flags, ?(Addrinfo | String) dest_sockaddr, *Socket::AncillaryData controlss, ?exception: boolish) -> (Integer | :wait_writable)
 
   # Sets a socket option. These are protocol and system specific, see your local
   # system documentation for details.
@@ -460,7 +460,7 @@ class BasicSocket < IO
   #     sock.setsockopt(Socket::IPPROTO_IP, Socket::IP_ADD_MEMBERSHIP, optval)
   #
   #
-  def setsockopt: (*(Symbol | Integer), bool | Integer | String) -> void
+  def setsockopt: (*(Symbol | Integer), boolish | Integer | String) -> void
 
   # Calls shutdown(2) system call.
   #
@@ -1205,7 +1205,7 @@ class Socket < BasicSocket
   # *   Socket#accept
   #
   #
-  def accept_nonblock: (?exception: bool) -> ([Socket, Addrinfo] | :wait_readable)
+  def accept_nonblock: (?exception: boolish) -> ([Socket, Addrinfo] | :wait_readable)
 
   # Binds to the given local address.
   #
@@ -1706,7 +1706,7 @@ class Socket < BasicSocket
   # *   Socket#recvfrom
   #
   #
-  def recvfrom_nonblock: (Integer maxlen, ?Integer flags, ?untyped outbuf, ?exception: bool) -> ([String, Addrinfo] | :wait_readable)
+  def recvfrom_nonblock: (Integer maxlen, ?Integer flags, ?untyped outbuf, ?exception: boolish) -> ([String, Addrinfo] | :wait_readable)
 
   # Accepts an incoming connection returning an array containing the (integer)
   # file descriptor for the incoming connection, *client_socket_fd*, and an
@@ -2906,7 +2906,7 @@ class IPSocket < BasicSocket
   #       p sock.addr(:numeric)   #=> ["AF_INET", 49429, "192.168.0.128", "192.168.0.128"]
   #     }
   #
-  def addr: (?(bool | :hostname | :numeric) reverse_lookup) -> [String, Integer, String, String]
+  def addr: (?(boolish | :hostname | :numeric) reverse_lookup) -> [String, Integer, String, String]
 
   # Return a string describing this IPSocket object.
   #
@@ -2929,7 +2929,7 @@ class IPSocket < BasicSocket
   #       p sock.peeraddr(:numeric)  #=> ["AF_INET", 80, "221.186.184.68", "221.186.184.68"]
   #     }
   #
-  def peeraddr: (?(bool | :hostname | :numeric) reverse_lookup) -> [String, Integer, String, String]
+  def peeraddr: (?(boolish | :hostname | :numeric) reverse_lookup) -> [String, Integer, String, String]
 
   # Receives a message and return the message as a string and an address which the
   # message come from.
@@ -3062,7 +3062,7 @@ class UDPSocket < IPSocket
   # *   Socket#recvfrom
   #
   #
-  def recvfrom_nonblock: (Integer len, ?Integer flag, ?String outbuf, ?exception: bool) -> [String, [String, Integer, String, String]]
+  def recvfrom_nonblock: (Integer len, ?Integer flag, ?String outbuf, ?exception: boolish) -> [String, [String, Integer, String, String]]
 
   # Sends *mesg* via *udpsocket*.
   #
@@ -3304,7 +3304,7 @@ class TCPServer < TCPSocket
   # *   Socket#accept
   #
   #
-  def accept_nonblock: (?exception: bool) -> (TCPSocket | :wait_readable)
+  def accept_nonblock: (?exception: boolish) -> (TCPSocket | :wait_readable)
 
   # Listens for connections, using the specified `int` as the backlog. A call to
   # *listen* only applies if the `socket` is of type SOCK_STREAM or
@@ -3460,7 +3460,7 @@ class UNIXServer < UNIXSocket
   # *   Socket#accept
   #
   #
-  def accept_nonblock: (?exception: bool) -> (UNIXSocket | :wait_readable)
+  def accept_nonblock: (?exception: boolish) -> (UNIXSocket | :wait_readable)
 
   # Listens for connections, using the specified `int` as the backlog. A call to
   # *listen* only applies if the `socket` is of type SOCK_STREAM or
