@@ -746,7 +746,7 @@ class IO < Object
 
   def self.readlines: (String name, ?String sep, ?Integer limit, ?external_encoding: String external_encoding, ?internal_encoding: String internal_encoding, ?encoding: String encoding, ?textmode: untyped textmode, ?binmode: untyped binmode, ?autoclose: untyped autoclose, ?mode: String mode) -> ::Array[String]
 
-  def self.select: (::Array[io]? read_array, ?::Array[io]? write_array, ?::Array[io]? error_array, ?Integer? timeout) -> ::Array[::Array[io]]?
+  def self.select: (::Array[io]? read_array, ?::Array[io]? write_array, ?::Array[io]? error_array, ?Numeric? timeout) -> ::Array[::Array[io]]?
 
   def self.sysopen: (String path, ?String mode, ?String perm) -> Integer
 

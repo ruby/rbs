@@ -11,24 +11,6 @@ module Gem
   end
 end
 
-class OptionParser
-  def initialize: () ?{ (instance) -> void } -> void
-
-  def on: [T] (*String) { (T) -> void } -> void
-
-  attr_accessor version: String
-
-  attr_accessor banner: String
-
-  def order!: (Array[String]) -> void
-
-  def parse!: (Array[String]) -> void
-
-  def ver: () -> String
-
-  def help: () -> String
-end
-
 module Enumerable[unchecked out Elem]
   def flat_map: [U] () { (Elem) -> Array[U] } -> Array[U]
               | [U] () { (Elem) -> U } -> Array[U]
