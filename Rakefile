@@ -54,6 +54,10 @@ task :validate => :parser do
       lib << "singleton"
     end
 
+    if lib == ["net-http"]
+      lib << "uri"
+    end
+
     sh "#{ruby} #{rbs} #{lib.map {|l| "-r #{l}"}.join(" ")} validate --silent"
   end
 end
