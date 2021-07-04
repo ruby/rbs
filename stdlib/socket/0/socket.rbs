@@ -407,7 +407,7 @@ class BasicSocket < IO
   # sendmsg_nonblock should not raise an IO::WaitWritable exception, but return
   # the symbol `:wait_writable` instead.
   #
-  def sendmsg_nonblock: (String mesg, ?Integer flags, ?(Addrinfo | String) dest_sockaddr, *Socket::AncillaryData controlss, ?exception: boolish) -> (Integer | :wait_writable)
+  def sendmsg_nonblock: (String mesg, ?Integer flags, ?(Addrinfo | String) dest_sockaddr, *Socket::AncillaryData controls, ?exception: boolish) -> (Integer | :wait_writable)
 
   # Sets a socket option. These are protocol and system specific, see your local
   # system documentation for details.
