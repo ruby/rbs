@@ -54,4 +54,9 @@ module Timeout
   def self?.timeout: [T] (Numeric? sec, ?singleton(Exception) klass, ?String message) { (Numeric sec) -> T } -> T
 end
 
+# Raised by Timeout.timeout when the block times out.
+class Timeout::Error < RuntimeError
+  attr_reader thread: Thread?
+end
+
 Timeout::VERSION: String
