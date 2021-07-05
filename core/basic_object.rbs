@@ -216,6 +216,7 @@ class BasicObject
   #     r.mm      #=> 2000
   #
   def method_missing: (Symbol, *untyped) -> untyped
+                    | (Symbol, *untyped, **untyped) -> untyped
 
   # Invoked as a callback whenever a singleton method is added to the receiver.
   #
