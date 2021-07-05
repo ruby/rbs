@@ -291,22 +291,22 @@ end
               module TestForOverrideModuleName
                 class C
                   include M
-          
+
                   def self.name: () -> untyped
-          
+
                   def self.to_s: () -> untyped
-          
+
                   INSTANCE: C
                 end
-          
+
                 class C2 < RBS::RuntimePrototypeTest::TestForOverrideModuleName::C
                 end
-          
+
                 module M
                   def self.name: () -> untyped
-          
+
                   def self.to_s: () -> untyped
-          
+
                   X: Integer
                 end
               end
@@ -341,11 +341,11 @@ end
               module TestForTypeParameters
                 class C < Hash[untyped, untyped]
                 end
-          
+
                 class C2
                   include Enumerable[untyped]
                 end
-          
+
                 module M
                   HASH: Hash[untyped, untyped]
                 end
@@ -371,7 +371,7 @@ end
             module RuntimePrototypeTest
               class TestForInitialize
                 private
-        
+
                 def initialize: () -> void
               end
             end
