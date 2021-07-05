@@ -9,6 +9,7 @@ module RBS
       def initialize(patterns:, env:, merge:, owners_included: [])
         @patterns = patterns
         @decls = nil
+        @modules = []
         @env = env
         @merge = merge
         @owners_included = owners_included.map do |name|
@@ -39,7 +40,8 @@ module RBS
       def decls
         unless @decls
           @decls = []
-          ObjectSpace.each_object(Module).select {|mod| target?(mod) }.sort_by{|mod| const_name(mod) }.each do |mod|
+          @modules = ObjectSpace.each_object(Module).to_a
+          @modules.select {|mod| target?(mod) }.sort_by{|mod| const_name(mod) }.each do |mod|
             case mod
             when Class
               generate_class mod
@@ -51,8 +53,9 @@ module RBS
         @decls
       end
 
-      def to_type_name(name)
+      def to_type_name(name, superclass: false)
         *prefix, last = name.split(/::/)
+        return TypeName.new(name: last.to_sym, namespace: Namespace.empty) unless superclass
 
         if prefix.empty?
           TypeName.new(name: last.to_sym, namespace: Namespace.empty)
@@ -305,7 +308,7 @@ module RBS
         end
       end
 
-      def generate_constants(mod)
+      def generate_constants(mod, decls)
         mod.constants(false).sort.each do |name|
           value = mod.const_get(name)
 
@@ -329,8 +332,8 @@ module RBS
                    Types::ClassInstance.new(name: value_type_name, args: args, location: nil)
                  end
 
-          @decls << AST::Declarations::Constant.new(
-            name: "#{const_name(mod)}::#{name}",
+          decls << AST::Declarations::Constant.new(
+            name: name,
             type: type,
             location: nil,
             comment: nil
@@ -338,28 +341,26 @@ module RBS
         end
       end
 
+      def generate_super_class(mod)
+        if mod.superclass == ::Object
+          nil
+        elsif const_name(mod.superclass).nil?
+          RBS.logger.warn("Skipping anonymous superclass #{mod.superclass} of #{mod}")
+          nil
+        else
+          super_name = to_type_name(const_name(mod.superclass), superclass: true)
+          super_args = type_args(super_name)
+          AST::Declarations::Class::Super.new(name: super_name, args: super_args, location: nil)
+        end
+      end
+
       def generate_class(mod)
         type_name = to_type_name(const_name(mod))
-        super_class = if mod.superclass == ::Object
-                        nil
-                      elsif const_name(mod.superclass).nil?
-                        RBS.logger.warn("Skipping anonymous superclass #{mod.superclass} of #{mod}")
-                        nil
-                      else
-                        super_name = to_type_name(const_name(mod.superclass))
-                        super_args = type_args(super_name)
-                        AST::Declarations::Class::Super.new(name: super_name, args: super_args, location: nil)
-                      end
 
-        decl = AST::Declarations::Class.new(
-          name: type_name,
-          type_params: AST::Declarations::ModuleTypeParams.empty,
-          super_class: super_class,
-          members: [],
-          annotations: [],
-          location: nil,
-          comment: nil
-        )
+        copy_decls = process(mod)
+        # Check if a declaration exists for the actual module
+        copy_decls << AST::Declarations::Class.new(name: to_type_name(only_name(mod)), type_params: AST::Declarations::ModuleTypeParams.empty, super_class: generate_super_class(mod), members: [], annotations: [], location: nil, comment: nil) unless copy_decls.detect { |decl| decl.is_a?(AST::Declarations::Class) && decl.name.name == only_name(mod).to_sym }
+        decl = copy_decls.detect { |decl| decl.is_a?(AST::Declarations::Class) && decl.name.name == only_name(mod).to_sym }
 
         each_included_module(type_name, mod) do |module_name, module_full_name, _|
           args = type_args(module_full_name)
@@ -385,9 +386,7 @@ module RBS
 
         generate_methods(mod, type_name, decl.members)
 
-        @decls << decl
-
-        generate_constants mod
+        generate_constants mod, decl.members
       end
 
       def generate_module(mod)
@@ -400,15 +399,10 @@ module RBS
 
         type_name = to_type_name(name)
 
-        decl = AST::Declarations::Module.new(
-          name: type_name,
-          type_params: AST::Declarations::ModuleTypeParams.empty,
-          self_types: [],
-          members: [],
-          annotations: [],
-          location: nil,
-          comment: nil
-        )
+        copy_decls = process(mod)
+        # Check if a declaration exists for the actual module
+        copy_decls << AST::Declarations::Module.new(name: to_type_name(only_name(mod)), type_params: AST::Declarations::ModuleTypeParams.empty, self_types: [], members: [], annotations: [], location: nil, comment: nil) unless copy_decls.detect { |decl| decl.is_a?(AST::Declarations::Module) && decl.name.name == only_name(mod).to_sym }
+        decl = copy_decls.detect { |decl| decl.is_a?(AST::Declarations::Module) && decl.name.name == only_name(mod).to_sym }
 
         each_included_module(type_name, mod) do |module_name, module_full_name, _|
           args = type_args(module_full_name)
@@ -434,9 +428,40 @@ module RBS
 
         generate_methods(mod, type_name, decl.members)
 
-        @decls << decl
+        generate_constants mod, decl.members
+      end
 
-        generate_constants mod
+      # Process an encountered module
+      # This is broken down into another method to comply with `DRY`
+      # This generates declarations in nested form & returns the last array of declarations
+      def process(mod)
+        *parent, _ = const_name(mod).split(/::/) #=> parent = [A, B], mod = C
+        copy_decls = @decls # Copy the entries in ivar @decls, not .dup
+        parent&.each do |parent_module_name|
+          parent_module = @modules.detect { |x| const_name(x) == parent_module_name }
+          x = copy_decls.detect { |decl| decl.is_a?(parent_module.is_a?(Class) ? AST::Declarations::Class : AST::Declarations::Module) && decl.name.name == parent_module_name.to_sym }
+          if x
+            # To checkout members of this decalration
+            copy_decls = x.members
+          else
+            # Insert AST::Declarations if declarations are not added previously
+            if parent_module.is_a?(Class)
+              copy_decls << AST::Declarations::Class.new(name: to_type_name(parent_module_name), type_params: AST::Declarations::ModuleTypeParams.empty, super_class: generate_super_class(parent_module), members: [], annotations: [], location: nil, comment: nil)
+            else
+              copy_decls << AST::Declarations::Module.new(name: to_type_name(parent_module_name), type_params: AST::Declarations::ModuleTypeParams.empty, self_types: [], members: [], annotations: [], location: nil, comment: nil)
+            end
+            # Checkout the members of the newly added declaration
+            copy_decls = copy_decls.last.members
+          end
+        end
+        # Return the array of declarations checked out at the end
+        copy_decls
+      end
+
+      # Returns the exact name & not compactly declared name
+      def only_name(mod)
+        # No nil check because this method is invoked after checking if the module exists
+        const_name(mod).split(/::/).last # (A::B::C) => C
       end
 
       def const_name(const)
