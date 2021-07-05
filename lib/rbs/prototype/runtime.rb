@@ -414,11 +414,23 @@ module RBS
         end
 
         type_name = to_type_name(name)
+        outer_decls = ensure_outer_module_declarations(mod)
 
-        copy_decls = ensure_outer_module_declarations(mod)
-        # Check if a declaration exists for the actual module
-        copy_decls << AST::Declarations::Module.new(name: to_type_name(only_name(mod)), type_params: AST::Declarations::ModuleTypeParams.empty, self_types: [], members: [], annotations: [], location: nil, comment: nil) unless copy_decls.detect { |decl| decl.is_a?(AST::Declarations::Module) && decl.name.name == only_name(mod).to_sym }
-        decl = copy_decls.detect { |decl| decl.is_a?(AST::Declarations::Module) && decl.name.name == only_name(mod).to_sym }
+        # Check if a declaration exists for the actual class
+        decl = outer_decls.detect { |decl| decl.is_a?(AST::Declarations::Module) && decl.name.name == only_name(mod).to_sym }
+        unless decl
+          decl = AST::Declarations::Module.new(
+            name: to_type_name(only_name(mod)),
+            type_params: AST::Declarations::ModuleTypeParams.empty,
+            self_types: [],
+            members: [],
+            annotations: [],
+            location: nil,
+            comment: nil
+          )
+
+          outer_decls << decl
+        end
 
         each_included_module(type_name, mod) do |module_name, module_full_name, _|
           args = type_args(module_full_name)
@@ -447,9 +459,9 @@ module RBS
         generate_constants mod, decl.members
       end
 
-      # Process an encountered module
+      # Generate/find outer module declarations
       # This is broken down into another method to comply with `DRY`
-      # This generates declarations in nested form & returns the last array of declarations
+      # This generates/finds declarations in nested form & returns the last array of declarations
       def ensure_outer_module_declarations(mod)
         *outer_module_names, _ = const_name(mod).split(/::/) #=> parent = [A, B], mod = C
         destination = @decls # Copy the entries in ivar @decls, not .dup
@@ -458,8 +470,8 @@ module RBS
           outer_module = @modules.detect { |x| const_name(x) == outer_module_name }
           outer_decl = destination.detect { |decl| decl.is_a?(outer_module.is_a?(Class) ? AST::Declarations::Class : AST::Declarations::Module) && decl.name.name == outer_module_name.to_sym }
 
+          # Insert AST::Declarations if declarations are not added previously
           unless outer_decl
-            # Insert AST::Declarations if declarations are not added previously
             if outer_module.is_a?(Class)
               outer_decl = AST::Declarations::Class.new(
                 name: to_type_name(outer_module_name),
