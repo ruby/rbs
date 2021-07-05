@@ -46,37 +46,43 @@ class RBS::RuntimePrototypeTest < Test::Unit::TestCase
         p = Runtime.new(patterns: ["RBS::RuntimePrototypeTest::TestTargets::*"], env: env, merge: false)
 
         assert_write p.decls, <<-EOF
-module RBS::RuntimePrototypeTest::TestTargets::Bar
+module RBS
+  module RuntimePrototypeTest
+    module TestTargets
+      module Bar
+      end
+
+      module Foo
+        include Enumerable[untyped]
+
+        extend Comparable
+      end
+
+      class Test < String
+        include Foo
+
+        extend Bar
+
+        def self.b: () -> untyped
+
+        def self.baz: () { (*untyped) -> untyped } -> untyped
+
+        public
+
+        alias bar foo
+
+        def foo: (untyped foo, ?untyped bar, *untyped baz, untyped a, b: untyped, ?c: untyped, **untyped) -> untyped
+
+        private
+
+        def a: () -> untyped
+
+        NAME: String
+      end
+    end
+  end
 end
-
-module RBS::RuntimePrototypeTest::TestTargets::Foo
-  include Enumerable[untyped]
-
-  extend Comparable
-end
-
-class RBS::RuntimePrototypeTest::TestTargets::Test < String
-  include Foo
-
-  extend Bar
-
-  def self.b: () -> untyped
-
-  def self.baz: () { (*untyped) -> untyped } -> untyped
-
-  public
-
-  alias bar foo
-
-  def foo: (untyped foo, ?untyped bar, *untyped baz, untyped a, b: untyped, ?c: untyped, **untyped) -> untyped
-
-  private
-
-  def a: () -> untyped
-end
-
-RBS::RuntimePrototypeTest::TestTargets::Test::NAME: String
-    EOF
+        EOF
       end
     end
   end
@@ -87,17 +93,16 @@ RBS::RuntimePrototypeTest::TestTargets::Test::NAME: String
 class RBS
   class RuntimePrototypeTest
     class TestTargets
+      class Test
+        def self.baz: () -> void
+
+        def foo: (String) -> Integer
+               | (String, bool) { () -> void } -> [Symbol]
+
+        def bar: () -> void
+      end
     end
   end
-end
-
-class RBS::RuntimePrototypeTest::TestTargets::Test
-  def self.baz: () -> void
-
-  def foo: (String) -> Integer
-         | (String, bool) { () -> void } -> [Symbol]
-
-  def bar: () -> void
 end
 EOF
 
@@ -105,37 +110,42 @@ EOF
         p = Runtime.new(patterns: ["RBS::RuntimePrototypeTest::TestTargets::*"], env: env, merge: true)
 
         assert_write p.decls, <<-EOF
-module RBS::RuntimePrototypeTest::TestTargets::Bar
+module RBS
+  module RuntimePrototypeTest
+    module TestTargets
+      module Bar
+      end
+
+      module Foo
+        include Enumerable[untyped]
+
+        extend Comparable
+      end
+
+      class Test < String
+        include Foo
+
+        extend Bar
+
+        def self.b: () -> untyped
+
+        def self.baz: () { (*untyped) -> untyped } -> untyped
+
+        public
+
+        alias bar foo
+
+        def foo: (untyped foo, ?untyped bar, *untyped baz, untyped a, b: untyped, ?c: untyped, **untyped) -> untyped
+
+        private
+
+        def a: () -> untyped
+
+        NAME: String
+      end
+    end
+  end
 end
-
-module RBS::RuntimePrototypeTest::TestTargets::Foo
-  include Enumerable[untyped]
-
-  extend Comparable
-end
-
-class RBS::RuntimePrototypeTest::TestTargets::Test < String
-  include Foo
-
-  extend Bar
-
-  def self.b: () -> untyped
-
-  def self.baz: () -> void
-
-  public
-
-  alias bar foo
-
-  def foo: (String) -> Integer
-         | (String, bool) { () -> void } -> [Symbol]
-
-  private
-
-  def a: () -> untyped
-end
-
-RBS::RuntimePrototypeTest::TestTargets::Test::NAME: String
         EOF
       end
     end
@@ -161,22 +171,28 @@ RBS::RuntimePrototypeTest::TestTargets::Test::NAME: String
                         owners_included: ["RBS::RuntimePrototypeTest::IncludeTests::SuperClass"])
 
         assert_write p.decls, <<-EOF
-class RBS::RuntimePrototypeTest::IncludeTests::ChildClass < RBS::RuntimePrototypeTest::IncludeTests::SuperClass
-  def self.foo: () -> untyped
+module RBS
+  module RuntimePrototypeTest
+    module IncludeTests
+      class ChildClass < RBS::RuntimePrototypeTest::IncludeTests::SuperClass
+        def self.foo: () -> untyped
 
-  public
+        public
 
-  def bar: () -> untyped
+        def bar: () -> untyped
 
-  def foo: () -> untyped
-end
+        def foo: () -> untyped
+      end
 
-class RBS::RuntimePrototypeTest::IncludeTests::SuperClass
-  def self.foo: () -> untyped
+      class SuperClass
+        def self.foo: () -> untyped
 
-  public
+        public
 
-  def foo: () -> untyped
+        def foo: () -> untyped
+      end
+    end
+  end
 end
         EOF
       end
@@ -229,10 +245,14 @@ end
           p = Runtime.new(patterns: ["RBS::RuntimePrototypeTest::TestForArgumentForwarding"], env: env, merge: true)
 
           assert_write p.decls, <<-EOF
-class RBS::RuntimePrototypeTest::TestForArgumentForwarding
-  public
+module RBS
+  module RuntimePrototypeTest
+    class TestForArgumentForwarding
+      public
 
-  def foo: (*untyped) { (*untyped) -> untyped } -> untyped
+      def foo: (*untyped) { (*untyped) -> untyped } -> untyped
+    end
+  end
 end
           EOF
         end
@@ -266,26 +286,32 @@ end
         p = Runtime.new(patterns: ["RBS::RuntimePrototypeTest::TestForOverrideModuleName::*"], env: env, merge: true)
 
         assert_write p.decls, <<~RBS
-          class RBS::RuntimePrototypeTest::TestForOverrideModuleName::C
-            include M
-
-            def self.name: () -> untyped
-
-            def self.to_s: () -> untyped
+          module RBS
+            module RuntimePrototypeTest
+              module TestForOverrideModuleName
+                class C
+                  include M
+          
+                  def self.name: () -> untyped
+          
+                  def self.to_s: () -> untyped
+          
+                  INSTANCE: C
+                end
+          
+                class C2 < RBS::RuntimePrototypeTest::TestForOverrideModuleName::C
+                end
+          
+                module M
+                  def self.name: () -> untyped
+          
+                  def self.to_s: () -> untyped
+          
+                  X: Integer
+                end
+              end
+            end
           end
-
-          RBS::RuntimePrototypeTest::TestForOverrideModuleName::C::INSTANCE: RBS::RuntimePrototypeTest::TestForOverrideModuleName::C
-
-          class RBS::RuntimePrototypeTest::TestForOverrideModuleName::C2 < RBS::RuntimePrototypeTest::TestForOverrideModuleName::C
-          end
-
-          module RBS::RuntimePrototypeTest::TestForOverrideModuleName::M
-            def self.name: () -> untyped
-
-            def self.to_s: () -> untyped
-          end
-
-          RBS::RuntimePrototypeTest::TestForOverrideModuleName::M::X: Integer
         RBS
       end
     end
@@ -310,17 +336,22 @@ end
         p = Runtime.new(patterns: ["RBS::RuntimePrototypeTest::TestForTypeParameters::*"], env: env, merge: true)
 
         assert_write p.decls, <<~RBS
-          class RBS::RuntimePrototypeTest::TestForTypeParameters::C < Hash[untyped, untyped]
+          module RBS
+            module RuntimePrototypeTest
+              module TestForTypeParameters
+                class C < Hash[untyped, untyped]
+                end
+          
+                class C2
+                  include Enumerable[untyped]
+                end
+          
+                module M
+                  HASH: Hash[untyped, untyped]
+                end
+              end
+            end
           end
-
-          class RBS::RuntimePrototypeTest::TestForTypeParameters::C2
-            include Enumerable[untyped]
-          end
-
-          module RBS::RuntimePrototypeTest::TestForTypeParameters::M
-          end
-
-          RBS::RuntimePrototypeTest::TestForTypeParameters::M::HASH: Hash[untyped, untyped]
         RBS
       end
     end
@@ -336,10 +367,14 @@ end
         p = Runtime.new(patterns: ["RBS::RuntimePrototypeTest::TestForInitialize"], env: env, merge: true)
 
         assert_write p.decls, <<~RBS
-          class RBS::RuntimePrototypeTest::TestForInitialize
-            private
-
-            def initialize: () -> void
+          module RBS
+            module RuntimePrototypeTest
+              class TestForInitialize
+                private
+        
+                def initialize: () -> void
+              end
+            end
           end
         RBS
       end
