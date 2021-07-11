@@ -35,17 +35,16 @@ class ResolvIPv4InstanceTest < Test::Unit::TestCase
 
   def test_address
     assert_send_type "() -> String",
-      ip, :address 
+      ip, :address
   end
 
   def test_hash
     assert_send_type "() -> Integer",
-      ip, :hash  
+      ip, :hash
   end
 
   def test_to_name
     assert_send_type "() -> Resolv::DNS::Name",
       ip, :to_name
   end
-
 end
