@@ -1637,7 +1637,7 @@ class Array[unchecked out Elem] < Object
   #     args           #=> ["filename"]
   #
   def shift: () -> Elem?
-           | (?int n) -> ::Array[Elem]
+           | (int n) -> ::Array[Elem]
 
   # Returns a new array with elements of `self` shuffled.
   #
