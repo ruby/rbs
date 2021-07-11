@@ -13,8 +13,8 @@
 module Kernel : BasicObject
   private
 
-  def self?.caller: (?Integer start_or_range, ?Integer length) -> ::Array[String]?
-            | (?::Range[Integer] start_or_range) -> ::Array[String]?
+  def self?.caller: (Integer start_or_range, ?Integer length) -> ::Array[String]?
+            | (::Range[Integer] start_or_range) -> ::Array[String]?
             | () -> ::Array[String]
 
   def self?.caller_locations: (?Integer start_or_range, ?Integer length) -> ::Array[Thread::Backtrace::Location]?
