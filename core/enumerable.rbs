@@ -334,7 +334,15 @@ module Enumerable[unchecked out Elem]: _Each[Elem]
           | [T] (_NotFound[T] ifnone) { (Elem) -> boolish } -> (Elem | T)
           | [T] (_NotFound[T] ifnone) -> ::Enumerator[Elem, Elem | T]
 
-  def flat_map: [U] () { (Elem) -> (Array[U] | U) } -> Array[U]
+  # Returns a new array with the concatenated results of running *block* once for
+  # every element in *enum*.
+  #
+  # If no block is given, an enumerator is returned instead.
+  #
+  #     [1, 2, 3, 4].flat_map { |e| [e, -e] } #=> [1, -1, 2, -2, 3, -3, 4, -4]
+  #     [[1, 2], [3, 4]].flat_map { |e| e + [100] } #=> [1, 2, 100, 3, 4, 100]
+  #
+  def flat_map: [U] () { (Elem obj) -> Array[U] } -> Array[U]
               | () -> ::Enumerator[Elem, Array[untyped]]
 
   def map: [U] () { (Elem arg0) -> U } -> ::Array[U]
