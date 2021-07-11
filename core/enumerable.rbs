@@ -48,7 +48,7 @@ module Enumerable[unchecked out Elem]: _Each[Elem]
   def collect: [U] () { (Elem arg0) -> U } -> ::Array[U]
              | () -> ::Enumerator[Elem, ::Array[untyped]]
 
-  def collect_concat: [U] () { (Elem arg0) -> ::Enumerator[U, untyped] } -> ::Array[U]
+  alias collect_concat flat_map
 
   # Returns the number of items in `enum` through enumeration. If an
   # argument is given, the number of items in `enum` that are equal to
