@@ -58,6 +58,11 @@ task :validate => :parser do
       lib << "uri"
     end
 
+    if lib == ["resolv"]
+      lib << "socket"
+      lib << "timeout"
+    end
+
     sh "#{ruby} #{rbs} #{lib.map {|l| "-r #{l}"}.join(" ")} validate --silent"
   end
 end
