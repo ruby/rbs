@@ -774,26 +774,10 @@ module RBS
     end
 
     def try_cache(type_name, cache:, key: type_name)
-      # @type var cc: Hash[untyped, Definition | false | nil]
+      # @type var cc: Hash[untyped, Definition | nil]
       cc = _ = cache
-      cached = cc[key]
 
-      case cached
-      when Definition
-        cached
-      when false
-        raise
-      when nil
-        cc[key] = false
-        begin
-          cc[key] = yield
-        rescue => ex
-          cc.delete(key)
-          raise ex
-        end
-      else
-        raise
-      end
+      cc[key] ||= yield
     end
 
     def expand_alias(type_name)
