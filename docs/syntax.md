@@ -352,9 +352,6 @@ def +: (Float | Integer) -> (Float | Integer)
      | (Numeric) -> Numeric
 ```
 
-Method types can end with `super` which means the methods from existing definitions.
-This is useful to define an _extension_, which adds a new variation to the existing method preserving the original behavior.
-
 ### Attribute definition
 
 Attribute definitions help to define methods and instance variables based on the convention of `attr_reader`, `attr_writer` and `attr_accessor` methods in Ruby.
