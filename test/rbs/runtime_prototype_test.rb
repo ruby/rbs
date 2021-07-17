@@ -231,7 +231,7 @@ end
     assert(true) # nothing raised above
   end
 
-  if RUBY_VERSION >= '2.7'
+  if RUBY_VERSION >= '2.7' && RUBY_VERSION <= '3.0'
     class TestForArgumentForwarding
       eval <<~RUBY
         def foo(...)
