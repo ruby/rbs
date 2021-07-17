@@ -386,4 +386,22 @@ module RBS
       end
     end
   end
+
+  class RecursiveTypeAliasError < LoadingError
+    attr_reader :decl
+
+    def initialize(decl:)
+      @decl = decl
+
+      super "#{Location.to_string location}: Recursive type alias definition found for #{name}"
+    end
+
+    def name
+      decl.name.name
+    end
+
+    def location
+      decl.location
+    end
+  end
 end

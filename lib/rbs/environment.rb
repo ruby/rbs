@@ -181,6 +181,7 @@ module RBS
         cache_name interface_decls, name: decl.name.with_prefix(namespace), decl: decl, outer: outer
 
       when AST::Declarations::Alias
+        raise RecursiveTypeAliasError.new(decl: decl) if decl.type.is_a?(RBS::Types::Alias) && decl.type.name == decl.name
         cache_name alias_decls, name: decl.name.with_prefix(namespace), decl: decl, outer: outer
 
       when AST::Declarations::Constant

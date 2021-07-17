@@ -196,4 +196,14 @@ module RBS
 
     def mixin_name: () -> String
   end
+
+  class RecursiveTypeAliasError < LoadingError
+    attr_reader decl: AST::Declarations::Alias
+
+    def initialize: (decl: AST::Declarations::Alias) -> void
+
+    def name: () -> Symbol
+
+    def location: () -> Location
+  end
 end
