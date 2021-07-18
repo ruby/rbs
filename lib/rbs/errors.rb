@@ -393,7 +393,7 @@ module RBS
     def initialize(decl:)
       @decl = decl
 
-      super "#{Location.to_string location}: Recursive type alias definition found for #{name}"
+      super "#{Location.to_string location}: Recursive type alias definition found for: #{name}"
     end
 
     def name
