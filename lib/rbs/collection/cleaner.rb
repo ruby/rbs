@@ -3,8 +3,8 @@ module RBS
     class Cleaner
       attr_reader :lock
 
-      def initialize(lock:)
-        @lock = lock
+      def initialize(lockfile_path:)
+        @lock = Config.from_path(lockfile_path)
       end
 
       def clean

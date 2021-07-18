@@ -3,7 +3,7 @@ module RBS
     class Cleaner
       attr_reader lock: Config
 
-      def initialize: (lock: Config) -> void
+      def initialize: (lockfile_path: Pathname) -> void
 
       def clean: () -> void
 
