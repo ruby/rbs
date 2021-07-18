@@ -61,23 +61,24 @@
 #     puts db['822']
 #
 class DBM
-  include Enumerable[untyped]
+  include Enumerable[[String, String]]
 
   # Open a dbm database and yields it if a block is given. See also `DBM.new`.
   #
-  def self.open: (*untyped) -> ::DBM
+  def self.open: (String filename, ?Integer mode, ?Integer flags) -> DBM
+               | [T] (String filename, ?Integer mode, ?Integer flags) { (DBM) -> T } -> T
 
   public
 
   # Return a value from the database by locating the key string provided.  If the
   # key is not found, returns nil.
   #
-  def []: (untyped) -> untyped
+  def []: (String) -> String?
 
   # Stores the specified string value in the database, indexed via the string key
   # provided.
   #
-  def []=: (untyped, untyped) -> untyped
+  def []=: (String, String) -> String
 
   # Deletes all data from the database.
   #
@@ -85,7 +86,7 @@ class DBM
 
   # Closes the database.
   #
-  def close: () -> NilClass
+  def close: () -> void
 
   # Returns true if the database is closed, false otherwise.
   #
@@ -93,27 +94,31 @@ class DBM
 
   # Deletes an entry from the database.
   #
-  def delete: (untyped) -> untyped
+  def delete: (String) -> void
 
   # Deletes all entries for which the code block returns true. Returns self.
   #
-  def delete_if: () ?{ (untyped) -> bool } -> self
+  def delete_if: () { (String) -> boolish } -> self
 
   # Calls the block once for each [key, value] pair in the database. Returns self.
   #
-  def each: (?untyped, ?untyped) -> Enumerator[untyped, ::DBM]
+  def each: () { ([String, String]) -> void } -> self
+          | () -> Enumerator[[String, String], self]
 
   # Calls the block once for each key string in the database. Returns self.
   #
-  def each_key: () -> Enumerator[String, ::DBM]
+  def each_key: { (String) -> void } -> self
+              | () -> Enumerator[String, self]
 
   # Calls the block once for each [key, value] pair in the database. Returns self.
   #
-  def each_pair: (?untyped, ?untyped) -> Enumerator[untyped, ::DBM]
+  def each_pair: () { ([String, String]) -> void } -> self
+               | () -> Enumerator[[String, String], self]
 
   # Calls the block once for each value string in the database. Returns self.
   #
-  def each_value: () -> Enumerator[untyped, ::DBM]
+  def each_value: () { (String) -> void } -> self
+                | () -> Enumerator[String, self]
 
   # Returns true if the database is empty, false otherwise.
   #
@@ -123,7 +128,7 @@ class DBM
   # key is not found, returns `ifnone`. If `ifnone` is not given, raises
   # IndexError.
   #
-  def fetch: (*String) -> untyped
+  def fetch: (String key, ?String ifnone) -> String
 
   # Returns true if the database contains the specified key, false otherwise.
   #
@@ -132,7 +137,7 @@ class DBM
   # Returns true if the database contains the specified string value, false
   # otherwise.
   #
-  def has_value?: (untyped) -> bool
+  def has_value?: () -> bool
 
   # Returns true if the database contains the specified key, false otherwise.
   #
@@ -141,15 +146,15 @@ class DBM
   # Returns a Hash (not a DBM database) created by using each value in the
   # database as a key, with the corresponding key as its value.
   #
-  def invert: () -> Hash[untyped, String]
+  def invert: () -> Hash[String, String]
 
   # Returns the key for the specified value.
   #
-  def key: (untyped) -> (String | NilClass)
+  def key: (String) -> String?
 
   # Returns true if the database contains the specified key, false otherwise.
   #
-  def key?: (untyped) -> bool
+  def key?: (String) -> bool
 
   # Returns an array of all the string keys in the database.
   #
@@ -161,33 +166,37 @@ class DBM
 
   # Returns true if the database contains the specified key, false otherwise.
   #
-  def member?: (untyped) -> bool
+  def member?: (String) -> bool
 
   # Converts the contents of the database to an in-memory Hash, then calls
   # Hash#reject with the specified code block, returning a new Hash.
   #
-  def reject: () -> Hash[untyped, untyped]
+  def reject: () { (String, String) -> boolish } -> Hash[String, String]
 
   # Deletes all entries for which the code block returns true. Returns self.
   #
-  def reject!: () { (String, untyped) -> untyped } -> self
+  def reject!: () { (String, String) -> boolish } -> self
 
   # Replaces the contents of the database with the contents of the specified
   # object. Takes any object which implements the each_pair method, including Hash
   # and DBM objects.
   #
-  def replace: (untyped) -> ::DBM
+  def replace: (_ReplaceSource) -> ::DBM
+
+  interface _ReplaceSource
+    def each_pair: () { ([String, String]) -> void } -> void
+  end
 
   # Returns a new array consisting of the [key, value] pairs for which the code
   # block returns true.
   #
-  def select: () { () -> untyped } -> Array[untyped]
+  def select: () { ([String, String]) -> boolish } -> Array[[String, String]]
 
   # Removes a [key, value] pair from the database, and returns it. If the database
   # is empty, returns nil. The order in which values are removed/returned is not
   # guaranteed.
   #
-  def shift: () -> Array[untyped]
+  def shift: () -> [String, String]?
 
   # Returns the number of entries in the database.
   #
@@ -196,35 +205,39 @@ class DBM
   # Stores the specified string value in the database, indexed via the string key
   # provided.
   #
-  def store: (String, untyped) -> String
+  def store: (String, String) -> String
 
   # Converts the contents of the database to an array of [key, value] arrays, and
   # returns it.
   #
-  def to_a: () -> Array[untyped]
+  def to_a: () -> Array[[String, String]]
 
   # Converts the contents of the database to an in-memory Hash object, and returns
   # it.
   #
-  def to_hash: () -> Hash[String, untyped]
+  def to_hash: () -> Hash[String, String]
 
   # Updates the database with multiple values from the specified object. Takes any
   # object which implements the each_pair method, including Hash and DBM objects.
   #
-  def update: (untyped) -> ::DBM
+  def update: (_UpdateSource) -> ::DBM
+
+  interface _UpdateSource
+    def each_pair: () { ([String, String]) -> void } -> void
+  end
 
   # Returns true if the database contains the specified string value, false
   # otherwise.
   #
-  def value?: (untyped) -> bool
+  def value?: (String) -> bool
 
   # Returns an array of all the string values in the database.
   #
-  def values: () -> Array[untyped]
+  def values: () -> Array[String]
 
   # Returns an array containing the values associated with the given keys.
   #
-  def values_at: (*String) -> Array[untyped]
+  def values_at: (*String) -> Array[String]
 
   private
 
@@ -237,7 +250,7 @@ class DBM
   #
   # Flags should be one of READER, WRITER, WRCREAT or NEWDB.
   #
-  def initialize: (*untyped) -> self
+  def initialize: (String filename, ?Integer mode, ?Integer flags) -> void
 end
 
 # Indicates that dbm_open() should open the database in read/write mode, create

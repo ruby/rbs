@@ -97,6 +97,9 @@ class DBMTest < Test::Unit::TestCase
   end
 
   def test_store
-    assert_send_type "(String, untyped) -> String", @dbm, :store, "keeey", Hash.new
+    assert_send_type(
+      "(String, String) -> String",
+      @dbm, :store, "keeey", "valuuueee"
+    )
   end
 end
