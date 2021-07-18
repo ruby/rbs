@@ -421,4 +421,24 @@ EOF
     assert env_.buffers.none? {|buf| buf.name == Pathname("foo.rbs") }
     assert env_.buffers.any? {|buf| buf.name == Pathname("bar.rbs") }
   end
+
+  def test_insert_decl_recursive_type_alias_error
+    env = Environment.new
+
+    decl = RBS::Parser.parse_signature(<<EOF)
+type x = x
+type random = Integer | String | random
+type something = Float & Integer & something
+EOF
+
+    assert_raises RBS::RecursiveTypeAliasError do
+      env << decl[0]
+    end
+    assert_raises RBS::RecursiveTypeAliasError do
+      env << decl[1]
+    end
+    assert_raises RBS::RecursiveTypeAliasError do
+      env << decl[2]
+    end
+  end
 end
