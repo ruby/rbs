@@ -30,7 +30,6 @@ module RBS
 
               installed_version = spec.version
               best_version = find_best_version(version: installed_version, versions: collection.versions({ 'name' => spec.name }))
-              # TODO: make gem entry
               config.add_gem({
                 'name' => spec.name,
                 'version' => best_version.to_s,
