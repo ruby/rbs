@@ -23,6 +23,11 @@ module RBS
         new(YAML.load(path.read))
       end
 
+      def self.lockfile_of(config_path)
+        lock_path = to_lockfile_path(config_path)
+        from_path lock_path if lock_path.exist?
+      end
+
       def self.to_lockfile_path(config_path)
         config_path.sub_ext('.lock' + config_path.extname)
       end

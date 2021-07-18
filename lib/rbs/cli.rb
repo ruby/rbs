@@ -6,6 +6,7 @@ module RBS
   class CLI
     class LibraryOptions
       attr_accessor :core_root
+      attr_accessor :config_path
       attr_reader :repos
       attr_reader :libs
       attr_reader :dirs
@@ -16,13 +17,16 @@ module RBS
 
         @libs = []
         @dirs = []
+        @config_path = Collection::Config::PATH
       end
 
       def loader
+        lock = config_path&.then { |p| Collection::Config.lockfile_of(p) }
         repository = Repository.new(no_stdlib: core_root.nil?)
         repos.each do |repo|
           repository.add(Pathname(repo))
         end
+        repository.add(lock.repo_path) if lock
 
         loader = EnvironmentLoader.new(core_root: core_root, repository: repository)
 
@@ -34,6 +38,12 @@ module RBS
           name, version = lib.split(/:/, 2)
           next unless name
           loader.add(library: name, version: version)
+        end
+
+        if lock
+          lock.gems.each do |gem|
+            loader.add(library: gem['name'], version: gem['version'])
+          end
         end
 
         loader
@@ -50,6 +60,14 @@ module RBS
 
         opts.on("--no-stdlib", "Skip loading standard library signatures") do
           self.core_root = nil
+        end
+
+        opts.on('--collection PATH', "File path of collection configration (default: #{Collection::Config::PATH})") do |path|
+          self.config_path = Pathname(path)
+        end
+
+        opts.on('--no-collection', 'Ignore collection configration') do
+          self.config_path = nil
         end
 
         opts.on("--repo DIR", "Add RBS repository") do |dir|

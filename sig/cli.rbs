@@ -2,6 +2,7 @@ module RBS
   class CLI
     class LibraryOptions
       attr_accessor core_root: Pathname?
+      attr_accessor config_path: Pathname?
 
       attr_reader libs: Array[String]
       attr_reader dirs: Array[String]
