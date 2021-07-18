@@ -10,7 +10,7 @@ module RBS
       end
 
       def install_from_lockfile
-        install_to = lockfile.path
+        install_to = lockfile.repo_path
         lockfile.gems.each do |config_entry|
           gem_name = config_entry['name']
           version = config_entry['version']

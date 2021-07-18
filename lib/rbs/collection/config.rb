@@ -39,7 +39,7 @@ module RBS
         gems.find { |gem| gem['name'] == gem_name }
       end
 
-      def path
+      def repo_path
         Pathname(@data['path'])
       end
 

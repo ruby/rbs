@@ -3,7 +3,7 @@ require "test_helper"
 class RBS::Collection::InstallerTest < Test::Unit::TestCase
   def test_install_from_lockfile_1
     mktmpdir do |tmpdir|
-      lockfile_path = tmpdir.join('rbs_collection.lock.yaml', )
+      lockfile_path = tmpdir.join('rbs_collection.lock.yaml')
       dest = tmpdir / 'gem_rbs_collection'
       lockfile_path.write(<<~YAML)
         collections:

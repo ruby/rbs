@@ -8,7 +8,7 @@ module RBS
       end
 
       def clean
-        lock.path.glob('*/*') do |dir|
+        lock.repo_path.glob('*/*') do |dir|
           *_, gem_name, version = dir.to_s.split('/')
           gem_name = _ = gem_name
           version = _ = version
