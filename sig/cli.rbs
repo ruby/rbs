@@ -2,6 +2,7 @@ module RBS
   class CLI
     class LibraryOptions
       attr_accessor core_root: Pathname?
+      attr_accessor config_path: Pathname?
 
       attr_reader libs: Array[String]
       attr_reader dirs: Array[String]
@@ -64,5 +65,7 @@ module RBS
     def run_test: (Array[String], LibraryOptions) -> void
 
     def test_opt: (LibraryOptions) -> String?
+
+    def parse_collection_options: (Array[String]) -> [Array[String], { config_path: String, frozen: boolish }]
   end
 end
