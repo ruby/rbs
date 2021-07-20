@@ -12,6 +12,7 @@ class RBS::Parser
         kPREPEND kEXTENSION kINCOMPATIBLE
         type_TYPE type_SIGNATURE type_METHODTYPE tEOF
         kOUT kIN kUNCHECKED kOVERLOAD
+        kUNDERSCORE
 
   prechigh
   nonassoc kQUESTION
@@ -1326,7 +1327,7 @@ rule
       }
 
   var_name_opt:
-    | tLIDENT | tINTERFACEIDENT | tQUOTEDIDENT | tUNDERSCOREIDENT
+    | tLIDENT | tINTERFACEIDENT | tQUOTEDIDENT | tUNDERSCOREIDENT | kUNDERSCORE
 
   qualified_name:
       namespace simple_name {
@@ -1721,6 +1722,8 @@ def next_token
     new_token(:tLIDENT)
   when input.scan(/_[a-z]\w*\b/)
     new_token(:tUNDERSCOREIDENT)
+  when input.scan(/_/)
+    new_token(:kUNDERSCORE)
   when input.scan(/"(\\"|[^"])*"/)
     s = input.matched.yield_self {|s| s[1, s.length - 2] }
                      .gsub(DBL_QUOTE_STR_ESCAPE_SEQUENCES_RE) do |match|
