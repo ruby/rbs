@@ -2,6 +2,38 @@
 
 ## master
 
+## 1.3.0 (2021-07-20)
+
+### Summary
+
+RBS 1.3.0 includes bug fixees of the parser and class/module definition validations.
+
+### Signature updates
+
+* dbm ([#718](https://github.com/ruby/rbs/pull/718))
+* net-http ([#686](https://github.com/ruby/rbs/pull/686))
+* optparse ([#693](https://github.com/ruby/rbs/pull/693))
+* resolv ([#697](https://github.com/ruby/rbs/pull/697))
+* socket ([#699](https://github.com/ruby/rbs/pull/699))
+* `IO` ([#698](https://github.com/ruby/rbs/pull/698))
+* `Marshal` ([#684](https://github.com/ruby/rbs/pull/684))
+* `Mutex` ([#683](https://github.com/ruby/rbs/pull/683))
+* `Array#shift` ([#707](https://github.com/ruby/rbs/pull/707))
+* `BasicObject#method_missing` ([#707](https://github.com/ruby/rbs/pull/706), [#710](https://github.com/ruby/rbs/pull/710))
+* `Kernel#caller` ([#705](https://github.com/ruby/rbs/pull/705))
+
+### Library changes
+
+* Interface names starting with lower case characters are now syntax error ([#678](https://github.com/ruby/rbs/pull/678), [#720](https://github.com/ruby/rbs/pull/720))
+* Mixins of classes are rejected ([#681](https://github.com/ruby/rbs/pull/681))
+* Generate prototype of `initialize` method with return type `void` ([#685](https://github.com/ruby/rbs/pull/685))
+* Let `prototype runtime` generate class/module declarations in nested syntax ([#700](https://github.com/ruby/rbs/pull/700))
+* Fix race condition for multi-thread support ([#702](https://github.com/ruby/rbs/pull/702))
+
+### Miscellaneous
+
+* Add new doc `docs/rbs_by_example.md` ([#694](https://github.com/ruby/rbs/pull/694))
+
 ## 1.2.1 (2021-05-27)
 
 This release includes the following minor changes:
