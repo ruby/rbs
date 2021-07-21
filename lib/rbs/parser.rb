@@ -340,8 +340,8 @@ def next_token
     new_token(:tLIDENT)
   when input.scan(/_[a-z]\w*\b/)
     new_token(:tUNDERSCOREIDENT)
-  when input.scan(/_/)
-    new_token(:kUNDERSCORE)
+  when input.scan(/_[\w_]*\b/)
+    new_token(:tPARAMNAME)
   when input.scan(/"(\\"|[^"])*"/)
     s = input.matched.yield_self {|s| s[1, s.length - 2] }
                      .gsub(DBL_QUOTE_STR_ESCAPE_SEQUENCES_RE) do |match|
@@ -1228,7 +1228,7 @@ racc_token_table = {
   :kIN => 79,
   :kUNCHECKED => 80,
   :kOVERLOAD => 81,
-  :kUNDERSCORE => 82 }
+  :tPARAMNAME => 82 }
 
 racc_nt_base = 83
 
@@ -1333,7 +1333,7 @@ Racc_token_to_s_table = [
   "kIN",
   "kUNCHECKED",
   "kOVERLOAD",
-  "kUNDERSCORE",
+  "tPARAMNAME",
   "$start",
   "target",
   "type",
