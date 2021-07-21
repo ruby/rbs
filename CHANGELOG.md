@@ -2,6 +2,12 @@
 
 ## master
 
+## 1.3.1 (2021-07-21)
+
+This release is to fix a bug introduced by parser update in 1.3.0.
+
+* Fix parser to accept param names starting with `_` ([#721](https://github.com/ruby/rbs/pull/721))
+
 ## 1.3.0 (2021-07-20)
 
 ### Summary
