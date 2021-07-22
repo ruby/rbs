@@ -1761,10 +1761,26 @@ end
     RBS
   end
 
+  def test_underscore_alias_name
+    Parser.parse_signature(<<-RBS)
+class Hello
+  alias _foo _bar
+end
+    RBS
+  end
+
   def test_underscore_type_name
     assert_raises RBS::Parser::SyntaxError do
       Parser.parse_signature(<<-RBS)
 type _foo = Integer
+      RBS
+    end
+  end
+
+  def test_underscore_qualified_name
+    assert_raises RBS::Parser::SyntaxError do
+      Parser.parse_signature(<<-RBS)
+type x = Foo::_bar
       RBS
     end
   end
