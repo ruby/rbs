@@ -2,6 +2,12 @@
 
 ## master
 
+## 1.3.2 (2021-07-23)
+
+This release is to fix a bug introduced by parser update in 1.3.0.
+
+* Fix parser to accept alias names starting with `_` ([#723](https://github.com/ruby/rbs/pull/723))
+
 ## 1.3.1 (2021-07-21)
 
 This release is to fix a bug introduced by parser update in 1.3.0.
