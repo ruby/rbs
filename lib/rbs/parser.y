@@ -1722,7 +1722,7 @@ def next_token
     new_token(:tLIDENT)
   when input.scan(/_[a-z]\w*\b/)
     new_token(:tUNDERSCOREIDENT)
-  when input.scan(/_[\w_]*\b/)
+  when input.scan(/_\w*\b/)
     new_token(:tPARAMNAME)
   when input.scan(/"(\\"|[^"])*"/)
     s = input.matched.yield_self {|s| s[1, s.length - 2] }
