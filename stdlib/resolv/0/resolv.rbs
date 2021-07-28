@@ -177,7 +177,7 @@ class Resolv::DNS
   # `address` must be a Resolv::IPv4, Resolv::IPv6 or a String.  Retrieved names
   # will be Resolv::DNS::Name instances.
   #
-  def getnames: (ip_address | dns_name address) -> [Resolv::DNS::Name]
+  def getnames: (ip_address | dns_name address) -> Array[Resolv::DNS::Name]
 
   # Look up the `typeclass` DNS resource of `name`.
   #
