@@ -36,7 +36,6 @@ class ResolvDNSSingletonTest < Test::Unit::TestCase
   end
 end
 
-
 class ResolvDNSinstanceTest < Test::Unit::TestCase
   include TypeAssertions
   library 'resolv'
@@ -86,10 +85,12 @@ class ResolvDNSinstanceTest < Test::Unit::TestCase
   end
 
   def test_getaddress
-    assert_send_type "(String) -> (Resolv::IPv4 | Resolv::IPv6)",
-      resolv_dns, :getaddress, "localhost"
-    assert_send_type "(Resolv::DNS::Name) -> (Resolv::IPv4 | Resolv::IPv6)",
-      resolv_dns, :getaddress, Resolv::DNS::Name.create("localhost")
+    allows_error(Resolv::ResolvError) do
+      assert_send_type "(String) -> (Resolv::IPv4 | Resolv::IPv6)",
+                       resolv_dns, :getaddress, "localhost"
+      assert_send_type "(Resolv::DNS::Name) -> (Resolv::IPv4 | Resolv::IPv6)",
+                       resolv_dns, :getaddress, Resolv::DNS::Name.create("localhost")
+    end
   end
 
   def test_getaddresses
@@ -100,12 +101,14 @@ class ResolvDNSinstanceTest < Test::Unit::TestCase
   end
 
   def test_getname
-    assert_send_type "(String) -> Resolv::DNS::Name",
-      resolv_dns, :getname, "127.0.0.1"
-    assert_send_type "(Resolv::IPv4) -> Resolv::DNS::Name",
-      resolv_dns, :getname, Resolv::IPv4.create("127.0.0.1")
-    assert_send_type "(Resolv::DNS::Name) -> Resolv::DNS::Name",
-      resolv_dns, :getname, Resolv::IPv4.create("127.0.0.1").to_name
+    allows_error(Resolv::ResolvError) do
+      assert_send_type "(String) -> Resolv::DNS::Name",
+        resolv_dns, :getname, "127.0.0.1"
+      assert_send_type "(Resolv::IPv4) -> Resolv::DNS::Name",
+        resolv_dns, :getname, Resolv::IPv4.create("127.0.0.1")
+      assert_send_type "(Resolv::DNS::Name) -> Resolv::DNS::Name",
+        resolv_dns, :getname, Resolv::IPv4.create("127.0.0.1").to_name
+    end
   end
 
   def test_getnames
@@ -114,8 +117,10 @@ class ResolvDNSinstanceTest < Test::Unit::TestCase
   end
 
   def test_getresource
-    assert_send_type "(String, singleton(Resolv::DNS::Query)) -> Resolv::DNS::Resource",
-      resolv_dns, :getresource, "localhost", Resolv::DNS::Resource::IN::A
+    allows_error(Resolv::ResolvError) do
+      assert_send_type "(String, singleton(Resolv::DNS::Query)) -> Resolv::DNS::Resource",
+        resolv_dns, :getresource, "localhost", Resolv::DNS::Resource::IN::A
+    end
   end
 
   def test_getresources

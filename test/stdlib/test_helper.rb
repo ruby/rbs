@@ -336,6 +336,12 @@ module TypeAssertions
       definition.methods[method].method_types
     end
   end
+
+  def allows_error(*errors)
+    yield
+  rescue *errors => exn
+    notify "Error allowed: #{exn.inspect}"
+  end
 end
 
 class ToInt
