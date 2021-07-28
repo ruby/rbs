@@ -196,7 +196,7 @@ class ResolvDNSConfigInstanceTest < Test::Unit::TestCase
   end
 
   def test_single?
-    assert_send_type '() -> [String, Integer]',
+    assert_send_type '() -> [String, Integer]?',
       dns_config, :single?
   end
 
