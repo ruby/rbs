@@ -2,6 +2,14 @@
 
 ## master
 
+## 1.3.3 (2021-07-28)
+
+This release includes a minor update of `resolv` library RBS and a fix of test for `ruby/ruby` CI.
+
+### Signature updates
+
+* resolv ([#726](https://github.com/ruby/rbs/pull/726))
+
 ## 1.3.2 (2021-07-23)
 
 This release is to fix a bug introduced by parser update in 1.3.0.
