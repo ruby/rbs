@@ -361,8 +361,7 @@ class Integer < Numeric
   #     18.floor(-1)      #=> 10
   #     (-18).floor(-1)   #=> -20
   #
-  def floor: () -> Integer
-           | (int digits) -> (Integer | Float)
+  def floor: (?int digits) -> Integer
 
   # Returns the greatest common divisor of the two integers. The result is always
   # positive. 0.gcd(x) and x.gcd(0) return x.abs.
