@@ -205,8 +205,8 @@ class Object < BasicObject
   #     enum.first(4) # => [1, 1, 1, 2]
   #     enum.size # => 42
   #
-  def enum_for: (Symbol method, *untyped args) ?{ (*untyped args) -> Integer } -> Enumerator[untyped, untyped]
-              | (*untyped args) ?{ (*untyped args) -> Integer } -> Enumerator[untyped, untyped]
+  def enum_for: (Symbol method, *untyped args) ?{ (*untyped args) -> Integer } -> Enumerator[untyped, self]
+              | (*untyped args) ?{ (*untyped args) -> Integer } -> Enumerator[untyped, self]
 
   # Creates a new Enumerator which will enumerate by calling `method` on `obj`,
   # passing `args` if any.
