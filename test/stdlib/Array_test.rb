@@ -156,6 +156,9 @@ class ArrayInstanceTest < Test::Unit::TestCase
   end
 
   def test_bsearch
+    assert_send_type "() -> Enumerable[String, Integer?]", [0,1,2,3,4],
+                     :bsearch
+
     assert_send_type "() { (Integer) -> (true | false) } -> Integer",
                      [0,1,2,3,4], :bsearch do |x| x > 2 end
     assert_send_type "() { (Integer) -> (true | false) } -> nil",
@@ -188,6 +191,8 @@ class ArrayInstanceTest < Test::Unit::TestCase
   def test_collect
     assert_send_type "() { (Integer) -> String } -> Array[String]",
                      [1,2,3], :collect do |x| x.to_s end
+    assert_send_type "() -> Enumerator[Integer, Array[untyped]]",
+                     [1,2,3], :collect
   end
 
   def test_collect!
@@ -309,10 +314,10 @@ class ArrayInstanceTest < Test::Unit::TestCase
   end
 
   def test_each_index
-    assert_send_type "() { (Integer) -> void } -> Array[Integer]",
-                     [1,2,3], :each_index do end
-    assert_send_type "() -> Enumerator[Integer, Array[Integer]]",
-                     [1,2,3], :each_index
+    assert_send_type "() { (Integer) -> void } -> Array[String]",
+                     ['1','2','3'], :each_index do end
+    assert_send_type "() -> Enumerator[Integer, Array[String]]",
+                     ['1','2','3'], :each_index
   end
 
   def test_empty?
