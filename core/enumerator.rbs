@@ -239,7 +239,7 @@ class Enumerator[unchecked out Elem, out Return] < Object
                 | (?Integer offset) -> ::Enumerator[[ Elem, Integer ], Return]
 
   def with_object: [U] (U arg0) { (Elem arg0, U arg1) -> untyped } -> U
-                 | [U] (U arg0) -> ::Enumerator[[ Elem, U ], Return]
+                 | [U] (U arg0) -> ::Enumerator[[ Elem, U ], U]
 end
 
 class Enumerator::Generator[out Elem] < Object
