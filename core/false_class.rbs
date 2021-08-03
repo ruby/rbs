@@ -5,12 +5,12 @@
 class FalseClass
   public
 
-  def !: () -> bool
+  def !: () -> true
 
   # And---Returns `false`. *obj* is always evaluated as it is the argument to a
   # method call---there is no short-circuit evaluation in this case.
   #
-  def &: (untyped obj) -> bool
+  def &: (untyped obj) -> false
 
   # Case Equality -- For class Object, effectively the same as calling `#==`, but
   # typically overridden by descendants to provide meaningful semantics in `case`
@@ -24,7 +24,7 @@ class FalseClass
   #
   def ^: (nil) -> false
        | (false) -> false
-       | (untyped obj) -> bool
+       | (untyped obj) -> true
 
   alias inspect to_s
 
@@ -36,5 +36,5 @@ class FalseClass
   #
   def |: (nil) -> false
        | (false) -> false
-       | (untyped obj) -> bool
+       | (untyped obj) -> true
 end

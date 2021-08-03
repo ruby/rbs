@@ -5,13 +5,13 @@
 class TrueClass
   public
 
-  def !: () -> bool
+  def !: () -> false
 
   # And---Returns `false` if *obj* is `nil` or `false`, `true` otherwise.
   #
   def &: (nil) -> false
        | (false) -> false
-       | (untyped obj) -> bool
+       | (untyped obj) -> true
 
   # Case Equality -- For class Object, effectively the same as calling `#==`, but
   # typically overridden by descendants to provide meaningful semantics in `case`
@@ -24,7 +24,7 @@ class TrueClass
   #
   def ^: (nil) -> true
        | (false) -> true
-       | (untyped obj) -> bool
+       | (untyped obj) -> false
 
   alias inspect to_s
 
@@ -42,5 +42,5 @@ class TrueClass
   #
   #     or
   #
-  def |: (boolish obj) -> bool
+  def |: (untyped obj) -> true
 end
