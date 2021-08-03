@@ -148,6 +148,46 @@ class EnumerableTest2 < Test::Unit::TestCase
 
   testing "::Enumerable[String]"
 
+  def test_chunk
+    assert_send_type "() -> ::Enumerator[String, ::Enumerator[[untyped, ::Array[String]], void]]",
+                     TestEnumerable.new, :chunk
+    assert_send_type "() { (String) -> Integer } -> ::Enumerator[[Integer, ::Array[String]], void]",
+                     TestEnumerable.new, :chunk do |x| x.to_i end
+  end
+
+  def test_collect_concat
+    assert_send_type "() -> ::Enumerator[String, ::Array[untyped]]",
+                     TestEnumerable.new, :collect_concat
+
+    assert_send_type "{ (String) -> Integer } -> ::Array[Integer]",
+                     TestEnumerable.new, :collect_concat do |x| x.to_i end
+    assert_send_type "{ (String) -> ::Array[Integer] } -> ::Array[Integer]",
+                     TestEnumerable.new, :collect_concat do |x| [x.to_i] end
+  end
+
+  def test_each_with_object
+    assert_send_type "(Integer) -> ::Enumerator[[String, Integer], Integer]",
+                     TestEnumerable.new, :each_with_object, 0
+    assert_send_type "(Integer) { (String, Integer) -> untyped } -> Integer",
+                     TestEnumerable.new, :each_with_object, 0 do end
+  end
+
+  def test_find_index
+    assert_send_type "() -> ::Enumerator[String, Integer?]", TestEnumerable.new,
+                     :find_index
+    assert_send_type "(untyped) -> Integer?", TestEnumerable.new, :find_index,
+                     '0'
+    assert_send_type "() { (String) -> untyped } -> Integer?",
+                     TestEnumerable.new, :find_index do end
+  end
+
+  def test_grepv
+    assert_send_type "(untyped) -> ::Array[String]", TestEnumerable.new,
+                     :grep_v, '0'
+    assert_send_type "(untyped) { (String) -> Integer } -> ::Array[Integer]",
+                     TestEnumerable.new, :grep_v, '0' do 0 end
+  end
+
   def test_inject
     assert_send_type "(String init, Symbol method) -> untyped", TestEnumerable.new, :inject, '', :<<
     assert_send_type "(Symbol method) -> String", TestEnumerable.new, :inject, :+
