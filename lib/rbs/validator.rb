@@ -53,5 +53,10 @@ module RBS
         validate_type(type, context: context)
       end
     end
+
+    def validate_type_alias(entry:)
+      @type_alias_dependency ||= TypeAliasDependency.new(env: env)
+      raise RecursiveTypeAliasError.new(alias_names: [entry.decl.name], location: entry.decl.location) if @type_alias_dependency.circular_definition?(entry.decl.name)
+    end
   end
 end

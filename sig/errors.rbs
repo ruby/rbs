@@ -196,4 +196,13 @@ module RBS
 
     def mixin_name: () -> String
   end
+
+  class RecursiveTypeAliasError < LoadingError
+    attr_reader alias_names: Array[TypeName]
+    attr_reader location: Location
+
+    def initialize: (alias_names: Array[TypeName], location: Location) -> void
+
+    def name: () -> String
+  end
 end
