@@ -451,6 +451,7 @@ EOU
         builder.expand_alias(name).tap do |type|
           validator.validate_type type, context: [Namespace.root]
         end
+        validator.validate_type_alias(entry: decl)
       end
     end
 
