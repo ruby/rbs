@@ -87,7 +87,7 @@ module RBS
             unless const_name(mix)
               RBS.logger.warn("Skipping anonymous module #{mix} included in #{mod}")
             else
-              module_name = module_full_name = to_type_name(const_name(mix))
+              module_name = module_full_name = to_type_name(const_name(mix), full_name: true)
               if module_full_name.namespace == type_name.namespace
                 module_name = TypeName.new(name: module_full_name.name, namespace: Namespace.empty)
               end
