@@ -1,5 +1,5 @@
 require "optparse"
-require_relative "generator"
+require "rbs/json_schema/generator"
 
 module RBS
   module JSONSchema
@@ -14,12 +14,12 @@ module RBS
       end
 
       def setup_initial_options(opts)
-        opts.on("-sBOOL", "--symbolize-keys=BOOL", "Generate types with symbolized keys") do |bool|
-          @options[:symbolize_keys] = bool
+        opts.on("--[no-]stringify-keys", "Generate record types with string keys") do |bool|
+          @options[:stringify_keys] = bool
         end
       end
 
-      def run
+      def run(args)
         OptionParser.new do |opts|
           setup_initial_options(opts)
 
@@ -29,10 +29,10 @@ module RBS
           opts.on("-o OUTPUT", "Output the generated RBS to a specific location") do |location|
             @options[:output] = location
           end
-        end.parse!(ARGV)
+        end.parse!(args)
 
-        @options[:file] = ARGV[0] if ARGV[0]
-        JSONSchema::Generator.new(options: @options, stdout: STDOUT, stderr: STDERR).generate
+        @options[:file] = args[0] if args[0]
+        JSONSchema::Generator.new(options: @options, stdout: stdout, stderr: stderr).generate
       end
     end
   end

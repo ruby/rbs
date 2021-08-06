@@ -1,0 +1,23 @@
+module RBS
+  module JSONSchema
+    class CLI
+      interface _IO
+        def puts: (*untyped) -> void
+
+        def print: (*untyped) -> void
+
+        def flush: () -> void
+      end
+
+      attr_reader stdout: _IO
+
+      attr_reader stderr: _IO
+
+      def initialize: (stdout: _IO, stderr: _IO) -> void
+
+      def setup_initial_options: (OptionParser opts) -> void
+
+      def run: (Array[String] args) -> void
+    end
+  end
+end

@@ -1,0 +1,49 @@
+module RBS
+  module JSONSchema
+    class Generator
+      attr_reader options: Hash[Symbol, untyped]
+
+      interface _IO
+        def puts: (*untyped) -> void
+
+        def print: (*untyped) -> void
+
+        def flush: () -> void
+      end
+
+      attr_reader stdout: _IO
+
+      attr_reader stderr: _IO
+
+      attr_reader name: String
+
+      attr_reader decls: Array[AST::Declarations::Alias]
+
+      SCHEMA_DEFINITIONS: Array[String]
+
+      REF_REGEX_1: untyped
+
+      REF_REGEX_2: untyped
+
+      REF_REGEX_3: untyped
+
+      type value = String | bool
+
+      def initialize: (options: Hash[Symbol, value], stdout: _IO, stderr: _IO) -> untyped
+
+      def type_name: (String name, ?prefix: boolish, ?absolute: boolish) -> TypeName
+
+      def generate: () -> void
+
+      def parse_schema: (Hash[String, untyped] schema) -> Types::t
+
+      def fetch_type: (String `type`, ?name: String, ?absolute: boolish, ?prefix: boolish) -> Types::t
+
+      def read_file: () { (String, String) -> void } -> void
+
+      def write_output: () -> void
+
+      def validate_options: () -> void
+    end
+  end
+end
