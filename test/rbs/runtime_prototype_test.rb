@@ -59,9 +59,9 @@ module RBS
       end
 
       class Test < String
-        include Foo
+        include RBS::RuntimePrototypeTest::TestTargets::Foo
 
-        extend Bar
+        extend RBS::RuntimePrototypeTest::TestTargets::Bar
 
         def self.b: () -> untyped
 
@@ -123,9 +123,9 @@ module RBS
       end
 
       class Test < String
-        include Foo
+        include RBS::RuntimePrototypeTest::TestTargets::Foo
 
-        extend Bar
+        extend RBS::RuntimePrototypeTest::TestTargets::Bar
 
         def self.b: () -> untyped
 
@@ -290,7 +290,7 @@ end
             module RuntimePrototypeTest
               module TestForOverrideModuleName
                 class C
-                  include M
+                  include RBS::RuntimePrototypeTest::TestForOverrideModuleName::M
 
                   def self.name: () -> untyped
 
