@@ -577,7 +577,7 @@ class Array[unchecked out Elem] < Object
   # actually picked up at each iteration.
   #
   def bsearch: () -> ::Enumerator[Elem, Elem?]
-             | () { (Elem) -> bool } -> Elem?
+             | () { (Elem) -> boolish } -> Elem?
              | () { (Elem) -> ::Integer } -> Elem?
 
   # By using binary search, finds an index of a value from this array which meets

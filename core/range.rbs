@@ -179,9 +179,9 @@ class Range[out Elem] < Object
   # (10..20).max    #=> 20
   # ```
   def max: () -> Elem
-         | () { (Elem arg0, Elem arg1) -> Integer } -> Elem
+         | () { (Elem a, Elem b) -> Integer } -> Elem
          | (Integer n) -> ::Array[Elem]
-         | (Integer n) { (Elem arg0, Elem arg1) -> Integer } -> ::Array[Elem]
+         | (Integer n) { (Elem a, Elem b) -> Integer } -> ::Array[Elem]
 
   # Returns the minimum value in the range. Returns `nil` if the begin value
   # of the range is larger than the end value. Returns `nil` if the begin
@@ -194,9 +194,9 @@ class Range[out Elem] < Object
   # (10..20).min    #=> 10
   # ```
   def min: () -> Elem
-         | () { (Elem arg0, Elem arg1) -> Integer } -> Elem
+         | () { (Elem a, Elem b) -> Integer } -> Elem
          | (Integer n) -> ::Array[Elem]
-         | (Integer n) { (Elem arg0, Elem arg1) -> Integer } -> ::Array[Elem]
+         | (Integer n) { (Elem a, Elem b) -> Integer } -> ::Array[Elem]
 
   # Returns the number of elements in the range. Both the begin and the end
   # of the [Range](Range.downloaded.ruby_doc) must be
