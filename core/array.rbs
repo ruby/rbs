@@ -452,7 +452,7 @@ class Array[unchecked out Elem] < Object
   #
   def []: (int index) -> Elem
         | (int start, int length) -> ::Array[Elem]?
-        | (::Range[::Integer] range) -> ::Array[Elem]?
+        | (::Range[::Integer?] range) -> ::Array[Elem]?
 
   # Element Assignment --- Sets the element at `index`, or replaces a subarray
   # from the `start` index for `length` elements, or replaces a subarray specified
@@ -486,9 +486,9 @@ class Array[unchecked out Elem] < Object
          | (int start, int length, Elem obj) -> Elem
          | (int start, int length, ::Array[Elem]) -> ::Array[Elem]
          | (int start, int length, nil) -> nil
-         | (::Range[::Integer], Elem obj) -> Elem
-         | (::Range[::Integer], ::Array[Elem]) -> ::Array[Elem]
-         | (::Range[::Integer], nil) -> nil
+         | (::Range[::Integer?], Elem obj) -> Elem
+         | (::Range[::Integer?], ::Array[Elem]) -> ::Array[Elem]
+         | (::Range[::Integer?], nil) -> nil
 
   # See also Enumerable#all?
   #

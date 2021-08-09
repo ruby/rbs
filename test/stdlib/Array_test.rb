@@ -102,6 +102,8 @@ class ArrayInstanceTest < Test::Unit::TestCase
                      [1,2,3], :[], 0...1
     assert_send_type "(Range[Integer]) -> nil",
                      [1,2,3], :[], 5..8
+    assert_send_type "(Range[Integer?]) -> Array[Integer]",
+                     [1,2,3], :[], 0...nil
   end
 
   def test_aupdate
@@ -121,6 +123,8 @@ class ArrayInstanceTest < Test::Unit::TestCase
                      [1,2,3], :[]=, 0...2, [-1]
     assert_send_type "(Range[Integer], nil) -> nil",
                      [1,2,3], :[]=, 0...2, nil
+    assert_send_type "(Range[Integer?], Integer) -> Integer",
+                     [1,2,3], :[]=, 0..nil, -1
   end
 
   def test_all?
