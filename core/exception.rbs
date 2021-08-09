@@ -185,6 +185,7 @@ class Exception < Object
   def message: () -> String
 
   def set_backtrace: (String | ::Array[String] arg0) -> ::Array[String]
+                   | (nil) -> nil
 
   # Returns exception’s message (or the name of the exception if no message
   # is set).
