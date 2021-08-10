@@ -1,0 +1,3724 @@
+# OpenSSL provides SSL, TLS and general purpose cryptography.  It wraps the
+# [OpenSSL](https://www.openssl.org/) library.
+#
+# # Examples
+#
+# All examples assume you have loaded OpenSSL with:
+#
+#     require 'openssl'
+#
+# These examples build atop each other.  For example the key created in the next
+# is used in throughout these examples.
+#
+# ## Keys
+#
+# ### Creating a Key
+#
+# This example creates a 2048 bit RSA keypair and writes it to the current
+# directory.
+#
+#     key = OpenSSL::PKey::RSA.new 2048
+#
+#     open 'private_key.pem', 'w' do |io| io.write key.to_pem end
+#     open 'public_key.pem', 'w' do |io| io.write key.public_key.to_pem end
+#
+# ### Exporting a Key
+#
+# Keys saved to disk without encryption are not secure as anyone who gets ahold
+# of the key may use it unless it is encrypted.  In order to securely export a
+# key you may export it with a pass phrase.
+#
+#     cipher = OpenSSL::Cipher.new 'AES-256-CBC'
+#     pass_phrase = 'my secure pass phrase goes here'
+#
+#     key_secure = key.export cipher, pass_phrase
+#
+#     open 'private.secure.pem', 'w' do |io|
+#       io.write key_secure
+#     end
+#
+# OpenSSL::Cipher.ciphers returns a list of available ciphers.
+#
+# ### Loading a Key
+#
+# A key can also be loaded from a file.
+#
+#     key2 = OpenSSL::PKey::RSA.new File.read 'private_key.pem'
+#     key2.public? # => true
+#     key2.private? # => true
+#
+# or
+#
+#     key3 = OpenSSL::PKey::RSA.new File.read 'public_key.pem'
+#     key3.public? # => true
+#     key3.private? # => false
+#
+# ### Loading an Encrypted Key
+#
+# OpenSSL will prompt you for your pass phrase when loading an encrypted key. If
+# you will not be able to type in the pass phrase you may provide it when
+# loading the key:
+#
+#     key4_pem = File.read 'private.secure.pem'
+#     pass_phrase = 'my secure pass phrase goes here'
+#     key4 = OpenSSL::PKey::RSA.new key4_pem, pass_phrase
+#
+# ## RSA Encryption
+#
+# RSA provides encryption and decryption using the public and private keys. You
+# can use a variety of padding methods depending upon the intended use of
+# encrypted data.
+#
+# ### Encryption & Decryption
+#
+# Asymmetric public/private key encryption is slow and victim to attack in cases
+# where it is used without padding or directly to encrypt larger chunks of data.
+# Typical use cases for RSA encryption involve "wrapping" a symmetric key with
+# the public key of the recipient who would "unwrap" that symmetric key again
+# using their private key. The following illustrates a simplified example of
+# such a key transport scheme. It shouldn't be used in practice, though,
+# standardized protocols should always be preferred.
+#
+#     wrapped_key = key.public_encrypt key
+#
+# A symmetric key encrypted with the public key can only be decrypted with the
+# corresponding private key of the recipient.
+#
+#     original_key = key.private_decrypt wrapped_key
+#
+# By default PKCS#1 padding will be used, but it is also possible to use other
+# forms of padding, see PKey::RSA for further details.
+#
+# ### Signatures
+#
+# Using "private_encrypt" to encrypt some data with the private key is
+# equivalent to applying a digital signature to the data. A verifying party may
+# validate the signature by comparing the result of decrypting the signature
+# with "public_decrypt" to the original data. However, OpenSSL::PKey already has
+# methods "sign" and "verify" that handle digital signatures in a standardized
+# way - "private_encrypt" and "public_decrypt" shouldn't be used in practice.
+#
+# To sign a document, a cryptographically secure hash of the document is
+# computed first, which is then signed using the private key.
+#
+#     signature = key.sign 'SHA256', document
+#
+# To validate the signature, again a hash of the document is computed and the
+# signature is decrypted using the public key. The result is then compared to
+# the hash just computed, if they are equal the signature was valid.
+#
+#     if key.verify 'SHA256', signature, document
+#       puts 'Valid'
+#     else
+#       puts 'Invalid'
+#     end
+#
+# ## PBKDF2 Password-based Encryption
+#
+# If supported by the underlying OpenSSL version used, Password-based Encryption
+# should use the features of PKCS5. If not supported or if required by legacy
+# applications, the older, less secure methods specified in RFC 2898 are also
+# supported (see below).
+#
+# PKCS5 supports PBKDF2 as it was specified in PKCS#5
+# [v2.0](http://www.rsa.com/rsalabs/node.asp?id=2127). It still uses a password,
+# a salt, and additionally a number of iterations that will slow the key
+# derivation process down. The slower this is, the more work it requires being
+# able to brute-force the resulting key.
+#
+# ### Encryption
+#
+# The strategy is to first instantiate a Cipher for encryption, and then to
+# generate a random IV plus a key derived from the password using PBKDF2. PKCS
+# #5 v2.0 recommends at least 8 bytes for the salt, the number of iterations
+# largely depends on the hardware being used.
+#
+#     cipher = OpenSSL::Cipher.new 'AES-256-CBC'
+#     cipher.encrypt
+#     iv = cipher.random_iv
+#
+#     pwd = 'some hopefully not to easily guessable password'
+#     salt = OpenSSL::Random.random_bytes 16
+#     iter = 20000
+#     key_len = cipher.key_len
+#     digest = OpenSSL::Digest.new('SHA256')
+#
+#     key = OpenSSL::PKCS5.pbkdf2_hmac(pwd, salt, iter, key_len, digest)
+#     cipher.key = key
+#
+#     Now encrypt the data:
+#
+#     encrypted = cipher.update document
+#     encrypted << cipher.final
+#
+# ### Decryption
+#
+# Use the same steps as before to derive the symmetric AES key, this time
+# setting the Cipher up for decryption.
+#
+#     cipher = OpenSSL::Cipher.new 'AES-256-CBC'
+#     cipher.decrypt
+#     cipher.iv = iv # the one generated with #random_iv
+#
+#     pwd = 'some hopefully not to easily guessable password'
+#     salt = ... # the one generated above
+#     iter = 20000
+#     key_len = cipher.key_len
+#     digest = OpenSSL::Digest.new('SHA256')
+#
+#     key = OpenSSL::PKCS5.pbkdf2_hmac(pwd, salt, iter, key_len, digest)
+#     cipher.key = key
+#
+#     Now decrypt the data:
+#
+#     decrypted = cipher.update encrypted
+#     decrypted << cipher.final
+#
+# ## PKCS #5 Password-based Encryption
+#
+# PKCS #5 is a password-based encryption standard documented at
+# [RFC2898](http://www.ietf.org/rfc/rfc2898.txt).  It allows a short password or
+# passphrase to be used to create a secure encryption key. If possible, PBKDF2
+# as described above should be used if the circumstances allow it.
+#
+# PKCS #5 uses a Cipher, a pass phrase and a salt to generate an encryption key.
+#
+#     pass_phrase = 'my secure pass phrase goes here'
+#     salt = '8 octets'
+#
+# ### Encryption
+#
+# First set up the cipher for encryption
+#
+#     encryptor = OpenSSL::Cipher.new 'AES-256-CBC'
+#     encryptor.encrypt
+#     encryptor.pkcs5_keyivgen pass_phrase, salt
+#
+# Then pass the data you want to encrypt through
+#
+#     encrypted = encryptor.update 'top secret document'
+#     encrypted << encryptor.final
+#
+# ### Decryption
+#
+# Use a new Cipher instance set up for decryption
+#
+#     decryptor = OpenSSL::Cipher.new 'AES-256-CBC'
+#     decryptor.decrypt
+#     decryptor.pkcs5_keyivgen pass_phrase, salt
+#
+# Then pass the data you want to decrypt through
+#
+#     plain = decryptor.update encrypted
+#     plain << decryptor.final
+#
+# ## X509 Certificates
+#
+# ### Creating a Certificate
+#
+# This example creates a self-signed certificate using an RSA key and a SHA1
+# signature.
+#
+#     key = OpenSSL::PKey::RSA.new 2048
+#     name = OpenSSL::X509::Name.parse '/CN=nobody/DC=example'
+#
+#     cert = OpenSSL::X509::Certificate.new
+#     cert.version = 2
+#     cert.serial = 0
+#     cert.not_before = Time.now
+#     cert.not_after = Time.now + 3600
+#
+#     cert.public_key = key.public_key
+#     cert.subject = name
+#
+# ### Certificate Extensions
+#
+# You can add extensions to the certificate with OpenSSL::SSL::ExtensionFactory
+# to indicate the purpose of the certificate.
+#
+#     extension_factory = OpenSSL::X509::ExtensionFactory.new nil, cert
+#
+#     cert.add_extension \
+#       extension_factory.create_extension('basicConstraints', 'CA:FALSE', true)
+#
+#     cert.add_extension \
+#       extension_factory.create_extension(
+#         'keyUsage', 'keyEncipherment,dataEncipherment,digitalSignature')
+#
+#     cert.add_extension \
+#       extension_factory.create_extension('subjectKeyIdentifier', 'hash')
+#
+# The list of supported extensions (and in some cases their possible values) can
+# be derived from the "objects.h" file in the OpenSSL source code.
+#
+# ### Signing a Certificate
+#
+# To sign a certificate set the issuer and use OpenSSL::X509::Certificate#sign
+# with a digest algorithm.  This creates a self-signed cert because we're using
+# the same name and key to sign the certificate as was used to create the
+# certificate.
+#
+#     cert.issuer = name
+#     cert.sign key, OpenSSL::Digest.new('SHA1')
+#
+#     open 'certificate.pem', 'w' do |io| io.write cert.to_pem end
+#
+# ### Loading a Certificate
+#
+# Like a key, a cert can also be loaded from a file.
+#
+#     cert2 = OpenSSL::X509::Certificate.new File.read 'certificate.pem'
+#
+# ### Verifying a Certificate
+#
+# Certificate#verify will return true when a certificate was signed with the
+# given public key.
+#
+#     raise 'certificate can not be verified' unless cert2.verify key
+#
+# ## Certificate Authority
+#
+# A certificate authority (CA) is a trusted third party that allows you to
+# verify the ownership of unknown certificates.  The CA issues key signatures
+# that indicate it trusts the user of that key.  A user encountering the key can
+# verify the signature by using the CA's public key.
+#
+# ### CA Key
+#
+# CA keys are valuable, so we encrypt and save it to disk and make sure it is
+# not readable by other users.
+#
+#     ca_key = OpenSSL::PKey::RSA.new 2048
+#     pass_phrase = 'my secure pass phrase goes here'
+#
+#     cipher = OpenSSL::Cipher.new 'AES-256-CBC'
+#
+#     open 'ca_key.pem', 'w', 0400 do |io|
+#       io.write ca_key.export(cipher, pass_phrase)
+#     end
+#
+# ### CA Certificate
+#
+# A CA certificate is created the same way we created a certificate above, but
+# with different extensions.
+#
+#     ca_name = OpenSSL::X509::Name.parse '/CN=ca/DC=example'
+#
+#     ca_cert = OpenSSL::X509::Certificate.new
+#     ca_cert.serial = 0
+#     ca_cert.version = 2
+#     ca_cert.not_before = Time.now
+#     ca_cert.not_after = Time.now + 86400
+#
+#     ca_cert.public_key = ca_key.public_key
+#     ca_cert.subject = ca_name
+#     ca_cert.issuer = ca_name
+#
+#     extension_factory = OpenSSL::X509::ExtensionFactory.new
+#     extension_factory.subject_certificate = ca_cert
+#     extension_factory.issuer_certificate = ca_cert
+#
+#     ca_cert.add_extension \
+#       extension_factory.create_extension('subjectKeyIdentifier', 'hash')
+#
+# This extension indicates the CA's key may be used as a CA.
+#
+#     ca_cert.add_extension \
+#       extension_factory.create_extension('basicConstraints', 'CA:TRUE', true)
+#
+# This extension indicates the CA's key may be used to verify signatures on both
+# certificates and certificate revocations.
+#
+#     ca_cert.add_extension \
+#       extension_factory.create_extension(
+#         'keyUsage', 'cRLSign,keyCertSign', true)
+#
+# Root CA certificates are self-signed.
+#
+#     ca_cert.sign ca_key, OpenSSL::Digest.new('SHA1')
+#
+# The CA certificate is saved to disk so it may be distributed to all the users
+# of the keys this CA will sign.
+#
+#     open 'ca_cert.pem', 'w' do |io|
+#       io.write ca_cert.to_pem
+#     end
+#
+# ### Certificate Signing Request
+#
+# The CA signs keys through a Certificate Signing Request (CSR).  The CSR
+# contains the information necessary to identify the key.
+#
+#     csr = OpenSSL::X509::Request.new
+#     csr.version = 0
+#     csr.subject = name
+#     csr.public_key = key.public_key
+#     csr.sign key, OpenSSL::Digest.new('SHA1')
+#
+# A CSR is saved to disk and sent to the CA for signing.
+#
+#     open 'csr.pem', 'w' do |io|
+#       io.write csr.to_pem
+#     end
+#
+# ### Creating a Certificate from a CSR
+#
+# Upon receiving a CSR the CA will verify it before signing it.  A minimal
+# verification would be to check the CSR's signature.
+#
+#     csr = OpenSSL::X509::Request.new File.read 'csr.pem'
+#
+#     raise 'CSR can not be verified' unless csr.verify csr.public_key
+#
+# After verification a certificate is created, marked for various usages, signed
+# with the CA key and returned to the requester.
+#
+#     csr_cert = OpenSSL::X509::Certificate.new
+#     csr_cert.serial = 0
+#     csr_cert.version = 2
+#     csr_cert.not_before = Time.now
+#     csr_cert.not_after = Time.now + 600
+#
+#     csr_cert.subject = csr.subject
+#     csr_cert.public_key = csr.public_key
+#     csr_cert.issuer = ca_cert.subject
+#
+#     extension_factory = OpenSSL::X509::ExtensionFactory.new
+#     extension_factory.subject_certificate = csr_cert
+#     extension_factory.issuer_certificate = ca_cert
+#
+#     csr_cert.add_extension \
+#       extension_factory.create_extension('basicConstraints', 'CA:FALSE')
+#
+#     csr_cert.add_extension \
+#       extension_factory.create_extension(
+#         'keyUsage', 'keyEncipherment,dataEncipherment,digitalSignature')
+#
+#     csr_cert.add_extension \
+#       extension_factory.create_extension('subjectKeyIdentifier', 'hash')
+#
+#     csr_cert.sign ca_key, OpenSSL::Digest.new('SHA1')
+#
+#     open 'csr_cert.pem', 'w' do |io|
+#       io.write csr_cert.to_pem
+#     end
+#
+# ## SSL and TLS Connections
+#
+# Using our created key and certificate we can create an SSL or TLS connection.
+# An SSLContext is used to set up an SSL session.
+#
+#     context = OpenSSL::SSL::SSLContext.new
+#
+# ### SSL Server
+#
+# An SSL server requires the certificate and private key to communicate securely
+# with its clients:
+#
+#     context.cert = cert
+#     context.key = key
+#
+# Then create an SSLServer with a TCP server socket and the context.  Use the
+# SSLServer like an ordinary TCP server.
+#
+#     require 'socket'
+#
+#     tcp_server = TCPServer.new 5000
+#     ssl_server = OpenSSL::SSL::SSLServer.new tcp_server, context
+#
+#     loop do
+#       ssl_connection = ssl_server.accept
+#
+#       data = connection.gets
+#
+#       response = "I got #{data.dump}"
+#       puts response
+#
+#       connection.puts "I got #{data.dump}"
+#       connection.close
+#     end
+#
+# ### SSL client
+#
+# An SSL client is created with a TCP socket and the context. SSLSocket#connect
+# must be called to initiate the SSL handshake and start encryption.  A key and
+# certificate are not required for the client socket.
+#
+# Note that SSLSocket#close doesn't close the underlying socket by default. Set
+# SSLSocket#sync_close to true if you want.
+#
+#     require 'socket'
+#
+#     tcp_socket = TCPSocket.new 'localhost', 5000
+#     ssl_client = OpenSSL::SSL::SSLSocket.new tcp_socket, context
+#     ssl_client.sync_close = true
+#     ssl_client.connect
+#
+#     ssl_client.puts "hello server!"
+#     puts ssl_client.gets
+#
+#     ssl_client.close # shutdown the TLS connection and close tcp_socket
+#
+# ### Peer Verification
+#
+# An unverified SSL connection does not provide much security.  For enhanced
+# security the client or server can verify the certificate of its peer.
+#
+# The client can be modified to verify the server's certificate against the
+# certificate authority's certificate:
+#
+#     context.ca_file = 'ca_cert.pem'
+#     context.verify_mode = OpenSSL::SSL::VERIFY_PEER
+#
+#     require 'socket'
+#
+#     tcp_socket = TCPSocket.new 'localhost', 5000
+#     ssl_client = OpenSSL::SSL::SSLSocket.new tcp_socket, context
+#     ssl_client.connect
+#
+#     ssl_client.puts "hello server!"
+#     puts ssl_client.gets
+#
+# If the server certificate is invalid or `context.ca_file` is not set when
+# verifying peers an OpenSSL::SSL::SSLError will be raised.
+module OpenSSL
+  # Returns a Digest subclass by *name*
+  #
+  #     require 'openssl'
+  #
+  #     OpenSSL::Digest("MD5")
+  #     # => OpenSSL::Digest::MD5
+  #
+  #     Digest("Foo")
+  #     # => NameError: wrong constant name Foo
+  #
+  # # arglists 💪👽🚨 << Delete this section
+  #     Digest(name)
+  #
+  def self.Digest: (String name) -> singleton(Digest)
+
+  def self.debug: () -> untyped
+
+  # Turns on or off debug mode. With debug mode, all erros added to the OpenSSL
+  # error queue will be printed to stderr.
+  #
+  # # arglists 💪👽🚨 << Delete this section
+  #     OpenSSL.debug = boolean -> boolean
+  #
+  def self.debug=: (untyped) -> untyped
+
+  # See any remaining errors held in queue.
+  #
+  # Any errors you see here are probably due to a bug in Ruby's OpenSSL
+  # implementation.
+  #
+  # # arglists 💪👽🚨 << Delete this section
+  #     OpenSSL.errors -> [String...]
+  #
+  def self.errors: () -> untyped
+
+  def self.fips_mode: () -> untyped
+
+  # Turns FIPS mode on or off. Turning on FIPS mode will obviously only have an
+  # effect for FIPS-capable installations of the OpenSSL library. Trying to do so
+  # otherwise will result in an error.
+  #
+  # ### Examples
+  #     OpenSSL.fips_mode = true   # turn FIPS mode on
+  #     OpenSSL.fips_mode = false  # and off again
+  #
+  # # arglists 💪👽🚨 << Delete this section
+  #     OpenSSL.fips_mode = boolean -> boolean
+  #
+  def self.fips_mode=: (untyped) -> untyped
+
+  # Constant time memory comparison for fixed length strings, such as results of
+  # HMAC calculations.
+  #
+  # Returns `true` if the strings are identical, `false` if they are of the same
+  # length but not identical. If the length is different, `ArgumentError` is
+  # raised.
+  #
+  # # arglists 💪👽🚨 << Delete this section
+  #     OpenSSL.fixed_length_secure_compare(string, string) -> boolean
+  #
+  def self.fixed_length_secure_compare: (untyped, untyped) -> untyped
+
+  # Constant time memory comparison. Inputs are hashed using SHA-256 to mask the
+  # length of the secret. Returns `true` if the strings are identical, `false`
+  # otherwise.
+  #
+  # # arglists 💪👽🚨 << Delete this section
+  #     OpenSSL.secure_compare(string, string) -> boolean
+  #
+  def self.secure_compare: (untyped a, untyped b) -> untyped
+
+  private
+
+  # Returns a Digest subclass by *name*
+  #
+  #     require 'openssl'
+  #
+  #     OpenSSL::Digest("MD5")
+  #     # => OpenSSL::Digest::MD5
+  #
+  #     Digest("Foo")
+  #     # => NameError: wrong constant name Foo
+  #
+  # # arglists 💪👽🚨 << Delete this section
+  #     Digest(name)
+  #
+  def Digest: (untyped name) -> untyped
+
+  def debug: () -> untyped
+
+  def debug=: (untyped) -> untyped
+
+  def errors: () -> untyped
+
+  def fips_mode: () -> untyped
+
+  def fips_mode=: (untyped) -> untyped
+
+  OPENSSL_FIPS: bool
+
+  OPENSSL_LIBRARY_VERSION: String
+
+  OPENSSL_VERSION: String
+
+  OPENSSL_VERSION_NUMBER: Integer
+
+  VERSION: String
+
+  module ASN1
+    def self.BMPString: (*untyped) -> untyped
+
+    def self.BitString: (*untyped) -> untyped
+
+    def self.Boolean: (*untyped) -> untyped
+
+    def self.EndOfContent: (*untyped) -> untyped
+
+    def self.Enumerated: (*untyped) -> untyped
+
+    def self.GeneralString: (*untyped) -> untyped
+
+    def self.GeneralizedTime: (*untyped) -> untyped
+
+    def self.GraphicString: (*untyped) -> untyped
+
+    def self.IA5String: (*untyped) -> untyped
+
+    def self.ISO64String: (*untyped) -> untyped
+
+    def self.Integer: (*untyped) -> untyped
+
+    def self.Null: (*untyped) -> untyped
+
+    def self.NumericString: (*untyped) -> untyped
+
+    def self.ObjectId: (*untyped) -> untyped
+
+    def self.OctetString: (*untyped) -> untyped
+
+    def self.PrintableString: (*untyped) -> untyped
+
+    def self.Sequence: (*untyped) -> untyped
+
+    def self.Set: (*untyped) -> untyped
+
+    def self.T61String: (*untyped) -> untyped
+
+    def self.UTCTime: (*untyped) -> untyped
+
+    def self.UTF8String: (*untyped) -> untyped
+
+    def self.UniversalString: (*untyped) -> untyped
+
+    def self.VideotexString: (*untyped) -> untyped
+
+    def self.decode: (untyped) -> untyped
+
+    def self.decode_all: (untyped) -> untyped
+
+    def self.traverse: (untyped) -> untyped
+
+    private
+
+    def BMPString: (*untyped) -> untyped
+
+    def BitString: (*untyped) -> untyped
+
+    def Boolean: (*untyped) -> untyped
+
+    def EndOfContent: (*untyped) -> untyped
+
+    def Enumerated: (*untyped) -> untyped
+
+    def GeneralString: (*untyped) -> untyped
+
+    def GeneralizedTime: (*untyped) -> untyped
+
+    def GraphicString: (*untyped) -> untyped
+
+    def IA5String: (*untyped) -> untyped
+
+    def ISO64String: (*untyped) -> untyped
+
+    def Integer: (*untyped) -> untyped
+
+    def Null: (*untyped) -> untyped
+
+    def NumericString: (*untyped) -> untyped
+
+    def ObjectId: (*untyped) -> untyped
+
+    def OctetString: (*untyped) -> untyped
+
+    def PrintableString: (*untyped) -> untyped
+
+    def Sequence: (*untyped) -> untyped
+
+    def Set: (*untyped) -> untyped
+
+    def T61String: (*untyped) -> untyped
+
+    def UTCTime: (*untyped) -> untyped
+
+    def UTF8String: (*untyped) -> untyped
+
+    def UniversalString: (*untyped) -> untyped
+
+    def VideotexString: (*untyped) -> untyped
+
+    def decode: (untyped) -> untyped
+
+    def decode_all: (untyped) -> untyped
+
+    def traverse: (untyped) -> untyped
+
+    BIT_STRING: Integer
+
+    BMPSTRING: Integer
+
+    BOOLEAN: Integer
+
+    CHARACTER_STRING: Integer
+
+    EMBEDDED_PDV: Integer
+
+    ENUMERATED: Integer
+
+    EOC: Integer
+
+    EXTERNAL: Integer
+
+    GENERALIZEDTIME: Integer
+
+    GENERALSTRING: Integer
+
+    GRAPHICSTRING: Integer
+
+    IA5STRING: Integer
+
+    INTEGER: Integer
+
+    ISO64STRING: Integer
+
+    NULL: Integer
+
+    NUMERICSTRING: Integer
+
+    OBJECT: Integer
+
+    OBJECT_DESCRIPTOR: Integer
+
+    OCTET_STRING: Integer
+
+    PRINTABLESTRING: Integer
+
+    REAL: Integer
+
+    RELATIVE_OID: Integer
+
+    SEQUENCE: Integer
+
+    SET: Integer
+
+    T61STRING: Integer
+
+    UNIVERSALSTRING: Integer
+
+    UNIVERSAL_TAG_NAME: Array[untyped]
+
+    UTCTIME: Integer
+
+    UTF8STRING: Integer
+
+    VIDEOTEXSTRING: Integer
+
+    class ASN1Data
+      public
+
+      def indefinite_length: () -> untyped
+
+      def indefinite_length=: (untyped) -> untyped
+
+      alias infinite_length indefinite_length
+
+      alias infinite_length= indefinite_length=
+
+      def tag: () -> untyped
+
+      def tag=: (untyped) -> untyped
+
+      def tag_class: () -> untyped
+
+      def tag_class=: (untyped) -> untyped
+
+      def to_der: () -> untyped
+
+      def value: () -> untyped
+
+      def value=: (untyped) -> untyped
+
+      private
+
+      def initialize: (untyped, untyped, untyped) -> void
+    end
+
+    class ASN1Error < OpenSSL::OpenSSLError
+    end
+
+    class BMPString < OpenSSL::ASN1::Primitive
+    end
+
+    class BitString < OpenSSL::ASN1::Primitive
+      public
+
+      def unused_bits: () -> untyped
+
+      def unused_bits=: (untyped) -> untyped
+    end
+
+    class Boolean < OpenSSL::ASN1::Primitive
+    end
+
+    class Constructive < OpenSSL::ASN1::ASN1Data
+      include Enumerable[untyped]
+
+      public
+
+      def each: () -> untyped
+
+      def tagging: () -> untyped
+
+      def tagging=: (untyped) -> untyped
+
+      def to_der: () -> untyped
+
+      private
+
+      def initialize: (*untyped) -> void
+    end
+
+    class EndOfContent < OpenSSL::ASN1::ASN1Data
+      public
+
+      def to_der: () -> untyped
+
+      private
+
+      def initialize: () -> void
+    end
+
+    class Enumerated < OpenSSL::ASN1::Primitive
+    end
+
+    class GeneralString < OpenSSL::ASN1::Primitive
+    end
+
+    class GeneralizedTime < OpenSSL::ASN1::Primitive
+    end
+
+    class GraphicString < OpenSSL::ASN1::Primitive
+    end
+
+    class IA5String < OpenSSL::ASN1::Primitive
+    end
+
+    class ISO64String < OpenSSL::ASN1::Primitive
+    end
+
+    class Integer < OpenSSL::ASN1::Primitive
+    end
+
+    class Null < OpenSSL::ASN1::Primitive
+    end
+
+    class NumericString < OpenSSL::ASN1::Primitive
+    end
+
+    class ObjectId < OpenSSL::ASN1::Primitive
+      def self.register: (untyped, untyped, untyped) -> untyped
+
+      public
+
+      def ==: (untyped) -> untyped
+
+      def ln: () -> untyped
+
+      alias long_name ln
+
+      def oid: () -> untyped
+
+      alias short_name sn
+
+      def sn: () -> untyped
+    end
+
+    class OctetString < OpenSSL::ASN1::Primitive
+    end
+
+    class Primitive < OpenSSL::ASN1::ASN1Data
+      public
+
+      def tagging: () -> untyped
+
+      def tagging=: (untyped) -> untyped
+
+      def to_der: () -> untyped
+
+      private
+
+      def initialize: (*untyped) -> void
+    end
+
+    class PrintableString < OpenSSL::ASN1::Primitive
+    end
+
+    class Sequence < OpenSSL::ASN1::Constructive
+    end
+
+    class Set < OpenSSL::ASN1::Constructive
+    end
+
+    class T61String < OpenSSL::ASN1::Primitive
+    end
+
+    class UTCTime < OpenSSL::ASN1::Primitive
+    end
+
+    class UTF8String < OpenSSL::ASN1::Primitive
+    end
+
+    class UniversalString < OpenSSL::ASN1::Primitive
+    end
+
+    class VideotexString < OpenSSL::ASN1::Primitive
+    end
+  end
+
+  class BN
+    include Comparable
+
+    def self.generate_prime: (*untyped) -> untyped
+
+    def self.pseudo_rand: (*untyped) -> untyped
+
+    def self.pseudo_rand_range: (untyped) -> untyped
+
+    def self.rand: (*untyped) -> untyped
+
+    def self.rand_range: (untyped) -> untyped
+
+    public
+
+    def %: (untyped) -> untyped
+
+    def *: (untyped) -> untyped
+
+    def **: (untyped) -> untyped
+
+    def +: (untyped) -> untyped
+
+    def +@: () -> untyped
+
+    def -: (untyped) -> untyped
+
+    def -@: () -> untyped
+
+    def /: (untyped) -> untyped
+
+    def <<: (untyped) -> untyped
+
+    alias <=> cmp
+
+    def ==: (untyped) -> untyped
+
+    alias === ==
+
+    def >>: (untyped) -> untyped
+
+    def bit_set?: (untyped) -> untyped
+
+    def clear_bit!: (untyped) -> untyped
+
+    def cmp: (untyped) -> untyped
+
+    def coerce: (untyped) -> untyped
+
+    def copy: (untyped) -> untyped
+
+    def eql?: (untyped) -> untyped
+
+    def gcd: (untyped) -> untyped
+
+    def hash: () -> untyped
+
+    def lshift!: (untyped) -> untyped
+
+    def mask_bits!: (untyped) -> untyped
+
+    def mod_add: (untyped, untyped) -> untyped
+
+    def mod_exp: (untyped, untyped) -> untyped
+
+    def mod_inverse: (untyped) -> untyped
+
+    def mod_mul: (untyped, untyped) -> untyped
+
+    def mod_sqr: (untyped) -> untyped
+
+    def mod_sub: (untyped, untyped) -> untyped
+
+    def negative?: () -> untyped
+
+    def num_bits: () -> untyped
+
+    def num_bytes: () -> untyped
+
+    def odd?: () -> untyped
+
+    def one?: () -> untyped
+
+    def pretty_print: (untyped q) -> untyped
+
+    def prime?: (*untyped) -> untyped
+
+    def prime_fasttest?: (*untyped) -> untyped
+
+    def rshift!: (untyped) -> untyped
+
+    def set_bit!: (untyped) -> untyped
+
+    def sqr: () -> untyped
+
+    def to_bn: () -> untyped
+
+    def to_i: () -> untyped
+
+    alias to_int to_i
+
+    def to_s: (*untyped) -> untyped
+
+    def ucmp: (untyped) -> untyped
+
+    def zero?: () -> untyped
+
+    private
+
+    def initialize: (*untyped) -> void
+
+    def initialize_copy: (untyped) -> untyped
+  end
+
+  class BNError < OpenSSL::OpenSSLError
+  end
+
+  module Buffering
+    include Enumerable[untyped]
+
+    public
+
+    def <<: (untyped s) -> untyped
+
+    def close: () -> untyped
+
+    def each: (?untyped eol) -> untyped
+
+    def each_byte: () -> untyped
+
+    alias each_line each
+
+    alias eof eof?
+
+    def eof?: () -> untyped
+
+    def flush: () -> untyped
+
+    def getc: () -> untyped
+
+    def gets: (?untyped eol, ?untyped limit) -> untyped
+
+    def print: (*untyped args) -> untyped
+
+    def printf: (untyped s, *untyped args) -> untyped
+
+    def puts: (*untyped args) -> untyped
+
+    def read: (?untyped size, ?untyped buf) -> untyped
+
+    def read_nonblock: (untyped maxlen, ?untyped buf, ?exception: untyped) -> untyped
+
+    def readchar: () -> untyped
+
+    def readline: (?untyped eol) -> untyped
+
+    def readlines: (?untyped eol) -> untyped
+
+    def readpartial: (untyped maxlen, ?untyped buf) -> untyped
+
+    def sync: () -> untyped
+
+    def sync=: (untyped) -> untyped
+
+    def ungetc: (untyped c) -> untyped
+
+    def write: (*untyped s) -> untyped
+
+    def write_nonblock: (untyped s, ?exception: untyped) -> untyped
+
+    private
+
+    def consume_rbuff: (?untyped size) -> untyped
+
+    def do_write: (untyped s) -> untyped
+
+    def fill_rbuff: () -> untyped
+
+    def initialize: (*untyped) -> void
+
+    BLOCK_SIZE: Integer
+
+    class Buffer < String
+      public
+
+      def <<: (untyped string) -> untyped
+
+      alias concat <<
+
+      private
+
+      def initialize: () -> void
+
+      BINARY: Encoding
+    end
+  end
+
+  class Cipher
+    def self.ciphers: () -> untyped
+
+    public
+
+    def auth_data=: (untyped) -> untyped
+
+    def auth_tag: (*untyped) -> untyped
+
+    def auth_tag=: (untyped) -> untyped
+
+    def auth_tag_len=: (untyped) -> untyped
+
+    def authenticated?: () -> untyped
+
+    def block_size: () -> untyped
+
+    def decrypt: (*untyped) -> untyped
+
+    def encrypt: (*untyped) -> untyped
+
+    def final: () -> untyped
+
+    def iv=: (untyped) -> untyped
+
+    def iv_len: () -> untyped
+
+    def iv_len=: (untyped) -> untyped
+
+    def key=: (untyped) -> untyped
+
+    def key_len: () -> untyped
+
+    def key_len=: (untyped) -> untyped
+
+    def name: () -> untyped
+
+    def padding=: (untyped) -> untyped
+
+    def pkcs5_keyivgen: (*untyped) -> untyped
+
+    def random_iv: () -> untyped
+
+    def random_key: () -> untyped
+
+    def reset: () -> untyped
+
+    def update: (*untyped) -> untyped
+
+    private
+
+    def ciphers: () -> untyped
+
+    def initialize: (untyped) -> void
+
+    def initialize_copy: (untyped) -> untyped
+
+    class AES < OpenSSL::Cipher
+      private
+
+      def initialize: (*untyped args) -> void
+    end
+
+    class AES128 < OpenSSL::Cipher
+      private
+
+      def initialize: (?untyped mode) -> void
+    end
+
+    class AES192 < OpenSSL::Cipher
+      private
+
+      def initialize: (?untyped mode) -> void
+    end
+
+    class AES256 < OpenSSL::Cipher
+      private
+
+      def initialize: (?untyped mode) -> void
+    end
+
+    class BF < OpenSSL::Cipher
+      private
+
+      def initialize: (*untyped args) -> void
+    end
+
+    class CAST5 < OpenSSL::Cipher
+      private
+
+      def initialize: (*untyped args) -> void
+    end
+
+    class Cipher < OpenSSL::Cipher
+    end
+
+    class CipherError < OpenSSL::OpenSSLError
+    end
+
+    class DES < OpenSSL::Cipher
+      private
+
+      def initialize: (*untyped args) -> void
+    end
+
+    class IDEA < OpenSSL::Cipher
+      private
+
+      def initialize: (*untyped args) -> void
+    end
+
+    class RC2 < OpenSSL::Cipher
+      private
+
+      def initialize: (*untyped args) -> void
+    end
+
+    class RC4 < OpenSSL::Cipher
+      private
+
+      def initialize: (*untyped args) -> void
+    end
+
+    class RC5 < OpenSSL::Cipher
+      private
+
+      def initialize: (*untyped args) -> void
+    end
+  end
+
+  class Config
+    include Enumerable[untyped]
+
+    def self.get_key_string: (untyped data, untyped section, untyped key) -> untyped
+
+    alias self.load self.new
+
+    def self.parse: (untyped string) -> untyped
+
+    def self.parse_config: (untyped io) -> untyped
+
+    public
+
+    def []: (untyped section) -> untyped
+
+    def []=: (untyped section, untyped pairs) -> untyped
+
+    def add_value: (untyped section, untyped key, untyped value) -> untyped
+
+    def each: () -> untyped
+
+    def get_value: (untyped section, untyped key) -> untyped
+
+    def inspect: () -> untyped
+
+    def section: (untyped name) -> untyped
+
+    def sections: () -> untyped
+
+    def set_section: (untyped section, untyped pairs) -> untyped
+
+    def to_s: () -> untyped
+
+    def value: (untyped arg1, ?untyped arg2) -> untyped
+
+    private
+
+    def check_modify: () -> untyped
+
+    def get_key_string: (untyped section, untyped key) -> untyped
+
+    def initialize: (?untyped filename) -> void
+
+    def initialize_copy: (untyped other) -> untyped
+
+    DEFAULT_CONFIG_FILE: String
+  end
+
+  class ConfigError < OpenSSL::OpenSSLError
+  end
+
+  class Digest < Digest::Class
+    def self.digest: (untyped name, untyped data) -> untyped
+
+    public
+
+    alias << update
+
+    def block_length: () -> untyped
+
+    def digest_length: () -> untyped
+
+    def name: () -> untyped
+
+    def reset: () -> untyped
+
+    def update: (untyped) -> untyped
+
+    private
+
+    def finish: (*untyped) -> untyped
+
+    def initialize: (*untyped) -> void
+
+    def initialize_copy: (untyped) -> untyped
+
+    class Digest < OpenSSL::Digest
+    end
+
+    class DigestError < OpenSSL::OpenSSLError
+    end
+
+    class MD4 < OpenSSL::Digest
+      def self.digest: (untyped data) -> untyped
+
+      def self.hexdigest: (untyped data) -> untyped
+
+      private
+
+      def initialize: (?untyped data) -> void
+    end
+
+    class MD5 < OpenSSL::Digest
+      def self.digest: (untyped data) -> untyped
+
+      def self.hexdigest: (untyped data) -> untyped
+
+      private
+
+      def initialize: (?untyped data) -> void
+    end
+
+    class RIPEMD160 < OpenSSL::Digest
+      def self.digest: (untyped data) -> untyped
+
+      def self.hexdigest: (untyped data) -> untyped
+
+      private
+
+      def initialize: (?untyped data) -> void
+    end
+
+    class SHA1 < OpenSSL::Digest
+      def self.digest: (untyped data) -> untyped
+
+      def self.hexdigest: (untyped data) -> untyped
+
+      private
+
+      def initialize: (?untyped data) -> void
+    end
+
+    class SHA224 < OpenSSL::Digest
+      def self.digest: (untyped data) -> untyped
+
+      def self.hexdigest: (untyped data) -> untyped
+
+      private
+
+      def initialize: (?untyped data) -> void
+    end
+
+    class SHA256 < OpenSSL::Digest
+      def self.digest: (untyped data) -> untyped
+
+      def self.hexdigest: (untyped data) -> untyped
+
+      private
+
+      def initialize: (?untyped data) -> void
+    end
+
+    class SHA384 < OpenSSL::Digest
+      def self.digest: (untyped data) -> untyped
+
+      def self.hexdigest: (untyped data) -> untyped
+
+      private
+
+      def initialize: (?untyped data) -> void
+    end
+
+    class SHA512 < OpenSSL::Digest
+      def self.digest: (untyped data) -> untyped
+
+      def self.hexdigest: (untyped data) -> untyped
+
+      private
+
+      def initialize: (?untyped data) -> void
+    end
+  end
+
+  class Engine
+    def self.by_id: (untyped) -> untyped
+
+    def self.cleanup: () -> untyped
+
+    def self.engines: () -> untyped
+
+    def self.load: (*untyped) -> untyped
+
+    public
+
+    def cipher: (untyped) -> untyped
+
+    def cmds: () -> untyped
+
+    def ctrl_cmd: (*untyped) -> untyped
+
+    def digest: (untyped) -> untyped
+
+    def finish: () -> untyped
+
+    def id: () -> untyped
+
+    def inspect: () -> untyped
+
+    def load_private_key: (*untyped) -> untyped
+
+    def load_public_key: (*untyped) -> untyped
+
+    def name: () -> untyped
+
+    def set_default: (untyped) -> untyped
+
+    METHOD_ALL: Integer
+
+    METHOD_CIPHERS: Integer
+
+    METHOD_DH: Integer
+
+    METHOD_DIGESTS: Integer
+
+    METHOD_DSA: Integer
+
+    METHOD_NONE: Integer
+
+    METHOD_RAND: Integer
+
+    METHOD_RSA: Integer
+
+    class EngineError < OpenSSL::OpenSSLError
+    end
+  end
+
+  module ExtConfig
+    HAVE_TLSEXT_HOST_NAME: bool
+
+    OPENSSL_NO_SOCK: bool
+  end
+
+  class HMAC
+    def self.digest: (untyped, untyped, untyped) -> untyped
+
+    def self.hexdigest: (untyped, untyped, untyped) -> untyped
+
+    public
+
+    alias << update
+
+    def ==: (untyped other) -> untyped
+
+    def digest: () -> untyped
+
+    def hexdigest: () -> untyped
+
+    alias inspect hexdigest
+
+    def reset: () -> untyped
+
+    alias to_s hexdigest
+
+    def update: (untyped) -> untyped
+
+    private
+
+    def initialize: (untyped, untyped) -> void
+
+    def initialize_copy: (untyped) -> untyped
+  end
+
+  class HMACError < OpenSSL::OpenSSLError
+  end
+
+  module KDF
+    def self.hkdf: (*untyped) -> untyped
+
+    def self.pbkdf2_hmac: (*untyped) -> untyped
+
+    def self.scrypt: (*untyped) -> untyped
+
+    private
+
+    def hkdf: (*untyped) -> untyped
+
+    def pbkdf2_hmac: (*untyped) -> untyped
+
+    def scrypt: (*untyped) -> untyped
+
+    class KDFError < OpenSSL::OpenSSLError
+    end
+  end
+
+  module Marshal
+    def self.included: (untyped base) -> untyped
+
+    public
+
+    def _dump: (untyped _level) -> untyped
+
+    module ClassMethods
+      public
+
+      def _load: (untyped string) -> untyped
+    end
+  end
+
+  module Netscape
+    class SPKI
+      public
+
+      def challenge: () -> untyped
+
+      def challenge=: (untyped) -> untyped
+
+      def public_key: () -> untyped
+
+      def public_key=: (untyped) -> untyped
+
+      def sign: (untyped, untyped) -> untyped
+
+      def to_der: () -> untyped
+
+      def to_pem: () -> untyped
+
+      alias to_s to_pem
+
+      def to_text: () -> untyped
+
+      def verify: (untyped) -> untyped
+
+      private
+
+      def initialize: (*untyped) -> void
+    end
+
+    class SPKIError < OpenSSL::OpenSSLError
+    end
+  end
+
+  module OCSP
+    NOCASIGN: Integer
+
+    NOCERTS: Integer
+
+    NOCHAIN: Integer
+
+    NOCHECKS: Integer
+
+    NODELEGATED: Integer
+
+    NOEXPLICIT: Integer
+
+    NOINTERN: Integer
+
+    NOSIGS: Integer
+
+    NOTIME: Integer
+
+    NOVERIFY: Integer
+
+    RESPID_KEY: Integer
+
+    RESPONSE_STATUS_INTERNALERROR: Integer
+
+    RESPONSE_STATUS_MALFORMEDREQUEST: Integer
+
+    RESPONSE_STATUS_SIGREQUIRED: Integer
+
+    RESPONSE_STATUS_SUCCESSFUL: Integer
+
+    RESPONSE_STATUS_TRYLATER: Integer
+
+    RESPONSE_STATUS_UNAUTHORIZED: Integer
+
+    REVOKED_STATUS_AFFILIATIONCHANGED: Integer
+
+    REVOKED_STATUS_CACOMPROMISE: Integer
+
+    REVOKED_STATUS_CERTIFICATEHOLD: Integer
+
+    REVOKED_STATUS_CESSATIONOFOPERATION: Integer
+
+    REVOKED_STATUS_KEYCOMPROMISE: Integer
+
+    REVOKED_STATUS_NOSTATUS: Integer
+
+    REVOKED_STATUS_REMOVEFROMCRL: Integer
+
+    REVOKED_STATUS_SUPERSEDED: Integer
+
+    REVOKED_STATUS_UNSPECIFIED: Integer
+
+    TRUSTOTHER: Integer
+
+    V_CERTSTATUS_GOOD: Integer
+
+    V_CERTSTATUS_REVOKED: Integer
+
+    V_CERTSTATUS_UNKNOWN: Integer
+
+    V_RESPID_KEY: Integer
+
+    V_RESPID_NAME: Integer
+
+    class BasicResponse
+      public
+
+      def add_nonce: (*untyped) -> untyped
+
+      def add_status: (untyped, untyped, untyped, untyped, untyped, untyped, untyped) -> untyped
+
+      def copy_nonce: (untyped) -> untyped
+
+      def find_response: (untyped) -> untyped
+
+      def responses: () -> untyped
+
+      def sign: (*untyped) -> untyped
+
+      def status: () -> untyped
+
+      def to_der: () -> untyped
+
+      def verify: (*untyped) -> untyped
+
+      private
+
+      def initialize: (*untyped) -> void
+
+      def initialize_copy: (untyped) -> untyped
+    end
+
+    class CertificateId
+      public
+
+      def cmp: (untyped) -> untyped
+
+      def cmp_issuer: (untyped) -> untyped
+
+      def hash_algorithm: () -> untyped
+
+      def issuer_key_hash: () -> untyped
+
+      def issuer_name_hash: () -> untyped
+
+      def serial: () -> untyped
+
+      def to_der: () -> untyped
+
+      private
+
+      def initialize: (*untyped) -> void
+
+      def initialize_copy: (untyped) -> untyped
+    end
+
+    class OCSPError < OpenSSL::OpenSSLError
+    end
+
+    class Request
+      public
+
+      def add_certid: (untyped) -> untyped
+
+      def add_nonce: (*untyped) -> untyped
+
+      def certid: () -> untyped
+
+      def check_nonce: (untyped) -> untyped
+
+      def sign: (*untyped) -> untyped
+
+      def signed?: () -> untyped
+
+      def to_der: () -> untyped
+
+      def verify: (*untyped) -> untyped
+
+      private
+
+      def initialize: (*untyped) -> void
+
+      def initialize_copy: (untyped) -> untyped
+    end
+
+    class Response
+      def self.create: (untyped, untyped) -> untyped
+
+      public
+
+      def basic: () -> untyped
+
+      def status: () -> untyped
+
+      def status_string: () -> untyped
+
+      def to_der: () -> untyped
+
+      private
+
+      def initialize: (*untyped) -> void
+
+      def initialize_copy: (untyped) -> untyped
+    end
+
+    class SingleResponse
+      public
+
+      def cert_status: () -> untyped
+
+      def certid: () -> untyped
+
+      def check_validity: (*untyped) -> untyped
+
+      def extensions: () -> untyped
+
+      def next_update: () -> untyped
+
+      def revocation_reason: () -> untyped
+
+      def revocation_time: () -> untyped
+
+      def this_update: () -> untyped
+
+      def to_der: () -> untyped
+
+      private
+
+      def initialize: (untyped) -> void
+
+      def initialize_copy: (untyped) -> untyped
+    end
+  end
+
+  class OpenSSLError < StandardError
+  end
+
+  class PKCS12
+    def self.create: (*untyped) -> untyped
+
+    public
+
+    def ca_certs: () -> untyped
+
+    def certificate: () -> untyped
+
+    def key: () -> untyped
+
+    def to_der: () -> untyped
+
+    private
+
+    def initialize: (*untyped) -> void
+
+    def initialize_copy: (untyped) -> untyped
+
+    class PKCS12Error < OpenSSL::OpenSSLError
+    end
+  end
+
+  module PKCS5
+    def self.pbkdf2_hmac: (untyped pass, untyped salt, untyped iter, untyped keylen, untyped digest) -> untyped
+
+    def self.pbkdf2_hmac_sha1: (untyped pass, untyped salt, untyped iter, untyped keylen) -> untyped
+
+    private
+
+    def pbkdf2_hmac: (untyped pass, untyped salt, untyped iter, untyped keylen, untyped digest) -> untyped
+
+    def pbkdf2_hmac_sha1: (untyped pass, untyped salt, untyped iter, untyped keylen) -> untyped
+  end
+
+  class PKCS7
+    def self.encrypt: (*untyped) -> untyped
+
+    def self.read_smime: (untyped) -> untyped
+
+    def self.sign: (*untyped) -> untyped
+
+    def self.write_smime: (*untyped) -> untyped
+
+    public
+
+    def add_certificate: (untyped) -> untyped
+
+    def add_crl: (untyped) -> untyped
+
+    def add_data: (untyped) -> untyped
+
+    def add_recipient: (untyped) -> untyped
+
+    def add_signer: (untyped) -> untyped
+
+    def certificates: () -> untyped
+
+    def certificates=: (untyped) -> untyped
+
+    def cipher=: (untyped) -> untyped
+
+    def crls: () -> untyped
+
+    def crls=: (untyped) -> untyped
+
+    def data: () -> untyped
+
+    alias data= add_data
+
+    def decrypt: (*untyped) -> untyped
+
+    def detached: () -> untyped
+
+    def detached=: (untyped) -> untyped
+
+    def detached?: () -> untyped
+
+    def error_string: () -> untyped
+
+    def error_string=: (untyped) -> untyped
+
+    def recipients: () -> untyped
+
+    def signers: () -> untyped
+
+    def to_der: () -> untyped
+
+    def to_pem: () -> untyped
+
+    alias to_s to_pem
+
+    def type: () -> untyped
+
+    def type=: (untyped) -> untyped
+
+    def verify: (*untyped) -> untyped
+
+    private
+
+    def initialize: (*untyped) -> void
+
+    def initialize_copy: (untyped) -> untyped
+
+    BINARY: Integer
+
+    DETACHED: Integer
+
+    NOATTR: Integer
+
+    NOCERTS: Integer
+
+    NOCHAIN: Integer
+
+    NOINTERN: Integer
+
+    NOSIGS: Integer
+
+    NOSMIMECAP: Integer
+
+    NOVERIFY: Integer
+
+    TEXT: Integer
+
+    class PKCS7Error < OpenSSL::OpenSSLError
+    end
+
+    class RecipientInfo
+      public
+
+      def enc_key: () -> untyped
+
+      def issuer: () -> untyped
+
+      def serial: () -> untyped
+
+      private
+
+      def initialize: (untyped) -> void
+    end
+
+    class SignerInfo
+      public
+
+      def issuer: () -> untyped
+
+      def serial: () -> untyped
+
+      def signed_time: () -> untyped
+
+      private
+
+      def initialize: (untyped, untyped, untyped) -> void
+    end
+  end
+
+  module PKey
+    def self.read: (*untyped) -> untyped
+
+    private
+
+    def read: (*untyped) -> untyped
+
+    class DH < OpenSSL::PKey::PKey
+      include OpenSSL::Marshal
+
+      extend OpenSSL::Marshal::ClassMethods
+
+      def self.generate: (*untyped) -> untyped
+
+      public
+
+      def compute_key: (untyped) -> untyped
+
+      def export: () -> untyped
+
+      def g: () -> untyped
+
+      def generate_key!: () -> untyped
+
+      def p: () -> untyped
+
+      def params: () -> untyped
+
+      def params_ok?: () -> untyped
+
+      def priv_key: () -> untyped
+
+      def private?: () -> untyped
+
+      def pub_key: () -> untyped
+
+      def public?: () -> untyped
+
+      def public_key: () -> untyped
+
+      def q: () -> untyped
+
+      def set_key: (untyped, untyped) -> untyped
+
+      def set_pqg: (untyped, untyped, untyped) -> untyped
+
+      def to_der: () -> untyped
+
+      alias to_pem export
+
+      alias to_s export
+
+      def to_text: () -> untyped
+
+      private
+
+      def initialize: (*untyped) -> void
+
+      def initialize_copy: (untyped) -> untyped
+    end
+
+    class DHError < OpenSSL::PKey::PKeyError
+    end
+
+    class DSA < OpenSSL::PKey::PKey
+      include OpenSSL::Marshal
+
+      extend OpenSSL::Marshal::ClassMethods
+
+      def self.generate: (untyped) -> untyped
+
+      public
+
+      def export: (*untyped) -> untyped
+
+      def g: () -> untyped
+
+      def p: () -> untyped
+
+      def params: () -> untyped
+
+      def priv_key: () -> untyped
+
+      def private?: () -> untyped
+
+      def pub_key: () -> untyped
+
+      def public?: () -> untyped
+
+      def public_key: () -> untyped
+
+      def q: () -> untyped
+
+      def set_key: (untyped, untyped) -> untyped
+
+      def set_pqg: (untyped, untyped, untyped) -> untyped
+
+      def syssign: (untyped) -> untyped
+
+      def sysverify: (untyped, untyped) -> untyped
+
+      def to_der: () -> untyped
+
+      alias to_pem export
+
+      alias to_s export
+
+      def to_text: () -> untyped
+
+      private
+
+      def initialize: (*untyped) -> void
+
+      def initialize_copy: (untyped) -> untyped
+    end
+
+    class DSAError < OpenSSL::PKey::PKeyError
+    end
+
+    class EC < OpenSSL::PKey::PKey
+      include OpenSSL::Marshal
+
+      extend OpenSSL::Marshal::ClassMethods
+
+      def self.builtin_curves: () -> untyped
+
+      def self.generate: (untyped) -> untyped
+
+      public
+
+      def check_key: () -> untyped
+
+      def dh_compute_key: (untyped) -> untyped
+
+      def dsa_sign_asn1: (untyped) -> untyped
+
+      def dsa_verify_asn1: (untyped, untyped) -> untyped
+
+      def export: (*untyped) -> untyped
+
+      alias generate_key generate_key!
+
+      def generate_key!: () -> untyped
+
+      def group: () -> untyped
+
+      def group=: (untyped) -> untyped
+
+      def private?: () -> untyped
+
+      def private_key: () -> untyped
+
+      def private_key=: (untyped) -> untyped
+
+      alias private_key? private?
+
+      def public?: () -> untyped
+
+      def public_key: () -> untyped
+
+      def public_key=: (untyped) -> untyped
+
+      alias public_key? public?
+
+      def to_der: () -> untyped
+
+      alias to_pem export
+
+      def to_text: () -> untyped
+
+      private
+
+      def initialize: (*untyped) -> void
+
+      def initialize_copy: (untyped) -> untyped
+
+      EXPLICIT_CURVE: Integer
+
+      NAMED_CURVE: Integer
+
+      class Group
+        public
+
+        alias == eql?
+
+        def asn1_flag: () -> untyped
+
+        def asn1_flag=: (untyped) -> untyped
+
+        def cofactor: () -> untyped
+
+        def curve_name: () -> untyped
+
+        def degree: () -> untyped
+
+        def eql?: (untyped) -> untyped
+
+        def generator: () -> untyped
+
+        def order: () -> untyped
+
+        def point_conversion_form: () -> untyped
+
+        def point_conversion_form=: (untyped) -> untyped
+
+        def seed: () -> untyped
+
+        def seed=: (untyped) -> untyped
+
+        def set_generator: (untyped, untyped, untyped) -> untyped
+
+        def to_der: () -> untyped
+
+        def to_pem: () -> untyped
+
+        def to_text: () -> untyped
+
+        private
+
+        def initialize: (*untyped) -> void
+
+        def initialize_copy: (untyped) -> untyped
+
+        class Error < OpenSSL::OpenSSLError
+        end
+      end
+
+      class Point
+        public
+
+        alias == eql?
+
+        def add: (untyped) -> untyped
+
+        def eql?: (untyped) -> untyped
+
+        def group: () -> untyped
+
+        def infinity?: () -> untyped
+
+        def invert!: () -> untyped
+
+        def make_affine!: () -> untyped
+
+        def mul: (*untyped) -> untyped
+
+        def on_curve?: () -> untyped
+
+        def set_to_infinity!: () -> untyped
+
+        def to_bn: (?untyped conversion_form) -> untyped
+
+        def to_octet_string: (untyped) -> untyped
+
+        private
+
+        def initialize: (*untyped) -> void
+
+        def initialize_copy: (untyped) -> untyped
+
+        class Error < OpenSSL::OpenSSLError
+        end
+      end
+    end
+
+    class ECError < OpenSSL::PKey::PKeyError
+    end
+
+    class PKey
+      public
+
+      def inspect: () -> untyped
+
+      def oid: () -> untyped
+
+      def private_to_der: (*untyped) -> untyped
+
+      def private_to_pem: (*untyped) -> untyped
+
+      def public_to_der: () -> untyped
+
+      def public_to_pem: () -> untyped
+
+      def sign: (untyped, untyped) -> untyped
+
+      def verify: (untyped, untyped, untyped) -> untyped
+
+      private
+
+      def initialize: () -> void
+    end
+
+    class PKeyError < OpenSSL::OpenSSLError
+    end
+
+    class RSA < OpenSSL::PKey::PKey
+      include OpenSSL::Marshal
+
+      extend OpenSSL::Marshal::ClassMethods
+
+      def self.generate: (*untyped) -> untyped
+
+      public
+
+      def d: () -> untyped
+
+      def dmp1: () -> untyped
+
+      def dmq1: () -> untyped
+
+      def e: () -> untyped
+
+      def export: (*untyped) -> untyped
+
+      def iqmp: () -> untyped
+
+      def n: () -> untyped
+
+      def p: () -> untyped
+
+      def params: () -> untyped
+
+      def private?: () -> untyped
+
+      def private_decrypt: (*untyped) -> untyped
+
+      def private_encrypt: (*untyped) -> untyped
+
+      def public?: () -> untyped
+
+      def public_decrypt: (*untyped) -> untyped
+
+      def public_encrypt: (*untyped) -> untyped
+
+      def public_key: () -> untyped
+
+      def q: () -> untyped
+
+      def set_crt_params: (untyped, untyped, untyped) -> untyped
+
+      def set_factors: (untyped, untyped) -> untyped
+
+      def set_key: (untyped, untyped, untyped) -> untyped
+
+      def sign_pss: (*untyped) -> untyped
+
+      def to_der: () -> untyped
+
+      alias to_pem export
+
+      alias to_s export
+
+      def to_text: () -> untyped
+
+      def verify_pss: (*untyped) -> untyped
+
+      private
+
+      def initialize: (*untyped) -> void
+
+      def initialize_copy: (untyped) -> untyped
+
+      NO_PADDING: Integer
+
+      PKCS1_OAEP_PADDING: Integer
+
+      PKCS1_PADDING: Integer
+
+      SSLV23_PADDING: Integer
+    end
+
+    class RSAError < OpenSSL::PKey::PKeyError
+    end
+  end
+
+  module Random
+    def self.load_random_file: (untyped) -> untyped
+
+    def self.random_add: (untyped, untyped) -> untyped
+
+    def self.random_bytes: (untyped) -> untyped
+
+    def self.seed: (untyped) -> untyped
+
+    def self.status?: () -> untyped
+
+    def self.write_random_file: (untyped) -> untyped
+
+    private
+
+    def load_random_file: (untyped) -> untyped
+
+    def random_add: (untyped, untyped) -> untyped
+
+    def random_bytes: (untyped) -> untyped
+
+    def seed: (untyped) -> untyped
+
+    def status?: () -> untyped
+
+    def write_random_file: (untyped) -> untyped
+
+    class RandomError < OpenSSL::OpenSSLError
+    end
+  end
+
+  module SSL
+    def self.verify_certificate_identity: (untyped cert, untyped hostname) -> untyped
+
+    def self.verify_hostname: (untyped hostname, untyped san) -> untyped
+
+    def self.verify_wildcard: (untyped domain_component, untyped san_component) -> untyped
+
+    private
+
+    def verify_certificate_identity: (untyped cert, untyped hostname) -> untyped
+
+    def verify_hostname: (untyped hostname, untyped san) -> untyped
+
+    def verify_wildcard: (untyped domain_component, untyped san_component) -> untyped
+
+    OP_ALL: Integer
+
+    OP_ALLOW_NO_DHE_KEX: Integer
+
+    OP_ALLOW_UNSAFE_LEGACY_RENEGOTIATION: Integer
+
+    OP_CIPHER_SERVER_PREFERENCE: Integer
+
+    OP_CRYPTOPRO_TLSEXT_BUG: Integer
+
+    OP_DONT_INSERT_EMPTY_FRAGMENTS: Integer
+
+    OP_EPHEMERAL_RSA: Integer
+
+    OP_LEGACY_SERVER_CONNECT: Integer
+
+    OP_MICROSOFT_BIG_SSLV3_BUFFER: Integer
+
+    OP_MICROSOFT_SESS_ID_BUG: Integer
+
+    OP_MSIE_SSLV2_RSA_PADDING: Integer
+
+    OP_NETSCAPE_CA_DN_BUG: Integer
+
+    OP_NETSCAPE_CHALLENGE_BUG: Integer
+
+    OP_NETSCAPE_DEMO_CIPHER_CHANGE_BUG: Integer
+
+    OP_NETSCAPE_REUSE_CIPHER_CHANGE_BUG: Integer
+
+    OP_NO_COMPRESSION: Integer
+
+    OP_NO_ENCRYPT_THEN_MAC: Integer
+
+    OP_NO_RENEGOTIATION: Integer
+
+    OP_NO_SESSION_RESUMPTION_ON_RENEGOTIATION: Integer
+
+    OP_NO_SSLv2: Integer
+
+    OP_NO_SSLv3: Integer
+
+    OP_NO_TICKET: Integer
+
+    OP_NO_TLSv1: Integer
+
+    OP_NO_TLSv1_1: Integer
+
+    OP_NO_TLSv1_2: Integer
+
+    OP_NO_TLSv1_3: Integer
+
+    OP_PKCS1_CHECK_1: Integer
+
+    OP_PKCS1_CHECK_2: Integer
+
+    OP_SAFARI_ECDHE_ECDSA_BUG: Integer
+
+    OP_SINGLE_DH_USE: Integer
+
+    OP_SINGLE_ECDH_USE: Integer
+
+    OP_SSLEAY_080_CLIENT_DH_BUG: Integer
+
+    OP_SSLREF2_REUSE_CERT_TYPE_BUG: Integer
+
+    OP_TLSEXT_PADDING: Integer
+
+    OP_TLS_BLOCK_PADDING_BUG: Integer
+
+    OP_TLS_D5_BUG: Integer
+
+    OP_TLS_ROLLBACK_BUG: Integer
+
+    SSL2_VERSION: Integer
+
+    SSL3_VERSION: Integer
+
+    TLS1_1_VERSION: Integer
+
+    TLS1_2_VERSION: Integer
+
+    TLS1_3_VERSION: Integer
+
+    TLS1_VERSION: Integer
+
+    VERIFY_CLIENT_ONCE: Integer
+
+    VERIFY_FAIL_IF_NO_PEER_CERT: Integer
+
+    VERIFY_NONE: Integer
+
+    VERIFY_PEER: Integer
+
+    class SSLContext
+      public
+
+      def add_certificate: (*untyped) -> untyped
+
+      def alpn_protocols: () -> untyped
+
+      def alpn_protocols=: (untyped) -> untyped
+
+      def alpn_select_cb: () -> untyped
+
+      def alpn_select_cb=: (untyped) -> untyped
+
+      def ca_file: () -> untyped
+
+      def ca_file=: (untyped) -> untyped
+
+      def ca_path: () -> untyped
+
+      def ca_path=: (untyped) -> untyped
+
+      def cert: () -> untyped
+
+      def cert=: (untyped) -> untyped
+
+      def cert_store: () -> untyped
+
+      def cert_store=: (untyped) -> untyped
+
+      def ciphers: () -> untyped
+
+      def ciphers=: (untyped) -> untyped
+
+      def client_ca: () -> untyped
+
+      def client_ca=: (untyped) -> untyped
+
+      def client_cert_cb: () -> untyped
+
+      def client_cert_cb=: (untyped) -> untyped
+
+      def ecdh_curves=: (untyped) -> untyped
+
+      def enable_fallback_scsv: () -> untyped
+
+      def extra_chain_cert: () -> untyped
+
+      def extra_chain_cert=: (untyped) -> untyped
+
+      def flush_sessions: (*untyped) -> untyped
+
+      alias freeze setup
+
+      def key: () -> untyped
+
+      def key=: (untyped) -> untyped
+
+      def max_version=: (untyped version) -> untyped
+
+      def min_version=: (untyped version) -> untyped
+
+      def npn_protocols: () -> untyped
+
+      def npn_protocols=: (untyped) -> untyped
+
+      def npn_select_cb: () -> untyped
+
+      def npn_select_cb=: (untyped) -> untyped
+
+      def options: () -> untyped
+
+      def options=: (untyped) -> untyped
+
+      def renegotiation_cb: () -> untyped
+
+      def renegotiation_cb=: (untyped) -> untyped
+
+      def security_level: () -> untyped
+
+      def security_level=: (untyped) -> untyped
+
+      def servername_cb: () -> untyped
+
+      def servername_cb=: (untyped) -> untyped
+
+      def session_add: (untyped) -> untyped
+
+      def session_cache_mode: () -> untyped
+
+      def session_cache_mode=: (untyped) -> untyped
+
+      def session_cache_size: () -> untyped
+
+      def session_cache_size=: (untyped) -> untyped
+
+      def session_cache_stats: () -> untyped
+
+      def session_get_cb: () -> untyped
+
+      def session_get_cb=: (untyped) -> untyped
+
+      def session_id_context: () -> untyped
+
+      def session_id_context=: (untyped) -> untyped
+
+      def session_new_cb: () -> untyped
+
+      def session_new_cb=: (untyped) -> untyped
+
+      def session_remove: (untyped) -> untyped
+
+      def session_remove_cb: () -> untyped
+
+      def session_remove_cb=: (untyped) -> untyped
+
+      def set_params: (?untyped params) -> untyped
+
+      def setup: () -> untyped
+
+      alias ssl_timeout timeout
+
+      alias ssl_timeout= timeout=
+
+      def ssl_version=: (untyped meth) -> untyped
+
+      def timeout: () -> untyped
+
+      def timeout=: (untyped) -> untyped
+
+      def tmp_dh_callback: () -> untyped
+
+      def tmp_dh_callback=: (untyped) -> untyped
+
+      def verify_callback: () -> untyped
+
+      def verify_callback=: (untyped) -> untyped
+
+      def verify_depth: () -> untyped
+
+      def verify_depth=: (untyped) -> untyped
+
+      def verify_hostname: () -> untyped
+
+      def verify_hostname=: (untyped) -> untyped
+
+      def verify_mode: () -> untyped
+
+      def verify_mode=: (untyped) -> untyped
+
+      private
+
+      def initialize: (?untyped version) -> void
+
+      def set_minmax_proto_version: (untyped, untyped) -> untyped
+
+      DEFAULT_CERT_STORE: Store
+
+      DEFAULT_PARAMS: Hash[untyped, untyped]
+
+      DEFAULT_TMP_DH_CALLBACK: Proc
+
+      METHODS: Array[untyped]
+
+      SESSION_CACHE_BOTH: Integer
+
+      SESSION_CACHE_CLIENT: Integer
+
+      SESSION_CACHE_NO_AUTO_CLEAR: Integer
+
+      SESSION_CACHE_NO_INTERNAL: Integer
+
+      SESSION_CACHE_NO_INTERNAL_LOOKUP: Integer
+
+      SESSION_CACHE_NO_INTERNAL_STORE: Integer
+
+      SESSION_CACHE_OFF: Integer
+
+      SESSION_CACHE_SERVER: Integer
+    end
+
+    class SSLError < OpenSSL::OpenSSLError
+    end
+
+    class SSLErrorWaitReadable < OpenSSL::SSL::SSLError
+      include IO::WaitReadable
+    end
+
+    class SSLErrorWaitWritable < OpenSSL::SSL::SSLError
+      include IO::WaitWritable
+    end
+
+    class SSLServer
+      include OpenSSL::SSL::SocketForwarder
+
+      public
+
+      def accept: () -> untyped
+
+      def close: () -> untyped
+
+      def listen: (?untyped backlog) -> untyped
+
+      def shutdown: (?untyped how) -> untyped
+
+      def start_immediately: () -> untyped
+
+      def start_immediately=: (untyped) -> untyped
+
+      def to_io: () -> untyped
+
+      private
+
+      def initialize: (untyped svr, untyped ctx) -> void
+    end
+
+    class SSLSocket
+      include OpenSSL::SSL::SocketForwarder
+
+      include OpenSSL::Buffering
+
+      def self.open: (untyped remote_host, untyped remote_port, ?untyped local_host, ?untyped local_port, ?context: untyped) -> untyped
+
+      public
+
+      def accept: () -> untyped
+
+      def accept_nonblock: (*untyped) -> untyped
+
+      def alpn_protocol: () -> untyped
+
+      def cert: () -> untyped
+
+      def cipher: () -> untyped
+
+      def client_ca: () -> untyped
+
+      def connect: () -> untyped
+
+      def connect_nonblock: (*untyped) -> untyped
+
+      def context: () -> untyped
+
+      def finished_message: () -> untyped
+
+      def hostname: () -> untyped
+
+      def hostname=: (untyped) -> untyped
+
+      def io: () -> untyped
+
+      def npn_protocol: () -> untyped
+
+      def peer_cert: () -> untyped
+
+      def peer_cert_chain: () -> untyped
+
+      def peer_finished_message: () -> untyped
+
+      def pending: () -> untyped
+
+      def post_connection_check: (untyped hostname) -> untyped
+
+      def session: () -> untyped
+
+      def session=: (untyped) -> untyped
+
+      def session_reused?: () -> untyped
+
+      def ssl_version: () -> untyped
+
+      def state: () -> untyped
+
+      def sync_close: () -> untyped
+
+      def sync_close=: (untyped) -> untyped
+
+      def sysclose: () -> untyped
+
+      def sysread: (*untyped) -> untyped
+
+      def syswrite: (untyped) -> untyped
+
+      def tmp_key: () -> untyped
+
+      alias to_io io
+
+      def verify_result: () -> untyped
+
+      private
+
+      def client_cert_cb: () -> untyped
+
+      def initialize: (*untyped) -> void
+
+      def session_get_cb: () -> untyped
+
+      def session_new_cb: () -> untyped
+
+      def stop: () -> untyped
+
+      def sysread_nonblock: (*untyped) -> untyped
+
+      def syswrite_nonblock: (*untyped) -> untyped
+
+      def tmp_dh_callback: () -> untyped
+
+      def tmp_ecdh_callback: () -> untyped
+
+      def using_anon_cipher?: () -> untyped
+    end
+
+    class Session
+      public
+
+      def ==: (untyped) -> untyped
+
+      def id: () -> untyped
+
+      def time: () -> untyped
+
+      def time=: (untyped) -> untyped
+
+      def timeout: () -> untyped
+
+      def timeout=: (untyped) -> untyped
+
+      def to_der: () -> untyped
+
+      def to_pem: () -> untyped
+
+      def to_text: () -> untyped
+
+      private
+
+      def initialize: (untyped) -> void
+
+      def initialize_copy: (untyped) -> untyped
+
+      class SessionError < OpenSSL::OpenSSLError
+      end
+    end
+
+    module SocketForwarder
+      public
+
+      def addr: () -> untyped
+
+      def closed?: () -> untyped
+
+      def do_not_reverse_lookup=: (untyped flag) -> untyped
+
+      def fcntl: (*untyped args) -> untyped
+
+      def fileno: () -> untyped
+
+      def getsockopt: (untyped level, untyped optname) -> untyped
+
+      def peeraddr: () -> untyped
+
+      def setsockopt: (untyped level, untyped optname, untyped optval) -> untyped
+    end
+  end
+
+  module Timestamp
+    class Factory
+      public
+
+      def additional_certs: () -> untyped
+
+      def additional_certs=: (untyped) -> untyped
+
+      def allowed_digests: () -> untyped
+
+      def allowed_digests=: (untyped) -> untyped
+
+      def create_timestamp: (untyped, untyped, untyped) -> untyped
+
+      def default_policy_id: () -> untyped
+
+      def default_policy_id=: (untyped) -> untyped
+
+      def gen_time: () -> untyped
+
+      def gen_time=: (untyped) -> untyped
+
+      def serial_number: () -> untyped
+
+      def serial_number=: (untyped) -> untyped
+    end
+
+    class Request
+      public
+
+      def algorithm: () -> untyped
+
+      def algorithm=: (untyped) -> untyped
+
+      def cert_requested=: (untyped) -> untyped
+
+      def cert_requested?: () -> untyped
+
+      def message_imprint: () -> untyped
+
+      def message_imprint=: (untyped) -> untyped
+
+      def nonce: () -> untyped
+
+      def nonce=: (untyped) -> untyped
+
+      def policy_id: () -> untyped
+
+      def policy_id=: (untyped) -> untyped
+
+      def to_der: () -> untyped
+
+      def version: () -> untyped
+
+      def version=: (untyped) -> untyped
+
+      private
+
+      def initialize: (*untyped) -> void
+    end
+
+    class Response
+      public
+
+      def failure_info: () -> untyped
+
+      def status: () -> untyped
+
+      def status_text: () -> untyped
+
+      def to_der: () -> untyped
+
+      def token: () -> untyped
+
+      def token_info: () -> untyped
+
+      def tsa_certificate: () -> untyped
+
+      def verify: (*untyped) -> untyped
+
+      private
+
+      def initialize: (untyped) -> void
+
+      GRANTED: Integer
+
+      GRANTED_WITH_MODS: Integer
+
+      REJECTION: Integer
+
+      REVOCATION_NOTIFICATION: Integer
+
+      REVOCATION_WARNING: Integer
+
+      WAITING: Integer
+    end
+
+    class TimestampError < OpenSSL::OpenSSLError
+    end
+
+    class TokenInfo
+      public
+
+      def algorithm: () -> untyped
+
+      def gen_time: () -> untyped
+
+      def message_imprint: () -> untyped
+
+      def nonce: () -> untyped
+
+      def ordering: () -> untyped
+
+      def policy_id: () -> untyped
+
+      def serial_number: () -> untyped
+
+      def to_der: () -> untyped
+
+      def version: () -> untyped
+
+      private
+
+      def initialize: (untyped) -> void
+    end
+  end
+
+  module X509
+    DEFAULT_CERT_AREA: String
+
+    DEFAULT_CERT_DIR: String
+
+    DEFAULT_CERT_DIR_ENV: String
+
+    DEFAULT_CERT_FILE: String
+
+    DEFAULT_CERT_FILE_ENV: String
+
+    DEFAULT_PRIVATE_DIR: String
+
+    PURPOSE_ANY: Integer
+
+    PURPOSE_CRL_SIGN: Integer
+
+    PURPOSE_NS_SSL_SERVER: Integer
+
+    PURPOSE_OCSP_HELPER: Integer
+
+    PURPOSE_SMIME_ENCRYPT: Integer
+
+    PURPOSE_SMIME_SIGN: Integer
+
+    PURPOSE_SSL_CLIENT: Integer
+
+    PURPOSE_SSL_SERVER: Integer
+
+    PURPOSE_TIMESTAMP_SIGN: Integer
+
+    TRUST_COMPAT: Integer
+
+    TRUST_EMAIL: Integer
+
+    TRUST_OBJECT_SIGN: Integer
+
+    TRUST_OCSP_REQUEST: Integer
+
+    TRUST_OCSP_SIGN: Integer
+
+    TRUST_SSL_CLIENT: Integer
+
+    TRUST_SSL_SERVER: Integer
+
+    TRUST_TSA: Integer
+
+    V_ERR_AKID_ISSUER_SERIAL_MISMATCH: Integer
+
+    V_ERR_AKID_SKID_MISMATCH: Integer
+
+    V_ERR_APPLICATION_VERIFICATION: Integer
+
+    V_ERR_CA_KEY_TOO_SMALL: Integer
+
+    V_ERR_CA_MD_TOO_WEAK: Integer
+
+    V_ERR_CERT_CHAIN_TOO_LONG: Integer
+
+    V_ERR_CERT_HAS_EXPIRED: Integer
+
+    V_ERR_CERT_NOT_YET_VALID: Integer
+
+    V_ERR_CERT_REJECTED: Integer
+
+    V_ERR_CERT_REVOKED: Integer
+
+    V_ERR_CERT_SIGNATURE_FAILURE: Integer
+
+    V_ERR_CERT_UNTRUSTED: Integer
+
+    V_ERR_CRL_HAS_EXPIRED: Integer
+
+    V_ERR_CRL_NOT_YET_VALID: Integer
+
+    V_ERR_CRL_PATH_VALIDATION_ERROR: Integer
+
+    V_ERR_CRL_SIGNATURE_FAILURE: Integer
+
+    V_ERR_DANE_NO_MATCH: Integer
+
+    V_ERR_DEPTH_ZERO_SELF_SIGNED_CERT: Integer
+
+    V_ERR_DIFFERENT_CRL_SCOPE: Integer
+
+    V_ERR_EE_KEY_TOO_SMALL: Integer
+
+    V_ERR_EMAIL_MISMATCH: Integer
+
+    V_ERR_ERROR_IN_CERT_NOT_AFTER_FIELD: Integer
+
+    V_ERR_ERROR_IN_CERT_NOT_BEFORE_FIELD: Integer
+
+    V_ERR_ERROR_IN_CRL_LAST_UPDATE_FIELD: Integer
+
+    V_ERR_ERROR_IN_CRL_NEXT_UPDATE_FIELD: Integer
+
+    V_ERR_EXCLUDED_VIOLATION: Integer
+
+    V_ERR_HOSTNAME_MISMATCH: Integer
+
+    V_ERR_INVALID_CA: Integer
+
+    V_ERR_INVALID_CALL: Integer
+
+    V_ERR_INVALID_EXTENSION: Integer
+
+    V_ERR_INVALID_NON_CA: Integer
+
+    V_ERR_INVALID_POLICY_EXTENSION: Integer
+
+    V_ERR_INVALID_PURPOSE: Integer
+
+    V_ERR_IP_ADDRESS_MISMATCH: Integer
+
+    V_ERR_KEYUSAGE_NO_CERTSIGN: Integer
+
+    V_ERR_KEYUSAGE_NO_CRL_SIGN: Integer
+
+    V_ERR_KEYUSAGE_NO_DIGITAL_SIGNATURE: Integer
+
+    V_ERR_NO_EXPLICIT_POLICY: Integer
+
+    V_ERR_NO_VALID_SCTS: Integer
+
+    V_ERR_OCSP_CERT_UNKNOWN: Integer
+
+    V_ERR_OCSP_VERIFY_FAILED: Integer
+
+    V_ERR_OCSP_VERIFY_NEEDED: Integer
+
+    V_ERR_OUT_OF_MEM: Integer
+
+    V_ERR_PATH_LENGTH_EXCEEDED: Integer
+
+    V_ERR_PATH_LOOP: Integer
+
+    V_ERR_PERMITTED_VIOLATION: Integer
+
+    V_ERR_PROXY_CERTIFICATES_NOT_ALLOWED: Integer
+
+    V_ERR_PROXY_PATH_LENGTH_EXCEEDED: Integer
+
+    V_ERR_PROXY_SUBJECT_NAME_VIOLATION: Integer
+
+    V_ERR_SELF_SIGNED_CERT_IN_CHAIN: Integer
+
+    V_ERR_STORE_LOOKUP: Integer
+
+    V_ERR_SUBJECT_ISSUER_MISMATCH: Integer
+
+    V_ERR_SUBTREE_MINMAX: Integer
+
+    V_ERR_SUITE_B_CANNOT_SIGN_P_384_WITH_P_256: Integer
+
+    V_ERR_SUITE_B_INVALID_ALGORITHM: Integer
+
+    V_ERR_SUITE_B_INVALID_CURVE: Integer
+
+    V_ERR_SUITE_B_INVALID_SIGNATURE_ALGORITHM: Integer
+
+    V_ERR_SUITE_B_INVALID_VERSION: Integer
+
+    V_ERR_SUITE_B_LOS_NOT_ALLOWED: Integer
+
+    V_ERR_UNABLE_TO_DECODE_ISSUER_PUBLIC_KEY: Integer
+
+    V_ERR_UNABLE_TO_DECRYPT_CERT_SIGNATURE: Integer
+
+    V_ERR_UNABLE_TO_DECRYPT_CRL_SIGNATURE: Integer
+
+    V_ERR_UNABLE_TO_GET_CRL: Integer
+
+    V_ERR_UNABLE_TO_GET_CRL_ISSUER: Integer
+
+    V_ERR_UNABLE_TO_GET_ISSUER_CERT: Integer
+
+    V_ERR_UNABLE_TO_GET_ISSUER_CERT_LOCALLY: Integer
+
+    V_ERR_UNABLE_TO_VERIFY_LEAF_SIGNATURE: Integer
+
+    V_ERR_UNHANDLED_CRITICAL_CRL_EXTENSION: Integer
+
+    V_ERR_UNHANDLED_CRITICAL_EXTENSION: Integer
+
+    V_ERR_UNNESTED_RESOURCE: Integer
+
+    V_ERR_UNSPECIFIED: Integer
+
+    V_ERR_UNSUPPORTED_CONSTRAINT_SYNTAX: Integer
+
+    V_ERR_UNSUPPORTED_CONSTRAINT_TYPE: Integer
+
+    V_ERR_UNSUPPORTED_EXTENSION_FEATURE: Integer
+
+    V_ERR_UNSUPPORTED_NAME_SYNTAX: Integer
+
+    V_FLAG_ALLOW_PROXY_CERTS: Integer
+
+    V_FLAG_CHECK_SS_SIGNATURE: Integer
+
+    V_FLAG_CRL_CHECK: Integer
+
+    V_FLAG_CRL_CHECK_ALL: Integer
+
+    V_FLAG_EXPLICIT_POLICY: Integer
+
+    V_FLAG_EXTENDED_CRL_SUPPORT: Integer
+
+    V_FLAG_IGNORE_CRITICAL: Integer
+
+    V_FLAG_INHIBIT_ANY: Integer
+
+    V_FLAG_INHIBIT_MAP: Integer
+
+    V_FLAG_NOTIFY_POLICY: Integer
+
+    V_FLAG_NO_ALT_CHAINS: Integer
+
+    V_FLAG_NO_CHECK_TIME: Integer
+
+    V_FLAG_PARTIAL_CHAIN: Integer
+
+    V_FLAG_POLICY_CHECK: Integer
+
+    V_FLAG_SUITEB_128_LOS: Integer
+
+    V_FLAG_SUITEB_128_LOS_ONLY: Integer
+
+    V_FLAG_SUITEB_192_LOS: Integer
+
+    V_FLAG_TRUSTED_FIRST: Integer
+
+    V_FLAG_USE_CHECK_TIME: Integer
+
+    V_FLAG_USE_DELTAS: Integer
+
+    V_FLAG_X509_STRICT: Integer
+
+    V_OK: Integer
+
+    class Attribute
+      include OpenSSL::Marshal
+
+      extend OpenSSL::Marshal::ClassMethods
+
+      public
+
+      def ==: (untyped other) -> untyped
+
+      def oid: () -> untyped
+
+      def oid=: (untyped) -> untyped
+
+      def to_der: () -> untyped
+
+      def value: () -> untyped
+
+      def value=: (untyped) -> untyped
+
+      private
+
+      def initialize: (*untyped) -> void
+
+      def initialize_copy: (untyped) -> untyped
+    end
+
+    class AttributeError < OpenSSL::OpenSSLError
+    end
+
+    class CRL
+      include OpenSSL::X509::Extension::AuthorityKeyIdentifier
+
+      include OpenSSL::Marshal
+
+      extend OpenSSL::Marshal::ClassMethods
+
+      public
+
+      def ==: (untyped other) -> untyped
+
+      def add_extension: (untyped) -> untyped
+
+      def add_revoked: (untyped) -> untyped
+
+      def extensions: () -> untyped
+
+      def extensions=: (untyped) -> untyped
+
+      def issuer: () -> untyped
+
+      def issuer=: (untyped) -> untyped
+
+      def last_update: () -> untyped
+
+      def last_update=: (untyped) -> untyped
+
+      def next_update: () -> untyped
+
+      def next_update=: (untyped) -> untyped
+
+      def revoked: () -> untyped
+
+      def revoked=: (untyped) -> untyped
+
+      def sign: (untyped, untyped) -> untyped
+
+      def signature_algorithm: () -> untyped
+
+      def to_der: () -> untyped
+
+      def to_pem: () -> untyped
+
+      alias to_s to_pem
+
+      def to_text: () -> untyped
+
+      def verify: (untyped) -> untyped
+
+      def version: () -> untyped
+
+      def version=: (untyped) -> untyped
+
+      private
+
+      def initialize: (*untyped) -> void
+
+      def initialize_copy: (untyped) -> untyped
+    end
+
+    class CRLError < OpenSSL::OpenSSLError
+    end
+
+    class Certificate
+      include OpenSSL::X509::Extension::AuthorityInfoAccess
+
+      include OpenSSL::X509::Extension::CRLDistributionPoints
+
+      include OpenSSL::X509::Extension::AuthorityKeyIdentifier
+
+      include OpenSSL::X509::Extension::SubjectKeyIdentifier
+
+      include OpenSSL::Marshal
+
+      extend OpenSSL::Marshal::ClassMethods
+
+      public
+
+      def ==: (untyped) -> untyped
+
+      def add_extension: (untyped) -> untyped
+
+      def check_private_key: (untyped) -> untyped
+
+      def extensions: () -> untyped
+
+      def extensions=: (untyped) -> untyped
+
+      def inspect: () -> untyped
+
+      def issuer: () -> untyped
+
+      def issuer=: (untyped) -> untyped
+
+      def not_after: () -> untyped
+
+      def not_after=: (untyped) -> untyped
+
+      def not_before: () -> untyped
+
+      def not_before=: (untyped) -> untyped
+
+      def pretty_print: (untyped q) -> untyped
+
+      def public_key: () -> untyped
+
+      def public_key=: (untyped) -> untyped
+
+      def serial: () -> untyped
+
+      def serial=: (untyped) -> untyped
+
+      def sign: (untyped, untyped) -> untyped
+
+      def signature_algorithm: () -> untyped
+
+      def subject: () -> untyped
+
+      def subject=: (untyped) -> untyped
+
+      def to_der: () -> untyped
+
+      def to_pem: () -> untyped
+
+      alias to_s to_pem
+
+      def to_text: () -> untyped
+
+      def verify: (untyped) -> untyped
+
+      def version: () -> untyped
+
+      def version=: (untyped) -> untyped
+
+      private
+
+      def initialize: (*untyped) -> void
+
+      def initialize_copy: (untyped) -> untyped
+    end
+
+    class CertificateError < OpenSSL::OpenSSLError
+    end
+
+    class Extension
+      include OpenSSL::Marshal
+
+      extend OpenSSL::Marshal::ClassMethods
+
+      public
+
+      def ==: (untyped other) -> untyped
+
+      def critical=: (untyped) -> untyped
+
+      def critical?: () -> untyped
+
+      def oid: () -> untyped
+
+      def oid=: (untyped) -> untyped
+
+      def to_a: () -> untyped
+
+      def to_der: () -> untyped
+
+      def to_h: () -> untyped
+
+      def to_s: () -> untyped
+
+      def value: () -> untyped
+
+      def value=: (untyped) -> untyped
+
+      def value_der: () -> untyped
+
+      private
+
+      def initialize: (*untyped) -> void
+
+      def initialize_copy: (untyped) -> untyped
+
+      module AuthorityInfoAccess
+        include OpenSSL::X509::Extension::Helpers
+
+        public
+
+        def ca_issuer_uris: () -> untyped
+
+        def ocsp_uris: () -> untyped
+
+        private
+
+        def parse_aia_asn1: () -> untyped
+      end
+
+      module AuthorityKeyIdentifier
+        include OpenSSL::X509::Extension::Helpers
+
+        public
+
+        def authority_key_identifier: () -> untyped
+      end
+
+      module CRLDistributionPoints
+        include OpenSSL::X509::Extension::Helpers
+
+        public
+
+        def crl_uris: () -> untyped
+      end
+
+      module Helpers
+        public
+
+        def find_extension: (untyped oid) -> untyped
+      end
+
+      module SubjectKeyIdentifier
+        include OpenSSL::X509::Extension::Helpers
+
+        public
+
+        def subject_key_identifier: () -> untyped
+      end
+    end
+
+    class ExtensionError < OpenSSL::OpenSSLError
+    end
+
+    class ExtensionFactory
+      public
+
+      def config: () -> untyped
+
+      def config=: (untyped) -> untyped
+
+      def create_ext: (*untyped) -> untyped
+
+      def create_ext_from_array: (untyped ary) -> untyped
+
+      def create_ext_from_hash: (untyped hash) -> untyped
+
+      def create_ext_from_string: (untyped str) -> untyped
+
+      def create_extension: (*untyped arg) -> untyped
+
+      def crl: () -> untyped
+
+      def crl=: (untyped) -> untyped
+
+      def issuer_certificate: () -> untyped
+
+      def issuer_certificate=: (untyped) -> untyped
+
+      def subject_certificate: () -> untyped
+
+      def subject_certificate=: (untyped) -> untyped
+
+      def subject_request: () -> untyped
+
+      def subject_request=: (untyped) -> untyped
+
+      private
+
+      def initialize: (*untyped) -> void
+    end
+
+    class Name
+      include OpenSSL::Marshal
+
+      include Comparable
+
+      extend OpenSSL::Marshal::ClassMethods
+
+      alias self.parse self.parse_openssl
+
+      def self.parse_openssl: (untyped str, ?untyped template) -> untyped
+
+      def self.parse_rfc2253: (untyped str, ?untyped template) -> untyped
+
+      public
+
+      alias <=> cmp
+
+      def add_entry: (*untyped) -> untyped
+
+      def cmp: (untyped) -> untyped
+
+      def eql?: (untyped) -> untyped
+
+      def hash: () -> untyped
+
+      def hash_old: () -> untyped
+
+      def inspect: () -> untyped
+
+      def pretty_print: (untyped q) -> untyped
+
+      def to_a: () -> untyped
+
+      def to_der: () -> untyped
+
+      def to_s: (*untyped) -> untyped
+
+      def to_utf8: () -> untyped
+
+      private
+
+      def initialize: (*untyped) -> void
+
+      def initialize_copy: (untyped) -> untyped
+
+      COMPAT: Integer
+
+      DEFAULT_OBJECT_TYPE: Integer
+
+      MULTILINE: Integer
+
+      OBJECT_TYPE_TEMPLATE: Hash[untyped, untyped]
+
+      ONELINE: Integer
+
+      RFC2253: Integer
+
+      module RFC2253DN
+        def self.expand_hexstring: (untyped str) -> untyped
+
+        def self.expand_pair: (untyped str) -> untyped
+
+        def self.expand_value: (untyped str1, untyped str2, untyped str3) -> untyped
+
+        def self.scan: (untyped dn) -> untyped
+
+        private
+
+        def expand_hexstring: (untyped str) -> untyped
+
+        def expand_pair: (untyped str) -> untyped
+
+        def expand_value: (untyped str1, untyped str2, untyped str3) -> untyped
+
+        def scan: (untyped dn) -> untyped
+
+        AttributeType: Regexp
+
+        AttributeValue: Regexp
+
+        HexChar: Regexp
+
+        HexPair: Regexp
+
+        HexString: Regexp
+
+        Pair: Regexp
+
+        QuoteChar: Regexp
+
+        Special: String
+
+        StringChar: Regexp
+
+        TypeAndValue: Regexp
+      end
+    end
+
+    class NameError < OpenSSL::OpenSSLError
+    end
+
+    class Request
+      include OpenSSL::Marshal
+
+      extend OpenSSL::Marshal::ClassMethods
+
+      public
+
+      def ==: (untyped other) -> untyped
+
+      def add_attribute: (untyped) -> untyped
+
+      def attributes: () -> untyped
+
+      def attributes=: (untyped) -> untyped
+
+      def public_key: () -> untyped
+
+      def public_key=: (untyped) -> untyped
+
+      def sign: (untyped, untyped) -> untyped
+
+      def signature_algorithm: () -> untyped
+
+      def subject: () -> untyped
+
+      def subject=: (untyped) -> untyped
+
+      def to_der: () -> untyped
+
+      def to_pem: () -> untyped
+
+      alias to_s to_pem
+
+      def to_text: () -> untyped
+
+      def verify: (untyped) -> untyped
+
+      def version: () -> untyped
+
+      def version=: (untyped) -> untyped
+
+      private
+
+      def initialize: (*untyped) -> void
+
+      def initialize_copy: (untyped) -> untyped
+    end
+
+    class RequestError < OpenSSL::OpenSSLError
+    end
+
+    class Revoked
+      public
+
+      def ==: (untyped other) -> untyped
+
+      def add_extension: (untyped) -> untyped
+
+      def extensions: () -> untyped
+
+      def extensions=: (untyped) -> untyped
+
+      def serial: () -> untyped
+
+      def serial=: (untyped) -> untyped
+
+      def time: () -> untyped
+
+      def time=: (untyped) -> untyped
+
+      def to_der: () -> untyped
+
+      private
+
+      def initialize: (*untyped) -> void
+
+      def initialize_copy: (untyped) -> untyped
+    end
+
+    class RevokedError < OpenSSL::OpenSSLError
+    end
+
+    class Store
+      public
+
+      def add_cert: (untyped) -> untyped
+
+      def add_crl: (untyped) -> untyped
+
+      def add_file: (untyped) -> untyped
+
+      def add_path: (untyped) -> untyped
+
+      def chain: () -> untyped
+
+      def error: () -> untyped
+
+      def error_string: () -> untyped
+
+      def flags=: (untyped) -> untyped
+
+      def purpose=: (untyped) -> untyped
+
+      def set_default_paths: () -> untyped
+
+      def time=: (untyped) -> untyped
+
+      def trust=: (untyped) -> untyped
+
+      def verify: (*untyped) -> untyped
+
+      def verify_callback: () -> untyped
+
+      def verify_callback=: (untyped) -> untyped
+
+      private
+
+      def initialize: (*untyped) -> void
+    end
+
+    class StoreContext
+      public
+
+      def chain: () -> untyped
+
+      def cleanup: () -> untyped
+
+      def current_cert: () -> untyped
+
+      def current_crl: () -> untyped
+
+      def error: () -> untyped
+
+      def error=: (untyped) -> untyped
+
+      def error_depth: () -> untyped
+
+      def error_string: () -> untyped
+
+      def flags=: (untyped) -> untyped
+
+      def purpose=: (untyped) -> untyped
+
+      def time=: (untyped) -> untyped
+
+      def trust=: (untyped) -> untyped
+
+      def verify: () -> untyped
+
+      private
+
+      def initialize: (*untyped) -> void
+    end
+
+    class StoreError < OpenSSL::OpenSSLError
+    end
+  end
+end
