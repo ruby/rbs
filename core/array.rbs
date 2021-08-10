@@ -628,8 +628,8 @@ class Array[unchecked out Elem] < Object
   #     a #=>  ["", "b", "c!", "d!"]
   #
   # collect! is monomorphic because of RBS limitation.
-  def collect!: [U] () { (Elem item) -> U } -> ::Array[U]
-              | () -> ::Enumerator[Elem, ::Array[untyped]]
+  def collect!: () { (Elem item) -> Elem } -> self
+              | () -> ::Enumerator[Elem, self]
 
   # When invoked with a block, yields all combinations of length `n` of elements
   # from the array and then returns the array itself.

@@ -776,7 +776,7 @@ class Hash[unchecked out K, unchecked out V] < Object
   #     h = { "a" => 100, "b" => 200 }
   #     h.replace({ "c" => 300, "d" => 400 })   #=> {"c"=>300, "d"=>400}
   #
-  def replace: [A, B] (Hash[A, B]) -> Hash[A, B]
+  def replace: (Hash[K, V]) -> self
 
   # Returns a new hash consisting of entries for which the block returns true.
   #
@@ -906,8 +906,8 @@ class Hash[unchecked out K, unchecked out V] < Object
   #
   # If no block is given, an enumerator is returned instead.
   #
-  def transform_keys!: () -> Enumerator[K, Hash[untyped, V]]
-                     | () { (K) -> K } -> Hash[K, V]
+  def transform_keys!: () -> Enumerator[K, self]
+                     | () { (K) -> K } -> self
 
   # Returns a new hash with the results of running the block once for every value.
   # This method does not change the keys.
@@ -935,8 +935,8 @@ class Hash[unchecked out K, unchecked out V] < Object
   #
   # If no block is given, an enumerator is returned instead.
   #
-  def transform_values!: () -> Enumerator[V, Hash[K, untyped]]
-                       | [A] () { (V) -> A } -> Hash[K, A]
+  def transform_values!: () -> Enumerator[V, self]
+                       | () { (V) -> V } -> self
 
   # Adds the contents of the given hashes to the receiver.
   #
