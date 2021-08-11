@@ -497,7 +497,7 @@ module OpenSSL
   #
   def self.Digest: (String name) -> singleton(Digest)
 
-  def self.debug: () -> untyped
+  def self.debug: () -> bool
 
   # Turns on or off debug mode. With debug mode, all erros added to the OpenSSL
   # error queue will be printed to stderr.
@@ -505,7 +505,7 @@ module OpenSSL
   # # arglists 💪👽🚨 << Delete this section
   #     OpenSSL.debug = boolean -> boolean
   #
-  def self.debug=: (untyped) -> untyped
+  def self.debug=: (bool) -> bool
 
   # See any remaining errors held in queue.
   #
@@ -515,9 +515,9 @@ module OpenSSL
   # # arglists 💪👽🚨 << Delete this section
   #     OpenSSL.errors -> [String...]
   #
-  def self.errors: () -> untyped
+  def self.errors: () -> Array[String]
 
-  def self.fips_mode: () -> untyped
+  def self.fips_mode: () -> bool
 
   # Turns FIPS mode on or off. Turning on FIPS mode will obviously only have an
   # effect for FIPS-capable installations of the OpenSSL library. Trying to do so
@@ -530,7 +530,7 @@ module OpenSSL
   # # arglists 💪👽🚨 << Delete this section
   #     OpenSSL.fips_mode = boolean -> boolean
   #
-  def self.fips_mode=: (untyped) -> untyped
+  def self.fips_mode=: (bool) -> bool
 
   # Constant time memory comparison for fixed length strings, such as results of
   # HMAC calculations.
@@ -542,7 +542,7 @@ module OpenSSL
   # # arglists 💪👽🚨 << Delete this section
   #     OpenSSL.fixed_length_secure_compare(string, string) -> boolean
   #
-  def self.fixed_length_secure_compare: (untyped, untyped) -> untyped
+  def self.fixed_length_secure_compare: (String, String) -> bool
 
   # Constant time memory comparison. Inputs are hashed using SHA-256 to mask the
   # length of the secret. Returns `true` if the strings are identical, `false`
@@ -551,34 +551,7 @@ module OpenSSL
   # # arglists 💪👽🚨 << Delete this section
   #     OpenSSL.secure_compare(string, string) -> boolean
   #
-  def self.secure_compare: (untyped a, untyped b) -> untyped
-
-  private
-
-  # Returns a Digest subclass by *name*
-  #
-  #     require 'openssl'
-  #
-  #     OpenSSL::Digest("MD5")
-  #     # => OpenSSL::Digest::MD5
-  #
-  #     Digest("Foo")
-  #     # => NameError: wrong constant name Foo
-  #
-  # # arglists 💪👽🚨 << Delete this section
-  #     Digest(name)
-  #
-  def Digest: (untyped name) -> untyped
-
-  def debug: () -> untyped
-
-  def debug=: (untyped) -> untyped
-
-  def errors: () -> untyped
-
-  def fips_mode: () -> untyped
-
-  def fips_mode=: (untyped) -> untyped
+  def self.secure_compare: (String a, String b) -> bool
 
   OPENSSL_FIPS: bool
 
@@ -591,111 +564,61 @@ module OpenSSL
   VERSION: String
 
   module ASN1
-    def self.BMPString: (*untyped) -> untyped
+    type tagging = :IMPLICIT | :EXPLICIT
 
-    def self.BitString: (*untyped) -> untyped
+    type tag_class = :UNIVERSAL | :CONTEXT_SPECIFIC | :APPLICATION | :PRIVATE
 
-    def self.Boolean: (*untyped) -> untyped
+    def self.BMPString: (String value, ?bn tag, ?tagging tagging) -> BMPString
 
-    def self.EndOfContent: (*untyped) -> untyped
+    def self.BitString: (String value, ?bn tag, ?tagging tagging) -> BitString
 
-    def self.Enumerated: (*untyped) -> untyped
+    def self.Boolean: (bool value, ?bn tag, ?tagging tagging) -> Boolean
 
-    def self.GeneralString: (*untyped) -> untyped
+    def self.EndOfContent: () -> EndOfContent
 
-    def self.GeneralizedTime: (*untyped) -> untyped
+    def self.Enumerated: (bn value, ?bn tag, ?tagging tagging) -> Enumerated
 
-    def self.GraphicString: (*untyped) -> untyped
+    def self.GeneralString: (String value, ?bn tag, ?tagging tagging) -> GeneralString
 
-    def self.IA5String: (*untyped) -> untyped
+    def self.GeneralizedTime: (::Time value, ?bn tag, ?tagging tagging) -> GeneralizedTime
 
-    def self.ISO64String: (*untyped) -> untyped
+    def self.GraphicString: (String value, ?bn tag, ?tagging tagging) -> GraphicString
 
-    def self.Integer: (*untyped) -> untyped
+    def self.IA5String: (String value, ?bn tag, ?tagging tagging) -> IA5String
 
-    def self.Null: (*untyped) -> untyped
+    def self.ISO64String: (String value, ?bn tag, ?tagging tagging) -> ISO64String
 
-    def self.NumericString: (*untyped) -> untyped
+    def self.Integer: (bn value, ?bn tag, ?tagging tagging) -> Integer
 
-    def self.ObjectId: (*untyped) -> untyped
+    def self.Null: (nil) -> Null
 
-    def self.OctetString: (*untyped) -> untyped
+    def self.NumericString: (String value, ?bn tag, ?tagging tagging) -> NumericString
 
-    def self.PrintableString: (*untyped) -> untyped
+    def self.ObjectId: (String value, ?bn tag, ?tagging tagging) -> ObjectId
 
-    def self.Sequence: (*untyped) -> untyped
+    def self.OctetString: (String value, ?bn tag, ?tagging tagging) -> OctetString
 
-    def self.Set: (*untyped) -> untyped
+    def self.PrintableString: (String value, ?bn tag, ?tagging tagging) -> PrintableString
 
-    def self.T61String: (*untyped) -> untyped
+    def self.Sequence: (Array[ASN1Data] value, ?bn tag, ?tagging tagging) -> Sequence
 
-    def self.UTCTime: (*untyped) -> untyped
+    def self.Set: (Array[ASN1Data] value, ?bn tag, ?tagging tagging) -> Set
 
-    def self.UTF8String: (*untyped) -> untyped
+    def self.T61String: (String value, ?bn tag, ?tagging tagging) -> T61String
 
-    def self.UniversalString: (*untyped) -> untyped
+    def self.UTCTime: (::Time value, ?bn tag, ?tagging tagging) -> UTCTime
 
-    def self.VideotexString: (*untyped) -> untyped
+    def self.UTF8String: (String value, ?bn tag, ?tagging tagging) -> UTF8String
 
-    def self.decode: (untyped) -> untyped
+    def self.UniversalString: (String value, ?bn tag, ?tagging tagging) -> UniversalString
 
-    def self.decode_all: (untyped) -> untyped
+    def self.VideotexString: (String value, ?bn tag, ?tagging tagging) -> VideotexString
 
-    def self.traverse: (untyped) -> untyped
+    def self.decode: (String | _ToDer der) -> ASN1Data
 
-    private
+    def self.decode_all: (String | _ToDer der) -> Array[ASN1Data]
 
-    def BMPString: (*untyped) -> untyped
-
-    def BitString: (*untyped) -> untyped
-
-    def Boolean: (*untyped) -> untyped
-
-    def EndOfContent: (*untyped) -> untyped
-
-    def Enumerated: (*untyped) -> untyped
-
-    def GeneralString: (*untyped) -> untyped
-
-    def GeneralizedTime: (*untyped) -> untyped
-
-    def GraphicString: (*untyped) -> untyped
-
-    def IA5String: (*untyped) -> untyped
-
-    def ISO64String: (*untyped) -> untyped
-
-    def Integer: (*untyped) -> untyped
-
-    def Null: (*untyped) -> untyped
-
-    def NumericString: (*untyped) -> untyped
-
-    def ObjectId: (*untyped) -> untyped
-
-    def OctetString: (*untyped) -> untyped
-
-    def PrintableString: (*untyped) -> untyped
-
-    def Sequence: (*untyped) -> untyped
-
-    def Set: (*untyped) -> untyped
-
-    def T61String: (*untyped) -> untyped
-
-    def UTCTime: (*untyped) -> untyped
-
-    def UTF8String: (*untyped) -> untyped
-
-    def UniversalString: (*untyped) -> untyped
-
-    def VideotexString: (*untyped) -> untyped
-
-    def decode: (untyped) -> untyped
-
-    def decode_all: (untyped) -> untyped
-
-    def traverse: (untyped) -> untyped
+    def self.traverse: (String | _ToDer der) { (::Integer, ::Integer, ::Integer, ::Integer, bool, tag_class, ::Integer) -> void } -> void
 
     BIT_STRING: Integer
 
@@ -757,26 +680,31 @@ module OpenSSL
 
     VIDEOTEXSTRING: Integer
 
+    interface _ToDer
+      def to_der: () -> String
+    end
+
     class ASN1Data
       public
 
-      def indefinite_length: () -> untyped
+      def indefinite_length: () -> bool
 
-      def indefinite_length=: (untyped) -> untyped
+      def indefinite_length=: (bool) -> bool
 
       alias infinite_length indefinite_length
 
       alias infinite_length= indefinite_length=
 
-      def tag: () -> untyped
+      def tag: () -> bn
 
-      def tag=: (untyped) -> untyped
+      def tag=: (::Integer) -> ::Integer
+              | (BN) -> BN
 
-      def tag_class: () -> untyped
+      def tag_class: () -> tag_class
 
-      def tag_class=: (untyped) -> untyped
+      def tag_class=: (tag_class) -> tag_class
 
-      def to_der: () -> untyped
+      def to_der: () -> String
 
       def value: () -> untyped
 
@@ -784,7 +712,7 @@ module OpenSSL
 
       private
 
-      def initialize: (untyped, untyped, untyped) -> void
+      def initialize: (untyped value, Integer tag, tag_class tag_class) -> void
     end
 
     class ASN1Error < OpenSSL::OpenSSLError
@@ -796,36 +724,43 @@ module OpenSSL
     class BitString < OpenSSL::ASN1::Primitive
       public
 
-      def unused_bits: () -> untyped
+      def unused_bits: () -> ::Integer
 
-      def unused_bits=: (untyped) -> untyped
+      def unused_bits=: (::Integer) -> ::Integer
+
+      def value: () -> String
+
+      def value=: (String) -> String
     end
 
     class Boolean < OpenSSL::ASN1::Primitive
+      def value: () -> bool
+
+      def value=: (bool) -> bool
     end
 
     class Constructive < OpenSSL::ASN1::ASN1Data
-      include Enumerable[untyped]
+      include Enumerable[ASN1Data]
 
       public
 
-      def each: () -> untyped
+      def each: () ?{ (ASN1Data) -> void }-> self
 
-      def tagging: () -> untyped
+      def tagging: () -> tagging?
 
-      def tagging=: (untyped) -> untyped
+      def tagging=: (tagging) -> tagging
 
-      def to_der: () -> untyped
+      def to_der: () -> String
 
       private
 
-      def initialize: (*untyped) -> void
+      def initialize: (Array[ASN1Data]) -> void
     end
 
     class EndOfContent < OpenSSL::ASN1::ASN1Data
       public
 
-      def to_der: () -> untyped
+      def to_der: () -> String
 
       private
 
@@ -833,96 +768,153 @@ module OpenSSL
     end
 
     class Enumerated < OpenSSL::ASN1::Primitive
+      def value: () -> ::Integer
+
+      def value=: (::Integer) -> ::Integer
     end
 
     class GeneralString < OpenSSL::ASN1::Primitive
+      def value: () -> String
+
+      def value=: (String) -> String
     end
 
     class GeneralizedTime < OpenSSL::ASN1::Primitive
+      def value: () -> Time
+
+      def value=: (Time) -> Time
     end
 
     class GraphicString < OpenSSL::ASN1::Primitive
+      def value: () -> String
+
+      def value=: (String) -> String
     end
 
     class IA5String < OpenSSL::ASN1::Primitive
+      def value: () -> String
+
+      def value=: (String) -> String
     end
 
     class ISO64String < OpenSSL::ASN1::Primitive
+      def value: () -> String
+
+      def value=: (String) -> String
     end
 
     class Integer < OpenSSL::ASN1::Primitive
+      def value: () -> ::Integer
+
+      def value=: (::Integer) -> ::Integer
     end
 
     class Null < OpenSSL::ASN1::Primitive
+      def value: () -> nil
+
+      def value=: (nil) -> nil
     end
 
     class NumericString < OpenSSL::ASN1::Primitive
+      def value: () -> String
+
+      def value=: (String) -> String
     end
 
     class ObjectId < OpenSSL::ASN1::Primitive
-      def self.register: (untyped, untyped, untyped) -> untyped
+      def self.register: (String object_id, String short_name, String ong_name) -> bool
+
+      def value: () -> String
+
+      def value=: (String) -> String
 
       public
 
-      def ==: (untyped) -> untyped
+      def ==: (ObjectId other) -> bool
 
-      def ln: () -> untyped
+      def ln: () -> String?
 
       alias long_name ln
 
-      def oid: () -> untyped
+      def oid: () -> String
 
       alias short_name sn
 
-      def sn: () -> untyped
+      def sn: () -> String?
     end
 
     class OctetString < OpenSSL::ASN1::Primitive
+      def value: () -> String
+
+      def value=: (String) -> String
     end
 
     class Primitive < OpenSSL::ASN1::ASN1Data
       public
 
-      def tagging: () -> untyped
+      def tagging: () -> tagging?
 
-      def tagging=: (untyped) -> untyped
+      def tagging=: (tagging) -> tagging
 
-      def to_der: () -> untyped
+      def to_der: () -> String
 
       private
 
-      def initialize: (*untyped) -> void
+      def initialize: (untyped value, Integer tag, tagging tagging) -> void
     end
 
     class PrintableString < OpenSSL::ASN1::Primitive
+      def value: () -> String
+
+      def value=: (String) -> String
     end
 
     class Sequence < OpenSSL::ASN1::Constructive
+      def value: () -> Array[ASN1Data]
+
+      def value=: (Array[ASN1Data]) -> Array[ASN1Data]
     end
 
     class Set < OpenSSL::ASN1::Constructive
     end
 
     class T61String < OpenSSL::ASN1::Primitive
+      def value: () -> String
+
+      def value=: (String) -> String
     end
 
     class UTCTime < OpenSSL::ASN1::Primitive
+      def value: () -> Time
+
+      def value=: (Time) -> Time
     end
 
     class UTF8String < OpenSSL::ASN1::Primitive
+      def value: () -> String
+
+      def value=: (String) -> String
     end
 
     class UniversalString < OpenSSL::ASN1::Primitive
+      def value: () -> String
+
+      def value=: (String) -> String
     end
 
     class VideotexString < OpenSSL::ASN1::Primitive
+      def value: () -> String
+
+      def value=: (String) -> String
     end
   end
+
+  type bn = BN | ::Integer
 
   class BN
     include Comparable
 
-    def self.generate_prime: (*untyped) -> untyped
+    def self.generate_prime: (::Integer bits, ?bool safe, ?bn add, ?bn rem) -> instance
 
     def self.pseudo_rand: (*untyped) -> untyped
 
@@ -934,103 +926,112 @@ module OpenSSL
 
     public
 
-    def %: (untyped) -> untyped
+    def %: (int) -> instance
 
-    def *: (untyped) -> untyped
+    def *: (int) -> instance
 
-    def **: (untyped) -> untyped
+    def **: (int) -> instance
 
-    def +: (untyped) -> untyped
+    def +: (int) -> instance
 
-    def +@: () -> untyped
+    def +@: () -> instance
 
-    def -: (untyped) -> untyped
+    def -: (int) -> instance
 
-    def -@: () -> untyped
+    def -@: () -> instance
 
-    def /: (untyped) -> untyped
+    def /: (int) -> [instance, instance]
 
-    def <<: (untyped) -> untyped
+    def <<: (int) -> instance
 
     alias <=> cmp
 
-    def ==: (untyped) -> untyped
+    def ==: (untyped) -> bool
 
     alias === ==
 
-    def >>: (untyped) -> untyped
+    def >>: (int) -> int
 
-    def bit_set?: (untyped) -> untyped
+    def bit_set?: (int) -> bool
 
-    def clear_bit!: (untyped) -> untyped
+    def clear_bit!: (int) -> void
 
-    def cmp: (untyped) -> untyped
+    def cmp: (Integer) -> Integer
 
-    def coerce: (untyped) -> untyped
+    def coerce: (::Integer) -> Array[Integer]
+              | (BN) -> Array[BN]
 
-    def copy: (untyped) -> untyped
+    def copy: (int) -> instance
 
-    def eql?: (untyped) -> untyped
+    def eql?: (untyped other) -> bool
 
-    def gcd: (untyped) -> untyped
+    def gcd: (int) -> instance
 
-    def hash: () -> untyped
+    def hash: () -> Integer
 
-    def lshift!: (untyped) -> untyped
+    def lshift!: (int bits) -> self
 
-    def mask_bits!: (untyped) -> untyped
+    def mask_bits!: (int) -> void
 
-    def mod_add: (untyped, untyped) -> untyped
+    def mod_add: (int, int) -> instance
 
-    def mod_exp: (untyped, untyped) -> untyped
+    def mod_exp: (int, int) -> instance
 
-    def mod_inverse: (untyped) -> untyped
+    def mod_inverse: (int) -> instance
 
-    def mod_mul: (untyped, untyped) -> untyped
+    def mod_mul: (int, int) -> instance
 
-    def mod_sqr: (untyped) -> untyped
+    def mod_sqr: (int) -> instance
 
-    def mod_sub: (untyped, untyped) -> untyped
+    def mod_sub: (int, int) -> instance
 
-    def negative?: () -> untyped
+    def negative?: () -> bool
 
-    def num_bits: () -> untyped
+    def num_bits: () -> ::Integer
 
-    def num_bytes: () -> untyped
+    def num_bytes: () -> ::Integer
 
-    def odd?: () -> untyped
+    def odd?: () -> bool
 
-    def one?: () -> untyped
+    def one?: () -> bool
 
     def pretty_print: (untyped q) -> untyped
 
-    def prime?: (*untyped) -> untyped
+    def prime?: (?int checks) -> bool
 
-    def prime_fasttest?: (*untyped) -> untyped
+    def prime_fasttest?: (?int checks, ?int trial_div) -> bool
 
-    def rshift!: (untyped) -> untyped
+    def rshift!: (int bits) -> self
 
-    def set_bit!: (untyped) -> untyped
+    def set_bit!: (int bit) -> self
 
-    def sqr: () -> untyped
+    def sqr: () -> instance
 
-    def to_bn: () -> untyped
+    def to_bn: () -> self
 
-    def to_i: () -> untyped
+    def to_i: () -> ::Integer
 
     alias to_int to_i
 
-    def to_s: (*untyped) -> untyped
+    def to_s: () -> String
+            | (0) -> String
+            | (2) -> String
+            | (10) -> String
+            | (16) -> String
+            | (int base) -> String
 
-    def ucmp: (untyped) -> untyped
+    def ucmp: (int bn2) -> ::Integer
 
-    def zero?: () -> untyped
+    def zero?: () -> bool
 
     private
 
-    def initialize: (*untyped) -> void
+    def initialize: (instance) -> void
+                  | (int) -> void
+                  | (String) -> void
+                  | (String, 0 | 2 | 10 | 16) -> void
 
-    def initialize_copy: (untyped) -> untyped
+    def initialize_copy: (instance other) -> instance
   end
 
   class BNError < OpenSSL::OpenSSLError
