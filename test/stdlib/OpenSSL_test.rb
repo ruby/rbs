@@ -408,3 +408,51 @@ class OpenSSLConfigTest < Test::Unit::TestCase
     OpenSSL::Config.load(OpenSSL::Config::DEFAULT_CONFIG_FILE)
   end
 end
+
+class OpenSSLDigestSingletonTest < Test::Unit::TestCase
+  include TypeAssertions
+  library "openssl"
+  testing "singleton(::OpenSSL::Digest)"
+
+  def test_digest
+    assert_send_type "(String, String) -> String",
+      OpenSSL::Digest, :digest, "SHA256", "abc"
+  end
+end
+
+class OpenSSLDigestTest < Test::Unit::TestCase
+  include TypeAssertions
+  library "openssl"
+  testing "::OpenSSL::Digest"
+
+  def test_block_length
+    assert_send_type "() -> Integer",
+      digest, :block_length
+  end
+
+  def test_digest_length
+    assert_send_type "() -> Integer",
+      digest, :digest_length
+  end
+
+  def test_name
+    assert_send_type "() -> String",
+      digest, :name
+  end
+
+  def test_reset
+    assert_send_type "() -> OpenSSL::Digest",
+      digest, :reset
+  end
+
+  def test_update
+    assert_send_type "(String) -> OpenSSL::Digest",
+      digest, :update, "cde"
+  end
+
+  private
+
+  def digest
+    OpenSSL::Digest.new("sha256")
+  end
+end

@@ -1240,7 +1240,7 @@ module OpenSSL
   end
 
   class Config
-    include Enumerable[untyped]
+    include Enumerable[[String, String, String]]
 
     def self.load: (?_ToS filename) -> instance
 
@@ -1280,30 +1280,34 @@ module OpenSSL
   class ConfigError < OpenSSL::OpenSSLError
   end
 
-  class Digest < Digest::Class
-    def self.digest: (untyped name, untyped data) -> untyped
+  class Digest
+    def self.digest: (String name, String data) -> String
 
     public
 
     alias << update
 
-    def block_length: () -> untyped
+    def block_length: () -> Integer
 
-    def digest_length: () -> untyped
+    def digest: () -> String
 
-    def name: () -> untyped
+    def digest_length: () -> Integer
 
-    def reset: () -> untyped
+    def hexdigest: () -> String
 
-    def update: (untyped) -> untyped
+    def name: () -> String
+
+    def reset: () -> self
+
+    def update: (String data) -> self
 
     private
 
     def finish: (*untyped) -> untyped
 
-    def initialize: (*untyped) -> void
+    def initialize: (String name, ?String data) -> void
 
-    def initialize_copy: (untyped) -> untyped
+    def initialize_copy: (instance) -> void
 
     class Digest < OpenSSL::Digest
     end
@@ -1312,83 +1316,83 @@ module OpenSSL
     end
 
     class MD4 < OpenSSL::Digest
-      def self.digest: (untyped data) -> untyped
+      def self.digest: (String data) -> String
 
-      def self.hexdigest: (untyped data) -> untyped
+      def self.hexdigest: (String data) -> String
 
       private
 
-      def initialize: (?untyped data) -> void
+      def initialize: (?String data) -> void
     end
 
     class MD5 < OpenSSL::Digest
-      def self.digest: (untyped data) -> untyped
+      def self.digest: (String data) -> String
 
-      def self.hexdigest: (untyped data) -> untyped
+      def self.hexdigest: (String data) -> String
 
       private
 
-      def initialize: (?untyped data) -> void
+      def initialize: (?String data) -> void
     end
 
     class RIPEMD160 < OpenSSL::Digest
-      def self.digest: (untyped data) -> untyped
+      def self.digest: (String data) -> String
 
-      def self.hexdigest: (untyped data) -> untyped
+      def self.hexdigest: (String data) -> String
 
       private
 
-      def initialize: (?untyped data) -> void
+      def initialize: (?String data) -> void
     end
 
     class SHA1 < OpenSSL::Digest
-      def self.digest: (untyped data) -> untyped
+      def self.digest: (String data) -> String
 
-      def self.hexdigest: (untyped data) -> untyped
+      def self.hexdigest: (String data) -> String
 
       private
 
-      def initialize: (?untyped data) -> void
+      def initialize: (?String data) -> void
     end
 
     class SHA224 < OpenSSL::Digest
-      def self.digest: (untyped data) -> untyped
+      def self.digest: (String data) -> String
 
-      def self.hexdigest: (untyped data) -> untyped
+      def self.hexdigest: (String data) -> String
 
       private
 
-      def initialize: (?untyped data) -> void
+      def initialize: (?String data) -> void
     end
 
     class SHA256 < OpenSSL::Digest
-      def self.digest: (untyped data) -> untyped
+      def self.digest: (String data) -> String
 
-      def self.hexdigest: (untyped data) -> untyped
+      def self.hexdigest: (String data) -> String
 
       private
 
-      def initialize: (?untyped data) -> void
+      def initialize: (?String data) -> void
     end
 
     class SHA384 < OpenSSL::Digest
-      def self.digest: (untyped data) -> untyped
+      def self.digest: (String data) -> String
 
-      def self.hexdigest: (untyped data) -> untyped
+      def self.hexdigest: (String data) -> String
 
       private
 
-      def initialize: (?untyped data) -> void
+      def initialize: (?String data) -> void
     end
 
     class SHA512 < OpenSSL::Digest
-      def self.digest: (untyped data) -> untyped
+      def self.digest: (String data) -> String
 
-      def self.hexdigest: (untyped data) -> untyped
+      def self.hexdigest: (String data) -> String
 
       private
 
-      def initialize: (?untyped data) -> void
+      def initialize: (?String data) -> void
     end
   end
 
