@@ -1456,33 +1456,33 @@ module OpenSSL
   end
 
   class HMAC
-    def self.digest: (untyped, untyped, untyped) -> untyped
+    def self.digest: (String algo, String key, String data) -> String
 
-    def self.hexdigest: (untyped, untyped, untyped) -> untyped
+    def self.hexdigest: (String algo, String key, String data) -> String
 
     public
 
     alias << update
 
-    def ==: (untyped other) -> untyped
+    def ==: (instance other) -> bool
 
-    def digest: () -> untyped
+    def digest: () -> String
 
-    def hexdigest: () -> untyped
+    def hexdigest: () -> String
 
     alias inspect hexdigest
 
-    def reset: () -> untyped
+    def reset: () -> self
 
     alias to_s hexdigest
 
-    def update: (untyped) -> untyped
+    def update: (String data) -> self
 
     private
 
-    def initialize: (untyped, untyped) -> void
+    def initialize: (String key, Digest digest) -> void
 
-    def initialize_copy: (untyped) -> untyped
+    def initialize_copy: (instance) -> void
   end
 
   class HMACError < OpenSSL::OpenSSLError

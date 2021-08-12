@@ -494,3 +494,52 @@ class OpenSSLEngineTest < Test::Unit::TestCase
     OpenSSL::Engine.by_id("openssl")
   end
 end
+
+class OpenSSLHMACSingletonTest < Test::Unit::TestCase
+  include TypeAssertions
+  library "openssl"
+  testing "singleton(::OpenSSL::HMAC)"
+
+  def test_digest
+    assert_send_type "(String, String, String) -> String",
+      OpenSSL::HMAC, :digest, "SHA256", "key", "data"
+  end
+
+  def test_hexdigest
+    assert_send_type "(String, String, String) -> String",
+      OpenSSL::HMAC, :hexdigest, "SHA256", "key", "data"
+  end
+end
+
+class OpenSSLHMACTest < Test::Unit::TestCase
+  include TypeAssertions
+  library "openssl"
+  testing "::OpenSSL::HMAC"
+
+  def test_digest
+    assert_send_type "() -> String",
+      hmac, :digest
+  end
+
+  def test_hexdigest
+    assert_send_type "() -> String",
+      hmac, :hexdigest
+  end
+
+  def test_reset
+    assert_send_type "() -> OpenSSL::HMAC",
+      hmac, :reset
+  end
+
+  def test_update
+    assert_send_type "(String) -> OpenSSL::HMAC",
+      hmac, :update, "cde"
+  end
+
+  private
+
+  def hmac
+    digest = OpenSSL::Digest.new('SHA256')
+    OpenSSL::HMAC.new("key", digest)
+  end
+end
