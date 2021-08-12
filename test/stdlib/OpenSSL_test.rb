@@ -456,3 +456,41 @@ class OpenSSLDigestTest < Test::Unit::TestCase
     OpenSSL::Digest.new("sha256")
   end
 end
+
+class OpenSSLEngineSingletonTest < Test::Unit::TestCase
+  include TypeAssertions
+  library "openssl"
+  testing "singleton(::OpenSSL::Engine)"
+
+  def test_by_id
+    assert_send_type "(String) -> OpenSSL::Engine",
+      OpenSSL::Engine, :by_id, "openssl"
+  end
+
+  def test_engines
+    assert_send_type "() -> Array[OpenSSL::Engine]",
+      OpenSSL::Engine, :engines
+  end
+end
+
+class OpenSSLEngineTest < Test::Unit::TestCase
+  include TypeAssertions
+  library "openssl"
+  testing "::OpenSSL::Engine"
+
+  def test_cipher
+    assert_send_type "(String) -> OpenSSL::Cipher",
+      engine, :cipher, "RC4"
+  end
+
+  def test_digest
+    assert_send_type "(String) -> OpenSSL::Digest",
+      engine, :digest, "SHA1"
+  end
+
+  private
+
+  def engine
+    OpenSSL::Engine.by_id("openssl")
+  end
+end

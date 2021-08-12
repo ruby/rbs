@@ -1397,37 +1397,37 @@ module OpenSSL
   end
 
   class Engine
-    def self.by_id: (untyped) -> untyped
+    def self.by_id: (String name) -> instance
 
-    def self.cleanup: () -> untyped
+    def self.cleanup: () -> void
 
-    def self.engines: () -> untyped
+    def self.engines: () -> Array[instance]
 
-    def self.load: (*untyped) -> untyped
+    def self.load: (?String name) -> (true | nil)
 
     public
 
-    def cipher: (untyped) -> untyped
+    def cipher: (String cipher) -> Cipher
 
-    def cmds: () -> untyped
+    def cmds: () -> Array[[String, String, String]]
 
-    def ctrl_cmd: (*untyped) -> untyped
+    def ctrl_cmd: (String cmd, ?String value) -> self
 
-    def digest: (untyped) -> untyped
+    def digest: (String digest) -> Digest
 
-    def finish: () -> untyped
+    def finish: () -> nil
 
-    def id: () -> untyped
+    def id: () -> String
 
-    def inspect: () -> untyped
+    def inspect: () -> String
 
-    def load_private_key: (*untyped) -> untyped
+    def load_private_key: (?String id, ?String data) -> PKey
 
-    def load_public_key: (*untyped) -> untyped
+    def load_public_key: (?String id, ?String data) -> PKey
 
-    def name: () -> untyped
+    def name: () -> String
 
-    def set_default: (untyped) -> untyped
+    def set_default: (Integer flag) -> bool
 
     METHOD_ALL: Integer
 
