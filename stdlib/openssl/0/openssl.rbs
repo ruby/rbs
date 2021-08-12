@@ -1756,32 +1756,32 @@ module OpenSSL
   end
 
   class PKCS12
-    def self.create: (*untyped) -> untyped
+    def self.create: (String pass, String name, PKey::PKey key, X509::Certificate cert, ?Array[X509::Certificate]? ca, ?String? key_pbe, ?String? cert_pbe, ?Integer? key_iter, ?Integer? mac_iter, ?Integer? keytype) -> instance
 
     public
 
-    def ca_certs: () -> untyped
+    def ca_certs: () -> Array[X509::Certificate]?
 
-    def certificate: () -> untyped
+    def certificate: () -> X509::Certificate
 
-    def key: () -> untyped
+    def key: () -> PKey::PKey
 
-    def to_der: () -> untyped
+    def to_der: () -> String
 
     private
 
-    def initialize: (*untyped) -> void
+    def initialize: (?String der, ?String pass) -> void
 
-    def initialize_copy: (untyped) -> untyped
+    def initialize_copy: (instance) -> void
 
     class PKCS12Error < OpenSSL::OpenSSLError
     end
   end
 
   module PKCS5
-    def self.pbkdf2_hmac: (untyped pass, untyped salt, untyped iter, untyped keylen, untyped digest) -> untyped
+    def self.pbkdf2_hmac: (String pass, String salt, Integer iter, Integer keylen, String | Digest digest) -> String
 
-    def self.pbkdf2_hmac_sha1: (untyped pass, untyped salt, untyped iter, untyped keylen) -> untyped
+    def self.pbkdf2_hmac_sha1: (String pass, String salt, Integer iter, Integer keylen) -> String
 
     private
 
@@ -1791,73 +1791,73 @@ module OpenSSL
   end
 
   class PKCS7
-    def self.encrypt: (*untyped) -> untyped
+    def self.encrypt: (X509::Certificate certs, String data, ?Cipher cipher, ?Integer flags) -> instance
 
-    def self.read_smime: (untyped) -> untyped
+    def self.read_smime: (String ) -> instance
 
-    def self.sign: (*untyped) -> untyped
+    def self.sign: (X509::Certificate certs,PKey::PKey key, String data, ?OpenSSL::Cipher cipher, ?Integer flags) -> instance
 
-    def self.write_smime: (*untyped) -> untyped
+    def self.write_smime: (instance pkcs7, ?String data, ?Integer flags) -> String
 
     public
 
-    def add_certificate: (untyped) -> untyped
+    def add_certificate: (X509::Certificate cert) -> self
 
-    def add_crl: (untyped) -> untyped
+    def add_crl: (X509::CRL crl) -> self
 
-    def add_data: (untyped) -> untyped
+    def add_data: (String data) -> self
 
-    def add_recipient: (untyped) -> untyped
+    def add_recipient: (RecipientInfo recipient) -> self
 
-    def add_signer: (untyped) -> untyped
+    def add_signer: (SignerInfo signer) -> self
 
-    def certificates: () -> untyped
+    def certificates: () -> Array[X509::Certificate]?
 
-    def certificates=: (untyped) -> untyped
+    def certificates=: (Array[X509::Certificate]) -> self
 
-    def cipher=: (untyped) -> untyped
+    def cipher=: (Cipher cipher) -> self
 
-    def crls: () -> untyped
+    def crls: () -> Array[X509::CRL]?
 
-    def crls=: (untyped) -> untyped
+    def crls=: (Array[X509::CRL]) -> self
 
-    def data: () -> untyped
+    def data: () -> String?
 
     alias data= add_data
 
-    def decrypt: (*untyped) -> untyped
+    def decrypt: (PKey::PKey p1, ?PKey::PKey p2, ?PKey::PKey p3) -> String
 
-    def detached: () -> untyped
+    def detached: () -> bool
 
-    def detached=: (untyped) -> untyped
+    def detached=: (bool) -> bool
 
-    def detached?: () -> untyped
+    def detached?: () -> bool
 
-    def error_string: () -> untyped
+    def error_string: () -> String?
 
-    def error_string=: (untyped) -> untyped
+    def error_string=: (String) -> String
 
-    def recipients: () -> untyped
+    def recipients: () -> Array[RecipientInfo]
 
-    def signers: () -> untyped
+    def signers: () -> Array[SignerInfo]
 
-    def to_der: () -> untyped
+    def to_der: () -> String
 
-    def to_pem: () -> untyped
+    def to_pem: () -> String
 
     alias to_s to_pem
 
-    def type: () -> untyped
+    def type: () -> String?
 
-    def type=: (untyped) -> untyped
+    def type=: (String) -> String
 
-    def verify: (*untyped) -> untyped
+    def verify: (PKey::PKey p1, PKey::PKey p2, ?PKey::PKey p3, ?PKey::PKey p4) -> bool
 
     private
 
-    def initialize: (*untyped) -> void
+    def initialize: (?String der) -> void
 
-    def initialize_copy: (untyped) -> untyped
+    def initialize_copy: (instance) -> untyped
 
     BINARY: Integer
 
@@ -1885,29 +1885,29 @@ module OpenSSL
     class RecipientInfo
       public
 
-      def enc_key: () -> untyped
+      def enc_key: () -> PKey::PKey
 
-      def issuer: () -> untyped
+      def issuer: () -> X509::Name
 
-      def serial: () -> untyped
+      def serial: () -> Integer
 
       private
 
-      def initialize: (untyped) -> void
+      def initialize: (X509::Certificate certificate) -> void
     end
 
     class SignerInfo
       public
 
-      def issuer: () -> untyped
+      def issuer: () -> X509::Name
 
-      def serial: () -> untyped
+      def serial: () -> Integer
 
-      def signed_time: () -> untyped
+      def signed_time: () -> Time?
 
       private
 
-      def initialize: (untyped, untyped, untyped) -> void
+      def initialize: (X509::Certificate certificate, PKey::PKey key, Digest digest) -> void
     end
   end
 
