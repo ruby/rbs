@@ -319,9 +319,16 @@ module RBS
                          const_to_name(node.children[0])
                        end
 
+          value_node = node.children.last
+          type = if value_node.nil?
+                  # Give up type prediction when node is MASGN.
+                  Types::Bases::Any.new(location: nil)
+                else
+                  node_type(value_node)
+                end
           decls << AST::Declarations::Constant.new(
             name: const_name,
-            type: node_type(node.children.last),
+            type: type,
             location: nil,
             comment: comments[node.first_lineno - 1]
           )
