@@ -1619,56 +1619,59 @@ module OpenSSL
 
     V_RESPID_NAME: Integer
 
+    type ocsp_status = V_CERTSTATUS_GOOD | V_CERTSTATUS_REVOKED | V_CERTSTATUS_UNKNOWN
+
     class BasicResponse
       public
 
-      def add_nonce: (*untyped) -> untyped
+      def add_nonce: (?String nonce) -> self
 
-      def add_status: (untyped, untyped, untyped, untyped, untyped, untyped, untyped) -> untyped
+      def add_status: (CertificateId certificate_id, ocsp_status status, Integer? reason, Integer? revocation_time, ?(Integer | Time) this_update, ?(Integer | Time) next_update, ?Array[X509::Extension] extensions) -> self
 
-      def copy_nonce: (untyped) -> untyped
+      def copy_nonce: (Request request) -> Integer
 
-      def find_response: (untyped) -> untyped
+      def find_response: (CertificateId certificate_id) -> SingleResponse?
 
-      def responses: () -> untyped
+      def responses: () -> Array[SingleResponse]
 
-      def sign: (*untyped) -> untyped
+      def sign: (X509::Certificate cert, PKey::PKey key, ?Array[X509::Certificate] certs, ?Integer flags, ?Digest digest) -> self
 
-      def status: () -> untyped
+      def status: () -> Integer
 
-      def to_der: () -> untyped
+      def to_der: () -> String
 
-      def verify: (*untyped) -> untyped
+      def verify: (Array[X509::Certificate] certs, X509::Store store, ?Integer flags) -> bool
 
       private
 
-      def initialize: (*untyped) -> void
+      def initialize: (?String der) -> void
 
-      def initialize_copy: (untyped) -> untyped
+      def initialize_copy: (instance) -> void
     end
 
     class CertificateId
       public
 
-      def cmp: (untyped) -> untyped
+      def cmp: (instance other) -> bool
 
-      def cmp_issuer: (untyped) -> untyped
+      def cmp_issuer: (instance other) -> bool
 
-      def hash_algorithm: () -> untyped
+      def hash_algorithm: () -> String
 
-      def issuer_key_hash: () -> untyped
+      def issuer_key_hash: () -> String
 
-      def issuer_name_hash: () -> untyped
+      def issuer_name_hash: () -> String
 
-      def serial: () -> untyped
+      def serial: () -> Integer
 
-      def to_der: () -> untyped
+      def to_der: () -> String
 
       private
 
-      def initialize: (*untyped) -> void
+      def initialize: (String | ASN1::_ToDer der) -> void
+                    | (X509::Certificate subject, X509::Certificate issuer, ?Digest digest) -> void
 
-      def initialize_copy: (untyped) -> untyped
+      def initialize_copy: (instance) -> void
     end
 
     class OCSPError < OpenSSL::OpenSSLError
@@ -1677,75 +1680,75 @@ module OpenSSL
     class Request
       public
 
-      def add_certid: (untyped) -> untyped
+      def add_certid: (CertificateId certificate_id) -> self
 
-      def add_nonce: (*untyped) -> untyped
+      def add_nonce: (?String nonce) -> self
 
-      def certid: () -> untyped
+      def certid: () -> Array[CertificateId]
 
-      def check_nonce: (untyped) -> untyped
+      def check_nonce: (Response response) -> (-1 | 0 | 1 | 2 | 3)
 
-      def sign: (*untyped) -> untyped
+      def sign: (X509::Certificate cert, PKey::PKey key, ?Array[X509::Certificate] certs, ?Integer flags, ?Digest digest) -> self
 
-      def signed?: () -> untyped
+      def signed?: () -> bool
 
-      def to_der: () -> untyped
+      def to_der: () -> String
 
-      def verify: (*untyped) -> untyped
+      def verify: (Array[X509::Certificate] certs, X509::Store store, ?Integer flags) -> bool
 
       private
 
-      def initialize: (*untyped) -> void
+      def initialize: (?String der) -> void
 
-      def initialize_copy: (untyped) -> untyped
+      def initialize_copy: (instance) -> void
     end
 
     class Response
-      def self.create: (untyped, untyped) -> untyped
+      def self.create: (Integer status, ?BasicResponse response) -> instance
 
       public
 
-      def basic: () -> untyped
+      def basic: () -> BasicResponse?
 
-      def status: () -> untyped
+      def status: () -> Integer
 
-      def status_string: () -> untyped
+      def status_string: () -> String
 
-      def to_der: () -> untyped
+      def to_der: () -> String
 
       private
 
-      def initialize: (*untyped) -> void
+      def initialize: (?String der) -> void
 
-      def initialize_copy: (untyped) -> untyped
+      def initialize_copy: (instance) -> void
     end
 
     class SingleResponse
       public
 
-      def cert_status: () -> untyped
+      def cert_status: () -> (V_CERTSTATUS_GOOD | V_CERTSTATUS_REVOKED | V_CERTSTATUS_UNKNOWN)
 
-      def certid: () -> untyped
+      def certid: () -> CertificateId
 
-      def check_validity: (*untyped) -> untyped
+      def check_validity: (?Integer nsec, ?Integer maxsec) -> bool
 
-      def extensions: () -> untyped
+      def extensions: () -> Array[X509::Certificate]
 
-      def next_update: () -> untyped
+      def next_update: () -> Time?
 
-      def revocation_reason: () -> untyped
+      def revocation_reason: () -> Integer?
 
-      def revocation_time: () -> untyped
+      def revocation_time: () -> Time?
 
-      def this_update: () -> untyped
+      def this_update: () -> Time
 
-      def to_der: () -> untyped
+      def to_der: () -> String
 
       private
 
-      def initialize: (untyped) -> void
+      def initialize: (String der) -> void
 
-      def initialize_copy: (untyped) -> untyped
+      def initialize_copy: (instance) -> void
     end
   end
 

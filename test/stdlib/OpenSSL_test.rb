@@ -612,3 +612,20 @@ class OpenSSLNetscapePKITest < Test::Unit::TestCase
 
   end
 end
+
+class OpenSSLOCSPBasicResponsePKITest < Test::Unit::TestCase
+  include TypeAssertions
+  library "openssl"
+  testing "::OpenSSL::OCSP::BasicResponse"
+
+  def test_add_nonce
+    assert_send_type "(String) -> OpenSSL::OCSP::BasicResponse",
+      basic_response, :add_nonce, "NONCE"
+  end
+
+  private
+
+  def basic_response
+    OpenSSL::OCSP::BasicResponse.new
+  end
+end
