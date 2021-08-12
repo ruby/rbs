@@ -583,3 +583,32 @@ class OpenSSLKDFSingletonTest < Test::Unit::TestCase
       OpenSSL::KDF, :scrypt, pass, salt: salt, N: n, r: r, p: p, length: dklen
   end
 end
+
+class OpenSSLNetscapePKITest < Test::Unit::TestCase
+  include TypeAssertions
+  library "openssl"
+  testing "::OpenSSL::Netscape::SPKI"
+
+  def test_sign
+    key = OpenSSL::PKey::RSA.new 2048
+    spki = OpenSSL::Netscape::SPKI.new
+
+    assert_send_type "() -> String",
+      spki, :to_der
+    assert_send_type "() -> String",
+      spki, :to_pem
+    assert_send_type "() -> String",
+      spki, :challenge
+    assert_send_type "(String) -> String",
+      spki, :challenge=, "RandomChallenge"
+    assert_send_type "(OpenSSL::PKey::PKey) -> OpenSSL::PKey::PKey",
+      spki, :public_key=, key.public_key
+    assert_send_type "() -> OpenSSL::PKey::PKey",
+      spki, :public_key
+    assert_send_type "(OpenSSL::PKey::PKey, OpenSSL::Digest) -> OpenSSL::Netscape::SPKI",
+      spki, :sign, key, OpenSSL::Digest::SHA256.new
+    assert_send_type "(OpenSSL::PKey::PKey) -> bool",
+      spki, :verify, key
+
+  end
+end

@@ -1421,9 +1421,9 @@ module OpenSSL
 
     def inspect: () -> String
 
-    def load_private_key: (?String id, ?String data) -> PKey
+    def load_private_key: (?String id, ?String data) -> PKey::PKey
 
-    def load_public_key: (?String id, ?String data) -> PKey
+    def load_public_key: (?String id, ?String data) -> PKey::PKey
 
     def name: () -> String
 
@@ -1489,11 +1489,11 @@ module OpenSSL
   end
 
   module KDF
-    def self.hkdf: (*untyped) -> untyped
+    def self.hkdf: (String ikm, salt: String, info: String, length: Integer, hash: String) -> String
 
-    def self.pbkdf2_hmac: (*untyped) -> untyped
+    def self.pbkdf2_hmac: (String pass, salt: String, iterations: Integer, length: Integer, hash: String | Digest) -> String
 
-    def self.scrypt: (*untyped) -> untyped
+    def self.scrypt: (String pass, salt: String, N: Integer, r: Integer, p: Integer, length: Integer) -> String
 
     private
 
@@ -1525,29 +1525,29 @@ module OpenSSL
     class SPKI
       public
 
-      def challenge: () -> untyped
+      def challenge: () -> String
 
-      def challenge=: (untyped) -> untyped
+      def challenge=: (String) -> String
 
-      def public_key: () -> untyped
+      def public_key: () -> PKey::PKey
 
-      def public_key=: (untyped) -> untyped
+      def public_key=: (PKey::PKey) -> PKey::PKey
 
-      def sign: (untyped, untyped) -> untyped
+      def sign: (PKey::PKey key, Digest digest) -> instance
 
-      def to_der: () -> untyped
+      def to_der: () -> String
 
-      def to_pem: () -> untyped
+      def to_pem: () -> String
 
       alias to_s to_pem
 
-      def to_text: () -> untyped
+      def to_text: () -> String
 
-      def verify: (untyped) -> untyped
+      def verify: (PKey::PKey key) -> bool
 
       private
 
-      def initialize: (*untyped) -> void
+      def initialize: (?String request) -> void
     end
 
     class SPKIError < OpenSSL::OpenSSLError
