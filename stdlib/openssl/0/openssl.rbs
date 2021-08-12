@@ -1242,47 +1242,37 @@ module OpenSSL
   class Config
     include Enumerable[untyped]
 
-    def self.get_key_string: (untyped data, untyped section, untyped key) -> untyped
+    def self.load: (?_ToS filename) -> instance
 
-    alias self.load self.new
+    def self.parse: (String string) -> instance
 
-    def self.parse: (untyped string) -> untyped
-
-    def self.parse_config: (untyped io) -> untyped
+    def self.parse_config: (IO io) -> Hash[String, Hash[String, String]]
 
     public
 
-    def []: (untyped section) -> untyped
+    def []: (String section) -> Hash[String, String]
 
-    def []=: (untyped section, untyped pairs) -> untyped
+    def []=: (String section, _Each[[String, String]] pairs) -> _Each[[String, String]]
 
-    def add_value: (untyped section, untyped key, untyped value) -> untyped
+    def add_value: (String section, untyped key, untyped value) -> untyped
 
-    def each: () -> untyped
+    def each: () { (String, String, String) -> void } -> self
 
-    def get_value: (untyped section, untyped key) -> untyped
+    def get_value: (String section, String key) -> String?
 
-    def inspect: () -> untyped
+    def inspect: () -> String
 
-    def section: (untyped name) -> untyped
+    def section: (String name) -> Hash[String, String]
 
-    def sections: () -> untyped
+    def sections: () -> Array[String]
 
-    def set_section: (untyped section, untyped pairs) -> untyped
-
-    def to_s: () -> untyped
-
-    def value: (untyped arg1, ?untyped arg2) -> untyped
+    def to_s: () -> String
 
     private
 
-    def check_modify: () -> untyped
+    def initialize: (?_ToS filename) -> void
 
-    def get_key_string: (untyped section, untyped key) -> untyped
-
-    def initialize: (?untyped filename) -> void
-
-    def initialize_copy: (untyped other) -> untyped
+    def initialize_copy: (instance other) -> void
 
     DEFAULT_CONFIG_FILE: String
   end

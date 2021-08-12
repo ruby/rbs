@@ -354,3 +354,57 @@ class OpenSSLCipherTest < Test::Unit::TestCase
     end
   end
 end
+
+class OpenSSLConfigSingletonTest < Test::Unit::TestCase
+  include TypeAssertions
+  library "openssl"
+  testing "singleton(::OpenSSL::Config)"
+
+  def test_load
+    assert_send_type "() -> OpenSSL::Config",
+      OpenSSL::Config, :load
+    assert_send_type "(String) -> OpenSSL::Config",
+      OpenSSL::Config, :load, OpenSSL::Config::DEFAULT_CONFIG_FILE
+  end
+
+  def test_parse
+    assert_send_type "(String) -> OpenSSL::Config",
+      OpenSSL::Config, :parse, File.read(OpenSSL::Config::DEFAULT_CONFIG_FILE)
+
+  end
+
+  def test_parse_config
+    assert_send_type "(File) -> Hash[String, Hash[String, String]]",
+      OpenSSL::Config, :parse_config, File.open(OpenSSL::Config::DEFAULT_CONFIG_FILE)
+
+  end
+end
+
+class OpenSSLConfigTest < Test::Unit::TestCase
+  include TypeAssertions
+  library "openssl"
+  testing "::OpenSSL::Config"
+
+  def test_sections
+    assert_send_type "() -> Array[String]",
+      config, :sections
+  end
+
+  def test_lookup_and_set
+    assert_send_type "(String) -> untyped",
+      config, :[], "default"
+    assert_send_type "(String, String) -> String",
+      config, :get_value, "default", "oid_section"
+  end
+
+  def test_each
+    assert_send_type "() { (String, String, String) -> void } -> OpenSSL::Config",
+      config, :each do |*k| return k; end
+  end
+
+  private
+
+  def config
+    OpenSSL::Config.load(OpenSSL::Config::DEFAULT_CONFIG_FILE)
+  end
+end
