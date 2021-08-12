@@ -543,3 +543,43 @@ class OpenSSLHMACTest < Test::Unit::TestCase
     OpenSSL::HMAC.new("key", digest)
   end
 end
+
+class OpenSSLKDFSingletonTest < Test::Unit::TestCase
+  include TypeAssertions
+  library "openssl"
+  testing "singleton(::OpenSSL::KDF)"
+
+  def test_hkdf
+    hash = "sha256"
+    ikm = "0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b"
+    salt = "000102030405060708090a0b0c"
+    info = "f0f1f2f3f4f5f6f7f8f9"
+    l = 42
+    assert_send_type "(String, salt: String, info: String, length: Integer, hash: String) -> String",
+      OpenSSL::KDF, :hkdf, ikm, salt: salt, info: info, length: l, hash: hash
+  end
+
+  def test_pbkdf2_hmac
+    p ="password"
+    s = "salt"
+    c = 1
+    dk_len = 20
+
+    assert_send_type "(String, salt: String, iterations: Integer, length: Integer, hash: String) -> String",
+      OpenSSL::KDF, :pbkdf2_hmac, p, salt: s, iterations: c, length: dk_len, hash: "sha1"
+    assert_send_type "(String, salt: String, iterations: Integer, length: Integer, hash: OpenSSL::Digest) -> String",
+      OpenSSL::KDF, :pbkdf2_hmac, p, salt: s, iterations: c, length: dk_len, hash: OpenSSL::Digest::SHA1.new
+  end
+
+  def test_scrypt
+    pass = ""
+    salt = ""
+    n = 16
+    r = 1
+    p = 1
+    dklen = 64
+
+    assert_send_type "(String, salt: String, N: Integer, r: Integer, p: Integer, length: Integer) -> String",
+      OpenSSL::KDF, :scrypt, pass, salt: salt, N: n, r: r, p: p, length: dklen
+  end
+end
