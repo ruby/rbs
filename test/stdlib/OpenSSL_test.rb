@@ -246,3 +246,111 @@ class OpenSSLBNTest < Test::Unit::TestCase
       OpenSSL::BN.new(2), :>>, 2
   end
 end
+
+class OpenSSLCipherSingletonTest < Test::Unit::TestCase
+  include TypeAssertions
+  library "openssl"
+  testing "singleton(::OpenSSL::Cipher)"
+
+  def test_ciphers
+    assert_send_type "() -> Array[String]",
+      OpenSSL::Cipher, :ciphers
+
+  end
+end
+
+
+class OpenSSLCipherTest < Test::Unit::TestCase
+  include TypeAssertions
+  library "openssl"
+  testing "::OpenSSL::Cipher"
+
+  def encrypt_decrypt
+    key = ["2b7e151628aed2a6abf7158809cf4f3c"].pack("H*")
+    iv =  ["000102030405060708090a0b0c0d0e0f"].pack("H*")
+    pt =  ["6bc1bee22e409f96e93d7e117393172a" \
+           "ae2d8a571e03ac9c9eb76fac45af8e51"].pack("H*")
+    ct =  ["7649abac8119b246cee98e9b12e9197d" \
+           "5086cb9b507219ee95db113a917678b2"].pack("H*")
+    cipher = new_encryptor("aes-128-cbc", key: key, iv: iv, padding: 0)
+    assert_send_type "(String) -> String",
+      cipher, :update, pt
+    assert_send_type "() -> String",
+      cipher, :final
+    cipher = new_decryptor("aes-128-cbc", key: key, iv: iv, padding: 0)
+    assert_equal pt, cipher.update(ct) << cipher.final
+    assert_send_type "(String) -> String",
+      cipher, :update, ct
+    assert_send_type "() -> String",
+      cipher, :final
+  end
+
+  def test_aes_gcm
+    # RFC 3610 Section 8, Test Case 1
+    key = ["feffe9928665731c6d6a8f9467308308"].pack("H*")
+    iv =  ["cafebabefacedbaddecaf888"].pack("H*")
+    aad = ["feedfacedeadbeeffeedfacedeadbeef" \
+           "abaddad2"].pack("H*")
+    pt =  ["d9313225f88406e5a55909c5aff5269a" \
+           "86a7a9531534f7da2e4c303d8a318a72" \
+           "1c3c0c95956809532fcf0e2449a6b525" \
+           "b16aedf5aa0de657ba637b39"].pack("H*")
+    ct =  ["42831ec2217774244b7221b784d0d49c" \
+           "e3aa212f2c02a4e035c17e2329aca12e" \
+           "21d514b25466931c7d8f6a5aac84aa05" \
+           "1ba30b396a0aac973d58e091"].pack("H*")
+    tag = ["5bc94fbc3221a5db94fae95ae7121a47"].pack("H*")
+
+
+    cipher = new_encryptor("aes-128-gcm", key: key, iv: iv, auth_data: aad)
+    assert_send_type "(String) -> String",
+      cipher, :update, pt
+    assert_send_type "() -> String",
+      cipher, :final
+    assert_send_type "() -> String",
+      cipher, :auth_tag
+    assert_send_type "(Integer) -> String",
+      cipher, :auth_tag, 8
+      cipher = new_decryptor("aes-128-gcm", key: key, iv: iv, auth_tag: tag, auth_data: aad)
+    assert_send_type "(String) -> String",
+      cipher, :update, ct
+    assert_send_type "() -> String",
+      cipher, :final
+  end
+
+  def test_funcs
+    cipher = new_encryptor("aes-128-cbc")
+    assert_send_type "() -> String",
+      cipher, :name
+    assert_send_type "() -> String",
+      cipher, :random_key
+    assert_send_type "() -> String",
+      cipher, :random_iv
+    assert_send_type "() -> OpenSSL::Cipher",
+      cipher, :reset
+  end
+
+  private
+
+  def new_encryptor(algo, **kwargs)
+    OpenSSL::Cipher.new(algo).tap do |cipher|
+      assert_send_type "() -> OpenSSL::Cipher",
+        cipher, :encrypt
+      kwargs.each do|k, v|
+        assert_send_type "(#{v.class}) -> #{v.class}",
+          cipher, :"#{k}=", v
+      end
+    end
+  end
+
+  def new_decryptor(algo, **kwargs)
+    OpenSSL::Cipher.new(algo).tap do |cipher|
+      assert_send_type "() -> OpenSSL::Cipher",
+        cipher, :decrypt
+      kwargs.each do |k, v|
+        assert_send_type "(#{v.class}) -> #{v.class}",
+          cipher, :"#{k}=", v
+      end
+    end
+  end
+end

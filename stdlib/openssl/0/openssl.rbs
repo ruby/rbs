@@ -1098,116 +1098,108 @@ module OpenSSL
 
     def fill_rbuff: () -> untyped
 
-    def initialize: (*untyped) -> void
-
     BLOCK_SIZE: Integer
 
     class Buffer < String
-      public
+      BINARY: Encoding
 
-      def <<: (untyped string) -> untyped
+      def <<: (String string) -> self
 
       alias concat <<
-
-      private
-
-      def initialize: () -> void
-
-      BINARY: Encoding
     end
   end
 
   class Cipher
-    def self.ciphers: () -> untyped
+    def self.ciphers: () -> Array[String]
 
     public
 
-    def auth_data=: (untyped) -> untyped
+    def auth_data=: (String) -> String
 
-    def auth_tag: (*untyped) -> untyped
+    def auth_tag: (?Integer tag_len) -> String
 
-    def auth_tag=: (untyped) -> untyped
+    def auth_tag=: (String) -> String
 
-    def auth_tag_len=: (untyped) -> untyped
+    def auth_tag_len=: (Integer) -> Integer
 
-    def authenticated?: () -> untyped
+    def authenticated?: () -> bool
 
-    def block_size: () -> untyped
+    def block_size: () -> Integer
 
-    def decrypt: (*untyped) -> untyped
+    def decrypt: () -> self
 
-    def encrypt: (*untyped) -> untyped
+    def encrypt: () -> self
 
-    def final: () -> untyped
+    def final: () -> String
 
-    def iv=: (untyped) -> untyped
+    def iv=: (String iv) -> String
 
-    def iv_len: () -> untyped
+    def iv_len: () -> Integer
 
-    def iv_len=: (untyped) -> untyped
+    def iv_len=: (Integer) -> Integer
 
-    def key=: (untyped) -> untyped
+    def key=: (String key) -> String
 
-    def key_len: () -> untyped
+    def key_len: () -> Integer
 
-    def key_len=: (untyped) -> untyped
+    def key_len=: (Integer) -> Integer
 
-    def name: () -> untyped
+    def name: () -> String
 
-    def padding=: (untyped) -> untyped
+    def padding=: (Integer) -> Integer
 
-    def pkcs5_keyivgen: (*untyped) -> untyped
+    def pkcs5_keyivgen: (String pass, ?String salt, ?Integer iterations, ?String digest) -> void
 
-    def random_iv: () -> untyped
+    def random_iv: () -> String
 
-    def random_key: () -> untyped
+    def random_key: () -> String
 
-    def reset: () -> untyped
+    def reset: () -> self
 
-    def update: (*untyped) -> untyped
+    def update: (String data, ?String buffer) -> String
 
     private
 
-    def ciphers: () -> untyped
+    def ciphers: () -> Array[String]
 
-    def initialize: (untyped) -> void
+    def initialize: (String cipher_name) -> void
 
     def initialize_copy: (untyped) -> untyped
 
     class AES < OpenSSL::Cipher
       private
 
-      def initialize: (*untyped args) -> void
+      def initialize: (*_ToS args) -> void
     end
 
     class AES128 < OpenSSL::Cipher
       private
 
-      def initialize: (?untyped mode) -> void
+      def initialize: (?_ToS mode) -> void
     end
 
     class AES192 < OpenSSL::Cipher
       private
 
-      def initialize: (?untyped mode) -> void
+      def initialize: (?_ToS mode) -> void
     end
 
     class AES256 < OpenSSL::Cipher
       private
 
-      def initialize: (?untyped mode) -> void
+      def initialize: (?_ToS mode) -> void
     end
 
     class BF < OpenSSL::Cipher
       private
 
-      def initialize: (*untyped args) -> void
+      def initialize: (*_ToS args) -> void
     end
 
     class CAST5 < OpenSSL::Cipher
       private
 
-      def initialize: (*untyped args) -> void
+      def initialize: (*_ToS args) -> void
     end
 
     class Cipher < OpenSSL::Cipher
@@ -1219,31 +1211,31 @@ module OpenSSL
     class DES < OpenSSL::Cipher
       private
 
-      def initialize: (*untyped args) -> void
+      def initialize: (*_ToS args) -> void
     end
 
     class IDEA < OpenSSL::Cipher
       private
 
-      def initialize: (*untyped args) -> void
+      def initialize: (*_ToS args) -> void
     end
 
     class RC2 < OpenSSL::Cipher
       private
 
-      def initialize: (*untyped args) -> void
+      def initialize: (*_ToS args) -> void
     end
 
     class RC4 < OpenSSL::Cipher
       private
 
-      def initialize: (*untyped args) -> void
+      def initialize: (*_ToS args) -> void
     end
 
     class RC5 < OpenSSL::Cipher
       private
 
-      def initialize: (*untyped args) -> void
+      def initialize: (*_ToS args) -> void
     end
   end
 
@@ -1980,7 +1972,7 @@ module OpenSSL
 
       def initialize: (*untyped) -> void
 
-      def initialize_copy: (untyped) -> untyped
+      def initialize_copy: (instance) -> void
     end
 
     class DHError < OpenSSL::PKey::PKeyError
