@@ -1912,62 +1912,60 @@ module OpenSSL
   end
 
   module PKey
-    def self.read: (*untyped) -> untyped
-
-    private
-
-    def read: (*untyped) -> untyped
+    def self?.read: (String | IO pem, ?String password) -> PKey
 
     class DH < OpenSSL::PKey::PKey
       include OpenSSL::Marshal
 
       extend OpenSSL::Marshal::ClassMethods
 
-      def self.generate: (*untyped) -> untyped
+      def self.generate: (Integer size, ?Integer generator) -> instance
 
       public
 
-      def compute_key: (untyped) -> untyped
+      def compute_key: (bn pub_bn) -> String
 
-      def export: () -> untyped
+      def export: () -> String
 
-      def g: () -> untyped
+      def g: () -> BN?
 
-      def generate_key!: () -> untyped
+      def generate_key!: () -> self
 
-      def p: () -> untyped
+      def p: () -> BN
 
-      def params: () -> untyped
+      def params: () -> Hash[String, BN]
 
-      def params_ok?: () -> untyped
+      def params_ok?: () -> bool
 
-      def priv_key: () -> untyped
+      def priv_key: () -> BN
 
-      def private?: () -> untyped
+      def private?: () -> bool
 
-      def pub_key: () -> untyped
+      def pub_key: () -> BN
 
-      def public?: () -> untyped
+      def public?: () -> bool
 
-      def public_key: () -> untyped
+      def public_key: () -> instance
 
-      def q: () -> untyped
+      def q: () -> BN
 
-      def set_key: (untyped, untyped) -> untyped
+      def set_key: (bn pub_key, bn? priv_key) -> self
 
-      def set_pqg: (untyped, untyped, untyped) -> untyped
+      def set_pqg: (bn p, bn q, bn g) -> self
 
-      def to_der: () -> untyped
+      def to_der: () -> String
 
       alias to_pem export
 
       alias to_s export
 
-      def to_text: () -> untyped
+      def to_text: () -> String
 
       private
 
-      def initialize: (*untyped) -> void
+      def initialize: (Integer size, ?Integer generator) -> void
+                    | (String pem) -> void
+                    | () -> void
 
       def initialize_copy: (instance) -> void
     end
@@ -1980,51 +1978,53 @@ module OpenSSL
 
       extend OpenSSL::Marshal::ClassMethods
 
-      def self.generate: (untyped) -> untyped
+      def self.generate: (Integer size) -> instance
 
       public
 
-      def export: (*untyped) -> untyped
+      def export: (String cipher, String password) -> String
+                | () -> String
 
-      def g: () -> untyped
+      def g: () -> BN
 
-      def p: () -> untyped
+      def p: () -> BN
 
-      def params: () -> untyped
+      def params: () -> Hash[String, BN]
 
-      def priv_key: () -> untyped
+      def priv_key: () -> BN
 
-      def private?: () -> untyped
+      def private?: () -> bool
 
-      def pub_key: () -> untyped
+      def pub_key: () -> BN
 
-      def public?: () -> untyped
+      def public?: () -> bool
 
-      def public_key: () -> untyped
+      def public_key: () -> instance
 
-      def q: () -> untyped
+      def q: () -> BN
 
-      def set_key: (untyped, untyped) -> untyped
+      def set_key: (bn pub_key, bn? priv_key) -> self
 
-      def set_pqg: (untyped, untyped, untyped) -> untyped
+      def set_pqg: (bn p, bn q, bn g) -> self
 
-      def syssign: (untyped) -> untyped
+      def syssign: (String digest) -> String
 
-      def sysverify: (untyped, untyped) -> untyped
+      def sysverify: (String digest, String data) -> bool
 
-      def to_der: () -> untyped
+      def to_der: () -> String
 
       alias to_pem export
 
       alias to_s export
 
-      def to_text: () -> untyped
+      def to_text: () -> String
 
       private
 
-      def initialize: (*untyped) -> void
+      def initialize: (String pem, ?String pass) -> void
+                    | (?Integer size) -> void
 
-      def initialize_copy: (untyped) -> untyped
+      def initialize_copy: (instance) -> void
     end
 
     class DSAError < OpenSSL::PKey::PKeyError
@@ -2035,104 +2035,114 @@ module OpenSSL
 
       extend OpenSSL::Marshal::ClassMethods
 
-      def self.builtin_curves: () -> untyped
+      def self.builtin_curves: () -> Array[[String, String]]
 
-      def self.generate: (untyped) -> untyped
+      def self.generate: (String | Group pem_or_der_or_group_or_curve_name) -> instance
 
       public
 
-      def check_key: () -> untyped
+      def check_key: () -> true
 
-      def dh_compute_key: (untyped) -> untyped
+      def dh_compute_key: (instance public_key) -> String
 
-      def dsa_sign_asn1: (untyped) -> untyped
+      def dsa_sign_asn1: (String digest) -> String
 
-      def dsa_verify_asn1: (untyped, untyped) -> untyped
+      def dsa_verify_asn1: (String digest, String signature) -> bool
 
-      def export: (*untyped) -> untyped
+      def export: (String cipher, String password) -> String
+                | () -> String
 
       alias generate_key generate_key!
 
-      def generate_key!: () -> untyped
+      def generate_key!: () -> self
 
-      def group: () -> untyped
+      def group: () -> Group?
 
-      def group=: (untyped) -> untyped
+      def group=: (Group) -> Group
 
-      def private?: () -> untyped
+      def private?: () -> bool
 
-      def private_key: () -> untyped
+      def private_key: () -> BN?
 
-      def private_key=: (untyped) -> untyped
+      def private_key=: (bn priv_key) -> self
 
       alias private_key? private?
 
-      def public?: () -> untyped
+      def public?: () -> bool
 
-      def public_key: () -> untyped
+      def public_key: () -> Point?
 
-      def public_key=: (untyped) -> untyped
+      def public_key=: (bn priv_key) -> self
 
       alias public_key? public?
 
-      def to_der: () -> untyped
+      def to_der: () -> String
 
       alias to_pem export
 
-      def to_text: () -> untyped
+      def to_text: () -> String
 
       private
 
-      def initialize: (*untyped) -> void
+      def initialize: (instance ec_key) -> void
+                    | (Group group) -> void
+                    | (String pem_or_der_or_curve, ?String pass) -> void
 
-      def initialize_copy: (untyped) -> untyped
+      def initialize_copy: (instance) -> void
 
       EXPLICIT_CURVE: Integer
 
       NAMED_CURVE: Integer
+
+      type ec_method = :GFp_simple | :GFp_mont | :GFp_nist | :GF2m_simple
+
+      type point_conversion_format = :compressed | :uncompressed | :hybrid
 
       class Group
         public
 
         alias == eql?
 
-        def asn1_flag: () -> untyped
+        def asn1_flag: () -> Integer
 
-        def asn1_flag=: (untyped) -> untyped
+        def asn1_flag=: (Integer) -> Integer
 
-        def cofactor: () -> untyped
+        def cofactor: () -> BN
 
-        def curve_name: () -> untyped
+        def curve_name: () -> String
 
-        def degree: () -> untyped
+        def degree: () -> Integer
 
-        def eql?: (untyped) -> untyped
+        def eql?: (instance other) -> bool
 
-        def generator: () -> untyped
+        def generator: () -> Point?
 
-        def order: () -> untyped
+        def order: () -> BN
 
-        def point_conversion_form: () -> untyped
+        def point_conversion_form: () -> point_conversion_format
 
-        def point_conversion_form=: (untyped) -> untyped
+        def point_conversion_form=: (point_conversion_format format) -> point_conversion_format
 
-        def seed: () -> untyped
+        def seed: () -> String?
 
-        def seed=: (untyped) -> untyped
+        def seed=: (String seed) -> String
 
-        def set_generator: (untyped, untyped, untyped) -> untyped
+        def set_generator: ( Point generator, Integer order, Integer cofactor) -> self
 
-        def to_der: () -> untyped
+        def to_der: () -> String
 
-        def to_pem: () -> untyped
+        def to_pem: () -> String
 
-        def to_text: () -> untyped
+        def to_text: () -> String
 
         private
 
-        def initialize: (*untyped) -> void
+        def initialize: (instance group) -> void
+                      | (String pem_or_der_encoded) -> void
+                      | (ec_method ec_method) -> void
+                      | (:GFp | :GF2m ec_method, Integer bignum_p, Integer bignum_a, Integer bignum_b) -> void
 
-        def initialize_copy: (untyped) -> untyped
+        def initialize_copy: (instance) -> void
 
         class Error < OpenSSL::OpenSSLError
         end
@@ -2143,33 +2153,35 @@ module OpenSSL
 
         alias == eql?
 
-        def add: (untyped) -> untyped
+        def add: (instance point) -> instance
 
-        def eql?: (untyped) -> untyped
+        def eql?: (instance other) -> bool
 
-        def group: () -> untyped
+        def group: () -> Group
 
-        def infinity?: () -> untyped
+        def infinity?: () -> bool
 
-        def invert!: () -> untyped
+        def invert!: () -> self
 
-        def make_affine!: () -> untyped
+        def make_affine!: () -> self
 
-        def mul: (*untyped) -> untyped
+        def mul: (bn bn1, ?bn bn2) -> instance
+               | (Array[bn] bns, Array[instance], ?bn bn2) -> instance
 
-        def on_curve?: () -> untyped
+        def on_curve?: () -> bool
 
-        def set_to_infinity!: () -> untyped
+        def set_to_infinity!: () -> self
 
-        def to_bn: (?untyped conversion_form) -> untyped
+        def to_bn: (?point_conversion_format conversion_form) -> BN
 
-        def to_octet_string: (untyped) -> untyped
+        def to_octet_string: (point_conversion_format) -> String
 
         private
 
-        def initialize: (*untyped) -> void
+        def initialize: (instance point) -> void
+                      | (Group group, ?(String | BN) encoded_point) -> void
 
-        def initialize_copy: (untyped) -> untyped
+        def initialize_copy: (instance) -> void
 
         class Error < OpenSSL::OpenSSLError
         end
@@ -2182,21 +2194,23 @@ module OpenSSL
     class PKey
       public
 
-      def inspect: () -> untyped
+      def inspect: () -> String
 
-      def oid: () -> untyped
+      def oid: () -> String
 
-      def private_to_der: (*untyped) -> untyped
+      def private_to_der: (String cipher, String password) -> String
+                        | () -> String
 
-      def private_to_pem: (*untyped) -> untyped
+      def private_to_pem: (String cipher, String password) -> String
+                        | () -> String
 
-      def public_to_der: () -> untyped
+      def public_to_der: () -> String
 
-      def public_to_pem: () -> untyped
+      def public_to_pem: () -> String
 
-      def sign: (untyped, untyped) -> untyped
+      def sign: (Digest digest, String data) -> String
 
-      def verify: (untyped, untyped, untyped) -> untyped
+      def verify: (Digest digest, String signature, String data) -> bool
 
       private
 
@@ -2211,67 +2225,69 @@ module OpenSSL
 
       extend OpenSSL::Marshal::ClassMethods
 
-      def self.generate: (*untyped) -> untyped
+      def self.generate: (Integer size, ?Integer exponent) -> instance
 
       public
 
-      def d: () -> untyped
+      def d: () -> BN?
 
-      def dmp1: () -> untyped
+      def dmp1: () -> BN?
 
-      def dmq1: () -> untyped
+      def dmq1: () -> BN?
 
-      def e: () -> untyped
+      def e: () -> BN?
 
-      def export: (*untyped) -> untyped
+      def export: (String cipher, String password) -> String
+                | () -> String
 
-      def iqmp: () -> untyped
+      def iqmp: () -> BN?
 
-      def n: () -> untyped
+      def n: () -> BN?
 
-      def p: () -> untyped
+      def p: () -> BN?
 
-      def params: () -> untyped
+      def params: () -> Hash[String, BN]
 
-      def private?: () -> untyped
+      def private?: () -> bool
 
-      def private_decrypt: (*untyped) -> untyped
+      def private_decrypt: (String data, ?Integer padding) -> String
 
-      def private_encrypt: (*untyped) -> untyped
+      def private_encrypt: (String data, ?Integer padding) -> String
 
-      def public?: () -> untyped
+      def public?: () -> bool
 
-      def public_decrypt: (*untyped) -> untyped
+      def public_decrypt: (String data, ?Integer padding) -> String
 
-      def public_encrypt: (*untyped) -> untyped
+      def public_encrypt: (String data, ?Integer padding) -> String
 
-      def public_key: () -> untyped
+      def public_key: () -> instance
 
-      def q: () -> untyped
+      def q: () -> BN?
 
-      def set_crt_params: (untyped, untyped, untyped) -> untyped
+      def set_crt_params: (bn dmp1, bn dmq1, bn iqmp) -> self
 
-      def set_factors: (untyped, untyped) -> untyped
+      def set_factors: (bn p, bn q) -> self
 
-      def set_key: (untyped, untyped, untyped) -> untyped
+      def set_key: (bn n, bn e, bn d) -> self
 
-      def sign_pss: (*untyped) -> untyped
+      def sign_pss: (String digest, String data, salt_length: :digest | :max | Integer, mgf1_hash: String) -> String
 
-      def to_der: () -> untyped
+      def to_der: () -> String
 
       alias to_pem export
 
       alias to_s export
 
-      def to_text: () -> untyped
+      def to_text: () -> String
 
-      def verify_pss: (*untyped) -> untyped
+      def verify_pss: (String digest, String signature, String data, salt_length: :auto | :digest | Integer, mgf1_hash: String) -> bool
 
       private
 
-      def initialize: (*untyped) -> void
+      def initialize: (Integer key_size) -> void
+                    | (String encoded_key, ?String pass_phrase) -> void
 
-      def initialize_copy: (untyped) -> untyped
+      def initialize_copy: (instance) -> void
 
       NO_PADDING: Integer
 

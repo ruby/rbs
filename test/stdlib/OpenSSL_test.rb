@@ -629,3 +629,264 @@ class OpenSSLOCSPBasicResponsePKITest < Test::Unit::TestCase
     OpenSSL::OCSP::BasicResponse.new
   end
 end
+
+class OpenSSLPKeySingletonTest < Test::Unit::TestCase
+  include TypeAssertions
+  library "openssl"
+  testing "singleton(::OpenSSL::PKey)"
+
+  def test_read
+    assert_send_type "(String) -> OpenSSL::PKey::PKey",
+      OpenSSL::PKey, :read, pem
+    rd, wr = IO.pipe
+    begin
+      Thread.start { wr.write(pem) ; wr.close }
+      assert_send_type "(IO) -> OpenSSL::PKey::PKey",
+        OpenSSL::PKey, :read, rd
+    ensure
+      rd.close
+    end
+  end
+
+  private
+
+  def pem
+    OpenSSL::PKey::RSA.new(2048).to_pem
+  end
+end
+
+
+
+class OpenSSLDHTest < Test::Unit::TestCase
+  include TypeAssertions
+  library "openssl"
+  testing "::OpenSSL::PKey::DH"
+
+  def test_compute_key
+    assert_send_type "(Integer) -> String",
+      pkey, :compute_key, 2
+  end
+
+  def test_export
+    assert_send_type "() -> String",
+      pkey, :export
+  end
+
+  def test_params
+    assert_send_type "() -> Hash[String, OpenSSL::BN]",
+      pkey, :params
+  end
+
+  def test_priv_key
+    assert_send_type "() -> OpenSSL::BN",
+      pkey, :priv_key
+  end
+
+  def test_pub_key
+    assert_send_type "() -> OpenSSL::BN",
+      pkey, :pub_key
+  end
+
+  def test_public_key
+    assert_send_type "() -> OpenSSL::PKey::DH",
+      pkey, :public_key
+  end
+
+  def test_set_key
+    assert_send_type "(Integer, nil) -> OpenSSL::PKey::DH",
+      pkey, :set_key, 123, nil
+    assert_send_type "(Integer, Integer) -> OpenSSL::PKey::DH",
+      pkey, :set_key, 123, 123
+  end
+
+  private
+
+  def pkey
+    OpenSSL::PKey::DH.new(512)
+  end
+end
+
+class OpenSSLDSATest < Test::Unit::TestCase
+  include TypeAssertions
+  library "openssl"
+  testing "::OpenSSL::PKey::DSA"
+
+  def test_export
+    assert_send_type "() -> String",
+      pkey, :export
+    assert_send_type "(String, String) -> String",
+      pkey, :export, "AES-128-CBC", "pass"
+  end
+
+  def test_g
+    assert_send_type "() -> OpenSSL::BN?",
+      pkey, :g
+  end
+
+  def test_p
+    assert_send_type "() -> OpenSSL::BN?",
+      pkey, :p
+  end
+
+  def test_q
+    assert_send_type "() -> OpenSSL::BN?",
+      pkey, :q
+  end
+
+  def test_params
+    assert_send_type "() -> Hash[String, OpenSSL::BN]",
+      pkey, :params
+  end
+
+  def test_priv_key
+    assert_send_type "() -> OpenSSL::BN",
+      pkey, :priv_key
+  end
+
+  def test_pub_key
+    assert_send_type "() -> OpenSSL::BN",
+      pkey, :pub_key
+  end
+
+  def test_public_key
+    assert_send_type "() -> OpenSSL::PKey::DSA",
+      pkey, :public_key
+  end
+
+  def test_set_key
+    assert_send_type "(Integer, nil) -> OpenSSL::PKey::DSA",
+      pkey, :set_key, 123, nil
+    assert_send_type "(Integer, Integer) -> OpenSSL::PKey::DSA",
+      pkey, :set_key, 123, 123
+  end
+
+  def test_syssign_sysbverify
+    doc = "Sign me"
+    digest = OpenSSL::Digest::SHA1.digest(doc)
+    sig = assert_send_type "(String) -> String",
+      pkey, :syssign, digest
+    assert_send_type "(String, String) -> bool",
+      pkey, :sysverify, digest, sig
+  end
+
+  private
+
+  def pkey
+    OpenSSL::PKey::DSA.new(512)
+  end
+end
+
+class OpenSSLECSingletonTest < Test::Unit::TestCase
+  include TypeAssertions
+  library "openssl"
+  testing "singleton(::OpenSSL::PKey::EC)"
+
+  def test_builtin_curves
+    assert_send_type "() -> Array[[String, String]]",
+      OpenSSL::PKey::EC, :builtin_curves
+  end
+
+  def test_generate
+    assert_send_type "(String) -> OpenSSL::PKey::EC",
+      OpenSSL::PKey::EC, :generate, "prime256v1"
+  end
+end
+
+class OpenSSLECTest < Test::Unit::TestCase
+  include TypeAssertions
+  library "openssl"
+  testing "::OpenSSL::PKey::EC"
+
+  def test_dh_compute_key
+    assert_send_type "(OpenSSL::PKey::EC::Point) -> String",
+      pkey, :dh_compute_key, OpenSSL::PKey::EC.generate("prime256v1").public_key
+  end
+
+  def test_dsa_sign_verify_asn1
+    key = OpenSSL::PKey::EC.new("prime256v1").generate_key!
+    size = key.group.order.num_bits / 8 + 1
+    dgst = (1..size).to_a.pack('C*')
+    sig = assert_send_type "(String) -> String",
+      pkey, :dsa_sign_asn1, dgst
+    assert_send_type "(String, String) -> bool",
+      pkey, :dsa_verify_asn1, dgst + "garbage", sig
+  end
+
+  def test_group
+    assert_send_type "() -> OpenSSL::PKey::EC::Group",
+      pkey, :group
+  end
+
+  def test_private_key
+    ec = OpenSSL::PKey::EC.new("prime256v1")
+    assert_send_type "() -> nil",
+      ec, :private_key
+    assert_send_type "() -> OpenSSL::PKey::EC",
+      ec, :generate_key!
+    assert_send_type "() -> OpenSSL::BN",
+      ec, :private_key
+  end
+
+  def test_public_key
+    ec = OpenSSL::PKey::EC.new("prime256v1")
+    assert_send_type "() -> nil",
+      ec, :public_key
+    assert_send_type "() -> OpenSSL::PKey::EC",
+      ec, :generate_key!
+    assert_send_type "() -> OpenSSL::PKey::EC::Point",
+      ec, :public_key
+  end
+
+  private
+
+  def pkey
+    OpenSSL::PKey::EC.generate("prime256v1")
+  end
+end
+
+class OpenSSLRSATest < Test::Unit::TestCase
+  include TypeAssertions
+  library "openssl"
+  testing "::OpenSSL::PKey::RSA"
+
+  def test_oid
+    assert_send_type "() -> String",
+      pkey, :oid
+  end
+
+  def test_private_to_der
+    assert_send_type "() -> String",
+      pkey, :private_to_der
+  end
+
+  def test_private_to_pem
+    assert_send_type "() -> String",
+      pkey, :private_to_pem
+  end
+
+  def test_public_to_der
+    assert_send_type "() -> String",
+      pkey, :public_to_der
+  end
+
+  def test_public_to_pem
+    assert_send_type "() -> String",
+      pkey, :public_to_pem
+  end
+
+  def test_sign_and_verify
+    data = 'Sign me!'
+    digest = OpenSSL::Digest::SHA256.new
+    sig = assert_send_type "(OpenSSL::Digest, String) -> String",
+      pkey, :sign, digest, data
+
+    assert_send_type "(OpenSSL::Digest, String, String) -> bool",
+      pkey, :verify, digest, sig, data
+  end
+
+  private
+
+  def pkey
+    OpenSSL::PKey::RSA.new(2048)
+  end
+end
