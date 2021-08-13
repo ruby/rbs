@@ -74,6 +74,11 @@ class FloatTest < StdlibTest
     a.ceil(ToInt.new)
   end
 
+  def test_coerce
+    1.2.coerce(3)
+    2.5.coerce(1.1)
+  end
+
   def test_conj
     a = 31.4
 

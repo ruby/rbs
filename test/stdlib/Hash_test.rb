@@ -324,6 +324,7 @@ class HashTest < StdlibTest
 
   def test_replace
     { a: 1 }.replace({ b: 2 })
+    { a: 1 }.replace({ 'b' => 2.0 })
   end
 
   def test_shift

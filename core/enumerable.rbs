@@ -48,7 +48,8 @@ module Enumerable[unchecked out Elem]: _Each[Elem]
   def collect: [U] () { (Elem arg0) -> U } -> ::Array[U]
              | () -> ::Enumerator[Elem, ::Array[untyped]]
 
-  def collect_concat: [U] () { (Elem arg0) -> ::Enumerator[U, untyped] } -> ::Array[U]
+  def collect_concat: [U] () { (Elem) -> (::Array[U] | U) } -> ::Array[U]
+                    | () -> ::Enumerator[Elem, ::Array[untyped]]
 
   # Returns the number of items in `enum` through enumeration. If an
   # argument is given, the number of items in `enum` that are equal to
@@ -79,11 +80,11 @@ module Enumerable[unchecked out Elem]: _Each[Elem]
   def each_cons: (Integer n) { (::Array[Elem] arg0) -> untyped } -> NilClass
                | (Integer n) -> ::Enumerator[::Array[Elem], NilClass]
 
-  def each_with_index: () { (Elem arg0, Integer arg1) -> untyped } -> void
-                     | () -> ::Enumerator[[ Elem, Integer ], void]
+  def each_with_index: () { (Elem, Integer index) -> untyped } -> self
+                     | () -> ::Enumerator[[ Elem, Integer ], self]
 
-  def each_with_object: [U] (U arg0) { (Elem arg0, untyped arg1) -> untyped } -> U
-                      | [U] (U arg0) -> ::Enumerator[[ Elem, U ], U]
+  def each_with_object: [U] (U obj) { (Elem, U obj) -> untyped } -> U
+                      | [U] (U obj) -> ::Enumerator[[ Elem, U ], U]
 
   # Returns an array containing the items in *enum* .
   #
@@ -102,7 +103,7 @@ module Enumerable[unchecked out Elem]: _Each[Elem]
   alias select find_all
   alias filter find_all
 
-  def find_index: (?untyped value) -> Integer?
+  def find_index: (untyped value) -> Integer?
                 | () { (Elem) -> boolish } -> Integer?
                 | () -> ::Enumerator[Elem, Integer?]
 
@@ -123,8 +124,8 @@ module Enumerable[unchecked out Elem]: _Each[Elem]
   def grep: (untyped arg0) -> ::Array[Elem]
           | [U] (untyped arg0) { (Elem arg0) -> U } -> ::Array[U]
 
-  def grep_v: (untyped arg0) -> ::Array[Integer]
-            | [U] (untyped arg0) { (Elem arg0) -> U } -> ::Array[U]
+  def grep_v: (untyped) -> ::Array[Elem]
+            | [U] (untyped) { (Elem) -> U } -> ::Array[U]
 
   def group_by: [U] () { (Elem arg0) -> U } -> ::Hash[U, ::Array[Elem]]
               | () -> ::Enumerator[Elem, ::Array[Elem]]
@@ -410,8 +411,8 @@ module Enumerable[unchecked out Elem]: _Each[Elem]
   def zip: [Elem2] (::Enumerable[Elem2] enum) -> ::Array[[Elem, Elem2 | nil]]
          | [U, Elem2] (::Enumerable[Elem2]) { ([Elem, Elem2 | nil]) -> U } -> nil
 
-  def chunk: [U] () { (Elem elt) -> U } -> ::Enumerator[[U, Array[Elem]], void]
-           | () -> ::Enumerator[Elem, Enumerator[untyped, untyped]]
+  def chunk: [U] () { (Elem elt) -> U } -> ::Enumerator[[U, ::Array[Elem]], void]
+           | () -> ::Enumerator[Elem, ::Enumerator[[untyped, ::Array[Elem]], void]]
 
   def chunk_while: () { (Elem elt_before, Elem elt_after) -> boolish } -> ::Enumerator[::Array[Elem], void]
 

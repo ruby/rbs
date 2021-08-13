@@ -12,6 +12,12 @@ class EnumeratorTest < Test::Unit::TestCase
     assert_send_type "() -> Enumerator[Integer, Array[untyped]]",
                      g, :map
   end
+
+  def test_with_object
+    g = [1,2,3].to_enum
+    assert_send_type "(String) -> Enumerator[[Integer, String], String]", g, :with_object, ''
+    assert_send_type "(String) { (Integer, String) -> untyped } -> String", g, :with_object, '' do end
+  end
 end
 
 class EnumeratorYielderTest < Test::Unit::TestCase

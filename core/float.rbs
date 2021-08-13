@@ -180,7 +180,7 @@ class Float < Numeric
   #     1.2.coerce(3)       #=> [3.0, 1.2]
   #     2.5.coerce(1.1)     #=> [1.1, 2.5]
   #
-  def coerce: (Numeric) -> [Numeric, Numeric]
+  def coerce: (Numeric) -> [Float, Float]
 
   def conj: () -> Float
 

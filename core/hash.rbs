@@ -493,8 +493,8 @@ class Hash[unchecked out K, unchecked out V] < Object
   #     h.fetch_values("cow", "bird")                  # raises KeyError
   #     h.fetch_values("cow", "bird") { |k| k.upcase } #=> ["bovine", "BIRD"]
   #
-  def fetch_values: (*K) -> Array[V]
-                  | [X] (*K) { (K) -> X } -> (V | X)
+  def fetch_values: (*K) -> ::Array[V]
+                  | [X] (*K) { (K) -> X } -> ::Array[V | X]
 
   # Returns a new hash consisting of entries for which the block returns true.
   #
@@ -906,8 +906,8 @@ class Hash[unchecked out K, unchecked out V] < Object
   #
   # If no block is given, an enumerator is returned instead.
   #
-  def transform_keys!: () -> Enumerator[K, Hash[untyped, V]]
-                     | () { (K) -> K } -> Hash[K, V]
+  def transform_keys!: () -> Enumerator[K, self]
+                     | () { (K) -> K } -> self
 
   # Returns a new hash with the results of running the block once for every value.
   # This method does not change the keys.
@@ -920,7 +920,7 @@ class Hash[unchecked out K, unchecked out V] < Object
   #
   # If no block is given, an enumerator is returned instead.
   #
-  def transform_values: () -> Enumerator[K, Hash[K, untyped]]
+  def transform_values: () -> Enumerator[V, Hash[K, untyped]]
                       | [A] () { (V) -> A } -> Hash[K, A]
 
   # Invokes the given block once for each value in *hsh*, replacing it with the
@@ -935,8 +935,8 @@ class Hash[unchecked out K, unchecked out V] < Object
   #
   # If no block is given, an enumerator is returned instead.
   #
-  def transform_values!: () -> Enumerator[K, Hash[K, untyped]]
-                       | () { (V) -> V } -> Hash[K, V]
+  def transform_values!: () -> Enumerator[V, self]
+                       | () { (V) -> V } -> self
 
   # Adds the contents of the given hashes to the receiver.
   #

@@ -101,7 +101,9 @@ class Range[out Elem] < Object
   # ```
   def begin: () -> Elem      # Begin-less ranges have type of Range[Integer?]
 
-  def bsearch: [U] () { (Elem) -> boolish } -> U?
+  def bsearch: () -> ::Enumerator[Elem, Elem?]
+             | () { (Elem) -> (true | false) } -> Elem?
+             | () { (Elem) -> ::Integer } -> Elem?
 
   def cover?: (untyped obj) -> bool
 
@@ -132,7 +134,7 @@ class Range[out Elem] < Object
   # (10..20).first(3)  #=> [10, 11, 12]
   # ```
   def first: () -> Elem
-           | (?Integer n) -> ::Array[Elem]
+           | (Integer n) -> ::Array[Elem]
 
   # Compute a hash-code for this range. Two ranges with equal begin and end
   # points (using `eql?` ), and the same
@@ -165,7 +167,7 @@ class Range[out Elem] < Object
   # (10...20).last(3)  #=> [17, 18, 19]
   # ```
   def last: () -> Elem
-          | (?Integer n) -> ::Array[Elem]
+          | (Integer n) -> ::Array[Elem]
 
   # Returns the maximum value in the range. Returns `nil` if the begin value
   # of the range larger than the end value. Returns `nil` if the begin value
@@ -178,9 +180,9 @@ class Range[out Elem] < Object
   # (10..20).max    #=> 20
   # ```
   def max: () -> Elem
-         | () { (Elem arg0, Elem arg1) -> Integer } -> Elem
-         | (?Integer n) -> ::Array[Elem]
-         | (?Integer n) { (Elem arg0, Elem arg1) -> Integer } -> ::Array[Elem]
+         | () { (Elem a, Elem b) -> Integer } -> Elem
+         | (Integer n) -> ::Array[Elem]
+         | (Integer n) { (Elem a, Elem b) -> Integer } -> ::Array[Elem]
 
   # Returns the minimum value in the range. Returns `nil` if the begin value
   # of the range is larger than the end value. Returns `nil` if the begin
@@ -193,9 +195,9 @@ class Range[out Elem] < Object
   # (10..20).min    #=> 10
   # ```
   def min: () -> Elem
-         | () { (Elem arg0, Elem arg1) -> Integer } -> Elem
-         | (?Integer n) -> ::Array[Elem]
-         | (?Integer n) { (Elem arg0, Elem arg1) -> Integer } -> ::Array[Elem]
+         | () { (Elem a, Elem b) -> Integer } -> Elem
+         | (Integer n) -> ::Array[Elem]
+         | (Integer n) { (Elem a, Elem b) -> Integer } -> ::Array[Elem]
 
   # Returns the number of elements in the range. Both the begin and the end
   # of the [Range](Range.downloaded.ruby_doc) must be
