@@ -1042,53 +1042,55 @@ module OpenSSL
 
     public
 
-    def <<: (untyped s) -> untyped
+    def <<: (String s) -> self
 
-    def close: () -> untyped
+    def close: () -> void
 
-    def each: (?untyped eol) -> untyped
+    def each: (?String eol) ?{ (String) -> void } -> void
 
-    def each_byte: () -> untyped
+    def each_byte: () ?{ (Integer) -> void } -> void
 
     alias each_line each
 
     alias eof eof?
 
-    def eof?: () -> untyped
+    def eof?: () -> bool
 
-    def flush: () -> untyped
+    def flush: () -> self
 
-    def getc: () -> untyped
+    def getc: () -> String?
 
-    def gets: (?untyped eol, ?untyped limit) -> untyped
+    def gets: (?(String | Regexp) eol, ?Integer limit) -> String?
 
-    def print: (*untyped args) -> untyped
+    def print: (*untyped args) -> nil
 
-    def printf: (untyped s, *untyped args) -> untyped
+    def printf: (String format_string, *untyped args) -> nil
 
-    def puts: (*untyped args) -> untyped
+    def puts: (*untyped args) -> nil
 
-    def read: (?untyped size, ?untyped buf) -> untyped
+    def read: (?Integer? size, ?String buf) -> String?
 
-    def read_nonblock: (untyped maxlen, ?untyped buf, ?exception: untyped) -> untyped
+    def read_nonblock: (Integer maxlen, ?String buf, ?exception: true) -> String
+                     | (Integer maxlen, ?String buf, exception: false) -> (String | :wait_writable | :wait_readable | nil)
 
-    def readchar: () -> untyped
+    def readchar: () -> String
 
-    def readline: (?untyped eol) -> untyped
+    def readline: (?String eol) -> String
 
-    def readlines: (?untyped eol) -> untyped
+    def readlines: (?String eol) -> ::Array[String]
 
-    def readpartial: (untyped maxlen, ?untyped buf) -> untyped
+    def readpartial: (Integer maxlen, ?String buf) -> String
 
-    def sync: () -> untyped
+    def sync: () -> bool
 
-    def sync=: (untyped) -> untyped
+    def sync=: (boolish) -> void
 
-    def ungetc: (untyped c) -> untyped
+    def ungetc: (String c) -> String
 
-    def write: (*untyped s) -> untyped
+    def write: (*_ToS s) -> Integer
 
-    def write_nonblock: (untyped s, ?exception: untyped) -> untyped
+    def write_nonblock: (_ToS s, ?exception: true) -> Integer
+                      | (_ToS s, exception: false) -> (Integer | :wait_writable | :wait_readable | nil)
 
     private
 
@@ -2320,19 +2322,11 @@ module OpenSSL
   end
 
   module SSL
-    def self.verify_certificate_identity: (untyped cert, untyped hostname) -> untyped
+    def self.verify_certificate_identity: (X509::Certificate cert, String hostname) -> bool
 
-    def self.verify_hostname: (untyped hostname, untyped san) -> untyped
+    def self.verify_hostname: (String hostname, String san) -> bool
 
-    def self.verify_wildcard: (untyped domain_component, untyped san_component) -> untyped
-
-    private
-
-    def verify_certificate_identity: (untyped cert, untyped hostname) -> untyped
-
-    def verify_hostname: (untyped hostname, untyped san) -> untyped
-
-    def verify_wildcard: (untyped domain_component, untyped san_component) -> untyped
+    def self.verify_wildcard: (String domain_component, String san_component) -> bool
 
     OP_ALL: Integer
 
@@ -2428,66 +2422,72 @@ module OpenSSL
 
     VERIFY_PEER: Integer
 
+    type tls_version = Symbol | Integer
+
+    type verify_mode = VERIFY_CLIENT_ONCE | VERIFY_FAIL_IF_NO_PEER_CERT | VERIFY_NONE | VERIFY_PEER
+
     class SSLContext
       public
 
-      def add_certificate: (*untyped) -> untyped
+      def add_certificate: (X509::Certificate certificate, PKey::PKey pkey, ?Array[X509::Certificate] extra_certs) -> self
 
-      def alpn_protocols: () -> untyped
+      def alpn_protocols: () -> Array[String]?
 
-      def alpn_protocols=: (untyped) -> untyped
+      def alpn_protocols=: (Array[String]) -> Array[String]
 
-      def alpn_select_cb: () -> untyped
+      def alpn_select_cb: () -> (^(Array[String]) -> String? | nil)
 
-      def alpn_select_cb=: (untyped) -> untyped
+      def alpn_select_cb=: (^(Array[String]) -> String? alpn_select_callback) -> void
 
-      def ca_file: () -> untyped
+      def ca_file: () -> String
 
-      def ca_file=: (untyped) -> untyped
+      def ca_file=: (String ca_file) -> String
 
-      def ca_path: () -> untyped
+      def ca_path: () -> String?
 
-      def ca_path=: (untyped) -> untyped
+      def ca_path=: (String ca_path) -> String
 
-      def cert: () -> untyped
+      def cert: () -> X509::Certificate?
 
-      def cert=: (untyped) -> untyped
+      def cert=: ( X509::Certificate cert) ->  X509::Certificate
 
-      def cert_store: () -> untyped
+      def cert_store: () -> X509::Store?
 
-      def cert_store=: (untyped) -> untyped
+      def cert_store=: (X509::Store store) -> X509::Store
 
-      def ciphers: () -> untyped
+      def ciphers: () -> Array[[String, String, Integer, Integer]]
 
-      def ciphers=: (untyped) -> untyped
+      def ciphers=: (Array[[String, String, Integer, Integer]] ciphers) -> void
+                  | (Array[String] ciphers) -> void
+                  | (String colon_sep_ciphers) -> void
 
-      def client_ca: () -> untyped
+      def client_ca: () -> (Array[X509::Certificate] | X509::Certificate)
 
-      def client_ca=: (untyped) -> untyped
+      def client_ca=: (Array[X509::Certificate] | X509::Certificate client_ca) -> void
 
-      def client_cert_cb: () -> untyped
+      def client_cert_cb: () -> (^(Session) -> [X509::Certificate, PKey::PKey]? | nil)
 
-      def client_cert_cb=: (untyped) -> untyped
+      def client_cert_cb=: (^(Session) -> [X509::Certificate, PKey::PKey]? client_cert_cb) -> void
 
-      def ecdh_curves=: (untyped) -> untyped
+      def ecdh_curves=: (String ecdh_curves) -> String
 
-      def enable_fallback_scsv: () -> untyped
+      def enable_fallback_scsv: () -> nil
 
-      def extra_chain_cert: () -> untyped
+      def extra_chain_cert: () -> Array[X509::Certificate]?
 
-      def extra_chain_cert=: (untyped) -> untyped
+      def extra_chain_cert=: (Array[X509::Certificate] extra_certs) -> Array[X509::Certificate]
 
-      def flush_sessions: (*untyped) -> untyped
+      def flush_sessions: (Time time) -> self
 
       alias freeze setup
 
-      def key: () -> untyped
+      def key: () -> PKey::PKey?
 
-      def key=: (untyped) -> untyped
+      def key=: (PKey::PKey) -> PKey::PKey
 
-      def max_version=: (untyped version) -> untyped
+      def max_version=: (tls_version version) -> tls_version
 
-      def min_version=: (untyped version) -> untyped
+      def min_version=: (tls_version version) -> tls_version
 
       def npn_protocols: () -> untyped
 
@@ -2497,51 +2497,51 @@ module OpenSSL
 
       def npn_select_cb=: (untyped) -> untyped
 
-      def options: () -> untyped
+      def options: () -> Integer
 
-      def options=: (untyped) -> untyped
+      def options=: (Integer ssl_options) -> Integer
 
-      def renegotiation_cb: () -> untyped
+      def renegotiation_cb: () -> (^(SSLSocket) -> void | nil)
 
-      def renegotiation_cb=: (untyped) -> untyped
+      def renegotiation_cb=: (^(SSLSocket) -> void) -> void
 
-      def security_level: () -> untyped
+      def security_level: () -> Integer
 
-      def security_level=: (untyped) -> untyped
+      def security_level=: (Integer sec_level) -> Integer
 
-      def servername_cb: () -> untyped
+      def servername_cb: () -> (^(SSLSocket, String) -> SSLContext? | nil)
 
-      def servername_cb=: (untyped) -> untyped
+      def servername_cb=: (^(SSLSocket, String) -> SSLContext?) -> ^(SSLSocket, String) -> SSLContext?
 
-      def session_add: (untyped) -> untyped
+      def session_add: (Session) -> bool
 
-      def session_cache_mode: () -> untyped
+      def session_cache_mode: () -> Integer
 
-      def session_cache_mode=: (untyped) -> untyped
+      def session_cache_mode=: (Integer) -> Integer
 
-      def session_cache_size: () -> untyped
+      def session_cache_size: () -> Integer
 
-      def session_cache_size=: (untyped) -> untyped
+      def session_cache_size=: (Integer) -> Integer
 
-      def session_cache_stats: () -> untyped
+      def session_cache_stats: () -> Hash[Symbol, Integer]
 
-      def session_get_cb: () -> untyped
+      def session_get_cb: () -> (^(SSLSocket, Integer) -> Session? | nil)
 
-      def session_get_cb=: (untyped) -> untyped
+      def session_get_cb=: (^(SSLSocket, Integer) -> Session?) -> void
 
-      def session_id_context: () -> untyped
+      def session_id_context: () -> Integer?
 
-      def session_id_context=: (untyped) -> untyped
+      def session_id_context=: (Integer) -> Integer
 
-      def session_new_cb: () -> untyped
+      def session_new_cb: () -> (^(SSLSocket) -> untyped | nil)
 
-      def session_new_cb=: (untyped) -> untyped
+      def session_new_cb=: (^(SSLSocket) -> untyped) -> ^(SSLSocket) -> untyped
 
-      def session_remove: (untyped) -> untyped
+      def session_remove: (Session session) -> bool
 
-      def session_remove_cb: () -> untyped
+      def session_remove_cb: () -> (^(SSLContext, Session) -> void | nil)
 
-      def session_remove_cb=: (untyped) -> untyped
+      def session_remove_cb=: (^(SSLContext, Session) -> void ) -> void
 
       def set_params: (?untyped params) -> untyped
 
@@ -2551,45 +2551,45 @@ module OpenSSL
 
       alias ssl_timeout= timeout=
 
-      def ssl_version=: (untyped meth) -> untyped
+      def ssl_version=: (tls_version meth) -> tls_version
 
-      def timeout: () -> untyped
+      def timeout: () -> Integer?
 
-      def timeout=: (untyped) -> untyped
+      def timeout=: (Integer) -> Integer
 
-      def tmp_dh_callback: () -> untyped
+      def tmp_dh_callback: () -> (^(Session, Integer, Integer) -> PKey::DH | nil)
 
-      def tmp_dh_callback=: (untyped) -> untyped
+      def tmp_dh_callback=: (^(Session, Integer, Integer) -> PKey::DH) -> void
 
-      def verify_callback: () -> untyped
+      def verify_callback: () -> (^(bool, X509::StoreContext) -> untyped | nil)
 
-      def verify_callback=: (untyped) -> untyped
+      def verify_callback=: (^(bool, X509::StoreContext) -> untyped) -> void
 
-      def verify_depth: () -> untyped
+      def verify_depth: () -> Integer?
 
-      def verify_depth=: (untyped) -> untyped
+      def verify_depth=: (Integer) -> Integer
 
-      def verify_hostname: () -> untyped
+      def verify_hostname: () -> bool?
 
-      def verify_hostname=: (untyped) -> untyped
+      def verify_hostname=: (bool) -> bool
 
-      def verify_mode: () -> untyped
+      def verify_mode: () -> verify_mode?
 
-      def verify_mode=: (untyped) -> untyped
+      def verify_mode=: (verify_mode) -> verify_mode
 
       private
 
-      def initialize: (?untyped version) -> void
+      def initialize: (?tls_version version) -> void
 
       def set_minmax_proto_version: (untyped, untyped) -> untyped
 
       DEFAULT_CERT_STORE: Store
 
-      DEFAULT_PARAMS: Hash[untyped, untyped]
+      DEFAULT_PARAMS: Hash[Symbol, untyped]
 
       DEFAULT_TMP_DH_CALLBACK: Proc
 
-      METHODS: Array[untyped]
+      METHODS: Array[Symbol]
 
       SESSION_CACHE_BOTH: Integer
 
@@ -2624,23 +2624,23 @@ module OpenSSL
 
       public
 
-      def accept: () -> untyped
+      def accept: () -> SSLSocket
 
-      def close: () -> untyped
+      def close: () -> nil
 
-      def listen: (?untyped backlog) -> untyped
+      def listen: (Integer backlog) -> void
 
-      def shutdown: (?untyped how) -> untyped
+      def shutdown: (Symbol | String | Integer how) -> void
 
-      def start_immediately: () -> untyped
+      def start_immediately: () -> bool
 
-      def start_immediately=: (untyped) -> untyped
+      def start_immediately=: (bool) -> bool
 
-      def to_io: () -> untyped
+      def to_io: () -> (TCPServer | UNIXServer)
 
       private
 
-      def initialize: (untyped svr, untyped ctx) -> void
+      def initialize: (TCPServer | UNIXServer svr, untyped ctx) -> void
     end
 
     class SSLSocket
@@ -2652,69 +2652,71 @@ module OpenSSL
 
       public
 
-      def accept: () -> untyped
+      def accept: () -> self
 
-      def accept_nonblock: (*untyped) -> untyped
+      def accept_nonblock: (?exception: true) -> self
+                         | (exception: false) -> (self | :wait_readable | :wait_writable)
 
-      def alpn_protocol: () -> untyped
+      def alpn_protocol: () -> String?
 
-      def cert: () -> untyped
+      def cert: () -> X509::Certificate?
 
-      def cipher: () -> untyped
+      def cipher: () -> [String, String, Integer, Integer]?
 
-      def client_ca: () -> untyped
+      def client_ca: () -> (Array[X509::Name] | Array[X509::Certificate] | X509::Certificate)
 
-      def connect: () -> untyped
+      def connect: () -> self
 
-      def connect_nonblock: (*untyped) -> untyped
+      def connect_nonblock: (?exception: true) -> self
+                          | (exception: false) -> (self | :wait_readable | :wait_writable)
 
-      def context: () -> untyped
+      def context: () -> SSLContext
 
-      def finished_message: () -> untyped
+      def finished_message: () -> String?
 
-      def hostname: () -> untyped
+      def hostname: () -> String?
 
-      def hostname=: (untyped) -> untyped
+      def hostname=: (String) -> String
 
-      def io: () -> untyped
+      def io: () -> BasicSocket
 
-      def npn_protocol: () -> untyped
+      def npn_protocol: () -> String?
 
-      def peer_cert: () -> untyped
+      def peer_cert: () -> X509::Certificate?
 
-      def peer_cert_chain: () -> untyped
+      def peer_cert_chain: () -> Array[X509::Certificate]?
 
-      def peer_finished_message: () -> untyped
+      def peer_finished_message: () -> String?
 
-      def pending: () -> untyped
+      def pending: () -> Integer
 
-      def post_connection_check: (untyped hostname) -> untyped
+      def post_connection_check: (String hostname) -> true
 
-      def session: () -> untyped
+      def session: () -> Session?
 
-      def session=: (untyped) -> untyped
+      def session=: (Session) -> Session
 
-      def session_reused?: () -> untyped
+      def session_reused?: () -> bool
 
-      def ssl_version: () -> untyped
+      def ssl_version: () -> tls_version
 
-      def state: () -> untyped
+      def state: () -> String
 
-      def sync_close: () -> untyped
+      def sync_close: () -> bool
 
-      def sync_close=: (untyped) -> untyped
+      def sync_close=: (bool) -> bool
 
-      def sysclose: () -> untyped
+      def sysclose: () -> nil
 
-      def sysread: (*untyped) -> untyped
+      def sysread: (Integer length, ?String buffer) -> String
 
-      def syswrite: (untyped) -> untyped
+      def syswrite: (String data) -> Integer
 
-      def tmp_key: () -> untyped
+      def tmp_key: () -> PKey::PKey?
 
       alias to_io io
 
-      def verify_result: () -> untyped
+      def verify_result: () -> Integer
 
       private
 
@@ -2742,29 +2744,29 @@ module OpenSSL
     class Session
       public
 
-      def ==: (untyped) -> untyped
+      def ==: (instance other) -> bool
 
-      def id: () -> untyped
+      def id: () -> String
 
-      def time: () -> untyped
+      def time: () -> Time
 
-      def time=: (untyped) -> untyped
+      def time=: (Time | Integer start_time) -> Time
 
-      def timeout: () -> untyped
+      def timeout: () -> Integer
 
-      def timeout=: (untyped) -> untyped
+      def timeout=: (Integer timeout) -> Integer
 
-      def to_der: () -> untyped
+      def to_der: () -> String
 
-      def to_pem: () -> untyped
+      def to_pem: () -> String
 
-      def to_text: () -> untyped
+      def to_text: () -> String
 
       private
 
-      def initialize: (untyped) -> void
+      def initialize: (SSLSocket | String sock_or_str) -> void
 
-      def initialize_copy: (untyped) -> untyped
+      def initialize_copy: (instance) -> void
 
       class SessionError < OpenSSL::OpenSSLError
       end
@@ -2773,17 +2775,17 @@ module OpenSSL
     module SocketForwarder
       public
 
-      def addr: () -> untyped
+      def addr: () -> Addrinfo?
 
       def closed?: () -> untyped
 
-      def do_not_reverse_lookup=: (untyped flag) -> untyped
+      def do_not_reverse_lookup=: (boolish flag) -> boolish
 
       def fcntl: (*untyped args) -> untyped
 
-      def fileno: () -> untyped
+      def fileno: () -> Integer
 
-      def getsockopt: (untyped level, untyped optname) -> untyped
+      def getsockopt: (Symbol | Integer level, Symbol | Integer optname) -> (Integer | boolish | String)
 
       def peeraddr: () -> untyped
 

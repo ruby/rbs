@@ -1,4 +1,5 @@
 require_relative "test_helper"
+require "socket"
 require "openssl"
 
 class OpenSSLSingletonTest < Test::Unit::TestCase
@@ -899,5 +900,22 @@ class OpenSSLRandomSingletonTest < Test::Unit::TestCase
   def test_random_bytes
     assert_send_type "(Integer) -> String",
       OpenSSL::Random, :random_bytes, 4
+  end
+end
+
+
+class OpenSSLSSLSingletonTest < Test::Unit::TestCase
+  include TypeAssertions
+  library "openssl"
+  testing "singleton(::OpenSSL::SSL)"
+
+  def test_verify_hostname
+    assert_send_type "(String, String) -> bool",
+    OpenSSL::SSL, :verify_hostname, "www.example.com", "*.example.com"
+  end
+
+  def test_verify_wildcard
+    assert_send_type "(String, String) -> bool",
+    OpenSSL::SSL, :verify_wildcard, "foo", "x*"
   end
 end

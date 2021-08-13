@@ -534,8 +534,8 @@ class IO < Object
   #
   def read: (?Integer? length, ?String outbuf) -> String?
 
-  def read_nonblock: (Integer len) -> String
-                   | (Integer len, ?String buf) -> String
+  def read_nonblock: (Integer len, ?String buf, ?exception: true) -> String
+                   | (Integer len, ?String buf, exception: false) -> (String | :wait_readable | nil)
 
   # Reads a byte as with `IO#getbyte`, but raises an `EOFError` on end of
   # file.
@@ -703,6 +703,9 @@ class IO < Object
   #     That was 15 bytes of data
   #
   def write: (*_ToS string) -> Integer
+
+  def write_nonblock: (_ToS s, ?exception: true) -> Integer
+                    | (_ToS s, exception: false) -> (Integer | :wait_writable | nil)
 
   # Opens the file, optionally seeks to the given *offset*, then returns *length*
   # bytes (defaulting to the rest of the file). #binread ensures the file is
