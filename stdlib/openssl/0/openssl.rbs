@@ -2797,85 +2797,85 @@ module OpenSSL
     class Factory
       public
 
-      def additional_certs: () -> untyped
+      def additional_certs: () -> Array[X509::Certificate]?
 
-      def additional_certs=: (untyped) -> untyped
+      def additional_certs=: (Array[X509::Certificate]? certs) -> Array[X509::Certificate]?
 
-      def allowed_digests: () -> untyped
+      def allowed_digests: () -> Array[String | Digest]?
 
-      def allowed_digests=: (untyped) -> untyped
+      def allowed_digests=: (Array[String | Digest]) -> Array[String | Digest]
 
-      def create_timestamp: (untyped, untyped, untyped) -> untyped
+      def create_timestamp: (PKey::PKey key, X509::Certificate cert, Request request) -> Response
 
-      def default_policy_id: () -> untyped
+      def default_policy_id: () -> String?
 
-      def default_policy_id=: (untyped) -> untyped
+      def default_policy_id=: (String) -> String
 
-      def gen_time: () -> untyped
+      def gen_time: () -> Time?
 
-      def gen_time=: (untyped) -> untyped
+      def gen_time=: (Time) -> Time
 
-      def serial_number: () -> untyped
+      def serial_number: () -> Integer?
 
-      def serial_number=: (untyped) -> untyped
+      def serial_number=: (Integer) -> Integer
     end
 
     class Request
       public
 
-      def algorithm: () -> untyped
+      def algorithm: () -> String
 
-      def algorithm=: (untyped) -> untyped
+      def algorithm=: (String) -> String
 
-      def cert_requested=: (untyped) -> untyped
+      def cert_requested=: (bool requested) -> bool
 
-      def cert_requested?: () -> untyped
+      def cert_requested?: () -> bool
 
-      def message_imprint: () -> untyped
+      def message_imprint: () -> String?
 
-      def message_imprint=: (untyped) -> untyped
+      def message_imprint=: (String) -> String
 
-      def nonce: () -> untyped
+      def nonce: () -> BN?
 
-      def nonce=: (untyped) -> untyped
+      def nonce=: (bn nonce) -> BN
 
-      def policy_id: () -> untyped
+      def policy_id: () -> String?
 
-      def policy_id=: (untyped) -> untyped
+      def policy_id=: (String policy_id) -> String
 
-      def to_der: () -> untyped
+      def to_der: () -> String
 
-      def version: () -> untyped
+      def version: () -> Integer
 
-      def version=: (untyped) -> untyped
+      def version=: (Integer) -> Integer
 
       private
 
-      def initialize: (*untyped) -> void
+      def initialize: (?(File | String) request_der) -> void
     end
 
     class Response
       public
 
-      def failure_info: () -> untyped
+      def failure_info: () -> Symbol?
 
-      def status: () -> untyped
+      def status: () -> BN
 
-      def status_text: () -> untyped
+      def status_text: () -> Array[String]?
 
-      def to_der: () -> untyped
+      def to_der: () -> String
 
-      def token: () -> untyped
+      def token: () -> PKCS7?
 
-      def token_info: () -> untyped
+      def token_info: () -> TokenInfo?
 
-      def tsa_certificate: () -> untyped
+      def tsa_certificate: () -> X509::Certificate?
 
-      def verify: (*untyped) -> untyped
+      def verify: (Request request, X509::Store store, ?X509::Certificate intermediate_cert) -> instance
 
       private
 
-      def initialize: (untyped) -> void
+      def initialize: (File | String response_der) -> void
 
       GRANTED: Integer
 
@@ -2896,27 +2896,27 @@ module OpenSSL
     class TokenInfo
       public
 
-      def algorithm: () -> untyped
+      def algorithm: () -> String?
 
-      def gen_time: () -> untyped
+      def gen_time: () -> Time
 
-      def message_imprint: () -> untyped
+      def message_imprint: () -> String
 
-      def nonce: () -> untyped
+      def nonce: () -> BN?
 
-      def ordering: () -> untyped
+      def ordering: () -> bool?
 
-      def policy_id: () -> untyped
+      def policy_id: () -> String?
 
-      def serial_number: () -> untyped
+      def serial_number: () -> BN?
 
-      def to_der: () -> untyped
+      def to_der: () -> String
 
-      def version: () -> untyped
+      def version: () -> Integer
 
       private
 
-      def initialize: (untyped) -> void
+      def initialize: (File | String token_der) -> void
     end
   end
 
@@ -3168,23 +3168,24 @@ module OpenSSL
 
       public
 
-      def ==: (untyped other) -> untyped
+      def ==: (instance other) -> bool
 
-      def oid: () -> untyped
+      def oid: () -> String
 
-      def oid=: (untyped) -> untyped
+      def oid=: (String) -> String
 
-      def to_der: () -> untyped
+      def to_der: () -> String
 
-      def value: () -> untyped
+      def value: () -> ASN1::Set
 
-      def value=: (untyped) -> untyped
+      def value=: (ASN1::ASN1Data) -> ASN1::Set
 
       private
 
-      def initialize: (*untyped) -> void
+      def initialize: (String der) -> void
+                    | (String oid, ASN1::ASN1Data value) -> void
 
-      def initialize_copy: (untyped) -> untyped
+      def initialize_copy: (instance) -> void
     end
 
     class AttributeError < OpenSSL::OpenSSLError
@@ -3199,55 +3200,55 @@ module OpenSSL
 
       public
 
-      def ==: (untyped other) -> untyped
+      def ==: (instance other) -> bool
 
-      def add_extension: (untyped) -> untyped
+      def add_extension: (Extension ext) -> Extension
 
-      def add_revoked: (untyped) -> untyped
+      def add_revoked: (Revoked revoked) -> Revoked
 
-      def extensions: () -> untyped
+      def extensions: () -> Array[Extension]
 
-      def extensions=: (untyped) -> untyped
+      def extensions=: (Array[Extension] extensions) -> Array[Extension]
 
-      def issuer: () -> untyped
+      def issuer: () -> X509::Name
 
-      def issuer=: (untyped) -> untyped
+      def issuer=: (X509::Name issuer) -> X509::Name
 
-      def last_update: () -> untyped
+      def last_update: () -> Time?
 
-      def last_update=: (untyped) -> untyped
+      def last_update=: (Time last_update) -> Time
 
-      def next_update: () -> untyped
+      def next_update: () -> Time?
 
-      def next_update=: (untyped) -> untyped
+      def next_update=: (Time next_update) -> Time
 
-      def revoked: () -> untyped
+      def revoked: () -> Array[Revoked]
 
-      def revoked=: (untyped) -> untyped
+      def revoked=: (Array[Revoked]) -> Array[Revoked]
 
-      def sign: (untyped, untyped) -> untyped
+      def sign: (PKey::PKey key, Digest digest) -> String
 
-      def signature_algorithm: () -> untyped
+      def signature_algorithm: () -> String
 
-      def to_der: () -> untyped
+      def to_der: () -> String
 
-      def to_pem: () -> untyped
+      def to_pem: () -> String
 
       alias to_s to_pem
 
-      def to_text: () -> untyped
+      def to_text: () -> String
 
-      def verify: (untyped) -> untyped
+      def verify: (PKey::PKey key) -> bool
 
-      def version: () -> untyped
+      def version: () -> Integer
 
-      def version=: (untyped) -> untyped
+      def version=: (Integer) -> Integer
 
       private
 
-      def initialize: (*untyped) -> void
+      def initialize: (?String der) -> void
 
-      def initialize_copy: (untyped) -> untyped
+      def initialize_copy: (instance) -> void
     end
 
     class CRLError < OpenSSL::OpenSSLError
@@ -3268,67 +3269,67 @@ module OpenSSL
 
       public
 
-      def ==: (untyped) -> untyped
+      def ==: (instance other) -> bool
 
-      def add_extension: (untyped) -> untyped
+      def add_extension: (Extension ext) -> Extension
 
-      def check_private_key: (untyped) -> untyped
+      def check_private_key: (PKey::PKey key) -> bool
 
-      def extensions: () -> untyped
+      def extensions: () -> Array[Extension]
 
-      def extensions=: (untyped) -> untyped
+      def extensions=: (Array[Extension]) -> Array[Extension]
 
-      def inspect: () -> untyped
+      def inspect: () -> String
 
-      def issuer: () -> untyped
+      def issuer: () -> Name
 
-      def issuer=: (untyped) -> untyped
+      def issuer=: (Name) -> Name
 
-      def not_after: () -> untyped
+      def not_after: () -> Time?
 
-      def not_after=: (untyped) -> untyped
+      def not_after=: (Time) -> Time
 
-      def not_before: () -> untyped
+      def not_before: () -> Time?
 
-      def not_before=: (untyped) -> untyped
+      def not_before=: (Time) -> Time
 
       def pretty_print: (untyped q) -> untyped
 
-      def public_key: () -> untyped
+      def public_key: () -> PKey::PKey
 
-      def public_key=: (untyped) -> untyped
+      def public_key=: (PKey::PKey pkey) -> PKey::PKey
 
-      def serial: () -> untyped
+      def serial: () -> BN
 
-      def serial=: (untyped) -> untyped
+      def serial=: (bn serial) -> bn
 
-      def sign: (untyped, untyped) -> untyped
+      def sign: (PKey::PKey key, String digest) -> String
 
-      def signature_algorithm: () -> untyped
+      def signature_algorithm: () -> String
 
-      def subject: () -> untyped
+      def subject: () -> Name
 
-      def subject=: (untyped) -> untyped
+      def subject=: (Name) -> Name
 
-      def to_der: () -> untyped
+      def to_der: () -> String
 
-      def to_pem: () -> untyped
+      def to_pem: () -> String
 
       alias to_s to_pem
 
-      def to_text: () -> untyped
+      def to_text: () -> String
 
-      def verify: (untyped) -> untyped
+      def verify: (PKey::PKey key) -> bool
 
-      def version: () -> untyped
+      def version: () -> Integer
 
-      def version=: (untyped) -> untyped
+      def version=: (Integer) -> Integer
 
       private
 
-      def initialize: (*untyped) -> void
+      def initialize: (?String pem) -> void
 
-      def initialize_copy: (untyped) -> untyped
+      def initialize_copy: (instance) -> void
     end
 
     class CertificateError < OpenSSL::OpenSSLError
@@ -3341,44 +3342,45 @@ module OpenSSL
 
       public
 
-      def ==: (untyped other) -> untyped
+      def ==: (instance other) -> bool
 
-      def critical=: (untyped) -> untyped
+      def critical=: (bool critical) -> bool
 
-      def critical?: () -> untyped
+      def critical?: () -> bool
 
-      def oid: () -> untyped
+      def oid: () -> String
 
-      def oid=: (untyped) -> untyped
+      def oid=: (String oid) -> String
 
-      def to_a: () -> untyped
+      def to_a: () -> [String, String, bool]
 
-      def to_der: () -> untyped
+      def to_der: () -> String
 
-      def to_h: () -> untyped
+      def to_h: () -> Hash[String, untyped]
 
-      def to_s: () -> untyped
+      def to_s: () -> String
 
-      def value: () -> untyped
+      def value: () -> String
 
-      def value=: (untyped) -> untyped
+      def value=: (String) -> String
 
-      def value_der: () -> untyped
+      def value_der: () -> String
 
       private
 
-      def initialize: (*untyped) -> void
+      def initialize: (String der) -> void
+                    | (String oid, String value, ?bool critical) -> void
 
-      def initialize_copy: (untyped) -> untyped
+      def initialize_copy: (instance) -> void
 
       module AuthorityInfoAccess
         include OpenSSL::X509::Extension::Helpers
 
         public
 
-        def ca_issuer_uris: () -> untyped
+        def ca_issuer_uris: () -> Array[String]?
 
-        def ocsp_uris: () -> untyped
+        def ocsp_uris: () -> Array[String]?
 
         private
 
@@ -3390,7 +3392,7 @@ module OpenSSL
 
         public
 
-        def authority_key_identifier: () -> untyped
+        def authority_key_identifier: () -> String?
       end
 
       module CRLDistributionPoints
@@ -3398,13 +3400,13 @@ module OpenSSL
 
         public
 
-        def crl_uris: () -> untyped
+        def crl_uris: () -> Array[String]?
       end
 
       module Helpers
         public
 
-        def find_extension: (untyped oid) -> untyped
+        def find_extension: (String oid) -> Extension?
       end
 
       module SubjectKeyIdentifier
@@ -3412,7 +3414,7 @@ module OpenSSL
 
         public
 
-        def subject_key_identifier: () -> untyped
+        def subject_key_identifier: () -> String?
       end
     end
 
@@ -3426,35 +3428,35 @@ module OpenSSL
 
       def config=: (untyped) -> untyped
 
-      def create_ext: (*untyped) -> untyped
+      def create_ext: (String oid, String value, ?bool critical) -> Extension
 
-      def create_ext_from_array: (untyped ary) -> untyped
+      def create_ext_from_array: ([String, String] | [String, String, bool] ary) -> Extension
 
-      def create_ext_from_hash: (untyped hash) -> untyped
+      def create_ext_from_hash: (Hash[String, String | bool] hash) -> Extension
 
-      def create_ext_from_string: (untyped str) -> untyped
+      def create_ext_from_string: (String str) -> Extension
 
-      def create_extension: (*untyped arg) -> untyped
+      def create_extension: (String oid, String value, ?bool critical) -> Extension
 
-      def crl: () -> untyped
+      def crl: () -> CRL?
 
-      def crl=: (untyped) -> untyped
+      def crl=: (CRL crl) -> CRL
 
-      def issuer_certificate: () -> untyped
+      def issuer_certificate: () -> Certificate?
 
-      def issuer_certificate=: (untyped) -> untyped
+      def issuer_certificate=: (Certificate cert) -> Certificate
 
-      def subject_certificate: () -> untyped
+      def subject_certificate: () -> Certificate?
 
-      def subject_certificate=: (untyped) -> untyped
+      def subject_certificate=: (Certificate cert) -> Certificate
 
-      def subject_request: () -> untyped
+      def subject_request: () -> Request?
 
-      def subject_request=: (untyped) -> untyped
+      def subject_request=: (Request request) -> Request
 
       private
 
-      def initialize: (*untyped) -> void
+      def initialize: (?Certificate? issuer_cert, ?Certificate? subject_cert, ?Request? request, ?CRL? crl) -> void
     end
 
     class Name

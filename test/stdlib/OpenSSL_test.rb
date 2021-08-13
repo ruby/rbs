@@ -919,3 +919,98 @@ class OpenSSLSSLSingletonTest < Test::Unit::TestCase
     OpenSSL::SSL, :verify_wildcard, "foo", "x*"
   end
 end
+
+class OpenSSLTimestampFactoryTest < Test::Unit::TestCase
+  include TypeAssertions
+  library "openssl"
+  testing "::OpenSSL::Timestamp::Factory"
+
+  def test_additional_certs
+    fct = factory
+    assert_send_type "() -> nil",
+      fct, :additional_certs
+    assert_send_type "(Array[OpenSSL::X509::Certificate]) -> Array[OpenSSL::X509::Certificate]",
+      fct, :additional_certs=, [cert]
+    assert_send_type "() -> Array[OpenSSL::X509::Certificate]",
+      fct, :additional_certs
+  end
+
+  def test_allowed_digests
+    fct = factory
+    assert_send_type "() -> nil",
+      fct, :allowed_digests
+    assert_send_type "(Array[String]) -> Array[String]",
+      fct, :allowed_digests=, ["sha1"]
+    assert_send_type "() -> Array[String]",
+      fct, :allowed_digests
+  end
+
+  private
+
+  def factory
+    OpenSSL::Timestamp::Factory.new
+  end
+
+  def cert
+    OpenSSL::X509::Certificate.new
+  end
+end
+
+class OpenSSLX509AttributeTest < Test::Unit::TestCase
+  include TypeAssertions
+  library "openssl"
+  testing "::OpenSSL::X509::Attribute"
+
+  def test_oid
+    assert_send_type "() -> String",
+      attribute, :oid
+    assert_send_type "(String) -> String",
+      attribute, :oid=, "extReq"
+  end
+
+  def test_value
+    assert_send_type "() -> OpenSSL::ASN1::Set",
+      attribute, :value
+    assert_send_type "(OpenSSL::ASN1::Set) -> OpenSSL::ASN1::Set",
+      attribute, :value=, OpenSSL::ASN1::Set.new([OpenSSL::ASN1::UTF8String("abc123")])
+  end
+
+  private
+
+  def attribute
+    test_der = "\x30\x15\x06\x09\x2a\x86\x48\x86\xf7\x0d\x01\x09\x07\x31\x08" \
+      "\x0c\x06\x61\x62\x63\x31\x32\x33".b
+    OpenSSL::X509::Attribute.new(test_der)
+  end
+end
+
+
+class OpenSSLX509CertificateTest < Test::Unit::TestCase
+  include TypeAssertions
+  library "openssl"
+  testing "::OpenSSL::X509::Certificate"
+
+  def test_issuer
+    assert_send_type "() -> OpenSSL::X509::Name",
+      cert, :issuer
+  end
+
+  def test_subject
+    assert_send_type "() -> OpenSSL::X509::Name",
+      cert, :subject
+  end
+
+  def test_public_key
+    assert_send_type "() -> OpenSSL::PKey::PKey",
+      cert, :public_key
+  end
+
+  private
+
+  def cert
+    key = OpenSSL::PKey::RSA.new 2048
+    cert = OpenSSL::X509::Certificate.new
+    cert.public_key = key.public_key
+    cert
+  end
+end
