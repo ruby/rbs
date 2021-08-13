@@ -51,5 +51,6 @@ module RBS
     Regexp = Name.define(:Regexp)
     TrueClass = Name.define(:TrueClass)
     FalseClass = Name.define(:FalseClass)
+    Numeric = Name.define(:Numeric)
   end
 end

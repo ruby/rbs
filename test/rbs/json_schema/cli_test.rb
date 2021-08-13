@@ -6,6 +6,7 @@ class RBS::JSONSchema::CLITest < Test::Unit::TestCase
   include TestHelper
 
   CLI = RBS::JSONSchema::CLI
+  PATH = Pathname(File.join(__dir__, "../../../schema")).realpath
 
   def stdout
     @stdout ||= StringIO.new
@@ -26,172 +27,124 @@ class RBS::JSONSchema::CLITest < Test::Unit::TestCase
     with_cli do |cli|
       cli.run(%W(./schema/location.json))
       assert_equal <<-EOF, stdout.string
+module Location
+  type definitions_point = { line: ::Integer, column: ::Integer }
 
-======= Generating RBS for schema: location =======
+  type definitions_buffer = { name: ::String | nil }
 
-type location__point = { line: ::Integer, column: ::Integer }
+  type definitions_location = { start: definitions_point, :end => definitions_point, buffer: definitions_buffer }
 
-type location__buffer = { name: ::String | nil }
-
-type location__location = { start: location__point, :end => location__point, buffer: location__buffer }
-
-type location = location__location | nil
-
-
-======= Completed generating RBS for schema: location =======
+  type t = definitions_location | nil
+end
       EOF
     end
 
     with_cli do |cli|
-      cli.run(%W(--stringify-keys ./schema/location.json))
+      cli.run(%W(--no-stringify-keys ./schema/decls.json))
       assert_equal <<-EOF, stdout.string
+module Decls
+  type definitions_alias = { declaration: "alias", name: ::String, :type => Types::t, annotations: ::Array[Annotation::t], location: Location::t, comment: Comment::t }
 
-======= Generating RBS for schema: location =======
+  type definitions_constant = { declaration: "constant", name: ::String, :type => Types::t, location: Location::t, comment: Comment::t }
 
-type location__point = { "line" => ::Integer, "column" => ::Integer }
+  type definitions_global = { declaration: "global", name: ::String, :type => Types::t, location: Location::t, comment: Comment::t }
 
-type location__buffer = { "name" => ::String | nil }
+  type definitions_moduletypeparam = { name: ::String, variance: "covariant" | "contravariant" | "invariant", skip_validation: bool }
 
-type location__location = { "start" => location__point, "end" => location__point, "buffer" => location__buffer }
+  type definitions_moduleself = { name: ::String, args: ::Array[Types::t] }
 
-type location = location__location | nil
+  type definitions_module = { declaration: "module", name: ::String, type_params: { params: ::Array[definitions_moduletypeparam] }, members: ::Array[definitions_classmember], self_types: ::Array[definitions_moduleself], annotations: ::Array[Annotation::t], comment: Comment::t, location: Location::t }
 
+  type definitions_interfacemember = Members::definitions_methoddefinition & { kind: "instance" } | Members::definitions_include | Members::definitions_alias
 
-======= Completed generating RBS for schema: location =======
-      EOF
-    end
+  type definitions_interface = { declaration: "interface", name: ::String, type_params: { params: ::Array[definitions_moduletypeparam] }, members: ::Array[definitions_interfacemember], annotations: ::Array[Annotation::t], comment: Comment::t, location: Location::t }
 
-    with_cli do |cli|
-      cli.run(%W(--no-stringify-keys -I ./schema/))
-      assert_equal <<-EOF, stdout.string
+  type definitions_classmember = Members::definitions_methoddefinition | Members::definitions_variable | Members::definitions_include | Members::definitions_extend | Members::definitions_prepend | Members::definitions_attribute | Members::definitions_visibility | Members::definitions_alias | definitions_alias | definitions_constant | definitions_class | definitions_module | definitions_interface
 
-======= Generating RBS for schema: annotation =======
+  type definitions_class = { declaration: "class", name: ::String, type_params: { params: ::Array[definitions_moduletypeparam] }, members: ::Array[definitions_classmember], :super_class => nil | { name: ::String, args: ::Array[Types::t] }, annotations: ::Array[Annotation::t], comment: Comment::t, location: Location::t }
 
-type annotation = { string: ::String, location: location }
+  type t = definitions_alias | definitions_constant | definitions_global | definitions_class | definitions_module | definitions_interface
+end
 
+module Location
+  type definitions_point = { line: ::Integer, column: ::Integer }
 
-======= Completed generating RBS for schema: annotation =======
+  type definitions_buffer = { name: ::String | nil }
 
-======= Generating RBS for schema: comment =======
+  type definitions_location = { start: definitions_point, :end => definitions_point, buffer: definitions_buffer }
 
-type comment__comment = { string: ::String, location: location }
+  type t = definitions_location | nil
+end
 
-type comment = comment__comment | nil
+module Types
+  type definitions_base = { :class => "bool" | "void" | "untyped" | "nil" | "top" | "bot" | "self" | "instance" | "class", location: Location::t }
 
+  type definitions_variable = { :class => "variable", name: ::String, location: Location::t }
 
-======= Completed generating RBS for schema: comment =======
+  type definitions_classinstance = { :class => "class_instance", name: ::String, args: ::Array[t], location: Location::t }
 
-======= Generating RBS for schema: decls =======
+  type definitions_classsingleton = { :class => "class_singleton", name: ::String, location: Location::t }
 
-type decls__alias = { declaration: "alias", name: ::String, :type => types, annotations: ::Array[annotation], location: location, comment: comment }
+  type definitions_interface = { :class => "interface", name: ::String, args: ::Array[t], location: Location::t }
 
-type decls__constant = { declaration: "constant", name: ::String, :type => types, location: location, comment: comment }
+  type definitions_alias = { :class => "alias", name: ::String, location: Location::t }
 
-type decls__global = { declaration: "global", name: ::String, :type => types, location: location, comment: comment }
+  type definitions_tuple = { :class => "tuple", types: ::Array[t], location: Location::t }
 
-type decls__moduleTypeParam = { name: ::String, variance: "covariant" | "contravariant" | "invariant", skip_validation: bool }
+  type definitions_record = { :class => "record", fields: ::Hash[::String, t], location: Location::t }
 
-type decls__classMember = members__methodDefinition | members__variable | members__include | members__extend | members__prepend | members__attribute | members__visibility | members__alias | decls__alias | decls__constant | decls__class | decls__module | decls__interface
+  type definitions_union = { :class => "union", types: ::Array[t], location: Location::t }
 
-type decls__class = { declaration: "class", name: ::String, type_params: { params: ::Array[decls__moduleTypeParam] }, members: ::Array[decls__classMember], :super_class => nil | { name: ::String, args: ::Array[types] }, annotations: ::Array[annotation], comment: comment, location: location }
+  type definitions_intersection = { :class => "intersection", types: ::Array[t], location: Location::t }
 
-type decls__module = { declaration: "module", name: ::String, type_params: { params: ::Array[decls__moduleTypeParam] }, members: ::Array[decls__classMember], self_types: ::Array[decls__moduleSelf], annotations: ::Array[annotation], comment: comment, location: location }
+  type definitions_optional = { :class => "optional", :type => t, location: Location::t }
 
-type decls__moduleSelf = { name: ::String, args: ::Array[types] }
+  type definitions_proc = { :class => "proc", :type => Function::t, location: Location::t }
 
-type decls__interfaceMember = members__methodDefinition & { kind: "instance" } | members__include | members__alias
+  type definitions_literal = { :class => "literal", literal: ::String, location: Location::t }
 
-type decls__interface = { declaration: "interface", name: ::String, type_params: { params: ::Array[decls__moduleTypeParam] }, members: ::Array[decls__interfaceMember], annotations: ::Array[annotation], comment: comment, location: location }
+  type t = definitions_base | definitions_variable | definitions_classinstance | definitions_classsingleton | definitions_interface | definitions_alias | definitions_tuple | definitions_record | definitions_union | definitions_intersection | definitions_optional | definitions_proc | definitions_literal
+end
 
-type decls = decls__alias | decls__constant | decls__global | decls__class | decls__module | decls__interface
+module Function
+  type definitions_param = { :type => Types::t, name: ::String | nil }
 
+  type t = { required_positionals: ::Array[definitions_param], optional_positionals: ::Array[definitions_param], rest_positionals: definitions_param | nil, trailing_positionals: ::Array[definitions_param], required_keywords: ::Hash[::String, definitions_param], optional_keywords: ::Hash[::String, definitions_param], rest_keywords: definitions_param | nil, :return_type => Types::t }
+end
 
-======= Completed generating RBS for schema: decls =======
+module Annotation
+  type t = { string: ::String, location: Location::t }
+end
 
-======= Generating RBS for schema: function =======
+module Comment
+  type definitions_comment = { string: ::String, location: Location::t }
 
-type function__param = { :type => types, name: ::String | nil }
+  type t = definitions_comment | nil
+end
 
-type function = { required_positionals: ::Array[function__param], optional_positionals: ::Array[function__param], rest_positionals: function__param | nil, trailing_positionals: ::Array[function__param], rest_keywords: function__param | nil, :return_type => types }
+module Methodtype
+  type definitions_block = { :type => Function::t, required: bool }
 
+  type t = { type_params: ::Array[::String], :type => Function::t, block: definitions_block | nil, location: Location::t }
+end
 
-======= Completed generating RBS for schema: function =======
+module Members
+  type definitions_methoddefinition = { member: "method_definition", kind: "instance" | "singleton" | "singleton_instance", types: ::Array[Methodtype::t], comment: Comment::t, annotations: ::Array[Annotation::t], attributes: ::Array["incompatible"], location: Location::t, :overload => bool }
 
-======= Generating RBS for schema: location =======
+  type definitions_variable = { member: "instance_variable" | "class_instance_variable" | "class_variable", name: ::String, :type => Types::t, location: Location::t, comment: Comment::t }
 
-type location__point = { line: ::Integer, column: ::Integer }
+  type definitions_include = { member: "include", name: ::String, args: ::Array[Types::t], annotations: ::Array[Annotation::t], comment: Comment::t, location: Location::t }
 
-type location__buffer = { name: ::String | nil }
+  type definitions_extend = { member: "extend", name: ::String, args: ::Array[Types::t], annotations: ::Array[Annotation::t], comment: Comment::t, location: Location::t }
 
-type location__location = { start: location__point, :end => location__point, buffer: location__buffer }
+  type definitions_prepend = { member: "prepend", name: ::String, args: ::Array[Types::t], annotations: ::Array[Annotation::t], comment: Comment::t, location: Location::t }
 
-type location = location__location | nil
+  type definitions_attribute = { member: "attr_reader" | "attr_accessor" | "attr_writer", name: ::String, kind: "instance" | "singleton", :type => Types::t, ivar_name: ::String | nil | false, annotations: ::Array[Annotation::t], comment: Comment::t, location: Location::t }
 
+  type definitions_visibility = { member: "public" | "private", location: Location::t }
 
-======= Completed generating RBS for schema: location =======
-
-======= Generating RBS for schema: members =======
-
-type members__methodDefinition = { member: "method_definition", kind: "instance" | "singleton" | "singleton_instance", types: ::Array[methodType], comment: comment, annotations: ::Array[annotation], attributes: ::Array["incompatible"], location: location, :overload => bool }
-
-type members__variable = { member: "instance_variable" | "class_instance_variable" | "class_variable", name: ::String, :type => types, location: location, comment: comment }
-
-type members__include = { member: "include", name: ::String, args: ::Array[types], annotations: ::Array[annotation], comment: comment, location: location }
-
-type members__extend = { member: "extend", name: ::String, args: ::Array[types], annotations: ::Array[annotation], comment: comment, location: location }
-
-type members__prepend = { member: "prepend", name: ::String, args: ::Array[types], annotations: ::Array[annotation], comment: comment, location: location }
-
-type members__attribute = { member: "attr_reader" | "attr_accessor" | "attr_writer", name: ::String, kind: "instance" | "singleton", :type => types, ivar_name: ::String | nil | false, annotations: ::Array[annotation], comment: comment, location: location }
-
-type members__visibility = { member: "public" | "private", location: location }
-
-type members__alias = { member: "alias", new_name: ::String, old_name: ::String, kind: "instance" | "singleton", annotations: ::Array[annotation], comment: comment, location: location }
-
-
-======= Completed generating RBS for schema: members =======
-
-======= Generating RBS for schema: methodType =======
-
-type methodType__block = { :type => function, required: bool }
-
-type methodType = { type_params: ::Array[::String], :type => function, block: methodType__block | nil, location: location }
-
-
-======= Completed generating RBS for schema: methodType =======
-
-======= Generating RBS for schema: types =======
-
-type types__base = { :class => "bool" | "void" | "untyped" | "nil" | "top" | "bot" | "self" | "instance" | "class", location: location }
-
-type types__variable = { :class => "variable", name: ::String, location: location }
-
-type types__classSingleton = { :class => "class_singleton", name: ::String, location: location }
-
-type types__classInstance = { :class => "class_instance", name: ::String, args: ::Array[types__types], location: location }
-
-type types__interface = { :class => "interface", name: ::String, args: ::Array[types__types], location: location }
-
-type types__alias = { :class => "alias", name: ::String, location: location }
-
-type types__tuple = { :class => "tuple", types: ::Array[types__types], location: location }
-
-type types__record = { :class => "record", location: location }
-
-type types__optional = { :class => "optional", :type => types__types, location: location }
-
-type types__union = { :class => "union", types: ::Array[types__types], location: location }
-
-type types__intersection = { :class => "intersection", types: ::Array[types__types], location: location }
-
-type types__proc = { :class => "proc", :type => function, location: location }
-
-type types__literal = { :class => "literal", literal: ::String, location: location }
-
-type types = types__base | types__variable | types__classInstance | types__classSingleton | types__interface | types__alias | types__tuple | types__record | types__union | types__intersection | types__optional | types__proc | types__literal
-
-
-======= Completed generating RBS for schema: types =======
+  type definitions_alias = { member: "alias", new_name: ::String, old_name: ::String, kind: "instance" | "singleton", annotations: ::Array[Annotation::t], comment: Comment::t, location: Location::t }
+end
       EOF
     end
   end
@@ -202,22 +155,18 @@ type types = types__base | types__variable | types__classInstance | types__class
         cli.run(%W(./schema/location.json -o #{dir}))
         assert File.file?("#{dir}/location.rbs")
         assert_equal <<-EOF, File.read("#{dir}/location.rbs")
-type location__point = { line: ::Integer, column: ::Integer }
+module Location
+  type definitions_point = { line: ::Integer, column: ::Integer }
 
-type location__buffer = { name: ::String | nil }
+  type definitions_buffer = { name: ::String | nil }
 
-type location__location = { start: location__point, :end => location__point, buffer: location__buffer }
+  type definitions_location = { start: definitions_point, :end => definitions_point, buffer: definitions_buffer }
 
-type location = location__location | nil
+  type t = definitions_location | nil
+end
         EOF
         assert_equal <<-EOF, stdout.string
-
-======= Generating RBS for schema: location =======
-
 Writing output to file: #{dir}/location.rbs
-
-
-======= Completed generating RBS for schema: location =======
         EOF
       end
     end
@@ -226,12 +175,12 @@ Writing output to file: #{dir}/location.rbs
   def test_validate_options
     with_cli do |cli|
       err = assert_raises(RBS::JSONSchema::ValidationError) { cli.run(%W(./schema/does_not_exist.json)) }
-      assert_equal "./schema/does_not_exist.json: File not found!", err.message
+      assert_equal "./schema/does_not_exist.json: No such file or directory found!", err.message
     end
 
     with_cli do |cli|
-      err = assert_raises(RBS::JSONSchema::ValidationError) { cli.run(%W(-I ./schema/does/not/exist)) }
-      assert_equal "./schema/does/not/exist: Directory not found!", err.message
+      err = assert_raises(RBS::JSONSchema::ValidationError) { cli.run(%W(./schema/does/not/exist)) }
+      assert_equal "./schema/does/not/exist: No such file or directory found!", err.message
     end
 
     with_cli do |cli|

@@ -1,7 +1,9 @@
 module RBS
   module JSONSchema
     class Generator
-      attr_reader options: Hash[Symbol, untyped]
+      attr_reader options: Hash[Symbol, value]
+
+      Alias: singleton(RBS::AST::Declarations::Alias)
 
       interface _IO
         def puts: (*untyped) -> void
@@ -17,31 +19,44 @@ module RBS
 
       attr_reader name: String
 
-      attr_reader decls: Array[AST::Declarations::Alias]
+      attr_reader path_decls: Hash[String, AST::Declarations::Module]
 
-      SCHEMA_DEFINITIONS: Array[String]
-
-      REF_REGEX_1: untyped
-
-      REF_REGEX_2: untyped
-
-      REF_REGEX_3: untyped
+      attr_reader generated_schemas: Hash[String, Hash[String, bool]]
 
       type value = String | bool
 
-      def initialize: (options: Hash[Symbol, value], stdout: _IO, stderr: _IO) -> untyped
+      type json_schema = Hash[String, untyped]
 
-      def type_name: (String name, ?prefix: boolish, ?absolute: boolish) -> TypeName
+      attr_reader stringify_keys: bool
+      attr_reader output: String?
 
-      def generate: () -> void
+      def initialize: (stringify_keys: boolish, output: String?, stdout: _IO, stderr: _IO) -> untyped
 
-      def parse_schema: (Hash[String, untyped] schema) -> Types::t
+      def generate: (URI::Generic uri) -> void
 
-      def fetch_type: (String `type`, ?name: String, ?absolute: boolish, ?prefix: boolish) -> Types::t
+      def generate_rbs: (URI::Generic uri, json_schema document) -> void
 
-      def read_file: () { (String, String) -> void } -> void
+      def translate_type: (URI::Generic uri, json_schema schema) -> Types::t
+
+      def read_from_uri: (URI::Generic uri) -> json_schema
 
       def write_output: () -> void
+
+      private
+
+      def literal_type: (untyped) -> (Types::Literal | Types::Bases::Nil)
+
+      def untyped_type: () -> Types::Bases::Any
+
+      def generate_type_name_for_uri: (URI::Generic uri, ?module_name: boolish, ?namespace: boolish) -> TypeName
+
+      def type_name: (String name, ?absolute: boolish) -> TypeName
+
+      def resolve_uri: (URI::Generic uri, URI::Generic ref_uri) -> URI::Generic
+
+      def snake_case: (String `string`) -> String
+
+      def camel_case: (String `string`) -> String
 
       def validate_options: () -> void
     end

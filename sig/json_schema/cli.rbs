@@ -15,8 +15,6 @@ module RBS
 
       def initialize: (stdout: _IO, stderr: _IO) -> void
 
-      def setup_initial_options: (OptionParser opts) -> void
-
       def run: (Array[String] args) -> void
     end
   end
