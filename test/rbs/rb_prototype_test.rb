@@ -573,6 +573,28 @@ end
     EOF
   end
 
+  def test_const_with_multi_assign
+    parser = RB.new
+
+    rb = <<-EOR
+module Foo
+  MAJOR, MINOR, PATCH = ['0', '1', '1']
+end
+    EOR
+
+    parser.parse(rb)
+
+    assert_write parser.decls, <<-EOF
+module Foo
+  MAJOR: untyped
+
+  MINOR: untyped
+
+  PATCH: untyped
+end
+    EOF
+  end
+
   def test_literal_types
     parser = RB.new
 
