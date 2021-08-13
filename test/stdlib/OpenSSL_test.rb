@@ -890,3 +890,14 @@ class OpenSSLRSATest < Test::Unit::TestCase
     OpenSSL::PKey::RSA.new(2048)
   end
 end
+
+class OpenSSLRandomSingletonTest < Test::Unit::TestCase
+  include TypeAssertions
+  library "openssl"
+  testing "singleton(::OpenSSL::Random)"
+
+  def test_random_bytes
+    assert_send_type "(Integer) -> String",
+      OpenSSL::Random, :random_bytes, 4
+  end
+end

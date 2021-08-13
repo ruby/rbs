@@ -2303,31 +2303,17 @@ module OpenSSL
   end
 
   module Random
-    def self.load_random_file: (untyped) -> untyped
+    def self.load_random_file: (String filename) -> true
 
-    def self.random_add: (untyped, untyped) -> untyped
+    def self.random_add: (String str, Numeric entropy) -> self
 
-    def self.random_bytes: (untyped) -> untyped
+    def self.random_bytes: (Integer length) -> String
 
-    def self.seed: (untyped) -> untyped
+    def self.seed: (String seed) -> String
 
-    def self.status?: () -> untyped
+    def self.status?: () -> bool
 
-    def self.write_random_file: (untyped) -> untyped
-
-    private
-
-    def load_random_file: (untyped) -> untyped
-
-    def random_add: (untyped, untyped) -> untyped
-
-    def random_bytes: (untyped) -> untyped
-
-    def seed: (untyped) -> untyped
-
-    def status?: () -> untyped
-
-    def write_random_file: (untyped) -> untyped
+    def self.write_random_file: (String filename) -> true
 
     class RandomError < OpenSSL::OpenSSLError
     end
