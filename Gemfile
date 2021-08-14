@@ -10,6 +10,7 @@ gem "rspec"
 gem "racc"
 gem "rubocop"
 gem "rubocop-rubycw"
+gem "scanf"
 gem "json"
 gem "json-schema"
 gem 'stackprof'
