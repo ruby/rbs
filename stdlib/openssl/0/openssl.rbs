@@ -3575,45 +3575,45 @@ module OpenSSL
 
       public
 
-      def ==: (untyped other) -> untyped
+      def ==: (untyped other) -> bool
 
-      def add_attribute: (untyped) -> untyped
+      def add_attribute: (Attribute attribute) -> Attribute
 
-      def attributes: () -> untyped
+      def attributes: () -> Array[Attribute]
 
-      def attributes=: (untyped) -> untyped
+      def attributes=: (Array[Attribute] attributes) -> Array[Attribute]
 
-      def public_key: () -> untyped
+      def public_key: () -> PKey::PKey
 
-      def public_key=: (untyped) -> untyped
+      def public_key=: (PKey::PKey public_key) -> PKey::PKey
 
-      def sign: (untyped, untyped) -> untyped
+      def sign: (PKey::PKey key, Digest | String digest) -> String
 
-      def signature_algorithm: () -> untyped
+      def signature_algorithm: () -> String
 
-      def subject: () -> untyped
+      def subject: () -> Name
 
-      def subject=: (untyped) -> untyped
+      def subject=: (Name subject) -> Name
 
-      def to_der: () -> untyped
+      def to_der: () -> String
 
-      def to_pem: () -> untyped
+      def to_pem: () -> String
 
       alias to_s to_pem
 
-      def to_text: () -> untyped
+      def to_text: () -> String
 
-      def verify: (untyped) -> untyped
+      def verify: (PKey::PKey key) -> bool
 
-      def version: () -> untyped
+      def version: () -> Integer
 
-      def version=: (untyped) -> untyped
+      def version=: (Integer version) -> Integer
 
       private
 
-      def initialize: (*untyped) -> void
+      def initialize: (?String der) -> void
 
-      def initialize_copy: (untyped) -> untyped
+      def initialize_copy: (instance) -> void
     end
 
     class RequestError < OpenSSL::OpenSSLError
@@ -3622,29 +3622,29 @@ module OpenSSL
     class Revoked
       public
 
-      def ==: (untyped other) -> untyped
+      def ==: (untyped other) -> bool
 
-      def add_extension: (untyped) -> untyped
+      def add_extension: (Extension ext) -> Extension
 
-      def extensions: () -> untyped
+      def extensions: () -> Array[Extension]
 
-      def extensions=: (untyped) -> untyped
+      def extensions=: (Array[Extension] extensions) -> Array[Extension]
 
-      def serial: () -> untyped
+      def serial: () -> Integer
 
-      def serial=: (untyped) -> untyped
+      def serial=: (Integer integer) -> Integer
 
-      def time: () -> untyped
+      def time: () -> Time?
 
-      def time=: (untyped) -> untyped
+      def time=: (Time time) -> Time
 
-      def to_der: () -> untyped
+      def to_der: () -> String
 
       private
 
       def initialize: (*untyped) -> void
 
-      def initialize_copy: (untyped) -> untyped
+      def initialize_copy: (instance) -> void
     end
 
     class RevokedError < OpenSSL::OpenSSLError
@@ -3653,73 +3653,73 @@ module OpenSSL
     class Store
       public
 
-      def add_cert: (untyped) -> untyped
+      def add_cert: (Certificate certificate) -> self
 
-      def add_crl: (untyped) -> untyped
+      def add_crl: (CRL crl) -> self
 
-      def add_file: (untyped) -> untyped
+      def add_file: (String file) -> self
 
-      def add_path: (untyped) -> untyped
+      def add_path: (String path) -> self
 
-      def chain: () -> untyped
+      def chain: () -> Array[Certificate]?
 
-      def error: () -> untyped
+      def error: () -> Integer?
 
-      def error_string: () -> untyped
+      def error_string: () -> String?
 
-      def flags=: (untyped) -> untyped
+      def flags=: (Integer flags) -> Integer
 
-      def purpose=: (untyped) -> untyped
+      def purpose=: (Integer purpose) -> Integer
 
-      def set_default_paths: () -> untyped
+      def set_default_paths: () -> nil
 
-      def time=: (untyped) -> untyped
+      def time=: (Time time) -> Time
 
-      def trust=: (untyped) -> untyped
+      def trust=: (Integer trust) -> Integer
 
-      def verify: (*untyped) -> untyped
+      def verify: (Certificate certificate, ?Array[Certificate] chain) ?{ (bool preverify_ok, StoreContext store_ctx) -> bool } -> bool
 
-      def verify_callback: () -> untyped
+      def verify_callback: () -> (^(bool preverify_ok, StoreContext store_ctx) -> bool | nil)
 
-      def verify_callback=: (untyped) -> untyped
+      def verify_callback=: [U] (^(bool preverify_ok, StoreContext store_ctx) -> bool) -> U
 
       private
 
-      def initialize: (*untyped) -> void
+      def initialize: () -> void
     end
 
     class StoreContext
       public
 
-      def chain: () -> untyped
+      def chain: () -> Array[Certificate]?
 
-      def cleanup: () -> untyped
+      def cleanup: () -> void
 
-      def current_cert: () -> untyped
+      def current_cert: () -> Certificate
 
-      def current_crl: () -> untyped
+      def current_crl: () -> CRL
 
-      def error: () -> untyped
+      def error: () -> Integer?
 
-      def error=: (untyped) -> untyped
+      def error=: (Integer error) -> Integer
 
-      def error_depth: () -> untyped
+      def error_depth: () -> Integer
 
-      def error_string: () -> untyped
+      def error_string: () -> String?
 
-      def flags=: (untyped) -> untyped
+      def flags=: (Integer flags) -> Integer
 
-      def purpose=: (untyped) -> untyped
+      def purpose=: (Integer purpose) -> Integer
 
-      def time=: (untyped) -> untyped
+      def time=: (Time time) -> Time
 
-      def trust=: (untyped) -> untyped
+      def trust=: (Integer trust) -> Integer
 
-      def verify: () -> untyped
+      def verify: () -> bool
 
       private
 
-      def initialize: (*untyped) -> void
+      def initialize: (Store store, ?Certificate cert, ?Array[Certificate] chain) -> void
     end
 
     class StoreError < OpenSSL::OpenSSLError
