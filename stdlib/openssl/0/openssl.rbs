@@ -712,7 +712,7 @@ module OpenSSL
 
       private
 
-      def initialize: (untyped value, Integer tag, tag_class tag_class) -> void
+      def initialize: (untyped value, ::Integer tag, tag_class tag_class) -> void
     end
 
     class ASN1Error < OpenSSL::OpenSSLError
@@ -860,7 +860,7 @@ module OpenSSL
 
       private
 
-      def initialize: (untyped value, Integer tag, tagging tagging) -> void
+      def initialize: (untyped value, ?Integer tag, ?tagging tagging) -> void
     end
 
     class PrintableString < OpenSSL::ASN1::Primitive
@@ -1258,7 +1258,7 @@ module OpenSSL
 
     def add_value: (String section, untyped key, untyped value) -> untyped
 
-    def each: () { (String, String, String) -> void } -> self
+    def each: () { ([String, String, String] args0) -> void } -> self
 
     def get_value: (String section, String key) -> String?
 
@@ -1621,7 +1621,7 @@ module OpenSSL
 
     V_RESPID_NAME: Integer
 
-    type ocsp_status = V_CERTSTATUS_GOOD | V_CERTSTATUS_REVOKED | V_CERTSTATUS_UNKNOWN
+    type ocsp_status = Integer
 
     class BasicResponse
       public
@@ -1728,7 +1728,7 @@ module OpenSSL
     class SingleResponse
       public
 
-      def cert_status: () -> (V_CERTSTATUS_GOOD | V_CERTSTATUS_REVOKED | V_CERTSTATUS_UNKNOWN)
+      def cert_status: () -> ocsp_status
 
       def certid: () -> CertificateId
 
@@ -2424,7 +2424,7 @@ module OpenSSL
 
     type tls_version = Symbol | Integer
 
-    type verify_mode = VERIFY_CLIENT_ONCE | VERIFY_FAIL_IF_NO_PEER_CERT | VERIFY_NONE | VERIFY_PEER
+    type verify_mode = Integer
 
     class SSLContext
       public
@@ -2583,7 +2583,7 @@ module OpenSSL
 
       def set_minmax_proto_version: (untyped, untyped) -> untyped
 
-      DEFAULT_CERT_STORE: Store
+      DEFAULT_CERT_STORE: X509::Store
 
       DEFAULT_PARAMS: Hash[Symbol, untyped]
 
@@ -3522,7 +3522,7 @@ module OpenSSL
 
       RFC2253: Integer
 
-      type format = COMPAT | RFC2253 | ONELINE | MULTILINE
+      type format = Integer
 
       module RFC2253DN
         def self.expand_hexstring: (untyped str) -> untyped
