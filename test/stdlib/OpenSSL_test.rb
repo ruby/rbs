@@ -30,12 +30,12 @@ class OpenSSLSingletonTest < Test::Unit::TestCase
   def test_fixed_length_secure_compare
     assert_send_type "(String, String) -> bool",
                      OpenSSL, :fixed_length_secure_compare, "a", "a"
-  end
+  end if OpenSSL.respond_to?(:fixed_length_secure_compare)
 
   def test_secure_compare
     assert_send_type "(String, String) -> bool",
                      OpenSSL, :secure_compare, "a", "a"
-  end
+  end if OpenSSL.respond_to?(:secure_compare)
 end
 
 
@@ -853,27 +853,27 @@ class OpenSSLRSATest < Test::Unit::TestCase
   def test_oid
     assert_send_type "() -> String",
       pkey, :oid
-  end
+  end if OpenSSL::PKey::RSA.method_defined?(:oid)
 
   def test_private_to_der
     assert_send_type "() -> String",
       pkey, :private_to_der
-  end
+  end if OpenSSL::PKey::RSA.method_defined?(:private_to_der)
 
   def test_private_to_pem
     assert_send_type "() -> String",
       pkey, :private_to_pem
-  end
+  end if OpenSSL::PKey::RSA.method_defined?(:private_to_pem)
 
   def test_public_to_der
     assert_send_type "() -> String",
       pkey, :public_to_der
-  end
+  end if OpenSSL::PKey::RSA.method_defined?(:public_to_der)
 
   def test_public_to_pem
     assert_send_type "() -> String",
       pkey, :public_to_pem
-  end
+  end if OpenSSL::PKey::RSA.method_defined?(:public_to_pem)
 
   def test_sign_and_verify
     data = 'Sign me!'
@@ -954,7 +954,7 @@ class OpenSSLTimestampFactoryTest < Test::Unit::TestCase
   def cert
     OpenSSL::X509::Certificate.new
   end
-end
+end if OpenSSL.const_defined?(:Timestamp)
 
 class OpenSSLX509AttributeTest < Test::Unit::TestCase
   include TypeAssertions
