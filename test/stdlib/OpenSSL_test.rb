@@ -1014,3 +1014,73 @@ class OpenSSLX509CertificateTest < Test::Unit::TestCase
     cert
   end
 end
+
+
+class OpenSSLX509ExtensionTest < Test::Unit::TestCase
+  include TypeAssertions
+  library "openssl"
+  testing "::OpenSSL::X509::Extension"
+
+  def test_oid
+    assert_send_type "() -> String",
+      extension, :oid
+    assert_send_type "(String) -> String",
+     extension, :oid=, "extReq"
+  end
+
+  def test_value
+    assert_send_type "() -> String",
+      extension, :value
+    assert_send_type "(OpenSSL::ASN1::Set) -> String",
+      extension, :value=, OpenSSL::ASN1::Set.new([OpenSSL::ASN1::UTF8String("abc123")])
+  end
+
+  private
+
+  def extension
+    basic_constraints_value = OpenSSL::ASN1::Sequence([
+      OpenSSL::ASN1::Boolean(true),   # CA
+      OpenSSL::ASN1::Integer(2)       # pathlen
+    ])
+    basic_constraints = OpenSSL::ASN1::Sequence([
+      OpenSSL::ASN1::ObjectId("basicConstraints"),
+      OpenSSL::ASN1::Boolean(true),
+      OpenSSL::ASN1::OctetString(basic_constraints_value.to_der),
+    ])
+    OpenSSL::X509::Extension.new(basic_constraints.to_der)
+  end
+end
+
+class OpenSSLX509NameSingletonTest < Test::Unit::TestCase
+  include TypeAssertions
+  library "openssl"
+  testing "singleton(::OpenSSL::X509::Name)"
+
+  def test_parse
+    assert_send_type "(String) -> OpenSSL::X509::Name",
+      OpenSSL::X509::Name, :parse, "/CN=nobody/DC=example"
+  end
+
+end
+
+class OpenSSLX509NameTest < Test::Unit::TestCase
+  include TypeAssertions
+  library "openssl"
+  testing "::OpenSSL::X509::Name"
+
+  def test_add_entry
+    assert_send_type "(String, String) -> OpenSSL::X509::Name",
+      name, :add_entry, "C", "anybody"
+  end
+
+  def test_to_a
+    assert_send_type "() -> Array[[String, String, Integer]]",
+      name, :to_a
+  end
+
+  private
+
+  def name
+    OpenSSL::X509::Name.parse('/CN=nobody/DC=example')
+  end
+end

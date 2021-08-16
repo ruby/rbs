@@ -3362,7 +3362,7 @@ module OpenSSL
 
       def value: () -> String
 
-      def value=: (String) -> String
+      def value=: (String | ASN1::_ToDer data) -> String
 
       def value_der: () -> String
 
@@ -3424,9 +3424,9 @@ module OpenSSL
     class ExtensionFactory
       public
 
-      def config: () -> untyped
+      def config: () -> Config?
 
-      def config=: (untyped) -> untyped
+      def config=: (Config config) -> Config
 
       def create_ext: (String oid, String value, ?bool critical) -> Extension
 
@@ -3460,6 +3460,10 @@ module OpenSSL
     end
 
     class Name
+      type distinguised_name = [String, String]
+
+      type template = Hash[String, Integer]
+
       include OpenSSL::Marshal
 
       include Comparable
@@ -3468,41 +3472,43 @@ module OpenSSL
 
       alias self.parse self.parse_openssl
 
-      def self.parse_openssl: (untyped str, ?untyped template) -> untyped
+      def self.parse_openssl: (String str, ?template template) -> instance
 
-      def self.parse_rfc2253: (untyped str, ?untyped template) -> untyped
+      def self.parse_rfc2253: (String str, ?template template) -> instance
 
       public
 
       alias <=> cmp
 
-      def add_entry: (*untyped) -> untyped
+      def add_entry: (String oid, String value, ?loc: Integer, ?set: Integer) -> self
 
-      def cmp: (untyped) -> untyped
+      def cmp: (untyped other) -> Integer?
 
-      def eql?: (untyped) -> untyped
+      def eql?: (instance other) -> bool
 
-      def hash: () -> untyped
+      def hash: () -> Integer
 
-      def hash_old: () -> untyped
+      def hash_old: () -> Integer
 
-      def inspect: () -> untyped
+      def inspect: () -> String
 
       def pretty_print: (untyped q) -> untyped
 
-      def to_a: () -> untyped
+      def to_a: () -> Array[[String, String, Integer]]
 
-      def to_der: () -> untyped
+      def to_der: () -> String
 
-      def to_s: (*untyped) -> untyped
+      def to_s: (?format format) -> String
 
-      def to_utf8: () -> untyped
+      def to_utf8: () -> String
 
       private
 
-      def initialize: (*untyped) -> void
+      def initialize: (distinguised_name name, template template) -> void
+                    | (Array[distinguised_name] names) -> void
+                    | (?String der) -> void
 
-      def initialize_copy: (untyped) -> untyped
+      def initialize_copy: (instance) -> void
 
       COMPAT: Integer
 
@@ -3510,11 +3516,13 @@ module OpenSSL
 
       MULTILINE: Integer
 
-      OBJECT_TYPE_TEMPLATE: Hash[untyped, untyped]
+      OBJECT_TYPE_TEMPLATE: template
 
       ONELINE: Integer
 
       RFC2253: Integer
+
+      type format = COMPAT | RFC2253 | ONELINE | MULTILINE
 
       module RFC2253DN
         def self.expand_hexstring: (untyped str) -> untyped
@@ -3533,7 +3541,7 @@ module OpenSSL
 
         def expand_value: (untyped str1, untyped str2, untyped str3) -> untyped
 
-        def scan: (untyped dn) -> untyped
+        def scan: (String dn) -> Array[distinguised_name]
 
         AttributeType: Regexp
 
