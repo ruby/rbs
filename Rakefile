@@ -63,6 +63,10 @@ task :validate => :parser do
       lib << "timeout"
     end
 
+    if lib == ["openssl"]
+      lib << "socket"
+    end
+
     sh "#{ruby} #{rbs} #{lib.map {|l| "-r #{l}"}.join(" ")} validate --silent"
   end
 end
