@@ -18,6 +18,8 @@ module RBS
 
         def assign_gem: (gem_name: String, version: String?) -> void
 
+        def upsert_gem: (gem_entry? old, gem_entry new) -> void
+
         def gemfile_lock_gems: () { (untyped) -> void } -> void
 
         def remove_ignored_gems!: () -> void

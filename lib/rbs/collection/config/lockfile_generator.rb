@@ -40,7 +40,7 @@ module RBS
 
           if locked
             # If rbs_collection.lock.yaml contain the gem, use it.
-            config.add_gem(locked)
+            upsert_gem specified, locked
           else
             # Find the gem from gem_collection.
             collection = find_collection(gem_name: gem_name)
@@ -48,17 +48,21 @@ module RBS
 
             installed_version = version
             best_version = find_best_version(version: installed_version, versions: collection.versions({ 'name' => gem_name }))
-            content = {
+            # @type var new_content: RBS::Collection::Config::gem_entry
+            new_content = {
               'name' => gem_name,
               'version' => best_version.to_s,
               'collection' => collection.to_lockfile,
-
             }
-            if specified
-              specified.merge!(content)
-            else
-              config.add_gem(content)
-            end
+            upsert_gem specified, new_content
+          end
+        end
+
+        private def upsert_gem(old, new)
+          if old
+            old.merge! new
+          else
+            config.add_gem new
           end
         end
 
