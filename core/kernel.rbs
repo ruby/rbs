@@ -127,7 +127,7 @@ module Kernel : BasicObject
 
   def self?.Rational: (Numeric | String | Object x, ?Numeric | String y, ?exception: bool exception) -> Rational
 
-  def self?.String: (Object x) -> String
+  def self?.String: (string x) -> String
 
   # Returns the called name of the current method as a
   # [Symbol](https://ruby-doc.org/core-2.6.3/Symbol.html). If called
