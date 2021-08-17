@@ -685,7 +685,7 @@ module Gem
   # NOTE: Enabling automatic discovery on multiuser systems can lead to execution
   # of arbitrary code when used from directories outside your control.
   #
-  def self.use_gemdeps: (?String path) -> Array[Specification]?
+  def self.use_gemdeps: (?String path) -> void
 
   # Use the `home` and `paths` values for Gem.dir and Gem.path.  Used mainly by
   # the unit tests to provide environment isolation.
