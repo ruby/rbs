@@ -38,6 +38,8 @@ module RBS
         'collection' => Collections::collection_entry?
       }
 
+      @config_path: Pathname
+
       def self.generate_lockfile: (config_path: Pathname, gemfile_lock_path: Pathname, ?with_lockfile: boolish) -> Config
 
       def self.from_path: (Pathname path) -> Config
@@ -46,7 +48,8 @@ module RBS
 
       def self.to_lockfile_path: (Pathname config_path) -> Pathname
 
-      def initialize: (untyped data) -> void
+      # config_path is necessary to resolve relative repo_path
+      def initialize: (untyped data, config_path: Pathname) -> void
 
       def add_gem: (untyped gem) -> untyped
 

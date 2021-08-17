@@ -63,7 +63,7 @@ module RBS
         end
 
         opts.on('--collection PATH', "File path of collection configration (default: #{Collection::Config::PATH})") do |path|
-          self.config_path = Pathname(path)
+          self.config_path = Pathname(path).expand_path
         end
 
         opts.on('--no-collection', 'Ignore collection configration') do

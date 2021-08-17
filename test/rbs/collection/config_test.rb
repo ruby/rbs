@@ -355,6 +355,21 @@ class RBS::Collection::ConfigTest < Test::Unit::TestCase
     end
   end
 
+  def test_repo_path
+    mktmpdir do |tmpdir|
+      config_path = tmpdir / 'rbs_collection.yaml'
+      config_path.write <<~YAML
+        collections: []
+        path: '.gem_rbs_collection'
+      YAML
+
+      config = RBS::Collection::Config.from_path(config_path)
+
+      assert config.repo_path.absolute?
+      assert_equal tmpdir.join('.gem_rbs_collection'), config.repo_path
+    end
+  end
+
   private def assert_config(expected_str, actual_str)
     assert_equal YAML.load(expected_str), YAML.load(actual_str)
   end

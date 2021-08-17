@@ -12,7 +12,7 @@ module RBS
       end
 
       def self.from_path(path)
-        new(YAML.load(path.read))
+        new(YAML.load(path.read), config_path: path)
       end
 
       def self.lockfile_of(config_path)
@@ -24,8 +24,9 @@ module RBS
         config_path.sub_ext('.lock' + config_path.extname)
       end
 
-      def initialize(data)
+      def initialize(data, config_path:)
         @data = data
+        @config_path = config_path
       end
 
       def add_gem(gem)
@@ -37,7 +38,7 @@ module RBS
       end
 
       def repo_path
-        Pathname(@data['path'])
+        @config_path.dirname.join @data['path']
       end
 
       def collections
