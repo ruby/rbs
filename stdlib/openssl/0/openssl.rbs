@@ -492,9 +492,6 @@ module OpenSSL
   #     Digest("Foo")
   #     # => NameError: wrong constant name Foo
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     Digest(name)
-  #
   def self.Digest: (String name) -> singleton(Digest)
 
   def self.debug: () -> bool
@@ -502,18 +499,12 @@ module OpenSSL
   # Turns on or off debug mode. With debug mode, all erros added to the OpenSSL
   # error queue will be printed to stderr.
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     OpenSSL.debug = boolean -> boolean
-  #
   def self.debug=: (bool) -> bool
 
   # See any remaining errors held in queue.
   #
   # Any errors you see here are probably due to a bug in Ruby's OpenSSL
   # implementation.
-  #
-  # # arglists 💪👽🚨 << Delete this section
-  #     OpenSSL.errors -> [String...]
   #
   def self.errors: () -> Array[String]
 
@@ -527,9 +518,6 @@ module OpenSSL
   #     OpenSSL.fips_mode = true   # turn FIPS mode on
   #     OpenSSL.fips_mode = false  # and off again
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     OpenSSL.fips_mode = boolean -> boolean
-  #
   def self.fips_mode=: (bool) -> bool
 
   # Constant time memory comparison for fixed length strings, such as results of
@@ -539,17 +527,12 @@ module OpenSSL
   # length but not identical. If the length is different, `ArgumentError` is
   # raised.
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     OpenSSL.fixed_length_secure_compare(string, string) -> boolean
-  #
   def self.fixed_length_secure_compare: (String, String) -> bool
 
   # Constant time memory comparison. Inputs are hashed using SHA-256 to mask the
   # length of the secret. Returns `true` if the strings are identical, `false`
   # otherwise.
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     OpenSSL.secure_compare(string, string) -> boolean
   #
   def self.secure_compare: (String a, String b) -> bool
 
@@ -3460,7 +3443,7 @@ module OpenSSL
     end
 
     class Name
-      type distinguised_name = [String, String]
+      type distinguished_name = [String, String]
 
       type template = Hash[String, Integer]
 
@@ -3504,8 +3487,8 @@ module OpenSSL
 
       private
 
-      def initialize: (distinguised_name name, template template) -> void
-                    | (Array[distinguised_name] names) -> void
+      def initialize: (distinguished_name name, template template) -> void
+                    | (Array[distinguished_name] names) -> void
                     | (?String der) -> void
 
       def initialize_copy: (instance) -> void
@@ -3541,7 +3524,7 @@ module OpenSSL
 
         def expand_value: (untyped str1, untyped str2, untyped str3) -> untyped
 
-        def scan: (String dn) -> Array[distinguised_name]
+        def scan: (String dn) -> Array[distinguished_name]
 
         AttributeType: Regexp
 
