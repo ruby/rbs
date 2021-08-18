@@ -2,6 +2,32 @@
 
 ## master
 
+## 1.4.0 (2021-08-19)
+
+This release includes feature enhancements including recursive `type` definition validation, improved compatibility of global variable names, and various method type updates.
+
+### Signature updates
+
+* openssl ([\#743](https://github.com/ruby/rbs/pull/743))
+* `Array`, `Enumerator`, `Enumerable`, `Hash`, `FalseClass`, `Float`, `Hash`, `Integer`, `Object`, `Range`, `TrueClass` ([\#728](https://github.com/ruby/rbs/pull/728))
+* `Array#[]` ([\#732](https://github.com/ruby/rbs/pull/732))
+* `Exception#set_backtrace` ([\#738](https://github.com/ruby/rbs/pull/738))
+* `Kernel#Array` ([\#733](https://github.com/ruby/rbs/pull/733))
+* `Kernel#spawn` ([\#748](https://github.com/ruby/rbs/pull/748))
+* `Kernel#String` ([\#745](https://github.com/ruby/rbs/pull/745), [\#751](https://github.com/ruby/rbs/pull/751))
+* `URI::Generic#fragment` ([\#752](https://github.com/ruby/rbs/pull/752))
+* `URI::Generic#merge` ([\#746](https://github.com/ruby/rbs/pull/746))
+
+### Language updates
+
+* Add global variables signature ([\#749](https://github.com/ruby/rbs/pull/749))
+
+### Library changes
+
+* Add Recursiive type alias defnition validation ([\#719](https://github.com/ruby/rbs/pull/719))
+* Generate included modules with complete name ([\#731](https://github.com/ruby/rbs/pull/731))
+* Fix `rbs-prototype-rb` error when multi assign with const ([\#740](https://github.com/ruby/rbs/pull/740))
+
 ## 1.3.3 (2021-07-28)
 
 This release includes a minor update of `resolv` library RBS and a fix of test for `ruby/ruby` CI.
