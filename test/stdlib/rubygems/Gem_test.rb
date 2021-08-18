@@ -561,7 +561,7 @@ class GemSingletonTest < Test::Unit::TestCase
   end
 
   def test_use_gemdeps
-    assert_send_type  "() -> nil",
+    assert_send_type  "() -> void",
                       Gem, :use_gemdeps
 
     Dir.mktmpdir do |dir|
@@ -570,7 +570,7 @@ class GemSingletonTest < Test::Unit::TestCase
         File.write(gemfile_path, <<GEMFILE)
 source "https://rubygems.org"
 GEMFILE
-        assert_send_type  "(String) -> Array[Gem::Specification]",
+        assert_send_type  "(String) -> void",
                           Gem, :use_gemdeps, "-"
       end
     end
