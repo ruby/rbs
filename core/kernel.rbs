@@ -113,6 +113,7 @@ module Kernel : BasicObject
   def self?.Array: (NilClass x) -> [ ]
            | [T] (::Array[T] x) -> ::Array[T]
            | [T] (::Range[T] x) -> ::Array[T]
+           | [T] (_Each[T] x) -> ::Array[T]
            | [K, V] (::Hash[K, V] x) -> ::Array[[K, V]]
            | [T] (T x) -> ::Array[T]
 
