@@ -706,7 +706,7 @@ module URI
     #   uri.merge!("/main.rbx?page=1")
     #   uri.to_s  # => "http://my.example.com/main.rbx?page=1"
     #
-    def merge!: (String oth) -> String
+    def merge!: (string oth) -> String
 
     #
     # == Args
@@ -726,7 +726,7 @@ module URI
     #   uri.merge("/main.rbx?page=1")
     #   # => "http://my.example.com/main.rbx?page=1"
     #
-    def merge: (String oth) -> URI::Generic
+    def merge: (string oth) -> URI::Generic
 
     # :stopdoc:
     def route_from_path: (String src, String dst) -> String
