@@ -1708,7 +1708,7 @@ def next_token
     new_token(:tUKEYWORD, input.matched.chop.to_sym)
   when input.scan(/[A-Z]\w*[?!]:/)
     new_token(:tUKEYWORD_Q_E, input.matched.chop.to_sym)
-  when input.scan(/\$[A-Za-z_]\w*/)
+  when input.scan(/\$([A-Za-z_]\w*|[~*$?!@\/\\;,.=:<>"&`'+]|\d+|-[0-9_A-Za-z])/)
     new_token(:tGLOBALIDENT)
   when input.scan(/@[a-zA-Z_]\w*/)
     new_token(:tIVAR, input.matched.to_sym)
