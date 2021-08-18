@@ -48,7 +48,7 @@ $-a: bool
 $-d: bool
 
 # In in-place-edit mode, this variable holds the extension, otherwise +nil+.
-$-i: bool
+$-i: String?
 
 # True if option <tt>-l</tt> is set. Read-only variable.
 $-l: bool
