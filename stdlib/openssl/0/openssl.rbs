@@ -499,7 +499,7 @@ module OpenSSL
   # Turns on or off debug mode. With debug mode, all erros added to the OpenSSL
   # error queue will be printed to stderr.
   #
-  def self.debug=: (bool) -> bool
+  def self.debug=: [U] (boolish) -> U
 
   # See any remaining errors held in queue.
   #
@@ -518,7 +518,7 @@ module OpenSSL
   #     OpenSSL.fips_mode = true   # turn FIPS mode on
   #     OpenSSL.fips_mode = false  # and off again
   #
-  def self.fips_mode=: (bool) -> bool
+  def self.fips_mode=: [U] (boolish) -> U
 
   # Constant time memory comparison for fixed length strings, such as results of
   # HMAC calculations.
@@ -555,7 +555,7 @@ module OpenSSL
 
     def self.BitString: (String value, ?bn tag, ?tagging tagging) -> BitString
 
-    def self.Boolean: (bool value, ?bn tag, ?tagging tagging) -> Boolean
+    def self.Boolean: (boolish value, ?bn tag, ?tagging tagging) -> Boolean
 
     def self.EndOfContent: () -> EndOfContent
 
@@ -672,7 +672,7 @@ module OpenSSL
 
       def indefinite_length: () -> bool
 
-      def indefinite_length=: (bool) -> bool
+      def indefinite_length=: [U] (boolish) -> U
 
       alias infinite_length indefinite_length
 
@@ -719,7 +719,7 @@ module OpenSSL
     class Boolean < OpenSSL::ASN1::Primitive
       def value: () -> bool
 
-      def value=: (bool) -> bool
+      def value=: [U] (boolish) -> U
     end
 
     class Constructive < OpenSSL::ASN1::ASN1Data
@@ -897,7 +897,7 @@ module OpenSSL
   class BN
     include Comparable
 
-    def self.generate_prime: (::Integer bits, ?bool safe, ?bn add, ?bn rem) -> instance
+    def self.generate_prime: (::Integer bits, ?boolish safe, ?bn add, ?bn rem) -> instance
 
     def self.pseudo_rand: (*untyped) -> untyped
 
@@ -1814,7 +1814,7 @@ module OpenSSL
 
     def detached: () -> bool
 
-    def detached=: (bool) -> bool
+    def detached=: [U] (boolish) -> U
 
     def detached?: () -> bool
 
@@ -2554,7 +2554,7 @@ module OpenSSL
 
       def verify_hostname: () -> bool?
 
-      def verify_hostname=: (bool) -> bool
+      def verify_hostname=: [U] (boolish) -> U
 
       def verify_mode: () -> verify_mode?
 
@@ -2617,7 +2617,7 @@ module OpenSSL
 
       def start_immediately: () -> bool
 
-      def start_immediately=: (bool) -> bool
+      def start_immediately=: [U] (boolish) -> U
 
       def to_io: () -> (TCPServer | UNIXServer)
 
@@ -2687,7 +2687,7 @@ module OpenSSL
 
       def sync_close: () -> bool
 
-      def sync_close=: (bool) -> bool
+      def sync_close=: [U] (boolish) -> U
 
       def sysclose: () -> nil
 
@@ -2810,7 +2810,7 @@ module OpenSSL
 
       def algorithm=: (String) -> String
 
-      def cert_requested=: (bool requested) -> bool
+      def cert_requested=: [U] (boolish) -> U
 
       def cert_requested?: () -> bool
 
@@ -3327,7 +3327,7 @@ module OpenSSL
 
       def ==: (instance other) -> bool
 
-      def critical=: (bool critical) -> bool
+      def critical=: [U] (boolish) -> U
 
       def critical?: () -> bool
 
@@ -3352,7 +3352,7 @@ module OpenSSL
       private
 
       def initialize: (String der) -> void
-                    | (String oid, String value, ?bool critical) -> void
+                    | (String oid, String value, ?boolish critical) -> void
 
       def initialize_copy: (instance) -> void
 
@@ -3411,15 +3411,15 @@ module OpenSSL
 
       def config=: (Config config) -> Config
 
-      def create_ext: (String oid, String value, ?bool critical) -> Extension
+      def create_ext: (String oid, String value, ?boolish critical) -> Extension
 
-      def create_ext_from_array: ([String, String] | [String, String, bool] ary) -> Extension
+      def create_ext_from_array: ([String, String] | [String, String, boolish] ary) -> Extension
 
-      def create_ext_from_hash: (Hash[String, String | bool] hash) -> Extension
+      def create_ext_from_hash: (Hash[String, String | boolish] hash) -> Extension
 
       def create_ext_from_string: (String str) -> Extension
 
-      def create_extension: (String oid, String value, ?bool critical) -> Extension
+      def create_extension: (String oid, String value, ?boolish critical) -> Extension
 
       def crl: () -> CRL?
 
@@ -3660,11 +3660,11 @@ module OpenSSL
 
       def trust=: (Integer trust) -> Integer
 
-      def verify: (Certificate certificate, ?Array[Certificate] chain) ?{ (bool preverify_ok, StoreContext store_ctx) -> bool } -> bool
+      def verify: (Certificate certificate, ?Array[Certificate] chain) ?{ (bool preverify_ok, StoreContext store_ctx) -> boolish } -> boolish
 
-      def verify_callback: () -> (^(bool preverify_ok, StoreContext store_ctx) -> bool | nil)
+      def verify_callback: () -> (^(bool preverify_ok, StoreContext store_ctx) -> boolish | nil)
 
-      def verify_callback=: [U] (^(bool preverify_ok, StoreContext store_ctx) -> bool) -> U
+      def verify_callback=: [U] (^(bool preverify_ok, StoreContext store_ctx) -> boolish) -> U
 
       private
 
