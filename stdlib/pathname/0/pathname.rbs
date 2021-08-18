@@ -755,8 +755,8 @@ class Pathname
   #
   # See File.open.
   #
-  def open: (?String mode, ?Integer perm) -> File
-          | [T] (?String mode, ?Integer perm) { (File) -> T } -> T
+  def open: (?(string | int) mode, ?int perm) -> File
+          | [T] (?(string | int) mode, ?int perm) { (File) -> T } -> T
 
   # Opens the referenced directory.
   #
