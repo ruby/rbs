@@ -1042,7 +1042,7 @@ class File::Stat < Object
 
   def rdev_minor: () -> Integer
 
-  def read: (?Integer length, ?String outbuf) -> String
+  def read: (?int? length, ?string outbuf) -> String?
 
   def readable?: () -> bool
 
