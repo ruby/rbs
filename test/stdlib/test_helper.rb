@@ -326,6 +326,7 @@ module TypeAssertions
 
   def method_types(method)
     type, definition = target
+
     case
     when definition.instance_type?
       subst = RBS::Substitution.build(definition.type_params, type.args)

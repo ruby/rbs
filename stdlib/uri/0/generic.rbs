@@ -260,7 +260,7 @@ module URI
     #
     #   URI("http://foo/bar/baz?search=FooBar#ponies").fragment #=> "ponies"
     #
-    attr_reader fragment: String
+    attr_reader fragment: String?
 
     # Returns the parser to be used.
     #
