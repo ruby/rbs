@@ -74,7 +74,7 @@ $.: Integer
 # The input record separator, newline by default. Aliased to $-0.
 $/: String | nil
 
-# The same as $!.backtrace.
+# Contains the name of the script being executed. May be assignable.
 $0: String
 
 # The Nth group of the last successful match. May be > 1.
@@ -149,7 +149,7 @@ $LOADED_FEATURES: Array[String]
 # the path the original Kernel#require method would load.
 $LOAD_PATH: Array[String]
 
-# The same as $!.backtrace.
+# Contains the name of the script being executed. May be assignable.
 $PROGRAM_NAME: String
 
 # The verbose flag, which is set by the <tt>-w</tt> or <tt>-v</tt> switch.
