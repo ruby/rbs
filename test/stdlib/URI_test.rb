@@ -115,3 +115,29 @@ class URISingletonTest < Test::Unit::TestCase
                      Kernel, :URI, "http://example.com"
   end
 end
+
+class URIInstanceTest < Test::Unit::TestCase
+  include TypeAssertions
+
+  library "uri"
+  testing "::URI::Generic"
+
+  def test_fragment
+    uri = URI.parse("https://example.com")
+
+    assert_send_type(
+      "() -> nil",
+      uri, :fragment
+    )
+
+    assert_send_type(
+      "(String) -> String",
+      uri, :fragment=, "foo"
+    )
+
+    assert_send_type(
+      "() -> String",
+      uri, :fragment
+    )
+end
+end
