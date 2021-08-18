@@ -128,7 +128,15 @@ module Kernel : BasicObject
 
   def self?.Rational: (Numeric | String | Object x, ?Numeric | String y, ?exception: bool exception) -> Rational
 
-  def self?.String: (string x) -> String
+  # Returns *arg* as a String.
+  #
+  # First tries to call its `to_str` method, then its `to_s` method.
+  #
+  #     String(self)        #=> "main"
+  #     String(self.class)  #=> "Object"
+  #     String(123456)      #=> "123456"
+  #
+  def self?.String: (_ToStr | _ToS x) -> String
 
   # Returns the called name of the current method as a
   # [Symbol](https://ruby-doc.org/core-2.6.3/Symbol.html). If called
