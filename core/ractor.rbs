@@ -246,24 +246,15 @@ class Ractor
   #     r.take                         # wait till r will finish
   #     Ractor.count                   #=> 1
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     count()
-  #
-  def self.count: () -> untyped
+  def self.count: () -> Integer
 
   # Returns the currently executing Ractor.
   #
   #     Ractor.current #=> #<Ractor:#1 running>
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     current()
-  #
   def self.current: () -> untyped
 
   # returns main ractor
-  #
-  # # arglists 💪👽🚨 << Delete this section
-  #     main()
   #
   def self.main: () -> untyped
 
@@ -300,10 +291,7 @@ class Ractor
   # See also the "Shareable and unshareable objects" section in the Ractor class
   # docs.
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     Ractor.make_shareable(obj, copy: false) -> shareable_obj
-  #
-  def self.make_shareable: (untyped obj, ?copy: untyped) -> untyped
+  def self.make_shareable: [T] (T obj, ?copy: boolish) -> T
 
   # Create a new Ractor with args and a block.
   #
@@ -334,10 +322,7 @@ class Ractor
   #     p r
   #     #=> #<Ractor:#3 my ractor test.rb:1 terminated>
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     Ractor.new(*args, name: nil) {|*args| block } -> ractor
-  #
-  def self.new: (*untyped args, ?name: untyped) { (*untyped) -> untyped } -> untyped
+  def self.new: (*untyped args, ?name: string) { (*untyped) -> untyped } -> Ractor
 
   # Receive an incoming message from the current Ractor's incoming port's queue,
   # which was sent there by #send.
@@ -394,9 +379,6 @@ class Ractor
   #     end
   #     wait
   #     # in `receive': The incoming port is already closed => #<Ractor:#2 test.rb:1 running> (Ractor::ClosedError)
-  #
-  # # arglists 💪👽🚨 << Delete this section
-  #     Ractor.receive -> msg
   #
   def self.receive: () -> untyped
 
@@ -455,10 +437,7 @@ class Ractor
   #     Ractor.receive_if{|msg| Ractor.receive}
   #     #=> `receive': can not call receive/receive_if recursively (Ractor::Error)
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     Ractor.receive_if {|msg| block } -> msg
-  #
-  def self.receive_if: () { (*untyped) -> untyped } -> untyped
+  def self.receive_if: () { (untyped) -> boolish } -> untyped
 
   alias self.recv self.receive
 
@@ -509,10 +488,7 @@ class Ractor
   # `move` boolean flag defines whether yielded value should be copied (default)
   # or moved.
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     Ractor.select(*ractors, [yield_value:, move: false]) -> [ractor or symbol, obj]
-  #
-  def self.select: (*untyped ractors, ?move: untyped, ?yield_value: untyped) -> untyped
+  def self.select: (*Ractor ractors, ?move: boolish, ?yield_value: untyped) -> [Ractor | Symbol, untyped]
 
   # Checks if the object is shareable by ractors.
   #
@@ -523,10 +499,7 @@ class Ractor
   # See also the "Shareable and unshareable objects" section in the Ractor class
   # docs.
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     Ractor.shareable?(obj) -> true | false
-  #
-  def self.shareable?: (untyped obj) -> untyped
+  def self.shareable?: (untyped obj) -> bool
 
   # Send a message to the current ractor's outgoing port to be consumed by #take.
   #
@@ -562,31 +535,19 @@ class Ractor
   #
   # The meaning of `move` argument is the same as for #send.
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     Ractor.yield(msg, move: false) -> nil
-  #
-  def self.yield: (untyped obj, ?move: untyped) -> untyped
+  def self.yield: (untyped obj, ?move: boolish) -> untyped
 
   public
 
-  # # arglists 💪👽🚨 << Delete this section
-  #     <<(obj, move: false)
-  #
   alias << send
 
   # get a value from ractor-local storage
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     [](sym)
-  #
-  def []: (untyped sym) -> untyped
+  def []: (Symbol | String sym) -> untyped
 
   # set a value in ractor-local storage
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     []=(sym, val)
-  #
-  def []=: (untyped sym, untyped val) -> untyped
+  def []=: [T] (Symbol | String sym, T val) -> T
 
   # Closes the incoming port and returns its previous state. All further attempts
   # to Ractor.receive in the ractor, and #send to the ractor will fail with
@@ -598,10 +559,7 @@ class Ractor
   #     r.send('test')
   #     # Ractor::ClosedError (The incoming-port is already closed)
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     ractor.close_incoming -> true | false
-  #
-  def close_incoming: () -> untyped
+  def close_incoming: () -> bool
 
   # Closes the outgoing port and returns its previous state. All further attempts
   # to Ractor.yield in the ractor, and #take from the ractor will fail with
@@ -613,19 +571,13 @@ class Ractor
   #     r.take
   #     # Ractor::ClosedError (The outgoing-port is already closed)
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     ractor.close_outgoing -> true | false
-  #
-  def close_outgoing: () -> untyped
+  def close_outgoing: () -> bool
 
-  def inspect: () -> untyped
+  def inspect: () -> String
 
   # The name set in Ractor.new, or `nil`.
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     name()
-  #
-  def name: () -> untyped
+  def name: () -> String?
 
   # Send a message to a Ractor's incoming queue to be consumed by Ractor.receive.
   #
@@ -706,10 +658,7 @@ class Ractor
   #     r.send(s, move: true)
   #     s.inspect #=> "message", still available
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     ractor.send(msg, move: false) -> self
-  #
-  def send: (untyped obj, ?move: untyped) -> untyped
+  def send: (untyped obj, ?move: boolish) -> Ractor
 
   # Take a message from ractor's outgoing port, which was put there by
   # Ractor.yield or at ractor's finalization.
@@ -771,9 +720,6 @@ class Ractor
   #     Received: finishing
   #     Continue successfully
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     ractor.take -> msg
-  #
   def take: () -> untyped
 
   alias to_s inspect
@@ -782,16 +728,10 @@ class Ractor
 
   # same as Ractor.receive
   #
-  # # arglists 💪👽🚨 << Delete this section
-  #     receive()
-  #
   def receive: () -> untyped
 
-  def receive_if: () { (*untyped) -> untyped } -> untyped
+  def receive_if: () { (untyped) -> boolish } -> untyped
 
-  # # arglists 💪👽🚨 << Delete this section
-  #     recv()
-  #
   alias recv receive
 
   class ClosedError < StopIteration
@@ -831,7 +771,7 @@ class Ractor
   class RemoteError < Ractor::Error
     public
 
-    def ractor: () -> untyped
+    def ractor: () -> Ractor
   end
 
   class UnsafeError < Ractor::Error
