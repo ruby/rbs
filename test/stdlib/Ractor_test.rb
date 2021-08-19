@@ -1,5 +1,10 @@
 require_relative "test_helper"
 
+if RUBY_VERSION < '3'
+  warn 'Ractor is not available on Ruby 2🐫 Skip the test'
+  return
+end
+
 class RactorSingletonTest < Test::Unit::TestCase
   include TypeAssertions
 
