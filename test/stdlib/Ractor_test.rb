@@ -37,7 +37,7 @@ class RactorSingletonTest < Test::Unit::TestCase
   end
 
   def test_new
-    # TODO: it raises an error becasue the proc is not isolated
+    # TODO: it raises an error because the proc is not isolated
     # assert_send_type '() { () -> untyped } -> Ractor',
     #                  Ractor, :new do end
   end
@@ -73,7 +73,6 @@ class RactorSingletonTest < Test::Unit::TestCase
     assert_send_type "(Ractor) -> [:receive, Integer]",
                      Ractor, :select, Ractor.current
 
-    
     Ractor.new(Ractor.current) { |r| r.take }
     assert_send_type "(Ractor, yield_value: untyped) -> [:yield, nil]",
                      Ractor, :select, Ractor.current, yield_value: 'foo'
