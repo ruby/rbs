@@ -1,0 +1,96 @@
+class Ractor
+  def self.count: () -> untyped
+
+  def self.current: () -> untyped
+
+  def self.main: () -> untyped
+
+  def self.make_shareable: (untyped obj, ?copy: untyped) -> untyped
+
+  def self.new: (*untyped args, ?name: untyped) { (*untyped) -> untyped } -> untyped
+
+  def self.receive: () -> untyped
+
+  def self.receive_if: () { (*untyped) -> untyped } -> untyped
+
+  alias self.recv self.receive
+
+  def self.select: (*untyped ractors, ?yield_value: untyped, ?move: untyped) -> untyped
+
+  def self.shareable?: (untyped obj) -> untyped
+
+  def self.yield: (untyped obj, ?move: untyped) -> untyped
+
+  public
+
+  alias << send
+
+  def []: (untyped sym) -> untyped
+
+  def []=: (untyped sym, untyped val) -> untyped
+
+  def close_incoming: () -> untyped
+
+  def close_outgoing: () -> untyped
+
+  def inspect: () -> untyped
+
+  def name: () -> untyped
+
+  def send: (untyped obj, ?move: untyped) -> untyped
+
+  def take: () -> untyped
+
+  alias to_s inspect
+
+  private
+
+  def receive: () -> untyped
+
+  def receive_if: () { (*untyped) -> untyped } -> untyped
+
+  alias recv receive
+
+  class ClosedError < StopIteration
+  end
+
+  class Error < RuntimeError
+  end
+
+  class IsolationError < Ractor::Error
+  end
+
+  class MovedError < Ractor::Error
+  end
+
+  class MovedObject < BasicObject
+    public
+
+    def !: (*untyped) -> untyped
+
+    def !=: (*untyped) -> untyped
+
+    def ==: (*untyped) -> untyped
+
+    def __id__: (*untyped) -> untyped
+
+    def __send__: (*untyped) -> untyped
+
+    def equal?: (*untyped) -> untyped
+
+    def instance_eval: (*untyped) -> untyped
+
+    def instance_exec: (*untyped) -> untyped
+
+    def method_missing: (*untyped) -> untyped
+  end
+
+  class RemoteError < Ractor::Error
+    public
+
+    def ractor: () -> untyped
+  end
+
+  class UnsafeError < Ractor::Error
+  end
+end
