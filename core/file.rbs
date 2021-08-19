@@ -1054,6 +1054,8 @@ class File::Stat < Object
 
   def size: () -> Integer
 
+  def size?: () -> Integer?
+
   def socket?: () -> bool
 
   def sticky?: () -> bool
