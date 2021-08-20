@@ -31,7 +31,7 @@ interface _Each[out A]
 end
 
 interface _Reader
-  def read: (?int length, ?string outbuf) -> String?
+  def read: (?int? length, ?string outbuf) -> String?
 end
 
 interface _ReaderPartial

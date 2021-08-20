@@ -164,10 +164,9 @@ class StringIO
 
   # See IO#read.
   #
-  def read: (?Integer length, ?String outbuf) -> String?
+  def read: (?int? length, ?string outbuf) -> String?
 
-  def read_nonblock: (Integer len) -> String
-                   | (Integer len, ?String buf) -> String
+  def read_nonblock: (int len, ?string buf) -> String
 
   def readbyte: () -> Integer
 
@@ -179,8 +178,7 @@ class StringIO
   #
   def readlines: (?String sep, ?Integer limit, ?chomp: boolish) -> ::Array[String]
 
-  def readpartial: (Integer maxlen) -> String
-                 | (Integer maxlen, ?String outbuf) -> String
+  def readpartial: (int maxlen, ?string outbuf) -> String
 
   # Reinitializes the stream with the given *other_StrIO* or *string* and *mode*
   # (see StringIO#new).

@@ -532,10 +532,10 @@ class IO < Object
   # need the behavior like a single read(2) system call, consider #readpartial,
   # #read_nonblock, and #sysread.
   #
-  def read: (?Integer? length, ?String outbuf) -> String?
+  def read: (?int? length, ?string outbuf) -> String?
 
-  def read_nonblock: (Integer len, ?String buf, ?exception: true) -> String
-                   | (Integer len, ?String buf, exception: false) -> (String | :wait_readable | nil)
+  def read_nonblock: (int len, ?string buf, ?exception: true) -> String
+                   | (int len, ?string buf, exception: false) -> (String | :wait_readable | nil)
 
   # Reads a byte as with `IO#getbyte`, but raises an `EOFError` on end of
   # file.
@@ -611,7 +611,7 @@ class IO < Object
   # on the situation IO#sysread causes Errno::EWOULDBLOCK as if the fd is blocking
   # mode.
   #
-  def readpartial: (Integer maxlen, ?String outbuf) -> String
+  def readpartial: (int maxlen, ?string outbuf) -> String
 
   def reopen: (IO other_IO_or_path) -> IO
             | (String other_IO_or_path, ?String mode_str) -> IO
