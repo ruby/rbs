@@ -878,7 +878,11 @@ EOB
           # A directory to install the downloaded RBSs
           path: .gem_rbs_collection
 
-          gems: []
+          gems:
+            # Skip loading rbs gem's RBS.
+            # It's unnecessary if you don't use rbs as a library.
+            - name: rbs
+              ignore: true
         YAML
         stdout.puts "created: #{config_path}"
       when 'clean'
