@@ -248,25 +248,97 @@ class IOWaitTest < Test::Unit::TestCase
 
   testing "::IO"
 
+  def test_readyp
+    if_ruby3 do
+      IO.pipe.tap do |r, w|
+        assert_send_type(
+          "() -> nil",
+          r, :ready?
+        )
+      end
+
+      IO.pipe.tap do |r, w|
+        w.write("hello")
+
+        assert_send_type(
+          "() -> IO",
+          r, :ready?
+        )
+      end
+    end
+  end
+
+  def test_wait_readable
+    IO.pipe.tap do |r, w|
+      w.write("hello")
+
+      assert_send_type(
+        "() -> IO",
+        r, :wait_readable
+      )
+    end
+
+    IO.pipe.tap do |r, w|
+      assert_send_type(
+        "(Integer) -> nil",
+        r, :wait_readable, 1
+      )
+    end
+  end
+
+  def test_wait_writable
+    IO.pipe.tap do |r, w|
+      assert_send_type(
+        "() -> IO",
+        w, :wait_writable
+      )
+    end
+
+    IO.pipe.tap do |r, w|
+      assert_send_type(
+        "(Integer) -> IO",
+        w, :wait_writable, 1
+      )
+    end
+  end
+
+  def test_nread
+    IO.pipe.tap do |r, w|
+      assert_send_type(
+        "() -> Integer",
+        r, :nread
+      )
+    end
+  end
+
   def test_wait
-    r, w = IO.pipe
-    assert_send_type "() -> Integer",
-      r, :nread
-    assert_send_type "() -> nil",
-      r, :ready?
-    assert_send_type "(Float) -> nil",
-      r, :wait_readable, 0.2
-    assert_send_type "(Integer, Float) -> nil",
-      r, :wait, IO::READABLE, 0.2
-    assert_send_type "(Float) -> IO",
-      w, :wait_writable, 0.2
-    w.write("a")
-    assert_send_type "(Float) -> IO",
-      r, :wait_readable, 0.2
-    assert_send_type "() -> IO",
-      r, :ready?
-  ensure
-    r.close
-    w.close
-  end if RUBY_VERSION >= "3.0.0"
+    if_ruby3 do
+      IO.pipe.tap do |r, w|
+        w.write("hello")
+
+        assert_send_type(
+          "(Integer) -> IO",
+          r, :wait, IO::READABLE
+        )
+      end
+
+      IO.pipe.tap do |r, w|
+        w.write("hello")
+
+        assert_send_type(
+          "(Integer, Float) -> IO",
+          w, :wait, IO::WRITABLE, 0.1
+        )
+      end
+    end
+
+    IO.pipe.tap do |r, w|
+      w.write("hello")
+
+      assert_send_type(
+        "(Float, :read, :w, :readable_writable) -> IO",
+        r, :wait, 0.1, :read, :w, :readable_writable
+      )
+    end
+  end
 end
