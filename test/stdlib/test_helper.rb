@@ -343,6 +343,28 @@ module TypeAssertions
   rescue *errors => exn
     notify "Error allowed: #{exn.inspect}"
   end
+
+  def if_ruby(range)
+    r = Range.new(
+      range.begin&.yield_self {|b| Gem::Version.new(b) },
+      range.end&.yield_self {|e| Gem::Version.new(e) },
+      range.exclude_end?
+    )
+
+    if r === Gem::Version.new(RUBY_VERSION)
+      yield
+    else
+      notify "Skipping test: #{r} !== #{RUBY_VERSION}"
+    end
+  end
+
+  def if_ruby3(&block)
+    if_ruby("3.0.0"..."4.0.0", &block)
+  end
+
+  def if_ruby30
+    if_ruby("3.0.0"..."3.1.0", &block)
+  end
 end
 
 class ToInt

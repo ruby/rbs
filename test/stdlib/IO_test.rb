@@ -249,20 +249,22 @@ class IOWaitTest < Test::Unit::TestCase
   testing "::IO"
 
   def test_readyp
-    IO.pipe.tap do |r, w|
-      assert_send_type(
-        "() -> nil",
-        r, :ready?
-      )
-    end
+    if_ruby3 do
+      IO.pipe.tap do |r, w|
+        assert_send_type(
+          "() -> nil",
+          r, :ready?
+        )
+      end
 
-    IO.pipe.tap do |r, w|
-      w.write("hello")
+      IO.pipe.tap do |r, w|
+        w.write("hello")
 
-      assert_send_type(
-        "() -> IO",
-        r, :ready?
-      )
+        assert_send_type(
+          "() -> IO",
+          r, :ready?
+        )
+      end
     end
   end
 
@@ -310,22 +312,24 @@ class IOWaitTest < Test::Unit::TestCase
   end
 
   def test_wait
-    IO.pipe.tap do |r, w|
-      w.write("hello")
+    if_ruby3 do
+      IO.pipe.tap do |r, w|
+        w.write("hello")
 
-      assert_send_type(
-        "(Integer) -> IO",
-        r, :wait, IO::READABLE
-      )
-    end
+        assert_send_type(
+          "(Integer) -> IO",
+          r, :wait, IO::READABLE
+        )
+      end
 
-    IO.pipe.tap do |r, w|
-      w.write("hello")
+      IO.pipe.tap do |r, w|
+        w.write("hello")
 
-      assert_send_type(
-        "(Integer, Float) -> IO",
-        w, :wait, IO::WRITABLE, 0.1
-      )
+        assert_send_type(
+          "(Integer, Float) -> IO",
+          w, :wait, IO::WRITABLE, 0.1
+        )
+      end
     end
 
     IO.pipe.tap do |r, w|
