@@ -58,3 +58,48 @@ class DigestInstanceTest < Test::Unit::TestCase
                      :hexencode, '_hexencode_'
   end
 end
+
+class DigestRootTest < Test::Unit::TestCase
+  include TypeAssertions
+
+  library 'digest'
+  testing '::Object'
+
+  def test_digest
+    assert_send_type  '(::String | ::Symbol name) -> singleton(::Digest::Base)',
+                      ::Digest, :Digest, :SHA1
+
+    assert_send_type  '(::String | ::Symbol name) -> singleton(::Digest::Base)',
+                      ::Digest, :Digest, 'SHA1'
+
+    assert_send_type  '(::String | ::Symbol name) -> singleton(::Digest::Base)',
+                      ::Digest, :Digest, :MD5
+
+    assert_send_type  '(::String | ::Symbol name) -> singleton(::Digest::Base)',
+                      ::Digest, :Digest, 'MD5'
+
+    assert_send_type  '(::String | ::Symbol name) -> singleton(::Digest::Base)',
+                      ::Digest, :Digest, :RMD160
+
+    assert_send_type  '(::String | ::Symbol name) -> singleton(::Digest::Base)',
+                      ::Digest, :Digest, 'RMD160'
+
+    assert_send_type  '(::String | ::Symbol name) -> singleton(::Digest::Base)',
+                      ::Digest, :Digest, :SHA256
+
+    assert_send_type  '(::String | ::Symbol name) -> singleton(::Digest::Base)',
+                      ::Digest, :Digest, 'SHA256'
+
+    assert_send_type  '(::String | ::Symbol name) -> singleton(::Digest::Base)',
+                      ::Digest, :Digest, :SHA384
+
+    assert_send_type  '(::String | ::Symbol name) -> singleton(::Digest::Base)',
+                      ::Digest, :Digest, 'SHA384'
+
+    assert_send_type  '(::String | ::Symbol name) -> singleton(::Digest::Base)',
+                      ::Digest, :Digest, :SHA512
+
+    assert_send_type  '(::String | ::Symbol name) -> singleton(::Digest::Base)',
+                      ::Digest, :Digest, 'SHA512'
+  end
+end
