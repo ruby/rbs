@@ -338,6 +338,10 @@ module TypeAssertions
     end
   end
 
+  def ci?
+    ENV["CI"] == "true"
+  end
+
   def allows_error(*errors)
     yield
   rescue *errors => exn
