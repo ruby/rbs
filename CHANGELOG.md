@@ -2,6 +2,18 @@
 
 ## master
 
+## 1.5.0 (2021-08-22)
+
+This release includes stdlib signature updates.
+
+### Signature updates
+
+* digest ([\#744](https://github.com/ruby/rbs/pull/744), [\#757](https://github.com/ruby/rbs/pull/757))
+* io-wait ([\#756](https://github.com/ruby/rbs/pull/756), [\#758](https://github.com/ruby/rbs/pull/758))
+* `Ractor` ([\#755](https://github.com/ruby/rbs/pull/755))
+* `File::Stat#size?` ([\#754](https://github.com/ruby/rbs/pull/754))
+* `$-i`, `$0`, `$PROGRAM_NAME` ([\#753](https://github.com/ruby/rbs/pull/753))
+
 ## 1.4.0 (2021-08-19)
 
 This release includes feature enhancements including recursive `type` definition validation, improved compatibility of global variable names, and various method type updates.
