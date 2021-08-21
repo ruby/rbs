@@ -1,4 +1,5 @@
 require_relative "test_helper"
+require "io/wait"
 
 class IOSingletonTest < Test::Unit::TestCase
   include TypeAssertions
@@ -240,4 +241,32 @@ class IOInstanceTest < Test::Unit::TestCase
                        io, :sync
     end
   end
+end
+
+class IOWaitTest < Test::Unit::TestCase
+  include TypeAssertions
+
+  testing "::IO"
+
+  def test_wait
+    r, w = IO.pipe
+    assert_send_type "() -> Integer",
+      r, :nread
+    assert_send_type "() -> nil",
+      r, :ready?
+    assert_send_type "(Float) -> nil",
+      r, :wait_readable, 0.2
+    assert_send_type "(Integer, Float) -> nil",
+      r, :wait, IO::READABLE, 0.2
+    assert_send_type "(Float) -> IO",
+      w, :wait_writable, 0.2
+    w.write("a")
+    assert_send_type "(Float) -> IO",
+      r, :wait_readable, 0.2
+    assert_send_type "() -> IO",
+      r, :ready?
+  ensure
+    r.close
+    w.close
+  end if RUBY_VERSION >= "3.0.0"
 end
