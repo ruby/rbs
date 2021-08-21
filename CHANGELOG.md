@@ -2,6 +2,12 @@
 
 ## master
 
+## 1.5.1 (2021-08-22)
+
+### Miscellaneous
+
+* Fix Net_HTTP_test ([\#759](https://github.com/ruby/rbs/pull/759))
+
 ## 1.5.0 (2021-08-22)
 
 This release includes stdlib signature updates.
