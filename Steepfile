@@ -4,7 +4,7 @@ target :lib do
   ignore "lib/rbs/parser.rb"
   ignore "lib/rbs/prototype", "lib/rbs/test", "lib/rbs/test.rb"
 
-  library "set", "pathname", "json", "logger", "monitor", "tsort"
+  library "set", "pathname", "json", "logger", "monitor", "tsort", "uri"
   signature "stdlib/strscan/0/"
   signature "stdlib/rubygems/0/"
   signature "stdlib/optparse/0/"
