@@ -2,35 +2,37 @@ require 'singleton'
 
 module RBS
   module Collection
-    module Collections
-      # signatures that are bundled in rbs gem under the stdlib/ directory
-      class Stdlib
+    module Sources
+      # Signatures that are inclduded in gem package as sig/ directory.
+      class Rubygems
         include Singleton
 
         def has?(config_entry)
-          gem_dir(config_entry).exist?
+          gem_sig_path(config_entry)
         end
 
         def versions(config_entry)
-          gem_dir(config_entry).glob('*/').map { |path| path.basename.to_s }
+          spec, _ = gem_sig_path(config_entry)
+          spec or raise
+          [spec.version.to_s]
         end
 
         def install(dest:, config_entry:, stdout:)
           # Do nothing because stdlib RBS is available by default
           name = config_entry['name']
           version = config_entry['version'] or raise
-          from = gem_dir(config_entry) / version
+          _, from = gem_sig_path(config_entry)
           stdout.puts "Using #{name}:#{version} (#{from})"
         end
 
         def to_lockfile
           {
-            'type' => 'stdlib',
+            'type' => 'rubygems',
           }
         end
 
-        private def gem_dir(config_entry)
-          Repository::DEFAULT_STDLIB_ROOT.join(config_entry['name'])
+        private def gem_sig_path(config_entry)
+          RBS::EnvironmentLoader.gem_sig_path(config_entry['name'], config_entry['version'])
         end
       end
     end

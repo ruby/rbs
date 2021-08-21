@@ -36,23 +36,23 @@ module RBS
           specified = config.gem(gem_name)
 
           return if specified&.dig('ignore')
-          return if specified&.dig('collection') # skip if the collection is already filled
+          return if specified&.dig('source') # skip if the source is already filled
 
           if locked
             # If rbs_collection.lock.yaml contain the gem, use it.
             upsert_gem specified, locked
           else
             # Find the gem from gem_collection.
-            collection = find_collection(gem_name: gem_name)
-            return unless collection
+            source = find_source(gem_name: gem_name)
+            return unless source
 
             installed_version = version
-            best_version = find_best_version(version: installed_version, versions: collection.versions({ 'name' => gem_name }))
+            best_version = find_best_version(version: installed_version, versions: source.versions({ 'name' => gem_name }))
             # @type var new_content: RBS::Collection::Config::gem_entry
             new_content = {
               'name' => gem_name,
               'version' => best_version.to_s,
-              'collection' => collection.to_lockfile,
+              'source' => source.to_lockfile,
             }
             upsert_gem specified, new_content
           end
@@ -76,10 +76,10 @@ module RBS
           end
         end
 
-        private def find_collection(gem_name:)
-          collections = config.collections
+        private def find_source(gem_name:)
+          sources = config.sources
 
-          collections.find { |c| c.has?({ 'name' => gem_name, 'revision' => nil } ) }
+          sources.find { |c| c.has?({ 'name' => gem_name, 'revision' => nil } ) }
         end
 
         private def find_best_version(version:, versions:)

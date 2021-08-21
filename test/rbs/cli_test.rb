@@ -325,7 +325,7 @@ singleton(::BasicObject)
       Dir.chdir(dir) do
         dir = Pathname(dir)
         dir.join(RBS::Collection::Config::PATH).write(<<~YAML)
-          collections:
+          sources:
             - name: ruby/gem_rbs_collection
               remote: https://github.com/ruby/gem_rbs_collection.git
               revision: b4d3b346d9657543099a35a1fd20347e75b8c523
@@ -363,7 +363,7 @@ singleton(::BasicObject)
       Dir.chdir(dir) do
         dir = Pathname(dir)
         lock_content = <<~YAML
-          collections:
+          sources:
             - name: ruby/gem_rbs_collection
               remote: https://github.com/ruby/gem_rbs_collection.git
               revision: b4d3b346d9657543099a35a1fd20347e75b8c523
@@ -372,7 +372,7 @@ singleton(::BasicObject)
           gems:
             - name: ast
               version: "2.4"
-              collection:
+              source:
                 name: ruby/gem_rbs_collection
                 remote: https://github.com/ruby/gem_rbs_collection.git
                 revision: b4d3b346d9657543099a35a1fd20347e75b8c523
@@ -395,7 +395,7 @@ singleton(::BasicObject)
       Dir.chdir(dir) do
         dir = Pathname(dir)
         dir.join(RBS::Collection::Config::PATH).write(<<~YAML)
-          collections:
+          sources:
             - name: ruby/gem_rbs_collection
               remote: https://github.com/ruby/gem_rbs_collection.git
               revision: b4d3b346d9657543099a35a1fd20347e75b8c523

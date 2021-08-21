@@ -6,7 +6,7 @@ class RBS::Collection::CleanerTest < Test::Unit::TestCase
       lockfile_path = tmpdir.join('rbs_collection.lock.yaml')
       dest = tmpdir / 'gem_rbs_collection'
       lockfile_path.write(<<~YAML)
-        collections:
+        sources:
           - name: ruby/gem_rbs_collection
             remote: https://github.com/ruby/gem_rbs_collection.git
             revision: b4d3b346d9657543099a35a1fd20347e75b8c523
@@ -15,7 +15,7 @@ class RBS::Collection::CleanerTest < Test::Unit::TestCase
         gems:
           - name: ast
             version: "2.4"
-            collection:
+            source:
               name: ruby/gem_rbs_collection
               remote: https://github.com/ruby/gem_rbs_collection.git
               revision: b4d3b346d9657543099a35a1fd20347e75b8c523

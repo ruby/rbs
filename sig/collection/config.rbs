@@ -24,7 +24,7 @@ module RBS
 
         def remove_ignored_gems!: () -> void
 
-        def find_collection: (gem_name: String) -> untyped
+        def find_source: (gem_name: String) -> untyped
 
         def find_best_version: (version: String?, versions: Array[String]) -> Gem::Version
       end
@@ -35,7 +35,7 @@ module RBS
         'name' => String,
         'version' => String?,
         'ignore' => boolish,
-        'collection' => Collections::collection_entry?
+        'source' => Sources::source_entry?
       }
 
       @config_path: Pathname
@@ -57,7 +57,7 @@ module RBS
 
       def repo_path: () -> Pathname
 
-      def collections: () -> Array[Collections::_Collection]
+      def sources: () -> Array[Sources::_Source]
 
       def dump_to: (Pathname) -> void
 

@@ -41,12 +41,12 @@ module RBS
         @config_path.dirname.join @data['path']
       end
 
-      def collections
-        @collections ||= (
-          @data['collections']
-            .map { |c| Collections.from_config_entry(c) }
-            .push(Collections::Stdlib.instance)
-            .push(Collections::Rubygems.instance)
+      def sources
+        @sources ||= (
+          @data['sources']
+            .map { |c| Sources.from_config_entry(c) }
+            .push(Sources::Stdlib.instance)
+            .push(Sources::Rubygems.instance)
         )
       end
 

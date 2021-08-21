@@ -20,7 +20,7 @@ created: rbs_collection.yaml
 
 $ cat rbs_collection.yaml
 # Download sources
-collections:
+sources:
   - name: ruby/gem_rbs_collection
     remote: https://github.com/ruby/gem_rbs_collection.git
     revision: main
@@ -66,7 +66,7 @@ Configure `rbs collection` with editing `rbs_collection.yaml`.
 ```yaml
 # Download sources.
 # You can add own collection git repository.
-collections:
+sources:
   - name: ruby/gem_rbs_collection
     remote: https://github.com/ruby/gem_rbs_collection.git
     revision: main

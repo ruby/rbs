@@ -6,7 +6,7 @@ class RBS::Collection::InstallerTest < Test::Unit::TestCase
       lockfile_path = tmpdir.join('rbs_collection.lock.yaml')
       dest = tmpdir / 'gem_rbs_collection'
       lockfile_path.write(<<~YAML)
-        collections:
+        sources:
           - name: ruby/gem_rbs_collection
             remote: https://github.com/ruby/gem_rbs_collection.git
             revision: b4d3b346d9657543099a35a1fd20347e75b8c523
@@ -15,7 +15,7 @@ class RBS::Collection::InstallerTest < Test::Unit::TestCase
         gems:
           - name: ast
             version: "2.4"
-            collection:
+            source:
               type: git
               name: ruby/gem_rbs_collection
               remote: https://github.com/ruby/gem_rbs_collection.git
@@ -23,7 +23,7 @@ class RBS::Collection::InstallerTest < Test::Unit::TestCase
               repo_dir: gems
           - name: rainbow
             version: "3.0"
-            collection:
+            source:
               type: git
               name: ruby/gem_rbs_collection
               remote: https://github.com/ruby/gem_rbs_collection.git
@@ -47,12 +47,12 @@ class RBS::Collection::InstallerTest < Test::Unit::TestCase
       lockfile_path = tmpdir.join('rbs_collection.lock.yaml')
       dest = tmpdir / 'gem_rbs_collection'
       lockfile_path.write(<<~YAML)
-        collections: []
+        sources: []
         path: "#{dest}"
         gems:
           - name: csv
             version: "0"
-            collection:
+            source:
               type: stdlib
       YAML
 
@@ -70,12 +70,12 @@ class RBS::Collection::InstallerTest < Test::Unit::TestCase
       lockfile_path = tmpdir.join('rbs_collection.lock.yaml')
       dest = tmpdir / 'gem_rbs_collection'
       lockfile_path.write(<<~YAML)
-        collections: []
+        sources: []
         path: "#{dest}"
         gems:
           - name: strong_json
             version: "2.1.2"
-            collection:
+            source:
               type: rubygems
       YAML
 

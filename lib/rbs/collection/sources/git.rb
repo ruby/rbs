@@ -3,7 +3,7 @@ require 'open3'
 
 module RBS
   module Collection
-    module Collections
+    module Sources
       class Git
         METADATA_FILENAME = '.rbs_meta.yaml'
 

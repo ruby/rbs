@@ -7,7 +7,7 @@ require "test_helper"
 
 class RBS::Collection::ConfigTest < Test::Unit::TestCase
   CONFIG = <<~YAML
-    collections:
+    sources:
       - name: ruby/gem_rbs_collection
         remote: https://github.com/ruby/gem_rbs_collection.git
         revision: b4d3b346d9657543099a35a1fd20347e75b8c523
@@ -44,7 +44,7 @@ class RBS::Collection::ConfigTest < Test::Unit::TestCase
       config.dump_to(io)
 
       assert_config <<~YAML, io.string
-        collections:
+        sources:
           - name: ruby/gem_rbs_collection
             remote: https://github.com/ruby/gem_rbs_collection.git
             revision: b4d3b346d9657543099a35a1fd20347e75b8c523
@@ -53,7 +53,7 @@ class RBS::Collection::ConfigTest < Test::Unit::TestCase
         gems:
           - name: ast
             version: "2.4"
-            collection:
+            source:
               name: ruby/gem_rbs_collection
               remote: https://github.com/ruby/gem_rbs_collection.git
               revision: b4d3b346d9657543099a35a1fd20347e75b8c523
@@ -61,7 +61,7 @@ class RBS::Collection::ConfigTest < Test::Unit::TestCase
               type: git
           - name: rainbow
             version: "3.0"
-            collection:
+            source:
               name: ruby/gem_rbs_collection
               remote: https://github.com/ruby/gem_rbs_collection.git
               revision: b4d3b346d9657543099a35a1fd20347e75b8c523
@@ -95,7 +95,7 @@ class RBS::Collection::ConfigTest < Test::Unit::TestCase
       GEMFILE_LOCK
 
       lockfile = <<~YAML
-        collections:
+        sources:
           - name: ruby/gem_rbs_collection
             remote: https://github.com/ruby/gem_rbs_collection.git
             revision: b4d3b346d9657543099a35a1fd20347e75b8c523
@@ -104,7 +104,7 @@ class RBS::Collection::ConfigTest < Test::Unit::TestCase
         gems:
           - name: ast
             version: "2.4"
-            collection:
+            source:
               name: ruby/gem_rbs_collection
               remote: https://github.com/ruby/gem_rbs_collection.git
               revision: b4d3b346d9657543099a35a1fd20347e75b8c523
@@ -112,7 +112,7 @@ class RBS::Collection::ConfigTest < Test::Unit::TestCase
               type: git
           - name: rainbow
             version: "3.0"
-            collection:
+            source:
               name: ruby/gem_rbs_collection
               remote: https://github.com/ruby/gem_rbs_collection.git
               revision: b4d3b346d9657543099a35a1fd20347e75b8c523
@@ -163,7 +163,7 @@ class RBS::Collection::ConfigTest < Test::Unit::TestCase
       config.dump_to(io)
 
       assert_config <<~YAML, io.string
-        collections:
+        sources:
           - name: ruby/gem_rbs_collection
             remote: https://github.com/ruby/gem_rbs_collection.git
             revision: b4d3b346d9657543099a35a1fd20347e75b8c523
@@ -173,7 +173,7 @@ class RBS::Collection::ConfigTest < Test::Unit::TestCase
           - name: rainbow
             ignore: false
             version: "3.0"
-            collection:
+            source:
               name: ruby/gem_rbs_collection
               remote: https://github.com/ruby/gem_rbs_collection.git
               revision: b4d3b346d9657543099a35a1fd20347e75b8c523
@@ -211,7 +211,7 @@ class RBS::Collection::ConfigTest < Test::Unit::TestCase
       config.dump_to(io)
 
       assert_config <<~YAML, io.string
-        collections:
+        sources:
           - name: ruby/gem_rbs_collection
             remote: https://github.com/ruby/gem_rbs_collection.git
             revision: b4d3b346d9657543099a35a1fd20347e75b8c523
@@ -220,7 +220,7 @@ class RBS::Collection::ConfigTest < Test::Unit::TestCase
         gems:
           - name: ast
             version: "2.4"
-            collection:
+            source:
               name: ruby/gem_rbs_collection
               remote: https://github.com/ruby/gem_rbs_collection.git
               revision: b4d3b346d9657543099a35a1fd20347e75b8c523
@@ -228,7 +228,7 @@ class RBS::Collection::ConfigTest < Test::Unit::TestCase
               type: git
           - name: rainbow
             version: "3.0"
-            collection:
+            source:
               name: ruby/gem_rbs_collection
               remote: https://github.com/ruby/gem_rbs_collection.git
               revision: b4d3b346d9657543099a35a1fd20347e75b8c523
@@ -264,7 +264,7 @@ class RBS::Collection::ConfigTest < Test::Unit::TestCase
       config.dump_to(io)
 
       assert_config <<~YAML, io.string
-        collections:
+        sources:
           - name: ruby/gem_rbs_collection
             remote: https://github.com/ruby/gem_rbs_collection.git
             revision: b4d3b346d9657543099a35a1fd20347e75b8c523
@@ -273,7 +273,7 @@ class RBS::Collection::ConfigTest < Test::Unit::TestCase
         gems:
           - name: csv
             version: "0"
-            collection:
+            source:
               type: stdlib
       YAML
     end
@@ -305,7 +305,7 @@ class RBS::Collection::ConfigTest < Test::Unit::TestCase
       config.dump_to(io)
 
       assert_config <<~YAML, io.string
-        collections:
+        sources:
           - name: ruby/gem_rbs_collection
             remote: https://github.com/ruby/gem_rbs_collection.git
             revision: b4d3b346d9657543099a35a1fd20347e75b8c523
@@ -314,7 +314,7 @@ class RBS::Collection::ConfigTest < Test::Unit::TestCase
         gems:
           - name: strong_json
             version: "2.1.2"
-            collection:
+            source:
               type: rubygems
       YAML
     end
@@ -344,7 +344,7 @@ class RBS::Collection::ConfigTest < Test::Unit::TestCase
       config.dump_to(io)
 
       assert_config <<~YAML, io.string
-        collections:
+        sources:
           - name: ruby/gem_rbs_collection
             remote: https://github.com/ruby/gem_rbs_collection.git
             revision: b4d3b346d9657543099a35a1fd20347e75b8c523
@@ -359,7 +359,7 @@ class RBS::Collection::ConfigTest < Test::Unit::TestCase
     mktmpdir do |tmpdir|
       config_path = tmpdir / 'rbs_collection.yaml'
       config_path.write <<~YAML
-        collections: []
+        sources: []
         path: '.gem_rbs_collection'
       YAML
 

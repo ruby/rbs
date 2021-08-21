@@ -9,7 +9,7 @@ module RBS
 
       private
 
-      def collection_for: (Config::gem_entry) -> Collections::_Collection
+      def source_for: (Config::gem_entry) -> Sources::_Source
     end
   end
 end
