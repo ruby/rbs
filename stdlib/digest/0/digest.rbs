@@ -399,8 +399,6 @@ end
 class Digest::SHA512 < Digest::Base
 end
 
-# https://github.com/seattlerb/minitest/blob/13c48a03d84a2a87855a4de0c959f968001
-# 00357/lib/minitest/mock.rb#L192
 # Object is the default root of all Ruby objects.  Object inherits from
 # BasicObject which allows creating alternate object hierarchies.  Methods on
 # Object are available to all classes unless explicitly overridden.
