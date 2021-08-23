@@ -269,6 +269,9 @@
 #     h('Usage: foo "bar" <baz>') # alias
 #
 class CGI
+  include CGI::Util
+
+  extend CGI::Util
   # <!--
   #   rdoc-file=lib/cgi/core.rb
   #   - CGI.new(tag_maker) { block }
@@ -349,7 +352,6 @@ class CGI
   #
   def initialize: (?String tag_maker) ?{ (String name, String value) -> void } -> void
                 | (Hash[Symbol, untyped] options_hash) ?{ (String name, String value) -> void } -> void
-
   # <!-- rdoc-file=lib/cgi/core.rb -->
   # Return the accept character set for this CGI instance.
   #
@@ -381,11 +383,16 @@ class CGI
   #       # {"name1" => ["value1", "value2", ...],
   #       #  "name2" => ["value1", "value2", ...], ... }
   #
+  #
   def self.parse: (String query) -> Hash[String, String | Array[String]]
 
   public
 
   # <!-- rdoc-file=lib/cgi/core.rb -->
+  # Return the accept character set for this CGI instance.
+  #
+  def accept_charset: () -> String
+
   # This method is an alias for #http_header, when HTML5 tag maker is inactive.
   #
   # NOTE: use #http_header to create HTTP header blocks, this alias is only
@@ -513,7 +520,7 @@ class CGI
   def http_header: (?String options) -> String
                  | (?Hash[String | Symbol, untyped] header_hash) -> String
 
-  def nph?: () -> boolish
+  def nph?: () -> untyped
 
   # <!--
   #   rdoc-file=lib/cgi/core.rb
@@ -612,43 +619,232 @@ class CGI
   # Synonym for $stdout.
   #
   def stdoutput: () -> ::IO
+
+  # <!-- rdoc-file=lib/cgi/core.rb -->
+  # String for carriage return
+  #
+  CR: String
+
+  # <!-- rdoc-file=lib/cgi/core.rb -->
+  # Standard internet newline sequence
+  #
+  EOL: String
+
+  # <!-- rdoc-file=lib/cgi/core.rb -->
+  # HTTP status codes.
+  #
+  HTTP_STATUS: Hash[String, String]
+
+  # <!-- rdoc-file=lib/cgi/core.rb -->
+  # String for linefeed
+  #
+  LF: String
+
+  # <!-- rdoc-file=lib/cgi/core.rb -->
+  # Maximum number of request parameters when multipart
+  #
+  MAX_MULTIPART_COUNT: Integer
+
+  # <!-- rdoc-file=lib/cgi/core.rb -->
+  # Whether processing will be required in binary vs text
+  #
+  NEEDS_BINMODE: bool
+
+  # <!-- rdoc-file=lib/cgi/core.rb -->
+  # Path separators in different environments.
+  #
+  PATH_SEPARATOR: Hash[String, String]
+
+  REVISION: String
+
+  VERSION: String
+
+  class Cookie < Array[untyped]
+    def self.parse: (untyped raw_cookie) -> untyped
+
+    public
+
+    def domain: () -> untyped
+
+    def domain=: (untyped) -> untyped
+
+    def expires: () -> untyped
+
+    def expires=: (untyped) -> untyped
+
+    def httponly: () -> untyped
+
+    def httponly=: (untyped val) -> untyped
+
+    def inspect: () -> untyped
+
+    def name: () -> untyped
+
+    def name=: (untyped) -> untyped
+
+    def path: () -> untyped
+
+    def path=: (untyped) -> untyped
+
+    def secure: () -> untyped
+
+    # Set whether the Cookie is a secure cookie or not.
+    #
+    # `val` must be a boolean.
+    #
+    def secure=: [A] (boolish val) -> A
+
+    def to_s: () -> untyped
+
+    def value: () -> untyped
+
+    def value=: (untyped val) -> untyped
+
+    private
+
+    def initialize: (?untyped name, *untyped value) -> void
+  end
+
+  module Escape
+    public
+
+    def escape: (untyped) -> untyped
+
+    def escapeHTML: (untyped) -> untyped
+
+    def unescape: (*untyped) -> untyped
+
+    def unescapeHTML: (untyped) -> untyped
+  end
+
+  class InvalidEncoding < Exception
+  end
+
+  module QueryExtension
+    public
+
+    def []: (untyped key) -> untyped
+
+    def accept: () -> untyped
+
+    def accept_charset: () -> untyped
+
+    def accept_encoding: () -> untyped
+
+    def accept_language: () -> untyped
+
+    def auth_type: () -> untyped
+
+    def cache_control: () -> untyped
+
+    def content_length: () -> untyped
+
+    def content_type: () -> untyped
+
+    def cookies: () -> untyped
+
+    def cookies=: (untyped) -> untyped
+
+    def create_body: (untyped is_large) -> untyped
+
+    def files: () -> untyped
+
+    def from: () -> untyped
+
+    def gateway_interface: () -> untyped
+
+    def has_key?: (*untyped args) -> untyped
+
+    def host: () -> untyped
+
+    alias include? has_key?
+
+    alias key? has_key?
+
+    def keys: (*untyped args) -> untyped
+
+    def multipart?: () -> untyped
+
+    def negotiate: () -> untyped
+
+    def params: () -> untyped
+
+    def params=: (untyped hash) -> untyped
+
+    def path_info: () -> untyped
+
+    def path_translated: () -> untyped
+
+    def pragma: () -> untyped
+
+    def query_string: () -> untyped
+
+    def raw_cookie: () -> untyped
+
+    def raw_cookie2: () -> untyped
+
+    def referer: () -> untyped
+
+    def remote_addr: () -> untyped
+
+    def remote_host: () -> untyped
+
+    def remote_ident: () -> untyped
+
+    def remote_user: () -> untyped
+
+    def request_method: () -> untyped
+
+    def script_name: () -> untyped
+
+    def server_name: () -> untyped
+
+    def server_port: () -> untyped
+
+    def server_protocol: () -> untyped
+
+    def server_software: () -> untyped
+
+    def unescape_filename?: () -> untyped
+
+    def user_agent: () -> untyped
+
+    private
+
+    def initialize_query: () -> untyped
+
+    def read_from_cmdline: () -> untyped
+
+    def read_multipart: (untyped boundary, untyped content_length) -> untyped
+  end
+
+  module Util
+    include CGI::Escape
+
+    public
+
+    def escapeElement: (untyped string, *untyped elements) -> untyped
+
+    alias escape_element escapeElement
+
+    alias escape_html escapeHTML
+
+    alias h escapeHTML
+
+    def pretty: (untyped string, ?untyped shift) -> untyped
+
+    def rfc1123_date: (untyped time) -> untyped
+
+    def unescapeElement: (untyped string, *untyped elements) -> untyped
+
+    alias unescape_element unescapeElement
+
+    alias unescape_html unescapeHTML
+
+    RFC822_DAYS: Array[untyped]
+
+    RFC822_MONTHS: Array[untyped]
+
+    TABLE_FOR_ESCAPE_HTML__: Hash[untyped, untyped]
+  end
 end
-
-# <!-- rdoc-file=lib/cgi/core.rb -->
-# String for carriage return
-#
-CGI::CR: String
-
-# <!-- rdoc-file=lib/cgi/core.rb -->
-# Standard internet newline sequence
-#
-CGI::EOL: String
-
-# <!-- rdoc-file=lib/cgi/core.rb -->
-# HTTP status codes.
-#
-CGI::HTTP_STATUS: Hash[String, String]
-
-# <!-- rdoc-file=lib/cgi/core.rb -->
-# String for linefeed
-#
-CGI::LF: String
-
-# <!-- rdoc-file=lib/cgi/core.rb -->
-# Maximum number of request parameters when multipart
-#
-CGI::MAX_MULTIPART_COUNT: Integer
-
-# <!-- rdoc-file=lib/cgi/core.rb -->
-# Whether processing will be required in binary vs text
-#
-CGI::NEEDS_BINMODE: bool
-
-# <!-- rdoc-file=lib/cgi/core.rb -->
-# Path separators in different environments.
-#
-CGI::PATH_SEPARATOR: Hash[String, String]
-
-CGI::REVISION: String
-
-CGI::VERSION: String
