@@ -383,8 +383,7 @@ class CGI
   #       # {"name1" => ["value1", "value2", ...],
   #       #  "name2" => ["value1", "value2", ...], ... }
   #
-  #
-  def self.parse: (String query) -> Hash[String, String | Array[String]]
+  def self.parse: (String query) -> Hash[String, Array[String]]
 
   public
 
@@ -659,34 +658,93 @@ class CGI
 
   VERSION: String
 
-  class Cookie < Array[untyped]
-    def self.parse: (untyped raw_cookie) -> untyped
+  # Class representing an HTTP cookie.
+  #
+  # In addition to its specific fields and methods, a Cookie instance is a
+  # delegator to the array of its values.
+  #
+  # See RFC 2965.
+  #
+  # ## Examples of use
+  #     cookie1 = CGI::Cookie.new("name", "value1", "value2", ...)
+  #     cookie1 = CGI::Cookie.new("name" => "name", "value" => "value")
+  #     cookie1 = CGI::Cookie.new('name'     => 'name',
+  #                               'value'    => ['value1', 'value2', ...],
+  #                               'path'     => 'path',   # optional
+  #                               'domain'   => 'domain', # optional
+  #                               'expires'  => Time.now, # optional
+  #                               'secure'   => true,     # optional
+  #                               'httponly' => true      # optional
+  #                               )
+  #
+  #     cgi.out("cookie" => [cookie1, cookie2]) { "string" }
+  #
+  #     name     = cookie1.name
+  #     values   = cookie1.value
+  #     path     = cookie1.path
+  #     domain   = cookie1.domain
+  #     expires  = cookie1.expires
+  #     secure   = cookie1.secure
+  #     httponly = cookie1.httponly
+  #
+  #     cookie1.name     = 'name'
+  #     cookie1.value    = ['value1', 'value2', ...]
+  #     cookie1.path     = 'path'
+  #     cookie1.domain   = 'domain'
+  #     cookie1.expires  = Time.now + 30
+  #     cookie1.secure   = true
+  #     cookie1.httponly = true
+  class Cookie < Array[String]
+    # Parse a raw cookie string into a hash of cookie-name=>Cookie pairs.
+    #
+    #     cookies = CGI::Cookie.parse("raw_cookie_string")
+    #       # { "name1" => cookie1, "name2" => cookie2, ... }
+    #
+    def self.parse: (String raw_cookie) -> Hash[String, instance]
 
     public
 
-    def domain: () -> untyped
+    # Domain for which this cookie applies, as a `String`
+    #
+    def domain: () -> String?
 
-    def domain=: (untyped) -> untyped
+    def domain=: (String domain) -> String
 
-    def expires: () -> untyped
+    # Time at which this cookie expires, as a `Time`
+    #
+    def expires: () -> Time?
 
-    def expires=: (untyped) -> untyped
+    def expires=: (Time time) -> Time
 
-    def httponly: () -> untyped
+    # True if this cookie is httponly; false otherwise
+    #
+    def httponly: () -> bool
 
-    def httponly=: (untyped val) -> untyped
+    # Set whether the Cookie is a httponly cookie or not.
+    #
+    # `val` must be a boolean.
+    #
+    def httponly=: (boolish val) -> bool
 
-    def inspect: () -> untyped
+    # A summary of cookie string.
+    #
+    def inspect: () -> String
 
-    def name: () -> untyped
+    # Name of this cookie, as a `String`
+    #
+    def name: () -> String
 
-    def name=: (untyped) -> untyped
+    def name=: (String name) -> String
 
-    def path: () -> untyped
+    # Path for which this cookie applies, as a `String`
+    #
+    def path: () -> String?
 
-    def path=: (untyped) -> untyped
+    def path=: (String path) -> String
 
-    def secure: () -> untyped
+    # True if this cookie is secure; false otherwise
+    #
+    def secure: () -> bool
 
     # Set whether the Cookie is a secure cookie or not.
     #
@@ -694,128 +752,234 @@ class CGI
     #
     def secure=: [A] (boolish val) -> A
 
-    def to_s: () -> untyped
+    # Convert the Cookie to its string representation.
+    #
+    def to_s: () -> String
 
-    def value: () -> untyped
+    # Returns the value or list of values for this cookie.
+    #
+    def value: () -> Array[String]
 
-    def value=: (untyped val) -> untyped
+    # Replaces the value of this cookie with a new value or list of values.
+    #
+    def value=: (String val) -> String
+              | (Array[String] val) -> Array[String]
 
     private
 
-    def initialize: (?untyped name, *untyped value) -> void
+    # Create a new CGI::Cookie object.
+    #
+    # `name_string`
+    # :   The name of the cookie; in this form, there is no #domain or #expiration.
+    #     The #path is gleaned from the `SCRIPT_NAME` environment variable, and
+    #     #secure is false.
+    # `*value`
+    # :   value or list of values of the cookie
+    # `options_hash`
+    # :   A Hash of options to initialize this Cookie.  Possible options are:
+    #
+    #     name
+    # :       the name of the cookie.  Required.
+    #     value
+    # :       the cookie's value or list of values.
+    #     path
+    # :       the path for which this cookie applies.  Defaults to the value of the
+    #         `SCRIPT_NAME` environment variable.
+    #     domain
+    # :       the domain for which this cookie applies.
+    #     expires
+    # :       the time at which this cookie expires, as a `Time` object.
+    #     secure
+    # :       whether this cookie is a secure cookie or not (default to false).
+    #         Secure cookies are only transmitted to HTTPS servers.
+    #     httponly
+    # :       whether this cookie is a HttpOnly cookie or not (default to
+    #
+    #         false).  HttpOnly cookies are not available to javascript.
+    #
+    #     These keywords correspond to attributes of the cookie object.
+    #
+    #
+    def initialize: (String name_string, *String value) -> void
+                  | (Hash[String, untyped] options_hash) -> void
   end
 
   module Escape
     public
 
-    def escape: (untyped) -> untyped
+    # Returns URL-escaped string.
+    #
+    def escape: (string str) -> String
 
-    def escapeHTML: (untyped) -> untyped
+    # Returns HTML-escaped string.
+    #
+    def escapeHTML: (string str) -> String
 
-    def unescape: (*untyped) -> untyped
+    # Returns URL-unescaped string.
+    #
+    def unescape: (string str, ?encoding encoding) -> String
 
-    def unescapeHTML: (untyped) -> untyped
+    # Returns HTML-unescaped string.
+    #
+    def unescapeHTML: (string str) -> String
   end
 
+  # Exception raised when there is an invalid encoding detected
   class InvalidEncoding < Exception
   end
 
+  # Mixin module that provides the following:
+  #
+  # 1.  Access to the CGI environment variables as methods.  See documentation to
+  #     the CGI class for a list of these variables.  The methods are exposed by
+  #     removing the leading `HTTP_` (if it exists) and downcasing the name.  For
+  #     example, `auth_type` will return the environment variable `AUTH_TYPE`, and
+  #     `accept` will return the value for `HTTP_ACCEPT`.
+  #
+  # 2.  Access to cookies, including the cookies attribute.
+  #
+  # 3.  Access to parameters, including the params attribute, and overloading #[]
+  #     to perform parameter value lookup by key.
+  #
+  # 4.  The initialize_query method, for initializing the above mechanisms,
+  #     handling multipart forms, and allowing the class to be used in "offline"
+  #     mode.
+  #
   module QueryExtension
     public
 
-    def []: (untyped key) -> untyped
+    # Get the value for the parameter with a given key.
+    #
+    # If the parameter has multiple values, only the first will be retrieved; use
+    # #params to get the array of values.
+    #
+    def []: (String key) -> String?
 
-    def accept: () -> untyped
+    def accept: () -> String?
 
-    def accept_charset: () -> untyped
+    def accept_charset: () -> String?
 
-    def accept_encoding: () -> untyped
+    def accept_encoding: () -> String?
 
-    def accept_language: () -> untyped
+    def accept_language: () -> String?
 
-    def auth_type: () -> untyped
+    def auth_type: () -> String?
 
-    def cache_control: () -> untyped
+    def cache_control: () -> String?
 
-    def content_length: () -> untyped
+    def content_length: () -> String?
 
-    def content_type: () -> untyped
+    def content_type: () -> String?
 
-    def cookies: () -> untyped
+    # Get the cookies as a hash of cookie-name=>Cookie pairs.
+    #
+    def cookies: () -> Hash[String, Cookie]
 
-    def cookies=: (untyped) -> untyped
+    def cookies=: (Hash[String, Cookie] cookies) -> Hash[String, Cookie]
 
-    def create_body: (untyped is_large) -> untyped
+    def create_body: (bool is_large) -> (Tempfile | StringIO)
 
-    def files: () -> untyped
+    # Get the uploaded files as a hash of name=>values pairs
+    #
+    def files: () -> Hash[String, Tempfile | StringIO]
 
-    def from: () -> untyped
+    def from: () -> String?
 
-    def gateway_interface: () -> untyped
+    def gateway_interface: () -> String?
 
-    def has_key?: (*untyped args) -> untyped
+    # Returns true if a given query string parameter exists.
+    #
+    def has_key?: (String key) -> bool
 
-    def host: () -> untyped
+    def host: () -> String?
 
     alias include? has_key?
 
     alias key? has_key?
 
-    def keys: (*untyped args) -> untyped
+    # Return all query parameter names as an array of String.
+    #
+    def keys: () -> Array[String]
 
-    def multipart?: () -> untyped
+    # Returns whether the form contained multipart/form-data
+    #
+    def multipart?: () -> bool
 
-    def negotiate: () -> untyped
+    def negotiate: () -> String?
 
-    def params: () -> untyped
+    # Get the parameters as a hash of name=>values pairs, where values is an Array.
+    #
+    def params: () -> Hash[String, Array[String] | Tempfile | StringIO]
 
-    def params=: (untyped hash) -> untyped
+    # Set all the parameters.
+    #
+    def params=: (Hash[String, Array[String] | Tempfile | StringIO] hash) -> Hash[String, Array[String] | Tempfile | StringIO]
 
-    def path_info: () -> untyped
+    def path_info: () -> String?
 
-    def path_translated: () -> untyped
+    def path_translated: () -> String?
 
-    def pragma: () -> untyped
+    def pragma: () -> String?
 
-    def query_string: () -> untyped
+    def query_string: () -> String?
 
-    def raw_cookie: () -> untyped
+    # Get the raw cookies as a string.
+    #
+    def raw_cookie: () -> String?
 
-    def raw_cookie2: () -> untyped
+    # Get the raw RFC2965 cookies as a string.
+    #
+    def raw_cookie2: () -> String?
 
-    def referer: () -> untyped
+    def referer: () -> String?
 
-    def remote_addr: () -> untyped
+    def remote_addr: () -> String?
 
-    def remote_host: () -> untyped
+    def remote_host: () -> String?
 
-    def remote_ident: () -> untyped
+    def remote_ident: () -> String?
 
-    def remote_user: () -> untyped
+    def remote_user: () -> String?
 
-    def request_method: () -> untyped
+    def request_method: () -> String?
 
-    def script_name: () -> untyped
+    def script_name: () -> String?
 
-    def server_name: () -> untyped
+    def server_name: () -> String?
 
-    def server_port: () -> untyped
+    def server_port: () -> String?
 
-    def server_protocol: () -> untyped
+    def server_protocol: () -> String?
 
-    def server_software: () -> untyped
+    def server_software: () -> String?
 
-    def unescape_filename?: () -> untyped
+    def unescape_filename?: () -> bool
 
-    def user_agent: () -> untyped
+    def user_agent: () -> String?
 
     private
 
-    def initialize_query: () -> untyped
+    # A wrapper class to use a StringIO object as the body and switch to a TempFile
+    # when the passed threshold is passed. Initialize the data from the query.
+    #
+    # Handles multipart forms (in particular, forms that involve file uploads).
+    # Reads query parameters in the @params field, and cookies into @cookies.
+    #
+    def initialize_query: () -> void
 
-    def read_from_cmdline: () -> untyped
+    # offline mode. read name=value pairs on standard input.
+    #
+    def read_from_cmdline: () -> String
 
-    def read_multipart: (untyped boundary, untyped content_length) -> untyped
+    # Parses multipart form elements according to
+    #     http://www.w3.org/TR/html401/interact/forms.html#h-17.13.4.2
+    #
+    # Returns a hash of multipart form parameters with bodies of type StringIO or
+    # Tempfile depending on whether the multipart form element exceeds 10 KB
+    #
+    #     params[name => body]
+    #
+    def read_multipart: (String boundary, Integer content_length) -> (Tempfile | StringIO)
   end
 
   module Util
@@ -823,28 +987,88 @@ class CGI
 
     public
 
-    def escapeElement: (untyped string, *untyped elements) -> untyped
+    # Escape only the tags of certain HTML elements in `string`.
+    #
+    # Takes an element or elements or array of elements.  Each element is specified
+    # by the name of the element, without angle brackets. This matches both the
+    # start and the end tag of that element. The attribute list of the open tag will
+    # also be escaped (for instance, the double-quotes surrounding attribute
+    # values).
+    #
+    #     print CGI.escapeElement('<BR><A HREF="url"></A>', "A", "IMG")
+    #       # "<BR>&lt;A HREF=&quot;url&quot;&gt;&lt;/A&gt"
+    #
+    #     print CGI.escapeElement('<BR><A HREF="url"></A>', ["A", "IMG"])
+    #       # "<BR>&lt;A HREF=&quot;url&quot;&gt;&lt;/A&gt"
+    #
+    def escapeElement: (string string, *String | Array[String] elements) -> String
 
+    # Synonym for CGI.escapeElement(str)
+    #
     alias escape_element escapeElement
 
+    # Synonym for CGI.escapeHTML(str)
+    #
     alias escape_html escapeHTML
 
+    # # arglists 💪👽🚨 << Delete this section
+    #     h(string)
+    #
     alias h escapeHTML
 
-    def pretty: (untyped string, ?untyped shift) -> untyped
+    # Prettify (indent) an HTML string.
+    #
+    # `string` is the HTML string to indent.  `shift` is the indentation unit to
+    # use; it defaults to two spaces.
+    #
+    #     print CGI.pretty("<HTML><BODY></BODY></HTML>")
+    #       # <HTML>
+    #       #   <BODY>
+    #       #   </BODY>
+    #       # </HTML>
+    #
+    #     print CGI.pretty("<HTML><BODY></BODY></HTML>", "\t")
+    #       # <HTML>
+    #       #         <BODY>
+    #       #         </BODY>
+    #       # </HTML>
+    #
+    def pretty: (string string, ?String shift) -> String
 
-    def rfc1123_date: (untyped time) -> untyped
+    # Format a `Time` object as a String using the format specified by RFC 1123.
+    #
+    #     CGI.rfc1123_date(Time.now)
+    #       # Sat, 01 Jan 2000 00:00:00 GMT
+    #
+    def rfc1123_date: (Time time) -> String
 
-    def unescapeElement: (untyped string, *untyped elements) -> untyped
+    # Undo escaping such as that done by CGI.escapeElement()
+    #
+    #     print CGI.unescapeElement(
+    #             CGI.escapeHTML('<BR><A HREF="url"></A>'), "A", "IMG")
+    #       # "&lt;BR&gt;<A HREF="url"></A>"
+    #
+    #     print CGI.unescapeElement(
+    #             CGI.escapeHTML('<BR><A HREF="url"></A>'), ["A", "IMG"])
+    #       # "&lt;BR&gt;<A HREF="url"></A>"
+    #
+    def unescapeElement: (string string, *String | Array[String] elements) -> String
 
+    # Synonym for CGI.unescapeElement(str)
+    #
     alias unescape_element unescapeElement
 
+    # Synonym for CGI.unescapeHTML(str)
+    #
     alias unescape_html unescapeHTML
 
-    RFC822_DAYS: Array[untyped]
+    # Abbreviated day-of-week names specified by RFC 822
+    RFC822_DAYS: Array[String]
 
-    RFC822_MONTHS: Array[untyped]
+    # Abbreviated month names specified by RFC 822
+    RFC822_MONTHS: Array[String]
 
-    TABLE_FOR_ESCAPE_HTML__: Hash[untyped, untyped]
+    # The set of special characters and their escaped values
+    TABLE_FOR_ESCAPE_HTML__: Hash[String, String]
   end
 end
