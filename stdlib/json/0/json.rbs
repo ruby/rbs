@@ -1511,7 +1511,7 @@ class Regexp
 end
 
 %a{annotate:rdoc:skip}
-class Set[A]
+class Set[unchecked out A]
   # <!--
   #   rdoc-file=ext/json/lib/json/add/set.rb
   #   - json_create(object)

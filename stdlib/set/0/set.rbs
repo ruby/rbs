@@ -186,7 +186,8 @@
 #      Resets the internal state; useful if an object
 #      has been modified while an element in the set.
 #
-class Set[A]
+class Set[unchecked out A]
+  include Enumerable[A]
   # <!--
   #   rdoc-file=lib/set.rb
   #   - new(enum = nil) { |o| ... }
@@ -605,8 +606,6 @@ class Set[A]
   #     Set[1, 'c', :s].to_a              #=> [1, "c", :s]
   #
   def to_a: () -> Array[A]
-
-  include Enumerable[A]
 end
 
 %a{annotate:rdoc:skip}
