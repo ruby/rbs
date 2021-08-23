@@ -83,10 +83,7 @@ end
 
   def test_loading_library_from_gem_repo
     mktmpdir do |path|
-      (path + "gems").mkdir
-      (path + "gems/gem1").mkdir
-      (path + "gems/gem1/1.2.3").mkdir
-
+      (path + "gems/gem1/1.2.3").mkpath
       write_signatures(path: path + "gems/gem1/1.2.3")
 
       repo = RBS::Repository.new()
@@ -145,6 +142,30 @@ end
       loader.load(env: env)
 
       assert_operator env.class_decls, :key?, TypeName("::Amber")
+    end
+  end
+
+  def test_loading_from_gem_and_repo
+    omit unless has_gem?("rbs-amber")
+
+    mktmpdir do |path|
+      (path + "gems/rbs-amber/1.2.3").mkpath
+      write_signatures(path: path + "gems/rbs-amber/1.2.3")
+
+      repo = RBS::Repository.new()
+      repo.add(path + "gems")
+
+      loader = EnvironmentLoader.new(repository: repo)
+      loader.add(library: "rbs-amber", version: nil)
+
+      env = Environment.new
+      loader.load(env: env)
+
+      # repo takes precedence over sig/ in gem package
+      # in order to override RBS in gem package
+      refute_operator env.class_decls, :key?, TypeName("::Amber")
+      assert_operator env.class_decls, :key?, TypeName("::Person")
+      assert_operator env.class_decls, :key?, TypeName("::PeopleController")
     end
   end
 

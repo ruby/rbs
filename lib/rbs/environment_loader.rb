@@ -78,10 +78,10 @@ module RBS
         end
 
         case
-        when from_gem = self.class.gem_sig_path(lib.name, lib.version)
-          yield lib, from_gem[1]
         when from_repo = repository.lookup(lib.name, lib.version)
           yield lib, from_repo
+        when from_gem = self.class.gem_sig_path(lib.name, lib.version)
+          yield lib, from_gem[1]
         end
       end
 
