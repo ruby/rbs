@@ -315,6 +315,13 @@ module RBS
       self_type.is_a?(Types::Interface)
     end
 
+    def delegates?
+      !ancestors.params.empty? &&
+        ancestors.ancestors.any? do |ancestor|
+          ancestor.name.name == :Delegator
+        end
+    end
+
     def type_params
       type_params_decl.each.map(&:name)
     end

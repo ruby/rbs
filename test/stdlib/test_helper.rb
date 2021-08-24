@@ -327,6 +327,16 @@ module TypeAssertions
   def method_types(method)
     type, definition = target
 
+    if definition.delegates?
+      delegate_class = type.args[0]
+      builder.build_instance(delegate_class.name).yield_self do |defn|
+        builder.merge_definition(src: defn,
+                        dest: definition,
+                        subst: RBS::Substitution.build(defn.type_params, delegate_class.args),
+                        keep_super: true)
+      end
+    end
+
     case
     when definition.instance_type?
       subst = RBS::Substitution.build(definition.type_params, type.args)
