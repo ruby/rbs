@@ -17,6 +17,11 @@ class DelegatorInstanceTest < Test::Unit::TestCase
       string_delegator, :<<, " world"
   end
 
+  def test_Delegate_class
+    assert_send_type '(singleton(Integer)) -> singleton(Delegator)',
+      Kernel, :DelegateClass, Integer
+  end
+
   private
 
   def string_delegator

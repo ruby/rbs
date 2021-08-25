@@ -125,3 +125,7 @@ class SimpleDelegator[A] < Delegator[A]
 
   def __setobj__: (A obj) -> A
 end
+
+module Kernel
+  def self?.DelegateClass: [A] (Class superclass) ?{ () -> singleton(Delegator) } -> singleton(Delegator)
+end
