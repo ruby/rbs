@@ -17,15 +17,22 @@ def format_comment(comment)
   out.accept(formatter).lines.map(&:rstrip).join("\n")
 end
 
-def comment_for_constant(decl, stores:)
-  class_name = decl.name.namespace.to_type_name.to_s
+def resolve_name(name, outer:)
+  namespace = outer.inject(RBS::Namespace.root) do |ns1, ns2|
+    ns1 + ns2
+  end + name.namespace
+
+  name.with_prefix(namespace)
+end
+
+def comment_for_constant(const_name, stores:)
   klass = store_for_class(class_name, stores: stores)&.yield_self {|store|
     store.find_class_named(class_name) || store.find_module_named(class_name)
   }
 
   if klass
     constant = klass.constants.find do |const|
-      const.name == decl.name.name.to_s
+      const.name == const_name.name.to_s
     end
 
     if constant&.documented?
@@ -35,8 +42,9 @@ def comment_for_constant(decl, stores:)
   end
 end
 
-def comment_for_class(decl, stores:)
-  name = decl.name.to_s
+def comment_for_class(class_name, stores:)
+  name = class_name.relative!.to_s
+
   klass = store_for_class(name, stores: stores)&.yield_self {|store|
     store.find_class_named(name) || store.find_module_named(name)
   }
@@ -48,7 +56,8 @@ def comment_for_class(decl, stores:)
 end
 
 def comment_for_method(klass, method, stores:)
-  method = store_for_class(klass, stores: stores)&.load_method(klass, method)
+  class_name = klass.relative!.to_s
+  method = store_for_class(class_name, stores: stores)&.load_method(class_name, method)
 
   if method&.documented?
     out = RDoc::Markup::Document.new
@@ -115,6 +124,32 @@ def print_members(stores, klass_name, members)
   end
 end
 
+def annotate_declaration(decl:, outer:, stores:)
+  case decl
+  when RBS::AST::Declarations::Constant
+    puts "  Importing documentation for #{decl.name}..."
+    const_name = resolve_name(decl, outer: outer)
+    comment = comment_for_constant(const_name, stores: stores)
+    decl.instance_variable_set(:@comment, comment)
+  when RBS::AST::Declarations::Class, RBS::AST::Declarations::Module
+    class_name = resolve_name(decl.name, outer: outer)
+
+    puts "  Importing documentation for #{class_name}..."
+    comment = comment_for_class(class_name, stores: stores)
+    decl.instance_variable_set(:@comment, comment)
+
+    print_members(stores, class_name, decl.members)
+
+    outer_ = outer + [decl.name.to_namespace]
+    decl.members.each do |member|
+      case member
+      when RBS::AST::Declarations::Class, RBS::AST::Declarations::Module
+        annotate_declaration(decl: member, outer: outer_, stores: stores)
+      end
+    end
+  end
+end
+
 stores = []
 RDoc::RI::Paths.each true, true, false, false do |path, type|
   puts "Loading store from #{path}..."
@@ -130,18 +165,7 @@ ARGV.map {|f| Pathname(f) }.each do |path|
   sigs = RBS::Parser.parse_signature(buffer)
 
   sigs.each do |decl|
-    case decl
-    when RBS::AST::Declarations::Constant
-      puts "  Importing documentation for #{decl.name}..."
-      comment = comment_for_constant(decl, stores: stores)
-      decl.instance_variable_set(:@comment, comment)
-    when RBS::AST::Declarations::Class, RBS::AST::Declarations::Module
-      puts "  Importing documentation for #{decl.name}..."
-      comment = comment_for_class(decl, stores: stores)
-      decl.instance_variable_set(:@comment, comment)
-
-      print_members stores, decl.name.to_s, decl.members
-    end
+    annotate_declaration(decl: decl, outer: [], stores: stores)
   end
 
   puts "Writing #{path}..."
