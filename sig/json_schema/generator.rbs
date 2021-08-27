@@ -1,0 +1,64 @@
+module RBS
+  module JSONSchema
+    class Generator
+      attr_reader options: Hash[Symbol, value]
+
+      Alias: singleton(RBS::AST::Declarations::Alias)
+
+      interface _IO
+        def puts: (*untyped) -> void
+
+        def print: (*untyped) -> void
+
+        def flush: () -> void
+      end
+
+      attr_reader stdout: _IO
+
+      attr_reader stderr: _IO
+
+      attr_reader name: String
+
+      attr_reader path_decls: Hash[String, AST::Declarations::Module]
+
+      attr_reader generated_schemas: Hash[String, Hash[String, bool]]
+
+      type value = String | bool
+
+      type json_schema = Hash[String, untyped]
+
+      attr_reader stringify_keys: bool
+      attr_reader output: String?
+
+      def initialize: (stringify_keys: boolish, output: String?, stdout: _IO, stderr: _IO) -> untyped
+
+      def generate: (URI::Generic uri) -> void
+
+      def generate_rbs: (URI::Generic uri, json_schema document) -> void
+
+      def translate_type: (URI::Generic uri, json_schema schema) -> Types::t
+
+      def read_from_uri: (URI::Generic uri) -> json_schema
+
+      def write_output: () -> void
+
+      private
+
+      def literal_type: (untyped) -> (Types::Literal | Types::Bases::Nil)
+
+      def untyped_type: () -> Types::Bases::Any
+
+      def generate_type_name_for_uri: (URI::Generic uri, ?module_name: boolish, ?namespace: boolish) -> TypeName
+
+      def type_name: (String name, ?absolute: boolish) -> TypeName
+
+      def resolve_uri: (URI::Generic uri, URI::Generic ref_uri) -> URI::Generic
+
+      def snake_case: (String `string`) -> String
+
+      def camel_case: (String `string`) -> String
+
+      def validate_options: () -> void
+    end
+  end
+end

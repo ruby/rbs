@@ -1,3 +1,0 @@
-module Abbrev
-  def self?.abbrev: (Array[String], ?(String | Regexp | nil)) -> Hash[String, String]
-end

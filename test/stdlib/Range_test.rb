@@ -2,7 +2,6 @@ require_relative "test_helper"
 
 class RangeTest < StdlibTest
   target Range
-  using hook.refinement
 
   def test_new
     Range.new(1, 10)
@@ -19,6 +18,7 @@ class RangeTest < StdlibTest
 
   def test_bsearch
     ary = [0, 4, 7, 10, 12]
+    (0...ary.size).bsearch
     (0...ary.size).bsearch { |i| ary[i] >= 4 }
     (0..).bsearch { |x| x <= 1 }
   end

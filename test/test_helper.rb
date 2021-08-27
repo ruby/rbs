@@ -1,44 +1,73 @@
-$LOAD_PATH.unshift File.expand_path("../../lib", __FILE__)
-require "ruby/signature"
+$LOAD_PATH.unshift File.expand_path("../lib", __FILE__)
+require "rbs"
 require "tmpdir"
-require 'minitest/reporters'
 require "stringio"
+require "open3"
+require "test/unit"
 
-Minitest::Reporters.use! [Minitest::Reporters::DefaultReporter.new]
+begin
+  require "amber"
+rescue LoadError
+end
 
 module TestHelper
+  def has_gem?(*gems)
+    gems.each do |gem|
+      Gem::Specification.find_by_name(gem)
+    end
+
+    true
+  rescue Gem::MissingSpecError
+    false
+  end
+
+  def skip_minitest?
+    ENV.key?("NO_MINITEST")
+  end
+
   def parse_type(string, variables: Set.new)
-    Ruby::Signature::Parser.parse_type(string, variables: variables)
+    RBS::Parser.parse_type(string, variables: variables)
   end
 
   def parse_method_type(string, variables: Set.new)
-    Ruby::Signature::Parser.parse_method_type(string, variables: variables)
+    RBS::Parser.parse_method_type(string, variables: variables)
   end
 
   def type_name(string)
-    Ruby::Signature::Namespace.parse(string).yield_self do |namespace|
+    RBS::Namespace.parse(string).yield_self do |namespace|
       last = namespace.path.last
-      Ruby::Signature::TypeName.new(name: last, namespace: namespace.parent)
+      RBS::TypeName.new(name: last, namespace: namespace.parent)
     end
   end
 
   def silence_warnings
-    Ruby::Signature.logger.stub :warn, nil do
-      yield
+    klass = RBS.logger.class
+    original_method = klass.instance_method(:warn)
+
+    klass.remove_method(:warn)
+    klass.define_method(:warn) do |*args, &block|
+      block&.call()
     end
+
+    yield
+  ensure
+    klass.remove_method(:warn)
+    klass.define_method(:warn, original_method)
   end
 
   class SignatureManager
     attr_reader :files
+    attr_reader :system_builtin
 
-    def initialize
+    def initialize(system_builtin: false)
       @files = {}
+      @system_builtin = system_builtin
 
-      files[Pathname("builtin.rbs")] = BUILTINS
+      files[Pathname("builtin.rbs")] = BUILTINS unless system_builtin
     end
 
-    def self.new
-      instance = super
+    def self.new(**kw)
+      instance = super(**kw)
 
       if block_given?
         yield instance
@@ -57,21 +86,23 @@ end
 
 class Object < BasicObject
   include Kernel
- 
+
   public
   def __id__: -> Integer
+
+  def to_i: -> Integer
 
   private
   def respond_to_missing?: (Symbol, bool) -> bool
 end
 
-module Kernel
+module Kernel : BasicObject
   private
   def puts: (*untyped) -> nil
-  def to_i: -> Integer
 end
 
 class Class < Module
+  def new: (*untyped, **untyped) ?{ (*untyped, **untyped) -> untyped } -> untyped
 end
 
 class Module
@@ -79,7 +110,6 @@ end
 
 class String
   include Comparable
-  prepend Enumerable[String, void]
 
   def self.try_convert: (untyped) -> String?
 end
@@ -93,7 +123,11 @@ end
 module Comparable
 end
 
-module Enumerable[A, B]
+module Enumerable[A]
+end
+
+class Hash[unchecked out K, unchecked out V]
+  include Enumerable[[K, V]]
 end
 SIG
 
@@ -111,24 +145,65 @@ SIG
           absolute_path.write(content)
         end
 
-        loader = Ruby::Signature::EnvironmentLoader.new()
-        loader.stdlib_root = nil
-        loader.add path: tmppath
+        root =
+          if system_builtin
+            RBS::EnvironmentLoader::DEFAULT_CORE_ROOT
+          else
+            nil
+          end
 
-        env = Ruby::Signature::Environment.new()
-        loader.load(env: env)
+        loader = RBS::EnvironmentLoader.new(core_root: root)
+        loader.add(path: tmppath)
 
-        yield env
+        yield RBS::Environment.from_loader(loader).resolve_type_names, tmppath
       end
     end
   end
 
+  def assert_any(collection, size: nil)
+    assert_any!(collection, size: size) do |item|
+      assert yield(item)
+    end
+  end
+
+  def assert_any!(collection, size: nil)
+    assert_equal size, collection.size if size
+
+    *items, last = collection
+
+    if last
+      items.each do |item|
+        begin
+          yield item
+        rescue Test::Unit::AssertionFailedError
+          next
+        else
+          # Pass test
+          return
+        end
+      end
+
+      yield last
+    end
+  end
+
   def assert_write(decls, string)
-    writer = Ruby::Signature::Writer.new(out: StringIO.new)
+    writer = RBS::Writer.new(out: StringIO.new)
     writer.write(decls)
 
     assert_equal string, writer.out.string
+
+    # Check syntax error
+    RBS::Parser.parse_signature(writer.out.string)
+  end
+
+  def assert_sampling_check(builder, sample_size, array)
+    checker = RBS::Test::TypeCheck.new(self_class: Integer, builder: builder, sample_size: sample_size, unchecked_classes: [])
+
+    sample = checker.each_sample(array).to_a
+
+    assert_operator(sample.size, :<=, array.size)
+    assert_operator(sample.size, :<=, sample_size) unless sample_size.nil?
+    assert_empty(sample - array)
   end
 end
-
-require "minitest/autorun"

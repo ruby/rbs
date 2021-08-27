@@ -46,7 +46,17 @@ def comment_for_method(klass, method, stores:)
   method = store_for_class(klass, stores: stores)&.load_method(klass, method)
 
   if method&.documented?
-    format_comment(method.comment)
+    out = RDoc::Markup::Document.new
+
+    out << method.comment
+
+    if method.arglists
+      out << RDoc::Markup::Heading.new(1, "arglists 💪👽🚨 << Delete this section")
+      arglists = method.arglists.chomp.split("\n").map {|line| line + "\n" }
+      out << RDoc::Markup::Verbatim.new(*arglists)
+    end
+
+    out.accept(RDoc::Markup::ToMarkdown.new)
   end
 rescue RDoc::Store::MissingFileError
   nil
@@ -76,7 +86,7 @@ when match = subject.match(/(?<constant_name>[^#]+)#(?<method_name>.+)/)
   comment = comment_for_method(match[:constant_name], "##{match[:method_name]}", stores: stores)
 when match = subject.match(/(?<constant_name>[^.]+)\.(?<method_name>.+)/)
   STDERR.puts "Finding singleton method #{match[:constant_name]} . #{match[:method_name]} ..."
-  comment = comment_for_method(match[:constant_name], ".#{match[:method_name]}", stores: stores)
+  comment = comment_for_method(match[:constant_name], "::#{match[:method_name]}", stores: stores)
 else
   STDERR.puts "Finding class/module/constant #{subject} ..."
   comment = comment_for_class(subject, stores: stores) || comment_for_constant(subject, stores: stores)
@@ -84,7 +94,9 @@ end
 
 if comment
   STDERR.puts "Printing document..."
-  puts comment
+  comment.each_line do |line|
+    puts "# #{line}"
+  end
 else
   STDERR.puts "Nothing to print; failed to query the document..."
   exit 1

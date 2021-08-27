@@ -1,0 +1,37 @@
+class IO
+  # Returns number of bytes that can be read without blocking. Returns zero if no
+  # information available.
+  #
+  def nread: () -> Integer
+
+  # Returns `true` if input available without blocking, or `false`.
+  #
+  def ready?: () -> boolish
+
+  # Waits until the IO becomes ready for the specified events and returns the
+  # subset of events that become ready, or `false` when times out.
+  #
+  # The events can be a bit mask of `IO::READABLE`, `IO::WRITABLE` or
+  # `IO::PRIORITY`.
+  #
+  # Returns `true` immediately when buffered data is available.
+  #
+  # Optional parameter `mode` is one of `:read`, `:write`, or `:read_write`
+  # (deprecated).
+  #
+  def wait: (Integer events, ?Numeric timeout) -> (self | bool | nil)
+          | (?Numeric timeout, *wait_mode mode) -> (self | bool | nil)
+
+  type wait_mode = :read | :r | :readable
+                 | :write | :w | :writable
+                 | :read_write | :rw | :readable_writable
+
+  # Waits until IO is readable and returns `true`, or `false` when times out.
+  # Returns `true` immediately when buffered data is available.
+  #
+  def wait_readable: (?Numeric timeout) -> (self | bool | nil)?
+
+  # Waits until IO is writable and returns `true` or `false` when times out.
+  #
+  def wait_writable: (?Numeric timeout) -> (self | bool | nil)?
+end

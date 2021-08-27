@@ -2,7 +2,6 @@ require_relative "test_helper"
 
 class StringIOTest < StdlibTest
   target StringIO
-  using hook.refinement
 
   def test_close_read
     io = StringIO.new('example')
@@ -26,5 +25,16 @@ class StringIOTest < StdlibTest
     io.closed_write?
     io.close_write
     io.closed_write?
+  end
+
+  def test_each
+    io = StringIO.new("")
+    io.each(chomp: 3) do end
+    io.each(chomp: 3)
+  end
+
+  def test_gets
+    io = StringIO.new("")
+    io.gets(chomp: :true)
   end
 end

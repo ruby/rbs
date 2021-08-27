@@ -4,7 +4,6 @@ require "securerandom"
 
 class KernelTest < StdlibTest
   target Kernel
-  using hook.refinement
 
   def test_caller
     caller(1, 2)
@@ -46,8 +45,7 @@ class KernelTest < StdlibTest
     eval "p", binding, "fname", 1
   end
 
-  def test_iterator?
-    iterator?
+  def test_block_given?
     block_given?
   end
 
@@ -74,10 +72,6 @@ class KernelTest < StdlibTest
     Object.new === Object.new
   end
 
-  def test_eq_tilde
-    Object.new =~ Object.new
-  end
-
   def test_clone
     Object.new.clone
     Object.new.clone(freeze: false)
@@ -92,14 +86,15 @@ class KernelTest < StdlibTest
     1.dup
   end
 
+  def each(*args)
+
+  end
+
   def test_enum_for
-    enum_for
-    to_enum
-
     enum_for :then
-    enum_for :then, 1
 
-    enum_for(:then, 1) { 2 }
+    enum_for :each, 1
+    enum_for(:each, 1) { 2 }
   end
 
   def test_eql?
@@ -303,7 +298,7 @@ class KernelTest < StdlibTest
     Float('1.4', exception: true)
   end
 
-  def test_hash
+  def test_Hash
     Hash(nil)
     Hash([])
     Hash({key: 1})
@@ -351,8 +346,11 @@ class KernelTest < StdlibTest
     end
 
     begin
+      $stderr = StringIO.new
       abort 'foo'
     rescue SystemExit
+    ensure
+      $stderr = STDERR
     end
   end
 
@@ -365,7 +363,7 @@ class KernelTest < StdlibTest
     autoload :FooBar, 'fname'
   end
 
-  def test_autoload
+  def test_autoload?
     autoload? 'FooBar'
     autoload? :FooBarBaz
   end
@@ -401,7 +399,52 @@ class KernelTest < StdlibTest
   end
 
   def test_fail
-    # TODO
+    begin
+      fail
+    rescue RuntimeError
+    end
+
+    begin
+      fail 'error'
+    rescue RuntimeError
+    end
+
+    test_error = Class.new(StandardError)
+    begin
+      fail test_error
+    rescue test_error
+    end
+
+    begin
+      fail test_error, 'a'
+    rescue test_error
+    end
+
+    begin
+      fail test_error, 'a', ['1.rb, 2.rb']
+    rescue test_error
+    end
+
+    begin
+      fail test_error.new('a')
+    rescue test_error
+    end
+
+    exception_container = Class.new do
+      define_method :exception do |arg = 'a'|
+        test_error.new(arg)
+      end
+    end
+
+    begin
+      fail exception_container.new
+    rescue test_error
+    end
+
+    begin
+      fail exception_container.new, 14
+    rescue test_error
+    end
   end
 
   def test_format
@@ -454,6 +497,7 @@ class KernelTest < StdlibTest
     #   printf 's'
     #   printf '%d', 2
     #   printf '%d%s', 2, 1
+    #   printf
   ensure
     $stdout = STDOUT
   end

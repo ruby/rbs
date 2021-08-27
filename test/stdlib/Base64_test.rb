@@ -5,8 +5,6 @@ class Base64Test < StdlibTest
   target Base64
   library "base64"
 
-  using hook.refinement
-
   include Base64
 
   def test_encode64_decode64
@@ -21,6 +19,8 @@ class Base64Test < StdlibTest
 
   def test_urlsafe_encode64_urlsafe_decode64
     Base64.urlsafe_decode64(Base64.urlsafe_encode64(""))
+    Base64.urlsafe_decode64(Base64.urlsafe_encode64("", padding: "true"))
     urlsafe_decode64(urlsafe_encode64(""))
+    urlsafe_decode64(urlsafe_encode64("", padding: 30))
   end
 end

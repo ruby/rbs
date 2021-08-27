@@ -1,11 +1,13 @@
 /.bundle/
+/steep/.bundle/
 /.yardoc
 /_yardoc/
 /coverage/
 /pkg/
 /spec/reports/
 /tmp/
-/Gemfile.lock
 /.ruby-version
-/lib/ruby/signature/parser.rb
-/lib/ruby/signature/parser.output
+/lib/rbs/parser.output
+/vendor/sigs
+/Gemfile.lock
+

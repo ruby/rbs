@@ -2,7 +2,6 @@ require_relative "test_helper"
 
 class ObjectTest < StdlibTest
   target Object
-  using hook.refinement
 
   def test_operators
     Object.new !~ 123
@@ -31,9 +30,13 @@ class ObjectTest < StdlibTest
   end
 
   def test_display
+    stdout = STDOUT.dup
+    STDOUT.reopen(IO::NULL)
     Object.new.display()
     Object.new.display(STDOUT)
     Object.new.display(StringIO.new)
+  ensure
+    STDOUT.reopen(stdout)
   end
 
   def test_dup
@@ -43,13 +46,13 @@ class ObjectTest < StdlibTest
   def test_enum_for
     obj = Object.new
 
-    obj.enum_for()
-    obj.enum_for(:each, 1,2,3)
-    obj.enum_for(:foo, 1,2,3) { |x,y,z| x + y + z }
+    obj.enum_for(:instance_exec)
+    obj.enum_for(:instance_exec, 1,2,3)
+    obj.enum_for(:instance_exec, 1,2,3) { |x,y,z| x + y + z }
 
-    obj.to_enum()
-    obj.to_enum(:each, 1, 2, 3)
-    obj.to_enum(:foo) { 3 }
+    obj.to_enum(:instance_exec)
+    obj.to_enum(:instance_exec, 1, 2, 3)
+    obj.to_enum(:instance_exec, 1, 2, 3) { |x, y, z| x + y + z }
   end
 
   def test_eql
