@@ -62,6 +62,8 @@ module RBS
       def dump_to: (Pathname) -> void
 
       def gems: () -> Array[untyped]
+
+      def check_rbs_availability!: () -> void
     end
   end
 end

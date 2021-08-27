@@ -21,14 +21,14 @@ module RBS
       end
 
       def loader
-        lock = config_path&.then { |p| Collection::Config.lockfile_of(p) }
         repository = Repository.new(no_stdlib: core_root.nil?)
         repos.each do |repo|
           repository.add(Pathname(repo))
         end
-        repository.add(lock.repo_path) if lock
 
         loader = EnvironmentLoader.new(core_root: core_root, repository: repository)
+        lock = config_path&.then { |p| Collection::Config.lockfile_of(p) }
+        loader.add_collection(lock) if lock
 
         dirs.each do |dir|
           loader.add(path: Pathname(dir))
@@ -38,12 +38,6 @@ module RBS
           name, version = lib.split(/:/, 2)
           next unless name
           loader.add(library: name, version: version)
-        end
-
-        if lock
-          lock.gems.each do |gem|
-            loader.add(library: gem['name'], version: gem['version'])
-          end
         end
 
         loader

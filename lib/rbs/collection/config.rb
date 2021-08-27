@@ -3,6 +3,15 @@ module RBS
 
     # This class represent the configration file.
     class Config
+      class CollectionNotAvailable < StandardError
+        def initialize
+          super <<~MSG
+            rbs collection is not initialized.
+            Run `rbs collection install` to install RBSs from collection.
+          MSG
+        end
+      end
+
       PATH = Pathname('rbs_collection.yaml')
 
       # Generate a rbs lockfile from Gemfile.lock to `config_path`.
@@ -56,6 +65,20 @@ module RBS
 
       def gems
         @data['gems'] ||= []
+      end
+
+      # It raises an error when there are non-available libraries
+      def check_rbs_availability!
+        raise CollectionNotAvailable unless repo_path.exist?
+
+        gems.each do |gem|
+          case gem['source']['type']
+          when 'git'
+            meta_path = repo_path.join(gem['name'], gem['version'], Sources::Git::METADATA_FILENAME)
+            raise CollectionNotAvailable unless meta_path.exist?
+            raise CollectionNotAvailable unless gem == YAML.load(meta_path.read)
+          end
+        end
       end
     end
   end
