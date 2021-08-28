@@ -877,7 +877,7 @@ class CGI
 
     def cookies=: (Hash[String, Cookie] cookies) -> Hash[String, Cookie]
 
-    def create_body: (bool is_large) -> (Tempfile | StringIO)
+    def create_body: (boolish is_large) -> (Tempfile | StringIO)
 
     # Get the uploaded files as a hash of name=>values pairs
     #
@@ -1011,9 +1011,6 @@ class CGI
     #
     alias escape_html escapeHTML
 
-    # # arglists 💪👽🚨 << Delete this section
-    #     h(string)
-    #
     alias h escapeHTML
 
     # Prettify (indent) an HTML string.
