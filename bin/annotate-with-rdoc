@@ -26,8 +26,15 @@ def resolve_name(name, outer:)
 end
 
 def comment_for_constant(const_name, stores:)
-  klass = store_for_class(class_name, stores: stores)&.yield_self {|store|
-    store.find_class_named(class_name) || store.find_module_named(class_name)
+  class_name =
+    if (ns = const_name.namespace).empty?
+      TypeName("::Object")
+    else
+      ns.to_type_name
+    end
+
+  klass = store_for_class(class_name.relative!.to_s, stores: stores)&.yield_self {|store|
+    store.find_class_named(class_name.relative!.to_s) || store.find_module_named(class_name.relative!.to_s)
   }
 
   if klass
@@ -128,7 +135,7 @@ def annotate_declaration(decl:, outer:, stores:)
   case decl
   when RBS::AST::Declarations::Constant
     puts "  Importing documentation for #{decl.name}..."
-    const_name = resolve_name(decl, outer: outer)
+    const_name = resolve_name(decl.name, outer: outer)
     comment = comment_for_constant(const_name, stores: stores)
     decl.instance_variable_set(:@comment, comment)
   when RBS::AST::Declarations::Class, RBS::AST::Declarations::Module
@@ -142,10 +149,7 @@ def annotate_declaration(decl:, outer:, stores:)
 
     outer_ = outer + [decl.name.to_namespace]
     decl.members.each do |member|
-      case member
-      when RBS::AST::Declarations::Class, RBS::AST::Declarations::Module
-        annotate_declaration(decl: member, outer: outer_, stores: stores)
-      end
+      annotate_declaration(decl: member, outer: outer_, stores: stores)
     end
   end
 end
