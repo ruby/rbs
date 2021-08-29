@@ -212,7 +212,7 @@ module ObjectSpace
 
   def self.dump: (untyped obj, ?output: Symbol) -> (String | File | nil)
 
-  def self.dump_all: (?since: Integer | nil, ?full: boolish, ?output: Symbol) -> (String | File | nil)
+  def self.dump_all: (?since: (Integer|nil), ?full: boolish, ?output: Symbol) -> (String | File | nil)
 
   # MRI specific feature
   # :   Return internal class of obj.
@@ -386,7 +386,7 @@ module ObjectSpace
   # method and is subject to change. In particular, the function signature and
   # output format are not guaranteed to be compatible in future versions of ruby.
   #
-  def dump_all: (?since: [ Integer, nil ], ?full: boolish, ?output: Symbol) -> (String|File|nil)
+  def dump_all: (?since: (Integer|nil), ?full: boolish, ?output: Symbol) -> (String|File|nil)
 
   def internal_class_of: (untyped) -> class
 
