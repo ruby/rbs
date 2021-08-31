@@ -78,6 +78,9 @@ module RBS
     def add: (path: Pathname) -> void
            | (library: String, version: String?) -> void
 
+    # Add repository path and libraries via rbs_collection.lock.yaml.
+    def add_collection: (Collection::Config collection_config) -> void
+
     # This is helper function to test if RBS for a library is available or not.
     # 
     def has_library?: (library: String, version: String?) -> bool

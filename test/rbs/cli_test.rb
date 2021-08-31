@@ -320,6 +320,114 @@ singleton(::BasicObject)
     end
   end
 
+  def test_collection_install
+    Dir.mktmpdir do |dir|
+      Dir.chdir(dir) do
+        dir = Pathname(dir)
+        dir.join(RBS::Collection::Config::PATH).write(<<~YAML)
+          sources:
+            - name: ruby/gem_rbs_collection
+              remote: https://github.com/ruby/gem_rbs_collection.git
+              revision: b4d3b346d9657543099a35a1fd20347e75b8c523
+              repo_dir: gems
+
+          path: #{dir.join('gem_rbs_collection')}
+        YAML
+        dir.join('Gemfile.lock').write(<<~LOCK)
+          GEM
+            remote: https://rubygems.org/
+            specs:
+              ast (2.4.2)
+
+          PLATFORMS
+            x86_64-linux
+
+          DEPENDENCIES
+            ast
+
+          BUNDLED WITH
+             2.2.0
+        LOCK
+
+        with_cli do |cli|
+          cli.run(%w[collection install])
+          assert dir.join('rbs_collection.lock.yaml').exist?
+          assert dir.join('gem_rbs_collection/ast').exist?
+        end
+      end
+    end
+  end
+
+  def test_collection_install_frozen
+    Dir.mktmpdir do |dir|
+      Dir.chdir(dir) do
+        dir = Pathname(dir)
+        lock_content = <<~YAML
+          sources:
+            - name: ruby/gem_rbs_collection
+              remote: https://github.com/ruby/gem_rbs_collection.git
+              revision: b4d3b346d9657543099a35a1fd20347e75b8c523
+              repo_dir: gems
+          path: #{dir.join('gem_rbs_collection')}
+          gems:
+            - name: ast
+              version: "2.4"
+              source:
+                name: ruby/gem_rbs_collection
+                remote: https://github.com/ruby/gem_rbs_collection.git
+                revision: b4d3b346d9657543099a35a1fd20347e75b8c523
+                repo_dir: gems
+        YAML
+        dir.join('rbs_collection.lock.yaml').write(lock_content)
+
+        with_cli do |cli|
+          cli.run(%w[collection install --frozen])
+          refute dir.join(RBS::Collection::Config::PATH).exist?
+          assert dir.join('gem_rbs_collection/ast').exist?
+          assert_equal lock_content, dir.join('rbs_collection.lock.yaml').read
+        end
+      end
+    end
+  end
+
+  def test_collection_update
+    Dir.mktmpdir do |dir|
+      Dir.chdir(dir) do
+        dir = Pathname(dir)
+        dir.join(RBS::Collection::Config::PATH).write(<<~YAML)
+          sources:
+            - name: ruby/gem_rbs_collection
+              remote: https://github.com/ruby/gem_rbs_collection.git
+              revision: b4d3b346d9657543099a35a1fd20347e75b8c523
+              repo_dir: gems
+
+          path: #{dir.join('gem_rbs_collection')}
+        YAML
+        dir.join('Gemfile.lock').write(<<~LOCK)
+          GEM
+            remote: https://rubygems.org/
+            specs:
+              ast (2.4.2)
+
+          PLATFORMS
+            x86_64-linux
+
+          DEPENDENCIES
+            ast
+
+          BUNDLED WITH
+             2.2.0
+        LOCK
+
+        with_cli do |cli|
+          cli.run(%w[collection update])
+          assert dir.join('rbs_collection.lock.yaml').exist?
+          assert dir.join('gem_rbs_collection/ast').exist?
+        end
+      end
+    end
+  end
+
   def assert_rbs_test_no_errors cli, dir, arg_array
     args = ['-I', dir.to_s, 'test', *arg_array]
     assert_instance_of Process::Status, cli.run(args)

@@ -45,6 +45,7 @@ require "rbs/repository"
 require "rbs/ancestor_graph"
 require "rbs/locator"
 require "rbs/type_alias_dependency"
+require "rbs/collection"
 
 begin
   require "rbs/parser"

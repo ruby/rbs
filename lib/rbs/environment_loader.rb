@@ -47,6 +47,16 @@ module RBS
       end
     end
 
+    def add_collection(collection_config)
+      collection_config.check_rbs_availability!
+
+      repository.add(collection_config.repo_path)
+
+      collection_config.gems.each do |gem|
+        add(library: gem['name'], version: gem['version'])
+      end
+    end
+
     def has_library?(library:, version:)
       if self.class.gem_sig_path(library, version) || repository.lookup(library, version)
         true

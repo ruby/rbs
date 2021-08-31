@@ -57,6 +57,10 @@ module RBS
 
     attr_reader gems: Hash[String, GemRBS]
 
+    def self.default: () -> instance
+
+    def self.find_best_version: (Gem::Version? version, Array[Gem::Version] candidates) -> Gem::Version
+
     # An optional keyword argument `no_stdlib` is to skip adding directory for stdlib classes.
     # Passing truthy value will skip loading stdlib. (You can add the stdlib root by yourself.)
     #

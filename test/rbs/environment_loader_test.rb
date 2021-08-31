@@ -164,4 +164,89 @@ end
       end
     end
   end
+
+  def test_loading_from_rbs_collection
+    mktmpdir do |path|
+      lockfile_path = path.join('rbs_collection.lock.yaml')
+      lockfile_path.write(<<~YAML)
+        sources:
+          - name: ruby/gem_rbs_collection
+            remote: https://github.com/ruby/gem_rbs_collection.git
+            revision: b4d3b346d9657543099a35a1fd20347e75b8c523
+            repo_dir: gems
+        path: '.gem_rbs_collection'
+        gems:
+          - name: ast
+            version: "2.4"
+            source:
+              name: ruby/gem_rbs_collection
+              remote: https://github.com/ruby/gem_rbs_collection.git
+              revision: b4d3b346d9657543099a35a1fd20347e75b8c523
+              repo_dir: gems
+              type: git
+          - name: rainbow
+            version: "3.0"
+            source:
+              name: ruby/gem_rbs_collection
+              remote: https://github.com/ruby/gem_rbs_collection.git
+              revision: b4d3b346d9657543099a35a1fd20347e75b8c523
+              repo_dir: gems
+              type: git
+      YAML
+      RBS::Collection::Installer.new(lockfile_path: lockfile_path, stdout: StringIO.new).install_from_lockfile
+      lock = RBS::Collection::Config.from_path(lockfile_path)
+
+      repo = RBS::Repository.new()
+
+      loader = EnvironmentLoader.new(repository: repo)
+      loader.add_collection(lock)
+
+      env = Environment.new
+      loader.load(env: env)
+
+      assert_operator env.class_decls, :key?, TypeName("::AST")
+      assert_operator env.class_decls, :key?, TypeName("::Rainbow")
+      assert repo.dirs.include? lock.repo_path
+    end
+  end
+
+  def test_loading_from_rbs_collection_without_install
+    mktmpdir do |path|
+      lockfile_path = path.join('rbs_collection.lock.yaml')
+      lockfile_path.write(<<~YAML)
+        sources:
+          - name: ruby/gem_rbs_collection
+            remote: https://github.com/ruby/gem_rbs_collection.git
+            revision: b4d3b346d9657543099a35a1fd20347e75b8c523
+            repo_dir: gems
+        path: '.gem_rbs_collection'
+        gems:
+          - name: ast
+            version: "2.4"
+            source:
+              name: ruby/gem_rbs_collection
+              remote: https://github.com/ruby/gem_rbs_collection.git
+              revision: b4d3b346d9657543099a35a1fd20347e75b8c523
+              repo_dir: gems
+              type: git
+          - name: rainbow
+            version: "3.0"
+            source:
+              name: ruby/gem_rbs_collection
+              remote: https://github.com/ruby/gem_rbs_collection.git
+              revision: b4d3b346d9657543099a35a1fd20347e75b8c523
+              repo_dir: gems
+              type: git
+      YAML
+      lock = RBS::Collection::Config.from_path(lockfile_path)
+
+      repo = RBS::Repository.new()
+
+      loader = EnvironmentLoader.new(repository: repo)
+
+      assert_raises RBS::Collection::Config::CollectionNotAvailable do
+        loader.add_collection(lock)
+      end
+    end
+  end
 end

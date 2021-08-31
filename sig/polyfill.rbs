@@ -1,6 +1,3 @@
-module Kernel
-end
-
 module Gem
   class Specification
     attr_reader version (): Version
@@ -15,4 +12,16 @@ module Enumerable[unchecked out Elem]
   def flat_map: [U] () { (Elem) -> Array[U] } -> Array[U]
               | [U] () { (Elem) -> U } -> Array[U]
               | ...
+end
+
+module Bundler
+  class LockfileParser
+    def initialize: (String) -> void
+    def specs: () -> Array[LazySpecification]
+  end
+
+  class LazySpecification
+    def name: () -> String
+    def version: () -> String
+  end
 end
