@@ -1,9 +1,0 @@
-module RBS
-  module JSONSchema
-    class ValidationError < StandardError
-      attr_reader message: String
-
-      def initialize: (message: String) -> void
-    end
-  end
-end
