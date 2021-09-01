@@ -839,6 +839,8 @@ EOB
     end
 
     def run_collection(args, options)
+      warn "warning: rbs collection is experimental, and the behavior may change until RBS v2.0"
+
       opts = collection_options(args)
       params = {}
       opts.order args[1..], into: params

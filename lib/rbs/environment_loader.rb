@@ -48,6 +48,8 @@ module RBS
     end
 
     def add_collection(collection_config)
+      warn "warning: rbs collection is experimental, and the behavior may change until RBS v2.0"
+
       collection_config.check_rbs_availability!
 
       repository.add(collection_config.repo_path)
