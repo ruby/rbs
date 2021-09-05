@@ -163,13 +163,13 @@ class ObjectSpaceTest < Test::Unit::TestCase
   end
 
   def test_internal_class_of
-    assert_send_type "(untyped) -> class",
+    assert_send_type "(String) -> singleton(String)",
       ObjectSpace, :internal_class_of, "dummy"
   end
 
   def test_internal_super_of
-    assert_send_type "(untyped) -> class",
-      ObjectSpace, :internal_class_of, "dummy"
+    assert_send_type "(singleton(String)) -> untyped",
+      ObjectSpace, :internal_super_of, String
   end
 
   def test_memsize_of
@@ -178,10 +178,10 @@ class ObjectSpaceTest < Test::Unit::TestCase
   end
 
   def test_memsize_of_all
-    assert_send_type "(?class) -> Integer",
+    assert_send_type "() -> Integer",
       ObjectSpace, :memsize_of_all
 
-    assert_send_type "(?class) -> Integer",
+    assert_send_type "(Class) -> Integer",
       ObjectSpace, :memsize_of_all, Symbol
   end
 

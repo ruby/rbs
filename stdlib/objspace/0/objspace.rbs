@@ -221,7 +221,7 @@ module ObjectSpace
   #
   # Note that you should not use this method in your application.
   #
-  def self.internal_class_of: (untyped) -> class
+  def self.internal_class_of: (untyped) -> Class
 
   # MRI specific feature
   # :   Return internal super class of cls (Class or Module).
@@ -230,7 +230,7 @@ module ObjectSpace
   #
   # Note that you should not use this method in your application.
   #
-  def self.internal_super_of: (untyped) -> class
+  def self.internal_super_of: (untyped) -> untyped
 
   # Return consuming memory size of obj in bytes.
   #
@@ -267,7 +267,7 @@ module ObjectSpace
   #
   # This method is only expected to work with C Ruby.
   #
-  def self.memsize_of_all: (?class) -> Integer
+  def self.memsize_of_all: (?Class) -> Integer
 
   # MRI specific feature
   # :   Return all reachable objects from `obj'.
@@ -387,10 +387,6 @@ module ObjectSpace
   # output format are not guaranteed to be compatible in future versions of ruby.
   #
   def dump_all: (?since: (Integer|nil), ?full: boolish, ?output: Symbol) -> (String|File|nil)
-
-  def internal_class_of: (untyped) -> class
-
-  def internal_super_of: (untyped) -> class
 
   def memsize_of: (untyped) -> Integer
 
