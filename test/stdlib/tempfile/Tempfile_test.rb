@@ -9,8 +9,12 @@ class TempfileSingletonTest < Test::Unit::TestCase
 
 
   def test_open
-    assert_send_type "(*untyped args, **untyped) -> ::Tempfile",
+    assert_send_type "(String) -> ::Tempfile",
                      Tempfile, :open, 'README.md'
+
+    assert_send_type "() { (::Tempfile) -> ::Integer } -> ::Integer",
+                     Tempfile, :open do 123 end
+
   end
 
   def test_new
@@ -19,9 +23,14 @@ class TempfileSingletonTest < Test::Unit::TestCase
   end
 
   def test_create
-    assert_send_type "(?::String basename, ?::String? tmpdir, ?mode: ::Integer, **untyped) -> ::File",
+    assert_send_type "(::String basename, ::String? tmpdir, mode: ::Integer) -> ::File",
                      Tempfile, :create, 'README.md', '/tmp', mode: 0
-  end
+
+    assert_send_type "() { (::File) -> Integer } -> Integer",
+                     Tempfile, :create do |file|
+                      123
+                     end
+end
 
   def test_initialize
     assert_send_type "(?::String basename, ?::String? tmpdir, ?mode: ::Integer, **untyped) -> void",
