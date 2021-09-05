@@ -16,6 +16,7 @@ gem 'stackprof'
 gem "goodcheck"
 gem "dbm"
 gem 'digest'
+gem 'tempfile'
 
 # Test gems
 gem "rbs-amber", path: "test/assets/test-gem"
