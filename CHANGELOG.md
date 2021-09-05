@@ -2,6 +2,31 @@
 
 ## master
 
+## 1.6.0 (2021-09-05)
+
+This release includes a preview of `rbs collection` commands, which is _bundler for RBS_.
+The command helps you manage RBS files from gem_rbs_collection or other repositories.
+
+This feature is a preview, and any feedback is welcome!
+
+## Signature updates
+
+* objspace ([\#763](https://github.com/ruby/rbs/pull/763), [\#776](https://github.com/ruby/rbs/pull/776))
+* tempfile ([\#767](https://github.com/ruby/rbs/pull/767), [\#775](https://github.com/ruby/rbs/pull/775))
+* `IO#set_encoding_by_bom` ([\#106](https://github.com/ruby/rbs/pull/106))
+* `OpenSSL::PKey::EC#dh_compute_key` ([\#775](https://github.com/ruby/rbs/pull/775))
+
+## Library changes
+
+* Add `rbs collection` ([\#589](https://github.com/ruby/rbs/pull/589), [\#772](https://github.com/ruby/rbs/pull/772), [\#773](https://github.com/ruby/rbs/pull/773))
+
+## Miscellaneous
+
+* Let `bin/annotate-with-rdoc` process nested constants/classes ([\#766](https://github.com/ruby/rbs/pull/766), [\#768](https://github.com/ruby/rbs/pull/768))
+* Stop printing version mismatch message in CI ([\#777](https://github.com/ruby/rbs/pull/777))
+* Update Steep and fix type errors ([\#770](https://github.com/ruby/rbs/pull/770), [\#774](https://github.com/ruby/rbs/pull/774))
+* Add dependabot configuration ([\#771](https://github.com/ruby/rbs/pull/771))
+
 ## 1.5.1 (2021-08-22)
 
 ### Miscellaneous
