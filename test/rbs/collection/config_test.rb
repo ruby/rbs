@@ -6,6 +6,8 @@ require "test_helper"
 # so the test generate and check the generated lockfile
 
 class RBS::Collection::ConfigTest < Test::Unit::TestCase
+  include TestHelper
+
   CONFIG = <<~YAML
     sources:
       - name: ruby/gem_rbs_collection
@@ -280,6 +282,8 @@ class RBS::Collection::ConfigTest < Test::Unit::TestCase
   end
 
   def test_generate_lock_from_rubygems
+    omit unless has_gem?("rbs-amber")
+
     mktmpdir do |tmpdir|
       config_path = tmpdir / 'rbs_collection.yaml'
       config_path.write CONFIG
@@ -288,13 +292,13 @@ class RBS::Collection::ConfigTest < Test::Unit::TestCase
         GEM
           remote: https://rubygems.org/
           specs:
-            strong_json (2.1.2)
+            rbs-amber (1.0.0)
 
         PLATFORMS
           x86_64-linux
 
         DEPENDENCIES
-          strong_json
+          rbs-amber
 
         BUNDLED WITH
            2.2.0
@@ -312,8 +316,8 @@ class RBS::Collection::ConfigTest < Test::Unit::TestCase
             repo_dir: gems
         path: "/path/to/somewhere"
         gems:
-          - name: strong_json
-            version: "2.1.2"
+          - name: rbs-amber
+            version: "1.0.0"
             source:
               type: rubygems
       YAML

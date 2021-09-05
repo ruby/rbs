@@ -1,6 +1,8 @@
 require "test_helper"
 
 class RBS::Collection::InstallerTest < Test::Unit::TestCase
+  include TestHelper
+
   def test_install_from_git
     mktmpdir do |tmpdir|
       lockfile_path = tmpdir.join('rbs_collection.lock.yaml')
@@ -66,6 +68,8 @@ class RBS::Collection::InstallerTest < Test::Unit::TestCase
   end
 
   def test_install_from_gem_sig_dir
+    omit unless has_gem?("rbs-amber")
+
     mktmpdir do |tmpdir|
       lockfile_path = tmpdir.join('rbs_collection.lock.yaml')
       dest = tmpdir / 'gem_rbs_collection'
@@ -73,8 +77,8 @@ class RBS::Collection::InstallerTest < Test::Unit::TestCase
         sources: []
         path: "#{dest}"
         gems:
-          - name: strong_json
-            version: "2.1.2"
+          - name: rbs-amber
+            version: "1.0.0"
             source:
               type: rubygems
       YAML
@@ -83,7 +87,7 @@ class RBS::Collection::InstallerTest < Test::Unit::TestCase
       RBS::Collection::Installer.new(lockfile_path: lockfile_path, stdout: stdout).install_from_lockfile
 
       assert dest.glob('*').empty? # because rubygems installer does nothing
-      assert_match(%r!Using strong_json:2.1.2 \(.+/strong_json-2\.1\.2/sig\)!, stdout.string)
+      assert_match(%r!Using rbs-amber:1.0.0 \(.+/rbs/test/assets/test-gem/sig\)!, stdout.string)
       assert_match("It's done! 1 gems' RBSs now installed.", stdout.string)
     end
   end

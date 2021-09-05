@@ -333,6 +333,7 @@ singleton(::BasicObject)
 
           path: #{dir.join('gem_rbs_collection')}
         YAML
+        dir.join('Gemfile').write('')
         dir.join('Gemfile.lock').write(<<~LOCK)
           GEM
             remote: https://rubygems.org/
@@ -403,6 +404,7 @@ singleton(::BasicObject)
 
           path: #{dir.join('gem_rbs_collection')}
         YAML
+        dir.join('Gemfile').write('')
         dir.join('Gemfile.lock').write(<<~LOCK)
           GEM
             remote: https://rubygems.org/
