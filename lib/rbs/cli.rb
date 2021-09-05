@@ -831,7 +831,7 @@ EOB
 
       # @type var out: String
       # @type var err: String
-      out, err, status = Open3.capture3(env_hash, *args)
+      out, err, status = __skip__ = Open3.capture3(env_hash, *args)
       stdout.print(out)
       stderr.print(err)
 
@@ -843,7 +843,7 @@ EOB
 
       opts = collection_options(args)
       params = {}
-      opts.order args[1..], into: params
+      opts.order args.drop(1), into: params
       config_path = options.config_path or raise
       lock_path = Collection::Config.to_lockfile_path(config_path)
 

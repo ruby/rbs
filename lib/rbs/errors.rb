@@ -383,6 +383,8 @@ module RBS
         "include"
       when AST::Members::Extend
         "extend"
+      else
+        raise
       end
     end
   end
