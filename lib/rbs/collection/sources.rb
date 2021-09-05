@@ -8,7 +8,7 @@ module RBS
       def self.from_config_entry(source_entry)
         case source_entry['type']
         when 'git', nil # git source by default
-          Git.new(**(_=source_entry).slice('name', 'revision', 'remote', 'repo_dir').transform_keys(&:to_sym))
+          __skip__ = Git.new(**source_entry.slice('name', 'revision', 'remote', 'repo_dir').transform_keys(&:to_sym))
         when 'stdlib'
           Stdlib.instance
         when 'rubygems'
