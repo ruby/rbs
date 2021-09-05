@@ -9,7 +9,9 @@ IS_LATEST_RUBY = Gem::Version.new(RUBY_VERSION).yield_self do |ruby_version|
 end
 
 unless IS_LATEST_RUBY
-  STDERR.puts "⚠️⚠️⚠️⚠️ stdlib test assumes Ruby 3.0 but RUBY_VERSION==#{RUBY_VERSION} ⚠️⚠️⚠️⚠️"
+  unless ENV["CI"]
+    STDERR.puts "⚠️⚠️⚠️⚠️ stdlib test assumes Ruby 3.0 but RUBY_VERSION==#{RUBY_VERSION} ⚠️⚠️⚠️⚠️"
+  end
 end
 
 KNOWN_FAILS = %w(dbm).map do |lib|
