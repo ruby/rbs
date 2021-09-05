@@ -6,37 +6,55 @@ class ResolvHostsInstanceTest < Test::Unit::TestCase
   library 'resolv'
   testing '::Resolv::Hosts'
 
-  def hosts
-    Resolv::Hosts.new
+  def with_hosts
+    Tempfile.create do |f|
+      f.write(<<~HOSTS)
+        127.0.0.1 localhost
+      HOSTS
+      f.close
+      yield Resolv::Hosts.new(f.path)
+    end
   end
 
   def test_each_address
-    assert_send_type "(String) { (String) -> void } -> void",
-      hosts, :each_address, "localhost" do |c| c end
+    with_hosts do |hosts|
+      assert_send_type "(String) { (String) -> void } -> void",
+        hosts, :each_address, "localhost" do |c| c end
+    end
   end
 
   def test_each_name
-    assert_send_type "(String) { (String) -> void } -> void",
-      hosts, :each_name, "127.0.0.1"  do |c| c end
+    with_hosts do |hosts|
+      assert_send_type "(String) { (String) -> void } -> void",
+        hosts, :each_name, "127.0.0.1"  do |c| c end
+    end
   end
 
   def test_getaddress
-    assert_send_type "(String) -> String",
-      hosts, :getaddress, "localhost"
+    with_hosts do |hosts|
+      assert_send_type "(String) -> String",
+        hosts, :getaddress, "localhost"
+    end
   end
 
   def test_getaddresses
-    assert_send_type "(String) -> Array[String]",
-      hosts, :getaddresses, "localhost"
+    with_hosts do |hosts|
+      assert_send_type "(String) -> Array[String]",
+        hosts, :getaddresses, "localhost"
+    end
   end
 
   def test_getname
-    assert_send_type "(String) -> String",
-      hosts, :getname, "127.0.0.1"
+    with_hosts do |hosts|
+      assert_send_type "(String) -> String",
+        hosts, :getname, "127.0.0.1"
+    end
   end
 
   def test_getnames
-    assert_send_type "(String) -> Array[String]",
-      hosts, :getnames, "127.0.0.1"
+    with_hosts do |hosts|
+      assert_send_type "(String) -> Array[String]",
+        hosts, :getnames, "127.0.0.1"
+    end
   end
 end
