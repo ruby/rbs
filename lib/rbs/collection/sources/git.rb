@@ -135,7 +135,7 @@ module RBS
 
         private def sh!(*cmd)
           RBS.logger.debug "$ #{cmd.join(' ')}"
-          Open3.capture3(*cmd, chdir: git_dir).then do |out, err, status|
+          (__skip__ = Open3.capture3(*cmd, chdir: git_dir)).then do |out, err, status|
             raise CommandError, "Unexpected status #{status.exitstatus}\n\n#{err}" unless status.success?
 
             out
