@@ -799,8 +799,10 @@ class OpenSSLECTest < Test::Unit::TestCase
   testing "::OpenSSL::PKey::EC"
 
   def test_dh_compute_key
-    assert_send_type "(OpenSSL::PKey::EC::Point) -> String",
+    assert_send_type(
+      "(OpenSSL::PKey::EC::Point) -> String",
       pkey, :dh_compute_key, OpenSSL::PKey::EC.generate("prime256v1").public_key
+    )
   end
 
   def test_dsa_sign_verify_asn1

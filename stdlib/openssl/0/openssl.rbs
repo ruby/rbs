@@ -2028,7 +2028,7 @@ module OpenSSL
 
       def check_key: () -> true
 
-      def dh_compute_key: (instance public_key) -> String
+      def dh_compute_key: (Point public_key) -> String
 
       def dsa_sign_asn1: (String digest) -> String
 

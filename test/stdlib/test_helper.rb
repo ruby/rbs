@@ -260,7 +260,9 @@ module TypeAssertions
       self_class: receiver.class,
       builder: builder,
       sample_size: 100,
-      unchecked_classes: []
+      unchecked_classes: [],
+      instance_class: instance_class,
+      class_class: class_class
     )
     errors = typecheck.method_call(method, mt, trace.last, errors: [])
 
