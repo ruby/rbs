@@ -2,6 +2,15 @@
 
 ## master
 
+## 1.6.1 (2021-09-05)
+
+This is a minor release including test fixes.
+
+## Miscellaneous
+
+* Fix stdlib test for `Resolv::Hosts` by removing `/etc/hosts` dependency ([\#779](https://github.com/ruby/rbs/pull/779))
+* Fix bundler related test for test-bundled-gems ([\#778](https://github.com/ruby/rbs/pull/778))
+
 ## 1.6.0 (2021-09-05)
 
 This release includes a preview of `rbs collection` commands, which is _bundler for RBS_.
