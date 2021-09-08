@@ -3,12 +3,24 @@ require "rbs"
 require "tmpdir"
 require "stringio"
 require "open3"
+
+unless ENV["XDG_CACHE_HOME"]
+  tmpdir = Dir.mktmpdir("rbs-test-")
+  ENV["XDG_CACHE_HOME"] = tmpdir
+
+  at_exit do
+    FileUtils.rmtree(tmpdir)
+    ENV.delete("XDG_CACHE_HOME")
+  end
+end
+
 require "test/unit"
 
 begin
   require "amber"
 rescue LoadError
 end
+
 
 module TestHelper
   def has_gem?(*gems)
