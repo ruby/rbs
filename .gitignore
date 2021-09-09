@@ -6,7 +6,11 @@
 /pkg/
 /spec/reports/
 /tmp/
-/.ruby-version
+**/.ruby-version
+**/.rvmrc
+**/.rbfu-version
+**/.rbenv-version
+**/.versions.conf
 /lib/rbs/parser.output
 /vendor/sigs
 /Gemfile.lock
