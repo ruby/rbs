@@ -249,6 +249,7 @@ class Enumerator::Generator[out Elem] < Object
 end
 
 class Enumerator::Lazy[out Elem, out Return] < Enumerator[Elem, Return]
+  alias force to_a
 end
 
 class Enumerator::Yielder < Object
