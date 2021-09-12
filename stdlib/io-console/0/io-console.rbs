@@ -1,8 +1,8 @@
 class IO
   class ConsoleMode
-    def echo=: ((true | false)) -> (true | false)
-    def raw: (?min: int, ?time: int, ?intr: (true | false)) -> self
-    def raw!: (?min: int, ?time: int, ?intr: (true | false)) -> self
+    def echo=: (bool) -> bool
+    def raw: (?min: int, ?time: int, ?intr: bool) -> self
+    def raw!: (?min: int, ?time: int, ?intr: bool) -> self
   end
 
   # Returns an File instance opened console.
@@ -56,10 +56,10 @@ class IO
 
   # Enables/disables echo back. On some platforms, all combinations of this flags
   # and raw/cooked mode may not be valid.
-  def echo=: ((true | false) flag) -> (true | false)
+  def echo=: (bool flag) -> bool
 
   # Returns `true` if echo back is enabled.
-  def echo?: () -> (true | false)
+  def echo?: () -> bool
 
   def erase_line: (0 | 1 | 2 | nil) -> self
   def erase_screen: (0 | 1 | 2 | 3 | nil) -> self
@@ -67,7 +67,7 @@ class IO
   # Reads and returns a character in raw mode.
   #
   # See IO#raw for details on the parameters.
-  def getch: (?min: int, ?time: int, ?intr: (true | false)) -> String
+  def getch: (?min: int, ?time: int, ?intr: bool) -> String
 
   # Reads and returns a line without echo back.
   # Prints +prompt+ unless it is +nil+.
@@ -115,14 +115,14 @@ class IO
   # special characters.
   #
   # Refer to the manual page of termios for further details.
-  def raw: [T] (?min: int, ?time: int, ?intr: (true | false)) { (self) -> T } -> T
+  def raw: [T] (?min: int, ?time: int, ?intr: bool) { (self) -> T } -> T
 
   # Enables raw mode, and returns `io`.
   #
   # If the terminal mode needs to be back, use `io.raw { ... }`.
   #
   # See IO#raw for details on the parameters.
-  def raw!: (?min: int, ?time: int, ?intr: (true | false)) -> self
+  def raw!: (?min: int, ?time: int, ?intr: bool) -> self
 
   def scroll_backward: (int) -> self
   def scroll_forward: (int) -> self
