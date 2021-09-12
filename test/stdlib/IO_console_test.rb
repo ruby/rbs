@@ -33,10 +33,10 @@ class IOConsoleTest < Test::Unit::TestCase
   library 'io-console'
   testing "::IO"
 
-  def helper
+  private def helper
     m, s = PTY.open
   rescue RuntimeError
-    puts "no pty"
+    omit $!
   else
     yield m, s
   ensure
