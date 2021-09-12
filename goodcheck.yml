@@ -40,7 +40,7 @@ rules:
     glob:
       - "**/*.rbs"
     justification:
-      - When you strictly want `true | false`.
+      - When you strictly want `true | false`. Use `bool` in this case.
     pass:
       - "(arg: boolish)"
       - "{ () -> boolish }"
