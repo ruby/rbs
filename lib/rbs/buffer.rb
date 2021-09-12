@@ -46,5 +46,9 @@ module RBS
     def last_position
       content.size
     end
+
+    def inspect
+      "#<RBS::Buffer:#{__id__} @name=#{name}, @content=#{content.bytesize} bytes, @lines=#{lines.size} lines,>"
+    end
   end
 end

@@ -5,6 +5,7 @@ gemspec
 
 # Development dependencies
 gem "rake"
+gem "rake-compiler"
 gem "test-unit"
 gem "rspec"
 gem "racc"

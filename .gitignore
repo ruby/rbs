@@ -11,3 +11,4 @@
 /vendor/sigs
 /Gemfile.lock
 
+lib/**/*.bundle

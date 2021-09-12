@@ -38,7 +38,7 @@ module RBS
     def attribute: (:reader | :writer | :accessor, AST::Members::Attribute) -> void
 
     interface _Located
-      def location: () -> Location?
+      def location: () -> Location[untyped, untyped]?
     end
 
     def preserve_empty_line: (_Located?, _Located) -> void

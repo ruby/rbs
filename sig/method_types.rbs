@@ -3,9 +3,9 @@ module RBS
     attr_reader type_params: Array[Symbol]
     attr_reader type: Types::Function
     attr_reader block: Types::Block?
-    attr_reader location: Location?
+    attr_reader location: Location[untyped, untyped]?
 
-    def initialize: (type_params: Array[Symbol], type: Types::Function, block: Types::Block?, location: Location?) -> void
+    def initialize: (type_params: Array[Symbol], type: Types::Function, block: Types::Block?, location: Location[untyped, untyped]?) -> void
 
     def ==: (untyped other) -> bool
 
@@ -13,7 +13,7 @@ module RBS
 
     def sub: (Substitution) -> MethodType
 
-    def update: (?type_params: Array[Symbol], ?type: Types::Function, ?block: Types::Block?, ?location: Location?) -> MethodType
+    def update: (?type_params: Array[Symbol], ?type: Types::Function, ?block: Types::Block?, ?location: Location[untyped, untyped]?) -> MethodType
 
     def free_variables: (?Set[Symbol] set) -> Set[Symbol]
 

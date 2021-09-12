@@ -18,7 +18,7 @@ class RBS::TypesTest < Test::Unit::TestCase
     assert_equal "{ a: 1 }", parse_type("{ a: 1 }").to_s
     assert_equal "{ :+ => 1 }", parse_type("{ :+ => 1 }").to_s
     assert_equal '{ a: 1, 1 => 42, "foo" => untyped }', parse_type("{ a: 1, 1 => 42, 'foo' => untyped }").to_s
-    assert_equal '{ :type => untyped }', parse_type("{ :type => untyped }").to_s
+    assert_equal '{ type: untyped }', parse_type("{ :type => untyped }").to_s
     assert_equal "String | bool?", parse_type("String | bool?").to_s
     assert_equal "(String | bool)?", parse_type("(String | bool)?").to_s
     assert_equal "String & bool?", parse_type("String & bool?").to_s

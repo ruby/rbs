@@ -1,32 +1,22 @@
 module RBS
   class Parser
-    class SyntaxError < ParsingError
-      attr_reader token_str: String
-      attr_reader error_value: untyped
-      attr_reader value_stack: untyped?
+    def self.parse_method_type: (Buffer | String, ?line: Integer, ?column: Integer, ?variables: Array[Symbol]) -> MethodType
 
-      def initialize: (token_str: String, error_value: untyped, ?value_stack: untyped?) -> void
-    end
+    def self.parse_type: (Buffer | String, ?line: Integer, ?column: Integer, ?variables: Array[Symbol]) -> Types::t
 
-    class LexerError < ParsingError
-      attr_reader input: String
-      attr_reader location: Location
+    def self.parse_signature: (Buffer | String, ?line: Integer, ?column: Integer) -> Array[AST::Declarations::t]
 
-      def initialize: (input: String, location: Location) -> void
-    end
+    private
 
-    class SemanticsError < ParsingError
-      attr_reader subject: untyped
-      attr_reader location: Location
-      attr_reader original_message: String
+    def self.buffer: (String | Buffer source) -> Buffer
 
-      def initialize: (String message, subject: untyped, location: Location) -> void
-    end
+    %a{no-defn}
+    def self._parse_type: (Buffer, Integer line, Integer column, Array[Symbol] variables) -> Types::t
 
-    def self.parse_method_type: (String | Buffer, ?variables: Array[Symbol], ?eof_re: Regexp?) -> MethodType
+    %a{no-defn}
+    def self._parse_method_type: (Buffer, Integer line, Integer column, Array[Symbol] variables) -> MethodType
 
-    def self.parse_type: (String | Buffer, ?variables: Array[Symbol], ?eof_re: Regexp?) -> Types::t
-
-    def self.parse_signature: (String | Buffer, ?eof_re: Regexp?) -> Array[AST::Declarations::t]
+    %a{no-defn}
+    def self._parse_signature: (Buffer, Integer line, Integer column) -> Array[AST::Declarations::t]
   end
 end

@@ -23,31 +23,31 @@ EOF
           assert_equal({}, result.result)
         end
 
-        calculator.in_method_type(method_type: parse_method_type("(A) -> B", variables: Set[:A, :B]), variables: [:A, :B]).tap do |result|
+        calculator.in_method_type(method_type: parse_method_type("(A) -> B", variables: [:A, :B]), variables: [:A, :B]).tap do |result|
           assert_equal({ A: :contravariant, B: :covariant }, result.result)
         end
 
-        calculator.in_method_type(method_type: parse_method_type("(A) -> A", variables: Set[:A]), variables: [:A, :B]).tap do |result|
+        calculator.in_method_type(method_type: parse_method_type("(A) -> A", variables: [:A]), variables: [:A, :B]).tap do |result|
           assert_equal({ A: :invariant, B: :unused }, result.result)
         end
 
-        calculator.in_method_type(method_type: parse_method_type("() -> ::Foo[A, B, C]", variables: Set[:A, :B, :C]), variables: [:A, :B, :C]).tap do |result|
+        calculator.in_method_type(method_type: parse_method_type("() -> ::Foo[A, B, C]", variables: [:A, :B, :C]), variables: [:A, :B, :C]).tap do |result|
           assert_equal({ A: :covariant, B: :contravariant, C: :invariant }, result.result)
         end
 
-        calculator.in_method_type(method_type: parse_method_type("() -> [A, B]", variables: Set[:A, :B]), variables: [:A, :B]).tap do |result|
+        calculator.in_method_type(method_type: parse_method_type("() -> [A, B]", variables: [:A, :B]), variables: [:A, :B]).tap do |result|
           assert_equal({ A: :covariant, B: :covariant }, result.result)
         end
 
-        calculator.in_method_type(method_type: parse_method_type("() -> { foo: A }", variables: Set[:A]), variables: [:A]).tap do |result|
+        calculator.in_method_type(method_type: parse_method_type("() -> { foo: A }", variables: [:A]), variables: [:A]).tap do |result|
           assert_equal({ A: :covariant }, result.result)
         end
 
-        calculator.in_method_type(method_type: parse_method_type("(A&B) -> void", variables: Set[:A, :B]), variables: [:A, :B]).tap do |result|
+        calculator.in_method_type(method_type: parse_method_type("(A&B) -> void", variables: [:A, :B]), variables: [:A, :B]).tap do |result|
           assert_equal({ A: :contravariant, B: :contravariant }, result.result)
         end
 
-        calculator.in_method_type(method_type: parse_method_type("() -> ::Foo[A, B, C, D]", variables: Set[:A, :B, :C, :D]), variables: [:A, :B, :C, :D]).tap do |result|
+        calculator.in_method_type(method_type: parse_method_type("() -> ::Foo[A, B, C, D]", variables: [:A, :B, :C, :D]), variables: [:A, :B, :C, :D]).tap do |result|
           assert_equal({ A: :covariant, B: :contravariant, C: :invariant, D: :unused }, result.result)
         end
       end

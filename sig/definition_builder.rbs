@@ -14,7 +14,7 @@ module RBS
 
     def validate_super_class!: (TypeName, Environment::ClassEntry) -> void
 
-    def ensure_namespace!: (Namespace, location: Location?) -> void
+    def ensure_namespace!: (Namespace, location: Location[untyped, untyped]?) -> void
 
     def build_interface: (TypeName) -> Definition
 
@@ -37,7 +37,7 @@ module RBS
 
     def validate_type_params: (Definition, ancestors: AncestorBuilder::OneAncestors, methods: MethodBuilder::Methods) -> void
 
-    def source_location: (Definition::Ancestor::Instance::source, AST::Declarations::t) -> Location?
+    def source_location: (Definition::Ancestor::Instance::source, AST::Declarations::t) -> Location[untyped, untyped]?
 
     def insert_variable: (TypeName, Hash[Symbol, Definition::Variable], name: Symbol, type: Types::t) -> void
 

@@ -102,7 +102,7 @@ end
 
   def test_escape
     assert_writer <<-SIG
-interface _Each[X, Y]
+module XYZZY[X, Y]
   def []: () -> void
 
   def []=: () -> void
@@ -113,9 +113,9 @@ interface _Each[X, Y]
 
   def def: () -> Symbol
 
-  def `self`: () -> void
+  def self: () -> void
 
-  def `self?`: () -> void
+  def self?: () -> void
 
   def timeout: () -> Integer
 
@@ -219,14 +219,16 @@ end
 
   def test_smoke
     Pathname.glob('{stdlib,core,sig}/**/*.rbs').each do |path|
-      orig_decls = RBS::Parser.parse_signature(path.read)
+      orig_decls = RBS::Parser.parse_signature(
+        RBS::Buffer.new(name: path, content: path.read)
+      )
 
       io = StringIO.new
       w = RBS::Writer.new(out: io)
       w.write(orig_decls)
-      decls = RBS::Parser.parse_signature(io.string)
+      decls = RBS::Parser.parse_signature(RBS::Buffer.new(name: path, content: io.string))
 
-      assert_equal orig_decls, decls
+      assert_equal orig_decls, decls, "(#{path})"
     end
   end
 end

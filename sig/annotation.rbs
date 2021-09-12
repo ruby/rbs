@@ -10,9 +10,9 @@ module RBS
     #
     class Annotation
       attr_reader string: String
-      attr_reader location: Location?
+      attr_reader location: Location[untyped, untyped]?
 
-      def initialize: (string: String, location: Location?) -> void
+      def initialize: (string: String, location: Location[untyped, untyped]?) -> void
 
       def ==: (untyped other) -> bool
 
