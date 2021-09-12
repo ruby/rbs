@@ -39,7 +39,7 @@ class IO
   #     STDIN.cooked(&:gets)
   #
   # will read and return a line with echo back and line editing.
-  def cooked: () { (self) -> void } -> void
+  def cooked: [T] () { (self) -> T } -> T
 
   # Enables cooked mode.
   #
@@ -92,7 +92,7 @@ class IO
   #     STDIN.noecho(&:gets)
   #
   # will read and return a line without echo back.
-  def noecho: () { (self) -> void } -> void
+  def noecho: [T] () { (self) -> T } -> T
 
   # Flushes output buffer in kernel.
   def oflush: () -> self
@@ -115,7 +115,7 @@ class IO
   # special characters.
   #
   # Refer to the manual page of termios for further details.
-  def raw: (?min: int, ?time: int, ?intr: (true | false)) { (self) -> void } -> void
+  def raw: [T] (?min: int, ?time: int, ?intr: (true | false)) { (self) -> T } -> T
 
   # Enables raw mode, and returns `io`.
   #
