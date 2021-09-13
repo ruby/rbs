@@ -2,6 +2,12 @@
 
 ## master
 
+## 1.7.0 (beta.1)
+
+## Library changes
+
+* Replace RBS::Parser ([#788](https://github.com/ruby/rbs/pull/788))
+
 ## 1.6.2 (2021-09-09)
 
 ## Signature updates
