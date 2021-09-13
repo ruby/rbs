@@ -1449,6 +1449,7 @@ VALUE parse_member_def(parserstate *state, bool instance_only, bool accept_overl
         parser_advance(state);
         loop = false;
         overload_range = state->current_token.range;
+        member_range.end = overload_range.end;
         break;
       } else {
         raise_syntax_error(
