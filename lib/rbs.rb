@@ -46,7 +46,7 @@ require "rbs/locator"
 require "rbs/type_alias_dependency"
 require "rbs/collection"
 
-require "rbs/extension"
+require "rbs_extension"
 require "rbs/parser_aux"
 require "rbs/location_aux"
 

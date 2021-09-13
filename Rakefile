@@ -9,7 +9,7 @@ ruby = ENV["RUBY"] || RbConfig.ruby
 rbs = File.join(__dir__, "exe/rbs")
 bin = File.join(__dir__, "bin")
 
-Rake::ExtensionTask.new("rbs/extension")
+Rake::ExtensionTask.new("rbs_extension")
 
 Rake::TestTask.new(:test => :compile) do |t|
   t.libs << "test"
