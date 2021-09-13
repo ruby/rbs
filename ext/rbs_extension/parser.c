@@ -2281,6 +2281,9 @@ VALUE parse_nested_decl(parserstate *state, const char *nested_in, position anno
   case pCOLON2:
     decl = parse_const_decl(state);
     break;
+  case tGIDENT:
+    decl = parse_global_decl(state);
+    break;
   case kTYPE:
     decl = parse_type_decl(state, annot_pos, annotations);
     break;
