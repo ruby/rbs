@@ -482,8 +482,8 @@ module Kernel : BasicObject
                    | [:child, int] # redirect to the redirected file descriptor
                    | :close # close the file descriptor in child process
 
-  def self?.spawn: (String command, *String args, ?unsetenv_others: boolish, ?pgroup?: (true | Integer), ?umask: Integer, ?in: redirect_fd, ?out: redirect_fd, ?err: redirect_fd, ?close_others: boolish, ?chdir: String) -> Integer
-                 | (Hash[string, string?] env, String command, *String args, ?unsetenv_others: boolish, ?pgroup?: (true | Integer), ?umask: Integer, ?in: redirect_fd, ?out: redirect_fd, ?err: redirect_fd, ?close_others: boolish, ?chdir: String) -> Integer
+  def self?.spawn: (String command, *String args, ?unsetenv_others: boolish, ?pgroup: (true | Integer), ?umask: Integer, ?in: redirect_fd, ?out: redirect_fd, ?err: redirect_fd, ?close_others: boolish, ?chdir: String) -> Integer
+                 | (Hash[string, string?] env, String command, *String args, ?unsetenv_others: boolish, ?pgroup: (true | Integer), ?umask: Integer, ?in: redirect_fd, ?out: redirect_fd, ?err: redirect_fd, ?close_others: boolish, ?chdir: String) -> Integer
 
   # Executes *command…* in a subshell. *command…* is one of following forms.
   #
@@ -510,8 +510,8 @@ module Kernel : BasicObject
   #     *
   #
   # See `Kernel.exec` for the standard shell.
-  def self?.system: (String command, *String args, ?unsetenv_others: boolish, ?pgroup?: (true | Integer), ?umask: Integer, ?in: redirect_fd, ?out: redirect_fd, ?err: redirect_fd, ?close_others: boolish, ?chdir: String) -> (NilClass | FalseClass | TrueClass)
-                  | (Hash[string, string?] env, String command, *String args, ?unsetenv_others: boolish, ?pgroup?: (true | Integer), ?umask: Integer, ?in: redirect_fd, ?out: redirect_fd, ?err: redirect_fd, ?close_others: boolish, ?chdir: String) -> (NilClass | FalseClass | TrueClass)
+  def self?.system: (String command, *String args, ?unsetenv_others: boolish, ?pgroup: (true | Integer), ?umask: Integer, ?in: redirect_fd, ?out: redirect_fd, ?err: redirect_fd, ?close_others: boolish, ?chdir: String) -> (NilClass | FalseClass | TrueClass)
+                  | (Hash[string, string?] env, String command, *String args, ?unsetenv_others: boolish, ?pgroup: (true | Integer), ?umask: Integer, ?in: redirect_fd, ?out: redirect_fd, ?err: redirect_fd, ?close_others: boolish, ?chdir: String) -> (NilClass | FalseClass | TrueClass)
 end
 
 Kernel::RUBYGEMS_ACTIVATION_MONITOR: untyped

@@ -172,16 +172,19 @@ module RBS
 
     def find_in_loc(pos, location:, array:)
       if test_loc(pos, location: location)
-        if location.is_a?(Location::WithChildren)
-          location.optional_children.each do |key, range|
-            if range === pos
-              array.unshift(key)
-              return true
+        if location.is_a?(Location)
+          location.each_optional_key do |key|
+            if loc = location[key]
+              if loc.range === pos
+                array.unshift(key)
+                return true
+              end
             end
           end
 
-          location.required_children.each do |key, range|
-            if range === pos
+          location.each_required_key do |key|
+            loc = location[key] or raise
+            if loc.range === pos
               array.unshift(key)
               return true
             end

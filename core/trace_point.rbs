@@ -286,5 +286,5 @@ class TracePoint < Object
   # Same as TracePoint#binding:
   #     trace.binding.eval('self')
   #
-  def `self`: () -> Binding
+  def self: () -> Binding
 end

@@ -22,18 +22,6 @@ module RBS
       def to_json(state = _ = nil)
         { string: string, location: location }.to_json(state)
       end
-
-      def concat(string:, location:)
-        @string.concat string
-
-        if loc = @location
-          loc.concat location
-        else
-          @location = location
-        end
-
-        self
-      end
     end
   end
 end

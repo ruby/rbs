@@ -25,7 +25,7 @@ class RBS::SignatureParsingTest < Test::Unit::TestCase
       assert_equal "type Steep::foo = untyped", type_decl.location.source
     end
 
-    assert_raises Parser::SyntaxError do
+    assert_raises RBS::ParsingError do
       Parser.parse_signature(<<~RBS)
         type Foo = untyped
       RBS
@@ -156,7 +156,7 @@ class RBS::SignatureParsingTest < Test::Unit::TestCase
       end
     end
 
-    assert_raises Parser::SemanticsError do
+    assert_raises RBS::ParsingError do
       Parser.parse_signature(<<~SIG)
         interface _Each[A, B]
           def self.foo: -> void
@@ -164,7 +164,7 @@ class RBS::SignatureParsingTest < Test::Unit::TestCase
       SIG
     end
 
-    assert_raises Parser::SemanticsError do
+    assert_raises RBS::ParsingError do
       Parser.parse_signature(<<~SIG)
         interface _Each[A, B]
           include Object
@@ -452,27 +452,8 @@ end
     end
   end
 
-  def test_incompatible_method_definition
-    # `incompatible` is ignored with warning message.
-    silence_warnings do
-      Parser.parse_signature(<<~SIG).yield_self do |decls|
-      class Foo
-        incompatible def foo: () -> Integer
-      end
-     SIG
-        assert_equal 1, decls.size
-
-        decls[0].yield_self do |decl|
-          assert_instance_of Declarations::Class, decl
-
-          assert_instance_of Members::MethodDefinition, decl.members[0]
-        end
-      end
-    end
-  end
-
   def test_method_super
-    assert_raises Parser::SyntaxError do
+    assert_raises RBS::ParsingError do
       Parser.parse_signature(<<~SIG)
       class Foo
         def foo: -> void
@@ -575,7 +556,7 @@ end
         def attr_reader: -> untyped
         def attr_accessor: -> untyped
         def attr_writer: -> untyped
-        def `\\``: -> untyped
+        def `: -> untyped
         def def!: -> untyped
         def !: -> untyped
         def _foo?: -> untyped
@@ -1096,21 +1077,6 @@ EOF
     end
   end
 
-  def test_overload_def_deprecated
-    silence_warnings do
-      Parser.parse_signature(<<EOF).yield_self do |decls|
-module Steep
-  overload def to_s: (Integer) -> String
-end
-EOF
-        decls[0].members[0].tap do |member|
-          assert_instance_of Members::MethodDefinition, member
-          assert_predicate member, :overload?
-        end
-      end
-    end
-  end
-
   def test_generics_type_parameter
     Parser.parse_signature(<<EOF).yield_self do |decls|
 module A[T]
@@ -1146,14 +1112,14 @@ EOF
   end
 
   def test_syntax_error_on_eof
-    ex = assert_raises Parser::SyntaxError do
+    ex = assert_raises RBS::ParsingError do
       Parser.parse_signature(<<~SIG)
       class Foo
       SIG
     end
-    loc = ex.error_value.location
-    assert_equal 1, loc.start_line
-    assert_equal 9, loc.start_column
+    loc = ex.location
+    assert_equal 2, loc.start_line
+    assert_equal 0, loc.start_column
   end
 
   def test_empty
@@ -1197,7 +1163,7 @@ module A
 end
     EOF
       decls[0].members[0].tap do |foo|
-        assert_instance_of Location::WithChildren, foo.location
+        assert_instance_of Location, foo.location
 
         assert_equal "def", foo.location[:keyword].source
         assert_equal "foo", foo.location[:name].source
@@ -1206,7 +1172,7 @@ end
       end
 
       decls[0].members[1].tap do |foo|
-        assert_instance_of Location::WithChildren, foo.location
+        assert_instance_of Location, foo.location
 
         assert_equal "def", foo.location[:keyword].source
         assert_equal "bar", foo.location[:name].source
@@ -1226,7 +1192,7 @@ module A
 end
     EOF
       decls[0].members[0].tap do |foo|
-        assert_instance_of Location::WithChildren, foo.location
+        assert_instance_of Location, foo.location
 
         assert_equal "@foo", foo.location[:name].source
         assert_equal ":", foo.location[:colon].source
@@ -1234,7 +1200,7 @@ end
       end
 
       decls[0].members[1].tap do |foo|
-        assert_instance_of Location::WithChildren, foo.location
+        assert_instance_of Location, foo.location
 
         assert_equal "@bar", foo.location[:name].source
         assert_equal ":", foo.location[:colon].source
@@ -1242,7 +1208,7 @@ end
       end
 
       decls[0].members[2].tap do |foo|
-        assert_instance_of Location::WithChildren, foo.location
+        assert_instance_of Location, foo.location
 
         assert_equal "@@baz", foo.location[:name].source
         assert_equal ":", foo.location[:colon].source
@@ -1264,7 +1230,7 @@ end
     RBS
 
       decls[0].members[0].tap do |foo|
-        assert_instance_of Location::WithChildren, foo.location
+        assert_instance_of Location, foo.location
 
         assert_equal "attr_reader", foo.location[:keyword].source
         assert_equal "reader1", foo.location[:name].source
@@ -1275,7 +1241,7 @@ end
       end
 
       decls[0].members[1].tap do |foo|
-        assert_instance_of Location::WithChildren, foo.location
+        assert_instance_of Location, foo.location
 
         assert_equal "attr_reader", foo.location[:keyword].source
         assert_equal "reader2", foo.location[:name].source
@@ -1286,7 +1252,7 @@ end
       end
 
       decls[0].members[2].tap do |foo|
-        assert_instance_of Location::WithChildren, foo.location
+        assert_instance_of Location, foo.location
 
         assert_equal "attr_reader", foo.location[:keyword].source
         assert_equal "reader3", foo.location[:name].source
@@ -1297,7 +1263,7 @@ end
       end
 
       decls[0].members[3].tap do |foo|
-        assert_instance_of Location::WithChildren, foo.location
+        assert_instance_of Location, foo.location
 
         assert_equal "attr_reader", foo.location[:keyword].source
         assert_equal "reader4", foo.location[:name].source
@@ -1308,7 +1274,7 @@ end
       end
 
       decls[0].members[4].tap do |foo|
-        assert_instance_of Location::WithChildren, foo.location
+        assert_instance_of Location, foo.location
 
         assert_equal "attr_reader", foo.location[:keyword].source
         assert_equal "reader5", foo.location[:name].source
@@ -1319,7 +1285,7 @@ end
       end
 
       decls[0].members[5].tap do |foo|
-        assert_instance_of Location::WithChildren, foo.location
+        assert_instance_of Location, foo.location
 
         assert_equal "attr_reader", foo.location[:keyword].source
         assert_equal "reader6", foo.location[:name].source
@@ -1342,7 +1308,7 @@ end
     RBS
 
       decls[0].members[0].tap do |attr|
-        assert_instance_of Location::WithChildren, attr.location
+        assert_instance_of Location, attr.location
 
         assert_equal "attr_writer", attr.location[:keyword].source
         assert_equal "attr1", attr.location[:name].source
@@ -1353,7 +1319,7 @@ end
       end
 
       decls[0].members[1].tap do |foo|
-        assert_instance_of Location::WithChildren, foo.location
+        assert_instance_of Location, foo.location
 
         assert_equal "attr_writer", foo.location[:keyword].source
         assert_equal "attr2", foo.location[:name].source
@@ -1364,7 +1330,7 @@ end
       end
 
       decls[0].members[2].tap do |foo|
-        assert_instance_of Location::WithChildren, foo.location
+        assert_instance_of Location, foo.location
 
         assert_equal "attr_writer", foo.location[:keyword].source
         assert_equal "attr3", foo.location[:name].source
@@ -1375,7 +1341,7 @@ end
       end
 
       decls[0].members[3].tap do |foo|
-        assert_instance_of Location::WithChildren, foo.location
+        assert_instance_of Location, foo.location
 
         assert_equal "attr_writer", foo.location[:keyword].source
         assert_equal "attr4", foo.location[:name].source
@@ -1386,7 +1352,7 @@ end
       end
 
       decls[0].members[4].tap do |foo|
-        assert_instance_of Location::WithChildren, foo.location
+        assert_instance_of Location, foo.location
 
         assert_equal "attr_writer", foo.location[:keyword].source
         assert_equal "attr5", foo.location[:name].source
@@ -1397,7 +1363,7 @@ end
       end
 
       decls[0].members[5].tap do |foo|
-        assert_instance_of Location::WithChildren, foo.location
+        assert_instance_of Location, foo.location
 
         assert_equal "attr_writer", foo.location[:keyword].source
         assert_equal "attr6", foo.location[:name].source
@@ -1420,7 +1386,7 @@ end
     RBS
 
       decls[0].members[0].tap do |attr|
-        assert_instance_of Location::WithChildren, attr.location
+        assert_instance_of Location, attr.location
 
         assert_equal "attr_accessor", attr.location[:keyword].source
         assert_equal "attr1", attr.location[:name].source
@@ -1431,7 +1397,7 @@ end
       end
 
       decls[0].members[1].tap do |foo|
-        assert_instance_of Location::WithChildren, foo.location
+        assert_instance_of Location, foo.location
 
         assert_equal "attr_accessor", foo.location[:keyword].source
         assert_equal "attr2", foo.location[:name].source
@@ -1442,7 +1408,7 @@ end
       end
 
       decls[0].members[2].tap do |foo|
-        assert_instance_of Location::WithChildren, foo.location
+        assert_instance_of Location, foo.location
 
         assert_equal "attr_accessor", foo.location[:keyword].source
         assert_equal "attr3", foo.location[:name].source
@@ -1453,7 +1419,7 @@ end
       end
 
       decls[0].members[3].tap do |foo|
-        assert_instance_of Location::WithChildren, foo.location
+        assert_instance_of Location, foo.location
 
         assert_equal "attr_accessor", foo.location[:keyword].source
         assert_equal "attr4", foo.location[:name].source
@@ -1464,7 +1430,7 @@ end
       end
 
       decls[0].members[4].tap do |foo|
-        assert_instance_of Location::WithChildren, foo.location
+        assert_instance_of Location, foo.location
 
         assert_equal "attr_accessor", foo.location[:keyword].source
         assert_equal "attr5", foo.location[:name].source
@@ -1475,7 +1441,7 @@ end
       end
 
       decls[0].members[5].tap do |foo|
-        assert_instance_of Location::WithChildren, foo.location
+        assert_instance_of Location, foo.location
 
         assert_equal "attr_accessor", foo.location[:keyword].source
         assert_equal "attr6", foo.location[:name].source
@@ -1496,7 +1462,7 @@ end
     RBS
 
       decls[0].members[0].tap do |foo|
-        assert_instance_of Location::WithChildren, foo.location
+        assert_instance_of Location, foo.location
 
         assert_equal "alias", foo.location[:keyword].source
         assert_equal "foo", foo.location[:new_name].source
@@ -1506,7 +1472,7 @@ end
       end
 
       decls[0].members[1].tap do |foo|
-        assert_instance_of Location::WithChildren, foo.location
+        assert_instance_of Location, foo.location
 
         assert_equal "alias", foo.location[:keyword].source
         assert_equal "foo", foo.location[:new_name].source
@@ -1531,7 +1497,7 @@ module A
 end
     EOF
       decls[0].members[0].tap do |foo|
-        assert_instance_of Location::WithChildren, foo.location
+        assert_instance_of Location, foo.location
 
         assert_equal "include", foo.location[:keyword].source
         assert_equal "_Foo", foo.location[:name].source
@@ -1539,7 +1505,7 @@ end
       end
 
       decls[0].members[1].tap do |foo|
-        assert_instance_of Location::WithChildren, foo.location
+        assert_instance_of Location, foo.location
 
         assert_equal "include", foo.location[:keyword].source
         assert_equal "_Bar", foo.location[:name].source
@@ -1547,7 +1513,7 @@ end
       end
 
       decls[0].members[2].tap do |foo|
-        assert_instance_of Location::WithChildren, foo.location
+        assert_instance_of Location, foo.location
 
         assert_equal "extend", foo.location[:keyword].source
         assert_equal "Foo", foo.location[:name].source
@@ -1555,7 +1521,7 @@ end
       end
 
       decls[0].members[3].tap do |foo|
-        assert_instance_of Location::WithChildren, foo.location
+        assert_instance_of Location, foo.location
 
         assert_equal "extend", foo.location[:keyword].source
         assert_equal "Bar", foo.location[:name].source
@@ -1563,7 +1529,7 @@ end
       end
 
       decls[0].members[4].tap do |foo|
-        assert_instance_of Location::WithChildren, foo.location
+        assert_instance_of Location, foo.location
 
         assert_equal "prepend", foo.location[:keyword].source
         assert_equal "Foo", foo.location[:name].source
@@ -1571,7 +1537,7 @@ end
       end
 
       decls[0].members[5].tap do |foo|
-        assert_instance_of Location::WithChildren, foo.location
+        assert_instance_of Location, foo.location
 
         assert_equal "prepend", foo.location[:keyword].source
         assert_equal "Bar", foo.location[:name].source
@@ -1589,7 +1555,7 @@ interface _B[X, unchecked in Y]
 end
     EOF
       decls[0].tap do |decl|
-        assert_instance_of Location::WithChildren, decl.location
+        assert_instance_of Location, decl.location
 
         assert_equal "interface", decl.location[:keyword].source
         assert_equal "_A", decl.location[:name].source
@@ -1598,7 +1564,7 @@ end
       end
 
       decls[1].tap do |decl|
-        assert_instance_of Location::WithChildren, decl.location
+        assert_instance_of Location, decl.location
 
         assert_equal "interface", decl.location[:keyword].source
         assert_equal "_B", decl.location[:name].source
@@ -1606,7 +1572,7 @@ end
         assert_equal "[X, unchecked in Y]", decl.location[:type_params].source
 
         decl.type_params[:X].tap do |param|
-          assert_instance_of Location::WithChildren, param.location
+          assert_instance_of Location, param.location
 
           assert_equal "X", param.location[:name].source
           assert_nil param.location[:variance]
@@ -1614,7 +1580,7 @@ end
         end
 
         decl.type_params[:Y].tap do |param|
-          assert_instance_of Location::WithChildren, param.location
+          assert_instance_of Location, param.location
 
           assert_equal "Y", param.location[:name].source
           assert_equal "in", param.location[:variance].source
@@ -1635,7 +1601,7 @@ end
 module C: BasicObject end
     EOF
       decls[0].tap do |decl|
-        assert_instance_of Location::WithChildren, decl.location
+        assert_instance_of Location, decl.location
 
         assert_equal "module", decl.location[:keyword].source
         assert_equal "A", decl.location[:name].source
@@ -1646,7 +1612,7 @@ module C: BasicObject end
       end
 
       decls[1].tap do |decl|
-        assert_instance_of Location::WithChildren, decl.location
+        assert_instance_of Location, decl.location
 
         assert_equal "module", decl.location[:keyword].source
         assert_equal "B", decl.location[:name].source
@@ -1657,7 +1623,7 @@ module C: BasicObject end
       end
 
       decls[2].tap do |decl|
-        assert_instance_of Location::WithChildren, decl.location
+        assert_instance_of Location, decl.location
 
         assert_equal "module", decl.location[:keyword].source
         assert_equal "C", decl.location[:name].source
@@ -1678,7 +1644,7 @@ class B[X] < Foo[X]
 end
     EOF
       decls[0].tap do |decl|
-        assert_instance_of Location::WithChildren, decl.location
+        assert_instance_of Location, decl.location
 
         assert_equal "class", decl.location[:keyword].source
         assert_equal "A", decl.location[:name].source
@@ -1688,7 +1654,7 @@ end
       end
 
       decls[1].tap do |decl|
-        assert_instance_of Location::WithChildren, decl.location
+        assert_instance_of Location, decl.location
 
         assert_equal "class", decl.location[:keyword].source
         assert_equal "B", decl.location[:name].source
@@ -1709,21 +1675,21 @@ A::B : String
 $B: Integer
     EOF
       decls[0].tap do |decl|
-        assert_instance_of Location::WithChildren, decl.location
+        assert_instance_of Location, decl.location
 
         assert_equal "X", decl.location[:name].source
         assert_equal ":", decl.location[:colon].source
       end
 
       decls[1].tap do |decl|
-        assert_instance_of Location::WithChildren, decl.location
+        assert_instance_of Location, decl.location
 
         assert_equal "A::B", decl.location[:name].source
         assert_equal ":", decl.location[:colon].source
       end
 
       decls[2].tap do |decl|
-        assert_instance_of Location::WithChildren, decl.location
+        assert_instance_of Location, decl.location
 
         assert_equal "$B", decl.location[:name].source
         assert_equal ":", decl.location[:colon].source
@@ -1736,7 +1702,7 @@ $B: Integer
 type foo = Integer
     EOF
       decls[0].tap do |decl|
-        assert_instance_of Location::WithChildren, decl.location
+        assert_instance_of Location, decl.location
 
         assert_equal "type", decl.location[:keyword].source
         assert_equal "foo", decl.location[:name].source
@@ -1746,7 +1712,7 @@ type foo = Integer
   end
 
   def test_interface_name
-    assert_raises RBS::Parser::SyntaxError do
+    assert_raises RBS::ParsingError do
       Parser.parse_signature(<<-RBS)
 interface _foo end
       RBS
@@ -1770,7 +1736,7 @@ end
   end
 
   def test_underscore_type_name
-    assert_raises RBS::Parser::SyntaxError do
+    assert_raises RBS::ParsingError do
       Parser.parse_signature(<<-RBS)
 type _foo = Integer
       RBS
@@ -1778,8 +1744,8 @@ type _foo = Integer
   end
 
   def test_underscore_qualified_name
-    assert_raises RBS::Parser::SyntaxError do
-      Parser.parse_signature(<<-RBS)
+    assert_raises RBS::ParsingError do
+      pp Parser.parse_signature(<<-RBS)
 type x = Foo::_bar
       RBS
     end

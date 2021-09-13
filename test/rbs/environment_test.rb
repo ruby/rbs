@@ -307,8 +307,6 @@ module Foo : _Each[String]
 
   type t = ::String | String
 
-  $size: Integer
-
   class String
   end
 
@@ -365,8 +363,6 @@ module ::Foo : ::Foo::_Each[::Foo::String]
   ::Foo::VERSION: ::String
 
   type ::Foo::t = ::String | ::Foo::String
-
-  $size: Integer
 
   class ::Foo::String
   end

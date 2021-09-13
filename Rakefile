@@ -1,15 +1,17 @@
 require "bundler/gem_tasks"
 require "rake/testtask"
 require "rbconfig"
+require 'rake/extensiontask'
 
 $LOAD_PATH << File.join(__dir__, "test")
 
 ruby = ENV["RUBY"] || RbConfig.ruby
-racc = ENV.fetch("RACC", "racc")
 rbs = File.join(__dir__, "exe/rbs")
 bin = File.join(__dir__, "bin")
 
-Rake::TestTask.new(:test) do |t|
+Rake::ExtensionTask.new("rbs/extension")
+
+Rake::TestTask.new(:test => :compile) do |t|
   t.libs << "test"
   t.libs << "lib"
   t.test_files = FileList["test/**/*_test.rb"].reject do |path|
@@ -19,7 +21,7 @@ end
 
 multitask :default => [:test, :stdlib_test, :rubocop, :validate, :test_doc]
 
-task :test_doc => :parser do
+task :test_doc do
   files = Dir.chdir(File.expand_path('..', __FILE__)) do
     `git ls-files -z`.split("\x0").select do |file| Pathname(file).extname == ".md" end
   end
@@ -27,7 +29,7 @@ task :test_doc => :parser do
   sh "#{ruby} #{__dir__}/bin/run_in_md.rb #{files.join(" ")}"
 end
 
-task :validate => :parser do
+task :validate => :compile do
   sh "#{ruby} #{rbs} validate --silent"
 
   FileList["stdlib/*"].each do |path|
@@ -72,7 +74,7 @@ task :validate => :parser do
 end
 
 FileList["test/stdlib/**/*_test.rb"].each do |test|
-  task test => :parser do
+  task test => :compile do
     sh "#{ruby} -Ilib #{bin}/test_runner.rb #{test}"
   end
   task stdlib_test: test
@@ -80,21 +82,6 @@ end
 
 task :rubocop do
   sh "rubocop --parallel"
-end
-
-rule ".rb" => ".y" do |t|
-  sh "#{racc} -v -o #{t.name} #{t.source}"
-end
-
-task :parser => "lib/rbs/parser.rb"
-task :test => :parser
-task :stdlib_test => :parser
-task :build => :parser
-
-task :confirm_parser do
-  puts "Testing if parser.rb is updated with respect to parser.y"
-  sh "#{racc} -v -o lib/rbs/parser.rb lib/rbs/parser.y"
-  sh "git diff --exit-code lib/rbs/parser.rb"
 end
 
 namespace :generate do
@@ -225,5 +212,3 @@ task :test_generate_stdlib do
   sh "RBS_GENERATE_TEST_PATH=/tmp/Array_test.rb rake 'generate:stdlib_test[Array]'"
   sh "ruby -c /tmp/Array_test.rb"
 end
-
-CLEAN.include("lib/rbs/parser.rb")

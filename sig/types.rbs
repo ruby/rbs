@@ -13,7 +13,7 @@ module RBS
       def sub: (Substitution) -> t
 
       # Maps type names included in the type and returns new instance of type.
-      def map_type_name: () { (TypeName, Location?, t) -> TypeName } -> t
+      def map_type_name: () { (TypeName, Location[untyped, untyped]?, t) -> TypeName } -> t
 
       # Yields all direct sub types included in the type.
       # It doesn't yield the type itself.
@@ -58,16 +58,16 @@ module RBS
     end
 
     module NoTypeName
-      def map_type_name: () { (TypeName, Location?, t) -> TypeName } -> self
+      def map_type_name: () { (TypeName, Location[untyped, untyped]?, t) -> TypeName } -> self
     end
 
     module Bases
       class Base
         include _TypeBase
 
-        attr_reader location: Location?
+        attr_reader location: Location[bot, bot]?
 
-        def initialize: (location: Location?) -> void
+        def initialize: (location: Location[bot, bot]?) -> void
 
         def ==: (untyped other) -> bool
 
@@ -111,6 +111,8 @@ module RBS
     end
 
     class Variable
+      type loc = Location[bot, bot]
+
       attr_reader name: Symbol
 
       @@count: Integer
@@ -119,9 +121,9 @@ module RBS
       include NoTypeName
       include EmptyEachType
 
-      def initialize: (name: Symbol, location: Location?) -> void
+      def initialize: (name: Symbol, location: loc?) -> void
 
-      attr_reader location: Location?
+      attr_reader location: loc?
 
       def ==: (untyped other) -> bool
 
@@ -144,7 +146,7 @@ module RBS
     class ClassSingleton
       # singleton(::Foo)
       #           ^^^^^  => name
-      type loc = Location::WithChildren[:name, bot]
+      type loc = Location[:name, bot]
 
       def initialize: (name: TypeName, location: loc?) -> void
 
@@ -189,7 +191,7 @@ module RBS
       # _Foo[Bar, Baz]
       # ^^^^           => name
       #     ^^^^^^^^^^ => args
-      type loc = Location::WithChildren[:name, :args]
+      type loc = Location[:name, :args]
 
       def initialize: (name: TypeName, args: Array[t], location: loc?) -> void
 
@@ -214,7 +216,8 @@ module RBS
       # Foo[Bar, Baz]
       # ^^^           => name
       #    ^^^^^^^^^^ => args
-      type loc = Location::WithChildren[:name, :args]
+      #
+      type loc = Location[:name, :args]
 
       def initialize: (name: TypeName, args: Array[t], location: loc?) -> void
 
@@ -226,54 +229,64 @@ module RBS
     class Alias
       attr_reader name: TypeName
 
-      def initialize: (name: TypeName, location: Location?) -> void
+      type loc = Location[bot, bot]
+
+      def initialize: (name: TypeName, location: loc?) -> void
 
       include _TypeBase
       include NoFreeVariables
       include NoSubst
       include EmptyEachType
 
-      attr_reader location: Location?
+      attr_reader location: loc?
     end
 
     class Tuple
       attr_reader types: Array[t]
 
-      def initialize: (types: Array[t], location: Location?) -> void
+      type loc = Location[bot, bot]
+
+      def initialize: (types: Array[t], location: loc?) -> void
 
       include _TypeBase
 
-      attr_reader location: Location?
+      attr_reader location: loc?
     end
 
     class Record
       attr_reader fields: Hash[Symbol, t]
 
-      def initialize: (fields: Hash[Symbol, t], location: Location?) -> void
+      type loc = Location[bot, bot]
+
+      def initialize: (fields: Hash[Symbol, t], location: loc?) -> void
 
       include _TypeBase
 
-      attr_reader location: Location?
+      attr_reader location: loc?
     end
 
     class Optional
       attr_reader type: t
 
-      def initialize: (type: t, location: Location?) -> void
+      type loc = Location[bot, bot]
+
+      def initialize: (type: t, location: loc?) -> void
 
       include _TypeBase
 
-      attr_reader location: Location?
+      attr_reader location: loc?
     end
 
     class Union
       attr_reader types: Array[t]
 
-      def initialize: (types: Array[t], location: Location?) -> void
+      type loc = Location[bot, bot]
+
+      def initialize: (types: Array[t], location: loc?) -> void
 
       include _TypeBase
 
-      attr_reader location: Location?
+      attr_reader location: loc?
 
       def map_type: () { (t) -> t } -> Union
                   | () -> Enumerator[t, Union]
@@ -282,11 +295,13 @@ module RBS
     class Intersection
       attr_reader types: Array[t]
 
-      def initialize: (types: Array[t], location: Location?) -> void
+      type loc = Location[bot, bot]
+
+      def initialize: (types: Array[t], location: loc?) -> void
 
       include _TypeBase
 
-      attr_reader location: Location?
+      attr_reader location: loc?
 
       def map_type: () { (t) -> t } -> Intersection
                   | () -> Enumerator[t, Intersection]
@@ -294,7 +309,7 @@ module RBS
 
     class Function
       class Param
-        type loc = Location::WithChildren[bot, :name]
+        type loc = Location[bot, :name]
 
         attr_reader type: t
         attr_reader name: Symbol?
@@ -329,7 +344,7 @@ module RBS
       def map_type: { (t) -> t } -> Function
                   | -> Enumerator[t, Function]
 
-      def map_type_name: () { (TypeName, Location?, t) -> TypeName } -> Function
+      def map_type_name: () { (TypeName, Location[untyped, untyped]?, t) -> TypeName } -> Function
 
       def each_type: () { (t) -> void } -> void
                    | -> Enumerator[t, void]
@@ -384,19 +399,22 @@ module RBS
       attr_reader type: Function
       attr_reader block: Block?
 
-      def initialize: (location: Location?, type: Function, block: Block?) -> void
+      type loc = Location[bot, bot]
+
+      def initialize: (location: loc?, type: Function, block: Block?) -> void
 
       include _TypeBase
 
-      attr_reader location: Location?
+      attr_reader location: loc?
     end
 
     class Literal
       type literal = String | Integer | Symbol | TrueClass | FalseClass
+      type loc = Location[bot, bot]
 
       attr_reader literal: literal
 
-      def initialize: (literal: literal, location: Location?) -> void
+      def initialize: (literal: literal, location: loc?) -> void
 
       include _TypeBase
       include NoFreeVariables
@@ -404,7 +422,7 @@ module RBS
       include EmptyEachType
       include NoTypeName
 
-      attr_reader location: Location?
+      attr_reader location: loc?
     end
   end
 end

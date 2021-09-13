@@ -749,14 +749,11 @@ Examples:
       args.each do |path|
         path = Pathname(path)
         loader.each_file(path, skip_hidden: false, immediate: true) do |file_path|
-          Parser.parse_signature(file_path.read)
-        rescue RBS::Parser::SyntaxError => ex
-          loc = ex.error_value.location
-          stdout.puts "#{file_path}:#{loc.start_line}:#{loc.start_column}: parse error on value: (#{ex.token_str})"
-          syntax_error = true
-        rescue RBS::Parser::SemanticsError => ex
-          loc = ex.location
-          stdout.puts "#{file_path}:#{loc.start_line}:#{loc.start_column}: #{ex.original_message}"
+          RBS.logger.info "Parsing #{file_path}..."
+          buffer = Buffer.new(content: file_path.read, name: file_path)
+          Parser.parse_signature(buffer)
+        rescue RBS::ParsingError => ex
+          stdout.puts ex.message
           syntax_error = true
         end
       end
