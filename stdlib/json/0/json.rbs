@@ -512,7 +512,7 @@ class Range[out Elem]
   # Deserializes JSON string by constructing new Range object with arguments `a`
   # serialized by `to_json`.
   #
-  def self.json_create: (Hash[String, String | [Elem, Elem, bool]] object) -> instance
+  def self.json_create: [A] (Hash[String, String | [A, A, bool]] object) -> Range[A]
 
   # Returns a hash, that will be turned into a JSON object and represent this
   # object.
@@ -565,7 +565,7 @@ class Set[A]
   #
   # method used for JSON marshalling support.
   #
-  def self.json_create: (Hash[String, String | Array[A]] object) -> instance
+  def self.json_create: [A] (Hash[String, String | Array[A]] object) -> Set[A]
 
   # Marshal the object to JSON.
   #
@@ -582,7 +582,7 @@ class Struct[Elem]
   # Deserializes JSON string by constructing new Struct object with values `v`
   # serialized by `to_json`.
   #
-  def self.json_create: (Hash[String, String | Array[Elem]] object) -> instance
+  def self.json_create: [Elem] (Hash[String, String | Array[Elem]] object) -> Struct[Elem]
 
   # Returns a hash, that will be turned into a JSON object and represent this
   # object.
