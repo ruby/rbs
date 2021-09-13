@@ -18,5 +18,8 @@ module RBS
 
     %a{no-defn}
     def self._parse_signature: (Buffer, Integer line, Integer column) -> Array[AST::Declarations::t]
+
+    class LocatedValue
+    end
   end
 end

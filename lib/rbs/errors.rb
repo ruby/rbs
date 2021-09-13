@@ -30,6 +30,14 @@ module RBS
 
       super "#{Location.to_string location}: Syntax error: #{error_message}, token=`#{location.source}` (#{token_type})"
     end
+
+    def error_value
+      location.source
+    end
+
+    def token_str
+      token_type
+    end
   end
 
   class InvalidTypeApplicationError < DefinitionError

@@ -24,6 +24,16 @@ module RBS
     attr_reader token_type: String
 
     def initialize: (Location[untyped, untyped], String error_message, String token_type) -> void
+
+    def error_value: () -> String
+
+    def token_str: () -> String
+  end
+
+  class Parser
+    SemanticsError: singleton(ParsingError)
+    SyntaxError: singleton(ParsingError)
+    LexerError: singleton(ParsingError)
   end
 
   # Error class for errors raised during loading environments.

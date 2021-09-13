@@ -20,5 +20,12 @@ module RBS
         source
       end
     end
+
+    SyntaxError = ParsingError
+    SemanticsError = ParsingError
+    LexerError = ParsingError
+
+    class LocatedValue
+    end
   end
 end

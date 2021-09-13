@@ -6,6 +6,19 @@ module RBS
       "#<#{self.class}:#{self.__id__} buffer=#{buffer.name}, start=#{start_line}:#{start_column}, pos=#{start_pos}...#{end_pos}, children=#{(rks + ops).join(",")} source='#{source.lines.first&.chomp}'>"
     end
 
+    def self.new(buffer_ = nil, start_pos_ = nil, end_pos_ = nil, buffer: nil, start_pos: nil, end_pos: nil)
+      __skip__ =
+        begin
+          if buffer && start_pos && end_pos
+            super(buffer, start_pos, end_pos)
+          else
+            super(buffer_, start_pos_, end_pos_)
+          end
+        end
+    end
+
+    WithChildren = self
+
     def name
       buffer.name
     end

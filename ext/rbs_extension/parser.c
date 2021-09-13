@@ -1449,6 +1449,7 @@ VALUE parse_member_def(parserstate *state, bool instance_only, bool accept_overl
         parser_advance(state);
         loop = false;
         overload_range = state->current_token.range;
+        member_range.end = overload_range.end;
         break;
       } else {
         raise_syntax_error(
@@ -2279,6 +2280,9 @@ VALUE parse_nested_decl(parserstate *state, const char *nested_in, position anno
   case tUIDENT:
   case pCOLON2:
     decl = parse_const_decl(state);
+    break;
+  case tGIDENT:
+    decl = parse_global_decl(state);
     break;
   case kTYPE:
     decl = parse_type_decl(state, annot_pos, annotations);

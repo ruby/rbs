@@ -20,6 +20,9 @@ module RBS
 
     def initialize: (Buffer, Integer start_pos, Integer end_pos) -> void
 
+    def self.new: (Buffer, Integer start_pos, Integer end_pos) -> instance
+                | (buffer: Buffer, start_pos: Integer, end_pos: Integer) -> instance
+
     def inspect: () -> String
 
     # Returns the name of the buffer.
@@ -92,5 +95,7 @@ module RBS
     def _add_optional_no_child: (OptionalChildKeys name) -> void
     def _optional_keys: () -> Array[Symbol]
     def _required_keys: () -> Array[Symbol]
+
+    WithChildren: singleton(Location)
   end
 end
