@@ -12,7 +12,6 @@ require "strscan"
 require "rbs/char_scanner"
 require "rbs/errors"
 require "rbs/buffer"
-require "rbs/location"
 require "rbs/namespace"
 require "rbs/type_name"
 require "rbs/types"
@@ -47,12 +46,9 @@ require "rbs/locator"
 require "rbs/type_alias_dependency"
 require "rbs/collection"
 
-begin
-  require "rbs/parser"
-rescue LoadError
-  STDERR.puts "Missing parser Ruby code? Running `rake parser` may solve the issue"
-  raise
-end
+require "rbs_extension"
+require "rbs/parser_aux"
+require "rbs/location_aux"
 
 module RBS
   class <<self

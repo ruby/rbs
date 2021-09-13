@@ -90,7 +90,7 @@ module RBS
 
       def initialize: (type_name: TypeName, params: Array[Symbol], ancestors: Array[Ancestor::t]) -> void
 
-      def apply: (Array[Types::t], location: Location?) -> Array[Ancestor::t]
+      def apply: (Array[Types::t], location: Location[untyped, untyped]?) -> Array[Ancestor::t]
     end
 
     class SingletonAncestors

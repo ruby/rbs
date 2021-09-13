@@ -266,8 +266,8 @@ singleton(::BasicObject)
         assert_raises(SystemExit) { cli.run(%W(parse #{dir})) }
 
         assert_equal [
-          "#{dir}/semantics_error.rbs:2:2: Interface cannot have singleton method",
-          "#{dir}/syntax_error.rbs:3:0: parse error on value: (kEND)",
+          "#{dir}/semantics_error.rbs:2:10...2:11: Syntax error: expected a token `pCOLON`, token=`.` (pDOT)",
+          "#{dir}/syntax_error.rbs:3:0...3:3: Syntax error: unexpected token for simple type, token=`end` (kEND)",
         ], stdout.string.split("\n").sort
       end
     end

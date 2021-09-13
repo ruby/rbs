@@ -82,7 +82,7 @@ module RBS
       def mixin_ancestors: (Environment::ClassEntry | Environment::ModuleEntry,
                             TypeName,
                             included_modules: Array[Definition::Ancestor::Instance]?,
-                         included_interfaces:Array[Definition::Ancestor::Instance]?,
+                         included_interfaces: Array[Definition::Ancestor::Instance]?,
                            prepended_modules: Array[Definition::Ancestor::Instance]?,
                             extended_modules: Array[Definition::Ancestor::Instance]?,
                          extended_interfaces: Array[Definition::Ancestor::Instance]?) -> void
@@ -91,7 +91,7 @@ module RBS
                              TypeName,
                              align_params: Substitution?,
                          included_modules: Array[Definition::Ancestor::Instance]?,
-                      included_interfaces:Array[Definition::Ancestor::Instance]?,
+                      included_interfaces: Array[Definition::Ancestor::Instance]?,
                         prepended_modules: Array[Definition::Ancestor::Instance]?,
                          extended_modules: Array[Definition::Ancestor::Instance]?,
                       extended_interfaces: Array[Definition::Ancestor::Instance]?) -> void

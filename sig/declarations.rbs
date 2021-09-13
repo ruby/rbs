@@ -17,7 +17,7 @@ module RBS
           # ^^^^^^^^^          unchecked
           #           ^^^      variance
           #               ^^^^ name
-          type loc = Location::WithChildren[:name, :variance | :unchecked]
+          type loc = Location[:name, :variance | :unchecked]
 
           attr_reader name: Symbol
           attr_reader variance: variance
@@ -86,7 +86,7 @@ module RBS
           # ^^^^^         name
           #      ^^^^^^^^ args
           #
-          type loc = Location::WithChildren[:name, :args]
+          type loc = Location[:name, :args]
 
           attr_reader name: TypeName
           attr_reader args: Array[Types::t]
@@ -112,7 +112,7 @@ module RBS
         #              ^            lt
         #                       ^^^ end
         #
-        type loc = Location::WithChildren[:keyword | :name | :end, :type_params | :lt]
+        type loc = Location[:keyword | :name | :end, :type_params | :lt]
 
         include NestedDeclarationHelper
         include MixinHelper
@@ -137,7 +137,7 @@ module RBS
           # ^^^^^         name
           #      ^^^^^^^^ args
           #
-          type loc = Location::WithChildren[:name, :args]
+          type loc = Location[:name, :args]
 
           attr_reader name: TypeName
           attr_reader args: Array[Types::t]
@@ -166,7 +166,7 @@ module RBS
         #                 ^^^^^^^^^^^     self_types
         #                             ^^^ end
         #
-        type loc = Location::WithChildren[:keyword | :name | :end, :type_params | :colon | :self_types]
+        type loc = Location[:keyword | :name | :end, :type_params | :colon | :self_types]
 
         include NestedDeclarationHelper
         include MixinHelper
@@ -199,7 +199,7 @@ module RBS
         #               ^^^^^^     type_params
         #                      ^^^ end
         #
-        type loc = Location::WithChildren[:name | :keyword | :end, :type_params]
+        type loc = Location[:name | :keyword | :end, :type_params]
 
         attr_reader name: TypeName
         attr_reader type_params: ModuleTypeParams
@@ -221,7 +221,7 @@ module RBS
         # ^^^^                keyword
         #      ^^^            name
         #          ^          eq
-        type loc = Location::WithChildren[:keyword | :name | :eq, bot]
+        type loc = Location[:keyword | :name | :eq, bot]
 
         attr_reader name: TypeName
         attr_reader type: Types::t
@@ -240,7 +240,7 @@ module RBS
         # ^^^^^^^         name
         #        ^        colon
         #
-        type loc = Location::WithChildren[:name | :colon, bot]
+        type loc = Location[:name | :colon, bot]
 
         attr_reader name: TypeName
         attr_reader type: Types::t
@@ -258,7 +258,7 @@ module RBS
         # ^^^^^         name
         #      ^        colon
         #
-        type loc = Location::WithChildren[:name | :colon, bot]
+        type loc = Location[:name | :colon, bot]
 
         attr_reader name: Symbol
         attr_reader type: Types::t

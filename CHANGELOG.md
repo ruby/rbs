@@ -2,6 +2,23 @@
 
 ## master
 
+## 1.7.0 (beta.2)
+
+## Library changes
+
+* Replace RBS::Parser ([#788](https://github.com/ruby/rbs/pull/788), [#789](https://github.com/ruby/rbs/pull/789))
+
+## 1.6.2 (2021-09-09)
+
+## Signature updates
+
+* `Enumerator::Lazy#force` ([\#782](https://github.com/ruby/rbs/pull/782))
+* `IO.readlines` ([\#780](https://github.com/ruby/rbs/pull/780))
+
+## Miscellaneous
+
+* Set `$XDG_CACHE_HOME` during test ([\#781](https://github.com/ruby/rbs/pull/781))
+
 ## 1.6.1 (2021-09-05)
 
 This is a minor release including test fixes.

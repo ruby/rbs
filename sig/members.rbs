@@ -25,7 +25,7 @@ module RBS
         #          ^^^                     name
         #                            ^^^   overload
         #
-        type loc = Location::WithChildren[:keyword | :name, :kind | :overload]
+        type loc = Location[:keyword | :name, :kind | :overload]
 
         attr_reader name: Symbol
         attr_reader kind: kind
@@ -59,7 +59,7 @@ module RBS
         #      ^^^^                    name
         #          ^                   colon
         #
-        type loc = Location::WithChildren[:name | :colon, :kind]
+        type loc = Location[:name | :colon, :kind]
 
         attr_reader name: Symbol
         attr_reader type: Types::t
@@ -97,7 +97,7 @@ module RBS
         #              ^         arg_open
         #                     ^  arg_close
         #
-        type loc = Location::WithChildren[:name | :keyword, :args]
+        type loc = Location[:name | :keyword, :args]
 
         attr_reader name: TypeName
         attr_reader args: Array[Types::t]
@@ -141,7 +141,7 @@ module RBS
         #                          ^^^^             ivar_name
         #                                ^          colon
         #
-        type loc = Location::WithChildren[:keyword | :name | :colon, :kind | :ivar | :ivar_name]
+        type loc = Location[:keyword | :name | :colon, :kind | :ivar | :ivar_name]
 
         attr_reader name: Symbol
         attr_reader type: Types::t
@@ -174,9 +174,9 @@ module RBS
       end
 
       module LocationOnly
-        attr_reader location: Location?
+        attr_reader location: Location[bot, bot]?
 
-        def initialize: (location: Location?) -> void
+        def initialize: (location: Location[bot, bot]?) -> void
 
         include _HashEqual
       end
@@ -206,7 +206,7 @@ module RBS
         #                ^^^^^       old_kind
         #                     ^^^    old_name
         #
-        type loc = Location::WithChildren[:keyword | :new_name | :old_name, :new_kind | :old_kind]
+        type loc = Location[:keyword | :new_name | :old_name, :new_kind | :old_kind]
 
         attr_reader new_name: Symbol
         attr_reader old_name: Symbol

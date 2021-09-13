@@ -15,9 +15,30 @@ module RBS
   end
 
   class ErrorBase < StandardError; end
-  class ParsingError < ErrorBase; end
   class LoadingError < ErrorBase; end
   class DefinitionError < ErrorBase; end
+
+  class ParsingError < ErrorBase
+    attr_reader :location
+    attr_reader :error_message
+    attr_reader :token_type
+
+    def initialize(location, error_message, token_type)
+      @location = location
+      @error_message = error_message
+      @token_type = token_type
+
+      super "#{Location.to_string location}: Syntax error: #{error_message}, token=`#{location.source}` (#{token_type})"
+    end
+
+    def error_value
+      location.source
+    end
+
+    def token_str
+      token_type
+    end
+  end
 
   class InvalidTypeApplicationError < DefinitionError
     attr_reader :type_name

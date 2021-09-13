@@ -15,13 +15,6 @@ class RBS::TypeParsingTest < Test::Unit::TestCase
       assert_equal "void", type.location.source
     end
 
-    silence_warnings do
-      Parser.parse_type("any").yield_self do |type|
-        assert_instance_of Types::Bases::Any, type
-        assert_equal "any", type.location.source
-      end
-    end
-
     Parser.parse_type("untyped").yield_self do |type|
       assert_instance_of Types::Bases::Any, type
       assert_equal "untyped", type.location.source
@@ -60,6 +53,11 @@ class RBS::TypeParsingTest < Test::Unit::TestCase
     Parser.parse_type("class").yield_self do |type|
       assert_instance_of Types::Bases::Class, type
       assert_equal "class", type.location.source
+    end
+
+    Parser.parse_type("any").yield_self do |type|
+      assert_instance_of Types::Alias, type
+      assert_equal "any", type.location.source
     end
   end
 
@@ -125,7 +123,7 @@ class RBS::TypeParsingTest < Test::Unit::TestCase
       assert_equal "::Foo::foo", type.location.source
     end
 
-    assert_raises Parser::SyntaxError do
+    assert_raises RBS::ParsingError do
       Parser.parse_type("foo[untyped]")
     end
   end
@@ -261,11 +259,11 @@ class RBS::TypeParsingTest < Test::Unit::TestCase
       assert_equal "singleton(::Object)", type.location.source
     end
 
-    assert_raises Parser::SyntaxError do
+    assert_raises RBS::ParsingError do
       Parser.parse_type("singleton(foo)")
     end
 
-    assert_raises Parser::SyntaxError do
+    assert_raises RBS::ParsingError do
       Parser.parse_type("singleton(_FOO)")
     end
   end
@@ -545,11 +543,11 @@ class RBS::TypeParsingTest < Test::Unit::TestCase
       end
     end
 
-    assert_raises Parser::SyntaxError do
+    assert_raises RBS::ParsingError do
       Parser.parse_type(":+foo")
     end
 
-    assert_raises Parser::SyntaxError do
+    assert_raises RBS::ParsingError do
       Parser.parse_type(":@")
     end
 
@@ -614,7 +612,7 @@ class RBS::TypeParsingTest < Test::Unit::TestCase
       end
     end
 
-    assert_raises Parser::SemanticsError do
+    assert_raises RBS::ParsingError do
       Parser.parse_type("Array[A]", variables: [:A, :Array])
     end
   end
@@ -637,42 +635,42 @@ class RBS::TypeParsingTest < Test::Unit::TestCase
 
   def test_location_children
     Parser.parse_type("_Foo").yield_self do |type|
-      assert_instance_of RBS::Location::WithChildren, type.location
+      assert_instance_of RBS::Location, type.location
 
       assert_equal "_Foo", type.location[:name].source
       assert_nil type.location[:args]
     end
 
     Parser.parse_type("_Foo[untyped]").yield_self do |type|
-      assert_instance_of RBS::Location::WithChildren, type.location
+      assert_instance_of RBS::Location, type.location
 
       assert_equal "_Foo", type.location[:name].source
       assert_equal "[untyped]", type.location[:args].source
     end
 
     Parser.parse_type("Foo").yield_self do |type|
-      assert_instance_of RBS::Location::WithChildren, type.location
+      assert_instance_of RBS::Location, type.location
 
       assert_equal "Foo", type.location[:name].source
       assert_nil type.location[:args]
     end
 
     Parser.parse_type("Foo[untyped]").yield_self do |type|
-      assert_instance_of RBS::Location::WithChildren, type.location
+      assert_instance_of RBS::Location, type.location
 
       assert_equal "Foo", type.location[:name].source
       assert_equal "[untyped]", type.location[:args].source
     end
 
     Parser.parse_type("foo").yield_self do |type|
-      assert_instance_of RBS::Location::WithChildren, type.location
+      assert_instance_of RBS::Location, type.location
 
       assert_equal "foo", type.location[:name].source
       assert_nil type.location[:args]
     end
 
     Parser.parse_type("singleton(::Foo)").yield_self do |type|
-      assert_instance_of RBS::Location::WithChildren, type.location
+      assert_instance_of RBS::Location, type.location
 
       assert_equal "::Foo", type.location[:name].source
     end

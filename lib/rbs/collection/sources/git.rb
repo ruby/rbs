@@ -1,5 +1,6 @@
 require 'digest/sha2'
 require 'open3'
+require 'find'
 
 module RBS
   module Collection
@@ -52,12 +53,26 @@ module RBS
         private def _install(dest:, config_entry:)
           gem_name = config_entry['name']
           version = config_entry['version'] or raise
-          dest = dest.join(gem_name)
+          dest = dest.join(gem_name, version)
           dest.mkpath
           src = gem_repo_dir.join(gem_name, version)
 
-          FileUtils.cp_r(src, dest)
-          dest.join(version, METADATA_FILENAME).write(YAML.dump(config_entry))
+          cp_r(src, dest)
+          dest.join(METADATA_FILENAME).write(YAML.dump(config_entry))
+        end
+
+        private def cp_r(src, dest)
+          Find.find(src) do |file_src|
+            file_src = Pathname(file_src)
+
+            # Skip file if it starts with _, such as _test/
+            Find.prune if file_src.basename.to_s.start_with?('_')
+
+            file_src_relative = file_src.relative_path_from(src)
+            file_dest = dest.join(file_src_relative)
+            file_dest.dirname.mkpath
+            FileUtils.copy_entry(file_src, file_dest, false, true) unless file_src.directory?
+          end
         end
 
         def to_lockfile

@@ -19,6 +19,21 @@ module RBS
   # Error class for errors raised during parsing.
   #
   class ParsingError < BaseError
+    attr_reader location: Location[untyped, untyped]
+    attr_reader error_message: String
+    attr_reader token_type: String
+
+    def initialize: (Location[untyped, untyped], String error_message, String token_type) -> void
+
+    def error_value: () -> String
+
+    def token_str: () -> String
+  end
+
+  class Parser
+    SemanticsError: singleton(ParsingError)
+    SyntaxError: singleton(ParsingError)
+    LexerError: singleton(ParsingError)
   end
 
   # Error class for errors raised during loading environments.
@@ -35,45 +50,45 @@ module RBS
     attr_reader type_name: TypeName
     attr_reader args: Array[Types::t]
     attr_reader params: Array[Symbol]
-    attr_reader location: Location?
+    attr_reader location: Location[untyped, untyped]?
 
-    def initialize: (type_name: TypeName, args: Array[Types::t], params: Array[Symbol], location: Location?) -> void
+    def initialize: (type_name: TypeName, args: Array[Types::t], params: Array[Symbol], location: Location[untyped, untyped]?) -> void
 
-    def self.check!: (type_name: TypeName, args: Array[Types::t], params: Array[Symbol], location: Location?) -> void
+    def self.check!: (type_name: TypeName, args: Array[Types::t], params: Array[Symbol], location: Location[untyped, untyped]?) -> void
   end
 
   class RecursiveAncestorError < DefinitionError
     attr_reader ancestors: Array[Definition::Ancestor::t]
-    attr_reader location: Location?
+    attr_reader location: Location[untyped, untyped]?
 
-    def initialize: (ancestors: Array[Definition::Ancestor::t], location: Location?) -> void
+    def initialize: (ancestors: Array[Definition::Ancestor::t], location: Location[untyped, untyped]?) -> void
 
-    def self.check!: (Definition::Ancestor::t, ancestors: Array[Definition::Ancestor::t], location: Location?) -> void
+    def self.check!: (Definition::Ancestor::t, ancestors: Array[Definition::Ancestor::t], location: Location[untyped, untyped]?) -> void
   end
 
   class NoTypeFoundError < DefinitionError
     attr_reader type_name: TypeName
-    attr_reader location: Location?
+    attr_reader location: Location[untyped, untyped]?
 
-    def initialize: (type_name: TypeName, location: Location?) -> void
+    def initialize: (type_name: TypeName, location: Location[untyped, untyped]?) -> void
 
-    def self.check!: (TypeName, env: Environment, location: Location?) -> TypeName
+    def self.check!: (TypeName, env: Environment, location: Location[untyped, untyped]?) -> TypeName
   end
 
   class NoSuperclassFoundError < DefinitionError
     attr_reader type_name: TypeName
-    attr_reader location: Location?
+    attr_reader location: Location[untyped, untyped]?
 
-    def initialize: (type_name: TypeName, location: Location?) -> void
+    def initialize: (type_name: TypeName, location: Location[untyped, untyped]?) -> void
 
-    def self.check!: (TypeName, env: Environment, location: Location?) -> void
+    def self.check!: (TypeName, env: Environment, location: Location[untyped, untyped]?) -> void
   end
 
   class NoSelfTypeFoundError < DefinitionError
     attr_reader type_name: TypeName
-    attr_reader location: Location?
+    attr_reader location: Location[untyped, untyped]?
 
-    def initialize: (type_name: TypeName, location: Location?) -> void
+    def initialize: (type_name: TypeName, location: Location[untyped, untyped]?) -> void
 
     def self.check!: (AST::Declarations::Module::Self, env: Environment) -> void
   end
@@ -84,7 +99,7 @@ module RBS
 
     def initialize: (type_name: TypeName, member: AST::Members::t) -> void
 
-    def location: () -> Location?
+    def location: () -> Location[untyped, untyped]?
 
     def self.check!: (TypeName, env: Environment, member: AST::Members::t) -> void
   end
@@ -103,9 +118,9 @@ module RBS
 
     def qualified_method_name: () -> String
 
-    def location: () -> Location?
+    def location: () -> Location[untyped, untyped]?
 
-    def other_locations: () -> Array[Location?]
+    def other_locations: () -> Array[Location[untyped, untyped]?]
   end
 
   class DuplicatedInterfaceMethodDefinitionError < DefinitionError
@@ -127,9 +142,9 @@ module RBS
     attr_reader type_name: TypeName
     attr_reader original_name: Symbol
     attr_reader aliased_name: Symbol
-    attr_reader location: Location?
+    attr_reader location: Location[untyped, untyped]?
 
-    def initialize: (type_name: TypeName, original_name: Symbol, aliased_name: Symbol, location: Location?) -> void
+    def initialize: (type_name: TypeName, original_name: Symbol, aliased_name: Symbol, location: Location[untyped, untyped]?) -> void
   end
 
   class SuperclassMismatchError < DefinitionError
@@ -165,9 +180,9 @@ module RBS
   class InvalidVarianceAnnotationError < DefinitionError
     attr_reader type_name: TypeName
     attr_reader param: AST::Declarations::ModuleTypeParams::TypeParam
-    attr_reader location: Location?
+    attr_reader location: Location[untyped, untyped]?
 
-    def initialize: (type_name: TypeName, param: AST::Declarations::ModuleTypeParams::TypeParam, location: Location?) -> void
+    def initialize: (type_name: TypeName, param: AST::Declarations::ModuleTypeParams::TypeParam, location: Location[untyped, untyped]?) -> void
   end
 
   class RecursiveAliasDefinitionError < DefinitionError
@@ -179,7 +194,7 @@ module RBS
 
     def initialize: (type: ty, defs: Array[defn]) -> void
 
-    def location: () -> Location?
+    def location: () -> Location[untyped, untyped]?
   end
 
   class MixinClassError < DefinitionError
@@ -190,7 +205,7 @@ module RBS
 
     def initialize: (type_name: TypeName, member: member) -> void
 
-    def location: () -> Location?
+    def location: () -> Location[untyped, untyped]?
 
     def self.check!: (type_name: TypeName, env: Environment, member: member) -> void
 
@@ -199,9 +214,9 @@ module RBS
 
   class RecursiveTypeAliasError < LoadingError
     attr_reader alias_names: Array[TypeName]
-    attr_reader location: Location
+    attr_reader location: Location[untyped, untyped]?
 
-    def initialize: (alias_names: Array[TypeName], location: Location) -> void
+    def initialize: (alias_names: Array[TypeName], location: Location[untyped, untyped]?) -> void
 
     def name: () -> String
   end
