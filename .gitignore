@@ -1,5 +1,7 @@
 /.bundle/
+/vendor/bundle/
 /steep/.bundle/
+/steep/vendor/bundle/
 /.yardoc
 /_yardoc/
 /coverage/
