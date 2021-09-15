@@ -20,17 +20,21 @@ class TempfileSingletonTest < Test::Unit::TestCase
   def test_new
     assert_send_type "(?::String basename, ?::String? tmpdir, ?mode: ::Integer, **untyped) -> ::Tempfile",
                      Tempfile, :new, 'README.md', '/tmp', mode: 0
+
+    assert_send_type "([::String, ::String]) -> ::Tempfile",
+                     Tempfile, :new, ['foo', '.txt']
   end
 
   def test_create
     assert_send_type "(::String basename, ::String? tmpdir, mode: ::Integer) -> ::File",
                      Tempfile, :create, 'README.md', '/tmp', mode: 0
 
+    assert_send_type "([::String, ::String]) -> ::File",
+                     Tempfile, :create, ['foo', '.txt']
+
     assert_send_type "() { (::File) -> Integer } -> Integer",
-                     Tempfile, :create do |file|
-                      123
-                     end
-end
+                     Tempfile, :create do |file| 123 end
+  end
 
   def test_initialize
     assert_send_type "(?::String basename, ?::String? tmpdir, ?mode: ::Integer, **untyped) -> void",
