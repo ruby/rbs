@@ -19,6 +19,11 @@ jobs:
         - test
         - stdlib_test
         - rubocop validate test_doc build test_generate_stdlib
+        - lexer confirm_lexer
+        - lexer compile
+        exclude:
+        - container_tag: master-nightly-focal
+          job: confirm_lexer
     container:
       image: rubylang/ruby:${{ matrix.container_tag }}
     steps:
@@ -26,7 +31,18 @@ jobs:
     - name: Install dependencies
       run: |
         apt-get update
-        apt-get install -y libdb-dev
+        apt-get install -y libdb-dev curl autoconf automake m4 libtool
+    - name: Install Re2c
+      if: contains(matrix.job, 'lexer')
+      run: |
+        cd /tmp
+        curl -L https://github.com/skvadrik/re2c/archive/refs/tags/2.2.tar.gz > re2c-2.2.tar.gz
+        tar xf re2c-2.2.tar.gz
+        cd re2c-2.2
+        autoreconf -i -W all
+        ./configure
+        make
+        make install
     - name: Update rubygems & bundler
       run: |
         ruby -v

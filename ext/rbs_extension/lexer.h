@@ -121,13 +121,12 @@ typedef struct {
   position current;               /* The current position */
   position start;                 /* The start position of the current token */
   bool first_token_of_line;       /* This flag is used for tLINECOMMENT */
+  unsigned int last_char;         /* Last peeked character */
 } lexstate;
 
 extern token NullToken;
 extern position NullPosition;
 extern range NULL_RANGE;
-
-token rbsparser_next_token(lexstate *state);
 
 char *peek_token(lexstate *state, token tok);
 int token_chars(token tok);
@@ -139,6 +138,23 @@ int token_bytes(token tok);
 #define RANGE_BYTES(range) (range.end.byte_pos - range.start.byte_pos)
 
 const char *token_type_str(enum TokenType type);
+
+/**
+ * Read next character.
+ * */
+unsigned int peek(lexstate *state);
+
+/**
+ * Skip one character.
+ * */
+void skip(lexstate *state);
+
+/**
+ * Return new token with given type.
+ * */
+token next_token(lexstate *state, enum TokenType type);
+
+token rbsparser_next_token(lexstate *state);
 
 void print_token(token tok);
 
