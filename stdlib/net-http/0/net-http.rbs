@@ -1204,6 +1204,7 @@ module Net
 
   class HTTPRequest < HTTPGenericRequest
     def initialize: (String path, ?Hash[String, untyped] initheader) -> void
+                  | (URI::Generic uri, ?Hash[String, untyped] initheader) -> void
   end
 
   class HTTP::Get < HTTPRequest
