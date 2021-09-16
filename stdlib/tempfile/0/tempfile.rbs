@@ -95,8 +95,8 @@ class Tempfile < File
   #        # ... do something with f ...
   #     end
   #
-  def self.create: (?String basename, ?String? tmpdir, ?mode: Integer, **untyped) -> File
-                 | [A] (?String basename, ?String? tmpdir, ?mode: Integer, **untyped) { (File) -> A } -> A
+  def self.create: (?(String | [String, String]) basename, ?String? tmpdir, ?mode: Integer, **untyped) -> File
+                 | [A] (?(String | [String, String]) basename, ?String? tmpdir, ?mode: Integer, **untyped) { (File) -> A } -> A
 
   # Creates a new Tempfile.
   #
@@ -263,6 +263,6 @@ class Tempfile < File
   # If Tempfile.new cannot find a unique filename within a limited number of
   # tries, then it will raise an exception.
   #
-  def self.new: (?String basename, ?String? tmpdir, ?mode: Integer, **untyped) -> instance
-              | [A] (?String basename, ?String? tmpdir, ?mode: Integer, **untyped) { (instance) -> A } -> A
+  def self.new: (?(String | [String, String]) basename, ?String? tmpdir, ?mode: Integer, **untyped) -> instance
+              | [A] (?(String | [String, String]) basename, ?String? tmpdir, ?mode: Integer, **untyped) { (instance) -> A } -> A
 end
