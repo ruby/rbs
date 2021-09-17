@@ -11,7 +11,7 @@ class IO
   # result will be returned instead of the console IO itself.
   def self.console: () -> File?
                   | (:close) -> nil
-                  | (Symbol sym, *untyped args) -> top
+                  | (Symbol sym, *untyped args) -> untyped
 
   # returns console window size
   #
