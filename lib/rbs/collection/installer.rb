@@ -11,6 +11,7 @@ module RBS
 
       def install_from_lockfile
         install_to = lockfile.repo_path
+        install_to.mkpath
         lockfile.gems.each do |config_entry|
           source_for(config_entry).install(dest: install_to, config_entry: config_entry, stdout: stdout)
         end
