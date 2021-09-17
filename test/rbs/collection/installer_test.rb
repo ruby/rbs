@@ -77,6 +77,7 @@ class RBS::Collection::InstallerTest < Test::Unit::TestCase
       stdout = StringIO.new
       RBS::Collection::Installer.new(lockfile_path: lockfile_path, stdout: stdout).install_from_lockfile
 
+      assert dest.directory?
       assert dest.glob('*').empty? # because stdlib installer does nothing
       assert_match(%r!Using csv:0 \(.+/stdlib/csv/0\)!, stdout.string)
       assert_match("It's done! 1 gems' RBSs now installed.", stdout.string)
@@ -102,6 +103,7 @@ class RBS::Collection::InstallerTest < Test::Unit::TestCase
       stdout = StringIO.new
       RBS::Collection::Installer.new(lockfile_path: lockfile_path, stdout: stdout).install_from_lockfile
 
+      assert dest.directory?
       assert dest.glob('*').empty? # because rubygems installer does nothing
       assert_match(%r!Using rbs-amber:1.0.0 \(.+/rbs/test/assets/test-gem/sig\)!, stdout.string)
       assert_match("It's done! 1 gems' RBSs now installed.", stdout.string)
