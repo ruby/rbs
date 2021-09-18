@@ -25,6 +25,8 @@ jobs:
         exclude:
         - container_tag: master-nightly-focal
           job: confirm_lexer
+        - container_tag: 2.6-bionic
+          job: stdlib_test
     container:
       image: rubylang/ruby:${{ matrix.container_tag }}
     steps:
