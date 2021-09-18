@@ -1,7 +1,6 @@
 #include "rbs_extension.h"
 
 VALUE RBS_Parser;
-VALUE RBS_Parser_KEYWORDS;
 
 VALUE RBS;
 VALUE RBS_AST;

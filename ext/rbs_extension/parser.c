@@ -2387,36 +2387,4 @@ void rbs__init_parser() {
   rb_define_singleton_method(RBS_Parser, "_parse_type", rbsparser_parse_type, 4);
   rb_define_singleton_method(RBS_Parser, "_parse_method_type", rbsparser_parse_method_type, 4);
   rb_define_singleton_method(RBS_Parser, "_parse_signature", rbsparser_parse_signature, 3);
-
-  RBS_Parser_KEYWORDS = rb_hash_new();
-  rb_hash_aset(RBS_Parser_KEYWORDS, rb_str_new_literal("bool"), INT2FIX(kBOOL));
-  rb_hash_aset(RBS_Parser_KEYWORDS, rb_str_new_literal("bot"), INT2FIX(kBOT));
-  rb_hash_aset(RBS_Parser_KEYWORDS, rb_str_new_literal("class"), INT2FIX(kCLASS));
-  rb_hash_aset(RBS_Parser_KEYWORDS, rb_str_new_literal("instance"), INT2FIX(kINSTANCE));
-  rb_hash_aset(RBS_Parser_KEYWORDS, rb_str_new_literal("interface"), INT2FIX(kINTERFACE));
-  rb_hash_aset(RBS_Parser_KEYWORDS, rb_str_new_literal("nil"), INT2FIX(kNIL));
-  rb_hash_aset(RBS_Parser_KEYWORDS, rb_str_new_literal("self"), INT2FIX(kSELF));
-  rb_hash_aset(RBS_Parser_KEYWORDS, rb_str_new_literal("singleton"), INT2FIX(kSINGLETON));
-  rb_hash_aset(RBS_Parser_KEYWORDS, rb_str_new_literal("top"), INT2FIX(kTOP));
-  rb_hash_aset(RBS_Parser_KEYWORDS, rb_str_new_literal("void"), INT2FIX(kVOID));
-  rb_hash_aset(RBS_Parser_KEYWORDS, rb_str_new_literal("type"), INT2FIX(kTYPE));
-  rb_hash_aset(RBS_Parser_KEYWORDS, rb_str_new_literal("unchecked"), INT2FIX(kUNCHECKED));
-  rb_hash_aset(RBS_Parser_KEYWORDS, rb_str_new_literal("in"), INT2FIX(kIN));
-  rb_hash_aset(RBS_Parser_KEYWORDS, rb_str_new_literal("out"), INT2FIX(kOUT));
-  rb_hash_aset(RBS_Parser_KEYWORDS, rb_str_new_literal("end"), INT2FIX(kEND));
-  rb_hash_aset(RBS_Parser_KEYWORDS, rb_str_new_literal("def"), INT2FIX(kDEF));
-  rb_hash_aset(RBS_Parser_KEYWORDS, rb_str_new_literal("include"), INT2FIX(kINCLUDE));
-  rb_hash_aset(RBS_Parser_KEYWORDS, rb_str_new_literal("extend"), INT2FIX(kEXTEND));
-  rb_hash_aset(RBS_Parser_KEYWORDS, rb_str_new_literal("prepend"), INT2FIX(kPREPEND));
-  rb_hash_aset(RBS_Parser_KEYWORDS, rb_str_new_literal("alias"), INT2FIX(kALIAS));
-  rb_hash_aset(RBS_Parser_KEYWORDS, rb_str_new_literal("module"), INT2FIX(kMODULE));
-  rb_hash_aset(RBS_Parser_KEYWORDS, rb_str_new_literal("attr_reader"), INT2FIX(kATTRREADER));
-  rb_hash_aset(RBS_Parser_KEYWORDS, rb_str_new_literal("attr_writer"), INT2FIX(kATTRWRITER));
-  rb_hash_aset(RBS_Parser_KEYWORDS, rb_str_new_literal("attr_accessor"), INT2FIX(kATTRACCESSOR));
-  rb_hash_aset(RBS_Parser_KEYWORDS, rb_str_new_literal("public"), INT2FIX(kPUBLIC));
-  rb_hash_aset(RBS_Parser_KEYWORDS, rb_str_new_literal("private"), INT2FIX(kPRIVATE));
-  rb_hash_aset(RBS_Parser_KEYWORDS, rb_str_new_literal("untyped"), INT2FIX(kUNTYPED));
-  rb_hash_aset(RBS_Parser_KEYWORDS, rb_str_new_literal("true"), INT2FIX(kTRUE));
-  rb_hash_aset(RBS_Parser_KEYWORDS, rb_str_new_literal("false"), INT2FIX(kFALSE));
-  rb_define_const(RBS_Parser, "KEYWORDS", RBS_Parser_KEYWORDS);
 }

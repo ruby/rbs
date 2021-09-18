@@ -2,7 +2,7 @@
 #line 1 "ext/rbs_extension/lexer.re"
 #include "rbs_extension.h"
 
-token __rbsparser_next_token(lexstate *state) {
+token rbsparser_next_token(lexstate *state) {
   lexstate backup;
 
 start:
@@ -14,101 +14,116 @@ start:
 	unsigned int yych;
 	unsigned int yyaccept = 0;
 	yych = peek(state);
-	if (yych <= '/') {
-		if (yych <= '%') {
-			if (yych <= ' ') {
-				if (yych <= 0x00000008) {
-					if (yych >= 0x00000001) goto yy4;
-				} else {
-					if (yych <= '\n') goto yy6;
-					if (yych <= 0x0000001F) goto yy4;
-					goto yy6;
-				}
-			} else {
-				if (yych <= '"') {
-					if (yych <= '!') goto yy9;
-					goto yy11;
-				} else {
-					if (yych <= '#') goto yy12;
-					if (yych <= '$') goto yy15;
-					goto yy16;
-				}
-			}
-		} else {
-			if (yych <= '*') {
-				if (yych <= '\'') {
-					if (yych <= '&') goto yy17;
-					goto yy19;
-				} else {
-					if (yych <= '(') goto yy20;
-					if (yych <= ')') goto yy22;
-					goto yy24;
-				}
-			} else {
-				if (yych <= ',') {
-					if (yych <= '+') goto yy26;
-					goto yy27;
-				} else {
-					if (yych <= '-') goto yy29;
-					if (yych <= '.') goto yy30;
-					goto yy32;
-				}
-			}
-		}
-	} else {
-		if (yych <= '[') {
-			if (yych <= '=') {
-				if (yych <= ':') {
-					if (yych <= '9') goto yy33;
-					goto yy36;
-				} else {
-					if (yych <= ';') goto yy4;
-					if (yych <= '<') goto yy38;
-					goto yy40;
-				}
-			} else {
-				if (yych <= '?') {
-					if (yych <= '>') goto yy42;
-					goto yy43;
-				} else {
-					if (yych <= '@') goto yy45;
-					if (yych <= 'Z') goto yy46;
-					goto yy49;
-				}
-			}
-		} else {
-			if (yych <= '`') {
-				if (yych <= ']') {
-					if (yych <= '\\') goto yy4;
-					goto yy51;
-				} else {
-					if (yych <= '^') goto yy53;
-					if (yych <= '_') goto yy55;
-					goto yy57;
-				}
-			} else {
-				if (yych <= '|') {
-					if (yych <= 'z') goto yy59;
-					if (yych <= '{') goto yy62;
-					goto yy64;
-				} else {
-					if (yych <= '}') goto yy66;
-					if (yych <= '~') goto yy32;
-					goto yy4;
-				}
-			}
-		}
+	switch (yych) {
+	case 0x00000000:	goto yy2;
+	case '\t':
+	case '\n':
+	case ' ':	goto yy6;
+	case '!':	goto yy9;
+	case '"':	goto yy11;
+	case '#':	goto yy12;
+	case '$':	goto yy15;
+	case '%':	goto yy16;
+	case '&':	goto yy17;
+	case '\'':	goto yy19;
+	case '(':	goto yy20;
+	case ')':	goto yy22;
+	case '*':	goto yy24;
+	case '+':	goto yy26;
+	case ',':	goto yy27;
+	case '-':	goto yy29;
+	case '.':	goto yy30;
+	case '/':
+	case '~':	goto yy32;
+	case '0':
+	case '1':
+	case '2':
+	case '3':
+	case '4':
+	case '5':
+	case '6':
+	case '7':
+	case '8':
+	case '9':	goto yy33;
+	case ':':	goto yy36;
+	case '<':	goto yy38;
+	case '=':	goto yy40;
+	case '>':	goto yy42;
+	case '?':	goto yy43;
+	case '@':	goto yy45;
+	case 'A':
+	case 'B':
+	case 'C':
+	case 'D':
+	case 'E':
+	case 'F':
+	case 'G':
+	case 'H':
+	case 'I':
+	case 'J':
+	case 'K':
+	case 'L':
+	case 'M':
+	case 'N':
+	case 'O':
+	case 'P':
+	case 'Q':
+	case 'R':
+	case 'S':
+	case 'T':
+	case 'U':
+	case 'V':
+	case 'W':
+	case 'X':
+	case 'Y':
+	case 'Z':	goto yy46;
+	case '[':	goto yy49;
+	case ']':	goto yy51;
+	case '^':	goto yy53;
+	case '_':	goto yy55;
+	case '`':	goto yy57;
+	case 'a':	goto yy59;
+	case 'b':	goto yy61;
+	case 'c':	goto yy62;
+	case 'd':	goto yy63;
+	case 'e':	goto yy64;
+	case 'f':	goto yy65;
+	case 'g':
+	case 'h':
+	case 'j':
+	case 'k':
+	case 'l':
+	case 'q':
+	case 'r':
+	case 'w':
+	case 'x':
+	case 'y':
+	case 'z':	goto yy66;
+	case 'i':	goto yy68;
+	case 'm':	goto yy69;
+	case 'n':	goto yy70;
+	case 'o':	goto yy71;
+	case 'p':	goto yy72;
+	case 's':	goto yy73;
+	case 't':	goto yy74;
+	case 'u':	goto yy75;
+	case 'v':	goto yy76;
+	case '{':	goto yy77;
+	case '|':	goto yy79;
+	case '}':	goto yy81;
+	default:	goto yy4;
 	}
+yy2:
 	skip(state);
-#line 108 "ext/rbs_extension/lexer.re"
+#line 137 "ext/rbs_extension/lexer.re"
 	{ return next_token(state, pEOF); }
-#line 106 "ext/rbs_extension/lexer.c"
+#line 121 "ext/rbs_extension/lexer.c"
 yy4:
 	skip(state);
 yy5:
-#line 109 "ext/rbs_extension/lexer.re"
+#line 138 "ext/rbs_extension/lexer.re"
 	{ return next_token(state, ErrorToken); }
-#line 112 "ext/rbs_extension/lexer.c"
+#line 127 "ext/rbs_extension/lexer.c"
 yy6:
 	skip(state);
 	yych = peek(state);
@@ -116,9 +131,9 @@ yy6:
 	if (yych <= '\n') goto yy6;
 	if (yych == ' ') goto yy6;
 yy8:
-#line 107 "ext/rbs_extension/lexer.re"
+#line 136 "ext/rbs_extension/lexer.re"
 	{ state->start = state->current; goto start; }
-#line 122 "ext/rbs_extension/lexer.c"
+#line 137 "ext/rbs_extension/lexer.c"
 yy9:
 	skip(state);
 	yych = peek(state);
@@ -127,14 +142,14 @@ yy9:
 yy10:
 #line 48 "ext/rbs_extension/lexer.re"
 	{ return next_token(state, tOPERATOR); }
-#line 131 "ext/rbs_extension/lexer.c"
+#line 146 "ext/rbs_extension/lexer.c"
 yy11:
 	yyaccept = 0;
 	skip(state);
 	backup = *state;
 	yych = peek(state);
 	if (yych <= 0x00000000) goto yy5;
-	goto yy69;
+	goto yy84;
 yy12:
 	skip(state);
 	yych = peek(state);
@@ -148,7 +163,7 @@ yy14:
           state->first_token_of_line ? tLINECOMMENT : tCOMMENT
         );
       }
-#line 152 "ext/rbs_extension/lexer.c"
+#line 167 "ext/rbs_extension/lexer.c"
 yy15:
 	skip(state);
 	yych = peek(state);
@@ -156,42 +171,42 @@ yy15:
 		if (yych <= 0x0000001F) {
 			if (yych <= '\n') {
 				if (yych <= 0x00000000) goto yy5;
-				if (yych <= 0x00000008) goto yy75;
+				if (yych <= 0x00000008) goto yy90;
 				goto yy5;
 			} else {
 				if (yych == '\r') goto yy5;
-				goto yy75;
+				goto yy90;
 			}
 		} else {
 			if (yych <= '#') {
 				if (yych <= ' ') goto yy5;
-				if (yych <= '"') goto yy78;
-				goto yy75;
+				if (yych <= '"') goto yy93;
+				goto yy90;
 			} else {
 				if (yych == '%') goto yy5;
-				if (yych <= '\'') goto yy78;
+				if (yych <= '\'') goto yy93;
 				goto yy5;
 			}
 		}
 	} else {
 		if (yych <= 'Z') {
 			if (yych <= '/') {
-				if (yych == '-') goto yy75;
-				goto yy78;
+				if (yych == '-') goto yy90;
+				goto yy93;
 			} else {
-				if (yych <= '9') goto yy75;
-				if (yych <= '>') goto yy78;
-				goto yy75;
+				if (yych <= '9') goto yy90;
+				if (yych <= '>') goto yy93;
+				goto yy90;
 			}
 		} else {
 			if (yych <= '^') {
-				if (yych == '\\') goto yy78;
+				if (yych == '\\') goto yy93;
 				goto yy5;
 			} else {
-				if (yych <= 'z') goto yy75;
+				if (yych <= 'z') goto yy90;
 				if (yych <= '}') goto yy5;
-				if (yych <= '~') goto yy78;
-				goto yy75;
+				if (yych <= '~') goto yy93;
+				goto yy90;
 			}
 		}
 	}
@@ -200,37 +215,37 @@ yy16:
 	skip(state);
 	backup = *state;
 	yych = peek(state);
-	if (yych == 'a') goto yy79;
+	if (yych == 'a') goto yy94;
 	goto yy10;
 yy17:
 	skip(state);
 #line 34 "ext/rbs_extension/lexer.re"
 	{ return next_token(state, pAMP); }
-#line 210 "ext/rbs_extension/lexer.c"
+#line 225 "ext/rbs_extension/lexer.c"
 yy19:
 	yyaccept = 0;
 	skip(state);
 	backup = *state;
 	yych = peek(state);
 	if (yych <= 0x00000000) goto yy5;
-	goto yy81;
+	goto yy96;
 yy20:
 	skip(state);
 #line 25 "ext/rbs_extension/lexer.re"
 	{ return next_token(state, pLPAREN); }
-#line 222 "ext/rbs_extension/lexer.c"
+#line 237 "ext/rbs_extension/lexer.c"
 yy22:
 	skip(state);
 #line 26 "ext/rbs_extension/lexer.re"
 	{ return next_token(state, pRPAREN); }
-#line 227 "ext/rbs_extension/lexer.c"
+#line 242 "ext/rbs_extension/lexer.c"
 yy24:
 	skip(state);
 	yych = peek(state);
-	if (yych == '*') goto yy86;
+	if (yych == '*') goto yy101;
 #line 36 "ext/rbs_extension/lexer.re"
 	{ return next_token(state, pSTAR); }
-#line 234 "ext/rbs_extension/lexer.c"
+#line 249 "ext/rbs_extension/lexer.c"
 yy26:
 	skip(state);
 	yych = peek(state);
@@ -242,7 +257,7 @@ yy27:
 	skip(state);
 #line 31 "ext/rbs_extension/lexer.re"
 	{ return next_token(state, pCOMMA); }
-#line 246 "ext/rbs_extension/lexer.c"
+#line 261 "ext/rbs_extension/lexer.c"
 yy29:
 	skip(state);
 	yych = peek(state);
@@ -251,7 +266,7 @@ yy29:
 		if (yych <= '9') goto yy33;
 		goto yy10;
 	} else {
-		if (yych <= '>') goto yy88;
+		if (yych <= '>') goto yy103;
 		if (yych == '@') goto yy32;
 		goto yy10;
 	}
@@ -260,11 +275,11 @@ yy30:
 	skip(state);
 	backup = *state;
 	yych = peek(state);
-	if (yych == '.') goto yy90;
+	if (yych == '.') goto yy105;
 yy31:
 #line 38 "ext/rbs_extension/lexer.re"
 	{ return next_token(state, pDOT); }
-#line 268 "ext/rbs_extension/lexer.c"
+#line 283 "ext/rbs_extension/lexer.c"
 yy32:
 	skip(state);
 	goto yy10;
@@ -277,32 +292,32 @@ yy33:
 yy35:
 #line 51 "ext/rbs_extension/lexer.re"
 	{ return next_token(state, tINTEGER); }
-#line 281 "ext/rbs_extension/lexer.c"
+#line 296 "ext/rbs_extension/lexer.c"
 yy36:
 	yyaccept = 3;
 	skip(state);
 	backup = *state;
 	yych = peek(state);
 	switch (yych) {
-	case '!':	goto yy91;
-	case '"':	goto yy93;
-	case '$':	goto yy95;
+	case '!':	goto yy106;
+	case '"':	goto yy108;
+	case '$':	goto yy110;
 	case '%':
 	case '&':
 	case '/':
 	case '^':
 	case '`':
 	case '|':
-	case '~':	goto yy96;
-	case '\'':	goto yy97;
-	case '*':	goto yy99;
+	case '~':	goto yy111;
+	case '\'':	goto yy112;
+	case '*':	goto yy114;
 	case '+':
-	case '-':	goto yy100;
-	case ':':	goto yy101;
-	case '<':	goto yy103;
-	case '=':	goto yy104;
-	case '>':	goto yy105;
-	case '@':	goto yy106;
+	case '-':	goto yy115;
+	case ':':	goto yy116;
+	case '<':	goto yy118;
+	case '=':	goto yy119;
+	case '>':	goto yy120;
+	case '@':	goto yy121;
 	case 'A':
 	case 'B':
 	case 'C':
@@ -355,38 +370,38 @@ yy36:
 	case 'w':
 	case 'x':
 	case 'y':
-	case 'z':	goto yy107;
-	case '[':	goto yy110;
+	case 'z':	goto yy122;
+	case '[':	goto yy125;
 	default:	goto yy37;
 	}
 yy37:
 #line 45 "ext/rbs_extension/lexer.re"
 	{ return next_token(state, pCOLON); }
-#line 366 "ext/rbs_extension/lexer.c"
+#line 381 "ext/rbs_extension/lexer.c"
 yy38:
 	skip(state);
 	yych = peek(state);
 	if (yych <= ';') goto yy39;
 	if (yych <= '<') goto yy32;
-	if (yych <= '=') goto yy111;
+	if (yych <= '=') goto yy126;
 yy39:
 #line 47 "ext/rbs_extension/lexer.re"
 	{ return next_token(state, pLT); }
-#line 376 "ext/rbs_extension/lexer.c"
+#line 391 "ext/rbs_extension/lexer.c"
 yy40:
 	skip(state);
 	yych = peek(state);
 	if (yych <= '>') {
 		if (yych <= '<') goto yy41;
-		if (yych <= '=') goto yy112;
-		goto yy113;
+		if (yych <= '=') goto yy127;
+		goto yy128;
 	} else {
 		if (yych == '~') goto yy32;
 	}
 yy41:
 #line 44 "ext/rbs_extension/lexer.re"
 	{ return next_token(state, pEQ); }
-#line 390 "ext/rbs_extension/lexer.c"
+#line 405 "ext/rbs_extension/lexer.c"
 yy42:
 	skip(state);
 	yych = peek(state);
@@ -397,7 +412,7 @@ yy43:
 	skip(state);
 #line 35 "ext/rbs_extension/lexer.re"
 	{ return next_token(state, pQUESTION); }
-#line 401 "ext/rbs_extension/lexer.c"
+#line 416 "ext/rbs_extension/lexer.c"
 yy45:
 	yyaccept = 0;
 	skip(state);
@@ -405,12 +420,12 @@ yy45:
 	yych = peek(state);
 	if (yych <= '^') {
 		if (yych <= '?') goto yy5;
-		if (yych <= '@') goto yy115;
-		if (yych <= 'Z') goto yy116;
+		if (yych <= '@') goto yy130;
+		if (yych <= 'Z') goto yy131;
 		goto yy5;
 	} else {
 		if (yych == '`') goto yy5;
-		if (yych <= 'z') goto yy116;
+		if (yych <= 'z') goto yy131;
 		goto yy5;
 	}
 yy46:
@@ -418,10 +433,10 @@ yy46:
 	yych = peek(state);
 	if (yych <= '=') {
 		if (yych <= '/') {
-			if (yych == '!') goto yy119;
+			if (yych == '!') goto yy134;
 		} else {
 			if (yych <= '9') goto yy46;
-			if (yych >= '=') goto yy121;
+			if (yych >= '=') goto yy136;
 		}
 	} else {
 		if (yych <= '^') {
@@ -433,49 +448,49 @@ yy46:
 		}
 	}
 yy48:
-#line 93 "ext/rbs_extension/lexer.re"
+#line 122 "ext/rbs_extension/lexer.re"
 	{ return next_token(state, tUIDENT); }
-#line 439 "ext/rbs_extension/lexer.c"
+#line 454 "ext/rbs_extension/lexer.c"
 yy49:
 	skip(state);
 	yych = peek(state);
-	if (yych == ']') goto yy112;
+	if (yych == ']') goto yy127;
 #line 27 "ext/rbs_extension/lexer.re"
 	{ return next_token(state, pLBRACKET); }
-#line 446 "ext/rbs_extension/lexer.c"
+#line 461 "ext/rbs_extension/lexer.c"
 yy51:
 	skip(state);
 #line 28 "ext/rbs_extension/lexer.re"
 	{ return next_token(state, pRBRACKET); }
-#line 451 "ext/rbs_extension/lexer.c"
+#line 466 "ext/rbs_extension/lexer.c"
 yy53:
 	skip(state);
 #line 33 "ext/rbs_extension/lexer.re"
 	{ return next_token(state, pHAT); }
-#line 456 "ext/rbs_extension/lexer.c"
+#line 471 "ext/rbs_extension/lexer.c"
 yy55:
 	skip(state);
 	yych = peek(state);
 	if (yych <= '=') {
 		if (yych <= '/') {
-			if (yych == '!') goto yy119;
+			if (yych == '!') goto yy134;
 		} else {
-			if (yych <= '9') goto yy123;
-			if (yych >= '=') goto yy121;
+			if (yych <= '9') goto yy138;
+			if (yych >= '=') goto yy136;
 		}
 	} else {
 		if (yych <= '^') {
 			if (yych <= '@') goto yy56;
-			if (yych <= 'Z') goto yy126;
+			if (yych <= 'Z') goto yy141;
 		} else {
 			if (yych == '`') goto yy56;
-			if (yych <= 'z') goto yy123;
+			if (yych <= 'z') goto yy138;
 		}
 	}
 yy56:
-#line 96 "ext/rbs_extension/lexer.re"
+#line 125 "ext/rbs_extension/lexer.re"
 	{ return next_token(state, tULLIDENT); }
-#line 479 "ext/rbs_extension/lexer.c"
+#line 494 "ext/rbs_extension/lexer.c"
 yy57:
 	yyaccept = 4;
 	skip(state);
@@ -483,65 +498,155 @@ yy57:
 	yych = peek(state);
 	if (yych <= ' ') {
 		if (yych <= 0x00000000) goto yy58;
-		if (yych <= 0x0000001F) goto yy129;
+		if (yych <= 0x0000001F) goto yy144;
 	} else {
-		if (yych != ':') goto yy129;
+		if (yych != ':') goto yy144;
 	}
 yy58:
 #line 40 "ext/rbs_extension/lexer.re"
 	{  return next_token(state, tOPERATOR); }
-#line 494 "ext/rbs_extension/lexer.c"
+#line 509 "ext/rbs_extension/lexer.c"
 yy59:
 	skip(state);
 	yych = peek(state);
+	if (yych == 'l') goto yy146;
+	if (yych == 't') goto yy147;
+	goto yy67;
+yy60:
+#line 121 "ext/rbs_extension/lexer.re"
+	{ return next_token(state, tLIDENT); }
+#line 519 "ext/rbs_extension/lexer.c"
+yy61:
+	skip(state);
+	yych = peek(state);
+	if (yych == 'o') goto yy148;
+	goto yy67;
+yy62:
+	skip(state);
+	yych = peek(state);
+	if (yych == 'l') goto yy149;
+	goto yy67;
+yy63:
+	skip(state);
+	yych = peek(state);
+	if (yych == 'e') goto yy150;
+	goto yy67;
+yy64:
+	skip(state);
+	yych = peek(state);
+	if (yych == 'n') goto yy151;
+	if (yych == 'x') goto yy152;
+	goto yy67;
+yy65:
+	skip(state);
+	yych = peek(state);
+	if (yych == 'a') goto yy153;
+	goto yy67;
+yy66:
+	skip(state);
+	yych = peek(state);
+yy67:
 	if (yych <= '=') {
 		if (yych <= '/') {
-			if (yych == '!') goto yy119;
+			if (yych == '!') goto yy134;
+			goto yy60;
 		} else {
-			if (yych <= '9') goto yy59;
-			if (yych >= '=') goto yy121;
+			if (yych <= '9') goto yy66;
+			if (yych <= '<') goto yy60;
+			goto yy136;
 		}
 	} else {
 		if (yych <= '^') {
-			if (yych <= '@') goto yy61;
-			if (yych <= 'Z') goto yy59;
+			if (yych <= '@') goto yy60;
+			if (yych <= 'Z') goto yy66;
+			goto yy60;
 		} else {
-			if (yych == '`') goto yy61;
-			if (yych <= 'z') goto yy59;
+			if (yych == '`') goto yy60;
+			if (yych <= 'z') goto yy66;
+			goto yy60;
 		}
 	}
-yy61:
-#line 92 "ext/rbs_extension/lexer.re"
-	{ return next_token(state, tLIDENT); }
-#line 517 "ext/rbs_extension/lexer.c"
-yy62:
-	skip(state);
-#line 29 "ext/rbs_extension/lexer.re"
-	{ return next_token(state, pLBRACE); }
-#line 522 "ext/rbs_extension/lexer.c"
-yy64:
-	skip(state);
-#line 32 "ext/rbs_extension/lexer.re"
-	{ return next_token(state, pBAR); }
-#line 527 "ext/rbs_extension/lexer.c"
-yy66:
-	skip(state);
-#line 30 "ext/rbs_extension/lexer.re"
-	{ return next_token(state, pRBRACE); }
-#line 532 "ext/rbs_extension/lexer.c"
 yy68:
 	skip(state);
 	yych = peek(state);
+	if (yych == 'n') goto yy154;
+	goto yy67;
 yy69:
-	if (yych <= '"') {
-		if (yych <= 0x00000000) goto yy70;
-		if (yych <= '!') goto yy68;
-		goto yy71;
-	} else {
-		if (yych == '\\') goto yy73;
-		goto yy68;
-	}
+	skip(state);
+	yych = peek(state);
+	if (yych == 'o') goto yy156;
+	goto yy67;
 yy70:
+	skip(state);
+	yych = peek(state);
+	if (yych == 'i') goto yy157;
+	goto yy67;
+yy71:
+	skip(state);
+	yych = peek(state);
+	if (yych == 'u') goto yy158;
+	goto yy67;
+yy72:
+	skip(state);
+	yych = peek(state);
+	if (yych == 'r') goto yy159;
+	if (yych == 'u') goto yy160;
+	goto yy67;
+yy73:
+	skip(state);
+	yych = peek(state);
+	if (yych == 'e') goto yy161;
+	if (yych == 'i') goto yy162;
+	goto yy67;
+yy74:
+	skip(state);
+	yych = peek(state);
+	if (yych <= 'q') {
+		if (yych == 'o') goto yy163;
+		goto yy67;
+	} else {
+		if (yych <= 'r') goto yy164;
+		if (yych == 'y') goto yy165;
+		goto yy67;
+	}
+yy75:
+	skip(state);
+	yych = peek(state);
+	if (yych == 'n') goto yy166;
+	goto yy67;
+yy76:
+	skip(state);
+	yych = peek(state);
+	if (yych == 'o') goto yy167;
+	goto yy67;
+yy77:
+	skip(state);
+#line 29 "ext/rbs_extension/lexer.re"
+	{ return next_token(state, pLBRACE); }
+#line 627 "ext/rbs_extension/lexer.c"
+yy79:
+	skip(state);
+#line 32 "ext/rbs_extension/lexer.re"
+	{ return next_token(state, pBAR); }
+#line 632 "ext/rbs_extension/lexer.c"
+yy81:
+	skip(state);
+#line 30 "ext/rbs_extension/lexer.re"
+	{ return next_token(state, pRBRACE); }
+#line 637 "ext/rbs_extension/lexer.c"
+yy83:
+	skip(state);
+	yych = peek(state);
+yy84:
+	if (yych <= '"') {
+		if (yych <= 0x00000000) goto yy85;
+		if (yych <= '!') goto yy83;
+		goto yy86;
+	} else {
+		if (yych == '\\') goto yy88;
+		goto yy83;
+	}
+yy85:
 	*state = backup;
 	if (yyaccept <= 4) {
 		if (yyaccept <= 2) {
@@ -564,705 +669,1865 @@ yy70:
 	} else {
 		if (yyaccept <= 6) {
 			if (yyaccept == 5) {
-				goto yy72;
+				goto yy87;
 			} else {
-				goto yy83;
+				goto yy98;
 			}
 		} else {
 			if (yyaccept == 7) {
-				goto yy146;
+				goto yy183;
 			} else {
-				goto yy154;
+				goto yy191;
 			}
 		}
 	}
-yy71:
+yy86:
 	skip(state);
-yy72:
-#line 69 "ext/rbs_extension/lexer.re"
+yy87:
+#line 99 "ext/rbs_extension/lexer.re"
 	{ return next_token(state, tDQSTRING); }
-#line 585 "ext/rbs_extension/lexer.c"
-yy73:
+#line 690 "ext/rbs_extension/lexer.c"
+yy88:
 	skip(state);
 	yych = peek(state);
 	if (yych <= '"') {
-		if (yych <= 0x00000000) goto yy70;
-		if (yych <= '!') goto yy68;
-		goto yy131;
+		if (yych <= 0x00000000) goto yy85;
+		if (yych <= '!') goto yy83;
+		goto yy168;
 	} else {
-		if (yych == '\\') goto yy73;
-		goto yy68;
+		if (yych == '\\') goto yy88;
+		goto yy83;
 	}
-yy75:
+yy90:
 	skip(state);
 	yych = peek(state);
 	if (yych <= ',') {
 		if (yych <= '\f') {
-			if (yych <= 0x00000000) goto yy77;
-			if (yych <= 0x00000008) goto yy75;
-			if (yych >= '\v') goto yy75;
+			if (yych <= 0x00000000) goto yy92;
+			if (yych <= 0x00000008) goto yy90;
+			if (yych >= '\v') goto yy90;
 		} else {
 			if (yych <= 0x0000001F) {
-				if (yych >= 0x0000000E) goto yy75;
+				if (yych >= 0x0000000E) goto yy90;
 			} else {
-				if (yych == '#') goto yy75;
+				if (yych == '#') goto yy90;
 			}
 		}
 	} else {
 		if (yych <= '>') {
-			if (yych <= '-') goto yy75;
-			if (yych <= '/') goto yy77;
-			if (yych <= '9') goto yy75;
+			if (yych <= '-') goto yy90;
+			if (yych <= '/') goto yy92;
+			if (yych <= '9') goto yy90;
 		} else {
 			if (yych <= '^') {
-				if (yych <= 'Z') goto yy75;
+				if (yych <= 'Z') goto yy90;
 			} else {
-				if (yych <= 'z') goto yy75;
-				if (yych >= 0x0000007F) goto yy75;
+				if (yych <= 'z') goto yy90;
+				if (yych >= 0x0000007F) goto yy90;
 			}
 		}
 	}
-yy77:
-#line 103 "ext/rbs_extension/lexer.re"
+yy92:
+#line 132 "ext/rbs_extension/lexer.re"
 	{ return next_token(state, tGIDENT); }
-#line 629 "ext/rbs_extension/lexer.c"
-yy78:
+#line 734 "ext/rbs_extension/lexer.c"
+yy93:
 	skip(state);
-	goto yy77;
-yy79:
+	goto yy92;
+yy94:
 	skip(state);
 	yych = peek(state);
 	if (yych <= 'Z') {
 		if (yych <= '(') {
-			if (yych <= '\'') goto yy70;
-			goto yy132;
+			if (yych <= '\'') goto yy85;
+			goto yy169;
 		} else {
-			if (yych == '<') goto yy134;
-			goto yy70;
+			if (yych == '<') goto yy171;
+			goto yy85;
 		}
 	} else {
 		if (yych <= 'z') {
-			if (yych <= '[') goto yy136;
-			goto yy70;
+			if (yych <= '[') goto yy173;
+			goto yy85;
 		} else {
-			if (yych <= '{') goto yy138;
-			if (yych <= '|') goto yy140;
-			goto yy70;
+			if (yych <= '{') goto yy175;
+			if (yych <= '|') goto yy177;
+			goto yy85;
 		}
 	}
-yy80:
+yy95:
 	skip(state);
 	yych = peek(state);
-yy81:
+yy96:
 	if (yych <= '\'') {
-		if (yych <= 0x00000000) goto yy70;
-		if (yych <= '&') goto yy80;
+		if (yych <= 0x00000000) goto yy85;
+		if (yych <= '&') goto yy95;
 	} else {
-		if (yych == '\\') goto yy84;
-		goto yy80;
+		if (yych == '\\') goto yy99;
+		goto yy95;
 	}
-yy82:
+yy97:
 	skip(state);
-yy83:
-#line 70 "ext/rbs_extension/lexer.re"
+yy98:
+#line 100 "ext/rbs_extension/lexer.re"
 	{ return next_token(state, tSQSTRING); }
-#line 670 "ext/rbs_extension/lexer.c"
-yy84:
+#line 775 "ext/rbs_extension/lexer.c"
+yy99:
 	skip(state);
 	yych = peek(state);
 	if (yych <= '\'') {
-		if (yych <= 0x00000000) goto yy70;
-		if (yych <= '&') goto yy80;
-		goto yy142;
+		if (yych <= 0x00000000) goto yy85;
+		if (yych <= '&') goto yy95;
+		goto yy179;
 	} else {
-		if (yych == '\\') goto yy84;
-		goto yy80;
+		if (yych == '\\') goto yy99;
+		goto yy95;
 	}
-yy86:
+yy101:
 	skip(state);
 #line 37 "ext/rbs_extension/lexer.re"
 	{ return next_token(state, pSTAR2); }
-#line 686 "ext/rbs_extension/lexer.c"
-yy88:
+#line 791 "ext/rbs_extension/lexer.c"
+yy103:
 	skip(state);
 #line 42 "ext/rbs_extension/lexer.re"
 	{ return next_token(state, pARROW); }
-#line 691 "ext/rbs_extension/lexer.c"
-yy90:
+#line 796 "ext/rbs_extension/lexer.c"
+yy105:
 	skip(state);
 	yych = peek(state);
-	if (yych == '.') goto yy143;
-	goto yy70;
-yy91:
+	if (yych == '.') goto yy180;
+	goto yy85;
+yy106:
 	skip(state);
 	yych = peek(state);
-	if (yych == '=') goto yy96;
-	if (yych == '~') goto yy96;
-yy92:
-#line 89 "ext/rbs_extension/lexer.re"
+	if (yych == '=') goto yy111;
+	if (yych == '~') goto yy111;
+yy107:
+#line 119 "ext/rbs_extension/lexer.re"
 	{ return next_token(state, tSYMBOL); }
-#line 705 "ext/rbs_extension/lexer.c"
-yy93:
+#line 810 "ext/rbs_extension/lexer.c"
+yy108:
 	skip(state);
 	yych = peek(state);
 	if (yych <= '"') {
-		if (yych <= 0x00000000) goto yy70;
-		if (yych <= '!') goto yy93;
-		goto yy145;
+		if (yych <= 0x00000000) goto yy85;
+		if (yych <= '!') goto yy108;
+		goto yy182;
 	} else {
-		if (yych == '\\') goto yy147;
-		goto yy93;
+		if (yych == '\\') goto yy184;
+		goto yy108;
 	}
-yy95:
+yy110:
 	skip(state);
 	yych = peek(state);
 	if (yych <= ')') {
 		if (yych <= 0x0000001F) {
 			if (yych <= '\n') {
-				if (yych <= 0x00000000) goto yy70;
-				if (yych <= 0x00000008) goto yy149;
-				goto yy70;
+				if (yych <= 0x00000000) goto yy85;
+				if (yych <= 0x00000008) goto yy186;
+				goto yy85;
 			} else {
-				if (yych == '\r') goto yy70;
-				goto yy149;
+				if (yych == '\r') goto yy85;
+				goto yy186;
 			}
 		} else {
 			if (yych <= '#') {
-				if (yych <= ' ') goto yy70;
-				if (yych <= '"') goto yy152;
-				goto yy149;
+				if (yych <= ' ') goto yy85;
+				if (yych <= '"') goto yy189;
+				goto yy186;
 			} else {
-				if (yych == '%') goto yy70;
-				if (yych <= '\'') goto yy152;
-				goto yy70;
+				if (yych == '%') goto yy85;
+				if (yych <= '\'') goto yy189;
+				goto yy85;
 			}
 		}
 	} else {
 		if (yych <= 'Z') {
 			if (yych <= '/') {
-				if (yych == '-') goto yy149;
-				goto yy152;
+				if (yych == '-') goto yy186;
+				goto yy189;
 			} else {
-				if (yych <= '9') goto yy149;
-				if (yych <= '>') goto yy152;
-				goto yy149;
+				if (yych <= '9') goto yy186;
+				if (yych <= '>') goto yy189;
+				goto yy186;
 			}
 		} else {
 			if (yych <= '^') {
-				if (yych == '\\') goto yy152;
-				goto yy70;
+				if (yych == '\\') goto yy189;
+				goto yy85;
 			} else {
-				if (yych <= 'z') goto yy149;
-				if (yych <= '}') goto yy70;
-				if (yych <= '~') goto yy152;
-				goto yy149;
+				if (yych <= 'z') goto yy186;
+				if (yych <= '}') goto yy85;
+				if (yych <= '~') goto yy189;
+				goto yy186;
 			}
 		}
 	}
-yy96:
+yy111:
 	skip(state);
-	goto yy92;
-yy97:
+	goto yy107;
+yy112:
 	skip(state);
 	yych = peek(state);
 	if (yych <= '\'') {
-		if (yych <= 0x00000000) goto yy70;
-		if (yych <= '&') goto yy97;
-		goto yy153;
+		if (yych <= 0x00000000) goto yy85;
+		if (yych <= '&') goto yy112;
+		goto yy190;
 	} else {
-		if (yych == '\\') goto yy155;
-		goto yy97;
+		if (yych == '\\') goto yy192;
+		goto yy112;
 	}
-yy99:
+yy114:
 	skip(state);
 	yych = peek(state);
-	if (yych == '*') goto yy96;
-	goto yy92;
-yy100:
+	if (yych == '*') goto yy111;
+	goto yy107;
+yy115:
 	skip(state);
 	yych = peek(state);
-	if (yych == '@') goto yy96;
-	goto yy92;
-yy101:
+	if (yych == '@') goto yy111;
+	goto yy107;
+yy116:
 	skip(state);
 #line 46 "ext/rbs_extension/lexer.re"
 	{ return next_token(state, pCOLON2); }
-#line 791 "ext/rbs_extension/lexer.c"
-yy103:
+#line 896 "ext/rbs_extension/lexer.c"
+yy118:
 	skip(state);
 	yych = peek(state);
-	if (yych <= ';') goto yy92;
-	if (yych <= '<') goto yy96;
-	if (yych <= '=') goto yy157;
-	goto yy92;
-yy104:
+	if (yych <= ';') goto yy107;
+	if (yych <= '<') goto yy111;
+	if (yych <= '=') goto yy194;
+	goto yy107;
+yy119:
 	skip(state);
 	yych = peek(state);
-	if (yych == '=') goto yy158;
-	if (yych == '~') goto yy96;
-	goto yy70;
-yy105:
+	if (yych == '=') goto yy195;
+	if (yych == '~') goto yy111;
+	goto yy85;
+yy120:
 	skip(state);
 	yych = peek(state);
-	if (yych <= '<') goto yy92;
-	if (yych <= '>') goto yy96;
-	goto yy92;
-yy106:
+	if (yych <= '<') goto yy107;
+	if (yych <= '>') goto yy111;
+	goto yy107;
+yy121:
 	skip(state);
 	yych = peek(state);
 	if (yych <= '^') {
-		if (yych <= '?') goto yy70;
-		if (yych <= '@') goto yy159;
-		if (yych <= 'Z') goto yy160;
-		goto yy70;
+		if (yych <= '?') goto yy85;
+		if (yych <= '@') goto yy196;
+		if (yych <= 'Z') goto yy197;
+		goto yy85;
 	} else {
-		if (yych == '`') goto yy70;
-		if (yych <= 'z') goto yy160;
-		goto yy70;
+		if (yych == '`') goto yy85;
+		if (yych <= 'z') goto yy197;
+		goto yy85;
 	}
-yy107:
+yy122:
 	skip(state);
 	yych = peek(state);
 	if (yych <= '>') {
 		if (yych <= '/') {
-			if (yych == '!') goto yy163;
+			if (yych == '!') goto yy200;
 		} else {
-			if (yych <= '9') goto yy107;
-			if (yych == '=') goto yy163;
+			if (yych <= '9') goto yy122;
+			if (yych == '=') goto yy200;
 		}
 	} else {
 		if (yych <= '^') {
-			if (yych <= '?') goto yy163;
-			if (yych <= '@') goto yy109;
-			if (yych <= 'Z') goto yy107;
+			if (yych <= '?') goto yy200;
+			if (yych <= '@') goto yy124;
+			if (yych <= 'Z') goto yy122;
 		} else {
-			if (yych == '`') goto yy109;
-			if (yych <= 'z') goto yy107;
+			if (yych == '`') goto yy124;
+			if (yych <= 'z') goto yy122;
 		}
 	}
-yy109:
-#line 85 "ext/rbs_extension/lexer.re"
+yy124:
+#line 115 "ext/rbs_extension/lexer.re"
 	{ return next_token(state, tSYMBOL); }
-#line 847 "ext/rbs_extension/lexer.c"
-yy110:
+#line 952 "ext/rbs_extension/lexer.c"
+yy125:
 	skip(state);
 	yych = peek(state);
-	if (yych == ']') goto yy158;
-	goto yy70;
-yy111:
+	if (yych == ']') goto yy195;
+	goto yy85;
+yy126:
 	skip(state);
 	yych = peek(state);
 	if (yych == '>') goto yy32;
 	goto yy10;
-yy112:
+yy127:
 	skip(state);
 	yych = peek(state);
 	if (yych == '=') goto yy32;
 	goto yy10;
-yy113:
+yy128:
 	skip(state);
 #line 43 "ext/rbs_extension/lexer.re"
 	{ return next_token(state, pFATARROW); }
-#line 867 "ext/rbs_extension/lexer.c"
-yy115:
+#line 972 "ext/rbs_extension/lexer.c"
+yy130:
 	skip(state);
 	yych = peek(state);
 	if (yych <= '^') {
-		if (yych <= '@') goto yy70;
-		if (yych <= 'Z') goto yy164;
-		goto yy70;
+		if (yych <= '@') goto yy85;
+		if (yych <= 'Z') goto yy201;
+		goto yy85;
 	} else {
-		if (yych == '`') goto yy70;
-		if (yych <= 'z') goto yy164;
-		goto yy70;
+		if (yych == '`') goto yy85;
+		if (yych <= 'z') goto yy201;
+		goto yy85;
 	}
-yy116:
+yy131:
 	skip(state);
 	yych = peek(state);
 	if (yych <= 'Z') {
-		if (yych <= '/') goto yy118;
-		if (yych <= '9') goto yy116;
-		if (yych >= 'A') goto yy116;
+		if (yych <= '/') goto yy133;
+		if (yych <= '9') goto yy131;
+		if (yych >= 'A') goto yy131;
 	} else {
 		if (yych <= '_') {
-			if (yych >= '_') goto yy116;
+			if (yych >= '_') goto yy131;
 		} else {
-			if (yych <= '`') goto yy118;
-			if (yych <= 'z') goto yy116;
+			if (yych <= '`') goto yy133;
+			if (yych <= 'z') goto yy131;
 		}
 	}
-yy118:
-#line 100 "ext/rbs_extension/lexer.re"
+yy133:
+#line 129 "ext/rbs_extension/lexer.re"
 	{ return next_token(state, tAIDENT); }
-#line 898 "ext/rbs_extension/lexer.c"
-yy119:
+#line 1003 "ext/rbs_extension/lexer.c"
+yy134:
 	skip(state);
-#line 97 "ext/rbs_extension/lexer.re"
+#line 126 "ext/rbs_extension/lexer.re"
 	{ return next_token(state, tBANGIDENT); }
-#line 903 "ext/rbs_extension/lexer.c"
-yy121:
+#line 1008 "ext/rbs_extension/lexer.c"
+yy136:
 	skip(state);
-#line 98 "ext/rbs_extension/lexer.re"
+#line 127 "ext/rbs_extension/lexer.re"
 	{ return next_token(state, tEQIDENT); }
-#line 908 "ext/rbs_extension/lexer.c"
-yy123:
+#line 1013 "ext/rbs_extension/lexer.c"
+yy138:
 	skip(state);
 	yych = peek(state);
 	if (yych <= '=') {
 		if (yych <= '/') {
-			if (yych == '!') goto yy119;
+			if (yych == '!') goto yy134;
 		} else {
-			if (yych <= '9') goto yy123;
-			if (yych >= '=') goto yy121;
+			if (yych <= '9') goto yy138;
+			if (yych >= '=') goto yy136;
 		}
 	} else {
 		if (yych <= '^') {
-			if (yych <= '@') goto yy125;
-			if (yych <= 'Z') goto yy123;
+			if (yych <= '@') goto yy140;
+			if (yych <= 'Z') goto yy138;
 		} else {
-			if (yych == '`') goto yy125;
-			if (yych <= 'z') goto yy123;
+			if (yych == '`') goto yy140;
+			if (yych <= 'z') goto yy138;
 		}
 	}
-yy125:
-#line 94 "ext/rbs_extension/lexer.re"
+yy140:
+#line 123 "ext/rbs_extension/lexer.re"
 	{ return next_token(state, tULLIDENT); }
-#line 931 "ext/rbs_extension/lexer.c"
-yy126:
+#line 1036 "ext/rbs_extension/lexer.c"
+yy141:
 	skip(state);
 	yych = peek(state);
 	if (yych <= '=') {
 		if (yych <= '/') {
-			if (yych == '!') goto yy119;
+			if (yych == '!') goto yy134;
 		} else {
-			if (yych <= '9') goto yy126;
-			if (yych >= '=') goto yy121;
+			if (yych <= '9') goto yy141;
+			if (yych >= '=') goto yy136;
 		}
 	} else {
 		if (yych <= '^') {
-			if (yych <= '@') goto yy128;
-			if (yych <= 'Z') goto yy126;
+			if (yych <= '@') goto yy143;
+			if (yych <= 'Z') goto yy141;
 		} else {
-			if (yych == '`') goto yy128;
-			if (yych <= 'z') goto yy126;
+			if (yych == '`') goto yy143;
+			if (yych <= 'z') goto yy141;
 		}
 	}
-yy128:
-#line 95 "ext/rbs_extension/lexer.re"
+yy143:
+#line 124 "ext/rbs_extension/lexer.re"
 	{ return next_token(state, tULIDENT); }
-#line 954 "ext/rbs_extension/lexer.c"
-yy129:
+#line 1059 "ext/rbs_extension/lexer.c"
+yy144:
 	skip(state);
 	yych = peek(state);
-	if (yych <= 0x00000000) goto yy70;
-	if (yych == '`') goto yy167;
-	goto yy129;
-yy131:
+	if (yych <= 0x00000000) goto yy85;
+	if (yych == '`') goto yy204;
+	goto yy144;
+yy146:
+	skip(state);
+	yych = peek(state);
+	if (yych == 'i') goto yy206;
+	goto yy67;
+yy147:
+	skip(state);
+	yych = peek(state);
+	if (yych == 't') goto yy207;
+	goto yy67;
+yy148:
+	skip(state);
+	yych = peek(state);
+	if (yych == 'o') goto yy208;
+	if (yych == 't') goto yy209;
+	goto yy67;
+yy149:
+	skip(state);
+	yych = peek(state);
+	if (yych == 'a') goto yy211;
+	goto yy67;
+yy150:
+	skip(state);
+	yych = peek(state);
+	if (yych == 'f') goto yy212;
+	goto yy67;
+yy151:
+	skip(state);
+	yych = peek(state);
+	if (yych == 'd') goto yy214;
+	goto yy67;
+yy152:
+	skip(state);
+	yych = peek(state);
+	if (yych == 't') goto yy216;
+	goto yy67;
+yy153:
+	skip(state);
+	yych = peek(state);
+	if (yych == 'l') goto yy217;
+	goto yy67;
+yy154:
+	skip(state);
+	yych = peek(state);
+	if (yych <= '^') {
+		if (yych <= '9') {
+			if (yych == '!') goto yy134;
+			if (yych >= '0') goto yy66;
+		} else {
+			if (yych <= '=') {
+				if (yych >= '=') goto yy136;
+			} else {
+				if (yych <= '@') goto yy155;
+				if (yych <= 'Z') goto yy66;
+			}
+		}
+	} else {
+		if (yych <= 'c') {
+			if (yych == '`') goto yy155;
+			if (yych <= 'b') goto yy66;
+			goto yy218;
+		} else {
+			if (yych <= 's') {
+				if (yych <= 'r') goto yy66;
+				goto yy219;
+			} else {
+				if (yych <= 't') goto yy220;
+				if (yych <= 'z') goto yy66;
+			}
+		}
+	}
+yy155:
+#line 77 "ext/rbs_extension/lexer.re"
+	{ return next_token(state, kIN); }
+#line 1140 "ext/rbs_extension/lexer.c"
+yy156:
+	skip(state);
+	yych = peek(state);
+	if (yych == 'd') goto yy221;
+	goto yy67;
+yy157:
+	skip(state);
+	yych = peek(state);
+	if (yych == 'l') goto yy222;
+	goto yy67;
+yy158:
+	skip(state);
+	yych = peek(state);
+	if (yych == 't') goto yy224;
+	goto yy67;
+yy159:
+	skip(state);
+	yych = peek(state);
+	if (yych == 'e') goto yy226;
+	if (yych == 'i') goto yy227;
+	goto yy67;
+yy160:
+	skip(state);
+	yych = peek(state);
+	if (yych == 'b') goto yy228;
+	goto yy67;
+yy161:
+	skip(state);
+	yych = peek(state);
+	if (yych == 'l') goto yy229;
+	goto yy67;
+yy162:
+	skip(state);
+	yych = peek(state);
+	if (yych == 'n') goto yy230;
+	goto yy67;
+yy163:
+	skip(state);
+	yych = peek(state);
+	if (yych == 'p') goto yy231;
+	goto yy67;
+yy164:
+	skip(state);
+	yych = peek(state);
+	if (yych == 'u') goto yy233;
+	goto yy67;
+yy165:
+	skip(state);
+	yych = peek(state);
+	if (yych == 'p') goto yy234;
+	goto yy67;
+yy166:
+	skip(state);
+	yych = peek(state);
+	if (yych == 'c') goto yy235;
+	if (yych == 't') goto yy236;
+	goto yy67;
+yy167:
+	skip(state);
+	yych = peek(state);
+	if (yych == 'i') goto yy237;
+	goto yy67;
+yy168:
 	yyaccept = 5;
 	skip(state);
 	backup = *state;
 	yych = peek(state);
 	if (yych <= '"') {
-		if (yych <= 0x00000000) goto yy72;
-		if (yych <= '!') goto yy68;
-		goto yy71;
+		if (yych <= 0x00000000) goto yy87;
+		if (yych <= '!') goto yy83;
+		goto yy86;
 	} else {
-		if (yych == '\\') goto yy73;
-		goto yy68;
+		if (yych == '\\') goto yy88;
+		goto yy83;
 	}
-yy132:
+yy169:
 	skip(state);
 	yych = peek(state);
-	if (yych <= 0x00000000) goto yy70;
-	if (yych == ')') goto yy169;
-	goto yy132;
-yy134:
+	if (yych <= 0x00000000) goto yy85;
+	if (yych == ')') goto yy238;
+	goto yy169;
+yy171:
 	skip(state);
 	yych = peek(state);
-	if (yych <= 0x00000000) goto yy70;
-	if (yych == '>') goto yy171;
-	goto yy134;
-yy136:
+	if (yych <= 0x00000000) goto yy85;
+	if (yych == '>') goto yy240;
+	goto yy171;
+yy173:
 	skip(state);
 	yych = peek(state);
-	if (yych <= 0x00000000) goto yy70;
-	if (yych == ']') goto yy173;
-	goto yy136;
-yy138:
+	if (yych <= 0x00000000) goto yy85;
+	if (yych == ']') goto yy242;
+	goto yy173;
+yy175:
 	skip(state);
 	yych = peek(state);
-	if (yych <= 0x00000000) goto yy70;
-	if (yych == '}') goto yy175;
-	goto yy138;
-yy140:
+	if (yych <= 0x00000000) goto yy85;
+	if (yych == '}') goto yy244;
+	goto yy175;
+yy177:
 	skip(state);
 	yych = peek(state);
-	if (yych <= 0x00000000) goto yy70;
-	if (yych == '|') goto yy177;
-	goto yy140;
-yy142:
+	if (yych <= 0x00000000) goto yy85;
+	if (yych == '|') goto yy246;
+	goto yy177;
+yy179:
 	yyaccept = 6;
 	skip(state);
 	backup = *state;
 	yych = peek(state);
 	if (yych <= '\'') {
-		if (yych <= 0x00000000) goto yy83;
-		if (yych <= '&') goto yy80;
-		goto yy82;
+		if (yych <= 0x00000000) goto yy98;
+		if (yych <= '&') goto yy95;
+		goto yy97;
 	} else {
-		if (yych == '\\') goto yy84;
-		goto yy80;
+		if (yych == '\\') goto yy99;
+		goto yy95;
 	}
-yy143:
+yy180:
 	skip(state);
 #line 39 "ext/rbs_extension/lexer.re"
 	{ return next_token(state, pDOT3); }
-#line 1021 "ext/rbs_extension/lexer.c"
-yy145:
+#line 1263 "ext/rbs_extension/lexer.c"
+yy182:
 	skip(state);
-yy146:
-#line 71 "ext/rbs_extension/lexer.re"
+yy183:
+#line 101 "ext/rbs_extension/lexer.re"
 	{ return next_token(state, tDQSYMBOL); }
-#line 1027 "ext/rbs_extension/lexer.c"
-yy147:
+#line 1269 "ext/rbs_extension/lexer.c"
+yy184:
 	skip(state);
 	yych = peek(state);
 	if (yych <= '"') {
-		if (yych <= 0x00000000) goto yy70;
-		if (yych <= '!') goto yy93;
-		goto yy179;
+		if (yych <= 0x00000000) goto yy85;
+		if (yych <= '!') goto yy108;
+		goto yy248;
 	} else {
-		if (yych == '\\') goto yy147;
-		goto yy93;
+		if (yych == '\\') goto yy184;
+		goto yy108;
 	}
-yy149:
+yy186:
 	skip(state);
 	yych = peek(state);
 	if (yych <= ',') {
 		if (yych <= '\f') {
-			if (yych <= 0x00000000) goto yy151;
-			if (yych <= 0x00000008) goto yy149;
-			if (yych >= '\v') goto yy149;
+			if (yych <= 0x00000000) goto yy188;
+			if (yych <= 0x00000008) goto yy186;
+			if (yych >= '\v') goto yy186;
 		} else {
 			if (yych <= 0x0000001F) {
-				if (yych >= 0x0000000E) goto yy149;
+				if (yych >= 0x0000000E) goto yy186;
 			} else {
-				if (yych == '#') goto yy149;
+				if (yych == '#') goto yy186;
 			}
 		}
 	} else {
 		if (yych <= '>') {
-			if (yych <= '-') goto yy149;
-			if (yych <= '/') goto yy151;
-			if (yych <= '9') goto yy149;
+			if (yych <= '-') goto yy186;
+			if (yych <= '/') goto yy188;
+			if (yych <= '9') goto yy186;
 		} else {
 			if (yych <= '^') {
-				if (yych <= 'Z') goto yy149;
+				if (yych <= 'Z') goto yy186;
 			} else {
-				if (yych <= 'z') goto yy149;
-				if (yych >= 0x0000007F) goto yy149;
+				if (yych <= 'z') goto yy186;
+				if (yych >= 0x0000007F) goto yy186;
 			}
 		}
 	}
-yy151:
-#line 88 "ext/rbs_extension/lexer.re"
+yy188:
+#line 118 "ext/rbs_extension/lexer.re"
 	{ return next_token(state, tSYMBOL); }
-#line 1071 "ext/rbs_extension/lexer.c"
-yy152:
+#line 1313 "ext/rbs_extension/lexer.c"
+yy189:
 	skip(state);
-	goto yy151;
-yy153:
+	goto yy188;
+yy190:
 	skip(state);
-yy154:
-#line 72 "ext/rbs_extension/lexer.re"
+yy191:
+#line 102 "ext/rbs_extension/lexer.re"
 	{ return next_token(state, tSQSYMBOL); }
-#line 1080 "ext/rbs_extension/lexer.c"
-yy155:
+#line 1322 "ext/rbs_extension/lexer.c"
+yy192:
 	skip(state);
 	yych = peek(state);
 	if (yych <= '\'') {
-		if (yych <= 0x00000000) goto yy70;
-		if (yych <= '&') goto yy97;
-		goto yy180;
+		if (yych <= 0x00000000) goto yy85;
+		if (yych <= '&') goto yy112;
+		goto yy249;
 	} else {
-		if (yych == '\\') goto yy155;
-		goto yy97;
+		if (yych == '\\') goto yy192;
+		goto yy112;
 	}
-yy157:
+yy194:
 	skip(state);
 	yych = peek(state);
-	if (yych == '>') goto yy96;
-	goto yy92;
-yy158:
+	if (yych == '>') goto yy111;
+	goto yy107;
+yy195:
 	skip(state);
 	yych = peek(state);
-	if (yych == '=') goto yy96;
-	goto yy92;
-yy159:
+	if (yych == '=') goto yy111;
+	goto yy107;
+yy196:
 	skip(state);
 	yych = peek(state);
 	if (yych <= '^') {
-		if (yych <= '@') goto yy70;
-		if (yych <= 'Z') goto yy181;
-		goto yy70;
+		if (yych <= '@') goto yy85;
+		if (yych <= 'Z') goto yy250;
+		goto yy85;
 	} else {
-		if (yych == '`') goto yy70;
-		if (yych <= 'z') goto yy181;
-		goto yy70;
+		if (yych == '`') goto yy85;
+		if (yych <= 'z') goto yy250;
+		goto yy85;
 	}
-yy160:
+yy197:
 	skip(state);
 	yych = peek(state);
 	if (yych <= '>') {
 		if (yych <= '/') {
-			if (yych == '!') goto yy184;
+			if (yych == '!') goto yy253;
 		} else {
-			if (yych <= '9') goto yy160;
-			if (yych == '=') goto yy184;
+			if (yych <= '9') goto yy197;
+			if (yych == '=') goto yy253;
 		}
 	} else {
 		if (yych <= '^') {
-			if (yych <= '?') goto yy184;
-			if (yych <= '@') goto yy162;
-			if (yych <= 'Z') goto yy160;
+			if (yych <= '?') goto yy253;
+			if (yych <= '@') goto yy199;
+			if (yych <= 'Z') goto yy197;
 		} else {
-			if (yych == '`') goto yy162;
-			if (yych <= 'z') goto yy160;
+			if (yych == '`') goto yy199;
+			if (yych <= 'z') goto yy197;
 		}
 	}
-yy162:
-#line 86 "ext/rbs_extension/lexer.re"
+yy199:
+#line 116 "ext/rbs_extension/lexer.re"
 	{ return next_token(state, tSYMBOL); }
-#line 1137 "ext/rbs_extension/lexer.c"
-yy163:
+#line 1379 "ext/rbs_extension/lexer.c"
+yy200:
 	skip(state);
-	goto yy109;
-yy164:
+	goto yy124;
+yy201:
 	skip(state);
 	yych = peek(state);
 	if (yych <= 'Z') {
-		if (yych <= '/') goto yy166;
-		if (yych <= '9') goto yy164;
-		if (yych >= 'A') goto yy164;
+		if (yych <= '/') goto yy203;
+		if (yych <= '9') goto yy201;
+		if (yych >= 'A') goto yy201;
 	} else {
 		if (yych <= '_') {
-			if (yych >= '_') goto yy164;
+			if (yych >= '_') goto yy201;
 		} else {
-			if (yych <= '`') goto yy166;
-			if (yych <= 'z') goto yy164;
+			if (yych <= '`') goto yy203;
+			if (yych <= 'z') goto yy201;
 		}
 	}
-yy166:
-#line 101 "ext/rbs_extension/lexer.re"
+yy203:
+#line 130 "ext/rbs_extension/lexer.re"
 	{ return next_token(state, tA2IDENT); }
-#line 1159 "ext/rbs_extension/lexer.c"
-yy167:
+#line 1401 "ext/rbs_extension/lexer.c"
+yy204:
 	skip(state);
 #line 41 "ext/rbs_extension/lexer.re"
 	{ return next_token(state, tQIDENT); }
-#line 1164 "ext/rbs_extension/lexer.c"
-yy169:
+#line 1406 "ext/rbs_extension/lexer.c"
+yy206:
+	skip(state);
+	yych = peek(state);
+	if (yych == 'a') goto yy254;
+	goto yy67;
+yy207:
+	skip(state);
+	yych = peek(state);
+	if (yych == 'r') goto yy255;
+	goto yy67;
+yy208:
+	skip(state);
+	yych = peek(state);
+	if (yych == 'l') goto yy256;
+	goto yy67;
+yy209:
+	skip(state);
+	yych = peek(state);
+	if (yych <= '=') {
+		if (yych <= '/') {
+			if (yych == '!') goto yy134;
+		} else {
+			if (yych <= '9') goto yy66;
+			if (yych >= '=') goto yy136;
+		}
+	} else {
+		if (yych <= '^') {
+			if (yych <= '@') goto yy210;
+			if (yych <= 'Z') goto yy66;
+		} else {
+			if (yych == '`') goto yy210;
+			if (yych <= 'z') goto yy66;
+		}
+	}
+yy210:
+#line 71 "ext/rbs_extension/lexer.re"
+	{ return next_token(state, kBOT); }
+#line 1444 "ext/rbs_extension/lexer.c"
+yy211:
+	skip(state);
+	yych = peek(state);
+	if (yych == 's') goto yy258;
+	goto yy67;
+yy212:
+	skip(state);
+	yych = peek(state);
+	if (yych <= '=') {
+		if (yych <= '/') {
+			if (yych == '!') goto yy134;
+		} else {
+			if (yych <= '9') goto yy66;
+			if (yych >= '=') goto yy136;
+		}
+	} else {
+		if (yych <= '^') {
+			if (yych <= '@') goto yy213;
+			if (yych <= 'Z') goto yy66;
+		} else {
+			if (yych == '`') goto yy213;
+			if (yych <= 'z') goto yy66;
+		}
+	}
+yy213:
+#line 73 "ext/rbs_extension/lexer.re"
+	{ return next_token(state, kDEF); }
+#line 1472 "ext/rbs_extension/lexer.c"
+yy214:
+	skip(state);
+	yych = peek(state);
+	if (yych <= '=') {
+		if (yych <= '/') {
+			if (yych == '!') goto yy134;
+		} else {
+			if (yych <= '9') goto yy66;
+			if (yych >= '=') goto yy136;
+		}
+	} else {
+		if (yych <= '^') {
+			if (yych <= '@') goto yy215;
+			if (yych <= 'Z') goto yy66;
+		} else {
+			if (yych == '`') goto yy215;
+			if (yych <= 'z') goto yy66;
+		}
+	}
+yy215:
+#line 74 "ext/rbs_extension/lexer.re"
+	{ return next_token(state, kEND); }
+#line 1495 "ext/rbs_extension/lexer.c"
+yy216:
+	skip(state);
+	yych = peek(state);
+	if (yych == 'e') goto yy259;
+	goto yy67;
+yy217:
+	skip(state);
+	yych = peek(state);
+	if (yych == 's') goto yy260;
+	goto yy67;
+yy218:
+	skip(state);
+	yych = peek(state);
+	if (yych == 'l') goto yy261;
+	goto yy67;
+yy219:
+	skip(state);
+	yych = peek(state);
+	if (yych == 't') goto yy262;
+	goto yy67;
+yy220:
+	skip(state);
+	yych = peek(state);
+	if (yych == 'e') goto yy263;
+	goto yy67;
+yy221:
+	skip(state);
+	yych = peek(state);
+	if (yych == 'u') goto yy264;
+	goto yy67;
+yy222:
+	skip(state);
+	yych = peek(state);
+	if (yych <= '=') {
+		if (yych <= '/') {
+			if (yych == '!') goto yy134;
+		} else {
+			if (yych <= '9') goto yy66;
+			if (yych >= '=') goto yy136;
+		}
+	} else {
+		if (yych <= '^') {
+			if (yych <= '@') goto yy223;
+			if (yych <= 'Z') goto yy66;
+		} else {
+			if (yych == '`') goto yy223;
+			if (yych <= 'z') goto yy66;
+		}
+	}
+yy223:
+#line 82 "ext/rbs_extension/lexer.re"
+	{ return next_token(state, kNIL); }
+#line 1548 "ext/rbs_extension/lexer.c"
+yy224:
+	skip(state);
+	yych = peek(state);
+	if (yych <= '=') {
+		if (yych <= '/') {
+			if (yych == '!') goto yy134;
+		} else {
+			if (yych <= '9') goto yy66;
+			if (yych >= '=') goto yy136;
+		}
+	} else {
+		if (yych <= '^') {
+			if (yych <= '@') goto yy225;
+			if (yych <= 'Z') goto yy66;
+		} else {
+			if (yych == '`') goto yy225;
+			if (yych <= 'z') goto yy66;
+		}
+	}
+yy225:
+#line 83 "ext/rbs_extension/lexer.re"
+	{ return next_token(state, kOUT); }
+#line 1571 "ext/rbs_extension/lexer.c"
+yy226:
+	skip(state);
+	yych = peek(state);
+	if (yych == 'p') goto yy265;
+	goto yy67;
+yy227:
+	skip(state);
+	yych = peek(state);
+	if (yych == 'v') goto yy266;
+	goto yy67;
+yy228:
+	skip(state);
+	yych = peek(state);
+	if (yych == 'l') goto yy267;
+	goto yy67;
+yy229:
+	skip(state);
+	yych = peek(state);
+	if (yych == 'f') goto yy268;
+	goto yy67;
+yy230:
+	skip(state);
+	yych = peek(state);
+	if (yych == 'g') goto yy270;
+	goto yy67;
+yy231:
+	skip(state);
+	yych = peek(state);
+	if (yych <= '=') {
+		if (yych <= '/') {
+			if (yych == '!') goto yy134;
+		} else {
+			if (yych <= '9') goto yy66;
+			if (yych >= '=') goto yy136;
+		}
+	} else {
+		if (yych <= '^') {
+			if (yych <= '@') goto yy232;
+			if (yych <= 'Z') goto yy66;
+		} else {
+			if (yych == '`') goto yy232;
+			if (yych <= 'z') goto yy66;
+		}
+	}
+yy232:
+#line 89 "ext/rbs_extension/lexer.re"
+	{ return next_token(state, kTOP); }
+#line 1619 "ext/rbs_extension/lexer.c"
+yy233:
+	skip(state);
+	yych = peek(state);
+	if (yych == 'e') goto yy271;
+	goto yy67;
+yy234:
+	skip(state);
+	yych = peek(state);
+	if (yych == 'e') goto yy273;
+	goto yy67;
+yy235:
+	skip(state);
+	yych = peek(state);
+	if (yych == 'h') goto yy275;
+	goto yy67;
+yy236:
+	skip(state);
+	yych = peek(state);
+	if (yych == 'y') goto yy276;
+	goto yy67;
+yy237:
+	skip(state);
+	yych = peek(state);
+	if (yych == 'd') goto yy277;
+	goto yy67;
+yy238:
 	skip(state);
 #line 54 "ext/rbs_extension/lexer.re"
 	{ return next_token(state, tANNOTATION); }
-#line 1169 "ext/rbs_extension/lexer.c"
-yy171:
+#line 1649 "ext/rbs_extension/lexer.c"
+yy240:
 	skip(state);
 #line 57 "ext/rbs_extension/lexer.re"
 	{ return next_token(state, tANNOTATION); }
-#line 1174 "ext/rbs_extension/lexer.c"
-yy173:
+#line 1654 "ext/rbs_extension/lexer.c"
+yy242:
 	skip(state);
 #line 55 "ext/rbs_extension/lexer.re"
 	{ return next_token(state, tANNOTATION); }
-#line 1179 "ext/rbs_extension/lexer.c"
-yy175:
+#line 1659 "ext/rbs_extension/lexer.c"
+yy244:
 	skip(state);
 #line 53 "ext/rbs_extension/lexer.re"
 	{ return next_token(state, tANNOTATION); }
-#line 1184 "ext/rbs_extension/lexer.c"
-yy177:
+#line 1664 "ext/rbs_extension/lexer.c"
+yy246:
 	skip(state);
 #line 56 "ext/rbs_extension/lexer.re"
 	{ return next_token(state, tANNOTATION); }
-#line 1189 "ext/rbs_extension/lexer.c"
-yy179:
+#line 1669 "ext/rbs_extension/lexer.c"
+yy248:
 	yyaccept = 7;
 	skip(state);
 	backup = *state;
 	yych = peek(state);
 	if (yych <= '"') {
-		if (yych <= 0x00000000) goto yy146;
-		if (yych <= '!') goto yy93;
-		goto yy145;
+		if (yych <= 0x00000000) goto yy183;
+		if (yych <= '!') goto yy108;
+		goto yy182;
 	} else {
-		if (yych == '\\') goto yy147;
-		goto yy93;
+		if (yych == '\\') goto yy184;
+		goto yy108;
 	}
-yy180:
+yy249:
 	yyaccept = 8;
 	skip(state);
 	backup = *state;
 	yych = peek(state);
 	if (yych <= '\'') {
-		if (yych <= 0x00000000) goto yy154;
-		if (yych <= '&') goto yy97;
-		goto yy153;
+		if (yych <= 0x00000000) goto yy191;
+		if (yych <= '&') goto yy112;
+		goto yy190;
 	} else {
-		if (yych == '\\') goto yy155;
-		goto yy97;
+		if (yych == '\\') goto yy192;
+		goto yy112;
 	}
-yy181:
+yy250:
 	skip(state);
 	yych = peek(state);
 	if (yych <= '>') {
 		if (yych <= '/') {
-			if (yych == '!') goto yy185;
+			if (yych == '!') goto yy279;
 		} else {
-			if (yych <= '9') goto yy181;
-			if (yych == '=') goto yy185;
+			if (yych <= '9') goto yy250;
+			if (yych == '=') goto yy279;
 		}
 	} else {
 		if (yych <= '^') {
-			if (yych <= '?') goto yy185;
-			if (yych <= '@') goto yy183;
-			if (yych <= 'Z') goto yy181;
+			if (yych <= '?') goto yy279;
+			if (yych <= '@') goto yy252;
+			if (yych <= 'Z') goto yy250;
 		} else {
-			if (yych == '`') goto yy183;
-			if (yych <= 'z') goto yy181;
+			if (yych == '`') goto yy252;
+			if (yych <= 'z') goto yy250;
 		}
 	}
-yy183:
-#line 87 "ext/rbs_extension/lexer.re"
+yy252:
+#line 117 "ext/rbs_extension/lexer.re"
 	{ return next_token(state, tSYMBOL); }
-#line 1239 "ext/rbs_extension/lexer.c"
-yy184:
+#line 1719 "ext/rbs_extension/lexer.c"
+yy253:
 	skip(state);
-	goto yy162;
-yy185:
+	goto yy199;
+yy254:
 	skip(state);
-	goto yy183;
+	yych = peek(state);
+	if (yych == 's') goto yy280;
+	goto yy67;
+yy255:
+	skip(state);
+	yych = peek(state);
+	if (yych == '_') goto yy282;
+	goto yy67;
+yy256:
+	skip(state);
+	yych = peek(state);
+	if (yych <= '=') {
+		if (yych <= '/') {
+			if (yych == '!') goto yy134;
+		} else {
+			if (yych <= '9') goto yy66;
+			if (yych >= '=') goto yy136;
+		}
+	} else {
+		if (yych <= '^') {
+			if (yych <= '@') goto yy257;
+			if (yych <= 'Z') goto yy66;
+		} else {
+			if (yych == '`') goto yy257;
+			if (yych <= 'z') goto yy66;
+		}
+	}
+yy257:
+#line 70 "ext/rbs_extension/lexer.re"
+	{ return next_token(state, kBOOL); }
+#line 1755 "ext/rbs_extension/lexer.c"
+yy258:
+	skip(state);
+	yych = peek(state);
+	if (yych == 's') goto yy283;
+	goto yy67;
+yy259:
+	skip(state);
+	yych = peek(state);
+	if (yych == 'n') goto yy285;
+	goto yy67;
+yy260:
+	skip(state);
+	yych = peek(state);
+	if (yych == 'e') goto yy286;
+	goto yy67;
+yy261:
+	skip(state);
+	yych = peek(state);
+	if (yych == 'u') goto yy288;
+	goto yy67;
+yy262:
+	skip(state);
+	yych = peek(state);
+	if (yych == 'a') goto yy289;
+	goto yy67;
+yy263:
+	skip(state);
+	yych = peek(state);
+	if (yych == 'r') goto yy290;
+	goto yy67;
+yy264:
+	skip(state);
+	yych = peek(state);
+	if (yych == 'l') goto yy291;
+	goto yy67;
+yy265:
+	skip(state);
+	yych = peek(state);
+	if (yych == 'e') goto yy292;
+	goto yy67;
+yy266:
+	skip(state);
+	yych = peek(state);
+	if (yych == 'a') goto yy293;
+	goto yy67;
+yy267:
+	skip(state);
+	yych = peek(state);
+	if (yych == 'i') goto yy294;
+	goto yy67;
+yy268:
+	skip(state);
+	yych = peek(state);
+	if (yych <= '=') {
+		if (yych <= '/') {
+			if (yych == '!') goto yy134;
+		} else {
+			if (yych <= '9') goto yy66;
+			if (yych >= '=') goto yy136;
+		}
+	} else {
+		if (yych <= '^') {
+			if (yych <= '@') goto yy269;
+			if (yych <= 'Z') goto yy66;
+		} else {
+			if (yych == '`') goto yy269;
+			if (yych <= 'z') goto yy66;
+		}
+	}
+yy269:
+#line 87 "ext/rbs_extension/lexer.re"
+	{ return next_token(state, kSELF); }
+#line 1828 "ext/rbs_extension/lexer.c"
+yy270:
+	skip(state);
+	yych = peek(state);
+	if (yych == 'l') goto yy295;
+	goto yy67;
+yy271:
+	skip(state);
+	yych = peek(state);
+	if (yych <= '=') {
+		if (yych <= '/') {
+			if (yych == '!') goto yy134;
+		} else {
+			if (yych <= '9') goto yy66;
+			if (yych >= '=') goto yy136;
+		}
+	} else {
+		if (yych <= '^') {
+			if (yych <= '@') goto yy272;
+			if (yych <= 'Z') goto yy66;
+		} else {
+			if (yych == '`') goto yy272;
+			if (yych <= 'z') goto yy66;
+		}
+	}
+yy272:
+#line 90 "ext/rbs_extension/lexer.re"
+	{ return next_token(state, kTRUE); }
+#line 1856 "ext/rbs_extension/lexer.c"
+yy273:
+	skip(state);
+	yych = peek(state);
+	if (yych <= '=') {
+		if (yych <= '/') {
+			if (yych == '!') goto yy134;
+		} else {
+			if (yych <= '9') goto yy66;
+			if (yych >= '=') goto yy136;
+		}
+	} else {
+		if (yych <= '^') {
+			if (yych <= '@') goto yy274;
+			if (yych <= 'Z') goto yy66;
+		} else {
+			if (yych == '`') goto yy274;
+			if (yych <= 'z') goto yy66;
+		}
+	}
+yy274:
+#line 91 "ext/rbs_extension/lexer.re"
+	{ return next_token(state, kTYPE); }
+#line 1879 "ext/rbs_extension/lexer.c"
+yy275:
+	skip(state);
+	yych = peek(state);
+	if (yych == 'e') goto yy296;
+	goto yy67;
+yy276:
+	skip(state);
+	yych = peek(state);
+	if (yych == 'p') goto yy297;
+	goto yy67;
+yy277:
+	skip(state);
+	yych = peek(state);
+	if (yych <= '=') {
+		if (yych <= '/') {
+			if (yych == '!') goto yy134;
+		} else {
+			if (yych <= '9') goto yy66;
+			if (yych >= '=') goto yy136;
+		}
+	} else {
+		if (yych <= '^') {
+			if (yych <= '@') goto yy278;
+			if (yych <= 'Z') goto yy66;
+		} else {
+			if (yych == '`') goto yy278;
+			if (yych <= 'z') goto yy66;
+		}
+	}
+yy278:
+#line 94 "ext/rbs_extension/lexer.re"
+	{ return next_token(state, kVOID); }
+#line 1912 "ext/rbs_extension/lexer.c"
+yy279:
+	skip(state);
+	goto yy252;
+yy280:
+	skip(state);
+	yych = peek(state);
+	if (yych <= '=') {
+		if (yych <= '/') {
+			if (yych == '!') goto yy134;
+		} else {
+			if (yych <= '9') goto yy66;
+			if (yych >= '=') goto yy136;
+		}
+	} else {
+		if (yych <= '^') {
+			if (yych <= '@') goto yy281;
+			if (yych <= 'Z') goto yy66;
+		} else {
+			if (yych == '`') goto yy281;
+			if (yych <= 'z') goto yy66;
+		}
+	}
+yy281:
+#line 66 "ext/rbs_extension/lexer.re"
+	{ return next_token(state, kALIAS); }
+#line 1938 "ext/rbs_extension/lexer.c"
+yy282:
+	skip(state);
+	yych = peek(state);
+	if (yych <= 'q') {
+		if (yych == 'a') goto yy298;
+		goto yy67;
+	} else {
+		if (yych <= 'r') goto yy299;
+		if (yych == 'w') goto yy300;
+		goto yy67;
+	}
+yy283:
+	skip(state);
+	yych = peek(state);
+	if (yych <= '=') {
+		if (yych <= '/') {
+			if (yych == '!') goto yy134;
+		} else {
+			if (yych <= '9') goto yy66;
+			if (yych >= '=') goto yy136;
+		}
+	} else {
+		if (yych <= '^') {
+			if (yych <= '@') goto yy284;
+			if (yych <= 'Z') goto yy66;
+		} else {
+			if (yych == '`') goto yy284;
+			if (yych <= 'z') goto yy66;
+		}
+	}
+yy284:
+#line 72 "ext/rbs_extension/lexer.re"
+	{ return next_token(state, kCLASS); }
+#line 1972 "ext/rbs_extension/lexer.c"
+yy285:
+	skip(state);
+	yych = peek(state);
+	if (yych == 'd') goto yy301;
+	goto yy67;
+yy286:
+	skip(state);
+	yych = peek(state);
+	if (yych <= '=') {
+		if (yych <= '/') {
+			if (yych == '!') goto yy134;
+		} else {
+			if (yych <= '9') goto yy66;
+			if (yych >= '=') goto yy136;
+		}
+	} else {
+		if (yych <= '^') {
+			if (yych <= '@') goto yy287;
+			if (yych <= 'Z') goto yy66;
+		} else {
+			if (yych == '`') goto yy287;
+			if (yych <= 'z') goto yy66;
+		}
+	}
+yy287:
+#line 76 "ext/rbs_extension/lexer.re"
+	{ return next_token(state, kFALSE); }
+#line 2000 "ext/rbs_extension/lexer.c"
+yy288:
+	skip(state);
+	yych = peek(state);
+	if (yych == 'd') goto yy303;
+	goto yy67;
+yy289:
+	skip(state);
+	yych = peek(state);
+	if (yych == 'n') goto yy304;
+	goto yy67;
+yy290:
+	skip(state);
+	yych = peek(state);
+	if (yych == 'f') goto yy305;
+	goto yy67;
+yy291:
+	skip(state);
+	yych = peek(state);
+	if (yych == 'e') goto yy306;
+	goto yy67;
+yy292:
+	skip(state);
+	yych = peek(state);
+	if (yych == 'n') goto yy308;
+	goto yy67;
+yy293:
+	skip(state);
+	yych = peek(state);
+	if (yych == 't') goto yy309;
+	goto yy67;
+yy294:
+	skip(state);
+	yych = peek(state);
+	if (yych == 'c') goto yy310;
+	goto yy67;
+yy295:
+	skip(state);
+	yych = peek(state);
+	if (yych == 'e') goto yy312;
+	goto yy67;
+yy296:
+	skip(state);
+	yych = peek(state);
+	if (yych == 'c') goto yy313;
+	goto yy67;
+yy297:
+	skip(state);
+	yych = peek(state);
+	if (yych == 'e') goto yy314;
+	goto yy67;
+yy298:
+	skip(state);
+	yych = peek(state);
+	if (yych == 'c') goto yy315;
+	goto yy67;
+yy299:
+	skip(state);
+	yych = peek(state);
+	if (yych == 'e') goto yy316;
+	goto yy67;
+yy300:
+	skip(state);
+	yych = peek(state);
+	if (yych == 'r') goto yy317;
+	goto yy67;
+yy301:
+	skip(state);
+	yych = peek(state);
+	if (yych <= '=') {
+		if (yych <= '/') {
+			if (yych == '!') goto yy134;
+		} else {
+			if (yych <= '9') goto yy66;
+			if (yych >= '=') goto yy136;
+		}
+	} else {
+		if (yych <= '^') {
+			if (yych <= '@') goto yy302;
+			if (yych <= 'Z') goto yy66;
+		} else {
+			if (yych == '`') goto yy302;
+			if (yych <= 'z') goto yy66;
+		}
+	}
+yy302:
+#line 75 "ext/rbs_extension/lexer.re"
+	{ return next_token(state, kEXTEND); }
+#line 2088 "ext/rbs_extension/lexer.c"
+yy303:
+	skip(state);
+	yych = peek(state);
+	if (yych == 'e') goto yy318;
+	goto yy67;
+yy304:
+	skip(state);
+	yych = peek(state);
+	if (yych == 'c') goto yy320;
+	goto yy67;
+yy305:
+	skip(state);
+	yych = peek(state);
+	if (yych == 'a') goto yy321;
+	goto yy67;
+yy306:
+	skip(state);
+	yych = peek(state);
+	if (yych <= '=') {
+		if (yych <= '/') {
+			if (yych == '!') goto yy134;
+		} else {
+			if (yych <= '9') goto yy66;
+			if (yych >= '=') goto yy136;
+		}
+	} else {
+		if (yych <= '^') {
+			if (yych <= '@') goto yy307;
+			if (yych <= 'Z') goto yy66;
+		} else {
+			if (yych == '`') goto yy307;
+			if (yych <= 'z') goto yy66;
+		}
+	}
+yy307:
+#line 81 "ext/rbs_extension/lexer.re"
+	{ return next_token(state, kMODULE); }
+#line 2126 "ext/rbs_extension/lexer.c"
+yy308:
+	skip(state);
+	yych = peek(state);
+	if (yych == 'd') goto yy322;
+	goto yy67;
+yy309:
+	skip(state);
+	yych = peek(state);
+	if (yych == 'e') goto yy324;
+	goto yy67;
+yy310:
+	skip(state);
+	yych = peek(state);
+	if (yych <= '=') {
+		if (yych <= '/') {
+			if (yych == '!') goto yy134;
+		} else {
+			if (yych <= '9') goto yy66;
+			if (yych >= '=') goto yy136;
+		}
+	} else {
+		if (yych <= '^') {
+			if (yych <= '@') goto yy311;
+			if (yych <= 'Z') goto yy66;
+		} else {
+			if (yych == '`') goto yy311;
+			if (yych <= 'z') goto yy66;
+		}
+	}
+yy311:
+#line 86 "ext/rbs_extension/lexer.re"
+	{ return next_token(state, kPUBLIC); }
+#line 2159 "ext/rbs_extension/lexer.c"
+yy312:
+	skip(state);
+	yych = peek(state);
+	if (yych == 't') goto yy326;
+	goto yy67;
+yy313:
+	skip(state);
+	yych = peek(state);
+	if (yych == 'k') goto yy327;
+	goto yy67;
+yy314:
+	skip(state);
+	yych = peek(state);
+	if (yych == 'd') goto yy328;
+	goto yy67;
+yy315:
+	skip(state);
+	yych = peek(state);
+	if (yych == 'c') goto yy330;
+	goto yy67;
+yy316:
+	skip(state);
+	yych = peek(state);
+	if (yych == 'a') goto yy331;
+	goto yy67;
+yy317:
+	skip(state);
+	yych = peek(state);
+	if (yych == 'i') goto yy332;
+	goto yy67;
+yy318:
+	skip(state);
+	yych = peek(state);
+	if (yych <= '=') {
+		if (yych <= '/') {
+			if (yych == '!') goto yy134;
+		} else {
+			if (yych <= '9') goto yy66;
+			if (yych >= '=') goto yy136;
+		}
+	} else {
+		if (yych <= '^') {
+			if (yych <= '@') goto yy319;
+			if (yych <= 'Z') goto yy66;
+		} else {
+			if (yych == '`') goto yy319;
+			if (yych <= 'z') goto yy66;
+		}
+	}
+yy319:
+#line 78 "ext/rbs_extension/lexer.re"
+	{ return next_token(state, kINCLUDE); }
+#line 2212 "ext/rbs_extension/lexer.c"
+yy320:
+	skip(state);
+	yych = peek(state);
+	if (yych == 'e') goto yy333;
+	goto yy67;
+yy321:
+	skip(state);
+	yych = peek(state);
+	if (yych == 'c') goto yy335;
+	goto yy67;
+yy322:
+	skip(state);
+	yych = peek(state);
+	if (yych <= '=') {
+		if (yych <= '/') {
+			if (yych == '!') goto yy134;
+		} else {
+			if (yych <= '9') goto yy66;
+			if (yych >= '=') goto yy136;
+		}
+	} else {
+		if (yych <= '^') {
+			if (yych <= '@') goto yy323;
+			if (yych <= 'Z') goto yy66;
+		} else {
+			if (yych == '`') goto yy323;
+			if (yych <= 'z') goto yy66;
+		}
+	}
+yy323:
+#line 84 "ext/rbs_extension/lexer.re"
+	{ return next_token(state, kPREPEND); }
+#line 2245 "ext/rbs_extension/lexer.c"
+yy324:
+	skip(state);
+	yych = peek(state);
+	if (yych <= '=') {
+		if (yych <= '/') {
+			if (yych == '!') goto yy134;
+		} else {
+			if (yych <= '9') goto yy66;
+			if (yych >= '=') goto yy136;
+		}
+	} else {
+		if (yych <= '^') {
+			if (yych <= '@') goto yy325;
+			if (yych <= 'Z') goto yy66;
+		} else {
+			if (yych == '`') goto yy325;
+			if (yych <= 'z') goto yy66;
+		}
+	}
+yy325:
+#line 85 "ext/rbs_extension/lexer.re"
+	{ return next_token(state, kPRIVATE); }
+#line 2268 "ext/rbs_extension/lexer.c"
+yy326:
+	skip(state);
+	yych = peek(state);
+	if (yych == 'o') goto yy336;
+	goto yy67;
+yy327:
+	skip(state);
+	yych = peek(state);
+	if (yych == 'e') goto yy337;
+	goto yy67;
+yy328:
+	skip(state);
+	yych = peek(state);
+	if (yych <= '=') {
+		if (yych <= '/') {
+			if (yych == '!') goto yy134;
+		} else {
+			if (yych <= '9') goto yy66;
+			if (yych >= '=') goto yy136;
+		}
+	} else {
+		if (yych <= '^') {
+			if (yych <= '@') goto yy329;
+			if (yych <= 'Z') goto yy66;
+		} else {
+			if (yych == '`') goto yy329;
+			if (yych <= 'z') goto yy66;
+		}
+	}
+yy329:
+#line 93 "ext/rbs_extension/lexer.re"
+	{ return next_token(state, kUNTYPED); }
+#line 2301 "ext/rbs_extension/lexer.c"
+yy330:
+	skip(state);
+	yych = peek(state);
+	if (yych == 'e') goto yy338;
+	goto yy67;
+yy331:
+	skip(state);
+	yych = peek(state);
+	if (yych == 'd') goto yy339;
+	goto yy67;
+yy332:
+	skip(state);
+	yych = peek(state);
+	if (yych == 't') goto yy340;
+	goto yy67;
+yy333:
+	skip(state);
+	yych = peek(state);
+	if (yych <= '=') {
+		if (yych <= '/') {
+			if (yych == '!') goto yy134;
+		} else {
+			if (yych <= '9') goto yy66;
+			if (yych >= '=') goto yy136;
+		}
+	} else {
+		if (yych <= '^') {
+			if (yych <= '@') goto yy334;
+			if (yych <= 'Z') goto yy66;
+		} else {
+			if (yych == '`') goto yy334;
+			if (yych <= 'z') goto yy66;
+		}
+	}
+yy334:
+#line 79 "ext/rbs_extension/lexer.re"
+	{ return next_token(state, kINSTANCE); }
+#line 2339 "ext/rbs_extension/lexer.c"
+yy335:
+	skip(state);
+	yych = peek(state);
+	if (yych == 'e') goto yy341;
+	goto yy67;
+yy336:
+	skip(state);
+	yych = peek(state);
+	if (yych == 'n') goto yy343;
+	goto yy67;
+yy337:
+	skip(state);
+	yych = peek(state);
+	if (yych == 'd') goto yy345;
+	goto yy67;
+yy338:
+	skip(state);
+	yych = peek(state);
+	if (yych == 's') goto yy347;
+	goto yy67;
+yy339:
+	skip(state);
+	yych = peek(state);
+	if (yych == 'e') goto yy348;
+	goto yy67;
+yy340:
+	skip(state);
+	yych = peek(state);
+	if (yych == 'e') goto yy349;
+	goto yy67;
+yy341:
+	skip(state);
+	yych = peek(state);
+	if (yych <= '=') {
+		if (yych <= '/') {
+			if (yych == '!') goto yy134;
+		} else {
+			if (yych <= '9') goto yy66;
+			if (yych >= '=') goto yy136;
+		}
+	} else {
+		if (yych <= '^') {
+			if (yych <= '@') goto yy342;
+			if (yych <= 'Z') goto yy66;
+		} else {
+			if (yych == '`') goto yy342;
+			if (yych <= 'z') goto yy66;
+		}
+	}
+yy342:
+#line 80 "ext/rbs_extension/lexer.re"
+	{ return next_token(state, kINTERFACE); }
+#line 2392 "ext/rbs_extension/lexer.c"
+yy343:
+	skip(state);
+	yych = peek(state);
+	if (yych <= '=') {
+		if (yych <= '/') {
+			if (yych == '!') goto yy134;
+		} else {
+			if (yych <= '9') goto yy66;
+			if (yych >= '=') goto yy136;
+		}
+	} else {
+		if (yych <= '^') {
+			if (yych <= '@') goto yy344;
+			if (yych <= 'Z') goto yy66;
+		} else {
+			if (yych == '`') goto yy344;
+			if (yych <= 'z') goto yy66;
+		}
+	}
+yy344:
+#line 88 "ext/rbs_extension/lexer.re"
+	{ return next_token(state, kSINGLETON); }
+#line 2415 "ext/rbs_extension/lexer.c"
+yy345:
+	skip(state);
+	yych = peek(state);
+	if (yych <= '=') {
+		if (yych <= '/') {
+			if (yych == '!') goto yy134;
+		} else {
+			if (yych <= '9') goto yy66;
+			if (yych >= '=') goto yy136;
+		}
+	} else {
+		if (yych <= '^') {
+			if (yych <= '@') goto yy346;
+			if (yych <= 'Z') goto yy66;
+		} else {
+			if (yych == '`') goto yy346;
+			if (yych <= 'z') goto yy66;
+		}
+	}
+yy346:
+#line 92 "ext/rbs_extension/lexer.re"
+	{ return next_token(state, kUNCHECKED); }
+#line 2438 "ext/rbs_extension/lexer.c"
+yy347:
+	skip(state);
+	yych = peek(state);
+	if (yych == 's') goto yy350;
+	goto yy67;
+yy348:
+	skip(state);
+	yych = peek(state);
+	if (yych == 'r') goto yy351;
+	goto yy67;
+yy349:
+	skip(state);
+	yych = peek(state);
+	if (yych == 'r') goto yy353;
+	goto yy67;
+yy350:
+	skip(state);
+	yych = peek(state);
+	if (yych == 'o') goto yy355;
+	goto yy67;
+yy351:
+	skip(state);
+	yych = peek(state);
+	if (yych <= '=') {
+		if (yych <= '/') {
+			if (yych == '!') goto yy134;
+		} else {
+			if (yych <= '9') goto yy66;
+			if (yych >= '=') goto yy136;
+		}
+	} else {
+		if (yych <= '^') {
+			if (yych <= '@') goto yy352;
+			if (yych <= 'Z') goto yy66;
+		} else {
+			if (yych == '`') goto yy352;
+			if (yych <= 'z') goto yy66;
+		}
+	}
+yy352:
+#line 68 "ext/rbs_extension/lexer.re"
+	{ return next_token(state, kATTRREADER); }
+#line 2481 "ext/rbs_extension/lexer.c"
+yy353:
+	skip(state);
+	yych = peek(state);
+	if (yych <= '=') {
+		if (yych <= '/') {
+			if (yych == '!') goto yy134;
+		} else {
+			if (yych <= '9') goto yy66;
+			if (yych >= '=') goto yy136;
+		}
+	} else {
+		if (yych <= '^') {
+			if (yych <= '@') goto yy354;
+			if (yych <= 'Z') goto yy66;
+		} else {
+			if (yych == '`') goto yy354;
+			if (yych <= 'z') goto yy66;
+		}
+	}
+yy354:
+#line 69 "ext/rbs_extension/lexer.re"
+	{ return next_token(state, kATTRWRITER); }
+#line 2504 "ext/rbs_extension/lexer.c"
+yy355:
+	skip(state);
+	yych = peek(state);
+	if (yych != 'r') goto yy67;
+	skip(state);
+	yych = peek(state);
+	if (yych <= '=') {
+		if (yych <= '/') {
+			if (yych == '!') goto yy134;
+		} else {
+			if (yych <= '9') goto yy66;
+			if (yych >= '=') goto yy136;
+		}
+	} else {
+		if (yych <= '^') {
+			if (yych <= '@') goto yy357;
+			if (yych <= 'Z') goto yy66;
+		} else {
+			if (yych == '`') goto yy357;
+			if (yych <= 'z') goto yy66;
+		}
+	}
+yy357:
+#line 67 "ext/rbs_extension/lexer.re"
+	{ return next_token(state, kATTRACCESSOR); }
+#line 2530 "ext/rbs_extension/lexer.c"
 }
-#line 110 "ext/rbs_extension/lexer.re"
+#line 139 "ext/rbs_extension/lexer.re"
 
-}
-
-token rbsparser_next_token(lexstate *state) {
-  token t = __rbsparser_next_token(state);
-
-  if (t.type == tLIDENT) {
-    // may be a keyword
-    VALUE string = rb_enc_str_new(
-      RSTRING_PTR(state->string) + t.range.start.byte_pos,
-      RANGE_BYTES(t.range),
-      rb_enc_get(state->string)
-    );
-
-    VALUE type = rb_hash_aref(RBS_Parser_KEYWORDS, string);
-    if (FIXNUM_P(type)) {
-      t.type = FIX2INT(type);
-    }
-  }
-
-  return t;
 }

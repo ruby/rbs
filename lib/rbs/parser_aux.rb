@@ -27,5 +27,39 @@ module RBS
 
     class LocatedValue
     end
+
+    KEYWORDS = Set.new(
+      %w(
+        bool
+        bot
+        class
+        instance
+        interface
+        nil
+        self
+        singleton
+        top
+        void
+        type
+        unchecked
+        in
+        out
+        end
+        def
+        include
+        extend
+        prepend
+        alias
+        module
+        attr_reader
+        attr_writer
+        attr_accessor
+        public
+        private
+        untyped
+        true
+        false
+      )
+    )
   end
 end
