@@ -1,6 +1,8 @@
 module RBS
   module Prototype
     class Runtime
+      include Helpers
+
       attr_reader :patterns
       attr_reader :env
       attr_reader :merge
@@ -137,6 +139,8 @@ module RBS
             )
           end
         end
+
+        block ||= block_from_ast_of(method)
 
         return_type = if method.name == :initialize
                         Types::Bases::Void.new(location: nil)
@@ -521,6 +525,18 @@ module RBS
         else
           []
         end
+      end
+
+      def block_from_ast_of(method)
+        return nil if RUBY_VERSION < '3.1'
+
+        begin
+          ast = RubyVM::AbstractSyntaxTree.of(method)
+        rescue ArgumentError
+          return # When the method is defined in eval
+        end
+
+        block_from_body(ast) if ast&.type == :SCOPE
       end
     end
   end
