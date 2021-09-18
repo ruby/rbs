@@ -29,35 +29,35 @@ enum TokenType {
   pLT,              /* < */
   pEQ,              /* = */
 
+  kALIAS,           /* alias */
+  kATTRACCESSOR,    /* attr_accessor */
+  kATTRREADER,      /* attr_reader */
+  kATTRWRITER,      /* attr_writer */
   kBOOL,            /* bool */
   kBOT,             /* bot */
   kCLASS,           /* class */
+  kDEF,             /* def */
+  kEND,             /* end */
+  kEXTEND,          /* extend */
   kFALSE,           /* false */
+  kIN,              /* in */
+  kINCLUDE,         /* include */
   kINSTANCE,        /* instance */
   kINTERFACE,       /* interface */
+  kMODULE,          /* module */
   kNIL,             /* nil */
+  kOUT,             /* out */
+  kPREPEND,         /* prepend */
+  kPRIVATE,         /* private */
+  kPUBLIC,          /* public */
   kSELF,            /* self */
   kSINGLETON,       /* singleton */
   kTOP,             /* top */
   kTRUE,            /* true */
-  kVOID,            /* void */
   kTYPE,            /* type */
   kUNCHECKED,       /* unchecked */
-  kIN,              /* in */
-  kOUT,             /* out */
-  kEND,             /* end */
-  kDEF,             /* def */
-  kINCLUDE,         /* include */
-  kEXTEND,          /* extend */
-  kPREPEND,         /* prepend */
-  kALIAS,           /* alias */
-  kMODULE,          /* module */
-  kATTRREADER,      /* attr_reader */
-  kATTRWRITER,      /* attr_writer */
-  kATTRACCESSOR,    /* attr_accessor */
-  kPUBLIC,          /* public */
-  kPRIVATE,         /* private */
   kUNTYPED,         /* untyped */
+  kVOID,            /* void */
 
   tLIDENT,          /* Identifiers starting with lower case */
   tUIDENT,          /* Identifiers starting with upper case */

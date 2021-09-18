@@ -1,6 +1,6 @@
 #include "rbs_extension.h"
 
-token __rbsparser_next_token(lexstate *state) {
+token rbsparser_next_token(lexstate *state) {
   lexstate backup;
 
 start:
@@ -63,6 +63,36 @@ start:
         );
       }
 
+      "alias"         { return next_token(state, kALIAS); }
+      "attr_accessor" { return next_token(state, kATTRACCESSOR); }
+      "attr_reader"   { return next_token(state, kATTRREADER); }
+      "attr_writer"   { return next_token(state, kATTRWRITER); }
+      "bool"          { return next_token(state, kBOOL); }
+      "bot"           { return next_token(state, kBOT); }
+      "class"         { return next_token(state, kCLASS); }
+      "def"           { return next_token(state, kDEF); }
+      "end"           { return next_token(state, kEND); }
+      "extend"        { return next_token(state, kEXTEND); }
+      "false"         { return next_token(state, kFALSE); }
+      "in"            { return next_token(state, kIN); }
+      "include"       { return next_token(state, kINCLUDE); }
+      "instance"      { return next_token(state, kINSTANCE); }
+      "interface"     { return next_token(state, kINTERFACE); }
+      "module"        { return next_token(state, kMODULE); }
+      "nil"           { return next_token(state, kNIL); }
+      "out"           { return next_token(state, kOUT); }
+      "prepend"       { return next_token(state, kPREPEND); }
+      "private"       { return next_token(state, kPRIVATE); }
+      "public"        { return next_token(state, kPUBLIC); }
+      "self"          { return next_token(state, kSELF); }
+      "singleton"     { return next_token(state, kSINGLETON); }
+      "top"           { return next_token(state, kTOP); }
+      "true"          { return next_token(state, kTRUE); }
+      "type"          { return next_token(state, kTYPE); }
+      "unchecked"     { return next_token(state, kUNCHECKED); }
+      "untyped"       { return next_token(state, kUNTYPED); }
+      "void"          { return next_token(state, kVOID); }
+
       dqstring = ["] ("\\"["] | [^"\x00])* ["];
       sqstring = ['] ("\\"['] | [^'\x00])* ['];
 
@@ -88,7 +118,6 @@ start:
       ":$" global_ident  { return next_token(state, tSYMBOL); }
       symbol_opr         { return next_token(state, tSYMBOL); }
 
-
       [a-z] word*           { return next_token(state, tLIDENT); }
       [A-Z] word*           { return next_token(state, tUIDENT); }
       "_" [a-z0-9_] word*   { return next_token(state, tULLIDENT); }
@@ -108,24 +137,4 @@ start:
       "\x00"   { return next_token(state, pEOF); }
       *        { return next_token(state, ErrorToken); }
   */
-}
-
-token rbsparser_next_token(lexstate *state) {
-  token t = __rbsparser_next_token(state);
-
-  if (t.type == tLIDENT) {
-    // may be a keyword
-    VALUE string = rb_enc_str_new(
-      RSTRING_PTR(state->string) + t.range.start.byte_pos,
-      RANGE_BYTES(t.range),
-      rb_enc_get(state->string)
-    );
-
-    VALUE type = rb_hash_aref(RBS_Parser_KEYWORDS, string);
-    if (FIXNUM_P(type)) {
-      t.type = FIX2INT(type);
-    }
-  }
-
-  return t;
 }
