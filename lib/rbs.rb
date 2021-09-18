@@ -68,5 +68,16 @@ module RBS
       @logger_level = level
       @logger = nil
     end
+
+    def print_warning()
+      @warnings ||= Set[]
+
+      message = yield()
+
+      unless @warnings.include?(message)
+        @warnings << message
+        logger.warn { message }
+      end
+    end
   end
 end
