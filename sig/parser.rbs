@@ -6,6 +6,8 @@ module RBS
 
     def self.parse_signature: (Buffer | String, ?line: Integer, ?column: Integer) -> Array[AST::Declarations::t]
 
+    KEYWORDS: Set[String]
+
     private
 
     def self.buffer: (String | Buffer source) -> Buffer
