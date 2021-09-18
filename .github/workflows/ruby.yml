@@ -15,6 +15,7 @@ jobs:
         - master-nightly-focal
         - 3.0-focal
         - 2.7-bionic
+        - 2.6-bionic
         job:
         - test
         - stdlib_test

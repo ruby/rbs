@@ -1,15 +1,25 @@
 #include "rbs_extension.h"
 
+#ifdef RB_PASS_KEYWORDS
+
+#define FUNCALL_KW(receiver, method, argc, argv) rb_funcallv_kw(receiver, method, argc, argv, RB_PASS_KEYWORDS)
+
+#else
+
+#define FUNCALL_KW(receiver, method, argc, argv) rb_funcallv(receiver, method, argc, argv)
+
+#endif
+
+
 VALUE rbs_base_type(VALUE klass, VALUE location) {
   VALUE args = rb_hash_new();
   rb_hash_aset(args, ID2SYM(rb_intern("location")), location);
 
-  return rb_funcallv_kw(
+  return FUNCALL_KW(
     klass,
     rb_intern("new"),
     1,
-    &args,
-    RB_PASS_KEYWORDS
+    &args
   );
 }
 
@@ -18,12 +28,11 @@ VALUE rbs_namespace(VALUE path, VALUE absolute) {
   rb_hash_aset(args, ID2SYM(rb_intern("path")), path);
   rb_hash_aset(args, ID2SYM(rb_intern("absolute")), absolute);
 
-  return rb_funcallv_kw(
+  return FUNCALL_KW(
     RBS_Namespace,
     rb_intern("new"),
     1,
-    &args,
-    RB_PASS_KEYWORDS
+    &args
   );
 }
 
@@ -32,12 +41,11 @@ VALUE rbs_type_name(VALUE namespace, VALUE name) {
   rb_hash_aset(args, ID2SYM(rb_intern("namespace")), namespace);
   rb_hash_aset(args, ID2SYM(rb_intern("name")), name);
 
-  return rb_funcallv_kw(
+  return FUNCALL_KW(
     RBS_TypeName,
     rb_intern("new"),
     1,
-    &args,
-    RB_PASS_KEYWORDS
+    &args
   );
 }
 
@@ -47,12 +55,11 @@ VALUE rbs_class_instance(VALUE typename, VALUE type_args, VALUE location) {
   rb_hash_aset(args, ID2SYM(rb_intern("args")), type_args);
   rb_hash_aset(args, ID2SYM(rb_intern("location")), location);
 
-  return rb_funcallv_kw(
+  return FUNCALL_KW(
     RBS_Types_ClassInstance,
     rb_intern("new"),
     1,
-    &args,
-    RB_PASS_KEYWORDS
+    &args
   );
 }
 
@@ -61,12 +68,11 @@ VALUE rbs_class_singleton(VALUE typename, VALUE location) {
   rb_hash_aset(args, ID2SYM(rb_intern("name")), typename);
   rb_hash_aset(args, ID2SYM(rb_intern("location")), location);
 
-  return rb_funcallv_kw(
+  return FUNCALL_KW(
     RBS_Types_ClassSingleton,
     rb_intern("new"),
     1,
-    &args,
-    RB_PASS_KEYWORDS
+    &args
   );
 }
 
@@ -75,12 +81,11 @@ VALUE rbs_alias(VALUE typename, VALUE location) {
   rb_hash_aset(args, ID2SYM(rb_intern("name")), typename);
   rb_hash_aset(args, ID2SYM(rb_intern("location")), location);
 
-  return rb_funcallv_kw(
+  return FUNCALL_KW(
     RBS_Types_Alias,
     rb_intern("new"),
     1,
-    &args,
-    RB_PASS_KEYWORDS
+    &args
   );
 }
 
@@ -90,12 +95,11 @@ VALUE rbs_interface(VALUE typename, VALUE type_args, VALUE location) {
   rb_hash_aset(args, ID2SYM(rb_intern("args")), type_args);
   rb_hash_aset(args, ID2SYM(rb_intern("location")), location);
 
-  return rb_funcallv_kw(
+  return FUNCALL_KW(
     RBS_Types_Interface,
     rb_intern("new"),
     1,
-    &args,
-    RB_PASS_KEYWORDS
+    &args
   );
 }
 
@@ -104,12 +108,11 @@ VALUE rbs_union(VALUE types, VALUE location) {
   rb_hash_aset(args, ID2SYM(rb_intern("types")), types);
   rb_hash_aset(args, ID2SYM(rb_intern("location")), location);
 
-  return rb_funcallv_kw(
+  return FUNCALL_KW(
     RBS_Types_Union,
     rb_intern("new"),
     1,
-    &args,
-    RB_PASS_KEYWORDS
+    &args
   );
 }
 
@@ -118,12 +121,11 @@ VALUE rbs_intersection(VALUE types, VALUE location) {
   rb_hash_aset(args, ID2SYM(rb_intern("types")), types);
   rb_hash_aset(args, ID2SYM(rb_intern("location")), location);
 
-  return rb_funcallv_kw(
+  return FUNCALL_KW(
     RBS_Types_Intersection,
     rb_intern("new"),
     1,
-    &args,
-    RB_PASS_KEYWORDS
+    &args
   );
 }
 
@@ -132,12 +134,11 @@ VALUE rbs_tuple(VALUE types, VALUE location) {
   rb_hash_aset(args, ID2SYM(rb_intern("types")), types);
   rb_hash_aset(args, ID2SYM(rb_intern("location")), location);
 
-  return rb_funcallv_kw(
+  return FUNCALL_KW(
     RBS_Types_Tuple,
     rb_intern("new"),
     1,
-    &args,
-    RB_PASS_KEYWORDS
+    &args
   );
 }
 
@@ -146,12 +147,11 @@ VALUE rbs_optional(VALUE type, VALUE location) {
   rb_hash_aset(args, ID2SYM(rb_intern("type")), type);
   rb_hash_aset(args, ID2SYM(rb_intern("location")), location);
 
-  return rb_funcallv_kw(
+  return FUNCALL_KW(
     RBS_Types_Optional,
     rb_intern("new"),
     1,
-    &args,
-    RB_PASS_KEYWORDS
+    &args
   );
 }
 
@@ -160,12 +160,11 @@ VALUE rbs_block(VALUE type, VALUE required) {
   rb_hash_aset(args, ID2SYM(rb_intern("type")), type);
   rb_hash_aset(args, ID2SYM(rb_intern("required")), required);
 
-  return rb_funcallv_kw(
+  return FUNCALL_KW(
     RBS_Types_Block,
     rb_intern("new"),
     1,
-    &args,
-    RB_PASS_KEYWORDS
+    &args
   );
 }
 
@@ -175,12 +174,11 @@ VALUE rbs_function_param(VALUE type, VALUE name, VALUE location) {
   rb_hash_aset(args, ID2SYM(rb_intern("name")), name);
   rb_hash_aset(args, ID2SYM(rb_intern("location")), location);
 
-  return rb_funcallv_kw(
+  return FUNCALL_KW(
     RBS_Types_Function_Param,
     rb_intern("new"),
     1,
-    &args,
-    RB_PASS_KEYWORDS
+    &args
   );
 }
 
@@ -204,12 +202,11 @@ VALUE rbs_function(
   rb_hash_aset(args, ID2SYM(rb_intern("rest_keywords")), rest_keyword_param);
   rb_hash_aset(args, ID2SYM(rb_intern("return_type")), return_type);
 
-  return rb_funcallv_kw(
+  return FUNCALL_KW(
     RBS_Types_Function,
     rb_intern("new"),
     1,
-    &args,
-    RB_PASS_KEYWORDS
+    &args
   );
 }
 
@@ -219,12 +216,11 @@ VALUE rbs_proc(VALUE function, VALUE block, VALUE location) {
   rb_hash_aset(args, ID2SYM(rb_intern("block")), block);
   rb_hash_aset(args, ID2SYM(rb_intern("location")), location);
 
-  return rb_funcallv_kw(
+  return FUNCALL_KW(
     RBS_Types_Proc,
     rb_intern("new"),
     1,
-    &args,
-    RB_PASS_KEYWORDS
+    &args
   );
 }
 
@@ -232,12 +228,11 @@ VALUE rbs_void(VALUE location) {
   VALUE args = rb_hash_new();
   rb_hash_aset(args, ID2SYM(rb_intern("location")), location);
 
-  return rb_funcallv_kw(
+  return FUNCALL_KW(
     RBS_Types_Bases_Void,
     rb_intern("new"),
     1,
-    &args,
-    RB_PASS_KEYWORDS
+    &args
   );
 }
 
@@ -246,12 +241,11 @@ VALUE rbs_literal(VALUE literal, VALUE location) {
   rb_hash_aset(args, ID2SYM(rb_intern("location")), location);
   rb_hash_aset(args, ID2SYM(rb_intern("literal")), literal);
 
-  return rb_funcallv_kw(
+  return FUNCALL_KW(
     RBS_Types_Literal,
     rb_intern("new"),
     1,
-    &args,
-    RB_PASS_KEYWORDS
+    &args
   );
 }
 
@@ -260,12 +254,11 @@ VALUE rbs_record(VALUE fields, VALUE location) {
   rb_hash_aset(args, ID2SYM(rb_intern("location")), location);
   rb_hash_aset(args, ID2SYM(rb_intern("fields")), fields);
 
-  return rb_funcallv_kw(
+  return FUNCALL_KW(
     RBS_Types_Record,
     rb_intern("new"),
     1,
-    &args,
-    RB_PASS_KEYWORDS
+    &args
   );
 }
 
@@ -274,12 +267,11 @@ VALUE rbs_variable(VALUE name, VALUE location) {
   rb_hash_aset(args, ID2SYM(rb_intern("location")), location);
   rb_hash_aset(args, ID2SYM(rb_intern("name")), name);
 
-  return rb_funcallv_kw(
+  return FUNCALL_KW(
     RBS_Types_Variable,
     rb_intern("new"),
     1,
-    &args,
-    RB_PASS_KEYWORDS
+    &args
   );
 }
 
@@ -290,12 +282,11 @@ VALUE rbs_method_type(VALUE type_params, VALUE type, VALUE block, VALUE location
   rb_hash_aset(args, ID2SYM(rb_intern("block")), block);
   rb_hash_aset(args, ID2SYM(rb_intern("location")), location);
 
-  return rb_funcallv_kw(
+  return FUNCALL_KW(
     RBS_MethodType,
     rb_intern("new"),
     1,
-    &args,
-    RB_PASS_KEYWORDS
+    &args
   );
 }
 
@@ -304,12 +295,11 @@ VALUE rbs_ast_comment(VALUE string, VALUE location) {
   rb_hash_aset(args, ID2SYM(rb_intern("string")), string);
   rb_hash_aset(args, ID2SYM(rb_intern("location")), location);
 
-  return rb_funcallv_kw(
+  return FUNCALL_KW(
     RBS_AST_Comment,
     rb_intern("new"),
     1,
-    &args,
-    RB_PASS_KEYWORDS
+    &args
   );
 }
 
@@ -318,12 +308,11 @@ VALUE rbs_ast_annotation(VALUE string, VALUE location) {
   rb_hash_aset(args, ID2SYM(rb_intern("string")), string);
   rb_hash_aset(args, ID2SYM(rb_intern("location")), location);
 
-  return rb_funcallv_kw(
+  return FUNCALL_KW(
     RBS_AST_Annotation,
     rb_intern("new"),
     1,
-    &args,
-    RB_PASS_KEYWORDS
+    &args
   );
 }
 
@@ -338,12 +327,11 @@ VALUE rbs_ast_decl_module_type_params_param(VALUE name, VALUE variance, VALUE sk
   rb_hash_aset(args, ID2SYM(rb_intern("skip_validation")), skip_validation);
   rb_hash_aset(args, ID2SYM(rb_intern("location")), location);
 
-  return rb_funcallv_kw(
+  return FUNCALL_KW(
     RBS_AST_Declarations_ModuleTypeParams_TypeParam,
     rb_intern("new"),
     1,
-    &args,
-    RB_PASS_KEYWORDS
+    &args
   );
 }
 
@@ -354,12 +342,11 @@ VALUE rbs_ast_decl_constant(VALUE name, VALUE type, VALUE location, VALUE commen
   rb_hash_aset(args, ID2SYM(rb_intern("location")), location);
   rb_hash_aset(args, ID2SYM(rb_intern("comment")), comment);
 
-  return rb_funcallv_kw(
+  return FUNCALL_KW(
     RBS_AST_Declarations_Constant,
     rb_intern("new"),
     1,
-    &args,
-    RB_PASS_KEYWORDS
+    &args
   );
 }
 
@@ -370,12 +357,11 @@ VALUE rbs_ast_decl_global(VALUE name, VALUE type, VALUE location, VALUE comment)
   rb_hash_aset(args, ID2SYM(rb_intern("location")), location);
   rb_hash_aset(args, ID2SYM(rb_intern("comment")), comment);
 
-  return rb_funcallv_kw(
+  return FUNCALL_KW(
     RBS_AST_Declarations_Global,
     rb_intern("new"),
     1,
-    &args,
-    RB_PASS_KEYWORDS
+    &args
   );
 }
 
@@ -387,12 +373,11 @@ VALUE rbs_ast_decl_alias(VALUE name, VALUE type, VALUE annotations, VALUE locati
   rb_hash_aset(args, ID2SYM(rb_intern("location")), location);
   rb_hash_aset(args, ID2SYM(rb_intern("comment")), comment);
 
-  return rb_funcallv_kw(
+  return FUNCALL_KW(
     RBS_AST_Declarations_Alias,
     rb_intern("new"),
     1,
-    &args,
-    RB_PASS_KEYWORDS
+    &args
   );
 }
 
@@ -405,12 +390,11 @@ VALUE rbs_ast_decl_interface(VALUE name, VALUE type_params, VALUE members, VALUE
   rb_hash_aset(args, ID2SYM(rb_intern("location")), location);
   rb_hash_aset(args, ID2SYM(rb_intern("comment")), comment);
 
-  return rb_funcallv_kw(
+  return FUNCALL_KW(
     RBS_AST_Declarations_Interface,
     rb_intern("new"),
     1,
-    &args,
-    RB_PASS_KEYWORDS
+    &args
   );
 }
 
@@ -420,12 +404,11 @@ VALUE rbs_ast_decl_module_self(VALUE name, VALUE args, VALUE location) {
   rb_hash_aset(kw_args, ID2SYM(rb_intern("args")), args);
   rb_hash_aset(kw_args, ID2SYM(rb_intern("location")), location);
 
-  return rb_funcallv_kw(
+  return FUNCALL_KW(
     RBS_AST_Declarations_Module_Self,
     rb_intern("new"),
     1,
-    &kw_args,
-    RB_PASS_KEYWORDS
+    &kw_args
   );
 }
 
@@ -439,12 +422,11 @@ VALUE rbs_ast_decl_module(VALUE name, VALUE type_params, VALUE self_types, VALUE
   rb_hash_aset(args, ID2SYM(rb_intern("location")), location);
   rb_hash_aset(args, ID2SYM(rb_intern("comment")), comment);
 
-  return rb_funcallv_kw(
+  return FUNCALL_KW(
     RBS_AST_Declarations_Module,
     rb_intern("new"),
     1,
-    &args,
-    RB_PASS_KEYWORDS
+    &args
   );
 }
 
@@ -458,12 +440,11 @@ VALUE rbs_ast_members_method_definition(VALUE name, VALUE kind, VALUE types, VAL
   rb_hash_aset(args, ID2SYM(rb_intern("comment")), comment);
   rb_hash_aset(args, ID2SYM(rb_intern("overload")), overload);
 
-  return rb_funcallv_kw(
+  return FUNCALL_KW(
     RBS_AST_Members_MethodDefinition,
     rb_intern("new"),
     1,
-    &args,
-    RB_PASS_KEYWORDS
+    &args
   );
 }
 
@@ -474,12 +455,11 @@ VALUE rbs_ast_members_variable(VALUE klass, VALUE name, VALUE type, VALUE locati
   rb_hash_aset(args, ID2SYM(rb_intern("location")), location);
   rb_hash_aset(args, ID2SYM(rb_intern("comment")), comment);
 
-  return rb_funcallv_kw(
+  return FUNCALL_KW(
     klass,
     rb_intern("new"),
     1,
-    &args,
-    RB_PASS_KEYWORDS
+    &args
   );
 }
 
@@ -491,12 +471,11 @@ VALUE rbs_ast_members_mixin(VALUE klass, VALUE name, VALUE module_args, VALUE an
   rb_hash_aset(args, ID2SYM(rb_intern("location")), location);
   rb_hash_aset(args, ID2SYM(rb_intern("comment")), comment);
 
-  return rb_funcallv_kw(
+  return FUNCALL_KW(
     klass,
     rb_intern("new"),
     1,
-    &args,
-    RB_PASS_KEYWORDS
+    &args
   );
 }
 
@@ -510,12 +489,11 @@ VALUE rbs_ast_members_attribute(VALUE klass, VALUE name, VALUE type, VALUE ivar_
   rb_hash_aset(args, ID2SYM(rb_intern("location")), location);
   rb_hash_aset(args, ID2SYM(rb_intern("comment")), comment);
 
-  return rb_funcallv_kw(
+  return FUNCALL_KW(
     klass,
     rb_intern("new"),
     1,
-    &args,
-    RB_PASS_KEYWORDS
+    &args
   );
 }
 
@@ -523,12 +501,11 @@ VALUE rbs_ast_members_visibility(VALUE klass, VALUE location) {
   VALUE args = rb_hash_new();
   rb_hash_aset(args, ID2SYM(rb_intern("location")), location);
 
-  return rb_funcallv_kw(
+  return FUNCALL_KW(
     klass,
     rb_intern("new"),
     1,
-    &args,
-    RB_PASS_KEYWORDS
+    &args
   );
 }
 
@@ -541,12 +518,11 @@ VALUE rbs_ast_members_alias(VALUE new_name, VALUE old_name, VALUE kind, VALUE an
   rb_hash_aset(args, ID2SYM(rb_intern("location")), location);
   rb_hash_aset(args, ID2SYM(rb_intern("comment")), comment);
 
-  return rb_funcallv_kw(
+  return FUNCALL_KW(
     RBS_AST_Members_Alias,
     rb_intern("new"),
     1,
-    &args,
-    RB_PASS_KEYWORDS
+    &args
   );
 }
 
@@ -556,12 +532,11 @@ VALUE rbs_ast_decl_class_super(VALUE name, VALUE args, VALUE location) {
   rb_hash_aset(kwargs, ID2SYM(rb_intern("args")), args);
   rb_hash_aset(kwargs, ID2SYM(rb_intern("location")), location);
 
-  return rb_funcallv_kw(
+  return FUNCALL_KW(
     RBS_AST_Declarations_Class_Super,
     rb_intern("new"),
     1,
-    &kwargs,
-    RB_PASS_KEYWORDS
+    &kwargs
   );
 }
 
@@ -575,11 +550,10 @@ VALUE rbs_ast_decl_class(VALUE name, VALUE type_params, VALUE super_class, VALUE
   rb_hash_aset(kwargs, ID2SYM(rb_intern("location")), location);
   rb_hash_aset(kwargs, ID2SYM(rb_intern("comment")), comment);
 
-  return rb_funcallv_kw(
+  return FUNCALL_KW(
     RBS_AST_Declarations_Class,
     rb_intern("new"),
     1,
-    &kwargs,
-    RB_PASS_KEYWORDS
+    &kwargs
   );
 }
