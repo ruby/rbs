@@ -1,0 +1,137 @@
+class IO
+  class ConsoleMode
+    def echo=: (bool) -> bool
+    def raw: (?min: int, ?time: int, ?intr: bool) -> self
+    def raw!: (?min: int, ?time: int, ?intr: bool) -> self
+  end
+
+  # Returns an File instance opened console.
+  #
+  # If `sym` is given, it will be sent to the opened console with `args` and the
+  # result will be returned instead of the console IO itself.
+  def self.console: () -> File?
+                  | (:close) -> nil
+                  | (Symbol sym, *untyped args) -> untyped
+
+  # returns console window size
+  #
+  # You must require 'io/console/size' to use this method.
+  def self.console_size: () -> [Integer, Integer]
+
+  # fallback to console window size
+  #
+  # You must require 'io/console/size' to use this method.
+  def self.default_console_size: -> [Integer, Integer]
+
+  def beep: () -> self
+
+  def check_winsize_changed: () { () -> void } -> self
+  def clear_screen: () -> self
+
+  # Returns a data represents the current console mode.
+  def console_mode: () -> IO::ConsoleMode
+
+  # Sets the console mode to `mode`.
+  def console_mode=: (IO::ConsoleMode mode) -> IO::ConsoleMode
+
+  # Yields `self` within cooked mode.
+  #
+  #     STDIN.cooked(&:gets)
+  #
+  # will read and return a line with echo back and line editing.
+  def cooked: [T] () { (self) -> T } -> T
+
+  # Enables cooked mode.
+  #
+  # If the terminal mode needs to be back, use io.cooked { ... }.
+  def cooked!: () -> self
+
+  def cursor: () -> [Integer, Integer]
+  def cursor=: ([Integer, Integer]) -> [Integer, Integer]
+
+  def cursor_down: (int) -> self
+  def cursor_left: (int) -> self
+  def cursor_right: (int) -> self
+  def cursor_up: (int) -> self
+
+  # Enables/disables echo back. On some platforms, all combinations of this flags
+  # and raw/cooked mode may not be valid.
+  def echo=: (bool flag) -> bool
+
+  # Returns `true` if echo back is enabled.
+  def echo?: () -> bool
+
+  def erase_line: (0 | 1 | 2 | nil) -> self
+  def erase_screen: (0 | 1 | 2 | 3 | nil) -> self
+
+  # Reads and returns a character in raw mode.
+  #
+  # See IO#raw for details on the parameters.
+  def getch: (?min: int, ?time: int, ?intr: bool) -> String
+
+  # Reads and returns a line without echo back.
+  # Prints +prompt+ unless it is +nil+.
+  #
+  # The newline character that terminates the
+  # read line is removed from the returned string,
+  # see String#chomp!.
+  def getpass: (?String) -> String
+
+  def goto: (int, int) -> self
+
+  def goto_column: (int) -> self
+
+  # Flushes input buffer in kernel.
+  def iflush: () -> self
+
+  # Flushes input and output buffers in kernel.
+  def ioflush: () -> self
+
+  # Yields `self` with disabling echo back.
+  #
+  #     STDIN.noecho(&:gets)
+  #
+  # will read and return a line without echo back.
+  def noecho: [T] () { (self) -> T } -> T
+
+  # Flushes output buffer in kernel.
+  def oflush: () -> self
+
+  def pressed?: (Integer | Symbol | String) -> bool
+
+  # Yields `self` within raw mode, and returns the result of the block.
+  #
+  #     STDIN.raw(&:gets)
+  #
+  # will read and return a line without echo back and line editing.
+  #
+  # The parameter `min` specifies the minimum number of bytes that should be
+  # received when a read operation is performed. (default: 1)
+  #
+  # The parameter `time` specifies the timeout in *seconds* with a precision of
+  # 1/10 of a second. (default: 0)
+  #
+  # If the parameter `intr` is `true`, enables break, interrupt, quit, and suspend
+  # special characters.
+  #
+  # Refer to the manual page of termios for further details.
+  def raw: [T] (?min: int, ?time: int, ?intr: bool) { (self) -> T } -> T
+
+  # Enables raw mode, and returns `io`.
+  #
+  # If the terminal mode needs to be back, use `io.raw { ... }`.
+  #
+  # See IO#raw for details on the parameters.
+  def raw!: (?min: int, ?time: int, ?intr: bool) -> self
+
+  def scroll_backward: (int) -> self
+  def scroll_forward: (int) -> self
+
+  # Returns console size.
+  def winsize: () -> [Integer, Integer]
+
+  # Tries to set console size.  The effect depends on the platform and the running
+  # environment.
+  def winsize=: ([Integer, Integer]) -> [Integer, Integer]
+              | ([Integer, Integer, Integer, Integer]) -> [Integer, Integer, Integer, Integer]
+end
