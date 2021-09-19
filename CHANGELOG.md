@@ -2,11 +2,19 @@
 
 ## master
 
-## 1.7.0 (beta.2)
+## 1.7.0 (beta.3)
+
+## Signature updates
+
+* io/console ([\#783](https://github.com/ruby/rbs/pull/783))
+* `Net::HTTPRequest` ([\#784](https://github.com/ruby/rbs/pull/784))
+* `Tempfile.new`, `Tempfile.create` ([\#792](https://github.com/ruby/rbs/pull/792), [\#791](https://github.com/ruby/rbs/pull/791))
 
 ## Library changes
 
+* Fix unexpected `CollectionNotAvailable` without `gems` from git source ([\#795](https://github.com/ruby/rbs/pull/795))
 * Replace RBS::Parser ([#788](https://github.com/ruby/rbs/pull/788), [#789](https://github.com/ruby/rbs/pull/789))
+* Print deprecation warning ([\#801](https://github.com/ruby/rbs/pull/801))
 
 ## 1.6.2 (2021-09-09)
 
