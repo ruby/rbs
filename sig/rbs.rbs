@@ -8,6 +8,10 @@ module RBS
   def self.logger_output: () -> IO
 
   def self.logger_output=: (IO) -> IO
+
+  def self.print_warning: () { () -> String } -> void
+
+  self.@warnings: Set[String]
 end
 
 module Ruby

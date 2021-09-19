@@ -32,10 +32,16 @@ module RBS
     end
 
     def error_value
+      RBS.print_warning {
+        "#{self.class.name}#error_value is deprecated and will be deleted in RBS 2.0. Consider using `location.source` instead."
+      }
       location.source
     end
 
     def token_str
+      RBS.print_warning {
+        "#{self.class.name}#token_str is deprecated and will be deleted in RBS 2.0. Consider using `token_type` instead."
+      }
       token_type
     end
   end

@@ -21,12 +21,10 @@ module RBS
       end
     end
 
-    SyntaxError = ParsingError
-    SemanticsError = ParsingError
-    LexerError = ParsingError
-
-    class LocatedValue
-    end
+    autoload :SyntaxError, "rbs/parser_compat/syntax_error"
+    autoload :SemanticsError, "rbs/parser_compat/semantics_error"
+    autoload :LexerError, "rbs/parser_compat/lexer_error"
+    autoload :LocatedValue, "rbs/parser_compat/located_value"
 
     KEYWORDS = Set.new(
       %w(
