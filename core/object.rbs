@@ -98,7 +98,7 @@ class Object < BasicObject
   #     guy.define_singleton_method(:hello) { "#{self}: Hello there!" }
   #     guy.hello    #=>  "Bob: Hello there!"
   #
-  def define_singleton_method: (Symbol, Method | UnboundMethod) -> Symbol
+  def define_singleton_method: (Symbol, Method | UnboundMethod | ^(*untyped) -> untyped) -> Symbol
                              | (Symbol) { (*untyped) -> untyped } -> Symbol
 
   # Prints *obj* on the given port (default `$>`). Equivalent to:
