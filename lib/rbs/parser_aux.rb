@@ -26,38 +26,38 @@ module RBS
     autoload :LexerError, "rbs/parser_compat/lexer_error"
     autoload :LocatedValue, "rbs/parser_compat/located_value"
 
-    KEYWORDS = Set.new(
-      %w(
-        bool
-        bot
-        class
-        instance
-        interface
-        nil
-        self
-        singleton
-        top
-        void
-        type
-        unchecked
-        in
-        out
-        end
-        def
-        include
-        extend
-        prepend
-        alias
-        module
-        attr_reader
-        attr_writer
-        attr_accessor
-        public
-        private
-        untyped
-        true
-        false
-      )
-    )
+    KEYWORDS = %w(
+      bool
+      bot
+      class
+      instance
+      interface
+      nil
+      self
+      singleton
+      top
+      void
+      type
+      unchecked
+      in
+      out
+      end
+      def
+      include
+      extend
+      prepend
+      alias
+      module
+      attr_reader
+      attr_writer
+      attr_accessor
+      public
+      private
+      untyped
+      true
+      false
+      ).each_with_object({}) do |keyword, hash|
+        hash[keyword] = nil
+      end
   end
 end
