@@ -2,7 +2,7 @@
 
 ## master
 
-## 1.7.0 (beta.3)
+## 1.7.0 (beta.4)
 
 ### Signature updates
 
@@ -15,6 +15,7 @@
 * Fix unexpected `CollectionNotAvailable` without `gems` from git source ([\#795](https://github.com/ruby/rbs/pull/795))
 * Replace RBS::Parser ([#788](https://github.com/ruby/rbs/pull/788), [#789](https://github.com/ruby/rbs/pull/789))
 * Print deprecation warning ([\#801](https://github.com/ruby/rbs/pull/801))
+* Make `Parser::KEYWORDS` a hash ([\#804](https://github.com/ruby/rbs/pull/804))
 
 ## 1.6.2 (2021-09-09)
 
