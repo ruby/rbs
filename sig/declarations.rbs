@@ -217,19 +217,22 @@ module RBS
       end
 
       class Alias < Base
-        # type loc = Location
-        # ^^^^                keyword
-        #      ^^^            name
-        #          ^          eq
-        type loc = Location[:keyword | :name | :eq, bot]
+        # type loc[T] = Location[T, bot]
+        # ^^^^                            keyword
+        #      ^^^                        name
+        #         ^^^                     type_params
+        #             ^                      eq
+        #
+        type loc = Location[:keyword | :name | :eq, :type_params]
 
         attr_reader name: TypeName
+        attr_reader type_params: ModuleTypeParams
         attr_reader type: Types::t
         attr_reader annotations: Array[Annotation]
         attr_reader location: loc?
         attr_reader comment: Comment?
 
-        def initialize: (name: TypeName, type: Types::t, annotations: Array[Annotation], location: loc?, comment: Comment?) -> void
+        def initialize: (name: TypeName, type_params: ModuleTypeParams, type: Types::t, annotations: Array[Annotation], location: loc?, comment: Comment?) -> void
 
         include _HashEqual
         include _ToJson

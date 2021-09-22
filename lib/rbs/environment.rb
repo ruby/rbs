@@ -319,6 +319,7 @@ module RBS
       when AST::Declarations::Alias
         AST::Declarations::Alias.new(
           name: decl.name.with_prefix(prefix),
+          type_params: decl.type_params,
           type: absolute_type(resolver, decl.type, context: context),
           location: decl.location,
           annotations: decl.annotations,
