@@ -37,11 +37,11 @@ module TestHelper
     ENV.key?("NO_MINITEST")
   end
 
-  def parse_type(string, variables: Set.new)
+  def parse_type(string, variables: [])
     RBS::Parser.parse_type(string, variables: variables)
   end
 
-  def parse_method_type(string, variables: Set.new)
+  def parse_method_type(string, variables: [])
     RBS::Parser.parse_method_type(string, variables: variables)
   end
 
