@@ -6,7 +6,7 @@ module RBS
 
     def self.parse_signature: (Buffer | String, ?line: Integer, ?column: Integer) -> Array[AST::Declarations::t]
 
-    KEYWORDS: Set[String]
+    KEYWORDS: Hash[String, bot]
 
     private
 
