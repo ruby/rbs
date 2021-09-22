@@ -133,6 +133,12 @@ end
     SIG
   end
 
+  def test_generic_alias
+    assert_writer <<-SIG
+type foo[Bar] = Baz
+    SIG
+  end
+
   def test_overload
     assert_writer <<-SIG
 class Foo

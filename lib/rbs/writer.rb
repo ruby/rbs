@@ -119,7 +119,7 @@ module RBS
       when AST::Declarations::Alias
         write_comment decl.comment
         write_annotation decl.annotations
-        puts "type #{decl.name} = #{decl.type}"
+        puts "type #{name_and_params(decl.name, decl.type_params)} = #{decl.type}"
 
       when AST::Declarations::Interface
         write_comment decl.comment
