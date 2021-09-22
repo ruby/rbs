@@ -4,13 +4,13 @@
 
 ## 1.7.0 (beta.3)
 
-## Signature updates
+### Signature updates
 
 * io/console ([\#783](https://github.com/ruby/rbs/pull/783))
 * `Net::HTTPRequest` ([\#784](https://github.com/ruby/rbs/pull/784))
 * `Tempfile.new`, `Tempfile.create` ([\#792](https://github.com/ruby/rbs/pull/792), [\#791](https://github.com/ruby/rbs/pull/791))
 
-## Library changes
+### Library changes
 
 * Fix unexpected `CollectionNotAvailable` without `gems` from git source ([\#795](https://github.com/ruby/rbs/pull/795))
 * Replace RBS::Parser ([#788](https://github.com/ruby/rbs/pull/788), [#789](https://github.com/ruby/rbs/pull/789))
@@ -18,12 +18,12 @@
 
 ## 1.6.2 (2021-09-09)
 
-## Signature updates
+### Signature updates
 
 * `Enumerator::Lazy#force` ([\#782](https://github.com/ruby/rbs/pull/782))
 * `IO.readlines` ([\#780](https://github.com/ruby/rbs/pull/780))
 
-## Miscellaneous
+### Miscellaneous
 
 * Set `$XDG_CACHE_HOME` during test ([\#781](https://github.com/ruby/rbs/pull/781))
 
@@ -31,7 +31,7 @@
 
 This is a minor release including test fixes.
 
-## Miscellaneous
+### Miscellaneous
 
 * Fix stdlib test for `Resolv::Hosts` by removing `/etc/hosts` dependency ([\#779](https://github.com/ruby/rbs/pull/779))
 * Fix bundler related test for test-bundled-gems ([\#778](https://github.com/ruby/rbs/pull/778))
@@ -43,18 +43,18 @@ The command helps you manage RBS files from gem_rbs_collection or other reposito
 
 This feature is a preview, and any feedback is welcome!
 
-## Signature updates
+### Signature updates
 
 * objspace ([\#763](https://github.com/ruby/rbs/pull/763), [\#776](https://github.com/ruby/rbs/pull/776))
 * tempfile ([\#767](https://github.com/ruby/rbs/pull/767), [\#775](https://github.com/ruby/rbs/pull/775))
 * `IO#set_encoding_by_bom` ([\#106](https://github.com/ruby/rbs/pull/106))
 * `OpenSSL::PKey::EC#dh_compute_key` ([\#775](https://github.com/ruby/rbs/pull/775))
 
-## Library changes
+### Library changes
 
 * Add `rbs collection` ([\#589](https://github.com/ruby/rbs/pull/589), [\#772](https://github.com/ruby/rbs/pull/772), [\#773](https://github.com/ruby/rbs/pull/773))
 
-## Miscellaneous
+### Miscellaneous
 
 * Let `bin/annotate-with-rdoc` process nested constants/classes ([\#766](https://github.com/ruby/rbs/pull/766), [\#768](https://github.com/ruby/rbs/pull/768))
 * Stop printing version mismatch message in CI ([\#777](https://github.com/ruby/rbs/pull/777))
