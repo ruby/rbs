@@ -45,6 +45,8 @@ module RBS
 
     def expand_alias: (TypeName) -> Types::t
 
+    def expand_alias2: (TypeName, args: Array[Types::t]) -> Types::t
+
     def update: (env: Environment, ancestor_builder: AncestorBuilder, except: _Each[TypeName]) -> DefinitionBuilder
   end
 end

@@ -782,6 +782,10 @@ module RBS
 
     def expand_alias(type_name)
       entry = env.alias_decls[type_name] or raise "Unknown name for expand_alias: #{type_name}"
+      unless entry.decl.type_params.empty?
+        raise "Use #expand_alias2 for generic type aliases: type_name=#{type_name}"
+      end
+
       ensure_namespace!(type_name.namespace, location: entry.decl.location)
       entry.decl.type
     end
