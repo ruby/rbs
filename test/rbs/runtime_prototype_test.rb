@@ -380,4 +380,39 @@ end
       end
     end
   end
+
+  if RUBY_VERSION >= '3.1'
+    class TestForYield
+      def m1() yield end
+      def m2() yield 42 end
+      def m3() yield 42; yield 42, 43 end
+      eval 'def m4() yield end'
+    end
+
+    def test_for_yield
+      SignatureManager.new do |manager|
+        manager.build do |env|
+          p = Runtime.new(patterns: ["RBS::RuntimePrototypeTest::TestForYield"], env: env, merge: true)
+
+          assert_write p.decls, <<~RBS
+            module RBS
+              module RuntimePrototypeTest
+                class TestForYield
+                  public
+
+                  def m1: () { () -> untyped } -> untyped
+
+                  def m2: () { (untyped) -> untyped } -> untyped
+
+                  def m3: () { (untyped, untyped) -> untyped } -> untyped
+
+                  def m4: () -> untyped
+                end
+              end
+            end
+          RBS
+        end
+      end
+    end
+  end
 end
