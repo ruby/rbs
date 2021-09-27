@@ -102,7 +102,12 @@ module RBS
               git 'fetch', 'origin'
             end
           else
-            git 'clone', remote, git_dir.to_s
+            begin
+              # git v2.27.0 or greater
+              git 'clone', '--filter=blob:none', remote, git_dir.to_s
+            rescue CommandError
+              git 'clone', remote, git_dir.to_s
+            end
           end
 
           begin
