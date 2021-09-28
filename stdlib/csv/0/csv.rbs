@@ -360,6 +360,49 @@ class CSV < Object
   # output non-ASCII compatible data.
   #
   def self.generate: (?String str, **untyped options) { (CSV csv) -> void } -> String
+
+  # :call-seq:
+  #   csv.each -> enumerator
+  #   csv.each {|row| ...}
+  #
+  # Calls the block with each successive row.
+  # The data source must be opened for reading.
+  #
+  # Without headers:
+  #   string = "foo,0\nbar,1\nbaz,2\n"
+  #   csv = CSV.new(string)
+  #   csv.each do |row|
+  #     p row
+  #   end
+  # Output:
+  #   ["foo", "0"]
+  #   ["bar", "1"]
+  #   ["baz", "2"]
+  #
+  # With headers:
+  #   string = "Name,Value\nfoo,0\nbar,1\nbaz,2\n"
+  #   csv = CSV.new(string, headers: true)
+  #   csv.each do |row|
+  #     p row
+  #   end
+  # Output:
+  #   <CSV::Row "Name":"foo" "Value":"0">
+  #   <CSV::Row "Name":"bar" "Value":"1">
+  #   <CSV::Row "Name":"baz" "Value":"2">
+  #
+  # ---
+  #
+  # Raises an exception if the source is not opened for reading:
+  #   string = "foo,0\nbar,1\nbaz,2\n"
+  #   csv = CSV.new(string)
+  #   csv.close
+  #   # Raises IOError (not opened for reading)
+  #   csv.each do |row|
+  #     p row
+  #   end
+  def each: () -> Enumerator[untyped, Integer]
+          | () { (untyped) -> void } -> Integer
+
 end
 
 # The options used when no overrides are given by calling code. They are:
@@ -408,7 +451,7 @@ CSV::VERSION: String
 # processing is activated.
 #
 class CSV::Row < Object
-  include Enumerable[untyped]
+  include Enumerable[Array[String]]
   extend Forwardable
 
   # If a two-element Array is provided, it is assumed to be a header and field and
@@ -464,7 +507,8 @@ class CSV::Row < Object
   #
   # Support for Enumerable.
   #
-  def each: () { (*untyped) -> untyped } -> untyped
+  def each: () -> Enumerator[Array[String], self]
+          | () { (Array[String]) -> void } -> self
 
   alias each_pair each
 
@@ -717,7 +761,9 @@ class CSV::Table[out Elem] < Object
   #
   # If no block is given, an Enumerator is returned.
   #
-  def each: () { (*untyped) -> untyped } -> untyped
+  def each: () -> Enumerator[untyped, self]
+          | () { (untyped) -> void } -> self
+          | () { (*untyped) -> void } -> self
 
   def empty?: (*untyped args) { (*untyped) -> untyped } -> untyped
 
