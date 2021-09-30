@@ -289,7 +289,6 @@ _method-member_ ::= `def` _method-name_ `:` _method-types_            # Instance
                   | `def self?.` _method-name_ `:` _method-types_     # Singleton and instance method
 
 _method-types_ ::=                                                       # Empty
-                 | `super`                                               # `super` overloading
                  | _type-parameters_ _method-type_ `|` _method-types_    # Overloading types
                  | `...`                                                 # Overloading for duplicate definitions
 
