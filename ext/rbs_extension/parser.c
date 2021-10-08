@@ -815,6 +815,8 @@ static VALUE parse_simple(parserstate *state) {
   }
   case tULIDENT:
     // fallthrough
+  case tLIDENT:
+    // fallthrough
   case pCOLON2: {
     range name_range;
     range args_range;
@@ -857,18 +859,10 @@ static VALUE parse_simple(parserstate *state) {
     } else if (kind == INTERFACE_NAME) {
       return rbs_interface(typename, types, location);
     } else if (kind == ALIAS_NAME) {
-      return rbs_alias(typename, location);
+      return rbs_alias(typename, types, location);
     } else {
       return Qnil;
     }
-  }
-  case tLIDENT: {
-    VALUE location = rbs_location_current_token(state);
-    rbs_loc *loc = rbs_check_location(location);
-    rbs_loc_add_required_child(loc, rb_intern("name"), state->current_token.range);
-    rbs_loc_add_optional_child(loc, rb_intern("args"), NULL_RANGE);
-    VALUE typename = parse_type_name(state, ALIAS_NAME, NULL);
-    return rbs_alias(typename, location);
   }
   case kSINGLETON: {
     range name_range;

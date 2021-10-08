@@ -70,15 +70,16 @@ VALUE rbs_class_singleton(VALUE typename, VALUE location) {
   );
 }
 
-VALUE rbs_alias(VALUE typename, VALUE location) {
-  VALUE args = rb_hash_new();
-  rb_hash_aset(args, ID2SYM(rb_intern("name")), typename);
-  rb_hash_aset(args, ID2SYM(rb_intern("location")), location);
+VALUE rbs_alias(VALUE typename, VALUE args, VALUE location) {
+  VALUE kwargs = rb_hash_new();
+  rb_hash_aset(kwargs, ID2SYM(rb_intern("name")), typename);
+  rb_hash_aset(kwargs, ID2SYM(rb_intern("args")), args);
+  rb_hash_aset(kwargs, ID2SYM(rb_intern("location")), location);
 
   return CLASS_NEW_INSTANCE(
     RBS_Types_Alias,
     1,
-    &args
+    &kwargs
   );
 }
 

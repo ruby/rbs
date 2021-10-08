@@ -123,8 +123,12 @@ class RBS::TypeParsingTest < Test::Unit::TestCase
       assert_equal "::Foo::foo", type.location.source
     end
 
-    assert_raises RBS::ParsingError do
-      Parser.parse_type("foo[untyped]")
+    Parser.parse_type("foo[untyped]").yield_self do |type|
+      assert_instance_of Types::Alias, type
+      assert_equal TypeName.new(namespace: Namespace.empty, name: :foo), type.name
+      assert_equal "foo[untyped]", type.location.source
+      assert_equal "foo", type.location[:name].source
+      assert_equal "[untyped]", type.location[:args].source
     end
   end
 
