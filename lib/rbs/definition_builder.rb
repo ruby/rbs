@@ -781,13 +781,36 @@ module RBS
     end
 
     def expand_alias(type_name)
-      entry = env.alias_decls[type_name] or raise "Unknown name for expand_alias: #{type_name}"
-      unless entry.decl.type_params.empty?
-        raise "Use #expand_alias2 for generic type aliases: type_name=#{type_name}"
-      end
+      expand_alias2(type_name, [])
+    end
+
+    def expand_alias1(type_name)
+      entry = env.alias_decls[type_name] or raise "Unknown alias name: #{type_name}"
+      as = entry.decl.type_params.each.map { Types::Bases::Any.new(location: nil) }
+      expand_alias2(type_name, as)
+    end
+
+    def expand_alias2(type_name, args)
+      entry = env.alias_decls[type_name] or raise "Unknown alias name: #{type_name}"
 
       ensure_namespace!(type_name.namespace, location: entry.decl.location)
-      entry.decl.type
+      params = entry.decl.type_params.each.map(&:name)
+
+      unless params.size == args.size
+        as = "[#{args.join(", ")}]" unless args.empty?
+        ps = "[#{params.join(", ")}]" unless params.empty?
+
+        raise "Invalid type application: type = #{type_name}#{as}, decl = #{type_name}#{ps}"
+      end
+
+      type = entry.decl.type
+
+      unless params.empty?
+        subst = Substitution.build(params, args)
+        type = type.sub(subst)
+      end
+
+      type
     end
 
     def update(env:, except:, ancestor_builder:)
