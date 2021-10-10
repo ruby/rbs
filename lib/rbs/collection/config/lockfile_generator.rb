@@ -15,15 +15,20 @@ module RBS
           @lock_path = Config.to_lockfile_path(config_path)
           @lock = Config.from_path(lock_path) if lock_path.exist? && with_lockfile
           @gemfile_lock = Bundler::LockfileParser.new(gemfile_lock_path.read)
+          @gem_queue = []
         end
 
         def generate
           config.gems.each do |gem|
-            assign_gem(gem_name: gem['name'], version: gem['version'])
+            @gem_queue.push({ name: gem['name'], version: gem['version'] })
           end
 
           gemfile_lock_gems do |spec|
-            assign_gem(gem_name: spec.name, version: spec.version)
+            @gem_queue.push({ name: spec.name, version: spec.version })
+          end
+
+          while gem = @gem_queue.shift
+            assign_gem(**gem)
           end
           remove_ignored_gems!
 
@@ -31,30 +36,33 @@ module RBS
           config
         end
 
-        private def assign_gem(gem_name:, version:)
-          locked = lock&.gem(gem_name)
-          specified = config.gem(gem_name)
+        private def assign_gem(name:, version:)
+          locked = lock&.gem(name)
+          specified = config.gem(name)
 
           return if specified&.dig('ignore')
           return if specified&.dig('source') # skip if the source is already filled
 
-          if locked
-            # If rbs_collection.lock.yaml contain the gem, use it.
-            upsert_gem specified, locked
-          else
-            # Find the gem from gem_collection.
-            source = find_source(gem_name: gem_name)
+          # If rbs_collection.lock.yaml contain the gem, use it.
+          # Else find the gem from gem_collection.
+          unless locked
+            source = find_source(name: name)
             return unless source
 
             installed_version = version
-            best_version = find_best_version(version: installed_version, versions: source.versions({ 'name' => gem_name }))
-            # @type var new_content: RBS::Collection::Config::gem_entry
-            new_content = {
-              'name' => gem_name,
+            best_version = find_best_version(version: installed_version, versions: source.versions({ 'name' => name }))
+            locked = {
+              'name' => name,
               'version' => best_version.to_s,
               'source' => source.to_lockfile,
             }
-            upsert_gem specified, new_content
+          end
+
+          upsert_gem specified, locked
+          source = Sources.from_config_entry((locked || new_content)['source'])
+          manifest = source.manifest_of((locked || new_content)) or return
+          manifest['dependencies']&.each do |dep|
+            @gem_queue.push({ name: dep['name'], version: nil} )
           end
         end
 
@@ -76,10 +84,10 @@ module RBS
           end
         end
 
-        private def find_source(gem_name:)
+        private def find_source(name:)
           sources = config.sources
 
-          sources.find { |c| c.has?({ 'name' => gem_name, 'revision' => nil } ) }
+          sources.find { |c| c.has?({ 'name' => name, 'revision' => nil } ) }
         end
 
         private def find_best_version(version:, versions:)

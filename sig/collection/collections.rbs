@@ -8,11 +8,15 @@ module RBS
         def versions: (Config::gem_entry) -> Array[String]
         def install: (dest: Pathname, config_entry: Config::gem_entry, stdout: CLI::_IO) -> void
         def to_lockfile: () -> source_entry
+        def manifest_of: (Config::gem_entry) -> manifest_entry?
       end
 
       type source_entry = Git::source_entry
                             | Stdlib::source_entry
                             | Rubygems::source_entry
+      type manifest_entry = {
+        dependencies?: Array[{name: String}],
+      }
 
       class Git
         METADATA_FILENAME: String

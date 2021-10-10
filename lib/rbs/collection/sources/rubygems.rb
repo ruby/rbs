@@ -25,6 +25,12 @@ module RBS
           stdout.puts "Using #{name}:#{version} (#{from})"
         end
 
+        def manifest_of(config_entry)
+          _, sig_path = gem_sig_path(config_entry)
+          manifest_path = sig_path.join('sig/manifest.yaml')
+          YAML.safe_load(manifest_path.read) if manifest_path.exist?
+        end
+
         def to_lockfile
           {
             'type' => 'rubygems',
