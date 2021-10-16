@@ -344,6 +344,10 @@ class RBS::Collection::ConfigTest < Test::Unit::TestCase
             version: "1.0.0"
             source:
               type: rubygems
+          - name: pathname
+            version: "0"
+            source:
+              type: stdlib
       YAML
     end
   end
