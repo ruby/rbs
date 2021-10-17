@@ -301,6 +301,10 @@ class RBS::Collection::ConfigTest < Test::Unit::TestCase
             version: "0"
             source:
               type: stdlib
+          - name: forwardable
+            version: "0"
+            source:
+              type: stdlib
       YAML
     end
   end

@@ -24,7 +24,7 @@ module RBS
         end
 
         def manifest_of(config_entry)
-          manifest_path = gem_dir(config_entry).join('manifest.yaml')
+          manifest_path = gem_dir(config_entry).join(config_entry['version'], 'manifest.yaml')
           YAML.safe_load(manifest_path.read) if manifest_path.exist?
         end
 
