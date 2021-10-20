@@ -61,7 +61,7 @@ class Set[A]
   #     Set[1, 2, 1]                # => #<Set: {1, 2}>
   #     Set[1, 'c', :s]             # => #<Set: {1, "c", :s}>
   #
-  def self.[]: [X] (*X) -> Set[X]
+  def self.[]: [X] (*X) -> instance
 
   # Returns a new set containing elements common to the set and the given
   # enumerable object.
@@ -225,7 +225,7 @@ class Set[A]
   # Returns a new set that is a copy of the set, flattening each containing set
   # recursively.
   #
-  def flatten: () -> Set[untyped]
+  def flatten: () -> self
 
   # Returns true if the set and the given set have at least one element in common.
   #
