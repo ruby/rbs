@@ -76,7 +76,7 @@ class Object < BasicObject
   # This method may have class-specific behavior.  If so, that behavior will be
   # documented under the #`initialize_copy` method of the class.
   #
-  def clone: (?freeze: bool) -> self
+  def clone: (?freeze: bool?) -> self
 
   # Defines a singleton method in the receiver. The *method* parameter can be a
   # `Proc`, a `Method` or an `UnboundMethod` object. If a block is specified, it

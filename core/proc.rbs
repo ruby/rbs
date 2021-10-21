@@ -210,6 +210,8 @@
 #     {test: 1}.to_proc.call(:test)       #=> 1
 #     %i[test many keys].map(&{test: 1})  #=> [1, nil, nil]
 class Proc < Object
+  def clone: () -> self
+
   # Returns the number of mandatory arguments. If the block is declared to
   # take no arguments, returns 0. If the block is known to take exactly n
   # arguments, returns n. If the block has optional arguments, returns -n-1,

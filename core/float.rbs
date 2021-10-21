@@ -171,8 +171,6 @@ class Float < Numeric
   def ceil: () -> Integer
           | (int digits) -> (Integer | Float)
 
-  def clone: (?freeze: bool) -> self
-
   # Returns an array with both `numeric` and `float` represented as Float objects.
   #
   # This is achieved by converting `numeric` to a Float.

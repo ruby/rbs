@@ -45,6 +45,19 @@
 #     um.bind(t).call   #=> :original
 #
 class UnboundMethod
+  # Returns a clone of this method.
+  #
+  #   class A
+  #     def foo
+  #       return "bar"
+  #     end
+  #   end
+  #
+  #   m = A.new.method(:foo)
+  #   m.call # => "bar"
+  #   n = m.clone.call # => "bar"
+  def clone: () -> self
+
   # Returns an indication of the number of arguments accepted by a method. Returns
   # a nonnegative integer for methods that take a fixed number of arguments. For
   # Ruby methods that take a variable number of arguments, returns -n-1, where n
