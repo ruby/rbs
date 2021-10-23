@@ -416,4 +416,11 @@ class Numeric
   # Returns `true` if `num` has a zero value.
   #
   def zero?: () -> bool
+
+  # Returns +self+.
+  #
+  # Raises an exception if the value for +freeze+ is neither +true+ nor +nil+.
+  #
+  # Related: Numeric#dup.
+  def clone: (?freeze: true?) -> self
 end

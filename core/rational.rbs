@@ -175,8 +175,6 @@ class Rational < Numeric
   def ceil: () -> Integer
           | (Integer digits) -> (Integer | Rational)
 
-  def clone: (?freeze: bool) -> self
-
   def coerce: (Numeric) -> [Numeric, Numeric]
 
   def conj: () -> Rational

@@ -272,8 +272,6 @@ class Integer < Numeric
   #
   def chr: (?encoding) -> String
 
-  def clone: (?freeze: bool) -> self
-
   # Returns an array with both a `numeric` and a `big` represented as Bignum
   # objects.
   #

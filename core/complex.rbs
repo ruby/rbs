@@ -165,8 +165,6 @@ class Complex < Numeric
 
   def ceil: (*untyped) -> bot
 
-  def clone: (?freeze: bool) -> self
-
   def coerce: (Numeric) -> [ Complex, Complex ]
 
   # Returns the complex conjugate.
