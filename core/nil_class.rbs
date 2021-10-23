@@ -79,4 +79,6 @@ class NilClass
   def |: (nil) -> false
        | (false) -> false
        | (untyped obj) -> bool
+
+  def clone: (?freeze: true?) -> self
 end

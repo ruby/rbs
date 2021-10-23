@@ -37,4 +37,6 @@ class FalseClass
   def |: (nil) -> false
        | (false) -> false
        | (untyped obj) -> true
+
+  def clone: (?freeze: true?) -> self
 end
