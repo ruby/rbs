@@ -699,7 +699,7 @@ class Array[unchecked out Elem] < Object
   #     ary.count {|x| x%2 == 0}   #=> 3
   #
   def count: () -> ::Integer
-           | (untyped obj) -> ::Integer
+           | (Elem) -> ::Integer
            | () { (Elem) -> boolish } -> ::Integer
 
   # Calls the given block for each element `n` times or forever if `nil` is given.

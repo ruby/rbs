@@ -63,7 +63,7 @@ module Enumerable[unchecked out Elem]: _Each[Elem]
   # ary.count{ |x| x%2==0 } #=> 3
   # ```
   def count: () -> Integer
-           | (?untyped) -> Integer
+           | (Elem) -> Integer
            | () { (Elem) -> boolish } -> Integer
 
   def cycle: (?Integer n) { (Elem arg0) -> untyped } -> NilClass
