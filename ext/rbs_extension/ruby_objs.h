@@ -41,6 +41,4 @@ VALUE rbs_type_name(VALUE namespace, VALUE name);
 VALUE rbs_union(VALUE types, VALUE location);
 VALUE rbs_variable(VALUE name, VALUE location);
 
-void pp(VALUE object);
-
 #endif
