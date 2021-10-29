@@ -1487,6 +1487,8 @@ VALUE parse_member_def(parserstate *state, bool instance_only, bool accept_overl
   case INSTANCE_SINGLETON_KIND:
     k = ID2SYM(rb_intern("singleton_instance"));
     break;
+  default:
+    rbs_abort();
   }
 
   VALUE location = rbs_new_location(state->buffer, member_range);
