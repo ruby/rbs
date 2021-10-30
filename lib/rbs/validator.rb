@@ -17,8 +17,8 @@ module RBS
     # Validates presence of the relative type, and application arity match.
     def validate_type(type, context:)
       case type
-      when Types::ClassInstance, Types::Interface
-        # @type var type: Types::ClassInstance | Types::Interface
+      when Types::ClassInstance, Types::Interface, Types::Alias
+        # @type var type: Types::ClassInstance | Types::Interface | Types::Alias
         if type.name.namespace.relative?
           type = _ = absolute_type(type, context: context) do |_|
             NoTypeFoundError.check!(type.name.absolute!, env: env, location: type.location)
@@ -30,6 +30,8 @@ module RBS
                         env.class_decls[type.name]&.type_params
                       when Types::Interface
                         env.interface_decls[type.name]&.decl&.type_params
+                      when Types::Alias
+                        env.alias_decls[type.name]&.decl&.type_params
                       end
 
         unless type_params
@@ -43,8 +45,8 @@ module RBS
           location: type.location
         )
 
-      when Types::Alias, Types::ClassSingleton
-        # @type var type: Types::Alias | Types::ClassSingleton
+      when Types::ClassSingleton
+        # @type var type: Types::ClassSingleton
         type = _ = absolute_type(type, context: context) { type.name.absolute! }
         NoTypeFoundError.check!(type.name, env: env, location: type.location)
       end
@@ -55,11 +57,23 @@ module RBS
     end
 
     def validate_type_alias(entry:)
-      @type_alias_dependency ||= TypeAliasDependency.new(env: env)
-      if @type_alias_dependency.circular_definition?(entry.decl.name)
+      if type_alias_dependency.circular_definition?(entry.decl.name)
         location = entry.decl.location or raise
         raise RecursiveTypeAliasError.new(alias_names: [entry.decl.name], location: location)
       end
+
+      if diagnostic = type_alias_regularity.nonregular?(entry.decl.name)
+        location = entry.decl.location or raise
+        raise NonregularTypeAliasError.new(diagnostic: diagnostic, location: location)
+      end
+    end
+
+    def type_alias_dependency
+      @type_alias_dependency ||= TypeAliasDependency.new(env: env)
+    end
+
+    def type_alias_regularity
+      @type_alias_regularity ||= TypeAliasRegularity.validate(env: env)
     end
   end
 end

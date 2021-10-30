@@ -110,7 +110,28 @@ type record = { foo: record }
         validator = RBS::Validator.new(env: env, resolver: resolver)
 
         env.alias_decls.each do |name, entry|
-          assert_nil validator.validate_type_alias(entry: entry)
+          validator.validate_type_alias(entry: entry)
+        end
+      end
+    end
+  end
+
+  def test_generic_type_aliases
+    SignatureManager.new do |manager|
+      manager.add_file("test.rbs", <<-EOF)
+type foo[T] = [T, foo[T]]
+
+type bar[T] = [bar[T?]]
+      EOF
+
+      manager.build do |env|
+        resolver = RBS::TypeNameResolver.from_env(env)
+        validator = RBS::Validator.new(env: env, resolver: resolver)
+
+        validator.validate_type_alias(entry: env.alias_decls[type_name("::foo")])
+
+        assert_raises RBS::NonregularTypeAliasError do
+          validator.validate_type_alias(entry: env.alias_decls[type_name("::bar")])
         end
       end
     end

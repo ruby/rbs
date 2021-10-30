@@ -220,4 +220,14 @@ module RBS
 
     def name: () -> String
   end
+
+  class NonregularTypeAliasError < LoadingError
+    # Diagnostic reported from `TypeAliasRegularity`.
+    attr_reader diagnostic: TypeAliasRegularity::Diagnostic
+
+    # Location of the definition.
+    attr_reader location: Location[untyped, untyped]?
+
+    def initialize: (diagnostic: TypeAliasRegularity::Diagnostic, location: Location[untyped, untyped]?) -> void
+  end
 end
