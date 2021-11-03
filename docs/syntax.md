@@ -110,10 +110,10 @@ Array[Integer | String]    # Array of Integer or String
 Intersection type denotes _a type of all of the given types_.
 
 ```
-Integer & String           # Integer and String
+_Reader & _Writer           # _Reader and _Writer
 ```
 
-Note that `&` has higher precedence than `|` that `Integer & String | Symbol` is `(Integer & String) | Symbol`.
+Note that `&` has higher precedence than `|` that `A & B | C` is `(A & B) | C`.
 
 ### Optional type
 
