@@ -13,6 +13,7 @@ begin
   filter = ENV.fetch('RBS_TEST_TARGET', "").split(',').map! { |e| e.strip }
   skips = (ENV['RBS_TEST_SKIP'] || '').split(',').map! { |e| e.strip }
   RBS.logger_level = (ENV["RBS_TEST_LOGLEVEL"] || "info")
+  logger.level = RBS.logger_level
   sample_size = get_sample_size(ENV['RBS_TEST_SAMPLE_SIZE'] || '')
   double_class = to_double_class(ENV['RBS_TEST_DOUBLE_SUITE'])
   unchecked_classes = (ENV['RBS_TEST_UNCHECKED_CLASSES'] || '').split(',').map! { |unchecked_class| unchecked_class.strip }.push(*double_class)
