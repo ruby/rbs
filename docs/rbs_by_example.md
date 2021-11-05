@@ -229,9 +229,9 @@ end
 
 ```ruby
 # .rb
-[1,2,3,4,5].select {|num| num.even? }
+[1,2,3,4,5].filter {|num| num.even? }
 # => [2, 4]
-%w[ a b c d e f ].select {|v| v =~ /[aeiou]/ }
+%w[ a b c d e f ].filter {|v| v =~ /[aeiou]/ }
 # => ["a", "e"]
 [1,2,3,4,5].filter
 ```
