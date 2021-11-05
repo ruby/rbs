@@ -54,6 +54,43 @@ EOF
     end
   end
 
+  def test_alias_generics
+    SignatureManager.new do |manager|
+      manager.files[Pathname("foo.rbs")] = <<EOF
+type a[T] = T
+
+type b[T, S] = ^(T) -> S
+
+type c[T, S] = Foo[T, S]
+
+type d[T] = Foo[T, T]
+
+class Foo[in T, out S]
+end
+EOF
+      manager.build do |env|
+        builder = DefinitionBuilder.new(env: env)
+        calculator = VarianceCalculator.new(builder: builder)
+
+        calculator.in_type_alias(name: TypeName("::a")).tap do |result|
+          assert_equal({ T: :covariant }, result.result)
+        end
+
+        calculator.in_type_alias(name: TypeName("::b")).tap do |result|
+          assert_equal({ T: :contravariant, S: :covariant }, result.result)
+        end
+
+        calculator.in_type_alias(name: TypeName("::c")).tap do |result|
+          assert_equal({ T: :contravariant, S: :covariant }, result.result)
+        end
+
+        calculator.in_type_alias(name: TypeName("::d")).tap do |result|
+          assert_equal({ T: :invariant }, result.result)
+        end
+      end
+    end
+  end
+
   def test_result
     result = VarianceCalculator::Result.new(variables: [:A, :B, :C])
     result.covariant(:A)

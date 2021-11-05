@@ -122,6 +122,8 @@ type record = { foo: record }
 type foo[T] = [T, foo[T]]
 
 type bar[T] = [bar[T?]]
+
+type baz[out T] = ^(T) -> void
       EOF
 
       manager.build do |env|
@@ -132,6 +134,10 @@ type bar[T] = [bar[T?]]
 
         assert_raises RBS::NonregularTypeAliasError do
           validator.validate_type_alias(entry: env.alias_decls[type_name("::bar")])
+        end
+
+        assert_raises RBS::InvalidVarianceAnnotationError do
+          validator.validate_type_alias(entry: env.alias_decls[type_name("::baz")])
         end
       end
     end

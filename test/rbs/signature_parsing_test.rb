@@ -63,6 +63,36 @@ RBS
     end
   end
 
+  def test_type_alias_generic_variance
+    Parser.parse_signature(<<RBS).yield_self do |decls|
+type x[T] = ^(T) -> void
+
+type y[unchecked out T] = ^(T) -> void
+RBS
+      assert_equal 2, decls.size
+
+      decls[0].tap do |type_decl|
+        assert_instance_of Declarations::Alias, type_decl
+
+        type_decl.type_params.params[0].tap do |param|
+          assert_equal :T, param.name
+          assert_equal :invariant, param.variance
+          refute_predicate param, :skip_validation
+        end
+      end
+
+      decls[1].tap do |type_decl|
+        assert_instance_of Declarations::Alias, type_decl
+
+        type_decl.type_params.params[0].tap do |param|
+          assert_equal :T, param.name
+          assert_equal :covariant, param.variance
+          assert_predicate param, :skip_validation
+        end
+      end
+    end
+  end
+
   def test_constant
     Parser.parse_signature("FOO: untyped").yield_self do |decls|
       assert_equal 1, decls.size

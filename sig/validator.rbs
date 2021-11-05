@@ -4,6 +4,8 @@ module RBS
 
     attr_reader resolver: TypeNameResolver
 
+    attr_reader definition_builder: DefinitionBuilder
+
     attr_reader type_alias_dependency: TypeAliasDependency
 
     attr_reader type_alias_regularity: TypeAliasRegularity

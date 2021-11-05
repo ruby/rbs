@@ -2,10 +2,12 @@ module RBS
   class Validator
     attr_reader :env
     attr_reader :resolver
+    attr_reader :definition_builder
 
     def initialize(env:, resolver:)
       @env = env
       @resolver = resolver
+      @definition_builder = DefinitionBuilder.new(env: env)
     end
 
     def absolute_type(type, context:)
@@ -57,14 +59,31 @@ module RBS
     end
 
     def validate_type_alias(entry:)
-      if type_alias_dependency.circular_definition?(entry.decl.name)
+      type_name = entry.decl.name
+
+      if type_alias_dependency.circular_definition?(type_name)
         location = entry.decl.location or raise
-        raise RecursiveTypeAliasError.new(alias_names: [entry.decl.name], location: location)
+        raise RecursiveTypeAliasError.new(alias_names: [type_name], location: location)
       end
 
-      if diagnostic = type_alias_regularity.nonregular?(entry.decl.name)
+      if diagnostic = type_alias_regularity.nonregular?(type_name)
         location = entry.decl.location or raise
         raise NonregularTypeAliasError.new(diagnostic: diagnostic, location: location)
+      end
+
+      unless entry.decl.type_params.empty?
+        calculator = VarianceCalculator.new(builder: definition_builder)
+        result = calculator.in_type_alias(name: type_name)
+        if set = result.incompatible?(entry.decl.type_params)
+          set.each do |param_name|
+            param = entry.decl.type_params[param_name] or raise
+            raise InvalidVarianceAnnotationError.new(
+              type_name: type_name,
+              param: param,
+              location: entry.decl.type.location
+            )
+          end
+        end
       end
     end
 
