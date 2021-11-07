@@ -2,13 +2,14 @@
 
 ## master
 
-## 1.7.0 (beta.4)
+## 1.7.0 (beta.5)
 
 ### Signature updates
 
 * io/console ([\#783](https://github.com/ruby/rbs/pull/783))
 * `Net::HTTPRequest` ([\#784](https://github.com/ruby/rbs/pull/784))
 * `Tempfile.new`, `Tempfile.create` ([\#792](https://github.com/ruby/rbs/pull/792), [\#791](https://github.com/ruby/rbs/pull/791))
+* `#clone` ([#811](https://github.com/ruby/rbs/pull/811))
 
 ### Library changes
 
@@ -16,6 +17,7 @@
 * Replace RBS::Parser ([#788](https://github.com/ruby/rbs/pull/788), [#789](https://github.com/ruby/rbs/pull/789))
 * Print deprecation warning ([\#801](https://github.com/ruby/rbs/pull/801))
 * Make `Parser::KEYWORDS` a hash ([\#804](https://github.com/ruby/rbs/pull/804))
+* Use _partial clone_ for `rbs collection` installer ([#805](https://github.com/ruby/rbs/pull/805))
 
 ## 1.6.2 (2021-09-09)
 
