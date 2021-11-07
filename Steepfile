@@ -3,7 +3,6 @@ D = Steep::Diagnostic
 target :lib do
   signature "sig"
   check "lib"
-  ignore "lib/rbs/parser.rb"
   ignore "lib/rbs/prototype", "lib/rbs/test", "lib/rbs/test.rb"
 
   library "set", "pathname", "json", "logger", "monitor", "tsort", "uri"

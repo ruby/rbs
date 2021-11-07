@@ -13,7 +13,6 @@
 **/.rbfu-version
 **/.rbenv-version
 **/.versions.conf
-/lib/rbs/parser.output
 /vendor/sigs
 /Gemfile.lock
 
