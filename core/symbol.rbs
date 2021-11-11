@@ -226,4 +226,6 @@ class Symbol
             | (:ascii | :lithuanian | :turkic) -> Symbol
             | (:lithuanian, :turkic) -> Symbol
             | (:turkic, :lithuanian) -> Symbol
+
+  def clone: (?freeze: true?) -> self
 end

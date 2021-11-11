@@ -43,4 +43,6 @@ class TrueClass
   #     or
   #
   def |: (untyped obj) -> true
+
+  def clone: (?freeze: true?) -> self
 end
