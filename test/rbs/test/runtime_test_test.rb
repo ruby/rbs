@@ -98,13 +98,13 @@ RUBY
   end
 
   def test_no_test_install
-    output = assert_test_success(other_env: { "RBS_TEST_TARGET" => "NO_SUCH_CLASS" })
+    output = assert_test_success(other_env: { "RBS_TEST_TARGET" => "NO_SUCH_CLASS", "RBS_TEST_LOGLEVEL" => "debug" })
     refute_match(/#{Regexp.escape("Setting up hooks for ::Hello")}/, output)
     assert_match(/#{Regexp.escape("No type checker was installed!")}/, output)
   end
 
   def test_name_override
-    output = assert_test_success(ruby_content: <<RUBY)
+    output = assert_test_success(ruby_content: <<RUBY, other_env: { "RBS_TEST_LOGLEVEL" => "debug" })
 class TestClass
   def self.name
     raise
