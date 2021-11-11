@@ -51,6 +51,27 @@ class BigDecimalSingletonTest < Test::Unit::TestCase
     assert_send_type  "() { (?nil) -> void } -> void",
                       BigDecimal, :save_rounding_mode do end
   end
+
+  def test_kernel
+    assert_send_type "(::String) -> ::BigDecimal",
+                     Kernel, :BigDecimal, "1.23"
+    assert_send_type "(::ToStr) -> ::BigDecimal",
+                     Kernel, :BigDecimal, ToStr.new("1.23")
+    assert_send_type "(::Integer) -> ::BigDecimal",
+                     Kernel, :BigDecimal, 123
+    assert_send_type "(::BigDecimal) -> ::BigDecimal",
+                     Kernel, :BigDecimal, BigDecimal("1.23")
+    assert_send_type "(::Float, ::Integer) -> ::BigDecimal",
+                     Kernel, :BigDecimal, 1.23, 1
+    assert_send_type "(::Float, ::ToInt) -> ::BigDecimal",
+                     Kernel, :BigDecimal, 1.23, ToInt.new(1)
+    assert_send_type "(::Rational, ::Integer) -> ::BigDecimal",
+                     Kernel, :BigDecimal, Rational(1.23), 1
+    assert_send_type "(::String, exception: bool) -> ::BigDecimal",
+                     Kernel, :BigDecimal, "1.23", exception: false
+    assert_send_type "(::Float, ::Integer, exception: bool) -> ::BigDecimal",
+                     Kernel, :BigDecimal, 1.23, 1, exception: true
+  end
 end
 
 class BigDecimalTest < Test::Unit::TestCase
