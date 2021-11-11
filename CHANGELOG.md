@@ -2,22 +2,38 @@
 
 ## master
 
-## 1.7.0 (beta.5)
+## 1.7.0 (2021-11-11)
+
+This version replaces `RBS::Parser` implementation from pure Ruby code based on [Racc](https://github.com/ruby/racc) to C extension.
+It improves the RBS file parsing performance up to 5 times faster. :rocket:
+
+* There are some incompatibilties to drop obsolete syntax rules: `super` keyword and `any` type are no longer supported.
+* [re2c](https://github.com/skvadrik/re2c) is used to generate lexical generator.
+
+When you want to change the parser/lexer, change the files under `ext/rbs_extension` directory and run `rake compile` to compile the extension.
 
 ### Signature updates
 
 * io/console ([\#783](https://github.com/ruby/rbs/pull/783))
+* `ENV` -- Note that it introduces a dummy `::ENVClass` class, which is not defined in Ruby. ([\#812](https://github.com/ruby/rbs/pull/812))
 * `Net::HTTPRequest` ([\#784](https://github.com/ruby/rbs/pull/784))
+* `#clone` ([#811](https://github.com/ruby/rbs/pull/811), [\#813](https://github.com/ruby/rbs/pull/813))
+* `Kernel#BigDecimal` ([\#817](https://github.com/ruby/rbs/pull/817))
 * `Tempfile.new`, `Tempfile.create` ([\#792](https://github.com/ruby/rbs/pull/792), [\#791](https://github.com/ruby/rbs/pull/791))
-* `#clone` ([#811](https://github.com/ruby/rbs/pull/811))
 
 ### Library changes
 
+* Replace `RBS::Parser` ([#788](https://github.com/ruby/rbs/pull/788), [#789](https://github.com/ruby/rbs/pull/789))
 * Fix unexpected `CollectionNotAvailable` without `gems` from git source ([\#795](https://github.com/ruby/rbs/pull/795))
-* Replace RBS::Parser ([#788](https://github.com/ruby/rbs/pull/788), [#789](https://github.com/ruby/rbs/pull/789))
 * Print deprecation warning ([\#801](https://github.com/ruby/rbs/pull/801))
 * Make `Parser::KEYWORDS` a hash ([\#804](https://github.com/ruby/rbs/pull/804))
 * Use _partial clone_ for `rbs collection` installer ([#805](https://github.com/ruby/rbs/pull/805))
+* Respect logger level for test/setup logger ([\#819](https://github.com/ruby/rbs/pull/819), [\#822](https://github.com/ruby/rbs/pull/822))
+
+## Miscellaneous
+
+* Avoid a mixture of `Array#filter` and `Array#select` ([\#820](https://github.com/ruby/rbs/pull/820))
+* Remove leftover documentation about `super` ([\#807](https://github.com/ruby/rbs/pull/807))
 
 ## 1.6.2 (2021-09-09)
 
