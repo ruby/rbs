@@ -414,7 +414,6 @@ These work only as _statements_, not per-method specifier.
 _decl_ ::= _class-decl_                         # Class declaration
          | _module-decl_                        # Module declaration
          | _interface-decl_                     # Interface declaration
-         | _extension-decl_                     # Extension declaration
          | _type-alias-decl_                    # Type alias declaration
          | _const-decl_                         # Constant declaration
          | _global-decl_                        # Global declaration
@@ -433,8 +432,6 @@ _interface-decl_ ::= `interface` _interface-name_ _module-type-parameters_ _inte
 _interface-members_ ::= _method-member_              # Method
                       | _include-member_             # Mixin (include)
                       | _alias-member_               # Alias
-
-_extension-decl_ ::= `extension` _class-name_ _type-parameters_ `(` _extension-name_ `)` _members_ `end`
 
 _type-alias-decl_ ::= `type` _alias-name_ _module-type-parameters_ `=` _type_
 
