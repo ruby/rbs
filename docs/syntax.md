@@ -5,14 +5,14 @@
 ```markdown
 _type_ ::= _class-name_ _type-arguments_                (Class instance type)
          | _interface-name_ _type-arguments_            (Interface type)
+         | _alias-name_ _type-arguments_                (Alias type)
          | `singleton(` _class-name_ `)`                (Class singleton type)
-         | _alias-name_                                 (Alias type)
          | _literal_                                    (Literal type)
          | _type_ `|` _type_                            (Union type)
          | _type_ `&` _type_                            (Intersection type)
          | _type_ `?`                                   (Optional type)
-         | `{` _record-name_ `:` _type_ `,` etc. `}`     (Record type)
-         | `[]` | `[` _type_ `,` etc. `]`                (Tuples)
+         | `{` _record-name_ `:` _type_ `,` etc. `}`    (Record type)
+         | `[]` | `[` _type_ `,` etc. `]`               (Tuples)
          | _type-variable_                              (Type variables)
          | `^(` _parameters_ `) ->` _type_              (Proc type)
          | `self`
@@ -35,8 +35,8 @@ _namespace_ ::=                                         (Empty namespace)
               | `::`                                    (Root)
               | _namespace_ /[A-Z]\w*/ `::`             (Namespace)
 
-_type-arguments_ ::=                                    (No application)
-                   | `[` _type_ `,` etc. `]`             (Type application)
+_type-arguments_ ::=                                    (No type arguments)
+                   | `[` _type_ `,` etc. `]`            (Type arguments)
 
 _literal_ ::= _string-literal_
             | _symbol-literal_
@@ -64,6 +64,18 @@ _ToS                          # _ToS interface
 ::MyApp::_Each[String]        # Interface name with namespace and type application
 ```
 
+### Alias type
+
+Alias type denotes an alias declared with _alias declaration_.
+
+The name of type aliases starts with lowercase `[a-z]`.
+
+```
+name
+::JSON::t                    # Alias name with namespace
+list[Integer]                # Type alias can be generic
+```
+
 ### Class singleton type
 
 Class singleton type denotes _the type of a singleton object of a class_.
@@ -71,18 +83,6 @@ Class singleton type denotes _the type of a singleton object of a class_.
 ```
 singleton(String)
 singleton(::Hash)            # Class singleton type cannot be parametrized.
-```
-
-### Alias type
-
-Alias type denotes an alias declared with _alias declaration_.
-
-The name of type aliases starts with lowercase `[a-z]`.
-
-
-```
-name
-::JSON::t                    # Alias name with namespace
 ```
 
 ### Literal type
@@ -155,7 +155,7 @@ Elem
 ```
 
 Type variables cannot be distinguished from _class instance types_.
-They are scoped in _class/module/interface declaration_ or _generic method types_.
+They are scoped in _class/module/interface/alias declaration_ or _generic method types_.
 
 ```
 class Ref[T]              # Object is scoped in the class declaration.
@@ -436,7 +436,7 @@ _interface-members_ ::= _method-member_              # Method
 
 _extension-decl_ ::= `extension` _class-name_ _type-parameters_ `(` _extension-name_ `)` _members_ `end`
 
-_type-alias-decl_ ::= `type` _alias-name_ `=` _type_
+_type-alias-decl_ ::= `type` _alias-name_ _module-type-parameters_ `=` _type_
 
 _const-decl_ ::= _const-name_ `:` _type_
 
@@ -534,6 +534,12 @@ You can declare an alias of types.
 ```
 type subject = Attendee | Speaker
 type JSON::t = Integer | TrueClass | FalseClass | String | Hash[Symbol, t] | Array[t]
+```
+
+Type alias can be generic like class, module, and interface.
+
+```
+type list[out T] = [T, list[T]] | nil
 ```
 
 ### Constant type declaration
