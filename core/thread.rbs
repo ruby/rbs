@@ -554,7 +554,7 @@ class Thread < Object
   # b = Thread.new { raise 'something went wrong' }
   # b.value   #=> RuntimeError: something went wrong
   # ```
-  def value: () -> Object
+  def value: () -> untyped
 
   # Marks a given thread as eligible for scheduling, however it may still
   # remain blocked on I/O.
