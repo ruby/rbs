@@ -46,6 +46,8 @@ module RBS
 
         def _install: (dest: Pathname , config_entry: Config::gem_entry) -> void
 
+        def cp_r: (Pathname, Pathname) -> void
+
         def setup!: (revision: String) -> void
 
         def need_to_fetch?: (String revision ) -> bool
