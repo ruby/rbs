@@ -12,7 +12,7 @@ class RBS::Collection::ConfigTest < Test::Unit::TestCase
     sources:
       - name: ruby/gem_rbs_collection
         remote: https://github.com/ruby/gem_rbs_collection.git
-        revision: b4d3b346d9657543099a35a1fd20347e75b8c523
+        revision: cde6057e7546843ace6420c5783dd945c6ccda54
         repo_dir: gems
 
     path: /path/to/somewhere
@@ -51,7 +51,7 @@ class RBS::Collection::ConfigTest < Test::Unit::TestCase
         sources:
           - name: ruby/gem_rbs_collection
             remote: https://github.com/ruby/gem_rbs_collection.git
-            revision: b4d3b346d9657543099a35a1fd20347e75b8c523
+            revision: cde6057e7546843ace6420c5783dd945c6ccda54
             repo_dir: gems
         path: "/path/to/somewhere"
         gems:
@@ -60,7 +60,7 @@ class RBS::Collection::ConfigTest < Test::Unit::TestCase
             source:
               name: ruby/gem_rbs_collection
               remote: https://github.com/ruby/gem_rbs_collection.git
-              revision: b4d3b346d9657543099a35a1fd20347e75b8c523
+              revision: cde6057e7546843ace6420c5783dd945c6ccda54
               repo_dir: gems
               type: git
           - name: rainbow
@@ -68,7 +68,7 @@ class RBS::Collection::ConfigTest < Test::Unit::TestCase
             source:
               name: ruby/gem_rbs_collection
               remote: https://github.com/ruby/gem_rbs_collection.git
-              revision: b4d3b346d9657543099a35a1fd20347e75b8c523
+              revision: cde6057e7546843ace6420c5783dd945c6ccda54
               repo_dir: gems
               type: git
       YAML
@@ -140,7 +140,7 @@ class RBS::Collection::ConfigTest < Test::Unit::TestCase
         sources:
           - name: ruby/gem_rbs_collection
             remote: https://github.com/ruby/gem_rbs_collection.git
-            revision: b4d3b346d9657543099a35a1fd20347e75b8c523
+            revision: cde6057e7546843ace6420c5783dd945c6ccda54
             repo_dir: gems
         path: "/path/to/somewhere"
         gems:
@@ -149,7 +149,7 @@ class RBS::Collection::ConfigTest < Test::Unit::TestCase
             source:
               name: ruby/gem_rbs_collection
               remote: https://github.com/ruby/gem_rbs_collection.git
-              revision: b4d3b346d9657543099a35a1fd20347e75b8c523
+              revision: cde6057e7546843ace6420c5783dd945c6ccda54
               repo_dir: gems
               type: git
           - name: rainbow
@@ -157,7 +157,7 @@ class RBS::Collection::ConfigTest < Test::Unit::TestCase
             source:
               name: ruby/gem_rbs_collection
               remote: https://github.com/ruby/gem_rbs_collection.git
-              revision: b4d3b346d9657543099a35a1fd20347e75b8c523
+              revision: cde6057e7546843ace6420c5783dd945c6ccda54
               repo_dir: gems
               type: git
       YAML
@@ -192,7 +192,7 @@ class RBS::Collection::ConfigTest < Test::Unit::TestCase
         sources:
           - name: ruby/gem_rbs_collection
             remote: https://github.com/ruby/gem_rbs_collection.git
-            revision: b4d3b346d9657543099a35a1fd20347e75b8c523
+            revision: cde6057e7546843ace6420c5783dd945c6ccda54
             repo_dir: gems
         path: "/path/to/somewhere"
         gems:
@@ -202,7 +202,7 @@ class RBS::Collection::ConfigTest < Test::Unit::TestCase
             source:
               name: ruby/gem_rbs_collection
               remote: https://github.com/ruby/gem_rbs_collection.git
-              revision: b4d3b346d9657543099a35a1fd20347e75b8c523
+              revision: cde6057e7546843ace6420c5783dd945c6ccda54
               repo_dir: gems
               type: git
       YAML
@@ -240,7 +240,7 @@ class RBS::Collection::ConfigTest < Test::Unit::TestCase
         sources:
           - name: ruby/gem_rbs_collection
             remote: https://github.com/ruby/gem_rbs_collection.git
-            revision: b4d3b346d9657543099a35a1fd20347e75b8c523
+            revision: cde6057e7546843ace6420c5783dd945c6ccda54
             repo_dir: gems
         path: "/path/to/somewhere"
         gems:
@@ -249,7 +249,7 @@ class RBS::Collection::ConfigTest < Test::Unit::TestCase
             source:
               name: ruby/gem_rbs_collection
               remote: https://github.com/ruby/gem_rbs_collection.git
-              revision: b4d3b346d9657543099a35a1fd20347e75b8c523
+              revision: cde6057e7546843ace6420c5783dd945c6ccda54
               repo_dir: gems
               type: git
           - name: rainbow
@@ -257,9 +257,90 @@ class RBS::Collection::ConfigTest < Test::Unit::TestCase
             source:
               name: ruby/gem_rbs_collection
               remote: https://github.com/ruby/gem_rbs_collection.git
-              revision: b4d3b346d9657543099a35a1fd20347e75b8c523
+              revision: cde6057e7546843ace6420c5783dd945c6ccda54
               repo_dir: gems
               type: git
+      YAML
+    end
+  end
+
+  def test_generate_lock_from_collection_with_manifest_yaml
+    mktmpdir do |tmpdir|
+      config_path = tmpdir / 'rbs_collection.yaml'
+      config_path.write CONFIG
+      gemfile_lock_path = tmpdir / 'Gemfile.lock'
+      gemfile_lock_path.write <<~GEMFILE_LOCK
+        GEM
+          remote: https://rubygems.org/
+          specs:
+            activesupport (6.1.4.1)
+              concurrent-ruby (~> 1.0, >= 1.0.2)
+              i18n (>= 1.6, < 2)
+              minitest (>= 5.1)
+              tzinfo (~> 2.0)
+              zeitwerk (~> 2.3)
+            concurrent-ruby (1.1.9)
+            i18n (1.8.11)
+              concurrent-ruby (~> 1.0)
+            minitest (5.14.4)
+            tzinfo (2.0.4)
+              concurrent-ruby (~> 1.0)
+            zeitwerk (2.5.1)
+
+        PLATFORMS
+          x86_64-linux
+
+        DEPENDENCIES
+          activesupport
+
+        BUNDLED WITH
+           2.2.0
+      GEMFILE_LOCK
+
+      config = RBS::Collection::Config.generate_lockfile(config_path: config_path, gemfile_lock_path: gemfile_lock_path)
+      io = StringIO.new
+      config.dump_to(io)
+
+      assert_config <<~YAML, io.string
+        sources:
+          - name: ruby/gem_rbs_collection
+            remote: https://github.com/ruby/gem_rbs_collection.git
+            revision: cde6057e7546843ace6420c5783dd945c6ccda54
+            repo_dir: gems
+        path: "/path/to/somewhere"
+        gems:
+          - name: activesupport
+            version: "6.0"
+            source:
+              name: ruby/gem_rbs_collection
+              remote: https://github.com/ruby/gem_rbs_collection.git
+              revision: cde6057e7546843ace6420c5783dd945c6ccda54
+              repo_dir: gems
+              type: git
+          - name: monitor
+            version: "0"
+            source:
+              type: stdlib
+          - name: date
+            version: "0"
+            source:
+              type: stdlib
+          - name: singleton
+            version: "0"
+            source:
+              type: stdlib
+          - name: logger
+            version: "0"
+            source:
+              type: stdlib
+          - name: mutex_m
+            version: "0"
+            source:
+              type: stdlib
+          - name: time
+            version: "0"
+            source:
+              type: stdlib
       YAML
     end
   end
@@ -293,7 +374,7 @@ class RBS::Collection::ConfigTest < Test::Unit::TestCase
         sources:
           - name: ruby/gem_rbs_collection
             remote: https://github.com/ruby/gem_rbs_collection.git
-            revision: b4d3b346d9657543099a35a1fd20347e75b8c523
+            revision: cde6057e7546843ace6420c5783dd945c6ccda54
             repo_dir: gems
         path: "/path/to/somewhere"
         gems:
@@ -340,7 +421,7 @@ class RBS::Collection::ConfigTest < Test::Unit::TestCase
         sources:
           - name: ruby/gem_rbs_collection
             remote: https://github.com/ruby/gem_rbs_collection.git
-            revision: b4d3b346d9657543099a35a1fd20347e75b8c523
+            revision: cde6057e7546843ace6420c5783dd945c6ccda54
             repo_dir: gems
         path: "/path/to/somewhere"
         gems:
@@ -383,7 +464,7 @@ class RBS::Collection::ConfigTest < Test::Unit::TestCase
         sources:
           - name: ruby/gem_rbs_collection
             remote: https://github.com/ruby/gem_rbs_collection.git
-            revision: b4d3b346d9657543099a35a1fd20347e75b8c523
+            revision: cde6057e7546843ace6420c5783dd945c6ccda54
             repo_dir: gems
         path: "/path/to/somewhere"
         gems: []
