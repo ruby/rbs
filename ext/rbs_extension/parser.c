@@ -273,7 +273,7 @@ static VALUE parse_function_param(parserstate *state) {
     param_range.start = type_range.start;
     param_range.end = name_range.end;
 
-    VALUE name = ID2SYM(INTERN_TOKEN(state, state->current_token));
+    VALUE name = rb_to_symbol(rbs_unquote_string(state, state->current_token.range, 0));
     VALUE location = rbs_new_location(state->buffer, param_range);
     rbs_loc *loc = rbs_check_location(location);
     rbs_loc_add_optional_child(loc, rb_intern("name"), name_range);
