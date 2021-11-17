@@ -252,9 +252,11 @@ class IOWaitTest < Test::Unit::TestCase
 
   def test_readyp
     if_ruby3 do
+      # This method returns true|false in Ruby 2.7, nil|IO in 3.0, and true|false in 3.1.
+
       IO.pipe.tap do |r, w|
         assert_send_type(
-          "() -> nil",
+          "() -> untyped",
           r, :ready?
         )
       end
@@ -263,7 +265,7 @@ class IOWaitTest < Test::Unit::TestCase
         w.write("hello")
 
         assert_send_type(
-          "() -> IO",
+          "() -> untyped",
           r, :ready?
         )
       end
