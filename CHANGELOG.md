@@ -2,6 +2,21 @@
 
 ## master
 
+## 1.7.1 (2021-11-18)
+
+### Signature updates
+
+* `Thread#value` ([\#824](https://github.com/ruby/rbs/pull/824/files))
+
+### Library changes
+
+* Unquote parameter name ([\#827](https://github.com/ruby/rbs/pull/827))
+* Remove `ruby/signature.rb` ([\#825](https://github.com/ruby/rbs/pull/825))
+
+### Miscellaneous
+
+* Use `untyped` as an expectation of return value of `IO#ready?` in test ([\#828](https://github.com/ruby/rbs/pull/828/files))
+
 ## 1.7.0 (2021-11-11)
 
 This version replaces `RBS::Parser` implementation from pure Ruby code based on [Racc](https://github.com/ruby/racc) to C extension.
