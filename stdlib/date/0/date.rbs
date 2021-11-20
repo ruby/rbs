@@ -446,7 +446,7 @@ class Date
   #     DateTime.jd(0,12) + DateTime.new(2001,2,3).ajd
   #                               #=> #<DateTime: 2001-02-03T00:00:00+00:00 ...>
   #
-  def +: (Integer | Rational other) -> Date
+  def +: ((Numeric & _ToR) other) -> Date
 
   # Returns the difference between the two dates if the other is a date object.
   # If the other is a numeric value, returns a date object pointing `other` days
@@ -461,7 +461,7 @@ class Date
   #     DateTime.new(2001,2,3) - DateTime.new(2001,2,2,12)
   #                              #=> (1/2)
   #
-  def -: (Integer | Rational other) -> Date
+  def -: ((Numeric & _ToR) other) -> Date
        | (Date other) -> Rational
 
   # Returns a date object pointing `n` months before self. The argument `n` should
