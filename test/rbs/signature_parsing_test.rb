@@ -1750,4 +1750,54 @@ type x = Foo::_bar
       RBS
     end
   end
+
+  def test_singleton_member_type_variables
+    Parser.parse_signature(<<-EOF).tap do |decls|
+class Foo[A]
+  @foo: A
+
+  @@foo: A
+
+  self.@foo: A
+
+  def foo: -> A
+
+  def self.foo2: -> A
+
+  def self?.foo3: -> A
+
+  attr_accessor self.foo4: A
+
+  attr_reader self.foo5: A
+
+  attr_writer self.foo6: A
+
+  include M[A]
+
+  extend M[A]
+
+  prepend M[A]
+end
+    EOF
+      decls[0].tap do |decl|
+        assert_instance_of Declarations::Class, decl
+
+        assert_instance_of Types::Variable, decl.members[0].type
+        assert_instance_of Types::ClassInstance, decl.members[1].type
+        assert_instance_of Types::ClassInstance, decl.members[2].type
+
+        assert_instance_of Types::Variable, decl.members[3].types[0].type.return_type
+        assert_instance_of Types::ClassInstance, decl.members[4].types[0].type.return_type
+        assert_instance_of Types::ClassInstance, decl.members[5].types[0].type.return_type
+
+        assert_instance_of Types::ClassInstance, decl.members[6].type
+        assert_instance_of Types::ClassInstance, decl.members[7].type
+        assert_instance_of Types::ClassInstance, decl.members[8].type
+
+        assert_instance_of Types::Variable, decl.members[9].args[0]
+        assert_instance_of Types::ClassInstance, decl.members[10].args[0]
+        assert_instance_of Types::Variable, decl.members[11].args[0]
+      end
+    end
+  end
 end
