@@ -6,6 +6,10 @@ interface _ToInt
   def to_int: -> Integer
 end
 
+interface _ToR
+  def to_r: () -> Rational
+end
+
 interface _ToS
   def to_s: -> String
 end
