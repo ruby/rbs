@@ -295,39 +295,27 @@ module RBS
 
     class Alias
       attr_reader :location
-      attr_reader :name
 
-      def initialize(name:, location:)
+      include Application
+
+      def initialize(name:, args:, location:)
         @name = name
+        @args = args
         @location = location
       end
 
-      def ==(other)
-        other.is_a?(Alias) && other.name == name
-      end
-
-      alias eql? ==
-
-      def hash
-        self.class.hash ^ name.hash
-      end
-
-      include NoFreeVariables
-      include NoSubst
-
       def to_json(state = _ = nil)
-        { class: :alias, name: name, location: location }.to_json(state)
+        { class: :alias, name: name, args: args, location: location }.to_json(state)
       end
 
-      def to_s(level = 0)
-        name.to_s
+      def sub(s)
+        Alias.new(name: name, args: args.map {|ty| ty.sub(s) }, location: location)
       end
 
-      include EmptyEachType
-
-      def map_type_name
+      def map_type_name(&block)
         Alias.new(
           name: yield(name, location, self),
+          args: args.map {|arg| arg.map_type_name(&block) },
           location: location
         )
       end

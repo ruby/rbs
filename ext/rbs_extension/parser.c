@@ -815,6 +815,8 @@ static VALUE parse_simple(parserstate *state) {
   }
   case tULIDENT:
     // fallthrough
+  case tLIDENT:
+    // fallthrough
   case pCOLON2: {
     range name_range;
     range args_range;
@@ -857,18 +859,10 @@ static VALUE parse_simple(parserstate *state) {
     } else if (kind == INTERFACE_NAME) {
       return rbs_interface(typename, types, location);
     } else if (kind == ALIAS_NAME) {
-      return rbs_alias(typename, location);
+      return rbs_alias(typename, types, location);
     } else {
       return Qnil;
     }
-  }
-  case tLIDENT: {
-    VALUE location = rbs_location_current_token(state);
-    rbs_loc *loc = rbs_check_location(location);
-    rbs_loc_add_required_child(loc, rb_intern("name"), state->current_token.range);
-    rbs_loc_add_optional_child(loc, rb_intern("args"), NULL_RANGE);
-    VALUE typename = parse_type_name(state, ALIAS_NAME, NULL);
-    return rbs_alias(typename, location);
   }
   case kSINGLETON: {
     range name_range;
@@ -1094,97 +1088,6 @@ VALUE parse_const_decl(parserstate *state) {
 }
 
 /*
-  type_decl ::= {kTYPE} alias_name `=` <type>
-*/
-VALUE parse_type_decl(parserstate *state, position comment_pos, VALUE annotations) {
-  range decl_range;
-  range keyword_range, name_range, eq_range;
-
-  decl_range.start = state->current_token.range.start;
-  comment_pos = nonnull_pos_or(comment_pos, decl_range.start);
-
-  keyword_range = state->current_token.range;
-
-  parser_advance(state);
-  VALUE typename = parse_type_name(state, ALIAS_NAME, &name_range);
-
-  parser_advance_assert(state, pEQ);
-  eq_range = state->current_token.range;
-
-  VALUE type = parse_type(state);
-  decl_range.end = state->current_token.range.end;
-
-  VALUE location = rbs_new_location(state->buffer, decl_range);
-  rbs_loc *loc = rbs_check_location(location);
-  rbs_loc_add_required_child(loc, rb_intern("keyword"), keyword_range);
-  rbs_loc_add_required_child(loc, rb_intern("name"), name_range);
-  rbs_loc_add_required_child(loc, rb_intern("eq"), eq_range);
-
-  return rbs_ast_decl_alias(
-    typename,
-    type,
-    annotations,
-    location,
-    get_comment(state, comment_pos.line)
-  );
-}
-
-/*
-  annotation ::= {<tANNOTATION>}
-*/
-VALUE parse_annotation(parserstate *state) {
-  VALUE content = rb_funcall(state->buffer, rb_intern("content"), 0);
-  rb_encoding *enc = rb_enc_get(content);
-
-  range rg = state->current_token.range;
-
-  int offset_bytes = rb_enc_codelen('%', enc) + rb_enc_codelen('a', enc);
-
-  unsigned int open_char = rb_enc_mbc_to_codepoint(
-    RSTRING_PTR(state->lexstate->string) + rg.start.byte_pos + offset_bytes,
-    RSTRING_END(state->lexstate->string),
-    enc
-  );
-
-  unsigned int close_char;
-
-  switch (open_char) {
-  case '{':
-    close_char = '}';
-    break;
-  case '(':
-    close_char = ')';
-    break;
-  case '[':
-    close_char = ']';
-    break;
-  case '<':
-    close_char = '>';
-    break;
-  case '|':
-    close_char = '|';
-    break;
-  default:
-    rbs_abort();
-  }
-
-  int open_bytes = rb_enc_codelen(open_char, enc);
-  int close_bytes = rb_enc_codelen(close_char, enc);
-
-  char *buffer = RSTRING_PTR(state->lexstate->string) + rg.start.byte_pos + offset_bytes + open_bytes;
-  VALUE string = rb_enc_str_new(
-    buffer,
-    rg.end.byte_pos - rg.start.byte_pos - offset_bytes - open_bytes - close_bytes,
-    enc
-  );
-  rb_funcall(string, rb_intern("strip!"), 0);
-
-  VALUE location = rbs_location_current_token(state);
-
-  return rbs_ast_annotation(string, location);
-}
-
-/*
   module_type_params ::= {} `[` module_type_param `,` ... <`]`>
                        | {<>}
 
@@ -1266,6 +1169,105 @@ VALUE parse_module_type_params(parserstate *state, range *rg) {
   }
 
   return params;
+}
+
+/*
+  type_decl ::= {kTYPE} alias_name `=` <type>
+*/
+VALUE parse_type_decl(parserstate *state, position comment_pos, VALUE annotations) {
+  range decl_range;
+  range keyword_range, name_range, params_range, eq_range;
+
+  parser_push_typevar_table(state, true);
+
+  decl_range.start = state->current_token.range.start;
+  comment_pos = nonnull_pos_or(comment_pos, decl_range.start);
+
+  keyword_range = state->current_token.range;
+
+  parser_advance(state);
+  VALUE typename = parse_type_name(state, ALIAS_NAME, &name_range);
+
+  VALUE type_params = parse_module_type_params(state, &params_range);
+
+  parser_advance_assert(state, pEQ);
+  eq_range = state->current_token.range;
+
+  VALUE type = parse_type(state);
+  decl_range.end = state->current_token.range.end;
+
+  VALUE location = rbs_new_location(state->buffer, decl_range);
+  rbs_loc *loc = rbs_check_location(location);
+  rbs_loc_add_required_child(loc, rb_intern("keyword"), keyword_range);
+  rbs_loc_add_required_child(loc, rb_intern("name"), name_range);
+  rbs_loc_add_optional_child(loc, rb_intern("type_params"), params_range);
+  rbs_loc_add_required_child(loc, rb_intern("eq"), eq_range);
+
+  parser_pop_typevar_table(state);
+
+  return rbs_ast_decl_alias(
+    typename,
+    type_params,
+    type,
+    annotations,
+    location,
+    get_comment(state, comment_pos.line)
+  );
+}
+
+/*
+  annotation ::= {<tANNOTATION>}
+*/
+VALUE parse_annotation(parserstate *state) {
+  VALUE content = rb_funcall(state->buffer, rb_intern("content"), 0);
+  rb_encoding *enc = rb_enc_get(content);
+
+  range rg = state->current_token.range;
+
+  int offset_bytes = rb_enc_codelen('%', enc) + rb_enc_codelen('a', enc);
+
+  unsigned int open_char = rb_enc_mbc_to_codepoint(
+    RSTRING_PTR(state->lexstate->string) + rg.start.byte_pos + offset_bytes,
+    RSTRING_END(state->lexstate->string),
+    enc
+  );
+
+  unsigned int close_char;
+
+  switch (open_char) {
+  case '{':
+    close_char = '}';
+    break;
+  case '(':
+    close_char = ')';
+    break;
+  case '[':
+    close_char = ']';
+    break;
+  case '<':
+    close_char = '>';
+    break;
+  case '|':
+    close_char = '|';
+    break;
+  default:
+    rbs_abort();
+  }
+
+  int open_bytes = rb_enc_codelen(open_char, enc);
+  int close_bytes = rb_enc_codelen(close_char, enc);
+
+  char *buffer = RSTRING_PTR(state->lexstate->string) + rg.start.byte_pos + offset_bytes + open_bytes;
+  VALUE string = rb_enc_str_new(
+    buffer,
+    rg.end.byte_pos - rg.start.byte_pos - offset_bytes - open_bytes - close_bytes,
+    enc
+  );
+  rb_funcall(string, rb_intern("strip!"), 0);
+
+  VALUE location = rbs_location_current_token(state);
+
+  return rbs_ast_annotation(string, location);
 }
 
 /*

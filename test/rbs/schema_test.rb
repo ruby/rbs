@@ -124,6 +124,7 @@ class RBS::SchemaTest < Test::Unit::TestCase
 
   def test_decls
     assert_decl RBS::Parser.parse_signature("type Steep::foo = untyped")[0], :alias
+    assert_decl RBS::Parser.parse_signature("type Steep::foo[A] = A")[0], :alias
 
     assert_decl RBS::Parser.parse_signature('Steep::VERSION: "1.2.3"')[0], :constant
 

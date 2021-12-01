@@ -460,7 +460,7 @@ EOU
 
       env.alias_decls.each do |name, decl|
         stdout.puts "Validating alias: `#{name}`..."
-        builder.expand_alias(name).tap do |type|
+        builder.expand_alias1(name).tap do |type|
           validator.validate_type type, context: [Namespace.root]
         end
         validator.validate_type_alias(entry: decl)

@@ -3,10 +3,10 @@
 
 #include "ruby.h"
 
-VALUE rbs_alias(VALUE typename, VALUE location);
+VALUE rbs_alias(VALUE typename, VALUE args, VALUE location);
 VALUE rbs_ast_annotation(VALUE string, VALUE location);
 VALUE rbs_ast_comment(VALUE string, VALUE location);
-VALUE rbs_ast_decl_alias(VALUE name, VALUE type, VALUE annotations, VALUE location, VALUE comment);
+VALUE rbs_ast_decl_alias(VALUE name, VALUE type_params, VALUE type, VALUE annotations, VALUE location, VALUE comment);
 VALUE rbs_ast_decl_class_super(VALUE name, VALUE args, VALUE location);
 VALUE rbs_ast_decl_class(VALUE name, VALUE type_params, VALUE super_class, VALUE members, VALUE annotations, VALUE location, VALUE comment);
 VALUE rbs_ast_decl_constant(VALUE name, VALUE type, VALUE location, VALUE comment);

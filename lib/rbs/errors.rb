@@ -431,4 +431,16 @@ module RBS
       @alias_names.map(&:name).join(', ')
     end
   end
+
+  class NonregularTypeAliasError < LoadingError
+    attr_reader :diagnostic
+    attr_reader :location
+
+    def initialize(diagnostic:, location:)
+      @diagnostic = diagnostic
+      @location = location
+
+      super "#{Location.to_string location}: Nonregular generic type alias is prohibited: #{diagnostic.type_name}, #{diagnostic.nonregular_type}"
+    end
+  end
 end

@@ -227,18 +227,21 @@ module RBS
     end
 
     class Alias
-      attr_reader name: TypeName
-
-      type loc = Location[bot, bot]
-
-      def initialize: (name: TypeName, location: loc?) -> void
-
-      include _TypeBase
-      include NoFreeVariables
-      include NoSubst
-      include EmptyEachType
+      # foo
+      # ^^^ => name
+      #
+      # foo[bar, baz]
+      # ^^^           => name
+      #    ^^^^^^^^^^ => args
+      #
+      type loc = Location[:name, :args]
 
       attr_reader location: loc?
+
+      def initialize: (name: TypeName, args: Array[t], location: loc?) -> void
+
+      include _TypeBase
+      include Application
     end
 
     class Tuple

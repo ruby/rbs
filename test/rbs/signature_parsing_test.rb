@@ -21,6 +21,7 @@ class RBS::SignatureParsingTest < Test::Unit::TestCase
 
       assert_instance_of Declarations::Alias, type_decl
       assert_equal TypeName.new(name: :foo, namespace: Namespace.parse("Steep")), type_decl.name
+      assert_equal [], type_decl.type_params.each.map(&:name)
       assert_equal Types::Bases::Any.new(location: nil), type_decl.type
       assert_equal "type Steep::foo = untyped", type_decl.location.source
     end
@@ -29,6 +30,66 @@ class RBS::SignatureParsingTest < Test::Unit::TestCase
       Parser.parse_signature(<<~RBS)
         type Foo = untyped
       RBS
+    end
+  end
+
+  def test_type_alias_generic
+    Parser.parse_signature(<<RBS).yield_self do |decls|
+type optional[A] = A?
+RBS
+      assert_equal 1, decls.size
+
+      type_decl = decls[0]
+
+      assert_instance_of Declarations::Alias, type_decl
+      assert_equal TypeName("optional"), type_decl.name
+      assert_equal [:A], type_decl.type_params.each.map(&:name)
+      assert_equal parse_type("A?", variables: [:A]), type_decl.type
+      assert_equal "[A]", type_decl.location[:type_params].source
+    end
+
+    Parser.parse_signature(<<RBS).yield_self do |decls|
+class Foo[A]
+  type bar = B
+end
+RBS
+      decls[0].members[0].tap do |type_decl|
+        assert_instance_of Declarations::Alias, type_decl
+        assert_equal TypeName("bar"), type_decl.name
+        assert_equal [], type_decl.type_params.each.map(&:name)
+        assert_instance_of Types::ClassInstance, type_decl.type
+        assert_nil type_decl.location[:type_params]
+      end
+    end
+  end
+
+  def test_type_alias_generic_variance
+    Parser.parse_signature(<<RBS).yield_self do |decls|
+type x[T] = ^(T) -> void
+
+type y[unchecked out T] = ^(T) -> void
+RBS
+      assert_equal 2, decls.size
+
+      decls[0].tap do |type_decl|
+        assert_instance_of Declarations::Alias, type_decl
+
+        type_decl.type_params.params[0].tap do |param|
+          assert_equal :T, param.name
+          assert_equal :invariant, param.variance
+          refute_predicate param, :skip_validation
+        end
+      end
+
+      decls[1].tap do |type_decl|
+        assert_instance_of Declarations::Alias, type_decl
+
+        type_decl.type_params.params[0].tap do |param|
+          assert_equal :T, param.name
+          assert_equal :covariant, param.variance
+          assert_predicate param, :skip_validation
+        end
+      end
     end
   end
 

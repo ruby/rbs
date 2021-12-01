@@ -1969,4 +1969,35 @@ end
       end
     end
   end
+
+  def test_expand_alias2
+    SignatureManager.new do |manager|
+      manager.files.merge!(Pathname("foo.rbs") => <<-EOF)
+type opt[T] = T | nil
+type pair[S, T] = [S, T]
+      EOF
+
+      manager.build do |env|
+        builder = DefinitionBuilder.new(env: env)
+
+        assert_equal(
+          parse_type("::Integer | nil"),
+          builder.expand_alias2(type_name("::opt"), [parse_type("::Integer")])
+        )
+
+        assert_equal(
+          parse_type("[::String, bool]"),
+          builder.expand_alias2(type_name("::pair"), [parse_type("::String"), parse_type("bool")])
+        )
+
+        assert_raises do
+          builder.expand_alias2(type_name("::opt"), [])
+        end
+
+        assert_raises do
+          builder.expand_alias2(type_name("::opt"), [parse_type("bool"), parse_type("top")])
+        end
+end
+    end
+  end
 end

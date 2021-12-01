@@ -1,7 +1,14 @@
 module RBS
   class Validator
     attr_reader env: Environment
+
     attr_reader resolver: TypeNameResolver
+
+    attr_reader definition_builder: DefinitionBuilder
+
+    attr_reader type_alias_dependency: TypeAliasDependency
+
+    attr_reader type_alias_regularity: TypeAliasRegularity
 
     def initialize: (env: Environment, resolver: TypeNameResolver) -> void
 

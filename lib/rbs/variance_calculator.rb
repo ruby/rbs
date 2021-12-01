@@ -54,6 +54,21 @@ module RBS
           false
         end
       end
+
+      def incompatible?(params)
+        # @type set: Hash[Symbol]
+        set = Set[]
+
+        params.each do |param|
+          unless compatible?(param.name, with_annotation: param.variance)
+            set << param.name
+          end
+        end
+
+        unless set.empty?
+          set
+        end
+      end
     end
 
     attr_reader :builder
@@ -69,18 +84,11 @@ module RBS
     def in_method_type(method_type:, variables:)
       result = Result.new(variables: variables)
 
-      method_type.type.each_param do |param|
-        type(param.type, result: result, context: :contravariant)
-      end
+      function(method_type.type, result: result, context: :covariant)
 
       if block = method_type.block
-        block.type.each_param do |param|
-          type(param.type, result: result, context: :covariant)
-        end
-        type(block.type.return_type, result: result, context: :contravariant)
+        function(block.type, result: result, context: :contravariant)
       end
-
-      type(method_type.type.return_type, result: result, context: :covariant)
 
       result
     end
@@ -97,6 +105,14 @@ module RBS
       end
     end
 
+    def in_type_alias(name:)
+      decl = env.alias_decls[name].decl or raise
+      variables = decl.type_params.each.map(&:name)
+      Result.new(variables: variables).tap do |result|
+        type(decl.type, result: result, context: :covariant)
+      end
+    end
+
     def type(type, result:, context:)
       case type
       when Types::Variable
@@ -110,7 +126,7 @@ module RBS
             result.invariant(type.name)
           end
         end
-      when Types::ClassInstance, Types::Interface
+      when Types::ClassInstance, Types::Interface, Types::Alias
         NoTypeFoundError.check!(type.name,
                                 env: env,
                                 location: type.location)
@@ -120,6 +136,8 @@ module RBS
                         env.class_decls[type.name].type_params
                       when Types::Interface
                         env.interface_decls[type.name].decl.type_params
+                      when Types::Alias
+                        env.alias_decls[type.name].decl.type_params
                       end
 
         type.args.each.with_index do |ty, i|
@@ -130,25 +148,35 @@ module RBS
           when :covariant
             type(ty, result: result, context: context)
           when :contravariant
-            # @type var con: variance
-            con = case context
-                  when :invariant
-                    :invariant
-                  when :covariant
-                    :contravariant
-                  when :contravariant
-                    :covariant
-                  else
-                    raise
-                  end
-            type(ty, result: result, context: con)
+            type(ty, result: result, context: negate(context))
           end
         end
-      when Types::Tuple, Types::Record, Types::Union, Types::Intersection
-        # Covariant types
+      when Types::Proc
+        function(type.type, result: result, context: context)
+      else
         type.each_type do |ty|
           type(ty, result: result, context: context)
         end
+      end
+    end
+
+    def function(type, result:, context:)
+      type.each_param do |param|
+        type(param.type, result: result, context: negate(context))
+      end
+      type(type.return_type, result: result, context: context)
+    end
+
+    def negate(variance)
+      case variance
+      when :invariant
+        :invariant
+      when :covariant
+        :contravariant
+      when :contravariant
+        :covariant
+      else
+        raise
       end
     end
   end

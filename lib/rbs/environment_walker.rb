@@ -57,7 +57,7 @@ module RBS
             end
           end
         when name.alias?
-          each_type_node builder.expand_alias(name), &block
+          each_type_node builder.expand_alias1(name), &block
         else
           raise "Unexpected TypeNameNode with type_name=#{name}"
         end
@@ -126,6 +126,9 @@ module RBS
         end
       when RBS::Types::Alias
         yield TypeNameNode.new(type_name: type.name)
+        type.args.each do |ty|
+          each_type_node(ty, &block)
+        end
       when RBS::Types::Union, RBS::Types::Intersection, RBS::Types::Tuple
         type.types.each do |ty|
           each_type_node ty, &block

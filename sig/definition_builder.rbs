@@ -43,7 +43,36 @@ module RBS
 
     def define_methods: (Definition, interface_methods: Hash[Symbol, Definition::Method], methods: MethodBuilder::Methods, super_interface_method: bool) -> void
 
+    # Expand a type alias of given name without type arguments.
+    # Raises an error if the type alias requires arguments.
+    #
+    # Assume `type foo[T] = [T, T]`:
+    #
+    # ```
+    # expand_alias("::foo")   # => error
+    # ```
+    #
     def expand_alias: (TypeName) -> Types::t
+
+    # Expand a type alias of given name with arguments of `untyped`.
+    #
+    # Assume `type foo[T] = [T, T]`:
+    #
+    # ```
+    # expand_alias1("::foo")   # => [untyped, untyped]
+    # ```
+    #
+    def expand_alias1: (TypeName) -> Types::t
+
+    # Expand a type alias of given name with `args`.
+    #
+    # Assume `type foo[T] = [T, T]`:
+    #
+    # ```
+    # expand_alias2("::foo", ["::Integer"])   # => [::Integer, ::Integer]
+    # ```
+    #
+    def expand_alias2: (TypeName, Array[Types::t] args) -> Types::t
 
     def update: (env: Environment, ancestor_builder: AncestorBuilder, except: _Each[TypeName]) -> DefinitionBuilder
   end

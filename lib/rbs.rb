@@ -45,6 +45,7 @@ require "rbs/repository"
 require "rbs/ancestor_graph"
 require "rbs/locator"
 require "rbs/type_alias_dependency"
+require "rbs/type_alias_regularity"
 require "rbs/collection"
 
 require "rbs_extension"

@@ -12,6 +12,18 @@
         "name": {
           "type": "string"
         },
+        "type_params": {
+          "type": "object",
+          "properties": {
+            "params": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/moduleTypeParam"
+              }
+            }
+          },
+          "required": ["params"]
+        },
         "type": {
           "$ref": "types.json"
         },
@@ -28,7 +40,7 @@
           "$ref": "comment.json"
         }
       },
-      "required": ["declaration", "name", "type", "annotations", "location", "comment"]
+      "required": ["declaration", "name", "type_params", "type", "annotations", "location", "comment"]
     },
     "constant": {
       "title": "Constant declaration: `VERSION: String`, ...",

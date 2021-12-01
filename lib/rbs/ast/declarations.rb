@@ -362,13 +362,15 @@ module RBS
 
       class Alias < Base
         attr_reader :name
+        attr_reader :type_params
         attr_reader :type
         attr_reader :annotations
         attr_reader :location
         attr_reader :comment
 
-        def initialize(name:, type:, annotations:, location:, comment:)
+        def initialize(name:, type_params:, type:, annotations:, location:, comment:)
           @name = name
+          @type_params = type_params
           @type = type
           @annotations = annotations
           @location = location
@@ -378,19 +380,21 @@ module RBS
         def ==(other)
           other.is_a?(Alias) &&
             other.name == name &&
+            other.type_params == type_params &&
             other.type == type
         end
 
         alias eql? ==
 
         def hash
-          self.class.hash ^ name.hash ^ type.hash
+          self.class.hash ^ name.hash ^ type_params.hash ^ type.hash
         end
 
         def to_json(state = _ = nil)
           {
             declaration: :alias,
             name: name,
+            type_params: type_params,
             type: type,
             annotations: annotations,
             location: location,
