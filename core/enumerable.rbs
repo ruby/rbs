@@ -63,7 +63,7 @@ module Enumerable[unchecked out Elem]: _Each[Elem]
   # ary.count{ |x| x%2==0 } #=> 3
   # ```
   def count: () -> Integer
-           | (?untyped) -> Integer
+           | (Elem) -> Integer
            | () { (Elem) -> boolish } -> Integer
 
   def cycle: (?Integer n) { (Elem arg0) -> untyped } -> NilClass
@@ -130,7 +130,7 @@ module Enumerable[unchecked out Elem]: _Each[Elem]
   def group_by: [U] () { (Elem arg0) -> U } -> ::Hash[U, ::Array[Elem]]
               | () -> ::Enumerator[Elem, ::Array[Elem]]
 
-  def `include?`: (untyped arg0) -> bool
+  def `include?`: (Elem arg0) -> bool
 
   def inject: (untyped init, Symbol method) -> untyped
             | (Symbol method) -> untyped
@@ -341,7 +341,7 @@ module Enumerable[unchecked out Elem]: _Each[Elem]
   def map: [U] () { (Elem arg0) -> U } -> ::Array[U]
          | () -> ::Enumerator[Elem, ::Array[untyped]]
 
-  def member?: (untyped arg0) -> bool
+  def member?: (Elem arg0) -> bool
 
   alias reduce inject
 
