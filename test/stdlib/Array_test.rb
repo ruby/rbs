@@ -256,8 +256,6 @@ class ArrayInstanceTest < Test::Unit::TestCase
   def test_delete
     assert_send_type "(Integer) -> Integer",
                      [1,2,3], :delete, 2
-    assert_send_type "(String) -> nil",
-                     [1,2,3], :delete, ""
 
     assert_send_type "(Integer) { (Integer) -> String } -> Integer",
                      [1,2,3], :delete, 2 do "" end
@@ -441,8 +439,6 @@ class ArrayInstanceTest < Test::Unit::TestCase
   def test_include?
     assert_send_type "(Integer) -> bool",
                      [1,2,3], :include?, 1
-    assert_send_type "(String) -> bool",
-                     [1,2,3], :include?, ""
   end
 
   def test_index

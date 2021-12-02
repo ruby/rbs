@@ -122,7 +122,7 @@ class Set[A]
   #
   # See also Enumerable#include?
   #
-  def include?: (untyped) -> bool
+  def include?: (A) -> bool
 
   alias member? include?
 
@@ -168,12 +168,12 @@ class Set[A]
   # Deletes the given object from the set and returns self.  Use `subtract` to
   # delete many items at once.
   #
-  def delete: (untyped) -> self
+  def delete: (A) -> self
 
   # Deletes the given object from the set and returns self.  If the object is not
   # in the set, returns nil.
   #
-  def delete?: (untyped) -> self?
+  def delete?: (A) -> self?
 
   # Deletes every element of the set for which block evaluates to true, and
   # returns self. Returns an enumerator if no block is given.

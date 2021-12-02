@@ -699,7 +699,7 @@ class Array[unchecked out Elem] < Object
   #     ary.count {|x| x%2 == 0}   #=> 3
   #
   def count: () -> ::Integer
-           | (untyped obj) -> ::Integer
+           | (Elem obj) -> ::Integer
            | () { (Elem) -> boolish } -> ::Integer
 
   # Calls the given block for each element `n` times or forever if `nil` is given.
@@ -733,7 +733,7 @@ class Array[unchecked out Elem] < Object
   #     a.delete("z")                   #=> nil
   #     a.delete("z") {"not found"}     #=> "not found"
   #
-  def delete: (untyped obj) -> Elem?
+  def delete: (Elem obj) -> Elem?
             | [S, T] (S obj) { (S) -> T } -> (Elem | T)
 
   # Deletes the element at the specified `index`, returning that element, or `nil`
@@ -1029,7 +1029,7 @@ class Array[unchecked out Elem] < Object
   #     a.include?("b")   #=> true
   #     a.include?("z")   #=> false
   #
-  def include?: (untyped object) -> bool
+  def include?: (Elem object) -> bool
 
   # Returns the *index* of the first object in `ary` such that the object is `==`
   # to `obj`.
