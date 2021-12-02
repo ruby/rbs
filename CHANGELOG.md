@@ -2,6 +2,29 @@
 
 ## master
 
+## 1.8.0 (2021-12-02)
+
+RBS 1.8.0 ships with a language feature enchancement, _generic type alias_.
+You can define a type alias with type parameters now.
+
+```rbs
+type list[T] = [T, list[T]] | nil  # Defines a list of type T
+
+type int_list = list[Integer]      # List of Integer
+type string_list = list[String]    # List of String
+```
+
+You can find the detail in the [PR](https://github.com/ruby/rbs/pull/823).
+
+### Signature updates
+
+* `Date#+`, `Date#-` ([\#830](https://github.com/ruby/rbs/pull/830))
+* `#include?`, `#member?`, `#delete`, `#count` ([\#835](https://github.com/ruby/rbs/pull/835))
+
+### Language updates
+
+* Generic type alias ([\#823](https://github.com/ruby/rbs/pull/823))
+
 ## 1.7.1 (2021-11-18)
 
 ### Signature updates
