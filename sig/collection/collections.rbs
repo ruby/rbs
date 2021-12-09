@@ -62,9 +62,9 @@ module RBS
 
         def resolve_revision: () -> String
 
-        def git: (*String cmd) -> String
+        def git: (*String cmd, **untyped opt) -> String
 
-        def sh!: (*String cmd) -> String
+        def sh!: (*String cmd, **untyped opt) -> String
 
         def format_config_entry: (Config::gem_entry) -> String
       end
