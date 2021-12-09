@@ -59,8 +59,8 @@ module RBS
           end
 
           upsert_gem specified, locked
-          source = Sources.from_config_entry((locked || new_content)['source'])
-          manifest = source.manifest_of((locked || new_content)) or return
+          source = Sources.from_config_entry(locked['source'])
+          manifest = source.manifest_of(locked) or return
           manifest['dependencies']&.each do |dep|
             @gem_queue.push({ name: dep['name'], version: nil} )
           end

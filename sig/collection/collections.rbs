@@ -15,7 +15,7 @@ module RBS
                             | Stdlib::source_entry
                             | Rubygems::source_entry
       type manifest_entry = {
-        dependencies?: Array[{name: String}],
+        "dependencies" => Array[{"name" => String}]?,
       }
 
       class Git
@@ -45,6 +45,8 @@ module RBS
         def install: (dest: Pathname, config_entry: Config::gem_entry, stdout: CLI::_IO) -> void
 
         def to_lockfile: () -> source_entry
+
+        def manifest_of: (Config::gem_entry) -> manifest_entry?
 
         private
 
@@ -90,6 +92,8 @@ module RBS
 
         def to_lockfile: () -> source_entry
 
+        def manifest_of: (Config::gem_entry) -> manifest_entry?
+
         private
 
         def gem_dir: (Config::gem_entry) -> Pathname
@@ -108,6 +112,7 @@ module RBS
         def versions: (Config::gem_entry) -> Array[String]
         def install: (dest: Pathname, config_entry: Config::gem_entry, stdout: CLI::_IO) -> void
         def to_lockfile: () -> source_entry
+        def manifest_of: (Config::gem_entry) -> manifest_entry?
 
         private
 
