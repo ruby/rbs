@@ -1,0 +1,38 @@
+module RBS
+  module AST
+    class TypeParam
+      # Key
+      # ^^^ name
+      #
+      # unchecked out Elem
+      # ^^^^^^^^^          unchecked
+      #           ^^^      variance
+      #               ^^^^ name
+      type loc = Location[:name, :variance | :unchecked]
+
+      type variance = :invariant | :covariant | :contravariant
+
+      attr_reader name: Symbol
+      attr_reader variance: variance
+      attr_reader location: loc?
+
+      def initialize: (name: Symbol, variance: variance, location: loc?) -> void
+
+      include _ToJson
+
+      def ==: (untyped) -> bool
+
+      def eql?: (untyped) -> bool
+
+      def hash: () -> Integer
+
+      @unchecked: bool
+
+      def unchecked!: (?boolish) -> self
+
+      def unchecked?: () -> bool
+
+      def rename: (Symbol) -> TypeParam
+    end
+  end
+end
