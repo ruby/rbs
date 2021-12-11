@@ -42,7 +42,7 @@ RBS
     locator.find(line: 1, column: 10).tap do |cs|
       assert_equal 3, cs.size
       assert_equal :name, cs[0]
-      assert_instance_of AST::Declarations::ModuleTypeParams::TypeParam, cs[1]
+      assert_instance_of AST::TypeParam, cs[1]
       assert_instance_of AST::Declarations::Class, cs[2]
     end
 
@@ -81,7 +81,7 @@ RBS
     locator.find(line: 1, column: 11).tap do |cs|
       assert_equal 3, cs.size
       assert_equal :name, cs[0]
-      assert_instance_of AST::Declarations::ModuleTypeParams::TypeParam, cs[1]
+      assert_instance_of AST::TypeParam, cs[1]
       assert_instance_of AST::Declarations::Module, cs[2]
     end
 

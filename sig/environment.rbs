@@ -31,7 +31,9 @@ module RBS
 
       def validate_type_params: () -> void
 
-      def type_params: () -> AST::Declarations::ModuleTypeParams
+      def compatible_params?: (Array[AST::TypeParam], Array[AST::TypeParam]) -> boolish
+
+      def type_params: () -> Array[AST::TypeParam]
 
       def primary: () -> D[module_decl]
     end

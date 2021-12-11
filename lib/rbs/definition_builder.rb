@@ -446,7 +446,7 @@ module RBS
 
     def validate_params_with(type_params, result:)
       type_params.each do |param|
-        unless param.skip_validation
+        unless param.unchecked?
           unless result.compatible?(param.name, with_annotation: param.variance)
             yield param
           end

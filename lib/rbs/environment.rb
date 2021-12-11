@@ -39,19 +39,30 @@ module RBS
 
       def validate_type_params
         unless decls.empty?
+          # @type var hd_decl: MultiEntry::D[module_decl]
+          # @type var tl_decls: Array[MultiEntry::D[module_decl]]
           hd_decl, *tl_decls = decls
           raise unless hd_decl
 
           hd_params = hd_decl.decl.type_params
-          hd_names = hd_params.params.map(&:name)
 
           tl_decls.each do |tl_decl|
             tl_params = tl_decl.decl.type_params
 
-            unless hd_params.size == tl_params.size && hd_params == tl_params.rename_to(hd_names)
+            unless compatible_params?(hd_params, tl_params)
               raise GenericParameterMismatchError.new(name: name, decl: tl_decl.decl)
             end
           end
+        end
+      end
+
+      def compatible_params?(ps1, ps2)
+        if ps1.size == ps2.size
+          ps1.each.with_index do |p1, index|
+            return unless p1 == ps2[index].rename(p1.name)
+          end
+
+          true
         end
       end
 

@@ -59,7 +59,7 @@ module RBS
 
       def compatible?: (Symbol, with_annotation: variance) -> bool
 
-      def incompatible?: (AST::Declarations::ModuleTypeParams) -> Set[Symbol]?
+      def incompatible?: (Array[AST::TypeParam]) -> Set[Symbol]?
     end
 
     attr_reader builder: DefinitionBuilder

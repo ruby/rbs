@@ -49,7 +49,7 @@ module RBS
             annotations: [],
             comment: nil,
             location: nil,
-            type_params: AST::Declarations::ModuleTypeParams.empty
+            type_params: []
           )
           decls << top
         end
@@ -88,7 +88,7 @@ module RBS
           kls = AST::Declarations::Class.new(
             name: const_to_name(class_name),
             super_class: super_class && AST::Declarations::Class::Super.new(name: const_to_name(super_class), args: [], location: nil),
-            type_params: AST::Declarations::ModuleTypeParams.empty,
+            type_params: [],
             members: [],
             annotations: [],
             location: nil,
@@ -108,7 +108,7 @@ module RBS
 
           mod = AST::Declarations::Module.new(
             name: const_to_name(module_name),
-            type_params: AST::Declarations::ModuleTypeParams.empty,
+            type_params: [],
             self_types: [],
             members: [],
             annotations: [],

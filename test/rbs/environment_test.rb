@@ -189,7 +189,7 @@ EOF
       entry.insert(decl: decls[0], outer: [])
       entry.insert(decl: decls[1], outer: [])
 
-      assert_instance_of RBS::AST::Declarations::ModuleTypeParams, entry.type_params
+      assert_instance_of Array, entry.type_params
     end
 
     Environment::ModuleEntry.new(name: type_name("::Foo")).tap do |entry|

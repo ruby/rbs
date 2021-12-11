@@ -127,7 +127,7 @@ module RBS
 
     def type_params: () -> Array[Symbol]
 
-    def type_params_decl: () -> AST::Declarations::ModuleTypeParams
+    def type_params_decl: () -> Array[AST::TypeParam]
 
     def sub: (Substitution) -> Definition
 

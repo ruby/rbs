@@ -7,7 +7,7 @@ module RBS
                    | MethodType
                    | AST::Declarations::t
                    | AST::Members::t
-                   | AST::Declarations::ModuleTypeParams::TypeParam
+                   | AST::TypeParam
                    | AST::Declarations::Class::Super
                    | AST::Declarations::Module::Self
 

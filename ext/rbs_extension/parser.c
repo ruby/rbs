@@ -1094,7 +1094,7 @@ VALUE parse_const_decl(parserstate *state) {
   module_type_param ::= kUNCHECKED? (kIN|kOUT|) tUIDENT
 */
 VALUE parse_module_type_params(parserstate *state, range *rg) {
-  VALUE params = rbs_ast_decl_module_type_params();
+  VALUE params = rb_ary_new();
 
   if (state->next_token.type == pLBRACKET) {
     parser_advance(state);
@@ -1103,7 +1103,7 @@ VALUE parse_module_type_params(parserstate *state, range *rg) {
 
     while (true) {
       VALUE name;
-      VALUE unchecked = Qfalse;
+      bool unchecked = false;
       VALUE variance = ID2SYM(rb_intern("invariant"));
 
       range param_range = NULL_RANGE;
@@ -1114,7 +1114,7 @@ VALUE parse_module_type_params(parserstate *state, range *rg) {
       param_range.start = state->next_token.range.start;
 
       if (state->next_token.type == kUNCHECKED) {
-        unchecked = Qtrue;
+        unchecked = true;
         parser_advance(state);
         unchecked_range = state->current_token.range;
       }
@@ -1150,8 +1150,8 @@ VALUE parse_module_type_params(parserstate *state, range *rg) {
       rbs_loc_add_optional_child(loc, rb_intern("variance"), variance_range);
       rbs_loc_add_optional_child(loc, rb_intern("unchecked"), unchecked_range);
 
-      VALUE param = rbs_ast_decl_module_type_params_param(name, variance, unchecked, location);
-      rb_funcall(params, rb_intern("add"), 1, param);
+      VALUE param = rbs_ast_type_param(name, variance, unchecked, location);
+      rb_ary_push(params, param);
 
       if (state->next_token.type == pCOMMA) {
         parser_advance(state);

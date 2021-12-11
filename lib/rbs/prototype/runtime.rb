@@ -371,7 +371,7 @@ module RBS
         unless decl
           decl = AST::Declarations::Class.new(
             name: to_type_name(only_name(mod)),
-            type_params: AST::Declarations::ModuleTypeParams.empty,
+            type_params: [],
             super_class: generate_super_class(mod),
             members: [],
             annotations: [],
@@ -425,7 +425,7 @@ module RBS
         unless decl
           decl = AST::Declarations::Module.new(
             name: to_type_name(only_name(mod)),
-            type_params: AST::Declarations::ModuleTypeParams.empty,
+            type_params: [],
             self_types: [],
             members: [],
             annotations: [],
@@ -479,7 +479,7 @@ module RBS
             if outer_module.is_a?(Class)
               outer_decl = AST::Declarations::Class.new(
                 name: to_type_name(outer_module_name),
-                type_params: AST::Declarations::ModuleTypeParams.empty,
+                type_params: [],
                 super_class: generate_super_class(outer_module),
                 members: [],
                 annotations: [],
@@ -489,7 +489,7 @@ module RBS
             else
               outer_decl = AST::Declarations::Module.new(
                 name: to_type_name(outer_module_name),
-                type_params: AST::Declarations::ModuleTypeParams.empty,
+                type_params: [],
                 self_types: [],
                 members: [],
                 annotations: [],

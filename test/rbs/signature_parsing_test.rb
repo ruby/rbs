@@ -6,6 +6,7 @@ class RBS::SignatureParsingTest < Test::Unit::TestCase
   Types = RBS::Types
   TypeName = RBS::TypeName
   Namespace = RBS::Namespace
+  AST = RBS::AST
   Declarations = RBS::AST::Declarations
   Members = RBS::AST::Members
   MethodType = RBS::MethodType
@@ -74,20 +75,20 @@ RBS
       decls[0].tap do |type_decl|
         assert_instance_of Declarations::Alias, type_decl
 
-        type_decl.type_params.params[0].tap do |param|
+        type_decl.type_params[0].tap do |param|
           assert_equal :T, param.name
           assert_equal :invariant, param.variance
-          refute_predicate param, :skip_validation
+          refute_predicate param, :unchecked?
         end
       end
 
       decls[1].tap do |type_decl|
         assert_instance_of Declarations::Alias, type_decl
 
-        type_decl.type_params.params[0].tap do |param|
+        type_decl.type_params[0].tap do |param|
           assert_equal :T, param.name
           assert_equal :covariant, param.variance
-          assert_predicate param, :skip_validation
+          assert_predicate param, :unchecked?
         end
       end
     end
@@ -1059,20 +1060,20 @@ end
       assert_instance_of Declarations::Interface, interface_decl
       a, b, c = interface_decl.type_params.each.to_a
 
-      assert_instance_of Declarations::ModuleTypeParams::TypeParam, a
+      assert_instance_of AST::TypeParam, a
       assert_equal :A, a.name
       assert_equal :invariant, a.variance
-      refute a.skip_validation
+      refute a.unchecked?
 
-      assert_instance_of Declarations::ModuleTypeParams::TypeParam, b
+      assert_instance_of AST::TypeParam, b
       assert_equal :B, b.name
       assert_equal :covariant, b.variance
-      refute b.skip_validation
+      refute b.unchecked?
 
-      assert_instance_of Declarations::ModuleTypeParams::TypeParam, c
+      assert_instance_of AST::TypeParam, c
       assert_equal :C, c.name
       assert_equal :contravariant, c.variance
-      assert c.skip_validation
+      assert c.unchecked?
     end
   end
 
@@ -1632,7 +1633,7 @@ end
         assert_equal "end", decl.location[:end].source
         assert_equal "[X, unchecked in Y]", decl.location[:type_params].source
 
-        decl.type_params[:X].tap do |param|
+        decl.type_params[0].tap do |param|
           assert_instance_of Location, param.location
 
           assert_equal "X", param.location[:name].source
@@ -1640,7 +1641,7 @@ end
           assert_nil param.location[:unchecked]
         end
 
-        decl.type_params[:Y].tap do |param|
+        decl.type_params[1].tap do |param|
           assert_instance_of Location, param.location
 
           assert_equal "Y", param.location[:name].source

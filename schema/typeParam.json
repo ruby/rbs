@@ -1,0 +1,20 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "title": "Type param: `A`, `unchecked out A`, ...",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "variance": {
+      "enum": ["covariant", "contravariant", "invariant"]
+    },
+    "unchecked": {
+      "type": "boolean"
+    },
+    "location": {
+      "$ref": "location.json"
+    }
+  },
+  "required": ["name", "variance", "unchecked", "location"]
+}

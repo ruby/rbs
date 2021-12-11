@@ -294,22 +294,19 @@ VALUE rbs_ast_annotation(VALUE string, VALUE location) {
   );
 }
 
-VALUE rbs_ast_decl_module_type_params() {
-  return rb_funcall(RBS_AST_Declarations_ModuleTypeParams, rb_intern("new"), 0);
-}
-
-VALUE rbs_ast_decl_module_type_params_param(VALUE name, VALUE variance, VALUE skip_validation, VALUE location) {
+VALUE rbs_ast_type_param(VALUE name, VALUE variance, bool unchecked, VALUE location) {
   VALUE args = rb_hash_new();
   rb_hash_aset(args, ID2SYM(rb_intern("name")), name);
   rb_hash_aset(args, ID2SYM(rb_intern("variance")), variance);
-  rb_hash_aset(args, ID2SYM(rb_intern("skip_validation")), skip_validation);
   rb_hash_aset(args, ID2SYM(rb_intern("location")), location);
 
-  return CLASS_NEW_INSTANCE(
-    RBS_AST_Declarations_ModuleTypeParams_TypeParam,
-    1,
-    &args
-  );
+  VALUE type_param = CLASS_NEW_INSTANCE(RBS_AST_TypeParam, 1, &args);
+
+  if (unchecked) {
+    rb_funcall(type_param, rb_intern("unchecked!"), 0);
+  }
+
+  return type_param;
 }
 
 VALUE rbs_ast_decl_constant(VALUE name, VALUE type, VALUE location, VALUE comment) {

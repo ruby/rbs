@@ -27,7 +27,7 @@ module RBS
 
     def write_member: (AST::Declarations::Module::member) -> void
 
-    def name_and_params: (TypeName, AST::Declarations::ModuleTypeParams) -> String?
+    def name_and_params: (TypeName, Array[AST::TypeParam]) -> String?
 
     def name_and_args: (TypeName, Array[Types::t]) -> String?
 

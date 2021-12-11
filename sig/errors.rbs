@@ -179,10 +179,10 @@ module RBS
 
   class InvalidVarianceAnnotationError < DefinitionError
     attr_reader type_name: TypeName
-    attr_reader param: AST::Declarations::ModuleTypeParams::TypeParam
+    attr_reader param: AST::TypeParam
     attr_reader location: Location[untyped, untyped]?
 
-    def initialize: (type_name: TypeName, param: AST::Declarations::ModuleTypeParams::TypeParam, location: Location[untyped, untyped]?) -> void
+    def initialize: (type_name: TypeName, param: AST::TypeParam, location: Location[untyped, untyped]?) -> void
   end
 
   class RecursiveAliasDefinitionError < DefinitionError

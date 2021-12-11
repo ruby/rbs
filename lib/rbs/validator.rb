@@ -72,7 +72,7 @@ module RBS
         result = calculator.in_type_alias(name: type_name)
         if set = result.incompatible?(entry.decl.type_params)
           set.each do |param_name|
-            param = entry.decl.type_params[param_name] or raise
+            param = entry.decl.type_params.find {|param| param.name == param_name } or raise
             raise InvalidVarianceAnnotationError.new(
               type_name: type_name,
               param: param,
