@@ -183,6 +183,25 @@ singleton(::BasicObject)
         assert_equal "::Hello", error.type_name.to_s
       end
     end
+
+    with_cli do |cli|
+      Dir.mktmpdir do |dir|
+        (Pathname(dir) + 'a.rbs').write(<<~RBS)
+        class Foo[A]
+          extend Bar[A]
+        end
+
+        module Bar[B]
+        end
+        RBS
+
+        error = assert_raises RBS::NoTypeFoundError do
+          cli.run(["-I", dir, "validate"])
+        end
+
+        assert_equal "::A", error.type_name.to_s
+      end
+    end
   end
 
   def test_constant

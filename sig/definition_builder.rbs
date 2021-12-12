@@ -43,6 +43,13 @@ module RBS
 
     def define_methods: (Definition, interface_methods: Hash[Symbol, Definition::Method], methods: MethodBuilder::Methods, super_interface_method: bool) -> void
 
+    # Validates presence of type names recursively.
+    # Assumes the type names are already resolved.
+    #
+    def validate_type_presence: (Types::t) -> void
+
+    def validate_type_name: (TypeName, Location[untyped, untyped]?) -> void
+
     # Expand a type alias of given name without type arguments.
     # Raises an error if the type alias requires arguments.
     #
