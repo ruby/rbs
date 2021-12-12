@@ -18,28 +18,30 @@ class RBS::Collection::ConfigTest < Test::Unit::TestCase
     path: /path/to/somewhere
   YAML
 
+  GEMFILE_LOCK = <<~YAML
+    GEM
+      remote: https://rubygems.org/
+      specs:
+        ast (2.4.2)
+        rainbow (3.0.0)
+
+    PLATFORMS
+      x86_64-linux
+
+    DEPENDENCIES
+      ast
+      rainbow
+
+    BUNDLED WITH
+       2.2.0
+  YAML
+
   def test_generate_lock_from_collection_repository
     mktmpdir do |tmpdir|
       config_path = tmpdir / 'rbs_collection.yaml'
       config_path.write CONFIG
       gemfile_lock_path = tmpdir / 'Gemfile.lock'
-      gemfile_lock_path.write <<~GEMFILE_LOCK
-        GEM
-          remote: https://rubygems.org/
-          specs:
-            ast (2.4.2)
-            rainbow (3.0.0)
-
-        PLATFORMS
-          x86_64-linux
-
-        DEPENDENCIES
-          ast
-          rainbow
-
-        BUNDLED WITH
-           2.2.0
-      GEMFILE_LOCK
+      gemfile_lock_path.write GEMFILE_LOCK
 
       config = RBS::Collection::Config.generate_lockfile(config_path: config_path, gemfile_lock_path: gemfile_lock_path)
       io = StringIO.new
@@ -73,28 +75,66 @@ class RBS::Collection::ConfigTest < Test::Unit::TestCase
     end
   end
 
+  def test_generate_lock_from_relative_git_repository
+    mktmpdir do |git_tmpdir|
+      system('git', 'clone', 'https://github.com/ruby/gem_rbs_collection.git', git_tmpdir.to_s, exception: true, 2 => '/dev/null')
+
+      mktmpdir do |tmpdir|
+        config_path = tmpdir / 'rbs_collection.yaml'
+        remote = git_tmpdir.relative_path_from(tmpdir)
+        config_path.write <<~YAML
+          sources:
+            - name: ruby/gem_rbs_collection
+              remote: #{remote}
+              revision: b4d3b346d9657543099a35a1fd20347e75b8c523
+              repo_dir: gems
+
+          path: /path/to/somewhere
+        YAML
+        gemfile_lock_path = tmpdir / 'Gemfile.lock'
+        gemfile_lock_path.write GEMFILE_LOCK
+
+        config = Dir.chdir(tmpdir) do
+          RBS::Collection::Config.generate_lockfile(config_path: config_path, gemfile_lock_path: gemfile_lock_path)
+        end
+        io = StringIO.new
+        config.dump_to(io)
+
+        assert_config <<~YAML, io.string
+          sources:
+            - name: ruby/gem_rbs_collection
+              remote: #{remote}
+              revision: b4d3b346d9657543099a35a1fd20347e75b8c523
+              repo_dir: gems
+          path: "/path/to/somewhere"
+          gems:
+            - name: ast
+              version: "2.4"
+              source:
+                name: ruby/gem_rbs_collection
+                remote: #{remote}
+                revision: b4d3b346d9657543099a35a1fd20347e75b8c523
+                repo_dir: gems
+                type: git
+            - name: rainbow
+              version: "3.0"
+              source:
+                name: ruby/gem_rbs_collection
+                remote: #{remote}
+                revision: b4d3b346d9657543099a35a1fd20347e75b8c523
+                repo_dir: gems
+                type: git
+        YAML
+      end
+    end
+  end
+
   def test_generate_lock_from_collection_repository_with_lockfile
     mktmpdir do |tmpdir|
       config_path = tmpdir / 'rbs_collection.yaml'
       config_path.write CONFIG
       gemfile_lock_path = tmpdir / 'Gemfile.lock'
-      gemfile_lock_path.write <<~GEMFILE_LOCK
-        GEM
-          remote: https://rubygems.org/
-          specs:
-            ast (2.4.2)
-            rainbow (3.0.0)
-
-        PLATFORMS
-          x86_64-linux
-
-        DEPENDENCIES
-          ast
-          rainbow
-
-        BUNDLED WITH
-           2.2.0
-      GEMFILE_LOCK
+      gemfile_lock_path.write GEMFILE_LOCK
 
       lockfile = <<~YAML
         sources:
@@ -142,23 +182,7 @@ class RBS::Collection::ConfigTest < Test::Unit::TestCase
             ignore: false
       YAML
       gemfile_lock_path = tmpdir / 'Gemfile.lock'
-      gemfile_lock_path.write <<~GEMFILE_LOCK
-        GEM
-          remote: https://rubygems.org/
-          specs:
-            ast (2.4.2)
-            rainbow (3.0.0)
-
-        PLATFORMS
-          x86_64-linux
-
-        DEPENDENCIES
-          ast
-          rainbow
-
-        BUNDLED WITH
-           2.2.0
-      GEMFILE_LOCK
+      gemfile_lock_path.write GEMFILE_LOCK
 
       config = RBS::Collection::Config.generate_lockfile(config_path: config_path, gemfile_lock_path: gemfile_lock_path)
       io = StringIO.new

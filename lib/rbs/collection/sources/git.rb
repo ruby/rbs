@@ -104,9 +104,9 @@ module RBS
           else
             begin
               # git v2.27.0 or greater
-              git 'clone', '--filter=blob:none', remote, git_dir.to_s
+              git 'clone', '--filter=blob:none', remote, git_dir.to_s, chdir: nil
             rescue CommandError
-              git 'clone', remote, git_dir.to_s
+              git 'clone', remote, git_dir.to_s, chdir: nil
             end
           end
 
@@ -131,7 +131,8 @@ module RBS
         private def git_dir
           @git_dir ||= (
             base = Pathname(ENV['XDG_CACHE_HOME'] || File.expand_path("~/.cache"))
-            dir = base.join('rbs', Digest::SHA256.hexdigest(remote))
+            cache_key = remote.start_with?('.') ? "#{remote}\0#{Dir.pwd}" : remote
+            dir = base.join('rbs', Digest::SHA256.hexdigest(cache_key))
             dir.mkpath
             dir
           )
@@ -149,13 +150,14 @@ module RBS
           git('rev-parse', 'HEAD').chomp
         end
 
-        private def git(*cmd)
-          sh! 'git', *cmd
+        private def git(*cmd, **opt)
+          sh! 'git', *cmd, **opt
         end
 
-        private def sh!(*cmd)
+        private def sh!(*cmd, **opt)
           RBS.logger.debug "$ #{cmd.join(' ')}"
-          (__skip__ = Open3.capture3(*cmd, chdir: git_dir)).then do |out, err, status|
+          opt = { chdir: git_dir }.merge(opt).compact
+          (__skip__ = Open3.capture3(*cmd, **opt)).then do |out, err, status|
             raise CommandError, "Unexpected status #{status.exitstatus}\n\n#{err}" unless status.success?
 
             out
