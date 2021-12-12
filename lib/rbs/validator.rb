@@ -27,18 +27,16 @@ module RBS
           end
         end
 
+        definition_builder.validate_type_name(type.name, type.location)
+
         type_params = case type
                       when Types::ClassInstance
-                        env.class_decls[type.name]&.type_params
+                        env.class_decls[type.name].type_params
                       when Types::Interface
-                        env.interface_decls[type.name]&.decl&.type_params
+                        env.interface_decls[type.name].decl.type_params
                       when Types::Alias
-                        env.alias_decls[type.name]&.decl&.type_params
+                        env.alias_decls[type.name].decl.type_params
                       end
-
-        unless type_params
-          raise NoTypeFoundError.new(type_name: type.name, location: type.location)
-        end
 
         InvalidTypeApplicationError.check!(
           type_name: type.name,
@@ -48,9 +46,7 @@ module RBS
         )
 
       when Types::ClassSingleton
-        # @type var type: Types::ClassSingleton
-        type = _ = absolute_type(type, context: context) { type.name.absolute! }
-        NoTypeFoundError.check!(type.name, env: env, location: type.location)
+        definition_builder.validate_type_presence(type)
       end
 
       type.each_type do |type|

@@ -291,6 +291,10 @@ module RBS
             end
 
             one_ancestors.each_extended_module do |mod|
+              mod.args.each do |arg|
+                validate_type_presence(arg)
+              end
+
               mod_defn = build_instance(mod.name, no_self_types: true)
               merge_definition(src: mod_defn,
                                dest: definition,
@@ -299,6 +303,10 @@ module RBS
 
             interface_methods = {}
             one_ancestors.each_extended_interface do |mod|
+              mod.args.each do |arg|
+                validate_type_presence(arg)
+              end
+
               mod_defn = build_interface(mod.name)
               subst = Substitution.build(mod_defn.type_params, mod.args)
 
@@ -830,6 +838,27 @@ module RBS
           builder.interface_cache.delete(name)
         end
       end
+    end
+
+    def validate_type_presence(type)
+      case type
+      when Types::ClassInstance, Types::ClassSingleton, Types::Interface, Types::Alias
+        validate_type_name(type.name, type.location)
+      end
+
+      type.each_type do |type|
+        validate_type_presence(type)
+      end
+    end
+
+    def validate_type_name(name, location)
+      name = name.absolute!
+
+      return if name.class? && env.class_decls.key?(name)
+      return if name.interface? && env.interface_decls.key?(name)
+      return if name.alias? && env.alias_decls.key?(name)
+
+      raise NoTypeFoundError.new(type_name: name, location: location)
     end
   end
 end
