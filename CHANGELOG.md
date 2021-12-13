@@ -2,6 +2,13 @@
 
 ## master
 
+## 1.8.1 (2021-12-13)
+
+### Library changes
+
+* Validate `extend` arguments ([\#840](https://github.com/ruby/rbs/pull/840))
+* Allow a relative path as git remote in collection ([\#839](https://github.com/ruby/rbs/pull/839))
+
 ## 1.8.0 (2021-12-02)
 
 RBS 1.8.0 ships with a language feature enchancement, _generic type alias_.
