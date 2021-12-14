@@ -55,6 +55,11 @@ module RBS
     module EmptyEachType
       def each_type: () { (t) -> void } -> void
                    | () -> Enumerator[t, void]
+
+      # `map_type` returns itself, because there is no sub type.
+      #
+      def map_type: () { (t) -> t } -> self
+                  | () -> Enumerator[t, self]
     end
 
     module NoTypeName
@@ -199,6 +204,9 @@ module RBS
       include _TypeBase
 
       attr_reader location: loc?
+
+      def map_type: () { (t) -> t } -> Interface
+                  | () -> Enumerator[t, Interface]
     end
 
     # ClassInstance represents a type of an instance of a class.
@@ -224,6 +232,9 @@ module RBS
       attr_reader location: loc?
 
       include _TypeBase
+
+      def map_type: () { (t) -> t } -> ClassInstance
+                  | () -> Enumerator[t, ClassInstance]
     end
 
     class Alias
@@ -242,6 +253,9 @@ module RBS
 
       include _TypeBase
       include Application
+
+      def map_type: () { (t) -> t } -> Alias
+                  | () -> Enumerator[t, Alias]
     end
 
     class Tuple
@@ -254,6 +268,9 @@ module RBS
       include _TypeBase
 
       attr_reader location: loc?
+
+      def map_type: () { (t) -> t } -> Tuple
+                  | () -> Enumerator[t, Tuple]
     end
 
     class Record
@@ -266,6 +283,9 @@ module RBS
       include _TypeBase
 
       attr_reader location: loc?
+
+      def map_type: () { (t) -> t } -> Record
+                  | () -> Enumerator[t, Record]
     end
 
     class Optional
@@ -278,6 +298,9 @@ module RBS
       include _TypeBase
 
       attr_reader location: loc?
+
+      def map_type: () { (t) -> t } -> Optional
+                  | () -> Enumerator[t, Optional]
     end
 
     class Union
@@ -395,7 +418,7 @@ module RBS
 
       def sub: (Substitution) -> Block
 
-      def map_type: () { (Types::t) -> Types::t } -> Block
+      def map_type: () { (t) -> t } -> Block
     end
 
     class Proc
@@ -409,6 +432,9 @@ module RBS
       include _TypeBase
 
       attr_reader location: loc?
+
+      def map_type: () { (t) -> t } -> Proc
+                  | () -> Enumerator[t, Proc]
     end
 
     class Literal
