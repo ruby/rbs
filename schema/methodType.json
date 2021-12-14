@@ -20,7 +20,7 @@
     "type_params": {
       "type": "array",
       "items": {
-        "type": "string"
+        "$ref": "typeParam.json"
       }
     },
     "type": {

@@ -385,7 +385,7 @@ module RBS
                 initialize = instance.methods[:initialize]
 
                 if initialize
-                  class_params = entry.type_params.each.map(&:name)
+                  class_params = entry.type_params
 
                   # Inject a virtual _typed new_.
                   initialize_defs = initialize.defs
@@ -394,20 +394,23 @@ module RBS
                     defs: initialize_defs.map do |initialize_def|
                       method_type = initialize_def.type
 
-                      class_type_param_vars = Set.new(class_params)
-                      method_type_param_vars = Set.new(method_type.type_params)
+                      class_type_param_vars = Set.new(class_params.map(&:name))
+                      method_type_param_vars = Set.new(method_type.type_params.map(&:name))
 
                       if class_type_param_vars.intersect?(method_type_param_vars)
-                        renamed_method_params = method_type.type_params.map do |name|
-                          if class_type_param_vars.include?(name)
-                            Types::Variable.fresh(name).name
+                        renamed_method_params = method_type.type_params.map do |method_param|
+                          if class_type_param_vars.include?(method_param.name)
+                            method_param.rename(Types::Variable.fresh(method_param.name).name)
                           else
-                            name
+                            method_param
                           end
                         end
                         method_params = class_params + renamed_method_params
 
-                        sub = Substitution.build(method_type.type_params, Types::Variable.build(renamed_method_params))
+                        sub = Substitution.build(
+                          method_type.type_params.map(&:name),
+                          Types::Variable.build(renamed_method_params.map(&:name))
+                        )
                       else
                         method_params = class_params + method_type.type_params
                         sub = Substitution.build([], [])

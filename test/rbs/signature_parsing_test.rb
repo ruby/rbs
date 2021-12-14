@@ -203,7 +203,10 @@ RBS
           assert_nil t2.block
           assert_equal "(untyped) -> Integer", t2.location.source
 
-          assert_equal [:X], t3.type_params
+          assert_equal(
+            [AST::TypeParam.new(name: :X, variance: :invariant, location: nil)],
+            t3.type_params
+          )
           assert_instance_of Types::Block, t3.block
           assert_instance_of Types::Variable, t3.block.type.required_positionals[0].type
           assert_instance_of Types::Variable, t3.block.type.return_type

@@ -223,6 +223,14 @@ end
     assert_equal expected, format(src)
   end
 
+  def test_generic_method
+    assert_writer(<<-SIG)
+class Foo
+  def foo: [A, B] () -> A
+end
+    SIG
+  end
+
   def test_smoke
     Pathname.glob('{stdlib,core,sig}/**/*.rbs').each do |path|
       orig_decls = RBS::Parser.parse_signature(

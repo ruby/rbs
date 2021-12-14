@@ -29,7 +29,7 @@ module RBS
     end
 
     def sub(s)
-      s.without(*type_params).yield_self do |sub|
+      s.without(*type_param_names).yield_self do |sub|
         map_type do |ty|
           ty.sub(sub)
         end
@@ -48,7 +48,7 @@ module RBS
     def free_variables(set = Set.new)
       type.free_variables(set)
       block&.type&.free_variables(set)
-      set.subtract(type_params)
+      set.subtract(type_param_names)
     end
 
     def map_type(&block)
@@ -86,8 +86,12 @@ module RBS
       if type_params.empty?
         s
       else
-        "[#{type_params.join(", ")}] #{s}"
+        "[#{type_param_names.join(", ")}] #{s}"
       end
+    end
+
+    def type_param_names
+      type_params.map(&:name)
     end
   end
 end
