@@ -26,6 +26,14 @@ module RBS
           enum_for :each_type
         end
       end
+
+      def map_type(&block)
+        if block
+          _ = self
+        else
+          enum_for(:map_type)
+        end
+      end
     end
 
     module Bases
@@ -261,6 +269,18 @@ module RBS
           location: location
         )
       end
+
+      def map_type(&block)
+        if block
+          Interface.new(
+            name: name,
+            args: args.map {|type| yield type },
+            location: location
+          )
+        else
+          enum_for(:map_type)
+        end
+      end
     end
 
     class ClassInstance
@@ -291,6 +311,18 @@ module RBS
           location: location
         )
       end
+
+      def map_type(&block)
+        if block
+          ClassInstance.new(
+            name: name,
+            args: args.map {|type| yield type },
+            location: location
+          )
+        else
+          enum_for :map_type
+        end
+      end
     end
 
     class Alias
@@ -318,6 +350,18 @@ module RBS
           args: args.map {|arg| arg.map_type_name(&block) },
           location: location
         )
+      end
+
+      def map_type(&block)
+        if block
+          Alias.new(
+            name: name,
+            args: args.map {|type| yield type },
+            location: location
+          )
+        else
+          enum_for :map_type
+        end
       end
     end
 
@@ -378,6 +422,17 @@ module RBS
           types: types.map {|type| type.map_type_name(&block) },
           location: location
         )
+      end
+
+      def map_type(&block)
+        if block
+          Tuple.new(
+            types: types.map {|type| yield type },
+            location: location
+          )
+        else
+          enum_for :map_type
+        end
       end
     end
 
@@ -444,6 +499,17 @@ module RBS
           location: location
         )
       end
+
+      def map_type(&block)
+        if block
+          Record.new(
+            fields: fields.transform_values {|type| yield type },
+            location: location
+          )
+        else
+          enum_for :map_type
+        end
+      end
     end
 
     class Optional
@@ -502,6 +568,17 @@ module RBS
           type: type.map_type_name(&block),
           location: location
         )
+      end
+
+      def map_type(&block)
+        if block
+          Optional.new(
+            type: yield(type),
+            location: location
+          )
+        else
+          enum_for :map_type
+        end
       end
     end
 
@@ -1045,6 +1122,18 @@ module RBS
           block: self.block&.map_type {|type| type.map_type_name(&block) },
           location: location
         )
+      end
+
+      def map_type(&block)
+        if block
+          Proc.new(
+            type: type.map_type(&block),
+            block: self.block&.map_type(&block),
+            location: location
+          )
+        else
+          enum_for :map_type
+        end
       end
     end
 
