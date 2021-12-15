@@ -8,7 +8,7 @@ module RBS
   #
   # ```
   #
-  class Location[RequiredChildKeys, OptionalChildKeys]
+  class Location[in RequiredChildKeys, in OptionalChildKeys]
     # The buffer this location points on.
     attr_reader buffer (): Buffer
 

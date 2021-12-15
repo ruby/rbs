@@ -215,7 +215,8 @@ module RBS
               current_module.type_params << AST::TypeParam.new(
                 name: node.children[0],
                 variance: variance || :invariant,
-                location: nil
+                location: nil,
+                upper_bound: nil
               )
             end
           else

@@ -742,6 +742,90 @@ static VALUE parse_symbol(parserstate *state) {
 }
 
 /*
+ instance_type ::= {type_name} <type_args>
+
+ type_args ::= {} <> /empty/
+             | {} `[` type_list <`]`>
+ */
+static VALUE parse_instance_type(parserstate *state, bool parse_alias) {
+    range name_range;
+    range args_range;
+    range type_range;
+
+    TypeNameKind expected_kind = INTERFACE_NAME | CLASS_NAME;
+    if (parse_alias) {
+      expected_kind |= ALIAS_NAME;
+    }
+
+    VALUE typename = parse_type_name(state, expected_kind, &name_range);
+    VALUE types = rb_ary_new();
+
+    TypeNameKind kind;
+    if (state->current_token.type == tUIDENT) {
+      kind = CLASS_NAME;
+    } else if (state->current_token.type == tULIDENT) {
+      kind = INTERFACE_NAME;
+    } else if (state->current_token.type == tLIDENT) {
+      kind = ALIAS_NAME;
+    } else {
+      rbs_abort();
+    }
+
+    if (state->next_token.type == pLBRACKET) {
+      parser_advance(state);
+      args_range.start = state->current_token.range.start;
+      parse_type_list(state, pRBRACKET, types);
+      parser_advance_assert(state, pRBRACKET);
+      args_range.end = state->current_token.range.end;
+    } else {
+      args_range = NULL_RANGE;
+    }
+
+    type_range.start = name_range.start;
+    type_range.end = nonnull_pos_or(args_range.end, name_range.end);
+
+    VALUE location = rbs_new_location(state->buffer, type_range);
+    rbs_loc *loc = rbs_check_location(location);
+    rbs_loc_add_required_child(loc, rb_intern("name"), name_range);
+    rbs_loc_add_optional_child(loc, rb_intern("args"), args_range);
+
+    if (kind == CLASS_NAME) {
+      return rbs_class_instance(typename, types, location);
+    } else if (kind == INTERFACE_NAME) {
+      return rbs_interface(typename, types, location);
+    } else if (kind == ALIAS_NAME) {
+      return rbs_alias(typename, types, location);
+    } else {
+      return Qnil;
+    }
+}
+
+/*
+  singleton_type ::= {`singleton`} `(` type_name <`)`>
+*/
+static VALUE parse_singleton_type(parserstate *state) {
+  range name_range;
+  range type_range;
+
+  parser_assert(state, kSINGLETON);
+
+  type_range.start = state->current_token.range.start;
+  parser_advance_assert(state, pLPAREN);
+  parser_advance(state);
+
+  VALUE typename = parse_type_name(state, CLASS_NAME, &name_range);
+
+  parser_advance_assert(state, pRPAREN);
+  type_range.end = state->current_token.range.end;
+
+  VALUE location = rbs_new_location(state->buffer, type_range);
+  rbs_loc *loc = rbs_check_location(location);
+  rbs_loc_add_required_child(loc, rb_intern("name"), name_range);
+
+  return rbs_class_singleton(typename, location);
+}
+
+/*
   simple ::= {} `(` type <`)`>
            | {} <base type>
            | {} <type_name>
@@ -813,76 +897,12 @@ static VALUE parse_simple(parserstate *state) {
     }
     // fallthrough for type name
   }
-  case tULIDENT:
-    // fallthrough
-  case tLIDENT:
-    // fallthrough
-  case pCOLON2: {
-    range name_range;
-    range args_range;
-    range type_range;
-
-    VALUE typename = parse_type_name(state, INTERFACE_NAME | CLASS_NAME | ALIAS_NAME, &name_range);
-    VALUE types = rb_ary_new();
-
-    TypeNameKind kind;
-    if (state->current_token.type == tUIDENT) {
-      kind = CLASS_NAME;
-    } else if (state->current_token.type == tULIDENT) {
-      kind = INTERFACE_NAME;
-    } else if (state->current_token.type == tLIDENT) {
-      kind = ALIAS_NAME;
-    } else {
-      rbs_abort();
-    }
-
-    if (state->next_token.type == pLBRACKET) {
-      parser_advance(state);
-      args_range.start = state->current_token.range.start;
-      parse_type_list(state, pRBRACKET, types);
-      parser_advance_assert(state, pRBRACKET);
-      args_range.end = state->current_token.range.end;
-    } else {
-      args_range = NULL_RANGE;
-    }
-
-    type_range.start = name_range.start;
-    type_range.end = nonnull_pos_or(args_range.end, name_range.end);
-
-    VALUE location = rbs_new_location(state->buffer, type_range);
-    rbs_loc *loc = rbs_check_location(location);
-    rbs_loc_add_required_child(loc, rb_intern("name"), name_range);
-    rbs_loc_add_optional_child(loc, rb_intern("args"), args_range);
-
-    if (kind == CLASS_NAME) {
-      return rbs_class_instance(typename, types, location);
-    } else if (kind == INTERFACE_NAME) {
-      return rbs_interface(typename, types, location);
-    } else if (kind == ALIAS_NAME) {
-      return rbs_alias(typename, types, location);
-    } else {
-      return Qnil;
-    }
-  }
-  case kSINGLETON: {
-    range name_range;
-    range type_range;
-
-    type_range.start = state->current_token.range.start;
-    parser_advance_assert(state, pLPAREN);
-    parser_advance(state);
-
-    VALUE typename = parse_type_name(state, CLASS_NAME, &name_range);
-
-    parser_advance_assert(state, pRPAREN);
-    type_range.end = state->current_token.range.end;
-
-    VALUE location = rbs_new_location(state->buffer, type_range);
-    rbs_loc *loc = rbs_check_location(location);
-    rbs_loc_add_required_child(loc, rb_intern("name"), name_range);
-
-    return rbs_class_singleton(typename, location);
-  }
+  case tULIDENT: // fallthrough
+  case tLIDENT: // fallthrough
+  case pCOLON2:
+    return parse_instance_type(state, true);
+  case kSINGLETON:
+    return parse_singleton_type(state);
   case pLBRACKET: {
     range rg;
     rg.start = state->current_token.range.start;
@@ -990,11 +1010,13 @@ VALUE parse_type_params(parserstate *state, range *rg, bool module_type_params) 
       VALUE name;
       bool unchecked = false;
       VALUE variance = ID2SYM(rb_intern("invariant"));
+      VALUE upper_bound = Qnil;
 
       range param_range = NULL_RANGE;
       range name_range;
       range variance_range = NULL_RANGE;
       range unchecked_range = NULL_RANGE;
+      range upper_bound_range = NULL_RANGE;
 
       param_range.start = state->next_token.range.start;
 
@@ -1031,13 +1053,26 @@ VALUE parse_type_params(parserstate *state, range *rg, bool module_type_params) 
 
       parser_insert_typevar(state, id);
 
+      if (state->next_token.type == pLT) {
+        parser_advance(state);
+
+        if (state->next_token.type == kSINGLETON) {
+          parser_advance(state);
+          upper_bound = parse_singleton_type(state);
+        } else {
+          parser_advance(state);
+          upper_bound = parse_instance_type(state, false);
+        }
+      }
+
       VALUE location = rbs_new_location(state->buffer, param_range);
       rbs_loc *loc = rbs_check_location(location);
       rbs_loc_add_required_child(loc, rb_intern("name"), name_range);
       rbs_loc_add_optional_child(loc, rb_intern("variance"), variance_range);
       rbs_loc_add_optional_child(loc, rb_intern("unchecked"), unchecked_range);
+      rbs_loc_add_optional_child(loc, rb_intern("upper_bound"), upper_bound_range);
 
-      VALUE param = rbs_ast_type_param(name, variance, unchecked, location);
+      VALUE param = rbs_ast_type_param(name, variance, unchecked, upper_bound, location);
       rb_ary_push(params, param);
 
       if (state->next_token.type == pCOMMA) {
@@ -1054,6 +1089,13 @@ VALUE parse_type_params(parserstate *state, range *rg, bool module_type_params) 
   } else {
     *rg = NULL_RANGE;
   }
+
+  rb_funcall(
+    RBS_AST_TypeParam,
+    rb_intern("resolve_variables"),
+    1,
+    params
+  );
 
   return params;
 }

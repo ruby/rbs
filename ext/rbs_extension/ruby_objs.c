@@ -294,10 +294,11 @@ VALUE rbs_ast_annotation(VALUE string, VALUE location) {
   );
 }
 
-VALUE rbs_ast_type_param(VALUE name, VALUE variance, bool unchecked, VALUE location) {
+VALUE rbs_ast_type_param(VALUE name, VALUE variance, bool unchecked, VALUE upper_bound, VALUE location) {
   VALUE args = rb_hash_new();
   rb_hash_aset(args, ID2SYM(rb_intern("name")), name);
   rb_hash_aset(args, ID2SYM(rb_intern("variance")), variance);
+  rb_hash_aset(args, ID2SYM(rb_intern("upper_bound")), upper_bound);
   rb_hash_aset(args, ID2SYM(rb_intern("location")), location);
 
   VALUE type_param = CLASS_NEW_INSTANCE(RBS_AST_TypeParam, 1, &args);

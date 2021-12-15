@@ -4,19 +4,24 @@ module RBS
       # Key
       # ^^^ name
       #
-      # unchecked out Elem
-      # ^^^^^^^^^          unchecked
-      #           ^^^      variance
-      #               ^^^^ name
-      type loc = Location[:name, :variance | :unchecked]
+      # unchecked out Elem < _ToJson
+      # ^^^^^^^^^                    unchecked
+      #           ^^^                variance
+      #               ^^^^           name
+      #                    ^^^^^^^^^ upper_bound
+      type loc = Location[:name, :variance | :unchecked | :upper_bound]
 
       type variance = :invariant | :covariant | :contravariant
+
+      type bound = Types::ClassInstance | Types::ClassSingleton | Types::Interface
 
       attr_reader name: Symbol
       attr_reader variance: variance
       attr_reader location: loc?
 
-      def initialize: (name: Symbol, variance: variance, location: loc?) -> void
+      attr_reader upper_bound: bound?
+
+      def initialize: (name: Symbol, variance: variance, upper_bound: bound?, location: loc?) -> void
 
       include _ToJson
 
@@ -33,6 +38,12 @@ module RBS
       def unchecked?: () -> bool
 
       def rename: (Symbol) -> TypeParam
+
+      def map_type: () { (bound) -> bound } -> TypeParam
+
+      def self.resolve_variables: (Array[TypeParam]) -> void
+
+      def self.subst_var: (Set[Symbol], Types::t) -> Types::t
     end
   end
 end

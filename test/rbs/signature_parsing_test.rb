@@ -204,7 +204,7 @@ RBS
           assert_equal "(untyped) -> Integer", t2.location.source
 
           assert_equal(
-            [AST::TypeParam.new(name: :X, variance: :invariant, location: nil)],
+            [AST::TypeParam.new(name: :X, variance: :invariant, upper_bound: nil, location: nil)],
             t3.type_params
           )
           assert_instance_of Types::Block, t3.block
@@ -1863,6 +1863,51 @@ end
         assert_instance_of Types::ClassInstance, decl.members[10].args[0]
         assert_instance_of Types::Variable, decl.members[11].args[0]
       end
+    end
+  end
+
+  def test_generics_bound
+    Parser.parse_signature(<<-EOF).tap do |decls|
+class Foo[X < _Each[Y], Y]
+  def foo: [X < Array[Y]] (X) -> X
+end
+    EOF
+      decls[0].tap do |decl|
+        assert_instance_of Declarations::Class, decl
+
+        assert_equal 2, decl.type_params.size
+        decl.type_params[0].tap do |param|
+          assert_equal :X, param.name
+          assert_equal :invariant, param.variance
+          refute_predicate param, :unchecked?
+          assert_equal parse_type("_Each[Y]", variables: [:Y]), param.upper_bound
+        end
+
+        decl.type_params[1].tap do |param|
+          assert_equal :Y, param.name
+          assert_equal :invariant, param.variance
+          refute_predicate param, :unchecked?
+          assert_nil param.upper_bound
+        end
+
+        decl.members[0].tap do |member|
+          member.types[0].type_params[0].tap do |param|
+            assert_equal :X, param.name
+            assert_equal :invariant, param.variance
+            refute_predicate param, :unchecked?
+            assert_equal parse_type("Array[Y]", variables: [:Y]), param.upper_bound
+          end
+        end
+      end
+    end
+  end
+
+  def test_generics_bound_error
+    assert_raises RBS::ParsingError do
+      Parser.parse_signature(<<-EOF)
+        class Foo[X < string]
+        end
+            EOF
     end
   end
 end

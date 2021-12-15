@@ -1,11 +1,12 @@
 module RBS
   module AST
     class TypeParam
-      attr_reader :name, :variance, :location
+      attr_reader :name, :variance, :location, :upper_bound
 
-      def initialize(name:, variance:, location:)
+      def initialize(name:, variance:, upper_bound:, location:)
         @name = name
         @variance = variance
+        @upper_bound = upper_bound
         @location = location
         @unchecked = false
       end
@@ -23,13 +24,14 @@ module RBS
         other.is_a?(TypeParam) &&
           other.name == name &&
           other.variance == variance &&
+          other.upper_bound == upper_bound &&
           other.unchecked? == unchecked?
       end
 
       alias eql? ==
 
       def hash
-        self.class.hash ^ name.hash ^ variance.hash ^ unchecked?.hash
+        self.class.hash ^ name.hash ^ variance.hash ^ upper_bound.hash ^ unchecked?.hash
       end
 
       def to_json(state = JSON::State.new)
@@ -37,7 +39,8 @@ module RBS
           name: name,
           variance: variance,
           unchecked: unchecked?,
-          location: location
+          location: location,
+          upper_bound: upper_bound
         }.to_json(state)
       end
 
@@ -45,8 +48,44 @@ module RBS
         TypeParam.new(
           name: name,
           variance: variance,
+          upper_bound: upper_bound,
           location: location
         ).unchecked!(unchecked?)
+      end
+
+      def map_type(&block)
+        if b = upper_bound
+          _upper_bound = yield(b)
+        end
+
+        TypeParam.new(
+          name: name,
+          variance: variance,
+          upper_bound: _upper_bound,
+          location: location
+        ).unchecked!(unchecked?)
+      end
+
+      def self.resolve_variables(params)
+        return if params.empty?
+
+        vars = Set.new(params.map(&:name))
+
+        params.map! do |param|
+          param.map_type {|bound| _ = subst_var(vars, bound) }
+        end
+      end
+
+      def self.subst_var(vars, type)
+        case type
+        when Types::ClassInstance
+          namespace = type.name.namespace
+          if namespace.relative? && namespace.empty? && vars.member?(type.name.name)
+            return Types::Variable.new(name: type.name.name, location: type.location)
+          end
+        end
+
+        type.map_type {|t| subst_var(vars, t) }
       end
     end
   end
