@@ -50,6 +50,15 @@ module RBS
           end
         end
 
+        def manifest_of(config_entry)
+          gem_name = config_entry['name']
+          version = config_entry['version'] or raise
+          gem_dir = gem_repo_dir.join(gem_name, version)
+
+          manifest_path = gem_dir.join('manifest.yaml')
+          YAML.safe_load(manifest_path.read) if manifest_path.exist?
+        end
+
         private def _install(dest:, config_entry:)
           gem_name = config_entry['name']
           version = config_entry['version'] or raise

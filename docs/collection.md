@@ -7,7 +7,6 @@
 * `git(1)`
 * `Gemfile.lock`
 
-
 ## Usage
 
 ### Setup
@@ -65,9 +64,13 @@ Finally the third party RBSs are available! `rbs` commands, such as `rbs validat
 
 ## Configuration
 
+### `rbs_collection.yaml`
+
 Configure `rbs collection` with editing `rbs_collection.yaml`.
 
 ```yaml
+# rbs_collection.yaml
+
 # Download sources.
 # You can add own collection git repository.
 sources:
@@ -91,6 +94,25 @@ gems:
   - name: nokogiri
     ignore: true
 ```
+
+### `manifest.yaml`
+
+If you are a gem maintainer, you can write `manifest.yaml`.
+You need to put the file if the gem has implicit dependencies, which don't appear in `Gemfile.lock`. You have to write standard libraries' dependencies in most cases.
+For example:
+
+```yaml
+# manifest.yaml
+
+dependencies:
+  # If your gem depends on pathname but the gemspec doesn't include pathname,
+  # you need to write the following.
+  - name: pathname
+```
+
+If the gem's RBS is managed with [ruby/gem_rbs_collection](https://github.com/ruby/gem_rbs_collection), put it as `gems/GEM_NAME/VERSION/manifest.yaml`.  For example, `gems/activesupport/6.0/manifest.yaml`.
+If the gem's RBS is included in the gem package, put it as `sig/manifest.yaml`.
+
 
 ## Files / Directories
 

@@ -16,7 +16,7 @@ module RBS
 
         private
 
-        def assign_gem: (gem_name: String, version: String?) -> void
+        def assign_gem: (name: String, version: String?) -> void
 
         def upsert_gem: (gem_entry? old, gem_entry new) -> void
 
@@ -24,7 +24,7 @@ module RBS
 
         def remove_ignored_gems!: () -> void
 
-        def find_source: (gem_name: String) -> untyped
+        def find_source: (name: String) -> untyped
 
         def find_best_version: (version: String?, versions: Array[String]) -> Gem::Version
       end
