@@ -58,11 +58,7 @@ module RBS
 
       def compatible_params?(ps1, ps2)
         if ps1.size == ps2.size
-          ps1.each.with_index do |p1, index|
-            return unless p1 == ps2[index].rename(p1.name)
-          end
-
-          true
+          ps1 == AST::TypeParam.rename(ps2, new_names: ps1.map(&:name))
         end
       end
 

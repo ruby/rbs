@@ -398,28 +398,30 @@ module RBS
                       method_type_param_vars = Set.new(method_type.type_params.map(&:name))
 
                       if class_type_param_vars.intersect?(method_type_param_vars)
-                        renamed_method_params = method_type.type_params.map do |method_param|
+                        new_method_param_names = method_type.type_params.map do |method_param|
                           if class_type_param_vars.include?(method_param.name)
-                            method_param.rename(Types::Variable.fresh(method_param.name).name)
+                            Types::Variable.fresh(method_param.name).name
                           else
-                            method_param
+                            method_param.name
                           end
                         end
-                        method_params = class_params + renamed_method_params
 
                         sub = Substitution.build(
                           method_type.type_params.map(&:name),
-                          Types::Variable.build(renamed_method_params.map(&:name))
+                          Types::Variable.build(new_method_param_names)
                         )
+
+                        method_params = class_params + AST::TypeParam.rename(method_type.type_params, new_names: new_method_param_names)
+                        method_type = method_type
+                          .update(type_params: [])
+                          .sub(sub)
+                          .update(type_params: method_params)
                       else
-                        method_params = class_params + method_type.type_params
-                        sub = Substitution.build([], [])
+                        method_type = method_type
+                          .update(type_params: class_params + method_type.type_params)
                       end
 
-                      method_type = method_type.sub(sub) unless sub.empty?
-
                       method_type = method_type.update(
-                        type_params: method_params,
                         type: method_type.type.with_return_type(
                           Types::ClassInstance.new(
                             name: type_name,

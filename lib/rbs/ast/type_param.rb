@@ -88,6 +88,23 @@ module RBS
         type.map_type {|t| subst_var(vars, t) }
       end
 
+      def self.rename(params, new_names:)
+        raise unless params.size == new_names.size
+
+        subst = Substitution.build(new_names, Types::Variable.build(new_names))
+
+        params.map.with_index do |param, index|
+          new_name = new_names[index]
+
+          TypeParam.new(
+            name: new_name,
+            variance: param.variance,
+            upper_bound: param.upper_bound&.map_type {|type| type.sub(subst) },
+            location: param.location
+          ).unchecked!(param.unchecked?)
+        end
+      end
+
       def to_s
         s = ""
 
