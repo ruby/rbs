@@ -340,7 +340,7 @@ module URI
   #     URI.split("http://www.ruby-lang.org/")
   #     # => ["http", nil, "www.ruby-lang.org", nil, nil, "/", nil, nil, nil]
   #
-  def self.split: (String uri) -> [ String?, String?, String?, String?, String?, String?, String?, String?, String? ]
+  def self.split: (String uri) -> [ String?, String?, String?, String?, nil, String?, String?, String?, String? ]
 end
 
 URI::ABS_PATH: Regexp
