@@ -44,6 +44,8 @@ module RBS
       def self.resolve_variables: (Array[TypeParam]) -> void
 
       def self.subst_var: (Set[Symbol], Types::t) -> Types::t
+
+      def to_s: () -> String
     end
   end
 end

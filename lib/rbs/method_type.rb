@@ -86,7 +86,7 @@ module RBS
       if type_params.empty?
         s
       else
-        "[#{type_param_names.join(", ")}] #{s}"
+        "[#{type_params.join(", ")}] #{s}"
       end
     end
 

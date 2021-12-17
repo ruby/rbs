@@ -225,8 +225,8 @@ end
 
   def test_generic_method
     assert_writer(<<-SIG)
-class Foo
-  def foo: [A, B] () -> A
+class Foo[unchecked out T < String]
+  def foo: [A < _Each[Foo], B < singleton(::Bar)] () -> A
 end
     SIG
   end

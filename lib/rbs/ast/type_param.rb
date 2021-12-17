@@ -87,6 +87,31 @@ module RBS
 
         type.map_type {|t| subst_var(vars, t) }
       end
+
+      def to_s
+        s = ""
+
+        if unchecked?
+          s << "unchecked "
+        end
+
+        case variance
+        when :invariant
+          # nop
+        when :covariant
+          s << "out "
+        when :contravariant
+          s << "in "
+        end
+
+        s << name.to_s
+
+        if type = upper_bound
+          s << " < #{type}"
+        end
+
+        s
+      end
     end
   end
 end
