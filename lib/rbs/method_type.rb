@@ -62,6 +62,18 @@ module RBS
       )
     end
 
+    def map_type_bound(&block)
+      if type_params.empty?
+        self
+      else
+        self.update(
+          type_params: type_params.map {|param|
+            param.map_type(&block)
+          }
+        )
+      end
+    end
+
     def each_type(&block)
       if block
         type.each_type(&block)

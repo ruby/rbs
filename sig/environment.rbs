@@ -98,6 +98,10 @@ module RBS
 
     def resolve_member: (TypeNameResolver, AST::Members::t, context: Array[Namespace]) -> AST::Members::t
 
+    def resolve_method_type: (TypeNameResolver, RBS::MethodType, context: Array[Namespace]) -> RBS::MethodType
+
+    def resolve_type_params: (TypeNameResolver resolver, Array[AST::TypeParam], context: Array[Namespace]) ->  Array[AST::TypeParam]
+
     def absolute_type: (TypeNameResolver, Types::t, context: Array[Namespace]) -> Types::t
 
     def absolute_type_name: (TypeNameResolver, TypeName, context: Array[Namespace]) -> TypeName

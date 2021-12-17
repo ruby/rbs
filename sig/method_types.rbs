@@ -26,7 +26,14 @@ module RBS
 
     def free_variables: (?Set[Symbol] set) -> Set[Symbol]
 
+    # Apply the mapping included in the MethodType.
+    #
+    # Note that type bound in generics parameter is not handled by this method.
+    # You have to use `map_type_bound` for them.
+    # 
     def map_type: () { (Types::t) -> Types::t } -> MethodType
+
+    def map_type_bound: () { (AST::TypeParam::bound) -> AST::TypeParam::bound } -> MethodType
 
     def each_type: () { (Types::t) -> void } -> void
                  | () -> Enumerator[Types::t, void]

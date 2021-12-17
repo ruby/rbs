@@ -257,7 +257,7 @@ module RBS
         prefix_ = prefix + decl.name.to_namespace
         AST::Declarations::Class.new(
           name: decl.name.with_prefix(prefix),
-          type_params: decl.type_params,
+          type_params: resolve_type_params(resolver, decl.type_params, context: context),
           super_class: decl.super_class&.yield_self do |super_class|
             AST::Declarations::Class::Super.new(
               name: absolute_type_name(resolver, super_class.name, context: context),
@@ -289,7 +289,7 @@ module RBS
         prefix_ = prefix + decl.name.to_namespace
         AST::Declarations::Module.new(
           name: decl.name.with_prefix(prefix),
-          type_params: decl.type_params,
+          type_params: resolve_type_params(resolver, decl.type_params, context: context),
           self_types: decl.self_types.map do |module_self|
             AST::Declarations::Module::Self.new(
               name: absolute_type_name(resolver, module_self.name, context: context),
@@ -319,7 +319,7 @@ module RBS
       when AST::Declarations::Interface
         AST::Declarations::Interface.new(
           name: decl.name.with_prefix(prefix),
-          type_params: decl.type_params,
+          type_params: resolve_type_params(resolver, decl.type_params, context: context),
           members: decl.members.map do |member|
             resolve_member(resolver, member, context: context)
           end,
@@ -330,7 +330,7 @@ module RBS
       when AST::Declarations::Alias
         AST::Declarations::Alias.new(
           name: decl.name.with_prefix(prefix),
-          type_params: decl.type_params,
+          type_params: resolve_type_params(resolver, decl.type_params, context: context),
           type: absolute_type(resolver, decl.type, context: context),
           location: decl.location,
           annotations: decl.annotations,
@@ -354,7 +354,7 @@ module RBS
           name: member.name,
           kind: member.kind,
           types: member.types.map do |type|
-            type.map_type {|ty| absolute_type(resolver, ty, context: context) }
+            resolve_method_type(resolver, type, context: context)
           end,
           comment: member.comment,
           overload: member.overload?,
@@ -438,6 +438,20 @@ module RBS
         )
       else
         member
+      end
+    end
+
+    def resolve_method_type(resolver, type, context:)
+      type.map_type do |ty|
+        absolute_type(resolver, ty, context: context)
+      end.map_type_bound do |bound|
+        _ = absolute_type(resolver, bound, context: context)
+      end
+    end
+
+    def resolve_type_params(resolver, params, context:)
+      params.map do |param|
+        param.map_type {|type| _ = absolute_type(resolver, type, context: context) }
       end
     end
 
