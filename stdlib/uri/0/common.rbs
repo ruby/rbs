@@ -302,7 +302,7 @@ module URI
   #       p $&
   #     end
   #
-  def self.regexp: (?Array[String] schemes) -> Regexp
+  def self.regexp: (?Array[String]? schemes) -> Regexp
 
   # Returns a Hash of the defined schemes.
   #
