@@ -11,7 +11,7 @@
 
 ## 1.8.0 (2021-12-02)
 
-RBS 1.8.0 ships with a language feature enchancement, _generic type alias_.
+RBS 1.8.0 ships with a language feature enhancement, _generic type alias_.
 You can define a type alias with type parameters now.
 
 ```rbs
@@ -52,7 +52,7 @@ You can find the detail in the [PR](https://github.com/ruby/rbs/pull/823).
 This version replaces `RBS::Parser` implementation from pure Ruby code based on [Racc](https://github.com/ruby/racc) to C extension.
 It improves the RBS file parsing performance up to 5 times faster. :rocket:
 
-* There are some incompatibilties to drop obsolete syntax rules: `super` keyword and `any` type are no longer supported.
+* There are some incompatibilities to drop obsolete syntax rules: `super` keyword and `any` type are no longer supported.
 * [re2c](https://github.com/skvadrik/re2c) is used to generate lexical generator.
 
 When you want to change the parser/lexer, change the files under `ext/rbs_extension` directory and run `rake compile` to compile the extension.
@@ -165,7 +165,7 @@ This release includes feature enhancements including recursive `type` definition
 
 ### Library changes
 
-* Add Recursiive type alias defnition validation ([\#719](https://github.com/ruby/rbs/pull/719))
+* Add Recursive type alias definition validation ([\#719](https://github.com/ruby/rbs/pull/719))
 * Generate included modules with complete name ([\#731](https://github.com/ruby/rbs/pull/731))
 * Fix `rbs-prototype-rb` error when multi assign with const ([\#740](https://github.com/ruby/rbs/pull/740))
 
@@ -193,7 +193,7 @@ This release is to fix a bug introduced by parser update in 1.3.0.
 
 ### Summary
 
-RBS 1.3.0 includes bug fixees of the parser and class/module definition validations.
+RBS 1.3.0 includes bug fixes of the parser and class/module definition validations.
 
 ### Signature updates
 
