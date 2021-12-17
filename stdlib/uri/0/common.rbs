@@ -268,7 +268,7 @@ module URI
   # It's recommended to first ::escape the provided `uri_str` if there are any
   # invalid URI characters.
   #
-  def self.parse: (String uri) -> URI::Generic
+  def self.parse: (_ToStr uri) -> (File | HTTP | HTTPS | LDAP | LDAPS | Generic)
 
   # ## Synopsis
   #
