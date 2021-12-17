@@ -20,6 +20,9 @@ module RBS
 
     include _ToJson
 
+    # Substitute type variables to some types.
+    # Takes care of type parameter bounds.
+    #
     def sub: (Substitution) -> MethodType
 
     def update: (?type_params: Array[AST::TypeParam], ?type: Types::Function, ?block: Types::Block?, ?location: loc?) -> MethodType
@@ -29,8 +32,8 @@ module RBS
     # Apply the mapping included in the MethodType.
     #
     # Note that type bound in generics parameter is not handled by this method.
-    # You have to use `map_type_bound` for them.
-    # 
+    # You may want to use `#map_type_bound` explicitly, or `#sub` for simple substitution.
+    #
     def map_type: () { (Types::t) -> Types::t } -> MethodType
 
     def map_type_bound: () { (AST::TypeParam::bound) -> AST::TypeParam::bound } -> MethodType

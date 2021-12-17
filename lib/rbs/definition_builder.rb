@@ -416,7 +416,8 @@ module RBS
                         sub = Substitution.build([], [])
                       end
 
-                      method_type = method_type.map_type {|ty| ty.sub(sub) }
+                      method_type = method_type.sub(sub) unless sub.empty?
+
                       method_type = method_type.update(
                         type_params: method_params,
                         type: method_type.type.with_return_type(

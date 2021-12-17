@@ -29,11 +29,18 @@ module RBS
     end
 
     def sub(s)
-      s.without(*type_param_names).yield_self do |sub|
-        map_type do |ty|
-          ty.sub(sub)
-        end
-      end
+      sub = s.without(*type_param_names)
+
+      self.class.new(
+        type_params: type_params.map do |param|
+          param.map_type do |bound|
+            bound.map_type {|ty| ty.sub(sub) }
+          end
+        end,
+        type: type.sub(sub),
+        block: block&.sub(sub),
+        location: location
+      )
     end
 
     def update(type_params: self.type_params, type: self.type, block: self.block, location: self.location)
