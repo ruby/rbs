@@ -212,7 +212,7 @@ module RBS
     def mixin_name: () -> String
   end
 
-  class RecursiveTypeAliasError < LoadingError
+  class RecursiveTypeAliasError < BaseError
     attr_reader alias_names: Array[TypeName]
     attr_reader location: Location[untyped, untyped]?
 
@@ -221,7 +221,7 @@ module RBS
     def name: () -> String
   end
 
-  class NonregularTypeAliasError < LoadingError
+  class NonregularTypeAliasError < BaseError
     # Diagnostic reported from `TypeAliasRegularity`.
     attr_reader diagnostic: TypeAliasRegularity::Diagnostic
 

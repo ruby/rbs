@@ -14,11 +14,11 @@ module RBS
     end
   end
 
-  class ErrorBase < StandardError; end
-  class LoadingError < ErrorBase; end
-  class DefinitionError < ErrorBase; end
+  class BaseError < StandardError; end
+  class LoadingError < BaseError; end
+  class DefinitionError < BaseError; end
 
-  class ParsingError < ErrorBase
+  class ParsingError < BaseError
     attr_reader :location
     attr_reader :error_message
     attr_reader :token_type
@@ -105,7 +105,7 @@ module RBS
     end
   end
 
-  class NoTypeFoundError < ErrorBase
+  class NoTypeFoundError < BaseError
     attr_reader :type_name
     attr_reader :location
 
@@ -416,7 +416,7 @@ module RBS
     end
   end
 
-  class RecursiveTypeAliasError < LoadingError
+  class RecursiveTypeAliasError < BaseError
     attr_reader :alias_names
     attr_reader :location
 
@@ -432,7 +432,7 @@ module RBS
     end
   end
 
-  class NonregularTypeAliasError < LoadingError
+  class NonregularTypeAliasError < BaseError
     attr_reader :diagnostic
     attr_reader :location
 
