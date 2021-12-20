@@ -1,11 +1,20 @@
 module RBS
   class MethodType
+    # () -> void
+    # ^^^^^^^^^^     type
+    #
+    # [A] () { () -> A } -> A
+    # ^^^                      type_params
+    #     ^^^^^^^^^^^^^^^^^^^  type
+    #
+    type loc = Location[:type, :type_params]
+
     attr_reader type_params: Array[AST::TypeParam]
     attr_reader type: Types::Function
     attr_reader block: Types::Block?
-    attr_reader location: Location[untyped, untyped]?
+    attr_reader location: loc?
 
-    def initialize: (type_params: Array[AST::TypeParam], type: Types::Function, block: Types::Block?, location: Location[untyped, untyped]?) -> void
+    def initialize: (type_params: Array[AST::TypeParam], type: Types::Function, block: Types::Block?, location: loc?) -> void
 
     def ==: (untyped other) -> bool
 
@@ -13,7 +22,7 @@ module RBS
 
     def sub: (Substitution) -> MethodType
 
-    def update: (?type_params: Array[AST::TypeParam], ?type: Types::Function, ?block: Types::Block?, ?location: Location[untyped, untyped]?) -> MethodType
+    def update: (?type_params: Array[AST::TypeParam], ?type: Types::Function, ?block: Types::Block?, ?location: loc?) -> MethodType
 
     def free_variables: (?Set[Symbol] set) -> Set[Symbol]
 

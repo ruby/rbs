@@ -1062,26 +1062,37 @@ VALUE parse_type_params(parserstate *state, range *rg, bool module_type_params) 
   method_type ::= {} type_params <function>
   */
 VALUE parse_method_type(parserstate *state) {
+  range rg;
+  range params_range = NULL_RANGE;
+  range type_range;
+
   VALUE function = Qnil;
   VALUE block = Qnil;
   parser_push_typevar_table(state, false);
 
-  position start = state->next_token.range.start;
+  rg.start = state->next_token.range.start;
 
-  range params_range;
   VALUE type_params = parse_type_params(state, &params_range, false);
+
+  type_range.start = state->next_token.range.start;
 
   parse_function(state, &function, &block);
 
-  position end = state->current_token.range.end;
+  rg.end = state->current_token.range.end;
+  type_range.end = rg.end;
 
   parser_pop_typevar_table(state);
+
+  VALUE location = rbs_new_location(state->buffer, rg);
+  rbs_loc *loc = rbs_check_location(location);
+  rbs_loc_add_required_child(loc, rb_intern("type"), type_range);
+  rbs_loc_add_optional_child(loc, rb_intern("type_params"), params_range);
 
   return rbs_method_type(
     type_params,
     function,
     block,
-    rbs_location_pp(state->buffer, &start, &end)
+    location
   );
 }
 
