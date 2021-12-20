@@ -430,7 +430,7 @@ EOU
       builder = DefinitionBuilder.new(env: env)
       validator = Validator.new(env: env, resolver: TypeNameResolver.from_env(env))
 
-      env.class_decls.each_key do |name|
+      env.class_decls.each do |name, decl|
         stdout.puts "Validating class/module definition: `#{name}`..."
         builder.build_instance(name).each_type do |type|
           validator.validate_type type, context: [Namespace.root]
@@ -438,12 +438,42 @@ EOU
         builder.build_singleton(name).each_type do |type|
           validator.validate_type type, context: [Namespace.root]
         end
+
+        d = decl.primary.decl
+
+        validator.validate_type_params(
+          d.type_params,
+          type_name: name,
+          location: d.location&.aref(:type_params)
+        )
+
+        decl.decls.each do |d|
+          d.decl.each_member do |member|
+            case member
+            when AST::Members::MethodDefinition
+              validator.validate_method_definition(member, type_name: name)
+            end
+          end
+        end
       end
 
-      env.interface_decls.each_key do |name|
+      env.interface_decls.each do |name, decl|
         stdout.puts "Validating interface: `#{name}`..."
         builder.build_interface(name).each_type do |type|
           validator.validate_type type, context: [Namespace.root]
+        end
+
+        validator.validate_type_params(
+          decl.decl.type_params,
+          type_name: name,
+          location: decl.decl.location&.aref(:type_params)
+        )
+
+        decl.decl.members.each do |member|
+          case member
+          when AST::Members::MethodDefinition
+            validator.validate_method_definition(member, type_name: name)
+          end
         end
       end
 

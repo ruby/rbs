@@ -79,6 +79,8 @@ module RBS
           | (OptionalChildKeys) -> Location[bot, bot]?
           | (Symbol) -> Location[bot, bot]?
 
+    alias aref []
+
     def each_optional_key: () { (Symbol) -> void } -> void
                          | () -> Enumerator[Symbol, void]
 

@@ -80,6 +80,61 @@ module RBS
             )
           end
         end
+
+        validate_type_params(
+          entry.decl.type_params,
+          type_name: type_name,
+          location: entry.decl.location&.aref(:type_params)
+        )
+      end
+    end
+
+    def validate_method_definition(method_def, type_name:)
+      method_def.types.each do |method_type|
+        unless method_type.type_params.empty?
+          loc = method_type.location&.aref(:type_params)
+
+          validate_type_params(
+            method_type.type_params,
+            type_name: type_name,
+            method_name: method_def.name,
+            location: loc
+          )
+        end
+      end
+    end
+
+    def validate_type_params(params, type_name: , method_name: nil, location:)
+      # @type var each_node: TSort::_EachNode[Symbol]
+      each_node = __skip__ = -> (&block) do
+        params.each do |param|
+          block[param.name]
+        end
+      end
+      # @type var each_child: TSort::_EachChild[Symbol]
+      each_child = __skip__ = -> (name, &block) do
+        if param = params.find {|p| p.name == name }
+          if b = param.upper_bound
+            b.free_variables.each do |tv|
+              block[tv]
+            end
+          end
+        end
+      end
+
+      TSort.each_strongly_connected_component(each_node, each_child) do |names|
+        if names.size > 1
+          params = names.map do |name|
+            params.find {|param| param.name == name} or raise
+          end
+
+          raise CyclicTypeParameterBound.new(
+            type_name: type_name,
+            method_name: method_name,
+            params: params,
+            location: location
+          )
+        end
       end
     end
 

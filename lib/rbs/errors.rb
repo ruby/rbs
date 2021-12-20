@@ -443,4 +443,17 @@ module RBS
       super "#{Location.to_string location}: Nonregular generic type alias is prohibited: #{diagnostic.type_name}, #{diagnostic.nonregular_type}"
     end
   end
+
+  class CyclicTypeParameterBound < BaseError
+    attr_reader :params, :type_name, :method_name, :location
+
+    def initialize(type_name:, method_name:, params:, location:)
+      @type_name = type_name
+      @method_name = method_name
+      @params = params
+      @location = location
+
+      super "#{Location.to_string(location)}: Cyclic type parameter bound is prohibited"
+    end
+  end
 end

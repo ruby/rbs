@@ -202,6 +202,80 @@ singleton(::BasicObject)
         assert_equal "::A", error.type_name.to_s
       end
     end
+
+    with_cli do |cli|
+      Dir.mktmpdir do |dir|
+        (Pathname(dir) + 'a.rbs').write(<<~RBS)
+        class Foo[A < _Each[B], B < _Foo[A]]
+        end
+        RBS
+
+        error = assert_raises RBS::CyclicTypeParameterBound do
+          cli.run(["-I", dir, "validate"])
+        end
+
+        assert_equal TypeName("::Foo"), error.type_name
+        assert_nil error.method_name
+        assert_equal "[A < _Each[B], B < _Foo[A]]", error.location.source
+      end
+    end
+
+    with_cli do |cli|
+      Dir.mktmpdir do |dir|
+        (Pathname(dir) + 'a.rbs').write(<<~RBS)
+        class Foo[A < _Each[B]]
+          def foo: [X < _Foo[Y]] () -> X
+
+          def bar: [X < _Foo[Y], Y < _Bar[Z], Z < _Baz[X]] () -> void
+        end
+        RBS
+
+        error = assert_raises RBS::CyclicTypeParameterBound do
+          cli.run(["-I", dir, "validate"])
+        end
+
+        assert_equal TypeName("::Foo"), error.type_name
+        assert_equal :bar, error.method_name
+        assert_equal "[X < _Foo[Y], Y < _Bar[Z], Z < _Baz[X]]", error.location.source
+      end
+    end
+
+    with_cli do |cli|
+      Dir.mktmpdir do |dir|
+        (Pathname(dir) + 'a.rbs').write(<<~RBS)
+        interface _Foo[A < _Each[B], B < _Baz[A]]
+        end
+        RBS
+
+        error = assert_raises RBS::CyclicTypeParameterBound do
+          cli.run(["-I", dir, "validate"])
+        end
+
+        assert_equal TypeName("::_Foo"), error.type_name
+        assert_nil error.method_name
+        assert_equal "[A < _Each[B], B < _Baz[A]]", error.location.source
+      end
+    end
+
+    with_cli do |cli|
+      Dir.mktmpdir do |dir|
+        (Pathname(dir) + 'a.rbs').write(<<~RBS)
+        interface _Foo[A]
+          def foo: [X < _Foo[Y]] () -> X
+
+          def bar: [X < _Foo[Y], Y < _Bar[Z], Z < _Baz[X]] () -> void
+        end
+        RBS
+
+        error = assert_raises RBS::CyclicTypeParameterBound do
+          cli.run(["-I", dir, "validate"])
+        end
+
+        assert_equal TypeName("::_Foo"), error.type_name
+        assert_equal :bar, error.method_name
+        assert_equal "[X < _Foo[Y], Y < _Bar[Z], Z < _Baz[X]]", error.location.source
+      end
+    end
   end
 
   def test_constant

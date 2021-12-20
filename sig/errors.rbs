@@ -230,4 +230,19 @@ module RBS
 
     def initialize: (diagnostic: TypeAliasRegularity::Diagnostic, location: Location[untyped, untyped]?) -> void
   end
+
+  class CyclicTypeParameterBound < BaseError
+    attr_reader location: Location[untyped, untyped]?
+
+    # Array of parameters which contains cyclic dependencies.
+    attr_reader params: Array[AST::TypeParam]
+
+    # Type name
+    attr_reader type_name: TypeName
+
+    # Method name
+    attr_reader method_name: Symbol?
+
+    def initialize: (type_name: TypeName, method_name: Symbol?, params: Array[AST::TypeParam], location: Location[untyped, untyped]?) -> void
+  end
 end
