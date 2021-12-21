@@ -1,0 +1,5 @@
+module URI
+  # RFC6068, the mailto URL scheme.
+  class MailTo < Generic
+  end
+end

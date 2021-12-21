@@ -268,7 +268,7 @@ module URI
   # It's recommended to first ::escape the provided `uri_str` if there are any
   # invalid URI characters.
   #
-  def self.parse: (String uri) -> URI::Generic
+  def self.parse: (_ToStr uri) -> (File | FTP | HTTP | HTTPS | LDAP | LDAPS | MailTo | WS | WSS | Generic)
 
   # ## Synopsis
   #
@@ -307,6 +307,11 @@ module URI
   # Returns a Hash of the defined schemes.
   #
   def self.scheme_list: () -> Hash[String, Class]
+
+  # Construct a URI instance, using the scheme to detect the appropriate class
+  # from +URI.scheme_list+.
+  #
+  def self.for: (String scheme, *untyped arguments, ?default: Class) -> (File | FTP | HTTP | HTTPS | LDAP | LDAPS | MailTo | WS | WSS | Generic)
 
   # ## Synopsis
   #
