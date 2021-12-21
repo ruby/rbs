@@ -288,12 +288,12 @@ _method-member_ ::= `def` _method-name_ `:` _method-types_            # Instance
                   | `def self.` _method-name_ `:` _method-types_      # Singleton method
                   | `def self?.` _method-name_ `:` _method-types_     # Singleton and instance method
 
-_method-types_ ::=                                                       # Empty
-                 | _type-parameters_ _method-type_ `|` _method-types_    # Overloading types
-                 | `...`                                                 # Overloading for duplicate definitions
+_method-types_ ::= _method-type-parameters_ _method-type_                       # Single method type
+                 | _method-type-parameters_ _method-type_ `|` _method-types_    # Overloading types
+                 | `...`                                                        # Overloading for duplicate definitions
 
-_type-parameters_ ::=                                                 # Empty
-                    | `[` _type-variable_ `,` etc. `]`
+_method-type-parameters_ ::=                                                    # Empty
+                           | `[` _type-variable_ `,` ... `]`
 
 _attribute-member_ ::= _attribute-type_ _method-name_ `:` _type_                     # Attribute
                      | _attribute-type_ _method-name_ `(` _ivar-name_ `) :` _type_   # Attribute with variable name specification
@@ -443,47 +443,12 @@ _const-name_ ::= _namespace_ /[A-Z]\w*/
 _global-name_ ::= /$[a-zA-Z]\w+/ | ...
 
 _module-type-parameters_ ::=                                                  # Empty
-                           | `[` _module-type-parameter_ `,` etc. `]`
-
-_module-type-parameter_ ::= _check_ _variance_ _type-variable_
-_variance_ ::= `out` | `in`
-_check_ ::= # Empty
-          | `unchecked`
+                           | `[` _module-type-parameter_ `,` ... `]`
 ```
 
 ### Class declaration
 
 Class declaration can have type parameters and superclass. When you omit superclass, `::Object` is assumed.
-
-```
-class Ref[A] < Object
-  attr_reader value: A
-  def initialize: (value: A) -> void
-end
-```
-
-For classes with type parameters, you may specify if they are "invariant" (default), "covariant" (`out`) or "contravariant" (`in`). See [this definition of covariance and contravariance](https://en.wikipedia.org/wiki/Covariance_and_contravariance_(computer_science)).
-
-For example, an `Array` of `String` can almost be considered to be an `Array` of `Object`, but not the reverse, so we can think of:
-
-```
-class Array[out T]
-  # etc.
-end
-```
-
-There's a limitation with this is for mutable objects (like arrays): a mutation could invalidate this.
-If an array of String is passed to a method as an array of Objects, and that method adds an Integer to the array, the promise is broken.
-
-In those cases, one must use the `unchecked` keyword:
-
-```
-class Array[unchecked out T]
-  # etc.
-end
-```
-
-This is how `Array` is actually defined in RBS.
 
 ### Module declaration
 
@@ -554,6 +519,94 @@ You can declare a global variable.
 ```
 $LOAD_PATH: Array[String]
 ```
+
+### Generics
+
+```md
+_module-type-parameter_ ::= _generics-unchecked_ _generics-variance_ _type-variable_ _generics-bound_
+
+_method-type-param_ ::= _type-variable_ _generics-bound_
+
+_generics-bound_ ::=                       (No type bound)
+                   | `<` _bound-type_      (The generics parameter is bounded)
+
+_bound-type_ ::= _class-name_ _type-arguments_       (Class instance type)
+              | _interface-name_ _type-arguments_    (Interface type)
+              | `singleton(` _class-name_ `)`        (Class singleton type)
+
+_generics-variance_ ::=               (Invariant)
+                      | `out`         (Covariant)
+                      | `in`          (Contravariant)
+
+_generics-unchecked_ ::=              (Empty)
+                       | `unchecked`  (Skips variance annotation validation)
+```
+
+RBS allows class/module/interface/type alias definitions and methods to be generic.
+
+```rbs
+# Simple generic class definition
+class Stack[T]
+  def push: (T) -> void
+
+  def pop: () -> T
+end
+```
+
+For classes with type parameters, you may specify if they are "invariant" (default), "covariant" (`out`) or "contravariant" (`in`). See [this definition of covariance and contravariance](https://en.wikipedia.org/wiki/Covariance_and_contravariance_(computer_science)).
+
+For example, an `Array` of `String` can almost be considered to be an `Array` of `Object`, but not the reverse, so we can think of:
+
+```
+# The `T` type parameter is covariant.
+class Array[out T]
+  # etc.
+end
+```
+
+There's a limitation with this is for mutable objects (like arrays): a mutation could invalidate this.
+If an array of `String` is passed to a method as an array of `Objects`, and that method adds an Integer to the array, the promise is broken.
+
+In those cases, one must use the `unchecked` keyword:
+
+```rbs
+# Skips the validation of variance of the type parameter `T`.
+# The type safety prohibits `out` type parameters to appear at _negative_ position (== method parameter), but we want `Array` to have it.
+class Array[unchecked out T]
+  def include?: (T) -> bool
+end
+```
+
+This is how `Array` is actually defined in RBS.
+
+Note that RBS doesn't allow specifying variance related annotations to generic method types.
+
+```rbs
+class Foo
+  def bar: [out T] () -> T    # Syntax error
+end
+```
+
+You can also specify the _upper bound_ of the type parameter.
+
+```rbs
+class PrettyPrint[T < _Output]
+  interface _Output
+    def <<: (String) -> void
+  end
+
+  attr_reader output: T
+end
+```
+
+If a type parameter has an upper bound, the type parameter must be instantiated with types that is a subclass of the upper bound.
+
+```rbs
+type str_printer = PrettyPrint[String]    # OK
+type int_printer = PrettyPrint[Integer]      # Type error
+```
+
+The upper bound must be one of a class instance type, interface type, or class singleton type.
 
 ### Comments
 
