@@ -154,7 +154,7 @@ module URI
   #
   # See URI.encode_www_form_component, URI.decode_www_form.
   #
-  def self.encode_www_form: (Enumerable[[ _ToS, _ToS ]] enum, ?encoding enc) -> String
+  def self.encode_www_form: (Enumerable[[ _ToS, _ToS ]] enum, ?encoding? enc) -> String
 
   # Encodes given `str` to URL-encoded form data.
   #
@@ -168,7 +168,7 @@ module URI
   #
   # See URI.decode_www_form_component, URI.encode_www_form.
   #
-  def self.encode_www_form_component: (String str, ?encoding enc) -> String
+  def self.encode_www_form_component: (_ToS str, ?encoding? enc) -> String
 
   # ## Synopsis
   #
