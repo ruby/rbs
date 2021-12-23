@@ -2,6 +2,53 @@
 
 ## master
 
+## 2.0.0 (pre1)
+
+### Bounded Generics
+
+RBS 2.0 ships with _bounded generics_, which improves the expressiveness of the language by adding new syntax to define the constraint on type parameters.
+
+```rbs
+class PrettyPrint[T < _Output]
+  interface _Output
+    def <<: (String) -> void
+  end
+
+  attr_reader output: T
+
+  def initialize: (T output) -> void
+end
+```
+
+This is the motivating example I found in the [prettyprint library](https://github.com/ruby/prettyprint).
+The `#initialize` receives a object of type `T` and it must have `#<<` method.
+This is defined with `< _Output` syntax in the example.
+It means _`T` has to be compatible with `_Output` interface._
+`PrettyPrint[String]` is okay, but `PrettyPrint[Integer]` is a type error.
+
+See [the PR for details](https://github.com/ruby/rbs/pull/844).
+
+`manifest.yaml` allows declaring the dependencies from your gems to standard libraries explicitly.
+
+This version contains a bug fix, which potentially breaks the compatibility with older versions.
+The super class names in class definitions are now resolved in _outer_ context.
+It was an incompatibility with Ruby and [this PR](https://github.com/ruby/rbs/pull/856) fixed the problem.
+
+### Signature updates
+
+* uri ([\#846](https://github.com/ruby/rbs/pull/846), [\#852](https://github.com/ruby/rbs/pull/852), [\#851](https://github.com/ruby/rbs/pull/851), [\#850](https://github.com/ruby/rbs/pull/850))
+
+### Language updates
+
+* Bounded generics ([\#844](https://github.com/ruby/rbs/pull/844))
+* Resolve super type names in outer context ([\#856](https://github.com/ruby/rbs/pull/856))
+
+### Library changes
+
+* Add `manifest.yaml` for collection to specify stdlib dependencies ([\#808](https://github.com/ruby/rbs/pull/808))
+* Remove experimental warning of `rbs collection` ([\#855](https://github.com/ruby/rbs/pull/855))
+* Add the utility `#map_type` methods ([\#841](https://github.com/ruby/rbs/pull/841))
+
 ## 1.8.1 (2021-12-13)
 
 ### Library changes
