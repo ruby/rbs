@@ -240,6 +240,8 @@ module RBS
         array.unshift(head + decl.name.to_namespace)
       end
 
+      outer_context = context.drop(1)
+
       case decl
       when AST::Declarations::Class
         outer_ = outer + [decl]
@@ -249,8 +251,8 @@ module RBS
           type_params: decl.type_params,
           super_class: decl.super_class&.yield_self do |super_class|
             AST::Declarations::Class::Super.new(
-              name: absolute_type_name(resolver, super_class.name, context: context),
-              args: super_class.args.map {|type| absolute_type(resolver, type, context: context) },
+              name: absolute_type_name(resolver, super_class.name, context: outer_context),
+              args: super_class.args.map {|type| absolute_type(resolver, type, context: outer_context) },
               location: super_class.location
             )
           end,

@@ -384,6 +384,31 @@ end
 RBS
   end
 
+  def test_absolute_type_super
+    env = Environment.new
+
+    decls = RBS::Parser.parse_signature(<<-RBS)
+module A
+  class C
+  end
+
+  class B < C
+    class C
+    end
+  end
+end
+    RBS
+
+    decls.each do |decl|
+      env << decl
+    end
+
+    env.resolve_type_names.tap do |env|
+      class_decl = env.class_decls[TypeName("::A::B")]
+      assert_equal TypeName("::A::C"), class_decl.primary.decl.super_class.name
+    end
+  end
+
   def test_reject
     env = Environment.new
 
