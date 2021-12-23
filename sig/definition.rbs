@@ -54,9 +54,19 @@ module RBS
 
       def private?: () -> bool
 
+      # Substitutes type variables to some types.
+      # Takes care of type parameter bounds.
+      #
       def sub: (Substitution) -> Method
 
+      # Applies the mapping from `Types::t` to `Types::t`.
+      #
+      # Note this method doesn't handle upper bound in type params.
+      # You may want to use `#map_type_bound` explicitly, or `#sub` for simple substitution.
+      #
       def map_type: () { (Types::t) -> Types::t } -> Method
+
+      def map_type_bound: () { (AST::TypeParam::bound) -> AST::TypeParam::bound } -> Method
 
       def map_method_type: () { (MethodType) -> MethodType } -> Method
     end
@@ -127,7 +137,7 @@ module RBS
 
     def type_params: () -> Array[Symbol]
 
-    def type_params_decl: () -> AST::Declarations::ModuleTypeParams
+    def type_params_decl: () -> Array[AST::TypeParam]
 
     def sub: (Substitution) -> Definition
 

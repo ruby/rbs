@@ -6,6 +6,7 @@ extern VALUE RBS;
 extern VALUE RBS_AST;
 extern VALUE RBS_AST_Annotation;
 extern VALUE RBS_AST_Comment;
+extern VALUE RBS_AST_TypeParam;
 
 extern VALUE RBS_AST_Declarations;
 extern VALUE RBS_AST_Declarations_Alias;
@@ -16,8 +17,6 @@ extern VALUE RBS_AST_Declarations_Global;
 extern VALUE RBS_AST_Declarations_Interface;
 extern VALUE RBS_AST_Declarations_Module_Self;
 extern VALUE RBS_AST_Declarations_Module;
-extern VALUE RBS_AST_Declarations_ModuleTypeParams_TypeParam;
-extern VALUE RBS_AST_Declarations_ModuleTypeParams;
 
 extern VALUE RBS_AST_Members;
 extern VALUE RBS_AST_Members_Alias;

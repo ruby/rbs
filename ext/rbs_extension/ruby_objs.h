@@ -6,6 +6,7 @@
 VALUE rbs_alias(VALUE typename, VALUE args, VALUE location);
 VALUE rbs_ast_annotation(VALUE string, VALUE location);
 VALUE rbs_ast_comment(VALUE string, VALUE location);
+VALUE rbs_ast_type_param(VALUE name, VALUE variance, bool unchecked, VALUE upper_bound, VALUE location);
 VALUE rbs_ast_decl_alias(VALUE name, VALUE type_params, VALUE type, VALUE annotations, VALUE location, VALUE comment);
 VALUE rbs_ast_decl_class_super(VALUE name, VALUE args, VALUE location);
 VALUE rbs_ast_decl_class(VALUE name, VALUE type_params, VALUE super_class, VALUE members, VALUE annotations, VALUE location, VALUE comment);
@@ -13,8 +14,6 @@ VALUE rbs_ast_decl_constant(VALUE name, VALUE type, VALUE location, VALUE commen
 VALUE rbs_ast_decl_global(VALUE name, VALUE type, VALUE location, VALUE comment);
 VALUE rbs_ast_decl_interface(VALUE name, VALUE type_params, VALUE members, VALUE annotations, VALUE location, VALUE comment);
 VALUE rbs_ast_decl_module_self(VALUE name, VALUE args, VALUE location);
-VALUE rbs_ast_decl_module_type_params_param(VALUE name, VALUE variance, VALUE skip_validation, VALUE location);
-VALUE rbs_ast_decl_module_type_params();
 VALUE rbs_ast_decl_module(VALUE name, VALUE type_params, VALUE self_types, VALUE members, VALUE annotations, VALUE location, VALUE comment);
 VALUE rbs_ast_members_alias(VALUE new_name, VALUE old_name, VALUE kind, VALUE annotations, VALUE location, VALUE comment);
 VALUE rbs_ast_members_attribute(VALUE klass, VALUE name, VALUE type, VALUE ivar_name, VALUE kind, VALUE annotations, VALUE location, VALUE comment);

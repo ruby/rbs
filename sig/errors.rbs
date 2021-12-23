@@ -179,10 +179,10 @@ module RBS
 
   class InvalidVarianceAnnotationError < DefinitionError
     attr_reader type_name: TypeName
-    attr_reader param: AST::Declarations::ModuleTypeParams::TypeParam
+    attr_reader param: AST::TypeParam
     attr_reader location: Location[untyped, untyped]?
 
-    def initialize: (type_name: TypeName, param: AST::Declarations::ModuleTypeParams::TypeParam, location: Location[untyped, untyped]?) -> void
+    def initialize: (type_name: TypeName, param: AST::TypeParam, location: Location[untyped, untyped]?) -> void
   end
 
   class RecursiveAliasDefinitionError < DefinitionError
@@ -212,7 +212,7 @@ module RBS
     def mixin_name: () -> String
   end
 
-  class RecursiveTypeAliasError < LoadingError
+  class RecursiveTypeAliasError < BaseError
     attr_reader alias_names: Array[TypeName]
     attr_reader location: Location[untyped, untyped]?
 
@@ -221,7 +221,7 @@ module RBS
     def name: () -> String
   end
 
-  class NonregularTypeAliasError < LoadingError
+  class NonregularTypeAliasError < BaseError
     # Diagnostic reported from `TypeAliasRegularity`.
     attr_reader diagnostic: TypeAliasRegularity::Diagnostic
 
@@ -229,5 +229,20 @@ module RBS
     attr_reader location: Location[untyped, untyped]?
 
     def initialize: (diagnostic: TypeAliasRegularity::Diagnostic, location: Location[untyped, untyped]?) -> void
+  end
+
+  class CyclicTypeParameterBound < BaseError
+    attr_reader location: Location[untyped, untyped]?
+
+    # Array of parameters which contains cyclic dependencies.
+    attr_reader params: Array[AST::TypeParam]
+
+    # Type name
+    attr_reader type_name: TypeName
+
+    # Method name
+    attr_reader method_name: Symbol?
+
+    def initialize: (type_name: TypeName, method_name: Symbol?, params: Array[AST::TypeParam], location: Location[untyped, untyped]?) -> void
   end
 end

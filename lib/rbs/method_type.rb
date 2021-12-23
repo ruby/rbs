@@ -29,11 +29,18 @@ module RBS
     end
 
     def sub(s)
-      s.without(*type_params).yield_self do |sub|
-        map_type do |ty|
-          ty.sub(sub)
-        end
-      end
+      sub = s.without(*type_param_names)
+
+      self.class.new(
+        type_params: type_params.map do |param|
+          param.map_type do |bound|
+            bound.map_type {|ty| ty.sub(sub) }
+          end
+        end,
+        type: type.sub(sub),
+        block: block&.sub(sub),
+        location: location
+      )
     end
 
     def update(type_params: self.type_params, type: self.type, block: self.block, location: self.location)
@@ -48,7 +55,7 @@ module RBS
     def free_variables(set = Set.new)
       type.free_variables(set)
       block&.type&.free_variables(set)
-      set.subtract(type_params)
+      set.subtract(type_param_names)
     end
 
     def map_type(&block)
@@ -60,6 +67,18 @@ module RBS
         end,
         location: location
       )
+    end
+
+    def map_type_bound(&block)
+      if type_params.empty?
+        self
+      else
+        self.update(
+          type_params: type_params.map {|param|
+            param.map_type(&block)
+          }
+        )
+      end
     end
 
     def each_type(&block)
@@ -88,6 +107,10 @@ module RBS
       else
         "[#{type_params.join(", ")}] #{s}"
       end
+    end
+
+    def type_param_names
+      type_params.map(&:name)
     end
   end
 end

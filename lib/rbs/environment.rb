@@ -39,19 +39,26 @@ module RBS
 
       def validate_type_params
         unless decls.empty?
+          # @type var hd_decl: MultiEntry::D[module_decl]
+          # @type var tl_decls: Array[MultiEntry::D[module_decl]]
           hd_decl, *tl_decls = decls
           raise unless hd_decl
 
           hd_params = hd_decl.decl.type_params
-          hd_names = hd_params.params.map(&:name)
 
           tl_decls.each do |tl_decl|
             tl_params = tl_decl.decl.type_params
 
-            unless hd_params.size == tl_params.size && hd_params == tl_params.rename_to(hd_names)
+            unless compatible_params?(hd_params, tl_params)
               raise GenericParameterMismatchError.new(name: name, decl: tl_decl.decl)
             end
           end
+        end
+      end
+
+      def compatible_params?(ps1, ps2)
+        if ps1.size == ps2.size
+          ps1 == AST::TypeParam.rename(ps2, new_names: ps1.map(&:name))
         end
       end
 
@@ -248,7 +255,7 @@ module RBS
         prefix_ = prefix + decl.name.to_namespace
         AST::Declarations::Class.new(
           name: decl.name.with_prefix(prefix),
-          type_params: decl.type_params,
+          type_params: resolve_type_params(resolver, decl.type_params, context: context),
           super_class: decl.super_class&.yield_self do |super_class|
             AST::Declarations::Class::Super.new(
               name: absolute_type_name(resolver, super_class.name, context: outer_context),
@@ -280,7 +287,7 @@ module RBS
         prefix_ = prefix + decl.name.to_namespace
         AST::Declarations::Module.new(
           name: decl.name.with_prefix(prefix),
-          type_params: decl.type_params,
+          type_params: resolve_type_params(resolver, decl.type_params, context: context),
           self_types: decl.self_types.map do |module_self|
             AST::Declarations::Module::Self.new(
               name: absolute_type_name(resolver, module_self.name, context: context),
@@ -310,7 +317,7 @@ module RBS
       when AST::Declarations::Interface
         AST::Declarations::Interface.new(
           name: decl.name.with_prefix(prefix),
-          type_params: decl.type_params,
+          type_params: resolve_type_params(resolver, decl.type_params, context: context),
           members: decl.members.map do |member|
             resolve_member(resolver, member, context: context)
           end,
@@ -321,7 +328,7 @@ module RBS
       when AST::Declarations::Alias
         AST::Declarations::Alias.new(
           name: decl.name.with_prefix(prefix),
-          type_params: decl.type_params,
+          type_params: resolve_type_params(resolver, decl.type_params, context: context),
           type: absolute_type(resolver, decl.type, context: context),
           location: decl.location,
           annotations: decl.annotations,
@@ -345,7 +352,7 @@ module RBS
           name: member.name,
           kind: member.kind,
           types: member.types.map do |type|
-            type.map_type {|ty| absolute_type(resolver, ty, context: context) }
+            resolve_method_type(resolver, type, context: context)
           end,
           comment: member.comment,
           overload: member.overload?,
@@ -429,6 +436,20 @@ module RBS
         )
       else
         member
+      end
+    end
+
+    def resolve_method_type(resolver, type, context:)
+      type.map_type do |ty|
+        absolute_type(resolver, ty, context: context)
+      end.map_type_bound do |bound|
+        _ = absolute_type(resolver, bound, context: context)
+      end
+    end
+
+    def resolve_type_params(resolver, params, context:)
+      params.map do |param|
+        param.map_type {|type| _ = absolute_type(resolver, type, context: context) }
       end
     end
 

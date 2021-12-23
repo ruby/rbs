@@ -33,7 +33,7 @@ module RBS
     def try_cache: (TypeName, cache: Hash[TypeName, Definition | false | nil]) { () -> Definition } -> Definition
                  | [A] (TypeName, cache: Hash[A, Definition | false | nil], key: A) { () -> Definition } -> Definition
 
-    def validate_params_with: (AST::Declarations::ModuleTypeParams, result: VarianceCalculator::Result) { (AST::Declarations::ModuleTypeParams::TypeParam) -> void } -> void
+    def validate_params_with: (Array[AST::TypeParam], result: VarianceCalculator::Result) { (AST::TypeParam) -> void } -> void
 
     def validate_type_params: (Definition, ancestors: AncestorBuilder::OneAncestors, methods: MethodBuilder::Methods) -> void
 

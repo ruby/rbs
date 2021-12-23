@@ -42,6 +42,18 @@ class RBS::MethodTypeParsingTest < Test::Unit::TestCase
     end
   end
 
+  def test_method_type_location
+    Parser.parse_method_type("(untyped _)->void").yield_self do |type|
+      assert_nil type.location[:type_params]
+      assert_equal "(untyped _)->void", type.location[:type].source
+    end
+
+    Parser.parse_method_type("[A < _Foo[String]] (A) { (String) -> void } -> void").yield_self do |type|
+      assert_equal "[A < _Foo[String]]", type.location[:type_params].source
+      assert_equal "(A) { (String) -> void } -> void", type.location[:type].source
+    end
+  end
+
   def test_method_parameter_location
     Parser.parse_method_type("(untyped a, ?Integer b, *String c, Symbol d) -> void").tap do |type|
       type.type.required_positionals[0].tap do |param|

@@ -31,7 +31,9 @@ module RBS
 
       def validate_type_params: () -> void
 
-      def type_params: () -> AST::Declarations::ModuleTypeParams
+      def compatible_params?: (Array[AST::TypeParam], Array[AST::TypeParam]) -> boolish
+
+      def type_params: () -> Array[AST::TypeParam]
 
       def primary: () -> D[module_decl]
     end
@@ -95,6 +97,10 @@ module RBS
     def resolve_declaration: (TypeNameResolver resolver, AST::Declarations::t decl, outer: Array[module_decl], prefix: Namespace) -> AST::Declarations::t
 
     def resolve_member: (TypeNameResolver, AST::Members::t, context: Array[Namespace]) -> AST::Members::t
+
+    def resolve_method_type: (TypeNameResolver, RBS::MethodType, context: Array[Namespace]) -> RBS::MethodType
+
+    def resolve_type_params: (TypeNameResolver resolver, Array[AST::TypeParam], context: Array[Namespace]) ->  Array[AST::TypeParam]
 
     def absolute_type: (TypeNameResolver, Types::t, context: Array[Namespace]) -> Types::t
 

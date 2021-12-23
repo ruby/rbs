@@ -155,6 +155,15 @@ module RBS
         )
       end
 
+      def map_type_bound(&block)
+        self.class.new(
+          super_method: super_method&.map_type_bound(&block),
+          defs: defs.map {|defn| defn.update(type: defn.type.map_type_bound(&block)) },
+          accessibility: @accessibility,
+          alias_of: alias_of
+        )
+      end
+
       def map_method_type(&block)
         self.class.new(
           super_method: super_method,

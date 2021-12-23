@@ -8,7 +8,7 @@ module RBS
   #
   # ```
   #
-  class Location[RequiredChildKeys, OptionalChildKeys]
+  class Location[in RequiredChildKeys, in OptionalChildKeys]
     # The buffer this location points on.
     attr_reader buffer (): Buffer
 
@@ -78,6 +78,8 @@ module RBS
     def []: (RequiredChildKeys) -> Location[bot, bot]
           | (OptionalChildKeys) -> Location[bot, bot]?
           | (Symbol) -> Location[bot, bot]?
+
+    alias aref []
 
     def each_optional_key: () { (Symbol) -> void } -> void
                          | () -> Enumerator[Symbol, void]

@@ -14,11 +14,11 @@ module RBS
     end
   end
 
-  class ErrorBase < StandardError; end
-  class LoadingError < ErrorBase; end
-  class DefinitionError < ErrorBase; end
+  class BaseError < StandardError; end
+  class LoadingError < BaseError; end
+  class DefinitionError < BaseError; end
 
-  class ParsingError < ErrorBase
+  class ParsingError < BaseError
     attr_reader :location
     attr_reader :error_message
     attr_reader :token_type
@@ -105,7 +105,7 @@ module RBS
     end
   end
 
-  class NoTypeFoundError < ErrorBase
+  class NoTypeFoundError < BaseError
     attr_reader :type_name
     attr_reader :location
 
@@ -416,7 +416,7 @@ module RBS
     end
   end
 
-  class RecursiveTypeAliasError < LoadingError
+  class RecursiveTypeAliasError < BaseError
     attr_reader :alias_names
     attr_reader :location
 
@@ -432,7 +432,7 @@ module RBS
     end
   end
 
-  class NonregularTypeAliasError < LoadingError
+  class NonregularTypeAliasError < BaseError
     attr_reader :diagnostic
     attr_reader :location
 
@@ -441,6 +441,19 @@ module RBS
       @location = location
 
       super "#{Location.to_string location}: Nonregular generic type alias is prohibited: #{diagnostic.type_name}, #{diagnostic.nonregular_type}"
+    end
+  end
+
+  class CyclicTypeParameterBound < BaseError
+    attr_reader :params, :type_name, :method_name, :location
+
+    def initialize(type_name:, method_name:, params:, location:)
+      @type_name = type_name
+      @method_name = method_name
+      @params = params
+      @location = location
+
+      super "#{Location.to_string(location)}: Cyclic type parameter bound is prohibited"
     end
   end
 end

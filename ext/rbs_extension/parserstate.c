@@ -130,8 +130,7 @@ bool parser_advance_if(parserstate *state, enum TokenType type) {
   }
 }
 
-void parser_advance_assert(parserstate *state, enum TokenType type) {
-  parser_advance(state);
+void parser_assert(parserstate *state, enum TokenType type) {
   if (state->current_token.type != type) {
     raise_syntax_error(
       state,
@@ -140,6 +139,11 @@ void parser_advance_assert(parserstate *state, enum TokenType type) {
       token_type_str(type)
     );
   }
+}
+
+void parser_advance_assert(parserstate *state, enum TokenType type) {
+  parser_advance(state);
+  parser_assert(state, type);
 }
 
 void print_token(token tok) {

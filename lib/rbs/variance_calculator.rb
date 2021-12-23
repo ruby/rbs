@@ -141,14 +141,15 @@ module RBS
                       end
 
         type.args.each.with_index do |ty, i|
-          var = type_params.params[i]
-          case var&.variance
-          when :invariant
-            type(ty, result: result, context: :invariant)
-          when :covariant
-            type(ty, result: result, context: context)
-          when :contravariant
-            type(ty, result: result, context: negate(context))
+          if var = type_params[i]
+            case var.variance
+            when :invariant
+              type(ty, result: result, context: :invariant)
+            when :covariant
+              type(ty, result: result, context: context)
+            when :contravariant
+              type(ty, result: result, context: negate(context))
+            end
           end
         end
       when Types::Proc

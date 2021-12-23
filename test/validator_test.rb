@@ -142,4 +142,28 @@ type baz[out T] = ^(T) -> void
       end
     end
   end
+
+  def test_generic_type_bound
+    SignatureManager.new do |manager|
+      manager.add_file("test.rbs", <<-EOF)
+type foo[T < String, S < Array[T]] = [T, S]
+
+type bar[T < _Foo[S], S < _Bar[T]] = nil
+      EOF
+
+      manager.build do |env|
+        resolver = RBS::TypeNameResolver.from_env(env)
+        validator = RBS::Validator.new(env: env, resolver: resolver)
+
+        validator.validate_type_alias(entry: env.alias_decls[type_name("::foo")])
+
+        error = assert_raises(RBS::CyclicTypeParameterBound) do
+          validator.validate_type_alias(entry: env.alias_decls[type_name("::bar")])
+        end
+
+        assert_equal error.type_name, TypeName("::bar")
+        assert_equal "[T < _Foo[S], S < _Bar[T]]", error.location.source
+      end
+    end
+  end
 end

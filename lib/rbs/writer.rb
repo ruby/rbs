@@ -146,19 +146,7 @@ module RBS
         "#{name}"
       else
         ps = params.each.map do |param|
-          s = ""
-          if param.skip_validation
-            s << "unchecked "
-          end
-          case param.variance
-          when :invariant
-            # nop
-          when :covariant
-            s << "out "
-          when :contravariant
-            s << "in "
-          end
-          s + param.name.to_s
+          param.to_s
         end
 
         "#{name}[#{ps.join(", ")}]"

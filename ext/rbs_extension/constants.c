@@ -6,11 +6,9 @@ VALUE RBS;
 VALUE RBS_AST;
 VALUE RBS_AST_Comment;
 VALUE RBS_AST_Annotation;
+VALUE RBS_AST_TypeParam;
 
 VALUE RBS_AST_Declarations;
-
-VALUE RBS_AST_Declarations_ModuleTypeParams;
-VALUE RBS_AST_Declarations_ModuleTypeParams_TypeParam;
 
 VALUE RBS_AST_Declarations_Alias;
 VALUE RBS_AST_Declarations_Constant;
@@ -77,11 +75,9 @@ void rbs__init_constants() {
   RBS_AST = rb_const_get(RBS, rb_intern("AST"));
   RBS_AST_Comment = rb_const_get(RBS_AST, rb_intern("Comment"));
   RBS_AST_Annotation = rb_const_get(RBS_AST, rb_intern("Annotation"));
+  RBS_AST_TypeParam = rb_const_get(RBS_AST, rb_intern("TypeParam"));
 
   RBS_AST_Declarations = rb_const_get(RBS_AST, rb_intern("Declarations"));
-
-  RBS_AST_Declarations_ModuleTypeParams = rb_const_get(RBS_AST_Declarations, rb_intern("ModuleTypeParams"));
-  RBS_AST_Declarations_ModuleTypeParams_TypeParam = rb_const_get(RBS_AST_Declarations_ModuleTypeParams, rb_intern("TypeParam"));
 
   RBS_AST_Declarations_Alias = rb_const_get(RBS_AST_Declarations, rb_intern("Alias"));
   RBS_AST_Declarations_Constant = rb_const_get(RBS_AST_Declarations, rb_intern("Constant"));

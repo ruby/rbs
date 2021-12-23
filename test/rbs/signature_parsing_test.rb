@@ -6,6 +6,7 @@ class RBS::SignatureParsingTest < Test::Unit::TestCase
   Types = RBS::Types
   TypeName = RBS::TypeName
   Namespace = RBS::Namespace
+  AST = RBS::AST
   Declarations = RBS::AST::Declarations
   Members = RBS::AST::Members
   MethodType = RBS::MethodType
@@ -74,20 +75,20 @@ RBS
       decls[0].tap do |type_decl|
         assert_instance_of Declarations::Alias, type_decl
 
-        type_decl.type_params.params[0].tap do |param|
+        type_decl.type_params[0].tap do |param|
           assert_equal :T, param.name
           assert_equal :invariant, param.variance
-          refute_predicate param, :skip_validation
+          refute_predicate param, :unchecked?
         end
       end
 
       decls[1].tap do |type_decl|
         assert_instance_of Declarations::Alias, type_decl
 
-        type_decl.type_params.params[0].tap do |param|
+        type_decl.type_params[0].tap do |param|
           assert_equal :T, param.name
           assert_equal :covariant, param.variance
-          assert_predicate param, :skip_validation
+          assert_predicate param, :unchecked?
         end
       end
     end
@@ -202,7 +203,10 @@ RBS
           assert_nil t2.block
           assert_equal "(untyped) -> Integer", t2.location.source
 
-          assert_equal [:X], t3.type_params
+          assert_equal(
+            [AST::TypeParam.new(name: :X, variance: :invariant, upper_bound: nil, location: nil)],
+            t3.type_params
+          )
           assert_instance_of Types::Block, t3.block
           assert_instance_of Types::Variable, t3.block.type.required_positionals[0].type
           assert_instance_of Types::Variable, t3.block.type.return_type
@@ -1059,20 +1063,20 @@ end
       assert_instance_of Declarations::Interface, interface_decl
       a, b, c = interface_decl.type_params.each.to_a
 
-      assert_instance_of Declarations::ModuleTypeParams::TypeParam, a
+      assert_instance_of AST::TypeParam, a
       assert_equal :A, a.name
       assert_equal :invariant, a.variance
-      refute a.skip_validation
+      refute a.unchecked?
 
-      assert_instance_of Declarations::ModuleTypeParams::TypeParam, b
+      assert_instance_of AST::TypeParam, b
       assert_equal :B, b.name
       assert_equal :covariant, b.variance
-      refute b.skip_validation
+      refute b.unchecked?
 
-      assert_instance_of Declarations::ModuleTypeParams::TypeParam, c
+      assert_instance_of AST::TypeParam, c
       assert_equal :C, c.name
       assert_equal :contravariant, c.variance
-      assert c.skip_validation
+      assert c.unchecked?
     end
   end
 
@@ -1632,7 +1636,7 @@ end
         assert_equal "end", decl.location[:end].source
         assert_equal "[X, unchecked in Y]", decl.location[:type_params].source
 
-        decl.type_params[:X].tap do |param|
+        decl.type_params[0].tap do |param|
           assert_instance_of Location, param.location
 
           assert_equal "X", param.location[:name].source
@@ -1640,7 +1644,7 @@ end
           assert_nil param.location[:unchecked]
         end
 
-        decl.type_params[:Y].tap do |param|
+        decl.type_params[1].tap do |param|
           assert_instance_of Location, param.location
 
           assert_equal "Y", param.location[:name].source
@@ -1859,6 +1863,51 @@ end
         assert_instance_of Types::ClassInstance, decl.members[10].args[0]
         assert_instance_of Types::Variable, decl.members[11].args[0]
       end
+    end
+  end
+
+  def test_generics_bound
+    Parser.parse_signature(<<-EOF).tap do |decls|
+class Foo[X < _Each[Y], Y]
+  def foo: [X < Array[Y]] (X) -> X
+end
+    EOF
+      decls[0].tap do |decl|
+        assert_instance_of Declarations::Class, decl
+
+        assert_equal 2, decl.type_params.size
+        decl.type_params[0].tap do |param|
+          assert_equal :X, param.name
+          assert_equal :invariant, param.variance
+          refute_predicate param, :unchecked?
+          assert_equal parse_type("_Each[Y]", variables: [:Y]), param.upper_bound
+        end
+
+        decl.type_params[1].tap do |param|
+          assert_equal :Y, param.name
+          assert_equal :invariant, param.variance
+          refute_predicate param, :unchecked?
+          assert_nil param.upper_bound
+        end
+
+        decl.members[0].tap do |member|
+          member.types[0].type_params[0].tap do |param|
+            assert_equal :X, param.name
+            assert_equal :invariant, param.variance
+            refute_predicate param, :unchecked?
+            assert_equal parse_type("Array[Y]", variables: [:Y]), param.upper_bound
+          end
+        end
+      end
+    end
+  end
+
+  def test_generics_bound_error
+    assert_raises RBS::ParsingError do
+      Parser.parse_signature(<<-EOF)
+        class Foo[X < string]
+        end
+            EOF
     end
   end
 end

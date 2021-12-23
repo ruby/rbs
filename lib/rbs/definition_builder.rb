@@ -385,7 +385,7 @@ module RBS
                 initialize = instance.methods[:initialize]
 
                 if initialize
-                  class_params = entry.type_params.each.map(&:name)
+                  class_params = entry.type_params
 
                   # Inject a virtual _typed new_.
                   initialize_defs = initialize.defs
@@ -394,28 +394,34 @@ module RBS
                     defs: initialize_defs.map do |initialize_def|
                       method_type = initialize_def.type
 
-                      class_type_param_vars = Set.new(class_params)
-                      method_type_param_vars = Set.new(method_type.type_params)
+                      class_type_param_vars = Set.new(class_params.map(&:name))
+                      method_type_param_vars = Set.new(method_type.type_params.map(&:name))
 
                       if class_type_param_vars.intersect?(method_type_param_vars)
-                        renamed_method_params = method_type.type_params.map do |name|
-                          if class_type_param_vars.include?(name)
-                            Types::Variable.fresh(name).name
+                        new_method_param_names = method_type.type_params.map do |method_param|
+                          if class_type_param_vars.include?(method_param.name)
+                            Types::Variable.fresh(method_param.name).name
                           else
-                            name
+                            method_param.name
                           end
                         end
-                        method_params = class_params + renamed_method_params
 
-                        sub = Substitution.build(method_type.type_params, Types::Variable.build(renamed_method_params))
+                        sub = Substitution.build(
+                          method_type.type_params.map(&:name),
+                          Types::Variable.build(new_method_param_names)
+                        )
+
+                        method_params = class_params + AST::TypeParam.rename(method_type.type_params, new_names: new_method_param_names)
+                        method_type = method_type
+                          .update(type_params: [])
+                          .sub(sub)
+                          .update(type_params: method_params)
                       else
-                        method_params = class_params + method_type.type_params
-                        sub = Substitution.build([], [])
+                        method_type = method_type
+                          .update(type_params: class_params + method_type.type_params)
                       end
 
-                      method_type = method_type.map_type {|ty| ty.sub(sub) }
                       method_type = method_type.update(
-                        type_params: method_params,
                         type: method_type.type.with_return_type(
                           Types::ClassInstance.new(
                             name: type_name,
@@ -446,7 +452,7 @@ module RBS
 
     def validate_params_with(type_params, result:)
       type_params.each do |param|
-        unless param.skip_validation
+        unless param.unchecked?
           unless result.compatible?(param.name, with_annotation: param.variance)
             yield param
           end

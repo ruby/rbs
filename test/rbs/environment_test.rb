@@ -189,7 +189,7 @@ EOF
       entry.insert(decl: decls[0], outer: [])
       entry.insert(decl: decls[1], outer: [])
 
-      assert_instance_of RBS::AST::Declarations::ModuleTypeParams, entry.type_params
+      assert_instance_of Array, entry.type_params
     end
 
     Environment::ModuleEntry.new(name: type_name("::Foo")).tap do |entry|
@@ -441,5 +441,45 @@ EOF
 
     assert env_.buffers.none? {|buf| buf.name == Pathname("foo.rbs") }
     assert env_.buffers.any? {|buf| buf.name == Pathname("bar.rbs") }
+  end
+
+  def test_absolute_type_generics_upper_bound
+    env = Environment.new
+
+    decls = RBS::Parser.parse_signature(<<RBS)
+interface _Equatable
+  def ==: (untyped) -> bool
+end
+
+module Bar[A]
+end
+
+class Foo[A < _Equatable]
+  def test: [B < Bar[_Equatable]] (A, B) -> bool
+end
+RBS
+
+    decls.each do |decl|
+      env << decl
+    end
+
+    env_ = env.resolve_type_names
+
+    writer = RBS::Writer.new(out: StringIO.new)
+
+    writer.write(env_.declarations)
+
+    assert_equal(<<RBS, writer.out.string)
+interface ::_Equatable
+  def ==: (untyped) -> bool
+end
+
+module ::Bar[A]
+end
+
+class ::Foo[A < ::_Equatable]
+  def test: [B < ::Bar[::_Equatable]] (A, B) -> bool
+end
+RBS
   end
 end

@@ -48,7 +48,7 @@ module RBS
         modules.push AST::Declarations::Class.new(
           name: nested_name(name),
           super_class: super_class && AST::Declarations::Class::Super.new(name: const_to_name(super_class), args: [], location: nil),
-          type_params: AST::Declarations::ModuleTypeParams.empty,
+          type_params: [],
           members: [],
           annotations: [],
           location: nil,
@@ -65,7 +65,7 @@ module RBS
       def push_module(name, comment:)
         modules.push AST::Declarations::Module.new(
           name: nested_name(name),
-          type_params: AST::Declarations::ModuleTypeParams.empty,
+          type_params: [],
           members: [],
           annotations: [],
           location: nil,
@@ -212,10 +212,12 @@ module RBS
                            end
               end
 
-              current_module.type_params.add(
-                AST::Declarations::ModuleTypeParams::TypeParam.new(name: node.children[0],
-                                                                   variance: variance || :invariant,
-                                                                   skip_validation: false))
+              current_module.type_params << AST::TypeParam.new(
+                name: node.children[0],
+                variance: variance || :invariant,
+                location: nil,
+                upper_bound: nil
+              )
             end
           else
             name = node.children[0].yield_self do |n|

@@ -17,6 +17,8 @@ module RBS
         end
     end
 
+    alias aref []
+
     WithChildren = self
 
     def name
