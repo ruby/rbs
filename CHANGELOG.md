@@ -2,7 +2,7 @@
 
 ## master
 
-## 2.0.0 (pre1)
+## 2.0.0 (2021-12-24)
 
 ### Bounded Generics
 
@@ -60,7 +60,7 @@ It was an incompatibility with Ruby and [this PR](https://github.com/ruby/rbs/pu
 
 ### Signature updates
 
-* uri ([\#846](https://github.com/ruby/rbs/pull/846), [\#852](https://github.com/ruby/rbs/pull/852), [\#851](https://github.com/ruby/rbs/pull/851), [\#850](https://github.com/ruby/rbs/pull/850))
+* uri ([\#846](https://github.com/ruby/rbs/pull/846), [\#852](https://github.com/ruby/rbs/pull/852), [\#851](https://github.com/ruby/rbs/pull/851), [\#850](https://github.com/ruby/rbs/pull/850), [#849](https://github.com/ruby/rbs/pull/849))
 
 ### Language updates
 
