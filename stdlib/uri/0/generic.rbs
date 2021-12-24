@@ -193,14 +193,14 @@ module URI
     #
     # Creates a new URI::Generic instance from ``generic'' components without check.
     #
-    def initialize: (String scheme, String userinfo, String host, Integer port, String? registry, String path, String? opaque, String query, String fragment, ?untyped parser, ?boolish arg_check) -> URI::Generic
+    def initialize: (String? scheme, String? userinfo, String? host, (String | Integer)? port, nil registry, String? path, String? opaque, String? query, String? fragment, ?untyped parser, ?boolish arg_check) -> void
 
     #
     # Returns the scheme component of the URI.
     #
     #   URI("http://foo/bar/baz").scheme #=> "http"
     #
-    attr_reader scheme: String
+    attr_reader scheme: String?
 
     # Returns the host component of the URI.
     #
@@ -222,14 +222,14 @@ module URI
     #   URI("http://[::1]/bar/baz").host     #=> "[::1]"
     #   URI("http://[::1]/bar/baz").hostname #=> "::1"
     #
-    attr_reader host: String
+    attr_reader host: String?
 
     # Returns the port component of the URI.
     #
     #   URI("http://foo/bar/baz").port      #=> 80
     #   URI("http://foo:8080/bar/baz").port #=> 8080
     #
-    attr_reader port: Integer
+    attr_reader port: Integer?
 
     def registry: () -> nil
 
@@ -237,13 +237,13 @@ module URI
     #
     #   URI("http://foo/bar/baz").path #=> "/bar/baz"
     #
-    attr_reader path: String
+    attr_reader path: String?
 
     # Returns the query component of the URI.
     #
     #   URI("http://foo/bar/baz?search=FooBar").query #=> "search=FooBar"
     #
-    attr_reader query: String
+    attr_reader query: String?
 
     # Returns the opaque part of the URI.
     #
@@ -280,13 +280,13 @@ module URI
     #
     # Checks the scheme +v+ component against the URI::Parser Regexp for :SCHEME.
     #
-    def check_scheme: (String v) -> true
+    def check_scheme: (String? v) -> true
 
     # Protected setter for the scheme component +v+.
     #
     # See also URI::Generic.scheme=.
     #
-    def set_scheme: (String v) -> String
+    def set_scheme: (String? v) -> String?
 
     #
     # == Args
@@ -309,7 +309,7 @@ module URI
     #   uri.scheme = "https"
     #   uri.to_s  #=> "https://my.example.com"
     #
-    def scheme=: (String v) -> String
+    def scheme=: (String? v) -> String?
 
     #
     # Checks the +user+ and +password+.
@@ -338,12 +338,12 @@ module URI
     # Can not have a registry or opaque component defined,
     # with a user component defined.
     #
-    def check_password: (String v, ?String user) -> (String | true)
+    def check_password: (String? v, ?String user) -> (String? | true)
 
     #
     # Sets userinfo, argument is string like 'name:pass'.
     #
-    def userinfo=: (String? userinfo) -> Array[String | nil]?
+    def userinfo=: (String? userinfo) -> String?
 
     #
     # == Args
@@ -366,7 +366,7 @@ module URI
     #   uri.user = "sam"
     #   uri.to_s  #=> "http://sam:V3ry_S3nsit1ve@my.example.com"
     #
-    def user=: (String user) -> String
+    def user=: (String? user) -> String?
 
     #
     # == Args
@@ -389,26 +389,26 @@ module URI
     #   uri.password = "V3ry_S3nsit1ve"
     #   uri.to_s  #=> "http://john:V3ry_S3nsit1ve@my.example.com"
     #
-    def password=: (String password) -> String
+    def password=: (String? password) -> String?
 
     # Protected setter for the +user+ component, and +password+ if available
     # (with validation).
     #
     # See also URI::Generic.userinfo=.
     #
-    def set_userinfo: (String user, ?String? password) -> Array[String | nil]
+    def set_userinfo: (String? user, ?String? password) -> [String?, String?]
 
     # Protected setter for the user component +v+.
     #
     # See also URI::Generic.user=.
     #
-    def set_user: (String v) -> String
+    def set_user: (String? v) -> String?
 
     # Protected setter for the password component +v+.
     #
     # See also URI::Generic.password=.
     #
-    def set_password: (String v) -> String
+    def set_password: (String? v) -> String?
 
     # Returns the userinfo +ui+ as <code>[user, password]</code>
     # if properly formatted as 'user:password'.
@@ -421,10 +421,10 @@ module URI
     def userinfo: () -> String?
 
     # Returns the user component.
-    def user: () -> String
+    def user: () -> String?
 
     # Returns the password component.
-    def password: () -> String
+    def password: () -> String?
 
     #
     # Checks the host +v+ component for RFC2396 compliance
@@ -433,13 +433,13 @@ module URI
     # Can not have a registry or opaque component defined,
     # with a host component defined.
     #
-    def check_host: (String v) -> (String | true)
+    def check_host: (String? v) -> true?
 
     # Protected setter for the host component +v+.
     #
     # See also URI::Generic.host=.
     #
-    def set_host: (String v) -> String
+    def set_host: (String? v) -> String?
 
     #
     # == Args
@@ -462,7 +462,7 @@ module URI
     #   uri.host = "foo.com"
     #   uri.to_s  #=> "http://foo.com"
     #
-    def host=: (String v) -> String
+    def host=: (String? v) -> String?
 
     # Extract the host part of the URI and unwrap brackets for IPv6 addresses.
     #
@@ -473,7 +473,7 @@ module URI
     #   uri.hostname      #=> "::1"
     #   uri.host          #=> "[::1]"
     #
-    def hostname: () -> String
+    def hostname: () -> String?
 
     # Sets the host part of the URI as the argument with brackets for IPv6 addresses.
     #
@@ -487,7 +487,7 @@ module URI
     # If the argument seems to be an IPv6 address,
     # it is wrapped with brackets.
     #
-    def hostname=: (String v) -> String
+    def hostname=: (String? v) -> String?
 
     #
     # Checks the port +v+ component for RFC2396 compliance
@@ -496,13 +496,13 @@ module URI
     # Can not have a registry or opaque component defined,
     # with a port component defined.
     #
-    def check_port: (Integer v) -> (Integer | true)
+    def check_port: ((String | Integer)? v) -> true?
 
     # Protected setter for the port component +v+.
     #
     # See also URI::Generic.port=.
     #
-    def set_port: (Integer v) -> Integer
+    def set_port: ((String | Integer)? v) -> (String | Integer)?
 
     #
     # == Args
@@ -525,7 +525,7 @@ module URI
     #   uri.port = 8080
     #   uri.to_s  #=> "http://my.example.com:8080"
     #
-    def port=: (Integer v) -> Integer
+    def port=: ((String | Integer)? v) -> (String | Integer)?
 
     def check_registry: (String v) -> nil
 
@@ -541,13 +541,13 @@ module URI
     # Can not have a opaque component defined,
     # with a path component defined.
     #
-    def check_path: (String v) -> true
+    def check_path: (String? v) -> true
 
     # Protected setter for the path component +v+.
     #
     # See also URI::Generic.path=.
     #
-    def set_path: (String v) -> String
+    def set_path: (String? v) -> String?
 
     #
     # == Args
@@ -570,7 +570,7 @@ module URI
     #   uri.path = "/faq/"
     #   uri.to_s  #=> "http://my.example.com/faq/"
     #
-    def path=: (String v) -> String
+    def path=: (String? v) -> String?
 
     #
     # == Args
@@ -590,7 +590,7 @@ module URI
     #   uri.query = "id=1"
     #   uri.to_s  #=> "http://my.example.com/?id=1"
     #
-    def query=: (String v) -> String
+    def query=: (String? v) -> String?
 
     #
     # Checks the opaque +v+ component for RFC2396 compliance and
@@ -599,13 +599,13 @@ module URI
     # Can not have a host, port, user, or path component defined,
     # with an opaque component defined.
     #
-    def check_opaque: (String v) -> (String | true)
+    def check_opaque: (String? v) -> true?
 
     # Protected setter for the opaque component +v+.
     #
     # See also URI::Generic.opaque=.
     #
-    def set_opaque: (String v) -> String
+    def set_opaque: (String? v) -> String?
 
     #
     # == Args
@@ -620,7 +620,7 @@ module URI
     #
     # See also URI::Generic.check_opaque.
     #
-    def opaque=: (String v) -> String
+    def opaque=: (String? v) -> String?
 
     #
     # Checks the fragment +v+ component against the URI::Parser Regexp for :FRAGMENT.
@@ -644,7 +644,7 @@ module URI
     #   uri.fragment = "time=1305212086"
     #   uri.to_s  #=> "http://my.example.com/?id=25#time=1305212086"
     #
-    def fragment=: (String v) -> String
+    def fragment=: (String? v) -> String?
 
     #
     # Returns true if URI is hierarchical.
