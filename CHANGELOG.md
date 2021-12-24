@@ -28,7 +28,29 @@ It means _`T` has to be compatible with `_Output` interface._
 
 See [the PR for details](https://github.com/ruby/rbs/pull/844).
 
-`manifest.yaml` allows declaring the dependencies from your gems to standard libraries explicitly.
+### RBS Collection manager
+
+RBS Collection feature is generally available on RBS 2.0. In short, it is Bundler for RBS. You can manage RBSs of standard libraries and third party gems with `rbs collection` subcommand.
+
+```bash
+$ rbs collection init
+created: rbs_collection.yaml
+
+# It makes `rbs_collection.lock.yaml` and installs the dependecies' RBSs
+$ rbs collection install
+Installing actionpack:6.0 (actionpack@ce6664cec73)
+(...snip...)
+Using tsort:0 (/path/to/rbs-2.0.0/stdlib/tsort/0)
+It's done! 21 gems' RBSs now installed.
+
+# Now you can use rbs, typeprof and steep commands with the dependencies out of the box!
+$ rbs validate
+$ typeprof app.rb
+$ steep check
+```
+
+RBS v2 also introduces `manifest.yaml` to declare the dependencies from your gems to standard libraries explicitly.
+See [the documentation](https://github.com/ruby/rbs/blob/master/docs/collection.md) for more information.
 
 This version contains a bug fix, which potentially breaks the compatibility with older versions.
 The super class names in class definitions are now resolved in _outer_ context.
