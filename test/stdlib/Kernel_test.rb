@@ -251,14 +251,16 @@ class KernelTest < StdlibTest
     o.singleton_methods
   end
 
-  def test_taint
-    Object.new.taint
-    Object.new.untrust
-  end
+  if Kernel.method_defined?(:taint)
+    def test_taint
+      Object.new.taint
+      Object.new.untrust
+    end
 
-  def test_tainted?
-    Object.new.tainted?
-    Object.new.untrusted?
+    def test_tainted?
+      Object.new.tainted?
+      Object.new.untrusted?
+    end
   end
 
   def test_tap
@@ -271,9 +273,11 @@ class KernelTest < StdlibTest
     Object.new.to_s
   end
 
-  def test_untaint
-    Object.new.untaint
-    Object.new.trust
+  if Kernel.method_defined?(:taint)
+    def test_untaint
+      Object.new.untaint
+      Object.new.trust
+    end
   end
 
   def test_Array

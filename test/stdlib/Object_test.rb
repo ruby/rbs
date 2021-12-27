@@ -176,12 +176,14 @@ class ObjectTest < StdlibTest
     obj.respond_to?('to_s', true)
   end
 
-  def test_taint
-    obj = Object.new
+  if Kernel.method_defined?(:taint)
+    def test_taint
+      obj = Object.new
 
-    obj.taint
-    obj.tainted?
-    obj.untaint
+      obj.taint
+      obj.tainted?
+      obj.untaint
+    end
   end
 
   def test_tap
