@@ -250,6 +250,7 @@ end
 class Hello
   include Foo
   extend ::Bar, baz
+  prepend Baz
 
   attr_reader :x
   attr_accessor :y, :z
@@ -278,6 +279,8 @@ class Hello
   include Foo
 
   extend ::Bar
+
+  prepend Baz
 
   attr_reader x: untyped
 
