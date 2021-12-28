@@ -197,6 +197,18 @@ module RBS
                 )
               end
             end
+          when :prepend
+            args.each do |arg|
+              if (name = const_to_name(arg))
+                decls << AST::Members::Prepend.new(
+                  name: name,
+                  args: [],
+                  annotations: [],
+                  location: nil,
+                  comment: comments[node.first_lineno - 1]
+                )
+              end
+            end
           when :extend
             args.each do |arg|
               if (name = const_to_name(arg, context: context))
