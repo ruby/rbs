@@ -1441,9 +1441,9 @@ module OpenSSL
   end
 
   class HMAC
-    def self.digest: (String algo, String key, String data) -> String
+    def self.digest: (String | Digest algo, String key, String data) -> String
 
-    def self.hexdigest: (String algo, String key, String data) -> String
+    def self.hexdigest: (String | Digest algo, String key, String data) -> String
 
     public
 
@@ -1465,7 +1465,7 @@ module OpenSSL
 
     private
 
-    def initialize: (String key, Digest digest) -> void
+    def initialize: (String key, String | Digest digest) -> void
 
     def initialize_copy: (instance) -> void
   end
