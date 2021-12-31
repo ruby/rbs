@@ -2069,7 +2069,8 @@ module OpenSSL
 
       private
 
-      def initialize: (instance ec_key) -> void
+      def initialize: () -> void
+                    | (instance ec_key) -> void
                     | (Group group) -> void
                     | (String pem_or_der_or_curve, ?String pass) -> void
 
@@ -2269,7 +2270,8 @@ module OpenSSL
 
       private
 
-      def initialize: (Integer key_size) -> void
+      def initialize: () -> void
+                    | (Integer key_size) -> void
                     | (String encoded_key, ?String pass_phrase) -> void
 
       def initialize_copy: (instance) -> void
