@@ -50,6 +50,41 @@ module URI
 
     # <!--
     #   rdoc-file=lib/uri/http.rb
+    #   - authority()
+    # -->
+    # ## Description
+    #
+    # Returns the authority for an HTTP uri, as defined in
+    # https://datatracker.ietf.org/doc/html/rfc3986/#section-3.2.
+    #
+    # Example:
+    #
+    #     URI::HTTP.build(host: 'www.example.com', path: '/foo/bar').authority #=> "www.example.com"
+    #     URI::HTTP.build(host: 'www.example.com', port: 8000, path: '/foo/bar').authority #=> "www.example.com:8000"
+    #     URI::HTTP.build(host: 'www.example.com', port: 80, path: '/foo/bar').authority #=> "www.example.com"
+    #
+    def authority: () -> String
+
+    # <!--
+    #   rdoc-file=lib/uri/http.rb
+    #   - origin()
+    # -->
+    # ## Description
+    #
+    # Returns the origin for an HTTP uri, as defined in
+    # https://datatracker.ietf.org/doc/html/rfc6454.
+    #
+    # Example:
+    #
+    #     URI::HTTP.build(host: 'www.example.com', path: '/foo/bar').origin #=> "http://www.example.com"
+    #     URI::HTTP.build(host: 'www.example.com', port: 8000, path: '/foo/bar').origin #=> "http://www.example.com:8000"
+    #     URI::HTTP.build(host: 'www.example.com', port: 80, path: '/foo/bar').origin #=> "http://www.example.com"
+    #     URI::HTTPS.build(host: 'www.example.com', path: '/foo/bar').origin #=> "https://www.example.com"
+    #
+    def origin: () -> String
+
+    # <!--
+    #   rdoc-file=lib/uri/http.rb
     #   - request_uri()
     # -->
     # ## Description
