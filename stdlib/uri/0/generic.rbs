@@ -880,7 +880,7 @@ module URI
     #     uri.merge!("/main.rbx?page=1")
     #     uri.to_s  # => "http://my.example.com/main.rbx?page=1"
     #
-    def merge!: (string oth) -> String
+    def merge!: (URI::Generic | string oth) -> String
 
     # <!--
     #   rdoc-file=lib/uri/generic.rb
@@ -904,7 +904,7 @@ module URI
     #     uri.merge("/main.rbx?page=1")
     #     # => "http://my.example.com/main.rbx?page=1"
     #
-    def merge: (string oth) -> URI::Generic
+    def merge: (URI::Generic | string oth) -> URI::Generic
 
     # :stopdoc:
     def route_from_path: (String src, String dst) -> String
