@@ -1274,7 +1274,7 @@ module OpenSSL
 
     def block_length: () -> Integer
 
-    def digest: () -> String
+    def digest: (?String data) -> String
 
     def digest_length: () -> Integer
 
