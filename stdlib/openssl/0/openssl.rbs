@@ -1011,8 +1011,8 @@ module OpenSSL
 
     def initialize: (instance) -> void
                   | (int) -> void
-                  | (String) -> void
-                  | (String, 0 | 2 | 10 | 16) -> void
+                  | (string) -> void
+                  | (string, 0 | 2 | 10 | 16) -> void
 
     def initialize_copy: (instance other) -> instance
   end
