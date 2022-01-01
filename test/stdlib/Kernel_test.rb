@@ -61,6 +61,8 @@ class KernelTest < StdlibTest
   end
 
   def test_not_tilde
+    return if RUBY_VERSION >= "3.2.0"
+    
     Object.new !~ Object.new
   end
 
@@ -477,7 +479,6 @@ class KernelTest < StdlibTest
   def test_open
     open(__FILE__).close
     open(__FILE__, 'r').close
-    open(__FILE__, 'r', 0644).close
     open(__FILE__) do |f|
       f.read
     end
