@@ -4,7 +4,7 @@ class ObjectTest < StdlibTest
   target Object
 
   def test_operators
-    Object.new !~ 123
+    nil !~ 123
 
     Object.new <=> 123
     Object.new <=> Object.new

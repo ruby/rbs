@@ -61,7 +61,7 @@ class KernelTest < StdlibTest
   end
 
   def test_not_tilde
-    Object.new !~ Object.new
+    nil !~ nil
   end
 
   def test_spaceship
