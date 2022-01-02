@@ -4,7 +4,9 @@ class ObjectTest < StdlibTest
   target Object
 
   def test_operators
-    Object.new !~ 123
+    if RUBY_VERSION < "3.2.0"
+      Object.new !~ 123
+    end
 
     Object.new <=> 123
     Object.new <=> Object.new
