@@ -43,6 +43,8 @@ class GemVersionInstanceTest < Test::Unit::TestCase
                       Gem::Version.new("0.0.1"), :<=>, Gem::Version.new("1.0.0")
     assert_send_type  "(String) -> (nil | Integer)",
                       Gem::Version.new("0.0.0"), :<=>, "1.0.0"
+    assert_send_type  "(String) -> (nil | Integer)",
+                      Gem::Version.new("0.0.0"), :<=>, "not a version"
   end
 
   def test_approximate_recommendation
