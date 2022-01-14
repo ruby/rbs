@@ -41,7 +41,7 @@ class GemVersionInstanceTest < Test::Unit::TestCase
   def test_comparable
     assert_send_type  "(Gem::Version) -> Integer",
                       Gem::Version.new("0.0.1"), :<=>, Gem::Version.new("1.0.0")
-    assert_send_type  "(String) -> nil",
+    assert_send_type  "(String) -> (nil | Integer)",
                       Gem::Version.new("0.0.0"), :<=>, "1.0.0"
   end
 
