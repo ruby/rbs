@@ -40,6 +40,19 @@
 #
 #     (1.2 - 1.0) == 0.2 #=> false
 #
+# ## A Note About Precision
+#
+# For a calculation using a BigDecimal and another `value`, the precision of the
+# result depends on the type of `value`:
+#
+# *   If `value` is a Float, the precision is Float::DIG + 1.
+# *   If `value` is a Rational, the precision is larger than Float::DIG + 1.
+# *   If `value` is a BigDecimal, the precision is `value`'s precision in the
+#     internal representation, which is platform-dependent.
+# *   If `value` is other object, the precision is determined by the result of
+#     +BigDecimal(value)+.
+#
+#
 # ## Special features of accurate decimal arithmetic
 #
 # Because BigDecimal is more accurate than normal binary floating point
@@ -119,15 +132,22 @@
 #
 # Documented by zzak <zachary@zacharyscott.net>, mathew <meta@pobox.com>, and
 # many other contributors.
-#
 class BigDecimal < Numeric
   # Internal method used to provide marshalling support. See the Marshal module.
   #
+  # <!--
+  #     _load(p1)
+  # -->
   def self._load: (String) -> BigDecimal
 
-  # The BigDecimal.double_fig class method returns the number of digits a Float
-  # number is allowed to have. The result depends upon the CPU and OS in use.
+  # Returns the number of digits a Float object is allowed to have; the result is
+  # system-dependent:
   #
+  #     BigDecimal.double_fig # => 16
+  #
+  # <!--
+  #     BigDecimal.double_fig -> integer
+  # -->
   def self.double_fig: () -> Integer
 
   def self.interpret_loosely: (string) -> BigDecimal
@@ -141,55 +161,171 @@ class BigDecimal < Numeric
   # The limit specified by this method takes less priority over any limit
   # specified to instance methods such as ceil, floor, truncate, or round.
   #
+  # <!--
+  #     BigDecimal.limit(digits)
+  # -->
   def self.limit: (?Integer? digits) -> Integer
 
-  # Controls handling of arithmetic exceptions and rounding. If no value is
-  # supplied, the current value is returned.
+  # Returns an integer representing the mode settings for exception handling and
+  # rounding.
   #
-  # Six values of the mode parameter control the handling of arithmetic
-  # exceptions:
+  # These modes control exception handling:
   #
-  # BigDecimal::EXCEPTION_NaN BigDecimal::EXCEPTION_INFINITY
-  # BigDecimal::EXCEPTION_UNDERFLOW BigDecimal::EXCEPTION_OVERFLOW
-  # BigDecimal::EXCEPTION_ZERODIVIDE BigDecimal::EXCEPTION_ALL
-  #
-  # For each mode parameter above, if the value set is false, computation
-  # continues after an arithmetic exception of the appropriate type. When
-  # computation continues, results are as follows:
-  #
-  # EXCEPTION_NaN
-  # :   NaN
-  # EXCEPTION_INFINITY
-  # :   +Infinity or -Infinity
-  # EXCEPTION_UNDERFLOW
-  # :   0
-  # EXCEPTION_OVERFLOW
-  # :   +Infinity or -Infinity
-  # EXCEPTION_ZERODIVIDE
-  # :   +Infinity or -Infinity
+  # *   BigDecimal::EXCEPTION_NaN.
+  # *   BigDecimal::EXCEPTION_INFINITY.
+  # *   BigDecimal::EXCEPTION_UNDERFLOW.
+  # *   BigDecimal::EXCEPTION_OVERFLOW.
+  # *   BigDecimal::EXCEPTION_ZERODIVIDE.
+  # *   BigDecimal::EXCEPTION_ALL.
   #
   #
-  # One value of the mode parameter controls the rounding of numeric values:
-  # BigDecimal::ROUND_MODE. The values it can take are:
+  # Values for `setting` for exception handling:
   #
-  # ROUND_UP, :up
-  # :   round away from zero
-  # ROUND_DOWN, :down, :truncate
-  # :   round towards zero (truncate)
-  # ROUND_HALF_UP, :half_up, :default
-  # :   round towards the nearest neighbor, unless both neighbors are equidistant,
-  #     in which case round away from zero. (default)
-  # ROUND_HALF_DOWN, :half_down
-  # :   round towards the nearest neighbor, unless both neighbors are equidistant,
-  #     in which case round towards zero.
-  # ROUND_HALF_EVEN, :half_even, :banker
-  # :   round towards the nearest neighbor, unless both neighbors are equidistant,
-  #     in which case round towards the even neighbor (Banker's rounding)
-  # ROUND_CEILING, :ceiling, :ceil
-  # :   round towards positive infinity (ceil)
-  # ROUND_FLOOR, :floor
-  # :   round towards negative infinity (floor)
+  # *   `true`: sets the given `mode` to `true`.
+  # *   `false`: sets the given `mode` to `false`.
+  # *   `nil`: does not modify the mode settings.
   #
+  #
+  # You can use method BigDecimal.save_exception_mode to temporarily change, and
+  # then automatically restore, exception modes.
+  #
+  # For clarity, some examples below begin by setting all exception modes to
+  # `false`.
+  #
+  # This mode controls the way rounding is to be performed:
+  #
+  # *   BigDecimal::ROUND_MODE
+  #
+  #
+  # You can use method BigDecimal.save_rounding_mode to temporarily change, and
+  # then automatically restore, the rounding mode.
+  #
+  # **NaNs**
+  #
+  # Mode BigDecimal::EXCEPTION_NaN controls behavior when a BigDecimal NaN is
+  # created.
+  #
+  # Settings:
+  #
+  # *   `false` (default): Returns `BigDecimal('NaN')`.
+  # *   `true`: Raises FloatDomainError.
+  #
+  #
+  # Examples:
+  #
+  #     BigDecimal.mode(BigDecimal::EXCEPTION_ALL, false) # => 0
+  #     BigDecimal('NaN')                                 # => NaN
+  #     BigDecimal.mode(BigDecimal::EXCEPTION_NaN, true)  # => 2
+  #     BigDecimal('NaN') # Raises FloatDomainError
+  #
+  # **Infinities**
+  #
+  # Mode BigDecimal::EXCEPTION_INFINITY controls behavior when a BigDecimal
+  # Infinity or -Infinity is created. Settings:
+  #
+  # *   `false` (default): Returns `BigDecimal('Infinity')` or
+  #     `BigDecimal('-Infinity')`.
+  # *   `true`: Raises FloatDomainError.
+  #
+  #
+  # Examples:
+  #
+  #     BigDecimal.mode(BigDecimal::EXCEPTION_ALL, false)     # => 0
+  #     BigDecimal('Infinity')                                # => Infinity
+  #     BigDecimal('-Infinity')                               # => -Infinity
+  #     BigDecimal.mode(BigDecimal::EXCEPTION_INFINITY, true) # => 1
+  #     BigDecimal('Infinity')  # Raises FloatDomainError
+  #     BigDecimal('-Infinity') # Raises FloatDomainError
+  #
+  # **Underflow**
+  #
+  # Mode BigDecimal::EXCEPTION_UNDERFLOW controls behavior when a BigDecimal
+  # underflow occurs. Settings:
+  #
+  # *   `false` (default): Returns `BigDecimal('0')` or `BigDecimal('-Infinity')`.
+  # *   `true`: Raises FloatDomainError.
+  #
+  #
+  # Examples:
+  #
+  #     BigDecimal.mode(BigDecimal::EXCEPTION_ALL, false)      # => 0
+  #     def flow_under
+  #       x = BigDecimal('0.1')
+  #       100.times { x *= x }
+  #     end
+  #     flow_under                                             # => 100
+  #     BigDecimal.mode(BigDecimal::EXCEPTION_UNDERFLOW, true) # => 4
+  #     flow_under # Raises FloatDomainError
+  #
+  # **Overflow**
+  #
+  # Mode BigDecimal::EXCEPTION_OVERFLOW controls behavior when a BigDecimal
+  # overflow occurs. Settings:
+  #
+  # *   `false` (default): Returns `BigDecimal('Infinity')` or
+  #     `BigDecimal('-Infinity')`.
+  # *   `true`: Raises FloatDomainError.
+  #
+  #
+  # Examples:
+  #
+  #     BigDecimal.mode(BigDecimal::EXCEPTION_ALL, false)     # => 0
+  #     def flow_over
+  #       x = BigDecimal('10')
+  #       100.times { x *= x }
+  #     end
+  #     flow_over                                             # => 100
+  #     BigDecimal.mode(BigDecimal::EXCEPTION_OVERFLOW, true) # => 1
+  #     flow_over # Raises FloatDomainError
+  #
+  # **Zero Division**
+  #
+  # Mode BigDecimal::EXCEPTION_ZERODIVIDE controls behavior when a zero-division
+  # occurs. Settings:
+  #
+  # *   `false` (default): Returns `BigDecimal('Infinity')` or
+  #     `BigDecimal('-Infinity')`.
+  # *   `true`: Raises FloatDomainError.
+  #
+  #
+  # Examples:
+  #
+  #     BigDecimal.mode(BigDecimal::EXCEPTION_ALL, false)       # => 0
+  #     one = BigDecimal('1')
+  #     zero = BigDecimal('0')
+  #     one / zero                                              # => Infinity
+  #     BigDecimal.mode(BigDecimal::EXCEPTION_ZERODIVIDE, true) # => 16
+  #     one / zero # Raises FloatDomainError
+  #
+  # **All Exceptions**
+  #
+  # Mode BigDecimal::EXCEPTION_ALL controls all of the above:
+  #
+  #     BigDecimal.mode(BigDecimal::EXCEPTION_ALL, false) # => 0
+  #     BigDecimal.mode(BigDecimal::EXCEPTION_ALL, true)  # => 23
+  #
+  # **Rounding**
+  #
+  # Mode BigDecimal::ROUND_MODE controls the way rounding is to be performed; its
+  # `setting` values are:
+  #
+  # *   `ROUND_UP`: Round away from zero. Aliased as `:up`.
+  # *   `ROUND_DOWN`: Round toward zero. Aliased as `:down` and `:truncate`.
+  # *   `ROUND_HALF_UP`: Round toward the nearest neighbor; if the neighbors are
+  #     equidistant, round away from zero. Aliased as `:half_up` and `:default`.
+  # *   `ROUND_HALF_DOWN`: Round toward the nearest neighbor; if the neighbors are
+  #     equidistant, round toward zero. Aliased as `:half_down`.
+  # *   `ROUND_HALF_EVEN` (Banker's rounding): Round toward the nearest neighbor;
+  #     if the neighbors are equidistant, round toward the even neighbor. Aliased
+  #     as `:half_even` and `:banker`.
+  # *   `ROUND_CEILING`: Round toward positive infinity. Aliased as `:ceiling` and
+  #     `:ceil`.
+  # *   `ROUND_FLOOR`: Round toward negative infinity. Aliased as `:floor:`.
+  #
+  #
+  # <!--
+  #     BigDecimal.mode(mode, setting = nil) -> integer
+  # -->
   def self.mode: (Integer mode, ?Integer? value) -> Integer?
 
   # Execute the provided block, but preserve the exception mode
@@ -207,6 +343,9 @@ class BigDecimal < Numeric
   #
   # See BigDecimal.mode
   #
+  # <!--
+  #     BigDecimal.save_exception_mode { ... }
+  # -->
   def self.save_exception_mode: () { (?nil) -> void } -> void
 
   # Execute the provided block, but preserve the precision limit
@@ -219,6 +358,9 @@ class BigDecimal < Numeric
   #     end
   #     puts BigDecimal.limit
   #
+  # <!--
+  #     BigDecimal.save_limit { ... }
+  # -->
   def self.save_limit: () { (?nil) -> void } -> void
 
   # Execute the provided block, but preserve the rounding mode
@@ -232,6 +374,9 @@ class BigDecimal < Numeric
   #
   # See BigDecimal.mode
   #
+  # <!--
+  #     BigDecimal.save_rounding_mode { ... }
+  # -->
   def self.save_rounding_mode: () { (?nil) -> void } -> void
 
   public
@@ -240,87 +385,129 @@ class BigDecimal < Numeric
   #
   # See BigDecimal#divmod.
   #
+  # <!--
+  #     a % b
+  #     a.modulo(b)
+  # -->
   def %: (Numeric) -> BigDecimal
 
-  # Multiply by the specified value.
-  #
-  # e.g.
-  #     c = a.mult(b,n)
-  #     c = a * b
-  #
-  # digits
-  # :   If specified and less than the number of significant digits of the result,
-  #     the result is rounded to that number of digits, according to
-  #     BigDecimal.mode.
-  #
   def *: (Numeric) -> BigDecimal
 
-  # Returns the value raised to the power of n.
+  # Returns the BigDecimal value of `self` raised to power `other`:
   #
-  # See BigDecimal#power.
+  #     b = BigDecimal('3.14')
+  #     b ** 2              # => 0.98596e1
+  #     b ** 2.0            # => 0.98596e1
+  #     b ** Rational(2, 1) # => 0.98596e1
   #
+  # Related: BigDecimal#power.
+  #
+  # <!--
+  #     self ** other -> bigdecimal
+  # -->
   def **: (Numeric) -> BigDecimal
 
-  # Add the specified value.
+  # Returns the BigDecimal sum of `self` and `value`:
   #
-  # e.g.
-  #     c = a.add(b,n)
-  #     c = a + b
+  #     b = BigDecimal('111111.111') # => 0.111111111e6
+  #     b + 2                        # => 0.111113111e6
+  #     b + 2.0                      # => 0.111113111e6
+  #     b + Rational(2, 1)           # => 0.111113111e6
+  #     b + Complex(2, 0)            # => (0.111113111e6+0i)
   #
-  # digits
-  # :   If specified and less than the number of significant digits of the result,
-  #     the result is rounded to that number of digits, according to
-  #     BigDecimal.mode.
+  # See the [Note About
+  # Precision](BigDecimal.html#class-BigDecimal-label-A+Note+About+Precision).
   #
+  # <!--
+  #     self + value -> bigdecimal
+  # -->
   def +: (Numeric) -> BigDecimal
 
-  # Return self.
+  # Returns `self`:
   #
-  #     +BigDecimal('5')  #=> 0.5e1
+  #     +BigDecimal(5)  # => 0.5e1
+  #     +BigDecimal(-5) # => -0.5e1
   #
+  # <!--
+  #     +big_decimal -> self
+  # -->
   def +@: () -> BigDecimal
 
-  # Subtract the specified value.
+  # Returns the BigDecimal difference of `self` and `value`:
   #
-  # e.g.
-  #     c = a - b
+  #     b = BigDecimal('333333.333') # => 0.333333333e6
+  #     b - 2                        # => 0.333331333e6
+  #     b - 2.0                      # => 0.333331333e6
+  #     b - Rational(2, 1)           # => 0.333331333e6
+  #     b - Complex(2, 0)            # => (0.333331333e6+0i)
   #
-  # The precision of the result value depends on the type of `b`.
+  # See the [Note About
+  # Precision](BigDecimal.html#class-BigDecimal-label-A+Note+About+Precision).
   #
-  # If `b` is a Float, the precision of the result is Float::DIG+1.
-  #
-  # If `b` is a BigDecimal, the precision of the result is `b`'s precision of
-  # internal representation from platform. So, it's return value is platform
-  # dependent.
-  #
+  # <!--
+  #     self - value -> bigdecimal
+  # -->
   def -: (Numeric) -> BigDecimal
 
-  # Return the negation of self.
+  # Returns the BigDecimal negation of self:
   #
-  #     -BigDecimal('5')  #=> -0.5e1
+  #     b0 = BigDecimal('1.5')
+  #     b1 = -b0 # => -0.15e1
+  #     b2 = -b1 # => 0.15e1
   #
+  # <!--
+  #     -self -> bigdecimal
+  # -->
   def -@: () -> BigDecimal
 
   # Divide by the specified value.
   #
-  # See BigDecimal#div.
+  # The result precision will be the precision of the larger operand, but its
+  # minimum is 2*Float::DIG.
   #
+  # See BigDecimal#div. See BigDecimal#quo.
+  #
+  # <!--
+  #     a / b   -> bigdecimal
+  # -->
   def /: (Numeric) -> BigDecimal
 
-  # Returns true if a is less than b.
+  # Returns `true` if `self` is less than `other`, `false` otherwise:
   #
-  # Values may be coerced to perform the comparison (see ==, BigDecimal#coerce).
+  #     b = BigDecimal('1.5') # => 0.15e1
+  #     b < 2                 # => true
+  #     b < 2.0               # => true
+  #     b < Rational(2, 1)    # => true
+  #     b < 1.5               # => false
   #
+  # Raises an exception if the comparison cannot be made.
+  #
+  # <!--
+  #     self < other -> true or false
+  # -->
   def <: (Numeric) -> bool
 
-  # Returns true if a is less than or equal to b.
+  # Returns `true` if `self` is less or equal to than `other`, `false` otherwise:
   #
-  # Values may be coerced to perform the comparison (see ==, BigDecimal#coerce).
+  #     b = BigDecimal('1.5') # => 0.15e1
+  #     b <= 2                # => true
+  #     b <= 2.0              # => true
+  #     b <= Rational(2, 1)   # => true
+  #     b <= 1.5              # => true
+  #     b < 1                 # => false
   #
+  # Raises an exception if the comparison cannot be made.
+  #
+  # <!--
+  #     self <= other -> true or false
+  # -->
   def <=: (Numeric) -> bool
 
   # The comparison operator. a <=> b is 0 if a == b, 1 if a > b, -1 if a < b.
   #
+  # <!--
+  #     <=>(p1)
+  # -->
   def <=>: (untyped) -> Integer?
 
   # Tests for value equality; returns true if the values are equal.
@@ -332,6 +519,9 @@ class BigDecimal < Numeric
   #
   #     BigDecimal('1.0') == 1.0  #=> true
   #
+  # <!--
+  #     ==(p1)
+  # -->
   def ==: (untyped) -> bool
 
   # Tests for value equality; returns true if the values are equal.
@@ -343,49 +533,86 @@ class BigDecimal < Numeric
   #
   #     BigDecimal('1.0') == 1.0  #=> true
   #
+  # <!--
+  #     ===(p1)
+  # -->
   def ===: (untyped) -> bool
 
-  # Returns true if a is greater than b.
+  # Returns `true` if `self` is greater than `other`, `false` otherwise:
   #
-  # Values may be coerced to perform the comparison (see ==, BigDecimal#coerce).
+  #     b = BigDecimal('1.5')
+  #     b > 1              # => true
+  #     b > 1.0            # => true
+  #     b > Rational(1, 1) # => true
+  #     b > 2              # => false
   #
+  # Raises an exception if the comparison cannot be made.
+  #
+  # <!--
+  #     self > other -> true or false
+  # -->
   def >: (Numeric) -> bool
 
-  # Returns true if a is greater than or equal to b.
+  # Returns `true` if `self` is greater than or equal to `other`, `false`
+  # otherwise:
   #
-  # Values may be coerced to perform the comparison (see ==, BigDecimal#coerce)
+  #     b = BigDecimal('1.5')
+  #     b >= 1              # => true
+  #     b >= 1.0            # => true
+  #     b >= Rational(1, 1) # => true
+  #     b >= 1.5            # => true
+  #     b > 2               # => false
   #
+  # Raises an exception if the comparison cannot be made.
+  #
+  # <!--
+  #     self >= other -> true or false
+  # -->
   def >=: (Numeric) -> bool
 
-  # Method used to provide marshalling support.
+  # Returns a string representing the marshalling of `self`. See module Marshal.
   #
-  #     inf = BigDecimal('Infinity')
-  #       #=> Infinity
-  #     BigDecimal._load(inf._dump)
-  #       #=> Infinity
+  #     inf = BigDecimal('Infinity') # => Infinity
+  #     dumped = inf._dump           # => "9:Infinity"
+  #     BigDecimal._load(dumped)     # => Infinity
   #
-  # See the Marshal module.
-  #
+  # <!--
+  #     _dump -> string
+  # -->
   def _dump: (?untyped) -> String
 
-  # Returns the absolute value, as a BigDecimal.
+  # Returns the BigDecimal absolute value of `self`:
   #
-  #     BigDecimal('5').abs  #=> 0.5e1
-  #     BigDecimal('-3').abs #=> 0.3e1
+  #     BigDecimal('5').abs  # => 0.5e1
+  #     BigDecimal('-3').abs # => 0.3e1
   #
+  # <!--
+  #     abs -> bigdecimal
+  # -->
   def abs: () -> BigDecimal
 
-  # Add the specified value.
+  # Returns the BigDecimal sum of `self` and `value` with a precision of `ndigits`
+  # decimal digits.
   #
-  # e.g.
-  #     c = a.add(b,n)
-  #     c = a + b
+  # When `ndigits` is less than the number of significant digits in the sum, the
+  # sum is rounded to that number of digits, according to the current rounding
+  # mode; see BigDecimal.mode.
   #
-  # digits
-  # :   If specified and less than the number of significant digits of the result,
-  #     the result is rounded to that number of digits, according to
-  #     BigDecimal.mode.
+  # Examples:
   #
+  #     # Set the rounding mode.
+  #     BigDecimal.mode(BigDecimal::ROUND_MODE, :half_up)
+  #     b = BigDecimal('111111.111')
+  #     b.add(1, 0)               # => 0.111112111e6
+  #     b.add(1, 3)               # => 0.111e6
+  #     b.add(1, 6)               # => 0.111112e6
+  #     b.add(1, 15)              # => 0.111112111e6
+  #     b.add(1.0, 15)            # => 0.111112111e6
+  #     b.add(Rational(1, 1), 15) # => 0.111112111e6
+  #
+  # <!--
+  #     add(value, ndigits) -> new_bigdecimal
+  # -->
   def add: (Numeric value, Integer digits) -> BigDecimal
 
   # Return the smallest integer greater than or equal to the value, as a
@@ -403,6 +630,9 @@ class BigDecimal < Numeric
   #     BigDecimal('3.14159').ceil(3) #=> 3.142
   #     BigDecimal('13345.234').ceil(-2) #=> 13400.0
   #
+  # <!--
+  #     ceil(n)
+  # -->
   def ceil: () -> Integer
           | (int n) -> BigDecimal
 
@@ -422,7 +652,10 @@ class BigDecimal < Numeric
   # Note that coercing a String to a BigDecimal is not supported by default; it
   # requires a special compile-time option when building Ruby.
   #
-  def coerce: (Numeric) -> [BigDecimal, BigDecimal]
+  # <!--
+  #     coerce(p1)
+  # -->
+  def coerce: (Numeric) -> [ BigDecimal, BigDecimal ]
 
   # Divide by the specified value.
   #
@@ -437,6 +670,8 @@ class BigDecimal < Numeric
   #     Float#div; see also BigDecimal#divmod.
   #
   #
+  # See BigDecimal#/. See BigDecimal#quo.
+  #
   # Examples:
   #
   #     a = BigDecimal("4")
@@ -450,6 +685,10 @@ class BigDecimal < Numeric
   #
   #     a.div(b)     # => 1
   #
+  # <!--
+  #     div(value)  -> integer
+  #     div(value, digits)  -> bigdecimal or integer
+  # -->
   def div: (Numeric value) -> Integer
          | (Numeric value, int digits) -> BigDecimal
 
@@ -472,7 +711,10 @@ class BigDecimal < Numeric
   # The quotient q is (a/b).floor, and the modulus is the amount that must be
   # added to q * b to get a.
   #
-  def divmod: (Numeric) -> [BigDecimal, BigDecimal]
+  # <!--
+  #     divmod(value)
+  # -->
+  def divmod: (Numeric) -> [ BigDecimal, BigDecimal ]
 
   def dup: () -> self
 
@@ -485,6 +727,9 @@ class BigDecimal < Numeric
   #
   #     BigDecimal('1.0') == 1.0  #=> true
   #
+  # <!--
+  #     eql?(p1)
+  # -->
   def eql?: (untyped) -> bool
 
   # Returns the exponent of the BigDecimal number, as an Integer.
@@ -492,14 +737,24 @@ class BigDecimal < Numeric
   # If the number can be represented as 0.xxxxxx*10**n where xxxxxx is a string of
   # digits with no leading zeros, then n is the exponent.
   #
+  # <!--
+  #     exponent()
+  # -->
   def exponent: () -> Integer
 
   # Returns True if the value is finite (not NaN or infinite).
   #
+  #
+  # <!--
+  #     finite?()
+  # -->
   def finite?: () -> bool
 
   # Return the integer part of the number, as a BigDecimal.
   #
+  # <!--
+  #     fix()
+  # -->
   def fix: () -> BigDecimal
 
   # Return the largest integer less than or equal to the value, as a BigDecimal.
@@ -516,23 +771,40 @@ class BigDecimal < Numeric
   #     BigDecimal('3.14159').floor(3) #=> 3.141
   #     BigDecimal('13345.234').floor(-2) #=> 13300.0
   #
+  # <!--
+  #     floor(n)
+  # -->
   def floor: () -> Integer
            | (int n) -> BigDecimal
 
   # Return the fractional part of the number, as a BigDecimal.
   #
+  # <!--
+  #     frac()
+  # -->
   def frac: () -> BigDecimal
 
-  # Creates a hash for this BigDecimal.
+  # Returns the integer hash value for `self`.
   #
-  # Two BigDecimals with equal sign, fractional part and exponent have the same
-  # hash.
+  # Two instances of BigDecimal have the same hash value if and only if they have
+  # equal:
   #
+  # *   Sign.
+  # *   Fractional part.
+  # *   Exponent.
+  #
+  #
+  # <!--
+  #     hash -> integer
+  # -->
   def hash: () -> Integer
 
   # Returns nil, -1, or +1 depending on whether the value is finite, -Infinity, or
   # +Infinity.
   #
+  # <!--
+  #     infinite?()
+  # -->
   def infinite?: () -> Integer?
 
   # Returns a string representation of self.
@@ -540,33 +812,59 @@ class BigDecimal < Numeric
   #     BigDecimal("1234.5678").inspect
   #       #=> "0.12345678e4"
   #
+  # <!--
+  #     inspect()
+  # -->
   def inspect: () -> String
 
   # Returns the modulus from dividing by b.
   #
   # See BigDecimal#divmod.
   #
+  # <!--
+  #     modulo(p1)
+  # -->
   def modulo: (Numeric b) -> BigDecimal
 
-  # Multiply by the specified value.
+  # Returns the BigDecimal product of `self` and `value` with a precision of
+  # `ndigits` decimal digits.
   #
-  # e.g.
-  #     c = a.mult(b,n)
-  #     c = a * b
+  # When `ndigits` is less than the number of significant digits in the sum, the
+  # sum is rounded to that number of digits, according to the current rounding
+  # mode; see BigDecimal.mode.
   #
-  # digits
-  # :   If specified and less than the number of significant digits of the result,
-  #     the result is rounded to that number of digits, according to
-  #     BigDecimal.mode.
+  # Examples:
   #
+  #     # Set the rounding mode.
+  #     BigDecimal.mode(BigDecimal::ROUND_MODE, :half_up)
+  #     b = BigDecimal('555555.555')
+  #     b.mult(3, 0)              # => 0.1666666665e7
+  #     b.mult(3, 3)              # => 0.167e7
+  #     b.mult(3, 6)              # => 0.166667e7
+  #     b.mult(3, 15)             # => 0.1666666665e7
+  #     b.mult(3.0, 0)            # => 0.1666666665e7
+  #     b.mult(Rational(3, 1), 0) # => 0.1666666665e7
+  #     b.mult(Complex(3, 0), 0)  # => (0.1666666665e7+0.0i)
+  #
+  # <!--
+  #     mult(other, ndigits) -> bigdecimal
+  # -->
   def mult: (Numeric value, int digits) -> BigDecimal
 
   # Returns True if the value is Not a Number.
   #
+  #
+  # <!--
+  #     nan?()
+  # -->
   def nan?: () -> bool
 
   # Returns self if the value is non-zero, nil otherwise.
   #
+  #
+  # <!--
+  #     nonzero?()
+  # -->
   def nonzero?: () -> self?
 
   # Returns the value raised to the power of n.
@@ -575,28 +873,50 @@ class BigDecimal < Numeric
   #
   # Also available as the operator **.
   #
+  # <!--
+  #     power(n)
+  #     power(n, prec)
+  # -->
   def power: (Numeric n, int prec) -> BigDecimal
 
-  # Returns an Array of two Integer values.
+  # Returns an Array of two Integer values that represent platform-dependent
+  # internal storage properties.
   #
-  # The first value is the current number of significant digits in the BigDecimal.
-  # The second value is the maximum number of significant digits for the
-  # BigDecimal.
+  # This method is deprecated and will be removed in the future. Instead, use
+  # BigDecimal#n_significant_digits for obtaining the number of significant digits
+  # in scientific notation, and BigDecimal#precision for obtaining the number of
+  # digits in decimal notation.
   #
-  #     BigDecimal('5').precs #=> [9, 18]
-  #
-  def precs: () -> [Integer, Integer]
+  # <!--
+  #     precs -> array
+  # -->
+  def precs: () -> [ Integer, Integer ]
 
   # Divide by the specified value.
   #
-  # See BigDecimal#div.
+  # digits
+  # :   If specified and less than the number of significant digits of the result,
+  #     the result is rounded to the given number of digits, according to the
+  #     rounding mode indicated by BigDecimal.mode.
   #
+  #     If digits is 0 or omitted, the result is the same as for the / operator.
+  #
+  #
+  # See BigDecimal#/. See BigDecimal#div.
+  #
+  # <!--
+  #     quo(value)  -> bigdecimal
+  #     quo(value, digits)  -> bigdecimal
+  # -->
   def quo: (Numeric) -> BigDecimal
 
   # Returns the remainder from dividing by the value.
   #
   # x.remainder(y) means x-y*(x/y).truncate
   #
+  # <!--
+  #     remainder(value)
+  # -->
   def remainder: (Numeric) -> BigDecimal
 
   # Round to the nearest integer (by default), returning the result as a
@@ -613,14 +933,17 @@ class BigDecimal < Numeric
   # than that many digits.
   #
   # If n is specified and negative, at least that many digits to the left of the
-  # decimal point will be 0 in the result.
+  # decimal point will be 0 in the result, and return value will be an Integer.
   #
   #     BigDecimal('3.14159').round(3) #=> 3.142
-  #     BigDecimal('13345.234').round(-2) #=> 13300.0
+  #     BigDecimal('13345.234').round(-2) #=> 13300
   #
   # The value of the optional mode argument can be used to determine how rounding
   # is performed; see BigDecimal.mode.
   #
+  # <!--
+  #     round(n, mode)
+  # -->
   def round: () -> Integer
            | (Numeric n, ?Integer mode) -> BigDecimal
 
@@ -646,6 +969,10 @@ class BigDecimal < Numeric
   # BigDecimal::SIGN_NEGATIVE_FINITE
   # :   value is negative
   #
+  #
+  # <!--
+  #     sign()
+  # -->
   def sign: () -> Integer
 
   # Splits a BigDecimal number into four parts, returned as an array of values.
@@ -672,12 +999,18 @@ class BigDecimal < Numeric
   # (Note that the to_f method is provided as a more convenient way to translate a
   # BigDecimal to a Float.)
   #
-  def split: () -> [Integer, String, Integer, Integer]
+  # <!--
+  #     split()
+  # -->
+  def split: () -> [ Integer, String, Integer, Integer ]
 
   # Returns the square root of the value.
   #
   # Result has at least n significant digits.
   #
+  # <!--
+  #     sqrt(n)
+  # -->
   def sqrt: (int n) -> BigDecimal
 
   # Subtract the specified value.
@@ -690,28 +1023,44 @@ class BigDecimal < Numeric
   #     the result is rounded to that number of digits, according to
   #     BigDecimal.mode.
   #
+  #
+  # <!--
+  #     sub(value, digits)  -> bigdecimal
+  # -->
   def sub: (Numeric value, int digits) -> BigDecimal
 
   # Returns a new Float object having approximately the same value as the
   # BigDecimal number. Normal accuracy limits and built-in errors of binary Float
   # arithmetic apply.
   #
+  # <!--
+  #     to_f()
+  # -->
   def to_f: () -> Float
 
   # Returns the value as an Integer.
   #
   # If the BigDecimal is infinity or NaN, raises FloatDomainError.
   #
+  # <!--
+  #     to_i()
+  # -->
   def to_i: () -> Integer
 
   # Returns the value as an Integer.
   #
   # If the BigDecimal is infinity or NaN, raises FloatDomainError.
   #
+  # <!--
+  #     to_int()
+  # -->
   def to_int: () -> Integer
 
   # Converts a BigDecimal to a Rational.
   #
+  # <!--
+  #     to_r()
+  # -->
   def to_r: () -> Rational
 
   # Converts the value to a string.
@@ -744,7 +1093,10 @@ class BigDecimal < Numeric
   #     BigDecimal('123.45678901234567890').to_s(' F')
   #       #=> ' 123.4567890123456789'
   #
-  def to_s: (?(String | int) s) -> String
+  # <!--
+  #     to_s(s)
+  # -->
+  def to_s: (?String | int s) -> String
 
   # Truncate to the nearest integer (by default), returning the result as a
   # BigDecimal.
@@ -762,11 +1114,18 @@ class BigDecimal < Numeric
   #     BigDecimal('3.14159').truncate(3) #=> 3.141
   #     BigDecimal('13345.234').truncate(-2) #=> 13300.0
   #
+  # <!--
+  #     truncate(n)
+  # -->
   def truncate: () -> Integer
               | (int n) -> BigDecimal
 
   # Returns True if the value is zero.
   #
+  #
+  # <!--
+  #     zero?()
+  # -->
   def zero?: () -> bool
 
   private
@@ -774,158 +1133,381 @@ class BigDecimal < Numeric
   def initialize_copy: (self) -> self
 end
 
-# Base value used in internal calculations.  On a 32 bit system, BASE is 10000,
-# indicating that calculation is done in groups of 4 digits. (If it were larger,
-# BASE**2 wouldn't fit in 32 bits, so you couldn't guarantee that two groups
-# could always be multiplied together without overflow.)
-#
 BigDecimal::BASE: Integer
 
-# Determines whether overflow, underflow or zero divide result in an exception
-# being thrown. See BigDecimal.mode.
-#
 BigDecimal::EXCEPTION_ALL: Integer
 
-# Determines what happens when the result of a computation is infinity.  See
-# BigDecimal.mode.
-#
 BigDecimal::EXCEPTION_INFINITY: Integer
 
-# Determines what happens when the result of a computation is not a number
-# (NaN). See BigDecimal.mode.
-#
 BigDecimal::EXCEPTION_NaN: Integer
 
-# Determines what happens when the result of a computation is an overflow (a
-# result too large to be represented). See BigDecimal.mode.
-#
 BigDecimal::EXCEPTION_OVERFLOW: Integer
 
-# Determines what happens when the result of a computation is an underflow (a
-# result too small to be represented). See BigDecimal.mode.
-#
 BigDecimal::EXCEPTION_UNDERFLOW: Integer
 
-# Determines what happens when a division by zero is performed. See
-# BigDecimal.mode.
-#
 BigDecimal::EXCEPTION_ZERODIVIDE: Integer
 
-# Positive infinity value.
-#
 BigDecimal::INFINITY: BigDecimal
 
-# 'Not a Number' value.
-#
 BigDecimal::NAN: BigDecimal
 
-# Round towards +Infinity. See BigDecimal.mode.
-#
 BigDecimal::ROUND_CEILING: Integer
 
-# Indicates that values should be rounded towards zero. See BigDecimal.mode.
-#
 BigDecimal::ROUND_DOWN: Integer
 
-# Round towards -Infinity. See BigDecimal.mode.
-#
 BigDecimal::ROUND_FLOOR: Integer
 
-# Indicates that digits >= 6 should be rounded up, others rounded down. See
-# BigDecimal.mode.
-#
 BigDecimal::ROUND_HALF_DOWN: Integer
 
-# Round towards the even neighbor. See BigDecimal.mode.
-#
 BigDecimal::ROUND_HALF_EVEN: Integer
 
-# Indicates that digits >= 5 should be rounded up, others rounded down. See
-# BigDecimal.mode.
-#
 BigDecimal::ROUND_HALF_UP: Integer
 
-# Determines what happens when a result must be rounded in order to fit in the
-# appropriate number of significant digits. See BigDecimal.mode.
-#
 BigDecimal::ROUND_MODE: Integer
 
-# Indicates that values should be rounded away from zero. See BigDecimal.mode.
-#
 BigDecimal::ROUND_UP: Integer
 
-# Indicates that a value is negative and finite. See BigDecimal.sign.
-#
 BigDecimal::SIGN_NEGATIVE_FINITE: Integer
 
-# Indicates that a value is negative and infinite. See BigDecimal.sign.
-#
 BigDecimal::SIGN_NEGATIVE_INFINITE: Integer
 
-# Indicates that a value is -0. See BigDecimal.sign.
-#
 BigDecimal::SIGN_NEGATIVE_ZERO: Integer
 
-# Indicates that a value is not a number. See BigDecimal.sign.
-#
 BigDecimal::SIGN_NaN: Integer
 
-# Indicates that a value is positive and finite. See BigDecimal.sign.
-#
 BigDecimal::SIGN_POSITIVE_FINITE: Integer
 
-# Indicates that a value is positive and infinite. See BigDecimal.sign.
-#
 BigDecimal::SIGN_POSITIVE_INFINITE: Integer
 
-# Indicates that a value is +0. See BigDecimal.sign.
-#
 BigDecimal::SIGN_POSITIVE_ZERO: Integer
 
-# The version of bigdecimal library
-#
 BigDecimal::VERSION: String
 
+# RubyGems adds the #gem method to allow activation of specific gem versions and
+# overrides the #require method on Kernel to make gems appear as if they live on
+# the `$LOAD_PATH`.  See the documentation of these methods for further detail.
+# The Kernel module is included by class Object, so its methods are available in
+# every Ruby object.
+#
+# The Kernel instance methods are documented in class Object while the module
+# methods are documented here.  These methods are called without a receiver and
+# thus can be called in functional form:
+#
+#     sprintf "%.1f", 1.234 #=> "1.2"
+#
+# ## What's Here
+#
+# Module Kernel provides methods that are useful for:
+#
+# *   [Converting](#module-Kernel-label-Converting)
+# *   [Querying](#module-Kernel-label-Querying)
+# *   [Exiting](#module-Kernel-label-Exiting)
+# *   [Exceptions](#module-Kernel-label-Exceptions)
+# *   [IO](#module-Kernel-label-IO)
+# *   [Procs](#module-Kernel-label-Procs)
+# *   [Tracing](#module-Kernel-label-Tracing)
+# *   [Subprocesses](#module-Kernel-label-Subprocesses)
+# *   [Loading](#module-Kernel-label-Loading)
+# *   [Yielding](#module-Kernel-label-Yielding)
+# *   [Random Values](#module-Kernel-label-Random+Values)
+# *   [Other](#module-Kernel-label-Other)
+#
+#
+# ### Converting
+#
+#     [#Array](#method-i-Array)
+# :       Returns an Array based on the given argument.
+#
+#     [#Complex](#method-i-Complex)
+# :       Returns a Complex based on the given arguments.
+#
+#     [#Float](#method-i-Float)
+# :       Returns a Float based on the given arguments.
+#
+#     [#Hash](#method-i-Hash)
+# :       Returns a Hash based on the given argument.
+#
+#     [#Integer](#method-i-Integer)
+# :       Returns an Integer based on the given arguments.
+#
+#     [#Rational](#method-i-Rational)
+# :       Returns a Rational based on the given arguments.
+#
+#     [#String](#method-i-String)
+# :       Returns a String based on the given argument.
+#
+#
+#
+# ### Querying
+#
+#     [#__callee__](#method-i-__callee__)
+# :       Returns the called name of the current method as a symbol.
+#
+#     [#__dir__](#method-i-__dir__)
+# :       Returns the path to the directory from which the current method is
+#         called.
+#
+#     [#__method__](#method-i-__method__)
+# :       Returns the name of the current method as a symbol.
+#
+#     #autoload?
+# :       Returns the file to be loaded when the given module is referenced.
+#
+#     #binding
+# :       Returns a Binding for the context at the point of call.
+#
+#     #block_given?
+# :       Returns `true` if a block was passed to the calling method.
+#
+#     #caller
+# :       Returns the current execution stack as an array of strings.
+#
+#     #caller_locations
+# :       Returns the current execution stack as an array of
+#         Thread::Backtrace::Location objects.
+#
+#     #class
+# :       Returns the class of `self`.
+#
+#     #frozen?
+# :       Returns whether `self` is frozen.
+#
+#     #global_variables
+# :       Returns an array of global variables as symbols.
+#
+#     #local_variables
+# :       Returns an array of local variables as symbols.
+#
+#     #test
+# :       Performs specified tests on the given single file or pair of files.
+#
+#
+#
+# ### Exiting
+#
+#     #abort
+# :       Exits the current process after printing the given arguments.
+#
+#     #at_exit
+# :       Executes the given block when the process exits.
+#
+#     #exit
+# :       Exits the current process after calling any registered `at_exit`
+#         handlers.
+#
+#     #exit!
+# :       Exits the current process without calling any registered `at_exit`
+#         handlers.
+#
+#
+#
+# ### Exceptions
+#
+#     #catch
+# :       Executes the given block, possibly catching a thrown object.
+#
+#     #raise (aliased as #fail)
+# :       Raises an exception based on the given arguments.
+#
+#     #throw
+# :       Returns from the active catch block waiting for the given tag.
+#
+#
+#
+# ### IO
+#
+#     #gets
+# :       Returns and assigns to `$_` the next line from the current input.
+#
+#     #open
+# :       Creates an IO object connected to the given stream, file, or
+#         subprocess.
+#
+#     #p
+# :       Prints the given objects' inspect output to the standard output.
+#
+#     #pp
+# :       Prints the given objects in pretty form.
+#
+#     #print
+# :       Prints the given objects to standard output without a newline.
+#
+#     #printf
+# :       Prints the string resulting from applying the given format string to
+#         any additional arguments.
+#
+#     #putc
+# :       Equivalent to <tt.$stdout.putc(object)</tt> for the given object.
+#
+#     #puts
+# :       Equivalent to `$stdout.puts(*objects)` for the given objects.
+#
+#     #readline
+# :       Similar to #gets, but raises an exception at the end of file.
+#
+#     #readlines
+# :       Returns an array of the remaining lines from the current input.
+#
+#     #select
+# :       Same as IO.select.
+#
+#
+#
+# ### Procs
+#
+#     #lambda
+# :       Returns a lambda proc for the given block.
+#
+#     #proc
+# :       Returns a new Proc; equivalent to Proc.new.
+#
+#
+#
+# ### Tracing
+#
+#     #set_trace_func
+# :       Sets the given proc as the handler for tracing, or disables tracing if
+#         given `nil`.
+#
+#     #trace_var
+# :       Starts tracing assignments to the given global variable.
+#
+#     #untrace_var
+# :       Disables tracing of assignments to the given global variable.
+#
+#
+#
+# ### Subprocesses
+#
+#     #`cmd`
+# :       Returns the standard output of running `cmd` in a subshell.
+#
+#     #exec
+# :       Replaces current process with a new process.
+#
+#     #fork
+# :       Forks the current process into two processes.
+#
+#     #spawn
+# :       Executes the given command and returns its pid without waiting for
+#         completion.
+#
+#     #system
+# :       Executes the given command in a subshell.
+#
+#
+#
+# ### Loading
+#
+#     #autoload
+# :       Registers the given file to be loaded when the given constant is first
+#         referenced.
+#
+#     #load
+# :       Loads the given Ruby file.
+#
+#     #require
+# :       Loads the given Ruby file unless it has already been loaded.
+#
+#     #require_relative
+# :       Loads the Ruby file path relative to the calling file, unless it has
+#         already been loaded.
+#
+#
+#
+# ### Yielding
+#
+#     #tap
+# :       Yields `self` to the given block; returns `self`.
+#
+#     #then (aliased as #yield_self)
+# :       Yields `self` to the block and returns the result of the block.
+#
+#
+#
+# ### Random Values
+#
+#     #rand
+# :       Returns a pseudo-random floating point number strictly between 0.0 and
+#         1.0.
+#
+#     #srand
+# :       Seeds the pseudo-random number generator with the given number.
+#
+#
+#
+# ### Other
+#
+#     #eval
+# :       Evaluates the given string as Ruby code.
+#
+#     #loop
+# :       Repeatedly executes the given block.
+#
+#     #sleep
+# :       Suspends the current thread for the given number of seconds.
+#
+#     #sprintf (aliased as #format)
+# :       Returns the string resulting from applying the given format string to
+#         any additional arguments.
+#
+#     #syscall
+# :       Runs an operating system call.
+#
+#     #trap
+# :       Specifies the handling of system signals.
+#
+#     #warn
+# :       Issue a warning based on the given messages and options.
+#
+#
 module Kernel
   private
 
-  # Create a new BigDecimal object.
+  #     Returns the \BigDecimal converted from +value+
+  #     with a precision of +ndigits+ decimal digits.
   #
-  # initial
-  # :   The initial value, as an Integer, a Float, a Rational, a BigDecimal, or a
-  #     String.
+  #     When +ndigits+ is less than the number of significant digits
+  #     in the value, the result is rounded to that number of digits,
+  #     according to the current rounding mode; see BigDecimal.mode.
   #
-  #     If it is a String, spaces are ignored and unrecognized characters
-  #     terminate the value.
+  # Returns `value` converted to a BigDecimal, depending on the type of `value`:
   #
-  # digits
-  # :   The number of significant digits, as an Integer. If omitted or 0, the
-  #     number of significant digits is determined from the initial value.
+  # *   Integer, Float, Rational, Complex, or BigDecimal: converted directly:
   #
-  #     The actual number of significant digits used in computation is usually
-  #     larger than the specified number.
+  #         # Integer, Complex, or BigDecimal value does not require ndigits; ignored if given.
+  #         BigDecimal(2)                     # => 0.2e1
+  #         BigDecimal(Complex(2, 0))         # => 0.2e1
+  #         BigDecimal(BigDecimal(2))         # => 0.2e1
+  #         # Float or Rational value requires ndigits.
+  #         BigDecimal(2.0, 0)                # => 0.2e1
+  #         BigDecimal(Rational(2, 1), 0)     # => 0.2e1
   #
-  # exception
-  # :   Whether an exception should be raised on invalid arguments. `true` by
-  #     default, if passed `false`, just returns `nil` for invalid.
+  # *   String: converted by parsing if it contains an integer or floating-point
+  #     literal; leading and trailing whitespace is ignored:
+  #
+  #         # String does not require ndigits; ignored if given.
+  #         BigDecimal('2')     # => 0.2e1
+  #         BigDecimal('2.0')   # => 0.2e1
+  #         BigDecimal('0.2e1') # => 0.2e1
+  #         BigDecimal(' 2.0 ') # => 0.2e1
+  #
+  # *   Other type that responds to method `:to_str`: first converted to a string,
+  #     then converted to a BigDecimal, as above.
+  #
+  # *   Other type:
+  #
+  #     *   Raises an exception if keyword argument `exception` is `true`.
+  #     *   Returns `nil` if keyword argument `exception` is `true`.
   #
   #
-  # #### Exceptions
   #
-  # TypeError
-  # :   If the `initial` type is neither Integer, Float, Rational, nor BigDecimal,
-  #     this exception is raised.
+  # Raises an exception if `value` evaluates to a Float and `digits` is larger
+  # than Float::DIG + 1.
   #
-  # TypeError
-  # :   If the `digits` is not an Integer, this exception is raised.
-  #
-  # ArgumentError
-  # :   If `initial` is a Float, and the `digits` is larger than Float::DIG + 1,
-  #     this exception is raised.
-  #
-  # ArgumentError
-  # :   If the `initial` is a Float or Rational, and the `digits` value is
-  #     omitted, this exception is raised.
-  #
-  def self?.BigDecimal: ((real | string | BigDecimal) initial, ?int digits, ?exception: bool) -> BigDecimal
+  # <!--
+  #     BigDecimal(value, exception: true) -> bigdecimal
+  #     BigDecimal(value, ndigits, exception: true) -> bigdecimal
+  # -->
+  def self?.BigDecimal: (real | string | BigDecimal initial, ?int digits, ?exception: bool) -> BigDecimal
 end
