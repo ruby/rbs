@@ -32,7 +32,6 @@
 #       "win"     => "winter",
 #       "wi"      => "winter",
 #       "w"       => "winter" }
-#
 module Abbrev
   # Given a set of strings, calculate the set of unambiguous abbreviations for
   # those strings, and return a hash where the keys are all the possible
@@ -56,5 +55,9 @@ module Abbrev
   #
   #     Abbrev.abbrev(%w{car box cone}, 'ca')
   #     #=> {"car"=>"car", "ca"=>"car"}
+  #
+  # <!--
+  #     abbrev(words, pattern = nil)
+  # -->
   def self?.abbrev: (Array[String], ?String | Regexp | nil) -> Hash[String, String]
 end
