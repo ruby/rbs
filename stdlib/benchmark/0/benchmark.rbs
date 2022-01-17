@@ -101,13 +101,15 @@
 #         >total:   2.880000   0.000000   2.880000 (  2.883764)
 #         >avg:     0.960000   0.000000   0.960000 (  0.961255)
 #
-#
 module Benchmark
   # Invokes the block with a Benchmark::Report object, which may be used to
   # collect and report on the results of individual benchmark tests. Reserves
   # `label_width` leading spaces for labels on each line. Prints `caption` at the
-  # top of the report, and uses `format` to format each line. Returns an array of
-  # Benchmark::Tms objects.
+  # top of the report, and uses `format` to format each line. (Note: `caption`
+  # must contain a terminating newline character, see the default
+  # Benchmark::Tms::CAPTION for an example.)
+  #
+  # Returns an array of Benchmark::Tms objects.
   #
   # If the block returns an array of Benchmark::Tms objects, these will be used to
   # format additional lines of output. If `labels` parameter are given, these are
@@ -139,6 +141,9 @@ module Benchmark
   #     >total:   2.930000   0.000000   2.930000 (  2.932889)
   #     >avg:     0.976667   0.000000   0.976667 (  0.977630)
   #
+  # <!--
+  #     benchmark(caption = "", label_width = nil, format = nil, *labels) { |report| ... }
+  # -->
   def self?.benchmark: (String caption, ?Integer? label_width, ?String? format, *String labels) { (Report report) -> (Array[Tms] | void) } -> Array[Tms]
 
   # A simple interface to the #benchmark method, #bm generates sequential reports
@@ -161,6 +166,9 @@ module Benchmark
   #     times:    0.960000   0.000000   0.960000 (  0.960423)
   #     upto:     0.950000   0.000000   0.950000 (  0.954864)
   #
+  # <!--
+  #     bm(label_width = 0, *labels) { |report| ... }
+  # -->
   def self?.bm: (?Integer label_width, *String labels) { (Report report) -> void } -> Array[Tms]
 
   # Sometimes benchmark results are skewed because code executed earlier
@@ -198,6 +206,9 @@ module Benchmark
   # #bmbm yields a Benchmark::Job object and returns an array of Benchmark::Tms
   # objects.
   #
+  # <!--
+  #     bmbm(width = 0) { |job| ... }
+  # -->
   def self?.bmbm: (?Integer width) { (Job job) -> void } -> Array[Tms]
 
   # Returns the time used to execute the given block as a Benchmark::Tms object.
@@ -216,84 +227,96 @@ module Benchmark
   #
   #     0.220000   0.000000   0.220000 (  0.227313)
   #
+  # <!--
+  #     measure(label = "") { || ... }
+  # -->
   def self?.measure: (?String label) { () -> void } -> Tms
 
   # Returns the elapsed real time used to execute the given block.
   #
+  # <!--
+  #     realtime() { || ... }
+  # -->
   def self?.realtime: () { () -> void } -> Float
 
   BENCHMARK_VERSION: String
 
   # The default caption string (heading above the output times).
-  #
   CAPTION: String
 
   # The default format string used to display times.  See also
   # Benchmark::Tms#format.
-  #
   FORMAT: String
 
   class Job
-    # Prints the `label` and measured time for the block,
-    # formatted by `format`. See Tms#format for the
-    # formatting rules.
     def item: (?String label) { () -> void } -> self
 
-    # An array of 2-element arrays, consisting of label and block pairs.
     def list: () -> Array[untyped]
 
     alias report item
 
-    # Length of the widest label in the #list.
     def width: () -> Integer
   end
 
   class Report
-    # Prints the `label` and measured time for the block,
-    # formatted by `format`. See Tms#format for the
-    # formatting rules.
     def item: (?String label, *untyped format) { () -> void } -> Tms
 
-    # An array of Benchmark::Tms objects representing each item.
     def list: () -> Array[Tms]
 
     alias report item
   end
 
   # A data object, representing the times associated with a benchmark measurement.
-  #
   class Tms
     # Returns a new Tms object obtained by memberwise multiplication of the
     # individual times for this Tms object by `x`.
     #
+    # <!--
+    #     *(x)
+    # -->
     def *: (untyped x) -> untyped
 
     # Returns a new Tms object obtained by memberwise summation of the individual
     # times for this Tms object with those of the `other` Tms object. This method
     # and #/() are useful for taking statistics.
     #
+    # <!--
+    #     +(other)
+    # -->
     def +: (untyped other) -> untyped
 
     # Returns a new Tms object obtained by memberwise subtraction of the individual
     # times for the `other` Tms object from those of this Tms object.
     #
+    # <!--
+    #     -(other)
+    # -->
     def -: (untyped other) -> untyped
 
     # Returns a new Tms object obtained by memberwise division of the individual
     # times for this Tms object by `x`. This method and #+() are useful for taking
     # statistics.
     #
+    # <!--
+    #     /(x)
+    # -->
     def /: (untyped x) -> untyped
 
     # Returns a new Tms object whose times are the sum of the times for this Tms
     # object, plus the time required to execute the code block (`blk`).
     #
+    # <!--
+    #     add() { || ... }
+    # -->
     def add: () { (*untyped) -> untyped } -> untyped
 
     # An in-place version of #add. Changes the times of this Tms object by making it
     # the sum of the times for this Tms object, plus the time required to execute
     # the code block (`blk`).
     #
+    # <!--
+    #     add!(&blk)
+    # -->
     def add!: () { (*untyped) -> untyped } -> untyped
 
     # System CPU time of children
@@ -329,6 +352,9 @@ module Benchmark
     # If `format` is not given, FORMAT is used as default value, detailing the user,
     # system and real elapsed time.
     #
+    # <!--
+    #     format(format = nil, *args)
+    # -->
     def format: (?String format, *untyped args) -> String
 
     # Label
@@ -347,10 +373,16 @@ module Benchmark
     # CPU time, children's user CPU time, children's system CPU time and elapsed
     # real time.
     #
+    # <!--
+    #     to_a()
+    # -->
     def to_a: () -> untyped
 
     # Same as #format.
     #
+    # <!--
+    #     to_s()
+    # -->
     def to_s: () -> String
 
     # Total time, that is `utime` + `stime` + `cutime` + `cstime`
@@ -362,11 +394,9 @@ module Benchmark
     def utime: () -> Float
 
     # Default caption, see also Benchmark::CAPTION
-    #
     CAPTION: String
 
     # Default format string, see also Benchmark::FORMAT
-    #
     FORMAT: String
   end
 end
