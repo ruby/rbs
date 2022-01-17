@@ -50,13 +50,18 @@ def comment_for_method(klass, method, stores:)
 
     out << method.comment
 
+    string = out.accept(RDoc::Markup::ToMarkdown.new)
+
     if method.arglists
-      out << RDoc::Markup::Heading.new(1, "arglists 💪👽🚨 << Delete this section")
-      arglists = method.arglists.chomp.split("\n").map {|line| line + "\n" }
-      out << RDoc::Markup::Verbatim.new(*arglists)
+      string << "<!--\n"
+      method.arglists.chomp.split("\n").each do |line|
+        string << "    #{line}\n"
+      end
+      string << "-->\n"
     end
 
-    out.accept(RDoc::Markup::ToMarkdown.new)
+
+    string
   end
 rescue RDoc::Store::MissingFileError
   nil
