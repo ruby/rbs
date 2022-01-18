@@ -18,7 +18,6 @@
 #         total_size += FileTest.size(path)
 #       end
 #     end
-#
 module Find
   # Calls the associated block with the name of every file and directory listed as
   # arguments, then recursively on their subdirectories, and so on.
@@ -27,8 +26,11 @@ module Find
   #
   # See the `Find` module documentation for an example.
   #
-  def self?.find: (*String | _ToPath paths, ?ignore_error: boolish) -> Enumerator[String, nil]
-                | (*String | _ToPath paths, ?ignore_error: boolish) { (String) -> void } -> nil
+  # <!--
+  #     find(*paths, ignore_error: true) { |path| ... }
+  # -->
+  def self.find: (*String | _ToPath paths, ?ignore_error: boolish) -> Enumerator[String, nil]
+               | (*String | _ToPath paths, ?ignore_error: boolish) { (String) -> void } -> nil
 
   # Skips the current file or directory, restarting the loop with the next entry.
   # If the current file is a directory, that directory will not be recursively
@@ -36,5 +38,34 @@ module Find
   #
   # See the `Find` module documentation for an example.
   #
-  def self?.prune: () -> void
+  # <!--
+  #     prune()
+  # -->
+  def self.prune: () -> void
+
+  private
+
+  # Calls the associated block with the name of every file and directory listed as
+  # arguments, then recursively on their subdirectories, and so on.
+  #
+  # Returns an enumerator if no block is given.
+  #
+  # See the `Find` module documentation for an example.
+  #
+  # <!--
+  #     find(*paths, ignore_error: true) { |path| ... }
+  # -->
+  def find: (*String | _ToPath paths, ?ignore_error: boolish) -> Enumerator[String, nil]
+          | (*String | _ToPath paths, ?ignore_error: boolish) { (String) -> void } -> nil
+
+  # Skips the current file or directory, restarting the loop with the next entry.
+  # If the current file is a directory, that directory will not be recursively
+  # entered. Meaningful only within the block associated with Find::find.
+  #
+  # See the `Find` module documentation for an example.
+  #
+  # <!--
+  #     prune()
+  # -->
+  def prune: () -> void
 end
