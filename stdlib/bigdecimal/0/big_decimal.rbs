@@ -1133,54 +1133,102 @@ class BigDecimal < Numeric
   def initialize_copy: (self) -> self
 end
 
+# Base value used in internal calculations.  On a 32 bit system, BASE is 10000,
+# indicating that calculation is done in groups of 4 digits. (If it were larger,
+# BASE**2 wouldn't fit in 32 bits, so you couldn't guarantee that two groups
+# could always be multiplied together without overflow.)
 BigDecimal::BASE: Integer
 
+# Determines whether overflow, underflow or zero divide result in an exception
+# being thrown. See BigDecimal.mode.
 BigDecimal::EXCEPTION_ALL: Integer
 
+# Determines what happens when the result of a computation is infinity.  See
+# BigDecimal.mode.
 BigDecimal::EXCEPTION_INFINITY: Integer
 
+# Determines what happens when the result of a computation is not a number
+# (NaN). See BigDecimal.mode.
 BigDecimal::EXCEPTION_NaN: Integer
 
+# Determines what happens when the result of a computation is an overflow (a
+# result too large to be represented). See BigDecimal.mode.
 BigDecimal::EXCEPTION_OVERFLOW: Integer
 
+# Determines what happens when the result of a computation is an underflow (a
+# result too small to be represented). See BigDecimal.mode.
 BigDecimal::EXCEPTION_UNDERFLOW: Integer
 
+# Determines what happens when a division by zero is performed. See
+# BigDecimal.mode.
 BigDecimal::EXCEPTION_ZERODIVIDE: Integer
 
+# Special value constants
+#
 BigDecimal::INFINITY: BigDecimal
 
 BigDecimal::NAN: BigDecimal
 
+# Round towards +Infinity. See BigDecimal.mode.
+#
 BigDecimal::ROUND_CEILING: Integer
 
+# Indicates that values should be rounded towards zero. See BigDecimal.mode.
 BigDecimal::ROUND_DOWN: Integer
 
+# Round towards -Infinity. See BigDecimal.mode.
+#
 BigDecimal::ROUND_FLOOR: Integer
 
+# Indicates that digits >= 6 should be rounded up, others rounded down. See
+# BigDecimal.mode.
 BigDecimal::ROUND_HALF_DOWN: Integer
 
+# Round towards the even neighbor. See BigDecimal.mode.
+#
 BigDecimal::ROUND_HALF_EVEN: Integer
 
+# Indicates that digits >= 5 should be rounded up, others rounded down. See
+# BigDecimal.mode.
+#
 BigDecimal::ROUND_HALF_UP: Integer
 
+# Determines what happens when a result must be rounded in order to fit in the
+# appropriate number of significant digits. See BigDecimal.mode.
 BigDecimal::ROUND_MODE: Integer
 
+# Indicates that values should be rounded away from zero. See BigDecimal.mode.
 BigDecimal::ROUND_UP: Integer
 
+# Indicates that a value is negative and finite. See BigDecimal.sign.
+#
 BigDecimal::SIGN_NEGATIVE_FINITE: Integer
 
+# Indicates that a value is negative and infinite. See BigDecimal.sign.
+#
 BigDecimal::SIGN_NEGATIVE_INFINITE: Integer
 
+# Indicates that a value is -0. See BigDecimal.sign.
+#
 BigDecimal::SIGN_NEGATIVE_ZERO: Integer
 
+# Indicates that a value is not a number. See BigDecimal.sign.
+#
 BigDecimal::SIGN_NaN: Integer
 
+# Indicates that a value is positive and finite. See BigDecimal.sign.
+#
 BigDecimal::SIGN_POSITIVE_FINITE: Integer
 
+# Indicates that a value is positive and infinite. See BigDecimal.sign.
+#
 BigDecimal::SIGN_POSITIVE_INFINITE: Integer
 
+# Indicates that a value is +0. See BigDecimal.sign.
+#
 BigDecimal::SIGN_POSITIVE_ZERO: Integer
 
+# The version of bigdecimal library
 BigDecimal::VERSION: String
 
 # RubyGems adds the #gem method to allow activation of specific gem versions and
