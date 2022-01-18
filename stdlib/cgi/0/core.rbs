@@ -340,6 +340,10 @@ class CGI
   # parameters are parsed automatically from the standard CGI locations, which
   # varies according to the REQUEST_METHOD.
   #
+  # <!--
+  #     CGI.new(tag_maker) { block }
+  #     CGI.new(options_hash = {}) { block }
+  # -->
   def initialize: (?String tag_maker) ?{ (String name, String value) -> void } -> void
                 | (Hash[Symbol, untyped] options_hash) ?{ (String name, String value) -> void } -> void
 
@@ -347,10 +351,16 @@ class CGI
 
   # Return the accept character set for all new CGI instances.
   #
+  # <!--
+  #     accept_charset()
+  # -->
   def self.accept_charset: () -> String
 
   # Set the accept character set for all new CGI instances.
   #
+  # <!--
+  #     accept_charset=(accept_charset)
+  # -->
   def self.accept_charset=: (String accept_charset) -> String
 
   # Parse an HTTP query string into a hash of key=>value pairs.
@@ -359,6 +369,9 @@ class CGI
   #       # {"name1" => ["value1", "value2", ...],
   #       #  "name2" => ["value1", "value2", ...], ... }
   #
+  # <!--
+  #     parse(query)
+  # -->
   def self.parse: (String query) -> Hash[String, String | Array[String]]
 
   public
@@ -370,6 +383,9 @@ class CGI
   #
   # Using #header with the HTML5 tag maker will create a <header> element.
   #
+  # <!--
+  #     header(options='text/html')
+  # -->
   alias header http_header
 
   # Create an HTTP header block as a string.
@@ -482,6 +498,10 @@ class CGI
   #
   # This method does not perform charset conversion.
   #
+  # <!--
+  #     http_header(content_type_string="text/html")
+  #     http_header(headers_hash)
+  # -->
   def http_header: (?String options) -> String
                  | (?Hash[String | Symbol, untyped] header_hash) -> String
 
@@ -548,6 +568,10 @@ class CGI
   #        #
   #        # string
   #
+  # <!--
+  #     cgi.out(content_type_string='text/html')
+  #     cgi.out(headers_hash)
+  # -->
   def out: (?String content_type_string) { () -> String } -> void
          | (Hash[String | Symbol, untyped] headers_hash) { () -> String } -> void
 
@@ -556,40 +580,49 @@ class CGI
   #     cgi = CGI.new
   #     cgi.print    # default:  cgi.print == $DEFAULT_OUTPUT.print
   #
+  # <!--
+  #     print(*options)
+  # -->
   def print: (*String options) -> void
 
   private
 
   # Synonym for $stdin.
   #
+  # <!--
+  #     stdinput()
+  # -->
   def stdinput: () -> ::IO
 
   # Synonym for $stdout.
   #
+  # <!--
+  #     stdoutput()
+  # -->
   def stdoutput: () -> ::IO
+
+  # String for carriage return
+  CR: String
+
+  # Standard internet newline sequence
+  EOL: String
+
+  # HTTP status codes.
+  HTTP_STATUS: Hash[String, String]
+
+  # String for linefeed
+  LF: String
+
+  # Maximum number of request parameters when multipart
+  MAX_MULTIPART_COUNT: Integer
+
+  # Whether processing will be required in binary vs text
+  NEEDS_BINMODE: bool
+
+  # Path separators in different environments.
+  PATH_SEPARATOR: Hash[String, String]
+
+  REVISION: String
+
+  VERSION: String
 end
-
-# String for carriage return
-CGI::CR: String
-
-# Standard internet newline sequence
-CGI::EOL: String
-
-# HTTP status codes.
-CGI::HTTP_STATUS: Hash[String, String]
-
-# String for linefeed
-CGI::LF: String
-
-# Maximum number of request parameters when multipart
-CGI::MAX_MULTIPART_COUNT: Integer
-
-# Whether processing will be required in binary vs text
-CGI::NEEDS_BINMODE: bool
-
-# Path separators in different environments.
-CGI::PATH_SEPARATOR: Hash[String, String]
-
-CGI::REVISION: String
-
-CGI::VERSION: String
