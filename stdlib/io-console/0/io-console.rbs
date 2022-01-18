@@ -9,19 +9,28 @@ class IO
   #
   # If `sym` is given, it will be sent to the opened console with `args` and the
   # result will be returned instead of the console IO itself.
+  #
+  # You must require 'io/console' to use this method.
+  #
+  # <!--
+  #     IO.console      -> #<File:/dev/tty>
+  #     IO.console(sym, *args)
+  # -->
   def self.console: () -> File?
                   | (:close) -> nil
                   | (Symbol sym, *untyped args) -> untyped
 
-  # returns console window size
-  #
-  # You must require 'io/console/size' to use this method.
-  def self.console_size: () -> [Integer, Integer]
+  # <!--
+  #     console_size()
+  # -->
+  def self.console_size: () -> [ Integer, Integer ]
 
   # fallback to console window size
   #
-  # You must require 'io/console/size' to use this method.
-  def self.default_console_size: -> [Integer, Integer]
+  # <!--
+  #     default_console_size()
+  # -->
+  def self.default_console_size: () -> [ Integer, Integer ]
 
   def beep: () -> self
 
@@ -29,9 +38,21 @@ class IO
   def clear_screen: () -> self
 
   # Returns a data represents the current console mode.
+  #
+  # You must require 'io/console' to use this method.
+  #
+  # <!--
+  #     io.console_mode       -> mode
+  # -->
   def console_mode: () -> IO::ConsoleMode
 
   # Sets the console mode to `mode`.
+  #
+  # You must require 'io/console' to use this method.
+  #
+  # <!--
+  #     io.console_mode = mode
+  # -->
   def console_mode=: (IO::ConsoleMode mode) -> IO::ConsoleMode
 
   # Yields `self` within cooked mode.
@@ -39,15 +60,27 @@ class IO
   #     STDIN.cooked(&:gets)
   #
   # will read and return a line with echo back and line editing.
+  #
+  # You must require 'io/console' to use this method.
+  #
+  # <!--
+  #     io.cooked {|io| }
+  # -->
   def cooked: [T] () { (self) -> T } -> T
 
   # Enables cooked mode.
   #
   # If the terminal mode needs to be back, use io.cooked { ... }.
+  #
+  # You must require 'io/console' to use this method.
+  #
+  # <!--
+  #     io.cooked!
+  # -->
   def cooked!: () -> self
 
-  def cursor: () -> [Integer, Integer]
-  def cursor=: ([Integer, Integer]) -> [Integer, Integer]
+  def cursor: () -> [ Integer, Integer ]
+  def cursor=: ([ Integer, Integer ]) -> [ Integer, Integer ]
 
   def cursor_down: (int) -> self
   def cursor_left: (int) -> self
@@ -56,9 +89,21 @@ class IO
 
   # Enables/disables echo back. On some platforms, all combinations of this flags
   # and raw/cooked mode may not be valid.
+  #
+  # You must require 'io/console' to use this method.
+  #
+  # <!--
+  #     io.echo = flag
+  # -->
   def echo=: (bool flag) -> bool
 
   # Returns `true` if echo back is enabled.
+  #
+  # You must require 'io/console' to use this method.
+  #
+  # <!--
+  #     io.echo?       -> true or false
+  # -->
   def echo?: () -> bool
 
   def erase_line: (0 | 1 | 2 | nil) -> self
@@ -67,14 +112,25 @@ class IO
   # Reads and returns a character in raw mode.
   #
   # See IO#raw for details on the parameters.
+  #
+  # You must require 'io/console' to use this method.
+  #
+  # <!--
+  #     io.getch(min: nil, time: nil, intr: nil) -> char
+  # -->
   def getch: (?min: int, ?time: int, ?intr: bool) -> String
 
-  # Reads and returns a line without echo back.
-  # Prints +prompt+ unless it is +nil+.
+  # Reads and returns a line without echo back. Prints `prompt` unless it is
+  # `nil`.
   #
-  # The newline character that terminates the
-  # read line is removed from the returned string,
-  # see String#chomp!.
+  # The newline character that terminates the read line is removed from the
+  # returned string, see String#chomp!.
+  #
+  # You must require 'io/console' to use this method.
+  #
+  # <!--
+  #     io.getpass(prompt=nil)       -> string
+  # -->
   def getpass: (?String) -> String
 
   def goto: (int, int) -> self
@@ -82,9 +138,21 @@ class IO
   def goto_column: (int) -> self
 
   # Flushes input buffer in kernel.
+  #
+  # You must require 'io/console' to use this method.
+  #
+  # <!--
+  #     io.iflush
+  # -->
   def iflush: () -> self
 
   # Flushes input and output buffers in kernel.
+  #
+  # You must require 'io/console' to use this method.
+  #
+  # <!--
+  #     io.ioflush
+  # -->
   def ioflush: () -> self
 
   # Yields `self` with disabling echo back.
@@ -92,9 +160,21 @@ class IO
   #     STDIN.noecho(&:gets)
   #
   # will read and return a line without echo back.
+  #
+  # You must require 'io/console' to use this method.
+  #
+  # <!--
+  #     io.noecho {|io| }
+  # -->
   def noecho: [T] () { (self) -> T } -> T
 
   # Flushes output buffer in kernel.
+  #
+  # You must require 'io/console' to use this method.
+  #
+  # <!--
+  #     io.oflush
+  # -->
   def oflush: () -> self
 
   def pressed?: (Integer | Symbol | String) -> bool
@@ -115,6 +195,12 @@ class IO
   # special characters.
   #
   # Refer to the manual page of termios for further details.
+  #
+  # You must require 'io/console' to use this method.
+  #
+  # <!--
+  #     io.raw(min: nil, time: nil, intr: nil) {|io| }
+  # -->
   def raw: [T] (?min: int, ?time: int, ?intr: bool) { (self) -> T } -> T
 
   # Enables raw mode, and returns `io`.
@@ -122,16 +208,34 @@ class IO
   # If the terminal mode needs to be back, use `io.raw { ... }`.
   #
   # See IO#raw for details on the parameters.
+  #
+  # You must require 'io/console' to use this method.
+  #
+  # <!--
+  #     io.raw!(min: nil, time: nil, intr: nil) -> io
+  # -->
   def raw!: (?min: int, ?time: int, ?intr: bool) -> self
 
   def scroll_backward: (int) -> self
   def scroll_forward: (int) -> self
 
   # Returns console size.
-  def winsize: () -> [Integer, Integer]
+  #
+  # You must require 'io/console' to use this method.
+  #
+  # <!--
+  #     io.winsize     -> [rows, columns]
+  # -->
+  def winsize: () -> [ Integer, Integer ]
 
   # Tries to set console size.  The effect depends on the platform and the running
   # environment.
-  def winsize=: ([Integer, Integer]) -> [Integer, Integer]
-              | ([Integer, Integer, Integer, Integer]) -> [Integer, Integer, Integer, Integer]
+  #
+  # You must require 'io/console' to use this method.
+  #
+  # <!--
+  #     io.winsize = [rows, columns]
+  # -->
+  def winsize=: ([ Integer, Integer ]) -> [ Integer, Integer ]
+              | ([ Integer, Integer, Integer, Integer ]) -> [ Integer, Integer, Integer, Integer ]
 end
