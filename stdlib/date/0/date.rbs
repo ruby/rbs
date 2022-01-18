@@ -132,7 +132,6 @@
 #     d.wday                       #=> 6
 #     d += 1                       #=> #<Date: 2001-02-04 ...>
 #     d.strftime('%a %d %b %Y')    #=> "Sun 04 Feb 2001"
-#
 class Date
   # Creates a date object denoting the given calendar date.
   #
@@ -154,42 +153,102 @@ class Date
   #
   # See also ::jd.
   #
+  # <!--
+  #     Date.civil([year=-4712[, month=1[, mday=1[, start=Date::ITALY]]]])  ->  date
+  #     Date.new([year=-4712[, month=1[, mday=1[, start=Date::ITALY]]]])    ->  date
+  # -->
   def initialize: (?Integer year, ?Integer month, ?Integer mday, ?Integer start) -> void
 
   include Comparable
 
   # Returns a hash of parsed elements.
   #
+  # Raise an ArgumentError when the string length is longer than *limit*. You can
+  # stop this check by passing `limit: nil`, but note that it may take a long time
+  # to parse.
+  #
+  # <!--
+  #     Date._httpdate(string, limit: 128)  ->  hash
+  # -->
   def self._httpdate: (String str) -> Hash[Symbol, Integer]
 
   # Returns a hash of parsed elements.
   #
+  # Raise an ArgumentError when the string length is longer than *limit*. You can
+  # stop this check by passing `limit: nil`, but note that it may take a long time
+  # to parse.
+  #
+  # <!--
+  #     Date._iso8601(string, limit: 128)  ->  hash
+  # -->
   def self._iso8601: (String str) -> Hash[Symbol, Integer]
 
   # Returns a hash of parsed elements.
   #
+  # Raise an ArgumentError when the string length is longer than *limit*. You can
+  # stop this check by passing `limit: nil`, but note that it may take a long time
+  # to parse.
+  #
+  # <!--
+  #     Date._jisx0301(string, limit: 128)  ->  hash
+  # -->
   def self._jisx0301: (String str) -> Hash[Symbol, Integer]
 
   # Parses the given representation of date and time, and returns a hash of parsed
-  # elements.  This method does not function as a validator.
+  # elements.
+  #
+  # This method *does not* function as a validator.  If the input string does not
+  # match valid formats strictly, you may get a cryptic result.  Should consider
+  # to use `Date._strptime` or `DateTime._strptime` instead of this method as
+  # possible.
   #
   # If the optional second argument is true and the detected year is in the range
   # "00" to "99", considers the year a 2-digit form and makes it full.
   #
   #     Date._parse('2001-02-03') #=> {:year=>2001, :mon=>2, :mday=>3}
   #
+  # Raise an ArgumentError when the string length is longer than *limit*. You can
+  # stop this check by passing `limit: nil`, but note that it may take a long time
+  # to parse.
+  #
+  # <!--
+  #     Date._parse(string[, comp=true], limit: 128)  ->  hash
+  # -->
   def self._parse: (String str, ?boolish complete) -> Hash[Symbol, Integer]
 
   # Returns a hash of parsed elements.
   #
+  # Raise an ArgumentError when the string length is longer than *limit*. You can
+  # stop this check by passing `limit: nil`, but note that it may take a long time
+  # to parse.
+  #
+  # <!--
+  #     Date._rfc2822(string, limit: 128)  ->  hash
+  #     Date._rfc822(string, limit: 128)   ->  hash
+  # -->
   def self._rfc2822: (String str) -> Hash[Symbol, Integer | String]
 
   # Returns a hash of parsed elements.
   #
+  # Raise an ArgumentError when the string length is longer than *limit*. You can
+  # stop this check by passing `limit: nil`, but note that it may take a long time
+  # to parse.
+  #
+  # <!--
+  #     Date._rfc3339(string, limit: 128)  ->  hash
+  # -->
   def self._rfc3339: (String str) -> Hash[Symbol, Integer | String]
 
   # Returns a hash of parsed elements.
   #
+  # Raise an ArgumentError when the string length is longer than *limit*. You can
+  # stop this check by passing `limit: nil`, but note that it may take a long time
+  # to parse.
+  #
+  # <!--
+  #     Date._rfc2822(string, limit: 128)  ->  hash
+  #     Date._rfc822(string, limit: 128)   ->  hash
+  # -->
   def self._rfc822: (String str) -> Hash[Symbol, Integer | String]
 
   # Parses the given representation of date and time with the given template, and
@@ -201,10 +260,20 @@ class Date
   #
   # See also strptime(3) and #strftime.
   #
+  # <!--
+  #     Date._strptime(string[, format='%F'])  ->  hash
+  # -->
   def self._strptime: (String str, ?String format) -> Hash[Symbol, Integer]
 
   # Returns a hash of parsed elements.
   #
+  # Raise an ArgumentError when the string length is longer than *limit*. You can
+  # stop this check by passing `limit: nil`, but note that it may take a long time
+  # to parse.
+  #
+  # <!--
+  #     Date._xmlschema(string, limit: 128)  ->  hash
+  # -->
   def self._xmlschema: (String str) -> Hash[Symbol, Integer]
 
   # Creates a date object denoting the given calendar date.
@@ -227,6 +296,10 @@ class Date
   #
   # See also ::jd.
   #
+  # <!--
+  #     Date.civil([year=-4712[, month=1[, mday=1[, start=Date::ITALY]]]])  ->  date
+  #     Date.new([year=-4712[, month=1[, mday=1[, start=Date::ITALY]]]])    ->  date
+  # -->
   def self.civil: (?Integer year, ?Integer month, ?Integer mday, ?Integer start) -> Date
 
   # Creates a date object denoting the given week date.
@@ -241,6 +314,9 @@ class Date
   #
   # See also ::jd and ::new.
   #
+  # <!--
+  #     Date.commercial([cwyear=-4712[, cweek=1[, cwday=1[, start=Date::ITALY]]]])  ->  date
+  # -->
   def self.commercial: (?Integer cwyear, ?Integer cweek, ?Integer cwday, ?Integer start) -> Date
 
   # Returns true if the given year is a leap year of the proleptic Gregorian
@@ -249,6 +325,10 @@ class Date
   #     Date.gregorian_leap?(1900)        #=> false
   #     Date.gregorian_leap?(2000)        #=> true
   #
+  # <!--
+  #     Date.gregorian_leap?(year)  ->  bool
+  #     Date.leap?(year)            ->  bool
+  # -->
   def self.gregorian_leap?: (Integer year) -> bool
 
   # Creates a new Date object by parsing from a string according to some RFC 2616
@@ -257,6 +337,13 @@ class Date
   #     Date.httpdate('Sat, 03 Feb 2001 00:00:00 GMT')
   #                                               #=> #<Date: 2001-02-03 ...>
   #
+  # Raise an ArgumentError when the string length is longer than *limit*. You can
+  # stop this check by passing `limit: nil`, but note that it may take a long time
+  # to parse.
+  #
+  # <!--
+  #     Date.httpdate(string='Mon, 01 Jan -4712 00:00:00 GMT'[, start=Date::ITALY], limit: 128)  ->  date
+  # -->
   def self.httpdate: (String str, ?Integer start) -> Date
 
   # Creates a new Date object by parsing from a string according to some typical
@@ -266,6 +353,13 @@ class Date
   #     Date.iso8601('20010203')          #=> #<Date: 2001-02-03 ...>
   #     Date.iso8601('2001-W05-6')        #=> #<Date: 2001-02-03 ...>
   #
+  # Raise an ArgumentError when the string length is longer than *limit*. You can
+  # stop this check by passing `limit: nil`, but note that it may take a long time
+  # to parse.
+  #
+  # <!--
+  #     Date.iso8601(string='-4712-01-01'[, start=Date::ITALY], limit: 128)  ->  date
+  # -->
   def self.iso8601: (String str, ?Integer start) -> Date
 
   # Creates a date object denoting the given chronological Julian day number.
@@ -276,6 +370,9 @@ class Date
   #
   # See also ::new.
   #
+  # <!--
+  #     Date.jd([jd=0[, start=Date::ITALY]])  ->  date
+  # -->
   def self.jd: (Integer jd, ?Integer start) -> Date
 
   # Creates a new Date object by parsing from a string according to some typical
@@ -287,6 +384,13 @@ class Date
   #
   #     Date.jisx0301('13.02.03')                 #=> #<Date: 2001-02-03 ...>
   #
+  # Raise an ArgumentError when the string length is longer than *limit*. You can
+  # stop this check by passing `limit: nil`, but note that it may take a long time
+  # to parse.
+  #
+  # <!--
+  #     Date.jisx0301(string='-4712-01-01'[, start=Date::ITALY], limit: 128)  ->  date
+  # -->
   def self.jisx0301: (String str, ?Integer start) -> Date
 
   # Returns true if the given year is a leap year of the proleptic Julian
@@ -295,6 +399,9 @@ class Date
   #     Date.julian_leap?(1900)           #=> true
   #     Date.julian_leap?(1901)           #=> false
   #
+  # <!--
+  #     Date.julian_leap?(year)  ->  bool
+  # -->
   def self.julian_leap?: (Integer year) -> bool
 
   # Returns true if the given year is a leap year of the proleptic Gregorian
@@ -303,6 +410,10 @@ class Date
   #     Date.gregorian_leap?(1900)        #=> false
   #     Date.gregorian_leap?(2000)        #=> true
   #
+  # <!--
+  #     Date.gregorian_leap?(year)  ->  bool
+  #     Date.leap?(year)            ->  bool
+  # -->
   def self.leap?: (Integer year) -> bool
 
   # Creates a date object denoting the given ordinal date.
@@ -316,10 +427,16 @@ class Date
   #
   # See also ::jd and ::new.
   #
+  # <!--
+  #     Date.ordinal([year=-4712[, yday=1[, start=Date::ITALY]]])  ->  date
+  # -->
   def self.ordinal: (?Integer year, ?Integer yday, ?Integer start) -> Date
 
   # Parses the given representation of date and time, and creates a date object.
-  # This method does not function as a validator.
+  #
+  # This method *does not* function as a validator.  If the input string does not
+  # match valid formats strictly, you may get a cryptic result.  Should consider
+  # to use `Date.strptime` instead of this method as possible.
   #
   # If the optional second argument is true and the detected year is in the range
   # "00" to "99", considers the year a 2-digit form and makes it full.
@@ -328,6 +445,13 @@ class Date
   #     Date.parse('20010203')            #=> #<Date: 2001-02-03 ...>
   #     Date.parse('3rd Feb 2001')        #=> #<Date: 2001-02-03 ...>
   #
+  # Raise an ArgumentError when the string length is longer than *limit*. You can
+  # stop this check by passing `limit: nil`, but note that it may take a long time
+  # to parse.
+  #
+  # <!--
+  #     Date.parse(string='-4712-01-01'[, comp=true[, start=Date::ITALY]], limit: 128)  ->  date
+  # -->
   def self.parse: (String str, ?boolish complete, ?Integer start) -> Date
 
   # Creates a new Date object by parsing from a string according to some typical
@@ -336,6 +460,14 @@ class Date
   #     Date.rfc2822('Sat, 3 Feb 2001 00:00:00 +0000')
   #                                               #=> #<Date: 2001-02-03 ...>
   #
+  # Raise an ArgumentError when the string length is longer than *limit*. You can
+  # stop this check by passing `limit: nil`, but note that it may take a long time
+  # to parse.
+  #
+  # <!--
+  #     Date.rfc2822(string='Mon, 1 Jan -4712 00:00:00 +0000'[, start=Date::ITALY], limit: 128)  ->  date
+  #     Date.rfc822(string='Mon, 1 Jan -4712 00:00:00 +0000'[, start=Date::ITALY], limit: 128)   ->  date
+  # -->
   def self.rfc2822: (String str, ?Integer start) -> Date
 
   # Creates a new Date object by parsing from a string according to some typical
@@ -343,6 +475,13 @@ class Date
   #
   #     Date.rfc3339('2001-02-03T04:05:06+07:00') #=> #<Date: 2001-02-03 ...>
   #
+  # Raise an ArgumentError when the string length is longer than *limit*. You can
+  # stop this check by passing `limit: nil`, but note that it may take a long time
+  # to parse.
+  #
+  # <!--
+  #     Date.rfc3339(string='-4712-01-01T00:00:00+00:00'[, start=Date::ITALY], limit: 128)  ->  date
+  # -->
   def self.rfc3339: (String str, ?Integer start) -> Date
 
   # Creates a new Date object by parsing from a string according to some typical
@@ -351,6 +490,14 @@ class Date
   #     Date.rfc2822('Sat, 3 Feb 2001 00:00:00 +0000')
   #                                               #=> #<Date: 2001-02-03 ...>
   #
+  # Raise an ArgumentError when the string length is longer than *limit*. You can
+  # stop this check by passing `limit: nil`, but note that it may take a long time
+  # to parse.
+  #
+  # <!--
+  #     Date.rfc2822(string='Mon, 1 Jan -4712 00:00:00 +0000'[, start=Date::ITALY], limit: 128)  ->  date
+  #     Date.rfc822(string='Mon, 1 Jan -4712 00:00:00 +0000'[, start=Date::ITALY], limit: 128)   ->  date
+  # -->
   def self.rfc822: (String str, ?Integer start) -> Date
 
   # Parses the given representation of date and time with the given template, and
@@ -367,12 +514,18 @@ class Date
   #
   # See also strptime(3) and #strftime.
   #
+  # <!--
+  #     Date.strptime([string='-4712-01-01'[, format='%F'[, start=Date::ITALY]]])  ->  date
+  # -->
   def self.strptime: (String str, ?String format, ?Integer start) -> Date
 
   # Creates a date object denoting the present day.
   #
   #     Date.today   #=> #<Date: 2011-06-11 ...>
   #
+  # <!--
+  #     Date.today([start=Date::ITALY])  ->  date
+  # -->
   def self.today: (?Integer start) -> Date
 
   # Returns true if the given calendar date is valid, and false if not. Valid in
@@ -385,6 +538,10 @@ class Date
   #
   # See also ::jd and ::civil.
   #
+  # <!--
+  #     Date.valid_civil?(year, month, mday[, start=Date::ITALY])  ->  bool
+  #     Date.valid_date?(year, month, mday[, start=Date::ITALY])   ->  bool
+  # -->
   def self.valid_civil?: (Integer year, Integer month, Integer mday, ?Integer start) -> bool
 
   # Returns true if the given week date is valid, and false if not.
@@ -394,6 +551,9 @@ class Date
   #
   # See also ::jd and ::commercial.
   #
+  # <!--
+  #     Date.valid_commercial?(cwyear, cweek, cwday[, start=Date::ITALY])  ->  bool
+  # -->
   def self.valid_commercial?: (Integer cwyear, Integer cweek, Integer cwday, ?Integer start) -> bool
 
   # Returns true if the given calendar date is valid, and false if not. Valid in
@@ -406,6 +566,10 @@ class Date
   #
   # See also ::jd and ::civil.
   #
+  # <!--
+  #     Date.valid_civil?(year, month, mday[, start=Date::ITALY])  ->  bool
+  #     Date.valid_date?(year, month, mday[, start=Date::ITALY])   ->  bool
+  # -->
   def self.valid_date?: (Integer year, Integer month, Integer mday, ?Integer start) -> bool
 
   # Just returns true.  It's nonsense, but is for symmetry.
@@ -414,6 +578,9 @@ class Date
   #
   # See also ::jd.
   #
+  # <!--
+  #     Date.valid_jd?(jd[, start=Date::ITALY])  ->  bool
+  # -->
   def self.valid_jd?: (Integer jd, ?Integer start) -> bool
 
   # Returns true if the given ordinal date is valid, and false if not.
@@ -423,6 +590,9 @@ class Date
   #
   # See also ::jd and ::ordinal.
   #
+  # <!--
+  #     Date.valid_ordinal?(year, yday[, start=Date::ITALY])  ->  bool
+  # -->
   def self.valid_ordinal?: (Integer year, Integer yday, ?Integer start) -> bool
 
   # Creates a new Date object by parsing from a string according to some typical
@@ -430,6 +600,13 @@ class Date
   #
   #     Date.xmlschema('2001-02-03')      #=> #<Date: 2001-02-03 ...>
   #
+  # Raise an ArgumentError when the string length is longer than *limit*. You can
+  # stop this check by passing `limit: nil`, but note that it may take a long time
+  # to parse.
+  #
+  # <!--
+  #     Date.xmlschema(string='-4712-01-01'[, start=Date::ITALY], limit: 128)  ->  date
+  # -->
   def self.xmlschema: (String str, ?Integer start) -> Date
 
   public
@@ -446,7 +623,10 @@ class Date
   #     DateTime.jd(0,12) + DateTime.new(2001,2,3).ajd
   #                               #=> #<DateTime: 2001-02-03T00:00:00+00:00 ...>
   #
-  def +: ((Numeric & _ToR) other) -> Date
+  # <!--
+  #     d + other  ->  date
+  # -->
+  def +: (Numeric & _ToR other) -> Date
 
   # Returns the difference between the two dates if the other is a date object.
   # If the other is a numeric value, returns a date object pointing `other` days
@@ -461,7 +641,10 @@ class Date
   #     DateTime.new(2001,2,3) - DateTime.new(2001,2,2,12)
   #                              #=> (1/2)
   #
-  def -: ((Numeric & _ToR) other) -> Date
+  # <!--
+  #     d - other  ->  date or rational
+  # -->
+  def -: (Numeric & _ToR other) -> Date
        | (Date other) -> Rational
 
   # Returns a date object pointing `n` months before self. The argument `n` should
@@ -483,6 +666,9 @@ class Date
   #
   #     Date.new(2001,3,31) << 1 << -1   #=> #<Date: 2001-03-28 ...>
   #
+  # <!--
+  #     d << n  ->  date
+  # -->
   def <<: (Integer month) -> Date
 
   # Compares the two dates and returns -1, zero, 1 or nil.  The other should be a
@@ -496,6 +682,9 @@ class Date
   #
   # See also Comparable.
   #
+  # <!--
+  #     d <=> other  -> -1, 0, +1 or nil
+  # -->
   def <=>: (untyped other) -> Integer?
 
   # Returns true if they are the same day.
@@ -511,6 +700,9 @@ class Date
   #     DateTime.new(2001,2,3) === DateTime.new(2001,2,4,0,0,0,'+24:00')
   #                                       #=> false
   #
+  # <!--
+  #     d === other  ->  bool
+  # -->
   def ===: (Date other) -> bool
 
   # Returns a date object pointing `n` months after self. The argument `n` should
@@ -532,6 +724,9 @@ class Date
   #
   #     Date.new(2001,1,31) >> 1 >> -1   #=> #<Date: 2001-01-28 ...>
   #
+  # <!--
+  #     d >> n  ->  date
+  # -->
   def >>: (Integer month) -> Date
 
   # Returns the astronomical Julian day number.  This is a fractional number,
@@ -540,6 +735,9 @@ class Date
   #     DateTime.new(2001,2,3,4,5,6,'+7').ajd     #=> (11769328217/4800)
   #     DateTime.new(2001,2,2,14,5,6,'-7').ajd    #=> (11769328217/4800)
   #
+  # <!--
+  #     d.ajd  ->  rational
+  # -->
   def ajd: () -> Rational
 
   # Returns the astronomical modified Julian day number.  This is a fractional
@@ -548,6 +746,9 @@ class Date
   #     DateTime.new(2001,2,3,4,5,6,'+7').amjd    #=> (249325817/4800)
   #     DateTime.new(2001,2,2,14,5,6,'-7').amjd   #=> (249325817/4800)
   #
+  # <!--
+  #     d.amjd  ->  rational
+  # -->
   def amjd: () -> Rational
 
   # Returns a string in asctime(3) format (but without "n\0" at the end).  This
@@ -555,6 +756,10 @@ class Date
   #
   # See also asctime(3) or ctime(3).
   #
+  # <!--
+  #     d.asctime  ->  string
+  #     d.ctime    ->  string
+  # -->
   def asctime: () -> String
 
   # Returns a string in asctime(3) format (but without "n\0" at the end).  This
@@ -562,18 +767,27 @@ class Date
   #
   # See also asctime(3) or ctime(3).
   #
+  # <!--
+  #     ctime()
+  # -->
   def ctime: () -> String
 
   # Returns the day of calendar week (1-7, Monday is 1).
   #
   #     Date.new(2001,2,3).cwday          #=> 6
   #
+  # <!--
+  #     d.cwday  ->  fixnum
+  # -->
   def cwday: () -> Integer
 
   # Returns the calendar week number (1-53).
   #
   #     Date.new(2001,2,3).cweek          #=> 5
   #
+  # <!--
+  #     d.cweek  ->  fixnum
+  # -->
   def cweek: () -> Integer
 
   # Returns the calendar week based year.
@@ -581,29 +795,48 @@ class Date
   #     Date.new(2001,2,3).cwyear         #=> 2001
   #     Date.new(2000,1,1).cwyear         #=> 1999
   #
+  # <!--
+  #     d.cwyear  ->  integer
+  # -->
   def cwyear: () -> Integer
 
   # Returns the day of the month (1-31).
   #
   #     Date.new(2001,2,3).mday           #=> 3
   #
+  # <!--
+  #     day()
+  # -->
   def day: () -> Integer
 
   # This method is equivalent to step(min, -1){|date| ...}.
   #
+  # <!--
+  #     d.downto(min)              ->  enumerator
+  #     d.downto(min){|date| ...}  ->  self
+  # -->
   def downto: (Date min) { (Date) -> untyped } -> Date
             | (Date min) -> Enumerator[Date, Date]
 
   # This method is equivalent to new_start(Date::ENGLAND).
   #
+  # <!--
+  #     d.england  ->  date
+  # -->
   def england: () -> Date
 
   # Returns true if the date is Friday.
   #
+  # <!--
+  #     d.friday?  ->  bool
+  # -->
   def friday?: () -> bool
 
   # This method is equivalent to new_start(Date::GREGORIAN).
   #
+  # <!--
+  #     d.gregorian  ->  date
+  # -->
   def gregorian: () -> Date
 
   # Returns true if the date is on or after the day of calendar reform.
@@ -611,11 +844,17 @@ class Date
   #     Date.new(1582,10,15).gregorian?          #=> true
   #     (Date.new(1582,10,15) - 1).gregorian?    #=> false
   #
+  # <!--
+  #     d.gregorian?  ->  bool
+  # -->
   def gregorian?: () -> bool
 
   # This method is equivalent to strftime('%a, %d %b %Y %T GMT'). See also RFC
   # 2616.
   #
+  # <!--
+  #     d.httpdate  ->  string
+  # -->
   def httpdate: () -> String
 
   # Returns the value as a string for inspection.
@@ -625,14 +864,24 @@ class Date
   #     DateTime.new(2001,2,3,4,5,6,'-7').inspect
   #               #=> "#<DateTime: 2001-02-03T04:05:06-07:00>"
   #
+  # <!--
+  #     d.inspect  ->  string
+  # -->
   def inspect: () -> String
 
   # This method is equivalent to strftime('%F').
   #
+  # <!--
+  #     d.iso8601    ->  string
+  #     d.xmlschema  ->  string
+  # -->
   def iso8601: () -> String
 
   # This method is equivalent to new_start(Date::ITALY).
   #
+  # <!--
+  #     d.italy  ->  date
+  # -->
   def italy: () -> Date
 
   # Returns the Julian day number.  This is a whole number, which is adjusted by
@@ -641,16 +890,25 @@ class Date
   #     DateTime.new(2001,2,3,4,5,6,'+7').jd      #=> 2451944
   #     DateTime.new(2001,2,3,4,5,6,'-7').jd      #=> 2451944
   #
+  # <!--
+  #     d.jd  ->  integer
+  # -->
   def jd: () -> Integer
 
   # Returns a string in a JIS X 0301 format.
   #
   #     Date.new(2001,2,3).jisx0301       #=> "H13.02.03"
   #
+  # <!--
+  #     d.jisx0301  ->  string
+  # -->
   def jisx0301: () -> String
 
   # This method is equivalent to new_start(Date::JULIAN).
   #
+  # <!--
+  #     d.julian  ->  date
+  # -->
   def julian: () -> Date
 
   # Returns true if the date is before the day of calendar reform.
@@ -658,6 +916,9 @@ class Date
   #     Date.new(1582,10,15).julian?             #=> false
   #     (Date.new(1582,10,15) - 1).julian?       #=> true
   #
+  # <!--
+  #     d.julian?  ->  bool
+  # -->
   def julian?: () -> bool
 
   # Returns the Lilian day number.  This is a whole number, which is adjusted by
@@ -665,6 +926,9 @@ class Date
   #
   #     Date.new(2001,2,3).ld            #=> 152784
   #
+  # <!--
+  #     d.ld  ->  integer
+  # -->
   def ld: () -> Integer
 
   # Returns true if the year is a leap year.
@@ -672,12 +936,19 @@ class Date
   #     Date.new(2000).leap?      #=> true
   #     Date.new(2001).leap?      #=> false
   #
+  # <!--
+  #     d.leap?  ->  bool
+  # -->
   def leap?: () -> bool
 
   # Returns the day of the month (1-31).
   #
   #     Date.new(2001,2,3).mday           #=> 3
   #
+  # <!--
+  #     d.mday  ->  fixnum
+  #     d.day   ->  fixnum
+  # -->
   def mday: () -> Integer
 
   # Returns the modified Julian day number.  This is a whole number, which is
@@ -686,22 +957,35 @@ class Date
   #     DateTime.new(2001,2,3,4,5,6,'+7').mjd     #=> 51943
   #     DateTime.new(2001,2,3,4,5,6,'-7').mjd     #=> 51943
   #
+  # <!--
+  #     d.mjd  ->  integer
+  # -->
   def mjd: () -> Integer
 
   # Returns the month (1-12).
   #
   #     Date.new(2001,2,3).mon            #=> 2
   #
+  # <!--
+  #     d.mon    ->  fixnum
+  #     d.month  ->  fixnum
+  # -->
   def mon: () -> Integer
 
   # Returns true if the date is Monday.
   #
+  # <!--
+  #     d.monday?  ->  bool
+  # -->
   def monday?: () -> bool
 
   # Returns the month (1-12).
   #
   #     Date.new(2001,2,3).mon            #=> 2
   #
+  # <!--
+  #     month()
+  # -->
   def month: () -> Integer
 
   # Duplicates self and resets its day of calendar reform.
@@ -709,18 +993,33 @@ class Date
   #     d = Date.new(1582,10,15)
   #     d.new_start(Date::JULIAN)         #=> #<Date: 1582-10-05 ...>
   #
+  # <!--
+  #     d.new_start([start=Date::ITALY])  ->  date
+  # -->
   def new_start: (?Integer start) -> Date
 
   # Returns a date object denoting the following day.
   #
+  # <!--
+  #     d.succ  ->  date
+  #     d.next  ->  date
+  # -->
   def next: () -> Date
 
   # This method is equivalent to d + n.
   #
+  # <!--
+  #     d.next_day([n=1])  ->  date
+  # -->
   def next_day: (?Integer day) -> Date
 
   # This method is equivalent to d >> n.
   #
+  # See Date#>> for examples.
+  #
+  # <!--
+  #     d.next_month([n=1])  ->  date
+  # -->
   def next_month: (?Integer month) -> Date
 
   # This method is equivalent to d >> (n * 12).
@@ -729,14 +1028,27 @@ class Date
   #     Date.new(2008,2,29).next_year     #=> #<Date: 2009-02-28 ...>
   #     Date.new(2008,2,29).next_year(4)  #=> #<Date: 2012-02-29 ...>
   #
+  # See also Date#>>.
+  #
+  # <!--
+  #     d.next_year([n=1])  ->  date
+  # -->
   def next_year: (?Integer year) -> Date
 
   # This method is equivalent to d - n.
   #
+  # <!--
+  #     d.prev_day([n=1])  ->  date
+  # -->
   def prev_day: (?Integer day) -> Date
 
   # This method is equivalent to d << n.
   #
+  # See Date#<< for examples.
+  #
+  # <!--
+  #     d.prev_month([n=1])  ->  date
+  # -->
   def prev_month: (?Integer month) -> Date
 
   # This method is equivalent to d << (n * 12).
@@ -745,22 +1057,48 @@ class Date
   #     Date.new(2008,2,29).prev_year     #=> #<Date: 2007-02-28 ...>
   #     Date.new(2008,2,29).prev_year(4)  #=> #<Date: 2004-02-29 ...>
   #
+  # See also Date#<<.
+  #
+  # <!--
+  #     d.prev_year([n=1])  ->  date
+  # -->
   def prev_year: (?Integer year) -> Date
 
   # This method is equivalent to strftime('%a, %-d %b %Y %T %z').
   #
+  # <!--
+  #     d.rfc2822  ->  string
+  #     d.rfc822   ->  string
+  # -->
   def rfc2822: () -> String
 
   # This method is equivalent to strftime('%FT%T%:z').
   #
+  # <!--
+  #     d.rfc3339  ->  string
+  # -->
   def rfc3339: () -> String
 
-  # This method is equivalent to strftime('%a, %-d %b %Y %T %z').
+  # Creates a new Date object by parsing from a string according to some typical
+  # RFC 2822 formats.
   #
+  #     Date.rfc2822('Sat, 3 Feb 2001 00:00:00 +0000')
+  #                                               #=> #<Date: 2001-02-03 ...>
+  #
+  # Raise an ArgumentError when the string length is longer than *limit*. You can
+  # stop this check by passing `limit: nil`, but note that it may take a long time
+  # to parse.
+  #
+  # <!--
+  #     rfc822()
+  # -->
   def rfc822: () -> String
 
   # Returns true if the date is Saturday.
   #
+  # <!--
+  #     d.saturday?  ->  bool
+  # -->
   def saturday?: () -> bool
 
   # Returns the Julian day number denoting the day of calendar reform.
@@ -768,6 +1106,9 @@ class Date
   #     Date.new(2001,2,3).start                  #=> 2299161.0
   #     Date.new(2001,2,3,Date::GREGORIAN).start  #=> -Infinity
   #
+  # <!--
+  #     d.start  ->  float
+  # -->
   def start: () -> Float
 
   # Iterates evaluation of the given block, which takes a date object. The limit
@@ -776,6 +1117,10 @@ class Date
   #     Date.new(2001).step(Date.new(2001,-1,-1)).select{|d| d.sunday?}.size
   #                               #=> 52
   #
+  # <!--
+  #     d.step(limit[, step=1])              ->  enumerator
+  #     d.step(limit[, step=1]){|date| ...}  ->  self
+  # -->
   def step: (Date limit, ?Integer step) { (Date) -> untyped } -> Date
           | (Date limit, ?Integer step) -> ::Enumerator[Date, Date]
 
@@ -886,7 +1231,7 @@ class Date
   #       %c - date and time (%a %b %e %T %Y)
   #       %D - Date (%m/%d/%y)
   #       %F - The ISO 8601 date format (%Y-%m-%d)
-  #       %v - VMS date (%e-%b-%Y)
+  #       %v - VMS date (%e-%^b-%Y)
   #       %x - Same as %D
   #       %X - Same as %T
   #       %r - 12-hour time (%I:%M:%S %p)
@@ -946,26 +1291,44 @@ class Date
   #
   # See also strftime(3) and ::strptime.
   #
+  # <!--
+  #     d.strftime([format='%F'])  ->  string
+  # -->
   def strftime: (?String format) -> String
 
   # Returns a date object denoting the following day.
   #
+  # <!--
+  #     succ()
+  # -->
   def succ: () -> Date
 
   # Returns true if the date is Sunday.
   #
+  # <!--
+  #     d.sunday?  ->  bool
+  # -->
   def sunday?: () -> bool
 
   # Returns true if the date is Thursday.
   #
+  # <!--
+  #     d.thursday?  ->  bool
+  # -->
   def thursday?: () -> bool
 
   # Returns self.
   #
+  # <!--
+  #     d.to_date  ->  self
+  # -->
   def to_date: () -> Date
 
   # Returns a DateTime object which denotes self.
   #
+  # <!--
+  #     d.to_datetime  -> datetime
+  # -->
   def to_datetime: () -> DateTime
 
   # Returns a string in an ISO 8601 format. (This method doesn't use the expanded
@@ -973,19 +1336,32 @@ class Date
   #
   #     Date.new(2001,2,3).to_s  #=> "2001-02-03"
   #
+  # <!--
+  #     d.to_s  ->  string
+  # -->
   def to_s: () -> String
 
   # Returns a Time object which denotes self. If self is a julian date, convert it
   # to a gregorian date before converting it to Time.
   #
+  # <!--
+  #     d.to_time  ->  time
+  # -->
   def to_time: () -> Time
 
   # Returns true if the date is Tuesday.
   #
+  # <!--
+  #     d.tuesday?  ->  bool
+  # -->
   def tuesday?: () -> bool
 
   # This method is equivalent to step(max, 1){|date| ...}.
   #
+  # <!--
+  #     d.upto(max)              ->  enumerator
+  #     d.upto(max){|date| ...}  ->  self
+  # -->
   def upto: (Date max) { (Date) -> untyped } -> Date
           | (Date max) -> ::Enumerator[Date, Date]
 
@@ -993,20 +1369,32 @@ class Date
   #
   #     Date.new(2001,2,3).wday           #=> 6
   #
+  # <!--
+  #     d.wday  ->  fixnum
+  # -->
   def wday: () -> Integer
 
   # Returns true if the date is Wednesday.
   #
+  # <!--
+  #     d.wednesday?  ->  bool
+  # -->
   def wednesday?: () -> bool
 
   # This method is equivalent to strftime('%F').
   #
+  # <!--
+  #     xmlschema()
+  # -->
   def xmlschema: () -> String
 
   # Returns the day of the year (1-366).
   #
   #     Date.new(2001,2,3).yday           #=> 34
   #
+  # <!--
+  #     d.yday  ->  fixnum
+  # -->
   def yday: () -> Integer
 
   # Returns the year.
@@ -1014,43 +1402,38 @@ class Date
   #     Date.new(2001,2,3).year           #=> 2001
   #     (Date.new(1,1,1) - 1).year        #=> 0
   #
+  # <!--
+  #     d.year  ->  integer
+  # -->
   def year: () -> Integer
 end
 
 # An array of strings of abbreviated day names in English.  The first is "Sun".
-#
 Date::ABBR_DAYNAMES: Array[String]
 
 # An array of strings of abbreviated month names in English.  The first element
 # is nil.
-#
 Date::ABBR_MONTHNAMES: Array[String?]
 
 # An array of strings of the full names of days of the week in English. The
 # first is "Sunday".
-#
 Date::DAYNAMES: Array[String]
 
 # The Julian day number of the day of calendar reform for England and her
 # colonies.
-#
 Date::ENGLAND: Integer
 
 # The Julian day number of the day of calendar reform for the proleptic
 # Gregorian calendar.
-#
 Date::GREGORIAN: Integer
 
 # The Julian day number of the day of calendar reform for Italy and some
 # catholic countries.
-#
 Date::ITALY: Integer
 
 # The Julian day number of the day of calendar reform for the proleptic Julian
 # calendar.
-#
 Date::JULIAN: Integer
 
 # An array of strings of full month names in English.  The first element is nil.
-#
 Date::MONTHNAMES: Array[String?]
