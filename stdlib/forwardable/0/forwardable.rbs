@@ -61,7 +61,7 @@
 #       def_delegators :@q, :clear, :first, :push, :shift, :size
 #     end
 #
-#     q = Queue.new
+#     q = Thread::Queue.new
 #     q.enq 1, 2, 3, 4, 5
 #     q.push 6
 #
@@ -92,18 +92,26 @@
 # `forwardable.rb` provides single-method delegation via the def_delegator and
 # def_delegators methods. For full-class delegation via DelegateClass, see
 # `delegate.rb`.
-#
 module Forwardable
+  # Version of `forwardable.rb`
   VERSION: String
 
   FORWARDABLE_VERSION: String
 
-  # Takes a hash as its argument.  The key is a symbol or an array of symbols.
+  # Takes a hash as its argument.  The key is a symbol or an array of symbols. 
   # These symbols correspond to method names, instance variable names, or constant
   # names (see def_delegator).  The value is the accessor to which the methods
   # will be delegated.
+  #
+  # <!--
+  #     delegate method => accessor
+  #     delegate [method, method, ...] => accessor
+  # -->
   def instance_delegate: (Hash[Symbol | Array[Symbol], Symbol] hash) -> void
 
+  # <!--
+  #     delegate(hash)
+  # -->
   alias delegate instance_delegate
 
   # Shortcut for defining multiple delegator methods, but with no provision for
@@ -115,13 +123,19 @@ module Forwardable
   #     def_delegator :@records, :<<
   #     def_delegator :@records, :map
   #
+  # <!--
+  #     def_instance_delegators(accessor, *methods)
+  # -->
   def def_instance_delegators: (Symbol | String accessor, *Symbol methods) -> void
 
+  # <!--
+  #     def_delegators(accessor, *methods)
+  # -->
   alias def_delegators def_instance_delegators
 
   # Define `method` as delegator instance method with an optional alias name
-  # `ali`. Method calls to `ali` will be delegated to `accessor.method`.
-  # `accessor` should be a method name, instance variable name, or constant name.
+  # `ali`. Method calls to `ali` will be delegated to `accessor.method`. 
+  # `accessor` should be a method name, instance variable name, or constant name. 
   # Use the full path to the constant if providing the constant name. Returns the
   # name of the method defined.
   #
@@ -143,8 +157,14 @@ module Forwardable
   #     q.push 23  #=> NoMethodError
   #     q.to_i     #=> 1
   #
+  # <!--
+  #     def_instance_delegator(accessor, method, ali = method)
+  # -->
   def def_instance_delegator: (Symbol | String accessor, Symbol method, ?Symbol ali) -> void
 
+  # <!--
+  #     def_delegator(accessor, method, ali = method)
+  # -->
   alias def_delegator def_instance_delegator
 end
 
@@ -173,13 +193,20 @@ end
 #
 # If you want to use both Forwardable and SingleForwardable, you can use methods
 # def_instance_delegator and def_single_delegator, etc.
-#
 module SingleForwardable
-  # Takes a hash as its argument.  The key is a symbol or an array of symbols.
+  # Takes a hash as its argument.  The key is a symbol or an array of symbols. 
   # These symbols correspond to method names.  The value is the accessor to which
   # the methods will be delegated.
+  #
+  # <!--
+  #     delegate method => accessor
+  #     delegate [method, method, ...] => accessor
+  # -->
   def single_delegate: (Hash[Symbol | Array[Symbol], Symbol] hash) -> void
 
+  # <!--
+  #     delegate(hash)
+  # -->
   alias delegate single_delegate
 
   # Shortcut for defining multiple delegator methods, but with no provision for
@@ -191,14 +218,27 @@ module SingleForwardable
   #     def_delegator :@records, :<<
   #     def_delegator :@records, :map
   #
+  # <!--
+  #     def_single_delegators(accessor, *methods)
+  # -->
   def def_single_delegators: (Symbol | String accessor, *Symbol methods) -> void
 
+  # <!--
+  #     def_delegators(accessor, *methods)
+  # -->
   alias def_delegators def_single_delegators
 
   # Defines a method *method* which delegates to *accessor* (i.e. it calls the
   # method of the same name in *accessor*).  If *new_name* is provided, it is used
   # as the name for the delegate method. Returns the name of the method defined.
+  #
+  # <!--
+  #     def_single_delegator(accessor, method, new_name=method)
+  # -->
   def def_single_delegator: (Symbol | String accessor, Symbol method, ?Symbol ali) -> void
 
+  # <!--
+  #     def_delegator(accessor, method, ali = method)
+  # -->
   alias def_delegator def_single_delegator
 end
