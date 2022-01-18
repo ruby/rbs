@@ -68,12 +68,18 @@
 module Digest
   # Returns a BubbleBabble encoded version of a given *string*.
   #
+  # <!--
+  #     Digest.bubblebabble(string) -> bubblebabble_string
+  # -->
   def self.bubblebabble: (String) -> String
 
   def self.const_missing: (Symbol name) -> singleton(::Digest::Base)
 
   # Generates a hex-encoded version of a given *string*.
   #
+  # <!--
+  #     Digest.hexencode(string) -> hexencoded_string
+  # -->
   def self.hexencode: (String) -> String
 
   private
@@ -96,12 +102,19 @@ module Digest::Instance
   # The update() method and the left-shift operator are overridden by each
   # implementation subclass. (One should be an alias for the other)
   #
+  # <!--
+  #     <<(p1)
+  # -->
   def <<: (String) -> self
 
   # If a string is given, checks whether it is equal to the hex-encoded hash value
   # of the digest object.  If another digest instance is given, checks whether
   # they have the same hash value.  Otherwise returns false.
   #
+  # <!--
+  #     digest_obj == another_digest_obj -> boolean
+  #     digest_obj == string -> boolean
+  # -->
   def ==: (::Digest::Instance | String) -> bool
 
   # If none is given, returns the resulting hash value of the digest in a base64
@@ -114,20 +127,32 @@ module Digest::Instance
   # In either case, the return value is properly padded with '=' and contains no
   # line feeds.
   #
+  # <!--
+  #     base64digest(str = nil)
+  # -->
   def base64digest: (?String? str) -> String
 
   # Returns the resulting hash value and resets the digest to the initial state.
   #
+  # <!--
+  #     base64digest!()
+  # -->
   def base64digest!: () -> String
 
   # Returns the block length of the digest.
   #
   # This method is overridden by each implementation subclass.
   #
+  # <!--
+  #     digest_obj.block_length -> integer
+  # -->
   def block_length: () -> Integer
 
   # Returns the resulting hash value in a Bubblebabble encoded form.
   #
+  # <!--
+  #     digest_obj.bubblebabble -> hash_string
+  # -->
   def bubblebabble: () -> String
 
   # If none is given, returns the resulting hash value of the digest, keeping the
@@ -136,10 +161,17 @@ module Digest::Instance
   # If a *string* is given, returns the hash value for the given *string*,
   # resetting the digest to the initial state before and after the process.
   #
+  # <!--
+  #     digest_obj.digest -> string
+  #     digest_obj.digest(string) -> string
+  # -->
   def digest: (?String) -> String
 
   # Returns the resulting hash value and resets the digest to the initial state.
   #
+  # <!--
+  #     digest_obj.digest! -> string
+  # -->
   def digest!: () -> String
 
   # Returns the length of the hash value of the digest.
@@ -147,10 +179,16 @@ module Digest::Instance
   # This method should be overridden by each implementation subclass. If not,
   # digest_obj.digest().length() is returned.
   #
+  # <!--
+  #     digest_obj.digest_length -> integer
+  # -->
   def digest_length: () -> Integer
 
   # Updates the digest with the contents of a given file *name* and returns self.
   #
+  # <!--
+  #     file(name)
+  # -->
   def file: (String name) -> self
 
   # If none is given, returns the resulting hash value of the digest in a
@@ -160,38 +198,64 @@ module Digest::Instance
   # hex-encoded form, resetting the digest to the initial state before and after
   # the process.
   #
+  # <!--
+  #     digest_obj.hexdigest -> string
+  #     digest_obj.hexdigest(string) -> string
+  # -->
   def hexdigest: (?String) -> String
 
   # Returns the resulting hash value in a hex-encoded form and resets the digest
   # to the initial state.
   #
+  # <!--
+  #     digest_obj.hexdigest! -> string
+  # -->
   def hexdigest!: () -> String
 
   # Creates a printable version of the digest object.
   #
+  # <!--
+  #     digest_obj.inspect -> string
+  # -->
   def inspect: () -> String
 
   # Returns digest_obj.digest_length().
   #
+  # <!--
+  #     digest_obj.length -> integer
+  #     digest_obj.size -> integer
+  # -->
   def length: () -> Integer
 
   # Returns a new, initialized copy of the digest object.  Equivalent to
   # digest_obj.clone().reset().
   #
+  # <!--
+  #     digest_obj.new -> another_digest_obj
+  # -->
   def new: () -> ::Digest::Base
 
   # Resets the digest to the initial state and returns self.
   #
   # This method is overridden by each implementation subclass.
   #
+  # <!--
+  #     digest_obj.reset -> digest_obj
+  # -->
   def reset: () -> self
 
   # Returns digest_obj.digest_length().
   #
+  # <!--
+  #     size()
+  # -->
   def size: () -> Integer
 
   # Returns digest_obj.hexdigest().
   #
+  # <!--
+  #     digest_obj.to_s -> string
+  # -->
   def to_s: () -> String
 
   # Updates the digest using a given *string* and returns self.
@@ -199,6 +263,10 @@ module Digest::Instance
   # The update() method and the left-shift operator are overridden by each
   # implementation subclass. (One should be an alias for the other)
   #
+  # <!--
+  #     digest_obj.update(string) -> digest_obj
+  #     digest_obj << string -> digest_obj
+  # -->
   def update: (String) -> self
 
   private
@@ -210,6 +278,9 @@ module Digest::Instance
   # uninitialized.  Do not call this method from outside.  Use #digest!() instead,
   # which ensures that internal data be reset for security reasons.
   #
+  # <!--
+  #     digest_obj.instance_eval { finish } -> digest_obj
+  # -->
   def finish: () -> self
 end
 
@@ -220,10 +291,16 @@ class Digest::Class
   # Returns the base64 encoded hash value of a given *string*.  The return value
   # is properly padded with '=' and contains no line feeds.
   #
+  # <!--
+  #     base64digest(str, *args)
+  # -->
   def self.base64digest: (String str, *untyped) -> String
 
   # Returns the BubbleBabble encoded hash value of a given *string*.
   #
+  # <!--
+  #     Digest::Class.bubblebabble(string, ...) -> hash_string
+  # -->
   def self.bubblebabble: (String, *untyped) -> String
 
   # Returns the hash value of a given *string*.  This is equivalent to
@@ -231,6 +308,9 @@ class Digest::Class
   # any, are passed through to the constructor and the *string* is passed to
   # #digest().
   #
+  # <!--
+  #     Digest::Class.digest(string, *parameters) -> hash_string
+  # -->
   def self.digest: (String, *untyped) -> String
 
   # Creates a digest object and reads a given file, *name*. Optional arguments are
@@ -239,11 +319,17 @@ class Digest::Class
   #     p Digest::SHA256.file("X11R6.8.2-src.tar.bz2").hexdigest
   #     # => "f02e3c85572dc9ad7cb77c2a638e3be24cc1b5bea9fdbb0b0299c9668475c534"
   #
+  # <!--
+  #     file(name, *args)
+  # -->
   def self.file: (String name, *untyped) -> ::Digest::Class
 
   # Returns the hex-encoded hash value of a given *string*.  This is almost
   # equivalent to Digest.hexencode(Digest::Class.new(*parameters).digest(string)).
   #
+  # <!--
+  #     Digest::Class.hexdigest(string[, ...]) -> hash_string
+  # -->
   def self.hexdigest: (String, *untyped) -> String
 
   private
@@ -290,22 +376,38 @@ class Digest::Base < Digest::Class
 
   # Update the digest using given *string* and return `self`.
   #
+  # <!--
+  #     <<(p1)
+  # -->
   def <<: (String) -> self
 
   # Return the block length of the digest in bytes.
   #
+  # <!--
+  #     digest_base.block_length -> Integer
+  # -->
   def block_length: () -> Integer
 
   # Return the length of the hash value in bytes.
   #
+  # <!--
+  #     digest_base.digest_length -> Integer
+  # -->
   def digest_length: () -> Integer
 
   # Reset the digest to its initial state and return `self`.
   #
+  # <!--
+  #     digest_base.reset -> digest_base
+  # -->
   def reset: () -> self
 
   # Update the digest using given *string* and return `self`.
   #
+  # <!--
+  #     digest_base.update(string) -> digest_base
+  #     digest_base << string -> digest_base
+  # -->
   def update: (String) -> self
 
   private
@@ -414,5 +516,8 @@ class Object
   #     Digest(:Foo)
   #     # => LoadError: library not found for class Digest::Foo -- digest/foo
   #
+  # <!--
+  #     Digest(name) -> digest_subclass
+  # -->
   def Digest: (String | Symbol name) -> singleton(::Digest::Base)
 end
