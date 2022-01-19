@@ -45,6 +45,9 @@ class PrettyPrint
   #       output
   #     end
   #
+  # <!--
+  #     format(output=''.dup, maxwidth=79, newline="\n", genspace=lambda {|n| ' ' * n}) { |q| ... }
+  # -->
   def self.format: (?untyped output, ?Integer maxwidth, ?String newline, ?^(Integer) -> Integer genspace) { (PrettyPrint) -> untyped } -> _Output
 
   # This is similar to PrettyPrint::format but the result has no breaks.
@@ -54,7 +57,10 @@ class PrettyPrint
   # The invocation of `breakable` in the block doesn't break a line and is treated
   # as just an invocation of `text`.
   #
-  def self.singleline_format: (?untyped output, ?Integer? maxwidth, ?String? newline, ?^(Integer) -> Integer? genspace ) { (PrettyPrint::SingleLine) -> untyped } -> _Output
+  # <!--
+  #     singleline_format(output=''.dup, maxwidth=nil, newline=nil, genspace=nil) { |q| ... }
+  # -->
+  def self.singleline_format: (?untyped output, ?Integer? maxwidth, ?String? newline, ?^(Integer) -> Integer? genspace) { (PrettyPrint::SingleLine) -> untyped } -> _Output
 
   # Creates a buffer for pretty printing.
   #
@@ -73,7 +79,10 @@ class PrettyPrint
   # The block is used to generate spaces. {|width| ' ' * width} is used if it is
   # not given.
   #
-  def initialize: (?untyped output, ?Integer maxwidth, ?String newline, ?^(Integer) -> Integer genspace)  -> void
+  # <!--
+  #     new(output=''.dup, maxwidth=79, newline="\n", &genspace)
+  # -->
+  def initialize: (?untyped output, ?Integer maxwidth, ?String newline, ?^(Integer) -> Integer genspace) -> void
 
   # The output object.
   #
@@ -133,16 +142,25 @@ class PrettyPrint
   #     #<PrettyPrint::Group:0x83541cc @depth=3, @breakables=[], @break=false>
   #     #<PrettyPrint::Group:0x8347e54 @depth=4, @breakables=[], @break=false>
   #
+  # <!--
+  #     current_group()
+  # -->
   def current_group: () -> PrettyPrint::Group
 
   # Breaks the buffer into lines that are shorter than #maxwidth
   #
-    def break_outmost_groups: () -> untyped
+  # <!--
+  #     break_outmost_groups()
+  # -->
+  def break_outmost_groups: () -> untyped
 
   # This adds `obj` as a text of `width` columns in width.
   #
   # If `width` is not specified, obj.length is used.
   #
+  # <!--
+  #     text(obj, width=obj.length)
+  # -->
   def text: (String obj, ?Integer width) -> void
 
   # This is similar to #breakable except the decision to break or not is
@@ -160,6 +178,9 @@ class PrettyPrint
   # If `width` is not specified, `sep.length` is used. You will have to specify
   # this when `sep` is a multibyte character, for example.
   #
+  # <!--
+  #     fill_breakable(sep=' ', width=sep.length)
+  # -->
   def fill_breakable: (?String sep, ?Integer width) -> void
 
   # This says "you can break a line here if necessary", and a `width`-column text
@@ -170,6 +191,9 @@ class PrettyPrint
   # If `width` is not specified, `sep.length` is used. You will have to specify
   # this when `sep` is a multibyte character, for example.
   #
+  # <!--
+  #     breakable(sep=' ', width=sep.length)
+  # -->
   def breakable: (?String sep, ?Integer width) -> void
 
   # Groups line break hints added in the block. The line break hints are all to be
@@ -182,53 +206,45 @@ class PrettyPrint
   # grouping. If `close_obj` is specified, `text close_obj, close_width` is called
   # after grouping.
   #
+  # <!--
+  #     group(indent=0, open_obj='', close_obj='', open_width=open_obj.length, close_width=close_obj.length) { || ... }
+  # -->
   def group: (?::Integer indent, ?::String open_obj, ?::String close_obj, ?Integer open_width, ?Integer close_width) { () -> untyped } -> Integer
 
   # Takes a block and queues a new group that is indented 1 level further.
   #
+  # <!--
+  #     group_sub() { || ... }
+  # -->
   def group_sub: () { () -> untyped } -> untyped
 
   # Increases left margin after newline with `indent` for line breaks added in the
   # block.
   #
+  # <!--
+  #     nest(indent) { || ... }
+  # -->
   def nest: (Integer indent) { () -> untyped } -> void
 
   # outputs buffered data.
   #
+  # <!--
+  #     flush()
+  # -->
   def flush: () -> Integer
 
   class Text
-    # Creates a new text object.
-    #
-    # This constructor takes no arguments.
-    #
-    # The workflow is to append a PrettyPrint::Text object to the buffer, and
-    # being able to call the buffer.last() to reference it.
-    #
-    # As there are objects, use PrettyPrint::Text#add to include the objects
-    # and the width to utilized by the String version of this object.
     def initialize: () -> void
 
     # The total width of the objects included in this Text object.
     attr_reader width: Integer
 
-    # Render the String text of the objects that have been added to this Text object.
-    #
-    # Output the text to +out+, and increment the width to +output_width+
     def output: (untyped `out`, untyped output_width) -> untyped
 
-    # Include +obj+ in the objects to be pretty printed, and increment
-    # this Text object's total width by +width+
     def add: (untyped obj, Integer width) -> void
   end
 
   class Breakable
-    # Create a new Breakable object.
-    #
-    # Arguments:
-    # * +sep+ String of the separator
-    # * +width+ Fixnum width of the +sep+
-    # * +q+ parent PrettyPrint object, to base from
     def initialize: (String sep, Integer width, PrettyPrint q) -> void
 
     # Holds the separator String
@@ -244,28 +260,10 @@ class PrettyPrint
     # This is inferred from +q+ within PrettyPrint, passed in ::new
     attr_reader indent: Integer
 
-    # Render the String text of the objects that have been added to this
-    # Breakable object.
-    #
-    # Output the text to +out+, and increment the width to +output_width+
     def output: (untyped `out`, Integer output_width) -> untyped
   end
 
   class Group
-    # The Group class is used for making indentation easier.
-    #
-    # While this class does neither the breaking into newlines nor indentation,
-    # it is used in a stack (as well as a queue) within PrettyPrint, to group
-    # objects.
-    #
-    # For information on using groups, see PrettyPrint#group
-    #
-    # This class is intended for internal use of the PrettyPrint buffers.
-    # :nodoc:
-    # Create a Group object
-    #
-    # Arguments:
-    # * +depth+ - this group's relation to previous groups
     def initialize: (untyped depth) -> void
 
     # This group's relation to previous groups
@@ -274,76 +272,69 @@ class PrettyPrint
     # Array to hold the Breakable objects for this Group
     attr_reader breakables: Array[PrettyPrint::Breakable]
 
-    # Makes a break for this Group, and returns true
     def break: () -> bool
 
-    # Boolean of whether this Group has made a break
     def break?: () -> bool
 
-    # Boolean of whether this Group has been queried for being first
-    #
-    # This is used as a predicate, and ought to be called first.
     def first?: () -> bool
   end
 
   class GroupQueue
-    # The GroupQueue class is used for managing the queue of Group to be pretty
-    # printed.
-    #
-    # This queue groups the Group objects, based on their depth.
-    #
-    # This class is intended for internal use of the PrettyPrint buffers.
-    # :nodoc:
-    # Create a GroupQueue object
-    #
-    # Arguments:
-    # * +groups+ - one or more PrettyPrint::Group objects
     def initialize: (*untyped groups) -> void
 
-    # Enqueue +group+
-    #
-    # This does not strictly append the group to the end of the queue,
-    # but instead adds it in line, base on the +group.depth+
     def enq: (untyped group) -> void
 
-    # Returns the outer group of the queue
     def deq: () -> (PrettyPrint::Group | nil)
 
-    # Remote +group+ from this queue
     def delete: (PrettyPrint::Group group) -> void
   end
 
   # PrettyPrint::SingleLine is used by PrettyPrint.singleline_format
   #
   # It is passed to be similar to a PrettyPrint object itself, by responding to:
-  # * #text
-  # * #breakable
-  # * #nest
-  # * #group
-  # * #flush
-  # * #first?
+  # *   #text
+  # *   #breakable
+  # *   #nest
+  # *   #group
+  # *   #flush
+  # *   #first?
+  #
   #
   # but instead, the output has no line breaks
-  #
   class SingleLine
     # Create a PrettyPrint::SingleLine object
     #
     # Arguments:
-    # * +output+ - String (or similar) to store rendered text. Needs to respond to '<<'
-    # * +maxwidth+ - Argument position expected to be here for compatibility.
-    #                This argument is a noop.
-    # * +newline+ - Argument position expected to be here for compatibility.
-    #               This argument is a noop.
+    # *   `output` - String (or similar) to store rendered text. Needs to respond to
+    #     '<<'
+    # *   `maxwidth` - Argument position expected to be here for compatibility.
+    #         This argument is a noop.
+    #
+    # *   `newline` - Argument position expected to be here for compatibility.
+    #         This argument is a noop.
+    #
+    #
+    # <!--
+    #     new(output, maxwidth=nil, newline=nil)
+    # -->
     def initialize: (String | untyped output, ?Integer? maxwidth, ?String? newline) -> void
 
-    # Add +obj+ to the text to be output.
+    # Add `obj` to the text to be output.
     #
-    # +width+ argument is here for compatibility. It is a noop argument.
+    # `width` argument is here for compatibility. It is a noop argument.
+    #
+    # <!--
+    #     text(obj, width=nil)
+    # -->
     def text: (String obj, ?Integer? width) -> void
 
-    # Appends +sep+ to the text to be output. By default +sep+ is ' '
+    # Appends `sep` to the text to be output. By default `sep` is ' '
     #
-    # +width+ argument is here for compatibility. It is a noop argument.
+    # `width` argument is here for compatibility. It is a noop argument.
+    #
+    # <!--
+    #     breakable(sep=' ', width=nil)
+    # -->
     def breakable: (?String sep, ?Integer? width) -> void
 
     def nest: (untyped indent) { () -> untyped } -> void
@@ -351,16 +342,25 @@ class PrettyPrint
     # Opens a block for grouping objects to be pretty printed.
     #
     # Arguments:
-    # * +indent+ - noop argument. Present for compatibility.
-    # * +open_obj+ - text appended before the &blok. Default is ''
-    # * +close_obj+ - text appended after the &blok. Default is ''
-    # * +open_width+ - noop argument. Present for compatibility.
-    # * +close_width+ - noop argument. Present for compatibility.
+    # *   `indent` - noop argument. Present for compatibility.
+    # *   `open_obj` - text appended before the &blok. Default is ''
+    # *   `close_obj` - text appended after the &blok. Default is ''
+    # *   `open_width` - noop argument. Present for compatibility.
+    # *   `close_width` - noop argument. Present for compatibility.
+    #
+    #
+    # <!--
+    #     group(indent=nil, open_obj='', close_obj='', open_width=nil, close_width=nil) { || ... }
+    # -->
     def group: (?Integer? indent, ?String open_obj, ?String close_obj, ?Integer? open_width, ?Integer? close_width) { () -> untyped } -> untyped
 
     def flush: () -> nil
 
     # This is used as a predicate, and ought to be called first.
+    #
+    # <!--
+    #     first?()
+    # -->
     def first?: () -> bool
   end
 end
