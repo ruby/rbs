@@ -161,6 +161,8 @@
 # *   #binread(*args)
 # *   #readlines(*args)
 # *   #sysopen(*args)
+# *   #write(*args)
+# *   #binwrite(*args)
 #
 #
 # ### Utilities
@@ -179,7 +181,6 @@
 # FileTest.writable?", as you should be familiar with the original method
 # anyway, and its documentation (e.g. through `ri`) will contain more
 # information.  In some cases, a brief description will follow.
-#
 class Pathname
   # Returns the current working directory as a Pathname.
   #
@@ -188,6 +189,9 @@ class Pathname
   #
   # See Dir.getwd.
   #
+  # <!--
+  #     getwd()
+  # -->
   def self.getwd: () -> Pathname
 
   # Returns or yields Pathname objects.
@@ -197,6 +201,9 @@ class Pathname
   #
   # See Dir.glob.
   #
+  # <!--
+  #     glob(p1, p2 = v2, p3 = v3)
+  # -->
   def self.glob: (String | Array[String] pattern, ?Integer flags) -> Array[Pathname]
                | (String | Array[String] pattern, ?Integer flags) { (Pathname) -> untyped } -> nil
 
@@ -207,6 +214,9 @@ class Pathname
   #
   # See Dir.getwd.
   #
+  # <!--
+  #     pwd()
+  # -->
   def self.pwd: () -> Pathname
 
   public
@@ -223,8 +233,14 @@ class Pathname
   #
   # This method doesn't access the file system; it is pure string manipulation.
   #
+  # <!--
+  #     +(other)
+  # -->
   def +: (Pathname | String | _ToStr other) -> Pathname
 
+  # <!--
+  #     /(other)
+  # -->
   alias / +
 
   # Provides a case-sensitive comparison operator for pathnames.
@@ -240,6 +256,9 @@ class Pathname
   # relative to the right argument. Or it will return `nil` if the arguments are
   # not comparable.
   #
+  # <!--
+  #     <=>(p1)
+  # -->
   def <=>: (Pathname other) -> Integer
          | (untyped other) -> nil
 
@@ -247,12 +266,18 @@ class Pathname
   # that two different paths (`foo.txt` and `./foo.txt`) can refer to the same
   # file.
   #
+  # <!--
+  #     ==(p1)
+  # -->
   def ==: (untyped) -> bool
 
   # Compare this pathname with `other`.  The comparison is string-based. Be aware
   # that two different paths (`foo.txt` and `./foo.txt`) can refer to the same
   # file.
   #
+  # <!--
+  #     ===(p1)
+  # -->
   def ===: (untyped) -> bool
 
   # Predicate method for testing whether a path is absolute.
@@ -267,6 +292,9 @@ class Pathname
   #     p.absolute?
   #         #=> false
   #
+  # <!--
+  #     absolute?()
+  # -->
   def absolute?: () -> bool
 
   # Iterates over and yields a new Pathname object for each element in the given
@@ -294,6 +322,9 @@ class Pathname
   #
   # It doesn't access the filesystem.
   #
+  # <!--
+  #     ascend() { |self| ... }
+  # -->
   def ascend: () { (Pathname) -> untyped } -> nil
             | () -> Enumerator[Pathname, nil]
 
@@ -301,58 +332,61 @@ class Pathname
   #
   # See File.atime.
   #
+  # <!--
+  #     pathname.atime     -> time
+  # -->
   def atime: () -> Time
 
   # Returns the last component of the path.
   #
   # See File.basename.
   #
+  # <!--
+  #     basename(p1 = v1)
+  # -->
   def basename: (?String | _ToStr suffix) -> Pathname
 
   # Returns all the bytes from the file, or the first `N` if specified.
   #
   # See File.binread.
   #
+  # <!--
+  #     pathname.binread([length [, offset]]) -> string
+  # -->
   def binread: (?Integer length, ?Integer offset) -> String
 
   # Writes `contents` to the file, opening it in binary mode.
   #
   # See File.binwrite.
   #
-  def binwrite: (String, ?Integer offset,
-                 ?mode: Integer | String,
-                 ?flags: Integer,
-                 ?external_encoding: encoding,
-                 ?internal_encoding: encoding,
-                 ?encoding: encoding,
-                 ?textmode: boolish,
-                 ?binmode: boolish,
-                 ?autoclose: boolish,
-
-                 # From String#encode
-                 ?invalid: :replace ?,
-                 ?undef: :replace ?,
-                 ?replace: String,
-                 ?fallback: Hash[String, String] | Proc | Method,
-                 ?xml: :text | :attr,
-                 ?universal_newline: true,
-                 ?cr_newline: true,
-                 ?crlf_newline: true,
-                ) -> Integer
+  # <!--
+  #     pathname.binwrite(string, [offset] )   => fixnum
+  #     pathname.binwrite(string, [offset], open_args )   => fixnum
+  # -->
+  def binwrite: (String, ?Integer offset, ?mode: Integer | String, ?flags: Integer, ?external_encoding: encoding, ?internal_encoding: encoding, ?encoding: encoding, ?textmode: boolish, ?binmode: boolish, ?autoclose: boolish, ?invalid: :replace ?, ?undef: :replace ?, ?replace: String, ?fallback: Hash[String, String] | Proc | Method, ?xml: :text | :attr, ?universal_newline: true, ?cr_newline: true, ?crlf_newline: true) -> Integer
 
   # Returns the birth time for the file. If the platform doesn't have birthtime,
   # raises NotImplementedError.
   #
   # See File.birthtime.
   #
+  # <!--
+  #     pathname.birthtime -> time
+  # -->
   def birthtime: () -> Time
 
   # See FileTest.blockdev?.
   #
+  # <!--
+  #     blockdev?()
+  # -->
   def blockdev?: () -> bool
 
   # See FileTest.chardev?.
   #
+  # <!--
+  #     chardev?()
+  # -->
   def chardev?: () -> bool
 
   # Returns the children of the directory (files and subdirectories, not
@@ -374,18 +408,27 @@ class Pathname
   # Note that the results never contain the entries `.` and `..` in the directory
   # because they are not children.
   #
+  # <!--
+  #     children(with_directory=true)
+  # -->
   def children: (?boolish with_directory) -> Array[Pathname]
 
   # Changes file permissions.
   #
   # See File.chmod.
   #
+  # <!--
+  #     pathname.chmod(mode_int)   -> integer
+  # -->
   def chmod: (Integer mode_int) -> Integer
 
   # Change owner and group of the file.
   #
   # See File.chown.
   #
+  # <!--
+  #     pathname.chown(owner_int, group_int)       -> integer
+  # -->
   def chown: (Integer owner, Integer group) -> Integer
 
   # Returns clean pathname of `self` with consecutive slashes and useless dots
@@ -398,6 +441,9 @@ class Pathname
   #
   # See Pathname#realpath.
   #
+  # <!--
+  #     cleanpath(consider_symlink=false)
+  # -->
   def cleanpath: (?boolish consider_symlink) -> Pathname
 
   # Returns the last change time, using directory information, not the file
@@ -405,11 +451,17 @@ class Pathname
   #
   # See File.ctime.
   #
+  # <!--
+  #     pathname.ctime     -> time
+  # -->
   def ctime: () -> Time
 
   # Removes a file or directory, using File.unlink if `self` is a file, or
   # Dir.unlink as necessary.
   #
+  # <!--
+  #     delete()
+  # -->
   def delete: () -> Integer
 
   # Iterates over and yields a new Pathname object for each element in the given
@@ -437,17 +489,26 @@ class Pathname
   #
   # It doesn't access the filesystem.
   #
+  # <!--
+  #     descend() { |v| ... }
+  # -->
   def descend: () { (Pathname) -> untyped } -> nil
              | () -> Enumerator[Pathname, nil]
 
   # See FileTest.directory?.
   #
+  # <!--
+  #     directory?()
+  # -->
   def directory?: () -> bool
 
   # Returns all but the last component of the path.
   #
   # See File.dirname.
   #
+  # <!--
+  #     dirname()
+  # -->
   def dirname: () -> Pathname
 
   # Iterates over the children of the directory (files and subdirectories, not
@@ -486,12 +547,18 @@ class Pathname
   #
   # See Pathname#children
   #
+  # <!--
+  #     each_child(with_directory=true, &b)
+  # -->
   def each_child: (?boolish with_directory) { (Pathname) -> void } -> Array[Pathname]
                 | (?boolish with_directory) -> Enumerator[Pathname, Array[Pathname]]
 
   # Iterates over the entries (files and subdirectories) in the directory,
   # yielding a Pathname object for each entry.
   #
+  # <!--
+  #     each_entry()
+  # -->
   def each_entry: () { (Pathname) -> untyped } -> nil
 
   # Iterates over each component of the path.
@@ -506,68 +573,33 @@ class Pathname
   #     enum.each { |e| ... }
   #       # yields "usr", "bin", and "ruby".
   #
+  # <!--
+  #     each_filename() { |filename| ... }
+  # -->
   def each_filename: () { (String) -> untyped } -> nil
                    | () -> Enumerator[String, nil]
 
   # Iterates over each line in the file and yields a String object for each.
   #
-  def each_line: (?String sep, ?Integer limit,
-                  # open_args
-                  ?mode: Integer | String,
-                  ?flags: Integer,
-                  ?external_encoding: encoding,
-                  ?internal_encoding: encoding,
-                  ?encoding: encoding,
-                  ?textmode: boolish,
-                  ?binmode: boolish,
-                  ?autoclose: boolish,
-                  # getline_args
-                  ?chomp: boolish,
-                 ) { (String) -> untyped } -> nil
-               | (Integer limit,
-                  # open_args
-                  ?mode: Integer | String,
-                  ?flags: Integer,
-                  ?external_encoding: encoding,
-                  ?internal_encoding: encoding,
-                  ?encoding: encoding,
-                  ?textmode: boolish,
-                  ?binmode: boolish,
-                  ?autoclose: boolish,
-                  # getline_args
-                  ?chomp: boolish,
-                 ) { (String) -> untyped } -> nil
-               | (?String sep, ?Integer limit,
-                  # open_args
-                  ?mode: Integer | String,
-                  ?flags: Integer,
-                  ?external_encoding: encoding,
-                  ?internal_encoding: encoding,
-                  ?encoding: encoding,
-                  ?textmode: boolish,
-                  ?binmode: boolish,
-                  ?autoclose: boolish,
-                  # getline_args
-                  ?chomp: boolish,
-                 ) -> Enumerator[String, nil]
-               | (Integer limit,
-                  # open_args
-                  ?mode: Integer | String,
-                  ?flags: Integer,
-                  ?external_encoding: encoding,
-                  ?internal_encoding: encoding,
-                  ?encoding: encoding,
-                  ?textmode: boolish,
-                  ?binmode: boolish,
-                  ?autoclose: boolish,
-                  # getline_args
-                  ?chomp: boolish,
-                 ) -> Enumerator[String, nil]
+  # <!--
+  #     pathname.each_line {|line| ... }
+  #     pathname.each_line(sep=$/ [, open_args]) {|line| block }     -> nil
+  #     pathname.each_line(limit [, open_args]) {|line| block }      -> nil
+  #     pathname.each_line(sep, limit [, open_args]) {|line| block } -> nil
+  #     pathname.each_line(...)                                      -> an_enumerator
+  # -->
+  def each_line: (?String sep, ?Integer limit, ?mode: Integer | String, ?flags: Integer, ?external_encoding: encoding, ?internal_encoding: encoding, ?encoding: encoding, ?textmode: boolish, ?binmode: boolish, ?autoclose: boolish, ?chomp: boolish) { (String) -> untyped } -> nil
+               | (Integer limit, ?mode: Integer | String, ?flags: Integer, ?external_encoding: encoding, ?internal_encoding: encoding, ?encoding: encoding, ?textmode: boolish, ?binmode: boolish, ?autoclose: boolish, ?chomp: boolish) { (String) -> untyped } -> nil
+               | (?String sep, ?Integer limit, ?mode: Integer | String, ?flags: Integer, ?external_encoding: encoding, ?internal_encoding: encoding, ?encoding: encoding, ?textmode: boolish, ?binmode: boolish, ?autoclose: boolish, ?chomp: boolish) -> Enumerator[String, nil]
+               | (Integer limit, ?mode: Integer | String, ?flags: Integer, ?external_encoding: encoding, ?internal_encoding: encoding, ?encoding: encoding, ?textmode: boolish, ?binmode: boolish, ?autoclose: boolish, ?chomp: boolish) -> Enumerator[String, nil]
 
   # Tests the file is empty.
   #
   # See Dir#empty? and FileTest.empty?.
   #
+  # <!--
+  #     empty?()
+  # -->
   def empty?: () -> bool
 
   # Return the entries (files and subdirectories) in the directory, each as a
@@ -595,40 +627,64 @@ class Pathname
   # If you don't want `.` and `..` and want directories, consider
   # Pathname#children.
   #
+  # <!--
+  #     entries()
+  # -->
   def entries: () -> Array[Pathname]
 
   # Compare this pathname with `other`.  The comparison is string-based. Be aware
   # that two different paths (`foo.txt` and `./foo.txt`) can refer to the same
   # file.
   #
+  # <!--
+  #     eql?(p1)
+  # -->
   def eql?: (untyped) -> bool
 
   # See FileTest.executable?.
   #
+  # <!--
+  #     executable?()
+  # -->
   def executable?: () -> bool
 
   # See FileTest.executable_real?.
   #
+  # <!--
+  #     executable_real?()
+  # -->
   def executable_real?: () -> bool
 
   # See FileTest.exist?.
   #
+  # <!--
+  #     exist?()
+  # -->
   def exist?: () -> bool
 
   # Returns the absolute path for the file.
   #
   # See File.expand_path.
   #
+  # <!--
+  #     expand_path(p1 = v1)
+  # -->
   def expand_path: (?String dir) -> Pathname
 
   # Returns the file's extension.
   #
   # See File.extname.
   #
+  # <!--
+  #     extname()
+  # -->
   def extname: () -> String
 
   # See FileTest.file?.
   #
+  # <!--
+  #     file?()
+  # -->
   def file?: () -> bool
 
   # Iterates over the directory tree in a depth first manner, yielding a Pathname
@@ -644,6 +700,9 @@ class Pathname
   #
   # See Find.find
   #
+  # <!--
+  #     find(ignore_error: true) { |pathname| ... }
+  # -->
   def find: (?ignore_error: boolish) { (Pathname) -> untyped } -> nil
           | (?ignore_error: boolish) -> Enumerator[Pathname, nil]
 
@@ -651,24 +710,37 @@ class Pathname
   #
   # See File.fnmatch.
   #
+  # <!--
+  #     pathname.fnmatch(pattern, [flags])        -> true or false
+  #     pathname.fnmatch?(pattern, [flags])       -> true or false
+  # -->
   def fnmatch: (String pattern, ?Integer flags) -> bool
 
   # Return `true` if the receiver matches the given pattern.
   #
   # See File.fnmatch.
   #
+  # <!--
+  #     fnmatch?(p1, p2 = v2)
+  # -->
   alias fnmatch? fnmatch
 
   # Freezes this Pathname.
   #
   # See Object.freeze.
   #
+  # <!--
+  #     pathname.freeze -> obj
+  # -->
   def freeze: () -> Pathname
 
   # Returns "type" of file ("file", "directory", etc).
   #
   # See File.ftype.
   #
+  # <!--
+  #     pathname.ftype     -> string
+  # -->
   def ftype: () -> String
 
   # Returns or yields Pathname objects.
@@ -678,11 +750,17 @@ class Pathname
   #
   # See Dir.glob. This method uses the `base` keyword argument of Dir.glob.
   #
+  # <!--
+  #     glob(p1, p2 = v2)
+  # -->
   def glob: (String | Array[String] pattern, ?Integer flags) -> Array[Pathname]
           | (String | Array[String] pattern, ?Integer flags) { (Pathname) -> untyped } -> nil
 
   # See FileTest.grpowned?.
   #
+  # <!--
+  #     grpowned?()
+  # -->
   def grpowned?: () -> bool
 
   def hash: () -> Integer
@@ -698,40 +776,61 @@ class Pathname
   #     path0 == path1
   #         #=> true
   #
+  # <!--
+  #     join(*args)
+  # -->
   def join: (*String | _ToStr | Pathname args) -> Pathname
 
   # Same as Pathname.chmod, but does not follow symbolic links.
   #
   # See File.lchmod.
   #
+  # <!--
+  #     pathname.lchmod(mode_int)  -> integer
+  # -->
   def lchmod: (Integer mode) -> Integer
 
   # Same as Pathname.chown, but does not follow symbolic links.
   #
   # See File.lchown.
   #
+  # <!--
+  #     pathname.lchown(owner_int, group_int)      -> integer
+  # -->
   def lchown: (Integer owner, Integer group) -> Integer
 
   # See File.lstat.
   #
+  # <!--
+  #     lstat()
+  # -->
   def lstat: () -> ::File::Stat
 
   # Creates a hard link at *pathname*.
   #
   # See File.link.
   #
+  # <!--
+  #     pathname.make_link(old)
+  # -->
   def make_link: (String | Pathname | _ToStr old) -> Integer
 
   # Creates a symbolic link.
   #
   # See File.symlink.
   #
+  # <!--
+  #     pathname.make_symlink(old)
+  # -->
   def make_symlink: (String | Pathname | _ToStr old) -> Integer
 
   # Create the referenced directory.
   #
   # See Dir.mkdir.
   #
+  # <!--
+  #     mkdir(p1 = v1)
+  # -->
   def mkdir: (?Integer perm) -> Integer
 
   # Creates a full path, including any intermediate directories that don't yet
@@ -739,105 +838,117 @@ class Pathname
   #
   # See FileUtils.mkpath and FileUtils.mkdir_p
   #
+  # <!--
+  #     mkpath(mode: nil)
+  # -->
   def mkpath: () -> nil
 
   # Returns `true` if `self` points to a mountpoint.
   #
+  # <!--
+  #     mountpoint?()
+  # -->
   def mountpoint?: () -> bool
 
   # Returns the last modified time of the file.
   #
   # See File.mtime.
   #
+  # <!--
+  #     pathname.mtime     -> time
+  # -->
   def mtime: () -> Time
 
   # Opens the file for reading or writing.
   #
   # See File.open.
   #
-  def open: (?(string | int) mode, ?int perm) -> File
-          | [T] (?(string | int) mode, ?int perm) { (File) -> T } -> T
+  # <!--
+  #     pathname.open()
+  #     pathname.open(mode="r" [, opt])                        -> file
+  #     pathname.open([mode [, perm]] [, opt])                 -> file
+  #     pathname.open(mode="r" [, opt]) {|file| block }        -> obj
+  #     pathname.open([mode [, perm]] [, opt]) {|file| block } -> obj
+  # -->
+  def open: (?string | int mode, ?int perm) -> File
+          | [T] (?string | int mode, ?int perm) { (File) -> T } -> T
 
   # Opens the referenced directory.
   #
   # See Dir.open.
   #
+  # <!--
+  #     opendir()
+  # -->
   def opendir: () -> Dir
-               | [U] () { (Dir) -> U } -> U
+             | [U] () { (Dir) -> U } -> U
 
   # See FileTest.owned?.
   #
+  # <!--
+  #     owned?()
+  # -->
   def owned?: () -> bool
 
   # Returns the parent directory.
   #
   # This is same as `self + '..'`.
   #
+  # <!--
+  #     parent()
+  # -->
   def parent: () -> Pathname
 
   # See FileTest.pipe?.
   #
+  # <!--
+  #     pipe?()
+  # -->
   def pipe?: () -> bool
 
   # Returns all data from the file, or the first `N` bytes if specified.
   #
   # See File.read.
   #
-  def read: (?Integer length, ?Integer offset,
-             # open_args
-             ?mode: Integer | String,
-             ?flags: Integer,
-             ?external_encoding: encoding,
-             ?internal_encoding: encoding,
-             ?encoding: encoding,
-             ?textmode: boolish,
-             ?binmode: boolish,
-             ?autoclose: boolish,
-            ) -> String
+  # <!--
+  #     pathname.read([length [, offset]]) -> string
+  #     pathname.read([length [, offset]], open_args) -> string
+  # -->
+  def read: (?Integer length, ?Integer offset, ?mode: Integer | String, ?flags: Integer, ?external_encoding: encoding, ?internal_encoding: encoding, ?encoding: encoding, ?textmode: boolish, ?binmode: boolish, ?autoclose: boolish) -> String
 
   # See FileTest.readable?.
   #
+  # <!--
+  #     readable?()
+  # -->
   def readable?: () -> bool
 
   # See FileTest.readable_real?.
   #
+  # <!--
+  #     readable_real?()
+  # -->
   def readable_real?: () -> bool
 
   # Returns all the lines from the file.
   #
   # See File.readlines.
   #
-  def readlines: (?String sep, ?Integer limit,
-                  # open_args
-                  ?mode: Integer | String,
-                  ?flags: Integer,
-                  ?external_encoding: encoding,
-                  ?internal_encoding: encoding,
-                  ?encoding: encoding,
-                  ?textmode: boolish,
-                  ?binmode: boolish,
-                  ?autoclose: boolish,
-                  # getline_args
-                  ?chomp: boolish,
-                 ) -> Array[String]
-               | (Integer limit,
-                  # open_args
-                  ?mode: Integer | String,
-                  ?flags: Integer,
-                  ?external_encoding: encoding,
-                  ?internal_encoding: encoding,
-                  ?encoding: encoding,
-                  ?textmode: boolish,
-                  ?binmode: boolish,
-                  ?autoclose: boolish,
-                  # getline_args
-                  ?chomp: boolish,
-                 ) -> Array[String]
+  # <!--
+  #     pathname.readlines(sep=$/ [, open_args])     -> array
+  #     pathname.readlines(limit [, open_args])      -> array
+  #     pathname.readlines(sep, limit [, open_args]) -> array
+  # -->
+  def readlines: (?String sep, ?Integer limit, ?mode: Integer | String, ?flags: Integer, ?external_encoding: encoding, ?internal_encoding: encoding, ?encoding: encoding, ?textmode: boolish, ?binmode: boolish, ?autoclose: boolish, ?chomp: boolish) -> Array[String]
+               | (Integer limit, ?mode: Integer | String, ?flags: Integer, ?external_encoding: encoding, ?internal_encoding: encoding, ?encoding: encoding, ?textmode: boolish, ?binmode: boolish, ?autoclose: boolish, ?chomp: boolish) -> Array[String]
 
   # Read symbolic link.
   #
   # See File.readlink.
   #
+  # <!--
+  #     readlink()
+  # -->
   def readlink: () -> untyped
 
   # Returns the real (absolute) pathname of `self` in the actual filesystem.
@@ -846,6 +957,9 @@ class Pathname
   #
   # The last component of the real pathname can be nonexistent.
   #
+  # <!--
+  #     realdirpath(p1 = v1)
+  # -->
   def realdirpath: (?string | Pathname base_dir) -> Pathname
 
   # Returns the real (absolute) pathname for `self` in the actual filesystem.
@@ -854,6 +968,9 @@ class Pathname
   #
   # All components of the pathname must exist when this method is called.
   #
+  # <!--
+  #     realpath(p1 = v1)
+  # -->
   def realpath: (?string | Pathname base_dir) -> Pathname
 
   # The opposite of Pathname#absolute?
@@ -868,6 +985,9 @@ class Pathname
   #     p.relative?
   #         #=> true
   #
+  # <!--
+  #     relative?()
+  # -->
   def relative?: () -> bool
 
   # Returns a relative path from the given `base_directory` to the receiver.
@@ -880,24 +1000,39 @@ class Pathname
   #
   # ArgumentError is raised when it cannot find a relative path.
   #
+  # Note that this method does not handle situations where the case sensitivity of
+  # the filesystem in use differs from the operating system default.
+  #
+  # <!--
+  #     relative_path_from(base_directory)
+  # -->
   def relative_path_from: (Pathname | string base_directory) -> Pathname
 
   # Rename the file.
   #
   # See File.rename.
   #
+  # <!--
+  #     rename(p1)
+  # -->
   def rename: (Pathname | string new_name) -> 0
 
   # Remove the referenced directory.
   #
   # See Dir.rmdir.
   #
+  # <!--
+  #     rmdir()
+  # -->
   def rmdir: () -> 0
 
   # Recursively deletes a directory, including all directories beneath it.
   #
   # See FileUtils.rm_r
   #
+  # <!--
+  #     rmtree()
+  # -->
   def rmtree: () -> void
 
   # Predicate method for root directories.  Returns `true` if the pathname
@@ -906,42 +1041,69 @@ class Pathname
   # It doesn't access the filesystem.  So it may return `false` for some pathnames
   # which points to roots such as `/usr/..`.
   #
+  # <!--
+  #     root?()
+  # -->
   def root?: () -> bool
 
   # See FileTest.setgid?.
   #
+  # <!--
+  #     setgid?()
+  # -->
   def setgid?: () -> bool
 
   # See FileTest.setuid?.
   #
+  # <!--
+  #     setuid?()
+  # -->
   def setuid?: () -> bool
 
   # See FileTest.size.
   #
+  # <!--
+  #     size()
+  # -->
   def size: () -> Integer
 
   # See FileTest.size?.
   #
+  # <!--
+  #     size?()
+  # -->
   def size?: () -> Integer?
 
   # See FileTest.socket?.
   #
+  # <!--
+  #     socket?()
+  # -->
   def socket?: () -> untyped
 
   # Returns the #dirname and the #basename in an Array.
   #
   # See File.split.
   #
-  def split: () -> [Pathname, Pathname]
+  # <!--
+  #     split()
+  # -->
+  def split: () -> [ Pathname, Pathname ]
 
   # Returns a File::Stat object.
   #
   # See File.stat.
   #
+  # <!--
+  #     stat()
+  # -->
   def stat: () -> File::Stat
 
   # See FileTest.sticky?.
   #
+  # <!--
+  #     sticky?()
+  # -->
   def sticky?: () -> untyped
 
   # Return a pathname which is substituted by String#sub.
@@ -950,6 +1112,9 @@ class Pathname
   #     path1.sub('perl', 'ruby')
   #         #=> #<Pathname:/usr/bin/ruby>
   #
+  # <!--
+  #     sub(*args)
+  # -->
   def sub: (Regexp | string pattern, string | Hash[String, String] replacement) -> Pathname
          | (Regexp | string pattern) { (String match) -> string } -> Pathname
 
@@ -960,87 +1125,127 @@ class Pathname
   #     Pathname.new('/usr/bin/shutdown').sub_ext('.rb')
   #         #=> #<Pathname:/usr/bin/shutdown.rb>
   #
+  # <!--
+  #     sub_ext(p1)
+  # -->
   def sub_ext: (string replacement) -> Pathname
 
   # See FileTest.symlink?.
   #
+  # <!--
+  #     symlink?()
+  # -->
   def symlink?: () -> untyped
 
   # See IO.sysopen.
   #
+  # <!--
+  #     pathname.sysopen([mode, [perm]])  -> fixnum
+  # -->
   def sysopen: (?String mode, ?Integer perm) -> Integer
 
   # Returns pathname.  This method is deprecated and will be removed in Ruby 3.2.
   #
+  # <!--
+  #     pathname.taint -> obj
+  # -->
   def taint: () -> Pathname
 
   # Return the path as a String.
   #
   # to_path is implemented so Pathname objects are usable with File.open, etc.
   #
+  # <!--
+  #     to_path()
+  # -->
   def to_path: () -> String
 
   # Return the path as a String.
   #
   # to_path is implemented so Pathname objects are usable with File.open, etc.
   #
+  # <!--
+  #     pathname.to_s             -> string
+  #     pathname.to_path          -> string
+  # -->
   alias to_s to_path
 
   # Truncates the file to `length` bytes.
   #
   # See File.truncate.
   #
+  # <!--
+  #     truncate(p1)
+  # -->
   def truncate: (Integer length) -> 0
 
   # Removes a file or directory, using File.unlink if `self` is a file, or
   # Dir.unlink as necessary.
   #
+  # <!--
+  #     unlink()
+  # -->
   def unlink: () -> Integer
 
   # Returns pathname.  This method is deprecated and will be removed in Ruby 3.2.
   #
+  # <!--
+  #     pathname.untaint -> obj
+  # -->
   def untaint: () -> Pathname
 
   # Update the access and modification times of the file.
   #
   # See File.utime.
   #
+  # <!--
+  #     utime(p1, p2)
+  # -->
   def utime: (Integer | Time atime, Integer | Time mtime) -> Integer
 
   # See FileTest.world_readable?.
   #
+  # <!--
+  #     world_readable?()
+  # -->
   def world_readable?: () -> (Integer | nil)
 
   # See FileTest.world_writable?.
   #
+  # <!--
+  #     world_writable?()
+  # -->
   def world_writable?: () -> (Integer | nil)
 
   # See FileTest.writable?.
   #
+  # <!--
+  #     writable?()
+  # -->
   def writable?: () -> bool
 
   # See FileTest.writable_real?.
   #
+  # <!--
+  #     writable_real?()
+  # -->
   def writable_real?: () -> bool
 
   # Writes `contents` to the file.
   #
   # See File.write.
   #
-  def write: (String content, ?Integer offset,
-              # open_args
-              ?mode: Integer | String,
-              ?flags: Integer,
-              ?external_encoding: encoding,
-              ?internal_encoding: encoding,
-              ?encoding: encoding,
-              ?textmode: boolish,
-              ?binmode: boolish,
-              ?autoclose: boolish,
-             ) -> Integer
+  # <!--
+  #     pathname.write(string, [offset] )   => fixnum
+  #     pathname.write(string, [offset], open_args )   => fixnum
+  # -->
+  def write: (String content, ?Integer offset, ?mode: Integer | String, ?flags: Integer, ?external_encoding: encoding, ?internal_encoding: encoding, ?encoding: encoding, ?textmode: boolish, ?binmode: boolish, ?autoclose: boolish) -> Integer
 
   # See FileTest.zero?.
   #
+  # <!--
+  #     zero?()
+  # -->
   def zero?: () -> bool
 
   private
@@ -1060,6 +1265,9 @@ class Pathname
   # Create a Pathname object from the given String (or String-like object). If
   # `path` contains a NULL character (`\0`), an ArgumentError is raised.
   #
+  # <!--
+  #     new(p1)
+  # -->
   def initialize: (string | Pathname) -> void
 
   def plus: (untyped path1, untyped path2) -> untyped
@@ -1078,6 +1286,23 @@ class Pathname
 end
 
 module Kernel
+  # Creates a new Pathname object from the given string, `path`, and returns
+  # pathname object.
+  #
+  # In order to use this constructor, you must first require the Pathname standard
+  # library extension.
+  #
+  #     require 'pathname'
+  #     Pathname("/home/zzak")
+  #     #=> #<Pathname:/home/zzak>
+  #
+  # See also Pathname::new for more information.
+  #
+  # <!--
+  #     Pathname(path)  -> pathname
+  # -->
+  def self.Pathname: (String | Pathname) -> Pathname
+
   private
 
   # Creates a new Pathname object from the given string, `path`, and returns
@@ -1092,5 +1317,8 @@ module Kernel
   #
   # See also Pathname::new for more information.
   #
-  def self?.Pathname: (String | Pathname) -> Pathname
+  # <!--
+  #     Pathname(path)  -> pathname
+  # -->
+  def self.Pathname: (String | Pathname) -> Pathname
 end
