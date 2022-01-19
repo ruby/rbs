@@ -35,6 +35,10 @@ class Monitor
   def try_enter: () -> bool
 
   # for compatibility
+  #
+  # <!--
+  #     try_mon_enter()
+  # -->
   alias try_mon_enter try_enter
 
   def wait_for_cond: (::MonitorMixin::ConditionVariable, Numeric? timeout) -> untyped
@@ -46,31 +50,66 @@ module MonitorMixin
   public
 
   # Enters exclusive section.
+  #
+  # <!--
+  #     mon_enter()
+  # -->
   def mon_enter: () -> nil
 
   # Leaves exclusive section.
+  #
+  # <!--
+  #     mon_exit()
+  # -->
   def mon_exit: () -> nil
 
   # Returns true if this monitor is locked by any thread
+  #
+  # <!--
+  #     mon_locked?()
+  # -->
   def mon_locked?: () -> bool
 
   # Returns true if this monitor is locked by current thread.
+  #
+  # <!--
+  #     mon_owned?()
+  # -->
   def mon_owned?: () -> bool
 
   # Enters exclusive section and executes the block.  Leaves the exclusive section
   # automatically when the block exits.  See example under `MonitorMixin`.
+  #
+  # <!--
+  #     mon_synchronize(&b)
+  # -->
   def mon_synchronize: [T] () { () -> T } -> T
 
   # Attempts to enter exclusive section.  Returns `false` if lock fails.
+  #
+  # <!--
+  #     mon_try_enter()
+  # -->
   def mon_try_enter: () -> bool
 
   # Creates a new MonitorMixin::ConditionVariable associated with the Monitor
   # object.
+  #
+  # <!--
+  #     new_cond()
+  # -->
   def new_cond: () -> ::MonitorMixin::ConditionVariable
 
+  # <!--
+  #     synchronize(&b)
+  # -->
   alias synchronize mon_synchronize
 
   # For backward compatibility
+  #
+  # <!--
+  #     try_mon_enter()
+  # -->
   alias try_mon_enter mon_try_enter
 
   private
@@ -78,12 +117,20 @@ module MonitorMixin
   # Use `extend MonitorMixin` or `include MonitorMixin` instead of this
   # constructor.  Have look at the examples above to understand how to use this
   # module.
+  #
+  # <!--
+  #     new(...)
+  # -->
   def initialize: (*untyped) { (*untyped) -> untyped } -> void
 
   def mon_check_owner: () -> nil
 
   # Initializes the MonitorMixin after being included in a class or when an object
   # has been extended with the MonitorMixin
+  #
+  # <!--
+  #     mon_initialize()
+  # -->
   def mon_initialize: () -> untyped
 end
 
@@ -95,9 +142,17 @@ class MonitorMixin::ConditionVariable
   public
 
   # Wakes up all threads waiting for this lock.
+  #
+  # <!--
+  #     broadcast()
+  # -->
   def broadcast: () -> Thread::ConditionVariable
 
   # Wakes up the first thread in line waiting for this lock.
+  #
+  # <!--
+  #     signal()
+  # -->
   def signal: () -> Thread::ConditionVariable
 
   # Releases the lock held in the associated monitor and waits; reacquires the
@@ -105,12 +160,24 @@ class MonitorMixin::ConditionVariable
   #
   # If `timeout` is given, this method returns after `timeout` seconds passed,
   # even if no other thread doesn't signal.
+  #
+  # <!--
+  #     wait(timeout = nil)
+  # -->
   def wait: (?Numeric? timeout) -> untyped
 
   # Calls wait repeatedly until the given block yields a truthy value.
+  #
+  # <!--
+  #     wait_until()
+  # -->
   def wait_until: () { () -> boolish } -> untyped
 
   # Calls wait repeatedly while the given block yields a truthy value.
+  #
+  # <!--
+  #     wait_while()
+  # -->
   def wait_while: () { () -> boolish } -> untyped
 
   private
