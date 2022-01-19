@@ -216,7 +216,7 @@
 #     Logger.new(logdev, formatter: proc {|severity, datetime, progname, msg|
 #       "#{datetime}: #{msg}\n"
 #     })
-#
+# not used after 1.2.7. just for compat.
 class Logger
   interface _WriteCloser
     def write: (_ToS) -> untyped
@@ -232,6 +232,9 @@ class Logger
   # Dump given message to the log device without any formatting.  If no log device
   # exists, return `nil`.
   #
+  # <!--
+  #     <<(msg)
+  # -->
   def <<: (untyped msg) -> (untyped | nil)
 
   # ### Args
@@ -271,14 +274,24 @@ class Logger
   # *   Append open does not need to lock file.
   # *   If the OS supports multi I/O, records possibly may be mixed.
   #
+  #
+  # <!--
+  #     Logger#add(severity, message = nil, progname = nil) { ... }
+  # -->
   def add: (Integer severity, ?untyped message, ?untyped progname) ?{ () -> untyped } -> true
 
   # Close the logging device.
   #
+  # <!--
+  #     close()
+  # -->
   def close: () -> untyped
 
   # Returns the date format being used.  See #datetime_format=
   #
+  # <!--
+  #     datetime_format()
+  # -->
   def datetime_format: () -> String?
 
   # Set date-time format.
@@ -286,6 +299,10 @@ class Logger
   # `datetime_format`
   # :   A string suitable for passing to `strftime`.
   #
+  #
+  # <!--
+  #     datetime_format=(datetime_format)
+  # -->
   def datetime_format=: (String datetime_format) -> String
                       | (nil datetime_format) -> nil
 
@@ -293,45 +310,72 @@ class Logger
   #
   # See #info for more information.
   #
+  # <!--
+  #     debug(progname = nil, &block)
+  # -->
   def debug: (?untyped progname) ?{ () -> untyped } -> true
 
   # Sets the severity to DEBUG.
   #
+  # <!--
+  #     debug!()
+  # -->
   def debug!: () -> Integer
 
-  # Returns `true` iff the current severity level allows for the printing of
-  # `DEBUG` messages.
+  # Returns `true` if and only if the current severity level allows for the
+  # printing of `DEBUG` messages.
   #
+  # <!--
+  #     debug?()
+  # -->
   def debug?: () -> bool
 
   # Log an `ERROR` message.
   #
   # See #info for more information.
   #
+  # <!--
+  #     error(progname = nil, &block)
+  # -->
   def error: (?untyped progname) ?{ () -> untyped } -> true
 
   # Sets the severity to ERROR.
   #
+  # <!--
+  #     error!()
+  # -->
   def error!: () -> Integer
 
-  # Returns `true` iff the current severity level allows for the printing of
-  # `ERROR` messages.
+  # Returns `true` if and only if the current severity level allows for the
+  # printing of `ERROR` messages.
   #
+  # <!--
+  #     error?()
+  # -->
   def error?: () -> bool
 
   # Log a `FATAL` message.
   #
   # See #info for more information.
   #
+  # <!--
+  #     fatal(progname = nil, &block)
+  # -->
   def fatal: (?untyped progname) ?{ () -> untyped } -> true
 
   # Sets the severity to FATAL.
   #
+  # <!--
+  #     fatal!()
+  # -->
   def fatal!: () -> Integer
 
-  # Returns `true` iff the current severity level allows for the printing of
-  # `FATAL` messages.
+  # Returns `true` if and only if the current severity level allows for the
+  # printing of `FATAL` messages.
   #
+  # <!--
+  #     fatal?()
+  # -->
   def fatal?: () -> bool
 
   # Logging formatter, as a `Proc` that will take four arguments and return the
@@ -384,15 +428,25 @@ class Logger
   #
   # See #add.
   #
+  # <!--
+  #     info(message)
+  #     info(progname, &block)
+  # -->
   def info: (?untyped progname) ?{ () -> untyped } -> true
 
   # Sets the severity to INFO.
   #
+  # <!--
+  #     info!()
+  # -->
   def info!: () -> Integer
 
-  # Returns `true` iff the current severity level allows for the printing of
-  # `INFO` messages.
+  # Returns `true` if and only if the current severity level allows for the
+  # printing of `INFO` messages.
   #
+  # <!--
+  #     info?()
+  # -->
   def info?: () -> bool
 
   # Logging severity threshold (e.g. `Logger::INFO`).
@@ -405,8 +459,14 @@ class Logger
   # :   The Severity of the log message.
   #
   #
+  # <!--
+  #     level=(severity)
+  # -->
   def level=: (Integer | String severity) -> Integer
 
+  # <!--
+  #     log(severity, message = nil, progname = nil)
+  # -->
   alias log add
 
   # Program name to include in log messages.
@@ -427,6 +487,10 @@ class Logger
   #
   # Reopen a log device.
   #
+  # <!--
+  #     Logger#reopen
+  #     Logger#reopen(logdev)
+  # -->
   def reopen: () -> self
             | (logdev?) -> self
 
@@ -434,6 +498,9 @@ class Logger
   #
   alias sev_threshold level
 
+  # <!--
+  #     sev_threshold=(severity)
+  # -->
   alias sev_threshold= level=
 
   # Log an `UNKNOWN` message.  This will be printed no matter what the logger's
@@ -441,34 +508,53 @@ class Logger
   #
   # See #info for more information.
   #
+  # <!--
+  #     unknown(progname = nil, &block)
+  # -->
   def unknown: (?untyped progname) ?{ () -> untyped } -> true
 
   # Log a `WARN` message.
   #
   # See #info for more information.
   #
+  # <!--
+  #     warn(progname = nil, &block)
+  # -->
   def warn: (?untyped progname) ?{ () -> untyped } -> true
 
   # Sets the severity to WARN.
   #
+  # <!--
+  #     warn!()
+  # -->
   def warn!: () -> Integer
 
-  # Returns `true` iff the current severity level allows for the printing of
-  # `WARN` messages.
+  # Returns `true` if and only if the current severity level allows for the
+  # printing of `WARN` messages.
   #
+  # <!--
+  #     warn?()
+  # -->
   def warn?: () -> bool
 
   private
 
+  # <!--
+  #     format_message(severity, datetime, progname, msg)
+  # -->
   def format_message: (String severity, Time datetime, untyped progname, untyped msg) -> _ToS
 
+  # <!--
+  #     format_severity(severity)
+  # -->
   def format_severity: (Integer severity) -> String
 
   # ### Args
   #
   # `logdev`
-  # :   The log device.  This is a filename (String) or IO object (typically
-  #     `STDOUT`, `STDERR`, or an open file).
+  # :   The log device.  This is a filename (String), IO object (typically
+  #     `STDOUT`, `STDERR`, or an open file), `nil` (it writes nothing) or
+  #     `File::NULL` (same as `nil`).
   # `shift_age`
   # :   Number of old log files to keep, **or** frequency of rotation (`daily`,
   #     `weekly` or `monthly`). Default value is 0, which disables log file
@@ -495,13 +581,20 @@ class Logger
   #
   # Create an instance.
   #
+  # <!--
+  #     Logger.new(logdev, shift_age = 0, shift_size = 1048576)
+  #     Logger.new(logdev, shift_age = 'weekly')
+  #     Logger.new(logdev, level: :info)
+  #     Logger.new(logdev, progname: 'progname')
+  #     Logger.new(logdev, formatter: formatter)
+  #     Logger.new(logdev, datetime_format: '%Y-%m-%d %H:%M:%S')
+  # -->
   def initialize: (logdev logdev, ?Numeric | String shift_age, ?Integer shift_size, ?shift_period_suffix: String, ?binmode: boolish, ?datetime_format: String, ?formatter: _Formatter, ?progname: String, ?level: Integer) -> void
 end
 
 Logger::ProgName: String
 
 # Severity label for logging (max 5 chars).
-#
 Logger::SEV_LABEL: Array[String]
 
 Logger::VERSION: String

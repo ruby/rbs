@@ -1,4 +1,5 @@
 class Logger
+  # Device used for logging messages.
   class LogDevice
     include MonitorMixin
 
@@ -9,30 +10,66 @@ class Logger
 
     public
 
+    # <!--
+    #     close()
+    # -->
     def close: () -> nil
 
+    # <!--
+    #     reopen(log = nil)
+    # -->
     def reopen: (?logdev log) -> self
 
+    # <!--
+    #     write(message)
+    # -->
     def write: (untyped message) -> untyped
 
     private
 
+    # <!--
+    #     add_log_header(file)
+    # -->
     def add_log_header: (IO file) -> untyped
 
+    # <!--
+    #     check_shift_log()
+    # -->
     def check_shift_log: () -> untyped
 
+    # <!--
+    #     create_logfile(filename)
+    # -->
     def create_logfile: (String filename) -> File
 
+    # <!--
+    #     new(log = nil, shift_age: nil, shift_size: nil, shift_period_suffix: nil, binmode: false)
+    # -->
     def initialize: (?untyped logdev, ?binmode: boolish, ?shift_period_suffix: String, ?shift_size: Integer, ?shift_age: Numeric | String) -> void
 
+    # <!--
+    #     lock_shift_log() { || ... }
+    # -->
     def lock_shift_log: () { () -> untyped } -> untyped
 
+    # <!--
+    #     open_logfile(filename)
+    # -->
     def open_logfile: (String filename) -> File
 
+    # <!--
+    #     set_dev(log)
+    # -->
     def set_dev: (logdev log) -> untyped
 
+    # <!--
+    #     shift_log_age()
+    # -->
     def shift_log_age: () -> true
 
+    # <!--
+    #     shift_log_period(period_end)
+    # -->
     def shift_log_period: (Time period_end) -> true
   end
 end
