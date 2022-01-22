@@ -6,6 +6,8 @@ set -x
 bundle install --jobs 4 --retry 3
 bundle install --jobs 4 --retry 3 --gemfile=steep/Gemfile
 
+bundle exec rake compile
+
 if type "re2c" > /dev/null 2>&1; then
   echo "🤖 Detected re2c"
 else
