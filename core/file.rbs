@@ -984,7 +984,7 @@ File::Constants::WRONLY: Integer
 class File::Stat < Object
   include Comparable
 
-  def initialize: (String file) -> Object
+  def initialize: (String file) -> self
   def <=>: (File::Stat other) -> Integer
          | (untyped) -> nil
 
@@ -1041,8 +1041,6 @@ class File::Stat < Object
   def rdev_major: () -> Integer
 
   def rdev_minor: () -> Integer
-
-  def read: (?int? length, ?string outbuf) -> String?
 
   def readable?: () -> bool
 
