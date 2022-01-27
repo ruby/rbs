@@ -984,7 +984,8 @@ File::Constants::WRONLY: Integer
 class File::Stat < Object
   include Comparable
 
-  def initialize: (String file) -> self
+  def initialize: (String file) -> void
+
   def <=>: (File::Stat other) -> Integer
          | (untyped) -> nil
 
