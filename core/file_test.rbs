@@ -11,9 +11,9 @@ module FileTest
 
   def self.empty?: (String | IO file_name) -> bool
 
-  def self.executable?: (String | IO file_name) -> bool
+  def self.executable?: (String file_name) -> bool
 
-  def self.executable_real?: (String | IO file_name) -> bool
+  def self.executable_real?: (String file_name) -> bool
 
   def self.exist?: (String | IO file_name) -> bool
 
@@ -29,9 +29,9 @@ module FileTest
 
   def self.pipe?: (String | IO file_name) -> bool
 
-  def self.readable?: (String | IO file_name) -> bool
+  def self.readable?: (String file_name) -> bool
 
-  def self.readable_real?: (String | IO file_name) -> bool
+  def self.readable_real?: (String file_name) -> bool
 
   def self.setgid?: (String | IO file_name) -> bool
 
@@ -45,15 +45,15 @@ module FileTest
 
   def self.sticky?: (String | IO file_name) -> bool
 
-  def self.symlink?: (String | IO file_name) -> bool
+  def self.symlink?: (String file_name) -> bool
 
   def self.world_readable?: (String | IO file_name) -> Integer?
 
   def self.world_writable?: (String | IO file_name) -> Integer?
 
-  def self.writable?: (String | IO file_name) -> bool
+  def self.writable?: (String file_name) -> bool
 
-  def self.writable_real?: (String | IO file_name) -> bool
+  def self.writable_real?: (String file_name) -> bool
 
   def self.zero?: (String | IO file_name) -> bool
 end
