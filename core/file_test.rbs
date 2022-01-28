@@ -58,7 +58,7 @@ module FileTest
   # Note that some OS-level security features may cause this to return true even
   # though the file is not executable by the effective user/group.
   #
-  def self?.executable?: (String | IO file_name) -> bool
+  def self?.executable?: (String file_name) -> bool
 
   # <!--
   #   rdoc-file=file.c
@@ -74,7 +74,7 @@ module FileTest
   # Note that some OS-level security features may cause this to return true even
   # though the file is not executable by the real user/group.
   #
-  def self?.executable_real?: (String | IO file_name) -> bool
+  def self?.executable_real?: (String file_name) -> bool
 
   # <!--
   #   rdoc-file=file.c
@@ -163,7 +163,7 @@ module FileTest
   # Note that some OS-level security features may cause this to return true even
   # though the file is not readable by the effective user/group.
   #
-  def self?.readable?: (String | IO file_name) -> bool
+  def self?.readable?: (String file_name) -> bool
 
   # <!--
   #   rdoc-file=file.c
@@ -175,7 +175,7 @@ module FileTest
   # Note that some OS-level security features may cause this to return true even
   # though the file is not readable by the real user/group.
   #
-  def self?.readable_real?: (String | IO file_name) -> bool
+  def self?.readable_real?: (String file_name) -> bool
 
   # <!--
   #   rdoc-file=file.c
@@ -244,7 +244,7 @@ module FileTest
   # -->
   # Returns `true` if the named file is a symbolic link.
   #
-  def self?.symlink?: (String | IO file_name) -> bool
+  def self?.symlink?: (String file_name) -> bool
 
   # <!--
   #   rdoc-file=file.c
@@ -288,7 +288,7 @@ module FileTest
   # Note that some OS-level security features may cause this to return true even
   # though the file is not writable by the effective user/group.
   #
-  def self?.writable?: (String | IO file_name) -> bool
+  def self?.writable?: (String file_name) -> bool
 
   # <!--
   #   rdoc-file=file.c
@@ -300,7 +300,7 @@ module FileTest
   # Note that some OS-level security features may cause this to return true even
   # though the file is not writable by the real user/group.
   #
-  def self?.writable_real?: (String | IO file_name) -> bool
+  def self?.writable_real?: (String file_name) -> bool
 
   # <!--
   #   rdoc-file=file.c
