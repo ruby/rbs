@@ -211,7 +211,9 @@ module Process
   # can be interpreted differently across systems. Time.now is recommended over
   # CLOCK_REALTIME.
   #
-  def self.clock_gettime: (Symbol | Integer clock_id, ?Symbol unit) -> (Float | Integer)
+  def self.clock_gettime: (Symbol | Integer clock_id) -> Float
+                        | (Symbol | Integer clock_id, :float_second | :float_millisecond | :float_microsecond unit) -> Float
+                        | (Symbol | Integer clock_id, :second | :millisecond | :microsecond | :nanosecond unit) -> Integer
 
   # Detach the process from controlling terminal and run in the background as
   # system daemon.  Unless the argument nochdir is true (i.e. non false), it
