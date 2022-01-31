@@ -80,7 +80,7 @@ module RBS
       @stderr = stderr
     end
 
-    COMMANDS = [:ast, :list, :ancestors, :methods, :method, :validate, :constant, :paths, :prototype, :vendor, :parse, :test, :collection]
+    COMMANDS = [:ast, :annotate, :list, :ancestors, :methods, :method, :validate, :constant, :paths, :prototype, :vendor, :parse, :test, :collection]
 
     def parse_logging_options(opts)
       opts.on("--log-level LEVEL", "Specify log level (defaults to `warn`)") do |level|
@@ -789,6 +789,50 @@ Examples:
       end
 
       exit 1 if syntax_error
+    end
+
+    def run_annotate(args, options)
+      require "rbs/annotate"
+
+      source = RBS::Annotate::RDocSource.new()
+      annotator = RBS::Annotate::RDocAnnotator.new(source: source)
+
+      OptionParser.new do |opts|
+        opts.banner = <<-EOB
+Usage: rbs annotate [options...] [files...]
+
+Import documents from RDoc and update RBS files.
+
+Examples:
+
+  $ rbs annotate stdlib/pathname/**/*.rbs
+
+Options:
+        EOB
+
+        opts.on("--[no-]system", "Load RDoc from system (defaults to true)") {|b| source.with_system_dir = b }
+        opts.on("--[no-]gems", "Load RDoc from gems (defaults to false)") {|b| source.with_gems_dir = b }
+        opts.on("--[no-]site", "Load RDoc from site directory (defaults to false)") {|b| source.with_site_dir = b }
+        opts.on("--[no-]home", "Load RDoc from home directory (defaults to false)") {|b| source.with_home_dir = b }
+        opts.on("-d", "--dir DIRNAME", "Load RDoc from DIRNAME") {|d| source.extra_dirs << Pathname(d) }
+        opts.on("--[no-]arglists", "Generate arglists section (defaults to true)") {|b| annotator.include_arg_lists = b }
+        opts.on("--[no-]filename", "Include source file name in the documentation (defaults to true)") {|b| annotator.include_filename = b }
+      end.parse!(args)
+
+      source.load()
+
+      args.each do |file|
+        path = Pathname(file)
+        if path.directory?
+          Pathname.glob((path + "**/*.rbs").to_s).each do |path|
+            stdout.puts "Processing #{path}..."
+            annotator.annotate_file(path)
+          end
+        else
+          stdout.puts "Processing #{path}..."
+          annotator.annotate_file(path)
+        end
+      end
     end
 
     def test_opt options
