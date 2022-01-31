@@ -88,8 +88,6 @@ module FileTest
   #
   def self?.exist?: (String | IO file_name) -> bool
 
-  def self?.exists?: (String | IO file_name) -> bool
-
   # <!--
   #   rdoc-file=file.c
   #   - File.file?(file) -> true or false

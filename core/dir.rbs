@@ -295,10 +295,6 @@ class Dir
   #
   def self.exist?: (string file) -> bool
 
-  # Deprecated method. Don't use.
-  #
-  def self.exists?: (string file) -> bool
-
   # <!--
   #   rdoc-file=dir.c
   #   - Dir.foreach( dirname ) {| filename | block }                 -> nil
