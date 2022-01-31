@@ -1,46 +1,41 @@
-# Standard Library Signatures Contribution Guide
+# Core and Standard Library Signatures Contribution Guide
 
 ## Guides
 
-* [Stdlib Signatures Guide](stdlib.md)
-* [Syntax](syntax.md)
+* [RBS by Example](rbs_by_example.md)
 * [Writing Signature Guide](sigs.md)
+* [Testing Core API and Standard Library Types](stdlib.md)
+* [Syntax](syntax.md)
+
+## Introduction
+
+The RBS repository contains the type definitions of Core API and Standard Libraries.
+There are some discussions whether if it is the best to have them in this repository, but we have them and continue updating the files meanwhile.
+
+The target version of the bundled type definitions is the latest _release_ of Ruby -- `3.1` as of January 2022.
+
+**The core API** type definitions are in `core` directory.
+You will find the familiar class names in the directory, like `string.rbs` or `array.rbs`.
+
+**The standard libraries** type definitions are in `stdlib` directory.
+They have the [third party repository](repo.md) structure.
+There is a `set` directory for the `set` library, and it contains `0` directory.
+Because RBS supports the latest release of Ruby, we have one set of RBS files which corresponds to the bundled versions of the libraries.
 
 ## Steps for Contribution
 
 1. Pick the class/library you will work for.
-2. Assign yourself on the [work spreadsheet](https://docs.google.com/spreadsheets/d/199rRB93I16H0k4TGZS3EGojns2R0W1oCsN8UPJzOpyU/edit#gid=1383307992) (optional but recommended to avoid duplication).
-3. Sort RBS members (if there is RBS files for the classes).
-    - Use `bin/sort stdlib/path/to/signature.rbs` command and confirm it does not break definitions.
-    - Committing the sorted RBSs is recommended.
-4. Add method prototypes.
-    - Use `rbs prototype runtime --merge CLASS_NAME` command to generate the missing method definitions.
-    - Committing the auto generated signatures is recommended.
-5. Annotate with RDoc.
-    - You'll need RDoc installed. Rvm users should use `rvm docs generate` first.
-    - Use `bin/annotate-with-rdoc stdlib/path/to/signature.rbs` to annotate the RBS files.
-    - Committing the generated annotations is recommended.
-6. Fix method types and comments.
-    - The auto generated RDoc comments include `arglists` section, which we don't expect to be included the RBS files.
-    - Delete the `arglists` sections.
-    - Give methods correct types.
-    - Write tests, if possible. (If it is too difficult to write test, skip it.)
+2. Make a directory `stdlib/foo/0` if you work for one of the standard libraries.
+3. Write RBS type definitions and tests.
 
-## The Target Version
+You will typically follow the steps as follows:
 
-* The standard library signatures targets Ruby 3.0 for now.
-* The library code targets Ruby 2.7 and 3.0.
+1. Run `rbs prototype runtime` to generate list of methods.
+2. Run `rbs annotate` to import RDoc comments.
+3. Run `rbs generate:stdlib_test[LIB]` to generate a test case.
+4. Write the type definitions and tests.
 
-## Stdlib Worksheet
-
-You can find the list of classes/libraries:
-
-* https://docs.google.com/spreadsheets/d/199rRB93I16H0k4TGZS3EGojns2R0W1oCsN8UPJzOpyU/edit#gid=1383307992
-
-Assign yourself when you start working for a class or library.
-After reviewing and merging your pull request, I will update the status of the library.
-
-You may find the *Good for first contributor* column where you can find some classes are recommended for new contributors (👍), and some classes are not-recommended (👎).
+See the next *Useful Tools* section and the guides above for writing and testing RBS files.
 
 ## Useful Tools
 
@@ -49,9 +44,9 @@ You may find the *Good for first contributor* column where you can find some cla
   * `--merge` tells to use the method types in RBS if exists.
 * `rbs prototype runtime --merge --method-owner=Numeric Integer`
   * You can use --method-owner if you want to print method of other classes too, for documentation purpose.
-* `bin/annotate-with-rdoc core/string.rbs`
-  * Write comments using RDoc.
-  * It contains arglists section, but I don't think we should have it in RBS files.
+* `rbs annotate core/string.rbs`
+  * Import RDoc comments.
+  * The imported docs contain the description, *arglists*, and filenames to help writing types.
 * `bin/query-rdoc String#initialize`
   * Print RDoc documents in the format you can copy-and-paste to RBS.
 * `bin/sort core/string.rbs`
@@ -63,7 +58,7 @@ You may find the *Good for first contributor* column where you can find some cla
 * `rake test/stdlib/Array_test.rb`
   Run specific stdlib test with the path.
 
-## Standard STDLIB Members Order
+### Standard STDLIB Members Order
 
 We define the standard members order so that ordering doesn't bother reading diffs or git-annotate outputs.
 
@@ -98,3 +93,14 @@ class HelloWorld[X]
   def validate_locale: () -> void
 end
 ```
+
+## Q&A
+
+### Some of the standard libraries are gems. Why we put the files in this repo?
+
+You are correct. We want to move to their repos. We haven't started the migration yet.
+
+### How can we handle incompatibilities of core APIs and standard libraries between Rubies
+
+We ignore the incompatibilities for now.
+We focus on the latest version of core APIs and standard libraries.
