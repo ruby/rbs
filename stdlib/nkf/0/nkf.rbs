@@ -1,3 +1,4 @@
+# <!-- rdoc-file=ext/nkf/nkf.c -->
 # NKF - Ruby extension for Network Kanji Filter
 #
 # ## Description
@@ -310,11 +311,20 @@
 # ### --
 #
 # Ignore rest of -option.
+#
 module NKF
+  # <!--
+  #   rdoc-file=ext/nkf/nkf.c
+  #   - NKF.guess(str)  => encoding
+  # -->
   # Returns guessed encoding of *str* by nkf routine.
   #
   def self.guess: (String str) -> Encoding
 
+  # <!--
+  #   rdoc-file=ext/nkf/nkf.c
+  #   - NKF.nkf(opt, str)   => string
+  # -->
   # Convert *str* and return converted result. Conversion details are specified by
   # *opt* as String.
   #
@@ -334,8 +344,14 @@ NKF::EUC: Encoding
 
 NKF::JIS: Encoding
 
+# <!-- rdoc-file=ext/nkf/nkf.c -->
+# Release date of nkf
+#
 NKF::NKF_RELEASE_DATE: String
 
+# <!-- rdoc-file=ext/nkf/nkf.c -->
+# Version of nkf
+#
 NKF::NKF_VERSION: String
 
 NKF::NOCONV: nil
@@ -350,4 +366,7 @@ NKF::UTF32: Encoding
 
 NKF::UTF8: Encoding
 
+# <!-- rdoc-file=ext/nkf/nkf.c -->
+# Full version string of nkf
+#
 NKF::VERSION: String
