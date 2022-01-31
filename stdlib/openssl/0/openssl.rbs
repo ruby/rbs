@@ -2961,8 +2961,61 @@ module OpenSSL
     #
     def []: (String section) -> Hash[String, String]
 
+    # <!--
+    #   rdoc-file=ext/openssl/lib/openssl/config.rb
+    #   - []=(section, pairs)
+    # -->
+    # *Deprecated in v2.2.0*. This method will be removed in a future release.
+    #
+    # Sets a specific *section* name with a Hash *pairs*.
+    #
+    # Given the following configuration being created:
+    #
+    #     config = OpenSSL::Config.new
+    #       #=> #<OpenSSL::Config sections=[]>
+    #     config['default'] = {"foo"=>"bar","baz"=>"buz"}
+    #       #=> {"foo"=>"bar", "baz"=>"buz"}
+    #     puts config.to_s
+    #       #=> [ default ]
+    #       #   foo=bar
+    #       #   baz=buz
+    #
+    # It's important to note that this will essentially merge any of the keys in
+    # *pairs* with the existing *section*. For example:
+    #
+    #     config['default']
+    #       #=> {"foo"=>"bar", "baz"=>"buz"}
+    #     config['default'] = {"foo" => "changed"}
+    #       #=> {"foo"=>"changed"}
+    #     config['default']
+    #       #=> {"foo"=>"changed", "baz"=>"buz"}
+    #
     def []=: (String section, _Each[[ String, String ]] pairs) -> _Each[[ String, String ]]
 
+    # <!--
+    #   rdoc-file=ext/openssl/lib/openssl/config.rb
+    #   - add_value(section, key, value)
+    # -->
+    # *Deprecated in v2.2.0*. This method will be removed in a future release.
+    #
+    # Set the target *key* with a given *value* under a specific *section*.
+    #
+    # Given the following configurating file being loaded:
+    #
+    #     config = OpenSSL::Config.load('foo.cnf')
+    #       #=> #<OpenSSL::Config sections=["default"]>
+    #     puts config.to_s
+    #       #=> [ default ]
+    #       #   foo=bar
+    #
+    # You can set the value of *foo* under the *default* section to a new value:
+    #
+    #     config.add_value('default', 'foo', 'buzz')
+    #       #=> "buzz"
+    #     puts config.to_s
+    #       #=> [ default ]
+    #       #   foo=buzz
+    #
     def add_value: (String section, untyped key, untyped value) -> untyped
 
     # <!--
@@ -5732,6 +5785,13 @@ module OpenSSL
       #
       alias to_s export
 
+      # <!--
+      #   rdoc-file=ext/openssl/ossl_pkey_dh.c
+      #   - dh.to_text -> aString
+      # -->
+      # Prints all parameters of key to buffer INSECURE: PRIVATE INFORMATIONS CAN LEAK
+      # OUT!!! Don't use :-)) (I's up to you)
+      #
       def to_text: () -> String
 
       private
@@ -5990,6 +6050,13 @@ module OpenSSL
       #
       alias to_s export
 
+      # <!--
+      #   rdoc-file=ext/openssl/ossl_pkey_dsa.c
+      #   - dsa.to_text -> aString
+      # -->
+      # Prints all parameters of key to buffer INSECURE: PRIVATE INFORMATIONS CAN LEAK
+      # OUT!!! Don't use :-)) (I's up to you)
+      #
       def to_text: () -> String
 
       private
@@ -6266,6 +6333,12 @@ module OpenSSL
       #
       alias to_pem export
 
+      # <!--
+      #   rdoc-file=ext/openssl/ossl_pkey_ec.c
+      #   - key.to_text   => String
+      # -->
+      # See the OpenSSL documentation for EC_KEY_print()
+      #
       def to_text: () -> String
 
       private
@@ -7034,6 +7107,16 @@ module OpenSSL
       #
       alias to_s export
 
+      # <!--
+      #   rdoc-file=ext/openssl/ossl_pkey_rsa.c
+      #   - rsa.to_text => String
+      # -->
+      # THIS METHOD IS INSECURE, PRIVATE INFORMATION CAN LEAK OUT!!!
+      #
+      # Dumps all parameters of a keypair to a String
+      #
+      # Don't use :-)) (It's up to you)
+      #
       def to_text: () -> String
 
       # <!--
@@ -8766,6 +8849,11 @@ module OpenSSL
       #
       def tmp_dh_callback: () -> untyped
 
+      # <!--
+      #   rdoc-file=ext/openssl/lib/openssl/ssl.rb
+      #   - tmp_ecdh_callback()
+      # -->
+      #
       def tmp_ecdh_callback: () -> untyped
 
       # <!--
