@@ -20,6 +20,33 @@ end
 
 type json_options = Hash[Symbol, untyped]
 
+# <!-- rdoc-file=ext/json/lib/json/common.rb -->
+# The base exception for JSON errors.
+#
+class JSON::JSONError < StandardError
+end
+
+# <!-- rdoc-file=ext/json/lib/json/common.rb -->
+# This exception is raised if a generator or unparser error occurs.
+#
+class JSON::GeneratorError < JSON::JSONError
+end
+
+class JSON::UnparserError < JSON::GeneratorError
+end
+
+# <!-- rdoc-file=ext/json/lib/json/common.rb -->
+# This exception is raised if a parser error occurs.
+#
+class JSON::ParserError < JSON::JSONError
+end
+
+# <!-- rdoc-file=ext/json/lib/json/common.rb -->
+# This exception is raised if the nesting of parsed data structures is too deep.
+#
+class JSON::NestingError < JSON::ParserError
+end
+
 class JSON::State
 end
 
