@@ -61,7 +61,7 @@
 #     puts db['822']
 #
 class DBM
-  include Enumerable[[String, String]]
+  include Enumerable[[ String, String ]]
 
   # Open a dbm database and yields it if a block is given. See also `DBM.new`.
   #
@@ -102,18 +102,18 @@ class DBM
 
   # Calls the block once for each [key, value] pair in the database. Returns self.
   #
-  def each: () { ([String, String]) -> void } -> self
-          | () -> Enumerator[[String, String], self]
+  def each: () { ([ String, String ]) -> void } -> self
+          | () -> Enumerator[[ String, String ], self]
 
   # Calls the block once for each key string in the database. Returns self.
   #
-  def each_key: { (String) -> void } -> self
+  def each_key: () { (String) -> void } -> self
               | () -> Enumerator[String, self]
 
   # Calls the block once for each [key, value] pair in the database. Returns self.
   #
-  def each_pair: () { ([String, String]) -> void } -> self
-               | () -> Enumerator[[String, String], self]
+  def each_pair: () { ([ String, String ]) -> void } -> self
+               | () -> Enumerator[[ String, String ], self]
 
   # Calls the block once for each value string in the database. Returns self.
   #
@@ -184,19 +184,19 @@ class DBM
   def replace: (_ReplaceSource) -> ::DBM
 
   interface _ReplaceSource
-    def each_pair: () { ([String, String]) -> void } -> void
+    def each_pair: () { ([ String, String ]) -> void } -> void
   end
 
   # Returns a new array consisting of the [key, value] pairs for which the code
   # block returns true.
   #
-  def select: () { ([String, String]) -> boolish } -> Array[[String, String]]
+  def select: () { ([ String, String ]) -> boolish } -> Array[[ String, String ]]
 
   # Removes a [key, value] pair from the database, and returns it. If the database
   # is empty, returns nil. The order in which values are removed/returned is not
   # guaranteed.
   #
-  def shift: () -> [String, String]?
+  def shift: () -> [ String, String ]?
 
   # Returns the number of entries in the database.
   #
@@ -210,7 +210,7 @@ class DBM
   # Converts the contents of the database to an array of [key, value] arrays, and
   # returns it.
   #
-  def to_a: () -> Array[[String, String]]
+  def to_a: () -> Array[[ String, String ]]
 
   # Converts the contents of the database to an in-memory Hash object, and returns
   # it.
@@ -223,7 +223,7 @@ class DBM
   def update: (_UpdateSource) -> ::DBM
 
   interface _UpdateSource
-    def each_pair: () { ([String, String]) -> void } -> void
+    def each_pair: () { ([ String, String ]) -> void } -> void
   end
 
   # Returns true if the database contains the specified string value, false

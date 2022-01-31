@@ -1,3 +1,4 @@
+%a{annotate:rdoc:skip}
 class Integer
   # Iterates the given block over all prime numbers.
   #

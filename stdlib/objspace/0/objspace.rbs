@@ -1,3 +1,4 @@
+# <!-- rdoc-file=ext/objspace/objspace.c -->
 # The objspace library extends the ObjectSpace module and adds several methods
 # to get internal statistic information about object/memory management.
 #
@@ -6,29 +7,13 @@
 # Generally, you *SHOULD NOT* use this library if you do not know about the MRI
 # implementation.  Mainly, this library is for (memory) profiler developers and
 # MRI developers who need to know about MRI memory usage.
-# The ObjectSpace module contains a number of routines that interact with the
-# garbage collection facility and allow you to traverse all living objects with
-# an iterator.
 #
-# ObjectSpace also provides support for object finalizers, procs that will be
-# called when a specific object is about to be destroyed by garbage collection.
-# See the documentation for `ObjectSpace.define_finalizer` for important
-# information on how to use this method correctly.
-#
-#     a = "A"
-#     b = "B"
-#
-#     ObjectSpace.define_finalizer(a, proc {|id| puts "Finalizer one on #{id}" })
-#     ObjectSpace.define_finalizer(b, proc {|id| puts "Finalizer two on #{id}" })
-#
-#     a = nil
-#     b = nil
-#
-# *produces:*
-#
-#     Finalizer two on 537763470
-#     Finalizer one on 537763480
+%a{annotate:rdoc:source:from=ext/objspace}
 module ObjectSpace
+  # <!--
+  #   rdoc-file=ext/objspace/object_tracing.c
+  #   - allocation_class_path(object) -> string
+  # -->
   # Returns the class for the given `object`.
   #
   #     class A
@@ -44,8 +29,12 @@ module ObjectSpace
   #
   # See ::trace_object_allocations for more information and examples.
   #
-  def self.allocation_class_path: (untyped) -> String
+  def self?.allocation_class_path: (untyped) -> String
 
+  # <!--
+  #   rdoc-file=ext/objspace/object_tracing.c
+  #   - allocation_generation(object) -> integer or nil
+  # -->
   # Returns garbage collector generation for the given `object`.
   #
   #     class B
@@ -63,8 +52,12 @@ module ObjectSpace
   #
   # See ::trace_object_allocations for more information and examples.
   #
-  def self.allocation_generation: (untyped) -> (Integer | nil)
+  def self?.allocation_generation: (untyped) -> (Integer | nil)
 
+  # <!--
+  #   rdoc-file=ext/objspace/object_tracing.c
+  #   - allocation_method_id(object) -> string
+  # -->
   # Returns the method identifier for the given `object`.
   #
   #     class A
@@ -82,20 +75,32 @@ module ObjectSpace
   #
   # See ::trace_object_allocations for more information and examples.
   #
-  def self.allocation_method_id: (untyped) -> Symbol
+  def self?.allocation_method_id: (untyped) -> Symbol
 
+  # <!--
+  #   rdoc-file=ext/objspace/object_tracing.c
+  #   - allocation_sourcefile(object) -> string
+  # -->
   # Returns the source file origin from the given `object`.
   #
   # See ::trace_object_allocations for more information and examples.
   #
-  def self.allocation_sourcefile: (untyped) -> String
+  def self?.allocation_sourcefile: (untyped) -> String
 
+  # <!--
+  #   rdoc-file=ext/objspace/object_tracing.c
+  #   - allocation_sourceline(object) -> integer
+  # -->
   # Returns the original line from source for from the given `object`.
   #
   # See ::trace_object_allocations for more information and examples.
   #
-  def self.allocation_sourceline: (untyped) -> Integer
+  def self?.allocation_sourceline: (untyped) -> Integer
 
+  # <!--
+  #   rdoc-file=ext/objspace/objspace.c
+  #   - ObjectSpace.count_imemo_objects([result_hash]) -> hash
+  # -->
   # Counts objects for each `T_IMEMO` type.
   #
   # This method is only for MRI developers interested in performance and memory
@@ -119,8 +124,12 @@ module ObjectSpace
   #
   # This method is only expected to work with C Ruby.
   #
-  def self.count_imemo_objects: (?Hash[Symbol, Integer] result_hash) -> Hash[Symbol, Integer]
+  def self?.count_imemo_objects: (?Hash[Symbol, Integer] result_hash) -> Hash[Symbol, Integer]
 
+  # <!--
+  #   rdoc-file=ext/objspace/objspace.c
+  #   - ObjectSpace.count_nodes([result_hash]) -> hash
+  # -->
   # Counts nodes for each node type.
   #
   # This method is only for MRI developers interested in performance and memory
@@ -138,8 +147,12 @@ module ObjectSpace
   #
   # This method is only expected to work with C Ruby.
   #
-  def self.count_nodes: (?Hash[Symbol, Integer] result_hash) -> Hash[Symbol, Integer]
+  def self?.count_nodes: (?Hash[Symbol, Integer] result_hash) -> Hash[Symbol, Integer]
 
+  # <!--
+  #   rdoc-file=ext/objspace/objspace.c
+  #   - ObjectSpace.count_objects_size([result_hash]) -> hash
+  # -->
   # Counts objects size (in bytes) for each type.
   #
   # Note that this information is incomplete.  You need to deal with this
@@ -157,8 +170,12 @@ module ObjectSpace
   #
   # This method is only expected to work with C Ruby.
   #
-  def self.count_objects_size: (?Hash[Symbol, Integer] result_hash) -> Hash[Symbol, Integer]
+  def self?.count_objects_size: (?Hash[Symbol, Integer] result_hash) -> Hash[Symbol, Integer]
 
+  # <!--
+  #   rdoc-file=ext/objspace/objspace.c
+  #   - ObjectSpace.count_symbols([result_hash]) -> hash
+  # -->
   # Counts symbols for each Symbol type.
   #
   # This method is only for MRI developers interested in performance and memory
@@ -179,8 +196,12 @@ module ObjectSpace
   #     * immortal_static_symbol: Immortal symbols (do not collected by GC)
   #     * immortal_symbol: total immortal symbols (immortal_dynamic_symbol+immortal_static_symbol)
   #
-  def self.count_symbols: (?Hash[Symbol, Integer] result_hash) -> Hash[Symbol, Integer]
+  def self?.count_symbols: (?Hash[Symbol, Integer] result_hash) -> Hash[Symbol, Integer]
 
+  # <!--
+  #   rdoc-file=ext/objspace/objspace.c
+  #   - ObjectSpace.count_tdata_objects([result_hash]) -> hash
+  # -->
   # Counts objects for each `T_DATA` type.
   #
   # This method is only for MRI developers interested in performance and memory
@@ -208,12 +229,55 @@ module ObjectSpace
   #
   # This method is only expected to work with C Ruby.
   #
-  def self.count_tdata_objects: (?Hash[untyped, Integer] result_hash) -> Hash[untyped, Integer]
+  def self?.count_tdata_objects: (?Hash[untyped, Integer] result_hash) -> Hash[untyped, Integer]
 
-  def self.dump: (untyped obj, ?output: Symbol) -> (String | File | nil)
+  # <!--
+  #   rdoc-file=ext/objspace/lib/objspace.rb
+  #   - ObjectSpace.dump(obj[, output: :string]) # => "{ ... }"
+  #   - ObjectSpace.dump(obj, output: :file)     # => #<File:/tmp/rubyobj20131125-88733-1xkfmpv.json>
+  #   - ObjectSpace.dump(obj, output: :stdout)   # => nil
+  # -->
+  # Dump the contents of a ruby object as JSON.
+  #
+  # This method is only expected to work with C Ruby. This is an experimental
+  # method and is subject to change. In particular, the function signature and
+  # output format are not guaranteed to be compatible in future versions of ruby.
+  #
+  def self?.dump: (untyped obj, ?output: Symbol) -> (String | File | nil)
 
-  def self.dump_all: (?since: (Integer|nil), ?full: boolish, ?output: Symbol) -> (String | File | nil)
+  # <!--
+  #   rdoc-file=ext/objspace/lib/objspace.rb
+  #   - ObjectSpace.dump_all([output: :file]) # => #<File:/tmp/rubyheap20131125-88469-laoj3v.json>
+  #   - ObjectSpace.dump_all(output: :stdout) # => nil
+  #   - ObjectSpace.dump_all(output: :string) # => "{...}\n{...}\n..."
+  #   - ObjectSpace.dump_all(output:
+  #   - File.open('heap.json','w'))         # => #<File:heap.json>
+  #   - ObjectSpace.dump_all(output: :string,
+  #   - since: 42)                          # => "{...}\n{...}\n..."
+  # -->
+  # Dump the contents of the ruby heap as JSON.
+  #
+  # *since* must be a non-negative integer or `nil`.
+  #
+  # If *since* is a positive integer, only objects of that generation and newer
+  # generations are dumped. The current generation can be accessed using
+  # GC::count.
+  #
+  # Objects that were allocated without object allocation tracing enabled are
+  # ignored. See ::trace_object_allocations for more information and examples.
+  #
+  # If *since* is omitted or is `nil`, all objects are dumped.
+  #
+  # This method is only expected to work with C Ruby. This is an experimental
+  # method and is subject to change. In particular, the function signature and
+  # output format are not guaranteed to be compatible in future versions of ruby.
+  #
+  def self?.dump_all: (?since: Integer | nil, ?full: boolish, ?output: Symbol) -> (String | File | nil)
 
+  # <!--
+  #   rdoc-file=ext/objspace/objspace.c
+  #   - ObjectSpace.internal_class_of(obj) -> Class or Module
+  # -->
   # MRI specific feature
   # :   Return internal class of obj.
   #
@@ -221,8 +285,12 @@ module ObjectSpace
   #
   # Note that you should not use this method in your application.
   #
-  def self.internal_class_of: (untyped) -> Class
+  def self?.internal_class_of: (untyped) -> Class
 
+  # <!--
+  #   rdoc-file=ext/objspace/objspace.c
+  #   - ObjectSpace.internal_super_of(cls) -> Class or Module
+  # -->
   # MRI specific feature
   # :   Return internal super class of cls (Class or Module).
   #
@@ -230,8 +298,12 @@ module ObjectSpace
   #
   # Note that you should not use this method in your application.
   #
-  def self.internal_super_of: (untyped) -> untyped
+  def self?.internal_super_of: (untyped) -> untyped
 
+  # <!--
+  #   rdoc-file=ext/objspace/objspace.c
+  #   - ObjectSpace.memsize_of(obj) -> Integer
+  # -->
   # Return consuming memory size of obj in bytes.
   #
   # Note that the return size is incomplete.  You need to deal with this
@@ -242,8 +314,12 @@ module ObjectSpace
   #
   # From Ruby 2.2, memsize_of(obj) returns a memory size includes sizeof(RVALUE).
   #
-  def self.memsize_of: (untyped) -> Integer
+  def self?.memsize_of: (untyped) -> Integer
 
+  # <!--
+  #   rdoc-file=ext/objspace/objspace.c
+  #   - ObjectSpace.memsize_of_all([klass]) -> Integer
+  # -->
   # Return consuming memory size of all living objects in bytes.
   #
   # If `klass` (should be Class object) is given, return the total memory size of
@@ -267,8 +343,12 @@ module ObjectSpace
   #
   # This method is only expected to work with C Ruby.
   #
-  def self.memsize_of_all: (?Class) -> Integer
+  def self?.memsize_of_all: (?Class) -> Integer
 
+  # <!--
+  #   rdoc-file=ext/objspace/objspace.c
+  #   - ObjectSpace.reachable_objects_from(obj) -> array or nil
+  # -->
   # MRI specific feature
   # :   Return all reachable objects from `obj'.
   #
@@ -307,14 +387,21 @@ module ObjectSpace
   #     ObjectSpace.reachable_objects_from(1)
   #     #=> nil # 1 is not markable (heap managed) object
   #
-  def self.reachable_objects_from: (untyped) -> ([ untyped ] | nil)
+  def self?.reachable_objects_from: (untyped) -> ([ untyped ] | nil)
 
+  # <!--
+  #   rdoc-file=ext/objspace/objspace.c
+  #   - ObjectSpace.reachable_objects_from_root -> hash
+  # -->
   # MRI specific feature
   # :   Return all reachable objects from root.
   #
-  #
-  def self.reachable_objects_from_root: () -> Hash[String, untyped]
+  def self?.reachable_objects_from_root: () -> Hash[String, untyped]
 
+  # <!--
+  #   rdoc-file=ext/objspace/object_tracing.c
+  #   - trace_object_allocations { block }
+  # -->
   # Starts tracing object allocations from the ObjectSpace extension module.
   #
   # For example:
@@ -342,65 +429,37 @@ module ObjectSpace
   #
   def self.trace_object_allocations: () { (untyped) -> untyped } -> untyped
 
+  # <!--
+  #   rdoc-file=ext/objspace/object_tracing.c
+  #   - trace_object_allocations_clear
+  # -->
   # Clear recorded tracing information.
   #
-  def self.trace_object_allocations_clear: () -> void
+  def self?.trace_object_allocations_clear: () -> void
 
-  def self.trace_object_allocations_debug_start: () -> void
+  # <!--
+  #   rdoc-file=ext/objspace/object_tracing.c
+  #   - trace_object_allocations_debug_start()
+  # -->
+  #
+  def self?.trace_object_allocations_debug_start: () -> void
 
+  # <!--
+  #   rdoc-file=ext/objspace/object_tracing.c
+  #   - trace_object_allocations_start
+  # -->
   # Starts tracing object allocations.
   #
-  def self.trace_object_allocations_start: () -> void
+  def self?.trace_object_allocations_start: () -> void
 
+  # <!--
+  #   rdoc-file=ext/objspace/object_tracing.c
+  #   - trace_object_allocations_stop
+  # -->
   # Stop tracing object allocations.
   #
   # Note that if ::trace_object_allocations_start is called n-times, then tracing
   # will stop after calling ::trace_object_allocations_stop n-times.
   #
-  def self.trace_object_allocations_stop: () -> void
-
-  private
-
-  # Dump the contents of a ruby object as JSON.
-  #
-  # This method is only expected to work with C Ruby. This is an experimental
-  # method and is subject to change. In particular, the function signature and
-  # output format are not guaranteed to be compatible in future versions of ruby.
-  #
-  def dump: (untyped obj, ?output: Symbol) -> (String|File|nil)
-
-  # Dump the contents of the ruby heap as JSON.
-  #
-  # *since* must be a non-negative integer or `nil`.
-  #
-  # If *since* is a positive integer, only objects of that generation and newer
-  # generations are dumped. The current generation can be accessed using
-  # GC::count.
-  #
-  # Objects that were allocated without object allocation tracing enabled are
-  # ignored. See ::trace_object_allocations for more information and examples.
-  #
-  # If *since* is omitted or is `nil`, all objects are dumped.
-  #
-  # This method is only expected to work with C Ruby. This is an experimental
-  # method and is subject to change. In particular, the function signature and
-  # output format are not guaranteed to be compatible in future versions of ruby.
-  #
-  def dump_all: (?since: (Integer|nil), ?full: boolish, ?output: Symbol) -> (String|File|nil)
-
-  def memsize_of: (untyped) -> Integer
-
-  def memsize_of_all: (?class) -> Integer
-
-  def reachable_objects_from: (untyped) -> ([ untyped ] | nil)
-
-  def reachable_objects_from_root: () -> Hash[String, untyped]
-
-  def trace_object_allocations_clear: () -> void
-
-  def trace_object_allocations_debug_start: () -> void
-
-  def trace_object_allocations_start: () -> void
-
-  def trace_object_allocations_stop: () -> void
+  def self?.trace_object_allocations_stop: () -> void
 end

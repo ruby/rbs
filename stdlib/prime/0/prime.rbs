@@ -145,7 +145,7 @@ class Prime
 
     include Enumerable[Integer]
 
-    attr_accessor upper_bound (): Integer?
+    attr_accessor upper_bound(): Integer?
 
     # Iterates the given block for each prime number.
     #

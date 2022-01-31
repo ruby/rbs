@@ -1,5 +1,6 @@
+# <!-- rdoc-file=ext/pty/pty.c -->
 # Creates and manages pseudo terminals (PTYs).  See also
-# http://en.wikipedia.org/wiki/Pseudo_terminal
+# https://en.wikipedia.org/wiki/Pseudo_terminal
 #
 # PTY allows you to allocate new terminals using ::open or ::spawn a new
 # terminal with a specific command.
@@ -42,18 +43,23 @@
 #
 # ## License
 #
-#     C) Copyright 1998 by Akinori Ito.
+# (c) Copyright 1998 by Akinori Ito.
 #
-#     This software may be redistributed freely for this purpose, in full
-#     or in part, provided that this entire copyright notice is included
-#     on any copies of this software and applications and derivations thereof.
+# This software may be redistributed freely for this purpose, in full or in
+# part, provided that this entire copyright notice is included on any copies of
+# this software and applications and derivations thereof.
 #
-#     This software is provided on an "as is" basis, without warranty of any
-#     kind, either expressed or implied, as to any matter including, but not
-#     limited to warranty of fitness of purpose, or merchantability, or
-#     results obtained from use of this software.
+# This software is provided on an "as is" basis, without warranty of any kind,
+# either expressed or implied, as to any matter including, but not limited to
+# warranty of fitness of purpose, or merchantability, or results obtained from
+# use of this software.
 #
 module PTY
+  # <!--
+  #   rdoc-file=ext/pty/pty.c
+  #   - PTY.check(pid, raise = false) => Process::Status or nil
+  #   - PTY.check(pid, true)          => nil or raises PTY::ChildExited
+  # -->
   # Checks the status of the child process specified by `pid`. Returns `nil` if
   # the process is still alive.
   #
@@ -68,12 +74,47 @@ module PTY
   #
   def self.check: (Integer pid, ?boolish raise) -> Process::Status?
 
+  # <!--
+  #   rdoc-file=ext/pty/pty.c
+  #   - PTY.spawn(command_line)  { |r, w, pid| ... }
+  #   - PTY.spawn(command_line)  => [r, w, pid]
+  #   - PTY.spawn(command, arguments, ...)  { |r, w, pid| ... }
+  #   - PTY.spawn(command, arguments, ...)  => [r, w, pid]
+  # -->
+  # Spawns the specified command on a newly allocated pty. You can also use the
+  # alias ::getpty.
+  #
+  # The command's controlling tty is set to the slave device of the pty and its
+  # standard input/output/error is redirected to the slave device.
+  #
+  # `command` and `command_line` are the full commands to run, given a String. Any
+  # additional `arguments` will be passed to the command.
+  #
+  # ### Return values
+  #
+  # In the non-block form this returns an array of size three, `[r, w, pid]`.
+  #
+  # In the block form these same values will be yielded to the block:
+  #
+  # `r`
+  # :   A readable IO that contains the command's standard output and standard
+  #     error
+  # `w`
+  # :   A writable IO that is the command's standard input
+  # `pid`
+  # :   The process identifier for the command.
+  #
   alias self.getpty self.spawn
 
+  # <!--
+  #   rdoc-file=ext/pty/pty.c
+  #   - PTY.open => [master_io, slave_file]
+  #   - PTY.open {|(master_io, slave_file)| ... } => block value
+  # -->
   # Allocates a pty (pseudo-terminal).
   #
-  # In the block form, yields two arguments `master_io, slave_file` and the value
-  # of the block is returned from `open`.
+  # In the block form, yields an array of two elements (`master_io, slave_file`)
+  # and the value of the block is returned from `open`.
   #
   # The IO and File are both closed after the block completes if they haven't been
   # already closed.
@@ -103,11 +144,19 @@ module PTY
   #     require 'io/console'
   #     PTY.open {|m, s|
   #       s.raw!
-  #       ...
+  #       # ...
   #     }
+  #
   def self.open: () -> [ IO, File ]
-               | [A] () { ([ IO , File ]) -> A } -> A
+               | [A] () { ([ IO, File ]) -> A } -> A
 
+  # <!--
+  #   rdoc-file=ext/pty/pty.c
+  #   - PTY.spawn(command_line)  { |r, w, pid| ... }
+  #   - PTY.spawn(command_line)  => [r, w, pid]
+  #   - PTY.spawn(command, arguments, ...)  { |r, w, pid| ... }
+  #   - PTY.spawn(command, arguments, ...)  => [r, w, pid]
+  # -->
   # Spawns the specified command on a newly allocated pty. You can also use the
   # alias ::getpty.
   #
@@ -130,6 +179,7 @@ module PTY
   # :   A writable IO that is the command's standard input
   # `pid`
   # :   The process identifier for the command.
+  #
   def self.spawn: (*String command) -> [ IO, IO, Integer ]
-                | (*String command) {([ IO , IO , Integer ]) -> void } -> void
+                | (*String command) { ([ IO, IO, Integer ]) -> void } -> void
 end

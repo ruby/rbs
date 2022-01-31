@@ -1,3 +1,4 @@
+# <!-- rdoc-file=error.c -->
 # Ruby exception objects are subclasses of Exception.  However, operating
 # systems typically report errors using plain integers. Module Errno is created
 # dynamically to map these operating system errors to Ruby classes, with each
@@ -19,16 +20,6 @@
 # available as the constants of Errno.
 #
 #     Errno.constants   #=> :E2BIG, :EACCES, :EADDRINUSE, :EADDRNOTAVAIL, ...
-# System call error module used by webrick for cross platform compatibility.
-#
-# EPROTO
-# :   protocol error
-# ECONNRESET
-# :   remote host reset the connection request
-# ECONNABORTED
-# :   Client sent TCP reset (RST) before server has accepted the connection
-#     requested by client.
-#
 #
 module Errno
 end

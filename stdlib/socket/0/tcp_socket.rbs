@@ -1,3 +1,4 @@
+# <!-- rdoc-file=ext/socket/tcpsocket.c -->
 # TCPSocket represents a TCP/IP client socket.
 #
 # A simple client may look like:
@@ -11,7 +12,12 @@
 #     end
 #
 #     s.close             # close socket when done
+#
 class TCPSocket < IPSocket
+  # <!--
+  #   rdoc-file=ext/socket/tcpsocket.c
+  #   - TCPSocket.gethostbyname(hostname) => [official_hostname, alias_hostnames, address_family, *address_list]
+  # -->
   # Use Addrinfo.getaddrinfo instead. This method is deprecated for the following
   # reasons:
   #
@@ -27,9 +33,14 @@ class TCPSocket < IPSocket
   #     TCPSocket.gethostbyname("localhost")
   #     #=> ["localhost", ["hal"], 2, "127.0.0.1"]
   #
-  def self.gethostbyname: (String host) -> [String, Array[String], Integer, String]
+  def self.gethostbyname: (String host) -> [ String, Array[String], Integer, String ]
 
   private
 
+  # <!--
+  #   rdoc-file=lib/resolv-replace.rb
+  #   - new(host, serv, *rest)
+  # -->
+  #
   def initialize: (String remote_host, Integer remote_port, ?String local_host, ?Integer local_port) -> untyped
 end

@@ -1,3 +1,4 @@
+# <!-- rdoc-file=lib/benchmark.rb -->
 # The Benchmark module provides methods to measure and report the time used to
 # execute Ruby code.
 #
@@ -101,13 +102,19 @@
 #         >total:   2.880000   0.000000   2.880000 (  2.883764)
 #         >avg:     0.960000   0.000000   0.960000 (  0.961255)
 #
-#
 module Benchmark
+  # <!--
+  #   rdoc-file=lib/benchmark.rb
+  #   - benchmark(caption = "", label_width = nil, format = nil, *labels) { |report| ... }
+  # -->
   # Invokes the block with a Benchmark::Report object, which may be used to
   # collect and report on the results of individual benchmark tests. Reserves
   # `label_width` leading spaces for labels on each line. Prints `caption` at the
-  # top of the report, and uses `format` to format each line. Returns an array of
-  # Benchmark::Tms objects.
+  # top of the report, and uses `format` to format each line. (Note: `caption`
+  # must contain a terminating newline character, see the default
+  # Benchmark::Tms::CAPTION for an example.)
+  #
+  # Returns an array of Benchmark::Tms objects.
   #
   # If the block returns an array of Benchmark::Tms objects, these will be used to
   # format additional lines of output. If `labels` parameter are given, these are
@@ -141,6 +148,10 @@ module Benchmark
   #
   def self?.benchmark: (String caption, ?Integer? label_width, ?String? format, *String labels) { (Report report) -> (Array[Tms] | void) } -> Array[Tms]
 
+  # <!--
+  #   rdoc-file=lib/benchmark.rb
+  #   - bm(label_width = 0, *labels) { |report| ... }
+  # -->
   # A simple interface to the #benchmark method, #bm generates sequential reports
   # with labels. `label_width` and `labels` parameters have the same meaning as
   # for #benchmark.
@@ -163,6 +174,10 @@ module Benchmark
   #
   def self?.bm: (?Integer label_width, *String labels) { (Report report) -> void } -> Array[Tms]
 
+  # <!--
+  #   rdoc-file=lib/benchmark.rb
+  #   - bmbm(width = 0) { |job| ... }
+  # -->
   # Sometimes benchmark results are skewed because code executed earlier
   # encounters different garbage collection overheads than that run later. #bmbm
   # attempts to minimize this effect by running the tests twice, the first time as
@@ -200,6 +215,10 @@ module Benchmark
   #
   def self?.bmbm: (?Integer width) { (Job job) -> void } -> Array[Tms]
 
+  # <!--
+  #   rdoc-file=lib/benchmark.rb
+  #   - measure(label = "") { || ... }
+  # -->
   # Returns the time used to execute the given block as a Benchmark::Tms object.
   # Takes `label` option.
   #
@@ -218,16 +237,22 @@ module Benchmark
   #
   def self?.measure: (?String label) { () -> void } -> Tms
 
+  # <!--
+  #   rdoc-file=lib/benchmark.rb
+  #   - realtime() { || ... }
+  # -->
   # Returns the elapsed real time used to execute the given block.
   #
   def self?.realtime: () { () -> void } -> Float
 
   BENCHMARK_VERSION: String
 
+  # <!-- rdoc-file=lib/benchmark.rb -->
   # The default caption string (heading above the output times).
   #
   CAPTION: String
 
+  # <!-- rdoc-file=lib/benchmark.rb -->
   # The default format string used to display times.  See also
   # Benchmark::Tms#format.
   #
@@ -260,50 +285,81 @@ module Benchmark
     alias report item
   end
 
+  # <!-- rdoc-file=lib/benchmark.rb -->
   # A data object, representing the times associated with a benchmark measurement.
   #
   class Tms
+    # <!--
+    #   rdoc-file=lib/benchmark.rb
+    #   - *(x)
+    # -->
     # Returns a new Tms object obtained by memberwise multiplication of the
     # individual times for this Tms object by `x`.
     #
     def *: (untyped x) -> untyped
 
+    # <!--
+    #   rdoc-file=lib/benchmark.rb
+    #   - +(other)
+    # -->
     # Returns a new Tms object obtained by memberwise summation of the individual
     # times for this Tms object with those of the `other` Tms object. This method
     # and #/() are useful for taking statistics.
     #
     def +: (untyped other) -> untyped
 
+    # <!--
+    #   rdoc-file=lib/benchmark.rb
+    #   - -(other)
+    # -->
     # Returns a new Tms object obtained by memberwise subtraction of the individual
     # times for the `other` Tms object from those of this Tms object.
     #
     def -: (untyped other) -> untyped
 
+    # <!--
+    #   rdoc-file=lib/benchmark.rb
+    #   - /(x)
+    # -->
     # Returns a new Tms object obtained by memberwise division of the individual
     # times for this Tms object by `x`. This method and #+() are useful for taking
     # statistics.
     #
     def /: (untyped x) -> untyped
 
+    # <!--
+    #   rdoc-file=lib/benchmark.rb
+    #   - add() { || ... }
+    # -->
     # Returns a new Tms object whose times are the sum of the times for this Tms
     # object, plus the time required to execute the code block (`blk`).
     #
     def add: () { (*untyped) -> untyped } -> untyped
 
+    # <!--
+    #   rdoc-file=lib/benchmark.rb
+    #   - add!(&blk)
+    # -->
     # An in-place version of #add. Changes the times of this Tms object by making it
     # the sum of the times for this Tms object, plus the time required to execute
     # the code block (`blk`).
     #
     def add!: () { (*untyped) -> untyped } -> untyped
 
+    # <!-- rdoc-file=lib/benchmark.rb -->
     # System CPU time of children
     #
     def cstime: () -> Float
 
+    # <!-- rdoc-file=lib/benchmark.rb -->
     # User CPU time of children
     #
     def cutime: () -> Float
 
+    # <!--
+    #   rdoc-file=lib/benchmark.rb
+    #   - format(format = nil, *args)
+    # -->
     # Returns the contents of this Tms object as a formatted string, according to a
     # `format` string like that passed to Kernel.format. In addition, #format
     # accepts the following extensions:
@@ -331,40 +387,55 @@ module Benchmark
     #
     def format: (?String format, *untyped args) -> String
 
+    # <!-- rdoc-file=lib/benchmark.rb -->
     # Label
     #
     def label: () -> String
 
+    # <!-- rdoc-file=lib/benchmark.rb -->
     # Elapsed real time
     #
     def real: () -> Float
 
+    # <!-- rdoc-file=lib/benchmark.rb -->
     # System CPU time
     #
     def stime: () -> Float
 
+    # <!--
+    #   rdoc-file=lib/benchmark.rb
+    #   - to_a()
+    # -->
     # Returns a new 6-element array, consisting of the label, user CPU time, system
     # CPU time, children's user CPU time, children's system CPU time and elapsed
     # real time.
     #
     def to_a: () -> untyped
 
+    # <!--
+    #   rdoc-file=lib/benchmark.rb
+    #   - to_s()
+    # -->
     # Same as #format.
     #
     def to_s: () -> String
 
+    # <!-- rdoc-file=lib/benchmark.rb -->
     # Total time, that is `utime` + `stime` + `cutime` + `cstime`
     #
     def total: () -> Float
 
+    # <!-- rdoc-file=lib/benchmark.rb -->
     # User CPU time
     #
     def utime: () -> Float
 
+    # <!-- rdoc-file=lib/benchmark.rb -->
     # Default caption, see also Benchmark::CAPTION
     #
     CAPTION: String
 
+    # <!-- rdoc-file=lib/benchmark.rb -->
     # Default format string, see also Benchmark::FORMAT
     #
     FORMAT: String

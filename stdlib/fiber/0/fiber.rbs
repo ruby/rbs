@@ -1,117 +1,99 @@
-# Fibers are primitives for implementing light weight cooperative concurrency in
-# Ruby. Basically they are a means of creating code blocks that can be paused
-# and resumed, much like threads. The main difference is that they are never
-# preempted and that the scheduling must be done by the programmer and not the
-# VM.
-#
-# As opposed to other stackless light weight concurrency models, each fiber
-# comes with a stack.  This enables the fiber to be paused from deeply nested
-# function calls within the fiber block.  See the ruby(1) manpage to configure
-# the size of the fiber stack(s).
-#
-# When a fiber is created it will not run automatically. Rather it must be
-# explicitly asked to run using the Fiber#resume method. The code running inside
-# the fiber can give up control by calling Fiber.yield in which case it yields
-# control back to caller (the caller of the Fiber#resume).
-#
-# Upon yielding or termination the Fiber returns the value of the last executed
-# expression
-#
-# For instance:
-#
-#     fiber = Fiber.new do
-#       Fiber.yield 1
-#       2
-#     end
-#
-#     puts fiber.resume
-#     puts fiber.resume
-#     puts fiber.resume
-#
-# *produces*
-#
-#     1
-#     2
-#     FiberError: dead fiber called
-#
-# The Fiber#resume method accepts an arbitrary number of parameters, if it is
-# the first call to #resume then they will be passed as block arguments.
-# Otherwise they will be the return value of the call to Fiber.yield
-#
-# Example:
-#
-#     fiber = Fiber.new do |first|
-#       second = Fiber.yield first + 2
-#     end
-#
-#     puts fiber.resume 10
-#     puts fiber.resume 1_000_000
-#     puts fiber.resume "The fiber will be dead before I can cause trouble"
-#
-# *produces*
-#
-#     12
-#     1000000
-#     FiberError: dead fiber called
-#
+%a{annotate:rdoc:skip}
 class Fiber
-  # Returns the current fiber. You need to `require 'fiber'` before using this
-  # method. If you are not running in the context of a fiber this method will
-  # return the root fiber.
+  # <!--
+  #   rdoc-file=cont.c
+  #   - Fiber.current -> fiber
+  # -->
+  # Returns the current fiber. If you are not running in the context of a fiber
+  # this method will return the root fiber.
   #
   def self.current: () -> Fiber
 
   public
 
+  # <!--
+  #   rdoc-file=cont.c
+  #   - fiber.alive? -> true or false
+  # -->
   # Returns true if the fiber can still be resumed (or transferred to). After
-  # finishing execution of the fiber block this method will always return false.
-  # You need to `require 'fiber'` before using this method.
+  # finishing execution of the fiber block this method will always return `false`.
   #
   def alive?: () -> bool
 
+  # <!--
+  #   rdoc-file=cont.c
+  #   - fiber.transfer(args, ...) -> obj
+  # -->
   # Transfer control to another fiber, resuming it from where it last stopped or
   # starting it if it was not resumed before. The calling fiber will be suspended
-  # much like in a call to Fiber.yield. You need to `require 'fiber'` before using
-  # this method.
+  # much like in a call to Fiber.yield.
   #
-  # The fiber which receives the transfer call is treats it much like a resume
-  # call. Arguments passed to transfer are treated like those passed to resume.
+  # The fiber which receives the transfer call treats it much like a resume call.
+  # Arguments passed to transfer are treated like those passed to resume.
   #
-  # You cannot call `resume` on a fiber that has been transferred to. If you call
-  # `transfer` on a fiber, and later call `resume` on the the fiber, a
-  # `FiberError` will be raised. Once you call `transfer` on a fiber, the only way
-  # to resume processing the fiber is to call `transfer` on it again.
+  # The two style of control passing to and from fiber (one is #resume and
+  # Fiber::yield, another is #transfer to and from fiber) can't be freely mixed.
+  #
+  # *   If the Fiber's lifecycle had started with transfer, it will never be able
+  #     to yield or be resumed control passing, only finish or transfer back. (It
+  #     still can resume other fibers that are allowed to be resumed.)
+  # *   If the Fiber's lifecycle had started with resume, it can yield or transfer
+  #     to another Fiber, but can receive control back only the way compatible
+  #     with the way it was given away: if it had transferred, it only can be
+  #     transferred back, and if it had yielded, it only can be resumed back.
+  #     After that, it again can transfer or yield.
+  #
+  #
+  # If those rules are broken FiberError is raised.
+  #
+  # For an individual Fiber design, yield/resume is easier to use (the Fiber just
+  # gives away control, it doesn't need to think about who the control is given
+  # to), while transfer is more flexible for complex cases, allowing to build
+  # arbitrary graphs of Fibers dependent on each other.
   #
   # Example:
   #
-  #     fiber1 = Fiber.new do
-  #       puts "In Fiber 1"
-  #       Fiber.yield
-  #       puts "In Fiber 1 again"
-  #     end
+  #     manager = nil # For local var to be visible inside worker block
   #
-  #     fiber2 = Fiber.new do
-  #       puts "In Fiber 2"
-  #       fiber1.transfer
-  #       puts "Never see this message"
-  #     end
+  #     # This fiber would be started with transfer
+  #     # It can't yield, and can't be resumed
+  #     worker = Fiber.new { |work|
+  #       puts "Worker: starts"
+  #       puts "Worker: Performed #{work.inspect}, transferring back"
+  #       # Fiber.yield     # this would raise FiberError: attempt to yield on a not resumed fiber
+  #       # manager.resume  # this would raise FiberError: attempt to resume a resumed fiber (double resume)
+  #       manager.transfer(work.capitalize)
+  #     }
   #
-  #     fiber3 = Fiber.new do
-  #       puts "In Fiber 3"
-  #     end
+  #     # This fiber would be started with resume
+  #     # It can yield or transfer, and can be transferred
+  #     # back or resumed
+  #     manager = Fiber.new {
+  #       puts "Manager: starts"
+  #       puts "Manager: transferring 'something' to worker"
+  #       result = worker.transfer('something')
+  #       puts "Manager: worker returned #{result.inspect}"
+  #       # worker.resume    # this would raise FiberError: attempt to resume a transferring fiber
+  #       Fiber.yield        # this is OK, the fiber transferred from and to, now it can yield
+  #       puts "Manager: finished"
+  #     }
   #
-  #     fiber2.resume
-  #     fiber3.resume
-  #     fiber1.resume rescue (p $!)
-  #     fiber1.transfer
+  #     puts "Starting the manager"
+  #     manager.resume
+  #     puts "Resuming the manager"
+  #     # manager.transfer  # this would raise FiberError: attempt to transfer to a yielding fiber
+  #     manager.resume
   #
   # *produces*
   #
-  #     In Fiber 2
-  #     In Fiber 1
-  #     In Fiber 3
-  #     #<FiberError: cannot resume transferred Fiber>
-  #     In Fiber 1 again
+  #     Starting the manager
+  #     Manager: starts
+  #     Manager: transferring 'something' to worker
+  #     Worker: starts
+  #     Worker: Performed "something", transferring back
+  #     Manager: worker returned "Something"
+  #     Resuming the manager
+  #     Manager: finished
   #
   def transfer: (*untyped) -> untyped
 end

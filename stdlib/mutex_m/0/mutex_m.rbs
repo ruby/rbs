@@ -1,3 +1,4 @@
+# <!-- rdoc-file=lib/mutex_m.rb -->
 # # mutex_m.rb
 #
 # When 'mutex_m' is required, any object that extends or includes Mutex_m will
@@ -37,34 +38,62 @@ module Mutex_m
 
   def mu_extended: () -> untyped
 
-  # See Mutex#lock
+  # <!--
+  #   rdoc-file=lib/mutex_m.rb
+  #   - mu_lock()
+  # -->
+  # See Thread::Mutex#lock
   #
   def mu_lock: () -> Thread::Mutex
 
-  # See Mutex#locked?
+  # <!--
+  #   rdoc-file=lib/mutex_m.rb
+  #   - mu_locked?()
+  # -->
+  # See Thread::Mutex#locked?
   #
   def mu_locked?: () -> bool
 
-  # See Mutex#synchronize
+  # <!--
+  #   rdoc-file=lib/mutex_m.rb
+  #   - mu_synchronize(&block)
+  # -->
+  # See Thread::Mutex#synchronize
   #
   def mu_synchronize: [T] () { () -> T } -> T
 
-  # See Mutex#try_lock
+  # <!--
+  #   rdoc-file=lib/mutex_m.rb
+  #   - mu_try_lock()
+  # -->
+  # See Thread::Mutex#try_lock
   #
   def mu_try_lock: () -> bool
 
-  # See Mutex#unlock
+  # <!--
+  #   rdoc-file=lib/mutex_m.rb
+  #   - mu_unlock()
+  # -->
+  # See Thread::Mutex#unlock
   #
   def mu_unlock: () -> Thread::Mutex
 
-  # See Mutex#sleep
+  # <!--
+  #   rdoc-file=lib/mutex_m.rb
+  #   - sleep(timeout = nil)
+  # -->
+  # See Thread::Mutex#sleep
   #
   def sleep: (?Numeric timeout) -> Integer?
 
   alias locked? mu_locked?
+
   alias lock mu_lock
+
   alias unlock mu_unlock
+
   alias try_lock mu_try_lock
+
   alias synchronize mu_synchronize
 
   private

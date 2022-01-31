@@ -1,7 +1,13 @@
+# <!-- rdoc-file=ext/socket/udpsocket.c -->
 # UDPSocket represents a UDP/IP socket.
+#
 class UDPSocket < IPSocket
   public
 
+  # <!--
+  #   rdoc-file=ext/socket/udpsocket.c
+  #   - udpsocket.bind(host, port) #=> 0
+  # -->
   # Binds *udpsocket* to *host*:*port*.
   #
   #     u1 = UDPSocket.new
@@ -11,6 +17,10 @@ class UDPSocket < IPSocket
   #
   def bind: (String host, Integer port) -> void
 
+  # <!--
+  #   rdoc-file=ext/socket/udpsocket.c
+  #   - udpsocket.connect(host, port) => 0
+  # -->
   # Connects *udpsocket* to *host*:*port*.
   #
   # This makes possible to send without destination address.
@@ -24,6 +34,10 @@ class UDPSocket < IPSocket
   #
   def connect: (String host, Integer port) -> void
 
+  # <!--
+  #   rdoc-file=ext/socket/lib/socket.rb
+  #   - udpsocket.recvfrom_nonblock(maxlen [, flags[, outbuf [, options]]]) => [mesg, sender_inet_addr]
+  # -->
   # Receives up to *maxlen* bytes from `udpsocket` using recvfrom(2) after
   # O_NONBLOCK is set for the underlying file descriptor. *flags* is zero or more
   # of the `MSG_` options. The first element of the results, *mesg*, is the data
@@ -73,9 +87,14 @@ class UDPSocket < IPSocket
   # ### See
   # *   Socket#recvfrom
   #
-  #
-  def recvfrom_nonblock: (Integer len, ?Integer flag, ?String outbuf, ?exception: boolish) -> [String, [String, Integer, String, String]]
+  def recvfrom_nonblock: (Integer len, ?Integer flag, ?String outbuf, ?exception: boolish) -> [ String, [ String, Integer, String, String ] ]
 
+  # <!--
+  #   rdoc-file=ext/socket/udpsocket.c
+  #   - udpsocket.send(mesg, flags, host, port)  => numbytes_sent
+  #   - udpsocket.send(mesg, flags, sockaddr_to) => numbytes_sent
+  #   - udpsocket.send(mesg, flags)              => numbytes_sent
+  # -->
   # Sends *mesg* via *udpsocket*.
   #
   # *flags* should be a bitwise OR of Socket::MSG_* constants.
@@ -97,6 +116,10 @@ class UDPSocket < IPSocket
 
   def __recvfrom_nonblock: (untyped, untyped, untyped, untyped) -> untyped
 
+  # <!--
+  #   rdoc-file=ext/socket/udpsocket.c
+  #   - UDPSocket.new([address_family]) => socket
+  # -->
   # Creates a new UDPSocket object.
   #
   # *address_family* should be an integer, a string or a symbol: Socket::AF_INET,

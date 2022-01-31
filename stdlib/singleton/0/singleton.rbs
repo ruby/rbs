@@ -1,3 +1,4 @@
+# <!-- rdoc-file=lib/singleton.rb -->
 # The Singleton module implements the Singleton pattern.
 #
 # ## Usage
@@ -88,21 +89,40 @@
 #     p a == b  #  => true
 #     p a.keep  #  => "keep this"
 #     p a.strip #  => nil
+#
 module Singleton
   def self.__init__: (Class klass) -> Class
 
+  # <!--
+  #   rdoc-file=lib/singleton.rb
+  #   - instance()
+  # -->
+  # Returns the singleton instance.
+  #
   def self.instance: () -> instance
 
   public
 
+  # <!--
+  #   rdoc-file=lib/singleton.rb
+  #   - _dump(depth = -1)
+  # -->
   # By default, do not retain any state when marshalling.
   #
   def _dump: (?Integer depth) -> String
 
+  # <!--
+  #   rdoc-file=lib/singleton.rb
+  #   - clone()
+  # -->
   # Raises a TypeError to prevent cloning.
   #
   def clone: () -> bot
 
+  # <!--
+  #   rdoc-file=lib/singleton.rb
+  #   - dup()
+  # -->
   # Raises a TypeError to prevent duping.
   #
   def dup: () -> bot
