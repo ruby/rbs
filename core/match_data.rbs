@@ -1,3 +1,4 @@
+# <!-- rdoc-file=re.c -->
 # MatchData encapsulates the result of matching a Regexp against string. It is
 # returned by Regexp#match and String#match, and also stored in a global
 # variable returned by Regexp.last_match.
@@ -34,11 +35,11 @@
 # global variables:
 #
 # *   `$~` is Regexp.last_match;
-# *   `$&` is [Regexp.last_match](0);
-# *   `$1`, `$2`, and so on are [Regexp.last_match](i) (captures by number);
+# *   `$&` is Regexp.last_match`[ 0 ]`;
+# *   `$1`, `$2`, and so on are Regexp.last_match`[ i ]` (captures by number);
 # *   `$`` is Regexp.last_match`.pre_match`;
 # *   `$'` is Regexp.last_match`.post_match`;
-# *   `$+` is [Regexp.last_match](-1) (the last capture).
+# *   `$+` is Regexp.last_match`[ -1 ]` (the last capture).
 #
 #
 # See also "Special global variables" section in Regexp documentation.
@@ -46,11 +47,19 @@
 class MatchData
   public
 
+  # <!-- rdoc-file=re.c -->
   # Equality---Two matchdata are equal if their target strings, patterns, and
   # matched positions are identical.
   #
   def ==: (untyped other) -> bool
 
+  # <!--
+  #   rdoc-file=re.c
+  #   - mtch[i]               -> str or nil
+  #   - mtch[start, length]   -> array
+  #   - mtch[range]           -> array
+  #   - mtch[name]            -> str or nil
+  # -->
   # Match Reference -- MatchData acts as an array, and may be accessed using the
   # normal array indexing techniques.  `mtch[0]` is equivalent to the special
   # variable `$&`, and returns the entire matched string.  `mtch[1]`, `mtch[2]`,
@@ -74,6 +83,10 @@ class MatchData
         | (::Range[Integer] range) -> ::Array[String?]
         | (String | Symbol name) -> String?
 
+  # <!--
+  #   rdoc-file=re.c
+  #   - mtch.begin(n)   -> integer
+  # -->
   # Returns the offset of the start of the *n*th element of the match array in the
   # string. *n* can be a string or symbol to reference a named capture.
   #
@@ -87,6 +100,10 @@ class MatchData
   #
   def begin: (Integer | String | Symbol n_or_name) -> Integer?
 
+  # <!--
+  #   rdoc-file=re.c
+  #   - mtch.captures   -> array
+  # -->
   # Returns the array of captures; equivalent to `mtch.to_a[1..-1]`.
   #
   #     f1,f2,f3,f4 = /(.)(.)(\d+)(\d)/.match("THX1138.").captures
@@ -97,6 +114,10 @@ class MatchData
   #
   def captures: () -> ::Array[String?]
 
+  # <!--
+  #   rdoc-file=re.c
+  #   - mtch.end(n)   -> integer
+  # -->
   # Returns the offset of the character immediately following the end of the *n*th
   # element of the match array in the string. *n* can be a string or symbol to
   # reference a named capture.
@@ -109,13 +130,22 @@ class MatchData
   #     p m.end(:foo)    #=> 1
   #     p m.end(:bar)    #=> 3
   #
-  def `end`: (Integer | String | Symbol n_or_name) -> Integer?
+  def end: (Integer | String | Symbol n_or_name) -> Integer?
 
+  # <!--
+  #   rdoc-file=re.c
+  #   - mtch == mtch2   -> true or false
+  #   - mtch.eql?(mtch2)   -> true or false
+  # -->
   # Equality---Two matchdata are equal if their target strings, patterns, and
   # matched positions are identical.
   #
   def eql?: (untyped other) -> bool
 
+  # <!--
+  #   rdoc-file=re.c
+  #   - mtch.hash   -> integer
+  # -->
   # Produce a hash based on the target string, regexp and matched positions of
   # this matchdata.
   #
@@ -123,6 +153,10 @@ class MatchData
   #
   def hash: () -> Integer
 
+  # <!--
+  #   rdoc-file=re.c
+  #   - mtch.inspect   -> str
+  # -->
   # Returns a printable version of *mtch*.
   #
   #     puts /.$/.match("foo").inspect
@@ -139,6 +173,7 @@ class MatchData
   #
   def inspect: () -> String
 
+  # <!-- rdoc-file=re.c -->
   # Returns the number of elements in the match array.
   #
   #     m = /(.)(.)(\d+)(\d)/.match("THX1138.")
@@ -147,6 +182,10 @@ class MatchData
   #
   def length: () -> Integer
 
+  # <!--
+  #   rdoc-file=re.c
+  #   - mtch.named_captures -> hash
+  # -->
   # Returns a Hash using named capture.
   #
   # A key of the hash is a name of the named captures. A value of the hash is a
@@ -166,8 +205,12 @@ class MatchData
   #
   def named_captures: () -> ::Hash[String, String?]
 
-  # Returns a list of names of captures as an array of strings. It is same as
-  # mtch.regexp.names.
+  # <!--
+  #   rdoc-file=re.c
+  #   - mtch.names   -> [name1, name2, ...]
+  # -->
+  # Returns a list of names of captures as an array of strings. This is the same
+  # as mtch.regexp.names.
   #
   #     /(?<foo>.)(?<bar>.)(?<baz>.)/.match("hoge").names
   #     #=> ["foo", "bar", "baz"]
@@ -177,6 +220,10 @@ class MatchData
   #
   def names: () -> ::Array[String]
 
+  # <!--
+  #   rdoc-file=re.c
+  #   - mtch.offset(n)   -> array
+  # -->
   # Returns a two-element array containing the beginning and ending offsets of the
   # *n*th match. *n* can be a string or symbol to reference a named capture.
   #
@@ -190,6 +237,10 @@ class MatchData
   #
   def offset: (Integer | Symbol | String n_or_name) -> ([ Integer, Integer ] | [ nil, nil ])
 
+  # <!--
+  #   rdoc-file=re.c
+  #   - mtch.post_match   -> str
+  # -->
   # Returns the portion of the original string after the current match. Equivalent
   # to the special variable `$'`.
   #
@@ -198,6 +249,10 @@ class MatchData
   #
   def post_match: () -> String
 
+  # <!--
+  #   rdoc-file=re.c
+  #   - mtch.pre_match   -> str
+  # -->
   # Returns the portion of the original string before the current match.
   # Equivalent to the special variable `$``.
   #
@@ -206,6 +261,10 @@ class MatchData
   #
   def pre_match: () -> String
 
+  # <!--
+  #   rdoc-file=re.c
+  #   - mtch.regexp   -> regexp
+  # -->
   # Returns the regexp.
   #
   #     m = /a.*b/.match("abc")
@@ -213,6 +272,11 @@ class MatchData
   #
   def regexp: () -> Regexp
 
+  # <!--
+  #   rdoc-file=re.c
+  #   - mtch.length   -> integer
+  #   - mtch.size     -> integer
+  # -->
   # Returns the number of elements in the match array.
   #
   #     m = /(.)(.)(\d+)(\d)/.match("THX1138.")
@@ -221,6 +285,10 @@ class MatchData
   #
   def size: () -> Integer
 
+  # <!--
+  #   rdoc-file=re.c
+  #   - mtch.string   -> str
+  # -->
   # Returns a frozen copy of the string passed in to `match`.
   #
   #     m = /(.)(.)(\d+)(\d)/.match("THX1138.")
@@ -228,6 +296,10 @@ class MatchData
   #
   def string: () -> String
 
+  # <!--
+  #   rdoc-file=re.c
+  #   - mtch.to_a   -> anArray
+  # -->
   # Returns the array of matches.
   #
   #     m = /(.)(.)(\d+)(\d)/.match("THX1138.")
@@ -245,6 +317,10 @@ class MatchData
   #
   def to_a: () -> ::Array[String?]
 
+  # <!--
+  #   rdoc-file=re.c
+  #   - mtch.to_s   -> str
+  # -->
   # Returns the entire matched string.
   #
   #     m = /(.)(.)(\d+)(\d)/.match("THX1138.")
@@ -252,12 +328,17 @@ class MatchData
   #
   def to_s: () -> String
 
+  # <!--
+  #   rdoc-file=re.c
+  #   - mtch.values_at(index, ...)   -> array
+  # -->
   # Uses each *index* to access the matching values, returning an array of the
   # corresponding matches.
   #
   #     m = /(.)(.)(\d+)(\d)/.match("THX1138: The Movie")
   #     m.to_a               #=> ["HX1138", "H", "X", "113", "8"]
   #     m.values_at(0, 2, -2)   #=> ["HX1138", "X", "113"]
+  #     m.values_at(1..2, -1)   #=> ["H", "X", "8"]
   #
   #     m = /(?<a>\d+) *(?<op>[+\-*\/]) *(?<b>\d+)/.match("1 + 2")
   #     m.to_a               #=> ["1 + 2", "1", "+", "2"]

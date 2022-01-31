@@ -1,8 +1,4 @@
-#
-#
-#     Windows NT
-#
-#
+# <!-- rdoc-file=lib/resolv.rb -->
 # Resolv is a thread-aware DNS resolver library written in Ruby.  Resolv can
 # handle multiple DNS requests concurrently without blocking the entire Ruby
 # interpreter.
@@ -28,71 +24,128 @@
 # *   NIS is not supported.
 # *   /etc/nsswitch.conf is not supported.
 #
+%a{annotate:rdoc:source:from=lib/resolv.rb}
 class Resolv
-
+  # <!--
+  #   rdoc-file=lib/resolv.rb
+  #   - each_address(name, &block)
+  # -->
   # Iterates over all IP addresses for `name`.
   #
   def self.each_address: (String name) { (String) -> void } -> void
 
+  # <!--
+  #   rdoc-file=lib/resolv.rb
+  #   - each_name(address, &proc)
+  # -->
   # Iterates over all hostnames for `address`.
   #
   def self.each_name: (String address) { (String) -> void } -> void
 
+  # <!--
+  #   rdoc-file=lib/resolv.rb
+  #   - getaddress(name)
+  # -->
   # Looks up the first IP address for `name`.
   #
   def self.getaddress: (String name) -> String
 
+  # <!--
+  #   rdoc-file=lib/resolv.rb
+  #   - getaddresses(name)
+  # -->
   # Looks up all IP address for `name`.
   #
   def self.getaddresses: (String name) -> Array[String]
 
+  # <!--
+  #   rdoc-file=lib/resolv.rb
+  #   - getname(address)
+  # -->
   # Looks up the hostname of `address`.
   #
   def self.getname: (String address) -> String
 
+  # <!--
+  #   rdoc-file=lib/resolv.rb
+  #   - getnames(address)
+  # -->
   # Looks up all hostnames for `address`.
   #
   def self.getnames: (String address) -> Array[String]
 
   public
 
+  # <!--
+  #   rdoc-file=lib/resolv.rb
+  #   - each_address(name) { |name| ... }
+  # -->
   # Iterates over all IP addresses for `name`.
   #
   def each_address: (String name) { (String) -> void } -> void
 
+  # <!--
+  #   rdoc-file=lib/resolv.rb
+  #   - each_name(address) { |name| ... }
+  # -->
   # Iterates over all hostnames for `address`.
   #
   def each_name: (String name) { (String) -> void } -> void
 
+  # <!--
+  #   rdoc-file=lib/resolv.rb
+  #   - getaddress(name)
+  # -->
   # Looks up the first IP address for `name`.
   #
   def getaddress: (String name) -> String
 
+  # <!--
+  #   rdoc-file=lib/resolv.rb
+  #   - getaddresses(name)
+  # -->
   # Looks up all IP address for `name`.
   #
   def getaddresses: (String name) -> Array[String]
 
+  # <!--
+  #   rdoc-file=lib/resolv.rb
+  #   - getname(address)
+  # -->
   # Looks up the hostname of `address`.
   #
   def getname: (String address) -> String
 
+  # <!--
+  #   rdoc-file=lib/resolv.rb
+  #   - getnames(address)
+  # -->
   # Looks up all hostnames for `address`.
   #
   def getnames: (String address) -> Array[String]
 
   private
 
+  # <!--
+  #   rdoc-file=lib/resolv.rb
+  #   - new(resolvers=[Hosts.new, DNS.new])
+  # -->
   # Creates a new Resolv using `resolvers`.
   #
-  def initialize: (?(Resolv::Hosts | Resolv::DNS) resolvers) -> untyped
+  def initialize: (?Resolv::Hosts | Resolv::DNS resolvers) -> untyped
 end
 
+# <!-- rdoc-file=lib/resolv.rb -->
 # Address Regexp to use for matching IP addresses.
+#
 Resolv::AddressRegex: Regexp
 
+# <!-- rdoc-file=lib/resolv.rb -->
 # Default resolver to use for Resolv class methods.
+#
 Resolv::DefaultResolver: Resolv
 
+# <!-- rdoc-file=lib/resolv.rb -->
 # Resolv::DNS is a DNS stub resolver.
 #
 # Information taken from the following places:
@@ -113,6 +166,10 @@ class Resolv::DNS
 
   def self.free_request_id: (String host, Integer port, Integer id) -> void
 
+  # <!--
+  #   rdoc-file=lib/resolv.rb
+  #   - open(*args) { |dns| ... }
+  # -->
   # Creates a new DNS resolver.  See Resolv::DNS.new for argument details.
   #
   # Yields the created DNS resolver to the block, if given, otherwise returns it.
@@ -124,10 +181,18 @@ class Resolv::DNS
 
   public
 
+  # <!--
+  #   rdoc-file=lib/resolv.rb
+  #   - close()
+  # -->
   # Closes the DNS resolver.
   #
   def close: () -> untyped
 
+  # <!--
+  #   rdoc-file=lib/resolv.rb
+  #   - each_address(name) { |address| ... }
+  # -->
   # Iterates over all IP addresses for `name` retrieved from the DNS resolver.
   #
   # `name` can be a Resolv::DNS::Name or a String.  Retrieved addresses will be a
@@ -135,6 +200,10 @@ class Resolv::DNS
   #
   def each_address: (dns_name name) { (ip_address) -> void } -> void
 
+  # <!--
+  #   rdoc-file=lib/resolv.rb
+  #   - each_name(address) { |name| ... }
+  # -->
   # Iterates over all hostnames for `address` retrieved from the DNS resolver.
   #
   # `address` must be a Resolv::IPv4, Resolv::IPv6 or a String.  Retrieved names
@@ -142,6 +211,10 @@ class Resolv::DNS
   #
   def each_name: (ip_address | dns_name address) { (Resolv::DNS::Name) -> void } -> void
 
+  # <!--
+  #   rdoc-file=lib/resolv.rb
+  #   - each_resource(name, typeclass, &proc)
+  # -->
   # Iterates over all `typeclass` DNS resources for `name`.  See #getresource for
   # argument details.
   #
@@ -149,8 +222,17 @@ class Resolv::DNS
 
   def extract_resources: (Resolv::DNS::Message msg, dns_name name, singleton(Resolv::DNS::Query) typeclass) { (Resolv::DNS::Resource) -> void } -> void
 
+  # <!--
+  #   rdoc-file=lib/resolv.rb
+  #   - fetch_resource(name, typeclass) { |reply, reply_name| ... }
+  # -->
+  #
   def fetch_resource: (Resolv::DNS::Name name, singleton(Resolv::DNS::Query) typeclass) { (Resolv::DNS::Message, Resolv::DNS::Name) -> void } -> void
 
+  # <!--
+  #   rdoc-file=lib/resolv.rb
+  #   - getaddress(name)
+  # -->
   # Gets the IP address of `name` from the DNS resolver.
   #
   # `name` can be a Resolv::DNS::Name or a String.  Retrieved address will be a
@@ -158,6 +240,10 @@ class Resolv::DNS
   #
   def getaddress: (dns_name name) -> ip_address
 
+  # <!--
+  #   rdoc-file=lib/resolv.rb
+  #   - getaddresses(name)
+  # -->
   # Gets all IP addresses for `name` from the DNS resolver.
   #
   # `name` can be a Resolv::DNS::Name or a String.  Retrieved addresses will be a
@@ -165,6 +251,10 @@ class Resolv::DNS
   #
   def getaddresses: (dns_name name) -> Array[ip_address]
 
+  # <!--
+  #   rdoc-file=lib/resolv.rb
+  #   - getname(address)
+  # -->
   # Gets the hostname for `address` from the DNS resolver.
   #
   # `address` must be a Resolv::IPv4, Resolv::IPv6 or a String.  Retrieved name
@@ -172,6 +262,10 @@ class Resolv::DNS
   #
   def getname: (ip_address | dns_name address) -> Resolv::DNS::Name
 
+  # <!--
+  #   rdoc-file=lib/resolv.rb
+  #   - getnames(address)
+  # -->
   # Gets all hostnames for `address` from the DNS resolver.
   #
   # `address` must be a Resolv::IPv4, Resolv::IPv6 or a String.  Retrieved names
@@ -179,6 +273,10 @@ class Resolv::DNS
   #
   def getnames: (ip_address | dns_name address) -> Array[Resolv::DNS::Name]
 
+  # <!--
+  #   rdoc-file=lib/resolv.rb
+  #   - getresource(name, typeclass)
+  # -->
   # Look up the `typeclass` DNS resource of `name`.
   #
   # `name` must be a Resolv::DNS::Name or a String.
@@ -204,6 +302,10 @@ class Resolv::DNS
   #
   def getresource: (dns_name name, singleton(Resolv::DNS::Query) typeclass) -> Resolv::DNS::Resource
 
+  # <!--
+  #   rdoc-file=lib/resolv.rb
+  #   - getresources(name, typeclass)
+  # -->
   # Looks up all `typeclass` DNS resources for `name`.  See #getresource for
   # argument details.
   #
@@ -215,6 +317,10 @@ class Resolv::DNS
 
   def make_udp_requester: () -> (Requester::ConnectedUDP | Requester::UnconnectedUDP)
 
+  # <!--
+  #   rdoc-file=lib/resolv.rb
+  #   - timeouts=(values)
+  # -->
   # Sets the resolver timeouts.  This may be a single positive number or an array
   # of positive numbers representing timeouts in seconds. If an array is
   # specified, a DNS request will retry and wait for each successive interval in
@@ -225,11 +331,14 @@ class Resolv::DNS
   #
   #         dns.timeouts = 3
   #
-  #
   def timeouts=: (Integer | Float | Array[Integer | Float] values) -> void
 
   private
 
+  # <!--
+  #   rdoc-file=lib/resolv.rb
+  #   - new(config_info=nil)
+  # -->
   # Creates a new DNS resolver.
   #
   # `config_info` can be:
@@ -260,19 +369,23 @@ class Resolv::DNS
   #                     :search => ['ruby-lang.org'],
   #                     :ndots => 1)
   #
-  def initialize: (?(String | Hash[Symbol, untyped]) config_info) -> untyped
+  def initialize: (?String | Hash[Symbol, untyped] config_info) -> untyped
 
   def use_ipv6?: () -> untyped
 end
 
+# <!-- rdoc-file=lib/resolv.rb -->
 # Default DNS Port
+#
 Resolv::DNS::Port: Integer
 
 Resolv::DNS::RequestID: Hash[untyped, untyped]
 
 Resolv::DNS::RequestIDMutex: Thread::Mutex
 
+# <!-- rdoc-file=lib/resolv.rb -->
 # Default DNS UDP packet size
+#
 Resolv::DNS::UDPSize: Integer
 
 class Resolv::DNS::Config
@@ -288,34 +401,42 @@ class Resolv::DNS::Config
 
   def lazy_initialize: () -> void
 
-  def nameserver_port: () -> Array[[String, Integer]]
+  def nameserver_port: () -> Array[[ String, Integer ]]
 
   def resolv: (String name) { (Resolv::DNS::Name, Integer, String, Integer) -> void } -> void
 
-  def single?: () -> [String, Integer]?
+  def single?: () -> [ String, Integer ]?
 
   def timeouts=: (Integer | Float | Array[Integer | Float] values) -> void
 
   private
 
-  def initialize: (?(String | Hash[Symbol, untyped]) config_info) -> untyped
+  def initialize: (?String | Hash[Symbol, untyped] config_info) -> untyped
 end
 
 Resolv::DNS::Config::InitialTimeout: Integer
 
+# <!-- rdoc-file=lib/resolv.rb -->
 # Indicates no such domain was found.
+#
 class Resolv::DNS::Config::NXDomain < Resolv::ResolvError
 end
 
+# <!-- rdoc-file=lib/resolv.rb -->
 # Indicates some other unhandled resolver error was encountered.
+#
 class Resolv::DNS::Config::OtherResolvError < Resolv::ResolvError
 end
 
+# <!-- rdoc-file=lib/resolv.rb -->
 # Indicates that the DNS response was unable to be decoded.
+#
 class Resolv::DNS::DecodeError < StandardError
 end
 
+# <!-- rdoc-file=lib/resolv.rb -->
 # Indicates that the DNS request was unable to be encoded.
+#
 class Resolv::DNS::EncodeError < StandardError
 end
 
@@ -364,11 +485,11 @@ class Resolv::DNS::Message
 
   def add_question: (String name, singleton(Resolv::DNS::Query) typeclass) -> void
 
-  def additional: () -> Array[[Resolv::DNS::Name, Integer, Resolv::DNS::Resource]]
+  def additional: () -> Array[[ Resolv::DNS::Name, Integer, Resolv::DNS::Resource ]]
 
-  def answer: () -> Array[[Resolv::DNS::Name, Integer, Resolv::DNS::Resource]]
+  def answer: () -> Array[[ Resolv::DNS::Name, Integer, Resolv::DNS::Resource ]]
 
-  def authority: () -> Array[[Resolv::DNS::Name, Integer, Resolv::DNS::Resource]]
+  def authority: () -> Array[[ Resolv::DNS::Name, Integer, Resolv::DNS::Resource ]]
 
   def each_additional: () { (Resolv::DNS::Name, Integer, Resolv::DNS::Resource) -> void } -> void
 
@@ -394,7 +515,7 @@ class Resolv::DNS::Message
 
   def qr=: (Integer) -> void
 
-  def question: () -> Array[[Resolv::DNS::Name, singleton(Resolv::DNS::Resource)]]
+  def question: () -> Array[[ Resolv::DNS::Name, singleton(Resolv::DNS::Resource) ]]
 
   def ra: () -> Integer
 
@@ -432,7 +553,7 @@ class Resolv::DNS::Message::MessageDecoder
 
   def get_question: () -> Resolv::DNS::Query
 
-  def get_rr: () -> [Resolv::DNS::Name, Integer, Resolv::DNS::Resource]
+  def get_rr: () -> [ Resolv::DNS::Name, Integer, Resolv::DNS::Resource ]
 
   def get_string: () -> String
 
@@ -473,15 +594,20 @@ class Resolv::DNS::Message::MessageEncoder
   def initialize: () -> untyped
 end
 
+# <!-- rdoc-file=lib/resolv.rb -->
 # A representation of a DNS name.
+#
 class Resolv::DNS::Name
+  # <!--
+  #   rdoc-file=lib/resolv.rb
+  #   - create(arg)
+  # -->
   # Creates a new DNS name from `arg`.  `arg` can be:
   #
   # Name
   # :   returns `arg`.
   # String
   # :   Creates a new Name.
-  #
   #
   def self.create: (Resolv::DNS::dns_name arg) -> untyped
 
@@ -491,6 +617,10 @@ class Resolv::DNS::Name
 
   def []: (Integer i) -> Resolv::DNS::Label::Str?
 
+  # <!--
+  #   rdoc-file=lib/resolv.rb
+  #   - absolute?()
+  # -->
   # True if this name is absolute.
   #
   def absolute?: () -> bool
@@ -503,6 +633,10 @@ class Resolv::DNS::Name
 
   def length: () -> Integer
 
+  # <!--
+  #   rdoc-file=lib/resolv.rb
+  #   - subdomain_of?(other)
+  # -->
   # Returns true if `other` is a subdomain.
   #
   # Example:
@@ -519,6 +653,10 @@ class Resolv::DNS::Name
 
   def to_a: () -> Array[Resolv::DNS::Label::Str]
 
+  # <!--
+  #   rdoc-file=lib/resolv.rb
+  #   - to_s()
+  # -->
   # returns the domain name as a string.
   #
   # The domain name doesn't have a trailing dot even if the name object is
@@ -549,7 +687,9 @@ Resolv::DNS::OpCode::Status: Integer
 
 Resolv::DNS::OpCode::Update: Integer
 
+# <!-- rdoc-file=lib/resolv.rb -->
 # A DNS query abstract class.
+#
 class Resolv::DNS::Query
   def self.decode_rdata: (Resolv::DNS::Message::MessageDecoder msg) -> instance
 
@@ -602,7 +742,7 @@ class Resolv::DNS::Requester
 
   def close: () -> void
 
-  def request: (Resolv::DNS::Requester::Sender sender, Numeric tout) -> [Resolv::DNS::Message, String]
+  def request: (Resolv::DNS::Requester::Sender sender, Numeric tout) -> [ Resolv::DNS::Message, String ]
 
   def sender_for: (String addr, Resolv::DNS::Message msg) -> Resolv::DNS::Requester::Sender
 
@@ -618,7 +758,7 @@ class Resolv::DNS::Requester::ConnectedUDP < Resolv::DNS::Requester
 
   def lazy_initialize: () -> void
 
-  def recv_reply: (Array[UDPSocket] readable_socks) -> [String, String]
+  def recv_reply: (Array[UDPSocket] readable_socks) -> [ String, String ]
 
   def sender: (Resolv::DNS::Message msg, String data, ?String host, ?Integer port) -> Resolv::DNS::Requester::Sender
 
@@ -640,10 +780,12 @@ class Resolv::DNS::Requester::MDNSOneShot < Resolv::DNS::Requester::UnconnectedU
 
   def sender: (Resolv::DNS::Message msg, String data, ?String host, ?Integer port) -> Resolv::DNS::Requester::Sender
 
-  def recv_reply: (Array[UDPSocket] readable_socks) -> [String, String]
+  def recv_reply: (Array[UDPSocket] readable_socks) -> [ String, String ]
 end
 
+# <!-- rdoc-file=lib/resolv.rb -->
 # Indicates a problem with the DNS request.
+#
 class Resolv::DNS::Requester::RequestError < StandardError
 end
 
@@ -658,7 +800,7 @@ class Resolv::DNS::Requester::TCP < Resolv::DNS::Requester
 
   def close: () -> untyped
 
-  def recv_reply: (Array[TCPSocket] readable_socks) -> [String, String]
+  def recv_reply: (Array[TCPSocket] readable_socks) -> [ String, String ]
 
   def sender: (Resolv::DNS::Message msg, String data, ?String host, ?Integer port) -> Resolv::DNS::Requester::Sender
 
@@ -682,13 +824,13 @@ class Resolv::DNS::Requester::UnconnectedUDP < Resolv::DNS::Requester
 
   def lazy_initialize: () -> void
 
-  def recv_reply: (Array[UDPSocket] readable_socks) -> [String, String]
+  def recv_reply: (Array[UDPSocket] readable_socks) -> [ String, String ]
 
   def sender: (Resolv::DNS::Message msg, String data, ?String host, ?Integer port) -> Resolv::DNS::Requester::Sender
 
   private
 
-  def initialize: (*[String, Integer] nameserver_port) -> untyped
+  def initialize: (*[ String, Integer ] nameserver_port) -> untyped
 end
 
 class Resolv::DNS::Requester::UnconnectedUDP::Sender < Resolv::DNS::Requester::Sender
@@ -703,7 +845,9 @@ class Resolv::DNS::Requester::UnconnectedUDP::Sender < Resolv::DNS::Requester::S
   def initialize: (Resolv::DNS::Message msg, String data, UDPSocket sock, String host, Integer port) -> untyped
 end
 
+# <!-- rdoc-file=lib/resolv.rb -->
 # A DNS resource abstract class.
+#
 class Resolv::DNS::Resource < Resolv::DNS::Query
   def self.decode_rdata: (Resolv::DNS::Message::MessageDecoder msg) -> instance
 
@@ -719,30 +863,37 @@ class Resolv::DNS::Resource < Resolv::DNS::Query
 
   def hash: () -> Integer
 
+  # <!-- rdoc-file=lib/resolv.rb -->
   # Remaining Time To Live for this Resource.
   #
   def ttl: () -> Integer
 end
 
-Resolv::DNS::Resource::ClassHash: Hash[[Integer, Integer], singleton(Resolv::DNS::Resource)]
+Resolv::DNS::Resource::ClassHash: Hash[[ Integer, Integer ], singleton(Resolv::DNS::Resource)]
 
 Resolv::DNS::Resource::ClassInsensitiveTypes: Array[singleton(Resolv::DNS::Resource)]
 
 Resolv::DNS::Resource::ClassValue: Integer?
 
+# <!-- rdoc-file=lib/resolv.rb -->
 # A Query type requesting any RR.
+#
 class Resolv::DNS::Resource::ANY < Resolv::DNS::Query
 end
 
 Resolv::DNS::Resource::ANY::TypeValue: Integer
 
+# <!-- rdoc-file=lib/resolv.rb -->
 # The canonical name for an alias.
+#
 class Resolv::DNS::Resource::CNAME < Resolv::DNS::Resource::DomainName
 end
 
 Resolv::DNS::Resource::CNAME::TypeValue: Integer
 
+# <!-- rdoc-file=lib/resolv.rb -->
 # Domain Name resource abstract class.
+#
 class Resolv::DNS::Resource::DomainName < Resolv::DNS::Resource
   def self.decode_rdata: (Resolv::DNS::Message::MessageDecoder msg) -> instance
 
@@ -750,18 +901,25 @@ class Resolv::DNS::Resource::DomainName < Resolv::DNS::Resource
 
   def encode_rdata: (Resolv::DNS::Message::MessageEncoder msg) -> void
 
+  # <!-- rdoc-file=lib/resolv.rb -->
   # The name of this DomainName.
   #
   def name: () -> String
 
   private
 
+  # <!--
+  #   rdoc-file=lib/resolv.rb
+  #   - new(name)
+  # -->
   # Creates a new DomainName from `name`.
   #
   def initialize: (String name) -> untyped
 end
 
+# <!-- rdoc-file=lib/resolv.rb -->
 # A generic resource abstract class.
+#
 class Resolv::DNS::Resource::Generic < Resolv::DNS::Resource
   def self.create: (Integer type_value, Integer class_value) -> instance
 
@@ -769,6 +927,7 @@ class Resolv::DNS::Resource::Generic < Resolv::DNS::Resource
 
   public
 
+  # <!-- rdoc-file=lib/resolv.rb -->
   # Data for this generic resource.
   #
   def data: () -> String
@@ -777,29 +936,41 @@ class Resolv::DNS::Resource::Generic < Resolv::DNS::Resource
 
   private
 
+  # <!--
+  #   rdoc-file=lib/resolv.rb
+  #   - new(data)
+  # -->
   # Creates a new generic resource.
   #
   def initialize: (String data) -> untyped
 end
 
+# <!-- rdoc-file=lib/resolv.rb -->
 # Host Information resource.
+#
 class Resolv::DNS::Resource::HINFO < Resolv::DNS::Resource
   def self.decode_rdata: (Resolv::DNS::Message::MessageDecoder msg) -> instance
 
   public
 
+  # <!-- rdoc-file=lib/resolv.rb -->
   # CPU architecture for this resource.
   #
   def cpu: () -> String
 
   def encode_rdata: (Resolv::DNS::Message::MessageEncoder msg) -> void
 
+  # <!-- rdoc-file=lib/resolv.rb -->
   # Operating system for this resource.
   #
   def os: () -> String
 
   private
 
+  # <!--
+  #   rdoc-file=lib/resolv.rb
+  #   - new(cpu, os)
+  # -->
   # Creates a new HINFO running `os` on `cpu`.
   #
   def initialize: (String cpu, String os) -> untyped
@@ -807,18 +978,23 @@ end
 
 Resolv::DNS::Resource::HINFO::TypeValue: Integer
 
+# <!-- rdoc-file=lib/resolv.rb -->
 # module IN contains ARPA Internet specific RRs.
+#
 module Resolv::DNS::Resource::IN
 end
 
 Resolv::DNS::Resource::IN::ClassValue: Integer
 
+# <!-- rdoc-file=lib/resolv.rb -->
 # IPv4 Address resource
+#
 class Resolv::DNS::Resource::IN::A < Resolv::DNS::Resource
   def self.decode_rdata: (Resolv::DNS::Message::MessageDecoder msg) -> instance
 
   public
 
+  # <!-- rdoc-file=lib/resolv.rb -->
   # The Resolv::IPv4 address for this A.
   #
   def address: () -> Resolv::IPv4
@@ -827,6 +1003,10 @@ class Resolv::DNS::Resource::IN::A < Resolv::DNS::Resource
 
   private
 
+  # <!--
+  #   rdoc-file=lib/resolv.rb
+  #   - new(address)
+  # -->
   # Creates a new A for `address`.
   #
   def initialize: (String | Resolv::IPv4 address) -> untyped
@@ -836,12 +1016,15 @@ Resolv::DNS::Resource::IN::A::ClassValue: Integer
 
 Resolv::DNS::Resource::IN::A::TypeValue: Integer
 
+# <!-- rdoc-file=lib/resolv.rb -->
 # An IPv6 address record.
+#
 class Resolv::DNS::Resource::IN::AAAA < Resolv::DNS::Resource
   def self.decode_rdata: (Resolv::DNS::Message::MessageDecoder msg) -> instance
 
   public
 
+  # <!-- rdoc-file=lib/resolv.rb -->
   # The Resolv::IPv6 address for this AAAA.
   #
   def address: () -> Resolv::IPv6
@@ -850,6 +1033,10 @@ class Resolv::DNS::Resource::IN::AAAA < Resolv::DNS::Resource
 
   private
 
+  # <!--
+  #   rdoc-file=lib/resolv.rb
+  #   - new(address)
+  # -->
   # Creates a new AAAA for `address`.
   #
   def initialize: (String | Resolv::IPv6 address) -> untyped
@@ -922,9 +1109,11 @@ Resolv::DNS::Resource::IN::SOA::ClassValue: Integer
 
 Resolv::DNS::Resource::IN::SOA::TypeValue: Integer
 
+# <!-- rdoc-file=lib/resolv.rb -->
 # SRV resource record defined in RFC 2782
 #
 # These records identify the hostname and port that a service is available at.
+#
 class Resolv::DNS::Resource::IN::SRV < Resolv::DNS::Resource
   def self.decode_rdata: (Resolv::DNS::Message::MessageDecoder msg) -> instance
 
@@ -932,12 +1121,14 @@ class Resolv::DNS::Resource::IN::SRV < Resolv::DNS::Resource
 
   def encode_rdata: (Resolv::DNS::Message::MessageEncoder msg) -> void
 
+  # <!-- rdoc-file=lib/resolv.rb -->
   # The port on this target host of this service.
   #
   # The range is 0-65535.
   #
   def port: () -> Integer
 
+  # <!-- rdoc-file=lib/resolv.rb -->
   # The priority of this target host.
   #
   # A client MUST attempt to contact the target host with the lowest-numbered
@@ -947,6 +1138,7 @@ class Resolv::DNS::Resource::IN::SRV < Resolv::DNS::Resource
   #
   def priority: () -> Integer
 
+  # <!-- rdoc-file=lib/resolv.rb -->
   # The domain name of the target host.
   #
   # A target of "." means that the service is decidedly not available at this
@@ -954,6 +1146,7 @@ class Resolv::DNS::Resource::IN::SRV < Resolv::DNS::Resource
   #
   def target: () -> String
 
+  # <!-- rdoc-file=lib/resolv.rb -->
   # A server selection mechanism.
   #
   # The weight field specifies a relative weight for entries with the same
@@ -967,6 +1160,10 @@ class Resolv::DNS::Resource::IN::SRV < Resolv::DNS::Resource
 
   private
 
+  # <!--
+  #   rdoc-file=lib/resolv.rb
+  #   - new(priority, weight, port, target)
+  # -->
   # Create a SRV resource record.
   #
   # See the documentation for #priority, #weight, #port and #target for
@@ -986,16 +1183,20 @@ Resolv::DNS::Resource::IN::TXT::ClassValue: Integer
 
 Resolv::DNS::Resource::IN::TXT::TypeValue: Integer
 
+# <!-- rdoc-file=lib/resolv.rb -->
 # Well Known Service resource.
+#
 class Resolv::DNS::Resource::IN::WKS < Resolv::DNS::Resource
   def self.decode_rdata: (Resolv::DNS::Message::MessageDecoder msg) -> instance
 
   public
 
+  # <!-- rdoc-file=lib/resolv.rb -->
   # The host these services run on.
   #
   def address: () -> Resolv::IPv4
 
+  # <!-- rdoc-file=lib/resolv.rb -->
   # A bit map of enabled services on this host.
   #
   # If protocol is 6 (TCP) then the 26th bit corresponds to the SMTP service (port
@@ -1006,12 +1207,18 @@ class Resolv::DNS::Resource::IN::WKS < Resolv::DNS::Resource
 
   def encode_rdata: (Resolv::DNS::Message::MessageEncoder msg) -> void
 
+  # <!-- rdoc-file=lib/resolv.rb -->
   # IP protocol number for these services.
   #
   def protocol: () -> Integer
 
   private
 
+  # <!--
+  #   rdoc-file=lib/resolv.rb
+  #   - new(address, protocol, bitmap)
+  # -->
+  #
   def initialize: (String | Resolv::IPv4 address, Integer protocol, Integer bitmap) -> untyped
 end
 
@@ -1019,12 +1226,15 @@ Resolv::DNS::Resource::IN::WKS::ClassValue: Integer
 
 Resolv::DNS::Resource::IN::WKS::TypeValue: Integer
 
+# <!-- rdoc-file=lib/resolv.rb -->
 # Location resource
+#
 class Resolv::DNS::Resource::LOC < Resolv::DNS::Resource
   def self.decode_rdata: (Resolv::DNS::Message::MessageDecoder msg) -> instance
 
   public
 
+  # <!-- rdoc-file=lib/resolv.rb -->
   # The altitude of the LOC above a reference sphere whose surface sits 100km
   # below the WGS84 spheroid in centimeters as an unsigned 32bit integer
   #
@@ -1032,30 +1242,36 @@ class Resolv::DNS::Resource::LOC < Resolv::DNS::Resource
 
   def encode_rdata: (Resolv::DNS::Message::MessageEncoder msg) -> void
 
+  # <!-- rdoc-file=lib/resolv.rb -->
   # The horizontal precision using ssize type values in meters using scientific
   # notation as 2 integers of XeY for precision use value/2 e.g. 2m = +/-1m
   #
   def hprecision: () -> Integer
 
+  # <!-- rdoc-file=lib/resolv.rb -->
   # The latitude for this LOC where 2**31 is the equator in thousandths of an arc
   # second as an unsigned 32bit integer
   #
   def latitude: () -> Integer
 
+  # <!-- rdoc-file=lib/resolv.rb -->
   # The longitude for this LOC where 2**31 is the prime meridian in thousandths of
   # an arc second as an unsigned 32bit integer
   #
   def longitude: () -> Integer
 
+  # <!-- rdoc-file=lib/resolv.rb -->
   # The spherical size of this LOC in meters using scientific notation as 2
   # integers of XeY
   #
   def ssize: () -> Integer
 
+  # <!-- rdoc-file=lib/resolv.rb -->
   # Returns the version value for this LOC record which should always be 00
   #
   def version: () -> Integer
 
+  # <!-- rdoc-file=lib/resolv.rb -->
   # The vertical precision using ssize type values in meters using scientific
   # notation as 2 integers of XeY for precision use value/2 e.g. 2m = +/-1m
   #
@@ -1063,35 +1279,51 @@ class Resolv::DNS::Resource::LOC < Resolv::DNS::Resource
 
   private
 
+  # <!--
+  #   rdoc-file=lib/resolv.rb
+  #   - new(version, ssize, hprecision, vprecision, latitude, longitude, altitude)
+  # -->
+  #
   def initialize: (Integer version, Integer ssize, Integer hprecision, Integer vprecision, Integer latitude, Integer longitude, Integer altitude) -> untyped
 end
 
 Resolv::DNS::Resource::LOC::TypeValue: Integer
 
+# <!-- rdoc-file=lib/resolv.rb -->
 # Mailing list or mailbox information.
+#
 class Resolv::DNS::Resource::MINFO < Resolv::DNS::Resource
   def self.decode_rdata: (Resolv::DNS::Message::MessageDecoder msg) -> instance
 
   public
 
+  # <!-- rdoc-file=lib/resolv.rb -->
   # Mailbox to use for error messages related to the mail list or mailbox.
   #
   def emailbx: () -> String
 
   def encode_rdata: (Resolv::DNS::Message::MessageEncoder msg) -> void
 
+  # <!-- rdoc-file=lib/resolv.rb -->
   # Domain name responsible for this mail list or mailbox.
   #
   def rmailbx: () -> String
 
   private
 
+  # <!--
+  #   rdoc-file=lib/resolv.rb
+  #   - new(rmailbx, emailbx)
+  # -->
+  #
   def initialize: (String rmailbx, String emailbx) -> untyped
 end
 
 Resolv::DNS::Resource::MINFO::TypeValue: Integer
 
+# <!-- rdoc-file=lib/resolv.rb -->
 # Mail Exchanger resource.
+#
 class Resolv::DNS::Resource::MX < Resolv::DNS::Resource
   def self.decode_rdata: (Resolv::DNS::Message::MessageDecoder msg) -> instance
 
@@ -1099,16 +1331,22 @@ class Resolv::DNS::Resource::MX < Resolv::DNS::Resource
 
   def encode_rdata: (Resolv::DNS::Message::MessageEncoder msg) -> void
 
+  # <!-- rdoc-file=lib/resolv.rb -->
   # The host of this MX.
   #
   def exchange: () -> String
 
+  # <!-- rdoc-file=lib/resolv.rb -->
   # The preference for this MX.
   #
   def preference: () -> Integer
 
   private
 
+  # <!--
+  #   rdoc-file=lib/resolv.rb
+  #   - new(preference, exchange)
+  # -->
   # Creates a new MX record with `preference`, accepting mail at `exchange`.
   #
   def initialize: (Integer preference, String exchange) -> untyped
@@ -1116,19 +1354,25 @@ end
 
 Resolv::DNS::Resource::MX::TypeValue: Integer
 
+# <!-- rdoc-file=lib/resolv.rb -->
 # An authoritative name server.
+#
 class Resolv::DNS::Resource::NS < Resolv::DNS::Resource::DomainName
 end
 
 Resolv::DNS::Resource::NS::TypeValue: Integer
 
+# <!-- rdoc-file=lib/resolv.rb -->
 # A Pointer to another DNS name.
+#
 class Resolv::DNS::Resource::PTR < Resolv::DNS::Resource::DomainName
 end
 
 Resolv::DNS::Resource::PTR::TypeValue: Integer
 
+# <!-- rdoc-file=lib/resolv.rb -->
 # Start Of Authority resource.
+#
 class Resolv::DNS::Resource::SOA < Resolv::DNS::Resource
   def self.decode_rdata: (Resolv::DNS::Message::MessageDecoder msg) -> instance
 
@@ -1136,39 +1380,50 @@ class Resolv::DNS::Resource::SOA < Resolv::DNS::Resource
 
   def encode_rdata: (Resolv::DNS::Message::MessageEncoder msg) -> void
 
+  # <!-- rdoc-file=lib/resolv.rb -->
   # Time in seconds that a secondary name server is to use the data before
   # refreshing from the primary name server.
   #
   def expire: () -> Integer
 
+  # <!-- rdoc-file=lib/resolv.rb -->
   # The minimum number of seconds to be used for TTL values in RRs.
   #
   def minimum: () -> Integer
 
+  # <!-- rdoc-file=lib/resolv.rb -->
   # Name of the host where the master zone file for this zone resides.
   #
   def mname: () -> String
 
+  # <!-- rdoc-file=lib/resolv.rb -->
   # How often, in seconds, a secondary name server is to check for updates from
   # the primary name server.
   #
   def refresh: () -> Integer
 
+  # <!-- rdoc-file=lib/resolv.rb -->
   # How often, in seconds, a secondary name server is to retry after a failure to
   # check for a refresh.
   #
   def retry: () -> Integer
 
+  # <!-- rdoc-file=lib/resolv.rb -->
   # The person responsible for this domain name.
   #
   def rname: () -> String
 
+  # <!-- rdoc-file=lib/resolv.rb -->
   # The version number of the zone file.
   #
   def serial: () -> Integer
 
   private
 
+  # <!--
+  #   rdoc-file=lib/resolv.rb
+  #   - new(mname, rname, serial, refresh, retry_, expire, minimum)
+  # -->
   # Creates a new SOA record.  See the attr documentation for the details of each
   # argument.
   #
@@ -1177,53 +1432,91 @@ end
 
 Resolv::DNS::Resource::SOA::TypeValue: Integer
 
+# <!-- rdoc-file=lib/resolv.rb -->
 # Unstructured text resource.
+#
 class Resolv::DNS::Resource::TXT < Resolv::DNS::Resource
   def self.decode_rdata: (Resolv::DNS::Message::MessageDecoder msg) -> instance
 
   public
 
+  # <!--
+  #   rdoc-file=lib/resolv.rb
+  #   - data()
+  # -->
   # Returns the concatenated string from `strings`.
   #
   def data: () -> String
 
   def encode_rdata: (Resolv::DNS::Message::MessageEncoder msg) -> void
 
+  # <!-- rdoc-file=lib/resolv.rb -->
   # Returns an Array of Strings for this TXT record.
   #
   def strings: () -> Array[String]
 
   private
 
+  # <!--
+  #   rdoc-file=lib/resolv.rb
+  #   - new(first_string, *rest_strings)
+  # -->
+  #
   def initialize: (String first_string, *String rest_strings) -> untyped
 end
 
 Resolv::DNS::Resource::TXT::TypeValue: Integer
 
+# <!-- rdoc-file=lib/resolv.rb -->
 # Resolv::Hosts is a hostname resolver that uses the system hosts file.
+#
 class Resolv::Hosts
   public
 
+  # <!--
+  #   rdoc-file=lib/resolv.rb
+  #   - each_address(name, &proc)
+  # -->
   # Iterates over all IP addresses for `name` retrieved from the hosts file.
   #
   def each_address: (String name) { (String) -> void } -> void
 
+  # <!--
+  #   rdoc-file=lib/resolv.rb
+  #   - each_name(address, &proc)
+  # -->
   # Iterates over all hostnames for `address` retrieved from the hosts file.
   #
   def each_name: (String address) { (String) -> void } -> void
 
+  # <!--
+  #   rdoc-file=lib/resolv.rb
+  #   - getaddress(name)
+  # -->
   # Gets the IP address of `name` from the hosts file.
   #
   def getaddress: (String name) -> String
 
+  # <!--
+  #   rdoc-file=lib/resolv.rb
+  #   - getaddresses(name)
+  # -->
   # Gets all IP addresses for `name` from the hosts file.
   #
   def getaddresses: (String name) -> Array[String]
 
+  # <!--
+  #   rdoc-file=lib/resolv.rb
+  #   - getname(address)
+  # -->
   # Gets the hostname of `address` from the hosts file.
   #
   def getname: (String address) -> String
 
+  # <!--
+  #   rdoc-file=lib/resolv.rb
+  #   - getnames(address)
+  # -->
   # Gets all hostnames for `address` from the hosts file.
   #
   def getnames: (String address) -> Array[String]
@@ -1232,6 +1525,10 @@ class Resolv::Hosts
 
   private
 
+  # <!--
+  #   rdoc-file=lib/resolv.rb
+  #   - new(filename = DefaultFileName)
+  # -->
   # Creates a new Resolv::Hosts, using `filename` for its data source.
   #
   def initialize: (?String filename) -> untyped
@@ -1239,14 +1536,22 @@ end
 
 Resolv::Hosts::DefaultFileName: String
 
+# <!-- rdoc-file=lib/resolv.rb -->
 # A Resolv::DNS IPv4 address.
+#
 class Resolv::IPv4
+  # <!--
+  #   rdoc-file=lib/resolv.rb
+  #   - create(arg)
+  # -->
+  #
   def self.create: (String | instance arg) -> instance
 
   public
 
   def ==: (instance other) -> bool
 
+  # <!-- rdoc-file=lib/resolv.rb -->
   # The raw IPv4 address as a String.
   #
   def address: () -> String
@@ -1257,6 +1562,10 @@ class Resolv::IPv4
 
   def inspect: () -> String
 
+  # <!--
+  #   rdoc-file=lib/resolv.rb
+  #   - to_name()
+  # -->
   # Turns this IPv4 address into a Resolv::DNS::Name.
   #
   def to_name: () -> Resolv::DNS::Name
@@ -1270,11 +1579,19 @@ end
 
 Resolv::IPv4::Regex: Regexp
 
+# <!-- rdoc-file=lib/resolv.rb -->
 # Regular expression IPv4 addresses must match.
+#
 Resolv::IPv4::Regex256: Regexp
 
+# <!-- rdoc-file=lib/resolv.rb -->
 # A Resolv::DNS IPv6 address.
+#
 class Resolv::IPv6
+  # <!--
+  #   rdoc-file=lib/resolv.rb
+  #   - create(arg)
+  # -->
   # Creates a new IPv6 address from `arg` which may be:
   #
   # IPv6
@@ -1282,13 +1599,13 @@ class Resolv::IPv6
   # String
   # :   `arg` must match one of the IPv6::Regex* constants
   #
-  #
   def self.create: (String | instance arg) -> instance
 
   public
 
   def ==: (instance other) -> bool
 
+  # <!-- rdoc-file=lib/resolv.rb -->
   # The raw IPv6 address as a String.
   #
   def address: () -> String
@@ -1299,6 +1616,10 @@ class Resolv::IPv6
 
   def inspect: () -> String
 
+  # <!--
+  #   rdoc-file=lib/resolv.rb
+  #   - to_name()
+  # -->
   # Turns this IPv6 address into a Resolv::DNS::Name.
   #
   def to_name: () -> Resolv::DNS::Name
@@ -1310,32 +1631,52 @@ class Resolv::IPv6
   def initialize: (untyped address) -> untyped
 end
 
+# <!-- rdoc-file=lib/resolv.rb -->
 # A composite IPv6 address Regexp.
+#
 Resolv::IPv6::Regex: Regexp
 
+# <!-- rdoc-file=lib/resolv.rb -->
 # IPv4 mapped IPv6 address format a:b:c:d:e:f:w.x.y.z
+#
 Resolv::IPv6::Regex_6Hex4Dec: Regexp
 
+# <!-- rdoc-file=lib/resolv.rb -->
 # IPv6 address format a:b:c:d:e:f:g:h
+#
 Resolv::IPv6::Regex_8Hex: Regexp
 
+# <!-- rdoc-file=lib/resolv.rb -->
 # IPv6 link local address format fe80:b:c:d:e:f:g:h%em1
+#
 Resolv::IPv6::Regex_8HexLinkLocal: Regexp
 
+# <!-- rdoc-file=lib/resolv.rb -->
 # Compressed IPv6 address format a::b
+#
 Resolv::IPv6::Regex_CompressedHex: Regexp
 
+# <!-- rdoc-file=lib/resolv.rb -->
 # Compressed IPv4 mapped IPv6 address format a::b:w.x.y.z
+#
 Resolv::IPv6::Regex_CompressedHex4Dec: Regexp
 
+# <!-- rdoc-file=lib/resolv.rb -->
 # Compressed IPv6 link local address format fe80::b%em1
+#
 Resolv::IPv6::Regex_CompressedHexLinkLocal: Regexp
 
 module Resolv::LOC
 end
 
+# <!-- rdoc-file=lib/resolv.rb -->
 # A Resolv::LOC::Alt
+#
 class Resolv::LOC::Alt
+  # <!--
+  #   rdoc-file=lib/resolv.rb
+  #   - create(arg)
+  # -->
   # Creates a new LOC::Alt from `arg` which may be:
   #
   # LOC::Alt
@@ -1343,13 +1684,13 @@ class Resolv::LOC::Alt
   # String
   # :   `arg` must match the LOC::Alt::Regex constant
   #
-  #
   def self.create: (Resolv::LOC::Alt | String arg) -> instance
 
   public
 
   def eql?: (Resolv::LOC::Alt other) -> bool
 
+  # <!-- rdoc-file=lib/resolv.rb -->
   # The raw altitude
   #
   def altitude: () -> Integer
@@ -1364,15 +1705,26 @@ class Resolv::LOC::Alt
 
   private
 
+  # <!--
+  #   rdoc-file=lib/resolv.rb
+  #   - new(altitude)
+  # -->
+  #
   def initialize: (Integer altitude) -> untyped
 end
 
 Resolv::LOC::Alt::Regex: Regexp
 
+# <!-- rdoc-file=lib/resolv.rb -->
 # A Resolv::LOC::Coord
+#
 class Resolv::LOC::Coord
   type orientation = "lat" | "lon"
 
+  # <!--
+  #   rdoc-file=lib/resolv.rb
+  #   - create(arg)
+  # -->
   # Creates a new LOC::Coord from `arg` which may be:
   #
   # LOC::Coord
@@ -1380,13 +1732,13 @@ class Resolv::LOC::Coord
   # String
   # :   `arg` must match the LOC::Coord::Regex constant
   #
-  #
   def self.create: (Resolv::LOC::Coord | String arg) -> instance
 
   public
 
   def eql?: (Resolv::LOC::Coord other) -> bool
 
+  # <!-- rdoc-file=lib/resolv.rb -->
   # The raw coordinates
   #
   def coordinates: () -> String
@@ -1397,6 +1749,7 @@ class Resolv::LOC::Coord
 
   def inspect: () -> String
 
+  # <!-- rdoc-file=lib/resolv.rb -->
   # The orientation of the hemisphere as 'lat' or 'lon'
   #
   def orientation: () -> orientation
@@ -1405,20 +1758,30 @@ class Resolv::LOC::Coord
 
   private
 
+  # <!--
+  #   rdoc-file=lib/resolv.rb
+  #   - new(coordinates,orientation)
+  # -->
+  #
   def initialize: (String coordinates, orientation orientation) -> untyped
 end
 
 Resolv::LOC::Coord::Regex: Regexp
 
+# <!-- rdoc-file=lib/resolv.rb -->
 # A Resolv::LOC::Size
+#
 class Resolv::LOC::Size
+  # <!--
+  #   rdoc-file=lib/resolv.rb
+  #   - create(arg)
+  # -->
   # Creates a new LOC::Size from `arg` which may be:
   #
   # LOC::Size
   # :   returns `arg`.
   # String
   # :   `arg` must match the LOC::Size::Regex constant
-  #
   #
   def self.create: (Resolv::LOC::Size | String arg) -> instance
 
@@ -1432,6 +1795,7 @@ class Resolv::LOC::Size
 
   def inspect: () -> String
 
+  # <!-- rdoc-file=lib/resolv.rb -->
   # The raw size
   #
   def scalar: () -> String
@@ -1440,11 +1804,17 @@ class Resolv::LOC::Size
 
   private
 
+  # <!--
+  #   rdoc-file=lib/resolv.rb
+  #   - new(scalar)
+  # -->
+  #
   def initialize: (String scalar) -> untyped
 end
 
 Resolv::LOC::Size::Regex: Regexp
 
+# <!-- rdoc-file=lib/resolv.rb -->
 # Resolv::MDNS is a one-shot Multicast DNS (mDNS) resolver.  It blindly makes
 # queries to the mDNS addresses without understanding anything about multicast
 # ports.
@@ -1456,6 +1826,10 @@ Resolv::LOC::Size::Regex: Regexp
 class Resolv::MDNS < Resolv::DNS
   public
 
+  # <!--
+  #   rdoc-file=lib/resolv.rb
+  #   - each_address(name)
+  # -->
   # Iterates over all IP addresses for `name` retrieved from the mDNS resolver,
   # provided name ends with "local".  If the name does not end in "local" no
   # records will be returned.
@@ -1469,6 +1843,10 @@ class Resolv::MDNS < Resolv::DNS
 
   private
 
+  # <!--
+  #   rdoc-file=lib/resolv.rb
+  #   - new(config_info=nil)
+  # -->
   # Creates a new one-shot Multicast DNS (mDNS) resolver.
   #
   # `config_info` can be:
@@ -1479,26 +1857,37 @@ class Resolv::MDNS < Resolv::DNS
   # Hash
   # :   Must contain :nameserver or :nameserver_port like Resolv::DNS#initialize.
   #
-  #
-  def initialize: (?(String | Hash[Symbol, untyped]) config_info) -> untyped
+  def initialize: (?String | Hash[Symbol, untyped] config_info) -> untyped
 end
 
+# <!-- rdoc-file=lib/resolv.rb -->
 # Default IPv4 mDNS address
+#
 Resolv::MDNS::AddressV4: String
 
+# <!-- rdoc-file=lib/resolv.rb -->
 # Default IPv6 mDNS address
+#
 Resolv::MDNS::AddressV6: String
 
+# <!-- rdoc-file=lib/resolv.rb -->
 # Default mDNS addresses
+#
 Resolv::MDNS::Addresses: Array[untyped]
 
+# <!-- rdoc-file=lib/resolv.rb -->
 # Default mDNS Port
+#
 Resolv::MDNS::Port: Integer
 
+# <!-- rdoc-file=lib/resolv.rb -->
 # Indicates a failure to resolve a name or address.
+#
 class Resolv::ResolvError < StandardError
 end
 
+# <!-- rdoc-file=lib/resolv.rb -->
 # Indicates a timeout resolving a name or address.
+#
 class Resolv::ResolvTimeout < Timeout::Error
 end

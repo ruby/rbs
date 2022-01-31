@@ -1,3 +1,4 @@
+# <!-- rdoc-file=ext/pathname/pathname.c -->
 # Pathname represents the name of a file or directory on the filesystem, but not
 # the file itself.
 #
@@ -161,6 +162,8 @@
 # *   #binread(*args)
 # *   #readlines(*args)
 # *   #sysopen(*args)
+# *   #write(*args)
+# *   #binwrite(*args)
 #
 #
 # ### Utilities
@@ -181,6 +184,10 @@
 # information.  In some cases, a brief description will follow.
 #
 class Pathname
+  # <!--
+  #   rdoc-file=ext/pathname/pathname.c
+  #   - getwd()
+  # -->
   # Returns the current working directory as a Pathname.
   #
   #     Pathname.getwd
@@ -190,6 +197,10 @@ class Pathname
   #
   def self.getwd: () -> Pathname
 
+  # <!--
+  #   rdoc-file=ext/pathname/pathname.c
+  #   - glob(p1, p2 = v2, p3 = v3)
+  # -->
   # Returns or yields Pathname objects.
   #
   #     Pathname.glob("lib/i*.rb")
@@ -200,6 +211,10 @@ class Pathname
   def self.glob: (String | Array[String] pattern, ?Integer flags) -> Array[Pathname]
                | (String | Array[String] pattern, ?Integer flags) { (Pathname) -> untyped } -> nil
 
+  # <!--
+  #   rdoc-file=ext/pathname/pathname.c
+  #   - pwd()
+  # -->
   # Returns the current working directory as a Pathname.
   #
   #     Pathname.getwd
@@ -211,6 +226,10 @@ class Pathname
 
   public
 
+  # <!--
+  #   rdoc-file=ext/pathname/lib/pathname.rb
+  #   - +(other)
+  # -->
   # Appends a pathname fragment to `self` to produce a new Pathname object.
   #
   #     p1 = Pathname.new("/usr")      # Pathname:/usr
@@ -225,8 +244,17 @@ class Pathname
   #
   def +: (Pathname | String | _ToStr other) -> Pathname
 
+  # <!--
+  #   rdoc-file=ext/pathname/lib/pathname.rb
+  #   - /(other)
+  # -->
+  #
   alias / +
 
+  # <!--
+  #   rdoc-file=ext/pathname/pathname.c
+  #   - <=>(p1)
+  # -->
   # Provides a case-sensitive comparison operator for pathnames.
   #
   #     Pathname.new('/usr') <=> Pathname.new('/usr/bin')
@@ -243,18 +271,27 @@ class Pathname
   def <=>: (Pathname other) -> Integer
          | (untyped other) -> nil
 
+  # <!--
+  #   rdoc-file=ext/pathname/pathname.c
+  #   - ==(p1)
+  # -->
   # Compare this pathname with `other`.  The comparison is string-based. Be aware
   # that two different paths (`foo.txt` and `./foo.txt`) can refer to the same
   # file.
   #
   def ==: (untyped) -> bool
 
+  # <!-- rdoc-file=ext/pathname/pathname.c -->
   # Compare this pathname with `other`.  The comparison is string-based. Be aware
   # that two different paths (`foo.txt` and `./foo.txt`) can refer to the same
   # file.
   #
   def ===: (untyped) -> bool
 
+  # <!--
+  #   rdoc-file=ext/pathname/lib/pathname.rb
+  #   - absolute?()
+  # -->
   # Predicate method for testing whether a path is absolute.
   #
   # It returns `true` if the pathname begins with a slash.
@@ -269,6 +306,10 @@ class Pathname
   #
   def absolute?: () -> bool
 
+  # <!--
+  #   rdoc-file=ext/pathname/lib/pathname.rb
+  #   - ascend() { |self| ... }
+  # -->
   # Iterates over and yields a new Pathname object for each element in the given
   # path in ascending order.
   #
@@ -297,49 +338,51 @@ class Pathname
   def ascend: () { (Pathname) -> untyped } -> nil
             | () -> Enumerator[Pathname, nil]
 
+  # <!--
+  #   rdoc-file=ext/pathname/pathname.c
+  #   - pathname.atime     -> time
+  # -->
   # Returns the last access time for the file.
   #
   # See File.atime.
   #
   def atime: () -> Time
 
+  # <!--
+  #   rdoc-file=ext/pathname/pathname.c
+  #   - basename(p1 = v1)
+  # -->
   # Returns the last component of the path.
   #
   # See File.basename.
   #
   def basename: (?String | _ToStr suffix) -> Pathname
 
+  # <!--
+  #   rdoc-file=ext/pathname/pathname.c
+  #   - pathname.binread([length [, offset]]) -> string
+  # -->
   # Returns all the bytes from the file, or the first `N` if specified.
   #
   # See File.binread.
   #
   def binread: (?Integer length, ?Integer offset) -> String
 
+  # <!--
+  #   rdoc-file=ext/pathname/pathname.c
+  #   - pathname.binwrite(string, [offset] )   => fixnum
+  #   - pathname.binwrite(string, [offset], open_args )   => fixnum
+  # -->
   # Writes `contents` to the file, opening it in binary mode.
   #
   # See File.binwrite.
   #
-  def binwrite: (String, ?Integer offset,
-                 ?mode: Integer | String,
-                 ?flags: Integer,
-                 ?external_encoding: encoding,
-                 ?internal_encoding: encoding,
-                 ?encoding: encoding,
-                 ?textmode: boolish,
-                 ?binmode: boolish,
-                 ?autoclose: boolish,
+  def binwrite: (String, ?Integer offset, ?mode: Integer | String, ?flags: Integer, ?external_encoding: encoding, ?internal_encoding: encoding, ?encoding: encoding, ?textmode: boolish, ?binmode: boolish, ?autoclose: boolish, ?invalid: :replace ?, ?undef: :replace ?, ?replace: String, ?fallback: Hash[String, String] | Proc | Method, ?xml: :text | :attr, ?universal_newline: true, ?cr_newline: true, ?crlf_newline: true) -> Integer
 
-                 # From String#encode
-                 ?invalid: :replace ?,
-                 ?undef: :replace ?,
-                 ?replace: String,
-                 ?fallback: Hash[String, String] | Proc | Method,
-                 ?xml: :text | :attr,
-                 ?universal_newline: true,
-                 ?cr_newline: true,
-                 ?crlf_newline: true,
-                ) -> Integer
-
+  # <!--
+  #   rdoc-file=ext/pathname/pathname.c
+  #   - pathname.birthtime -> time
+  # -->
   # Returns the birth time for the file. If the platform doesn't have birthtime,
   # raises NotImplementedError.
   #
@@ -347,14 +390,26 @@ class Pathname
   #
   def birthtime: () -> Time
 
+  # <!--
+  #   rdoc-file=ext/pathname/pathname.c
+  #   - blockdev?()
+  # -->
   # See FileTest.blockdev?.
   #
   def blockdev?: () -> bool
 
+  # <!--
+  #   rdoc-file=ext/pathname/pathname.c
+  #   - chardev?()
+  # -->
   # See FileTest.chardev?.
   #
   def chardev?: () -> bool
 
+  # <!--
+  #   rdoc-file=ext/pathname/lib/pathname.rb
+  #   - children(with_directory=true)
+  # -->
   # Returns the children of the directory (files and subdirectories, not
   # recursive) as an array of Pathname objects.
   #
@@ -376,18 +431,30 @@ class Pathname
   #
   def children: (?boolish with_directory) -> Array[Pathname]
 
+  # <!--
+  #   rdoc-file=ext/pathname/pathname.c
+  #   - pathname.chmod(mode_int)   -> integer
+  # -->
   # Changes file permissions.
   #
   # See File.chmod.
   #
   def chmod: (Integer mode_int) -> Integer
 
+  # <!--
+  #   rdoc-file=ext/pathname/pathname.c
+  #   - pathname.chown(owner_int, group_int)       -> integer
+  # -->
   # Change owner and group of the file.
   #
   # See File.chown.
   #
   def chown: (Integer owner, Integer group) -> Integer
 
+  # <!--
+  #   rdoc-file=ext/pathname/lib/pathname.rb
+  #   - cleanpath(consider_symlink=false)
+  # -->
   # Returns clean pathname of `self` with consecutive slashes and useless dots
   # removed.  The filesystem is not accessed.
   #
@@ -400,6 +467,10 @@ class Pathname
   #
   def cleanpath: (?boolish consider_symlink) -> Pathname
 
+  # <!--
+  #   rdoc-file=ext/pathname/pathname.c
+  #   - pathname.ctime     -> time
+  # -->
   # Returns the last change time, using directory information, not the file
   # itself.
   #
@@ -407,11 +478,16 @@ class Pathname
   #
   def ctime: () -> Time
 
+  # <!-- rdoc-file=ext/pathname/pathname.c -->
   # Removes a file or directory, using File.unlink if `self` is a file, or
   # Dir.unlink as necessary.
   #
   def delete: () -> Integer
 
+  # <!--
+  #   rdoc-file=ext/pathname/lib/pathname.rb
+  #   - descend() { |v| ... }
+  # -->
   # Iterates over and yields a new Pathname object for each element in the given
   # path in descending order.
   #
@@ -440,16 +516,28 @@ class Pathname
   def descend: () { (Pathname) -> untyped } -> nil
              | () -> Enumerator[Pathname, nil]
 
+  # <!--
+  #   rdoc-file=ext/pathname/pathname.c
+  #   - directory?()
+  # -->
   # See FileTest.directory?.
   #
   def directory?: () -> bool
 
+  # <!--
+  #   rdoc-file=ext/pathname/pathname.c
+  #   - dirname()
+  # -->
   # Returns all but the last component of the path.
   #
   # See File.dirname.
   #
   def dirname: () -> Pathname
 
+  # <!--
+  #   rdoc-file=ext/pathname/lib/pathname.rb
+  #   - each_child(with_directory=true, &b)
+  # -->
   # Iterates over the children of the directory (files and subdirectories, not
   # recursive).
   #
@@ -489,11 +577,19 @@ class Pathname
   def each_child: (?boolish with_directory) { (Pathname) -> void } -> Array[Pathname]
                 | (?boolish with_directory) -> Enumerator[Pathname, Array[Pathname]]
 
+  # <!--
+  #   rdoc-file=ext/pathname/pathname.c
+  #   - each_entry()
+  # -->
   # Iterates over the entries (files and subdirectories) in the directory,
   # yielding a Pathname object for each entry.
   #
   def each_entry: () { (Pathname) -> untyped } -> nil
 
+  # <!--
+  #   rdoc-file=ext/pathname/lib/pathname.rb
+  #   - each_filename() { |filename| ... }
+  # -->
   # Iterates over each component of the path.
   #
   #     Pathname.new("/usr/bin/ruby").each_filename {|filename| ... }
@@ -509,67 +605,35 @@ class Pathname
   def each_filename: () { (String) -> untyped } -> nil
                    | () -> Enumerator[String, nil]
 
+  # <!--
+  #   rdoc-file=ext/pathname/pathname.c
+  #   - pathname.each_line {|line| ... }
+  #   - pathname.each_line(sep=$/ [, open_args]) {|line| block }     -> nil
+  #   - pathname.each_line(limit [, open_args]) {|line| block }      -> nil
+  #   - pathname.each_line(sep, limit [, open_args]) {|line| block } -> nil
+  #   - pathname.each_line(...)                                      -> an_enumerator
+  # -->
   # Iterates over each line in the file and yields a String object for each.
   #
-  def each_line: (?String sep, ?Integer limit,
-                  # open_args
-                  ?mode: Integer | String,
-                  ?flags: Integer,
-                  ?external_encoding: encoding,
-                  ?internal_encoding: encoding,
-                  ?encoding: encoding,
-                  ?textmode: boolish,
-                  ?binmode: boolish,
-                  ?autoclose: boolish,
-                  # getline_args
-                  ?chomp: boolish,
-                 ) { (String) -> untyped } -> nil
-               | (Integer limit,
-                  # open_args
-                  ?mode: Integer | String,
-                  ?flags: Integer,
-                  ?external_encoding: encoding,
-                  ?internal_encoding: encoding,
-                  ?encoding: encoding,
-                  ?textmode: boolish,
-                  ?binmode: boolish,
-                  ?autoclose: boolish,
-                  # getline_args
-                  ?chomp: boolish,
-                 ) { (String) -> untyped } -> nil
-               | (?String sep, ?Integer limit,
-                  # open_args
-                  ?mode: Integer | String,
-                  ?flags: Integer,
-                  ?external_encoding: encoding,
-                  ?internal_encoding: encoding,
-                  ?encoding: encoding,
-                  ?textmode: boolish,
-                  ?binmode: boolish,
-                  ?autoclose: boolish,
-                  # getline_args
-                  ?chomp: boolish,
-                 ) -> Enumerator[String, nil]
-               | (Integer limit,
-                  # open_args
-                  ?mode: Integer | String,
-                  ?flags: Integer,
-                  ?external_encoding: encoding,
-                  ?internal_encoding: encoding,
-                  ?encoding: encoding,
-                  ?textmode: boolish,
-                  ?binmode: boolish,
-                  ?autoclose: boolish,
-                  # getline_args
-                  ?chomp: boolish,
-                 ) -> Enumerator[String, nil]
+  def each_line: (?String sep, ?Integer limit, ?mode: Integer | String, ?flags: Integer, ?external_encoding: encoding, ?internal_encoding: encoding, ?encoding: encoding, ?textmode: boolish, ?binmode: boolish, ?autoclose: boolish, ?chomp: boolish) { (String) -> untyped } -> nil
+               | (Integer limit, ?mode: Integer | String, ?flags: Integer, ?external_encoding: encoding, ?internal_encoding: encoding, ?encoding: encoding, ?textmode: boolish, ?binmode: boolish, ?autoclose: boolish, ?chomp: boolish) { (String) -> untyped } -> nil
+               | (?String sep, ?Integer limit, ?mode: Integer | String, ?flags: Integer, ?external_encoding: encoding, ?internal_encoding: encoding, ?encoding: encoding, ?textmode: boolish, ?binmode: boolish, ?autoclose: boolish, ?chomp: boolish) -> Enumerator[String, nil]
+               | (Integer limit, ?mode: Integer | String, ?flags: Integer, ?external_encoding: encoding, ?internal_encoding: encoding, ?encoding: encoding, ?textmode: boolish, ?binmode: boolish, ?autoclose: boolish, ?chomp: boolish) -> Enumerator[String, nil]
 
+  # <!--
+  #   rdoc-file=ext/pathname/pathname.c
+  #   - empty?()
+  # -->
   # Tests the file is empty.
   #
   # See Dir#empty? and FileTest.empty?.
   #
   def empty?: () -> bool
 
+  # <!--
+  #   rdoc-file=ext/pathname/pathname.c
+  #   - entries()
+  # -->
   # Return the entries (files and subdirectories) in the directory, each as a
   # Pathname object.
   #
@@ -597,40 +661,69 @@ class Pathname
   #
   def entries: () -> Array[Pathname]
 
+  # <!-- rdoc-file=ext/pathname/pathname.c -->
   # Compare this pathname with `other`.  The comparison is string-based. Be aware
   # that two different paths (`foo.txt` and `./foo.txt`) can refer to the same
   # file.
   #
   def eql?: (untyped) -> bool
 
+  # <!--
+  #   rdoc-file=ext/pathname/pathname.c
+  #   - executable?()
+  # -->
   # See FileTest.executable?.
   #
   def executable?: () -> bool
 
+  # <!--
+  #   rdoc-file=ext/pathname/pathname.c
+  #   - executable_real?()
+  # -->
   # See FileTest.executable_real?.
   #
   def executable_real?: () -> bool
 
+  # <!--
+  #   rdoc-file=ext/pathname/pathname.c
+  #   - exist?()
+  # -->
   # See FileTest.exist?.
   #
   def exist?: () -> bool
 
+  # <!--
+  #   rdoc-file=ext/pathname/pathname.c
+  #   - expand_path(p1 = v1)
+  # -->
   # Returns the absolute path for the file.
   #
   # See File.expand_path.
   #
   def expand_path: (?String dir) -> Pathname
 
+  # <!--
+  #   rdoc-file=ext/pathname/pathname.c
+  #   - extname()
+  # -->
   # Returns the file's extension.
   #
   # See File.extname.
   #
   def extname: () -> String
 
+  # <!--
+  #   rdoc-file=ext/pathname/pathname.c
+  #   - file?()
+  # -->
   # See FileTest.file?.
   #
   def file?: () -> bool
 
+  # <!--
+  #   rdoc-file=ext/pathname/lib/pathname.rb
+  #   - find(ignore_error: true) { |pathname| ... }
+  # -->
   # Iterates over the directory tree in a depth first manner, yielding a Pathname
   # for each file under "this" directory.
   #
@@ -647,30 +740,48 @@ class Pathname
   def find: (?ignore_error: boolish) { (Pathname) -> untyped } -> nil
           | (?ignore_error: boolish) -> Enumerator[Pathname, nil]
 
+  # <!--
+  #   rdoc-file=ext/pathname/pathname.c
+  #   - pathname.fnmatch(pattern, [flags])        -> true or false
+  #   - pathname.fnmatch?(pattern, [flags])       -> true or false
+  # -->
   # Return `true` if the receiver matches the given pattern.
   #
   # See File.fnmatch.
   #
   def fnmatch: (String pattern, ?Integer flags) -> bool
 
+  # <!-- rdoc-file=ext/pathname/pathname.c -->
   # Return `true` if the receiver matches the given pattern.
   #
   # See File.fnmatch.
   #
   alias fnmatch? fnmatch
 
+  # <!--
+  #   rdoc-file=ext/pathname/pathname.c
+  #   - pathname.freeze -> obj
+  # -->
   # Freezes this Pathname.
   #
   # See Object.freeze.
   #
   def freeze: () -> Pathname
 
+  # <!--
+  #   rdoc-file=ext/pathname/pathname.c
+  #   - pathname.ftype     -> string
+  # -->
   # Returns "type" of file ("file", "directory", etc).
   #
   # See File.ftype.
   #
   def ftype: () -> String
 
+  # <!--
+  #   rdoc-file=ext/pathname/pathname.c
+  #   - glob(p1, p2 = v2)
+  # -->
   # Returns or yields Pathname objects.
   #
   #     Pathname("ruby-2.4.2").glob("R*.md")
@@ -681,6 +792,10 @@ class Pathname
   def glob: (String | Array[String] pattern, ?Integer flags) -> Array[Pathname]
           | (String | Array[String] pattern, ?Integer flags) { (Pathname) -> untyped } -> nil
 
+  # <!--
+  #   rdoc-file=ext/pathname/pathname.c
+  #   - grpowned?()
+  # -->
   # See FileTest.grpowned?.
   #
   def grpowned?: () -> bool
@@ -689,6 +804,10 @@ class Pathname
 
   def inspect: () -> String
 
+  # <!--
+  #   rdoc-file=ext/pathname/lib/pathname.rb
+  #   - join(*args)
+  # -->
   # Joins the given pathnames onto `self` to create a new Pathname object.
   #
   #     path0 = Pathname.new("/usr")                # Pathname:/usr
@@ -700,40 +819,68 @@ class Pathname
   #
   def join: (*String | _ToStr | Pathname args) -> Pathname
 
+  # <!--
+  #   rdoc-file=ext/pathname/pathname.c
+  #   - pathname.lchmod(mode_int)  -> integer
+  # -->
   # Same as Pathname.chmod, but does not follow symbolic links.
   #
   # See File.lchmod.
   #
   def lchmod: (Integer mode) -> Integer
 
+  # <!--
+  #   rdoc-file=ext/pathname/pathname.c
+  #   - pathname.lchown(owner_int, group_int)      -> integer
+  # -->
   # Same as Pathname.chown, but does not follow symbolic links.
   #
   # See File.lchown.
   #
   def lchown: (Integer owner, Integer group) -> Integer
 
+  # <!--
+  #   rdoc-file=ext/pathname/pathname.c
+  #   - lstat()
+  # -->
   # See File.lstat.
   #
   def lstat: () -> ::File::Stat
 
+  # <!--
+  #   rdoc-file=ext/pathname/pathname.c
+  #   - pathname.make_link(old)
+  # -->
   # Creates a hard link at *pathname*.
   #
   # See File.link.
   #
   def make_link: (String | Pathname | _ToStr old) -> Integer
 
+  # <!--
+  #   rdoc-file=ext/pathname/pathname.c
+  #   - pathname.make_symlink(old)
+  # -->
   # Creates a symbolic link.
   #
   # See File.symlink.
   #
   def make_symlink: (String | Pathname | _ToStr old) -> Integer
 
+  # <!--
+  #   rdoc-file=ext/pathname/pathname.c
+  #   - mkdir(p1 = v1)
+  # -->
   # Create the referenced directory.
   #
   # See Dir.mkdir.
   #
   def mkdir: (?Integer perm) -> Integer
 
+  # <!--
+  #   rdoc-file=ext/pathname/lib/pathname.rb
+  #   - mkpath(mode: nil)
+  # -->
   # Creates a full path, including any intermediate directories that don't yet
   # exist.
   #
@@ -741,105 +888,130 @@ class Pathname
   #
   def mkpath: () -> nil
 
+  # <!--
+  #   rdoc-file=ext/pathname/lib/pathname.rb
+  #   - mountpoint?()
+  # -->
   # Returns `true` if `self` points to a mountpoint.
   #
   def mountpoint?: () -> bool
 
+  # <!--
+  #   rdoc-file=ext/pathname/pathname.c
+  #   - pathname.mtime     -> time
+  # -->
   # Returns the last modified time of the file.
   #
   # See File.mtime.
   #
   def mtime: () -> Time
 
+  # <!--
+  #   rdoc-file=ext/pathname/pathname.c
+  #   - pathname.open()
+  #   - pathname.open(mode="r" [, opt])                        -> file
+  #   - pathname.open([mode [, perm]] [, opt])                 -> file
+  #   - pathname.open(mode="r" [, opt]) {|file| block }        -> obj
+  #   - pathname.open([mode [, perm]] [, opt]) {|file| block } -> obj
+  # -->
   # Opens the file for reading or writing.
   #
   # See File.open.
   #
-  def open: (?(string | int) mode, ?int perm) -> File
-          | [T] (?(string | int) mode, ?int perm) { (File) -> T } -> T
+  def open: (?string | int mode, ?int perm) -> File
+          | [T] (?string | int mode, ?int perm) { (File) -> T } -> T
 
+  # <!--
+  #   rdoc-file=ext/pathname/pathname.c
+  #   - opendir()
+  # -->
   # Opens the referenced directory.
   #
   # See Dir.open.
   #
   def opendir: () -> Dir
-               | [U] () { (Dir) -> U } -> U
+             | [U] () { (Dir) -> U } -> U
 
+  # <!--
+  #   rdoc-file=ext/pathname/pathname.c
+  #   - owned?()
+  # -->
   # See FileTest.owned?.
   #
   def owned?: () -> bool
 
+  # <!--
+  #   rdoc-file=ext/pathname/lib/pathname.rb
+  #   - parent()
+  # -->
   # Returns the parent directory.
   #
   # This is same as `self + '..'`.
   #
   def parent: () -> Pathname
 
+  # <!--
+  #   rdoc-file=ext/pathname/pathname.c
+  #   - pipe?()
+  # -->
   # See FileTest.pipe?.
   #
   def pipe?: () -> bool
 
+  # <!--
+  #   rdoc-file=ext/pathname/pathname.c
+  #   - pathname.read([length [, offset]]) -> string
+  #   - pathname.read([length [, offset]], open_args) -> string
+  # -->
   # Returns all data from the file, or the first `N` bytes if specified.
   #
   # See File.read.
   #
-  def read: (?Integer length, ?Integer offset,
-             # open_args
-             ?mode: Integer | String,
-             ?flags: Integer,
-             ?external_encoding: encoding,
-             ?internal_encoding: encoding,
-             ?encoding: encoding,
-             ?textmode: boolish,
-             ?binmode: boolish,
-             ?autoclose: boolish,
-            ) -> String
+  def read: (?Integer length, ?Integer offset, ?mode: Integer | String, ?flags: Integer, ?external_encoding: encoding, ?internal_encoding: encoding, ?encoding: encoding, ?textmode: boolish, ?binmode: boolish, ?autoclose: boolish) -> String
 
+  # <!--
+  #   rdoc-file=ext/pathname/pathname.c
+  #   - readable?()
+  # -->
   # See FileTest.readable?.
   #
   def readable?: () -> bool
 
+  # <!--
+  #   rdoc-file=ext/pathname/pathname.c
+  #   - readable_real?()
+  # -->
   # See FileTest.readable_real?.
   #
   def readable_real?: () -> bool
 
+  # <!--
+  #   rdoc-file=ext/pathname/pathname.c
+  #   - pathname.readlines(sep=$/ [, open_args])     -> array
+  #   - pathname.readlines(limit [, open_args])      -> array
+  #   - pathname.readlines(sep, limit [, open_args]) -> array
+  # -->
   # Returns all the lines from the file.
   #
   # See File.readlines.
   #
-  def readlines: (?String sep, ?Integer limit,
-                  # open_args
-                  ?mode: Integer | String,
-                  ?flags: Integer,
-                  ?external_encoding: encoding,
-                  ?internal_encoding: encoding,
-                  ?encoding: encoding,
-                  ?textmode: boolish,
-                  ?binmode: boolish,
-                  ?autoclose: boolish,
-                  # getline_args
-                  ?chomp: boolish,
-                 ) -> Array[String]
-               | (Integer limit,
-                  # open_args
-                  ?mode: Integer | String,
-                  ?flags: Integer,
-                  ?external_encoding: encoding,
-                  ?internal_encoding: encoding,
-                  ?encoding: encoding,
-                  ?textmode: boolish,
-                  ?binmode: boolish,
-                  ?autoclose: boolish,
-                  # getline_args
-                  ?chomp: boolish,
-                 ) -> Array[String]
+  def readlines: (?String sep, ?Integer limit, ?mode: Integer | String, ?flags: Integer, ?external_encoding: encoding, ?internal_encoding: encoding, ?encoding: encoding, ?textmode: boolish, ?binmode: boolish, ?autoclose: boolish, ?chomp: boolish) -> Array[String]
+               | (Integer limit, ?mode: Integer | String, ?flags: Integer, ?external_encoding: encoding, ?internal_encoding: encoding, ?encoding: encoding, ?textmode: boolish, ?binmode: boolish, ?autoclose: boolish, ?chomp: boolish) -> Array[String]
 
+  # <!--
+  #   rdoc-file=ext/pathname/pathname.c
+  #   - readlink()
+  # -->
   # Read symbolic link.
   #
   # See File.readlink.
   #
   def readlink: () -> untyped
 
+  # <!--
+  #   rdoc-file=ext/pathname/pathname.c
+  #   - realdirpath(p1 = v1)
+  # -->
   # Returns the real (absolute) pathname of `self` in the actual filesystem.
   #
   # Does not contain symlinks or useless dots, `..` and `.`.
@@ -848,6 +1020,10 @@ class Pathname
   #
   def realdirpath: (?string | Pathname base_dir) -> Pathname
 
+  # <!--
+  #   rdoc-file=ext/pathname/pathname.c
+  #   - realpath(p1 = v1)
+  # -->
   # Returns the real (absolute) pathname for `self` in the actual filesystem.
   #
   # Does not contain symlinks or useless dots, `..` and `.`.
@@ -856,6 +1032,10 @@ class Pathname
   #
   def realpath: (?string | Pathname base_dir) -> Pathname
 
+  # <!--
+  #   rdoc-file=ext/pathname/lib/pathname.rb
+  #   - relative?()
+  # -->
   # The opposite of Pathname#absolute?
   #
   # It returns `false` if the pathname begins with a slash.
@@ -870,6 +1050,10 @@ class Pathname
   #
   def relative?: () -> bool
 
+  # <!--
+  #   rdoc-file=ext/pathname/lib/pathname.rb
+  #   - relative_path_from(base_directory)
+  # -->
   # Returns a relative path from the given `base_directory` to the receiver.
   #
   # If `self` is absolute, then `base_directory` must be absolute too.
@@ -880,26 +1064,45 @@ class Pathname
   #
   # ArgumentError is raised when it cannot find a relative path.
   #
+  # Note that this method does not handle situations where the case sensitivity of
+  # the filesystem in use differs from the operating system default.
+  #
   def relative_path_from: (Pathname | string base_directory) -> Pathname
 
+  # <!--
+  #   rdoc-file=ext/pathname/pathname.c
+  #   - rename(p1)
+  # -->
   # Rename the file.
   #
   # See File.rename.
   #
   def rename: (Pathname | string new_name) -> 0
 
+  # <!--
+  #   rdoc-file=ext/pathname/pathname.c
+  #   - rmdir()
+  # -->
   # Remove the referenced directory.
   #
   # See Dir.rmdir.
   #
   def rmdir: () -> 0
 
+  # <!--
+  #   rdoc-file=ext/pathname/lib/pathname.rb
+  #   - rmtree()
+  # -->
   # Recursively deletes a directory, including all directories beneath it.
   #
   # See FileUtils.rm_r
   #
   def rmtree: () -> void
 
+  # <!--
+  #   rdoc-file=ext/pathname/lib/pathname.rb
+  #   - root?()
+  # -->
   # Predicate method for root directories.  Returns `true` if the pathname
   # consists of consecutive slashes.
   #
@@ -908,42 +1111,78 @@ class Pathname
   #
   def root?: () -> bool
 
+  # <!--
+  #   rdoc-file=ext/pathname/pathname.c
+  #   - setgid?()
+  # -->
   # See FileTest.setgid?.
   #
   def setgid?: () -> bool
 
+  # <!--
+  #   rdoc-file=ext/pathname/pathname.c
+  #   - setuid?()
+  # -->
   # See FileTest.setuid?.
   #
   def setuid?: () -> bool
 
+  # <!--
+  #   rdoc-file=ext/pathname/pathname.c
+  #   - size()
+  # -->
   # See FileTest.size.
   #
   def size: () -> Integer
 
+  # <!--
+  #   rdoc-file=ext/pathname/pathname.c
+  #   - size?()
+  # -->
   # See FileTest.size?.
   #
   def size?: () -> Integer?
 
+  # <!--
+  #   rdoc-file=ext/pathname/pathname.c
+  #   - socket?()
+  # -->
   # See FileTest.socket?.
   #
   def socket?: () -> untyped
 
+  # <!--
+  #   rdoc-file=ext/pathname/pathname.c
+  #   - split()
+  # -->
   # Returns the #dirname and the #basename in an Array.
   #
   # See File.split.
   #
-  def split: () -> [Pathname, Pathname]
+  def split: () -> [ Pathname, Pathname ]
 
+  # <!--
+  #   rdoc-file=ext/pathname/pathname.c
+  #   - stat()
+  # -->
   # Returns a File::Stat object.
   #
   # See File.stat.
   #
   def stat: () -> File::Stat
 
+  # <!--
+  #   rdoc-file=ext/pathname/pathname.c
+  #   - sticky?()
+  # -->
   # See FileTest.sticky?.
   #
   def sticky?: () -> untyped
 
+  # <!--
+  #   rdoc-file=ext/pathname/pathname.c
+  #   - sub(*args)
+  # -->
   # Return a pathname which is substituted by String#sub.
   #
   #     path1 = Pathname.new('/usr/bin/perl')
@@ -953,6 +1192,10 @@ class Pathname
   def sub: (Regexp | string pattern, string | Hash[String, String] replacement) -> Pathname
          | (Regexp | string pattern) { (String match) -> string } -> Pathname
 
+  # <!--
+  #   rdoc-file=ext/pathname/pathname.c
+  #   - sub_ext(p1)
+  # -->
   # Return a pathname with `repl` added as a suffix to the basename.
   #
   # If self has no extension part, `repl` is appended.
@@ -962,83 +1205,132 @@ class Pathname
   #
   def sub_ext: (string replacement) -> Pathname
 
+  # <!--
+  #   rdoc-file=ext/pathname/pathname.c
+  #   - symlink?()
+  # -->
   # See FileTest.symlink?.
   #
   def symlink?: () -> untyped
 
+  # <!--
+  #   rdoc-file=ext/pathname/pathname.c
+  #   - pathname.sysopen([mode, [perm]])  -> fixnum
+  # -->
   # See IO.sysopen.
   #
   def sysopen: (?String mode, ?Integer perm) -> Integer
 
+  # <!--
+  #   rdoc-file=ext/pathname/pathname.c
+  #   - pathname.taint -> obj
+  # -->
   # Returns pathname.  This method is deprecated and will be removed in Ruby 3.2.
   #
   def taint: () -> Pathname
 
+  # <!-- rdoc-file=ext/pathname/pathname.c -->
   # Return the path as a String.
   #
   # to_path is implemented so Pathname objects are usable with File.open, etc.
   #
   def to_path: () -> String
 
+  # <!--
+  #   rdoc-file=ext/pathname/pathname.c
+  #   - pathname.to_s             -> string
+  #   - pathname.to_path          -> string
+  # -->
   # Return the path as a String.
   #
   # to_path is implemented so Pathname objects are usable with File.open, etc.
   #
   alias to_s to_path
 
+  # <!--
+  #   rdoc-file=ext/pathname/pathname.c
+  #   - truncate(p1)
+  # -->
   # Truncates the file to `length` bytes.
   #
   # See File.truncate.
   #
   def truncate: (Integer length) -> 0
 
+  # <!--
+  #   rdoc-file=ext/pathname/pathname.c
+  #   - unlink()
+  # -->
   # Removes a file or directory, using File.unlink if `self` is a file, or
   # Dir.unlink as necessary.
   #
   def unlink: () -> Integer
 
+  # <!--
+  #   rdoc-file=ext/pathname/pathname.c
+  #   - pathname.untaint -> obj
+  # -->
   # Returns pathname.  This method is deprecated and will be removed in Ruby 3.2.
   #
   def untaint: () -> Pathname
 
+  # <!--
+  #   rdoc-file=ext/pathname/pathname.c
+  #   - utime(p1, p2)
+  # -->
   # Update the access and modification times of the file.
   #
   # See File.utime.
   #
   def utime: (Integer | Time atime, Integer | Time mtime) -> Integer
 
+  # <!--
+  #   rdoc-file=ext/pathname/pathname.c
+  #   - world_readable?()
+  # -->
   # See FileTest.world_readable?.
   #
   def world_readable?: () -> (Integer | nil)
 
+  # <!--
+  #   rdoc-file=ext/pathname/pathname.c
+  #   - world_writable?()
+  # -->
   # See FileTest.world_writable?.
   #
   def world_writable?: () -> (Integer | nil)
 
+  # <!--
+  #   rdoc-file=ext/pathname/pathname.c
+  #   - writable?()
+  # -->
   # See FileTest.writable?.
   #
   def writable?: () -> bool
 
+  # <!--
+  #   rdoc-file=ext/pathname/pathname.c
+  #   - writable_real?()
+  # -->
   # See FileTest.writable_real?.
   #
   def writable_real?: () -> bool
 
+  # <!--
+  #   rdoc-file=ext/pathname/pathname.c
+  #   - pathname.write(string, [offset] )   => fixnum
+  #   - pathname.write(string, [offset], open_args )   => fixnum
+  # -->
   # Writes `contents` to the file.
   #
   # See File.write.
   #
-  def write: (String content, ?Integer offset,
-              # open_args
-              ?mode: Integer | String,
-              ?flags: Integer,
-              ?external_encoding: encoding,
-              ?internal_encoding: encoding,
-              ?encoding: encoding,
-              ?textmode: boolish,
-              ?binmode: boolish,
-              ?autoclose: boolish,
-             ) -> Integer
+  def write: (String content, ?Integer offset, ?mode: Integer | String, ?flags: Integer, ?external_encoding: encoding, ?internal_encoding: encoding, ?encoding: encoding, ?textmode: boolish, ?binmode: boolish, ?autoclose: boolish) -> Integer
 
+  # <!--
+  #   rdoc-file=ext/pathname/pathname.c
+  #   - zero?()
+  # -->
   # See FileTest.zero?.
   #
   def zero?: () -> bool
@@ -1057,6 +1349,10 @@ class Pathname
 
   def has_trailing_separator?: (untyped path) -> untyped
 
+  # <!--
+  #   rdoc-file=ext/pathname/pathname.c
+  #   - new(p1)
+  # -->
   # Create a Pathname object from the given String (or String-like object). If
   # `path` contains a NULL character (`\0`), an ArgumentError is raised.
   #
@@ -1077,9 +1373,14 @@ class Pathname
   TO_PATH: Symbol
 end
 
+%a{annotate:rdoc:skip}
 module Kernel
   private
 
+  # <!--
+  #   rdoc-file=ext/pathname/pathname.c
+  #   - Pathname(path)  -> pathname
+  # -->
   # Creates a new Pathname object from the given string, `path`, and returns
   # pathname object.
   #

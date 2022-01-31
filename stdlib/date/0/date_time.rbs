@@ -1,6 +1,9 @@
+# <!-- rdoc-file=ext/date/date_core.c -->
 # ## DateTime
 #
 # A subclass of Date that easily handles date, hour, minute, second, and offset.
+#
+# DateTime class is considered deprecated. Use Time class.
 #
 # DateTime does not consider any leap seconds, does not track any summer time
 # rules.
@@ -59,17 +62,17 @@
 # ### When should you use DateTime and when should you use Time?
 #
 # It's a common misconception that [William
-# Shakespeare](http://en.wikipedia.org/wiki/William_Shakespeare) and [Miguel de
-# Cervantes](http://en.wikipedia.org/wiki/Miguel_de_Cervantes) died on the same
+# Shakespeare](https://en.wikipedia.org/wiki/William_Shakespeare) and [Miguel de
+# Cervantes](https://en.wikipedia.org/wiki/Miguel_de_Cervantes) died on the same
 # day in history - so much so that UNESCO named April 23 as [World Book Day
-# because of this fact](http://en.wikipedia.org/wiki/World_Book_Day). However,
+# because of this fact](https://en.wikipedia.org/wiki/World_Book_Day). However,
 # because England hadn't yet adopted the [Gregorian Calendar
-# Reform](http://en.wikipedia.org/wiki/Gregorian_calendar#Gregorian_reform) (and
-# wouldn't until
-# [1752](http://en.wikipedia.org/wiki/Calendar_(New_Style)_Act_1750)) their
+# Reform](https://en.wikipedia.org/wiki/Gregorian_calendar#Gregorian_reform)
+# (and wouldn't until
+# [1752](https://en.wikipedia.org/wiki/Calendar_(New_Style)_Act_1750)) their
 # deaths are actually 10 days apart. Since Ruby's Time class implements a
 # [proleptic Gregorian
-# calendar](http://en.wikipedia.org/wiki/Proleptic_Gregorian_calendar) and has
+# calendar](https://en.wikipedia.org/wiki/Proleptic_Gregorian_calendar) and has
 # no concept of calendar reform there's no way to express this with Time
 # objects. This is where DateTime steps in:
 #
@@ -112,7 +115,7 @@
 #      #=> Fri, 04 May 1753 00:00:00 +0000
 #
 # As you can see, if we're accurately tracking the number of [solar
-# years](http://en.wikipedia.org/wiki/Tropical_year) since Shakespeare's
+# years](https://en.wikipedia.org/wiki/Tropical_year) since Shakespeare's
 # birthday then the correct anniversary date would be the 4th May and not the
 # 23rd April.
 #
@@ -122,12 +125,17 @@
 # a historical context you'll want to use DateTime to avoid making the same
 # mistakes as UNESCO. If you also have to deal with timezones then best of luck
 # - just bear in mind that you'll probably be dealing with [local solar
-# times](http://en.wikipedia.org/wiki/Solar_time), since it wasn't until the
+# times](https://en.wikipedia.org/wiki/Solar_time), since it wasn't until the
 # 19th century that the introduction of the railways necessitated the need for
-# [Standard Time](http://en.wikipedia.org/wiki/Standard_time#Great_Britain) and
+# [Standard Time](https://en.wikipedia.org/wiki/Standard_time#Great_Britain) and
 # eventually timezones.
 #
 class DateTime < Date
+  # <!--
+  #   rdoc-file=ext/date/date_core.c
+  #   - DateTime.civil([year=-4712[, month=1[, mday=1[, hour=0[, minute=0[, second=0[, offset=0[, start=Date::ITALY]]]]]]]])  ->  datetime
+  #   - DateTime.new([year=-4712[, month=1[, mday=1[, hour=0[, minute=0[, second=0[, offset=0[, start=Date::ITALY]]]]]]]])    ->  datetime
+  # -->
   # Creates a DateTime object denoting the given calendar date.
   #
   #     DateTime.new(2001,2,3)    #=> #<DateTime: 2001-02-03T00:00:00+00:00 ...>
@@ -138,6 +146,10 @@ class DateTime < Date
   #
   def initialize: (?Integer year, ?Integer month, ?Integer mday, ?Integer hour, ?Integer minute, ?Integer second, ?Integer offset, ?Integer start) -> void
 
+  # <!--
+  #   rdoc-file=ext/date/date_core.c
+  #   - DateTime._strptime(string[, format='%FT%T%z'])  ->  hash
+  # -->
   # Parses the given representation of date and time with the given template, and
   # returns a hash of parsed elements.  _strptime does not support specification
   # of flags and width unlike strftime.
@@ -146,6 +158,11 @@ class DateTime < Date
   #
   def self._strptime: (String str, ?String format) -> Hash[Symbol, Integer | String]
 
+  # <!--
+  #   rdoc-file=ext/date/date_core.c
+  #   - DateTime.civil([year=-4712[, month=1[, mday=1[, hour=0[, minute=0[, second=0[, offset=0[, start=Date::ITALY]]]]]]]])  ->  datetime
+  #   - DateTime.new([year=-4712[, month=1[, mday=1[, hour=0[, minute=0[, second=0[, offset=0[, start=Date::ITALY]]]]]]]])    ->  datetime
+  # -->
   # Creates a DateTime object denoting the given calendar date.
   #
   #     DateTime.new(2001,2,3)    #=> #<DateTime: 2001-02-03T00:00:00+00:00 ...>
@@ -156,6 +173,10 @@ class DateTime < Date
   #
   def self.civil: (?Integer year, ?Integer month, ?Integer mday, ?Integer hour, ?Integer minute, ?Integer second, ?Integer offset, ?Integer start) -> DateTime
 
+  # <!--
+  #   rdoc-file=ext/date/date_core.c
+  #   - DateTime.commercial([cwyear=-4712[, cweek=1[, cwday=1[, hour=0[, minute=0[, second=0[, offset=0[, start=Date::ITALY]]]]]]]])  ->  datetime
+  # -->
   # Creates a DateTime object denoting the given week date.
   #
   #     DateTime.commercial(2001) #=> #<DateTime: 2001-01-01T00:00:00+00:00 ...>
@@ -165,14 +186,26 @@ class DateTime < Date
   #
   def self.commercial: (?Integer cwyear, ?Integer cweek, ?Integer cwday, ?Integer hour, ?Integer minute, ?Integer second, ?Integer offset, ?Integer start) -> DateTime
 
+  # <!--
+  #   rdoc-file=ext/date/date_core.c
+  #   - DateTime.httpdate(string='Mon, 01 Jan -4712 00:00:00 GMT'[, start=Date::ITALY])  ->  datetime
+  # -->
   # Creates a new DateTime object by parsing from a string according to some RFC
   # 2616 format.
   #
   #     DateTime.httpdate('Sat, 03 Feb 2001 04:05:06 GMT')
   #                               #=> #<DateTime: 2001-02-03T04:05:06+00:00 ...>
   #
+  # Raise an ArgumentError when the string length is longer than *limit*. You can
+  # stop this check by passing `limit: nil`, but note that it may take a long time
+  # to parse.
+  #
   def self.httpdate: (String str, ?Integer start) -> DateTime
 
+  # <!--
+  #   rdoc-file=ext/date/date_core.c
+  #   - DateTime.iso8601(string='-4712-01-01T00:00:00+00:00'[, start=Date::ITALY], limit: 128)  ->  datetime
+  # -->
   # Creates a new DateTime object by parsing from a string according to some
   # typical ISO 8601 formats.
   #
@@ -183,8 +216,16 @@ class DateTime < Date
   #     DateTime.iso8601('2001-W05-6T04:05:06+07:00')
   #                               #=> #<DateTime: 2001-02-03T04:05:06+07:00 ...>
   #
+  # Raise an ArgumentError when the string length is longer than *limit*. You can
+  # stop this check by passing `limit: nil`, but note that it may take a long time
+  # to parse.
+  #
   def self.iso8601: (String str, ?Integer start) -> DateTime
 
+  # <!--
+  #   rdoc-file=ext/date/date_core.c
+  #   - DateTime.jd([jd=0[, hour=0[, minute=0[, second=0[, offset=0[, start=Date::ITALY]]]]]])  ->  datetime
+  # -->
   # Creates a DateTime object denoting the given chronological Julian day number.
   #
   #     DateTime.jd(2451944)      #=> #<DateTime: 2001-02-03T00:00:00+00:00 ...>
@@ -194,6 +235,10 @@ class DateTime < Date
   #
   def self.jd: (?Integer jd, ?Integer hour, ?Integer minute, ?Integer second, ?Integer offset, ?Integer start) -> DateTime
 
+  # <!--
+  #   rdoc-file=ext/date/date_core.c
+  #   - DateTime.jisx0301(string='-4712-01-01T00:00:00+00:00'[, start=Date::ITALY], limit: 128)  ->  datetime
+  # -->
   # Creates a new DateTime object by parsing from a string according to some
   # typical JIS X 0301 formats.
   #
@@ -205,14 +250,26 @@ class DateTime < Date
   #     DateTime.jisx0301('13.02.03T04:05:06+07:00')
   #                               #=> #<DateTime: 2001-02-03T04:05:06+07:00 ...>
   #
+  # Raise an ArgumentError when the string length is longer than *limit*. You can
+  # stop this check by passing `limit: nil`, but note that it may take a long time
+  # to parse.
+  #
   def self.jisx0301: (String str, ?Integer start) -> DateTime
 
+  # <!--
+  #   rdoc-file=ext/date/date_core.c
+  #   - DateTime.now([start=Date::ITALY])  ->  datetime
+  # -->
   # Creates a DateTime object denoting the present time.
   #
   #     DateTime.now              #=> #<DateTime: 2011-06-11T21:20:44+09:00 ...>
   #
   def self.now: (?Integer start) -> DateTime
 
+  # <!--
+  #   rdoc-file=ext/date/date_core.c
+  #   - DateTime.ordinal([year=-4712[, yday=1[, hour=0[, minute=0[, second=0[, offset=0[, start=Date::ITALY]]]]]]])  ->  datetime
+  # -->
   # Creates a DateTime object denoting the given ordinal date.
   #
   #     DateTime.ordinal(2001,34) #=> #<DateTime: 2001-02-03T00:00:00+00:00 ...>
@@ -223,8 +280,16 @@ class DateTime < Date
   #
   def self.ordinal: (?Integer year, ?Integer yday, ?Integer hour, ?Integer minute, ?Integer second, ?Integer offset, ?Integer start) -> DateTime
 
+  # <!--
+  #   rdoc-file=ext/date/date_core.c
+  #   - DateTime.parse(string='-4712-01-01T00:00:00+00:00'[, comp=true[, start=Date::ITALY]], limit: 128)  ->  datetime
+  # -->
   # Parses the given representation of date and time, and creates a DateTime
-  # object.  This method does not function as a validator.
+  # object.
+  #
+  # This method *does not* function as a validator.  If the input string does not
+  # match valid formats strictly, you may get a cryptic result.  Should consider
+  # to use `DateTime.strptime` instead of this method as possible.
   #
   # If the optional second argument is true and the detected year is in the range
   # "00" to "99", makes it full.
@@ -236,32 +301,66 @@ class DateTime < Date
   #     DateTime.parse('3rd Feb 2001 04:05:06 PM')
   #                               #=> #<DateTime: 2001-02-03T16:05:06+00:00 ...>
   #
+  # Raise an ArgumentError when the string length is longer than *limit*. You can
+  # stop this check by passing `limit: nil`, but note that it may take a long time
+  # to parse.
+  #
   def self.parse: (String str, ?boolish complete, ?Integer start) -> DateTime
 
+  # <!--
+  #   rdoc-file=ext/date/date_core.c
+  #   - DateTime.rfc2822(string='Mon, 1 Jan -4712 00:00:00 +0000'[, start=Date::ITALY], limit: 128)  ->  datetime
+  #   - DateTime.rfc822(string='Mon, 1 Jan -4712 00:00:00 +0000'[, start=Date::ITALY], limit: 128)   ->  datetime
+  # -->
   # Creates a new DateTime object by parsing from a string according to some
   # typical RFC 2822 formats.
   #
   #     DateTime.rfc2822('Sat, 3 Feb 2001 04:05:06 +0700')
   #                              #=> #<DateTime: 2001-02-03T04:05:06+07:00 ...>
   #
+  # Raise an ArgumentError when the string length is longer than *limit*. You can
+  # stop this check by passing `limit: nil`, but note that it may take a long time
+  # to parse.
+  #
   def self.rfc2822: (String str, ?Integer start) -> DateTime
 
+  # <!--
+  #   rdoc-file=ext/date/date_core.c
+  #   - DateTime.rfc3339(string='-4712-01-01T00:00:00+00:00'[, start=Date::ITALY], limit: 128)  ->  datetime
+  # -->
   # Creates a new DateTime object by parsing from a string according to some
   # typical RFC 3339 formats.
   #
   #     DateTime.rfc3339('2001-02-03T04:05:06+07:00')
   #                               #=> #<DateTime: 2001-02-03T04:05:06+07:00 ...>
   #
+  # Raise an ArgumentError when the string length is longer than *limit*. You can
+  # stop this check by passing `limit: nil`, but note that it may take a long time
+  # to parse.
+  #
   def self.rfc3339: (String str, ?Integer start) -> DateTime
 
+  # <!--
+  #   rdoc-file=ext/date/date_core.c
+  #   - DateTime.rfc2822(string='Mon, 1 Jan -4712 00:00:00 +0000'[, start=Date::ITALY], limit: 128)  ->  datetime
+  #   - DateTime.rfc822(string='Mon, 1 Jan -4712 00:00:00 +0000'[, start=Date::ITALY], limit: 128)   ->  datetime
+  # -->
   # Creates a new DateTime object by parsing from a string according to some
   # typical RFC 2822 formats.
   #
   #     DateTime.rfc2822('Sat, 3 Feb 2001 04:05:06 +0700')
   #                              #=> #<DateTime: 2001-02-03T04:05:06+07:00 ...>
   #
+  # Raise an ArgumentError when the string length is longer than *limit*. You can
+  # stop this check by passing `limit: nil`, but note that it may take a long time
+  # to parse.
+  #
   def self.rfc822: (String str, ?Integer start) -> DateTime
 
+  # <!--
+  #   rdoc-file=ext/date/date_core.c
+  #   - DateTime.strptime([string='-4712-01-01T00:00:00+00:00'[, format='%FT%T%z'[ ,start=Date::ITALY]]])  ->  datetime
+  # -->
   # Parses the given representation of date and time with the given template, and
   # creates a DateTime object.  strptime does not support specification of flags
   # and width unlike strftime.
@@ -287,22 +386,39 @@ class DateTime < Date
   #
   def self.strptime: (String str, ?String format, ?Integer start) -> DateTime
 
+  # <!--
+  #   rdoc-file=ext/date/date_core.c
+  #   - DateTime.xmlschema(string='-4712-01-01T00:00:00+00:00'[, start=Date::ITALY], limit: 128)  ->  datetime
+  # -->
   # Creates a new DateTime object by parsing from a string according to some
   # typical XML Schema formats.
   #
   #     DateTime.xmlschema('2001-02-03T04:05:06+07:00')
   #                               #=> #<DateTime: 2001-02-03T04:05:06+07:00 ...>
   #
+  # Raise an ArgumentError when the string length is longer than *limit*. You can
+  # stop this check by passing `limit: nil`, but note that it may take a long time
+  # to parse.
+  #
   def self.xmlschema: (String str, ?Integer start) -> DateTime
 
   public
 
+  # <!--
+  #   rdoc-file=ext/date/date_core.c
+  #   - d.hour  ->  fixnum
+  # -->
   # Returns the hour (0-23).
   #
   #     DateTime.new(2001,2,3,4,5,6).hour         #=> 4
   #
   def hour: () -> Integer
 
+  # <!--
+  #   rdoc-file=ext/date/date_core.c
+  #   - dt.iso8601([n=0])    ->  string
+  #   - dt.xmlschema([n=0])  ->  string
+  # -->
   # This method is equivalent to strftime('%FT%T%:z'). The optional argument `n`
   # is the number of digits for fractional seconds.
   #
@@ -311,6 +427,10 @@ class DateTime < Date
   #
   def iso8601: (?Integer n) -> String
 
+  # <!--
+  #   rdoc-file=ext/date/date_core.c
+  #   - dt.jisx0301([n=0])  ->  string
+  # -->
   # Returns a string in a JIS X 0301 format. The optional argument `n` is the
   # number of digits for fractional seconds.
   #
@@ -319,18 +439,28 @@ class DateTime < Date
   #
   def jisx0301: (?Integer n) -> String
 
+  # <!--
+  #   rdoc-file=ext/date/date_core.c
+  #   - d.min     ->  fixnum
+  #   - d.minute  ->  fixnum
+  # -->
   # Returns the minute (0-59).
   #
   #     DateTime.new(2001,2,3,4,5,6).min          #=> 5
   #
   def min: () -> Integer
 
+  # <!-- rdoc-file=ext/date/date_core.c -->
   # Returns the minute (0-59).
   #
   #     DateTime.new(2001,2,3,4,5,6).min          #=> 5
   #
   def minute: () -> Integer
 
+  # <!--
+  #   rdoc-file=ext/date/date_core.c
+  #   - d.new_offset([offset=0])  ->  date
+  # -->
   # Duplicates self and resets its offset.
   #
   #     d = DateTime.new(2001,2,3,4,5,6,'-02:00')
@@ -339,12 +469,20 @@ class DateTime < Date
   #
   def new_offset: (?String offset) -> DateTime
 
+  # <!--
+  #   rdoc-file=ext/date/date_core.c
+  #   - d.offset  ->  rational
+  # -->
   # Returns the offset.
   #
   #     DateTime.parse('04pm+0730').offset        #=> (5/16)
   #
   def offset: () -> Rational
 
+  # <!--
+  #   rdoc-file=ext/date/date_core.c
+  #   - dt.rfc3339([n=0])  ->  string
+  # -->
   # This method is equivalent to strftime('%FT%T%:z'). The optional argument `n`
   # is the number of digits for fractional seconds.
   #
@@ -353,30 +491,46 @@ class DateTime < Date
   #
   def rfc3339: (?Integer n) -> String
 
+  # <!--
+  #   rdoc-file=ext/date/date_core.c
+  #   - d.sec     ->  fixnum
+  #   - d.second  ->  fixnum
+  # -->
   # Returns the second (0-59).
   #
   #     DateTime.new(2001,2,3,4,5,6).sec          #=> 6
   #
   def sec: () -> Integer
 
+  # <!--
+  #   rdoc-file=ext/date/date_core.c
+  #   - d.sec_fraction     ->  rational
+  #   - d.second_fraction  ->  rational
+  # -->
   # Returns the fractional part of the second.
   #
   #     DateTime.new(2001,2,3,4,5,6.5).sec_fraction       #=> (1/2)
   #
   def sec_fraction: () -> Rational
 
+  # <!-- rdoc-file=ext/date/date_core.c -->
   # Returns the second (0-59).
   #
   #     DateTime.new(2001,2,3,4,5,6).sec          #=> 6
   #
   def second: () -> Integer
 
+  # <!-- rdoc-file=ext/date/date_core.c -->
   # Returns the fractional part of the second.
   #
   #     DateTime.new(2001,2,3,4,5,6.5).sec_fraction       #=> (1/2)
   #
   def second_fraction: () -> Rational
 
+  # <!--
+  #   rdoc-file=ext/date/date_core.c
+  #   - dt.strftime([format='%FT%T%:z'])  ->  string
+  # -->
   # Formats date according to the directives in the given format string. The
   # directives begin with a percent (%) character. Any text not listed as a
   # directive will be passed through to the output string.
@@ -484,7 +638,7 @@ class DateTime < Date
   #       %c - date and time (%a %b %e %T %Y)
   #       %D - Date (%m/%d/%y)
   #       %F - The ISO 8601 date format (%Y-%m-%d)
-  #       %v - VMS date (%e-%b-%Y)
+  #       %v - VMS date (%e-%^b-%Y)
   #       %x - Same as %D
   #       %X - Same as %T
   #       %r - 12-hour time (%I:%M:%S %p)
@@ -546,14 +700,26 @@ class DateTime < Date
   #
   def strftime: (?String format) -> String
 
+  # <!--
+  #   rdoc-file=ext/date/date_core.c
+  #   - dt.to_date  ->  date
+  # -->
   # Returns a Date object which denotes self.
   #
   def to_date: () -> Date
 
+  # <!--
+  #   rdoc-file=ext/date/date_core.c
+  #   - dt.to_datetime  ->  self
+  # -->
   # Returns self.
   #
   def to_datetime: () -> DateTime
 
+  # <!--
+  #   rdoc-file=ext/date/date_core.c
+  #   - dt.to_s  ->  string
+  # -->
   # Returns a string in an ISO 8601 format. (This method doesn't use the expanded
   # representations.)
   #
@@ -562,10 +728,15 @@ class DateTime < Date
   #
   def to_s: () -> String
 
+  # <!--
+  #   rdoc-file=ext/date/date_core.c
+  #   - dt.to_time  ->  time
+  # -->
   # Returns a Time object which denotes self.
   #
   def to_time: () -> Time
 
+  # <!-- rdoc-file=ext/date/date_core.c -->
   # This method is equivalent to strftime('%FT%T%:z'). The optional argument `n`
   # is the number of digits for fractional seconds.
   #
@@ -574,6 +745,10 @@ class DateTime < Date
   #
   def xmlschema: (?Integer n) -> String
 
+  # <!--
+  #   rdoc-file=ext/date/date_core.c
+  #   - d.zone  ->  string
+  # -->
   # Returns the timezone.
   #
   #     DateTime.parse('04pm+0730').zone          #=> "+07:30"

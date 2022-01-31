@@ -1,3 +1,4 @@
+# <!-- rdoc-file=ext/strscan/strscan.c -->
 # StringScanner provides for lexical scanning operations on a String.  Here is
 # an example of its usage:
 #
@@ -66,7 +67,7 @@
 #
 # ### Finding Where we Are
 #
-# *   #beginning_of_line? (#bol?)
+# *   #beginning_of_line? (`#bol?`)
 # *   #eos?
 # *   #rest?
 # *   #rest_size
@@ -85,16 +86,14 @@
 # *   #matched
 # *   #matched?
 # *   #matched_size
-#
-#
-# :
+# *   `#[]`
 # *   #pre_match
 # *   #post_match
 #
 #
 # ### Miscellaneous
 #
-# *   <<
+# *   `<<`
 # *   #concat
 # *   #string
 # *   #string=
@@ -102,13 +101,19 @@
 #
 #
 # There are aliases to several of the methods.
+#
 class StringScanner
+  # <!--
+  #   rdoc-file=ext/strscan/strscan.c
+  #   - StringScanner.must_C_version
+  # -->
   # This method is defined for backward compatibility.
   #
   def self.must_C_version: () -> self
 
   public
 
+  # <!-- rdoc-file=ext/strscan/strscan.c -->
   # Appends `str` to the string being scanned. This method does not affect scan
   # pointer.
   #
@@ -120,6 +125,10 @@ class StringScanner
   #
   def <<: (String) -> self
 
+  # <!--
+  #   rdoc-file=ext/strscan/strscan.c
+  #   - [](n)
+  # -->
   # Returns the n-th subgroup in the most recent match.
   #
   #     s = StringScanner.new("Fri Dec 12 1975 14:39")
@@ -145,7 +154,12 @@ class StringScanner
   #
   def []: (Integer) -> String?
 
-  # Returns `true` iff the scan pointer is at the beginning of the line.
+  # <!--
+  #   rdoc-file=ext/strscan/strscan.c
+  #   - beginning_of_line?()
+  # -->
+  # Returns `true` if and only if the scan pointer is at the beginning of the
+  # line.
   #
   #     s = StringScanner.new("test\ntest\n")
   #     s.bol?           # => true
@@ -160,6 +174,10 @@ class StringScanner
 
   alias bol? beginning_of_line?
 
+  # <!--
+  #   rdoc-file=ext/strscan/strscan.c
+  #   - captures
+  # -->
   # Returns the subgroups in the most recent match (not including the full match).
   # If nothing was priorly matched, it returns nil.
   #
@@ -171,6 +189,10 @@ class StringScanner
   #
   def captures: () -> Array[String]?
 
+  # <!--
+  #   rdoc-file=ext/strscan/strscan.c
+  #   - charpos()
+  # -->
   # Returns the character position of the scan pointer.  In the 'reset' position,
   # this value is zero.  In the 'terminated' position (i.e. the string is
   # exhausted), this value is the size of the string.
@@ -185,6 +207,10 @@ class StringScanner
   #
   def charpos: () -> Integer
 
+  # <!--
+  #   rdoc-file=ext/strscan/strscan.c
+  #   - check(pattern)
+  # -->
   # This returns the value that #scan would return, without advancing the scan
   # pointer.  The match register is affected, though.
   #
@@ -199,6 +225,10 @@ class StringScanner
   #
   def check: (Regexp) -> String?
 
+  # <!--
+  #   rdoc-file=ext/strscan/strscan.c
+  #   - check_until(pattern)
+  # -->
   # This returns the value that #scan_until would return, without advancing the
   # scan pointer.  The match register is affected, though.
   #
@@ -211,16 +241,42 @@ class StringScanner
   #
   def check_until: (Regexp) -> String
 
+  # <!--
+  #   rdoc-file=ext/strscan/strscan.c
+  #   - clear()
+  # -->
   # Equivalent to #terminate. This method is obsolete; use #terminate instead.
   #
   def clear: () -> void
 
+  # <!--
+  #   rdoc-file=ext/strscan/strscan.c
+  #   - concat(str)
+  #   - <<(str)
+  # -->
+  # Appends `str` to the string being scanned. This method does not affect scan
+  # pointer.
+  #
+  #     s = StringScanner.new("Fri Dec 12 1975 14:39")
+  #     s.scan(/Fri /)
+  #     s << " +1000 GMT"
+  #     s.string            # -> "Fri Dec 12 1975 14:39 +1000 GMT"
+  #     s.scan(/Dec/)       # -> "Dec"
+  #
   alias concat <<
 
+  # <!--
+  #   rdoc-file=ext/strscan/strscan.c
+  #   - empty?()
+  # -->
   # Equivalent to #eos?. This method is obsolete, use #eos? instead.
   #
   def empty?: () -> bool
 
+  # <!--
+  #   rdoc-file=ext/strscan/strscan.c
+  #   - eos?()
+  # -->
   # Returns `true` if the scan pointer is at the end of the string.
   #
   #     s = StringScanner.new('test string')
@@ -232,6 +288,10 @@ class StringScanner
   #
   def eos?: () -> bool
 
+  # <!--
+  #   rdoc-file=ext/strscan/strscan.c
+  #   - exist?(pattern)
+  # -->
   # Looks *ahead* to see if the `pattern` exists *anywhere* in the string, without
   # advancing the scan pointer.  This predicates whether a #scan_until will return
   # a value.
@@ -244,6 +304,10 @@ class StringScanner
   #
   def exist?: (Regexp) -> Integer?
 
+  # <!--
+  #   rdoc-file=ext/strscan/strscan.c
+  #   - scanner.fixed_anchor? -> true or false
+  # -->
   # Whether `scanner` uses fixed anchor mode or not.
   #
   # If fixed anchor mode is used, `\A` always matches the beginning of the string.
@@ -251,6 +315,10 @@ class StringScanner
   #
   def fixed_anchor?: () -> bool
 
+  # <!--
+  #   rdoc-file=ext/strscan/strscan.c
+  #   - get_byte()
+  # -->
   # Scans one byte and returns it. This method is not multibyte character
   # sensitive. See also: #getch.
   #
@@ -266,10 +334,18 @@ class StringScanner
   #
   def get_byte: () -> String?
 
+  # <!--
+  #   rdoc-file=ext/strscan/strscan.c
+  #   - getbyte()
+  # -->
   # Equivalent to #get_byte. This method is obsolete; use #get_byte instead.
   #
   def getbyte: () -> String?
 
+  # <!--
+  #   rdoc-file=ext/strscan/strscan.c
+  #   - getch()
+  # -->
   # Scans one character and returns it. This method is multibyte character
   # sensitive.
   #
@@ -284,6 +360,10 @@ class StringScanner
   #
   def getch: () -> String?
 
+  # <!--
+  #   rdoc-file=ext/strscan/strscan.c
+  #   - inspect()
+  # -->
   # Returns a string that represents the StringScanner object, showing:
   # *   the current position
   # *   the size of the string
@@ -296,6 +376,10 @@ class StringScanner
   #
   def inspect: () -> String
 
+  # <!--
+  #   rdoc-file=ext/strscan/strscan.c
+  #   - match?(pattern)
+  # -->
   # Tests whether the given `pattern` is matched from the current scan pointer.
   # Returns the length of the match, or `nil`.  The scan pointer is not advanced.
   #
@@ -307,6 +391,10 @@ class StringScanner
   #
   def match?: (Regexp) -> Integer?
 
+  # <!--
+  #   rdoc-file=ext/strscan/strscan.c
+  #   - matched()
+  # -->
   # Returns the last matched string.
   #
   #     s = StringScanner.new('test string')
@@ -315,7 +403,11 @@ class StringScanner
   #
   def matched: () -> String?
 
-  # Returns `true` iff the last match was successful.
+  # <!--
+  #   rdoc-file=ext/strscan/strscan.c
+  #   - matched?()
+  # -->
+  # Returns `true` if and only if the last match was successful.
   #
   #     s = StringScanner.new('test string')
   #     s.match?(/\w+/)     # => 4
@@ -325,6 +417,10 @@ class StringScanner
   #
   def matched?: () -> bool
 
+  # <!--
+  #   rdoc-file=ext/strscan/strscan.c
+  #   - matched_size()
+  # -->
   # Returns the size of the most recent match in bytes, or `nil` if there was no
   # recent match.  This is different than `matched.size`, which will return the
   # size in characters.
@@ -337,6 +433,10 @@ class StringScanner
   #
   def matched_size: () -> Integer?
 
+  # <!--
+  #   rdoc-file=ext/strscan/strscan.c
+  #   - peek(len)
+  # -->
   # Extracts a string corresponding to `string[pos,len]`, without advancing the
   # scan pointer.
   #
@@ -346,10 +446,15 @@ class StringScanner
   #
   def peek: (Integer) -> String
 
+  # <!--
+  #   rdoc-file=ext/strscan/strscan.c
+  #   - peep(p1)
+  # -->
   # Equivalent to #peek. This method is obsolete; use #peek instead.
   #
   def peep: (Integer) -> String
 
+  # <!-- rdoc-file=ext/strscan/strscan.c -->
   # Returns the byte position of the scan pointer.  In the 'reset' position, this
   # value is zero.  In the 'terminated' position (i.e. the string is exhausted),
   # this value is the bytesize of the string.
@@ -365,6 +470,7 @@ class StringScanner
   #
   def pointer: () -> Integer
 
+  # <!-- rdoc-file=ext/strscan/strscan.c -->
   # Sets the byte position of the scan pointer.
   #
   #     s = StringScanner.new('test string')
@@ -373,6 +479,10 @@ class StringScanner
   #
   def pointer=: (Integer) -> Integer
 
+  # <!--
+  #   rdoc-file=ext/strscan/strscan.c
+  #   - pos()
+  # -->
   # Returns the byte position of the scan pointer.  In the 'reset' position, this
   # value is zero.  In the 'terminated' position (i.e. the string is exhausted),
   # this value is the bytesize of the string.
@@ -388,6 +498,10 @@ class StringScanner
   #
   def pos: () -> Integer
 
+  # <!--
+  #   rdoc-file=ext/strscan/strscan.c
+  #   - pos=(n)
+  # -->
   # Sets the byte position of the scan pointer.
   #
   #     s = StringScanner.new('test string')
@@ -396,6 +510,10 @@ class StringScanner
   #
   def pos=: (Integer) -> Integer
 
+  # <!--
+  #   rdoc-file=ext/strscan/strscan.c
+  #   - post_match()
+  # -->
   # Returns the ***post**-match* (in the regular expression sense) of the last
   # scan.
   #
@@ -407,6 +525,10 @@ class StringScanner
   #
   def post_match: () -> String
 
+  # <!--
+  #   rdoc-file=ext/strscan/strscan.c
+  #   - pre_match()
+  # -->
   # Returns the ***pre**-match* (in the regular expression sense) of the last
   # scan.
   #
@@ -418,17 +540,29 @@ class StringScanner
   #
   def pre_match: () -> String
 
+  # <!--
+  #   rdoc-file=ext/strscan/strscan.c
+  #   - reset()
+  # -->
   # Reset the scan pointer (index 0) and clear matching data.
   #
   def reset: () -> void
 
+  # <!--
+  #   rdoc-file=ext/strscan/strscan.c
+  #   - rest()
+  # -->
   # Returns the "rest" of the string (i.e. everything after the scan pointer). If
   # there is no more data (eos? = true), it returns `""`.
   #
   def rest: () -> String
 
-  # Returns true iff there is more data in the string.  See #eos?. This method is
-  # obsolete; use #eos? instead.
+  # <!--
+  #   rdoc-file=ext/strscan/strscan.c
+  #   - rest?()
+  # -->
+  # Returns true if and only if there is more data in the string.  See #eos?. This
+  # method is obsolete; use #eos? instead.
   #
   #     s = StringScanner.new('test string')
   #     s.eos?              # These two
@@ -436,15 +570,27 @@ class StringScanner
   #
   def rest?: () -> bool
 
+  # <!--
+  #   rdoc-file=ext/strscan/strscan.c
+  #   - rest_size()
+  # -->
   # `s.rest_size` is equivalent to `s.rest.size`.
   #
   def rest_size: () -> Integer
 
+  # <!--
+  #   rdoc-file=ext/strscan/strscan.c
+  #   - restsize()
+  # -->
   # `s.restsize` is equivalent to `s.rest_size`. This method is obsolete; use
   # #rest_size instead.
   #
   def restsize: () -> Integer
 
+  # <!--
+  #   rdoc-file=ext/strscan/strscan.c
+  #   - scan(pattern) => String
+  # -->
   # Tries to match with `pattern` at the current position. If there's a match, the
   # scanner advances the "scan pointer" and returns the matched string. Otherwise,
   # the scanner returns `nil`.
@@ -459,6 +605,10 @@ class StringScanner
   #
   def scan: (Regexp) -> String?
 
+  # <!--
+  #   rdoc-file=ext/strscan/strscan.c
+  #   - scan_full(pattern, advance_pointer_p, return_string_p)
+  # -->
   # Tests whether the given `pattern` is matched from the current scan pointer.
   # Advances the scan pointer if `advance_pointer_p` is true. Returns the matched
   # string if `return_string_p` is true. The match register is affected.
@@ -467,6 +617,10 @@ class StringScanner
   #
   def scan_full: (Regexp pattern, bool advance_pointer_p, bool return_string_p) -> untyped
 
+  # <!--
+  #   rdoc-file=ext/strscan/strscan.c
+  #   - scan_until(pattern)
+  # -->
   # Scans the string *until* the `pattern` is matched.  Returns the substring up
   # to and including the end of the match, advancing the scan pointer to that
   # location. If there is no match, `nil` is returned.
@@ -478,6 +632,10 @@ class StringScanner
   #
   def scan_until: (Regexp) -> String?
 
+  # <!--
+  #   rdoc-file=ext/strscan/strscan.c
+  #   - search_full(pattern, advance_pointer_p, return_string_p)
+  # -->
   # Scans the string *until* the `pattern` is matched. Advances the scan pointer
   # if `advance_pointer_p`, otherwise not. Returns the matched string if
   # `return_string_p` is true, otherwise returns the number of bytes advanced.
@@ -485,6 +643,10 @@ class StringScanner
   #
   def search_full: (Regexp pattern, bool advance_pointer_p, bool return_string_p) -> untyped
 
+  # <!--
+  #   rdoc-file=ext/strscan/strscan.c
+  #   - size
+  # -->
   # Returns the amount of subgroups in the most recent match. The full match
   # counts as a subgroup.
   #
@@ -494,6 +656,10 @@ class StringScanner
   #
   def size: () -> Integer
 
+  # <!--
+  #   rdoc-file=ext/strscan/strscan.c
+  #   - skip(pattern)
+  # -->
   # Attempts to skip over the given `pattern` beginning with the scan pointer. If
   # it matches, the scan pointer is advanced to the end of the match, and the
   # length of the match is returned.  Otherwise, `nil` is returned.
@@ -510,6 +676,10 @@ class StringScanner
   #
   def skip: (Regexp) -> Integer?
 
+  # <!--
+  #   rdoc-file=ext/strscan/strscan.c
+  #   - skip_until(pattern)
+  # -->
   # Advances the scan pointer until `pattern` is matched and consumed.  Returns
   # the number of bytes advanced, or `nil` if no match was found.
   #
@@ -525,19 +695,36 @@ class StringScanner
   #
   def skip_until: (Regexp) -> Integer?
 
+  # <!--
+  #   rdoc-file=ext/strscan/strscan.c
+  #   - string()
+  # -->
   # Returns the string being scanned.
   #
   def string: () -> String
 
+  # <!--
+  #   rdoc-file=ext/strscan/strscan.c
+  #   - string=(str)
+  # -->
   # Changes the string being scanned to `str` and resets the scanner. Returns
   # `str`.
   #
   def string=: (String) -> String
 
+  # <!--
+  #   rdoc-file=ext/strscan/strscan.c
+  #   - terminate
+  #   - clear
+  # -->
   # Sets the scan pointer to the end of the string and clear matching data.
   #
   def terminate: () -> void
 
+  # <!--
+  #   rdoc-file=ext/strscan/strscan.c
+  #   - unscan()
+  # -->
   # Sets the scan pointer to the previous position.  Only one previous position is
   # remembered, and it changes with each scanning operation.
   #
@@ -550,6 +737,10 @@ class StringScanner
   #
   def unscan: () -> void
 
+  # <!--
+  #   rdoc-file=ext/strscan/strscan.c
+  #   - scanner.values_at( i1, i2, ... iN )   -> an_array
+  # -->
   # Returns the subgroups in the most recent match at the given indices. If
   # nothing was priorly matched, it returns nil.
   #
@@ -563,6 +754,11 @@ class StringScanner
 
   private
 
+  # <!--
+  #   rdoc-file=ext/strscan/strscan.c
+  #   - StringScanner.new(string, fixed_anchor: false)
+  #   - StringScanner.new(string, dup = false)
+  # -->
   # Creates a new StringScanner object to scan over the given `string`.
   #
   # If `fixed_anchor` is `true`, `\A` always matches the beginning of the string.
@@ -572,6 +768,11 @@ class StringScanner
   #
   def initialize: (String, ?bool dup, ?fixed_anchor: bool) -> untyped
 
+  # <!--
+  #   rdoc-file=ext/strscan/strscan.c
+  #   - dup
+  #   - clone
+  # -->
   # Duplicates a StringScanner object.
   #
   def initialize_copy: (StringScanner) -> void

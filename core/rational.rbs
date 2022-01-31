@@ -1,14 +1,24 @@
+# <!-- rdoc-file=rational.c -->
 # A rational number can be represented as a pair of integer numbers: a/b (b>0),
 # where a is the numerator and b is the denominator. Integer a equals rational
 # a/1 mathematically.
 #
-# In Ruby, you can create rational objects with the Kernel#Rational, to_r, or
-# rationalize methods or by suffixing `r` to a literal. The return values will
-# be irreducible fractions.
+# You can create a Rational object explicitly with:
+#
+# *   A [rational
+#     literal](doc/syntax/literals_rdoc.html#label-Rational+Literals).
+#
+#
+# You can convert certain objects to Rationals with:
+#
+# *   Method [Rational](Kernel.html#method-i-Rational).
+#
+#
+# Examples
 #
 #     Rational(1)      #=> (1/1)
 #     Rational(2, 3)   #=> (2/3)
-#     Rational(4, -6)  #=> (-2/3)
+#     Rational(4, -6)  #=> (-2/3) # Reduced.
 #     3.to_r           #=> (3/1)
 #     2/3r             #=> (2/3)
 #
@@ -46,6 +56,10 @@ class Rational < Numeric
        | (Rational) -> Rational
        | (Numeric) -> Numeric
 
+  # <!--
+  #   rdoc-file=rational.c
+  #   - rat * numeric  ->  numeric
+  # -->
   # Performs multiplication.
   #
   #     Rational(2, 3)  * Rational(2, 3)   #=> (4/9)
@@ -58,6 +72,10 @@ class Rational < Numeric
        | (Complex) -> Complex
        | (Numeric) -> Numeric
 
+  # <!--
+  #   rdoc-file=rational.c
+  #   - rat ** numeric  ->  numeric
+  # -->
   # Performs exponentiation.
   #
   #     Rational(2)    ** Rational(3)     #=> (8/1)
@@ -70,6 +88,10 @@ class Rational < Numeric
   def **: (Complex) -> Complex
         | (Numeric) -> Numeric
 
+  # <!--
+  #   rdoc-file=rational.c
+  #   - rat + numeric  ->  numeric
+  # -->
   # Performs addition.
   #
   #     Rational(2, 3)  + Rational(2, 3)   #=> (4/3)
@@ -84,6 +106,10 @@ class Rational < Numeric
 
   def +@: () -> Rational
 
+  # <!--
+  #   rdoc-file=rational.c
+  #   - rat - numeric  ->  numeric
+  # -->
   # Performs subtraction.
   #
   #     Rational(2, 3)  - Rational(2, 3)   #=> (0/1)
@@ -96,10 +122,19 @@ class Rational < Numeric
        | (Complex) -> Complex
        | (Numeric) -> Rational
 
+  # <!--
+  #   rdoc-file=rational.c
+  #   - -rat  ->  rational
+  # -->
   # Negates `rat`.
   #
   def -@: () -> Rational
 
+  # <!--
+  #   rdoc-file=rational.c
+  #   - rat / numeric     ->  numeric
+  #   - rat.quo(numeric)  ->  numeric
+  # -->
   # Performs division.
   #
   #     Rational(2, 3)  / Rational(2, 3)   #=> (1/1)
@@ -112,6 +147,10 @@ class Rational < Numeric
        | (Complex) -> Complex
        | (Numeric) -> Rational
 
+  # <!--
+  #   rdoc-file=rational.c
+  #   - rational <=> numeric  ->  -1, 0, +1, or nil
+  # -->
   # Returns -1, 0, or +1 depending on whether `rational` is less than, equal to,
   # or greater than `numeric`.
   #
@@ -128,6 +167,10 @@ class Rational < Numeric
   def <=>: (Integer | Rational) -> Integer
          | (untyped) -> Integer?
 
+  # <!--
+  #   rdoc-file=rational.c
+  #   - rat == object  ->  true or false
+  # -->
   # Returns `true` if `rat` equals `object` numerically.
   #
   #     Rational(2, 3)  == Rational(2, 3)   #=> true
@@ -138,6 +181,11 @@ class Rational < Numeric
   #
   def ==: (untyped) -> bool
 
+  # <!--
+  #   rdoc-file=rational.c
+  #   - rat.abs        ->  rational
+  #   - rat.magnitude  ->  rational
+  # -->
   # Returns the absolute value of `rat`.
   #
   #     (1/2r).abs    #=> (1/2)
@@ -153,6 +201,10 @@ class Rational < Numeric
 
   alias arg angle
 
+  # <!--
+  #   rdoc-file=rational.c
+  #   - rat.ceil([ndigits])  ->  integer or rational
+  # -->
   # Returns the smallest number greater than or equal to `rat` with a precision of
   # `ndigits` decimal digits (default: 0).
   #
@@ -175,12 +227,16 @@ class Rational < Numeric
   def ceil: () -> Integer
           | (Integer digits) -> (Integer | Rational)
 
-  def coerce: (Numeric) -> [Numeric, Numeric]
+  def coerce: (Numeric) -> [ Numeric, Numeric ]
 
   def conj: () -> Rational
 
   def conjugate: () -> Rational
 
+  # <!--
+  #   rdoc-file=rational.c
+  #   - rat.denominator  ->  integer
+  # -->
   # Returns the denominator (always positive).
   #
   #     Rational(7).denominator             #=> 1
@@ -192,12 +248,16 @@ class Rational < Numeric
 
   def div: (Numeric) -> Integer
 
-  def divmod: (Numeric) -> [Numeric, Numeric]
+  def divmod: (Numeric) -> [ Numeric, Numeric ]
 
   def dup: () -> self
 
   def eql?: (untyped) -> bool
 
+  # <!--
+  #   rdoc-file=rational.c
+  #   - rat.fdiv(numeric)  ->  float
+  # -->
   # Performs division and returns the value as a Float.
   #
   #     Rational(2, 3).fdiv(1)       #=> 0.6666666666666666
@@ -208,6 +268,10 @@ class Rational < Numeric
 
   def finite?: () -> bool
 
+  # <!--
+  #   rdoc-file=rational.c
+  #   - rat.floor([ndigits])  ->  integer or rational
+  # -->
   # Returns the largest number less than or equal to `rat` with a precision of
   # `ndigits` decimal digits (default: 0).
   #
@@ -230,6 +294,11 @@ class Rational < Numeric
   def floor: () -> Integer
            | (Integer digits) -> (Integer | Rational)
 
+  # <!--
+  #   rdoc-file=rational.c
+  #   - hash()
+  # -->
+  #
   def hash: () -> Integer
 
   def i: () -> Complex
@@ -240,6 +309,10 @@ class Rational < Numeric
 
   def infinite?: () -> Integer?
 
+  # <!--
+  #   rdoc-file=rational.c
+  #   - rat.inspect  ->  string
+  # -->
   # Returns the value as a string for inspection.
   #
   #     Rational(2).inspect      #=> "(2/1)"
@@ -250,6 +323,7 @@ class Rational < Numeric
 
   def integer?: () -> bool
 
+  # <!-- rdoc-file=rational.c -->
   # Returns the absolute value of `rat`.
   #
   #     (1/2r).abs    #=> (1/2)
@@ -262,12 +336,20 @@ class Rational < Numeric
   def modulo: (Float) -> Float
             | (Numeric) -> Rational
 
+  # <!--
+  #   rdoc-file=rational.c
+  #   - rat.negative?  ->  true or false
+  # -->
   # Returns `true` if `rat` is less than 0.
   #
   def negative?: () -> bool
 
   def nonzero?: () -> self?
 
+  # <!--
+  #   rdoc-file=rational.c
+  #   - rat.numerator  ->  integer
+  # -->
   # Returns the numerator.
   #
   #     Rational(7).numerator        #=> 7
@@ -281,10 +363,15 @@ class Rational < Numeric
 
   def polar: () -> [ Rational, Integer | Float ]
 
+  # <!--
+  #   rdoc-file=rational.c
+  #   - rat.positive?  ->  true or false
+  # -->
   # Returns `true` if `rat` is greater than 0.
   #
   def positive?: () -> bool
 
+  # <!-- rdoc-file=rational.c -->
   # Performs division.
   #
   #     Rational(2, 3)  / Rational(2, 3)   #=> (1/1)
@@ -297,6 +384,11 @@ class Rational < Numeric
          | (Complex) -> Complex
          | (Numeric) -> Rational
 
+  # <!--
+  #   rdoc-file=rational.c
+  #   - rat.rationalize       ->  self
+  #   - rat.rationalize(eps)  ->  rational
+  # -->
   # Returns a simpler approximation of the value if the optional argument `eps` is
   # given (rat-|eps| <= result <= rat+|eps|), self otherwise.
   #
@@ -318,6 +410,10 @@ class Rational < Numeric
   def remainder: (Float) -> Float
                | (Numeric) -> Rational
 
+  # <!--
+  #   rdoc-file=rational.c
+  #   - rat.round([ndigits] [, half: mode])  ->  integer or rational
+  # -->
   # Returns `rat` rounded to the nearest value with a precision of `ndigits`
   # decimal digits (default: 0).
   #
@@ -359,6 +455,10 @@ class Rational < Numeric
 
   def to_c: () -> Complex
 
+  # <!--
+  #   rdoc-file=rational.c
+  #   - rat.to_f  ->  float
+  # -->
   # Returns the value as a Float.
   #
   #     Rational(2).to_f      #=> 2.0
@@ -368,6 +468,10 @@ class Rational < Numeric
   #
   def to_f: () -> Float
 
+  # <!--
+  #   rdoc-file=rational.c
+  #   - rat.to_i  ->  integer
+  # -->
   # Returns the truncated value as an integer.
   #
   # Equivalent to Rational#truncate.
@@ -382,6 +486,10 @@ class Rational < Numeric
 
   alias to_int to_i
 
+  # <!--
+  #   rdoc-file=rational.c
+  #   - rat.to_r  ->  self
+  # -->
   # Returns self.
   #
   #     Rational(2).to_r      #=> (2/1)
@@ -389,6 +497,10 @@ class Rational < Numeric
   #
   def to_r: () -> Rational
 
+  # <!--
+  #   rdoc-file=rational.c
+  #   - rat.to_s  ->  string
+  # -->
   # Returns the value as a string.
   #
   #     Rational(2).to_s      #=> "2/1"
@@ -397,6 +509,10 @@ class Rational < Numeric
   #
   def to_s: () -> String
 
+  # <!--
+  #   rdoc-file=rational.c
+  #   - rat.truncate([ndigits])  ->  integer or rational
+  # -->
   # Returns `rat` truncated (toward zero) to a precision of `ndigits` decimal
   # digits (default: 0).
   #

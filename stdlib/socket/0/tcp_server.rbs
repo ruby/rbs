@@ -1,3 +1,4 @@
+# <!-- rdoc-file=ext/socket/tcpserver.c -->
 # TCPServer represents a TCP/IP server socket.
 #
 # A simple TCP server may look like:
@@ -24,9 +25,14 @@
 #         client.close
 #       end
 #     end
+#
 class TCPServer < TCPSocket
   public
 
+  # <!--
+  #   rdoc-file=ext/socket/tcpserver.c
+  #   - tcpserver.accept => tcpsocket
+  # -->
   # Accepts an incoming connection. It returns a new TCPSocket object.
   #
   #     TCPServer.open("127.0.0.1", 14641) {|serv|
@@ -37,6 +43,10 @@ class TCPServer < TCPSocket
   #
   def accept: () -> TCPSocket
 
+  # <!--
+  #   rdoc-file=ext/socket/lib/socket.rb
+  #   - tcpserver.accept_nonblock([options]) => tcpsocket
+  # -->
   # Accepts an incoming connection using accept(2) after O_NONBLOCK is set for the
   # underlying file descriptor. It returns an accepted TCPSocket for the incoming
   # connection.
@@ -70,9 +80,12 @@ class TCPServer < TCPSocket
   # *   TCPServer#accept
   # *   Socket#accept
   #
-  #
   def accept_nonblock: (?exception: boolish) -> (TCPSocket | :wait_readable)
 
+  # <!--
+  #   rdoc-file=ext/socket/tcpserver.c
+  #   - socket.listen( int ) => 0
+  # -->
   # Listens for connections, using the specified `int` as the backlog. A call to
   # *listen* only applies if the `socket` is of type SOCK_STREAM or
   # SOCK_SEQPACKET.
@@ -142,9 +155,12 @@ class TCPServer < TCPSocket
   # *   listen manual pages on unix-based systems
   # *   listen function in Microsoft's Winsock functions reference
   #
-  #
   def listen: (Integer backlog) -> void
 
+  # <!--
+  #   rdoc-file=ext/socket/tcpserver.c
+  #   - tcpserver.sysaccept => file_descriptor
+  # -->
   # Returns a file descriptor of a accepted connection.
   #
   #     TCPServer.open("127.0.0.1", 28561) {|serv|
@@ -160,6 +176,10 @@ class TCPServer < TCPSocket
 
   def __accept_nonblock: (untyped) -> untyped
 
+  # <!--
+  #   rdoc-file=ext/socket/tcpserver.c
+  #   - TCPServer.new([hostname,] port) => tcpserver
+  # -->
   # Creates a new server socket bound to *port*.
   #
   # If *hostname* is given, the socket is bound to it.

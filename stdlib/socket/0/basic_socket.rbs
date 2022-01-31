@@ -1,11 +1,21 @@
+# <!-- rdoc-file=ext/socket/basicsocket.c -->
 # BasicSocket is the super class for all the Socket classes.
+#
 class BasicSocket < IO
+  # <!--
+  #   rdoc-file=ext/socket/basicsocket.c
+  #   - BasicSocket.do_not_reverse_lookup => true or false
+  # -->
   # Gets the global do_not_reverse_lookup flag.
   #
   #     BasicSocket.do_not_reverse_lookup  #=> false
   #
   def self.do_not_reverse_lookup: () -> bool
 
+  # <!--
+  #   rdoc-file=ext/socket/basicsocket.c
+  #   - BasicSocket.do_not_reverse_lookup = bool
+  # -->
   # Sets the global do_not_reverse_lookup flag.
   #
   # The flag is used for initial value of do_not_reverse_lookup for each socket.
@@ -19,6 +29,10 @@ class BasicSocket < IO
   #
   def self.do_not_reverse_lookup=: (boolish) -> void
 
+  # <!--
+  #   rdoc-file=ext/socket/basicsocket.c
+  #   - BasicSocket.for_fd(fd) => basicsocket
+  # -->
   # Returns a socket object which contains the file descriptor, *fd*.
   #
   #     # If invoked by inetd, STDIN/STDOUT/STDERR is a socket.
@@ -29,6 +43,10 @@ class BasicSocket < IO
 
   public
 
+  # <!--
+  #   rdoc-file=ext/socket/basicsocket.c
+  #   - basicsocket.close_read => nil
+  # -->
   # Disallows further read using shutdown system call.
   #
   #     s1, s2 = UNIXSocket.pair
@@ -37,6 +55,10 @@ class BasicSocket < IO
   #
   def close_read: () -> void
 
+  # <!--
+  #   rdoc-file=ext/socket/basicsocket.c
+  #   - basicsocket.close_write => nil
+  # -->
   # Disallows further write using shutdown system call.
   #
   #     UNIXSocket.pair {|s1, s2|
@@ -50,6 +72,10 @@ class BasicSocket < IO
   #
   def close_write: () -> void
 
+  # <!--
+  #   rdoc-file=ext/socket/lib/socket.rb
+  #   - connect_address()
+  # -->
   # Returns an address of the socket suitable for connect in the local machine.
   #
   # This method returns *self*.local_address, except following condition.
@@ -73,6 +99,10 @@ class BasicSocket < IO
   #
   def connect_address: () -> Addrinfo
 
+  # <!--
+  #   rdoc-file=ext/socket/basicsocket.c
+  #   - basicsocket.do_not_reverse_lookup => true or false
+  # -->
   # Gets the do_not_reverse_lookup flag of *basicsocket*.
   #
   #     require 'socket'
@@ -88,6 +118,10 @@ class BasicSocket < IO
   #
   def do_not_reverse_lookup: () -> bool
 
+  # <!--
+  #   rdoc-file=ext/socket/basicsocket.c
+  #   - basicsocket.do_not_reverse_lookup = bool
+  # -->
   # Sets the do_not_reverse_lookup flag of *basicsocket*.
   #
   #     TCPSocket.open("www.ruby-lang.org", 80) {|sock|
@@ -99,6 +133,10 @@ class BasicSocket < IO
   #
   def do_not_reverse_lookup=: (boolish) -> void
 
+  # <!--
+  #   rdoc-file=ext/socket/basicsocket.c
+  #   - basicsocket.getpeereid => [euid, egid]
+  # -->
   # Returns the user and group on the peer of the UNIX socket. The result is a two
   # element array which contains the effective uid and the effective gid.
   #
@@ -116,8 +154,12 @@ class BasicSocket < IO
   #       end
   #     }
   #
-  def getpeereid: () -> [Integer, Integer]
+  def getpeereid: () -> [ Integer, Integer ]
 
+  # <!--
+  #   rdoc-file=ext/socket/basicsocket.c
+  #   - basicsocket.getpeername => sockaddr
+  # -->
   # Returns the remote address of the socket as a sockaddr string.
   #
   #     TCPServer.open("127.0.0.1", 1440) {|serv|
@@ -131,6 +173,10 @@ class BasicSocket < IO
   #
   def getpeername: () -> String
 
+  # <!--
+  #   rdoc-file=ext/socket/basicsocket.c
+  #   - basicsocket.getsockname => sockaddr
+  # -->
   # Returns the local address of the socket as a sockaddr string.
   #
   #     TCPServer.open("127.0.0.1", 15120) {|serv|
@@ -142,6 +188,10 @@ class BasicSocket < IO
   #
   def getsockname: () -> String
 
+  # <!--
+  #   rdoc-file=ext/socket/basicsocket.c
+  #   - getsockopt(level, optname) => socketoption
+  # -->
   # Gets a socket option. These are protocol and system specific, see your local
   # system documentation for details. The option is returned as a Socket::Option
   # object.
@@ -172,7 +222,7 @@ class BasicSocket < IO
   #     ipttl = sock.getsockopt(:IP, :TTL).int
   #
   #     optval = sock.getsockopt(Socket::IPPROTO_IP, Socket::IP_TTL)
-  #     ipttl = optval.unpack("i")[0]
+  #     ipttl = optval.unpack1("i")
   #
   # Option values may be structs. Decoding them can be complex as it involves
   # examining your system headers to determine the correct definition. An example
@@ -193,6 +243,10 @@ class BasicSocket < IO
   #
   def getsockopt: (Symbol | Integer, Symbol | Integer) -> (Integer | boolish | String)
 
+  # <!--
+  #   rdoc-file=ext/socket/basicsocket.c
+  #   - bsock.local_address => addrinfo
+  # -->
   # Returns an Addrinfo object for local address obtained by getsockname.
   #
   # Note that addrinfo.protocol is filled by 0.
@@ -207,6 +261,10 @@ class BasicSocket < IO
   #
   def local_address: () -> Addrinfo
 
+  # <!--
+  #   rdoc-file=ext/socket/basicsocket.c
+  #   - basicsocket.recv(maxlen[, flags[, outbuf]]) => mesg
+  # -->
   # Receives a message.
   #
   # *maxlen* is the maximum number of bytes to receive.
@@ -227,6 +285,10 @@ class BasicSocket < IO
   def recv: (Integer maxlen, ?Integer flags, ?String outbuf) -> String
           | (Integer maxlen, ?String outbuf) -> String
 
+  # <!--
+  #   rdoc-file=ext/socket/lib/socket.rb
+  #   - basicsocket.recv_nonblock(maxlen [, flags [, buf [, options ]]]) => mesg
+  # -->
   # Receives up to *maxlen* bytes from `socket` using recvfrom(2) after O_NONBLOCK
   # is set for the underlying file descriptor. *flags* is zero or more of the
   # `MSG_` options. The result, *mesg*, is the data received.
@@ -271,9 +333,12 @@ class BasicSocket < IO
   # ### See
   # *   Socket#recvfrom
   #
-  #
   def recv_nonblock: (Integer maxlen, ?Integer flags, ?String buf, ?exception: boolish) -> (String | :wait_readable)
 
+  # <!--
+  #   rdoc-file=ext/socket/lib/socket.rb
+  #   - basicsocket.recvmsg(maxmesglen=nil, flags=0, maxcontrollen=nil, opts={}) => [mesg, sender_addrinfo, rflags, *controls]
+  # -->
   # recvmsg receives a message using recvmsg(2) system call in blocking manner.
   #
   # *maxmesglen* is the maximum length of mesg to receive.
@@ -323,8 +388,12 @@ class BasicSocket < IO
   #       end
   #     }
   #
-  def recvmsg: (?Integer dlen, ?Integer flags, ?Integer clen, ?scm_rights: boolish) -> [String, Addrinfo, Integer?, Array[Socket::AncillaryData]]
+  def recvmsg: (?Integer dlen, ?Integer flags, ?Integer clen, ?scm_rights: boolish) -> [ String, Addrinfo, Integer?, Array[Socket::AncillaryData] ]
 
+  # <!--
+  #   rdoc-file=ext/socket/lib/socket.rb
+  #   - basicsocket.recvmsg_nonblock(maxdatalen=nil, flags=0, maxcontrollen=nil, opts={}) => [data, sender_addrinfo, rflags, *controls]
+  # -->
   # recvmsg receives a message using recvmsg(2) system call in non-blocking
   # manner.
   #
@@ -335,8 +404,12 @@ class BasicSocket < IO
   # recvmsg_nonblock should not raise an IO::WaitReadable exception, but return
   # the symbol `:wait_readable` instead.
   #
-  def recvmsg_nonblock: (?Integer dlen, ?Integer flags, ?Integer clen, ?exception: boolish, ?scm_rights: boolish) -> ([String, Addrinfo, Integer?, Array[Socket::AncillaryData]] | :wait_readable)
+  def recvmsg_nonblock: (?Integer dlen, ?Integer flags, ?Integer clen, ?exception: boolish, ?scm_rights: boolish) -> ([ String, Addrinfo, Integer?, Array[Socket::AncillaryData] ] | :wait_readable)
 
+  # <!--
+  #   rdoc-file=ext/socket/basicsocket.c
+  #   - bsock.remote_address => addrinfo
+  # -->
   # Returns an Addrinfo object for remote address obtained by getpeername.
   #
   # Note that addrinfo.protocol is filled by 0.
@@ -353,6 +426,10 @@ class BasicSocket < IO
   #
   def remote_address: () -> Addrinfo
 
+  # <!--
+  #   rdoc-file=ext/socket/basicsocket.c
+  #   - basicsocket.send(mesg, flags [, dest_sockaddr]) => numbytes_sent
+  # -->
   # send *mesg* via *basicsocket*.
   #
   # *mesg* should be a string.
@@ -366,8 +443,12 @@ class BasicSocket < IO
   #       p s.read
   #     }
   #
-  def send: (String msg, ?Integer flags, ?(Addrinfo | String) dest_sockaddr) -> void
+  def send: (String msg, ?Integer flags, ?Addrinfo | String dest_sockaddr) -> void
 
+  # <!--
+  #   rdoc-file=ext/socket/lib/socket.rb
+  #   - basicsocket.sendmsg(mesg, flags=0, dest_sockaddr=nil, *controls) => numbytes_sent
+  # -->
   # sendmsg sends a message using sendmsg(2) system call in blocking manner.
   #
   # *mesg* is a string to send.
@@ -395,8 +476,12 @@ class BasicSocket < IO
   #     ancdata = [:SOCKET, :RIGHTS, [io.fileno].pack("i!")]
   #     sock.sendmsg("\0", 0, nil, ancdata)
   #
-  def sendmsg: (String mesg, ?Integer flags, ?(Addrinfo | String) dest_sockaddr, *Socket::AncillaryData controls) -> Integer
+  def sendmsg: (String mesg, ?Integer flags, ?Addrinfo | String dest_sockaddr, *Socket::AncillaryData controls) -> Integer
 
+  # <!--
+  #   rdoc-file=ext/socket/lib/socket.rb
+  #   - basicsocket.sendmsg_nonblock(mesg, flags=0, dest_sockaddr=nil, *controls, opts={}) => numbytes_sent
+  # -->
   # sendmsg_nonblock sends a message using sendmsg(2) system call in non-blocking
   # manner.
   #
@@ -407,8 +492,13 @@ class BasicSocket < IO
   # sendmsg_nonblock should not raise an IO::WaitWritable exception, but return
   # the symbol `:wait_writable` instead.
   #
-  def sendmsg_nonblock: (String mesg, ?Integer flags, ?(Addrinfo | String) dest_sockaddr, *Socket::AncillaryData controls, ?exception: boolish) -> (Integer | :wait_writable)
+  def sendmsg_nonblock: (String mesg, ?Integer flags, ?Addrinfo | String dest_sockaddr, *Socket::AncillaryData controls, ?exception: boolish) -> (Integer | :wait_writable)
 
+  # <!--
+  #   rdoc-file=ext/socket/basicsocket.c
+  #   - setsockopt(level, optname, optval)
+  #   - setsockopt(socketoption)
+  # -->
   # Sets a socket option. These are protocol and system specific, see your local
   # system documentation for details.
   #
@@ -459,9 +549,12 @@ class BasicSocket < IO
   #              IPAddr.new(Socket::INADDR_ANY, Socket::AF_INET).hton
   #     sock.setsockopt(Socket::IPPROTO_IP, Socket::IP_ADD_MEMBERSHIP, optval)
   #
-  #
-  def setsockopt: (*(Symbol | Integer), boolish | Integer | String) -> void
+  def setsockopt: (*Symbol | Integer, boolish | Integer | String) -> void
 
+  # <!--
+  #   rdoc-file=ext/socket/basicsocket.c
+  #   - basicsocket.shutdown([how]) => 0
+  # -->
   # Calls shutdown(2) system call.
   #
   # s.shutdown(Socket::SHUT_RD) disallows further read.
@@ -485,7 +578,6 @@ class BasicSocket < IO
   #         p s1.read          #=> "pong\n"
   #
   #     }
-  #
   #
   def shutdown: (Symbol | String | Integer flags) -> void
 

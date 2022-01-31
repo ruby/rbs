@@ -1,3 +1,4 @@
+# <!-- rdoc-file=math.c -->
 # The Math module contains module functions for basic trigonometric and
 # transcendental functions. See class Float for a list of constants that define
 # Ruby's floating point accuracy.
@@ -5,6 +6,10 @@
 # Domains and codomains are given only for real (not complex) numbers.
 #
 module Math
+  # <!--
+  #   rdoc-file=math.c
+  #   - Math.acos(x)    -> Float
+  # -->
   # Computes the arc cosine of `x`. Returns 0..PI.
   #
   # Domain: [-1, 1]
@@ -15,6 +20,10 @@ module Math
   #
   def self.acos: (Numeric x) -> Float
 
+  # <!--
+  #   rdoc-file=math.c
+  #   - Math.acosh(x)    -> Float
+  # -->
   # Computes the inverse hyperbolic cosine of `x`.
   #
   # Domain: [1, INFINITY)
@@ -25,6 +34,10 @@ module Math
   #
   def self.acosh: (Numeric x) -> Float
 
+  # <!--
+  #   rdoc-file=math.c
+  #   - Math.asin(x)    -> Float
+  # -->
   # Computes the arc sine of `x`. Returns -PI/2..PI/2.
   #
   # Domain: [-1, -1]
@@ -35,6 +48,10 @@ module Math
   #
   def self.asin: (Numeric x) -> Float
 
+  # <!--
+  #   rdoc-file=math.c
+  #   - Math.asinh(x)    -> Float
+  # -->
   # Computes the inverse hyperbolic sine of `x`.
   #
   # Domain: (-INFINITY, INFINITY)
@@ -45,6 +62,10 @@ module Math
   #
   def self.asinh: (Numeric x) -> Float
 
+  # <!--
+  #   rdoc-file=math.c
+  #   - Math.atan(x)    -> Float
+  # -->
   # Computes the arc tangent of `x`. Returns -PI/2..PI/2.
   #
   # Domain: (-INFINITY, INFINITY)
@@ -55,6 +76,10 @@ module Math
   #
   def self.atan: (Numeric x) -> Float
 
+  # <!--
+  #   rdoc-file=math.c
+  #   - Math.atan2(y, x)  -> Float
+  # -->
   # Computes the arc tangent given `y` and `x`. Returns a Float in the range
   # -PI..PI. Return value is a angle in radians between the positive x-axis of
   # cartesian plane and the point given by the coordinates (`x`, `y`) on it.
@@ -80,6 +105,10 @@ module Math
   #
   def self.atan2: (Numeric y, Numeric x) -> Float
 
+  # <!--
+  #   rdoc-file=math.c
+  #   - Math.atanh(x)    -> Float
+  # -->
   # Computes the inverse hyperbolic tangent of `x`.
   #
   # Domain: (-1, 1)
@@ -90,6 +119,10 @@ module Math
   #
   def self.atanh: (Numeric x) -> Float
 
+  # <!--
+  #   rdoc-file=math.c
+  #   - Math.cbrt(x)    -> Float
+  # -->
   # Returns the cube root of `x`.
   #
   # Domain: (-INFINITY, INFINITY)
@@ -121,6 +154,10 @@ module Math
   #
   def self.cbrt: (Numeric x) -> Float
 
+  # <!--
+  #   rdoc-file=math.c
+  #   - Math.cos(x)    -> Float
+  # -->
   # Computes the cosine of `x` (expressed in radians). Returns a Float in the
   # range -1.0..1.0.
   #
@@ -132,6 +169,10 @@ module Math
   #
   def self.cos: (Numeric x) -> Float
 
+  # <!--
+  #   rdoc-file=math.c
+  #   - Math.cosh(x)    -> Float
+  # -->
   # Computes the hyperbolic cosine of `x` (expressed in radians).
   #
   # Domain: (-INFINITY, INFINITY)
@@ -142,6 +183,10 @@ module Math
   #
   def self.cosh: (Numeric x) -> Float
 
+  # <!--
+  #   rdoc-file=math.c
+  #   - Math.erf(x)  -> Float
+  # -->
   # Calculates the error function of `x`.
   #
   # Domain: (-INFINITY, INFINITY)
@@ -152,6 +197,10 @@ module Math
   #
   def self.erf: (Numeric x) -> Float
 
+  # <!--
+  #   rdoc-file=math.c
+  #   - Math.erfc(x)  -> Float
+  # -->
   # Calculates the complementary error function of x.
   #
   # Domain: (-INFINITY, INFINITY)
@@ -162,6 +211,10 @@ module Math
   #
   def self.erfc: (Numeric x) -> Float
 
+  # <!--
+  #   rdoc-file=math.c
+  #   - Math.exp(x)    -> Float
+  # -->
   # Returns e**x.
   #
   # Domain: (-INFINITY, INFINITY)
@@ -174,6 +227,10 @@ module Math
   #
   def self.exp: (Numeric x) -> Float
 
+  # <!--
+  #   rdoc-file=math.c
+  #   - Math.frexp(x)    -> [fraction, exponent]
+  # -->
   # Returns a two-element array containing the normalized fraction (a Float) and
   # exponent (an Integer) of `x`.
   #
@@ -182,10 +239,14 @@ module Math
   #
   def self.frexp: (Numeric x) -> [ Float, Integer ]
 
+  # <!--
+  #   rdoc-file=math.c
+  #   - Math.gamma(x)  -> Float
+  # -->
   # Calculates the gamma function of x.
   #
-  # Note that gamma(n) is same as fact(n-1) for integer n > 0. However gamma(n)
-  # returns float and can be an approximation.
+  # Note that gamma(n) is the same as fact(n-1) for integer n > 0. However
+  # gamma(n) returns float and can be an approximation.
   #
   #     def fact(n) (1..n).inject(1) {|r,i| r*i } end
   #     1.upto(26) {|i| p [i, Math.gamma(i), fact(i-1)] }
@@ -218,6 +279,10 @@ module Math
   #
   def self.gamma: (Numeric x) -> Float
 
+  # <!--
+  #   rdoc-file=math.c
+  #   - Math.hypot(x, y)    -> Float
+  # -->
   # Returns sqrt(x**2 + y**2), the hypotenuse of a right-angled triangle with
   # sides `x` and `y`.
   #
@@ -225,6 +290,10 @@ module Math
   #
   def self.hypot: (Numeric x, Numeric y) -> Float
 
+  # <!--
+  #   rdoc-file=math.c
+  #   - Math.ldexp(fraction, exponent) -> float
+  # -->
   # Returns the value of `fraction`*(2**`exponent`).
   #
   #     fraction, exponent = Math.frexp(1234)
@@ -232,19 +301,45 @@ module Math
   #
   def self.ldexp: (Numeric fraction, Numeric exponent) -> Float
 
+  # <!--
+  #   rdoc-file=math.c
+  #   - Math.lgamma(x)  -> [float, -1 or 1]
+  # -->
   # Calculates the logarithmic gamma of `x` and the sign of gamma of `x`.
   #
-  # Math.lgamma(x) is same as
+  # Math.lgamma(x) is the same as
   #     [Math.log(Math.gamma(x).abs), Math.gamma(x) < 0 ? -1 : 1]
   #
-  # but avoid overflow by Math.gamma(x) for large x.
+  # but avoids overflow by Math.gamma(x) for large x.
   #
   #     Math.lgamma(0) #=> [Infinity, 1]
   #
   def self.lgamma: (Numeric x) -> [ Float, Integer ]
 
+  # <!--
+  #   rdoc-file=math.c
+  #   - Math.log(x)          -> Float
+  #   - Math.log(x, base)    -> Float
+  # -->
+  # Returns the logarithm of `x`. If additional second argument is given, it will
+  # be the base of logarithm. Otherwise it is `e` (for the natural logarithm).
+  #
+  # Domain: (0, INFINITY)
+  #
+  # Codomain: (-INFINITY, INFINITY)
+  #
+  #     Math.log(0)          #=> -Infinity
+  #     Math.log(1)          #=> 0.0
+  #     Math.log(Math::E)    #=> 1.0
+  #     Math.log(Math::E**3) #=> 3.0
+  #     Math.log(12, 3)      #=> 2.2618595071429146
+  #
   def self.log: (Numeric x, ?Numeric base) -> Float
 
+  # <!--
+  #   rdoc-file=math.c
+  #   - Math.log10(x)    -> Float
+  # -->
   # Returns the base 10 logarithm of `x`.
   #
   # Domain: (0, INFINITY)
@@ -257,6 +352,10 @@ module Math
   #
   def self.log10: (Numeric x) -> Float
 
+  # <!--
+  #   rdoc-file=math.c
+  #   - Math.log2(x)    -> Float
+  # -->
   # Returns the base 2 logarithm of `x`.
   #
   # Domain: (0, INFINITY)
@@ -270,6 +369,10 @@ module Math
   #
   def self.log2: (Numeric x) -> Float
 
+  # <!--
+  #   rdoc-file=math.c
+  #   - Math.sin(x)    -> Float
+  # -->
   # Computes the sine of `x` (expressed in radians). Returns a Float in the range
   # -1.0..1.0.
   #
@@ -281,6 +384,10 @@ module Math
   #
   def self.sin: (Numeric x) -> Float
 
+  # <!--
+  #   rdoc-file=math.c
+  #   - Math.sinh(x)    -> Float
+  # -->
   # Computes the hyperbolic sine of `x` (expressed in radians).
   #
   # Domain: (-INFINITY, INFINITY)
@@ -291,6 +398,10 @@ module Math
   #
   def self.sinh: (Numeric x) -> Float
 
+  # <!--
+  #   rdoc-file=math.c
+  #   - Math.sqrt(x)    -> Float
+  # -->
   # Returns the non-negative square root of `x`.
   #
   # Domain: [0, INFINITY)
@@ -321,6 +432,10 @@ module Math
   #
   def self.sqrt: (Numeric x) -> Float
 
+  # <!--
+  #   rdoc-file=math.c
+  #   - Math.tan(x)    -> Float
+  # -->
   # Computes the tangent of `x` (expressed in radians).
   #
   # Domain: (-INFINITY, INFINITY)
@@ -331,6 +446,10 @@ module Math
   #
   def self.tan: (Numeric x) -> Float
 
+  # <!--
+  #   rdoc-file=math.c
+  #   - Math.tanh(x)    -> Float
+  # -->
   # Computes the hyperbolic tangent of `x` (expressed in radians).
   #
   # Domain: (-INFINITY, INFINITY)
@@ -342,17 +461,18 @@ module Math
   def self.tanh: (Numeric x) -> Float
 end
 
+# <!-- rdoc-file=math.c -->
 # Definition of the mathematical constant E for Euler's number (e) as a Float
 # number.
 #
-#
 Math::E: Float
 
+# <!-- rdoc-file=math.c -->
 # Definition of the mathematical constant PI as a Float number.
-#
 #
 Math::PI: Float
 
+# <!-- rdoc-file=math.c -->
 # Raised when a mathematical function is evaluated outside of its domain of
 # definition.
 #

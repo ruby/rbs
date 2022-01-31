@@ -1,6 +1,12 @@
+# <!-- rdoc-file=re.c -->
 # A Regexp holds a regular expression, used to match a pattern against strings.
 # Regexps are created using the `/.../` and `%r{...}` literals, and by the
 # Regexp::new constructor.
+#
+# You can create a Regexp object explicitly with:
+#
+# *   A [regexp literal](doc/syntax/literals_rdoc.html#label-Regexp+Literals).
+#
 #
 # Regular expressions (*regexp*s) are patterns which describe the contents of a
 # string. They're used for testing whether a string contains a given pattern, or
@@ -184,6 +190,8 @@
 #
 #     "Hello".match(/[[:upper:]]+[[:lower:]]+l{2}o/) #=> #<MatchData "Hello">
 #
+# ### Greedy match
+#
 # Repetition is *greedy* by default: as many occurrences as possible are matched
 # while still allowing the overall match to succeed. By contrast, *lazy*
 # matching makes the minimal amount of matches necessary for overall success.
@@ -199,20 +207,26 @@
 #     /<.+>/.match("<a><b>")  #=> #<MatchData "<a><b>">
 #     /<.+?>/.match("<a><b>") #=> #<MatchData "<a>">
 #
+# ### Possessive match
+#
 # A quantifier followed by `+` matches *possessively*: once it has matched it
 # does not backtrack. They behave like greedy quantifiers, but having matched
 # they refuse to "give up" their match even if this jeopardises the overall
 # match.
 #
+#     /<.*><.+>/.match("<a><b>") #=> #<MatchData "<a><b>">
+#     /<.*+><.+>/.match("<a><b>") #=> nil
+#     /<.*><.++>/.match("<a><b>") #=> nil
+#
 # ## Capturing
 #
-# Parentheses can be used for *capturing*. The text enclosed by the
-# *n*<sup>th</sup> group of parentheses can be subsequently referred to with
-# *n*. Within a pattern use the *backreference* `\n`; outside of the pattern use
-# `MatchData[n]`.
+# Parentheses can be used for *capturing*. The text enclosed by the *n*th group
+# of parentheses can be subsequently referred to with *n*. Within a pattern use
+# the *backreference* `\n` (e.g. `\1`); outside of the pattern use
+# `MatchData[n]` (e.g. `MatchData[1]`).
 #
-# 'at' is captured by the first group of parentheses, then referred to later
-# with `\1`:
+# In this example, `'at'` is captured by the first group of parentheses, then
+# referred to later with `\1`:
 #
 #     /[csh](..) [csh]\1 in/.match("The cat sat in the hat")
 #         #=> #<MatchData "cat sat in" 1:"at">
@@ -221,6 +235,21 @@
 # available with its #[] method:
 #
 #     /[csh](..) [csh]\1 in/.match("The cat sat in the hat")[1] #=> 'at'
+#
+# While Ruby supports an arbitrary number of numbered captured groups, only
+# groups 1-9 are supported using the `\n` backreference syntax.
+#
+# Ruby also supports `\0` as a special backreference, which references the
+# entire matched string.  This is also available at `MatchData[0]`.  Note that
+# the `\0` backreference cannot be used inside the regexp, as backreferences can
+# only be used after the end of the capture group, and the `\0` backreference
+# uses the implicit capture group of the entire match.  However, you can use
+# this backreference when doing substitution:
+#
+#     "The cat sat in the hat".gsub(/[csh]at/, '\0s')
+#       # => "The cats sats in the hats"
+#
+# ### Named captures
 #
 # Capture groups can be referred to by name when defined with the
 # `(?<`*name*`>)` or `(?'`*name*`')` constructs.
@@ -348,8 +377,8 @@
 #
 # ## Alternation
 #
-# The vertical bar metacharacter (`|`) combines two expressions into a single
-# one that matches either of the expressions. Each expression is an
+# The vertical bar metacharacter (`|`) combines several expressions into a
+# single one that matches any of the expressions. Each expression is an
 # *alternative*.
 #
 #     /\w(and|or)\w/.match("Feliformia") #=> #<MatchData "form" 1:"or">
@@ -494,6 +523,16 @@
 # *   `(?<!`*pat*`)` - *Negative lookbehind* assertion: ensures that the
 #     preceding characters do not match *pat*, but doesn't include those
 #     characters in the matched text
+# *   `\K` - Uses an positive lookbehind of the content preceding `\K` in the
+#     regexp.  For example, the following two regexps are almost equivalent:
+#
+#         /ab\Kc/
+#         /(?<=ab)c/
+#
+#     As are the following two regexps:
+#
+#         /(a)\K(b)\Kc/
+#         /(?<=(?<=(a))(b))c/
 #
 #
 # If a pattern isn't anchored it can begin at any point in the string:
@@ -700,6 +739,13 @@
 #     Regexp.new('a{0,29}' + 'a' * 29) =~ 'a' * 29
 #
 class Regexp
+  # <!--
+  #   rdoc-file=re.c
+  #   - Regexp.new(string, [options])       -> regexp
+  #   - Regexp.new(regexp)                  -> regexp
+  #   - Regexp.compile(string, [options])   -> regexp
+  #   - Regexp.compile(regexp)              -> regexp
+  # -->
   # Constructs a new regular expression from `pattern`, which can be either a
   # String or a Regexp (in which case that regexp's options are propagated), and
   # new options may not be specified (a change as of Ruby 1.8).
@@ -717,11 +763,20 @@ class Regexp
   def initialize: (String string, ?untyped options, ?String kcode) -> Object
                 | (Regexp regexp) -> void
 
+  # <!--
+  #   rdoc-file=re.c
+  #   - compile(*args)
+  # -->
   # Alias for Regexp.new
   #
   def self.compile: (String string, ?untyped options, ?String kcode) -> Regexp
                   | (Regexp regexp) -> Regexp
 
+  # <!--
+  #   rdoc-file=re.c
+  #   - Regexp.escape(str)   -> string
+  #   - Regexp.quote(str)    -> string
+  # -->
   # Escapes any characters that would have special meaning in a regular
   # expression. Returns a new escaped string with the same or compatible encoding.
   # For any string, `Regexp.new(Regexp.escape(*str*))=~*str`* will be true.
@@ -730,6 +785,11 @@ class Regexp
   #
   def self.escape: (String | Symbol str) -> String
 
+  # <!--
+  #   rdoc-file=re.c
+  #   - Regexp.last_match           -> matchdata
+  #   - Regexp.last_match(n)        -> str
+  # -->
   # The first form returns the MatchData object generated by the last successful
   # pattern match.  Equivalent to reading the special global variable `$~` (see
   # Special global variables in Regexp for details).
@@ -755,6 +815,11 @@ class Regexp
                      | (Integer n) -> String?
                      | (Symbol | String n) -> String?
 
+  # <!--
+  #   rdoc-file=re.c
+  #   - Regexp.escape(str)   -> string
+  #   - Regexp.quote(str)    -> string
+  # -->
   # Escapes any characters that would have special meaning in a regular
   # expression. Returns a new escaped string with the same or compatible encoding.
   # For any string, `Regexp.new(Regexp.escape(*str*))=~*str`* will be true.
@@ -763,6 +828,10 @@ class Regexp
   #
   def self.quote: (String | Symbol str) -> String
 
+  # <!--
+  #   rdoc-file=re.c
+  #   - Regexp.try_convert(obj) -> re or nil
+  # -->
   # Try to convert *obj* into a Regexp, using to_regexp method. Returns converted
   # regexp or nil if *obj* cannot be converted for any reason.
   #
@@ -776,6 +845,11 @@ class Regexp
   #
   def self.try_convert: (untyped obj) -> Regexp?
 
+  # <!--
+  #   rdoc-file=re.c
+  #   - Regexp.union(pat1, pat2, ...)            -> new_regexp
+  #   - Regexp.union(pats_ary)                   -> new_regexp
+  # -->
   # Return a Regexp object that is the union of the given *pattern*s, i.e., will
   # match any of its parts. The *pattern*s can be Regexp objects, in which case
   # their options will be preserved, or Strings. If no patterns are given, returns
@@ -798,6 +872,7 @@ class Regexp
 
   public
 
+  # <!-- rdoc-file=re.c -->
   # Equality---Two regexps are equal if their patterns are identical, they have
   # the same character set code, and their `casefold?` values are the same.
   #
@@ -808,6 +883,10 @@ class Regexp
   #
   def ==: (untyped other) -> bool
 
+  # <!--
+  #   rdoc-file=re.c
+  #   - rxp === str   -> true or false
+  # -->
   # Case Equality---Used in case statements.
   #
   #     a = "HELLO"
@@ -826,6 +905,10 @@ class Regexp
   #
   def ===: (untyped other) -> bool
 
+  # <!--
+  #   rdoc-file=re.c
+  #   - rxp =~ str    -> integer or nil
+  # -->
   # Match---Matches *rxp* against *str*.
   #
   #     /at/ =~ "input data"   #=> 7
@@ -868,6 +951,10 @@ class Regexp
   #
   def =~: (String? str) -> Integer?
 
+  # <!--
+  #   rdoc-file=re.c
+  #   - rxp.casefold?   -> true or false
+  # -->
   # Returns the value of the case-insensitive flag.
   #
   #     /a/.casefold?           #=> false
@@ -876,10 +963,19 @@ class Regexp
   #
   def casefold?: () -> bool
 
+  # <!--
+  #   rdoc-file=re.c
+  #   - obj.encoding   -> encoding
+  # -->
   # Returns the Encoding object that represents the encoding of obj.
   #
   def encoding: () -> Encoding
 
+  # <!--
+  #   rdoc-file=re.c
+  #   - rxp == other_rxp      -> true or false
+  #   - rxp.eql?(other_rxp)   -> true or false
+  # -->
   # Equality---Two regexps are equal if their patterns are identical, they have
   # the same character set code, and their `casefold?` values are the same.
   #
@@ -890,6 +986,10 @@ class Regexp
   #
   def eql?: (untyped other) -> bool
 
+  # <!--
+  #   rdoc-file=re.c
+  #   - rxp.fixed_encoding?   -> true or false
+  # -->
   # Returns false if rxp is applicable to a string with any ASCII compatible
   # encoding. Returns true otherwise.
   #
@@ -915,12 +1015,20 @@ class Regexp
   #
   def fixed_encoding?: () -> bool
 
+  # <!--
+  #   rdoc-file=re.c
+  #   - rxp.hash   -> integer
+  # -->
   # Produce a hash based on the text and options of this regular expression.
   #
   # See also Object#hash.
   #
   def hash: () -> Integer
 
+  # <!--
+  #   rdoc-file=re.c
+  #   - rxp.inspect   -> string
+  # -->
   # Produce a nicely formatted string-version of *rxp*. Perhaps surprisingly,
   # `#inspect` actually produces the more natural version of the string than
   # `#to_s`.
@@ -929,6 +1037,11 @@ class Regexp
   #
   def inspect: () -> String
 
+  # <!--
+  #   rdoc-file=re.c
+  #   - rxp.match(str, pos=0)                   -> matchdata or nil
+  #   - rxp.match(str, pos=0) {|match| block }  -> obj
+  # -->
   # Returns a MatchData object describing the match, or `nil` if there was no
   # match. This is equivalent to retrieving the value of the special variable `$~`
   # following a normal match.  If the second parameter is present, it specifies
@@ -957,7 +1070,12 @@ class Regexp
   def match: (String? | Symbol | _ToStr str, ?Integer pos) -> MatchData?
            | [T] (String? | Symbol | _ToStr str, ?Integer pos) { (MatchData) -> T } -> T?
 
-  # Returns a `true` or `false` indicates whether the regexp is matched or not
+  # <!--
+  #   rdoc-file=re.c
+  #   - rxp.match?(str)          -> true or false
+  #   - rxp.match?(str, pos=0)   -> true or false
+  # -->
+  # Returns `true` or `false` to indicate whether the regexp is matched or not
   # without updating $~ and other related variables. If the second parameter is
   # present, it specifies the position in the string to begin the search.
   #
@@ -968,6 +1086,10 @@ class Regexp
   #
   def match?: (String? | Symbol | _ToStr str, ?Integer pos) -> bool
 
+  # <!--
+  #   rdoc-file=re.c
+  #   - rxp.named_captures  -> hash
+  # -->
   # Returns a hash representing information about named captures of *rxp*.
   #
   # A key of the hash is a name of the named captures. A value of the hash is an
@@ -986,6 +1108,10 @@ class Regexp
   #
   def named_captures: () -> ::Hash[String, ::Array[Integer]]
 
+  # <!--
+  #   rdoc-file=re.c
+  #   - rxp.names   -> [name1, name2, ...]
+  # -->
   # Returns a list of names of captures as an array of strings.
   #
   #     /(?<foo>.)(?<bar>.)(?<baz>.)/.names
@@ -999,6 +1125,10 @@ class Regexp
   #
   def names: () -> ::Array[String]
 
+  # <!--
+  #   rdoc-file=re.c
+  #   - rxp.options   -> integer
+  # -->
   # Returns the set of bits corresponding to the options used when creating this
   # Regexp (see Regexp::new for details. Note that additional bits may be set in
   # the returned options: these are used internally by the regular expression
@@ -1018,6 +1148,10 @@ class Regexp
   #
   def options: () -> Integer
 
+  # <!--
+  #   rdoc-file=re.c
+  #   - rxp.source   -> str
+  # -->
   # Returns the original string of the pattern.
   #
   #     /ab+c/ix.source #=> "ab+c"
@@ -1028,6 +1162,10 @@ class Regexp
   #
   def source: () -> String
 
+  # <!--
+  #   rdoc-file=re.c
+  #   - rxp.to_s   -> str
+  # -->
   # Returns a string containing the regular expression and its options (using the
   # `(?opts:source)` notation. This string can be fed back in to Regexp::new to a
   # regular expression with the same semantics as the original. (However,
@@ -1044,6 +1182,10 @@ class Regexp
   #
   def to_s: () -> String
 
+  # <!--
+  #   rdoc-file=re.c
+  #   - ~ rxp   -> integer or nil
+  # -->
   # Match---Matches *rxp* against the contents of `$_`. Equivalent to *`rxp* =~
   # $_`.
   #
@@ -1057,27 +1199,27 @@ class Regexp
   def initialize_copy: (self object) -> self
 end
 
+# <!-- rdoc-file=re.c -->
 # see Regexp.options and Regexp.new
-#
 #
 Regexp::EXTENDED: Integer
 
+# <!-- rdoc-file=re.c -->
 # see Regexp.options and Regexp.new
-#
 #
 Regexp::FIXEDENCODING: Integer
 
+# <!-- rdoc-file=re.c -->
 # see Regexp.options and Regexp.new
-#
 #
 Regexp::IGNORECASE: Integer
 
+# <!-- rdoc-file=re.c -->
 # see Regexp.options and Regexp.new
-#
 #
 Regexp::MULTILINE: Integer
 
+# <!-- rdoc-file=re.c -->
 # see Regexp.options and Regexp.new
-#
 #
 Regexp::NOENCODING: Integer

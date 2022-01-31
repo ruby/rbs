@@ -1,4 +1,8 @@
 class Addrinfo
+  # <!--
+  #   rdoc-file=ext/socket/lib/socket.rb
+  #   - foreach(nodename, service, family=nil, socktype=nil, protocol=nil, flags=nil, timeout: nil, &block)
+  # -->
   # iterates over the list of Addrinfo objects obtained by Addrinfo.getaddrinfo.
   #
   #     Addrinfo.foreach(nil, 80) {|x| p x }
@@ -7,10 +11,18 @@ class Addrinfo
   #     #   #<Addrinfo: [::1]:80 TCP (:80)>
   #     #   #<Addrinfo: [::1]:80 UDP (:80)>
   #
-  def self.foreach: (String? nodename, String | Integer service, ?Integer? family, ?Symbol socktype, ?(Symbol | Integer) protocol, ?Integer flags, ?timeout: Numeric) { (Addrinfo) -> void } -> void
-                  |(String? nodename, String | Integer service, ?Integer? family, ?Symbol socktype, ?(Symbol | Integer) protocol, ?Integer flags, ?timeout: Numeric) -> Enumerable[Addrinfo]
+  def self.foreach: (String? nodename, String | Integer service, ?Integer? family, ?Symbol socktype, ?Symbol | Integer protocol, ?Integer flags, ?timeout: Numeric) { (Addrinfo) -> void } -> void
+                  | (String? nodename, String | Integer service, ?Integer? family, ?Symbol socktype, ?Symbol | Integer protocol, ?Integer flags, ?timeout: Numeric) -> Enumerable[Addrinfo]
 
-                  # returns a list of addrinfo objects as an array.
+  # <!--
+  #   rdoc-file=ext/socket/raddrinfo.c
+  #   - Addrinfo.getaddrinfo(nodename, service, family, socktype, protocol, flags) => [addrinfo, ...]
+  #   - Addrinfo.getaddrinfo(nodename, service, family, socktype, protocol)        => [addrinfo, ...]
+  #   - Addrinfo.getaddrinfo(nodename, service, family, socktype)                  => [addrinfo, ...]
+  #   - Addrinfo.getaddrinfo(nodename, service, family)                            => [addrinfo, ...]
+  #   - Addrinfo.getaddrinfo(nodename, service)                                    => [addrinfo, ...]
+  # -->
+  # returns a list of addrinfo objects as an array.
   #
   # This method converts nodename (hostname) and service (port) to addrinfo. Since
   # the conversion is not unique, the result is a list of addrinfo objects.
@@ -45,8 +57,12 @@ class Addrinfo
   #     #=> [#<Addrinfo: 203.178.141.194:80 TCP (www.kame.net)>,
   #     #    #<Addrinfo: [2001:200:dff:fff1:216:3eff:feb1:44d7]:80 TCP (www.kame.net)>]
   #
-  def self.getaddrinfo: (String nodename, ?(String | Integer) service, ?Symbol? family, ?(Symbol | Integer) protocol) -> Array[Addrinfo]
+  def self.getaddrinfo: (String nodename, ?String | Integer service, ?Symbol? family, ?Symbol | Integer protocol) -> Array[Addrinfo]
 
+  # <!--
+  #   rdoc-file=ext/socket/raddrinfo.c
+  #   - Addrinfo.ip(host) => addrinfo
+  # -->
   # returns an addrinfo object for IP address.
   #
   # The port, socktype, protocol of the result is filled by zero. So, it is not
@@ -56,18 +72,30 @@ class Addrinfo
   #
   def self.ip: (String host) -> Addrinfo
 
+  # <!--
+  #   rdoc-file=ext/socket/raddrinfo.c
+  #   - Addrinfo.tcp(host, port) => addrinfo
+  # -->
   # returns an addrinfo object for TCP address.
   #
   #     Addrinfo.tcp("localhost", "smtp") #=> #<Addrinfo: 127.0.0.1:25 TCP (localhost:smtp)>
   #
   def self.tcp: (String host, String | Integer service) -> Addrinfo
 
+  # <!--
+  #   rdoc-file=ext/socket/raddrinfo.c
+  #   - Addrinfo.udp(host, port) => addrinfo
+  # -->
   # returns an addrinfo object for UDP address.
   #
   #     Addrinfo.udp("localhost", "daytime") #=> #<Addrinfo: 127.0.0.1:13 UDP (localhost:daytime)>
   #
   def self.udp: (String host, String | Integer service) -> Addrinfo
 
+  # <!--
+  #   rdoc-file=ext/socket/raddrinfo.c
+  #   - Addrinfo.unix(path [, socktype]) => addrinfo
+  # -->
   # returns an addrinfo object for UNIX socket address.
   #
   # *socktype* specifies the socket type. If it is omitted, :STREAM is used.
@@ -79,12 +107,20 @@ class Addrinfo
 
   public
 
+  # <!--
+  #   rdoc-file=ext/socket/raddrinfo.c
+  #   - addrinfo.afamily => integer
+  # -->
   # returns the address family as an integer.
   #
   #     Addrinfo.tcp("localhost", 80).afamily == Socket::AF_INET #=> true
   #
   def afamily: () -> Integer
 
+  # <!--
+  #   rdoc-file=ext/socket/lib/socket.rb
+  #   - bind() { |sock| ... }
+  # -->
   # creates a socket bound to self.
   #
   # If a block is given, it is called with the socket and the value of the block
@@ -96,8 +132,12 @@ class Addrinfo
   #     }
   #
   def bind: () -> Socket
-          |  () { (Socket) -> void } -> void
+          | () { (Socket) -> void } -> void
 
+  # <!--
+  #   rdoc-file=ext/socket/raddrinfo.c
+  #   - addrinfo.canonname => string or nil
+  # -->
   # returns the canonical name as a string.
   #
   # nil is returned if no canonical name.
@@ -111,6 +151,11 @@ class Addrinfo
   #
   def canonname: () -> String
 
+  # <!--
+  #   rdoc-file=ext/socket/lib/socket.rb
+  #   - addrinfo.connect([opts]) {|socket| ... }
+  #   - addrinfo.connect([opts])
+  # -->
   # creates a socket connected to the address of self.
   #
   # The optional argument *opts* is options represented by a hash. *opts* may have
@@ -131,6 +176,11 @@ class Addrinfo
   def connect: (?timeout: Numeric) { (Socket) -> void } -> void
              | (?timeout: Numeric) -> Socket
 
+  # <!--
+  #   rdoc-file=ext/socket/lib/socket.rb
+  #   - addrinfo.connect_from([local_addr_args], [opts]) {|socket| ... }
+  #   - addrinfo.connect_from([local_addr_args], [opts])
+  # -->
   # creates a socket connected to the address of self.
   #
   # If one or more arguments given as *local_addr_args*, it is used as the local
@@ -162,10 +212,15 @@ class Addrinfo
   #     }
   #
   def connect_from: (String host, Integer port, ?timeout: Numeric) { (Socket) -> void } -> void
-                  | (String host, Integer port, ?timeout: Numeric)  -> Socket
+                  | (String host, Integer port, ?timeout: Numeric) -> Socket
                   | (Addrinfo sockaddr, ?timeout: Numeric) { (Socket) -> void } -> void
                   | (Addrinfo sockaddr, ?timeout: Numeric) -> Socket
 
+  # <!--
+  #   rdoc-file=ext/socket/lib/socket.rb
+  #   - addrinfo.connect_to([remote_addr_args], [opts]) {|socket| ... }
+  #   - addrinfo.connect_to([remote_addr_args], [opts])
+  # -->
   # creates a socket connected to *remote_addr_args* and bound to self.
   #
   # The optional last argument *opts* is options represented by a hash. *opts* may
@@ -184,10 +239,14 @@ class Addrinfo
   #     }
   #
   def connect_to: (String host, Integer port, ?timeout: Numeric) { (Socket) -> void } -> void
-                | (String host, Integer port, ?timeout: Numeric)  -> Socket
+                | (String host, Integer port, ?timeout: Numeric) -> Socket
                 | (Addrinfo sockaddr, ?timeout: Numeric) { (Socket) -> void } -> void
                 | (Addrinfo sockaddr, ?timeout: Numeric) -> Socket
 
+  # <!--
+  #   rdoc-file=ext/socket/lib/socket.rb
+  #   - family_addrinfo(*args)
+  # -->
   # creates an Addrinfo object from the arguments.
   #
   # The arguments are interpreted as similar to self.
@@ -201,6 +260,11 @@ class Addrinfo
   def family_addrinfo: (String host, Integer port) -> Addrinfo
                      | (String path) -> Addrinfo
 
+  # <!--
+  #   rdoc-file=ext/socket/raddrinfo.c
+  #   - addrinfo.getnameinfo        => [nodename, service]
+  #   - addrinfo.getnameinfo(flags) => [nodename, service]
+  # -->
   # returns nodename and service as a pair of strings. This converts struct
   # sockaddr in addrinfo to textual representation.
   #
@@ -211,8 +275,12 @@ class Addrinfo
   #     Addrinfo.tcp("127.0.0.1", 80).getnameinfo(Socket::NI_NUMERICSERV)
   #     #=> ["localhost", "80"]
   #
-  def getnameinfo: (?Integer flags) -> [String, Integer]
+  def getnameinfo: (?Integer flags) -> [ String, Integer ]
 
+  # <!--
+  #   rdoc-file=ext/socket/raddrinfo.c
+  #   - addrinfo.inspect => string
+  # -->
   # returns a string which shows addrinfo in human-readable form.
   #
   #     Addrinfo.tcp("localhost", 80).inspect #=> "#<Addrinfo: 127.0.0.1:80 TCP (localhost)>"
@@ -220,6 +288,10 @@ class Addrinfo
   #
   def inspect: () -> String
 
+  # <!--
+  #   rdoc-file=ext/socket/raddrinfo.c
+  #   - addrinfo.inspect_sockaddr => string
+  # -->
   # returns a string which shows the sockaddr in *addrinfo* with human-readable
   # form.
   #
@@ -229,6 +301,10 @@ class Addrinfo
   #
   def inspect_sockaddr: () -> String
 
+  # <!--
+  #   rdoc-file=ext/socket/raddrinfo.c
+  #   - addrinfo.ip? => true or false
+  # -->
   # returns true if addrinfo is internet (IPv4/IPv6) address. returns false
   # otherwise.
   #
@@ -238,6 +314,10 @@ class Addrinfo
   #
   def ip?: () -> bool
 
+  # <!--
+  #   rdoc-file=ext/socket/raddrinfo.c
+  #   - addrinfo.ip_address => string
+  # -->
   # Returns the IP address as a string.
   #
   #     Addrinfo.tcp("127.0.0.1", 80).ip_address    #=> "127.0.0.1"
@@ -245,6 +325,10 @@ class Addrinfo
   #
   def ip_address: () -> String
 
+  # <!--
+  #   rdoc-file=ext/socket/raddrinfo.c
+  #   - addrinfo.ip_port => port
+  # -->
   # Returns the port number as an integer.
   #
   #     Addrinfo.tcp("127.0.0.1", 80).ip_port    #=> 80
@@ -252,13 +336,21 @@ class Addrinfo
   #
   def ip_port: () -> Integer
 
+  # <!--
+  #   rdoc-file=ext/socket/raddrinfo.c
+  #   - addrinfo.ip_unpack => [addr, port]
+  # -->
   # Returns the IP address and port number as 2-element array.
   #
   #     Addrinfo.tcp("127.0.0.1", 80).ip_unpack    #=> ["127.0.0.1", 80]
   #     Addrinfo.tcp("::1", 80).ip_unpack          #=> ["::1", 80]
   #
-  def ip_unpack: () -> [String, Integer]
+  def ip_unpack: () -> [ String, Integer ]
 
+  # <!--
+  #   rdoc-file=ext/socket/raddrinfo.c
+  #   - addrinfo.ipv4? => true or false
+  # -->
   # returns true if addrinfo is IPv4 address. returns false otherwise.
   #
   #     Addrinfo.tcp("127.0.0.1", 80).ipv4? #=> true
@@ -267,21 +359,37 @@ class Addrinfo
   #
   def ipv4?: () -> bool
 
+  # <!--
+  #   rdoc-file=ext/socket/raddrinfo.c
+  #   - ipv4_loopback?()
+  # -->
   # Returns true for IPv4 loopback address (127.0.0.0/8). It returns false
   # otherwise.
   #
   def ipv4_loopback?: () -> bool
 
+  # <!--
+  #   rdoc-file=ext/socket/raddrinfo.c
+  #   - ipv4_multicast?()
+  # -->
   # Returns true for IPv4 multicast address (224.0.0.0/4). It returns false
   # otherwise.
   #
   def ipv4_multicast?: () -> bool
 
+  # <!--
+  #   rdoc-file=ext/socket/raddrinfo.c
+  #   - ipv4_private?()
+  # -->
   # Returns true for IPv4 private address (10.0.0.0/8, 172.16.0.0/12,
   # 192.168.0.0/16). It returns false otherwise.
   #
   def ipv4_private?: () -> bool
 
+  # <!--
+  #   rdoc-file=ext/socket/raddrinfo.c
+  #   - addrinfo.ipv6? => true or false
+  # -->
   # returns true if addrinfo is IPv6 address. returns false otherwise.
   #
   #     Addrinfo.tcp("127.0.0.1", 80).ipv6? #=> false
@@ -290,50 +398,90 @@ class Addrinfo
   #
   def ipv6?: () -> bool
 
+  # <!--
+  #   rdoc-file=ext/socket/raddrinfo.c
+  #   - ipv6_linklocal?()
+  # -->
   # Returns true for IPv6 link local address (ff80::/10). It returns false
   # otherwise.
   #
   def ipv6_linklocal?: () -> bool
 
+  # <!--
+  #   rdoc-file=ext/socket/raddrinfo.c
+  #   - ipv6_loopback?()
+  # -->
   # Returns true for IPv6 loopback address (::1). It returns false otherwise.
   #
   def ipv6_loopback?: () -> bool
 
+  # <!--
+  #   rdoc-file=ext/socket/raddrinfo.c
+  #   - ipv6_mc_global?()
+  # -->
   # Returns true for IPv6 multicast global scope address. It returns false
   # otherwise.
   #
   def ipv6_mc_global?: () -> bool
 
+  # <!--
+  #   rdoc-file=ext/socket/raddrinfo.c
+  #   - ipv6_mc_linklocal?()
+  # -->
   # Returns true for IPv6 multicast link-local scope address. It returns false
   # otherwise.
   #
   def ipv6_mc_linklocal?: () -> bool
 
+  # <!--
+  #   rdoc-file=ext/socket/raddrinfo.c
+  #   - ipv6_mc_nodelocal?()
+  # -->
   # Returns true for IPv6 multicast node-local scope address. It returns false
   # otherwise.
   #
   def ipv6_mc_nodelocal?: () -> bool
 
+  # <!--
+  #   rdoc-file=ext/socket/raddrinfo.c
+  #   - ipv6_mc_orglocal?()
+  # -->
   # Returns true for IPv6 multicast organization-local scope address. It returns
   # false otherwise.
   #
   def ipv6_mc_orglocal?: () -> bool
 
+  # <!--
+  #   rdoc-file=ext/socket/raddrinfo.c
+  #   - ipv6_mc_sitelocal?()
+  # -->
   # Returns true for IPv6 multicast site-local scope address. It returns false
   # otherwise.
   #
   def ipv6_mc_sitelocal?: () -> bool
 
+  # <!--
+  #   rdoc-file=ext/socket/raddrinfo.c
+  #   - ipv6_multicast?()
+  # -->
   # Returns true for IPv6 multicast address (ff00::/8). It returns false
   # otherwise.
   #
   def ipv6_multicast?: () -> bool
 
+  # <!--
+  #   rdoc-file=ext/socket/raddrinfo.c
+  #   - ipv6_sitelocal?()
+  # -->
   # Returns true for IPv6 site local address (ffc0::/10). It returns false
   # otherwise.
   #
   def ipv6_sitelocal?: () -> bool
 
+  # <!--
+  #   rdoc-file=ext/socket/raddrinfo.c
+  #   - ipv6_to_ipv4()
+  # -->
   # Returns IPv4 address of IPv4 mapped/compatible IPv6 address. It returns nil if
   # `self` is not IPv4 mapped/compatible IPv6 address.
   #
@@ -345,25 +493,45 @@ class Addrinfo
   #
   def ipv6_to_ipv4: () -> Addrinfo?
 
+  # <!--
+  #   rdoc-file=ext/socket/raddrinfo.c
+  #   - ipv6_unique_local?()
+  # -->
   # Returns true for IPv6 unique local address (fc00::/7, RFC4193). It returns
   # false otherwise.
   #
   def ipv6_unique_local?: () -> bool
 
+  # <!--
+  #   rdoc-file=ext/socket/raddrinfo.c
+  #   - ipv6_unspecified?()
+  # -->
   # Returns true for IPv6 unspecified address (::). It returns false otherwise.
   #
   def ipv6_unspecified?: () -> bool
 
+  # <!--
+  #   rdoc-file=ext/socket/raddrinfo.c
+  #   - ipv6_v4compat?()
+  # -->
   # Returns true for IPv4-compatible IPv6 address (::/80). It returns false
   # otherwise.
   #
   def ipv6_v4compat?: () -> bool
 
+  # <!--
+  #   rdoc-file=ext/socket/raddrinfo.c
+  #   - ipv6_v4mapped?()
+  # -->
   # Returns true for IPv4-mapped IPv6 address (::ffff:0:0/80). It returns false
   # otherwise.
   #
   def ipv6_v4mapped?: () -> bool
 
+  # <!--
+  #   rdoc-file=ext/socket/lib/socket.rb
+  #   - listen(backlog=Socket::SOMAXCONN) { |sock| ... }
+  # -->
   # creates a listening socket bound to self.
   #
   def listen: (Integer backlog) -> void
@@ -372,24 +540,37 @@ class Addrinfo
 
   def marshal_load: (String) -> instance
 
+  # <!--
+  #   rdoc-file=ext/socket/raddrinfo.c
+  #   - addrinfo.pfamily => integer
+  # -->
   # returns the protocol family as an integer.
   #
   #     Addrinfo.tcp("localhost", 80).pfamily == Socket::PF_INET #=> true
   #
   def pfamily: () -> Integer
 
+  # <!--
+  #   rdoc-file=ext/socket/raddrinfo.c
+  #   - addrinfo.protocol => integer
+  # -->
   # returns the socket type as an integer.
   #
   #     Addrinfo.tcp("localhost", 80).protocol == Socket::IPPROTO_TCP #=> true
   #
   def protocol: () -> Integer
 
+  # <!--
+  #   rdoc-file=ext/socket/raddrinfo.c
+  #   - addrinfo.socktype => integer
+  # -->
   # returns the socket type as an integer.
   #
   #     Addrinfo.tcp("localhost", 80).socktype == Socket::SOCK_STREAM #=> true
   #
   def socktype: () -> Integer
 
+  # <!-- rdoc-file=ext/socket/raddrinfo.c -->
   # returns the socket address as packed struct sockaddr string.
   #
   #     Addrinfo.tcp("localhost", 80).to_sockaddr
@@ -397,6 +578,11 @@ class Addrinfo
   #
   def to_s: () -> String
 
+  # <!--
+  #   rdoc-file=ext/socket/raddrinfo.c
+  #   - addrinfo.to_sockaddr => string
+  #   - addrinfo.to_s => string
+  # -->
   # returns the socket address as packed struct sockaddr string.
   #
   #     Addrinfo.tcp("localhost", 80).to_sockaddr
@@ -404,6 +590,10 @@ class Addrinfo
   #
   def to_sockaddr: () -> String
 
+  # <!--
+  #   rdoc-file=ext/socket/raddrinfo.c
+  #   - addrinfo.unix? => true or false
+  # -->
   # returns true if addrinfo is UNIX address. returns false otherwise.
   #
   #     Addrinfo.tcp("127.0.0.1", 80).unix? #=> false
@@ -412,6 +602,10 @@ class Addrinfo
   #
   def unix?: () -> bool
 
+  # <!--
+  #   rdoc-file=ext/socket/raddrinfo.c
+  #   - addrinfo.unix_path => path
+  # -->
   # Returns the socket path as a string.
   #
   #     Addrinfo.unix("/tmp/sock").unix_path       #=> "/tmp/sock"
@@ -420,6 +614,13 @@ class Addrinfo
 
   private
 
+  # <!--
+  #   rdoc-file=ext/socket/raddrinfo.c
+  #   - Addrinfo.new(sockaddr)                             => addrinfo
+  #   - Addrinfo.new(sockaddr, family)                     => addrinfo
+  #   - Addrinfo.new(sockaddr, family, socktype)           => addrinfo
+  #   - Addrinfo.new(sockaddr, family, socktype, protocol) => addrinfo
+  # -->
   # returns a new instance of Addrinfo. The instance contains sockaddr, family,
   # socktype, protocol. sockaddr means struct sockaddr which can be used for
   # connect(2), etc. family, socktype and protocol are integers which is used for

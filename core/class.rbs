@@ -1,4 +1,4 @@
-# Extends any Class to include *json_creatable?* method.
+# <!-- rdoc-file=object.c -->
 # Classes in Ruby are first-class objects---each is an instance of class Class.
 #
 # Typically, you create a new class by using:
@@ -52,7 +52,13 @@
 #                  |                     |
 #     obj--->OtherClass---------->(OtherClass)-----------...
 #
+%a{annotate:rdoc:source:from=object.c}
 class Class < Module
+  # <!--
+  #   rdoc-file=object.c
+  #   - Class.new(super_class=Object)               -> a_class
+  #   - Class.new(super_class=Object) { |mod| ... } -> a_class
+  # -->
   # Creates a new anonymous (unnamed) class with the given superclass (or Object
   # if no parameter is given). You can give a class a name by assigning the class
   # object to a constant.
@@ -78,6 +84,10 @@ class Class < Module
   #
   def initialize: (?Class superclass) ?{ (Class newclass) -> void } -> void
 
+  # <!--
+  #   rdoc-file=object.c
+  #   - class.allocate()   ->   obj
+  # -->
   # Allocates space for a new object of *class*'s class and does not call
   # initialize on the new instance. The returned object must be an instance of
   # *class*.
@@ -96,6 +106,10 @@ class Class < Module
   #
   def allocate: () -> untyped
 
+  # <!--
+  #   rdoc-file=object.c
+  #   - inherited(subclass)
+  # -->
   # Callback invoked whenever a subclass of the current class is created.
   #
   # Example:
@@ -119,12 +133,20 @@ class Class < Module
   #
   def inherited: (Class arg0) -> untyped
 
+  # <!--
+  #   rdoc-file=object.c
+  #   - class.new(args, ...)    ->  obj
+  # -->
   # Calls #allocate to create a new object of *class*'s class, then invokes that
   # object's #initialize method, passing it *args*.  This is the method that ends
   # up getting called whenever an object is constructed using `.new`.
   #
   def new: () -> untyped
 
+  # <!--
+  #   rdoc-file=object.c
+  #   - class.superclass -> a_super_class or nil
+  # -->
   # Returns the superclass of *class*, or `nil`.
   #
   #     File.superclass          #=> IO
@@ -138,8 +160,5 @@ class Class < Module
   #
   #     BasicObject.superclass   #=> nil
   #
-  # # arglists
-  #     class.superclass -> a_super_class or nil
-  #
-  def `superclass`: () -> Class?
+  def superclass: () -> Class?
 end

@@ -1,7 +1,13 @@
+# <!-- rdoc-file=ext/socket/unixserver.c -->
 # UNIXServer represents a UNIX domain stream server socket.
+#
 class UNIXServer < UNIXSocket
   public
 
+  # <!--
+  #   rdoc-file=ext/socket/unixserver.c
+  #   - unixserver.accept => unixsocket
+  # -->
   # Accepts an incoming connection. It returns a new UNIXSocket object.
   #
   #     UNIXServer.open("/tmp/sock") {|serv|
@@ -15,6 +21,10 @@ class UNIXServer < UNIXSocket
   #
   def accept: () -> UNIXSocket
 
+  # <!--
+  #   rdoc-file=ext/socket/lib/socket.rb
+  #   - unixserver.accept_nonblock([options]) => unixsocket
+  # -->
   # Accepts an incoming connection using accept(2) after O_NONBLOCK is set for the
   # underlying file descriptor. It returns an accepted UNIXSocket for the incoming
   # connection.
@@ -48,9 +58,12 @@ class UNIXServer < UNIXSocket
   # *   UNIXServer#accept
   # *   Socket#accept
   #
-  #
   def accept_nonblock: (?exception: boolish) -> (UNIXSocket | :wait_readable)
 
+  # <!--
+  #   rdoc-file=ext/socket/unixserver.c
+  #   - socket.listen( int ) => 0
+  # -->
   # Listens for connections, using the specified `int` as the backlog. A call to
   # *listen* only applies if the `socket` is of type SOCK_STREAM or
   # SOCK_SEQPACKET.
@@ -120,9 +133,12 @@ class UNIXServer < UNIXSocket
   # *   listen manual pages on unix-based systems
   # *   listen function in Microsoft's Winsock functions reference
   #
-  #
   def listen: (Integer backlog) -> void
 
+  # <!--
+  #   rdoc-file=ext/socket/unixserver.c
+  #   - unixserver.sysaccept => file_descriptor
+  # -->
   # Accepts a new connection. It returns the new file descriptor which is an
   # integer.
   #
@@ -142,6 +158,10 @@ class UNIXServer < UNIXSocket
 
   def __accept_nonblock: (untyped) -> untyped
 
+  # <!--
+  #   rdoc-file=ext/socket/unixserver.c
+  #   - UNIXServer.new(path) => unixserver
+  # -->
   # Creates a new UNIX server socket bound to *path*.
   #
   #     require 'socket'
