@@ -934,6 +934,10 @@ class OptionParser
 
   private
 
+  # <!--
+  #   rdoc-file=lib/optparse.rb
+  #   - complete(typ, opt, icase = false, *pat)
+  # -->
   # Completes shortened long style option switch and returns pair of canonical
   # switch and switch descriptor OptionParser::Switch.
   #
@@ -945,7 +949,6 @@ class OptionParser
   # :   Search case insensitive if true.
   # `pat`
   # :   Optional pattern for completion.
-  #
   #
   def complete: (untyped typ, untyped opt, ?untyped icase, *untyped pat) -> untyped
 
@@ -964,6 +967,10 @@ class OptionParser
   #
   def initialize: (?String banner, ?Integer width, ?String indent) ?{ (OptionParser) -> void } -> void
 
+  # <!--
+  #   rdoc-file=lib/optparse.rb
+  #   - notwice(obj, prv, msg)
+  # -->
   # Checks if an argument is given twice, in which case an ArgumentError is
   # raised. Called from OptionParser#switch only.
   #
@@ -974,15 +981,22 @@ class OptionParser
   # `msg`
   # :   Exception message.
   #
-  #
   def notwice: (untyped obj, untyped prv, untyped msg) -> untyped
 
   def parse_in_order: (?untyped argv, ?untyped setter) { (*untyped) -> untyped } -> untyped
 
+  # <!--
+  #   rdoc-file=lib/optparse.rb
+  #   - search(id, key) { |k| ... }
+  # -->
   # Searches `key` in @stack for `id` hash and returns or yields the result.
   #
   def search: (untyped id, untyped key) -> untyped
 
+  # <!--
+  #   rdoc-file=lib/optparse.rb
+  #   - visit(id, *args, &block)
+  # -->
   # Traverses @stack, sending each element method `id` with `args` and `block`.
   #
   def visit: (untyped id, *untyped args) { (*untyped) -> untyped } -> untyped
@@ -1359,6 +1373,10 @@ class OptionParser::List
   #
   def initialize: () -> void
 
+  # <!--
+  #   rdoc-file=lib/optparse.rb
+  #   - update(sw, sopts, lopts, nsw = nil, nlopts = nil)
+  # -->
   # Adds `sw` according to `sopts`, `lopts` and `nlopts`.
   #
   # `sw`
@@ -1369,7 +1387,6 @@ class OptionParser::List
   # :   Long style option list.
   # `nlopts`
   # :   Negated long style options list.
-  #
   #
   def update: (untyped sw, untyped sopts, untyped lopts, ?untyped nsw, ?untyped nlopts) -> untyped
 end
@@ -1564,6 +1581,10 @@ class OptionParser::Switch
 
   private
 
+  # <!--
+  #   rdoc-file=lib/optparse.rb
+  #   - conv_arg(arg, val = [])
+  # -->
   # Parses argument, converts and returns `arg`, `block` and result of conversion.
   # Yields at semi-error condition instead of raising an exception.
   #
@@ -1576,6 +1597,10 @@ class OptionParser::Switch
   #
   def initialize: (?untyped pattern, ?untyped conv, ?untyped short, ?untyped long, ?untyped arg, ?untyped desc, ?untyped block) { (*untyped) -> untyped } -> void
 
+  # <!--
+  #   rdoc-file=lib/optparse.rb
+  #   - parse_arg(arg) { |InvalidArgument, arg| ... }
+  # -->
   # Parses `arg` and returns rest of `arg` and matched portion to the argument
   # pattern. Yields when the pattern doesn't match substring.
   #

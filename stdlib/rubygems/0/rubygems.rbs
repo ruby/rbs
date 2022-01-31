@@ -116,6 +116,7 @@ module Gem
   #
   MARSHAL_SPEC_DIR: String
 
+  # <!-- rdoc-file=lib/rubygems.rb -->
   # Exception classes used in a Gem.read_binary `rescue` statement
   #
   READ_BINARY_ERRORS: Array[Class]
@@ -145,6 +146,7 @@ module Gem
   #
   WIN_PATTERNS: Array[Regexp]
 
+  # <!-- rdoc-file=lib/rubygems.rb -->
   # Exception classes used in Gem.write_binary `rescue` statement
   #
   WRITE_BINARY_ERRORS: Array[Class]
