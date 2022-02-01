@@ -41,6 +41,27 @@ class UnboundMethodTest < Test::Unit::TestCase
                      TestClass.instance_method(:m), :parameters
   end
 
+  def test_public?
+    assert_send_type(
+      "() -> bool",
+      unbound_method, :public?
+    )
+  end
+
+  def test_private?
+    assert_send_type(
+      "() -> bool",
+      unbound_method, :private?
+    )
+  end
+
+  def test_protected?
+    assert_send_type(
+      "() -> bool",
+      unbound_method, :protected?
+    )
+  end
+
   def test_source_location
     assert_send_type "() -> nil",
                      unbound_method, :source_location
