@@ -16,6 +16,19 @@
 #
 module Process
   # <!--
+  #   rdoc-file=process.c
+  #   - Process._fork   -> integer
+  # -->
+  # An internal API for fork. Do not call this method directly. Currently, this is
+  # called via Kernel#fork, Process.fork, and IO.popen with `"-"`.
+  #
+  # This method is not for casual code but for application monitoring libraries.
+  # You can add custom code before and after fork events by overriding this
+  # method.
+  #
+  def self._fork: () -> Integer
+
+  # <!--
   #   rdoc-file=ruby.c
   #   - Process.argv0  -> frozen_string
   # -->

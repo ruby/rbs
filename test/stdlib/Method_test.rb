@@ -77,8 +77,16 @@ class MethodTest < StdlibTest
     Foo.new.method(:foo_with_arg_and_rest).parameters
   end
 
-  def test_receiver
-    Foo.new.method(:foo).receiver
+  def test_public?
+    Foo.new.method(:foo).public?
+  end
+
+  def test_private?
+    Foo.new.method(:foo).private?
+  end
+
+  def test_protected?
+    Foo.new.method(:foo).protected?
   end
 
   def test_source_location

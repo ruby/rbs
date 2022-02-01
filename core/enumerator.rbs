@@ -473,6 +473,14 @@ class Enumerator::Lazy[out Elem, out Return] < Enumerator[Elem, Return]
   # Expands `lazy` enumerator to an array. See Enumerable#to_a.
   #
   alias force to_a
+
+  # <!--
+  #   rdoc-file=enumerator.c
+  #   - lazy.compact                  -> lazy_enumerator
+  # -->
+  # Like Enumerable#compact, but chains operation to be lazy-evaluated.
+  #
+  def compact: () -> Enumerator::Lazy[Elem, Return]
 end
 
 # <!-- rdoc-file=enumerator.c -->

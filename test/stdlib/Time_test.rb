@@ -268,3 +268,69 @@ class TimeTest < StdlibTest
     Time.new.ceil(1)
   end
 end
+
+class TimeSingletonTest < Test::Unit::TestCase
+  include TypeAssertions
+  testing "singleton(::Time)"
+
+  def test_now
+    assert_send_type(
+      "() -> Time",
+      Time, :now
+    )
+    assert_send_type(
+      "(in: Integer) -> Time",
+      Time, :now, in: 9*3600
+    )
+    assert_send_type(
+      "(in: String) -> Time",
+      Time, :now, in: "+09:00"
+    )
+    assert_send_type(
+      "(in: nil) -> Time",
+      Time, :now, in: nil
+    )
+  end
+
+  def test_at
+    assert_send_type(
+      "(Time) -> Time",
+      Time, :at, Time.now
+    )
+    assert_send_type(
+      "(Time, in: String) -> Time",
+      Time, :at, Time.now, in: "+09:00"
+    )
+    assert_send_type(
+      "(Integer) -> Time",
+      Time, :at, Time.now.to_i
+    )
+    assert_send_type(
+      "(Integer, in: String) -> Time",
+      Time, :at, Time.now.to_i, in: "+04:00"
+    )
+    assert_send_type(
+      "(Integer, Integer, :millisecond, in: String) -> Time",
+      Time, :at, Time.now.to_i, 100, :millisecond, in: "+04:00"
+    )
+  end
+
+  def test_new
+    assert_send_type(
+      "() -> Time",
+      Time, :new
+    )
+    assert_send_type(
+      "(in: String) -> Time",
+      Time, :new, in: "+08:00"
+    )
+    assert_send_type(
+      "(Integer, Integer, Integer, Integer, Integer, Float, String) -> Time",
+      Time, :new, 2022, 1, 3, 13, 22, 30.4, "Z"
+    )
+    assert_send_type(
+      "(Integer, Integer, Integer, in: String) -> Time",
+      Time, :new, 2022, 1, 3, in: "Z"
+    )
+  end
+end

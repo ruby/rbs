@@ -208,6 +208,25 @@ class Integer < Numeric
   #
   def self.sqrt: (int n) -> Integer
 
+  # <!--
+  #   rdoc-file=numeric.rb
+  #   - Integer.try_convert(object) -> object, integer, or nil
+  # -->
+  # If `object` is an Integer object, returns `object`.
+  #     Integer.try_convert(1) # => 1
+  #
+  # Otherwise if `object` responds to `:to_int`, calls `object.to_int` and returns
+  # the result.
+  #     Integer.try_convert(1.25) # => 1
+  #
+  # Returns `nil` if `object` does not respond to `:to_int`
+  #     Integer.try_convert([]) # => nil
+  #
+  # Raises an exception unless `object.to_int` returns an Integer object.
+  #
+  def self.try_convert: (int) -> Integer
+                      | (untyped) -> Integer?
+
   public
 
   # <!--

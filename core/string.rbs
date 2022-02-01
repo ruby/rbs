@@ -3268,7 +3268,7 @@ class String
   # *   Q_, Q!, q_, and q! are available since Ruby 2.1.
   # *   I!<, i!<, I!>, and i!> are available since Ruby 1.9.3.
   #
-  def unpack: (String format) -> Array[Integer | Float | String | nil]
+  def unpack: (String format, ?offset: Integer) -> Array[Integer | Float | String | nil]
 
   # <!--
   #   rdoc-file=pack.rb

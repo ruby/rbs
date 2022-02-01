@@ -275,4 +275,21 @@ class Struct[Elem] < Object
   #     Customer.members # => [:name, :address, :zip]
   #
   def self.members: () -> ::Array[Symbol]
+
+  # <!--
+  #   rdoc-file=struct.c
+  #   - StructClass::keyword_init? -> true or falsy value
+  # -->
+  # Returns `true` if the class was initialized with `keyword_init: true`.
+  # Otherwise returns `nil` or `false`.
+  #
+  # Examples:
+  #     Foo = Struct.new(:a)
+  #     Foo.keyword_init? # => nil
+  #     Bar = Struct.new(:a, keyword_init: true)
+  #     Bar.keyword_init? # => true
+  #     Baz = Struct.new(:a, keyword_init: false)
+  #     Baz.keyword_init? # => false
+  #
+  def self.keyword_init?: () -> (true | false | nil)
 end

@@ -276,8 +276,11 @@ class Time < Object
   #     *   A timezone object; see [Timezone
   #         Argument](#class-Time-label-Timezone+Argument) for details.
   #
-  def self.at: (Time | Numeric seconds) -> Time
-             | (Numeric seconds, ?Numeric microseconds_with_frac) -> Time
+  def self.at: (Time, ?in: String | Integer | nil) -> Time
+             | (Numeric, ?in: String | Integer | nil) -> Time
+             | (Integer sec_i, Numeric msec, subsec_unit msec, ?in: String | Integer | nil) -> Time
+
+  type subsec_unit = :msec | :millisecond | :usec | :microsecond | :nsec | :nanosecond
 
   # Creates a Time object based on given values, interpreted as UTC (GMT). The
   # year must be specified. Other values default to the minimum value for that
@@ -355,7 +358,7 @@ class Time < Object
   #     *   A timezone object; see [Timezone
   #         Argument](#class-Time-label-Timezone+Argument) for details.
   #
-  def self.now: () -> Time
+  def self.now: (?in: String | Integer | nil) -> Time
 
   # <!--
   #   rdoc-file=time.c
@@ -692,7 +695,8 @@ class Time < Object
   #
   # *   `in: zone`: a timezone *zone*, which may be as above.
   #
-  def initialize: (?Integer | String year, ?Integer | String month, ?Integer | String day, ?Integer | String hour, ?Integer | String min, ?Numeric | String sec, ?Numeric | String usec_with_frac) -> void
+  def initialize: (?Integer? year, ?Integer? month, ?Integer? day, ?Integer? hour, ?Integer? min, ?Numeric? sec, ?String | Integer | nil) -> void
+                | (?Integer? year, ?Integer? month, ?Integer? day, ?Integer? hour, ?Integer? min, ?Numeric? sec, in: String | Integer | nil) -> void
 
   # <!--
   #   rdoc-file=time.c

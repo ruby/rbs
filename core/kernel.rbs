@@ -1489,7 +1489,7 @@ module Kernel : BasicObject
   # executed under the given module. In no circumstance will any local variables
   # in the loaded file be propagated to the loading environment.
   #
-  def self?.load: (String filename, ?boolish) -> bool
+  def self?.load: (String filename, ?Module | bool) -> bool
 
   # <!--
   #   rdoc-file=vm_eval.c

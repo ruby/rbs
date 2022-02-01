@@ -222,6 +222,42 @@ class MatchData
 
   # <!--
   #   rdoc-file=re.c
+  #   - mtch.match(n)   -> string or nil
+  # -->
+  # Returns the captured substring corresponding to the argument. *n* can be a
+  # string or symbol to reference a named capture.
+  #
+  #     m = /(.)(.)(\d+)(\d)(\w)?/.match("THX1138.")
+  #     m.match(0)       #=> "HX1138"
+  #     m.match(4)       #=> "8"
+  #     m.match(5)       #=> nil
+  #
+  #     m = /(?<foo>.)(.)(?<bar>.+)/.match("hoge")
+  #     m.match(:foo)    #=> "h"
+  #     m.match(:bar)    #=> "ge"
+  #
+  def match: (int | String | Symbol) -> String?
+
+  # <!--
+  #   rdoc-file=re.c
+  #   - mtch.match_length(n)   -> array
+  # -->
+  # Returns the length of the captured substring corresponding to the argument.
+  # *n* can be a string or symbol to reference a named capture.
+  #
+  #     m = /(.)(.)(\d+)(\d)(\w)?/.match("THX1138.")
+  #     m.match_length(0)       #=> 6
+  #     m.match_length(4)       #=> 1
+  #     m.match_length(5)       #=> nil
+  #
+  #     m = /(?<foo>.)(.)(?<bar>.+)/.match("hoge")
+  #     m.match_length(:foo)    #=> 1
+  #     m.match_length(:bar)    #=> 2
+  #
+  def match_length: (int | String | Symbol) -> Integer?
+
+  # <!--
+  #   rdoc-file=re.c
   #   - mtch.offset(n)   -> array
   # -->
   # Returns a two-element array containing the beginning and ending offsets of the

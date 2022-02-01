@@ -341,6 +341,17 @@ module Enumerable[unchecked out Elem] : _Each[Elem]
 
   # <!--
   #   rdoc-file=enum.c
+  #   - compact -> array
+  # -->
+  # Returns an array of all non-`nil` elements:
+  #
+  #     a = [nil, 0, nil, 'a', false, nil, false, nil, 'a', nil, 0, nil]
+  #     a.compact # => [0, "a", false, false, "a", 0]
+  #
+  def compact: () -> Array[Elem]
+
+  # <!--
+  #   rdoc-file=enum.c
   #   - count -> integer
   #   - count(object) -> integer
   #   - count {|element| ... } -> integer
@@ -473,8 +484,8 @@ module Enumerable[unchecked out Elem] : _Each[Elem]
   #
   # With no block given, returns an Enumerator.
   #
-  def each_cons: (Integer n) { (::Array[Elem] arg0) -> untyped } -> NilClass
-               | (Integer n) -> ::Enumerator[::Array[Elem], NilClass]
+  def each_cons: (Integer n) { (::Array[Elem]) -> void } -> self
+               | (Integer n) -> ::Enumerator[::Array[Elem], self]
 
   # <!--
   #   rdoc-file=enum.c
@@ -1490,8 +1501,8 @@ module Enumerable[unchecked out Elem] : _Each[Elem]
   #
   # With no block given, returns an Enumerator.
   #
-  def each_slice: (Integer n) { (::Array[Elem]) -> untyped } -> NilClass
-                | (Integer n) -> ::Enumerator[::Array[Elem], NilClass]
+  def each_slice: (Integer n) { (::Array[Elem]) -> void } -> self
+                | (Integer n) -> ::Enumerator[::Array[Elem], self]
 
   interface _NotFound[T]
     def call: () -> T
@@ -1881,7 +1892,7 @@ module Enumerable[unchecked out Elem] : _Each[Elem]
   #     hash = %w[b a m].tally(hash)
   #     hash # => {"a"=>4, "c"=>2, "d"=>1, "b"=>3, "z"=>1, "m"=> 1}
   #
-  def tally: () -> ::Hash[Elem, Integer]
+  def tally: (?Hash[Elem, Integer] hash) -> ::Hash[Elem, Integer]
 
   # <!--
   #   rdoc-file=enum.c

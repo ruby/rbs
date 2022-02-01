@@ -491,7 +491,7 @@ class File < IO
   #     File.dirname("/home/gumby/work/ruby.rb", 2) #=> "/home/gumby"
   #     File.dirname("/home/gumby/work/ruby.rb", 4) #=> "/"
   #
-  def self.dirname: (string | _ToPath file_name) -> String
+  def self.dirname: (string | _ToPath file_name, ?Integer level) -> String
 
   # <!--
   #   rdoc-file=file.c

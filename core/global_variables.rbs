@@ -147,7 +147,11 @@ $LOADED_FEATURES: Array[String]
 # Has a singleton method <code>$LOAD_PATH.resolve_feature_path(feature)</code>
 # that returns [+:rb+ or +:so+, path], which resolves the feature to
 # the path the original Kernel#require method would load.
-$LOAD_PATH: Array[String]
+$LOAD_PATH: Array[String] & _LoadPathAPI
+
+interface _LoadPathAPI
+  def resolve_feature_path: (String) -> [:rb | :so, String]?
+end
 
 # Contains the name of the script being executed. May be assignable.
 $PROGRAM_NAME: String
