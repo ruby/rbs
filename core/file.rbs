@@ -1826,8 +1826,6 @@ class File::Stat < Object
   #
   def rdev_minor: () -> Integer
 
-  def read: (?int? length, ?string outbuf) -> String?
-
   # <!--
   #   rdoc-file=file.c
   #   - stat.readable?    -> true or false
