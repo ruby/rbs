@@ -84,6 +84,17 @@ class MatchDataTest < StdlibTest
     m.match("bar")
   end
 
+  def test_match_length
+    m = /(.)(.)(\d+)(\d)(\w)?/.match("THX1138.")
+    m.match_length(0)
+    m.match_length(4.0)
+    m.match_length(ToInt.new(5))
+
+    m = /(?<foo>.)(.)(?<bar>.+)/.match("hoge")
+    m.match_length(:foo)
+    m.match_length("bar")
+  end
+
   def test_offset
     /(?<first>foo)(?<second>bar)(?<third>Baz)?/ =~ "foobarbaz"
     $~.offset 0
