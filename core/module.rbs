@@ -1139,7 +1139,11 @@ class Module < Object
   #
   # Note that to show a private method on RDoc, use `:doc:`.
   #
-  def private: (*Symbol | String arg0) -> self
+  def private: () -> nil
+             | (Symbol method_name) -> Symbol
+             | (Symbol, Symbol, *Symbol method_name) -> Array[Symbol]
+             | (string method_name) -> string
+             | (string | Symbol, string | Symbol, *string | Symbol method_name) -> Array[string | Symbol]
 
   # <!--
   #   rdoc-file=vm_method.c
@@ -1296,7 +1300,11 @@ class Module < Object
   # returned. If no argument is passed, nil is returned. If multiple arguments are
   # passed, the arguments are returned as an array.
   #
-  def public: (*Symbol | String arg0) -> self
+  def public: () -> nil
+            | (Symbol method_name) -> Symbol
+            | (Symbol, Symbol, *Symbol method_name) -> Array[Symbol]
+            | (string method_name) -> string
+            | (string | Symbol, string | Symbol, *string | Symbol method_name) -> Array[string | Symbol]
 
   # <!--
   #   rdoc-file=vm_method.c

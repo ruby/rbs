@@ -79,4 +79,64 @@ class ModuleInstanceTest < Test::Unit::TestCase
     assert_send_type '(::String new_name, ::String old_name) -> ::Symbol',
                      mod, :alias_method, 'bar3', 'foo'
   end
+
+  def test_private
+    mod = Module.new do
+      def foo; end
+
+      def bar; end
+    end
+
+    assert_send_type(
+      "() -> nil",
+      mod, :private
+    )
+    assert_send_type(
+      "(Symbol) -> Symbol",
+      mod, :private, :foo
+    )
+    assert_send_type(
+      "(String) -> String",
+      mod, :private, "foo"
+    )
+    assert_send_type(
+      "(ToStr) -> ToStr",
+      mod, :private, ToStr.new("foo")
+    )
+
+    assert_send_type(
+      "(Symbol, String) -> Array[Symbol | String]",
+      mod, :private, :foo, "bar"
+    )
+  end
+
+  def test_public
+    mod = Module.new do
+      def foo; end
+
+      def bar; end
+    end
+
+    assert_send_type(
+      "() -> nil",
+      mod, :public
+    )
+    assert_send_type(
+      "(Symbol) -> Symbol",
+      mod, :public, :foo
+    )
+    assert_send_type(
+      "(String) -> String",
+      mod, :public, "foo"
+    )
+    assert_send_type(
+      "(ToStr) -> ToStr",
+      mod, :public, ToStr.new("foo")
+    )
+
+    assert_send_type(
+      "(Symbol, String) -> Array[Symbol | String]",
+      mod, :public, :foo, "bar"
+    )
+  end
 end
