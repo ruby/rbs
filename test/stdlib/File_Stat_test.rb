@@ -185,8 +185,14 @@ class FileStatInstanceTest < Test::Unit::TestCase
   end
 
   def test_size?
-    assert_send_type "() -> Integer?",
+    assert_send_type "() -> Integer",
                       File::Stat.new(__FILE__), :size?
+    Dir.mktmpdir do |dir|
+      File.open("#{dir}/empty", "w"){}
+
+      assert_send_type "() -> nil",
+                        File::Stat.new("#{dir}/empty"), :size?
+    end
   end
 
   def test_socket?
@@ -210,13 +216,32 @@ class FileStatInstanceTest < Test::Unit::TestCase
   end
 
   def test_world_readable?
-    assert_send_type "() -> Integer?",
+    assert_send_type "() -> Integer",
                       File::Stat.new(__FILE__), :world_readable?
+
+    Dir.mktmpdir do |dir|
+      File.open("#{dir}/unreadable", "w"){}
+      system "chmod o-r #{dir}/unreadable"
+
+      assert_send_type "() -> nil",
+                        File::Stat.new("#{dir}/unreadable"), :world_readable?
+    end
   end
 
   def test_world_writable?
-    assert_send_type "() -> Integer?",
-                      File::Stat.new(__FILE__), :world_writable?
+    Dir.mktmpdir do |dir|
+      File.open("#{dir}/writable", "w"){}
+      system "chmod a+w #{dir}/writable"
+
+      assert_send_type "() -> Integer?",
+                        File::Stat.new("#{dir}/writable"), :world_writable?
+
+      File.open("#{dir}/unwritable", "w"){}
+      system "chmod o-w #{dir}/unwritable"
+
+      assert_send_type "() -> nil",
+                        File::Stat.new("#{dir}/unwritable"), :world_writable?
+    end
   end
 
   def test_writable?
