@@ -1892,7 +1892,7 @@ module Enumerable[unchecked out Elem] : _Each[Elem]
   #     hash = %w[b a m].tally(hash)
   #     hash # => {"a"=>4, "c"=>2, "d"=>1, "b"=>3, "z"=>1, "m"=> 1}
   #
-  def tally: () -> ::Hash[Elem, Integer]
+  def tally: (?Hash[Elem, Integer] hash) -> ::Hash[Elem, Integer]
 
   # <!--
   #   rdoc-file=enum.c

@@ -60,6 +60,7 @@ class EnumerableTest < StdlibTest
   if Enumerable.public_method_defined?(:tally)
     def test_tally
       enumerable.tally
+      enumerable.tally({})
     end
   end
 
