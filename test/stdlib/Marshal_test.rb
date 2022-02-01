@@ -22,11 +22,24 @@ class MarshalSingletonTest < Test::Unit::TestCase
   def test_load
     dump = Marshal.dump([1,2,3])
 
-    assert_send_type "(::String) -> ::Array[::Integer]",
-                     Marshal, :load, dump
+    assert_send_type(
+      "(::String) -> ::Array[::Integer]",
+      Marshal, :load, dump
+    )
 
-    assert_send_type "(::String, ^(untyped) -> void) -> ::Integer",
-                     Marshal, :load, dump, -> (_x) { 123 }
+    assert_send_type(
+      "(::String, freeze: bool) -> ::Array[::Integer]",
+      Marshal, :load, dump, freeze: true
+    )
+    assert_send_type(
+      "(::String, freeze: Symbol) -> ::Array[::Integer]",
+      Marshal, :load, dump, freeze: :true
+    )
+
+    assert_send_type(
+      "(::String, ^(untyped) -> void) -> ::Integer",
+      Marshal, :load, dump, -> (_x) { 123 }
+    )
 
     name = Pathname(Dir.mktmpdir) + "foo"
 
@@ -34,8 +47,10 @@ class MarshalSingletonTest < Test::Unit::TestCase
       Marshal.dump([1,2,3], io)
     end
     File.open(name) do |io|
-      assert_send_type "(IO) -> ::Array[::Integer]",
-                       Marshal, :load, io
+      assert_send_type(
+        "(IO) -> ::Array[::Integer]",
+        Marshal, :load, io
+      )
     end
   end
 end

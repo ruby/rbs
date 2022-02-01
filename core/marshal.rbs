@@ -175,8 +175,8 @@ module Marshal
   #     deserialized.map(&:object_id)
   #     # => [1039360, 1039380, 1039360, 1039380] -- only 2 different objects, object_ids repeating
   #
-  def self.load: (String | untyped port) -> untyped
-               | [A] (String | untyped port, ^(untyped) -> A) -> A
+  def self.load: (String | untyped port, ?freeze: boolish) -> untyped
+               | [A] (String | untyped port, ^(untyped) -> A, ?freeze: boolish) -> A
 
   # <!--
   #   rdoc-file=marshal.rb
