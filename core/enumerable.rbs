@@ -484,8 +484,8 @@ module Enumerable[unchecked out Elem] : _Each[Elem]
   #
   # With no block given, returns an Enumerator.
   #
-  def each_cons: (Integer n) { (::Array[Elem] arg0) -> untyped } -> NilClass
-               | (Integer n) -> ::Enumerator[::Array[Elem], NilClass]
+  def each_cons: (Integer n) { (::Array[Elem]) -> void } -> self
+               | (Integer n) -> ::Enumerator[::Array[Elem], self]
 
   # <!--
   #   rdoc-file=enum.c
@@ -1501,8 +1501,8 @@ module Enumerable[unchecked out Elem] : _Each[Elem]
   #
   # With no block given, returns an Enumerator.
   #
-  def each_slice: (Integer n) { (::Array[Elem]) -> untyped } -> NilClass
-                | (Integer n) -> ::Enumerator[::Array[Elem], NilClass]
+  def each_slice: (Integer n) { (::Array[Elem]) -> void } -> self
+                | (Integer n) -> ::Enumerator[::Array[Elem], self]
 
   interface _NotFound[T]
     def call: () -> T

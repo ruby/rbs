@@ -180,6 +180,20 @@ class EnumerableTest2 < Test::Unit::TestCase
                      TestEnumerable.new, :each_with_object, 0 do end
   end
 
+  def test_each_cons
+    assert_send_type(
+      "(Integer) { (Array[String]) -> void } -> EnumerableTest2::TestEnumerable",
+      TestEnumerable.new, :each_cons, 2
+    ) do end
+  end
+
+  def test_each_slice
+    assert_send_type(
+      "(Integer) { (Array[String]) -> void } -> EnumerableTest2::TestEnumerable",
+      TestEnumerable.new, :each_slice, 2
+    ) do end
+  end
+
   def test_find_index
     assert_send_type "() -> ::Enumerator[String, Integer?]", TestEnumerable.new,
                      :find_index
