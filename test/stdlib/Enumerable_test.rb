@@ -165,6 +165,13 @@ class EnumerableTest2 < Test::Unit::TestCase
                      TestEnumerable.new, :collect_concat do |x| [x.to_i] end
   end
 
+  def test_compact
+    assert_send_type(
+      "() -> Array[String]",
+      TestEnumerable.new, :compact
+    )
+  end
+
   def test_each_with_object
     assert_send_type "(Integer) -> ::Enumerator[[String, Integer], Integer]",
                      TestEnumerable.new, :each_with_object, 0

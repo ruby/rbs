@@ -341,6 +341,17 @@ module Enumerable[unchecked out Elem] : _Each[Elem]
 
   # <!--
   #   rdoc-file=enum.c
+  #   - compact -> array
+  # -->
+  # Returns an array of all non-`nil` elements:
+  #
+  #     a = [nil, 0, nil, 'a', false, nil, false, nil, 'a', nil, 0, nil]
+  #     a.compact # => [0, "a", false, false, "a", 0]
+  #
+  def compact: () -> Array[Elem]
+
+  # <!--
+  #   rdoc-file=enum.c
   #   - count -> integer
   #   - count(object) -> integer
   #   - count {|element| ... } -> integer
