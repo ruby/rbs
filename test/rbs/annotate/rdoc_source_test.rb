@@ -1,5 +1,7 @@
 require "test_helper"
 
+return if ENV["RUBY"]
+
 class RDocSourceTest < Test::Unit::TestCase
   def load_source(files)
     Dir.mktmpdir do |dir|
