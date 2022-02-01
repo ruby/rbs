@@ -173,6 +173,14 @@ module GC
 
   # <!--
   #   rdoc-file=gc.rb
+  #   - GC.total_time -> int
+  # -->
+  # Return measured GC total time in nano seconds.
+  #
+  def self.total_time: () -> Integer
+
+  # <!--
+  #   rdoc-file=gc.rb
   #   - GC.compact
   # -->
   # This function compacts objects together in Ruby's heap.  It eliminates unused
