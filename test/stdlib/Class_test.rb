@@ -21,4 +21,8 @@ class ClassTest < StdlibTest
     Class.new.superclass
     BasicObject.superclass
   end
+
+  def test_subclasses
+    Class.new.subclasses
+  end
 end
