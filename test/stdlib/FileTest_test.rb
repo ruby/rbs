@@ -50,13 +50,6 @@ class FileTestSingletonTest < Test::Unit::TestCase
                       FileTest, :exist?, io_open
   end
 
-  def test_exists?
-    assert_send_type  "(::String file_name) -> bool",
-                      FileTest, :exists?, __FILE__
-    assert_send_type  "(::IO file_name) -> bool",
-                      FileTest, :exists?, io_open
-  end
-
   def test_file?
     assert_send_type  "(::String file) -> bool",
                       FileTest, :file?, __FILE__
