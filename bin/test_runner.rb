@@ -5,12 +5,12 @@ $LOAD_PATH << File.join(__dir__, "../lib")
 require "set"
 
 IS_LATEST_RUBY = Gem::Version.new(RUBY_VERSION).yield_self do |ruby_version|
-  Gem::Version.new('3.0.0') <= ruby_version && ruby_version < Gem::Version.new('3.1.0')
+  Gem::Version.new('3.1.0') <= ruby_version && ruby_version < Gem::Version.new('3.2.0')
 end
 
 unless IS_LATEST_RUBY
   unless ENV["CI"]
-    STDERR.puts "⚠️⚠️⚠️⚠️ stdlib test assumes Ruby 3.0 but RUBY_VERSION==#{RUBY_VERSION} ⚠️⚠️⚠️⚠️"
+    STDERR.puts "⚠️⚠️⚠️⚠️ stdlib test assumes Ruby 3.1 but RUBY_VERSION==#{RUBY_VERSION} ⚠️⚠️⚠️⚠️"
   end
 end
 
