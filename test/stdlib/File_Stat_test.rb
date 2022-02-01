@@ -31,6 +31,7 @@ class FileStatInstanceTest < Test::Unit::TestCase
   def test_birthtime
     assert_send_type "() -> Time",
                       File::Stat.new(__FILE__), :birthtime
+  rescue NotImplementedError
   end
 
   def test_blksize
