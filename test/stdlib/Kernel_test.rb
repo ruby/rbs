@@ -62,7 +62,7 @@ class KernelTest < StdlibTest
 
   def test_not_tilde
     return if RUBY_VERSION >= "3.2.0"
-    
+
     Object.new !~ Object.new
   end
 
@@ -468,7 +468,16 @@ class KernelTest < StdlibTest
   end
 
   def test_load
-    # TODO
+    Dir.mktmpdir do |dir|
+      path = File.join(dir, "foo.rb")
+
+      File.write(path, "class Foo; end")
+
+      load(path)
+      load(path, true)
+      load(path, false)
+      load(path, Module.new)
+    end
   end
 
   def test_loop

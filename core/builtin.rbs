@@ -1,9 +1,9 @@
 interface _ToI
-  def to_i: -> Integer
+  def to_i: () -> Integer
 end
 
 interface _ToInt
-  def to_int: -> Integer
+  def to_int: () -> Integer
 end
 
 interface _ToR
@@ -11,7 +11,7 @@ interface _ToR
 end
 
 interface _ToS
-  def to_s: -> String
+  def to_s: () -> String
 end
 
 interface _ToStr
@@ -31,7 +31,7 @@ interface _ToPath
 end
 
 interface _Each[out A]
-  def each: { (A) -> void } -> void
+  def each: () { (A) -> void } -> void
 end
 
 interface _Reader

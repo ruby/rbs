@@ -213,6 +213,11 @@ class FileSingletonTest < Test::Unit::TestCase
                      File, :dirname, ToStr.new(__FILE__)
     assert_send_type "(ToPath) -> String",
                      File, :dirname, ToPath.new(__FILE__)
+
+    assert_send_type(
+      "(String, Integer) -> String",
+      File, :dirname, __FILE__, 2
+    )
   end
 
   def test_empty?

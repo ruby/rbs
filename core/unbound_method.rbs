@@ -1,3 +1,4 @@
+# <!-- rdoc-file=proc.c -->
 # Ruby supports two forms of objectified methods. Class Method is used to
 # represent methods that are associated with a particular object: these method
 # objects are bound to that object. Bound method objects for an object can be
@@ -45,19 +46,28 @@
 #     um.bind(t).call   #=> :original
 #
 class UnboundMethod
+  # <!--
+  #   rdoc-file=proc.c
+  #   - method.clone -> new_method
+  # -->
   # Returns a clone of this method.
   #
-  #   class A
-  #     def foo
-  #       return "bar"
+  #     class A
+  #       def foo
+  #         return "bar"
+  #       end
   #     end
-  #   end
   #
-  #   m = A.new.method(:foo)
-  #   m.call # => "bar"
-  #   n = m.clone.call # => "bar"
+  #     m = A.new.method(:foo)
+  #     m.call # => "bar"
+  #     n = m.clone.call # => "bar"
+  #
   def clone: () -> self
 
+  # <!--
+  #   rdoc-file=proc.c
+  #   - meth.arity    -> integer
+  # -->
   # Returns an indication of the number of arguments accepted by a method. Returns
   # a nonnegative integer for methods that take a fixed number of arguments. For
   # Ruby methods that take a variable number of arguments, returns -n-1, where n
@@ -97,6 +107,10 @@ class UnboundMethod
   #
   def arity: () -> Integer
 
+  # <!--
+  #   rdoc-file=proc.c
+  #   - umeth.bind(obj) -> method
+  # -->
   # Bind *umeth* to *obj*. If Klass was the class from which *umeth* was obtained,
   # `obj.kind_of?(Klass)` must be true.
   #
@@ -127,16 +141,28 @@ class UnboundMethod
   #
   def bind: (untyped obj) -> Method
 
+  # <!--
+  #   rdoc-file=proc.c
+  #   - meth.name    -> symbol
+  # -->
   # Returns the name of the method.
   #
   def name: () -> Symbol
 
+  # <!--
+  #   rdoc-file=proc.c
+  #   - meth.owner    -> class_or_module
+  # -->
   # Returns the class or module that defines the method. See also Method#receiver.
   #
   #     (1..3).method(:map).owner #=> Enumerable
   #
   def owner: () -> Module
 
+  # <!--
+  #   rdoc-file=proc.c
+  #   - meth.parameters  -> array
+  # -->
   # Returns the parameter information of this method.
   #
   #     def foo(bar); end
@@ -154,16 +180,52 @@ class UnboundMethod
   def parameters: () -> ::Array[[ Symbol, Symbol ]]
                 | () -> ::Array[[ Symbol ]]
 
+  # <!--
+  #   rdoc-file=proc.c
+  #   - meth.private? -> true or false
+  # -->
+  # Returns whether the method is private.
+  #
+  def private?: () -> bool
+
+  # <!--
+  #   rdoc-file=proc.c
+  #   - meth.protected? -> true or false
+  # -->
+  # Returns whether the method is protected.
+  #
+  def protected?: () -> bool
+
+  # <!--
+  #   rdoc-file=proc.c
+  #   - meth.public? -> true or false
+  # -->
+  # Returns whether the method is public.
+  #
+  def public?: () -> bool
+
+  # <!--
+  #   rdoc-file=proc.c
+  #   - meth.source_location  -> [String, Integer]
+  # -->
   # Returns the Ruby source filename and line number containing this method or nil
   # if this method was not defined in Ruby (i.e. native).
   #
   def source_location: () -> [ String, Integer ]?
 
+  # <!--
+  #   rdoc-file=proc.c
+  #   - meth.super_method  -> method
+  # -->
   # Returns a Method of superclass which would be called when super is used or nil
   # if there is no method on superclass.
   #
   def super_method: () -> UnboundMethod?
 
+  # <!--
+  #   rdoc-file=proc.c
+  #   - meth.original_name    -> symbol
+  # -->
   # Returns the original name of the method.
   #
   #     class C
@@ -174,6 +236,10 @@ class UnboundMethod
   #
   def original_name: () -> Symbol
 
+  # <!--
+  #   rdoc-file=proc.c
+  #   - umeth.bind_call(recv, args, ...) -> obj
+  # -->
   # Bind *umeth* to *recv* and then invokes the method with the specified
   # arguments. This is semantically equivalent to `umeth.bind(recv).call(args,
   # ...)`.

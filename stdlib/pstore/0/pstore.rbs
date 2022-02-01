@@ -1,3 +1,4 @@
+# <!-- rdoc-file=lib/pstore.rb -->
 # PStore implements a file based persistence mechanism based on a Hash.  User
 # code can store hierarchies of Ruby objects (values) into the data store file
 # by name (keys).  An object hierarchy may be just a single object.  User code
@@ -82,6 +83,10 @@
 class PStore
   public
 
+  # <!--
+  #   rdoc-file=lib/pstore.rb
+  #   - [](name)
+  # -->
   # Retrieves a value from the PStore file data, by *name*.  The hierarchy of Ruby
   # objects stored under that root *name* will be returned.
   #
@@ -90,6 +95,10 @@ class PStore
   #
   def []: (untyped name) -> untyped
 
+  # <!--
+  #   rdoc-file=lib/pstore.rb
+  #   - []=(name, value)
+  # -->
   # Stores an individual Ruby object or a hierarchy of Ruby objects in the data
   # store file under the root *name*.  Assigning to a *name* already in the data
   # store clobbers the old data.
@@ -111,6 +120,10 @@ class PStore
   #
   def []=: (untyped name, untyped value) -> untyped
 
+  # <!--
+  #   rdoc-file=lib/pstore.rb
+  #   - abort()
+  # -->
   # Ends the current PStore#transaction, discarding any changes to the data store.
   #
   # ## Example:
@@ -132,6 +145,10 @@ class PStore
   #
   def abort: () -> untyped
 
+  # <!--
+  #   rdoc-file=lib/pstore.rb
+  #   - commit()
+  # -->
   # Ends the current PStore#transaction, committing any changes to the data store
   # immediately.
   #
@@ -155,6 +172,10 @@ class PStore
   #
   def commit: () -> nil
 
+  # <!--
+  #   rdoc-file=lib/pstore.rb
+  #   - delete(name)
+  # -->
   # Removes an object hierarchy from the data store, by *name*.
   #
   # **WARNING**:  This method is only valid in a PStore#transaction and it cannot
@@ -162,6 +183,10 @@ class PStore
   #
   def delete: (untyped name) -> untyped
 
+  # <!--
+  #   rdoc-file=lib/pstore.rb
+  #   - fetch(name, default=PStore::Error)
+  # -->
   # This method is just like PStore#[], save that you may also provide a *default*
   # value for the object.  In the event the specified *name* is not found in the
   # data store, your *default* will be returned instead.  If you do not specify a
@@ -172,10 +197,18 @@ class PStore
   #
   def fetch: (untyped name, ?untyped default) -> untyped
 
+  # <!--
+  #   rdoc-file=lib/pstore.rb
+  #   - path()
+  # -->
   # Returns the path to the data store file.
   #
   def path: () -> untyped
 
+  # <!--
+  #   rdoc-file=lib/pstore.rb
+  #   - root?(name)
+  # -->
   # Returns true if the supplied *name* is currently in the data store.
   #
   # **WARNING**:  This method is only valid in a PStore#transaction.  It will
@@ -183,6 +216,10 @@ class PStore
   #
   def root?: (untyped name) -> bool
 
+  # <!--
+  #   rdoc-file=lib/pstore.rb
+  #   - roots()
+  # -->
   # Returns the names of all object hierarchies currently in the store.
   #
   # **WARNING**:  This method is only valid in a PStore#transaction.  It will
@@ -190,6 +227,10 @@ class PStore
   #
   def roots: () -> Array[untyped]
 
+  # <!--
+  #   rdoc-file=lib/pstore.rb
+  #   - transaction(read_only = false) { |pstore| ... }
+  # -->
   # Opens a new transaction for the data store.  Code executed inside a block
   # passed to this method may read and write data to and from the data store file.
   #
@@ -207,6 +248,7 @@ class PStore
   #
   def transaction: (?untyped read_only) -> untyped
 
+  # <!-- rdoc-file=lib/pstore.rb -->
   # Whether PStore should do its best to prevent file corruptions, even when under
   # unlikely-to-occur error conditions such as out-of-space conditions and other
   # unusual OS filesystem errors. Setting this flag comes at the price in the form
@@ -218,25 +260,57 @@ class PStore
   #
   def ultra_safe: () -> untyped
 
+  # <!-- rdoc-file=lib/pstore.rb -->
+  # Whether PStore should do its best to prevent file corruptions, even when under
+  # unlikely-to-occur error conditions such as out-of-space conditions and other
+  # unusual OS filesystem errors. Setting this flag comes at the price in the form
+  # of a performance loss.
+  #
+  # This flag only has effect on platforms on which file renames are atomic (e.g.
+  # all POSIX platforms: Linux, MacOS X, FreeBSD, etc). The default value is
+  # false.
+  #
   def ultra_safe=: (untyped) -> untyped
 
   private
 
   def dump: (untyped table) -> untyped
 
+  # <!--
+  #   rdoc-file=lib/pstore.rb
+  #   - empty_marshal_checksum()
+  # -->
+  #
   def empty_marshal_checksum: () -> untyped
 
+  # <!--
+  #   rdoc-file=lib/pstore.rb
+  #   - empty_marshal_data()
+  # -->
+  #
   def empty_marshal_data: () -> untyped
 
+  # <!--
+  #   rdoc-file=lib/pstore.rb
+  #   - in_transaction()
+  # -->
   # Raises PStore::Error if the calling code is not in a PStore#transaction.
   #
   def in_transaction: () -> untyped
 
+  # <!--
+  #   rdoc-file=lib/pstore.rb
+  #   - in_transaction_wr()
+  # -->
   # Raises PStore::Error if the calling code is not in a PStore#transaction or if
   # the code is in a read-only PStore#transaction.
   #
   def in_transaction_wr: () -> untyped
 
+  # <!--
+  #   rdoc-file=lib/pstore.rb
+  #   - new(file, thread_safe = false)
+  # -->
   # To construct a PStore object, pass in the *file* path where you would like the
   # data to be stored.
   #
@@ -247,14 +321,27 @@ class PStore
 
   def load: (untyped content) -> untyped
 
+  # <!--
+  #   rdoc-file=lib/pstore.rb
+  #   - load_data(file, read_only)
+  # -->
   # Load the given PStore file. If `read_only` is true, the unmarshalled Hash will
   # be returned. If `read_only` is false, a 3-tuple will be returned: the
   # unmarshalled Hash, a checksum of the data, and the size of the data.
   #
   def load_data: (untyped file, untyped read_only) -> untyped
 
+  # <!--
+  #   rdoc-file=lib/pstore.rb
+  #   - on_windows?()
+  # -->
+  #
   def on_windows?: () -> bool
 
+  # <!--
+  #   rdoc-file=lib/pstore.rb
+  #   - open_and_lock_file(filename, read_only)
+  # -->
   # Open the specified filename (either in read-only mode or in read-write mode)
   # and lock it for reading or writing.
   #
@@ -265,10 +352,25 @@ class PStore
   #
   def open_and_lock_file: (untyped filename, untyped read_only) -> untyped
 
+  # <!--
+  #   rdoc-file=lib/pstore.rb
+  #   - save_data(original_checksum, original_file_size, file)
+  # -->
+  #
   def save_data: (untyped original_checksum, untyped original_file_size, untyped file) -> untyped
 
+  # <!--
+  #   rdoc-file=lib/pstore.rb
+  #   - save_data_with_atomic_file_rename_strategy(data, file)
+  # -->
+  #
   def save_data_with_atomic_file_rename_strategy: (untyped data, untyped file) -> untyped
 
+  # <!--
+  #   rdoc-file=lib/pstore.rb
+  #   - save_data_with_fast_strategy(data, file)
+  # -->
+  #
   def save_data_with_fast_strategy: (untyped data, untyped file) -> untyped
 end
 

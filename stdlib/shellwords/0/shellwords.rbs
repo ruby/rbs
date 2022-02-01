@@ -1,3 +1,4 @@
+# <!-- rdoc-file=lib/shellwords.rb -->
 # ## Manipulates strings like the UNIX Bourne shell
 #
 # This module manipulates strings according to the word parsing rules of the
@@ -67,7 +68,12 @@
 # 1: [IEEE Std 1003.1-2008, 2016 Edition, the Shell & Utilities
 # volume](http://pubs.opengroup.org/onlinepubs/9699919799/utilities/contents.htm
 # l)
+#
 module Shellwords
+  # <!--
+  #   rdoc-file=lib/shellwords.rb
+  #   - shellescape(str)
+  # -->
   # Escapes a string so that it can be safely used in a Bourne shell command line.
   #  `str` can be a non-string object that responds to `to_s`.
   #
@@ -98,8 +104,12 @@ module Shellwords
   #
   # Returns an empty quoted String if `str` has a length of zero.
   #
-  def self.shellescape: (String str) -> String
+  def self?.shellescape: (String str) -> String
 
+  # <!--
+  #   rdoc-file=lib/shellwords.rb
+  #   - shelljoin(array)
+  # -->
   # Builds a command line string from an argument list, `array`.
   #
   # All elements are joined into a single string with fields separated by a space,
@@ -120,8 +130,12 @@ module Shellwords
   #
   #     output = `#{['ps', '-p', $$].shelljoin}`
   #
-  def self.shelljoin: (Array[String] array) -> String
+  def self?.shelljoin: (Array[String] array) -> String
 
+  # <!--
+  #   rdoc-file=lib/shellwords.rb
+  #   - shellsplit(line)
+  # -->
   # Splits a string into an array of tokens in the same way the UNIX Bourne shell
   # does.
   #
@@ -139,95 +153,50 @@ module Shellwords
   #     argv = 'here are "two words"'.shellsplit
   #     argv #=> ["here", "are", "two words"]
   #
-  def self.shellsplit: (String line) -> Array[String]
+  def self?.shellsplit: (String line) -> Array[String]
 
+  # <!--
+  #   rdoc-file=lib/shellwords.rb
+  #   - escape(str)
+  # -->
+  #
   alias self.escape self.shellescape
 
+  # <!--
+  #   rdoc-file=lib/shellwords.rb
+  #   - join(array)
+  # -->
+  #
   alias self.join self.shelljoin
 
+  # <!--
+  #   rdoc-file=lib/shellwords.rb
+  #   - shellwords(line)
+  # -->
+  #
   alias self.shellwords self.shellsplit
 
+  # <!--
+  #   rdoc-file=lib/shellwords.rb
+  #   - split(line)
+  # -->
+  #
   alias self.split self.shellsplit
 
-  private
-
-  # Escapes a string so that it can be safely used in a Bourne shell command line.
-  #  `str` can be a non-string object that responds to `to_s`.
+  # <!--
+  #   rdoc-file=lib/shellwords.rb
+  #   - shellwords(line)
+  # -->
   #
-  # Note that a resulted string should be used unquoted and is not intended for
-  # use in double quotes nor in single quotes.
-  #
-  #     argv = Shellwords.escape("It's better to give than to receive")
-  #     argv #=> "It\\'s\\ better\\ to\\ give\\ than\\ to\\ receive"
-  #
-  # String#shellescape is a shorthand for this function.
-  #
-  #     argv = "It's better to give than to receive".shellescape
-  #     argv #=> "It\\'s\\ better\\ to\\ give\\ than\\ to\\ receive"
-  #
-  #     # Search files in lib for method definitions
-  #     pattern = "^[ \t]*def "
-  #     open("| grep -Ern -e #{pattern.shellescape} lib") { |grep|
-  #       grep.each_line { |line|
-  #         file, lineno, matched_line = line.split(':', 3)
-  #         # ...
-  #       }
-  #     }
-  #
-  # It is the caller's responsibility to encode the string in the right encoding
-  # for the shell environment where this string is used.
-  #
-  # Multibyte characters are treated as multibyte characters, not as bytes.
-  #
-  # Returns an empty quoted String if `str` has a length of zero.
-  #
-  def shellescape: (String str) -> String
-
-  # Builds a command line string from an argument list, `array`.
-  #
-  # All elements are joined into a single string with fields separated by a space,
-  # where each element is escaped for the Bourne shell and stringified using
-  # `to_s`.
-  #
-  #     ary = ["There's", "a", "time", "and", "place", "for", "everything"]
-  #     argv = Shellwords.join(ary)
-  #     argv #=> "There\\'s a time and place for everything"
-  #
-  # Array#shelljoin is a shortcut for this function.
-  #
-  #     ary = ["Don't", "rock", "the", "boat"]
-  #     argv = ary.shelljoin
-  #     argv #=> "Don\\'t rock the boat"
-  #
-  # You can also mix non-string objects in the elements as allowed in Array#join.
-  #
-  #     output = `#{['ps', '-p', $$].shelljoin}`
-  #
-  def shelljoin: (Array[String] array) -> String
-
-  # Splits a string into an array of tokens in the same way the UNIX Bourne shell
-  # does.
-  #
-  #     argv = Shellwords.split('here are "two words"')
-  #     argv #=> ["here", "are", "two words"]
-  #
-  # Note, however, that this is not a command line parser.  Shell metacharacters
-  # except for the single and double quotes and backslash are not treated as such.
-  #
-  #     argv = Shellwords.split('ruby my_prog.rb | less')
-  #     argv #=> ["ruby", "my_prog.rb", "|", "less"]
-  #
-  # String#shellsplit is a shortcut for this function.
-  #
-  #     argv = 'here are "two words"'.shellsplit
-  #     argv #=> ["here", "are", "two words"]
-  #
-  def shellsplit: (String line) -> Array[String]
-
   alias shellwords shellsplit
 end
 
+%a{annotate:rdoc:skip}
 class Array[unchecked out Elem]
+  # <!--
+  #   rdoc-file=lib/shellwords.rb
+  #   - array.shelljoin => string
+  # -->
   # Builds a command line string from an argument list `array` joining all
   # elements escaped for the Bourne shell and separated by a space.
   #
@@ -236,13 +205,22 @@ class Array[unchecked out Elem]
   def shelljoin: () -> String
 end
 
+%a{annotate:rdoc:skip}
 class String
+  # <!--
+  #   rdoc-file=lib/shellwords.rb
+  #   - str.shellescape => string
+  # -->
   # Escapes `str` so that it can be safely used in a Bourne shell command line.
   #
   # See Shellwords.shellescape for details.
   #
   def shellescape: () -> String
 
+  # <!--
+  #   rdoc-file=lib/shellwords.rb
+  #   - str.shellsplit => array
+  # -->
   # Splits `str` into an array of tokens in the same way the UNIX Bourne shell
   # does.
   #

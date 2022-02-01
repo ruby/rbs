@@ -1,8 +1,17 @@
+%a{annotate:rdoc:skip}
 class Dir
+  # <!--
+  #   rdoc-file=lib/tmpdir.rb
+  #   - tmpdir()
+  # -->
   # Returns the operating system's temporary file path.
   #
   def self.tmpdir: () -> String
 
+  # <!--
+  #   rdoc-file=lib/tmpdir.rb
+  #   - mktmpdir(prefix_suffix=nil, *rest, **options) { |dup| ... }
+  # -->
   # Dir.mktmpdir creates a temporary directory.
   #
   # The directory is created with 0700 permission. Application should not change
@@ -33,7 +42,7 @@ class Dir
   #
   #     Dir.mktmpdir {|dir|
   #       # use the directory...
-  #       open("#{dir}/foo", "w") { ... }
+  #       open("#{dir}/foo", "w") { something using the file }
   #     }
   #
   # If a block is not given, The path of the directory is returned. In this case,
@@ -42,12 +51,12 @@ class Dir
   #     dir = Dir.mktmpdir
   #     begin
   #       # use the directory...
-  #       open("#{dir}/foo", "w") { ... }
+  #       open("#{dir}/foo", "w") { something using the file }
   #     ensure
   #       # remove the directory.
   #       FileUtils.remove_entry dir
   #     end
   #
-  def self.mktmpdir: (?(String | [ String, String ] | nil), ?String?, ?max_try: Integer?) -> String
-                   | [X] (?(String | [ String, String ] | nil), ?String?, ?max_try: Integer?) { (String) -> X } -> X
+  def self.mktmpdir: (?String | [ String, String ] | nil, ?String?, ?max_try: Integer?) -> String
+                   | [X] (?String | [ String, String ] | nil, ?String?, ?max_try: Integer?) { (String) -> X } -> X
 end

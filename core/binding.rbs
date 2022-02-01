@@ -1,3 +1,4 @@
+# <!-- rdoc-file=proc.c -->
 # Objects of class Binding encapsulate the execution context at some particular
 # place in the code and retain this context for future use. The variables,
 # methods, value of `self`, and possibly an iterator block that can be accessed
@@ -33,6 +34,10 @@ class Binding
 
   def clone: () -> self
 
+  # <!--
+  #   rdoc-file=proc.c
+  #   - binding.eval(string [, filename [,lineno]])  -> obj
+  # -->
   # Evaluates the Ruby expression(s) in *string*, in the *binding*'s context.  If
   # the optional *filename* and *lineno* parameters are present, they will be used
   # when reporting syntax errors.
@@ -45,6 +50,10 @@ class Binding
   #
   def eval: (String arg0, ?String filename, ?Integer lineno) -> untyped
 
+  # <!--
+  #   rdoc-file=lib/irb.rb
+  #   - irb()
+  # -->
   # Opens an IRB session where `binding.irb` is called which allows for
   # interactive debugging. You can call any methods or variables available in the
   # current scope, and mutate state if you need to.
@@ -103,6 +112,10 @@ class Binding
   #
   def irb: () -> void
 
+  # <!--
+  #   rdoc-file=proc.c
+  #   - binding.local_variable_defined?(symbol) -> obj
+  # -->
   # Returns `true` if a local variable `symbol` exists.
   #
   #     def foo
@@ -117,6 +130,10 @@ class Binding
   #
   def local_variable_defined?: (String | Symbol symbol) -> bool
 
+  # <!--
+  #   rdoc-file=proc.c
+  #   - binding.local_variable_get(symbol) -> obj
+  # -->
   # Returns the value of the local variable `symbol`.
   #
   #     def foo
@@ -131,6 +148,10 @@ class Binding
   #
   def local_variable_get: (String | Symbol symbol) -> untyped
 
+  # <!--
+  #   rdoc-file=proc.c
+  #   - binding.local_variable_set(symbol, obj) -> obj
+  # -->
   # Set local variable named `symbol` as `obj`.
   #
   #     def foo
@@ -154,6 +175,10 @@ class Binding
   #
   def local_variable_set: [U] (String | Symbol symbol, U obj) -> U
 
+  # <!--
+  #   rdoc-file=proc.c
+  #   - binding.local_variables -> Array
+  # -->
   # Returns the names of the binding's local variables as symbols.
   #
   #     def foo
@@ -169,10 +194,18 @@ class Binding
   #
   def local_variables: () -> Array[Symbol]
 
+  # <!--
+  #   rdoc-file=proc.c
+  #   - binding.receiver    -> object
+  # -->
   # Returns the bound receiver of the binding object.
   #
   def receiver: () -> untyped
 
+  # <!--
+  #   rdoc-file=proc.c
+  #   - binding.source_location  -> [String, Integer]
+  # -->
   # Returns the Ruby source filename and line number of the binding object.
   #
   def source_location: () -> [ String, Integer ]

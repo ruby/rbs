@@ -52,6 +52,11 @@ end
 ```
 <!-- run-end -->
 
+## The Target Version
+
+* The standard library signatures targets Ruby 3.1. (The latest release of Ruby.)
+* The library code targets Ruby 3.1, 3.0, and 2.7. (It runs on 2.6 in fact.)
+
 ## Installation
 
 Install the `rbs` gem. `$ gem install rbs` from the command line, or add a line in your `Gemfile`.
@@ -122,7 +127,7 @@ puts singleton.methods[:gsub]
 
 ## Guides
 
-- [Standard library signature contribution guide](docs/CONTRIBUTING.md)
+- [Core and standard library signature contribution guide](docs/CONTRIBUTING.md)
 - [Writing signatures guide](docs/sigs.md)
 - [Stdlib signatures guide](docs/stdlib.md)
 - [Syntax](docs/syntax.md)

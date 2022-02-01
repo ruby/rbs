@@ -1,3 +1,4 @@
+# <!-- rdoc-file=lib/abbrev.rb -->
 # Calculates the set of unambiguous abbreviations for a given set of strings.
 #
 #     require 'abbrev'
@@ -34,6 +35,10 @@
 #       "w"       => "winter" }
 #
 module Abbrev
+  # <!--
+  #   rdoc-file=lib/abbrev.rb
+  #   - abbrev(words, pattern = nil)
+  # -->
   # Given a set of strings, calculate the set of unambiguous abbreviations for
   # those strings, and return a hash where the keys are all the possible
   # abbreviations and the values are the full strings.
@@ -56,5 +61,6 @@ module Abbrev
   #
   #     Abbrev.abbrev(%w{car box cone}, 'ca')
   #     #=> {"car"=>"car", "ca"=>"car"}
+  #
   def self?.abbrev: (Array[String], ?String | Regexp | nil) -> Hash[String, String]
 end

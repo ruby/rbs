@@ -1,3 +1,4 @@
+# <!-- rdoc-file=lib/prime.rb -->
 # The set of all prime numbers.
 #
 # ## Example
@@ -30,7 +31,7 @@
 # few implementations of generator.
 #
 # `Prime`::`EratosthenesGenerator`
-# :   Uses eratosthenes' sieve.
+# :   Uses Eratosthenes' sieve.
 # `Prime`::`TrialDivisionGenerator`
 # :   Uses the trial division method.
 # `Prime`::`Generator23`
@@ -40,7 +41,6 @@
 #     for factorizing an integer which is not large but has many prime factors.
 #     e.g. for Prime#prime? .
 #
-#
 class Prime
   include Singleton
 
@@ -48,6 +48,10 @@ class Prime
 
   extend Enumerable[Integer]
 
+  # <!--
+  #   rdoc-file=lib/prime.rb
+  #   - each(ubound = nil, generator = EratosthenesGenerator.new, &block)
+  # -->
   # Iterates the given block over all prime numbers.
   #
   # ## Parameters
@@ -75,24 +79,38 @@ class Prime
   def self?.each: (?Integer? ubound, ?PseudoPrimeGenerator generator) { (Integer) -> void } -> void
                 | (?Integer? ubound, ?PseudoPrimeGenerator generator) -> PseudoPrimeGenerator
 
+  # <!--
+  #   rdoc-file=lib/prime.rb
+  #   - int_from_prime_division(pd)
+  # -->
   # Re-composes a prime factorization and returns the product.
+  #
+  # For the decomposition:
+  #
+  #     [[p_1, e_1], [p_2, e_2], ..., [p_n, e_n]],
+  #
+  # it returns:
+  #
+  #     p_1**e_1 * p_2**e_2 * ... * p_n**e_n.
   #
   # ## Parameters
   # `pd`
-  # :   Array of pairs of integers. The each internal pair consists of a prime
-  #     number -- a prime factor -- and a natural number -- an exponent.
+  # :   Array of pairs of integers. Each pair consists of a prime number -- a
+  #     prime factor -- and a natural number -- its exponent (multiplicity).
   #
   #
   # ## Example
-  # For `[[p_1, e_1], [p_2, e_2], ...., [p_n, e_n]]`, it returns:
-  #
-  #     p_1**e_1 * p_2**e_2 * .... * p_n**e_n.
-  #
-  #     Prime.int_from_prime_division([[2,2], [3,1]])  #=> 12
+  #     Prime.int_from_prime_division([[3, 2], [5, 1]])  #=> 45
+  #     3**2 * 5                                         #=> 45
   #
   def self?.int_from_prime_division: (Array[[ Integer, Integer ]]) -> Integer
 
-  # Returns true if `value` is a prime number, else returns false.
+  # <!--
+  #   rdoc-file=lib/prime.rb
+  #   - prime?(value, generator = Prime::Generator23.new)
+  # -->
+  # Returns true if `value` is a prime number, else returns false. Integer#prime?
+  # is much more performant.
   #
   # ## Parameters
   #
@@ -103,15 +121,30 @@ class Prime
   #
   def self?.prime?: (Integer value, ?PseudoPrimeGenerator generator) -> bool
 
+  # <!--
+  #   rdoc-file=lib/prime.rb
+  #   - prime_division(value, generator = Prime::Generator23.new)
+  # -->
   # Returns the factorization of `value`.
+  #
+  # For an arbitrary integer:
+  #
+  #     p_1**e_1 * p_2**e_2 * ... * p_n**e_n,
+  #
+  # prime_division returns an array of pairs of integers:
+  #
+  #     [[p_1, e_1], [p_2, e_2], ..., [p_n, e_n]].
+  #
+  # Each pair consists of a prime number -- a prime factor -- and a natural number
+  # -- its exponent (multiplicity).
   #
   # ## Parameters
   # `value`
   # :   An arbitrary integer.
   # `generator`
   # :   Optional. A pseudo-prime generator. `generator`.succ must return the next
-  #     pseudo-prime number in the ascending order. It must generate all prime
-  #     numbers, but may also generate non prime numbers too.
+  #     pseudo-prime number in ascending order. It must generate all prime
+  #     numbers, but may also generate non-prime numbers, too.
   #
   #
   # ### Exceptions
@@ -120,15 +153,9 @@ class Prime
   #
   #
   # ## Example
-  # For an arbitrary integer:
   #
-  #     n = p_1**e_1 * p_2**e_2 * .... * p_n**e_n,
-  #
-  # prime_division(n) returns:
-  #
-  #     [[p_1, e_1], [p_2, e_2], ...., [p_n, e_n]].
-  #
-  #     Prime.prime_division(12) #=> [[2,2], [3,1]]
+  #     Prime.prime_division(45)  #=> [[3, 2], [5, 1]]
+  #     3**2 * 5                  #=> 45
   #
   def self?.prime_division: (Integer, ?PseudoPrimeGenerator generator) -> Array[[ Integer, Integer ]]
 
@@ -136,33 +163,70 @@ class Prime
   #
   def self.instance: () -> Prime
 
+  # <!-- rdoc-file=lib/prime.rb -->
   # An abstract class for enumerating pseudo-prime numbers.
   #
   # Concrete subclasses should override succ, next, rewind.
   #
   class PseudoPrimeGenerator
+    # <!--
+    #   rdoc-file=lib/prime.rb
+    #   - new(ubound = nil)
+    # -->
+    #
     def initialize: (?Integer?) -> void
 
     include Enumerable[Integer]
 
-    attr_accessor upper_bound (): Integer?
+    # <!--
+    #   rdoc-file=lib/prime.rb
+    #   - upper_bound()
+    # -->
+    # ----
+    # <!--
+    #   rdoc-file=lib/prime.rb
+    #   - upper_bound=(ubound)
+    # -->
+    #
+    attr_accessor upper_bound(): Integer?
 
+    # <!--
+    #   rdoc-file=lib/prime.rb
+    #   - each() { |prime| ... }
+    # -->
     # Iterates the given block for each prime number.
     #
     def each: () { (Integer) -> void } -> void
 
+    # <!--
+    #   rdoc-file=lib/prime.rb
+    #   - next()
+    # -->
     # alias of `succ`.
     #
     def next: () -> Integer
 
+    # <!--
+    #   rdoc-file=lib/prime.rb
+    #   - rewind()
+    # -->
     # Rewinds the internal position for enumeration.
     #
     # See `Enumerator`#rewind.
     #
     def rewind: () -> void
 
+    # <!--
+    #   rdoc-file=lib/prime.rb
+    #   - size()
+    # -->
+    #
     def size: () -> Float
 
+    # <!--
+    #   rdoc-file=lib/prime.rb
+    #   - succ()
+    # -->
     # returns the next pseudo-prime number, and move the internal position forward.
     #
     # `PseudoPrimeGenerator`#succ raises `NotImplementedError`.
@@ -170,6 +234,7 @@ class Prime
     def succ: () -> Integer
   end
 
+  # <!-- rdoc-file=lib/prime.rb -->
   # An implementation of `PseudoPrimeGenerator`.
   #
   # Uses `EratosthenesSieve`.
@@ -177,12 +242,14 @@ class Prime
   class EratosthenesGenerator < PseudoPrimeGenerator
   end
 
+  # <!-- rdoc-file=lib/prime.rb -->
   # An implementation of `PseudoPrimeGenerator` which uses a prime table generated
   # by trial division.
   #
   class TrialDivisionGenerator < PseudoPrimeGenerator
   end
 
+  # <!-- rdoc-file=lib/prime.rb -->
   # Generates all integers which are greater than 2 and are not divisible by
   # either 2 or 3.
   #

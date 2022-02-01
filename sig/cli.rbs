@@ -66,6 +66,8 @@ module RBS
 
     def run_collection: (Array[String], LibraryOptions) -> void
 
+    def run_annotate: (Array[String], top) -> void
+
     def test_opt: (LibraryOptions) -> String?
 
     def collection_options: (Array[String]) -> OptionParser

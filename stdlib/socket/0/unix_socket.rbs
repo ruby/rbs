@@ -1,5 +1,12 @@
+# <!-- rdoc-file=ext/socket/unixsocket.c -->
 # UNIXSocket represents a UNIX domain stream client socket.
+#
 class UNIXSocket < BasicSocket
+  # <!--
+  #   rdoc-file=ext/socket/unixsocket.c
+  #   - UNIXSocket.pair([type [, protocol]])       => [unixsocket1, unixsocket2]
+  #   - UNIXSocket.socketpair([type [, protocol]]) => [unixsocket1, unixsocket2]
+  # -->
   # Creates a pair of sockets connected to each other.
   #
   # *socktype* should be a socket type such as: :STREAM, :DGRAM, :RAW, etc.
@@ -12,8 +19,13 @@ class UNIXSocket < BasicSocket
   #     s1.send "b", 0
   #     p s2.recv(10) #=> "ab"
   #
-  def self.pair: (?Symbol socktype, ?Integer protocol) -> [instance, instance]
+  def self.pair: (?Symbol socktype, ?Integer protocol) -> [ instance, instance ]
 
+  # <!--
+  #   rdoc-file=ext/socket/unixsocket.c
+  #   - UNIXSocket.pair([type [, protocol]])       => [unixsocket1, unixsocket2]
+  #   - UNIXSocket.socketpair([type [, protocol]]) => [unixsocket1, unixsocket2]
+  # -->
   # Creates a pair of sockets connected to each other.
   #
   # *socktype* should be a socket type such as: :STREAM, :DGRAM, :RAW, etc.
@@ -26,10 +38,14 @@ class UNIXSocket < BasicSocket
   #     s1.send "b", 0
   #     p s2.recv(10) #=> "ab"
   #
-  def self.socketpair: (?Symbol socktype, ?Integer protocol) -> [instance, instance]
+  def self.socketpair: (?Symbol socktype, ?Integer protocol) -> [ instance, instance ]
 
   public
 
+  # <!--
+  #   rdoc-file=ext/socket/unixsocket.c
+  #   - unixsocket.addr => [address_family, unix_path]
+  # -->
   # Returns the local address as an array which contains address_family and
   # unix_path.
   #
@@ -37,8 +53,12 @@ class UNIXSocket < BasicSocket
   #     serv = UNIXServer.new("/tmp/sock")
   #     p serv.addr #=> ["AF_UNIX", "/tmp/sock"]
   #
-  def addr: () -> [String, String]
+  def addr: () -> [ String, String ]
 
+  # <!--
+  #   rdoc-file=ext/socket/unixsocket.c
+  #   - unixsocket.path => path
+  # -->
   # Returns the path of the local address of unixsocket.
   #
   #     s = UNIXServer.new("/tmp/sock")
@@ -46,6 +66,10 @@ class UNIXSocket < BasicSocket
   #
   def path: () -> String
 
+  # <!--
+  #   rdoc-file=ext/socket/unixsocket.c
+  #   - unixsocket.peeraddr => [address_family, unix_path]
+  # -->
   # Returns the remote address as an array which contains address_family and
   # unix_path.
   #
@@ -54,8 +78,12 @@ class UNIXSocket < BasicSocket
   #     c = UNIXSocket.new("/tmp/sock")
   #     p c.peeraddr #=> ["AF_UNIX", "/tmp/sock"]
   #
-  def peeraddr: () -> [String, String]
+  def peeraddr: () -> [ String, String ]
 
+  # <!--
+  #   rdoc-file=ext/socket/unixsocket.c
+  #   - unixsocket.recv_io([klass [, mode]]) => io
+  # -->
   # Example
   #
   #     UNIXServer.open("/tmp/sock") {|serv|
@@ -80,6 +108,10 @@ class UNIXSocket < BasicSocket
   #
   def recv_io: (?singleton(BasicSocket), ?String mode) -> BasicSocket
 
+  # <!--
+  #   rdoc-file=ext/socket/unixsocket.c
+  #   - unixsocket.recvfrom(maxlen [, flags[, outbuf]]) => [mesg, unixaddress]
+  # -->
   # Receives a message via *unixsocket*.
   #
   # *maxlen* is the maximum number of bytes to receive.
@@ -101,8 +133,12 @@ class UNIXSocket < BasicSocket
   #     s1.send "a", 0, s2_ai
   #     p s3.recvfrom(10) #=> ["a", ["AF_UNIX", "/tmp/sock1"]]
   #
-  def recvfrom: (Integer maxlen, ?Integer flags, ?String outbuf) -> [String, [String, String]]
+  def recvfrom: (Integer maxlen, ?Integer flags, ?String outbuf) -> [ String, [ String, String ] ]
 
+  # <!--
+  #   rdoc-file=ext/socket/unixsocket.c
+  #   - unixsocket.send_io(io) => nil
+  # -->
   # Sends *io* as file descriptor passing.
   #
   #     s1, s2 = UNIXSocket.pair
@@ -121,6 +157,10 @@ class UNIXSocket < BasicSocket
 
   private
 
+  # <!--
+  #   rdoc-file=ext/socket/unixsocket.c
+  #   - UNIXSocket.new(path) => unixsocket
+  # -->
   # Creates a new UNIX client socket connected to *path*.
   #
   #     require 'socket'

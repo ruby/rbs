@@ -466,6 +466,17 @@ class ArrayInstanceTest < Test::Unit::TestCase
                      [1,2,3], :insert, 0
   end
 
+  def test_intersect?
+    assert_send_type(
+      "(Array[Integer]) -> bool",
+      [1,2,3], :intersect?, [0]
+    )
+    assert_send_type(
+      "(ToArray[Integer]) -> bool",
+      [1,2,3], :intersect?, ToArray.new([0, 1])
+    )
+  end
+
   def test_intersection
     assert_send_type "(Array[Integer]) -> Array[Integer]",
                      [1,2,3], :intersection, [2,3,4]

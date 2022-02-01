@@ -1,3 +1,4 @@
+%a{annotate:rdoc:skip}
 module TSort[Node]
   interface _Sortable[Node]
     # #tsort_each_node is used to iterate for all nodes over a graph.

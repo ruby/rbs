@@ -340,3 +340,25 @@ class IntegerTest < StdlibTest
     5.upto(10) {}
   end
 end
+
+
+class IntegerSingletonTest < Test::Unit::TestCase
+  include TypeAssertions
+
+  testing "singleton(::Integer)"
+
+  def test_try_convert
+    assert_send_type(
+      "(Integer) -> Integer",
+      Integer, :try_convert, 10
+    )
+    assert_send_type(
+      "(ToInt) -> Integer",
+      Integer, :try_convert, ToInt.new(10)
+    )
+    assert_send_type(
+      "(String) -> nil",
+      Integer, :try_convert, "10"
+    )
+  end
+end

@@ -1,3 +1,4 @@
+# <!-- rdoc-file=ext/digest/digest.c -->
 # This module provides a framework for message digest libraries.
 #
 # You may want to look at OpenSSL::Digest as it supports more algorithms.
@@ -65,13 +66,22 @@
 #
 # The latest versions of the FIPS publications can be found here:
 # http://csrc.nist.gov/publications/PubsFIPS.html.
+#
 module Digest
+  # <!--
+  #   rdoc-file=ext/digest/bubblebabble/bubblebabble.c
+  #   - Digest.bubblebabble(string) -> bubblebabble_string
+  # -->
   # Returns a BubbleBabble encoded version of a given *string*.
   #
   def self.bubblebabble: (String) -> String
 
   def self.const_missing: (Symbol name) -> singleton(::Digest::Base)
 
+  # <!--
+  #   rdoc-file=ext/digest/digest.c
+  #   - Digest.hexencode(string) -> hexencoded_string
+  # -->
   # Generates a hex-encoded version of a given *string*.
   #
   def self.hexencode: (String) -> String
@@ -83,14 +93,19 @@ module Digest
   def hexencode: (String) -> String
 end
 
+# <!-- rdoc-file=ext/digest/lib/digest.rb -->
 # A mutex for Digest().
+#
 Digest::REQUIRE_MUTEX: Thread::Mutex
 
+# <!-- rdoc-file=ext/digest/digest.c -->
 # This module provides instance methods for a digest implementation object to
 # calculate message digest values.
+#
 module Digest::Instance
   public
 
+  # <!-- rdoc-file=ext/digest/digest.c -->
   # Updates the digest using a given *string* and returns self.
   #
   # The update() method and the left-shift operator are overridden by each
@@ -98,12 +113,21 @@ module Digest::Instance
   #
   def <<: (String) -> self
 
+  # <!--
+  #   rdoc-file=ext/digest/digest.c
+  #   - digest_obj == another_digest_obj -> boolean
+  #   - digest_obj == string -> boolean
+  # -->
   # If a string is given, checks whether it is equal to the hex-encoded hash value
   # of the digest object.  If another digest instance is given, checks whether
   # they have the same hash value.  Otherwise returns false.
   #
   def ==: (::Digest::Instance | String) -> bool
 
+  # <!--
+  #   rdoc-file=ext/digest/lib/digest.rb
+  #   - base64digest(str = nil)
+  # -->
   # If none is given, returns the resulting hash value of the digest in a base64
   # encoded form, keeping the digest's state.
   #
@@ -116,20 +140,37 @@ module Digest::Instance
   #
   def base64digest: (?String? str) -> String
 
+  # <!--
+  #   rdoc-file=ext/digest/lib/digest.rb
+  #   - base64digest!()
+  # -->
   # Returns the resulting hash value and resets the digest to the initial state.
   #
   def base64digest!: () -> String
 
+  # <!--
+  #   rdoc-file=ext/digest/digest.c
+  #   - digest_obj.block_length -> integer
+  # -->
   # Returns the block length of the digest.
   #
   # This method is overridden by each implementation subclass.
   #
   def block_length: () -> Integer
 
+  # <!--
+  #   rdoc-file=ext/digest/bubblebabble/bubblebabble.c
+  #   - digest_obj.bubblebabble -> hash_string
+  # -->
   # Returns the resulting hash value in a Bubblebabble encoded form.
   #
   def bubblebabble: () -> String
 
+  # <!--
+  #   rdoc-file=ext/digest/digest.c
+  #   - digest_obj.digest -> string
+  #   - digest_obj.digest(string) -> string
+  # -->
   # If none is given, returns the resulting hash value of the digest, keeping the
   # digest's state.
   #
@@ -138,10 +179,18 @@ module Digest::Instance
   #
   def digest: (?String) -> String
 
+  # <!--
+  #   rdoc-file=ext/digest/digest.c
+  #   - digest_obj.digest! -> string
+  # -->
   # Returns the resulting hash value and resets the digest to the initial state.
   #
   def digest!: () -> String
 
+  # <!--
+  #   rdoc-file=ext/digest/digest.c
+  #   - digest_obj.digest_length -> integer
+  # -->
   # Returns the length of the hash value of the digest.
   #
   # This method should be overridden by each implementation subclass. If not,
@@ -149,10 +198,19 @@ module Digest::Instance
   #
   def digest_length: () -> Integer
 
+  # <!--
+  #   rdoc-file=ext/digest/lib/digest.rb
+  #   - file(name)
+  # -->
   # Updates the digest with the contents of a given file *name* and returns self.
   #
   def file: (String name) -> self
 
+  # <!--
+  #   rdoc-file=ext/digest/digest.c
+  #   - digest_obj.hexdigest -> string
+  #   - digest_obj.hexdigest(string) -> string
+  # -->
   # If none is given, returns the resulting hash value of the digest in a
   # hex-encoded form, keeping the digest's state.
   #
@@ -162,38 +220,69 @@ module Digest::Instance
   #
   def hexdigest: (?String) -> String
 
+  # <!--
+  #   rdoc-file=ext/digest/digest.c
+  #   - digest_obj.hexdigest! -> string
+  # -->
   # Returns the resulting hash value in a hex-encoded form and resets the digest
   # to the initial state.
   #
   def hexdigest!: () -> String
 
+  # <!--
+  #   rdoc-file=ext/digest/digest.c
+  #   - digest_obj.inspect -> string
+  # -->
   # Creates a printable version of the digest object.
   #
   def inspect: () -> String
 
+  # <!--
+  #   rdoc-file=ext/digest/digest.c
+  #   - digest_obj.length -> integer
+  #   - digest_obj.size -> integer
+  # -->
   # Returns digest_obj.digest_length().
   #
   def length: () -> Integer
 
+  # <!--
+  #   rdoc-file=ext/digest/digest.c
+  #   - digest_obj.new -> another_digest_obj
+  # -->
   # Returns a new, initialized copy of the digest object.  Equivalent to
   # digest_obj.clone().reset().
   #
   def new: () -> ::Digest::Base
 
+  # <!--
+  #   rdoc-file=ext/digest/digest.c
+  #   - digest_obj.reset -> digest_obj
+  # -->
   # Resets the digest to the initial state and returns self.
   #
   # This method is overridden by each implementation subclass.
   #
   def reset: () -> self
 
+  # <!-- rdoc-file=ext/digest/digest.c -->
   # Returns digest_obj.digest_length().
   #
   def size: () -> Integer
 
+  # <!--
+  #   rdoc-file=ext/digest/digest.c
+  #   - digest_obj.to_s -> string
+  # -->
   # Returns digest_obj.hexdigest().
   #
   def to_s: () -> String
 
+  # <!--
+  #   rdoc-file=ext/digest/digest.c
+  #   - digest_obj.update(string) -> digest_obj
+  #   - digest_obj << string -> digest_obj
+  # -->
   # Updates the digest using a given *string* and returns self.
   #
   # The update() method and the left-shift operator are overridden by each
@@ -203,6 +292,10 @@ module Digest::Instance
 
   private
 
+  # <!--
+  #   rdoc-file=ext/digest/digest.c
+  #   - digest_obj.instance_eval { finish } -> digest_obj
+  # -->
   # Finishes the digest and returns the resulting hash value.
   #
   # This method is overridden by each implementation subclass and often made
@@ -213,19 +306,33 @@ module Digest::Instance
   def finish: () -> self
 end
 
+# <!-- rdoc-file=ext/digest/digest.c -->
 # This module stands as a base class for digest implementation classes.
+#
 class Digest::Class
   include ::Digest::Instance
 
+  # <!--
+  #   rdoc-file=ext/digest/lib/digest.rb
+  #   - base64digest(str, *args)
+  # -->
   # Returns the base64 encoded hash value of a given *string*.  The return value
   # is properly padded with '=' and contains no line feeds.
   #
   def self.base64digest: (String str, *untyped) -> String
 
+  # <!--
+  #   rdoc-file=ext/digest/bubblebabble/bubblebabble.c
+  #   - Digest::Class.bubblebabble(string, ...) -> hash_string
+  # -->
   # Returns the BubbleBabble encoded hash value of a given *string*.
   #
   def self.bubblebabble: (String, *untyped) -> String
 
+  # <!--
+  #   rdoc-file=ext/digest/digest.c
+  #   - Digest::Class.digest(string, *parameters) -> hash_string
+  # -->
   # Returns the hash value of a given *string*.  This is equivalent to
   # Digest::Class.new(*parameters).digest(string), where extra *parameters*, if
   # any, are passed through to the constructor and the *string* is passed to
@@ -233,6 +340,10 @@ class Digest::Class
   #
   def self.digest: (String, *untyped) -> String
 
+  # <!--
+  #   rdoc-file=ext/digest/lib/digest.rb
+  #   - file(name, *args)
+  # -->
   # Creates a digest object and reads a given file, *name*. Optional arguments are
   # passed to the constructor of the digest class.
   #
@@ -241,6 +352,10 @@ class Digest::Class
   #
   def self.file: (String name, *untyped) -> ::Digest::Class
 
+  # <!--
+  #   rdoc-file=ext/digest/digest.c
+  #   - Digest::Class.hexdigest(string[, ...]) -> hash_string
+  # -->
   # Returns the hex-encoded hash value of a given *string*.  This is almost
   # equivalent to Digest.hexencode(Digest::Class.new(*parameters).digest(string)).
   #
@@ -251,6 +366,7 @@ class Digest::Class
   def initialize: () -> self
 end
 
+# <!-- rdoc-file=ext/digest/digest.c -->
 # This abstract class provides a common interface to message digest
 # implementation classes written in C.
 #
@@ -285,25 +401,44 @@ end
 #
 #     rb_ivar_set(cDigest_SHA1, rb_intern("metadata"),
 #                 Data_Wrap_Struct(0, 0, 0, (void *)&sha1));
+#
 class Digest::Base < Digest::Class
   public
 
+  # <!-- rdoc-file=ext/digest/digest.c -->
   # Update the digest using given *string* and return `self`.
   #
   def <<: (String) -> self
 
+  # <!--
+  #   rdoc-file=ext/digest/digest.c
+  #   - digest_base.block_length -> Integer
+  # -->
   # Return the block length of the digest in bytes.
   #
   def block_length: () -> Integer
 
+  # <!--
+  #   rdoc-file=ext/digest/digest.c
+  #   - digest_base.digest_length -> Integer
+  # -->
   # Return the length of the hash value in bytes.
   #
   def digest_length: () -> Integer
 
+  # <!--
+  #   rdoc-file=ext/digest/digest.c
+  #   - digest_base.reset -> digest_base
+  # -->
   # Reset the digest to its initial state and return `self`.
   #
   def reset: () -> self
 
+  # <!--
+  #   rdoc-file=ext/digest/digest.c
+  #   - digest_base.update(string) -> digest_base
+  #   - digest_base << string -> digest_base
+  # -->
   # Update the digest using given *string* and return `self`.
   #
   def update: (String) -> self
@@ -315,6 +450,7 @@ class Digest::Base < Digest::Class
   def initialize_copy: (::Digest::Base) -> self
 end
 
+# <!-- rdoc-file=ext/digest/sha1/sha1init.c -->
 # A class for calculating message digests using the SHA-1 Secure Hash Algorithm
 # by NIST (the US' National Institute of Standards and Technology), described in
 # FIPS PUB 180-1.
@@ -339,9 +475,11 @@ end
 #     sha1.reset
 #     sha1 << "message"
 #     sha1.hexdigest                        # => "6f9b9af3..."
+#
 class Digest::SHA1 < Digest::Base
 end
 
+# <!-- rdoc-file=ext/digest/md5/md5init.c -->
 # A class for calculating message digests using the MD5 Message-Digest Algorithm
 # by RSA Data Security, Inc., described in RFC1321.
 #
@@ -363,9 +501,11 @@ end
 #     md5.reset
 #     md5 << "message"
 #     md5.hexdigest                        # => "78e73102..."
+#
 class Digest::MD5 < Digest::Base
 end
 
+# <!-- rdoc-file=ext/digest/rmd160/rmd160init.c -->
 # A class for calculating message digests using RIPEMD-160 cryptographic hash
 # function, designed by Hans Dobbertin, Antoon Bosselaers, and Bart Preneel.
 #
@@ -387,6 +527,7 @@ end
 #     rmd160.reset
 #     rmd160 << "message"
 #     rmd160.hexdigest                        # => "1dddbe1b..."
+#
 class Digest::RMD160 < Digest::Base
 end
 
@@ -399,7 +540,12 @@ end
 class Digest::SHA512 < Digest::Base
 end
 
+%a{annotate:rdoc:skip}
 class Object
+  # <!--
+  #   rdoc-file=ext/digest/lib/digest.rb
+  #   - Digest(name) -> digest_subclass
+  # -->
   # Returns a Digest subclass by `name` in a thread-safe manner even when
   # on-demand loading is involved.
   #

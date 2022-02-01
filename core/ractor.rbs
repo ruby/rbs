@@ -1,15 +1,16 @@
+# <!-- rdoc-file=ractor.rb -->
 # Ractor is a Actor-model abstraction for Ruby that provides thread-safe
 # parallel execution.
 #
-# Ractor.new can make new Ractor and it will run in parallel.
+# Ractor.new can make a new Ractor, and it will run in parallel.
 #
 #     # The simplest ractor
 #     r = Ractor.new {puts "I am in Ractor!"}
-#     r.take # wait it to finish
+#     r.take # wait for it to finish
 #     # here "I am in Ractor!" would be printed
 #
-# Ractors do not share usual objects, so the some kind of thread-safety concerns
-# such as data-race, race-conditions are not available on multi-ractor
+# Ractors do not share usual objects, so the same kinds of thread-safety
+# concerns such as data-race, race-conditions are not available on multi-ractor
 # programming.
 #
 # To achieve this, ractors severely limit object sharing between different
@@ -156,7 +157,7 @@
 # inaccessible on a moved object.
 #
 # Besides frozen objects, there are shareable objects. Class and Module objects
-# are shareable so the Class/Module definitons are shared between ractors.
+# are shareable so the Class/Module definitions are shared between ractors.
 # Ractor objects are also shareable objects. All operations for the shareable
 # mutable objects are thread-safe, so the thread-safety property will be kept.
 # We can not define mutable shareable objects in Ruby, but C extensions can
@@ -206,7 +207,7 @@
 #     # can not access instance variables of classes/modules from non-main Ractors (RuntimeError)
 #
 # See also the description of `# shareable_constant_value` pragma in [Comments
-# syntax](rdoc-ref:doc/syntax/comments.rdoc) explanation.
+# syntax](rdoc-ref:syntax/comments.rdoc) explanation.
 #
 # ## Ractors vs threads
 #
@@ -235,8 +236,13 @@
 #
 # ## Reference
 #
-# See [Ractor desgin doc](rdoc-ref:doc/ractor.md) for more details.
+# See [Ractor design doc](rdoc-ref:ractor.md) for more details.
+#
 class Ractor
+  # <!--
+  #   rdoc-file=ractor.rb
+  #   - count()
+  # -->
   # Returns total count of Ractors currently running.
   #
   #     Ractor.count                   #=> 1
@@ -248,16 +254,28 @@ class Ractor
   #
   def self.count: () -> Integer
 
+  # <!--
+  #   rdoc-file=ractor.rb
+  #   - current()
+  # -->
   # Returns the currently executing Ractor.
   #
   #     Ractor.current #=> #<Ractor:#1 running>
   #
   def self.current: () -> untyped
 
+  # <!--
+  #   rdoc-file=ractor.rb
+  #   - main()
+  # -->
   # returns main ractor
   #
   def self.main: () -> untyped
 
+  # <!--
+  #   rdoc-file=ractor.rb
+  #   - Ractor.make_shareable(obj, copy: false) -> shareable_obj
+  # -->
   # Make `obj` shareable between ractors.
   #
   # `obj` and all the objects it refers to will be frozen, unless they are already
@@ -293,6 +311,10 @@ class Ractor
   #
   def self.make_shareable: [T] (T obj, ?copy: boolish) -> T
 
+  # <!--
+  #   rdoc-file=ractor.rb
+  #   - Ractor.new(*args, name: nil) {|*args| block } -> ractor
+  # -->
   # Create a new Ractor with args and a block.
   #
   # A block (Proc) will be isolated (can't access to outer variables). `self`
@@ -324,6 +346,10 @@ class Ractor
   #
   def self.new: (*untyped args, ?name: string) { (*untyped) -> untyped } -> Ractor
 
+  # <!--
+  #   rdoc-file=ractor.rb
+  #   - Ractor.receive -> msg
+  # -->
   # Receive an incoming message from the current Ractor's incoming port's queue,
   # which was sent there by #send.
   #
@@ -382,6 +408,10 @@ class Ractor
   #
   def self.receive: () -> untyped
 
+  # <!--
+  #   rdoc-file=ractor.rb
+  #   - Ractor.receive_if {|msg| block } -> msg
+  # -->
   # Receive only a specific message.
   #
   # Instead of Ractor.receive, Ractor.receive_if can provide a pattern by a block
@@ -404,7 +434,7 @@ class Ractor
   #     baz2
   #
   # If the block returns a truthy value, the message will be removed from the
-  # incoming queue and returned. Otherwise, the messsage remains in the incoming
+  # incoming queue and returned. Otherwise, the message remains in the incoming
   # queue and the following received messages are checked by the given block.
   #
   # If there are no messages left in the incoming queue, the method will block
@@ -439,8 +469,17 @@ class Ractor
   #
   def self.receive_if: () { (untyped) -> boolish } -> untyped
 
+  # <!--
+  #   rdoc-file=ractor.rb
+  #   - recv()
+  # -->
+  #
   alias self.recv self.receive
 
+  # <!--
+  #   rdoc-file=ractor.rb
+  #   - Ractor.select(*ractors, [yield_value:, move: false]) -> [ractor or symbol, obj]
+  # -->
   # Waits for the first ractor to have something in its outgoing port, reads from
   # this ractor, and returns that ractor and the object received.
   #
@@ -488,8 +527,12 @@ class Ractor
   # `move` boolean flag defines whether yielded value should be copied (default)
   # or moved.
   #
-  def self.select: (*Ractor ractors, ?move: boolish, ?yield_value: untyped) -> [Ractor | Symbol, untyped]
+  def self.select: (*Ractor ractors, ?move: boolish, ?yield_value: untyped) -> [ Ractor | Symbol, untyped ]
 
+  # <!--
+  #   rdoc-file=ractor.rb
+  #   - Ractor.shareable?(obj) -> true | false
+  # -->
   # Checks if the object is shareable by ractors.
   #
   #     Ractor.shareable?(1)            #=> true -- numbers and other immutable basic values are frozen
@@ -501,6 +544,10 @@ class Ractor
   #
   def self.shareable?: (untyped obj) -> bool
 
+  # <!--
+  #   rdoc-file=ractor.rb
+  #   - Ractor.yield(msg, move: false) -> nil
+  # -->
   # Send a message to the current ractor's outgoing port to be consumed by #take.
   #
   #     r = Ractor.new {Ractor.yield 'Hello from ractor'}
@@ -539,16 +586,33 @@ class Ractor
 
   public
 
+  # <!--
+  #   rdoc-file=ractor.rb
+  #   - <<(obj, move: false)
+  # -->
+  #
   alias << send
 
+  # <!--
+  #   rdoc-file=ractor.rb
+  #   - [](sym)
+  # -->
   # get a value from ractor-local storage
   #
   def []: (Symbol | String sym) -> untyped
 
+  # <!--
+  #   rdoc-file=ractor.rb
+  #   - []=(sym, val)
+  # -->
   # set a value in ractor-local storage
   #
   def []=: [T] (Symbol | String sym, T val) -> T
 
+  # <!--
+  #   rdoc-file=ractor.rb
+  #   - ractor.close_incoming -> true | false
+  # -->
   # Closes the incoming port and returns its previous state. All further attempts
   # to Ractor.receive in the ractor, and #send to the ractor will fail with
   # Ractor::ClosedError.
@@ -561,6 +625,10 @@ class Ractor
   #
   def close_incoming: () -> bool
 
+  # <!--
+  #   rdoc-file=ractor.rb
+  #   - ractor.close_outgoing -> true | false
+  # -->
   # Closes the outgoing port and returns its previous state. All further attempts
   # to Ractor.yield in the ractor, and #take from the ractor will fail with
   # Ractor::ClosedError.
@@ -573,12 +641,25 @@ class Ractor
   #
   def close_outgoing: () -> bool
 
+  # <!--
+  #   rdoc-file=ractor.rb
+  #   - inspect()
+  # -->
+  #
   def inspect: () -> String
 
+  # <!--
+  #   rdoc-file=ractor.rb
+  #   - name()
+  # -->
   # The name set in Ractor.new, or `nil`.
   #
   def name: () -> String?
 
+  # <!--
+  #   rdoc-file=ractor.rb
+  #   - ractor.send(msg, move: false) -> self
+  # -->
   # Send a message to a Ractor's incoming queue to be consumed by Ractor.receive.
   #
   #     r = Ractor.new do
@@ -660,6 +741,10 @@ class Ractor
   #
   def send: (untyped obj, ?move: boolish) -> Ractor
 
+  # <!--
+  #   rdoc-file=ractor.rb
+  #   - ractor.take -> msg
+  # -->
   # Take a message from ractor's outgoing port, which was put there by
   # Ractor.yield or at ractor's finalization.
   #
@@ -722,18 +807,71 @@ class Ractor
   #
   def take: () -> untyped
 
+  # <!--
+  #   rdoc-file=ractor.rb
+  #   - to_s()
+  # -->
+  #
   alias to_s inspect
 
   private
 
+  # <!--
+  #   rdoc-file=ractor.rb
+  #   - receive()
+  # -->
   # same as Ractor.receive
   #
   def receive: () -> untyped
 
+  # <!--
+  #   rdoc-file=ractor.rb
+  #   - receive_if(&b)
+  # -->
+  #
   def receive_if: () { (untyped) -> boolish } -> untyped
 
+  # <!--
+  #   rdoc-file=ractor.rb
+  #   - recv()
+  # -->
+  #
   alias recv receive
 
+  # <!-- rdoc-file=ractor.c -->
+  # Raised when an attempt is made to send a message to a closed port, or to
+  # retrieve a message from a closed and empty port. Ports may be closed
+  # explicitly with Ractor#close_outgoing/close_incoming and are closed implicitly
+  # when a Ractor terminates.
+  #
+  #     r = Ractor.new { sleep(500) }
+  #     r.close_outgoing
+  #     r.take # Ractor::ClosedError
+  #
+  # ClosedError is a descendant of StopIteration, so the closing of the ractor
+  # will break the loops without propagating the error:
+  #
+  #     r = Ractor.new do
+  #       loop do
+  #         msg = receive # raises ClosedError and loop traps it
+  #         puts "Received: #{msg}"
+  #       end
+  #       puts "loop exited"
+  #     end
+  #
+  #     3.times{|i| r << i}
+  #     r.close_incoming
+  #     r.take
+  #     puts "Continue successfully"
+  #
+  # This will print:
+  #
+  #     Received: 0
+  #     Received: 1
+  #     Received: 2
+  #     loop exited
+  #     Continue successfully
+  #
   class ClosedError < StopIteration
   end
 
@@ -743,31 +881,116 @@ class Ractor
   class IsolationError < Ractor::Error
   end
 
+  # <!-- rdoc-file=ractor.c -->
+  # Raised on an attempt to access an object which was moved in Ractor#send or
+  # Ractor.yield.
+  #
+  #     r = Ractor.new { sleep }
+  #
+  #     ary = [1, 2, 3]
+  #     r.send(ary, move: true)
+  #     ary.inspect
+  #     # Ractor::MovedError (can not send any methods to a moved object)
+  #
   class MovedError < Ractor::Error
   end
 
+  # <!-- rdoc-file=ractor.c -->
+  # A special object which replaces any value that was moved to another ractor in
+  # Ractor#send or Ractor.yield. Any attempt to access the object results in
+  # Ractor::MovedError.
+  #
+  #     r = Ractor.new { receive }
+  #
+  #     ary = [1, 2, 3]
+  #     r.send(ary, move: true)
+  #     p Ractor::MovedObject === ary
+  #     # => true
+  #     ary.inspect
+  #     # Ractor::MovedError (can not send any methods to a moved object)
+  #
   class MovedObject < BasicObject
     public
 
+    # <!--
+    #   rdoc-file=ractor.c
+    #   - !(*args)
+    # -->
+    #
     def !: (*untyped) -> untyped
 
+    # <!--
+    #   rdoc-file=ractor.c
+    #   - !=(*args)
+    # -->
+    #
     def !=: (*untyped) -> untyped
 
+    # <!--
+    #   rdoc-file=ractor.c
+    #   - ==(*args)
+    # -->
+    #
     def ==: (*untyped) -> untyped
 
+    # <!--
+    #   rdoc-file=ractor.c
+    #   - __id__(*args)
+    # -->
+    #
     def __id__: (*untyped) -> untyped
 
+    # <!--
+    #   rdoc-file=ractor.c
+    #   - __send__(*args)
+    # -->
+    #
     def __send__: (*untyped) -> untyped
 
+    # <!--
+    #   rdoc-file=ractor.c
+    #   - equal?(*args)
+    # -->
+    #
     def equal?: (*untyped) -> untyped
 
+    # <!--
+    #   rdoc-file=ractor.c
+    #   - instance_eval(*args)
+    # -->
+    #
     def instance_eval: (*untyped) -> untyped
 
+    # <!--
+    #   rdoc-file=ractor.c
+    #   - instance_exec(*args)
+    # -->
+    #
     def instance_exec: (*untyped) -> untyped
 
+    # <!--
+    #   rdoc-file=ractor.c
+    #   - method_missing(*args)
+    # -->
+    #
     def method_missing: (*untyped) -> untyped
   end
 
+  # <!-- rdoc-file=ractor.c -->
+  # Raised on attempt to Ractor#take if there was an uncaught exception in the
+  # Ractor. Its `cause` will contain the original exception, and `ractor` is the
+  # original ractor it was raised in.
+  #
+  #     r = Ractor.new { raise "Something weird happened" }
+  #
+  #     begin
+  #       r.take
+  #     rescue => e
+  #       p e             # => #<Ractor::RemoteError: thrown by remote Ractor.>
+  #       p e.ractor == r # => true
+  #       p e.cause       # => #<RuntimeError: Something weird happened>
+  #     end
+  #
   class RemoteError < Ractor::Error
     public
 

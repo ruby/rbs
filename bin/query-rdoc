@@ -1,103 +1,50 @@
 #!/usr/bin/env ruby
 
-require "rdoc"
+require "bundler/setup"
+require "optparse"
+require "rbs"
+require "rbs/annotate"
 
-def store_for_class(name, stores:)
-  stores.find do |store|
-    store.find_class_named(name) || store.find_module_named(name)
-  end
+source = RBS::Annotate::RDocSource.new()
+annotator = RBS::Annotate::RDocAnnotator.new(source: source)
+
+OptionParser.new do |opts|
+  opts.on("--[no-]system", "Load RDoc from system (defaults to true)") {|b| source.with_system_dir = b }
+  opts.on("--[no-]gems", "Load RDoc from gems (defaults to false)") {|b| source.with_gems_dir = b }
+  opts.on("--[no-]site", "Load RDoc from site directory (defaults to false)") {|b| source.with_site_dir = b }
+  opts.on("--[no-]home", "Load RDoc from home directory (defaults to false)") {|b| source.with_home_dir = b }
+  opts.on("-d", "--dir DIRNAME", "Load RDoc from DIRNAME") {|d| source.extra_dirs << Pathname(d) }
+  opts.on("--[no-]arglists", "Generate arglists section (defaults to true)") {|b| annotator.include_arg_lists = b }
+  opts.on("--[no-]filename", "Include source file name in the documentation (defaults to true)") {|b| annotator.include_filename = b }
+end.parse!(ARGV)
+
+tester = Object.new.tap do |object|
+  object.singleton_class.define_method(:test_path) {|*| true }
 end
 
-def format_comment(comment)
-  out = RDoc::Markup::Document.new
-  out << comment
-  formatter = RDoc::Markup::ToMarkdown.new
-  out.accept(formatter)
-end
+name = ARGV.shift or return
 
-def comment_for_constant(name, stores:)
-  *class_components, const_name = name.split(/::/)
-  class_name = class_components.join("::")
-
-  klass = store_for_class(class_name, stores: stores)&.yield_self {|store|
-    store.find_class_named(class_name) || store.find_module_named(class_name)
-  }
-
-  constant = klass.constants.find do |const|
-    const.name == const_name
-  end
-
-  if constant&.documented?
-    format_comment(constant.comment)
-  end
-end
-
-def comment_for_class(class_name, stores:)
-  klass = store_for_class(class_name, stores: stores)&.yield_self {|store|
-    store.find_class_named(class_name) || store.find_module_named(class_name)
-  }
-
-  if klass&.documented?
-    format_comment(klass.comment)
-  end
-end
-
-def comment_for_method(klass, method, stores:)
-  method = store_for_class(klass, stores: stores)&.load_method(klass, method)
-
-  if method&.documented?
-    out = RDoc::Markup::Document.new
-
-    out << method.comment
-
-    if method.arglists
-      out << RDoc::Markup::Heading.new(1, "arglists 💪👽🚨 << Delete this section")
-      arglists = method.arglists.chomp.split("\n").map {|line| line + "\n" }
-      out << RDoc::Markup::Verbatim.new(*arglists)
-    end
-
-    out.accept(RDoc::Markup::ToMarkdown.new)
-  end
-rescue RDoc::Store::MissingFileError
-  nil
-end
-
-if ARGV.empty?
-  puts 'query-rdoc [subject]'
-  puts "  subject ::= ClassName         (class, module, or constant)"
-  puts "            | ClassName.method  (singleton method)"
-  puts "            | ClassName#method  (instance method)"
-  exit
-end
-
-stores = []
-RDoc::RI::Paths.each true, true, false, false do |path, type|
-  STDERR.puts "Loading store from #{path}..."
-  store = RDoc::RI::Store.new(path, type)
-  store.load_all
-  stores << store
-end
-
-subject = ARGV[0]
+source.load()
 
 case
-when match = subject.match(/(?<constant_name>[^#]+)#(?<method_name>.+)/)
-  STDERR.puts "Finding instance method #{match[:constant_name]} # #{match[:method_name]} ..."
-  comment = comment_for_method(match[:constant_name], "##{match[:method_name]}", stores: stores)
-when match = subject.match(/(?<constant_name>[^.]+)\.(?<method_name>.+)/)
-  STDERR.puts "Finding singleton method #{match[:constant_name]} . #{match[:method_name]} ..."
-  comment = comment_for_method(match[:constant_name], "::#{match[:method_name]}", stores: stores)
+when match = name.match(/(?<constant_name>[^#]+)#(?<method_name>.+)/)
+  type_name = TypeName(match[:constant_name] || raise)
+  instance_method = (match[:method_name] or raise).to_sym
+
+  doc = annotator.doc_for_method(type_name, instance_method: instance_method, tester: tester)
+when match = name.match(/(?<constant_name>[^#]+)\.(?<method_name>.+)/)
+  type_name = TypeName(match[:constant_name] || raise)
+  singleton_method = (match[:method_name] or raise).to_sym
+
+  doc = annotator.doc_for_method(type_name, singleton_method: singleton_method, tester: tester)
 else
-  STDERR.puts "Finding class/module/constant #{subject} ..."
-  comment = comment_for_class(subject, stores: stores) || comment_for_constant(subject, stores: stores)
+  type_name = TypeName(name)
+
+  doc = annotator.doc_for_class(type_name, tester: tester) || annotator.doc_for_constant(type_name, tester: tester)
 end
 
-if comment
-  STDERR.puts "Printing document..."
-  comment.each_line do |line|
-    puts "# #{line}"
-  end
+if doc
+  puts doc
 else
-  STDERR.puts "Nothing to print; failed to query the document..."
-  exit 1
+  puts "🤯 Cannot find the definition of `#{name}`"
 end

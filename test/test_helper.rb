@@ -1,5 +1,6 @@
 $LOAD_PATH.unshift File.expand_path("../lib", __FILE__)
 require "rbs"
+require "rbs/annotate"
 require "tmpdir"
 require "stringio"
 require "open3"

@@ -24,3 +24,16 @@ class ThreadSingletonTest < Test::Unit::TestCase
                      Class.new(Thread), :start do 1 end
   end
 end
+
+class ThreadTest < Test::Unit::TestCase
+  include TypeAssertions
+
+  testing "::Thread"
+
+  def test_native_thread_id
+    assert_send_type(
+      "() -> Integer",
+      Thread.current, :native_thread_id
+    )
+  end
+end

@@ -1,3 +1,4 @@
+# <!-- rdoc-file=lib/yaml/store.rb -->
 # YAML::Store provides the same functionality as PStore, except it uses YAML to
 # dump objects instead of Marshal.
 #
@@ -30,6 +31,11 @@
 #       hello: world
 #
 class YAML::Store < ::PStore
+  # <!--
+  #   rdoc-file=lib/yaml/store.rb
+  #   - initialize( file_name, yaml_opts = {} )
+  #   - initialize( file_name, thread_safe = false, yaml_opts = {} )
+  # -->
   # Creates a new YAML::Store object, which will store data in `file_name`. If the
   # file does not already exist, it will be created.
   #
