@@ -1519,16 +1519,30 @@ class StringInstanceTest < Test::Unit::TestCase
   end
 
   def test_unpack
-    assert_send_type "(String) -> [ ]",
-                     "a", :unpack, ""
-    assert_send_type "(String) -> [ nil ]",
-                     "", :unpack, "f"
-    assert_send_type "(String) -> Array[Integer]",
-                     "a", :unpack, "c"
-    assert_send_type "(String) -> Array[String]",
-                     "a", :unpack, "A"
-    assert_send_type "(String) -> Array[Float]",
-                     "\x00\x00\x00\x00", :unpack, "f"
+    assert_send_type(
+      "(String) -> [ ]",
+      "a", :unpack, ""
+    )
+    assert_send_type(
+      "(String) -> [ nil ]",
+      "", :unpack, "f"
+    )
+    assert_send_type(
+      "(String) -> Array[Integer]",
+      "a", :unpack, "c"
+    )
+    assert_send_type(
+      "(String) -> Array[String]",
+      "a", :unpack, "A"
+    )
+    assert_send_type(
+      "(String) -> Array[Float]",
+      "\x00\x00\x00\x00", :unpack, "f"
+    )
+    assert_send_type(
+      "(String, offset: Integer) -> Array[String]",
+      "  a", :unpack, "A", offset: 2
+    )
   end
 
   def test_unpack1
