@@ -15,13 +15,13 @@
     "upper_bound": {
       "oneOf": [
         {
-          "$ref": "types.json#definitions/classInstance"
+          "$ref": "types.json#/definitions/classInstance"
         },
         {
-          "$ref": "types.json#definitions/classSingleton"
+          "$ref": "types.json#/definitions/classSingleton"
         },
         {
-          "$ref": "types.json#definitions/interface"
+          "$ref": "types.json#/definitions/interface"
         },
         {
           "type": "null"
