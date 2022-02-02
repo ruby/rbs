@@ -7,7 +7,11 @@ module RBS
     # ^^^                      type_params
     #     ^^^^^^^^^^^^^^^^^^^  type
     #
-    type loc = Location[:type, :type_params]
+    type def_loc = Location[:type, :type_params]
+
+    type attr_loc = AST::Members::Attribute::loc
+
+    type loc = def_loc | attr_loc
 
     attr_reader type_params: Array[AST::TypeParam]
     attr_reader type: Types::Function

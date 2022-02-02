@@ -614,6 +614,7 @@ class RBS::TypeParsingTest < Test::Unit::TestCase
       assert_equal 1, type.args.size
       type.args[0].yield_self do |arg|
         assert_instance_of Types::Variable, arg
+        assert_instance_of RBS::Location, arg.location
       end
     end
 

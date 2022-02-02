@@ -119,5 +119,17 @@ module RBS
         enum_for(:each_required_key)
       end
     end
+
+    def key?(name)
+      optional_key?(name) || required_key?(name)
+    end
+
+    def optional_key?(name)
+      _optional_keys.include?(name)
+    end
+
+    def required_key?(name)
+      _required_keys.include?(name)
+    end
   end
 end

@@ -539,8 +539,12 @@ module RBS
 
         if method_types
           method_types.each do |method_type|
+            merged_params = type_params
+              .reject {|param| method_type.type_param_names.include?(param.name) }
+              .concat(method_type.type_params)
+
             result = calculator.in_method_type(method_type: method_type, variables: param_names)
-            validate_params_with(type_params, result: result) do |param|
+            validate_params_with(merged_params, result: result) do |param|
               raise InvalidVarianceAnnotationError.new(
                 type_name: definition.type_name,
                 param: param,

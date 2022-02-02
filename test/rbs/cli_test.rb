@@ -278,6 +278,20 @@ singleton(::BasicObject)
     end
   end
 
+  def test_validate_878
+    with_cli do |cli|
+      Dir.mktmpdir do |dir|
+        (Pathname(dir) + 'a.rbs').write(<<~RBS)
+        class Bar[out X]
+          def voice: [X] { () -> X } -> String
+        end
+        RBS
+
+        cli.run(["-I", dir, "validate"])
+      end
+    end
+  end
+
   def test_constant
     with_cli do |cli|
       cli.run(%w(-r set constant Pathname))

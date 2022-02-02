@@ -87,6 +87,12 @@ module RBS
     def each_required_key: () { (Symbol) -> void } -> void
                          | () -> Enumerator[Symbol, void]
 
+    def optional_key?: (Symbol) -> bool
+
+    def required_key?: (Symbol) -> bool
+
+    def key?: (Symbol) -> bool
+
     private
 
     def _start_loc: () -> Buffer::loc?
