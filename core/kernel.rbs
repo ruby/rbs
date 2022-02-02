@@ -1986,7 +1986,11 @@ module Kernel : BasicObject
   #     Time.new    #=> 2008-03-08 19:56:22 +0900
   #
   def self?.sleep: () -> bot
-                 | (Numeric duration) -> Integer
+                 | ((Integer | Float | _Divmod) duration) -> Integer
+
+  interface _Divmod
+    def divmod: (Numeric) -> [ Numeric, Numeric ]
+  end
 
   # <!--
   #   rdoc-file=io.c

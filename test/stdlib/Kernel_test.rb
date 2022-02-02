@@ -576,10 +576,15 @@ class KernelTest < StdlibTest
   end
 
   def test_sleep
-    # TODO
-    #   sleep
+    sleep 0
 
     sleep 0.01
+
+    o = Object.new
+    def o.divmod(i)
+      [0.001, 0.001]
+    end
+    sleep o
   end
 
   def test_syscall
