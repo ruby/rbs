@@ -73,6 +73,7 @@ task :validate => :compile do
 
     if lib == ["net-http"]
       lib << "uri"
+      lib << "timeout"
     end
 
     if lib == ["resolv"]
