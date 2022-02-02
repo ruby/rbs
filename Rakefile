@@ -111,7 +111,7 @@ namespace :generate do
 
     class TestTarget
       def initialize(klass)
-        @type_name = RBS::Namespace.parse(klass).to_type_name # .absolute!
+        @type_name = RBS::Namespace.parse(klass).to_type_name
       end
 
       def path
