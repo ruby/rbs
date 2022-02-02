@@ -2,6 +2,29 @@
 
 ## master
 
+## 2.1.0 (2022-02-02)
+
+RBS 2.1 is a release to deliver the types and documents of the new and updated methods of Ruby 3.1.
+
+### Signature updates
+
+* Documents imported from Ruby 3.1 ([\#881](https://github.com/ruby/rbs/pull/881))
+* Methods/classes updated in Ruby 3.1 ([\#886](https://github.com/ruby/rbs/pull/886))
+* io/wait ([\#865](https://github.com/ruby/rbs/pull/865))
+* json ([\#863](https://github.com/ruby/rbs/pull/863))
+* nkf ([\#873](https://github.com/ruby/rbs/pull/873))
+* openssl ([\#866](https://github.com/ruby/rbs/pull/866))
+* `Dir.exists?`, `FileTest#exists?` ([\#884](https://github.com/ruby/rbs/pull/884))
+* `FileTest` ([\#880](https://github.com/ruby/rbs/pull/880))
+* `Gem::Version#<=>` ([\#869](https://github.com/ruby/rbs/pull/869))
+* `Process.clock_gettime` ([\#858](https://github.com/ruby/rbs/pull/858))
+
+### Library changes
+
+* Introduce `rbs annotate` command ([\#881](https://github.com/ruby/rbs/pull/881))
+* Make prototype rb to be aware of prepend ([\#861](https://github.com/ruby/rbs/pull/861))
+* Fixes incorrect "Invalid Variance" error when method type variable shadows outer type variable ([#889](https://github.com/ruby/rbs/pull/889))
+
 ## 2.0.0 (2021-12-24)
 
 ### Bounded Generics
