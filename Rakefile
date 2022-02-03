@@ -106,17 +106,40 @@ namespace :generate do
       raise "Class name is necessary. e.g. rake 'generate:stdlib_test[String]'"
     end
 
-    path = Pathname(ENV["RBS_GENERATE_TEST_PATH"] || "test/stdlib/#{klass}_test.rb")
-    raise "#{path} already exists!" if path.exist?
-
     require "erb"
     require "rbs"
 
-    class TestTemplateBuilder
-      attr_reader :klass, :env
-
+    class TestTarget
       def initialize(klass)
-        @klass = klass
+        @type_name = RBS::Namespace.parse(klass).to_type_name
+      end
+
+      def path
+        Pathname(ENV['RBS_GENERATE_TEST_PATH'] || "test/stdlib/#{file_name}_test.rb")
+      end
+
+      def file_name
+        @type_name.to_s.gsub(/\A::/, '').gsub(/::/, '_')
+      end
+
+      def to_s
+        @type_name.to_s
+      end
+      
+      def absolute_type_name
+        @absolute_type_name ||= @type_name.absolute!
+      end
+    end
+
+    target = TestTarget.new(klass)
+    path = target.path
+    raise "#{path} already exists!" if path.exist?
+
+    class TestTemplateBuilder
+      attr_reader :target, :env
+
+      def initialize(target)
+        @target = target
 
         loader = RBS::EnvironmentLoader.new
         Dir['stdlib/*'].each do |lib|
@@ -132,17 +155,17 @@ namespace :generate do
           require_relative "test_helper"
 
           <%- unless class_methods.empty? -%>
-          class <%= klass %>SingletonTest < Test::Unit::TestCase
+          class <%= target %>SingletonTest < Test::Unit::TestCase
             include TypeAssertions
 
             # library "pathname", "set", "securerandom"     # Declare library signatures to load
-            testing "singleton(::<%= klass %>)"
+            testing "singleton(::<%= target %>)"
 
           <%- class_methods.each do |method_name, definition| %>
             def test_<%= test_name_for(method_name) %>
           <%- definition.method_types.each do |method_type| -%>
               assert_send_type  "<%= method_type %>",
-                                <%= klass %>, :<%= method_name %>
+                                <%= target %>, :<%= method_name %>
           <%- end -%>
             end
           <%- end -%>
@@ -150,17 +173,17 @@ namespace :generate do
           <%- end -%>
 
           <%- unless instance_methods.empty? -%>
-          class <%= klass %>Test < Test::Unit::TestCase
+          class <%= target %>Test < Test::Unit::TestCase
             include TypeAssertions
 
             # library "pathname", "set", "securerandom"     # Declare library signatures to load
-            testing "::<%= klass %>"
+            testing "::<%= target %>"
 
           <%- instance_methods.each do |method_name, definition| %>
             def test_<%= test_name_for(method_name) %>
           <%- definition.method_types.each do |method_type| -%>
               assert_send_type  "<%= method_type %>",
-                                <%= klass %>.new, :<%= method_name %>
+                                <%= target %>.new, :<%= method_name %>
           <%- end -%>
             end
           <%- end -%>
@@ -199,25 +222,21 @@ namespace :generate do
           :~   => 'tilde'
         }.fetch(method_name, method_name)
       end
-
-      def type_name
-        @type_name ||= RBS::TypeName.new(name: klass.to_sym, namespace: RBS::Namespace.new(path: [], absolute: true))
-      end
-
+      
       def class_methods
-        @class_methods ||= RBS::DefinitionBuilder.new(env: env).build_singleton(type_name).methods.select {|_, definition|
-          definition.implemented_in == type_name
+        @class_methods ||= RBS::DefinitionBuilder.new(env: env).build_singleton(target.absolute_type_name).methods.select {|_, definition|
+          definition.implemented_in == target.absolute_type_name
         }
       end
 
       def instance_methods
-        @instance_methods ||= RBS::DefinitionBuilder.new(env: env).build_instance(type_name).methods.select {|_, definition|
-          definition.implemented_in == type_name
+        @instance_methods ||= RBS::DefinitionBuilder.new(env: env).build_instance(target.absolute_type_name).methods.select {|_, definition|
+          definition.implemented_in == target.absolute_type_name
         }
       end
     end
 
-    path.write TestTemplateBuilder.new(klass).call
+    path.write TestTemplateBuilder.new(target).call
 
     puts "Created: #{path}"
   end
@@ -226,4 +245,6 @@ end
 task :test_generate_stdlib do
   sh "RBS_GENERATE_TEST_PATH=/tmp/Array_test.rb rake 'generate:stdlib_test[Array]'"
   sh "ruby -c /tmp/Array_test.rb"
+  sh "RBS_GENERATE_TEST_PATH=/tmp/Thread_Mutex_test.rb rake 'generate:stdlib_test[Thread::Mutex]'"
+  sh "ruby -c /tmp/Thread_Mutex_test.rb"
 end
