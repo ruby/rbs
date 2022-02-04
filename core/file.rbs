@@ -1492,7 +1492,7 @@ class File::Stat < Object
   # Create a File::Stat object for the given file name (raising an exception if
   # the file doesn't exist).
   #
-  def initialize: (String file) -> Object
+  def initialize: (String file) -> void
 
   # <!--
   #   rdoc-file=file.c
@@ -1825,8 +1825,6 @@ class File::Stat < Object
   #     File.stat("/dev/tty").rdev_minor   #=> 0
   #
   def rdev_minor: () -> Integer
-
-  def read: (?int? length, ?string outbuf) -> String?
 
   # <!--
   #   rdoc-file=file.c
