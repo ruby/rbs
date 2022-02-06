@@ -1099,4 +1099,67 @@ end
 # Raised by Encoding and String methods when a transcoding operation fails.
 #
 class Encoding::UndefinedConversionError < EncodingError
+  public
+
+  # <!--
+  #   rdoc-file=transcode.c
+  #   - ecerr.destination_encoding         -> string
+  # -->
+  # Returns the destination encoding as an encoding object.
+  #
+  def destination_encoding: () -> Encoding
+
+  # <!--
+  #   rdoc-file=transcode.c
+  #   - ecerr.destination_encoding_name         -> string
+  # -->
+  # Returns the destination encoding name as a string.
+  #
+  def destination_encoding_name: () -> String
+
+  # <!--
+  #   rdoc-file=transcode.c
+  #   - ecerr.error_char         -> string
+  # -->
+  # Returns the one-character string which cause
+  # Encoding::UndefinedConversionError.
+  #
+  #     ec = Encoding::Converter.new("ISO-8859-1", "EUC-JP")
+  #     begin
+  #       ec.convert("\xa0")
+  #     rescue Encoding::UndefinedConversionError
+  #       puts $!.error_char.dump   #=> "\xC2\xA0"
+  #       p $!.error_char.encoding  #=> #<Encoding:UTF-8>
+  #     end
+  #
+  def error_char: () -> String
+
+  # <!--
+  #   rdoc-file=transcode.c
+  #   - ecerr.source_encoding              -> encoding
+  # -->
+  # Returns the source encoding as an encoding object.
+  #
+  # Note that the result may not be equal to the source encoding of the encoding
+  # converter if the conversion has multiple steps.
+  #
+  #     ec = Encoding::Converter.new("ISO-8859-1", "EUC-JP") # ISO-8859-1 -> UTF-8 -> EUC-JP
+  #     begin
+  #       ec.convert("\xa0") # NO-BREAK SPACE, which is available in UTF-8 but not in EUC-JP.
+  #     rescue Encoding::UndefinedConversionError
+  #       p $!.source_encoding              #=> #<Encoding:UTF-8>
+  #       p $!.destination_encoding         #=> #<Encoding:EUC-JP>
+  #       p $!.source_encoding_name         #=> "UTF-8"
+  #       p $!.destination_encoding_name    #=> "EUC-JP"
+  #     end
+  #
+  def source_encoding: () -> Encoding
+
+  # <!--
+  #   rdoc-file=transcode.c
+  #   - ecerr.source_encoding_name         -> string
+  # -->
+  # Returns the source encoding name as a string.
+  #
+  def source_encoding_name: () -> String
 end
