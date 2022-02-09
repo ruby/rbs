@@ -8,7 +8,7 @@ module RBS
 
       def initialize: (source: RDocSource) -> void
 
-      def annotate_file: (Pathname) -> void
+      def annotate_file: (Pathname, preserve: bool) -> void
 
       def annotate_decls: (Array[AST::Declarations::t], ?outer: Array[Namespace]) -> void
 

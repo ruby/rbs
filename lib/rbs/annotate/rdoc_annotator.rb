@@ -11,7 +11,7 @@ module RBS
         @include_filename = true
       end
 
-      def annotate_file(path)
+      def annotate_file(path, preserve:)
         content = path.read()
 
         decls = Parser.parse_signature(content)
@@ -19,7 +19,7 @@ module RBS
         annotate_decls(decls)
 
         path.open("w") do |io|
-          Writer.new(out: io).write(decls)
+          Writer.new(out: io).preserve!(preserve: preserve).write(decls)
         end
       end
 
