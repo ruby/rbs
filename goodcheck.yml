@@ -1,15 +1,4 @@
 rules:
-  - id: rbs.no_mark
-    pattern: 💪👽🚨
-    message: Do you forget to delete `arglists` section?
-    glob:
-      - "{core,stdlib}/**/*.rbs"
-    fail:
-      - |
-        # arglists 💪👽🚨 << Delete this section
-        #    File.absolute_path?(file_name)  ->  true or false
-        #
-
   - id: rbs.no_arg
     pattern:
       regexp: arg\d+
