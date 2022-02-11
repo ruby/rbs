@@ -34,6 +34,15 @@ rule ".c" => ".re" do |t|
   puts "⚠️⚠️⚠️ #{t.name} is older than #{t.source}. You may need to run `rake lexer` ⚠️⚠️⚠️"
 end
 
+task :annotate do
+  sh "rbs annotate core stdlib"
+end
+
+task :confirm_annotation do
+  puts "Testing if RBS docs are updated with respect to RDoc"
+  sh "git diff --exit-code core stdlib"
+end
+
 task :compile => "ext/rbs_extension/lexer.c"
 
 task :test_doc do
@@ -126,7 +135,7 @@ namespace :generate do
       def to_s
         @type_name.to_s
       end
-      
+
       def absolute_type_name
         @absolute_type_name ||= @type_name.absolute!
       end
@@ -223,7 +232,7 @@ namespace :generate do
           :~   => 'tilde'
         }.fetch(method_name, method_name)
       end
-      
+
       def class_methods
         @class_methods ||= RBS::DefinitionBuilder.new(env: env).build_singleton(target.absolute_type_name).methods.select {|_, definition|
           definition.implemented_in == target.absolute_type_name

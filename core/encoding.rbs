@@ -894,6 +894,7 @@ class Encoding::Converter < Object
                       | :destination_buffer_full
                       | :source_buffer_empty
                       | :finished
+
   # <!--
   #   rdoc-file=transcode.c
   #   - Encoding::Converter.asciicompat_encoding(string) -> encoding or nil
