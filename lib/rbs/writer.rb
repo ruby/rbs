@@ -6,6 +6,16 @@ module RBS
     def initialize(out:)
       @out = out
       @indentation = []
+      @preserve = false
+    end
+
+    def preserve?
+      @preserve
+    end
+
+    def preserve!(preserve: true)
+      @preserve = preserve
+      self
     end
 
     def indent(size = 2)
@@ -119,7 +129,9 @@ module RBS
       when AST::Declarations::Alias
         write_comment decl.comment
         write_annotation decl.annotations
-        puts "type #{name_and_params(decl.name, decl.type_params)} = #{decl.type}"
+        write_loc_source(decl) {
+          puts "type #{name_and_params(decl.name, decl.type_params)} = #{decl.type}"
+        }
 
       when AST::Declarations::Interface
         write_comment decl.comment
@@ -160,6 +172,16 @@ module RBS
         else
           "#{name}[#{args.join(", ")}]"
         end
+      end
+    end
+
+    def put_lines(lines, leading_spaces:)
+      lines.each_line.with_index do |line, index|
+        line.chomp!
+        line.rstrip!
+        line.sub!(/\A( {,#{leading_spaces}})/, '') if index > 0
+
+        puts line
       end
     end
 
@@ -211,7 +233,7 @@ module RBS
       when AST::Members::MethodDefinition
         write_comment member.comment
         write_annotation member.annotations
-        write_def member
+        write_loc_source(member) { write_def member }
       else
         write_decl member
       end
@@ -227,6 +249,14 @@ module RBS
         s
       else
         "`#{s}`"
+      end
+    end
+
+    def write_loc_source(located)
+      if preserve? && loc = located.location
+        put_lines(loc.source, leading_spaces: loc.start_column)
+      else
+        yield
       end
     end
 
