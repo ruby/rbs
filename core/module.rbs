@@ -40,7 +40,7 @@ class Module < Object
   #
   # The second form calls the instance method `constants`.
   #
-  def self.constants: () -> ::Array[Integer]
+  def self.constants: () -> ::Array[Symbol]
 
   # <!--
   #   rdoc-file=eval.c
@@ -255,7 +255,7 @@ class Module < Object
   #     end
   #     Mod.instance_methods.sort   #=> [:one, :one=, :two, :two=]
   #
-  def attr_accessor: (*Symbol | String arg0) -> NilClass
+  def attr_accessor: (*Symbol | String arg0) -> Array[Symbol]
 
   # <!--
   #   rdoc-file=object.c
@@ -269,7 +269,7 @@ class Module < Object
   # in turn. String arguments are converted to symbols. Returns an array of
   # defined method names as symbols.
   #
-  def attr_reader: (*Symbol | String arg0) -> NilClass
+  def attr_reader: (*Symbol | String arg0) -> Array[Symbol]
 
   # <!--
   #   rdoc-file=object.c
@@ -280,7 +280,7 @@ class Module < Object
   # *symbol*`.id2name`. String arguments are converted to symbols. Returns an
   # array of defined method names as symbols.
   #
-  def attr_writer: (*Symbol | String arg0) -> NilClass
+  def attr_writer: (*Symbol | String arg0) -> Array[Symbol]
 
   # <!--
   #   rdoc-file=load.c
@@ -295,7 +295,7 @@ class Module < Object
   #     A.autoload(:B, "b")
   #     A::B.doit            # autoloads "b"
   #
-  def autoload: (Symbol _module, String filename) -> NilClass
+  def autoload: (Symbol _module, String filename) -> nil
 
   # <!--
   #   rdoc-file=load.c
@@ -363,7 +363,7 @@ class Module < Object
   #
   #     Hello there!
   #
-  def class_exec: (*untyped args) { () -> untyped } -> untyped
+  def class_exec: [U] (*untyped args) { () -> U } -> U
 
   # <!--
   #   rdoc-file=object.c
@@ -414,7 +414,7 @@ class Module < Object
   #     Fred.class_variable_set(:@@foo, 101)     #=> 101
   #     Fred.new.foo                             #=> 101
   #
-  def class_variable_set: (Symbol | String arg0, untyped arg1) -> untyped
+  def class_variable_set: [T] (Symbol | String arg0, T arg1) -> T
 
   # <!--
   #   rdoc-file=object.c
@@ -565,7 +565,7 @@ class Module < Object
   #
   #     Object.const_set('foobar', 42) #=> NameError: wrong constant name foobar
   #
-  def const_set: (Symbol | String arg0, untyped arg1) -> untyped
+  def const_set: [T] (Symbol | String arg0, T arg1) -> T
 
   # <!--
   #   rdoc-file=object.c
@@ -706,7 +706,7 @@ class Module < Object
   #     Picky added to Array
   #     Can't add Picky to a String
   #
-  def extend_object: (untyped arg0) -> untyped
+  def extend_object: [T] (T arg0) -> T
 
   # <!--
   #   rdoc-file=object.c
