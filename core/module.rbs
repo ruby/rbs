@@ -782,7 +782,7 @@ class Module < Object
   #     end
   #      # => prints "A included in Enumerable"
   #
-  def included: (Module othermod) -> untyped
+  def included: (Module othermod) -> void
 
   # <!--
   #   rdoc-file=object.c
@@ -832,8 +832,8 @@ class Module < Object
   # Assign the module to a constant (name starting uppercase) if you want to treat
   # it like a regular module.
   #
-  def initialize: () -> Object
-                | () { (Module arg0) -> untyped } -> void
+  def initialize: () -> void
+                | () { (Module arg0) -> void } -> void
 
   # <!--
   #   rdoc-file=proc.c
