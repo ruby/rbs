@@ -1067,8 +1067,8 @@ class Module < Object
   #     c.call_one  #=> "This is the new one"
   #
   def module_function: () -> nil
-                     | (Symbol | String method_name) -> Symbol
-                     | (Symbol | String, Symbol | String, *Symbol | String method_name) -> Array[Symbol]
+                     | (Symbol | string method_name) -> (Symbol | string)
+                     | (Symbol | string, Symbol | string, *Symbol | string method_name) -> Array[Symbol | string]
 
   # <!--
   #   rdoc-file=object.c
@@ -1386,7 +1386,7 @@ class Module < Object
   #
   # Returns a module, where refined methods are defined.
   #
-  def refine: (Class arg0) { (untyped arg0) -> untyped } -> self
+  def refine: (Class arg0) { () -> void } -> self
 
   # <!--
   #   rdoc-file=object.c

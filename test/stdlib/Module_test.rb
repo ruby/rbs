@@ -85,6 +85,8 @@ class ModuleInstanceTest < Test::Unit::TestCase
       def foo; end
 
       def bar; end
+
+      def baz; end
     end
 
     assert_send_type(
@@ -107,6 +109,10 @@ class ModuleInstanceTest < Test::Unit::TestCase
     assert_send_type(
       "(Symbol, String) -> Array[Symbol | String]",
       mod, :private, :foo, "bar"
+    )
+    assert_send_type(
+      "(Symbol, String, Symbol) -> [Symbol, String, Symbol]",
+      mod, :private, :foo, "bar", :baz
     )
   end
 
