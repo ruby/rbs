@@ -27,7 +27,7 @@ module RBS
     alias eql? ==
 
     def hash
-      self.class.hash ^ namespace.hash ^ name.hash
+      namespace.hash ^ name.hash
     end
 
     def to_s

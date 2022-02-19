@@ -59,7 +59,7 @@ module RBS
     alias eql? ==
 
     def hash
-      self.class.hash ^ path.hash ^ absolute?.hash
+      path.hash ^ absolute?.hash
     end
 
     def split
