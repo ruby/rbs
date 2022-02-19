@@ -1,890 +1,846 @@
-# [`Net::IMAP`](https://docs.ruby-lang.org/en/2.7.0/Net/IMAP.html) implements
-# Internet Message Access Protocol
-# ([`IMAP`](https://docs.ruby-lang.org/en/2.7.0/Net/IMAP.html)) client
-# functionality. The protocol is described in [IMAP].
-#
-# ## [`IMAP`](https://docs.ruby-lang.org/en/2.7.0/Net/IMAP.html) Overview
-#
-# An [`IMAP`](https://docs.ruby-lang.org/en/2.7.0/Net/IMAP.html) client connects
-# to a server, and then authenticates itself using either
-# [`authenticate()`](https://docs.ruby-lang.org/en/2.7.0/Net/IMAP.html#method-i-authenticate)
-# or
-# [`login()`](https://docs.ruby-lang.org/en/2.7.0/Net/IMAP.html#method-i-login).
-# Having authenticated itself, there is a range of commands available to it.
-# Most work with mailboxes, which may be arranged in an hierarchical namespace,
-# and each of which contains zero or more messages. How this is implemented on
-# the server is implementation-dependent; on a UNIX server, it will frequently
-# be implemented as files in mailbox format within a hierarchy of directories.
-#
-# To work on the messages within a mailbox, the client must first select that
-# mailbox, using either
-# [`select()`](https://docs.ruby-lang.org/en/2.7.0/Net/IMAP.html#method-i-select)
-# or (for read-only access)
-# [`examine()`](https://docs.ruby-lang.org/en/2.7.0/Net/IMAP.html#method-i-examine).
-# Once the client has successfully selected a mailbox, they enter *selected*
-# state, and that mailbox becomes the *current* mailbox, on which mail-item
-# related commands implicitly operate.
-#
-# Messages have two sorts of identifiers: message sequence numbers and UIDs.
-#
-# Message sequence numbers number messages within a mailbox from 1 up to the
-# number of items in the mailbox. If a new message arrives during a session, it
-# receives a sequence number equal to the new size of the mailbox. If messages
-# are expunged from the mailbox, remaining messages have their sequence numbers
-# "shuffled down" to fill the gaps.
-#
-# UIDs, on the other hand, are permanently guaranteed not to identify another
-# message within the same mailbox, even if the existing message is deleted. UIDs
-# are required to be assigned in ascending (but not necessarily sequential)
-# order within a mailbox; this means that if a non-IMAP client rearranges the
-# order of mailitems within a mailbox, the UIDs have to be reassigned. An
-# [`IMAP`](https://docs.ruby-lang.org/en/2.7.0/Net/IMAP.html) client thus cannot
-# rearrange message orders.
-#
-# ## Examples of Usage
-#
-# ### List sender and subject of all recent messages in the default mailbox
-#
-# ```ruby
-# imap = Net::IMAP.new('mail.example.com')
-# imap.authenticate('LOGIN', 'joe_user', 'joes_password')
-# imap.examine('INBOX')
-# imap.search(["RECENT"]).each do |message_id|
-#   envelope = imap.fetch(message_id, "ENVELOPE")[0].attr["ENVELOPE"]
-#   puts "#{envelope.from[0].name}: \t#{envelope.subject}"
-# end
-# ```
-#
-# ### Move all messages from April 2003 from "Mail/sent-mail" to "Mail/sent-apr03"
-#
-# ```ruby
-# imap = Net::IMAP.new('mail.example.com')
-# imap.authenticate('LOGIN', 'joe_user', 'joes_password')
-# imap.select('Mail/sent-mail')
-# if not imap.list('Mail/', 'sent-apr03')
-#   imap.create('Mail/sent-apr03')
-# end
-# imap.search(["BEFORE", "30-Apr-2003", "SINCE", "1-Apr-2003"]).each do |message_id|
-#   imap.copy(message_id, "Mail/sent-apr03")
-#   imap.store(message_id, "+FLAGS", [:Deleted])
-# end
-# imap.expunge
-# ```
-#
-# ## [`Thread`](https://docs.ruby-lang.org/en/2.7.0/Thread.html) Safety
-#
-# [`Net::IMAP`](https://docs.ruby-lang.org/en/2.7.0/Net/IMAP.html) supports
-# concurrent threads. For example,
-#
-# ```ruby
-# imap = Net::IMAP.new("imap.foo.net", "imap2")
-# imap.authenticate("cram-md5", "bar", "password")
-# imap.select("inbox")
-# fetch_thread = Thread.start { imap.fetch(1..-1, "UID") }
-# search_result = imap.search(["BODY", "hello"])
-# fetch_result = fetch_thread.value
-# imap.disconnect
-# ```
-#
-# This script invokes the FETCH command and the SEARCH command concurrently.
-#
-# ## Errors
-#
-# An [`IMAP`](https://docs.ruby-lang.org/en/2.7.0/Net/IMAP.html) server can send
-# three different types of responses to indicate failure:
-#
-# NO
-# :   the attempted command could not be successfully completed. For instance,
-#     the username/password used for logging in are incorrect; the selected
-#     mailbox does not exist; etc.
-#
-# BAD
-# :   the request from the client does not follow the server's understanding of
-#     the [`IMAP`](https://docs.ruby-lang.org/en/2.7.0/Net/IMAP.html) protocol.
-#     This includes attempting commands from the wrong client state; for
-#     instance, attempting to perform a SEARCH command without having SELECTed a
-#     current mailbox. It can also signal an internal server failure (such as a
-#     disk crash) has occurred.
-#
-# BYE
-# :   the server is saying goodbye. This can be part of a normal logout
-#     sequence, and can be used as part of a login sequence to indicate that the
-#     server is (for some reason) unwilling to accept your connection. As a
-#     response to any other command, it indicates either that the server is
-#     shutting down, or that the server is timing out the client connection due
-#     to inactivity.
-#
-#
-# These three error response are represented by the errors
-# [`Net::IMAP::NoResponseError`](https://docs.ruby-lang.org/en/2.7.0/Net/IMAP/NoResponseError.html),
-# [`Net::IMAP::BadResponseError`](https://docs.ruby-lang.org/en/2.7.0/Net/IMAP/BadResponseError.html),
-# and
-# [`Net::IMAP::ByeResponseError`](https://docs.ruby-lang.org/en/2.7.0/Net/IMAP/ByeResponseError.html),
-# all of which are subclasses of
-# [`Net::IMAP::ResponseError`](https://docs.ruby-lang.org/en/2.7.0/Net/IMAP/ResponseError.html).
-# Essentially, all methods that involve sending a request to the server can
-# generate one of these errors. Only the most pertinent instances have been
-# documented below.
-#
-# Because the [`IMAP`](https://docs.ruby-lang.org/en/2.7.0/Net/IMAP.html) class
-# uses Sockets for communication, its methods are also susceptible to the
-# various errors that can occur when working with sockets. These are generally
-# represented as [`Errno`](https://docs.ruby-lang.org/en/2.7.0/Errno.html)
-# errors. For instance, any method that involves sending a request to the server
-# and/or receiving a response from it could raise an Errno::EPIPE error if the
-# network connection unexpectedly goes down. See the socket(7), ip(7), tcp(7),
-# socket(2), connect(2), and associated man pages.
-#
-# Finally, a
-# [`Net::IMAP::DataFormatError`](https://docs.ruby-lang.org/en/2.7.0/Net/IMAP/DataFormatError.html)
-# is thrown if low-level data is found to be in an incorrect format (for
-# instance, when converting between UTF-8 and UTF-16), and
-# [`Net::IMAP::ResponseParseError`](https://docs.ruby-lang.org/en/2.7.0/Net/IMAP/ResponseParseError.html)
-# is thrown if a server response is non-parseable.
-#
-# ## References
-#
-#     1.  Crispin, "INTERNET MESSAGE ACCESS PROTOCOL - VERSION 4rev1",
-#
-#     RFC 2060, December 1996. (Note: since obsoleted by RFC 3501)
-#
-# [LANGUAGE-TAGS]
-# :   Alvestrand, H., "Tags for the Identification of Languages", RFC 1766,
-#     March 1995.
-#
-# [MD5]
-# :   Myers, J., and M. Rose, "The Content-MD5 Header Field", RFC 1864, October
-#     1995.
-#
-# [MIME-IMB]
-# :   Freed, N., and N. Borenstein, "MIME (Multipurpose Internet Mail
-#     Extensions) Part One: Format of Internet Message Bodies", RFC 2045,
-#     November 1996.
-#
-# [RFC-822]
-# :   Crocker, D., "Standard for the Format of ARPA Internet Text Messages", STD
-#     11, RFC 822, University of Delaware, August 1982.
-#
-# [RFC-2087]
-# :   Myers, J., "IMAP4 QUOTA extension", RFC 2087, January 1997.
-#
-# [RFC-2086]
-# :   Myers, J., "IMAP4 [`ACL`](https://docs.ruby-lang.org/en/2.7.0/ACL.html)
-#     extension", RFC 2086, January 1997.
-#
-# [RFC-2195]
-# :   Klensin, J., Catoe, R., and Krumviede, P., "IMAP/POP AUTHorize Extension
-#     for Simple Challenge/Response", RFC 2195, September 1997.
-#
-# [SORT-THREAD-EXT]
-# :   Crispin, M., "INTERNET MESSAGE ACCESS PROTOCOL - SORT and THREAD
-#     Extensions", draft-ietf-imapext-sort, May 2003.
-#
-# [OSSL]
-# :   http://www.openssl.org
-#
-# [RSSL]
-# :   http://savannah.gnu.org/projects/rubypki
-#
-# [UTF7]
-# :   Goldsmith, D. and Davis, M., "UTF-7: A Mail-Safe Transformation Format of
-#     Unicode", RFC 2152, May 1997.
-class Net::IMAP < Net::Protocol
-  include ::SSL
-
-  include ::OpenSSL
-
-  include ::MonitorMixin
-end
-
-Net::IMAP::ANSWERED: untyped
-
-Net::IMAP::CRLF: untyped
-
-Net::IMAP::DATE_MONTH: untyped
-
-Net::IMAP::DELETED: untyped
-
-Net::IMAP::DRAFT: untyped
-
-Net::IMAP::FLAGGED: untyped
-
-Net::IMAP::MARKED: untyped
-
-Net::IMAP::NOINFERIORS: untyped
-
-Net::IMAP::NOSELECT: untyped
-
-Net::IMAP::PORT: untyped
-
-Net::IMAP::RECENT: untyped
-
-Net::IMAP::SEEN: untyped
-
-Net::IMAP::SSL_PORT: untyped
-
-Net::IMAP::UNMARKED: untyped
-
-# [`Net::IMAP::Address`](https://docs.ruby-lang.org/en/2.7.0/Net/IMAP.html#Address)
-# represents electronic mail addresses.
-#
-# #### Fields:
-#
-# name
-# :   Returns the phrase from [RFC-822] mailbox.
-#
-# route
-# :   Returns the route from [RFC-822] route-addr.
-#
-# mailbox
-# :   nil indicates end of [RFC-822] group. If non-nil and host is nil, returns
-#     [RFC-822] group name. Otherwise, returns [RFC-822] local-part.
-#
-# host
-# :   nil indicates [RFC-822] group syntax. Otherwise, returns [RFC-822] domain
-#     name.
-class Net::IMAP::Address < Struct
-end
-
-class Net::IMAP::Atom
-end
-
-# [`Error`](https://docs.ruby-lang.org/en/2.7.0/Error.html) raised upon a "BAD"
-# response from the server, indicating that the client command violated the
-# [`IMAP`](https://docs.ruby-lang.org/en/2.7.0/Net/IMAP.html) protocol, or an
-# internal server failure has occurred.
-class Net::IMAP::BadResponseError < Net::IMAP::ResponseError
-end
-
-# [`Net::IMAP::BodyTypeAttachment`](https://docs.ruby-lang.org/en/2.7.0/Net/IMAP/BodyTypeAttachment.html)
-# represents attachment body structures of messages.
-#
-# #### Fields:
-#
-# media\_type
-# :   Returns the content media type name.
-#
-# subtype
-# :   Returns `nil`.
-#
-# param
-# :   Returns a hash that represents parameters.
-#
-# multipart?
-# :   Returns false.
-class Net::IMAP::BodyTypeAttachment < Struct
-end
-
-# [`Net::IMAP::BodyTypeBasic`](https://docs.ruby-lang.org/en/2.7.0/Net/IMAP/BodyTypeBasic.html)
-# represents basic body structures of messages.
-#
-# #### Fields:
-#
-# media\_type
-# :   Returns the content media type name as defined in [MIME-IMB].
-#
-# subtype
-# :   Returns the content subtype name as defined in [MIME-IMB].
-#
-# param
-# :   Returns a hash that represents parameters as defined in [MIME-IMB].
-#
-# content\_id
-# :   Returns a string giving the content id as defined in [MIME-IMB].
-#
-# description
-# :   Returns a string giving the content description as defined in [MIME-IMB].
-#
-# encoding
-# :   Returns a string giving the content transfer encoding as defined in
-#     [MIME-IMB].
-#
-# size
-# :   Returns a number giving the size of the body in octets.
-#
-# md5
-# :   Returns a string giving the body MD5 value as defined in [MD5].
-#
-# disposition
-# :   Returns a Net::IMAP::ContentDisposition object giving the content
-#     disposition.
-#
-# language
-# :   Returns a string or an array of strings giving the body language value as
-#     defined in [LANGUAGE-TAGS].
-#
-# extension
-# :   Returns extension data.
-#
-# multipart?
-# :   Returns false.
-class Net::IMAP::BodyTypeBasic < Struct
-end
-
-class Net::IMAP::BodyTypeExtension < Struct
-end
-
-# [`Net::IMAP::BodyTypeMessage`](https://docs.ruby-lang.org/en/2.7.0/Net/IMAP/BodyTypeMessage.html)
-# represents MESSAGE/RFC822 body structures of messages.
-#
-# #### Fields:
-#
-# envelope
-# :   Returns a Net::IMAP::Envelope giving the envelope structure.
-#
-# body
-# :   Returns an object giving the body structure.
-#
-#
-# And
-# [`Net::IMAP::BodyTypeMessage`](https://docs.ruby-lang.org/en/2.7.0/Net/IMAP/BodyTypeMessage.html)
-# has all methods of
-# [`Net::IMAP::BodyTypeText`](https://docs.ruby-lang.org/en/2.7.0/Net/IMAP/BodyTypeText.html).
-class Net::IMAP::BodyTypeMessage < Struct
-end
-
-# [`Net::IMAP::BodyTypeMultipart`](https://docs.ruby-lang.org/en/2.7.0/Net/IMAP/BodyTypeMultipart.html)
-# represents multipart body structures of messages.
-#
-# #### Fields:
-#
-# media\_type
-# :   Returns the content media type name as defined in [MIME-IMB].
-#
-# subtype
-# :   Returns the content subtype name as defined in [MIME-IMB].
-#
-# parts
-# :   Returns multiple parts.
-#
-# param
-# :   Returns a hash that represents parameters as defined in [MIME-IMB].
-#
-# disposition
-# :   Returns a Net::IMAP::ContentDisposition object giving the content
-#     disposition.
-#
-# language
-# :   Returns a string or an array of strings giving the body language value as
-#     defined in [LANGUAGE-TAGS].
-#
-# extension
-# :   Returns extension data.
-#
-# multipart?
-# :   Returns true.
-class Net::IMAP::BodyTypeMultipart < Struct
-end
-
-# [`Net::IMAP::BodyTypeText`](https://docs.ruby-lang.org/en/2.7.0/Net/IMAP/BodyTypeText.html)
-# represents TEXT body structures of messages.
-#
-# #### Fields:
-#
-# lines
-# :   Returns the size of the body in text lines.
-#
-#
-# And
-# [`Net::IMAP::BodyTypeText`](https://docs.ruby-lang.org/en/2.7.0/Net/IMAP/BodyTypeText.html)
-# has all fields of
-# [`Net::IMAP::BodyTypeBasic`](https://docs.ruby-lang.org/en/2.7.0/Net/IMAP/BodyTypeBasic.html).
-class Net::IMAP::BodyTypeText < Struct
-end
-
-# [`Error`](https://docs.ruby-lang.org/en/2.7.0/Error.html) raised upon a "BYE"
-# response from the server, indicating that the client is not being allowed to
-# login, or has been timed out due to inactivity.
-class Net::IMAP::ByeResponseError < Net::IMAP::ResponseError
-end
-
-# [`Net::IMAP::ContentDisposition`](https://docs.ruby-lang.org/en/2.7.0/Net/IMAP.html#ContentDisposition)
-# represents Content-Disposition fields.
-#
-# #### Fields:
-#
-# dsp\_type
-# :   Returns the disposition type.
-#
-# param
-# :   Returns a hash that represents parameters of the Content-Disposition
-#     field.
-class Net::IMAP::ContentDisposition < Struct
-end
-
-# [`Net::IMAP::ContinuationRequest`](https://docs.ruby-lang.org/en/2.7.0/Net/IMAP.html#ContinuationRequest)
-# represents command continuation requests.
-#
-# The command continuation request response is indicated by a "+" token instead
-# of a tag. This form of response indicates that the server is ready to accept
-# the continuation of a command from the client. The remainder of this response
-# is a line of text.
-#
-# ```
-# continue_req    ::= "+" SPACE (resp_text / base64)
-# ```
-#
-# #### Fields:
-#
-# data
-# :   Returns the data
-#     ([`Net::IMAP::ResponseText`](https://docs.ruby-lang.org/en/2.7.0/Net/IMAP.html#ResponseText)).
-#
-# raw\_data
-# :   Returns the raw data string.
-class Net::IMAP::ContinuationRequest < Struct
-end
-
-# Authenticator for the "CRAM-MD5" authentication type. See authenticate().
-class Net::IMAP::CramMD5Authenticator
-end
-
-# [`Error`](https://docs.ruby-lang.org/en/2.7.0/Error.html) raised when data is
-# in the incorrect format.
-class Net::IMAP::DataFormatError < Net::IMAP::Error
-end
-
-# Authenticator for the "DIGEST-MD5" authentication type. See authenticate().
-class Net::IMAP::DigestMD5Authenticator
-end
-
-Net::IMAP::DigestMD5Authenticator::STAGE_ONE: untyped
-
-Net::IMAP::DigestMD5Authenticator::STAGE_TWO: untyped
-
-# [`Net::IMAP::Envelope`](https://docs.ruby-lang.org/en/2.7.0/Net/IMAP.html#Envelope)
-# represents envelope structures of messages.
-#
-# #### Fields:
-#
-# date
-# :   Returns a string that represents the date.
-#
-# subject
-# :   Returns a string that represents the subject.
-#
-# from
-# :   Returns an array of
-#     [`Net::IMAP::Address`](https://docs.ruby-lang.org/en/2.7.0/Net/IMAP.html#Address)
-#     that represents the from.
-#
-# sender
-# :   Returns an array of
-#     [`Net::IMAP::Address`](https://docs.ruby-lang.org/en/2.7.0/Net/IMAP.html#Address)
-#     that represents the sender.
-#
-# reply\_to
-# :   Returns an array of
-#     [`Net::IMAP::Address`](https://docs.ruby-lang.org/en/2.7.0/Net/IMAP.html#Address)
-#     that represents the reply-to.
-#
-# to
-# :   Returns an array of
-#     [`Net::IMAP::Address`](https://docs.ruby-lang.org/en/2.7.0/Net/IMAP.html#Address)
-#     that represents the to.
-#
-# cc
-# :   Returns an array of
-#     [`Net::IMAP::Address`](https://docs.ruby-lang.org/en/2.7.0/Net/IMAP.html#Address)
-#     that represents the cc.
-#
-# bcc
-# :   Returns an array of
-#     [`Net::IMAP::Address`](https://docs.ruby-lang.org/en/2.7.0/Net/IMAP.html#Address)
-#     that represents the bcc.
-#
-# in\_reply\_to
-# :   Returns a string that represents the in-reply-to.
-#
-# message\_id
-# :   Returns a string that represents the message-id.
-class Net::IMAP::Envelope < Struct
-end
-
-# Superclass of [`IMAP`](https://docs.ruby-lang.org/en/2.7.0/Net/IMAP.html)
-# errors.
-class Net::IMAP::Error < StandardError
-end
-
-# [`Net::IMAP::FetchData`](https://docs.ruby-lang.org/en/2.7.0/Net/IMAP.html#FetchData)
-# represents the contents of the FETCH response.
-#
-# #### Fields:
-#
-# seqno
-# :   Returns the message sequence number. (Note: not the unique identifier,
-#     even for the UID command response.)
-#
-# attr
-# :   Returns a hash. Each key is a data item name, and each value is its value.
-#
-#     The current data items are:
-#
-#     BODY
-# :       A form of BODYSTRUCTURE without extension data.
-#     [BODY](<section>)<<origin\_octet>>
-# :       A string expressing the body contents of the specified section.
-#     BODYSTRUCTURE
-# :       An object that describes the [MIME-IMB] body structure of a message.
-#         See
-#         [`Net::IMAP::BodyTypeBasic`](https://docs.ruby-lang.org/en/2.7.0/Net/IMAP/BodyTypeBasic.html),
-#         [`Net::IMAP::BodyTypeText`](https://docs.ruby-lang.org/en/2.7.0/Net/IMAP/BodyTypeText.html),
-#         [`Net::IMAP::BodyTypeMessage`](https://docs.ruby-lang.org/en/2.7.0/Net/IMAP/BodyTypeMessage.html),
-#         [`Net::IMAP::BodyTypeMultipart`](https://docs.ruby-lang.org/en/2.7.0/Net/IMAP/BodyTypeMultipart.html).
-#     ENVELOPE
-# :       A
-#         [`Net::IMAP::Envelope`](https://docs.ruby-lang.org/en/2.7.0/Net/IMAP.html#Envelope)
-#         object that describes the envelope structure of a message.
-#     FLAGS
-# :       A array of flag symbols that are set for this message. Flag symbols
-#         are capitalized by
-#         [`String#capitalize`](https://docs.ruby-lang.org/en/2.7.0/String.html#method-i-capitalize).
-#     INTERNALDATE
-# :       A string representing the internal date of the message.
-#     RFC822
-# :       Equivalent to BODY[].
-#     RFC822.HEADER
-# :       Equivalent to [BODY.PEEK](HEADER).
-#     RFC822.SIZE
-# :       A number expressing the [RFC-822] size of the message.
-#     RFC822.TEXT
-# :       Equivalent to [BODY](TEXT).
-#     UID
-# :       A number expressing the unique identifier of the message.
-class Net::IMAP::FetchData < Struct
-end
-
-# [`Error`](https://docs.ruby-lang.org/en/2.7.0/Error.html) raised when too many
-# flags are interned to symbols.
-class Net::IMAP::FlagCountError < Net::IMAP::Error
-end
-
-class Net::IMAP::Literal
-end
-
-# Authenticator for the "LOGIN" authentication type. See authenticate().
-class Net::IMAP::LoginAuthenticator
-end
-
-Net::IMAP::LoginAuthenticator::STATE_PASSWORD: untyped
-
-Net::IMAP::LoginAuthenticator::STATE_USER: untyped
-
-# [`Net::IMAP::MailboxACLItem`](https://docs.ruby-lang.org/en/2.7.0/Net/IMAP.html#MailboxACLItem)
-# represents the response from GETACL.
-#
-# ```
-# acl_data        ::= "ACL" SPACE mailbox *(SPACE identifier SPACE rights)
-#
-# identifier      ::= astring
-#
-# rights          ::= astring
-# ```
-#
-# #### Fields:
-#
-# user
-# :   Login name that has certain rights to the mailbox that was specified with
-#     the getacl command.
-#
-# rights
-# :   The access rights the indicated user has to the mailbox.
-class Net::IMAP::MailboxACLItem < Struct
-end
-
-# [`Net::IMAP::MailboxList`](https://docs.ruby-lang.org/en/2.7.0/Net/IMAP.html#MailboxList)
-# represents contents of the LIST response.
-#
-# ```
-# mailbox_list    ::= "(" #("\Marked" / "\Noinferiors" /
-#                     "\Noselect" / "\Unmarked" / flag_extension) ")"
-#                     SPACE (<"> QUOTED_CHAR <"> / nil) SPACE mailbox
-# ```
-#
-# #### Fields:
-#
-# attr
-# :   Returns the name attributes. Each name attribute is a symbol capitalized
-#     by
-#     [`String#capitalize`](https://docs.ruby-lang.org/en/2.7.0/String.html#method-i-capitalize),
-#     such as :Noselect (not :NoSelect).
-#
-# delim
-# :   Returns the hierarchy delimiter.
-#
-# name
-# :   Returns the mailbox name.
-class Net::IMAP::MailboxList < Struct
-end
-
-# [`Net::IMAP::MailboxQuota`](https://docs.ruby-lang.org/en/2.7.0/Net/IMAP.html#MailboxQuota)
-# represents contents of GETQUOTA response. This object can also be a response
-# to GETQUOTAROOT. In the syntax specification below, the delimiter used with
-# the "#" construct is a single space (SPACE).
-#
-# ```
-# quota_list      ::= "(" #quota_resource ")"
-#
-# quota_resource  ::= atom SPACE number SPACE number
-#
-# quota_response  ::= "QUOTA" SPACE astring SPACE quota_list
-# ```
-#
-# #### Fields:
-#
-# mailbox
-# :   The mailbox with the associated quota.
-#
-# usage
-# :   Current storage usage of the mailbox.
-#
-# quota
-# :   Quota limit imposed on the mailbox.
-class Net::IMAP::MailboxQuota < Struct
-end
-
-# [`Net::IMAP::MailboxQuotaRoot`](https://docs.ruby-lang.org/en/2.7.0/Net/IMAP.html#MailboxQuotaRoot)
-# represents part of the GETQUOTAROOT response. (GETQUOTAROOT can also return
-# [`Net::IMAP::MailboxQuota`](https://docs.ruby-lang.org/en/2.7.0/Net/IMAP.html#MailboxQuota).)
-#
-# ```
-# quotaroot_response ::= "QUOTAROOT" SPACE astring *(SPACE astring)
-# ```
-#
-# #### Fields:
-#
-# mailbox
-# :   The mailbox with the associated quota.
-#
-# quotaroots
-# :   Zero or more quotaroots that affect the quota on the specified mailbox.
-class Net::IMAP::MailboxQuotaRoot < Struct
-end
-
-class Net::IMAP::MessageSet
-end
-
-# [`Error`](https://docs.ruby-lang.org/en/2.7.0/Error.html) raised upon a "NO"
-# response from the server, indicating that the client command could not be
-# completed successfully.
-class Net::IMAP::NoResponseError < Net::IMAP::ResponseError
-end
-
-# Common validators of number and nz\_number types
-module Net::IMAP::NumValidator
-end
-
-# Authenticator for the "PLAIN" authentication type. See authenticate().
-class Net::IMAP::PlainAuthenticator
-end
-
-class Net::IMAP::QuotedString
-end
-
-class Net::IMAP::RawData
-end
-
-# [`Net::IMAP::ResponseCode`](https://docs.ruby-lang.org/en/2.7.0/Net/IMAP.html#ResponseCode)
-# represents response codes.
-#
-# ```
-# resp_text_code  ::= "ALERT" / "PARSE" /
-#                     "PERMANENTFLAGS" SPACE "(" #(flag / "\*") ")" /
-#                     "READ-ONLY" / "READ-WRITE" / "TRYCREATE" /
-#                     "UIDVALIDITY" SPACE nz_number /
-#                     "UNSEEN" SPACE nz_number /
-#                     atom [SPACE 1*<any TEXT_CHAR except "]">]
-# ```
-#
-# #### Fields:
-#
-# name
-# :   Returns the name, such as "ALERT", "PERMANENTFLAGS", or "UIDVALIDITY".
-#
-# data
-# :   Returns the data, if it exists.
-class Net::IMAP::ResponseCode < Struct
-end
-
-# Superclass of all errors used to encapsulate "fail" responses from the server.
-class Net::IMAP::ResponseError < Net::IMAP::Error
-end
-
-# [`Error`](https://docs.ruby-lang.org/en/2.7.0/Error.html) raised when a
-# response from the server is non-parseable.
-class Net::IMAP::ResponseParseError < Net::IMAP::Error
-end
-
-class Net::IMAP::ResponseParser
-end
-
-Net::IMAP::ResponseParser::ADDRESS_REGEXP: untyped
-
-Net::IMAP::ResponseParser::ATOM_TOKENS: untyped
-
-Net::IMAP::ResponseParser::BEG_REGEXP: untyped
-
-Net::IMAP::ResponseParser::CTEXT_REGEXP: untyped
-
-Net::IMAP::ResponseParser::DATA_REGEXP: untyped
-
-Net::IMAP::ResponseParser::EXPR_BEG: untyped
-
-Net::IMAP::ResponseParser::EXPR_CTEXT: untyped
-
-Net::IMAP::ResponseParser::EXPR_DATA: untyped
-
-Net::IMAP::ResponseParser::EXPR_RTEXT: untyped
-
-Net::IMAP::ResponseParser::EXPR_TEXT: untyped
-
-Net::IMAP::ResponseParser::FLAG_REGEXP: untyped
-
-Net::IMAP::ResponseParser::RTEXT_REGEXP: untyped
-
-Net::IMAP::ResponseParser::STRING_TOKENS: untyped
-
-Net::IMAP::ResponseParser::TEXT_REGEXP: untyped
-
-Net::IMAP::ResponseParser::T_ATOM: untyped
-
-Net::IMAP::ResponseParser::T_BSLASH: untyped
-
-Net::IMAP::ResponseParser::T_CRLF: untyped
-
-Net::IMAP::ResponseParser::T_EOF: untyped
-
-Net::IMAP::ResponseParser::T_LBRA: untyped
-
-Net::IMAP::ResponseParser::T_LITERAL: untyped
-
-Net::IMAP::ResponseParser::T_LPAR: untyped
-
-Net::IMAP::ResponseParser::T_NIL: untyped
-
-Net::IMAP::ResponseParser::T_NUMBER: untyped
-
-Net::IMAP::ResponseParser::T_PERCENT: untyped
-
-Net::IMAP::ResponseParser::T_PLUS: untyped
-
-Net::IMAP::ResponseParser::T_QUOTED: untyped
-
-Net::IMAP::ResponseParser::T_RBRA: untyped
-
-Net::IMAP::ResponseParser::T_RPAR: untyped
-
-Net::IMAP::ResponseParser::T_SPACE: untyped
-
-Net::IMAP::ResponseParser::T_STAR: untyped
-
-Net::IMAP::ResponseParser::T_TEXT: untyped
-
-class Net::IMAP::ResponseParser::Token < Struct
-end
-
-# [`Net::IMAP::ResponseText`](https://docs.ruby-lang.org/en/2.7.0/Net/IMAP.html#ResponseText)
-# represents texts of responses. The text may be prefixed by the response code.
-#
-# ```
-# resp_text       ::= ["[" resp_text_code "]" SPACE] (text_mime2 / text)
-#                     ;; text SHOULD NOT begin with "[" or "="
-# ```
-#
-# #### Fields:
-#
-# code
-# :   Returns the response code. See ((<Net::IMAP::ResponseCode>)).
-#
-# text
-# :   Returns the text.
-class Net::IMAP::ResponseText < Struct
-end
-
-# [`Net::IMAP::StatusData`](https://docs.ruby-lang.org/en/2.7.0/Net/IMAP.html#StatusData)
-# represents the contents of the STATUS response.
-#
-# #### Fields:
-#
-# mailbox
-# :   Returns the mailbox name.
-#
-# attr
-# :   Returns a hash. Each key is one of "MESSAGES", "RECENT", "UIDNEXT",
-#     "UIDVALIDITY", "UNSEEN". Each value is a number.
-class Net::IMAP::StatusData < Struct
-end
-
-# [`Net::IMAP::TaggedResponse`](https://docs.ruby-lang.org/en/2.7.0/Net/IMAP.html#TaggedResponse)
-# represents tagged responses.
-#
-# The server completion result response indicates the success or failure of the
-# operation. It is tagged with the same tag as the client command which began
-# the operation.
-#
-# ```
-# response_tagged ::= tag SPACE resp_cond_state CRLF
-#
-# tag             ::= 1*<any ATOM_CHAR except "+">
-#
-# resp_cond_state ::= ("OK" / "NO" / "BAD") SPACE resp_text
-# ```
-#
-# #### Fields:
-#
-# tag
-# :   Returns the tag.
-#
-# name
-# :   Returns the name, one of "OK", "NO", or "BAD".
-#
-# data
-# :   Returns the data. See ((<Net::IMAP::ResponseText>)).
-#
-# raw\_data
-# :   Returns the raw data string.
-class Net::IMAP::TaggedResponse < Struct
-end
-
-# [`Net::IMAP::ThreadMember`](https://docs.ruby-lang.org/en/2.7.0/Net/IMAP.html#ThreadMember)
-# represents a thread-node returned by
-# [`Net::IMAP#thread`](https://docs.ruby-lang.org/en/2.7.0/Net/IMAP.html#method-i-thread).
-#
-# #### Fields:
-#
-# seqno
-# :   The sequence number of this message.
-#
-# children
-# :   An array of
-#     [`Net::IMAP::ThreadMember`](https://docs.ruby-lang.org/en/2.7.0/Net/IMAP.html#ThreadMember)
-#     objects for mail items that are children of this in the thread.
-class Net::IMAP::ThreadMember < Struct
-end
-
-# [`Net::IMAP::UntaggedResponse`](https://docs.ruby-lang.org/en/2.7.0/Net/IMAP.html#UntaggedResponse)
-# represents untagged responses.
-#
-# [`Data`](https://docs.ruby-lang.org/en/2.7.0/Data.html) transmitted by the
-# server to the client and status responses that do not indicate command
-# completion are prefixed with the token "\*", and are called untagged
-# responses.
-#
-# ```
-# response_data   ::= "*" SPACE (resp_cond_state / resp_cond_bye /
-#                     mailbox_data / message_data / capability_data)
-# ```
-#
-# #### Fields:
-#
-# name
-# :   Returns the name, such as "FLAGS", "LIST", or "FETCH".
-#
-# data
-# :   Returns the data such as an array of flag symbols, a
-#     ((<Net::IMAP::MailboxList>)) object.
-#
-# raw\_data
-# :   Returns the raw data string.
-class Net::IMAP::UntaggedResponse < Struct
+module Net
+  class IMAP < Net::Protocol
+    include OpenSSL::SSL
+
+    include OpenSSL
+
+    include MonitorMixin
+
+    extend Net::IMAP::Authenticators
+
+    def self.debug: () -> untyped
+
+    def self.debug=: (untyped val) -> untyped
+
+    def self.decode_utf7: (untyped s) -> untyped
+
+    alias self.default_imap_port self.default_port
+
+    alias self.default_imaps_port self.default_tls_port
+
+    def self.default_port: () -> untyped
+
+    alias self.default_ssl_port self.default_tls_port
+
+    def self.default_tls_port: () -> untyped
+
+    def self.encode_utf7: (untyped s) -> untyped
+
+    def self.format_date: (untyped time) -> untyped
+
+    def self.format_datetime: (untyped time) -> untyped
+
+    public
+
+    def add_response_handler: (?untyped handler) { (*untyped) -> untyped } -> untyped
+
+    def append: (untyped mailbox, untyped message, ?untyped flags, ?untyped date_time) -> untyped
+
+    def authenticate: (untyped auth_type, *untyped args) -> untyped
+
+    def capability: () -> untyped
+
+    def check: () -> untyped
+
+    def client_thread: () -> untyped
+
+    def client_thread=: (untyped) -> untyped
+
+    def close: () -> untyped
+
+    def copy: (untyped set, untyped mailbox) -> untyped
+
+    def create: (untyped mailbox) -> untyped
+
+    def delete: (untyped mailbox) -> untyped
+
+    def disconnect: () -> untyped
+
+    def disconnected?: () -> untyped
+
+    def examine: (untyped mailbox) -> untyped
+
+    def expunge: () -> untyped
+
+    def fetch: (untyped set, untyped attr, ?untyped mod) -> untyped
+
+    def getacl: (untyped mailbox) -> untyped
+
+    def getquota: (untyped mailbox) -> untyped
+
+    def getquotaroot: (untyped mailbox) -> untyped
+
+    def greeting: () -> untyped
+
+    def id: (?untyped client_id) -> untyped
+
+    def idle: (?untyped timeout) { (*untyped) -> untyped } -> untyped
+
+    def idle_done: () -> untyped
+
+    def idle_response_timeout: () -> untyped
+
+    def list: (untyped refname, untyped mailbox) -> untyped
+
+    def login: (untyped user, untyped password) -> untyped
+
+    def logout: () -> untyped
+
+    def lsub: (untyped refname, untyped mailbox) -> untyped
+
+    def move: (untyped set, untyped mailbox) -> untyped
+
+    def namespace: () -> untyped
+
+    def noop: () -> untyped
+
+    def open_timeout: () -> untyped
+
+    def remove_response_handler: (untyped handler) -> untyped
+
+    def rename: (untyped mailbox, untyped newname) -> untyped
+
+    def response_handlers: () -> untyped
+
+    def responses: () -> untyped
+
+    def search: (untyped keys, ?untyped charset) -> untyped
+
+    def select: (untyped mailbox) -> untyped
+
+    def setacl: (untyped mailbox, untyped user, untyped rights) -> untyped
+
+    def setquota: (untyped mailbox, untyped quota) -> untyped
+
+    def sort: (untyped sort_keys, untyped search_keys, untyped charset) -> untyped
+
+    def starttls: (?untyped options, ?untyped verify) -> untyped
+
+    def status: (untyped mailbox, untyped attr) -> untyped
+
+    def store: (untyped set, untyped attr, untyped flags) -> untyped
+
+    def subscribe: (untyped mailbox) -> untyped
+
+    def thread: (untyped algorithm, untyped search_keys, untyped charset) -> untyped
+
+    def uid_copy: (untyped set, untyped mailbox) -> untyped
+
+    def uid_fetch: (untyped set, untyped attr, ?untyped mod) -> untyped
+
+    def uid_move: (untyped set, untyped mailbox) -> untyped
+
+    def uid_search: (untyped keys, ?untyped charset) -> untyped
+
+    def uid_sort: (untyped sort_keys, untyped search_keys, untyped charset) -> untyped
+
+    def uid_store: (untyped set, untyped attr, untyped flags) -> untyped
+
+    def uid_thread: (untyped algorithm, untyped search_keys, untyped charset) -> untyped
+
+    def unsubscribe: (untyped mailbox) -> untyped
+
+    def xlist: (untyped refname, untyped mailbox) -> untyped
+
+    private
+
+    def copy_internal: (untyped cmd, untyped set, untyped mailbox) -> untyped
+
+    def create_ssl_params: (?untyped certs, ?untyped verify) -> untyped
+
+    def fetch_internal: (untyped cmd, untyped set, untyped attr, ?untyped mod) -> untyped
+
+    def generate_tag: () -> untyped
+
+    def get_response: () -> untyped
+
+    def get_tagged_response: (untyped tag, untyped cmd, ?untyped timeout) -> untyped
+
+    def initialize: (untyped host, ?untyped port_or_options, ?untyped usessl, ?untyped certs, ?untyped verify) -> void
+
+    def normalize_searching_criteria: (untyped keys) -> untyped
+
+    def put_string: (untyped str) -> untyped
+
+    def receive_responses: () -> untyped
+
+    def record_response: (untyped name, untyped data) -> untyped
+
+    def search_internal: (untyped cmd, untyped keys, untyped charset) -> untyped
+
+    def send_command: (untyped cmd, *untyped args) { (*untyped) -> untyped } -> untyped
+
+    def send_data: (untyped data, ?untyped tag) -> untyped
+
+    def send_list_data: (untyped list, ?untyped tag) -> untyped
+
+    def send_literal: (untyped str, ?untyped tag) -> untyped
+
+    def send_number_data: (untyped num) -> untyped
+
+    def send_quoted_string: (untyped str) -> untyped
+
+    def send_string_data: (untyped str, ?untyped tag) -> untyped
+
+    def send_symbol_data: (untyped symbol) -> untyped
+
+    def send_time_data: (untyped time) -> untyped
+
+    def sort_internal: (untyped cmd, untyped sort_keys, untyped search_keys, untyped charset) -> untyped
+
+    def start_tls_session: (?untyped params) -> untyped
+
+    def store_internal: (untyped cmd, untyped set, untyped attr, untyped flags) -> untyped
+
+    def tcp_socket: (untyped host, untyped port) -> untyped
+
+    def thread_internal: (untyped cmd, untyped algorithm, untyped search_keys, untyped charset) -> untyped
+
+    def validate_data: (untyped data) -> untyped
+
+    ALL: Symbol
+
+    ANSWERED: Symbol
+
+    ARCHIVE: Symbol
+
+    CRLF: String
+
+    DATE_MONTH: Array[untyped]
+
+    DELETED: Symbol
+
+    DRAFT: Symbol
+
+    DRAFTS: Symbol
+
+    FLAGGED: Symbol
+
+    HAS_CHILDREN: Symbol
+
+    HAS_NO_CHILDREN: Symbol
+
+    JUNK: Symbol
+
+    MARKED: Symbol
+
+    NOINFERIORS: Symbol
+
+    NONEXISTENT: Symbol
+
+    NOSELECT: Symbol
+
+    PORT: Integer
+
+    RECENT: Symbol
+
+    REMOTE: Symbol
+
+    RESPONSE_ERRORS: Hash[untyped, untyped]
+
+    SEEN: Symbol
+
+    SENT: Symbol
+
+    SSL_PORT: Integer
+
+    SUBSCRIBED: Symbol
+
+    TRASH: Symbol
+
+    UNMARKED: Symbol
+
+    VERSION: String
+  end
+
+  module IMAP
+    class Address
+    end
+
+    class Atom
+      public
+
+      def send_data: (untyped imap, untyped tag) -> untyped
+
+      def validate: () -> untyped
+
+      private
+
+      def initialize: (untyped data) -> void
+    end
+
+    module Authenticators
+      public
+
+      def add_authenticator: (untyped auth_type, untyped authenticator) -> untyped
+
+      def authenticator: (untyped auth_type, *untyped args) -> untyped
+
+      private
+
+      def authenticators: () -> untyped
+    end
+
+    class BadResponseError < Net::IMAP::ResponseError
+    end
+
+    class BodyTypeAttachment
+      public
+
+      def multipart?: () -> untyped
+    end
+
+    class BodyTypeBasic
+      public
+
+      def media_subtype: () -> untyped
+
+      def multipart?: () -> untyped
+    end
+
+    class BodyTypeExtension
+      public
+
+      def multipart?: () -> untyped
+    end
+
+    class BodyTypeMessage
+      public
+
+      def media_subtype: () -> untyped
+
+      def multipart?: () -> untyped
+    end
+
+    class BodyTypeMultipart
+      public
+
+      def media_subtype: () -> untyped
+
+      def multipart?: () -> untyped
+    end
+
+    class BodyTypeText
+      public
+
+      def media_subtype: () -> untyped
+
+      def multipart?: () -> untyped
+    end
+
+    class ByeResponseError < Net::IMAP::ResponseError
+    end
+
+    class ClientID
+      public
+
+      def send_data: (untyped imap, untyped tag) -> untyped
+
+      def validate: () -> untyped
+
+      private
+
+      def format_internal: (untyped client_id) -> untyped
+
+      def initialize: (untyped data) -> void
+
+      def validate_internal: (untyped client_id) -> untyped
+    end
+
+    class ContentDisposition
+    end
+
+    class ContinuationRequest
+    end
+
+    class CramMD5Authenticator
+      public
+
+      def process: (untyped challenge) -> untyped
+
+      private
+
+      def hmac_md5: (untyped text, untyped key) -> untyped
+
+      def initialize: (untyped user, untyped password) -> void
+    end
+
+    class DataFormatError < Net::IMAP::Error
+    end
+
+    class DigestMD5Authenticator
+      public
+
+      def process: (untyped challenge) -> untyped
+
+      private
+
+      def initialize: (untyped user, untyped password, ?untyped authname) -> void
+
+      def nc: (untyped nonce) -> untyped
+
+      def qdval: (untyped k, untyped v) -> untyped
+
+      STAGE_ONE: Symbol
+
+      STAGE_TWO: Symbol
+    end
+
+    class Envelope
+    end
+
+    class Error < StandardError
+    end
+
+    class FetchData
+    end
+
+    class IgnoredResponse
+    end
+
+    class Literal
+      public
+
+      def send_data: (untyped imap, untyped tag) -> untyped
+
+      def validate: () -> untyped
+
+      private
+
+      def initialize: (untyped data) -> void
+    end
+
+    class LoginAuthenticator
+      public
+
+      def process: (untyped data) -> untyped
+
+      private
+
+      def initialize: (untyped user, untyped password) -> void
+
+      STATE_PASSWORD: Symbol
+
+      STATE_USER: Symbol
+    end
+
+    class MailboxACLItem
+    end
+
+    class MailboxList
+    end
+
+    class MailboxQuota
+    end
+
+    class MailboxQuotaRoot
+    end
+
+    class MessageSet
+      public
+
+      def send_data: (untyped imap, untyped tag) -> untyped
+
+      def validate: () -> untyped
+
+      private
+
+      def format_internal: (untyped data) -> untyped
+
+      def initialize: (untyped data) -> void
+
+      def validate_internal: (untyped data) -> untyped
+    end
+
+    class Namespace
+    end
+
+    class Namespaces
+    end
+
+    class NoResponseError < Net::IMAP::ResponseError
+    end
+
+    module NumValidator
+      def self.ensure_mod_sequence_value: (untyped num) -> untyped
+
+      def self.ensure_number: (untyped num) -> untyped
+
+      def self.ensure_nz_number: (untyped num) -> untyped
+
+      def self.valid_mod_sequence_value?: (untyped num) -> untyped
+
+      def self.valid_number?: (untyped num) -> untyped
+
+      def self.valid_nz_number?: (untyped num) -> untyped
+
+      private
+
+      def ensure_mod_sequence_value: (untyped num) -> untyped
+
+      def ensure_number: (untyped num) -> untyped
+
+      def ensure_nz_number: (untyped num) -> untyped
+
+      def valid_mod_sequence_value?: (untyped num) -> untyped
+
+      def valid_number?: (untyped num) -> untyped
+
+      def valid_nz_number?: (untyped num) -> untyped
+    end
+
+    class PlainAuthenticator
+      public
+
+      def process: (untyped data) -> untyped
+
+      private
+
+      def initialize: (untyped username, untyped password, ?authzid: untyped) -> void
+
+      NULL: String
+    end
+
+    class QuotedString
+      public
+
+      def send_data: (untyped imap, untyped tag) -> untyped
+
+      def validate: () -> untyped
+
+      private
+
+      def initialize: (untyped data) -> void
+    end
+
+    class RawData
+      public
+
+      def send_data: (untyped imap, untyped tag) -> untyped
+
+      def validate: () -> untyped
+
+      private
+
+      def initialize: (untyped data) -> void
+    end
+
+    class ResponseCode
+    end
+
+    class ResponseError < Net::IMAP::Error
+      public
+
+      def response: () -> untyped
+
+      def response=: (untyped) -> untyped
+
+      private
+
+      def initialize: (untyped response) -> void
+    end
+
+    class ResponseParseError < Net::IMAP::Error
+    end
+
+    class ResponseParser
+      public
+
+      def parse: (untyped str) -> untyped
+
+      private
+
+      def accept: (*untyped args) -> untyped
+
+      def accept_space: () -> untyped
+
+      def accept_spaces: () -> untyped
+
+      def address: () -> untyped
+
+      def address_list: () -> untyped
+
+      def astring: () -> untyped
+
+      def astring_chars: () -> untyped
+
+      def atom: () -> untyped
+
+      def body: () -> untyped
+
+      def body_data: () -> untyped
+
+      def body_ext_1part: () -> untyped
+
+      def body_ext_mpart: () -> untyped
+
+      def body_extension: () -> untyped
+
+      def body_extensions: () -> untyped
+
+      def body_fields: () -> untyped
+
+      def body_fld_dsp: () -> untyped
+
+      def body_fld_lang: () -> untyped
+
+      def body_fld_param: () -> untyped
+
+      def body_type_1part: () -> untyped
+
+      def body_type_attachment: () -> untyped
+
+      def body_type_basic: () -> untyped
+
+      def body_type_mixed: () -> untyped
+
+      def body_type_mpart: () -> untyped
+
+      def body_type_msg: () -> untyped
+
+      def body_type_text: () -> untyped
+
+      def capability_data: () -> untyped
+
+      def capability_response: () -> untyped
+
+      def case_insensitive_string: () -> untyped
+
+      def charset: () -> untyped
+
+      def charset_list: () -> untyped
+
+      def combine_adjacent: (*untyped tokens) -> untyped
+
+      def continue_req: () -> untyped
+
+      def envelope: () -> untyped
+
+      def envelope_data: () -> untyped
+
+      def flag_list: () -> untyped
+
+      def flags_data: () -> untyped
+
+      def flags_response: () -> untyped
+
+      def format_string: (untyped str) -> untyped
+
+      def getacl_response: () -> untyped
+
+      def getquota_response: () -> untyped
+
+      def getquotaroot_response: () -> untyped
+
+      def id_response: () -> untyped
+
+      def ignored_response: () -> untyped
+
+      def initialize: () -> void
+
+      def internaldate_data: () -> untyped
+
+      def list_response: () -> untyped
+
+      def lookahead: () -> untyped
+
+      def mailbox_list: () -> untyped
+
+      def match: (*untyped args, ?lex_state: untyped) -> untyped
+
+      def media_type: () -> untyped
+
+      def modseq_data: () -> untyped
+
+      def msg_att: (untyped n) -> untyped
+
+      def namespace: () -> untyped
+
+      def namespace_response: () -> untyped
+
+      def namespace_response_extensions: () -> untyped
+
+      def namespaces: () -> untyped
+
+      def next_token: () -> untyped
+
+      def nil_atom: () -> untyped
+
+      def nstring: () -> untyped
+
+      def number: () -> untyped
+
+      def numeric_response: () -> untyped
+
+      def parse_error: (untyped fmt, *untyped args) -> untyped
+
+      def resp_text: () -> untyped
+
+      def resp_text_code: () -> untyped
+
+      def response: () -> untyped
+
+      def response_cond: () -> untyped
+
+      def response_tagged: () -> untyped
+
+      def response_untagged: () -> untyped
+
+      def rfc822_size: () -> untyped
+
+      def rfc822_text: () -> untyped
+
+      def search_response: () -> untyped
+
+      def section: () -> untyped
+
+      def shift_token: () -> untyped
+
+      def status_response: () -> untyped
+
+      def string: () -> untyped
+
+      def string_token?: (untyped token) -> untyped
+
+      def text: () -> untyped
+
+      def text_response: () -> untyped
+
+      def thread_branch: (untyped token) -> untyped
+
+      def thread_response: () -> untyped
+
+      def uid_data: () -> untyped
+
+      ADDRESS_REGEXP: Regexp
+
+      ASTRING_CHARS_TOKENS: Array[untyped]
+
+      ATOM_TOKENS: Array[untyped]
+
+      BEG_REGEXP: Regexp
+
+      CTEXT_REGEXP: Regexp
+
+      DATA_REGEXP: Regexp
+
+      EXPR_BEG: Symbol
+
+      EXPR_CTEXT: Symbol
+
+      EXPR_DATA: Symbol
+
+      EXPR_RTEXT: Symbol
+
+      EXPR_TEXT: Symbol
+
+      FLAG_REGEXP: Regexp
+
+      RTEXT_REGEXP: Regexp
+
+      SPACES_REGEXP: Regexp
+
+      STRING_TOKENS: Array[untyped]
+
+      TEXT_REGEXP: Regexp
+
+      T_ATOM: Symbol
+
+      T_BSLASH: Symbol
+
+      T_CRLF: Symbol
+
+      T_EOF: Symbol
+
+      T_LBRA: Symbol
+
+      T_LITERAL: Symbol
+
+      T_LPAR: Symbol
+
+      T_NIL: Symbol
+
+      T_NUMBER: Symbol
+
+      T_PERCENT: Symbol
+
+      T_PLUS: Symbol
+
+      T_QUOTED: Symbol
+
+      T_RBRA: Symbol
+
+      T_RPAR: Symbol
+
+      T_SPACE: Symbol
+
+      T_STAR: Symbol
+
+      T_TEXT: Symbol
+    end
+
+    module ResponseParser
+      class Token < Struct[untyped]
+        def self.[]: (*untyped) -> untyped
+
+        def self.inspect: () -> untyped
+
+        def self.keyword_init?: () -> untyped
+
+        def self.members: () -> untyped
+
+        def self.new: (*untyped) -> untyped
+
+        public
+
+        def symbol: () -> untyped
+
+        def symbol=: (untyped _) -> untyped
+
+        def value: () -> untyped
+
+        def value=: (untyped _) -> untyped
+      end
+    end
+
+    class ResponseText
+    end
+
+    class StatusData
+    end
+
+    module StringFormatter
+      def self.nstring: (untyped str) -> untyped
+
+      def self.string: (untyped str) -> untyped
+
+      def self.valid_nstring?: (untyped str) -> untyped
+
+      def self.valid_string?: (untyped str) -> untyped
+
+      private
+
+      def nstring: (untyped str) -> untyped
+
+      def string: (untyped str) -> untyped
+
+      def valid_nstring?: (untyped str) -> untyped
+
+      def valid_string?: (untyped str) -> untyped
+
+      LITERAL_REGEX: Regexp
+    end
+
+    class TaggedResponse
+    end
+
+    class ThreadMember
+    end
+
+    class UnknownResponseError < Net::IMAP::ResponseError
+    end
+
+    class UntaggedResponse
+    end
+  end
 end
