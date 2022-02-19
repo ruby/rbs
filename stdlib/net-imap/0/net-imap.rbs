@@ -1,4 +1,192 @@
 module Net
+  # <!-- rdoc-file=lib/net/imap.rb -->
+  # Net::IMAP implements Internet Message Access Protocol (IMAP) client
+  # functionality.  The protocol is described in
+  # [[IMAP](https://tools.ietf.org/html/rfc3501)].
+  #
+  # ## IMAP Overview
+  #
+  # An IMAP client connects to a server, and then authenticates itself using
+  # either #authenticate or #login.  Having authenticated itself, there is a range
+  # of commands available to it.  Most work with mailboxes, which may be arranged
+  # in an hierarchical namespace, and each of which contains zero or more
+  # messages.  How this is implemented on the server is implementation-dependent;
+  # on a UNIX server, it will frequently be implemented as files in mailbox format
+  # within a hierarchy of directories.
+  #
+  # To work on the messages within a mailbox, the client must first select that
+  # mailbox, using either #select or (for read-only access) #examine.  Once the
+  # client has successfully selected a mailbox, they enter *selected* state, and
+  # that mailbox becomes the *current* mailbox, on which mail-item related
+  # commands implicitly operate.
+  #
+  # Messages have two sorts of identifiers: message sequence numbers and UIDs.
+  #
+  # Message sequence numbers number messages within a mailbox from 1 up to the
+  # number of items in the mailbox.  If a new message arrives during a session, it
+  # receives a sequence number equal to the new size of the mailbox.  If messages
+  # are expunged from the mailbox, remaining messages have their sequence numbers
+  # "shuffled down" to fill the gaps.
+  #
+  # UIDs, on the other hand, are permanently guaranteed not to identify another
+  # message within the same mailbox, even if the existing message is deleted.
+  # UIDs are required to be assigned in ascending (but not necessarily sequential)
+  # order within a mailbox; this means that if a non-IMAP client rearranges the
+  # order of mailitems within a mailbox, the UIDs have to be reassigned.  An IMAP
+  # client thus cannot rearrange message orders.
+  #
+  # ## Examples of Usage
+  #
+  # ### List sender and subject of all recent messages in the default mailbox
+  #
+  #     imap = Net::IMAP.new('mail.example.com')
+  #     imap.authenticate('LOGIN', 'joe_user', 'joes_password')
+  #     imap.examine('INBOX')
+  #     imap.search(["RECENT"]).each do |message_id|
+  #       envelope = imap.fetch(message_id, "ENVELOPE")[0].attr["ENVELOPE"]
+  #       puts "#{envelope.from[0].name}: \t#{envelope.subject}"
+  #     end
+  #
+  # ### Move all messages from April 2003 from "Mail/sent-mail" to "Mail/sent-apr03"
+  #
+  #     imap = Net::IMAP.new('mail.example.com')
+  #     imap.authenticate('LOGIN', 'joe_user', 'joes_password')
+  #     imap.select('Mail/sent-mail')
+  #     if not imap.list('Mail/', 'sent-apr03')
+  #       imap.create('Mail/sent-apr03')
+  #     end
+  #     imap.search(["BEFORE", "30-Apr-2003", "SINCE", "1-Apr-2003"]).each do |message_id|
+  #       imap.copy(message_id, "Mail/sent-apr03")
+  #       imap.store(message_id, "+FLAGS", [:Deleted])
+  #     end
+  #     imap.expunge
+  #
+  # ## Thread Safety
+  #
+  # Net::IMAP supports concurrent threads. For example,
+  #
+  #     imap = Net::IMAP.new("imap.foo.net", "imap2")
+  #     imap.authenticate("cram-md5", "bar", "password")
+  #     imap.select("inbox")
+  #     fetch_thread = Thread.start { imap.fetch(1..-1, "UID") }
+  #     search_result = imap.search(["BODY", "hello"])
+  #     fetch_result = fetch_thread.value
+  #     imap.disconnect
+  #
+  # This script invokes the FETCH command and the SEARCH command concurrently.
+  #
+  # ## Errors
+  #
+  # An IMAP server can send three different types of responses to indicate
+  # failure:
+  #
+  # NO
+  # :   the attempted command could not be successfully completed.  For instance,
+  #     the username/password used for logging in are incorrect; the selected
+  #     mailbox does not exist; etc.
+  #
+  # BAD
+  # :   the request from the client does not follow the server's understanding of
+  #     the IMAP protocol.  This includes attempting commands from the wrong
+  #     client state; for instance, attempting to perform a SEARCH command without
+  #     having SELECTed a current mailbox.  It can also signal an internal server
+  #     failure (such as a disk crash) has occurred.
+  #
+  # BYE
+  # :   the server is saying goodbye.  This can be part of a normal logout
+  #     sequence, and can be used as part of a login sequence to indicate that the
+  #     server is (for some reason) unwilling to accept your connection.  As a
+  #     response to any other command, it indicates either that the server is
+  #     shutting down, or that the server is timing out the client connection due
+  #     to inactivity.
+  #
+  #
+  # These three error response are represented by the errors
+  # Net::IMAP::NoResponseError, Net::IMAP::BadResponseError, and
+  # Net::IMAP::ByeResponseError, all of which are subclasses of
+  # Net::IMAP::ResponseError.  Essentially, all methods that involve sending a
+  # request to the server can generate one of these errors. Only the most
+  # pertinent instances have been documented below.
+  #
+  # Because the IMAP class uses Sockets for communication, its methods are also
+  # susceptible to the various errors that can occur when working with sockets.
+  # These are generally represented as Errno errors.  For instance, any method
+  # that involves sending a request to the server and/or receiving a response from
+  # it could raise an Errno::EPIPE error if the network connection unexpectedly
+  # goes down.  See the socket(7), ip(7), tcp(7), socket(2), connect(2), and
+  # associated man pages.
+  #
+  # Finally, a Net::IMAP::DataFormatError is thrown if low-level data is found to
+  # be in an incorrect format (for instance, when converting between UTF-8 and
+  # UTF-16), and Net::IMAP::ResponseParseError is thrown if a server response is
+  # non-parseable.
+  #
+  # ## References
+  #
+  # [[IMAP](https://tools.ietf.org/html/rfc3501)]
+  # :   Crispin, M. "INTERNET MESSAGE ACCESS PROTOCOL - VERSION 4rev1",
+  #     [RFC-3501](https://tools.ietf.org/html/rfc3501), March 2003.  (Note:
+  #     obsoletes [RFC-2060](https://tools.ietf.org/html/rfc2060), December 1996.)
+  #
+  # [[LANGUAGE-TAGS](https://tools.ietf.org/html/rfc1766)]
+  # :   Phillips, A. and Davis, M. "Tags for Identifying Languages",
+  #     [RFC-5646](https://tools.ietf.org/html/rfc5646), September 2009. (Note:
+  #     obsoletes [RFC-3066](https://tools.ietf.org/html/rfc3066), January 2001,
+  #     [RFC-4646](https://tools.ietf.org/html/rfc4646), September 2006, and
+  #     [RFC-1766](https://tools.ietf.org/html/rfc1766), March 1995.)
+  #
+  # [[MD5](https://tools.ietf.org/html/rfc1864)]
+  # :   Myers, J. and M. Rose, "The Content-MD5 Header Field",
+  #     [RFC-1864](https://tools.ietf.org/html/rfc1864), October 1995.
+  #
+  # [[MIME-IMB](https://tools.ietf.org/html/rfc2045)]
+  # :   Freed, N. and N. Borenstein, "MIME (Multipurpose Internet Mail Extensions)
+  #     Part One: Format of Internet Message Bodies",
+  #     [RFC-2045](https://tools.ietf.org/html/rfc2045), November 1996.
+  #
+  # [[RFC-5322](https://tools.ietf.org/html/rfc5322)]
+  # :   Resnick, P., "Internet Message Format",
+  #     [RFC-5322](https://tools.ietf.org/html/rfc5322), October 2008. (Note:
+  #     obsoletes [RFC-2822](https://tools.ietf.org/html/rfc2822), April 2001, and
+  #     [RFC-822](https://tools.ietf.org/html/rfc822), August 1982.)
+  #
+  # [[EXT-QUOTA](https://tools.ietf.org/html/rfc2087)]
+  # :   Myers, J., "IMAP4 QUOTA extension",
+  #     [RFC-2087](https://tools.ietf.org/html/rfc2087), January 1997.
+  #
+  # [[EXT-NAMESPACE](https://tools.ietf.org/html/rfc2342)]
+  # :   Gahrns, M. and Newman, C., "IMAP4 Namespace",
+  #     [RFC-2342](https://tools.ietf.org/html/rfc2342), May 1998.
+  #
+  # [[EXT-ID](https://tools.ietf.org/html/rfc2971)]
+  # :   Showalter, T., "IMAP4 ID extension",
+  #     [RFC-2971](https://tools.ietf.org/html/rfc2971), October 2000.
+  #
+  # [[EXT-ACL](https://tools.ietf.org/html/rfc4314)]
+  # :   Melnikov, A., "IMAP4 ACL extension",
+  #     [RFC-4314](https://tools.ietf.org/html/rfc4314), December 2005.  (Note:
+  #     obsoletes [RFC-2086](https://tools.ietf.org/html/rfc2086), January 1997.)
+  #
+  # [[EXT-SORT-THREAD](https://tools.ietf.org/html/rfc5256)]
+  # :   Crispin, M. and Muchison, K., "INTERNET MESSAGE ACCESS PROTOCOL - SORT and
+  #     THREAD Extensions", [RFC-5256](https://tools.ietf.org/html/rfc5256), June
+  #     2008.
+  #
+  # [[EXT-MOVE](https://tools.ietf.org/html/rfc6851)]
+  # :   Gulbrandsen, A. and Freed, N., "Internet Message Access Protocol (IMAP) -
+  #     MOVE Extension", [RFC-6851](https://tools.ietf.org/html/rfc6851), January
+  #     2013.
+  #
+  # [OSSL]
+  # :   http://www.openssl.org
+  #
+  # [RSSL]
+  # :   http://savannah.gnu.org/projects/rubypki
+  #
+  # [[UTF7](https://tools.ietf.org/html/rfc2152)]
+  # :   Goldsmith, D. and Davis, M., "UTF-7: A Mail-Safe Transformation Format of
+  #     Unicode", [RFC-2152](https://tools.ietf.org/html/rfc2152), May 1997.
+  #
   class IMAP < Net::Protocol
     include OpenSSL::SSL
 
@@ -8,252 +196,1572 @@ module Net
 
     extend Net::IMAP::Authenticators
 
+    # <!--
+    #   rdoc-file=lib/net/imap.rb
+    #   - debug()
+    # -->
+    # Returns the debug mode.
+    #
     def self.debug: () -> untyped
 
+    # <!--
+    #   rdoc-file=lib/net/imap.rb
+    #   - debug=(val)
+    # -->
+    # Sets the debug mode.
+    #
     def self.debug=: (untyped val) -> untyped
 
+    # <!--
+    #   rdoc-file=lib/net/imap/data_encoding.rb
+    #   - decode_utf7(s)
+    # -->
+    # Decode a string from modified UTF-7 format to UTF-8.
+    #
+    # UTF-7 is a 7-bit encoding of Unicode [UTF7].  IMAP uses a slightly modified
+    # version of this to encode mailbox names containing non-ASCII characters; see
+    # [IMAP] section 5.1.3.
+    #
+    # Net::IMAP does *not* automatically encode and decode mailbox names to and from
+    # UTF-7.
+    #
     def self.decode_utf7: (untyped s) -> untyped
 
+    # <!--
+    #   rdoc-file=lib/net/imap.rb
+    #   - default_imap_port()
+    # -->
+    #
     alias self.default_imap_port self.default_port
 
+    # <!--
+    #   rdoc-file=lib/net/imap.rb
+    #   - default_imaps_port()
+    # -->
+    #
     alias self.default_imaps_port self.default_tls_port
 
+    # <!--
+    #   rdoc-file=lib/net/imap.rb
+    #   - default_port()
+    # -->
+    # The default port for IMAP connections, port 143
+    #
     def self.default_port: () -> untyped
 
+    # <!--
+    #   rdoc-file=lib/net/imap.rb
+    #   - default_ssl_port()
+    # -->
+    #
     alias self.default_ssl_port self.default_tls_port
 
+    # <!--
+    #   rdoc-file=lib/net/imap.rb
+    #   - default_tls_port()
+    # -->
+    # The default port for IMAPS connections, port 993
+    #
     def self.default_tls_port: () -> untyped
 
+    # <!--
+    #   rdoc-file=lib/net/imap/data_encoding.rb
+    #   - encode_utf7(s)
+    # -->
+    # Encode a string from UTF-8 format to modified UTF-7.
+    #
     def self.encode_utf7: (untyped s) -> untyped
 
+    # <!--
+    #   rdoc-file=lib/net/imap/data_encoding.rb
+    #   - format_date(time)
+    # -->
+    # Formats `time` as an IMAP-style date.
+    #
     def self.format_date: (untyped time) -> untyped
 
+    # <!--
+    #   rdoc-file=lib/net/imap/data_encoding.rb
+    #   - format_datetime(time)
+    # -->
+    # Formats `time` as an IMAP-style date-time.
+    #
     def self.format_datetime: (untyped time) -> untyped
 
     public
 
+    # <!--
+    #   rdoc-file=lib/net/imap.rb
+    #   - add_response_handler(handler = nil, &block)
+    # -->
+    # Adds a response handler. For example, to detect when the server sends a new
+    # EXISTS response (which normally indicates new messages being added to the
+    # mailbox), add the following handler after selecting the mailbox:
+    #
+    #     imap.add_response_handler { |resp|
+    #       if resp.kind_of?(Net::IMAP::UntaggedResponse) and resp.name == "EXISTS"
+    #         puts "Mailbox now has #{resp.data} messages"
+    #       end
+    #     }
+    #
     def add_response_handler: (?untyped handler) { (*untyped) -> untyped } -> untyped
 
+    # <!--
+    #   rdoc-file=lib/net/imap.rb
+    #   - append(mailbox, message, flags = nil, date_time = nil)
+    # -->
+    # Sends a APPEND command to append the `message` to the end of the `mailbox`.
+    # The optional `flags` argument is an array of flags initially passed to the new
+    # message.  The optional `date_time` argument specifies the creation time to
+    # assign to the new message; it defaults to the current time. For example:
+    #
+    #     imap.append("inbox", <<EOF.gsub(/\n/, "\r\n"), [:Seen], Time.now)
+    #     Subject: hello
+    #     From: shugo@ruby-lang.org
+    #     To: shugo@ruby-lang.org
+    #
+    #     hello world
+    #     EOF
+    #
+    # A Net::IMAP::NoResponseError is raised if the mailbox does not exist (it is
+    # not created automatically), or if the flags, date_time, or message arguments
+    # contain errors.
+    #
     def append: (untyped mailbox, untyped message, ?untyped flags, ?untyped date_time) -> untyped
 
+    # <!--
+    #   rdoc-file=lib/net/imap.rb
+    #   - authenticate(auth_type, *args)
+    # -->
+    # Sends an AUTHENTICATE command to authenticate the client. The `auth_type`
+    # parameter is a string that represents the authentication mechanism to be used.
+    # Currently Net::IMAP supports the authentication mechanisms:
+    #
+    #     LOGIN:: login using cleartext user and password.
+    #     CRAM-MD5:: login with cleartext user and encrypted password
+    #                (see [RFC-2195] for a full description).  This
+    #                mechanism requires that the server have the user's
+    #                password stored in clear-text password.
+    #
+    # For both of these mechanisms, there should be two `args`: username and
+    # (cleartext) password.  A server may not support one or the other of these
+    # mechanisms; check #capability for a capability of the form "AUTH=LOGIN" or
+    # "AUTH=CRAM-MD5".
+    #
+    # Authentication is done using the appropriate authenticator object: see
+    # `add_authenticator` for more information on plugging in your own
+    # authenticator.
+    #
+    # For example:
+    #
+    #     imap.authenticate('LOGIN', user, password)
+    #
+    # A Net::IMAP::NoResponseError is raised if authentication fails.
+    #
     def authenticate: (untyped auth_type, *untyped args) -> untyped
 
+    # <!--
+    #   rdoc-file=lib/net/imap.rb
+    #   - capability()
+    # -->
+    # Sends a CAPABILITY command, and returns an array of capabilities that the
+    # server supports.  Each capability is a string.  See [IMAP] for a list of
+    # possible capabilities.
+    #
+    # Note that the Net::IMAP class does not modify its behaviour according to the
+    # capabilities of the server; it is up to the user of the class to ensure that a
+    # certain capability is supported by a server before using it.
+    #
     def capability: () -> untyped
 
+    # <!--
+    #   rdoc-file=lib/net/imap.rb
+    #   - check()
+    # -->
+    # Sends a CHECK command to request a checkpoint of the currently selected
+    # mailbox.  This performs implementation-specific housekeeping; for instance,
+    # reconciling the mailbox's in-memory and on-disk state.
+    #
     def check: () -> untyped
 
+    # <!-- rdoc-file=lib/net/imap.rb -->
+    # The thread to receive exceptions.
+    #
     def client_thread: () -> untyped
 
+    # <!-- rdoc-file=lib/net/imap.rb -->
+    # The thread to receive exceptions.
+    #
     def client_thread=: (untyped) -> untyped
 
+    # <!--
+    #   rdoc-file=lib/net/imap.rb
+    #   - close()
+    # -->
+    # Sends a CLOSE command to close the currently selected mailbox. The CLOSE
+    # command permanently removes from the mailbox all messages that have the
+    # Deleted flag set.
+    #
     def close: () -> untyped
 
+    # <!--
+    #   rdoc-file=lib/net/imap.rb
+    #   - copy(set, mailbox)
+    # -->
+    # Sends a COPY command to copy the specified message(s) to the end of the
+    # specified destination `mailbox`. The `set` parameter is a number, an array of
+    # numbers, or a Range object. The number is a message sequence number.
+    #
     def copy: (untyped set, untyped mailbox) -> untyped
 
+    # <!--
+    #   rdoc-file=lib/net/imap.rb
+    #   - create(mailbox)
+    # -->
+    # Sends a CREATE command to create a new `mailbox`.
+    #
+    # A Net::IMAP::NoResponseError is raised if a mailbox with that name cannot be
+    # created.
+    #
     def create: (untyped mailbox) -> untyped
 
+    # <!--
+    #   rdoc-file=lib/net/imap.rb
+    #   - delete(mailbox)
+    # -->
+    # Sends a DELETE command to remove the `mailbox`.
+    #
+    # A Net::IMAP::NoResponseError is raised if a mailbox with that name cannot be
+    # deleted, either because it does not exist or because the client does not have
+    # permission to delete it.
+    #
     def delete: (untyped mailbox) -> untyped
 
+    # <!--
+    #   rdoc-file=lib/net/imap.rb
+    #   - disconnect()
+    # -->
+    # Disconnects from the server.
+    #
     def disconnect: () -> untyped
 
+    # <!--
+    #   rdoc-file=lib/net/imap.rb
+    #   - disconnected?()
+    # -->
+    # Returns true if disconnected from the server.
+    #
     def disconnected?: () -> untyped
 
+    # <!--
+    #   rdoc-file=lib/net/imap.rb
+    #   - examine(mailbox)
+    # -->
+    # Sends a EXAMINE command to select a `mailbox` so that messages in the
+    # `mailbox` can be accessed.  Behaves the same as #select, except that the
+    # selected `mailbox` is identified as read-only.
+    #
+    # A Net::IMAP::NoResponseError is raised if the mailbox does not exist or is for
+    # some reason non-examinable.
+    #
     def examine: (untyped mailbox) -> untyped
 
+    # <!--
+    #   rdoc-file=lib/net/imap.rb
+    #   - expunge()
+    # -->
+    # Sends a EXPUNGE command to permanently remove from the currently selected
+    # mailbox all messages that have the Deleted flag set.
+    #
     def expunge: () -> untyped
 
+    # <!--
+    #   rdoc-file=lib/net/imap.rb
+    #   - fetch(set, attr, mod = nil)
+    # -->
+    # Sends a FETCH command to retrieve data associated with a message in the
+    # mailbox.
+    #
+    # The `set` parameter is a number or a range between two numbers, or an array of
+    # those.  The number is a message sequence number, where -1 represents a '*' for
+    # use in range notation like 100..-1 being interpreted as '100:*'.  Beware that
+    # the `exclude_end?` property of a Range object is ignored, and the contents of
+    # a range are independent of the order of the range endpoints as per the
+    # protocol specification, so 1...5, 5..1 and 5...1 are all equivalent to 1..5.
+    #
+    # `attr` is a list of attributes to fetch; see the documentation for
+    # Net::IMAP::FetchData for a list of valid attributes.
+    #
+    # The return value is an array of Net::IMAP::FetchData or nil (instead of an
+    # empty array) if there is no matching message.
+    #
+    # For example:
+    #
+    #     p imap.fetch(6..8, "UID")
+    #     #=> [#<Net::IMAP::FetchData seqno=6, attr={"UID"=>98}>, \\
+    #          #<Net::IMAP::FetchData seqno=7, attr={"UID"=>99}>, \\
+    #          #<Net::IMAP::FetchData seqno=8, attr={"UID"=>100}>]
+    #     p imap.fetch(6, "BODY[HEADER.FIELDS (SUBJECT)]")
+    #     #=> [#<Net::IMAP::FetchData seqno=6, attr={"BODY[HEADER.FIELDS (SUBJECT)]"=>"Subject: test\r\n\r\n"}>]
+    #     data = imap.uid_fetch(98, ["RFC822.SIZE", "INTERNALDATE"])[0]
+    #     p data.seqno
+    #     #=> 6
+    #     p data.attr["RFC822.SIZE"]
+    #     #=> 611
+    #     p data.attr["INTERNALDATE"]
+    #     #=> "12-Oct-2000 22:40:59 +0900"
+    #     p data.attr["UID"]
+    #     #=> 98
+    #
     def fetch: (untyped set, untyped attr, ?untyped mod) -> untyped
 
+    # <!--
+    #   rdoc-file=lib/net/imap.rb
+    #   - getacl(mailbox)
+    # -->
+    # Send the GETACL command along with a specified `mailbox`. If this mailbox
+    # exists, an array containing objects of Net::IMAP::MailboxACLItem will be
+    # returned.
+    #
+    # The ACL extension is described in
+    # [[EXT-ACL](https://tools.ietf.org/html/rfc4314)]
+    #
     def getacl: (untyped mailbox) -> untyped
 
+    # <!--
+    #   rdoc-file=lib/net/imap.rb
+    #   - getquota(mailbox)
+    # -->
+    # Sends the GETQUOTA command along with specified `mailbox`. If this mailbox
+    # exists, then an array containing a Net::IMAP::MailboxQuota object is returned.
+    #  This command is generally only available to server admin.
+    #
+    # The QUOTA extension is described in
+    # [[EXT-QUOTA](https://tools.ietf.org/html/rfc2087)]
+    #
     def getquota: (untyped mailbox) -> untyped
 
+    # <!--
+    #   rdoc-file=lib/net/imap.rb
+    #   - getquotaroot(mailbox)
+    # -->
+    # Sends the GETQUOTAROOT command along with the specified `mailbox`. This
+    # command is generally available to both admin and user. If this mailbox exists,
+    # it returns an array containing objects of type Net::IMAP::MailboxQuotaRoot and
+    # Net::IMAP::MailboxQuota.
+    #
+    # The QUOTA extension is described in
+    # [[EXT-QUOTA](https://tools.ietf.org/html/rfc2087)]
+    #
     def getquotaroot: (untyped mailbox) -> untyped
 
+    # <!-- rdoc-file=lib/net/imap.rb -->
+    # Returns an initial greeting response from the server.
+    #
     def greeting: () -> untyped
 
+    # <!--
+    #   rdoc-file=lib/net/imap.rb
+    #   - id(client_id=nil)
+    # -->
+    # Sends an ID command, and returns a hash of the server's response, or nil if
+    # the server does not identify itself.
+    #
+    # Note that the user should first check if the server supports the ID
+    # capability. For example:
+    #
+    #     capabilities = imap.capability
+    #     if capabilities.include?("ID")
+    #       id = imap.id(
+    #         name: "my IMAP client (ruby)",
+    #         version: MyIMAP::VERSION,
+    #         "support-url": "mailto:bugs@example.com",
+    #         os: RbConfig::CONFIG["host_os"],
+    #       )
+    #     end
+    #
+    # See [[EXT-ID](https://tools.ietf.org/html/rfc2971)] for field definitions.
+    #
     def id: (?untyped client_id) -> untyped
 
+    # <!--
+    #   rdoc-file=lib/net/imap.rb
+    #   - idle(timeout = nil, &response_handler)
+    # -->
+    # Sends an IDLE command that waits for notifications of new or expunged
+    # messages.  Yields responses from the server during the IDLE.
+    #
+    # Use #idle_done to leave IDLE.
+    #
+    # If `timeout` is given, this method returns after `timeout` seconds passed.
+    # `timeout` can be used for keep-alive.  For example, the following code checks
+    # the connection for each 60 seconds.
+    #
+    #     loop do
+    #       imap.idle(60) do |res|
+    #         ...
+    #       end
+    #     end
+    #
     def idle: (?untyped timeout) { (*untyped) -> untyped } -> untyped
 
+    # <!--
+    #   rdoc-file=lib/net/imap.rb
+    #   - idle_done()
+    # -->
+    # Leaves IDLE.
+    #
     def idle_done: () -> untyped
 
+    # <!-- rdoc-file=lib/net/imap.rb -->
+    # Seconds to wait until an IDLE response is received.
+    #
     def idle_response_timeout: () -> untyped
 
+    # <!--
+    #   rdoc-file=lib/net/imap.rb
+    #   - list(refname, mailbox)
+    # -->
+    # Sends a LIST command, and returns a subset of names from the complete set of
+    # all names available to the client. `refname` provides a context (for instance,
+    # a base directory in a directory-based mailbox hierarchy).  `mailbox` specifies
+    # a mailbox or (via wildcards) mailboxes under that context. Two wildcards may
+    # be used in `mailbox`: '*', which matches all characters **including** the
+    # hierarchy delimiter (for instance, '/' on a UNIX-hosted directory-based
+    # mailbox hierarchy); and '%', which matches all characters **except** the
+    # hierarchy delimiter.
+    #
+    # If `refname` is empty, `mailbox` is used directly to determine which mailboxes
+    # to match.  If `mailbox` is empty, the root name of `refname` and the hierarchy
+    # delimiter are returned.
+    #
+    # The return value is an array of `Net::IMAP::MailboxList`. For example:
+    #
+    #     imap.create("foo/bar")
+    #     imap.create("foo/baz")
+    #     p imap.list("", "foo/%")
+    #     #=> [#<Net::IMAP::MailboxList attr=[:Noselect], delim="/", name="foo/">, \\
+    #          #<Net::IMAP::MailboxList attr=[:Noinferiors, :Marked], delim="/", name="foo/bar">, \\
+    #          #<Net::IMAP::MailboxList attr=[:Noinferiors], delim="/", name="foo/baz">]
+    #
     def list: (untyped refname, untyped mailbox) -> untyped
 
+    # <!--
+    #   rdoc-file=lib/net/imap.rb
+    #   - login(user, password)
+    # -->
+    # Sends a LOGIN command to identify the client and carries the plaintext
+    # `password` authenticating this `user`.  Note that, unlike calling
+    # #authenticate with an `auth_type` of "LOGIN", #login does **not** use the
+    # login authenticator.
+    #
+    # A Net::IMAP::NoResponseError is raised if authentication fails.
+    #
     def login: (untyped user, untyped password) -> untyped
 
+    # <!--
+    #   rdoc-file=lib/net/imap.rb
+    #   - logout()
+    # -->
+    # Sends a LOGOUT command to inform the server that the client is done with the
+    # connection.
+    #
     def logout: () -> untyped
 
+    # <!--
+    #   rdoc-file=lib/net/imap.rb
+    #   - lsub(refname, mailbox)
+    # -->
+    # Sends a LSUB command, and returns a subset of names from the set of names that
+    # the user has declared as being "active" or "subscribed."  `refname` and
+    # `mailbox` are interpreted as for #list.
+    #
+    # The return value is an array of `Net::IMAP::MailboxList`.
+    #
     def lsub: (untyped refname, untyped mailbox) -> untyped
 
+    # <!--
+    #   rdoc-file=lib/net/imap.rb
+    #   - move(set, mailbox)
+    # -->
+    # Sends a MOVE command to move the specified message(s) to the end of the
+    # specified destination `mailbox`. The `set` parameter is a number, an array of
+    # numbers, or a Range object. The number is a message sequence number.
+    #
+    # The MOVE extension is described in
+    # [[EXT-MOVE](https://tools.ietf.org/html/rfc6851)].
+    #
     def move: (untyped set, untyped mailbox) -> untyped
 
+    # <!--
+    #   rdoc-file=lib/net/imap.rb
+    #   - namespace()
+    # -->
+    # Sends a NAMESPACE command and returns the namespaces that are available. The
+    # NAMESPACE command allows a client to discover the prefixes of namespaces used
+    # by a server for personal mailboxes, other users' mailboxes, and shared
+    # mailboxes.
+    #
+    # The NAMESPACE extension predates
+    # [[IMAP4rev1](https://tools.ietf.org/html/rfc2501)], so most IMAP servers
+    # support it. Many popular IMAP servers are configured with the default personal
+    # namespaces as `("" "/")`: no prefix and "/" hierarchy delimiter. In that
+    # common case, the naive client may not have any trouble naming mailboxes.
+    #
+    # But many servers are configured with the default personal namespace as e.g.
+    # `("INBOX." ".")`, placing all personal folders under INBOX, with "." as the
+    # hierarchy delimiter. If the client does not check for this, but naively
+    # assumes it can use the same folder names for all servers, then folder creation
+    # (and listing, moving, etc) can lead to errors.
+    #
+    # From RFC2342:
+    #
+    #     Although typically a server will support only a single Personal
+    #     Namespace, and a single Other User's Namespace, circumstances exist
+    #     where there MAY be multiples of these, and a client MUST be prepared
+    #     for them. If a client is configured such that it is required to create
+    #     a certain mailbox, there can be circumstances where it is unclear which
+    #     Personal Namespaces it should create the mailbox in. In these
+    #     situations a client SHOULD let the user select which namespaces to
+    #     create the mailbox in.
+    #
+    # The user of this method should first check if the server supports the
+    # NAMESPACE capability.  The return value is a `Net::IMAP::Namespaces` object
+    # which has `personal`, `other`, and `shared` fields, each an array of
+    # `Net::IMAP::Namespace` objects. These arrays will be empty when the server
+    # responds with nil.
+    #
+    # For example:
+    #
+    #     capabilities = imap.capability
+    #     if capabilities.include?("NAMESPACE")
+    #       namespaces = imap.namespace
+    #       if namespace = namespaces.personal.first
+    #         prefix = namespace.prefix  # e.g. "" or "INBOX."
+    #         delim  = namespace.delim   # e.g. "/" or "."
+    #         # personal folders should use the prefix and delimiter
+    #         imap.create(prefix + "foo")
+    #         imap.create(prefix + "bar")
+    #         imap.create(prefix + %w[path to my folder].join(delim))
+    #       end
+    #     end
+    #
+    # The NAMESPACE extension is described in
+    # [[EXT-NAMESPACE](https://tools.ietf.org/html/rfc2342)]
+    #
     def namespace: () -> untyped
 
+    # <!--
+    #   rdoc-file=lib/net/imap.rb
+    #   - noop()
+    # -->
+    # Sends a NOOP command to the server. It does nothing.
+    #
     def noop: () -> untyped
 
+    # <!-- rdoc-file=lib/net/imap.rb -->
+    # Seconds to wait until a connection is opened. If the IMAP object cannot open a
+    # connection within this time, it raises a Net::OpenTimeout exception. The
+    # default value is 30 seconds.
+    #
     def open_timeout: () -> untyped
 
+    # <!--
+    #   rdoc-file=lib/net/imap.rb
+    #   - remove_response_handler(handler)
+    # -->
+    # Removes the response handler.
+    #
     def remove_response_handler: (untyped handler) -> untyped
 
+    # <!--
+    #   rdoc-file=lib/net/imap.rb
+    #   - rename(mailbox, newname)
+    # -->
+    # Sends a RENAME command to change the name of the `mailbox` to `newname`.
+    #
+    # A Net::IMAP::NoResponseError is raised if a mailbox with the name `mailbox`
+    # cannot be renamed to `newname` for whatever reason; for instance, because
+    # `mailbox` does not exist, or because there is already a mailbox with the name
+    # `newname`.
+    #
     def rename: (untyped mailbox, untyped newname) -> untyped
 
+    # <!-- rdoc-file=lib/net/imap.rb -->
+    # Returns all response handlers.
+    #
     def response_handlers: () -> untyped
 
+    # <!-- rdoc-file=lib/net/imap.rb -->
+    # Returns recorded untagged responses.  For example:
+    #
+    #     imap.select("inbox")
+    #     p imap.responses["EXISTS"][-1]
+    #     #=> 2
+    #     p imap.responses["UIDVALIDITY"][-1]
+    #     #=> 968263756
+    #
     def responses: () -> untyped
 
+    # <!--
+    #   rdoc-file=lib/net/imap.rb
+    #   - search(keys, charset = nil)
+    # -->
+    # Sends a SEARCH command to search the mailbox for messages that match the given
+    # searching criteria, and returns message sequence numbers.  `keys` can either
+    # be a string holding the entire search string, or a single-dimension array of
+    # search keywords and arguments.  The following are some common search criteria;
+    # see [IMAP] section 6.4.4 for a full list.
+    #
+    # <message set>
+    # :   a set of message sequence numbers.  ',' indicates an interval, ':'
+    #     indicates a range.  For instance, '2,10:12,15' means "2,10,11,12,15".
+    #
+    # BEFORE <date>
+    # :   messages with an internal date strictly before <date>.  The date argument
+    #     has a format similar to 8-Aug-2002.
+    #
+    # BODY <string>
+    # :   messages that contain <string> within their body.
+    #
+    # CC <string>
+    # :   messages containing <string> in their CC field.
+    #
+    # FROM <string>
+    # :   messages that contain <string> in their FROM field.
+    #
+    # NEW
+    # :   messages with the Recent, but not the Seen, flag set.
+    #
+    # NOT <search-key>
+    # :   negate the following search key.
+    #
+    # OR <search-key> <search-key>
+    # :   "or" two search keys together.
+    #
+    # ON <date>
+    # :   messages with an internal date exactly equal to <date>, which has a format
+    #     similar to 8-Aug-2002.
+    #
+    # SINCE <date>
+    # :   messages with an internal date on or after <date>.
+    #
+    # SUBJECT <string>
+    # :   messages with <string> in their subject.
+    #
+    # TO <string>
+    # :   messages with <string> in their TO field.
+    #
+    #
+    # For example:
+    #
+    #     p imap.search(["SUBJECT", "hello", "NOT", "NEW"])
+    #     #=> [1, 6, 7, 8]
+    #
     def search: (untyped keys, ?untyped charset) -> untyped
 
+    # <!--
+    #   rdoc-file=lib/net/imap.rb
+    #   - select(mailbox)
+    # -->
+    # Sends a SELECT command to select a `mailbox` so that messages in the `mailbox`
+    # can be accessed.
+    #
+    # After you have selected a mailbox, you may retrieve the number of items in
+    # that mailbox from +@[responses]("EXISTS")[-1]+, and the number of recent
+    # messages from +@[responses]("RECENT")[-1]+. Note that these values can change
+    # if new messages arrive during a session; see #add_response_handler for a way
+    # of detecting this event.
+    #
+    # A Net::IMAP::NoResponseError is raised if the mailbox does not exist or is for
+    # some reason non-selectable.
+    #
     def select: (untyped mailbox) -> untyped
 
+    # <!--
+    #   rdoc-file=lib/net/imap.rb
+    #   - setacl(mailbox, user, rights)
+    # -->
+    # Sends the SETACL command along with `mailbox`, `user` and the `rights` that
+    # user is to have on that mailbox.  If `rights` is nil, then that user will be
+    # stripped of any rights to that mailbox.
+    #
+    # The ACL extension is described in
+    # [[EXT-ACL](https://tools.ietf.org/html/rfc4314)]
+    #
     def setacl: (untyped mailbox, untyped user, untyped rights) -> untyped
 
+    # <!--
+    #   rdoc-file=lib/net/imap.rb
+    #   - setquota(mailbox, quota)
+    # -->
+    # Sends a SETQUOTA command along with the specified `mailbox` and `quota`.  If
+    # `quota` is nil, then `quota` will be unset for that mailbox.  Typically one
+    # needs to be logged in as a server admin for this to work.
+    #
+    # The QUOTA extension is described in
+    # [[EXT-QUOTA](https://tools.ietf.org/html/rfc2087)]
+    #
     def setquota: (untyped mailbox, untyped quota) -> untyped
 
+    # <!--
+    #   rdoc-file=lib/net/imap.rb
+    #   - sort(sort_keys, search_keys, charset)
+    # -->
+    # Sends a SORT command to sort messages in the mailbox. Returns an array of
+    # message sequence numbers. For example:
+    #
+    #     p imap.sort(["FROM"], ["ALL"], "US-ASCII")
+    #     #=> [1, 2, 3, 5, 6, 7, 8, 4, 9]
+    #     p imap.sort(["DATE"], ["SUBJECT", "hello"], "US-ASCII")
+    #     #=> [6, 7, 8, 1]
+    #
+    # The SORT extension is described in
+    # [[EXT-SORT-THREAD](https://tools.ietf.org/html/rfc5256)].
+    #
     def sort: (untyped sort_keys, untyped search_keys, untyped charset) -> untyped
 
+    # <!--
+    #   rdoc-file=lib/net/imap.rb
+    #   - starttls(options = {}, verify = true)
+    # -->
+    # Sends a STARTTLS command to start TLS session.
+    #
     def starttls: (?untyped options, ?untyped verify) -> untyped
 
+    # <!--
+    #   rdoc-file=lib/net/imap.rb
+    #   - status(mailbox, attr)
+    # -->
+    # Sends a STATUS command, and returns the status of the indicated `mailbox`.
+    # `attr` is a list of one or more attributes whose statuses are to be requested.
+    #  Supported attributes include:
+    #
+    #     MESSAGES:: the number of messages in the mailbox.
+    #     RECENT:: the number of recent messages in the mailbox.
+    #     UNSEEN:: the number of unseen messages in the mailbox.
+    #
+    # The return value is a hash of attributes. For example:
+    #
+    #     p imap.status("inbox", ["MESSAGES", "RECENT"])
+    #     #=> {"RECENT"=>0, "MESSAGES"=>44}
+    #
+    # A Net::IMAP::NoResponseError is raised if status values for `mailbox` cannot
+    # be returned; for instance, because it does not exist.
+    #
     def status: (untyped mailbox, untyped attr) -> untyped
 
+    # <!--
+    #   rdoc-file=lib/net/imap.rb
+    #   - store(set, attr, flags)
+    # -->
+    # Sends a STORE command to alter data associated with messages in the mailbox,
+    # in particular their flags. The `set` parameter is a number, an array of
+    # numbers, or a Range object. Each number is a message sequence number.  `attr`
+    # is the name of a data item to store: 'FLAGS' will replace the message's flag
+    # list with the provided one, '+FLAGS' will add the provided flags, and '-FLAGS'
+    # will remove them.  `flags` is a list of flags.
+    #
+    # The return value is an array of Net::IMAP::FetchData. For example:
+    #
+    #     p imap.store(6..8, "+FLAGS", [:Deleted])
+    #     #=> [#<Net::IMAP::FetchData seqno=6, attr={"FLAGS"=>[:Seen, :Deleted]}>, \\
+    #          #<Net::IMAP::FetchData seqno=7, attr={"FLAGS"=>[:Seen, :Deleted]}>, \\
+    #          #<Net::IMAP::FetchData seqno=8, attr={"FLAGS"=>[:Seen, :Deleted]}>]
+    #
     def store: (untyped set, untyped attr, untyped flags) -> untyped
 
+    # <!--
+    #   rdoc-file=lib/net/imap.rb
+    #   - subscribe(mailbox)
+    # -->
+    # Sends a SUBSCRIBE command to add the specified `mailbox` name to the server's
+    # set of "active" or "subscribed" mailboxes as returned by #lsub.
+    #
+    # A Net::IMAP::NoResponseError is raised if `mailbox` cannot be subscribed to;
+    # for instance, because it does not exist.
+    #
     def subscribe: (untyped mailbox) -> untyped
 
+    # <!--
+    #   rdoc-file=lib/net/imap.rb
+    #   - thread(algorithm, search_keys, charset)
+    # -->
+    # Similar to #search, but returns message sequence numbers in threaded format,
+    # as a Net::IMAP::ThreadMember tree.  The supported algorithms are:
+    #
+    # ORDEREDSUBJECT
+    # :   split into single-level threads according to subject, ordered by date.
+    # REFERENCES
+    # :   split into threads by parent/child relationships determined by which
+    #     message is a reply to which.
+    #
+    #
+    # Unlike #search, `charset` is a required argument.  US-ASCII and UTF-8 are
+    # sample values.
+    #
+    # The THREAD extension is described in
+    # [[EXT-SORT-THREAD](https://tools.ietf.org/html/rfc5256)].
+    #
     def thread: (untyped algorithm, untyped search_keys, untyped charset) -> untyped
 
+    # <!--
+    #   rdoc-file=lib/net/imap.rb
+    #   - uid_copy(set, mailbox)
+    # -->
+    # Similar to #copy, but `set` contains unique identifiers.
+    #
     def uid_copy: (untyped set, untyped mailbox) -> untyped
 
+    # <!--
+    #   rdoc-file=lib/net/imap.rb
+    #   - uid_fetch(set, attr, mod = nil)
+    # -->
+    # Similar to #fetch, but `set` contains unique identifiers.
+    #
     def uid_fetch: (untyped set, untyped attr, ?untyped mod) -> untyped
 
+    # <!--
+    #   rdoc-file=lib/net/imap.rb
+    #   - uid_move(set, mailbox)
+    # -->
+    # Similar to #move, but `set` contains unique identifiers.
+    #
+    # The MOVE extension is described in
+    # [[EXT-MOVE](https://tools.ietf.org/html/rfc6851)].
+    #
     def uid_move: (untyped set, untyped mailbox) -> untyped
 
+    # <!--
+    #   rdoc-file=lib/net/imap.rb
+    #   - uid_search(keys, charset = nil)
+    # -->
+    # Similar to #search, but returns unique identifiers.
+    #
     def uid_search: (untyped keys, ?untyped charset) -> untyped
 
+    # <!--
+    #   rdoc-file=lib/net/imap.rb
+    #   - uid_sort(sort_keys, search_keys, charset)
+    # -->
+    # Similar to #sort, but returns an array of unique identifiers.
+    #
+    # The SORT extension is described in
+    # [[EXT-SORT-THREAD](https://tools.ietf.org/html/rfc5256)].
+    #
     def uid_sort: (untyped sort_keys, untyped search_keys, untyped charset) -> untyped
 
+    # <!--
+    #   rdoc-file=lib/net/imap.rb
+    #   - uid_store(set, attr, flags)
+    # -->
+    # Similar to #store, but `set` contains unique identifiers.
+    #
     def uid_store: (untyped set, untyped attr, untyped flags) -> untyped
 
+    # <!--
+    #   rdoc-file=lib/net/imap.rb
+    #   - uid_thread(algorithm, search_keys, charset)
+    # -->
+    # Similar to #thread, but returns unique identifiers instead of message sequence
+    # numbers.
+    #
+    # The THREAD extension is described in
+    # [[EXT-SORT-THREAD](https://tools.ietf.org/html/rfc5256)].
+    #
     def uid_thread: (untyped algorithm, untyped search_keys, untyped charset) -> untyped
 
+    # <!--
+    #   rdoc-file=lib/net/imap.rb
+    #   - unsubscribe(mailbox)
+    # -->
+    # Sends a UNSUBSCRIBE command to remove the specified `mailbox` name from the
+    # server's set of "active" or "subscribed" mailboxes.
+    #
+    # A Net::IMAP::NoResponseError is raised if `mailbox` cannot be unsubscribed
+    # from; for instance, because the client is not currently subscribed to it.
+    #
     def unsubscribe: (untyped mailbox) -> untyped
 
+    # <!--
+    #   rdoc-file=lib/net/imap.rb
+    #   - xlist(refname, mailbox)
+    # -->
+    # Sends a XLIST command, and returns a subset of names from the complete set of
+    # all names available to the client. `refname` provides a context (for instance,
+    # a base directory in a directory-based mailbox hierarchy).  `mailbox` specifies
+    # a mailbox or (via wildcards) mailboxes under that context. Two wildcards may
+    # be used in `mailbox`: '*', which matches all characters **including** the
+    # hierarchy delimiter (for instance, '/' on a UNIX-hosted directory-based
+    # mailbox hierarchy); and '%', which matches all characters **except** the
+    # hierarchy delimiter.
+    #
+    # If `refname` is empty, `mailbox` is used directly to determine which mailboxes
+    # to match.  If `mailbox` is empty, the root name of `refname` and the hierarchy
+    # delimiter are returned.
+    #
+    # The XLIST command is like the LIST command except that the flags returned
+    # refer to the function of the folder/mailbox, e.g. :Sent
+    #
+    # The return value is an array of `Net::IMAP::MailboxList`. For example:
+    #
+    #     imap.create("foo/bar")
+    #     imap.create("foo/baz")
+    #     p imap.xlist("", "foo/%")
+    #     #=> [#<Net::IMAP::MailboxList attr=[:Noselect], delim="/", name="foo/">, \\
+    #          #<Net::IMAP::MailboxList attr=[:Noinferiors, :Marked], delim="/", name="foo/bar">, \\
+    #          #<Net::IMAP::MailboxList attr=[:Noinferiors], delim="/", name="foo/baz">]
+    #
     def xlist: (untyped refname, untyped mailbox) -> untyped
 
     private
 
+    # <!--
+    #   rdoc-file=lib/net/imap.rb
+    #   - copy_internal(cmd, set, mailbox)
+    # -->
+    #
     def copy_internal: (untyped cmd, untyped set, untyped mailbox) -> untyped
 
+    # <!--
+    #   rdoc-file=lib/net/imap.rb
+    #   - create_ssl_params(certs = nil, verify = true)
+    # -->
+    #
     def create_ssl_params: (?untyped certs, ?untyped verify) -> untyped
 
+    # <!--
+    #   rdoc-file=lib/net/imap.rb
+    #   - fetch_internal(cmd, set, attr, mod = nil)
+    # -->
+    #
     def fetch_internal: (untyped cmd, untyped set, untyped attr, ?untyped mod) -> untyped
 
+    # <!--
+    #   rdoc-file=lib/net/imap.rb
+    #   - generate_tag()
+    # -->
+    #
     def generate_tag: () -> untyped
 
+    # <!--
+    #   rdoc-file=lib/net/imap.rb
+    #   - get_response()
+    # -->
+    #
     def get_response: () -> untyped
 
+    # <!--
+    #   rdoc-file=lib/net/imap.rb
+    #   - get_tagged_response(tag, cmd, timeout = nil)
+    # -->
+    #
     def get_tagged_response: (untyped tag, untyped cmd, ?untyped timeout) -> untyped
 
+    # <!--
+    #   rdoc-file=lib/net/imap.rb
+    #   - Net::IMAP.new(host, options = {})
+    # -->
+    # Creates a new Net::IMAP object and connects it to the specified `host`.
+    #
+    # `options` is an option hash, each key of which is a symbol.
+    #
+    # The available options are:
+    #
+    # port
+    # :   Port number (default value is 143 for imap, or 993 for imaps)
+    # ssl
+    # :   If `options[:ssl]` is true, then an attempt will be made to use SSL (now
+    #     TLS) to connect to the server.  For this to work OpenSSL [OSSL] and the
+    #     Ruby OpenSSL [RSSL] extensions need to be installed. If `options[:ssl]` is
+    #     a hash, it's passed to OpenSSL::SSL::SSLContext#set_params as parameters.
+    # open_timeout
+    # :   Seconds to wait until a connection is opened
+    # idle_response_timeout
+    # :   Seconds to wait until an IDLE response is received
+    #
+    #
+    # The most common errors are:
+    #
+    # Errno::ECONNREFUSED
+    # :   Connection refused by `host` or an intervening firewall.
+    # Errno::ETIMEDOUT
+    # :   Connection timed out (possibly due to packets being dropped by an
+    #     intervening firewall).
+    # Errno::ENETUNREACH
+    # :   There is no route to that network.
+    # SocketError
+    # :   Hostname not known or other socket error.
+    # Net::IMAP::ByeResponseError
+    # :   The connected to the host was successful, but it immediately said goodbye.
+    #
     def initialize: (untyped host, ?untyped port_or_options, ?untyped usessl, ?untyped certs, ?untyped verify) -> void
 
+    # <!--
+    #   rdoc-file=lib/net/imap.rb
+    #   - normalize_searching_criteria(keys)
+    # -->
+    #
     def normalize_searching_criteria: (untyped keys) -> untyped
 
+    # <!--
+    #   rdoc-file=lib/net/imap.rb
+    #   - put_string(str)
+    # -->
+    #
     def put_string: (untyped str) -> untyped
 
+    # <!--
+    #   rdoc-file=lib/net/imap.rb
+    #   - receive_responses()
+    # -->
+    #
     def receive_responses: () -> untyped
 
+    # <!--
+    #   rdoc-file=lib/net/imap.rb
+    #   - record_response(name, data)
+    # -->
+    #
     def record_response: (untyped name, untyped data) -> untyped
 
+    # <!--
+    #   rdoc-file=lib/net/imap.rb
+    #   - search_internal(cmd, keys, charset)
+    # -->
+    #
     def search_internal: (untyped cmd, untyped keys, untyped charset) -> untyped
 
+    # <!--
+    #   rdoc-file=lib/net/imap.rb
+    #   - send_command(cmd, *args, &block)
+    # -->
+    #
     def send_command: (untyped cmd, *untyped args) { (*untyped) -> untyped } -> untyped
 
+    # <!--
+    #   rdoc-file=lib/net/imap/command_data.rb
+    #   - send_data(data, tag = nil)
+    # -->
+    #
     def send_data: (untyped data, ?untyped tag) -> untyped
 
+    # <!--
+    #   rdoc-file=lib/net/imap/command_data.rb
+    #   - send_list_data(list, tag = nil)
+    # -->
+    #
     def send_list_data: (untyped list, ?untyped tag) -> untyped
 
+    # <!--
+    #   rdoc-file=lib/net/imap/command_data.rb
+    #   - send_literal(str, tag = nil)
+    # -->
+    #
     def send_literal: (untyped str, ?untyped tag) -> untyped
 
+    # <!--
+    #   rdoc-file=lib/net/imap/command_data.rb
+    #   - send_number_data(num)
+    # -->
+    #
     def send_number_data: (untyped num) -> untyped
 
+    # <!--
+    #   rdoc-file=lib/net/imap/command_data.rb
+    #   - send_quoted_string(str)
+    # -->
+    #
     def send_quoted_string: (untyped str) -> untyped
 
+    # <!--
+    #   rdoc-file=lib/net/imap/command_data.rb
+    #   - send_string_data(str, tag = nil)
+    # -->
+    #
     def send_string_data: (untyped str, ?untyped tag) -> untyped
 
+    # <!--
+    #   rdoc-file=lib/net/imap/command_data.rb
+    #   - send_symbol_data(symbol)
+    # -->
+    #
     def send_symbol_data: (untyped symbol) -> untyped
 
+    # <!--
+    #   rdoc-file=lib/net/imap/command_data.rb
+    #   - send_time_data(time)
+    # -->
+    #
     def send_time_data: (untyped time) -> untyped
 
+    # <!--
+    #   rdoc-file=lib/net/imap.rb
+    #   - sort_internal(cmd, sort_keys, search_keys, charset)
+    # -->
+    #
     def sort_internal: (untyped cmd, untyped sort_keys, untyped search_keys, untyped charset) -> untyped
 
+    # <!--
+    #   rdoc-file=lib/net/imap.rb
+    #   - start_tls_session(params = {})
+    # -->
+    #
     def start_tls_session: (?untyped params) -> untyped
 
+    # <!--
+    #   rdoc-file=lib/net/imap.rb
+    #   - store_internal(cmd, set, attr, flags)
+    # -->
+    #
     def store_internal: (untyped cmd, untyped set, untyped attr, untyped flags) -> untyped
 
+    # <!--
+    #   rdoc-file=lib/net/imap.rb
+    #   - tcp_socket(host, port)
+    # -->
+    #
     def tcp_socket: (untyped host, untyped port) -> untyped
 
+    # <!--
+    #   rdoc-file=lib/net/imap.rb
+    #   - thread_internal(cmd, algorithm, search_keys, charset)
+    # -->
+    #
     def thread_internal: (untyped cmd, untyped algorithm, untyped search_keys, untyped charset) -> untyped
 
+    # <!--
+    #   rdoc-file=lib/net/imap/command_data.rb
+    #   - validate_data(data)
+    # -->
+    #
     def validate_data: (untyped data) -> untyped
 
+    # <!-- rdoc-file=lib/net/imap/flags.rb -->
+    # Mailbox attribute indicating that this mailbox presents all messages in the
+    # user's message store. Implementations MAY omit some messages, such as,
+    # perhaps, those in Trash and Junk. When this special use is supported, it is
+    # almost certain to represent a virtual mailbox
+    #
     ALL: Symbol
 
+    # <!-- rdoc-file=lib/net/imap/flags.rb -->
+    # Flag indicating a message has been answered.
+    #
     ANSWERED: Symbol
 
+    # <!-- rdoc-file=lib/net/imap/flags.rb -->
+    # Mailbox attribute indicating that this mailbox is used to archive messages.
+    # The meaning of an "archival" mailbox is server dependent; typically, it will
+    # be used to get messages out of the inbox, or otherwise keep them out of the
+    # user's way, while still making them accessible
+    #
     ARCHIVE: Symbol
 
     CRLF: String
 
     DATE_MONTH: Array[untyped]
 
+    # <!-- rdoc-file=lib/net/imap/flags.rb -->
+    # Flag indicating a message has been marked for deletion.  This will occur when
+    # the mailbox is closed or expunged.
+    #
     DELETED: Symbol
 
+    # <!-- rdoc-file=lib/net/imap/flags.rb -->
+    # Flag indicating a message is only a draft or work-in-progress version.
+    #
     DRAFT: Symbol
 
+    # <!-- rdoc-file=lib/net/imap/flags.rb -->
+    # Mailbox attribute indicating that this mailbox is used to hold draft messages
+    # -- typically, messages that are being composed but have not yet been sent. In
+    # some server implementations, this might be a virtual mailbox, containing
+    # messages from other mailboxes that are marked with the "Draft" message flag.
+    # Alternatively, this might just be advice that a client put drafts here
+    #
     DRAFTS: Symbol
 
+    # <!-- rdoc-file=lib/net/imap/flags.rb -->
+    # A message flag indicating a message has been flagged for special or urgent
+    # attention.
+    #
+    # Also a mailbox special use attribute, which indicates that this mailbox
+    # presents all messages marked in some way as "important".  When this special
+    # use is supported, it is likely to represent a virtual mailbox collecting
+    # messages (from other mailboxes) that are marked with the "Flagged" message
+    # flag.
+    #
     FLAGGED: Symbol
 
+    # <!-- rdoc-file=lib/net/imap/flags.rb -->
+    # The presence of this attribute indicates that the mailbox has child mailboxes.
+    # A server SHOULD NOT set this attribute if there are child mailboxes and the
+    # user does not have permission to access any of them.  In this case,
+    # HasNoChildren SHOULD be used. In many cases, however, a server may not be able
+    # to efficiently compute whether a user has access to any child mailboxes. Note
+    # that even though the HasChildren attribute for a mailbox must be correct at
+    # the time of processing the mailbox, a client must be prepared to deal with a
+    # situation when a mailbox is marked with the HasChildren attribute, but no
+    # child mailbox appears in the response to the LIST command. This might happen,
+    # for example, due to child mailboxes being deleted or made inaccessible to the
+    # user (using access control) by another client before the server is able to
+    # list them.
+    #
+    # It is an error for the server to return both a HasChildren and a HasNoChildren
+    # attribute in the same LIST response. A client that encounters a LIST response
+    # with both HasChildren and HasNoChildren attributes present should act as if
+    # both are absent in the LIST response.
+    #
     HAS_CHILDREN: Symbol
 
+    # <!-- rdoc-file=lib/net/imap/flags.rb -->
+    # The presence of this attribute indicates that the mailbox has NO child
+    # mailboxes that are accessible to the currently authenticated user.
+    #
+    # It is an error for the server to return both a HasChildren and a HasNoChildren
+    # attribute in the same LIST response. A client that encounters a LIST response
+    # with both HasChildren and HasNoChildren attributes present should act as if
+    # both are absent in the LIST response.
+    #
+    # Note: the HasNoChildren attribute should not be confused with the NoInferiors
+    # attribute, which indicates that no child mailboxes exist now and none can be
+    # created in the future.
+    #
     HAS_NO_CHILDREN: Symbol
 
+    # <!-- rdoc-file=lib/net/imap/flags.rb -->
+    # Mailbox attribute indicating that this mailbox is where messages deemed to be
+    # junk mail are held. Some server implementations might put messages here
+    # automatically.  Alternatively, this might just be advice to a client-side spam
+    # filter.
+    #
     JUNK: Symbol
 
+    # <!-- rdoc-file=lib/net/imap/flags.rb -->
+    # The mailbox has been marked "interesting" by the server; the mailbox probably
+    # contains messages that have been added since the last time the mailbox was
+    # selected.
+    #
+    # If it is not feasible for the server to determine whether or not the mailbox
+    # is "interesting", the server SHOULD NOT send either Marked or Unmarked. The
+    # server MUST NOT send more than one of Marked, Unmarked, and Noselect for a
+    # single mailbox, and it MAY send none of these.
+    #
     MARKED: Symbol
 
+    # <!-- rdoc-file=lib/net/imap/flags.rb -->
+    # Mailbox attribute indicating it is not possible for any child levels of
+    # hierarchy to exist under this name; no child levels exist now and none can be
+    # created in the future children.
+    #
+    # The client must treat the presence of the NoInferiors attribute as if the
+    # HasNoChildren attribute was also sent by the server
+    #
     NOINFERIORS: Symbol
 
+    # <!-- rdoc-file=lib/net/imap/flags.rb -->
+    # The "NonExistent" attribute indicates that a mailbox name does not refer to an
+    # existing mailbox. Note that this attribute is not meaningful by itself, as
+    # mailbox names that match the canonical LIST pattern but don't exist must not
+    # be returned unless one of the two conditions listed below is also satisfied:
+    #
+    # 1.  The mailbox name also satisfies the selection criteria (for example, it is
+    #     subscribed and the "SUBSCRIBED" selection option has been specified).
+    #
+    # 2.  "RECURSIVEMATCH" has been specified, and the mailbox name has at least one
+    #     descendant mailbox name that does not match the LIST pattern and does
+    #     match the selection criteria.
+    #
+    #
+    # In practice, this means that the "NonExistent" attribute is usually returned
+    # with one or more of "Subscribed", "Remote", "HasChildren", or the CHILDINFO
+    # extended data item.
+    #
+    # The client must treat the presence of the NonExistent attribute as if the
+    # NoSelect attribute was also sent by the server
+    #
     NONEXISTENT: Symbol
 
+    # <!-- rdoc-file=lib/net/imap/flags.rb -->
+    # Mailbox attribute indicating it is not possible to use this name as a
+    # selectable mailbox.
+    #
     NOSELECT: Symbol
 
     PORT: Integer
 
+    # <!-- rdoc-file=lib/net/imap/flags.rb -->
+    # Flag indicating that the message is "recent," meaning that this session is the
+    # first session in which the client has been notified of this message.
+    #
+    # This flag was defined by IMAP4rev1
+    # [RFC-3501](https://www.rfc-editor.org/rfc/rfc3501.html), and has been
+    # deprecated by IMAP4rev2
+    # [RFC-9051](https://www.rfc-editor.org/rfc/rfc9051.html).
+    #
     RECENT: Symbol
 
+    # <!-- rdoc-file=lib/net/imap/flags.rb -->
+    # The mailbox is a remote mailbox.
+    #
     REMOTE: Symbol
 
     RESPONSE_ERRORS: Hash[untyped, untyped]
 
+    # <!-- rdoc-file=lib/net/imap/flags.rb -->
+    # Flag indicating a message has been read.
+    #
     SEEN: Symbol
 
+    # <!-- rdoc-file=lib/net/imap/flags.rb -->
+    # Mailbox attribute indicating that this mailbox is used to hold copies of
+    # messages that have been sent. Some server implementations might put messages
+    # here automatically. Alternatively, this might just be advice that a client
+    # save sent messages here.
+    #
     SENT: Symbol
 
     SSL_PORT: Integer
 
+    # <!-- rdoc-file=lib/net/imap/flags.rb -->
+    # The mailbox name was subscribed to using the SUBSCRIBE command.
+    #
     SUBSCRIBED: Symbol
 
+    # <!-- rdoc-file=lib/net/imap/flags.rb -->
+    # Mailbox attribute indicating that this mailbox is used to hold messages that
+    # have been deleted or marked for deletion. In some server implementations, this
+    # might be a virtual mailbox, containing messages from other mailboxes that are
+    # marked with the "Deleted" message flag. Alternatively, this might just be
+    # advice that a client that chooses not to use the IMAP "Deleted" model should
+    # use as its trash location. In server implementations that strictly expect the
+    # IMAP "Deleted" model, this special use is likely not to be supported.
+    #
     TRASH: Symbol
 
+    # <!-- rdoc-file=lib/net/imap/flags.rb -->
+    # The mailbox does not contain any additional messages since the last time the
+    # mailbox was selected.
+    #
+    # If it is not feasible for the server to determine whether or not the mailbox
+    # is "interesting", the server SHOULD NOT send either Marked or Unmarked. The
+    # server MUST NOT send more than one of Marked, Unmarked, and Noselect for a
+    # single mailbox, and it MAY send none of these.
+    #
     UNMARKED: Symbol
 
     VERSION: String
   end
 
+  # <!-- rdoc-file=lib/net/imap.rb -->
+  # Net::IMAP implements Internet Message Access Protocol (IMAP) client
+  # functionality.  The protocol is described in
+  # [[IMAP](https://tools.ietf.org/html/rfc3501)].
+  #
+  # ## IMAP Overview
+  #
+  # An IMAP client connects to a server, and then authenticates itself using
+  # either #authenticate or #login.  Having authenticated itself, there is a range
+  # of commands available to it.  Most work with mailboxes, which may be arranged
+  # in an hierarchical namespace, and each of which contains zero or more
+  # messages.  How this is implemented on the server is implementation-dependent;
+  # on a UNIX server, it will frequently be implemented as files in mailbox format
+  # within a hierarchy of directories.
+  #
+  # To work on the messages within a mailbox, the client must first select that
+  # mailbox, using either #select or (for read-only access) #examine.  Once the
+  # client has successfully selected a mailbox, they enter *selected* state, and
+  # that mailbox becomes the *current* mailbox, on which mail-item related
+  # commands implicitly operate.
+  #
+  # Messages have two sorts of identifiers: message sequence numbers and UIDs.
+  #
+  # Message sequence numbers number messages within a mailbox from 1 up to the
+  # number of items in the mailbox.  If a new message arrives during a session, it
+  # receives a sequence number equal to the new size of the mailbox.  If messages
+  # are expunged from the mailbox, remaining messages have their sequence numbers
+  # "shuffled down" to fill the gaps.
+  #
+  # UIDs, on the other hand, are permanently guaranteed not to identify another
+  # message within the same mailbox, even if the existing message is deleted.
+  # UIDs are required to be assigned in ascending (but not necessarily sequential)
+  # order within a mailbox; this means that if a non-IMAP client rearranges the
+  # order of mailitems within a mailbox, the UIDs have to be reassigned.  An IMAP
+  # client thus cannot rearrange message orders.
+  #
+  # ## Examples of Usage
+  #
+  # ### List sender and subject of all recent messages in the default mailbox
+  #
+  #     imap = Net::IMAP.new('mail.example.com')
+  #     imap.authenticate('LOGIN', 'joe_user', 'joes_password')
+  #     imap.examine('INBOX')
+  #     imap.search(["RECENT"]).each do |message_id|
+  #       envelope = imap.fetch(message_id, "ENVELOPE")[0].attr["ENVELOPE"]
+  #       puts "#{envelope.from[0].name}: \t#{envelope.subject}"
+  #     end
+  #
+  # ### Move all messages from April 2003 from "Mail/sent-mail" to "Mail/sent-apr03"
+  #
+  #     imap = Net::IMAP.new('mail.example.com')
+  #     imap.authenticate('LOGIN', 'joe_user', 'joes_password')
+  #     imap.select('Mail/sent-mail')
+  #     if not imap.list('Mail/', 'sent-apr03')
+  #       imap.create('Mail/sent-apr03')
+  #     end
+  #     imap.search(["BEFORE", "30-Apr-2003", "SINCE", "1-Apr-2003"]).each do |message_id|
+  #       imap.copy(message_id, "Mail/sent-apr03")
+  #       imap.store(message_id, "+FLAGS", [:Deleted])
+  #     end
+  #     imap.expunge
+  #
+  # ## Thread Safety
+  #
+  # Net::IMAP supports concurrent threads. For example,
+  #
+  #     imap = Net::IMAP.new("imap.foo.net", "imap2")
+  #     imap.authenticate("cram-md5", "bar", "password")
+  #     imap.select("inbox")
+  #     fetch_thread = Thread.start { imap.fetch(1..-1, "UID") }
+  #     search_result = imap.search(["BODY", "hello"])
+  #     fetch_result = fetch_thread.value
+  #     imap.disconnect
+  #
+  # This script invokes the FETCH command and the SEARCH command concurrently.
+  #
+  # ## Errors
+  #
+  # An IMAP server can send three different types of responses to indicate
+  # failure:
+  #
+  # NO
+  # :   the attempted command could not be successfully completed.  For instance,
+  #     the username/password used for logging in are incorrect; the selected
+  #     mailbox does not exist; etc.
+  #
+  # BAD
+  # :   the request from the client does not follow the server's understanding of
+  #     the IMAP protocol.  This includes attempting commands from the wrong
+  #     client state; for instance, attempting to perform a SEARCH command without
+  #     having SELECTed a current mailbox.  It can also signal an internal server
+  #     failure (such as a disk crash) has occurred.
+  #
+  # BYE
+  # :   the server is saying goodbye.  This can be part of a normal logout
+  #     sequence, and can be used as part of a login sequence to indicate that the
+  #     server is (for some reason) unwilling to accept your connection.  As a
+  #     response to any other command, it indicates either that the server is
+  #     shutting down, or that the server is timing out the client connection due
+  #     to inactivity.
+  #
+  #
+  # These three error response are represented by the errors
+  # Net::IMAP::NoResponseError, Net::IMAP::BadResponseError, and
+  # Net::IMAP::ByeResponseError, all of which are subclasses of
+  # Net::IMAP::ResponseError.  Essentially, all methods that involve sending a
+  # request to the server can generate one of these errors. Only the most
+  # pertinent instances have been documented below.
+  #
+  # Because the IMAP class uses Sockets for communication, its methods are also
+  # susceptible to the various errors that can occur when working with sockets.
+  # These are generally represented as Errno errors.  For instance, any method
+  # that involves sending a request to the server and/or receiving a response from
+  # it could raise an Errno::EPIPE error if the network connection unexpectedly
+  # goes down.  See the socket(7), ip(7), tcp(7), socket(2), connect(2), and
+  # associated man pages.
+  #
+  # Finally, a Net::IMAP::DataFormatError is thrown if low-level data is found to
+  # be in an incorrect format (for instance, when converting between UTF-8 and
+  # UTF-16), and Net::IMAP::ResponseParseError is thrown if a server response is
+  # non-parseable.
+  #
+  # ## References
+  #
+  # [[IMAP](https://tools.ietf.org/html/rfc3501)]
+  # :   Crispin, M. "INTERNET MESSAGE ACCESS PROTOCOL - VERSION 4rev1",
+  #     [RFC-3501](https://tools.ietf.org/html/rfc3501), March 2003.  (Note:
+  #     obsoletes [RFC-2060](https://tools.ietf.org/html/rfc2060), December 1996.)
+  #
+  # [[LANGUAGE-TAGS](https://tools.ietf.org/html/rfc1766)]
+  # :   Phillips, A. and Davis, M. "Tags for Identifying Languages",
+  #     [RFC-5646](https://tools.ietf.org/html/rfc5646), September 2009. (Note:
+  #     obsoletes [RFC-3066](https://tools.ietf.org/html/rfc3066), January 2001,
+  #     [RFC-4646](https://tools.ietf.org/html/rfc4646), September 2006, and
+  #     [RFC-1766](https://tools.ietf.org/html/rfc1766), March 1995.)
+  #
+  # [[MD5](https://tools.ietf.org/html/rfc1864)]
+  # :   Myers, J. and M. Rose, "The Content-MD5 Header Field",
+  #     [RFC-1864](https://tools.ietf.org/html/rfc1864), October 1995.
+  #
+  # [[MIME-IMB](https://tools.ietf.org/html/rfc2045)]
+  # :   Freed, N. and N. Borenstein, "MIME (Multipurpose Internet Mail Extensions)
+  #     Part One: Format of Internet Message Bodies",
+  #     [RFC-2045](https://tools.ietf.org/html/rfc2045), November 1996.
+  #
+  # [[RFC-5322](https://tools.ietf.org/html/rfc5322)]
+  # :   Resnick, P., "Internet Message Format",
+  #     [RFC-5322](https://tools.ietf.org/html/rfc5322), October 2008. (Note:
+  #     obsoletes [RFC-2822](https://tools.ietf.org/html/rfc2822), April 2001, and
+  #     [RFC-822](https://tools.ietf.org/html/rfc822), August 1982.)
+  #
+  # [[EXT-QUOTA](https://tools.ietf.org/html/rfc2087)]
+  # :   Myers, J., "IMAP4 QUOTA extension",
+  #     [RFC-2087](https://tools.ietf.org/html/rfc2087), January 1997.
+  #
+  # [[EXT-NAMESPACE](https://tools.ietf.org/html/rfc2342)]
+  # :   Gahrns, M. and Newman, C., "IMAP4 Namespace",
+  #     [RFC-2342](https://tools.ietf.org/html/rfc2342), May 1998.
+  #
+  # [[EXT-ID](https://tools.ietf.org/html/rfc2971)]
+  # :   Showalter, T., "IMAP4 ID extension",
+  #     [RFC-2971](https://tools.ietf.org/html/rfc2971), October 2000.
+  #
+  # [[EXT-ACL](https://tools.ietf.org/html/rfc4314)]
+  # :   Melnikov, A., "IMAP4 ACL extension",
+  #     [RFC-4314](https://tools.ietf.org/html/rfc4314), December 2005.  (Note:
+  #     obsoletes [RFC-2086](https://tools.ietf.org/html/rfc2086), January 1997.)
+  #
+  # [[EXT-SORT-THREAD](https://tools.ietf.org/html/rfc5256)]
+  # :   Crispin, M. and Muchison, K., "INTERNET MESSAGE ACCESS PROTOCOL - SORT and
+  #     THREAD Extensions", [RFC-5256](https://tools.ietf.org/html/rfc5256), June
+  #     2008.
+  #
+  # [[EXT-MOVE](https://tools.ietf.org/html/rfc6851)]
+  # :   Gulbrandsen, A. and Freed, N., "Internet Message Access Protocol (IMAP) -
+  #     MOVE Extension", [RFC-6851](https://tools.ietf.org/html/rfc6851), January
+  #     2013.
+  #
+  # [OSSL]
+  # :   http://www.openssl.org
+  #
+  # [RSSL]
+  # :   http://savannah.gnu.org/projects/rubypki
+  #
+  # [[UTF7](https://tools.ietf.org/html/rfc2152)]
+  # :   Goldsmith, D. and Davis, M., "UTF-7: A Mail-Safe Transformation Format of
+  #     Unicode", [RFC-2152](https://tools.ietf.org/html/rfc2152), May 1997.
+  #
   module IMAP
+    # <!-- rdoc-file=lib/net/imap/response_data.rb -->
+    # Net::IMAP::Address represents electronic mail addresses.
+    #
+    # #### Fields:
+    #
+    # name
+    # :   Returns the phrase from [RFC-822] mailbox.
+    #
+    # route
+    # :   Returns the route from [RFC-822] route-addr.
+    #
+    # mailbox
+    # :   nil indicates end of [RFC-822] group. If non-nil and host is nil, returns
+    #     [RFC-822] group name. Otherwise, returns [RFC-822] local-part.
+    #
+    # host
+    # :   nil indicates [RFC-822] group syntax. Otherwise, returns [RFC-822] domain
+    #     name.
+    #
     class Address
     end
 
@@ -269,65 +1777,282 @@ module Net
       def initialize: (untyped data) -> void
     end
 
+    # <!-- rdoc-file=lib/net/imap/authenticators.rb -->
+    # Registry for SASL authenticators used by Net::IMAP.
+    #
     module Authenticators
       public
 
+      # <!--
+      #   rdoc-file=lib/net/imap/authenticators.rb
+      #   - add_authenticator(auth_type, authenticator)
+      # -->
+      # Adds an authenticator for use with Net::IMAP#authenticate.  `auth_type` is the
+      # [SASL
+      # mechanism](https://www.iana.org/assignments/sasl-mechanisms/sasl-mechanisms.xh
+      # tml) supported by `authenticator` (for instance, "`PLAIN`").  The
+      # `authenticator` is an object which defines a `#process` method to handle
+      # authentication with the server.  See Net::IMAP::PlainAuthenticator,
+      # Net::IMAP::LoginAuthenticator, Net::IMAP::CramMD5Authenticator, and
+      # Net::IMAP::DigestMD5Authenticator for examples.
+      #
+      # If `auth_type` refers to an existing authenticator, it will be replaced by the
+      # new one.
+      #
       def add_authenticator: (untyped auth_type, untyped authenticator) -> untyped
 
+      # <!--
+      #   rdoc-file=lib/net/imap/authenticators.rb
+      #   - authenticator(auth_type, *args)
+      # -->
+      # Builds an authenticator for Net::IMAP#authenticate.  `args` will be passed
+      # directly to the chosen authenticator's `#initialize`.
+      #
       def authenticator: (untyped auth_type, *untyped args) -> untyped
 
       private
 
+      # <!--
+      #   rdoc-file=lib/net/imap/authenticators.rb
+      #   - authenticators()
+      # -->
+      #
       def authenticators: () -> untyped
     end
 
+    # <!-- rdoc-file=lib/net/imap/errors.rb -->
+    # Error raised upon a "BAD" response from the server, indicating that the client
+    # command violated the IMAP protocol, or an internal server failure has
+    # occurred.
+    #
     class BadResponseError < Net::IMAP::ResponseError
     end
 
+    # <!-- rdoc-file=lib/net/imap/response_data.rb -->
+    # Net::IMAP::BodyTypeAttachment represents attachment body structures of
+    # messages.
+    #
+    # #### Fields:
+    #
+    # media_type
+    # :   Returns the content media type name.
+    #
+    # subtype
+    # :   Returns `nil`.
+    #
+    # param
+    # :   Returns a hash that represents parameters.
+    #
+    # multipart?
+    # :   Returns false.
+    #
     class BodyTypeAttachment
       public
 
+      # <!--
+      #   rdoc-file=lib/net/imap/response_data.rb
+      #   - multipart?()
+      # -->
+      #
       def multipart?: () -> untyped
     end
 
+    # <!-- rdoc-file=lib/net/imap/response_data.rb -->
+    # Net::IMAP::BodyTypeBasic represents basic body structures of messages.
+    #
+    # #### Fields:
+    #
+    # media_type
+    # :   Returns the content media type name as defined in [MIME-IMB].
+    #
+    # subtype
+    # :   Returns the content subtype name as defined in [MIME-IMB].
+    #
+    # param
+    # :   Returns a hash that represents parameters as defined in [MIME-IMB].
+    #
+    # content_id
+    # :   Returns a string giving the content id as defined in [MIME-IMB].
+    #
+    # description
+    # :   Returns a string giving the content description as defined in [MIME-IMB].
+    #
+    # encoding
+    # :   Returns a string giving the content transfer encoding as defined in
+    #     [MIME-IMB].
+    #
+    # size
+    # :   Returns a number giving the size of the body in octets.
+    #
+    # md5
+    # :   Returns a string giving the body MD5 value as defined in [MD5].
+    #
+    # disposition
+    # :   Returns a Net::IMAP::ContentDisposition object giving the content
+    #     disposition.
+    #
+    # language
+    # :   Returns a string or an array of strings giving the body language value as
+    #     defined in [LANGUAGE-TAGS].
+    #
+    # extension
+    # :   Returns extension data.
+    #
+    # multipart?
+    # :   Returns false.
+    #
     class BodyTypeBasic
       public
 
+      # <!--
+      #   rdoc-file=lib/net/imap/response_data.rb
+      #   - media_subtype()
+      # -->
+      # Obsolete: use `subtype` instead.  Calling this will generate a warning message
+      # to `stderr`, then return the value of `subtype`.
+      #
       def media_subtype: () -> untyped
 
+      # <!--
+      #   rdoc-file=lib/net/imap/response_data.rb
+      #   - multipart?()
+      # -->
+      #
       def multipart?: () -> untyped
     end
 
     class BodyTypeExtension
       public
 
+      # <!--
+      #   rdoc-file=lib/net/imap/response_data.rb
+      #   - multipart?()
+      # -->
+      #
       def multipart?: () -> untyped
     end
 
+    # <!-- rdoc-file=lib/net/imap/response_data.rb -->
+    # Net::IMAP::BodyTypeMessage represents MESSAGE/RFC822 body structures of
+    # messages.
+    #
+    # #### Fields:
+    #
+    # envelope
+    # :   Returns a Net::IMAP::Envelope giving the envelope structure.
+    #
+    # body
+    # :   Returns an object giving the body structure.
+    #
+    #
+    # And Net::IMAP::BodyTypeMessage has all methods of Net::IMAP::BodyTypeText.
+    #
     class BodyTypeMessage
       public
 
+      # <!--
+      #   rdoc-file=lib/net/imap/response_data.rb
+      #   - media_subtype()
+      # -->
+      # Obsolete: use `subtype` instead.  Calling this will generate a warning message
+      # to `stderr`, then return the value of `subtype`.
+      #
       def media_subtype: () -> untyped
 
+      # <!--
+      #   rdoc-file=lib/net/imap/response_data.rb
+      #   - multipart?()
+      # -->
+      #
       def multipart?: () -> untyped
     end
 
+    # <!-- rdoc-file=lib/net/imap/response_data.rb -->
+    # Net::IMAP::BodyTypeMultipart represents multipart body structures of messages.
+    #
+    # #### Fields:
+    #
+    # media_type
+    # :   Returns the content media type name as defined in [MIME-IMB].
+    #
+    # subtype
+    # :   Returns the content subtype name as defined in [MIME-IMB].
+    #
+    # parts
+    # :   Returns multiple parts.
+    #
+    # param
+    # :   Returns a hash that represents parameters as defined in [MIME-IMB].
+    #
+    # disposition
+    # :   Returns a Net::IMAP::ContentDisposition object giving the content
+    #     disposition.
+    #
+    # language
+    # :   Returns a string or an array of strings giving the body language value as
+    #     defined in [LANGUAGE-TAGS].
+    #
+    # extension
+    # :   Returns extension data.
+    #
+    # multipart?
+    # :   Returns true.
+    #
     class BodyTypeMultipart
       public
 
+      # <!--
+      #   rdoc-file=lib/net/imap/response_data.rb
+      #   - media_subtype()
+      # -->
+      # Obsolete: use `subtype` instead.  Calling this will generate a warning message
+      # to `stderr`, then return the value of `subtype`.
+      #
       def media_subtype: () -> untyped
 
+      # <!--
+      #   rdoc-file=lib/net/imap/response_data.rb
+      #   - multipart?()
+      # -->
+      #
       def multipart?: () -> untyped
     end
 
+    # <!-- rdoc-file=lib/net/imap/response_data.rb -->
+    # Net::IMAP::BodyTypeText represents TEXT body structures of messages.
+    #
+    # #### Fields:
+    #
+    # lines
+    # :   Returns the size of the body in text lines.
+    #
+    #
+    # And Net::IMAP::BodyTypeText has all fields of Net::IMAP::BodyTypeBasic.
+    #
     class BodyTypeText
       public
 
+      # <!--
+      #   rdoc-file=lib/net/imap/response_data.rb
+      #   - media_subtype()
+      # -->
+      # Obsolete: use `subtype` instead.  Calling this will generate a warning message
+      # to `stderr`, then return the value of `subtype`.
+      #
       def media_subtype: () -> untyped
 
+      # <!--
+      #   rdoc-file=lib/net/imap/response_data.rb
+      #   - multipart?()
+      # -->
+      #
       def multipart?: () -> untyped
     end
 
+    # <!-- rdoc-file=lib/net/imap/errors.rb -->
+    # Error raised upon a "BYE" response from the server, indicating that the client
+    # is not being allowed to login, or has been timed out due to inactivity.
+    #
     class ByeResponseError < Net::IMAP::ResponseError
     end
 
@@ -347,38 +2072,133 @@ module Net
       def validate_internal: (untyped client_id) -> untyped
     end
 
+    # <!-- rdoc-file=lib/net/imap/response_data.rb -->
+    # Net::IMAP::ContentDisposition represents Content-Disposition fields.
+    #
+    # #### Fields:
+    #
+    # dsp_type
+    # :   Returns the disposition type.
+    #
+    # param
+    # :   Returns a hash that represents parameters of the Content-Disposition
+    #     field.
+    #
     class ContentDisposition
     end
 
+    # <!-- rdoc-file=lib/net/imap/response_data.rb -->
+    # Net::IMAP::ContinuationRequest represents command continuation requests.
+    #
+    # The command continuation request response is indicated by a "+" token instead
+    # of a tag.  This form of response indicates that the server is ready to accept
+    # the continuation of a command from the client.  The remainder of this response
+    # is a line of text.
+    #
+    #     continue_req    ::= "+" SPACE (resp_text / base64)
+    #
+    # #### Fields:
+    #
+    # data
+    # :   Returns the data (Net::IMAP::ResponseText).
+    #
+    # raw_data
+    # :   Returns the raw data string.
+    #
     class ContinuationRequest
     end
 
+    # <!-- rdoc-file=lib/net/imap/authenticators/cram_md5.rb -->
+    # Authenticator for the "`CRAM-MD5`" SASL mechanism, specified in
+    # [RFC2195](https://tools.ietf.org/html/rfc2195).  See Net::IMAP#authenticate.
+    #
+    # ## Deprecated
+    #
+    # `CRAM-MD5` is obsolete and insecure.  It is included for compatibility with
+    # existing servers.
+    # [draft-ietf-sasl-crammd5-to-historic](https://tools.ietf.org/html/draft-ietf-s
+    # asl-crammd5-to-historic-00.html) recommends using `SCRAM-*` or `PLAIN`
+    # protected by TLS instead.
+    #
+    # Additionally, [RFC8314](https://tools.ietf.org/html/rfc8314) discourage the
+    # use of cleartext and recommends TLS version 1.2 or greater be used for all
+    # traffic.  With TLS `CRAM-MD5` is okay, but so is `PLAIN`
+    #
     class CramMD5Authenticator
       public
 
+      # <!--
+      #   rdoc-file=lib/net/imap/authenticators/cram_md5.rb
+      #   - process(challenge)
+      # -->
+      #
       def process: (untyped challenge) -> untyped
 
       private
 
+      # <!--
+      #   rdoc-file=lib/net/imap/authenticators/cram_md5.rb
+      #   - hmac_md5(text, key)
+      # -->
+      #
       def hmac_md5: (untyped text, untyped key) -> untyped
 
+      # <!--
+      #   rdoc-file=lib/net/imap/authenticators/cram_md5.rb
+      #   - new(user, password)
+      # -->
+      #
       def initialize: (untyped user, untyped password) -> void
     end
 
+    # <!-- rdoc-file=lib/net/imap/errors.rb -->
+    # Error raised when data is in the incorrect format.
+    #
     class DataFormatError < Net::IMAP::Error
     end
 
+    # <!-- rdoc-file=lib/net/imap/authenticators/digest_md5.rb -->
+    # Net::IMAP authenticator for the "`DIGEST-MD5`" SASL mechanism type, specified
+    # in RFC2831(https://tools.ietf.org/html/rfc2831).  See Net::IMAP#authenticate.
+    #
+    # ## Deprecated
+    #
+    # "`DIGEST-MD5`" has been deprecated by
+    # [RFC6331](https://tools.ietf.org/html/rfc6331) and should not be relied on for
+    # security.  It is included for compatibility with existing servers.
+    #
     class DigestMD5Authenticator
       public
 
+      # <!--
+      #   rdoc-file=lib/net/imap/authenticators/digest_md5.rb
+      #   - process(challenge)
+      # -->
+      #
       def process: (untyped challenge) -> untyped
 
       private
 
+      # <!--
+      #   rdoc-file=lib/net/imap/authenticators/digest_md5.rb
+      #   - new(user, password, authname = nil)
+      # -->
+      #
       def initialize: (untyped user, untyped password, ?untyped authname) -> void
 
+      # <!--
+      #   rdoc-file=lib/net/imap/authenticators/digest_md5.rb
+      #   - nc(nonce)
+      # -->
+      #
       def nc: (untyped nonce) -> untyped
 
+      # <!--
+      #   rdoc-file=lib/net/imap/authenticators/digest_md5.rb
+      #   - qdval(k, v)
+      # -->
+      # some responses need quoting
+      #
       def qdval: (untyped k, untyped v) -> untyped
 
       STAGE_ONE: Symbol
@@ -386,15 +2206,107 @@ module Net
       STAGE_TWO: Symbol
     end
 
+    # <!-- rdoc-file=lib/net/imap/response_data.rb -->
+    # Net::IMAP::Envelope represents envelope structures of messages.
+    #
+    # #### Fields:
+    #
+    # date
+    # :   Returns a string that represents the date.
+    #
+    # subject
+    # :   Returns a string that represents the subject.
+    #
+    # from
+    # :   Returns an array of Net::IMAP::Address that represents the from.
+    #
+    # sender
+    # :   Returns an array of Net::IMAP::Address that represents the sender.
+    #
+    # reply_to
+    # :   Returns an array of Net::IMAP::Address that represents the reply-to.
+    #
+    # to
+    # :   Returns an array of Net::IMAP::Address that represents the to.
+    #
+    # cc
+    # :   Returns an array of Net::IMAP::Address that represents the cc.
+    #
+    # bcc
+    # :   Returns an array of Net::IMAP::Address that represents the bcc.
+    #
+    # in_reply_to
+    # :   Returns a string that represents the in-reply-to.
+    #
+    # message_id
+    # :   Returns a string that represents the message-id.
+    #
     class Envelope
     end
 
+    # <!-- rdoc-file=lib/net/imap/errors.rb -->
+    # Superclass of IMAP errors.
+    #
     class Error < StandardError
     end
 
+    # <!-- rdoc-file=lib/net/imap/response_data.rb -->
+    # Net::IMAP::FetchData represents the contents of the FETCH response.
+    #
+    # #### Fields:
+    #
+    # seqno
+    # :   Returns the message sequence number. (Note: not the unique identifier,
+    #     even for the UID command response.)
+    #
+    # attr
+    # :   Returns a hash. Each key is a data item name, and each value is its value.
+    #
+    #     The current data items are:
+    #
+    #     BODY
+    # :       A form of BODYSTRUCTURE without extension data.
+    #     [BODY](<section>)<<origin_octet>>
+    # :       A string expressing the body contents of the specified section.
+    #     BODYSTRUCTURE
+    # :       An object that describes the [MIME-IMB] body structure of a message.
+    #         See Net::IMAP::BodyTypeBasic, Net::IMAP::BodyTypeText,
+    #         Net::IMAP::BodyTypeMessage, Net::IMAP::BodyTypeMultipart.
+    #     ENVELOPE
+    # :       A Net::IMAP::Envelope object that describes the envelope structure of
+    #         a message.
+    #     FLAGS
+    # :       A array of flag symbols that are set for this message. Flag symbols
+    #         are capitalized by String#capitalize.
+    #     INTERNALDATE
+    # :       A string representing the internal date of the message.
+    #     RFC822
+    # :       Equivalent to `BODY[]`.
+    #     RFC822.HEADER
+    # :       Equivalent to `BODY.PEEK[HEADER]`.
+    #     RFC822.SIZE
+    # :       A number expressing the [RFC-822] size of the message.
+    #     RFC822.TEXT
+    # :       Equivalent to `BODY[TEXT]`.
+    #     UID
+    # :       A number expressing the unique identifier of the message.
+    #
     class FetchData
     end
 
+    # <!-- rdoc-file=lib/net/imap/response_data.rb -->
+    # Net::IMAP::IgnoredResponse represents intentionally ignored responses.
+    #
+    # This includes untagged response "NOOP" sent by eg. Zimbra to avoid some
+    # clients to close the connection.
+    #
+    # It matches no IMAP standard.
+    #
+    # #### Fields:
+    #
+    # raw_data
+    # :   Returns the raw data string.
+    #
     class IgnoredResponse
     end
 
@@ -410,13 +2322,42 @@ module Net
       def initialize: (untyped data) -> void
     end
 
+    # <!-- rdoc-file=lib/net/imap/authenticators/login.rb -->
+    # Authenticator for the "`LOGIN`" SASL mechanism.  See Net::IMAP#authenticate.
+    #
+    # `LOGIN` authentication sends the password in cleartext.
+    # [RFC3501](https://tools.ietf.org/html/rfc3501) encourages servers to disable
+    # cleartext authentication until after TLS has been negotiated.
+    # [RFC8314](https://tools.ietf.org/html/rfc8314) recommends TLS version 1.2 or
+    # greater be used for all traffic, and deprecate cleartext access ASAP.  `LOGIN`
+    # can be secured by TLS encryption.
+    #
+    # ## Deprecated
+    #
+    # The [SASL mechanisms
+    # registry](https://www.iana.org/assignments/sasl-mechanisms/sasl-mechanisms.xht
+    # ml) marks "LOGIN" as obsoleted in favor of "PLAIN".  It is included here for
+    # compatibility with existing servers.  See
+    # [draft-murchison-sasl-login](https://www.iana.org/go/draft-murchison-sasl-logi
+    # n) for both specification and deprecation.
+    #
     class LoginAuthenticator
       public
 
+      # <!--
+      #   rdoc-file=lib/net/imap/authenticators/login.rb
+      #   - process(data)
+      # -->
+      #
       def process: (untyped data) -> untyped
 
       private
 
+      # <!--
+      #   rdoc-file=lib/net/imap/authenticators/login.rb
+      #   - new(user, password)
+      # -->
+      #
       def initialize: (untyped user, untyped password) -> void
 
       STATE_PASSWORD: Symbol
@@ -424,15 +2365,88 @@ module Net
       STATE_USER: Symbol
     end
 
+    # <!-- rdoc-file=lib/net/imap/response_data.rb -->
+    # Net::IMAP::MailboxACLItem represents the response from GETACL.
+    #
+    #     acl_data        ::= "ACL" SPACE mailbox *(SPACE identifier SPACE rights)
+    #
+    #     identifier      ::= astring
+    #
+    #     rights          ::= astring
+    #
+    # #### Fields:
+    #
+    # user
+    # :   Login name that has certain rights to the mailbox that was specified with
+    #     the getacl command.
+    #
+    # rights
+    # :   The access rights the indicated user has to the mailbox.
+    #
     class MailboxACLItem
     end
 
+    # <!-- rdoc-file=lib/net/imap/response_data.rb -->
+    # Net::IMAP::MailboxList represents contents of the LIST response.
+    #
+    #     mailbox_list    ::= "(" #("\Marked" / "\Noinferiors" /
+    #                         "\Noselect" / "\Unmarked" / flag_extension) ")"
+    #                         SPACE (<"> QUOTED_CHAR <"> / nil) SPACE mailbox
+    #
+    # #### Fields:
+    #
+    # attr
+    # :   Returns the name attributes. Each name attribute is a symbol capitalized
+    #     by String#capitalize, such as :Noselect (not :NoSelect).
+    #
+    # delim
+    # :   Returns the hierarchy delimiter.
+    #
+    # name
+    # :   Returns the mailbox name.
+    #
     class MailboxList
     end
 
+    # <!-- rdoc-file=lib/net/imap/response_data.rb -->
+    # Net::IMAP::MailboxQuota represents contents of GETQUOTA response. This object
+    # can also be a response to GETQUOTAROOT.  In the syntax specification below,
+    # the delimiter used with the "#" construct is a single space (SPACE).
+    #
+    #     quota_list      ::= "(" #quota_resource ")"
+    #
+    #     quota_resource  ::= atom SPACE number SPACE number
+    #
+    #     quota_response  ::= "QUOTA" SPACE astring SPACE quota_list
+    #
+    # #### Fields:
+    #
+    # mailbox
+    # :   The mailbox with the associated quota.
+    #
+    # usage
+    # :   Current storage usage of the mailbox.
+    #
+    # quota
+    # :   Quota limit imposed on the mailbox.
+    #
     class MailboxQuota
     end
 
+    # <!-- rdoc-file=lib/net/imap/response_data.rb -->
+    # Net::IMAP::MailboxQuotaRoot represents part of the GETQUOTAROOT response.
+    # (GETQUOTAROOT can also return Net::IMAP::MailboxQuota.)
+    #
+    #     quotaroot_response ::= "QUOTAROOT" SPACE astring *(SPACE astring)
+    #
+    # #### Fields:
+    #
+    # mailbox
+    # :   The mailbox with the associated quota.
+    #
+    # quotaroots
+    # :   Zero or more quotaroots that affect the quota on the specified mailbox.
+    #
     class MailboxQuotaRoot
     end
 
@@ -452,15 +2466,59 @@ module Net
       def validate_internal: (untyped data) -> untyped
     end
 
+    # <!-- rdoc-file=lib/net/imap/response_data.rb -->
+    # Net::IMAP::Namespace represents a single [RFC-2342] namespace.
+    #
+    #     Namespace = nil / "(" 1*( "(" string SP  (<"> QUOTED_CHAR <"> /
+    #        nil) *(Namespace_Response_Extension) ")" ) ")"
+    #
+    #     Namespace_Response_Extension = SP string SP "(" string *(SP string)
+    #        ")"
+    #
+    # #### Fields:
+    #
+    # prefix
+    # :   Returns the namespace prefix string.
+    # delim
+    # :   Returns nil or the hierarchy delimiter character.
+    # extensions
+    # :   Returns a hash of extension names to extension flag arrays.
+    #
     class Namespace
     end
 
+    # <!-- rdoc-file=lib/net/imap/response_data.rb -->
+    # Net::IMAP::Namespaces represents the response from [RFC-2342] NAMESPACE.
+    #
+    #     Namespace_Response = "*" SP "NAMESPACE" SP Namespace SP Namespace SP
+    #        Namespace
+    #
+    #        ; The first Namespace is the Personal Namespace(s)
+    #        ; The second Namespace is the Other Users' Namespace(s)
+    #        ; The third Namespace is the Shared Namespace(s)
+    #
+    # #### Fields:
+    #
+    # personal
+    # :   Returns an array of Personal Net::IMAP::Namespace objects.
+    # other
+    # :   Returns an array of Other Users' Net::IMAP::Namespace objects.
+    # shared
+    # :   Returns an array of Shared Net::IMAP::Namespace objects.
+    #
     class Namespaces
     end
 
+    # <!-- rdoc-file=lib/net/imap/errors.rb -->
+    # Error raised upon a "NO" response from the server, indicating that the client
+    # command could not be completed successfully.
+    #
     class NoResponseError < Net::IMAP::ResponseError
     end
 
+    # <!-- rdoc-file=lib/net/imap/data_encoding.rb -->
+    # Common validators of number and nz_number types
+    #
     module NumValidator
       def self.ensure_mod_sequence_value: (untyped num) -> untyped
 
@@ -476,22 +2534,74 @@ module Net
 
       private
 
+      # <!--
+      #   rdoc-file=lib/net/imap/data_encoding.rb
+      #   - ensure_mod_sequence_value(num)
+      # -->
+      # Ensure argument is 'mod_sequence_value' or raise DataFormatError
+      #
       def ensure_mod_sequence_value: (untyped num) -> untyped
 
+      # <!--
+      #   rdoc-file=lib/net/imap/data_encoding.rb
+      #   - ensure_number(num)
+      # -->
+      # Ensure argument is 'number' or raise DataFormatError
+      #
       def ensure_number: (untyped num) -> untyped
 
+      # <!--
+      #   rdoc-file=lib/net/imap/data_encoding.rb
+      #   - ensure_nz_number(num)
+      # -->
+      # Ensure argument is 'nz_number' or raise DataFormatError
+      #
       def ensure_nz_number: (untyped num) -> untyped
 
+      # <!--
+      #   rdoc-file=lib/net/imap/data_encoding.rb
+      #   - valid_mod_sequence_value?(num)
+      # -->
+      # Check is passed argument valid 'mod_sequence_value' in RFC 4551 terminology
+      #
       def valid_mod_sequence_value?: (untyped num) -> untyped
 
+      # <!--
+      #   rdoc-file=lib/net/imap/data_encoding.rb
+      #   - valid_number?(num)
+      # -->
+      # Check is passed argument valid 'number' in RFC 3501 terminology
+      #
       def valid_number?: (untyped num) -> untyped
 
+      # <!--
+      #   rdoc-file=lib/net/imap/data_encoding.rb
+      #   - valid_nz_number?(num)
+      # -->
+      # Check is passed argument valid 'nz_number' in RFC 3501 terminology
+      #
       def valid_nz_number?: (untyped num) -> untyped
     end
 
+    # <!-- rdoc-file=lib/net/imap/authenticators/plain.rb -->
+    # Authenticator for the "`PLAIN`" SASL mechanism, specified in
+    # [RFC4616](https://tools.ietf.org/html/rfc4616).  See Net::IMAP#authenticate.
+    #
+    # `PLAIN` authentication sends the password in cleartext.
+    # [RFC3501](https://tools.ietf.org/html/rfc3501) encourages servers to disable
+    # cleartext authentication until after TLS has been negotiated.
+    # [RFC8314](https://tools.ietf.org/html/rfc8314) recommends TLS version 1.2 or
+    # greater be used for all traffic, and deprecate cleartext access ASAP.  `PLAIN`
+    # can be secured by TLS encryption.
+    #
     class PlainAuthenticator
       public
 
+      # <!--
+      #   rdoc-file=lib/net/imap/authenticators/plain.rb
+      #   - process(data)
+      # -->
+      #
       def process: (untyped data) -> untyped
 
       private
@@ -525,21 +2635,59 @@ module Net
       def initialize: (untyped data) -> void
     end
 
+    # <!-- rdoc-file=lib/net/imap/response_data.rb -->
+    # Net::IMAP::ResponseCode represents response codes.
+    #
+    #     resp_text_code  ::= "ALERT" /
+    #                         "BADCHARSET" [SP "(" astring *(SP astring) ")" ] /
+    #                         capability_data / "PARSE" /
+    #                         "PERMANENTFLAGS" SP "("
+    #                         [flag_perm *(SP flag_perm)] ")" /
+    #                         "READ-ONLY" / "READ-WRITE" / "TRYCREATE" /
+    #                         "UIDNEXT" SP nz_number / "UIDVALIDITY" SP nz_number /
+    #                         "UNSEEN" SP nz_number /
+    #                         atom [SP 1*<any TEXT-CHAR except "]">]
+    #
+    # #### Fields:
+    #
+    # name
+    # :   Returns the name, such as "ALERT", "PERMANENTFLAGS", or "UIDVALIDITY".
+    #
+    # data
+    # :   Returns the data, if it exists.
+    #
     class ResponseCode
     end
 
+    # <!-- rdoc-file=lib/net/imap/errors.rb -->
+    # Superclass of all errors used to encapsulate "fail" responses from the server.
+    #
     class ResponseError < Net::IMAP::Error
       public
 
+      # <!-- rdoc-file=lib/net/imap/errors.rb -->
+      # The response that caused this error
+      #
       def response: () -> untyped
 
+      # <!-- rdoc-file=lib/net/imap/errors.rb -->
+      # The response that caused this error
+      #
       def response=: (untyped) -> untyped
 
       private
 
+      # <!--
+      #   rdoc-file=lib/net/imap/errors.rb
+      #   - new(response)
+      # -->
+      #
       def initialize: (untyped response) -> void
     end
 
+    # <!-- rdoc-file=lib/net/imap/errors.rb -->
+    # Error raised when a response from the server is non-parseable.
+    #
     class ResponseParseError < Net::IMAP::Error
     end
 
@@ -803,9 +2951,35 @@ module Net
       end
     end
 
+    # <!-- rdoc-file=lib/net/imap/response_data.rb -->
+    # Net::IMAP::ResponseText represents texts of responses. The text may be
+    # prefixed by the response code.
+    #
+    #     resp_text       ::= ["[" resp-text-code "]" SP] text
+    #
+    # #### Fields:
+    #
+    # code
+    # :   Returns the response code. See ((<Net::IMAP::ResponseCode>)).
+    #
+    # text
+    # :   Returns the text.
+    #
     class ResponseText
     end
 
+    # <!-- rdoc-file=lib/net/imap/response_data.rb -->
+    # Net::IMAP::StatusData represents the contents of the STATUS response.
+    #
+    # #### Fields:
+    #
+    # mailbox
+    # :   Returns the mailbox name.
+    #
+    # attr
+    # :   Returns a hash. Each key is one of "MESSAGES", "RECENT", "UIDNEXT",
+    #     "UIDVALIDITY", "UNSEEN". Each value is a number.
+    #
     class StatusData
     end
 
@@ -820,26 +2994,114 @@ module Net
 
       private
 
+      # <!--
+      #   rdoc-file=lib/net/imap/command_data.rb
+      #   - nstring(str)
+      # -->
+      # coerces non-nil using `to_s`
+      #
       def nstring: (untyped str) -> untyped
 
+      # <!--
+      #   rdoc-file=lib/net/imap/command_data.rb
+      #   - string(str)
+      # -->
+      # coerces using `to_s`
+      #
       def string: (untyped str) -> untyped
 
+      # <!--
+      #   rdoc-file=lib/net/imap/command_data.rb
+      #   - valid_nstring?(str)
+      # -->
+      # Allows nil, symbols, and strings
+      #
       def valid_nstring?: (untyped str) -> untyped
 
+      # <!--
+      #   rdoc-file=lib/net/imap/command_data.rb
+      #   - valid_string?(str)
+      # -->
+      # Allows symbols in addition to strings
+      #
       def valid_string?: (untyped str) -> untyped
 
       LITERAL_REGEX: Regexp
     end
 
+    # <!-- rdoc-file=lib/net/imap/response_data.rb -->
+    # Net::IMAP::TaggedResponse represents tagged responses.
+    #
+    # The server completion result response indicates the success or failure of the
+    # operation.  It is tagged with the same tag as the client command which began
+    # the operation.
+    #
+    #     response_tagged ::= tag SPACE resp_cond_state CRLF
+    #
+    #     tag             ::= 1*<any ATOM_CHAR except "+">
+    #
+    #     resp_cond_state ::= ("OK" / "NO" / "BAD") SPACE resp_text
+    #
+    # #### Fields:
+    #
+    # tag
+    # :   Returns the tag.
+    #
+    # name
+    # :   Returns the name, one of "OK", "NO", or "BAD".
+    #
+    # data
+    # :   Returns the data. See ((<Net::IMAP::ResponseText>)).
+    #
+    # raw_data
+    # :   Returns the raw data string.
+    #
     class TaggedResponse
     end
 
+    # <!-- rdoc-file=lib/net/imap/response_data.rb -->
+    # Net::IMAP::ThreadMember represents a thread-node returned by Net::IMAP#thread.
+    #
+    # #### Fields:
+    #
+    # seqno
+    # :   The sequence number of this message.
+    #
+    # children
+    # :   An array of Net::IMAP::ThreadMember objects for mail items that are
+    #     children of this in the thread.
+    #
     class ThreadMember
     end
 
+    # <!-- rdoc-file=lib/net/imap/errors.rb -->
+    # Error raised upon an unknown response from the server.
+    #
     class UnknownResponseError < Net::IMAP::ResponseError
     end
 
+    # <!-- rdoc-file=lib/net/imap/response_data.rb -->
+    # Net::IMAP::UntaggedResponse represents untagged responses.
+    #
+    # Data transmitted by the server to the client and status responses that do not
+    # indicate command completion are prefixed with the token "*", and are called
+    # untagged responses.
+    #
+    #     response_data   ::= "*" SPACE (resp_cond_state / resp_cond_bye /
+    #                         mailbox_data / message_data / capability_data)
+    #
+    # #### Fields:
+    #
+    # name
+    # :   Returns the name, such as "FLAGS", "LIST", or "FETCH".
+    #
+    # data
+    # :   Returns the data such as an array of flag symbols, a
+    #     ((<Net::IMAP::MailboxList>)) object.
+    #
+    # raw_data
+    # :   Returns the raw data string.
+    #
     class UntaggedResponse
     end
   end
