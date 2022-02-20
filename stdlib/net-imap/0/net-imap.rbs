@@ -202,7 +202,7 @@ module Net
     # -->
     # Returns the debug mode.
     #
-    def self.debug: () -> untyped
+    def self.debug: () -> boolish
 
     # <!--
     #   rdoc-file=lib/net/imap.rb
@@ -210,7 +210,7 @@ module Net
     # -->
     # Sets the debug mode.
     #
-    def self.debug=: (untyped val) -> untyped
+    def self.debug=: (boolish val) -> boolish
 
     # <!--
     #   rdoc-file=lib/net/imap/data_encoding.rb
@@ -225,7 +225,7 @@ module Net
     # Net::IMAP does *not* automatically encode and decode mailbox names to and from
     # UTF-7.
     #
-    def self.decode_utf7: (untyped s) -> untyped
+    def self.decode_utf7: (String s) -> String
 
     # <!--
     #   rdoc-file=lib/net/imap.rb
@@ -247,7 +247,7 @@ module Net
     # -->
     # The default port for IMAP connections, port 143
     #
-    def self.default_port: () -> untyped
+    def self.default_port: () -> Integer
 
     # <!--
     #   rdoc-file=lib/net/imap.rb
@@ -262,7 +262,7 @@ module Net
     # -->
     # The default port for IMAPS connections, port 993
     #
-    def self.default_tls_port: () -> untyped
+    def self.default_tls_port: () -> Integer
 
     # <!--
     #   rdoc-file=lib/net/imap/data_encoding.rb
@@ -270,7 +270,11 @@ module Net
     # -->
     # Encode a string from UTF-8 format to modified UTF-7.
     #
-    def self.encode_utf7: (untyped s) -> untyped
+    def self.encode_utf7: (String s) -> String
+
+    interface _Strftime
+      def strftime: (String fmt) -> String
+    end
 
     # <!--
     #   rdoc-file=lib/net/imap/data_encoding.rb
@@ -278,7 +282,7 @@ module Net
     # -->
     # Formats `time` as an IMAP-style date.
     #
-    def self.format_date: (untyped time) -> untyped
+    def self.format_date: (_Strftime time) -> String
 
     # <!--
     #   rdoc-file=lib/net/imap/data_encoding.rb
@@ -286,7 +290,7 @@ module Net
     # -->
     # Formats `time` as an IMAP-style date-time.
     #
-    def self.format_datetime: (untyped time) -> untyped
+    def self.format_datetime: (_Strftime time) -> String
 
     public
 
@@ -304,7 +308,7 @@ module Net
     #       end
     #     }
     #
-    def add_response_handler: (?untyped handler) { (*untyped) -> untyped } -> untyped
+    def add_response_handler: (^(*untyped resp) -> void ) { (*untyped resp) -> void } -> untyped
 
     # <!--
     #   rdoc-file=lib/net/imap.rb
@@ -327,7 +331,7 @@ module Net
     # not created automatically), or if the flags, date_time, or message arguments
     # contain errors.
     #
-    def append: (untyped mailbox, untyped message, ?untyped flags, ?untyped date_time) -> untyped
+    def append: (String mailbox, String message, ?Array flags, ?untyped date_time) -> untyped
 
     # <!--
     #   rdoc-file=lib/net/imap.rb
@@ -372,7 +376,7 @@ module Net
     # capabilities of the server; it is up to the user of the class to ensure that a
     # certain capability is supported by a server before using it.
     #
-    def capability: () -> untyped
+    def capability: () -> Array[String]
 
     # <!--
     #   rdoc-file=lib/net/imap.rb
