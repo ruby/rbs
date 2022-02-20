@@ -73,6 +73,8 @@ module RBS
         if set = result.incompatible?(entry.decl.type_params)
           set.each do |param_name|
             param = entry.decl.type_params.find {|param| param.name == param_name } or raise
+            next if param.unchecked?
+
             raise InvalidVarianceAnnotationError.new(
               type_name: type_name,
               param: param,
