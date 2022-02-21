@@ -213,7 +213,7 @@ module RBS
       alias eql? ==
 
       def hash
-        self.class.hash ^ name.hash ^ args.hash
+        name.hash ^ args.hash
       end
 
       def free_variables(set = Set.new)

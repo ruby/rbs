@@ -34,7 +34,7 @@ module RBS
         alias eql? ==
 
         def hash
-          self.class.hash ^ name.hash ^ kind.hash ^ types.hash ^ overload.hash
+          name.hash ^ kind.hash ^ types.hash ^ overload.hash
         end
 
         def instance?
@@ -94,7 +94,7 @@ module RBS
         alias eql? ==
 
         def hash
-          self.class.hash ^ name.hash ^ type.hash
+          name.hash ^ type.hash
         end
       end
 
@@ -164,7 +164,7 @@ module RBS
         end
 
         def hash
-          self.class.hash ^ name.hash ^ args.hash
+          name.hash ^ args.hash
         end
       end
 
@@ -243,7 +243,7 @@ module RBS
         alias eql? ==
 
         def hash
-          self.class.hash ^ name.hash ^ type.hash ^ ivar_name.hash ^ kind.hash
+          name.hash ^ type.hash ^ ivar_name.hash ^ kind.hash
         end
 
         def update(name: self.name, type: self.type, ivar_name: self.ivar_name, kind: self.kind, annotations: self.annotations, location: self.location, comment: self.comment)
@@ -372,7 +372,7 @@ module RBS
         alias eql? ==
 
         def hash
-          self.class.hash ^ new_name.hash ^ old_name.hash ^ kind.hash
+          new_name.hash ^ old_name.hash ^ kind.hash
         end
 
         def to_json(state = _ = nil)
