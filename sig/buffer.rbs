@@ -11,11 +11,15 @@ module RBS
     # The content of the buffer.
     attr_reader content: String
 
-    attr_reader lines: Array[String]
+    @lines: Array[String]
 
-    attr_reader ranges: Array[Range[Integer]]
+    @ranges: Array[Range[Integer]]
 
     def initialize: (name: untyped name, content: String content) -> void
+
+    def lines: () -> Array[String]
+
+    def ranges: () -> Array[Range[Integer]]
 
     # Translate position to location.
     def pos_to_loc: (Integer pos) -> loc
