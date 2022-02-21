@@ -272,4 +272,18 @@ class Foo
 end
     SIG
   end
+
+  def test_write_visibility_modifier
+    assert_writer <<-SIG, preserve: true
+class Foo
+  private def foo: () -> String
+
+  public def bar: () -> String
+
+  def baz: () -> String
+
+  private attr_reader name: String
+end
+    SIG
+  end
 end
