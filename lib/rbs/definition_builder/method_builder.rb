@@ -134,19 +134,19 @@ module RBS
 
             Methods.new(type: type).tap do |methods|
               entry.decls.each do |d|
-                each_member_with_accessibility(d.decl.members) do |member, accessibility|
+                d.decl.members.each do |member|
                   case member
                   when AST::Members::MethodDefinition
                     if member.singleton?
-                      build_method(methods, type, member: member, accessibility: accessibility)
+                      build_method(methods, type, member: member, accessibility: :public)
                     end
                   when AST::Members::AttrReader, AST::Members::AttrWriter, AST::Members::AttrAccessor
                     if member.kind == :singleton
-                      build_attribute(methods, type, member: member, accessibility: accessibility)
+                      build_attribute(methods, type, member: member, accessibility: :public)
                     end
                   when AST::Members::Alias
                     if member.kind == :singleton
-                      build_alias(methods, type, member: member, accessibility: accessibility)
+                      build_alias(methods, type, member: member, accessibility: :public)
                     end
                   end
                 end
