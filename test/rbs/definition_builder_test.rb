@@ -2031,4 +2031,45 @@ end
       end
     end
   end
+
+  def test_module_function
+    SignatureManager.new do |manager|
+      manager.files.merge!(Pathname("foo.rbs") => <<-EOF)
+class C
+  def self?.a: () -> void
+end
+
+module M
+  def self?.b: () -> void
+end
+      EOF
+      manager.build do |env|
+        builder = DefinitionBuilder.new(env: env)
+
+        builder.build_singleton(type_name("::C")).tap do |definition|
+          definition.methods[:a].tap do |a|
+            assert_predicate a, :public?
+          end
+        end
+
+        builder.build_instance(type_name("::C")).tap do |definition|
+          definition.methods[:a].tap do |a|
+            assert_predicate a, :private?
+          end
+        end
+
+        builder.build_singleton(type_name("::M")).tap do |definition|
+          definition.methods[:b].tap do |b|
+            assert_predicate b, :public?
+          end
+        end
+
+        builder.build_instance(type_name("::M")).tap do |definition|
+          definition.methods[:b].tap do |b|
+            assert_predicate b, :private?
+          end
+        end
+      end
+    end
+  end
 end

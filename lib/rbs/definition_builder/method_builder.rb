@@ -102,11 +102,21 @@ module RBS
                 each_member_with_accessibility(d.decl.members) do |member, accessibility|
                   case member
                   when AST::Members::MethodDefinition
-                    if member.instance?
-                      build_method(methods,
-                                   type,
-                                   member: member.update(types: member.types.map {|type| type.sub(subst) }),
-                                   accessibility: accessibility)
+                    case member.kind
+                    when :instance
+                      build_method(
+                        methods,
+                        type,
+                        member: member.update(types: member.types.map {|type| type.sub(subst) }),
+                        accessibility: accessibility
+                      )
+                    when :singleton_instance
+                      build_method(
+                        methods,
+                        type,
+                        member: member.update(types: member.types.map {|type| type.sub(subst) }),
+                        accessibility: :private
+                      )
                     end
                   when AST::Members::AttrReader, AST::Members::AttrWriter, AST::Members::AttrAccessor
                     if member.kind == :instance
