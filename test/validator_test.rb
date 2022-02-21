@@ -166,4 +166,22 @@ type bar[T < _Foo[S], S < _Bar[T]] = nil
       end
     end
   end
+
+  def test_unchecked_type_alias
+    SignatureManager.new do |manager|
+      manager.add_file("test.rbs", <<-RBS)
+class Foo[in A, out B]
+end
+
+type foo[unchecked out A, unchecked in B] = Foo[A, B]
+      RBS
+
+      manager.build do |env|
+        resolver = RBS::TypeNameResolver.from_env(env)
+        validator = RBS::Validator.new(env: env, resolver: resolver)
+
+        validator.validate_type_alias(entry: env.alias_decls[type_name("::foo")])
+      end
+    end
+  end
 end
