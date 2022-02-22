@@ -279,13 +279,12 @@ _member_ ::= _ivar-member_                # Ivar definition
            | _extend-member_              # Mixin (extend)
            | _prepend-member_             # Mixin (prepend)
            | _alias-member_               # Alias
-           | `public`                     # Public
-           | `private`                    # Private
+           | _visibility-member_          # Visibility member
 
 _ivar-member_ ::= _ivar-name_ `:` _type_
 
-_method-member_ ::= `def` _method-name_ `:` _method-types_            # Instance method
-                  | `def self.` _method-name_ `:` _method-types_      # Singleton method
+_method-member_ ::= _visibility_ `def` _method-name_ `:` _method-types_            # Instance method
+                  | _visibility_ `def self.` _method-name_ `:` _method-types_      # Singleton method
                   | `def self?.` _method-name_ `:` _method-types_     # Singleton and instance method
 
 _method-types_ ::= _method-type-parameters_ _method-type_                       # Single method type
@@ -295,9 +294,11 @@ _method-types_ ::= _method-type-parameters_ _method-type_                       
 _method-type-parameters_ ::=                                                    # Empty
                            | `[` _type-variable_ `,` ... `]`
 
-_attribute-member_ ::= _attribute-type_ _method-name_ `:` _type_                     # Attribute
-                     | _attribute-type_ _method-name_ `(` _ivar-name_ `) :` _type_   # Attribute with variable name specification
-                     | _attribute-type_ _method-name_ `() :` _type_                  # Attribute without variable
+_attribute-member_ ::= _visibility_ _attribute-type_ _method-name_ `:` _type_                     # Attribute
+                     | _visibility_ _attribute-type_ _method-name_ `(` _ivar-name_ `) :` _type_   # Attribute with variable name specification
+                     | _visibility_ _attribute-type_ _method-name_ `() :` _type_                  # Attribute without variable
+
+_visibility_ ::= `public` | `private`
 
 _attribute-type_ ::= `attr_reader` | `attr_writer` | `attr_accessor`
 
@@ -309,6 +310,8 @@ _prepend-member_ ::= `prepend` _class-name_ _type-arguments_
 
 _alias-member_ ::= `alias` _method-name_ _method-name_
                  | `alias self.` _method-name_ `self.` _method-name_
+
+_visibility-member_ ::= _visibility_
 
 _ivar-name_ ::= /@\w+/
 _method-name_ ::= ...
@@ -353,6 +356,16 @@ def +: (Float | Integer) -> (Float | Integer)
      | (Numeric) -> Numeric
 ```
 
+Adding `public` and `private` modifier changes the visibility of the method.
+
+```
+private def puts: (*untyped) -> void       # Defines private instance method
+
+public def self.puts: (*untyped) -> void   # Defines public singleton method
+
+public def self?.puts: (*untyped) -> void  # 🚨🚨🚨 Error: `?.` has own visibility semantics (== `module_function`) 🚨🚨🚨
+```
+
 ### Attribute definition
 
 Attribute definitions help to define methods and instance variables based on the convention of `attr_reader`, `attr_writer` and `attr_accessor` methods in Ruby.
@@ -374,6 +387,14 @@ attr_writer name (@raw_name) : String
 attr_accessor people (): Array[Person]
 # def people: () -> Array[Person]
 # def people=: (Array[Person]) -> Array[Person]
+```
+
+Attribute definitions can have the `public` and `private` modifiers like method definitions:
+
+```
+private attr_accessor id: Integer
+
+private attr_reader self.name: String
 ```
 
 ### Mixin (include), Mixin (extend), Mixin (prepend)
@@ -404,11 +425,31 @@ def map: [X] () { (String) -> X } -> Array[X]
 alias collect map                                   # `#collect` has the same type with `map`
 ```
 
-### `public`, `private`
+### Visibility member
 
-`public` and `private` allows specifying the visibility of instance methods.
+Visibility member allows specifying the default visibility of instance methods and instance attributes.
 
-These work only as _statements_, not per-method specifier.
+```rbs
+public
+
+def foo: () -> void          # public instance method
+
+attr_reader name: String     # public instance attribute
+
+private
+
+def bar: () -> void          # private instance method
+
+attr_reader email: String    # private instance attribute
+```
+
+The visibility _modifiers_ overwrite the default visibility per member bases.
+
+The visibility member requires a new line `\n` after the token.
+
+```rbs
+private alias foo bar       # Syntax error
+```
 
 ## Declarations
 
