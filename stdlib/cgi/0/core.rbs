@@ -354,11 +354,6 @@ class CGI
   def initialize: (?String tag_maker) ?{ (String name, String value) -> void } -> void
                 | (Hash[Symbol, untyped] options_hash) ?{ (String name, String value) -> void } -> void
 
-  # <!-- rdoc-file=lib/cgi/core.rb -->
-  # Return the accept character set for this CGI instance.
-  #
-  attr_reader accept_charset: String
-
   # <!--
   #   rdoc-file=lib/cgi/core.rb
   #   - accept_charset()
@@ -392,7 +387,7 @@ class CGI
   # <!-- rdoc-file=lib/cgi/core.rb -->
   # Return the accept character set for this CGI instance.
   #
-  def accept_charset: () -> String
+  attr_reader accept_charset: String
 
   # <!-- rdoc-file=lib/cgi/core.rb -->
   # This method is an alias for #http_header, when HTML5 tag maker is inactive.
