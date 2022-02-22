@@ -188,6 +188,7 @@
 #
 class Set[unchecked out A]
   include Enumerable[A]
+
   # <!--
   #   rdoc-file=lib/set.rb
   #   - new(enum = nil) { |o| ... }

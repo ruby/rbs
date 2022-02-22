@@ -272,6 +272,7 @@ class CGI
   include CGI::Util
 
   extend CGI::Util
+
   # <!--
   #   rdoc-file=lib/cgi/core.rb
   #   - CGI.new(tag_maker) { block }
@@ -352,6 +353,7 @@ class CGI
   #
   def initialize: (?String tag_maker) ?{ (String name, String value) -> void } -> void
                 | (Hash[Symbol, untyped] options_hash) ?{ (String name, String value) -> void } -> void
+
   # <!-- rdoc-file=lib/cgi/core.rb -->
   # Return the accept character set for this CGI instance.
   #
@@ -392,6 +394,7 @@ class CGI
   #
   def accept_charset: () -> String
 
+  # <!-- rdoc-file=lib/cgi/core.rb -->
   # This method is an alias for #http_header, when HTML5 tag maker is inactive.
   #
   # NOTE: use #http_header to create HTTP header blocks, this alias is only
@@ -658,6 +661,7 @@ class CGI
 
   VERSION: String
 
+  # <!-- rdoc-file=lib/cgi/cookie.rb -->
   # Class representing an HTTP cookie.
   #
   # In addition to its specific fields and methods, a Cookie instance is a
@@ -694,7 +698,12 @@ class CGI
   #     cookie1.expires  = Time.now + 30
   #     cookie1.secure   = true
   #     cookie1.httponly = true
+  #
   class Cookie < Array[String]
+    # <!--
+    #   rdoc-file=lib/cgi/cookie.rb
+    #   - parse(raw_cookie)
+    # -->
     # Parse a raw cookie string into a hash of cookie-name=>Cookie pairs.
     #
     #     cookies = CGI::Cookie.parse("raw_cookie_string")
@@ -704,62 +713,104 @@ class CGI
 
     public
 
+    # <!-- rdoc-file=lib/cgi/cookie.rb -->
     # Domain for which this cookie applies, as a `String`
     #
     def domain: () -> String?
 
+    # <!-- rdoc-file=lib/cgi/cookie.rb -->
+    # Domain for which this cookie applies, as a `String`
+    #
     def domain=: (String domain) -> String
 
+    # <!-- rdoc-file=lib/cgi/cookie.rb -->
     # Time at which this cookie expires, as a `Time`
     #
     def expires: () -> Time?
 
+    # <!-- rdoc-file=lib/cgi/cookie.rb -->
+    # Time at which this cookie expires, as a `Time`
+    #
     def expires=: (Time time) -> Time
 
+    # <!-- rdoc-file=lib/cgi/cookie.rb -->
     # True if this cookie is httponly; false otherwise
     #
     def httponly: () -> bool
 
+    # <!--
+    #   rdoc-file=lib/cgi/cookie.rb
+    #   - httponly=(val)
+    # -->
     # Set whether the Cookie is a httponly cookie or not.
     #
     # `val` must be a boolean.
     #
     def httponly=: (boolish val) -> bool
 
+    # <!--
+    #   rdoc-file=lib/cgi/cookie.rb
+    #   - inspect()
+    # -->
     # A summary of cookie string.
     #
     def inspect: () -> String
 
+    # <!-- rdoc-file=lib/cgi/cookie.rb -->
     # Name of this cookie, as a `String`
     #
     def name: () -> String
 
+    # <!-- rdoc-file=lib/cgi/cookie.rb -->
+    # Name of this cookie, as a `String`
+    #
     def name=: (String name) -> String
 
+    # <!-- rdoc-file=lib/cgi/cookie.rb -->
     # Path for which this cookie applies, as a `String`
     #
     def path: () -> String?
 
+    # <!-- rdoc-file=lib/cgi/cookie.rb -->
+    # Path for which this cookie applies, as a `String`
+    #
     def path=: (String path) -> String
 
+    # <!-- rdoc-file=lib/cgi/cookie.rb -->
     # True if this cookie is secure; false otherwise
     #
     def secure: () -> bool
 
+    # <!--
+    #   rdoc-file=lib/cgi/cookie.rb
+    #   - secure=(val)
+    # -->
     # Set whether the Cookie is a secure cookie or not.
     #
     # `val` must be a boolean.
     #
     def secure=: [A] (boolish val) -> A
 
+    # <!--
+    #   rdoc-file=lib/cgi/cookie.rb
+    #   - to_s()
+    # -->
     # Convert the Cookie to its string representation.
     #
     def to_s: () -> String
 
+    # <!--
+    #   rdoc-file=lib/cgi/cookie.rb
+    #   - value()
+    # -->
     # Returns the value or list of values for this cookie.
     #
     def value: () -> Array[String]
 
+    # <!--
+    #   rdoc-file=lib/cgi/cookie.rb
+    #   - value=(val)
+    # -->
     # Replaces the value of this cookie with a new value or list of values.
     #
     def value=: (String val) -> String
@@ -767,6 +818,11 @@ class CGI
 
     private
 
+    # <!--
+    #   rdoc-file=lib/cgi/cookie.rb
+    #   - Cookie.new(name_string,*value)
+    #   - Cookie.new(options_hash)
+    # -->
     # Create a new CGI::Cookie object.
     #
     # `name_string`
@@ -799,7 +855,6 @@ class CGI
     #
     #     These keywords correspond to attributes of the cookie object.
     #
-    #
     def initialize: (String name_string, *String value) -> void
                   | (Hash[String, untyped] options_hash) -> void
   end
@@ -807,27 +862,46 @@ class CGI
   module Escape
     public
 
+    # <!--
+    #   rdoc-file=ext/cgi/escape/escape.c
+    #   - CGI.escape(string) -> string
+    # -->
     # Returns URL-escaped string.
     #
     def escape: (string str) -> String
 
+    # <!--
+    #   rdoc-file=ext/cgi/escape/escape.c
+    #   - CGI.escapeHTML(string) -> string
+    # -->
     # Returns HTML-escaped string.
     #
     def escapeHTML: (string str) -> String
 
+    # <!--
+    #   rdoc-file=ext/cgi/escape/escape.c
+    #   - CGI.unescape(string, encoding=@@accept_charset) -> string
+    # -->
     # Returns URL-unescaped string.
     #
     def unescape: (string str, ?encoding encoding) -> String
 
+    # <!--
+    #   rdoc-file=ext/cgi/escape/escape.c
+    #   - CGI.unescapeHTML(string) -> string
+    # -->
     # Returns HTML-unescaped string.
     #
     def unescapeHTML: (string str) -> String
   end
 
+  # <!-- rdoc-file=lib/cgi/core.rb -->
   # Exception raised when there is an invalid encoding detected
+  #
   class InvalidEncoding < Exception
   end
 
+  # <!-- rdoc-file=lib/cgi/core.rb -->
   # Mixin module that provides the following:
   #
   # 1.  Access to the CGI environment variables as methods.  See documentation to
@@ -848,6 +922,10 @@ class CGI
   module QueryExtension
     public
 
+    # <!--
+    #   rdoc-file=lib/cgi/core.rb
+    #   - [](key)
+    # -->
     # Get the value for the parameter with a given key.
     #
     # If the parameter has multiple values, only the first will be retrieved; use
@@ -871,14 +949,19 @@ class CGI
 
     def content_type: () -> String?
 
+    # <!-- rdoc-file=lib/cgi/core.rb -->
     # Get the cookies as a hash of cookie-name=>Cookie pairs.
     #
     def cookies: () -> Hash[String, Cookie]
 
+    # <!-- rdoc-file=lib/cgi/core.rb -->
+    # Get the cookies as a hash of cookie-name=>Cookie pairs.
+    #
     def cookies=: (Hash[String, Cookie] cookies) -> Hash[String, Cookie]
 
     def create_body: (boolish is_large) -> (Tempfile | StringIO)
 
+    # <!-- rdoc-file=lib/cgi/core.rb -->
     # Get the uploaded files as a hash of name=>values pairs
     #
     def files: () -> Hash[String, Tempfile | StringIO]
@@ -887,30 +970,57 @@ class CGI
 
     def gateway_interface: () -> String?
 
+    # <!--
+    #   rdoc-file=lib/cgi/core.rb
+    #   - has_key?(*args)
+    # -->
     # Returns true if a given query string parameter exists.
     #
     def has_key?: (String key) -> bool
 
     def host: () -> String?
 
+    # <!--
+    #   rdoc-file=lib/cgi/core.rb
+    #   - include?(*args)
+    # -->
+    #
     alias include? has_key?
 
+    # <!--
+    #   rdoc-file=lib/cgi/core.rb
+    #   - key?(*args)
+    # -->
+    #
     alias key? has_key?
 
+    # <!--
+    #   rdoc-file=lib/cgi/core.rb
+    #   - keys(*args)
+    # -->
     # Return all query parameter names as an array of String.
     #
     def keys: () -> Array[String]
 
+    # <!--
+    #   rdoc-file=lib/cgi/core.rb
+    #   - multipart?()
+    # -->
     # Returns whether the form contained multipart/form-data
     #
     def multipart?: () -> bool
 
     def negotiate: () -> String?
 
+    # <!-- rdoc-file=lib/cgi/core.rb -->
     # Get the parameters as a hash of name=>values pairs, where values is an Array.
     #
     def params: () -> Hash[String, Array[String] | Tempfile | StringIO]
 
+    # <!--
+    #   rdoc-file=lib/cgi/core.rb
+    #   - params=(hash)
+    # -->
     # Set all the parameters.
     #
     def params=: (Hash[String, Array[String] | Tempfile | StringIO] hash) -> Hash[String, Array[String] | Tempfile | StringIO]
@@ -923,10 +1033,18 @@ class CGI
 
     def query_string: () -> String?
 
+    # <!--
+    #   rdoc-file=lib/cgi/core.rb
+    #   - raw_cookie()
+    # -->
     # Get the raw cookies as a string.
     #
     def raw_cookie: () -> String?
 
+    # <!--
+    #   rdoc-file=lib/cgi/core.rb
+    #   - raw_cookie2()
+    # -->
     # Get the raw RFC2965 cookies as a string.
     #
     def raw_cookie2: () -> String?
@@ -959,6 +1077,10 @@ class CGI
 
     private
 
+    # <!--
+    #   rdoc-file=lib/cgi/core.rb
+    #   - initialize_query()
+    # -->
     # A wrapper class to use a StringIO object as the body and switch to a TempFile
     # when the passed threshold is passed. Initialize the data from the query.
     #
@@ -967,10 +1089,18 @@ class CGI
     #
     def initialize_query: () -> void
 
+    # <!--
+    #   rdoc-file=lib/cgi/core.rb
+    #   - read_from_cmdline()
+    # -->
     # offline mode. read name=value pairs on standard input.
     #
     def read_from_cmdline: () -> String
 
+    # <!--
+    #   rdoc-file=lib/cgi/core.rb
+    #   - read_multipart(boundary, content_length)
+    # -->
     # Parses multipart form elements according to
     #     http://www.w3.org/TR/html401/interact/forms.html#h-17.13.4.2
     #
@@ -987,6 +1117,10 @@ class CGI
 
     public
 
+    # <!--
+    #   rdoc-file=lib/cgi/util.rb
+    #   - escapeElement(string, *elements)
+    # -->
     # Escape only the tags of certain HTML elements in `string`.
     #
     # Takes an element or elements or array of elements.  Each element is specified
@@ -1003,16 +1137,27 @@ class CGI
     #
     def escapeElement: (string string, *String | Array[String] elements) -> String
 
+    # <!-- rdoc-file=lib/cgi/util.rb -->
     # Synonym for CGI.escapeElement(str)
     #
     alias escape_element escapeElement
 
+    # <!-- rdoc-file=lib/cgi/util.rb -->
     # Synonym for CGI.escapeHTML(str)
     #
     alias escape_html escapeHTML
 
+    # <!--
+    #   rdoc-file=lib/cgi/util.rb
+    #   - h(string)
+    # -->
+    #
     alias h escapeHTML
 
+    # <!--
+    #   rdoc-file=lib/cgi/util.rb
+    #   - pretty(string, shift = " ")
+    # -->
     # Prettify (indent) an HTML string.
     #
     # `string` is the HTML string to indent.  `shift` is the indentation unit to
@@ -1032,6 +1177,10 @@ class CGI
     #
     def pretty: (string string, ?String shift) -> String
 
+    # <!--
+    #   rdoc-file=lib/cgi/util.rb
+    #   - rfc1123_date(time)
+    # -->
     # Format a `Time` object as a String using the format specified by RFC 1123.
     #
     #     CGI.rfc1123_date(Time.now)
@@ -1039,6 +1188,10 @@ class CGI
     #
     def rfc1123_date: (Time time) -> String
 
+    # <!--
+    #   rdoc-file=lib/cgi/util.rb
+    #   - unescapeElement(string, *elements)
+    # -->
     # Undo escaping such as that done by CGI.escapeElement()
     #
     #     print CGI.unescapeElement(
@@ -1051,10 +1204,12 @@ class CGI
     #
     def unescapeElement: (string string, *String | Array[String] elements) -> String
 
+    # <!-- rdoc-file=lib/cgi/util.rb -->
     # Synonym for CGI.unescapeElement(str)
     #
     alias unescape_element unescapeElement
 
+    # <!-- rdoc-file=lib/cgi/util.rb -->
     # Synonym for CGI.unescapeHTML(str)
     #
     alias unescape_html unescapeHTML
@@ -1065,7 +1220,9 @@ class CGI
     # Abbreviated month names specified by RFC 822
     RFC822_MONTHS: Array[String]
 
+    # <!-- rdoc-file=lib/cgi/util.rb -->
     # The set of special characters and their escaped values
+    #
     TABLE_FOR_ESCAPE_HTML__: Hash[String, String]
   end
 end
