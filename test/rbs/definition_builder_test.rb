@@ -2099,4 +2099,68 @@ end
       end
     end
   end
+
+  def test_def_with_visibility_modifier
+    SignatureManager.new do |manager|
+      manager.files.merge!(Pathname("foo.rbs") => <<-EOF)
+class C
+  private def self.a: () -> void
+end
+
+module M
+  private
+  public def b: () -> void
+end
+      EOF
+      manager.build do |env|
+        builder = DefinitionBuilder.new(env: env)
+
+        builder.build_singleton(type_name("::C")).tap do |definition|
+          definition.methods[:a].tap do |a|
+            assert_predicate a, :private?
+          end
+        end
+
+        builder.build_instance(type_name("::M")).tap do |definition|
+          definition.methods[:b].tap do |b|
+            assert_predicate b, :public?
+          end
+        end
+      end
+    end
+  end
+
+  def test_attribute_with_visibility_modifier
+    SignatureManager.new do |manager|
+      manager.files.merge!(Pathname("foo.rbs") => <<-EOF)
+class C
+  private attr_reader self.a: String
+end
+
+module M
+  private
+  public attr_accessor b: String
+end
+      EOF
+      manager.build do |env|
+        builder = DefinitionBuilder.new(env: env)
+
+        builder.build_singleton(type_name("::C")).tap do |definition|
+          definition.methods[:a].tap do |a|
+            assert_predicate a, :private?
+          end
+        end
+
+        builder.build_instance(type_name("::M")).tap do |definition|
+          definition.methods[:b].tap do |b|
+            assert_predicate b, :public?
+          end
+
+          definition.methods[:b=].tap do |b|
+            assert_predicate b, :public?
+          end
+        end
+      end
+    end
+  end
 end
