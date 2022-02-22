@@ -587,7 +587,7 @@ module RBS
             defs: original_method.defs.map do |defn|
               defn.update(defined_in: definition.type_name, implemented_in: definition.type_name)
             end,
-            accessibility: method_def.accessibility,
+            accessibility: original_method.accessibility,
             alias_of: original_method
           )
         else

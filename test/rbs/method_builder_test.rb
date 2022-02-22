@@ -120,7 +120,7 @@ EOF
               assert_equal :bar, member.name
             end
 
-            assert_equal [:public], bar.accessibilities
+            assert_equal [], bar.accessibilities
           end
         end
       end
@@ -233,7 +233,7 @@ EOF
               assert_equal :bar, member.name
             end
 
-            assert_equal [:public], bar.accessibilities
+            assert_equal [], bar.accessibilities
           end
         end
       end
@@ -292,18 +292,21 @@ EOF
         builder.build_interface(type_name("::_Foo")).tap do |methods|
           assert_equal parse_type("::_Foo"), methods.type
 
-          methods.methods[:world].tap do |hello|
-            assert_instance_of MethodBuilder::Methods::Definition, hello
+          methods.methods[:world].tap do |world|
+            assert_instance_of MethodBuilder::Methods::Definition, world
 
-            assert_instance_of AST::Members::Alias, hello.original
-            assert_equal :hello, hello.original.old_name
+            assert_instance_of AST::Members::Alias, world.original
+            assert_equal :hello, world.original.old_name
 
-            assert_any!(hello.overloads, size: 1) do |member|
+            assert_any!(world.overloads, size: 1) do |member|
               assert_instance_of AST::Members::MethodDefinition, member
               assert_equal [parse_method_type("() -> ::Integer")], member.types
             end
 
-            assert_equal :public, hello.accessibility
+            assert_equal [], world.accessibilities
+            assert_raises do
+              world.accessibility
+            end
           end
         end
       end

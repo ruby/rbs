@@ -2072,4 +2072,31 @@ end
       end
     end
   end
+
+  def test_alias_visibility
+    SignatureManager.new do |manager|
+      manager.files.merge!(Pathname("foo.rbs") => <<-EOF)
+class C
+  def self?.a: () -> void
+
+  public
+
+  alias b a
+end
+      EOF
+      manager.build do |env|
+        builder = DefinitionBuilder.new(env: env)
+
+        builder.build_instance(type_name("::C")).tap do |definition|
+          definition.methods[:a].tap do |a|
+            assert_predicate a, :private?
+          end
+
+          definition.methods[:b].tap do |b|
+            assert_predicate b, :private?
+          end
+        end
+      end
+    end
+  end
 end

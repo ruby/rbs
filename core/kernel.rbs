@@ -275,8 +275,6 @@
 #
 %a{annotate:rdoc:source:from=object.c}
 module Kernel : BasicObject
-  private
-
   # <!--
   #   rdoc-file=vm_backtrace.c
   #   - caller(start=1, length=nil)  -> array or nil
