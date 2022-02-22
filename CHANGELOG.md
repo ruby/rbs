@@ -2,6 +2,14 @@
 
 ## master
 
+## 2.2.2 (2022-02-22)
+
+### Signature updates
+
+* `cgi` ([\#761](https://github.com/ruby/rbs/pull/761))
+* `json` ([\#761](https://github.com/ruby/rbs/pull/761))
+* `set` ([\#761](https://github.com/ruby/rbs/pull/761))
+
 ## 2.2.1 (2022-02-22)
 
 ### Library changes
