@@ -328,13 +328,15 @@ An instance variable definition consists of the name of an instance variable and
 
 Method definition has several syntax variations.
 
-You can write `self.` or `self?.` before the name of the method to specify the kind of method: instance, singleton, or both instance and singleton.
+You can write `self.` or `self?.` before the name of the method to specify the kind of method: instance, singleton, or module function.
 
 ```
 def to_s: () -> String                        # Defines a instance method
 def self.new: () -> AnObject                  # Defines singleton method
 def self?.sqrt: (Numeric) -> Numeric          # self? is for `module_function`s
 ```
+
+`self?` method definition adds two methods: a public singleton method and a private instance method, which is equivalent to `module_function` in Ruby.
 
 The method type can be connected with `|`s to define an overloaded method.
 
@@ -404,7 +406,7 @@ alias collect map                                   # `#collect` has the same ty
 
 ### `public`, `private`
 
-`public` and `private` allows specifying the visibility of methods.
+`public` and `private` allows specifying the visibility of instance methods.
 
 These work only as _statements_, not per-method specifier.
 

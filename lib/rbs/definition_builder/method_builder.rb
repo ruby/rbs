@@ -10,7 +10,11 @@ module RBS
           end
 
           def accessibility
-            accessibilities[0]
+            if original.is_a?(AST::Members::Alias)
+              raise "alias member doesn't have accessibility"
+            else
+              accessibilities[0] or raise
+            end
           end
 
           def self.empty(name:, type:)
@@ -102,11 +106,21 @@ module RBS
                 each_member_with_accessibility(d.decl.members) do |member, accessibility|
                   case member
                   when AST::Members::MethodDefinition
-                    if member.instance?
-                      build_method(methods,
-                                   type,
-                                   member: member.update(types: member.types.map {|type| type.sub(subst) }),
-                                   accessibility: accessibility)
+                    case member.kind
+                    when :instance
+                      build_method(
+                        methods,
+                        type,
+                        member: member.update(types: member.types.map {|type| type.sub(subst) }),
+                        accessibility: accessibility
+                      )
+                    when :singleton_instance
+                      build_method(
+                        methods,
+                        type,
+                        member: member.update(types: member.types.map {|type| type.sub(subst) }),
+                        accessibility: :private
+                      )
                     end
                   when AST::Members::AttrReader, AST::Members::AttrWriter, AST::Members::AttrAccessor
                     if member.kind == :instance
@@ -117,7 +131,7 @@ module RBS
                     end
                   when AST::Members::Alias
                     if member.kind == :instance
-                      build_alias(methods, type, member: member, accessibility: accessibility)
+                      build_alias(methods, type, member: member)
                     end
                   end
                 end
@@ -134,19 +148,19 @@ module RBS
 
             Methods.new(type: type).tap do |methods|
               entry.decls.each do |d|
-                each_member_with_accessibility(d.decl.members) do |member, accessibility|
+                d.decl.members.each do |member|
                   case member
                   when AST::Members::MethodDefinition
                     if member.singleton?
-                      build_method(methods, type, member: member, accessibility: accessibility)
+                      build_method(methods, type, member: member, accessibility: :public)
                     end
                   when AST::Members::AttrReader, AST::Members::AttrWriter, AST::Members::AttrAccessor
                     if member.kind == :singleton
-                      build_attribute(methods, type, member: member, accessibility: accessibility)
+                      build_attribute(methods, type, member: member, accessibility: :public)
                     end
                   when AST::Members::Alias
                     if member.kind == :singleton
-                      build_alias(methods, type, member: member, accessibility: accessibility)
+                      build_alias(methods, type, member: member)
                     end
                   end
                 end
@@ -168,18 +182,16 @@ module RBS
                 when AST::Members::MethodDefinition
                   build_method(methods, type, member: member, accessibility: :public)
                 when AST::Members::Alias
-                  build_alias(methods, type, member: member, accessibility: :public)
+                  build_alias(methods, type, member: member)
                 end
               end
             end.validate!
           end
       end
 
-      def build_alias(methods, type, member:, accessibility:)
+      def build_alias(methods, type, member:)
         defn = methods.methods[member.new_name] ||= Methods::Definition.empty(type: type, name: member.new_name)
-
         defn.originals << member
-        defn.accessibilities << accessibility
       end
 
       def build_attribute(methods, type, member:, accessibility:)

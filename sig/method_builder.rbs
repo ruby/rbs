@@ -6,7 +6,8 @@ module RBS
 
         class Definition
           type original = AST::Members::MethodDefinition | AST::Members::Alias | AST::Members::AttrAccessor | AST::Members::AttrWriter | AST::Members::AttrReader
-          type accessibility = :public | :private
+
+          type accessibility = RBS::Definition::accessibility
 
           attr_reader name: Symbol
           attr_reader type: instance_type
@@ -59,11 +60,11 @@ module RBS
 
       def build_interface: (TypeName) -> Methods
 
-      def build_alias: (Methods, Methods::instance_type, member: AST::Members::Alias, accessibility: Methods::Definition::accessibility) -> void
+      def build_alias: (Methods, Methods::instance_type, member: AST::Members::Alias) -> void
 
-      def build_attribute: (Methods, Methods::instance_type, member: AST::Members::AttrAccessor | AST::Members::AttrReader | AST::Members::AttrWriter, accessibility: Methods::Definition::accessibility) -> void
+      def build_attribute: (Methods, Methods::instance_type, member: AST::Members::AttrAccessor | AST::Members::AttrReader | AST::Members::AttrWriter, accessibility: Definition::accessibility) -> void
 
-      def build_method: (Methods, Methods::instance_type, member: AST::Members::MethodDefinition, accessibility: Methods::Definition::accessibility) -> void
+      def build_method: (Methods, Methods::instance_type, member: AST::Members::MethodDefinition, accessibility: Definition::accessibility) -> void
 
       def each_member_with_accessibility: (Array[AST::Members::t | AST::Declarations::t], ?accessibility: Definition::accessibility) { (AST::Members::t | AST::Declarations::t, Definition::accessibility) -> void } -> void
 
