@@ -2,6 +2,51 @@
 
 ## master
 
+## 2.2.0 (2022-02-22)
+
+RBS 2.2 ships with a new syntax to specify the visibility of a method per definition bases.
+
+```rbs
+class Foo
+  private def hello: () -> void
+
+  private attr_accessor world: String
+end
+```
+
+It also changes the semantics of `self?` method.
+It defines both _public_ singleton method and _private_ instance method, which is equivalent to `module_function`.
+
+## Signature updates
+
+* `net-http` ([\#892](https://github.com/ruby/rbs/pull/892))
+* `uri` ([\#864](https://github.com/ruby/rbs/pull/864))
+* `Encoding` ([\#897](https://github.com/ruby/rbs/pull/897), [\#898](https://github.com/ruby/rbs/pull/898))
+* `File::Stat` ([\#879](https://github.com/ruby/rbs/pull/879))
+* `Kernel#sleep` ([\#893](https://github.com/ruby/rbs/pull/893))
+
+### Language updates
+
+* Add public/private per member modifier ([\#911](https://github.com/ruby/rbs/pull/911))
+* Let `self?.` be equivalent to `module_function` ([\#910](https://github.com/ruby/rbs/pull/910))
+
+### Library changes
+
+* Add c99 flag for compiling on Ruby 2 ([\#895](https://github.com/ruby/rbs/pull/895))
+* Fix incorrect URI reference in `schema/typeParam.json` ([\#891](https://github.com/ruby/rbs/pull/891))
+* Allow scaffolding below namespace ([\#894](https://github.com/ruby/rbs/pull/894))
+* Let `Writer` preserve format ([\#900](https://github.com/ruby/rbs/pull/900))
+* Reduce memory usage of `RBS::Buffer` ([\#907](https://github.com/ruby/rbs/pull/907))
+* Do not call `#class` from `#hash` to improve performance ([\#906](https://github.com/ruby/rbs/pull/906))
+* Skip type variable validation if `unchcked` ([\#909](https://github.com/ruby/rbs/pull/909))
+
+### Miscellaneous
+
+* Add `Thread::Backtrace` and `Thread::Backtrace::Location` test ([\#896](https://github.com/ruby/rbs/pull/896))
+* Test annotations ([\#902](https://github.com/ruby/rbs/pull/902))
+* Remove goodcheck rule for arglists section ([\#901](https://github.com/ruby/rbs/pull/901))
+* Remove `CharScanner` due to no longer used ([\#905](https://github.com/ruby/rbs/pull/905))
+
 ## 2.1.0 (2022-02-02)
 
 RBS 2.1 is a release to deliver the types and documents of the new and updated methods of Ruby 3.1.
