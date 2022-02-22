@@ -72,6 +72,10 @@ task :validate => :compile do
       lib << "monitor"
     end
 
+    if lib == ["cgi"]
+      lib << "tempfile"
+    end
+
     if lib == ["csv"]
       lib << "forwardable"
     end
