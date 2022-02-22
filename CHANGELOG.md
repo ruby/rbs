@@ -2,6 +2,12 @@
 
 ## master
 
+## 2.2.1 (2022-02-22)
+
+### Library changes
+
+* Let `validate_type_alias` run without an error on unknown type ([\#912](https://github.com/ruby/rbs/pull/912))
+
 ## 2.2.0 (2022-02-22)
 
 RBS 2.2 ships with a new syntax to specify the visibility of a method per definition bases.
