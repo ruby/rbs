@@ -89,6 +89,10 @@ module RBS
           location: entry.decl.location&.aref(:type_params)
         )
       end
+
+      if block_given?
+        yield entry.decl.type
+      end
     end
 
     def validate_method_definition(method_def, type_name:)

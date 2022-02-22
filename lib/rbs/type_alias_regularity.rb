@@ -55,7 +55,7 @@ module RBS
     end
 
     def build_alias_type(name)
-      entry = env.alias_decls[name] or raise "Unknown alias name: #{name}"
+      entry = env.alias_decls[name] or return
       unless entry.decl.type_params.empty?
         as = entry.decl.type_params.each.map {|param| Types::Variable.new(name: param.name, location: nil) }
         Types::Alias.new(name: name, args: as, location: nil)
@@ -85,9 +85,11 @@ module RBS
       end
       # @type var each_child: TSort::_EachChild[TypeName]
       each_child = __skip__ = -> (name, &block) do
-        type = builder.expand_alias1(name)
-        each_alias_type(type) do |ty|
-          block[ty.name]
+        if env.alias_decls.key?(name)
+          type = builder.expand_alias1(name)
+          each_alias_type(type) do |ty|
+            block[ty.name]
+          end
         end
       end
 

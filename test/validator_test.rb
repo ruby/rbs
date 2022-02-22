@@ -184,4 +184,27 @@ type foo[unchecked out A, unchecked in B] = Foo[A, B]
       end
     end
   end
+
+  def test_type_alias_unknown_type
+    SignatureManager.new do |manager|
+      manager.add_file("test.rbs", <<-RBS)
+type foo = bar
+      RBS
+
+      manager.build do |env|
+        resolver = RBS::TypeNameResolver.from_env(env)
+        validator = RBS::Validator.new(env: env, resolver: resolver)
+
+        # No error is raised.
+        validator.validate_type_alias(entry: env.alias_decls[type_name("::foo")])
+
+        # Passing a block and validating the given type raises an error.
+        assert_raises RBS::NoTypeFoundError do
+          validator.validate_type_alias(entry: env.alias_decls[type_name("::foo")]) do |type|
+            validator.validate_type(type, context: [])
+          end
+        end
+      end
+    end
+  end
 end
