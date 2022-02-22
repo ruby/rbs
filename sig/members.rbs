@@ -12,6 +12,8 @@ module RBS
       class Base
       end
 
+      type visibility = :public | :private
+
       class MethodDefinition < Base
         type kind = :instance | :singleton | :singleton_instance
 
@@ -19,13 +21,14 @@ module RBS
         # ^^^                    keyword
         #     ^^^                name
         #
-        # def self.bar: () -> void | ...
-        # ^^^                              keyword
-        #     ^^^^^                        kind
-        #          ^^^                     name
-        #                            ^^^   overload
+        # private def self.bar: () -> void | ...
+        # ^^^^^^^                                  visibility
+        #         ^^^                              keyword
+        #             ^^^^^                        kind
+        #                  ^^^                     name
+        #                                    ^^^   overload
         #
-        type loc = Location[:keyword | :name, :kind | :overload]
+        type loc = Location[:keyword | :name, :kind | :overload | :visibility]
 
         attr_reader name: Symbol
         attr_reader kind: kind
@@ -34,8 +37,9 @@ module RBS
         attr_reader location: loc?
         attr_reader comment: Comment?
         attr_reader overload: bool
+        attr_reader visibility: visibility?
 
-        def initialize: (name: Symbol, kind: kind, types: Array[MethodType], annotations: Array[Annotation], location: loc?, comment: Comment?, overload: boolish) -> void
+        def initialize: (name: Symbol, kind: kind, types: Array[MethodType], annotations: Array[Annotation], location: loc?, comment: Comment?, overload: boolish, ?visibility: visibility?) -> void
 
         include _HashEqual
         include _ToJson
@@ -46,7 +50,7 @@ module RBS
 
         def overload?: () -> bool
 
-        def update: (?name: Symbol, ?kind: kind, ?types: Array[MethodType], ?annotations: Array[Annotation], ?location: loc?, ?comment: Comment?, ?overload: boolish) -> MethodDefinition
+        def update: (?name: Symbol, ?kind: kind, ?types: Array[MethodType], ?annotations: Array[Annotation], ?location: loc?, ?comment: Comment?, ?overload: boolish, ?visibility: visibility?) -> MethodDefinition
       end
 
       module Var
@@ -133,15 +137,16 @@ module RBS
         #             ^^^^             name
         #                 ^            colon
         #
-        # attr_accessor self.name (@foo) : String
-        # ^^^^^^^^^^^^^                             keyword
-        #               ^^^^^                       kind
-        #                    ^^^^                   name
-        #                         ^^^^^^            ivar
-        #                          ^^^^             ivar_name
-        #                                ^          colon
+        # public attr_accessor self.name (@foo) : String
+        # ^^^^^^                                           visibility
+        #        ^^^^^^^^^^^^^                             keyword
+        #                      ^^^^^                       kind
+        #                           ^^^^                   name
+        #                                ^^^^^^            ivar
+        #                                 ^^^^             ivar_name
+        #                                       ^          colon
         #
-        type loc = Location[:keyword | :name | :colon, :kind | :ivar | :ivar_name]
+        type loc = Location[:keyword | :name | :colon, :kind | :ivar | :ivar_name | :visibility]
 
         attr_reader name: Symbol
         attr_reader type: Types::t
@@ -150,12 +155,13 @@ module RBS
         attr_reader annotations: Array[Annotation]
         attr_reader location: loc?
         attr_reader comment: Comment?
+        attr_reader visibility: visibility?
 
-        def initialize: (name: Symbol, type: Types::t, ivar_name: Symbol | false | nil, kind: kind, annotations: Array[Annotation], location: loc?, comment: Comment?) -> void
+        def initialize: (name: Symbol, type: Types::t, ivar_name: Symbol | false | nil, kind: kind, annotations: Array[Annotation], location: loc?, comment: Comment?, ?visibility: visibility?) -> void
 
         include _HashEqual
 
-        def update: (?name: Symbol, ?type: Types::t, ?ivar_name: Symbol | false | nil, ?kind: kind, ?annotations: Array[Annotation], ?location: loc?, ?comment: Comment?) -> instance
+        def update: (?name: Symbol, ?type: Types::t, ?ivar_name: Symbol | false | nil, ?kind: kind, ?annotations: Array[Annotation], ?location: loc?, ?comment: Comment?, ?visibility: visibility) -> instance
       end
 
       class AttrReader < Base

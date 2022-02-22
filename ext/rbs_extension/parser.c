@@ -1430,6 +1430,8 @@ InstanceSingletonKind parse_instance_singleton_kind(parserstate *state, bool all
 
 /**
  * def_member ::= {kDEF} method_name `:` <method_types>
+ *              | {kPRIVATE2} kDEF method_name `:` <method_types>
+ *              | {kPUBLIC2} kDEF method_name `:` <method_types>
  *
  * method_types ::= {} <method_type>
  *                | {} <`...`>
@@ -1440,30 +1442,61 @@ InstanceSingletonKind parse_instance_singleton_kind(parserstate *state, bool all
  * */
 VALUE parse_member_def(parserstate *state, bool instance_only, bool accept_overload, position comment_pos, VALUE annotations) {
   range member_range;
+  range visibility_range;
   range keyword_range;
   range name_range;
   range kind_range;
   range overload_range = NULL_RANGE;
 
-  keyword_range = state->current_token.range;
-  member_range.start = keyword_range.start;
+  VALUE visibility;
 
-  comment_pos = nonnull_pos_or(comment_pos, keyword_range.start);
+  member_range.start = state->current_token.range.start;
+  comment_pos = nonnull_pos_or(comment_pos, member_range.start);
   VALUE comment = get_comment(state, comment_pos.line);
+
+  switch (state->current_token.type)
+  {
+  case kPRIVATE:
+    visibility_range = state->current_token.range;
+    visibility = ID2SYM(rb_intern("private"));
+    member_range.start = visibility_range.start;
+    parser_advance(state);
+    break;
+  case kPUBLIC:
+    visibility_range = state->current_token.range;
+    visibility = ID2SYM(rb_intern("public"));
+    member_range.start = visibility_range.start;
+    parser_advance(state);
+    break;
+  default:
+    visibility_range = NULL_RANGE;
+    visibility = Qnil;
+    break;
+  }
+
+  keyword_range = state->current_token.range;
 
   InstanceSingletonKind kind;
   if (instance_only) {
     kind_range = NULL_RANGE;
     kind = INSTANCE_KIND;
   } else {
-    kind = parse_instance_singleton_kind(state, true, &kind_range);
+    kind = parse_instance_singleton_kind(state, NIL_P(visibility), &kind_range);
   }
 
   VALUE name = parse_method_name(state, &name_range);
   VALUE method_types = rb_ary_new();
   VALUE overload = Qfalse;
 
-  parser_advance_assert(state, pCOLON);
+  if (state->next_token.type == pDOT && RB_SYM2ID(name) == rb_intern("self?")) {
+    raise_syntax_error(
+      state,
+      state->next_token,
+      "`self?` method cannot have visibility"
+    );
+  } else {
+    parser_advance_assert(state, pCOLON);
+  }
 
   parser_push_typevar_table(state, kind != INSTANCE_KIND);
 
@@ -1533,6 +1566,7 @@ VALUE parse_member_def(parserstate *state, bool instance_only, bool accept_overl
   rbs_loc_add_required_child(loc, rb_intern("name"), name_range);
   rbs_loc_add_optional_child(loc, rb_intern("kind"), kind_range);
   rbs_loc_add_optional_child(loc, rb_intern("overload"), overload_range);
+  rbs_loc_add_optional_child(loc, rb_intern("visibility"), visibility_range);
 
   return rbs_ast_members_method_definition(
     name,
@@ -1541,7 +1575,8 @@ VALUE parse_member_def(parserstate *state, bool instance_only, bool accept_overl
     annotations,
     location,
     comment,
-    overload
+    overload,
+    visibility
   );
 }
 
@@ -1839,9 +1874,13 @@ VALUE parse_visibility_member(parserstate *state, VALUE annotations) {
 
 /*
   attribute_member ::= {attr_keyword} attr_name attr_var `:` <type>
+                     | {visibility} attr_keyword attr_name attr_var `:` <type>
                      | {attr_keyword} `self` `.` attr_name attr_var `:` <type>
+                     | {visibility} attr_keyword `self` `.` attr_name attr_var `:` <type>
 
   attr_keyword ::= `attr_reader` | `attr_writer` | `attr_accessor`
+
+  visibility ::= `public` | `private`
 
   attr_var ::=                    # empty
              | `(` tAIDENT `)`    # Ivar name
@@ -1850,7 +1889,7 @@ VALUE parse_visibility_member(parserstate *state, VALUE annotations) {
 VALUE parse_attribute_member(parserstate *state, position comment_pos, VALUE annotations) {
   range member_range;
   range keyword_range, name_range, colon_range;
-  range kind_range = NULL_RANGE, ivar_range = NULL_RANGE, ivar_name_range = NULL_RANGE;
+  range kind_range = NULL_RANGE, ivar_range = NULL_RANGE, ivar_name_range = NULL_RANGE, visibility_range = NULL_RANGE;
 
   InstanceSingletonKind is_kind;
   VALUE klass;
@@ -1860,11 +1899,30 @@ VALUE parse_attribute_member(parserstate *state, position comment_pos, VALUE ann
   VALUE type;
   VALUE comment;
   VALUE location;
+  VALUE visibility;
   rbs_loc *loc;
 
   member_range.start = state->current_token.range.start;
   comment_pos = nonnull_pos_or(comment_pos, member_range.start);
   comment = get_comment(state, comment_pos.line);
+
+  switch (state->current_token.type)
+  {
+  case kPRIVATE:
+    visibility = ID2SYM(rb_intern("private"));
+    visibility_range = state->current_token.range;
+    parser_advance(state);
+    break;
+  case kPUBLIC:
+    visibility = ID2SYM(rb_intern("public"));
+    visibility_range = state->current_token.range;
+    parser_advance(state);
+    break;
+  default:
+    visibility = Qnil;
+    visibility_range = NULL_RANGE;
+    break;
+  }
 
   keyword_range = state->current_token.range;
   switch (state->current_token.type)
@@ -1924,6 +1982,7 @@ VALUE parse_attribute_member(parserstate *state, position comment_pos, VALUE ann
   rbs_loc_add_optional_child(loc, rb_intern("kind"), kind_range);
   rbs_loc_add_optional_child(loc, rb_intern("ivar"), ivar_range);
   rbs_loc_add_optional_child(loc, rb_intern("ivar_name"), ivar_name_range);
+  rbs_loc_add_optional_child(loc, rb_intern("visibility"), visibility_range);
 
   return rbs_ast_members_attribute(
     klass,
@@ -1933,7 +1992,8 @@ VALUE parse_attribute_member(parserstate *state, position comment_pos, VALUE ann
     kind,
     annotations,
     location,
-    comment
+    comment,
+    visibility
   );
 }
 
@@ -2113,7 +2173,6 @@ VALUE parse_module_members(parserstate *state) {
       member = parse_alias_member(state, false, annot_pos, annotations);
       break;
 
-
     case tAIDENT:
     case tA2IDENT:
     case kSELF:
@@ -2128,7 +2187,23 @@ VALUE parse_module_members(parserstate *state) {
 
     case kPUBLIC:
     case kPRIVATE:
-      member = parse_visibility_member(state, annotations);
+      if (state->next_token.range.start.line == state->current_token.range.start.line) {
+        switch (state->next_token.type)
+        {
+        case kDEF:
+          member = parse_member_def(state, false, true, annot_pos, annotations);
+          break;
+        case kATTRREADER:
+        case kATTRWRITER:
+        case kATTRACCESSOR:
+          member = parse_attribute_member(state, annot_pos, annotations);
+          break;
+        default:
+          raise_syntax_error(state, state->next_token, "method or attribute definition is expected after visibility modifier");
+        }
+      } else {
+        member = parse_visibility_member(state, annotations);
+      }
       break;
 
     default:

@@ -357,7 +357,8 @@ module RBS
           comment: member.comment,
           overload: member.overload?,
           annotations: member.annotations,
-          location: member.location
+          location: member.location,
+          visibility: member.visibility
         )
       when AST::Members::AttrAccessor
         AST::Members::AttrAccessor.new(
@@ -367,7 +368,8 @@ module RBS
           annotations: member.annotations,
           comment: member.comment,
           location: member.location,
-          ivar_name: member.ivar_name
+          ivar_name: member.ivar_name,
+          visibility: member.visibility
         )
       when AST::Members::AttrReader
         AST::Members::AttrReader.new(
@@ -377,7 +379,8 @@ module RBS
           annotations: member.annotations,
           comment: member.comment,
           location: member.location,
-          ivar_name: member.ivar_name
+          ivar_name: member.ivar_name,
+          visibility: member.visibility
         )
       when AST::Members::AttrWriter
         AST::Members::AttrWriter.new(
@@ -387,7 +390,8 @@ module RBS
           annotations: member.annotations,
           comment: member.comment,
           location: member.location,
-          ivar_name: member.ivar_name
+          ivar_name: member.ivar_name,
+          visibility: member.visibility
         )
       when AST::Members::InstanceVariable
         AST::Members::InstanceVariable.new(

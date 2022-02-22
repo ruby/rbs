@@ -12,8 +12,9 @@ module RBS
         attr_reader :location
         attr_reader :comment
         attr_reader :overload
+        attr_reader :visibility
 
-        def initialize(name:, kind:, types:, annotations:, location:, comment:, overload:)
+        def initialize(name:, kind:, types:, annotations:, location:, comment:, overload:, visibility: nil)
           @name = name
           @kind = kind
           @types = types
@@ -21,6 +22,7 @@ module RBS
           @location = location
           @comment = comment
           @overload = overload ? true : false
+          @visibility = visibility
         end
 
         def ==(other)
@@ -28,7 +30,8 @@ module RBS
             other.name == name &&
             other.kind == kind &&
             other.types == types &&
-            other.overload == overload
+            other.overload == overload &&
+            other.visibility == visibility
         end
 
         alias eql? ==
@@ -49,7 +52,7 @@ module RBS
           overload
         end
 
-        def update(name: self.name, kind: self.kind, types: self.types, annotations: self.annotations, location: self.location, comment: self.comment, overload: self.overload)
+        def update(name: self.name, kind: self.kind, types: self.types, annotations: self.annotations, location: self.location, comment: self.comment, overload: self.overload, visibility: self.visibility)
           self.class.new(
             name: name,
             kind: kind,
@@ -57,7 +60,8 @@ module RBS
             annotations: annotations,
             location: location,
             comment: comment,
-            overload: overload
+            overload: overload,
+            visibility: visibility
           )
         end
 
@@ -221,8 +225,9 @@ module RBS
         attr_reader :annotations
         attr_reader :location
         attr_reader :comment
+        attr_reader :visibility
 
-        def initialize(name:, type:, ivar_name:, kind:, annotations:, location:, comment:)
+        def initialize(name:, type:, ivar_name:, kind:, annotations:, location:, comment:, visibility: nil)
           @name = name
           @type = type
           @ivar_name = ivar_name
@@ -230,6 +235,7 @@ module RBS
           @location = location
           @comment = comment
           @kind = kind
+          @visibility = visibility
         end
 
         def ==(other)
@@ -237,16 +243,17 @@ module RBS
             other.name == name &&
             other.type == type &&
             other.ivar_name == ivar_name &&
-            other.kind == kind
+            other.kind == kind &&
+            other.visibility == visibility
         end
 
         alias eql? ==
 
         def hash
-          name.hash ^ type.hash ^ ivar_name.hash ^ kind.hash
+          name.hash ^ type.hash ^ ivar_name.hash ^ kind.hash ^ visibility.hash
         end
 
-        def update(name: self.name, type: self.type, ivar_name: self.ivar_name, kind: self.kind, annotations: self.annotations, location: self.location, comment: self.comment)
+        def update(name: self.name, type: self.type, ivar_name: self.ivar_name, kind: self.kind, annotations: self.annotations, location: self.location, comment: self.comment, visibility: self.visibility)
           klass = _ = self.class
           klass.new(
             name: name,
@@ -255,7 +262,8 @@ module RBS
             kind: kind,
             annotations: annotations,
             location: location,
-            comment: comment
+            comment: comment,
+            visibility: visibility
           )
         end
       end

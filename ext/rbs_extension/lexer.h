@@ -150,6 +150,11 @@ unsigned int peek(lexstate *state);
 void skip(lexstate *state);
 
 /**
+ * Skip n characters.
+ * */
+void skipn(lexstate *state, size_t size);
+
+/**
  * Return new token with given type.
  * */
 token next_token(lexstate *state, enum TokenType type);

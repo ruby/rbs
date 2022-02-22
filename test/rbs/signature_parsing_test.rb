@@ -552,6 +552,108 @@ end
     end
   end
 
+  def test_private_public_def
+    Parser.parse_signature(<<~SIG).yield_self do |decls|
+      class Foo
+        public def foo: () -> void
+        private def bar: () -> void
+        def baz: () -> void
+      end
+    SIG
+
+      decls[0].tap do |decl|
+        assert_instance_of Declarations::Class, decl
+
+        assert_equal 3, decl.members.size
+
+        decl.members[0].tap do |m|
+          assert_instance_of Members::MethodDefinition, m
+          assert_equal :foo, m.name
+          assert_equal :public, m.visibility
+        end
+
+        decl.members[1].tap do |m|
+          assert_instance_of Members::MethodDefinition, m
+          assert_equal :bar, m.name
+          assert_equal :private, m.visibility
+        end
+
+        decl.members[2].tap do |m|
+          assert_instance_of Members::MethodDefinition, m
+          assert_equal :baz, m.name
+          assert_nil m.visibility
+        end
+      end
+    end
+  end
+
+  def test_private_public_def_error
+    assert_raises RBS::ParsingError do
+      Parser.parse_signature(<<~SIG)
+      class Foo
+        public def self?.foo: () -> void
+      end
+    SIG
+    end
+  end
+
+  def test_private_public_attr
+    Parser.parse_signature(<<~SIG).yield_self do |decls|
+      class Foo
+        public attr_reader foo: String
+        private attr_reader bar: String
+        attr_reader baz: String
+      end
+    SIG
+
+      decls[0].tap do |decl|
+        assert_instance_of Declarations::Class, decl
+
+        assert_equal 3, decl.members.size
+
+        decl.members[0].tap do |m|
+          assert_instance_of Members::AttrReader, m
+          assert_equal :foo, m.name
+          assert_equal :public, m.visibility
+        end
+
+        decl.members[1].tap do |m|
+          assert_instance_of Members::AttrReader, m
+          assert_equal :bar, m.name
+          assert_equal :private, m.visibility
+        end
+
+        decl.members[2].tap do |m|
+          assert_instance_of Members::AttrReader, m
+          assert_equal :baz, m.name
+          assert_nil m.visibility
+        end
+      end
+    end
+  end
+
+  def test_private_public_modifier_error
+    assert_raises RBS::ParsingError do
+      Parser.parse_signature(<<~SIG)
+      class Foo
+        public alias foo bar
+      end
+    SIG
+    end
+  end
+
+  def test_private_public_modifier
+    Parser.parse_signature(<<~SIG)
+      class Foo
+        public
+
+        private
+
+        public    # comment can follow
+      end
+    SIG
+  end
+
   def test_alias
     Parser.parse_signature(<<~SIG).yield_self do |decls|
       class Foo

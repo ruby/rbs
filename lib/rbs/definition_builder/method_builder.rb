@@ -112,7 +112,7 @@ module RBS
                         methods,
                         type,
                         member: member.update(types: member.types.map {|type| type.sub(subst) }),
-                        accessibility: accessibility
+                        accessibility: member.visibility || accessibility
                       )
                     when :singleton_instance
                       build_method(
@@ -127,7 +127,7 @@ module RBS
                       build_attribute(methods,
                                       type,
                                       member: member.update(type: member.type.sub(subst)),
-                                      accessibility: accessibility)
+                                      accessibility: member.visibility || accessibility)
                     end
                   when AST::Members::Alias
                     if member.kind == :instance
@@ -152,11 +152,11 @@ module RBS
                   case member
                   when AST::Members::MethodDefinition
                     if member.singleton?
-                      build_method(methods, type, member: member, accessibility: :public)
+                      build_method(methods, type, member: member, accessibility: member.visibility || :public)
                     end
                   when AST::Members::AttrReader, AST::Members::AttrWriter, AST::Members::AttrAccessor
                     if member.kind == :singleton
-                      build_attribute(methods, type, member: member, accessibility: :public)
+                      build_attribute(methods, type, member: member, accessibility: member.visibility || :public)
                     end
                   when AST::Members::Alias
                     if member.kind == :singleton

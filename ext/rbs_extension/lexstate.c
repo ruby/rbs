@@ -134,6 +134,12 @@ void skip(lexstate *state) {
   }
 }
 
+void skipn(lexstate *state, size_t size) {
+  for (size_t i = 0; i < size; i ++) {
+    skip(state);
+  }
+}
+
 char *peek_token(lexstate *state, token tok) {
   return RSTRING_PTR(state->string) + tok.range.start.byte_pos;
 }

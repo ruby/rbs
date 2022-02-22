@@ -400,7 +400,7 @@ VALUE rbs_ast_decl_module(VALUE name, VALUE type_params, VALUE self_types, VALUE
   );
 }
 
-VALUE rbs_ast_members_method_definition(VALUE name, VALUE kind, VALUE types, VALUE annotations, VALUE location, VALUE comment, VALUE overload) {
+VALUE rbs_ast_members_method_definition(VALUE name, VALUE kind, VALUE types, VALUE annotations, VALUE location, VALUE comment, VALUE overload, VALUE visibility) {
   VALUE args = rb_hash_new();
   rb_hash_aset(args, ID2SYM(rb_intern("name")), name);
   rb_hash_aset(args, ID2SYM(rb_intern("kind")), kind);
@@ -409,6 +409,7 @@ VALUE rbs_ast_members_method_definition(VALUE name, VALUE kind, VALUE types, VAL
   rb_hash_aset(args, ID2SYM(rb_intern("location")), location);
   rb_hash_aset(args, ID2SYM(rb_intern("comment")), comment);
   rb_hash_aset(args, ID2SYM(rb_intern("overload")), overload);
+  rb_hash_aset(args, ID2SYM(rb_intern("visibility")), visibility);
 
   return CLASS_NEW_INSTANCE(
     RBS_AST_Members_MethodDefinition,
@@ -446,7 +447,7 @@ VALUE rbs_ast_members_mixin(VALUE klass, VALUE name, VALUE module_args, VALUE an
   );
 }
 
-VALUE rbs_ast_members_attribute(VALUE klass, VALUE name, VALUE type, VALUE ivar_name, VALUE kind, VALUE annotations, VALUE location, VALUE comment) {
+VALUE rbs_ast_members_attribute(VALUE klass, VALUE name, VALUE type, VALUE ivar_name, VALUE kind, VALUE annotations, VALUE location, VALUE comment, VALUE visibility) {
   VALUE args = rb_hash_new();
   rb_hash_aset(args, ID2SYM(rb_intern("name")), name);
   rb_hash_aset(args, ID2SYM(rb_intern("type")), type);
@@ -455,6 +456,7 @@ VALUE rbs_ast_members_attribute(VALUE klass, VALUE name, VALUE type, VALUE ivar_
   rb_hash_aset(args, ID2SYM(rb_intern("annotations")), annotations);
   rb_hash_aset(args, ID2SYM(rb_intern("location")), location);
   rb_hash_aset(args, ID2SYM(rb_intern("comment")), comment);
+  rb_hash_aset(args, ID2SYM(rb_intern("visibility")), visibility);
 
   return CLASS_NEW_INSTANCE(
     klass,

@@ -261,6 +261,16 @@ module RBS
     end
 
     def write_def(member)
+      visibility =
+        case member.visibility
+        when :public
+          "public "
+        when :private
+          "private "
+        else
+          ""
+        end
+
       name = case member.kind
              when :instance
                "#{method_name(member.name)}"
@@ -272,7 +282,7 @@ module RBS
 
       string = ""
 
-      prefix = "def #{name}:"
+      prefix = "#{visibility}def #{name}:"
       padding = " " * (prefix.size-1)
 
       string << prefix
@@ -300,6 +310,16 @@ module RBS
     end
 
     def attribute(kind, attr)
+      visibility =
+        case attr.visibility
+        when :public
+          "public "
+        when :private
+          "private "
+        else
+          ""
+        end
+
       var = case attr.ivar_name
             when nil
               ""
@@ -316,7 +336,7 @@ module RBS
                    ""
                  end
 
-      "attr_#{kind} #{receiver}#{attr.name}#{var}: #{attr.type}"
+      "#{visibility}attr_#{kind} #{receiver}#{attr.name}#{var}: #{attr.type}"
     end
 
     def preserve_empty_line(prev, decl)
