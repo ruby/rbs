@@ -140,7 +140,7 @@ module RBS
         case entry
         when Environment::ClassEntry, Environment::ModuleEntry
           ancestors = ancestor_builder.instance_ancestors(type_name)
-          args = Types::Variable.build(entry.type_params.each.map(&:name))
+          args = entry.type_params.map {|param| Types::Variable.new(name: param.name, location: param.location) }
           self_type = Types::ClassInstance.new(name: type_name, args: args, location: nil)
 
           Definition.new(type_name: type_name, entry: entry, self_type: self_type, ancestors: ancestors).tap do |definition|
@@ -425,7 +425,7 @@ module RBS
                         type: method_type.type.with_return_type(
                           Types::ClassInstance.new(
                             name: type_name,
-                            args: Types::Variable.build(entry.type_params.each.map(&:name)),
+                            args: entry.type_params.map {|param| Types::Variable.new(name: param.name, location: param.location) },
                             location: nil
                           )
                         )
