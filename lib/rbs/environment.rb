@@ -10,12 +10,16 @@ module RBS
 
     module ContextUtil
       def context
-        @context ||= begin
-                       (outer + [decl]).each.with_object([Namespace.root]) do |decl, array|
-                         first = array.first or raise
-                         array.unshift(first + decl.name.to_namespace)
-                       end
-                     end
+        @context ||=
+          begin
+            # @type var decls: Array[_ModuleOrClass]
+            decls = outer + [decl]
+
+            decls.each.with_object([Namespace.root]) do |decl, array|
+              first = array.first or raise
+              array.unshift(first + decl.name.to_namespace)
+            end
+          end
       end
     end
 
@@ -39,8 +43,6 @@ module RBS
 
       def validate_type_params
         unless decls.empty?
-          # @type var hd_decl: MultiEntry::D[module_decl]
-          # @type var tl_decls: Array[MultiEntry::D[module_decl]]
           hd_decl, *tl_decls = decls
           raise unless hd_decl
 
@@ -50,7 +52,7 @@ module RBS
             tl_params = tl_decl.decl.type_params
 
             unless compatible_params?(hd_params, tl_params)
-              raise GenericParameterMismatchError.new(name: name, decl: tl_decl.decl)
+              raise GenericParameterMismatchError.new(name: name, decl: _ = tl_decl.decl)
             end
           end
         end

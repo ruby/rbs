@@ -2,32 +2,38 @@ module RBS
   class Environment
     type module_decl = AST::Declarations::Class | AST::Declarations::Module
 
-    interface _WithContext
-      def outer: () -> Array[module_decl]
+    interface _ModuleOrClass
+      def name: () -> TypeName
 
-      def decl: () -> untyped
+      def type_params: () -> Array[AST::TypeParam]
     end
 
-    module ContextUtil : _WithContext
+    interface _WithContext[M < _ModuleOrClass]
+      def outer: () -> Array[module_decl]
+
+      def decl: () -> M
+    end
+
+    module ContextUtil[M < _ModuleOrClass] : _WithContext[M]
       def context: () -> Array[Namespace]
     end
 
-    class MultiEntry
-      class D[M]
+    class MultiEntry[M < _ModuleOrClass]
+      class D[M < _ModuleOrClass]
         attr_reader decl: M
         attr_reader outer: Array[module_decl]
 
-        def initialize: (decl: module_decl, outer: Array[module_decl]) -> void
+        def initialize: (decl: M, outer: Array[module_decl]) -> void
 
-        include ContextUtil
+        include ContextUtil[M]
       end
 
       attr_reader name: TypeName
-      attr_reader decls: Array[untyped]
+      attr_reader decls: Array[D[M]]
 
       def initialize: (name: TypeName) -> void
 
-      def insert: (decl: module_decl, outer: Array[module_decl]) -> void
+      def insert: (decl: M, outer: Array[module_decl]) -> void
 
       def validate_type_params: () -> void
 
@@ -35,23 +41,18 @@ module RBS
 
       def type_params: () -> Array[AST::TypeParam]
 
-      def primary: () -> D[module_decl]
+      def primary: () -> D[M]
     end
 
-    class ModuleEntry < MultiEntry
-      attr_reader decls: Array[MultiEntry::D[AST::Declarations::Module]]
-      attr_reader primary: MultiEntry::D[AST::Declarations::Module]
-
+    class ModuleEntry < MultiEntry[AST::Declarations::Module]
       def self_types: () -> Array[AST::Declarations::Module::Self]
     end
 
-    class ClassEntry < MultiEntry
-      attr_reader decls: Array[MultiEntry::D[AST::Declarations::Class]]
-      attr_reader primary: MultiEntry::D[AST::Declarations::Class]
+    class ClassEntry < MultiEntry[AST::Declarations::Class]
     end
 
     class SingleEntry[N, D]
-      include ContextUtil
+      include ContextUtil[D]
 
       attr_reader name: N
       attr_reader decl: D
