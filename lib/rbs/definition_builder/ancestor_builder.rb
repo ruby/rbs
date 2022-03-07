@@ -367,7 +367,7 @@ module RBS
 
           align_params = Substitution.build(
             decl.type_params.each.map(&:name),
-            Types::Variable.build(entry.type_params.each.map(&:name))
+            entry.type_params.map {|param| Types::Variable.new(name: param.name, location: param.location) }
           )
 
           mixin_ancestors0(decl,
@@ -386,7 +386,9 @@ module RBS
 
         entry = env.class_decls[type_name] or raise "Unknown name for instance_ancestors: #{type_name}"
         params = entry.type_params.each.map(&:name)
-        args = Types::Variable.build(params)
+        args = entry.type_params.map do |type_param|
+          Types::Variable.new(name: type_param.name, location: type_param.location)
+        end
         self_ancestor = Definition::Ancestor::Instance.new(name: type_name, args: args, source: nil)
 
         RecursiveAncestorError.check!(self_ancestor,

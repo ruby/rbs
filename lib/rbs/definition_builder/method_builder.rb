@@ -98,7 +98,7 @@ module RBS
         instance_methods[type_name] ||=
           begin
             entry = env.class_decls[type_name]
-            args = Types::Variable.build(entry.type_params.each.map(&:name))
+            args = entry.type_params.map {|param| Types::Variable.new(name: param.name, location: param.location) }
             type = Types::ClassInstance.new(name: type_name, args: args, location: nil)
             Methods.new(type: type).tap do |methods|
               entry.decls.each do |d|
