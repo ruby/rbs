@@ -205,6 +205,7 @@ class IntegerTest < StdlibTest
   def test_down_to
     30.downto(1) {}
     30.downto(31)
+    30.downto(4.2)
   end
 
   def test_eql?
@@ -338,6 +339,7 @@ class IntegerTest < StdlibTest
 
   def test_upto
     5.upto(10) {}
+    5.upto(10.1) {}
   end
 end
 

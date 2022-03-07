@@ -857,8 +857,8 @@ class Integer < Numeric
   #
   # With no block given, returns an Enumerator.
   #
-  def downto: (Integer limit) { (Integer) -> void } -> Integer
-            | (Integer limit) -> ::Enumerator[Integer, self]
+  def downto: (Numeric limit) { (Integer) -> void } -> Integer
+            | (Numeric limit) -> ::Enumerator[Integer, self]
 
   def dup: () -> self
 
@@ -1432,8 +1432,8 @@ class Integer < Numeric
   #
   # With no block given, returns an Enumerator.
   #
-  def upto: (Integer limit) { (Integer) -> void } -> Integer
-          | (Integer limit) -> ::Enumerator[Integer, self]
+  def upto: (Numeric limit) { (Integer) -> void } -> Integer
+          | (Numeric limit) -> ::Enumerator[Integer, self]
 
   # <!--
   #   rdoc-file=numeric.rb
