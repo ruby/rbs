@@ -4,7 +4,7 @@ IFS=$'\n\t'
 set -x
 
 bundle install --jobs 4 --retry 3
-bundle install --jobs 4 --retry 3 --gemfile=steep/Gemfile
+bundle install --jobs 4 --retry 3 --gemfile=steep/Gemfile || echo "🚨 Failed to install Steep"
 
 bundle exec rake compile
 
