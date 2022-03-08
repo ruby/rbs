@@ -9,6 +9,8 @@ def group(member)
   case member
   when Members::Include, Members::Extend, Members::Prepend
     0
+  when RBS::AST::Declarations::Constant
+    -5
   when Members::ClassVariable
     -3
   when Members::ClassInstanceVariable
@@ -54,6 +56,8 @@ def key(member)
     member.name.to_s
   when Members::Alias
     member.new_name.to_s
+  when RBS::AST::Declarations::Constant
+    member.name.to_s
   else
     1
   end
