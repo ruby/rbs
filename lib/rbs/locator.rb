@@ -41,11 +41,7 @@ module RBS
         case decl
         when AST::Declarations::Class
           decl.type_params.each do |param|
-            if test_loc(pos, location: param.location)
-              array.unshift(param)
-              find_in_loc(pos, array: array, location: param.location)
-              return true
-            end
+            find_in_type_param(pos, type_param: param, array: array) and return true
           end
 
           if super_class = decl.super_class
@@ -66,11 +62,7 @@ module RBS
 
         when AST::Declarations::Module
           decl.type_params.each do |param|
-            if test_loc(pos, location: param.location)
-              array.unshift(param)
-              find_in_loc(pos, array: array, location: param.location)
-              return true
-            end
+            find_in_type_param(pos, type_param: param, array: array) and return true
           end
 
           decl.self_types.each do |self_type|
@@ -91,11 +83,7 @@ module RBS
 
         when AST::Declarations::Interface
           decl.type_params.each do |param|
-            if test_loc(pos, location: param.location)
-              array.unshift(param)
-              find_in_loc(pos, array: array, location: param.location)
-              return true
-            end
+            find_in_type_param(pos, type_param: param, array: array) and return true
           end
 
           decl.members.each do |member|
@@ -144,8 +132,29 @@ module RBS
       if test_loc(pos, location: method_type.location)
         array.unshift(method_type)
 
+        method_type.type_params.each do |param|
+          find_in_type_param(pos, type_param: param, array: array) and return true
+        end
+
         method_type.each_type do |type|
           find_in_type(pos, array: array, type: type) and break
+        end
+
+        true
+      else
+        false
+      end
+    end
+
+    def find_in_type_param(pos, type_param:, array:)
+      if test_loc(pos, location: type_param.location)
+        array.unshift(type_param)
+
+        if upper_bound = type_param.upper_bound
+          find_in_type(pos, type: upper_bound, array: array) or
+            find_in_loc(pos, location: type_param.location, array: array)
+        else
+          find_in_loc(pos, location: type_param.location, array: array)
         end
 
         true
