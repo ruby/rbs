@@ -9,23 +9,23 @@ module RBS
     attr_reader :global_decls
 
     module ContextUtil
-      def context
-        @context ||=
-          begin
-            # @type var decls: Array[_ModuleOrClass]
-            decls = outer + [decl]
-
-            decls.each.with_object([Namespace.root]) do |decl, array|
-              first = array.first or raise
-              array.unshift(first + decl.name.to_namespace)
-            end
-          end
+      def calculate_context(decls)
+        decls.each.with_object([Namespace.root]) do |decl, array|
+          first = array.first or raise
+          array.unshift(first + decl.name.to_namespace)
+        end
       end
     end
 
     class MultiEntry
       D = _ = Struct.new(:decl, :outer, keyword_init: true) do
+        # @implements D[M]
+
         include ContextUtil
+
+        def context
+          @context ||= calculate_context(outer + [decl])
+        end
       end
 
       attr_reader :name
@@ -88,6 +88,12 @@ module RBS
       end
     end
 
+    def foo
+      a = [1].sample()
+      return unless a
+      a + 1
+    end
+
     class ClassEntry < MultiEntry
       def primary
         @primary ||= begin
@@ -98,8 +104,6 @@ module RBS
     end
 
     class SingleEntry
-      include ContextUtil
-
       attr_reader :name
       attr_reader :outer
       attr_reader :decl
@@ -108,6 +112,12 @@ module RBS
         @name = name
         @decl = decl
         @outer = outer
+      end
+
+      include ContextUtil
+
+      def context
+        @context = calculate_context(outer)
       end
     end
 

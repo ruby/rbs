@@ -27,7 +27,6 @@ EOF
     )
 
     assert_equal [
-                   type_name("::Foo::Bar::Baz").to_namespace,
                    type_name("::Foo::Bar").to_namespace,
                    type_name("::Foo").to_namespace,
                    Namespace.root
