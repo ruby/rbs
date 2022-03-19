@@ -73,7 +73,8 @@ module RBS
             annotations: annotations,
             location: location,
             comment: comment,
-            overload: overload
+            overload: overload,
+            visibility: visibility
           }.to_json(state)
         end
       end
