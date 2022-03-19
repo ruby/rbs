@@ -37,9 +37,12 @@
         },
         "overload": {
           "type": "boolean"
+        },
+        "visibility": {
+          "enum": ["public", "private", null]
         }
       },
-      "required": ["member", "kind", "types", "comment", "annotations", "location"]
+      "required": ["member", "kind", "types", "comment", "annotations", "location", "visibility"]
     },
     "variable": {
       "title": "Declaration for instance variables and class variables",
