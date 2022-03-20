@@ -1046,7 +1046,6 @@ VALUE parse_type_params(parserstate *state, range *rg, bool module_type_params) 
 
       parser_advance_assert(state, tUIDENT);
       name_range = state->current_token.range;
-      param_range.end = state->current_token.range.end;
 
       ID id = INTERN_TOKEN(state, state->current_token);
       name = ID2SYM(id);
@@ -1065,6 +1064,8 @@ VALUE parse_type_params(parserstate *state, range *rg, bool module_type_params) 
         }
       }
 
+      param_range.end = state->current_token.range.end;
+      
       VALUE location = rbs_new_location(state->buffer, param_range);
       rbs_loc *loc = rbs_check_location(location);
       rbs_loc_add_required_child(loc, rb_intern("name"), name_range);

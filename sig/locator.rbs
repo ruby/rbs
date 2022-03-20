@@ -37,6 +37,8 @@ module RBS
 
     def find_in_type: (Integer pos, type: Types::t, array: Array[component]) -> bool
 
+    def find_in_type_param: (Integer pos, type_param: AST::TypeParam, array: Array[component]) -> bool
+
     def find_in_loc: (Integer pos, location: Location[untyped, untyped]?, array: Array[component]) -> bool
 
     def test_loc: (Integer pos, location: Location[untyped, untyped]?) -> bool
