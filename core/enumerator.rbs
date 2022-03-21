@@ -515,7 +515,7 @@ end
 #
 # This type of objects can be created by Enumerable#chain and Enumerator#+.
 #
-class Enumerator::Chain[out Elem] < Object
+class Enumerator::Chain[out Elem] < Enumerator[Elem, void]
   include Enumerable[Elem]
 
   # <!--
