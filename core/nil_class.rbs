@@ -4,6 +4,8 @@
 class NilClass
   public
 
+  def !: () -> true
+
   # <!--
   #   rdoc-file=object.c
   #   - false & obj   -> false
@@ -12,7 +14,7 @@ class NilClass
   # And---Returns `false`. *obj* is always evaluated as it is the argument to a
   # method call---there is no short-circuit evaluation in this case.
   #
-  def &: (untyped obj) -> bool
+  def &: (untyped obj) -> false
 
   # <!--
   #   rdoc-file=object.c
@@ -23,7 +25,7 @@ class NilClass
   # statements.
   #
   def ===: (nil) -> true
-         | (untyped obj) -> bool
+         | (untyped obj) -> false
 
   # <!--
   #   rdoc-file=object.c
@@ -43,7 +45,7 @@ class NilClass
   #
   def ^: (nil) -> false
        | (false) -> false
-       | (untyped obj) -> bool
+       | (untyped obj) -> true
 
   # <!--
   #   rdoc-file=object.c
@@ -59,7 +61,7 @@ class NilClass
   # -->
   # Only the object *nil* responds `true` to `nil?`.
   #
-  def nil?: () -> bool
+  def nil?: () -> true
 
   # <!--
   #   rdoc-file=rational.c
@@ -142,7 +144,7 @@ class NilClass
   #
   def |: (nil) -> false
        | (false) -> false
-       | (untyped obj) -> bool
+       | (untyped obj) -> true
 
   def clone: (?freeze: true?) -> self
 end
