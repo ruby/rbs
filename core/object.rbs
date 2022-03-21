@@ -912,6 +912,8 @@ class Object < BasicObject
   #
   def public_method: (name name) -> Method
 
+  def public_methods: (?boolish all) -> Array[Symbol]
+
   # <!--
   #   rdoc-file=vm_eval.c
   #   - obj.public_send(symbol [, args...])  -> obj
