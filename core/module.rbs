@@ -363,7 +363,7 @@ class Module < Object
   #
   #     Hello there!
   #
-  def class_exec: (*untyped args) { () -> untyped } -> untyped
+  def class_exec: [U] (*untyped args) { () -> U } -> U
 
   # <!--
   #   rdoc-file=object.c
@@ -675,6 +675,8 @@ class Module < Object
   #
   def define_method: (Symbol | String arg0, ?Proc | Method | UnboundMethod arg1) -> Symbol
                    | (Symbol | String arg0) { () -> untyped } -> Symbol
+
+  def deprecate_constant: (*Symbol) -> self
 
   def eql?: (untyped other) -> bool
 
@@ -1025,7 +1027,7 @@ class Module < Object
   #
   #     Hello there!
   #
-  def module_exec: (*untyped args) { () -> untyped } -> untyped
+  def module_exec: [U] (*untyped args) { (*untyped args) -> U } -> U
 
   # <!--
   #   rdoc-file=vm_method.c
