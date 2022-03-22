@@ -76,8 +76,39 @@ class Prime
   # :   Upper bound of prime numbers. The iterator stops after it yields all prime
   #     numbers p <= `ubound`.
   #
-  def self?.each: (?Integer? ubound, ?PseudoPrimeGenerator generator) { (Integer) -> void } -> void
+  def self.each: (?Integer? ubound, ?PseudoPrimeGenerator generator) { (Integer) -> void } -> void
                 | (?Integer? ubound, ?PseudoPrimeGenerator generator) -> PseudoPrimeGenerator
+
+  # <!--
+  #   rdoc-file=lib/prime.rb
+  #   - each(ubound = nil, generator = EratosthenesGenerator.new, &block)
+  # -->
+  # Iterates the given block over all prime numbers.
+  #
+  # ## Parameters
+  #
+  # `ubound`
+  # :   Optional. An arbitrary positive number. The upper bound of enumeration.
+  #     The method enumerates prime numbers infinitely if `ubound` is nil.
+  # `generator`
+  # :   Optional. An implementation of pseudo-prime generator.
+  #
+  #
+  # ## Return value
+  #
+  # An evaluated value of the given block at the last time. Or an enumerator which
+  # is compatible to an `Enumerator` if no block given.
+  #
+  # ## Description
+  #
+  # Calls `block` once for each prime number, passing the prime as a parameter.
+  #
+  # `ubound`
+  # :   Upper bound of prime numbers. The iterator stops after it yields all prime
+  #     numbers p <= `ubound`.
+  #
+  def each: (?Integer? ubound, ?PseudoPrimeGenerator generator) { (Integer) -> void } -> void
+          | (?Integer? ubound, ?PseudoPrimeGenerator generator) -> PseudoPrimeGenerator
 
   # <!--
   #   rdoc-file=lib/prime.rb
@@ -103,7 +134,33 @@ class Prime
   #     Prime.int_from_prime_division([[3, 2], [5, 1]])  #=> 45
   #     3**2 * 5                                         #=> 45
   #
-  def self?.int_from_prime_division: (Array[[ Integer, Integer ]]) -> Integer
+  def self.int_from_prime_division: (Array[[ Integer, Integer ]]) -> Integer
+
+  # <!--
+  #   rdoc-file=lib/prime.rb
+  #   - int_from_prime_division(pd)
+  # -->
+  # Re-composes a prime factorization and returns the product.
+  #
+  # For the decomposition:
+  #
+  #     [[p_1, e_1], [p_2, e_2], ..., [p_n, e_n]],
+  #
+  # it returns:
+  #
+  #     p_1**e_1 * p_2**e_2 * ... * p_n**e_n.
+  #
+  # ## Parameters
+  # `pd`
+  # :   Array of pairs of integers. Each pair consists of a prime number -- a
+  #     prime factor -- and a natural number -- its exponent (multiplicity).
+  #
+  #
+  # ## Example
+  #     Prime.int_from_prime_division([[3, 2], [5, 1]])  #=> 45
+  #     3**2 * 5                                         #=> 45
+  #
+  def int_from_prime_division: (Array[[ Integer, Integer ]]) -> Integer
 
   # <!--
   #   rdoc-file=lib/prime.rb
@@ -119,7 +176,23 @@ class Prime
   # `generator`
   # :   optional. A pseudo-prime generator.
   #
-  def self?.prime?: (Integer value, ?PseudoPrimeGenerator generator) -> bool
+  def self.prime?: (Integer value, ?PseudoPrimeGenerator generator) -> bool
+
+  # <!--
+  #   rdoc-file=lib/prime.rb
+  #   - prime?(value, generator = Prime::Generator23.new)
+  # -->
+  # Returns true if `value` is a prime number, else returns false. Integer#prime?
+  # is much more performant.
+  #
+  # ## Parameters
+  #
+  # `value`
+  # :   an arbitrary integer to be checked.
+  # `generator`
+  # :   optional. A pseudo-prime generator.
+  #
+  def prime?: (Integer value, ?PseudoPrimeGenerator generator) -> bool
 
   # <!--
   #   rdoc-file=lib/prime.rb
@@ -157,7 +230,45 @@ class Prime
   #     Prime.prime_division(45)  #=> [[3, 2], [5, 1]]
   #     3**2 * 5                  #=> 45
   #
-  def self?.prime_division: (Integer, ?PseudoPrimeGenerator generator) -> Array[[ Integer, Integer ]]
+  def self.prime_division: (Integer, ?PseudoPrimeGenerator generator) -> Array[[ Integer, Integer ]]
+
+  # <!--
+  #   rdoc-file=lib/prime.rb
+  #   - prime_division(value, generator = Prime::Generator23.new)
+  # -->
+  # Returns the factorization of `value`.
+  #
+  # For an arbitrary integer:
+  #
+  #     p_1**e_1 * p_2**e_2 * ... * p_n**e_n,
+  #
+  # prime_division returns an array of pairs of integers:
+  #
+  #     [[p_1, e_1], [p_2, e_2], ..., [p_n, e_n]].
+  #
+  # Each pair consists of a prime number -- a prime factor -- and a natural number
+  # -- its exponent (multiplicity).
+  #
+  # ## Parameters
+  # `value`
+  # :   An arbitrary integer.
+  # `generator`
+  # :   Optional. A pseudo-prime generator. `generator`.succ must return the next
+  #     pseudo-prime number in ascending order. It must generate all prime
+  #     numbers, but may also generate non-prime numbers, too.
+  #
+  #
+  # ### Exceptions
+  # `ZeroDivisionError`
+  # :   when `value` is zero.
+  #
+  #
+  # ## Example
+  #
+  #     Prime.prime_division(45)  #=> [[3, 2], [5, 1]]
+  #     3**2 * 5                  #=> 45
+  #
+  def prime_division: (Integer, ?PseudoPrimeGenerator generator) -> Array[[ Integer, Integer ]]
 
   # Returns the singleton instance.
   #
