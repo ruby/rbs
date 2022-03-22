@@ -597,6 +597,14 @@ module RBS
           BuiltinNames::Array.instance_type(default)
         when :HASH
           BuiltinNames::Hash.instance_type(default, default)
+        when :CALL
+          receiver, method_name, * = node.children
+          case method_name
+          when :freeze, :tap, :itself, :dup, :clone, :taint, :untaint, :extend
+            node_type(receiver)
+          else
+            default
+          end
         else
           default
         end
