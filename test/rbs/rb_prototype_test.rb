@@ -100,6 +100,7 @@ class Hello
   def zlist() [] end
   def list1() [1, '2', :x] end
   def list2() [1, 2, foo] end
+  def list3() [1, 2, 3].freeze end
 
   def range1() 1..foo end
   def range2() 1..42 end
@@ -155,6 +156,8 @@ class Hello
   def list1: () -> ::Array[1 | "2" | :x]
 
   def list2: () -> ::Array[1 | 2 | untyped]
+
+  def list3: () -> ::Array[1 | 2 | 3]
 
   def range1: () -> ::Range[::Integer]
 
