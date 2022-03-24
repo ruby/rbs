@@ -49,8 +49,6 @@ class Hello
   end
 
   def kw_req(a:) end
-
-  def opt_with_method_call(a = 'a'.freeze, b: 'b'.dup) end
 end
     EOR
 
@@ -63,8 +61,6 @@ class Hello
   def self.world: () { (untyped, untyped, untyped, x: untyped, y: untyped) -> untyped } -> untyped
 
   def kw_req: (a: untyped a) -> nil
-
-  def opt_with_method_call: (?::String a, ?b: ::String b) -> nil
 end
     EOF
   end
@@ -576,7 +572,7 @@ end
 module Foo
   VERSION: "0.1.1"
 
-  FROZEN: untyped
+  FROZEN: "str"
 
   ::Hello::World: :foo
 end

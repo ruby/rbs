@@ -536,6 +536,14 @@ module RBS
             value_type = types_to_union_type(value_types)
             BuiltinNames::Hash.instance_type([key_type, value_type])
           end
+        when :CALL
+          receiver, method_name, * = node.children
+          case method_name
+          when :freeze, :tap, :itself, :dup, :clone, :taint, :untaint, :extend
+            literal_to_type(receiver)
+          else
+            default
+          end
         else
           untyped
         end
@@ -597,14 +605,6 @@ module RBS
           BuiltinNames::Array.instance_type(default)
         when :HASH
           BuiltinNames::Hash.instance_type(default, default)
-        when :CALL
-          receiver, method_name, * = node.children
-          case method_name
-          when :freeze, :tap, :itself, :dup, :clone, :taint, :untaint, :extend
-            node_type(receiver)
-          else
-            default
-          end
         else
           default
         end
