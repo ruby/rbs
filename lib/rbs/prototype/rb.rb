@@ -408,7 +408,7 @@ module RBS
           name = lvasgn.children[0]
           fun.optional_positionals << Types::Function::Param.new(
             name: name,
-            type: node_type(lvasgn.children[1])
+            type: param_type(lvasgn.children[1])
           )
         end
 
@@ -429,7 +429,7 @@ module RBS
           when nil, :NODE_SPECIAL_REQUIRED_KEYWORD
             fun.required_keywords[name] = Types::Function::Param.new(name: name, type: untyped)
           when RubyVM::AbstractSyntaxTree::Node
-            fun.optional_keywords[name] = Types::Function::Param.new(name: name, type: node_type(value))
+            fun.optional_keywords[name] = Types::Function::Param.new(name: name, type: param_type(value))
           else
             raise "Unexpected keyword arg value: #{value}"
           end
@@ -578,7 +578,7 @@ module RBS
         end
       end
 
-      def node_type(node, default: Types::Bases::Any.new(location: nil))
+      def param_type(node, default: Types::Bases::Any.new(location: nil))
         case node.type
         when :LIT
           case node.children[0]
@@ -609,6 +609,9 @@ module RBS
           default
         end
       end
+
+      # backward compatible
+      alias node_type param_type
 
       def private
         @private ||= AST::Members::Private.new(location: nil)
