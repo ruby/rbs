@@ -338,7 +338,7 @@ module RBS
                   # Give up type prediction when node is MASGN.
                   Types::Bases::Any.new(location: nil)
                 else
-                  node_type(value_node)
+                  literal_to_type(value_node)
                 end
           decls << AST::Declarations::Constant.new(
             name: const_name,

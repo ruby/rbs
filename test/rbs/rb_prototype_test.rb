@@ -574,11 +574,11 @@ end
 
     assert_write parser.decls, <<-EOF
 module Foo
-  VERSION: ::String
+  VERSION: "0.1.1"
 
-  FROZEN: ::String
+  FROZEN: untyped
 
-  ::Hello::World: ::Symbol
+  ::Hello::World: :foo
 end
     EOF
   end
@@ -622,21 +622,21 @@ H = { id: 123 }
     parser.parse(rb)
 
     assert_write parser.decls, <<-EOF
-A: ::Integer
+A: 1
 
 B: ::Float
 
 C: ::String
 
-D: ::Symbol
+D: :hello
 
-E: untyped?
+E: nil
 
-F: bool
+F: ::FalseClass
 
-G: ::Array[untyped]
+G: ::Array[1 | 2 | 3]
 
-H: ::Hash[untyped, untyped]
+H: { id: 123 }
     EOF
   end
 
