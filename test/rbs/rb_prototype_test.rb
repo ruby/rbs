@@ -130,9 +130,9 @@ class Hello
 
   def dregx: () -> ::Regexp
 
-  def t: () -> ::TrueClass
+  def t: () -> true
 
-  def f: () -> ::FalseClass
+  def f: () -> false
 
   def n: () -> nil
 
@@ -628,7 +628,7 @@ D: :hello
 
 E: nil
 
-F: ::FalseClass
+F: false
 
 G: ::Array[1 | 2 | 3]
 

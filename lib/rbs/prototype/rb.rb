@@ -477,9 +477,9 @@ module RBS
         when :DREGX
           BuiltinNames::Regexp.instance_type
         when :TRUE
-          BuiltinNames::TrueClass.instance_type
+          Types::Literal.new(literal: true, location: nil)
         when :FALSE
-          BuiltinNames::FalseClass.instance_type
+          Types::Literal.new(literal: false, location: nil)
         when :NIL
           Types::Bases::Nil.new(location: nil)
         when :LIT
