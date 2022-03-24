@@ -106,7 +106,9 @@ module RBS
       consts = {}
 
       if context
-        constants_from_ancestors(context[1], constants: consts)
+        if last = context[1]
+          constants_from_ancestors(last, constants: consts)
+        end
       end
       constants_from_context(context, constants: consts) or return
       constants_itself(context, constants: consts)
@@ -141,12 +143,14 @@ module RBS
 
     def constants_from_context(context, constants:)
       if context
-        parent, typename = context
+        parent, last = context
 
         constants_from_context(parent, constants: constants) or return false
 
-        consts = table.children(typename) or return false
-        constants.merge!(consts)
+        if last
+          consts = table.children(last) or return false
+          constants.merge!(consts)
+        end
       else
         constants.merge!(table.toplevel)
       end
@@ -167,15 +171,19 @@ module RBS
     end
 
     def constants_itself(context, constants:)
-      if (_, typename = context)
-        if (ns = typename.namespace).empty?
-          constant = table.toplevel[typename.name] or raise
-        else
-          hash = table.children(ns.to_type_name) or raise
-          constant = hash[typename.name]
-        end
+      if context
+        _, typename = context
 
-        constants[typename.name] = constant
+        if typename
+          if (ns = typename.namespace).empty?
+            constant = table.toplevel[typename.name] or raise
+          else
+            hash = table.children(ns.to_type_name) or raise
+            constant = hash[typename.name]
+          end
+
+          constants[typename.name] = constant
+        end
       end
     end
   end

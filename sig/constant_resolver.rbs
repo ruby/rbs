@@ -44,8 +44,27 @@ module RBS
     attr_reader context_constants_cache: Hash[context, Hash[Symbol, Constant]?]
     attr_reader child_constants_cache: Hash[TypeName, Hash[Symbol, Constant]]
 
-    type context = [context, TypeName]      # Nested context
-                 | nil                      # Toplevel context
+    # context represents the module nesting structure.
+    #
+    # - `nil` means toplevel
+    # - A 2-tuple represents parent and the most inner module
+    #   - `TypeName` is for a module
+    #   - `false` is for unknown module
+    #
+    # The following Ruby code has context of `[[nil, TypeName("::Foo")], false]` where
+    #
+    # * `Foo` is a class defined in RBS file
+    # * `Bar` is not defined in RBS files
+    #
+    # ```ruby
+    # class Foo
+    #   module Bar
+    #     # Context here
+    #   end
+    # end
+    # ```
+    #
+    type context = [context, TypeName | false] | nil
 
     def initialize: (builder: DefinitionBuilder) -> void
 
