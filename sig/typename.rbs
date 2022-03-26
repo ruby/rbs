@@ -56,11 +56,17 @@ module RBS
 
     # Returns a new type name with a namespace appended to given namespace.
     #
-    #    TypeName("Hello").with_prefix(Namespace("World"))           # => World::Hello
-    #    TypeName("Foo::Bar").with_prefix(Namespace("::Hello"))      # => ::Hello::Foo::Bar
-    #    TypeName("::A::B").with_prefix(Namespace("C"))              # => ::A::B
+    # ```rb
+    # TypeName("Hello").with_prefix(Namespace("World"))           # => World::Hello
+    # TypeName("Foo::Bar").with_prefix(Namespace("::Hello"))      # => ::Hello::Foo::Bar
+    # TypeName("::A::B").with_prefix(Namespace("C"))              # => ::A::B
+    # ```
     #
     def with_prefix: (Namespace namespace) -> TypeName
+
+    def +: (TypeName) -> TypeName
+
+    def split: () -> Array[Symbol]
   end
 end
 

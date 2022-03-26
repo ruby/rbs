@@ -1,6 +1,6 @@
 require "test_helper"
 
-class RBS::ConstantResolverTest < Test::Unit::TestCase
+class RBS::Resolver::ConstantResolverTest < Test::Unit::TestCase
   include TestHelper
   include RBS
 
@@ -17,7 +17,7 @@ end
 EOF
 
       manager.build do |env|
-        table = ConstantResolver::Table.new(env)
+        table = Resolver::ConstantResolver::Table.new(env)
 
         assert table.toplevel.key?(:M1)
 
@@ -46,7 +46,7 @@ EOF
 
       manager.build do |env|
         builder = DefinitionBuilder.new(env: env)
-        resolver = ConstantResolver.new(builder: builder)
+        resolver = Resolver::ConstantResolver.new(builder: builder)
 
         resolver.resolve(:Object, context: nil).tap do |constant|
           assert_instance_of Constant, constant
@@ -74,7 +74,7 @@ Foo::Name: "Foo::Name"
 EOF
       manager.build do |env|
         builder = DefinitionBuilder.new(env: env)
-        resolver = ConstantResolver.new(builder: builder)
+        resolver = Resolver::ConstantResolver.new(builder: builder)
         namespace = Namespace.parse("::Foo")
 
         resolver.resolve(:Name, context: [nil, TypeName("::Foo")]).tap do |constant|
@@ -106,7 +106,7 @@ end
 EOF
       manager.build do |env|
         builder = DefinitionBuilder.new(env: env)
-        resolver = ConstantResolver.new(builder: builder)
+        resolver = Resolver::ConstantResolver.new(builder: builder)
 
         resolver.resolve(:Bar, context: [nil, TypeName("::Foo")]).tap do |constant|
           assert_instance_of Constant, constant
@@ -138,7 +138,7 @@ X: "::X"
 EOF
       manager.build do |env|
         builder = DefinitionBuilder.new(env: env)
-        resolver = ConstantResolver.new(builder: builder)
+        resolver = Resolver::ConstantResolver.new(builder: builder)
 
         resolver.resolve(:X, context: [[nil, TypeName("::Foo")], TypeName("::Foo::Bar::Baz")]).tap do |constant|
           assert_instance_of Constant, constant
@@ -168,7 +168,7 @@ Mix::MIN: 0
 EOF
       manager.build do |env|
         builder = DefinitionBuilder.new(env: env)
-        resolver = ConstantResolver.new(builder: builder)
+        resolver = Resolver::ConstantResolver.new(builder: builder)
 
         resolver.resolve(:MAX, context: [nil, TypeName("::Child")]).tap do |constant|
           assert_instance_of Constant, constant
@@ -204,7 +204,7 @@ end
 EOF
       manager.build do |env|
         builder = DefinitionBuilder.new(env: env)
-        resolver = ConstantResolver.new(builder: builder)
+        resolver = Resolver::ConstantResolver.new(builder: builder)
 
         resolver.resolve(:Set, context: [[nil, TypeName("::Foo")], TypeName("::Foo::Bar")]).tap do |constant|
           assert_instance_of Constant, constant
@@ -258,7 +258,7 @@ BasicObject::FOUR: 4
 EOF
       manager.build do |env|
         builder = DefinitionBuilder.new(env: env)
-        resolver = ConstantResolver.new(builder: builder)
+        resolver = Resolver::ConstantResolver.new(builder: builder)
 
         resolver.resolve_child(TypeName("::Stuff"), :ONE).tap do |constant|
           assert_nil constant
