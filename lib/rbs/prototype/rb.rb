@@ -338,7 +338,7 @@ module RBS
                   # Give up type prediction when node is MASGN.
                   Types::Bases::Any.new(location: nil)
                 else
-                  node_type(value_node)
+                  literal_to_type(value_node)
                 end
           decls << AST::Declarations::Constant.new(
             name: const_name,
@@ -408,7 +408,7 @@ module RBS
           name = lvasgn.children[0]
           fun.optional_positionals << Types::Function::Param.new(
             name: name,
-            type: node_type(lvasgn.children[1])
+            type: param_type(lvasgn.children[1])
           )
         end
 
@@ -429,7 +429,7 @@ module RBS
           when nil, :NODE_SPECIAL_REQUIRED_KEYWORD
             fun.required_keywords[name] = Types::Function::Param.new(name: name, type: untyped)
           when RubyVM::AbstractSyntaxTree::Node
-            fun.optional_keywords[name] = Types::Function::Param.new(name: name, type: node_type(value))
+            fun.optional_keywords[name] = Types::Function::Param.new(name: name, type: param_type(value))
           else
             raise "Unexpected keyword arg value: #{value}"
           end
@@ -477,9 +477,9 @@ module RBS
         when :DREGX
           BuiltinNames::Regexp.instance_type
         when :TRUE
-          BuiltinNames::TrueClass.instance_type
+          Types::Literal.new(literal: true, location: nil)
         when :FALSE
-          BuiltinNames::FalseClass.instance_type
+          Types::Literal.new(literal: false, location: nil)
         when :NIL
           Types::Bases::Nil.new(location: nil)
         when :LIT
@@ -536,6 +536,14 @@ module RBS
             value_type = types_to_union_type(value_types)
             BuiltinNames::Hash.instance_type([key_type, value_type])
           end
+        when :CALL
+          receiver, method_name, * = node.children
+          case method_name
+          when :freeze, :tap, :itself, :dup, :clone, :taint, :untaint, :extend
+            literal_to_type(receiver)
+          else
+            default
+          end
         else
           untyped
         end
@@ -570,7 +578,7 @@ module RBS
         end
       end
 
-      def node_type(node, default: Types::Bases::Any.new(location: nil))
+      def param_type(node, default: Types::Bases::Any.new(location: nil))
         case node.type
         when :LIT
           case node.children[0]
@@ -597,18 +605,13 @@ module RBS
           BuiltinNames::Array.instance_type(default)
         when :HASH
           BuiltinNames::Hash.instance_type(default, default)
-        when :CALL
-          receiver, method_name, * = node.children
-          case method_name
-          when :freeze, :tap, :itself, :dup, :clone, :taint, :untaint, :extend
-            node_type(receiver)
-          else
-            default
-          end
         else
           default
         end
       end
+
+      # backward compatible
+      alias node_type param_type
 
       def private
         @private ||= AST::Members::Private.new(location: nil)

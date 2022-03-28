@@ -49,8 +49,6 @@ class Hello
   end
 
   def kw_req(a:) end
-
-  def opt_with_method_call(a = 'a'.freeze, b: 'b'.dup) end
 end
     EOR
 
@@ -63,8 +61,6 @@ class Hello
   def self.world: () { (untyped, untyped, untyped, x: untyped, y: untyped) -> untyped } -> untyped
 
   def kw_req: (a: untyped a) -> nil
-
-  def opt_with_method_call: (?::String a, ?b: ::String b) -> nil
 end
     EOF
   end
@@ -134,9 +130,9 @@ class Hello
 
   def dregx: () -> ::Regexp
 
-  def t: () -> ::TrueClass
+  def t: () -> true
 
-  def f: () -> ::FalseClass
+  def f: () -> false
 
   def n: () -> nil
 
@@ -574,11 +570,11 @@ end
 
     assert_write parser.decls, <<-EOF
 module Foo
-  VERSION: ::String
+  VERSION: "0.1.1"
 
-  FROZEN: ::String
+  FROZEN: "str"
 
-  ::Hello::World: ::Symbol
+  ::Hello::World: :foo
 end
     EOF
   end
@@ -622,21 +618,21 @@ H = { id: 123 }
     parser.parse(rb)
 
     assert_write parser.decls, <<-EOF
-A: ::Integer
+A: 1
 
 B: ::Float
 
 C: ::String
 
-D: ::Symbol
+D: :hello
 
-E: untyped?
+E: nil
 
-F: bool
+F: false
 
-G: ::Array[untyped]
+G: ::Array[1 | 2 | 3]
 
-H: ::Hash[untyped, untyped]
+H: { id: 123 }
     EOF
   end
 
