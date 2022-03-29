@@ -223,6 +223,85 @@ end
     EOF
   end
 
+  def test_defs_return_type_with_if
+    parser = RB.new
+
+    rb = <<-EOR
+class ReturnTypeWithIF
+  def with_if
+    if foo?
+      true
+    end
+  end
+
+  def with_if_and_block
+    if foo?
+      foo
+      return false if bar?
+      true
+    end
+  end
+
+  def with_else_and_bool
+    if foo?
+      true
+    else
+      false
+    end
+  end
+
+  def with_else_and_elsif_and_bool_nil
+    if foo?
+    elsif bar?
+      true
+    else
+      false
+    end
+  end
+
+  def with_nested_if
+    if foo?
+      if bar?
+        if baz?
+          1
+        else
+          2
+        end
+      else
+        3
+      end
+    else
+      4
+    end
+  end
+
+  def with_unless
+    unless foo?
+      :sym
+    end
+  end
+end
+EOR
+
+    parser.parse(rb)
+
+    assert_write parser.decls, <<-EOR
+class ReturnTypeWithIF
+  def with_if: () -> (true | nil)
+
+  def with_if_and_block: () -> (false | true | nil)
+
+  def with_else_and_bool: () -> (true | false)
+
+  def with_else_and_elsif_and_bool_nil: () -> (nil | true | false)
+
+  def with_nested_if: () -> (1 | 2 | 3 | 4)
+
+  def with_unless: () -> (:sym | nil)
+end
+EOR
+  end
+
   def test_sclass
     parser = RB.new
 
