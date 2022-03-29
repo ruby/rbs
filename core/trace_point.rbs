@@ -304,8 +304,8 @@ class TracePoint < Object
   #     trace.enable { p tp.lineno }
   #     #=> RuntimeError: access from outside
   #
-  def enable: () -> bool
-            | () { () -> void } -> void
+  def enable:     (?target: (Method | UnboundMethod | Proc)?, ?target_line: Integer?, ?target_thread: Thread?) -> bool
+            | [R] (?target: (Method | UnboundMethod | Proc)?, ?target_line: Integer?, ?target_thread: Thread?) { () -> R } -> R
 
   # <!--
   #   rdoc-file=trace_point.rb
@@ -349,6 +349,15 @@ class TracePoint < Object
 
   # <!--
   #   rdoc-file=trace_point.rb
+  #   - parameters()
+  # -->
+  # Return the parameters definition of the method or block that the current hook
+  # belongs to. Format is the same as for Method#parameters
+  #
+  def parameters: () -> ::Array[[ :req | :opt | :rest | :keyreq | :key | :keyrest | :block, Symbol ] | [ :rest | :keyrest ]]
+
+  # <!--
+  #   rdoc-file=trace_point.rb
   #   - raised_exception()
   # -->
   # Value from exception raised on the `:raise` event
@@ -375,4 +384,24 @@ class TracePoint < Object
   #     trace.binding.eval('self')
   #
   def self: () -> Binding
+
+  # <!--
+  #   rdoc-file=trace_point.rb
+  #   - eval_script()
+  # -->
+  # Compiled source code (String) on *eval methods on the `:script_compiled`
+  # event. If loaded from a file, it will return nil.
+  #
+  def eval_script: () -> String?
+
+  # <!--
+  #   rdoc-file=trace_point.rb
+  #   - instruction_sequence()
+  # -->
+  # Compiled instruction sequence represented by a RubyVM::InstructionSequence
+  # instance on the `:script_compiled` event.
+  #
+  # Note that this method is MRI specific.
+  #
+  def instruction_sequence: () -> RubyVM::InstructionSequence
 end
