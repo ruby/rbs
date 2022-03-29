@@ -383,7 +383,7 @@ class TracePoint < Object
   #
   #     trace.binding.eval('self')
   #
-  def self: () -> Binding
+  def self: () -> untyped
 
   # <!--
   #   rdoc-file=trace_point.rb
