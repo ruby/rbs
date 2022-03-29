@@ -54,5 +54,5 @@ class IO
   # -->
   # Waits until IO is writable and returns `true` or `false` when times out.
   #
-  def wait_writable: (?Numeric? timeout) -> (self | bool | nil)?
+  def wait_writable: (?Numeric? timeout) -> boolish
 end
