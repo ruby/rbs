@@ -30,7 +30,7 @@ GEM
     json-schema (2.8.1)
       addressable (>= 2.4)
     marcel (1.0.1)
-    minitest (5.14.4)
+    minitest (5.15.0)
     parallel (1.20.1)
     parser (3.0.2.0)
       ast (~> 2.4.1)
