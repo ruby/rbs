@@ -88,6 +88,13 @@ class TracePointTest < Test::Unit::TestCase
     end.enable { 1 }
   end
 
+  def test_event
+    TracePoint.new(:line) do |tp|
+      assert_send_type  "() -> ::Symbol",
+                        tp, :event
+    end.enable { 1 }
+  end
+
   def test_lineno
     TracePoint.new(:line) do |tp|
       assert_send_type  "() -> ::Integer",

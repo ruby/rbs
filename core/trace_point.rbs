@@ -317,6 +317,16 @@ class TracePoint < Object
 
   # <!--
   #   rdoc-file=trace_point.rb
+  #   - event()
+  # -->
+  # Type of event
+  #
+  # See TracePoint@Events for more information.
+  #
+  def event: () -> ::Symbol
+
+  # <!--
+  #   rdoc-file=trace_point.rb
   #   - trace.inspect  -> string
   # -->
   # Return a string containing a human-readable TracePoint status.
