@@ -20,7 +20,10 @@ module RBS
 
       private def source_for(config_entry)
         @source_for ||= {}
-        key = config_entry['source'] or raise
+        key = config_entry['source']
+        unless key
+          raise "Cannot find source of '#{config_entry['name']}' gem"
+        end
         @source_for[key] ||= Sources.from_config_entry(key)
       end
     end
