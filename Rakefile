@@ -35,7 +35,7 @@ rule ".c" => ".re" do |t|
 end
 
 task :annotate do
-  sh "rbs annotate core stdlib"
+  sh "bin/generate_docs.sh"
 end
 
 task :confirm_annotation do
