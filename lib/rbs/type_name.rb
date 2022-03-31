@@ -69,6 +69,21 @@ module RBS
     def with_prefix(namespace)
       self.class.new(namespace: namespace + self.namespace, name: name)
     end
+
+    def split
+      namespace.path + [name]
+    end
+
+    def +(other)
+      if other.absolute?
+        other
+      else
+        TypeName.new(
+          namespace: self.to_namespace + other.namespace,
+          name: other.name
+        )
+      end
+    end
   end
 end
 
