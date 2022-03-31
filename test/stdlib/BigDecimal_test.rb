@@ -1,5 +1,6 @@
 require_relative "test_helper"
 require "bigdecimal"
+require "bigdecimal/util"
 
 class BigDecimalSingletonTest < Test::Unit::TestCase
   include TypeAssertions
@@ -342,6 +343,11 @@ class BigDecimalTest < Test::Unit::TestCase
                       BigDecimal("1.23"), :sub, BigDecimal("1.23"), 2
   end
 
+  def test_to_d
+    assert_send_type  "() -> ::BigDecimal",
+                      BigDecimal("1.23"), :to_d
+  end
+
   def test_to_f
     assert_send_type  "() -> ::Float",
                       BigDecimal("1.23"), :to_f
@@ -355,5 +361,71 @@ class BigDecimalTest < Test::Unit::TestCase
   def test_to_r
     assert_send_type  "() -> ::Rational",
                       BigDecimal("1.23"), :to_r
+  end
+end
+
+class IntegerToBigDecimalTest < Test::Unit::TestCase
+  include TypeAssertions
+
+  library "bigdecimal"
+  testing "::Integer"
+
+  def test_to_d_with_integer
+    assert_send_type "() -> ::BigDecimal", 123, :to_d
+  end
+end
+
+class FloatToBigDecimalTest < Test::Unit::TestCase
+  include TypeAssertions
+
+  library "bigdecimal"
+  testing "::Float"
+
+  def test_to_d_with_float
+    assert_send_type "() -> ::BigDecimal", 12.3, :to_d
+  end
+end
+
+class StringToBigDecimalTest < Test::Unit::TestCase
+  include TypeAssertions
+
+  library "bigdecimal"
+  testing "::String"
+
+  def test_to_d_with_string
+    assert_send_type "() -> ::BigDecimal", "123", :to_d
+  end
+end
+
+class RationalToBigDecimalTest < Test::Unit::TestCase
+  include TypeAssertions
+
+  library "bigdecimal"
+  testing "::Rational"
+
+  def test_to_d_with_rational
+    assert_send_type "(Integer) -> ::BigDecimal", Rational(22, 7), :to_d, 3
+  end
+end
+
+class ComplexToBigDecimalTest < Test::Unit::TestCase
+  include TypeAssertions
+
+  library "bigdecimal"
+  testing "::Complex"
+
+  def test_to_d_with_complex
+    assert_send_type "() -> ::BigDecimal", Complex(0.1234567, 0), :to_d
+  end
+end
+
+class NilToBigDecimalTest < Test::Unit::TestCase
+  include TypeAssertions
+
+  library "bigdecimal"
+  testing "::NilClass"
+
+  def test_to_d_with_nil
+    assert_send_type "() -> ::BigDecimal", nil, :to_d
   end
 end
