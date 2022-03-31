@@ -16,7 +16,7 @@ jobs:
     - name: Install dependencies
       run: |
         apt-get update
-        apt-get install -y libdb-dev
+        apt-get install -y libdb-dev curl
     - name: Update rubygems & bundler
       run: |
         ruby -v
