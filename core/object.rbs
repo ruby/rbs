@@ -912,6 +912,13 @@ class Object < BasicObject
   #
   def public_method: (name name) -> Method
 
+  # <!--
+  #   rdoc-file=object.c
+  #   - obj.public_methods(all=true)   -> array
+  # -->
+  # Returns the list of public methods accessible to *obj*. If the *all* parameter
+  # is set to `false`, only those methods in the receiver will be listed.
+  #
   def public_methods: (?boolish all) -> Array[Symbol]
 
   # <!--
