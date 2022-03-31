@@ -27,7 +27,7 @@ class TrueClass
   # statements.
   #
   def ===: (true) -> true
-         | (untyped obj) -> bool
+         | (untyped obj) -> false
 
   # <!--
   #   rdoc-file=object.c
