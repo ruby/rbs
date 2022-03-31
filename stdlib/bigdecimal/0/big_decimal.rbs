@@ -1187,9 +1187,10 @@ class BigDecimal < Numeric
   #
   def zero?: () -> bool
 
-  # call-seq:
-  #     a.to_d -> bigdecimal
-  #
+  # <!--
+  #   rdoc-file=ext/bigdecimal/lib/bigdecimal/util.rb
+  #   - a.to_d -> bigdecimal
+  # -->
   # Returns self.
   #
   #     require 'bigdecimal/util'
@@ -1391,11 +1392,13 @@ module Kernel
   def self?.BigDecimal: (real | string | BigDecimal initial, ?int digits, ?exception: bool) -> BigDecimal
 end
 
+%a{annotate:rdoc:skip}
 class Integer
-  # call-seq:
-  #     int.to_d  -> bigdecimal
-  #
-  # Returns the value of +int+ as a BigDecimal.
+  # <!--
+  #   rdoc-file=ext/bigdecimal/lib/bigdecimal/util.rb
+  #   - int.to_d  -> bigdecimal
+  # -->
+  # Returns the value of `int` as a BigDecimal.
   #
   #     require 'bigdecimal'
   #     require 'bigdecimal/util'
@@ -1407,14 +1410,16 @@ class Integer
   def to_d: () -> BigDecimal
 end
 
+%a{annotate:rdoc:skip}
 class Float
-  # call-seq:
-  #     float.to_d             -> bigdecimal
-  #     float.to_d(precision)  -> bigdecimal
-  #
-  # Returns the value of +float+ as a BigDecimal.
-  # The +precision+ parameter is used to determine the number of
-  # significant digits for the result (the default is Float::DIG).
+  # <!--
+  #   rdoc-file=ext/bigdecimal/lib/bigdecimal/util.rb
+  #   - float.to_d             -> bigdecimal
+  #   - float.to_d(precision)  -> bigdecimal
+  # -->
+  # Returns the value of `float` as a BigDecimal. The `precision` parameter is
+  # used to determine the number of significant digits for the result (the default
+  # is Float::DIG).
   #
   #     require 'bigdecimal'
   #     require 'bigdecimal/util'
@@ -1427,12 +1432,14 @@ class Float
   def to_d: (?Integer precision) -> BigDecimal
 end
 
+%a{annotate:rdoc:skip}
 class String
-  # call-seq:
-  #     str.to_d  -> bigdecimal
-  #
-  # Returns the result of interpreting leading characters in +str+
-  # as a BigDecimal.
+  # <!--
+  #   rdoc-file=ext/bigdecimal/lib/bigdecimal/util.rb
+  #   - str.to_d  -> bigdecimal
+  # -->
+  # Returns the result of interpreting leading characters in `str` as a
+  # BigDecimal.
   #
   #     require 'bigdecimal'
   #     require 'bigdecimal/util'
@@ -1446,13 +1453,15 @@ class String
   def to_d: () -> BigDecimal
 end
 
+%a{annotate:rdoc:skip}
 class Rational
-  # call-seq:
-  #     rat.to_d(precision)  -> bigdecimal
-  #
+  # <!--
+  #   rdoc-file=ext/bigdecimal/lib/bigdecimal/util.rb
+  #   - rat.to_d(precision)  -> bigdecimal
+  # -->
   # Returns the value as a BigDecimal.
   #
-  # The required +precision+ parameter is used to determine the number of
+  # The required `precision` parameter is used to determine the number of
   # significant digits for the result.
   #
   #     require 'bigdecimal'
@@ -1465,16 +1474,18 @@ class Rational
   def to_d: (Integer precision) -> BigDecimal
 end
 
+%a{annotate:rdoc:skip}
 class Complex
-  # call-seq:
-  #     cmp.to_d             -> bigdecimal
-  #     cmp.to_d(precision)  -> bigdecimal
-  #
+  # <!--
+  #   rdoc-file=ext/bigdecimal/lib/bigdecimal/util.rb
+  #   - cmp.to_d             -> bigdecimal
+  #   - cmp.to_d(precision)  -> bigdecimal
+  # -->
   # Returns the value as a BigDecimal.
   #
-  # The +precision+ parameter is required for a rational complex number.
-  # This parameter is used to determine the number of significant digits
-  # for the result.
+  # The `precision` parameter is required for a rational complex number. This
+  # parameter is used to determine the number of significant digits for the
+  # result.
   #
   #     require 'bigdecimal'
   #     require 'bigdecimal/util'
@@ -1487,10 +1498,12 @@ class Complex
   def to_d: (*untyped args) -> BigDecimal
 end
 
+%a{annotate:rdoc:skip}
 class NilClass
-  # call-seq:
-  #     nil.to_d -> bigdecimal
-  #
+  # <!--
+  #   rdoc-file=ext/bigdecimal/lib/bigdecimal/util.rb
+  #   - nil.to_d -> bigdecimal
+  # -->
   # Returns nil represented as a BigDecimal.
   #
   #     require 'bigdecimal'

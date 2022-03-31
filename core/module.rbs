@@ -676,6 +676,23 @@ class Module < Object
   def define_method: (Symbol | String arg0, ?Proc | Method | UnboundMethod arg1) -> Symbol
                    | (Symbol | String arg0) { () -> untyped } -> Symbol
 
+  # <!--
+  #   rdoc-file=object.c
+  #   - mod.deprecate_constant(symbol, ...)    => mod
+  # -->
+  # Makes a list of existing constants deprecated. Attempt to refer to them will
+  # produce a warning.
+  #
+  #     module HTTP
+  #       NotFound = Exception.new
+  #       NOT_FOUND = NotFound # previous version of the library used this name
+  #
+  #       deprecate_constant :NOT_FOUND
+  #     end
+  #
+  #     HTTP::NOT_FOUND
+  #     # warning: constant HTTP::NOT_FOUND is deprecated
+  #
   def deprecate_constant: (*Symbol) -> self
 
   def eql?: (untyped other) -> bool
