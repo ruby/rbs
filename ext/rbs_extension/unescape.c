@@ -19,6 +19,7 @@ void rbs_unescape_string(VALUE string) {
 
   if (!HASH) {
     HASH = rb_hash_new();
+    rb_global_variable(&HASH);
     rb_hash_aset(HASH, rb_str_new_literal("\\a"), rb_str_new_literal("\a"));
     rb_hash_aset(HASH, rb_str_new_literal("\\b"), rb_str_new_literal("\b"));
     rb_hash_aset(HASH, rb_str_new_literal("\\e"), rb_str_new_literal("\e"));
@@ -29,7 +30,6 @@ void rbs_unescape_string(VALUE string) {
     rb_hash_aset(HASH, rb_str_new_literal("\\t"), rb_str_new_literal("\t"));
     rb_hash_aset(HASH, rb_str_new_literal("\\v"), rb_str_new_literal("\v"));
     rb_hash_aset(HASH, rb_str_new_literal("\\\""), rb_str_new_literal("\""));
-    rb_global_variable(&HASH);
   }
 
   rb_funcall(string, gsub, 2, REGEXP, HASH);
