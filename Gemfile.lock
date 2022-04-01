@@ -81,7 +81,7 @@ GEM
     singleton (0.1.1)
     stackprof (0.2.17)
     strong_json (2.1.2)
-    tempfile (0.1.1)
+    tempfile (0.1.2)
     test-unit (3.4.4)
       power_assert
     unicode-display_width (2.0.0)
