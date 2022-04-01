@@ -2,6 +2,49 @@
 
 ## master
 
+## 2.3.0 (2022-04-01)
+
+### Signature updates
+
+* `Enumerator` ([\#931](https://github.com/ruby/rbs/pull/931))
+* `FalseClass` ([\#931](https://github.com/ruby/rbs/pull/931))
+* `Integer` ([\#914](https://github.com/ruby/rbs/pull/914))
+* `Module` ([\#931](https://github.com/ruby/rbs/pull/931))
+* `NilClass` ([\#931](https://github.com/ruby/rbs/pull/931))
+* `Object` ([\#931](https://github.com/ruby/rbs/pull/931))
+* `Prime` ([\#934](https://github.com/ruby/rbs/pull/934))
+* `TracePoint` ([\#941](https://github.com/ruby/rbs/pull/941))
+* `TrueClass` ([\#931](https://github.com/ruby/rbs/pull/931))
+* `#to_d` ([\#936](https://github.com/ruby/rbs/pull/936))
+* `IO#wait_writable` ([\#943](https://github.com/ruby/rbs/pull/943))
+
+### Library changes
+
+* Add `Resolver::ConstantResolver` and `Resolver::TypeNameResolver` ([\#938](https://github.com/ruby/rbs/pull/938))
+* Fix RBS::Locator ([\#930](https://github.com/ruby/rbs/pull/930))
+* Trying to preserve more locations ([\#915](https://github.com/ruby/rbs/pull/915))
+* Add visibility modifier to method definition json ([\#923](https://github.com/ruby/rbs/pull/923), [\#928](https://github.com/ruby/rbs/pull/928))
+* Add manifest.yaml for rbs gem ([\#921](https://github.com/ruby/rbs/pull/921))
+* Fix Environment type checking ([\#929](https://github.com/ruby/rbs/pull/929))
+* Fix memory violation in C extension ([\#952](https://github.com/ruby/rbs/pull/952))
+* Fix warnings in C extension ([\#954](https://github.com/ruby/rbs/pull/954))
+
+#### rbs prototype
+
+* Better typing for known `self`-returning method calls ([\#932](https://github.com/ruby/rbs/pull/932))
+* Let constants have literal types ([\#937](https://github.com/ruby/rbs/pull/937))
+
+#### rbs collection
+
+* Fix error message to tell gem name when source is not found ([\#927](https://github.com/ruby/rbs/pull/927))
+
+### Miscellaneous
+
+* Fix `bin/sort` for constants ([\#919](https://github.com/ruby/rbs/pull/919))
+* Use actions/checkout@v3 ([\#944](https://github.com/ruby/rbs/pull/944))
+* Added actions ecosystem for dependabot ([\#946](https://github.com/ruby/rbs/pull/946))
+* Confirm RDoc is up to date ([\#945](https://github.com/ruby/rbs/pull/945))
+
 ## 2.2.2 (2022-02-22)
 
 ### Signature updates
