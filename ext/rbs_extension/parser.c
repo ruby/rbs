@@ -77,7 +77,7 @@ static VALUE string_of_loc(parserstate *state, position start, position end) {
 /**
  * Raises RuntimeError with "Unexpected error " messsage.
  * */
-static NORETURN(void) rbs_abort() {
+static NORETURN(void) rbs_abort(void) {
   rb_raise(
     rb_eRuntimeError,
     "Unexpected error"
@@ -1065,7 +1065,7 @@ VALUE parse_type_params(parserstate *state, range *rg, bool module_type_params) 
       }
 
       param_range.end = state->current_token.range.end;
-      
+
       VALUE location = rbs_new_location(state->buffer, param_range);
       rbs_loc *loc = rbs_check_location(location);
       rbs_loc_add_required_child(loc, rb_intern("name"), name_range);
@@ -2496,7 +2496,7 @@ rbsparser_parse_signature(VALUE self, VALUE buffer, VALUE line, VALUE column)
   return signature;
 }
 
-void rbs__init_parser() {
+void rbs__init_parser(void) {
   RBS_Parser = rb_define_class_under(RBS, "Parser", rb_cObject);
   rb_define_singleton_method(RBS_Parser, "_parse_type", rbsparser_parse_type, 4);
   rb_define_singleton_method(RBS_Parser, "_parse_method_type", rbsparser_parse_method_type, 4);

@@ -2,7 +2,7 @@
 
 #define RESET_TABLE_P(table) (table->size == 0)
 
-id_table *alloc_empty_table() {
+id_table *alloc_empty_table(void) {
   id_table *table = malloc(sizeof(id_table));
   table->size = 10;
   table->count = 0;
@@ -11,7 +11,7 @@ id_table *alloc_empty_table() {
   return table;
 }
 
-id_table *alloc_reset_table() {
+id_table *alloc_reset_table(void) {
   id_table *table = malloc(sizeof(id_table));
   table->size = 0;
 
