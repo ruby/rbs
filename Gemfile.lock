@@ -34,7 +34,7 @@ GEM
     parallel (1.20.1)
     parser (3.0.2.0)
       ast (~> 2.4.1)
-    power_assert (2.0.0)
+    power_assert (2.0.1)
     prime (0.1.2)
       forwardable
       singleton
@@ -82,7 +82,7 @@ GEM
     stackprof (0.2.17)
     strong_json (2.1.2)
     tempfile (0.1.1)
-    test-unit (3.4.4)
+    test-unit (3.5.3)
       power_assert
     unicode-display_width (2.0.0)
 
