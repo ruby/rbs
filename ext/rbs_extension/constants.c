@@ -67,7 +67,7 @@ VALUE RBS_MethodType;
 
 VALUE RBS_ParsingError;
 
-void rbs__init_constants() {
+void rbs__init_constants(void) {
   ID id_RBS = rb_intern_const("RBS");
 
   RBS = rb_const_get(rb_cObject, id_RBS);

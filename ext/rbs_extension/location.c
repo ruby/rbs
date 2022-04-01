@@ -276,7 +276,7 @@ VALUE rbs_location_pp(VALUE buffer, const position *start_pos, const position *e
   return rbs_new_location(buffer, rg);
 }
 
-void rbs__init_location() {
+void rbs__init_location(void) {
   RBS_Location = rb_define_class_under(RBS, "Location", rb_cObject);
   rb_define_alloc_func(RBS_Location, location_s_allocate);
   rb_define_private_method(RBS_Location, "initialize", location_initialize, 3);
