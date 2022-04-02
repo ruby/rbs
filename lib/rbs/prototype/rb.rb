@@ -542,7 +542,7 @@ module RBS
           when :freeze, :tap, :itself, :dup, :clone, :taint, :untaint, :extend
             literal_to_type(receiver)
           else
-            default
+            untyped
           end
         else
           untyped
