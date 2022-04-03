@@ -66,3 +66,21 @@ jobs:
     - name: Run test
       run: |
         bundle exec rake ${{ matrix.job }}
+
+  windows:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ windows-2019, windows-2022 ]
+        ruby: [ ucrt, mswin ]
+    steps:
+      - uses: actions/checkout@v3
+      - name: load ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: ${{ matrix.ruby }}
+      - name: rake-compiler
+        run: gem install rake-compiler
+      - name: compile
+        run: rake compile
