@@ -594,6 +594,13 @@ class RBS::TypeParsingTest < Test::Unit::TestCase
                    }, type.fields)
       assert_equal "{ foo: untyped, }", type.location.source
     end
+
+    error = assert_raises(RBS::ParsingError) do
+      Parser.parse_type("{ foo")
+    end
+    assert_equal "tLIDENT", error.token_type
+    assert_equal "foo", error.location.source
+    assert_equal "a.rbs:1:2...1:5: Syntax error: unexpected record key token, token=`foo` (tLIDENT)", error.message
   end
 
   def test_type_var
