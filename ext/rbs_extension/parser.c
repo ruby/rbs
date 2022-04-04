@@ -684,7 +684,11 @@ VALUE parse_record_attributes(parserstate *state) {
         key = rb_funcall(parse_type(state), rb_intern("literal"), 0);
         break;
       default:
-        rbs_abort();
+        raise_syntax_error(
+          state,
+          state->next_token,
+          "unexpected record key token"
+        );
       }
       parser_advance_assert(state, pFATARROW);
     }
