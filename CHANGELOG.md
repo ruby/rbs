@@ -2,6 +2,18 @@
 
 ## master
 
+## 2.3.1 (2022-04-05)
+
+### Library changes
+
+* Fix mswin build, use `append_cflags`, add Windows 'compile only' CI  ([\#964](https://github.com/ruby/rbs/pull/964))
+* Raise `RBS::SyntaxError` from `parse_record_attributes` ([\#966](https://github.com/ruby/rbs/pull/966))
+* Toplevel constant must have the lowest precedence ([\#967](https://github.com/ruby/rbs/pull/967))
+
+#### rbs prototype
+
+* Use default value also for `literal_to_type` ([\#962](https://github.com/ruby/rbs/pull/962))
+
 ## 2.3.0 (2022-04-01)
 
 ### Signature updates
