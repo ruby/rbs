@@ -282,4 +282,47 @@ EOF
       end
     end
   end
+
+  def test_reference_constant_toplevel
+    SignatureManager.new do |manager|
+      manager.files[Pathname("foo.rbs")] = <<EOF
+CONST: Integer
+
+class Foo
+  CONST: String
+end
+
+class Bar < Foo
+end
+EOF
+      manager.build do |env|
+        builder = DefinitionBuilder.new(env: env)
+        resolver = Resolver::ConstantResolver.new(builder: builder)
+
+        resolver.resolve(:CONST, context: [nil, TypeName("::Bar")]).tap do |constant|
+          assert_equal "::Foo::CONST", constant.name.to_s
+        end
+      end
+    end
+  end
+
+  def test_reference_constant_toplevel2
+    SignatureManager.new do |manager|
+      manager.files[Pathname("foo.rbs")] = <<EOF
+CONST: Integer
+
+class BasicObject
+  CONST: String
+end
+EOF
+      manager.build do |env|
+        builder = DefinitionBuilder.new(env: env)
+        resolver = Resolver::ConstantResolver.new(builder: builder)
+
+        resolver.resolve(:CONST, context: [nil, TypeName("::String")]).tap do |constant|
+          assert_equal "::CONST", constant.name.to_s
+        end
+      end
+    end
+  end
 end
