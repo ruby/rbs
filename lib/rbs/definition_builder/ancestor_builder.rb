@@ -398,6 +398,7 @@ module RBS
 
         one_ancestors = one_instance_ancestors(type_name)
 
+        # @type var ancestors: Array[::RBS::Definition::Ancestor::t]
         ancestors = []
 
         case entry

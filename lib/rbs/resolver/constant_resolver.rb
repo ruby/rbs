@@ -106,10 +106,10 @@ module RBS
         # @type var consts: Hash[Symbol, Constant]
         consts = {}
 
-        if context
-          if last = context[1]
-            constants_from_ancestors(last, constants: consts)
-          end
+        if last = context&.[](1)
+          constants_from_ancestors(last, constants: consts)
+        else
+          constants_from_ancestors(BuiltinNames::Object.name, constants: consts)
         end
         constants_from_context(context, constants: consts) or return
         constants_itself(context, constants: consts)
@@ -122,7 +122,7 @@ module RBS
         constants = {}
 
         if table.children(name)
-          builder.ancestor_builder.instance_ancestors(name).ancestors.each do |ancestor|
+          builder.ancestor_builder.instance_ancestors(name).ancestors.reverse_each do |ancestor|
             if ancestor.is_a?(Definition::Ancestor::Instance)
               if ancestor.name == BuiltinNames::Object.name
                 if name != BuiltinNames::Object.name
@@ -152,19 +152,38 @@ module RBS
             consts = table.children(last) or return false
             constants.merge!(consts)
           end
-        else
-          constants.merge!(table.toplevel)
         end
 
         true
       end
 
       def constants_from_ancestors(module_name, constants:)
-        builder.ancestor_builder.instance_ancestors(module_name).ancestors.each do |ancestor|
+        if (entry = builder.env.class_decls[module_name]).is_a?(Environment::ModuleEntry)
+          self_types = entry.self_types
+          if self_types.empty?
+            self_types << AST::Declarations::Module::Self.new(
+              name: BuiltinNames::Object.name,
+              args: [],
+              location: nil
+            )
+          end
+
+          self_types.each do |self_type|
+            if self_type.name.class?
+              constants_from_ancestors(self_type.name, constants: constants)
+            end
+          end
+        end
+
+        builder.ancestor_builder.instance_ancestors(module_name).ancestors.reverse_each do |ancestor|
           if ancestor.is_a?(Definition::Ancestor::Instance)
             case ancestor.source
             when AST::Members::Include, :super, nil
               consts = table.children(ancestor.name) or raise
+              if ancestor.name == BuiltinNames::Object.name
+                # Insert toplevel constants as ::Object's constants
+                consts.merge!(table.toplevel)
+              end
               constants.merge!(consts)
             end
           end
