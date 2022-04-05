@@ -22,7 +22,7 @@ void rbs_unescape_string(VALUE string) {
     rb_global_variable(&HASH);
     rb_hash_aset(HASH, rb_str_new_literal("\\a"), rb_str_new_literal("\a"));
     rb_hash_aset(HASH, rb_str_new_literal("\\b"), rb_str_new_literal("\b"));
-    rb_hash_aset(HASH, rb_str_new_literal("\\e"), rb_str_new_literal("\e"));
+    rb_hash_aset(HASH, rb_str_new_literal("\\e"), rb_str_new_literal("\033"));
     rb_hash_aset(HASH, rb_str_new_literal("\\f"), rb_str_new_literal("\f"));
     rb_hash_aset(HASH, rb_str_new_literal("\\n"), rb_str_new_literal("\n"));
     rb_hash_aset(HASH, rb_str_new_literal("\\r"), rb_str_new_literal("\r"));
