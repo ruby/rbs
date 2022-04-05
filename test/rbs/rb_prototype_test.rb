@@ -754,6 +754,32 @@ end
     RBS
   end
 
+  def test_calling_class_method_from_instance
+    parser = RB.new
+
+    rb = <<~'RUBY'
+class HelloWorld
+  def self.world(str)
+    str + 'world'
+  end
+
+  def hello
+    self.class.world('hello')
+  end
+end
+    RUBY
+
+    parser.parse(rb)
+
+    assert_write parser.decls, <<~RBS
+class HelloWorld
+  def self.world: (untyped str) -> untyped
+
+  def hello: () -> untyped
+end
+    RBS
+  end
+
   if RUBY_VERSION >= '2.7'
     def test_argument_forwarding
       parser = RB.new
