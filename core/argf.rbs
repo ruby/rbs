@@ -1,0 +1,112 @@
+class ARGFClass
+  include Enumerable[untyped]
+
+  public
+
+  def argv: () -> untyped
+
+  def binmode: () -> untyped
+
+  def binmode?: () -> untyped
+
+  def close: () -> untyped
+
+  def closed?: () -> untyped
+
+  def each: (*untyped) -> untyped
+
+  def each_byte: () -> untyped
+
+  def each_char: () -> untyped
+
+  def each_codepoint: () -> untyped
+
+  def each_line: (*untyped) -> untyped
+
+  def eof: () -> untyped
+
+  def eof?: () -> untyped
+
+  def external_encoding: () -> untyped
+
+  def file: () -> untyped
+
+  def filename: () -> untyped
+
+  def fileno: () -> untyped
+
+  def getbyte: () -> untyped
+
+  def getc: () -> untyped
+
+  def gets: (*untyped) -> untyped
+
+  def inplace_mode: () -> untyped
+
+  def inplace_mode=: (untyped) -> untyped
+
+  alias inspect to_s
+
+  def internal_encoding: () -> untyped
+
+  def lineno: () -> untyped
+
+  def lineno=: (untyped) -> untyped
+
+  def path: () -> untyped
+
+  def pos: () -> untyped
+
+  def pos=: (untyped) -> untyped
+
+  def print: (*untyped) -> untyped
+
+  def printf: (*untyped) -> untyped
+
+  def putc: (untyped) -> untyped
+
+  def puts: (*untyped) -> untyped
+
+  def read: (*untyped) -> untyped
+
+  def read_nonblock: (*untyped) -> untyped
+
+  def readbyte: () -> untyped
+
+  def readchar: () -> untyped
+
+  def readline: (*untyped) -> untyped
+
+  def readlines: (*untyped) -> untyped
+
+  def readpartial: (*untyped) -> untyped
+
+  def rewind: () -> untyped
+
+  def seek: (*untyped) -> untyped
+
+  def set_encoding: (*untyped) -> untyped
+
+  def skip: () -> untyped
+
+  def tell: () -> untyped
+
+  def to_a: (*untyped) -> untyped
+
+  def to_i: () -> untyped
+
+  def to_io: () -> untyped
+
+  def to_s: () -> untyped
+
+  def to_write_io: () -> untyped
+
+  def write: (untyped) -> untyped
+
+  private
+
+  def initialize: (*untyped) -> void
+
+  def initialize_copy: (untyped) -> untyped
+end
+
