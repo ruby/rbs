@@ -158,21 +158,11 @@ module RBS
       end
 
       def constants_from_ancestors(module_name, constants:)
-        if (entry = builder.env.class_decls[module_name]).is_a?(Environment::ModuleEntry)
-          self_types = entry.self_types
-          if self_types.empty?
-            self_types << AST::Declarations::Module::Self.new(
-              name: BuiltinNames::Object.name,
-              args: [],
-              location: nil
-            )
-          end
+        entry = builder.env.class_decls[module_name]
 
-          self_types.each do |self_type|
-            if self_type.name.class?
-              constants_from_ancestors(self_type.name, constants: constants)
-            end
-          end
+        if entry.is_a?(Environment::ModuleEntry)
+          constants.merge!(table.children(BuiltinNames::Object.name) || raise)
+          constants.merge!(table.toplevel)
         end
 
         builder.ancestor_builder.instance_ancestors(module_name).ancestors.reverse_each do |ancestor|
@@ -180,7 +170,7 @@ module RBS
             case ancestor.source
             when AST::Members::Include, :super, nil
               consts = table.children(ancestor.name) or raise
-              if ancestor.name == BuiltinNames::Object.name
+              if ancestor.name == BuiltinNames::Object.name && entry.is_a?(Environment::ClassEntry)
                 # Insert toplevel constants as ::Object's constants
                 consts.merge!(table.toplevel)
               end
