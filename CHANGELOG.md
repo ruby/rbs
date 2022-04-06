@@ -2,6 +2,17 @@
 
 ## master
 
+## 2.3.2 (2022-04-06)
+
+### Library changes
+
+* Let modules have constants under `::Object` ([\#972](https://github.com/ruby/rbs/pull/972))
+
+### Miscellaneous
+
+* Delete `-Wold-style-definition` ([\#971](https://github.com/ruby/rbs/pull/971))
+* `\e` is not defined in C90 ([\#970](https://github.com/ruby/rbs/pull/970))
+
 ## 2.3.1 (2022-04-05)
 
 ### Library changes
