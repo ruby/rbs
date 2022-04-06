@@ -1,112 +1,164 @@
+%a{annotate:rdoc:copy:ARGF}
 class ARGFClass
   include Enumerable[untyped]
 
   public
 
+  %a{annotate:rdoc:copy:ARGF#argv}
   def argv: () -> untyped
 
+  %a{annotate:rdoc:copy:ARGF#binmode}
   def binmode: () -> untyped
 
+  %a{annotate:rdoc:copy:ARGF#binmode?}
   def binmode?: () -> untyped
 
+  %a{annotate:rdoc:copy:ARGF#close}
   def close: () -> untyped
 
+  %a{annotate:rdoc:copy:ARGF#closed?}
   def closed?: () -> untyped
 
+  %a{annotate:rdoc:copy:ARGF#each}
   def each: (*untyped) -> untyped
 
+  %a{annotate:rdoc:copy:ARGF#each_byte}
   def each_byte: () -> untyped
 
+  %a{annotate:rdoc:copy:ARGF#each_char}
   def each_char: () -> untyped
 
+  %a{annotate:rdoc:copy:ARGF#each_codepoint}
   def each_codepoint: () -> untyped
 
+  %a{annotate:rdoc:copy:ARGF#each_line}
   def each_line: (*untyped) -> untyped
 
+  %a{annotate:rdoc:copy:ARGF#eof}
   def eof: () -> untyped
 
+  %a{annotate:rdoc:copy:ARGF#eof?}
   def eof?: () -> untyped
 
+  %a{annotate:rdoc:copy:ARGF#external_encoding}
   def external_encoding: () -> untyped
 
+  %a{annotate:rdoc:copy:ARGF#file}
   def file: () -> untyped
 
+  %a{annotate:rdoc:copy:ARGF#filename}
   def filename: () -> untyped
 
+  %a{annotate:rdoc:copy:ARGF#fileno}
   def fileno: () -> untyped
 
+  %a{annotate:rdoc:copy:ARGF#getbyte}
   def getbyte: () -> untyped
 
+  %a{annotate:rdoc:copy:ARGF#getc}
   def getc: () -> untyped
 
+  %a{annotate:rdoc:copy:ARGF#gets}
   def gets: (*untyped) -> untyped
 
+  %a{annotate:rdoc:copy:ARGF#inplace_mode}
   def inplace_mode: () -> untyped
 
+  %a{annotate:rdoc:copy:ARGF#inplace_mode=}
   def inplace_mode=: (untyped) -> untyped
 
   alias inspect to_s
 
+  %a{annotate:rdoc:copy:ARGF#internal_encoding}
   def internal_encoding: () -> untyped
 
+  %a{annotate:rdoc:copy:ARGF#lineno}
   def lineno: () -> untyped
 
+  %a{annotate:rdoc:copy:ARGF#lineno=}
   def lineno=: (untyped) -> untyped
 
+  %a{annotate:rdoc:copy:ARGF#path}
   def path: () -> untyped
 
+  %a{annotate:rdoc:copy:ARGF#pos}
   def pos: () -> untyped
 
+  %a{annotate:rdoc:copy:ARGF#pos=}
   def pos=: (untyped) -> untyped
 
+  %a{annotate:rdoc:copy:ARGF#print}
   def print: (*untyped) -> untyped
 
+  %a{annotate:rdoc:copy:ARGF#printf}
   def printf: (*untyped) -> untyped
 
+  %a{annotate:rdoc:copy:ARGF#putc}
   def putc: (untyped) -> untyped
 
+  %a{annotate:rdoc:copy:ARGF#puts}
   def puts: (*untyped) -> untyped
 
+  %a{annotate:rdoc:copy:ARGF#read}
   def read: (*untyped) -> untyped
 
+  %a{annotate:rdoc:copy:ARGF#read_nonblock}
   def read_nonblock: (*untyped) -> untyped
 
+  %a{annotate:rdoc:copy:ARGF#readbyte}
   def readbyte: () -> untyped
 
+  %a{annotate:rdoc:copy:ARGF#readchar}
   def readchar: () -> untyped
 
+  %a{annotate:rdoc:copy:ARGF#readline}
   def readline: (*untyped) -> untyped
 
+  %a{annotate:rdoc:copy:ARGF#readlines}
   def readlines: (*untyped) -> untyped
 
+  %a{annotate:rdoc:copy:ARGF#readpartial}
   def readpartial: (*untyped) -> untyped
 
+  %a{annotate:rdoc:copy:ARGF#rewind}
   def rewind: () -> untyped
 
+  %a{annotate:rdoc:copy:ARGF#seek}
   def seek: (*untyped) -> untyped
 
+  %a{annotate:rdoc:copy:ARGF#set_encoding}
   def set_encoding: (*untyped) -> untyped
 
+  %a{annotate:rdoc:copy:ARGF#skip}
   def skip: () -> untyped
 
+  %a{annotate:rdoc:copy:ARGF#tell}
   def tell: () -> untyped
 
+  %a{annotate:rdoc:copy:ARGF#to_a}
   def to_a: (*untyped) -> untyped
 
+  %a{annotate:rdoc:copy:ARGF#to_i}
   def to_i: () -> untyped
 
+  %a{annotate:rdoc:copy:ARGF#to_io}
   def to_io: () -> untyped
 
+  %a{annotate:rdoc:copy:ARGF#to_s}
   def to_s: () -> untyped
 
+  %a{annotate:rdoc:copy:ARGF#to_write_io}
   def to_write_io: () -> untyped
 
+  %a{annotate:rdoc:copy:ARGF#write}
   def write: (untyped) -> untyped
 
   private
 
+  %a{annotate:rdoc:copy:ARGF#initialize}
   def initialize: (*untyped) -> void
 
+  %a{annotate:rdoc:copy:ARGF#initialize_copy}
   def initialize_copy: (untyped) -> untyped
 end
 
