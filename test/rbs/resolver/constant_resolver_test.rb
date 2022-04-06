@@ -185,6 +185,41 @@ EOF
     end
   end
 
+  def test_reference_constant_inherit_object
+    SignatureManager.new do |manager|
+      manager.files[Pathname("foo.rbs")] = <<EOF
+class Object
+  FOO: String
+end
+
+class C
+end
+
+module M
+end
+EOF
+      manager.build do |env|
+        builder = DefinitionBuilder.new(env: env)
+        resolver = Resolver::ConstantResolver.new(builder: builder)
+
+        resolver.resolve(:FOO, context: nil).tap do |constant|
+          assert_instance_of Constant, constant
+          assert_equal "::Object::FOO", constant.name.to_s
+        end
+
+        resolver.resolve(:FOO, context: [nil, TypeName("::C")]).tap do |constant|
+          assert_instance_of Constant, constant
+          assert_equal "::Object::FOO", constant.name.to_s
+        end
+
+        resolver.resolve(:FOO, context: [nil, TypeName("::M")]).tap do |constant|
+          assert_instance_of Constant, constant
+          assert_equal "::Object::FOO", constant.name.to_s
+        end
+      end
+    end
+  end
+
   def test_reference_constant_inherit_module
     SignatureManager.new do |manager|
       manager.files[Pathname("foo.rbs")] = <<EOF
@@ -216,6 +251,29 @@ EOF
           assert_instance_of Constant, constant
           assert_equal "::Baz::X", constant.name.to_s
           assert_equal '::Integer', constant.type.to_s
+        end
+      end
+    end
+  end
+
+  def test_reference_constant_inherit_module_self
+    SignatureManager.new do |manager|
+      manager.files[Pathname("foo.rbs")] = <<EOF
+module Foo : _Bar, String
+end
+
+interface _Bar
+end
+
+BAZ: String
+EOF
+      manager.build do |env|
+        builder = DefinitionBuilder.new(env: env)
+        resolver = Resolver::ConstantResolver.new(builder: builder)
+
+        resolver.resolve(:BAZ, context: [nil, TypeName("::Foo")]).tap do |constant|
+          assert_instance_of Constant, constant
+          assert_equal "::BAZ", constant.name.to_s
         end
       end
     end
