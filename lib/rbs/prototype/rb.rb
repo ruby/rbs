@@ -444,21 +444,41 @@ module RBS
 
       def function_return_type_from_body(node)
         body = node.children[2]
-        return Types::Bases::Nil.new(location: nil) unless body
+        body_type(body)
+      end
 
-        if body.type == :BLOCK
-          return_stmts = any_node?(body) do |n|
-            n.type == :RETURN
-          end&.map do |return_node|
-            returned_value = return_node.children[0]
-            returned_value ? literal_to_type(returned_value) : Types::Bases::Nil.new(location: nil)
-          end || []
-          last_node = body.children.last
-          last_evaluated =  last_node ? literal_to_type(last_node) : Types::Bases::Nil.new(location: nil)
-          types_to_union_type([*return_stmts, last_evaluated])
+      def body_type(node)
+        return Types::Bases::Nil.new(location: nil) unless node
+
+        case node.type
+        when :IF, :UNLESS
+          if_unless_type(node)
+        when :BLOCK
+          block_type(node)
         else
-          literal_to_type(body)
+          literal_to_type(node)
         end
+      end
+
+      def if_unless_type(node)
+        raise unless node.type == :IF || node.type == :UNLESS
+
+        _exp_node, true_node, false_node = node.children
+        types_to_union_type([body_type(true_node), body_type(false_node)])
+      end
+
+      def block_type(node)
+        raise unless node.type == :BLOCK
+
+        return_stmts = any_node?(node) do |n|
+          n.type == :RETURN
+        end&.map do |return_node|
+          returned_value = return_node.children[0]
+          returned_value ? literal_to_type(returned_value) : Types::Bases::Nil.new(location: nil)
+        end || []
+        last_node = node.children.last
+        last_evaluated =  last_node ? literal_to_type(last_node) : Types::Bases::Nil.new(location: nil)
+        types_to_union_type([*return_stmts, last_evaluated])
       end
 
       def literal_to_type(node)
