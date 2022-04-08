@@ -427,9 +427,9 @@ module RBS
 
           case value
           when nil, :NODE_SPECIAL_REQUIRED_KEYWORD
-            fun.required_keywords[name] = Types::Function::Param.new(name: name, type: untyped)
+            fun.required_keywords[name] = Types::Function::Param.new(name: nil, type: untyped)
           when RubyVM::AbstractSyntaxTree::Node
-            fun.optional_keywords[name] = Types::Function::Param.new(name: name, type: param_type(value))
+            fun.optional_keywords[name] = Types::Function::Param.new(name: nil, type: param_type(value))
           else
             raise "Unexpected keyword arg value: #{value}"
           end

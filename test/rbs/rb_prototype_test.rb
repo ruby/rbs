@@ -56,11 +56,11 @@ end
 
     assert_write parser.decls, <<-EOF
 class Hello
-  def hello: (untyped a, ?::Integer b, *untyped c, untyped d, e: untyped e, ?f: ::Integer f, **untyped g) { () -> untyped } -> nil
+  def hello: (untyped a, ?::Integer b, *untyped c, untyped d, e: untyped, ?f: ::Integer, **untyped g) { () -> untyped } -> nil
 
   def self.world: () { (untyped, untyped, untyped, x: untyped, y: untyped) -> untyped } -> untyped
 
-  def kw_req: (a: untyped a) -> nil
+  def kw_req: (a: untyped) -> nil
 end
     EOF
   end
