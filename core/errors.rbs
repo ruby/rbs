@@ -299,6 +299,36 @@ class NameError[T] < StandardError
   def receiver: () -> T?
 end
 
+class NoMatchingPatternError < StandardError
+end
+
+class NoMatchingPatternKeyError[M, K] < NoMatchingPatternError
+  # <!--
+  #   rdoc-file=error.c
+  #   - NoMatchingPatternKeyError.new(message=nil, matchee: nil, key: nil) -> no_matching_pattern_key_error
+  # -->
+  # Construct a new `NoMatchingPatternKeyError` exception with the given message,
+  # matchee and key.
+  #
+  def initialize: (?string message, matchee: M, key: K) -> void
+
+  # <!--
+  #   rdoc-file=error.c
+  #   - no_matching_pattern_key_error.matchee  -> object
+  # -->
+  # Return the matchee associated with this NoMatchingPatternKeyError exception.
+  #
+  def matchee: () -> M
+
+  # <!--
+  #   rdoc-file=error.c
+  #   - no_matching_pattern_key_error.key  -> object
+  # -->
+  # Return the key caused this NoMatchingPatternKeyError exception.
+  #
+  def key: () -> K
+end
+
 # <!-- rdoc-file=error.c -->
 # Raised when memory allocation fails.
 #
