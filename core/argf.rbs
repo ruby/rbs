@@ -522,7 +522,7 @@ class ARGFClass
   #     ARGF.lineno      #=> 0
   #
   %a{annotate:rdoc:copy:ARGF#lineno=}
-  def lineno=: (Integer) -> untyped    # TODO: call-seq says it returns an integer, but the implementation does not
+  def lineno=: (Integer) -> untyped
 
   # <!-- rdoc-file=io.c -->
   # Returns the current filename. "-" is returned when the current file is STDIN.
