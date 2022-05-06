@@ -126,6 +126,9 @@ module Singleton
   # Raises a TypeError to prevent duping.
   #
   def dup: () -> bot
+
+  module SingletonClassMethods
+  end
 end
 
 Singleton::VERSION: String
