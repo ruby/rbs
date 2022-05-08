@@ -2,6 +2,26 @@
 
 ## master
 
+## 2.4.0 (2022-05-08)
+
+This is a minor release with some signature updates, `prototype rb` improvement, and test fixes.
+
+### Signature updates
+
+* did_you_mean ([\#980](https://github.com/ruby/rbs/pull/980))
+* Pattern-matching exceptions ([\#979](https://github.com/ruby/rbs/pull/979/files))
+* `Singleton::SingletonClassMethods` ([\#978](https://github.com/ruby/rbs/pull/978))
+
+#### rbs prototype
+
+* Omit unnecessary param name on keyword arg from `prototype rb` ([\#974](https://github.com/ruby/rbs/pull/974))
+
+### Miscellaneous
+
+* Fix git unsafe repository error on ci test ([\#985](https://github.com/ruby/rbs/pull/985))
+* Prefer `IO::Buffer.new` for mutable buffer tests ([\#989](https://github.com/ruby/rbs/pull/989))
+* Update steep ([\#990](https://github.com/ruby/rbs/pull/990))
+
 ## 2.3.2 (2022-04-06)
 
 ### Library changes
