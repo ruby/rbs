@@ -55,7 +55,7 @@ class IO_Buffer_InstanceTest < Test::Unit::TestCase
   end
 
   def test_clear
-    buf = IO::Buffer.for("hello world")
+    buf = IO::Buffer.new
 
     assert_send_type(
       "() -> IO::Buffer",
@@ -68,7 +68,7 @@ class IO_Buffer_InstanceTest < Test::Unit::TestCase
   end
 
   def test_copy
-    buf = IO::Buffer.for("hello world")
+    buf = IO::Buffer.new
     src = IO::Buffer.for("srcsrcsrc")
 
     assert_send_type(
