@@ -8,12 +8,6 @@ module Gem
   end
 end
 
-module Enumerable[unchecked out Elem]
-  def flat_map: [U] () { (Elem) -> Array[U] } -> Array[U]
-              | [U] () { (Elem) -> U } -> Array[U]
-              | ...
-end
-
 module Bundler
   class LockfileParser
     def initialize: (String) -> void
