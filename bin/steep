@@ -1,7 +1,8 @@
-#!/bin/sh
+#!/usr/bin/env bash
 
-REPO_ROOT=$(cd $(dirname $0); pwd)
-GEMFILE=${REPO_ROOT}/../steep/Gemfile
+BINSTUB_DIR=$(cd $(dirname $0); pwd)
+GEMFILE=$(readlink -f ${BINSTUB_DIR}/../steep/Gemfile)
+ROOT_DIR=$(readlink -f ${BINSTUB_DIR}/..)
 
 STEEP="bundle exec --gemfile=${GEMFILE} steep"
 
@@ -9,8 +10,8 @@ if type "rbenv" > /dev/null 2>&1; then
   STEEP="rbenv exec ${STEEP}"
 else
   if type "rvm" > /dev/null 2>&1; then
-    STEEP="rvm ${REPO_ROOT} do ${STEEP}"
+    STEEP="rvm ${ROOT_DIR} do ${STEEP}"
   fi
 fi
 
-exec $STEEP $*
+exec $STEEP $@
