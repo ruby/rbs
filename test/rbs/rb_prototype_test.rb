@@ -17,6 +17,9 @@ end
 
 module Foo
 end
+
+class Bar < Struct.new(:bar)
+end
     EOR
 
     parser.parse(rb)
@@ -29,6 +32,9 @@ class World < Hello
 end
 
 module Foo
+end
+
+class Bar
 end
     EOF
   end

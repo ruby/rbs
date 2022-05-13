@@ -85,9 +85,14 @@ module RBS
         case node.type
         when :CLASS
           class_name, super_class, *class_body = node.children
+          super_class_name = const_to_name(super_class)
+          if super_class_name.nil?
+            # Give up detect super class e.g. `class Foo < Struct.new(:bar)`
+            super_class = nil
+          end
           kls = AST::Declarations::Class.new(
             name: const_to_name(class_name),
-            super_class: super_class && AST::Declarations::Class::Super.new(name: const_to_name(super_class), args: [], location: nil),
+            super_class: super_class && AST::Declarations::Class::Super.new(name: super_class_name, args: [], location: nil),
             type_params: [],
             members: [],
             annotations: [],
