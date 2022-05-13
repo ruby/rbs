@@ -485,7 +485,7 @@ module RBS
         case node.type
         when :STR
           lit = node.children[0]
-          if lit.match?(/\A[ -~]+\z/)
+          if lit.ascii_only?
             Types::Literal.new(literal: lit, location: nil)
           else
             BuiltinNames::String.instance_type
@@ -506,7 +506,7 @@ module RBS
           lit = node.children[0]
           case lit
           when Symbol
-            if lit.match?(/\A[ -~]+\z/)
+            if lit.to_s.ascii_only?
               Types::Literal.new(literal: lit, location: nil)
             else
               BuiltinNames::Symbol.instance_type
