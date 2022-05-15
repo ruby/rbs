@@ -859,6 +859,23 @@ end
     RBS
   end
 
+  def test_literal_to_type
+    parser = RBS::Prototype::RB.new
+    [
+      [%{"abc"}, %{"abc"}],
+      [%{:abc}, %{:abc}],
+      [%{[]}, %{::Array[untyped]}],
+      [%{[true]}, %{::Array[true]}],
+      [%{1..2}, %{::Range[::Integer]}],
+      [%{{}}, %{::Hash[untyped, untyped]}],
+      [%{{a: nil}}, %{ { a: nil } }],
+      [%{{"a" => /b/}}, %{ ::Hash[::String, ::Regexp] }],
+    ].each do |rb, rbs|
+      node = RubyVM::AbstractSyntaxTree.parse(rb).children[2]
+      assert_equal RBS::Parser.parse_type(rbs), parser.literal_to_type(node)
+    end
+  end
+
   if RUBY_VERSION >= '2.7'
     def test_argument_forwarding
       parser = RB.new

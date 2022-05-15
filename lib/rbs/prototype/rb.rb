@@ -518,15 +518,15 @@ module RBS
             Types::ClassInstance.new(name: type_name, args: [], location: nil)
           end
         when :ZLIST, :ZARRAY
-          BuiltinNames::Array.instance_type([untyped])
+          BuiltinNames::Array.instance_type(untyped)
         when :LIST, :ARRAY
           elem_types = node.children.compact.map { |e| literal_to_type(e) }
           t = types_to_union_type(elem_types)
-          BuiltinNames::Array.instance_type([t])
+          BuiltinNames::Array.instance_type(t)
         when :DOT2, :DOT3
           types = node.children.map { |c| literal_to_type(c) }
           type = range_element_type(types)
-          BuiltinNames::Range.instance_type([type])
+          BuiltinNames::Range.instance_type(type)
         when :HASH
           list = node.children[0]
           if list
@@ -554,7 +554,7 @@ module RBS
           else
             key_type = types_to_union_type(key_types)
             value_type = types_to_union_type(value_types)
-            BuiltinNames::Hash.instance_type([key_type, value_type])
+            BuiltinNames::Hash.instance_type(key_type, value_type)
           end
         when :CALL
           receiver, method_name, * = node.children
