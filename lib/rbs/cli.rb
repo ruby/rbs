@@ -590,7 +590,7 @@ EOU
 
       case format
       when "rbi", "rb"
-        decls = run_prototype_file(format, args)
+        run_prototype_file(format, args)
       when "runtime"
         require_libs = []
         relative_libs = []
@@ -638,6 +638,9 @@ EOU
         end
 
         decls = Prototype::Runtime.new(patterns: args, env: env, merge: merge, owners_included: owners_included).decls
+
+        writer = Writer.new(out: stdout)
+        writer.write decls
       else
         stdout.puts <<EOU
 Usage: rbs prototype [generator...] [args...]
@@ -651,13 +654,6 @@ Examples:
   $ rbs prototype rbi foo.rbi
   $ rbs prototype runtime String
 EOU
-        exit 1
-      end
-
-      if decls
-        writer = Writer.new(out: stdout)
-        writer.write decls
-      else
         exit 1
       end
     end
@@ -700,11 +696,15 @@ EOU
                  Prototype::RB.new()
                end
 
-      args.each do |file|
-        parser.parse Pathname(file).read
+      input_paths = args.map {|arg| Pathname(arg) }
+
+      # file mode
+      input_paths.each do |file|
+        parser.parse file.read()
       end
 
-      parser.decls
+      writer = Writer.new(out: stdout)
+      writer.write parser.decls
     end
 
     def run_vendor(args, options)
