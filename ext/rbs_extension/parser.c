@@ -662,6 +662,10 @@ static VALUE parse_proc_type(parserstate *state) {
 VALUE parse_record_attributes(parserstate *state) {
   VALUE hash = rb_hash_new();
 
+  if (state->next_token.type == pRBRACE) {
+    return hash;
+  }
+
   while (true) {
     VALUE key;
     VALUE type;
@@ -918,6 +922,9 @@ static VALUE parse_simple(parserstate *state) {
     rg.end = state->current_token.range.end;
 
     return rbs_tuple(types, rbs_new_location(state->buffer, rg));
+  }
+  case pAREF_OPR: {
+    return rbs_tuple(rb_ary_new(), rbs_new_location(state->buffer, state->current_token.range));
   }
   case pLBRACE: {
     position start = state->current_token.range.start;
@@ -1376,6 +1383,7 @@ VALUE parse_method_name(parserstate *state, range *range) {
   case pSTAR:
   case pSTAR2:
   case pLT:
+  case pAREF_OPR:
   case tOPERATOR:
     *range = state->current_token.range;
     return ID2SYM(INTERN_TOKEN(state, state->current_token));

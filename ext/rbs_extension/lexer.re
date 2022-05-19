@@ -19,7 +19,7 @@ start:
 
       word = [a-zA-Z0-9_];
 
-      operator = "/" | "~" | "[]" | "[]=" | "!" | "!=" | "!~" | "-" | "-@" | "+" | "+@"
+      operator = "/" | "~" | "[]=" | "!" | "!=" | "!~" | "-" | "-@" | "+" | "+@"
                | "==" | "===" | "=~" | "<<" | "<=" | "<=>" | ">" | ">=" | ">>" | "%";
 
       "("   { return next_token(state, pLPAREN); }
@@ -45,6 +45,7 @@ start:
       ":"   { return next_token(state, pCOLON); }
       "::"  { return next_token(state, pCOLON2); }
       "<"   { return next_token(state, pLT); }
+      "[]"  { return next_token(state, pAREF_OPR); }
       operator  { return next_token(state, tOPERATOR); }
 
       number = [0-9] [0-9_]*;

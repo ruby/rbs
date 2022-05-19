@@ -68,6 +68,7 @@ static const char *RBS_TOKENTYPE_NAMES[] = {
   "tBANGIDENT",
   "tEQIDENT",
   "tQIDENT",          /* Quoted identifier */
+  "pAREF_OPR",        /* [] */
   "tOPERATOR",        /* Operator identifier */
 
   "tCOMMENT",

@@ -69,7 +69,8 @@ enum TokenType {
   tBANGIDENT,       /* Identifiers ending with `!` */
   tEQIDENT,         /* Identifiers ending with `=` */
   tQIDENT,          /* Quoted identifier */
-  tOPERATOR,         /* Operator identifier */
+  pAREF_OPR,        /* [] */
+  tOPERATOR,        /* Operator identifier */
 
   tCOMMENT,         /* Comment */
   tLINECOMMENT,     /* Comment of all line */

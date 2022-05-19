@@ -197,6 +197,12 @@ class RBS::TypeParsingTest < Test::Unit::TestCase
       assert_equal [], type.types
       assert_equal "[ ]", type.location.source
     end
+
+    Parser.parse_type("[]").yield_self do |type|
+      assert_instance_of Types::Tuple, type
+      assert_equal [], type.types
+      assert_equal "[]", type.location.source
+    end
   end
 
   def test_union_intersection
@@ -585,6 +591,12 @@ class RBS::TypeParsingTest < Test::Unit::TestCase
                      3 => Types::Literal.new(literal: "hoge", location: nil)
                    }, type.fields)
       assert_equal "{ foo: untyped, 3 => 'hoge' }", type.location.source
+    end
+
+    Parser.parse_type("{}").yield_self do |type|
+      assert_instance_of Types::Record, type
+      assert_equal({}, type.fields)
+      assert_equal "{}", type.location.source
     end
 
     Parser.parse_type("{ foo: untyped, }").yield_self do |type|
