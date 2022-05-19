@@ -919,6 +919,9 @@ static VALUE parse_simple(parserstate *state) {
 
     return rbs_tuple(types, rbs_new_location(state->buffer, rg));
   }
+  case pAREF_OPR: {
+    return rbs_tuple(rb_ary_new(), rbs_new_location(state->buffer, state->current_token.range));
+  }
   case pLBRACE: {
     position start = state->current_token.range.start;
     VALUE fields = parse_record_attributes(state);
@@ -1376,6 +1379,7 @@ VALUE parse_method_name(parserstate *state, range *range) {
   case pSTAR:
   case pSTAR2:
   case pLT:
+  case pAREF_OPR:
   case tOPERATOR:
     *range = state->current_token.range;
     return ID2SYM(INTERN_TOKEN(state, state->current_token));
