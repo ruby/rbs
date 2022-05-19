@@ -590,7 +590,7 @@ EOU
 
       case format
       when "rbi", "rb"
-        decls = run_prototype_file(format, args)
+        run_prototype_file(format, args)
       when "runtime"
         require_libs = []
         relative_libs = []
@@ -638,6 +638,9 @@ EOU
         end
 
         decls = Prototype::Runtime.new(patterns: args, env: env, merge: merge, owners_included: owners_included).decls
+
+        writer = Writer.new(out: stdout)
+        writer.write decls
       else
         stdout.puts <<EOU
 Usage: rbs prototype [generator...] [args...]
@@ -653,19 +656,17 @@ Examples:
 EOU
         exit 1
       end
-
-      if decls
-        writer = Writer.new(out: stdout)
-        writer.write decls
-      else
-        exit 1
-      end
     end
 
     def run_prototype_file(format, args)
       availability = unless has_parser?
                        "\n** This command does not work on this interpreter (#{RUBY_ENGINE}) **\n"
                      end
+
+      # @type var output_dir: Pathname?
+      output_dir = nil
+      # @type var base_dir: Pathname?
+      base_dir = nil
 
       opts = OptionParser.new
       opts.banner = <<EOU
@@ -680,7 +681,21 @@ Examples:
 
   $ rbs prototype rb lib/foo.rb
   $ rbs prototype rbi sorbet/rbi/foo.rbi
+
+You can run the tool in *batch* mode by passing `--out-dir` option.
+
+  $ rbs prototype rb --out-dir=sig lib/foo.rb
+  $ rbs prototype rbi --out-dir=sig/models --base-dir=app/models app/models
 EOU
+
+      opts.on("--out-dir=DIR", "Specify the path to save the generated RBS files") do |path|
+        output_dir = Pathname(path)
+      end
+
+      opts.on("--base-dir=DIR", "Specify the path to calculate the relative path to save the generated RBS files") do |path|
+        base_dir = Pathname(path)
+      end
+
       opts.parse!(args)
 
       unless has_parser?
@@ -693,18 +708,80 @@ EOU
         return nil
       end
 
-      parser = case format
-               when "rbi"
-                 Prototype::RBI.new()
-               when "rb"
-                 Prototype::RB.new()
-               end
-
-      args.each do |file|
-        parser.parse Pathname(file).read
+      new_parser = -> do
+        case format
+        when "rbi"
+          Prototype::RBI.new()
+        when "rb"
+          Prototype::RB.new()
+        end
       end
 
-      parser.decls
+      input_paths = args.map {|arg| Pathname(arg) }
+
+      if output_dir
+        # batch mode
+        input_paths.each do |path|
+          stdout.puts "Processing `#{path}`..."
+          ruby_files =
+            if path.file?
+              [path]
+            else
+              path.glob("**/*.rb").sort
+            end
+
+          ruby_files.each do |file_path|
+            stdout.puts "  Generating RBS for `#{file_path}`..."
+
+            relative_path =
+              if base_dir
+                file_path.relative_path_from(base_dir)
+              else
+                if top = file_path.descend.first
+                  case
+                  when top == Pathname("lib")
+                    file_path.relative_path_from(top)
+                  when top == Pathname("app")
+                    file_path.relative_path_from(top)
+                  else
+                    file_path
+                  end
+                else
+                  file_path
+                end
+              end
+            relative_path = relative_path.cleanpath()
+
+            if relative_path.absolute? || relative_path.descend.first&.to_s == ".."
+              stdout.puts "  ⚠️  Cannot write the RBS to outside of the output dir: `#{relative_path}`"
+              next
+            end
+
+            output_path = (output_dir + relative_path).sub_ext(".rbs")
+
+            parser = new_parser[]
+            parser.parse file_path.read()
+
+            stdout.puts "  Writing RBS to `#{output_path}`..."
+
+            (output_path.parent).mkpath
+            output_path.open("w") do |io|
+              writer = Writer.new(out: io)
+              writer.write(parser.decls)
+            end
+          end
+        end
+      else
+        # file mode
+        parser = new_parser[]
+
+        input_paths.each do |file|
+          parser.parse file.read()
+        end
+
+        writer = Writer.new(out: stdout)
+        writer.write parser.decls
+      end
     end
 
     def run_vendor(args, options)

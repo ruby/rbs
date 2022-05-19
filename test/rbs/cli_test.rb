@@ -401,6 +401,78 @@ singleton(::BasicObject)
     end
   end
 
+  def test_prototype_batch
+    Dir.mktmpdir do |dir|
+      dir = Pathname(dir)
+
+      (dir + "lib").mkdir
+      (dir + "lib/a.rb").write(<<-RUBY)
+module A
+end
+      RUBY
+      (dir + "lib/a").mkdir
+      (dir + "lib/a/b.rb").write(<<-RUBY)
+module A
+  class B
+  end
+end
+      RUBY
+      (dir + "Gemfile").write(<<-RUBY)
+source "https://rubygems.org"
+
+gem "rbs"
+      RUBY
+
+      Dir.chdir(dir) do
+        with_cli do |cli|
+          cli.run(%w(prototype rb --out_dir=sig lib Gemfile))
+
+          assert_equal <<-EOM, cli.stdout.string
+Processing `lib`...
+  Generating RBS for `lib/a/b.rb`...
+  Writing RBS to `sig/a/b.rbs`...
+  Generating RBS for `lib/a.rb`...
+  Writing RBS to `sig/a.rbs`...
+Processing `Gemfile`...
+  Generating RBS for `Gemfile`...
+  Writing RBS to `sig/Gemfile.rbs`...
+          EOM
+        end
+      end
+
+      assert_predicate dir + "sig", :directory?
+      assert_predicate dir + "sig/a.rbs", :exist?
+      assert_predicate dir + "sig/a", :exist?
+      assert_predicate dir + "sig/a/b.rbs", :exist?
+    end
+  end
+
+  def test_prototype_batch_outer
+    Dir.mktmpdir do |dir|
+      dir = Pathname(dir)
+
+      (dir + "test").mkdir
+      (dir + "test/a_test.rb").write(<<-RUBY)
+module A
+end
+      RUBY
+
+      Dir.chdir(dir) do
+        with_cli do |cli|
+          cli.run(%w(prototype rb --out_dir=sig --base_dir=lib test/a_test.rb))
+
+          assert_equal <<-EOM, cli.stdout.string
+Processing `test/a_test.rb`...
+  Generating RBS for `test/a_test.rb`...
+  ⚠️  Cannot write the RBS to outside of the output dir: `../test/a_test.rb`
+          EOM
+        end
+      end
+
+      refute_predicate dir + "sig", :directory?
+    end
+  end
+
   def test_test
     Dir.mktmpdir do |dir|
       dir = Pathname(dir)
