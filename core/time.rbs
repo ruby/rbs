@@ -1080,7 +1080,7 @@ class Time < Object
   #
   #     Time.new(2000,1,1,0,0,1/3r,"UTC").subsec #=> (1/3)
   #
-  def subsec: () -> Numeric
+  def subsec: () -> (0 | Rational)
 
   # <!--
   #   rdoc-file=time.c
@@ -1215,7 +1215,7 @@ class Time < Object
   #
   # Time#subsec can be used to obtain the subsecond part exactly.
   #
-  def tv_nsec: () -> Numeric
+  def tv_nsec: () -> Integer
 
   # <!-- rdoc-file=time.c -->
   # Returns the value of *time* as an integer number of seconds since the Epoch.
@@ -1225,7 +1225,7 @@ class Time < Object
   #     t = Time.now        #=> 2020-07-21 01:41:29.746012609 +0900
   #     t.to_i              #=> 1595263289
   #
-  def tv_sec: () -> Numeric
+  def tv_sec: () -> Integer
 
   # <!--
   #   rdoc-file=time.c
@@ -1245,7 +1245,7 @@ class Time < Object
   #
   # Time#subsec can be used to obtain the subsecond part exactly.
   #
-  def tv_usec: () -> Numeric
+  def tv_usec: () -> Integer
 
   # <!-- rdoc-file=time.c -->
   # Returns the number of microseconds for the subsecond part of *time*. The
@@ -1261,7 +1261,7 @@ class Time < Object
   #
   # Time#subsec can be used to obtain the subsecond part exactly.
   #
-  def usec: () -> Numeric
+  def usec: () -> Integer
 
   # <!-- rdoc-file=time.c -->
   # Converts *time* to UTC (GMT), modifying the receiver.
