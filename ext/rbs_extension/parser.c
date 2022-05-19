@@ -662,6 +662,10 @@ static VALUE parse_proc_type(parserstate *state) {
 VALUE parse_record_attributes(parserstate *state) {
   VALUE hash = rb_hash_new();
 
+  if (state->next_token.type == pRBRACE) {
+    return hash;
+  }
+
   while (true) {
     VALUE key;
     VALUE type;

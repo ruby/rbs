@@ -593,6 +593,12 @@ class RBS::TypeParsingTest < Test::Unit::TestCase
       assert_equal "{ foo: untyped, 3 => 'hoge' }", type.location.source
     end
 
+    Parser.parse_type("{}").yield_self do |type|
+      assert_instance_of Types::Record, type
+      assert_equal({}, type.fields)
+      assert_equal "{}", type.location.source
+    end
+
     Parser.parse_type("{ foo: untyped, }").yield_self do |type|
       assert_instance_of Types::Record, type
       assert_equal({
