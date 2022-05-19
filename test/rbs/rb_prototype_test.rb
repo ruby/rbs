@@ -72,7 +72,7 @@ end
 class Hello
   def initialize() 'foo' end
 
-  def str() "foo\nbar" end
+  def str() "こんにちは" end
   def str_lit() "foo" end
   def dstr() "f#{x}oo" end
   def xstr() `ls` end
@@ -713,6 +713,12 @@ G: ::Array[1 | 2 | 3]
 
 H: { id: 123 }
     EOF
+  end
+
+  def test_invalid_byte_sequence_in_utf8
+    parser = RB.new
+    parser.parse('A = "\xff"')
+    assert_write parser.decls, "A: ::String\n"
   end
 
   def test_argumentless_fcall
