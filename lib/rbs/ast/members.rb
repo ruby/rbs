@@ -68,6 +68,7 @@ module RBS
         def to_json(state = _ = nil)
           {
             member: :method_definition,
+            name: name,
             kind: kind,
             types: types,
             annotations: annotations,

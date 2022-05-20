@@ -8,6 +8,9 @@
           "type": "string",
           "enum": ["method_definition"]
         },
+        "name": {
+          "type": "string"
+        },
         "kind": {
           "enum": ["instance", "singleton", "singleton_instance"]
         },
@@ -42,7 +45,7 @@
           "enum": ["public", "private", null]
         }
       },
-      "required": ["member", "kind", "types", "comment", "annotations", "location", "visibility"]
+      "required": ["member", "name", "kind", "types", "comment", "annotations", "location", "visibility"]
     },
     "variable": {
       "title": "Declaration for instance variables and class variables",
