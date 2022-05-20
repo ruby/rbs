@@ -1,7 +1,7 @@
 GEM
   remote: https://rubygems.org/
   specs:
-    activesupport (7.0.2.4)
+    activesupport (7.0.3)
       concurrent-ruby (~> 1.0, >= 1.0.2)
       i18n (>= 1.6, < 2)
       minitest (>= 5.1)
@@ -23,8 +23,8 @@ GEM
     rb-fsevent (0.11.1)
     rb-inotify (0.10.1)
       ffi (~> 1.0)
-    rbs (2.3.2)
-    steep (0.52.2)
+    rbs (2.4.0)
+    steep (1.0.0)
       activesupport (>= 5.1)
       language_server-protocol (>= 3.15, < 4.0)
       listen (~> 3.0)
@@ -46,4 +46,4 @@ DEPENDENCIES
   steep
 
 BUNDLED WITH
-   2.2.22
+   2.2.32
