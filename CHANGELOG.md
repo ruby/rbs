@@ -2,6 +2,32 @@
 
 ## master
 
+## 2.5.0 (2022-05-20)
+
+This is a minor release with tuple type/record type syntax updates and `rbs prototype` improvements.
+
+* You can write empty tuple type as `[]`, instead of `[ ]`
+* You can write empty record type as `{}`
+* `prototype-rb` command with `--out-dir` option generates multiple RBS files in the directory
+
+### Signature updates
+
+* `Time` ([\#994](https://github.com/ruby/rbs/pull/994))
+
+### Language updates
+
+* Fix empty tuple type syntax and allow empty record type ([\#1001](https://github.com/ruby/rbs/pull/1001))
+
+### Library changes
+
+* Add `name` attribute in `MethodDefinition#to_json` ([\#997](https://github.com/ruby/rbs/pull/997))
+
+#### rbs prototype
+
+* Fix (`ArgumentError`) invalid byte sequence in UTF-8 ([\#995](https://github.com/ruby/rbs/pull/995))
+* Fix broken args after parsed `decls` from `RBS::Prototype::RB` ([\#998](https://github.com/ruby/rbs/pull/998))
+* Add *batch* mode to `rbs prototype` ([\#1000](https://github.com/ruby/rbs/pull/1000))
+
 ## 2.4.0 (2022-05-08)
 
 This is a minor release with some signature updates, `prototype rb` improvement, and test fixes.
