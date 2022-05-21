@@ -111,6 +111,8 @@ class Hello
   def hash2() { foo: 1 } end
   def hash3() { foo: { bar: 42 }, x: { y: z } } end
   def hash4() { foo: 1, **({ bar: x}).compact } end
+
+  def self1() self end
 end
     EOR
 
@@ -171,6 +173,8 @@ class Hello
   def hash3: () -> { foo: { bar: 42 }, x: { y: untyped } }
 
   def hash4: () -> ::Hash[:foo | untyped, 1 | untyped]
+
+  def self1: () -> self
 end
     EOF
   end
@@ -698,6 +702,7 @@ E = nil
 F = false
 G = [1,2,3]
 H = { id: 123 }
+I = self
     EOR
 
     parser.parse(rb)
@@ -718,6 +723,8 @@ F: false
 G: ::Array[1 | 2 | 3]
 
 H: { id: 123 }
+
+I: self
     EOF
   end
 

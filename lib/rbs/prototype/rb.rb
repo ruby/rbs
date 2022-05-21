@@ -561,6 +561,8 @@ module RBS
             value_type = types_to_union_type(value_types)
             BuiltinNames::Hash.instance_type(key_type, value_type)
           end
+        when :SELF
+          Types::Bases::Self.new(location: nil)
         when :CALL
           receiver, method_name, * = node.children
           case method_name
