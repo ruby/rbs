@@ -32,7 +32,7 @@ You will typically follow the steps as follows:
 
 1. Run `rbs prototype runtime` to generate list of methods.
 2. Run `rbs annotate` to import RDoc comments.
-3. Run `rbs generate:stdlib_test[LIB]` to generate a test case.
+3. Run `rake generate:stdlib_test[LIB]` to generate a test case.
 4. Write the type definitions and tests.
 
 See the next *Useful Tools* section and the guides above for writing and testing RBS files.
