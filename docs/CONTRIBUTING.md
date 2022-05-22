@@ -51,7 +51,7 @@ See the next *Useful Tools* section and the guides above for writing and testing
   * Print RDoc documents in the format you can copy-and-paste to RBS.
 * `bin/sort core/string.rbs`
   * Sort declarations members in RBS files.
-* `rbs validate -r LIB`
+* `rbs -r LIB validate`
   Validate the syntax and some of the semantics.
 * `rake generate:stdlib_test[String]`
   Scaffold the stdlib test.
