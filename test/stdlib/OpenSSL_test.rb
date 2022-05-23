@@ -773,7 +773,7 @@ class OpenSSLDSATest < Test::Unit::TestCase
   private
 
   def pkey
-    OpenSSL::PKey::DSA.new(512)
+    OpenSSL::PKey::DSA.new(1024)
   end
 end
 
