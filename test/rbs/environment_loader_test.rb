@@ -155,7 +155,7 @@ end
       repo = RBS::Repository.new()
 
       loader = EnvironmentLoader.new(repository: repo)
-      loader.add(library: "minitest", version: nil)
+      loader.add(library: "non_existent_gems", version: nil)
 
       env = Environment.new
 
