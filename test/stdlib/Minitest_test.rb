@@ -1,3 +1,8 @@
+if ENV.key?("NO_MINITEST")
+  warn "Skip testing for library 'minitest' since enable NO_MINITEST"
+  return
+end
+
 require_relative "test_helper"
 require 'minitest'
 
