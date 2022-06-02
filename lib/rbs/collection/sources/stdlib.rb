@@ -5,6 +5,7 @@ module RBS
     module Sources
       # signatures that are bundled in rbs gem under the stdlib/ directory
       class Stdlib
+        include Base
         include Singleton
 
         REPO = Repository.default

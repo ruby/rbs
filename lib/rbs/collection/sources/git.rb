@@ -6,6 +6,7 @@ module RBS
   module Collection
     module Sources
       class Git
+        include Base
         METADATA_FILENAME = '.rbs_meta.yaml'
 
         class CommandError < StandardError; end
