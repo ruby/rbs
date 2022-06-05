@@ -1543,8 +1543,8 @@ class Hash[unchecked out K, unchecked out V] < Object
   #     h1 = e.each {|key, value| key.start_with?('b') }
   #     h1 # => {:foo=>0}
   #
-  def reject: () -> ::Enumerator[[ K, V ], self]
-            | () { (K, V) -> boolish } -> self
+  def reject: () -> ::Enumerator[[ K, V ], ::Hash[K, V]]
+            | () { (K, V) -> boolish } -> ::Hash[K, V]
 
   # <!--
   #   rdoc-file=hash.c
