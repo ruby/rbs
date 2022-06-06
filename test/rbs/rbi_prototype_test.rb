@@ -180,6 +180,27 @@ end
     EOF
   end
 
+  def test_implicit_block
+    parser = RBI.new
+
+    rbi = <<-EOR
+class Hello
+  sig do
+    params(arg0: String).void
+  end
+  def hello(arg0, &blk); end
+end
+    EOR
+
+    parser.parse(rbi)
+
+    assert_write parser.decls, <<-EOF
+class Hello
+  def hello: (String arg0) ?{ () -> untyped } -> void
+end
+    EOF
+  end
+
   def test_optional_block
     parser = RBI.new
 

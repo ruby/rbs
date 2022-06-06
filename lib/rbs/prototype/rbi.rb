@@ -177,7 +177,7 @@ module RBS
             comment = join_comments(sigs, comments)
 
             args = node.children[2]
-            types = sigs.map {|sig| method_type(args, sig, variables: current_module!.type_params) }.compact
+            types = sigs.map {|sig| method_type(args, sig, variables: current_module!.type_params, overloads: sigs.size) }.compact
 
             current_module!.members << AST::Members::MethodDefinition.new(
               name: node.children[1],
@@ -197,7 +197,7 @@ module RBS
             comment = join_comments(sigs, comments)
 
             args = node.children[1]
-            types = sigs.map {|sig| method_type(args, sig, variables: current_module!.type_params) }.compact
+            types = sigs.map {|sig| method_type(args, sig, variables: current_module!.type_params, overloads: sigs.size) }.compact
 
             current_module!.members << AST::Members::MethodDefinition.new(
               name: node.children[0],
@@ -271,10 +271,10 @@ module RBS
         end
       end
 
-      def method_type(args_node, type_node, variables:)
+      def method_type(args_node, type_node, variables:, overloads:)
         if type_node
           if type_node.type == :CALL
-            method_type = method_type(args_node, type_node.children[0], variables: variables) or raise
+            method_type = method_type(args_node, type_node.children[0], variables: variables, overloads: overloads) or raise
           else
             method_type = MethodType.new(
               type: Types::Function.empty(Types::Bases::Any.new(location: nil)),
@@ -303,7 +303,7 @@ module RBS
             method_type.update(type: method_type.type.with_return_type(type_of(return_type, variables: variables)))
           when :params
             if args_node
-              parse_params(args_node, args, method_type, variables: variables)
+              parse_params(args_node, args, method_type, variables: variables, overloads: overloads)
             else
               vars = (node_to_hash(each_arg(args).to_a[0]) || {}).transform_values {|value| type_of(value, variables: variables) }
 
@@ -333,7 +333,7 @@ module RBS
         end
       end
 
-      def parse_params(args_node, args, method_type, variables:)
+      def parse_params(args_node, args, method_type, variables:, overloads:)
         vars = (node_to_hash(each_arg(args).to_a[0]) || {}).transform_values {|value| type_of(value, variables: variables) }
 
         # @type var required_positionals: Array[Types::Function::Param]
@@ -427,6 +427,13 @@ module RBS
                 type: Types::Function.empty(Types::Bases::Any.new(location: nil))
               )
             end
+          else
+            if overloads == 1
+              method_block = Types::Block.new(
+                required: false,
+                type: Types::Function.empty(Types::Bases::Any.new(location: nil))
+              )
+            end
           end
         end
 
@@ -511,7 +518,7 @@ module RBS
           Types::Tuple.new(types: types, location: nil)
         else
           if proc_type?(type_node)
-            method_type = method_type(nil, type_node, variables: variables) or raise
+            method_type = method_type(nil, type_node, variables: variables, overloads: 1) or raise
             Types::Proc.new(type: method_type.type, block: nil, location: nil)
           else
             STDERR.puts "Unexpected type_node:"

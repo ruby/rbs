@@ -43,9 +43,9 @@ module RBS
 
       def process: (RubyVM::AbstractSyntaxTree::Node node, comments: Hash[Integer, AST::Comment], ?outer: Array[RubyVM::AbstractSyntaxTree::Node]) -> void
 
-      def method_type: (RubyVM::AbstractSyntaxTree::Node? args_node, RubyVM::AbstractSyntaxTree::Node? type_node, variables: Array[AST::TypeParam]) -> MethodType?
+      def method_type: (RubyVM::AbstractSyntaxTree::Node? args_node, RubyVM::AbstractSyntaxTree::Node? type_node, variables: Array[AST::TypeParam], overloads: Integer) -> MethodType?
 
-      def parse_params: (RubyVM::AbstractSyntaxTree::Node args_node, RubyVM::AbstractSyntaxTree::Node args, MethodType method_type, variables: Array[AST::TypeParam]) -> MethodType
+      def parse_params: (RubyVM::AbstractSyntaxTree::Node args_node, RubyVM::AbstractSyntaxTree::Node args, MethodType method_type, variables: Array[AST::TypeParam], overloads: Integer) -> MethodType
 
       def type_of: (RubyVM::AbstractSyntaxTree::Node type_node, variables: Array[AST::TypeParam]) -> Types::t
 
