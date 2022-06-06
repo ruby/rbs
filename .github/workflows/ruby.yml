@@ -46,9 +46,9 @@ jobs:
       if: contains(matrix.job, 'lexer')
       run: |
         cd /tmp
-        curl -L https://github.com/skvadrik/re2c/archive/refs/tags/2.2.tar.gz > re2c-2.2.tar.gz
-        tar xf re2c-2.2.tar.gz
-        cd re2c-2.2
+        curl -L https://github.com/skvadrik/re2c/archive/refs/tags/3.0.tar.gz > re2c-3.0.tar.gz
+        tar xf re2c-3.0.tar.gz
+        cd re2c-3.0
         autoreconf -i -W all
         ./configure
         make
