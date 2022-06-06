@@ -1,53 +1,73 @@
 module RBS
   module Prototype
     class RBI
-      attr_reader decls: untyped
+      attr_reader decls: Array[AST::Declarations::t]
 
-      attr_reader modules: untyped
+      type module_decl = AST::Declarations::Class | AST::Declarations::Module
 
-      attr_reader last_sig: untyped
+      # A stack representing the module nesting structure in the Ruby code
+      attr_reader modules: Array[module_decl]
+
+      # Last subsequent `sig` calls
+      attr_reader last_sig: Array[RubyVM::AbstractSyntaxTree::Node]?
 
       def initialize: () -> void
 
-      def parse: (untyped string) -> untyped
+      def parse: (String) -> void
 
-      def nested_name: (untyped name) -> untyped
+      def nested_name: (RubyVM::AbstractSyntaxTree::Node name) -> TypeName
 
-      def current_namespace: () -> untyped
+      def current_namespace: () -> Namespace
 
-      def push_class: (untyped name, untyped super_class, comment: untyped) { () -> untyped } -> untyped
+      def push_class: (
+        RubyVM::AbstractSyntaxTree::Node name,
+        RubyVM::AbstractSyntaxTree::Node super_class,
+        comment: AST::Comment?
+      ) { () -> void } -> void
 
-      def push_module: (untyped name, comment: untyped) { () -> untyped } -> untyped
+      def push_module: (RubyVM::AbstractSyntaxTree::Node name, comment: AST::Comment?) { () -> void } -> void
 
-      def current_module: () -> untyped
+      # The inner most module/class definition, returns `nil` on toplevel
+      def current_module: () -> module_decl?
 
-      def push_sig: (untyped node) -> untyped
+      # The inner most module/class definition, raises on toplevel
+      def current_module!: () -> module_decl
 
-      def pop_sig: () -> untyped
+      # Put a `sig` call to current list.
+      def push_sig: (RubyVM::AbstractSyntaxTree::Node node) -> void
 
-      def join_comments: (untyped nodes, untyped comments) -> untyped
+      # Clear the `sig` call list
+      def pop_sig: () -> Array[RubyVM::AbstractSyntaxTree::Node]?
 
-      def process: (untyped node, comments: untyped, ?outer: untyped) -> untyped
+      def join_comments: (Array[RubyVM::AbstractSyntaxTree::Node] nodes, Hash[Integer, AST::Comment] comments) -> AST::Comment
 
-      def method_type: (untyped args_node, untyped type_node, variables: untyped) -> (untyped | nil)
+      def process: (RubyVM::AbstractSyntaxTree::Node node, comments: Hash[Integer, AST::Comment], ?outer: Array[RubyVM::AbstractSyntaxTree::Node]) -> void
 
-      def parse_params: (untyped args_node, untyped args, untyped method_type, variables: untyped) -> untyped
+      def method_type: (RubyVM::AbstractSyntaxTree::Node? args_node, RubyVM::AbstractSyntaxTree::Node? type_node, variables: Array[AST::TypeParam]) -> MethodType?
 
-      def type_of: (untyped type_node, variables: untyped) -> untyped
+      def parse_params: (RubyVM::AbstractSyntaxTree::Node args_node, RubyVM::AbstractSyntaxTree::Node args, MethodType method_type, variables: Array[AST::TypeParam]) -> MethodType
 
-      def type_of0: (untyped type_node, variables: untyped) -> untyped
+      def type_of: (RubyVM::AbstractSyntaxTree::Node type_node, variables: Array[AST::TypeParam]) -> Types::t
 
-      def proc_type?: (untyped type_node) -> (true | untyped)
+      def type_of0: (RubyVM::AbstractSyntaxTree::Node type_node, variables: Array[AST::TypeParam]) -> Types::t
 
-      def call_node?: (untyped node, name: untyped, ?receiver: untyped, ?args: untyped) -> untyped
+      def proc_type?: (RubyVM::AbstractSyntaxTree::Node type_node) -> bool
 
-      def const_to_name: (untyped node) -> untyped
+      def call_node?: (RubyVM::AbstractSyntaxTree::Node node, name: Symbol, ?receiver: ^(RubyVM::AbstractSyntaxTree::Node) -> bool, ?args: ^(RubyVM::AbstractSyntaxTree::Node) -> bool) -> bool
 
-      def each_arg: (untyped array) { (untyped) -> untyped } -> (untyped | nil | untyped)
+      # Receives a constant node and returns `TypeName` instance
+      def const_to_name: (RubyVM::AbstractSyntaxTree::Node node) -> TypeName
 
-      def each_child: (untyped node) { (untyped) -> untyped } -> untyped
+      # Receives `:ARRAY` or `:LIST` node and yields the child nodes.
+      def each_arg: (RubyVM::AbstractSyntaxTree::Node array) { (RubyVM::AbstractSyntaxTree::Node) -> void } -> void
+                  | (RubyVM::AbstractSyntaxTree::Node array) -> Enumerator[RubyVM::AbstractSyntaxTree::Node, void]
 
-      def node_to_hash: (untyped node) -> (untyped | nil)
+      # Receives node and yields the child nodes.
+      def each_child: (RubyVM::AbstractSyntaxTree::Node node) { (RubyVM::AbstractSyntaxTree::Node) -> void } -> void
+                    | (RubyVM::AbstractSyntaxTree::Node node) -> Enumerator[RubyVM::AbstractSyntaxTree::Node, void]
+
+      # Receives a keyword `:HASH` node and returns hash instance.
+      def node_to_hash: (RubyVM::AbstractSyntaxTree::Node node) -> Hash[Symbol, RubyVM::AbstractSyntaxTree::Node]?
     end
   end
 end

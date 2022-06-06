@@ -3,7 +3,13 @@ D = Steep::Diagnostic
 target :lib do
   signature "sig"
   check "lib"
-  ignore "lib/rbs/prototype", "lib/rbs/test", "lib/rbs/test.rb"
+  ignore(
+    "lib/rbs/prototype/rb.rb",
+    "lib/rbs/prototype/runtime.rb",
+    "lib/rbs/prototype/helpers.rb",
+    "lib/rbs/test",
+    "lib/rbs/test.rb"
+  )
 
   library "set", "pathname", "json", "logger", "monitor", "tsort", "uri"
   signature "stdlib/strscan/0/"
