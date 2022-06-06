@@ -5,6 +5,8 @@ module RBS
 
       *path, name = string.delete_prefix("::").split("::").map(&:to_sym)
 
+      name or raise
+
       TypeName.new(
         name: name,
         namespace: Namespace.new(path: path, absolute: absolute)
