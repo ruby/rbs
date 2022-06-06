@@ -12,10 +12,7 @@ module RBS
 
         if block
           method_block = Types::Block.new(
-            # HACK: The `block` is :& on `def m(...)` syntax.
-            #       In this case the block looks optional in most cases, so it marks optional.
-            #       In other cases, we can't determine which is required or optional, so it marks required.
-            required: block != :&,
+            required: false,
             type: Types::Function.empty(untyped)
           )
         end
