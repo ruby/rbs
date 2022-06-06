@@ -76,7 +76,6 @@ module RBS
         end
       end
 
-
       def any_node?(node, nodes: [], &block)
         if yield(node)
           nodes << node

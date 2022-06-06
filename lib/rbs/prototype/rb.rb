@@ -3,7 +3,9 @@ module RBS
     class RB
       include Helpers
 
-      Context = Struct.new(:module_function, :singleton, :namespace, keyword_init: true) do
+      Context = _ = Struct.new(:module_function, :singleton, :namespace, keyword_init: true) do
+        # @implements Context
+
         def self.initial(namespace: Namespace.root)
           self.new(module_function: false, singleton: false, namespace: namespace)
         end
@@ -35,9 +37,12 @@ module RBS
       end
 
       def decls
+        # @type var decls: Array[AST::Declarations::t]
         decls = []
 
-        top_decls, top_members = source_decls.partition {|decl| decl.is_a?(AST::Declarations::Base) }
+        # @type var top_decls: Array[AST::Declarations::t]
+        # @type var top_members: Array[AST::Members::t]
+        top_decls, top_members = _ = source_decls.partition {|decl| decl.is_a?(AST::Declarations::Base) }
 
         decls.push(*top_decls)
 
@@ -58,11 +63,12 @@ module RBS
       end
 
       def parse(string)
+        # @type var comments: Hash[Integer, AST::Comment]
         comments = Ripper.lex(string).yield_self do |tokens|
           tokens.each.with_object({}) do |token, hash|
             if token[1] == :on_comment
               line = token[0][0]
-              body = token[2][2..-1]
+              body = token[2][2..-1] or raise
 
               body = "\n" if body.empty?
 
@@ -84,15 +90,18 @@ module RBS
       def process(node, decls:, comments:, context:)
         case node.type
         when :CLASS
-          class_name, super_class, *class_body = node.children
-          super_class_name = const_to_name(super_class)
-          if super_class_name.nil?
-            # Give up detect super class e.g. `class Foo < Struct.new(:bar)`
-            super_class = nil
-          end
+          class_name, super_class_node, *class_body = node.children
+          super_class_name = const_to_name(super_class_node, context: context)
+          super_class =
+            if super_class_name
+              AST::Declarations::Class::Super.new(name: super_class_name, args: [], location: nil)
+            else
+              # Give up detect super class e.g. `class Foo < Struct.new(:bar)`
+              nil
+            end
           kls = AST::Declarations::Class.new(
-            name: const_to_name(class_name),
-            super_class: super_class && AST::Declarations::Class::Super.new(name: super_class_name, args: [], location: nil),
+            name: const_to_name!(class_name),
+            super_class: super_class,
             type_params: [],
             members: [],
             annotations: [],
@@ -112,7 +121,7 @@ module RBS
           module_name, *module_body = node.children
 
           mod = AST::Declarations::Module.new(
-            name: const_to_name(module_name),
+            name: const_to_name!(module_name),
             type_params: [],
             self_types: [],
             members: [],
@@ -144,34 +153,36 @@ module RBS
           decls << accessibility
 
         when :DEFN, :DEFS
-            if node.type == :DEFN
-              def_name, def_body = node.children
-              kind = context.method_kind
-            else
-              _, def_name, def_body = node.children
-              kind = :singleton
-            end
+          # @type var kind: Context::method_kind
 
-            types = [
-              MethodType.new(
-                type_params: [],
-                type: function_type_from_body(def_body, def_name),
-                block: block_from_body(def_body),
-                location: nil
-              )
-            ]
+          if node.type == :DEFN
+            def_name, def_body = node.children
+            kind = context.method_kind
+          else
+            _, def_name, def_body = node.children
+            kind = :singleton
+          end
 
-            member = AST::Members::MethodDefinition.new(
-              name: def_name,
-              location: nil,
-              annotations: [],
-              types: types,
-              kind: kind,
-              comment: comments[node.first_lineno - 1],
-              overload: false
+          types = [
+            MethodType.new(
+              type_params: [],
+              type: function_type_from_body(def_body, def_name),
+              block: block_from_body(def_body),
+              location: nil
             )
+          ]
 
-            decls.push member unless decls.include?(member)
+          member = AST::Members::MethodDefinition.new(
+            name: def_name,
+            location: nil,
+            annotations: [],
+            types: types,
+            kind: kind,
+            comment: comments[node.first_lineno - 1],
+            overload: false
+          )
+
+          decls.push member unless decls.include?(member)
 
         when :ALIAS
           new_name, old_name = node.children.map { |c| literal_to_symbol(c) }
@@ -192,7 +203,7 @@ module RBS
           case node.children[0]
           when :include
             args.each do |arg|
-              if (name = const_to_name(arg))
+              if (name = const_to_name(arg, context: context))
                 decls << AST::Members::Include.new(
                   name: name,
                   args: [],
@@ -204,7 +215,7 @@ module RBS
             end
           when :prepend
             args.each do |arg|
-              if (name = const_to_name(arg))
+              if (name = const_to_name(arg, context: context))
                 decls << AST::Members::Prepend.new(
                   name: name,
                   args: [],
@@ -286,8 +297,10 @@ module RBS
               module_func_context = context.dup.tap { |ctx| ctx.module_function = true }
               args.each do |arg|
                 if arg && (name = literal_to_symbol(arg))
-                  if i = find_def_index_by_name(decls, name)
-                    decls[i] = decls[i].update(kind: :singleton_instance)
+                  if (i, defn = find_def_index_by_name(decls, name))
+                    if defn.is_a?(AST::Members::MethodDefinition)
+                      decls[i] = defn.update(kind: :singleton_instance)
+                    end
                   end
                 elsif arg
                   process arg, decls: decls, comments: comments, context: module_func_context
@@ -301,7 +314,7 @@ module RBS
             else
               args.each do |arg|
                 if arg && (name = literal_to_symbol(arg))
-                  if i = find_def_index_by_name(decls, name)
+                  if (i, _ = find_def_index_by_name(decls, name))
                     current = current_accessibility(decls, i)
                     if current != accessibility
                       decls.insert(i + 1, current)
@@ -335,7 +348,7 @@ module RBS
                        when node.children[0].is_a?(Symbol)
                          TypeName.new(name: node.children[0], namespace: Namespace.empty)
                        else
-                         const_to_name(node.children[0])
+                         const_to_name!(node.children[0])
                        end
 
           value_node = node.children.last
@@ -363,13 +376,13 @@ module RBS
         end
       end
 
-      def const_to_name(node, context: nil)
-        case node&.type
+      def const_to_name!(node)
+        case node.type
         when :CONST
           TypeName.new(name: node.children[0], namespace: Namespace.empty)
         when :COLON2
           if node.children[0]
-            namespace = const_to_name(node.children[0]).to_namespace
+            namespace = const_to_name!(node.children[0]).to_namespace
           else
             namespace = Namespace.empty
           end
@@ -377,8 +390,19 @@ module RBS
           TypeName.new(name: node.children[1], namespace: namespace)
         when :COLON3
           TypeName.new(name: node.children[0], namespace: Namespace.root)
-        when :SELF
-          context&.then { |c| c.namespace.to_type_name }
+        else
+          raise
+        end
+      end
+
+      def const_to_name(node, context:)
+        if node
+          case node.type
+          when :SELF
+            context.namespace.to_type_name
+          when :CONST, :COLON2, :COLON3
+            const_to_name!(node)
+          end
         end
       end
 
@@ -580,7 +604,9 @@ module RBS
         return untyped if types.empty?
 
         uniq = types.uniq
-        return uniq.first if uniq.size == 1
+        if uniq.size == 1
+          return uniq.first || raise
+        end
 
         Types::Union.new(types: uniq, location: nil)
       end
@@ -599,7 +625,7 @@ module RBS
         end.uniq
 
         if types.size == 1
-          types.first
+          types.first or raise
         else
           untyped
         end
@@ -649,11 +675,17 @@ module RBS
       end
 
       def current_accessibility(decls, index = decls.size)
-        idx = decls.slice(0, index).rindex { |decl| decl == private || decl == public }
-        (idx && decls[idx]) || public
+        slice = decls.slice(0, index) or raise
+        idx = slice.rindex { |decl| decl == private || decl == public }
+        if idx
+          _ = decls[idx]
+        else
+          public
+        end
       end
 
       def remove_unnecessary_accessibility_methods!(decls)
+        # @type var current: decl
         current = public
         idx = 0
 
@@ -675,7 +707,7 @@ module RBS
           idx += 1
         end
 
-        decls.pop while decls.last && is_accessibility?(decls.last)
+        decls.pop while decls.last && is_accessibility?(decls.last || raise)
       end
 
       def is_accessibility?(decl)
@@ -683,13 +715,20 @@ module RBS
       end
 
       def find_def_index_by_name(decls, name)
-        decls.find_index do |decl|
+        index = decls.find_index do |decl|
           case decl
           when AST::Members::MethodDefinition, AST::Members::AttrReader
             decl.name == name
           when AST::Members::AttrWriter
-            decl.name == :"#{name}="
+            :"#{decl.name}=" == name
           end
+        end
+
+        if index
+          [
+            index,
+            _ = decls[index]
+          ]
         end
       end
     end
