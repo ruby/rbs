@@ -1,0 +1,53 @@
+module RBS
+  module Prototype
+    class RBI
+      attr_reader decls: untyped
+
+      attr_reader modules: untyped
+
+      attr_reader last_sig: untyped
+
+      def initialize: () -> void
+
+      def parse: (untyped string) -> untyped
+
+      def nested_name: (untyped name) -> untyped
+
+      def current_namespace: () -> untyped
+
+      def push_class: (untyped name, untyped super_class, comment: untyped) { () -> untyped } -> untyped
+
+      def push_module: (untyped name, comment: untyped) { () -> untyped } -> untyped
+
+      def current_module: () -> untyped
+
+      def push_sig: (untyped node) -> untyped
+
+      def pop_sig: () -> untyped
+
+      def join_comments: (untyped nodes, untyped comments) -> untyped
+
+      def process: (untyped node, comments: untyped, ?outer: untyped) -> untyped
+
+      def method_type: (untyped args_node, untyped type_node, variables: untyped) -> (untyped | nil)
+
+      def parse_params: (untyped args_node, untyped args, untyped method_type, variables: untyped) -> untyped
+
+      def type_of: (untyped type_node, variables: untyped) -> untyped
+
+      def type_of0: (untyped type_node, variables: untyped) -> untyped
+
+      def proc_type?: (untyped type_node) -> (true | untyped)
+
+      def call_node?: (untyped node, name: untyped, ?receiver: untyped, ?args: untyped) -> untyped
+
+      def const_to_name: (untyped node) -> untyped
+
+      def each_arg: (untyped array) { (untyped) -> untyped } -> (untyped | nil | untyped)
+
+      def each_child: (untyped node) { (untyped) -> untyped } -> untyped
+
+      def node_to_hash: (untyped node) -> (untyped | nil)
+    end
+  end
+end
