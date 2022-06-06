@@ -4,9 +4,7 @@ target :lib do
   signature "sig"
   check "lib"
   ignore(
-    "lib/rbs/prototype/rb.rb",
     "lib/rbs/prototype/runtime.rb",
-    "lib/rbs/prototype/helpers.rb",
     "lib/rbs/test",
     "lib/rbs/test.rb"
   )
