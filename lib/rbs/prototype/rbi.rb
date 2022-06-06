@@ -14,17 +14,20 @@ module RBS
       def parse(string)
         comments = Ripper.lex(string).yield_self do |tokens|
           tokens.each.with_object({}) do |token, hash|
+            # @type var hash: Hash[Integer, AST::Comment]
+
             if token[1] == :on_comment
               line = token[0][0]
-              body = token[2][2..-1]
+              body = token[2][2..-1] or raise
 
               body = "\n" if body.empty?
 
               comment = AST::Comment.new(string: body, location: nil)
-              if (prev_comment = hash[line - 1])
-                hash[line - 1] = nil
-                hash[line] = AST::Comment.new(string: prev_comment.string + comment.string,
-                                              location: nil)
+              if (prev_comment = hash.delete(line - 1))
+                hash[line] = AST::Comment.new(
+                  string: prev_comment.string + comment.string,
+                  location: nil
+                )
               else
                 hash[line] = comment
               end
@@ -45,7 +48,7 @@ module RBS
       end
 
       def push_class(name, super_class, comment:)
-        modules.push AST::Declarations::Class.new(
+        class_decl = AST::Declarations::Class.new(
           name: nested_name(name),
           super_class: super_class && AST::Declarations::Class::Super.new(name: const_to_name(super_class), args: [], location: nil),
           type_params: [],
@@ -55,7 +58,8 @@ module RBS
           comment: comment
         )
 
-        decls << modules.last
+        modules << class_decl
+        decls << class_decl
 
         yield
       ensure
@@ -63,7 +67,7 @@ module RBS
       end
 
       def push_module(name, comment:)
-        modules.push AST::Declarations::Module.new(
+        module_decl = AST::Declarations::Module.new(
           name: nested_name(name),
           type_params: [],
           members: [],
@@ -73,7 +77,8 @@ module RBS
           comment: comment
         )
 
-        decls << modules.last
+        modules << module_decl
+        decls << module_decl
 
         yield
       ensure
@@ -84,9 +89,16 @@ module RBS
         modules.last
       end
 
+      def current_module!
+        current_module or raise
+      end
+
       def push_sig(node)
-        @last_sig ||= []
-        @last_sig << node
+        if last_sig = @last_sig
+          last_sig << node
+        else
+          @last_sig = [node]
+        end
       end
 
       def pop_sig
@@ -125,7 +137,7 @@ module RBS
                   location: nil,
                   comment: nil
                 )
-                current_module.members << include_member
+                current_module!.members << include_member
               end
             end
           when :extend
@@ -140,15 +152,16 @@ module RBS
                     location: nil,
                     comment: nil
                   )
-                  current_module.members << member
+                  current_module!.members << member
                 end
               end
             end
           when :sig
-            push_sig outer.last.children.last.children.last
+            out = outer.last or raise
+            push_sig out.children.last.children.last
           when :alias_method
             new, old = each_arg(node.children[1]).map {|x| x.children[0] }
-            current_module.members << AST::Members::Alias.new(
+            current_module!.members << AST::Members::Alias.new(
               new_name: new,
               old_name: old,
               location: nil,
@@ -164,9 +177,9 @@ module RBS
             comment = join_comments(sigs, comments)
 
             args = node.children[2]
-            types = sigs.map {|sig| method_type(args, sig, variables: current_module.type_params) }
+            types = sigs.map {|sig| method_type(args, sig, variables: current_module!.type_params, overloads: sigs.size) }.compact
 
-            current_module.members << AST::Members::MethodDefinition.new(
+            current_module!.members << AST::Members::MethodDefinition.new(
               name: node.children[1],
               location: nil,
               annotations: [],
@@ -184,9 +197,9 @@ module RBS
             comment = join_comments(sigs, comments)
 
             args = node.children[1]
-            types = sigs.map {|sig| method_type(args, sig, variables: current_module.type_params) }
+            types = sigs.map {|sig| method_type(args, sig, variables: current_module!.type_params, overloads: sigs.size) }.compact
 
-            current_module.members << AST::Members::MethodDefinition.new(
+            current_module!.members << AST::Members::MethodDefinition.new(
               name: node.children[0],
               location: nil,
               annotations: [],
@@ -203,7 +216,8 @@ module RBS
               node.type == :HASH &&
                 each_arg(node.children[0]).each_slice(2).any? {|a, _| a.type == :LIT && a.children[0] == :fixed }
             }
-              if (a0 = each_arg(send.children[1]).to_a[0])&.type == :LIT
+              # @type var variance: AST::TypeParam::variance?
+              if (a0 = each_arg(send.children[1]).to_a[0]) && a0.type == :LIT
                 variance = case a0.children[0]
                            when :out
                              :covariant
@@ -212,7 +226,7 @@ module RBS
                            end
               end
 
-              current_module.type_params << AST::TypeParam.new(
+              current_module!.type_params << AST::TypeParam.new(
                 name: node.children[0],
                 variance: variance || :invariant,
                 location: nil,
@@ -242,7 +256,7 @@ module RBS
             )
           end
         when :ALIAS
-          current_module.members << AST::Members::Alias.new(
+          current_module!.members << AST::Members::Alias.new(
             new_name: node.children[0].children[0],
             old_name: node.children[1].children[0],
             location: nil,
@@ -257,10 +271,10 @@ module RBS
         end
       end
 
-      def method_type(args_node, type_node, variables:)
+      def method_type(args_node, type_node, variables:, overloads:)
         if type_node
           if type_node.type == :CALL
-            method_type = method_type(args_node, type_node.children[0], variables: variables)
+            method_type = method_type(args_node, type_node.children[0], variables: variables, overloads: overloads) or raise
           else
             method_type = MethodType.new(
               type: Types::Function.empty(Types::Bases::Any.new(location: nil)),
@@ -289,7 +303,7 @@ module RBS
             method_type.update(type: method_type.type.with_return_type(type_of(return_type, variables: variables)))
           when :params
             if args_node
-              parse_params(args_node, args, method_type, variables: variables)
+              parse_params(args_node, args, method_type, variables: variables, overloads: overloads)
             else
               vars = (node_to_hash(each_arg(args).to_a[0]) || {}).transform_values {|value| type_of(value, variables: variables) }
 
@@ -319,15 +333,22 @@ module RBS
         end
       end
 
-      def parse_params(args_node, args, method_type, variables:)
+      def parse_params(args_node, args, method_type, variables:, overloads:)
         vars = (node_to_hash(each_arg(args).to_a[0]) || {}).transform_values {|value| type_of(value, variables: variables) }
 
+        # @type var required_positionals: Array[Types::Function::Param]
         required_positionals = []
+        # @type var optional_positionals: Array[Types::Function::Param]
         optional_positionals = []
+        # @type var rest_positionals: Types::Function::Param?
         rest_positionals = nil
+        # @type var trailing_positionals: Array[Types::Function::Param]
         trailing_positionals = []
+        # @type var required_keywords: Hash[Symbol, Types::Function::Param]
         required_keywords = {}
+        # @type var optional_keywords: Hash[Symbol, Types::Function::Param]
         optional_keywords = {}
+        # @type var rest_keywords: Types::Function::Param?
         rest_keywords = nil
 
         var_names = args_node.children[0]
@@ -396,13 +417,20 @@ module RBS
                 type: Types::Function.empty(Types::Bases::Any.new(location: nil))
               )
             # Handle an optional block like `T.nilable(T.proc.void)`.
-            elsif type.is_a?(Types::Optional) && type.type.is_a?(Types::Proc)
-              method_block = Types::Block.new(required: false, type: type.type.type)
+            elsif type.is_a?(Types::Optional) && (proc_type = type.type).is_a?(Types::Proc)
+              method_block = Types::Block.new(required: false, type: proc_type.type)
             else
               STDERR.puts "Unexpected block type: #{type}"
               PP.pp args_node, STDERR
               method_block = Types::Block.new(
                 required: true,
+                type: Types::Function.empty(Types::Bases::Any.new(location: nil))
+              )
+            end
+          else
+            if overloads == 1
+              method_block = Types::Block.new(
+                required: false,
                 type: Types::Function.empty(Types::Bases::Any.new(location: nil))
               )
             end
@@ -439,7 +467,7 @@ module RBS
       def type_of0(type_node, variables:)
         case
         when type_node.type == :CONST
-          if variables.each.include?(type_node.children[0])
+          if variables.include?(type_node.children[0])
             Types::Variable.new(name: type_node.children[0], location: nil)
           else
             Types::ClassInstance.new(name: const_to_name(type_node), args: [], location: nil)
@@ -447,7 +475,10 @@ module RBS
         when type_node.type == :COLON2
           Types::ClassInstance.new(name: const_to_name(type_node), args: [], location: nil)
         when call_node?(type_node, name: :[], receiver: -> (_) { true })
+          # The type_node represents a type application
           type = type_of(type_node.children[0], variables: variables)
+          type.is_a?(Types::ClassInstance) or raise
+
           each_arg(type_node.children[2]) do |arg|
             type.args << type_of(arg, variables: variables)
           end
@@ -487,7 +518,8 @@ module RBS
           Types::Tuple.new(types: types, location: nil)
         else
           if proc_type?(type_node)
-            Types::Proc.new(type: method_type(nil, type_node, variables: variables).type, block: nil, location: nil)
+            method_type = method_type(nil, type_node, variables: variables, overloads: 1) or raise
+            Types::Proc.new(type: method_type.type, block: nil, location: nil)
           else
             STDERR.puts "Unexpected type_node:"
             PP.pp type_node, STDERR
@@ -572,9 +604,12 @@ module RBS
 
       def node_to_hash(node)
         if node&.type == :HASH
+          # @type var hash: Hash[Symbol, untyped]
           hash = {}
 
           each_arg(node.children[0]).each_slice(2) do |var, type|
+            var or raise
+
             if var.type == :LIT && type
               hash[var.children[0]] = type
             end
