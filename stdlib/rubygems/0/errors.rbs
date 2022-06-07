@@ -1,0 +1,7 @@
+module Gem
+  class LoadError < ::LoadError
+  end
+
+  class MissingSpecError
+  end
+end
