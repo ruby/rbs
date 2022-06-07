@@ -531,8 +531,21 @@ Processing `test/a_test.rb`...
 
         with_cli do |cli|
           cli.run(%w[collection install])
-          assert dir.join('rbs_collection.lock.yaml').exist?
-          assert dir.join('gem_rbs_collection/ast').exist?
+
+          rbs_collection_lock = dir.join('rbs_collection.lock.yaml')
+          assert rbs_collection_lock.exist?
+          rbs_collection_lock.delete
+
+          collection_file = dir.join('gem_rbs_collection/ast')
+          assert collection_file.exist?
+          collection_file.rmtree
+
+          Dir.mkdir("child")
+          Dir.chdir("child") do
+            cli.run(%w[collection install])
+            assert rbs_collection_lock.exist?
+            assert collection_file.exist?
+          end
         end
       end
     end

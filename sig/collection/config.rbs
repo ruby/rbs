@@ -43,6 +43,8 @@ module RBS
 
       @config_path: Pathname
 
+      def self.find_config_path: () -> Pathname?
+
       def self.generate_lockfile: (config_path: Pathname, gemfile_lock_path: Pathname, ?with_lockfile: boolish) -> Config
 
       def self.from_path: (Pathname path) -> Config

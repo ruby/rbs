@@ -17,7 +17,7 @@ module RBS
 
         @libs = []
         @dirs = []
-        @config_path = Collection::Config::PATH
+        @config_path = Collection::Config.find_config_path || Collection::Config::PATH
       end
 
       def loader
@@ -1001,12 +1001,12 @@ EOB
       case args[0]
       when 'install'
         unless params[:frozen]
-          Collection::Config.generate_lockfile(config_path: config_path, gemfile_lock_path: Pathname('./Gemfile.lock'))
+          Collection::Config.generate_lockfile(config_path: config_path, gemfile_lock_path: Bundler.default_lockfile)
         end
         Collection::Installer.new(lockfile_path: lock_path, stdout: stdout).install_from_lockfile
       when 'update'
         # TODO: Be aware of argv to update only specified gem
-        Collection::Config.generate_lockfile(config_path: config_path, gemfile_lock_path: Pathname('./Gemfile.lock'), with_lockfile: false)
+        Collection::Config.generate_lockfile(config_path: config_path, gemfile_lock_path: Bundler.default_lockfile, with_lockfile: false)
         Collection::Installer.new(lockfile_path: lock_path, stdout: stdout).install_from_lockfile
       when 'init'
         if config_path.exist?

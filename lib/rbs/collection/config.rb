@@ -14,6 +14,15 @@ module RBS
 
       PATH = Pathname('rbs_collection.yaml')
 
+      def self.find_config_path
+        current = Dir.pwd
+        until File.exist?(File.join(current, PATH))
+          return nil if current == File.expand_path("..", current)
+          current = File.expand_path("..", current)
+        end
+        Pathname(current) / PATH
+      end
+
       # Generate a rbs lockfile from Gemfile.lock to `config_path`.
       # If `with_lockfile` is true, it respects existing rbs lockfile.
       def self.generate_lockfile(config_path:, gemfile_lock_path:, with_lockfile: true)
