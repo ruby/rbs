@@ -714,6 +714,8 @@ EOU
           Prototype::RBI.new()
         when "rb"
           Prototype::RB.new()
+        else
+          raise
         end
       end
 

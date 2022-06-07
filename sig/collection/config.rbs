@@ -2,6 +2,9 @@ module RBS
   module Collection
     # This class represent the configration file.
     class Config
+      class CollectionNotAvailable < StandardError
+      end
+
       class LockfileGenerator
         attr_reader config: Config
         attr_reader lock: Config?
