@@ -29,6 +29,6 @@ jobs:
     - name: bin/setup
       run: |
         bin/setup
-    - name: Run test
+    - name: Check if `rake annotate` has been executed
       run: |
         bundle exec rake annotate confirm_annotation
