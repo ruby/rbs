@@ -65,9 +65,15 @@ module RBS
       def parse(string)
         # @type var comments: Hash[Integer, AST::Comment]
         comments = Ripper.lex(string).yield_self do |tokens|
+          code_lines = {}
           tokens.each.with_object({}) do |token, hash|
-            if token[1] == :on_comment
+            case token[1]
+            when :on_sp, :on_ignored_nl
+              # skip
+            when :on_comment
               line = token[0][0]
+              # skip like `module Foo # :nodoc:`
+              next if code_lines[line]
               body = token[2][2..-1] or raise
 
               body = "\n" if body.empty?
@@ -80,6 +86,8 @@ module RBS
               else
                 hash[line] = comment
               end
+            else
+              code_lines[token[0][0]] = true
             end
           end
         end

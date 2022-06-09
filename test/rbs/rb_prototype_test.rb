@@ -566,7 +566,7 @@ end
     rb = <<-EOR
 # Comments for class.
 # This is a comment.
-class Hello
+class Hello # :nodoc:
   # Comment for include.
   include Foo
 
