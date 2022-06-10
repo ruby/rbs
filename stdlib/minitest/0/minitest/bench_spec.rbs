@@ -12,7 +12,7 @@ class Minitest::BenchSpec < ::Minitest::Benchmark
   #
   # See ::bench_performance_linear for an example of how to use this.
   #
-  def self.bench: (untyped name) { () -> untyped } -> untyped
+  def self.bench: (untyped name) ?{ () -> untyped } -> untyped
 
   # <!--
   #   rdoc-file=lib/minitest/benchmark.rb
@@ -26,7 +26,7 @@ class Minitest::BenchSpec < ::Minitest::Benchmark
   #
   # See Minitest::Benchmark#bench_range for more details.
   #
-  def self.bench_range: () { () -> untyped } -> untyped
+  def self.bench_range: () ?{ () -> untyped } -> untyped
 
   # <!--
   #   rdoc-file=lib/minitest/benchmark.rb
@@ -40,7 +40,7 @@ class Minitest::BenchSpec < ::Minitest::Benchmark
   #       end
   #     end
   #
-  def self.bench_performance_linear: (untyped name, ?::Float threshold) { () -> untyped } -> untyped
+  def self.bench_performance_linear: (untyped name, ?::Float threshold) ?{ () -> untyped } -> untyped
 
   # <!--
   #   rdoc-file=lib/minitest/benchmark.rb
@@ -54,7 +54,7 @@ class Minitest::BenchSpec < ::Minitest::Benchmark
   #       end
   #     end
   #
-  def self.bench_performance_constant: (untyped name, ?::Float threshold) { () -> untyped } -> untyped
+  def self.bench_performance_constant: (untyped name, ?::Float threshold) ?{ () -> untyped } -> untyped
 
   # <!--
   #   rdoc-file=lib/minitest/benchmark.rb
@@ -68,7 +68,7 @@ class Minitest::BenchSpec < ::Minitest::Benchmark
   #       end
   #     end
   #
-  def self.bench_performance_exponential: (untyped name, ?::Float threshold) { () -> untyped } -> untyped
+  def self.bench_performance_exponential: (untyped name, ?::Float threshold) ?{ () -> untyped } -> untyped
 
   # <!--
   #   rdoc-file=lib/minitest/benchmark.rb
@@ -82,7 +82,7 @@ class Minitest::BenchSpec < ::Minitest::Benchmark
   #       end
   #     end
   #
-  def self.bench_performance_logarithmic: (untyped name, ?::Float threshold) { () -> untyped } -> untyped
+  def self.bench_performance_logarithmic: (untyped name, ?::Float threshold) ?{ () -> untyped } -> untyped
 
   # <!--
   #   rdoc-file=lib/minitest/benchmark.rb
@@ -96,6 +96,7 @@ class Minitest::BenchSpec < ::Minitest::Benchmark
   #       end
   #     end
   #
-  def self.bench_performance_power: (untyped name, ?::Float threshold) { () -> untyped } -> untyped
+  def self.bench_performance_power: (untyped name, ?::Float threshold) ?{ () -> untyped } -> untyped
   include Minitest::Spec::DSL::InstanceMethods
+  extend Minitest::Spec::DSL
 end

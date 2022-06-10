@@ -52,7 +52,7 @@ class Minitest::Runnable
   # Minitest::ParallelTest::ClassMethods for an example.
   #
   def self.run_one_method: (untyped klass, untyped method_name, untyped reporter) -> untyped
-  def self.with_info_handler: (untyped reporter) { () -> untyped } -> untyped
+  def self.with_info_handler: (untyped reporter) ?{ () -> untyped } -> untyped
   def self.on_signal: (untyped name, untyped action) { () -> untyped } -> untyped
 
   # <!--

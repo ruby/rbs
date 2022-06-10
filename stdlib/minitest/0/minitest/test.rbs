@@ -64,7 +64,7 @@ class Minitest::Test < ::Minitest::Runnable
   def run: () -> untyped
   def capture_exceptions: () { () -> untyped } -> untyped
   def sanitize_exception: (untyped e) -> untyped
-  def with_info_handler: () { () -> untyped } -> untyped
+  def with_info_handler: () ?{ () -> untyped } -> untyped
   attr_accessor self.io_lock: untyped
   include Minitest::Assertions
   include Minitest::Reportable

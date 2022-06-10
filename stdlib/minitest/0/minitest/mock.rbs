@@ -44,7 +44,7 @@ class Minitest::Mock
   #     @mock.ordinal_increment # => 'second'
   #     @mock.ordinal_increment # => raises MockExpectationError "No more expects available for :ordinal_increment"
   #
-  def expect: (untyped name, untyped retval, ?untyped args) { () -> untyped } -> self
+  def expect: (untyped name, untyped retval, ?untyped args) ?{ () -> untyped } -> self
   def __call: (untyped name, untyped data) -> untyped
 
   # <!--
@@ -55,6 +55,6 @@ class Minitest::Mock
   # if the mock object was not called as expected.
   #
   def verify: () -> true
-  def method_missing: (untyped sym, *untyped args) { () -> untyped } -> untyped
+  def method_missing: (untyped sym, *untyped args) ?{ () -> untyped } -> untyped
   def respond_to?: (untyped sym, ?bool include_private) -> (true | untyped)
 end

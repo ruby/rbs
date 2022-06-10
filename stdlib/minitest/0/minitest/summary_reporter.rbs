@@ -13,14 +13,13 @@ class Minitest::SummaryReporter < ::Minitest::StatisticsReporter
   def aggregated_results: (untyped io) -> untyped
   def to_s: () -> untyped
   def summary: () -> untyped
-  private
 
   # <!--
   #   rdoc-file=lib/minitest.rb
   #   - binary_string()
   # -->
   #
-  def binary_string: () -> untyped
+  private def binary_string: () -> untyped
   attr_accessor sync: untyped
   attr_accessor old_sync: untyped
 end

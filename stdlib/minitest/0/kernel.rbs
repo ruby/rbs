@@ -1,7 +1,5 @@
 %a{annotate:rdoc:skip}
 module Kernel : ::BasicObject
-  private
-
   # <!--
   #   rdoc-file=lib/minitest/spec.rb
   #   - describe(desc, *additional_desc, &block)
@@ -40,5 +38,5 @@ module Kernel : ::BasicObject
   #
   # For more information about expectations, see Minitest::Expectations.
   #
-  def describe: (untyped desc, *untyped additional_desc) { () -> untyped } -> untyped
+  private def describe: (untyped desc, *untyped additional_desc) ?{ () -> untyped } -> untyped
 end

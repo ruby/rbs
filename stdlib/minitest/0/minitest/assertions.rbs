@@ -360,7 +360,7 @@ module Minitest::Assertions
   # -->
   # Returns a proc that will output `msg` along with the default message.
   #
-  def message: (?untyped? msg, ?untyped? ending) { () -> untyped } -> untyped
+  def message: (?untyped? msg, ?untyped? ending) ?{ () -> untyped } -> untyped
 
   # <!--
   #   rdoc-file=lib/minitest/assertions.rb

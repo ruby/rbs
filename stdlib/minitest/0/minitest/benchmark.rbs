@@ -63,7 +63,7 @@ class Minitest::Benchmark < ::Minitest::Test
   #       end
   #     end
   #
-  def assert_performance: (untyped validation) { () -> untyped } -> untyped
+  def assert_performance: (untyped validation) ?{ () -> untyped } -> untyped
 
   # <!--
   #   rdoc-file=lib/minitest/benchmark.rb
@@ -91,7 +91,7 @@ class Minitest::Benchmark < ::Minitest::Test
   #       end
   #     end
   #
-  def assert_performance_constant: (?::Float threshold) { () -> untyped } -> untyped
+  def assert_performance_constant: (?::Float threshold) ?{ () -> untyped } -> untyped
 
   # <!--
   #   rdoc-file=lib/minitest/benchmark.rb
@@ -112,7 +112,7 @@ class Minitest::Benchmark < ::Minitest::Test
   #       end
   #     end
   #
-  def assert_performance_exponential: (?::Float threshold) { () -> untyped } -> untyped
+  def assert_performance_exponential: (?::Float threshold) ?{ () -> untyped } -> untyped
 
   # <!--
   #   rdoc-file=lib/minitest/benchmark.rb
@@ -133,7 +133,7 @@ class Minitest::Benchmark < ::Minitest::Test
   #       end
   #     end
   #
-  def assert_performance_logarithmic: (?::Float threshold) { () -> untyped } -> untyped
+  def assert_performance_logarithmic: (?::Float threshold) ?{ () -> untyped } -> untyped
 
   # <!--
   #   rdoc-file=lib/minitest/benchmark.rb
@@ -154,7 +154,7 @@ class Minitest::Benchmark < ::Minitest::Test
   #       end
   #     end
   #
-  def assert_performance_linear: (?::Float threshold) { () -> untyped } -> untyped
+  def assert_performance_linear: (?::Float threshold) ?{ () -> untyped } -> untyped
 
   # <!--
   #   rdoc-file=lib/minitest/benchmark.rb
@@ -175,7 +175,7 @@ class Minitest::Benchmark < ::Minitest::Test
   #       end
   #     end
   #
-  def assert_performance_power: (?::Float threshold) { () -> untyped } -> untyped
+  def assert_performance_power: (?::Float threshold) ?{ () -> untyped } -> untyped
 
   # <!--
   #   rdoc-file=lib/minitest/benchmark.rb
@@ -245,7 +245,7 @@ class Minitest::Benchmark < ::Minitest::Test
   #     sigma([1, 2, 3])                # => 1 + 2 + 3 => 6
   #     sigma([1, 2, 3]) { |n| n ** 2 } # => 1 + 4 + 9 => 14
   #
-  def sigma: (untyped enum) { () -> untyped } -> untyped
+  def sigma: (untyped enum) ?{ () -> untyped } -> untyped
 
   # <!--
   #   rdoc-file=lib/minitest/benchmark.rb

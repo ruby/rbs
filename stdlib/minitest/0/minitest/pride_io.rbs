@@ -43,12 +43,12 @@ class Minitest::PrideIO
   attr_reader io: untyped
 
   # <!-- rdoc-file=lib/minitest/pride_plugin.rb -->
-  # End the escape sequence
-  #
-  NND: String
-
-  # <!-- rdoc-file=lib/minitest/pride_plugin.rb -->
   # Start an escape sequence
   #
   ESC: String
+
+  # <!-- rdoc-file=lib/minitest/pride_plugin.rb -->
+  # End the escape sequence
+  #
+  NND: String
 end

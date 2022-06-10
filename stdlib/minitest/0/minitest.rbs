@@ -901,7 +901,7 @@ module Minitest
   #
   #     Minitest.after_run { p $debugging_info }
   #
-  def self.after_run: () { () -> untyped } -> untyped
+  def self.after_run: () ?{ () -> untyped } -> untyped
 
   def self.init_plugins: (untyped options) -> untyped
 
@@ -960,7 +960,7 @@ module Minitest
 
   attr_accessor self.info_signal: untyped
 
-  ENCS: true
-
   VERSION: String
+
+  ENCS: true
 end

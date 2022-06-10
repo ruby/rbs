@@ -28,7 +28,7 @@ module Minitest::Spec::DSL::InstanceMethods
   #      value(1 + 1).must_equal 2
   #     expect(1 + 1).must_equal 2
   #
-  def _: (?untyped? value) { () -> untyped } -> untyped
+  def _: (?untyped? value) ?{ () -> untyped } -> untyped
 
   # <!--
   #   rdoc-file=lib/minitest/spec.rb
