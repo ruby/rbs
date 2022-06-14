@@ -871,8 +871,8 @@ module Kernel : BasicObject
   #     raise ArgumentError, "No parameters", caller
   #
   def self?.fail: () -> bot
-                | (String arg0, ?cause: Exception?) -> bot
-                | (_Exception arg0, ?untyped arg1, ?::Array[String] arg2, ?cause: Exception?) -> bot
+                | (String message, ?cause: Exception?) -> bot
+                | (_Exception exception, ?untyped message, ?::Array[String] backtrace, ?cause: Exception?) -> bot
 
   # <!--
   #   rdoc-file=eval.c
