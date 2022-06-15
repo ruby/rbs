@@ -470,8 +470,9 @@ module RBS
         *outer_module_names, _ = const_name(mod).split(/::/) #=> parent = [A, B], mod = C
         destination = @decls # Copy the entries in ivar @decls, not .dup
 
-        outer_module_names&.each do |outer_module_name|
-          outer_module = @modules.detect { |x| const_name(x) == outer_module_name }
+        outer_module_names&.each_with_index do |outer_module_name, i|
+          current_name = outer_module_names[0, i + 1].join('::')
+          outer_module = @modules.detect { |x| const_name(x) == current_name }
           outer_decl = destination.detect { |decl| decl.is_a?(outer_module.is_a?(Class) ? AST::Declarations::Class : AST::Declarations::Module) && decl.name.name == outer_module_name.to_sym }
 
           # Insert AST::Declarations if declarations are not added previously
