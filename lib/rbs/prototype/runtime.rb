@@ -341,7 +341,7 @@ module RBS
                  end
 
           decls << AST::Declarations::Constant.new(
-            name: name,
+            name: to_type_name(name.to_s),
             type: type,
             location: nil,
             comment: nil

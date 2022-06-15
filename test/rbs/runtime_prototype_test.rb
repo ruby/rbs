@@ -415,4 +415,31 @@ end
       end
     end
   end
+
+  module TestForEnv
+    # A = 1
+    def a
+      2
+    end
+    alias b a
+    module B
+    end
+    include B
+    extend B
+    prepend B
+  end
+
+  def test_decls_structure
+    SignatureManager.new do |manager|
+      manager.build do |env|
+        p = Runtime.new(patterns: ["RBS::RuntimePrototypeTest::TestForEnv"], env: env, merge: true)
+        assert_equal(p.decls.length, 1)
+        p.decls.each do |decl|
+          env << decl
+        end
+        env.resolve_type_names
+        assert(true) # nothing raised above
+      end
+    end
+  end
 end
