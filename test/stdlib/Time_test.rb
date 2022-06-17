@@ -334,3 +334,24 @@ class TimeSingletonTest < Test::Unit::TestCase
     )
   end
 end
+
+class TimeInDateTest < Test::Unit::TestCase
+  include TypeAssertions
+
+  require "date"
+
+  library "date"
+  testing "::Time"
+
+  def test_to_time
+    assert_send_type "() -> Time", Time.now, :to_time
+  end
+
+  def test_to_date
+    assert_send_type "() -> Date", Time.now, :to_date
+  end
+
+  def test_to_datetime
+    assert_send_type "() -> DateTime", Time.now, :to_datetime
+  end
+end
