@@ -251,7 +251,7 @@ class IOWaitTest < Test::Unit::TestCase
   testing "::IO"
 
   def test_readyp
-    if_ruby3 do
+    if_ruby31 do
       # This method returns true|false in Ruby 2.7, nil|IO in 3.0, and true|false in 3.1.
 
       IO.pipe.tap do |r, w|
