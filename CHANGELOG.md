@@ -2,6 +2,19 @@
 
 ## master
 
+## 2.5.1 (2022-06-19)
+
+This is a maintenance release mainly to fix errors detected in CI of `ruby/ruby`.
+Nothing changed related to the users of RBS gem.
+
+### Miscellaneous
+
+* Skip failing tests on ruby/ruby CI ([\#1036](https://github.com/ruby/rbs/pull/1036))
+* Fix warnings ([\#1035](https://github.com/ruby/rbs/pull/1035) except changes on `test/tools/sort_test.rb` that is not included in this release)
+* Fix `Regexp.new` argument ([\#1034](https://github.com/ruby/rbs/pull/1034))
+* Fix errors with OpenSSL 3 ([\#1029](https://github.com/ruby/rbs/pull/1029))
+* Fix `OpenSSL::PKey::PKeyError: EVP_PKEY_keygen: bad ffc parameters` with OpenSSL 3 ([\#1005](https://github.com/ruby/rbs/pull/1005))
+
 ## 2.5.0 (2022-05-20)
 
 This is a minor release with tuple type/record type syntax updates and `rbs prototype` improvements.
