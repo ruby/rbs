@@ -75,7 +75,7 @@ EOF
       manager.build do |env|
         builder = DefinitionBuilder.new(env: env)
         resolver = Resolver::ConstantResolver.new(builder: builder)
-        namespace = Namespace.parse("::Foo")
+        Namespace.parse("::Foo")
 
         resolver.resolve(:Name, context: [nil, TypeName("::Foo")]).tap do |constant|
           assert_instance_of Constant, constant
