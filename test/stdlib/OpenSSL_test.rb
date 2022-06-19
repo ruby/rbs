@@ -2,6 +2,17 @@ require_relative "test_helper"
 require "socket"
 require "openssl"
 
+module OpenSSL::TestUtils
+  module_function
+
+  def openssl?(major = nil, minor = nil, fix = nil, patch = 0)
+    return false if OpenSSL::OPENSSL_VERSION.include?("LibreSSL")
+    return true unless major
+    OpenSSL::OPENSSL_VERSION_NUMBER >=
+      major * 0x10000000 + minor * 0x100000 + fix * 0x1000 + patch * 0x10
+  end
+end
+
 class OpenSSLSingletonTest < Test::Unit::TestCase
   include TypeAssertions
   library "openssl"
@@ -472,7 +483,7 @@ class OpenSSLEngineSingletonTest < Test::Unit::TestCase
     assert_send_type "() -> Array[OpenSSL::Engine]",
       OpenSSL::Engine, :engines
   end
-end
+end if defined?(OpenSSL::Engine)
 
 class OpenSSLEngineTest < Test::Unit::TestCase
   include TypeAssertions
@@ -494,7 +505,7 @@ class OpenSSLEngineTest < Test::Unit::TestCase
   def engine
     OpenSSL::Engine.by_id("openssl")
   end
-end
+end if defined?(OpenSSL::Engine)
 
 class OpenSSLHMACSingletonTest < Test::Unit::TestCase
   include TypeAssertions
@@ -594,20 +605,20 @@ class OpenSSLNetscapePKITest < Test::Unit::TestCase
     key = OpenSSL::PKey::RSA.new 2048
     spki = OpenSSL::Netscape::SPKI.new
 
+    assert_send_type "(String) -> String",
+      spki, :challenge=, "RandomChallenge"
+    assert_send_type "(OpenSSL::PKey::PKey) -> OpenSSL::PKey::PKey",
+      spki, :public_key=, key.public_key
+    assert_send_type "(OpenSSL::PKey::PKey, OpenSSL::Digest) -> OpenSSL::Netscape::SPKI",
+      spki, :sign, key, OpenSSL::Digest::SHA256.new
     assert_send_type "() -> String",
       spki, :to_der
     assert_send_type "() -> String",
       spki, :to_pem
     assert_send_type "() -> String",
       spki, :challenge
-    assert_send_type "(String) -> String",
-      spki, :challenge=, "RandomChallenge"
-    assert_send_type "(OpenSSL::PKey::PKey) -> OpenSSL::PKey::PKey",
-      spki, :public_key=, key.public_key
     assert_send_type "() -> OpenSSL::PKey::PKey",
       spki, :public_key
-    assert_send_type "(OpenSSL::PKey::PKey, OpenSSL::Digest) -> OpenSSL::Netscape::SPKI",
-      spki, :sign, key, OpenSSL::Digest::SHA256.new
     assert_send_type "(OpenSSL::PKey::PKey) -> bool",
       spki, :verify, key
 
@@ -694,6 +705,7 @@ class OpenSSLDHTest < Test::Unit::TestCase
   end
 
   def test_set_key
+    return if OpenSSL::TestUtils.openssl?(3, 0, 0)
     assert_send_type "(Integer, nil) -> OpenSSL::PKey::DH",
       pkey, :set_key, 123, nil
     assert_send_type "(Integer, Integer) -> OpenSSL::PKey::DH",
@@ -755,6 +767,7 @@ class OpenSSLDSATest < Test::Unit::TestCase
   end
 
   def test_set_key
+    return if OpenSSL::TestUtils.openssl?(3, 0, 0)
     assert_send_type "(Integer, nil) -> OpenSSL::PKey::DSA",
       pkey, :set_key, 123, nil
     assert_send_type "(Integer, Integer) -> OpenSSL::PKey::DSA",
@@ -806,7 +819,7 @@ class OpenSSLECTest < Test::Unit::TestCase
   end
 
   def test_dsa_sign_verify_asn1
-    key = OpenSSL::PKey::EC.new("prime256v1").generate_key!
+    key = OpenSSL::PKey::EC.new("prime256v1")
     size = key.group.order.num_bits / 8 + 1
     dgst = (1..size).to_a.pack('C*')
     sig = assert_send_type "(String) -> String",
@@ -824,6 +837,7 @@ class OpenSSLECTest < Test::Unit::TestCase
     ec = OpenSSL::PKey::EC.new("prime256v1")
     assert_send_type "() -> nil",
       ec, :private_key
+    return if OpenSSL::TestUtils.openssl?(3, 0, 0)
     assert_send_type "() -> OpenSSL::PKey::EC",
       ec, :generate_key!
     assert_send_type "() -> OpenSSL::BN",
@@ -834,6 +848,7 @@ class OpenSSLECTest < Test::Unit::TestCase
     ec = OpenSSL::PKey::EC.new("prime256v1")
     assert_send_type "() -> nil",
       ec, :public_key
+    return if OpenSSL::TestUtils.openssl?(3, 0, 0)
     assert_send_type "() -> OpenSSL::PKey::EC",
       ec, :generate_key!
     assert_send_type "() -> OpenSSL::PKey::EC::Point",
