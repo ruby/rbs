@@ -368,8 +368,12 @@ module TypeAssertions
     if_ruby("3.0.0"..."4.0.0", &block)
   end
 
-  def if_ruby30
+  def if_ruby30(&block)
     if_ruby("3.0.0"..."3.1.0", &block)
+  end
+
+  def if_ruby31(&block)
+    if_ruby("3.1.0"..."3.2.0", &block)
   end
 end
 
