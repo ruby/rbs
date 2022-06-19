@@ -122,7 +122,7 @@ class RBS::ToolSortTest < Test::Unit::TestCase
     actual = Tempfile.create('rbs-sort-test-') do |f|
       f.write original
       f.close
-      system File.join(__dir__, '../../bin/sort'), f.path, exception: true
+      system File.join(__dir__, '../../bin/sort'), f.path, exception: true, out: IO::NULL
 
       File.read(f.path)
     end
