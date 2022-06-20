@@ -28,7 +28,12 @@ class SetupHelperTest < Test::Unit::TestCase
   end
 
   def test_to_double_class
-    assert_equal ['::RSpec::Mocks::Double'], to_double_class('rspec')
+    assert_equal [
+      '::RSpec::Mocks::Double',
+      '::RSpec::Mocks::InstanceVerifyingDouble',
+      '::RSpec::Mocks::ObjectVerifyingDouble',
+      '::RSpec::Mocks::ClassVerifyingDouble',
+    ], to_double_class('rspec')
     assert_equal ['::Minitest::Mock'], to_double_class('minitest')
 
     silence_warnings do
@@ -40,4 +45,3 @@ class SetupHelperTest < Test::Unit::TestCase
     end
   end
 end
-

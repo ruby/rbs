@@ -30,7 +30,12 @@ module RBS
 
         case double_suite.downcase.strip
         when 'rspec'
-          ['::RSpec::Mocks::Double']
+          [
+            '::RSpec::Mocks::Double',
+            '::RSpec::Mocks::InstanceVerifyingDouble',
+            '::RSpec::Mocks::ObjectVerifyingDouble',
+            '::RSpec::Mocks::ClassVerifyingDouble',
+          ]
         when 'minitest'
           ['::Minitest::Mock']
         else
