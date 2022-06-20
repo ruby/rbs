@@ -179,3 +179,20 @@ class RationalTest < StdlibTest
     a.truncate(1)
   end
 end
+
+class RationalInstanceTest < Test::Unit::TestCase
+  include TypeAssertions
+
+  testing "::Rational"
+
+  def test_multiply
+    assert_send_type "(Integer) -> Rational",
+                      1r, :*, 1
+    assert_send_type "(Rational) -> Rational",
+                      1r, :*, 1r
+    assert_send_type "(Float) -> Float",
+                      1r, :*, 3.1
+    assert_send_type "(Complex) -> Complex",
+                      1, :*, Complex.rect(1,2)
+  end
+end
