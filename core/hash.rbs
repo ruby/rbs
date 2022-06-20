@@ -978,7 +978,7 @@ class Hash[unchecked out K, unchecked out V] < Object
   #     h.dig(:hello, :world) # => h
   #     h.dig(:hello, :world, :foo, :bar, 2) # => :c
   #
-  def dig: (*untyped) -> untyped
+  def dig: (K, *untyped) -> untyped
 
   # <!-- rdoc-file=hash.c -->
   # Hash#each is an alias for Hash#each_pair.
