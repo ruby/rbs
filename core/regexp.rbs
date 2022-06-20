@@ -760,7 +760,7 @@ class Regexp
   #     r3 = Regexp.new(r2)              #=> /cat/i
   #     r4 = Regexp.new('dog', Regexp::EXTENDED | Regexp::IGNORECASE) #=> /dog/ix
   #
-  def initialize: (String string, ?untyped options, ?String kcode) -> Object
+  def initialize: (String string, ?Integer | nil | false options, ?String kcode) -> Object
                 | (Regexp regexp) -> void
 
   # <!--
@@ -769,8 +769,7 @@ class Regexp
   # -->
   # Alias for Regexp.new
   #
-  def self.compile: (String string, ?untyped options, ?String kcode) -> Regexp
-                  | (Regexp regexp) -> Regexp
+  alias self.compile self.new
 
   # <!--
   #   rdoc-file=re.c
