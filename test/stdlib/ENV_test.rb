@@ -1,13 +1,16 @@
 require_relative "test_helper"
 
-# initialize temporary class
-class ENVClass
+# Instantiate the pseudo class
+module RBS
+  module Unnamed
+    ENVClass = ENV.class
+  end
 end
 
 class ENVTest < Test::Unit::TestCase
   include TypeAssertions
 
-  testing "::ENVClass"
+  testing "::RBS::Unnamed::ENVClass"
 
   def test_get
     assert_send_type "(String) -> String?",
