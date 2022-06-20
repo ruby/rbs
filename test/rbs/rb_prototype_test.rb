@@ -890,8 +890,8 @@ end
       [%{{a: nil}}, %{ { a: nil } }],
       [%{{"a" => /b/}}, %{ ::Hash[::String, ::Regexp] }],
     ].each do |rb, rbs|
-      node = RubyVM::AbstractSyntaxTree.parse(rb).children[2]
-      assert_equal RBS::Parser.parse_type(rbs), parser.literal_to_type(node)
+      node = RubyVM::AbstractSyntaxTree.parse("_ = #{rb}").children[2]
+      assert_equal RBS::Parser.parse_type(rbs), parser.literal_to_type(node.children[1])
     end
   end
 
