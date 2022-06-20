@@ -202,9 +202,12 @@
         },
         "location": {
           "$ref": "location.json"
+        },
+        "visibility": {
+          "enum": ["public", "private", null]
         }
       },
-      "required": ["member", "name", "ivar_name", "type", "annotations", "kind", "comment", "location"]
+      "required": ["member", "name", "ivar_name", "type", "annotations", "kind", "comment", "location", "visibility"]
     },
     "visibility": {
       "title": "Visibility specifier",

@@ -282,7 +282,8 @@ module RBS
             kind: kind,
             annotations: annotations,
             location: location,
-            comment: comment
+            comment: comment,
+            visibility: visibility
           }.to_json(state)
         end
       end
@@ -299,7 +300,8 @@ module RBS
             kind: kind,
             annotations: annotations,
             location: location,
-            comment: comment
+            comment: comment,
+            visibility: visibility
           }.to_json(state)
         end
       end
@@ -316,7 +318,8 @@ module RBS
             kind: kind,
             annotations: annotations,
             location: location,
-            comment: comment
+            comment: comment,
+            visibility: visibility
           }.to_json(state)
         end
       end
