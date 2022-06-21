@@ -98,10 +98,6 @@ task :validate => :compile do
       lib << "socket"
     end
 
-    if lib == ["minitest"]
-      lib << "mutex_m"
-    end
-
     sh "#{ruby} #{rbs} #{lib.map {|l| "-r #{l}"}.join(" ")} validate --silent"
   end
 end
