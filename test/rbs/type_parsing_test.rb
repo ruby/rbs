@@ -581,6 +581,18 @@ class RBS::TypeParsingTest < Test::Unit::TestCase
       assert_instance_of Types::Literal, type
       assert_equal 'not escape sequences \a\b\e\f\n\r\s\t\v\"', type.literal
     end
+
+    # "\\" in RBS
+    Parser.parse_type(%q{"\\\\"}).yield_self do |type|
+      assert_instance_of Types::Literal, type
+      assert_equal "\\", type.literal
+    end
+
+    # '\\' in RBS
+    Parser.parse_type(%q{'\\\\'}).yield_self do |type|
+      assert_instance_of Types::Literal, type
+      assert_equal "\\", type.literal
+    end
   end
 
   def test_literal_to_s

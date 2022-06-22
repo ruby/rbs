@@ -1,16 +1,23 @@
 #include "rbs_extension.h"
 
-static VALUE REGEXP = 0;
+static VALUE DQ_REGEXP = 0;
+static VALUE SQ_REGEXP = 0;
 static VALUE HASH = 0;
 
-static const char *regexp_str = "\\\\[abefnrstv\"\\\\]";
+static const char *dq_regexp_str = "\\\\[abefnrstv\"\\\\]";
+static const char *sq_regexp_str = "\\\\[\'\\\\]";
 
 static ID gsub = 0;
 
-void rbs_unescape_string(VALUE string) {
-  if (!REGEXP) {
-    REGEXP = rb_reg_new(regexp_str, strlen(regexp_str), 0);
-    rb_global_variable(&REGEXP);
+void rbs_unescape_string(VALUE string, bool dq_string) {
+  if (!DQ_REGEXP) {
+    DQ_REGEXP = rb_reg_new(dq_regexp_str, strlen(dq_regexp_str), 0);
+    rb_global_variable(&DQ_REGEXP);
+  }
+
+  if (!SQ_REGEXP) {
+    SQ_REGEXP = rb_reg_new(sq_regexp_str, strlen(sq_regexp_str), 0);
+    rb_global_variable(&SQ_REGEXP);
   }
 
   if (!gsub) {
@@ -30,10 +37,11 @@ void rbs_unescape_string(VALUE string) {
     rb_hash_aset(HASH, rb_str_new_literal("\\t"), rb_str_new_literal("\t"));
     rb_hash_aset(HASH, rb_str_new_literal("\\v"), rb_str_new_literal("\v"));
     rb_hash_aset(HASH, rb_str_new_literal("\\\""), rb_str_new_literal("\""));
+    rb_hash_aset(HASH, rb_str_new_literal("\\\'"), rb_str_new_literal("'"));
     rb_hash_aset(HASH, rb_str_new_literal("\\\\"), rb_str_new_literal("\\"));
   }
 
-  rb_funcall(string, gsub, 2, REGEXP, HASH);
+  rb_funcall(string, gsub, 2, dq_string ? DQ_REGEXP : SQ_REGEXP, HASH);
 }
 
 VALUE rbs_unquote_string(parserstate *state, range rg, int offset_bytes) {
@@ -57,9 +65,7 @@ VALUE rbs_unquote_string(parserstate *state, range rg, int offset_bytes) {
   char *buffer = RSTRING_PTR(state->lexstate->string) + rg.start.byte_pos + offset_bytes;
   VALUE str = rb_enc_str_new(buffer, byte_length, enc);
 
-  if (first_char == '\"') {
-    rbs_unescape_string(str);
-  }
+  rbs_unescape_string(str, first_char == '\"');
 
   return str;
 }
