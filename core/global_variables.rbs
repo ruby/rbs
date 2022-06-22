@@ -115,7 +115,7 @@ $:: Array[String]
 $;: Regexp | String | nil
 
 # The same as ARGF.
-$<: ARGFClass
+$<: RBS::Unnamed::ARGFClass
 
 # This variable is no longer effective. Deprecated.
 $=: bool

@@ -2,12 +2,15 @@ require_relative "test_helper"
 require 'tempfile'
 
 # initialize temporary class
-class ARGFClass
+module RBS
+  module Unnamed
+    ARGFClass = ARGF.class
+  end
 end
 
 class ARGFTest < Test::Unit::TestCase
   include TypeAssertions
-  testing "::ARGFClass"
+  testing "::RBS::Unnamed::ARGFClass"
 
   def argf_for_write
     argf = ARGF.class.new(Tempfile.new.path)

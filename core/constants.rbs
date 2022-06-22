@@ -4,7 +4,7 @@
 #
 # See ARGF (the class) for more details.
 #
-::ARGF: ARGFClass
+::ARGF: RBS::Unnamed::ARGFClass
 
 # <!-- rdoc-file=ruby.c -->
 # ARGV contains the command line arguments used to run ruby.
