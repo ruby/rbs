@@ -3,7 +3,7 @@
 static VALUE REGEXP = 0;
 static VALUE HASH = 0;
 
-static const char *regexp_str = "\\\\[abefnrstv\"]";
+static const char *regexp_str = "\\\\[abefnrstv\"\\\\]";
 
 static ID gsub = 0;
 
@@ -30,6 +30,7 @@ void rbs_unescape_string(VALUE string) {
     rb_hash_aset(HASH, rb_str_new_literal("\\t"), rb_str_new_literal("\t"));
     rb_hash_aset(HASH, rb_str_new_literal("\\v"), rb_str_new_literal("\v"));
     rb_hash_aset(HASH, rb_str_new_literal("\\\""), rb_str_new_literal("\""));
+    rb_hash_aset(HASH, rb_str_new_literal("\\\\"), rb_str_new_literal("\\"));
   }
 
   rb_funcall(string, gsub, 2, REGEXP, HASH);
