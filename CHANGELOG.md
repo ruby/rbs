@@ -2,6 +2,63 @@
 
 ## master
 
+## 2.6.0 (2022-06-22)
+
+RBS 2.6 ships with `rbs prototype` commands improvements and signature updates.
+New minitest RBS definitions will help you to type check your tests.
+
+### Signature updates
+
+* etc ([\#1006](https://github.com/ruby/rbs/pull/1006))
+* minitest ([\#1009](https://github.com/ruby/rbs/pull/1009))
+* date ([\#1033](https://github.com/ruby/rbs/pull/1033))
+* `ENV`. `ARGF`, `Random::Base` ([\#1041](https://github.com/ruby/rbs/pull/1041))
+* `Hash#dig` ([\#1011](https://github.com/ruby/rbs/pull/1011))
+* `Hash#reject` ([\#1016](https://github.com/ruby/rbs/pull/1016))
+* `Kernel?.fail` ([\#1026](https://github.com/ruby/rbs/pull/1026), [\#1028](https://github.com/ruby/rbs/pull/1028))
+* `Rational#*` ([\#1012](https://github.com/ruby/rbs/pull/1012))
+* `Regexp.new` ([\#1040](https://github.com/ruby/rbs/pull/1040))
+
+### Library changes
+
+* Add `visibility` columns in {AttrReader,AttrAccessor,AttrWriter}#to_json ([\#1014](https://github.com/ruby/rbs/pull/1014))
+* Add support for RSpec's verifying doubles in test setup helper ([\#1015](https://github.com/ruby/rbs/pull/1015))
+* Fix lexer to analyze escape characters ([\#1043](https://github.com/ruby/rbs/pull/1043))
+
+#### rbs prototype
+
+* [rb] Support the case where the return value is `self` ([\#1003](https://github.com/ruby/rbs/pull/1003))
+* [rb] Lean to the optional side ([\#1021](https://github.com/ruby/rbs/pull/1021))
+* [rb] Fix method commenting ([\#1027](https://github.com/ruby/rbs/pull/1027))
+* [runtime] Fix decls of output from `Prototype::Runtime` ([\#1030](https://github.com/ruby/rbs/pull/1030))
+* [runtime] Fix class name resolution of prototype runtime ([\#1032](https://github.com/ruby/rbs/pull/1032))
+* [rbi] Improve `Prototype::RBI` ([\#1018](https://github.com/ruby/rbs/pull/1018))
+
+### Miscellaneous
+
+* Fix typo in `CONTRIBUTING.md` ([\#1004](https://github.com/ruby/rbs/pull/1004))
+* Use manifest.yaml instead of manually for validate task ([\#1010](https://github.com/ruby/rbs/pull/1010))
+* Update re2c ([\#1017](https://github.com/ruby/rbs/pull/1017))
+* Type check `Prototype::RB` ([\#1019](https://github.com/ruby/rbs/pull/1019))
+* Minor cleanup & fix ([\#1020](https://github.com/ruby/rbs/pull/1020))
+* Fix type errors ([\#1023](https://github.com/ruby/rbs/pull/1023))
+* Clarify GHA step name for rake annotate ([\#1024](https://github.com/ruby/rbs/pull/1024))
+* Silence parser warning ([\#1039](https://github.com/ruby/rbs/pull/1039))
+* Fix warnings ([\#1035](https://github.com/ruby/rbs/pull/1035)
+
+## 2.5.1 (2022-06-19)
+
+This is a maintenance release mainly to fix errors detected in CI of `ruby/ruby`.
+Nothing changed related to the users of RBS gem.
+
+### Miscellaneous
+
+* Skip failing tests on ruby/ruby CI ([\#1036](https://github.com/ruby/rbs/pull/1036))
+* Fix warnings ([\#1035](https://github.com/ruby/rbs/pull/1035) except changes on `test/tools/sort_test.rb` that is not included in this release)
+* Fix `Regexp.new` argument ([\#1034](https://github.com/ruby/rbs/pull/1034))
+* Fix errors with OpenSSL 3 ([\#1029](https://github.com/ruby/rbs/pull/1029))
+* Fix `OpenSSL::PKey::PKeyError: EVP_PKEY_keygen: bad ffc parameters` with OpenSSL 3 ([\#1005](https://github.com/ruby/rbs/pull/1005))
+
 ## 2.5.0 (2022-05-20)
 
 This is a minor release with tuple type/record type syntax updates and `rbs prototype` improvements.
