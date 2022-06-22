@@ -581,6 +581,37 @@ class RBS::TypeParsingTest < Test::Unit::TestCase
       assert_instance_of Types::Literal, type
       assert_equal 'not escape sequences \a\b\e\f\n\r\s\t\v\"', type.literal
     end
+
+    # "\\" in RBS
+    Parser.parse_type(%q{"\\\\"}).yield_self do |type|
+      assert_instance_of Types::Literal, type
+      assert_equal "\\", type.literal
+    end
+
+    # '\\' in RBS
+    Parser.parse_type(%q{'\\\\'}).yield_self do |type|
+      assert_instance_of Types::Literal, type
+      assert_equal "\\", type.literal
+    end
+  end
+
+  def test_literal_to_s
+    Parser.parse_type(%q{"\\a\\\\"}).yield_self do |type|
+      assert_equal type, Parser.parse_type(type.to_s)
+    end
+  end
+
+  def test_string_literal_union
+    Parser.parse_type(%q{"\\\\" | "a"}).yield_self do |type|
+      assert_instance_of Types::Union, type
+
+      assert_instance_of Types::Literal, type.types[0]
+      assert_equal 1, type.types[0].literal.size
+      assert_equal '\\', type.types[0].literal
+
+      assert_instance_of Types::Literal, type.types[1]
+      assert_equal "a", type.types[1].literal
+    end
   end
 
   def test_record
