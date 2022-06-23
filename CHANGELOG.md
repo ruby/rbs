@@ -44,7 +44,7 @@ New minitest RBS definitions will help you to type check your tests.
 * Fix type errors ([\#1023](https://github.com/ruby/rbs/pull/1023))
 * Clarify GHA step name for rake annotate ([\#1024](https://github.com/ruby/rbs/pull/1024))
 * Silence parser warning ([\#1039](https://github.com/ruby/rbs/pull/1039))
-* Fix warnings ([\#1035](https://github.com/ruby/rbs/pull/1035)
+* Fix warnings ([\#1035](https://github.com/ruby/rbs/pull/1035))
 
 ## 2.5.1 (2022-06-19)
 
