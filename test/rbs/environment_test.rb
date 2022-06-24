@@ -284,7 +284,11 @@ EOF
 # (Will be an error afterward.)
 #
 class Hello < String
-  def hello: (String) -> Integer
+  def hello: (String) -> Hello
+end
+
+class Hello::World
+  def world: () -> World
 end
 
 module Foo : _Each[String]
@@ -337,7 +341,11 @@ EOF
 # (Will be an error afterward.)
 #
 class ::Hello < ::String
-  def hello: (::String) -> Integer
+  def hello: (::String) -> ::Hello
+end
+
+class ::Hello::World
+  def world: () -> ::Hello::World
 end
 
 module ::Foo : ::Foo::_Each[::Foo::String]

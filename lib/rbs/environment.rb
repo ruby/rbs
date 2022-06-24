@@ -256,7 +256,11 @@ module RBS
 
       context = (outer + [decl]).each.with_object([Namespace.root]) do |decl, array|
         head = array.first or raise
-        array.unshift(head + decl.name.to_namespace)
+        namespace = decl.name.to_namespace
+        namespace.path.each_with_index do |path, i|
+          part = Namespace.new(path: namespace.path[0, i + 1], absolute: false)
+          array.unshift(head + part)
+        end
       end
 
       outer_context = context.drop(1)
