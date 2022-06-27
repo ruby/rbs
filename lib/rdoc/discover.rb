@@ -3,6 +3,6 @@ begin
     require 'rdoc/parser/rbs'
 rescue Gem::LoadError
     # Error :sad:
-rescue Exception => e
+rescue Exception
     # Exception :sad:
 end
