@@ -14,6 +14,7 @@ class RDoc::Parser::RBS < RDoc::Parser
     ast.each do |decl|
       parse_member(decl: decl, context: @top_level)
     end
+    @top_level
   end
 
   def parse_member(decl:, context:, outer_name: nil)
@@ -48,7 +49,7 @@ class RDoc::Parser::RBS < RDoc::Parser
     full_name = fully_qualified_name(outer_name: outer_name, decl: decl)
     kmodule = context.add_module(RDoc::NormalModule, full_name.to_s)
     kmodule.add_comment(construct_comment(context: context, comment: decl.comment.string), context) if decl.comment
-    decl.members.each { |member| parse_member(decl: member, context: context, outer_name: outer_name) }
+    decl.members.each { |member| parse_member(decl: member, context: context, outer_name: full_name) }
   end
 
   def parse_constant_decl(decl:, context:, outer_name: nil)
