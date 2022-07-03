@@ -446,4 +446,18 @@ end
       end
     end
   end
+
+  def test_basic_object
+    SignatureManager.new do |manager|
+      manager.build do |env|
+        p = Runtime.new(patterns: ["BasicObject"], env: env, merge: true)
+        assert_equal(p.decls.length, 1)
+        p.decls.each do |decl|
+          env << decl
+        end
+        env.resolve_type_names
+        assert(true) # nothing raised above
+      end
+    end
+  end
 end

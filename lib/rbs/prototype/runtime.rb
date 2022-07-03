@@ -77,7 +77,7 @@ module RBS
           supers.merge(mix.included_modules)
         end
 
-        if mod.is_a?(Class)
+        if mod.is_a?(Class) && mod.superclass
           mod.superclass.included_modules.each do |mix|
             supers << mix
             supers.merge(mix.included_modules)
@@ -350,7 +350,7 @@ module RBS
       end
 
       def generate_super_class(mod)
-        if mod.superclass == ::Object
+        if mod.superclass.nil? || mod.superclass == ::Object
           nil
         elsif const_name(mod.superclass).nil?
           RBS.logger.warn("Skipping anonymous superclass #{mod.superclass} of #{mod}")
