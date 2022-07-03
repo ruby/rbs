@@ -21,6 +21,7 @@ module RBS
 
       def target?(const)
         name = const_name(const)
+        return false unless name
 
         patterns.any? do |pattern|
           if pattern.end_with?("*")
