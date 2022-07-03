@@ -2135,7 +2135,7 @@ module Kernel : BasicObject
   # :experimental
   # :   Used for experimental features that may change in future releases.
   #
-  def self?.warn: (*untyped msg, ?uplevel: Integer | nil) -> NilClass
+  def self?.warn: (*untyped msg, ?uplevel: Integer | nil, ?category: :deprecated | :experimental) -> NilClass
 
   # <!--
   #   rdoc-file=process.c
