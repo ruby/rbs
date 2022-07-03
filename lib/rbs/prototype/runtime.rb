@@ -318,7 +318,12 @@ module RBS
 
       def generate_constants(mod, decls)
         mod.constants(false).sort.each do |name|
-          value = mod.const_get(name)
+          begin
+            value = mod.const_get(name)
+          rescue StandardError, LoadError => e
+            RBS.logger.warn("Skipping constant #{name} of #{mod} since #{e}")
+            next
+          end
 
           next if value.is_a?(Class) || value.is_a?(Module)
           unless value.class.name
