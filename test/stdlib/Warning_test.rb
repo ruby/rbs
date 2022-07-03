@@ -23,11 +23,14 @@ class WarningTest < Test::Unit::TestCase
 
     omit_if(RUBY_VERSION < "3.0")
 
-    assert_send_type "(::String, category: :deprecated | :experimental) -> nil",
+    assert_send_type "(::String, category: :deprecated) -> nil",
         Warning, :warn, 'message', category: :deprecated
 
-    assert_send_type "(::String, category: :deprecated | :experimental) -> nil",
+    assert_send_type "(::String, category: :experimental) -> nil",
         Warning, :warn, 'message', category: :experimental
+
+    assert_send_type "(::String, category: nil) -> nil",
+        Warning, :warn, 'message', category: nil
 
     refute_send_type "(::String, category: ::Symbol) -> nil",
         Warning, :warn, 'message', category: :unknown_category
