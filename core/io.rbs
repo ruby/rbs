@@ -2563,7 +2563,7 @@ class IO < Object
   #
   # See also IO.read for details about `name` and open_args.
   #
-  def self.readlines: (String name, ?String sep, ?Integer limit, ?external_encoding: String external_encoding, ?internal_encoding: String internal_encoding, ?encoding: String encoding, ?textmode: untyped textmode, ?binmode: untyped binmode, ?autoclose: untyped autoclose, ?mode: String mode, ?chomp: boolish) -> ::Array[String]
+  def self.readlines: (String | _ToPath name, ?String sep, ?Integer limit, ?external_encoding: String external_encoding, ?internal_encoding: String internal_encoding, ?encoding: String encoding, ?textmode: untyped textmode, ?binmode: untyped binmode, ?autoclose: untyped autoclose, ?mode: String mode, ?chomp: boolish) -> ::Array[String]
 
   # <!--
   #   rdoc-file=io.c
