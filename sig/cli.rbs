@@ -26,6 +26,14 @@ module RBS
     attr_reader stdout: _IO
     attr_reader stderr: _IO
 
+    # The copy of `args` passed to `run`.
+    #
+    # `OptionParser#order!` mutates given `arg`, the `run_***` actions should read `original_args` to get the original commandline arguments.
+    #
+    # Returns `nil` if called before `#run` call.
+    #
+    attr_reader original_args: Array[String]
+
     def initialize: (stdout: IO, stderr: IO) -> void
 
     COMMANDS: Array[Symbol]
