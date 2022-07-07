@@ -2418,7 +2418,7 @@ class IO < Object
   # IO.readlines for details about getline_args. And see also IO.read for details
   # about open_args.
   #
-  def self.foreach: (string | _ToPath path, ?String sep, ?Integer limit, ?external_encoding: String external_encoding, ?internal_encoding: String internal_encoding, ?encoding: String encoding, ?textmode: untyped textmode, ?binmode: untyped binmode, ?autoclose: untyped autoclose, ?mode: String mode, ?chomp: boolish) { (String arg0) -> untyped } -> nil
+  def self.foreach: (string | _ToPath path, ?String sep, ?Integer limit, ?external_encoding: String external_encoding, ?internal_encoding: String internal_encoding, ?encoding: String encoding, ?textmode: untyped textmode, ?binmode: untyped binmode, ?autoclose: untyped autoclose, ?mode: String mode, ?chomp: boolish) { (String line) -> untyped } -> nil
                   | (string | _ToPath path, ?String sep, ?Integer limit, ?external_encoding: String external_encoding, ?internal_encoding: String internal_encoding, ?encoding: String encoding, ?textmode: untyped textmode, ?binmode: untyped binmode, ?autoclose: untyped autoclose, ?mode: String mode, ?chomp: boolish) -> ::Enumerator[String, self]
 
   # <!--
@@ -2475,7 +2475,7 @@ class IO < Object
   #     Parent got: <Hi Dad>
   #
   def self.pipe: (?String | Encoding ext_or_ext_int_enc, ?String | Encoding int_enc, ?external_encoding: String external_encoding, ?internal_encoding: String internal_encoding, ?encoding: String encoding, ?textmode: untyped textmode, ?binmode: untyped binmode, ?autoclose: untyped autoclose, ?mode: String mode, ?chomp: boolish) -> [IO, IO]
-               | [X] (?String | Encoding ext_or_ext_int_enc, ?String | Encoding int_enc, ?external_encoding: String external_encoding, ?internal_encoding: String internal_encoding, ?encoding: String encoding, ?textmode: untyped textmode, ?binmode: untyped binmode, ?autoclose: untyped autoclose, ?mode: String mode, ?chomp: boolish) { (IO arg0, IO arg1) -> X } -> X
+               | [X] (?String | Encoding ext_or_ext_int_enc, ?String | Encoding int_enc, ?external_encoding: String external_encoding, ?internal_encoding: String internal_encoding, ?encoding: String encoding, ?textmode: untyped textmode, ?binmode: untyped binmode, ?autoclose: untyped autoclose, ?mode: String mode, ?chomp: boolish) { (IO read_io, IO write_io) -> X } -> X
 
   # <!--
   #   rdoc-file=io.c
