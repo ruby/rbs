@@ -373,6 +373,26 @@ class IntegerToBigDecimalTest < Test::Unit::TestCase
   def test_to_d_with_integer
     assert_send_type "() -> ::BigDecimal", 123, :to_d
   end
+
+  def test_plus_with_integer
+    assert_send_type "(::BigDecimal) -> ::BigDecimal",
+                     123, :+, BigDecimal("1.23")
+  end
+
+  def test_minus_with_integer
+    assert_send_type "(::BigDecimal) -> ::BigDecimal",
+                     123, :-, BigDecimal("1.23")
+  end
+
+  def test_divide_with_integer
+    assert_send_type "(::BigDecimal) -> ::BigDecimal",
+                     123, :/, BigDecimal("1.23")
+  end
+
+  def test_multiply_with_integer
+    assert_send_type "(::BigDecimal) -> ::BigDecimal",
+                     123, :*, BigDecimal("1.23")
+  end
 end
 
 class FloatToBigDecimalTest < Test::Unit::TestCase
@@ -383,6 +403,26 @@ class FloatToBigDecimalTest < Test::Unit::TestCase
 
   def test_to_d_with_float
     assert_send_type "() -> ::BigDecimal", 12.3, :to_d
+  end
+
+  def test_plus_with_float
+    assert_send_type "(::BigDecimal) -> ::BigDecimal",
+                     1.23, :+, BigDecimal("1.23")
+  end
+
+  def test_minus_with_float
+    assert_send_type "(::BigDecimal) -> ::BigDecimal",
+                     1.23, :-, BigDecimal("1.23")
+  end
+
+  def test_divide_with_float
+    assert_send_type "(::BigDecimal) -> ::BigDecimal",
+                     1.23, :/, BigDecimal("1.23")
+  end
+
+  def test_multiply_with_float
+    assert_send_type "(::BigDecimal) -> ::BigDecimal",
+                     1.23, :*, BigDecimal("1.23")
   end
 end
 
@@ -406,6 +446,26 @@ class RationalToBigDecimalTest < Test::Unit::TestCase
   def test_to_d_with_rational
     assert_send_type "(Integer) -> ::BigDecimal", Rational(22, 7), :to_d, 3
   end
+
+  def test_plus_with_rational
+    assert_send_type "(::BigDecimal) -> ::BigDecimal",
+                     123r, :+, BigDecimal("1.23")
+  end
+
+  def test_minus_with_rational
+    assert_send_type "(::BigDecimal) -> ::BigDecimal",
+                     123r, :-, BigDecimal("1.23")
+  end
+
+  def test_divide_with_rational
+    assert_send_type "(::BigDecimal) -> ::BigDecimal",
+                     123r, :/, BigDecimal("1.23")
+  end
+
+  def test_multiply_with_rational
+    assert_send_type "(::BigDecimal) -> ::BigDecimal",
+                     123r, :*, BigDecimal("1.23")
+  end
 end
 
 class ComplexToBigDecimalTest < Test::Unit::TestCase
@@ -416,6 +476,26 @@ class ComplexToBigDecimalTest < Test::Unit::TestCase
 
   def test_to_d_with_complex
     assert_send_type "() -> ::BigDecimal", Complex(0.1234567, 0), :to_d
+  end
+
+  def test_plus_with_complex
+    assert_send_type "(::BigDecimal) -> ::Complex",
+                     Complex(0.1234567, 0), :+, BigDecimal("1.23")
+  end
+
+  def test_minus_with_complex
+    assert_send_type "(::BigDecimal) -> ::Complex",
+                     Complex(0.1234567, 0), :-, BigDecimal("1.23")
+  end
+
+  def test_divide_with_complex
+    assert_send_type "(::BigDecimal) -> ::Complex",
+                     Complex(0.1234567, 0), :/, BigDecimal("1.23")
+  end
+
+  def test_multiply_with_complex
+    assert_send_type "(::BigDecimal) -> ::Complex",
+                     Complex(0.1234567, 0), :*, BigDecimal("1.23")
   end
 end
 

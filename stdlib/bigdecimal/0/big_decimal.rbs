@@ -1408,6 +1408,18 @@ class Integer
   # See also BigDecimal::new.
   #
   def to_d: () -> BigDecimal
+
+  def /: (BigDecimal) -> BigDecimal
+    | ...
+
+  def *: (BigDecimal) -> BigDecimal
+    | ...
+
+  def +: (BigDecimal) -> BigDecimal
+    | ...
+
+  def -: (BigDecimal) -> BigDecimal
+    | ...
 end
 
 %a{annotate:rdoc:skip}
@@ -1430,6 +1442,18 @@ class Float
   # See also BigDecimal::new.
   #
   def to_d: (?Integer precision) -> BigDecimal
+
+  def /: (BigDecimal) -> BigDecimal
+    | ...
+
+  def *: (BigDecimal) -> BigDecimal
+    | ...
+
+  def +: (BigDecimal) -> BigDecimal
+    | ...
+
+  def -: (BigDecimal) -> BigDecimal
+    | ...
 end
 
 %a{annotate:rdoc:skip}
@@ -1472,6 +1496,18 @@ class Rational
   # See also BigDecimal::new.
   #
   def to_d: (Integer precision) -> BigDecimal
+
+  def /: (BigDecimal) -> BigDecimal
+    | ...
+
+  def *: (BigDecimal) -> BigDecimal
+    | ...
+
+  def +: (BigDecimal) -> BigDecimal
+    | ...
+
+  def -: (BigDecimal) -> BigDecimal
+    | ...
 end
 
 %a{annotate:rdoc:skip}
@@ -1496,6 +1532,19 @@ class Complex
   # See also BigDecimal::new.
   #
   def to_d: (*untyped args) -> BigDecimal
+
+
+  def /: (BigDecimal) -> Complex
+    | ...
+
+  def *: (BigDecimal) -> Complex
+    | ...
+
+  def +: (BigDecimal) -> Complex
+    | ...
+
+  def -: (BigDecimal) -> Complex
+    | ...
 end
 
 %a{annotate:rdoc:skip}
