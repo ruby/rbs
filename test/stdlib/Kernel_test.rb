@@ -608,6 +608,10 @@ class KernelTest < StdlibTest
     warn 'foo'
     warn 'foo', 'bar'
     warn 'foo', uplevel: 1
+
+    omit_if(RUBY_VERSION < "3.0")
+
+    warn 'foo', uplevel: 1, category: :deprecated
   ensure
     $stderr = STDERR
   end
