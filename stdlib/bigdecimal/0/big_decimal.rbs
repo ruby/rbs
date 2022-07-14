@@ -1408,6 +1408,74 @@ class Integer
   # See also BigDecimal::new.
   #
   def to_d: () -> BigDecimal
+
+  # <!--
+  #   rdoc-file=numeric.c
+  #   - self / numeric -> numeric_result
+  # -->
+  # Performs division; for integer `numeric`, truncates the result to an integer:
+  #
+  #      4 / 3              # => 1
+  #      4 / -3             # => -2
+  #      -4 / 3             # => -2
+  #      -4 / -3            # => 1
+  #
+  #     For other +numeric+, returns non-integer result:
+  #
+  #      4 / 3.0            # => 1.3333333333333333
+  #      4 / Rational(3, 1) # => (4/3)
+  #      4 / Complex(3, 0)  # => ((4/3)+0i)
+  #
+  def /: (BigDecimal) -> BigDecimal
+    | ...
+
+  # <!--
+  #   rdoc-file=numeric.c
+  #   - self * numeric -> numeric_result
+  # -->
+  # Performs multiplication:
+  #
+  #     4 * 2              # => 8
+  #     4 * -2             # => -8
+  #     -4 * 2             # => -8
+  #     4 * 2.0            # => 8.0
+  #     4 * Rational(1, 3) # => (4/3)
+  #     4 * Complex(2, 0)  # => (8+0i)
+  #
+  def *: (BigDecimal) -> BigDecimal
+    | ...
+
+  # <!--
+  #   rdoc-file=numeric.c
+  #   - self + numeric -> numeric_result
+  # -->
+  # Performs addition:
+  #
+  #     2 + 2              # => 4
+  #     -2 + 2             # => 0
+  #     -2 + -2            # => -4
+  #     2 + 2.0            # => 4.0
+  #     2 + Rational(2, 1) # => (4/1)
+  #     2 + Complex(2, 0)  # => (4+0i)
+  #
+  def +: (BigDecimal) -> BigDecimal
+    | ...
+
+  # <!--
+  #   rdoc-file=numeric.c
+  #   - self - numeric -> numeric_result
+  # -->
+  # Performs subtraction:
+  #
+  #     4 - 2              # => 2
+  #     -4 - 2             # => -6
+  #     -4 - -2            # => -2
+  #     4 - 2.0            # => 2.0
+  #     4 - Rational(2, 1) # => (2/1)
+  #     4 - Complex(2, 0)  # => (2+0i)
+  #
+  def -: (BigDecimal) -> BigDecimal
+    | ...
 end
 
 %a{annotate:rdoc:skip}
@@ -1430,6 +1498,66 @@ class Float
   # See also BigDecimal::new.
   #
   def to_d: (?Integer precision) -> BigDecimal
+
+  # <!--
+  #   rdoc-file=numeric.c
+  #   - self / other -> numeric
+  # -->
+  # Returns a new Float which is the result of dividing `self` by `other`:
+  #
+  #     f = 3.14
+  #     f / 2              # => 1.57
+  #     f / 2.0            # => 1.57
+  #     f / Rational(2, 1) # => 1.57
+  #     f / Complex(2, 0)  # => (1.57+0.0i)
+  #
+  def /: (BigDecimal) -> BigDecimal
+    | ...
+
+  # <!--
+  #   rdoc-file=numeric.c
+  #   - self * other -> numeric
+  # -->
+  # Returns a new Float which is the product of `self` and `other`:
+  #
+  #     f = 3.14
+  #     f * 2              # => 6.28
+  #     f * 2.0            # => 6.28
+  #     f * Rational(1, 2) # => 1.57
+  #     f * Complex(2, 0)  # => (6.28+0.0i)
+  #
+  def *: (BigDecimal) -> BigDecimal
+    | ...
+
+  # <!--
+  #   rdoc-file=numeric.c
+  #   - self + other -> numeric
+  # -->
+  # Returns a new Float which is the sum of `self` and `other`:
+  #
+  #     f = 3.14
+  #     f + 1                 # => 4.140000000000001
+  #     f + 1.0               # => 4.140000000000001
+  #     f + Rational(1, 1)    # => 4.140000000000001
+  #     f + Complex(1, 0)     # => (4.140000000000001+0i)
+  #
+  def +: (BigDecimal) -> BigDecimal
+    | ...
+
+  # <!--
+  #   rdoc-file=numeric.c
+  #   - self - other -> numeric
+  # -->
+  # Returns a new Float which is the difference of `self` and `other`:
+  #
+  #     f = 3.14
+  #     f - 1                 # => 2.14
+  #     f - 1.0               # => 2.14
+  #     f - Rational(1, 1)    # => 2.14
+  #     f - Complex(1, 0)     # => (2.14+0i)
+  #
+  def -: (BigDecimal) -> BigDecimal
+    | ...
 end
 
 %a{annotate:rdoc:skip}
@@ -1472,6 +1600,67 @@ class Rational
   # See also BigDecimal::new.
   #
   def to_d: (Integer precision) -> BigDecimal
+
+  # <!--
+  #   rdoc-file=rational.c
+  #   - rat / numeric     ->  numeric
+  #   - rat.quo(numeric)  ->  numeric
+  # -->
+  # Performs division.
+  #
+  #     Rational(2, 3)  / Rational(2, 3)   #=> (1/1)
+  #     Rational(900)   / Rational(1)      #=> (900/1)
+  #     Rational(-2, 9) / Rational(-9, 2)  #=> (4/81)
+  #     Rational(9, 8)  / 4                #=> (9/32)
+  #     Rational(20, 9) / 9.8              #=> 0.22675736961451246
+  #
+  def /: (BigDecimal) -> BigDecimal
+    | ...
+
+  # <!--
+  #   rdoc-file=rational.c
+  #   - rat * numeric  ->  numeric
+  # -->
+  # Performs multiplication.
+  #
+  #     Rational(2, 3)  * Rational(2, 3)   #=> (4/9)
+  #     Rational(900)   * Rational(1)      #=> (900/1)
+  #     Rational(-2, 9) * Rational(-9, 2)  #=> (1/1)
+  #     Rational(9, 8)  * 4                #=> (9/2)
+  #     Rational(20, 9) * 9.8              #=> 21.77777777777778
+  #
+  def *: (BigDecimal) -> BigDecimal
+    | ...
+
+  # <!--
+  #   rdoc-file=rational.c
+  #   - rat + numeric  ->  numeric
+  # -->
+  # Performs addition.
+  #
+  #     Rational(2, 3)  + Rational(2, 3)   #=> (4/3)
+  #     Rational(900)   + Rational(1)      #=> (901/1)
+  #     Rational(-2, 9) + Rational(-9, 2)  #=> (-85/18)
+  #     Rational(9, 8)  + 4                #=> (41/8)
+  #     Rational(20, 9) + 9.8              #=> 12.022222222222222
+  #
+  def +: (BigDecimal) -> BigDecimal
+    | ...
+
+  # <!--
+  #   rdoc-file=rational.c
+  #   - rat - numeric  ->  numeric
+  # -->
+  # Performs subtraction.
+  #
+  #     Rational(2, 3)  - Rational(2, 3)   #=> (0/1)
+  #     Rational(900)   - Rational(1)      #=> (899/1)
+  #     Rational(-2, 9) - Rational(-9, 2)  #=> (77/18)
+  #     Rational(9, 8)  - 4                #=> (-23/8)
+  #     Rational(20, 9) - 9.8              #=> -7.577777777777778
+  #
+  def -: (BigDecimal) -> BigDecimal
+    | ...
 end
 
 %a{annotate:rdoc:skip}
@@ -1496,6 +1685,67 @@ class Complex
   # See also BigDecimal::new.
   #
   def to_d: (*untyped args) -> BigDecimal
+
+  # <!--
+  #   rdoc-file=complex.c
+  #   - cmp / numeric     ->  complex
+  #   - cmp.quo(numeric)  ->  complex
+  # -->
+  # Performs division.
+  #
+  #     Complex(2, 3)  / Complex(2, 3)   #=> ((1/1)+(0/1)*i)
+  #     Complex(900)   / Complex(1)      #=> ((900/1)+(0/1)*i)
+  #     Complex(-2, 9) / Complex(-9, 2)  #=> ((36/85)-(77/85)*i)
+  #     Complex(9, 8)  / 4               #=> ((9/4)+(2/1)*i)
+  #     Complex(20, 9) / 9.8             #=> (2.0408163265306123+0.9183673469387754i)
+  #
+  def /: (BigDecimal) -> Complex
+    | ...
+
+  # <!--
+  #   rdoc-file=complex.c
+  #   - cmp * numeric  ->  complex
+  # -->
+  # Performs multiplication.
+  #
+  #     Complex(2, 3)  * Complex(2, 3)   #=> (-5+12i)
+  #     Complex(900)   * Complex(1)      #=> (900+0i)
+  #     Complex(-2, 9) * Complex(-9, 2)  #=> (0-85i)
+  #     Complex(9, 8)  * 4               #=> (36+32i)
+  #     Complex(20, 9) * 9.8             #=> (196.0+88.2i)
+  #
+  def *: (BigDecimal) -> Complex
+    | ...
+
+  # <!--
+  #   rdoc-file=complex.c
+  #   - cmp + numeric  ->  complex
+  # -->
+  # Performs addition.
+  #
+  #     Complex(2, 3)  + Complex(2, 3)   #=> (4+6i)
+  #     Complex(900)   + Complex(1)      #=> (901+0i)
+  #     Complex(-2, 9) + Complex(-9, 2)  #=> (-11+11i)
+  #     Complex(9, 8)  + 4               #=> (13+8i)
+  #     Complex(20, 9) + 9.8             #=> (29.8+9i)
+  #
+  def +: (BigDecimal) -> Complex
+    | ...
+
+  # <!--
+  #   rdoc-file=complex.c
+  #   - cmp - numeric  ->  complex
+  # -->
+  # Performs subtraction.
+  #
+  #     Complex(2, 3)  - Complex(2, 3)   #=> (0+0i)
+  #     Complex(900)   - Complex(1)      #=> (899+0i)
+  #     Complex(-2, 9) - Complex(-9, 2)  #=> (7+7i)
+  #     Complex(9, 8)  - 4               #=> (5+8i)
+  #     Complex(20, 9) - 9.8             #=> (10.2+9i)
+  #
+  def -: (BigDecimal) -> Complex
+    | ...
 end
 
 %a{annotate:rdoc:skip}
