@@ -77,6 +77,8 @@ module RBS
 
       # signatures that are bundled in rbs gem under the stdlib/ directory
       class Stdlib
+        REPO: Repository
+
         type source_entry =  {
           'type' => 'stdlib',
         }
@@ -84,7 +86,7 @@ module RBS
         # polyfill of singleton module
         def self.instance: () -> instance
 
-        def has?: (Config::gem_entry) -> bool
+        def has?: (Config::gem_entry) -> boolish
 
         def versions: (Config::gem_entry) -> Array[String]
 
@@ -96,7 +98,7 @@ module RBS
 
         private
 
-        def gem_dir: (Config::gem_entry) -> Pathname
+        def lookup: (Config::gem_entry) -> Pathname?
       end
 
       # sig/ directory

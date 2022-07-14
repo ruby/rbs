@@ -1,6 +1,6 @@
 require "test_helper"
 
-class RBS::CollectionSourcesGitTest < Test::Unit::TestCase
+class RBS::Collection::Sources::GitTest < Test::Unit::TestCase
   def test_has?
     s = source
 
