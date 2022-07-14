@@ -3,6 +3,7 @@ module RBS
     # This class represent the configration file.
     class Config
       class CollectionNotAvailable < StandardError
+        def initialize: () -> void
       end
 
       class LockfileGenerator
