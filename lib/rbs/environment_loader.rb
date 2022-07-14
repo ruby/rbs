@@ -34,16 +34,32 @@ module RBS
       @core_root = core_root
       @repository = repository
 
-      @libs = []
+      @libs = Set.new
       @dirs = []
     end
 
-    def add(path: nil, library: nil, version: nil)
+    def add(path: nil, library: nil, version: nil, resolve_dependencies: true)
       case
       when path
         dirs << path
       when library
-        libs << Library.new(name: library, version: version)
+        if libs.add?(Library.new(name: library, version: version)) && resolve_dependencies
+          resolve_dependencies(library: library, version: version)
+        end
+      end
+    end
+
+    def resolve_dependencies(library:, version:)
+      [Collection::Sources::Rubygems.instance, Collection::Sources::Stdlib.instance].each do |source|
+        # @type var gem: { 'name' => String, 'version' => String? }
+        gem = { 'name' => library, 'version' => version }
+        next unless source.has?(gem)
+
+        gem['version'] ||= source.versions(gem).last
+        source.dependencies_of(gem)&.each do |dep|
+          add(library: dep['name'], version: nil)
+        end
+        return
       end
     end
 
@@ -53,7 +69,7 @@ module RBS
       repository.add(collection_config.repo_path)
 
       collection_config.gems.each do |gem|
-        add(library: gem['name'], version: gem['version'])
+        add(library: gem['name'], version: gem['version'], resolve_dependencies: false)
       end
     end
 
