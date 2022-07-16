@@ -1,6 +1,8 @@
 require_relative "test_helper"
 
 class StringIOTest < StdlibTest
+  include TypeAssertions
+
   target StringIO
 
   def test_close_read
@@ -36,5 +38,12 @@ class StringIOTest < StdlibTest
   def test_gets
     io = StringIO.new("")
     io.gets(chomp: :true)
+  end
+
+  def test_write
+    io = StringIO.new
+
+    assert_send_type "(*_ToS data) -> Integer",
+                     io, :write, "a", "b"
   end
 end
