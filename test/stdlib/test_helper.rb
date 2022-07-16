@@ -81,7 +81,13 @@ module Spy
                       end
 
           begin
-            return_value = spy.object.__send__(spy.method_name, *args, &spy_block)
+            if spy_block
+              return_value = spy.object.__send__(spy.method_name, *args) do |*a, **k, &b|
+                spy_block.call(*a, **k, &b)
+              end
+            else
+              return_value = spy.object.__send__(spy.method_name, *args, &spy_block)
+            end
           rescue ::Exception => exn
             exception = exn
           end
