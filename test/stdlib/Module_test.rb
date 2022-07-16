@@ -20,6 +20,11 @@ class ModuleInstanceTest < Test::Unit::TestCase
     BAR = 1
   end
 
+  def test_refine
+    assert_send_type "(Module) { () -> void } -> Refinement",
+                     Foo, :refine, String do nil end
+  end
+
   def test_const_source_location
     assert_send_type "(Symbol) -> [String, Integer]",
                      Foo, :const_source_location, :BAR
