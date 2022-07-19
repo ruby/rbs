@@ -26,6 +26,8 @@ class RDoc::Parser::RBS < RDoc::Parser
     when ::RBS::AST::Declarations::Constant
       context = @top_level.find_class_or_module outer_name.to_s if outer_name
       parse_constant_decl(decl: decl, context: context, outer_name: outer_name)
+    when ::RBS::AST::Declarations::Interface
+      parse_module_decl(decl: decl, context: context, outer_name: outer_name)
     when ::RBS::AST::Members::MethodDefinition
       context = @top_level.find_class_or_module outer_name.to_s if outer_name
       parse_method_decl(decl: decl, context: context, outer_name: outer_name)
@@ -35,6 +37,12 @@ class RDoc::Parser::RBS < RDoc::Parser
     when ::RBS::AST::Members::AttrReader, ::RBS::AST::Members::AttrWriter, ::RBS::AST::Members::AttrAccessor
       context = @top_level.find_class_or_module outer_name.to_s if outer_name
       parse_attr_decl(decl: decl, context: context, outer_name: outer_name)
+    when ::RBS::AST::Members::Include
+      context = @top_level.find_class_or_module outer_name.to_s if outer_name
+      parse_include_decl(decl: decl, context: context, outer_name: outer_name)
+    when ::RBS::AST::Members::Extend
+      context = @top_level.find_class_or_module outer_name.to_s if outer_name
+      parse_extend_decl(decl: decl, context: context, outer_name: outer_name)
     end
   end
 
@@ -92,6 +100,38 @@ class RDoc::Parser::RBS < RDoc::Parser
     attribute.visibility = decl.visibility
     attribute.comment = construct_comment(context: context, comment: decl.comment.string) if decl.comment
     context.add_attribute(attribute)
+  end
+
+  def parse_include_decl(decl:, context:, outer_name: nil)
+    name = decl.name.to_s
+    outer_names = outer_name ? outer_name.to_s.split("::") : []
+    qualified_name = ''
+    outer_names.each do |namespace|
+      qualified_name += namespace
+      if (module_name = @top_level.find_module_named((qualified_name += "::") + name))
+        name = module_name.full_name
+        break
+      end
+    end
+    include_decl = RDoc::Include.new(name, nil)
+    include_decl.comment = construct_comment(context: context, comment: decl.comment.string) if decl.comment
+    context.add_include(include_decl)
+  end
+
+  def parse_extend_decl(decl:, context:, outer_name: nil)
+    name = decl.name.to_s
+    outer_names = outer_name ? outer_name.to_s.split("::") : []
+    qualified_name = ''
+    outer_names.each do |namespace|
+      qualified_name += namespace
+      if (module_name = @top_level.find_module_named((qualified_name += "::") + name))
+        name = module_name.full_name
+        break
+      end
+    end
+    extend_decl = RDoc::Extend.new(name, nil)
+    exclude_decl.comment = construct_comment(context: context, comment: decl.comment.string) if decl.comment
+    context.add_extend(extend_decl)
   end
 
   private
