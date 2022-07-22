@@ -54,9 +54,10 @@ class RDoc::Parser::RBS < RDoc::Parser
   end
 
   def parse_module_decl(decl:, context:, outer_name: nil)
-    full_name = fully_qualified_name(outer_name: outer_name, decl: decl)
+    full_name = fully_qualified_name(outer_name: outer_name, decl: _ = decl)
     kmodule = context.add_module(RDoc::NormalModule, full_name.to_s)
-    kmodule.add_comment(construct_comment(context: context, comment: decl.comment.string), context) if decl.comment
+    # @type var comment: RBS::AST::Comment
+    kmodule.add_comment(construct_comment(context: context, comment: comment.string), context) if (comment = decl.comment)
     decl.members.each { |member| parse_member(decl: member, context: context, outer_name: full_name) }
   end
 
@@ -130,7 +131,7 @@ class RDoc::Parser::RBS < RDoc::Parser
       end
     end
     extend_decl = RDoc::Extend.new(name, nil)
-    exclude_decl.comment = construct_comment(context: context, comment: decl.comment.string) if decl.comment
+    extend_decl.comment = construct_comment(context: context, comment: decl.comment.string) if decl.comment
     context.add_extend(extend_decl)
   end
 

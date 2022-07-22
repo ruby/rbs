@@ -1,0 +1,31 @@
+class RDoc::Parser::RBS < RDoc::Parser
+  type allowed_decls = RBS::AST::Declarations::Class | RBS::AST::Declarations::Module | RBS::AST::Declarations::Constant | RBS::AST::Members::MethodDefinition | RBS::AST::Members::AttrReader | RBS::AST::Members::AttrAccessor | RBS::AST::Members::AttrWriter | RBS::AST::Members::Include | RBS::AST::Members::Extend
+
+  def initialize: (RDoc::TopLevel top_level, String filename, String content, Hash[untyped, untyped] options, RDoc::Stats stats) -> void
+
+  def scan: () -> RDoc::TopLevel
+
+  def parse_member: (decl: RBS::AST::Declarations::t | RBS::AST::Members::t, context: RDoc::Context, ?outer_name: RBS::TypeName?) -> void
+
+  def parse_class_decl: (decl: RBS::AST::Declarations::Class, context: RDoc::Context, ?outer_name: RBS::TypeName?) -> void
+
+  def parse_module_decl: (decl: RBS::AST::Declarations::Module | RBS::AST::Declarations::Interface, context: RDoc::Context, ?outer_name: RBS::TypeName?) -> void
+
+  def parse_constant_decl: (decl: RBS::AST::Declarations::Constant, context: RDoc::Context, ?outer_name: RBS::TypeName?) -> void
+
+  def parse_method_decl: (decl: RBS::AST::Members::MethodDefinition, context: RDoc::Context, ?outer_name: RBS::TypeName?) -> void
+
+  def parse_method_alias_decl: (decl: RBS::AST::Members::Alias, context: RDoc::Context, ?outer_name: RBS::TypeName?) -> void
+
+  def parse_attr_decl: (decl: RBS::AST::Members::AttrReader | RBS::AST::Members::AttrAccessor | RBS::AST::Members::AttrWriter, context: RDoc::Context, ?outer_name: RBS::TypeName?) -> void
+
+  def parse_include_decl: (decl: RBS::AST::Members::Include, context: RDoc::Context, ?outer_name: RBS::TypeName?) -> void
+
+  def parse_extend_decl: (decl: RBS::AST::Members::Extend, context: RDoc::Context, ?outer_name: RBS::TypeName?) -> void
+
+  private
+
+  def construct_comment: (context: RDoc::Context, comment: String) -> RDoc::Comment
+
+  def fully_qualified_name: (outer_name: RBS::TypeName?, decl: allowed_decls) -> RBS::TypeName
+end

@@ -1,0 +1,199 @@
+module RDoc
+  class Parser
+    def self?.parse_files_matching: (Regexp path) -> void
+
+    def initialize: (RDoc::TopLevel top_level, String filename, String content, Hash[untyped, untyped] options, RDoc::Stats stats) -> void
+
+    def scan: () -> RDoc::TopLevel
+  end
+
+  class CodeObject
+    attr_reader comment: RDoc::Comment
+
+    def initialize: () -> void
+
+    def comment=: (RDoc::Comment | String) -> RDoc::Comment
+  end
+
+  class Context < CodeObject
+    include Comparable
+
+    TYPES: ::Array["class" | "instance"]
+
+    TOMDOC_TITLES: ::Array[nil | "Public" | "Internal" | "Deprecated"]
+
+    type class_types = singleton(RDoc::NormalClass) | singleton(RDoc::SingleClass)
+
+    def initialize: () -> void
+
+    def add_alias: (RDoc::Alias an_alias) -> RDoc::Alias
+
+    def add_attribute: (RDoc::Attr attribute) -> RDoc::Attr
+
+    def add_class: (class_types class_type, ::String given_name, ?::String superclass) -> (RDoc::NormalClass | RDoc::SingleClass)
+
+    def add_constant: (RDoc::Constant constant) -> RDoc::Constant
+
+    def add_include: (RDoc::Include `include`) -> RDoc::Include
+
+    def add_extend: (RDoc::Extend ext) -> RDoc::Extend
+
+    def add_method: (RDoc::AnyMethod method) -> RDoc::AnyMethod
+
+    def add_module: (singleton(RDoc::NormalModule) class_type, String name) -> RDoc::NormalModule
+
+    def find_module_named: (untyped name) -> (untyped | self)
+
+    def full_name: () -> "(unknown)"
+
+    def to_s: () -> ::String
+
+    def top_level: () -> RDoc::TopLevel
+  end
+
+  class TopLevel < Context
+    MARSHAL_VERSION: 0
+
+    def initialize: (String absolute_name, ?String relative_name) -> void
+
+    def ==: (untyped other) -> bool
+
+    alias eql? ==
+
+    def add_alias: (RDoc::Alias an_alias) -> RDoc::Alias
+
+    def add_constant: (RDoc::Constant constant) -> RDoc::Constant
+
+    def add_include: (RDoc::Include `include`) -> RDoc::Include
+
+    def add_method: (RDoc::AnyMethod method) -> RDoc::AnyMethod
+
+    def find_class_or_module: (::String name) -> RDoc::Context
+
+    def find_module_named: (String name) -> RDoc::Context
+
+    def full_name: () -> String
+
+    def to_s: () -> ::String
+  end
+
+  module TokenStream
+    def add_token: (Hash[untyped, untyped] token) -> void
+
+    def collect_tokens: () -> void
+
+    alias start_collecting_tokens collect_tokens
+  end
+
+  class Comment
+    attr_reader format: String
+
+    attr_accessor location: String
+
+    def initialize: (?String? text, ?RDoc::Context? location, ?String? language) -> void
+
+    def format=: (String format) -> void
+  end
+
+  class ClassModule < Context
+    def initialize: (String name, ?String superclass) -> void
+
+    def add_comment: (RDoc::Comment comment, RDoc::Context location) -> void
+  end
+
+  class NormalClass < ClassModule
+    def initialize: (String name, ?String superclass) -> void
+  end
+
+  class SingleClass < ClassModule
+    def initialize: (String name, ?String superclass) -> void
+  end
+
+  class NormalModule < ClassModule
+  end
+
+  class MethodAttr < CodeObject
+    include Comparable
+
+    attr_reader is_alias_for: MethodAttr?
+
+    attr_reader arglists: String
+
+    attr_accessor name: String
+
+    attr_accessor visibility: untyped
+
+    attr_accessor `singleton`: bool
+
+    attr_reader text: String
+
+    attr_accessor call_seq: String
+
+    def initialize: (String text, String name) -> void
+
+    def pretty_name: () -> ::String
+
+    def type: () -> ("class" | "instance")
+
+    def path: () -> ::String
+
+    def to_s: () -> ::String
+  end
+
+  class AnyMethod < MethodAttr
+    include TokenStream
+
+    attr_accessor call_seq: ::String
+
+    attr_accessor params: ::String
+
+    attr_accessor line: Integer
+
+    def arglists: () -> String?
+
+    def callseq: () -> String?
+
+    def initialize: (String? text, String name) -> void
+  end
+
+  class Attr < MethodAttr
+    attr_accessor rw: "RW" | "R" | "W"
+
+    def initialize: (String? text, String name, String rw, RDoc::Comment? comment, ?bool `singleton`) -> void
+  end
+
+  class Constant < CodeObject
+    attr_writer is_alias_for: String
+
+    attr_accessor name: String
+
+    attr_accessor value: String
+
+    attr_accessor visibility: String
+
+    def initialize: (String name, String value, RDoc::Comment? comment) -> void
+  end
+
+  class Mixin < CodeObject
+    attr_accessor name: String
+
+    def initialize: (String name, RDoc::Comment? comment) -> void
+  end
+
+  class Include < Mixin
+  end
+
+  class Extend < Mixin
+  end
+
+  class Alias < CodeObject
+    attr_accessor name: String
+
+    attr_accessor old_name: String
+
+    def initialize: (String? text, String name, String old_name, RDoc::Comment? comment, ?bool `singleton`) -> void
+  end
+
+  class Stats
+  end
+end
