@@ -9,7 +9,7 @@ class RBSParserTest < Test::Unit::TestCase
     top_level = RDoc::TopLevel.new("a.rbs")
     top_level.store = RDoc::Store.new()
 
-    RBS::RDocPlugin::RBSParser.new(top_level, content)
+    RBS::RDocPlugin::Parser.new(top_level, content)
   end
 
   def teardown
@@ -103,7 +103,7 @@ RBS
     top_level = parser.top_level
 
     klass = top_level.find_class_or_module("A")
-    method = klass.method_list.find {|m| m.name == "foo" }
+    method = klass.method_list.find { |m| m.name == "foo" }
 
     assert_instance_of RDoc::AnyMethod, method
     assert_equal "", method.comment
@@ -122,7 +122,7 @@ RBS
     top_level = parser.top_level
 
     klass = top_level.find_class_or_module("A")
-    method = klass.method_list.find {|m| m.name == "foo" }
+    method = klass.method_list.find { |m| m.name == "foo" }
 
     assert_instance_of RDoc::AnyMethod, method
     assert_equal "", method.comment
@@ -141,10 +141,256 @@ RBS
     top_level = parser.top_level
 
     klass = top_level.find_class_or_module("A")
-    method = klass.method_list.find {|m| m.name == "foo" }
+    method = klass.method_list.find { |m| m.name == "foo" }
 
     assert_instance_of RDoc::AnyMethod, method
     assert_equal "", method.comment
     assert_equal "foo[A] (Integer) { (String) -> A } -> A", method.call_seq
+  end
+
+  def test_instance_method_comment_and_tokens
+    parser = parser(<<~RBS)
+class A
+  # Added comment for foo
+  def foo: [A] (Integer) { (String) -> A } -> A
+end
+RBS
+
+    parser.scan()
+
+    top_level = parser.top_level
+
+    klass = top_level.find_class_or_module("A")
+    method = klass.method_list.find { |m| m.name == "foo" }
+
+    assert_instance_of RDoc::AnyMethod, method
+    assert_equal "Added comment for foo", method.comment.text
+    assert_equal "foo[A] (Integer) { (String) -> A } -> A", method.call_seq
+    assert_equal "# File a.rbs, line(s) 3:3\n" + "def foo: [A] (Integer) { (String) -> A } -> A", method.tokens_to_s
+  end
+
+  def test_constant_decl_1
+    parser = parser(<<~RBS)
+class A
+  CONSTANT: Integer
+end
+RBS
+
+    parser.scan()
+
+    top_level = parser.top_level
+
+    klass = top_level.find_class_or_module("A")
+    constant = klass.constants.first
+
+    assert_instance_of RDoc::Constant, constant
+    assert_equal "CONSTANT", constant.name
+    assert_equal "Integer", constant.value
+    assert_equal "", constant.comment
+  end
+
+  def test_constant_decl_2
+    parser = parser(<<~RBS)
+class A
+  # Constant comment test
+  CONSTANT: ("Literal" | "Union check")
+end
+RBS
+
+    parser.scan()
+
+    top_level = parser.top_level
+
+    klass = top_level.find_class_or_module("A")
+    constant = klass.constants.first
+
+    assert_instance_of RDoc::Constant, constant
+    assert_equal "CONSTANT", constant.name
+    assert_equal "\"Literal\" | \"Union check\"", constant.value
+    assert_equal "Constant comment test", constant.comment.text
+  end
+
+  def test_method_alias_decl_1
+    parser = parser(<<~RBS)
+class A
+  def foo: () -> void
+  alias bar foo
+end
+RBS
+
+    parser.scan()
+
+    top_level = parser.top_level
+
+    klass = top_level.find_class_or_module("A")
+    method = klass.method_list.find { |m| m.name == "bar" }
+
+    assert_instance_of RDoc::AnyMethod, method
+    assert_equal "bar", method.name
+    assert_instance_of RDoc::AnyMethod, method.is_alias_for
+    assert_equal "foo", method.is_alias_for.name
+    assert_nil method.is_alias_for.is_alias_for
+  end
+
+  def test_method_alias_decl_2
+    parser = parser(<<~RBS)
+class A
+  def foo: () -> void
+  alias bar foo
+  alias baz bar
+  alias foo dam
+end
+RBS
+
+    parser.scan()
+
+    top_level = parser.top_level
+
+    klass = top_level.find_class_or_module("A")
+    method = klass.method_list.find { |m| m.name == "baz" }
+
+    assert_instance_of RDoc::AnyMethod, method
+    assert_equal "baz", method.name
+    assert_instance_of RDoc::AnyMethod, method.is_alias_for
+    assert_equal "bar", method.is_alias_for.name
+    assert_instance_of RDoc::AnyMethod, method.is_alias_for.is_alias_for
+    assert_equal "foo", method.is_alias_for.is_alias_for.name
+
+    assert_instance_of RDoc::Alias, klass.external_aliases.first
+    assert_equal "foo", klass.external_aliases.first.name
+    assert_equal "dam", klass.external_aliases.first.old_name
+  end
+
+  def test_attr_decl_1
+    parser = parser(<<~RBS)
+class A
+  attr_reader foo: Integer
+  attr_writer bar: Float
+  attr_accessor dam: String
+end
+RBS
+
+    parser.scan()
+
+    top_level = parser.top_level
+
+    klass = top_level.find_class_or_module("A")
+    attr_r = klass.attributes[0]
+    attr_w = klass.attributes[1]
+    attr_a = klass.attributes[2]
+
+    assert_instance_of RDoc::Attr, attr_r
+    assert_equal "foo", attr_r.name
+    assert_equal "R", attr_r.rw
+    assert_equal "", attr_r.comment
+
+    assert_instance_of RDoc::Attr, attr_w
+    assert_equal "bar", attr_w.name
+    assert_equal "W", attr_w.rw
+    assert_equal "", attr_w.comment
+
+    assert_instance_of RDoc::Attr, attr_a
+    assert_equal "dam", attr_a.name
+    assert_equal "RW", attr_a.rw
+    assert_equal "", attr_a.comment
+  end
+
+  def test_attr_decl_2
+    parser = parser(<<~RBS)
+class A
+  # Comment 1
+  attr_reader foo: Integer
+  # Comment 2
+  attr_writer bar: Float
+  # Comment 3
+  attr_accessor dam: String
+end
+RBS
+
+    parser.scan()
+
+    top_level = parser.top_level
+
+    klass = top_level.find_class_or_module("A")
+    attr_r = klass.attributes[0]
+    attr_w = klass.attributes[1]
+    attr_a = klass.attributes[2]
+
+    assert_instance_of RDoc::Attr, attr_r
+    assert_equal "foo", attr_r.name
+    assert_equal "R", attr_r.rw
+    assert_equal "Comment 1", attr_r.comment.text
+
+    assert_instance_of RDoc::Attr, attr_w
+    assert_equal "bar", attr_w.name
+    assert_equal "W", attr_w.rw
+    assert_equal "Comment 2", attr_w.comment.text
+
+    assert_instance_of RDoc::Attr, attr_a
+    assert_equal "dam", attr_a.name
+    assert_equal "RW", attr_a.rw
+    assert_equal "Comment 3", attr_a.comment.text
+  end
+
+  def test_include_decl_1
+    parser = parser(<<~RBS)
+module D
+end
+class A
+  module B
+  end
+  class C
+    include B
+    # Test comment
+    include D
+  end
+end
+RBS
+
+    parser.scan()
+
+    top_level = parser.top_level
+
+    klass = top_level.find_class_or_module("A::C")
+    rdoc_include = klass.includes.first
+    assert_instance_of RDoc::Include, rdoc_include
+    assert_equal "A::B", rdoc_include.name
+    assert_equal "", rdoc_include.comment
+
+    rdoc_include = klass.includes[1]
+    assert_instance_of RDoc::Include, rdoc_include
+    assert_equal "D", rdoc_include.name
+    assert_equal "Test comment", rdoc_include.comment.text
+  end
+
+  def test_extend_decl_1
+    parser = parser(<<~RBS)
+module D
+end
+class A
+  module B
+  end
+  class C
+    extend B
+    # Test comment
+    extend D
+  end
+end
+RBS
+
+    parser.scan()
+
+    top_level = parser.top_level
+
+    klass = top_level.find_class_or_module("A::C")
+    rdoc_extend = klass.extends.first
+    assert_instance_of RDoc::Extend, rdoc_extend
+    assert_equal "A::B", rdoc_extend.name
+    assert_equal "", rdoc_extend.comment
+
+    rdoc_extend = klass.extends[1]
+    assert_instance_of RDoc::Extend, rdoc_extend
+    assert_equal "D", rdoc_extend.name
+    assert_equal "Test comment", rdoc_extend.comment.text
   end
 end

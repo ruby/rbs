@@ -8,7 +8,7 @@ module RDoc
       parse_files_matching(/\.rbs$/)
 
       def scan
-        RBS::RDocPlugin::RBSParser.new(@top_level, @content).scan
+        ::RBS::RDocPlugin::Parser.new(@top_level, @content).scan
       end
     end
   end
@@ -16,8 +16,10 @@ end
 
 module RBS
   module RDocPlugin
-    class RBSParser
+    class Parser
+
       attr_reader :top_level, :content
+
       def initialize(top_level, content)
         @top_level = top_level
         @content = content
