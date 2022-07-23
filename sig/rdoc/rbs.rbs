@@ -1,7 +1,9 @@
 module RBS
   module RDocPlugin
     class Parser
-      type allowed_decls = RBS::AST::Declarations::Class | RBS::AST::Declarations::Module | RBS::AST::Declarations::Constant | RBS::AST::Members::MethodDefinition | RBS::AST::Members::AttrReader | RBS::AST::Members::AttrAccessor | RBS::AST::Members::AttrWriter | RBS::AST::Members::Include | RBS::AST::Members::Extend
+      type allowed_decls = RBS::AST::Declarations::Class
+                         | RBS::AST::Declarations::Module
+                         | RBS::AST::Declarations::Constant
 
       def initialize: (RDoc::TopLevel top_level, String content) -> void
 
@@ -28,6 +30,25 @@ module RBS
       private
 
       def construct_comment: (context: RDoc::Context, comment: String) -> RDoc::Comment
+
+      # _DeclWithComment is a utility interface that has `#comment`
+      #
+      interface _DeclWithComment
+        def comment: () -> ::RBS::AST::Comment?
+      end
+
+      # Extract comment string from a declaration with comment
+      #
+      # * If `#comment" returns a Comment object, it returns its `#string` value
+      # * If `#comment` returns `nil`, it raises an error
+      #
+      # Note that you have to confirm if the `#comment` of given declartion exists.
+      #
+      # ```ruby
+      # comment = construct_comment(context: context, comment: comment_string(decl)) if decl.comment
+      # ```
+      #
+      def comment_string: (_DeclWithComment) -> String
 
       def fully_qualified_name: (outer_name: RBS::TypeName?, decl: allowed_decls) -> RBS::TypeName
     end
