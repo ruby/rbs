@@ -663,6 +663,9 @@ module RDoc
   # A constant
   #
   class Constant < CodeObject
+    # <!-- rdoc-file=lib/rdoc/constant.rb -->
+    # Sets the module or class this is constant is an alias for.
+    #
     attr_writer is_alias_for: String
 
     # <!-- rdoc-file=lib/rdoc/constant.rb -->
