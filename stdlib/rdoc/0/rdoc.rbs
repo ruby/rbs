@@ -109,9 +109,6 @@ module RDoc
     def initialize: (RDoc::TopLevel top_level, String filename, String content, Hash[untyped, untyped] options, RDoc::Stats stats) -> void
 
     def scan: () -> RDoc::TopLevel
-
-    class RBS < Parser
-    end
   end
 
   # <!-- rdoc-file=lib/rdoc/code_object.rb -->

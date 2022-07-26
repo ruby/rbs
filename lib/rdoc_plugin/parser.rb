@@ -2,23 +2,11 @@
 
 require 'rbs'
 
-module RDoc
-  class Parser
-    class RBS < Parser
-      parse_files_matching(/\.rbs$/)
-
-      def scan
-        ::RBS::RDocPlugin::Parser.new(@top_level, @content).scan
-      end
-    end
-  end
-end
-
 module RBS
   module RDocPlugin
     class Parser
 
-      attr_reader :top_level, :content
+      attr_accessor :top_level, :content
 
       def initialize(top_level, content)
         @top_level = top_level

@@ -1,3 +1,10 @@
+module RDoc
+  class Parser
+    class RBS < Parser
+    end
+  end
+end
+
 module RBS
   module RDocPlugin
     class Parser

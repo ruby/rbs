@@ -1,10 +1,8 @@
 require "test_helper"
 
-require "tempfile"
+require "rdoc_plugin/parser"
 
-require "rdoc/parser/rbs"
-
-class RBSParserTest < Test::Unit::TestCase
+class RDocPluginParserTest < Test::Unit::TestCase
   def parser(content)
     top_level = RDoc::TopLevel.new("a.rbs")
     top_level.store = RDoc::Store.new()
