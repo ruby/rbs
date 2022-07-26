@@ -10,9 +10,6 @@ class RDocPluginParserTest < Test::Unit::TestCase
     RBS::RDocPlugin::Parser.new(top_level, content)
   end
 
-  def teardown
-  end
-
   def test_class_decl_1
     parser = parser(<<~RBS)
 class A
