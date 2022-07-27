@@ -18,3 +18,5 @@
 lib/**/*.bundle
 lib/**/*.so
 lib/**/*.dll
+doc/
+**/*.gem
