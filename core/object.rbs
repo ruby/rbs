@@ -978,6 +978,8 @@ class Object < BasicObject
   #
   def respond_to?: (name name, ?boolish include_all) -> bool
 
+  def respond_to_missing?: (name name, ?boolish include_all) -> bool
+
   # <!--
   #   rdoc-file=vm_eval.c
   #   - foo.send(symbol [, args...])       -> obj
