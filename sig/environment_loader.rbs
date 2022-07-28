@@ -40,7 +40,7 @@ module RBS
     attr_reader core_root: Pathname?
     attr_reader repository: Repository
 
-    attr_reader libs: Array[Library]
+    attr_reader libs: Set[Library]
     attr_reader dirs: Array[Pathname]
 
     # The source where the RBS comes from.
@@ -76,7 +76,9 @@ module RBS
     # If RBS files cannot be found in the gem, it tries to load RBSs from repository.
     #
     def add: (path: Pathname) -> void
-           | (library: String, version: String?) -> void
+           | (library: String, version: String?, ?resolve_dependencies: boolish) -> void
+
+    def resolve_dependencies: (library: String, version: String?) -> void
 
     # Add repository path and libraries via rbs_collection.lock.yaml.
     def add_collection: (Collection::Config collection_config) -> void

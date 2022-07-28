@@ -165,6 +165,20 @@ end
     end
   end
 
+  def test_loading_dependencies
+    mktmpdir do |path|
+      loader = EnvironmentLoader.new
+      loader.add(library: "yaml")
+
+      env = Environment.new
+      loader.load(env: env)
+
+      assert_operator env.class_decls, :key?, TypeName("::YAML")
+      assert_operator env.class_decls, :key?, TypeName("::DBM")
+      assert_operator env.class_decls, :key?, TypeName("::PStore")
+    end
+  end
+
   def test_loading_from_rbs_collection
     mktmpdir do |path|
       lockfile_path = path.join('rbs_collection.lock.yaml')

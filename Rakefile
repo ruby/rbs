@@ -60,11 +60,6 @@ task :validate => :compile do
 
   FileList["stdlib/*"].each do |path|
     lib = [File.basename(path).to_s]
-    if File.exist?("#{path}/0/manifest.yaml")
-      YAML.load_file("#{path}/0/manifest.yaml")["dependencies"].each do |dep|
-        lib << dep["name"]
-      end
-    end
 
     sh "#{ruby} #{rbs} #{lib.map {|l| "-r #{l}"}.join(" ")} validate --silent"
   end
