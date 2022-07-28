@@ -79,9 +79,7 @@ module RBS
     end
 
     def self.default
-      new().tap do |repo|
-        repo.add(DEFAULT_STDLIB_ROOT)
-      end
+      new()
     end
 
     def self.find_best_version(version, candidates)
