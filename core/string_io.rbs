@@ -450,7 +450,7 @@ class StringIO
   # opened for writing.  If the argument is not a string, it will be converted to
   # a string using `to_s`. Returns the number of bytes written.  See IO#write.
   #
-  def write: (String arg0) -> Integer
+  def write: (*_ToS) -> Integer
 
   # This is a deprecated alias for #each_byte.
   #
