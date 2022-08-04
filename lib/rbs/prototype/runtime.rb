@@ -21,6 +21,7 @@ module RBS
 
       def target?(const)
         name = const_name(const)
+        return false unless name
 
         patterns.any? do |pattern|
           if pattern.end_with?("*")
@@ -77,7 +78,7 @@ module RBS
           supers.merge(mix.included_modules)
         end
 
-        if mod.is_a?(Class)
+        if mod.is_a?(Class) && mod.superclass
           mod.superclass.included_modules.each do |mix|
             supers << mix
             supers.merge(mix.included_modules)
@@ -318,7 +319,12 @@ module RBS
 
       def generate_constants(mod, decls)
         mod.constants(false).sort.each do |name|
-          value = mod.const_get(name)
+          begin
+            value = mod.const_get(name)
+          rescue StandardError, LoadError => e
+            RBS.logger.warn("Skipping constant #{name} of #{mod} since #{e}")
+            next
+          end
 
           next if value.is_a?(Class) || value.is_a?(Module)
           unless value.class.name
@@ -350,7 +356,7 @@ module RBS
       end
 
       def generate_super_class(mod)
-        if mod.superclass == ::Object
+        if mod.superclass.nil? || mod.superclass == ::Object
           nil
         elsif const_name(mod.superclass).nil?
           RBS.logger.warn("Skipping anonymous superclass #{mod.superclass} of #{mod}")
