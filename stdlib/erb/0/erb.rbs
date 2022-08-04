@@ -446,4 +446,111 @@ class ERB
   #     print MyClass.new('foo', 123).render()
   #
   def def_class: (?Class, ?String) -> Class
+
+  # <!-- rdoc-file=lib/erb.rb -->
+  # A utility module for conversion routines, often handy in HTML generation.
+  #
+  module Util
+    # <!--
+    #   rdoc-file=lib/erb.rb
+    #   - html_escape(s)
+    # -->
+    # A utility method for escaping HTML tag characters in *s*.
+    #
+    #     require "erb"
+    #     include ERB::Util
+    #
+    #     puts html_escape("is a > 0 & a < 10?")
+    #
+    # *Generates*
+    #
+    #     is a &gt; 0 &amp; a &lt; 10?
+    #
+    def self?.html_escape: (String str) -> String
+
+    # <!--
+    #   rdoc-file=lib/erb.rb
+    #   - h(s)
+    # -->
+    #
+    alias h html_escape
+
+    # <!--
+    #   rdoc-file=lib/erb.rb
+    #   - h(s)
+    # -->
+    #
+    alias self.h self.html_escape
+
+    # <!--
+    #   rdoc-file=lib/erb.rb
+    #   - url_encode(s)
+    # -->
+    # A utility method for encoding the String *s* as a URL.
+    #
+    #     require "erb"
+    #     include ERB::Util
+    #
+    #     puts url_encode("Programming Ruby:  The Pragmatic Programmer's Guide")
+    #
+    # *Generates*
+    #
+    #     Programming%20Ruby%3A%20%20The%20Pragmatic%20Programmer%27s%20Guide
+    #
+    def self?.url_encode: (String) -> String
+
+    # <!--
+    #   rdoc-file=lib/erb.rb
+    #   - u(s)
+    # -->
+    #
+    alias u url_encode
+
+    # <!--
+    #   rdoc-file=lib/erb.rb
+    #   - u(s)
+    # -->
+    #
+    alias self.u self.url_encode
+  end
+
+  # <!-- rdoc-file=lib/erb.rb -->
+  # Utility module to define eRuby script as instance method.
+  #
+  # ### Example
+  #
+  # example.rhtml:
+  #     <% for item in @items %>
+  #     <b><%= item %></b>
+  #     <% end %>
+  #
+  # example.rb:
+  #     require 'erb'
+  #     class MyClass
+  #       extend ERB::DefMethod
+  #       def_erb_method('render()', 'example.rhtml')
+  #       def initialize(items)
+  #         @items = items
+  #       end
+  #     end
+  #     print MyClass.new([10,20,30]).render()
+  #
+  # result:
+  #
+  #     <b>10</b>
+  #
+  #     <b>20</b>
+  #
+  #     <b>30</b>
+  #
+  module DefMethod
+    # <!--
+    #   rdoc-file=lib/erb.rb
+    #   - def_erb_method(methodname, erb_or_fname)
+    # -->
+    # define *methodname* as instance method of current module, using ERB object or
+    # eRuby file
+    #
+    def self.def_erb_method: (String methodname, (String | ERB) erb_or_fname) -> untyped
+  end
 end
