@@ -566,13 +566,30 @@ static void initialize_method_params(method_params *params){
 }
 
 /*
-  function ::= {} `(` params `)` `{` `(` params `)` `->` optional `}` `->` <optional>
-             | {} `(` params `)` `->` <optional>
-             | {} `{` `(` params `)` `->` optional `}` `->` <optional>
-             | {} `{` `->` optional `}` `->` <optional>
-             | {} `->` <optional>
+  self_type_binding ::= {} <>
+                      | {} `[` `self` `:` type <`]`>
 */
-static void parse_function(parserstate *state, VALUE *function, VALUE *block) {
+static VALUE parse_self_type_binding(parserstate *state) {
+  if (state->next_token.type == pLBRACKET) {
+    parser_advance(state);
+    parser_advance_assert(state, kSELF);
+    parser_advance_assert(state, pCOLON);
+    VALUE type = parse_type(state);
+    parser_advance_assert(state, pRBRACKET);
+    return type;
+  } else {
+    return Qnil;
+  }
+}
+
+/*
+  function ::= {} `(` params `)` self_type_binding? `{` `(` params `)` self_type_binding? `->` optional `}` `->` <optional>
+             | {} `(` params `)` self_type_binding? `->` <optional>
+             | {} self_type_binding? `{` `(` params `)` self_type_binding? `->` optional `}` `->` <optional>
+             | {} self_type_binding? `{` self_type_binding `->` optional `}` `->` <optional>
+             | {} self_type_binding? `->` <optional>
+*/
+static void parse_function(parserstate *state, VALUE *function, VALUE *block, VALUE *function_self_type) {
   method_params params;
   initialize_method_params(&params);
 
@@ -580,6 +597,11 @@ static void parse_function(parserstate *state, VALUE *function, VALUE *block) {
     parser_advance(state);
     parse_params(state, &params);
     parser_advance_assert(state, pRPAREN);
+  }
+
+  // Passing NULL to function_self_type means the function itself doesn't accept self type binding. (== method type)
+  if (function_self_type) {
+    *function_self_type = parse_self_type_binding(state);
   }
 
   VALUE required = Qtrue;
@@ -600,6 +622,8 @@ static void parse_function(parserstate *state, VALUE *function, VALUE *block) {
       parser_advance_assert(state, pRPAREN);
     }
 
+    VALUE block_self_type = parse_self_type_binding(state);
+
     parser_advance_assert(state, pARROW);
     VALUE block_return_type = parse_optional(state);
 
@@ -615,7 +639,7 @@ static void parse_function(parserstate *state, VALUE *function, VALUE *block) {
         block_return_type
       ),
       required,
-      Qnil
+      block_self_type
     );
 
     parser_advance_assert(state, pRBRACE);
@@ -643,11 +667,12 @@ static VALUE parse_proc_type(parserstate *state) {
   position start = state->current_token.range.start;
   VALUE function = Qnil;
   VALUE block = Qnil;
-  parse_function(state, &function, &block);
+  VALUE proc_self = Qnil;
+  parse_function(state, &function, &block, &proc_self);
   position end = state->current_token.range.end;
   VALUE loc = rbs_location_pp(state->buffer, &start, &end);
 
-  return rbs_proc(function, block, loc, Qnil);
+  return rbs_proc(function, block, loc, proc_self);
 }
 
 /**
@@ -1131,7 +1156,7 @@ VALUE parse_method_type(parserstate *state) {
 
   type_range.start = state->next_token.range.start;
 
-  parse_function(state, &function, &block);
+  parse_function(state, &function, &block, NULL);
 
   rg.end = state->current_token.range.end;
   type_range.end = rg.end;
