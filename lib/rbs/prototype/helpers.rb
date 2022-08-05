@@ -13,7 +13,8 @@ module RBS
         if block
           method_block = Types::Block.new(
             required: false,
-            type: Types::Function.empty(untyped)
+            type: Types::Function.empty(untyped),
+            self_type: nil
           )
         end
 
@@ -21,7 +22,8 @@ module RBS
           if (yields = any_node?(body_node) {|n| n.type == :YIELD })
             method_block = Types::Block.new(
               required: true,
-              type: Types::Function.empty(untyped)
+              type: Types::Function.empty(untyped),
+              self_type: nil
             )
 
             yields.each do |yield_node|

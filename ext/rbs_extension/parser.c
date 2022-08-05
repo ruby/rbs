@@ -614,7 +614,8 @@ static void parse_function(parserstate *state, VALUE *function, VALUE *block) {
         block_params.rest_keywords,
         block_return_type
       ),
-      required
+      required,
+      Qnil
     );
 
     parser_advance_assert(state, pRBRACE);
@@ -646,7 +647,7 @@ static VALUE parse_proc_type(parserstate *state) {
   position end = state->current_token.range.end;
   VALUE loc = rbs_location_pp(state->buffer, &start, &end);
 
-  return rbs_proc(function, block, loc);
+  return rbs_proc(function, block, loc, Qnil);
 }
 
 /**

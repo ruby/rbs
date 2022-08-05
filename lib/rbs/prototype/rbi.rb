@@ -410,28 +410,31 @@ module RBS
         if block
           if (type = vars[block])
             if type.is_a?(Types::Proc)
-              method_block = Types::Block.new(required: true, type: type.type)
+              method_block = Types::Block.new(required: true, type: type.type, self_type: nil)
             elsif type.is_a?(Types::Bases::Any)
               method_block = Types::Block.new(
                 required: true,
-                type: Types::Function.empty(Types::Bases::Any.new(location: nil))
+                type: Types::Function.empty(Types::Bases::Any.new(location: nil)),
+                self_type: nil
               )
             # Handle an optional block like `T.nilable(T.proc.void)`.
             elsif type.is_a?(Types::Optional) && (proc_type = type.type).is_a?(Types::Proc)
-              method_block = Types::Block.new(required: false, type: proc_type.type)
+              method_block = Types::Block.new(required: false, type: proc_type.type, self_type: nil)
             else
               STDERR.puts "Unexpected block type: #{type}"
               PP.pp args_node, STDERR
               method_block = Types::Block.new(
                 required: true,
-                type: Types::Function.empty(Types::Bases::Any.new(location: nil))
+                type: Types::Function.empty(Types::Bases::Any.new(location: nil)),
+                self_type: nil
               )
             end
           else
             if overloads == 1
               method_block = Types::Block.new(
                 required: false,
-                type: Types::Function.empty(Types::Bases::Any.new(location: nil))
+                type: Types::Function.empty(Types::Bases::Any.new(location: nil)),
+                self_type: nil
               )
             end
           end
@@ -519,7 +522,7 @@ module RBS
         else
           if proc_type?(type_node)
             method_type = method_type(nil, type_node, variables: variables, overloads: 1) or raise
-            Types::Proc.new(type: method_type.type, block: nil, location: nil)
+            Types::Proc.new(type: method_type.type, block: nil, location: nil, self_type: nil)
           else
             STDERR.puts "Unexpected type_node:"
             PP.pp type_node, STDERR

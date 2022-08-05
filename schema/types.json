@@ -238,9 +238,21 @@
         },
         "location": {
           "$ref": "location.json"
+        },
+        "block": {
+          "oneOf": [
+            { "$ref": "methodType.json#/definitions/block" },
+            { "type": "null" }
+          ]
+        },
+        "self_type": {
+          "oneOf": [
+            { "$ref": "#" },
+            { "type": "null" }
+          ]
         }
       },
-      "required": ["class", "type", "location"]
+      "required": ["class", "type", "location", "block", "self_type"]
     },
     "literal": {
       "title": "Literal types: `1`, `:foo`, `\"foo\"`, ...",
