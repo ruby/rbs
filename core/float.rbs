@@ -1168,3 +1168,7 @@ Float::RADIX: Integer
 #
 #
 Float::ROUNDS: Integer
+
+Float::INFINITY: Float
+
+Float::Infinity: Float
