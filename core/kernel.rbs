@@ -873,6 +873,7 @@ module Kernel : BasicObject
   def self?.fail: () -> bot
                 | (String message, ?cause: Exception?) -> bot
                 | (_Exception exception, ?untyped message, ?::Array[String] backtrace, ?cause: Exception?) -> bot
+                | (Exception exception, ?untyped message, ?::Array[String] backtrace, ?cause: Exception?) -> bot
 
   # <!--
   #   rdoc-file=eval.c
