@@ -111,7 +111,7 @@ module RBS
     def lookup_path(gem, version)
       if gem_rbs = gems[gem]
         unless gem_rbs.empty?
-          set = if v = Gem::Version.create(version)&.release
+          set = if version and v = Gem::Version.create(version)&.release
             gem_rbs.find_best_version(v)
           else
             gem_rbs.latest_version
