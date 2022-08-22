@@ -21,7 +21,9 @@ module RBS
     DEFAULT_CORE_ROOT = Pathname(_ = __dir__) + "../../core"
 
     def self.gem_sig_path(name, version)
-      spec = Gem::Specification.find_by_name(name, version)
+      requirements = []
+      requirements << version if version
+      spec = Gem::Specification.find_by_name(name, *requirements)
       path = Pathname(spec.gem_dir) + "sig"
       if path.directory?
         [spec, path]
