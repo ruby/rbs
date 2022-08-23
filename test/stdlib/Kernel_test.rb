@@ -111,8 +111,8 @@ class KernelTest < StdlibTest
 
   def test_fork
     if Process.respond_to?(:fork)
-      exit unless fork
-      fork { exit }
+      exit! unless fork
+      fork { exit! }
     end
   end
 
