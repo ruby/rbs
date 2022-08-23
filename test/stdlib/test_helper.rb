@@ -526,4 +526,20 @@ class StdlibTest < Test::Unit::TestCase
   def hook
     self.class.hook
   end
+
+  def self.discard_output
+    include DiscardOutput
+  end
+
+  module DiscardOutput
+    def setup
+      null = StringIO.new
+      @stdout, @stderr = $stdout, $stderr
+      $stderr = $stdout = null
+    end
+
+    def teardown
+      $stderr, $stdout = @stderr, @stdout
+    end
+  end
 end
