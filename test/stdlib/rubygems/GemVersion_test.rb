@@ -20,8 +20,6 @@ class GemVersionSingletonTest < Test::Unit::TestCase
                       Gem::Version, :create, ToS.new("1.2.3")
     assert_send_type  "(Gem::Version) -> Gem::Version",
                       Gem::Version, :create, Gem::Version.new("1.2.3")
-    assert_send_type  "(nil) -> nil",
-                      Gem::Version, :create, nil
   end
 
   def test_new
