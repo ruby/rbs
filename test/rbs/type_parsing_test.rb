@@ -466,6 +466,29 @@ class RBS::TypeParsingTest < Test::Unit::TestCase
     end
   end
 
+  def test_proc_with_self
+    Parser.parse_type("^() -> void").yield_self do |type|
+      assert_instance_of Types::Proc, type
+
+      assert_equal "^() -> void", type.location.source
+      assert_nil type.self_type
+    end
+
+    Parser.parse_type("^() [self: String] -> void").yield_self do |type|
+      assert_instance_of Types::Proc, type
+
+      assert_equal "^() [self: String] -> void", type.location.source
+      assert_equal Parser.parse_type("String"), type.self_type
+    end
+
+    Parser.parse_type("^ { [self: String] -> void } -> void").tap do |type|
+      assert_instance_of Types::Proc, type
+      assert_nil type.self_type
+      assert_instance_of Types::Block, type.block
+      assert_equal Parser.parse_type("String"), type.block.self_type
+    end
+  end
+
   def test_optional
     Parser.parse_type("untyped?").yield_self do |type|
       assert_instance_of Types::Optional, type

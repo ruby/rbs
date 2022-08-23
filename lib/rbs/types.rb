@@ -1020,64 +1020,85 @@ module RBS
     class Block
       attr_reader :type
       attr_reader :required
+      attr_reader :self_type
 
-      def initialize(type:, required:)
+      def initialize(type:, required:, self_type:)
         @type = type
         @required = required ? true : false
+        @self_type = self_type
       end
 
       def ==(other)
         other.is_a?(Block) &&
           other.type == type &&
-          other.required == required
+          other.required == required &&
+          other.self_type == self_type
       end
 
       def to_json(state = _ = nil)
         {
           type: type,
-          required: required
+          required: required,
+          self_type: self_type
         }.to_json(state)
       end
 
       def sub(s)
         self.class.new(
           type: type.sub(s),
-          required: required
+          required: required,
+          self_type: self_type&.sub(s)
         )
       end
 
       def map_type(&block)
         Block.new(
           required: required,
-          type: type.map_type(&block)
+          type: type.map_type(&block),
+          self_type: self_type ? yield(self_type) : nil
         )
+      end
+    end
+
+    module SelfTypeBindingHelper
+      module_function
+
+      def self_type_binding_to_s(t)
+        if t
+          "[self: #{t}] "
+        else
+          ""
+        end
       end
     end
 
     class Proc
       attr_reader :type
       attr_reader :block
+      attr_reader :self_type
       attr_reader :location
 
-      def initialize(location:, type:, block:)
+      def initialize(location:, type:, block:, self_type:)
         @type = type
         @block = block
         @location = location
+        @self_type = self_type
       end
 
       def ==(other)
-        other.is_a?(Proc) && other.type == type && other.block == block
+        other.is_a?(Proc) && other.type == type && other.block == block && other.self_type == self_type
       end
 
       alias eql? ==
 
       def hash
-        self.class.hash ^ type.hash ^ block.hash
+        self.class.hash ^ type.hash ^ block.hash ^ self_type.hash
       end
 
       def free_variables(set = Set[])
         type.free_variables(set)
         block&.type&.free_variables(set)
+        self_type&.free_variables(set)
         set
       end
 
@@ -1086,24 +1107,33 @@ module RBS
           class: :proc,
           type: type,
           block: block,
-          location: location
+          location: location,
+          self_type: self_type
         }.to_json(state)
       end
 
       def sub(s)
-        self.class.new(type: type.sub(s), block: block&.sub(s), location: location)
+        self.class.new(
+          type: type.sub(s),
+          block: block&.sub(s),
+          self_type: self_type&.sub(s),
+          location: location
+        )
       end
 
       def to_s(level = 0)
+        self_binding = SelfTypeBindingHelper.self_type_binding_to_s(self_type)
+        block_self_binding = SelfTypeBindingHelper.self_type_binding_to_s(block&.self_type)
+
         case
         when b = block
           if b.required
-            "^(#{type.param_to_s}) { (#{b.type.param_to_s}) -> #{b.type.return_to_s} } -> #{type.return_to_s}"
+            "^(#{type.param_to_s}) #{self_binding}{ (#{b.type.param_to_s}) #{block_self_binding}-> #{b.type.return_to_s} } -> #{type.return_to_s}"
           else
-            "^(#{type.param_to_s}) ?{ (#{b.type.param_to_s}) -> #{b.type.return_to_s} } -> #{type.return_to_s}"
+            "^(#{type.param_to_s}) #{self_binding}?{ (#{b.type.param_to_s}) #{block_self_binding}-> #{b.type.return_to_s} } -> #{type.return_to_s}"
           end
         else
-          "^(#{type.param_to_s}) -> #{type.return_to_s}"
+          "^(#{type.param_to_s}) #{self_binding}-> #{type.return_to_s}"
         end
       end
 
@@ -1120,6 +1150,7 @@ module RBS
         Proc.new(
           type: type.map_type_name(&block),
           block: self.block&.map_type {|type| type.map_type_name(&block) },
+          self_type: self_type&.map_type_name(&block),
           location: location
         )
       end
@@ -1129,6 +1160,7 @@ module RBS
           Proc.new(
             type: type.map_type(&block),
             block: self.block&.map_type(&block),
+            self_type: self_type ? yield(self_type) : nil,
             location: location
           )
         else

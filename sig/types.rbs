@@ -410,7 +410,9 @@ module RBS
       attr_reader type: Types::Function
       attr_reader required: bool
 
-      def initialize: (type: Types::Function, required: boolish) -> void
+      attr_reader self_type: t?
+
+      def initialize: (type: Types::Function, self_type: t?, required: boolish) -> void
 
       def ==: (untyped other) -> bool
 
@@ -421,13 +423,19 @@ module RBS
       def map_type: () { (t) -> t } -> Block
     end
 
+    module SelfTypeBindingHelper
+      def self?.self_type_binding_to_s: (t?) -> String
+    end
+
     class Proc
       attr_reader type: Function
       attr_reader block: Block?
 
+      attr_reader self_type: t?
+
       type loc = Location[bot, bot]
 
-      def initialize: (location: loc?, type: Function, block: Block?) -> void
+      def initialize: (location: loc?, type: Function, self_type: t?, block: Block?) -> void
 
       include _TypeBase
 
