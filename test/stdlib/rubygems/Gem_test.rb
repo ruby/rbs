@@ -563,17 +563,6 @@ class GemSingletonTest < Test::Unit::TestCase
   def test_use_gemdeps
     assert_send_type  "() -> void",
                       Gem, :use_gemdeps
-
-    Dir.mktmpdir do |dir|
-      Dir.chdir dir do
-        gemfile_path = File.join(dir, "Gemfile")
-        File.write(gemfile_path, <<GEMFILE)
-source "https://rubygems.org"
-GEMFILE
-        assert_send_type  "(String) -> void",
-                          Gem, :use_gemdeps, "-"
-      end
-    end
   end
 
   def test_use_paths
