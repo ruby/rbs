@@ -4,7 +4,7 @@ module RBS
 
     def initialize(path:, absolute:)
       @path = path
-      @absolute = absolute
+      @absolute = absolute ? true : false
     end
 
     def self.empty

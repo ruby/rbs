@@ -70,7 +70,11 @@ module RBS
 
       def private: () -> AST::Members::Private
 
+      @private: AST::Members::Private?
+
       def public: () -> AST::Members::Public
+
+      @public: AST::Members::Public?
 
       def current_accessibility: (Array[decl] decls, ?Integer index) -> (AST::Members::Private | AST::Members::Public)
 

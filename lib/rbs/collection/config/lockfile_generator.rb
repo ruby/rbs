@@ -37,6 +37,7 @@ module RBS
         end
 
         private def assign_gem(name:, version:)
+          # @type var locked: gem_entry?
           locked = lock&.gem(name)
           specified = config.gem(name)
 
@@ -51,6 +52,7 @@ module RBS
 
             installed_version = version
             best_version = find_best_version(version: installed_version, versions: source.versions({ 'name' => name }))
+
             locked = {
               'name' => name,
               'version' => best_version.to_s,
@@ -58,8 +60,10 @@ module RBS
             }
           end
 
+          locked or raise
+
           upsert_gem specified, locked
-          source = Sources.from_config_entry(locked['source'])
+          source = Sources.from_config_entry(locked['source'] || raise)
           source.dependencies_of(locked)&.each do |dep|
             @gem_queue.push({ name: dep['name'], version: nil} )
           end

@@ -13,8 +13,9 @@ module RBS
       end
 
       type source_entry = Git::source_entry
-                            | Stdlib::source_entry
-                            | Rubygems::source_entry
+                        | Stdlib::source_entry
+                        | Rubygems::source_entry
+
       type manifest_entry = {
         "dependencies" => Array[{"name" => String}]?,
       }
@@ -56,6 +57,10 @@ module RBS
         def manifest_of: (Config::gem_entry) -> manifest_entry?
 
         private
+
+        @git_dir: Pathname?
+
+        @resolved_revision: String?
 
         def _install: (dest: Pathname , config_entry: Config::gem_entry) -> void
 

@@ -29,6 +29,7 @@ module RBS
             yields.each do |yield_node|
               array_content = yield_node.children[0]&.children&.compact || []
 
+              # @type var keywords: node?
               positionals, keywords = if keyword_hash?(array_content.last)
                                         [array_content.take(array_content.size - 1), array_content.last]
                                       else
@@ -88,12 +89,12 @@ module RBS
       end
 
       def keyword_hash?(node)
-        if node
-          if node.type == :HASH
-            node.children[0].children.compact.each_slice(2).all? {|key, _|
-              key.type == :LIT && key.children[0].is_a?(Symbol)
-            }
-          end
+        if node && node.type == :HASH
+          node.children[0].children.compact.each_slice(2).all? {|key, _|
+            key.type == :LIT && key.children[0].is_a?(Symbol)
+          }
+        else
+          false
         end
       end
 
