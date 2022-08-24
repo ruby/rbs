@@ -69,6 +69,14 @@ module RBS
       def map_type_bound: () { (AST::TypeParam::bound) -> AST::TypeParam::bound } -> Method
 
       def map_method_type: () { (MethodType) -> MethodType } -> Method
+
+      def update: (
+        ?super_method: Method?,
+        ?defs: Array[TypeDef],
+        ?accessibility: accessibility,
+        ?alias_of: Method?,
+        ?annotations: Array[AST::Annotation]
+      ) -> Method
     end
 
     module Ancestor

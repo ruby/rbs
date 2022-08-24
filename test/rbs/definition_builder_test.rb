@@ -2163,4 +2163,35 @@ end
       end
     end
   end
+
+  def test_new_alias
+    SignatureManager.new do |manager|
+      manager.files.merge!(Pathname("foo.rbs") => <<-EOF)
+class C
+  def initialize: (String) -> void
+
+  alias self.compile self.new
+
+  alias self.start self.compile
+end
+      EOF
+      manager.build do |env|
+        builder = DefinitionBuilder.new(env: env)
+
+        builder.build_singleton(type_name("::C")).tap do |definition|
+          definition.methods[:new].tap do |a|
+            assert_equal ["(::String) -> ::C"], a.method_types.map(&:to_s)
+          end
+
+          definition.methods[:compile].tap do |a|
+            assert_equal ["(::String) -> ::C"], a.method_types.map(&:to_s)
+          end
+
+          definition.methods[:start].tap do |a|
+            assert_equal ["(::String) -> ::C"], a.method_types.map(&:to_s)
+          end
+        end
+      end
+    end
+  end
 end
