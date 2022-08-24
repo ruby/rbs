@@ -12,6 +12,10 @@ module RBS
         attr_reader lock_path: Pathname
         attr_reader gemfile_lock: Bundler::LockfileParser
 
+        type gem_queue_entry = { name: String, version: String? }
+
+        @gem_queue: Array[gem_queue_entry]
+
         def self.generate: (config_path: Pathname, gemfile_lock_path: Pathname, ?with_lockfile: boolish) -> Config
 
         def initialize: (config_path: Pathname, gemfile_lock_path: Pathname, with_lockfile: boolish) -> void
@@ -28,7 +32,7 @@ module RBS
 
         def remove_ignored_gems!: () -> void
 
-        def find_source: (name: String) -> untyped
+        def find_source: (name: String) -> Sources::_Source?
 
         def find_best_version: (version: String?, versions: Array[String]) -> Gem::Version
       end
@@ -59,9 +63,9 @@ module RBS
       # config_path is necessary to resolve relative repo_path
       def initialize: (untyped data, config_path: Pathname) -> void
 
-      def add_gem: (untyped gem) -> untyped
+      def add_gem: (gem_entry gem) -> void
 
-      def gem: (String gem_name) -> untyped
+      def gem: (String gem_name) -> gem_entry?
 
       def repo_path: () -> Pathname
 
@@ -69,7 +73,7 @@ module RBS
 
       def dump_to: (Pathname) -> void
 
-      def gems: () -> Array[untyped]
+      def gems: () -> Array[gem_entry]
 
       def check_rbs_availability!: () -> void
     end
