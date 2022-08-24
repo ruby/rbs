@@ -379,6 +379,18 @@ module RBS
             if entry.is_a?(Environment::ClassEntry)
               new_method = definition.methods[:new]
               if new_method.defs.all? {|d| d.defined_in == BuiltinNames::Class.name }
+                alias_methods = definition.methods.each.with_object([]) do |entry, array|
+                  # @type var method: Definition::Method?
+                  name, method = entry
+                  while method
+                    if method.alias_of == new_method
+                      array << name
+                      break
+                    end
+                    method = method.alias_of
+                  end
+                end
+
                 # The method is _untyped new_.
 
                 instance = build_instance(type_name)
@@ -389,7 +401,7 @@ module RBS
 
                   # Inject a virtual _typed new_.
                   initialize_defs = initialize.defs
-                  definition.methods[:new] = Definition::Method.new(
+                  typed_new = Definition::Method.new(
                     super_method: new_method,
                     defs: initialize_defs.map do |initialize_def|
                       method_type = initialize_def.type
@@ -442,6 +454,15 @@ module RBS
                     annotations: [],
                     alias_of: nil
                   )
+
+                  definition.methods[:new] = typed_new
+
+                  alias_methods.each do |alias_name|
+                    definition.methods[alias_name] = definition.methods[alias_name].update(
+                      alias_of: typed_new,
+                      defs: typed_new.defs
+                    )
+                  end
                 end
               end
             end

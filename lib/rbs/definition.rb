@@ -172,6 +172,16 @@ module RBS
           alias_of: alias_of
         )
       end
+
+      def update(super_method: self.super_method, defs: self.defs, accessibility: self.accessibility, alias_of: self.alias_of, annotations: self.annotations)
+        self.class.new(
+          super_method: super_method,
+          defs: defs,
+          accessibility: accessibility,
+          alias_of: alias_of,
+          annotations: annotations
+        )
+      end
     end
 
     module Ancestor
