@@ -56,9 +56,9 @@ module RBS
                         name_to_constant(TypeName.new(name: head, namespace: Namespace.root))
                       else
                         resolve_constant_reference_context(head, context: context) ||
-                          context.first.yield_self do |first_contet|
-                            raise unless first_contet
-                            resolve_constant_reference_inherit(head, scopes: constant_scopes(first_contet.to_type_name))
+                          context.first.yield_self do |first_context|
+                            raise unless first_context
+                            resolve_constant_reference_inherit(head, scopes: constant_scopes(first_context.to_type_name))
                           end
                       end
 
