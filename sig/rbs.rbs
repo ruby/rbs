@@ -19,7 +19,3 @@ module RBS
 
   self.@warnings: Set[String]
 end
-
-module Ruby
-  Signature: singleton(RBS)
-end
