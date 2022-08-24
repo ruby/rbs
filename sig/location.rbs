@@ -42,12 +42,20 @@ module RBS
 
     attr_reader start_loc (): Buffer::loc
 
+    @start_loc: Buffer::loc?
+
     attr_reader end_loc (): Buffer::loc
+
+    @end_loc: Buffer::loc?
 
     attr_reader range (): Range[Integer]
 
+    @range: Range[Integer]?
+
     # A substring of buffer associated to the location.
     def source: () -> String
+
+    @source: String?
 
     def to_s: () -> String
 

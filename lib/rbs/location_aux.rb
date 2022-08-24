@@ -58,7 +58,7 @@ module RBS
     end
 
     def source
-      @source ||= buffer.content[range] or raise
+      @source ||= (buffer.content[range] || raise)
     end
 
     def to_s
