@@ -812,8 +812,10 @@ module RBS
       end
     end
 
-    def try_cache(type_name, cache:, key: type_name)
+    def try_cache(type_name, cache:, key: nil)
       # @type var cc: Hash[untyped, Definition | nil]
+      # @type var key: untyped
+      key ||= type_name
       cc = _ = cache
 
       cc[key] ||= yield
