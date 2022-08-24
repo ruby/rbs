@@ -30,6 +30,8 @@ module RBS
 
     def initialize: (path: Array[Symbol], absolute: boolish) -> void
 
+    @absolute: bool
+
     # Returns new _empty_ namespace.
     def self.empty: () -> Namespace
 
