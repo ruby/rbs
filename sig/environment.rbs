@@ -33,6 +33,8 @@ module RBS
       attr_reader name: TypeName
       attr_reader decls: Array[D[M]]
 
+      @primary: D[M]?
+
       def initialize: (name: TypeName) -> void
 
       def insert: (decl: M, outer: Array[module_decl]) -> void
@@ -114,6 +116,8 @@ module RBS
     def absolute_type_name: (TypeNameResolver, TypeName, context: Array[Namespace]) -> TypeName
 
     def inspect: () -> String
+
+    @buffers: Array[Buffer]
 
     def buffers: () -> Array[Buffer]
 
