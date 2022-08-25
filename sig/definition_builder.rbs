@@ -72,6 +72,34 @@ module RBS
       super_interface_method: bool
     ) -> void
 
+    # Define methods on singleton type
+    #
+    def define_methods_singleton: (
+      Definition,
+      methods: MethodBuilder::Methods,
+      interface_methods: Hash[Symbol, Definition::Method]
+    ) -> void
+
+    # Define methods on instance type
+    #
+    def define_methods_instance: (
+      Definition,
+      methods: MethodBuilder::Methods,
+      interface_methods: Hash[Symbol, Definition::Method]
+    ) -> void
+
+    # Define methods on module instance type
+    #
+    # * Pass `nil` to `module_self_methods:` to build a module instance type that will be mixed in to other modules/classes
+    # * Pass methods from self-type-constraints to build a module instance type alone (to type check itself)
+    #
+    def define_methods_module_instance: (
+      Definition,
+      methods: MethodBuilder::Methods,
+      interface_methods: Hash[Symbol, Definition::Method],
+      module_self_methods: Hash[Symbol, Definition::Method]?
+    ) -> void
+
     # Validates presence of type names recursively.
     # Assumes the type names are already resolved.
     #

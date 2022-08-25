@@ -215,13 +215,16 @@ module RBS
               end
             end
 
-            define_methods(
-              definition,
-              methods: methods,
-              interface_methods: interface_methods,
-              methods_with_self: methods_with_self,
-              super_interface_method: entry.is_a?(Environment::ModuleEntry)
-            )
+            if entry.is_a?(Environment::ModuleEntry)
+              define_methods_module_instance(
+                definition,
+                methods: methods,
+                interface_methods: interface_methods,
+                module_self_methods: methods_with_self
+              )
+            else
+              define_methods_instance(definition, methods: methods, interface_methods: interface_methods)
+            end
 
             entry.decls.each do |d|
               subst = Substitution.build(d.decl.type_params.each.map(&:name), args)
@@ -335,13 +338,7 @@ module RBS
             end
 
             methods = method_builder.build_singleton(type_name)
-            define_methods(
-              definition,
-              interface_methods: interface_methods,
-              methods: methods,
-              methods_with_self: nil,
-              super_interface_method: false
-            )
+            define_methods_singleton(definition, methods: methods, interface_methods: interface_methods)
 
             entry.decls.each do |d|
               d.decl.members.each do |member|
@@ -595,6 +592,30 @@ module RBS
         parent_variable: variables[name],
         type: type,
         declared_in: type_name
+      )
+    end
+
+    def define_methods_instance(definition, methods:, interface_methods:)
+      define_methods(
+        definition,
+        methods: methods,
+        interface_methods: interface_methods,
+        methods_with_self: nil,
+        super_interface_method: false
+      )
+    end
+
+    def define_methods_module_instance(definition, methods:, interface_methods:, module_self_methods:)
+      define_methods(definition, methods: methods, interface_methods: interface_methods, methods_with_self: module_self_methods, super_interface_method: true)
+    end
+
+    def define_methods_singleton(definition, methods:, interface_methods:)
+      define_methods(
+        definition,
+        methods: methods,
+        interface_methods: interface_methods,
+        methods_with_self: nil,
+        super_interface_method: false
       )
     end
 
