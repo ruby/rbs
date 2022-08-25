@@ -173,11 +173,15 @@ module RBS
                          end
 
                   # Successor interface method overwrites.
-                  merge_definition(src: defn,
-                                   dest: definition,
-                                   subst: Substitution.build(defn.type_params, ans.args),
-                                   keep_super: true)
+                  merge_definition(
+                    src: defn,
+                    dest: definition,
+                    subst: Substitution.build(defn.type_params, ans.args),
+                    keep_super: true
+                  )
                 end
+              else
+                methods_with_self = build_instance(type_name, no_self_types: false).methods
               end
             end
 
@@ -211,10 +215,16 @@ module RBS
               end
             end
 
-            define_methods(definition,
-                           interface_methods: interface_methods,
-                           methods: methods,
-                           super_interface_method: entry.is_a?(Environment::ModuleEntry))
+            if entry.is_a?(Environment::ModuleEntry)
+              define_methods_module_instance(
+                definition,
+                methods: methods,
+                interface_methods: interface_methods,
+                module_self_methods: methods_with_self
+              )
+            else
+              define_methods_instance(definition, methods: methods, interface_methods: interface_methods)
+            end
 
             entry.decls.each do |d|
               subst = Substitution.build(d.decl.type_params.each.map(&:name), args)
@@ -328,7 +338,7 @@ module RBS
             end
 
             methods = method_builder.build_singleton(type_name)
-            define_methods(definition, interface_methods: interface_methods, methods: methods, super_interface_method: false)
+            define_methods_singleton(definition, methods: methods, interface_methods: interface_methods)
 
             entry.decls.each do |d|
               d.decl.members.each do |member|
@@ -585,14 +595,41 @@ module RBS
       )
     end
 
-    def define_methods(definition, interface_methods:, methods:, super_interface_method:)
+    def define_methods_instance(definition, methods:, interface_methods:)
+      define_methods(
+        definition,
+        methods: methods,
+        interface_methods: interface_methods,
+        methods_with_self: nil,
+        super_interface_method: false
+      )
+    end
+
+    def define_methods_module_instance(definition, methods:, interface_methods:, module_self_methods:)
+      define_methods(definition, methods: methods, interface_methods: interface_methods, methods_with_self: module_self_methods, super_interface_method: true)
+    end
+
+    def define_methods_singleton(definition, methods:, interface_methods:)
+      define_methods(
+        definition,
+        methods: methods,
+        interface_methods: interface_methods,
+        methods_with_self: nil,
+        super_interface_method: false
+      )
+    end
+
+    def define_methods(definition, methods:, interface_methods:, methods_with_self:, super_interface_method:)
       methods.each do |method_def|
         method_name = method_def.name
         original = method_def.original
 
         if original.is_a?(AST::Members::Alias)
           existing_method = interface_methods[method_name] || definition.methods[method_name]
-          original_method = interface_methods[original.old_name] || definition.methods[original.old_name]
+          original_method =
+            interface_methods[original.old_name] ||
+            methods_with_self&.[](original.old_name) ||
+            definition.methods[original.old_name]
 
           unless original_method
             raise UnknownMethodAliasError.new(
