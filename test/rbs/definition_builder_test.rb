@@ -2194,4 +2194,32 @@ end
       end
     end
   end
+
+  def test_alias_in_module_from_self_constraints
+    loader = RBS::EnvironmentLoader.new
+    env = RBS::Environment.from_loader(loader)
+      rbs = <<~DEF
+module Mod
+  alias request send
+end
+
+class Foo
+  include Mod
+end
+      DEF
+      RBS::Parser.parse_signature(rbs).each do |decl|
+        env << decl
+      end
+      definition_builder = RBS::DefinitionBuilder.new(env: env.resolve_type_names)
+      definition_builder.build_instance(TypeName("::Foo")).tap do |defn|
+        defn.methods[:request].tap do |m|
+          assert_equal ["(::Object::name name, *untyped args) ?{ (*untyped) -> untyped } -> untyped"], m.method_types.map(&:to_s)
+        end
+      end
+      definition_builder.build_instance(TypeName("::Mod")).tap do |defn|
+        defn.methods[:request].tap do |m|
+          assert_equal ["(::Object::name name, *untyped args) ?{ (*untyped) -> untyped } -> untyped"], m.method_types.map(&:to_s)
+        end
+      end
+  end
 end

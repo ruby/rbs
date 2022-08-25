@@ -27,7 +27,8 @@ module RBS
 
     # Returns a Definition of a instance of given type name.
     #
-    # * If TypeName is a module and `no_self_types` is `true`, it won't have methods of _self type constraints_.
+    # If TypeName is a module and `no_self_types` is `true`, it won't have methods of _self type constraints_.
+    # This typically happens when definition is being calculated for mixin.
     #
     def build_instance: (TypeName, ?no_self_types: bool) -> Definition
 
@@ -56,7 +57,20 @@ module RBS
 
     def insert_variable: (TypeName, Hash[Symbol, Definition::Variable], name: Symbol, type: Types::t) -> void
 
-    def define_methods: (Definition, interface_methods: Hash[Symbol, Definition::Method], methods: MethodBuilder::Methods, super_interface_method: bool) -> void
+    # Add methods from `methods` to Definition
+    #
+    # * `methods`:
+    # * `interface_methods`: Methods of interfaces mixed into the type
+    # * `self_constraints_methods`: Methods of the self constraints methods
+    # * `super_interface_method`: `true` to have super method of existing method (`true` is the Definition is the target module)
+    #
+    def define_methods: (
+      Definition,
+      methods: MethodBuilder::Methods,
+      interface_methods: Hash[Symbol, Definition::Method],
+      methods_with_self: Hash[Symbol, Definition::Method]?,
+      super_interface_method: bool
+    ) -> void
 
     # Validates presence of type names recursively.
     # Assumes the type names are already resolved.
