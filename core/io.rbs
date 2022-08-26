@@ -2348,50 +2348,12 @@ class IO < Object
   #
   #     Sending message to parent
   #     Parent got: <Hi Dad>
-  def self.pipe: () -> [IO, IO]
-               | (Encoding ext_enc) -> [IO, IO]
-               | (String ext_int_enc,
-                    ?invalid: :replace | nil,
-                    ?undef: :replace | nil,
-                    ?replace: String,
-                    ?newline: :universal | :crlf | :cr,
-                    ?universal_newline: bool,
-                    ?crlf_newline: bool,
-                    ?cr_newline: bool,
-                    ?xml: :text | :attr
-                  ) -> [IO, IO]
-                | (Encoding ext_enc, Encoding int_enc,
-                  ?invalid: :replace | nil,
-                  ?undef: :replace | nil,
-                  ?replace: String,
-                  ?newline: :universal | :crlf | :cr,
-                  ?universal_newline: bool,
-                  ?crlf_newline: bool,
-                  ?cr_newline: bool,
-                  ?xml: :text | :attr
-                ) -> [IO, IO]
-               | [T] () { (IO read_io, IO write_io) -> T } -> T
-               | [T] (Encoding ext_enc) { (IO read_io, IO write_io) -> T } -> T
-               | [T] (String ext_int_enc,
-                       ?invalid: :replace | nil,
-                       ?undef: :replace | nil,
-                       ?replace: String,
-                       ?newline: :universal | :crlf | :cr,
-                       ?universal_newline: bool,
-                       ?crlf_newline: bool,
-                       ?cr_newline: bool,
-                       ?xml: :text | :attr
-                     ) { (IO read_io, IO write_io) -> T } -> T
-                | [T] (Encoding ext_enc, Encoding int_enc,
-                        ?invalid: :replace | nil,
-                        ?undef: :replace | nil,
-                        ?replace: String,
-                        ?newline: :universal | :crlf | :cr,
-                        ?universal_newline: bool,
-                        ?crlf_newline: bool,
-                        ?cr_newline: bool,
-                        ?xml: :text | :attr
-                      ) { (IO read_io, IO write_io) -> T } -> T
+  def self.pipe: (?Encoding ext_enc) -> [IO, IO]
+               | [A] (?Encoding ext_enc) { (IO, IO) -> A } -> A
+               | (Encoding ext_enc, Encoding int_enc, **untyped) -> [IO, IO]
+               | [A] (Encoding ext_enc, Encoding int_enc, **untyped) { (IO, IO) -> A } -> A
+               | (String ext_int_enc, **untyped) -> [IO, IO]
+               | [A] (String ext_int_enc, **untyped) { (IO, IO) -> A } -> A
 
   # <!--
   #   rdoc-file=io.c
