@@ -26,6 +26,11 @@ class FiberSingletonTest < Test::Unit::TestCase
                        Fiber, :yield, 42, '42'
     end.resume
   end
+
+  def test_current
+    assert_send_type "() -> Fiber",
+                     Fiber, :current
+  end
 end
 
 class FiberTest < Test::Unit::TestCase
@@ -69,27 +74,6 @@ class FiberTest < Test::Unit::TestCase
     assert_send_type "(singleton(StandardError), String, Array[String]) -> untyped",
                      f, :raise, StandardError, 'Error!', caller
   end
-end
-
-require 'fiber'
-
-class FiberSingletonExtTest < Test::Unit::TestCase
-  include TypeAssertions
-
-  library 'fiber'
-  testing 'singleton(::Fiber)'
-
-  def test_current
-    assert_send_type "() -> Fiber",
-                     Fiber, :current
-  end
-end
-
-class FiberExtTest < Test::Unit::TestCase
-  include TypeAssertions
-
-  library 'fiber'
-  testing '::Fiber'
 
   def test_alive?
     f = Fiber.new {}

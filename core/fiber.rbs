@@ -337,8 +337,8 @@ class Fiber < Object
   # parameter is an array of callback information. Exceptions are caught by the
   # `rescue` clause of `begin...end` blocks.
   #
-  def raise: (?String msg) -> untyped
-           | (singleton(Exception), ?String msg, ?Array[String] backtrace) -> untyped
+  def raise: (?string msg) -> untyped
+           | (_Exception, ?string msg, ?Array[string] backtrace) -> untyped
 
   # <!--
   #   rdoc-file=cont.c
