@@ -110,7 +110,7 @@ class Fiber < Object
   # Returns the Fiber scheduler, that was last set for the current thread with
   # Fiber.set_scheduler if and only if the current fiber is non-blocking.
   #
-  def self.current_scheduler: () -> Object?
+  def self.current_scheduler: () -> untyped?
 
   # <!--
   #   rdoc-file=cont.c
@@ -152,7 +152,7 @@ class Fiber < Object
   # If the scheduler is not set, the method raises `RuntimeError (No scheduler is
   # available!)`.
   #
-  def self.schedule: () { (*untyped) -> void } -> Fiber
+  def self.schedule: () { () -> void } -> Fiber
 
   # <!--
   #   rdoc-file=cont.c
@@ -164,7 +164,7 @@ class Fiber < Object
   # #  behavior is the same as blocking.
   #     (see "Non-blocking fibers" section in class docs for details about the scheduler concept).
   #
-  def self.scheduler: () -> untyped
+  def self.scheduler: () -> untyped?
 
   # <!--
   #   rdoc-file=cont.c
@@ -182,7 +182,7 @@ class Fiber < Object
   #
   # See also the "Non-blocking fibers" section in class docs.
   #
-  def self.set_scheduler: (Object) -> Object
+  def self.set_scheduler: (untyped) -> untyped
 
   # <!--
   #   rdoc-file=cont.c
@@ -274,7 +274,8 @@ class Fiber < Object
   #     f.backtrace
   #     #=> nil
   #
-  def backtrace: (*untyped args) -> ::Array[untyped]
+  def backtrace: (?Integer start, ?Integer count) -> Array[String]?
+               | (Range[Integer]) -> Array[String]?
 
   # <!--
   #   rdoc-file=cont.c
@@ -293,7 +294,8 @@ class Fiber < Object
   #     loc.path   #=> "test.rb"
   #     loc.lineno #=> 1
   #
-  def backtrace_locations: (*untyped args) -> ::Array[untyped]?
+  def backtrace_locations: (?Integer start, ?Integer count) -> Array[Thread::Backtrace::Location]?
+                         | (Range[Integer]) -> Array[Thread::Backtrace::Location]?
 
   # <!--
   #   rdoc-file=cont.c
@@ -308,7 +310,7 @@ class Fiber < Object
   #
   # See the "Non-blocking fibers" section in class docs for details.
   #
-  def blocking?: () -> (false | 1)
+  def blocking?: () -> bool
 
   # <!--
   #   rdoc-file=cont.c
