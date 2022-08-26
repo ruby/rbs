@@ -76,6 +76,8 @@
 # the scheduler.
 #
 class Fiber < Object
+  def self.blocking?: () -> untyped
+
   # <!--
   #   rdoc-file=cont.c
   #   - Fiber.current -> fiber
@@ -135,6 +137,8 @@ class Fiber < Object
   # available!```
   #
   def self.schedule: () { (*untyped) -> void } -> Fiber
+
+  def self.scheduler: () -> untyped
 
   # <!--
   #   rdoc-file=cont.c
@@ -281,6 +285,8 @@ class Fiber < Object
   #
   def blocking?: () -> (false | 1)
 
+  alias inspect to_s
+
   # <!--
   #   rdoc-file=cont.c
   #   - raise -> obj
@@ -318,6 +324,8 @@ class Fiber < Object
   # completion without any ```Fiber.yield```
   #
   def resume: (*untyped) -> untyped
+
+  def to_s: () -> untyped
 
   # <!--
   #   rdoc-file=cont.c
