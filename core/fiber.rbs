@@ -76,6 +76,22 @@
 # the scheduler.
 #
 class Fiber < Object
+  # <!--
+  #   rdoc-file=cont.c
+  #   - Fiber.blocking? -> false or 1
+  # -->
+  # Returns `false` if the current fiber is non-blocking. Fiber is non-blocking if
+  # it was created via passing `blocking: false` to Fiber.new, or via
+  # Fiber.schedule.
+  #
+  # If the current Fiber is blocking, the method returns 1. Future developments
+  # may allow for situations where larger integers could be returned.
+  #
+  # Note that, even if the method returns `false`, Fiber behaves differently only
+  # if Fiber.scheduler is set in the current thread.
+  #
+  # See the "Non-blocking fibers" section in class docs for details.
+  #
   def self.blocking?: () -> untyped
 
   # <!--
@@ -87,12 +103,12 @@ class Fiber < Object
   #
   def self.current: () -> Fiber
 
-    # <!--
+  # <!--
   #   rdoc-file=cont.c
   #   - Fiber.current_scheduler -> obj or nil
   # -->
-  # Returns the ```Fiber``` scheduler, that was last set for the current thread with
-  # ```Fiber.set_scheduler``` if and only if the current fiber is non-blocking.
+  # Returns the Fiber scheduler, that was last set for the current thread with
+  # Fiber.set_scheduler if and only if the current fiber is non-blocking.
   #
   def self.current_scheduler: () -> Object?
 
@@ -100,8 +116,8 @@ class Fiber < Object
   #   rdoc-file=cont.c
   #   - Fiber.schedule { |*args| ... } -> fiber
   # -->
-  # The method is *expected* to immediately run the provided block of code in a separate
-  # non-blocking fiber.
+  # The method is *expected* to immediately run the provided block of code in a
+  # separate non-blocking fiber.
   #
   #     puts "Go to sleep!"
   #
@@ -123,48 +139,59 @@ class Fiber < Object
   #     ...1 sec pause here...
   #     I slept well
   #
-  # …e.g. on the first blocking operation inside the ```Fiber (sleep(1))```,
-  # the control is yielded to the outside code (main fiber), and *at the end
-  # of that execution*, the scheduler takes care of properly resuming all the
-  # blocked fibers.
+  # ...e.g. on the first blocking operation inside the Fiber (`sleep(1)`), the
+  # control is yielded to the outside code (main fiber), and *at the end of that
+  # execution*, the scheduler takes care of properly resuming all the blocked
+  # fibers.
   #
-  # Note that the behavior described above is how the method is expected to behave,
-  # actual behavior is up to the current scheduler's implementation of`
-  # ```Fiber::SchedulerInterface#fiber``` method. Ruby doesn't enforce this
-  # method to behave in any particular way.
+  # Note that the behavior described above is how the method is *expected* to
+  # behave, actual behavior is up to the current scheduler's implementation of
+  # Fiber::SchedulerInterface#fiber method. Ruby doesn't enforce this method to
+  # behave in any particular way.
   #
-  # If the scheduler is not set, the method raises ```RuntimeError (No scheduler `s
-  # available!```
+  # If the scheduler is not set, the method raises `RuntimeError (No scheduler is
+  # available!)`.
   #
   def self.schedule: () { (*untyped) -> void } -> Fiber
 
+  # <!--
+  #   rdoc-file=cont.c
+  #   - Fiber.scheduler -> obj or nil
+  # -->
+  # Returns the Fiber scheduler, that was last set for the current thread with Fiber.set_scheduler.
+  #     Returns +nil+ if no scheduler is set (which is the default), and non-blocking fibers'
+  #
+  # #  behavior is the same as blocking.
+  #     (see "Non-blocking fibers" section in class docs for details about the scheduler concept).
+  #
   def self.scheduler: () -> untyped
 
   # <!--
   #   rdoc-file=cont.c
   #   - Fiber.set_scheduler(scheduler) -> scheduler
   # -->
-  # Sets the ```Fiber``` scheduler for the current thread. If the scheduler is set,
-  # non-blocking fibers (created by ```Fiber.ne``` with ```blocking: fals````, or`
-  # by ```Fiber.schedule```) call that scheduler's hook methods on potentially blocking
-  # operations, and the current thread will call scheduler's ```close``` method on
-  # finalization (allowing the scheduler to properly manage all non-finished fibers).
+  # Sets the Fiber scheduler for the current thread. If the scheduler is set,
+  # non-blocking fibers (created by Fiber.new with `blocking: false`, or by
+  # Fiber.schedule) call that scheduler's hook methods on potentially blocking
+  # operations, and the current thread will call scheduler's `close` method on
+  # finalization (allowing the scheduler to properly manage all non-finished
+  # fibers).
   #
-  # ```scheduler``` can be an object of any class corresponding to ```Fiber::SchedulerInterface```.
-  # Its implementation is up to the user.
+  # `scheduler` can be an object of any class corresponding to
+  # Fiber::SchedulerInterface. Its implementation is up to the user.
   #
-  # See also the “Non-blocking fibers” section in class docs.
+  # See also the "Non-blocking fibers" section in class docs.
   #
   def self.set_scheduler: (Object) -> Object
 
   # <!--
   #   rdoc-file=cont.c
-  #   - Fiber.yield(*args) -> obj
+  #   - Fiber.yield(args, ...) -> obj
   # -->
-  # Yields control back to the context that resumed the fiber, passing along any arguments
-  # that were passed to it. The fiber will resume processing at this point when ```resume```
-  # is called next. Any arguments passed to the next ```resume``` will be the value that
-  # this ```Fiber.yield``` expression evaluates to.
+  # Yields control back to the context that resumed the fiber, passing along any
+  # arguments that were passed to it. The fiber will resume processing at this
+  # point when #resume is called next. Any arguments passed to the next #resume
+  # will be the value that this Fiber.yield expression evaluates to.
   #
   def self.yield: (*untyped) -> untyped
 
@@ -204,12 +231,13 @@ class Fiber < Object
 
   # <!--
   #   rdoc-file=cont.c
-  #   - backtrace → array click to toggle source
-  #   - backtrace(start) -> array
-  #   - backtrace(start, count) -> array
-  #   - backtrace(start..end) -> array
+  #   - fiber.backtrace -> array
+  #   - fiber.backtrace(start) -> array
+  #   - fiber.backtrace(start, count) -> array
+  #   - fiber.backtrace(start..end) -> array
   # -->
-  # Returns the current execution stack of the fiber. start, count and end allow to select only parts of the backtrace.
+  # Returns the current execution stack of the fiber. `start`, `count` and `end`
+  # allow to select only parts of the backtrace.
   #
   #     def level3
   #       Fiber.yield
@@ -250,14 +278,13 @@ class Fiber < Object
 
   # <!--
   #   rdoc-file=cont.c
-  #   - backtrace_locations -> array click to toggle source
-  #   - backtrace_locations(start) -> array
-  #   - backtrace_locations(start, count) -> array
-  #   - backtrace_locations(start..end) -> array
+  #   - fiber.backtrace_locations -> array
+  #   - fiber.backtrace_locations(start) -> array
+  #   - fiber.backtrace_locations(start, count) -> array
+  #   - fiber.backtrace_locations(start..end) -> array
   # -->
-  #
-  # Like ```backtrace```, but returns each line of the execution stack
-  # as a ```Thread::Backtrace::Location```. Accepts the same arguments as ```backtrace```.
+  # Like #backtrace, but returns each line of the execution stack as a
+  # Thread::Backtrace::Location. Accepts the same arguments as #backtrace.
   #
   #     f = Fiber.new { Fiber.yield }
   #     f.resume
@@ -270,61 +297,69 @@ class Fiber < Object
 
   # <!--
   #   rdoc-file=cont.c
-  #   - fiber.blocking? -> false or 1
+  #   - fiber.blocking? -> true or false
   # -->
-  # Returns false if the current fiber is non-blocking. Fiber is non-blocking if it
-  # was created via passing blocking: false to Fiber.new, or via Fiber.schedule.
+  # Returns `true` if `fiber` is blocking and `false` otherwise. Fiber is
+  # non-blocking if it was created via passing `blocking: false` to Fiber.new, or
+  # via Fiber.schedule.
   #
-  # If the current Fiber is blocking, the method returns 1. Future developments
-  # may allow for situations where larger integers could be returned.
+  # Note that, even if the method returns `false`, the fiber behaves differently
+  # only if Fiber.scheduler is set in the current thread.
   #
-  # Note that, even if the method returns false, Fiber behaves differently only if
-  # Fiber.scheduler is set in the current thread.
-  #
-  # See the “Non-blocking fibers” section in class docs for details.
+  # See the "Non-blocking fibers" section in class docs for details.
   #
   def blocking?: () -> (false | 1)
 
+  # <!--
+  #   rdoc-file=cont.c
+  #   - inspect()
+  # -->
+  #
   alias inspect to_s
 
   # <!--
   #   rdoc-file=cont.c
-  #   - raise -> obj
-  #   - raise(string) -> obj
-  #   - raise(exception [, string [, array]]) -> obj
+  #   - fiber.raise                                 -> obj
+  #   - fiber.raise(string)                         -> obj
+  #   - fiber.raise(exception [, string [, array]]) -> obj
   # -->
+  # Raises an exception in the fiber at the point at which the last `Fiber.yield`
+  # was called. If the fiber has not been started or has already run to
+  # completion, raises `FiberError`. If the fiber is yielding, it is resumed. If
+  # it is transferring, it is transferred into. But if it is resuming, raises
+  # `FiberError`.
   #
-  # Raises an exception in the fiber at the point at which the last ```Fiber.yield```
-  # was called. If the fiber has not been started or has already run to completion, raises
-  # ```FiberError```. If the fiber is yielding, it is resumed. If it is transferring,
-  # it is transferred into. But if it is resuming, raises ```FiberError```.
-  #
-  # With no arguments, raises a ```RuntimeError```. With a single ```String``` argument,
-  # raises a ```RuntimeError``` with the string as a message. Otherwise, the first parameter
-  # should be the name of an ```Exception``` class (or an object that returns an ```Exception```
-  # object when sent an exception message). The optional second parameter sets the message
-  # associated with the exception, and the third parameter is an array of callback information.
-  # Exceptions are caught by the ```rescue``` clause of ```begin...end``` blocks.
+  # With no arguments, raises a `RuntimeError`. With a single `String` argument,
+  # raises a `RuntimeError` with the string as a message.  Otherwise, the first
+  # parameter should be the name of an `Exception` class (or an object that
+  # returns an `Exception` object when sent an `exception` message). The optional
+  # second parameter sets the message associated with the exception, and the third
+  # parameter is an array of callback information. Exceptions are caught by the
+  # `rescue` clause of `begin...end` blocks.
   #
   def raise: (?String msg) -> untyped
            | (singleton(Exception), ?String msg, ?Array[String] backtrace) -> untyped
 
   # <!--
   #   rdoc-file=cont.c
-  #   - resume(args, ...) →-> obj
+  #   - fiber.resume(args, ...) -> obj
   # -->
+  # Resumes the fiber from the point at which the last Fiber.yield was called, or
+  # starts running it if it is the first call to #resume. Arguments passed to
+  # resume will be the value of the Fiber.yield expression or will be passed as
+  # block parameters to the fiber's block if this is the first #resume.
   #
-  # Resumes the fiber from the point at which the last ```Fiber.yield``` was called, or starts
-  # running it if it is the first call to ```resume```. Arguments passed to resume will be the
-  # value of the ```Fiber.yield``` expression or will be passed as block parameters to the fiber's
-  # block if this is the first ```resume```.
-  #
-  # Alternatively, when ```resume``` is called it evaluates to the arguments passed to the next
-  # ```Fiber.yield``` statement inside the fiber's block or to the block value if it runs to
-  # completion without any ```Fiber.yield```
+  # Alternatively, when resume is called it evaluates to the arguments passed to
+  # the next Fiber.yield statement inside the fiber's block or to the block value
+  # if it runs to completion without any Fiber.yield
   #
   def resume: (*untyped) -> untyped
 
+  # <!--
+  #   rdoc-file=cont.c
+  #   - to_s()
+  # -->
+  #
   def to_s: () -> untyped
 
   # <!--
