@@ -218,7 +218,7 @@ module RBS
       @method_name = method_name
       @members = members
 
-      message = "#{Location.to_string location}: #{qualified_method_name} has duplicated definitions"
+      message = +"#{Location.to_string location}: #{qualified_method_name} has duplicated definitions"
       if members.size > 1
         message << " in #{other_locations.map { |loc| Location.to_string loc }.join(', ')}"
       end

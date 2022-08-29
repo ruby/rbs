@@ -108,7 +108,7 @@ module RBS
       end
 
       def to_s
-        s = ""
+        s = +""
 
         if unchecked?
           s << "unchecked "
