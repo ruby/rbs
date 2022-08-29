@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require "rbs"
 require "rbs/test"
 require "optparse"

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module RBS
   module MethodNameHelper
     def method_name_string()

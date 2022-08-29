@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module RBS
   class Validator
     attr_reader :env

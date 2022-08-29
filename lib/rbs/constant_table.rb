@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module RBS
   class ConstantTable
     attr_reader :definition_builder

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module RBS
   class EnvironmentLoader
     class UnknownLibraryError < StandardError

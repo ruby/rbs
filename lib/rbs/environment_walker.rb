@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module RBS
   class EnvironmentWalker
     InstanceNode = _ = Struct.new(:type_name, keyword_init: true)

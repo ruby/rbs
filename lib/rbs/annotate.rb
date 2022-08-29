@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require "rdoc"
 
 require "rbs/annotate/rdoc_annotator"

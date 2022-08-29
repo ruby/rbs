@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module RBS
   class MethodType
     attr_reader :type_params
