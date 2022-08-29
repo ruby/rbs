@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module RBS
   class Repository
     DEFAULT_STDLIB_ROOT = Pathname(_ = __dir__) + "../../stdlib"

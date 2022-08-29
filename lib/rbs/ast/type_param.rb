@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module RBS
   module AST
     class TypeParam
@@ -106,7 +108,7 @@ module RBS
       end
 
       def to_s
-        s = ""
+        s = +""
 
         if unchecked?
           s << "unchecked "

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module RBS
   class Writer
     attr_reader :out
@@ -280,7 +282,7 @@ module RBS
                "self.#{method_name(member.name)}"
              end
 
-      string = ""
+      string = +""
 
       prefix = "#{visibility}def #{name}:"
       padding = " " * (prefix.size-1)

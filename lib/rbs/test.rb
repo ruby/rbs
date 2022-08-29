@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require "securerandom"
 require "rbs/test/observer"
 require "rbs/test/spy"

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module RBS
   class TypeNameResolver
     Query = _ = Struct.new(:type_name, :context, keyword_init: true)
