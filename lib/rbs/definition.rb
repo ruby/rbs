@@ -120,7 +120,7 @@ module RBS
       end
 
       def comments
-        @comments ||= _ = defs.map(&:comment).compact
+        @comments ||= defs.map(&:comment).compact.uniq
       end
 
       def annotations
