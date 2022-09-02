@@ -416,7 +416,7 @@ module RBS
 
       attr_reader self_type: t?
 
-      def initialize: (type: Types::Function, self_type: t?, required: boolish) -> void
+      def initialize: (type: Types::Function, ?self_type: t?, required: boolish) -> void
 
       def ==: (untyped other) -> bool
 
@@ -439,7 +439,7 @@ module RBS
 
       type loc = Location[bot, bot]
 
-      def initialize: (location: loc?, type: Function, self_type: t?, block: Block?) -> void
+      def initialize: (location: loc?, type: Function, ?self_type: t?, block: Block?) -> void
 
       include _TypeBase
 
