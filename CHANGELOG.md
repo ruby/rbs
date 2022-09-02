@@ -2,6 +2,53 @@
 
 ## master
 
+## 2.7.0.pre.1 (2022-09-02)
+
+See [Release Note 2.7](https://github.com/ruby/rbs/wiki/Release-Note-2.7) for the highlights of this release.
+
+### Signature updates
+
+* fiber ([#1071](https://github.com/ruby/rbs/pull/1071))
+* `BigDecimal` ([#1053](https://github.com/ruby/rbs/pull/1053))
+* `ERB::Util`, `ERB::DefMethod` ([#1074](https://github.com/ruby/rbs/pull/1074))
+* `Float::Infinity` ([#1095](https://github.com/ruby/rbs/pull/1095))
+* `Logger` ([#1046](https://github.com/ruby/rbs/pull/1046))
+* `IO.pipe`, `IO.foreach` ([#1057](https://github.com/ruby/rbs/pull/1057))
+* `Module#refine` ([#1064](https://github.com/ruby/rbs/pull/1064))
+* `Regexp.new` ([#1059](https://github.com/ruby/rbs/pull/1059))
+* `StringIO#write` ([#1065](https://github.com/ruby/rbs/pull/1065))
+* `Warning.#warn`, `Kernel.#warn` ([#1056](https://github.com/ruby/rbs/pull/1056))
+
+### Language updates
+
+* Type of `self` in blocks/procs ([#1077](https://github.com/ruby/rbs/issues/1077), [#1101](https://github.com/ruby/rbs/pull/1101))
+
+### Library changes
+
+* RDoc plugin ([#1048](https://github.com/ruby/rbs/pull/1048))
+* Dedupe method comments ([#1103](https://github.com/ruby/rbs/pull/1103))
+* Reduce object allocations for GC ([#1102](https://github.com/ruby/rbs/pull/1102))
+* Add `frozen_string_literal: true` ([#1100](https://github.com/ruby/rbs/pull/1100))
+* Load dependencies on `-r` option also ([#1013](https://github.com/ruby/rbs/pull/1013))
+* Fix DefinitionBuilder for methods aliased from module self constraints ([#1099](https://github.com/ruby/rbs/pull/1099))
+* Fix RBS type definitions ([#1098](https://github.com/ruby/rbs/pull/1098))
+* Give aliases of `.new` methods correct type ([#1097](https://github.com/ruby/rbs/pull/1097))
+* `nil` versions are discouraged and will be deprecated in Rubygems 4 ([#1091](https://github.com/ruby/rbs/pull/1091))
+* Fixes towards Rubygems 4.0 ([#1090](https://github.com/ruby/rbs/pull/1090))
+* Remove redundant `add` for `Repository.default` ([#1062](https://github.com/ruby/rbs/pull/1062))
+* Refactor: Use Repository in stdlib source ([#1063](https://github.com/ruby/rbs/pull/1063))
+* Move `bin/sort` implementation to under `lib/` ([#1051](https://github.com/ruby/rbs/pull/1051))
+
+#### rbs prototype
+
+* Fix some error on `prototype runtime` ([#1055](https://github.com/ruby/rbs/pull/1055))
+* Skip existing RBS files from batch `prototype` ([#1060](https://github.com/ruby/rbs/pull/1060))
+
+### Miscellaneous
+
+* Discard outputs from test code ([#1093](https://github.com/ruby/rbs/pull/1093))
+* Skip testing visibility methods with Ruby 3.2 ([#1082](https://github.com/ruby/rbs/pull/1082))
+
 ## 2.6.0 (2022-06-22)
 
 RBS 2.6 ships with `rbs prototype` commands improvements and signature updates.
