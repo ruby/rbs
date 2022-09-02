@@ -845,17 +845,33 @@ module RBS
       def map_type(&block)
         if block
           Function.new(
-            required_positionals: required_positionals.map {|param| param.map_type(&block) },
-            optional_positionals: optional_positionals.map {|param| param.map_type(&block) },
+            required_positionals: amap(required_positionals) {|param| param.map_type(&block) },
+            optional_positionals: amap(optional_positionals) {|param| param.map_type(&block) },
             rest_positionals: rest_positionals&.yield_self {|param| param.map_type(&block) },
-            trailing_positionals: trailing_positionals.map {|param| param.map_type(&block) },
-            required_keywords: required_keywords.transform_values {|param| param.map_type(&block) },
-            optional_keywords: optional_keywords.transform_values {|param| param.map_type(&block) },
+            trailing_positionals: amap(trailing_positionals) {|param| param.map_type(&block) },
+            required_keywords: hmapv(required_keywords) {|param| param.map_type(&block) },
+            optional_keywords: hmapv(optional_keywords) {|param| param.map_type(&block) },
             rest_keywords: rest_keywords&.yield_self {|param| param.map_type(&block) },
             return_type: yield(return_type)
           )
         else
           enum_for :map_type
+        end
+      end
+
+      def amap(array, &block)
+        if array.empty?
+          _ = array
+        else
+          array.map(&block)
+        end
+      end
+
+      def hmapv(hash, &block)
+        if hash.empty?
+          _ = hash
+        else
+          hash.transform_values(&block)
         end
       end
 

@@ -404,6 +404,10 @@ module RBS
       def drop_tail: () -> [Param, Function]
 
       def has_keyword?: () -> bool
+
+      def amap: [A, B] (Array[A]) { (A) -> B } -> Array[B]
+
+      def hmapv: [X, Y, Z] (Hash[X, Y]) { (Y) -> Z } -> Hash[X, Z]
     end
 
     class Block

@@ -10,11 +10,11 @@ module RBS
     end
 
     def self.empty
-      new(path: [], absolute: false)
+      @empty ||= new(path: [], absolute: false)
     end
 
     def self.root
-      new(path: [], absolute: true)
+      @root ||= new(path: [], absolute: true)
     end
 
     def +(other)
@@ -30,8 +30,10 @@ module RBS
     end
 
     def parent
-      raise "Parent with empty namespace" if empty?
-      self.class.new(path: path.take(path.size - 1), absolute: absolute?)
+      @parent ||= begin
+        raise "Parent with empty namespace" if empty?
+        self.class.new(path: path.take(path.size - 1), absolute: absolute?)
+      end
     end
 
     def absolute?

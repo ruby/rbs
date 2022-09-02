@@ -37,11 +37,11 @@ module RBS
 
       query = Query.new(type_name: type_name, context: context)
       try_cache(query) do
-        path_head, *path_tail = type_name.to_namespace.path
+        path_head, *path_tail = type_name.split
         raise unless path_head
 
         name_head = TypeName.new(name: path_head, namespace: Namespace.empty)
- 
+
         absolute_head = context.find do |namespace|
           # @type break: TypeName
           full_name = name_head.with_prefix(namespace)

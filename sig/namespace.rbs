@@ -38,6 +38,12 @@ module RBS
 
     @absolute: bool
 
+    @parent: Namespace?
+
+    self.@root: Namespace?
+
+    self.@empty: Namespace?
+
     # Returns new _empty_ namespace.
     def self.empty: () -> Namespace
 
