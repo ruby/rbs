@@ -228,7 +228,7 @@ module RDoc
     # later sees `class Container`.  `add_class` automatically upgrades `given_name`
     # to a class in this case.
     #
-    def add_class: (class_types class_type, ::String given_name, ?::String superclass) -> (RDoc::NormalClass | RDoc::SingleClass)
+    def add_class: (class_types class_type, ::String given_name, ?::String superclass, ?Array[RDoc::TypeParameter]) -> (RDoc::NormalClass | RDoc::SingleClass)
 
     # <!--
     #   rdoc-file=lib/rdoc/context.rb
@@ -271,7 +271,7 @@ module RDoc
     # Adds a module named `name`.  If RDoc already knows `name` is a class then that
     # class is returned instead.  See also #add_class.
     #
-    def add_module: (singleton(RDoc::NormalModule) class_type, String name) -> RDoc::NormalModule
+    def add_module: (singleton(RDoc::NormalModule) class_type, String name, ?Array[RDoc::TypeParameter]) -> RDoc::NormalModule
 
     # <!--
     #   rdoc-file=lib/rdoc/context.rb
@@ -747,6 +747,25 @@ module RDoc
     # `new_name`, has `comment` and is a `singleton` context.
     #
     def initialize: (String? text, String name, String old_name, RDoc::Comment? comment, ?bool `singleton`) -> void
+  end
+
+  class TypeParameter < CodeObject
+    type variance = :invariant | :covariant | :contravariant
+
+    attr_reader name: String
+    attr_reader variance: variance
+    attr_reader upper_bound: String?
+    attr_reader `unchecked`: bool
+
+    def initialize: (String name, Symbol variance, ?bool `unchecked`, ?String? upper_bound) -> void
+
+    def ==: (untyped other) -> bool
+
+    alias eql? ==
+
+    def unchecked?: () -> bool
+
+    def to_s: () -> String
   end
 
   # <!-- rdoc-file=lib/rdoc/stats.rb -->

@@ -52,14 +52,27 @@ module RBS
 
       def parse_class_decl(decl:, context:, outer_name: nil)
         full_name = fully_qualified_name(outer_name: outer_name, decl: decl)
-        klass = context.add_class(RDoc::NormalClass, full_name.to_s, decl.super_class&.name&.to_s || "::Object")
+        klass = context.add_class(RDoc::NormalClass, full_name.to_s, decl.super_class&.name&.to_s || "::Object",
+                                  decl.type_params.map do |type_param|
+                                    RDoc::TypeParameter.new(type_param.name.to_s,
+                                                        type_param.variance,
+                                                        type_param.unchecked?,
+                                                        type_param.upper_bound&.name&.to_s)
+                                    end
+                                  )
         klass.add_comment(construct_comment(context: context, comment: comment_string(decl)), context) if decl.comment
         decl.members.each { |member| parse_member(decl: member, context: context, outer_name: full_name) }
       end
 
       def parse_module_decl(decl:, context:, outer_name: nil)
         full_name = fully_qualified_name(outer_name: outer_name, decl: _ = decl)
-        kmodule = context.add_module(RDoc::NormalModule, full_name.to_s)
+        kmodule = context.add_module(RDoc::NormalModule, full_name.to_s,
+                                     decl.type_params.map do |type_param|
+                                       RDoc::TypeParameter.new(type_param.name.to_s,
+                                                           type_param.variance,
+                                                           type_param.unchecked?,
+                                                           type_param.upper_bound&.name&.to_s)
+                                       end)
         kmodule.add_comment(construct_comment(context: context, comment: comment_string(decl)), context) if decl.comment
         decl.members.each { |member| parse_member(decl: member, context: context, outer_name: full_name) }
       end
