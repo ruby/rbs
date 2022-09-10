@@ -47,6 +47,11 @@ module RBS
       when path
         dirs << path
       when library
+        if library == 'rubygems'
+          RBS.logger.warn '`rubygems` has been moved to core library, so it is always loaded. Remove explicit loading `rubygems`'
+          return
+        end
+
         if libs.add?(Library.new(name: library, version: version)) && resolve_dependencies
           resolve_dependencies(library: library, version: version)
         end
