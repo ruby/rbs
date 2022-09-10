@@ -3,7 +3,6 @@ require_relative "../test_helper"
 class GemRequirementSingletonTest < Test::Unit::TestCase
   include TypeAssertions
 
-  library "rubygems"
   testing "singleton(::Gem::Requirement)"
 
   def test_create
@@ -43,7 +42,6 @@ end
 class GemRequirementInstanceTest < Test::Unit::TestCase
   include TypeAssertions
 
-  library "rubygems"
   testing "::Gem::Requirement"
 
   def test_concat
