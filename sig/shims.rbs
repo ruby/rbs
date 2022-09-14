@@ -51,7 +51,7 @@ module RDoc
     def attributes: () -> Array[Attr]
   end
 
-  module Markup
+  class Markup
     class Document
       include Enumerable[Document]
 
