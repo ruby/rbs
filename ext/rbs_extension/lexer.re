@@ -132,7 +132,7 @@ start:
 
       "$" global_ident      { return next_token(state, tGIDENT); }
 
-      skip = [ \t\n]+;
+      skip = [ \t\n\r]+;
 
       skip     { state->start = state->current; goto start; }
       "\x00"   { return next_token(state, pEOF); }
