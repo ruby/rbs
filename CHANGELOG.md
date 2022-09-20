@@ -2,6 +2,21 @@
 
 ## master
 
+## 2.7.0.pre.2 (2022-09-20)
+
+### Signature updates
+
+* `Set` ([#1110](https://github.com/ruby/rbs/pull/1110))
+* `RDoc::Markup` ([#1109](https://github.com/ruby/rbs/pull/1109))
+
+### Library changes
+
+* Always skip CR explicitly ([#1112](https://github.com/ruby/rbs/pull/1112))
+
+### Miscellaneous
+
+* Use `append_cflags` for other than GCC ([#1106](https://github.com/ruby/rbs/pull/1106))
+
 ## 2.7.0.pre.1 (2022-09-02)
 
 See [Release Note 2.7](https://github.com/ruby/rbs/wiki/Release-Note-2.7) for the highlights of this release.
