@@ -485,7 +485,7 @@ module Process
 
   # <!--
   #   rdoc-file=process.c
-  #   - Process.kill(signal, pid, ...)    -> integer
+  #   - Process.kill(signal, pid, *pids)    -> integer
   # -->
   # Sends the given signal to the specified process id(s) if *pid* is positive. If
   # *pid* is zero, *signal* is sent to all processes whose group ID is equal to
