@@ -677,8 +677,10 @@ class OptionParser
   #
   def on: (*String params) ?{ (*untyped) -> untyped } -> self
         | (String params, Class | Array[String] | Hash[Symbol, untyped] | Regexp obj, ?String desc) ?{ (*untyped) -> untyped } -> self
+        | (String short_params, String long_params, Class | Array[String] | Hash[Symbol, untyped] | Regexp obj, ?String desc) ?{ (*untyped) -> untyped } -> self
         | (*String params, Proc | Method handler) -> self
         | (String params, Class | Array[String] | Hash[Symbol, untyped] | Regexp obj, ?String desc, Proc | Method handler) -> self
+        | (String short_params, String long_params, Class | Array[String] | Hash[Symbol, untyped] | Regexp obj, ?String desc, Proc | Method handler) -> self
 
   # <!--
   #   rdoc-file=lib/optparse.rb
@@ -696,8 +698,10 @@ class OptionParser
   #
   def on_head: (*String params) ?{ (*untyped) -> untyped } -> self
              | (String params, Class | Array[String] | Hash[Symbol, untyped] | Regexp obj, ?String desc) ?{ (*untyped) -> untyped } -> self
+             | (String short_params, String long_params, Class | Array[String] | Hash[Symbol, untyped] | Regexp obj, ?String desc) ?{ (*untyped) -> untyped } -> self
              | (*String params, Proc | Method handler) -> self
              | (String params, Class | Array[String] | Hash[Symbol, untyped] | Regexp obj, ?String desc, Proc | Method handler) -> self
+             | (String short_params, String long_params, Class | Array[String] | Hash[Symbol, untyped] | Regexp obj, ?String desc, Proc | Method handler) -> self
 
   # <!--
   #   rdoc-file=lib/optparse.rb
@@ -715,8 +719,10 @@ class OptionParser
   #
   def on_tail: (*String params) ?{ (*untyped) -> untyped } -> self
              | (String params, Class | Array[String] | Hash[Symbol, untyped] | Regexp obj, ?String desc) ?{ (*untyped) -> untyped } -> self
+             | (String short_params, String long_params, Class | Array[String] | Hash[Symbol, untyped] | Regexp obj, ?String desc) ?{ (*untyped) -> untyped } -> self
              | (*String params, Proc | Method handler) -> self
              | (String params, Class | Array[String] | Hash[Symbol, untyped] | Regexp obj, ?String desc, Proc | Method handler) -> self
+             | (String short_params, String long_params, Class | Array[String] | Hash[Symbol, untyped] | Regexp obj, ?String desc, Proc | Method handler) -> self
 
   # <!--
   #   rdoc-file=lib/optparse.rb
