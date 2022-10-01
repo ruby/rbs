@@ -13,7 +13,6 @@ class GemSingletonTest < Test::Unit::TestCase
     end
   end
 
-  library "rubygems"
   testing "singleton(::Gem)"
 
   def test_activated_gem_paths

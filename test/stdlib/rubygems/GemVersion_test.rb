@@ -3,7 +3,6 @@ require_relative "../test_helper"
 class GemVersionSingletonTest < Test::Unit::TestCase
   include TypeAssertions
 
-  library "rubygems"
   testing "singleton(::Gem::Version)"
 
   def test_correct?
@@ -33,7 +32,6 @@ end
 class GemVersionInstanceTest < Test::Unit::TestCase
   include TypeAssertions
 
-  library "rubygems"
   testing "::Gem::Version"
 
   def test_comparable

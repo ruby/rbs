@@ -81,6 +81,22 @@ end
     end
   end
 
+  def test_loading_rubygems
+    RBS.logger_output = io = StringIO.new
+    mktmpdir do |path|
+      loader = EnvironmentLoader.new
+      loader.add(library: "rubygems")
+
+      env = Environment.new
+      loader.load(env: env)
+
+      assert_operator env.class_decls, :key?, TypeName("::Gem")
+      assert io.string.include?('`rubygems` has been moved to core library')
+    end
+  ensure
+    RBS.logger_output = nil
+  end
+
   def test_loading_library_from_gem_repo
     mktmpdir do |path|
       (path + "gems").mkdir
