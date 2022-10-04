@@ -84,7 +84,7 @@ GEM
     stringio (3.0.2)
     strong_json (2.1.2)
     tempfile (0.1.2)
-    test-unit (3.5.3)
+    test-unit (3.5.5)
       power_assert
     unicode-display_width (2.2.0)
 
