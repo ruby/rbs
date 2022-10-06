@@ -2,6 +2,13 @@
 
 ## master
 
+## 2.7.0.pre.3 (2022-10-06)
+
+### Signature updates
+
+* rubygems ([#1107](https://github.com/ruby/rbs/pull/1107))
+* `OptionParser` ([#1114](https://github.com/ruby/rbs/pull/1114))
+
 ## 2.7.0.pre.2 (2022-09-20)
 
 ### Signature updates
