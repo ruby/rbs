@@ -120,9 +120,13 @@ class OptionParserTest < Test::Unit::TestCase
     assert_send_type "(*String) -> self", opt, :on, '-a'
     assert_send_type "(String, Class) -> self", opt, :on, '-a', Array
     assert_send_type "(String, Class, String) -> self", opt, :on, '-a', Array, 'description'
+    assert_send_type "(String, String, Class, String) -> self", opt, :on, '-a', '--all', Array, 'description'
     assert_send_type "(String, Array[String]) -> self", opt, :on, '-a', ['foo', 'bar']
+    assert_send_type "(String, String, Array[String]) -> self", opt, :on, '-a', '--all', ['foo', 'bar']
     assert_send_type "(String, Hash[Symbol, untyped]) -> self", opt, :on, '-a', {foo: 1, bar: 2}
+    assert_send_type "(String, String, Hash[Symbol, untyped]) -> self", opt, :on, '-a', '--all', {foo: 1, bar: 2}
     assert_send_type "(String, Regexp) -> self", opt, :on, '-a', /foo/
+    assert_send_type "(String, String, Regexp) -> self", opt, :on, '-a', '--all', /foo/
     assert_send_type "(*String, Proc) -> self", opt, :on, '-a', proc {}
   end
 
@@ -130,9 +134,13 @@ class OptionParserTest < Test::Unit::TestCase
     assert_send_type "(*String) -> self", opt, :on_head, '-a'
     assert_send_type "(String, Class) -> self", opt, :on_head, '-a', Array
     assert_send_type "(String, Class, String) -> self", opt, :on_head, '-a', Array, 'description'
+    assert_send_type "(String, String, Class, String) -> self", opt, :on_head, '-a', '--all', Array, 'description'
     assert_send_type "(String, Array[String]) -> self", opt, :on_head, '-a', ['foo', 'bar']
+    assert_send_type "(String, String, Array[String]) -> self", opt, :on_head, '-a', '--all', ['foo', 'bar']
     assert_send_type "(String, Hash[Symbol, untyped]) -> self", opt, :on_head, '-a', {foo: 1, bar: 2}
+    assert_send_type "(String, String, Hash[Symbol, untyped]) -> self", opt, :on_head, '-a', '--all', {foo: 1, bar: 2}
     assert_send_type "(String, Regexp) -> self", opt, :on_head, '-a', /foo/
+    assert_send_type "(String, String, Regexp) -> self", opt, :on_head, '-a', '--all', /foo/
     assert_send_type "(*String, Proc) -> self", opt, :on_head, '-a', proc {}
   end
 
@@ -140,9 +148,13 @@ class OptionParserTest < Test::Unit::TestCase
     assert_send_type "(*String) -> self", opt, :on_tail, '-a'
     assert_send_type "(String, Class) -> self", opt, :on_tail, '-a', Array
     assert_send_type "(String, Class, String) -> self", opt, :on_tail, '-a', Array, 'description'
+    assert_send_type "(String, String, Class, String) -> self", opt, :on_tail, '-a', '--all', Array, 'description'
     assert_send_type "(String, Array[String]) -> self", opt, :on_tail, '-a', ['foo', 'bar']
+    assert_send_type "(String, String, Array[String]) -> self", opt, :on_tail, '-a', '--all', ['foo', 'bar']
     assert_send_type "(String, Hash[Symbol, untyped]) -> self", opt, :on_tail, '-a', {foo: 1, bar: 2}
+    assert_send_type "(String, String, Hash[Symbol, untyped]) -> self", opt, :on_tail, '-a', '--all', {foo: 1, bar: 2}
     assert_send_type "(String, Regexp) -> self", opt, :on_tail, '-a', /foo/
+    assert_send_type "(String, String, Regexp) -> self", opt, :on_tail, '-a', '--all', /foo/
     assert_send_type "(*String, Proc) -> self", opt, :on_tail, '-a', proc {}
   end
 
