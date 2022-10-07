@@ -30,6 +30,18 @@ class URILDAPSingletonTest < Test::Unit::TestCase
                         filter: '(t=1)',
                         extensions: 't=2'
                       }
+
+    assert_send_type '({ host: nil, port: nil, dn: nil, attributes: nil, scope: nil, filter: nil, extensions: nil }) -> URI::LDAP',
+                      URI::LDAP, :build,
+                      {
+                        host: nil,
+                        port: nil,
+                        dn: nil,
+                        attributes: nil,
+                        scope: nil,
+                        filter: nil,
+                        extensions: nil
+                      }
   end
 
   def test_new

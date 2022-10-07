@@ -28,6 +28,17 @@ class URIHTTPSingletonTest < Test::Unit::TestCase
                         query: 't=1',
                         fragment: 'baz'
                       }
+
+    assert_send_type  '({ userinfo: nil, host: nil, port: nil, path: nil, query: nil, fragment: nil }) -> URI::HTTP',
+                      URI::HTTP, :build,
+                      {
+                        userinfo: nil,
+                        host: nil,
+                        port: nil,
+                        path: nil,
+                        query: nil,
+                        fragment: nil
+                      }
   end
 end
 

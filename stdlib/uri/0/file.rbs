@@ -42,7 +42,7 @@ module URI
     #     uri2.to_s  # => "file://host.example.com/ruby/src"
     #
     def self.build: (Array[String] args) -> URI::File
-                  | ({ host: String, path: String }) -> URI::File
+                  | ({ host: String?, path: String? }) -> URI::File
 
     # <!--
     #   rdoc-file=lib/uri/file.rb

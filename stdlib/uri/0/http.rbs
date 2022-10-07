@@ -46,7 +46,7 @@ module URI
     # URIs as per RFC 1738.
     #
     def self.build: (Array[String | Integer] args) -> URI::HTTP
-                  | ({ userinfo: String, host: String, port: Integer, path: String, query: String, fragment: String }) -> URI::HTTP
+                  | ({ userinfo: String?, host: String?, port: Integer?, path: String?, query: String?, fragment: String? }) -> URI::HTTP
 
     # <!--
     #   rdoc-file=lib/uri/http.rb

@@ -50,7 +50,7 @@ module URI
     #       "/dc=example;dc=com", "query", nil, nil, nil])
     #
     def self.build: (Array[nil | String | Integer] args) -> URI::LDAP
-                  | ({ host: String, port: Integer?, dn: String, attributes: String?, scope: String?, filter: String?, extensions: String? }) -> URI::LDAP
+                  | ({ host: String?, port: Integer?, dn: String?, attributes: String?, scope: String?, filter: String?, extensions: String? }) -> URI::LDAP
 
     # <!--
     #   rdoc-file=lib/uri/ldap.rb
