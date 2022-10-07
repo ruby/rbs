@@ -2,6 +2,13 @@
 
 ## master
 
+## 2.7.0 (2022-10-07)
+
+### Signature updates
+
+* `Symbol#start_with?` ([#1118](https://github.com/ruby/rbs/pull/1118))
+* `URL::*.build` ([#1118](https://github.com/ruby/rbs/pull/1118))
+
 ## 2.7.0.pre.3 (2022-10-06)
 
 ### Signature updates
