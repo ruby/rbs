@@ -16,6 +16,13 @@ class URIFileSingletonTest < Test::Unit::TestCase
                         host: 'localhost',
                         path: '/path/to/file'
                       }
+
+    assert_send_type  '({ host: nil, path: nil }) -> URI::File',
+                      URI::File, :build,
+                      {
+                        host: nil,
+                        path: nil
+                      }
   end
 end
 
