@@ -349,6 +349,14 @@ def +: (Float) -> Float
      | (Numeric) -> Numeric
 ```
 
+Overloaded method can have `...` to overload an existing method. It is useful for monkey-patching.
+
+```
+def +: (Float) -> Float
+def +: (BigDecimal) -> BigDecimal
+     | ...
+```
+
 You need extra parentheses on return type to avoid ambiguity.
 
 ```
