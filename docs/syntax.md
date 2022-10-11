@@ -3,18 +3,17 @@
 ## Types
 
 ```markdown
-_type_ ::= _class-name_ _type-arguments_                (Class instance type)
-         | _interface-name_ _type-arguments_            (Interface type)
-         | _alias-name_ _type-arguments_                (Alias type)
-         | `singleton(` _class-name_ `)`                (Class singleton type)
-         | _literal_                                    (Literal type)
-         | _type_ `|` _type_                            (Union type)
-         | _type_ `&` _type_                            (Intersection type)
-         | _type_ `?`                                   (Optional type)
-         | `{` _record-name_ `:` _type_ `,` etc. `}`    (Record type)
-         | `[]` | `[` _type_ `,` etc. `]`               (Tuples)
-         | _type-variable_                              (Type variables)
-         | `^(` _parameters_ `) ->` _type_              (Proc type)
+_type_ ::= _class-name_ _type-arguments_                 (Class instance type)
+         | _interface-name_ _type-arguments_             (Interface type)
+         | _alias-name_ _type-arguments_                 (Alias type)
+         | `singleton(` _class-name_ `)`                 (Class singleton type)
+         | _literal_                                     (Literal type)
+         | _type_ `|` _type_                             (Union type)
+         | _type_ `&` _type_                             (Intersection type)
+         | _type_ `?`                                    (Optional type)
+         | `{` _record-name_ `:` _type_ `,` etc. `}`     (Record type)
+         | `[]` | `[` _type_ `,` etc. `]`                (Tuples)
+         | _type-variable_                               (Type variables)
          | `self`
          | `instance`
          | `class`
@@ -24,6 +23,7 @@ _type_ ::= _class-name_ _type-arguments_                (Class instance type)
          | `top`
          | `bot`
          | `void`
+         | _proc_                                        (Proc type)
 
 _class-name_ ::= _namespace_ /[A-Z]\w*/
 _interface-name_ ::= _namespace_ /_[A-Z]\w*/
@@ -43,6 +43,8 @@ _literal_ ::= _string-literal_
             | _integer-literal_
             | `true`
             | `false`
+
+_proc_ ::= _parameters?_ _self-type-binding?_ _block?_ `->` _type_
 ```
 
 ### Class instance type
@@ -164,15 +166,6 @@ class Ref[T]              # Object is scoped in the class declaration.
 end
 ```
 
-### Proc type
-
-Proc type denotes type of procedures, `Proc` instances.
-
-```
-^(Integer) -> String                  # A procedure with an `Integer` parameter and returns `String`
-^(?String, size: Integer) -> bool     # A procedure with `String` optional parameter, `size` keyword of `Integer`, and returns `bool`
-```
-
 ### Base types
 
 `self` denotes the type of receiver. The type is used to model the open recursion via `self`.
@@ -221,14 +214,28 @@ They are all equivalent for the type system; they are all _top type_.
 
 `void` tells developers a hint that _the value should not be used_. `boolish` implies the value is used as a truth value. `top` is anything else.
 
-## Method Types
+### Proc type
+
+Proc type denotes type of procedures, `Proc` instances.
+
+```
+^(Integer) -> String                  # A procedure with an `Integer` parameter and returns `String`
+^(?String, size: Integer) -> bool     # A procedure with `String` optional parameter, `size` keyword of `Integer`, and returns `bool`
+```
+
+See the next section for details.
+
+## Method Types and Proc Types
 
 ```markdown
-_method-type_ ::= `(` _parameters_ `) ->` _type_                                       # Method without block
-                | `(` _parameters_ `) { (` _parameters_ `) -> ` _type_ `} ->` _type_   # Method with required block
-                | `(` _parameters_ `) ?{ (` _parameters_ `) -> ` _type_ `} ->` _type_  # Method with optional block
+_method-type_ ::= _parameters?_ _block?_ `->` _type_                # Method type
 
-_parameters_ ::= _required-positionals_ _optional-positionals_ _rest-positional_ _trailing-positionals_ _keywords_
+_proc_ ::= `^` _parameters?_ _self-type-binding?_ _block?_ `->` _type_  # Proc type
+
+_parameters?_ ::=                   (Empty)
+                | _parameters_      (Parameters)
+
+_parameters_ ::= `(` _required-positionals_ _optional-positionals_ _rest-positional_ _trailing-positionals_ _keywords_ `)`
 
 _parameter_ ::= _type_ _var-name_                                  # Parameter with var name
               | _type_                                             # Parameter without var name
@@ -243,6 +250,13 @@ _keywords_ ::=                                                     # Empty
              | `?` _keyword_ `:` _parameter_ `,` _keywords_        # Optional keyword
 
 _var-name_ ::= /[a-z]\w*/
+
+_self-type-binding?_ =                              (Empty)
+                     | `[` `self` `:` _type_ `]`    (Self type binding)
+
+_block?_ =                                                           (No block)
+         | `{` _parameters_ _self-type-binding?_ `->` _type_ `}`      (Block)
+         | `?` `{` _parameters_ _self-type-binding?_ `->` _type_ `}`  (Optional block)
 ```
 
 ### Parameters
@@ -250,7 +264,7 @@ _var-name_ ::= /[a-z]\w*/
 A parameter can be a type or a pair of type and variable name.
 Variable name can be used for documentation.
 
-### Examples
+#### Examples
 
 ```
 # Two required positional `Integer` parameters, and returns `String`
@@ -267,6 +281,29 @@ Variable name can be used for documentation.
 # `name` is a optional keyword.
 # `created_at` is a optional keyword, and the value can be `nil`.
 (size: Integer sz, ?name: String, ?created_at: Time?) -> void
+```
+
+### Self type binding
+
+Self type binding represents the type of methods that uses `#instance_eval`, which replaces the value of `self` inside blocks.
+
+```ruby
+123.instance_eval do
+  self + 1        # self is `123` here
+end
+```
+
+Proc types and blocks can have self type bindings.
+
+```rbs
+^(Integer) [self: String] -> void                                     # Proc type with self type binding
+^(Integer) [self: String] { (Symbol) [self: bool] -> void } -> void   # Proc type with self type binding of `String` and a block with self type binding of `bool`
+```
+
+Method type can have blocks with self type bindings.
+
+```rbs
+() { (Integer) [self: String] -> void } -> void     # A method type with block with self type binding
 ```
 
 ## Members
