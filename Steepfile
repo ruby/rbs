@@ -14,9 +14,6 @@ target :lib do
   signature "stdlib/optparse/0/"
   signature "stdlib/rdoc/0/"
 
-  # Please remove the following line after releasing #1107
-  signature "core/rubygems/"
-
   configure_code_diagnostics do |config|
     config[D::Ruby::MethodDefinitionMissing] = :hint
     config[D::Ruby::ElseOnExhaustiveCase] = :hint
