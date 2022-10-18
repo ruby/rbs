@@ -11,5 +11,6 @@ This documentation describes major tools related to RBS.
 
 * Emacs: [rbs-mode](https://github.com/ybiquitous/rbs-mode)
 * RubyMine: [It supports RBS by default](https://www.jetbrains.com/help/ruby/rbs.html)
+* Sublime Text: [sublime-rbs-plugin](https://github.com/soutaro/sublime-rbs-plugin)
 * Vim: [rbs.vim](https://github.com/pocke/rbs.vim)
 * Visual Studio Code: [vscode-rbs-syntax](https://github.com/soutaro/vscode-rbs-syntax)
