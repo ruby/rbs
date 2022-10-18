@@ -1,10 +1,10 @@
-# Integrations
+# Tools
 
 This documentation describes major tools related to RBS.
 
 ## Type Checkers
 
-* [Steep](https://github.com/soutaro/steep)
+* [Steep](https://github.com/soutaro/steep) is a static type checker based on RBS. You can use it as a language server integrated with an editor or IDE and run it from the command line.
 * [TypeProf](https://github.com/ruby/typeprof)
 
 ## Editor integrations
