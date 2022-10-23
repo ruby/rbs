@@ -404,11 +404,11 @@ end
                 class TestForYield
                   public
 
-                  def m1: () { () -> untyped } -> untyped
+                  def m1: () ?{ () -> untyped } -> untyped
 
-                  def m2: () { (untyped) -> untyped } -> untyped
+                  def m2: () ?{ (untyped) -> untyped } -> untyped
 
-                  def m3: () { (untyped, untyped) -> untyped } -> untyped
+                  def m3: () ?{ (untyped, untyped) -> untyped } -> untyped
 
                   def m4: () -> untyped
                 end

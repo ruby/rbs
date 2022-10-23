@@ -23,7 +23,7 @@ module RBS
         if body_node
           if (yields = any_node?(body_node) {|n| n.type == :YIELD })
             method_block = Types::Block.new(
-              required: true,
+              required: false,
               type: Types::Function.empty(untyped),
               self_type: nil
             )

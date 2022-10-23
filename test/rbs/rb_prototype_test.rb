@@ -64,7 +64,7 @@ end
 class Hello
   def hello: (untyped a, ?::Integer b, *untyped c, untyped d, e: untyped, ?f: ::Integer, **untyped g) ?{ () -> untyped } -> nil
 
-  def self.world: () { (untyped, untyped, untyped, x: untyped, y: untyped) -> untyped } -> untyped
+  def self.world: () ?{ (untyped, untyped, untyped, x: untyped, y: untyped) -> untyped } -> untyped
 
   def kw_req: (a: untyped) -> nil
 end
