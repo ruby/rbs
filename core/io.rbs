@@ -2984,6 +2984,12 @@ IO::TRUNC: Integer
 
 IO::WRONLY: Integer
 
+IO::READABLE: Integer
+
+IO::WRITABLE: Integer
+
+IO::PRIORITY: Integer
+
 # <!-- rdoc-file=io.c -->
 # exception to wait for reading by EAGAIN. see IO.select.
 #
