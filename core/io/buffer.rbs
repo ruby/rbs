@@ -706,5 +706,20 @@ class IO
     PRIVATE: Integer
 
     READONLY: Integer
+
+    class LockedError < RuntimeError
+    end
+
+    class AllocationError < RuntimeError
+    end
+
+    class AccessError < RuntimeError
+    end
+
+    class InvalidatedError < RuntimeError
+    end
+
+    class MaskError < ArgumentError
+    end
   end
 end
