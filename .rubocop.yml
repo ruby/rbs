@@ -13,3 +13,8 @@ Lint/DuplicateMethods:
   Enabled: true
   Include:
     - 'test/**/*_test.rb'
+
+Style/FrozenStringLiteralComment:
+  Enabled: true
+  Include:
+    - 'lib/**/*.rb'

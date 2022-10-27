@@ -94,8 +94,8 @@ start:
       "untyped"       { return next_token(state, kUNTYPED); }
       "void"          { return next_token(state, kVOID); }
 
-      dqstring = ["] ("\\"["] | [^"\x00])* ["];
-      sqstring = ['] ("\\"['] | [^'\x00])* ['];
+      dqstring = ["] ("\\"[abefnrstv"\\] | [^"\\\x00])* ["];
+      sqstring = ['] ("\\"['\\] | [^'\x00])* ['];
 
       dqstring     { return next_token(state, tDQSTRING); }
       sqstring     { return next_token(state, tSQSTRING); }
@@ -132,7 +132,7 @@ start:
 
       "$" global_ident      { return next_token(state, tGIDENT); }
 
-      skip = [ \t\n]+;
+      skip = [ \t\n\r]+;
 
       skip     { state->start = state->current; goto start; }
       "\x00"   { return next_token(state, pEOF); }

@@ -1,3 +1,6 @@
+# frozen_string_literal: true
+
+require_relative './sources/base'
 require_relative './sources/git'
 require_relative './sources/stdlib'
 require_relative './sources/rubygems'

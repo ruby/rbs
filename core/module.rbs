@@ -1401,7 +1401,7 @@ class Module < Object
   #
   # Returns a module, where refined methods are defined.
   #
-  def refine: (Class arg0) { (untyped arg0) -> untyped } -> self
+  def refine: (Module mod) { () -> void } -> Refinement
 
   # <!--
   #   rdoc-file=object.c

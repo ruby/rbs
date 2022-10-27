@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'singleton'
 
 module RBS
@@ -5,27 +7,30 @@ module RBS
     module Sources
       # signatures that are bundled in rbs gem under the stdlib/ directory
       class Stdlib
+        include Base
         include Singleton
 
+        REPO = Repository.default
+
         def has?(config_entry)
-          gem_dir(config_entry).exist?
+          lookup(config_entry)
         end
 
         def versions(config_entry)
-          gem_dir(config_entry).glob('*/').map { |path| path.basename.to_s }
+          REPO.gems[config_entry['name']].versions.keys.map(&:to_s)
         end
 
         def install(dest:, config_entry:, stdout:)
           # Do nothing because stdlib RBS is available by default
           name = config_entry['name']
           version = config_entry['version'] or raise
-          from = gem_dir(config_entry) / version
+          from = lookup(config_entry)
           stdout.puts "Using #{name}:#{version} (#{from})"
         end
 
         def manifest_of(config_entry)
-          version = config_entry['version'] or raise
-          manifest_path = gem_dir(config_entry).join(version, 'manifest.yaml')
+          config_entry['version'] or raise
+          manifest_path = (lookup(config_entry) or raise).join('manifest.yaml')
           YAML.safe_load(manifest_path.read) if manifest_path.exist?
         end
 
@@ -35,8 +40,8 @@ module RBS
           }
         end
 
-        private def gem_dir(config_entry)
-          Repository::DEFAULT_STDLIB_ROOT.join(config_entry['name'])
+        private def lookup(config_entry)
+          REPO.lookup(config_entry['name'], config_entry['version'])
         end
       end
     end

@@ -4,6 +4,7 @@ require "securerandom"
 
 class KernelTest < StdlibTest
   target Kernel
+  discard_output
 
   def test_caller
     caller(1, 2)
@@ -81,7 +82,7 @@ class KernelTest < StdlibTest
 
   def test_display
     1.display
-    1.display(STDERR)
+    1.display($stderr)
   end
 
   def test_dup
@@ -110,8 +111,8 @@ class KernelTest < StdlibTest
 
   def test_fork
     if Process.respond_to?(:fork)
-      exit unless fork
-      fork { exit }
+      exit! unless fork
+      fork { exit! }
     end
   end
 
@@ -352,11 +353,8 @@ class KernelTest < StdlibTest
     end
 
     begin
-      $stderr = StringIO.new
       abort 'foo'
     rescue SystemExit
-    ensure
-      $stderr = STDERR
     end
   end
 
@@ -494,15 +492,11 @@ class KernelTest < StdlibTest
   end
 
   def test_print
-    $stdout = StringIO.new
     print 1
     print 'a', 2
-  ensure
-    $stdout = STDOUT
   end
 
   def test_printf
-    $stdout = StringIO.new
     File.open('/dev/null', 'w') do |io|
       printf io, 'a'
       printf io, '%d', 2
@@ -512,8 +506,6 @@ class KernelTest < StdlibTest
     #   printf '%d', 2
     #   printf '%d%s', 2, 1
     #   printf
-  ensure
-    $stdout = STDOUT
   end
 
   def test_proc
@@ -525,27 +517,18 @@ class KernelTest < StdlibTest
   end
 
   def test_putc
-    $stdout = StringIO.new
     putc 1
     putc 'a'
-  ensure
-    $stdout = STDOUT
   end
 
   def test_puts
-    $stdout = StringIO.new
     puts 1
     puts Object.new
-  ensure
-    $stdout = STDOUT
   end
 
   def test_p
-    $stdout = StringIO.new
     p 1
     p 'a', 2
-  ensure
-    $stdout = STDOUT
   end
 
   def test_rand
@@ -603,13 +586,14 @@ class KernelTest < StdlibTest
   end
 
   def test_warn
-    $stderr = StringIO.new
     warn
     warn 'foo'
     warn 'foo', 'bar'
     warn 'foo', uplevel: 1
-  ensure
-    $stderr = STDERR
+
+    omit_if(RUBY_VERSION < "3.0")
+
+    warn 'foo', uplevel: 1, category: :deprecated
   end
 
   def test_exec

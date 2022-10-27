@@ -81,7 +81,13 @@ module Spy
                       end
 
           begin
-            return_value = spy.object.__send__(spy.method_name, *args, &spy_block)
+            if spy_block
+              return_value = spy.object.__send__(spy.method_name, *args) do |*a, **k, &b|
+                spy_block.call(*a, **k, &b)
+              end
+            else
+              return_value = spy.object.__send__(spy.method_name, *args, &spy_block)
+            end
           rescue ::Exception => exn
             exception = exn
           end
@@ -114,6 +120,34 @@ module Spy
         }.ruby2_keywords)
       end.new()
     end
+  end
+end
+
+module VersionHelper
+  def if_ruby(range)
+    r = Range.new(
+      range.begin&.yield_self {|b| Gem::Version.new(b) },
+      range.end&.yield_self {|e| Gem::Version.new(e) },
+      range.exclude_end?
+    )
+
+    if r === Gem::Version.new(RUBY_VERSION)
+      yield
+    else
+      notify "Skipping test: #{r} !== #{RUBY_VERSION}"
+    end
+  end
+
+  def if_ruby3(&block)
+    if_ruby("3.0.0"..."4.0.0", &block)
+  end
+
+  def if_ruby30(&block)
+    if_ruby("3.0.0"..."3.1.0", &block)
+  end
+
+  def if_ruby31(&block)
+    if_ruby("3.1.0"..."3.2.0", &block)
   end
 end
 
@@ -301,7 +335,8 @@ module TypeAssertions
     mt = mt.update(block: if mt.block
                             RBS::Types::Block.new(
                               type: mt.block.type.with_return_type(RBS::Types::Bases::Any.new(location: nil)),
-                              required: mt.block.required
+                              required: mt.block.required,
+                              self_type: nil
                             )
                           end,
                    type: mt.type.with_return_type(RBS::Types::Bases::Any.new(location: nil)))
@@ -350,27 +385,7 @@ module TypeAssertions
     notify "Error allowed: #{exn.inspect}"
   end
 
-  def if_ruby(range)
-    r = Range.new(
-      range.begin&.yield_self {|b| Gem::Version.new(b) },
-      range.end&.yield_self {|e| Gem::Version.new(e) },
-      range.exclude_end?
-    )
-
-    if r === Gem::Version.new(RUBY_VERSION)
-      yield
-    else
-      notify "Skipping test: #{r} !== #{RUBY_VERSION}"
-    end
-  end
-
-  def if_ruby3(&block)
-    if_ruby("3.0.0"..."4.0.0", &block)
-  end
-
-  def if_ruby30
-    if_ruby("3.0.0"..."3.1.0", &block)
-  end
+  include VersionHelper
 end
 
 class ToInt
@@ -476,6 +491,8 @@ end
 class StdlibTest < Test::Unit::TestCase
   RBS.logger_level = ENV["RBS_TEST_LOGLEVEL"] || "info"
 
+  include VersionHelper
+
   loader = RBS::EnvironmentLoader.new
   DEFAULT_ENV = RBS::Environment.new.yield_self do |env|
     loader.load(env: env)
@@ -509,5 +526,21 @@ class StdlibTest < Test::Unit::TestCase
 
   def hook
     self.class.hook
+  end
+
+  def self.discard_output
+    include DiscardOutput
+  end
+
+  module DiscardOutput
+    def setup
+      null = StringIO.new
+      @stdout, @stderr = $stdout, $stderr
+      $stderr = $stdout = null
+    end
+
+    def teardown
+      $stderr, $stdout = @stderr, @stdout
+    end
   end
 end

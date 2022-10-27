@@ -9,16 +9,24 @@ module RBS
         def install: (dest: Pathname, config_entry: Config::gem_entry, stdout: CLI::_IO) -> void
         def to_lockfile: () -> source_entry
         def manifest_of: (Config::gem_entry) -> manifest_entry?
+        def dependencies_of: (Config::gem_entry) -> Array[{"name" => String}]?
       end
 
       type source_entry = Git::source_entry
-                            | Stdlib::source_entry
-                            | Rubygems::source_entry
+                        | Stdlib::source_entry
+                        | Rubygems::source_entry
+
       type manifest_entry = {
         "dependencies" => Array[{"name" => String}]?,
       }
 
+      module Base : _Source
+        def dependencies_of: (Config::gem_entry config_entry) -> Array[{"name" => String}]?
+      end
+
       class Git
+        include Base
+
         METADATA_FILENAME: String
 
         type source_entry = {
@@ -50,6 +58,10 @@ module RBS
 
         private
 
+        @git_dir: Pathname?
+
+        @resolved_revision: String?
+
         def _install: (dest: Pathname , config_entry: Config::gem_entry) -> void
 
         def cp_r: (Pathname, Pathname) -> void
@@ -77,6 +89,11 @@ module RBS
 
       # signatures that are bundled in rbs gem under the stdlib/ directory
       class Stdlib
+
+        REPO: Repository
+
+        include Base
+
         type source_entry =  {
           'type' => 'stdlib',
         }
@@ -84,7 +101,7 @@ module RBS
         # polyfill of singleton module
         def self.instance: () -> instance
 
-        def has?: (Config::gem_entry) -> bool
+        def has?: (Config::gem_entry) -> boolish
 
         def versions: (Config::gem_entry) -> Array[String]
 
@@ -96,11 +113,13 @@ module RBS
 
         private
 
-        def gem_dir: (Config::gem_entry) -> Pathname
+        def lookup: (Config::gem_entry) -> Pathname?
       end
 
       # sig/ directory
       class Rubygems
+        include Base
+
         type source_entry = {
           'type' => 'rubygems',
         }

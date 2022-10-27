@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require "open3"
 require "optparse"
 require "shellwords"
@@ -74,6 +76,7 @@ module RBS
 
     attr_reader :stdout
     attr_reader :stderr
+    attr_reader :original_args
 
     def initialize(stdout:, stderr:)
       @stdout = stdout
@@ -100,6 +103,8 @@ module RBS
     end
 
     def run(args)
+      @original_args = args.dup
+
       options = LibraryOptions.new
 
       opts = OptionParser.new
@@ -667,6 +672,8 @@ EOU
       output_dir = nil
       # @type var base_dir: Pathname?
       base_dir = nil
+      # @type var force: bool
+      force = false
 
       opts = OptionParser.new
       opts.banner = <<EOU
@@ -696,6 +703,10 @@ EOU
         base_dir = Pathname(path)
       end
 
+      opts.on("--force", "Overwrite existing RBS files") do
+        force = true
+      end
+
       opts.parse!(args)
 
       unless has_parser?
@@ -722,6 +733,9 @@ EOU
       input_paths = args.map {|arg| Pathname(arg) }
 
       if output_dir
+        # @type var skip_paths: Array[Pathname]
+        skip_paths = []
+
         # batch mode
         input_paths.each do |path|
           stdout.puts "Processing `#{path}`..."
@@ -764,13 +778,36 @@ EOU
             parser = new_parser[]
             parser.parse file_path.read()
 
-            stdout.puts "  Writing RBS to `#{output_path}`..."
+            if output_path.file?
+              if force
+                stdout.puts "    - Writing RBS to existing file `#{output_path}`..."
+              else
+                stdout.puts "    - Skipping existing file `#{output_path}`..."
+                skip_paths << file_path
+                next
+              end
+            else
+              stdout.puts "    - Writing RBS to `#{output_path}`..."
+            end
 
             (output_path.parent).mkpath
             output_path.open("w") do |io|
               writer = Writer.new(out: io)
               writer.write(parser.decls)
             end
+          end
+        end
+
+        unless skip_paths.empty?
+          stdout.puts
+          stdout.puts ">>>> Skipped existing #{skip_paths.size} files. Use `--force` option to update the files."
+          command = original_args.take(original_args.size - input_paths.size)
+
+          skip_paths.take(10).each do |path|
+            stdout.puts "  #{defined?(Bundler) ? "bundle exec " : ""}rbs #{Shellwords.join(command)} --force #{Shellwords.escape(path.to_s)}"
+          end
+          if skip_paths.size > 10
+            stdout.puts "  ..."
           end
         end
       else
@@ -975,7 +1012,7 @@ EOB
       env_hash = {
         'RUBYOPT' => "#{ENV['RUBYOPT']} -rrbs/test/setup",
         'RBS_TEST_OPT' => test_opt(options),
-        'RBS_TEST_LOGLEVEL' => RBS.logger_level,
+        'RBS_TEST_LOGLEVEL' => %w(DEBUG INFO WARN ERROR FATAL)[RBS.logger_level || 5] || "UNKNOWN",
         'RBS_TEST_SAMPLE_SIZE' => sample_size,
         'RBS_TEST_DOUBLE_SUITE' => double_suite,
         'RBS_TEST_UNCHECKED_CLASSES' => (unchecked_classes.join(',') unless unchecked_classes.empty?),

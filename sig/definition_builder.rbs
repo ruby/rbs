@@ -1,4 +1,15 @@
 module RBS
+  # DefinitionBuilder translates TypeName to Definition of the type
+  #
+  # The translation goes three steps:
+  #
+  # 1. Calculate _ancestors_ of the type with AncestorBuilder
+  # 2. Calculate _partial_ definitions of each ancestor
+  # 3. Merge _partial_ definitions
+  #
+  # A _partial_ definition is a definition of one type name, in terms of it doesn't have methods of super classes nor included modules.
+  #
+  #
   class DefinitionBuilder
     attr_reader env: Environment
     attr_reader type_name_resolver: TypeNameResolver
@@ -12,17 +23,22 @@ module RBS
 
     def initialize: (env: Environment, ?ancestor_builder: AncestorBuilder?, ?method_builder: MethodBuilder?) -> void
 
+    def build_interface: (TypeName) -> Definition
+
+    # Returns a Definition of a instance of given type name.
+    #
+    # If TypeName is a module and `no_self_types` is `true`, it won't have methods of _self type constraints_.
+    # This typically happens when definition is being calculated for mixin.
+    #
+    def build_instance: (TypeName, ?no_self_types: bool) -> Definition
+
+    def build_singleton: (TypeName) -> Definition
+
     def validate_super_class!: (TypeName, Environment::ClassEntry) -> void
 
     def ensure_namespace!: (Namespace, location: Location[untyped, untyped]?) -> void
 
-    def build_interface: (TypeName) -> Definition
-
-    def build_instance: (TypeName, ?no_self_types: bool) -> Definition
-
     def build_singleton0: (TypeName) -> Definition
-
-    def build_singleton: (TypeName) -> Definition
 
     def merge_definition: (src: Definition, dest: Definition, subst: Substitution, ?implemented_in: :keep | TypeName | nil, ?keep_super: bool) -> void
 
@@ -41,7 +57,48 @@ module RBS
 
     def insert_variable: (TypeName, Hash[Symbol, Definition::Variable], name: Symbol, type: Types::t) -> void
 
-    def define_methods: (Definition, interface_methods: Hash[Symbol, Definition::Method], methods: MethodBuilder::Methods, super_interface_method: bool) -> void
+    # Add methods from `methods` to Definition
+    #
+    # * `methods`:
+    # * `interface_methods`: Methods of interfaces mixed into the type
+    # * `self_constraints_methods`: Methods of the self constraints methods
+    # * `super_interface_method`: `true` to have super method of existing method (`true` is the Definition is the target module)
+    #
+    def define_methods: (
+      Definition,
+      methods: MethodBuilder::Methods,
+      interface_methods: Hash[Symbol, Definition::Method],
+      methods_with_self: Hash[Symbol, Definition::Method]?,
+      super_interface_method: bool
+    ) -> void
+
+    # Define methods on singleton type
+    #
+    def define_methods_singleton: (
+      Definition,
+      methods: MethodBuilder::Methods,
+      interface_methods: Hash[Symbol, Definition::Method]
+    ) -> void
+
+    # Define methods on instance type
+    #
+    def define_methods_instance: (
+      Definition,
+      methods: MethodBuilder::Methods,
+      interface_methods: Hash[Symbol, Definition::Method]
+    ) -> void
+
+    # Define methods on module instance type
+    #
+    # * Pass `nil` to `module_self_methods:` to build a module instance type that will be mixed in to other modules/classes
+    # * Pass methods from self-type-constraints to build a module instance type alone (to type check itself)
+    #
+    def define_methods_module_instance: (
+      Definition,
+      methods: MethodBuilder::Methods,
+      interface_methods: Hash[Symbol, Definition::Method],
+      module_self_methods: Hash[Symbol, Definition::Method]?
+    ) -> void
 
     # Validates presence of type names recursively.
     # Assumes the type names are already resolved.

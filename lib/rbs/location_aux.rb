@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module RBS
   class Location
     def inspect
@@ -58,7 +60,7 @@ module RBS
     end
 
     def source
-      @source ||= buffer.content[range] or raise
+      @source ||= (buffer.content[range] || raise)
     end
 
     def to_s

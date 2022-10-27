@@ -641,4 +641,10 @@ RBS
       assert_equal "foo?: String, bar!: Integer", method_type.type.param_to_s
     end
   end
+
+  def test_neline_inconsitency
+    code = "module Test\r\nend"
+
+    RBS::Parser.parse_signature(code)
+  end
 end

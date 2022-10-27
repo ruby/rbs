@@ -1,7 +1,8 @@
 require "test_helper"
 require 'tempfile'
+require 'rbs/sorter'
 
-class RBS::ToolSortTest < Test::Unit::TestCase
+class RBS::SorterTest < Test::Unit::TestCase
   def test_sort
     assert_sort <<~RUBY_EXPECTED, <<~RUBY_ORIG
       class C
@@ -122,7 +123,7 @@ class RBS::ToolSortTest < Test::Unit::TestCase
     actual = Tempfile.create('rbs-sort-test-') do |f|
       f.write original
       f.close
-      system File.join(__dir__, '../../bin/sort'), f.path, exception: true
+      RBS::Sorter.new(Pathname(f.path), stdout: StringIO.new).run
 
       File.read(f.path)
     end

@@ -454,6 +454,27 @@ end
     end
   end
 
+  def test_build_comment_dedup
+    SignatureManager.new do |manager|
+      manager.files.merge!(Pathname("foo.rbs") => <<-EOF)
+class Hello
+  # doc1
+  def foo: () -> String
+         | (Integer) -> String
+end
+      EOF
+      manager.build do |env|
+        builder = DefinitionBuilder.new(env: env)
+
+        builder.build_instance(type_name("::Hello")).tap do |definition|
+          foo = definition.methods[:foo]
+
+          assert_equal 1, foo.comments.size
+        end
+      end
+    end
+  end
+
   def test_build_instance_method_variance
     SignatureManager.new do |manager|
       manager.files.merge!(Pathname("foo.rbs") => <<-EOF)
@@ -2162,5 +2183,64 @@ end
         end
       end
     end
+  end
+
+  def test_new_alias
+    SignatureManager.new do |manager|
+      manager.files.merge!(Pathname("foo.rbs") => <<-EOF)
+class C
+  def initialize: (String) -> void
+
+  alias self.compile self.new
+
+  alias self.start self.compile
+end
+      EOF
+      manager.build do |env|
+        builder = DefinitionBuilder.new(env: env)
+
+        builder.build_singleton(type_name("::C")).tap do |definition|
+          definition.methods[:new].tap do |a|
+            assert_equal ["(::String) -> ::C"], a.method_types.map(&:to_s)
+          end
+
+          definition.methods[:compile].tap do |a|
+            assert_equal ["(::String) -> ::C"], a.method_types.map(&:to_s)
+          end
+
+          definition.methods[:start].tap do |a|
+            assert_equal ["(::String) -> ::C"], a.method_types.map(&:to_s)
+          end
+        end
+      end
+    end
+  end
+
+  def test_alias_in_module_from_self_constraints
+    loader = RBS::EnvironmentLoader.new
+    env = RBS::Environment.from_loader(loader)
+      rbs = <<~DEF
+module Mod
+  alias request send
+end
+
+class Foo
+  include Mod
+end
+      DEF
+      RBS::Parser.parse_signature(rbs).each do |decl|
+        env << decl
+      end
+      definition_builder = RBS::DefinitionBuilder.new(env: env.resolve_type_names)
+      definition_builder.build_instance(TypeName("::Foo")).tap do |defn|
+        defn.methods[:request].tap do |m|
+          assert_equal ["(::Object::name name, *untyped args) ?{ (*untyped) -> untyped } -> untyped"], m.method_types.map(&:to_s)
+        end
+      end
+      definition_builder.build_instance(TypeName("::Mod")).tap do |defn|
+        defn.methods[:request].tap do |m|
+          assert_equal ["(::Object::name name, *untyped args) ?{ (*untyped) -> untyped } -> untyped"], m.method_types.map(&:to_s)
+        end
+      end
   end
 end

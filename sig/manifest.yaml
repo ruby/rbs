@@ -6,3 +6,4 @@ dependencies:
   - name: optparse
   - name: rubygems
   - name: tsort
+  - name: rdoc

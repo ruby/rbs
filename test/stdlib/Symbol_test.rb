@@ -299,6 +299,8 @@ class SymbolInstanceTest < Test::Unit::TestCase
                      :a, :start_with?, ToStr.new("b")
     assert_send_type "(ToStr, ToStr) -> true",
                      :a, :start_with?, ToStr.new("b"), ToStr.new("a")
+    assert_send_type "(Regexp) -> true",
+                     :a, :start_with?, /a/
   end
 
   def test_succ

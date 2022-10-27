@@ -2,6 +2,139 @@
 
 ## master
 
+## 2.7.0 (2022-10-07)
+
+### Signature updates
+
+* `Symbol#start_with?` ([#1118](https://github.com/ruby/rbs/pull/1118))
+* `URL::*.build` ([#1118](https://github.com/ruby/rbs/pull/1118))
+
+## 2.7.0.pre.3 (2022-10-06)
+
+### Signature updates
+
+* rubygems ([#1107](https://github.com/ruby/rbs/pull/1107))
+* `OptionParser` ([#1114](https://github.com/ruby/rbs/pull/1114))
+
+## 2.7.0.pre.2 (2022-09-20)
+
+### Signature updates
+
+* `Set` ([#1110](https://github.com/ruby/rbs/pull/1110))
+* `RDoc::Markup` ([#1109](https://github.com/ruby/rbs/pull/1109))
+
+### Library changes
+
+* Always skip CR explicitly ([#1112](https://github.com/ruby/rbs/pull/1112))
+
+### Miscellaneous
+
+* Use `append_cflags` for other than GCC ([#1106](https://github.com/ruby/rbs/pull/1106))
+
+## 2.7.0.pre.1 (2022-09-02)
+
+See [Release Note 2.7](https://github.com/ruby/rbs/wiki/Release-Note-2.7) for the highlights of this release.
+
+### Signature updates
+
+* fiber ([#1071](https://github.com/ruby/rbs/pull/1071))
+* `BigDecimal` ([#1053](https://github.com/ruby/rbs/pull/1053))
+* `ERB::Util`, `ERB::DefMethod` ([#1074](https://github.com/ruby/rbs/pull/1074))
+* `Float::Infinity` ([#1095](https://github.com/ruby/rbs/pull/1095))
+* `Logger` ([#1046](https://github.com/ruby/rbs/pull/1046))
+* `IO.pipe`, `IO.foreach` ([#1057](https://github.com/ruby/rbs/pull/1057))
+* `Module#refine` ([#1064](https://github.com/ruby/rbs/pull/1064))
+* `Regexp.new` ([#1059](https://github.com/ruby/rbs/pull/1059))
+* `StringIO#write` ([#1065](https://github.com/ruby/rbs/pull/1065))
+* `Warning.#warn`, `Kernel.#warn` ([#1056](https://github.com/ruby/rbs/pull/1056))
+
+### Language updates
+
+* Type of `self` in blocks/procs ([#1077](https://github.com/ruby/rbs/issues/1077), [#1101](https://github.com/ruby/rbs/pull/1101))
+
+### Library changes
+
+* RDoc plugin ([#1048](https://github.com/ruby/rbs/pull/1048))
+* Dedupe method comments ([#1103](https://github.com/ruby/rbs/pull/1103))
+* Reduce object allocations for GC ([#1102](https://github.com/ruby/rbs/pull/1102))
+* Add `frozen_string_literal: true` ([#1100](https://github.com/ruby/rbs/pull/1100))
+* Load dependencies on `-r` option also ([#1013](https://github.com/ruby/rbs/pull/1013))
+* Fix DefinitionBuilder for methods aliased from module self constraints ([#1099](https://github.com/ruby/rbs/pull/1099))
+* Fix RBS type definitions ([#1098](https://github.com/ruby/rbs/pull/1098))
+* Give aliases of `.new` methods correct type ([#1097](https://github.com/ruby/rbs/pull/1097))
+* `nil` versions are discouraged and will be deprecated in Rubygems 4 ([#1091](https://github.com/ruby/rbs/pull/1091))
+* Fixes towards Rubygems 4.0 ([#1090](https://github.com/ruby/rbs/pull/1090))
+* Remove redundant `add` for `Repository.default` ([#1062](https://github.com/ruby/rbs/pull/1062))
+* Refactor: Use Repository in stdlib source ([#1063](https://github.com/ruby/rbs/pull/1063))
+* Move `bin/sort` implementation to under `lib/` ([#1051](https://github.com/ruby/rbs/pull/1051))
+
+#### rbs prototype
+
+* Fix some error on `prototype runtime` ([#1055](https://github.com/ruby/rbs/pull/1055))
+* Skip existing RBS files from batch `prototype` ([#1060](https://github.com/ruby/rbs/pull/1060))
+
+### Miscellaneous
+
+* Discard outputs from test code ([#1093](https://github.com/ruby/rbs/pull/1093))
+* Skip testing visibility methods with Ruby 3.2 ([#1082](https://github.com/ruby/rbs/pull/1082))
+
+## 2.6.0 (2022-06-22)
+
+RBS 2.6 ships with `rbs prototype` commands improvements and signature updates.
+New minitest RBS definitions will help you to type check your tests.
+
+### Signature updates
+
+* etc ([\#1006](https://github.com/ruby/rbs/pull/1006))
+* minitest ([\#1009](https://github.com/ruby/rbs/pull/1009))
+* date ([\#1033](https://github.com/ruby/rbs/pull/1033))
+* `ENV`. `ARGF`, `Random::Base` ([\#1041](https://github.com/ruby/rbs/pull/1041))
+* `Hash#dig` ([\#1011](https://github.com/ruby/rbs/pull/1011))
+* `Hash#reject` ([\#1016](https://github.com/ruby/rbs/pull/1016))
+* `Kernel?.fail` ([\#1026](https://github.com/ruby/rbs/pull/1026), [\#1028](https://github.com/ruby/rbs/pull/1028))
+* `Rational#*` ([\#1012](https://github.com/ruby/rbs/pull/1012))
+* `Regexp.new` ([\#1040](https://github.com/ruby/rbs/pull/1040))
+
+### Library changes
+
+* Add `visibility` columns in {AttrReader,AttrAccessor,AttrWriter}#to_json ([\#1014](https://github.com/ruby/rbs/pull/1014))
+* Add support for RSpec's verifying doubles in test setup helper ([\#1015](https://github.com/ruby/rbs/pull/1015))
+* Fix lexer to analyze escape characters ([\#1043](https://github.com/ruby/rbs/pull/1043))
+
+#### rbs prototype
+
+* [rb] Support the case where the return value is `self` ([\#1003](https://github.com/ruby/rbs/pull/1003))
+* [rb] Lean to the optional side ([\#1021](https://github.com/ruby/rbs/pull/1021))
+* [rb] Fix method commenting ([\#1027](https://github.com/ruby/rbs/pull/1027))
+* [runtime] Fix decls of output from `Prototype::Runtime` ([\#1030](https://github.com/ruby/rbs/pull/1030))
+* [runtime] Fix class name resolution of prototype runtime ([\#1032](https://github.com/ruby/rbs/pull/1032))
+* [rbi] Improve `Prototype::RBI` ([\#1018](https://github.com/ruby/rbs/pull/1018))
+
+### Miscellaneous
+
+* Fix typo in `CONTRIBUTING.md` ([\#1004](https://github.com/ruby/rbs/pull/1004))
+* Use manifest.yaml instead of manually for validate task ([\#1010](https://github.com/ruby/rbs/pull/1010))
+* Update re2c ([\#1017](https://github.com/ruby/rbs/pull/1017))
+* Type check `Prototype::RB` ([\#1019](https://github.com/ruby/rbs/pull/1019))
+* Minor cleanup & fix ([\#1020](https://github.com/ruby/rbs/pull/1020))
+* Fix type errors ([\#1023](https://github.com/ruby/rbs/pull/1023))
+* Clarify GHA step name for rake annotate ([\#1024](https://github.com/ruby/rbs/pull/1024))
+* Silence parser warning ([\#1039](https://github.com/ruby/rbs/pull/1039))
+* Fix warnings ([\#1035](https://github.com/ruby/rbs/pull/1035))
+
+## 2.5.1 (2022-06-19)
+
+This is a maintenance release mainly to fix errors detected in CI of `ruby/ruby`.
+Nothing changed related to the users of RBS gem.
+
+### Miscellaneous
+
+* Skip failing tests on ruby/ruby CI ([\#1036](https://github.com/ruby/rbs/pull/1036))
+* Fix warnings ([\#1035](https://github.com/ruby/rbs/pull/1035) except changes on `test/tools/sort_test.rb` that is not included in this release)
+* Fix `Regexp.new` argument ([\#1034](https://github.com/ruby/rbs/pull/1034))
+* Fix errors with OpenSSL 3 ([\#1029](https://github.com/ruby/rbs/pull/1029))
+* Fix `OpenSSL::PKey::PKeyError: EVP_PKEY_keygen: bad ffc parameters` with OpenSSL 3 ([\#1005](https://github.com/ruby/rbs/pull/1005))
+
 ## 2.5.0 (2022-05-20)
 
 This is a minor release with tuple type/record type syntax updates and `rbs prototype` improvements.

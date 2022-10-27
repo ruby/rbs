@@ -425,6 +425,15 @@ class Set[unchecked out A]
 
   # <!--
   #   rdoc-file=lib/set.rb
+  #   - compare_by_identity()
+  # -->
+  # Makes the set compare its elements by their identity and returns
+  # self. This method may not be supported by all subclasses of Set.
+  #
+  def compare_by_identity: () -> self
+
+  # <!--
+  #   rdoc-file=lib/set.rb
   #   - disjoint?(set)
   # -->
   # Returns true if the set and the given enumerable have
@@ -467,6 +476,7 @@ class Set[unchecked out A]
   # given.
   #
   def each: () { (A) -> void } -> self
+          | () -> Enumerator[A, self]
 
   # <!--
   #   rdoc-file=lib/set.rb

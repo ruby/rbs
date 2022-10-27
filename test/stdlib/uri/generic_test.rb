@@ -41,6 +41,20 @@ class URIGenericSingletonTest < Test::Unit::TestCase
                         query: '?t=1',
                         fragment: 'baz'
                       }
+
+    assert_send_type '({ scheme: nil, userinfo: nil, host: nil, port: nil, registry: nil, path: nil, opaque: nil, query: nil, fragment: nil }) -> URI::Generic',
+                      URI::Generic, :build2,
+                      {
+                        scheme: nil,
+                        userinfo: nil,
+                        host: nil,
+                        port: nil,
+                        registry: nil,
+                        path: nil,
+                        opaque: nil,
+                        query: nil,
+                        fragment: nil
+                      }
   end
 
   def test_build
@@ -187,7 +201,7 @@ class URIGenericInstanceTest < Test::Unit::TestCase
                       generic, :check_password, 'pass', 'user'
   end
 
-  def test_userinfo=      
+  def test_userinfo=
     omit "userinfo= returns an array, but we want String?"
 
     assert_send_type  '(String? userinfo) -> Array[String | nil]?',

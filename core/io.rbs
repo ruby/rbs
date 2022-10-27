@@ -2385,6 +2385,100 @@ class IO < Object
 
   # <!--
   #   rdoc-file=io.c
+  #   - IO.foreach(name, sep=$/ [, getline_args, open_args]) {|line| block }     -> nil
+  #   - IO.foreach(name, limit [, getline_args, open_args]) {|line| block }      -> nil
+  #   - IO.foreach(name, sep, limit [, getline_args, open_args]) {|line| block } -> nil
+  #   - IO.foreach(...)                                            -> an_enumerator
+  #   - File.foreach(name, sep=$/ [, getline_args, open_args]) {|line| block }     -> nil
+  #   - File.foreach(name, limit [, getline_args, open_args]) {|line| block }      -> nil
+  #   - File.foreach(name, sep, limit [, getline_args, open_args]) {|line| block } -> nil
+  #   - File.foreach(...)                                            -> an_enumerator
+  # -->
+  # Executes the block for every line in the named I/O port, where lines are
+  # separated by *sep*.
+  #
+  # If no block is given, an enumerator is returned instead.
+  #
+  # If `name` starts with a pipe character (`"|"`) and the receiver is the IO
+  # class, a subprocess is created in the same way as Kernel#open, and its output
+  # is returned. Consider to use File.foreach to disable the behavior of
+  # subprocess invocation.
+  #
+  #     File.foreach("testfile") {|x| print "GOT ", x }
+  #     IO.foreach("| cat testfile") {|x| print "GOT ", x }
+  #
+  # *produces:*
+  #
+  #     GOT This is line one
+  #     GOT This is line two
+  #     GOT This is line three
+  #     GOT And so on...
+  #
+  # If the last argument is a hash, it's the keyword argument to open. See
+  # IO.readlines for details about getline_args. And see also IO.read for details
+  # about open_args.
+  #
+  def self.foreach: (string | _ToPath path, ?String sep, ?Integer limit, ?external_encoding: String external_encoding, ?internal_encoding: String internal_encoding, ?encoding: String encoding, ?textmode: untyped textmode, ?binmode: untyped binmode, ?autoclose: untyped autoclose, ?mode: String mode, ?chomp: boolish) { (String line) -> void } -> nil
+                  | (string | _ToPath path, ?String sep, ?Integer limit, ?external_encoding: String external_encoding, ?internal_encoding: String internal_encoding, ?encoding: String encoding, ?textmode: untyped textmode, ?binmode: untyped binmode, ?autoclose: untyped autoclose, ?mode: String mode, ?chomp: boolish) -> ::Enumerator[String, nil]
+
+  # <!--
+  #   rdoc-file=io.c
+  #   - IO.pipe                             ->  [read_io, write_io]
+  #   - IO.pipe(ext_enc)                    ->  [read_io, write_io]
+  #   - IO.pipe("ext_enc:int_enc" [, opt])  ->  [read_io, write_io]
+  #   - IO.pipe(ext_enc, int_enc [, opt])   ->  [read_io, write_io]
+  #   - IO.pipe(...) {|read_io, write_io| ... }
+  # -->
+  # Creates a pair of pipe endpoints (connected to each other) and returns them as
+  # a two-element array of IO objects: `[` *read_io*, *write_io* `]`.
+  #
+  # If a block is given, the block is called and returns the value of the block.
+  # *read_io* and *write_io* are sent to the block as arguments. If read_io and
+  # write_io are not closed when the block exits, they are closed. i.e. closing
+  # read_io and/or write_io doesn't cause an error.
+  #
+  # Not available on all platforms.
+  #
+  # If an encoding (encoding name or encoding object) is specified as an optional
+  # argument, read string from pipe is tagged with the encoding specified. If the
+  # argument is a colon separated two encoding names "A:B", the read string is
+  # converted from encoding A (external encoding) to encoding B (internal
+  # encoding), then tagged with B. If two optional arguments are specified, those
+  # must be encoding objects or encoding names, and the first one is the external
+  # encoding, and the second one is the internal encoding. If the external
+  # encoding and the internal encoding is specified, optional hash argument
+  # specify the conversion option.
+  #
+  # In the example below, the two processes close the ends of the pipe that they
+  # are not using. This is not just a cosmetic nicety. The read end of a pipe will
+  # not generate an end of file condition if there are any writers with the pipe
+  # still open. In the case of the parent process, the `rd.read` will never return
+  # if it does not first issue a `wr.close`.
+  #
+  #     rd, wr = IO.pipe
+  #
+  #     if fork
+  #       wr.close
+  #       puts "Parent got: <#{rd.read}>"
+  #       rd.close
+  #       Process.wait
+  #     else
+  #       rd.close
+  #       puts "Sending message to parent"
+  #       wr.write "Hi Dad"
+  #       wr.close
+  #     end
+  #
+  # *produces:*
+  #
+  #     Sending message to parent
+  #     Parent got: <Hi Dad>
+  #
+  def self.pipe: (?String | Encoding ext_or_ext_int_enc, ?String | Encoding int_enc, ?external_encoding: String external_encoding, ?internal_encoding: String internal_encoding, ?encoding: String encoding, ?textmode: untyped textmode, ?binmode: untyped binmode, ?autoclose: untyped autoclose, ?mode: String mode, ?chomp: boolish) -> [IO, IO]
+               | [X] (?String | Encoding ext_or_ext_int_enc, ?String | Encoding int_enc, ?external_encoding: String external_encoding, ?internal_encoding: String internal_encoding, ?encoding: String encoding, ?textmode: untyped textmode, ?binmode: untyped binmode, ?autoclose: untyped autoclose, ?mode: String mode, ?chomp: boolish) { (IO read_io, IO write_io) -> X } -> X
+
+  # <!--
+  #   rdoc-file=io.c
   #   - IO.read(name, [length [, offset]] [, opt])   -> string
   #   - File.read(name, [length [, offset]] [, opt]) -> string
   # -->
@@ -2469,7 +2563,7 @@ class IO < Object
   #
   # See also IO.read for details about `name` and open_args.
   #
-  def self.readlines: (String name, ?String sep, ?Integer limit, ?external_encoding: String external_encoding, ?internal_encoding: String internal_encoding, ?encoding: String encoding, ?textmode: untyped textmode, ?binmode: untyped binmode, ?autoclose: untyped autoclose, ?mode: String mode, ?chomp: boolish) -> ::Array[String]
+  def self.readlines: (String | _ToPath name, ?String sep, ?Integer limit, ?external_encoding: String external_encoding, ?internal_encoding: String internal_encoding, ?encoding: String encoding, ?textmode: untyped textmode, ?binmode: untyped binmode, ?autoclose: untyped autoclose, ?mode: String mode, ?chomp: boolish) -> ::Array[String]
 
   # <!--
   #   rdoc-file=io.c

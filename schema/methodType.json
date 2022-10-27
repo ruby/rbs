@@ -9,9 +9,15 @@
         },
         "required": {
           "type": "boolean"
+        },
+        "self_type": {
+          "oneOf": [
+            { "$ref": "#" },
+            { "type": "null" }
+          ]
         }
       },
-      "required": ["type", "required"]
+      "required": ["type", "required", "self_type"]
     }
   },
   "title": "Method type: `() -> void`, `[X] (::Integer) { (::String) -> X } -> Array[X]`, ...",

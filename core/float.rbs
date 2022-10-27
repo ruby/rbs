@@ -1078,6 +1078,8 @@ Float::EPSILON: Float
 #
 Float::INFINITY: Float
 
+Float::Infinity: Float
+
 # <!-- rdoc-file=numeric.c -->
 # The number of base digits for the `double` data type.
 #

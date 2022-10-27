@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'singleton'
 
 module RBS
@@ -5,6 +7,7 @@ module RBS
     module Sources
       # Signatures that are inclduded in gem package as sig/ directory.
       class Rubygems
+        include Base
         include Singleton
 
         def has?(config_entry)

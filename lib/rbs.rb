@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require "rbs/version"
 
 require "set"
@@ -59,12 +61,12 @@ module RBS
     attr_reader :logger_output
 
     def logger
-      @logger ||= Logger.new(logger_output || STDERR, level: logger_level || "warn", progname: "rbs")
+      @logger ||= Logger.new(logger_output || STDERR, level: logger_level || Logger::WARN, progname: "rbs")
     end
 
     def logger_output=(val)
-      @logger_output = val
       @logger = nil
+      @logger_output = val
     end
 
     def logger_level=(level)

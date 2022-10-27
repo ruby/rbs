@@ -123,5 +123,5 @@ RBS
       assert_instance_of AST::Members::MethodDefinition, cs[4]
       assert_instance_of AST::Declarations::Module, cs[5]
     end
-end
+  end
 end

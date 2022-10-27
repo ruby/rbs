@@ -81,6 +81,22 @@ end
     end
   end
 
+  def test_loading_rubygems
+    RBS.logger_output = io = StringIO.new
+    mktmpdir do |path|
+      loader = EnvironmentLoader.new
+      loader.add(library: "rubygems")
+
+      env = Environment.new
+      loader.load(env: env)
+
+      assert_operator env.class_decls, :key?, TypeName("::Gem")
+      assert io.string.include?('`rubygems` has been moved to core library')
+    end
+  ensure
+    RBS.logger_output = nil
+  end
+
   def test_loading_library_from_gem_repo
     mktmpdir do |path|
       (path + "gems").mkdir
@@ -155,13 +171,27 @@ end
       repo = RBS::Repository.new()
 
       loader = EnvironmentLoader.new(repository: repo)
-      loader.add(library: "minitest", version: nil)
+      loader.add(library: "non_existent_gems", version: nil)
 
       env = Environment.new
 
       assert_raises EnvironmentLoader::UnknownLibraryError do
         loader.load(env: env)
       end
+    end
+  end
+
+  def test_loading_dependencies
+    mktmpdir do |path|
+      loader = EnvironmentLoader.new
+      loader.add(library: "yaml")
+
+      env = Environment.new
+      loader.load(env: env)
+
+      assert_operator env.class_decls, :key?, TypeName("::YAML")
+      assert_operator env.class_decls, :key?, TypeName("::DBM")
+      assert_operator env.class_decls, :key?, TypeName("::PStore")
     end
   end
 

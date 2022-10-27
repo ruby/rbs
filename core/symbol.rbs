@@ -434,7 +434,7 @@ class Symbol
   #     :hello.start_with?("heaven", "hell")     #=> true
   #     :hello.start_with?("heaven", "paradise") #=> false
   #
-  def start_with?: (*string prefixes) -> bool
+  def start_with?: (*string | Regexp prefixes) -> bool
 
   # <!--
   #   rdoc-file=string.c

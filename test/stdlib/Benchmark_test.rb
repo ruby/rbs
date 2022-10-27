@@ -4,6 +4,7 @@ require "benchmark"
 class BenchmarkTest < StdlibTest
   target Benchmark
   library "benchmark"
+  discard_output
 
   def test_benchmark
     n = 10
@@ -39,6 +40,7 @@ end
 class BenchmarkReportTest < StdlibTest
   target Benchmark::Report
   library "benchmark"
+  discard_output
 
   def test_benchmark
     n = 10

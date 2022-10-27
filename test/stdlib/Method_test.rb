@@ -77,16 +77,23 @@ class MethodTest < StdlibTest
     Foo.new.method(:foo_with_arg_and_rest).parameters
   end
 
+
   def test_public?
-    Foo.new.method(:foo).public?
+    if_ruby31 do
+      Foo.new.method(:foo).public?
+    end
   end
 
   def test_private?
-    Foo.new.method(:foo).private?
+    if_ruby31 do
+      Foo.new.method(:foo).private?
+    end
   end
 
   def test_protected?
-    Foo.new.method(:foo).protected?
+    if_ruby31 do
+      Foo.new.method(:foo).protected?
+    end
   end
 
   def test_source_location

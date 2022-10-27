@@ -47,7 +47,7 @@ class RBS::RuntimePrototypeTest < Test::Unit::TestCase
 
         assert_write p.decls, <<-EOF
 module RBS
-  module RuntimePrototypeTest
+  class RuntimePrototypeTest < Test::Unit::TestCase
     module TestTargets
       module Bar
       end
@@ -91,7 +91,7 @@ end
     SignatureManager.new do |manager|
       manager.files[Pathname("foo.rbs")] = <<EOF
 class RBS
-  class RuntimePrototypeTest
+  class RuntimePrototypeTest < Test::Unit::TestCase
     class TestTargets
       class Test
         def self.baz: () -> void
@@ -111,7 +111,7 @@ EOF
 
         assert_write p.decls, <<-EOF
 module RBS
-  module RuntimePrototypeTest
+  class RuntimePrototypeTest < Test::Unit::TestCase
     module TestTargets
       module Bar
       end
@@ -172,7 +172,7 @@ end
 
         assert_write p.decls, <<-EOF
 module RBS
-  module RuntimePrototypeTest
+  class RuntimePrototypeTest < Test::Unit::TestCase
     module IncludeTests
       class ChildClass < RBS::RuntimePrototypeTest::IncludeTests::SuperClass
         def self.foo: () -> untyped
@@ -223,12 +223,16 @@ end
   end
 
   def test_decls_for_anonymous_class_or_module
-    p = Runtime.new(patterns: ["RBS::RuntimePrototypeTest::TestForAnonymous::*"],
-                    env: nil, merge: false)
-    silence_warnings do
-      p.decls
+    SignatureManager.new do |manager|
+      manager.build do |env|
+        p = Runtime.new(patterns: ["RBS::RuntimePrototypeTest::TestForAnonymous::*"],
+                        env: env, merge: false)
+        silence_warnings do
+          p.decls
+        end
+        assert(true) # nothing raised above
+      end
     end
-    assert(true) # nothing raised above
   end
 
   if RUBY_VERSION >= '2.7' && RUBY_VERSION <= '3.0'
@@ -246,7 +250,7 @@ end
 
           assert_write p.decls, <<-EOF
 module RBS
-  module RuntimePrototypeTest
+  class RuntimePrototypeTest < Test::Unit::TestCase
     class TestForArgumentForwarding
       public
 
@@ -287,7 +291,7 @@ end
 
         assert_write p.decls, <<~RBS
           module RBS
-            module RuntimePrototypeTest
+            class RuntimePrototypeTest < Test::Unit::TestCase
               module TestForOverrideModuleName
                 class C
                   include RBS::RuntimePrototypeTest::TestForOverrideModuleName::M
@@ -337,7 +341,7 @@ end
 
         assert_write p.decls, <<~RBS
           module RBS
-            module RuntimePrototypeTest
+            class RuntimePrototypeTest < Test::Unit::TestCase
               module TestForTypeParameters
                 class C < Hash[untyped, untyped]
                 end
@@ -368,7 +372,7 @@ end
 
         assert_write p.decls, <<~RBS
           module RBS
-            module RuntimePrototypeTest
+            class RuntimePrototypeTest < Test::Unit::TestCase
               class TestForInitialize
                 private
 
@@ -396,7 +400,7 @@ end
 
           assert_write p.decls, <<~RBS
             module RBS
-              module RuntimePrototypeTest
+              class RuntimePrototypeTest < Test::Unit::TestCase
                 class TestForYield
                   public
 
@@ -412,6 +416,47 @@ end
             end
           RBS
         end
+      end
+    end
+  end
+
+  module TestForEnv
+    # A = 1
+    def a
+      2
+    end
+    alias b a
+    module B
+    end
+    include B
+    extend B
+    prepend B
+  end
+
+  def test_decls_structure
+    SignatureManager.new do |manager|
+      manager.build do |env|
+        p = Runtime.new(patterns: ["RBS::RuntimePrototypeTest::TestForEnv"], env: env, merge: true)
+        assert_equal(p.decls.length, 1)
+        p.decls.each do |decl|
+          env << decl
+        end
+        env.resolve_type_names
+        assert(true) # nothing raised above
+      end
+    end
+  end
+
+  def test_basic_object
+    SignatureManager.new do |manager|
+      manager.build do |env|
+        p = Runtime.new(patterns: ["BasicObject"], env: env, merge: true)
+        assert_equal(p.decls.length, 1)
+        p.decls.each do |decl|
+          env << decl
+        end
+        env.resolve_type_names
+        assert(true) # nothing raised above
       end
     end
   end

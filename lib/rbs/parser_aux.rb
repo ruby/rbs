@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module RBS
   class Parser
     def self.parse_type(source, line: 1, column: 0, variables: [])

@@ -466,6 +466,29 @@ class RBS::TypeParsingTest < Test::Unit::TestCase
     end
   end
 
+  def test_proc_with_self
+    Parser.parse_type("^() -> void").yield_self do |type|
+      assert_instance_of Types::Proc, type
+
+      assert_equal "^() -> void", type.location.source
+      assert_nil type.self_type
+    end
+
+    Parser.parse_type("^() [self: String] -> void").yield_self do |type|
+      assert_instance_of Types::Proc, type
+
+      assert_equal "^() [self: String] -> void", type.location.source
+      assert_equal Parser.parse_type("String"), type.self_type
+    end
+
+    Parser.parse_type("^ { [self: String] -> void } -> void").tap do |type|
+      assert_instance_of Types::Proc, type
+      assert_nil type.self_type
+      assert_instance_of Types::Block, type.block
+      assert_equal Parser.parse_type("String"), type.block.self_type
+    end
+  end
+
   def test_optional
     Parser.parse_type("untyped?").yield_self do |type|
       assert_instance_of Types::Optional, type
@@ -580,6 +603,37 @@ class RBS::TypeParsingTest < Test::Unit::TestCase
     Parser.parse_type(%q{'not escape sequences \a\b\e\f\n\r\s\t\v\"'}).yield_self do |type|
       assert_instance_of Types::Literal, type
       assert_equal 'not escape sequences \a\b\e\f\n\r\s\t\v\"', type.literal
+    end
+
+    # "\\" in RBS
+    Parser.parse_type(%q{"\\\\"}).yield_self do |type|
+      assert_instance_of Types::Literal, type
+      assert_equal "\\", type.literal
+    end
+
+    # '\\' in RBS
+    Parser.parse_type(%q{'\\\\'}).yield_self do |type|
+      assert_instance_of Types::Literal, type
+      assert_equal "\\", type.literal
+    end
+  end
+
+  def test_literal_to_s
+    Parser.parse_type(%q{"\\a\\\\"}).yield_self do |type|
+      assert_equal type, Parser.parse_type(type.to_s)
+    end
+  end
+
+  def test_string_literal_union
+    Parser.parse_type(%q{"\\\\" | "a"}).yield_self do |type|
+      assert_instance_of Types::Union, type
+
+      assert_instance_of Types::Literal, type.types[0]
+      assert_equal 1, type.types[0].literal.size
+      assert_equal '\\', type.types[0].literal
+
+      assert_instance_of Types::Literal, type.types[1]
+      assert_equal "a", type.types[1].literal
     end
   end
 

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module RBS
   module Prototype
     class Runtime
@@ -21,6 +23,7 @@ module RBS
 
       def target?(const)
         name = const_name(const)
+        return false unless name
 
         patterns.any? do |pattern|
           if pattern.end_with?("*")
@@ -77,7 +80,7 @@ module RBS
           supers.merge(mix.included_modules)
         end
 
-        if mod.is_a?(Class)
+        if mod.is_a?(Class) && mod.superclass
           mod.superclass.included_modules.each do |mix|
             supers << mix
             supers.merge(mix.included_modules)
@@ -135,7 +138,8 @@ module RBS
           when :block
             block = Types::Block.new(
               type: Types::Function.empty(untyped).update(rest_positionals: Types::Function::Param.new(name: nil, type: untyped)),
-              required: true
+              required: true,
+              self_type: nil
             )
           end
         end
@@ -318,7 +322,12 @@ module RBS
 
       def generate_constants(mod, decls)
         mod.constants(false).sort.each do |name|
-          value = mod.const_get(name)
+          begin
+            value = mod.const_get(name)
+          rescue StandardError, LoadError => e
+            RBS.logger.warn("Skipping constant #{name} of #{mod} since #{e}")
+            next
+          end
 
           next if value.is_a?(Class) || value.is_a?(Module)
           unless value.class.name
@@ -341,7 +350,7 @@ module RBS
                  end
 
           decls << AST::Declarations::Constant.new(
-            name: name,
+            name: to_type_name(name.to_s),
             type: type,
             location: nil,
             comment: nil
@@ -350,7 +359,7 @@ module RBS
       end
 
       def generate_super_class(mod)
-        if mod.superclass == ::Object
+        if mod.superclass.nil? || mod.superclass == ::Object
           nil
         elsif const_name(mod.superclass).nil?
           RBS.logger.warn("Skipping anonymous superclass #{mod.superclass} of #{mod}")
@@ -470,8 +479,9 @@ module RBS
         *outer_module_names, _ = const_name(mod).split(/::/) #=> parent = [A, B], mod = C
         destination = @decls # Copy the entries in ivar @decls, not .dup
 
-        outer_module_names&.each do |outer_module_name|
-          outer_module = @modules.detect { |x| const_name(x) == outer_module_name }
+        outer_module_names&.each_with_index do |outer_module_name, i|
+          current_name = outer_module_names[0, i + 1].join('::')
+          outer_module = @modules.detect { |x| const_name(x) == current_name }
           outer_decl = destination.detect { |decl| decl.is_a?(outer_module.is_a?(Class) ? AST::Declarations::Class : AST::Declarations::Module) && decl.name.name == outer_module_name.to_sym }
 
           # Insert AST::Declarations if declarations are not added previously

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module RBS
   class Repository
     DEFAULT_STDLIB_ROOT = Pathname(_ = __dir__) + "../../stdlib"
@@ -79,9 +81,7 @@ module RBS
     end
 
     def self.default
-      new().tap do |repo|
-        repo.add(DEFAULT_STDLIB_ROOT)
-      end
+      new()
     end
 
     def self.find_best_version(version, candidates)
@@ -113,7 +113,7 @@ module RBS
     def lookup_path(gem, version)
       if gem_rbs = gems[gem]
         unless gem_rbs.empty?
-          set = if v = Gem::Version.create(version)&.release
+          set = if version and v = Gem::Version.create(version)&.release
             gem_rbs.find_best_version(v)
           else
             gem_rbs.latest_version

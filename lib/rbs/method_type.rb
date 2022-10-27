@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module RBS
   class MethodType
     attr_reader :type_params
@@ -62,9 +64,7 @@ module RBS
       self.class.new(
         type_params: type_params,
         type: type.map_type(&block),
-        block: self.block&.yield_self do |b|
-          Types::Block.new(type: b.type.map_type(&block), required: b.required)
-        end,
+        block: self.block&.map_type(&block),
         location: location
       )
     end
@@ -93,11 +93,13 @@ module RBS
     end
 
     def to_s
+      block_self_binding = Types::SelfTypeBindingHelper.self_type_binding_to_s(block&.self_type)
+
       s = case
           when (b = block) && b.required
-            "(#{type.param_to_s}) { (#{b.type.param_to_s}) -> #{b.type.return_to_s} } -> #{type.return_to_s}"
+            "(#{type.param_to_s}) { (#{b.type.param_to_s}) #{block_self_binding}-> #{b.type.return_to_s} } -> #{type.return_to_s}"
           when b = block
-            "(#{type.param_to_s}) ?{ (#{b.type.param_to_s}) -> #{b.type.return_to_s} } -> #{type.return_to_s}"
+            "(#{type.param_to_s}) ?{ (#{b.type.param_to_s}) #{block_self_binding}-> #{b.type.return_to_s} } -> #{type.return_to_s}"
           else
             "(#{type.param_to_s}) -> #{type.return_to_s}"
           end

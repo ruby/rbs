@@ -417,10 +417,20 @@ module A
   end
 end
       RUBY
+      (dir + "lib/c.rb").write(<<-RUBY)
+module C
+end
+      RUBY
       (dir + "Gemfile").write(<<-RUBY)
 source "https://rubygems.org"
 
 gem "rbs"
+      RUBY
+
+      (dir+"sig").mkdir
+      (dir + "sig/c.rbs").write(<<-RUBY)
+module C
+end
       RUBY
 
       Dir.chdir(dir) do
@@ -430,13 +440,18 @@ gem "rbs"
           assert_equal <<-EOM, cli.stdout.string
 Processing `lib`...
   Generating RBS for `lib/a/b.rb`...
-  Writing RBS to `sig/a/b.rbs`...
+    - Writing RBS to `sig/a/b.rbs`...
   Generating RBS for `lib/a.rb`...
-  Writing RBS to `sig/a.rbs`...
+    - Writing RBS to `sig/a.rbs`...
+  Generating RBS for `lib/c.rb`...
+    - Skipping existing file `sig/c.rbs`...
 Processing `Gemfile`...
   Generating RBS for `Gemfile`...
-  Writing RBS to `sig/Gemfile.rbs`...
-          EOM
+    - Writing RBS to `sig/Gemfile.rbs`...
+
+>>>> Skipped existing 1 files. Use `--force` option to update the files.
+  bundle exec rbs prototype rb --out_dir\\=sig --force lib/c.rb
+        EOM
         end
       end
 

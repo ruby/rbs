@@ -161,7 +161,7 @@ module RBS
 
         include _HashEqual
 
-        def update: (?name: Symbol, ?type: Types::t, ?ivar_name: Symbol | false | nil, ?kind: kind, ?annotations: Array[Annotation], ?location: loc?, ?comment: Comment?, ?visibility: visibility) -> instance
+        def update: (?name: Symbol, ?type: Types::t, ?ivar_name: Symbol | false | nil, ?kind: kind, ?annotations: Array[Annotation], ?location: loc?, ?comment: Comment?, ?visibility: visibility?) -> instance
       end
 
       class AttrReader < Base

@@ -1,10 +1,12 @@
+# frozen_string_literal: true
+
 module RBS
   module Annotate
     class Formatter
       attr_reader :buffer
 
       def initialize()
-        @buffer = ""
+        @buffer = +""
         @pending_separator = nil
       end
 
@@ -14,7 +16,7 @@ module RBS
             s = self.class.translate(s) or raise
           end
 
-          s.rstrip!
+          s = s.rstrip
 
           unless s.empty?
             if ss = @pending_separator

@@ -154,7 +154,7 @@ module URI
     # then it does URI::Escape.escape all URI components and tries again.
     #
     def self.build2: (Array[nil | String | Integer]) -> URI::Generic
-                   | ({ scheme: String, userinfo: String, host: String, port: Integer, registry: String?, path: String, opaque: String?, query: String, fragment: String }) -> URI::Generic
+                   | ({ scheme: String?, userinfo: String?, host: String?, port: Integer?, registry: String?, path: String?, opaque: String?, query: String?, fragment: String? }) -> URI::Generic
 
     # <!--
     #   rdoc-file=lib/uri/generic.rb
@@ -172,7 +172,7 @@ module URI
     # See ::new for hash keys to use or for order of array items.
     #
     def self.build: (Array[nil | String | Integer]) -> URI::Generic
-                  | ({ scheme: String, userinfo: String, host: String, port: Integer, registry: String?, path: String, opaque: String?, query: String, fragment: String }) -> URI::Generic
+                  | ({ scheme: String?, userinfo: String?, host: String?, port: Integer?, registry: String?, path: String?, opaque: String?, query: String?, fragment: String? }) -> URI::Generic
 
     # <!--
     #   rdoc-file=lib/uri/generic.rb

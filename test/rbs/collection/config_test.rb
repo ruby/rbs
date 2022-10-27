@@ -317,6 +317,10 @@ class RBS::Collection::ConfigTest < Test::Unit::TestCase
               revision: cde6057e7546843ace6420c5783dd945c6ccda54
               repo_dir: gems
               type: git
+          - name: minitest
+            version: '0'
+            source:
+              type: stdlib
           - name: monitor
             version: "0"
             source:

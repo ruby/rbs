@@ -54,49 +54,12 @@ task :test_doc do
 end
 
 task :validate => :compile do
+  require 'yaml'
+
   sh "#{ruby} #{rbs} validate --silent"
 
   FileList["stdlib/*"].each do |path|
     lib = [File.basename(path).to_s]
-
-    if lib == ["bigdecimal-math"]
-      lib << "bigdecimal"
-    end
-
-    if lib == ["yaml"]
-      lib << "dbm"
-      lib << "pstore"
-    end
-
-    if lib == ["logger"]
-      lib << "monitor"
-    end
-
-    if lib == ["cgi"]
-      lib << "tempfile"
-    end
-
-    if lib == ["csv"]
-      lib << "forwardable"
-    end
-
-    if lib == ["prime"]
-      lib << "singleton"
-    end
-
-    if lib == ["net-http"]
-      lib << "uri"
-      lib << "timeout"
-    end
-
-    if lib == ["resolv"]
-      lib << "socket"
-      lib << "timeout"
-    end
-
-    if lib == ["openssl"]
-      lib << "socket"
-    end
 
     sh "#{ruby} #{rbs} #{lib.map {|l| "-r #{l}"}.join(" ")} validate --silent"
   end

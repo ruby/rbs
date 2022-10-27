@@ -871,8 +871,8 @@ module Kernel : BasicObject
   #     raise ArgumentError, "No parameters", caller
   #
   def self?.fail: () -> bot
-                | (String arg0) -> bot
-                | (_Exception arg0, ?untyped arg1, ?::Array[String] arg2) -> bot
+                | (String message, ?cause: Exception?) -> bot
+                | (_Exception exception, ?untyped message, ?::Array[String] backtrace, ?cause: Exception?) -> bot
 
   # <!--
   #   rdoc-file=eval.c
@@ -2135,7 +2135,7 @@ module Kernel : BasicObject
   # :experimental
   # :   Used for experimental features that may change in future releases.
   #
-  def self?.warn: (*untyped msg, ?uplevel: Integer | nil) -> NilClass
+  def self?.warn: (*untyped msg, ?uplevel: Integer | nil, ?category: :deprecated | :experimental | nil) -> NilClass
 
   # <!--
   #   rdoc-file=process.c

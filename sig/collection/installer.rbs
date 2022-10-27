@@ -9,6 +9,8 @@ module RBS
 
       private
 
+      @source_for: Hash[Sources::source_entry, Sources::_Source]
+
       def source_for: (Config::gem_entry) -> Sources::_Source
     end
   end

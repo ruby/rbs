@@ -1,9 +1,19 @@
 module RBS
   class DefinitionBuilder
+    # MethodBuilder calculates the sequence of methods available on given type
+    #
+    # The sequence are sorted topologically.
+    #
     class MethodBuilder
+      # Set of methods defined in a type.
+      #
       class Methods
         type instance_type = Types::ClassInstance | Types::ClassSingleton | Types::Interface
 
+        # Definition of a method in the type
+        #
+        # The Definition object allows invalid method definition so that more than one _original_ definitions may exist.
+        #
         class Definition
           type original = AST::Members::MethodDefinition | AST::Members::Alias | AST::Members::AttrAccessor | AST::Members::AttrWriter | AST::Members::AttrReader
 

@@ -68,9 +68,9 @@ class Rational < Numeric
   #     Rational(9, 8)  * 4                #=> (9/2)
   #     Rational(20, 9) * 9.8              #=> 21.77777777777778
   #
-  def *: (Float) -> Float
-       | (Complex) -> Complex
-       | (Numeric) -> Numeric
+  def *: (Integer) -> Rational
+       | (Rational) -> Rational
+       | [T < Numeric](T) -> T
 
   # <!--
   #   rdoc-file=rational.c

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module RBS
   class Definition
     class Variable
@@ -118,7 +120,7 @@ module RBS
       end
 
       def comments
-        @comments ||= _ = defs.map(&:comment).compact
+        @comments ||= defs.map(&:comment).compact.uniq
       end
 
       def annotations
@@ -170,6 +172,16 @@ module RBS
           defs: defs.map {|defn| defn.update(type: yield(defn.type)) },
           accessibility: @accessibility,
           alias_of: alias_of
+        )
+      end
+
+      def update(super_method: self.super_method, defs: self.defs, accessibility: self.accessibility, alias_of: self.alias_of, annotations: self.annotations)
+        self.class.new(
+          super_method: super_method,
+          defs: defs,
+          accessibility: accessibility,
+          alias_of: alias_of,
+          annotations: annotations
         )
       end
     end

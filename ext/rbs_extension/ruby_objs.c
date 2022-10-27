@@ -144,10 +144,11 @@ VALUE rbs_optional(VALUE type, VALUE location) {
   );
 }
 
-VALUE rbs_block(VALUE type, VALUE required) {
+VALUE rbs_block(VALUE type, VALUE required, VALUE self_type) {
   VALUE args = rb_hash_new();
   rb_hash_aset(args, ID2SYM(rb_intern("type")), type);
   rb_hash_aset(args, ID2SYM(rb_intern("required")), required);
+  rb_hash_aset(args, ID2SYM(rb_intern("self_type")), self_type);
 
   return CLASS_NEW_INSTANCE(
     RBS_Types_Block,
@@ -196,11 +197,12 @@ VALUE rbs_function(
   );
 }
 
-VALUE rbs_proc(VALUE function, VALUE block, VALUE location) {
+VALUE rbs_proc(VALUE function, VALUE block, VALUE location, VALUE self_type) {
   VALUE args = rb_hash_new();
   rb_hash_aset(args, ID2SYM(rb_intern("type")), function);
   rb_hash_aset(args, ID2SYM(rb_intern("block")), block);
   rb_hash_aset(args, ID2SYM(rb_intern("location")), location);
+  rb_hash_aset(args, ID2SYM(rb_intern("self_type")), self_type);
 
   return CLASS_NEW_INSTANCE(
     RBS_Types_Proc,
