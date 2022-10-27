@@ -551,15 +551,15 @@ Processing `test/a_test.rb`...
           assert rbs_collection_lock.exist?
           rbs_collection_lock.delete
 
-          collection_file = dir.join('gem_rbs_collection/ast')
-          assert collection_file.exist?
-          collection_file.rmtree
+          collection_dir = dir.join('gem_rbs_collection/ast')
+          assert collection_dir.exist?
+          collection_dir.rmtree
 
           Dir.mkdir("child")
           Dir.chdir("child") do
             cli.run(%w[collection install])
             assert rbs_collection_lock.exist?
-            assert collection_file.exist?
+            assert collection_dir.exist?
           end
         end
       end
