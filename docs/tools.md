@@ -1,6 +1,6 @@
 # Tools
 
-This documentation describes major tools related to RBS.
+This documentation describes major tools related to RBS. They are listed alphabetically.
 
 ## Type Checkers
 
