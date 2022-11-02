@@ -54,6 +54,7 @@ class RBS::Collection::ConfigTest < Test::Unit::TestCase
             revision: cde6057e7546843ace6420c5783dd945c6ccda54
             repo_dir: gems
         path: "/path/to/somewhere"
+        gemfile_lock_path: 'Gemfile.lock'
         gems:
           - name: ast
             version: "2.4"
@@ -107,6 +108,7 @@ class RBS::Collection::ConfigTest < Test::Unit::TestCase
               revision: b4d3b346d9657543099a35a1fd20347e75b8c523
               repo_dir: gems
           path: "/path/to/somewhere"
+          gemfile_lock_path: 'Gemfile.lock'
           gems:
             - name: ast
               version: "2.4"
@@ -143,6 +145,7 @@ class RBS::Collection::ConfigTest < Test::Unit::TestCase
             revision: cde6057e7546843ace6420c5783dd945c6ccda54
             repo_dir: gems
         path: "/path/to/somewhere"
+        gemfile_lock_path: 'Gemfile.lock'
         gems:
           - name: ast
             version: "2.4"
@@ -195,6 +198,7 @@ class RBS::Collection::ConfigTest < Test::Unit::TestCase
             revision: cde6057e7546843ace6420c5783dd945c6ccda54
             repo_dir: gems
         path: "/path/to/somewhere"
+        gemfile_lock_path: 'Gemfile.lock'
         gems:
           - name: rainbow
             ignore: false
@@ -243,6 +247,7 @@ class RBS::Collection::ConfigTest < Test::Unit::TestCase
             revision: cde6057e7546843ace6420c5783dd945c6ccda54
             repo_dir: gems
         path: "/path/to/somewhere"
+        gemfile_lock_path: 'Gemfile.lock'
         gems:
           - name: ast
             version: "2.4"
@@ -308,6 +313,7 @@ class RBS::Collection::ConfigTest < Test::Unit::TestCase
             revision: cde6057e7546843ace6420c5783dd945c6ccda54
             repo_dir: gems
         path: "/path/to/somewhere"
+        gemfile_lock_path: 'Gemfile.lock'
         gems:
           - name: activesupport
             version: "6.0"
@@ -381,6 +387,7 @@ class RBS::Collection::ConfigTest < Test::Unit::TestCase
             revision: cde6057e7546843ace6420c5783dd945c6ccda54
             repo_dir: gems
         path: "/path/to/somewhere"
+        gemfile_lock_path: 'Gemfile.lock'
         gems:
           - name: csv
             version: "0"
@@ -428,6 +435,7 @@ class RBS::Collection::ConfigTest < Test::Unit::TestCase
             revision: cde6057e7546843ace6420c5783dd945c6ccda54
             repo_dir: gems
         path: "/path/to/somewhere"
+        gemfile_lock_path: 'Gemfile.lock'
         gems:
           - name: rbs-amber
             version: "1.0.0"
@@ -471,6 +479,7 @@ class RBS::Collection::ConfigTest < Test::Unit::TestCase
             revision: cde6057e7546843ace6420c5783dd945c6ccda54
             repo_dir: gems
         path: "/path/to/somewhere"
+        gemfile_lock_path: 'Gemfile.lock'
         gems: []
       YAML
     end

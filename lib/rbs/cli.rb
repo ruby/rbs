@@ -1034,17 +1034,15 @@ EOB
       opts.order args.drop(1), into: params
       config_path = options.config_path or raise
       lock_path = Collection::Config.to_lockfile_path(config_path)
-      gemfile_lock_path = config_path.dirname.join('Gemfile.lock')
+      gemfile_lock_path = Bundler.default_lockfile
 
       case args[0]
       when 'install'
-        RBS.logger.info "Running rbs collection with #{config_path}"
         unless params[:frozen]
           Collection::Config.generate_lockfile(config_path: config_path, gemfile_lock_path: gemfile_lock_path)
         end
         Collection::Installer.new(lockfile_path: lock_path, stdout: stdout).install_from_lockfile
       when 'update'
-        RBS.logger.info "Running rbs collection with #{config_path}"
         # TODO: Be aware of argv to update only specified gem
         Collection::Config.generate_lockfile(config_path: config_path, gemfile_lock_path: gemfile_lock_path, with_lockfile: false)
         Collection::Installer.new(lockfile_path: lock_path, stdout: stdout).install_from_lockfile

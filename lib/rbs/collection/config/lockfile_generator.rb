@@ -2,8 +2,6 @@
 
 module RBS
   module Collection
-
-    # This class represent the configration file.
     class Config
       class LockfileGenerator
         attr_reader :config, :lock, :gemfile_lock, :lock_path
@@ -18,6 +16,10 @@ module RBS
           @lock = Config.from_path(lock_path) if lock_path.exist? && with_lockfile
           @gemfile_lock = Bundler::LockfileParser.new(gemfile_lock_path.read)
           @gem_queue = []
+
+          validate_gemfile_lock_path!(lock: lock, gemfile_lock_path: gemfile_lock_path)
+
+          config.gemfile_lock_path = gemfile_lock_path
         end
 
         def generate
@@ -36,6 +38,14 @@ module RBS
 
           config.dump_to(lock_path)
           config
+        end
+
+        private def validate_gemfile_lock_path!(lock:, gemfile_lock_path:)
+          return unless lock
+          return unless lock.gemfile_lock_path
+          return if lock.gemfile_lock_path == gemfile_lock_path
+
+          raise 'todo'
         end
 
         private def assign_gem(name:, version:)

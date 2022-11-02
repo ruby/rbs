@@ -80,6 +80,16 @@ module RBS
         @data['gems'] ||= []
       end
 
+      def gemfile_lock_path=(path)
+        @data['gemfile_lock_path'] = path.relative_path_from(@config_path.dirname).to_s
+      end
+
+      def gemfile_lock_path
+        path = @data['gemfile_lock_path']
+        return unless path
+        @config_path.dirname.join path
+      end
+
       # It raises an error when there are non-available libraries
       def check_rbs_availability!
         raise CollectionNotAvailable unless repo_path.exist?
