@@ -101,7 +101,7 @@ bool parser_typevar_member(parserstate *state, ID id);
  * alloc_parser(buffer, 3, 5, Qnil)         // New parserstate without variables
  * ```
  * */
-parserstate *alloc_parser(VALUE buffer, int line, int column, VALUE variables);
+parserstate *alloc_parser(VALUE buffer, int start_pos, int end_pos, VALUE variables);
 void free_parser(parserstate *parser);
 /**
  * Advance one token.
