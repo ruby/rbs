@@ -1419,9 +1419,34 @@ class Socket < BasicSocket
 end
 
 # <!-- rdoc-file=ext/socket/constdefs.c -->
+# Interface to kernel crypto API
+#
+Socket::AF_ALG: Integer
+
+# <!-- rdoc-file=ext/socket/constdefs.c -->
 # AppleTalk protocol
 #
 Socket::AF_APPLETALK: Integer
+
+# <!-- rdoc-file=ext/socket/constdefs.c -->
+# Asynchronous Transfer Mode
+#
+Socket::AF_ATM: Integer
+
+# <!-- rdoc-file=ext/socket/constdefs.c -->
+# AX.25 protocol
+#
+Socket::AF_AX25: Integer
+
+# <!-- rdoc-file=ext/socket/constdefs.c -->
+# Bluetooth low-level socket protocol
+#
+Socket::AF_BLUETOOTH: Integer
+
+# <!-- rdoc-file=ext/socket/constdefs.c -->
+# Controller Area Network automotive bus protocol
+#
+Socket::AF_CAN: Integer
 
 # <!-- rdoc-file=ext/socket/constdefs.c -->
 # CCITT (now ITU-T) protocols
@@ -1449,6 +1474,16 @@ Socket::AF_COIP: Integer
 Socket::AF_DATAKIT: Integer
 
 # <!-- rdoc-file=ext/socket/constdefs.c -->
+# DECnet protocol
+#
+Socket::AF_DEC: Integer
+
+# <!-- rdoc-file=ext/socket/constdefs.c -->
+# DECnet protocol
+#
+Socket::AF_DECnet: Integer
+
+# <!-- rdoc-file=ext/socket/constdefs.c -->
 # DEC Direct Data Link Interface protocol
 #
 Socket::AF_DLI: Integer
@@ -1467,6 +1502,11 @@ Socket::AF_ECMA: Integer
 # NSC Hyperchannel protocol
 #
 Socket::AF_HYLINK: Integer
+
+# <!-- rdoc-file=ext/socket/constdefs.c -->
+# InfiniBand native addressing
+#
+Socket::AF_IB: Integer
 
 # <!-- rdoc-file=ext/socket/constdefs.c -->
 # ARPANET IMP protocol
@@ -1499,6 +1539,16 @@ Socket::AF_ISDN: Integer
 Socket::AF_ISO: Integer
 
 # <!-- rdoc-file=ext/socket/constdefs.c -->
+# KCM (kernel connection multiplexor) interface
+#
+Socket::AF_KCM: Integer
+
+# <!-- rdoc-file=ext/socket/constdefs.c -->
+# Key management protocol, originally developed for usage with IPsec
+#
+Socket::AF_KEY: Integer
+
+# <!-- rdoc-file=ext/socket/constdefs.c -->
 # Local Area Transport protocol
 #
 Socket::AF_LAT: Integer
@@ -1509,6 +1559,11 @@ Socket::AF_LAT: Integer
 Socket::AF_LINK: Integer
 
 # <!-- rdoc-file=ext/socket/constdefs.c -->
+# Logical  link control (IEEE 802.2 LLC) protocol
+#
+Socket::AF_LLC: Integer
+
+# <!-- rdoc-file=ext/socket/constdefs.c -->
 # Host-internal protocols
 #
 Socket::AF_LOCAL: Integer
@@ -1517,6 +1572,11 @@ Socket::AF_LOCAL: Integer
 # Maximum address family for this platform
 #
 Socket::AF_MAX: Integer
+
+# <!-- rdoc-file=ext/socket/constdefs.c -->
+# Multiprotocol Label Switching
+#
+Socket::AF_MPLS: Integer
 
 # <!-- rdoc-file=ext/socket/constdefs.c -->
 # Native ATM access
@@ -1534,6 +1594,16 @@ Socket::AF_NDRV: Integer
 Socket::AF_NETBIOS: Integer
 
 # <!-- rdoc-file=ext/socket/constdefs.c -->
+# Netgraph sockets
+#
+Socket::AF_NETGRAPH: Integer
+
+# <!-- rdoc-file=ext/socket/constdefs.c -->
+# Kernel user interface device
+#
+Socket::AF_NETLINK: Integer
+
+# <!-- rdoc-file=ext/socket/constdefs.c -->
 # XEROX NS protocols
 #
 Socket::AF_NS: Integer
@@ -1544,14 +1614,29 @@ Socket::AF_NS: Integer
 Socket::AF_OSI: Integer
 
 # <!-- rdoc-file=ext/socket/constdefs.c -->
+# Direct link-layer access
+#
+Socket::AF_PACKET: Integer
+
+# <!-- rdoc-file=ext/socket/constdefs.c -->
 # Point-to-Point Protocol
 #
 Socket::AF_PPP: Integer
 
 # <!-- rdoc-file=ext/socket/constdefs.c -->
+# Generic PPP transport layer, for setting up L2 tunnels (L2TP and PPPoE)
+#
+Socket::AF_PPPOX: Integer
+
+# <!-- rdoc-file=ext/socket/constdefs.c -->
 # PARC Universal Packet protocol
 #
 Socket::AF_PUP: Integer
+
+# <!-- rdoc-file=ext/socket/constdefs.c -->
+# Reliable Datagram Sockets (RDS) protocol
+#
+Socket::AF_RDS: Integer
 
 # <!-- rdoc-file=ext/socket/constdefs.c -->
 # Internal routing protocol
@@ -1567,8 +1652,12 @@ Socket::AF_SIP: Integer
 # IBM SNA protocol
 #
 Socket::AF_SNA: Integer
-
 Socket::AF_SYSTEM: Integer
+
+# <!-- rdoc-file=ext/socket/constdefs.c -->
+# TIPC, "cluster domain sockets" protocol
+#
+Socket::AF_TIPC: Integer
 
 # <!-- rdoc-file=ext/socket/constdefs.c -->
 # UNIX sockets
@@ -1579,6 +1668,17 @@ Socket::AF_UNIX: Integer
 # Unspecified protocol, any supported address family
 #
 Socket::AF_UNSPEC: Integer
+
+# <!-- rdoc-file=ext/socket/constdefs.c -->
+# VSOCK (originally "VMWare VSockets") protocol for hypervisor-guest
+# communication
+#
+Socket::AF_VSOCK: Integer
+
+# <!-- rdoc-file=ext/socket/constdefs.c -->
+# XDP (express data path) interface
+#
+Socket::AF_XDP: Integer
 
 # <!-- rdoc-file=ext/socket/constdefs.c -->
 # Accept only if any address is assigned
@@ -1706,6 +1806,11 @@ Socket::EAI_SOCKTYPE: Integer
 Socket::EAI_SYSTEM: Integer
 
 # <!-- rdoc-file=ext/socket/constdefs.c -->
+# 802.1Q VLAN device
+#
+Socket::IFF_802_1Q_VLAN: Integer
+
+# <!-- rdoc-file=ext/socket/constdefs.c -->
 # receive all multicast packets
 #
 Socket::IFF_ALLMULTI: Integer
@@ -1716,14 +1821,89 @@ Socket::IFF_ALLMULTI: Integer
 Socket::IFF_ALTPHYS: Integer
 
 # <!-- rdoc-file=ext/socket/constdefs.c -->
+# auto media select active
+#
+Socket::IFF_AUTOMEDIA: Integer
+
+# <!-- rdoc-file=ext/socket/constdefs.c -->
+# bonding master or slave
+#
+Socket::IFF_BONDING: Integer
+
+# <!-- rdoc-file=ext/socket/constdefs.c -->
+# device used as bridge port
+#
+Socket::IFF_BRIDGE_PORT: Integer
+
+# <!-- rdoc-file=ext/socket/constdefs.c -->
 # broadcast address valid
 #
 Socket::IFF_BROADCAST: Integer
 
 # <!-- rdoc-file=ext/socket/constdefs.c -->
+# flags not changeable
+#
+Socket::IFF_CANTCHANGE: Integer
+
+# <!-- rdoc-file=ext/socket/constdefs.c -->
+# unconfigurable using ioctl(2)
+#
+Socket::IFF_CANTCONFIG: Integer
+
+# <!-- rdoc-file=ext/socket/constdefs.c -->
 # turn on debugging
 #
 Socket::IFF_DEBUG: Integer
+
+# <!-- rdoc-file=ext/socket/constdefs.c -->
+# disable netpoll at run-time
+#
+Socket::IFF_DISABLE_NETPOLL: Integer
+
+# <!-- rdoc-file=ext/socket/constdefs.c -->
+# disallow bridging this ether dev
+#
+Socket::IFF_DONT_BRIDGE: Integer
+
+# <!-- rdoc-file=ext/socket/constdefs.c -->
+# driver signals dormant
+#
+Socket::IFF_DORMANT: Integer
+
+# <!-- rdoc-file=ext/socket/constdefs.c -->
+# tx hardware queue is full
+#
+Socket::IFF_DRV_OACTIVE: Integer
+
+# <!-- rdoc-file=ext/socket/constdefs.c -->
+# resources allocated
+#
+Socket::IFF_DRV_RUNNING: Integer
+
+# <!-- rdoc-file=ext/socket/constdefs.c -->
+# interface is winding down
+#
+Socket::IFF_DYING: Integer
+
+# <!-- rdoc-file=ext/socket/constdefs.c -->
+# dialup device with changing addresses
+#
+Socket::IFF_DYNAMIC: Integer
+
+# <!-- rdoc-file=ext/socket/constdefs.c -->
+# ethernet bridging device
+#
+Socket::IFF_EBRIDGE: Integer
+
+# <!-- rdoc-file=ext/socket/constdefs.c -->
+# echo sent packets
+#
+Socket::IFF_ECHO: Integer
+
+# <!-- rdoc-file=ext/socket/constdefs.c -->
+# ISATAP interface (RFC4214)
+#
+Socket::IFF_ISATAP: Integer
 
 # <!-- rdoc-file=ext/socket/constdefs.c -->
 # per link layer defined bit 0
@@ -1741,9 +1921,49 @@ Socket::IFF_LINK1: Integer
 Socket::IFF_LINK2: Integer
 
 # <!-- rdoc-file=ext/socket/constdefs.c -->
+# hardware address change when it's running
+#
+Socket::IFF_LIVE_ADDR_CHANGE: Integer
+
+# <!-- rdoc-file=ext/socket/constdefs.c -->
 # loopback net
 #
 Socket::IFF_LOOPBACK: Integer
+
+# <!-- rdoc-file=ext/socket/constdefs.c -->
+# driver signals L1 up
+#
+Socket::IFF_LOWER_UP: Integer
+
+# <!-- rdoc-file=ext/socket/constdefs.c -->
+# device used as macvlan port
+#
+Socket::IFF_MACVLAN_PORT: Integer
+
+# <!-- rdoc-file=ext/socket/constdefs.c -->
+# master of a load balancer
+#
+Socket::IFF_MASTER: Integer
+
+# <!-- rdoc-file=ext/socket/constdefs.c -->
+# bonding master, 802.3ad.
+#
+Socket::IFF_MASTER_8023AD: Integer
+
+# <!-- rdoc-file=ext/socket/constdefs.c -->
+# bonding master, balance-alb.
+#
+Socket::IFF_MASTER_ALB: Integer
+
+# <!-- rdoc-file=ext/socket/constdefs.c -->
+# bonding master, ARP mon in use
+#
+Socket::IFF_MASTER_ARPMON: Integer
+
+# <!-- rdoc-file=ext/socket/constdefs.c -->
+# user-requested monitor mode
+#
+Socket::IFF_MONITOR: Integer
 
 # <!-- rdoc-file=ext/socket/constdefs.c -->
 # supports multicast
@@ -1766,14 +1986,39 @@ Socket::IFF_NOTRAILERS: Integer
 Socket::IFF_OACTIVE: Integer
 
 # <!-- rdoc-file=ext/socket/constdefs.c -->
+# device used as Open vSwitch datapath port
+#
+Socket::IFF_OVS_DATAPATH: Integer
+
+# <!-- rdoc-file=ext/socket/constdefs.c -->
 # point-to-point link
 #
 Socket::IFF_POINTOPOINT: Integer
 
 # <!-- rdoc-file=ext/socket/constdefs.c -->
+# can set media type
+#
+Socket::IFF_PORTSEL: Integer
+
+# <!-- rdoc-file=ext/socket/constdefs.c -->
+# user-requested promisc mode
+#
+Socket::IFF_PPROMISC: Integer
+
+# <!-- rdoc-file=ext/socket/constdefs.c -->
 # receive all packets
 #
 Socket::IFF_PROMISC: Integer
+
+# <!-- rdoc-file=ext/socket/constdefs.c -->
+# interface is being renamed
+#
+Socket::IFF_RENAMING: Integer
+
+# <!-- rdoc-file=ext/socket/constdefs.c -->
+# routing entry installed
+#
+Socket::IFF_ROUTE: Integer
 
 # <!-- rdoc-file=ext/socket/constdefs.c -->
 # resources allocated
@@ -1786,9 +2031,69 @@ Socket::IFF_RUNNING: Integer
 Socket::IFF_SIMPLEX: Integer
 
 # <!-- rdoc-file=ext/socket/constdefs.c -->
+# slave of a load balancer
+#
+Socket::IFF_SLAVE: Integer
+
+# <!-- rdoc-file=ext/socket/constdefs.c -->
+# bonding slave not the curr. active
+#
+Socket::IFF_SLAVE_INACTIVE: Integer
+
+# <!-- rdoc-file=ext/socket/constdefs.c -->
+# need ARPs for validation
+#
+Socket::IFF_SLAVE_NEEDARP: Integer
+
+# <!-- rdoc-file=ext/socket/constdefs.c -->
+# interface manages own routes
+#
+Socket::IFF_SMART: Integer
+
+# <!-- rdoc-file=ext/socket/constdefs.c -->
+# static ARP
+#
+Socket::IFF_STATICARP: Integer
+
+# <!-- rdoc-file=ext/socket/constdefs.c -->
+# sending custom FCS
+#
+Socket::IFF_SUPP_NOFCS: Integer
+
+# <!-- rdoc-file=ext/socket/constdefs.c -->
+# used as team port
+#
+Socket::IFF_TEAM_PORT: Integer
+
+# <!-- rdoc-file=ext/socket/constdefs.c -->
+# sharing skbs on transmit
+#
+Socket::IFF_TX_SKB_SHARING: Integer
+
+# <!-- rdoc-file=ext/socket/constdefs.c -->
+# unicast filtering
+#
+Socket::IFF_UNICAST_FLT: Integer
+
+# <!-- rdoc-file=ext/socket/constdefs.c -->
 # interface is up
 #
 Socket::IFF_UP: Integer
+
+# <!-- rdoc-file=ext/socket/constdefs.c -->
+# volatile flags
+#
+Socket::IFF_VOLATILE: Integer
+
+# <!-- rdoc-file=ext/socket/constdefs.c -->
+# WAN HDLC device
+#
+Socket::IFF_WAN_HDLC: Integer
+
+# <!-- rdoc-file=ext/socket/constdefs.c -->
+# dev_hard_start_xmit() is allowed to release skb->dst
+#
+Socket::IFF_XMIT_DST_RELEASE: Integer
 
 # <!-- rdoc-file=ext/socket/constdefs.c -->
 # Maximum interface name size
@@ -1860,6 +2165,7 @@ Socket::IPPORT_USERRESERVED: Integer
 # IP6 auth header
 #
 Socket::IPPROTO_AH: Integer
+Socket::IPPROTO_BIP: Integer
 
 # <!-- rdoc-file=ext/socket/constdefs.c -->
 # IP6 destination option
@@ -2115,6 +2421,7 @@ Socket::IPV6_USE_MIN_MTU: Integer
 # Only bind IPv6 with a wildcard bind
 #
 Socket::IPV6_V6ONLY: Integer
+Socket::IPX_TYPE: Integer
 
 # <!-- rdoc-file=ext/socket/constdefs.c -->
 # Add a multicast group membership
@@ -2142,6 +2449,11 @@ Socket::IP_DEFAULT_MULTICAST_LOOP: Integer
 Socket::IP_DEFAULT_MULTICAST_TTL: Integer
 
 # <!-- rdoc-file=ext/socket/constdefs.c -->
+# Don't fragment packets
+#
+Socket::IP_DONTFRAG: Integer
+
+# <!-- rdoc-file=ext/socket/constdefs.c -->
 # Drop a multicast group membership
 #
 Socket::IP_DROP_MEMBERSHIP: Integer
@@ -2150,6 +2462,11 @@ Socket::IP_DROP_MEMBERSHIP: Integer
 # Drop a multicast group membership
 #
 Socket::IP_DROP_SOURCE_MEMBERSHIP: Integer
+
+# <!-- rdoc-file=ext/socket/constdefs.c -->
+# Allow binding to nonexistent IP addresses
+#
+Socket::IP_FREEBIND: Integer
 
 # <!-- rdoc-file=ext/socket/constdefs.c -->
 # Header is included with data
@@ -2167,9 +2484,24 @@ Socket::IP_IPSEC_POLICY: Integer
 Socket::IP_MAX_MEMBERSHIPS: Integer
 
 # <!-- rdoc-file=ext/socket/constdefs.c -->
+# Minimum TTL allowed for received packets
+#
+Socket::IP_MINTTL: Integer
+
+# <!-- rdoc-file=ext/socket/constdefs.c -->
 # Multicast source filtering
 #
 Socket::IP_MSFILTER: Integer
+
+# <!-- rdoc-file=ext/socket/constdefs.c -->
+# The Maximum Transmission Unit of the socket
+#
+Socket::IP_MTU: Integer
+
+# <!-- rdoc-file=ext/socket/constdefs.c -->
+# Path MTU discovery
+#
+Socket::IP_MTU_DISCOVER: Integer
 
 # <!-- rdoc-file=ext/socket/constdefs.c -->
 # IP multicast interface
@@ -2187,14 +2519,44 @@ Socket::IP_MULTICAST_LOOP: Integer
 Socket::IP_MULTICAST_TTL: Integer
 
 # <!-- rdoc-file=ext/socket/constdefs.c -->
+# Force outgoing broadcast datagrams to have the undirected broadcast address
+#
+Socket::IP_ONESBCAST: Integer
+
+# <!-- rdoc-file=ext/socket/constdefs.c -->
 # IP options to be included in packets
 #
 Socket::IP_OPTIONS: Integer
 
 # <!-- rdoc-file=ext/socket/constdefs.c -->
+# Retrieve security context with datagram
+#
+Socket::IP_PASSSEC: Integer
+
+# <!-- rdoc-file=ext/socket/constdefs.c -->
 # Receive packet information with datagrams
 #
 Socket::IP_PKTINFO: Integer
+
+# <!-- rdoc-file=ext/socket/constdefs.c -->
+# Receive packet options with datagrams
+#
+Socket::IP_PKTOPTIONS: Integer
+
+# <!-- rdoc-file=ext/socket/constdefs.c -->
+# Always send DF frames
+#
+Socket::IP_PMTUDISC_DO: Integer
+
+# <!-- rdoc-file=ext/socket/constdefs.c -->
+# Never send DF frames
+#
+Socket::IP_PMTUDISC_DONT: Integer
+
+# <!-- rdoc-file=ext/socket/constdefs.c -->
+# Use per-route hints
+#
+Socket::IP_PMTUDISC_WANT: Integer
 
 # <!-- rdoc-file=ext/socket/constdefs.c -->
 # Set the port range for sockets with unspecified port numbers
@@ -2205,6 +2567,11 @@ Socket::IP_PORTRANGE: Integer
 # Receive IP destination address with datagram
 #
 Socket::IP_RECVDSTADDR: Integer
+
+# <!-- rdoc-file=ext/socket/constdefs.c -->
+# Enable extended reliable error message passing
+#
+Socket::IP_RECVERR: Integer
 
 # <!-- rdoc-file=ext/socket/constdefs.c -->
 # Receive interface information with datagrams
@@ -2222,6 +2589,11 @@ Socket::IP_RECVOPTS: Integer
 Socket::IP_RECVRETOPTS: Integer
 
 # <!-- rdoc-file=ext/socket/constdefs.c -->
+# Receive link-layer address with datagrams
+#
+Socket::IP_RECVSLLA: Integer
+
+# <!-- rdoc-file=ext/socket/constdefs.c -->
 # Receive TOS with incoming packets
 #
 Socket::IP_RECVTOS: Integer
@@ -2237,9 +2609,24 @@ Socket::IP_RECVTTL: Integer
 Socket::IP_RETOPTS: Integer
 
 # <!-- rdoc-file=ext/socket/constdefs.c -->
+# Notify transit routers to more closely examine the contents of an IP packet
+#
+Socket::IP_ROUTER_ALERT: Integer
+
+# <!-- rdoc-file=ext/socket/constdefs.c -->
+# Source address for outgoing UDP datagrams
+#
+Socket::IP_SENDSRCADDR: Integer
+
+# <!-- rdoc-file=ext/socket/constdefs.c -->
 # IP type-of-service
 #
 Socket::IP_TOS: Integer
+
+# <!-- rdoc-file=ext/socket/constdefs.c -->
+# Transparent proxy
+#
+Socket::IP_TRANSPARENT: Integer
 
 # <!-- rdoc-file=ext/socket/constdefs.c -->
 # IP time-to-live
@@ -2250,6 +2637,17 @@ Socket::IP_TTL: Integer
 # Unblock IPv4 multicast packets with a give source address
 #
 Socket::IP_UNBLOCK_SOURCE: Integer
+Socket::IP_XFRM_POLICY: Integer
+
+# <!-- rdoc-file=ext/socket/constdefs.c -->
+# Connect blocks until accepted
+#
+Socket::LOCAL_CONNWAIT: Integer
+
+# <!-- rdoc-file=ext/socket/constdefs.c -->
+# Pass credentials to receiver
+#
+Socket::LOCAL_CREDS: Integer
 
 # <!-- rdoc-file=ext/socket/constdefs.c -->
 # Retrieve peer credentials
@@ -2292,9 +2690,24 @@ Socket::MCAST_LEAVE_GROUP: Integer
 Socket::MCAST_LEAVE_SOURCE_GROUP: Integer
 
 # <!-- rdoc-file=ext/socket/constdefs.c -->
+# Multicast source filtering
+#
+Socket::MCAST_MSFILTER: Integer
+
+# <!-- rdoc-file=ext/socket/constdefs.c -->
 # Unblock multicast packets from this source
 #
 Socket::MCAST_UNBLOCK_SOURCE: Integer
+
+# <!-- rdoc-file=ext/socket/constdefs.c -->
+# End of record
+#
+Socket::MSG_COMPAT: Integer
+
+# <!-- rdoc-file=ext/socket/constdefs.c -->
+# Confirm path validity
+#
+Socket::MSG_CONFIRM: Integer
 
 # <!-- rdoc-file=ext/socket/constdefs.c -->
 # Control data lost before delivery
@@ -2322,6 +2735,17 @@ Socket::MSG_EOF: Integer
 Socket::MSG_EOR: Integer
 
 # <!-- rdoc-file=ext/socket/constdefs.c -->
+# Fetch message from error queue
+#
+Socket::MSG_ERRQUEUE: Integer
+
+# <!-- rdoc-file=ext/socket/constdefs.c -->
+# Reduce step of the handshake process
+#
+Socket::MSG_FASTOPEN: Integer
+Socket::MSG_FIN: Integer
+
+# <!-- rdoc-file=ext/socket/constdefs.c -->
 # Start of a hold sequence.  Dumps to so_temp
 #
 Socket::MSG_FLUSH: Integer
@@ -2337,6 +2761,16 @@ Socket::MSG_HAVEMORE: Integer
 Socket::MSG_HOLD: Integer
 
 # <!-- rdoc-file=ext/socket/constdefs.c -->
+# Sender will send more
+#
+Socket::MSG_MORE: Integer
+
+# <!-- rdoc-file=ext/socket/constdefs.c -->
+# Do not generate SIGPIPE
+#
+Socket::MSG_NOSIGNAL: Integer
+
+# <!-- rdoc-file=ext/socket/constdefs.c -->
 # Process out-of-band data
 #
 Socket::MSG_OOB: Integer
@@ -2347,14 +2781,21 @@ Socket::MSG_OOB: Integer
 Socket::MSG_PEEK: Integer
 
 # <!-- rdoc-file=ext/socket/constdefs.c -->
+# Wait for full request
+#
+Socket::MSG_PROXY: Integer
+
+# <!-- rdoc-file=ext/socket/constdefs.c -->
 # Data remains in the current packet
 #
 Socket::MSG_RCVMORE: Integer
+Socket::MSG_RST: Integer
 
 # <!-- rdoc-file=ext/socket/constdefs.c -->
 # Send the packet in so_temp
 #
 Socket::MSG_SEND: Integer
+Socket::MSG_SYN: Integer
 
 # <!-- rdoc-file=ext/socket/constdefs.c -->
 # Data discarded before delivery
@@ -2402,9 +2843,34 @@ Socket::NI_NUMERICHOST: Integer
 Socket::NI_NUMERICSERV: Integer
 
 # <!-- rdoc-file=ext/socket/constdefs.c -->
+# Interface to kernel crypto API
+#
+Socket::PF_ALG: Integer
+
+# <!-- rdoc-file=ext/socket/constdefs.c -->
 # AppleTalk protocol
 #
 Socket::PF_APPLETALK: Integer
+
+# <!-- rdoc-file=ext/socket/constdefs.c -->
+# Asynchronous Transfer Mode
+#
+Socket::PF_ATM: Integer
+
+# <!-- rdoc-file=ext/socket/constdefs.c -->
+# AX.25 protocol
+#
+Socket::PF_AX25: Integer
+
+# <!-- rdoc-file=ext/socket/constdefs.c -->
+# Bluetooth low-level socket protocol
+#
+Socket::PF_BLUETOOTH: Integer
+
+# <!-- rdoc-file=ext/socket/constdefs.c -->
+# Controller Area Network automotive bus protocol
+#
+Socket::PF_CAN: Integer
 
 # <!-- rdoc-file=ext/socket/constdefs.c -->
 # CCITT (now ITU-T) protocols
@@ -2432,6 +2898,16 @@ Socket::PF_COIP: Integer
 Socket::PF_DATAKIT: Integer
 
 # <!-- rdoc-file=ext/socket/constdefs.c -->
+# DECnet protocol
+#
+Socket::PF_DEC: Integer
+
+# <!-- rdoc-file=ext/socket/constdefs.c -->
+# DECnet protocol
+#
+Socket::PF_DECnet: Integer
+
+# <!-- rdoc-file=ext/socket/constdefs.c -->
 # DEC Direct Data Link Interface protocol
 #
 Socket::PF_DLI: Integer
@@ -2445,6 +2921,11 @@ Socket::PF_ECMA: Integer
 # NSC Hyperchannel protocol
 #
 Socket::PF_HYLINK: Integer
+
+# <!-- rdoc-file=ext/socket/constdefs.c -->
+# InfiniBand native addressing
+#
+Socket::PF_IB: Integer
 
 # <!-- rdoc-file=ext/socket/constdefs.c -->
 # ARPANET IMP protocol
@@ -2477,6 +2958,11 @@ Socket::PF_ISDN: Integer
 Socket::PF_ISO: Integer
 
 # <!-- rdoc-file=ext/socket/constdefs.c -->
+# KCM (kernel connection multiplexor) interface
+#
+Socket::PF_KCM: Integer
+
+# <!-- rdoc-file=ext/socket/constdefs.c -->
 # Key management protocol, originally developed for usage with IPsec
 #
 Socket::PF_KEY: Integer
@@ -2492,6 +2978,11 @@ Socket::PF_LAT: Integer
 Socket::PF_LINK: Integer
 
 # <!-- rdoc-file=ext/socket/constdefs.c -->
+# Logical  link control (IEEE 802.2 LLC) protocol
+#
+Socket::PF_LLC: Integer
+
+# <!-- rdoc-file=ext/socket/constdefs.c -->
 # Host-internal protocols
 #
 Socket::PF_LOCAL: Integer
@@ -2500,6 +2991,11 @@ Socket::PF_LOCAL: Integer
 # Maximum address family for this platform
 #
 Socket::PF_MAX: Integer
+
+# <!-- rdoc-file=ext/socket/constdefs.c -->
+# Multiprotocol Label Switching
+#
+Socket::PF_MPLS: Integer
 
 # <!-- rdoc-file=ext/socket/constdefs.c -->
 # Native ATM access
@@ -2517,6 +3013,16 @@ Socket::PF_NDRV: Integer
 Socket::PF_NETBIOS: Integer
 
 # <!-- rdoc-file=ext/socket/constdefs.c -->
+# Netgraph sockets
+#
+Socket::PF_NETGRAPH: Integer
+
+# <!-- rdoc-file=ext/socket/constdefs.c -->
+# Kernel user interface device
+#
+Socket::PF_NETLINK: Integer
+
+# <!-- rdoc-file=ext/socket/constdefs.c -->
 # XEROX NS protocols
 #
 Socket::PF_NS: Integer
@@ -2526,6 +3032,10 @@ Socket::PF_NS: Integer
 #
 Socket::PF_OSI: Integer
 
+# <!-- rdoc-file=ext/socket/constdefs.c -->
+# Direct link-layer access
+#
+Socket::PF_PACKET: Integer
 Socket::PF_PIP: Integer
 
 # <!-- rdoc-file=ext/socket/constdefs.c -->
@@ -2534,15 +3044,24 @@ Socket::PF_PIP: Integer
 Socket::PF_PPP: Integer
 
 # <!-- rdoc-file=ext/socket/constdefs.c -->
+# Generic PPP transport layer, for setting up L2 tunnels (L2TP and PPPoE)
+#
+Socket::PF_PPPOX: Integer
+
+# <!-- rdoc-file=ext/socket/constdefs.c -->
 # PARC Universal Packet protocol
 #
 Socket::PF_PUP: Integer
 
 # <!-- rdoc-file=ext/socket/constdefs.c -->
+# Reliable Datagram Sockets (RDS) protocol
+#
+Socket::PF_RDS: Integer
+
+# <!-- rdoc-file=ext/socket/constdefs.c -->
 # Internal routing protocol
 #
 Socket::PF_ROUTE: Integer
-
 Socket::PF_RTIP: Integer
 
 # <!-- rdoc-file=ext/socket/constdefs.c -->
@@ -2554,8 +3073,12 @@ Socket::PF_SIP: Integer
 # IBM SNA protocol
 #
 Socket::PF_SNA: Integer
-
 Socket::PF_SYSTEM: Integer
+
+# <!-- rdoc-file=ext/socket/constdefs.c -->
+# TIPC, "cluster domain sockets" protocol
+#
+Socket::PF_TIPC: Integer
 
 # <!-- rdoc-file=ext/socket/constdefs.c -->
 # UNIX sockets
@@ -2568,9 +3091,30 @@ Socket::PF_UNIX: Integer
 Socket::PF_UNSPEC: Integer
 
 # <!-- rdoc-file=ext/socket/constdefs.c -->
+# VSOCK (originally "VMWare VSockets") protocol for hypervisor-guest
+# communication
+#
+Socket::PF_VSOCK: Integer
+
+# <!-- rdoc-file=ext/socket/constdefs.c -->
+# XDP (express data path) interface
+#
+Socket::PF_XDP: Integer
+
+# <!-- rdoc-file=ext/socket/constdefs.c -->
 # eXpress Transfer Protocol
 #
 Socket::PF_XTP: Integer
+
+# <!-- rdoc-file=ext/socket/constdefs.c -->
+# Timestamp (bintime)
+#
+Socket::SCM_BINTIME: Integer
+
+# <!-- rdoc-file=ext/socket/constdefs.c -->
+# The sender's credentials
+#
+Socket::SCM_CREDENTIALS: Integer
 
 # <!-- rdoc-file=ext/socket/constdefs.c -->
 # Process credentials
@@ -2588,6 +3132,26 @@ Socket::SCM_RIGHTS: Integer
 Socket::SCM_TIMESTAMP: Integer
 
 # <!-- rdoc-file=ext/socket/constdefs.c -->
+# Timestamp (timespec list) (Linux 2.6.30)
+#
+Socket::SCM_TIMESTAMPING: Integer
+
+# <!-- rdoc-file=ext/socket/constdefs.c -->
+# Timespec (timespec)
+#
+Socket::SCM_TIMESTAMPNS: Integer
+
+# <!-- rdoc-file=ext/socket/constdefs.c -->
+# User credentials
+#
+Socket::SCM_UCRED: Integer
+
+# <!-- rdoc-file=ext/socket/constdefs.c -->
+# Wifi status (Linux 3.3)
+#
+Socket::SCM_WIFI_STATUS: Integer
+
+# <!-- rdoc-file=ext/socket/constdefs.c -->
 # Shut down the reading side of the socket
 #
 Socket::SHUT_RD: Integer
@@ -2603,9 +3167,25 @@ Socket::SHUT_RDWR: Integer
 Socket::SHUT_WR: Integer
 
 # <!-- rdoc-file=ext/socket/constdefs.c -->
+# Set the close-on-exec (FD_CLOEXEC) flag on the new file  descriptor.
+#
+Socket::SOCK_CLOEXEC: Integer
+
+# <!-- rdoc-file=ext/socket/constdefs.c -->
 # A datagram socket provides connectionless, unreliable messaging
 #
 Socket::SOCK_DGRAM: Integer
+
+# <!-- rdoc-file=ext/socket/constdefs.c -->
+# Set the O_NONBLOCK file status flag on the open file description (see open(2))
+# referred to by the new file descriptor.
+#
+Socket::SOCK_NONBLOCK: Integer
+
+# <!-- rdoc-file=ext/socket/constdefs.c -->
+# Device-level packet access
+#
+Socket::SOCK_PACKET: Integer
 
 # <!-- rdoc-file=ext/socket/constdefs.c -->
 # A raw socket provides low-level access for direct access or implementing
@@ -2631,9 +3211,39 @@ Socket::SOCK_SEQPACKET: Integer
 Socket::SOCK_STREAM: Integer
 
 # <!-- rdoc-file=ext/socket/constdefs.c -->
+# AppleTalk socket options
+#
+Socket::SOL_ATALK: Integer
+
+# <!-- rdoc-file=ext/socket/constdefs.c -->
+# AX.25 socket options
+#
+Socket::SOL_AX25: Integer
+
+# <!-- rdoc-file=ext/socket/constdefs.c -->
+# IP socket options
+#
+Socket::SOL_IP: Integer
+
+# <!-- rdoc-file=ext/socket/constdefs.c -->
+# IPX socket options
+#
+Socket::SOL_IPX: Integer
+
+# <!-- rdoc-file=ext/socket/constdefs.c -->
 # Socket-level options
 #
 Socket::SOL_SOCKET: Integer
+
+# <!-- rdoc-file=ext/socket/constdefs.c -->
+# TCP socket options
+#
+Socket::SOL_TCP: Integer
+
+# <!-- rdoc-file=ext/socket/constdefs.c -->
+# UDP socket options
+#
+Socket::SOL_UDP: Integer
 
 # <!-- rdoc-file=ext/socket/constdefs.c -->
 # Maximum connection requests that may be queued for a socket
@@ -2641,9 +3251,54 @@ Socket::SOL_SOCKET: Integer
 Socket::SOMAXCONN: Integer
 
 # <!-- rdoc-file=ext/socket/constdefs.c -->
+# Background socket priority
+#
+Socket::SOPRI_BACKGROUND: Integer
+
+# <!-- rdoc-file=ext/socket/constdefs.c -->
+# Interactive socket priority
+#
+Socket::SOPRI_INTERACTIVE: Integer
+
+# <!-- rdoc-file=ext/socket/constdefs.c -->
+# Normal socket priority
+#
+Socket::SOPRI_NORMAL: Integer
+
+# <!-- rdoc-file=ext/socket/constdefs.c -->
 # Socket has had listen() called on it
 #
 Socket::SO_ACCEPTCONN: Integer
+
+# <!-- rdoc-file=ext/socket/constdefs.c -->
+# There is an accept filter
+#
+Socket::SO_ACCEPTFILTER: Integer
+
+# <!-- rdoc-file=ext/socket/constdefs.c -->
+# Bypass zone boundaries
+#
+Socket::SO_ALLZONES: Integer
+
+# <!-- rdoc-file=ext/socket/constdefs.c -->
+# Attach an accept filter
+#
+Socket::SO_ATTACH_FILTER: Integer
+
+# <!-- rdoc-file=ext/socket/constdefs.c -->
+# Only send packets from the given interface
+#
+Socket::SO_BINDTODEVICE: Integer
+
+# <!-- rdoc-file=ext/socket/constdefs.c -->
+# Receive timestamp with datagrams (bintime)
+#
+Socket::SO_BINTIME: Integer
+
+# <!-- rdoc-file=ext/socket/constdefs.c -->
+# Query supported BPF extensions (Linux 3.14)
+#
+Socket::SO_BPF_EXTENSIONS: Integer
 
 # <!-- rdoc-file=ext/socket/constdefs.c -->
 # Permit sending of broadcast messages
@@ -2651,9 +3306,24 @@ Socket::SO_ACCEPTCONN: Integer
 Socket::SO_BROADCAST: Integer
 
 # <!-- rdoc-file=ext/socket/constdefs.c -->
+# Set the threshold in microseconds for low latency polling (Linux 3.11)
+#
+Socket::SO_BUSY_POLL: Integer
+
+# <!-- rdoc-file=ext/socket/constdefs.c -->
 # Debug info recording
 #
 Socket::SO_DEBUG: Integer
+
+# <!-- rdoc-file=ext/socket/constdefs.c -->
+# Detach an accept filter
+#
+Socket::SO_DETACH_FILTER: Integer
+
+# <!-- rdoc-file=ext/socket/constdefs.c -->
+# Domain given for socket() (Linux 2.6.32)
+#
+Socket::SO_DOMAIN: Integer
 
 # <!-- rdoc-file=ext/socket/constdefs.c -->
 # Use interface addresses
@@ -2671,6 +3341,11 @@ Socket::SO_DONTTRUNC: Integer
 Socket::SO_ERROR: Integer
 
 # <!-- rdoc-file=ext/socket/constdefs.c -->
+# Obtain filter set by SO_ATTACH_FILTER (Linux 3.8)
+#
+Socket::SO_GET_FILTER: Integer
+
+# <!-- rdoc-file=ext/socket/constdefs.c -->
 # Keep connections alive
 #
 Socket::SO_KEEPALIVE: Integer
@@ -2681,14 +3356,44 @@ Socket::SO_KEEPALIVE: Integer
 Socket::SO_LINGER: Integer
 
 # <!-- rdoc-file=ext/socket/constdefs.c -->
+# Lock the filter attached to a socket (Linux 3.9)
+#
+Socket::SO_LOCK_FILTER: Integer
+
+# <!-- rdoc-file=ext/socket/constdefs.c -->
+# Mandatory Access Control exemption for unlabeled peers
+#
+Socket::SO_MAC_EXEMPT: Integer
+
+# <!-- rdoc-file=ext/socket/constdefs.c -->
+# Set the mark for mark-based routing (Linux 2.6.25)
+#
+Socket::SO_MARK: Integer
+
+# <!-- rdoc-file=ext/socket/constdefs.c -->
+# Cap the rate computed by transport layer. [bytes per second] (Linux 3.13)
+#
+Socket::SO_MAX_PACING_RATE: Integer
+
+# <!-- rdoc-file=ext/socket/constdefs.c -->
 # Install socket-level Network Kernel Extension
 #
 Socket::SO_NKE: Integer
 
 # <!-- rdoc-file=ext/socket/constdefs.c -->
+# Set netns of a socket (Linux 3.4)
+#
+Socket::SO_NOFCS: Integer
+
+# <!-- rdoc-file=ext/socket/constdefs.c -->
 # Don't SIGPIPE on EPIPE
 #
 Socket::SO_NOSIGPIPE: Integer
+
+# <!-- rdoc-file=ext/socket/constdefs.c -->
+# Disable checksums
+#
+Socket::SO_NO_CHECK: Integer
 
 # <!-- rdoc-file=ext/socket/constdefs.c -->
 # Get first packet byte count
@@ -2701,9 +3406,54 @@ Socket::SO_NREAD: Integer
 Socket::SO_OOBINLINE: Integer
 
 # <!-- rdoc-file=ext/socket/constdefs.c -->
+# Receive SCM_CREDENTIALS messages
+#
+Socket::SO_PASSCRED: Integer
+
+# <!-- rdoc-file=ext/socket/constdefs.c -->
+# Toggle security context passing (Linux 2.6.18)
+#
+Socket::SO_PASSSEC: Integer
+
+# <!-- rdoc-file=ext/socket/constdefs.c -->
+# Set the peek offset (Linux 3.4)
+#
+Socket::SO_PEEK_OFF: Integer
+
+# <!-- rdoc-file=ext/socket/constdefs.c -->
+# The credentials of the foreign process connected to this socket
+#
+Socket::SO_PEERCRED: Integer
+
+# <!-- rdoc-file=ext/socket/constdefs.c -->
+# Name of the connecting user
+#
+Socket::SO_PEERNAME: Integer
+
+# <!-- rdoc-file=ext/socket/constdefs.c -->
+# Obtain the security credentials (Linux 2.6.2)
+#
+Socket::SO_PEERSEC: Integer
+
+# <!-- rdoc-file=ext/socket/constdefs.c -->
+# The protocol-defined priority for all packets on this socket
+#
+Socket::SO_PRIORITY: Integer
+
+# <!-- rdoc-file=ext/socket/constdefs.c -->
+# Protocol given for socket() (Linux 2.6.32)
+#
+Socket::SO_PROTOCOL: Integer
+
+# <!-- rdoc-file=ext/socket/constdefs.c -->
 # Receive buffer size
 #
 Socket::SO_RCVBUF: Integer
+
+# <!-- rdoc-file=ext/socket/constdefs.c -->
+# Receive buffer size without rmem_max limit (Linux 2.6.14)
+#
+Socket::SO_RCVBUFFORCE: Integer
 
 # <!-- rdoc-file=ext/socket/constdefs.c -->
 # Receive low-water mark
@@ -2716,6 +3466,11 @@ Socket::SO_RCVLOWAT: Integer
 Socket::SO_RCVTIMEO: Integer
 
 # <!-- rdoc-file=ext/socket/constdefs.c -->
+# Receive user credentials with datagram
+#
+Socket::SO_RECVUCRED: Integer
+
+# <!-- rdoc-file=ext/socket/constdefs.c -->
 # Allow local address reuse
 #
 Socket::SO_REUSEADDR: Integer
@@ -2726,9 +3481,27 @@ Socket::SO_REUSEADDR: Integer
 Socket::SO_REUSEPORT: Integer
 
 # <!-- rdoc-file=ext/socket/constdefs.c -->
+# Toggle cmsg for number of packets dropped (Linux 2.6.33)
+#
+Socket::SO_RXQ_OVFL: Integer
+Socket::SO_SECURITY_AUTHENTICATION: Integer
+Socket::SO_SECURITY_ENCRYPTION_NETWORK: Integer
+Socket::SO_SECURITY_ENCRYPTION_TRANSPORT: Integer
+
+# <!-- rdoc-file=ext/socket/constdefs.c -->
+# Make select() detect socket error queue with errorfds (Linux 3.10)
+#
+Socket::SO_SELECT_ERR_QUEUE: Integer
+
+# <!-- rdoc-file=ext/socket/constdefs.c -->
 # Send buffer size
 #
 Socket::SO_SNDBUF: Integer
+
+# <!-- rdoc-file=ext/socket/constdefs.c -->
+# Send buffer size without wmem_max limit (Linux 2.6.14)
+#
+Socket::SO_SNDBUFFORCE: Integer
 
 # <!-- rdoc-file=ext/socket/constdefs.c -->
 # Send low-water mark
@@ -2744,6 +3517,16 @@ Socket::SO_SNDTIMEO: Integer
 # Receive timestamp with datagrams (timeval)
 #
 Socket::SO_TIMESTAMP: Integer
+
+# <!-- rdoc-file=ext/socket/constdefs.c -->
+# Time stamping of incoming and outgoing packets (Linux 2.6.30)
+#
+Socket::SO_TIMESTAMPING: Integer
+
+# <!-- rdoc-file=ext/socket/constdefs.c -->
+# Receive nanosecond timestamp with datagrams (timespec)
+#
+Socket::SO_TIMESTAMPNS: Integer
 
 # <!-- rdoc-file=ext/socket/constdefs.c -->
 # Get the socket type
@@ -2766,9 +3549,39 @@ Socket::SO_WANTMORE: Integer
 Socket::SO_WANTOOBFLAG: Integer
 
 # <!-- rdoc-file=ext/socket/constdefs.c -->
+# Toggle cmsg for wifi status (Linux 3.3)
+#
+Socket::SO_WIFI_STATUS: Integer
+
+# <!-- rdoc-file=ext/socket/constdefs.c -->
+# TCP congestion control algorithm (Linux 2.6.13, glibc 2.6)
+#
+Socket::TCP_CONGESTION: Integer
+
+# <!-- rdoc-file=ext/socket/constdefs.c -->
+# TCP Cookie Transactions (Linux 2.6.33, glibc 2.18)
+#
+Socket::TCP_COOKIE_TRANSACTIONS: Integer
+
+# <!-- rdoc-file=ext/socket/constdefs.c -->
+# Don't send partial frames (Linux 2.2, glibc 2.2)
+#
+Socket::TCP_CORK: Integer
+
+# <!-- rdoc-file=ext/socket/constdefs.c -->
+# Don't notify a listening socket until data is ready (Linux 2.4, glibc 2.2)
+#
+Socket::TCP_DEFER_ACCEPT: Integer
+
+# <!-- rdoc-file=ext/socket/constdefs.c -->
 # Reduce step of the handshake process (Linux 3.7, glibc 2.18)
 #
 Socket::TCP_FASTOPEN: Integer
+
+# <!-- rdoc-file=ext/socket/constdefs.c -->
+# Retrieve information about this socket (Linux 2.4, glibc 2.2)
+#
+Socket::TCP_INFO: Integer
 
 # <!-- rdoc-file=ext/socket/constdefs.c -->
 # Maximum number of keepalive probes allowed before dropping a connection (Linux
@@ -2777,14 +3590,29 @@ Socket::TCP_FASTOPEN: Integer
 Socket::TCP_KEEPCNT: Integer
 
 # <!-- rdoc-file=ext/socket/constdefs.c -->
+# Idle time before keepalive probes are sent (Linux 2.4, glibc 2.2)
+#
+Socket::TCP_KEEPIDLE: Integer
+
+# <!-- rdoc-file=ext/socket/constdefs.c -->
 # Time between keepalive probes (Linux 2.4, glibc 2.2)
 #
 Socket::TCP_KEEPINTVL: Integer
 
 # <!-- rdoc-file=ext/socket/constdefs.c -->
+# Lifetime of orphaned FIN_WAIT2 sockets (Linux 2.4, glibc 2.2)
+#
+Socket::TCP_LINGER2: Integer
+
+# <!-- rdoc-file=ext/socket/constdefs.c -->
 # Set maximum segment size
 #
 Socket::TCP_MAXSEG: Integer
+
+# <!-- rdoc-file=ext/socket/constdefs.c -->
+# Use MD5 digests (RFC2385, Linux 2.6.20, glibc 2.7)
+#
+Socket::TCP_MD5SIG: Integer
 
 # <!-- rdoc-file=ext/socket/constdefs.c -->
 # Don't delay sending to coalesce packets
@@ -2800,6 +3628,68 @@ Socket::TCP_NOOPT: Integer
 # Don't push the last block of write
 #
 Socket::TCP_NOPUSH: Integer
+
+# <!-- rdoc-file=ext/socket/constdefs.c -->
+# Sequence of a queue for repair mode (Linux 3.5, glibc 2.18)
+#
+Socket::TCP_QUEUE_SEQ: Integer
+
+# <!-- rdoc-file=ext/socket/constdefs.c -->
+# Enable quickack mode (Linux 2.4.4, glibc 2.3)
+#
+Socket::TCP_QUICKACK: Integer
+
+# <!-- rdoc-file=ext/socket/constdefs.c -->
+# Repair mode (Linux 3.5, glibc 2.18)
+#
+Socket::TCP_REPAIR: Integer
+
+# <!-- rdoc-file=ext/socket/constdefs.c -->
+# Options for repair mode (Linux 3.5, glibc 2.18)
+#
+Socket::TCP_REPAIR_OPTIONS: Integer
+
+# <!-- rdoc-file=ext/socket/constdefs.c -->
+# Queue for repair mode (Linux 3.5, glibc 2.18)
+#
+Socket::TCP_REPAIR_QUEUE: Integer
+
+# <!-- rdoc-file=ext/socket/constdefs.c -->
+# Number of SYN retransmits before a connection is dropped (Linux 2.4, glibc
+# 2.2)
+#
+Socket::TCP_SYNCNT: Integer
+
+# <!-- rdoc-file=ext/socket/constdefs.c -->
+# Duplicated acknowledgments handling for thin-streams (Linux 2.6.34, glibc
+# 2.18)
+#
+Socket::TCP_THIN_DUPACK: Integer
+
+# <!-- rdoc-file=ext/socket/constdefs.c -->
+# Linear timeouts for thin-streams (Linux 2.6.34, glibc 2.18)
+#
+Socket::TCP_THIN_LINEAR_TIMEOUTS: Integer
+
+# <!-- rdoc-file=ext/socket/constdefs.c -->
+# TCP timestamp (Linux 3.9, glibc 2.18)
+#
+Socket::TCP_TIMESTAMP: Integer
+
+# <!-- rdoc-file=ext/socket/constdefs.c -->
+# Max timeout before a TCP connection is aborted (Linux 2.6.37, glibc 2.18)
+#
+Socket::TCP_USER_TIMEOUT: Integer
+
+# <!-- rdoc-file=ext/socket/constdefs.c -->
+# Clamp the size of the advertised window (Linux 2.4, glibc 2.2)
+#
+Socket::TCP_WINDOW_CLAMP: Integer
+
+# <!-- rdoc-file=ext/socket/constdefs.c -->
+# Don't send partial frames (Linux 2.5.44, glibc 2.11)
+#
+Socket::UDP_CORK: Integer
 
 # <!-- rdoc-file=ext/socket/ifaddr.c -->
 # Socket::Ifaddr represents a result of getifaddrs() function.
