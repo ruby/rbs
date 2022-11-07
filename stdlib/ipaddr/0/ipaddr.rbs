@@ -406,3 +406,18 @@ IPAddr::IN6FORMAT: String
 # 128 bit mask for IPv6
 #
 IPAddr::IN6MASK: Integer
+
+# <!-- rdoc-file=lib/ipaddr.rb -->
+# Regexp *internally* used for parsing IPv4 address.
+#
+IPAddr::RE_IPV4ADDRLIKE: Regexp
+
+# <!-- rdoc-file=lib/ipaddr.rb -->
+# Regexp *internally* used for parsing IPv6 address.
+#
+IPAddr::RE_IPV6ADDRLIKE_COMPRESSED: Regexp
+
+# <!-- rdoc-file=lib/ipaddr.rb -->
+# Regexp *internally* used for parsing IPv6 address.
+#
+IPAddr::RE_IPV6ADDRLIKE_FULL: Regexp
