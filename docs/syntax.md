@@ -619,8 +619,8 @@ _generics-bound_ ::=                       (No type bound)
                    | `<` _bound-type_      (The generics parameter is bounded)
 
 _bound-type_ ::= _class-name_ _type-arguments_       (Class instance type)
-              | _interface-name_ _type-arguments_    (Interface type)
-              | `singleton(` _class-name_ `)`        (Class singleton type)
+               | _interface-name_ _type-arguments_   (Interface type)
+               | `singleton(` _class-name_ `)`       (Class singleton type)
 
 _generics-variance_ ::=               (Invariant)
                       | `out`         (Covariant)
@@ -652,8 +652,8 @@ class Array[out T]
 end
 ```
 
-There's a limitation with this is for mutable objects (like arrays): a mutation could invalidate this.
-If an array of `String` is passed to a method as an array of `Objects`, and that method adds an Integer to the array, the promise is broken.
+There's a limitation with this for mutable objects (like arrays): a mutation could invalidate this.
+If an `Array` of `String` is passed to a method as an `Array` of `Object`, and that method adds an `Integer` to the `Array`, the promise is broken.
 
 In those cases, one must use the `unchecked` keyword:
 
