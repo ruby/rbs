@@ -2502,12 +2502,19 @@ VALUE parse_signature(parserstate *state) {
 }
 
 static VALUE
-rbsparser_parse_type(VALUE self, VALUE buffer, VALUE line, VALUE column, VALUE variables)
+rbsparser_parse_type(VALUE self, VALUE buffer, VALUE start_pos, VALUE end_pos, VALUE variables, VALUE requires_eof)
 {
-  parserstate *parser = alloc_parser(buffer, FIX2INT(line), FIX2INT(column), variables);
+  parserstate *parser = alloc_parser(buffer, FIX2INT(start_pos), FIX2INT(end_pos), variables);
+
+  if (parser->next_token.type == pEOF) {
+    return Qnil;
+  }
 
   VALUE type = parse_type(parser);
-  parser_advance_assert(parser, pEOF);
+
+  if (RTEST(requires_eof)) {
+    parser_advance_assert(parser, pEOF);
+  }
 
   free_parser(parser);
 
@@ -2515,19 +2522,29 @@ rbsparser_parse_type(VALUE self, VALUE buffer, VALUE line, VALUE column, VALUE v
 }
 
 static VALUE
-rbsparser_parse_method_type(VALUE self, VALUE buffer, VALUE line, VALUE column, VALUE variables)
+rbsparser_parse_method_type(VALUE self, VALUE buffer, VALUE start_pos, VALUE end_pos, VALUE variables, VALUE requires_eof)
 {
-  parserstate *parser = alloc_parser(buffer, FIX2INT(line), FIX2INT(column), variables);
+  parserstate *parser = alloc_parser(buffer, FIX2INT(start_pos), FIX2INT(end_pos), variables);
+
+  if (parser->next_token.type == pEOF) {
+    return Qnil;
+  }
+
   VALUE method_type = parse_method_type(parser);
-  free(parser);
+
+  if (RTEST(requires_eof)) {
+    parser_advance_assert(parser, pEOF);
+  }
+
+  free_parser(parser);
 
   return method_type;
 }
 
 static VALUE
-rbsparser_parse_signature(VALUE self, VALUE buffer, VALUE line, VALUE column)
+rbsparser_parse_signature(VALUE self, VALUE buffer, VALUE end_pos)
 {
-  parserstate *parser = alloc_parser(buffer, FIX2INT(line), FIX2INT(column), Qnil);
+  parserstate *parser = alloc_parser(buffer, 0, FIX2INT(end_pos), Qnil);
   VALUE signature = parse_signature(parser);
   free_parser(parser);
 
@@ -2536,7 +2553,7 @@ rbsparser_parse_signature(VALUE self, VALUE buffer, VALUE line, VALUE column)
 
 void rbs__init_parser(void) {
   RBS_Parser = rb_define_class_under(RBS, "Parser", rb_cObject);
-  rb_define_singleton_method(RBS_Parser, "_parse_type", rbsparser_parse_type, 4);
-  rb_define_singleton_method(RBS_Parser, "_parse_method_type", rbsparser_parse_method_type, 4);
-  rb_define_singleton_method(RBS_Parser, "_parse_signature", rbsparser_parse_signature, 3);
+  rb_define_singleton_method(RBS_Parser, "_parse_type", rbsparser_parse_type, 5);
+  rb_define_singleton_method(RBS_Parser, "_parse_method_type", rbsparser_parse_method_type, 5);
+  rb_define_singleton_method(RBS_Parser, "_parse_signature", rbsparser_parse_signature, 2);
 }

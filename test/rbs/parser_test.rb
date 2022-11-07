@@ -647,4 +647,57 @@ RBS
 
     RBS::Parser.parse_signature(code)
   end
+
+  def test_buffer_location
+    code = buffer("type1 type2 type3")
+
+    RBS::Parser.parse_type(code, range: 0...).tap do |type|
+      assert_equal "type1", type.to_s
+      assert_equal 0...5, type.location.range
+    end
+
+    RBS::Parser.parse_type(code, range: 5...).tap do |type|
+      assert_equal "type2", type.to_s
+      assert_equal 6...11, type.location.range
+      assert_equal 1, type.location.start_line
+      assert_equal 6, type.location.start_column
+      assert_equal 1, type.location.end_line
+      assert_equal 11, type.location.end_column
+    end
+
+    RBS::Parser.parse_type(code, range: 5...).tap do |type|
+      assert_equal "type2", type.to_s
+      assert_equal 6...11, type.location.range
+      assert_equal 1, type.location.start_line
+      assert_equal 6, type.location.start_column
+      assert_equal 1, type.location.end_line
+      assert_equal 11, type.location.end_column
+    end
+
+    RBS::Parser.parse_type(code, range: 6...8).tap do |type|
+      assert_equal "ty", type.to_s
+      assert_equal 6...8, type.location.range
+      assert_equal 1, type.location.start_line
+      assert_equal 6, type.location.start_column
+      assert_equal 1, type.location.end_line
+      assert_equal 8, type.location.end_column
+    end
+  end
+
+  def test_parse_eof_nil
+    code = buffer("type1   ")
+
+    RBS::Parser.parse_type(code, range: 0...).tap do |type|
+      assert_equal "type1", type.to_s
+      assert_equal 0...5, type.location.range
+    end
+
+    RBS::Parser.parse_type(code, range: 5...).tap do |type|
+      assert_nil type
+    end
+
+    RBS::Parser.parse_type(code, range: 5...8).tap do |type|
+      assert_nil type
+    end
+  end
 end

@@ -100,9 +100,14 @@ int token_bytes(token tok) {
 }
 
 unsigned int peek(lexstate *state) {
-  unsigned int c = rb_enc_mbc_to_codepoint(RSTRING_PTR(state->string) + state->current.byte_pos, RSTRING_END(state->string), rb_enc_get(state->string));
-  state->last_char = c;
-  return c;
+  if (state->current.char_pos == state->end_pos) {
+    state->last_char = '\0';
+    return 0;
+  } else {
+    unsigned int c = rb_enc_mbc_to_codepoint(RSTRING_PTR(state->string) + state->current.byte_pos, RSTRING_END(state->string), rb_enc_get(state->string));
+    state->last_char = c;
+    return c;
+  }
 }
 
 token next_token(lexstate *state, enum TokenType type) {
@@ -137,6 +142,7 @@ void skip(lexstate *state) {
 
 void skipn(lexstate *state, size_t size) {
   for (size_t i = 0; i < size; i ++) {
+    peek(state);
     skip(state);
   }
 }

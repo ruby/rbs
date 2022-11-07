@@ -119,6 +119,8 @@ typedef struct {
  * */
 typedef struct {
   VALUE string;
+  int start_pos;                  /* The character position that defines the start of the input */
+  int end_pos;                    /* The character position that defines the end of the input */
   position current;               /* The current position */
   position start;                 /* The start position of the current token */
   bool first_token_of_line;       /* This flag is used for tLINECOMMENT */
