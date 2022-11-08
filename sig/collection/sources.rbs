@@ -8,20 +8,16 @@ module RBS
         def versions: (Config::gem_entry) -> Array[String]
         def install: (dest: Pathname, config_entry: Config::gem_entry, stdout: CLI::_IO) -> void
         def to_lockfile: () -> source_entry
-        def manifest_of: (Config::gem_entry) -> manifest_entry?
-        def dependencies_of: (Config::gem_entry) -> Array[{"name" => String}]?
+        def manifest_of: (Config::gem_entry) -> Manifest?
+        def dependencies_of: (Config::gem_entry) -> Array[Manifest::Dependency]?
       end
 
       type source_entry = Git::source_entry
                         | Stdlib::source_entry
                         | Rubygems::source_entry
 
-      type manifest_entry = {
-        "dependencies" => Array[{"name" => String}]?,
-      }
-
       module Base : _Source
-        def dependencies_of: (Config::gem_entry config_entry) -> Array[{"name" => String}]?
+        def dependencies_of: (Config::gem_entry config_entry) -> Array[Manifest::Dependency]?
       end
 
       class Git
@@ -54,7 +50,7 @@ module RBS
 
         def to_lockfile: () -> source_entry
 
-        def manifest_of: (Config::gem_entry) -> manifest_entry?
+        def manifest_of: (Config::gem_entry) -> Manifest?
 
         private
 
@@ -109,7 +105,7 @@ module RBS
 
         def to_lockfile: () -> source_entry
 
-        def manifest_of: (Config::gem_entry) -> manifest_entry?
+        def manifest_of: (Config::gem_entry) -> Manifest?
 
         private
 
@@ -131,7 +127,7 @@ module RBS
         def versions: (Config::gem_entry) -> Array[String]
         def install: (dest: Pathname, config_entry: Config::gem_entry, stdout: CLI::_IO) -> void
         def to_lockfile: () -> source_entry
-        def manifest_of: (Config::gem_entry) -> manifest_entry?
+        def manifest_of: (Config::gem_entry) -> Manifest?
 
         private
 

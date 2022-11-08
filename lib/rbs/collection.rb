@@ -8,6 +8,7 @@ require_relative './collection/config'
 require_relative './collection/config/lockfile_generator'
 require_relative './collection/installer'
 require_relative './collection/cleaner'
+require_relative './collection/manifest'
 
 module RBS
   module Collection

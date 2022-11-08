@@ -59,7 +59,9 @@ module RBS
           gem_dir = gem_repo_dir.join(gem_name, version)
 
           manifest_path = gem_dir.join('manifest.yaml')
-          YAML.safe_load(manifest_path.read) if manifest_path.exist?
+          if manifest_path.exist?
+            Manifest.from(manifest_path, YAML.safe_load(manifest_path.read))
+          end
         end
 
         private def _install(dest:, config_entry:)

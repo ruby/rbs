@@ -1,0 +1,50 @@
+module RBS
+  module Collection
+    # Manifest class defines the properties of a RBS library that is loaded from `manifest.yaml` file
+    #
+    class Manifest
+      # The type of YAML content
+      type manifest = { "dependencies" => Array[dependency] }
+
+      type dependency = { "name" => String }
+
+      class Dependency
+        attr_reader name: String
+
+        def initialize: (name: String) -> void
+
+        def ==: (untyped other) -> bool
+
+        alias eql? ==
+
+        def hash: () -> Integer
+      end
+
+      attr_reader path: Pathname
+
+      # Required key `"dependencies"` that is an array of depedent library names
+      #
+      # ```yaml
+      # dependencies:
+      #   - name: pathname
+      #   - name: set
+      # ```
+      #
+      attr_reader dependencies: Array[Dependency]
+
+      # *Default* manifest that is used for a library without `manifest.yaml`
+      #
+      attr_reader self.default: Manifest
+
+      def self.from: (Pathname path, manifest hash) -> Manifest
+
+      def initialize: (Pathname path, dependencies: Array[Dependency]) -> void
+
+      def ==: (untyped other) -> bool
+
+      alias eql? ==
+
+      def hash: () -> Integer
+    end
+  end
+end

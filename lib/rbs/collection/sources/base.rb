@@ -6,7 +6,7 @@ module RBS
       module Base
         def dependencies_of(config_entry)
           manifest = manifest_of(config_entry) or return
-          manifest['dependencies']
+          manifest.dependencies
         end
       end
     end
