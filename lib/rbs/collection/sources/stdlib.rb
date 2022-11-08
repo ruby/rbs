@@ -31,7 +31,9 @@ module RBS
         def manifest_of(config_entry)
           config_entry['version'] or raise
           manifest_path = (lookup(config_entry) or raise).join('manifest.yaml')
-          YAML.safe_load(manifest_path.read) if manifest_path.exist?
+          if manifest_path.exist?
+            Manifest.from(manifest_path, YAML.safe_load(manifest_path.read))
+          end
         end
 
         def to_lockfile

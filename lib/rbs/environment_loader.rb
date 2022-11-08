@@ -66,7 +66,7 @@ module RBS
 
         gem['version'] ||= source.versions(gem).last
         source.dependencies_of(gem)&.each do |dep|
-          add(library: dep['name'], version: nil)
+          add(library: dep.name, version: nil)
         end
         return
       end

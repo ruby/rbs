@@ -32,7 +32,9 @@ module RBS
           _, sig_path = gem_sig_path(config_entry)
           sig_path or raise
           manifest_path = sig_path.join('manifest.yaml')
-          YAML.safe_load(manifest_path.read) if manifest_path.exist?
+          if manifest_path.exist?
+            Manifest.from(manifest_path, YAML.safe_load(manifest_path.read))
+          end
         end
 
         def to_lockfile

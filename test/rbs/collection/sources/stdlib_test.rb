@@ -1,6 +1,8 @@
 require "test_helper"
 
 class RBS::Collection::Sources::StdlibTest < Test::Unit::TestCase
+  Manifest = RBS::Collection::Manifest
+
   def test_has?
     s = source
 
@@ -16,8 +18,16 @@ class RBS::Collection::Sources::StdlibTest < Test::Unit::TestCase
 
   def test_manifest_of__exist
     s = source
-    assert_equal({ 'dependencies' => [{ 'name' => 'dbm'}, { 'name' => 'pstore'}] },
-                 s.manifest_of({ 'name' => 'yaml', 'version' => '0' }))
+    assert_equal(
+      Manifest.new(
+        Pathname("yaml/0/manifest.yaml"),
+        dependencies: [
+          Manifest::Dependency.new(name: "dbm"),
+          Manifest::Dependency.new(name: "pstore"),
+        ]
+      ),
+      s.manifest_of({ 'name' => 'yaml', 'version' => '0' })
+    )
   end
 
   def test_manifest_of__nonexist
