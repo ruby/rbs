@@ -39,7 +39,7 @@ module RBS
           gem_dir = dest.join(gem_name, version)
 
           if gem_dir.directory?
-            if (prev = YAML.load_file(gem_dir.join(METADATA_FILENAME))) == config_entry
+            if (prev = YAML.load_file(gem_dir.join(METADATA_FILENAME).to_s)) == config_entry
               stdout.puts "Using #{format_config_entry(config_entry)}"
             else
               # @type var prev: RBS::Collection::Config::gem_entry
