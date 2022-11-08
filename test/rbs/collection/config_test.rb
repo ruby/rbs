@@ -485,6 +485,23 @@ class RBS::Collection::ConfigTest < Test::Unit::TestCase
     end
   end
 
+  def test_generate_lock_with_different_gemfile_lock
+    mktmpdir do |tmpdir|
+      config_path = tmpdir / 'rbs_collection.yaml'
+      config_path.write CONFIG
+      lock_path = tmpdir / 'rbs_collection.lock.yaml'
+      lock_path.write CONFIG + "gemfile_lock_path: Gemfile.lock"
+      gemfile_lock_path = tmpdir / 'Gemfile.lock'
+      gemfile_lock_path.write GEMFILE_LOCK
+      gemfile_lock_path2 = tmpdir / 'Gemfile.2.lock'
+      gemfile_lock_path2.write GEMFILE_LOCK
+
+      assert_raises(RBS::Collection::Config::LockfileGenerator::GemfileLockMismatchError) do
+        RBS::Collection::Config.generate_lockfile(config_path: config_path, gemfile_lock_path: gemfile_lock_path2)
+      end
+    end
+  end
+
   def test_repo_path
     mktmpdir do |tmpdir|
       config_path = tmpdir / 'rbs_collection.yaml'
