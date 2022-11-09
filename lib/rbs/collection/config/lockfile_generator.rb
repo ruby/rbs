@@ -18,19 +18,24 @@ module RBS
           @lock = Config.from_path(lock_path) if lock_path.exist? && with_lockfile
           @gemfile_lock = Bundler::LockfileParser.new(gemfile_lock_path.read)
           @gem_queue = []
+
+          @gemfile_lock_gems = @gemfile_lock.specs.each.with_object({}) do |spec, hash|
+            # @type var hash: Hash[String, Bundler::LazySpecification]
+            hash[spec.name] = spec
+          end
         end
 
         def generate
           config.gems.each do |gem|
-            @gem_queue.push({ name: gem['name'], version: gem['version'] })
+            @gem_queue.push({ name: gem['name'], version: gem['version'], implicit: false })
           end
 
           gemfile_lock_gems do |spec|
-            @gem_queue.push({ name: spec.name, version: spec.version })
+            @gem_queue.push({ name: spec.name, version: spec.version, implicit: true })
           end
 
           while gem = @gem_queue.shift
-            assign_gem(**gem)
+            assign_gem(name: gem[:name], version: gem[:version], implicit: gem[:implicit])
           end
           remove_ignored_gems!
 
@@ -38,7 +43,7 @@ module RBS
           config
         end
 
-        private def assign_gem(name:, version:)
+        private def assign_gem(name:, version:, implicit:)
           # @type var locked: gem_entry?
           locked = lock&.gem(name)
           specified = config.gem(name)
@@ -64,10 +69,13 @@ module RBS
 
           locked or raise
 
+          manifest = Sources.from_config_entry(locked['source'] || raise).manifest_of(locked) || Manifest.default
+          return if implicit && !manifest.load_implicitly?
+
           upsert_gem specified, locked
-          source = Sources.from_config_entry(locked['source'] || raise)
-          source.dependencies_of(locked)&.each do |dep|
-            @gem_queue.push({ name: dep.name, version: nil} )
+          manifest.dependencies.each do |dep|
+            version = @gemfile_lock_gems[dep.name]&.version
+            @gem_queue.push({ name: dep.name, version: version, implicit: false })
           end
         end
 
@@ -84,9 +92,7 @@ module RBS
         end
 
         private def gemfile_lock_gems(&block)
-          gemfile_lock.specs.each do |spec|
-            yield spec
-          end
+          @gemfile_lock_gems.each_value(&block)
         end
 
         private def find_source(name:)

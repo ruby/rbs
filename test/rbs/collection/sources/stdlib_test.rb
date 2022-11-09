@@ -24,7 +24,8 @@ class RBS::Collection::Sources::StdlibTest < Test::Unit::TestCase
         dependencies: [
           Manifest::Dependency.new(name: "dbm"),
           Manifest::Dependency.new(name: "pstore"),
-        ]
+        ],
+        load_implicitly: false
       ),
       s.manifest_of({ 'name' => 'yaml', 'version' => '0' })
     )

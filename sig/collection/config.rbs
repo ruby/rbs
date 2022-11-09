@@ -12,9 +12,11 @@ module RBS
         attr_reader lock_path: Pathname
         attr_reader gemfile_lock: Bundler::LockfileParser
 
-        type gem_queue_entry = { name: String, version: String? }
+        type gem_queue_entry = { name: String, version: String?, implicit: bool }
 
         @gem_queue: Array[gem_queue_entry]
+
+        @gemfile_lock_gems: Hash[String, Bundler::LazySpecification]
 
         def self.generate: (config_path: Pathname, gemfile_lock_path: Pathname, ?with_lockfile: boolish) -> Config
 
@@ -24,11 +26,11 @@ module RBS
 
         private
 
-        def assign_gem: (name: String, version: String?) -> void
+        def assign_gem: (name: String, version: String?, implicit: bool) -> void
 
         def upsert_gem: (gem_entry? old, gem_entry new) -> void
 
-        def gemfile_lock_gems: () { (untyped) -> void } -> void
+        def gemfile_lock_gems: () { (Bundler::LazySpecification) -> void } -> void
 
         def remove_ignored_gems!: () -> void
 

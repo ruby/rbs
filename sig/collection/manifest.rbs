@@ -4,7 +4,7 @@ module RBS
     #
     class Manifest
       # The type of YAML content
-      type manifest = { "dependencies" => Array[dependency] }
+      type manifest = { "dependencies" => Array[dependency], "load_implicitly" => bool? }
 
       type dependency = { "name" => String }
 
@@ -32,13 +32,40 @@ module RBS
       #
       attr_reader dependencies: Array[Dependency]
 
+      # Optional key `"load_implicitly"` that is true or false (defaults to `true`)
+      #
+      # ```yaml
+      # load_implicitly: false
+      # ```
+      #
+      # Disables *implicit* load when this is `false`.
+      # Returns `nil` if `"load_implicitly`" is not included in the YAML.
+      #
+      # There are four ways to load RBS of a library:
+      #
+      # 1. Tool specific loading mechanics
+      # 2. Specify the library in `rbs_collection.yaml`
+      # 3. When dependent library is loaded
+      # 4. A library managed by Bundler is loaded by `rbs collection` ⬅️
+      #
+      # The `load_implicitly` property controls the last case.
+      #
+      # This is typically for `rbs` and `steep` gems.
+      # These gems have RBS files, but the tool users rarely want to load them.
+      #
+      attr_reader load_implicitly: bool?
+
       # *Default* manifest that is used for a library without `manifest.yaml`
       #
       attr_reader self.default: Manifest
 
+      # Returns `true` to load the RBS of the library implicitly, `false` to skip loading it
+      #
+      def load_implicitly?: () -> bool
+
       def self.from: (Pathname path, manifest hash) -> Manifest
 
-      def initialize: (Pathname path, dependencies: Array[Dependency]) -> void
+      def initialize: (Pathname path, dependencies: Array[Dependency], load_implicitly: bool?) -> void
 
       def ==: (untyped other) -> bool
 

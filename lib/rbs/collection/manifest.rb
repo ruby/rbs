@@ -19,20 +19,30 @@ module RBS
         end
       end
 
-      attr_reader :dependencies
+      attr_reader :dependencies, :load_implicitly
 
       def path
         @path or raise "`#path` is `nil` (reading `#path` of *default* manifest?)"
       end
 
-      def self.from(path, hash)
-        dependencies = hash["dependencies"].map {|dep| Dependency.new(name: dep["name"]) }
-        new(path, dependencies: dependencies)
+      def load_implicitly?
+        case load_implicitly
+        when nil
+          true
+        else
+          load_implicitly
+        end
       end
 
-      def initialize(path, dependencies:)
+      def self.from(path, hash)
+        dependencies = hash["dependencies"].map {|dep| Dependency.new(name: dep["name"]) }
+        new(path, dependencies: dependencies, load_implicitly: hash["load_implicitly"])
+      end
+
+      def initialize(path, dependencies:, load_implicitly:)
         @path = path
         @dependencies = dependencies
+        @load_implicitly = load_implicitly
       end
 
       def ==(other)
@@ -49,7 +59,7 @@ module RBS
         @default
       end
 
-      @default = new(_ = nil, dependencies: [])
+      @default = new(_ = nil, dependencies: [], load_implicitly: true)
     end
   end
 end
