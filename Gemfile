@@ -21,7 +21,11 @@ gem "prime"
 gem "rdoc"
 
 # Test gems
-gem "rbs-amber", path: "test/assets/test-gem"
+path "test/assets/test-gem" do
+  gem "rbs-amber"
+  gem "rbs-load_implicit_false"
+  gem "rbs-depends_on_load_implicit_false"
+end
 
 group :ide, optional: true do
   gem "ruby-debug-ide"

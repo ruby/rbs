@@ -585,6 +585,41 @@ Processing `test/a_test.rb`...
     end
   end
 
+  def test_collection_install_skip_implicit
+    Dir.mktmpdir do |dir|
+      Dir.chdir(dir) do
+        dir = Pathname(dir)
+        dir.join(RBS::Collection::Config::PATH).write(<<~YAML)
+          sources:
+            - name: ruby/gem_rbs_collection
+              remote: https://github.com/ruby/gem_rbs_collection.git
+              revision: b4d3b346d9657543099a35a1fd20347e75b8c523
+              repo_dir: gems
+
+          path: #{dir.join('gem_rbs_collection')}
+        YAML
+        dir.join('Gemfile').write(<<~GEMFILE)
+source "https://rubygems.org"
+
+path "#{File.join(__dir__, "../assets")}" do
+  gem "rbs-load_implicit_false"
+end
+        GEMFILE
+
+        Bundler.with_unbundled_env do
+          system("bundle install")
+
+          with_cli do |cli|
+            cli.run(%w[collection install])
+            assert dir.join('rbs_collection.lock.yaml').exist?
+
+            puts dir.join("rbs_collection.lock.yaml").read
+          end
+        end
+      end
+    end
+  end
+
   def test_collection_update
     Dir.mktmpdir do |dir|
       Dir.chdir(dir) do
