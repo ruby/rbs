@@ -15,7 +15,12 @@ module RBS
         install_to = lockfile.repo_path
         install_to.mkpath
         lockfile.gems.each do |config_entry|
-          source_for(config_entry).install(dest: install_to, config_entry: config_entry, stdout: stdout)
+          source_for(config_entry).install(
+            dest: install_to,
+            name: config_entry["name"],
+            version: config_entry["version"] || raise,
+            stdout: stdout
+          )
         end
         stdout.puts "It's done! #{lockfile.gems.size} gems' RBSs now installed."
       end

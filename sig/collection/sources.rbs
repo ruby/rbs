@@ -4,12 +4,12 @@ module RBS
       def self.from_config_entry: (source_entry) -> _Source
 
       interface _Source
-        def has?: (Config::gem_entry) -> boolish
-        def versions: (Config::gem_entry) -> Array[String]
-        def install: (dest: Pathname, config_entry: Config::gem_entry, stdout: CLI::_IO) -> void
+        def has?: (String name, String? version) -> boolish
+        def versions: (String name) -> Array[String]
+        def install: (dest: Pathname, name: String, version: String, stdout: CLI::_IO) -> void
         def to_lockfile: () -> source_entry
-        def manifest_of: (Config::gem_entry) -> manifest_entry?
-        def dependencies_of: (Config::gem_entry) -> Array[{"name" => String}]?
+        def manifest_of: (String name, String version) -> manifest_entry?
+        def dependencies_of: (String name, String version) -> Array[manifest_dependency]?
       end
 
       type source_entry = Git::source_entry
@@ -17,11 +17,13 @@ module RBS
                         | Rubygems::source_entry
 
       type manifest_entry = {
-        "dependencies" => Array[{"name" => String}]?,
+        "dependencies" => Array[manifest_dependency]?,
       }
 
+      type manifest_dependency = { "name" => String }
+
       module Base : _Source
-        def dependencies_of: (Config::gem_entry config_entry) -> Array[{"name" => String}]?
+        def dependencies_of: (String name, String version) -> Array[manifest_dependency]?
       end
 
       class Git
@@ -46,15 +48,15 @@ module RBS
 
         def initialize: (name: String, revision: String, remote: String, repo_dir: String?) -> untyped
 
-        def has?: (Config::gem_entry) -> bool
+        def has?: (String name, String? version) -> boolish
 
-        def versions: (Config::gem_entry) -> Array[String]
+        def versions: (String name) -> Array[String]
 
-        def install: (dest: Pathname, config_entry: Config::gem_entry, stdout: CLI::_IO) -> void
+        def install: (dest: Pathname, name: String, version: String, stdout: CLI::_IO) -> void
 
         def to_lockfile: () -> source_entry
 
-        def manifest_of: (Config::gem_entry) -> manifest_entry?
+        def manifest_of: (String name, String version) -> manifest_entry?
 
         private
 
@@ -62,7 +64,7 @@ module RBS
 
         @resolved_revision: String?
 
-        def _install: (dest: Pathname , config_entry: Config::gem_entry) -> void
+        def _install: (dest: Pathname , name: String, version: String) -> void
 
         def cp_r: (Pathname, Pathname) -> void
 
@@ -84,7 +86,18 @@ module RBS
 
         def sh!: (*String cmd, **untyped opt) -> String
 
-        def format_config_entry: (Config::gem_entry) -> String
+        def format_config_entry: (String name, String version) -> String
+
+        type metadata = { 'name' => String, 'version' => String, 'source' => source_entry }
+
+        def metadata_content: (name: String, version: String) -> metadata
+
+        # Write `.rbs_meta.yaml`
+        def write_metadata: (dir: Pathname, name: String, version: String) -> void
+
+        # Load `.rbs_meta.yaml` from the `dir`, where is the destination of the RBS file installation, and return the cleaned up content
+        #
+        def load_metadata: (dir: Pathname) -> metadata
       end
 
       # signatures that are bundled in rbs gem under the stdlib/ directory
@@ -101,19 +114,19 @@ module RBS
         # polyfill of singleton module
         def self.instance: () -> instance
 
-        def has?: (Config::gem_entry) -> boolish
+        def has?: (String name, String? version) -> boolish
 
-        def versions: (Config::gem_entry) -> Array[String]
+        def versions: (String name) -> Array[String]
 
-        def install: (dest: Pathname, config_entry: Config::gem_entry, stdout: CLI::_IO) -> void
+        def install: (dest: Pathname, name: String, version: String, stdout: CLI::_IO) -> void
 
         def to_lockfile: () -> source_entry
 
-        def manifest_of: (Config::gem_entry) -> manifest_entry?
+        def manifest_of: (String name, String version) -> manifest_entry?
 
         private
 
-        def lookup: (Config::gem_entry) -> Pathname?
+        def lookup: (String name, String? version) -> Pathname?
       end
 
       # sig/ directory
@@ -127,15 +140,19 @@ module RBS
         # polyfill of singleton module
         def self.instance: () -> instance
 
-        def has?: (Config::gem_entry) -> boolish
-        def versions: (Config::gem_entry) -> Array[String]
-        def install: (dest: Pathname, config_entry: Config::gem_entry, stdout: CLI::_IO) -> void
+        def has?: (String name, String? version) -> boolish
+
+        def versions: (String name) -> Array[String]
+
+        def install: (dest: Pathname, name: String, version: String, stdout: CLI::_IO) -> void
+
         def to_lockfile: () -> source_entry
-        def manifest_of: (Config::gem_entry) -> manifest_entry?
+
+        def manifest_of: (String name, String version) -> manifest_entry?
 
         private
 
-        def gem_sig_path: (Config::gem_entry) -> [Gem::Specification, Pathname]?
+        def gem_sig_path: (String name, String? version) -> [Gem::Specification, Pathname]?
       end
     end
   end
