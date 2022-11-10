@@ -24,6 +24,8 @@ module RBS
 
         private
 
+        def validate_gemfile_lock_path!: (lock: Config?, gemfile_lock_path: Pathname) -> void
+
         def assign_gem: (name: String, version: String?) -> void
 
         def upsert_gem: (gem_entry? old, gem_entry new) -> void
@@ -52,6 +54,8 @@ module RBS
 
       @sources: Array[Sources::_Source]
 
+      def self.find_config_path: () -> Pathname?
+
       def self.generate_lockfile: (config_path: Pathname, gemfile_lock_path: Pathname, ?with_lockfile: boolish) -> Config
 
       def self.from_path: (Pathname path) -> Config
@@ -74,6 +78,10 @@ module RBS
       def dump_to: (Pathname) -> void
 
       def gems: () -> Array[gem_entry]
+
+      def gemfile_lock_path=: (Pathname) -> Pathname
+
+      def gemfile_lock_path: () -> Pathname?
 
       def check_rbs_availability!: () -> void
     end

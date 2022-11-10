@@ -16,6 +16,17 @@ module RBS
 
       PATH = Pathname('rbs_collection.yaml')
 
+      def self.find_config_path
+        current = Pathname.pwd
+
+        loop do
+          config_path = current.join(PATH)
+          return config_path if config_path.exist?
+          current = current.join('..')
+          return nil if current.root?
+        end
+      end
+
       # Generate a rbs lockfile from Gemfile.lock to `config_path`.
       # If `with_lockfile` is true, it respects existing rbs lockfile.
       def self.generate_lockfile(config_path:, gemfile_lock_path:, with_lockfile: true)
@@ -67,6 +78,16 @@ module RBS
 
       def gems
         @data['gems'] ||= []
+      end
+
+      def gemfile_lock_path=(path)
+        @data['gemfile_lock_path'] = path.relative_path_from(@config_path.dirname).to_s
+      end
+
+      def gemfile_lock_path
+        path = @data['gemfile_lock_path']
+        return unless path
+        @config_path.dirname.join path
       end
 
       # It raises an error when there are non-available libraries

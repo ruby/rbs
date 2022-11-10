@@ -2,10 +2,24 @@
 
 module RBS
   module Collection
-
-    # This class represent the configration file.
     class Config
       class LockfileGenerator
+        class GemfileLockMismatchError < StandardError
+          def initialize(expected:, actual:)
+            @expected = expected
+            @actual = actual
+          end
+
+          def message
+            <<~MESSAGE
+              RBS Collection loads a different Gemfile.lock from before.
+              The Gemfile.lock must be the same as that is recorded in rbs_collection.lock.yaml.
+              Expected Gemfile.lock: #{@expected}
+              Actual Gemfile.lock: #{@actual}
+            MESSAGE
+          end
+        end
+
         attr_reader :config, :lock, :gemfile_lock, :lock_path
 
         def self.generate(config_path:, gemfile_lock_path:, with_lockfile: true)
@@ -18,6 +32,10 @@ module RBS
           @lock = Config.from_path(lock_path) if lock_path.exist? && with_lockfile
           @gemfile_lock = Bundler::LockfileParser.new(gemfile_lock_path.read)
           @gem_queue = []
+
+          validate_gemfile_lock_path!(lock: lock, gemfile_lock_path: gemfile_lock_path)
+
+          config.gemfile_lock_path = gemfile_lock_path
         end
 
         def generate
@@ -36,6 +54,14 @@ module RBS
 
           config.dump_to(lock_path)
           config
+        end
+
+        private def validate_gemfile_lock_path!(lock:, gemfile_lock_path:)
+          return unless lock
+          return unless lock.gemfile_lock_path
+          return if lock.gemfile_lock_path == gemfile_lock_path
+
+          raise GemfileLockMismatchError.new(expected: lock.gemfile_lock_path, actual: gemfile_lock_path)
         end
 
         private def assign_gem(name:, version:)
