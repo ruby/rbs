@@ -50,7 +50,7 @@ module RBS
           end
 
           while gem = @gem_queue.shift
-            assign_gem(**gem)
+            assign_gem(name: gem[:name], version: gem[:version])
           end
           remove_ignored_gems!
 
@@ -81,7 +81,7 @@ module RBS
             return unless source
 
             installed_version = version
-            best_version = find_best_version(version: installed_version, versions: source.versions({ 'name' => name }))
+            best_version = find_best_version(version: installed_version, versions: source.versions(name))
 
             locked = {
               'name' => name,
@@ -94,7 +94,7 @@ module RBS
 
           upsert_gem specified, locked
           source = Sources.from_config_entry(locked['source'] || raise)
-          source.dependencies_of(locked)&.each do |dep|
+          source.dependencies_of(locked["name"], locked["version"] || raise)&.each do |dep|
             @gem_queue.push({ name: dep.name, version: nil} )
           end
         end
@@ -120,7 +120,7 @@ module RBS
         private def find_source(name:)
           sources = config.sources
 
-          sources.find { |c| c.has?({ 'name' => name, 'revision' => nil } ) }
+          sources.find { |c| c.has?(name, nil) }
         end
 
         private def find_best_version(version:, versions:)

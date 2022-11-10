@@ -12,25 +12,22 @@ module RBS
 
         REPO = Repository.default
 
-        def has?(config_entry)
-          lookup(config_entry)
+        def has?(name, version)
+          lookup(name, version)
         end
 
-        def versions(config_entry)
-          REPO.gems[config_entry['name']].versions.keys.map(&:to_s)
+        def versions(name)
+          REPO.gems[name].versions.keys.map(&:to_s)
         end
 
-        def install(dest:, config_entry:, stdout:)
+        def install(dest:, name:, version:, stdout:)
           # Do nothing because stdlib RBS is available by default
-          name = config_entry['name']
-          version = config_entry['version'] or raise
-          from = lookup(config_entry)
+          from = lookup(name, version)
           stdout.puts "Using #{name}:#{version} (#{from})"
         end
 
-        def manifest_of(config_entry)
-          config_entry['version'] or raise
-          manifest_path = (lookup(config_entry) or raise).join('manifest.yaml')
+        def manifest_of(name, version)
+          manifest_path = (lookup(name, version) or raise).join('manifest.yaml')
           if manifest_path.exist?
             Manifest.from(manifest_path, YAML.safe_load(manifest_path.read))
           end
@@ -42,8 +39,8 @@ module RBS
           }
         end
 
-        private def lookup(config_entry)
-          REPO.lookup(config_entry['name'], config_entry['version'])
+        private def lookup(name, version)
+          REPO.lookup(name, version)
         end
       end
     end

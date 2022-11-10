@@ -4,8 +4,8 @@ module RBS
   module Collection
     module Sources
       module Base
-        def dependencies_of(config_entry)
-          manifest = manifest_of(config_entry) or return
+        def dependencies_of(name, version)
+          manifest = manifest_of(name, version) or return
           manifest.dependencies
         end
       end

@@ -23,40 +23,41 @@ module RBS
           setup!(revision: revision)
         end
 
-        def has?(config_entry)
-          gem_name = config_entry['name']
-          gem_repo_dir.join(gem_name).directory?
-        end
-
-        def versions(config_entry)
-          gem_name = config_entry['name']
-          gem_repo_dir.join(gem_name).glob('*/').map { |path| path.basename.to_s }
-        end
-
-        def install(dest:, config_entry:, stdout:)
-          gem_name = config_entry['name']
-          version = config_entry['version'] or raise
-          gem_dir = dest.join(gem_name, version)
-
-          if gem_dir.directory?
-            if (prev = YAML.load_file(gem_dir.join(METADATA_FILENAME).to_s)) == config_entry
-              stdout.puts "Using #{format_config_entry(config_entry)}"
+        def has?(name, version)
+          if gem_repo_dir.join(name).directory?
+            if version
+              versions(name).include?(version)
             else
-              # @type var prev: RBS::Collection::Config::gem_entry
-              stdout.puts "Updating to #{format_config_entry(config_entry)} from #{format_config_entry(prev)}"
-              FileUtils.remove_entry_secure(gem_dir.to_s)
-              _install(dest: dest, config_entry: config_entry)
+              true
             end
-          else
-            stdout.puts "Installing #{format_config_entry(config_entry)}"
-            _install(dest: dest, config_entry: config_entry)
           end
         end
 
-        def manifest_of(config_entry)
-          gem_name = config_entry['name']
-          version = config_entry['version'] or raise
-          gem_dir = gem_repo_dir.join(gem_name, version)
+        def versions(name)
+          gem_repo_dir.join(name).glob('*/').map { |path| path.basename.to_s }
+        end
+
+        def install(dest:, name:, version:, stdout:)
+          gem_dir = dest.join(name, version)
+
+          if gem_dir.directory?
+            prev = load_metadata(dir: gem_dir)
+
+            if prev == metadata_content(name: name, version: version)
+              stdout.puts "Using #{format_config_entry(name, version)}"
+            else
+              stdout.puts "Updating to #{format_config_entry(name, version)} from #{format_config_entry(prev["name"], prev["version"])}"
+              FileUtils.remove_entry_secure(gem_dir.to_s)
+              _install(dest: dest, name: name, version: version)
+            end
+          else
+            stdout.puts "Installing #{format_config_entry(name, version)}"
+            _install(dest: dest, name: name, version: version)
+          end
+        end
+
+        def manifest_of(name, version)
+          gem_dir = gem_repo_dir.join(name, version)
 
           manifest_path = gem_dir.join('manifest.yaml')
           if manifest_path.exist?
@@ -64,15 +65,13 @@ module RBS
           end
         end
 
-        private def _install(dest:, config_entry:)
-          gem_name = config_entry['name']
-          version = config_entry['version'] or raise
-          dest = dest.join(gem_name, version)
-          dest.mkpath
-          src = gem_repo_dir.join(gem_name, version)
+        private def _install(dest:, name:, version:)
+          dir = dest.join(name, version)
+          dir.mkpath
+          src = gem_repo_dir.join(name, version)
 
-          cp_r(src, dest)
-          dest.join(METADATA_FILENAME).write(YAML.dump(config_entry))
+          cp_r(src, dir)
+          write_metadata(dir: dir, name: name, version: version)
         end
 
         private def cp_r(src, dest)
@@ -99,14 +98,11 @@ module RBS
           }
         end
 
-        private def format_config_entry(config_entry)
-          name = config_entry['name']
-          v = config_entry['version']
-
+        private def format_config_entry(name, version)
           rev = resolved_revision[0..10]
           desc = "#{name}@#{rev}"
 
-          "#{name}:#{v} (#{desc})"
+          "#{name}:#{version} (#{desc})"
         end
 
         private def setup!(revision:)
@@ -176,6 +172,28 @@ module RBS
 
             out
           end
+        end
+
+        def metadata_content(name:, version:)
+          {
+            "name" => name,
+            "version" => version,
+            "source" => to_lockfile
+          }
+        end
+
+        def write_metadata(dir:, name:, version:)
+          dir.join(METADATA_FILENAME).write(
+            YAML.dump(
+              metadata_content(name: name, version: version)
+            )
+          )
+        end
+
+        def load_metadata(dir:)
+          # @type var content: Hash[String, untyped]
+          content = YAML.load_file(dir.join(METADATA_FILENAME).to_s)
+          _ = content.slice("name", "version", "source")
         end
       end
     end

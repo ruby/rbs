@@ -10,26 +10,24 @@ module RBS
         include Base
         include Singleton
 
-        def has?(config_entry)
-          gem_sig_path(config_entry)
+        def has?(name, version)
+          gem_sig_path(name, version)
         end
 
-        def versions(config_entry)
-          spec, _ = gem_sig_path(config_entry)
+        def versions(name)
+          spec, _ = gem_sig_path(name, nil)
           spec or raise
           [spec.version.to_s]
         end
 
-        def install(dest:, config_entry:, stdout:)
+        def install(dest:, name:, version:, stdout:)
           # Do nothing because stdlib RBS is available by default
-          name = config_entry['name']
-          version = config_entry['version'] or raise
-          _, from = gem_sig_path(config_entry)
+          _, from = gem_sig_path(name, version)
           stdout.puts "Using #{name}:#{version} (#{from})"
         end
 
-        def manifest_of(config_entry)
-          _, sig_path = gem_sig_path(config_entry)
+        def manifest_of(name, version)
+          _, sig_path = gem_sig_path(name, version)
           sig_path or raise
           manifest_path = sig_path.join('manifest.yaml')
           if manifest_path.exist?
@@ -43,8 +41,8 @@ module RBS
           }
         end
 
-        private def gem_sig_path(config_entry)
-          RBS::EnvironmentLoader.gem_sig_path(config_entry['name'], config_entry['version'])
+        private def gem_sig_path(name, version)
+          RBS::EnvironmentLoader.gem_sig_path(name, version)
         end
       end
     end
