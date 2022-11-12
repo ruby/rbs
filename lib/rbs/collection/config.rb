@@ -54,10 +54,6 @@ module RBS
         @config_path = config_path
       end
 
-      def add_gem(gem)
-        gems << gem
-      end
-
       def gem(gem_name)
         gems.find { |gem| gem['name'] == gem_name }
       end
@@ -80,14 +76,6 @@ module RBS
             .map { |c| Sources.from_config_entry(c) }
             .push(Sources::Stdlib.instance)
             .push(Sources::Rubygems.instance)
-        )
-      end
-
-      def dump_to(io)
-        gems = self.gems.reject {|gem| gem['ignore'] }.sort_by {|gem| gem['name'] }
-        YAML.dump(
-          @data.merge({ "gems" => gems }),
-          io
         )
       end
 
