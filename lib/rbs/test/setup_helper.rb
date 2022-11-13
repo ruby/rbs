@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module RBS
   module Test
     module SetupHelper
@@ -30,7 +32,12 @@ module RBS
 
         case double_suite.downcase.strip
         when 'rspec'
-          ['::RSpec::Mocks::Double']
+          [
+            '::RSpec::Mocks::Double',
+            '::RSpec::Mocks::InstanceVerifyingDouble',
+            '::RSpec::Mocks::ObjectVerifyingDouble',
+            '::RSpec::Mocks::ClassVerifyingDouble',
+          ]
         when 'minitest'
           ['::Minitest::Mock']
         else
@@ -38,7 +45,6 @@ module RBS
           nil
         end
       end
-
     end
   end
 end

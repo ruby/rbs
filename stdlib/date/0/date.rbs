@@ -1,3 +1,4 @@
+# <!-- rdoc-file=ext/date/date_core.c -->
 # date and datetime class - Tadayoshi Funaba 1998-2011
 #
 # 'date' provides two classes: Date and DateTime.
@@ -134,64 +135,116 @@
 #     d.strftime('%a %d %b %Y')    #=> "Sun 04 Feb 2001"
 #
 class Date
-  # Creates a date object denoting the given calendar date.
-  #
-  # In this class, BCE years are counted astronomically.  Thus, the year before
-  # the year 1 is the year zero, and the year preceding the year zero is the year
-  # -1.  The month and the day of month should be a negative or a positive number
-  # (as a relative month/day from the end of year/month when negative).  They
-  # should not be zero.
-  #
-  # The last argument should be a Julian day number which denotes the day of
-  # calendar reform.  Date::ITALY (2299161=1582-10-15), Date::ENGLAND
-  # (2361222=1752-09-14), Date::GREGORIAN (the proleptic Gregorian calendar) and
-  # Date::JULIAN (the proleptic Julian calendar) can be specified as a day of
-  # calendar reform.
-  #
-  #     Date.new(2001)            #=> #<Date: 2001-01-01 ...>
-  #     Date.new(2001,2,3)        #=> #<Date: 2001-02-03 ...>
-  #     Date.new(2001,2,-1)       #=> #<Date: 2001-02-28 ...>
-  #
-  # See also ::jd.
+  # <!--
+  #   rdoc-file=ext/date/date_core.c
+  #   - new(p1 = v1, p2 = v2, p3 = v3, p4 = v4)
+  # -->
   #
   def initialize: (?Integer year, ?Integer month, ?Integer mday, ?Integer start) -> void
 
   include Comparable
 
+  # <!--
+  #   rdoc-file=ext/date/date_core.c
+  #   - Date._httpdate(string, limit: 128)  ->  hash
+  # -->
   # Returns a hash of parsed elements.
+  #
+  # Raise an ArgumentError when the string length is longer than *limit*. You can
+  # stop this check by passing `limit: nil`, but note that it may take a long time
+  # to parse.
   #
   def self._httpdate: (String str) -> Hash[Symbol, Integer]
 
+  # <!--
+  #   rdoc-file=ext/date/date_core.c
+  #   - Date._iso8601(string, limit: 128)  ->  hash
+  # -->
   # Returns a hash of parsed elements.
+  #
+  # Raise an ArgumentError when the string length is longer than *limit*. You can
+  # stop this check by passing `limit: nil`, but note that it may take a long time
+  # to parse.
   #
   def self._iso8601: (String str) -> Hash[Symbol, Integer]
 
+  # <!--
+  #   rdoc-file=ext/date/date_core.c
+  #   - Date._jisx0301(string, limit: 128)  ->  hash
+  # -->
   # Returns a hash of parsed elements.
+  #
+  # Raise an ArgumentError when the string length is longer than *limit*. You can
+  # stop this check by passing `limit: nil`, but note that it may take a long time
+  # to parse.
   #
   def self._jisx0301: (String str) -> Hash[Symbol, Integer]
 
+  # <!--
+  #   rdoc-file=ext/date/date_core.c
+  #   - Date._parse(string[, comp=true], limit: 128)  ->  hash
+  # -->
   # Parses the given representation of date and time, and returns a hash of parsed
-  # elements.  This method does not function as a validator.
+  # elements.
+  #
+  # This method *does not* function as a validator.  If the input string does not
+  # match valid formats strictly, you may get a cryptic result.  Should consider
+  # to use `Date._strptime` or `DateTime._strptime` instead of this method as
+  # possible.
   #
   # If the optional second argument is true and the detected year is in the range
   # "00" to "99", considers the year a 2-digit form and makes it full.
   #
   #     Date._parse('2001-02-03') #=> {:year=>2001, :mon=>2, :mday=>3}
   #
+  # Raise an ArgumentError when the string length is longer than *limit*. You can
+  # stop this check by passing `limit: nil`, but note that it may take a long time
+  # to parse.
+  #
   def self._parse: (String str, ?boolish complete) -> Hash[Symbol, Integer]
 
+  # <!--
+  #   rdoc-file=ext/date/date_core.c
+  #   - Date._rfc2822(string, limit: 128)  ->  hash
+  #   - Date._rfc822(string, limit: 128)   ->  hash
+  # -->
   # Returns a hash of parsed elements.
+  #
+  # Raise an ArgumentError when the string length is longer than *limit*. You can
+  # stop this check by passing `limit: nil`, but note that it may take a long time
+  # to parse.
   #
   def self._rfc2822: (String str) -> Hash[Symbol, Integer | String]
 
+  # <!--
+  #   rdoc-file=ext/date/date_core.c
+  #   - Date._rfc3339(string, limit: 128)  ->  hash
+  # -->
   # Returns a hash of parsed elements.
+  #
+  # Raise an ArgumentError when the string length is longer than *limit*. You can
+  # stop this check by passing `limit: nil`, but note that it may take a long time
+  # to parse.
   #
   def self._rfc3339: (String str) -> Hash[Symbol, Integer | String]
 
+  # <!--
+  #   rdoc-file=ext/date/date_core.c
+  #   - Date._rfc2822(string, limit: 128)  ->  hash
+  #   - Date._rfc822(string, limit: 128)   ->  hash
+  # -->
   # Returns a hash of parsed elements.
+  #
+  # Raise an ArgumentError when the string length is longer than *limit*. You can
+  # stop this check by passing `limit: nil`, but note that it may take a long time
+  # to parse.
   #
   def self._rfc822: (String str) -> Hash[Symbol, Integer | String]
 
+  # <!--
+  #   rdoc-file=ext/date/date_core.c
+  #   - Date._strptime(string[, format='%F'])  ->  hash
+  # -->
   # Parses the given representation of date and time with the given template, and
   # returns a hash of parsed elements.  _strptime does not support specification
   # of flags and width unlike strftime.
@@ -203,10 +256,23 @@ class Date
   #
   def self._strptime: (String str, ?String format) -> Hash[Symbol, Integer]
 
+  # <!--
+  #   rdoc-file=ext/date/date_core.c
+  #   - Date._xmlschema(string, limit: 128)  ->  hash
+  # -->
   # Returns a hash of parsed elements.
+  #
+  # Raise an ArgumentError when the string length is longer than *limit*. You can
+  # stop this check by passing `limit: nil`, but note that it may take a long time
+  # to parse.
   #
   def self._xmlschema: (String str) -> Hash[Symbol, Integer]
 
+  # <!--
+  #   rdoc-file=ext/date/date_core.c
+  #   - Date.civil([year=-4712[, month=1[, mday=1[, start=Date::ITALY]]]])  ->  date
+  #   - Date.new([year=-4712[, month=1[, mday=1[, start=Date::ITALY]]]])    ->  date
+  # -->
   # Creates a date object denoting the given calendar date.
   #
   # In this class, BCE years are counted astronomically.  Thus, the year before
@@ -229,6 +295,10 @@ class Date
   #
   def self.civil: (?Integer year, ?Integer month, ?Integer mday, ?Integer start) -> Date
 
+  # <!--
+  #   rdoc-file=ext/date/date_core.c
+  #   - Date.commercial([cwyear=-4712[, cweek=1[, cwday=1[, start=Date::ITALY]]]])  ->  date
+  # -->
   # Creates a date object denoting the given week date.
   #
   # The week and the day of week should be a negative or a positive number (as a
@@ -243,6 +313,11 @@ class Date
   #
   def self.commercial: (?Integer cwyear, ?Integer cweek, ?Integer cwday, ?Integer start) -> Date
 
+  # <!--
+  #   rdoc-file=ext/date/date_core.c
+  #   - Date.gregorian_leap?(year)  ->  bool
+  #   - Date.leap?(year)            ->  bool
+  # -->
   # Returns true if the given year is a leap year of the proleptic Gregorian
   # calendar.
   #
@@ -251,14 +326,26 @@ class Date
   #
   def self.gregorian_leap?: (Integer year) -> bool
 
+  # <!--
+  #   rdoc-file=ext/date/date_core.c
+  #   - Date.httpdate(string='Mon, 01 Jan -4712 00:00:00 GMT'[, start=Date::ITALY], limit: 128)  ->  date
+  # -->
   # Creates a new Date object by parsing from a string according to some RFC 2616
   # format.
   #
   #     Date.httpdate('Sat, 03 Feb 2001 00:00:00 GMT')
   #                                               #=> #<Date: 2001-02-03 ...>
   #
+  # Raise an ArgumentError when the string length is longer than *limit*. You can
+  # stop this check by passing `limit: nil`, but note that it may take a long time
+  # to parse.
+  #
   def self.httpdate: (String str, ?Integer start) -> Date
 
+  # <!--
+  #   rdoc-file=ext/date/date_core.c
+  #   - Date.iso8601(string='-4712-01-01'[, start=Date::ITALY], limit: 128)  ->  date
+  # -->
   # Creates a new Date object by parsing from a string according to some typical
   # ISO 8601 formats.
   #
@@ -266,8 +353,16 @@ class Date
   #     Date.iso8601('20010203')          #=> #<Date: 2001-02-03 ...>
   #     Date.iso8601('2001-W05-6')        #=> #<Date: 2001-02-03 ...>
   #
+  # Raise an ArgumentError when the string length is longer than *limit*. You can
+  # stop this check by passing `limit: nil`, but note that it may take a long time
+  # to parse.
+  #
   def self.iso8601: (String str, ?Integer start) -> Date
 
+  # <!--
+  #   rdoc-file=ext/date/date_core.c
+  #   - Date.jd([jd=0[, start=Date::ITALY]])  ->  date
+  # -->
   # Creates a date object denoting the given chronological Julian day number.
   #
   #     Date.jd(2451944)          #=> #<Date: 2001-02-03 ...>
@@ -278,6 +373,10 @@ class Date
   #
   def self.jd: (Integer jd, ?Integer start) -> Date
 
+  # <!--
+  #   rdoc-file=ext/date/date_core.c
+  #   - Date.jisx0301(string='-4712-01-01'[, start=Date::ITALY], limit: 128)  ->  date
+  # -->
   # Creates a new Date object by parsing from a string according to some typical
   # JIS X 0301 formats.
   #
@@ -287,8 +386,16 @@ class Date
   #
   #     Date.jisx0301('13.02.03')                 #=> #<Date: 2001-02-03 ...>
   #
+  # Raise an ArgumentError when the string length is longer than *limit*. You can
+  # stop this check by passing `limit: nil`, but note that it may take a long time
+  # to parse.
+  #
   def self.jisx0301: (String str, ?Integer start) -> Date
 
+  # <!--
+  #   rdoc-file=ext/date/date_core.c
+  #   - Date.julian_leap?(year)  ->  bool
+  # -->
   # Returns true if the given year is a leap year of the proleptic Julian
   # calendar.
   #
@@ -297,6 +404,11 @@ class Date
   #
   def self.julian_leap?: (Integer year) -> bool
 
+  # <!--
+  #   rdoc-file=ext/date/date_core.c
+  #   - Date.gregorian_leap?(year)  ->  bool
+  #   - Date.leap?(year)            ->  bool
+  # -->
   # Returns true if the given year is a leap year of the proleptic Gregorian
   # calendar.
   #
@@ -305,6 +417,10 @@ class Date
   #
   def self.leap?: (Integer year) -> bool
 
+  # <!--
+  #   rdoc-file=ext/date/date_core.c
+  #   - Date.ordinal([year=-4712[, yday=1[, start=Date::ITALY]]])  ->  date
+  # -->
   # Creates a date object denoting the given ordinal date.
   #
   # The day of year should be a negative or a positive number (as a relative day
@@ -318,8 +434,15 @@ class Date
   #
   def self.ordinal: (?Integer year, ?Integer yday, ?Integer start) -> Date
 
+  # <!--
+  #   rdoc-file=ext/date/date_core.c
+  #   - Date.parse(string='-4712-01-01'[, comp=true[, start=Date::ITALY]], limit: 128)  ->  date
+  # -->
   # Parses the given representation of date and time, and creates a date object.
-  # This method does not function as a validator.
+  #
+  # This method *does not* function as a validator.  If the input string does not
+  # match valid formats strictly, you may get a cryptic result.  Should consider
+  # to use `Date.strptime` instead of this method as possible.
   #
   # If the optional second argument is true and the detected year is in the range
   # "00" to "99", considers the year a 2-digit form and makes it full.
@@ -328,31 +451,65 @@ class Date
   #     Date.parse('20010203')            #=> #<Date: 2001-02-03 ...>
   #     Date.parse('3rd Feb 2001')        #=> #<Date: 2001-02-03 ...>
   #
+  # Raise an ArgumentError when the string length is longer than *limit*. You can
+  # stop this check by passing `limit: nil`, but note that it may take a long time
+  # to parse.
+  #
   def self.parse: (String str, ?boolish complete, ?Integer start) -> Date
 
+  # <!--
+  #   rdoc-file=ext/date/date_core.c
+  #   - Date.rfc2822(string='Mon, 1 Jan -4712 00:00:00 +0000'[, start=Date::ITALY], limit: 128)  ->  date
+  #   - Date.rfc822(string='Mon, 1 Jan -4712 00:00:00 +0000'[, start=Date::ITALY], limit: 128)   ->  date
+  # -->
   # Creates a new Date object by parsing from a string according to some typical
   # RFC 2822 formats.
   #
   #     Date.rfc2822('Sat, 3 Feb 2001 00:00:00 +0000')
   #                                               #=> #<Date: 2001-02-03 ...>
   #
+  # Raise an ArgumentError when the string length is longer than *limit*. You can
+  # stop this check by passing `limit: nil`, but note that it may take a long time
+  # to parse.
+  #
   def self.rfc2822: (String str, ?Integer start) -> Date
 
+  # <!--
+  #   rdoc-file=ext/date/date_core.c
+  #   - Date.rfc3339(string='-4712-01-01T00:00:00+00:00'[, start=Date::ITALY], limit: 128)  ->  date
+  # -->
   # Creates a new Date object by parsing from a string according to some typical
   # RFC 3339 formats.
   #
   #     Date.rfc3339('2001-02-03T04:05:06+07:00') #=> #<Date: 2001-02-03 ...>
   #
+  # Raise an ArgumentError when the string length is longer than *limit*. You can
+  # stop this check by passing `limit: nil`, but note that it may take a long time
+  # to parse.
+  #
   def self.rfc3339: (String str, ?Integer start) -> Date
 
+  # <!--
+  #   rdoc-file=ext/date/date_core.c
+  #   - Date.rfc2822(string='Mon, 1 Jan -4712 00:00:00 +0000'[, start=Date::ITALY], limit: 128)  ->  date
+  #   - Date.rfc822(string='Mon, 1 Jan -4712 00:00:00 +0000'[, start=Date::ITALY], limit: 128)   ->  date
+  # -->
   # Creates a new Date object by parsing from a string according to some typical
   # RFC 2822 formats.
   #
   #     Date.rfc2822('Sat, 3 Feb 2001 00:00:00 +0000')
   #                                               #=> #<Date: 2001-02-03 ...>
   #
+  # Raise an ArgumentError when the string length is longer than *limit*. You can
+  # stop this check by passing `limit: nil`, but note that it may take a long time
+  # to parse.
+  #
   def self.rfc822: (String str, ?Integer start) -> Date
 
+  # <!--
+  #   rdoc-file=ext/date/date_core.c
+  #   - Date.strptime([string='-4712-01-01'[, format='%F'[, start=Date::ITALY]]])  ->  date
+  # -->
   # Parses the given representation of date and time with the given template, and
   # creates a date object.  strptime does not support specification of flags and
   # width unlike strftime.
@@ -369,12 +526,21 @@ class Date
   #
   def self.strptime: (String str, ?String format, ?Integer start) -> Date
 
+  # <!--
+  #   rdoc-file=ext/date/date_core.c
+  #   - Date.today([start=Date::ITALY])  ->  date
+  # -->
   # Creates a date object denoting the present day.
   #
   #     Date.today   #=> #<Date: 2011-06-11 ...>
   #
   def self.today: (?Integer start) -> Date
 
+  # <!--
+  #   rdoc-file=ext/date/date_core.c
+  #   - Date.valid_civil?(year, month, mday[, start=Date::ITALY])  ->  bool
+  #   - Date.valid_date?(year, month, mday[, start=Date::ITALY])   ->  bool
+  # -->
   # Returns true if the given calendar date is valid, and false if not. Valid in
   # this context is whether the arguments passed to this method would be accepted
   # by ::new.
@@ -387,6 +553,10 @@ class Date
   #
   def self.valid_civil?: (Integer year, Integer month, Integer mday, ?Integer start) -> bool
 
+  # <!--
+  #   rdoc-file=ext/date/date_core.c
+  #   - Date.valid_commercial?(cwyear, cweek, cwday[, start=Date::ITALY])  ->  bool
+  # -->
   # Returns true if the given week date is valid, and false if not.
   #
   #     Date.valid_commercial?(2001,5,6)  #=> true
@@ -396,6 +566,11 @@ class Date
   #
   def self.valid_commercial?: (Integer cwyear, Integer cweek, Integer cwday, ?Integer start) -> bool
 
+  # <!--
+  #   rdoc-file=ext/date/date_core.c
+  #   - Date.valid_civil?(year, month, mday[, start=Date::ITALY])  ->  bool
+  #   - Date.valid_date?(year, month, mday[, start=Date::ITALY])   ->  bool
+  # -->
   # Returns true if the given calendar date is valid, and false if not. Valid in
   # this context is whether the arguments passed to this method would be accepted
   # by ::new.
@@ -408,6 +583,10 @@ class Date
   #
   def self.valid_date?: (Integer year, Integer month, Integer mday, ?Integer start) -> bool
 
+  # <!--
+  #   rdoc-file=ext/date/date_core.c
+  #   - Date.valid_jd?(jd[, start=Date::ITALY])  ->  bool
+  # -->
   # Just returns true.  It's nonsense, but is for symmetry.
   #
   #     Date.valid_jd?(2451944)           #=> true
@@ -416,6 +595,10 @@ class Date
   #
   def self.valid_jd?: (Integer jd, ?Integer start) -> bool
 
+  # <!--
+  #   rdoc-file=ext/date/date_core.c
+  #   - Date.valid_ordinal?(year, yday[, start=Date::ITALY])  ->  bool
+  # -->
   # Returns true if the given ordinal date is valid, and false if not.
   #
   #     Date.valid_ordinal?(2001,34)      #=> true
@@ -425,15 +608,27 @@ class Date
   #
   def self.valid_ordinal?: (Integer year, Integer yday, ?Integer start) -> bool
 
+  # <!--
+  #   rdoc-file=ext/date/date_core.c
+  #   - Date.xmlschema(string='-4712-01-01'[, start=Date::ITALY], limit: 128)  ->  date
+  # -->
   # Creates a new Date object by parsing from a string according to some typical
   # XML Schema formats.
   #
   #     Date.xmlschema('2001-02-03')      #=> #<Date: 2001-02-03 ...>
   #
+  # Raise an ArgumentError when the string length is longer than *limit*. You can
+  # stop this check by passing `limit: nil`, but note that it may take a long time
+  # to parse.
+  #
   def self.xmlschema: (String str, ?Integer start) -> Date
 
   public
 
+  # <!--
+  #   rdoc-file=ext/date/date_core.c
+  #   - d + other  ->  date
+  # -->
   # Returns a date object pointing `other` days after self.  The other should be a
   # numeric value.  If the other is a fractional number, assumes its precision is
   # at most nanosecond.
@@ -446,8 +641,12 @@ class Date
   #     DateTime.jd(0,12) + DateTime.new(2001,2,3).ajd
   #                               #=> #<DateTime: 2001-02-03T00:00:00+00:00 ...>
   #
-  def +: (Integer | Rational other) -> Date
+  def +: (Numeric & _ToR other) -> Date
 
+  # <!--
+  #   rdoc-file=ext/date/date_core.c
+  #   - d - other  ->  date or rational
+  # -->
   # Returns the difference between the two dates if the other is a date object.
   # If the other is a numeric value, returns a date object pointing `other` days
   # before self.  If the other is a fractional number, assumes its precision is at
@@ -461,9 +660,13 @@ class Date
   #     DateTime.new(2001,2,3) - DateTime.new(2001,2,2,12)
   #                              #=> (1/2)
   #
-  def -: (Integer | Rational other) -> Date
+  def -: (Numeric & _ToR other) -> Date
        | (Date other) -> Rational
 
+  # <!--
+  #   rdoc-file=ext/date/date_core.c
+  #   - d << n  ->  date
+  # -->
   # Returns a date object pointing `n` months before self. The argument `n` should
   # be a numeric value.
   #
@@ -485,6 +688,10 @@ class Date
   #
   def <<: (Integer month) -> Date
 
+  # <!--
+  #   rdoc-file=ext/date/date_core.c
+  #   - d <=> other  -> -1, 0, +1 or nil
+  # -->
   # Compares the two dates and returns -1, zero, 1 or nil.  The other should be a
   # date object or a numeric value as an astronomical Julian day number.
   #
@@ -496,8 +703,12 @@ class Date
   #
   # See also Comparable.
   #
-  def <=>: (Date | Rational | Object other) -> Integer?
+  def <=>: (untyped other) -> Integer?
 
+  # <!--
+  #   rdoc-file=ext/date/date_core.c
+  #   - d === other  ->  bool
+  # -->
   # Returns true if they are the same day.
   #
   #     Date.new(2001,2,3) === Date.new(2001,2,3)
@@ -513,6 +724,10 @@ class Date
   #
   def ===: (Date other) -> bool
 
+  # <!--
+  #   rdoc-file=ext/date/date_core.c
+  #   - d >> n  ->  date
+  # -->
   # Returns a date object pointing `n` months after self. The argument `n` should
   # be a numeric value.
   #
@@ -534,6 +749,10 @@ class Date
   #
   def >>: (Integer month) -> Date
 
+  # <!--
+  #   rdoc-file=ext/date/date_core.c
+  #   - d.ajd  ->  rational
+  # -->
   # Returns the astronomical Julian day number.  This is a fractional number,
   # which is not adjusted by the offset.
   #
@@ -542,6 +761,10 @@ class Date
   #
   def ajd: () -> Rational
 
+  # <!--
+  #   rdoc-file=ext/date/date_core.c
+  #   - d.amjd  ->  rational
+  # -->
   # Returns the astronomical modified Julian day number.  This is a fractional
   # number, which is not adjusted by the offset.
   #
@@ -550,6 +773,11 @@ class Date
   #
   def amjd: () -> Rational
 
+  # <!--
+  #   rdoc-file=ext/date/date_core.c
+  #   - d.asctime  ->  string
+  #   - d.ctime    ->  string
+  # -->
   # Returns a string in asctime(3) format (but without "n\0" at the end).  This
   # method is equivalent to strftime('%c').
   #
@@ -557,6 +785,7 @@ class Date
   #
   def asctime: () -> String
 
+  # <!-- rdoc-file=ext/date/date_core.c -->
   # Returns a string in asctime(3) format (but without "n\0" at the end).  This
   # method is equivalent to strftime('%c').
   #
@@ -564,18 +793,30 @@ class Date
   #
   def ctime: () -> String
 
+  # <!--
+  #   rdoc-file=ext/date/date_core.c
+  #   - d.cwday  ->  fixnum
+  # -->
   # Returns the day of calendar week (1-7, Monday is 1).
   #
   #     Date.new(2001,2,3).cwday          #=> 6
   #
   def cwday: () -> Integer
 
+  # <!--
+  #   rdoc-file=ext/date/date_core.c
+  #   - d.cweek  ->  fixnum
+  # -->
   # Returns the calendar week number (1-53).
   #
   #     Date.new(2001,2,3).cweek          #=> 5
   #
   def cweek: () -> Integer
 
+  # <!--
+  #   rdoc-file=ext/date/date_core.c
+  #   - d.cwyear  ->  integer
+  # -->
   # Returns the calendar week based year.
   #
   #     Date.new(2001,2,3).cwyear         #=> 2001
@@ -583,29 +824,51 @@ class Date
   #
   def cwyear: () -> Integer
 
+  # <!-- rdoc-file=ext/date/date_core.c -->
   # Returns the day of the month (1-31).
   #
   #     Date.new(2001,2,3).mday           #=> 3
   #
   def day: () -> Integer
 
+  # <!--
+  #   rdoc-file=ext/date/date_core.c
+  #   - d.downto(min)              ->  enumerator
+  #   - d.downto(min){|date| ...}  ->  self
+  # -->
   # This method is equivalent to step(min, -1){|date| ...}.
   #
   def downto: (Date min) { (Date) -> untyped } -> Date
             | (Date min) -> Enumerator[Date, Date]
 
+  # <!--
+  #   rdoc-file=ext/date/date_core.c
+  #   - d.england  ->  date
+  # -->
   # This method is equivalent to new_start(Date::ENGLAND).
   #
   def england: () -> Date
 
+  # <!--
+  #   rdoc-file=ext/date/date_core.c
+  #   - d.friday?  ->  bool
+  # -->
   # Returns true if the date is Friday.
   #
   def friday?: () -> bool
 
+  # <!--
+  #   rdoc-file=ext/date/date_core.c
+  #   - d.gregorian  ->  date
+  # -->
   # This method is equivalent to new_start(Date::GREGORIAN).
   #
   def gregorian: () -> Date
 
+  # <!--
+  #   rdoc-file=ext/date/date_core.c
+  #   - d.gregorian?  ->  bool
+  # -->
   # Returns true if the date is on or after the day of calendar reform.
   #
   #     Date.new(1582,10,15).gregorian?          #=> true
@@ -613,11 +876,19 @@ class Date
   #
   def gregorian?: () -> bool
 
+  # <!--
+  #   rdoc-file=ext/date/date_core.c
+  #   - d.httpdate  ->  string
+  # -->
   # This method is equivalent to strftime('%a, %d %b %Y %T GMT'). See also RFC
   # 2616.
   #
   def httpdate: () -> String
 
+  # <!--
+  #   rdoc-file=ext/date/date_core.c
+  #   - d.inspect  ->  string
+  # -->
   # Returns the value as a string for inspection.
   #
   #     Date.new(2001,2,3).inspect
@@ -627,14 +898,27 @@ class Date
   #
   def inspect: () -> String
 
+  # <!--
+  #   rdoc-file=ext/date/date_core.c
+  #   - d.iso8601    ->  string
+  #   - d.xmlschema  ->  string
+  # -->
   # This method is equivalent to strftime('%F').
   #
   def iso8601: () -> String
 
+  # <!--
+  #   rdoc-file=ext/date/date_core.c
+  #   - d.italy  ->  date
+  # -->
   # This method is equivalent to new_start(Date::ITALY).
   #
   def italy: () -> Date
 
+  # <!--
+  #   rdoc-file=ext/date/date_core.c
+  #   - d.jd  ->  integer
+  # -->
   # Returns the Julian day number.  This is a whole number, which is adjusted by
   # the offset as the local time.
   #
@@ -643,16 +927,28 @@ class Date
   #
   def jd: () -> Integer
 
+  # <!--
+  #   rdoc-file=ext/date/date_core.c
+  #   - d.jisx0301  ->  string
+  # -->
   # Returns a string in a JIS X 0301 format.
   #
   #     Date.new(2001,2,3).jisx0301       #=> "H13.02.03"
   #
   def jisx0301: () -> String
 
+  # <!--
+  #   rdoc-file=ext/date/date_core.c
+  #   - d.julian  ->  date
+  # -->
   # This method is equivalent to new_start(Date::JULIAN).
   #
   def julian: () -> Date
 
+  # <!--
+  #   rdoc-file=ext/date/date_core.c
+  #   - d.julian?  ->  bool
+  # -->
   # Returns true if the date is before the day of calendar reform.
   #
   #     Date.new(1582,10,15).julian?             #=> false
@@ -660,6 +956,10 @@ class Date
   #
   def julian?: () -> bool
 
+  # <!--
+  #   rdoc-file=ext/date/date_core.c
+  #   - d.ld  ->  integer
+  # -->
   # Returns the Lilian day number.  This is a whole number, which is adjusted by
   # the offset as the local time.
   #
@@ -667,6 +967,10 @@ class Date
   #
   def ld: () -> Integer
 
+  # <!--
+  #   rdoc-file=ext/date/date_core.c
+  #   - d.leap?  ->  bool
+  # -->
   # Returns true if the year is a leap year.
   #
   #     Date.new(2000).leap?      #=> true
@@ -674,12 +978,21 @@ class Date
   #
   def leap?: () -> bool
 
+  # <!--
+  #   rdoc-file=ext/date/date_core.c
+  #   - d.mday  ->  fixnum
+  #   - d.day   ->  fixnum
+  # -->
   # Returns the day of the month (1-31).
   #
   #     Date.new(2001,2,3).mday           #=> 3
   #
   def mday: () -> Integer
 
+  # <!--
+  #   rdoc-file=ext/date/date_core.c
+  #   - d.mjd  ->  integer
+  # -->
   # Returns the modified Julian day number.  This is a whole number, which is
   # adjusted by the offset as the local time.
   #
@@ -688,22 +1001,36 @@ class Date
   #
   def mjd: () -> Integer
 
+  # <!--
+  #   rdoc-file=ext/date/date_core.c
+  #   - d.mon    ->  fixnum
+  #   - d.month  ->  fixnum
+  # -->
   # Returns the month (1-12).
   #
   #     Date.new(2001,2,3).mon            #=> 2
   #
   def mon: () -> Integer
 
+  # <!--
+  #   rdoc-file=ext/date/date_core.c
+  #   - d.monday?  ->  bool
+  # -->
   # Returns true if the date is Monday.
   #
   def monday?: () -> bool
 
+  # <!-- rdoc-file=ext/date/date_core.c -->
   # Returns the month (1-12).
   #
   #     Date.new(2001,2,3).mon            #=> 2
   #
   def month: () -> Integer
 
+  # <!--
+  #   rdoc-file=ext/date/date_core.c
+  #   - d.new_start([start=Date::ITALY])  ->  date
+  # -->
   # Duplicates self and resets its day of calendar reform.
   #
   #     d = Date.new(1582,10,15)
@@ -711,58 +1038,121 @@ class Date
   #
   def new_start: (?Integer start) -> Date
 
+  # <!--
+  #   rdoc-file=ext/date/date_core.c
+  #   - d.succ  ->  date
+  #   - d.next  ->  date
+  # -->
   # Returns a date object denoting the following day.
   #
   def next: () -> Date
 
+  # <!--
+  #   rdoc-file=ext/date/date_core.c
+  #   - d.next_day([n=1])  ->  date
+  # -->
   # This method is equivalent to d + n.
   #
   def next_day: (?Integer day) -> Date
 
+  # <!--
+  #   rdoc-file=ext/date/date_core.c
+  #   - d.next_month([n=1])  ->  date
+  # -->
   # This method is equivalent to d >> n.
+  #
+  # See Date#>> for examples.
   #
   def next_month: (?Integer month) -> Date
 
+  # <!--
+  #   rdoc-file=ext/date/date_core.c
+  #   - d.next_year([n=1])  ->  date
+  # -->
   # This method is equivalent to d >> (n * 12).
   #
   #     Date.new(2001,2,3).next_year      #=> #<Date: 2002-02-03 ...>
   #     Date.new(2008,2,29).next_year     #=> #<Date: 2009-02-28 ...>
   #     Date.new(2008,2,29).next_year(4)  #=> #<Date: 2012-02-29 ...>
   #
+  # See also Date#>>.
+  #
   def next_year: (?Integer year) -> Date
 
+  # <!--
+  #   rdoc-file=ext/date/date_core.c
+  #   - d.prev_day([n=1])  ->  date
+  # -->
   # This method is equivalent to d - n.
   #
   def prev_day: (?Integer day) -> Date
 
+  # <!--
+  #   rdoc-file=ext/date/date_core.c
+  #   - d.prev_month([n=1])  ->  date
+  # -->
   # This method is equivalent to d << n.
+  #
+  # See Date#<< for examples.
   #
   def prev_month: (?Integer month) -> Date
 
+  # <!--
+  #   rdoc-file=ext/date/date_core.c
+  #   - d.prev_year([n=1])  ->  date
+  # -->
   # This method is equivalent to d << (n * 12).
   #
   #     Date.new(2001,2,3).prev_year      #=> #<Date: 2000-02-03 ...>
   #     Date.new(2008,2,29).prev_year     #=> #<Date: 2007-02-28 ...>
   #     Date.new(2008,2,29).prev_year(4)  #=> #<Date: 2004-02-29 ...>
   #
+  # See also Date#<<.
+  #
   def prev_year: (?Integer year) -> Date
 
+  # <!--
+  #   rdoc-file=ext/date/date_core.c
+  #   - d.rfc2822  ->  string
+  #   - d.rfc822   ->  string
+  # -->
   # This method is equivalent to strftime('%a, %-d %b %Y %T %z').
   #
   def rfc2822: () -> String
 
+  # <!--
+  #   rdoc-file=ext/date/date_core.c
+  #   - d.rfc3339  ->  string
+  # -->
   # This method is equivalent to strftime('%FT%T%:z').
   #
   def rfc3339: () -> String
 
-  # This method is equivalent to strftime('%a, %-d %b %Y %T %z').
+  # <!-- rdoc-file=ext/date/date_core.c -->
+  # Creates a new Date object by parsing from a string according to some typical
+  # RFC 2822 formats.
+  #
+  #     Date.rfc2822('Sat, 3 Feb 2001 00:00:00 +0000')
+  #                                               #=> #<Date: 2001-02-03 ...>
+  #
+  # Raise an ArgumentError when the string length is longer than *limit*. You can
+  # stop this check by passing `limit: nil`, but note that it may take a long time
+  # to parse.
   #
   def rfc822: () -> String
 
+  # <!--
+  #   rdoc-file=ext/date/date_core.c
+  #   - d.saturday?  ->  bool
+  # -->
   # Returns true if the date is Saturday.
   #
   def saturday?: () -> bool
 
+  # <!--
+  #   rdoc-file=ext/date/date_core.c
+  #   - d.start  ->  float
+  # -->
   # Returns the Julian day number denoting the day of calendar reform.
   #
   #     Date.new(2001,2,3).start                  #=> 2299161.0
@@ -770,6 +1160,11 @@ class Date
   #
   def start: () -> Float
 
+  # <!--
+  #   rdoc-file=ext/date/date_core.c
+  #   - d.step(limit[, step=1])              ->  enumerator
+  #   - d.step(limit[, step=1]){|date| ...}  ->  self
+  # -->
   # Iterates evaluation of the given block, which takes a date object. The limit
   # should be a date object.
   #
@@ -779,6 +1174,10 @@ class Date
   def step: (Date limit, ?Integer step) { (Date) -> untyped } -> Date
           | (Date limit, ?Integer step) -> ::Enumerator[Date, Date]
 
+  # <!--
+  #   rdoc-file=ext/date/date_core.c
+  #   - d.strftime([format='%F'])  ->  string
+  # -->
   # Formats date according to the directives in the given format string. The
   # directives begin with a percent (%) character. Any text not listed as a
   # directive will be passed through to the output string.
@@ -886,7 +1285,7 @@ class Date
   #       %c - date and time (%a %b %e %T %Y)
   #       %D - Date (%m/%d/%y)
   #       %F - The ISO 8601 date format (%Y-%m-%d)
-  #       %v - VMS date (%e-%b-%Y)
+  #       %v - VMS date (%e-%^b-%Y)
   #       %x - Same as %D
   #       %X - Same as %T
   #       %r - 12-hour time (%I:%M:%S %p)
@@ -948,26 +1347,47 @@ class Date
   #
   def strftime: (?String format) -> String
 
+  # <!-- rdoc-file=ext/date/date_core.c -->
   # Returns a date object denoting the following day.
   #
   def succ: () -> Date
 
+  # <!--
+  #   rdoc-file=ext/date/date_core.c
+  #   - d.sunday?  ->  bool
+  # -->
   # Returns true if the date is Sunday.
   #
   def sunday?: () -> bool
 
+  # <!--
+  #   rdoc-file=ext/date/date_core.c
+  #   - d.thursday?  ->  bool
+  # -->
   # Returns true if the date is Thursday.
   #
   def thursday?: () -> bool
 
+  # <!--
+  #   rdoc-file=ext/date/date_core.c
+  #   - d.to_date  ->  self
+  # -->
   # Returns self.
   #
   def to_date: () -> Date
 
+  # <!--
+  #   rdoc-file=ext/date/date_core.c
+  #   - d.to_datetime  -> datetime
+  # -->
   # Returns a DateTime object which denotes self.
   #
   def to_datetime: () -> DateTime
 
+  # <!--
+  #   rdoc-file=ext/date/date_core.c
+  #   - d.to_s  ->  string
+  # -->
   # Returns a string in an ISO 8601 format. (This method doesn't use the expanded
   # representations.)
   #
@@ -975,40 +1395,70 @@ class Date
   #
   def to_s: () -> String
 
+  # <!--
+  #   rdoc-file=ext/date/date_core.c
+  #   - d.to_time  ->  time
+  # -->
   # Returns a Time object which denotes self. If self is a julian date, convert it
   # to a gregorian date before converting it to Time.
   #
   def to_time: () -> Time
 
+  # <!--
+  #   rdoc-file=ext/date/date_core.c
+  #   - d.tuesday?  ->  bool
+  # -->
   # Returns true if the date is Tuesday.
   #
   def tuesday?: () -> bool
 
+  # <!--
+  #   rdoc-file=ext/date/date_core.c
+  #   - d.upto(max)              ->  enumerator
+  #   - d.upto(max){|date| ...}  ->  self
+  # -->
   # This method is equivalent to step(max, 1){|date| ...}.
   #
   def upto: (Date max) { (Date) -> untyped } -> Date
           | (Date max) -> ::Enumerator[Date, Date]
 
+  # <!--
+  #   rdoc-file=ext/date/date_core.c
+  #   - d.wday  ->  fixnum
+  # -->
   # Returns the day of week (0-6, Sunday is zero).
   #
   #     Date.new(2001,2,3).wday           #=> 6
   #
   def wday: () -> Integer
 
+  # <!--
+  #   rdoc-file=ext/date/date_core.c
+  #   - d.wednesday?  ->  bool
+  # -->
   # Returns true if the date is Wednesday.
   #
   def wednesday?: () -> bool
 
+  # <!-- rdoc-file=ext/date/date_core.c -->
   # This method is equivalent to strftime('%F').
   #
   def xmlschema: () -> String
 
+  # <!--
+  #   rdoc-file=ext/date/date_core.c
+  #   - d.yday  ->  fixnum
+  # -->
   # Returns the day of the year (1-366).
   #
   #     Date.new(2001,2,3).yday           #=> 34
   #
   def yday: () -> Integer
 
+  # <!--
+  #   rdoc-file=ext/date/date_core.c
+  #   - d.year  ->  integer
+  # -->
   # Returns the year.
   #
   #     Date.new(2001,2,3).year           #=> 2001
@@ -1017,40 +1467,48 @@ class Date
   def year: () -> Integer
 end
 
+# <!-- rdoc-file=ext/date/date_core.c -->
 # An array of strings of abbreviated day names in English.  The first is "Sun".
 #
 Date::ABBR_DAYNAMES: Array[String]
 
+# <!-- rdoc-file=ext/date/date_core.c -->
 # An array of strings of abbreviated month names in English.  The first element
 # is nil.
 #
 Date::ABBR_MONTHNAMES: Array[String?]
 
+# <!-- rdoc-file=ext/date/date_core.c -->
 # An array of strings of the full names of days of the week in English. The
 # first is "Sunday".
 #
 Date::DAYNAMES: Array[String]
 
+# <!-- rdoc-file=ext/date/date_core.c -->
 # The Julian day number of the day of calendar reform for England and her
 # colonies.
 #
 Date::ENGLAND: Integer
 
+# <!-- rdoc-file=ext/date/date_core.c -->
 # The Julian day number of the day of calendar reform for the proleptic
 # Gregorian calendar.
 #
 Date::GREGORIAN: Integer
 
+# <!-- rdoc-file=ext/date/date_core.c -->
 # The Julian day number of the day of calendar reform for Italy and some
 # catholic countries.
 #
 Date::ITALY: Integer
 
+# <!-- rdoc-file=ext/date/date_core.c -->
 # The Julian day number of the day of calendar reform for the proleptic Julian
 # calendar.
 #
 Date::JULIAN: Integer
 
+# <!-- rdoc-file=ext/date/date_core.c -->
 # An array of strings of full month names in English.  The first element is nil.
 #
 Date::MONTHNAMES: Array[String?]

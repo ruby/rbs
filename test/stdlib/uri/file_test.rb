@@ -1,7 +1,7 @@
 require_relative '../test_helper'
 require 'uri'
 
-class URIFileSingletonTest < Minitest::Test
+class URIFileSingletonTest < Test::Unit::TestCase
   include TypeAssertions
   library 'uri'
   testing 'singleton(::URI::File)'
@@ -16,10 +16,17 @@ class URIFileSingletonTest < Minitest::Test
                         host: 'localhost',
                         path: '/path/to/file'
                       }
+
+    assert_send_type  '({ host: nil, path: nil }) -> URI::File',
+                      URI::File, :build,
+                      {
+                        host: nil,
+                        path: nil
+                      }
   end
 end
 
-class URIFileInstanceTest < Minitest::Test
+class URIFileInstanceTest < Test::Unit::TestCase
   include TypeAssertions
   library 'uri'
   testing '::URI::File'

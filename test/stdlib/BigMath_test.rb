@@ -2,7 +2,7 @@ require_relative "test_helper"
 require "bigdecimal"
 require "bigdecimal/math"
 
-class BigMathSingletonTest < Minitest::Test
+class BigMathSingletonTest < Test::Unit::TestCase
   include TypeAssertions
   library "bigdecimal", "bigdecimal-math"
   testing "singleton(::BigMath)"
@@ -48,7 +48,7 @@ class BigMathSingletonTest < Minitest::Test
   end
 end
 
-class BigMathTest < Minitest::Test
+class BigMathTest < Test::Unit::TestCase
   include TypeAssertions
   library "bigdecimal", "bigdecimal-math"
   testing "::BigMath"

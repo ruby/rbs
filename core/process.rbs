@@ -1,3 +1,4 @@
+# <!-- rdoc-file=process.c -->
 # The module contains several groups of functionality for handling OS processes:
 #
 # *   Low-level property introspection and management of the current process,
@@ -13,8 +14,24 @@
 #     Process.clock_gettime, which could be important for proper benchmarking
 #     and other elapsed time measurement tasks.
 #
-#
 module Process
+  # <!--
+  #   rdoc-file=process.c
+  #   - Process._fork   -> integer
+  # -->
+  # An internal API for fork. Do not call this method directly. Currently, this is
+  # called via Kernel#fork, Process.fork, and IO.popen with `"-"`.
+  #
+  # This method is not for casual code but for application monitoring libraries.
+  # You can add custom code before and after fork events by overriding this
+  # method.
+  #
+  def self._fork: () -> Integer
+
+  # <!--
+  #   rdoc-file=ruby.c
+  #   - Process.argv0  -> frozen_string
+  # -->
   # Returns the name of the script being executed.  The value is not affected by
   # assigning a new value to $0.
   #
@@ -23,27 +40,35 @@ module Process
   #
   def self.argv0: () -> String
 
-  # Returns the time resolution returned by POSIX clock_getres() function.
+  # <!--
+  #   rdoc-file=process.c
+  #   - Process.clock_getres(clock_id [, unit])   -> number
+  # -->
+  # Returns an estimate of the resolution of a `clock_id` using the POSIX
+  # `clock_getres()` function.
+  #
+  # Note the reported resolution is often inaccurate on most platforms due to
+  # underlying bugs for this function and therefore the reported resolution often
+  # differs from the actual resolution of the clock in practice. Inaccurate
+  # reported resolutions have been observed for various clocks including
+  # CLOCK_MONOTONIC and CLOCK_MONOTONIC_RAW when using Linux, macOS, BSD or AIX
+  # platforms, when using ARM processors, or when using virtualization.
   #
   # `clock_id` specifies a kind of clock. See the document of
-  # `Process.clock_gettime` for details.
-  #
-  # `clock_id` can be a symbol as `Process.clock_gettime`. However the result may
-  # not be accurate. For example,
-  # `Process.clock_getres(:GETTIMEOFDAY_BASED_CLOCK_REALTIME)` returns 1.0e-06
-  # which means 1 microsecond, but actual resolution can be more coarse.
+  # `Process.clock_gettime` for details. `clock_id` can be a symbol as for
+  # `Process.clock_gettime`.
   #
   # If the given `clock_id` is not supported, Errno::EINVAL is raised.
   #
-  # `unit` specifies a type of the return value. `Process.clock_getres` accepts
+  # `unit` specifies the type of the return value. `Process.clock_getres` accepts
   # `unit` as `Process.clock_gettime`. The default value, `:float_second`, is also
-  # same as `Process.clock_gettime`.
+  # the same as `Process.clock_gettime`.
   #
-  # `Process.clock_getres` also accepts `:hertz` as `unit`. `:hertz` means a the
+  # `Process.clock_getres` also accepts `:hertz` as `unit`. `:hertz` means the
   # reciprocal of `:float_second`.
   #
   # `:hertz` can be used to obtain the exact value of the clock ticks per second
-  # for times() function and CLOCKS_PER_SEC for clock() function.
+  # for the times() function and CLOCKS_PER_SEC for the clock() function.
   #
   # `Process.clock_getres(:TIMES_BASED_CLOCK_PROCESS_CPUTIME_ID, :hertz)` returns
   # the clock ticks per second.
@@ -56,6 +81,10 @@ module Process
   #
   def self.clock_getres: (Symbol | Integer clock_id, ?Symbol unit) -> (Float | Integer)
 
+  # <!--
+  #   rdoc-file=process.c
+  #   - Process.clock_gettime(clock_id [, unit])   -> number
+  # -->
   # Returns a time returned by POSIX clock_gettime() function.
   #
   #     p Process.clock_gettime(Process::CLOCK_MONOTONIC)
@@ -70,10 +99,10 @@ module Process
   #
   # CLOCK_REALTIME
   # :   SUSv2 to 4, Linux 2.5.63, FreeBSD 3.0, NetBSD 2.0, OpenBSD 2.1, macOS
-  #     10.12
+  #     10.12, Windows-8/Server-2012
   # CLOCK_MONOTONIC
   # :   SUSv3 to 4, Linux 2.5.63, FreeBSD 3.0, NetBSD 2.0, OpenBSD 3.4, macOS
-  #     10.12
+  #     10.12, Windows-2000
   # CLOCK_PROCESS_CPUTIME_ID
   # :   SUSv3 to 4, Linux 2.5.63, FreeBSD 9.3, OpenBSD 5.4, macOS 10.12
   # CLOCK_THREAD_CPUTIME_ID
@@ -211,8 +240,15 @@ module Process
   # can be interpreted differently across systems. Time.now is recommended over
   # CLOCK_REALTIME.
   #
-  def self.clock_gettime: (Symbol | Integer clock_id, ?Symbol unit) -> (Float | Integer)
+  def self.clock_gettime: (Symbol | Integer clock_id) -> Float
+                        | (Symbol | Integer clock_id, :float_second | :float_millisecond | :float_microsecond unit) -> Float
+                        | (Symbol | Integer clock_id, :second | :millisecond | :microsecond | :nanosecond unit) -> Integer
 
+  # <!--
+  #   rdoc-file=process.c
+  #   - Process.daemon()                        -> 0
+  #   - Process.daemon(nochdir=nil,noclose=nil) -> 0
+  # -->
   # Detach the process from controlling terminal and run in the background as
   # system daemon.  Unless the argument nochdir is true (i.e. non false), it
   # changes the current working directory to the root ("/"). Unless the argument
@@ -221,6 +257,10 @@ module Process
   #
   def self.daemon: (?untyped nochdir, ?untyped noclose) -> Integer
 
+  # <!--
+  #   rdoc-file=process.c
+  #   - Process.detach(pid)   -> thread
+  # -->
   # Some operating systems retain the status of terminated child processes until
   # the parent collects that status (normally using some variant of `wait()`). If
   # the parent never collects this status, the child stays around as a *zombie*
@@ -261,6 +301,12 @@ module Process
   #
   def self.detach: (Integer pid) -> Thread
 
+  # <!--
+  #   rdoc-file=process.c
+  #   - Process.egid          -> integer
+  #   - Process::GID.eid      -> integer
+  #   - Process::Sys.geteid   -> integer
+  # -->
   # Returns the effective group ID for this process. Not available on all
   # platforms.
   #
@@ -268,20 +314,38 @@ module Process
   #
   def self.egid: () -> Integer
 
+  # <!--
+  #   rdoc-file=process.c
+  #   - Process.egid = integer   -> integer
+  # -->
   # Sets the effective group ID for this process. Not available on all platforms.
   #
   def self.egid=: (Integer arg0) -> Integer
 
+  # <!--
+  #   rdoc-file=process.c
+  #   - Process.euid           -> integer
+  #   - Process::UID.eid       -> integer
+  #   - Process::Sys.geteuid   -> integer
+  # -->
   # Returns the effective user ID for this process.
   #
   #     Process.euid   #=> 501
   #
   def self.euid: () -> Integer
 
+  # <!--
+  #   rdoc-file=process.c
+  #   - Process.euid= user
+  # -->
   # Sets the effective user ID for this process. Not available on all platforms.
   #
   def self.euid=: (Integer arg0) -> Integer
 
+  # <!--
+  #   rdoc-file=process.c
+  #   - Process.getpgid(pid)   -> integer
+  # -->
   # Returns the process group ID for the given process id. Not available on all
   # platforms.
   #
@@ -289,6 +353,10 @@ module Process
   #
   def self.getpgid: (Integer pid) -> Integer
 
+  # <!--
+  #   rdoc-file=process.c
+  #   - Process.getpgrp   -> integer
+  # -->
   # Returns the process group ID for this process. Not available on all platforms.
   #
   #     Process.getpgid(0)   #=> 25527
@@ -296,6 +364,10 @@ module Process
   #
   def self.getpgrp: () -> Integer
 
+  # <!--
+  #   rdoc-file=process.c
+  #   - Process.getpriority(kind, integer)   -> integer
+  # -->
   # Gets the scheduling priority for specified process, process group, or user.
   # *kind* indicates the kind of entity to find: one of Process::PRIO_PGRP,
   # Process::PRIO_USER, or Process::PRIO_PROCESS. *integer* is an id indicating
@@ -308,6 +380,10 @@ module Process
   #
   def self.getpriority: (Integer kind, Integer arg0) -> Integer
 
+  # <!--
+  #   rdoc-file=process.c
+  #   - Process.getrlimit(resource)   -> [cur_limit, max_limit]
+  # -->
   # Gets the resource limit of the process. *cur_limit* means current (soft) limit
   # and *max_limit* means maximum (hard) limit.
   #
@@ -321,6 +397,11 @@ module Process
   #
   def self.getrlimit: (Symbol | String | Integer resource) -> [ Integer, Integer ]
 
+  # <!--
+  #   rdoc-file=process.c
+  #   - Process.getsid()      -> integer
+  #   - Process.getsid(pid)   -> integer
+  # -->
   # Returns the session ID for the given process id. If not given, return current
   # process sid. Not available on all platforms.
   #
@@ -330,16 +411,30 @@ module Process
   #
   def self.getsid: (?Integer pid) -> Integer
 
+  # <!--
+  #   rdoc-file=process.c
+  #   - Process.gid           -> integer
+  #   - Process::GID.rid      -> integer
+  #   - Process::Sys.getgid   -> integer
+  # -->
   # Returns the (real) group ID for this process.
   #
   #     Process.gid   #=> 500
   #
   def self.gid: () -> Integer
 
+  # <!--
+  #   rdoc-file=process.c
+  #   - Process.gid= integer   -> integer
+  # -->
   # Sets the group ID for this process.
   #
   def self.gid=: (Integer arg0) -> Integer
 
+  # <!--
+  #   rdoc-file=process.c
+  #   - Process.groups   -> array
+  # -->
   # Get an Array of the group IDs in the supplemental group access list for this
   # process.
   #
@@ -360,6 +455,10 @@ module Process
   #
   def self.groups: () -> ::Array[Integer]
 
+  # <!--
+  #   rdoc-file=process.c
+  #   - Process.groups= array   -> array
+  # -->
   # Set the supplemental group access list to the given Array of group IDs.
   #
   #     Process.groups   #=> [0, 1, 2, 3, 4, 6, 10, 11, 20, 26, 27]
@@ -368,6 +467,10 @@ module Process
   #
   def self.groups=: (::Array[Integer] arg0) -> ::Array[Integer]
 
+  # <!--
+  #   rdoc-file=process.c
+  #   - Process.initgroups(username, gid)   -> array
+  # -->
   # Initializes the supplemental group access list by reading the system group
   # database and using all groups of which the given user is a member. The group
   # with the specified *gid* is also added to the list. Returns the resulting
@@ -380,6 +483,10 @@ module Process
   #
   def self.initgroups: (String username, Integer gid) -> ::Array[Integer]
 
+  # <!--
+  #   rdoc-file=process.c
+  #   - Process.kill(signal, pid, ...)    -> integer
+  # -->
   # Sends the given signal to the specified process id(s) if *pid* is positive. If
   # *pid* is zero, *signal* is sent to all processes whose group ID is equal to
   # the group ID of the process. If *pid* is negative, results are dependent on
@@ -411,6 +518,10 @@ module Process
   #
   def self.kill: (Integer | Symbol | String signal, *Integer pids) -> Integer
 
+  # <!--
+  #   rdoc-file=process.c
+  #   - Process.maxgroups   -> integer
+  # -->
   # Returns the maximum number of gids allowed in the supplemental group access
   # list.
   #
@@ -418,16 +529,28 @@ module Process
   #
   def self.maxgroups: () -> Integer
 
+  # <!--
+  #   rdoc-file=process.c
+  #   - Process.maxgroups= integer   -> integer
+  # -->
   # Sets the maximum number of gids allowed in the supplemental group access list.
   #
   def self.maxgroups=: (Integer arg0) -> Integer
 
+  # <!--
+  #   rdoc-file=process.c
+  #   - Process.pid   -> integer
+  # -->
   # Returns the process id of this process. Not available on all platforms.
   #
   #     Process.pid   #=> 27415
   #
   def self.pid: () -> Integer
 
+  # <!--
+  #   rdoc-file=process.c
+  #   - Process.ppid   -> integer
+  # -->
   # Returns the process id of the parent of this process. Returns untrustworthy
   # value on Win32/64. Not available on all platforms.
   #
@@ -441,11 +564,19 @@ module Process
   #
   def self.ppid: () -> Integer
 
+  # <!--
+  #   rdoc-file=process.c
+  #   - Process.setpgid(pid, integer)   -> 0
+  # -->
   # Sets the process group ID of *pid* (0 indicates this process) to *integer*.
   # Not available on all platforms.
   #
   def self.setpgid: (Integer pid, Integer arg0) -> Integer
 
+  # <!--
+  #   rdoc-file=process.c
+  #   - Process.setpriority(kind, integer, priority)   -> 0
+  # -->
   # See Process.getpriority.
   #
   #     Process.setpriority(Process::PRIO_USER, 0, 19)      #=> 0
@@ -455,6 +586,10 @@ module Process
   #
   def self.setpriority: (Integer kind, Integer arg0, Integer priority) -> Integer
 
+  # <!--
+  #   rdoc-file=ruby.c
+  #   - Process.setproctitle(string)  -> string
+  # -->
   # Sets the process title that appears on the ps(1) command.  Not necessarily
   # effective on all platforms.  No exception will be raised regardless of the
   # result, nor will NotImplementedError be raised even if the platform does not
@@ -469,6 +604,11 @@ module Process
   #
   def self.setproctitle: (String arg0) -> String
 
+  # <!--
+  #   rdoc-file=process.c
+  #   - Process.setrlimit(resource, cur_limit, max_limit)        -> nil
+  #   - Process.setrlimit(resource, cur_limit)                   -> nil
+  # -->
   # Sets the resource limit of the process. *cur_limit* means current (soft) limit
   # and *max_limit* means maximum (hard) limit.
   #
@@ -526,6 +666,10 @@ module Process
   #
   def self.setrlimit: (Symbol | String | Integer resource, Integer cur_limit, ?Integer max_limit) -> nil
 
+  # <!--
+  #   rdoc-file=process.c
+  #   - Process.setsid   -> integer
+  # -->
   # Establishes this process as a new session and process group leader, with no
   # controlling tty. Returns the session id. Not available on all platforms.
   #
@@ -533,6 +677,10 @@ module Process
   #
   def self.setsid: () -> Integer
 
+  # <!--
+  #   rdoc-file=process.c
+  #   - Process.times   -> aProcessTms
+  # -->
   # Returns a `Tms` structure (see Process::Tms) that contains user and system CPU
   # times for this process, and also for children processes.
   #
@@ -541,16 +689,32 @@ module Process
   #
   def self.times: () -> Process::Tms
 
+  # <!--
+  #   rdoc-file=process.c
+  #   - Process.uid           -> integer
+  #   - Process::UID.rid      -> integer
+  #   - Process::Sys.getuid   -> integer
+  # -->
   # Returns the (real) user ID of this process.
   #
   #     Process.uid   #=> 501
   #
   def self.uid: () -> Integer
 
+  # <!--
+  #   rdoc-file=process.c
+  #   - Process.uid= user   -> numeric
+  # -->
   # Sets the (user) user ID for this process. Not available on all platforms.
   #
   def self.uid=: (Integer user) -> Integer
 
+  # <!--
+  #   rdoc-file=process.c
+  #   - Process.wait()                     -> integer
+  #   - Process.wait(pid=-1, flags=0)      -> integer
+  #   - Process.waitpid(pid=-1, flags=0)   -> integer
+  # -->
   # Waits for a child process to exit, returns its process id, and sets `$?` to a
   # Process::Status object containing information on that process. Which child it
   # waits on depends on the value of *pid*:
@@ -592,6 +756,11 @@ module Process
   #
   def self.wait: (?Integer pid, ?Integer flags) -> Integer
 
+  # <!--
+  #   rdoc-file=process.c
+  #   - Process.wait2(pid=-1, flags=0)      -> [pid, status]
+  #   - Process.waitpid2(pid=-1, flags=0)   -> [pid, status]
+  # -->
   # Waits for a child process to exit (see Process::waitpid for exact semantics)
   # and returns an array containing the process id and the exit status (a
   # Process::Status object) of that child. Raises a SystemCallError if there are
@@ -604,6 +773,10 @@ module Process
   #
   def self.wait2: (?Integer pid, ?Integer flags) -> [ Integer, Process::Status ]
 
+  # <!--
+  #   rdoc-file=process.c
+  #   - Process.waitall   -> [ [pid1,status1], ...]
+  # -->
   # Waits for all children, returning an array of *pid*/*status* pairs (where
   # *status* is a Process::Status object).
   #
@@ -620,6 +793,12 @@ module Process
   #
   def self.waitall: () -> ::Array[[ Integer, Process::Status ]]
 
+  # <!--
+  #   rdoc-file=process.c
+  #   - Process.wait()                     -> integer
+  #   - Process.wait(pid=-1, flags=0)      -> integer
+  #   - Process.waitpid(pid=-1, flags=0)   -> integer
+  # -->
   # Waits for a child process to exit, returns its process id, and sets `$?` to a
   # Process::Status object containing information on that process. Which child it
   # waits on depends on the value of *pid*:
@@ -661,6 +840,11 @@ module Process
   #
   def self.waitpid: (?Integer pid, ?Integer flags) -> Integer
 
+  # <!--
+  #   rdoc-file=process.c
+  #   - Process.wait2(pid=-1, flags=0)      -> [pid, status]
+  #   - Process.waitpid2(pid=-1, flags=0)   -> [pid, status]
+  # -->
   # Waits for a child process to exit (see Process::waitpid for exact semantics)
   # and returns an array containing the process id and the exit status (a
   # Process::Status object) of that child. Raises a SystemCallError if there are
@@ -674,107 +858,114 @@ module Process
   def self.waitpid2: (?Integer pid, ?Integer flags) -> [ Integer, Process::Status ]
 end
 
+# <!-- rdoc-file=process.c -->
 # see Process.clock_gettime
-#
 #
 Process::CLOCK_BOOTTIME: Integer
 
+# <!-- rdoc-file=process.c -->
 # see Process.clock_gettime
-#
 #
 Process::CLOCK_BOOTTIME_ALARM: Integer
 
+# <!-- rdoc-file=process.c -->
 # see Process.clock_gettime
-#
 #
 Process::CLOCK_MONOTONIC: Integer
 
+# <!-- rdoc-file=process.c -->
 # see Process.clock_gettime
-#
 #
 Process::CLOCK_MONOTONIC_COARSE: Integer
 
+# <!-- rdoc-file=process.c -->
 # see Process.clock_gettime
-#
 #
 Process::CLOCK_MONOTONIC_RAW: Integer
 
+# <!-- rdoc-file=process.c -->
 # see Process.clock_gettime
-#
 #
 Process::CLOCK_PROCESS_CPUTIME_ID: Integer
 
+# <!-- rdoc-file=process.c -->
 # see Process.clock_gettime
-#
 #
 Process::CLOCK_REALTIME: Integer
 
+# <!-- rdoc-file=process.c -->
 # see Process.clock_gettime
-#
 #
 Process::CLOCK_REALTIME_ALARM: Integer
 
+# <!-- rdoc-file=process.c -->
 # see Process.clock_gettime
-#
 #
 Process::CLOCK_REALTIME_COARSE: Integer
 
+# <!-- rdoc-file=process.c -->
 # see Process.clock_gettime
-#
 #
 Process::CLOCK_THREAD_CPUTIME_ID: Integer
 
+# <!-- rdoc-file=process.c -->
 # see Process.setpriority
-#
 #
 Process::PRIO_PGRP: Integer
 
+# <!-- rdoc-file=process.c -->
 # see Process.setpriority
-#
 #
 Process::PRIO_PROCESS: Integer
 
+# <!-- rdoc-file=process.c -->
 # see Process.setpriority
-#
 #
 Process::PRIO_USER: Integer
 
+# <!-- rdoc-file=process.c -->
 # Maximum size of the process's virtual memory (address space) in bytes.
 #
 # see the system getrlimit(2) manual for details.
 #
 Process::RLIMIT_AS: Integer
 
+# <!-- rdoc-file=process.c -->
 # Maximum size of the core file.
 #
 # see the system getrlimit(2) manual for details.
 #
 Process::RLIMIT_CORE: Integer
 
+# <!-- rdoc-file=process.c -->
 # CPU time limit in seconds.
 #
 # see the system getrlimit(2) manual for details.
 #
 Process::RLIMIT_CPU: Integer
 
+# <!-- rdoc-file=process.c -->
 # Maximum size of the process's data segment.
 #
 # see the system getrlimit(2) manual for details.
 #
 Process::RLIMIT_DATA: Integer
 
+# <!-- rdoc-file=process.c -->
 # Maximum size of files that the process may create.
 #
 # see the system getrlimit(2) manual for details.
 #
 Process::RLIMIT_FSIZE: Integer
 
+# <!-- rdoc-file=process.c -->
 # Maximum number of bytes of memory that may be locked into RAM.
 #
 # see the system getrlimit(2) manual for details.
 #
 Process::RLIMIT_MEMLOCK: Integer
 
+# <!-- rdoc-file=process.c -->
 # Specifies the limit on the number of bytes that can be allocated for POSIX
 # message queues for the real user ID of the calling process.
 #
@@ -782,12 +973,14 @@ Process::RLIMIT_MEMLOCK: Integer
 #
 Process::RLIMIT_MSGQUEUE: Integer
 
+# <!-- rdoc-file=process.c -->
 # Specifies a ceiling to which the process's nice value can be raised.
 #
 # see the system getrlimit(2) manual for details.
 #
 Process::RLIMIT_NICE: Integer
 
+# <!-- rdoc-file=process.c -->
 # Specifies a value one greater than the maximum file descriptor number that can
 # be opened by this process.
 #
@@ -795,6 +988,7 @@ Process::RLIMIT_NICE: Integer
 #
 Process::RLIMIT_NOFILE: Integer
 
+# <!-- rdoc-file=process.c -->
 # The maximum number of processes that can be created for the real user ID of
 # the calling process.
 #
@@ -802,12 +996,14 @@ Process::RLIMIT_NOFILE: Integer
 #
 Process::RLIMIT_NPROC: Integer
 
+# <!-- rdoc-file=process.c -->
 # Specifies the limit (in pages) of the process's resident set.
 #
 # see the system getrlimit(2) manual for details.
 #
 Process::RLIMIT_RSS: Integer
 
+# <!-- rdoc-file=process.c -->
 # Specifies a ceiling on the real-time priority that may be set for this
 # process.
 #
@@ -815,6 +1011,7 @@ Process::RLIMIT_RSS: Integer
 #
 Process::RLIMIT_RTPRIO: Integer
 
+# <!-- rdoc-file=process.c -->
 # Specifies limit on CPU time this process scheduled under a real-time
 # scheduling policy can consume.
 #
@@ -822,6 +1019,7 @@ Process::RLIMIT_RTPRIO: Integer
 #
 Process::RLIMIT_RTTIME: Integer
 
+# <!-- rdoc-file=process.c -->
 # Specifies a limit on the number of signals that may be queued for the real
 # user ID of the calling process.
 #
@@ -829,42 +1027,48 @@ Process::RLIMIT_RTTIME: Integer
 #
 Process::RLIMIT_SIGPENDING: Integer
 
+# <!-- rdoc-file=process.c -->
 # Maximum size of the stack, in bytes.
 #
 # see the system getrlimit(2) manual for details.
 #
 Process::RLIMIT_STACK: Integer
 
+# <!-- rdoc-file=process.c -->
 # see Process.setrlimit
-#
 #
 Process::RLIM_INFINITY: Integer
 
+# <!-- rdoc-file=process.c -->
 # see Process.setrlimit
-#
 #
 Process::RLIM_SAVED_CUR: Integer
 
+# <!-- rdoc-file=process.c -->
 # see Process.setrlimit
-#
 #
 Process::RLIM_SAVED_MAX: Integer
 
+# <!-- rdoc-file=process.c -->
 # see Process.wait
-#
 #
 Process::WNOHANG: Integer
 
+# <!-- rdoc-file=process.c -->
 # see Process.wait
-#
 #
 Process::WUNTRACED: Integer
 
+# <!-- rdoc-file=process.c -->
 # The Process::GID module contains a collection of module functions which can be
 # used to portably get, set, and switch the current process's real, effective,
 # and saved group IDs.
 #
 module Process::GID
+  # <!--
+  #   rdoc-file=process.c
+  #   - Process::GID.change_privilege(group)   -> integer
+  # -->
   # Change the current process's real and effective group ID to that specified by
   # *group*. Returns the new group ID. Not available on all platforms.
   #
@@ -874,6 +1078,12 @@ module Process::GID
   #
   def self.change_privilege: (Integer group) -> Integer
 
+  # <!--
+  #   rdoc-file=process.c
+  #   - Process.egid          -> integer
+  #   - Process::GID.eid      -> integer
+  #   - Process::Sys.geteid   -> integer
+  # -->
   # Returns the effective group ID for this process. Not available on all
   # platforms.
   #
@@ -881,6 +1091,10 @@ module Process::GID
   #
   def self.eid: () -> Integer
 
+  # <!--
+  #   rdoc-file=process.c
+  #   - Process::GID.from_name(name)   -> gid
+  # -->
   # Get the group ID by the *name*. If the group is not found, `ArgumentError`
   # will be raised.
   #
@@ -889,6 +1103,11 @@ module Process::GID
   #
   def self.from_name: (String name) -> Integer
 
+  # <!--
+  #   rdoc-file=process.c
+  #   - Process::GID.grant_privilege(group)    -> integer
+  #   - Process::GID.eid = group               -> integer
+  # -->
   # Set the effective group ID, and if possible, the saved group ID of the process
   # to the given *group*. Returns the new effective group ID. Not available on all
   # platforms.
@@ -899,6 +1118,10 @@ module Process::GID
   #
   def self.grant_privilege: (Integer group) -> Integer
 
+  # <!--
+  #   rdoc-file=process.c
+  #   - Process::GID.re_exchange   -> integer
+  # -->
   # Exchange real and effective group IDs and return the new effective group ID.
   # Not available on all platforms.
   #
@@ -908,21 +1131,40 @@ module Process::GID
   #
   def self.re_exchange: () -> Integer
 
+  # <!--
+  #   rdoc-file=process.c
+  #   - Process::GID.re_exchangeable?   -> true or false
+  # -->
   # Returns `true` if the real and effective group IDs of a process may be
   # exchanged on the current platform.
   #
   def self.re_exchangeable?: () -> bool
 
+  # <!--
+  #   rdoc-file=process.c
+  #   - Process.gid           -> integer
+  #   - Process::GID.rid      -> integer
+  #   - Process::Sys.getgid   -> integer
+  # -->
   # Returns the (real) group ID for this process.
   #
   #     Process.gid   #=> 500
   #
   def self.rid: () -> Integer
 
+  # <!--
+  #   rdoc-file=process.c
+  #   - Process::GID.sid_available?   -> true or false
+  # -->
   # Returns `true` if the current platform has saved group ID functionality.
   #
   def self.sid_available?: () -> bool
 
+  # <!--
+  #   rdoc-file=process.c
+  #   - Process::GID.switch              -> integer
+  #   - Process::GID.switch {|| block}   -> object
+  # -->
   # Switch the effective and real group IDs of the current process. If a *block*
   # is given, the group IDs will be switched back after the block is executed.
   # Returns the new effective group ID if called without a block, and the return
@@ -934,6 +1176,7 @@ module Process::GID
   def self.eid=: (Integer group) -> Integer
 end
 
+# <!-- rdoc-file=process.c -->
 # Process::Status encapsulates the information on the status of a running or
 # terminated system process. The built-in variable `$?` is either `nil` or a
 # Process::Status object.
@@ -957,6 +1200,10 @@ end
 # the integer value of *stat*, we're referring to this 16 bit value.
 #
 class Process::Status < Object
+  # <!--
+  #   rdoc-file=process.c
+  #   - stat & num   -> integer
+  # -->
   # Logical AND of the bits in *stat* with *num*.
   #
   #     fork { exit 0x37 }
@@ -966,10 +1213,18 @@ class Process::Status < Object
   #
   def &: (Integer num) -> Integer
 
+  # <!--
+  #   rdoc-file=process.c
+  #   - stat == other   -> true or false
+  # -->
   # Returns `true` if the integer value of *stat* equals *other*.
   #
   def ==: (untyped other) -> bool
 
+  # <!--
+  #   rdoc-file=process.c
+  #   - stat >> num   -> integer
+  # -->
   # Shift the bits in *stat* right *num* places.
   #
   #     fork { exit 99 }   #=> 26563
@@ -979,16 +1234,28 @@ class Process::Status < Object
   #
   def >>: (Integer num) -> Integer
 
+  # <!--
+  #   rdoc-file=process.c
+  #   - stat.coredump?   -> true or false
+  # -->
   # Returns `true` if *stat* generated a coredump when it terminated. Not
   # available on all platforms.
   #
   def coredump?: () -> bool
 
+  # <!--
+  #   rdoc-file=process.c
+  #   - stat.exited?   -> true or false
+  # -->
   # Returns `true` if *stat* exited normally (for example using an `exit()` call
   # or finishing the program).
   #
   def exited?: () -> bool
 
+  # <!--
+  #   rdoc-file=process.c
+  #   - stat.exitstatus   -> integer or nil
+  # -->
   # Returns the least significant eight bits of the return code of *stat*. Only
   # available if #exited? is `true`.
   #
@@ -1004,6 +1271,10 @@ class Process::Status < Object
   #
   def exitstatus: () -> Integer?
 
+  # <!--
+  #   rdoc-file=process.c
+  #   - stat.inspect   -> string
+  # -->
   # Override the inspection method.
   #
   #     system("false")
@@ -1011,6 +1282,10 @@ class Process::Status < Object
   #
   def inspect: () -> String
 
+  # <!--
+  #   rdoc-file=process.c
+  #   - stat.pid   -> integer
+  # -->
   # Returns the process ID that this status object represents.
   #
   #     fork { exit }   #=> 26569
@@ -1019,31 +1294,55 @@ class Process::Status < Object
   #
   def pid: () -> Integer
 
+  # <!--
+  #   rdoc-file=process.c
+  #   - stat.signaled?   -> true or false
+  # -->
   # Returns `true` if *stat* terminated because of an uncaught signal.
   #
   def signaled?: () -> bool
 
+  # <!--
+  #   rdoc-file=process.c
+  #   - stat.stopped?   -> true or false
+  # -->
   # Returns `true` if this process is stopped. This is only returned if the
   # corresponding #wait call had the Process::WUNTRACED flag set.
   #
   def stopped?: () -> bool
 
+  # <!--
+  #   rdoc-file=process.c
+  #   - stat.stopsig   -> integer or nil
+  # -->
   # Returns the number of the signal that caused *stat* to stop (or `nil` if self
   # is not stopped).
   #
   def stopsig: () -> Integer?
 
+  # <!--
+  #   rdoc-file=process.c
+  #   - stat.success?   -> true, false or nil
+  # -->
   # Returns `true` if *stat* is successful, `false` if not. Returns `nil` if
   # #exited? is not `true`.
   #
   def success?: () -> bool
 
+  # <!--
+  #   rdoc-file=process.c
+  #   - stat.termsig   -> integer or nil
+  # -->
   # Returns the number of the signal that caused *stat* to terminate (or `nil` if
   # self was not terminated by an uncaught signal).
   #
   def termsig: () -> Integer?
 
-  # Returns the bits in *stat* as a Integer. Poking around in these bits is
+  # <!--
+  #   rdoc-file=process.c
+  #   - stat.to_i     -> integer
+  # -->
+  # Returns the bits in *stat* as an Integer. Poking around in these bits is
   # platform dependent.
   #
   #     fork { exit 0xab }         #=> 26566
@@ -1052,6 +1351,10 @@ class Process::Status < Object
   #
   def to_i: () -> Integer
 
+  # <!--
+  #   rdoc-file=process.c
+  #   - stat.to_s   -> string
+  # -->
   # Show pid and exit status as a string.
   #
   #     system("false")
@@ -1060,30 +1363,53 @@ class Process::Status < Object
   def to_s: () -> String
 end
 
+# <!-- rdoc-file=process.c -->
 # The Process::Sys module contains UID and GID functions which provide direct
 # bindings to the system calls of the same names instead of the more-portable
 # versions of the same functionality found in the Process, Process::UID, and
 # Process::GID modules.
 #
 module Process::Sys
+  # <!--
+  #   rdoc-file=process.c
+  #   - Process.euid           -> integer
+  #   - Process::UID.eid       -> integer
+  #   - Process::Sys.geteuid   -> integer
+  # -->
   # Returns the effective user ID for this process.
   #
   #     Process.euid   #=> 501
   #
   def self.geteuid: () -> Integer
 
+  # <!--
+  #   rdoc-file=process.c
+  #   - Process.gid           -> integer
+  #   - Process::GID.rid      -> integer
+  #   - Process::Sys.getgid   -> integer
+  # -->
   # Returns the (real) group ID for this process.
   #
   #     Process.gid   #=> 500
   #
   def self.getgid: () -> Integer
 
+  # <!--
+  #   rdoc-file=process.c
+  #   - Process.uid           -> integer
+  #   - Process::UID.rid      -> integer
+  #   - Process::Sys.getuid   -> integer
+  # -->
   # Returns the (real) user ID of this process.
   #
   #     Process.uid   #=> 501
   #
   def self.getuid: () -> Integer
 
+  # <!--
+  #   rdoc-file=process.c
+  #   - Process::Sys.issetugid   -> true or false
+  # -->
   # Returns `true` if the process was created as a result of an execve(2) system
   # call which had either of the setuid or setgid bits set (and extra privileges
   # were given as a result) or if it has changed any of its real, effective or
@@ -1091,66 +1417,111 @@ module Process::Sys
   #
   def self.issetugid: () -> bool
 
+  # <!--
+  #   rdoc-file=process.c
+  #   - Process::Sys.setegid(group)   -> nil
+  # -->
   # Set the effective group ID of the calling process to *group*.  Not available
   # on all platforms.
   #
   def self.setegid: (Integer group) -> nil
 
+  # <!--
+  #   rdoc-file=process.c
+  #   - Process::Sys.seteuid(user)   -> nil
+  # -->
   # Set the effective user ID of the calling process to *user*.  Not available on
   # all platforms.
   #
   def self.seteuid: (Integer user) -> nil
 
+  # <!--
+  #   rdoc-file=process.c
+  #   - Process::Sys.setgid(group)   -> nil
+  # -->
   # Set the group ID of the current process to *group*. Not available on all
   # platforms.
   #
   def self.setgid: (Integer group) -> nil
 
+  # <!--
+  #   rdoc-file=process.c
+  #   - Process::Sys.setregid(rid, eid)   -> nil
+  # -->
   # Sets the (group) real and/or effective group IDs of the current process to
   # *rid* and *eid*, respectively. A value of `-1` for either means to leave that
   # ID unchanged. Not available on all platforms.
   #
   def self.setregid: (Integer rid, Integer eid) -> nil
 
+  # <!--
+  #   rdoc-file=process.c
+  #   - Process::Sys.setresgid(rid, eid, sid)   -> nil
+  # -->
   # Sets the (group) real, effective, and saved user IDs of the current process to
   # *rid*, *eid*, and *sid* respectively. A value of `-1` for any value means to
   # leave that ID unchanged. Not available on all platforms.
   #
   def self.setresgid: (Integer rid, Integer eid, Integer sid) -> nil
 
+  # <!--
+  #   rdoc-file=process.c
+  #   - Process::Sys.setresuid(rid, eid, sid)   -> nil
+  # -->
   # Sets the (user) real, effective, and saved user IDs of the current process to
   # *rid*, *eid*, and *sid* respectively. A value of `-1` for any value means to
   # leave that ID unchanged. Not available on all platforms.
   #
   def self.setresuid: (Integer rid, Integer eid, Integer sid) -> nil
 
+  # <!--
+  #   rdoc-file=process.c
+  #   - Process::Sys.setreuid(rid, eid)   -> nil
+  # -->
   # Sets the (user) real and/or effective user IDs of the current process to *rid*
   # and *eid*, respectively. A value of `-1` for either means to leave that ID
   # unchanged. Not available on all platforms.
   #
   def self.setreuid: (Integer rid, Integer eid) -> nil
 
+  # <!--
+  #   rdoc-file=process.c
+  #   - Process::Sys.setrgid(group)   -> nil
+  # -->
   # Set the real group ID of the calling process to *group*. Not available on all
   # platforms.
   #
   def self.setrgid: (Integer group) -> nil
 
+  # <!--
+  #   rdoc-file=process.c
+  #   - Process::Sys.setruid(user)   -> nil
+  # -->
   # Set the real user ID of the calling process to *user*. Not available on all
   # platforms.
   #
   def self.setruid: (Integer user) -> nil
 
+  # <!--
+  #   rdoc-file=process.c
+  #   - Process::Sys.setuid(user)   -> nil
+  # -->
   # Set the user ID of the current process to *user*. Not available on all
   # platforms.
   #
   def self.setuid: (Integer user) -> nil
 end
 
+# <!-- rdoc-file=process.c -->
 # The Process::UID module contains a collection of module functions which can be
 # used to portably get, set, and switch the current process's real, effective,
 # and saved user IDs.
 #
 module Process::UID
+  # <!--
+  #   rdoc-file=process.c
+  #   - Process::UID.change_privilege(user)   -> integer
+  # -->
   # Change the current process's real and effective user ID to that specified by
   # *user*. Returns the new user ID. Not available on all platforms.
   #
@@ -1160,12 +1531,22 @@ module Process::UID
   #
   def self.change_privilege: (Integer user) -> Integer
 
+  # <!--
+  #   rdoc-file=process.c
+  #   - Process.euid           -> integer
+  #   - Process::UID.eid       -> integer
+  #   - Process::Sys.geteuid   -> integer
+  # -->
   # Returns the effective user ID for this process.
   #
   #     Process.euid   #=> 501
   #
   def self.eid: () -> Integer
 
+  # <!--
+  #   rdoc-file=process.c
+  #   - Process::UID.from_name(name)   -> uid
+  # -->
   # Get the user ID by the *name*. If the user is not found, `ArgumentError` will
   # be raised.
   #
@@ -1174,6 +1555,11 @@ module Process::UID
   #
   def self.from_name: (String name) -> Integer
 
+  # <!--
+  #   rdoc-file=process.c
+  #   - Process::UID.grant_privilege(user)   -> integer
+  #   - Process::UID.eid= user               -> integer
+  # -->
   # Set the effective user ID, and if possible, the saved user ID of the process
   # to the given *user*. Returns the new effective user ID. Not available on all
   # platforms.
@@ -1184,6 +1570,10 @@ module Process::UID
   #
   def self.grant_privilege: (Integer user) -> Integer
 
+  # <!--
+  #   rdoc-file=process.c
+  #   - Process::UID.re_exchange   -> integer
+  # -->
   # Exchange real and effective user IDs and return the new effective user ID. Not
   # available on all platforms.
   #
@@ -1193,21 +1583,40 @@ module Process::UID
   #
   def self.re_exchange: () -> Integer
 
+  # <!--
+  #   rdoc-file=process.c
+  #   - Process::UID.re_exchangeable?   -> true or false
+  # -->
   # Returns `true` if the real and effective user IDs of a process may be
   # exchanged on the current platform.
   #
   def self.re_exchangeable?: () -> bool
 
+  # <!--
+  #   rdoc-file=process.c
+  #   - Process.uid           -> integer
+  #   - Process::UID.rid      -> integer
+  #   - Process::Sys.getuid   -> integer
+  # -->
   # Returns the (real) user ID of this process.
   #
   #     Process.uid   #=> 501
   #
   def self.rid: () -> Integer
 
+  # <!--
+  #   rdoc-file=process.c
+  #   - Process::UID.sid_available?   -> true or false
+  # -->
   # Returns `true` if the current platform has saved user ID functionality.
   #
   def self.sid_available?: () -> bool
 
+  # <!--
+  #   rdoc-file=process.c
+  #   - Process::UID.switch              -> integer
+  #   - Process::UID.switch {|| block}   -> object
+  # -->
   # Switch the effective and real user IDs of the current process. If a *block* is
   # given, the user IDs will be switched back after the block is executed. Returns
   # the new effective user ID if called without a block, and the return value of

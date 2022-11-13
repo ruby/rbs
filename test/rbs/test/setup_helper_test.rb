@@ -1,7 +1,7 @@
 require "test_helper"
 require "rbs/test"
 
-class SetupHelperTest < Minitest::Test
+class SetupHelperTest < Test::Unit::TestCase
   include RBS::Test::SetupHelper
   include TestHelper
 
@@ -28,8 +28,13 @@ class SetupHelperTest < Minitest::Test
   end
 
   def test_to_double_class
-    assert '::RSpec::Mocks::Double', to_double_class('rspec')
-    assert '::Minitest::Mock', to_double_class('rspec')
+    assert_equal [
+      '::RSpec::Mocks::Double',
+      '::RSpec::Mocks::InstanceVerifyingDouble',
+      '::RSpec::Mocks::ObjectVerifyingDouble',
+      '::RSpec::Mocks::ClassVerifyingDouble',
+    ], to_double_class('rspec')
+    assert_equal ['::Minitest::Mock'], to_double_class('minitest')
 
     silence_warnings do
       assert_nil to_double_class('rr')
@@ -40,4 +45,3 @@ class SetupHelperTest < Minitest::Test
     end
   end
 end
-

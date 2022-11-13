@@ -1,6 +1,6 @@
 require "test_helper"
 
-class RBS::RuntimePrototypeTest < Minitest::Test
+class RBS::RuntimePrototypeTest < Test::Unit::TestCase
   Runtime = RBS::Prototype::Runtime
   DefinitionBuilder = RBS::DefinitionBuilder
 
@@ -9,10 +9,16 @@ class RBS::RuntimePrototypeTest < Minitest::Test
   module TestTargets
     module Foo
       include Enumerable
+
+      extend Comparable
+    end
+
+    module Bar
     end
 
     class Test < String
       include Foo
+      extend Bar
 
       NAME = "Hello"
 
@@ -40,30 +46,43 @@ class RBS::RuntimePrototypeTest < Minitest::Test
         p = Runtime.new(patterns: ["RBS::RuntimePrototypeTest::TestTargets::*"], env: env, merge: false)
 
         assert_write p.decls, <<-EOF
-module RBS::RuntimePrototypeTest::TestTargets::Foo
-  include Enumerable
+module RBS
+  class RuntimePrototypeTest < Test::Unit::TestCase
+    module TestTargets
+      module Bar
+      end
+
+      module Foo
+        include Enumerable[untyped]
+
+        extend Comparable
+      end
+
+      class Test < String
+        include RBS::RuntimePrototypeTest::TestTargets::Foo
+
+        extend RBS::RuntimePrototypeTest::TestTargets::Bar
+
+        def self.b: () -> untyped
+
+        def self.baz: () { (*untyped) -> untyped } -> untyped
+
+        public
+
+        alias bar foo
+
+        def foo: (untyped foo, ?untyped bar, *untyped baz, untyped a, b: untyped, ?c: untyped, **untyped) -> untyped
+
+        private
+
+        def a: () -> untyped
+
+        NAME: String
+      end
+    end
+  end
 end
-
-class RBS::RuntimePrototypeTest::TestTargets::Test < String
-  include Foo
-
-  def self.b: () -> untyped
-
-  def self.baz: () { (*untyped) -> untyped } -> untyped
-
-  public
-
-  alias bar foo
-
-  def foo: (untyped foo, ?untyped bar, *untyped baz, untyped a, b: untyped, ?c: untyped, **untyped) -> untyped
-
-  private
-
-  def a: () -> untyped
-end
-
-RBS::RuntimePrototypeTest::TestTargets::Test::NAME: String
-    EOF
+        EOF
       end
     end
   end
@@ -72,19 +91,18 @@ RBS::RuntimePrototypeTest::TestTargets::Test::NAME: String
     SignatureManager.new do |manager|
       manager.files[Pathname("foo.rbs")] = <<EOF
 class RBS
-  class RuntimePrototypeTest
+  class RuntimePrototypeTest < Test::Unit::TestCase
     class TestTargets
+      class Test
+        def self.baz: () -> void
+
+        def foo: (String) -> Integer
+               | (String, bool) { () -> void } -> [Symbol]
+
+        def bar: () -> void
+      end
     end
   end
-end
-
-class RBS::RuntimePrototypeTest::TestTargets::Test
-  def self.baz: () -> void
-
-  def foo: (String) -> Integer
-         | (String, bool) { () -> void } -> [Symbol]
-
-  def bar: () -> void
 end
 EOF
 
@@ -92,30 +110,42 @@ EOF
         p = Runtime.new(patterns: ["RBS::RuntimePrototypeTest::TestTargets::*"], env: env, merge: true)
 
         assert_write p.decls, <<-EOF
-module RBS::RuntimePrototypeTest::TestTargets::Foo
-  include Enumerable
+module RBS
+  class RuntimePrototypeTest < Test::Unit::TestCase
+    module TestTargets
+      module Bar
+      end
+
+      module Foo
+        include Enumerable[untyped]
+
+        extend Comparable
+      end
+
+      class Test < String
+        include RBS::RuntimePrototypeTest::TestTargets::Foo
+
+        extend RBS::RuntimePrototypeTest::TestTargets::Bar
+
+        def self.b: () -> untyped
+
+        def self.baz: () { (*untyped) -> untyped } -> untyped
+
+        public
+
+        alias bar foo
+
+        def foo: (untyped foo, ?untyped bar, *untyped baz, untyped a, b: untyped, ?c: untyped, **untyped) -> untyped
+
+        private
+
+        def a: () -> untyped
+
+        NAME: String
+      end
+    end
+  end
 end
-
-class RBS::RuntimePrototypeTest::TestTargets::Test < String
-  include Foo
-
-  def self.b: () -> untyped
-
-  def self.baz: () -> void
-
-  public
-
-  alias bar foo
-
-  def foo: (String) -> Integer
-         | (String, bool) { () -> void } -> [Symbol]
-
-  private
-
-  def a: () -> untyped
-end
-
-RBS::RuntimePrototypeTest::TestTargets::Test::NAME: String
         EOF
       end
     end
@@ -141,22 +171,28 @@ RBS::RuntimePrototypeTest::TestTargets::Test::NAME: String
                         owners_included: ["RBS::RuntimePrototypeTest::IncludeTests::SuperClass"])
 
         assert_write p.decls, <<-EOF
-class RBS::RuntimePrototypeTest::IncludeTests::ChildClass < RBS::RuntimePrototypeTest::IncludeTests::SuperClass
-  def self.foo: () -> untyped
+module RBS
+  class RuntimePrototypeTest < Test::Unit::TestCase
+    module IncludeTests
+      class ChildClass < RBS::RuntimePrototypeTest::IncludeTests::SuperClass
+        def self.foo: () -> untyped
 
-  public
+        public
 
-  def bar: () -> untyped
+        def bar: () -> untyped
 
-  def foo: () -> untyped
-end
+        def foo: () -> untyped
+      end
 
-class RBS::RuntimePrototypeTest::IncludeTests::SuperClass
-  def self.foo: () -> untyped
+      class SuperClass
+        def self.foo: () -> untyped
 
-  public
+        public
 
-  def foo: () -> untyped
+        def foo: () -> untyped
+      end
+    end
+  end
 end
         EOF
       end
@@ -187,11 +223,241 @@ end
   end
 
   def test_decls_for_anonymous_class_or_module
-    p = Runtime.new(patterns: ["RBS::RuntimePrototypeTest::TestForAnonymous::*"],
-                    env: nil, merge: false)
-    silence_warnings do
-      p.decls
+    SignatureManager.new do |manager|
+      manager.build do |env|
+        p = Runtime.new(patterns: ["RBS::RuntimePrototypeTest::TestForAnonymous::*"],
+                        env: env, merge: false)
+        silence_warnings do
+          p.decls
+        end
+        assert(true) # nothing raised above
+      end
     end
-    assert(true) # nothing raised above
+  end
+
+  if RUBY_VERSION >= '2.7' && RUBY_VERSION <= '3.0'
+    class TestForArgumentForwarding
+      eval <<~RUBY
+        def foo(...)
+        end
+      RUBY
+    end
+
+    def test_argument_forwarding
+      SignatureManager.new do |manager|
+        manager.build do |env|
+          p = Runtime.new(patterns: ["RBS::RuntimePrototypeTest::TestForArgumentForwarding"], env: env, merge: true)
+
+          assert_write p.decls, <<-EOF
+module RBS
+  class RuntimePrototypeTest < Test::Unit::TestCase
+    class TestForArgumentForwarding
+      public
+
+      def foo: (*untyped) { (*untyped) -> untyped } -> untyped
+    end
+  end
+end
+          EOF
+        end
+      end
+    end
+  end
+
+  module TestForOverrideModuleName
+    module M
+      def self.name() 'FakeNameM' end
+      def self.to_s() 'FakeToS' end
+      X = 1
+    end
+
+    class C
+      def self.name() 'FakeNameC' end
+      def self.to_s() 'FakeToS2' end
+      include M
+
+      INSTANCE = C.new
+    end
+
+
+    class C2 < C
+    end
+  end
+
+  def test_for_overwritten_module_name
+    SignatureManager.new do |manager|
+      manager.build do |env|
+        p = Runtime.new(patterns: ["RBS::RuntimePrototypeTest::TestForOverrideModuleName::*"], env: env, merge: true)
+
+        assert_write p.decls, <<~RBS
+          module RBS
+            class RuntimePrototypeTest < Test::Unit::TestCase
+              module TestForOverrideModuleName
+                class C
+                  include RBS::RuntimePrototypeTest::TestForOverrideModuleName::M
+
+                  def self.name: () -> untyped
+
+                  def self.to_s: () -> untyped
+
+                  INSTANCE: C
+                end
+
+                class C2 < RBS::RuntimePrototypeTest::TestForOverrideModuleName::C
+                end
+
+                module M
+                  def self.name: () -> untyped
+
+                  def self.to_s: () -> untyped
+
+                  X: Integer
+                end
+              end
+            end
+          end
+        RBS
+      end
+    end
+  end
+
+  module TestForTypeParameters
+    module M
+      HASH = { foo: 42 }
+    end
+
+    class C < Hash
+    end
+
+    class C2
+      include Enumerable
+    end
+  end
+
+  def test_for_type_parameters
+    SignatureManager.new do |manager|
+      manager.build do |env|
+        p = Runtime.new(patterns: ["RBS::RuntimePrototypeTest::TestForTypeParameters::*"], env: env, merge: true)
+
+        assert_write p.decls, <<~RBS
+          module RBS
+            class RuntimePrototypeTest < Test::Unit::TestCase
+              module TestForTypeParameters
+                class C < Hash[untyped, untyped]
+                end
+
+                class C2
+                  include Enumerable[untyped]
+                end
+
+                module M
+                  HASH: Hash[untyped, untyped]
+                end
+              end
+            end
+          end
+        RBS
+      end
+    end
+  end
+
+  class TestForInitialize
+    def initialize() 'foo' end
+  end
+
+  def test_for_initialize_type
+    SignatureManager.new do |manager|
+      manager.build do |env|
+        p = Runtime.new(patterns: ["RBS::RuntimePrototypeTest::TestForInitialize"], env: env, merge: true)
+
+        assert_write p.decls, <<~RBS
+          module RBS
+            class RuntimePrototypeTest < Test::Unit::TestCase
+              class TestForInitialize
+                private
+
+                def initialize: () -> void
+              end
+            end
+          end
+        RBS
+      end
+    end
+  end
+
+  if RUBY_VERSION >= '3.1'
+    class TestForYield
+      def m1() yield end
+      def m2() yield 42 end
+      def m3() yield 42; yield 42, 43 end
+      eval 'def m4() yield end'
+    end
+
+    def test_for_yield
+      SignatureManager.new do |manager|
+        manager.build do |env|
+          p = Runtime.new(patterns: ["RBS::RuntimePrototypeTest::TestForYield"], env: env, merge: true)
+
+          assert_write p.decls, <<~RBS
+            module RBS
+              class RuntimePrototypeTest < Test::Unit::TestCase
+                class TestForYield
+                  public
+
+                  def m1: () { () -> untyped } -> untyped
+
+                  def m2: () { (untyped) -> untyped } -> untyped
+
+                  def m3: () { (untyped, untyped) -> untyped } -> untyped
+
+                  def m4: () -> untyped
+                end
+              end
+            end
+          RBS
+        end
+      end
+    end
+  end
+
+  module TestForEnv
+    # A = 1
+    def a
+      2
+    end
+    alias b a
+    module B
+    end
+    include B
+    extend B
+    prepend B
+  end
+
+  def test_decls_structure
+    SignatureManager.new do |manager|
+      manager.build do |env|
+        p = Runtime.new(patterns: ["RBS::RuntimePrototypeTest::TestForEnv"], env: env, merge: true)
+        assert_equal(p.decls.length, 1)
+        p.decls.each do |decl|
+          env << decl
+        end
+        env.resolve_type_names
+        assert(true) # nothing raised above
+      end
+    end
+  end
+
+  def test_basic_object
+    SignatureManager.new do |manager|
+      manager.build do |env|
+        p = Runtime.new(patterns: ["BasicObject"], env: env, merge: true)
+        assert_equal(p.decls.length, 1)
+        p.decls.each do |decl|
+          env << decl
+        end
+        env.resolve_type_names
+        assert(true) # nothing raised above
+      end
+    end
   end
 end

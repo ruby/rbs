@@ -1,6 +1,6 @@
 require "test_helper"
 
-class RBS::LocationTest < Minitest::Test
+class RBS::LocationTest < Test::Unit::TestCase
   Buffer = RBS::Buffer
   Location = RBS::Location
 
@@ -10,7 +10,9 @@ class RBS::LocationTest < Minitest::Test
 abc
     CONTENT
 
-    Location.new(buffer: buffer, start_pos: 0, end_pos: 4).yield_self do |location|
+    Location.new(buffer, 0, 4).yield_self do |location|
+      assert_equal 0, location.start_pos
+      assert_equal 4, location.end_pos
       assert_equal 1, location.start_line
       assert_equal 0, location.start_column
       assert_equal 2, location.end_line
@@ -18,7 +20,7 @@ abc
       assert_equal "123\n", location.source
     end
 
-    Location.new(buffer: buffer, start_pos: 4, end_pos: 8).yield_self do |location|
+    Location.new(buffer, 4, 8).yield_self do |location|
       assert_equal 2, location.start_line
       assert_equal 0, location.start_column
       assert_equal 3, location.end_line
@@ -27,19 +29,23 @@ abc
     end
   end
 
-  def test_location_plus
+  def test_location_child
     buffer = Buffer.new(name: Pathname("foo.rbs"), content: <<-CONTENT)
 123
 abc
     CONTENT
 
-    loc1 = Location.new(buffer: buffer, start_pos: 0, end_pos: 3)
-    loc2 = Location.new(buffer: buffer, start_pos: 4, end_pos: 7)
+    Location.new(buffer, 0, 8).yield_self do |location|
+      location.add_optional_child(:num, 0...2)
+      location.add_optional_child(:hira, nil)
+      location.add_required_child(:alpha, 4...7)
 
-    loc = loc1 + loc2
+      assert_equal "12", location[:num].source
+      assert_nil location[:hira]
+      assert_equal "abc", location[:alpha].source
 
-    assert_equal 0, loc.start_pos
-    assert_equal 7, loc.end_pos
-    assert_equal "123\nabc", loc.source
+      assert_equal [:num, :hira].sort, location.each_optional_key.to_a.sort
+      assert_equal [:alpha], location.each_required_key.to_a
+    end
   end
 end

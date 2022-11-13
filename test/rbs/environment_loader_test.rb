@@ -1,6 +1,6 @@
 require "test_helper"
 
-class RBS::EnvironmentLoaderTest < Minitest::Test
+class RBS::EnvironmentLoaderTest < Test::Unit::TestCase
   include TestHelper
 
   Environment = RBS::Environment
@@ -61,7 +61,7 @@ end
       loader.add(path: path)
 
       env = Environment.new
-      loaded = loader.load(env: env)
+      loader.load(env: env)
 
       assert_operator env.class_decls, :key?, TypeName("::Person")
       assert_operator env.class_decls, :key?, TypeName("::PeopleController")
@@ -75,10 +75,26 @@ end
       loader.add(library: "set")
 
       env = Environment.new
-      loaded = loader.load(env: env)
+      loader.load(env: env)
 
       assert_operator env.class_decls, :key?, TypeName("::Set")
     end
+  end
+
+  def test_loading_rubygems
+    RBS.logger_output = io = StringIO.new
+    mktmpdir do |path|
+      loader = EnvironmentLoader.new
+      loader.add(library: "rubygems")
+
+      env = Environment.new
+      loader.load(env: env)
+
+      assert_operator env.class_decls, :key?, TypeName("::Gem")
+      assert io.string.include?('`rubygems` has been moved to core library')
+    end
+  ensure
+    RBS.logger_output = nil
   end
 
   def test_loading_library_from_gem_repo
@@ -96,7 +112,7 @@ end
       loader.add(library: "gem1", version: "1.2.3")
 
       env = Environment.new
-      loaded = loader.load(env: env)
+      loader.load(env: env)
 
       assert_operator env.class_decls, :key?, TypeName("::Person")
       assert_operator env.class_decls, :key?, TypeName("::PeopleController")
@@ -133,7 +149,7 @@ end
   end
 
   def test_loading_from_gem
-    skip unless has_gem?("rbs-amber")
+    omit unless has_gem?("rbs-amber")
 
     mktmpdir do |path|
       repo = RBS::Repository.new()
@@ -142,25 +158,124 @@ end
       loader.add(library: "rbs-amber", version: nil)
 
       env = Environment.new
-      loaded = loader.load(env: env)
+      loader.load(env: env)
 
       assert_operator env.class_decls, :key?, TypeName("::Amber")
     end
   end
 
   def test_loading_from_gem_without_rbs
-    skip unless has_gem?("minitest")
+    omit if skip_minitest?
 
     mktmpdir do |path|
       repo = RBS::Repository.new()
 
       loader = EnvironmentLoader.new(repository: repo)
-      loader.add(library: "minitest", version: nil)
+      loader.add(library: "non_existent_gems", version: nil)
 
       env = Environment.new
 
       assert_raises EnvironmentLoader::UnknownLibraryError do
         loader.load(env: env)
+      end
+    end
+  end
+
+  def test_loading_dependencies
+    mktmpdir do |path|
+      loader = EnvironmentLoader.new
+      loader.add(library: "yaml")
+
+      env = Environment.new
+      loader.load(env: env)
+
+      assert_operator env.class_decls, :key?, TypeName("::YAML")
+      assert_operator env.class_decls, :key?, TypeName("::DBM")
+      assert_operator env.class_decls, :key?, TypeName("::PStore")
+    end
+  end
+
+  def test_loading_from_rbs_collection
+    mktmpdir do |path|
+      lockfile_path = path.join('rbs_collection.lock.yaml')
+      lockfile_path.write(<<~YAML)
+        sources:
+          - name: ruby/gem_rbs_collection
+            remote: https://github.com/ruby/gem_rbs_collection.git
+            revision: b4d3b346d9657543099a35a1fd20347e75b8c523
+            repo_dir: gems
+        path: '.gem_rbs_collection'
+        gems:
+          - name: ast
+            version: "2.4"
+            source:
+              name: ruby/gem_rbs_collection
+              remote: https://github.com/ruby/gem_rbs_collection.git
+              revision: b4d3b346d9657543099a35a1fd20347e75b8c523
+              repo_dir: gems
+              type: git
+          - name: rainbow
+            version: "3.0"
+            source:
+              name: ruby/gem_rbs_collection
+              remote: https://github.com/ruby/gem_rbs_collection.git
+              revision: b4d3b346d9657543099a35a1fd20347e75b8c523
+              repo_dir: gems
+              type: git
+      YAML
+      RBS::Collection::Installer.new(lockfile_path: lockfile_path, stdout: StringIO.new).install_from_lockfile
+      lock = RBS::Collection::Config.from_path(lockfile_path)
+
+      repo = RBS::Repository.new()
+
+      loader = EnvironmentLoader.new(repository: repo)
+      loader.add_collection(lock)
+
+      env = Environment.new
+      loader.load(env: env)
+
+      assert_operator env.class_decls, :key?, TypeName("::AST")
+      assert_operator env.class_decls, :key?, TypeName("::Rainbow")
+      assert repo.dirs.include? lock.repo_path
+    end
+  end
+
+  def test_loading_from_rbs_collection_without_install
+    mktmpdir do |path|
+      lockfile_path = path.join('rbs_collection.lock.yaml')
+      lockfile_path.write(<<~YAML)
+        sources:
+          - name: ruby/gem_rbs_collection
+            remote: https://github.com/ruby/gem_rbs_collection.git
+            revision: b4d3b346d9657543099a35a1fd20347e75b8c523
+            repo_dir: gems
+        path: '.gem_rbs_collection'
+        gems:
+          - name: ast
+            version: "2.4"
+            source:
+              name: ruby/gem_rbs_collection
+              remote: https://github.com/ruby/gem_rbs_collection.git
+              revision: b4d3b346d9657543099a35a1fd20347e75b8c523
+              repo_dir: gems
+              type: git
+          - name: rainbow
+            version: "3.0"
+            source:
+              name: ruby/gem_rbs_collection
+              remote: https://github.com/ruby/gem_rbs_collection.git
+              revision: b4d3b346d9657543099a35a1fd20347e75b8c523
+              repo_dir: gems
+              type: git
+      YAML
+      lock = RBS::Collection::Config.from_path(lockfile_path)
+
+      repo = RBS::Repository.new()
+
+      loader = EnvironmentLoader.new(repository: repo)
+
+      assert_raises RBS::Collection::Config::CollectionNotAvailable do
+        loader.add_collection(lock)
       end
     end
   end

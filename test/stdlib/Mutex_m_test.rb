@@ -1,7 +1,7 @@
 require_relative "test_helper"
 require 'mutex_m'
 
-class Mutex_mInstanceTest < Minitest::Test
+class Mutex_mInstanceTest < Test::Unit::TestCase
   include TypeAssertions
 
   library 'mutex_m'
@@ -47,9 +47,9 @@ class Mutex_mInstanceTest < Minitest::Test
   def test_sleep
     mu = mu()
     mu.lock
-    assert_send_type "(Integer) -> Integer",
+    assert_send_type "(Integer) -> Integer?",
                      mu, :sleep, 0
-    assert_send_type "(Float) -> Integer",
+    assert_send_type "(Float) -> Integer?",
                      mu, :sleep, 0.1
   end
 end

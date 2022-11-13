@@ -4,6 +4,7 @@ require "securerandom"
 
 class KernelTest < StdlibTest
   target Kernel
+  discard_output
 
   def test_caller
     caller(1, 2)
@@ -45,8 +46,7 @@ class KernelTest < StdlibTest
     eval "p", binding, "fname", 1
   end
 
-  def test_iterator?
-    iterator?
+  def test_block_given?
     block_given?
   end
 
@@ -62,6 +62,8 @@ class KernelTest < StdlibTest
   end
 
   def test_not_tilde
+    return if RUBY_VERSION >= "3.2.0"
+
     Object.new !~ Object.new
   end
 
@@ -73,10 +75,6 @@ class KernelTest < StdlibTest
     Object.new === Object.new
   end
 
-  def test_eq_tilde
-    Object.new =~ Object.new
-  end
-
   def test_clone
     Object.new.clone
     Object.new.clone(freeze: false)
@@ -84,7 +82,7 @@ class KernelTest < StdlibTest
 
   def test_display
     1.display
-    1.display(STDERR)
+    1.display($stderr)
   end
 
   def test_dup
@@ -113,8 +111,8 @@ class KernelTest < StdlibTest
 
   def test_fork
     if Process.respond_to?(:fork)
-      exit unless fork
-      fork { exit }
+      exit! unless fork
+      fork { exit! }
     end
   end
 
@@ -256,14 +254,16 @@ class KernelTest < StdlibTest
     o.singleton_methods
   end
 
-  def test_taint
-    Object.new.taint
-    Object.new.untrust
-  end
+  if Kernel.method_defined?(:taint)
+    def test_taint
+      Object.new.taint
+      Object.new.untrust
+    end
 
-  def test_tainted?
-    Object.new.tainted?
-    Object.new.untrusted?
+    def test_tainted?
+      Object.new.tainted?
+      Object.new.untrusted?
+    end
   end
 
   def test_tap
@@ -276,9 +276,11 @@ class KernelTest < StdlibTest
     Object.new.to_s
   end
 
-  def test_untaint
-    Object.new.untaint
-    Object.new.trust
+  if Kernel.method_defined?(:taint)
+    def test_untaint
+      Object.new.untaint
+      Object.new.trust
+    end
   end
 
   def test_Array
@@ -464,7 +466,16 @@ class KernelTest < StdlibTest
   end
 
   def test_load
-    # TODO
+    Dir.mktmpdir do |dir|
+      path = File.join(dir, "foo.rb")
+
+      File.write(path, "class Foo; end")
+
+      load(path)
+      load(path, true)
+      load(path, false)
+      load(path, Module.new)
+    end
   end
 
   def test_loop
@@ -475,22 +486,17 @@ class KernelTest < StdlibTest
   def test_open
     open(__FILE__).close
     open(__FILE__, 'r').close
-    open(__FILE__, 'r', 0644).close
     open(__FILE__) do |f|
       f.read
     end
   end
 
   def test_print
-    $stdout = StringIO.new
     print 1
     print 'a', 2
-  ensure
-    $stdout = STDOUT
   end
 
   def test_printf
-    $stdout = StringIO.new
     File.open('/dev/null', 'w') do |io|
       printf io, 'a'
       printf io, '%d', 2
@@ -500,8 +506,6 @@ class KernelTest < StdlibTest
     #   printf '%d', 2
     #   printf '%d%s', 2, 1
     #   printf
-  ensure
-    $stdout = STDOUT
   end
 
   def test_proc
@@ -513,27 +517,18 @@ class KernelTest < StdlibTest
   end
 
   def test_putc
-    $stdout = StringIO.new
     putc 1
     putc 'a'
-  ensure
-    $stdout = STDOUT
   end
 
   def test_puts
-    $stdout = StringIO.new
     puts 1
     puts Object.new
-  ensure
-    $stdout = STDOUT
   end
 
   def test_p
-    $stdout = StringIO.new
     p 1
     p 'a', 2
-  ensure
-    $stdout = STDOUT
   end
 
   def test_rand
@@ -564,10 +559,15 @@ class KernelTest < StdlibTest
   end
 
   def test_sleep
-    # TODO
-    #   sleep
+    sleep 0
 
     sleep 0.01
+
+    o = Object.new
+    def o.divmod(i)
+      [0.001, 0.001]
+    end
+    sleep o
   end
 
   def test_syscall
@@ -586,13 +586,14 @@ class KernelTest < StdlibTest
   end
 
   def test_warn
-    $stderr = StringIO.new
     warn
     warn 'foo'
     warn 'foo', 'bar'
     warn 'foo', uplevel: 1
-  ensure
-    $stderr = STDERR
+
+    omit_if(RUBY_VERSION < "3.0")
+
+    warn 'foo', uplevel: 1, category: :deprecated
   end
 
   def test_exec

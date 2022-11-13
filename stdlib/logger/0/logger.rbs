@@ -1,3 +1,4 @@
+# <!-- rdoc-file=lib/logger.rb -->
 # ## Description
 #
 # The Logger class provides a simple but sophisticated logging utility that you
@@ -217,6 +218,9 @@
 #       "#{datetime}: #{msg}\n"
 #     })
 #
+# <!-- rdoc-file=lib/logger/errors.rb -->
+# not used after 1.2.7. just for compat.
+#
 class Logger
   interface _WriteCloser
     def write: (_ToS) -> untyped
@@ -229,11 +233,19 @@ class Logger
 
   public
 
+  # <!--
+  #   rdoc-file=lib/logger.rb
+  #   - <<(msg)
+  # -->
   # Dump given message to the log device without any formatting.  If no log device
   # exists, return `nil`.
   #
   def <<: (untyped msg) -> (untyped | nil)
 
+  # <!--
+  #   rdoc-file=lib/logger.rb
+  #   - Logger#add(severity, message = nil, progname = nil) { ... }
+  # -->
   # ### Args
   #
   # `severity`
@@ -273,14 +285,26 @@ class Logger
   #
   def add: (Integer severity, ?untyped message, ?untyped progname) ?{ () -> untyped } -> true
 
+  # <!--
+  #   rdoc-file=lib/logger.rb
+  #   - close()
+  # -->
   # Close the logging device.
   #
   def close: () -> untyped
 
+  # <!--
+  #   rdoc-file=lib/logger.rb
+  #   - datetime_format()
+  # -->
   # Returns the date format being used.  See #datetime_format=
   #
   def datetime_format: () -> String?
 
+  # <!--
+  #   rdoc-file=lib/logger.rb
+  #   - datetime_format=(datetime_format)
+  # -->
   # Set date-time format.
   #
   # `datetime_format`
@@ -289,51 +313,88 @@ class Logger
   def datetime_format=: (String datetime_format) -> String
                       | (nil datetime_format) -> nil
 
+  # <!--
+  #   rdoc-file=lib/logger.rb
+  #   - debug(progname = nil, &block)
+  # -->
   # Log a `DEBUG` message.
   #
   # See #info for more information.
   #
   def debug: (?untyped progname) ?{ () -> untyped } -> true
 
+  # <!--
+  #   rdoc-file=lib/logger.rb
+  #   - debug!()
+  # -->
   # Sets the severity to DEBUG.
   #
   def debug!: () -> Integer
 
-  # Returns `true` iff the current severity level allows for the printing of
-  # `DEBUG` messages.
+  # <!--
+  #   rdoc-file=lib/logger.rb
+  #   - debug?()
+  # -->
+  # Returns `true` if and only if the current severity level allows for the
+  # printing of `DEBUG` messages.
   #
   def debug?: () -> bool
 
+  # <!--
+  #   rdoc-file=lib/logger.rb
+  #   - error(progname = nil, &block)
+  # -->
   # Log an `ERROR` message.
   #
   # See #info for more information.
   #
   def error: (?untyped progname) ?{ () -> untyped } -> true
 
+  # <!--
+  #   rdoc-file=lib/logger.rb
+  #   - error!()
+  # -->
   # Sets the severity to ERROR.
   #
   def error!: () -> Integer
 
-  # Returns `true` iff the current severity level allows for the printing of
-  # `ERROR` messages.
+  # <!--
+  #   rdoc-file=lib/logger.rb
+  #   - error?()
+  # -->
+  # Returns `true` if and only if the current severity level allows for the
+  # printing of `ERROR` messages.
   #
   def error?: () -> bool
 
+  # <!--
+  #   rdoc-file=lib/logger.rb
+  #   - fatal(progname = nil, &block)
+  # -->
   # Log a `FATAL` message.
   #
   # See #info for more information.
   #
   def fatal: (?untyped progname) ?{ () -> untyped } -> true
 
+  # <!--
+  #   rdoc-file=lib/logger.rb
+  #   - fatal!()
+  # -->
   # Sets the severity to FATAL.
   #
   def fatal!: () -> Integer
 
-  # Returns `true` iff the current severity level allows for the printing of
-  # `FATAL` messages.
+  # <!--
+  #   rdoc-file=lib/logger.rb
+  #   - fatal?()
+  # -->
+  # Returns `true` if and only if the current severity level allows for the
+  # printing of `FATAL` messages.
   #
   def fatal?: () -> bool
 
+  # <!-- rdoc-file=lib/logger.rb -->
   # Logging formatter, as a `Proc` that will take four arguments and return the
   # formatted message. The arguments are:
   #
@@ -352,9 +413,31 @@ class Logger
   #
   def formatter: () -> (_Formatter | nil)
 
+  # <!-- rdoc-file=lib/logger.rb -->
+  # Logging formatter, as a `Proc` that will take four arguments and return the
+  # formatted message. The arguments are:
+  #
+  # `severity`
+  # :   The Severity of the log message.
+  # `time`
+  # :   A Time instance representing when the message was logged.
+  # `progname`
+  # :   The #progname configured, or passed to the logger method.
+  # `msg`
+  # :   The *Object* the user passed to the log message; not necessarily a String.
+  #
+  #
+  # The block should return an Object that can be written to the logging device
+  # via `write`.  The default formatter is used when no formatter is set.
+  #
   def formatter=: (_Formatter) -> _Formatter
                 | (nil) -> nil
 
+  # <!--
+  #   rdoc-file=lib/logger.rb
+  #   - info(message)
+  #   - info(progname, &block)
+  # -->
   # Log an `INFO` message.
   #
   # `message`
@@ -386,35 +469,61 @@ class Logger
   #
   def info: (?untyped progname) ?{ () -> untyped } -> true
 
+  # <!--
+  #   rdoc-file=lib/logger.rb
+  #   - info!()
+  # -->
   # Sets the severity to INFO.
   #
   def info!: () -> Integer
 
-  # Returns `true` iff the current severity level allows for the printing of
-  # `INFO` messages.
+  # <!--
+  #   rdoc-file=lib/logger.rb
+  #   - info?()
+  # -->
+  # Returns `true` if and only if the current severity level allows for the
+  # printing of `INFO` messages.
   #
   def info?: () -> bool
 
+  # <!-- rdoc-file=lib/logger.rb -->
   # Logging severity threshold (e.g. `Logger::INFO`).
   #
   def level: () -> Integer
 
+  # <!--
+  #   rdoc-file=lib/logger.rb
+  #   - level=(severity)
+  # -->
   # Set logging severity threshold.
   #
   # `severity`
   # :   The Severity of the log message.
   #
-  #
-  def level=: (Integer | String severity) -> Integer
+  def level=: (Integer | String | Symbol severity) -> Integer
 
+  # <!--
+  #   rdoc-file=lib/logger.rb
+  #   - log(severity, message = nil, progname = nil)
+  # -->
+  #
   alias log add
 
+  # <!-- rdoc-file=lib/logger.rb -->
   # Program name to include in log messages.
   #
   def progname: () -> untyped
 
+  # <!-- rdoc-file=lib/logger.rb -->
+  # Program name to include in log messages.
+  #
   def progname=: (untyped) -> untyped
 
+  # <!--
+  #   rdoc-file=lib/logger.rb
+  #   - Logger#reopen
+  #   - Logger#reopen(logdev)
+  # -->
   # ### Args
   #
   # `logdev`
@@ -430,12 +539,22 @@ class Logger
   def reopen: () -> self
             | (logdev?) -> self
 
+  # <!-- rdoc-file=lib/logger.rb -->
   # Logging severity threshold (e.g. `Logger::INFO`).
   #
   alias sev_threshold level
 
+  # <!--
+  #   rdoc-file=lib/logger.rb
+  #   - sev_threshold=(severity)
+  # -->
+  #
   alias sev_threshold= level=
 
+  # <!--
+  #   rdoc-file=lib/logger.rb
+  #   - unknown(progname = nil, &block)
+  # -->
   # Log an `UNKNOWN` message.  This will be printed no matter what the logger's
   # level is.
   #
@@ -443,32 +562,64 @@ class Logger
   #
   def unknown: (?untyped progname) ?{ () -> untyped } -> true
 
+  # <!--
+  #   rdoc-file=lib/logger.rb
+  #   - warn(progname = nil, &block)
+  # -->
   # Log a `WARN` message.
   #
   # See #info for more information.
   #
   def warn: (?untyped progname) ?{ () -> untyped } -> true
 
+  # <!--
+  #   rdoc-file=lib/logger.rb
+  #   - warn!()
+  # -->
   # Sets the severity to WARN.
   #
   def warn!: () -> Integer
 
-  # Returns `true` iff the current severity level allows for the printing of
-  # `WARN` messages.
+  # <!--
+  #   rdoc-file=lib/logger.rb
+  #   - warn?()
+  # -->
+  # Returns `true` if and only if the current severity level allows for the
+  # printing of `WARN` messages.
   #
   def warn?: () -> bool
 
   private
 
+  # <!--
+  #   rdoc-file=lib/logger.rb
+  #   - format_message(severity, datetime, progname, msg)
+  # -->
+  #
   def format_message: (String severity, Time datetime, untyped progname, untyped msg) -> _ToS
 
+  # <!--
+  #   rdoc-file=lib/logger.rb
+  #   - format_severity(severity)
+  # -->
+  #
   def format_severity: (Integer severity) -> String
 
+  # <!--
+  #   rdoc-file=lib/logger.rb
+  #   - Logger.new(logdev, shift_age = 0, shift_size = 1048576)
+  #   - Logger.new(logdev, shift_age = 'weekly')
+  #   - Logger.new(logdev, level: :info)
+  #   - Logger.new(logdev, progname: 'progname')
+  #   - Logger.new(logdev, formatter: formatter)
+  #   - Logger.new(logdev, datetime_format: '%Y-%m-%d %H:%M:%S')
+  # -->
   # ### Args
   #
   # `logdev`
-  # :   The log device.  This is a filename (String) or IO object (typically
-  #     `STDOUT`, `STDERR`, or an open file).
+  # :   The log device.  This is a filename (String), IO object (typically
+  #     `STDOUT`, `STDERR`, or an open file), `nil` (it writes nothing) or
+  #     `File::NULL` (same as `nil`).
   # `shift_age`
   # :   Number of old log files to keep, **or** frequency of rotation (`daily`,
   #     `weekly` or `monthly`). Default value is 0, which disables log file
@@ -495,11 +646,12 @@ class Logger
   #
   # Create an instance.
   #
-  def initialize: (logdev logdev, ?Numeric | String shift_age, ?Integer shift_size, ?shift_period_suffix: String, ?binmode: boolish, ?datetime_format: String, ?formatter: _Formatter, ?progname: String, ?level: Integer) -> void
+  def initialize: (logdev logdev, ?Numeric | String shift_age, ?Integer shift_size, ?shift_period_suffix: String, ?binmode: boolish, ?datetime_format: String, ?formatter: _Formatter, ?progname: String, ?level: Integer | String | Symbol) -> void
 end
 
 Logger::ProgName: String
 
+# <!-- rdoc-file=lib/logger.rb -->
 # Severity label for logging (max 5 chars).
 #
 Logger::SEV_LABEL: Array[String]

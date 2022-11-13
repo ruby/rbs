@@ -12,6 +12,12 @@
         "name": {
           "type": "string"
         },
+        "type_params": {
+          "type": "array",
+          "items": {
+            "$ref": "typeParam.json"
+          }
+        },
         "type": {
           "$ref": "types.json"
         },
@@ -28,7 +34,7 @@
           "$ref": "comment.json"
         }
       },
-      "required": ["declaration", "name", "type", "annotations", "location", "comment"]
+      "required": ["declaration", "name", "type_params", "type", "annotations", "location", "comment"]
     },
     "constant": {
       "title": "Constant declaration: `VERSION: String`, ...",
@@ -75,21 +81,6 @@
         }
       },
       "required": ["declaration", "name", "type", "comment", "location"]
-    },
-    "moduleTypeParam": {
-      "type": "object",
-      "properties": {
-        "name": {
-          "type": "string"
-        },
-        "variance": {
-          "enum": ["covariant", "contravariant", "invariant"]
-        },
-        "skip_validation": {
-          "type": "boolean"
-        }
-      },
-      "required": ["name", "variance", "skip_validation"]
     },
     "classMember": {
       "oneOf": [
@@ -145,16 +136,10 @@
           "type": "string"
         },
         "type_params": {
-          "type": "object",
-          "properties": {
-            "params": {
-              "type": "array",
-              "items": {
-                "$ref": "#/definitions/moduleTypeParam"
-              }
-            }
-          },
-          "required": ["params"]
+          "type": "array",
+          "items": {
+            "$ref": "typeParam.json"
+          }
         },
         "members": {
           "type": "array",
@@ -209,16 +194,10 @@
           "type": "string"
         },
         "type_params": {
-          "type": "object",
-          "properties": {
-            "params": {
-              "type": "array",
-              "items": {
-                "$ref": "#/definitions/moduleTypeParam"
-              }
-            }
-          },
-          "required": ["params"]
+          "type": "array",
+          "items": {
+            "$ref": "typeParam.json"
+          }
         },
         "members": {
           "type": "array",
@@ -297,16 +276,10 @@
           "type": "string"
         },
         "type_params": {
-          "type": "object",
-          "properties": {
-            "params": {
-              "type": "array",
-              "items": {
-                "$ref": "#/definitions/moduleTypeParam"
-              }
-            }
-          },
-          "required": ["params"]
+          "type": "array",
+          "items": {
+            "$ref": "typeParam.json"
+          }
         },
         "members": {
           "type": "array",

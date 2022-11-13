@@ -1,3 +1,4 @@
+# <!-- rdoc-file=ext/zlib/zlib.c -->
 # This module provides access to the [zlib library](http://zlib.net). Zlib is
 # designed to be a portable, free, general-purpose, legally unencumbered -- that
 # is, not covered by any patents -- lossless data-compression library for use on
@@ -54,6 +55,7 @@
 #     *   Zlib::MemError
 #     *   Zlib::BufError
 #     *   Zlib::VersionError
+#     *   Zlib::InProgressError
 #
 #
 #
@@ -66,12 +68,16 @@
 #     *   Zlib::GzipFile::CRCError
 #     *   Zlib::GzipFile::NoFooter
 #
-#
-#
 module Zlib
+  # <!--
+  #   rdoc-file=ext/zlib/zlib.c
+  #   - Zlib.adler32(string, adler)
+  # -->
   # Calculates Adler-32 checksum for `string`, and returns updated value of
   # `adler`. If `string` is omitted, it returns the Adler-32 initial value. If
-  # `adler` is omitted, it assumes that the initial value is given to `adler`.
+  # `adler` is omitted, it assumes that the initial value is given to `adler`. If
+  # `string` is an IO instance, reads from the IO until the IO returns nil and
+  # returns Adler-32 of all read data.
   #
   # Example usage:
   #
@@ -85,15 +91,25 @@ module Zlib
                   | (String) -> Integer
                   | (String, Integer) -> Integer
 
+  # <!--
+  #   rdoc-file=ext/zlib/zlib.c
+  #   - Zlib.adler32_combine(adler1, adler2, len2)
+  # -->
   # Combine two Adler-32 check values in to one.  `alder1` is the first Adler-32
   # value, `adler2` is the second Adler-32 value.  `len2` is the length of the
   # string used to generate `adler2`.
   #
   def self.adler32_combine: (Integer, Integer, Integer) -> Integer
 
+  # <!--
+  #   rdoc-file=ext/zlib/zlib.c
+  #   - Zlib.crc32(string, crc)
+  # -->
   # Calculates CRC checksum for `string`, and returns updated value of `crc`. If
   # `string` is omitted, it returns the CRC initial value. If `crc` is omitted, it
-  # assumes that the initial value is given to `crc`.
+  # assumes that the initial value is given to `crc`. If `string` is an IO
+  # instance, reads from the IO until the IO returns nil and returns CRC checksum
+  # of all read data.
   #
   # FIXME: expression.
   #
@@ -101,16 +117,29 @@ module Zlib
                 | (String) -> Integer
                 | (String, Integer) -> Integer
 
+  # <!--
+  #   rdoc-file=ext/zlib/zlib.c
+  #   - Zlib.crc32_combine(crc1, crc2, len2)
+  # -->
   # Combine two CRC-32 check values in to one.  `crc1` is the first CRC-32 value,
   # `crc2` is the second CRC-32 value.  `len2` is the length of the string used to
   # generate `crc2`.
   #
   def self.crc32_combine: (Integer, Integer, Integer) -> Integer
 
+  # <!--
+  #   rdoc-file=ext/zlib/zlib.c
+  #   - crc_table()
+  # -->
   # Returns the table for calculating CRC checksum as an array.
   #
   def self.crc_table: () -> Array[Integer]
 
+  # <!--
+  #   rdoc-file=ext/zlib/zlib.c
+  #   - Zlib.deflate(string[, level])
+  #   - Zlib::Deflate.deflate(string[, level])
+  # -->
   # Compresses the given `string`. Valid values of level are Zlib::NO_COMPRESSION,
   # Zlib::BEST_SPEED, Zlib::BEST_COMPRESSION, Zlib::DEFAULT_COMPRESSION, or an
   # integer from 0 to 9.
@@ -128,6 +157,11 @@ module Zlib
   #
   def self.deflate: (String) -> String
                   | (String, Integer) -> String
+
+  # <!--
+  #   rdoc-file=ext/zlib/zlib.c
+  #   - Zlib.gunzip(src) -> String
+  # -->
   # Decode the given gzipped `string`.
   #
   # This method is almost equivalent to the following code:
@@ -144,6 +178,10 @@ module Zlib
   #
   def self.gunzip: (String) -> String
 
+  # <!--
+  #   rdoc-file=ext/zlib/zlib.c
+  #   - Zlib.gzip(src, level: nil, strategy: nil) -> String
+  # -->
   # Gzip the given `string`. Valid values of level are Zlib::NO_COMPRESSION,
   # Zlib::BEST_SPEED, Zlib::BEST_COMPRESSION, Zlib::DEFAULT_COMPRESSION (default),
   # or an integer from 0 to 9.
@@ -165,6 +203,12 @@ module Zlib
                | (String, level: Integer) -> String
                | (String, strategy: Integer) -> String
                | (String, level: Integer, strategy: Integer) -> String
+
+  # <!--
+  #   rdoc-file=ext/zlib/zlib.c
+  #   - Zlib.inflate(string)
+  #   - Zlib::Inflate.inflate(string)
+  # -->
   # Decompresses `string`. Raises a Zlib::NeedDict exception if a preset
   # dictionary is needed for decompression.
   #
@@ -182,11 +226,16 @@ module Zlib
   #
   def self.inflate: (String) -> String
 
+  # <!--
+  #   rdoc-file=ext/zlib/zlib.c
+  #   - zlib_version()
+  # -->
   # Returns the string which represents the version of zlib library.
   #
   def self.zlib_version: () -> String
 end
 
+# <!-- rdoc-file=ext/zlib/zlib.c -->
 # Represents text data as guessed by deflate.
 #
 # NOTE: The underlying constant Z_ASCII was deprecated in favor of Z_TEXT in
@@ -194,39 +243,41 @@ end
 #
 # See Zlib::Deflate#data_type.
 #
-#
 Zlib::ASCII: Integer
 
+# <!-- rdoc-file=ext/zlib/zlib.c -->
 # Slowest compression level, but with the best space savings.
-#
 #
 Zlib::BEST_COMPRESSION: Integer
 
+# <!-- rdoc-file=ext/zlib/zlib.c -->
 # Fastest compression level, but with the lowest space savings.
-#
 #
 Zlib::BEST_SPEED: Integer
 
+# <!-- rdoc-file=ext/zlib/zlib.c -->
 # Represents binary data as guessed by deflate.
 #
 # See Zlib::Deflate#data_type.
 #
-#
 Zlib::BINARY: Integer
 
+# <!-- rdoc-file=ext/zlib/zlib.c -->
 # Default compression level which is a good trade-off between space and time
 #
 Zlib::DEFAULT_COMPRESSION: Integer
 
+# <!-- rdoc-file=ext/zlib/zlib.c -->
 # Default deflate strategy which is used for normal data.
-#
 #
 Zlib::DEFAULT_STRATEGY: Integer
 
+# <!-- rdoc-file=ext/zlib/zlib.c -->
 # The default memory level for allocating zlib deflate compression state.
 #
 Zlib::DEF_MEM_LEVEL: Integer
 
+# <!-- rdoc-file=ext/zlib/zlib.c -->
 # Deflate strategy for data produced by a filter (or predictor). The effect of
 # FILTERED is to force more Huffman codes and less string matching; it is
 # somewhat intermediate between DEFAULT_STRATEGY and HUFFMAN_ONLY. Filtered data
@@ -234,16 +285,18 @@ Zlib::DEF_MEM_LEVEL: Integer
 #
 Zlib::FILTERED: Integer
 
+# <!-- rdoc-file=ext/zlib/zlib.c -->
 # Processes all pending input and flushes pending output.
-#
 #
 Zlib::FINISH: Integer
 
+# <!-- rdoc-file=ext/zlib/zlib.c -->
 # Deflate strategy which prevents the use of dynamic Huffman codes, allowing for
 # a simpler decoder for specialized applications.
 #
 Zlib::FIXED: Integer
 
+# <!-- rdoc-file=ext/zlib/zlib.c -->
 # Flushes all output as with SYNC_FLUSH, and the compression state is reset so
 # that decompression can restart from this point if previous compressed data has
 # been damaged or if random access is desired. Like SYNC_FLUSH, using FULL_FLUSH
@@ -251,115 +304,121 @@ Zlib::FIXED: Integer
 #
 Zlib::FULL_FLUSH: Integer
 
+# <!-- rdoc-file=ext/zlib/zlib.c -->
 # Deflate strategy which uses Huffman codes only (no string matching).
-#
 #
 Zlib::HUFFMAN_ONLY: Integer
 
+# <!-- rdoc-file=ext/zlib/zlib.c -->
 # The maximum memory level for allocating zlib deflate compression state.
 #
 Zlib::MAX_MEM_LEVEL: Integer
 
+# <!-- rdoc-file=ext/zlib/zlib.c -->
 # The maximum size of the zlib history buffer.  Note that zlib allows larger
 # values to enable different inflate modes.  See Zlib::Inflate.new for details.
 #
 Zlib::MAX_WBITS: Integer
 
+# <!-- rdoc-file=ext/zlib/zlib.c -->
 # No compression, passes through data untouched.  Use this for appending
 # pre-compressed data to a deflate stream.
 #
 Zlib::NO_COMPRESSION: Integer
 
+# <!-- rdoc-file=ext/zlib/zlib.c -->
 # NO_FLUSH is the default flush method and allows deflate to decide how much
 # data to accumulate before producing output in order to maximize compression.
 #
 Zlib::NO_FLUSH: Integer
 
+# <!-- rdoc-file=ext/zlib/zlib.c -->
 # OS code for Amiga hosts
-#
 #
 Zlib::OS_AMIGA: Integer
 
+# <!-- rdoc-file=ext/zlib/zlib.c -->
 # OS code for Atari hosts
-#
 #
 Zlib::OS_ATARI: Integer
 
+# <!-- rdoc-file=ext/zlib/zlib.c -->
 # The OS code of current host
-#
 #
 Zlib::OS_CODE: Integer
 
+# <!-- rdoc-file=ext/zlib/zlib.c -->
 # OS code for CP/M hosts
-#
 #
 Zlib::OS_CPM: Integer
 
+# <!-- rdoc-file=ext/zlib/zlib.c -->
 # OS code for Mac OS hosts
-#
 #
 Zlib::OS_MACOS: Integer
 
+# <!-- rdoc-file=ext/zlib/zlib.c -->
 # OS code for MSDOS hosts
-#
 #
 Zlib::OS_MSDOS: Integer
 
+# <!-- rdoc-file=ext/zlib/zlib.c -->
 # OS code for OS2 hosts
-#
 #
 Zlib::OS_OS2: Integer
 
+# <!-- rdoc-file=ext/zlib/zlib.c -->
 # OS code for QDOS hosts
-#
 #
 Zlib::OS_QDOS: Integer
 
+# <!-- rdoc-file=ext/zlib/zlib.c -->
 # OS code for RISC OS hosts
-#
 #
 Zlib::OS_RISCOS: Integer
 
+# <!-- rdoc-file=ext/zlib/zlib.c -->
 # OS code for TOPS-20 hosts
-#
 #
 Zlib::OS_TOPS20: Integer
 
+# <!-- rdoc-file=ext/zlib/zlib.c -->
 # OS code for UNIX hosts
-#
 #
 Zlib::OS_UNIX: Integer
 
+# <!-- rdoc-file=ext/zlib/zlib.c -->
 # OS code for unknown hosts
-#
 #
 Zlib::OS_UNKNOWN: Integer
 
+# <!-- rdoc-file=ext/zlib/zlib.c -->
 # OS code for VM OS hosts
-#
 #
 Zlib::OS_VMCMS: Integer
 
+# <!-- rdoc-file=ext/zlib/zlib.c -->
 # OS code for VMS hosts
-#
 #
 Zlib::OS_VMS: Integer
 
+# <!-- rdoc-file=ext/zlib/zlib.c -->
 # OS code for Win32 hosts
-#
 #
 Zlib::OS_WIN32: Integer
 
+# <!-- rdoc-file=ext/zlib/zlib.c -->
 # OS code for Z-System hosts
-#
 #
 Zlib::OS_ZSYSTEM: Integer
 
+# <!-- rdoc-file=ext/zlib/zlib.c -->
 # Deflate compression strategy designed to be almost as fast as HUFFMAN_ONLY,
 # but give better compression for PNG image data.
 #
 Zlib::RLE: Integer
 
+# <!-- rdoc-file=ext/zlib/zlib.c -->
 # The SYNC_FLUSH method flushes all pending output to the output buffer and the
 # output is aligned on a byte boundary. Flushing may degrade compression so it
 # should be used only when necessary, such as at a request or response boundary
@@ -367,26 +426,26 @@ Zlib::RLE: Integer
 #
 Zlib::SYNC_FLUSH: Integer
 
+# <!-- rdoc-file=ext/zlib/zlib.c -->
 # Represents text data as guessed by deflate.
 #
 # See Zlib::Deflate#data_type.
 #
-#
 Zlib::TEXT: Integer
 
+# <!-- rdoc-file=ext/zlib/zlib.c -->
 # Represents an unknown data type as guessed by deflate.
 #
 # See Zlib::Deflate#data_type.
 #
-#
 Zlib::UNKNOWN: Integer
 
+# <!-- rdoc-file=ext/zlib/zlib.c -->
 # The Ruby/zlib version string.
-#
 #
 Zlib::VERSION: String
 
+# <!-- rdoc-file=ext/zlib/zlib.c -->
 # The string which represents the version of zlib.h
-#
 #
 Zlib::ZLIB_VERSION: String

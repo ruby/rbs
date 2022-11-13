@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module RBS
   module BuiltinNames
     class Name
@@ -51,5 +53,6 @@ module RBS
     Regexp = Name.define(:Regexp)
     TrueClass = Name.define(:TrueClass)
     FalseClass = Name.define(:FalseClass)
+    Numeric = Name.define(:Numeric)
   end
 end

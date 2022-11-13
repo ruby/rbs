@@ -1,3 +1,4 @@
+# <!-- rdoc-file=lib/tsort.rb -->
 # TSort implements topological sorting using Tarjan's algorithm for strongly
 # connected components.
 #
@@ -115,7 +116,12 @@
 #
 #
 # *SIAM Journal on Computing*, Vol. 1, No. 2, pp. 146-160, June 1972.
+#
 module TSort[Node] : TSort::_Sortable[Node]
+  # <!--
+  #   rdoc-file=lib/tsort.rb
+  #   - each_strongly_connected_component(each_node, each_child) { |nodes| ... }
+  # -->
   # The iterator version of the TSort.strongly_connected_components method.
   #
   # The graph is represented by *each_node* and *each_child*. *each_node* should
@@ -142,7 +148,13 @@ module TSort[Node] : TSort::_Sortable[Node]
   #
   def self.each_strongly_connected_component: [T] (_EachNode[T] each_node, _EachChild[T] each_child) { (Array[T]) -> void } -> void
                                             | [T] (_EachNode[T] each_node, _EachChild[T] each_child) -> Enumerator[Array[T], void]
+                                            | [T] (^() { (T) -> void } -> void each_node, ^(T) { (T) -> void } -> void each_child) { (Array[T]) -> void } -> void
+                                            | [T] (^() { (T) -> void } -> void each_node, ^(T) { (T) -> void } -> void each_child) -> Enumerator[Array[T], void]
 
+  # <!--
+  #   rdoc-file=lib/tsort.rb
+  #   - each_strongly_connected_component_from(node, each_child, id_map={}, stack=[]) { |nodes| ... }
+  # -->
   # Iterates over strongly connected components in a graph. The graph is
   # represented by *node* and *each_child*.
   #
@@ -165,7 +177,13 @@ module TSort[Node] : TSort::_Sortable[Node]
   #
   def self.each_strongly_connected_component_from: [T] (T node, _EachChild[T] each_child, ?untyped id_map, ?untyped stack) { (Array[T]) -> void } -> void
                                                  | [T] (T node, _EachChild[T] each_child, ?untyped id_map, ?untyped stack) -> Enumerator[Array[T], void]
+                                                 | [T] (T node, ^(T) { (T) -> void } -> void each_child, ?untyped id_map, ?untyped stack) { (Array[T]) -> void } -> void
+                                                 | [T] (T node, ^(T) { (T) -> void } -> void each_child, ?untyped id_map, ?untyped stack) -> Enumerator[Array[T], void]
 
+  # <!--
+  #   rdoc-file=lib/tsort.rb
+  #   - strongly_connected_components(each_node, each_child)
+  # -->
   # Returns strongly connected components as an array of arrays of nodes. The
   # array is sorted from children to parents. Each elements of the array
   # represents a strongly connected component.
@@ -188,7 +206,12 @@ module TSort[Node] : TSort::_Sortable[Node]
   #     #=> [[4], [2, 3], [1]]
   #
   def self.strongly_connected_components: [T] (_EachNode[T] each_node, _EachChild[T] each_child) -> Array[Array[T]]
+                                        | [T] (^() { (T) -> void } -> void each_node, ^(T) { (T) -> void } -> void each_child) -> Array[Array[T]]
 
+  # <!--
+  #   rdoc-file=lib/tsort.rb
+  #   - tsort(each_node, each_child)
+  # -->
   # Returns a topologically sorted array of nodes. The array is sorted from
   # children to parents, i.e. the first element has no child and the last node has
   # no parent.
@@ -211,7 +234,12 @@ module TSort[Node] : TSort::_Sortable[Node]
   #     p TSort.tsort(each_node, each_child) # raises TSort::Cyclic
   #
   def self.tsort: [T] (_EachNode[T] each_node, _EachChild[T] each_child) -> Array[T]
+                | [T] (^() { (T) -> void } -> void each_node, ^(T) { (T) -> void } -> void each_child) -> Array[T]
 
+  # <!--
+  #   rdoc-file=lib/tsort.rb
+  #   - tsort_each(each_node, each_child) { |node| ... }
+  # -->
   # The iterator version of the TSort.tsort method.
   #
   # The graph is represented by *each_node* and *each_child*. *each_node* should
@@ -230,7 +258,13 @@ module TSort[Node] : TSort::_Sortable[Node]
   #
   def self.tsort_each: [T] (_EachNode[T] each_node, _EachChild[T] each_child) { (T) -> void } -> void
                      | [T] (_EachNode[T] each_node, _EachChild[T] each_child) -> Enumerator[T, void]
+                     | [T] (^() { (T) -> void } -> void each_node, ^(T) { (T) -> void } -> void each_child) { (T) -> void } -> void
+                     | [T] (^() { (T) -> void } -> void each_node, ^(T) { (T) -> void } -> void each_child) -> Enumerator[T, void]
 
+  # <!--
+  #   rdoc-file=lib/tsort.rb
+  #   - each_strongly_connected_component() { |nodes| ... }
+  # -->
   # The iterator version of the #strongly_connected_components method.
   # *`obj*.each_strongly_connected_component` is similar to
   # *`obj*.strongly_connected_components.each`, but modification of *obj* during
@@ -263,6 +297,10 @@ module TSort[Node] : TSort::_Sortable[Node]
   def each_strongly_connected_component: () { (Array[Node]) -> void } -> void
                                        | () -> Enumerator[Array[Node], void]
 
+  # <!--
+  #   rdoc-file=lib/tsort.rb
+  #   - each_strongly_connected_component_from(node, id_map={}, stack=[]) { |nodes| ... }
+  # -->
   # Iterates over strongly connected component in the subgraph reachable from
   # *node*.
   #
@@ -292,6 +330,10 @@ module TSort[Node] : TSort::_Sortable[Node]
   def each_strongly_connected_component_from: (Node, ?untyped id_map, ?untyped stack) { (Array[Node]) -> void } -> void
                                             | (Node, ?untyped id_map, ?untyped stack) -> Enumerator[Array[Node], void]
 
+  # <!--
+  #   rdoc-file=lib/tsort.rb
+  #   - strongly_connected_components()
+  # -->
   # Returns strongly connected components as an array of arrays of nodes. The
   # array is sorted from children to parents. Each elements of the array
   # represents a strongly connected component.
@@ -313,6 +355,10 @@ module TSort[Node] : TSort::_Sortable[Node]
   #
   def strongly_connected_components: () -> Array[Array[Node]]
 
+  # <!--
+  #   rdoc-file=lib/tsort.rb
+  #   - tsort()
+  # -->
   # Returns a topologically sorted array of nodes. The array is sorted from
   # children to parents, i.e. the first element has no child and the last node has
   # no parent.
@@ -336,6 +382,10 @@ module TSort[Node] : TSort::_Sortable[Node]
   #
   def tsort: () -> Array[Node]
 
+  # <!--
+  #   rdoc-file=lib/tsort.rb
+  #   - tsort_each() { |node| ... }
+  # -->
   # The iterator version of the #tsort method. *`obj*.tsort_each` is similar to
   # *`obj*.tsort.each`, but modification of *obj* during the iteration may lead to
   # unexpected results.

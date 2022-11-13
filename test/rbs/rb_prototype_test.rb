@@ -1,6 +1,6 @@
 require "test_helper"
 
-class RBS::RbPrototypeTest < Minitest::Test
+class RBS::RbPrototypeTest < Test::Unit::TestCase
   RB = RBS::Prototype::RB
 
   include TestHelper
@@ -17,6 +17,9 @@ end
 
 module Foo
 end
+
+class Bar < Struct.new(:bar)
+end
     EOR
 
     parser.parse(rb)
@@ -29,6 +32,9 @@ class World < Hello
 end
 
 module Foo
+end
+
+class Bar
 end
     EOF
   end
@@ -56,11 +62,11 @@ end
 
     assert_write parser.decls, <<-EOF
 class Hello
-  def hello: (untyped a, ?::Integer b, *untyped c, untyped d, e: untyped e, ?f: ::Integer f, **untyped g) { () -> untyped } -> nil
+  def hello: (untyped a, ?::Integer b, *untyped c, untyped d, e: untyped, ?f: ::Integer, **untyped g) ?{ () -> untyped } -> nil
 
   def self.world: () { (untyped, untyped, untyped, x: untyped, y: untyped) -> untyped } -> untyped
 
-  def kw_req: (a: untyped a) -> nil
+  def kw_req: (a: untyped) -> nil
 end
     EOF
   end
@@ -70,7 +76,9 @@ end
 
     rb = <<-'EOR'
 class Hello
-  def str() "foo\nbar" end
+  def initialize() 'foo' end
+
+  def str() "こんにちは" end
   def str_lit() "foo" end
   def dstr() "f#{x}oo" end
   def xstr() `ls` end
@@ -103,6 +111,8 @@ class Hello
   def hash2() { foo: 1 } end
   def hash3() { foo: { bar: 42 }, x: { y: z } } end
   def hash4() { foo: 1, **({ bar: x}).compact } end
+
+  def self1() self end
 end
     EOR
 
@@ -110,6 +120,8 @@ end
 
     assert_write parser.decls, <<-EOF
 class Hello
+  def initialize: () -> void
+
   def str: () -> ::String
 
   def str_lit: () -> "foo"
@@ -126,9 +138,9 @@ class Hello
 
   def dregx: () -> ::Regexp
 
-  def t: () -> ::TrueClass
+  def t: () -> true
 
-  def f: () -> ::FalseClass
+  def f: () -> false
 
   def n: () -> nil
 
@@ -161,6 +173,8 @@ class Hello
   def hash3: () -> { foo: { bar: 42 }, x: { y: untyped } }
 
   def hash4: () -> ::Hash[:foo | untyped, 1 | untyped]
+
+  def self1: () -> self
 end
     EOF
   end
@@ -219,6 +233,85 @@ end
     EOF
   end
 
+  def test_defs_return_type_with_if
+    parser = RB.new
+
+    rb = <<-EOR
+class ReturnTypeWithIF
+  def with_if
+    if foo?
+      true
+    end
+  end
+
+  def with_if_and_block
+    if foo?
+      foo
+      return false if bar?
+      true
+    end
+  end
+
+  def with_else_and_bool
+    if foo?
+      true
+    else
+      false
+    end
+  end
+
+  def with_else_and_elsif_and_bool_nil
+    if foo?
+    elsif bar?
+      true
+    else
+      false
+    end
+  end
+
+  def with_nested_if
+    if foo?
+      if bar?
+        if baz?
+          1
+        else
+          2
+        end
+      else
+        3
+      end
+    else
+      4
+    end
+  end
+
+  def with_unless
+    unless foo?
+      :sym
+    end
+  end
+end
+EOR
+
+    parser.parse(rb)
+
+    assert_write parser.decls, <<-EOR
+class ReturnTypeWithIF
+  def with_if: () -> (true | nil)
+
+  def with_if_and_block: () -> (false | true | nil)
+
+  def with_else_and_bool: () -> (true | false)
+
+  def with_else_and_elsif_and_bool_nil: () -> (nil | true | false)
+
+  def with_nested_if: () -> (1 | 2 | 3 | 4)
+
+  def with_unless: () -> (:sym | nil)
+end
+EOR
+  end
+
   def test_sclass
     parser = RB.new
 
@@ -246,10 +339,25 @@ end
 class Hello
   include Foo
   extend ::Bar, baz
+  prepend Baz
 
   attr_reader :x
   attr_accessor :y, :z
   attr_writer foo, :a, 'b'
+
+  class << self
+    attr_reader :x2
+    attr_accessor :y2, :z2
+    attr_writer foo2, :a2, 'b2'
+  end
+end
+
+module Mod
+  extend self
+
+  module Mod2
+    extend self
+  end
 end
     EOR
 
@@ -261,6 +369,8 @@ class Hello
 
   extend ::Bar
 
+  prepend Baz
+
   attr_reader x: untyped
 
   attr_accessor y: untyped
@@ -270,8 +380,151 @@ class Hello
   attr_writer a: untyped
 
   attr_writer b: untyped
+
+  attr_reader self.x2: untyped
+
+  attr_accessor self.y2: untyped
+
+  attr_accessor self.z2: untyped
+
+  attr_writer self.a2: untyped
+
+  attr_writer self.b2: untyped
+end
+
+module Mod
+  extend ::Mod
+
+  module Mod2
+    extend ::Mod::Mod2
+  end
 end
     EOF
+  end
+
+  def test_module_function
+    parser = RB.new
+
+    rb = <<-EOR
+module Hello
+  def foo() end
+
+  def bar() end
+  module_function :bar
+
+  module_function def baz() end
+
+  module_function
+
+  def foobar() end
+
+  module_function :unknown_method
+end
+    EOR
+
+    parser.parse(rb)
+
+    assert_write parser.decls, <<-EOF
+module Hello
+  def foo: () -> nil
+
+  def self?.bar: () -> nil
+
+  def self?.baz: () -> nil
+
+  def self?.foobar: () -> nil
+end
+    EOF
+  end
+
+  def test_accessibility
+    parser = RB.new
+
+    rb = <<-EOR
+class Hello
+  attr_reader :private_attr
+
+  private :private_attr
+
+  private def prv1() end
+
+  private def prv2() end
+
+  def pub1() end
+
+  private
+
+  def prv3() end
+
+  public
+
+  def pub2() end
+
+  def prv4() end
+
+  private :prv4
+end
+    EOR
+
+    parser.parse(rb)
+
+    assert_write parser.decls, <<-EOF
+class Hello
+  private
+
+  attr_reader private_attr: untyped
+
+  def prv1: () -> nil
+
+  def prv2: () -> nil
+
+  public
+
+  def pub1: () -> nil
+
+  private
+
+  def prv3: () -> nil
+
+  public
+
+  def pub2: () -> nil
+
+  private
+
+  def prv4: () -> nil
+end
+    EOF
+  end
+
+  def test_accessibility_and_sclass
+    parser = RB.new
+
+    rb = <<~RUBY
+      class C
+        class << self
+          private
+
+          def foo() end
+        end
+
+        def bar() end
+      end
+    RUBY
+
+    parser.parse(rb)
+
+    assert_write parser.decls, <<~RBS
+      class C
+        private
+
+        def self.foo: () -> nil
+
+        public
+
+        def bar: () -> nil
+      end
+    RBS
   end
 
   def test_aliases
@@ -313,7 +566,7 @@ end
     rb = <<-EOR
 # Comments for class.
 # This is a comment.
-class Hello
+class Hello # :nodoc:
   # Comment for include.
   include Foo
 
@@ -397,6 +650,7 @@ end
     rb = <<-EOR
 module Foo
   VERSION = '0.1.1'
+  FROZEN = 'str'.freeze
   ::Hello::World = :foo
 end
     EOR
@@ -405,9 +659,33 @@ end
 
     assert_write parser.decls, <<-EOF
 module Foo
-  VERSION: ::String
+  VERSION: "0.1.1"
 
-  ::Hello::World: ::Symbol
+  FROZEN: "str"
+
+  ::Hello::World: :foo
+end
+    EOF
+  end
+
+  def test_const_with_multi_assign
+    parser = RB.new
+
+    rb = <<-EOR
+module Foo
+  MAJOR, MINOR, PATCH = ['0', '1', '1']
+end
+    EOR
+
+    parser.parse(rb)
+
+    assert_write parser.decls, <<-EOF
+module Foo
+  MAJOR: untyped
+
+  MINOR: untyped
+
+  PATCH: untyped
 end
     EOF
   end
@@ -424,27 +702,36 @@ E = nil
 F = false
 G = [1,2,3]
 H = { id: 123 }
+I = self
     EOR
 
     parser.parse(rb)
 
     assert_write parser.decls, <<-EOF
-A: ::Integer
+A: 1
 
 B: ::Float
 
 C: ::String
 
-D: ::Symbol
+D: :hello
 
-E: untyped?
+E: nil
 
-F: bool
+F: false
 
-G: ::Array[untyped]
+G: ::Array[1 | 2 | 3]
 
-H: ::Hash[untyped, untyped]
+H: { id: 123 }
+
+I: self
     EOF
+  end
+
+  def test_invalid_byte_sequence_in_utf8
+    parser = RB.new
+    parser.parse('A = "\xff"')
+    assert_write parser.decls, "A: ::String\n"
   end
 
   def test_argumentless_fcall
@@ -471,7 +758,7 @@ end
 
     rb = <<-'EOR'
 class C
-  private def foo
+  some_method_takes_method_name def foo
   end
 end
     EOR
@@ -539,5 +826,110 @@ class C
   def foo: (untyped x, untyped y, untyped z) -> untyped
 end
     EOF
+  end
+
+  def test_refinements
+    parser = RB.new
+
+    rb = <<~'RUBY'
+module M
+  def not_refinements
+  end
+
+  refine Array do
+    def by_refinements
+    end
+  end
+end
+    RUBY
+
+    parser.parse(rb)
+
+    assert_write parser.decls, <<~RBS
+module M
+  def not_refinements: () -> nil
+end
+    RBS
+  end
+
+  def test_calling_class_method_from_instance
+    parser = RB.new
+
+    rb = <<~'RUBY'
+class HelloWorld
+  def self.world(str)
+    str + 'world'
+  end
+
+  def hello
+    self.class.world('hello')
+  end
+end
+    RUBY
+
+    parser.parse(rb)
+
+    assert_write parser.decls, <<~RBS
+class HelloWorld
+  def self.world: (untyped str) -> untyped
+
+  def hello: () -> untyped
+end
+    RBS
+  end
+
+  def test_literal_to_type
+    parser = RBS::Prototype::RB.new
+    [
+      [%{"abc"}, %{"abc"}],
+      [%{:abc}, %{:abc}],
+      [%{[]}, %{::Array[untyped]}],
+      [%{[true]}, %{::Array[true]}],
+      [%{1..2}, %{::Range[::Integer]}],
+      [%{{}}, %{::Hash[untyped, untyped]}],
+      [%{{a: nil}}, %{ { a: nil } }],
+      [%{{"a" => /b/}}, %{ ::Hash[::String, ::Regexp] }],
+    ].each do |rb, rbs|
+      node = RubyVM::AbstractSyntaxTree.parse("_ = #{rb}").children[2]
+      assert_equal RBS::Parser.parse_type(rbs), parser.literal_to_type(node.children[1])
+    end
+  end
+
+  if RUBY_VERSION >= '2.7'
+    def test_argument_forwarding
+      parser = RB.new
+
+      rb = <<~'RUBY'
+module M
+  def foo(...) end
+end
+      RUBY
+
+      parser.parse(rb)
+
+      assert_write parser.decls, <<~RBS
+module M
+  def foo: (*untyped) ?{ () -> untyped } -> nil
+end
+      RBS
+    end
+  end
+
+  if RUBY_VERSION >= '3'
+    def test_endless_method_definition
+      parser = RB.new
+      rb = <<~'RUBY'
+module M
+  def foo = 42
+end
+      RUBY
+      parser.parse(rb)
+
+      assert_write parser.decls, <<~RBS
+module M
+  def foo: () -> 42
+end
+      RBS
+    end
   end
 end

@@ -1,6 +1,6 @@
 require_relative "test_helper"
 
-class ArraySingletonTest < Minitest::Test
+class ArraySingletonTest < Test::Unit::TestCase
   include TypeAssertions
 
   testing "singleton(::Array)"
@@ -27,7 +27,7 @@ class ArraySingletonTest < Minitest::Test
                      Array, :[], 1, "2"
   end
 
-  def test_try_connvert
+  def test_try_convert
     assert_send_type "(Integer) -> nil",
                      Array, :try_convert, 3
     assert_send_type "(ToArray) -> Array[Integer]",
@@ -35,7 +35,7 @@ class ArraySingletonTest < Minitest::Test
   end
 end
 
-class ArrayInstanceTest < Minitest::Test
+class ArrayInstanceTest < Test::Unit::TestCase
   include TypeAssertions
 
   testing "::Array[::Integer]"
@@ -102,6 +102,8 @@ class ArrayInstanceTest < Minitest::Test
                      [1,2,3], :[], 0...1
     assert_send_type "(Range[Integer]) -> nil",
                      [1,2,3], :[], 5..8
+    assert_send_type "(Range[Integer?]) -> Array[Integer]",
+                     [1,2,3], :[], 0...nil
   end
 
   def test_aupdate
@@ -121,6 +123,8 @@ class ArrayInstanceTest < Minitest::Test
                      [1,2,3], :[]=, 0...2, [-1]
     assert_send_type "(Range[Integer], nil) -> nil",
                      [1,2,3], :[]=, 0...2, nil
+    assert_send_type "(Range[Integer?], Integer) -> Integer",
+                     [1,2,3], :[]=, 0..nil, -1
   end
 
   def test_all?
@@ -156,6 +160,9 @@ class ArrayInstanceTest < Minitest::Test
   end
 
   def test_bsearch
+    assert_send_type "() -> Enumerable[String, Integer?]", [0,1,2,3,4],
+                     :bsearch
+
     assert_send_type "() { (Integer) -> (true | false) } -> Integer",
                      [0,1,2,3,4], :bsearch do |x| x > 2 end
     assert_send_type "() { (Integer) -> (true | false) } -> nil",
@@ -188,6 +195,8 @@ class ArrayInstanceTest < Minitest::Test
   def test_collect
     assert_send_type "() { (Integer) -> String } -> Array[String]",
                      [1,2,3], :collect do |x| x.to_s end
+    assert_send_type "() -> Enumerator[Integer, Array[untyped]]",
+                     [1,2,3], :collect
   end
 
   def test_collect!
@@ -217,6 +226,8 @@ class ArrayInstanceTest < Minitest::Test
   def test_concat
     assert_send_type "(Array[Integer], Array[Integer]) -> Array[Integer]",
                      [1,2,3], :concat, [4,5,6], [7,8,9]
+    assert_send_type "(Array[Integer], Array[Integer]) -> self",
+                     Class.new(Array).new, :concat, [4,5,6], [7,8,9]
   end
 
   def test_count
@@ -245,8 +256,6 @@ class ArrayInstanceTest < Minitest::Test
   def test_delete
     assert_send_type "(Integer) -> Integer",
                      [1,2,3], :delete, 2
-    assert_send_type "(String) -> nil",
-                     [1,2,3], :delete, ""
 
     assert_send_type "(Integer) { (Integer) -> String } -> Integer",
                      [1,2,3], :delete, 2 do "" end
@@ -307,10 +316,10 @@ class ArrayInstanceTest < Minitest::Test
   end
 
   def test_each_index
-    assert_send_type "() { (Integer) -> void } -> Array[Integer]",
-                     [1,2,3], :each_index do end
-    assert_send_type "() -> Enumerator[Integer, Array[Integer]]",
-                     [1,2,3], :each_index
+    assert_send_type "() { (Integer) -> void } -> Array[String]",
+                     ['1','2','3'], :each_index do end
+    assert_send_type "() -> Enumerator[Integer, Array[String]]",
+                     ['1','2','3'], :each_index
   end
 
   def test_empty?
@@ -430,8 +439,6 @@ class ArrayInstanceTest < Minitest::Test
   def test_include?
     assert_send_type "(Integer) -> bool",
                      [1,2,3], :include?, 1
-    assert_send_type "(String) -> bool",
-                     [1,2,3], :include?, ""
   end
 
   def test_index
@@ -457,6 +464,17 @@ class ArrayInstanceTest < Minitest::Test
 
     assert_send_type "(Integer) -> Array[Integer]",
                      [1,2,3], :insert, 0
+  end
+
+  def test_intersect?
+    assert_send_type(
+      "(Array[Integer]) -> bool",
+      [1,2,3], :intersect?, [0]
+    )
+    assert_send_type(
+      "(ToArray[Integer]) -> bool",
+      [1,2,3], :intersect?, ToArray.new([0, 1])
+    )
   end
 
   def test_intersection
@@ -724,11 +742,15 @@ class ArrayInstanceTest < Minitest::Test
                      [], :sample
     assert_send_type "(random: Random) -> Integer",
                      [1,2,3], :sample, random: Random.new(1)
+    assert_send_type "(random: Rand) -> Integer",
+                     [1,2,3], :sample, random: Rand.new
 
     assert_send_type "(Integer) -> Array[Integer]",
                      [1,2,3], :sample, 2
     assert_send_type "(ToInt, random: Random) -> Array[Integer]",
                      [1,2,3], :sample, ToInt.new(2), random: Random.new(2)
+    assert_send_type "(ToInt, random: Rand) -> Array[Integer]",
+                     [1,2,3], :sample, ToInt.new(2), random: Rand.new
   end
 
   def test_select
@@ -759,6 +781,8 @@ class ArrayInstanceTest < Minitest::Test
                      [1,2,3], :shuffle
     assert_send_type "(random: Random) -> Array[Integer]",
                      [1,2,3], :shuffle, random: Random.new(2)
+    assert_send_type "(random: Rand) -> Array[Integer]",
+                     [1,2,3], :shuffle, random: Rand.new
   end
 
   def test_shuffle!
@@ -766,6 +790,8 @@ class ArrayInstanceTest < Minitest::Test
                      [1,2,3], :shuffle!
     assert_send_type "(random: Random) -> Array[Integer]",
                      [1,2,3], :shuffle!, random: Random.new(2)
+    assert_send_type "(random: Rand) -> Array[Integer]",
+                     [1,2,3], :shuffle!, random: Rand.new
   end
 
   def test_slice
@@ -809,7 +835,6 @@ class ArrayInstanceTest < Minitest::Test
     assert_send_type "() { (Integer, Integer) -> Integer } -> Array[Integer]",
                      [1,2,3], :sort do |a, b| b <=> a end
 
-    # returning nil from block type checks but causes an error
     refute_send_type "() { (Integer, Integer) -> nil } -> Array[Integer]",
                      [1,2,3], :sort do end
   end
@@ -821,7 +846,6 @@ class ArrayInstanceTest < Minitest::Test
     assert_send_type "() { (Integer, Integer) -> Integer } -> Array[Integer]",
                      [1,2,3], :sort! do |a, b| b <=> a end
 
-    # returning nil from block type checks but causes an error
     refute_send_type "() { (Integer, Integer) -> nil } -> Array[Integer]",
                      [1,2,3], :sort! do end
   end

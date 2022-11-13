@@ -4,7 +4,9 @@ class ObjectTest < StdlibTest
   target Object
 
   def test_operators
-    Object.new !~ 123
+    if RUBY_VERSION < "3.2.0"
+      Object.new !~ 123
+    end
 
     Object.new <=> 123
     Object.new <=> Object.new
@@ -30,9 +32,13 @@ class ObjectTest < StdlibTest
   end
 
   def test_display
+    stdout = STDOUT.dup
+    STDOUT.reopen(IO::NULL)
     Object.new.display()
     Object.new.display(STDOUT)
     Object.new.display(StringIO.new)
+  ensure
+    STDOUT.reopen(stdout)
   end
 
   def test_dup
@@ -172,12 +178,14 @@ class ObjectTest < StdlibTest
     obj.respond_to?('to_s', true)
   end
 
-  def test_taint
-    obj = Object.new
+  if Kernel.method_defined?(:taint)
+    def test_taint
+      obj = Object.new
 
-    obj.taint
-    obj.tainted?
-    obj.untaint
+      obj.taint
+      obj.tainted?
+      obj.untaint
+    end
   end
 
   def test_tap

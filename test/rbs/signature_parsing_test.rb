@@ -1,14 +1,16 @@
 require "test_helper"
 
-class RBS::SignatureParsingTest < Minitest::Test
+class RBS::SignatureParsingTest < Test::Unit::TestCase
   Parser = RBS::Parser
   Buffer = RBS::Buffer
   Types = RBS::Types
   TypeName = RBS::TypeName
   Namespace = RBS::Namespace
+  AST = RBS::AST
   Declarations = RBS::AST::Declarations
   Members = RBS::AST::Members
   MethodType = RBS::MethodType
+  Location = RBS::Location
 
   include TestHelper
 
@@ -20,8 +22,75 @@ class RBS::SignatureParsingTest < Minitest::Test
 
       assert_instance_of Declarations::Alias, type_decl
       assert_equal TypeName.new(name: :foo, namespace: Namespace.parse("Steep")), type_decl.name
+      assert_equal [], type_decl.type_params.each.map(&:name)
       assert_equal Types::Bases::Any.new(location: nil), type_decl.type
       assert_equal "type Steep::foo = untyped", type_decl.location.source
+    end
+
+    assert_raises RBS::ParsingError do
+      Parser.parse_signature(<<~RBS)
+        type Foo = untyped
+      RBS
+    end
+  end
+
+  def test_type_alias_generic
+    Parser.parse_signature(<<RBS).yield_self do |decls|
+type optional[A] = A?
+RBS
+      assert_equal 1, decls.size
+
+      type_decl = decls[0]
+
+      assert_instance_of Declarations::Alias, type_decl
+      assert_equal TypeName("optional"), type_decl.name
+      assert_equal [:A], type_decl.type_params.each.map(&:name)
+      assert_equal parse_type("A?", variables: [:A]), type_decl.type
+      assert_equal "[A]", type_decl.location[:type_params].source
+    end
+
+    Parser.parse_signature(<<RBS).yield_self do |decls|
+class Foo[A]
+  type bar = B
+end
+RBS
+      decls[0].members[0].tap do |type_decl|
+        assert_instance_of Declarations::Alias, type_decl
+        assert_equal TypeName("bar"), type_decl.name
+        assert_equal [], type_decl.type_params.each.map(&:name)
+        assert_instance_of Types::ClassInstance, type_decl.type
+        assert_nil type_decl.location[:type_params]
+      end
+    end
+  end
+
+  def test_type_alias_generic_variance
+    Parser.parse_signature(<<RBS).yield_self do |decls|
+type x[T] = ^(T) -> void
+
+type y[unchecked out T] = ^(T) -> void
+RBS
+      assert_equal 2, decls.size
+
+      decls[0].tap do |type_decl|
+        assert_instance_of Declarations::Alias, type_decl
+
+        type_decl.type_params[0].tap do |param|
+          assert_equal :T, param.name
+          assert_equal :invariant, param.variance
+          refute_predicate param, :unchecked?
+        end
+      end
+
+      decls[1].tap do |type_decl|
+        assert_instance_of Declarations::Alias, type_decl
+
+        type_decl.type_params[0].tap do |param|
+          assert_equal :T, param.name
+          assert_equal :covariant, param.variance
+          assert_predicate param, :unchecked?
+        end
+      end
     end
   end
 
@@ -134,8 +203,11 @@ class RBS::SignatureParsingTest < Minitest::Test
           assert_nil t2.block
           assert_equal "(untyped) -> Integer", t2.location.source
 
-          assert_equal [:X], t3.type_params
-          assert_instance_of MethodType::Block, t3.block
+          assert_equal(
+            [AST::TypeParam.new(name: :X, variance: :invariant, upper_bound: nil, location: nil)],
+            t3.type_params
+          )
+          assert_instance_of Types::Block, t3.block
           assert_instance_of Types::Variable, t3.block.type.required_positionals[0].type
           assert_instance_of Types::Variable, t3.block.type.return_type
           assert_equal "[X] { (A) -> X } -> Integer", t3.location.source
@@ -149,7 +221,7 @@ class RBS::SignatureParsingTest < Minitest::Test
       end
     end
 
-    assert_raises Parser::SemanticsError do
+    assert_raises RBS::ParsingError do
       Parser.parse_signature(<<~SIG)
         interface _Each[A, B]
           def self.foo: -> void
@@ -157,7 +229,7 @@ class RBS::SignatureParsingTest < Minitest::Test
       SIG
     end
 
-    assert_raises Parser::SemanticsError do
+    assert_raises RBS::ParsingError do
       Parser.parse_signature(<<~SIG)
         interface _Each[A, B]
           include Object
@@ -430,14 +502,14 @@ end
           m.types[1].yield_self do |ty|
             assert_instance_of MethodType, ty
             assert_equal "?{ -> void } -> Integer", ty.location.source
-            assert_instance_of MethodType::Block, ty.block
+            assert_instance_of Types::Block, ty.block
             refute ty.block.required
           end
 
           m.types[2].yield_self do |ty|
             assert_instance_of MethodType, ty
             assert_equal "[A] () { (String, ?Object, *Float, Symbol, foo: bool, ?bar: untyped, **Y) -> X } -> A", ty.location.source
-            assert_instance_of MethodType::Block, ty.block
+            assert_instance_of Types::Block, ty.block
             assert ty.block.required
           end
         end
@@ -445,27 +517,8 @@ end
     end
   end
 
-  def test_incompatible_method_definition
-    # `incompatible` is ignored with warning message.
-    silence_warnings do
-      Parser.parse_signature(<<~SIG).yield_self do |decls|
-      class Foo
-        incompatible def foo: () -> Integer
-      end
-     SIG
-        assert_equal 1, decls.size
-
-        decls[0].yield_self do |decl|
-          assert_instance_of Declarations::Class, decl
-
-          assert_instance_of Members::MethodDefinition, decl.members[0]
-        end
-      end
-    end
-  end
-
   def test_method_super
-    assert_raises Parser::SyntaxError do
+    assert_raises RBS::ParsingError do
       Parser.parse_signature(<<~SIG)
       class Foo
         def foo: -> void
@@ -497,6 +550,108 @@ end
         end
       end
     end
+  end
+
+  def test_private_public_def
+    Parser.parse_signature(<<~SIG).yield_self do |decls|
+      class Foo
+        public def foo: () -> void
+        private def bar: () -> void
+        def baz: () -> void
+      end
+    SIG
+
+      decls[0].tap do |decl|
+        assert_instance_of Declarations::Class, decl
+
+        assert_equal 3, decl.members.size
+
+        decl.members[0].tap do |m|
+          assert_instance_of Members::MethodDefinition, m
+          assert_equal :foo, m.name
+          assert_equal :public, m.visibility
+        end
+
+        decl.members[1].tap do |m|
+          assert_instance_of Members::MethodDefinition, m
+          assert_equal :bar, m.name
+          assert_equal :private, m.visibility
+        end
+
+        decl.members[2].tap do |m|
+          assert_instance_of Members::MethodDefinition, m
+          assert_equal :baz, m.name
+          assert_nil m.visibility
+        end
+      end
+    end
+  end
+
+  def test_private_public_def_error
+    assert_raises RBS::ParsingError do
+      Parser.parse_signature(<<~SIG)
+      class Foo
+        public def self?.foo: () -> void
+      end
+    SIG
+    end
+  end
+
+  def test_private_public_attr
+    Parser.parse_signature(<<~SIG).yield_self do |decls|
+      class Foo
+        public attr_reader foo: String
+        private attr_reader bar: String
+        attr_reader baz: String
+      end
+    SIG
+
+      decls[0].tap do |decl|
+        assert_instance_of Declarations::Class, decl
+
+        assert_equal 3, decl.members.size
+
+        decl.members[0].tap do |m|
+          assert_instance_of Members::AttrReader, m
+          assert_equal :foo, m.name
+          assert_equal :public, m.visibility
+        end
+
+        decl.members[1].tap do |m|
+          assert_instance_of Members::AttrReader, m
+          assert_equal :bar, m.name
+          assert_equal :private, m.visibility
+        end
+
+        decl.members[2].tap do |m|
+          assert_instance_of Members::AttrReader, m
+          assert_equal :baz, m.name
+          assert_nil m.visibility
+        end
+      end
+    end
+  end
+
+  def test_private_public_modifier_error
+    assert_raises RBS::ParsingError do
+      Parser.parse_signature(<<~SIG)
+      class Foo
+        public alias foo bar
+      end
+    SIG
+    end
+  end
+
+  def test_private_public_modifier
+    Parser.parse_signature(<<~SIG)
+      class Foo
+        public
+
+        private
+
+        public    # comment can follow
+      end
+    SIG
   end
 
   def test_alias
@@ -568,7 +723,7 @@ end
         def attr_reader: -> untyped
         def attr_accessor: -> untyped
         def attr_writer: -> untyped
-        def `\\``: -> untyped
+        def `: -> untyped
         def def!: -> untyped
         def !: -> untyped
         def _foo?: -> untyped
@@ -671,6 +826,77 @@ end
     end
   end
 
+  def test_attributes
+    Parser.parse_signature(<<~SIG).tap do |decls|
+      class Hello
+        attr_reader a: Integer
+        attr_writer b(@B): String
+        attr_accessor c(): bool
+
+        attr_reader self.x: Integer
+        attr_writer self.y(@Y): String
+        attr_accessor self.z(): bool
+      end
+    SIG
+
+      decls[0].tap do |module_decl|
+        module_decl.members[0].tap do |m|
+          assert_equal "attr_reader a: Integer", m.location.source
+          assert_instance_of Members::AttrReader, m
+          assert_equal :a, m.name
+          assert_nil m.ivar_name
+          assert_equal :instance, m.kind
+          assert_equal parse_type("Integer"), m.type
+        end
+
+        module_decl.members[1].tap do |m|
+          assert_equal "attr_writer b(@B): String", m.location.source
+          assert_instance_of Members::AttrWriter, m
+          assert_equal :b, m.name
+          assert_equal :@B, m.ivar_name
+          assert_equal :instance, m.kind
+          assert_equal parse_type("String"), m.type
+        end
+
+        module_decl.members[2].tap do |m|
+          assert_equal "attr_accessor c(): bool", m.location.source
+          assert_instance_of Members::AttrAccessor, m
+          assert_equal :c, m.name
+          assert_equal false, m.ivar_name
+          assert_equal :instance, m.kind
+          assert_equal parse_type("bool"), m.type
+        end
+
+        module_decl.members[3].tap do |m|
+          assert_equal "attr_reader self.x: Integer", m.location.source
+          assert_instance_of Members::AttrReader, m
+          assert_equal :x, m.name
+          assert_nil m.ivar_name
+          assert_equal :singleton, m.kind
+          assert_equal parse_type("Integer"), m.type
+        end
+
+        module_decl.members[4].tap do |m|
+          assert_equal "attr_writer self.y(@Y): String", m.location.source
+          assert_instance_of Members::AttrWriter, m
+          assert_equal :y, m.name
+          assert_equal :@Y, m.ivar_name
+          assert_equal :singleton, m.kind
+          assert_equal parse_type("String"), m.type
+        end
+
+        module_decl.members[5].tap do |m|
+          assert_equal "attr_accessor self.z(): bool", m.location.source
+          assert_instance_of Members::AttrAccessor, m
+          assert_equal :z, m.name
+          assert_equal false, m.ivar_name
+          assert_equal :singleton, m.kind
+          assert_equal parse_type("bool"), m.type
+        end
+      end
+    end
+  end
+
   def test_annotations_on_members
     Parser.parse_signature(<<~SIG).yield_self do |decls|
       class Hello
@@ -730,30 +956,6 @@ end
         assert_equal TypeName.new(name: :Foo, namespace: Namespace.empty), m.name
         assert_equal [], m.args
         assert_equal "prepend Foo", m.location.source
-      end
-    end
-  end
-
-  def test_extension
-    Parser.parse_signature(<<~SIG).yield_self do |decls|
-      extension Array[X] (Pathname)
-        @name: String
-
-        include Foo
-        extend Bar
-        prepend Baz
-
-        attr_reader path: X
-        def Pathname: (String) -> Pathname
-      end
-    SIG
-      decls[0].yield_self do |decl|
-        assert_instance_of Declarations::Extension, decl
-        assert_equal TypeName.new(name: :Array, namespace: Namespace.empty), decl.name
-        assert_equal :Pathname, decl.extension_name
-        assert_equal [:X], decl.type_params
-
-        assert_equal 6, decl.members.size
       end
     end
   end
@@ -963,20 +1165,20 @@ end
       assert_instance_of Declarations::Interface, interface_decl
       a, b, c = interface_decl.type_params.each.to_a
 
-      assert_instance_of Declarations::ModuleTypeParams::TypeParam, a
+      assert_instance_of AST::TypeParam, a
       assert_equal :A, a.name
       assert_equal :invariant, a.variance
-      refute a.skip_validation
+      refute a.unchecked?
 
-      assert_instance_of Declarations::ModuleTypeParams::TypeParam, b
+      assert_instance_of AST::TypeParam, b
       assert_equal :B, b.name
       assert_equal :covariant, b.variance
-      refute b.skip_validation
+      refute b.unchecked?
 
-      assert_instance_of Declarations::ModuleTypeParams::TypeParam, c
+      assert_instance_of AST::TypeParam, c
       assert_equal :C, c.name
       assert_equal :contravariant, c.variance
-      assert c.skip_validation
+      assert c.unchecked?
     end
   end
 
@@ -1032,27 +1234,12 @@ end
 EOF
       decls[0].members[0].tap do |member|
         assert_instance_of Members::MethodDefinition, member
-        assert_operator member, :overload?
+        assert_predicate member, :overload?
       end
 
       decls[0].members[1].tap do |member|
         assert_instance_of Members::MethodDefinition, member
-        refute_operator member, :overload?
-      end
-    end
-  end
-
-  def test_overload_def_deprecated
-    silence_warnings do
-      Parser.parse_signature(<<EOF).yield_self do |decls|
-module Steep
-  overload def to_s: (Integer) -> String
-end
-EOF
-        decls[0].members[0].tap do |member|
-          assert_instance_of Members::MethodDefinition, member
-          assert_operator member, :overload?
-        end
+        refute_predicate member, :overload?
       end
     end
   end
@@ -1092,13 +1279,737 @@ EOF
   end
 
   def test_syntax_error_on_eof
-    ex = assert_raises Parser::SyntaxError do
+    ex = assert_raises RBS::ParsingError do
       Parser.parse_signature(<<~SIG)
       class Foo
       SIG
     end
-    loc = ex.error_value.location
-    assert_equal 1, loc.start_line
-    assert_equal 9, loc.start_column
+    loc = ex.location
+    assert_equal 2, loc.start_line
+    assert_equal 0, loc.start_column
+  end
+
+  def test_empty
+    Parser.parse_signature("").tap do |decls|
+      assert_empty decls
+    end
+  end
+
+  def test_module_self_syntax
+    Parser.parse_signature(<<EOF).tap do |decls|
+module Foo: Object
+end
+
+module ::Bar: Object
+end
+
+module Baz::Baz: Object
+end
+EOF
+      decls[0].tap do |decl|
+        assert_equal TypeName("Foo"), decl.name
+      end
+
+      decls[1].tap do |decl|
+        assert_equal TypeName("::Bar"), decl.name
+      end
+
+      decls[2].tap do |decl|
+        assert_equal TypeName("Baz::Baz"), decl.name
+      end
+    end
+  end
+
+  def test_method_location
+    Parser.parse_signature(<<-EOF).tap do |decls|
+module A
+  def foo: () -> void
+
+  def self?.bar: () -> void
+               | ...
+end
+    EOF
+      decls[0].members[0].tap do |foo|
+        assert_instance_of Location, foo.location
+
+        assert_equal "def", foo.location[:keyword].source
+        assert_equal "foo", foo.location[:name].source
+        assert_nil foo.location[:kind]
+        assert_nil foo.location[:overload]
+      end
+
+      decls[0].members[1].tap do |foo|
+        assert_instance_of Location, foo.location
+
+        assert_equal "def", foo.location[:keyword].source
+        assert_equal "bar", foo.location[:name].source
+        assert_equal "self?.", foo.location[:kind].source
+        assert_equal "...", foo.location[:overload].source
+      end
+    end
+  end
+
+  def test_var_location
+    Parser.parse_signature(<<-EOF).tap do |decls|
+module A
+  @foo: Integer
+  self.@bar: String
+
+  @@baz: bool
+end
+    EOF
+      decls[0].members[0].tap do |foo|
+        assert_instance_of Location, foo.location
+
+        assert_equal "@foo", foo.location[:name].source
+        assert_equal ":", foo.location[:colon].source
+        assert_nil foo.location[:kind]
+      end
+
+      decls[0].members[1].tap do |foo|
+        assert_instance_of Location, foo.location
+
+        assert_equal "@bar", foo.location[:name].source
+        assert_equal ":", foo.location[:colon].source
+        assert_equal "self.", foo.location[:kind].source
+      end
+
+      decls[0].members[2].tap do |foo|
+        assert_instance_of Location, foo.location
+
+        assert_equal "@@baz", foo.location[:name].source
+        assert_equal ":", foo.location[:colon].source
+        assert_nil foo.location[:kind]
+      end
+    end
+  end
+
+  def test_attribute_location
+    Parser.parse_signature(<<-RBS).tap do |decls|
+module A
+  attr_reader reader1: String
+  attr_reader reader2 : String
+  attr_reader reader3 () : String
+  attr_reader reader4 (@reader) : String
+  attr_reader self.reader5: String
+  attr_reader self.reader6 : String
+end
+    RBS
+
+      decls[0].members[0].tap do |foo|
+        assert_instance_of Location, foo.location
+
+        assert_equal "attr_reader", foo.location[:keyword].source
+        assert_equal "reader1", foo.location[:name].source
+        assert_equal ":", foo.location[:colon].source
+        assert_nil foo.location[:ivar]
+        assert_nil foo.location[:ivar_name]
+        assert_nil foo.location[:kind]
+      end
+
+      decls[0].members[1].tap do |foo|
+        assert_instance_of Location, foo.location
+
+        assert_equal "attr_reader", foo.location[:keyword].source
+        assert_equal "reader2", foo.location[:name].source
+        assert_equal ":", foo.location[:colon].source
+        assert_nil foo.location[:ivar]
+        assert_nil foo.location[:ivar_name]
+        assert_nil foo.location[:kind]
+      end
+
+      decls[0].members[2].tap do |foo|
+        assert_instance_of Location, foo.location
+
+        assert_equal "attr_reader", foo.location[:keyword].source
+        assert_equal "reader3", foo.location[:name].source
+        assert_equal ":", foo.location[:colon].source
+        assert_equal "()", foo.location[:ivar].source
+        assert_nil foo.location[:ivar_name]
+        assert_nil foo.location[:kind]
+      end
+
+      decls[0].members[3].tap do |foo|
+        assert_instance_of Location, foo.location
+
+        assert_equal "attr_reader", foo.location[:keyword].source
+        assert_equal "reader4", foo.location[:name].source
+        assert_equal ":", foo.location[:colon].source
+        assert_equal "(@reader)", foo.location[:ivar].source
+        assert_equal "@reader", foo.location[:ivar_name].source
+        assert_nil foo.location[:kind]
+      end
+
+      decls[0].members[4].tap do |foo|
+        assert_instance_of Location, foo.location
+
+        assert_equal "attr_reader", foo.location[:keyword].source
+        assert_equal "reader5", foo.location[:name].source
+        assert_equal ":", foo.location[:colon].source
+        assert_nil foo.location[:ivar]
+        assert_nil foo.location[:ivar_name]
+        assert_equal "self.", foo.location[:kind].source
+      end
+
+      decls[0].members[5].tap do |foo|
+        assert_instance_of Location, foo.location
+
+        assert_equal "attr_reader", foo.location[:keyword].source
+        assert_equal "reader6", foo.location[:name].source
+        assert_equal ":", foo.location[:colon].source
+        assert_nil foo.location[:ivar]
+        assert_nil foo.location[:ivar_name]
+        assert_equal "self.", foo.location[:kind].source
+      end
+    end
+
+    Parser.parse_signature(<<-RBS).tap do |decls|
+module A
+  attr_writer attr1: String
+  attr_writer attr2 : String
+  attr_writer attr3 () : String
+  attr_writer attr4 (@attr0) : String
+  attr_writer self.attr5: String
+  attr_writer self.attr6 : String
+end
+    RBS
+
+      decls[0].members[0].tap do |attr|
+        assert_instance_of Location, attr.location
+
+        assert_equal "attr_writer", attr.location[:keyword].source
+        assert_equal "attr1", attr.location[:name].source
+        assert_equal ":", attr.location[:colon].source
+        assert_nil attr.location[:ivar]
+        assert_nil attr.location[:ivar_name]
+        assert_nil attr.location[:kind]
+      end
+
+      decls[0].members[1].tap do |foo|
+        assert_instance_of Location, foo.location
+
+        assert_equal "attr_writer", foo.location[:keyword].source
+        assert_equal "attr2", foo.location[:name].source
+        assert_equal ":", foo.location[:colon].source
+        assert_nil foo.location[:ivar]
+        assert_nil foo.location[:ivar_name]
+        assert_nil foo.location[:kind]
+      end
+
+      decls[0].members[2].tap do |foo|
+        assert_instance_of Location, foo.location
+
+        assert_equal "attr_writer", foo.location[:keyword].source
+        assert_equal "attr3", foo.location[:name].source
+        assert_equal ":", foo.location[:colon].source
+        assert_equal "()", foo.location[:ivar].source
+        assert_nil foo.location[:ivar_name]
+        assert_nil foo.location[:kind]
+      end
+
+      decls[0].members[3].tap do |foo|
+        assert_instance_of Location, foo.location
+
+        assert_equal "attr_writer", foo.location[:keyword].source
+        assert_equal "attr4", foo.location[:name].source
+        assert_equal ":", foo.location[:colon].source
+        assert_equal "(@attr0)", foo.location[:ivar].source
+        assert_equal "@attr0", foo.location[:ivar_name].source
+        assert_nil foo.location[:kind]
+      end
+
+      decls[0].members[4].tap do |foo|
+        assert_instance_of Location, foo.location
+
+        assert_equal "attr_writer", foo.location[:keyword].source
+        assert_equal "attr5", foo.location[:name].source
+        assert_equal ":", foo.location[:colon].source
+        assert_nil foo.location[:ivar]
+        assert_nil foo.location[:ivar_name]
+        assert_equal "self.", foo.location[:kind].source
+      end
+
+      decls[0].members[5].tap do |foo|
+        assert_instance_of Location, foo.location
+
+        assert_equal "attr_writer", foo.location[:keyword].source
+        assert_equal "attr6", foo.location[:name].source
+        assert_equal ":", foo.location[:colon].source
+        assert_nil foo.location[:ivar]
+        assert_nil foo.location[:ivar_name]
+        assert_equal "self.", foo.location[:kind].source
+      end
+    end
+
+    Parser.parse_signature(<<-RBS).tap do |decls|
+module A
+  attr_accessor attr1: String
+  attr_accessor attr2 : String
+  attr_accessor attr3 () : String
+  attr_accessor attr4 (@attr0) : String
+  attr_accessor self.attr5: String
+  attr_accessor self.attr6 : String
+end
+    RBS
+
+      decls[0].members[0].tap do |attr|
+        assert_instance_of Location, attr.location
+
+        assert_equal "attr_accessor", attr.location[:keyword].source
+        assert_equal "attr1", attr.location[:name].source
+        assert_equal ":", attr.location[:colon].source
+        assert_nil attr.location[:ivar]
+        assert_nil attr.location[:ivar_name]
+        assert_nil attr.location[:kind]
+      end
+
+      decls[0].members[1].tap do |foo|
+        assert_instance_of Location, foo.location
+
+        assert_equal "attr_accessor", foo.location[:keyword].source
+        assert_equal "attr2", foo.location[:name].source
+        assert_equal ":", foo.location[:colon].source
+        assert_nil foo.location[:ivar]
+        assert_nil foo.location[:ivar_name]
+        assert_nil foo.location[:kind]
+      end
+
+      decls[0].members[2].tap do |foo|
+        assert_instance_of Location, foo.location
+
+        assert_equal "attr_accessor", foo.location[:keyword].source
+        assert_equal "attr3", foo.location[:name].source
+        assert_equal ":", foo.location[:colon].source
+        assert_equal "()", foo.location[:ivar].source
+        assert_nil foo.location[:ivar_name]
+        assert_nil foo.location[:kind]
+      end
+
+      decls[0].members[3].tap do |foo|
+        assert_instance_of Location, foo.location
+
+        assert_equal "attr_accessor", foo.location[:keyword].source
+        assert_equal "attr4", foo.location[:name].source
+        assert_equal ":", foo.location[:colon].source
+        assert_equal "(@attr0)", foo.location[:ivar].source
+        assert_equal "@attr0", foo.location[:ivar_name].source
+        assert_nil foo.location[:kind]
+      end
+
+      decls[0].members[4].tap do |foo|
+        assert_instance_of Location, foo.location
+
+        assert_equal "attr_accessor", foo.location[:keyword].source
+        assert_equal "attr5", foo.location[:name].source
+        assert_equal ":", foo.location[:colon].source
+        assert_nil foo.location[:ivar]
+        assert_nil foo.location[:ivar_name]
+        assert_equal "self.", foo.location[:kind].source
+      end
+
+      decls[0].members[5].tap do |foo|
+        assert_instance_of Location, foo.location
+
+        assert_equal "attr_accessor", foo.location[:keyword].source
+        assert_equal "attr6", foo.location[:name].source
+        assert_equal ":", foo.location[:colon].source
+        assert_nil foo.location[:ivar]
+        assert_nil foo.location[:ivar_name]
+        assert_equal "self.", foo.location[:kind].source
+      end
+    end
+  end
+
+  def test_alias_location
+    Parser.parse_signature(<<-RBS).tap do |decls|
+module A
+  alias foo bar
+  alias self.foo self.bar
+end
+    RBS
+
+      decls[0].members[0].tap do |foo|
+        assert_instance_of Location, foo.location
+
+        assert_equal "alias", foo.location[:keyword].source
+        assert_equal "foo", foo.location[:new_name].source
+        assert_equal "bar", foo.location[:old_name].source
+        assert_nil foo.location[:new_kind]
+        assert_nil foo.location[:old_kind]
+      end
+
+      decls[0].members[1].tap do |foo|
+        assert_instance_of Location, foo.location
+
+        assert_equal "alias", foo.location[:keyword].source
+        assert_equal "foo", foo.location[:new_name].source
+        assert_equal "bar", foo.location[:old_name].source
+        assert_equal "self.", foo.location[:new_kind].source
+        assert_equal "self.", foo.location[:old_kind].source
+      end
+    end
+  end
+
+  def test_mixin_location
+    Parser.parse_signature(<<-EOF).tap do |decls|
+module A
+  include _Foo
+  include _Bar[String]
+
+  extend Foo
+  extend Bar[String]
+
+  prepend Foo
+  prepend Bar[String]
+end
+    EOF
+      decls[0].members[0].tap do |foo|
+        assert_instance_of Location, foo.location
+
+        assert_equal "include", foo.location[:keyword].source
+        assert_equal "_Foo", foo.location[:name].source
+        assert_nil foo.location[:args]
+      end
+
+      decls[0].members[1].tap do |foo|
+        assert_instance_of Location, foo.location
+
+        assert_equal "include", foo.location[:keyword].source
+        assert_equal "_Bar", foo.location[:name].source
+        assert_equal "[String]", foo.location[:args].source
+      end
+
+      decls[0].members[2].tap do |foo|
+        assert_instance_of Location, foo.location
+
+        assert_equal "extend", foo.location[:keyword].source
+        assert_equal "Foo", foo.location[:name].source
+        assert_nil foo.location[:args]
+      end
+
+      decls[0].members[3].tap do |foo|
+        assert_instance_of Location, foo.location
+
+        assert_equal "extend", foo.location[:keyword].source
+        assert_equal "Bar", foo.location[:name].source
+        assert_equal "[String]", foo.location[:args].source
+      end
+
+      decls[0].members[4].tap do |foo|
+        assert_instance_of Location, foo.location
+
+        assert_equal "prepend", foo.location[:keyword].source
+        assert_equal "Foo", foo.location[:name].source
+        assert_nil foo.location[:args]
+      end
+
+      decls[0].members[5].tap do |foo|
+        assert_instance_of Location, foo.location
+
+        assert_equal "prepend", foo.location[:keyword].source
+        assert_equal "Bar", foo.location[:name].source
+        assert_equal "[String]", foo.location[:args].source
+      end
+    end
+  end
+
+  def test_interface_location
+    Parser.parse_signature(<<-EOF).tap do |decls|
+interface _A
+end
+
+interface _B[X, unchecked in Y]
+end
+    EOF
+      decls[0].tap do |decl|
+        assert_instance_of Location, decl.location
+
+        assert_equal "interface", decl.location[:keyword].source
+        assert_equal "_A", decl.location[:name].source
+        assert_equal "end", decl.location[:end].source
+        assert_nil decl.location[:type_params]
+      end
+
+      decls[1].tap do |decl|
+        assert_instance_of Location, decl.location
+
+        assert_equal "interface", decl.location[:keyword].source
+        assert_equal "_B", decl.location[:name].source
+        assert_equal "end", decl.location[:end].source
+        assert_equal "[X, unchecked in Y]", decl.location[:type_params].source
+
+        decl.type_params[0].tap do |param|
+          assert_instance_of Location, param.location
+
+          assert_equal "X", param.location[:name].source
+          assert_nil param.location[:variance]
+          assert_nil param.location[:unchecked]
+        end
+
+        decl.type_params[1].tap do |param|
+          assert_instance_of Location, param.location
+
+          assert_equal "Y", param.location[:name].source
+          assert_equal "in", param.location[:variance].source
+          assert_equal "unchecked", param.location[:unchecked].source
+        end
+      end
+    end
+  end
+
+  def test_module_location
+    Parser.parse_signature(<<-EOF).tap do |decls|
+module A
+end
+
+module B[X] : Foo[X], Bar
+end
+
+module C: BasicObject end
+    EOF
+      decls[0].tap do |decl|
+        assert_instance_of Location, decl.location
+
+        assert_equal "module", decl.location[:keyword].source
+        assert_equal "A", decl.location[:name].source
+        assert_equal "end", decl.location[:end].source
+        assert_nil decl.location[:type_params]
+        assert_nil decl.location[:colon]
+        assert_nil decl.location[:self_types]
+      end
+
+      decls[1].tap do |decl|
+        assert_instance_of Location, decl.location
+
+        assert_equal "module", decl.location[:keyword].source
+        assert_equal "B", decl.location[:name].source
+        assert_equal "end", decl.location[:end].source
+        assert_equal "[X]", decl.location[:type_params].source
+        assert_equal ":", decl.location[:colon].source
+        assert_equal "Foo[X], Bar", decl.location[:self_types].source
+      end
+
+      decls[2].tap do |decl|
+        assert_instance_of Location, decl.location
+
+        assert_equal "module", decl.location[:keyword].source
+        assert_equal "C", decl.location[:name].source
+        assert_equal "end", decl.location[:end].source
+        assert_nil decl.location[:type_params]
+        assert_equal ":", decl.location[:colon].source
+        assert_equal "BasicObject", decl.location[:self_types].source
+      end
+    end
+  end
+
+  def test_class_location
+    Parser.parse_signature(<<-EOF).tap do |decls|
+class A
+end
+
+class B[X] < Foo[X]
+end
+    EOF
+      decls[0].tap do |decl|
+        assert_instance_of Location, decl.location
+
+        assert_equal "class", decl.location[:keyword].source
+        assert_equal "A", decl.location[:name].source
+        assert_equal "end", decl.location[:end].source
+        assert_nil decl.location[:type_params]
+        assert_nil decl.location[:lt]
+      end
+
+      decls[1].tap do |decl|
+        assert_instance_of Location, decl.location
+
+        assert_equal "class", decl.location[:keyword].source
+        assert_equal "B", decl.location[:name].source
+        assert_equal "end", decl.location[:end].source
+        assert_equal "[X]", decl.location[:type_params].source
+        assert_equal "<", decl.location[:lt].source
+
+        assert_equal "Foo", decl.super_class.location[:name].source
+        assert_equal "[X]", decl.super_class.location[:args].source
+      end
+    end
+  end
+
+  def test_constant_global_location
+    Parser.parse_signature(<<-EOF).tap do |decls|
+X: String
+A::B : String
+$B: Integer
+    EOF
+      decls[0].tap do |decl|
+        assert_instance_of Location, decl.location
+
+        assert_equal "X", decl.location[:name].source
+        assert_equal ":", decl.location[:colon].source
+      end
+
+      decls[1].tap do |decl|
+        assert_instance_of Location, decl.location
+
+        assert_equal "A::B", decl.location[:name].source
+        assert_equal ":", decl.location[:colon].source
+      end
+
+      decls[2].tap do |decl|
+        assert_instance_of Location, decl.location
+
+        assert_equal "$B", decl.location[:name].source
+        assert_equal ":", decl.location[:colon].source
+      end
+    end
+  end
+
+  def test_type_alias_location
+    Parser.parse_signature(<<-EOF).tap do |decls|
+type foo = Integer
+    EOF
+      decls[0].tap do |decl|
+        assert_instance_of Location, decl.location
+
+        assert_equal "type", decl.location[:keyword].source
+        assert_equal "foo", decl.location[:name].source
+        assert_equal "=", decl.location[:eq].source
+      end
+    end
+  end
+
+  def test_interface_name
+    assert_raises RBS::ParsingError do
+      Parser.parse_signature(<<-RBS)
+interface _foo end
+      RBS
+    end
+  end
+
+  def test_lident_param_name
+    Parser.parse_signature(<<-RBS)
+class Hello
+def hello: (String _name) -> void
+end
+    RBS
+  end
+
+  def test_underscore_alias_name
+    Parser.parse_signature(<<-RBS)
+class Hello
+  alias _foo _bar
+end
+    RBS
+  end
+
+  def test_underscore_type_name
+    assert_raises RBS::ParsingError do
+      Parser.parse_signature(<<-RBS)
+type _foo = Integer
+      RBS
+    end
+  end
+
+  def test_underscore_qualified_name
+    assert_raises RBS::ParsingError do
+      pp Parser.parse_signature(<<-RBS)
+type x = Foo::_bar
+      RBS
+    end
+  end
+
+  def test_singleton_member_type_variables
+    Parser.parse_signature(<<-EOF).tap do |decls|
+class Foo[A]
+  @foo: A
+
+  @@foo: A
+
+  self.@foo: A
+
+  def foo: -> A
+
+  def self.foo2: -> A
+
+  def self?.foo3: -> A
+
+  attr_accessor self.foo4: A
+
+  attr_reader self.foo5: A
+
+  attr_writer self.foo6: A
+
+  include M[A]
+
+  extend M[A]
+
+  prepend M[A]
+end
+    EOF
+      decls[0].tap do |decl|
+        assert_instance_of Declarations::Class, decl
+
+        assert_instance_of Types::Variable, decl.members[0].type
+        assert_instance_of Types::ClassInstance, decl.members[1].type
+        assert_instance_of Types::ClassInstance, decl.members[2].type
+
+        assert_instance_of Types::Variable, decl.members[3].types[0].type.return_type
+        assert_instance_of Types::ClassInstance, decl.members[4].types[0].type.return_type
+        assert_instance_of Types::ClassInstance, decl.members[5].types[0].type.return_type
+
+        assert_instance_of Types::ClassInstance, decl.members[6].type
+        assert_instance_of Types::ClassInstance, decl.members[7].type
+        assert_instance_of Types::ClassInstance, decl.members[8].type
+
+        assert_instance_of Types::Variable, decl.members[9].args[0]
+        assert_instance_of Types::ClassInstance, decl.members[10].args[0]
+        assert_instance_of Types::Variable, decl.members[11].args[0]
+      end
+    end
+  end
+
+  def test_generics_bound
+    Parser.parse_signature(<<-EOF).tap do |decls|
+class Foo[X < _Each[Y], Y]
+  def foo: [X < Array[Y]] (X) -> X
+end
+    EOF
+      decls[0].tap do |decl|
+        assert_instance_of Declarations::Class, decl
+
+        assert_equal 2, decl.type_params.size
+        decl.type_params[0].tap do |param|
+          assert_equal :X, param.name
+          assert_equal :invariant, param.variance
+          refute_predicate param, :unchecked?
+          assert_equal parse_type("_Each[Y]", variables: [:Y]), param.upper_bound
+        end
+
+        decl.type_params[1].tap do |param|
+          assert_equal :Y, param.name
+          assert_equal :invariant, param.variance
+          refute_predicate param, :unchecked?
+          assert_nil param.upper_bound
+        end
+
+        decl.members[0].tap do |member|
+          member.types[0].type_params[0].tap do |param|
+            assert_equal :X, param.name
+            assert_equal :invariant, param.variance
+            refute_predicate param, :unchecked?
+            assert_equal parse_type("Array[Y]", variables: [:Y]), param.upper_bound
+          end
+        end
+      end
+    end
+  end
+
+  def test_generics_bound_error
+    assert_raises RBS::ParsingError do
+      Parser.parse_signature(<<-EOF)
+        class Foo[X < string]
+        end
+            EOF
+    end
   end
 end

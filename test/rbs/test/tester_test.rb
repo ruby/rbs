@@ -2,7 +2,7 @@ require "test_helper"
 
 require "rbs/test"
 
-class RBS::Test::TesterTest < Minitest::Test
+class RBS::Test::TesterTest < Test::Unit::TestCase
   include TestHelper
 
   ArgumentsReturn = RBS::Test::ArgumentsReturn

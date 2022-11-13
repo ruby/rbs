@@ -1,3 +1,4 @@
+# <!-- rdoc-file=compar.c -->
 # The Comparable mixin is used by classes whose objects may be ordered. The
 # class must define the `<=>` operator, which compares the receiver against
 # another object, returning a value less than 0, returning 0, or returning a
@@ -32,32 +33,83 @@
 #     s4.between?(s3, s5)           #=> true
 #     [ s3, s2, s5, s4, s1 ].sort   #=> [Z, YY, XXX, WWWW, VVVVV]
 #
+# ## What's Here
+#
+# Module Comparable provides these methods, all of which use method `<=>`:
+#
+#     [<](#method-i-3C)
+# :       Returns whether `self` is less than the given object.
+#
+#     [<=](#method-i-3C-3D)
+# :       Returns whether `self` is less than or equal to the given object.
+#
+#     [==](#method-i-3D-3D)
+# :       Returns whether `self` is equal to the given object.
+#
+#     [>](#method-i-3E)
+# :       Returns whether `self` is greater than or equal to the given object.
+#
+#     [>=](#method-i-3E-3D)
+# :       Returns whether `self` is greater than the given object.
+#
+# *   #between? Returns `true` if `self` is between two given objects.
+#     #clamp
+# :       For given objects `min` and `max`, or range `(min..max)`, returns:
+#
+#     *   `min` if `(self <=> min) < 0`.
+#     *   `max` if `(self <=> max) > 0`.
+#     *   `self` otherwise.
+#
 module Comparable : _WithSpaceshipOperator
+  # <!--
+  #   rdoc-file=compar.c
+  #   - obj < other    -> true or false
+  # -->
   # Compares two objects based on the receiver's `<=>` method, returning true if
   # it returns a value less than 0.
   #
   def <: (untyped other) -> bool
 
+  # <!--
+  #   rdoc-file=compar.c
+  #   - obj <= other    -> true or false
+  # -->
   # Compares two objects based on the receiver's `<=>` method, returning true if
   # it returns a value less than or equal to 0.
   #
   def <=: (untyped other) -> bool
 
+  # <!--
+  #   rdoc-file=compar.c
+  #   - obj == other    -> true or false
+  # -->
   # Compares two objects based on the receiver's `<=>` method, returning true if
   # it returns 0. Also returns true if *obj* and *other* are the same object.
   #
   def ==: (untyped other) -> bool
 
+  # <!--
+  #   rdoc-file=compar.c
+  #   - obj > other    -> true or false
+  # -->
   # Compares two objects based on the receiver's `<=>` method, returning true if
   # it returns a value greater than 0.
   #
   def >: (untyped other) -> bool
 
+  # <!--
+  #   rdoc-file=compar.c
+  #   - obj >= other    -> true or false
+  # -->
   # Compares two objects based on the receiver's `<=>` method, returning true if
   # it returns a value greater than or equal to 0.
   #
   def >=: (untyped other) -> bool
 
+  # <!--
+  #   rdoc-file=compar.c
+  #   - obj.between?(min, max)    -> true or false
+  # -->
   # Returns `false` if *obj* `<=>` *min* is less than zero or if *obj* `<=>` *max*
   # is greater than zero, `true` otherwise.
   #
@@ -68,6 +120,11 @@ module Comparable : _WithSpaceshipOperator
   #
   def between?: (untyped min, untyped max) -> bool
 
+  # <!--
+  #   rdoc-file=compar.c
+  #   - obj.clamp(min, max) ->  obj
+  #   - obj.clamp(range)    ->  obj
+  # -->
   # In `(min, max)` form, returns *min* if *obj* `<=>` *min* is less than zero,
   # *max* if *obj* `<=>` *max* is greater than zero, and *obj* otherwise.
   #

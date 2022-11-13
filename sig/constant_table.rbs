@@ -9,7 +9,7 @@ module RBS
 
     def absolute_type: (Types::t, context: Array[Namespace]) -> Types::t
 
-    def absolute_type_name: (TypeName, context: Array[Namespace], location: Location?) -> TypeName
+    def absolute_type_name: (TypeName, context: Array[Namespace], location: Location[untyped, untyped]?) -> TypeName
 
     def name_to_constant: (TypeName) -> Constant?
 

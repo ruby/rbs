@@ -1,7 +1,7 @@
 require_relative '../test_helper'
 require 'uri'
 
-class URIHTTPSingletonTest < Minitest::Test
+class URIHTTPSingletonTest < Test::Unit::TestCase
   include TypeAssertions
   library 'uri'
   testing 'singleton(::URI::HTTP)'
@@ -28,10 +28,21 @@ class URIHTTPSingletonTest < Minitest::Test
                         query: 't=1',
                         fragment: 'baz'
                       }
+
+    assert_send_type  '({ userinfo: nil, host: nil, port: nil, path: nil, query: nil, fragment: nil }) -> URI::HTTP',
+                      URI::HTTP, :build,
+                      {
+                        userinfo: nil,
+                        host: nil,
+                        port: nil,
+                        path: nil,
+                        query: nil,
+                        fragment: nil
+                      }
   end
 end
 
-class URIHTTPInstanceTest < Minitest::Test
+class URIHTTPInstanceTest < Test::Unit::TestCase
   include TypeAssertions
   library 'uri'
   testing '::URI::HTTP'

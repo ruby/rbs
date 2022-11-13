@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 
 module RBS
   module Types
@@ -27,6 +28,14 @@ module RBS
           enum_for :each_type
         end
       end
+
+      def map_type(&block)
+        if block
+          _ = self
+        else
+          enum_for(:map_type)
+        end
+      end
     end
 
     module Bases
@@ -52,9 +61,9 @@ module RBS
         include EmptyEachType
         include NoTypeName
 
-        def to_json(*a)
+        def to_json(state = _ = nil)
           klass = to_s.to_sym
-          { class: klass, location: location }.to_json(*a)
+          { class: klass, location: location }.to_json(state)
         end
 
         def to_s(level = 0)
@@ -125,8 +134,8 @@ module RBS
         end
       end
 
-      def to_json(*a)
-        { class: :variable, name: name, location: location }.to_json(*a)
+      def to_json(state = _ = nil)
+        { class: :variable, name: name, location: location }.to_json(state)
       end
 
       def sub(s)
@@ -177,8 +186,8 @@ module RBS
       include NoFreeVariables
       include NoSubst
 
-      def to_json(*a)
-        { class: :class_singleton, name: name, location: location }.to_json(*a)
+      def to_json(state = _ = nil)
+        { class: :class_singleton, name: name, location: location }.to_json(state)
       end
 
       def to_s(level = 0)
@@ -206,7 +215,7 @@ module RBS
       alias eql? ==
 
       def hash
-        self.class.hash ^ name.hash ^ args.hash
+        name.hash ^ args.hash
       end
 
       def free_variables(set = Set.new)
@@ -245,8 +254,8 @@ module RBS
         @location = location
       end
 
-      def to_json(*a)
-        { class: :interface, name: name, args: args, location: location }.to_json(*a)
+      def to_json(state = _ = nil)
+        { class: :interface, name: name, args: args, location: location }.to_json(state)
       end
 
       def sub(s)
@@ -262,6 +271,18 @@ module RBS
           location: location
         )
       end
+
+      def map_type(&block)
+        if block
+          Interface.new(
+            name: name,
+            args: args.map {|type| yield type },
+            location: location
+          )
+        else
+          enum_for(:map_type)
+        end
+      end
     end
 
     class ClassInstance
@@ -275,8 +296,8 @@ module RBS
         @location = location
       end
 
-      def to_json(*a)
-        { class: :class_instance, name: name, args: args, location: location }.to_json(*a)
+      def to_json(state = _ = nil)
+        { class: :class_instance, name: name, args: args, location: location }.to_json(state)
       end
 
       def sub(s)
@@ -292,45 +313,57 @@ module RBS
           location: location
         )
       end
+
+      def map_type(&block)
+        if block
+          ClassInstance.new(
+            name: name,
+            args: args.map {|type| yield type },
+            location: location
+          )
+        else
+          enum_for :map_type
+        end
+      end
     end
 
     class Alias
       attr_reader :location
-      attr_reader :name
 
-      def initialize(name:, location:)
+      include Application
+
+      def initialize(name:, args:, location:)
         @name = name
+        @args = args
         @location = location
       end
 
-      def ==(other)
-        other.is_a?(Alias) && other.name == name
+      def to_json(state = _ = nil)
+        { class: :alias, name: name, args: args, location: location }.to_json(state)
       end
 
-      alias eql? ==
-
-      def hash
-        self.class.hash ^ name.hash
+      def sub(s)
+        Alias.new(name: name, args: args.map {|ty| ty.sub(s) }, location: location)
       end
 
-      include NoFreeVariables
-      include NoSubst
-
-      def to_json(*a)
-        { class: :alias, name: name, location: location }.to_json(*a)
-      end
-
-      def to_s(level = 0)
-        name.to_s
-      end
-
-      include EmptyEachType
-
-      def map_type_name
+      def map_type_name(&block)
         Alias.new(
           name: yield(name, location, self),
+          args: args.map {|arg| arg.map_type_name(&block) },
           location: location
         )
+      end
+
+      def map_type(&block)
+        if block
+          Alias.new(
+            name: name,
+            args: args.map {|type| yield type },
+            location: location
+          )
+        else
+          enum_for :map_type
+        end
       end
     end
 
@@ -361,8 +394,8 @@ module RBS
         end
       end
 
-      def to_json(*a)
-        { class: :tuple, types: types, location: location }.to_json(*a)
+      def to_json(state = _ = nil)
+        { class: :tuple, types: types, location: location }.to_json(state)
       end
 
       def sub(s)
@@ -391,6 +424,17 @@ module RBS
           types: types.map {|type| type.map_type_name(&block) },
           location: location
         )
+      end
+
+      def map_type(&block)
+        if block
+          Tuple.new(
+            types: types.map {|type| yield type },
+            location: location
+          )
+        else
+          enum_for :map_type
+        end
       end
     end
 
@@ -421,8 +465,8 @@ module RBS
         end
       end
 
-      def to_json(*a)
-        { class: :record, fields: fields, location: location }.to_json(*a)
+      def to_json(state = _ = nil)
+        { class: :record, fields: fields, location: location }.to_json(state)
       end
 
       def sub(s)
@@ -434,7 +478,7 @@ module RBS
         return "{ }" if self.fields.empty?
 
         fields = self.fields.map do |key, type|
-          if key.is_a?(Symbol) && key.match?(/\A[A-Za-z_][A-Za-z_]*\z/) && !key.match?(Parser::KEYWORDS_RE)
+          if key.is_a?(Symbol) && key.match?(/\A[A-Za-z_][A-Za-z_]*\z/)
             "#{key}: #{type}"
           else
             "#{key.inspect} => #{type}"
@@ -456,6 +500,17 @@ module RBS
           fields: fields.transform_values {|ty| ty.map_type_name(&block) },
           location: location
         )
+      end
+
+      def map_type(&block)
+        if block
+          Record.new(
+            fields: fields.transform_values {|type| yield type },
+            location: location
+          )
+        else
+          enum_for :map_type
+        end
       end
     end
 
@@ -482,8 +537,8 @@ module RBS
         type.free_variables(set)
       end
 
-      def to_json(*a)
-        { class: :optional, type: type, location: location }.to_json(*a)
+      def to_json(state = _ = nil)
+        { class: :optional, type: type, location: location }.to_json(state)
       end
 
       def sub(s)
@@ -516,6 +571,17 @@ module RBS
           location: location
         )
       end
+
+      def map_type(&block)
+        if block
+          Optional.new(
+            type: yield(type),
+            location: location
+          )
+        else
+          enum_for :map_type
+        end
+      end
     end
 
     class Union
@@ -545,8 +611,8 @@ module RBS
         end
       end
 
-      def to_json(*a)
-        { class: :union, types: types, location: location }.to_json(*a)
+      def to_json(state = _ = nil)
+        { class: :union, types: types, location: location }.to_json(state)
       end
 
       def sub(s)
@@ -613,8 +679,8 @@ module RBS
         end
       end
 
-      def to_json(*a)
-        { class: :intersection, types: types, location: location }.to_json(*a)
+      def to_json(state = _ = nil)
+        { class: :intersection, types: types, location: location }.to_json(state)
       end
 
       def sub(s)
@@ -659,10 +725,12 @@ module RBS
       class Param
         attr_reader :type
         attr_reader :name
+        attr_reader :location
 
-        def initialize(type:, name:)
+        def initialize(type:, name:, location: nil)
           @type = type
           @name = name
+          @location = location
         end
 
         def ==(other)
@@ -677,19 +745,19 @@ module RBS
 
         def map_type(&block)
           if block
-            Param.new(name: name, type: yield(type))
+            Param.new(name: name, type: yield(type), location: location)
           else
             enum_for :map_type
           end
         end
 
-        def to_json(*a)
-          { type: type, name: name }.to_json(*a)
+        def to_json(state = _ = nil)
+          { type: type, name: name }.to_json(state)
         end
 
         def to_s
           if name
-            if /\A#{Parser::KEYWORDS_RE}\z/.match?(name)
+            if Parser::KEYWORDS.include?(name.to_s)
               "#{type} `#{name}`"
             else
               "#{type} #{name}"
@@ -777,17 +845,33 @@ module RBS
       def map_type(&block)
         if block
           Function.new(
-            required_positionals: required_positionals.map {|param| param.map_type(&block) },
-            optional_positionals: optional_positionals.map {|param| param.map_type(&block) },
+            required_positionals: amap(required_positionals) {|param| param.map_type(&block) },
+            optional_positionals: amap(optional_positionals) {|param| param.map_type(&block) },
             rest_positionals: rest_positionals&.yield_self {|param| param.map_type(&block) },
-            trailing_positionals: trailing_positionals.map {|param| param.map_type(&block) },
-            required_keywords: required_keywords.transform_values {|param| param.map_type(&block) },
-            optional_keywords: optional_keywords.transform_values {|param| param.map_type(&block) },
+            trailing_positionals: amap(trailing_positionals) {|param| param.map_type(&block) },
+            required_keywords: hmapv(required_keywords) {|param| param.map_type(&block) },
+            optional_keywords: hmapv(optional_keywords) {|param| param.map_type(&block) },
             rest_keywords: rest_keywords&.yield_self {|param| param.map_type(&block) },
             return_type: yield(return_type)
           )
         else
           enum_for :map_type
+        end
+      end
+
+      def amap(array, &block)
+        if array.empty?
+          _ = array
+        else
+          array.map(&block)
+        end
+      end
+
+      def hmapv(hash, &block)
+        if hash.empty?
+          _ = hash
+        else
+          hash.transform_values(&block)
         end
       end
 
@@ -826,7 +910,7 @@ module RBS
         end
       end
 
-      def to_json(*a)
+      def to_json(state = _ = nil)
         {
           required_positionals: required_positionals,
           optional_positionals: optional_positionals,
@@ -836,7 +920,7 @@ module RBS
           optional_keywords: optional_keywords,
           rest_keywords: rest_keywords,
           return_type: return_type
-        }.to_json(*a)
+        }.to_json(state)
       end
 
       def sub(s)
@@ -943,48 +1027,138 @@ module RBS
       end
 
       def has_keyword?
-        !required_keywords.empty? || !optional_keywords.empty? || rest_keywords
+        if !required_keywords.empty? || !optional_keywords.empty? || rest_keywords
+          true
+        else
+          false
+        end
+      end
+    end
+
+    class Block
+      attr_reader :type
+      attr_reader :required
+      attr_reader :self_type
+
+      def initialize(type:, required:, self_type: nil)
+        @type = type
+        @required = required ? true : false
+        @self_type = self_type
+      end
+
+      def ==(other)
+        other.is_a?(Block) &&
+          other.type == type &&
+          other.required == required &&
+          other.self_type == self_type
+      end
+
+      def to_json(state = _ = nil)
+        {
+          type: type,
+          required: required,
+          self_type: self_type
+        }.to_json(state)
+      end
+
+      def sub(s)
+        self.class.new(
+          type: type.sub(s),
+          required: required,
+          self_type: self_type&.sub(s)
+        )
+      end
+
+      def map_type(&block)
+        Block.new(
+          required: required,
+          type: type.map_type(&block),
+          self_type: self_type ? yield(self_type) : nil
+        )
+      end
+    end
+
+    module SelfTypeBindingHelper
+      module_function
+
+      def self_type_binding_to_s(t)
+        if t
+          "[self: #{t}] "
+        else
+          ""
+        end
       end
     end
 
     class Proc
       attr_reader :type
+      attr_reader :block
+      attr_reader :self_type
       attr_reader :location
 
-      def initialize(location:, type:)
+      def initialize(location:, type:, block:, self_type: nil)
         @type = type
+        @block = block
         @location = location
+        @self_type = self_type
       end
 
       def ==(other)
-        other.is_a?(Proc) && other.type == type
+        other.is_a?(Proc) && other.type == type && other.block == block && other.self_type == self_type
       end
 
       alias eql? ==
 
       def hash
-        self.class.hash ^ type.hash
+        self.class.hash ^ type.hash ^ block.hash ^ self_type.hash
       end
 
       def free_variables(set = Set[])
         type.free_variables(set)
+        block&.type&.free_variables(set)
+        self_type&.free_variables(set)
+        set
       end
 
-      def to_json(*a)
-        { class: :proc, type: type, location: location }.to_json(*a)
+      def to_json(state = _ = nil)
+        {
+          class: :proc,
+          type: type,
+          block: block,
+          location: location,
+          self_type: self_type
+        }.to_json(state)
       end
 
       def sub(s)
-        self.class.new(type: type.sub(s), location: location)
+        self.class.new(
+          type: type.sub(s),
+          block: block&.sub(s),
+          self_type: self_type&.sub(s),
+          location: location
+        )
       end
 
       def to_s(level = 0)
-        "^(#{type.param_to_s}) -> #{type.return_to_s}".lstrip
+        self_binding = SelfTypeBindingHelper.self_type_binding_to_s(self_type)
+        block_self_binding = SelfTypeBindingHelper.self_type_binding_to_s(block&.self_type)
+
+        case
+        when b = block
+          if b.required
+            "^(#{type.param_to_s}) #{self_binding}{ (#{b.type.param_to_s}) #{block_self_binding}-> #{b.type.return_to_s} } -> #{type.return_to_s}"
+          else
+            "^(#{type.param_to_s}) #{self_binding}?{ (#{b.type.param_to_s}) #{block_self_binding}-> #{b.type.return_to_s} } -> #{type.return_to_s}"
+          end
+        else
+          "^(#{type.param_to_s}) #{self_binding}-> #{type.return_to_s}"
+        end
       end
 
       def each_type(&block)
         if block
           type.each_type(&block)
+          self.block&.type&.each_type(&block)
         else
           enum_for :each_type
         end
@@ -993,8 +1167,23 @@ module RBS
       def map_type_name(&block)
         Proc.new(
           type: type.map_type_name(&block),
+          block: self.block&.map_type {|type| type.map_type_name(&block) },
+          self_type: self_type&.map_type_name(&block),
           location: location
         )
+      end
+
+      def map_type(&block)
+        if block
+          Proc.new(
+            type: type.map_type(&block),
+            block: self.block&.map_type(&block),
+            self_type: self_type ? yield(self_type) : nil,
+            location: location
+          )
+        else
+          enum_for :map_type
+        end
       end
     end
 
@@ -1022,8 +1211,8 @@ module RBS
       include EmptyEachType
       include NoTypeName
 
-      def to_json(*a)
-        { class: :literal, literal: literal.inspect, location: location }.to_json(*a)
+      def to_json(state = _ = nil)
+        { class: :literal, literal: literal.inspect, location: location }.to_json(state)
       end
 
       def to_s(level = 0)

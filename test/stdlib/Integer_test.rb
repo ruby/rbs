@@ -205,6 +205,7 @@ class IntegerTest < StdlibTest
   def test_down_to
     30.downto(1) {}
     30.downto(31)
+    30.downto(4.2)
   end
 
   def test_eql?
@@ -338,5 +339,28 @@ class IntegerTest < StdlibTest
 
   def test_upto
     5.upto(10) {}
+    5.upto(10.1) {}
+  end
+end
+
+
+class IntegerSingletonTest < Test::Unit::TestCase
+  include TypeAssertions
+
+  testing "singleton(::Integer)"
+
+  def test_try_convert
+    assert_send_type(
+      "(Integer) -> Integer",
+      Integer, :try_convert, 10
+    )
+    assert_send_type(
+      "(ToInt) -> Integer",
+      Integer, :try_convert, ToInt.new(10)
+    )
+    assert_send_type(
+      "(String) -> nil",
+      Integer, :try_convert, "10"
+    )
   end
 end

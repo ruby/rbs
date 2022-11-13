@@ -1,89 +1,9 @@
+# frozen_string_literal: true
+
 module RBS
   module AST
     module Declarations
       class Base
-      end
-
-      class ModuleTypeParams
-        attr_reader :params
-
-        TypeParam = _ = Struct.new(:name, :variance, :skip_validation, keyword_init: true) do
-          def to_json(*a)
-            {
-              name: name,
-              variance: variance,
-              skip_validation: skip_validation,
-            }.to_json(*a)
-          end
-        end
-
-        def initialize()
-          @params = []
-        end
-
-        def add(param)
-          params << param
-          self
-        end
-
-        def ==(other)
-          other.is_a?(ModuleTypeParams) && other.params == params
-        end
-
-        alias eql? ==
-
-        def hash
-          params.hash
-        end
-
-        def [](name)
-          params.find {|p| p.name == name }
-        end
-
-        def to_json(*a)
-          {
-            params: params
-          }.to_json(*a)
-        end
-
-        def each(&block)
-          if block
-            params.each(&block)
-          else
-            params.each
-          end
-        end
-
-        def self.empty
-          new
-        end
-
-        def variance(name)
-          var = self[name] or raise
-          var.variance
-        end
-
-        def skip_validation?(name)
-          var = self[name] or raise
-          var.skip_validation
-        end
-
-        def empty?
-          params.empty?
-        end
-
-        def size
-          params.size
-        end
-
-        def rename_to(names)
-          ModuleTypeParams.new().tap do |params|
-            names.each.with_index do |new_name, index|
-              param = self.params[index]
-              params.add(TypeParam.new(name: new_name, variance: param.variance, skip_validation: param.skip_validation))
-            end
-          end
-        end
       end
 
       module NestedDeclarationHelper
@@ -136,10 +56,12 @@ module RBS
         class Super
           attr_reader :name
           attr_reader :args
+          attr_reader :location
 
-          def initialize(name:, args:)
+          def initialize(name:, args:, location:)
             @name = name
             @args = args
+            @location = location
           end
 
           def ==(other)
@@ -152,11 +74,12 @@ module RBS
             self.class.hash ^ name.hash ^ args.hash
           end
 
-          def to_json(*a)
+          def to_json(state = _ = nil)
             {
               name: name,
-              args: args
-            }.to_json(*a)
+              args: args,
+              location: location
+            }.to_json(state)
           end
         end
 
@@ -195,7 +118,7 @@ module RBS
           self.class.hash ^ name.hash ^ type_params.hash ^ super_class.hash ^ members.hash
         end
 
-        def to_json(*a)
+        def to_json(state = _ = nil)
           {
             declaration: :class,
             name: name,
@@ -205,7 +128,7 @@ module RBS
             annotations: annotations,
             location: location,
             comment: comment
-          }.to_json(*a)
+          }.to_json(state)
         end
       end
 
@@ -231,12 +154,12 @@ module RBS
             self.class.hash ^ name.hash ^ args.hash ^ location.hash
           end
 
-          def to_json(*a)
+          def to_json(state = _ = nil)
             {
               name: name,
               args: args,
               location: location
-            }.to_json(*a)
+            }.to_json(state)
           end
 
           def to_s
@@ -283,7 +206,7 @@ module RBS
           self.class.hash ^ name.hash ^ type_params.hash ^ self_types.hash ^ members.hash
         end
 
-        def to_json(*a)
+        def to_json(state = _ = nil)
           {
             declaration: :module,
             name: name,
@@ -293,54 +216,7 @@ module RBS
             annotations: annotations,
             location: location,
             comment: comment
-          }.to_json(*a)
-        end
-      end
-
-      class Extension < Base
-        attr_reader :name
-        attr_reader :type_params
-        attr_reader :extension_name
-        attr_reader :members
-        attr_reader :annotations
-        attr_reader :location
-        attr_reader :comment
-
-        def initialize(name:, type_params:, extension_name:, members:, annotations:, location:, comment:)
-          @name = name
-          @type_params = type_params
-          @extension_name = extension_name
-          @members = members
-          @annotations = annotations
-          @location = location
-          @comment = comment
-        end
-
-        def ==(other)
-          other.is_a?(Extension) &&
-            other.name == name &&
-            other.type_params == type_params &&
-            other.extension_name == extension_name &&
-            other.members == members
-        end
-
-        alias eql? ==
-
-        def hash
-          self.class.hash ^ name.hash ^ type_params.hash ^ extension_name.hash ^ members.hash
-        end
-
-        def to_json(*a)
-          {
-            declaration: :extension,
-            name: name,
-            type_params: type_params,
-            extension_name: extension_name,
-            members: members,
-            annotations: annotations,
-            location: location,
-            comment: comment
-          }.to_json(*a)
+          }.to_json(state)
         end
       end
 
@@ -351,6 +227,8 @@ module RBS
         attr_reader :annotations
         attr_reader :location
         attr_reader :comment
+
+        include MixinHelper
 
         def initialize(name:, type_params:, members:, annotations:, location:, comment:)
           @name = name
@@ -374,7 +252,7 @@ module RBS
           self.class.hash ^ type_params.hash ^ members.hash
         end
 
-        def to_json(*a)
+        def to_json(state = _ = nil)
           {
             declaration: :interface,
             name: name,
@@ -383,19 +261,21 @@ module RBS
             annotations: annotations,
             location: location,
             comment: comment
-          }.to_json(*a)
+          }.to_json(state)
         end
       end
 
       class Alias < Base
         attr_reader :name
+        attr_reader :type_params
         attr_reader :type
         attr_reader :annotations
         attr_reader :location
         attr_reader :comment
 
-        def initialize(name:, type:, annotations:, location:, comment:)
+        def initialize(name:, type_params:, type:, annotations:, location:, comment:)
           @name = name
+          @type_params = type_params
           @type = type
           @annotations = annotations
           @location = location
@@ -405,24 +285,26 @@ module RBS
         def ==(other)
           other.is_a?(Alias) &&
             other.name == name &&
+            other.type_params == type_params &&
             other.type == type
         end
 
         alias eql? ==
 
         def hash
-          self.class.hash ^ name.hash ^ type.hash
+          self.class.hash ^ name.hash ^ type_params.hash ^ type.hash
         end
 
-        def to_json(*a)
+        def to_json(state = _ = nil)
           {
             declaration: :alias,
             name: name,
+            type_params: type_params,
             type: type,
             annotations: annotations,
             location: location,
             comment: comment
-          }.to_json(*a)
+          }.to_json(state)
         end
       end
 
@@ -451,14 +333,14 @@ module RBS
           self.class.hash ^ name.hash ^ type.hash
         end
 
-        def to_json(*a)
+        def to_json(state = _ = nil)
           {
             declaration: :constant,
             name: name,
             type: type,
             location: location,
             comment: comment
-          }.to_json(*a)
+          }.to_json(state)
         end
       end
 
@@ -487,14 +369,14 @@ module RBS
           self.class.hash ^ name.hash ^ type.hash
         end
 
-        def to_json(*a)
+        def to_json(state = _ = nil)
           {
             declaration: :global,
             name: name,
             type: type,
             location: location,
             comment: comment
-          }.to_json(*a)
+          }.to_json(state)
         end
       end
     end

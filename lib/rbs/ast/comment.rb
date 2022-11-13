@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module RBS
   module AST
     class Comment
@@ -19,20 +21,8 @@ module RBS
         self.class.hash ^ string.hash
       end
 
-      def to_json(*a)
-        { string: string, location: location }.to_json(*a)
-      end
-
-      def concat(string:, location:)
-        @string.concat string
-
-        if loc = @location
-          loc.concat location
-        else
-          @location = location
-        end
-
-        self
+      def to_json(state = _ = nil)
+        { string: string, location: location }.to_json(state)
       end
     end
   end

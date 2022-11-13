@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module RBS
   class EnvironmentLoader
     class UnknownLibraryError < StandardError
@@ -21,7 +23,9 @@ module RBS
     DEFAULT_CORE_ROOT = Pathname(_ = __dir__) + "../../core"
 
     def self.gem_sig_path(name, version)
-      spec = Gem::Specification.find_by_name(name, version)
+      requirements = []
+      requirements << version if version
+      spec = Gem::Specification.find_by_name(name, *requirements)
       path = Pathname(spec.gem_dir) + "sig"
       if path.directory?
         [spec, path]
@@ -34,21 +38,56 @@ module RBS
       @core_root = core_root
       @repository = repository
 
-      @libs = []
+      @libs = Set.new
       @dirs = []
     end
 
-    def add(path: nil, library: nil, version: nil)
+    def add(path: nil, library: nil, version: nil, resolve_dependencies: true)
       case
       when path
         dirs << path
       when library
-        libs << Library.new(name: library, version: version)
+        if library == 'rubygems'
+          RBS.logger.warn '`rubygems` has been moved to core library, so it is always loaded. Remove explicit loading `rubygems`'
+          return
+        end
+
+        if libs.add?(Library.new(name: library, version: version)) && resolve_dependencies
+          resolve_dependencies(library: library, version: version)
+        end
+      end
+    end
+
+    def resolve_dependencies(library:, version:)
+      [Collection::Sources::Rubygems.instance, Collection::Sources::Stdlib.instance].each do |source|
+        # @type var gem: { 'name' => String, 'version' => String? }
+        gem = { 'name' => library, 'version' => version }
+        next unless source.has?(gem)
+
+        gem['version'] ||= source.versions(gem).last
+        source.dependencies_of(gem)&.each do |dep|
+          add(library: dep['name'], version: nil)
+        end
+        return
+      end
+    end
+
+    def add_collection(collection_config)
+      collection_config.check_rbs_availability!
+
+      repository.add(collection_config.repo_path)
+
+      collection_config.gems.each do |gem|
+        add(library: gem['name'], version: gem['version'], resolve_dependencies: false)
       end
     end
 
     def has_library?(library:, version:)
-      self.class.gem_sig_path(library, version) || repository.lookup(library, version)
+      if self.class.gem_sig_path(library, version) || repository.lookup(library, version)
+        true
+      else
+        false
+      end
     end
 
     def load(env:)
@@ -70,7 +109,7 @@ module RBS
 
       libs.each do |lib|
         unless has_library?(version: lib.version, library: lib.name)
-          raise UnknownLibraryError.new(lib: lib) 
+          raise UnknownLibraryError.new(lib: lib)
         end
 
         case
@@ -97,12 +136,12 @@ module RBS
         if path.basename.to_s.start_with?("_")
           if skip_hidden
             unless immediate
-              return 
+              return
             end
           end
         end
 
-        path.each_child do |child|
+        path.children.sort.each do |child|
           each_file(child, immediate: false, skip_hidden: skip_hidden, &block)
         end
       end
@@ -118,7 +157,7 @@ module RBS
           next if files.include?(path)
 
           files << path
-          buffer = Buffer.new(name: path.to_s, content: path.read)
+          buffer = Buffer.new(name: path.to_s, content: path.read(encoding: "UTF-8"))
 
           Parser.parse_signature(buffer).each do |decl|
             yield decl, buffer, source, path

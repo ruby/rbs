@@ -2,7 +2,7 @@ require_relative "test_helper"
 
 require "tsort"
 
-class TSortSingletonTest < Minitest::Test
+class TSortSingletonTest < Test::Unit::TestCase
   include TypeAssertions
 
   library 'tsort'
@@ -79,7 +79,7 @@ class TSortSingletonTest < Minitest::Test
   end
 end
 
-class TSortInstanceTest < Minitest::Test
+class TSortInstanceTest < Test::Unit::TestCase
   include TypeAssertions
 
   library 'tsort'

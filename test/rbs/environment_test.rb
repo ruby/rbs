@@ -1,6 +1,6 @@
 require "test_helper"
 
-class RBS::EnvironmentTest < Minitest::Test
+class RBS::EnvironmentTest < Test::Unit::TestCase
   include TestHelper
 
   Environment = RBS::Environment
@@ -27,7 +27,6 @@ EOF
     )
 
     assert_equal [
-                   type_name("::Foo::Bar::Baz").to_namespace,
                    type_name("::Foo::Bar").to_namespace,
                    type_name("::Foo").to_namespace,
                    Namespace.root
@@ -160,11 +159,14 @@ module Foo[X, in Y]      # Variance mismatch
 end
 EOF
 
-    # The GenericParameterMismatchError raises on #type_params call
     env << decls[0]
     env << decls[1]
     env << decls[2]
     env << decls[3]
+
+    assert_raises RBS::GenericParameterMismatchError do
+      env.validate_type_params()
+    end
   end
 
   def test_generic_class_error
@@ -186,7 +188,7 @@ EOF
       entry.insert(decl: decls[0], outer: [])
       entry.insert(decl: decls[1], outer: [])
 
-      assert_instance_of RBS::AST::Declarations::ModuleTypeParams, entry.type_params
+      assert_instance_of Array, entry.type_params
     end
 
     Environment::ModuleEntry.new(name: type_name("::Foo")).tap do |entry|
@@ -304,8 +306,6 @@ module Foo : _Each[String]
 
   type t = ::String | String
 
-  $size: Integer
-
   class String
   end
 
@@ -363,8 +363,6 @@ module ::Foo : ::Foo::_Each[::Foo::String]
 
   type ::Foo::t = ::String | ::Foo::String
 
-  $size: Integer
-
   class ::Foo::String
   end
 
@@ -381,6 +379,105 @@ end
 class ::Time
 end
 module ::Enumerable[A]
+end
+RBS
+  end
+
+  def test_absolute_type_super
+    env = Environment.new
+
+    decls = RBS::Parser.parse_signature(<<-RBS)
+module A
+  class C
+  end
+
+  class B < C
+    class C
+    end
+  end
+end
+    RBS
+
+    decls.each do |decl|
+      env << decl
+    end
+
+    env.resolve_type_names.tap do |env|
+      class_decl = env.class_decls[TypeName("::A::B")]
+      assert_equal TypeName("::A::C"), class_decl.primary.decl.super_class.name
+    end
+  end
+
+  def test_reject
+    env = Environment.new
+
+    foo = RBS::Buffer.new(content: <<EOF, name: Pathname("foo.rbs"))
+class Hello < String
+  def hello: (String) -> Integer
+end
+EOF
+
+    RBS::Parser.parse_signature(foo).each do |decl|
+      env << decl
+    end
+
+    bar = RBS::Buffer.new(content: <<EOF, name: Pathname("bar.rbs"))
+class Hello
+  def world: () -> void
+end
+EOF
+
+    RBS::Parser.parse_signature(bar).each do |decl|
+      env << decl
+    end
+
+    assert env.buffers.any? {|buf| buf.name == Pathname("foo.rbs") }
+    assert env.buffers.any? {|buf| buf.name == Pathname("bar.rbs") }
+
+    env_ = env.reject do |decl|
+      decl.location.buffer.name == Pathname("foo.rbs")
+    end
+
+    assert env_.buffers.none? {|buf| buf.name == Pathname("foo.rbs") }
+    assert env_.buffers.any? {|buf| buf.name == Pathname("bar.rbs") }
+  end
+
+  def test_absolute_type_generics_upper_bound
+    env = Environment.new
+
+    decls = RBS::Parser.parse_signature(<<RBS)
+interface _Equatable
+  def ==: (untyped) -> bool
+end
+
+module Bar[A]
+end
+
+class Foo[A < _Equatable]
+  def test: [B < Bar[_Equatable]] (A, B) -> bool
+end
+RBS
+
+    decls.each do |decl|
+      env << decl
+    end
+
+    env_ = env.resolve_type_names
+
+    writer = RBS::Writer.new(out: StringIO.new)
+
+    writer.write(env_.declarations)
+
+    assert_equal(<<RBS, writer.out.string)
+interface ::_Equatable
+  def ==: (untyped) -> bool
+end
+
+module ::Bar[A]
+end
+
+class ::Foo[A < ::_Equatable]
+  def test: [B < ::Bar[::_Equatable]] (A, B) -> bool
 end
 RBS
   end

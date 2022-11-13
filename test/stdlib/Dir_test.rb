@@ -1,6 +1,6 @@
 require_relative "test_helper"
 
-class DirSingletonTest < Minitest::Test
+class DirSingletonTest < Test::Unit::TestCase
   include TypeAssertions
 
   testing "singleton(::Dir)"
@@ -158,7 +158,7 @@ class DirSingletonTest < Minitest::Test
   end
 end
 
-class DirInstanceTest < Minitest::Test
+class DirInstanceTest < Test::Unit::TestCase
   include TypeAssertions
 
   testing "::Dir"

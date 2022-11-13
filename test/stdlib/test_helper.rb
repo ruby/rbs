@@ -1,12 +1,9 @@
 require "rbs"
 require "rbs/test"
-require "minitest/autorun"
-
-begin
-  require 'minitest/reporters'
-  Minitest::Reporters.use! [Minitest::Reporters::DefaultReporter.new]
-rescue LoadError
-end
+require "test/unit"
+require "tmpdir"
+require "stringio"
+require "tempfile"
 
 module Spy
   def self.wrap(object, method_name)
@@ -84,7 +81,13 @@ module Spy
                       end
 
           begin
-            return_value = spy.object.__send__(spy.method_name, *args, &spy_block)
+            if spy_block
+              return_value = spy.object.__send__(spy.method_name, *args) do |*a, **k, &b|
+                spy_block.call(*a, **k, &b)
+              end
+            else
+              return_value = spy.object.__send__(spy.method_name, *args, &spy_block)
+            end
           rescue ::Exception => exn
             exception = exn
           end
@@ -120,11 +123,43 @@ module Spy
   end
 end
 
+module VersionHelper
+  def if_ruby(range)
+    r = Range.new(
+      range.begin&.yield_self {|b| Gem::Version.new(b) },
+      range.end&.yield_self {|e| Gem::Version.new(e) },
+      range.exclude_end?
+    )
+
+    if r === Gem::Version.new(RUBY_VERSION)
+      yield
+    else
+      notify "Skipping test: #{r} !== #{RUBY_VERSION}"
+    end
+  end
+
+  def if_ruby3(&block)
+    if_ruby("3.0.0"..."4.0.0", &block)
+  end
+
+  def if_ruby30(&block)
+    if_ruby("3.0.0"..."3.1.0", &block)
+  end
+
+  def if_ruby31(&block)
+    if_ruby("3.1.0"..."3.2.0", &block)
+  end
+end
+
 module TypeAssertions
   module ClassMethods
     attr_reader :target
 
     def library(*libs)
+      if @libs
+        raise "Multiple #library calls are not allowed"
+      end
+
       @libs = libs
       @env = nil
       @target = nil
@@ -216,6 +251,24 @@ module TypeAssertions
     end
   end
 
+  def instance_class
+    type, _ = target
+
+    case type
+    when RBS::Types::ClassSingleton, RBS::Types::ClassInstance
+      Object.const_get(type.name.to_s)
+    end
+  end
+
+  def class_class
+    type, _ = target
+
+    case type
+    when RBS::Types::ClassSingleton, RBS::Types::ClassInstance
+      Object.const_get(type.name.to_s).singleton_class
+    end
+  end
+
   ruby2_keywords def assert_send_type(method_type, receiver, method, *args, &block)
     trace = []
     spy = Spy.wrap(receiver, method)
@@ -237,22 +290,19 @@ module TypeAssertions
            method_type
          end
 
-    typecheck = RBS::Test::TypeCheck.new(self_class: receiver.class, builder: builder, sample_size: 100, unchecked_classes: [])
+    typecheck = RBS::Test::TypeCheck.new(
+      self_class: receiver.class,
+      builder: builder,
+      sample_size: 100,
+      unchecked_classes: [],
+      instance_class: instance_class,
+      class_class: class_class
+    )
     errors = typecheck.method_call(method, mt, trace.last, errors: [])
 
     assert_empty errors.map {|x| RBS::Test::Errors.to_string(x) }, "Call trace does not match with given method type: #{trace.last.inspect}"
 
-    type, definition = target
-    method_types = case
-                   when definition.instance_type?
-                     subst = RBS::Substitution.build(definition.type_params, type.args)
-                     definition.methods[method].method_types.map do |method_type|
-                       method_type.sub(subst)
-                     end
-                   when definition.class_type?
-                     definition.methods[method].method_types
-                   end
-
+    method_types = method_types(method)
     all_errors = method_types.map {|t| typecheck.method_call(method, t, trace.last, errors: []) }
     assert all_errors.any? {|es| es.empty? }, "Call trace does not match one of method definitions:\n  #{trace.last.inspect}\n  #{method_types.join(" | ")}"
 
@@ -283,21 +333,59 @@ module TypeAssertions
          end
 
     mt = mt.update(block: if mt.block
-                            RBS::MethodType::Block.new(
+                            RBS::Types::Block.new(
                               type: mt.block.type.with_return_type(RBS::Types::Bases::Any.new(location: nil)),
-                              required: mt.block.required
+                              required: mt.block.required,
+                              self_type: nil
                             )
                           end,
                    type: mt.type.with_return_type(RBS::Types::Bases::Any.new(location: nil)))
 
-    typecheck = RBS::Test::TypeCheck.new(self_class: receiver.class, builder: builder, sample_size: 100, unchecked_classes: [])
+    typecheck = RBS::Test::TypeCheck.new(
+      self_class: receiver.class,
+      instance_class: instance_class,
+      class_class: class_class,
+      builder: builder,
+      sample_size: 100,
+      unchecked_classes: []
+    )
     errors = typecheck.method_call(method, mt, trace.last, errors: [])
 
     assert_operator exception, :is_a?, ::Exception
     assert_empty errors.map {|x| RBS::Test::Errors.to_string(x) }
 
+    method_types = method_types(method)
+    all_errors = method_types.map {|t| typecheck.method_call(method, t, trace.last, errors: []) }
+    assert all_errors.all? {|es| es.size > 0 }, "Call trace unexpectedly matches one of method definitions:\n  #{trace.last.inspect}\n  #{method_types.join(" | ")}"
+
     result
   end
+
+  def method_types(method)
+    type, definition = target
+
+    case
+    when definition.instance_type?
+      subst = RBS::Substitution.build(definition.type_params, type.args)
+      definition.methods[method].method_types.map do |method_type|
+        method_type.sub(subst)
+      end
+    when definition.class_type?
+      definition.methods[method].method_types
+    end
+  end
+
+  def ci?
+    ENV["CI"] == "true"
+  end
+
+  def allows_error(*errors)
+    yield
+  rescue *errors => exn
+    notify "Error allowed: #{exn.inspect}"
+  end
+
+  include VersionHelper
 end
 
 class ToInt
@@ -353,6 +441,12 @@ end
 class ToJson
 end
 
+class Rand
+  def rand(max)
+    max - 1
+  end
+end
+
 class JsonWrite
   def write(_str)
   end
@@ -394,8 +488,10 @@ class ArefFromStringToString
   end
 end
 
-class StdlibTest < Minitest::Test
+class StdlibTest < Test::Unit::TestCase
   RBS.logger_level = ENV["RBS_TEST_LOGLEVEL"] || "info"
+
+  include VersionHelper
 
   loader = RBS::EnvironmentLoader.new
   DEFAULT_ENV = RBS::Environment.new.yield_self do |env|
@@ -430,5 +526,21 @@ class StdlibTest < Minitest::Test
 
   def hook
     self.class.hook
+  end
+
+  def self.discard_output
+    include DiscardOutput
+  end
+
+  module DiscardOutput
+    def setup
+      null = StringIO.new
+      @stdout, @stderr = $stdout, $stderr
+      $stderr = $stdout = null
+    end
+
+    def teardown
+      $stderr, $stdout = @stderr, @stdout
+    end
   end
 end

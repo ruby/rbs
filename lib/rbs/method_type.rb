@@ -1,35 +1,7 @@
+# frozen_string_literal: true
+
 module RBS
   class MethodType
-    class Block
-      attr_reader :type
-      attr_reader :required
-
-      def initialize(type:, required:)
-        @type = type
-        @required = required
-      end
-
-      def ==(other)
-        other.is_a?(Block) &&
-          other.type == type &&
-          other.required == required
-      end
-
-      def to_json(*a)
-        {
-          type: type,
-          required: required
-        }.to_json(*a)
-      end
-
-      def sub(s)
-        self.class.new(
-          type: type.sub(s),
-          required: required
-        )
-      end
-    end
-
     attr_reader :type_params
     attr_reader :type
     attr_reader :block
@@ -49,21 +21,28 @@ module RBS
         other.block == block
     end
 
-    def to_json(*a)
+    def to_json(state = _ = nil)
       {
         type_params: type_params,
         type: type,
         block: block,
         location: location
-      }.to_json(*a)
+      }.to_json(state)
     end
 
     def sub(s)
-      s.without(*type_params).yield_self do |sub|
-        map_type do |ty|
-          ty.sub(sub)
-        end
-      end
+      sub = s.without(*type_param_names)
+
+      self.class.new(
+        type_params: type_params.map do |param|
+          param.map_type do |bound|
+            bound.map_type {|ty| ty.sub(sub) }
+          end
+        end,
+        type: type.sub(sub),
+        block: block&.sub(sub),
+        location: location
+      )
     end
 
     def update(type_params: self.type_params, type: self.type, block: self.block, location: self.location)
@@ -78,18 +57,28 @@ module RBS
     def free_variables(set = Set.new)
       type.free_variables(set)
       block&.type&.free_variables(set)
-      set.subtract(type_params)
+      set.subtract(type_param_names)
     end
 
     def map_type(&block)
       self.class.new(
         type_params: type_params,
         type: type.map_type(&block),
-        block: self.block&.yield_self do |b|
-          Block.new(type: b.type.map_type(&block), required: b.required)
-        end,
+        block: self.block&.map_type(&block),
         location: location
       )
+    end
+
+    def map_type_bound(&block)
+      if type_params.empty?
+        self
+      else
+        self.update(
+          type_params: type_params.map {|param|
+            param.map_type(&block)
+          }
+        )
+      end
     end
 
     def each_type(&block)
@@ -104,11 +93,13 @@ module RBS
     end
 
     def to_s
+      block_self_binding = Types::SelfTypeBindingHelper.self_type_binding_to_s(block&.self_type)
+
       s = case
           when (b = block) && b.required
-            "(#{type.param_to_s}) { (#{b.type.param_to_s}) -> #{b.type.return_to_s} } -> #{type.return_to_s}"
+            "(#{type.param_to_s}) { (#{b.type.param_to_s}) #{block_self_binding}-> #{b.type.return_to_s} } -> #{type.return_to_s}"
           when b = block
-            "(#{type.param_to_s}) ?{ (#{b.type.param_to_s}) -> #{b.type.return_to_s} } -> #{type.return_to_s}"
+            "(#{type.param_to_s}) ?{ (#{b.type.param_to_s}) #{block_self_binding}-> #{b.type.return_to_s} } -> #{type.return_to_s}"
           else
             "(#{type.param_to_s}) -> #{type.return_to_s}"
           end
@@ -118,6 +109,10 @@ module RBS
       else
         "[#{type_params.join(", ")}] #{s}"
       end
+    end
+
+    def type_param_names
+      type_params.map(&:name)
     end
   end
 end

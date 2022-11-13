@@ -1,7 +1,7 @@
 require_relative '../test_helper'
 require 'uri'
 
-class URIGenericSingletonTest < Minitest::Test
+class URIGenericSingletonTest < Test::Unit::TestCase
   include TypeAssertions
   library 'uri'
   testing 'singleton(::URI::Generic)'
@@ -40,6 +40,20 @@ class URIGenericSingletonTest < Minitest::Test
                         opaque: nil,
                         query: '?t=1',
                         fragment: 'baz'
+                      }
+
+    assert_send_type '({ scheme: nil, userinfo: nil, host: nil, port: nil, registry: nil, path: nil, opaque: nil, query: nil, fragment: nil }) -> URI::Generic',
+                      URI::Generic, :build2,
+                      {
+                        scheme: nil,
+                        userinfo: nil,
+                        host: nil,
+                        port: nil,
+                        registry: nil,
+                        path: nil,
+                        opaque: nil,
+                        query: nil,
+                        fragment: nil
                       }
   end
 
@@ -82,7 +96,7 @@ class URIGenericSingletonTest < Minitest::Test
   end
 end
 
-class URIGenericInstanceTest < Minitest::Test
+class URIGenericInstanceTest < Test::Unit::TestCase
   include TypeAssertions
   library 'uri'
   testing '::URI::Generic'
@@ -188,6 +202,8 @@ class URIGenericInstanceTest < Minitest::Test
   end
 
   def test_userinfo=
+    omit "userinfo= returns an array, but we want String?"
+
     assert_send_type  '(String? userinfo) -> Array[String | nil]?',
                       generic, :userinfo=, nil
 

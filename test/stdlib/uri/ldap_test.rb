@@ -1,7 +1,7 @@
 require_relative '../test_helper'
 require 'uri'
 
-class URILDAPSingletonTest < Minitest::Test
+class URILDAPSingletonTest < Test::Unit::TestCase
   include TypeAssertions
   library 'uri'
   testing 'singleton(::URI::LDAP)'
@@ -30,6 +30,18 @@ class URILDAPSingletonTest < Minitest::Test
                         filter: '(t=1)',
                         extensions: 't=2'
                       }
+
+    assert_send_type '({ host: nil, port: nil, dn: nil, attributes: nil, scope: nil, filter: nil, extensions: nil }) -> URI::LDAP',
+                      URI::LDAP, :build,
+                      {
+                        host: nil,
+                        port: nil,
+                        dn: nil,
+                        attributes: nil,
+                        scope: nil,
+                        filter: nil,
+                        extensions: nil
+                      }
   end
 
   def test_new
@@ -45,7 +57,7 @@ class URILDAPSingletonTest < Minitest::Test
   end
 end
 
-class URILDAPInstanceTest < Minitest::Test
+class URILDAPInstanceTest < Test::Unit::TestCase
   include TypeAssertions
   library 'uri'
   testing '::URI::LDAP'

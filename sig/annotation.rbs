@@ -2,17 +2,18 @@ module RBS
   module AST
     # RBS allows writing annotations of declarations and members.
     #
-    #    %a{annotation_here}
-    #    class Hello
-    #      %a{rbs:test:skip}
-    #      def foo: () -> void
-    #    end
-    #
+    # ```rbs
+    # %a{annotation_here}
+    # class Hello
+    #   %a{rbs:test:skip}
+    #   def foo: () -> void
+    # end
+    # ```
     class Annotation
       attr_reader string: String
-      attr_reader location: Location?
+      attr_reader location: Location[untyped, untyped]?
 
-      def initialize: (string: String, location: Location?) -> void
+      def initialize: (string: String, location: Location[untyped, untyped]?) -> void
 
       def ==: (untyped other) -> bool
 
@@ -20,7 +21,7 @@ module RBS
 
       def hash: () -> Integer
 
-      def to_json: (*untyped) -> String
+      include _ToJson
     end
   end
 end

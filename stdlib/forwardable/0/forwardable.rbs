@@ -1,3 +1,4 @@
+# <!-- rdoc-file=lib/forwardable.rb -->
 # The Forwardable module provides delegation of specified methods to a
 # designated object, using the methods #def_delegator and #def_delegators.
 #
@@ -61,7 +62,7 @@
 #       def_delegators :@q, :clear, :first, :push, :shift, :size
 #     end
 #
-#     q = Queue.new
+#     q = Thread::Queue.new
 #     q.enq 1, 2, 3, 4, 5
 #     q.push 6
 #
@@ -94,18 +95,36 @@
 # `delegate.rb`.
 #
 module Forwardable
+  # <!-- rdoc-file=lib/forwardable.rb -->
+  # Version of `forwardable.rb`
+  #
   VERSION: String
 
   FORWARDABLE_VERSION: String
 
+  # <!--
+  #   rdoc-file=lib/forwardable.rb
+  #   - delegate method => accessor
+  #   - delegate [method, method, ...] => accessor
+  # -->
   # Takes a hash as its argument.  The key is a symbol or an array of symbols.
   # These symbols correspond to method names, instance variable names, or constant
   # names (see def_delegator).  The value is the accessor to which the methods
   # will be delegated.
+  #
   def instance_delegate: (Hash[Symbol | Array[Symbol], Symbol] hash) -> void
 
+  # <!--
+  #   rdoc-file=lib/forwardable.rb
+  #   - delegate(hash)
+  # -->
+  #
   alias delegate instance_delegate
 
+  # <!--
+  #   rdoc-file=lib/forwardable.rb
+  #   - def_instance_delegators(accessor, *methods)
+  # -->
   # Shortcut for defining multiple delegator methods, but with no provision for
   # using a different name.  The following two code samples have the same effect:
   #
@@ -117,8 +136,17 @@ module Forwardable
   #
   def def_instance_delegators: (Symbol | String accessor, *Symbol methods) -> void
 
+  # <!--
+  #   rdoc-file=lib/forwardable.rb
+  #   - def_delegators(accessor, *methods)
+  # -->
+  #
   alias def_delegators def_instance_delegators
 
+  # <!--
+  #   rdoc-file=lib/forwardable.rb
+  #   - def_instance_delegator(accessor, method, ali = method)
+  # -->
   # Define `method` as delegator instance method with an optional alias name
   # `ali`. Method calls to `ali` will be delegated to `accessor.method`.
   # `accessor` should be a method name, instance variable name, or constant name.
@@ -145,9 +173,15 @@ module Forwardable
   #
   def def_instance_delegator: (Symbol | String accessor, Symbol method, ?Symbol ali) -> void
 
+  # <!--
+  #   rdoc-file=lib/forwardable.rb
+  #   - def_delegator(accessor, method, ali = method)
+  # -->
+  #
   alias def_delegator def_instance_delegator
 end
 
+# <!-- rdoc-file=lib/forwardable.rb -->
 # SingleForwardable can be used to setup delegation at the object level as well.
 #
 #     printer = String.new
@@ -175,13 +209,28 @@ end
 # def_instance_delegator and def_single_delegator, etc.
 #
 module SingleForwardable
+  # <!--
+  #   rdoc-file=lib/forwardable.rb
+  #   - delegate method => accessor
+  #   - delegate [method, method, ...] => accessor
+  # -->
   # Takes a hash as its argument.  The key is a symbol or an array of symbols.
   # These symbols correspond to method names.  The value is the accessor to which
   # the methods will be delegated.
+  #
   def single_delegate: (Hash[Symbol | Array[Symbol], Symbol] hash) -> void
 
+  # <!--
+  #   rdoc-file=lib/forwardable.rb
+  #   - delegate(hash)
+  # -->
+  #
   alias delegate single_delegate
 
+  # <!--
+  #   rdoc-file=lib/forwardable.rb
+  #   - def_single_delegators(accessor, *methods)
+  # -->
   # Shortcut for defining multiple delegator methods, but with no provision for
   # using a different name.  The following two code samples have the same effect:
   #
@@ -193,12 +242,27 @@ module SingleForwardable
   #
   def def_single_delegators: (Symbol | String accessor, *Symbol methods) -> void
 
+  # <!--
+  #   rdoc-file=lib/forwardable.rb
+  #   - def_delegators(accessor, *methods)
+  # -->
+  #
   alias def_delegators def_single_delegators
 
+  # <!--
+  #   rdoc-file=lib/forwardable.rb
+  #   - def_single_delegator(accessor, method, new_name=method)
+  # -->
   # Defines a method *method* which delegates to *accessor* (i.e. it calls the
   # method of the same name in *accessor*).  If *new_name* is provided, it is used
   # as the name for the delegate method. Returns the name of the method defined.
+  #
   def def_single_delegator: (Symbol | String accessor, Symbol method, ?Symbol ali) -> void
 
+  # <!--
+  #   rdoc-file=lib/forwardable.rb
+  #   - def_delegator(accessor, method, ali = method)
+  # -->
+  #
   alias def_delegator def_single_delegator
 end

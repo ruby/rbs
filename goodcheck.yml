@@ -1,15 +1,4 @@
 rules:
-  - id: rbs.no_mark
-    pattern: 💪👽🚨
-    message: Do you forget to delete `arglists` section?
-    glob:
-      - "stdlib/**/*.rbs"
-    fail:
-      - |
-        # arglists 💪👽🚨 << Delete this section
-        #    File.absolute_path?(file_name)  ->  true or false
-        #
-
   - id: rbs.no_arg
     pattern:
       regexp: arg\d+
@@ -22,11 +11,31 @@ rules:
     justification:
       - Documents (comments) may contain that pattern.
     glob:
-      - "stdlib/**/*.rbs"
+      - "{core,stdlib}/**/*.rbs"
     fail:
       - "def `send`: (String | Symbol arg0, *untyped arg1) -> untyped"
     pass:
       - "def `send`: (String | Symbol, *untyped) -> untyped"
+
+  - id: rbs.prefer_boolish
+    pattern:
+      - regexp: '\([^(]*\bbool\b[^\n]*\)'
+      - token: "-> bool }"
+    message: |
+      Prefer `boolish` over `bool` for method arguments and block return values
+
+      See the doc below:
+      https://github.com/ruby/rbs/blob/78d04a2db0f1c4925d2b13c2939868edf9465d6c/docs/syntax.md#bool-or-boolish
+    glob:
+      - "**/*.rbs"
+    justification:
+      - When you strictly want `true | false`. Use `bool` in this case.
+    pass:
+      - "(arg: boolish)"
+      - "{ () -> boolish }"
+    fail:
+      - "(arg: bool)"
+      - "{ () -> bool }"
 
   - id: deprecate_stdlib_test
     pattern:
@@ -51,7 +60,7 @@ rules:
         end
     pass:
       - |
-        class IntegerTest < Minitest::Test
+        class IntegerTest < Test::Unit::TestCase
           include TypeAssertions
 
           testing "Integer"

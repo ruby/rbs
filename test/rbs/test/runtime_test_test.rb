@@ -4,13 +4,13 @@ require "logger"
 
 return unless Gem::Version.new(RUBY_VERSION) >= Gem::Version.new('2.7.0')
 
-class RBS::Test::RuntimeTestTest < Minitest::Test
+class RBS::Test::RuntimeTestTest < Test::Unit::TestCase
   include TestHelper
 
   def test_runtime_success
     output = assert_test_success()
-    assert_match "Setting up hooks for ::Hello", output
-    refute_match "No type checker was installed!", output
+    assert_match("Setting up hooks for ::Hello", output)
+    refute_match(/#{Regexp.escape("No type checker was installed!")}/, output)
   end
 
   def test_runtime_test_with_sample_size
@@ -67,11 +67,10 @@ RUBY
           "RBS_TEST_TARGET" => "::Hello",
           "RBS_TEST_OPT" => "-I./foo.rbs"
         }
-        ruby = ENV['RUBY'] || RbConfig.ruby
-        command_line = if defined?(Bundler)
-                         [ruby, "-rbundler/setup", "-rrbs/test/setup", "sample.rb"]
+        command_line = if ENV['RUBY']
+                         [ENV['RUBY'], "-I#{__dir__}/../../../lib", "-EUTF-8", "-rrbs/test/setup", "sample.rb"]
                        else
-                         [ruby, "-I#{__dir__}/../../../lib", "-EUTF-8", "-rrbs/test/setup", "sample.rb"]
+                         [RbConfig.ruby, "-rbundler/setup", "-rrbs/test/setup", "sample.rb"]
                        end
 
         _out, err, status = Open3.capture3(env.merge(other_env), *command_line, chdir: path.to_s)
@@ -99,13 +98,13 @@ RUBY
   end
 
   def test_no_test_install
-    output = assert_test_success(other_env: { "RBS_TEST_TARGET" => "NO_SUCH_CLASS" })
-    refute_match "Setting up hooks for ::Hello", output
-    assert_match "No type checker was installed!", output
+    output = assert_test_success(other_env: { "RBS_TEST_TARGET" => "NO_SUCH_CLASS", "RBS_TEST_LOGLEVEL" => "debug" })
+    refute_match(/#{Regexp.escape("Setting up hooks for ::Hello")}/, output)
+    assert_match(/#{Regexp.escape("No type checker was installed!")}/, output)
   end
 
   def test_name_override
-    output = assert_test_success(ruby_content: <<RUBY)
+    output = assert_test_success(ruby_content: <<RUBY, other_env: { "RBS_TEST_LOGLEVEL" => "debug" })
 class TestClass
   def self.name
     raise
@@ -136,7 +135,7 @@ RBS
   end
 
   def test_minitest
-    skip unless has_gem?("minitest")
+    omit if skip_minitest?
 
     assert_test_success(other_env: { 'RBS_TEST_TARGET' => 'Foo', 'RBS_TEST_DOUBLE_SUITE' => 'minitest' }, rbs_content: <<RBS, ruby_content: <<RUBY)
 class Foo
@@ -168,7 +167,7 @@ RUBY
   end
 
   def test_rspec
-    skip unless has_gem?("rspec")
+    omit unless has_gem?("rspec")
 
     assert_test_success(other_env: { "RBS_TEST_TARGET" => 'Foo', "RBS_TEST_DOUBLE_SUITE" => 'rspec' }, rbs_content: <<RBS, ruby_content: <<RUBY)
 class Foo
@@ -199,5 +198,167 @@ describe 'Foo' do
   end
 end
 RUBY
+  end
+
+  def test_instance_eval
+    assert_test_success(other_env: { 'RBS_TEST_TARGET' => 'Foo' }, rbs_content: <<RBS, ruby_content: <<RUBY)
+class Foo
+  def foo: (Integer) { (Integer) -> Integer } -> Integer
+end
+RBS
+
+class Foo
+  def foo(integer, &block)
+    integer.instance_eval(&block)
+  end
+end
+
+Foo.new.foo(10) do
+  self + 3
+end
+RUBY
+  end
+
+  def test_super
+    assert_test_success(other_env: { 'RBS_TEST_TARGET' => 'Foo,Bar' }, rbs_content: <<RBS, ruby_content: <<'RUBY')
+class Foo
+  def foo: (Integer) -> void
+end
+
+class Bar
+  def foo: (Integer) -> void
+end
+RBS
+
+class Foo
+  def foo(x)
+    ::RBS.logger.error("Foo#foo")
+    puts "Foo#foo: x=#{x}"
+  end
+end
+
+class Bar < Foo
+  def foo(x)
+    ::RBS.logger.error("Bar#foo")
+    puts "Bar#foo: x=#{x}"
+    super
+  end
+end
+
+Bar.new.foo(30)
+RUBY
+  end
+
+  def test_block_keywords
+    assert_test_success(other_env: { 'RBS_TEST_TARGET' => 'A' }, rbs_content: <<RBS, ruby_content: <<'RUBY')
+class A
+  def call: (untyped) { (untyped) -> void } -> void
+end
+RBS
+
+class A
+  def call(val, &block)
+    yield(value: val)
+  end
+end
+
+A.new.call("foo") {|value:| puts value }
+RUBY
+  end
+
+  def test_method_curry
+    assert_test_success(other_env: { 'RBS_TEST_TARGET' => "A" }, rbs_content: <<RBS, ruby_content: <<'RUBY')
+class A
+  def on_object: (Integer, String) -> void
+end
+RBS
+class A
+  def on_object(x, y)
+    pp(x: x, y: y)
+  end
+end
+
+STDOUT.puts A.new.method(:on_object).curry[1][""]
+RUBY
+  end
+
+  def test_missing_required_args
+    output = refute_test_success(ruby_content: <<RUBY, rbs_content: <<RBS)
+class Hello
+  def world(x)
+  end
+end
+
+Hello.new.world()
+RUBY
+class Hello
+  def world: (Integer) -> void
+end
+RBS
+
+    # Ruby's standard ArgumentError is raised if required argument is not given.
+    assert_match(/\(ArgumentError\)/, output)
+  end
+
+  def test_method_callbacks
+    assert_test_success(other_env: { 'RBS_TEST_TARGET' => "Callbacks" }, rbs_content: <<RBS, ruby_content: <<'RUBY')
+module Callbacks
+  def on: (Symbol) { (*untyped) -> void } -> void
+  def emit: (Symbol event, *untyped args) ?{ (*untyped) -> void } -> void
+end
+RBS
+module Callbacks
+  def on(e, &block)
+    (@callbacks[e] ||= []) << block
+  end
+
+  def emit(e, *args, &block)
+    @callbacks[e].each do |callable|
+      callable.call(*args, &block)
+    end
+  end
+end
+
+class A
+  def initialize
+    @callbacks = {}
+  end
+
+  include Callbacks
+
+  def bar(&block)
+    emit(:bar, &block)
+  end
+end
+
+a = A.new
+a.on(:bar) { |*args, &block| puts "bar: #{args}"; block.call(self) }
+a.emit(:bar, 1, 2) { |a| "this is A: #{a}" }
+RUBY
+  end
+
+  def test_block_arg
+    assert_test_success(ruby_content: <<RUBY, rbs_content: <<RBS)
+class Hello
+  def world(block)
+  end
+end
+
+Hello.new.world(123)
+RUBY
+class Hello
+  def world: (Integer) -> void
+end
+RBS
+  end
+
+  def test_String
+    assert_test_success(
+      other_env: { "RBS_TEST_TARGET" => "String" },
+      ruby_content: <<RUBY
+class String
+end
+RUBY
+    )
   end
 end

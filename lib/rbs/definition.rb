@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module RBS
   class Definition
     class Variable
@@ -32,6 +34,20 @@ module RBS
           @member = member
           @defined_in = defined_in
           @implemented_in = implemented_in
+        end
+
+        def ==(other)
+          other.is_a?(TypeDef) &&
+            other.type == type &&
+            other.member == member &&
+            other.defined_in == defined_in &&
+            other.implemented_in == implemented_in
+        end
+
+        alias eql? ==
+
+        def hash
+          self.class.hash ^ type.hash ^ member.hash ^ defined_in.hash ^ implemented_in.hash
         end
 
         def comment
@@ -70,6 +86,21 @@ module RBS
         @alias_of = alias_of
       end
 
+      def ==(other)
+        other.is_a?(Method) &&
+          other.super_method == super_method &&
+          other.defs == defs &&
+          other.accessibility == accessibility &&
+          other.annotations == annotations &&
+          other.alias_of == alias_of
+      end
+
+      alias eql? ==
+
+      def hash
+        self.class.hash ^ super_method.hash ^ defs.hash ^ accessibility.hash ^ annotations.hash ^ alias_of.hash
+      end
+
       def defined_in
         @defined_in ||= begin
           last_def = defs.last or raise
@@ -89,11 +120,11 @@ module RBS
       end
 
       def comments
-        @comments ||= _ = defs.map(&:comment).compact
+        @comments ||= defs.map(&:comment).compact.uniq
       end
 
       def annotations
-        @annotations ||= @extra_annotations + defs.flat_map(&:annotations)
+        @annotations ||= @extra_annotations + defs.flat_map {|d| d.annotations }
       end
 
       def members
@@ -126,6 +157,15 @@ module RBS
         )
       end
 
+      def map_type_bound(&block)
+        self.class.new(
+          super_method: super_method&.map_type_bound(&block),
+          defs: defs.map {|defn| defn.update(type: defn.type.map_type_bound(&block)) },
+          accessibility: @accessibility,
+          alias_of: alias_of
+        )
+      end
+
       def map_method_type(&block)
         self.class.new(
           super_method: super_method,
@@ -134,11 +174,56 @@ module RBS
           alias_of: alias_of
         )
       end
+
+      def update(super_method: self.super_method, defs: self.defs, accessibility: self.accessibility, alias_of: self.alias_of, annotations: self.annotations)
+        self.class.new(
+          super_method: super_method,
+          defs: defs,
+          accessibility: accessibility,
+          alias_of: alias_of,
+          annotations: annotations
+        )
+      end
     end
 
     module Ancestor
-      Instance = _ = Struct.new(:name, :args, keyword_init: true)
-      Singleton = _ = Struct.new(:name, keyword_init: true)
+      class Instance
+        attr_reader :name, :args, :source
+
+        def initialize(name:, args:, source:)
+          @name = name
+          @args = args
+          @source = source
+        end
+
+        def ==(other)
+          other.is_a?(Instance) && other.name == name && other.args == args
+        end
+
+        alias eql? ==
+
+        def hash
+          self.class.hash ^ name.hash ^ args.hash
+        end
+      end
+
+      class Singleton
+        attr_reader :name
+
+        def initialize(name:)
+          @name = name
+        end
+
+        def ==(other)
+          other.is_a?(Singleton) && other.name == name
+        end
+
+        alias eql? ==
+
+        def hash
+          self.class.hash ^ name.hash
+        end
+      end
     end
 
     class InstanceAncestors
@@ -170,7 +255,8 @@ module RBS
             else
               Ancestor::Instance.new(
                 name: ancestor.name,
-                args: ancestor.args.map {|type| type.sub(subst) }
+                args: ancestor.args.map {|type| type.sub(subst) },
+                source: ancestor.source
               )
             end
           when Ancestor::Singleton
@@ -233,6 +319,8 @@ module RBS
       case en = entry
       when Environment::SingleEntry
         en.decl.is_a?(AST::Declarations::Interface)
+      else
+        false
       end
     end
 

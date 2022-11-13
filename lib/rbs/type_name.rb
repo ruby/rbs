@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 
 module RBS
   class TypeName
@@ -28,15 +29,15 @@ module RBS
     alias eql? ==
 
     def hash
-      self.class.hash ^ namespace.hash ^ name.hash
+      namespace.hash ^ name.hash
     end
 
     def to_s
       "#{namespace.to_s}#{name}"
     end
 
-    def to_json(*a)
-      to_s.to_json(*a)
+    def to_json(state = _ = nil)
+      to_s.to_json(state)
     end
 
     def to_namespace
@@ -69,6 +70,21 @@ module RBS
 
     def with_prefix(namespace)
       self.class.new(namespace: namespace + self.namespace, name: name)
+    end
+
+    def split
+      namespace.path + [name]
+    end
+
+    def +(other)
+      if other.absolute?
+        other
+      else
+        TypeName.new(
+          namespace: self.to_namespace + other.namespace,
+          name: other.name
+        )
+      end
     end
   end
 end

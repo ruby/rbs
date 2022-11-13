@@ -1,8 +1,15 @@
 #!/usr/bin/env bash
 set -euo pipefail
 IFS=$'\n\t'
-set -vx
+set -x
 
 bundle install --jobs 4 --retry 3
+bundle install --jobs 4 --retry 3 --gemfile=steep/Gemfile || echo "🚨 Failed to install Steep"
 
-# Do any other automated setup that you need to do here
+bundle exec rake compile
+
+if type "re2c" > /dev/null 2>&1; then
+  echo "🤖 Detected re2c"
+else
+  echo "🚨 Cannot find re2c, which is required to generate lexer. Install the tool to change the lexer."
+fi

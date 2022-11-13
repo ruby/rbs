@@ -26,7 +26,7 @@ The test installs instrumentations to spy the method calls and check if argument
 If errors are reported by the test, you will fix the signature.
 You will be sure that you ship a correct signature finally.
 
-The instrumentations are implemneted using `Module#prepend`.
+The instrumentations are implemented using `Module#prepend`.
 It defines a module with same name of methods, which asserts the type of arguments/return values and calls `super`.
 
 ## Type errors
@@ -69,6 +69,23 @@ ERROR -- : [Kaigi::Conference#speakers] UnexpectedBlockError: unexpected block i
 
 The error means there is a type error on overloaded methods.
 The `rbs` test framework tries to the best error message for overloaded methods too, but it reports the `UnresolvedOverloadingError` when it fails.
+
+### DuplicatedMethodDefinitionError
+
+The error is reported when a method is defined multiple times, as RBS does not allow duplicate method definitions. When you need to overload a method, use the `...` syntax:
+
+```ruby
+# First definition
+class C
+  def foo: () -> untyped
+end
+
+# Second definition, use `...` syntax to tell RBS that we're overloading the method
+class C
+  def foo: () -> untyped
+         | ...
+end
+```
 
 ## Setting up the test
 
@@ -114,8 +131,10 @@ You may need to specify `-r` or `-I` to load signatures.
 The default is `-I sig`.
 
 ```
-RBS_TEST_OPT='-r set -r pathname -I sig'
+RBS_TEST_OPT='-r pathname -I sig'
 ```
+
+Replacing `pathname` with the `stdlib` you want to include. For example, if you need to load `Set` and `BigDecimal` in `stdlib`, you would need to have `RBS_TEST_OPT='-r set -r bigdecimal -I sig'`
 
 `RBS_TEST_LOGLEVEL` can be used to configure log level. Defaults to `info`.
 

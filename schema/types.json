@@ -106,7 +106,7 @@
       "required": ["class", "name", "args", "location"]
     },
     "alias": {
-      "title": "Type alias: `u`, `ty`, `json`, ...",
+      "title": "Type alias: `u`, `ty`, `json`, `list[Integer]`, ...",
       "type": "object",
       "properties": {
         "class": {
@@ -116,11 +116,17 @@
         "name": {
           "type": "string"
         },
+        "args": {
+          "type": "array",
+          "items": {
+            "$ref": "#"
+          }
+        },
         "location": {
           "$ref": "location.json"
         }
       },
-      "required": ["class", "name", "location"]
+      "required": ["class", "name", "args", "location"]
     },
     "tuple": {
       "title": "Tuple type: `[Foo, bar]`, ...",
@@ -232,9 +238,21 @@
         },
         "location": {
           "$ref": "location.json"
+        },
+        "block": {
+          "oneOf": [
+            { "$ref": "methodType.json#/definitions/block" },
+            { "type": "null" }
+          ]
+        },
+        "self_type": {
+          "oneOf": [
+            { "$ref": "#" },
+            { "type": "null" }
+          ]
         }
       },
-      "required": ["class", "type", "location"]
+      "required": ["class", "type", "location", "block", "self_type"]
     },
     "literal": {
       "title": "Literal types: `1`, `:foo`, `\"foo\"`, ...",

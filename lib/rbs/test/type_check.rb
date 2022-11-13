@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module RBS
   module Test
     class TypeCheck
@@ -5,13 +7,17 @@ module RBS
       attr_reader :builder
       attr_reader :sample_size
       attr_reader :unchecked_classes
+      attr_reader :instance_class
+      attr_reader :class_class
 
       attr_reader :const_cache
 
       DEFAULT_SAMPLE_SIZE = 100
 
-      def initialize(self_class:, builder:, sample_size:, unchecked_classes:)
+      def initialize(self_class:, builder:, sample_size:, unchecked_classes:, instance_class: Object, class_class: Module)
         @self_class = self_class
+        @instance_class = instance_class
+        @class_class = class_class
         @builder = builder
         @sample_size = sample_size
         @unchecked_classes = unchecked_classes.uniq
@@ -237,9 +243,9 @@ module RBS
         when Types::Bases::Nil
           Test.call(val, IS_AP, ::NilClass)
         when Types::Bases::Class
-          Test.call(val, IS_AP, Class)
+          Test.call(val, IS_AP, class_class)
         when Types::Bases::Instance
-          Test.call(val, IS_AP, self_class)
+          Test.call(val, IS_AP, instance_class)
         when Types::ClassInstance
           klass = get_class(type.name) or return false
           case
@@ -288,7 +294,12 @@ module RBS
           end
         when Types::ClassSingleton
           klass = get_class(type.name) or return false
-          val == klass
+          singleton_class = begin
+                              klass.singleton_class
+                            rescue TypeError
+                              return false
+                            end
+          val.is_a?(singleton_class)
         when Types::Interface
           methods = Set.new(Test.call(val, METHODS))
           if (definition = builder.build_interface(type.name))

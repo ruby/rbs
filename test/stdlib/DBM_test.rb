@@ -1,7 +1,7 @@
 require_relative "test_helper"
 require "dbm"
 
-class DBMSingletonTest < Minitest::Test
+class DBMSingletonTest < Test::Unit::TestCase
   include TypeAssertions
   library "dbm"
   testing "singleton(::DBM)"
@@ -18,7 +18,7 @@ class DBMSingletonTest < Minitest::Test
   end
 end
 
-class DBMTest < Minitest::Test
+class DBMTest < Test::Unit::TestCase
   include TypeAssertions
   library "dbm"
   testing "::DBM"
@@ -80,12 +80,6 @@ class DBMTest < Minitest::Test
     assert_send_type "() -> Hash[untyped, String]", @dbm, :invert
   end
 
-  def test_index
-    @dbm["key3"] = 1
-    assert_send_type "(untyped) -> (String | NilClass)", @dbm, :index, "key1"
-    assert_send_type "(untyped) -> (String | NilClass)", @dbm, :index, "keaaaay1"
-  end
-
   def test_key
     @dbm["key_key"] = 1
     assert_send_type "(untyped) -> (String | NilClass)", @dbm, :key, "key_key"
@@ -103,6 +97,9 @@ class DBMTest < Minitest::Test
   end
 
   def test_store
-    assert_send_type "(String, untyped) -> String", @dbm, :store, "keeey", Hash.new
+    assert_send_type(
+      "(String, String) -> String",
+      @dbm, :store, "keeey", "valuuueee"
+    )
   end
 end

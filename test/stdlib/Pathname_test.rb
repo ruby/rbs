@@ -1,7 +1,7 @@
 require_relative "test_helper"
 require 'pathname'
 
-class PathnameSingletonTest < Minitest::Test
+class PathnameSingletonTest < Test::Unit::TestCase
   include TypeAssertions
   library 'pathname'
   testing 'singleton(::Pathname)'
@@ -37,7 +37,7 @@ class PathnameSingletonTest < Minitest::Test
   end
 end
 
-class PathnameInstanceTest < Minitest::Test
+class PathnameInstanceTest < Test::Unit::TestCase
   include TypeAssertions
   library 'pathname'
   testing '::Pathname'

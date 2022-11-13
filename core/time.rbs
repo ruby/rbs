@@ -1,32 +1,30 @@
+# <!-- rdoc-file=timev.rb -->
 # Time is an abstraction of dates and times. Time is stored internally as the
-# number of seconds with fraction since the *Epoch*, January 1, 1970 00:00 UTC.
-# Also see the library module Date. The Time class treats GMT (Greenwich Mean
-# Time) and UTC (Coordinated Universal Time) as equivalent. GMT is the older way
-# of referring to these baseline times but persists in the names of calls on
-# POSIX systems.
+# number of seconds with subsecond since the *Epoch*, 1970-01-01 00:00:00 UTC.
 #
-# All times may have fraction. Be aware of this fact when comparing times with
+# The Time class treats GMT (Greenwich Mean Time) and UTC (Coordinated Universal
+# Time) as equivalent. GMT is the older way of referring to these baseline times
+# but persists in the names of calls on POSIX systems.
+#
+# Note: A Time object uses the resolution available on your system clock.
+#
+# All times may have subsecond. Be aware of this fact when comparing times with
 # each other -- times that are apparently equal when displayed may be different
-# when compared.
+# when compared. (Since Ruby 2.7.0, Time#inspect shows subsecond but Time#to_s
+# still doesn't show subsecond.)
 #
-# Since Ruby 1.9.2, Time implementation uses a signed 63 bit integer, Bignum or
-# Rational. The integer is a number of nanoseconds since the *Epoch* which can
-# represent 1823-11-12 to 2116-02-20. When Bignum or Rational is used (before
-# 1823, after 2116, under nanosecond), Time works slower as when integer is
-# used.
-#
-# # Examples
+# ## Examples
 #
 # All of these examples were done using the EST timezone which is GMT-5.
 #
-# ## Creating a new Time instance
+# ### Creating a New Time Instance
 #
-# You can create a new instance of Time with Time::new. This will use the
-# current system time. Time::now is an alias for this. You can also pass parts
-# of the time to Time::new such as year, month, minute, etc. When you want to
-# construct a time this way you must pass at least a year. If you pass the year
-# with nothing else time will default to January 1 of that year at 00:00:00 with
-# the current system timezone. Here are some examples:
+# You can create a new instance of Time with Time.new. This will use the current
+# system time. Time.now is an alias for this. You can also pass parts of the
+# time to Time.new such as year, month, minute, etc. When you want to construct
+# a time this way you must pass at least a year. If you pass the year with
+# nothing else time will default to January 1 of that year at 00:00:00 with the
+# current system timezone. Here are some examples:
 #
 #     Time.new(2002)         #=> 2002-01-01 00:00:00 -0500
 #     Time.new(2002, 10)     #=> 2002-10-01 00:00:00 -0500
@@ -38,19 +36,19 @@
 #
 # Or a timezone object:
 #
-#     tz = timezone("Europe/Athens") # Eastern European Time, UTC+2
-#     Time.new(2002, 10, 31, 2, 2, 2, tz) #=> 2002-10-31 02:02:02 +0200
+#     zone = timezone("Europe/Athens")      # Eastern European Time, UTC+2
+#     Time.new(2002, 10, 31, 2, 2, 2, zone) #=> 2002-10-31 02:02:02 +0200
 #
-# You can also use Time::gm, Time::local and Time::utc to infer GMT, local and
-# UTC timezones instead of using the current system setting.
+# You can also use Time.local and Time.utc to infer local and UTC timezones
+# instead of using the current system setting.
 #
-# You can also create a new time using Time::at which takes the number of
-# seconds (or fraction of seconds) since the [Unix
-# Epoch](http://en.wikipedia.org/wiki/Unix_time).
+# You can also create a new time using Time.at which takes the number of seconds
+# (with subsecond) since the [Unix
+# Epoch](https://en.wikipedia.org/wiki/Unix_time).
 #
 #     Time.at(628232400) #=> 1989-11-28 00:00:00 -0500
 #
-# ## Working with an instance of Time
+# ### Working with an Instance of Time
 #
 # Once you have an instance of Time there is a multitude of things you can do
 # with it. Below are some examples. For all of the following examples, we will
@@ -90,7 +88,106 @@
 #
 #     Time.new(2010,10,31).between?(t1, t2) #=> true
 #
-# ## Timezone argument
+# ## What's Here
+#
+# First, what's elsewhere. Class Time:
+#
+# *   Inherits from [class
+#     Object](Object.html#class-Object-label-What-27s+Here).
+# *   Includes [module
+#     Comparable](Comparable.html#module-Comparable-label-What-27s+Here).
+#
+#
+# Here, class Time provides methods that are useful for:
+#
+# *   [Creating \Time objects](#class-Time-label-Methods+for+Creating).
+# *   [Fetching \Time values](#class-Time-label-Methods+for+Fetching).
+# *   [Querying a \Time object](#class-Time-label-Methods+for+Querying).
+# *   [Comparing \Time objects](#class-Time-label-Methods+for+Comparing).
+# *   [Converting a \Time object](#class-Time-label-Methods+for+Converting).
+# *   [Rounding a \Time](#class-Time-label-Methods+for+Rounding).
+#
+#
+# ### Methods for Creating
+#
+# *   ::new: Returns a new time from specified arguments (year, month, etc.),
+#     including an optional timezone value.
+# *   ::local (aliased as ::mktime): Same as ::new, except the timezone is the
+#     local timezone.
+# *   ::utc (aliased as ::gm): Same as ::new, except the timezone is UTC.
+# *   ::at: Returns a new time based on seconds since epoch.
+# *   ::now: Returns a new time based on the current system time.
+# *   #+ (plus): Returns a new time increased by the given number of seconds.
+# *   [-](#method-i-2D) (minus): Returns a new time
+#         decreased by the given number of seconds.
+#
+#
+# ### Methods for Fetching
+#
+# *   #year: Returns the year of the time.
+# *   #month (aliased as #mon): Returns the month of the time.
+# *   #mday (aliased as #day): Returns the day of the month.
+# *   #hour: Returns the hours value for the time.
+# *   #min: Returns the minutes value for the time.
+# *   #sec: Returns the seconds value for the time.
+# *   #usec (aliased as #tv_usec): Returns the number of microseconds in the
+#     subseconds value of the time.
+# *   #nsec (aliased as #tv_nsec: Returns the number of nanoseconds in the
+#     subsecond part of the time.
+# *   #subsec: Returns the subseconds value for the time.
+# *   #wday: Returns the integer weekday value of the time (0 == Sunday).
+# *   #yday: Returns the integer yearday value of the time (1 == January 1).
+# *   #hash: Returns the integer hash value for the time.
+# *   #utc_offset (aliased as #gmt_offset and #gmtoff): Returns the offset in
+#     seconds between time and UTC.
+# *   #to_f: Returns the float number of seconds since epoch for the time.
+# *   #to_i (aliased as #tv_sec): Returns the integer number of seconds since
+#     epoch for the time.
+# *   #to_r: Returns the Rational number of seconds since epoch for the time.
+# *   #zone: Returns a string representation of the timezone of the time.
+#
+#
+# ### Methods for Querying
+#
+# *   #utc? (aliased as #gmt?): Returns whether the time is UTC.
+# *   #dst? (aliased as #isdst): Returns whether the time is DST (daylight
+#     saving time).
+# *   #sunday?: Returns whether the time is a Sunday.
+# *   #monday?: Returns whether the time is a Monday.
+# *   #tuesday?: Returns whether the time is a Tuesday.
+# *   #wednesday?: Returns whether the time is a Wednesday.
+# *   #thursday?: Returns whether the time is a Thursday.
+# *   #friday?: Returns whether time is a Friday.
+# *   #saturday?: Returns whether the time is a Saturday.
+#
+#
+# ### Methods for Comparing
+#
+# *   [#<=>](#method-i-3C-3D-3E): Compares `self` to another time.
+# *   #eql?: Returns whether the time is equal to another time.
+#
+#
+# ### Methods for Converting
+#
+# *   #asctime (aliased as #ctime): Returns the time as a string.
+# *   #inspect: Returns the time in detail as a string.
+# *   #strftime: Returns the time as a string, according to a given format.
+# *   #to_a: Returns a 10-element array of values from the time.
+# *   #to_s: Returns a string representation of the time.
+# *   #getutc (aliased as #getgm): Returns a new time converted to UTC.
+# *   #getlocal: Returns a new time converted to local time.
+# *   #utc (aliased as #gmtime): Converts time to UTC in place.
+# *   #localtime: Converts time to local time in place.
+#
+#
+# ### Methods for Rounding
+#
+# *   #round:Returns a new time with subseconds rounded.
+# *   #ceil: Returns a new time with subseconds raised to a ceiling.
+# *   #floor: Returns a new time with subseconds lowered to a floor.
+#
+#
+# ## Timezone Argument
 #
 # A timezone argument must have `local_to_utc` and `utc_to_local` methods, and
 # may have `name`, `abbr`, and `dst?` methods.
@@ -99,8 +196,8 @@
 # to UTC, and `utc_to_local` is the opposite.  The result also should be a Time
 # or Time-like object (not necessary to be the same class).  The #zone of the
 # result is just ignored. Time-like argument to these methods is similar to a
-# Time object in UTC without sub-second; it has attribute readers for the parts,
-# e.g. #year, #month, and so on, and epoch time readers, #to_i.  The sub-second
+# Time object in UTC without subsecond; it has attribute readers for the parts,
+# e.g. #year, #month, and so on, and epoch time readers, #to_i.  The subsecond
 # attributes are fixed as 0, and #utc_offset, #zone, #isdst, and their aliases
 # are same as a Time object in UTC. Also #to_time, #+, and #- methods are
 # defined.
@@ -114,7 +211,7 @@
 # The `dst?` method is called with a `Time` value and should return whether the
 # `Time` value is in daylight savings time in the zone.
 #
-# ### Auto conversion to Timezone
+# ### Auto Conversion to Timezone
 #
 # At loading marshaled data, a timezone name will be converted to a timezone
 # object by `find_timezone` class method, if the method is defined.
@@ -125,25 +222,65 @@
 class Time < Object
   include Comparable
 
-  # Creates a new Time object with the value given by `time`, the given number of
-  # `seconds_with_frac`, or `seconds` and `microseconds_with_frac` since the
-  # Epoch. `seconds_with_frac` and `microseconds_with_frac` can be an Integer,
-  # Float, Rational, or other Numeric. non-portable feature allows the offset to
-  # be negative on some systems.
+  # <!--
+  #   rdoc-file=timev.rb
+  #   - at(time, subsec = false, unit = :microsecond, in: nil)
+  # -->
+  # *Time*
   #
-  # If `in` argument is given, the result is in that timezone or UTC offset, or if
-  # a numeric argument is given, the result is in local time.
+  # This form accepts a Time object `time` and optional keyword argument `in`:
   #
-  #     Time.at(0)                                #=> 1969-12-31 18:00:00 -0600
-  #     Time.at(Time.at(0))                       #=> 1969-12-31 18:00:00 -0600
-  #     Time.at(946702800)                        #=> 1999-12-31 23:00:00 -0600
-  #     Time.at(-284061600)                       #=> 1960-12-31 00:00:00 -0600
-  #     Time.at(946684800.2).usec                 #=> 200000
-  #     Time.at(946684800, 123456.789).nsec       #=> 123456789
-  #     Time.at(946684800, 123456789, :nsec).nsec #=> 123456789
+  #     Time.at(Time.new)               # => 2021-04-26 08:52:31.6023486 -0500
+  #     Time.at(Time.new, in: '+09:00') # => 2021-04-26 22:52:31.6023486 +0900
   #
-  def self.at: (Time | Numeric seconds) -> Time
-             | (Numeric seconds, ?Numeric microseconds_with_frac) -> Time
+  # *Seconds*
+  #
+  # This form accepts a numeric number of seconds `sec` and optional keyword
+  # argument `in`:
+  #
+  #     Time.at(946702800)               # => 1999-12-31 23:00:00 -0600
+  #     Time.at(946702800, in: '+09:00') # => 2000-01-01 14:00:00 +0900
+  #
+  # *Seconds with Subseconds and Units*
+  #
+  # This form accepts an integer number of seconds `sec_i`, a numeric number of
+  # milliseconds `msec`, a symbol argument for the subsecond unit type (defaulting
+  # to :usec), and an optional keyword argument `in`:
+  #
+  #     Time.at(946702800, 500, :millisecond)               # => 1999-12-31 23:00:00.5 -0600
+  #     Time.at(946702800, 500, :millisecond, in: '+09:00') # => 2000-01-01 14:00:00.5 +0900
+  #     Time.at(946702800, 500000)                             # => 1999-12-31 23:00:00.5 -0600
+  #     Time.at(946702800, 500000, :usec)                      # => 1999-12-31 23:00:00.5 -0600
+  #     Time.at(946702800, 500000, :microsecond)               # => 1999-12-31 23:00:00.5 -0600
+  #     Time.at(946702800, 500000, in: '+09:00')               # => 2000-01-01 14:00:00.5 +0900
+  #     Time.at(946702800, 500000, :usec, in: '+09:00')        # => 2000-01-01 14:00:00.5 +0900
+  #     Time.at(946702800, 500000, :microsecond, in: '+09:00') # => 2000-01-01 14:00:00.5 +0900
+  #     Time.at(946702800, 500000000, :nsec)                     # => 1999-12-31 23:00:00.5 -0600
+  #     Time.at(946702800, 500000000, :nanosecond)               # => 1999-12-31 23:00:00.5 -0600
+  #     Time.at(946702800, 500000000, :nsec, in: '+09:00')       # => 2000-01-01 14:00:00.5 +0900
+  #     Time.at(946702800, 500000000, :nanosecond, in: '+09:00') # => 2000-01-01 14:00:00.5 +0900
+  #
+  # Parameters:
+  # *   `isec_i` is the integer number of seconds in the range `0..60`.
+  # *   `msec` is the number of milliseconds (Integer, Float, or Rational) in the
+  #     range `0..1000`.
+  # *   `usec` is the number of microseconds (Integer, Float, or Rational) in the
+  #     range `0..1000000`.
+  # *   `nsec` is the number of nanoseconds (Integer, Float, or Rational) in the
+  #     range `0..1000000000`.
+  # *   `in: zone`: a timezone *zone*, which may be:
+  #     *   A string offset from UTC.
+  #     *   A single letter offset from UTC, in the range `'A'..'Z'`, `'J'` (the
+  #         so-called military timezone) excluded.
+  #     *   An integer number of seconds.
+  #     *   A timezone object; see [Timezone
+  #         Argument](#class-Time-label-Timezone+Argument) for details.
+  #
+  def self.at: (Time, ?in: String | Integer | nil) -> Time
+             | (Numeric, ?in: String | Integer | nil) -> Time
+             | (Integer sec_i, Numeric msec, subsec_unit msec, ?in: String | Integer | nil) -> Time
+
+  type subsec_unit = :msec | :millisecond | :usec | :microsecond | :nsec | :nanosecond
 
   # Creates a Time object based on given values, interpreted as UTC (GMT). The
   # year must be specified. Other values default to the minimum value for that
@@ -159,49 +296,136 @@ class Time < Object
   #
   def self.gm: (Integer year, ?Integer | String month, ?Integer day, ?Integer hour, ?Integer min, ?Numeric sec, ?Numeric usec_with_frac) -> Time
 
-  # Same as Time::gm, but interprets the values in the local time zone.
+  # <!--
+  #   rdoc-file=time.c
+  #   - Time.local(year, month=1, day=1, hour=0, min=0, sec_i=0, usec=0) -> new_time
+  #   - Time.local(sec, min, hour, day, month, year, dummy, dummy, dummy, dummy) -> new_time
+  # -->
+  # Returns a new Time object based the on given arguments; its timezone is the
+  # local timezone.
   #
-  #     Time.local(2000,"jan",1,20,15,1)   #=> 2000-01-01 20:15:01 -0600
+  # In the first form (up to seven arguments), argument `year` is required.
+  #
+  #     Time.local(2000)                   # => 2000-01-01 00:00:00 -0600
+  #     Time.local(0, 1, 2, 3, 4, 5, 6.5)  # => 0000-01-02 03:04:05.0000065 -0600
+  #
+  # In the second form, all ten arguments are required, though the last four are
+  # ignored. This form is useful for creating a time from a 10-element array such
+  # as those returned by #to_a.
+  #
+  #     array = Time.now.to_a
+  #     p array # => [57, 26, 13, 24, 4, 2021, 6, 114, true, "Central Daylight Time"]
+  #     array[5] = 2000
+  #     Time.local(*array)  # => 2000-04-24 13:26:57 -0500
+  #
+  # Parameters:
+  # *   `year`: an integer year.
+  # *   `month`: a month value, which may be:
+  #     *   An integer month in the range `1..12`.
+  #     *   A 3-character string that matches regular expression
+  #         `/jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec/i`.
+  #
+  # *   `day`: an integer day in the range `1..31` (less than 31 for some months).
+  # *   `hour`: an integer hour in the range `0..23`.
+  # *   `min`: an integer minute in the range `0..59`.
+  # *   `isec_i` is the integer number of seconds in the range `0..60`.
+  # *   `usec` is the number of microseconds (Integer, Float, or Rational) in the
+  #     range `0..1000000`.
+  #
+  #
+  # Alias: Time.mktime.
+  #
+  # Related: Time.utc.
   #
   def self.local: (Integer year, ?Integer | String month, ?Integer day, ?Integer hour, ?Integer min, ?Numeric sec, ?Numeric usec_with_frac) -> Time
 
-  # Creates a new Time object for the current time. This is same as Time.new
-  # without arguments.
+  # <!--
+  #   rdoc-file=timev.rb
+  #   - now(in: nil)
+  # -->
+  # Creates a new Time object from the current system time. This is the same as
+  # Time.new without arguments.
   #
-  #     Time.now            #=> 2009-06-24 12:39:54 +0900
+  #     Time.now               # => 2009-06-24 12:39:54 +0900
+  #     Time.now(in: '+04:00') # => 2009-06-24 07:39:54 +0400
   #
-  def self.now: () -> Time
+  # Parameter:
+  # *   `in: zone`: a timezone *zone*, which may be:
+  #     *   A string offset from UTC.
+  #     *   A single letter offset from UTC, in the range `'A'..'Z'`, `'J'` (the
+  #         so-called military timezone) excluded.
+  #     *   An integer number of seconds.
+  #     *   A timezone object; see [Timezone
+  #         Argument](#class-Time-label-Timezone+Argument) for details.
+  #
+  def self.now: (?in: String | Integer | nil) -> Time
 
-  # Creates a Time object based on given values, interpreted as UTC (GMT). The
-  # year must be specified. Other values default to the minimum value for that
-  # field (and may be `nil` or omitted). Months may be specified by numbers from 1
-  # to 12, or by the three-letter English month names. Hours are specified on a
-  # 24-hour clock (0..23). Raises an ArgumentError if any values are out of range.
-  # Will also accept ten arguments in the order output by Time#to_a.
+  # <!--
+  #   rdoc-file=time.c
+  #   - Time.utc(year, month=1, day=1, hour=0, min=0, sec_i=0, usec=0) -> new_time
+  #   - Time.utc(sec_i, min, hour, day, month, year, dummy, dummy, dummy, dummy) -> new_time
+  # -->
+  # Returns a new Time object based the on given arguments; its timezone is UTC.
   #
-  # `sec_with_frac` and `usec_with_frac` can have a fractional part.
+  # In the first form (up to seven arguments), argument `year` is required.
   #
-  #     Time.utc(2000,"jan",1,20,15,1)  #=> 2000-01-01 20:15:01 UTC
-  #     Time.gm(2000,"jan",1,20,15,1)   #=> 2000-01-01 20:15:01 UTC
+  #     Time.utc(2000)                  # => 2000-01-01 00:00:00 UTC
+  #     Time.utc(0, 1, 2, 3, 4, 5, 6.5) # => 0000-01-02 03:04:05.0000065 UTC
+  #
+  # In the second form, all ten arguments are required, though the last four are
+  # ignored. This form is useful for creating a time from a 10-element array such
+  # as is returned by #to_a.
+  #
+  #     array = Time.now.to_a
+  #     p array # => [57, 26, 13, 24, 4, 2021, 6, 114, true, "Central Daylight Time"]
+  #     array[5] = 2000
+  #     Time.utc(*array) # => 2000-04-24 13:26:57 UTC
+  #
+  # Parameters:
+  # *   `year`: an integer year.
+  # *   `month`: a month value, which may be:
+  #     *   An integer month in the range `1..12`.
+  #     *   A 3-character string that matches regular expression
+  #         `/jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec/i`.
+  #
+  # *   `day`: an integer day in the range `1..31` (less than 31 for some months).
+  # *   `hour`: an integer hour in the range `0..23`.
+  # *   `min`: an integer minute in the range `0..59`.
+  # *   `isec_i` is the integer number of seconds in the range `0..60`.
+  # *   `usec` is the number of microseconds (Integer, Float, or Rational) in the
+  #     range `0..1000000`.
+  #
+  #
+  # Alias: Time.gm.
+  #
+  # Related: Time.local.
   #
   def self.utc: (Integer year, ?Integer | String month, ?Integer day, ?Integer hour, ?Integer min, ?Numeric sec, ?Numeric usec_with_frac) -> Time
 
-  # Addition --- Adds some number of seconds (possibly fractional) to *time* and
+  # <!--
+  #   rdoc-file=time.c
+  #   - time + numeric -> time
+  # -->
+  # Adds some number of seconds (possibly including subsecond) to *time* and
   # returns that value as a new Time object.
   #
-  #     t = Time.now         #=> 2007-11-19 08:22:21 -0600
-  #     t + (60 * 60 * 24)   #=> 2007-11-20 08:22:21 -0600
+  #     t = Time.now         #=> 2020-07-20 22:14:43.170490982 +0900
+  #     t + (60 * 60 * 24)   #=> 2020-07-21 22:14:43.170490982 +0900
   #
   def +: (Numeric arg0) -> Time
 
-  # Difference --- Returns a difference in seconds as a Float between *time* and
-  # `other_time`, or subtracts the given number of seconds in `numeric` from
-  # *time*.
+  # <!--
+  #   rdoc-file=time.c
+  #   - time - other_time -> float
+  #   - time - numeric    -> time
+  # -->
+  # Returns a difference in seconds as a Float between *time* and `other_time`, or
+  # subtracts the given number of seconds in `numeric` from *time*.
   #
-  #     t = Time.now       #=> 2007-11-19 08:23:10 -0600
-  #     t2 = t + 2592000   #=> 2007-12-19 08:23:10 -0600
+  #     t = Time.now       #=> 2020-07-20 22:15:49.302766336 +0900
+  #     t2 = t + 2592000   #=> 2020-08-19 22:15:49.302766336 +0900
   #     t2 - t             #=> 2592000.0
-  #     t2 - 2592000       #=> 2007-11-19 08:23:10 -0600
+  #     t2 - 2592000       #=> 2020-07-20 22:15:49.302766336 +0900
   #
   def -: (Time arg0) -> Float
        | (Numeric arg0) -> Time
@@ -210,9 +434,13 @@ class Time < Object
 
   def <=: (Time arg0) -> bool
 
-  # Comparison---Compares `time` with `other_time`.
+  # <!--
+  #   rdoc-file=time.c
+  #   - time <=> other_time -> -1, 0, +1, or nil
+  # -->
+  # Compares `time` with `other_time`.
   #
-  # -1, 0, +1 or nil depending on whether `time` is less  than, equal to, or
+  # -1, 0, +1 or nil depending on whether `time` is less than, equal to, or
   # greater than `other_time`.
   #
   # `nil` is returned if the two values are incomparable.
@@ -230,12 +458,14 @@ class Time < Object
   #     t2 <=> t           #=> 1
   #     t <=> t            #=> 0
   #
-  def <=>: (Time other) -> Integer?
+  def <=>: (Time other) -> Integer
+         | (untyped other) -> Integer?
 
   def >: (Time arg0) -> bool
 
   def >=: (Time arg0) -> bool
 
+  # <!-- rdoc-file=time.c -->
   # Returns a canonical string representation of *time*.
   #
   #     Time.now.asctime   #=> "Wed Apr  9 08:56:03 2003"
@@ -243,6 +473,11 @@ class Time < Object
   #
   def asctime: () -> String
 
+  # <!--
+  #   rdoc-file=time.c
+  #   - time.asctime -> string
+  #   - time.ctime   -> string
+  # -->
   # Returns a canonical string representation of *time*.
   #
   #     Time.now.asctime   #=> "Wed Apr  9 08:56:03 2003"
@@ -250,7 +485,8 @@ class Time < Object
   #
   def ctime: () -> String
 
-  # Returns the day of the month (1..n) for *time*.
+  # <!-- rdoc-file=time.c -->
+  # Returns the day of the month (1..31) for *time*.
   #
   #     t = Time.now   #=> 2007-11-19 08:27:03 -0600
   #     t.day          #=> 19
@@ -258,6 +494,7 @@ class Time < Object
   #
   def day: () -> Integer
 
+  # <!-- rdoc-file=time.c -->
   # Returns `true` if *time* occurs during Daylight Saving Time in its time zone.
   #
   #     # CST6CDT:
@@ -278,11 +515,19 @@ class Time < Object
   #
   def dst?: () -> bool
 
+  # <!--
+  #   rdoc-file=time.c
+  #   - time.eql?(other_time)
+  # -->
   # Returns `true` if *time* and `other_time` are both Time objects with the same
-  # seconds and fractional seconds.
+  # seconds (including subsecond) from the Epoch.
   #
   def eql?: (untyped arg0) -> bool
 
+  # <!--
+  #   rdoc-file=time.c
+  #   - time.friday? -> true or false
+  # -->
   # Returns `true` if *time* represents Friday.
   #
   #     t = Time.local(1987, 12, 18)     #=> 1987-12-18 00:00:00 -0600
@@ -290,6 +535,11 @@ class Time < Object
   #
   def friday?: () -> bool
 
+  # <!--
+  #   rdoc-file=time.c
+  #   - time.getgm  -> new_time
+  #   - time.getutc -> new_time
+  # -->
   # Returns a new Time object representing *time* in UTC.
   #
   #     t = Time.local(2000,1,1,20,15,1)   #=> 2000-01-01 20:15:01 -0600
@@ -300,6 +550,12 @@ class Time < Object
   #
   def getgm: () -> Time
 
+  # <!--
+  #   rdoc-file=time.c
+  #   - time.getlocal -> new_time
+  #   - time.getlocal(utc_offset) -> new_time
+  #   - time.getlocal(timezone) -> new_time
+  # -->
   # Returns a new Time object representing *time* in local time (using the local
   # time zone in effect for this process).
   #
@@ -324,6 +580,7 @@ class Time < Object
   #
   def getlocal: (?Integer utc_offset) -> Time
 
+  # <!-- rdoc-file=time.c -->
   # Returns a new Time object representing *time* in UTC.
   #
   #     t = Time.local(2000,1,1,20,15,1)   #=> 2000-01-01 20:15:01 -0600
@@ -334,6 +591,7 @@ class Time < Object
   #
   def getutc: () -> Time
 
+  # <!-- rdoc-file=time.c -->
   # Returns `true` if *time* represents a time in UTC (GMT).
   #
   #     t = Time.now                        #=> 2007-11-19 08:15:23 -0600
@@ -348,6 +606,7 @@ class Time < Object
   #
   def gmt?: () -> bool
 
+  # <!-- rdoc-file=time.c -->
   # Returns the offset in seconds between the timezone of *time* and UTC.
   #
   #     t = Time.gm(2000,1,1,20,15,1)   #=> 2000-01-01 20:15:01 UTC
@@ -357,6 +616,11 @@ class Time < Object
   #
   def gmt_offset: () -> Integer
 
+  # <!--
+  #   rdoc-file=time.c
+  #   - time.gmtime    -> time
+  #   - time.utc       -> time
+  # -->
   # Converts *time* to UTC (GMT), modifying the receiver.
   #
   #     t = Time.now   #=> 2007-11-19 08:18:31 -0600
@@ -371,12 +635,20 @@ class Time < Object
   #
   def gmtime: () -> Time
 
+  # <!--
+  #   rdoc-file=time.c
+  #   - time.hash   -> integer
+  # -->
   # Returns a hash code for this Time object.
   #
   # See also Object#hash.
   #
   def hash: () -> Integer
 
+  # <!--
+  #   rdoc-file=time.c
+  #   - time.hour -> integer
+  # -->
   # Returns the hour of the day (0..23) for *time*.
   #
   #     t = Time.now   #=> 2007-11-19 08:26:20 -0600
@@ -384,50 +656,54 @@ class Time < Object
   #
   def hour: () -> Integer
 
-  # Returns a Time object.
+  # <!--
+  #   rdoc-file=timev.rb
+  #   - new(year = (now = true), mon = nil, mday = nil, hour = nil, min = nil, sec = nil, zone = nil, in: nil)
+  # -->
+  # Returns a new Time object based on the given arguments.
   #
-  # It is initialized to the current system time if no argument is given.
+  # With no positional arguments, returns the value of Time.now:
   #
-  # **Note:** The new object will use the resolution available on your system
-  # clock, and may include fractional seconds.
+  #     Time.new                                       # => 2021-04-24 17:27:46.0512465 -0500
   #
-  # If one or more arguments are specified, the time is initialized to the
-  # specified time.
+  # Otherwise, returns a new Time object based on the given parameters:
   #
-  # `sec` may have fraction if it is a rational.
+  #     Time.new(2000)                                 # => 2000-01-01 00:00:00 -0600
+  #     Time.new(2000, 12, 31, 23, 59, 59.5)           # => 2000-12-31 23:59:59.5 -0600
+  #     Time.new(2000, 12, 31, 23, 59, 59.5, '+09:00') # => 2000-12-31 23:59:59.5 +0900
   #
-  # `tz` specifies the timezone. It can be an offset from UTC, given either as a
-  # string such as "+09:00" or a single letter "A".."Z" excluding "J" (so-called
-  # military time zone), or as a number of seconds such as 32400. Or it can be a
-  # timezone object, see [Timezone argument](#class-Time-label-Timezone+argument)
-  # for details.
+  # Parameters:
   #
-  #     a = Time.new      #=> 2007-11-19 07:50:02 -0600
-  #     b = Time.new      #=> 2007-11-19 07:50:02 -0600
-  #     a == b            #=> false
-  #     "%.6f" % a.to_f   #=> "1195480202.282373"
-  #     "%.6f" % b.to_f   #=> "1195480202.283415"
+  # *   `year`: an integer year.
+  # *   `month`: a month value, which may be:
+  #     *   An integer month in the range `1..12`.
+  #     *   A 3-character string that matches regular expression
+  #         `/jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec/i`.
   #
-  #     Time.new(2008,6,21, 13,30,0, "+09:00") #=> 2008-06-21 13:30:00 +0900
+  # *   `day`: an integer day in the range `1..31` (less than 31 for some months).
+  # *   `hour`: an integer hour in the range `0..23`.
+  # *   `min`: an integer minute in the range `0..59`.
+  # *   `sec` is the number of seconds (Integer, Float, or Rational) in the range
+  #     `0..60`.
+  # *   `zone`: a timezone, which may be:
+  #     *   A string offset from UTC.
+  #     *   A single letter offset from UTC, in the range `'A'..'Z'`, `'J'` (the
+  #         so-called military timezone) excluded.
+  #     *   An integer number of seconds.
+  #     *   A timezone object; see [Timezone
+  #         Argument](#class-Time-label-Timezone+Argument) for details.
   #
-  #     # A trip for RubyConf 2007
-  #     t1 = Time.new(2007,11,1,15,25,0, "+09:00") # JST (Narita)
-  #     t2 = Time.new(2007,11,1,12, 5,0, "-05:00") # CDT (Minneapolis)
-  #     t3 = Time.new(2007,11,1,13,25,0, "-05:00") # CDT (Minneapolis)
-  #     t4 = Time.new(2007,11,1,16,53,0, "-04:00") # EDT (Charlotte)
-  #     t5 = Time.new(2007,11,5, 9,24,0, "-05:00") # EST (Charlotte)
-  #     t6 = Time.new(2007,11,5,11,21,0, "-05:00") # EST (Detroit)
-  #     t7 = Time.new(2007,11,5,13,45,0, "-05:00") # EST (Detroit)
-  #     t8 = Time.new(2007,11,6,17,10,0, "+09:00") # JST (Narita)
-  #     (t2-t1)/3600.0                             #=> 10.666666666666666
-  #     (t4-t3)/3600.0                             #=> 2.466666666666667
-  #     (t6-t5)/3600.0                             #=> 1.95
-  #     (t8-t7)/3600.0                             #=> 13.416666666666666
+  # *   `in: zone`: a timezone *zone*, which may be as above.
   #
-  def initialize: (?Integer | String year, ?Integer | String month, ?Integer | String day, ?Integer | String hour, ?Integer | String min, ?Numeric | String sec, ?Numeric | String usec_with_frac) -> void
+  def initialize: (?Integer? year, ?Integer? month, ?Integer? day, ?Integer? hour, ?Integer? min, ?Numeric? sec, ?String | Integer | nil) -> void
+                | (?Integer? year, ?Integer? month, ?Integer? day, ?Integer? hour, ?Integer? min, ?Numeric? sec, in: String | Integer | nil) -> void
 
+  # <!--
+  #   rdoc-file=time.c
+  #   - time.inspect -> string
+  # -->
   # Returns a detailed string representing *time*. Unlike to_s, preserves
-  # nanoseconds in the representation for easier debugging.
+  # subsecond in the representation for easier debugging.
   #
   #     t = Time.now
   #     t.inspect                             #=> "2012-11-10 18:16:12.261257655 +0100"
@@ -438,6 +714,11 @@ class Time < Object
   #
   def inspect: () -> String
 
+  # <!--
+  #   rdoc-file=time.c
+  #   - time.isdst -> true or false
+  #   - time.dst?  -> true or false
+  # -->
   # Returns `true` if *time* occurs during Daylight Saving Time in its time zone.
   #
   #     # CST6CDT:
@@ -458,6 +739,11 @@ class Time < Object
   #
   def isdst: () -> bool
 
+  # <!--
+  #   rdoc-file=time.c
+  #   - time.localtime -> time
+  #   - time.localtime(utc_offset) -> time
+  # -->
   # Converts *time* to local time (using the local time zone in effect at the
   # creation time of *time*) modifying the receiver.
   #
@@ -477,7 +763,12 @@ class Time < Object
   #
   def localtime: (?String utc_offset) -> Time
 
-  # Returns the day of the month (1..n) for *time*.
+  # <!--
+  #   rdoc-file=time.c
+  #   - time.day  -> integer
+  #   - time.mday -> integer
+  # -->
+  # Returns the day of the month (1..31) for *time*.
   #
   #     t = Time.now   #=> 2007-11-19 08:27:03 -0600
   #     t.day          #=> 19
@@ -485,6 +776,10 @@ class Time < Object
   #
   def mday: () -> Integer
 
+  # <!--
+  #   rdoc-file=time.c
+  #   - time.min -> integer
+  # -->
   # Returns the minute of the hour (0..59) for *time*.
   #
   #     t = Time.now   #=> 2007-11-19 08:25:51 -0600
@@ -492,6 +787,11 @@ class Time < Object
   #
   def min: () -> Integer
 
+  # <!--
+  #   rdoc-file=time.c
+  #   - time.mon   -> integer
+  #   - time.month -> integer
+  # -->
   # Returns the month of the year (1..12) for *time*.
   #
   #     t = Time.now   #=> 2007-11-19 08:27:30 -0600
@@ -500,6 +800,10 @@ class Time < Object
   #
   def mon: () -> Integer
 
+  # <!--
+  #   rdoc-file=time.c
+  #   - time.monday? -> true or false
+  # -->
   # Returns `true` if *time* represents Monday.
   #
   #     t = Time.local(2003, 8, 4)       #=> 2003-08-04 00:00:00 -0500
@@ -507,48 +811,55 @@ class Time < Object
   #
   def monday?: () -> bool
 
-  # Returns the number of nanoseconds for *time*.
+  # <!-- rdoc-file=time.c -->
+  # Returns the number of nanoseconds for the subsecond part of *time*. The result
+  # is a non-negative integer less than 10**9.
   #
-  #     t = Time.now        #=> 2007-11-17 15:18:03 +0900
-  #     "%10.9f" % t.to_f   #=> "1195280283.536151409"
-  #     t.nsec              #=> 536151406
+  #     t = Time.now        #=> 2020-07-20 22:07:10.963933942 +0900
+  #     t.nsec              #=> 963933942
   #
-  # The lowest digits of #to_f and #nsec are different because IEEE 754 double is
-  # not accurate enough to represent the exact number of nanoseconds since the
-  # Epoch.
+  # If *time* has fraction of nanosecond (such as picoseconds), it is truncated.
   #
-  # The more accurate value is returned by #nsec.
+  #     t = Time.new(2000,1,1,0,0,0.666_777_888_999r)
+  #     t.nsec              #=> 666777888
+  #
+  # Time#subsec can be used to obtain the subsecond part exactly.
   #
   def nsec: () -> Integer
 
-  # Rounds sub seconds to a given precision in decimal digits (0 digits by
-  # default). It returns a new Time object. `ndigits` should be zero or a positive
-  # integer.
-  #
-  #     require 'time'
+  # <!--
+  #   rdoc-file=time.c
+  #   - time.round([ndigits])   -> new_time
+  # -->
+  # Rounds subsecond to a given precision in decimal digits (0 digits by default).
+  # It returns a new Time object. `ndigits` should be zero or a positive integer.
   #
   #     t = Time.utc(2010,3,30, 5,43,25.123456789r)
-  #     t.iso8601(10)           #=> "2010-03-30T05:43:25.1234567890Z"
-  #     t.round.iso8601(10)     #=> "2010-03-30T05:43:25.0000000000Z"
-  #     t.round(0).iso8601(10)  #=> "2010-03-30T05:43:25.0000000000Z"
-  #     t.round(1).iso8601(10)  #=> "2010-03-30T05:43:25.1000000000Z"
-  #     t.round(2).iso8601(10)  #=> "2010-03-30T05:43:25.1200000000Z"
-  #     t.round(3).iso8601(10)  #=> "2010-03-30T05:43:25.1230000000Z"
-  #     t.round(4).iso8601(10)  #=> "2010-03-30T05:43:25.1235000000Z"
+  #     t                       #=> 2010-03-30 05:43:25.123456789 UTC
+  #     t.round                 #=> 2010-03-30 05:43:25 UTC
+  #     t.round(0)              #=> 2010-03-30 05:43:25 UTC
+  #     t.round(1)              #=> 2010-03-30 05:43:25.1 UTC
+  #     t.round(2)              #=> 2010-03-30 05:43:25.12 UTC
+  #     t.round(3)              #=> 2010-03-30 05:43:25.123 UTC
+  #     t.round(4)              #=> 2010-03-30 05:43:25.1235 UTC
   #
   #     t = Time.utc(1999,12,31, 23,59,59)
-  #     (t + 0.4).round.iso8601(3)    #=> "1999-12-31T23:59:59.000Z"
-  #     (t + 0.49).round.iso8601(3)   #=> "1999-12-31T23:59:59.000Z"
-  #     (t + 0.5).round.iso8601(3)    #=> "2000-01-01T00:00:00.000Z"
-  #     (t + 1.4).round.iso8601(3)    #=> "2000-01-01T00:00:00.000Z"
-  #     (t + 1.49).round.iso8601(3)   #=> "2000-01-01T00:00:00.000Z"
-  #     (t + 1.5).round.iso8601(3)    #=> "2000-01-01T00:00:01.000Z"
+  #     (t + 0.4).round         #=> 1999-12-31 23:59:59 UTC
+  #     (t + 0.49).round        #=> 1999-12-31 23:59:59 UTC
+  #     (t + 0.5).round         #=> 2000-01-01 00:00:00 UTC
+  #     (t + 1.4).round         #=> 2000-01-01 00:00:00 UTC
+  #     (t + 1.49).round        #=> 2000-01-01 00:00:00 UTC
+  #     (t + 1.5).round         #=> 2000-01-01 00:00:01 UTC
   #
-  #     t = Time.utc(1999,12,31, 23,59,59)
-  #     (t + 0.123456789).round(4).iso8601(6)  #=> "1999-12-31T23:59:59.123500Z"
+  #     t = Time.utc(1999,12,31, 23,59,59)     #=> 1999-12-31 23:59:59 UTC
+  #     (t + 0.123456789).round(4).iso8601(6)  #=> 1999-12-31 23:59:59.1235 UTC
   #
   def round: (?Integer arg0) -> Time
 
+  # <!--
+  #   rdoc-file=time.c
+  #   - time.saturday? -> true or false
+  # -->
   # Returns `true` if *time* represents Saturday.
   #
   #     t = Time.local(2006, 6, 10)      #=> 2006-06-10 00:00:00 -0500
@@ -556,16 +867,24 @@ class Time < Object
   #
   def saturday?: () -> bool
 
+  # <!--
+  #   rdoc-file=time.c
+  #   - time.sec -> integer
+  # -->
   # Returns the second of the minute (0..60) for *time*.
   #
   # **Note:** Seconds range from zero to 60 to allow the system to inject leap
-  # seconds. See http://en.wikipedia.org/wiki/Leap_second for further details.
+  # seconds. See https://en.wikipedia.org/wiki/Leap_second for further details.
   #
   #     t = Time.now   #=> 2007-11-19 08:25:02 -0600
   #     t.sec          #=> 2
   #
   def sec: () -> Integer
 
+  # <!--
+  #   rdoc-file=time.c
+  #   - time.strftime( string ) -> string
+  # -->
   # Formats *time* according to the directives in the given format string.
   #
   # The directives begin with a percent (%) character. Any text not listed as a
@@ -742,33 +1061,31 @@ class Time < Object
   #
   def strftime: (String arg0) -> String
 
-  # Returns the fraction for *time*.
+  # <!--
+  #   rdoc-file=time.c
+  #   - time.subsec    -> number
+  # -->
+  # Returns the subsecond for *time*.
   #
   # The return value can be a rational number.
   #
-  #     t = Time.now        #=> 2009-03-26 22:33:12 +0900
-  #     "%10.9f" % t.to_f   #=> "1238074392.940563917"
-  #     t.subsec            #=> (94056401/100000000)
+  #     t = Time.now        #=> 2020-07-20 15:40:26.867462289 +0900
+  #     t.subsec            #=> (867462289/1000000000)
   #
-  # The lowest digits of #to_f and #subsec are different because IEEE 754 double
-  # is not accurate enough to represent the rational number.
+  #     t = Time.now        #=> 2020-07-20 15:40:50.313828595 +0900
+  #     t.subsec            #=> (62765719/200000000)
   #
-  # The more accurate value is returned by #subsec.
+  #     t = Time.new(2000,1,1,2,3,4) #=> 2000-01-01 02:03:04 +0900
+  #     t.subsec                     #=> 0
   #
-  def subsec: () -> Numeric
+  #     Time.new(2000,1,1,0,0,1/3r,"UTC").subsec #=> (1/3)
+  #
+  def subsec: () -> (0 | Rational)
 
-  # Returns a new Time object, one second later than *time*. Time#succ is obsolete
-  # since 1.9.2 for time is not a discrete value.
-  #
-  #     t = Time.now       #=> 2007-11-19 08:23:57 -0600
-  #     t.succ             #=> 2007-11-19 08:23:58 -0600
-  #
-  # Use instead `time + 1`
-  #
-  #     t + 1              #=> 2007-11-19 08:23:58 -0600
-  #
-  def succ: () -> Time
-
+  # <!--
+  #   rdoc-file=time.c
+  #   - time.sunday? -> true or false
+  # -->
   # Returns `true` if *time* represents Sunday.
   #
   #     t = Time.local(1990, 4, 1)       #=> 1990-04-01 00:00:00 -0600
@@ -776,6 +1093,10 @@ class Time < Object
   #
   def sunday?: () -> bool
 
+  # <!--
+  #   rdoc-file=time.c
+  #   - time.thursday? -> true or false
+  # -->
   # Returns `true` if *time* represents Thursday.
   #
   #     t = Time.local(1995, 12, 21)     #=> 1995-12-21 00:00:00 -0600
@@ -783,12 +1104,16 @@ class Time < Object
   #
   def thursday?: () -> bool
 
+  # <!--
+  #   rdoc-file=time.c
+  #   - time.to_a -> array
+  # -->
   # Returns a ten-element *array* of values for *time*:
   #
   #     [sec, min, hour, day, month, year, wday, yday, isdst, zone]
   #
   # See the individual methods for an explanation of the valid ranges of each
-  # value. The ten elements can be passed directly to Time::utc or Time::local to
+  # value. The ten elements can be passed directly to Time.utc or Time.local to
   # create a new Time object.
   #
   #     t = Time.now     #=> 2007-11-19 08:36:01 -0600
@@ -796,37 +1121,59 @@ class Time < Object
   #
   def to_a: () -> [ Integer, Integer, Integer, Integer, Integer, Integer, Integer, Integer, bool, String ]
 
+  # <!--
+  #   rdoc-file=time.c
+  #   - time.to_f -> float
+  # -->
   # Returns the value of *time* as a floating point number of seconds since the
-  # Epoch.
+  # Epoch. The return value approximate the exact value in the Time object because
+  # floating point numbers cannot represent all rational numbers exactly.
   #
-  #     t = Time.now
-  #     "%10.5f" % t.to_f   #=> "1270968744.77658"
-  #     t.to_i              #=> 1270968744
+  #     t = Time.now        #=> 2020-07-20 22:00:29.38740268 +0900
+  #     t.to_f              #=> 1595250029.3874028
+  #     t.to_i              #=> 1595250029
   #
   # Note that IEEE 754 double is not accurate enough to represent the exact number
-  # of nanoseconds since the Epoch.
+  # of nanoseconds since the Epoch. (IEEE 754 double has 53bit mantissa. So it can
+  # represent exact number of nanoseconds only in `2 ** 53 / 1_000_000_000 / 60 /
+  # 60 / 24 = 104.2` days.) When Ruby uses a nanosecond-resolution clock function,
+  # such as `clock_gettime` of POSIX, to obtain the current time, Time#to_f can
+  # lose information of a Time object created with `Time.now`.
   #
   def to_f: () -> Float
 
+  # <!--
+  #   rdoc-file=time.c
+  #   - time.to_i   -> int
+  #   - time.tv_sec -> int
+  # -->
   # Returns the value of *time* as an integer number of seconds since the Epoch.
   #
-  #     t = Time.now
-  #     "%10.5f" % t.to_f   #=> "1270968656.89607"
-  #     t.to_i              #=> 1270968656
+  # If *time* contains subsecond, they are truncated.
+  #
+  #     t = Time.now        #=> 2020-07-21 01:41:29.746012609 +0900
+  #     t.to_i              #=> 1595263289
   #
   def to_i: () -> Integer
 
+  # <!--
+  #   rdoc-file=time.c
+  #   - time.to_r -> a_rational
+  # -->
   # Returns the value of *time* as a rational number of seconds since the Epoch.
   #
-  #     t = Time.now
-  #     t.to_r            #=> (1270968792716287611/1000000000)
+  #     t = Time.now      #=> 2020-07-20 22:03:45.212167333 +0900
+  #     t.to_r            #=> (1595250225212167333/1000000000)
   #
-  # This methods is intended to be used to get an accurate value representing the
-  # nanoseconds since the Epoch. You can use this method to convert *time* to
-  # another Epoch.
+  # This method is intended to be used to get an accurate value representing the
+  # seconds (including subsecond) since the Epoch.
   #
   def to_r: () -> Rational
 
+  # <!--
+  #   rdoc-file=time.c
+  #   - time.to_s    -> string
+  # -->
   # Returns a string representing *time*. Equivalent to calling #strftime with the
   # appropriate format string.
   #
@@ -839,6 +1186,10 @@ class Time < Object
   #
   def to_s: () -> String
 
+  # <!--
+  #   rdoc-file=time.c
+  #   - time.tuesday? -> true or false
+  # -->
   # Returns `true` if *time* represents Tuesday.
   #
   #     t = Time.local(1991, 2, 19)      #=> 1991-02-19 00:00:00 -0600
@@ -846,44 +1197,73 @@ class Time < Object
   #
   def tuesday?: () -> bool
 
-  # Returns the number of nanoseconds for *time*.
+  # <!--
+  #   rdoc-file=time.c
+  #   - time.nsec    -> int
+  #   - time.tv_nsec -> int
+  # -->
+  # Returns the number of nanoseconds for the subsecond part of *time*. The result
+  # is a non-negative integer less than 10**9.
   #
-  #     t = Time.now        #=> 2007-11-17 15:18:03 +0900
-  #     "%10.9f" % t.to_f   #=> "1195280283.536151409"
-  #     t.nsec              #=> 536151406
+  #     t = Time.now        #=> 2020-07-20 22:07:10.963933942 +0900
+  #     t.nsec              #=> 963933942
   #
-  # The lowest digits of #to_f and #nsec are different because IEEE 754 double is
-  # not accurate enough to represent the exact number of nanoseconds since the
-  # Epoch.
+  # If *time* has fraction of nanosecond (such as picoseconds), it is truncated.
   #
-  # The more accurate value is returned by #nsec.
+  #     t = Time.new(2000,1,1,0,0,0.666_777_888_999r)
+  #     t.nsec              #=> 666777888
   #
-  def tv_nsec: () -> Numeric
+  # Time#subsec can be used to obtain the subsecond part exactly.
+  #
+  def tv_nsec: () -> Integer
 
+  # <!-- rdoc-file=time.c -->
   # Returns the value of *time* as an integer number of seconds since the Epoch.
   #
-  #     t = Time.now
-  #     "%10.5f" % t.to_f   #=> "1270968656.89607"
-  #     t.to_i              #=> 1270968656
+  # If *time* contains subsecond, they are truncated.
   #
-  def tv_sec: () -> Numeric
+  #     t = Time.now        #=> 2020-07-21 01:41:29.746012609 +0900
+  #     t.to_i              #=> 1595263289
+  #
+  def tv_sec: () -> Integer
 
-  # Returns the number of microseconds for *time*.
+  # <!--
+  #   rdoc-file=time.c
+  #   - time.usec    -> int
+  #   - time.tv_usec -> int
+  # -->
+  # Returns the number of microseconds for the subsecond part of *time*. The
+  # result is a non-negative integer less than 10**6.
   #
-  #     t = Time.now        #=> 2007-11-19 08:03:26 -0600
-  #     "%10.6f" % t.to_f   #=> "1195481006.775195"
-  #     t.usec              #=> 775195
+  #     t = Time.now        #=> 2020-07-20 22:05:58.459785953 +0900
+  #     t.usec              #=> 459785
   #
-  def tv_usec: () -> Numeric
+  # If *time* has fraction of microsecond (such as nanoseconds), it is truncated.
+  #
+  #     t = Time.new(2000,1,1,0,0,0.666_777_888_999r)
+  #     t.usec              #=> 666777
+  #
+  # Time#subsec can be used to obtain the subsecond part exactly.
+  #
+  def tv_usec: () -> Integer
 
-  # Returns the number of microseconds for *time*.
+  # <!-- rdoc-file=time.c -->
+  # Returns the number of microseconds for the subsecond part of *time*. The
+  # result is a non-negative integer less than 10**6.
   #
-  #     t = Time.now        #=> 2007-11-19 08:03:26 -0600
-  #     "%10.6f" % t.to_f   #=> "1195481006.775195"
-  #     t.usec              #=> 775195
+  #     t = Time.now        #=> 2020-07-20 22:05:58.459785953 +0900
+  #     t.usec              #=> 459785
   #
-  def usec: () -> Numeric
+  # If *time* has fraction of microsecond (such as nanoseconds), it is truncated.
+  #
+  #     t = Time.new(2000,1,1,0,0,0.666_777_888_999r)
+  #     t.usec              #=> 666777
+  #
+  # Time#subsec can be used to obtain the subsecond part exactly.
+  #
+  def usec: () -> Integer
 
+  # <!-- rdoc-file=time.c -->
   # Converts *time* to UTC (GMT), modifying the receiver.
   #
   #     t = Time.now   #=> 2007-11-19 08:18:31 -0600
@@ -898,6 +1278,11 @@ class Time < Object
   #
   def utc: () -> Time
 
+  # <!--
+  #   rdoc-file=time.c
+  #   - time.utc? -> true or false
+  #   - time.gmt? -> true or false
+  # -->
   # Returns `true` if *time* represents a time in UTC (GMT).
   #
   #     t = Time.now                        #=> 2007-11-19 08:15:23 -0600
@@ -912,6 +1297,7 @@ class Time < Object
   #
   def utc?: () -> bool
 
+  # <!-- rdoc-file=time.c -->
   # Returns the offset in seconds between the timezone of *time* and UTC.
   #
   #     t = Time.gm(2000,1,1,20,15,1)   #=> 2000-01-01 20:15:01 UTC
@@ -921,6 +1307,10 @@ class Time < Object
   #
   def utc_offset: () -> Integer
 
+  # <!--
+  #   rdoc-file=time.c
+  #   - time.wday -> integer
+  # -->
   # Returns an integer representing the day of the week, 0..6, with Sunday == 0.
   #
   #     t = Time.now   #=> 2007-11-20 02:35:35 -0600
@@ -935,6 +1325,10 @@ class Time < Object
   #
   def wday: () -> Integer
 
+  # <!--
+  #   rdoc-file=time.c
+  #   - time.wednesday? -> true or false
+  # -->
   # Returns `true` if *time* represents Wednesday.
   #
   #     t = Time.local(1993, 2, 24)      #=> 1993-02-24 00:00:00 -0600
@@ -942,6 +1336,10 @@ class Time < Object
   #
   def wednesday?: () -> bool
 
+  # <!--
+  #   rdoc-file=time.c
+  #   - time.yday -> integer
+  # -->
   # Returns an integer representing the day of the year, 1..366.
   #
   #     t = Time.now   #=> 2007-11-19 08:32:31 -0600
@@ -949,6 +1347,10 @@ class Time < Object
   #
   def yday: () -> Integer
 
+  # <!--
+  #   rdoc-file=time.c
+  #   - time.year -> integer
+  # -->
   # Returns the year for *time* (including the century).
   #
   #     t = Time.now   #=> 2007-11-19 08:27:51 -0600
@@ -956,6 +1358,10 @@ class Time < Object
   #
   def year: () -> Integer
 
+  # <!--
+  #   rdoc-file=time.c
+  #   - time.zone -> string or timezone
+  # -->
   # Returns the name of the time zone used for *time*. As of Ruby 1.8, returns
   # ``UTC'' rather than ``GMT'' for UTC times.
   #
@@ -972,6 +1378,12 @@ class Time < Object
   #
   def self.mktime: (Integer year, ?Integer | String month, ?Integer day, ?Integer hour, ?Integer min, ?Numeric sec, ?Numeric usec_with_frac) -> Time
 
+  # <!--
+  #   rdoc-file=time.c
+  #   - time.gmt_offset -> integer
+  #   - time.gmtoff     -> integer
+  #   - time.utc_offset -> integer
+  # -->
   # Returns the offset in seconds between the timezone of *time* and UTC.
   #
   #     t = Time.gm(2000,1,1,20,15,1)   #=> 2000-01-01 20:15:01 UTC
@@ -981,6 +1393,7 @@ class Time < Object
   #
   def gmtoff: () -> Integer
 
+  # <!-- rdoc-file=time.c -->
   # Returns the month of the year (1..12) for *time*.
   #
   #     t = Time.now   #=> 2007-11-19 08:27:30 -0600
@@ -989,55 +1402,57 @@ class Time < Object
   #
   def month: () -> Integer
 
-  # Floors sub seconds to a given precision in decimal digits (0 digits by
-  # default). It returns a new Time object. `ndigits` should be zero or a positive
-  # integer.
-  #
-  #     require 'time'
+  # <!--
+  #   rdoc-file=time.c
+  #   - time.floor([ndigits])   -> new_time
+  # -->
+  # Floors subsecond to a given precision in decimal digits (0 digits by default).
+  # It returns a new Time object. `ndigits` should be zero or a positive integer.
   #
   #     t = Time.utc(2010,3,30, 5,43,25.123456789r)
-  #     t.iso8601(10)           #=> "2010-03-30T05:43:25.1234567890Z"
-  #     t.floor.iso8601(10)     #=> "2010-03-30T05:43:25.0000000000Z"
-  #     t.floor(0).iso8601(10)  #=> "2010-03-30T05:43:25.0000000000Z"
-  #     t.floor(1).iso8601(10)  #=> "2010-03-30T05:43:25.1000000000Z"
-  #     t.floor(2).iso8601(10)  #=> "2010-03-30T05:43:25.1200000000Z"
-  #     t.floor(3).iso8601(10)  #=> "2010-03-30T05:43:25.1230000000Z"
-  #     t.floor(4).iso8601(10)  #=> "2010-03-30T05:43:25.1234000000Z"
+  #     t                       #=> 2010-03-30 05:43:25.123456789 UTC
+  #     t.floor                 #=> 2010-03-30 05:43:25 UTC
+  #     t.floor(0)              #=> 2010-03-30 05:43:25 UTC
+  #     t.floor(1)              #=> 2010-03-30 05:43:25.1 UTC
+  #     t.floor(2)              #=> 2010-03-30 05:43:25.12 UTC
+  #     t.floor(3)              #=> 2010-03-30 05:43:25.123 UTC
+  #     t.floor(4)              #=> 2010-03-30 05:43:25.1234 UTC
   #
   #     t = Time.utc(1999,12,31, 23,59,59)
-  #     (t + 0.4).floor.iso8601(3)    #=> "1999-12-31T23:59:59.000Z"
-  #     (t + 0.9).floor.iso8601(3)    #=> "1999-12-31T23:59:59.000Z"
-  #     (t + 1.4).floor.iso8601(3)    #=> "2000-01-01T00:00:00.000Z"
-  #     (t + 1.9).floor.iso8601(3)    #=> "2000-01-01T00:00:00.000Z"
+  #     (t + 0.4).floor    #=> 1999-12-31 23:59:59 UTC
+  #     (t + 0.9).floor    #=> 1999-12-31 23:59:59 UTC
+  #     (t + 1.4).floor    #=> 2000-01-01 00:00:00 UTC
+  #     (t + 1.9).floor    #=> 2000-01-01 00:00:00 UTC
   #
   #     t = Time.utc(1999,12,31, 23,59,59)
-  #     (t + 0.123456789).floor(4).iso8601(6)  #=> "1999-12-31T23:59:59.123400Z"
+  #     (t + 0.123456789).floor(4)  #=> 1999-12-31 23:59:59.1234 UTC
   #
   def floor: (?Integer ndigits) -> Time
 
-  # Ceils sub seconds to a given precision in decimal digits (0 digits by
-  # default). It returns a new Time object. `ndigits` should be zero or a positive
-  # integer.
-  #
-  #     require 'time'
+  # <!--
+  #   rdoc-file=time.c
+  #   - time.ceil([ndigits])   -> new_time
+  # -->
+  # Ceils subsecond to a given precision in decimal digits (0 digits by default).
+  # It returns a new Time object. `ndigits` should be zero or a positive integer.
   #
   #     t = Time.utc(2010,3,30, 5,43,25.0123456789r)
-  #     t.iso8601(10)          #=> "2010-03-30T05:43:25.0123456789Z"
-  #     t.ceil.iso8601(10)     #=> "2010-03-30T05:43:26.0000000000Z"
-  #     t.ceil(0).iso8601(10)  #=> "2010-03-30T05:43:26.0000000000Z"
-  #     t.ceil(1).iso8601(10)  #=> "2010-03-30T05:43:25.1000000000Z"
-  #     t.ceil(2).iso8601(10)  #=> "2010-03-30T05:43:25.0200000000Z"
-  #     t.ceil(3).iso8601(10)  #=> "2010-03-30T05:43:25.0130000000Z"
-  #     t.ceil(4).iso8601(10)  #=> "2010-03-30T05:43:25.0124000000Z"
+  #     t                      #=> 2010-03-30 05:43:25 123456789/10000000000 UTC
+  #     t.ceil                 #=> 2010-03-30 05:43:26 UTC
+  #     t.ceil(0)              #=> 2010-03-30 05:43:26 UTC
+  #     t.ceil(1)              #=> 2010-03-30 05:43:25.1 UTC
+  #     t.ceil(2)              #=> 2010-03-30 05:43:25.02 UTC
+  #     t.ceil(3)              #=> 2010-03-30 05:43:25.013 UTC
+  #     t.ceil(4)              #=> 2010-03-30 05:43:25.0124 UTC
   #
   #     t = Time.utc(1999,12,31, 23,59,59)
-  #     (t + 0.4).ceil.iso8601(3)    #=> "2000-01-01T00:00:00.000Z"
-  #     (t + 0.9).ceil.iso8601(3)    #=> "2000-01-01T00:00:00.000Z"
-  #     (t + 1.4).ceil.iso8601(3)    #=> "2000-01-01T00:00:01.000Z"
-  #     (t + 1.9).ceil.iso8601(3)    #=> "2000-01-01T00:00:01.000Z"
+  #     (t + 0.4).ceil         #=> 2000-01-01 00:00:00 UTC
+  #     (t + 0.9).ceil         #=> 2000-01-01 00:00:00 UTC
+  #     (t + 1.4).ceil         #=> 2000-01-01 00:00:01 UTC
+  #     (t + 1.9).ceil         #=> 2000-01-01 00:00:01 UTC
   #
   #     t = Time.utc(1999,12,31, 23,59,59)
-  #     (t + 0.123456789).ceil(4).iso8601(6)  #=> "1999-12-31T23:59:59.123500Z"
+  #     (t + 0.123456789).ceil(4)  #=> 1999-12-31 23:59:59.1235 UTC
   #
   def ceil: (?Integer ndigits) -> Time
 end

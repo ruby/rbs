@@ -1,19 +1,27 @@
 $LOAD_PATH.unshift File.expand_path("../lib", __FILE__)
 require "rbs"
+require "rbs/annotate"
 require "tmpdir"
 require "stringio"
 require "open3"
 
-begin
-  require 'minitest/reporters'
-  Minitest::Reporters.use! [Minitest::Reporters::DefaultReporter.new]
-rescue LoadError
+unless ENV["XDG_CACHE_HOME"]
+  tmpdir = Dir.mktmpdir("rbs-test-")
+  ENV["XDG_CACHE_HOME"] = tmpdir
+
+  at_exit do
+    FileUtils.rmtree(tmpdir)
+    ENV.delete("XDG_CACHE_HOME")
+  end
 end
+
+require "test/unit"
 
 begin
   require "amber"
 rescue LoadError
 end
+
 
 module TestHelper
   def has_gem?(*gems)
@@ -26,11 +34,15 @@ module TestHelper
     false
   end
 
-  def parse_type(string, variables: Set.new)
+  def skip_minitest?
+    ENV.key?("NO_MINITEST")
+  end
+
+  def parse_type(string, variables: [])
     RBS::Parser.parse_type(string, variables: variables)
   end
 
-  def parse_method_type(string, variables: Set.new)
+  def parse_method_type(string, variables: [])
     RBS::Parser.parse_method_type(string, variables: variables)
   end
 
@@ -41,16 +53,19 @@ module TestHelper
     end
   end
 
-  def silence_errors
-    RBS.logger.stub :error, nil do
-      yield
-    end
-  end
-
   def silence_warnings
-    RBS.logger.stub :warn, nil do
-      yield
+    klass = RBS.logger.class
+    original_method = klass.instance_method(:warn)
+
+    klass.remove_method(:warn)
+    klass.define_method(:warn) do |*args, &block|
+      block&.call()
     end
+
+    yield
+  ensure
+    klass.remove_method(:warn)
+    klass.define_method(:warn, original_method)
   end
 
   class SignatureManager
@@ -88,17 +103,19 @@ class Object < BasicObject
   public
   def __id__: -> Integer
 
+  def to_i: -> Integer
+
   private
   def respond_to_missing?: (Symbol, bool) -> bool
 end
 
-module Kernel
+module Kernel : BasicObject
   private
   def puts: (*untyped) -> nil
-  def to_i: -> Integer
 end
 
 class Class < Module
+  def new: (*untyped, **untyped) ?{ (*untyped, **untyped) -> untyped } -> untyped
 end
 
 class Module
@@ -119,7 +136,11 @@ end
 module Comparable
 end
 
-module Enumerable[A, B]
+module Enumerable[A]
+end
+
+class Hash[unchecked out K, unchecked out V]
+  include Enumerable[[K, V]]
 end
 SIG
 
@@ -137,7 +158,7 @@ SIG
           absolute_path.write(content)
         end
 
-        root = 
+        root =
           if system_builtin
             RBS::EnvironmentLoader::DEFAULT_CORE_ROOT
           else
@@ -149,6 +170,33 @@ SIG
 
         yield RBS::Environment.from_loader(loader).resolve_type_names, tmppath
       end
+    end
+  end
+
+  def assert_any(collection, size: nil)
+    assert_any!(collection, size: size) do |item|
+      assert yield(item)
+    end
+  end
+
+  def assert_any!(collection, size: nil)
+    assert_equal size, collection.size if size
+
+    *items, last = collection
+
+    if last
+      items.each do |item|
+        begin
+          yield item
+        rescue Test::Unit::AssertionFailedError
+          next
+        else
+          # Pass test
+          return
+        end
+      end
+
+      yield last
     end
   end
 
@@ -172,5 +220,3 @@ SIG
     assert_empty(sample - array)
   end
 end
-
-require "minitest/autorun"

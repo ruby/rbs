@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require "open3"
 require "optparse"
 require "shellwords"
@@ -6,6 +8,7 @@ module RBS
   class CLI
     class LibraryOptions
       attr_accessor :core_root
+      attr_accessor :config_path
       attr_reader :repos
       attr_reader :libs
       attr_reader :dirs
@@ -16,6 +19,7 @@ module RBS
 
         @libs = []
         @dirs = []
+        @config_path = Collection::Config.find_config_path || Collection::Config::PATH
       end
 
       def loader
@@ -25,7 +29,9 @@ module RBS
         end
 
         loader = EnvironmentLoader.new(core_root: core_root, repository: repository)
-        
+        lock = config_path&.then { |p| Collection::Config.lockfile_of(p) }
+        loader.add_collection(lock) if lock
+
         dirs.each do |dir|
           loader.add(path: Pathname(dir))
         end
@@ -43,32 +49,41 @@ module RBS
         opts.on("-r LIBRARY", "Load RBS files of the library") do |lib|
           libs << lib
         end
-  
+
         opts.on("-I DIR", "Load RBS files from the directory") do |dir|
           dirs << dir
         end
-  
+
         opts.on("--no-stdlib", "Skip loading standard library signatures") do
           self.core_root = nil
         end
-  
+
+        opts.on('--collection PATH', "File path of collection configration (default: #{Collection::Config::PATH})") do |path|
+          self.config_path = Pathname(path).expand_path
+        end
+
+        opts.on('--no-collection', 'Ignore collection configration') do
+          self.config_path = nil
+        end
+
         opts.on("--repo DIR", "Add RBS repository") do |dir|
           repos << dir
         end
-  
+
         opts
-      end  
+      end
     end
 
     attr_reader :stdout
     attr_reader :stderr
+    attr_reader :original_args
 
     def initialize(stdout:, stderr:)
       @stdout = stdout
       @stderr = stderr
     end
 
-    COMMANDS = [:ast, :list, :ancestors, :methods, :method, :validate, :constant, :paths, :prototype, :vendor, :parse, :test]
+    COMMANDS = [:ast, :annotate, :list, :ancestors, :methods, :method, :validate, :constant, :paths, :prototype, :vendor, :parse, :test, :collection]
 
     def parse_logging_options(opts)
       opts.on("--log-level LEVEL", "Specify log level (defaults to `warn`)") do |level|
@@ -88,6 +103,8 @@ module RBS
     end
 
     def run(args)
+      @original_args = args.dup
+
       options = LibraryOptions.new
 
       opts = OptionParser.new
@@ -242,7 +259,7 @@ EOU
 
       env = Environment.from_loader(loader).resolve_type_names
 
-      builder = DefinitionBuilder.new(env: env)
+      builder = DefinitionBuilder::AncestorBuilder.new(env: env)
       type_name = TypeName(args[0]).absolute!
 
       if env.class_decls.key?(type_name)
@@ -418,7 +435,7 @@ EOU
       builder = DefinitionBuilder.new(env: env)
       validator = Validator.new(env: env, resolver: TypeNameResolver.from_env(env))
 
-      env.class_decls.each_key do |name|
+      env.class_decls.each do |name, decl|
         stdout.puts "Validating class/module definition: `#{name}`..."
         builder.build_instance(name).each_type do |type|
           validator.validate_type type, context: [Namespace.root]
@@ -426,12 +443,42 @@ EOU
         builder.build_singleton(name).each_type do |type|
           validator.validate_type type, context: [Namespace.root]
         end
+
+        d = decl.primary.decl
+
+        validator.validate_type_params(
+          d.type_params,
+          type_name: name,
+          location: d.location&.aref(:type_params)
+        )
+
+        decl.decls.each do |d|
+          d.decl.each_member do |member|
+            case member
+            when AST::Members::MethodDefinition
+              validator.validate_method_definition(member, type_name: name)
+            end
+          end
+        end
       end
 
-      env.interface_decls.each_key do |name|
+      env.interface_decls.each do |name, decl|
         stdout.puts "Validating interface: `#{name}`..."
         builder.build_interface(name).each_type do |type|
           validator.validate_type type, context: [Namespace.root]
+        end
+
+        validator.validate_type_params(
+          decl.decl.type_params,
+          type_name: name,
+          location: decl.decl.location&.aref(:type_params)
+        )
+
+        decl.decl.members.each do |member|
+          case member
+          when AST::Members::MethodDefinition
+            validator.validate_method_definition(member, type_name: name)
+          end
         end
       end
 
@@ -448,9 +495,10 @@ EOU
 
       env.alias_decls.each do |name, decl|
         stdout.puts "Validating alias: `#{name}`..."
-        builder.expand_alias(name).tap do |type|
+        builder.expand_alias1(name).tap do |type|
           validator.validate_type type, context: [Namespace.root]
         end
+        validator.validate_type_alias(entry: decl)
       end
     end
 
@@ -547,7 +595,7 @@ EOU
 
       case format
       when "rbi", "rb"
-        decls = run_prototype_file(format, args)
+        run_prototype_file(format, args)
       when "runtime"
         require_libs = []
         relative_libs = []
@@ -595,6 +643,9 @@ EOU
         end
 
         decls = Prototype::Runtime.new(patterns: args, env: env, merge: merge, owners_included: owners_included).decls
+
+        writer = Writer.new(out: stdout)
+        writer.write decls
       else
         stdout.puts <<EOU
 Usage: rbs prototype [generator...] [args...]
@@ -610,13 +661,6 @@ Examples:
 EOU
         exit 1
       end
-
-      if decls
-        writer = Writer.new(out: stdout)
-        writer.write decls
-      else
-        exit 1
-      end
     end
 
     def run_prototype_file(format, args)
@@ -624,9 +668,16 @@ EOU
                        "\n** This command does not work on this interpreter (#{RUBY_ENGINE}) **\n"
                      end
 
+      # @type var output_dir: Pathname?
+      output_dir = nil
+      # @type var base_dir: Pathname?
+      base_dir = nil
+      # @type var force: bool
+      force = false
+
       opts = OptionParser.new
       opts.banner = <<EOU
-Usage: rbs prototype #{format} [options...] [files...]
+Usage: rbs prototype #{format} [files...]
 #{availability}
 Generate RBS prototype from source code.
 It parses specified Ruby code and and generates RBS prototypes.
@@ -637,7 +688,25 @@ Examples:
 
   $ rbs prototype rb lib/foo.rb
   $ rbs prototype rbi sorbet/rbi/foo.rbi
+
+You can run the tool in *batch* mode by passing `--out-dir` option.
+
+  $ rbs prototype rb --out-dir=sig lib/foo.rb
+  $ rbs prototype rbi --out-dir=sig/models --base-dir=app/models app/models
 EOU
+
+      opts.on("--out-dir=DIR", "Specify the path to save the generated RBS files") do |path|
+        output_dir = Pathname(path)
+      end
+
+      opts.on("--base-dir=DIR", "Specify the path to calculate the relative path to save the generated RBS files") do |path|
+        base_dir = Pathname(path)
+      end
+
+      opts.on("--force", "Overwrite existing RBS files") do
+        force = true
+      end
+
       opts.parse!(args)
 
       unless has_parser?
@@ -650,18 +719,108 @@ EOU
         return nil
       end
 
-      parser = case format
-               when "rbi"
-                 Prototype::RBI.new()
-               when "rb"
-                 Prototype::RB.new()
-               end
-
-      args.each do |file|
-        parser.parse Pathname(file).read
+      new_parser = -> do
+        case format
+        when "rbi"
+          Prototype::RBI.new()
+        when "rb"
+          Prototype::RB.new()
+        else
+          raise
+        end
       end
 
-      parser.decls
+      input_paths = args.map {|arg| Pathname(arg) }
+
+      if output_dir
+        # @type var skip_paths: Array[Pathname]
+        skip_paths = []
+
+        # batch mode
+        input_paths.each do |path|
+          stdout.puts "Processing `#{path}`..."
+          ruby_files =
+            if path.file?
+              [path]
+            else
+              path.glob("**/*.rb").sort
+            end
+
+          ruby_files.each do |file_path|
+            stdout.puts "  Generating RBS for `#{file_path}`..."
+
+            relative_path =
+              if base_dir
+                file_path.relative_path_from(base_dir)
+              else
+                if top = file_path.descend.first
+                  case
+                  when top == Pathname("lib")
+                    file_path.relative_path_from(top)
+                  when top == Pathname("app")
+                    file_path.relative_path_from(top)
+                  else
+                    file_path
+                  end
+                else
+                  file_path
+                end
+              end
+            relative_path = relative_path.cleanpath()
+
+            if relative_path.absolute? || relative_path.descend.first&.to_s == ".."
+              stdout.puts "  ⚠️  Cannot write the RBS to outside of the output dir: `#{relative_path}`"
+              next
+            end
+
+            output_path = (output_dir + relative_path).sub_ext(".rbs")
+
+            parser = new_parser[]
+            parser.parse file_path.read()
+
+            if output_path.file?
+              if force
+                stdout.puts "    - Writing RBS to existing file `#{output_path}`..."
+              else
+                stdout.puts "    - Skipping existing file `#{output_path}`..."
+                skip_paths << file_path
+                next
+              end
+            else
+              stdout.puts "    - Writing RBS to `#{output_path}`..."
+            end
+
+            (output_path.parent).mkpath
+            output_path.open("w") do |io|
+              writer = Writer.new(out: io)
+              writer.write(parser.decls)
+            end
+          end
+        end
+
+        unless skip_paths.empty?
+          stdout.puts
+          stdout.puts ">>>> Skipped existing #{skip_paths.size} files. Use `--force` option to update the files."
+          command = original_args.take(original_args.size - input_paths.size)
+
+          skip_paths.take(10).each do |path|
+            stdout.puts "  #{defined?(Bundler) ? "bundle exec " : ""}rbs #{Shellwords.join(command)} --force #{Shellwords.escape(path.to_s)}"
+          end
+          if skip_paths.size > 10
+            stdout.puts "  ..."
+          end
+        end
+      else
+        # file mode
+        parser = new_parser[]
+
+        input_paths.each do |file|
+          parser.parse file.read()
+        end
+
+        writer = Writer.new(out: stdout)
+        writer.write parser.decls
+      end
     end
 
     def run_vendor(args, options)
@@ -735,20 +894,64 @@ Examples:
       syntax_error = false
       args.each do |path|
         path = Pathname(path)
-        loader.each_file(path, skip_hidden: false, immediate: true) do |file_path| 
-          Parser.parse_signature(file_path.read)
-        rescue RBS::Parser::SyntaxError => ex
-          loc = ex.error_value.location
-          stdout.puts "#{file_path}:#{loc.start_line}:#{loc.start_column}: parse error on value: (#{ex.token_str})"
-          syntax_error = true
-        rescue RBS::Parser::SemanticsError => ex
-          loc = ex.location
-          stdout.puts "#{file_path}:#{loc.start_line}:#{loc.start_column}: #{ex.original_message}"
+        loader.each_file(path, skip_hidden: false, immediate: true) do |file_path|
+          RBS.logger.info "Parsing #{file_path}..."
+          buffer = Buffer.new(content: file_path.read, name: file_path)
+          Parser.parse_signature(buffer)
+        rescue RBS::ParsingError => ex
+          stdout.puts ex.message
           syntax_error = true
         end
       end
 
       exit 1 if syntax_error
+    end
+
+    def run_annotate(args, options)
+      require "rbs/annotate"
+
+      source = RBS::Annotate::RDocSource.new()
+      annotator = RBS::Annotate::RDocAnnotator.new(source: source)
+
+      preserve = true
+
+      OptionParser.new do |opts|
+        opts.banner = <<-EOB
+Usage: rbs annotate [options...] [files...]
+
+Import documents from RDoc and update RBS files.
+
+Examples:
+
+  $ rbs annotate stdlib/pathname/**/*.rbs
+
+Options:
+        EOB
+
+        opts.on("--[no-]system", "Load RDoc from system (defaults to true)") {|b| source.with_system_dir = b }
+        opts.on("--[no-]gems", "Load RDoc from gems (defaults to false)") {|b| source.with_gems_dir = b }
+        opts.on("--[no-]site", "Load RDoc from site directory (defaults to false)") {|b| source.with_site_dir = b }
+        opts.on("--[no-]home", "Load RDoc from home directory (defaults to false)") {|b| source.with_home_dir = b }
+        opts.on("-d", "--dir DIRNAME", "Load RDoc from DIRNAME") {|d| source.extra_dirs << Pathname(d) }
+        opts.on("--[no-]arglists", "Generate arglists section (defaults to true)") {|b| annotator.include_arg_lists = b }
+        opts.on("--[no-]filename", "Include source file name in the documentation (defaults to true)") {|b| annotator.include_filename = b }
+        opts.on("--[no-]preserve", "Try preserve the format of the original file (defaults to true)") {|b| preserve = b }
+      end.parse!(args)
+
+      source.load()
+
+      args.each do |file|
+        path = Pathname(file)
+        if path.directory?
+          Pathname.glob((path + "**/*.rbs").to_s).each do |path|
+            stdout.puts "Processing #{path}..."
+            annotator.annotate_file(path, preserve: preserve)
+          end
+        else
+          stdout.puts "Processing #{path}..."
+          annotator.annotate_file(path, preserve: preserve)
+        end
+      end
     end
 
     def test_opt options
@@ -757,7 +960,7 @@ Examples:
       opts.push(*options.repos.map {|dir| "--repo #{Shellwords.escape(dir)}"})
       opts.push(*options.dirs.map {|dir| "-I #{Shellwords.escape(dir)}"})
       opts.push(*options.libs.map {|lib| "-r#{Shellwords.escape(lib)}"})
-      
+
       opts.empty? ? nil : opts.join(" ")
     end
 
@@ -809,17 +1012,98 @@ EOB
       env_hash = {
         'RUBYOPT' => "#{ENV['RUBYOPT']} -rrbs/test/setup",
         'RBS_TEST_OPT' => test_opt(options),
-        'RBS_TEST_LOGLEVEL' => RBS.logger_level,
+        'RBS_TEST_LOGLEVEL' => %w(DEBUG INFO WARN ERROR FATAL)[RBS.logger_level || 5] || "UNKNOWN",
         'RBS_TEST_SAMPLE_SIZE' => sample_size,
         'RBS_TEST_DOUBLE_SUITE' => double_suite,
         'RBS_TEST_UNCHECKED_CLASSES' => (unchecked_classes.join(',') unless unchecked_classes.empty?),
         'RBS_TEST_TARGET' => (targets.join(',') unless targets.empty?)
       }
 
-      out, err, status = Open3.capture3(env_hash, *args)
+      # @type var out: String
+      # @type var err: String
+      out, err, status = __skip__ = Open3.capture3(env_hash, *args)
       stdout.print(out)
       stderr.print(err)
+
       status
+    end
+
+    def run_collection(args, options)
+      opts = collection_options(args)
+      params = {}
+      opts.order args.drop(1), into: params
+      config_path = options.config_path or raise
+      lock_path = Collection::Config.to_lockfile_path(config_path)
+      gemfile_lock_path = Bundler.default_lockfile
+
+      case args[0]
+      when 'install'
+        unless params[:frozen]
+          Collection::Config.generate_lockfile(config_path: config_path, gemfile_lock_path: gemfile_lock_path)
+        end
+        Collection::Installer.new(lockfile_path: lock_path, stdout: stdout).install_from_lockfile
+      when 'update'
+        # TODO: Be aware of argv to update only specified gem
+        Collection::Config.generate_lockfile(config_path: config_path, gemfile_lock_path: gemfile_lock_path, with_lockfile: false)
+        Collection::Installer.new(lockfile_path: lock_path, stdout: stdout).install_from_lockfile
+      when 'init'
+        if config_path.exist?
+          puts "#{config_path} already exists"
+          exit 1
+        end
+
+        config_path.write(<<~'YAML')
+          # Download sources
+          sources:
+            - name: ruby/gem_rbs_collection
+              remote: https://github.com/ruby/gem_rbs_collection.git
+              revision: main
+              repo_dir: gems
+
+          # A directory to install the downloaded RBSs
+          path: .gem_rbs_collection
+
+          gems:
+            # Skip loading rbs gem's RBS.
+            # It's unnecessary if you don't use rbs as a library.
+            - name: rbs
+              ignore: true
+        YAML
+        stdout.puts "created: #{config_path}"
+      when 'clean'
+        unless lock_path.exist?
+          puts "#{lock_path} should exist to clean"
+          exit 1
+        end
+        Collection::Cleaner.new(lockfile_path: lock_path)
+      when 'help'
+        puts opts.help
+      else
+        puts opts.help
+        exit 1
+      end
+    end
+
+    def collection_options(args)
+      OptionParser.new do |opts|
+        opts.banner = <<~HELP
+          Usage: rbs collection [install|update|init|clean|help]
+
+          Manage RBS collection, which contains third party RBS.
+
+          Examples:
+
+            # Initialize the configration file
+            $ rbs collection init
+
+            # Generate the lock file and install RBSs from the lock file
+            $ rbs collection install
+
+            # Update the RBSs
+            $ rbs collection update
+        HELP
+        opts.on('--frozen') if args[0] == 'install'
+      end
     end
   end
 end

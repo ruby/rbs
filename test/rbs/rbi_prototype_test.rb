@@ -1,6 +1,6 @@
 require "test_helper"
 
-class RBS::RbiPrototypeTest < Minitest::Test
+class RBS::RbiPrototypeTest < Test::Unit::TestCase
   RBI = RBS::Prototype::RBI
 
   include TestHelper
@@ -176,6 +176,27 @@ end
     assert_write parser.decls, <<-EOF
 class File
   def self.split: () { () -> untyped } -> void
+end
+    EOF
+  end
+
+  def test_implicit_block
+    parser = RBI.new
+
+    rbi = <<-EOR
+class Hello
+  sig do
+    params(arg0: String).void
+  end
+  def hello(arg0, &blk); end
+end
+    EOR
+
+    parser.parse(rbi)
+
+    assert_write parser.decls, <<-EOF
+class Hello
+  def hello: (String arg0) ?{ () -> untyped } -> void
 end
     EOF
   end

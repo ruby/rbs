@@ -54,21 +54,44 @@ module RBS
 
       def private?: () -> bool
 
+      # Substitutes type variables to some types.
+      # Takes care of type parameter bounds.
+      #
       def sub: (Substitution) -> Method
 
+      # Applies the mapping from `Types::t` to `Types::t`.
+      #
+      # Note this method doesn't handle upper bound in type params.
+      # You may want to use `#map_type_bound` explicitly, or `#sub` for simple substitution.
+      #
       def map_type: () { (Types::t) -> Types::t } -> Method
 
+      def map_type_bound: () { (AST::TypeParam::bound) -> AST::TypeParam::bound } -> Method
+
       def map_method_type: () { (MethodType) -> MethodType } -> Method
+
+      def update: (
+        ?super_method: Method?,
+        ?defs: Array[TypeDef],
+        ?accessibility: accessibility,
+        ?alias_of: Method?,
+        ?annotations: Array[AST::Annotation]
+      ) -> Method
     end
 
     module Ancestor
       type t = Instance | Singleton
 
       class Instance
+        type source = :super | nil
+                    | AST::Members::Include | AST::Members::Extend | AST::Members::Prepend
+                    | AST::Declarations::Module::Self
+
         attr_reader name: TypeName
         attr_reader args: Array[Types::t]
+        attr_reader source: source
 
-        def initialize: (name: TypeName, args: Array[Types::t]) -> void
+        def initialize: (name: TypeName, args: Array[Types::t], source: source) -> void
       end
 
       class Singleton
@@ -85,7 +108,7 @@ module RBS
 
       def initialize: (type_name: TypeName, params: Array[Symbol], ancestors: Array[Ancestor::t]) -> void
 
-      def apply: (Array[Types::t], location: Location?) -> Array[Ancestor::t]
+      def apply: (Array[Types::t], location: Location[untyped, untyped]?) -> Array[Ancestor::t]
     end
 
     class SingletonAncestors
@@ -122,7 +145,7 @@ module RBS
 
     def type_params: () -> Array[Symbol]
 
-    def type_params_decl: () -> AST::Declarations::ModuleTypeParams
+    def type_params_decl: () -> Array[AST::TypeParam]
 
     def sub: (Substitution) -> Definition
 

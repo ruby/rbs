@@ -1,6 +1,6 @@
 require "test_helper"
 
-class RBS::EnvironmentWalkerTest < Minitest::Test
+class RBS::EnvironmentWalkerTest < Test::Unit::TestCase
   include TestHelper
 
   Environment = RBS::Environment
@@ -44,23 +44,63 @@ EOF
         walker = EnvironmentWalker.new(env: env)
 
         components = walker.each_strongly_connected_component.to_a
-        foo = components.find {|c| c.any? {|name| name.to_s == "::A::Foo" } }
-        a = components.find {|c| c.any? {|name| name.to_s == "::A" } }
+        foo_instance = components.find_index do |component|
+          component.any? {|node|
+            node.is_a?(EnvironmentWalker::InstanceNode) && node.type_name.to_s == "::A::Foo"
+          }
+        end
+        foo_singleton = components.find_index do |component|
+          component.any? {|node|
+            node.is_a?(EnvironmentWalker::SingletonNode) && node.type_name.to_s == "::A::Foo"
+          }
+        end
+        a_instance = components.find_index do |component|
+          component.any? {|node|
+            node.is_a?(EnvironmentWalker::InstanceNode) && node.type_name.to_s == "::A"
+          }
+        end
+        a_singleton = components.find_index do |component|
+          component.any? {|node|
+            node.is_a?(EnvironmentWalker::SingletonNode) && node.type_name.to_s == "::A"
+          }
+        end
 
-        # module A::Foo makes a dependency to A
-        # A#hello makes a dependency to A::Foo
-        assert_operator a.map(&:to_s), :==, foo.map(&:to_s)
+        # singleton(A) <| A::Foo, singleton(A) <| singleton(A::Foo)
+        # A::Foo <| A
+        assert_operator a_singleton, :<, foo_instance
+        assert_operator a_singleton, :<, foo_singleton
+        assert_operator foo_instance, :<, a_instance
       end
     end
   end
 
-  def test_stdlib
+  def test_stdlib_strongly_connected_components
     env = Environment.from_loader(EnvironmentLoader.new).resolve_type_names
 
     walker = EnvironmentWalker.new(env: env.resolve_type_names).only_ancestors!
 
     walker.each_strongly_connected_component do |component|
       # pp component.map(&:to_s)
+    end
+  end
+
+  def test_stdlib_tsort
+    env = Environment.from_loader(EnvironmentLoader.new).resolve_type_names
+
+    walker = EnvironmentWalker.new(env: env.resolve_type_names).only_ancestors!
+
+    walker.tsort_each do |type_name|
+      # pp type_name.to_s
+    end
+  end
+
+  def test_each_type_name
+    env = Environment.from_loader(EnvironmentLoader.new).resolve_type_names
+
+    walker = EnvironmentWalker.new(env: env.resolve_type_names).only_ancestors!
+
+    walker.each_type_name(parse_type("::String")) do |type_name|
+      # pp type_name.to_s
     end
   end
 end

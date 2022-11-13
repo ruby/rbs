@@ -53,3 +53,17 @@ class GCTest < StdlibTest
     GC.stress = false
   end
 end
+
+
+class GCSingletonTest < Test::Unit::TestCase
+  include TypeAssertions
+
+  testing "singleton(::GC)"
+
+  def test_total_time
+    assert_send_type(
+      "() -> Integer",
+      GC, :total_time
+    )
+  end
+end

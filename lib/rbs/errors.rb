@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module RBS
   module MethodNameHelper
     def method_name_string()
@@ -14,7 +16,39 @@ module RBS
     end
   end
 
-  class InvalidTypeApplicationError < StandardError
+  class BaseError < StandardError; end
+  class LoadingError < BaseError; end
+  class DefinitionError < BaseError; end
+
+  class ParsingError < BaseError
+    attr_reader :location
+    attr_reader :error_message
+    attr_reader :token_type
+
+    def initialize(location, error_message, token_type)
+      @location = location
+      @error_message = error_message
+      @token_type = token_type
+
+      super "#{Location.to_string location}: Syntax error: #{error_message}, token=`#{location.source}` (#{token_type})"
+    end
+
+    def error_value
+      RBS.print_warning {
+        "#{self.class.name}#error_value is deprecated and will be deleted in RBS 2.0. Consider using `location.source` instead."
+      }
+      location.source
+    end
+
+    def token_str
+      RBS.print_warning {
+        "#{self.class.name}#token_str is deprecated and will be deleted in RBS 2.0. Consider using `token_type` instead."
+      }
+      token_type
+    end
+  end
+
+  class InvalidTypeApplicationError < DefinitionError
     attr_reader :type_name
     attr_reader :args
     attr_reader :params
@@ -35,51 +69,28 @@ module RBS
     end
   end
 
-  class InvalidExtensionParameterError < StandardError
-    attr_reader :type_name
-    attr_reader :extension_name
-    attr_reader :location
-    attr_reader :extension_params
-    attr_reader :class_params
-
-    def initialize(type_name:, extension_name:, extension_params:, class_params:, location:)
-      @type_name = type_name
-      @extension_name = extension_name
-      @extension_params = extension_params
-      @class_params = class_params
-      @location = location
-
-      super "#{Location.to_string location}: Expected #{class_params.size} parameters to #{type_name} (#{extension_name}) but has #{extension_params.size} parameters"
-    end
-
-    def self.check!(type_name:, extension_name:, extension_params:, class_params:, location:)
-      unless extension_params.size == class_params.size
-        raise new(type_name: type_name,
-                  extension_name: extension_name,
-                  extension_params: extension_params,
-                  class_params: class_params,
-                  location: location)
-      end
-    end
-  end
-
-  class RecursiveAncestorError < StandardError
+  class RecursiveAncestorError < DefinitionError
     attr_reader :ancestors
     attr_reader :location
 
     def initialize(ancestors:, location:)
-      last = case last = ancestors.last
-             when Definition::Ancestor::Singleton
-               "singleton(#{last.name})"
-             when Definition::Ancestor::Instance
-               if last.args.empty?
-                 last.name.to_s
-               else
-                 "#{last.name}[#{last.args.join(", ")}]"
-               end
-             end
+      @ancestors = ancestors
+      @location = location
 
-      super "#{Location.to_string location}: Detected recursive ancestors: #{last}"
+      names = ancestors.map do |ancestor|
+        case ancestor
+        when Definition::Ancestor::Singleton
+          "singleton(#{ancestor.name})"
+        when Definition::Ancestor::Instance
+          if ancestor.args.empty?
+            ancestor.name.to_s
+          else
+            "#{ancestor.name}[#{ancestor.args.join(", ")}]"
+          end
+        end
+      end
+
+      super "#{Location.to_string location}: Detected recursive ancestors: #{names.join(" < ")}"
     end
 
     def self.check!(self_ancestor, ancestors:, location:)
@@ -96,7 +107,7 @@ module RBS
     end
   end
 
-  class NoTypeFoundError < StandardError
+  class NoTypeFoundError < BaseError
     attr_reader :type_name
     attr_reader :location
 
@@ -125,7 +136,7 @@ module RBS
     end
   end
 
-  class NoSuperclassFoundError < StandardError
+  class NoSuperclassFoundError < DefinitionError
     attr_reader :type_name
     attr_reader :location
 
@@ -141,7 +152,7 @@ module RBS
     end
   end
 
-  class NoSelfTypeFoundError < StandardError
+  class NoSelfTypeFoundError < DefinitionError
     attr_reader :type_name
     attr_reader :location
 
@@ -160,13 +171,15 @@ module RBS
               env.class_decls
             when type_name.interface?
               env.interface_decls
+            else
+              raise
             end
 
       dic.key?(type_name) or raise new(type_name: type_name, location: self_type.location)
     end
   end
 
-  class NoMixinFoundError < StandardError
+  class NoMixinFoundError < DefinitionError
     attr_reader :type_name
     attr_reader :member
 
@@ -187,109 +200,108 @@ module RBS
               env.class_decls
             when type_name.interface?
               env.interface_decls
+            else
+              raise
             end
 
       dic.key?(type_name) or raise new(type_name: type_name, member: member)
     end
   end
 
-  class DuplicatedMethodDefinitionError < StandardError
-    attr_reader :decl
-    attr_reader :location
+  class DuplicatedMethodDefinitionError < DefinitionError
+    attr_reader :type
+    attr_reader :method_name
+    attr_reader :members
 
-    def initialize(decl:, name:, location:)
-      decl_str = case decl
-                 when AST::Declarations::Interface, AST::Declarations::Class, AST::Declarations::Module
-                   decl.name.to_s
-                 when AST::Declarations::Extension
-                   "#{decl.name} (#{decl.extension_name})"
-                 end
+    def initialize(type:, method_name:, members:)
+      @type = type
+      @method_name = method_name
+      @members = members
 
-      super "#{Location.to_string location}: #{decl_str} has duplicated method definition: #{name}"
+      message = +"#{Location.to_string location}: #{qualified_method_name} has duplicated definitions"
+      if members.size > 1
+        message << " in #{other_locations.map { |loc| Location.to_string loc }.join(', ')}"
+      end
+      super message
     end
 
-    def self.check!(decl:, methods:, name:, location:)
-      if methods.key?(name)
-        raise new(decl: decl, name: name, location: location)
+    def qualified_method_name
+      case type
+      when Types::ClassSingleton
+        "#{type.name}.#{method_name}"
+      else
+        "#{type.name}##{method_name}"
       end
     end
-  end
 
-  class MethodDefinitionConflictWithInterfaceMixinError < StandardError
-    include MethodNameHelper
+    def type_name
+      type.name
+    end
 
-    attr_reader :type_name
-    attr_reader :method_name
-    attr_reader :kind
-    attr_reader :mixin_member
-    attr_reader :entries
+    def location
+      members[0].location
+    end
 
-    def initialize(type_name:, method_name:, kind:, mixin_member:, entries:)
-      @type_name = type_name
-      @method_name = method_name
-      @kind = kind
-      @mixin_member = mixin_member
-      @entries = entries
-
-      super "#{entries[0].decl.location}: Duplicated method with interface mixin: #{method_name_string}"
+    def other_locations
+      members.drop(1).map(&:location)
     end
   end
 
-  class UnknownMethodAliasError < StandardError
+  class DuplicatedInterfaceMethodDefinitionError < DefinitionError
+    attr_reader :type
+    attr_reader :method_name
+    attr_reader :member
+
+    def initialize(type:, method_name:, member:)
+      @type = type
+      @method_name = method_name
+      @member = member
+
+      super "#{member.location}: Duplicated method definition: #{qualified_method_name}"
+    end
+
+    def qualified_method_name
+      case type
+      when Types::ClassSingleton
+        "#{type.name}.#{method_name}"
+      else
+        "#{type.name}##{method_name}"
+      end
+    end
+
+    def type_name
+      type.name
+    end
+  end
+
+  class UnknownMethodAliasError < DefinitionError
+    attr_reader :type_name
     attr_reader :original_name
     attr_reader :aliased_name
     attr_reader :location
 
-    def initialize(original_name:, aliased_name:, location:)
+    def initialize(type_name:, original_name:, aliased_name:, location:)
+      @type_name = type_name
       @original_name = original_name
       @aliased_name = aliased_name
       @location = location
 
-      super "#{Location.to_string location}: Unknown method alias name: #{original_name} => #{aliased_name}"
-    end
-
-    def self.check!(methods:, original_name:, aliased_name:, location:)
-      unless methods.key?(original_name)
-        raise new(original_name: original_name, aliased_name: aliased_name, location: location)
-      end
+      super "#{Location.to_string location}: Unknown method alias name: #{original_name} => #{aliased_name} (#{type_name})"
     end
   end
 
-  class SuperclassMismatchError < StandardError
+  class SuperclassMismatchError < DefinitionError
     attr_reader :name
     attr_reader :entry
 
-    def initialize(name:, super_classes:, entry:)
+    def initialize(name:, entry:)
       @name = name
       @entry = entry
       super "#{Location.to_string entry.primary.decl.location}: Superclass mismatch: #{name}"
     end
   end
 
-  class InconsistentMethodVisibilityError < StandardError
-    attr_reader :type_name
-    attr_reader :method_name
-    attr_reader :kind
-    attr_reader :member_pairs
-
-    def initialize(type_name:, method_name:, kind:, member_pairs:)
-      @type_name = type_name
-      @method_name = method_name
-      @kind = kind
-      @member_pairs = member_pairs
-
-      delimiter = case kind
-                  when :instance
-                    "#"
-                  when :singleton
-                    "."
-                  end
-
-      super "#{Location.to_string member_pairs[0][0].location}: Inconsistent method visibility: #{type_name}#{delimiter}#{method_name}"
-    end
-  end
-
-  class InvalidOverloadMethodError < StandardError
+  class InvalidOverloadMethodError < DefinitionError
     attr_reader :type_name
     attr_reader :method_name
     attr_reader :kind
@@ -312,7 +324,7 @@ module RBS
     end
   end
 
-  class GenericParameterMismatchError < StandardError
+  class GenericParameterMismatchError < LoadingError
     attr_reader :name
     attr_reader :decl
 
@@ -323,7 +335,7 @@ module RBS
     end
   end
 
-  class DuplicatedDeclarationError < StandardError
+  class DuplicatedDeclarationError < LoadingError
     attr_reader :name
     attr_reader :decls
 
@@ -331,38 +343,119 @@ module RBS
       @name = name
       @decls = decls
 
-      super "#{Location.to_string decls.last.location}: Duplicated declaration: #{name}"
+      last_decl = decls.last or raise
+      super "#{Location.to_string last_decl.location}: Duplicated declaration: #{name}"
     end
   end
 
-  class InvalidVarianceAnnotationError < StandardError
-    MethodTypeError = Struct.new(:method_name, :method_type, :param, keyword_init: true)
-    InheritanceError = Struct.new(:super_class, :param, keyword_init: true)
-    MixinError = Struct.new(:include_member, :param, keyword_init: true)
+  class InvalidVarianceAnnotationError < DefinitionError
+    attr_reader :type_name
+    attr_reader :param
+    attr_reader :location
 
-    attr_reader :decl
-    attr_reader :errors
+    def initialize(type_name:, param:, location:)
+      @type_name = type_name
+      @param = param
+      @location = location
 
-    def initialize(decl:, errors:)
-      @decl = decl
-      @errors = errors
+      super "#{Location.to_string location}: Type parameter variance error: #{param.name} is #{param.variance} but used as incompatible variance"
+    end
+  end
 
-      message = [
-        "#{Location.to_string decl.location}: Invalid variance annotation: #{decl.name}"
-      ]
+  class RecursiveAliasDefinitionError < DefinitionError
+    attr_reader :type
+    attr_reader :defs
 
-      errors.each do |error|
-        case error
-        when MethodTypeError
-          message << "  MethodTypeError (#{error.param.name}): on `#{error.method_name}` #{error.method_type.to_s} (#{error.method_type.location&.start_line})"
-        when InheritanceError
-          message << "  InheritanceError: #{error.super_class}"
-        when MixinError
-          message << "  MixinError: #{error.include_member.name} (#{error.include_member.location&.start_line})"
-        end
+    def initialize(type:, defs:)
+      @type = type
+      @defs = defs
+
+      super "#{Location.to_string location}: Recursive aliases in #{type}: #{defs.map(&:name).join(", ")}"
+    end
+
+    def location
+      first_def = defs.first or raise
+      original = first_def.original or raise
+      original.location
+    end
+  end
+
+  class MixinClassError < DefinitionError
+    attr_reader :type_name
+    attr_reader :member
+
+    def initialize(type_name:, member:)
+      @type_name = type_name
+      @member = member
+
+      super "#{Location.to_string member.location}: Cannot #{mixin_name} a class `#{member.name}` in the definition of `#{type_name}`"
+    end
+
+    def location
+      member.location
+    end
+
+    def self.check!(type_name:, env:, member:)
+      case env.class_decls[member.name]
+      when Environment::ClassEntry
+        raise new(type_name: type_name, member: member)
       end
+    end
 
-      super message.join("\n")
+    private
+
+    def mixin_name
+      case member
+      when AST::Members::Prepend
+        "prepend"
+      when AST::Members::Include
+        "include"
+      when AST::Members::Extend
+        "extend"
+      else
+        raise
+      end
+    end
+  end
+
+  class RecursiveTypeAliasError < BaseError
+    attr_reader :alias_names
+    attr_reader :location
+
+    def initialize(alias_names:, location:)
+      @alias_names = alias_names
+      @location = location
+
+      super "#{Location.to_string location}: Recursive type alias definition found for: #{name}"
+    end
+
+    def name
+      @alias_names.map(&:name).join(', ')
+    end
+  end
+
+  class NonregularTypeAliasError < BaseError
+    attr_reader :diagnostic
+    attr_reader :location
+
+    def initialize(diagnostic:, location:)
+      @diagnostic = diagnostic
+      @location = location
+
+      super "#{Location.to_string location}: Nonregular generic type alias is prohibited: #{diagnostic.type_name}, #{diagnostic.nonregular_type}"
+    end
+  end
+
+  class CyclicTypeParameterBound < BaseError
+    attr_reader :params, :type_name, :method_name, :location
+
+    def initialize(type_name:, method_name:, params:, location:)
+      @type_name = type_name
+      @method_name = method_name
+      @params = params
+      @location = location
+
+      super "#{Location.to_string(location)}: Cyclic type parameter bound is prohibited"
     end
   end
 end

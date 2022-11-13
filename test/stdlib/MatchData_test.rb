@@ -73,6 +73,28 @@ class MatchDataTest < StdlibTest
     'foo'.match('(?<a>foo)').names
   end
 
+  def test_match
+    m = /(.)(.)(\d+)(\d)(\w)?/.match("THX1138.")
+    m.match(0)
+    m.match(4.0)
+    m.match(ToInt.new(5))
+
+    m = /(?<foo>.)(.)(?<bar>.+)/.match("hoge")
+    m.match(:foo)
+    m.match("bar")
+  end
+
+  def test_match_length
+    m = /(.)(.)(\d+)(\d)(\w)?/.match("THX1138.")
+    m.match_length(0)
+    m.match_length(4.0)
+    m.match_length(ToInt.new(5))
+
+    m = /(?<foo>.)(.)(?<bar>.+)/.match("hoge")
+    m.match_length(:foo)
+    m.match_length("bar")
+  end
+
   def test_offset
     /(?<first>foo)(?<second>bar)(?<third>Baz)?/ =~ "foobarbaz"
     $~.offset 0

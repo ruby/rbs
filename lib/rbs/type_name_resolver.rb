@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module RBS
   class TypeNameResolver
     Query = _ = Struct.new(:type_name, :context, keyword_init: true)
@@ -35,7 +37,7 @@ module RBS
 
       query = Query.new(type_name: type_name, context: context)
       try_cache(query) do
-        path_head, *path_tail = type_name.to_namespace.path
+        path_head, *path_tail = type_name.split
         raise unless path_head
 
         name_head = TypeName.new(name: path_head, namespace: Namespace.empty)

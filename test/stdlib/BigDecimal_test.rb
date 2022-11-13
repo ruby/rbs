@@ -1,7 +1,8 @@
 require_relative "test_helper"
 require "bigdecimal"
+require "bigdecimal/util"
 
-class BigDecimalSingletonTest < Minitest::Test
+class BigDecimalSingletonTest < Test::Unit::TestCase
   include TypeAssertions
   library "bigdecimal"
   testing "singleton(::BigDecimal)"
@@ -51,9 +52,30 @@ class BigDecimalSingletonTest < Minitest::Test
     assert_send_type  "() { (?nil) -> void } -> void",
                       BigDecimal, :save_rounding_mode do end
   end
+
+  def test_kernel
+    assert_send_type "(::String) -> ::BigDecimal",
+                     Kernel, :BigDecimal, "1.23"
+    assert_send_type "(::ToStr) -> ::BigDecimal",
+                     Kernel, :BigDecimal, ToStr.new("1.23")
+    assert_send_type "(::Integer) -> ::BigDecimal",
+                     Kernel, :BigDecimal, 123
+    assert_send_type "(::BigDecimal) -> ::BigDecimal",
+                     Kernel, :BigDecimal, BigDecimal("1.23")
+    assert_send_type "(::Float, ::Integer) -> ::BigDecimal",
+                     Kernel, :BigDecimal, 1.23, 1
+    assert_send_type "(::Float, ::ToInt) -> ::BigDecimal",
+                     Kernel, :BigDecimal, 1.23, ToInt.new(1)
+    assert_send_type "(::Rational, ::Integer) -> ::BigDecimal",
+                     Kernel, :BigDecimal, Rational(1.23), 1
+    assert_send_type "(::String, exception: bool) -> ::BigDecimal",
+                     Kernel, :BigDecimal, "1.23", exception: false
+    assert_send_type "(::Float, ::Integer, exception: bool) -> ::BigDecimal",
+                     Kernel, :BigDecimal, 1.23, 1, exception: true
+  end
 end
 
-class BigDecimalTest < Minitest::Test
+class BigDecimalTest < Test::Unit::TestCase
   include TypeAssertions
   library "bigdecimal"
   testing "::BigDecimal"
@@ -321,6 +343,11 @@ class BigDecimalTest < Minitest::Test
                       BigDecimal("1.23"), :sub, BigDecimal("1.23"), 2
   end
 
+  def test_to_d
+    assert_send_type  "() -> ::BigDecimal",
+                      BigDecimal("1.23"), :to_d
+  end
+
   def test_to_f
     assert_send_type  "() -> ::Float",
                       BigDecimal("1.23"), :to_f
@@ -334,5 +361,151 @@ class BigDecimalTest < Minitest::Test
   def test_to_r
     assert_send_type  "() -> ::Rational",
                       BigDecimal("1.23"), :to_r
+  end
+end
+
+class IntegerToBigDecimalTest < Test::Unit::TestCase
+  include TypeAssertions
+
+  library "bigdecimal"
+  testing "::Integer"
+
+  def test_to_d_with_integer
+    assert_send_type "() -> ::BigDecimal", 123, :to_d
+  end
+
+  def test_plus_with_integer
+    assert_send_type "(::BigDecimal) -> ::BigDecimal",
+                     123, :+, BigDecimal("1.23")
+  end
+
+  def test_minus_with_integer
+    assert_send_type "(::BigDecimal) -> ::BigDecimal",
+                     123, :-, BigDecimal("1.23")
+  end
+
+  def test_divide_with_integer
+    assert_send_type "(::BigDecimal) -> ::BigDecimal",
+                     123, :/, BigDecimal("1.23")
+  end
+
+  def test_multiply_with_integer
+    assert_send_type "(::BigDecimal) -> ::BigDecimal",
+                     123, :*, BigDecimal("1.23")
+  end
+end
+
+class FloatToBigDecimalTest < Test::Unit::TestCase
+  include TypeAssertions
+
+  library "bigdecimal"
+  testing "::Float"
+
+  def test_to_d_with_float
+    assert_send_type "() -> ::BigDecimal", 12.3, :to_d
+  end
+
+  def test_plus_with_float
+    assert_send_type "(::BigDecimal) -> ::BigDecimal",
+                     1.23, :+, BigDecimal("1.23")
+  end
+
+  def test_minus_with_float
+    assert_send_type "(::BigDecimal) -> ::BigDecimal",
+                     1.23, :-, BigDecimal("1.23")
+  end
+
+  def test_divide_with_float
+    assert_send_type "(::BigDecimal) -> ::BigDecimal",
+                     1.23, :/, BigDecimal("1.23")
+  end
+
+  def test_multiply_with_float
+    assert_send_type "(::BigDecimal) -> ::BigDecimal",
+                     1.23, :*, BigDecimal("1.23")
+  end
+end
+
+class StringToBigDecimalTest < Test::Unit::TestCase
+  include TypeAssertions
+
+  library "bigdecimal"
+  testing "::String"
+
+  def test_to_d_with_string
+    assert_send_type "() -> ::BigDecimal", "123", :to_d
+  end
+end
+
+class RationalToBigDecimalTest < Test::Unit::TestCase
+  include TypeAssertions
+
+  library "bigdecimal"
+  testing "::Rational"
+
+  def test_to_d_with_rational
+    assert_send_type "(Integer) -> ::BigDecimal", Rational(22, 7), :to_d, 3
+  end
+
+  def test_plus_with_rational
+    assert_send_type "(::BigDecimal) -> ::BigDecimal",
+                     123r, :+, BigDecimal("1.23")
+  end
+
+  def test_minus_with_rational
+    assert_send_type "(::BigDecimal) -> ::BigDecimal",
+                     123r, :-, BigDecimal("1.23")
+  end
+
+  def test_divide_with_rational
+    assert_send_type "(::BigDecimal) -> ::BigDecimal",
+                     123r, :/, BigDecimal("1.23")
+  end
+
+  def test_multiply_with_rational
+    assert_send_type "(::BigDecimal) -> ::BigDecimal",
+                     123r, :*, BigDecimal("1.23")
+  end
+end
+
+class ComplexToBigDecimalTest < Test::Unit::TestCase
+  include TypeAssertions
+
+  library "bigdecimal"
+  testing "::Complex"
+
+  def test_to_d_with_complex
+    assert_send_type "() -> ::BigDecimal", Complex(0.1234567, 0), :to_d
+  end
+
+  def test_plus_with_complex
+    assert_send_type "(::BigDecimal) -> ::Complex",
+                     Complex(0.1234567, 0), :+, BigDecimal("1.23")
+  end
+
+  def test_minus_with_complex
+    assert_send_type "(::BigDecimal) -> ::Complex",
+                     Complex(0.1234567, 0), :-, BigDecimal("1.23")
+  end
+
+  def test_divide_with_complex
+    assert_send_type "(::BigDecimal) -> ::Complex",
+                     Complex(0.1234567, 0), :/, BigDecimal("1.23")
+  end
+
+  def test_multiply_with_complex
+    assert_send_type "(::BigDecimal) -> ::Complex",
+                     Complex(0.1234567, 0), :*, BigDecimal("1.23")
+  end
+end
+
+class NilToBigDecimalTest < Test::Unit::TestCase
+  include TypeAssertions
+
+  library "bigdecimal"
+  testing "::NilClass"
+
+  def test_to_d_with_nil
+    assert_send_type "() -> ::BigDecimal", nil, :to_d
   end
 end

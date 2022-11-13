@@ -1,7 +1,7 @@
 require "test_helper"
 require "json_validator"
 
-class RBS::SchemaTest < Minitest::Test
+class RBS::SchemaTest < Test::Unit::TestCase
   include TestHelper
 
   def test_location_schema
@@ -124,6 +124,7 @@ class RBS::SchemaTest < Minitest::Test
 
   def test_decls
     assert_decl RBS::Parser.parse_signature("type Steep::foo = untyped")[0], :alias
+    assert_decl RBS::Parser.parse_signature("type Steep::foo[A] = A")[0], :alias
 
     assert_decl RBS::Parser.parse_signature('Steep::VERSION: "1.2.3"')[0], :constant
 

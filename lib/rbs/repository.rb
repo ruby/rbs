@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module RBS
   class Repository
     DEFAULT_STDLIB_ROOT = Pathname(_ = __dir__) + "../../stdlib"
@@ -55,13 +57,8 @@ module RBS
       end
 
       def find_best_version(version)
-        return latest_version unless version
-
-        if v = version_names.reverse.bsearch {|v| v <= version ? true : false }
-          versions[v]
-        else
-          oldest_version
-        end
+        best_version = Repository.find_best_version(version, version_names)
+        versions[best_version]
       end
 
       def empty?
@@ -84,8 +81,17 @@ module RBS
     end
 
     def self.default
-      new().tap do |repo|
-        repo.add(DEFAULT_STDLIB_ROOT)
+      new()
+    end
+
+    def self.find_best_version(version, candidates)
+      candidates = candidates.sort
+      return candidates.last || raise unless version
+
+      if v = candidates.reverse.bsearch {|v| v <= version ? true : false }
+        v
+      else
+        candidates.first or raise
       end
     end
 
@@ -107,7 +113,7 @@ module RBS
     def lookup_path(gem, version)
       if gem_rbs = gems[gem]
         unless gem_rbs.empty?
-          set = if v = Gem::Version.create(version)&.release
+          set = if version and v = Gem::Version.create(version)&.release
             gem_rbs.find_best_version(v)
           else
             gem_rbs.latest_version

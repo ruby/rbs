@@ -7,7 +7,7 @@ return unless Gem::Version.new(RUBY_VERSION) >= Gem::Version.new('2.7.0')
 
 RSPEC_MOCK = -> { double('foo') }
 
-class RBS::Test::TypeCheckTest < Minitest::Test
+class RBS::Test::TypeCheckTest < Test::Unit::TestCase
   include TestHelper
   include RBS
 
@@ -48,6 +48,10 @@ EOF
         assert typecheck.value(Object, parse_type("::Class"))
         refute typecheck.value(Object, parse_type("singleton(::String)"))
 
+        assert typecheck.value(String, parse_type("singleton(::String)"))
+        assert typecheck.value(String, parse_type("singleton(::Object)"))
+        refute typecheck.value(String, parse_type("singleton(::Integer)"))
+
         assert typecheck.value(3, parse_type("::M::t"))
         assert typecheck.value(3, parse_type("::M::s"))
 
@@ -61,6 +65,27 @@ EOF
         assert typecheck.value(false, parse_type("bool"))
         refute typecheck.value(nil, parse_type("bool"))
         refute typecheck.value("", parse_type("bool"))
+      end
+    end
+  end
+
+  def test_type_check_instance_class
+    SignatureManager.new do |manager|
+      manager.build do |env|
+        typecheck = Test::TypeCheck.new(
+          self_class: Integer,
+          instance_class: Integer,
+          class_class: Integer.singleton_class,
+          builder: DefinitionBuilder.new(env: env),
+          sample_size: 100,
+          unchecked_classes: []
+        )
+
+        assert typecheck.value(30, parse_type("instance"))
+        refute typecheck.value("30", parse_type("instance"))
+
+        assert typecheck.value(Integer, parse_type("class"))
+        refute typecheck.value(String, parse_type("class"))
       end
     end
   end
@@ -388,9 +413,11 @@ EOF
   end
 
   def test_is_double
-    skip unless has_gem?("rspec")
+    omit unless has_gem?("rspec")
+    omit if skip_minitest?
 
     require "rspec/mocks/standalone"
+    require "minitest/mock"
 
     SignatureManager.new do |manager|
       manager.build do |env|

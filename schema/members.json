@@ -8,6 +8,9 @@
           "type": "string",
           "enum": ["method_definition"]
         },
+        "name": {
+          "type": "string"
+        },
         "kind": {
           "enum": ["instance", "singleton", "singleton_instance"]
         },
@@ -37,9 +40,12 @@
         },
         "overload": {
           "type": "boolean"
+        },
+        "visibility": {
+          "enum": ["public", "private", null]
         }
       },
-      "required": ["member", "kind", "types", "comment", "annotations", "location"]
+      "required": ["member", "name", "kind", "types", "comment", "annotations", "location", "visibility"]
     },
     "variable": {
       "title": "Declaration for instance variables and class variables",
@@ -165,6 +171,10 @@
         "name": {
           "type": "string"
         },
+        "kind": {
+          "type": "string",
+          "enum": ["instance", "singleton"]
+        },
         "type": {
           "$ref": "types.json"
         },
@@ -192,9 +202,12 @@
         },
         "location": {
           "$ref": "location.json"
+        },
+        "visibility": {
+          "enum": ["public", "private", null]
         }
       },
-      "required": ["member", "name", "ivar_name", "type", "annotations", "comment", "location"]
+      "required": ["member", "name", "ivar_name", "type", "annotations", "kind", "comment", "location", "visibility"]
     },
     "visibility": {
       "title": "Visibility specifier",

@@ -3,6 +3,8 @@ module RBS
     class Name
       attr_reader name: TypeName
 
+      @singleton_type: Types::t?
+
       def initialize: (name: TypeName) -> void
 
       def to_s: () -> String
@@ -37,5 +39,6 @@ module RBS
     Regexp: Name
     TrueClass: Name
     FalseClass: Name
+    Numeric: Name
   end
 end

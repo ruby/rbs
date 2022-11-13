@@ -1,13 +1,17 @@
 interface _ToI
-  def to_i: -> Integer
+  def to_i: () -> Integer
 end
 
 interface _ToInt
-  def to_int: -> Integer
+  def to_int: () -> Integer
+end
+
+interface _ToR
+  def to_r: () -> Rational
 end
 
 interface _ToS
-  def to_s: -> String
+  def to_s: () -> String
 end
 
 interface _ToStr
@@ -26,12 +30,16 @@ interface _ToPath
   def to_path: () -> String
 end
 
-interface _Each[out A, out B]
-  def each: { (A) -> void } -> B
+interface _Each[out A]
+  def each: () { (A) -> void } -> void
 end
 
 interface _Reader
-  def read: (?int length, ?string outbuf) -> String?
+  def read: (?int? length, ?string outbuf) -> String?
+end
+
+interface _ReaderPartial
+  def readpartial: (int maxlen, ?string outbuf) -> String
 end
 
 interface _Writer

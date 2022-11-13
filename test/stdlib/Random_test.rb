@@ -1,34 +1,22 @@
 require_relative "test_helper"
 
-class RandomSingletonTest < Minitest::Test
+class RandomSingletonTest < Test::Unit::TestCase
   include TypeAssertions
 
-  # library "pathname", "set", "securerandom"     # Declare library signatures to load
   testing "singleton(::Random)"
 
-
   def test_srand
-    assert_send_type  "(?::Integer number) -> ::Numeric",
+    assert_send_type  "(?::Integer number) -> ::Integer",
                       Random, :srand
-    assert_send_type  "(?::Integer number) -> ::Numeric",
-                      Random, :srand, 0
   end
 
   def test_rand
     assert_send_type  "() -> ::Float",
                       Random, :rand
-    assert_send_type  "(::Integer) -> ::Integer",
-                      Random, :rand, 1
-    assert_send_type  "(::Range[Integer]) -> ::Integer",
-                      Random, :rand, 1..10
-    assert_send_type  "(::Numeric) -> ::Integer",
-                      Random, :rand, Rational(7,6)
-    assert_send_type  "(::Float) -> ::Float",
-                      Random, :rand, 1.5
-    assert_send_type  "(::Range[Float]) -> ::Float",
-                      Random, :rand, 1.5..5.5
-    assert_send_type  "(::Range[Numeric]) -> ::Numeric",
-                      Random, :rand, Rational(1/6)..Rational(13/6)
+    assert_send_type  "(::Integer | ::Range[::Integer] max) -> ::Integer",
+                      Random, :rand, 100
+    assert_send_type  "(::Float | ::Range[::Float] max) -> ::Float",
+                      Random, :rand, 100.0
   end
 
   def test_new
@@ -52,10 +40,9 @@ class RandomSingletonTest < Minitest::Test
   end
 end
 
-class RandomTest < Minitest::Test
+class RandomTest < Test::Unit::TestCase
   include TypeAssertions
 
-  # library "pathname", "set", "securerandom"     # Declare library signatures to load
   testing "::Random"
 
   def test_double_equal
@@ -72,22 +59,14 @@ class RandomTest < Minitest::Test
     assert_send_type  "() -> ::Float",
                       Random.new, :rand
     assert_send_type  "(::Integer | ::Range[::Integer] max) -> ::Integer",
-                      Random.new, :rand, 10
-    assert_send_type  "(::Integer | ::Range[::Integer] max) -> ::Integer",
-                      Random.new, :rand, 0..10
-    assert_send_type  "(::Numeric) -> ::Integer",
-                      Random.new, :rand, Rational(7,6)
+                      Random.new, :rand, 100
     assert_send_type  "(::Float | ::Range[::Float] max) -> ::Float",
-                      Random.new, :rand, 0.9
-    assert_send_type  "(::Float | ::Range[::Float] max) -> ::Float",
-                      Random.new, :rand, 0.1..0.9
-    assert_send_type  "(::Range[Numeric]) -> ::Numeric",
-                      Random.new, :rand, Rational(1/6)..Rational(13/6)
+                      Random.new, :rand, 100.0
   end
 
   def test_bytes
     assert_send_type  "(::Integer size) -> ::String",
-                      Random.new, :bytes, 1
+                      Random.new, :bytes, 8
   end
 
   def test_seed

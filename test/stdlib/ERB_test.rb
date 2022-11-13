@@ -91,3 +91,60 @@ class ERBTest < StdlibTest
     '<%= ERB.version %>'
   end
 end
+
+class ERBUtilSingletonTest < Test::Unit::TestCase
+  include TypeAssertions
+
+  library "erb"
+  testing "singleton(::ERB::Util)"
+
+  def test_html_escape
+    assert_send_type "(String str) -> String",
+                     ERB::Util, :html_escape, "abc"
+    assert_send_type "(String str) -> String",
+                     ERB::Util, :h, "abc"
+  end
+
+  def test_url_encode
+    assert_send_type "(String str) -> String",
+                     ERB::Util, :url_encode, "abc"
+    assert_send_type "(String str) -> String",
+                     ERB::Util, :u, "abc"
+  end
+end
+
+class ERBUtilTest < Test::Unit::TestCase
+  include TypeAssertions
+  class Mock
+    include ERB::Util
+  end
+
+  library "erb"
+  testing "::ERB::Util"
+
+  def test_html_escape
+    assert_send_type "(String str) -> String",
+                     Mock.new, :html_escape, "abc"
+    assert_send_type "(String str) -> String",
+                     Mock.new, :h, "abc"
+  end
+
+  def test_url_encode
+    assert_send_type "(String str) -> String",
+                     Mock.new, :url_encode, "abc"
+    assert_send_type "(String str) -> String",
+                     Mock.new, :u, "abc"
+  end
+end
+
+class ERBDefMethodSingletonTest < Test::Unit::TestCase
+  include TypeAssertions
+
+  library "erb"
+  testing "singleton(::ERB::DefMethod)"
+
+  def test_def_erb_method
+    assert_send_type "(String, String) -> untyped",
+                     ERB::DefMethod, :def_erb_method, "render()", __FILE__
+  end
+end

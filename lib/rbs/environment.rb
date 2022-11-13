@@ -1,6 +1,7 @@
+# frozen_string_literal: true
+
 module RBS
   class Environment
-    attr_reader :buffers
     attr_reader :declarations
 
     attr_reader :class_decls
@@ -10,19 +11,23 @@ module RBS
     attr_reader :global_decls
 
     module ContextUtil
-      def context
-        @context ||= begin
-                       (outer + [decl]).each.with_object([Namespace.root]) do |decl, array|
-                         first = array.first or raise
-                         array.unshift(first + decl.name.to_namespace)
-                       end
-                     end
+      def calculate_context(decls)
+        decls.each.with_object([Namespace.root]) do |decl, array|
+          first = array.first or raise
+          array.unshift(first + decl.name.to_namespace)
+        end
       end
     end
 
     class MultiEntry
       D = _ = Struct.new(:decl, :outer, keyword_init: true) do
+        # @implements D[M]
+
         include ContextUtil
+
+        def context
+          @context ||= calculate_context(outer + [decl])
+        end
       end
 
       attr_reader :name
@@ -44,15 +49,20 @@ module RBS
           raise unless hd_decl
 
           hd_params = hd_decl.decl.type_params
-          hd_names = hd_params.params.map(&:name)
 
           tl_decls.each do |tl_decl|
             tl_params = tl_decl.decl.type_params
 
-            unless hd_params.size == tl_params.size && hd_params == tl_params.rename_to(hd_names)
-              raise GenericParameterMismatchError.new(name: name, decl: tl_decl.decl)
+            unless compatible_params?(hd_params, tl_params)
+              raise GenericParameterMismatchError.new(name: name, decl: _ = tl_decl.decl)
             end
           end
+        end
+      end
+
+      def compatible_params?(ps1, ps2)
+        if ps1.size == ps2.size
+          ps1 == AST::TypeParam.rename(ps2, new_names: ps1.map(&:name))
         end
       end
 
@@ -80,6 +90,12 @@ module RBS
       end
     end
 
+    def foo
+      a = [1].sample()
+      return unless a
+      a + 1
+    end
+
     class ClassEntry < MultiEntry
       def primary
         @primary ||= begin
@@ -90,8 +106,6 @@ module RBS
     end
 
     class SingleEntry
-      include ContextUtil
-
       attr_reader :name
       attr_reader :outer
       attr_reader :decl
@@ -100,6 +114,12 @@ module RBS
         @name = name
         @decl = decl
         @outer = outer
+      end
+
+      include ContextUtil
+
+      def context
+        @context = calculate_context(outer)
       end
     end
 
@@ -133,7 +153,7 @@ module RBS
 
     def cache_name(cache, name:, decl:, outer:)
       if cache.key?(name)
-        raise DuplicatedDeclarationError.new(name, decl, cache[name].decl)
+        raise DuplicatedDeclarationError.new(_ = name, _ = decl, _ = cache[name].decl)
       end
 
       cache[name] = SingleEntry.new(name: name, decl: decl, outer: outer)
@@ -169,7 +189,7 @@ module RBS
           # @type var decl: AST::Declarations::Class
           existing_entry.insert(decl: decl, outer: outer)
         else
-          raise DuplicatedDeclarationError.new(name, decl, existing_entry.primary.decl)
+          raise DuplicatedDeclarationError.new(name, decl, existing_entry.decls[0].decl)
         end
 
         prefix = outer + [decl]
@@ -195,9 +215,6 @@ module RBS
 
       when AST::Declarations::Global
         cache_name global_decls, name: decl.name, decl: decl, outer: outer
-
-      when AST::Declarations::Extension
-        RBS.logger.warn "#{Location.to_string decl.location} Extension construct is deprecated: use class/module syntax instead"
       end
     end
 
@@ -207,12 +224,22 @@ module RBS
       self
     end
 
-    def resolve_type_names
+    def validate_type_params
+      class_decls.each_value do |decl|
+        decl.primary
+      end
+    end
+
+    def resolve_type_names(only: nil)
       resolver = TypeNameResolver.from_env(self)
       env = Environment.new()
 
       declarations.each do |decl|
-        env << resolve_declaration(resolver, decl, outer: [], prefix: Namespace.root)
+        if only && !only.member?(decl)
+          env << decl
+        else
+          env << resolve_declaration(resolver, decl, outer: [], prefix: Namespace.root)
+        end
       end
 
       env
@@ -234,17 +261,20 @@ module RBS
         array.unshift(head + decl.name.to_namespace)
       end
 
+      outer_context = context.drop(1)
+
       case decl
       when AST::Declarations::Class
         outer_ = outer + [decl]
         prefix_ = prefix + decl.name.to_namespace
         AST::Declarations::Class.new(
           name: decl.name.with_prefix(prefix),
-          type_params: decl.type_params,
+          type_params: resolve_type_params(resolver, decl.type_params, context: context),
           super_class: decl.super_class&.yield_self do |super_class|
             AST::Declarations::Class::Super.new(
-              name: absolute_type_name(resolver, super_class.name, context: context),
-              args: super_class.args.map {|type| absolute_type(resolver, type, context: context) }
+              name: absolute_type_name(resolver, super_class.name, context: outer_context),
+              args: super_class.args.map {|type| absolute_type(resolver, type, context: outer_context) },
+              location: super_class.location
             )
           end,
           members: decl.members.map do |member|
@@ -271,7 +301,7 @@ module RBS
         prefix_ = prefix + decl.name.to_namespace
         AST::Declarations::Module.new(
           name: decl.name.with_prefix(prefix),
-          type_params: decl.type_params,
+          type_params: resolve_type_params(resolver, decl.type_params, context: context),
           self_types: decl.self_types.map do |module_self|
             AST::Declarations::Module::Self.new(
               name: absolute_type_name(resolver, module_self.name, context: context),
@@ -301,7 +331,7 @@ module RBS
       when AST::Declarations::Interface
         AST::Declarations::Interface.new(
           name: decl.name.with_prefix(prefix),
-          type_params: decl.type_params,
+          type_params: resolve_type_params(resolver, decl.type_params, context: context),
           members: decl.members.map do |member|
             resolve_member(resolver, member, context: context)
           end,
@@ -312,6 +342,7 @@ module RBS
       when AST::Declarations::Alias
         AST::Declarations::Alias.new(
           name: decl.name.with_prefix(prefix),
+          type_params: resolve_type_params(resolver, decl.type_params, context: context),
           type: absolute_type(resolver, decl.type, context: context),
           location: decl.location,
           annotations: decl.annotations,
@@ -325,9 +356,6 @@ module RBS
           location: decl.location,
           comment: decl.comment
         )
-
-      else
-        raise
       end
     end
 
@@ -338,39 +366,46 @@ module RBS
           name: member.name,
           kind: member.kind,
           types: member.types.map do |type|
-            type.map_type {|ty| absolute_type(resolver, ty, context: context) }
+            resolve_method_type(resolver, type, context: context)
           end,
           comment: member.comment,
           overload: member.overload?,
           annotations: member.annotations,
-          location: member.location
+          location: member.location,
+          visibility: member.visibility
         )
       when AST::Members::AttrAccessor
         AST::Members::AttrAccessor.new(
           name: member.name,
           type: absolute_type(resolver, member.type, context: context),
+          kind: member.kind,
           annotations: member.annotations,
           comment: member.comment,
           location: member.location,
-          ivar_name: member.ivar_name
+          ivar_name: member.ivar_name,
+          visibility: member.visibility
         )
       when AST::Members::AttrReader
         AST::Members::AttrReader.new(
           name: member.name,
           type: absolute_type(resolver, member.type, context: context),
+          kind: member.kind,
           annotations: member.annotations,
           comment: member.comment,
           location: member.location,
-          ivar_name: member.ivar_name
+          ivar_name: member.ivar_name,
+          visibility: member.visibility
         )
       when AST::Members::AttrWriter
         AST::Members::AttrWriter.new(
           name: member.name,
           type: absolute_type(resolver, member.type, context: context),
+          kind: member.kind,
           annotations: member.annotations,
           comment: member.comment,
           location: member.location,
-          ivar_name: member.ivar_name
+          ivar_name: member.ivar_name,
+          visibility: member.visibility
         )
       when AST::Members::InstanceVariable
         AST::Members::InstanceVariable.new(
@@ -422,6 +457,20 @@ module RBS
       end
     end
 
+    def resolve_method_type(resolver, type, context:)
+      type.map_type do |ty|
+        absolute_type(resolver, ty, context: context)
+      end.map_type_bound do |bound|
+        _ = absolute_type(resolver, bound, context: context)
+      end
+    end
+
+    def resolve_type_params(resolver, params, context:)
+      params.map do |param|
+        param.map_type {|type| _ = absolute_type(resolver, type, context: context) }
+      end
+    end
+
     def absolute_type_name(resolver, type_name, context:)
       resolver.resolve(type_name, context: context) || type_name
     end
@@ -433,8 +482,36 @@ module RBS
     end
 
     def inspect
-      ivars = %i[@buffers @declarations @class_decls @interface_decls @alias_decls @constant_decls @global_decls]
+      ivars = %i[@declarations @class_decls @interface_decls @alias_decls @constant_decls @global_decls]
       "\#<RBS::Environment #{ivars.map { |iv| "#{iv}=(#{instance_variable_get(iv).size} items)"}.join(' ')}>"
+    end
+
+    def buffers
+      buffers_decls.keys.compact
+    end
+
+    def buffers_decls
+      # @type var hash: Hash[Buffer, Array[AST::Declarations::t]]
+      hash = {}
+
+      declarations.each do |decl|
+        location = decl.location or next
+        (hash[location.buffer] ||= []) << decl
+      end
+
+      hash
+    end
+
+    def reject
+      env = Environment.new
+
+      declarations.each do |decl|
+        unless yield(decl)
+          env << decl
+        end
+      end
+
+      env
     end
   end
 end

@@ -3,7 +3,7 @@ require_relative "test_helper"
 require 'logger'
 require 'stringio'
 
-class LoggerSingletonTest < Minitest::Test
+class LoggerSingletonTest < Test::Unit::TestCase
   include TypeAssertions
 
   library 'logger'
@@ -24,10 +24,14 @@ class LoggerSingletonTest < Minitest::Test
                       Logger, :new, '/dev/null', 1, 1, shift_period_suffix: '%Y', binmode: true, datetime_format: '%Y', formatter: proc { '' }, progname: 'foo', level: Logger::INFO
     assert_send_type  "(String logdev, Integer shift_age, Integer shift_size, shift_period_suffix: String, binmode: Symbol, datetime_format: String, formatter: Proc, progname: String, level: Integer) -> void",
                       Logger, :new, '/dev/null', 1, 1, shift_period_suffix: '%Y', binmode: :true, datetime_format: '%Y', formatter: proc { '' }, progname: 'foo', level: Logger::INFO
+    assert_send_type  "(String logdev, Integer shift_age, Integer shift_size, shift_period_suffix: String, binmode: Symbol, datetime_format: String, formatter: Proc, progname: String, level: String) -> void",
+                      Logger, :new, '/dev/null', 1, 1, shift_period_suffix: '%Y', binmode: :true, datetime_format: '%Y', formatter: proc { '' }, progname: 'foo', level: "INFO"
+    assert_send_type  "(String logdev, Integer shift_age, Integer shift_size, shift_period_suffix: String, binmode: Symbol, datetime_format: String, formatter: Proc, progname: String, level: Symbol) -> void",
+                      Logger, :new, '/dev/null', 1, 1, shift_period_suffix: '%Y', binmode: :true, datetime_format: '%Y', formatter: proc { '' }, progname: 'foo', level: :INFO
   end
 end
 
-class LoggerTest < Minitest::Test
+class LoggerTest < Test::Unit::TestCase
   include TypeAssertions
 
   library 'logger'
@@ -209,6 +213,8 @@ class LoggerTest < Minitest::Test
                       logger, :level=, Logger::DEBUG
     assert_send_type  "(String severity) -> Integer",
                       logger, :level=, 'debug'
+    assert_send_type  "(Symbol severity) -> Integer",
+                      logger, :level=, :debug
   end
 
   def test_progname

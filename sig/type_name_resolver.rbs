@@ -1,10 +1,12 @@
 module RBS
   class TypeNameResolver
+    type context = Array[Namespace]
+
     class Query
       attr_reader type_name: TypeName
       attr_reader context: Array[Namespace]
 
-      def initialize: (type_name: TypeName, context: Array[Namespace]) -> void
+      def initialize: (type_name: TypeName, context: context) -> void
     end
 
     attr_reader all_names: Set[TypeName]
@@ -15,7 +17,7 @@ module RBS
 
     def add_names: (Array[TypeName]) -> self
 
-    def resolve: (TypeName, context: Array[Namespace]) -> TypeName?
+    def resolve: (TypeName, context: context) -> TypeName?
 
     def has_name?: (TypeName) -> TypeName?
 

@@ -1,6 +1,6 @@
 require "test_helper"
 
-class RBS::TypesTest < Minitest::Test
+class RBS::TypesTest < Test::Unit::TestCase
   Types = RBS::Types
 
   include TestHelper
@@ -9,6 +9,8 @@ class RBS::TypesTest < Minitest::Test
     assert_equal "Array[Integer]", parse_type("Array[Integer]").to_s
     assert_equal "Array[Integer]?", parse_type("Array[Integer]?").to_s
     assert_equal '"foo"?', parse_type('"foo" ?').to_s
+    assert_equal '"foo\\\\n"', parse_type(%q{'foo\n'}).to_s
+    assert_equal '"foo\\n"', parse_type('"foo\n"').to_s
     assert_equal ":foo ?", parse_type(":foo ?").to_s
     assert_equal "[ Integer, bool? ]", parse_type("[Integer, bool?]").to_s
     assert_equal "[ ]", parse_type("[   ]").to_s
@@ -16,7 +18,7 @@ class RBS::TypesTest < Minitest::Test
     assert_equal "{ a: 1 }", parse_type("{ a: 1 }").to_s
     assert_equal "{ :+ => 1 }", parse_type("{ :+ => 1 }").to_s
     assert_equal '{ a: 1, 1 => 42, "foo" => untyped }', parse_type("{ a: 1, 1 => 42, 'foo' => untyped }").to_s
-    assert_equal '{ :type => untyped }', parse_type("{ :type => untyped }").to_s
+    assert_equal '{ type: untyped }', parse_type("{ :type => untyped }").to_s
     assert_equal "String | bool?", parse_type("String | bool?").to_s
     assert_equal "(String | bool)?", parse_type("(String | bool)?").to_s
     assert_equal "String & bool?", parse_type("String & bool?").to_s

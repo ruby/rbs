@@ -1,7 +1,13 @@
+# frozen_string_literal: true
+
 module RBS
   class Substitution
     attr_reader :mapping
     attr_accessor :instance_type
+
+    def empty?
+      mapping.empty? && instance_type.nil?
+    end
 
     def initialize()
       @mapping = {}

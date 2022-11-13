@@ -1,6 +1,6 @@
 require_relative "test_helper"
 
-class StringSingletonTest < Minitest::Test
+class StringSingletonTest < Test::Unit::TestCase
   include TypeAssertions
 
   testing "singleton(::String)"
@@ -34,7 +34,7 @@ class StringSingletonTest < Minitest::Test
   end
 end
 
-class StringInstanceTest < Minitest::Test
+class StringInstanceTest < Test::Unit::TestCase
   include TypeAssertions
 
   testing "::String"
@@ -87,6 +87,8 @@ class StringInstanceTest < Minitest::Test
   def test_cmp
     assert_send_type "(String) -> Integer",
                      "abcdef", :<=>, "abcde"
+    assert_send_type "(ToStr) -> Integer",
+                     "abcdef", :<=>, ToStr.new('foo')
     assert_send_type "(Integer) -> nil",
                      "abcdef", :<=>, 1
   end
@@ -1517,16 +1519,30 @@ class StringInstanceTest < Minitest::Test
   end
 
   def test_unpack
-    assert_send_type "(String) -> [ ]",
-                     "a", :unpack, ""
-    assert_send_type "(String) -> [ nil ]",
-                     "", :unpack, "f"
-    assert_send_type "(String) -> Array[Integer]",
-                     "a", :unpack, "c"
-    assert_send_type "(String) -> Array[String]",
-                     "a", :unpack, "A"
-    assert_send_type "(String) -> Array[Float]",
-                     "\x00\x00\x00\x00", :unpack, "f"
+    assert_send_type(
+      "(String) -> [ ]",
+      "a", :unpack, ""
+    )
+    assert_send_type(
+      "(String) -> [ nil ]",
+      "", :unpack, "f"
+    )
+    assert_send_type(
+      "(String) -> Array[Integer]",
+      "a", :unpack, "c"
+    )
+    assert_send_type(
+      "(String) -> Array[String]",
+      "a", :unpack, "A"
+    )
+    assert_send_type(
+      "(String) -> Array[Float]",
+      "\x00\x00\x00\x00", :unpack, "f"
+    )
+    assert_send_type(
+      "(String, offset: Integer) -> Array[String]",
+      "  a", :unpack, "A", offset: 2
+    )
   end
 
   def test_unpack1

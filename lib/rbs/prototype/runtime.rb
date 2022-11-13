@@ -1,6 +1,10 @@
+# frozen_string_literal: true
+
 module RBS
   module Prototype
     class Runtime
+      include Helpers
+
       attr_reader :patterns
       attr_reader :env
       attr_reader :merge
@@ -9,6 +13,7 @@ module RBS
       def initialize(patterns:, env:, merge:, owners_included: [])
         @patterns = patterns
         @decls = nil
+        @modules = []
         @env = env
         @merge = merge
         @owners_included = owners_included.map do |name|
@@ -18,6 +23,7 @@ module RBS
 
       def target?(const)
         name = const_name(const)
+        return false unless name
 
         patterns.any? do |pattern|
           if pattern.end_with?("*")
@@ -39,7 +45,8 @@ module RBS
       def decls
         unless @decls
           @decls = []
-          ObjectSpace.each_object(Module).select {|mod| target?(mod) }.sort_by{|mod| const_name(mod) }.each do |mod|
+          @modules = ObjectSpace.each_object(Module).to_a
+          @modules.select {|mod| target?(mod) }.sort_by{|mod| const_name(mod) }.each do |mod|
             case mod
             when Class
               generate_class mod
@@ -48,24 +55,50 @@ module RBS
             end
           end
         end
+
         @decls
       end
 
-      def to_type_name(name)
+      def to_type_name(name, full_name: false)
         *prefix, last = name.split(/::/)
 
-        if prefix.empty?
-          TypeName.new(name: last.to_sym, namespace: Namespace.empty)
+        if full_name
+          if prefix.empty?
+            TypeName.new(name: last.to_sym, namespace: Namespace.empty)
+          else
+            TypeName.new(name: last.to_sym, namespace: Namespace.parse(prefix.join("::")))
+          end
         else
-          TypeName.new(name: last.to_sym, namespace: Namespace.parse(prefix.join("::")))
+          TypeName.new(name: last.to_sym, namespace: Namespace.empty)
         end
       end
 
-      def each_mixin(mixins, *super_mixes)
-        supers = Set.new(super_mixes)
-        mixins.each do |mix|
+      def each_included_module(type_name, mod)
+        supers = Set[]
+
+        mod.included_modules.each do |mix|
+          supers.merge(mix.included_modules)
+        end
+
+        if mod.is_a?(Class) && mod.superclass
+          mod.superclass.included_modules.each do |mix|
+            supers << mix
+            supers.merge(mix.included_modules)
+          end
+        end
+
+        mod.included_modules.each do |mix|
           unless supers.include?(mix)
-            yield mix
+            unless const_name(mix)
+              RBS.logger.warn("Skipping anonymous module #{mix} included in #{mod}")
+            else
+              module_name = module_full_name = to_type_name(const_name(mix), full_name: true)
+              if module_full_name.namespace == type_name.namespace
+                module_name = TypeName.new(name: module_full_name.name, namespace: Namespace.empty)
+              end
+
+              yield module_name, module_full_name, mix
+            end
           end
         end
       end
@@ -94,6 +127,7 @@ module RBS
             optional_positionals << Types::Function::Param.new(name: name, type: untyped)
           when :rest
             requireds = trailing_positionals
+            name = nil if name == :* # For `def f(...) end` syntax
             rest = Types::Function::Param.new(name: name, type: untyped)
           when :keyreq
             required_keywords[name] = Types::Function::Param.new(name: nil, type: untyped)
@@ -102,13 +136,21 @@ module RBS
           when :keyrest
             rest_keywords = Types::Function::Param.new(name: nil, type: untyped)
           when :block
-            block = MethodType::Block.new(
+            block = Types::Block.new(
               type: Types::Function.empty(untyped).update(rest_positionals: Types::Function::Param.new(name: nil, type: untyped)),
-              required: true
+              required: true,
+              self_type: nil
             )
           end
         end
 
+        block ||= block_from_ast_of(method)
+
+        return_type = if method.name == :initialize
+                        Types::Bases::Void.new(location: nil)
+                      else
+                        untyped
+                      end
         method_type = Types::Function.new(
           required_positionals: required_positionals,
           optional_positionals: optional_positionals,
@@ -117,7 +159,7 @@ module RBS
           required_keywords: required_keywords,
           optional_keywords: optional_keywords,
           rest_keywords: rest_keywords,
-          return_type: untyped
+          return_type: return_type,
         )
 
         MethodType.new(
@@ -278,9 +320,14 @@ module RBS
         end
       end
 
-      def generate_constants(mod)
+      def generate_constants(mod, decls)
         mod.constants(false).sort.each do |name|
-          value = mod.const_get(name)
+          begin
+            value = mod.const_get(name)
+          rescue StandardError, LoadError => e
+            RBS.logger.warn("Skipping constant #{name} of #{mod} since #{e}")
+            next
+          end
 
           next if value.is_a?(Class) || value.is_a?(Module)
           unless value.class.name
@@ -297,11 +344,13 @@ module RBS
                      location: nil
                    )
                  else
-                   Types::ClassInstance.new(name: to_type_name(value.class.to_s), args: [], location: nil)
+                   value_type_name = to_type_name(const_name(value.class))
+                   args = type_args(value_type_name)
+                   Types::ClassInstance.new(name: value_type_name, args: args, location: nil)
                  end
 
-          @decls << AST::Declarations::Constant.new(
-            name: "#{mod.to_s}::#{name}",
+          decls << AST::Declarations::Constant.new(
+            name: to_type_name(name.to_s),
             type: type,
             location: nil,
             comment: nil
@@ -309,41 +358,55 @@ module RBS
         end
       end
 
+      def generate_super_class(mod)
+        if mod.superclass.nil? || mod.superclass == ::Object
+          nil
+        elsif const_name(mod.superclass).nil?
+          RBS.logger.warn("Skipping anonymous superclass #{mod.superclass} of #{mod}")
+          nil
+        else
+          super_name = to_type_name(const_name(mod.superclass), full_name: true)
+          super_args = type_args(super_name)
+          AST::Declarations::Class::Super.new(name: super_name, args: super_args, location: nil)
+        end
+      end
+
       def generate_class(mod)
-        type_name = to_type_name(mod.name)
-        super_class = if mod.superclass == ::Object
-                        nil
-                      elsif mod.superclass.name.nil?
-                        RBS.logger.warn("Skipping anonymous superclass #{mod.superclass} of #{mod}")
-                        nil
-                      else
-                        AST::Declarations::Class::Super.new(name: to_type_name(mod.superclass.name), args: [])
-                      end
+        type_name = to_type_name(const_name(mod))
+        outer_decls = ensure_outer_module_declarations(mod)
 
-        decl = AST::Declarations::Class.new(
-          name: type_name,
-          type_params: AST::Declarations::ModuleTypeParams.empty,
-          super_class: super_class,
-          members: [],
-          annotations: [],
-          location: nil,
-          comment: nil
-        )
+        # Check if a declaration exists for the actual module
+        decl = outer_decls.detect { |decl| decl.is_a?(AST::Declarations::Class) && decl.name.name == only_name(mod).to_sym }
+        unless decl
+          decl = AST::Declarations::Class.new(
+            name: to_type_name(only_name(mod)),
+            type_params: [],
+            super_class: generate_super_class(mod),
+            members: [],
+            annotations: [],
+            location: nil,
+            comment: nil
+          )
 
-        each_mixin(mod.included_modules, *mod.superclass.included_modules, *mod.included_modules.flat_map(&:included_modules)) do |included_module|
-          unless included_module.name
-            RBS.logger.warn("Skipping anonymous module #{included_module} included in #{mod}")
-            next
-          end
+          outer_decls << decl
+        end
 
-          module_name = to_type_name(included_module.name)
-          if module_name.namespace == type_name.namespace
-            module_name = TypeName.new(name: module_name.name, namespace: Namespace.empty)
-          end
-
+        each_included_module(type_name, mod) do |module_name, module_full_name, _|
+          args = type_args(module_full_name)
           decl.members << AST::Members::Include.new(
             name: module_name,
-            args: [],
+            args: args,
+            location: nil,
+            comment: nil,
+            annotations: []
+          )
+        end
+
+        each_included_module(type_name, mod.singleton_class) do |module_name, module_full_name ,_|
+          args = type_args(module_full_name)
+          decl.members << AST::Members::Extend.new(
+            name: module_name,
+            args: args,
             location: nil,
             comment: nil,
             annotations: []
@@ -352,9 +415,7 @@ module RBS
 
         generate_methods(mod, type_name, decl.members)
 
-        @decls << decl
-
-        generate_constants mod
+        generate_constants mod, decl.members
       end
 
       def generate_module(mod)
@@ -366,32 +427,40 @@ module RBS
         end
 
         type_name = to_type_name(name)
+        outer_decls = ensure_outer_module_declarations(mod)
 
-        decl = AST::Declarations::Module.new(
-          name: type_name,
-          type_params: AST::Declarations::ModuleTypeParams.empty,
-          self_types: [],
-          members: [],
-          annotations: [],
-          location: nil,
-          comment: nil
-        )
+        # Check if a declaration exists for the actual class
+        decl = outer_decls.detect { |decl| decl.is_a?(AST::Declarations::Module) && decl.name.name == only_name(mod).to_sym }
+        unless decl
+          decl = AST::Declarations::Module.new(
+            name: to_type_name(only_name(mod)),
+            type_params: [],
+            self_types: [],
+            members: [],
+            annotations: [],
+            location: nil,
+            comment: nil
+          )
 
-        each_mixin(mod.included_modules, *mod.included_modules.flat_map(&:included_modules), namespace: type_name.namespace) do |included_module|
-          included_module_name = const_name(included_module)
-          unless included_module_name
-            RBS.logger.warn("Skipping anonymous module #{included_module} included in #{mod}")
-            next
-          end
+          outer_decls << decl
+        end
 
-          module_name = to_type_name(included_module_name)
-          if module_name.namespace == type_name.namespace
-            module_name = TypeName.new(name: module_name.name, namespace: Namespace.empty)
-          end
-
+        each_included_module(type_name, mod) do |module_name, module_full_name, _|
+          args = type_args(module_full_name)
           decl.members << AST::Members::Include.new(
             name: module_name,
-            args: [],
+            args: args,
+            location: nil,
+            comment: nil,
+            annotations: []
+          )
+        end
+
+        each_included_module(type_name, mod.singleton_class) do |module_name, module_full_name, _|
+          args = type_args(module_full_name)
+          decl.members << AST::Members::Extend.new(
+            name: module_name,
+            args: args,
             location: nil,
             comment: nil,
             annotations: []
@@ -400,14 +469,84 @@ module RBS
 
         generate_methods(mod, type_name, decl.members)
 
-        @decls << decl
+        generate_constants mod, decl.members
+      end
 
-        generate_constants mod
+      # Generate/find outer module declarations
+      # This is broken down into another method to comply with `DRY`
+      # This generates/finds declarations in nested form & returns the last array of declarations
+      def ensure_outer_module_declarations(mod)
+        *outer_module_names, _ = const_name(mod).split(/::/) #=> parent = [A, B], mod = C
+        destination = @decls # Copy the entries in ivar @decls, not .dup
+
+        outer_module_names&.each_with_index do |outer_module_name, i|
+          current_name = outer_module_names[0, i + 1].join('::')
+          outer_module = @modules.detect { |x| const_name(x) == current_name }
+          outer_decl = destination.detect { |decl| decl.is_a?(outer_module.is_a?(Class) ? AST::Declarations::Class : AST::Declarations::Module) && decl.name.name == outer_module_name.to_sym }
+
+          # Insert AST::Declarations if declarations are not added previously
+          unless outer_decl
+            if outer_module.is_a?(Class)
+              outer_decl = AST::Declarations::Class.new(
+                name: to_type_name(outer_module_name),
+                type_params: [],
+                super_class: generate_super_class(outer_module),
+                members: [],
+                annotations: [],
+                location: nil,
+                comment: nil
+              )
+            else
+              outer_decl = AST::Declarations::Module.new(
+                name: to_type_name(outer_module_name),
+                type_params: [],
+                self_types: [],
+                members: [],
+                annotations: [],
+                location: nil,
+                comment: nil
+              )
+            end
+
+            destination << outer_decl
+          end
+
+          destination = outer_decl.members
+        end
+
+        # Return the array of declarations checked out at the end
+        destination
+      end
+
+      # Returns the exact name & not compactly declared name
+      def only_name(mod)
+        # No nil check because this method is invoked after checking if the module exists
+        const_name(mod).split(/::/).last # (A::B::C) => C
       end
 
       def const_name(const)
         @module_name_method ||= Module.instance_method(:name)
         @module_name_method.bind(const).call
+      end
+
+      def type_args(type_name)
+        if class_decl = env.class_decls[type_name.absolute!]
+          class_decl.type_params.size.times.map { :untyped }
+        else
+          []
+        end
+      end
+
+      def block_from_ast_of(method)
+        return nil if RUBY_VERSION < '3.1'
+
+        begin
+          ast = RubyVM::AbstractSyntaxTree.of(method)
+        rescue ArgumentError
+          return # When the method is defined in eval
+        end
+
+        block_from_body(ast) if ast&.type == :SCOPE
       end
     end
   end

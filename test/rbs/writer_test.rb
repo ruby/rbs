@@ -1,22 +1,22 @@
 require "test_helper"
 
-class RBS::WriterTest < Minitest::Test
+class RBS::WriterTest < Test::Unit::TestCase
   include TestHelper
 
   Parser = RBS::Parser
   Writer = RBS::Writer
 
-  def format(sig)
+  def format(sig, preserve: false)
     Parser.parse_signature(sig).then do |decls|
-      writer = Writer.new(out: StringIO.new)
+      writer = Writer.new(out: StringIO.new).preserve!(preserve: preserve)
       writer.write(decls)
 
       writer.out.string
     end
   end
 
-  def assert_writer(sig)
-    assert_equal sig, format(sig)
+  def assert_writer(sig, preserve: false)
+    assert_equal sig, format(sig, preserve: preserve)
   end
 
   def test_const_decl
@@ -54,6 +54,12 @@ class Foo::Bar[X] < Array[String]
   attr_reader age(): Integer
 
   attr_writer email(@foo): String?
+
+  attr_accessor self.name: String
+
+  attr_reader self.age(): Integer
+
+  attr_writer self.email(@foo): String?
 
   public
 
@@ -96,7 +102,7 @@ end
 
   def test_escape
     assert_writer <<-SIG
-interface _Each[X, Y]
+module XYZZY[X, Y]
   def []: () -> void
 
   def []=: () -> void
@@ -105,9 +111,15 @@ interface _Each[X, Y]
 
   def __id__: () -> Integer
 
-  def `def`: () -> Symbol
+  def def: () -> Symbol
+
+  def self: () -> void
+
+  def self?: () -> void
 
   def timeout: () -> Integer
+
+  def `foo!=`: () -> Integer
 
   def `: (String) -> untyped
 end
@@ -118,6 +130,12 @@ end
     assert_writer <<-SIG
 class Foo[out A, unchecked B, in C] < Bar[A, C, B]
 end
+    SIG
+  end
+
+  def test_generic_alias
+    assert_writer <<-SIG
+type foo[Bar] = Baz
     SIG
   end
 
@@ -205,18 +223,67 @@ end
     assert_equal expected, format(src)
   end
 
+  def test_generic_method
+    assert_writer(<<-SIG)
+class Foo[unchecked out T < String]
+  def foo: [A < _Each[Foo], B < singleton(::Bar)] () -> A
+end
+    SIG
+  end
+
   def test_smoke
-    Pathname.glob('stdlib/**/*.rbs').each do |path|
-      orig_decls = RBS::Parser.parse_signature(path.read).reject do |decl|
-        decl.is_a?(RBS::AST::Declarations::Extension)
-      end
+    Pathname.glob('{stdlib,core,sig}/**/*.rbs').each do |path|
+      orig_decls = RBS::Parser.parse_signature(
+        RBS::Buffer.new(name: path, content: path.read)
+      )
 
       io = StringIO.new
       w = RBS::Writer.new(out: io)
       w.write(orig_decls)
-      decls = RBS::Parser.parse_signature(io.string)
+      decls = RBS::Parser.parse_signature(RBS::Buffer.new(name: path, content: io.string))
 
-      assert_equal orig_decls, decls
+      assert_equal orig_decls, decls, "(#{path})"
     end
+  end
+
+  def test_alias
+    assert_writer <<-SIG, preserve: true
+class Foo
+  type t = Integer
+         | String
+         | [Foo, Bar]
+end
+    SIG
+  end
+
+  def test_write_method_def
+    assert_writer <<-SIG, preserve: true
+class Foo
+  def foo: () -> String
+         | () {
+             () -> void
+           } -> bool
+          | (
+              *String,
+              id: Integer?,
+              name: String,
+              email: String, **untyped
+            ) -> void
+end
+    SIG
+  end
+
+  def test_write_visibility_modifier
+    assert_writer <<-SIG, preserve: true
+class Foo
+  private def foo: () -> String
+
+  public def bar: () -> String
+
+  def baz: () -> String
+
+  private attr_reader name: String
+end
+    SIG
   end
 end

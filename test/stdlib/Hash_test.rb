@@ -76,6 +76,7 @@ class HashTest < StdlibTest
     { a: nil }.compact
     { a: nil, b: 2 }.compact
     { b: 2 }.compact
+    Class.new(Hash)[:a, nil].compact
   end
 
   def test_compact!
@@ -185,6 +186,12 @@ class HashTest < StdlibTest
     { a: 2 }.eql?({ a: 1 })
   end
 
+  def test_except
+    omit_if(!Hash.method_defined?(:except))
+    { a: 100, b: 200, c: 300 }.except(:a)
+    { a: 100, b: 200, c: 300 }.except(:b, :c, :d)
+  end
+
   def test_fetch
     hash = { a: 1 }
     hash.fetch(:a)
@@ -202,9 +209,13 @@ class HashTest < StdlibTest
   def test_filter
     { a: 1, b: 2 }.filter
     { a: 1, b: 2 }.filter { |k, v| v == 1 }
+    Class.new(Hash)[:a, nil].filter.each { |k, v| k }
+    Class.new(Hash)[:a, nil].filter { |k, v| k }
 
     { a: 1, b: 2 }.select
     { a: 1, b: 2 }.select { |k, v| v == 1 }
+    Class.new(Hash)[:a, nil].select.each { |k, v| k }
+    Class.new(Hash)[:a, nil].select { |k, v| k }
   end
 
   def test_filter!
@@ -245,13 +256,6 @@ class HashTest < StdlibTest
     { a: 1 }.hash
   end
 
-  def test_index
-    hash = { a: 1 }
-    hash.index(1)
-    hash.index(42)
-    hash.key(3)
-  end
-
   def test_inspect
     { a: 1 }.inspect
     { a: 1 }.to_s
@@ -265,6 +269,12 @@ class HashTest < StdlibTest
     hash = { a: 1, b: 2 }
     hash.keep_if
     hash.keep_if { |k, v| k == :a }
+  end
+
+  def test_key
+    hash = { a: 1 }
+    hash.key(1)
+    hash.key(3)
   end
 
   def test_keys
@@ -314,6 +324,7 @@ class HashTest < StdlibTest
 
   def test_replace
     { a: 1 }.replace({ b: 2 })
+    { a: 1 }.replace({ 'b' => 2.0 })
   end
 
   def test_shift
@@ -324,6 +335,7 @@ class HashTest < StdlibTest
   def test_slice
     { a: 42, b: 43, c: 44 }.slice(:a)
     { a: 42, b: 43, c: 44 }.slice(:a, :b)
+    Class.new(Hash)[:a, 42].slice(:a)
   end
 
   def test_to_a
@@ -333,6 +345,11 @@ class HashTest < StdlibTest
   def test_to_h
     { a: 42 }.to_h
     { a: 42 }.to_h { |k, v| [k.to_s, v.to_f] }
+  end
+
+  def test_to_hash
+    { a: 42 }.to_hash
+    Class.new(Hash)[:a, 42].to_hash
   end
 
   def test_to_proc
@@ -372,5 +389,19 @@ class HashTest < StdlibTest
     Hash.new
     Hash.new(10)
     Hash.new { |hash, key| key.to_s }
+  end
+end
+
+class HashInstanceTest < Test::Unit::TestCase
+  include TypeAssertions
+
+  testing "::Hash[::Symbol, ::Integer]"
+
+  def test_except
+    omit_if(!Hash.method_defined?(:except))
+    assert_send_type "() -> ::Hash[::Symbol, ::Integer]",
+                      { a: 100, b: 200, c: 300 }, :except
+    assert_send_type "(*Symbol keys) -> ::Hash[::Symbol, ::Integer]",
+                      { a: 100, b: 200, c: 300 }, :except, :a
   end
 end

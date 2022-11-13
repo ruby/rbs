@@ -7,7 +7,7 @@ It also allows declaring constants and global variables.
 The following is a small example of RBS for a chat app.
 
 <!-- run-start:a.rbs:bundle exec rbs -I a.rbs validate -->
-```rbs
+```rb
 module ChatApp
   VERSION: String
 
@@ -46,11 +46,16 @@ module ChatApp
     def initialize: (name: String) -> void
 
     def each_member: () { (User | Bot) -> void } -> void  # `{` and `}` means block.
-                   | () -> Enumerable[User | Bot, void]   # Method can be overloaded.
+                   | () -> Enumerator[User | Bot, void]   # Method can be overloaded.
   end
 end
 ```
 <!-- run-end -->
+
+## The Target Version
+
+* The standard library signatures targets Ruby 3.1. (The latest release of Ruby.)
+* The library code targets Ruby 3.1, 3.0, and 2.7. (It runs on 2.6 in fact.)
 
 ## Installation
 
@@ -107,7 +112,7 @@ instance = builder.build_instance(string)
 
 # Print the types of `gsub` method:
 puts instance.methods[:gsub].method_types.join("\n")
-# Ouputs =>
+# Outputs =>
 #  (::Regexp | ::string pattern, ::string replacement) -> ::String
 #  (::Regexp | ::string pattern, ::Hash[::String, ::String] hash) -> ::String
 #  (::Regexp | ::string pattern) { (::String match) -> ::_ToS } -> ::String
@@ -122,7 +127,7 @@ puts singleton.methods[:gsub]
 
 ## Guides
 
-- [Standard library signature contribution guide](docs/CONTRIBUTING.md)
+- [Core and standard library signature contribution guide](docs/CONTRIBUTING.md)
 - [Writing signatures guide](docs/sigs.md)
 - [Stdlib signatures guide](docs/stdlib.md)
 - [Syntax](docs/syntax.md)

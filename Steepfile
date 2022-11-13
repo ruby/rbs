@@ -1,9 +1,25 @@
+D = Steep::Diagnostic
+
 target :lib do
   signature "sig"
   check "lib"
-  ignore "lib/rbs/parser.rb"
+  ignore(
+    "lib/rbs/prototype/runtime.rb",
+    "lib/rbs/test",
+    "lib/rbs/test.rb"
+  )
 
-  library "set", "pathname", "json", "logger"
+  library "set", "pathname", "json", "logger", "monitor", "tsort", "uri", 'dbm', 'pstore', 'singleton', 'shellwords', 'fileutils', 'find', 'digest'
+  signature 'stdlib/yaml/0'
+  signature "stdlib/strscan/0/"
+  signature "stdlib/optparse/0/"
+  signature "stdlib/rdoc/0/"
+
+  configure_code_diagnostics do |config|
+    config[D::Ruby::MethodDefinitionMissing] = :hint
+    config[D::Ruby::ElseOnExhaustiveCase] = :hint
+    config[D::Ruby::FallbackAny] = :hint
+  end
 end
 
 # target :lib do

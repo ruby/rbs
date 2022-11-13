@@ -1,24 +1,32 @@
+# frozen_string_literal: true
+
 module RBS
   class Buffer
     attr_reader :name
     attr_reader :content
-    attr_reader :lines
-    attr_reader :ranges
 
     def initialize(name:, content:)
       @name = name
       @content = content
+    end
 
-      @lines = content.lines
+    def lines
+      @lines ||= content.lines
+    end
 
-      @ranges = []
-      offset = 0
-      lines.each do |line|
-        size = line.size
-        range = offset...(offset+size)
-        ranges << range
-        offset += size
-      end
+    def ranges
+      @ranges ||=
+        begin
+          @ranges = []
+          offset = 0
+          lines.each do |line|
+            size = line.size
+            range = offset...(offset+size)
+            @ranges << range
+            offset += size
+          end
+          @ranges
+        end
     end
 
     def pos_to_loc(pos)
@@ -45,6 +53,10 @@ module RBS
 
     def last_position
       content.size
+    end
+
+    def inspect
+      "#<RBS::Buffer:#{__id__} @name=#{name}, @content=#{content.bytesize} bytes, @lines=#{lines.size} lines,>"
     end
   end
 end

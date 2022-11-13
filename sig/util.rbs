@@ -6,8 +6,4 @@ module RBS
 
     def hash: () -> Integer
   end
-
-  interface _ToJson
-    def to_json: (*untyped) -> String
-  end
 end
