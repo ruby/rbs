@@ -134,9 +134,9 @@ class Random < Object
   # (`-`) and add (`+`)methods, or rand will raise an ArgumentError.
   #
   def rand: () -> Float
-          | (Integer | ::Range[Integer] | Numeric max) -> Integer
           | (Float | ::Range[Float] max) -> Float
-          | (::Range[Numeric]) -> Numeric
+          | (Integer | ::Range[Integer] | Numeric max) -> Integer
+          | (::Range[T]) -> T
 
   # Returns the seed value used to initialize the generator. This may be used to
   # initialize another generator with the same state at a later time, causing it
