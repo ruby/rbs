@@ -21,6 +21,10 @@
 # use SecureRandom for security purpose, instead of this PRNG.
 #
 class Random < RBS::Unnamed::Random_Base
+  # <!--
+  #   rdoc-file=random.c
+  #   - Random.new(seed = Random.new_seed) -> prng
+  # -->
   # Creates a new PRNG using `seed` to set the initial state. If `seed` is
   # omitted, the generator is initialized with Random.new_seed.
   #
@@ -28,6 +32,10 @@ class Random < RBS::Unnamed::Random_Base
   #
   def initialize: (?Integer seed) -> void
 
+  # <!--
+  #   rdoc-file=random.c
+  #   - Random.bytes(size) -> string
+  # -->
   # Returns a random binary string. The argument `size` specifies the length of
   # the returned string.
   #
@@ -109,6 +117,10 @@ class Random < RBS::Unnamed::Random_Base
   #
   def self.srand: (?Integer number) -> Integer
 
+  # <!--
+  #   rdoc-file=random.c
+  #   - Random.urandom(size) -> string
+  # -->
   # Returns a string, using platform providing features. Returned value is
   # expected to be a cryptographically secure pseudo-random number in binary form.
   # This method raises a RuntimeError if the feature provided by platform failed
@@ -122,6 +134,10 @@ class Random < RBS::Unnamed::Random_Base
   #
   def self.urandom: (Integer) -> String
 
+  # <!--
+  #   rdoc-file=random.c
+  #   - prng.seed -> integer
+  # -->
   # Returns the seed value used to initialize the generator. This may be used to
   # initialize another generator with the same state at a later time, causing it
   # to produce the same sequence of numbers.
