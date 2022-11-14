@@ -10,15 +10,17 @@ module RBS
         attr_reader config: Config
         attr_reader lock: Config?
         attr_reader lock_path: Pathname
-        attr_reader gemfile_lock: Bundler::LockfileParser
+        attr_reader bundler_definition: Bundler::Definition
 
         type gem_queue_entry = { name: String, version: String? }
 
         @gem_queue: Array[gem_queue_entry]
 
+        @gem_map: Hash[String, Bundler::LazySpecification]
+
         def self.generate: (config_path: Pathname, gemfile_lock_path: Pathname, ?with_lockfile: boolish) -> Config
 
-        def initialize: (config_path: Pathname, gemfile_lock_path: Pathname, with_lockfile: boolish) -> void
+        def initialize: (config_path: Pathname, bundler_definition: Bundler::Definition, with_lockfile: boolish) -> void
 
         def generate: () -> Config
 

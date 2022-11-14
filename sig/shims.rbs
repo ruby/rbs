@@ -18,6 +18,21 @@ module Bundler
     def name: () -> String
     def version: () -> String
   end
+
+  class Dependency
+  end
+
+  class Definition
+    def self.build: (Pathname gemfile, Pathname? lockfile, Hash[String, untyped] | bool | nil unlock) -> Definition
+
+    def locked_gems: () -> LockfileParser
+
+    def requires: () -> Hash[String, Array[String]]
+
+    def lockfile: () -> Pathname
+  end
+
+  def self.definition: () -> Definition
 end
 
 module RDoc

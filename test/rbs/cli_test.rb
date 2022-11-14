@@ -527,7 +527,7 @@ Processing `test/a_test.rb`...
 
           path: #{dir.join('gem_rbs_collection')}
         YAML
-        dir.join('Gemfile').write('')
+        dir.join('Gemfile').write('source "https://rubygems.org"')
         dir.join('Gemfile.lock').write(<<~LOCK)
           GEM
             remote: https://rubygems.org/
@@ -611,7 +611,7 @@ Processing `test/a_test.rb`...
 
           path: #{dir.join('gem_rbs_collection')}
         YAML
-        dir.join('Gemfile').write('')
+        dir.join('Gemfile').write('source "https://rubygems.org"')
         dir.join('Gemfile.lock').write(<<~LOCK)
           GEM
             remote: https://rubygems.org/

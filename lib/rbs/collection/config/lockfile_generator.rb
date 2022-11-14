@@ -20,22 +20,24 @@ module RBS
           end
         end
 
-        attr_reader :config, :lock, :gemfile_lock, :lock_path
+        attr_reader :config, :lock, :lock_path, :bundler_definition
 
         def self.generate(config_path:, gemfile_lock_path:, with_lockfile: true)
-          new(config_path: config_path, gemfile_lock_path: gemfile_lock_path, with_lockfile: with_lockfile).generate
+          gemfile_path = gemfile_lock_path.sub_ext("")
+          definition = Bundler::Definition.build(gemfile_path, gemfile_lock_path, {})
+          new(config_path: config_path, bundler_definition: definition, with_lockfile: with_lockfile).generate
         end
 
-        def initialize(config_path:, gemfile_lock_path:, with_lockfile:)
+        def initialize(config_path:, bundler_definition:, with_lockfile:)
           @config = Config.from_path config_path
           @lock_path = Config.to_lockfile_path(config_path)
           @lock = Config.from_path(lock_path) if lock_path.exist? && with_lockfile
-          @gemfile_lock = Bundler::LockfileParser.new(gemfile_lock_path.read)
+          @bundler_definition = bundler_definition
           @gem_queue = []
 
-          validate_gemfile_lock_path!(lock: lock, gemfile_lock_path: gemfile_lock_path)
+          validate_gemfile_lock_path!(lock: lock, gemfile_lock_path: bundler_definition.lockfile)
 
-          config.gemfile_lock_path = gemfile_lock_path
+          config.gemfile_lock_path = bundler_definition.lockfile
         end
 
         def generate
@@ -110,7 +112,7 @@ module RBS
         end
 
         private def gemfile_lock_gems(&block)
-          gemfile_lock.specs.each do |spec|
+          bundler_definition.locked_gems.specs.each do |spec|
             yield spec
           end
         end

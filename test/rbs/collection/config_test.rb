@@ -18,6 +18,13 @@ class RBS::Collection::ConfigTest < Test::Unit::TestCase
     path: /path/to/somewhere
   YAML
 
+  GEMFILE = <<~GEMFILE
+source "https://rubygems.org/"
+
+gem "ast"
+gem "rainbow"
+  GEMFILE
+
   GEMFILE_LOCK = <<~YAML
     GEM
       remote: https://rubygems.org/
@@ -40,6 +47,8 @@ class RBS::Collection::ConfigTest < Test::Unit::TestCase
     mktmpdir do |tmpdir|
       config_path = tmpdir / 'rbs_collection.yaml'
       config_path.write CONFIG
+      gemfile_path = tmpdir / 'Gemfile'
+      gemfile_path.write GEMFILE
       gemfile_lock_path = tmpdir / 'Gemfile.lock'
       gemfile_lock_path.write GEMFILE_LOCK
 
@@ -92,7 +101,9 @@ class RBS::Collection::ConfigTest < Test::Unit::TestCase
 
           path: /path/to/somewhere
         YAML
-        gemfile_lock_path = tmpdir / 'Gemfile.lock'
+        gemfile_path = tmpdir / 'Gemfile'
+        gemfile_path.write GEMFILE
+          gemfile_lock_path = tmpdir / 'Gemfile.lock'
         gemfile_lock_path.write GEMFILE_LOCK
 
         config = Dir.chdir(tmpdir) do
@@ -135,6 +146,8 @@ class RBS::Collection::ConfigTest < Test::Unit::TestCase
     mktmpdir do |tmpdir|
       config_path = tmpdir / 'rbs_collection.yaml'
       config_path.write CONFIG
+      gemfile_path = tmpdir / 'Gemfile'
+      gemfile_path.write GEMFILE
       gemfile_lock_path = tmpdir / 'Gemfile.lock'
       gemfile_lock_path.write GEMFILE_LOCK
 
@@ -184,6 +197,8 @@ class RBS::Collection::ConfigTest < Test::Unit::TestCase
           - name: rainbow
             ignore: false
       YAML
+      gemfile_path = tmpdir / 'Gemfile'
+      gemfile_path.write GEMFILE
       gemfile_lock_path = tmpdir / 'Gemfile.lock'
       gemfile_lock_path.write GEMFILE_LOCK
 
@@ -221,6 +236,10 @@ class RBS::Collection::ConfigTest < Test::Unit::TestCase
           - name: ast
           - name: rainbow
       YAML
+      gemfile_path = tmpdir / 'Gemfile'
+      gemfile_path.write <<~GEMFILE
+source "https://rubygems.org/"
+      GEMFILE
       gemfile_lock_path = tmpdir / 'Gemfile.lock'
       gemfile_lock_path.write <<~GEMFILE_LOCK
         GEM
@@ -273,6 +292,13 @@ class RBS::Collection::ConfigTest < Test::Unit::TestCase
     mktmpdir do |tmpdir|
       config_path = tmpdir / 'rbs_collection.yaml'
       config_path.write CONFIG
+      gemfile_path = tmpdir / 'Gemfile'
+      gemfile_path.write <<~GEMFILE
+source "https://rubygems.org/"
+
+gem "activesupport"
+      GEMFILE
+
       gemfile_lock_path = tmpdir / 'Gemfile.lock'
       gemfile_lock_path.write <<~GEMFILE_LOCK
         GEM
@@ -359,6 +385,10 @@ class RBS::Collection::ConfigTest < Test::Unit::TestCase
     mktmpdir do |tmpdir|
       config_path = tmpdir / 'rbs_collection.yaml'
       config_path.write CONFIG
+      gemfile_path = tmpdir / 'Gemfile'
+      gemfile_path.write <<~GEMFILE
+source "https://rubygems.org/"
+      GEMFILE
       gemfile_lock_path = tmpdir / 'Gemfile.lock'
       gemfile_lock_path.write <<~GEMFILE_LOCK
         GEM
@@ -407,6 +437,12 @@ class RBS::Collection::ConfigTest < Test::Unit::TestCase
     mktmpdir do |tmpdir|
       config_path = tmpdir / 'rbs_collection.yaml'
       config_path.write CONFIG
+      gemfile_path = tmpdir / 'Gemfile'
+      gemfile_path.write <<~GEMFILE
+source "https://rubygems.org/"
+
+gem "rbs-amber"
+      GEMFILE
       gemfile_lock_path = tmpdir / 'Gemfile.lock'
       gemfile_lock_path.write <<~GEMFILE_LOCK
         GEM
@@ -453,6 +489,10 @@ class RBS::Collection::ConfigTest < Test::Unit::TestCase
     mktmpdir do |tmpdir|
       config_path = tmpdir / 'rbs_collection.yaml'
       config_path.write CONFIG
+      gemfile_path = tmpdir / 'Gemfile'
+      gemfile_path.write <<~GEMFILE
+source "https://rubygems.org/"
+      GEMFILE
       gemfile_lock_path = tmpdir / 'Gemfile.lock'
       gemfile_lock_path.write <<~GEMFILE_LOCK
         GEM
