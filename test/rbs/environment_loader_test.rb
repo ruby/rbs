@@ -197,6 +197,20 @@ end
 
   def test_loading_from_rbs_collection
     mktmpdir do |path|
+      config_path = path.join('rbs_collection.yaml')
+      config_path.write(<<~YAML)
+      sources:
+        - name: ruby/gem_rbs_collection
+          remote: https://github.com/ruby/gem_rbs_collection.git
+          revision: b4d3b346d9657543099a35a1fd20347e75b8c523
+          repo_dir: gems
+      path: '.gem_rbs_collection'
+      gems:
+        - name: ast
+          version: "2.4"
+        - name: rainbow
+          version: "3.0"
+      YAML
       lockfile_path = path.join('rbs_collection.lock.yaml')
       lockfile_path.write(<<~YAML)
         sources:

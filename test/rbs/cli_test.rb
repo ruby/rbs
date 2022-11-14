@@ -527,7 +527,11 @@ Processing `test/a_test.rb`...
 
           path: #{dir.join('gem_rbs_collection')}
         YAML
-        dir.join('Gemfile').write('source "https://rubygems.org"')
+        dir.join('Gemfile').write(<<~GEMFILE)
+          source "https://rubygems.org"
+
+          gem 'ast'
+        GEMFILE
         dir.join('Gemfile.lock').write(<<~LOCK)
           GEM
             remote: https://rubygems.org/
@@ -561,6 +565,49 @@ Processing `test/a_test.rb`...
             assert rbs_collection_lock.exist?
             assert collection_dir.exist?
           end
+        end
+      end
+    end
+  end
+
+  def test_collection_install_require_false
+    Dir.mktmpdir do |dir|
+      Dir.chdir(dir) do
+        dir = Pathname(dir)
+        dir.join(RBS::Collection::Config::PATH).write(<<~YAML)
+          sources:
+            - name: ruby/gem_rbs_collection
+              remote: https://github.com/ruby/gem_rbs_collection.git
+              revision: b4d3b346d9657543099a35a1fd20347e75b8c523
+              repo_dir: gems
+
+          path: #{dir.join('gem_rbs_collection')}
+        YAML
+        dir.join('Gemfile').write(<<~GEMFILE)
+          source "https://rubygems.org"
+
+          gem 'ast', require: false
+        GEMFILE
+        dir.join('Gemfile.lock').write(<<~LOCK)
+          GEM
+            remote: https://rubygems.org/
+            specs:
+              ast (2.4.2)
+
+          PLATFORMS
+            x86_64-linux
+
+          DEPENDENCIES
+            ast
+
+          BUNDLED WITH
+             2.2.0
+        LOCK
+
+        with_cli do |cli|
+          cli.run(%w[collection install])
+          assert dir.join('rbs_collection.lock.yaml').exist?
+          refute dir.join('gem_rbs_collection/ast').exist?
         end
       end
     end
@@ -611,7 +658,11 @@ Processing `test/a_test.rb`...
 
           path: #{dir.join('gem_rbs_collection')}
         YAML
-        dir.join('Gemfile').write('source "https://rubygems.org"')
+        dir.join('Gemfile').write(<<~GEMFILE)
+          source "https://rubygems.org"
+
+          gem 'ast'
+        GEMFILE
         dir.join('Gemfile.lock').write(<<~LOCK)
           GEM
             remote: https://rubygems.org/

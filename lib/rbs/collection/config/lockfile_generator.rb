@@ -56,20 +56,23 @@ module RBS
             @existing_lockfile = Lockfile.load(lock_path, YAML.load_file(lock_path.to_s))
             validate_gemfile_lock_path!(lock: @existing_lockfile, gemfile_lock_path: gemfile_lock_path)
           end
+
+          @gem_map = bundler_definition.locked_gems.specs.each.with_object({}) do |spec, hash|
+            hash[spec.name] = spec
+          end
         end
 
         def generate
           ignored_gems = config.gems.select {|gem| gem['ignore'] }.map {|gem| gem['name'] }.to_set
 
           config.gems.each do |gem|
-            unless ignored_gems.include?(gem['name'])
-              assign_gem(name: gem['name'], version: gem['version'])
-            end
+            assign_gem(name: gem['name'], version: gem['version'], ignored_gems: ignored_gems)
           end
 
-          gemfile_lock_gems do |spec|
-            unless ignored_gems.include?(spec.name)
-              assign_gem(name: spec.name, version: spec.version)
+          bundler_definition.requires.each do |gem, requires|
+            unless requires.empty?
+              spec = @gem_map[gem] or raise
+              assign_gem(name: spec.name, version: spec.version, ignored_gems: ignored_gems)
             end
           end
 
@@ -85,37 +88,45 @@ module RBS
           raise GemfileLockMismatchError.new(expected: lock.gemfile_lock_path, actual: gemfile_lock_path)
         end
 
-        private def assign_gem(name:, version:)
+        private def assign_gem(name:, version:, ignored_gems:)
           return if lockfile.gems.key?(name)
 
-          # @type var locked: Lockfile::gem?
-          if existing_lockfile
-            locked = existing_lockfile.gems[name]
-          end
+          begin
+            # @type var locked: Lockfile::gem?
+            if existing_lockfile
+              locked = existing_lockfile.gems[name]
+            end
 
-          # If rbs_collection.lock.yaml contain the gem, use it.
-          # Else find the gem from gem_collection.
-          unless locked
-            source = find_source(name: name)
-            return unless source
+            # If rbs_collection.lock.yaml contain the gem, use it.
+            # Else find the gem from gem_collection.
+            unless locked
+              source = find_source(name: name)
+              return unless source
 
-            installed_version = version
-            best_version = find_best_version(version: installed_version, versions: source.versions(name))
+              installed_version = version
+              best_version = find_best_version(version: installed_version, versions: source.versions(name))
 
-            locked = {
-              name: name,
-              version: best_version.to_s,
-              source: source,
-            }
-          end
+              locked = {
+                name: name,
+                version: best_version.to_s,
+                source: source,
+              }
+            end
 
-          locked or raise
+            locked or raise
 
-          lockfile.gems[locked[:name]] = locked
+            unless ignored_gems.include?(name)
+              lockfile.gems[locked[:name]] = locked
 
-          source = locked[:source]
-          source.dependencies_of(locked[:name], locked[:version])&.each do |dep|
-            assign_stdlib(name: dep.name)
+              source = locked[:source]
+              source.dependencies_of(locked[:name], locked[:version])&.each do |dep|
+                assign_stdlib(name: dep.name)
+              end
+            end
+          ensure
+            each_dependent_gem(name: name) do |spec|
+              assign_gem(name: spec.name, version: spec.version, ignored_gems: ignored_gems)
+            end
           end
         end
 
@@ -134,9 +145,11 @@ module RBS
           end
         end
 
-        private def gemfile_lock_gems(&block)
-          bundler_definition.locked_gems.specs.each do |spec|
-            yield spec
+        private def each_dependent_gem(name:)
+          if spec = @gem_map[name]
+            spec.dependencies.each do |dep|
+              yield @gem_map[dep.name]
+            end
           end
         end
 

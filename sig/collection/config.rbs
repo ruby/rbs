@@ -43,11 +43,11 @@ module RBS
 
         def validate_gemfile_lock_path!: (lock: Lockfile?, gemfile_lock_path: Pathname) -> void
 
-        def assign_gem: (name: String, version: String?) -> void
+        def assign_gem: (name: String, version: String?, ignored_gems: Set[String]) -> void
 
         def assign_stdlib: (name: String) -> void
 
-        def gemfile_lock_gems: () { (Bundler::LazySpecification) -> void } -> void
+        def each_dependent_gem: (name: String) { (Bundler::LazySpecification) -> void } -> void
 
         def find_source: (name: String) -> Sources::t?
 

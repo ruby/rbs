@@ -17,9 +17,11 @@ module Bundler
   class LazySpecification
     def name: () -> String
     def version: () -> String
+    def dependencies: () -> Array[Dependency]
   end
 
   class Dependency
+    def name: () -> String
   end
 
   class Definition
