@@ -1,0 +1,38 @@
+module RBS
+  module Collection
+    class Config
+      class LockfileGenerator
+        attr_reader config: Config
+        attr_reader lock: Config?
+        attr_reader lock_path: Pathname
+        attr_reader gemfile_lock: Bundler::LockfileParser
+
+        type gem_queue_entry = { name: String, version: String? }
+
+        @gem_queue: Array[gem_queue_entry]
+
+        def self.generate: (config_path: Pathname, gemfile_lock_path: Pathname, ?with_lockfile: boolish) -> Config
+
+        def initialize: (config_path: Pathname, gemfile_lock_path: Pathname, with_lockfile: boolish) -> void
+
+        def generate: () -> Config
+
+        private
+
+        def validate_gemfile_lock_path!: (lock: Config?, gemfile_lock_path: Pathname) -> void
+
+        def assign_gem: (name: String, version: String?) -> void
+
+        def upsert_gem: (gem_entry? old, gem_entry new) -> void
+
+        def gemfile_lock_gems: () { (untyped) -> void } -> void
+
+        def remove_ignored_gems!: () -> void
+
+        def find_source: (name: String) -> Sources::_Source?
+
+        def find_best_version: (version: String?, versions: Array[String]) -> Gem::Version
+      end
+    end
+  end
+end
