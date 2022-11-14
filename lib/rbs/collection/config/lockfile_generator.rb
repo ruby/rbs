@@ -120,7 +120,7 @@ module RBS
 
               source = locked[:source]
               source.dependencies_of(locked[:name], locked[:version])&.each do |dep|
-                assign_stdlib(name: dep.name)
+                assign_stdlib(name: dep.name, from_gem: name)
               end
             end
           ensure
@@ -130,8 +130,18 @@ module RBS
           end
         end
 
-        private def assign_stdlib(name:)
+        private def assign_stdlib(name:, from_gem:)
           return if lockfile.gems.key?(name)
+
+          if name == 'rubygems'
+            if from_gem
+              RBS.logger.warn "`rubygems` has been moved to core library, so it is always loaded. Remove explicit loading `rubygems` from `#{from_gem}`"
+            else
+              RBS.logger.warn '`rubygems` has been moved to core library, so it is always loaded. Remove explicit loading `rubygems`'
+            end
+
+            return
+          end
 
           source = Sources::Stdlib.instance
           raise "Cannot find stdlib RBS of `#{name}`" unless source.has?(name, nil)
@@ -140,7 +150,7 @@ module RBS
           lockfile.gems[name] = { name: name, version: version, source: source }
           if deps = source.dependencies_of(name, version)
             deps.each do |dep|
-              assign_stdlib(name: dep.name)
+              assign_stdlib(name: dep.name, from_gem: nil)
             end
           end
         end

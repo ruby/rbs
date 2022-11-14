@@ -45,7 +45,7 @@ module RBS
 
         def assign_gem: (name: String, version: String?, ignored_gems: Set[String]) -> void
 
-        def assign_stdlib: (name: String) -> void
+        def assign_stdlib: (name: String, from_gem: String?) -> void
 
         def each_dependent_gem: (name: String) { (Bundler::LazySpecification) -> void } -> void
 
