@@ -8,4 +8,6 @@ module Bundler
     def name: () -> String
     def version: () -> String
   end
+
+  def self.default_lockfile: () -> Pathname
 end
