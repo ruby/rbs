@@ -29,7 +29,7 @@ module RBS
         end
 
         loader = EnvironmentLoader.new(core_root: core_root, repository: repository)
-        if config_path
+        if config_path && config_path.file?
           config = Collection::Config.from_path(config_path)
           lock = Collection::Config.lockfile_of(config_path)
 

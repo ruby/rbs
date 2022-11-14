@@ -224,19 +224,20 @@ end
               type: git
       YAML
       RBS::Collection::Installer.new(lockfile_path: lockfile_path, stdout: StringIO.new).install_from_lockfile
-      lock = RBS::Collection::Config.from_path(lockfile_path)
+      config = RBS::Collection::Config.from_path(config_path)
+      lock = RBS::Collection::Config.lockfile_of(config_path)
 
       repo = RBS::Repository.new()
 
       loader = EnvironmentLoader.new(repository: repo)
-      loader.add_collection(lock)
+      loader.add_collection(config, lock)
 
       env = Environment.new
       loader.load(env: env)
 
       assert_operator env.class_decls, :key?, TypeName("::AST")
       assert_operator env.class_decls, :key?, TypeName("::Rainbow")
-      assert repo.dirs.include? lock.repo_path
+      assert repo.dirs.include? config.repo_path
     end
   end
 
@@ -268,14 +269,14 @@ end
               repo_dir: gems
               type: git
       YAML
-      lock = RBS::Collection::Config.from_path(lockfile_path)
+      config = RBS::Collection::Config.from_path(lockfile_path)
 
       repo = RBS::Repository.new()
 
       loader = EnvironmentLoader.new(repository: repo)
 
       assert_raises RBS::Collection::Config::CollectionNotAvailable do
-        loader.add_collection(lock)
+        loader.add_collection(config, nil)
       end
     end
   end
