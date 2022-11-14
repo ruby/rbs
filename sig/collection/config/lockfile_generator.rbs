@@ -2,6 +2,16 @@ module RBS
   module Collection
     class Config
       class LockfileGenerator
+        class GemfileLockMismatchError < StandardError
+          @expected: Pathname
+
+          @actual: Pathname
+          
+          def initialize: (expected: Pathname, actual: Pathname) -> void
+
+          def message: () -> String
+        end
+
         attr_reader config: Config
         attr_reader lock: Config?
         attr_reader lock_path: Pathname
