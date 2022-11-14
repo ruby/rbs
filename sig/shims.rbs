@@ -40,6 +40,8 @@ module Bundler
   end
 
   def self.definition: () -> Definition
+
+  def self.default_lockfile: () -> Pathname
 end
 
 module RDoc

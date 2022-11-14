@@ -31,6 +31,7 @@ GEM
       addressable (>= 2.8)
     marcel (1.0.2)
     minitest (5.16.3)
+    moji (1.6)
     parallel (1.22.1)
     parser (3.1.2.1)
       ast (~> 2.4.1)
@@ -100,6 +101,7 @@ DEPENDENCIES
   json
   json-schema
   minitest
+  moji
   prime
   rake
   rake-compiler

@@ -20,6 +20,8 @@ gem 'tempfile'
 gem "prime"
 gem "rdoc"
 
+gem "moji", require: false
+
 # Test gems
 gem "rbs-amber", path: "test/assets/test-gem"
 

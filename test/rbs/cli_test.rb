@@ -583,31 +583,12 @@ Processing `test/a_test.rb`...
 
           path: #{dir.join('gem_rbs_collection')}
         YAML
-        dir.join('Gemfile').write(<<~GEMFILE)
-          source "https://rubygems.org"
 
-          gem 'ast', require: false
-        GEMFILE
-        dir.join('Gemfile.lock').write(<<~LOCK)
-          GEM
-            remote: https://rubygems.org/
-            specs:
-              ast (2.4.2)
-
-          PLATFORMS
-            x86_64-linux
-
-          DEPENDENCIES
-            ast
-
-          BUNDLED WITH
-             2.2.0
-        LOCK
-
+        # Load gems from current Bundler context
         with_cli do |cli|
           cli.run(%w[collection install])
           assert dir.join('rbs_collection.lock.yaml').exist?
-          refute dir.join('gem_rbs_collection/ast').exist?
+          refute dir.join('gem_rbs_collection/moji').exist?
         end
       end
     end
