@@ -12,6 +12,8 @@ module RBS
         def dependencies_of: (String name, String version) -> Array[manifest_dependency]?
       end
 
+      type t = Git | Stdlib | Rubygems
+
       type source_entry = Git::source_entry
                         | Stdlib::source_entry
                         | Rubygems::source_entry
@@ -78,7 +80,7 @@ module RBS
 
         def with_revision: [T] () { () -> T } -> T
 
-        def resolved_revision: () -> String
+        public def resolved_revision: () -> String
 
         def resolve_revision: () -> String
 
