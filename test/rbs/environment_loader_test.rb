@@ -224,7 +224,7 @@ end
               type: git
       YAML
       RBS::Collection::Installer.new(lockfile_path: lockfile_path, stdout: StringIO.new).install_from_lockfile
-      lock = RBS::Collection::Config.from_path(lockfile_path)
+      lock = RBS::Collection::Config::Lockfile.from_lockfile(lockfile_path: lockfile_path, data: YAML.load_file(lockfile_path))
 
       repo = RBS::Repository.new()
 
@@ -236,7 +236,7 @@ end
 
       assert_operator env.class_decls, :key?, TypeName("::AST")
       assert_operator env.class_decls, :key?, TypeName("::Rainbow")
-      assert repo.dirs.include? lock.repo_path
+      assert repo.dirs.include? lock.fullpath
     end
   end
 
@@ -268,7 +268,7 @@ end
               repo_dir: gems
               type: git
       YAML
-      lock = RBS::Collection::Config.from_path(lockfile_path)
+      lock = RBS::Collection::Config::Lockfile.from_lockfile(lockfile_path: lockfile_path, data: YAML.load_file(lockfile_path.to_s))
 
       repo = RBS::Repository.new()
 

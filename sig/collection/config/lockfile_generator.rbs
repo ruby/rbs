@@ -6,40 +6,43 @@ module RBS
           @expected: Pathname
 
           @actual: Pathname
-          
+
           def initialize: (expected: Pathname, actual: Pathname) -> void
 
           def message: () -> String
         end
 
         attr_reader config: Config
-        attr_reader lock: Config?
-        attr_reader lock_path: Pathname
         attr_reader gemfile_lock: Bundler::LockfileParser
+
+        attr_reader lockfile: Lockfile
+        attr_reader existing_lockfile: Lockfile?
 
         type gem_queue_entry = { name: String, version: String? }
 
         @gem_queue: Array[gem_queue_entry]
 
-        def self.generate: (config_path: Pathname, gemfile_lock_path: Pathname, ?with_lockfile: boolish) -> Config
+        def self.generate: (config: Config, gemfile_lock_path: Pathname, ?with_lockfile: boolish) -> Lockfile
 
-        def initialize: (config_path: Pathname, gemfile_lock_path: Pathname, with_lockfile: boolish) -> void
+        def initialize: (config: Config, gemfile_lock_path: Pathname, with_lockfile: boolish) -> void
 
-        def generate: () -> Config
+        def generate: () -> void
 
         private
 
-        def validate_gemfile_lock_path!: (lock: Config?, gemfile_lock_path: Pathname) -> void
+        # Ensure if current `gemfile_lock_path` is the same with the path saved in `lock`
+        #
+        def validate_gemfile_lock_path!: (lock: Lockfile?, gemfile_lock_path: Pathname) -> void
 
-        def assign_gem: (name: String, version: String?) -> void
+        def assign_gem: (name: String, version: String?, ignored_gems: Set[String]) -> void
 
-        def upsert_gem: (gem_entry? old, gem_entry new) -> void
+        def assign_stdlib: (name: String, from_gem: String?) -> void
 
         def gemfile_lock_gems: () { (untyped) -> void } -> void
 
         def remove_ignored_gems!: () -> void
 
-        def find_source: (name: String) -> Sources::_Source?
+        def find_source: (name: String) -> Sources::t?
 
         def find_best_version: (version: String?, versions: Array[String]) -> Gem::Version
       end

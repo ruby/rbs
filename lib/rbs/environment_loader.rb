@@ -73,13 +73,13 @@ module RBS
       end
     end
 
-    def add_collection(collection_config)
-      collection_config.check_rbs_availability!
+    def add_collection(lockfile)
+      lockfile.check_rbs_availability!
 
-      repository.add(collection_config.repo_path)
+      repository.add(lockfile.fullpath)
 
-      collection_config.gems.each do |gem|
-        add(library: gem['name'], version: gem['version'], resolve_dependencies: false)
+      lockfile.gems.each_value do |gem|
+        add(library: gem[:name], version: gem[:version], resolve_dependencies: false)
       end
     end
 
