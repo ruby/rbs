@@ -53,7 +53,7 @@ module RBS
 
           lockfile = Lockfile.new(file_path: file_path, path: path, gemfile_lock_path: gemfile_lock_path)
 
-          yaml['sources'].each do |src|
+          Array(yaml['sources']).each do |src|
             lockfile.sources << Sources::Git.new(
               name: src["name"],
               revision: src["revision"],
@@ -62,7 +62,7 @@ module RBS
             )
           end
 
-          yaml["gems"].each do |gem|
+          Array(yaml["gems"]).each do |gem|
             source = lockfile.all_sources.find {|source| source.has?(gem['name'], gem['version']) } or raise
             lockfile.gems[gem['name']] = {
               name: gem['name'],

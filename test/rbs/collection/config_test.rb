@@ -532,6 +532,8 @@ source "https://rubygems.org/"
       lock_path.write CONFIG + "gemfile_lock_path: Gemfile.lock"
       gemfile_lock_path = tmpdir / 'Gemfile.lock'
       gemfile_lock_path.write GEMFILE_LOCK
+      gemfile_lock_path = tmpdir / 'Gemfile.2'
+      gemfile_lock_path.write GEMFILE
       gemfile_lock_path2 = tmpdir / 'Gemfile.2.lock'
       gemfile_lock_path2.write GEMFILE_LOCK
 

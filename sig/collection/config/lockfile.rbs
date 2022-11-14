@@ -13,9 +13,9 @@ module RBS
         type lockfile_source_gem = { 'name' => String, 'version' => String, 'source' => Sources::source_entry }
 
         type lockfile_source = {
-          'sources' => Array[lockfile_source_git_source],
+          'sources' => Array[lockfile_source_git_source]?,
           'path' => String,
-          'gems' => Array[lockfile_source_gem],
+          'gems' => Array[lockfile_source_gem]?,
           'gemfile_lock_path' => String?
         }
 

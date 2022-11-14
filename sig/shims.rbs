@@ -8,6 +8,11 @@ module Gem
   end
 end
 
+module Kernel
+  def self?.Array: [T] (Array[T]?) -> Array[T]
+                 | ...
+end
+
 module Bundler
   class LockfileParser
     def initialize: (String) -> void
