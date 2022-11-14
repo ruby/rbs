@@ -42,7 +42,7 @@ module RBS
           @bundler_definition = bundler_definition
 
           lock_path = Config.to_lockfile_path(config_path)
-          gemfile_lock_path = bundler_definition.lockfile.relative_path_from(lock_path)
+          gemfile_lock_path = bundler_definition.lockfile.relative_path_from(lock_path.parent)
 
           @lockfile = Lockfile.new(file_path: lock_path, path: Pathname(config.data_path), gemfile_lock_path: gemfile_lock_path)
           config.sources.each do |source|
