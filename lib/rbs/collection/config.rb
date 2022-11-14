@@ -27,10 +27,12 @@ module RBS
         end
       end
 
-      # Generate a rbs lockfile from Gemfile.lock to `config_path`.
+      # Generate a rbs lockfile from Gemfile/Gemfile.lock to `config_path`.
       # If `with_lockfile` is true, it respects existing rbs lockfile.
+      #
       def self.generate_lockfile(config_path:, gemfile_lock_path:, with_lockfile: true)
-        LockfileGenerator.generate(config_path: config_path, gemfile_lock_path: gemfile_lock_path, with_lockfile: with_lockfile)
+        config, _ = LockfileGenerator.generate(config_path: config_path, gemfile_lock_path: gemfile_lock_path, with_lockfile: with_lockfile)
+        config
       end
 
       def self.from_path(path)
@@ -39,7 +41,9 @@ module RBS
 
       def self.lockfile_of(config_path)
         lock_path = to_lockfile_path(config_path)
-        from_path lock_path if lock_path.exist?
+        if lock_path.file?
+          Lockfile.load(lock_path, YAML.load_file(lock_path.to_s))
+        end
       end
 
       def self.to_lockfile_path(config_path)
@@ -60,12 +64,20 @@ module RBS
       end
 
       def repo_path
-        @config_path.dirname.join @data['path']
+        @config_path.dirname.join data_path
+      end
+
+      def data_path
+        @data['path']
+      end
+
+      def data_sources
+        @data['sources']
       end
 
       def sources
         @sources ||= (
-          @data['sources']
+          data_sources
             .map { |c| Sources.from_config_entry(c) }
             .push(Sources::Stdlib.instance)
             .push(Sources::Rubygems.instance)
@@ -73,7 +85,11 @@ module RBS
       end
 
       def dump_to(io)
-        YAML.dump(@data, io)
+        gems = self.gems.reject {|gem| gem['ignore'] }.sort_by {|gem| gem['name'] }
+        YAML.dump(
+          @data.merge({ "gems" => gems }),
+          io
+        )
       end
 
       def gems
@@ -95,9 +111,10 @@ module RBS
         raise CollectionNotAvailable unless repo_path.exist?
 
         gems.each do |gem|
-          case gem['source']['type']
+          source = gem['source'] or next
+          case source['type']
           when 'git'
-            meta_path = repo_path.join(gem['name'], gem['version'], Sources::Git::METADATA_FILENAME)
+            meta_path = repo_path.join(gem['name'], gem['version'] || raise, Sources::Git::METADATA_FILENAME)
             raise CollectionNotAvailable unless meta_path.exist?
             raise CollectionNotAvailable unless gem == YAML.load(meta_path.read)
           end

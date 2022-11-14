@@ -5,6 +5,8 @@ module RBS
     class Config
       class LockfileGenerator
         class GemfileLockMismatchError < StandardError
+          attr_reader :expected, :actual
+
           def initialize(expected:, actual:)
             @expected = expected
             @actual = actual
@@ -20,42 +22,59 @@ module RBS
           end
         end
 
-        attr_reader :config, :lock, :lock_path, :bundler_definition
+        attr_reader :config, :bundler_definition, :lockfile, :existing_lockfile
 
         def self.generate(config_path:, gemfile_lock_path:, with_lockfile: true)
           gemfile_path = gemfile_lock_path.sub_ext("")
           definition = Bundler::Definition.build(gemfile_path, gemfile_lock_path, {})
-          new(config_path: config_path, bundler_definition: definition, with_lockfile: with_lockfile).generate
+
+          generator = new(config_path: config_path, bundler_definition: definition, with_lockfile: with_lockfile)
+          generator.generate
+
+          [
+            generator.config,
+            generator.lockfile
+          ]
         end
 
         def initialize(config_path:, bundler_definition:, with_lockfile:)
           @config = Config.from_path config_path
-          @lock_path = Config.to_lockfile_path(config_path)
-          @lock = Config.from_path(lock_path) if lock_path.exist? && with_lockfile
           @bundler_definition = bundler_definition
-          @gem_queue = []
 
-          validate_gemfile_lock_path!(lock: lock, gemfile_lock_path: bundler_definition.lockfile)
+          lock_path = Config.to_lockfile_path(config_path)
+          gemfile_lock_path = bundler_definition.lockfile.relative_path_from(lock_path)
 
-          config.gemfile_lock_path = bundler_definition.lockfile
+          @lockfile = Lockfile.new(file_path: lock_path, path: Pathname(config.data_path), gemfile_lock_path: gemfile_lock_path)
+          config.sources.each do |source|
+            case source
+            when Sources::Git
+              lockfile.sources << source
+            end
+          end
+
+          if with_lockfile && lock_path.file?
+            @existing_lockfile = Lockfile.load(lock_path, YAML.load_file(lock_path.to_s))
+            validate_gemfile_lock_path!(lock: @existing_lockfile, gemfile_lock_path: gemfile_lock_path)
+          end
         end
 
         def generate
+          ignored_gems = config.gems.select {|gem| gem['ignore'] }.map {|gem| gem['name'] }.to_set
+
           config.gems.each do |gem|
-            @gem_queue.push({ name: gem['name'], version: gem['version'] })
+            unless ignored_gems.include?(gem['name'])
+              assign_gem(name: gem['name'], version: gem['version'])
+            end
           end
 
           gemfile_lock_gems do |spec|
-            @gem_queue.push({ name: spec.name, version: spec.version })
+            unless ignored_gems.include?(spec.name)
+              assign_gem(name: spec.name, version: spec.version)
+            end
           end
 
-          while gem = @gem_queue.shift
-            assign_gem(name: gem[:name], version: gem[:version])
-          end
-          remove_ignored_gems!
-
-          config.dump_to(lock_path)
-          config
+          content = YAML.dump(lockfile.dump)
+          lockfile.file_path.write(content)
         end
 
         private def validate_gemfile_lock_path!(lock:, gemfile_lock_path:)
@@ -67,12 +86,12 @@ module RBS
         end
 
         private def assign_gem(name:, version:)
-          # @type var locked: gem_entry?
-          locked = lock&.gem(name)
-          specified = config.gem(name)
+          return if lockfile.gems.key?(name)
 
-          return if specified&.dig('ignore')
-          return if specified&.dig('source') # skip if the source is already filled
+          # @type var locked: Lockfile::gem?
+          if existing_lockfile
+            locked = existing_lockfile.gems[name]
+          end
 
           # If rbs_collection.lock.yaml contain the gem, use it.
           # Else find the gem from gem_collection.
@@ -84,31 +103,35 @@ module RBS
             best_version = find_best_version(version: installed_version, versions: source.versions(name))
 
             locked = {
-              'name' => name,
-              'version' => best_version.to_s,
-              'source' => source.to_lockfile,
+              name: name,
+              version: best_version.to_s,
+              source: source,
             }
           end
 
           locked or raise
 
-          upsert_gem specified, locked
-          source = Sources.from_config_entry(locked['source'] || raise)
-          source.dependencies_of(locked["name"], locked["version"] || raise)&.each do |dep|
-            @gem_queue.push({ name: dep.name, version: nil} )
+          lockfile.gems[locked[:name]] = locked
+
+          source = locked[:source]
+          source.dependencies_of(locked[:name], locked[:version])&.each do |dep|
+            assign_stdlib(name: dep.name)
           end
         end
 
-        private def upsert_gem(old, new)
-          if old
-            old.merge! new
-          else
-            config.add_gem new
-          end
-        end
+        private def assign_stdlib(name:)
+          return if lockfile.gems.key?(name)
 
-        private def remove_ignored_gems!
-          config.gems.reject! { |gem| gem['ignore'] }
+          source = Sources::Stdlib.instance
+          raise "Cannot find stdlib RBS of `#{name}`" unless source.has?(name, nil)
+
+          version = source.versions(name).last || raise
+          lockfile.gems[name] = { name: name, version: version, source: source }
+          if deps = source.dependencies_of(name, version)
+            deps.each do |dep|
+              assign_stdlib(name: dep.name)
+            end
+          end
         end
 
         private def gemfile_lock_gems(&block)
@@ -119,8 +142,7 @@ module RBS
 
         private def find_source(name:)
           sources = config.sources
-
-          sources.find { |c| c.has?(name, nil) }
+          _ = sources.find { |c| c.has?(name, nil) }
         end
 
         private def find_best_version(version:, versions:)

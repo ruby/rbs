@@ -16,6 +16,8 @@ module RBS
                         | Stdlib::source_entry
                         | Rubygems::source_entry
 
+      type t = Git | Stdlib | Rubygems
+
       module Base : _Source
         def dependencies_of: (String name, String version) -> Array[Manifest::Dependency]?
       end
@@ -52,6 +54,8 @@ module RBS
 
         def manifest_of: (String name, String version) -> Manifest?
 
+        def resolved_revision: () -> String
+
         private
 
         @git_dir: Pathname?
@@ -71,8 +75,6 @@ module RBS
         def gem_repo_dir: () -> Pathname
 
         def with_revision: [T] () { () -> T } -> T
-
-        def resolved_revision: () -> String
 
         def resolve_revision: () -> String
 

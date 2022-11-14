@@ -7,36 +7,49 @@ module RBS
       end
 
       class LockfileGenerator
+        class GemfileLockMismatchError < StandardError
+          attr_reader expected: Pathname
+
+          attr_reader actual: Pathname
+
+          def initialize: (expected: Pathname, actual: Pathname) -> void
+        end
+
+        type lockfile_gem = { 'name' => String, 'version' => String, source: Sources::source_entry }
+
+        type lockfile = {
+          'sources' => Array[Sources::Git::source_entry],
+          'path' => String,
+          'gems' => Array[lockfile_gem]
+        }
+
         attr_reader config: Config
-        attr_reader lock: Config?
-        attr_reader lock_path: Pathname
         attr_reader bundler_definition: Bundler::Definition
 
-        type gem_queue_entry = { name: String, version: String? }
-
-        @gem_queue: Array[gem_queue_entry]
+        attr_reader lockfile: Lockfile
+        attr_reader existing_lockfile: Lockfile?
 
         @gem_map: Hash[String, Bundler::LazySpecification]
 
-        def self.generate: (config_path: Pathname, gemfile_lock_path: Pathname, ?with_lockfile: boolish) -> Config
+        # Load a Config, generates and save Lockfile, and returns a pair of them
+        #
+        def self.generate: (config_path: Pathname, gemfile_lock_path: Pathname, ?with_lockfile: boolish) -> [Config, Lockfile]
 
         def initialize: (config_path: Pathname, bundler_definition: Bundler::Definition, with_lockfile: boolish) -> void
 
-        def generate: () -> Config
+        def generate: () -> void
 
         private
 
-        def validate_gemfile_lock_path!: (lock: Config?, gemfile_lock_path: Pathname) -> void
+        def validate_gemfile_lock_path!: (lock: Lockfile?, gemfile_lock_path: Pathname) -> void
 
         def assign_gem: (name: String, version: String?) -> void
 
-        def upsert_gem: (gem_entry? old, gem_entry new) -> void
+        def assign_stdlib: (name: String) -> void
 
-        def gemfile_lock_gems: () { (untyped) -> void } -> void
+        def gemfile_lock_gems: () { (Bundler::LazySpecification) -> void } -> void
 
-        def remove_ignored_gems!: () -> void
-
-        def find_source: (name: String) -> Sources::_Source?
+        def find_source: (name: String) -> Sources::t?
 
         def find_best_version: (version: String?, versions: Array[String]) -> Gem::Version
       end
@@ -62,7 +75,7 @@ module RBS
 
       def self.from_path: (Pathname path) -> Config
 
-      def self.lockfile_of: (Pathname config_path) -> Config?
+      def self.lockfile_of: (Pathname config_path) -> Lockfile?
 
       def self.to_lockfile_path: (Pathname config_path) -> Pathname
 
@@ -73,11 +86,15 @@ module RBS
 
       def gem: (String gem_name) -> gem_entry?
 
+      def data_path: () -> String
+
       def repo_path: () -> Pathname
+
+      def data_sources: () -> Array[Sources::Git::source_entry]
 
       def sources: () -> Array[Sources::_Source]
 
-      def dump_to: (Pathname) -> void
+      def dump_to: (IO) -> void
 
       def gems: () -> Array[gem_entry]
 

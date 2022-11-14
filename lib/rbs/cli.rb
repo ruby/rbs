@@ -29,8 +29,12 @@ module RBS
         end
 
         loader = EnvironmentLoader.new(core_root: core_root, repository: repository)
-        lock = config_path&.then { |p| Collection::Config.lockfile_of(p) }
-        loader.add_collection(lock) if lock
+        if config_path
+          config = Collection::Config.from_path(config_path)
+          lock = Collection::Config.lockfile_of(config_path)
+
+          loader.add_collection(config, lock) if lock
+        end
 
         dirs.each do |dir|
           loader.add(path: Pathname(dir))

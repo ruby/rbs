@@ -65,7 +65,7 @@ module RBS
         unless version
           version = source.versions(library).last or raise
         end
-        
+
         source.dependencies_of(library, version)&.each do |dep|
           add(library: dep.name, version: nil)
         end
@@ -73,13 +73,13 @@ module RBS
       end
     end
 
-    def add_collection(collection_config)
+    def add_collection(collection_config, lock)
       collection_config.check_rbs_availability!
 
       repository.add(collection_config.repo_path)
 
-      collection_config.gems.each do |gem|
-        add(library: gem['name'], version: gem['version'], resolve_dependencies: false)
+      lock.gems.each_value do |gem|
+        add(library: gem[:name], version: gem[:version], resolve_dependencies: false)
       end
     end
 

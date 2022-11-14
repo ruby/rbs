@@ -52,9 +52,9 @@ gem "rainbow"
       gemfile_lock_path = tmpdir / 'Gemfile.lock'
       gemfile_lock_path.write GEMFILE_LOCK
 
-      config = RBS::Collection::Config.generate_lockfile(config_path: config_path, gemfile_lock_path: gemfile_lock_path)
+      config, lockfile = RBS::Collection::Config.generate_lockfile(config_path: config_path, gemfile_lock_path: gemfile_lock_path)
       io = StringIO.new
-      config.dump_to(io)
+      lockfile.dump_to(io)
 
       assert_config <<~YAML, io.string
         sources:
@@ -106,11 +106,11 @@ gem "rainbow"
           gemfile_lock_path = tmpdir / 'Gemfile.lock'
         gemfile_lock_path.write GEMFILE_LOCK
 
-        config = Dir.chdir(tmpdir) do
+        config, lockfile = Dir.chdir(tmpdir) do
           RBS::Collection::Config.generate_lockfile(config_path: config_path, gemfile_lock_path: gemfile_lock_path)
         end
         io = StringIO.new
-        config.dump_to(io)
+        lockfile.dump_to(io)
 
         assert_config <<~YAML, io.string
           sources:
@@ -151,7 +151,7 @@ gem "rainbow"
       gemfile_lock_path = tmpdir / 'Gemfile.lock'
       gemfile_lock_path.write GEMFILE_LOCK
 
-      lockfile = <<~YAML
+      lockfile_yaml = <<~YAML
         sources:
           - name: ruby/gem_rbs_collection
             remote: https://github.com/ruby/gem_rbs_collection.git
@@ -177,13 +177,13 @@ gem "rainbow"
               repo_dir: gems
               type: git
       YAML
-      tmpdir.join('rbs_collection.lock.yaml').write lockfile
+      tmpdir.join('rbs_collection.lock.yaml').write lockfile_yaml
 
-      config = RBS::Collection::Config.generate_lockfile(config_path: config_path, gemfile_lock_path: gemfile_lock_path)
-      io = StringIO.new
-      config.dump_to(io)
+      config, lockfile = RBS::Collection::Config.generate_lockfile(config_path: config_path, gemfile_lock_path: gemfile_lock_path)
+      io = StringIO.new()
+      lockfile.dump_to(io)
 
-      assert_config lockfile, io.string
+      assert_config lockfile_yaml, io.string
     end
   end
 
@@ -202,11 +202,9 @@ gem "rainbow"
       gemfile_lock_path = tmpdir / 'Gemfile.lock'
       gemfile_lock_path.write GEMFILE_LOCK
 
-      config = RBS::Collection::Config.generate_lockfile(config_path: config_path, gemfile_lock_path: gemfile_lock_path)
-      io = StringIO.new
-      config.dump_to(io)
+      config, lockfile = RBS::Collection::Config.generate_lockfile(config_path: config_path, gemfile_lock_path: gemfile_lock_path)
 
-      assert_config <<~YAML, io.string
+      assert_config <<~YAML, YAML.dump(lockfile.dump)
         sources:
           - name: ruby/gem_rbs_collection
             remote: https://github.com/ruby/gem_rbs_collection.git
@@ -216,7 +214,6 @@ gem "rainbow"
         gemfile_lock_path: 'Gemfile.lock'
         gems:
           - name: rainbow
-            ignore: false
             version: "3.0"
             source:
               name: ruby/gem_rbs_collection
@@ -255,9 +252,9 @@ source "https://rubygems.org/"
            2.2.0
       GEMFILE_LOCK
 
-      config = RBS::Collection::Config.generate_lockfile(config_path: config_path, gemfile_lock_path: gemfile_lock_path)
+      config, lockfile = RBS::Collection::Config.generate_lockfile(config_path: config_path, gemfile_lock_path: gemfile_lock_path)
       io = StringIO.new
-      config.dump_to(io)
+      lockfile.dump_to(io)
 
       assert_config <<~YAML, io.string
         sources:
@@ -328,9 +325,9 @@ gem "activesupport"
            2.2.0
       GEMFILE_LOCK
 
-      config = RBS::Collection::Config.generate_lockfile(config_path: config_path, gemfile_lock_path: gemfile_lock_path)
+      config, lockfile = RBS::Collection::Config.generate_lockfile(config_path: config_path, gemfile_lock_path: gemfile_lock_path)
       io = StringIO.new
-      config.dump_to(io)
+      lockfile.dump_to(io)
 
       assert_config <<~YAML, io.string
         sources:
@@ -349,6 +346,14 @@ gem "activesupport"
               revision: cde6057e7546843ace6420c5783dd945c6ccda54
               repo_dir: gems
               type: git
+          - name: date
+            version: "0"
+            source:
+              type: stdlib
+          - name: logger
+            version: "0"
+            source:
+              type: stdlib
           - name: minitest
             version: '0'
             source:
@@ -357,19 +362,11 @@ gem "activesupport"
             version: "0"
             source:
               type: stdlib
-          - name: date
+          - name: mutex_m
             version: "0"
             source:
               type: stdlib
           - name: singleton
-            version: "0"
-            source:
-              type: stdlib
-          - name: logger
-            version: "0"
-            source:
-              type: stdlib
-          - name: mutex_m
             version: "0"
             source:
               type: stdlib
@@ -406,9 +403,9 @@ source "https://rubygems.org/"
            2.2.0
       GEMFILE_LOCK
 
-      config = RBS::Collection::Config.generate_lockfile(config_path: config_path, gemfile_lock_path: gemfile_lock_path)
+      config, lockfile = RBS::Collection::Config.generate_lockfile(config_path: config_path, gemfile_lock_path: gemfile_lock_path)
       io = StringIO.new
-      config.dump_to(io)
+      lockfile.dump_to(io)
 
       assert_config <<~YAML, io.string
         sources:
@@ -460,9 +457,9 @@ gem "rbs-amber"
            2.2.0
       GEMFILE_LOCK
 
-      config = RBS::Collection::Config.generate_lockfile(config_path: config_path, gemfile_lock_path: gemfile_lock_path)
+      config, lockfile = RBS::Collection::Config.generate_lockfile(config_path: config_path, gemfile_lock_path: gemfile_lock_path)
       io = StringIO.new
-      config.dump_to(io)
+      lockfile.dump_to(io)
 
       assert_config <<~YAML, io.string
         sources:
@@ -473,14 +470,14 @@ gem "rbs-amber"
         path: "/path/to/somewhere"
         gemfile_lock_path: 'Gemfile.lock'
         gems:
-          - name: rbs-amber
-            version: "1.0.0"
-            source:
-              type: rubygems
           - name: pathname
             version: "0"
             source:
               type: stdlib
+          - name: rbs-amber
+            version: "1.0.0"
+            source:
+              type: rubygems
       YAML
     end
   end
@@ -508,9 +505,9 @@ source "https://rubygems.org/"
            2.2.0
       GEMFILE_LOCK
 
-      config = RBS::Collection::Config.generate_lockfile(config_path: config_path, gemfile_lock_path: gemfile_lock_path)
+      config, lockfile = RBS::Collection::Config.generate_lockfile(config_path: config_path, gemfile_lock_path: gemfile_lock_path)
       io = StringIO.new
-      config.dump_to(io)
+      lockfile.dump_to(io)
 
       assert_config <<~YAML, io.string
         sources:

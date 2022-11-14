@@ -152,7 +152,7 @@ module RBS
           git_dir.join @repo_dir
         end
 
-        private def resolved_revision
+        def resolved_revision
           @resolved_revision ||= resolve_revision
         end
 
