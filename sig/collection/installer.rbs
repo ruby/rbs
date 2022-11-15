@@ -1,7 +1,7 @@
 module RBS
   module Collection
     class Installer
-      attr_reader lockfile: Config
+      attr_reader lockfile: Config::Lockfile
       attr_reader stdout: CLI::_IO
 
       def initialize: (lockfile_path: Pathname, ?stdout: CLI::_IO) -> void
