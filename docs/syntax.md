@@ -561,7 +561,7 @@ Interface declaration can have parameters but allows only a few of the members.
 ```
 interface _Hashing
   def hash: () -> Integer
-  def eql?: (any) -> bool
+  def eql?: (untyped) -> bool
 end
 ```
 
