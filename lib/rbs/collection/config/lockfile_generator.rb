@@ -58,15 +58,17 @@ module RBS
           ignored_gems = config.gems.select {|gem| gem["ignore"] }.map {|gem| gem["name"] }.to_set
 
           config.gems.each do |gem|
-            if Sources::Stdlib.instance.has?(gem["name"], nil)
-              assign_stdlib(name: gem["name"], from_gem: nil) unless ignored_gems.include?(gem["name"])
+            if Sources::Stdlib.instance.has?(gem["name"], nil) || gem.dig("source", "type") == "stdlib"
+              unless ignored_gems.include?(gem["name"])
+                assign_stdlib(name: gem["name"], from_gem: nil)
+              end
             else
-              assign_gem(name: gem["name"], version: gem["version"], ignored_gems: ignored_gems)
+              assign_gem(name: gem["name"], version: gem["version"], ignored_gems: ignored_gems, src_data: gem["source"])
             end
           end
 
           gemfile_lock_gems do |spec|
-            assign_gem(name: spec.name, version: spec.version, ignored_gems: ignored_gems)
+            assign_gem(name: spec.name, version: spec.version, ignored_gems: ignored_gems, src_data: nil)
           end
 
           lockfile.lockfile_path.write(YAML.dump(lockfile.to_lockfile))
@@ -80,7 +82,7 @@ module RBS
           end
         end
 
-        private def assign_gem(name:, version:, ignored_gems:)
+        private def assign_gem(name:, version:, ignored_gems:, src_data:)
           return if ignored_gems.include?(name)
           return if lockfile.gems.key?(name)
 
@@ -93,7 +95,12 @@ module RBS
           # If rbs_collection.lock.yaml contain the gem, use it.
           # Else find the gem from gem_collection.
           unless locked
-            source = find_source(name: name)
+            source =
+              if src_data
+                Sources.from_config_entry(src_data)
+              else
+                find_source(name: name)
+              end
             return unless source
 
             installed_version = version

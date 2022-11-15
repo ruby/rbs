@@ -1,7 +1,8 @@
 module RBS
   module Collection
     module Sources
-      def self.from_config_entry: (source_entry) -> _Source
+      def self.from_config_entry: (Git::source_entry) -> Git
+                                | (source_entry) -> t
 
       interface _Source
         def has?: (String name, String? version) -> boolish

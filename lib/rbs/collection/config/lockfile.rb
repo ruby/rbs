@@ -81,24 +81,7 @@ module RBS
           if gems = data["gems"]
             gems.each do |gem|
               src = gem["source"]
-              source =
-                case src["type"]
-                when "git"
-                  # @type var src: Sources::Git::source_entry
-                  Sources::Git.new(
-                    name: src["name"],
-                    revision: src["revision"],
-                    remote: src["remote"],
-                    repo_dir: src["repo_dir"]
-                  )
-                when "stdlib"
-                  Sources::Stdlib.instance
-                when "rubygems"
-                  Sources::Rubygems.instance
-                else
-                  raise
-                end
-
+              source = Sources.from_config_entry(src)
               lockfile.gems[gem["name"]] = {
                 name: gem["name"],
                 version: gem["version"],
