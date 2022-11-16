@@ -45,9 +45,12 @@ module RBS
         class CommandError < StandardError
         end
 
+        attr_reader gems_versions: Hash[String, Set[String]]?
+
         attr_reader name: String
         attr_reader remote: String
         attr_reader repo_dir: String
+        attr_reader revision: String
 
         def initialize: (name: String, revision: String, remote: String, repo_dir: String?) -> untyped
 
@@ -61,7 +64,11 @@ module RBS
 
         def manifest_of: (String name, String version) -> manifest_entry?
 
+        def resolved_revision: () -> String
+
         private
+
+        @need_setup: bool
 
         @git_dir: Pathname?
 
@@ -71,9 +78,15 @@ module RBS
 
         def cp_r: (Pathname, Pathname) -> void
 
-        def setup!: (revision: String) -> void
+        # Ensure the git repository status is expected one
+        #
+        # * It exists, and
+        # * The `HEAD` is the `revision`
+        #
+        def setup!: [T] () { () -> T } -> T
+                  | () -> void
 
-        def need_to_fetch?: (String revision ) -> bool
+        def need_to_fetch?: (String revision) -> bool
 
         def git_dir: () -> Pathname
 
@@ -81,11 +94,15 @@ module RBS
 
         def with_revision: [T] () { () -> T } -> T
 
-        public def resolved_revision: () -> String
-
         def resolve_revision: () -> String
 
+        # Returns `true` if `revision` looks like a commit hash
+        #
+        def commit_hash?: () -> bool
+
         def git: (*String cmd, **untyped opt) -> String
+
+        def git?: (*String cmd, **untyped opt) -> String?
 
         def sh!: (*String cmd, **untyped opt) -> String
 
@@ -101,6 +118,8 @@ module RBS
         # Load `.rbs_meta.yaml` from the `dir`, where is the destination of the RBS file installation, and return the cleaned up content
         #
         def load_metadata: (dir: Pathname) -> metadata
+
+        def gems_versions!: () -> Hash[String, Set[String]]
       end
 
       # signatures that are bundled in rbs gem under the stdlib/ directory

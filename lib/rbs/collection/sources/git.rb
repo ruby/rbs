@@ -13,31 +13,36 @@ module RBS
 
         class CommandError < StandardError; end
 
-        attr_reader :name, :remote, :repo_dir
+        attr_reader :name, :remote, :repo_dir, :revision
 
         def initialize(name:, revision:, remote:, repo_dir:)
           @name = name
           @remote = remote
           @repo_dir = repo_dir || 'gems'
-
-          setup!(revision: revision)
+          @revision = revision
+          @need_setup = true
         end
 
         def has?(name, version)
-          if gem_repo_dir.join(name).directory?
+          setup! do
             if version
-              versions(name).include?(version)
+              (gems_versions![name] || Set[]).include?(version)
             else
-              true
+              gems_versions!.key?(name)
             end
           end
         end
 
         def versions(name)
-          gem_repo_dir.join(name).glob('*/').map { |path| path.basename.to_s }
+          setup! do
+            versions = gems_versions![name] or raise "Git source `#{name}` doesn't have `#{name}`"
+            versions.sort
+          end
         end
 
         def install(dest:, name:, version:, stdout:)
+          setup!()
+
           gem_dir = dest.join(name, version)
 
           if gem_dir.directory?
@@ -57,13 +62,23 @@ module RBS
         end
 
         def manifest_of(name, version)
-          gem_dir = gem_repo_dir.join(name, version)
-
-          manifest_path = gem_dir.join('manifest.yaml')
-          YAML.safe_load(manifest_path.read) if manifest_path.exist?
+          setup! do
+            path = File.join(repo_dir, name, version, 'manifest.yaml')
+            content = git('cat-file', '-p', "#{resolved_revision}:#{path}")
+            YAML.safe_load(content)
+          rescue CommandError
+            if has?(name, version)
+              nil
+            else
+              raise
+            end
+          end
         end
 
         private def _install(dest:, name:, version:)
+          # Should checkout that revision to support symlinks
+          git("reset", "--hard", resolved_revision)
+
           dir = dest.join(name, version)
           dir.mkpath
           src = gem_repo_dir.join(name, version)
@@ -103,30 +118,30 @@ module RBS
           "#{name}:#{version} (#{desc})"
         end
 
-        private def setup!(revision:)
-          git_dir.mkpath
-          if git_dir.join('.git').directory?
-            if need_to_fetch?(revision)
-              git 'fetch', 'origin'
+        private def setup!
+          if @need_setup
+            git_dir.mkpath
+            if git_dir.join('.git').directory?
+              if need_to_fetch?(revision)
+                git 'fetch', 'origin'
+              end
+            else
+              begin
+                # git v2.27.0 or greater
+                git 'clone', '--filter=blob:none', remote, git_dir.to_s, chdir: nil
+              rescue CommandError
+                git 'clone', remote, git_dir.to_s, chdir: nil
+              end
             end
-          else
-            begin
-              # git v2.27.0 or greater
-              git 'clone', '--filter=blob:none', remote, git_dir.to_s, chdir: nil
-            rescue CommandError
-              git 'clone', remote, git_dir.to_s, chdir: nil
-            end
+
+            @need_setup = false
           end
 
-          begin
-            git 'checkout', "origin/#{revision}" # for branch name as `revision`
-          rescue CommandError
-            git 'checkout', revision
-          end
+          yield if block_given?
         end
 
         private def need_to_fetch?(revision)
-          return true unless revision.match?(/\A[a-f0-9]{40}\z/)
+          return true unless commit_hash?
 
           begin
             git('cat-file', '-e', revision)
@@ -151,15 +166,29 @@ module RBS
         end
 
         def resolved_revision
-          @resolved_revision ||= resolve_revision
+          @resolved_revision ||= setup! { resolve_revision }
         end
 
         private def resolve_revision
-          git('rev-parse', 'HEAD').chomp
+          if commit_hash?
+            revision
+          else
+            git('rev-parse', revision).chomp
+          end
+        end
+
+        private def commit_hash?
+          revision.match?(/\A[a-f0-9]{40}\z/)
         end
 
         private def git(*cmd, **opt)
           sh! 'git', *cmd, **opt
+        end
+
+        private def git?(*cmd, **opt)
+          git(*cmd, **opt)
+        rescue CommandError
+          nil
         end
 
         private def sh!(*cmd, **opt)
@@ -192,6 +221,33 @@ module RBS
           # @type var content: Hash[String, untyped]
           content = YAML.load_file(dir.join(METADATA_FILENAME).to_s)
           _ = content.slice("name", "version", "source")
+        end
+
+        private def gems_versions!
+          @gems_versions ||= begin
+            repo_path = Pathname(repo_dir)
+
+            paths = git('ls-tree', '--full-tree', '-dr', '--name-only', '-z', resolved_revision, File.join(repo_dir, "")).split("\0").map {|line| Pathname(line) }
+
+            # @type var versions: Hash[String, Set[String]]
+            versions = {}
+
+            paths.each do |full_path|
+              path = full_path.relative_path_from(repo_path)
+
+              gem_name, version = path.descend.take(2)
+
+              if gem_name
+                versions[gem_name.to_s] ||= Set[]
+
+                if version
+                  versions[gem_name.to_s] << version.basename.to_s
+                end
+              end
+            end
+
+            versions
+          end
         end
       end
     end
