@@ -42,7 +42,7 @@ module RBS
 
         def remove_ignored_gems!: () -> void
 
-        # Find a source of a gem from ones registerd in `config.sources`
+        # Find a source of a gem from ones registered in `config.sources`
         #
         # Returns `nil` if no source contains the definition of the gem.
         #
