@@ -166,15 +166,14 @@ module RBS
         end
 
         def resolved_revision
-          @resolved_revision ||= setup! { resolve_revision }
-        end
-
-        private def resolve_revision
-          if commit_hash?
-            revision
-          else
-            git('rev-parse', revision).chomp
-          end
+          @resolved_revision ||=
+            begin
+              if commit_hash?
+                revision
+              else
+                setup! { git('rev-parse', revision).chomp }
+              end
+            end
         end
 
         private def commit_hash?

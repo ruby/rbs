@@ -94,8 +94,6 @@ module RBS
 
         def with_revision: [T] () { () -> T } -> T
 
-        def resolve_revision: () -> String
-
         # Returns `true` if `revision` looks like a commit hash
         #
         def commit_hash?: () -> bool
