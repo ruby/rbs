@@ -165,6 +165,7 @@ class Socket < BasicSocket
   # If Addrinfo object is preferred, use Addrinfo.getaddrinfo.
   #
   def self.getaddrinfo: (String peer, String | Integer | nil protocol, ?Integer | Symbol | nil family, ?Integer | Symbol | nil socktype, ?Integer | Symbol | nil protocol, ?Integer | nil flags) -> [ String, Integer, String, String, Integer, Integer, Integer ]
+                      | (String? peer, String | Integer protocol, ?Integer | Symbol | nil family, ?Integer | Symbol | nil socktype, ?Integer | Symbol | nil protocol, ?Integer | nil flags) -> [ String, Integer, String, String, Integer, Integer, Integer ]
 
   # <!--
   #   rdoc-file=ext/socket/socket.c
