@@ -197,6 +197,8 @@ module RBS
     def location: () -> Location[untyped, untyped]?
   end
 
+  # MixinClassError is raised if a include/prepend/extend has a class (not a module) to mix-in
+  #
   class MixinClassError < DefinitionError
     type member = AST::Members::Include | AST::Members::Prepend | AST::Members::Extend
 
@@ -210,6 +212,18 @@ module RBS
     def self.check!: (type_name: TypeName, env: Environment, member: member) -> void
 
     def mixin_name: () -> String
+  end
+
+  # InheritModuleError is raised if a class definition inherits a module (not a class)
+  #
+  class InheritModuleError < DefinitionError
+    attr_reader super_decl: AST::Declarations::Class::Super
+
+    def initialize: (AST::Declarations::Class::Super) -> void
+
+    def location: () -> Location[untyped, untyped]?
+
+    def self.check!: (AST::Declarations::Class::Super, env: Environment) -> void
   end
 
   class RecursiveTypeAliasError < BaseError

@@ -2243,4 +2243,23 @@ end
         end
       end
   end
+
+  def test_class_definition_inheriting_module
+    SignatureManager.new do |manager|
+      manager.files.merge!(Pathname("foo.rbs") => <<~EOF)
+        module Mod
+        end
+
+        class Foo < Mod
+        end
+      EOF
+
+      manager.build do |env|
+        builder = DefinitionBuilder.new(env: env)
+
+        assert_raises(RBS::InheritModuleError) { builder.build_instance(type_name("::Foo")) }
+        assert_raises(RBS::InheritModuleError) { builder.build_singleton(type_name("::Foo")) }
+      end
+    end
+  end
 end
