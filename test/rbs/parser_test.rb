@@ -58,6 +58,13 @@ end
     end
   end
 
+  def test_type_error
+    buffer = RBS::Buffer.new(content: 1, name: nil)
+    assert_raises TypeError do
+      RBS::Parser.parse_signature(buffer)
+    end
+  end
+
   def test_interface_alias
     RBS::Parser.parse_signature(buffer(<<-RBS)).tap do |decls|
 interface _Foo[unchecked in A]

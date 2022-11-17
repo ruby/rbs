@@ -275,6 +275,8 @@ VALUE comment_to_ruby(comment *com, VALUE buffer) {
 parserstate *alloc_parser(VALUE buffer, int start_pos, int end_pos, VALUE variables) {
   VALUE string = rb_funcall(buffer, rb_intern("content"), 0);
 
+  StringValue(string);
+
   lexstate *lexer = calloc(1, sizeof(lexstate));
   lexer->string = string;
   lexer->current.line = 1;
