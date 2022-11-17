@@ -2,6 +2,35 @@
 
 ## master
 
+## 2.8.0.pre.1 (2022-11-17)
+
+### Signature updates
+
+* `IO` ([#1132](https://github.com/ruby/rbs/pull/1132))
+* `IO::Buffer` ([#1137](https://github.com/ruby/rbs/pull/1137))
+* `IPAddr` ([#1131](https://github.com/ruby/rbs/pull/1131), [#1151](https://github.com/ruby/rbs/pull/1151))
+* `Socket` ([#1133](https://github.com/ruby/rbs/pull/1133), [#1134](https://github.com/ruby/rbs/pull/1134), [#1151](https://github.com/ruby/rbs/pull/1151))
+* `Yaml` ([#1141](https://github.com/ruby/rbs/pull/1141))
+
+### Library changes
+
+* Make type/method-type parser more flexible about input position ([#1140](https://github.com/ruby/rbs/pull/1140))
+* Raise an error if a class definition inherits a module ([#1152](https://github.com/ruby/rbs/pull/1152))
+* Fix SEGV when parse with invalid content ([#1146](https://github.com/ruby/rbs/pull/1146))
+
+#### rbs collection
+
+* Support to call collection command in child dir ([#1025](https://github.com/ruby/rbs/pull/1025), [#1135](https://github.com/ruby/rbs/pull/1135))
+
+### Miscellaneous
+
+* Remove `rubygems` from `rbs`’s manifest ([#1150](https://github.com/ruby/rbs/pull/1150))
+* Use `untyped` instead of `any` in `syntax.md` ([#1147](https://github.com/ruby/rbs/pull/1147))
+* Fix typo and grammatical mistakes in "Generics" section of `syntax.md` ([#1127](https://github.com/ruby/rbs/pull/1127))
+* Add a doc that describes tools related to RBS ([#1125](https://github.com/ruby/rbs/pull/1125))
+* Add self-type-bindings to `syntax.md` ([#1123](https://github.com/ruby/rbs/pull/1123))
+* Add documentation for `...` in `syntax.md` ([#1120](https://github.com/ruby/rbs/pull/1120))
+
 ## 2.7.0 (2022-10-07)
 
 ### Signature updates
