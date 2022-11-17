@@ -4,6 +4,5 @@ dependencies:
   - name: pathname
   - name: json
   - name: optparse
-  - name: rubygems
   - name: tsort
   - name: rdoc
