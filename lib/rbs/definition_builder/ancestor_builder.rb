@@ -211,6 +211,9 @@ module RBS
             end
 
             NoSuperclassFoundError.check!(super_name, env: env, location: primary.decl.location)
+            if super_class
+              InheritModuleError.check!(super_class, env: env)
+            end
 
             ancestors = OneAncestors.class_instance(
               type_name: type_name,
@@ -268,6 +271,9 @@ module RBS
             end
 
             NoSuperclassFoundError.check!(super_name, env: env, location: primary.decl.location)
+            if super_class
+              InheritModuleError.check!(super_class, env: env)
+            end
 
             ancestors = OneAncestors.singleton(
               type_name: type_name,

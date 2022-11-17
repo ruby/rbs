@@ -148,7 +148,27 @@ module RBS
     end
 
     def self.check!(type_name, env:, location:)
-      env.class_decls.key?(type_name) or raise new(type_name: type_name, location: location)
+      if decl = env.class_decls[type_name]
+        return
+      end
+
+      raise new(type_name: type_name, location: location)
+    end
+  end
+
+  class InheritModuleError < DefinitionError
+    attr_reader :super_decl
+
+    def initialize(super_decl)
+      @super_decl = super_decl
+
+      super "#{Location.to_string(super_decl.location)}: Cannot inherit a module: #{super_decl.name}"
+    end
+
+    def self.check!(super_decl, env:)
+      return if env.class_decls[super_decl.name].is_a?(Environment::ClassEntry)
+
+      raise new(super_decl)
     end
   end
 
