@@ -57,7 +57,8 @@ class Addrinfo
   #     #=> [#<Addrinfo: 203.178.141.194:80 TCP (www.kame.net)>,
   #     #    #<Addrinfo: [2001:200:dff:fff1:216:3eff:feb1:44d7]:80 TCP (www.kame.net)>]
   #
-  def self.getaddrinfo: (String nodename, ?String | Integer service, ?Symbol? family, ?Symbol | Integer protocol) -> Array[Addrinfo]
+  def self.getaddrinfo: (String nodename, ?String | Integer | nil service, ?Symbol? family, ?Symbol | Integer protocol) -> Array[Addrinfo]
+                      | (String? nodename, ?String | Integer service, ?Symbol? family, ?Symbol | Integer protocol) -> Array[Addrinfo]
 
   # <!--
   #   rdoc-file=ext/socket/raddrinfo.c
