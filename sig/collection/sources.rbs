@@ -45,8 +45,6 @@ module RBS
         class CommandError < StandardError
         end
 
-        attr_reader gems_versions: Hash[String, Set[String]]?
-
         attr_reader name: String
         attr_reader remote: String
         attr_reader repo_dir: String
@@ -73,6 +71,8 @@ module RBS
         @git_dir: Pathname?
 
         @resolved_revision: String?
+
+        @gems_versions: Hash[String, Set[String]]?
 
         def _install: (dest: Pathname , name: String, version: String) -> void
 
@@ -117,7 +117,7 @@ module RBS
         #
         def load_metadata: (dir: Pathname) -> metadata
 
-        def gems_versions!: () -> Hash[String, Set[String]]
+        def gems_versions: () -> Hash[String, Set[String]]
       end
 
       # signatures that are bundled in rbs gem under the stdlib/ directory

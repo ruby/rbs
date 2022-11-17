@@ -26,16 +26,16 @@ module RBS
         def has?(name, version)
           setup! do
             if version
-              (gems_versions![name] || Set[]).include?(version)
+              (gems_versions[name] || Set[]).include?(version)
             else
-              gems_versions!.key?(name)
+              gems_versions.key?(name)
             end
           end
         end
 
         def versions(name)
           setup! do
-            versions = gems_versions![name] or raise "Git source `#{name}` doesn't have `#{name}`"
+            versions = gems_versions[name] or raise "Git source `#{name}` doesn't have `#{name}`"
             versions.sort
           end
         end
@@ -222,7 +222,7 @@ module RBS
           _ = content.slice("name", "version", "source")
         end
 
-        private def gems_versions!
+        private def gems_versions
           @gems_versions ||= begin
             repo_path = Pathname(repo_dir)
 
