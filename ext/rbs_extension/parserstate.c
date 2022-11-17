@@ -299,6 +299,12 @@ parserstate *alloc_parser(VALUE buffer, int start_pos, int end_pos, VALUE variab
   parser_advance(parser);
 
   if (!NIL_P(variables)) {
+    if (!RB_TYPE_P(variables, T_ARRAY)) {
+      rb_raise(rb_eTypeError,
+               "wrong argument type %"PRIsVALUE" (must be array or nil)",
+               rb_obj_class(variables));
+    }
+
     parser_push_typevar_table(parser, true);
 
     for (long i = 0; i < rb_array_len(variables); i++) {
