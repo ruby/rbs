@@ -537,8 +537,8 @@ EOP:
 }
 
 /*
-  optinal ::= {} <simple_type>
-            | {} simple_type <`?`>
+  optional ::= {} <simple_type>
+             | {} simple_type <`?`>
 */
 static VALUE parse_optional(parserstate *state) {
   range rg;
