@@ -58,11 +58,11 @@ module RBS
           self.core_root = nil
         end
 
-        opts.on('--collection PATH', "File path of collection configration (default: #{Collection::Config::PATH})") do |path|
+        opts.on('--collection PATH', "File path of collection configuration (default: #{Collection::Config::PATH})") do |path|
           self.config_path = Pathname(path).expand_path
         end
 
-        opts.on('--no-collection', 'Ignore collection configration') do
+        opts.on('--no-collection', 'Ignore collection configuration') do
           self.config_path = nil
         end
 
@@ -1093,7 +1093,7 @@ EOB
 
           Examples:
 
-            # Initialize the configration file
+            # Initialize the configuration file
             $ rbs collection init
 
             # Generate the lock file and install RBSs from the lock file
