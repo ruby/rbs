@@ -58,10 +58,16 @@ end
     end
   end
 
-  def test_type_error
+  def test_type_error_for_content
     buffer = RBS::Buffer.new(content: 1, name: nil)
     assert_raises TypeError do
       RBS::Parser.parse_signature(buffer)
+    end
+  end
+
+  def test_type_error_for_variables
+    assert_raises TypeError do
+      RBS::Parser.parse_type("bool", variables: 1)
     end
   end
 
