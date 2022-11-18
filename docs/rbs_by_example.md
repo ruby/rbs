@@ -176,7 +176,7 @@ the type variable `Elem`, and the `?` suffix nilable marker.
 When called with an `Integer` positional argument, the return value will be an
 `Array` of whatever type is contained.
 
-The `?` syntax is a convenient shorthand for a union with nil. An equivalent union type woould be `(Elem | nil)`.
+The `?` syntax is a convenient shorthand for a union with nil. An equivalent union type would be `(Elem | nil)`.
 
 ### Keyword Arguments
 
