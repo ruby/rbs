@@ -12,7 +12,7 @@ module RBS
   # loader.add(path: Pathname("sig"))      # Dirs will be ignored.
   #
   # vendorer = RBS::Vendorer.new(vendor_dir: Pathname("vendor/rbs"), loader: loader)
-  # vendorer.clearn!
+  # vendorer.clean!
   # vendorer.copy!
   # ```
   #
