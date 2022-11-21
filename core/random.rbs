@@ -91,7 +91,7 @@ class Random < RBS::Unnamed::Random_Base
   def self.rand: () -> Float
                | (Integer | ::Range[Integer] max) -> Integer
                | (Float | ::Range[Float] max) -> Float
-               | (::Range[T]) -> T
+               | [T < Numeric] (::Range[T]) -> T
 
   # <!--
   #   rdoc-file=random.c
