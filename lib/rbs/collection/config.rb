@@ -3,7 +3,7 @@
 module RBS
   module Collection
 
-    # This class represent the configration file.
+    # This class represent the configuration file.
     class Config
       class CollectionNotAvailable < StandardError
         def initialize

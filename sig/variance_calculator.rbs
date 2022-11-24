@@ -14,7 +14,7 @@ module RBS
   # result = calculator.in_type_alias(name: name, args: args, variables: variables)
   # ```
   #
-  # See `RBS::VarianceCaluculator::Result` for information recorded in the `Result` object.
+  # See `RBS::VarianceCalculator::Result` for information recorded in the `Result` object.
   #
   class VarianceCalculator
     type variance = :unused | :covariant | :contravariant | :invariant

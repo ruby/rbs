@@ -28,7 +28,7 @@ typedef struct {
 VALUE rbs_new_location(VALUE buffer, range rg);
 
 /**
- * Return rbs_loc assiciated with the RBS::Location object.
+ * Return rbs_loc associated with the RBS::Location object.
  * */
 rbs_loc *rbs_check_location(VALUE location);
 
