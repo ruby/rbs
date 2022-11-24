@@ -24,9 +24,19 @@ class RandomSingletonTest < Test::Unit::TestCase
                       Random, :new
   end
 
+  def test_bytes
+    assert_send_type  "(::Integer size) -> ::String",
+                      Random, :bytes, 0
+  end
+
   def test_new_seed
     assert_send_type  "() -> ::Integer",
                       Random, :new_seed
+  end
+
+  def test_urandom
+    assert_send_type  "(::Integer) -> ::String",
+                      Random, :urandom, 0
   end
 end
 
