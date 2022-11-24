@@ -2,6 +2,21 @@
 
 ## master
 
+## 2.8.0 (2022-11-24)
+
+### Signature updates
+
+* random ([#1144](https://github.com/ruby/rbs/pull/1144))
+
+### Library changes
+
+* Fix SEGV when give invalid object to `variables:` ([#1153](https://github.com/ruby/rbs/pull/1153))
+
+### Miscellaneous
+
+* Fix some typos ([#1155](https://github.com/ruby/rbs/pull/1155))
+* Fix a formatting some YAML files ([#1154](https://github.com/ruby/rbs/pull/1154))
+
 ## 2.8.0.pre.1 (2022-11-17)
 
 ### Signature updates
