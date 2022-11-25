@@ -31,4 +31,5 @@ jobs:
           bin/setup
       - name: Check if `rake annotate` has been executed
         run: |
+          git config --global --add safe.directory `pwd`
           bundle exec rake annotate confirm_annotation
