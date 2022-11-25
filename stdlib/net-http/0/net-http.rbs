@@ -153,7 +153,7 @@ module Net
   #     puts res.class.name # => 'HTTPOK'
   #
   #     # Body
-  #     puts res.body if res.response_body_permitted?
+  #     puts res.body
   #
   # ### Following Redirection
   #
@@ -2324,9 +2324,6 @@ module Net
     alias entity body
   end
 
-  # <!-- rdoc-file=lib/net/http/responses.rb -->
-  # https://www.iana.org/assignments/http-status-codes/http-status-codes.xhtml
-  #
   class HTTPUnknownResponse < HTTPResponse
     HAS_BODY: bool
 
@@ -2445,9 +2442,6 @@ module Net
     HAS_BODY: bool
   end
 
-  # <!-- rdoc-file=lib/net/http/responses.rb -->
-  # 306 Switch Proxy - no longer unused
-  #
   class HTTPTemporaryRedirect < HTTPRedirection
     HAS_BODY: bool
   end
@@ -2528,9 +2522,6 @@ module Net
     HAS_BODY: bool
   end
 
-  # <!-- rdoc-file=lib/net/http/responses.rb -->
-  # 418 I'm a teapot - RFC 2324; a joke RFC 420 Enhance Your Calm - Twitter
-  #
   class HTTPMisdirectedRequest < HTTPClientError
     HAS_BODY: bool
   end
@@ -2547,9 +2538,6 @@ module Net
     HAS_BODY: bool
   end
 
-  # <!-- rdoc-file=lib/net/http/responses.rb -->
-  # 425 Unordered Collection - existed only in draft
-  #
   class HTTPUpgradeRequired < HTTPClientError
     HAS_BODY: bool
   end
@@ -2570,10 +2558,6 @@ module Net
     HAS_BODY: bool
   end
 
-  # <!-- rdoc-file=lib/net/http/responses.rb -->
-  # 444 No Response - Nginx 449 Retry With - Microsoft 450 Blocked by Windows
-  # Parental Controls - Microsoft 499 Client Closed Request - Nginx
-  #
   class HTTPInternalServerError < HTTPServerError
     HAS_BODY: bool
   end
@@ -2610,9 +2594,6 @@ module Net
     HAS_BODY: bool
   end
 
-  # <!-- rdoc-file=lib/net/http/responses.rb -->
-  # 509 Bandwidth Limit Exceeded - Apache bw/limited extension
-  #
   class HTTPNotExtended < HTTPServerError
     HAS_BODY: bool
   end

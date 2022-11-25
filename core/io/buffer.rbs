@@ -88,11 +88,13 @@ class IO
 
     # <!--
     #   rdoc-file=io_buffer.c
-    #   - IO::Buffer.for(string) -> io_buffer
+    #   - IO::Buffer.for(string) -> readonly io_buffer
+    #   - IO::Buffer.for(string) {|io_buffer| ... read/write io_buffer ...}
     # -->
-    # Creates a IO::Buffer from the given string's memory. The buffer remains
-    # associated with the string, and writing to a buffer will update the string's
-    # contents.
+    # Creates a IO::Buffer from the given string's memory. Without a block a frozen
+    # internal copy of the string is created efficiently and used as the buffer
+    # source. When a block is provided, the buffer is associated directly with the
+    # string's internal data and updating the buffer will update the string.
     #
     # Until #free is invoked on the buffer, either explicitly or via the garbage
     # collector, the source string will be locked and cannot be modified.
@@ -101,7 +103,7 @@ class IO
     # modified.
     #
     #     string = 'test'
-    #     buffer = IO::Buffer.for(str)
+    #     buffer = IO::Buffer.for(string)
     #     buffer.external? #=> true
     #
     #     buffer.get_string(0, 1)
@@ -111,6 +113,12 @@ class IO
     #
     #     buffer.resize(100)
     #     # in `resize': Cannot resize external buffer! (IO::Buffer::AccessError)
+    #
+    #     IO::Buffer.for(string) do |buffer|
+    #       buffer.set_string("T")
+    #       string
+    #       # => "Test"
+    #     end
     #
     def self.for: (String) -> Buffer
 
