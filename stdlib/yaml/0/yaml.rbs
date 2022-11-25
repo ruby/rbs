@@ -100,8 +100,36 @@ module YAML
 
   # <!--
   #   rdoc-file=ext/psych/lib/psych.rb
-  #   - load(yaml, filename: nil, fallback: false, symbolize_names: false, freeze: false)
+  #   - load(yaml, permitted_classes: [Symbol], permitted_symbols: [], aliases: false, filename: nil, fallback: nil, symbolize_names: false, freeze: false, strict_integer: false)
   # -->
+  # Load `yaml` in to a Ruby data structure.  If multiple documents are provided,
+  # the object contained in the first document will be returned. `filename` will
+  # be used in the exception message if any exception is raised while parsing.  If
+  # `yaml` is empty, it returns the specified `fallback` return value, which
+  # defaults to `false`.
+  #
+  # Raises a Psych::SyntaxError when a YAML syntax error is detected.
+  #
+  # Example:
+  #
+  #     Psych.load("--- a")             # => 'a'
+  #     Psych.load("---\n - a\n - b")   # => ['a', 'b']
+  #
+  #     begin
+  #       Psych.load("--- `", filename: "file.txt")
+  #     rescue Psych::SyntaxError => ex
+  #       ex.file    # => 'file.txt'
+  #       ex.message # => "(file.txt): found character that cannot start any token"
+  #     end
+  #
+  # When the optional `symbolize_names` keyword argument is set to a true value,
+  # returns symbols for keys in Hash objects (default: strings).
+  #
+  #     Psych.load("---\n foo: bar")                         # => {"foo"=>"bar"}
+  #     Psych.load("---\n foo: bar", symbolize_names: true)  # => {:foo=>"bar"}
+  #
+  # Raises a TypeError when `yaml` parameter is NilClass.  This method is similar
+  # to `safe_load` except that `Symbol` objects are allowed by default.
   #
   %a{annotate:rdoc:copy:Psych.load}
   def self.load: (String yaml, ?filename: String | _ToStr | _ToS?, ?fallback: untyped, ?symbolize_names: bool, ?freeze: bool) -> untyped
@@ -119,7 +147,7 @@ module YAML
 
   # <!--
   #   rdoc-file=ext/psych/lib/psych.rb
-  #   - safe_load(yaml, permitted_classes: [], permitted_symbols: [], aliases: false, filename: nil, fallback: nil, symbolize_names: false, freeze: false)
+  #   - safe_load(yaml, permitted_classes: [], permitted_symbols: [], aliases: false, filename: nil, fallback: nil, symbolize_names: false, freeze: false, strict_integer: false)
   # -->
   # Safely load the yaml string in `yaml`.  By default, only the following classes
   # are allowed to be deserialized:

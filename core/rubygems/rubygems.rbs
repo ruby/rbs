@@ -155,8 +155,8 @@ module Gem
   #   rdoc-file=lib/rubygems.rb
   #   - activated_gem_paths()
   # -->
-  # The number of paths in the `$LOAD_PATH` from activated gems. Used to
-  # prioritize `-I` and `[ENV]('RUBYLIB`)` entries during `require`.
+  # The number of paths in the +$LOAD_PATH+ from activated gems. Used to
+  # prioritize `-I` and +[ENV]('RUBYLIB')+ entries during `require`.
   #
   def self.activated_gem_paths: () -> Integer
 

@@ -149,7 +149,7 @@
 #     cgi.has_key?('field_name')
 #     cgi.include?('field_name')
 #
-# CAUTION! [cgi]('field_name') returned an Array with the old cgi.rb(included in
+# CAUTION! `cgi['field_name']` returned an Array with the old cgi.rb(included in
 # Ruby 1.6)
 #
 # ### Get form values as hash
@@ -713,8 +713,11 @@ class CGI
     #
     def domain: () -> String?
 
-    # <!-- rdoc-file=lib/cgi/cookie.rb -->
-    # Domain for which this cookie applies, as a `String`
+    # <!--
+    #   rdoc-file=lib/cgi/cookie.rb
+    #   - domain=(str)
+    # -->
+    # Set domain for which this cookie applies
     #
     def domain=: (String domain) -> String
 
@@ -756,8 +759,11 @@ class CGI
     #
     def name: () -> String
 
-    # <!-- rdoc-file=lib/cgi/cookie.rb -->
-    # Name of this cookie, as a `String`
+    # <!--
+    #   rdoc-file=lib/cgi/cookie.rb
+    #   - name=(str)
+    # -->
+    # Set name of this cookie
     #
     def name=: (String name) -> String
 
@@ -766,8 +772,11 @@ class CGI
     #
     def path: () -> String?
 
-    # <!-- rdoc-file=lib/cgi/cookie.rb -->
-    # Path for which this cookie applies, as a `String`
+    # <!--
+    #   rdoc-file=lib/cgi/cookie.rb
+    #   - path=(str)
+    # -->
+    # Set path for which this cookie applies
     #
     def path=: (String path) -> String
 
@@ -861,7 +870,7 @@ class CGI
     #   rdoc-file=ext/cgi/escape/escape.c
     #   - CGI.escape(string) -> string
     # -->
-    # Returns URL-escaped string.
+    # Returns URL-escaped string (`application/x-www-form-urlencoded`).
     #
     def escape: (string str) -> String
 
@@ -877,7 +886,7 @@ class CGI
     #   rdoc-file=ext/cgi/escape/escape.c
     #   - CGI.unescape(string, encoding=@@accept_charset) -> string
     # -->
-    # Returns URL-unescaped string.
+    # Returns URL-unescaped string (`application/x-www-form-urlencoded`).
     #
     def unescape: (string str, ?encoding encoding) -> String
 
