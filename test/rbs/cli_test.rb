@@ -15,18 +15,15 @@ class RBS::CliTest < Test::Unit::TestCase
     @stderr ||= StringIO.new
   end
 
-  def bundler_available?
-    Bundler.default_lockfile
-    true
-  rescue Bundler::GemfileNotFound
-    false
-  end
-
   def with_cli
     yield CLI.new(stdout: stdout, stderr: stderr)
   ensure
     @stdout = nil
     @stderr = nil
+  end
+
+  def ci?
+    ENV["CI"] == "true"
   end
 
   def test_ast
@@ -522,7 +519,7 @@ Processing `test/a_test.rb`...
   end
 
   def test_collection_install
-    omit unless bundler_available?
+    omit if ci?
 
     Dir.mktmpdir do |dir|
       Dir.chdir(dir) do
@@ -576,7 +573,7 @@ Processing `test/a_test.rb`...
   end
 
   def test_collection_install_frozen
-    omit unless bundler_available?
+    omit if ci?
 
     Dir.mktmpdir do |dir|
       Dir.chdir(dir) do
@@ -610,7 +607,7 @@ Processing `test/a_test.rb`...
   end
 
   def test_collection_update
-    omit unless bundler_available?
+    omit if ci?
 
     Dir.mktmpdir do |dir|
       Dir.chdir(dir) do
