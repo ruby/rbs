@@ -58,7 +58,7 @@ module RBS
           self.core_root = nil
         end
 
-        opts.on('--collection PATH', "File path of collection configuration (default: #{Collection::Config::PATH})") do |path|
+        opts.on('--collection PATH', "File path of collection configuration (default: #{@config_path})") do |path|
           self.config_path = Pathname(path).expand_path
         end
 
