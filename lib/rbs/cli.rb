@@ -1101,6 +1101,8 @@ EOB
 
             # Update the RBSs
             $ rbs collection update
+
+          Options:
         HELP
         opts.on('--frozen') if args[0] == 'install'
       end
