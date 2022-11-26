@@ -45,8 +45,8 @@ class RBS::CliTest < Test::Unit::TestCase
     @stderr = nil
   end
 
-  def ci?
-    ENV["CI"] == "true"
+  def bundler?
+    ENV.key?("BUNDLE_GEMFILE")
   end
 
   def test_ast
@@ -542,7 +542,7 @@ Processing `test/a_test.rb`...
   end
 
   def test_collection_install
-    omit if ci?
+    omit unless bundler?
 
     Dir.mktmpdir do |dir|
       Dir.chdir(dir) do
@@ -597,8 +597,6 @@ Processing `test/a_test.rb`...
   end
 
   def test_collection_install_frozen
-    omit if ci?
-
     Dir.mktmpdir do |dir|
       Dir.chdir(dir) do
         dir = Pathname(dir)
@@ -630,7 +628,7 @@ Processing `test/a_test.rb`...
   end
 
   def test_collection_update
-    omit if ci?
+    omit unless bundler?
 
     Dir.mktmpdir do |dir|
       Dir.chdir(dir) do
