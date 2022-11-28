@@ -597,6 +597,8 @@ Processing `test/a_test.rb`...
   end
 
   def test_collection_install_frozen
+    omit unless bundler?
+
     Dir.mktmpdir do |dir|
       Dir.chdir(dir) do
         dir = Pathname(dir)
