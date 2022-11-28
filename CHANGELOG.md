@@ -2,6 +2,22 @@
 
 ## master
 
+## 2.8.1 (2022-11-28)
+
+### Signature updates
+
+* Update documents based on ruby-3.1.3 ([#1160](https://github.com/ruby/rbs/pull/1160))
+
+### Library changes
+
+#### rbs collection
+
+* Delay loading `Gemfile` for unbundled environments ([#1161](https://github.com/ruby/rbs/pull/1161))
+
+### Miscellaneous
+
+* Fix collection tests ([#1159](https://github.com/ruby/rbs/pull/1159), [#1162](https://github.com/ruby/rbs/pull/1162))
+
 ## 2.8.0 (2022-11-24)
 
 ### Signature updates
