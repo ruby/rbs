@@ -15,6 +15,29 @@ class RBS::CliTest < Test::Unit::TestCase
     @stderr ||= StringIO.new
   end
 
+  def run_rbs(*commands, bundler: true)
+    stdout, stderr, status =
+      Bundler.with_unbundled_env do
+        bundle_exec = []
+        bundle_exec = ["bundle", "exec"] if bundler
+
+        rbs_path = Pathname("#{__dir__}/../../lib").cleanpath.to_s
+        if rblib = ENV["RUBYLIB"]
+          rbs_path << (":" + rblib)
+        end
+
+        Open3.capture3({ "RUBYLIB" => rbs_path }, *bundle_exec, "#{__dir__}/../../exe/rbs", *commands, chdir: Dir.pwd)
+      end
+
+    if block_given?
+      yield status
+    else
+      assert_predicate status, :success?, stderr
+    end
+
+    [stdout, stderr]
+  end
+
   def with_cli
     yield CLI.new(stdout: stdout, stderr: stderr)
   ensure
@@ -22,8 +45,8 @@ class RBS::CliTest < Test::Unit::TestCase
     @stderr = nil
   end
 
-  def ci?
-    ENV["CI"] == "true"
+  def bundler?
+    ENV.key?("BUNDLE_GEMFILE")
   end
 
   def test_ast
@@ -519,7 +542,7 @@ Processing `test/a_test.rb`...
   end
 
   def test_collection_install
-    omit if ci?
+    omit unless bundler?
 
     Dir.mktmpdir do |dir|
       Dir.chdir(dir) do
@@ -533,7 +556,10 @@ Processing `test/a_test.rb`...
 
           path: #{dir.join('gem_rbs_collection')}
         YAML
-        dir.join('Gemfile').write('')
+        dir.join('Gemfile').write(<<~GEMFILE)
+          source 'https://rubygems.org'
+          gem 'ast'
+        GEMFILE
         dir.join('Gemfile.lock').write(<<~LOCK)
           GEM
             remote: https://rubygems.org/
@@ -550,31 +576,27 @@ Processing `test/a_test.rb`...
              2.2.0
         LOCK
 
-        with_cli do |cli|
-          cli.run(%w[collection install])
+        _stdout, _stderr = run_rbs("collection", "install")
 
-          rbs_collection_lock = dir.join('rbs_collection.lock.yaml')
+        rbs_collection_lock = dir.join('rbs_collection.lock.yaml')
+        assert rbs_collection_lock.exist?
+        rbs_collection_lock.delete
+
+        collection_dir = dir.join('gem_rbs_collection/ast')
+        assert collection_dir.exist?
+        collection_dir.rmtree
+
+        Dir.mkdir("child")
+        Dir.chdir("child") do
+          _stdout, _stderr = run_rbs("collection", "install")
           assert rbs_collection_lock.exist?
-          rbs_collection_lock.delete
-
-          collection_dir = dir.join('gem_rbs_collection/ast')
           assert collection_dir.exist?
-          collection_dir.rmtree
-
-          Dir.mkdir("child")
-          Dir.chdir("child") do
-            cli.run(%w[collection install])
-            assert rbs_collection_lock.exist?
-            assert collection_dir.exist?
-          end
         end
       end
     end
   end
 
   def test_collection_install_frozen
-    omit if ci?
-
     Dir.mktmpdir do |dir|
       Dir.chdir(dir) do
         dir = Pathname(dir)
@@ -596,18 +618,17 @@ Processing `test/a_test.rb`...
         YAML
         dir.join('rbs_collection.lock.yaml').write(lock_content)
 
-        with_cli do |cli|
-          cli.run(%w[collection install --frozen])
-          refute dir.join(RBS::Collection::Config::PATH).exist?
-          assert dir.join('gem_rbs_collection/ast').exist?
-          assert_equal lock_content, dir.join('rbs_collection.lock.yaml').read
-        end
+        run_rbs("collection", "install", "--frozen", bundler: false)
+
+        refute dir.join(RBS::Collection::Config::PATH).exist?
+        assert dir.join('gem_rbs_collection/ast').exist?
+        assert_equal lock_content, dir.join('rbs_collection.lock.yaml').read
       end
     end
   end
 
   def test_collection_update
-    omit if ci?
+    omit unless bundler?
 
     Dir.mktmpdir do |dir|
       Dir.chdir(dir) do
@@ -621,7 +642,10 @@ Processing `test/a_test.rb`...
 
           path: #{dir.join('gem_rbs_collection')}
         YAML
-        dir.join('Gemfile').write('')
+        dir.join('Gemfile').write(<<~GEMFILE)
+          source 'https://rubygems.org'
+          gem 'ast'
+        GEMFILE
         dir.join('Gemfile.lock').write(<<~LOCK)
           GEM
             remote: https://rubygems.org/
@@ -638,11 +662,10 @@ Processing `test/a_test.rb`...
              2.2.0
         LOCK
 
-        with_cli do |cli|
-          cli.run(%w[collection update])
-          assert dir.join('rbs_collection.lock.yaml').exist?
-          assert dir.join('gem_rbs_collection/ast').exist?
-        end
+        run_rbs("collection", "update", bundler: true)
+
+        assert dir.join('rbs_collection.lock.yaml').exist?
+        assert dir.join('gem_rbs_collection/ast').exist?
       end
     end
   end

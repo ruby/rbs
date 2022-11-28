@@ -58,7 +58,7 @@ module RBS
           self.core_root = nil
         end
 
-        opts.on('--collection PATH', "File path of collection configuration (default: #{Collection::Config::PATH})") do |path|
+        opts.on('--collection PATH', "File path of collection configuration (default: #{@config_path})") do |path|
           self.config_path = Pathname(path).expand_path
         end
 
@@ -1034,15 +1034,17 @@ EOB
       opts.order args.drop(1), into: params
       config_path = options.config_path or raise
       lock_path = Collection::Config.to_lockfile_path(config_path)
-      gemfile_lock_path = Bundler.default_lockfile
 
       case args[0]
       when 'install'
         unless params[:frozen]
+          gemfile_lock_path = Bundler.default_lockfile
           Collection::Config.generate_lockfile(config_path: config_path, gemfile_lock_path: gemfile_lock_path)
         end
         Collection::Installer.new(lockfile_path: lock_path, stdout: stdout).install_from_lockfile
       when 'update'
+        gemfile_lock_path = Bundler.default_lockfile
+
         # TODO: Be aware of argv to update only specified gem
         Collection::Config.generate_lockfile(config_path: config_path, gemfile_lock_path: gemfile_lock_path, with_lockfile: false)
         Collection::Installer.new(lockfile_path: lock_path, stdout: stdout).install_from_lockfile
@@ -1101,6 +1103,8 @@ EOB
 
             # Update the RBSs
             $ rbs collection update
+
+          Options:
         HELP
         opts.on('--frozen') if args[0] == 'install'
       end
