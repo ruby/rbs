@@ -907,11 +907,19 @@ end
 
       parser.parse(rb)
 
-      assert_write parser.decls, <<~RBS
+      if support_argument_forwarding_with_anonymous_kwrest?
+        assert_write parser.decls, <<~RBS
+module M
+  def foo: (*untyped, **untyped **) ?{ () -> untyped } -> nil
+end
+        RBS
+      else
+        assert_write parser.decls, <<~RBS
 module M
   def foo: (*untyped) ?{ () -> untyped } -> nil
 end
-      RBS
+        RBS
+      end
     end
   end
 
@@ -931,5 +939,14 @@ module M
 end
       RBS
     end
+  end
+
+  private
+
+  def support_argument_forwarding_with_anonymous_kwrest?
+    eval("def foo(...); bar(**); end")
+    true
+  rescue Exception
+    false
   end
 end
