@@ -20,7 +20,25 @@ module RBS
   class LoadingError < BaseError; end
   class DefinitionError < BaseError; end
 
+  module DetailedMessageable
+    def detailed_message(highlight: false, **)
+      indent = " " * location.start_column
+      marker = "^" * (location.end_column - location.start_column)
+
+      io = StringIO.new
+      io.puts super
+      io.puts
+      io.print "\e[1m" if highlight
+      io.puts "  #{location.buffer.lines[location.end_line - 1]}"
+      io.puts "  #{indent}#{marker}"
+      io.print "\e[m" if highlight
+      io.string
+    end
+  end
+
   class ParsingError < BaseError
+    include DetailedMessageable
+
     attr_reader :location
     attr_reader :error_message
     attr_reader :token_type
