@@ -4,6 +4,11 @@ require "test/unit"
 require "tmpdir"
 require "stringio"
 require "tempfile"
+require_relative "../test_skip"
+
+class Test::Unit::TestCase
+  prepend TestSkip
+end
 
 module Spy
   def self.wrap(object, method_name)

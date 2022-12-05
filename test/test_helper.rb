@@ -4,6 +4,7 @@ require "rbs/annotate"
 require "tmpdir"
 require "stringio"
 require "open3"
+require "test_skip"
 
 unless ENV["XDG_CACHE_HOME"]
   tmpdir = Dir.mktmpdir("rbs-test-")
@@ -22,6 +23,9 @@ begin
 rescue LoadError
 end
 
+class Test::Unit::TestCase
+  prepend TestSkip
+end
 
 module TestHelper
   def has_gem?(*gems)
