@@ -48,7 +48,8 @@ class RBS::Collection::ConfigTest < Test::Unit::TestCase
 
       assert_config <<~YAML, string
         sources:
-          - name: ruby/gem_rbs_collection
+          - type: git
+            name: ruby/gem_rbs_collection
             remote: https://github.com/ruby/gem_rbs_collection.git
             revision: cde6057e7546843ace6420c5783dd945c6ccda54
             repo_dir: gems
@@ -101,7 +102,8 @@ class RBS::Collection::ConfigTest < Test::Unit::TestCase
 
         assert_config <<~YAML, string
           sources:
-            - name: ruby/gem_rbs_collection
+            - type: git
+              name: ruby/gem_rbs_collection
               remote: #{remote}
               revision: b4d3b346d9657543099a35a1fd20347e75b8c523
               repo_dir: gems
@@ -138,7 +140,8 @@ class RBS::Collection::ConfigTest < Test::Unit::TestCase
 
       lockfile_yaml = <<~YAML
         sources:
-          - name: ruby/gem_rbs_collection
+          - type: git
+            name: ruby/gem_rbs_collection
             remote: https://github.com/ruby/gem_rbs_collection.git
             revision: cde6057e7546843ace6420c5783dd945c6ccda54
             repo_dir: gems
@@ -189,7 +192,8 @@ class RBS::Collection::ConfigTest < Test::Unit::TestCase
 
       assert_config <<~YAML, string
         sources:
-          - name: ruby/gem_rbs_collection
+          - type: git
+            name: ruby/gem_rbs_collection
             remote: https://github.com/ruby/gem_rbs_collection.git
             revision: cde6057e7546843ace6420c5783dd945c6ccda54
             repo_dir: gems
@@ -236,7 +240,8 @@ class RBS::Collection::ConfigTest < Test::Unit::TestCase
 
       assert_config <<~YAML, string
         sources:
-          - name: ruby/gem_rbs_collection
+          - type: git
+            name: ruby/gem_rbs_collection
             remote: https://github.com/ruby/gem_rbs_collection.git
             revision: cde6057e7546843ace6420c5783dd945c6ccda54
             repo_dir: gems
@@ -301,7 +306,8 @@ class RBS::Collection::ConfigTest < Test::Unit::TestCase
 
       assert_config <<~YAML, string
         sources:
-          - name: ruby/gem_rbs_collection
+          - type: git
+            name: ruby/gem_rbs_collection
             remote: https://github.com/ruby/gem_rbs_collection.git
             revision: cde6057e7546843ace6420c5783dd945c6ccda54
             repo_dir: gems
@@ -374,7 +380,8 @@ class RBS::Collection::ConfigTest < Test::Unit::TestCase
 
       assert_config <<~YAML, string
         sources:
-          - name: ruby/gem_rbs_collection
+          - type: git
+            name: ruby/gem_rbs_collection
             remote: https://github.com/ruby/gem_rbs_collection.git
             revision: cde6057e7546843ace6420c5783dd945c6ccda54
             repo_dir: gems
@@ -421,7 +428,8 @@ class RBS::Collection::ConfigTest < Test::Unit::TestCase
 
       assert_config <<~YAML, string
         sources:
-          - name: ruby/gem_rbs_collection
+          - type: git
+            name: ruby/gem_rbs_collection
             remote: https://github.com/ruby/gem_rbs_collection.git
             revision: cde6057e7546843ace6420c5783dd945c6ccda54
             repo_dir: gems
@@ -464,7 +472,8 @@ class RBS::Collection::ConfigTest < Test::Unit::TestCase
 
       assert_config <<~YAML, string
         sources:
-          - name: ruby/gem_rbs_collection
+          - type: git
+            name: ruby/gem_rbs_collection
             remote: https://github.com/ruby/gem_rbs_collection.git
             revision: cde6057e7546843ace6420c5783dd945c6ccda54
             repo_dir: gems

@@ -7,17 +7,10 @@ module RBS
         # Data structure stored in `rbs_collection.lock.yaml`
         #
         type lockfile_data = {
-          "sources" => Array[git_source_data]?,   # null if empty
+          "sources" => Array[Sources::Git::source_entry]?,   # null if empty
           "path" => String,
           "gems" => Array[library_data]?,         # null if empty
           "gemfile_lock_path" => String?          # gemfile_lock_path is optional because older versions doesn't have it
-        }
-
-        type git_source_data = {
-          'name' => String,
-          'remote' => String,
-          'revision' => String,
-          'repo_dir' => String?
         }
 
         type library_data = {

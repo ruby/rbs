@@ -40,15 +40,7 @@ module RBS
           # @type var data: lockfile_data
 
           data = {
-            "sources" => sources.each_value.sort_by {|s| s.name }.map do |source|
-              # @type block: git_source_data
-              {
-                "name" => source.name,
-                "remote" => source.remote,
-                "revision" => source.resolved_revision,
-                "repo_dir" => source.repo_dir
-              }
-            end,
+            "sources" => sources.each_value.sort_by {|s| s.name }.map {|source| source.to_lockfile },
             "path" => path.to_s,
             "gems" => gems.each_value.sort_by {|g| g[:name] }.map {|hash| library_data(hash) },
             "gemfile_lock_path" => gemfile_lock_path.to_s
