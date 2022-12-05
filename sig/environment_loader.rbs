@@ -81,7 +81,7 @@ module RBS
     def resolve_dependencies: (library: String, version: String?) -> void
 
     # Add repository path and libraries via rbs_collection.lock.yaml.
-    def add_collection: (Collection::Config collection_config) -> void
+    def add_collection: (Collection::Config::Lockfile lockfile) -> void
 
     # This is helper function to test if RBS for a library is available or not.
     #

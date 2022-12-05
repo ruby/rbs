@@ -13,64 +13,78 @@ module RBS
 
         class CommandError < StandardError; end
 
-        attr_reader :name, :remote, :repo_dir
+        attr_reader :name, :remote, :repo_dir, :revision
 
         def initialize(name:, revision:, remote:, repo_dir:)
           @name = name
           @remote = remote
           @repo_dir = repo_dir || 'gems'
-
-          setup!(revision: revision)
+          @revision = revision
+          @need_setup = true
         end
 
-        def has?(config_entry)
-          gem_name = config_entry['name']
-          gem_repo_dir.join(gem_name).directory?
-        end
-
-        def versions(config_entry)
-          gem_name = config_entry['name']
-          gem_repo_dir.join(gem_name).glob('*/').map { |path| path.basename.to_s }
-        end
-
-        def install(dest:, config_entry:, stdout:)
-          gem_name = config_entry['name']
-          version = config_entry['version'] or raise
-          gem_dir = dest.join(gem_name, version)
-
-          if gem_dir.directory?
-            if (prev = YAML.load_file(gem_dir.join(METADATA_FILENAME))) == config_entry
-              stdout.puts "Using #{format_config_entry(config_entry)}"
+        def has?(name, version)
+          setup! do
+            if version
+              (gems_versions[name] || Set[]).include?(version)
             else
-              # @type var prev: RBS::Collection::Config::gem_entry
-              stdout.puts "Updating to #{format_config_entry(config_entry)} from #{format_config_entry(prev)}"
-              FileUtils.remove_entry_secure(gem_dir.to_s)
-              _install(dest: dest, config_entry: config_entry)
+              gems_versions.key?(name)
             end
-          else
-            stdout.puts "Installing #{format_config_entry(config_entry)}"
-            _install(dest: dest, config_entry: config_entry)
           end
         end
 
-        def manifest_of(config_entry)
-          gem_name = config_entry['name']
-          version = config_entry['version'] or raise
-          gem_dir = gem_repo_dir.join(gem_name, version)
-
-          manifest_path = gem_dir.join('manifest.yaml')
-          YAML.safe_load(manifest_path.read) if manifest_path.exist?
+        def versions(name)
+          setup! do
+            versions = gems_versions[name] or raise "Git source `#{name}` doesn't have `#{name}`"
+            versions.sort
+          end
         end
 
-        private def _install(dest:, config_entry:)
-          gem_name = config_entry['name']
-          version = config_entry['version'] or raise
-          dest = dest.join(gem_name, version)
-          dest.mkpath
-          src = gem_repo_dir.join(gem_name, version)
+        def install(dest:, name:, version:, stdout:)
+          setup!()
 
-          cp_r(src, dest)
-          dest.join(METADATA_FILENAME).write(YAML.dump(config_entry))
+          gem_dir = dest.join(name, version)
+
+          if gem_dir.directory?
+            prev = load_metadata(dir: gem_dir)
+
+            if prev == metadata_content(name: name, version: version)
+              stdout.puts "Using #{format_config_entry(name, version)}"
+            else
+              stdout.puts "Updating to #{format_config_entry(name, version)} from #{format_config_entry(prev["name"], prev["version"])}"
+              FileUtils.remove_entry_secure(gem_dir.to_s)
+              _install(dest: dest, name: name, version: version)
+            end
+          else
+            stdout.puts "Installing #{format_config_entry(name, version)}"
+            _install(dest: dest, name: name, version: version)
+          end
+        end
+
+        def manifest_of(name, version)
+          setup! do
+            path = File.join(repo_dir, name, version, 'manifest.yaml')
+            content = git('cat-file', '-p', "#{resolved_revision}:#{path}")
+            YAML.safe_load(content)
+          rescue CommandError
+            if has?(name, version)
+              nil
+            else
+              raise
+            end
+          end
+        end
+
+        private def _install(dest:, name:, version:)
+          # Should checkout that revision to support symlinks
+          git("reset", "--hard", resolved_revision)
+
+          dir = dest.join(name, version)
+          dir.mkpath
+          src = gem_repo_dir.join(name, version)
+
+          cp_r(src, dir)
+          write_metadata(dir: dir, name: name, version: version)
         end
 
         private def cp_r(src, dest)
@@ -97,40 +111,37 @@ module RBS
           }
         end
 
-        private def format_config_entry(config_entry)
-          name = config_entry['name']
-          v = config_entry['version']
-
+        private def format_config_entry(name, version)
           rev = resolved_revision[0..10]
           desc = "#{name}@#{rev}"
 
-          "#{name}:#{v} (#{desc})"
+          "#{name}:#{version} (#{desc})"
         end
 
-        private def setup!(revision:)
-          git_dir.mkpath
-          if git_dir.join('.git').directory?
-            if need_to_fetch?(revision)
-              git 'fetch', 'origin'
+        private def setup!
+          if @need_setup
+            git_dir.mkpath
+            if git_dir.join('.git').directory?
+              if need_to_fetch?(revision)
+                git 'fetch', 'origin'
+              end
+            else
+              begin
+                # git v2.27.0 or greater
+                git 'clone', '--filter=blob:none', remote, git_dir.to_s, chdir: nil
+              rescue CommandError
+                git 'clone', remote, git_dir.to_s, chdir: nil
+              end
             end
-          else
-            begin
-              # git v2.27.0 or greater
-              git 'clone', '--filter=blob:none', remote, git_dir.to_s, chdir: nil
-            rescue CommandError
-              git 'clone', remote, git_dir.to_s, chdir: nil
-            end
+
+            @need_setup = false
           end
 
-          begin
-            git 'checkout', "origin/#{revision}" # for branch name as `revision`
-          rescue CommandError
-            git 'checkout', revision
-          end
+          yield if block_given?
         end
 
         private def need_to_fetch?(revision)
-          return true unless revision.match?(/\A[a-f0-9]{40}\z/)
+          return true unless commit_hash?
 
           begin
             git('cat-file', '-e', revision)
@@ -154,16 +165,29 @@ module RBS
           git_dir.join @repo_dir
         end
 
-        private def resolved_revision
-          @resolved_revision ||= resolve_revision
+        def resolved_revision
+          @resolved_revision ||=
+            begin
+              if commit_hash?
+                revision
+              else
+                setup! { git('rev-parse', revision).chomp }
+              end
+            end
         end
 
-        private def resolve_revision
-          git('rev-parse', 'HEAD').chomp
+        private def commit_hash?
+          revision.match?(/\A[a-f0-9]{40}\z/)
         end
 
         private def git(*cmd, **opt)
           sh! 'git', *cmd, **opt
+        end
+
+        private def git?(*cmd, **opt)
+          git(*cmd, **opt)
+        rescue CommandError
+          nil
         end
 
         private def sh!(*cmd, **opt)
@@ -173,6 +197,55 @@ module RBS
             raise CommandError, "Unexpected status #{status.exitstatus}\n\n#{err}" unless status.success?
 
             out
+          end
+        end
+
+        def metadata_content(name:, version:)
+          {
+            "name" => name,
+            "version" => version,
+            "source" => to_lockfile
+          }
+        end
+
+        def write_metadata(dir:, name:, version:)
+          dir.join(METADATA_FILENAME).write(
+            YAML.dump(
+              metadata_content(name: name, version: version)
+            )
+          )
+        end
+
+        def load_metadata(dir:)
+          # @type var content: Hash[String, untyped]
+          content = YAML.load_file(dir.join(METADATA_FILENAME).to_s)
+          _ = content.slice("name", "version", "source")
+        end
+
+        private def gems_versions
+          @gems_versions ||= begin
+            repo_path = Pathname(repo_dir)
+
+            paths = git('ls-tree', '--full-tree', '-dr', '--name-only', '-z', resolved_revision, File.join(repo_dir, "")).split("\0").map {|line| Pathname(line) }
+
+            # @type var versions: Hash[String, Set[String]]
+            versions = {}
+
+            paths.each do |full_path|
+              path = full_path.relative_path_from(repo_path)
+
+              gem_name, version = path.descend.take(2)
+
+              if gem_name
+                versions[gem_name.to_s] ||= Set[]
+
+                if version
+                  versions[gem_name.to_s] << version.basename.to_s
+                end
+              end
+            end
+
+            versions
           end
         end
       end

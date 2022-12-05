@@ -1,0 +1,55 @@
+module RBS
+  module Collection
+    class Config
+      class LockfileGenerator
+        class GemfileLockMismatchError < StandardError
+          @expected: Pathname
+
+          @actual: Pathname
+
+          def initialize: (expected: Pathname, actual: Pathname) -> void
+
+          def message: () -> String
+        end
+
+        attr_reader config: Config
+        attr_reader gemfile_lock: Bundler::LockfileParser
+
+        attr_reader lockfile: Lockfile
+        attr_reader existing_lockfile: Lockfile?
+
+        type gem_queue_entry = { name: String, version: String? }
+
+        @gem_queue: Array[gem_queue_entry]
+
+        def self.generate: (config: Config, gemfile_lock_path: Pathname, ?with_lockfile: boolish) -> Lockfile
+
+        def initialize: (config: Config, gemfile_lock_path: Pathname, with_lockfile: boolish) -> void
+
+        def generate: () -> void
+
+        private
+
+        # Ensure if current `gemfile_lock_path` is the same with the path saved in `lock`
+        #
+        def validate_gemfile_lock_path!: (lock: Lockfile?, gemfile_lock_path: Pathname) -> void
+
+        def assign_gem: (name: String, version: String?, ignored_gems: Set[String], src_data: Sources::source_entry?) -> void
+
+        def assign_stdlib: (name: String, from_gem: String?) -> void
+
+        def gemfile_lock_gems: () { (untyped) -> void } -> void
+
+        def remove_ignored_gems!: () -> void
+
+        # Find a source of a gem from ones registered in `config.sources`
+        #
+        # Returns `nil` if no source contains the definition of the gem.
+        #
+        def find_source: (name: String) -> Sources::t?
+
+        def find_best_version: (version: String?, versions: Array[String]) -> Gem::Version
+      end
+    end
+  end
+end

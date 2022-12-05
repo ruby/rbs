@@ -16,6 +16,8 @@ module RBS
 
       PATH = Pathname('rbs_collection.yaml')
 
+      attr_reader :config_path, :data
+
       def self.find_config_path
         current = Pathname.pwd
 
@@ -30,16 +32,14 @@ module RBS
       # Generate a rbs lockfile from Gemfile.lock to `config_path`.
       # If `with_lockfile` is true, it respects existing rbs lockfile.
       def self.generate_lockfile(config_path:, gemfile_lock_path:, with_lockfile: true)
-        LockfileGenerator.generate(config_path: config_path, gemfile_lock_path: gemfile_lock_path, with_lockfile: with_lockfile)
+        config = from_path(config_path)
+        lockfile = LockfileGenerator.generate(config: config, gemfile_lock_path: gemfile_lock_path, with_lockfile: with_lockfile)
+
+        [config, lockfile]
       end
 
       def self.from_path(path)
         new(YAML.load(path.read), config_path: path)
-      end
-
-      def self.lockfile_of(config_path)
-        lock_path = to_lockfile_path(config_path)
-        from_path lock_path if lock_path.exist?
       end
 
       def self.to_lockfile_path(config_path)
@@ -51,16 +51,16 @@ module RBS
         @config_path = config_path
       end
 
-      def add_gem(gem)
-        gems << gem
-      end
-
       def gem(gem_name)
         gems.find { |gem| gem['name'] == gem_name }
       end
 
       def repo_path
-        @config_path.dirname.join @data['path']
+        @config_path.dirname.join repo_path_data
+      end
+
+      def repo_path_data
+        Pathname(@data["path"])
       end
 
       def sources
@@ -72,36 +72,8 @@ module RBS
         )
       end
 
-      def dump_to(io)
-        YAML.dump(@data, io)
-      end
-
       def gems
         @data['gems'] ||= []
-      end
-
-      def gemfile_lock_path=(path)
-        @data['gemfile_lock_path'] = path.relative_path_from(@config_path.dirname).to_s
-      end
-
-      def gemfile_lock_path
-        path = @data['gemfile_lock_path']
-        return unless path
-        @config_path.dirname.join path
-      end
-
-      # It raises an error when there are non-available libraries
-      def check_rbs_availability!
-        raise CollectionNotAvailable unless repo_path.exist?
-
-        gems.each do |gem|
-          case gem['source']['type']
-          when 'git'
-            meta_path = repo_path.join(gem['name'], gem['version'], Sources::Git::METADATA_FILENAME)
-            raise CollectionNotAvailable unless meta_path.exist?
-            raise CollectionNotAvailable unless gem == YAML.load(meta_path.read)
-          end
-        end
       end
     end
   end

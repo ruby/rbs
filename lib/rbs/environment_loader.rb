@@ -60,25 +60,26 @@ module RBS
 
     def resolve_dependencies(library:, version:)
       [Collection::Sources::Rubygems.instance, Collection::Sources::Stdlib.instance].each do |source|
-        # @type var gem: { 'name' => String, 'version' => String? }
-        gem = { 'name' => library, 'version' => version }
-        next unless source.has?(gem)
+        next unless source.has?(library, version)
 
-        gem['version'] ||= source.versions(gem).last
-        source.dependencies_of(gem)&.each do |dep|
+        unless version
+          version = source.versions(library).last or raise
+        end
+
+        source.dependencies_of(library, version)&.each do |dep|
           add(library: dep['name'], version: nil)
         end
         return
       end
     end
 
-    def add_collection(collection_config)
-      collection_config.check_rbs_availability!
+    def add_collection(lockfile)
+      lockfile.check_rbs_availability!
 
-      repository.add(collection_config.repo_path)
+      repository.add(lockfile.fullpath)
 
-      collection_config.gems.each do |gem|
-        add(library: gem['name'], version: gem['version'], resolve_dependencies: false)
+      lockfile.gems.each_value do |gem|
+        add(library: gem[:name], version: gem[:version], resolve_dependencies: false)
       end
     end
 
