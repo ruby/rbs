@@ -143,7 +143,7 @@ module YAML
   # `fallback` return value, which defaults to `false`. See load for options.
   #
   %a{annotate:rdoc:copy:Psych.load_file}
-  def self.load_file: (string, ?fallback: untyped, ?symbolize_names: bool, ?freeze: bool) -> untyped
+  def self.load_file: (string | _ToPath, ?fallback: untyped, ?symbolize_names: bool, ?freeze: bool) -> untyped
 
   # <!--
   #   rdoc-file=ext/psych/lib/psych.rb
