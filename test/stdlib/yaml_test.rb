@@ -37,8 +37,8 @@ foo: 123
       )
 
       assert_send_type(
-        "(::_ToStr, fallback: ::String, symbolize_names: bool, freeze: bool) -> untyped",
-        YAML, :load_file, ToStr.new(File.join(dir, "test.yaml")), fallback: "foo", symbolize_names: false, freeze: false
+        "(::_ToPath, fallback: ::String, symbolize_names: bool, freeze: bool) -> untyped",
+        YAML, :load_file, Pathname(File.join(dir, "test.yaml")), fallback: "foo", symbolize_names: false, freeze: false
       )
     end
   end
