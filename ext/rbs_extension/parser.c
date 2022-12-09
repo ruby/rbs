@@ -2343,7 +2343,7 @@ VALUE parse_class_decl_super(parserstate *state, range *lt_range) {
     args = rb_ary_new();
     class_instance_name(state, CLASS_NAME, &name, args, &name_range, &args_range);
 
-    super_range.end = args_range.end;
+    super_range.end = state->current_token.range.end;
 
     location = rbs_new_location(state->buffer, super_range);
     loc = rbs_check_location(location);
