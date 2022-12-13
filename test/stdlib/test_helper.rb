@@ -4,6 +4,11 @@ require "test/unit"
 require "tmpdir"
 require "stringio"
 require "tempfile"
+require_relative "../test_skip"
+
+class Test::Unit::TestCase
+  prepend TestSkip
+end
 
 module Spy
   def self.wrap(object, method_name)
@@ -373,10 +378,6 @@ module TypeAssertions
     when definition.class_type?
       definition.methods[method].method_types
     end
-  end
-
-  def ci?
-    ENV["CI"] == "true"
   end
 
   def allows_error(*errors)

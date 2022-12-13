@@ -9,8 +9,6 @@ class NetSingletonTest < Test::Unit::TestCase
   testing "singleton(::Net::HTTP)"
 
   def test_get
-    omit if ci?
-
     $stdout = StringIO.new
     assert_send_type "(URI::Generic) -> nil",
                      Net::HTTP, :get_print, URI("https://www.ruby-lang.org")
@@ -35,8 +33,6 @@ class NetSingletonTest < Test::Unit::TestCase
   end
 
   def test_post
-    omit if ci?
-
     assert_send_type "(URI, String, Hash[String, String]) -> Net::HTTPResponse",
                      Net::HTTP, :post, URI('http://www.example.com/api/search'), { "q" => "ruby", "max" => "50" }.to_json, "Content-Type" => "application/json"
     assert_send_type "(URI, Hash[String, Symbol]) -> Net::HTTPResponse",
@@ -44,8 +40,6 @@ class NetSingletonTest < Test::Unit::TestCase
   end
 
   def test_new
-    omit if ci?
-
     assert_send_type "(String, Integer, nil, nil, nil, nil, nil) -> Net::HTTP",
                      Net::HTTP, :new, 'www.ruby-lang.org', 80, nil, nil, nil, nil, nil
   end
@@ -64,32 +58,26 @@ class NetInstanceTest < Test::Unit::TestCase
   end
 
   def test_inspect
-    omit if ci?
-
     assert_send_type "() -> String",
                      TestNet.new, :inspect
   end
 
   def test_set_debug_output
-    omit if ci?
     assert_send_type "(IO) -> void",
                      TestNet.new, :set_debug_output, $stderr
   end
 
   def test_address
-    omit if ci?
     assert_send_type "() -> String",
                      TestNet.new, :address
   end
 
   def test_port
-    omit if ci?
     assert_send_type "() -> Integer",
                      TestNet.new, :port
   end
 
   def test_ipaddr
-    omit if ci?
     assert_send_type "() -> nil",
                      TestNet.new, :ipaddr
     assert_send_type "(String) -> void",
@@ -97,13 +85,11 @@ class NetInstanceTest < Test::Unit::TestCase
   end
 
   def test_open_timeout
-    omit if ci?
     assert_send_type "() -> Integer",
                      TestNet.new, :open_timeout
   end
 
   def test_read_timeout
-    omit if ci?
     assert_send_type "() -> Integer",
                      TestNet.new, :read_timeout
     assert_send_type "(Integer) -> void",
@@ -111,7 +97,6 @@ class NetInstanceTest < Test::Unit::TestCase
   end
 
   def test_write_timeout
-    omit if ci?
     assert_send_type "() -> Integer",
                      TestNet.new, :write_timeout
     assert_send_type "(Integer) -> void",
@@ -119,7 +104,6 @@ class NetInstanceTest < Test::Unit::TestCase
   end
 
   def test_continue_timeout
-    omit if ci?
     assert_send_type "() -> nil",
                      TestNet.new, :continue_timeout
     assert_send_type "(Integer) -> void",
@@ -127,8 +111,6 @@ class NetInstanceTest < Test::Unit::TestCase
   end
 
   def test_max_retries
-    omit if ci?
-
     assert_send_type "() -> Integer",
                      TestNet.new, :max_retries
     assert_send_type "(Integer) -> void",
@@ -136,15 +118,11 @@ class NetInstanceTest < Test::Unit::TestCase
   end
 
   def test_keep_alive_timeout
-    omit if ci?
-
     assert_send_type "() -> Integer",
                      TestNet.new, :keep_alive_timeout
   end
 
   def test_started_?
-    omit if ci?
-
     assert_send_type "() -> bool",
                      TestNet.new, :started?
     assert_send_type "() -> bool",
@@ -152,8 +130,6 @@ class NetInstanceTest < Test::Unit::TestCase
   end
 
   def test_use_ssl
-    omit if ci?
-
     assert_send_type "() -> bool",
                      TestNet.new, :use_ssl?
     assert_send_type "(bool) -> void",
@@ -161,8 +137,6 @@ class NetInstanceTest < Test::Unit::TestCase
   end
 
   def test_start
-    omit if ci?
-
     assert_send_type "() { (Net::HTTP) -> untyped } -> untyped",
                      TestNet.new, :start do |net_http| net_http.class end
     assert_send_type "() -> Net::HTTP",
@@ -170,8 +144,6 @@ class NetInstanceTest < Test::Unit::TestCase
   end
 
   def test_proxy
-    omit if ci?
-
     assert_send_type "() -> bool",
                      TestNet.new, :proxy?
     assert_send_type "() -> bool",
@@ -193,8 +165,6 @@ class NetInstanceTest < Test::Unit::TestCase
   end
 
   def test_http_verbs
-    omit if ci?
-
     assert_send_type "(String) -> Net::HTTPResponse",
                      Net::HTTP.start('www.ruby-lang.org', 443, use_ssl: true), :get, '/en'
     assert_send_type "(String, Hash[String, String]) -> Net::HTTPResponse",
@@ -326,8 +296,6 @@ class NetInstanceTest < Test::Unit::TestCase
   end
 
   def test_request
-    omit if ci?
-
     assert_send_type "(String, String) -> Net::HTTPResponse",
                      Net::HTTP.start('reqres.in', 443, use_ssl: true), :send_request, 'GET', 'api/users'
     assert_send_type "(String, String, String, Hash[String, String]) -> Net::HTTPResponse",
@@ -346,15 +314,11 @@ class TestHTTPRequest < Test::Unit::TestCase
   testing "::Net::HTTPRequest"
 
   def test_inspect
-    omit if ci?
-
     assert_send_type "() -> String",
                      Net::HTTP::Get.new(URI('https://www.ruby-lang.org')), :inspect
   end
 
   def test_attr_readers
-    omit if ci?
-
     assert_send_type "() -> String",
                      Net::HTTP::Get.new(URI('https://www.ruby-lang.org')), :method
     assert_send_type "() -> String",
@@ -366,8 +330,6 @@ class TestHTTPRequest < Test::Unit::TestCase
   end
 
   def test_body
-    omit if ci?
-
     assert_send_type "() -> bool",
                      Net::HTTP::Get.new(URI('https://www.ruby-lang.org')), :request_body_permitted?
     assert_send_type "() -> bool",
@@ -385,8 +347,6 @@ class TestHTTPRequest < Test::Unit::TestCase
   end
 
   def test_manipulation_of_headers
-    omit if ci?
-
     assert_send_type "(String) -> nil",
                      Net::HTTP::Get.new(URI('https://www.ruby-lang.org')), :[], "Content-Type"
     assert_send_type "(String, untyped) -> void",
@@ -460,8 +420,6 @@ class TestHTTPRequest < Test::Unit::TestCase
   end
 
   def test_iteration_on_headers
-    omit if ci?
-
     assert_send_type "() { (String, String) -> untyped } -> Hash[String, Array[String]]",
                      Net::HTTP::Get.new(URI('https://www.ruby-lang.org')), :each_header do |str, array| "#{str} #{array}" end
     assert_send_type "() -> Enumerator[[String, String], Hash[String, Array[String]]]",
@@ -520,8 +478,6 @@ class TestInstanceNetHTTPResponse < Test::Unit::TestCase
   end
 
   def test_attr_readers
-    omit if ci?
-
     assert_send_type "() -> String",
                      Foo.success, :http_version
     assert_send_type "() -> String",
@@ -537,8 +493,6 @@ class TestInstanceNetHTTPResponse < Test::Unit::TestCase
   end
 
   def test_manipulation_function
-    omit if ci?
-
     assert_send_type "() -> String",
                      Foo.success, :inspect
     assert_send_type "() -> untyped",
