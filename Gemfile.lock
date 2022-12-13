@@ -38,14 +38,14 @@ GEM
     prime (0.1.2)
       forwardable
       singleton
-    psych (4.0.4)
+    psych (4.0.6)
       stringio
     public_suffix (4.0.7)
     rainbow (3.1.1)
     rake (13.0.6)
     rake-compiler (1.2.0)
       rake
-    rdoc (6.4.0)
+    rdoc (6.5.0)
       psych (>= 4.0.0)
     regexp_parser (2.6.1)
     rexml (3.2.5)
@@ -81,7 +81,7 @@ GEM
     ruby-progressbar (1.11.0)
     singleton (0.1.1)
     stackprof (0.2.22)
-    stringio (3.0.2)
+    stringio (3.0.4)
     strong_json (2.1.2)
     tempfile (0.1.2)
     test-unit (3.5.5)
