@@ -1809,6 +1809,9 @@ end
 
 class B[X] < Foo[X]
 end
+
+class C < Bar
+end
     EOF
       decls[0].tap do |decl|
         assert_instance_of Location, decl.location
@@ -1831,6 +1834,23 @@ end
 
         assert_equal "Foo", decl.super_class.location[:name].source
         assert_equal "[X]", decl.super_class.location[:args].source
+        assert_equal [4, 13], decl.super_class.location.start_loc
+        assert_equal [4, 19], decl.super_class.location.end_loc
+      end
+
+      decls[2].tap do |decl|
+        assert_instance_of Location, decl.location
+
+        assert_equal "class", decl.location[:keyword].source
+        assert_equal "C", decl.location[:name].source
+        assert_equal "end", decl.location[:end].source
+        assert_nil decl.location[:type_params]
+        assert_equal "<", decl.location[:lt].source
+
+        assert_equal "Bar", decl.super_class.location[:name].source
+        assert_nil decl.super_class.location[:args]
+        assert_equal [7, 10], decl.super_class.location.start_loc
+        assert_equal [7, 13], decl.super_class.location.end_loc
       end
     end
   end
