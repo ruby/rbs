@@ -945,6 +945,26 @@ end
     end
   end
 
+  def test_annotations_on_overload
+    Parser.parse_signature(<<~SIG).yield_self do |decls|
+      class Hello
+        def foo: %a{noreturn} () -> void
+               | %a{implicitly-returns-nil} %a{primitive:is_a?} (Class) -> bool
+      end
+    SIG
+
+      decls[0].members[0].yield_self do |m|
+        assert_instance_of Members::MethodDefinition, m
+
+        assert_equal ["noreturn"], m.overloads[0].annotations.map(&:string)
+        assert_equal ["implicitly-returns-nil", "primitive:is_a?"], m.overloads[1].annotations.map(&:string)
+
+        assert_equal "() -> void", m.overloads[0].method_type.location.source
+        assert_equal "(Class) -> bool", m.overloads[1].method_type.location.source
+      end
+    end
+  end
+
   def test_prepend
     Parser.parse_signature(<<~SIG).yield_self do |decls|
       class Foo
