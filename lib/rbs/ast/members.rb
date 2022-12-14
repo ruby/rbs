@@ -7,23 +7,57 @@ module RBS
       end
 
       class MethodDefinition < Base
+        class Overload
+          attr_reader :method_type, :annotations
+
+          def initialize(method_type:, annotations:)
+            @method_type = method_type
+            @annotations = annotations
+          end
+
+          def ==(other)
+            other.is_a?(Overload) && other.method_type == method_type && other.annotations == annotations
+          end
+
+          def hash
+            method_type.hash ^ annotations.hash
+          end
+
+          alias eql? ==
+
+          def update(annotations: self.annotations, method_type: self.method_type)
+            Overload.new(annotations: annotations, method_type: method_type)
+          end
+
+          def sub(subst)
+            update(method_type: self.method_type.sub(subst))
+          end
+
+          def to_json(state = _ = nil)
+            {
+              annotations: annotations,
+              method_type: method_type
+            }.to_json(state)
+          end
+        end
+
         attr_reader :name
         attr_reader :kind
-        attr_reader :types
+        attr_reader :overloads
         attr_reader :annotations
         attr_reader :location
         attr_reader :comment
-        attr_reader :overload
+        attr_reader :overloading
         attr_reader :visibility
 
-        def initialize(name:, kind:, types:, annotations:, location:, comment:, overload:, visibility: nil)
+        def initialize(name:, kind:, overloads:, annotations:, location:, comment:, overloading:, visibility:)
           @name = name
           @kind = kind
-          @types = types
+          @overloads = overloads
           @annotations = annotations
           @location = location
           @comment = comment
-          @overload = overload ? true : false
+          @overloading = overloading
           @visibility = visibility
         end
 
@@ -31,15 +65,15 @@ module RBS
           other.is_a?(MethodDefinition) &&
             other.name == name &&
             other.kind == kind &&
-            other.types == types &&
-            other.overload == overload &&
+            other.overloads == overloads &&
+            other.overloading? == overloading? &&
             other.visibility == visibility
         end
 
         alias eql? ==
 
         def hash
-          name.hash ^ kind.hash ^ types.hash ^ overload.hash
+          name.hash ^ kind.hash ^ overloads.hash ^ overloading?.hash ^ visibility.hash
         end
 
         def instance?
@@ -50,19 +84,19 @@ module RBS
           kind == :singleton || kind == :singleton_instance
         end
 
-        def overload?
-          overload
+        def overloading?
+          overloading
         end
 
-        def update(name: self.name, kind: self.kind, types: self.types, annotations: self.annotations, location: self.location, comment: self.comment, overload: self.overload, visibility: self.visibility)
+        def update(name: self.name, kind: self.kind, overloads: self.overloads, annotations: self.annotations, location: self.location, comment: self.comment, overloading: self.overloading?, visibility: self.visibility)
           self.class.new(
             name: name,
             kind: kind,
-            types: types,
+            overloads: overloads,
             annotations: annotations,
             location: location,
             comment: comment,
-            overload: overload,
+            overloading: overloading,
             visibility: visibility
           )
         end
@@ -72,11 +106,11 @@ module RBS
             member: :method_definition,
             name: name,
             kind: kind,
-            types: types,
+            overloads: overloads,
             annotations: annotations,
             location: location,
             comment: comment,
-            overload: overload,
+            overloading: overloading?,
             visibility: visibility
           }.to_json(state)
         end
