@@ -80,7 +80,7 @@ GEM
       rake (>= 0.8.1)
     ruby-progressbar (1.11.0)
     singleton (0.1.1)
-    stackprof (0.2.22)
+    stackprof (0.2.23)
     stringio (3.0.4)
     strong_json (2.1.2)
     tempfile (0.1.2)
