@@ -29,6 +29,7 @@ extern VALUE RBS_AST_Members_Extend;
 extern VALUE RBS_AST_Members_Include;
 extern VALUE RBS_AST_Members_InstanceVariable;
 extern VALUE RBS_AST_Members_MethodDefinition;
+extern VALUE RBS_AST_Members_MethodDefinition_Overload;
 extern VALUE RBS_AST_Members_Prepend;
 extern VALUE RBS_AST_Members_Private;
 extern VALUE RBS_AST_Members_Public;

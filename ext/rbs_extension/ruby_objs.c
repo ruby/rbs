@@ -402,15 +402,27 @@ VALUE rbs_ast_decl_module(VALUE name, VALUE type_params, VALUE self_types, VALUE
   );
 }
 
-VALUE rbs_ast_members_method_definition(VALUE name, VALUE kind, VALUE types, VALUE annotations, VALUE location, VALUE comment, VALUE overload, VALUE visibility) {
+VALUE rbs_ast_members_method_definition_overload(VALUE annotations, VALUE method_type) {
+  VALUE args = rb_hash_new();
+  rb_hash_aset(args, ID2SYM(rb_intern("annotations")), annotations);
+  rb_hash_aset(args, ID2SYM(rb_intern("method_type")), method_type);
+
+  return CLASS_NEW_INSTANCE(
+    RBS_AST_Members_MethodDefinition_Overload,
+    1,
+    &args
+  );
+}
+
+VALUE rbs_ast_members_method_definition(VALUE name, VALUE kind, VALUE overloads, VALUE annotations, VALUE location, VALUE comment, VALUE overloading, VALUE visibility) {
   VALUE args = rb_hash_new();
   rb_hash_aset(args, ID2SYM(rb_intern("name")), name);
   rb_hash_aset(args, ID2SYM(rb_intern("kind")), kind);
-  rb_hash_aset(args, ID2SYM(rb_intern("types")), types);
+  rb_hash_aset(args, ID2SYM(rb_intern("overloads")), overloads);
   rb_hash_aset(args, ID2SYM(rb_intern("annotations")), annotations);
   rb_hash_aset(args, ID2SYM(rb_intern("location")), location);
   rb_hash_aset(args, ID2SYM(rb_intern("comment")), comment);
-  rb_hash_aset(args, ID2SYM(rb_intern("overload")), overload);
+  rb_hash_aset(args, ID2SYM(rb_intern("overloading")), overloading);
   rb_hash_aset(args, ID2SYM(rb_intern("visibility")), visibility);
 
   return CLASS_NEW_INSTANCE(
