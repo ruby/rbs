@@ -94,6 +94,8 @@ module RBS
 
     def write_loc_source: (_Located) { () -> void } -> void
 
+    def format_annotation: (AST::Annotation) -> String
+
     def write_annotation: (Array[AST::Annotation]) -> void
 
     def write_comment: (AST::Comment?) -> void

@@ -187,18 +187,22 @@ module RBS
             if method
               members << AST::Members::MethodDefinition.new(
                 name: method_name,
-                types: method.method_types.map {|type|
-                  type.update.tap do |ty|
-                    def ty.to_s
-                      location.source
+                overloads: method.method_types.map {|type|
+                  AST::Members::MethodDefinition::Overload.new(
+                    annotations: [],
+                    method_type: type.update.tap do |ty|
+                      def ty.to_s
+                        location.source
+                      end
                     end
-                  end
+                  )
                 },
                 kind: kind,
                 location: nil,
                 comment: method.comments[0],
                 annotations: method.annotations,
-                overload: false
+                overloading: false,
+                visibility: nil
               )
               return
             end
@@ -231,12 +235,15 @@ module RBS
 
               members << AST::Members::MethodDefinition.new(
                 name: method.name,
-                types: [method_type(method)],
+                overloads: [
+                  AST::Members::MethodDefinition::Overload.new(annotations: [], method_type: method_type(method))
+                ],
                 kind: :singleton,
                 location: nil,
                 comment: nil,
                 annotations: [],
-                overload: false
+                overloading: false,
+                visibility: nil
               )
             end
           else
@@ -264,12 +271,15 @@ module RBS
 
                 members << AST::Members::MethodDefinition.new(
                   name: method.name,
-                  types: [method_type(method)],
+                  overloads: [
+                    AST::Members::MethodDefinition::Overload.new(annotations: [], method_type: method_type(method))
+                  ],
                   kind: :instance,
                   location: nil,
                   comment: nil,
                   annotations: [],
-                  overload: false
+                  overloading: false,
+                  visibility: nil
                 )
               end
             else
@@ -298,12 +308,15 @@ module RBS
 
                 members << AST::Members::MethodDefinition.new(
                   name: method.name,
-                  types: [method_type(method)],
+                  overloads: [
+                    AST::Members::MethodDefinition::Overload.new(annotations: [], method_type: method_type(method))
+                  ],
                   kind: :instance,
                   location: nil,
                   comment: nil,
                   annotations: [],
-                  overload: false
+                  overloading: false,
+                  visibility: nil
                 )
               end
             else

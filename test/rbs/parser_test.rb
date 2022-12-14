@@ -17,12 +17,12 @@ end
       decls[0].tap do |decl|
         decl.members[0].tap do |member|
           assert_equal :bar, member.name
-          assert_instance_of RBS::Types::Variable, member.types[0].type.return_type
+          assert_instance_of RBS::Types::Variable, member.overloads[0].method_type.type.return_type
         end
 
         decl.members[1].tap do |member|
           assert_equal :foo, member.name
-          assert_instance_of RBS::Types::Variable, member.types[0].type.return_type
+          assert_instance_of RBS::Types::Variable, member.overloads[0].method_type.type.return_type
         end
       end
     end
@@ -316,17 +316,17 @@ end
 
         decl.members[0].tap do |member|
           assert_instance_of RBS::AST::Members::MethodDefinition, member
-          assert_instance_of RBS::Types::Variable, member.types[0].type.return_type
+          assert_instance_of RBS::Types::Variable, member.overloads[0].method_type.type.return_type
         end
 
         decl.members[1].tap do |member|
           assert_instance_of RBS::AST::Members::MethodDefinition, member
-          assert_instance_of RBS::Types::ClassInstance, member.types[0].type.return_type
+          assert_instance_of RBS::Types::ClassInstance, member.overloads[0].method_type.type.return_type
         end
 
         decl.members[2].tap do |member|
           assert_instance_of RBS::AST::Members::MethodDefinition, member
-          assert_instance_of RBS::Types::ClassInstance, member.types[0].type.return_type
+          assert_instance_of RBS::Types::ClassInstance, member.overloads[0].method_type.type.return_type
         end
       end
     end

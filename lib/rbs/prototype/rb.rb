@@ -186,10 +186,11 @@ module RBS
             name: def_name,
             location: nil,
             annotations: [],
-            types: types,
+            overloads: types.map {|type| AST::Members::MethodDefinition::Overload.new(annotations: [], method_type: type )},
             kind: kind,
             comment: comments[node.first_lineno - 1],
-            overload: false
+            overloading: false,
+            visibility: nil
           )
 
           decls.push member unless decls.include?(member)

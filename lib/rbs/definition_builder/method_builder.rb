@@ -113,14 +113,14 @@ module RBS
                       build_method(
                         methods,
                         type,
-                        member: member.update(types: member.types.map {|type| type.sub(subst) }),
+                        member: member.update(overloads: member.overloads.map {|overload| overload.sub(subst) }),
                         accessibility: member.visibility || accessibility
                       )
                     when :singleton_instance
                       build_method(
                         methods,
                         type,
-                        member: member.update(types: member.types.map {|type| type.sub(subst) }),
+                        member: member.update(overloads: member.overloads.map {|overload| overload.sub(subst) }),
                         accessibility: :private
                       )
                     end
@@ -215,7 +215,7 @@ module RBS
       def build_method(methods, type, member:, accessibility:)
         defn = methods.methods[member.name] ||= Methods::Definition.empty(type: type, name: member.name)
 
-        if member.overload?
+        if member.overloading?
           defn.overloads << member
         else
           defn.accessibilities << accessibility

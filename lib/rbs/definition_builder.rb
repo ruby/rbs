@@ -64,9 +64,9 @@ module RBS
           methods.each do |defn|
             method = case original = defn.original
                      when AST::Members::MethodDefinition
-                       defs = original.types.map do |method_type|
+                       defs = original.overloads.map do |overload|
                          Definition::Method::TypeDef.new(
-                           type: method_type,
+                           type: overload.method_type,
                            member: original,
                            defined_in: type_name,
                            implemented_in: nil
@@ -115,11 +115,11 @@ module RBS
 
                      end
 
-            defn.overloads.each do |overload|
-              overload_defs = overload.types.map do |method_type|
+            defn.overloads.each do |overloading|
+              overload_defs = overloading.overloads.map do |overload|
                 Definition::Method::TypeDef.new(
-                  type: method_type,
-                  member: overload,
+                  type: overload.method_type,
+                  member: overloading,
                   defined_in: type_name,
                   implemented_in: nil
                 )
@@ -463,7 +463,6 @@ module RBS
                       )
                     end,
                     accessibility: :public,
-                    annotations: [],
                     alias_of: nil
                   )
 
@@ -539,7 +538,7 @@ module RBS
 
         method_types = case original = defn.original
                        when AST::Members::MethodDefinition
-                         original.types
+                         original.overloads.map(&:method_type)
                        when AST::Members::AttrWriter, AST::Members::AttrReader, AST::Members::AttrAccessor
                          if defn.name.to_s.end_with?("=")
                            [
@@ -669,9 +668,9 @@ module RBS
 
           case original
           when AST::Members::MethodDefinition
-            defs = original.types.map do |method_type|
+            defs = original.overloads.map do |overload|
               Definition::Method::TypeDef.new(
-                type: method_type,
+                type: overload.method_type,
                 member: original,
                 defined_in: definition.type_name,
                 implemented_in: definition.type_name
@@ -757,11 +756,11 @@ module RBS
           end
         end
 
-        method_def.overloads.each do |overload|
-          type_defs = overload.types.map do |method_type|
+        method_def.overloads.each do |overloading|
+          type_defs = overloading.overloads.map do |overload|
             Definition::Method::TypeDef.new(
-              type: method_type,
-              member: overload,
+              type: overload.method_type,
+              member: overloading,
               defined_in: definition.type_name,
               implemented_in: definition.type_name
             )

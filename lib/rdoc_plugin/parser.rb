@@ -74,7 +74,7 @@ module RBS
         method = RDoc::AnyMethod.new(nil, decl.name.to_s)
         method.singleton = decl.singleton?
         method.visibility = decl.visibility
-        method.call_seq = decl.types.map { |type| "#{decl.name.to_s}#{type.to_s}" }.join("\n")
+        method.call_seq = decl.overloads.map {|overload| "#{decl.name.to_s}#{overload.method_type.to_s}" }.join("\n")
         if loc = decl.location
           method.start_collecting_tokens
           method.add_token({ line_no: 1, char_no: 1, kind: :on_comment, text: "# File #{@top_level.relative_name}, line(s) #{loc.start_line}:#{loc.end_line}\n" })
