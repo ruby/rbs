@@ -15,6 +15,26 @@ module RBS
       type visibility = :public | :private
 
       class MethodDefinition < Base
+        class Overload
+          attr_reader method_type: MethodType
+
+          attr_reader annotations: Array[Annotation]
+
+          def initialize: (method_type: MethodType, annotations: Array[Annotation]) -> void
+
+          def ==: (untyped) -> bool
+
+          def hash: () -> Integer
+
+          alias eql? ==
+
+          def update: (?annotations: Array[Annotation], ?method_type: MethodType) -> Overload
+
+          def sub: (Substitution) -> Overload
+
+          include _ToJson
+        end
+
         type kind = :instance | :singleton | :singleton_instance
 
         # def foo: () -> void
@@ -26,31 +46,35 @@ module RBS
         #         ^^^                              keyword
         #             ^^^^^                        kind
         #                  ^^^                     name
-        #                                    ^^^   overload
+        #                                    ^^^   overloading
         #
-        type loc = Location[:keyword | :name, :kind | :overload | :visibility]
+        type loc = Location[:keyword | :name, :kind | :overloading | :visibility]
 
         attr_reader name: Symbol
         attr_reader kind: kind
-        attr_reader types: Array[MethodType]
+        attr_reader overloads: Array[Overload]
         attr_reader annotations: Array[Annotation]
         attr_reader location: loc?
         attr_reader comment: Comment?
-        attr_reader overload: bool
+        attr_reader overloading: bool
         attr_reader visibility: visibility?
 
-        def initialize: (name: Symbol, kind: kind, types: Array[MethodType], annotations: Array[Annotation], location: loc?, comment: Comment?, overload: boolish, ?visibility: visibility?) -> void
+        def initialize: (name: Symbol, kind: kind, overloads: Array[Overload], annotations: Array[Annotation], location: loc?, comment: Comment?, overloading: bool, visibility: visibility?) -> void
 
         include _HashEqual
         include _ToJson
 
+        # Returns true if the `def` is to define instance method
         def instance?: () -> bool
 
+        # Returns true if the `def` is to define singleton method
         def singleton?: () -> bool
 
-        def overload?: () -> bool
+        # Returns true if the `def` is overloading (== with `...`)
+        #
+        def overloading?: () -> bool
 
-        def update: (?name: Symbol, ?kind: kind, ?types: Array[MethodType], ?annotations: Array[Annotation], ?location: loc?, ?comment: Comment?, ?overload: boolish, ?visibility: visibility?) -> MethodDefinition
+        def update: (?name: Symbol, ?kind: kind, ?overloads: Array[Overload], ?annotations: Array[Annotation], ?location: loc?, ?comment: Comment?, ?overloading: bool, ?visibility: visibility?) -> MethodDefinition
       end
 
       module Var

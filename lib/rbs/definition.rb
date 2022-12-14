@@ -65,7 +65,7 @@ module RBS
         def overload?
           case mem = member
           when AST::Members::MethodDefinition
-            mem.overload?
+            mem.overloading?
           else
             false
           end

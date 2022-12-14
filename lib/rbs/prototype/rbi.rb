@@ -185,10 +185,11 @@ module RBS
               name: node.children[1],
               location: nil,
               annotations: [],
-              types: types,
+              overloads: types.map {|type| AST::Members::MethodDefinition::Overload.new(annotations: [], method_type: type) },
               kind: :singleton,
               comment: comment,
-              overload: false
+              overloading: false,
+              visibility: nil
             )
           end
 
@@ -205,10 +206,11 @@ module RBS
               name: node.children[0],
               location: nil,
               annotations: [],
-              types: types,
+              overloads: types.map {|type| AST::Members::MethodDefinition::Overload.new(annotations: [], method_type: type) },
               kind: :instance,
               comment: comment,
-              overload: false
+              overloading: false,
+              visibility: nil
             )
           end
 

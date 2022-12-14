@@ -98,7 +98,8 @@ module RBS
     end
 
     def validate_method_definition(method_def, type_name:)
-      method_def.types.each do |method_type|
+      method_def.overloads.each do |overload|
+        method_type = overload.method_type
         unless method_type.type_params.empty?
           loc = method_type.location&.aref(:type_params)
 

@@ -36,11 +36,11 @@ EOF
             assert_instance_of MethodBuilder::Methods::Definition, hello
 
             assert_instance_of AST::Members::MethodDefinition, hello.original
-            assert_equal [parse_method_type("() -> ::String")], hello.original.types
+            assert_equal [parse_method_type("() -> ::String")], hello.original.overloads.map(&:method_type)
 
             assert_any!(hello.overloads, size: 1) do |member|
               assert_instance_of AST::Members::MethodDefinition, member
-              assert_equal [parse_method_type("() -> ::Integer")], member.types
+              assert_equal [parse_method_type("() -> ::Integer")], member.overloads.map(&:method_type)
             end
 
             assert_equal :public, hello.accessibility
@@ -83,7 +83,7 @@ EOF
 
             assert_any!(hello.overloads, size: 1) do |member|
               assert_instance_of AST::Members::MethodDefinition, member
-              assert_equal [parse_method_type("(::Integer) -> void")], member.types
+              assert_equal [parse_method_type("(::Integer) -> void")], member.overloads.map(&:method_type)
             end
 
             assert_equal :public, hello.accessibility
@@ -149,11 +149,11 @@ EOF
             assert_instance_of MethodBuilder::Methods::Definition, hello
 
             assert_instance_of AST::Members::MethodDefinition, hello.original
-            assert_equal [parse_method_type("() -> ::String")], hello.original.types
+            assert_equal [parse_method_type("() -> ::String")], hello.original.overloads.map(&:method_type)
 
             assert_any!(hello.overloads, size: 1) do |member|
               assert_instance_of AST::Members::MethodDefinition, member
-              assert_equal [parse_method_type("() -> ::Integer")], member.types
+              assert_equal [parse_method_type("() -> ::Integer")], member.overloads.map(&:method_type)
             end
 
             assert_equal :public, hello.accessibility
@@ -196,7 +196,7 @@ EOF
 
             assert_any!(hello.overloads, size: 1) do |member|
               assert_instance_of AST::Members::MethodDefinition, member
-              assert_equal [parse_method_type("(::Integer) -> void")], member.types
+              assert_equal [parse_method_type("(::Integer) -> void")], member.overloads.map(&:method_type)
             end
 
             assert_equal :public, hello.accessibility
@@ -260,11 +260,11 @@ EOF
             assert_instance_of MethodBuilder::Methods::Definition, hello
 
             assert_instance_of AST::Members::MethodDefinition, hello.original
-            assert_equal [parse_method_type("() -> ::String")], hello.original.types
+            assert_equal [parse_method_type("() -> ::String")], hello.original.overloads.map(&:method_type)
 
             assert_any!(hello.overloads, size: 1) do |member|
               assert_instance_of AST::Members::MethodDefinition, member
-              assert_equal [parse_method_type("() -> ::Integer")], member.types
+              assert_equal [parse_method_type("() -> ::Integer")], member.overloads.map(&:method_type)
             end
 
             assert_equal :public, hello.accessibility
@@ -300,7 +300,7 @@ EOF
 
             assert_any!(world.overloads, size: 1) do |member|
               assert_instance_of AST::Members::MethodDefinition, member
-              assert_equal [parse_method_type("() -> ::Integer")], member.types
+              assert_equal [parse_method_type("() -> ::Integer")], member.overloads.map(&:method_type)
             end
 
             assert_equal [], world.accessibilities

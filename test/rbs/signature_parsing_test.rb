@@ -191,26 +191,27 @@ RBS
       interface_decl.members[0].yield_self do |def_member|
         assert_instance_of Members::MethodDefinition, def_member
         assert_equal :count, def_member.name
-        assert_equal 3, def_member.types.size
+        assert_equal 3, def_member.overloads.size
 
-        def_member.types.yield_self do |t1, t2, t3|
-          assert_empty t1.type_params
-          assert_nil t1.block
-          assert_equal "-> Integer", t1.location.source
+        def_member.overloads.yield_self do |o1, o2, o3|
+          assert_empty o1.annotations
+          assert_empty o1.method_type.type_params
+          assert_nil o1.method_type.block
+          assert_equal "-> Integer", o1.method_type.location.source
 
-          assert_empty t2.type_params
-          assert_equal 1, t2.type.required_positionals.size
-          assert_nil t2.block
-          assert_equal "(untyped) -> Integer", t2.location.source
+          assert_empty o2.method_type.type_params
+          assert_equal 1, o2.method_type.type.required_positionals.size
+          assert_nil o2.method_type.block
+          assert_equal "(untyped) -> Integer", o2.method_type.location.source
 
           assert_equal(
             [AST::TypeParam.new(name: :X, variance: :invariant, upper_bound: nil, location: nil)],
-            t3.type_params
+            o3.method_type.type_params
           )
-          assert_instance_of Types::Block, t3.block
-          assert_instance_of Types::Variable, t3.block.type.required_positionals[0].type
-          assert_instance_of Types::Variable, t3.block.type.return_type
-          assert_equal "[X] { (A) -> X } -> Integer", t3.location.source
+          assert_instance_of Types::Block, o3.method_type.block
+          assert_instance_of Types::Variable, o3.method_type.block.type.required_positionals[0].type
+          assert_instance_of Types::Variable, o3.method_type.block.type.return_type
+          assert_equal "[X] { (A) -> X } -> Integer", o3.method_type.location.source
         end
       end
 
@@ -491,22 +492,22 @@ end
 
         assert_instance_of Members::MethodDefinition, decl.members[0]
         decl.members[0].yield_self do |m|
-          assert_equal 3, m.types.size
+          assert_equal 3, m.overloads.size
 
-          m.types[0].yield_self do |ty|
+          m.overloads[0].method_type.yield_self do |ty|
             assert_instance_of MethodType, ty
             assert_equal "-> Integer", ty.location.source
             assert_nil ty.block
           end
 
-          m.types[1].yield_self do |ty|
+          m.overloads[1].method_type.yield_self do |ty|
             assert_instance_of MethodType, ty
             assert_equal "?{ -> void } -> Integer", ty.location.source
             assert_instance_of Types::Block, ty.block
             refute ty.block.required
           end
 
-          m.types[2].yield_self do |ty|
+          m.overloads[2].method_type.yield_self do |ty|
             assert_instance_of MethodType, ty
             assert_equal "[A] () { (String, ?Object, *Float, Symbol, foo: bool, ?bar: untyped, **Y) -> X } -> A", ty.location.source
             assert_instance_of Types::Block, ty.block
@@ -944,6 +945,26 @@ end
     end
   end
 
+  def test_annotations_on_overload
+    Parser.parse_signature(<<~SIG).yield_self do |decls|
+      class Hello
+        def foo: %a{noreturn} () -> void
+               | %a{implicitly-returns-nil} %a{primitive:is_a?} (Class) -> bool
+      end
+    SIG
+
+      decls[0].members[0].yield_self do |m|
+        assert_instance_of Members::MethodDefinition, m
+
+        assert_equal ["noreturn"], m.overloads[0].annotations.map(&:string)
+        assert_equal ["implicitly-returns-nil", "primitive:is_a?"], m.overloads[1].annotations.map(&:string)
+
+        assert_equal "() -> void", m.overloads[0].method_type.location.source
+        assert_equal "(Class) -> bool", m.overloads[1].method_type.location.source
+      end
+    end
+  end
+
   def test_prepend
     Parser.parse_signature(<<~SIG).yield_self do |decls|
       class Foo
@@ -1234,12 +1255,12 @@ end
 EOF
       decls[0].members[0].tap do |member|
         assert_instance_of Members::MethodDefinition, member
-        assert_predicate member, :overload?
+        assert_predicate member, :overloading?
       end
 
       decls[0].members[1].tap do |member|
         assert_instance_of Members::MethodDefinition, member
-        refute_predicate member, :overload?
+        refute_predicate member, :overloading?
       end
     end
   end
@@ -1256,7 +1277,7 @@ end
 EOF
       decls[0].members[1].tap do |member|
         assert_instance_of Members::MethodDefinition, member
-        assert_instance_of Types::Variable, member.types[0].type.return_type
+        assert_instance_of Types::Variable, member.overloads[0].method_type.type.return_type
       end
     end
   end
@@ -1270,7 +1291,7 @@ EOF
 
       decls[0].members[0].tap do |member|
         assert_instance_of Members::MethodDefinition, member
-        member.types[0].type.return_type.tap do |return_type|
+        member.overloads[0].method_type.type.return_type.tap do |return_type|
           assert_instance_of Types::Proc, return_type
           assert_instance_of Types::ClassInstance, return_type.type.return_type
         end
@@ -1335,7 +1356,7 @@ end
         assert_equal "def", foo.location[:keyword].source
         assert_equal "foo", foo.location[:name].source
         assert_nil foo.location[:kind]
-        assert_nil foo.location[:overload]
+        assert_nil foo.location[:overloading]
       end
 
       decls[0].members[1].tap do |foo|
@@ -1344,7 +1365,7 @@ end
         assert_equal "def", foo.location[:keyword].source
         assert_equal "bar", foo.location[:name].source
         assert_equal "self?.", foo.location[:kind].source
-        assert_equal "...", foo.location[:overload].source
+        assert_equal "...", foo.location[:overloading].source
       end
     end
   end
@@ -1973,9 +1994,9 @@ end
         assert_instance_of Types::ClassInstance, decl.members[1].type
         assert_instance_of Types::ClassInstance, decl.members[2].type
 
-        assert_instance_of Types::Variable, decl.members[3].types[0].type.return_type
-        assert_instance_of Types::ClassInstance, decl.members[4].types[0].type.return_type
-        assert_instance_of Types::ClassInstance, decl.members[5].types[0].type.return_type
+        assert_instance_of Types::Variable, decl.members[3].overloads[0].method_type.type.return_type
+        assert_instance_of Types::ClassInstance, decl.members[4].overloads[0].method_type.type.return_type
+        assert_instance_of Types::ClassInstance, decl.members[5].overloads[0].method_type.type.return_type
 
         assert_instance_of Types::ClassInstance, decl.members[6].type
         assert_instance_of Types::ClassInstance, decl.members[7].type
@@ -2013,7 +2034,7 @@ end
         end
 
         decl.members[0].tap do |member|
-          member.types[0].type_params[0].tap do |param|
+          member.overloads[0].method_type.type_params[0].tap do |param|
             assert_equal :X, param.name
             assert_equal :invariant, param.variance
             refute_predicate param, :unchecked?

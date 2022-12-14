@@ -30,6 +30,7 @@ VALUE RBS_AST_Members_Extend;
 VALUE RBS_AST_Members_Include;
 VALUE RBS_AST_Members_InstanceVariable;
 VALUE RBS_AST_Members_MethodDefinition;
+VALUE RBS_AST_Members_MethodDefinition_Overload;
 VALUE RBS_AST_Members_Prepend;
 VALUE RBS_AST_Members_Private;
 VALUE RBS_AST_Members_Public;
@@ -99,6 +100,7 @@ void rbs__init_constants(void) {
   RBS_AST_Members_Include = rb_const_get(RBS_AST_Members, rb_intern("Include"));
   RBS_AST_Members_InstanceVariable = rb_const_get(RBS_AST_Members, rb_intern("InstanceVariable"));
   RBS_AST_Members_MethodDefinition = rb_const_get(RBS_AST_Members, rb_intern("MethodDefinition"));
+  RBS_AST_Members_MethodDefinition_Overload = rb_const_get(RBS_AST_Members_MethodDefinition, rb_intern("Overload"));
   RBS_AST_Members_Prepend = rb_const_get(RBS_AST_Members, rb_intern("Prepend"));
   RBS_AST_Members_Private = rb_const_get(RBS_AST_Members, rb_intern("Private"));
   RBS_AST_Members_Public = rb_const_get(RBS_AST_Members, rb_intern("Public"));

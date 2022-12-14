@@ -113,8 +113,8 @@ module RBS
 
         case member
         when AST::Members::MethodDefinition
-          member.types.each do |method_type|
-            find_in_method_type(pos, array: array, method_type: method_type) and return true
+          member.overloads.each do |overload|
+            find_in_method_type(pos, array: array, method_type: overload.method_type) and return true
           end
         when AST::Members::InstanceVariable, AST::Members::ClassInstanceVariable, AST::Members::ClassVariable
           find_in_type(pos, array: array, type: member.type) and return true

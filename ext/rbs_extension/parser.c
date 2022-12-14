@@ -1485,7 +1485,7 @@ VALUE parse_member_def(parserstate *state, bool instance_only, bool accept_overl
   range keyword_range;
   range name_range;
   range kind_range;
-  range overload_range = NULL_RANGE;
+  range overloading_range = NULL_RANGE;
 
   VALUE visibility;
 
@@ -1524,8 +1524,8 @@ VALUE parse_member_def(parserstate *state, bool instance_only, bool accept_overl
   }
 
   VALUE name = parse_method_name(state, &name_range);
-  VALUE method_types = rb_ary_new();
-  VALUE overload = Qfalse;
+  VALUE overloads = rb_ary_new();
+  VALUE overloading = Qfalse;
 
   if (state->next_token.type == pDOT && RB_SYM2ID(name) == rb_intern("self?")) {
     raise_syntax_error(
@@ -1541,23 +1541,33 @@ VALUE parse_member_def(parserstate *state, bool instance_only, bool accept_overl
 
   bool loop = true;
   while (loop) {
+    VALUE annotations = rb_ary_new();
+    position overload_annot_pos = NullPosition;
+
+    if (state->next_token.type == tANNOTATION) {
+      parse_annotations(state, annotations, &overload_annot_pos);
+    }
+
     switch (state->next_token.type) {
     case pLPAREN:
     case pARROW:
     case pLBRACE:
     case pLBRACKET:
     case pQUESTION:
-      rb_ary_push(method_types, parse_method_type(state));
-      member_range.end = state->current_token.range.end;
-      break;
+      {
+        VALUE method_type = parse_method_type(state);
+        rb_ary_push(overloads, rbs_ast_members_method_definition_overload(annotations, method_type));
+        member_range.end = state->current_token.range.end;
+        break;
+      }
 
     case pDOT3:
       if (accept_overload) {
-        overload = Qtrue;
+        overloading = Qtrue;
         parser_advance(state);
         loop = false;
-        overload_range = state->current_token.range;
-        member_range.end = overload_range.end;
+        overloading_range = state->current_token.range;
+        member_range.end = overloading_range.end;
         break;
       } else {
         raise_syntax_error(
@@ -1604,17 +1614,17 @@ VALUE parse_member_def(parserstate *state, bool instance_only, bool accept_overl
   rbs_loc_add_required_child(loc, rb_intern("keyword"), keyword_range);
   rbs_loc_add_required_child(loc, rb_intern("name"), name_range);
   rbs_loc_add_optional_child(loc, rb_intern("kind"), kind_range);
-  rbs_loc_add_optional_child(loc, rb_intern("overload"), overload_range);
+  rbs_loc_add_optional_child(loc, rb_intern("overloading"), overloading_range);
   rbs_loc_add_optional_child(loc, rb_intern("visibility"), visibility_range);
 
   return rbs_ast_members_method_definition(
     name,
     k,
-    method_types,
+    overloads,
     annotations,
     location,
     comment,
-    overload,
+    overloading,
     visibility
   );
 }

@@ -365,11 +365,13 @@ module RBS
         AST::Members::MethodDefinition.new(
           name: member.name,
           kind: member.kind,
-          types: member.types.map do |type|
-            resolve_method_type(resolver, type, context: context)
+          overloads: member.overloads.map do |overload|
+            overload.update(
+              method_type: resolve_method_type(resolver, overload.method_type, context: context)
+            )
           end,
           comment: member.comment,
-          overload: member.overload?,
+          overloading: member.overloading?,
           annotations: member.annotations,
           location: member.location,
           visibility: member.visibility

@@ -39,21 +39,27 @@ module RBS
       end
     end
 
+    def format_annotation(annotation)
+      string = annotation.string
+      case
+      when string !~ /\}/
+        "%a{#{string}}"
+      when string !~ /\)/
+        "%a(#{string})"
+      when string !~ /\]/
+        "%a[#{string}]"
+      when string !~ /\>/
+        "%a<#{string}>"
+      when string !~ /\|/
+        "%a|#{string}|"
+      else
+        raise
+      end
+    end
+
     def write_annotation(annotations)
       annotations.each do |annotation|
-        string = annotation.string
-        case
-        when string !~ /\}/
-          puts "%a{#{string}}"
-        when string !~ /\)/
-          puts "%a(#{string})"
-        when string !~ /\]/
-          puts "%a[#{string}]"
-        when string !~ /\>/
-          puts "%a<#{string}>"
-        when string !~ /\|/
-          puts "%a|#{string}|"
-        end
+        puts format_annotation(annotation)
       end
     end
 
@@ -289,17 +295,20 @@ module RBS
 
       string << prefix
 
-      member.types.each.with_index do |type, index|
+      member.overloads.each.with_index do |overload, index|
         if index > 0
           string << padding
           string << "|"
         end
 
-        string << " #{type}\n"
+        overload.annotations.each do |annotation|
+          string << " #{format_annotation(annotation)}"
+        end
+        string << " #{overload.method_type}\n"
       end
 
-      if member.overload
-        if member.types.size > 0
+      if member.overloading?
+        if member.overloads.size > 0
           string << padding
           string << "|"
         end

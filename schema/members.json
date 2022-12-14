@@ -14,10 +14,21 @@
         "kind": {
           "enum": ["instance", "singleton", "singleton_instance"]
         },
-        "types": {
+        "overloads": {
           "type": "array",
           "items": {
-            "$ref": "methodType.json"
+            "type": "object",
+            "properties": {
+              "annotations": {
+                "type": "array",
+                "items": {
+                  "$ref": "annotation.json"
+                }
+              },
+              "method_type": {
+                "$ref": "methodType.json"
+              }
+            }
           }
         },
         "comment": {
@@ -29,23 +40,17 @@
             "$ref": "annotation.json"
           }
         },
-        "attributes": {
-          "type": "array",
-          "items": {
-            "enum": ["incompatible"]
-          }
-        },
         "location": {
           "$ref": "location.json"
         },
-        "overload": {
+        "overloading": {
           "type": "boolean"
         },
         "visibility": {
           "enum": ["public", "private", null]
         }
       },
-      "required": ["member", "name", "kind", "types", "comment", "annotations", "location", "visibility"]
+      "required": ["member", "name", "kind", "overloads", "comment", "annotations", "location", "visibility", "overloading"]
     },
     "variable": {
       "title": "Declaration for instance variables and class variables",
