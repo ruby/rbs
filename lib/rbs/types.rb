@@ -757,11 +757,7 @@ module RBS
 
         def to_s
           if name
-            if Parser::KEYWORDS.include?(name.to_s)
-              "#{type} `#{name}`"
-            else
-              "#{type} #{name}"
-            end
+            "#{type} #{name}"
           else
             "#{type}"
           end
