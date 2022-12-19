@@ -2262,4 +2262,31 @@ end
       end
     end
   end
+
+  def test_prepend_initialize
+    SignatureManager.new do |manager|
+      manager.files.merge!(Pathname("foo.rbs") => <<~EOF)
+        module M1
+        end
+
+        class Foo
+          prepend M1
+
+          def initialize: (String) -> void
+        end
+      EOF
+
+      manager.build do |env|
+        builder = DefinitionBuilder.new(env: env)
+
+        builder.build_instance(type_name("::Foo")).tap do |instance|
+          assert_equal [parse_method_type("(::String) -> void")], instance.methods[:initialize].defs.map(&:type)
+        end
+
+        builder.build_singleton(type_name("::Foo")).tap do |singleton|
+          assert_equal [parse_method_type("(::String) -> ::Foo")], singleton.methods[:new].defs.map(&:type)
+        end
+      end
+    end
+  end
 end

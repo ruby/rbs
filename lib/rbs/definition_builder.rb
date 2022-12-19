@@ -263,7 +263,7 @@ module RBS
             end
 
             one_ancestors.each_prepended_module do |mod|
-              defn = build_instance(mod.name)
+              defn = build_instance(mod.name, no_self_types: true)
               merge_definition(src: defn,
                                dest: definition,
                                subst: Substitution.build(defn.type_params, mod.args))
