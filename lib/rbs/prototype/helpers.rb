@@ -7,27 +7,43 @@ module RBS
 
       def block_from_body(node)
         _, args_node, body_node = node.children
+        _pre_num, _pre_init, _opt, _first_post, _post_num, _post_init, _rest, _kw, _kwrest, block_var = args_from_node(args_node)
 
-        _pre_num, _pre_init, _opt, _first_post, _post_num, _post_init, _rest, _kw, _kwrest, block = args_from_node(args_node)
+        # @type var body_node: node?
+        if body_node
+          yields = any_node?(body_node) {|n| n.type == :YIELD }
+        end
 
-        method_block = nil
+        if yields || block_var
+          required = true
 
-        if block
+          if body_node
+            if any_node?(body_node) {|n| n.type == :FCALL && n.children[0] == :block_given? && !n.children[1] }
+              required = false
+            end
+          end
+
+          if _rest == :* && block_var == :&
+            # ... is given
+            required = false
+          end
+
+          if block_var
+            if body_node
+              usage = NodeUsage.new(body_node)
+              if usage.each_conditional_node.any? {|n| n.type == :LVAR && n.children[0] == block_var }
+                required = false
+              end
+            end
+          end
+
           method_block = Types::Block.new(
-            required: false,
+            required: required,
             type: Types::Function.empty(untyped),
             self_type: nil
           )
-        end
 
-        if body_node
-          if (yields = any_node?(body_node) {|n| n.type == :YIELD })
-            method_block = Types::Block.new(
-              required: true,
-              type: Types::Function.empty(untyped),
-              self_type: nil
-            )
-
+          if yields
             yields.each do |yield_node|
               array_content = yield_node.children[0]&.children&.compact || []
 
