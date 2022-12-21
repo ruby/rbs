@@ -45,7 +45,7 @@ GEM
     rake (13.0.6)
     rake-compiler (1.2.1)
       rake
-    rdoc (6.4.0)
+    rdoc (6.5.0)
       psych (>= 4.0.0)
     regexp_parser (2.6.1)
     rexml (3.2.5)
@@ -105,7 +105,7 @@ DEPENDENCIES
   rake-compiler
   rbs!
   rbs-amber!
-  rdoc (< 6.5.0)
+  rdoc (< 6.6.0)
   rspec
   rubocop
   rubocop-rubycw
