@@ -2,6 +2,20 @@
 
 ## master
 
+## 2.8.2 (2022-12-21)
+
+### Signature updates
+
+* `YAML.load` ([#1170](https://github.com/ruby/rbs/pull/1170))
+
+### Library changes
+
+* Add the methods of the `prepend`ed module itself ([#1182](https://github.com/ruby/rbs/pull/1182))
+
+### Miscellaneous
+
+* Add `TestSkip` module to skip tests that fails in ruby CI ([#1167](https://github.com/ruby/rbs/pull/1167))
+
 ## 2.8.1 (2022-11-28)
 
 ### Signature updates

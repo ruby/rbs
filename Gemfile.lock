@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    rbs (2.8.1)
+    rbs (2.8.2)
 
 PATH
   remote: test/assets/test-gem
