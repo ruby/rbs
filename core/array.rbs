@@ -3689,61 +3689,6 @@ class Array[unchecked out Elem] < Object
 
   # <!--
   #   rdoc-file=array.c
-  #   - array.zip(*other_arrays) -> new_array
-  #   - array.zip(*other_arrays) {|other_array| ... } -> nil
-  # -->
-  # When no block given, returns a new Array `new_array` of size `self.size` whose
-  # elements are Arrays.
-  #
-  # Each nested array `new_array[n]` is of size `other_arrays.size+1`, and
-  # contains:
-  # *   The *nth* element of `self`.
-  # *   The *nth* element of each of the `other_arrays`.
-  #
-  #
-  # If all `other_arrays` and `self` are the same size:
-  #     a = [:a0, :a1, :a2, :a3]
-  #     b = [:b0, :b1, :b2, :b3]
-  #     c = [:c0, :c1, :c2, :c3]
-  #     d = a.zip(b, c)
-  #     d # => [[:a0, :b0, :c0], [:a1, :b1, :c1], [:a2, :b2, :c2], [:a3, :b3, :c3]]
-  #
-  # If any array in `other_arrays` is smaller than `self`, fills to `self.size`
-  # with `nil`:
-  #     a = [:a0, :a1, :a2, :a3]
-  #     b = [:b0, :b1, :b2]
-  #     c = [:c0, :c1]
-  #     d = a.zip(b, c)
-  #     d # => [[:a0, :b0, :c0], [:a1, :b1, :c1], [:a2, :b2, nil], [:a3, nil, nil]]
-  #
-  # If any array in `other_arrays` is larger than `self`, its trailing elements
-  # are ignored:
-  #     a = [:a0, :a1, :a2, :a3]
-  #     b = [:b0, :b1, :b2, :b3, :b4]
-  #     c = [:c0, :c1, :c2, :c3, :c4, :c5]
-  #     d = a.zip(b, c)
-  #     d # => [[:a0, :b0, :c0], [:a1, :b1, :c1], [:a2, :b2, :c2], [:a3, :b3, :c3]]
-  #
-  # When a block is given, calls the block with each of the sub-arrays (formed as
-  # above); returns nil
-  #     a = [:a0, :a1, :a2, :a3]
-  #     b = [:b0, :b1, :b2, :b3]
-  #     c = [:c0, :c1, :c2, :c3]
-  #     a.zip(b, c) {|sub_array| p sub_array} # => nil
-  #
-  # Output:
-  #     [:a0, :b0, :c0]
-  #     [:a1, :b1, :c1]
-  #     [:a2, :b2, :c2]
-  #     [:a3, :b3, :c3]
-  #
-  def zip: [U] (::Array[U] arg) -> ::Array[[ Elem, U? ]]
-         | (::Array[untyped] arg, *::Array[untyped] args) -> ::Array[::Array[untyped]]
-         | [U] (::Array[U] arg) { ([ Elem, U? ]) -> void } -> void
-         | (::Array[untyped] arg, *::Array[untyped] args) { (::Array[untyped]) -> void } -> void
-
-  # <!--
-  #   rdoc-file=array.c
   #   - array | other_array -> new_array
   # -->
   # Returns the union of `array` and Array `other_array`; duplicates are removed;

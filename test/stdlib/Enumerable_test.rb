@@ -83,11 +83,6 @@ class EnumerableTest < StdlibTest
     enumerable.each_entry { |x| x }
   end
 
-  def test_zip
-    enumerable.zip([4,5,6])
-    enumerable.zip([4,5,6]) { |arr| arr.sum }
-  end
-
   def test_chunk
     enumerable.chunk
     enumerable.chunk { |x| x.even? }
@@ -226,5 +221,19 @@ class EnumerableTest2 < Test::Unit::TestCase
     assert_send_type '() -> ::String?' , TestEmptyEnumerable.new, :first
     assert_send_type '(ToInt n) -> ::Array[::String]' , TestEnumerable.new, :first, ToInt.new(42)
     assert_send_type '(ToInt n) -> ::Array[::String]' , TestEmptyEnumerable.new, :first, ToInt.new(42)
+  end
+
+  def test_zip
+    assert_send_type "(Enumerator[Integer, Array[Integer]]) -> Array[[String, Integer?]]",
+                     TestEnumerable.new, :zip, [1, 2].to_enum
+    assert_send_type "(Enumerator[Integer, Array[Integer]]) -> Array[[String, Integer]]",
+                     TestEnumerable.new, :zip, [1, 2, 3, 4].to_enum
+    assert_send_type "(Enumerator[Integer, Array[Integer]], Array[Symbol]) -> Array[Array[untyped]]",
+                     TestEnumerable.new, :zip, [1, 2].to_enum, [:foo, :bar]
+
+    assert_send_type "(Enumerator[Integer, Array[Integer]]) { ([String, Integer?]) -> true } -> nil",
+                     TestEnumerable.new, :zip, [1, 2].to_enum do true end
+    assert_send_type "(Enumerator[Integer, Array[Integer]], Array[Symbol]) { ([String, Integer?, Symbol?]) -> true } -> nil",
+                     TestEnumerable.new, :zip, [1, 2].to_enum, [:foo, :bar] do true end
   end
 end
