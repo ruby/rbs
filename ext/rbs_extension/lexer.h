@@ -150,7 +150,7 @@ unsigned int peek(lexstate *state);
 /**
  * Skip one character.
  * */
-void skip(lexstate *state);
+void rbs_skip(lexstate *state);
 
 /**
  * Skip n characters.
