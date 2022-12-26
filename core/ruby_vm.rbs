@@ -51,3 +51,142 @@ RubyVM::OPTS: Array[String]
 #
 class RubyVM::InstructionSequence < Object
 end
+
+# <!-- rdoc-file=ast.rb -->
+# AbstractSyntaxTree provides methods to parse Ruby code into abstract syntax
+# trees. The nodes in the tree are instances of
+# RubyVM::AbstractSyntaxTree::Node.
+#
+# This module is MRI specific as it exposes implementation details of the MRI
+# abstract syntax tree.
+#
+# This module is experimental and its API is not stable, therefore it might
+# change without notice. As examples, the order of children nodes is not
+# guaranteed, the number of children nodes might change, there is no way to
+# access children nodes by name, etc.
+#
+# If you are looking for a stable API or an API working under multiple Ruby
+# implementations, consider using the *parser* gem or Ripper. If you would like
+# to make RubyVM::AbstractSyntaxTree stable, please join the discussion at
+# https://bugs.ruby-lang.org/issues/14844.
+#
+module RubyVM::AbstractSyntaxTree
+  # <!--
+  #   rdoc-file=ast.rb
+  #   - RubyVM::AbstractSyntaxTree.parse(string) -> RubyVM::AbstractSyntaxTree::Node
+  # -->
+  # Parses the given *string* into an abstract syntax tree, returning the root
+  # node of that tree.
+  #
+  # SyntaxError is raised if the given *string* is invalid syntax.
+  #
+  #     RubyVM::AbstractSyntaxTree.parse("x = 1 + 2")
+  #     # => #<RubyVM::AbstractSyntaxTree::Node:SCOPE@1:0-1:9>
+  #
+  def self.parse: (String string, ?keep_script_lines: bool, ?error_tolerant: bool, ?keep_tokens: bool) -> Node
+
+  # <!--
+  #   rdoc-file=ast.rb
+  #   - RubyVM::AbstractSyntaxTree.parse_file(pathname) -> RubyVM::AbstractSyntaxTree::Node
+  # -->
+  # Reads the file from *pathname*, then parses it like ::parse, returning the
+  # root node of the abstract syntax tree.
+  #
+  # SyntaxError is raised if *pathname*'s contents are not valid Ruby syntax.
+  #
+  #     RubyVM::AbstractSyntaxTree.parse_file("my-app/app.rb")
+  #     # => #<RubyVM::AbstractSyntaxTree::Node:SCOPE@1:0-31:3>
+  #
+  def self.parse_file: (String | Pathname string, ?keep_script_lines: bool, ?error_tolerant: bool, ?keep_tokens: bool) -> Node
+
+  # <!--
+  #   rdoc-file=ast.rb
+  #   - RubyVM::AbstractSyntaxTree.of(proc)   -> RubyVM::AbstractSyntaxTree::Node
+  #   - RubyVM::AbstractSyntaxTree.of(method) -> RubyVM::AbstractSyntaxTree::Node
+  # -->
+  # Returns AST nodes of the given *proc* or *method*.
+  #
+  #     RubyVM::AbstractSyntaxTree.of(proc {1 + 2})
+  #     # => #<RubyVM::AbstractSyntaxTree::Node:SCOPE@1:35-1:42>
+  #
+  #     def hello
+  #       puts "hello, world"
+  #     end
+  #
+  #     RubyVM::AbstractSyntaxTree.of(method(:hello))
+  #     # => #<RubyVM::AbstractSyntaxTree::Node:SCOPE@1:0-3:3>
+  #
+  def self.of: (Proc | Method | UnboundMethod body, ?keep_script_lines: bool, ?error_tolerant: bool, ?keep_tokens: bool) -> Node?
+
+  def self.node_id_for_backtrace_location: (Thread::Backtrace::Location backtrace_location) -> Integer
+
+  # <!-- rdoc-file=ast.rb -->
+  # RubyVM::AbstractSyntaxTree::Node instances are created by parse methods in
+  # RubyVM::AbstractSyntaxTree.
+  #
+  # This class is MRI specific.
+  #
+  class Node
+    # <!--
+    #   rdoc-file=ast.rb
+    #   - node.type -> symbol
+    # -->
+    # Returns the type of this node as a symbol.
+    #
+    #     root = RubyVM::AbstractSyntaxTree.parse("x = 1 + 2")
+    #     root.type # => :SCOPE
+    #     lasgn = root.children[2]
+    #     lasgn.type # => :LASGN
+    #     call = lasgn.children[1]
+    #     call.type # => :OPCALL
+    #
+    def type: () -> Symbol
+
+    # <!--
+    #   rdoc-file=ast.rb
+    #   - node.first_lineno -> integer
+    # -->
+    # The line number in the source code where this AST's text began.
+    #
+    def first_lineno: () -> Integer
+
+    # <!--
+    #   rdoc-file=ast.rb
+    #   - node.first_column -> integer
+    # -->
+    # The column number in the source code where this AST's text began.
+    #
+    def first_column: () -> Integer
+
+    # <!--
+    #   rdoc-file=ast.rb
+    #   - node.last_lineno -> integer
+    # -->
+    # The line number in the source code where this AST's text ended.
+    #
+    def last_lineno: () -> Integer
+
+    # <!--
+    #   rdoc-file=ast.rb
+    #   - node.last_column -> integer
+    # -->
+    # The column number in the source code where this AST's text ended.
+    #
+    def last_column: () -> Integer
+
+    def tokens: () -> Array[[Integer, Symbol, String, [Integer, Integer, Integer, Integer]]]?
+
+    def all_tokens: () -> Array[[Integer, Symbol, String, [Integer, Integer, Integer, Integer]]]?
+
+    # <!--
+    #   rdoc-file=ast.rb
+    #   - node.children -> array
+    # -->
+    # Returns AST nodes under this one.  Each kind of node has different children,
+    # depending on what kind of node it is.
+    #
+    # The returned array may contain other nodes or `nil`.
+    #
+    def children: () -> Array[untyped]
+  end
+end
