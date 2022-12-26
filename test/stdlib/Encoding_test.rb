@@ -73,8 +73,4 @@ class EncodingTest < StdlibTest
   def test_names
     Encoding::UTF_8.names
   end
-
-  def test_replicate
-    Encoding::UTF_8.replicate("a")
-  end
 end
