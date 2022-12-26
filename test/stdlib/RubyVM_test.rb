@@ -11,7 +11,7 @@ class RubyVM::AbstractSyntaxTreeSingletonTest < Test::Unit::TestCase
   end
 
   def test_parse_file
-    assert_send_type "(::String | ::Pathname string, ?keep_script_lines: bool, ?error_tolerant: bool, ?keep_tokens: bool) -> ::RubyVM::AbstractSyntaxTree::Node",
+    assert_send_type "(::String | ::_ToPath string, ?keep_script_lines: bool, ?error_tolerant: bool, ?keep_tokens: bool) -> ::RubyVM::AbstractSyntaxTree::Node",
                      RubyVM::AbstractSyntaxTree, :parse_file, __FILE__
   end
 
