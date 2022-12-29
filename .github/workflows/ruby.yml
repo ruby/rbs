@@ -37,7 +37,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - name: Set working directory as safe
-        run: /usr/bin/git config --global --add safe.directory $(pwd)
+        run: git config --global --add safe.directory $(pwd)
       - name: Install dependencies
         run: |
           apt-get update
