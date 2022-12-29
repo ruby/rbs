@@ -19,6 +19,10 @@ class RBS::SorterTest < Test::Unit::TestCase
           def x: () -> void
         end
 
+        interface _I
+          def i: () -> void
+        end
+
         include M2
         prepend M1
         extend M3
@@ -101,6 +105,10 @@ class RBS::SorterTest < Test::Unit::TestCase
         include M2
 
         extend M3
+
+        interface _I
+          def i: () -> void
+        end
 
         class B
           def x: () -> void

@@ -34,7 +34,7 @@ module RBS
         -3
       when Declarations::Constant
         -2
-      when Declarations::Class, Declarations::Module
+      when Declarations::Class, Declarations::Module, Declarations::Interface
         -1
       when Members::Include
         0.0
@@ -102,7 +102,7 @@ module RBS
         member.name.to_s
       when Declarations::TypeAlias
         member.name.to_s
-      when Declarations::Class, Declarations::Module
+      when Declarations::Class, Declarations::Module, Declarations::Interface
         member.name.to_s
       else
         raise
