@@ -6,6 +6,9 @@ on:
       - master
   pull_request: {}
 
+env:
+  LANG: 'C.UTF-8'
+
 jobs:
   test:
     runs-on: "ubuntu-latest"
