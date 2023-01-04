@@ -165,6 +165,18 @@ module RBS
               end
             end
 
+            if super_class&.name&.name == :Delegator &&
+              args != super_class.args
+              delegate_class = super_class.args[0]
+
+              build_instance(delegate_class.name).yield_self do |defn|
+                merge_definition(src: defn,
+                                dest: definition,
+                                subst: Substitution.build(defn.type_params, delegate_class.args),
+                                keep_super: true)
+                end
+            end
+
             if self_types = one_ancestors.self_types
               unless no_self_types
                 self_types.each do |ans|

@@ -1,0 +1,131 @@
+# This library provides three different ways to delegate method calls to an
+# object.  The easiest to use is SimpleDelegator.  Pass an object to the
+# constructor and all methods supported by the object will be delegated.  This
+# object can be changed later.
+#
+# Going a step further, the top level DelegateClass method allows you to easily
+# setup delegation through class inheritance.  This is considerably more
+# flexible and thus probably the most common use for this library.
+#
+# Finally, if you need full control over the delegation scheme, you can inherit
+# from the abstract class Delegator and customize as needed.  (If you find
+# yourself needing this control, have a look at Forwardable which is also in the
+# standard library.  It may suit your needs better.)
+#
+# SimpleDelegator's implementation serves as a nice example of the use of
+# Delegator:
+#
+#     require 'delegate'
+#
+#     class SimpleDelegator < Delegator
+#       def __getobj__
+#         @delegate_sd_obj # return object we are delegating to, required
+#       end
+#
+#       def __setobj__(obj)
+#         @delegate_sd_obj = obj # change delegation object,
+#                                # a feature we're providing
+#       end
+#     end
+#
+# ## Notes
+#
+# Be advised, RDoc will not detect delegated methods.
+class Delegator[A] < BasicObject
+  def self.const_missing: (Symbol | String n) -> untyped
+
+  def self.delegating_block: (String | Symbol mid) -> untyped
+
+  def self.public_api: () -> Array[Symbol]
+
+  public
+
+  # Delegates ! to the _*getobj*_
+  #
+  def !: () -> bool
+
+  # Returns true if two objects are not considered of equal value.
+  #
+  def !=: (untyped obj) -> bool
+
+  # Returns true if two objects are considered of equal value.
+  #
+  def ==: (untyped obj) -> bool
+
+  # This method must be overridden by subclasses and should return the object
+  # method calls are being delegated to.
+  #
+  def __getobj__: () -> A
+
+  # This method must be overridden by subclasses and change the object delegate to
+  # *obj*.
+  #
+  def __setobj__: (A obj) -> A
+
+  # Returns true if two objects are considered of equal value.
+  #
+  def eql?: (untyped obj) -> bool
+
+  # :method: freeze Freeze both the object returned by _*getobj*_ and self.
+  #
+  def freeze: () -> void
+
+  # Serialization support for the object returned by _*getobj*_.
+  #
+  def marshal_dump: () -> Array[untyped]
+
+  # Reinitializes delegation from a serialized object.
+  #
+  def marshal_load: (untyped data) -> A
+
+  def method_missing: (untyped m, *untyped args) { (*untyped) -> untyped } -> untyped
+
+  # Returns the methods available to this delegate object as the union of this
+  # object's and _*getobj*_ methods.
+  #
+  def methods: (?boolish all) -> Array[Symbol]
+
+  # Returns the methods available to this delegate object as the union of this
+  # object's and _*getobj*_ protected methods.
+  #
+  def protected_methods: (?boolish all) -> Array[Symbol]
+
+  # Returns the methods available to this delegate object as the union of this
+  # object's and _*getobj*_ public methods.
+  #
+  def public_methods: (?boolish all) -> Array[Symbol]
+
+  private
+
+  # Pass in the *obj* to delegate method calls to.  All methods supported by *obj*
+  # will be delegated to.
+  #
+  def initialize: (A obj) -> void
+
+  def initialize_clone: (A obj, ?freeze: bool) -> void
+
+  def initialize_dup: (A obj) -> void
+
+  # Checks for a method provided by this the delegate object by forwarding the
+  # call through _*getobj*_.
+  #
+  def respond_to_missing?: (Symbol m, bool include_private) -> bool
+
+  # Handle BasicObject instances
+  #
+  def target_respond_to?: (A target, Symbol m, bool include_private) -> bool
+
+  VERSION: String
+end
+
+class SimpleDelegator[A] < Delegator[A]
+  @delegate_sd_obj: A
+
+  def __getobj__: () -> A
+
+  def __setobj__: (A obj) -> A
+end
+
+module Kernel
+  def self?.DelegateClass: [A] (Class superclass) ?{ () -> singleton(Delegator) } -> singleton(Delegator)
+end
