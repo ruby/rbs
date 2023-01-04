@@ -16,7 +16,7 @@ module RBS
     attr_reader ancestor_builder: AncestorBuilder
     attr_reader method_builder: MethodBuilder
 
-    attr_reader instance_cache: Hash[[TypeName, bool], Definition | false | nil]
+    attr_reader instance_cache: Hash[TypeName, Definition | false | nil]
     attr_reader singleton_cache: Hash[TypeName, Definition | false | nil]
     attr_reader singleton0_cache: Hash[TypeName, Definition | false | nil]
     attr_reader interface_cache: Hash[TypeName, Definition | false | nil]
@@ -30,7 +30,7 @@ module RBS
     # If TypeName is a module and `no_self_types` is `true`, it won't have methods of _self type constraints_.
     # This typically happens when definition is being calculated for mixin.
     #
-    def build_instance: (TypeName, ?no_self_types: bool) -> Definition
+    def build_instance: (TypeName) -> Definition
 
     def build_singleton: (TypeName) -> Definition
 
@@ -40,6 +40,13 @@ module RBS
 
     def build_singleton0: (TypeName) -> Definition
 
+    # Returns `interface_methods` from given array of interface ancestors
+    #
+    #
+    def interface_methods: (Array[Definition::Ancestor::Instance] interface_ancestors) -> interface_methods
+
+    # Copies the methods, instance variables, and class variables from `src` Definition to `dest` Definition
+    #
     def merge_definition: (src: Definition, dest: Definition, subst: Substitution, ?implemented_in: :keep | TypeName | nil, ?keep_super: bool) -> void
 
     def merge_method: (TypeName, Hash[Symbol, Definition::Method], Symbol, Definition::Method, Substitution, ?implemented_in: :keep | TypeName | nil, ?keep_super: bool) -> void
@@ -47,7 +54,6 @@ module RBS
     def merge_variable: (Hash[Symbol, Definition::Variable], Symbol, Definition::Variable, Substitution, ?keep_super: bool) -> void
 
     def try_cache: (TypeName, cache: Hash[TypeName, Definition | false | nil]) { () -> Definition } -> Definition
-                 | [A] (TypeName, cache: Hash[A, Definition | false | nil], key: A) { () -> Definition } -> Definition
 
     def validate_params_with: (Array[AST::TypeParam], result: VarianceCalculator::Result) { (AST::TypeParam) -> void } -> void
 
@@ -56,6 +62,50 @@ module RBS
     def source_location: (Definition::Ancestor::Instance::source, AST::Declarations::t) -> Location[untyped, untyped]?
 
     def insert_variable: (TypeName, Hash[Symbol, Definition::Variable], name: Symbol, type: Types::t) -> void
+
+    # Add method definition to `methods`, which will be merged to `class_definition` after defining all methods at this *level* -- class, module, or interface
+    #
+    # `class_definition` is a definition of given type, but it has definitions of prior levels.
+    #
+    def define_method: (
+      Hash[Symbol, Definition::Method] methods,
+      Definition class_definition,
+      MethodBuilder::Methods::Definition method_definition,
+      Substitution subst,
+      defined_in: TypeName,
+      ?implemented_in: TypeName?
+    ) -> void
+
+    # The `interface_methods` type describes the association between the interface name to its name and the *mixin* to a module
+    #
+    type interface_methods = Hash[
+      Definition::Ancestor::Instance,
+      [MethodBuilder::Methods, AST::Members::Include | AST::Members::Extend]
+    ]
+
+    # Add method definitions from `module_methods` to `definition`
+    #
+    def import_methods: (
+      Definition definition,
+      TypeName module_name,
+      MethodBuilder::Methods module_methods,
+      interface_methods interface_methods,
+      Substitution subst
+    ) -> void
+
+    def define_singleton: (Definition definition, TypeName type_name) -> void
+
+    def define_instance: (Definition definition, TypeName type_name, Substitution subst) -> void
+
+    def define_interface: (Definition definition, TypeName type_name, Substitution subst) -> void
+
+    # Returns a substitution that corresponds to type application
+    #
+    # ```
+    # tapp_subst(`::Array`, [`::Integer`]) # => Subsitution.build([:Elem], [`::Integer`])
+    # ```
+    #
+    def tapp_subst: (TypeName, Array[Types::t]) -> Substitution
 
     # Add methods from `methods` to Definition
     #

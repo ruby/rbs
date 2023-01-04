@@ -2289,4 +2289,53 @@ end
       end
     end
   end
+
+  def test_include_super_overload
+    SignatureManager.new do |manager|
+      manager.files.merge!(Pathname("foo.rbs") => <<~EOF)
+        interface _WithFoo
+          def foo: () -> void
+        end
+
+        module M1 : _WithFoo
+          def foo: (String) -> void
+                 | ...
+        end
+
+        class Foo1
+          def foo: () -> void
+                 | (Integer) -> void
+        end
+
+        class Foo < Foo1
+          include M1
+        end
+      EOF
+
+      manager.build do |env|
+        builder = DefinitionBuilder.new(env: env)
+
+        builder.build_instance(type_name("::M1")).tap do |definition|
+          assert_equal(
+            [
+              parse_method_type("(::String) -> void"),
+              parse_method_type("() -> void"),
+            ],
+            definition.methods[:foo].defs.map(&:type)
+          )
+        end
+
+        builder.build_instance(type_name("::Foo")).tap do |definition|
+          assert_equal(
+            [
+              parse_method_type("(::String) -> void"),
+              parse_method_type("() -> void"),
+              parse_method_type("(::Integer) -> void")
+            ],
+            definition.methods[:foo].defs.map(&:type)
+          )
+        end
+      end
+    end
+  end
 end

@@ -38,5 +38,11 @@ module RBS
 
     # Returns true if given substitution is identity.
     def empty?: () -> bool
+
+    alias [] apply
+
+    # (s1 + s2)[t] == s2[s1[t]]
+    # 
+    def +: (Substitution) -> Substitution
   end
 end

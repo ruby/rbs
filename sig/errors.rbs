@@ -123,6 +123,23 @@ module RBS
     def other_locations: () -> Array[Location[untyped, untyped]?]
   end
 
+  # An interface mixin causes a duplication of a method definition
+  #
+  # ```rbs
+  # interface _Foo1
+  #   def foo: () -> void
+  # end
+  #
+  # interface _Foo2
+  #   def foo: () -> void
+  # end
+  #
+  # class Foo
+  #   include _Foo1
+  #   include _Foo2    # <= The error will be reported here (or the line of _Foo1)
+  # end
+  # ```
+  #
   class DuplicatedInterfaceMethodDefinitionError < DefinitionError
     type ty = Types::ClassSingleton | Types::ClassInstance | Types::Interface
     type mixin_member = AST::Members::Include | AST::Members::Extend
@@ -138,6 +155,8 @@ module RBS
     def qualified_method_name: () -> String
   end
 
+  # The `alias` member declares an alias from unknown method
+  #
   class UnknownMethodAliasError < DefinitionError
     attr_reader type_name: TypeName
     attr_reader original_name: Symbol
@@ -154,6 +173,8 @@ module RBS
     def initialize: (name: TypeName, entry: Environment::ClassEntry) -> void
   end
 
+  # The *overloading* method definition cannot find *non-overloading* method definition
+  # 
   class InvalidOverloadMethodError < DefinitionError
     attr_reader type_name: TypeName
     attr_reader method_name: Symbol
