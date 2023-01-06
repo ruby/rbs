@@ -2,6 +2,13 @@
 
 ## master
 
+## 2.8.3 (2023-01-06)
+
+### Library changes
+
+* Use `-std=gnu99` instead of `-std=c99` ([#973](https://github.com/ruby/rbs/pull/973))
+* Add `rbs_` prefix to `skip` function ([#1186](https://github.com/ruby/rbs/pull/1186))
+
 ## 2.8.2 (2022-12-21)
 
 ### Signature updates
