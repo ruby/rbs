@@ -437,16 +437,6 @@ class Encoding < Object
 
   # <!--
   #   rdoc-file=encoding.c
-  #   - enc.replicate(name) -> encoding
-  # -->
-  # Returns a replicated encoding of *enc* whose name is *name*. The new encoding
-  # should have the same byte structure of *enc*. If *name* is used by another
-  # encoding, raise ArgumentError.
-  #
-  def replicate: (String name) -> Encoding
-
-  # <!--
-  #   rdoc-file=encoding.c
   #   - enc.name -> string
   #   - enc.to_s -> string
   # -->
