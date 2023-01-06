@@ -12,7 +12,7 @@ start:
       re2c:flags:input = custom;
       re2c:define:YYCTYPE = "unsigned int";
       re2c:define:YYPEEK = "peek(state)";
-      re2c:define:YYSKIP = "skip(state);";
+      re2c:define:YYSKIP = "rbs_skip(state);";
       re2c:define:YYBACKUP = "backup = *state;";
       re2c:define:YYRESTORE = "*state = backup;";
       re2c:yyfill:enable  = 0;

@@ -122,7 +122,7 @@ token next_token(lexstate *state, enum TokenType type) {
   return t;
 }
 
-void skip(lexstate *state) {
+void rbs_skip(lexstate *state) {
   if (!state->last_char) {
     peek(state);
   }
@@ -143,7 +143,7 @@ void skip(lexstate *state) {
 void skipn(lexstate *state, size_t size) {
   for (size_t i = 0; i < size; i ++) {
     peek(state);
-    skip(state);
+    rbs_skip(state);
   }
 }
 
