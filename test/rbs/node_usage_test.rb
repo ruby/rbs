@@ -24,12 +24,12 @@ class RBS::NodeUsageTest < Test::Unit::TestCase
       a ||= b
       a += 123
 
-      x = 1
+      _x = 1
       @y = 2
       Z = 3
       Z::Z1 = 4
 
-      x, y, z = foo
+      _x, _y, _z = foo
 
       puts unless foo
 

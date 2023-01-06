@@ -50,6 +50,8 @@ module RBS
       end
     end
 
+    alias [] apply
+
     def without(*vars)
       Substitution.new.tap do |subst|
         subst.mapping.merge!(mapping)
@@ -58,6 +60,23 @@ module RBS
         end
 
         subst.instance_type = self.instance_type
+      end
+    end
+
+    def +(other)
+      return self if other.empty?
+      return other if self.empty?
+
+      Substitution.new.tap do |subst|
+        subst.mapping.merge!(mapping)
+
+        other.mapping.each do |var, type|
+          if mapping.key?(var)
+            subst.add(from: var, to: self[type])
+          else
+            subst.add(from: var, to: type)
+          end
+        end
       end
     end
   end
