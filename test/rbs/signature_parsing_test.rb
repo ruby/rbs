@@ -2053,4 +2053,40 @@ end
             EOF
     end
   end
+
+  def test_module_alias_decl
+    Parser.parse_signature(<<~EOF).yield_self do |decls|
+        module RBS::Kernel = Kernel
+      EOF
+
+      decls[0].tap do |decl|
+        assert_instance_of Declarations::ModuleAlias, decl
+
+        assert_equal TypeName("RBS::Kernel"), decl.new_name
+        assert_equal TypeName("Kernel"), decl.old_name
+        assert_equal "module", decl.location[:keyword].source
+        assert_equal "RBS::Kernel", decl.location[:new_name].source
+        assert_equal "=", decl.location[:eq].source
+        assert_equal "Kernel", decl.location[:old_name].source
+      end
+    end
+  end
+
+  def test_class_alias_decl
+    Parser.parse_signature(<<~EOF).yield_self do |decls|
+        class RBS::Object = Object
+      EOF
+
+      decls[0].tap do |decl|
+        assert_instance_of Declarations::ClassAlias, decl
+
+        assert_equal TypeName("RBS::Object"), decl.new_name
+        assert_equal TypeName("Object"), decl.old_name
+        assert_equal "class", decl.location[:keyword].source
+        assert_equal "RBS::Object", decl.location[:new_name].source
+        assert_equal "=", decl.location[:eq].source
+        assert_equal "Object", decl.location[:old_name].source
+      end
+    end
+  end
 end
