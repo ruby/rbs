@@ -69,31 +69,39 @@ module RBS
       def context: () -> Array[Namespace]
     end
 
-    # Top level declarations.
+    # Top level declarations
     attr_reader declarations: Array[AST::Declarations::t]
 
+    # Class declarations
     attr_reader class_decls: Hash[TypeName, ModuleEntry | ClassEntry]
+
+    # Interface declarations
     attr_reader interface_decls: Hash[TypeName, SingleEntry[TypeName, AST::Declarations::Interface]]
+
+    # Type alias declarations
     attr_reader alias_decls: Hash[TypeName, SingleEntry[TypeName, AST::Declarations::Alias]]
+
+    # Constant declarations
     attr_reader constant_decls: Hash[TypeName, SingleEntry[TypeName, AST::Declarations::Constant]]
+
+    # Global declarations
     attr_reader global_decls: Hash[Symbol, SingleEntry[Symbol, AST::Declarations::Global]]
 
     def initialize: () -> void
 
     def initialize_copy: (Environment) -> void
 
+    # Construct an environment from EnvironmentLoader
+    #
     def self.from_loader: (EnvironmentLoader) -> Environment
 
-    def cache_name: [N, D] (Hash[N, SingleEntry[N, D]] cache, name: N, decl: D, outer: Array[module_decl]) -> SingleEntry[N, D]
-
-    def insert_decl: (AST::Declarations::t, outer: Array[module_decl], namespace: Namespace) -> void
-
-    # Insert a toplevel declaration into the env.
+    # Insert a toplevel declaration into the environment
     #
     def <<: (AST::Declarations::t decl) -> self
 
-    # Runs generics type params validation over each class definitions.
-    def validate_type_params: () -> void
+    # Insert a declaration into the environment
+    #
+    def insert_decl: (AST::Declarations::t, outer: Array[module_decl], namespace: Namespace) -> void
 
     # Resolve all type names in the environment to absolute type names.
     # Relative type name will be left if absolute type name cannot be found.
@@ -102,18 +110,6 @@ module RBS
     # This helps running resolution faster in the case of _partial updates_.
     #
     def resolve_type_names: (?only: Set[AST::Declarations::t]?) -> Environment
-
-    def resolve_declaration: (TypeNameResolver resolver, AST::Declarations::t decl, outer: Array[module_decl], prefix: Namespace) -> AST::Declarations::t
-
-    def resolve_member: (TypeNameResolver, AST::Members::t, context: Array[Namespace]) -> AST::Members::t
-
-    def resolve_method_type: (TypeNameResolver, RBS::MethodType, context: Array[Namespace]) -> RBS::MethodType
-
-    def resolve_type_params: (TypeNameResolver resolver, Array[AST::TypeParam], context: Array[Namespace]) ->  Array[AST::TypeParam]
-
-    def absolute_type: (TypeNameResolver, Types::t, context: Array[Namespace]) -> Types::t
-
-    def absolute_type_name: (TypeNameResolver, TypeName, context: Array[Namespace]) -> TypeName
 
     def inspect: () -> String
 
@@ -127,5 +123,24 @@ module RBS
     # Construction of new environment is done with `<<` so that nested declarations will work well.
     #
     def reject: () { (AST::Declarations::t) -> boolish } -> Environment
+
+    private
+
+    def cache_name: [N, D] (Hash[N, SingleEntry[N, D]] cache, name: N, decl: D, outer: Array[module_decl]) -> SingleEntry[N, D]
+
+    def resolve_declaration: (TypeNameResolver resolver, AST::Declarations::t decl, outer: Array[module_decl], prefix: Namespace) -> AST::Declarations::t
+
+    def resolve_member: (TypeNameResolver, AST::Members::t, context: Array[Namespace]) -> AST::Members::t
+
+    def resolve_method_type: (TypeNameResolver, RBS::MethodType, context: Array[Namespace]) -> RBS::MethodType
+
+    def resolve_type_params: (TypeNameResolver resolver, Array[AST::TypeParam], context: Array[Namespace]) ->  Array[AST::TypeParam]
+
+    # Runs generics type params validation over each class definitions
+    def validate_type_params: () -> void
+
+    def absolute_type: (TypeNameResolver, Types::t, context: Array[Namespace]) -> Types::t
+
+    def absolute_type_name: (TypeNameResolver, TypeName, context: Array[Namespace]) -> TypeName
   end
 end
