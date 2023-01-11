@@ -151,6 +151,46 @@ module RBS
       end
     end
 
+    def interface_name?(name)
+      name.absolute? or raise "Absolute type name is expected: #{name}"
+      interface_decls.key?(name)
+    end
+
+    def type_alias_name?(name)
+      name.absolute? or raise "Absolute type name is expected: #{name}"
+      type_alias_decls.key?(name)
+    end
+
+    def module_name?(name)
+      name.absolute? or raise "Absolute type name is expected: #{name}"
+      class_decls.key?(name)
+    end
+
+    def type_name?(name)
+      interface_name?(name) ||
+        type_alias_name?(name) ||
+        module_name?(name)
+    end
+
+    def constant_name?(name)
+      constant_decl?(name) || module_name?(name)
+    end
+
+    def constant_decl?(name)
+      name.absolute? or raise "Absolute type name is expected: #{name}"
+      constant_decls.key?(name)
+    end
+
+    def class_decl?(name)
+      name.absolute? or raise "Absolute type name is expected: #{name}"
+      class_decls[name].is_a?(ClassEntry)
+    end
+
+    def module_decl?(name)
+      name.absolute? or raise "Absolute type name is expected: #{name}"
+      class_decls[name].is_a?(ModuleEntry)
+    end
+
     def cache_name(cache, name:, decl:, outer:)
       if cache.key?(name)
         raise DuplicatedDeclarationError.new(_ = name, _ = decl, _ = cache[name].decl)

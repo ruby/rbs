@@ -124,6 +124,38 @@ module RBS
     #
     def reject: () { (AST::Declarations::t) -> boolish } -> Environment
 
+    # Returns true if an interface with the type name is defined
+    #
+    def interface_name?: (TypeName) -> bool
+
+    # Returns true if a type alias with the type name is defined
+    #
+    def type_alias_name?: (TypeName) -> bool
+
+    # Returns true if a module or class with the type name is defined
+    #
+    def module_name?: (TypeName) -> bool
+
+    # Returns true if the type name is defined
+    #
+    def type_name?: (TypeName) -> bool
+
+    # Returns if a constant of the name is defined
+    #
+    def constant_name?: (TypeName) -> bool
+
+    # Returns true if the type name is defined by constant declaration
+    # 
+    def constant_decl?: (TypeName) -> bool
+
+    # Returns true if the type name is defined by class declaration
+    #
+    def class_decl?: (TypeName) -> bool
+
+    # Returns true if the type name is defined by module declaration
+    #
+    def module_decl?: (TypeName) -> bool
+
     private
 
     def cache_name: [N, D] (Hash[N, SingleEntry[N, D]] cache, name: N, decl: D, outer: Array[module_decl]) -> SingleEntry[N, D]
