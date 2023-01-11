@@ -1,7 +1,7 @@
 module RBS
   module AST
     module Declarations
-      type t = Class | Module | Interface | Constant | Global | Alias
+      type t = Class | Module | Interface | Constant | Global | TypeAlias
 
       class Base
       end
@@ -166,7 +166,7 @@ module RBS
         include _ToJson
       end
 
-      class Alias < Base
+      class TypeAlias < Base
         # type loc[T] = Location[T, bot]
         # ^^^^                            keyword
         #      ^^^                        name

@@ -265,7 +265,7 @@ module RBS
         end
       end
 
-      class Alias < Base
+      class TypeAlias < Base
         attr_reader :name
         attr_reader :type_params
         attr_reader :type
@@ -283,7 +283,7 @@ module RBS
         end
 
         def ==(other)
-          other.is_a?(Alias) &&
+          other.is_a?(TypeAlias) &&
             other.name == name &&
             other.type_params == type_params &&
             other.type == type

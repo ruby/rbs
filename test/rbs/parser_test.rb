@@ -237,7 +237,7 @@ end
         assert_instance_of RBS::AST::Declarations::Module, decl
 
         decl.members[0].tap do |member|
-          assert_instance_of RBS::AST::Declarations::Alias, member
+          assert_instance_of RBS::AST::Declarations::TypeAlias, member
           assert_instance_of RBS::Types::ClassInstance, member.type
         end
 

@@ -10,7 +10,7 @@ VALUE RBS_AST_TypeParam;
 
 VALUE RBS_AST_Declarations;
 
-VALUE RBS_AST_Declarations_Alias;
+VALUE RBS_AST_Declarations_TypeAlias;
 VALUE RBS_AST_Declarations_Constant;
 VALUE RBS_AST_Declarations_Global;
 VALUE RBS_AST_Declarations_Interface;
@@ -80,7 +80,7 @@ void rbs__init_constants(void) {
 
   RBS_AST_Declarations = rb_const_get(RBS_AST, rb_intern("Declarations"));
 
-  RBS_AST_Declarations_Alias = rb_const_get(RBS_AST_Declarations, rb_intern("Alias"));
+  RBS_AST_Declarations_TypeAlias = rb_const_get(RBS_AST_Declarations, rb_intern("TypeAlias"));
   RBS_AST_Declarations_Constant = rb_const_get(RBS_AST_Declarations, rb_intern("Constant"));
   RBS_AST_Declarations_Global = rb_const_get(RBS_AST_Declarations, rb_intern("Global"));
   RBS_AST_Declarations_Interface = rb_const_get(RBS_AST_Declarations, rb_intern("Interface"));

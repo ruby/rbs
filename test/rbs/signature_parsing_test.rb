@@ -20,7 +20,7 @@ class RBS::SignatureParsingTest < Test::Unit::TestCase
 
       type_decl = decls[0]
 
-      assert_instance_of Declarations::Alias, type_decl
+      assert_instance_of Declarations::TypeAlias, type_decl
       assert_equal TypeName.new(name: :foo, namespace: Namespace.parse("Steep")), type_decl.name
       assert_equal [], type_decl.type_params.each.map(&:name)
       assert_equal Types::Bases::Any.new(location: nil), type_decl.type
@@ -42,7 +42,7 @@ RBS
 
       type_decl = decls[0]
 
-      assert_instance_of Declarations::Alias, type_decl
+      assert_instance_of Declarations::TypeAlias, type_decl
       assert_equal TypeName("optional"), type_decl.name
       assert_equal [:A], type_decl.type_params.each.map(&:name)
       assert_equal parse_type("A?", variables: [:A]), type_decl.type
@@ -55,7 +55,7 @@ class Foo[A]
 end
 RBS
       decls[0].members[0].tap do |type_decl|
-        assert_instance_of Declarations::Alias, type_decl
+        assert_instance_of Declarations::TypeAlias, type_decl
         assert_equal TypeName("bar"), type_decl.name
         assert_equal [], type_decl.type_params.each.map(&:name)
         assert_instance_of Types::ClassInstance, type_decl.type
@@ -73,7 +73,7 @@ RBS
       assert_equal 2, decls.size
 
       decls[0].tap do |type_decl|
-        assert_instance_of Declarations::Alias, type_decl
+        assert_instance_of Declarations::TypeAlias, type_decl
 
         type_decl.type_params[0].tap do |param|
           assert_equal :T, param.name
@@ -83,7 +83,7 @@ RBS
       end
 
       decls[1].tap do |type_decl|
-        assert_instance_of Declarations::Alias, type_decl
+        assert_instance_of Declarations::TypeAlias, type_decl
 
         type_decl.type_params[0].tap do |param|
           assert_equal :T, param.name
@@ -819,7 +819,7 @@ end
       end
 
       decls[3].yield_self do |decl|
-        assert_instance_of Declarations::Alias, decl
+        assert_instance_of Declarations::TypeAlias, decl
 
         assert_equal "bar is okay", decl.annotations[0].string
         assert_equal "%a|bar is okay|", decl.annotations[0].location.source
@@ -1235,7 +1235,7 @@ EOF
       assert_equal 6, mod.members.size
 
       assert_instance_of Declarations::Constant, mod.members[0]
-      assert_instance_of Declarations::Alias, mod.members[1]
+      assert_instance_of Declarations::TypeAlias, mod.members[1]
       assert_instance_of Members::MethodDefinition, mod.members[2]
       assert_instance_of Declarations::Class, mod.members[3]
       assert_instance_of Declarations::Module, mod.members[4]

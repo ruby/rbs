@@ -9,7 +9,7 @@ extern VALUE RBS_AST_Comment;
 extern VALUE RBS_AST_TypeParam;
 
 extern VALUE RBS_AST_Declarations;
-extern VALUE RBS_AST_Declarations_Alias;
+extern VALUE RBS_AST_Declarations_TypeAlias;
 extern VALUE RBS_AST_Declarations_Class_Super;
 extern VALUE RBS_AST_Declarations_Class;
 extern VALUE RBS_AST_Declarations_Constant;

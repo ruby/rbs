@@ -85,7 +85,7 @@ type u_2 = string & u & Numeric
       manager.build do |env|
         resolver = RBS::TypeNameResolver.from_env(env)
         validator = RBS::Validator.new(env: env, resolver: resolver)
-        env.alias_decls.each do |name, decl|
+        env.type_alias_decls.each do |name, decl|
           assert_raises RBS::RecursiveTypeAliasError do
             validator.validate_type_alias(entry: decl)
           end
@@ -109,7 +109,7 @@ type record = { foo: record }
         resolver = RBS::TypeNameResolver.from_env(env)
         validator = RBS::Validator.new(env: env, resolver: resolver)
 
-        env.alias_decls.each do |name, entry|
+        env.type_alias_decls.each do |name, entry|
           validator.validate_type_alias(entry: entry)
         end
       end
@@ -130,14 +130,14 @@ type baz[out T] = ^(T) -> void
         resolver = RBS::TypeNameResolver.from_env(env)
         validator = RBS::Validator.new(env: env, resolver: resolver)
 
-        validator.validate_type_alias(entry: env.alias_decls[type_name("::foo")])
+        validator.validate_type_alias(entry: env.type_alias_decls[type_name("::foo")])
 
         assert_raises RBS::NonregularTypeAliasError do
-          validator.validate_type_alias(entry: env.alias_decls[type_name("::bar")])
+          validator.validate_type_alias(entry: env.type_alias_decls[type_name("::bar")])
         end
 
         assert_raises RBS::InvalidVarianceAnnotationError do
-          validator.validate_type_alias(entry: env.alias_decls[type_name("::baz")])
+          validator.validate_type_alias(entry: env.type_alias_decls[type_name("::baz")])
         end
       end
     end
@@ -155,10 +155,10 @@ type bar[T < _Foo[S], S < _Bar[T]] = nil
         resolver = RBS::TypeNameResolver.from_env(env)
         validator = RBS::Validator.new(env: env, resolver: resolver)
 
-        validator.validate_type_alias(entry: env.alias_decls[type_name("::foo")])
+        validator.validate_type_alias(entry: env.type_alias_decls[type_name("::foo")])
 
         error = assert_raises(RBS::CyclicTypeParameterBound) do
-          validator.validate_type_alias(entry: env.alias_decls[type_name("::bar")])
+          validator.validate_type_alias(entry: env.type_alias_decls[type_name("::bar")])
         end
 
         assert_equal error.type_name, TypeName("::bar")
@@ -180,7 +180,7 @@ type foo[unchecked out A, unchecked in B] = Foo[A, B]
         resolver = RBS::TypeNameResolver.from_env(env)
         validator = RBS::Validator.new(env: env, resolver: resolver)
 
-        validator.validate_type_alias(entry: env.alias_decls[type_name("::foo")])
+        validator.validate_type_alias(entry: env.type_alias_decls[type_name("::foo")])
       end
     end
   end
@@ -196,11 +196,11 @@ type foo = bar
         validator = RBS::Validator.new(env: env, resolver: resolver)
 
         # No error is raised.
-        validator.validate_type_alias(entry: env.alias_decls[type_name("::foo")])
+        validator.validate_type_alias(entry: env.type_alias_decls[type_name("::foo")])
 
         # Passing a block and validating the given type raises an error.
         assert_raises RBS::NoTypeFoundError do
-          validator.validate_type_alias(entry: env.alias_decls[type_name("::foo")]) do |type|
+          validator.validate_type_alias(entry: env.type_alias_decls[type_name("::foo")]) do |type|
             validator.validate_type(type, context: [])
           end
         end

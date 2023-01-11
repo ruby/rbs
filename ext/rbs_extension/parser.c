@@ -1277,7 +1277,7 @@ VALUE parse_type_decl(parserstate *state, position comment_pos, VALUE annotation
 
   parser_pop_typevar_table(state);
 
-  return rbs_ast_decl_alias(
+  return rbs_ast_decl_type_alias(
     typename,
     type_params,
     type,

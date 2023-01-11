@@ -6,7 +6,7 @@ module RBS
 
     attr_reader :class_decls
     attr_reader :interface_decls
-    attr_reader :alias_decls
+    attr_reader :type_alias_decls
     attr_reader :constant_decls
     attr_reader :global_decls
 
@@ -201,7 +201,7 @@ module RBS
       when AST::Declarations::Interface
         cache_name interface_decls, name: decl.name.with_prefix(namespace), decl: decl, outer: outer
 
-      when AST::Declarations::Alias
+      when AST::Declarations::TypeAlias
         cache_name type_alias_decls, name: decl.name.with_prefix(namespace), decl: decl, outer: outer
 
       when AST::Declarations::Constant
@@ -339,8 +339,8 @@ module RBS
           location: decl.location,
           annotations: decl.annotations
         )
-      when AST::Declarations::Alias
-        AST::Declarations::Alias.new(
+      when AST::Declarations::TypeAlias
+        AST::Declarations::TypeAlias.new(
           name: decl.name.with_prefix(prefix),
           type_params: resolve_type_params(resolver, decl.type_params, context: context),
           type: absolute_type(resolver, decl.type, context: context),

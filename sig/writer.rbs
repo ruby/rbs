@@ -108,7 +108,7 @@ module RBS
 
     def name_and_args: (TypeName, Array[Types::t]) -> String?
 
-    def write_alias: (AST::Declarations::Alias) -> void
+    def write_alias: (AST::Declarations::TypeAlias) -> void
 
     def method_name: (Symbol) -> String
 
