@@ -57,7 +57,7 @@ module RBS
     end
 
     def build_alias_type(name)
-      entry = env.alias_decls[name] or return
+      entry = env.type_alias_decls[name] or return
       unless entry.decl.type_params.empty?
         as = entry.decl.type_params.each.map {|param| Types::Variable.new(name: param.name, location: nil) }
         Types::Alias.new(name: name, args: as, location: nil)

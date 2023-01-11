@@ -108,7 +108,7 @@ module RBS
     end
 
     def in_type_alias(name:)
-      decl = env.alias_decls[name].decl or raise
+      decl = env.type_alias_decls[name].decl or raise
       variables = decl.type_params.each.map(&:name)
       Result.new(variables: variables).tap do |result|
         type(decl.type, result: result, context: :covariant)
@@ -139,7 +139,7 @@ module RBS
                       when Types::Interface
                         env.interface_decls[type.name].decl.type_params
                       when Types::Alias
-                        env.alias_decls[type.name].decl.type_params
+                        env.type_alias_decls[type.name].decl.type_params
                       end
 
         type.args.each.with_index do |ty, i|

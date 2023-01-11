@@ -129,7 +129,7 @@ module RBS
 
       @class_decls = {}
       @interface_decls = {}
-      @alias_decls = {}
+      @type_alias_decls = {}
       @constant_decls = {}
       @global_decls = {}
     end
@@ -140,7 +140,7 @@ module RBS
 
       @class_decls = other.class_decls.dup
       @interface_decls = other.interface_decls.dup
-      @alias_decls = other.alias_decls.dup
+      @type_alias_decls = other.type_alias_decls.dup
       @constant_decls = other.constant_decls.dup
       @global_decls = other.global_decls.dup
     end
@@ -202,7 +202,7 @@ module RBS
         cache_name interface_decls, name: decl.name.with_prefix(namespace), decl: decl, outer: outer
 
       when AST::Declarations::Alias
-        cache_name alias_decls, name: decl.name.with_prefix(namespace), decl: decl, outer: outer
+        cache_name type_alias_decls, name: decl.name.with_prefix(namespace), decl: decl, outer: outer
 
       when AST::Declarations::Constant
         name = decl.name.with_prefix(namespace)

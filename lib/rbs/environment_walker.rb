@@ -36,7 +36,7 @@ module RBS
       env.interface_decls.each_key do |type_name|
         yield TypeNameNode.new(type_name: type_name)
       end
-      env.alias_decls.each_key do |type_name|
+      env.type_alias_decls.each_key do |type_name|
         yield TypeNameNode.new(type_name: type_name)
       end
     end

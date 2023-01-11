@@ -15,7 +15,7 @@ module RBS
     def self.from_env(env)
       new.add_names(env.class_decls.keys)
         .add_names(env.interface_decls.keys)
-        .add_names(env.alias_decls.keys)
+        .add_names(env.type_alias_decls.keys)
     end
 
     def add_names(names)

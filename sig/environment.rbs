@@ -79,7 +79,7 @@ module RBS
     attr_reader interface_decls: Hash[TypeName, SingleEntry[TypeName, AST::Declarations::Interface]]
 
     # Type alias declarations
-    attr_reader alias_decls: Hash[TypeName, SingleEntry[TypeName, AST::Declarations::Alias]]
+    attr_reader type_alias_decls: Hash[TypeName, SingleEntry[TypeName, AST::Declarations::Alias]]
 
     # Constant declarations
     attr_reader constant_decls: Hash[TypeName, SingleEntry[TypeName, AST::Declarations::Constant]]

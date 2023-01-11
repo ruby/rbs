@@ -32,7 +32,7 @@ module RBS
       # Initialize dependencies as an empty hash
       @dependencies = {}
       # Iterate over alias declarations inserted into environment
-      env.alias_decls.each do |name, entry|
+      env.type_alias_decls.each do |name, entry|
         # Construct a directed graph by recursively extracting type aliases
         @direct_dependencies[name] = direct_dependency(entry.decl.type)
         # Initialize dependencies with an empty hash

@@ -123,7 +123,7 @@ module RBS
             when type_name.class?
               env.class_decls
             when type_name.alias?
-              env.alias_decls
+              env.type_alias_decls
             when type_name.interface?
               env.interface_decls
             else
