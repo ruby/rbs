@@ -69,7 +69,10 @@ FileList["test/stdlib/**/*_test.rb"].each do |test|
   task test => :compile do
     sh "#{ruby} -Ilib #{bin}/test_runner.rb #{test}"
   end
-  task stdlib_test: test
+end
+
+task :stdlib_test do
+  sh "#{ruby} -Ilib #{bin}/test_runner.rb #{FileList['test/stdlib/**/*_test.rb'].join(' ')}"
 end
 
 task :rubocop do
