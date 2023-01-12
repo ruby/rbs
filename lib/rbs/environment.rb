@@ -204,7 +204,7 @@ module RBS
       when AST::Declarations::Class, AST::Declarations::Module
         name = decl.name.with_prefix(namespace)
 
-        if constant_decls.key?(name)
+        if constant_decl?(name)
           raise DuplicatedDeclarationError.new(name, decl, constant_decls[name].decl)
         end
 
@@ -247,7 +247,7 @@ module RBS
       when AST::Declarations::Constant
         name = decl.name.with_prefix(namespace)
 
-        if class_decls.key?(name)
+        if module_name?(name)
           raise DuplicatedDeclarationError.new(name, decl, class_decls[name].decls[0].decl)
         end
 

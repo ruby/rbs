@@ -119,19 +119,7 @@ module RBS
     end
 
     def self.check!(type_name, env:, location:)
-      dic = case
-            when type_name.class?
-              env.class_decls
-            when type_name.alias?
-              env.type_alias_decls
-            when type_name.interface?
-              env.interface_decls
-            else
-              raise
-            end
-
-      dic.key?(type_name) or raise new(type_name: type_name, location: location)
-
+      env.type_name?(type_name) or raise new(type_name: type_name, location: location)
       type_name
     end
   end
@@ -148,7 +136,7 @@ module RBS
     end
 
     def self.check!(type_name, env:, location:)
-      if decl = env.class_decls[type_name]
+      if env.module_name?(type_name)
         return
       end
 
@@ -166,7 +154,7 @@ module RBS
     end
 
     def self.check!(super_decl, env:)
-      return if env.class_decls[super_decl.name].is_a?(Environment::ClassEntry)
+      return if env.class_decl?(super_decl.name)
 
       raise new(super_decl)
     end
@@ -186,16 +174,7 @@ module RBS
     def self.check!(self_type, env:)
       type_name = self_type.name
 
-      dic = case
-            when type_name.class?
-              env.class_decls
-            when type_name.interface?
-              env.interface_decls
-            else
-              raise
-            end
-
-      dic.key?(type_name) or raise new(type_name: type_name, location: self_type.location)
+      (env.module_name?(type_name) || env.interface_name?(type_name)) or raise new(type_name: type_name, location: self_type.location)
     end
   end
 
@@ -215,16 +194,7 @@ module RBS
     end
 
     def self.check!(type_name, env:, member:)
-      dic = case
-            when type_name.class?
-              env.class_decls
-            when type_name.interface?
-              env.interface_decls
-            else
-              raise
-            end
-
-      dic.key?(type_name) or raise new(type_name: type_name, member: member)
+      (env.module_name?(type_name) || env.interface_name?(type_name)) or raise new(type_name: type_name, member: member)
     end
   end
 
@@ -416,8 +386,7 @@ module RBS
     end
 
     def self.check!(type_name:, env:, member:)
-      case env.class_decls[member.name]
-      when Environment::ClassEntry
+      if env.class_decl?(member.name)
         raise new(type_name: type_name, member: member)
       end
     end
