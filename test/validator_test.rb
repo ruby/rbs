@@ -25,9 +25,9 @@ type ty = String | Integer
       EOF
 
       manager.build do |env|
-        root = [Namespace.root]
+        root = nil
 
-        resolver = RBS::TypeNameResolver.from_env(env)
+        resolver = RBS::Resolver::TypeNameResolver.new(env)
         validator = RBS::Validator.new(env: env, resolver: resolver)
 
         validator.validate_type(parse_type("::Foo"), context: root)
@@ -83,7 +83,7 @@ type u_2 = string & u & Numeric
       EOF
 
       manager.build do |env|
-        resolver = RBS::TypeNameResolver.from_env(env)
+        resolver = RBS::Resolver::TypeNameResolver.new(env)
         validator = RBS::Validator.new(env: env, resolver: resolver)
         env.type_alias_decls.each do |name, decl|
           assert_raises RBS::RecursiveTypeAliasError do
@@ -106,7 +106,7 @@ type proc = ^(proc) -> proc
 type record = { foo: record }
       EOF
       manager.build do |env|
-        resolver = RBS::TypeNameResolver.from_env(env)
+        resolver = RBS::Resolver::TypeNameResolver.new(env)
         validator = RBS::Validator.new(env: env, resolver: resolver)
 
         env.type_alias_decls.each do |name, entry|
@@ -127,7 +127,7 @@ type baz[out T] = ^(T) -> void
       EOF
 
       manager.build do |env|
-        resolver = RBS::TypeNameResolver.from_env(env)
+        resolver = RBS::Resolver::TypeNameResolver.new(env)
         validator = RBS::Validator.new(env: env, resolver: resolver)
 
         validator.validate_type_alias(entry: env.type_alias_decls[type_name("::foo")])
@@ -152,7 +152,7 @@ type bar[T < _Foo[S], S < _Bar[T]] = nil
       EOF
 
       manager.build do |env|
-        resolver = RBS::TypeNameResolver.from_env(env)
+        resolver = RBS::Resolver::TypeNameResolver.new(env)
         validator = RBS::Validator.new(env: env, resolver: resolver)
 
         validator.validate_type_alias(entry: env.type_alias_decls[type_name("::foo")])
@@ -177,7 +177,7 @@ type foo[unchecked out A, unchecked in B] = Foo[A, B]
       RBS
 
       manager.build do |env|
-        resolver = RBS::TypeNameResolver.from_env(env)
+        resolver = RBS::Resolver::TypeNameResolver.new(env)
         validator = RBS::Validator.new(env: env, resolver: resolver)
 
         validator.validate_type_alias(entry: env.type_alias_decls[type_name("::foo")])
@@ -192,7 +192,7 @@ type foo = bar
       RBS
 
       manager.build do |env|
-        resolver = RBS::TypeNameResolver.from_env(env)
+        resolver = RBS::Resolver::TypeNameResolver.new(env)
         validator = RBS::Validator.new(env: env, resolver: resolver)
 
         # No error is raised.

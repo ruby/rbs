@@ -3,7 +3,6 @@
 module RBS
   class DefinitionBuilder
     attr_reader :env
-    attr_reader :type_name_resolver
     attr_reader :ancestor_builder
     attr_reader :method_builder
 
@@ -14,7 +13,6 @@ module RBS
 
     def initialize(env:, ancestor_builder: nil, method_builder: nil)
       @env = env
-      @type_name_resolver = TypeNameResolver.from_env(env)
       @ancestor_builder = ancestor_builder || AncestorBuilder.new(env: env)
       @method_builder = method_builder || MethodBuilder.new(env: env)
 
@@ -803,9 +801,7 @@ module RBS
     def validate_type_name(name, location)
       name = name.absolute!
 
-      return if name.class? && env.class_decls.key?(name)
-      return if name.interface? && env.interface_decls.key?(name)
-      return if name.alias? && env.type_alias_decls.key?(name)
+      return if env.type_name?(name)
 
       raise NoTypeFoundError.new(type_name: name, location: location)
     end

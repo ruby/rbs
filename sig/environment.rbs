@@ -13,9 +13,11 @@ module RBS
     end
 
     module ContextUtil
-      def calculate_context: (Array[_NamedDecl]) -> Array[Namespace]
+      def calculate_context: (Array[_NamedDecl]) -> Resolver::context
     end
 
+    # Name of object, it's (multiple) declarations with the outer module declarations
+    #
     class MultiEntry[M < _ModuleOrClass]
       class D[M < _ModuleOrClass]
         attr_reader decl: M
@@ -25,9 +27,9 @@ module RBS
 
         include ContextUtil
 
-        @context: Array[Namespace]
+        @context: Resolver::context
 
-        def context: () -> Array[Namespace]
+        def context: () -> Resolver::context
       end
 
       attr_reader name: TypeName
@@ -55,6 +57,8 @@ module RBS
     class ClassEntry < MultiEntry[AST::Declarations::Class]
     end
 
+    # Name of object, it's (single) declaration, and the outer module declarations
+    #
     class SingleEntry[N, D]
       attr_reader name: N
       attr_reader decl: D
@@ -64,9 +68,9 @@ module RBS
 
       include ContextUtil
 
-      @context: Array[Namespace]
+      @context: Resolver::context
 
-      def context: () -> Array[Namespace]
+      def context: () -> Resolver::context
     end
 
     # Top level declarations
@@ -145,7 +149,7 @@ module RBS
     def constant_name?: (TypeName) -> bool
 
     # Returns true if the type name is defined by constant declaration
-    # 
+    #
     def constant_decl?: (TypeName) -> bool
 
     # Returns true if the type name is defined by class declaration
@@ -160,19 +164,19 @@ module RBS
 
     def cache_name: [N, D] (Hash[N, SingleEntry[N, D]] cache, name: N, decl: D, outer: Array[module_decl]) -> SingleEntry[N, D]
 
-    def resolve_declaration: (TypeNameResolver resolver, AST::Declarations::t decl, outer: Array[module_decl], prefix: Namespace) -> AST::Declarations::t
+    def resolve_declaration: (Resolver::TypeNameResolver resolver, AST::Declarations::t decl, outer: Array[module_decl], prefix: Namespace) -> AST::Declarations::t
 
-    def resolve_member: (TypeNameResolver, AST::Members::t, context: Array[Namespace]) -> AST::Members::t
+    def resolve_member: (Resolver::TypeNameResolver, AST::Members::t, context: Resolver::context) -> AST::Members::t
 
-    def resolve_method_type: (TypeNameResolver, RBS::MethodType, context: Array[Namespace]) -> RBS::MethodType
+    def resolve_method_type: (Resolver::TypeNameResolver, RBS::MethodType, context: Resolver::context) -> RBS::MethodType
 
-    def resolve_type_params: (TypeNameResolver resolver, Array[AST::TypeParam], context: Array[Namespace]) ->  Array[AST::TypeParam]
+    def resolve_type_params: (Resolver::TypeNameResolver resolver, Array[AST::TypeParam], context: Resolver::context) ->  Array[AST::TypeParam]
 
     # Runs generics type params validation over each class definitions
     def validate_type_params: () -> void
 
-    def absolute_type: (TypeNameResolver, Types::t, context: Array[Namespace]) -> Types::t
+    def absolute_type: (Resolver::TypeNameResolver, Types::t, context: Resolver::context) -> Types::t
 
-    def absolute_type_name: (TypeNameResolver, TypeName, context: Array[Namespace]) -> TypeName
+    def absolute_type_name: (Resolver::TypeNameResolver, TypeName, context: Resolver::context) -> TypeName
   end
 end

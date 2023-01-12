@@ -5,7 +5,6 @@ module RBS
   #
   class DefinitionBuilder
     attr_reader env: Environment
-    attr_reader type_name_resolver: TypeNameResolver
     attr_reader ancestor_builder: AncestorBuilder
     attr_reader method_builder: MethodBuilder
 

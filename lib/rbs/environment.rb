@@ -12,9 +12,13 @@ module RBS
 
     module ContextUtil
       def calculate_context(decls)
-        decls.each.with_object([Namespace.root]) do |decl, array|
-          first = array.first or raise
-          array.unshift(first + decl.name.to_namespace)
+        decls.inject(nil) do |context, decl| #$ Resolver::context
+          if (_, last = context)
+            last or raise
+            [context, last + decl.name]
+          else
+            [nil, decl.name.absolute!]
+          end
         end
       end
     end
@@ -90,12 +94,6 @@ module RBS
       end
     end
 
-    def foo
-      a = [1].sample()
-      return unless a
-      a + 1
-    end
-
     class ClassEntry < MultiEntry
       def primary
         @primary ||= begin
@@ -119,7 +117,7 @@ module RBS
       include ContextUtil
 
       def context
-        @context = calculate_context(outer)
+        @context ||= calculate_context(outer)
       end
     end
 
@@ -152,17 +150,14 @@ module RBS
     end
 
     def interface_name?(name)
-      name.absolute? or raise "Absolute type name is expected: #{name}"
       interface_decls.key?(name)
     end
 
     def type_alias_name?(name)
-      name.absolute? or raise "Absolute type name is expected: #{name}"
       type_alias_decls.key?(name)
     end
 
     def module_name?(name)
-      name.absolute? or raise "Absolute type name is expected: #{name}"
       class_decls.key?(name)
     end
 
@@ -177,17 +172,14 @@ module RBS
     end
 
     def constant_decl?(name)
-      name.absolute? or raise "Absolute type name is expected: #{name}"
       constant_decls.key?(name)
     end
 
     def class_decl?(name)
-      name.absolute? or raise "Absolute type name is expected: #{name}"
       class_decls[name].is_a?(ClassEntry)
     end
 
     def module_decl?(name)
-      name.absolute? or raise "Absolute type name is expected: #{name}"
       class_decls[name].is_a?(ModuleEntry)
     end
 
@@ -271,8 +263,8 @@ module RBS
     end
 
     def resolve_type_names(only: nil)
-      resolver = TypeNameResolver.from_env(self)
-      env = Environment.new()
+      resolver = Resolver::TypeNameResolver.new(self)
+      env = Environment.new
 
       declarations.each do |decl|
         if only && !only.member?(decl)
@@ -290,18 +282,22 @@ module RBS
         # @type var decl: AST::Declarations::Global
         return AST::Declarations::Global.new(
           name: decl.name,
-          type: absolute_type(resolver, decl.type, context: [Namespace.root]),
+          type: absolute_type(resolver, decl.type, context: nil),
           location: decl.location,
           comment: decl.comment
         )
       end
 
-      context = (outer + [decl]).each.with_object([Namespace.root]) do |decl, array|
-        head = array.first or raise
-        array.unshift(head + decl.name.to_namespace)
-      end
-
-      outer_context = context.drop(1)
+      nesting = [*outer, decl] #: Array[module_decl]
+      context = nesting.inject(nil) {|context, decl| #$ Resolver::context
+        if (_, last = context)
+          last or raise
+          [context, last + decl.name]
+        else
+          [nil, decl.name.absolute!]
+        end
+      }
+      outer_context = context&.first
 
       case decl
       when AST::Declarations::Class

@@ -26,11 +26,7 @@ EOF
       ]
     )
 
-    assert_equal [
-                   type_name("::Foo::Bar").to_namespace,
-                   type_name("::Foo").to_namespace,
-                   Namespace.root
-                 ],
+    assert_equal [[nil, type_name("::Foo")], type_name("::Foo::Bar")],
                  entry.context
   end
 
