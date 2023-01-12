@@ -145,6 +145,6 @@ class ERBDefMethodSingletonTest < Test::Unit::TestCase
 
   def test_def_erb_method
     assert_send_type "(String, String) -> untyped",
-                     ERB::DefMethod, :def_erb_method, "render()", __FILE__
+                     ERB::DefMethod, :def_erb_method, "render()", File.expand_path(__FILE__, "../..")
   end
 end
