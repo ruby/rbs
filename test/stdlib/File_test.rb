@@ -8,124 +8,124 @@ class FileSingletonTest < Test::Unit::TestCase
 
   def test_new
     assert_send_type "(String) -> File",
-                     File, :new, __FILE__
+                     File, :new, File.expand_path(__FILE__, "../..")
     assert_send_type "(ToStr) -> File",
-                     File, :new, ToStr.new(__FILE__)
+                     File, :new, ToStr.new(File.expand_path(__FILE__, "../.."))
     assert_send_type "(ToPath) -> File",
-                     File, :new, ToPath.new(__FILE__)
+                     File, :new, ToPath.new(File.expand_path(__FILE__, "../.."))
     assert_send_type "(Integer) -> File",
-                     File, :new, IO.sysopen(__FILE__)
+                     File, :new, IO.sysopen(File.expand_path(__FILE__, "../.."))
     assert_send_type "(ToInt) -> File",
-                     File, :new, ToInt.new(IO.sysopen(__FILE__))
+                     File, :new, ToInt.new(IO.sysopen(File.expand_path(__FILE__, "../..")))
     assert_send_type "(String, String) -> File",
-                     File, :new, __FILE__, "r"
+                     File, :new, File.expand_path(__FILE__, "../.."), "r"
     assert_send_type "(String, ToStr) -> File",
-                     File, :new, __FILE__, ToStr.new("r")
+                     File, :new, File.expand_path(__FILE__, "../.."), ToStr.new("r")
     assert_send_type "(String, Integer) -> File",
-                     File, :new, __FILE__, File::RDONLY
+                     File, :new, File.expand_path(__FILE__, "../.."), File::RDONLY
     assert_send_type "(String, ToInt) -> File",
-                     File, :new, __FILE__, ToInt.new(File::RDONLY)
+                     File, :new, File.expand_path(__FILE__, "../.."), ToInt.new(File::RDONLY)
     assert_send_type "(String, String, Integer) -> File",
-                     File, :new, __FILE__, "r", 0644
+                     File, :new, File.expand_path(__FILE__, "../.."), "r", 0644
     assert_send_type "(String, String, ToInt) -> File",
-                     File, :new, __FILE__, "r", ToInt.new(0644)
+                     File, :new, File.expand_path(__FILE__, "../.."), "r", ToInt.new(0644)
   end
 
   def test_open
     assert_send_type "(String) -> File",
-                     File, :open, __FILE__
+                     File, :open, File.expand_path(__FILE__, "../..")
     assert_send_type "(ToStr) -> File",
-                     File, :open, ToStr.new(__FILE__)
+                     File, :open, ToStr.new(File.expand_path(__FILE__, "../.."))
     assert_send_type "(ToPath) -> File",
-                     File, :open, ToPath.new(__FILE__)
+                     File, :open, ToPath.new(File.expand_path(__FILE__, "../.."))
     assert_send_type "(Integer) -> File",
-                     File, :open, IO.sysopen(__FILE__)
+                     File, :open, IO.sysopen(File.expand_path(__FILE__, "../.."))
     assert_send_type "(ToInt) -> File",
-                     File, :open, ToInt.new(IO.sysopen(__FILE__))
+                     File, :open, ToInt.new(IO.sysopen(File.expand_path(__FILE__, "../..")))
     assert_send_type "(String, String) -> File",
-                     File, :open, __FILE__, "r"
+                     File, :open, File.expand_path(__FILE__, "../.."), "r"
     assert_send_type "(String, ToStr) -> File",
-                     File, :open, __FILE__, ToStr.new("r")
+                     File, :open, File.expand_path(__FILE__, "../.."), ToStr.new("r")
     assert_send_type "(String, Integer) -> File",
-                     File, :open, __FILE__, File::RDONLY
+                     File, :open, File.expand_path(__FILE__, "../.."), File::RDONLY
     assert_send_type "(String, ToInt) -> File",
-                     File, :open, __FILE__, ToInt.new(File::RDONLY)
+                     File, :open, File.expand_path(__FILE__, "../.."), ToInt.new(File::RDONLY)
     assert_send_type "(String, String, Integer) -> File",
-                     File, :open, __FILE__, "r", 0644
+                     File, :open, File.expand_path(__FILE__, "../.."), "r", 0644
     assert_send_type "(String, String, ToInt) -> File",
-                     File, :open, __FILE__, "r", ToInt.new(0644)
+                     File, :open, File.expand_path(__FILE__, "../.."), "r", ToInt.new(0644)
     assert_send_type "(String) { (File) -> String } -> String",
-                     File, :open, __FILE__ do |file| file.read end
+                     File, :open, File.expand_path(__FILE__, "../..") do |file| file.read end
   end
 
   def test_absolute_path
     assert_send_type "(String) -> String",
-                     File, :absolute_path, __FILE__
+                     File, :absolute_path, File.expand_path(__FILE__, "../..")
     assert_send_type "(ToStr) -> String",
-                     File, :absolute_path, ToStr.new(__FILE__)
+                     File, :absolute_path, ToStr.new(File.expand_path(__FILE__, "../.."))
     assert_send_type "(ToPath) -> String",
-                     File, :absolute_path, ToPath.new(__FILE__)
+                     File, :absolute_path, ToPath.new(File.expand_path(__FILE__, "../.."))
     assert_send_type "(String, String) -> String",
-                     File, :absolute_path, __FILE__, __dir__
+                     File, :absolute_path, File.expand_path(__FILE__, "../.."), __dir__
     assert_send_type "(String, ToStr) -> String",
-                     File, :absolute_path, __FILE__, ToStr.new(__dir__)
+                     File, :absolute_path, File.expand_path(__FILE__, "../.."), ToStr.new(__dir__)
     assert_send_type "(String, ToPath) -> String",
-                     File, :absolute_path, __FILE__, ToPath.new(__dir__)
+                     File, :absolute_path, File.expand_path(__FILE__, "../.."), ToPath.new(__dir__)
   end
 
   def test_absolute_path?
     assert_send_type "(String) -> bool",
-                     File, :absolute_path?, __FILE__
+                     File, :absolute_path?, File.expand_path(__FILE__, "../..")
     assert_send_type "(ToStr) -> bool",
-                     File, :absolute_path?, ToStr.new(__FILE__)
+                     File, :absolute_path?, ToStr.new(File.expand_path(__FILE__, "../.."))
     assert_send_type "(ToPath) -> bool",
-                     File, :absolute_path?, ToPath.new(__FILE__)
+                     File, :absolute_path?, ToPath.new(File.expand_path(__FILE__, "../.."))
   end
 
   def test_atime
     assert_send_type "(String) -> Time",
-                     File, :atime, __FILE__
+                     File, :atime, File.expand_path(__FILE__, "../..")
     assert_send_type "(ToStr) -> Time",
-                     File, :atime, ToStr.new(__FILE__)
+                     File, :atime, ToStr.new(File.expand_path(__FILE__, "../.."))
     assert_send_type "(ToPath) -> Time",
-                     File, :atime, ToPath.new(__FILE__)
+                     File, :atime, ToPath.new(File.expand_path(__FILE__, "../.."))
     assert_send_type "(IO) -> Time",
-                     File, :atime, IO.new(IO.sysopen(__FILE__))
+                     File, :atime, IO.new(IO.sysopen(File.expand_path(__FILE__, "../..")))
   end
 
   def test_basename
     assert_send_type "(String) -> String",
-                     File, :basename, __FILE__
+                     File, :basename, File.expand_path(__FILE__, "../..")
     assert_send_type "(ToStr) -> String",
-                     File, :basename, ToStr.new(__FILE__)
+                     File, :basename, ToStr.new(File.expand_path(__FILE__, "../.."))
     assert_send_type "(ToPath) -> String",
-                     File, :basename, ToPath.new(__FILE__)
+                     File, :basename, ToPath.new(File.expand_path(__FILE__, "../.."))
     assert_send_type "(String, String) -> String",
-                     File, :basename, __FILE__, ".rb"
+                     File, :basename, File.expand_path(__FILE__, "../.."), ".rb"
     assert_send_type "(String, ToStr) -> String",
-                     File, :basename, __FILE__, ToStr.new(".rb")
+                     File, :basename, File.expand_path(__FILE__, "../.."), ToStr.new(".rb")
   end
 
   def test_blockdev?
     assert_send_type "(String) -> bool",
-                     File, :blockdev?, __FILE__
+                     File, :blockdev?, File.expand_path(__FILE__, "../..")
     assert_send_type "(ToStr) -> bool",
-                     File, :blockdev?, ToStr.new(__FILE__)
+                     File, :blockdev?, ToStr.new(File.expand_path(__FILE__, "../.."))
     assert_send_type "(ToPath) -> bool",
-                     File, :blockdev?, ToPath.new(__FILE__)
+                     File, :blockdev?, ToPath.new(File.expand_path(__FILE__, "../.."))
     assert_send_type "(IO) -> bool",
-                     File, :blockdev?, IO.new(IO.sysopen(__FILE__))
+                     File, :blockdev?, IO.new(IO.sysopen(File.expand_path(__FILE__, "../..")))
   end
 
   def test_chardev?
     assert_send_type "(String) -> bool",
-                     File, :chardev?, __FILE__
+                     File, :chardev?, File.expand_path(__FILE__, "../..")
     assert_send_type "(ToStr) -> bool",
-                     File, :chardev?, ToStr.new(__FILE__)
+                     File, :chardev?, ToStr.new(File.expand_path(__FILE__, "../.."))
     assert_send_type "(ToPath) -> bool",
-                     File, :chardev?, ToPath.new(__FILE__)
+                     File, :chardev?, ToPath.new(File.expand_path(__FILE__, "../.."))
     assert_send_type "(IO) -> bool",
-                     File, :chardev?, IO.new(IO.sysopen(__FILE__))
+                     File, :chardev?, IO.new(IO.sysopen(File.expand_path(__FILE__, "../..")))
   end
 
   def test_chmod
@@ -146,32 +146,32 @@ class FileSingletonTest < Test::Unit::TestCase
 
   def test_chown
     assert_send_type "(Integer, Integer, String) -> Integer",
-                     File, :chown, Process.uid, Process.gid, __FILE__
+                     File, :chown, Process.uid, Process.gid, File.expand_path(__FILE__, "../..")
     assert_send_type "(ToInt, Integer, String) -> Integer",
-                     File, :chown, ToInt.new(Process.uid), Process.gid, __FILE__
+                     File, :chown, ToInt.new(Process.uid), Process.gid, File.expand_path(__FILE__, "../..")
     assert_send_type "(nil, Integer, String) -> Integer",
-                     File, :chown, nil, Process.gid, __FILE__
+                     File, :chown, nil, Process.gid, File.expand_path(__FILE__, "../..")
     assert_send_type "(Integer, ToInt, String) -> Integer",
-                     File, :chown, Process.uid, ToInt.new(Process.gid), __FILE__
+                     File, :chown, Process.uid, ToInt.new(Process.gid), File.expand_path(__FILE__, "../..")
     assert_send_type "(Integer, nil, String) -> Integer",
-                     File, :chown, Process.uid, nil, __FILE__
+                     File, :chown, Process.uid, nil, File.expand_path(__FILE__, "../..")
     assert_send_type "(Integer, Integer, ToStr) -> Integer",
-                     File, :chown, Process.uid, Process.gid, ToStr.new(__FILE__)
+                     File, :chown, Process.uid, Process.gid, ToStr.new(File.expand_path(__FILE__, "../.."))
     assert_send_type "(Integer, Integer, ToPath) -> Integer",
-                     File, :chown, Process.uid, Process.gid, ToPath.new(__FILE__)
+                     File, :chown, Process.uid, Process.gid, ToPath.new(File.expand_path(__FILE__, "../.."))
     assert_send_type "(Integer, nil, String, String) -> Integer",
-                     File, :chown, Process.uid, nil, __FILE__, __FILE__
+                     File, :chown, Process.uid, nil, File.expand_path(__FILE__, "../.."), File.expand_path(__FILE__, "../..")
   end
 
   def test_ctime
     assert_send_type "(String) -> Time",
-                     File, :ctime, __FILE__
+                     File, :ctime, File.expand_path(__FILE__, "../..")
     assert_send_type "(ToStr) -> Time",
-                     File, :ctime, ToStr.new(__FILE__)
+                     File, :ctime, ToStr.new(File.expand_path(__FILE__, "../.."))
     assert_send_type "(ToPath) -> Time",
-                     File, :ctime, ToPath.new(__FILE__)
+                     File, :ctime, ToPath.new(File.expand_path(__FILE__, "../.."))
     assert_send_type "(IO) -> Time",
-                     File, :ctime, IO.new(IO.sysopen(__FILE__))
+                     File, :ctime, IO.new(IO.sysopen(File.expand_path(__FILE__, "../..")))
   end
 
   def test_delete
@@ -208,148 +208,148 @@ class FileSingletonTest < Test::Unit::TestCase
 
   def test_dirname
     assert_send_type "(String) -> String",
-                     File, :dirname, __FILE__
+                     File, :dirname, File.expand_path(__FILE__, "../..")
     assert_send_type "(ToStr) -> String",
-                     File, :dirname, ToStr.new(__FILE__)
+                     File, :dirname, ToStr.new(File.expand_path(__FILE__, "../.."))
     assert_send_type "(ToPath) -> String",
-                     File, :dirname, ToPath.new(__FILE__)
+                     File, :dirname, ToPath.new(File.expand_path(__FILE__, "../.."))
 
     assert_send_type(
       "(String, Integer) -> String",
-      File, :dirname, __FILE__, 2
+      File, :dirname, File.expand_path(__FILE__, "../.."), 2
     )
   end
 
   def test_empty?
     assert_send_type "(String) -> bool",
-                     File, :empty?, __FILE__
+                     File, :empty?, File.expand_path(__FILE__, "../..")
     assert_send_type "(ToStr) -> bool",
-                     File, :empty?, ToStr.new(__FILE__)
+                     File, :empty?, ToStr.new(File.expand_path(__FILE__, "../.."))
     assert_send_type "(ToPath) -> bool",
-                     File, :empty?, ToPath.new(__FILE__)
+                     File, :empty?, ToPath.new(File.expand_path(__FILE__, "../.."))
     assert_send_type "(IO) -> bool",
-                     File, :empty?, IO.new(IO.sysopen(__FILE__))
+                     File, :empty?, IO.new(IO.sysopen(File.expand_path(__FILE__, "../..")))
   end
 
   def test_executable?
     assert_send_type "(String) -> bool",
-                     File, :executable?, __FILE__
+                     File, :executable?, File.expand_path(__FILE__, "../..")
     assert_send_type "(ToStr) -> bool",
-                     File, :executable?, ToStr.new(__FILE__)
+                     File, :executable?, ToStr.new(File.expand_path(__FILE__, "../.."))
     assert_send_type "(ToPath) -> bool",
-                     File, :executable?, ToPath.new(__FILE__)
+                     File, :executable?, ToPath.new(File.expand_path(__FILE__, "../.."))
   end
 
   def test_executable_real?
     assert_send_type "(String) -> bool",
-                     File, :executable_real?, __FILE__
+                     File, :executable_real?, File.expand_path(__FILE__, "../..")
     assert_send_type "(ToStr) -> bool",
-                     File, :executable_real?, ToStr.new(__FILE__)
+                     File, :executable_real?, ToStr.new(File.expand_path(__FILE__, "../.."))
     assert_send_type "(ToPath) -> bool",
-                     File, :executable_real?, ToPath.new(__FILE__)
+                     File, :executable_real?, ToPath.new(File.expand_path(__FILE__, "../.."))
   end
 
   def test_exist?
     assert_send_type "(String) -> bool",
-                     File, :exist?, __FILE__
+                     File, :exist?, File.expand_path(__FILE__, "../..")
     assert_send_type "(ToStr) -> bool",
-                     File, :exist?, ToStr.new(__FILE__)
+                     File, :exist?, ToStr.new(File.expand_path(__FILE__, "../.."))
     assert_send_type "(ToPath) -> bool",
-                     File, :exist?, ToPath.new(__FILE__)
+                     File, :exist?, ToPath.new(File.expand_path(__FILE__, "../.."))
     assert_send_type "(IO) -> bool",
-                     File, :exist?, IO.new(IO.sysopen(__FILE__))
+                     File, :exist?, IO.new(IO.sysopen(File.expand_path(__FILE__, "../..")))
   end
 
   def test_expand_path
     assert_send_type "(String) -> String",
-                     File, :expand_path, __FILE__
+                     File, :expand_path, File.expand_path(__FILE__, "../..")
     assert_send_type "(ToStr) -> String",
-                     File, :expand_path, ToStr.new(__FILE__)
+                     File, :expand_path, ToStr.new(File.expand_path(__FILE__, "../.."))
     assert_send_type "(ToPath) -> String",
-                     File, :expand_path, ToPath.new(__FILE__)
+                     File, :expand_path, ToPath.new(File.expand_path(__FILE__, "../.."))
     assert_send_type "(String, String) -> String",
-                     File, :expand_path, __FILE__, __dir__
+                     File, :expand_path, File.expand_path(__FILE__, "../.."), __dir__
     assert_send_type "(String, ToStr) -> String",
-                     File, :expand_path, __FILE__, ToStr.new(__dir__)
+                     File, :expand_path, File.expand_path(__FILE__, "../.."), ToStr.new(__dir__)
     assert_send_type "(String, ToPath) -> String",
-                     File, :expand_path, __FILE__, ToPath.new(__dir__)
+                     File, :expand_path, File.expand_path(__FILE__, "../.."), ToPath.new(__dir__)
   end
 
   def test_extname
     assert_send_type "(String) -> String",
-                     File, :extname, __FILE__
+                     File, :extname, File.expand_path(__FILE__, "../..")
     assert_send_type "(ToStr) -> String",
-                     File, :extname, ToStr.new(__FILE__)
+                     File, :extname, ToStr.new(File.expand_path(__FILE__, "../.."))
     assert_send_type "(ToPath) -> String",
-                     File, :extname, ToPath.new(__FILE__)
+                     File, :extname, ToPath.new(File.expand_path(__FILE__, "../.."))
   end
 
   def test_file?
     assert_send_type "(String) -> bool",
-                     File, :file?, __FILE__
+                     File, :file?, File.expand_path(__FILE__, "../..")
     assert_send_type "(ToStr) -> bool",
-                     File, :file?, ToStr.new(__FILE__)
+                     File, :file?, ToStr.new(File.expand_path(__FILE__, "../.."))
     assert_send_type "(ToPath) -> bool",
-                     File, :file?, ToPath.new(__FILE__)
+                     File, :file?, ToPath.new(File.expand_path(__FILE__, "../.."))
     assert_send_type "(IO) -> bool",
-                     File, :file?, IO.new(IO.sysopen(__FILE__))
+                     File, :file?, IO.new(IO.sysopen(File.expand_path(__FILE__, "../..")))
   end
 
   def test_fnmatch
     assert_send_type "(String, String) -> bool",
-                     File, :fnmatch, "File_test", __FILE__
+                     File, :fnmatch, "File_test", File.expand_path(__FILE__, "../..")
     assert_send_type "(ToStr, String) -> bool",
-                     File, :fnmatch, ToStr.new("File_test"), __FILE__
+                     File, :fnmatch, ToStr.new("File_test"), File.expand_path(__FILE__, "../..")
     assert_send_type "(String, ToStr) -> bool",
-                     File, :fnmatch, "File_test", ToStr.new(__FILE__)
+                     File, :fnmatch, "File_test", ToStr.new(File.expand_path(__FILE__, "../.."))
     assert_send_type "(String, ToPath) -> bool",
-                     File, :fnmatch, "File_test", ToPath.new(__FILE__)
+                     File, :fnmatch, "File_test", ToPath.new(File.expand_path(__FILE__, "../.."))
     assert_send_type "(String, String, Integer) -> bool",
-                     File, :fnmatch, "File_test", __FILE__, File::FNM_CASEFOLD
+                     File, :fnmatch, "File_test", File.expand_path(__FILE__, "../.."), File::FNM_CASEFOLD
     assert_send_type "(String, String, ToInt) -> bool",
-                     File, :fnmatch, "File_test", __FILE__, ToInt.new(File::FNM_CASEFOLD)
+                     File, :fnmatch, "File_test", File.expand_path(__FILE__, "../.."), ToInt.new(File::FNM_CASEFOLD)
   end
 
   def test_fnmatch?
     assert_send_type "(String, String) -> bool",
-                     File, :fnmatch?, "File_test", __FILE__
+                     File, :fnmatch?, "File_test", File.expand_path(__FILE__, "../..")
   end
 
   def test_ftype
     assert_send_type "(String) -> String",
-                     File, :ftype, __FILE__
+                     File, :ftype, File.expand_path(__FILE__, "../..")
     assert_send_type "(ToStr) -> String",
-                     File, :ftype, ToStr.new(__FILE__)
+                     File, :ftype, ToStr.new(File.expand_path(__FILE__, "../.."))
     assert_send_type "(ToPath) -> String",
-                     File, :ftype, ToPath.new(__FILE__)
+                     File, :ftype, ToPath.new(File.expand_path(__FILE__, "../.."))
   end
 
   def test_grpowned?
     assert_send_type "(String) -> bool",
-                     File, :grpowned?, __FILE__
+                     File, :grpowned?, File.expand_path(__FILE__, "../..")
     assert_send_type "(ToStr) -> bool",
-                     File, :grpowned?, ToStr.new(__FILE__)
+                     File, :grpowned?, ToStr.new(File.expand_path(__FILE__, "../.."))
     assert_send_type "(ToPath) -> bool",
-                     File, :grpowned?, ToPath.new(__FILE__)
+                     File, :grpowned?, ToPath.new(File.expand_path(__FILE__, "../.."))
     assert_send_type "(IO) -> bool",
-                     File, :grpowned?, IO.new(IO.sysopen(__FILE__))
+                     File, :grpowned?, IO.new(IO.sysopen(File.expand_path(__FILE__, "../..")))
   end
 
   def test_identical?
     assert_send_type "(String, String) -> bool",
-                     File, :identical?, __FILE__, __FILE__
+                     File, :identical?, File.expand_path(__FILE__, "../.."), File.expand_path(__FILE__, "../..")
     assert_send_type "(ToStr, String) -> bool",
-                     File, :identical?, ToStr.new(__FILE__), __FILE__
+                     File, :identical?, ToStr.new(File.expand_path(__FILE__, "../..")), File.expand_path(__FILE__, "../..")
     assert_send_type "(ToPath, String) -> bool",
-                     File, :identical?, ToPath.new(__FILE__), __FILE__
+                     File, :identical?, ToPath.new(File.expand_path(__FILE__, "../..")), File.expand_path(__FILE__, "../..")
     assert_send_type "(IO, String) -> bool",
-                     File, :identical?, IO.new(IO.sysopen(__FILE__)), __FILE__
+                     File, :identical?, IO.new(IO.sysopen(File.expand_path(__FILE__, "../.."))), File.expand_path(__FILE__, "../..")
     assert_send_type "(String, ToStr) -> bool",
-                     File, :identical?, __FILE__, ToStr.new(__FILE__)
+                     File, :identical?, File.expand_path(__FILE__, "../.."), ToStr.new(File.expand_path(__FILE__, "../.."))
     assert_send_type "(String, ToPath) -> bool",
-                     File, :identical?, __FILE__, ToPath.new(__FILE__)
+                     File, :identical?, File.expand_path(__FILE__, "../.."), ToPath.new(File.expand_path(__FILE__, "../.."))
     assert_send_type "(String, IO) -> bool",
-                     File, :identical?, __FILE__, IO.new(IO.sysopen(__FILE__))
+                     File, :identical?, File.expand_path(__FILE__, "../.."), IO.new(IO.sysopen(File.expand_path(__FILE__, "../..")))
   end
 
   def test_join
@@ -363,51 +363,51 @@ class FileSingletonTest < Test::Unit::TestCase
 
   def test_lchown
     assert_send_type "(Integer, Integer, String) -> Integer",
-                     File, :lchown, Process.uid, Process.gid, __FILE__
+                     File, :lchown, Process.uid, Process.gid, File.expand_path(__FILE__, "../..")
     assert_send_type "(ToInt, Integer, String) -> Integer",
-                     File, :lchown, ToInt.new(Process.uid), Process.gid, __FILE__
+                     File, :lchown, ToInt.new(Process.uid), Process.gid, File.expand_path(__FILE__, "../..")
     assert_send_type "(nil, Integer, String) -> Integer",
-                     File, :lchown, nil, Process.gid, __FILE__
+                     File, :lchown, nil, Process.gid, File.expand_path(__FILE__, "../..")
     assert_send_type "(Integer, ToInt, String) -> Integer",
-                     File, :lchown, Process.uid, ToInt.new(Process.gid), __FILE__
+                     File, :lchown, Process.uid, ToInt.new(Process.gid), File.expand_path(__FILE__, "../..")
     assert_send_type "(Integer, nil, String) -> Integer",
-                     File, :lchown, Process.uid, nil, __FILE__
+                     File, :lchown, Process.uid, nil, File.expand_path(__FILE__, "../..")
     assert_send_type "(Integer, Integer, ToStr) -> Integer",
-                     File, :lchown, Process.uid, Process.gid, ToStr.new(__FILE__)
+                     File, :lchown, Process.uid, Process.gid, ToStr.new(File.expand_path(__FILE__, "../.."))
     assert_send_type "(Integer, Integer, ToPath) -> Integer",
-                     File, :lchown, Process.uid, Process.gid, ToPath.new(__FILE__)
+                     File, :lchown, Process.uid, Process.gid, ToPath.new(File.expand_path(__FILE__, "../.."))
     assert_send_type "(Integer, nil, String, String) -> Integer",
-                     File, :lchown, Process.uid, nil, __FILE__, __FILE__
+                     File, :lchown, Process.uid, nil, File.expand_path(__FILE__, "../.."), File.expand_path(__FILE__, "../..")
   end
 
   def test_link
     assert_send_type "(String, String) -> 0",
-                     File, :link, __FILE__, "new_name"
+                     File, :link, File.expand_path(__FILE__, "../.."), "new_name"
     File.unlink("new_name")
 
     assert_send_type "(ToStr, ToStr) -> 0",
-                     File, :link, ToStr.new(__FILE__), ToStr.new("new_name")
+                     File, :link, ToStr.new(File.expand_path(__FILE__, "../..")), ToStr.new("new_name")
     File.unlink("new_name")
 
     assert_send_type "(ToPath, ToPath) -> 0",
-                     File, :link, ToPath.new(__FILE__), ToPath.new("new_name")
+                     File, :link, ToPath.new(File.expand_path(__FILE__, "../..")), ToPath.new("new_name")
     File.unlink("new_name")
   end
 
   def test_lstat
     assert_send_type "(String) -> File::Stat",
-                     File, :lstat, __FILE__
+                     File, :lstat, File.expand_path(__FILE__, "../..")
     assert_send_type "(ToStr) -> File::Stat",
-                     File, :lstat, ToStr.new(__FILE__)
+                     File, :lstat, ToStr.new(File.expand_path(__FILE__, "../.."))
     assert_send_type "(ToPath) -> File::Stat",
-                     File, :lstat, ToPath.new(__FILE__)
+                     File, :lstat, ToPath.new(File.expand_path(__FILE__, "../.."))
   end
 
   def test_lutime
     Dir.mktmpdir do |dir|
       File.open("#{dir}/a", "w"){}
       assert_send_type "(Time, Time, String) -> Integer",
-                       File, :lutime, File.atime(__FILE__), File.atime(__FILE__), "#{dir}/a"
+                       File, :lutime, File.atime(File.expand_path(__FILE__, "../..")), File.atime(File.expand_path(__FILE__, "../..")), "#{dir}/a"
       assert_send_type "(Numeric, Numeric, ToStr) -> Integer",
                        File, :lutime, 1, 2, ToStr.new("#{dir}/a")
       assert_send_type "(Numeric, Numeric, ToPath) -> Integer",
@@ -415,7 +415,7 @@ class FileSingletonTest < Test::Unit::TestCase
 
       File.open("#{dir}/b", "w"){}
       assert_send_type "(Time, Time, String, String) -> Integer",
-                       File, :lutime, File.atime(__FILE__), File.atime(__FILE__), "#{dir}/a", "#{dir}/b"
+                       File, :lutime, File.atime(File.expand_path(__FILE__, "../..")), File.atime(File.expand_path(__FILE__, "../..")), "#{dir}/a", "#{dir}/b"
     end
   end
 
@@ -434,62 +434,62 @@ class FileSingletonTest < Test::Unit::TestCase
 
   def test_mtime
     assert_send_type "(String) -> Time",
-                     File, :mtime, __FILE__
+                     File, :mtime, File.expand_path(__FILE__, "../..")
     assert_send_type "(ToStr) -> Time",
-                     File, :mtime, ToStr.new(__FILE__)
+                     File, :mtime, ToStr.new(File.expand_path(__FILE__, "../.."))
     assert_send_type "(ToPath) -> Time",
-                     File, :mtime, ToPath.new(__FILE__)
+                     File, :mtime, ToPath.new(File.expand_path(__FILE__, "../.."))
     assert_send_type "(IO) -> Time",
-                     File, :mtime, IO.new(IO.sysopen(__FILE__))
+                     File, :mtime, IO.new(IO.sysopen(File.expand_path(__FILE__, "../..")))
   end
 
   def test_owned?
     assert_send_type "(String) -> bool",
-                     File, :owned?, __FILE__
+                     File, :owned?, File.expand_path(__FILE__, "../..")
     assert_send_type "(ToStr) -> bool",
-                     File, :owned?, ToStr.new(__FILE__)
+                     File, :owned?, ToStr.new(File.expand_path(__FILE__, "../.."))
     assert_send_type "(ToPath) -> bool",
-                     File, :owned?, ToPath.new(__FILE__)
+                     File, :owned?, ToPath.new(File.expand_path(__FILE__, "../.."))
     assert_send_type "(IO) -> bool",
-                     File, :owned?, IO.new(IO.sysopen(__FILE__))
+                     File, :owned?, IO.new(IO.sysopen(File.expand_path(__FILE__, "../..")))
   end
 
   def test_path
     assert_send_type "(String) -> String",
-                     File, :path, __FILE__
+                     File, :path, File.expand_path(__FILE__, "../..")
     assert_send_type "(ToStr) -> String",
-                     File, :path, ToStr.new(__FILE__)
+                     File, :path, ToStr.new(File.expand_path(__FILE__, "../.."))
     assert_send_type "(ToPath) -> String",
-                     File, :path, ToPath.new(__FILE__)
+                     File, :path, ToPath.new(File.expand_path(__FILE__, "../.."))
   end
 
   def test_pipe?
     assert_send_type "(String) -> bool",
-                     File, :pipe?, __FILE__
+                     File, :pipe?, File.expand_path(__FILE__, "../..")
     assert_send_type "(ToStr) -> bool",
-                     File, :pipe?, ToStr.new(__FILE__)
+                     File, :pipe?, ToStr.new(File.expand_path(__FILE__, "../.."))
     assert_send_type "(ToPath) -> bool",
-                     File, :pipe?, ToPath.new(__FILE__)
+                     File, :pipe?, ToPath.new(File.expand_path(__FILE__, "../.."))
     assert_send_type "(IO) -> bool",
-                     File, :pipe?, IO.new(IO.sysopen(__FILE__))
+                     File, :pipe?, IO.new(IO.sysopen(File.expand_path(__FILE__, "../..")))
   end
 
   def test_readable?
     assert_send_type "(String) -> bool",
-                     File, :readable?, __FILE__
+                     File, :readable?, File.expand_path(__FILE__, "../..")
     assert_send_type "(ToStr) -> bool",
-                     File, :readable?, ToStr.new(__FILE__)
+                     File, :readable?, ToStr.new(File.expand_path(__FILE__, "../.."))
     assert_send_type "(ToPath) -> bool",
-                     File, :readable?, ToPath.new(__FILE__)
+                     File, :readable?, ToPath.new(File.expand_path(__FILE__, "../.."))
   end
 
   def test_readable_real?
     assert_send_type "(String) -> bool",
-                     File, :readable_real?, __FILE__
+                     File, :readable_real?, File.expand_path(__FILE__, "../..")
     assert_send_type "(ToStr) -> bool",
-                     File, :readable_real?, ToStr.new(__FILE__)
+                     File, :readable_real?, ToStr.new(File.expand_path(__FILE__, "../.."))
     assert_send_type "(ToPath) -> bool",
-                     File, :readable_real?, ToPath.new(__FILE__)
+                     File, :readable_real?, ToPath.new(File.expand_path(__FILE__, "../.."))
   end
 
   def test_readlink
@@ -508,11 +508,11 @@ class FileSingletonTest < Test::Unit::TestCase
 
   def test_realdirpath
     assert_send_type "(String) -> String",
-                     File, :realdirpath , __FILE__
+                     File, :realdirpath , File.expand_path(__FILE__, "../..")
     assert_send_type "(ToStr) -> String",
-                     File, :realdirpath, ToStr.new(__FILE__)
+                     File, :realdirpath, ToStr.new(File.expand_path(__FILE__, "../.."))
     assert_send_type "(ToPath) -> String",
-                     File, :realdirpath, ToPath.new(__FILE__)
+                     File, :realdirpath, ToPath.new(File.expand_path(__FILE__, "../.."))
     assert_send_type "(String, String) -> String",
                      File, :realdirpath, "..", __dir__
     assert_send_type "(String, ToStr) -> String",
@@ -523,11 +523,11 @@ class FileSingletonTest < Test::Unit::TestCase
 
   def test_realpath
     assert_send_type "(String) -> String",
-                     File, :realpath , __FILE__
+                     File, :realpath , File.expand_path(__FILE__, "../..")
     assert_send_type "(ToStr) -> String",
-                     File, :realpath, ToStr.new(__FILE__)
+                     File, :realpath, ToStr.new(File.expand_path(__FILE__, "../.."))
     assert_send_type "(ToPath) -> String",
-                     File, :realpath, ToPath.new(__FILE__)
+                     File, :realpath, ToPath.new(File.expand_path(__FILE__, "../.."))
     assert_send_type "(String, String) -> String",
                      File, :realpath, "..", __dir__
     assert_send_type "(String, ToStr) -> String",
@@ -568,7 +568,7 @@ class FileSingletonTest < Test::Unit::TestCase
     end
 
     assert_send_type "(String) -> false",
-                     File, :setgid?, __FILE__
+                     File, :setgid?, File.expand_path(__FILE__, "../..")
   end
 
   def test_setuid?
@@ -587,29 +587,29 @@ class FileSingletonTest < Test::Unit::TestCase
     end
 
     assert_send_type "(String) -> false",
-                     File, :setuid?, __FILE__
+                     File, :setuid?, File.expand_path(__FILE__, "../..")
   end
 
   def test_size
     assert_send_type "(String) -> Integer",
-                     File, :size, __FILE__
+                     File, :size, File.expand_path(__FILE__, "../..")
     assert_send_type "(ToStr) -> Integer",
-                     File, :size, ToStr.new(__FILE__)
+                     File, :size, ToStr.new(File.expand_path(__FILE__, "../.."))
     assert_send_type "(ToPath) -> Integer",
-                     File, :size, ToPath.new(__FILE__)
+                     File, :size, ToPath.new(File.expand_path(__FILE__, "../.."))
     assert_send_type "(IO) -> Integer",
-                     File, :size, IO.new(IO.sysopen(__FILE__))
+                     File, :size, IO.new(IO.sysopen(File.expand_path(__FILE__, "../..")))
   end
 
   def test_size?
     assert_send_type "(String) -> Integer",
-                     File, :size?, __FILE__
+                     File, :size?, File.expand_path(__FILE__, "../..")
     assert_send_type "(ToStr) -> Integer",
-                     File, :size?, ToStr.new(__FILE__)
+                     File, :size?, ToStr.new(File.expand_path(__FILE__, "../.."))
     assert_send_type "(ToPath) -> Integer",
-                     File, :size?, ToPath.new(__FILE__)
+                     File, :size?, ToPath.new(File.expand_path(__FILE__, "../.."))
     assert_send_type "(IO) -> Integer",
-                     File, :size?, IO.new(IO.sysopen(__FILE__))
+                     File, :size?, IO.new(IO.sysopen(File.expand_path(__FILE__, "../..")))
 
     Dir.mktmpdir do |dir|
       File.open("#{dir}/size", "w"){}
@@ -620,13 +620,13 @@ class FileSingletonTest < Test::Unit::TestCase
 
   def test_socket?
     assert_send_type "(String) -> false",
-                     File, :socket?, __FILE__
+                     File, :socket?, File.expand_path(__FILE__, "../..")
     assert_send_type "(ToStr) -> false",
-                     File, :socket?, ToStr.new(__FILE__)
+                     File, :socket?, ToStr.new(File.expand_path(__FILE__, "../.."))
     assert_send_type "(ToPath) -> false",
-                     File, :socket?, ToPath.new(__FILE__)
+                     File, :socket?, ToPath.new(File.expand_path(__FILE__, "../.."))
     assert_send_type "(IO) -> false",
-                     File, :socket?, IO.new(IO.sysopen(__FILE__))
+                     File, :socket?, IO.new(IO.sysopen(File.expand_path(__FILE__, "../..")))
 
     Socket.unix_server_socket("testsocket") do
       assert_send_type "(String) -> true",
@@ -636,20 +636,20 @@ class FileSingletonTest < Test::Unit::TestCase
 
   def test_split
     assert_send_type "(String) -> [String, String]",
-                     File, :split, __FILE__
+                     File, :split, File.expand_path(__FILE__, "../..")
     assert_send_type "(ToStr) -> [String, String]",
-                     File, :split, ToStr.new(__FILE__)
+                     File, :split, ToStr.new(File.expand_path(__FILE__, "../.."))
     assert_send_type "(ToPath) -> [String, String]",
-                     File, :split, ToPath.new(__FILE__)
+                     File, :split, ToPath.new(File.expand_path(__FILE__, "../.."))
   end
 
   def test_stat
     assert_send_type "(String) -> File::Stat",
-                     File, :stat, __FILE__
+                     File, :stat, File.expand_path(__FILE__, "../..")
     assert_send_type "(ToStr) -> File::Stat",
-                     File, :stat, ToStr.new(__FILE__)
+                     File, :stat, ToStr.new(File.expand_path(__FILE__, "../.."))
     assert_send_type "(ToPath) -> File::Stat",
-                     File, :stat, ToPath.new(__FILE__)
+                     File, :stat, ToPath.new(File.expand_path(__FILE__, "../.."))
   end
 
   def test_sticky?
@@ -668,27 +668,27 @@ class FileSingletonTest < Test::Unit::TestCase
     end
 
     assert_send_type "(String) -> false",
-                     File, :sticky?, __FILE__
+                     File, :sticky?, File.expand_path(__FILE__, "../..")
   end
 
   def test_symlink
     Dir.mktmpdir do |dir|
       assert_send_type "(String, String) -> 0",
-                       File, :symlink, __FILE__, "#{dir}/symlink_a"
+                       File, :symlink, File.expand_path(__FILE__, "../.."), "#{dir}/symlink_a"
       assert_send_type "(ToStr, String) -> 0",
-                       File, :symlink, ToStr.new(__FILE__), "#{dir}/symlink_b"
+                       File, :symlink, ToStr.new(File.expand_path(__FILE__, "../..")), "#{dir}/symlink_b"
       assert_send_type "(ToPath, String) -> 0",
-                       File, :symlink, ToPath.new(__FILE__), "#{dir}/symlink_c"
+                       File, :symlink, ToPath.new(File.expand_path(__FILE__, "../..")), "#{dir}/symlink_c"
       assert_send_type "(String, ToStr) -> 0",
-                       File, :symlink, __FILE__, ToStr.new("#{dir}/symlink_d")
+                       File, :symlink, File.expand_path(__FILE__, "../.."), ToStr.new("#{dir}/symlink_d")
       assert_send_type "(String, ToPath) -> 0",
-                       File, :symlink, __FILE__, ToPath.new("#{dir}/symlink_e")
+                       File, :symlink, File.expand_path(__FILE__, "../.."), ToPath.new("#{dir}/symlink_e")
     end
   end
 
   def test_symlink?
     Dir.mktmpdir do |dir|
-      File.symlink(__FILE__, "#{dir}/symlink")
+      File.symlink(File.expand_path(__FILE__, "../.."), "#{dir}/symlink")
 
       assert_send_type "(String) -> true",
                        File, :symlink?, "#{dir}/symlink"
@@ -699,7 +699,7 @@ class FileSingletonTest < Test::Unit::TestCase
     end
 
     assert_send_type "(String) -> false",
-                     File, :symlink?, __FILE__
+                     File, :symlink?, File.expand_path(__FILE__, "../..")
   end
 
   def test_truncate
@@ -755,7 +755,7 @@ class FileSingletonTest < Test::Unit::TestCase
     Dir.mktmpdir do |dir|
       File.open("#{dir}/a", "w"){}
       assert_send_type "(Time, Time, String) -> Integer",
-                       File, :utime, File.atime(__FILE__), File.atime(__FILE__), "#{dir}/a"
+                       File, :utime, File.atime(File.expand_path(__FILE__, "../..")), File.atime(File.expand_path(__FILE__, "../..")), "#{dir}/a"
       assert_send_type "(Numeric, Numeric, ToStr) -> Integer",
                        File, :utime, 1, 2, ToStr.new("#{dir}/a")
       assert_send_type "(Numeric, Numeric, ToPath) -> Integer",
@@ -763,19 +763,19 @@ class FileSingletonTest < Test::Unit::TestCase
 
       File.open("#{dir}/b", "w"){}
       assert_send_type "(Time, Time, String, String) -> Integer",
-                       File, :utime, File.atime(__FILE__), File.atime(__FILE__), "#{dir}/a", "#{dir}/b"
+                       File, :utime, File.atime(File.expand_path(__FILE__, "../..")), File.atime(File.expand_path(__FILE__, "../..")), "#{dir}/a", "#{dir}/b"
     end
   end
 
   def test_world_readable?
     assert_send_type "(String) -> Integer",
-                     File, :world_readable?, __FILE__
+                     File, :world_readable?, File.expand_path(__FILE__, "../..")
     assert_send_type "(ToStr) -> Integer",
-                     File, :world_readable?, ToStr.new(__FILE__)
+                     File, :world_readable?, ToStr.new(File.expand_path(__FILE__, "../.."))
     assert_send_type "(ToPath) -> Integer",
-                     File, :world_readable?, ToPath.new(__FILE__)
+                     File, :world_readable?, ToPath.new(File.expand_path(__FILE__, "../.."))
     assert_send_type "(IO) -> Integer",
-                     File, :world_readable?, IO.new(IO.sysopen(__FILE__))
+                     File, :world_readable?, IO.new(IO.sysopen(File.expand_path(__FILE__, "../..")))
 
     Dir.mktmpdir do |dir|
       File.open("#{dir}/unreadable", "w"){}
@@ -810,31 +810,31 @@ class FileSingletonTest < Test::Unit::TestCase
 
   def test_writable?
     assert_send_type "(String) -> bool",
-                     File, :writable?, __FILE__
+                     File, :writable?, File.expand_path(__FILE__, "../..")
     assert_send_type "(ToStr) -> bool",
-                     File, :writable?, ToStr.new(__FILE__)
+                     File, :writable?, ToStr.new(File.expand_path(__FILE__, "../.."))
     assert_send_type "(ToPath) -> bool",
-                     File, :writable?, ToPath.new(__FILE__)
+                     File, :writable?, ToPath.new(File.expand_path(__FILE__, "../.."))
   end
 
   def test_writable_real?
     assert_send_type "(String) -> bool",
-                     File, :writable_real?, __FILE__
+                     File, :writable_real?, File.expand_path(__FILE__, "../..")
     assert_send_type "(ToStr) -> bool",
-                     File, :writable_real?, ToStr.new(__FILE__)
+                     File, :writable_real?, ToStr.new(File.expand_path(__FILE__, "../.."))
     assert_send_type "(ToPath) -> bool",
-                     File, :writable_real?, ToPath.new(__FILE__)
+                     File, :writable_real?, ToPath.new(File.expand_path(__FILE__, "../.."))
   end
 
   def test_zero?
     assert_send_type "(String) -> bool",
-                     File, :zero?, __FILE__
+                     File, :zero?, File.expand_path(__FILE__, "../..")
     assert_send_type "(ToStr) -> bool",
-                     File, :zero?, ToStr.new(__FILE__)
+                     File, :zero?, ToStr.new(File.expand_path(__FILE__, "../.."))
     assert_send_type "(ToPath) -> bool",
-                     File, :zero?, ToPath.new(__FILE__)
+                     File, :zero?, ToPath.new(File.expand_path(__FILE__, "../.."))
     assert_send_type "(IO) -> bool",
-                     File, :zero?, IO.new(IO.sysopen(__FILE__))
+                     File, :zero?, IO.new(IO.sysopen(File.expand_path(__FILE__, "../..")))
   end
 end
 
@@ -845,7 +845,7 @@ class FileInstanceTest < Test::Unit::TestCase
 
   def test_atime
     assert_send_type "() -> Time",
-                     File.open(__FILE__), :atime
+                     File.open(File.expand_path(__FILE__, "../..")), :atime
   end
 
   def test_chmod
@@ -860,20 +860,20 @@ class FileInstanceTest < Test::Unit::TestCase
 
   def test_chown
     assert_send_type "(Integer, Integer) -> 0",
-                     File.open(__FILE__), :chown, Process.uid, Process.gid
+                     File.open(File.expand_path(__FILE__, "../..")), :chown, Process.uid, Process.gid
     assert_send_type "(ToInt, Integer) -> 0",
-                     File.open(__FILE__), :chown, ToInt.new(Process.uid), Process.gid
+                     File.open(File.expand_path(__FILE__, "../..")), :chown, ToInt.new(Process.uid), Process.gid
     assert_send_type "(nil, Integer) -> 0",
-                     File.open(__FILE__), :chown, nil, Process.gid
+                     File.open(File.expand_path(__FILE__, "../..")), :chown, nil, Process.gid
     assert_send_type "(Integer, ToInt) -> 0",
-                     File.open(__FILE__), :chown, Process.uid, ToInt.new(Process.gid)
+                     File.open(File.expand_path(__FILE__, "../..")), :chown, Process.uid, ToInt.new(Process.gid)
     assert_send_type "(Integer, nil) -> 0",
-                     File.open(__FILE__), :chown, Process.uid, nil
+                     File.open(File.expand_path(__FILE__, "../..")), :chown, Process.uid, nil
   end
 
   def test_ctime
     assert_send_type "() -> Time",
-                     File.open(__FILE__), :ctime
+                     File.open(File.expand_path(__FILE__, "../..")), :ctime
   end
 
   def test_flock
@@ -892,27 +892,27 @@ class FileInstanceTest < Test::Unit::TestCase
 
   def test_lstat
     assert_send_type "() -> File::Stat",
-                     File.open(__FILE__), :lstat
+                     File.open(File.expand_path(__FILE__, "../..")), :lstat
   end
 
   def test_mtime
     assert_send_type "() -> Time",
-                     File.open(__FILE__), :mtime
+                     File.open(File.expand_path(__FILE__, "../..")), :mtime
   end
 
   def test_path
     assert_send_type "() -> String",
-                     File.open(__FILE__), :path
+                     File.open(File.expand_path(__FILE__, "../..")), :path
   end
 
   def test_size
     assert_send_type "() -> Integer",
-                     File.open(__FILE__), :size
+                     File.open(File.expand_path(__FILE__, "../..")), :size
   end
 
   def test_to_path
     assert_send_type "() -> String",
-                     File.open(__FILE__), :to_path
+                     File.open(File.expand_path(__FILE__, "../..")), :to_path
   end
 
   def test_truncate
