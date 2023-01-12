@@ -10,11 +10,11 @@ class IOSingletonTest < Test::Unit::TestCase
 
   def test_binread
     assert_send_type "(String) -> String",
-                     IO, :binread, __FILE__
+                     IO, :binread, File.expand_path(__FILE__, "../..")
     assert_send_type "(String, Integer) -> String",
-                     IO, :binread, __FILE__, 3
+                     IO, :binread, File.expand_path(__FILE__, "../.."), 3
     assert_send_type "(String, Integer, Integer) -> String",
-                     IO, :binread, __FILE__, 3, 0
+                     IO, :binread, File.expand_path(__FILE__, "../.."), 3, 0
   end
 
   def test_binwrite
@@ -35,7 +35,7 @@ class IOSingletonTest < Test::Unit::TestCase
 
   def test_open
     Dir.mktmpdir do |dir|
-      fd = IO.sysopen(__FILE__)
+      fd = IO.sysopen(File.expand_path(__FILE__, "../.."))
 
       assert_send_type "(Integer) -> IO",
                        IO, :open, fd
@@ -135,7 +135,7 @@ class IOInstanceTest < Test::Unit::TestCase
   end
 
   def test_advise
-    IO.open(IO.sysopen(__FILE__)) do |io|
+    IO.open(IO.sysopen(File.expand_path(__FILE__, "../.."))) do |io|
       assert_send_type "(Symbol) -> nil",
                        io, :advise, :normal
       assert_send_type "(Symbol) -> nil",
@@ -156,7 +156,7 @@ class IOInstanceTest < Test::Unit::TestCase
   end
 
   def test_autoclose=
-    IO.open(IO.sysopen(__FILE__)) do |io|
+    IO.open(IO.sysopen(File.expand_path(__FILE__, "../.."))) do |io|
       assert_send_type "(bool) -> bool",
                        io, :autoclose=, true
       assert_send_type "(bool) -> bool",
@@ -169,14 +169,14 @@ class IOInstanceTest < Test::Unit::TestCase
   end
 
   def test_autoclose?
-    IO.open(IO.sysopen(__FILE__)) do |io|
+    IO.open(IO.sysopen(File.expand_path(__FILE__, "../.."))) do |io|
       assert_send_type "() -> bool",
                        io, :autoclose?
     end
   end
 
   def test_read
-    IO.open(IO.sysopen(__FILE__)) do |io|
+    IO.open(IO.sysopen(File.expand_path(__FILE__, "../.."))) do |io|
       assert_send_type "() -> String",
                        io, :read
       assert_send_type "(Integer) -> String",
@@ -195,7 +195,7 @@ class IOInstanceTest < Test::Unit::TestCase
   end
 
   def test_readpartial
-    IO.open(IO.sysopen(__FILE__)) do |io|
+    IO.open(IO.sysopen(File.expand_path(__FILE__, "../.."))) do |io|
       assert_send_type "(Integer) -> String",
                        io, :readpartial, 10
       assert_send_type "(Integer, String) -> String",
@@ -217,7 +217,7 @@ class IOInstanceTest < Test::Unit::TestCase
   end
 
   def test_close_on_exec
-    IO.open(IO.sysopen(__FILE__)) do |io|
+    IO.open(IO.sysopen(File.expand_path(__FILE__, "../.."))) do |io|
       assert_send_type '() -> bool',
                        io, :close_on_exec?
       assert_send_type '(::Integer) -> untyped',
@@ -232,7 +232,7 @@ class IOInstanceTest < Test::Unit::TestCase
   end
 
   def test_sync
-    IO.open(IO.sysopen(__FILE__)) do |io|
+    IO.open(IO.sysopen(File.expand_path(__FILE__, "../.."))) do |io|
       assert_send_type '() -> bool',
                        io, :sync
       assert_send_type '(::Integer) -> ::Integer',
