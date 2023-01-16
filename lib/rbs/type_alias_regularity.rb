@@ -57,7 +57,7 @@ module RBS
     end
 
     def build_alias_type(name)
-      entry = env.alias_decls[name] or return
+      entry = env.type_alias_decls[name] or return
       unless entry.decl.type_params.empty?
         as = entry.decl.type_params.each.map {|param| Types::Variable.new(name: param.name, location: nil) }
         Types::Alias.new(name: name, args: as, location: nil)
@@ -81,13 +81,13 @@ module RBS
     def each_mutual_alias_defs(&block)
       # @type var each_node: TSort::_EachNode[TypeName]
       each_node = __skip__ = -> (&block) do
-        env.alias_decls.each_value do |decl|
+        env.type_alias_decls.each_value do |decl|
           block[decl.name]
         end
       end
       # @type var each_child: TSort::_EachChild[TypeName]
       each_child = __skip__ = -> (name, &block) do
-        if env.alias_decls.key?(name)
+        if env.type_alias_decls.key?(name)
           type = builder.expand_alias1(name)
           each_alias_type(type) do |ty|
             block[ty.name]

@@ -37,7 +37,7 @@ module RBS
                       when Types::Interface
                         env.interface_decls[type.name].decl.type_params
                       when Types::Alias
-                        env.alias_decls[type.name].decl.type_params
+                        env.type_alias_decls[type.name].decl.type_params
                       end
 
         InvalidTypeApplicationError.check!(

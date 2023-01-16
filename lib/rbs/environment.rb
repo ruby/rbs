@@ -6,15 +6,19 @@ module RBS
 
     attr_reader :class_decls
     attr_reader :interface_decls
-    attr_reader :alias_decls
+    attr_reader :type_alias_decls
     attr_reader :constant_decls
     attr_reader :global_decls
 
     module ContextUtil
       def calculate_context(decls)
-        decls.each.with_object([Namespace.root]) do |decl, array|
-          first = array.first or raise
-          array.unshift(first + decl.name.to_namespace)
+        decls.inject(nil) do |context, decl| #$ Resolver::context
+          if (_, last = context)
+            last or raise
+            [context, last + decl.name]
+          else
+            [nil, decl.name.absolute!]
+          end
         end
       end
     end
@@ -90,12 +94,6 @@ module RBS
       end
     end
 
-    def foo
-      a = [1].sample()
-      return unless a
-      a + 1
-    end
-
     class ClassEntry < MultiEntry
       def primary
         @primary ||= begin
@@ -119,7 +117,7 @@ module RBS
       include ContextUtil
 
       def context
-        @context = calculate_context(outer)
+        @context ||= calculate_context(outer)
       end
     end
 
@@ -129,7 +127,7 @@ module RBS
 
       @class_decls = {}
       @interface_decls = {}
-      @alias_decls = {}
+      @type_alias_decls = {}
       @constant_decls = {}
       @global_decls = {}
     end
@@ -140,7 +138,7 @@ module RBS
 
       @class_decls = other.class_decls.dup
       @interface_decls = other.interface_decls.dup
-      @alias_decls = other.alias_decls.dup
+      @type_alias_decls = other.type_alias_decls.dup
       @constant_decls = other.constant_decls.dup
       @global_decls = other.global_decls.dup
     end
@@ -149,6 +147,40 @@ module RBS
       self.new.tap do |env|
         loader.load(env: env)
       end
+    end
+
+    def interface_name?(name)
+      interface_decls.key?(name)
+    end
+
+    def type_alias_name?(name)
+      type_alias_decls.key?(name)
+    end
+
+    def module_name?(name)
+      class_decls.key?(name)
+    end
+
+    def type_name?(name)
+      interface_name?(name) ||
+        type_alias_name?(name) ||
+        module_name?(name)
+    end
+
+    def constant_name?(name)
+      constant_decl?(name) || module_name?(name)
+    end
+
+    def constant_decl?(name)
+      constant_decls.key?(name)
+    end
+
+    def class_decl?(name)
+      class_decls[name].is_a?(ClassEntry)
+    end
+
+    def module_decl?(name)
+      class_decls[name].is_a?(ModuleEntry)
     end
 
     def cache_name(cache, name:, decl:, outer:)
@@ -164,7 +196,7 @@ module RBS
       when AST::Declarations::Class, AST::Declarations::Module
         name = decl.name.with_prefix(namespace)
 
-        if constant_decls.key?(name)
+        if constant_decl?(name)
           raise DuplicatedDeclarationError.new(name, decl, constant_decls[name].decl)
         end
 
@@ -201,13 +233,13 @@ module RBS
       when AST::Declarations::Interface
         cache_name interface_decls, name: decl.name.with_prefix(namespace), decl: decl, outer: outer
 
-      when AST::Declarations::Alias
-        cache_name alias_decls, name: decl.name.with_prefix(namespace), decl: decl, outer: outer
+      when AST::Declarations::TypeAlias
+        cache_name type_alias_decls, name: decl.name.with_prefix(namespace), decl: decl, outer: outer
 
       when AST::Declarations::Constant
         name = decl.name.with_prefix(namespace)
 
-        if class_decls.key?(name)
+        if module_name?(name)
           raise DuplicatedDeclarationError.new(name, decl, class_decls[name].decls[0].decl)
         end
 
@@ -231,8 +263,8 @@ module RBS
     end
 
     def resolve_type_names(only: nil)
-      resolver = TypeNameResolver.from_env(self)
-      env = Environment.new()
+      resolver = Resolver::TypeNameResolver.new(self)
+      env = Environment.new
 
       declarations.each do |decl|
         if only && !only.member?(decl)
@@ -250,18 +282,22 @@ module RBS
         # @type var decl: AST::Declarations::Global
         return AST::Declarations::Global.new(
           name: decl.name,
-          type: absolute_type(resolver, decl.type, context: [Namespace.root]),
+          type: absolute_type(resolver, decl.type, context: nil),
           location: decl.location,
           comment: decl.comment
         )
       end
 
-      context = (outer + [decl]).each.with_object([Namespace.root]) do |decl, array|
-        head = array.first or raise
-        array.unshift(head + decl.name.to_namespace)
-      end
-
-      outer_context = context.drop(1)
+      nesting = [*outer, decl] #: Array[module_decl]
+      context = nesting.inject(nil) {|context, decl| #$ Resolver::context
+        if (_, last = context)
+          last or raise
+          [context, last + decl.name]
+        else
+          [nil, decl.name.absolute!]
+        end
+      }
+      outer_context = context&.first
 
       case decl
       when AST::Declarations::Class
@@ -339,8 +375,8 @@ module RBS
           location: decl.location,
           annotations: decl.annotations
         )
-      when AST::Declarations::Alias
-        AST::Declarations::Alias.new(
+      when AST::Declarations::TypeAlias
+        AST::Declarations::TypeAlias.new(
           name: decl.name.with_prefix(prefix),
           type_params: resolve_type_params(resolver, decl.type_params, context: context),
           type: absolute_type(resolver, decl.type, context: context),

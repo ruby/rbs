@@ -134,7 +134,7 @@ module RBS
         write_comment decl.comment
         puts "#{decl.name}: #{decl.type}"
 
-      when AST::Declarations::Alias
+      when AST::Declarations::TypeAlias
         write_comment decl.comment
         write_annotation decl.annotations
         write_loc_source(decl) {

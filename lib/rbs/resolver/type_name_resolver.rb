@@ -12,7 +12,7 @@ module RBS
 
         all_names.merge(env.class_decls.keys)
         all_names.merge(env.interface_decls.keys)
-        all_names.merge(env.alias_decls.keys)
+        all_names.merge(env.type_alias_decls.keys)
       end
 
       def try_cache(query)

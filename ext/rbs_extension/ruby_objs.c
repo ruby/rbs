@@ -340,7 +340,7 @@ VALUE rbs_ast_decl_global(VALUE name, VALUE type, VALUE location, VALUE comment)
   );
 }
 
-VALUE rbs_ast_decl_alias(VALUE name, VALUE type_params, VALUE type, VALUE annotations, VALUE location, VALUE comment) {
+VALUE rbs_ast_decl_type_alias(VALUE name, VALUE type_params, VALUE type, VALUE annotations, VALUE location, VALUE comment) {
   VALUE args = rb_hash_new();
   rb_hash_aset(args, ID2SYM(rb_intern("name")), name);
   rb_hash_aset(args, ID2SYM(rb_intern("type_params")), type_params);
@@ -350,7 +350,7 @@ VALUE rbs_ast_decl_alias(VALUE name, VALUE type_params, VALUE type, VALUE annota
   rb_hash_aset(args, ID2SYM(rb_intern("comment")), comment);
 
   return CLASS_NEW_INSTANCE(
-    RBS_AST_Declarations_Alias,
+    RBS_AST_Declarations_TypeAlias,
     1,
     &args
   );

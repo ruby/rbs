@@ -95,7 +95,7 @@ module RBS
         when AST::Declarations::Constant, AST::Declarations::Global
           find_in_type(pos, array: array, type: decl.type) and return true
 
-        when AST::Declarations::Alias
+        when AST::Declarations::TypeAlias
           find_in_type(pos, array: array, type: decl.type) and return true
         end
 

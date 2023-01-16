@@ -3,7 +3,6 @@
 module RBS
   class DefinitionBuilder
     attr_reader :env
-    attr_reader :type_name_resolver
     attr_reader :ancestor_builder
     attr_reader :method_builder
 
@@ -14,7 +13,6 @@ module RBS
 
     def initialize(env:, ancestor_builder: nil, method_builder: nil)
       @env = env
-      @type_name_resolver = TypeNameResolver.from_env(env)
       @ancestor_builder = ancestor_builder || AncestorBuilder.new(env: env)
       @method_builder = method_builder || MethodBuilder.new(env: env)
 
@@ -72,7 +70,7 @@ module RBS
           entry = env.interface_decls[name] or raise "Unknown interface name: #{name}"
           entry.decl.type_params
         when name.alias?
-          entry = env.alias_decls[name] or raise "Unknown alias name: #{name}"
+          entry = env.type_alias_decls[name] or raise "Unknown alias name: #{name}"
           entry.decl.type_params
         when name.class?
           entry = env.class_decls[name] or raise "Unknown module name: #{name}"
@@ -743,13 +741,13 @@ module RBS
     end
 
     def expand_alias1(type_name)
-      entry = env.alias_decls[type_name] or raise "Unknown alias name: #{type_name}"
+      entry = env.type_alias_decls[type_name] or raise "Unknown alias name: #{type_name}"
       as = entry.decl.type_params.each.map { Types::Bases::Any.new(location: nil) }
       expand_alias2(type_name, as)
     end
 
     def expand_alias2(type_name, args)
-      entry = env.alias_decls[type_name] or raise "Unknown alias name: #{type_name}"
+      entry = env.type_alias_decls[type_name] or raise "Unknown alias name: #{type_name}"
 
       ensure_namespace!(type_name.namespace, location: entry.decl.location)
       params = entry.decl.type_params.each.map(&:name)
@@ -803,9 +801,7 @@ module RBS
     def validate_type_name(name, location)
       name = name.absolute!
 
-      return if name.class? && env.class_decls.key?(name)
-      return if name.interface? && env.interface_decls.key?(name)
-      return if name.alias? && env.alias_decls.key?(name)
+      return if env.type_name?(name)
 
       raise NoTypeFoundError.new(type_name: name, location: location)
     end

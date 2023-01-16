@@ -438,15 +438,15 @@ EOU
       env = Environment.from_loader(loader).resolve_type_names
 
       builder = DefinitionBuilder.new(env: env)
-      validator = Validator.new(env: env, resolver: TypeNameResolver.from_env(env))
+      validator = Validator.new(env: env, resolver: Resolver::TypeNameResolver.new(env))
 
       env.class_decls.each do |name, decl|
         stdout.puts "Validating class/module definition: `#{name}`..."
         builder.build_instance(name).each_type do |type|
-          validator.validate_type type, context: [Namespace.root]
+          validator.validate_type type, context: nil
         end
         builder.build_singleton(name).each_type do |type|
-          validator.validate_type type, context: [Namespace.root]
+          validator.validate_type type, context: nil
         end
 
         d = decl.primary.decl
@@ -470,7 +470,7 @@ EOU
       env.interface_decls.each do |name, decl|
         stdout.puts "Validating interface: `#{name}`..."
         builder.build_interface(name).each_type do |type|
-          validator.validate_type type, context: [Namespace.root]
+          validator.validate_type type, context: nil
         end
 
         validator.validate_type_params(
@@ -495,13 +495,13 @@ EOU
 
       env.global_decls.each do |name, global|
         stdout.puts "Validating global: `#{name}`..."
-        validator.validate_type global.decl.type, context: [Namespace.root]
+        validator.validate_type global.decl.type, context: nil
       end
 
-      env.alias_decls.each do |name, decl|
+      env.type_alias_decls.each do |name, decl|
         stdout.puts "Validating alias: `#{name}`..."
         builder.expand_alias1(name).tap do |type|
-          validator.validate_type type, context: [Namespace.root]
+          validator.validate_type type, context: nil
         end
         validator.validate_type_alias(entry: decl)
       end
@@ -537,14 +537,26 @@ EOU
       env = Environment.from_loader(loader).resolve_type_names
 
       builder = DefinitionBuilder.new(env: env)
-      table = ConstantTable.new(builder: builder)
+      resolver = Resolver::ConstantResolver.new(builder: builder)
 
-      namespace = context ? Namespace.parse(context).absolute! : Namespace.root
-      stdout.puts "Context: #{namespace}"
-      name = Namespace.parse(args[0]).to_type_name
-      stdout.puts "Constant name: #{name}"
+      resolver_context = context ? [nil, TypeName(context).absolute!] : nil #: Resolver::context
+      stdout.puts "Context: #{context}"
+      const_name = TypeName(args[0])
+      stdout.puts "Constant name: #{const_name}"
 
-      constant = table.resolve_constant_reference(name, context: namespace.ascend.to_a)
+      if const_name.absolute?
+        constant = resolver.table.constant(const_name)
+      else
+        head, *components = const_name.to_namespace.path
+        head or raise
+
+        constant = resolver.resolve(head, context: resolver_context)
+        constant = components.inject(constant) do |const, component|
+          if const
+            resolver.resolve_child(const.name, component)
+          end
+        end
+      end
 
       if constant
         stdout.puts " => #{constant.name}: #{constant.type}"

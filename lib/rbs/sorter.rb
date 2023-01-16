@@ -30,7 +30,7 @@ module RBS
 
     def group(member)
       case member
-      when Declarations::Alias
+      when Declarations::TypeAlias
         -3
       when Declarations::Constant
         -2
@@ -100,7 +100,7 @@ module RBS
         member.new_name.to_s
       when Declarations::Constant
         member.name.to_s
-      when Declarations::Alias
+      when Declarations::TypeAlias
         member.name.to_s
       when Declarations::Class, Declarations::Module
         member.name.to_s

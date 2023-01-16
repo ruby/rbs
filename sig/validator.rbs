@@ -2,7 +2,7 @@ module RBS
   class Validator
     attr_reader env: Environment
 
-    attr_reader resolver: TypeNameResolver
+    attr_reader resolver: Resolver::TypeNameResolver
 
     attr_reader definition_builder: DefinitionBuilder
 
@@ -10,11 +10,11 @@ module RBS
 
     attr_reader type_alias_regularity: TypeAliasRegularity
 
-    def initialize: (env: Environment, resolver: TypeNameResolver) -> void
+    def initialize: (env: Environment, resolver: Resolver::TypeNameResolver) -> void
 
     # Validates the presence of type names and type application arity match.
     #
-    def validate_type: (Types::t, context: TypeNameResolver::context) -> void
+    def validate_type: (Types::t, context: Resolver::context) -> void
 
     # Validates type alias definition:
     #
@@ -25,7 +25,7 @@ module RBS
     #
     # It yields the rhs type if block is given, so that you can validate the rhs type.
     #
-    def validate_type_alias: (entry: Environment::SingleEntry[TypeName, AST::Declarations::Alias]) ?{ (Types::t rhs_type) -> void } -> void
+    def validate_type_alias: (entry: Environment::SingleEntry[TypeName, AST::Declarations::TypeAlias]) ?{ (Types::t rhs_type) -> void } -> void
 
     # Validates the type parameters in generic methods.
     #
@@ -47,6 +47,6 @@ module RBS
     # Resolves relative type names to absolute type names in given context.
     # Yields the type when the type name resolution using `#resolver` fails.
     #
-    def absolute_type: (Types::t, context: TypeNameResolver::context) { (Types::t) -> TypeName } -> Types::t
+    def absolute_type: (Types::t, context: Resolver::context) { (Types::t) -> TypeName } -> Types::t
   end
 end

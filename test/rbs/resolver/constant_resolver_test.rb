@@ -289,15 +289,15 @@ Foo::Name: "Foo::Name"
 EOF
       manager.build do |env|
         builder = DefinitionBuilder.new(env: env)
-        table = ConstantTable.new(builder: builder)
+        resolver = Resolver::ConstantResolver.new(builder: builder)
 
-        table.resolve_constant_reference(
-          TypeName.new(name: :Name, namespace: Namespace.parse("Foo")),
-          context: Namespace.parse("::Foo").ascend.to_a
+        resolver.resolve(
+          :Foo,
+          context: [nil, TypeName("::Foo")],
         ).tap do |constant|
           assert_instance_of Constant, constant
-          assert_equal "::Foo::Name", constant.name.to_s
-          assert_equal '"Foo::Name"', constant.type.to_s
+          assert_equal "::Foo", constant.name.to_s
+          assert_equal 'singleton(::Foo)', constant.type.to_s
         end
       end
     end
