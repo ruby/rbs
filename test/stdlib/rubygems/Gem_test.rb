@@ -462,7 +462,7 @@ class GemSingletonTest < Test::Unit::TestCase
 
   def test_read_binary
     assert_send_type  "(String) -> String",
-                      Gem, :read_binary, __FILE__
+                      Gem, :read_binary, File.expand_path(__FILE__, "../..")
   end
 
   def test_refresh
