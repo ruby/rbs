@@ -2,6 +2,34 @@
 
 ## master
 
+## 2.8.4 (2023-01-20)
+
+### Miscellaneous
+
+* Make `rake stdlib_test` run with single process (Backport [#1207](https://github.com/ruby/rbs/pull/1207), [#1211](https://github.com/ruby/rbs/pull/1211))
+* Remove `steep/*` files from `.gem` (Backport [#1214](https://github.com/ruby/rbs/pull/1214), [#1216](https://github.com/ruby/rbs/pull/1216))
+
+## 2.8.3 (2023-01-06)
+
+### Library changes
+
+* Use `-std=gnu99` instead of `-std=c99` (Backport [#973](https://github.com/ruby/rbs/pull/973))
+* Add `rbs_` prefix to `skip` function (Backport [#1186](https://github.com/ruby/rbs/pull/1186))
+
+## 2.8.2 (2022-12-21)
+
+### Signature updates
+
+* `YAML.load` ([#1170](https://github.com/ruby/rbs/pull/1170))
+
+### Library changes
+
+* Add the methods of the `prepend`ed module itself ([#1182](https://github.com/ruby/rbs/pull/1182))
+
+### Miscellaneous
+
+* Add `TestSkip` module to skip tests that fails in ruby CI ([#1167](https://github.com/ruby/rbs/pull/1167))
+
 ## 2.8.1 (2022-11-28)
 
 ### Signature updates
