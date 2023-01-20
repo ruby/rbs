@@ -39,4 +39,36 @@ class RBS::Collection::Sources::GitTest < Test::Unit::TestCase
       'repo_dir' => 'gems',
     })
   end
+
+  def git(*cmd, **opts)
+    Open3.capture3("git", *cmd, **opts).then do |out, err, status|
+      raise "Unexpected git status: \n\n#{err}" unless status.success?
+      out
+    end
+  end
+
+  def test_resolved_revision_updated_after_fetch
+    Dir.mktmpdir do |dir|
+      origin_repo = File.join(dir, "origin_repo")
+      Dir.mkdir(origin_repo)
+      git "init", chdir: origin_repo
+      git "config", "user.email", "you@example.com", chdir: origin_repo
+      git "config", "user.name", "Your Name", chdir: origin_repo
+      git "checkout", "-b", "main", chdir: origin_repo
+
+      git "commit", "--allow-empty", "-m", "Initial commit", chdir: origin_repo
+      sha_initial_commit = git("rev-parse", "HEAD", chdir: origin_repo).chomp
+
+      RBS::Collection::Sources::Git.new(name: "test", revision: "main", remote: origin_repo, repo_dir: "gems").tap do |source|
+        assert_equal sha_initial_commit, source.resolved_revision
+      end
+
+      git "commit", "--allow-empty", "-m", "Second commit", chdir: origin_repo
+      sha_second_commit = git("rev-parse", "HEAD", chdir: origin_repo).chomp
+
+      RBS::Collection::Sources::Git.new(name: "test", revision: "main", remote: origin_repo, repo_dir: "gems").tap do |source|
+        assert_equal sha_second_commit, source.resolved_revision
+      end
+    end
+  end
 end
