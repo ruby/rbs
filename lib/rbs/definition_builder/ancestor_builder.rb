@@ -190,6 +190,8 @@ module RBS
       end
 
       def one_instance_ancestors(type_name)
+        type_name = env.normalize_module_name(type_name)
+
         as = one_instance_ancestors_cache[type_name] and return as
 
         entry = env.class_decls[type_name] or raise "Unknown name for one_instance_ancestors: #{type_name}"
@@ -209,6 +211,8 @@ module RBS
               super_name = BuiltinNames::Object.name
               super_args = []
             end
+
+            super_name = env.normalize_module_name(super_name)
 
             NoSuperclassFoundError.check!(super_name, env: env, location: primary.decl.location)
             if super_class
@@ -236,7 +240,12 @@ module RBS
           else
             entry.self_types.each do |module_self|
               NoSelfTypeFoundError.check!(module_self, env: env)
-              self_types.push Definition::Ancestor::Instance.new(name: module_self.name, args: module_self.args, source: module_self)
+
+              module_name = module_self.name
+              if module_name.class?
+                module_name = env.normalize_module_name(module_name)
+              end
+              self_types.push Definition::Ancestor::Instance.new(name: module_name, args: module_self.args, source: module_self)
             end
           end
         end
@@ -253,6 +262,7 @@ module RBS
       end
 
       def one_singleton_ancestors(type_name)
+        type_name = env.normalize_module_name(type_name)
         as = one_singleton_ancestors_cache[type_name] and return as
 
         entry = env.class_decls[type_name] or raise "Unknown name for one_singleton_ancestors: #{type_name}"
@@ -269,6 +279,8 @@ module RBS
             else
               super_name = BuiltinNames::Object.name
             end
+
+            super_name = env.normalize_module_name(super_name)
 
             NoSuperclassFoundError.check!(super_name, env: env, location: primary.decl.location)
             if super_class
@@ -328,16 +340,18 @@ module RBS
           when AST::Members::Include
             module_name = member.name
             module_args = member.args.map {|type| align_params ? type.sub(align_params) : type }
-            ancestor = Definition::Ancestor::Instance.new(name: module_name, args: module_args, source: member)
 
             case
             when member.name.class? && included_modules
               MixinClassError.check!(type_name: type_name, env: env, member: member)
               NoMixinFoundError.check!(member.name, env: env, member: member)
-              included_modules << ancestor
+
+              module_name = env.normalize_module_name(module_name)
+              included_modules << Definition::Ancestor::Instance.new(name: module_name, args: module_args, source: member)
             when member.name.interface? && included_interfaces
               NoMixinFoundError.check!(member.name, env: env, member: member)
-              included_interfaces << ancestor
+
+              included_interfaces << Definition::Ancestor::Instance.new(name: module_name, args: module_args, source: member)
             end
 
           when AST::Members::Prepend
@@ -345,7 +359,7 @@ module RBS
               MixinClassError.check!(type_name: type_name, env: env, member: member)
               NoMixinFoundError.check!(member.name, env: env, member: member)
 
-              module_name = member.name
+              module_name = env.normalize_module_name(member.name)
               module_args = member.args.map {|type| align_params ? type.sub(align_params) : type }
 
               prepended_modules << Definition::Ancestor::Instance.new(name: module_name, args: module_args, source: member)
@@ -354,16 +368,18 @@ module RBS
           when AST::Members::Extend
             module_name = member.name
             module_args = member.args
-            ancestor = Definition::Ancestor::Instance.new(name: module_name, args: module_args, source: member)
 
             case
             when member.name.class? && extended_modules
               MixinClassError.check!(type_name: type_name, env: env, member: member)
               NoMixinFoundError.check!(member.name, env: env, member: member)
-              extended_modules << ancestor
+
+              module_name = env.normalize_module_name(module_name)
+              extended_modules << Definition::Ancestor::Instance.new(name: module_name, args: module_args, source: member)
             when member.name.interface? && extended_interfaces
               NoMixinFoundError.check!(member.name, env: env, member: member)
-              extended_interfaces << ancestor
+
+              extended_interfaces << Definition::Ancestor::Instance.new(name: module_name, args: module_args, source: member)
             end
           end
         end
