@@ -233,3 +233,69 @@ task :test_generate_stdlib do
   sh "RBS_GENERATE_TEST_PATH=/tmp/Thread_Mutex_test.rb rake 'generate:stdlib_test[Thread::Mutex]'"
   sh "ruby -c /tmp/Thread_Mutex_test.rb"
 end
+
+Rake::Task[:release].enhance do
+  Rake::Task[:"release:note"].invoke
+end
+
+namespace :release do
+  desc "Explain the post-release steps automatically"
+  task :note do
+    version = Gem::Version.new(RBS::VERSION)
+    major, minor, patch, *_ = RBS::VERSION.split(".")
+    major = major.to_i
+    minor = minor.to_i
+    patch = patch.to_i
+
+    puts "🎉🎉🎉🎉 Congratulations for **#{version}** release! 🎉🎉🎉🎉"
+    puts
+    puts "There are a few things left to complete the release. 💪"
+    puts
+
+    if patch == 0 || version.prerelease?
+      puts "* [ ] Update release note: https://github.com/ruby/rbs/wiki/Release-Note-#{major}.#{minor}"
+    end
+
+    if patch == 0 && !version.prerelease?
+      puts "* [ ] Delete `RBS XYZ is the latest version of...` from release note: https://github.com/ruby/rbs/wiki/Release-Note-#{major}.#{minor}"
+    end
+
+    puts "* [ ] Publish a release at GitHub"
+    puts "* [ ] Make some announcements on Twitter/Mustdon/Slack/???"
+
+    puts
+    puts
+
+    puts "✏️ Making a draft release on GitHub..."
+
+    content = File.read(File.join(__dir__, "CHANGELOG.md"))
+    changelog = content.scan(/^## \d.*?(?=^## \d)/m)[0]
+    changelog = changelog.sub(/^.*\n^.*\n/, "").rstrip
+
+    notes = <<NOTES
+[Release note](https://github.com/ruby/rbs/wiki/Release-Note-#{major}.#{minor})
+
+#{changelog}
+NOTES
+
+    command = [
+      "gh",
+      "release",
+      "create",
+      "--draft",
+      "v#{RBS::VERSION}",
+      "--title=#{RBS::VERSION}",
+      "--notes=#{notes}"
+    ]
+
+    if version.prerelease?
+      command << "--prerelease"
+    end
+
+    require "open3"
+    output, status = Open3.capture2(*command)
+    if status.success?
+      puts "  >> Done! Open #{output.chomp} and publish the release!"
+    end
+  end
+end
