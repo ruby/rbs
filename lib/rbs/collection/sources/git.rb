@@ -171,7 +171,7 @@ module RBS
               if commit_hash?
                 revision
               else
-                setup! { git('rev-parse', revision).chomp }
+                setup! { git('rev-parse', "refs/remotes/origin/#{revision}").chomp }
               end
             end
         end
