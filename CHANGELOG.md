@@ -2,12 +2,19 @@
 
 ## master
 
+## 2.8.4 (2023-01-20)
+
+### Miscellaneous
+
+* Make `rake stdlib_test` run with single process (Backport [#1207](https://github.com/ruby/rbs/pull/1207), [#1211](https://github.com/ruby/rbs/pull/1211))
+* Remove `steep/*` files from `.gem` (Backport [#1214](https://github.com/ruby/rbs/pull/1214), [#1216](https://github.com/ruby/rbs/pull/1216))
+
 ## 2.8.3 (2023-01-06)
 
 ### Library changes
 
-* Use `-std=gnu99` instead of `-std=c99` ([#973](https://github.com/ruby/rbs/pull/973))
-* Add `rbs_` prefix to `skip` function ([#1186](https://github.com/ruby/rbs/pull/1186))
+* Use `-std=gnu99` instead of `-std=c99` (Backport [#973](https://github.com/ruby/rbs/pull/973))
+* Add `rbs_` prefix to `skip` function (Backport [#1186](https://github.com/ruby/rbs/pull/1186))
 
 ## 2.8.2 (2022-12-21)
 
