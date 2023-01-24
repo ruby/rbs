@@ -148,6 +148,8 @@ module RBS
     end
 
     def build_instance(type_name)
+      type_name = env.normalize_module_name(type_name)
+
       try_cache(type_name, cache: instance_cache) do
         entry = env.class_decls[type_name] or raise "Unknown name for build_instance: #{type_name}"
         ensure_namespace!(type_name.namespace, location: entry.decls[0].decl.location)
@@ -276,6 +278,8 @@ module RBS
     end
 
     def build_singleton(type_name)
+      type_name = env.normalize_module_name(type_name)
+      
       try_cache type_name, cache: singleton_cache do
         entry = env.class_decls[type_name] or raise "Unknown name for build_singleton: #{type_name}"
         ensure_namespace!(type_name.namespace, location: entry.decls[0].decl.location)
