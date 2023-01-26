@@ -105,7 +105,7 @@ module RBS
           unless locked
             source =
               if src_data
-                Sources.from_config_entry(src_data)
+                Sources.from_config_entry(src_data, base_directory: config.config_path.dirname)
               else
                 find_source(name: name)
               end

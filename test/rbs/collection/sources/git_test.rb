@@ -37,7 +37,7 @@ class RBS::Collection::Sources::GitTest < Test::Unit::TestCase
       'revision' => revision,
       'remote' => 'https://github.com/ruby/gem_rbs_collection.git',
       'repo_dir' => 'gems',
-    })
+    }, base_directory: nil)
   end
 
   def git(*cmd, **opts)

@@ -240,7 +240,7 @@ end
     end
   end
 
-  def test_loading_from_rbs_collection_without_install
+  def test_loading_from_rbs_collection_git_source_without_install
     mktmpdir do |path|
       lockfile_path = path.join('rbs_collection.lock.yaml')
       lockfile_path.write(<<~YAML)
@@ -267,6 +267,35 @@ end
               revision: b4d3b346d9657543099a35a1fd20347e75b8c523
               repo_dir: gems
               type: git
+      YAML
+      lock = RBS::Collection::Config::Lockfile.from_lockfile(lockfile_path: lockfile_path, data: YAML.load_file(lockfile_path.to_s))
+
+      repo = RBS::Repository.new()
+
+      loader = EnvironmentLoader.new(repository: repo)
+
+      assert_raises RBS::Collection::Config::CollectionNotAvailable do
+        loader.add_collection(lock)
+      end
+    end
+  end
+
+  def test_loading_from_rbs_collection_local_source_without_install
+    mktmpdir do |path|
+      lockfile_path = path.join('rbs_collection.lock.yaml')
+      lockfile_path.write(<<~YAML)
+        sources:
+          - type: local
+            name: the local source
+            path: path/to/local/source
+        path: '.gem_rbs_collection'
+        gems:
+          - name: ast
+            version: "2.4"
+            source:
+              type: local
+              name: the local source
+              path: path/to/local/source
       YAML
       lock = RBS::Collection::Config::Lockfile.from_lockfile(lockfile_path: lockfile_path, data: YAML.load_file(lockfile_path.to_s))
 

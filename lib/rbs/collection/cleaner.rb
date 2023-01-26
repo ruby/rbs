@@ -16,7 +16,14 @@ module RBS
           version or raise
           next if needed? gem_name, version
 
-          FileUtils.remove_entry_secure(dir.to_s)
+          case
+          when dir.symlink?
+            dir.unlink
+          when dir.directory?
+            FileUtils.remove_entry_secure(dir.to_s)
+          else
+            raise
+          end
         end
       end
 

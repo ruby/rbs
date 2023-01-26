@@ -1076,10 +1076,15 @@ EOB
         config_path.write(<<~'YAML')
           # Download sources
           sources:
-            - name: ruby/gem_rbs_collection
+            - type: git
+              name: ruby/gem_rbs_collection
               remote: https://github.com/ruby/gem_rbs_collection.git
               revision: main
               repo_dir: gems
+
+          # You can specify local directories as sources also.
+          # - type: local
+          #   path: path/to/your/local/repository
 
           # A directory to install the downloaded RBSs
           path: .gem_rbs_collection

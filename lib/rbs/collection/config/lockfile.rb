@@ -75,7 +75,7 @@ module RBS
           if gems = data["gems"]
             gems.each do |gem|
               src = gem["source"]
-              source = Sources.from_config_entry(src)
+              source = Sources.from_config_entry(src, base_directory: lockfile_path.dirname)
               lockfile.gems[gem["name"]] = {
                 name: gem["name"],
                 version: gem["version"],
@@ -106,6 +106,8 @@ module RBS
               meta_path = fullpath.join(gem[:name], gem[:version], Sources::Git::METADATA_FILENAME)
               raise CollectionNotAvailable unless meta_path.exist?
               raise CollectionNotAvailable unless library_data(gem) == YAML.load(meta_path.read)
+            when Sources::Local
+              raise CollectionNotAvailable unless fullpath.join(gem[:name], gem[:version]).symlink?
             end
           end
         end
