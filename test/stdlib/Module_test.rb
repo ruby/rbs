@@ -144,4 +144,14 @@ class ModuleInstanceTest < Test::Unit::TestCase
       mod, :public, :foo, "bar"
     )
   end
+
+  def test_attr
+    if RUBY_VERSION >= '3.0'
+      mod = Module.new
+      assert_send_type(
+        "(*Symbol | String arg0) -> Array[Symbol]",
+        mod, :attr, :foo
+      )
+    end
+  end
 end

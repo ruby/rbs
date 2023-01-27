@@ -1536,5 +1536,5 @@ class Module < Object
   # `attr_reader(name)` but deprecated. Returns an array of defined method names
   # as symbols.
   #
-  def attr: (*Symbol | String arg0) -> NilClass
+  def attr: (*Symbol | String arg0) -> Array[Symbol]
 end
