@@ -240,22 +240,24 @@ module RBS
     end
 
     def normalized_class_entry(type_name)
-      entry = class_entry(normalize_module_name(type_name))
-      case entry
-      when ClassEntry, nil
-        entry
-      when ClassAliasEntry
-        raise
+      if name = normalize_module_name?(type_name)
+        case entry = class_entry(name)
+        when ClassEntry, nil
+          entry
+        when ClassAliasEntry
+          raise
+        end
       end
     end
 
     def normalized_module_entry(type_name)
-      entry = module_entry(normalize_module_name(type_name))
-      case entry
-      when ModuleEntry, nil
-        entry
-      when ModuleAliasEntry
-        raise
+      if name = normalize_module_name?(type_name)
+        case entry = module_entry(name)
+        when ModuleEntry, nil
+          entry
+        when ModuleAliasEntry
+          raise
+        end
       end
     end
 
@@ -280,21 +282,7 @@ module RBS
       name = name.absolute! if name.relative!
 
       if @normalize_module_name_cache.key?(name)
-        case norm = @normalize_module_name_cache[name]
-        when TypeName
-          return norm
-        when nil
-          return nil
-        when false
-          entry = module_class_entry(name)
-          case entry
-          when ClassAliasEntry, ModuleAliasEntry
-            raise CyclicClassAliasDefinitionError.new(entry)
-          else
-            # This cannot happen because the recursion starts with an alias entry
-            raise
-          end
-        end
+        return @normalize_module_name_cache[name]
       end
 
       @normalize_module_name_cache[name] = false
@@ -311,24 +299,26 @@ module RBS
           @normalize_module_name_cache[name] = normalize_module_name?(old_name)
         else
           parent = old_name.namespace.to_type_name
-          normalized_parent = normalize_module_name(parent)
 
-          @normalize_module_name_cache[name] =
-            if normalized_parent == parent
-              normalize_module_name?(old_name)
-            else
-              normalize_module_name?(
-                TypeName.new(name: old_name.name, namespace: normalized_parent.to_namespace)
-              )
-            end
+          if normalized_parent = normalize_module_name?(parent)
+            @normalize_module_name_cache[name] =
+              if normalized_parent == parent
+                normalize_module_name?(old_name)
+              else
+                normalize_module_name?(
+                  TypeName.new(name: old_name.name, namespace: normalized_parent.to_namespace)
+                )
+              end
+          else
+            @normalize_module_name_cache[name] = nil
+          end
         end
 
       when ConstantEntry
         raise "#{name} is a constant name"
 
       else
-        @normalize_module_name_cache.delete(name)
-        nil
+        @normalize_module_name_cache[name] = nil
       end
     end
 

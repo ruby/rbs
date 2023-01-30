@@ -210,10 +210,10 @@ module RBS
     # Returns the original module name that is defined with `module` declaration
     #
     # * Calls `#absolute!` for relative module names
-    # * Raises an error if given type name is not module
-    # * Returns nil if the name cannot be normalized to a class/module
+    # * Returns `nil` if the rhs name cannot be found
+    # * Returns `false` if the name is cyclic
     #
-    def normalize_module_name?: (TypeName) -> TypeName?
+    def normalize_module_name?: (TypeName) -> (TypeName | nil | false)
 
     # Returns the original module name that is defined with `module` declaration
     #
