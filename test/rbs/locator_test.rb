@@ -124,4 +124,24 @@ RBS
       assert_instance_of AST::Declarations::Module, cs[5]
     end
   end
+
+  def test_find_class_alias
+    locator = locator(<<~RBS)
+      class Foo = Object
+
+      module Bar = Kernel
+    RBS
+
+    locator.find(line: 1, column: 16).tap do |cs|
+      assert_equal 2, cs.size
+      assert_equal :old_name, cs[0]
+      assert_instance_of AST::Declarations::ClassAlias, cs[1]
+    end
+
+    locator.find(line: 3, column: 18).tap do |cs|
+      assert_equal 2, cs.size
+      assert_equal :old_name, cs[0]
+      assert_instance_of AST::Declarations::ModuleAlias, cs[1]
+    end
+  end
 end

@@ -174,7 +174,7 @@ module RBS
   end
 
   # The *overloading* method definition cannot find *non-overloading* method definition
-  # 
+  #
   class InvalidOverloadMethodError < DefinitionError
     attr_reader type_name: TypeName
     attr_reader method_name: Symbol
@@ -279,5 +279,26 @@ module RBS
     attr_reader method_name: Symbol?
 
     def initialize: (type_name: TypeName, method_name: Symbol?, params: Array[AST::TypeParam], location: Location[untyped, untyped]?) -> void
+  end
+
+  # A module/class alias declaration has inconsistent right-hand-side
+  #
+  # ```rbs
+  # module Foo = Object     # Error
+  # class Bar = Kernel      # Error
+  # ```
+  #
+  class InconsistentClassModuleAliasError < BaseError
+    attr_reader alias_entry: Environment::ModuleAliasEntry | Environment::ClassAliasEntry
+
+    def initialize: (Environment::ModuleAliasEntry | Environment::ClassAliasEntry) -> void
+  end
+
+  # A module/class alias declaration is cyclic
+  #
+  class CyclicClassAliasDefinitionError < BaseError
+    attr_reader alias_entry: Environment::ModuleAliasEntry | Environment::ClassAliasEntry
+
+    def initialize: (Environment::ModuleAliasEntry | Environment::ClassAliasEntry) -> void
   end
 end

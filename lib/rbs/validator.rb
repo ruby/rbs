@@ -33,7 +33,8 @@ module RBS
 
         type_params = case type
                       when Types::ClassInstance
-                        env.class_decls[type.name].type_params
+                        entry = env.normalized_module_class_entry(type.name) or raise
+                        entry.type_params
                       when Types::Interface
                         env.interface_decls[type.name].decl.type_params
                       when Types::Alias
@@ -143,6 +144,23 @@ module RBS
             params: params,
             location: location
           )
+        end
+      end
+    end
+
+    def validate_class_alias(entry:)
+      unless env.normalize_module_name?(entry.decl.new_name)
+        raise NoTypeFoundError.new(type_name: entry.decl.old_name, location: entry.decl.location&.[](:old_name))
+      end
+
+      case entry
+      when Environment::ClassAliasEntry
+        unless env.class_entry(entry.decl.old_name)
+          raise InconsistentClassModuleAliasError.new(entry)
+        end
+      when Environment::ModuleAliasEntry
+        unless env.module_entry(entry.decl.old_name)
+          raise InconsistentClassModuleAliasError.new(entry)
         end
       end
     end

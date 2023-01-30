@@ -1034,7 +1034,6 @@ VALUE parse_type(parserstate *state) {
 
   type_param ::= tUIDENT                            (module_type_params == false)
 */
-
 VALUE parse_type_params(parserstate *state, range *rg, bool module_type_params) {
   VALUE params = rb_ary_new();
 
@@ -2267,13 +2266,11 @@ VALUE parse_module_members(parserstate *state) {
 }
 
 /*
-  module_decl ::= {`module`} module_name module_type_params module_members <kEND>
-                | {`module`} module_name module_type_params `:` module_self_types module_members <kEND>
+  module_decl ::= {module_name} module_type_params module_members <kEND>
+                | {module_name} module_name module_type_params `:` module_self_types module_members <kEND>
 */
-VALUE parse_module_decl(parserstate *state, position comment_pos, VALUE annotations) {
+VALUE parse_module_decl0(parserstate *state, range keyword_range, VALUE module_name, range name_range, VALUE comment, VALUE annotations) {
   range decl_range;
-  range keyword_range;
-  range name_range;
   range end_range;
   range type_params_range;
   range colon_range;
@@ -2281,15 +2278,8 @@ VALUE parse_module_decl(parserstate *state, position comment_pos, VALUE annotati
 
   parser_push_typevar_table(state, true);
 
-  position start = state->current_token.range.start;
-  comment_pos = nonnull_pos_or(comment_pos, start);
-  VALUE comment = get_comment(state, comment_pos.line);
+  decl_range.start = keyword_range.start;
 
-  keyword_range = state->current_token.range;
-  decl_range.start = state->current_token.range.start;
-
-  parser_advance(state);
-  VALUE module_name = parse_type_name(state, CLASS_NAME, &name_range);
   VALUE type_params = parse_type_params(state, &type_params_range, true);
   VALUE self_types = rb_ary_new();
 
@@ -2333,6 +2323,46 @@ VALUE parse_module_decl(parserstate *state, position comment_pos, VALUE annotati
 }
 
 /*
+  module_decl ::= {`module`} module_name `=` old_module_name <kEND>
+                | {`module`} module_name module_decl0 <kEND>
+
+*/
+VALUE parse_module_decl(parserstate *state, position comment_pos, VALUE annotations) {
+  range keyword_range = state->current_token.range;
+  range module_name_range;
+
+  comment_pos = nonnull_pos_or(comment_pos, state->current_token.range.start);
+  VALUE comment = get_comment(state, comment_pos.line);
+
+  parser_advance(state);
+  VALUE module_name = parse_type_name(state, CLASS_NAME, &module_name_range);
+
+  if (state->next_token.type == pEQ) {
+    range eq_range = state->next_token.range;
+    parser_advance(state);
+    parser_advance(state);
+
+    range old_name_range;
+    VALUE old_name = parse_type_name(state, CLASS_NAME, &old_name_range);
+
+    range decl_range;
+    decl_range.start = keyword_range.start;
+    decl_range.end = old_name_range.end;
+
+    VALUE location = rbs_new_location(state->buffer, decl_range);
+    rbs_loc *loc = rbs_check_location(location);
+    rbs_loc_add_required_child(loc, rb_intern("keyword"), keyword_range);
+    rbs_loc_add_required_child(loc, rb_intern("new_name"), module_name_range);
+    rbs_loc_add_required_child(loc, rb_intern("eq"), eq_range);
+    rbs_loc_add_optional_child(loc, rb_intern("old_name"), old_name_range);
+
+    return rbs_ast_decl_module_alias(module_name, old_name, location, comment);
+  } else {
+    return parse_module_decl0(state, keyword_range, module_name, module_name_range, comment, annotations);
+  }
+}
+
+/*
   class_decl_super ::= {} `<` <class_instance_name>
                      | {<>}
 */
@@ -2368,35 +2398,25 @@ VALUE parse_class_decl_super(parserstate *state, range *lt_range) {
 }
 
 /*
-  class_decl ::= {`class`} class_name type_params class_decl_super class_members <`end`>
+  class_decl ::= {class_name} type_params class_decl_super class_members <`end`>
 */
-VALUE parse_class_decl(parserstate *state, position comment_pos, VALUE annotations) {
+VALUE parse_class_decl0(parserstate *state, range keyword_range, VALUE name, range name_range, VALUE comment, VALUE annotations) {
   range decl_range;
-  range keyword_range;
-  range name_range;
   range end_range;
   range type_params_range;
   range lt_range;
 
-  VALUE name;
   VALUE type_params;
   VALUE super;
   VALUE members;
-  VALUE comment;
   VALUE location;
 
   rbs_loc *loc;
 
   parser_push_typevar_table(state, true);
 
-  decl_range.start = state->current_token.range.start;
-  keyword_range = state->current_token.range;
+  decl_range.start = keyword_range.start;
 
-  comment_pos = nonnull_pos_or(comment_pos, decl_range.start);
-  comment = get_comment(state, comment_pos.line);
-
-  parser_advance(state);
-  name = parse_type_name(state, CLASS_NAME, &name_range);
   type_params = parse_type_params(state, &type_params_range, true);
   super = parse_class_decl_super(state, &lt_range);
   members = parse_module_members(state);
@@ -2424,6 +2444,45 @@ VALUE parse_class_decl(parserstate *state, position comment_pos, VALUE annotatio
     location,
     comment
   );
+}
+
+/*
+  class_decl ::= {`class`} class_name `=` <class_name>
+               | {`class`} class_name <class_decl0>
+*/
+VALUE parse_class_decl(parserstate *state, position comment_pos, VALUE annotations) {
+  range keyword_range = state->current_token.range;
+  range class_name_range;
+
+  comment_pos = nonnull_pos_or(comment_pos, state->current_token.range.start);
+  VALUE comment = get_comment(state, comment_pos.line);
+
+  parser_advance(state);
+  VALUE class_name = parse_type_name(state, CLASS_NAME, &class_name_range);
+
+  if (state->next_token.type == pEQ) {
+    range eq_range = state->next_token.range;
+    parser_advance(state);
+    parser_advance(state);
+
+    range old_name_range;
+    VALUE old_name = parse_type_name(state, CLASS_NAME, &old_name_range);
+
+    range decl_range;
+    decl_range.start = keyword_range.start;
+    decl_range.end = old_name_range.end;
+
+    VALUE location = rbs_new_location(state->buffer, decl_range);
+    rbs_loc *loc = rbs_check_location(location);
+    rbs_loc_add_required_child(loc, rb_intern("keyword"), keyword_range);
+    rbs_loc_add_required_child(loc, rb_intern("new_name"), class_name_range);
+    rbs_loc_add_required_child(loc, rb_intern("eq"), eq_range);
+    rbs_loc_add_optional_child(loc, rb_intern("old_name"), old_name_range);
+
+    return rbs_ast_decl_class_alias(class_name, old_name, location, comment);
+  } else {
+    return parse_class_decl0(state, keyword_range, class_name, class_name_range, comment, annotations);
+  }
 }
 
 /*

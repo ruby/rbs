@@ -17,6 +17,8 @@ extern VALUE RBS_AST_Declarations_Global;
 extern VALUE RBS_AST_Declarations_Interface;
 extern VALUE RBS_AST_Declarations_Module_Self;
 extern VALUE RBS_AST_Declarations_Module;
+extern VALUE RBS_AST_Declarations_ModuleAlias;
+extern VALUE RBS_AST_Declarations_ClassAlias;
 
 extern VALUE RBS_AST_Members;
 extern VALUE RBS_AST_Members_Alias;

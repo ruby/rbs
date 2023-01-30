@@ -2338,4 +2338,61 @@ end
       end
     end
   end
+
+  def test_build_instance_alias
+    SignatureManager.new do |manager|
+      manager.files[Pathname("foo.rbs")] = <<~EOF
+        class A
+        end
+
+        class B = A
+
+        module K = Kernel
+      EOF
+
+      manager.build do |env|
+        builder = DefinitionBuilder.new(env: env)
+
+        builder.build_instance(type_name("::B")).tap do |definition|
+          assert_instance_of Definition, definition
+          assert_equal type_name("::A"), definition.type_name
+        end
+
+        builder.build_instance(type_name("::K")).tap do |definition|
+          assert_instance_of Definition, definition
+          assert_equal type_name("::Kernel"), definition.type_name
+        end
+      end
+    end
+  end
+
+  def test_build_singleton_alias
+    SignatureManager.new do |manager|
+      manager.files[Pathname("foo.rbs")] = <<~EOF
+        class A
+          def initialize: (String) -> void
+        end
+
+        class B = A
+
+        module K = Kernel
+      EOF
+
+      manager.build do |env|
+        builder = DefinitionBuilder.new(env: env)
+
+        builder.build_singleton(type_name("::B")).tap do |definition|
+          assert_instance_of Definition, definition
+          assert_equal type_name("::A"), definition.type_name
+
+          assert_equal [parse_method_type("(::String) -> ::A")], definition.methods[:new].defs.map(&:type)
+        end
+
+        builder.build_singleton(type_name("::K")).tap do |definition|
+          assert_instance_of Definition, definition
+          assert_equal type_name("::Kernel"), definition.type_name
+        end
+      end
+    end
+  end
 end

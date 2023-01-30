@@ -402,6 +402,34 @@ VALUE rbs_ast_decl_module(VALUE name, VALUE type_params, VALUE self_types, VALUE
   );
 }
 
+VALUE rbs_ast_decl_class_alias(VALUE new_name, VALUE old_name, VALUE location, VALUE comment) {
+  VALUE args = rb_hash_new();
+  rb_hash_aset(args, ID2SYM(rb_intern("new_name")), new_name);
+  rb_hash_aset(args, ID2SYM(rb_intern("old_name")), old_name);
+  rb_hash_aset(args, ID2SYM(rb_intern("location")), location);
+  rb_hash_aset(args, ID2SYM(rb_intern("comment")), comment);
+
+  return CLASS_NEW_INSTANCE(
+    RBS_AST_Declarations_ClassAlias,
+    1,
+    &args
+  );
+}
+
+VALUE rbs_ast_decl_module_alias(VALUE new_name, VALUE old_name, VALUE location, VALUE comment) {
+  VALUE args = rb_hash_new();
+  rb_hash_aset(args, ID2SYM(rb_intern("new_name")), new_name);
+  rb_hash_aset(args, ID2SYM(rb_intern("old_name")), old_name);
+  rb_hash_aset(args, ID2SYM(rb_intern("location")), location);
+  rb_hash_aset(args, ID2SYM(rb_intern("comment")), comment);
+
+  return CLASS_NEW_INSTANCE(
+    RBS_AST_Declarations_ModuleAlias,
+    1,
+    &args
+  );
+}
+
 VALUE rbs_ast_members_method_definition_overload(VALUE annotations, VALUE method_type) {
   VALUE args = rb_hash_new();
   rb_hash_aset(args, ID2SYM(rb_intern("annotations")), annotations);

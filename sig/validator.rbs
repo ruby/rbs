@@ -25,7 +25,7 @@ module RBS
     #
     # It yields the rhs type if block is given, so that you can validate the rhs type.
     #
-    def validate_type_alias: (entry: Environment::SingleEntry[TypeName, AST::Declarations::TypeAlias]) ?{ (Types::t rhs_type) -> void } -> void
+    def validate_type_alias: (entry: Environment::TypeAliasEntry) ?{ (Types::t rhs_type) -> void } -> void
 
     # Validates the type parameters in generic methods.
     #
@@ -41,6 +41,13 @@ module RBS
     # ```
     #
     def validate_type_params: (Array[AST::TypeParam] params, type_name: TypeName, ?method_name: Symbol?, location: Location[untyped, untyped]?) -> void
+
+    # Validates class alias declaration
+    #
+    # - The right hand side can be normalized
+    # - No mixing alias declaration between class and modules
+    # 
+    def validate_class_alias: (entry: Environment::ClassAliasEntry | Environment::ModuleAliasEntry) -> void
 
     private
 

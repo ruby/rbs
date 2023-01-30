@@ -18,6 +18,8 @@ VALUE RBS_AST_Declarations_Module;
 VALUE RBS_AST_Declarations_Module_Self;
 VALUE RBS_AST_Declarations_Class;
 VALUE RBS_AST_Declarations_Class_Super;
+VALUE RBS_AST_Declarations_ModuleAlias;
+VALUE RBS_AST_Declarations_ClassAlias;
 
 VALUE RBS_AST_Members;
 VALUE RBS_AST_Members_Alias;
@@ -88,6 +90,8 @@ void rbs__init_constants(void) {
   RBS_AST_Declarations_Module_Self = rb_const_get(RBS_AST_Declarations_Module, rb_intern("Self"));
   RBS_AST_Declarations_Class = rb_const_get(RBS_AST_Declarations, rb_intern("Class"));
   RBS_AST_Declarations_Class_Super = rb_const_get(RBS_AST_Declarations_Class, rb_intern("Super"));
+  RBS_AST_Declarations_ClassAlias = rb_const_get(RBS_AST_Declarations, rb_intern("ClassAlias"));
+  RBS_AST_Declarations_ModuleAlias = rb_const_get(RBS_AST_Declarations, rb_intern("ModuleAlias"));
 
   RBS_AST_Members = rb_const_get(RBS_AST, rb_intern("Members"));
   RBS_AST_Members_Alias = rb_const_get(RBS_AST_Members, rb_intern("Alias"));

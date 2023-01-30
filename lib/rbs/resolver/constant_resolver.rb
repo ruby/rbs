@@ -18,18 +18,31 @@ module RBS
           end
 
           environment.class_decls.each do |name, entry|
+            constant = constant_of_module(name, entry)
+
             unless name.namespace.empty?
               parent = name.namespace.to_type_name
-
               table = children_table[parent] or raise
-              constant = constant_of_module(name, entry)
             else
               table = toplevel
-              constant = constant_of_module(name, entry)
             end
 
             table[name.name] = constant
             constants_table[name] = constant
+          end
+
+          environment.class_alias_decls.each do |name, entry|
+            normalized_entry = environment.normalized_module_class_entry(name) or raise
+            constant = constant_of_module(name, normalized_entry)
+
+            # Insert class/module aliases into `children_table` and `toplevel` table
+            unless name.namespace.empty?
+              normalized_parent = environment.normalize_module_name?(name.namespace.to_type_name) or raise
+              table = children_table[normalized_parent] or raise
+              table[name.name] = constant
+            else
+              toplevel[name.name] = constant
+            end
           end
 
           environment.constant_decls.each do |name, entry|
@@ -97,6 +110,8 @@ module RBS
       end
 
       def children(module_name)
+        module_name = builder.env.normalize_module_name(module_name)
+        
         unless child_constants_cache.key?(module_name)
           load_child_constants(module_name)
         end
@@ -113,6 +128,7 @@ module RBS
         else
           constants_from_ancestors(BuiltinNames::Object.name, constants: consts)
         end
+
         constants_from_context(context, constants: consts) or return
         constants_itself(context, constants: consts)
 
@@ -151,7 +167,7 @@ module RBS
           constants_from_context(parent, constants: constants) or return false
 
           if last
-            consts = table.children(last) or return false
+            consts = table.children(builder.env.normalize_module_name(last)) or return false
             constants.merge!(consts)
           end
         end
@@ -160,14 +176,14 @@ module RBS
       end
 
       def constants_from_ancestors(module_name, constants:)
-        entry = builder.env.class_decls[module_name]
+        entry = builder.env.normalized_module_class_entry(module_name) or raise
 
-        if entry.is_a?(Environment::ModuleEntry)
+        if entry.is_a?(Environment::ClassEntry) || entry.is_a?(Environment::ModuleEntry)
           constants.merge!(table.children(BuiltinNames::Object.name) || raise)
           constants.merge!(table.toplevel)
         end
 
-        builder.ancestor_builder.instance_ancestors(module_name).ancestors.reverse_each do |ancestor|
+        builder.ancestor_builder.instance_ancestors(entry.name).ancestors.reverse_each do |ancestor|
           if ancestor.is_a?(Definition::Ancestor::Instance)
             case ancestor.source
             when AST::Members::Include, :super, nil

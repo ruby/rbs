@@ -1,7 +1,7 @@
 module RBS
   module AST
     module Declarations
-      type t = Class | Module | Interface | Constant | Global | TypeAlias
+      type t = Class | Module | Interface | Constant | Global | TypeAlias | ClassAlias | ModuleAlias
 
       class Base
       end
@@ -221,6 +221,39 @@ module RBS
         def initialize: (name: Symbol, type: Types::t, location: loc?, comment: Comment?) -> void
 
         include _HashEqual
+        include _ToJson
+      end
+
+      class AliasDecl < Base
+        # module Foo = Bar
+        # ^^^^^^             keyword
+        #        ^^^         new_name
+        #            ^       eq
+        #              ^^^   old_name
+        #
+        # class Foo = Bar
+        # ^^^^^              keyword
+        #
+        type loc = Location[:keyword | :new_name | :eq | :old_name, bot]
+
+        attr_reader new_name: TypeName
+
+        attr_reader old_name: TypeName
+
+        attr_reader location: loc?
+
+        attr_reader comment: Comment?
+
+        def initialize: (new_name: TypeName, old_name: TypeName, location: loc?, comment: Comment?) -> void
+
+        include _HashEqual
+      end
+
+      class ClassAlias < AliasDecl
+        include _ToJson
+      end
+
+      class ModuleAlias < AliasDecl
         include _ToJson
       end
     end

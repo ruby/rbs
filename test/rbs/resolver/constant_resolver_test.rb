@@ -383,4 +383,69 @@ EOF
       end
     end
   end
+
+  def test_alias_constants_toplevel
+    SignatureManager.new do |manager|
+      manager.files[Pathname("foo.rbs")] = <<~EOF
+        class Hello = Object
+      EOF
+
+      manager.build do |env|
+        builder = DefinitionBuilder.new(env: env)
+        resolver = Resolver::ConstantResolver.new(builder: builder)
+
+        resolver.constants(nil).tap do |constants|
+          assert constants.key?(:Hello)
+        end
+      end
+    end
+  end
+
+  def test_alias_constants_context
+    SignatureManager.new do |manager|
+      manager.files[Pathname("foo.rbs")] = <<~EOF
+        module M
+          class Hello = Object
+
+          module M2
+          end
+        end
+      EOF
+
+      manager.build do |env|
+        builder = DefinitionBuilder.new(env: env)
+        resolver = Resolver::ConstantResolver.new(builder: builder)
+
+        resolver.constants([[nil, TypeName("::M")], TypeName("::M::M2")]).tap do |constants|
+          assert constants.key?(:Hello)
+        end
+      end
+    end
+  end
+
+  def test_alias_constants_aliased_context
+    SignatureManager.new do |manager|
+      manager.files[Pathname("foo.rbs")] = <<~EOF
+        module M
+          module M2
+          end
+        end
+
+        module M3 = M
+      EOF
+
+      manager.build do |env|
+        builder = DefinitionBuilder.new(env: env)
+        resolver = Resolver::ConstantResolver.new(builder: builder)
+
+        resolver.constants([nil, TypeName("::M3")]).tap do |constants|
+          assert constants.key?(:M2)
+        end
+
+        resolver.constants([nil, TypeName("::M3")]).tap do |constants|
+          assert constants.key?(:M3)
+        end
+      end
+    end
+  end
 end

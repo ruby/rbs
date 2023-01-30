@@ -37,7 +37,7 @@ module RBS
 
         def constant_of_module: (TypeName name, Environment::ClassEntry | Environment::ModuleEntry) -> Constant
 
-        def constant_of_constant: (TypeName name, Environment::SingleEntry[TypeName, AST::Declarations::Constant]) -> Constant
+        def constant_of_constant: (TypeName name, Environment::ConstantEntry) -> Constant
       end
 
       attr_reader builder: DefinitionBuilder
@@ -65,7 +65,6 @@ module RBS
       #    ^  <- constant_name
       # ```
       #
-      # Find the
       def resolve_child: (TypeName module_name, Symbol constant_name) -> Constant?
 
       # Returns the table of all constants accessible with `::` (colon2) operator.

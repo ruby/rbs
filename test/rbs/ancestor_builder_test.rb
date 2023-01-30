@@ -576,4 +576,149 @@ EOF
       end
     end
   end
+
+  def test_alias_class_instance_ancestor
+    SignatureManager.new do |manager|
+      manager.files[Pathname("foo.rbs")] = <<~EOF
+        class Super
+        end
+
+        class SuperAlias = Super
+
+        module M1
+        end
+
+        module M1Alias = M1
+
+        module M2
+        end
+
+        module M2Alias = M2
+
+        class Foo < SuperAlias
+          include M1Alias
+          prepend M2Alias
+        end
+
+        class Bar = Foo
+      EOF
+
+      manager.build do |env|
+        builder = DefinitionBuilder::AncestorBuilder.new(env: env)
+
+        as = builder.one_instance_ancestors(type_name("::Bar"))
+
+        assert_instance_of DefinitionBuilder::AncestorBuilder::OneAncestors, as
+
+        assert_equal type_name("::Foo"), as.type_name
+        assert_equal type_name("::Super"), as.super_class.name
+        assert_equal [type_name("::M1")], as.included_modules.map(&:name)
+        assert_equal [type_name("::M2")], as.prepended_modules.map(&:name)
+      end
+    end
+  end
+
+  def test_alias_class_singleton_ancestor
+    SignatureManager.new do |manager|
+      manager.files[Pathname("foo.rbs")] = <<~EOF
+        class Super
+        end
+
+        class SuperAlias = Super
+
+        module M1
+        end
+
+        module M1Alias = M1
+
+        class Foo < SuperAlias
+          extend M1Alias
+        end
+
+        class Bar = Foo
+      EOF
+
+      manager.build do |env|
+        builder = DefinitionBuilder::AncestorBuilder.new(env: env)
+
+        as = builder.one_singleton_ancestors(type_name("::Bar"))
+
+        assert_instance_of DefinitionBuilder::AncestorBuilder::OneAncestors, as
+
+        assert_equal type_name("::Foo"), as.type_name
+        assert_equal type_name("::Super"), as.super_class.name
+        assert_equal [type_name("::M1")], as.extended_modules.map(&:name)
+      end
+    end
+  end
+
+  def test_alias_module_instance_ancestor
+    SignatureManager.new do |manager|
+      manager.files[Pathname("foo.rbs")] = <<~EOF
+        module M1
+        end
+
+        module M1Alias = M1
+
+        module M2
+        end
+
+        module M2Alias = M2
+
+        module M3
+        end
+
+        module M3Alias = M3
+
+        module M : M1Alias
+          include M2Alias
+          prepend M3Alias
+        end
+
+        module MAlias = M
+      EOF
+
+      manager.build do |env|
+        builder = DefinitionBuilder::AncestorBuilder.new(env: env)
+
+        as = builder.one_instance_ancestors(type_name("::MAlias"))
+
+        assert_instance_of DefinitionBuilder::AncestorBuilder::OneAncestors, as
+
+        assert_equal type_name("::M"), as.type_name
+        assert_equal [type_name("::M1")], as.self_types.map(&:name)
+        assert_equal [type_name("::M2")], as.included_modules.map(&:name)
+        assert_equal [type_name("::M3")], as.prepended_modules.map(&:name)
+      end
+    end
+  end
+
+  def test_alias_module_singleton_ancestor
+    SignatureManager.new do |manager|
+      manager.files[Pathname("foo.rbs")] = <<~EOF
+        module Aliases
+          module M1 = ::M1
+
+          module M2 = ::M2
+        end
+
+        module M1
+          extend Aliases::M2
+        end
+
+        module M2 end
+      EOF
+
+      manager.build do |env|
+        builder = DefinitionBuilder::AncestorBuilder.new(env: env)
+
+        as = builder.one_singleton_ancestors(type_name("::Aliases::M1"))
+
+        assert_instance_of DefinitionBuilder::AncestorBuilder::OneAncestors, as
+
+        assert_equal type_name("::M1"), as.type_name
+        assert_equal [type_name("::M2")], as.extended_modules.map(&:name)
+      end
+    end
+  end
 end

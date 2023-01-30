@@ -207,4 +207,39 @@ type foo = bar
       end
     end
   end
+
+  def test_validate_class_alias
+    SignatureManager.new do |manager|
+      manager.add_file("bar.rbs", <<-EOF)
+class Foo = Kernel
+
+module Bar = NoSuchClass
+
+class Baz = Baz
+      EOF
+
+      manager.build do |env|
+        resolver = RBS::Resolver::TypeNameResolver.new(env)
+        validator = RBS::Validator.new(env: env, resolver: resolver)
+
+        env.class_alias_decls[TypeName("::Foo")].tap do |entry|
+          assert_raises RBS::InconsistentClassModuleAliasError do
+            validator.validate_class_alias(entry: entry)
+          end
+        end
+
+        env.class_alias_decls[TypeName("::Bar")].tap do |entry|
+          assert_raises RBS::NoTypeFoundError do
+            validator.validate_class_alias(entry: entry)
+          end
+        end
+
+        env.class_alias_decls[TypeName("::Baz")].tap do |entry|
+          assert_raises RBS::CyclicClassAliasDefinitionError do
+            validator.validate_class_alias(entry: entry)
+          end
+        end
+      end
+    end
+  end
 end

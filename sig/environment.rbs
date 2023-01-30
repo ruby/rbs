@@ -73,23 +73,43 @@ module RBS
       def context: () -> Resolver::context
     end
 
+    class ModuleAliasEntry < SingleEntry[TypeName, AST::Declarations::ModuleAlias]
+    end
+
+    class ClassAliasEntry < SingleEntry[TypeName, AST::Declarations::ClassAlias]
+    end
+
+    class InterfaceEntry < SingleEntry[TypeName, AST::Declarations::Interface]
+    end
+
+    class TypeAliasEntry < SingleEntry[TypeName, AST::Declarations::TypeAlias]
+    end
+
+    class ConstantEntry < SingleEntry[TypeName, AST::Declarations::Constant]
+    end
+
+    class GlobalEntry < SingleEntry[Symbol, AST::Declarations::Global]
+    end
+
     # Top level declarations
     attr_reader declarations: Array[AST::Declarations::t]
 
     # Class declarations
     attr_reader class_decls: Hash[TypeName, ModuleEntry | ClassEntry]
 
+    attr_reader class_alias_decls: Hash[TypeName, ModuleAliasEntry | ClassAliasEntry]
+
     # Interface declarations
-    attr_reader interface_decls: Hash[TypeName, SingleEntry[TypeName, AST::Declarations::Interface]]
+    attr_reader interface_decls: Hash[TypeName, InterfaceEntry]
 
     # Type alias declarations
-    attr_reader type_alias_decls: Hash[TypeName, SingleEntry[TypeName, AST::Declarations::TypeAlias]]
+    attr_reader type_alias_decls: Hash[TypeName, TypeAliasEntry]
 
     # Constant declarations
-    attr_reader constant_decls: Hash[TypeName, SingleEntry[TypeName, AST::Declarations::Constant]]
+    attr_reader constant_decls: Hash[TypeName, ConstantEntry]
 
     # Global declarations
-    attr_reader global_decls: Hash[Symbol, SingleEntry[Symbol, AST::Declarations::Global]]
+    attr_reader global_decls: Hash[Symbol, GlobalEntry]
 
     def initialize: () -> void
 
@@ -160,9 +180,59 @@ module RBS
     #
     def module_decl?: (TypeName) -> bool
 
+    # Returns true if the type name is a module alias
+    #
+    def module_alias?: (TypeName) -> bool
+
+    # Returns true if the type name is a class alias
+    def class_alias?: (TypeName) -> bool
+
+    def class_entry: (TypeName) -> (ClassEntry | ClassAliasEntry | nil)
+
+    # Returns ClassEntry if the class definition is found, normalized in case of alias
+    #
+    def normalized_class_entry: (TypeName) -> ClassEntry?
+
+    def module_entry: (TypeName) -> (ModuleEntry | ModuleAliasEntry | nil)
+
+    # Returns ModuleEntry if the module definition is found, normalized in case of alias
+    #
+    def normalized_module_entry: (TypeName) -> ModuleEntry?
+
+    def constant_entry: (TypeName) -> (ClassEntry | ClassAliasEntry | ModuleEntry | ModuleAliasEntry | ConstantEntry | nil)
+
+    def module_class_entry: (TypeName) -> (ClassEntry | ClassAliasEntry | ModuleEntry | ModuleAliasEntry | nil)
+
+    def normalized_module_class_entry: (TypeName) -> (ClassEntry | ModuleEntry | nil)
+
+    @normalize_module_name_cache: Hash[TypeName, TypeName | false | nil]
+
+    # Returns the original module name that is defined with `module` declaration
+    #
+    # * Calls `#absolute!` for relative module names
+    # * Raises an error if given type name is not module
+    # * Returns nil if the name cannot be normalized to a class/module
+    #
+    def normalize_module_name?: (TypeName) -> TypeName?
+
+    # Returns the original module name that is defined with `module` declaration
+    #
+    # * Raises an error if given type name is not module
+    # * Calls `#absolute!` for relative module names
+    # * Returns the name itself if the name cannot be normalized to a class/module
+    #
+    def normalize_module_name: (TypeName) -> TypeName
+
+    # Runs generics type params validation over each class definitions
+    def validate_type_params: () -> void
+
     private
 
-    def cache_name: [N, D] (Hash[N, SingleEntry[N, D]] cache, name: N, decl: D, outer: Array[module_decl]) -> SingleEntry[N, D]
+    # Returns a context for inside given decls
+    #
+    def resolver_context: (*module_decl) -> Resolver::context
+
+    def append_context: (Resolver::context, module_decl) -> Resolver::context
 
     def resolve_declaration: (Resolver::TypeNameResolver resolver, AST::Declarations::t decl, outer: Array[module_decl], prefix: Namespace) -> AST::Declarations::t
 
@@ -171,9 +241,6 @@ module RBS
     def resolve_method_type: (Resolver::TypeNameResolver, RBS::MethodType, context: Resolver::context) -> RBS::MethodType
 
     def resolve_type_params: (Resolver::TypeNameResolver resolver, Array[AST::TypeParam], context: Resolver::context) ->  Array[AST::TypeParam]
-
-    # Runs generics type params validation over each class definitions
-    def validate_type_params: () -> void
 
     def absolute_type: (Resolver::TypeNameResolver, Types::t, context: Resolver::context) -> Types::t
 

@@ -2,7 +2,7 @@ module RBS
   class Constant
     type constant_entry = Environment::ClassEntry
                         | Environment::ModuleEntry
-                        | Environment::SingleEntry[TypeName, AST::Declarations::Constant]
+                        | Environment::ConstantEntry
 
     attr_reader name: TypeName
 

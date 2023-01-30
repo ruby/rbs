@@ -379,6 +379,53 @@ module RBS
           }.to_json(state)
         end
       end
+
+      class AliasDecl < Base
+        attr_reader :new_name, :old_name, :location, :comment
+
+        def initialize(new_name:, old_name:, location:, comment:)
+          @new_name = new_name
+          @old_name = old_name
+          @location = location
+          @comment = comment
+        end
+
+        def ==(other)
+          other.is_a?(self.class) &&
+            other.new_name == new_name &&
+            other.old_name == old_name
+        end
+
+        alias eql? ==
+
+        def hash
+          self.class.hash ^ new_name.hash ^ old_name.hash
+        end
+      end
+
+      class ClassAlias < AliasDecl
+        def to_json(state = _ = nil)
+          {
+            declaration: :class_alias,
+            new_name: new_name,
+            old_name: old_name,
+            location: location,
+            comment: comment
+          }.to_json(state)
+        end
+      end
+
+      class ModuleAlias < AliasDecl
+        def to_json(state = _ = nil)
+          {
+            declaration: :module_alias,
+            new_name: new_name,
+            old_name: old_name,
+            location: location,
+            comment: comment
+          }.to_json(state)
+        end
+      end
     end
   end
 end
