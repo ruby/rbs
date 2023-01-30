@@ -42,6 +42,13 @@ module RBS
     #
     def validate_type_params: (Array[AST::TypeParam] params, type_name: TypeName, ?method_name: Symbol?, location: Location[untyped, untyped]?) -> void
 
+    # Validates class alias declaration
+    #
+    # - The right hand side can be normalized
+    # - No mixing alias declaration between class and modules
+    # 
+    def validate_class_alias: (entry: Environment::ClassAliasEntry | Environment::ModuleAliasEntry) -> void
+
     private
 
     # Resolves relative type names to absolute type names in given context.

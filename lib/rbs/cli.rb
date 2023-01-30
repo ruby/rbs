@@ -467,6 +467,11 @@ EOU
         end
       end
 
+      env.class_alias_decls.each do |name, entry|
+        stdout.puts "Validating class/module alias definition: `#{name}`..."
+        validator.validate_class_alias(entry: entry)
+      end
+
       env.interface_decls.each do |name, decl|
         stdout.puts "Validating interface: `#{name}`..."
         builder.build_interface(name).each_type do |type|

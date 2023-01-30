@@ -448,6 +448,24 @@ module RBS
     end
   end
 
+  class InconsistentClassModuleAliasError < BaseError
+    attr_reader :alias_entry
+
+    def initialize(entry)
+      @alias_entry = entry
+
+      expected_kind, actual_kind =
+        case entry
+        when Environment::ModuleAliasEntry
+          ["module", "class"]
+        when Environment::ClassAliasEntry
+          ["class", "module"]
+        end
+
+      super "#{Location.to_string(entry.decl.location&.[](:old_name))}: A #{expected_kind} `#{entry.decl.new_name}` cannot be an alias of a #{actual_kind} `#{entry.decl.old_name}`"
+    end
+  end
+
   class CyclicClassAliasDefinitionError < BaseError
     attr_reader :alias_entry
 
