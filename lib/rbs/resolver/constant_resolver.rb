@@ -32,7 +32,7 @@ module RBS
           end
 
           environment.class_alias_decls.each do |name, entry|
-            normalized_entry = environment.normalized_module_class_entry(name) or raise
+            normalized_entry = environment.normalized_module_class_entry(name) or next
             constant = constant_of_module(name, normalized_entry)
 
             # Insert class/module aliases into `children_table` and `toplevel` table
@@ -111,7 +111,7 @@ module RBS
 
       def children(module_name)
         module_name = builder.env.normalize_module_name(module_name)
-        
+
         unless child_constants_cache.key?(module_name)
           load_child_constants(module_name)
         end
