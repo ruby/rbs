@@ -280,4 +280,12 @@ module RBS
 
     def initialize: (type_name: TypeName, method_name: Symbol?, params: Array[AST::TypeParam], location: Location[untyped, untyped]?) -> void
   end
+
+  # A module/class alias declaration is cyclic
+  #
+  class CyclicClassAliasDefinitionError < BaseError
+    attr_reader alias_entry: Environment::ModuleAliasEntry | Environment::ClassAliasEntry
+
+    def initialize: (Environment::ModuleAliasEntry | Environment::ClassAliasEntry) -> void
+  end
 end

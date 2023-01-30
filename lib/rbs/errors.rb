@@ -447,4 +447,14 @@ module RBS
       super "#{Location.to_string(location)}: Cyclic type parameter bound is prohibited"
     end
   end
+
+  class CyclicClassAliasDefinitionError < BaseError
+    attr_reader :alias_entry
+
+    def initialize(entry)
+      @alias_entry = entry
+
+      super "#{Location.to_string(entry.decl.location&.[](:old_name))}: A #{alias_entry.decl.new_name} is a cyclic definition"
+    end
+  end
 end

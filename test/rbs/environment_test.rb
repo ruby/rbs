@@ -50,6 +50,43 @@ EOF
     assert_operator env.class_decls, :key?, type_name("::Baz")
   end
 
+  def test_insert_class_module_alias
+    env = Environment.new
+
+    decls = RBS::Parser.parse_signature(<<EOF)
+module RBS
+  module Kernel = ::Kernel
+
+  class RbObject = Object
+end
+EOF
+
+    decls.each do |decl|
+      env << decl
+    end
+
+    env.class_alias_decls[TypeName("::RBS::Kernel")].tap do |decl|
+      assert_instance_of Environment::ModuleAliasEntry, decl
+    end
+  end
+
+  def test_class_alias_open
+    env = Environment.new
+
+    decls = RBS::Parser.parse_signature(<<~EOF)
+      module Foo = Kernel
+
+      module Foo
+      end
+    EOF
+
+    env << decls[0]
+
+    assert_raises RBS::DuplicatedDeclarationError do
+      env << decls[1]
+    end
+  end
+
   def test_insert_decl_open_class
     env = Environment.new
 
@@ -476,5 +513,29 @@ class ::Foo[A < ::_Equatable]
   def test: [B < ::Bar[::_Equatable]] (A, B) -> bool
 end
 RBS
+  end
+
+  def test_normalize_module_name
+    decls = RBS::Parser.parse_signature(<<~EOF)
+      class Foo
+        module Bar
+          module Baz
+          end
+        end
+      end
+
+      module M = Foo::Bar
+      module N = M::Baz
+    EOF
+
+
+    env = Environment.new()
+    decls.each do |decl|
+      env << decl
+    end
+    env = env.resolve_type_names
+
+    assert_equal type_name("::Foo::Bar"), env.normalize_module_name(type_name("::M"))
+    assert_equal type_name("::Foo::Bar::Baz"), env.normalize_module_name(type_name("::N"))
   end
 end

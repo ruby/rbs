@@ -119,7 +119,7 @@ module RBS
     end
 
     type self_type = Types::ClassSingleton | Types::ClassInstance | Types::Interface
-    type definition_entry = Environment::ModuleEntry | Environment::ClassEntry | Environment::SingleEntry[TypeName, AST::Declarations::Interface]
+    type definition_entry = Environment::ModuleEntry | Environment::ClassEntry | Environment::InterfaceEntry
 
     attr_reader type_name: TypeName
     attr_reader entry: definition_entry
