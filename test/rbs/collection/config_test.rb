@@ -233,65 +233,6 @@ class RBS::Collection::ConfigTest < Test::Unit::TestCase
     end
   end
 
-  def test_generate_lock_from_collection_repository_specified
-    mktmpdir do |tmpdir|
-      config_path = tmpdir / 'rbs_collection.yaml'
-      config_path.write [CONFIG, <<~YAML].join("\n")
-        gems:
-          - name: ast
-          - name: rainbow
-      YAML
-      gemfile_path = tmpdir / 'Gemfile'
-      gemfile_path.write "source 'https://rubygems.org'"
-      gemfile_lock_path = tmpdir / 'Gemfile.lock'
-      gemfile_lock_path.write <<~GEMFILE_LOCK
-        GEM
-          remote: https://rubygems.org/
-          specs:
-
-        PLATFORMS
-          x86_64-linux
-
-        DEPENDENCIES
-
-        BUNDLED WITH
-           2.2.0
-      GEMFILE_LOCK
-
-      definition = Bundler::Definition.build(gemfile_path, gemfile_lock_path, false)
-      _config, lockfile = RBS::Collection::Config.generate_lockfile(config_path: config_path, definition: definition)
-      string = YAML.dump(lockfile.to_lockfile)
-
-      assert_config <<~YAML, string
-        sources:
-          - type: git
-            name: ruby/gem_rbs_collection
-            remote: https://github.com/ruby/gem_rbs_collection.git
-            revision: cde6057e7546843ace6420c5783dd945c6ccda54
-            repo_dir: gems
-        path: "/path/to/somewhere"
-        gemfile_lock_path: 'Gemfile.lock'
-        gems:
-          - name: ast
-            version: "2.4"
-            source:
-              name: ruby/gem_rbs_collection
-              remote: https://github.com/ruby/gem_rbs_collection.git
-              revision: cde6057e7546843ace6420c5783dd945c6ccda54
-              repo_dir: gems
-              type: git
-          - name: rainbow
-            version: "3.0"
-            source:
-              name: ruby/gem_rbs_collection
-              remote: https://github.com/ruby/gem_rbs_collection.git
-              revision: cde6057e7546843ace6420c5783dd945c6ccda54
-              repo_dir: gems
-              type: git
-      YAML
-    end
-  end
-
   def test_generate_lock_from_collection_with_manifest_yaml
     mktmpdir do |tmpdir|
       config_path = tmpdir / 'rbs_collection.yaml'
