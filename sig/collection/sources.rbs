@@ -78,28 +78,34 @@ module RBS
 
         def cp_r: (Pathname, Pathname) -> void
 
-        # Ensure the git repository status is expected one
+        # Ensure the git repository exists, and
         #
-        # * It exists, and
-        # * The `HEAD` is the `revision`
+        # * When `revision` is a commit hash, the commit exists in the local repository, or
+        # * When `revision` is a branch name, the latest version is fetched from `origin`
+        #
+        # It may require a network connection to fetch or clone the repository from remote.
+        #
+        # * If `revision` is a commit hash and the commit doesn't exists in the local repository, it runs `git fetch`
+        # * If `revision` is a branch name, it runs `git fetch` once per instance
         #
         def setup!: [T] () { () -> T } -> T
                   | () -> void
 
         def need_to_fetch?: (String revision) -> bool
 
+        # The full path of local git repository
         def git_dir: () -> Pathname
 
+        # The full path of `repo_dir` in the local git repository
         def gem_repo_dir: () -> Pathname
 
-        def with_revision: [T] () { () -> T } -> T
-
         # Returns `true` if `revision` looks like a commit hash
-        #
         def commit_hash?: () -> bool
 
+        # Executes a git command, raises an error if failed
         def git: (*String cmd, **untyped opt) -> String
 
+        # Executes a git command, returns `nil` if failed
         def git?: (*String cmd, **untyped opt) -> String?
 
         def sh!: (*String cmd, **untyped opt) -> String
