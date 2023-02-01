@@ -1060,15 +1060,12 @@ EOB
       case args[0]
       when 'install'
         unless params[:frozen]
-          gemfile_lock_path = Bundler.default_lockfile
-          Collection::Config.generate_lockfile(config_path: config_path, gemfile_lock_path: gemfile_lock_path)
+          Collection::Config.generate_lockfile(config_path: config_path, definition: Bundler.definition)
         end
         Collection::Installer.new(lockfile_path: lock_path, stdout: stdout).install_from_lockfile
       when 'update'
-        gemfile_lock_path = Bundler.default_lockfile
-
         # TODO: Be aware of argv to update only specified gem
-        Collection::Config.generate_lockfile(config_path: config_path, gemfile_lock_path: gemfile_lock_path, with_lockfile: false)
+        Collection::Config.generate_lockfile(config_path: config_path, definition: Bundler.definition, with_lockfile: false)
         Collection::Installer.new(lockfile_path: lock_path, stdout: stdout).install_from_lockfile
       when 'init'
         if config_path.exist?

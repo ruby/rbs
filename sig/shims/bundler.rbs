@@ -1,13 +1,27 @@
 module Bundler
   class LockfileParser
     def initialize: (String) -> void
+
     def specs: () -> Array[LazySpecification]
   end
 
   class LazySpecification
     def name: () -> String
+
     def version: () -> String
+
+    def dependencies: () -> Array[Gem::Dependency]
+  end
+
+  class Definition
+    def lockfile: () -> Pathname
+
+    def requires: () -> Hash[String, Array[String]]
+
+    def locked_gems: () -> LockfileParser
   end
 
   def self.default_lockfile: () -> Pathname
+
+  def self.definition: () -> Definition
 end
