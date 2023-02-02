@@ -15,7 +15,7 @@ module RBS
       stdout.puts "Opening #{path}..."
 
       buffer = Buffer.new(name: path, content: path.read)
-      sigs = Parser.parse_signature(buffer)
+      _, _, sigs = Parser.parse_signature(buffer)
 
       sigs.each do |m|
         sort_decl! m

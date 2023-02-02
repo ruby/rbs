@@ -123,12 +123,12 @@ class RBS::SchemaTest < Test::Unit::TestCase
   end
 
   def test_decls
-    assert_decl RBS::Parser.parse_signature("type Steep::foo = untyped")[0], :alias
-    assert_decl RBS::Parser.parse_signature("type Steep::foo[A] = A")[0], :alias
+    assert_decl RBS::Parser.parse_signature("type Steep::foo = untyped")[2][0], :alias
+    assert_decl RBS::Parser.parse_signature("type Steep::foo[A] = A")[2][0], :alias
 
-    assert_decl RBS::Parser.parse_signature('Steep::VERSION: "1.2.3"')[0], :constant
+    assert_decl RBS::Parser.parse_signature('Steep::VERSION: "1.2.3"')[2][0], :constant
 
-    assert_decl RBS::Parser.parse_signature('$SIZE: Integer?')[0], :global
+    assert_decl RBS::Parser.parse_signature('$SIZE: Integer?')[2][0], :global
   end
 
   def assert_member(member, name=nil)
@@ -143,7 +143,7 @@ class RBS::SchemaTest < Test::Unit::TestCase
   end
 
   def test_members
-    members = RBS::Parser.parse_signature(<<EOF)[0].members
+    members = RBS::Parser.parse_signature(<<EOF)[2][0].members
 class Foo
   # Hello
   %a{foo:bar:baz}
@@ -191,7 +191,7 @@ EOF
   end
 
   def test_class_decl
-    decl, = RBS::Parser.parse_signature(<<EOF)
+    _, _, (decl, *_) = RBS::Parser.parse_signature(<<EOF)
 class Foo[A] < String
   # Hello
   %a{foo:bar:baz}
@@ -221,7 +221,7 @@ EOF
   end
 
   def test_module_decl
-    decl, = RBS::Parser.parse_signature(<<EOF)
+    _, _, (decl, *_) = RBS::Parser.parse_signature(<<EOF)
 module Enumerable[A, unchecked out B] : _Each[A, B]
   # Hello
   %a{foo:bar:baz}
@@ -251,7 +251,7 @@ EOF
   end
 
   def test_interface_decl
-    decl, = RBS::Parser.parse_signature(<<EOF)
+    _, _, (decl, *_) = RBS::Parser.parse_signature(<<EOF)
 interface _Hello
   # Hello
   %a{foo:bar:baz}
@@ -265,7 +265,7 @@ EOF
   end
 
   def test_nested
-    decl, = RBS::Parser.parse_signature(<<EOF)
+    _, _, (decl, *_) = RBS::Parser.parse_signature(<<EOF)
 module RBS
   VERSION: String
 

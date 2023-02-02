@@ -2,19 +2,21 @@
 
 module RBS
   class Parser
-    def self.parse_type(source, line: nil, column: nil, range: nil, variables: [])
+    def self.parse_type(source, range: 0..., variables: [])
       buf = buffer(source)
-      _parse_type(buf, range&.begin || 0, range&.end || buf.last_position, variables, range.nil?)
+      _parse_type(buf, range.begin || 0, range.end || buf.last_position, variables)
     end
 
-    def self.parse_method_type(source, line: nil, column: nil, range: nil, variables: [])
+    def self.parse_method_type(source, range: 0..., variables: [])
       buf = buffer(source)
-      _parse_method_type(buf, range&.begin || 0, range&.end || buf.last_position, variables, range.nil?)
+      _parse_method_type(buf, range.begin || 0, range.end || buf.last_position, variables)
     end
 
-    def self.parse_signature(source, line: nil, column: nil)
+    def self.parse_signature(source)
       buf = buffer(source)
-      _parse_signature(buf, buf.last_position)
+      dirs, decls = _parse_signature(buf, buf.last_position)
+
+      [buf, dirs, decls]
     end
 
     def self.buffer(source)

@@ -8,7 +8,7 @@ class RBS::EnvironmentTest < Test::Unit::TestCase
   InvalidTypeApplicationError = RBS::InvalidTypeApplicationError
 
   def test_entry_context
-    decls = RBS::Parser.parse_signature(<<EOF)
+    _, _, decls = RBS::Parser.parse_signature(<<EOF)
 class Foo
   module Bar
     module Baz
@@ -33,7 +33,7 @@ EOF
   def test_insert_decl_nested_modules
     env = Environment.new
 
-    decls = RBS::Parser.parse_signature(<<EOF)
+    _, _, decls = RBS::Parser.parse_signature(<<EOF)
 class Foo
   module Bar
   end
@@ -53,7 +53,7 @@ EOF
   def test_insert_class_module_alias
     env = Environment.new
 
-    decls = RBS::Parser.parse_signature(<<EOF)
+    _, _, decls = RBS::Parser.parse_signature(<<EOF)
 module RBS
   module Kernel = ::Kernel
 
@@ -73,7 +73,7 @@ EOF
   def test_class_alias_open
     env = Environment.new
 
-    decls = RBS::Parser.parse_signature(<<~EOF)
+    _, _, decls = RBS::Parser.parse_signature(<<~EOF)
       module Foo = Kernel
 
       module Foo
@@ -90,7 +90,7 @@ EOF
   def test_insert_decl_open_class
     env = Environment.new
 
-    decls = RBS::Parser.parse_signature(<<EOF)
+    _, _, decls = RBS::Parser.parse_signature(<<EOF)
 class Foo
   module Bar
   end
@@ -120,7 +120,7 @@ EOF
   def test_insert_decl_const_duplication_error
     env = Environment.new
 
-    decls = RBS::Parser.parse_signature(<<EOF)
+    _, _, decls = RBS::Parser.parse_signature(<<EOF)
 module Foo
 end
 
@@ -147,7 +147,7 @@ EOF
   def test_class_module_mix
     env = Environment.new
 
-    decls = RBS::Parser.parse_signature(<<EOF)
+    _, _, decls = RBS::Parser.parse_signature(<<EOF)
 module Foo
 end
 
@@ -164,7 +164,7 @@ EOF
   def test_const_twice_duplication_error
     env = Environment.new
 
-    decls = RBS::Parser.parse_signature(<<EOF)
+    _, _, decls = RBS::Parser.parse_signature(<<EOF)
 Foo: String
 Foo: String
 EOF
@@ -178,7 +178,7 @@ EOF
   def test_generic_class
     env = Environment.new
 
-    decls = RBS::Parser.parse_signature(<<EOF)
+    _, _, decls = RBS::Parser.parse_signature(<<EOF)
 module Foo[A, out B]
 end
 
@@ -203,7 +203,7 @@ EOF
   end
 
   def test_generic_class_error
-    decls = RBS::Parser.parse_signature(<<EOF)
+    _, _, decls = RBS::Parser.parse_signature(<<EOF)
 module Foo[A, out B]
 end
 
@@ -246,7 +246,7 @@ EOF
   def test_insert_global
     env = Environment.new
 
-    decls = RBS::Parser.parse_signature(<<EOF)
+    _, _, decls = RBS::Parser.parse_signature(<<EOF)
 $VERSION: String
 EOF
 
@@ -256,7 +256,7 @@ EOF
   end
 
   def test_module_self_type
-    decls = RBS::Parser.parse_signature(<<EOF)
+    _, _, decls = RBS::Parser.parse_signature(<<EOF)
 interface _Animal
   def bark: () -> void
 end
@@ -312,7 +312,7 @@ EOF
   def test_absolute_type
     env = Environment.new
 
-    decls = RBS::Parser.parse_signature(<<EOF)
+    _, _, decls = RBS::Parser.parse_signature(<<EOF)
 # Integer is undefined and the type is left relative.
 # (Will be an error afterward.)
 #
@@ -419,7 +419,7 @@ RBS
   def test_absolute_type_super
     env = Environment.new
 
-    decls = RBS::Parser.parse_signature(<<-RBS)
+    _, _, decls = RBS::Parser.parse_signature(<<-RBS)
 module A
   class C
   end
@@ -450,7 +450,7 @@ class Hello < String
 end
 EOF
 
-    RBS::Parser.parse_signature(foo).each do |decl|
+    RBS::Parser.parse_signature(foo)[2].each do |decl|
       env << decl
     end
 
@@ -460,7 +460,7 @@ class Hello
 end
 EOF
 
-    RBS::Parser.parse_signature(bar).each do |decl|
+    RBS::Parser.parse_signature(bar)[2].each do |decl|
       env << decl
     end
 
@@ -478,7 +478,7 @@ EOF
   def test_absolute_type_generics_upper_bound
     env = Environment.new
 
-    decls = RBS::Parser.parse_signature(<<RBS)
+    _, _, decls = RBS::Parser.parse_signature(<<RBS)
 interface _Equatable
   def ==: (untyped) -> bool
 end
@@ -516,7 +516,7 @@ RBS
   end
 
   def test_normalize_module_name
-    decls = RBS::Parser.parse_signature(<<~EOF)
+    _, _, decls = RBS::Parser.parse_signature(<<~EOF)
       class Foo
         module Bar
           module Baz

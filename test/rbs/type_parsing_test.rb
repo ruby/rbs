@@ -578,7 +578,7 @@ class RBS::TypeParsingTest < Test::Unit::TestCase
     end
 
     assert_raises RBS::ParsingError do
-      Parser.parse_type(":+foo")
+      Parser.parse_type("[:+foo]")
     end
 
     assert_raises RBS::ParsingError do
@@ -692,7 +692,7 @@ class RBS::TypeParsingTest < Test::Unit::TestCase
     end
 
     assert_raises RBS::ParsingError do
-      Parser.parse_type("Array[A]", variables: [:A, :Array])
+      Parser.parse_type("(Array[A])", variables: [:A, :Array])
     end
   end
 

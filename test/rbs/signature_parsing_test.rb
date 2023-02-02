@@ -15,7 +15,7 @@ class RBS::SignatureParsingTest < Test::Unit::TestCase
   include TestHelper
 
   def test_type_alias
-    Parser.parse_signature("type Steep::foo = untyped").yield_self do |decls|
+    Parser.parse_signature("type Steep::foo = untyped").tap do |_, _, decls|
       assert_equal 1, decls.size
 
       type_decl = decls[0]
@@ -35,7 +35,7 @@ class RBS::SignatureParsingTest < Test::Unit::TestCase
   end
 
   def test_type_alias_generic
-    Parser.parse_signature(<<RBS).yield_self do |decls|
+    Parser.parse_signature(<<RBS).yield_self do |_, _, decls|
 type optional[A] = A?
 RBS
       assert_equal 1, decls.size
@@ -49,7 +49,7 @@ RBS
       assert_equal "[A]", type_decl.location[:type_params].source
     end
 
-    Parser.parse_signature(<<RBS).yield_self do |decls|
+    Parser.parse_signature(<<RBS).tap do |_, _, decls|
 class Foo[A]
   type bar = B
 end
@@ -65,7 +65,7 @@ RBS
   end
 
   def test_type_alias_generic_variance
-    Parser.parse_signature(<<RBS).yield_self do |decls|
+    Parser.parse_signature(<<RBS).yield_self do |_, _, decls|
 type x[T] = ^(T) -> void
 
 type y[unchecked out T] = ^(T) -> void
@@ -95,7 +95,7 @@ RBS
   end
 
   def test_constant
-    Parser.parse_signature("FOO: untyped").yield_self do |decls|
+    Parser.parse_signature("FOO: untyped").tap do |_, _, decls|
       assert_equal 1, decls.size
 
       const_decl = decls[0]
@@ -106,7 +106,7 @@ RBS
       assert_equal "FOO: untyped", const_decl.location.source
     end
 
-    Parser.parse_signature("::BAR: untyped").yield_self do |decls|
+    Parser.parse_signature("::BAR: untyped").tap do |_, _, decls|
       assert_equal 1, decls.size
 
       const_decl = decls[0]
@@ -117,7 +117,7 @@ RBS
       assert_equal "::BAR: untyped", const_decl.location.source
     end
 
-    Parser.parse_signature("FOO : untyped").yield_self do |decls|
+    Parser.parse_signature("FOO : untyped").tap do |_, _, decls|
       assert_equal 1, decls.size
 
       const_decl = decls[0]
@@ -128,7 +128,7 @@ RBS
       assert_equal "FOO : untyped", const_decl.location.source
     end
 
-    Parser.parse_signature("::BAR : untyped").yield_self do |decls|
+    Parser.parse_signature("::BAR : untyped").tap do |_, _, decls|
       assert_equal 1, decls.size
 
       const_decl = decls[0]
@@ -141,7 +141,7 @@ RBS
   end
 
   def test_global
-    Parser.parse_signature("$FOO: untyped").yield_self do |decls|
+    Parser.parse_signature("$FOO: untyped").tap do |_, _, decls|
       assert_equal 1, decls.size
 
       global_decl = decls[0]
@@ -154,7 +154,7 @@ RBS
   end
 
   def test_interface
-    Parser.parse_signature("interface _Each[A, B] end").yield_self do |decls|
+    Parser.parse_signature("interface _Each[A, B] end").tap do |_, _, decls|
       assert_equal 1, decls.size
 
       interface_decl = decls[0]
@@ -166,7 +166,7 @@ RBS
       assert_equal "interface _Each[A, B] end", interface_decl.location.source
     end
 
-    Parser.parse_signature(<<~SIG).yield_self do |decls|
+    Parser.parse_signature(<<~SIG).tap do |_, _, decls|
       interface _Each[A, B]
         #
         # Yield all elements included in `self`.
@@ -240,7 +240,7 @@ RBS
   end
 
   def test_module
-    Parser.parse_signature("module Enumerable[A, B] end").yield_self do |decls|
+    Parser.parse_signature("module Enumerable[A, B] end").tap do |_, _, decls|
       assert_equal 1, decls.size
 
       module_decl = decls[0]
@@ -253,7 +253,7 @@ RBS
       assert_equal "module Enumerable[A, B] end", module_decl.location.source
     end
 
-    Parser.parse_signature(<<~SIG).yield_self do |decls|
+    Parser.parse_signature(<<~SIG).tap do |_, _, decls|
       module Enumerable[A, B] : _Each
         @foo: String
         self.@bar: Integer
@@ -430,7 +430,7 @@ RBS
   end
 
   def test_module_selfs
-    Parser.parse_signature(<<-RBS).yield_self do |decls|
+    Parser.parse_signature(<<-RBS).tap do |_, _, decls|
 module Enumerable[A, B] : _Each, Object
 end
     RBS
@@ -451,7 +451,7 @@ end
   end
 
   def test_class
-    Parser.parse_signature("class Array[A] end").yield_self do |decls|
+    Parser.parse_signature("class Array[A] end").tap do |_, _, decls|
       assert_equal 1, decls.size
 
       decls[0].yield_self do |class_decl|
@@ -462,7 +462,7 @@ end
       end
     end
 
-    Parser.parse_signature("class ::Array[A] < Object[A] end").yield_self do |decls|
+    Parser.parse_signature("class ::Array[A] < Object[A] end").tap do |_, _, decls|
       assert_equal 1, decls.size
 
       decls[0].yield_self do |class_decl|
@@ -478,7 +478,7 @@ end
   end
 
   def test_method_definition
-    Parser.parse_signature(<<~SIG).yield_self do |decls|
+    Parser.parse_signature(<<~SIG).tap do |_, _, decls|
       class Foo[X, Y]
         def foo: -> Integer
                | ?{ -> void } -> Integer
@@ -530,7 +530,7 @@ end
   end
 
   def test_private_public
-    Parser.parse_signature(<<~SIG).yield_self do |decls|
+    Parser.parse_signature(<<~SIG).tap do |_, _, decls|
       class Foo
         public
         private
@@ -554,7 +554,7 @@ end
   end
 
   def test_private_public_def
-    Parser.parse_signature(<<~SIG).yield_self do |decls|
+    Parser.parse_signature(<<~SIG).tap do |_, _, decls|
       class Foo
         public def foo: () -> void
         private def bar: () -> void
@@ -599,7 +599,7 @@ end
   end
 
   def test_private_public_attr
-    Parser.parse_signature(<<~SIG).yield_self do |decls|
+    Parser.parse_signature(<<~SIG).tap do |_, _, decls|
       class Foo
         public attr_reader foo: String
         private attr_reader bar: String
@@ -656,7 +656,7 @@ end
   end
 
   def test_alias
-    Parser.parse_signature(<<~SIG).yield_self do |decls|
+    Parser.parse_signature(<<~SIG).tap do |_, _, decls|
       class Foo
         def foo: -> String
         alias bar foo
@@ -687,7 +687,7 @@ end
   end
 
   def test_method_names
-    Parser.parse_signature(<<~SIG).yield_self do |decls|
+    Parser.parse_signature(<<~SIG).tap do |_, _, decls|
       interface _Foo
         def class: -> String
         def void: -> String
@@ -779,7 +779,7 @@ end
   end
 
   def test_annotation_on_declaration
-    Parser.parse_signature(<<~SIG).yield_self do |decls|
+    Parser.parse_signature(<<~SIG).tap do |_, _, decls|
       %a(foo)
       %a[hello world]
       class Hello end
@@ -828,7 +828,7 @@ end
   end
 
   def test_attributes
-    Parser.parse_signature(<<~SIG).tap do |decls|
+    Parser.parse_signature(<<~SIG).tap do |_, _, decls|
       class Hello
         attr_reader a: Integer
         attr_writer b(@B): String
@@ -899,7 +899,7 @@ end
   end
 
   def test_annotations_on_members
-    Parser.parse_signature(<<~SIG).yield_self do |decls|
+    Parser.parse_signature(<<~SIG).tap do |_, _, decls|
       class Hello
         %a{noreturn}
         def foo: () -> untyped
@@ -946,7 +946,7 @@ end
   end
 
   def test_annotations_on_overload
-    Parser.parse_signature(<<~SIG).yield_self do |decls|
+    Parser.parse_signature(<<~SIG).tap do |_, _, decls|
       class Hello
         def foo: %a{noreturn} () -> void
                | %a{implicitly-returns-nil} %a{primitive:is_a?} (Class) -> bool
@@ -966,7 +966,7 @@ end
   end
 
   def test_prepend
-    Parser.parse_signature(<<~SIG).yield_self do |decls|
+    Parser.parse_signature(<<~SIG).tap do |_, _, decls|
       class Foo
         prepend Foo
       end
@@ -1013,7 +1013,7 @@ end
   end
 
   def test_class_comment
-    Parser.parse_signature(<<-EOF).yield_self do |foo_decl,bar_decl|
+    Parser.parse_signature(<<-EOF).yield_self do |_, _, (foo_decl,bar_decl)|
 # This is a class.
 # Foo Bar Baz.
 class Foo
@@ -1041,7 +1041,7 @@ EOF
   end
 
   def test_member_comment
-    Parser.parse_signature(<<-EOF).yield_self do |foo_decl,|
+    Parser.parse_signature(<<-EOF).yield_self do |_, _, (foo_decl)|
 # This is a class.
 # Foo Bar Baz.
 class Foo
@@ -1087,7 +1087,7 @@ EOF
   end
 
   def test_code_comment
-    Parser.parse_signature(<<-EOF).yield_self do |foo_decl,|
+    Parser.parse_signature(<<-EOF).yield_self do |_, _, (foo_decl)|
 # Passes each element of the collection to the given block. The method
 # returns `true` if the block never returns `false` or `nil` . If the
 # block is not given, Ruby adds an implicit block of `{ |obj| obj }` which
@@ -1129,7 +1129,7 @@ EOF
   end
 
   def test_comment_without_leading_space
-    Parser.parse_signature(<<-EOF).yield_self do |foo_decl,|
+    Parser.parse_signature(<<-EOF).yield_self do |_, _, (foo_decl)|
 #This is a class.
 class Foo
   #This is a method.
@@ -1178,7 +1178,7 @@ end
   end
 
   def test_module_type_param_variance
-    Parser.parse_signature("interface _Each[A, out B, unchecked in C] end").yield_self do |decls|
+    Parser.parse_signature("interface _Each[A, out B, unchecked in C] end").tap do |_, _, decls|
       assert_equal 1, decls.size
 
       interface_decl = decls[0]
@@ -1204,7 +1204,7 @@ end
   end
 
   def test_mame
-    Parser.parse_signature(<<EOF).yield_self do |decls|
+    Parser.parse_signature(<<EOF).tap do |_, _, decls|
 # h –
 class Exception < Object
 end
@@ -1215,7 +1215,7 @@ EOF
   end
 
   def test_decl_in_module
-    Parser.parse_signature(<<EOF).yield_self do |decls|
+    Parser.parse_signature(<<EOF).tap do |_, _, decls|
 module Steep
   VERSION: String
   type t = AST::Types::Base | AST::Types::Proc
@@ -1247,7 +1247,7 @@ EOF
   end
 
   def test_overload_def
-    Parser.parse_signature(<<EOF).yield_self do |decls|
+    Parser.parse_signature(<<EOF).tap do |_, _, decls|
 module Steep
   def to_s: (Integer) -> String | ...
   def to_i: () -> Integer
@@ -1266,7 +1266,7 @@ EOF
   end
 
   def test_generics_type_parameter
-    Parser.parse_signature(<<EOF).yield_self do |decls|
+    Parser.parse_signature(<<EOF).tap do |_, _, decls|
 module A[T]
   module B
     def foo: () -> void
@@ -1283,7 +1283,7 @@ EOF
   end
 
   def test_proc
-    Parser.parse_signature(<<EOF).tap do |decls|
+    Parser.parse_signature(<<EOF).tap do |_, _, decls|
 module A
   def bar: () -> ^->Integer
 end
@@ -1311,13 +1311,13 @@ EOF
   end
 
   def test_empty
-    Parser.parse_signature("").tap do |decls|
+    Parser.parse_signature("").tap do |_, _, decls|
       assert_empty decls
     end
   end
 
   def test_module_self_syntax
-    Parser.parse_signature(<<EOF).tap do |decls|
+    Parser.parse_signature(<<EOF).tap do |_, _, decls|
 module Foo: Object
 end
 
@@ -1342,7 +1342,7 @@ EOF
   end
 
   def test_method_location
-    Parser.parse_signature(<<-EOF).tap do |decls|
+    Parser.parse_signature(<<-EOF).tap do |_, _, decls|
 module A
   def foo: () -> void
 
@@ -1371,7 +1371,7 @@ end
   end
 
   def test_var_location
-    Parser.parse_signature(<<-EOF).tap do |decls|
+    Parser.parse_signature(<<-EOF).tap do |_, _, decls|
 module A
   @foo: Integer
   self.@bar: String
@@ -1406,7 +1406,7 @@ end
   end
 
   def test_attribute_location
-    Parser.parse_signature(<<-RBS).tap do |decls|
+    Parser.parse_signature(<<-RBS).tap do |_, _, decls|
 module A
   attr_reader reader1: String
   attr_reader reader2 : String
@@ -1484,7 +1484,7 @@ end
       end
     end
 
-    Parser.parse_signature(<<-RBS).tap do |decls|
+    Parser.parse_signature(<<-RBS).tap do |_, _, decls|
 module A
   attr_writer attr1: String
   attr_writer attr2 : String
@@ -1562,7 +1562,7 @@ end
       end
     end
 
-    Parser.parse_signature(<<-RBS).tap do |decls|
+    Parser.parse_signature(<<-RBS).tap do |_, _, decls|
 module A
   attr_accessor attr1: String
   attr_accessor attr2 : String
@@ -1642,7 +1642,7 @@ end
   end
 
   def test_alias_location
-    Parser.parse_signature(<<-RBS).tap do |decls|
+    Parser.parse_signature(<<-RBS).tap do |_, _, decls|
 module A
   alias foo bar
   alias self.foo self.bar
@@ -1672,7 +1672,7 @@ end
   end
 
   def test_mixin_location
-    Parser.parse_signature(<<-EOF).tap do |decls|
+    Parser.parse_signature(<<-EOF).tap do |_, _, decls|
 module A
   include _Foo
   include _Bar[String]
@@ -1735,7 +1735,7 @@ end
   end
 
   def test_interface_location
-    Parser.parse_signature(<<-EOF).tap do |decls|
+    Parser.parse_signature(<<-EOF).tap do |_, _, decls|
 interface _A
 end
 
@@ -1779,7 +1779,7 @@ end
   end
 
   def test_module_location
-    Parser.parse_signature(<<-EOF).tap do |decls|
+    Parser.parse_signature(<<-EOF).tap do |_, _, decls|
 module A
 end
 
@@ -1824,7 +1824,7 @@ module C: BasicObject end
   end
 
   def test_class_location
-    Parser.parse_signature(<<-EOF).tap do |decls|
+    Parser.parse_signature(<<-EOF).tap do |_, _, decls|
 class A
 end
 
@@ -1877,7 +1877,7 @@ end
   end
 
   def test_constant_global_location
-    Parser.parse_signature(<<-EOF).tap do |decls|
+    Parser.parse_signature(<<-EOF).tap do |_, _, decls|
 X: String
 A::B : String
 $B: Integer
@@ -1906,7 +1906,7 @@ $B: Integer
   end
 
   def test_type_alias_location
-    Parser.parse_signature(<<-EOF).tap do |decls|
+    Parser.parse_signature(<<-EOF).tap do |_, _, decls|
 type foo = Integer
     EOF
       decls[0].tap do |decl|
@@ -1960,7 +1960,7 @@ type x = Foo::_bar
   end
 
   def test_singleton_member_type_variables
-    Parser.parse_signature(<<-EOF).tap do |decls|
+    Parser.parse_signature(<<-EOF).tap do |_, _, decls|
 class Foo[A]
   @foo: A
 
@@ -2010,7 +2010,7 @@ end
   end
 
   def test_generics_bound
-    Parser.parse_signature(<<-EOF).tap do |decls|
+    Parser.parse_signature(<<-EOF).tap do |_, _, decls|
 class Foo[X < _Each[Y], Y]
   def foo: [X < Array[Y]] (X) -> X
 end
@@ -2055,7 +2055,7 @@ end
   end
 
   def test_module_alias_decl
-    Parser.parse_signature(<<~EOF).yield_self do |decls|
+    Parser.parse_signature(<<~EOF).tap do |_, _, decls|
         module RBS::Kernel = Kernel
       EOF
 
@@ -2073,7 +2073,7 @@ end
   end
 
   def test_class_alias_decl
-    Parser.parse_signature(<<~EOF).yield_self do |decls|
+    Parser.parse_signature(<<~EOF).tap do |_, _, decls|
         class RBS::Object = Object
       EOF
 

@@ -14,8 +14,8 @@ module RBS
       end
 
       def scan
-        ast = ::RBS::Parser.parse_signature(@content)
-        ast.each do |decl|
+        _, _, decls = ::RBS::Parser.parse_signature(@content)
+        decls.each do |decl|
           parse_member(decl: decl, context: @top_level)
         end
         @top_level

@@ -160,7 +160,9 @@ module RBS
           files << path
           buffer = Buffer.new(name: path.to_s, content: path.read(encoding: "UTF-8"))
 
-          Parser.parse_signature(buffer).each do |decl|
+          _, _dirs, decls = Parser.parse_signature(buffer)
+
+          decls.each do |decl|
             yield decl, buffer, source, path
           end
         end
