@@ -425,6 +425,10 @@ module RBS
       self
     end
 
+    def add_signature_content(buffer:, decls:, directives:)
+      
+    end
+
     def validate_type_params
       class_decls.each_value do |decl|
         decl.primary

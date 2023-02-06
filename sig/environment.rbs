@@ -119,13 +119,15 @@ module RBS
     #
     def self.from_loader: (EnvironmentLoader) -> Environment
 
+    def add_signature_content: (buffer: Buffer, decls: Array[AST::Declarations::t], directives: Array[AST::Directives::t]) -> void
+
     # Insert a toplevel declaration into the environment
     #
-    def <<: (AST::Declarations::t decl) -> self
+    private def <<: (AST::Declarations::t decl) -> self
 
     # Insert a declaration into the environment
     #
-    def insert_decl: (AST::Declarations::t, outer: Array[module_decl], namespace: Namespace) -> void
+    private def insert_decl: (AST::Declarations::t, outer: Array[module_decl], namespace: Namespace) -> void
 
     # Resolve all type names in the environment to absolute type names.
     # Relative type name will be left if absolute type name cannot be found.
