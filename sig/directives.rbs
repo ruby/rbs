@@ -6,6 +6,10 @@ module RBS
       class Base
       end
 
+      # ```
+      # use Foo, Foo::Bar as FBar, Foo:Baz::*
+      # ```
+      #
       class Use < Base
         type clause = SingleClause | WildcardClause
 

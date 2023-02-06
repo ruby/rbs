@@ -20,6 +20,11 @@ extern VALUE RBS_AST_Declarations_Module;
 extern VALUE RBS_AST_Declarations_ModuleAlias;
 extern VALUE RBS_AST_Declarations_ClassAlias;
 
+extern VALUE RBS_AST_Directives;
+extern VALUE RBS_AST_Directives_Use;
+extern VALUE RBS_AST_Directives_Use_SingleClause;
+extern VALUE RBS_AST_Directives_Use_WildcardClause;
+
 extern VALUE RBS_AST_Members;
 extern VALUE RBS_AST_Members_Alias;
 extern VALUE RBS_AST_Members_AttrAccessor;

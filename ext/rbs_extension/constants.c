@@ -21,6 +21,11 @@ VALUE RBS_AST_Declarations_Class_Super;
 VALUE RBS_AST_Declarations_ModuleAlias;
 VALUE RBS_AST_Declarations_ClassAlias;
 
+VALUE RBS_AST_Directives;
+VALUE RBS_AST_Directives_Use;
+VALUE RBS_AST_Directives_Use_SingleClause;
+VALUE RBS_AST_Directives_Use_WildcardClause;
+
 VALUE RBS_AST_Members;
 VALUE RBS_AST_Members_Alias;
 VALUE RBS_AST_Members_AttrAccessor;
@@ -92,6 +97,11 @@ void rbs__init_constants(void) {
   RBS_AST_Declarations_Class_Super = rb_const_get(RBS_AST_Declarations_Class, rb_intern("Super"));
   RBS_AST_Declarations_ClassAlias = rb_const_get(RBS_AST_Declarations, rb_intern("ClassAlias"));
   RBS_AST_Declarations_ModuleAlias = rb_const_get(RBS_AST_Declarations, rb_intern("ModuleAlias"));
+
+  RBS_AST_Directives = rb_const_get(RBS_AST, rb_intern("Directives"));
+  RBS_AST_Directives_Use = rb_const_get(RBS_AST_Directives, rb_intern("Use"));
+  RBS_AST_Directives_Use_SingleClause = rb_const_get(RBS_AST_Directives_Use, rb_intern("SingleClause"));
+  RBS_AST_Directives_Use_WildcardClause = rb_const_get(RBS_AST_Directives_Use, rb_intern("WildcardClause"));
 
   RBS_AST_Members = rb_const_get(RBS_AST, rb_intern("Members"));
   RBS_AST_Members_Alias = rb_const_get(RBS_AST_Members, rb_intern("Alias"));

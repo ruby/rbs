@@ -37,6 +37,8 @@
   case kPUBLIC: \
   case kPRIVATE: \
   case kUNTYPED: \
+  case kUSE: \
+  case kAS: \
   /* nop */
 
 typedef struct {
@@ -2560,12 +2562,175 @@ VALUE parse_decl(parserstate *state) {
   }
 }
 
+/*
+  namespace ::= {} (`::`)? (`tUIDENT` `::`)* `tUIDENT` <`::`>
+              | {} <>                                            (empty -- returns empty namespace)
+*/
+VALUE parse_namespace(parserstate *state, range *rg) {
+  bool is_absolute = false;
+
+  if (state->next_token.type == pCOLON2) {
+    rg->start = state->next_token.range.start;
+    rg->end = state->next_token.range.end;
+    is_absolute = true;
+
+    parser_advance(state);
+  }
+
+  VALUE path = rb_ary_new();
+
+  while (true) {
+    if (state->next_token.type == tUIDENT && state->next_token2.type == pCOLON2) {
+      rb_ary_push(path, ID2SYM(INTERN_TOKEN(state, state->next_token)));
+      if (null_position_p(rg->start)) {
+        rg->start = state->next_token.range.start;
+      }
+      rg->end = state->next_token2.range.end;
+      parser_advance(state);
+      parser_advance(state);
+    } else {
+      break;
+    }
+  }
+
+  return rbs_namespace(path, is_absolute ? Qtrue : Qfalse);
+}
+
+/*
+  use_clauses ::= {} use_clause `,` ... `,` <use_clause>
+
+  use_clause ::= {} namespace <tUIDENT>
+               | {} namespace tUIDENT `as` <tUIDENT>
+               | {} namespace <tSTAR>
+*/
+void parse_use_clauses(parserstate *state, VALUE clauses) {
+  while (true) {
+    range namespace_range = NULL_RANGE;
+    VALUE namespace = parse_namespace(state, &namespace_range);
+
+    range clause_range = namespace_range;
+
+    switch (state->next_token.type)
+    {
+      case tLIDENT:
+      case tULIDENT:
+      case tUIDENT: {
+        parser_advance(state);
+
+        enum TokenType ident_type = state->current_token.type;
+
+        range type_name_range;
+        if (null_range_p(namespace_range)) {
+          type_name_range = state->current_token.range;
+        } else {
+          type_name_range.start = namespace_range.start;
+          type_name_range.end = state->current_token.range.end;
+        }
+        clause_range = type_name_range;
+
+        VALUE type_name = rbs_type_name(namespace, ID2SYM(INTERN_TOKEN(state, state->current_token)));
+
+        range keyword_range = NULL_RANGE;
+        range new_name_range = NULL_RANGE;
+
+        VALUE new_name = Qnil;
+        if (state->next_token.type == kAS) {
+          parser_advance(state);
+          keyword_range = state->current_token.range;
+
+          if (ident_type == tUIDENT) parser_advance_assert(state, tUIDENT);
+          if (ident_type == tLIDENT) parser_advance_assert(state, tLIDENT);
+          if (ident_type == tULIDENT) parser_advance_assert(state, tULIDENT);
+
+          new_name = ID2SYM(INTERN_TOKEN(state, state->current_token));
+          new_name_range = state->current_token.range;
+          clause_range.end = new_name_range.end;
+        }
+
+        VALUE location = rbs_new_location(state->buffer, clause_range);
+        rbs_loc *loc = rbs_check_location(location);
+        rbs_loc_add_required_child(loc, rb_intern("type_name"), state->current_token.range);
+        if (!null_range_p(keyword_range)) {
+          rbs_loc_add_optional_child(loc, rb_intern("keyword"), keyword_range);
+        }
+        if (!null_range_p(new_name_range)) {
+          rbs_loc_add_optional_child(loc, rb_intern("new_name"), new_name_range);
+        }
+
+        rb_ary_push(clauses, rbs_ast_directives_use_single_clause(type_name, new_name, location));
+
+        break;
+      }
+      case pSTAR:
+      {
+        parser_advance(state);
+
+        range star_range = state->current_token.range;
+        clause_range.end = star_range.end;
+
+        VALUE location = rbs_new_location(state->buffer, clause_range);
+        rbs_loc *loc = rbs_check_location(location);
+        rbs_loc_add_required_child(loc, rb_intern("namespace"), namespace_range);
+        rbs_loc_add_required_child(loc, rb_intern("star"), star_range);
+
+        rb_ary_push(clauses, rbs_ast_directives_use_wildcard_clause(namespace, location));
+
+        break;
+      }
+      default:
+        raise_syntax_error(
+          state,
+          state->next_token,
+          "use clause is expected"
+        );
+    }
+
+    if (state->next_token.type == pCOMMA) {
+      parser_advance(state);
+    } else {
+      break;
+    }
+  }
+
+  return;
+}
+
+/*
+  use_directive ::= {} `use` <clauses>
+ */
+VALUE parse_use_directive(parserstate *state) {
+  if (state->next_token.type == kUSE) {
+    parser_advance(state);
+
+    range keyword_range = state->current_token.range;
+
+    VALUE clauses = rb_ary_new();
+    parse_use_clauses(state, clauses);
+
+    range directive_range = keyword_range;
+    directive_range.end = state->current_token.range.end;
+
+    VALUE location = rbs_new_location(state->buffer, directive_range);
+    rbs_loc *loc = rbs_check_location(location);
+    rbs_loc_add_required_child(loc, rb_intern("keyword"), keyword_range);
+
+    return rbs_ast_directives_use(clauses, location);
+  } else {
+    return Qnil;
+  }
+}
+
 VALUE parse_signature(parserstate *state) {
   VALUE dirs = rb_ary_new();
   VALUE decls = rb_ary_new();
 
   while (state->next_token.type != pEOF) {
-    rb_ary_push(decls, parse_decl(state));
+    if (state->next_token.type == kUSE) {
+      VALUE use = parse_use_directive(state);
+      rb_ary_push(dirs, use);
+    } else  {
+      rb_ary_push(decls, parse_decl(state));
+    }
   }
 
   VALUE ret = rb_ary_new();

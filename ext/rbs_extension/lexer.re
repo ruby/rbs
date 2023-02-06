@@ -93,6 +93,8 @@ start:
       "unchecked"     { return next_token(state, kUNCHECKED); }
       "untyped"       { return next_token(state, kUNTYPED); }
       "void"          { return next_token(state, kVOID); }
+      "use"           { return next_token(state, kUSE); }
+      "as"            { return next_token(state, kAS); }
 
       dqstring = ["] ("\\"[abefnrstv"\\] | [^"\\\x00])* ["];
       sqstring = ['] ("\\"['\\] | [^'\x00])* ['];

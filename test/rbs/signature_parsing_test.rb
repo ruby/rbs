@@ -2089,4 +2089,36 @@ end
       end
     end
   end
+
+  def test_use_directive
+    Parser.parse_signature(<<~RBS).tap do |_, dirs, _|
+      use RBS::Namespace as NS
+
+      module Baz
+      end
+
+      use RBS::TypeName, RBS::AST::Declarations::*
+
+      class Foo
+      end
+    RBS
+
+      assert_equal 2, dirs.size
+
+      dirs[0].tap do |use|
+        assert_equal 1, use.clauses.size
+        assert_equal TypeName("RBS::Namespace"), use.clauses[0].type_name
+        assert_equal :NS, use.clauses[0].new_name
+      end
+
+      dirs[1].tap do |use|
+        assert_equal 2, use.clauses.size
+
+        assert_equal TypeName("RBS::TypeName"), use.clauses[0].type_name
+        assert_nil use.clauses[0].new_name
+
+        assert_equal Namespace("RBS::AST::Declarations::"), use.clauses[1].namespace
+      end
+    end
+  end
 end
