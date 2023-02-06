@@ -23,7 +23,7 @@ interface _ToHash[K, V]
 end
 
 interface _ToProc
-  def to_proc: () -> untyped
+  def to_proc: () -> Proc
 end
 
 interface _ToPath
