@@ -13,12 +13,16 @@ module Bundler
     def dependencies: () -> Array[Gem::Dependency]
   end
 
+  class Dependency < Gem::Dependency
+    attr_reader autorequire: Array[String]?
+  end
+
   class Definition
     def lockfile: () -> Pathname
 
-    def requires: () -> Hash[String, Array[String]]
-
     def locked_gems: () -> LockfileParser
+
+    def dependencies: () -> Array[Dependency]
   end
 
   def self.default_lockfile: () -> Pathname

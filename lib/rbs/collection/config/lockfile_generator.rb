@@ -70,12 +70,13 @@ module RBS
             end
           end
 
-          definition.requires.each do |gem, requires|
-            # `require: false`` gems has empty array here
-            unless requires.empty?
-              spec = gem_hash[gem] or raise "Cannot find `#{gem}` in bundler context"
-              assign_gem(name: gem, version: spec.version, ignored_gems: ignored_gems, src_data: nil)
+          definition.dependencies.each do |dep|
+            if dep.autorequire && dep.autorequire.empty?
+              next
             end
+
+            spec = gem_hash[dep.name] or raise "Cannot find `#{dep.name}` in bundler context"
+            assign_gem(name: dep.name, version: spec.version, ignored_gems: ignored_gems, src_data: nil)
           end
 
           lockfile.lockfile_path.write(YAML.dump(lockfile.to_lockfile))
