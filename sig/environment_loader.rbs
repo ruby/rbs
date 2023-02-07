@@ -100,7 +100,7 @@ module RBS
     #
     def self.gem_sig_path: (String name, String? version) -> [Gem::Specification, Pathname]?
 
-    def each_decl: () { (AST::Declarations::t, Buffer, source, Pathname) -> void } -> void
+    def each_signature: () { (source, Pathname, Buffer, Array[AST::Declarations::t], Array[AST::Directives::t]) -> void } -> void
 
     def each_dir: { (source, Pathname) -> void } -> void
 

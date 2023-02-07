@@ -312,7 +312,7 @@ EOF
   def test_absolute_type
     env = Environment.new
 
-    _, _, decls = RBS::Parser.parse_signature(<<EOF)
+    buf, dirs, decls = RBS::Parser.parse_signature(<<EOF)
 # Integer is undefined and the type is left relative.
 # (Will be an error afterward.)
 #
@@ -355,9 +355,7 @@ class Time end
 module Enumerable[A] end
 EOF
 
-    decls.each do |decl|
-      env << decl
-    end
+    env.add_signature(buffer: buf, directives: dirs, decls: decls)
 
     env_ = env.resolve_type_names
 
@@ -419,7 +417,7 @@ RBS
   def test_absolute_type_super
     env = Environment.new
 
-    _, _, decls = RBS::Parser.parse_signature(<<-RBS)
+    buf, dirs, decls = RBS::Parser.parse_signature(<<-RBS)
 module A
   class C
   end
@@ -431,9 +429,7 @@ module A
 end
     RBS
 
-    decls.each do |decl|
-      env << decl
-    end
+    env.add_signature(buffer: buf, directives: dirs, decls: decls)
 
     env.resolve_type_names.tap do |env|
       class_decl = env.class_decls[TypeName("::A::B")]
@@ -478,7 +474,7 @@ EOF
   def test_absolute_type_generics_upper_bound
     env = Environment.new
 
-    _, _, decls = RBS::Parser.parse_signature(<<RBS)
+    buf, dirs, decls = RBS::Parser.parse_signature(<<RBS)
 interface _Equatable
   def ==: (untyped) -> bool
 end
@@ -491,9 +487,7 @@ class Foo[A < _Equatable]
 end
 RBS
 
-    decls.each do |decl|
-      env << decl
-    end
+    env.add_signature(buffer: buf, directives: dirs, decls: decls)
 
     env_ = env.resolve_type_names
 
@@ -516,7 +510,7 @@ RBS
   end
 
   def test_normalize_module_name
-    _, _, decls = RBS::Parser.parse_signature(<<~EOF)
+    buf, dirs, decls = RBS::Parser.parse_signature(<<~EOF)
       class Foo
         module Bar
           module Baz
@@ -530,12 +524,33 @@ RBS
 
 
     env = Environment.new()
-    decls.each do |decl|
-      env << decl
-    end
+    env.add_signature(buffer: buf, directives: dirs, decls: decls)
+
     env = env.resolve_type_names
 
     assert_equal type_name("::Foo::Bar"), env.normalize_module_name(type_name("::M"))
     assert_equal type_name("::Foo::Bar::Baz"), env.normalize_module_name(type_name("::N"))
+  end
+
+  def test_use_resolve
+    buf, dirs, decls = RBS::Parser.parse_signature(<<-RBS)
+use Object as OB
+
+class Foo < OB
+end
+
+class OB
+end
+    RBS
+
+    env = Environment.new
+    env.add_signature(buffer: buf, directives: dirs, decls: decls)
+
+    env.resolve_type_names.tap do |env|
+      class_decl = env.class_decls[TypeName("::Foo")]
+      assert_equal TypeName("::Object"), class_decl.primary.decl.super_class.name
+
+      assert_operator env.class_decls, :key?, TypeName("::OB")
+    end
   end
 end

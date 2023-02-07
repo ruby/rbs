@@ -95,9 +95,11 @@ module RBS
       # @type var loaded: Array[[AST::Declarations::t, Pathname, source]]
       loaded = []
 
-      each_decl do |decl, buf, source, path|
-        env << decl
-        loaded << [decl, path, source]
+      each_signature do |source, path, buffer, decls, dirs|
+        decls.each do |decl|
+          loaded << [decl, path, source]
+        end
+        env.add_signature(buffer: buffer, directives: dirs, decls: decls)
       end
 
       loaded
@@ -148,7 +150,7 @@ module RBS
       end
     end
 
-    def each_decl
+    def each_signature
       files = Set[]
 
       each_dir do |source, dir|
@@ -160,11 +162,9 @@ module RBS
           files << path
           buffer = Buffer.new(name: path.to_s, content: path.read(encoding: "UTF-8"))
 
-          _, _dirs, decls = Parser.parse_signature(buffer)
+          _, dirs, decls = Parser.parse_signature(buffer)
 
-          decls.each do |decl|
-            yield decl, buffer, source, path
-          end
+          yield source, path, buffer, decls, dirs
         end
       end
     end
