@@ -41,9 +41,11 @@ class RBS::Collection::Sources::GitTest < Test::Unit::TestCase
   end
 
   def git(*cmd, **opts)
-    Open3.capture3("git", *cmd, **opts).then do |out, err, status|
-      raise "Unexpected git status: \n\n#{err}" unless status.success?
-      out
+    Bundler.with_unbundled_env do
+      Open3.capture3("git", *cmd, **opts).then do |out, err, status|
+        raise "Unexpected git status: \n\n#{err.each_line.map {|line| ">> #{line}" }.join}" unless status.success?
+        out
+      end
     end
   end
 
