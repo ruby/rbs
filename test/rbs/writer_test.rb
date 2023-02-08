@@ -7,9 +7,9 @@ class RBS::WriterTest < Test::Unit::TestCase
   Writer = RBS::Writer
 
   def format(sig, preserve: false)
-    Parser.parse_signature(sig).then do |_, _, decls|
+    Parser.parse_signature(sig).then do |_, dirs, decls|
       writer = Writer.new(out: StringIO.new).preserve!(preserve: preserve)
-      writer.write(decls)
+      writer.write(dirs + decls)
 
       writer.out.string
     end
@@ -284,6 +284,15 @@ class Foo
 
   private attr_reader name: String
 end
+    SIG
+  end
+
+  def test_use
+    assert_writer(<<~SIG)
+      use Foo::Bar
+      use Foo::Bar as FB, Baz::*
+
+      $hoge: Foo
     SIG
   end
 end

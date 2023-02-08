@@ -135,7 +135,7 @@ module RBS
         include _ToJson
       end
 
-      class Interface
+      class Interface < Base
         type member = Members::t
 
         # interface _Foo end
