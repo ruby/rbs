@@ -43,4 +43,8 @@ VALUE rbs_type_name(VALUE namespace, VALUE name);
 VALUE rbs_union(VALUE types, VALUE location);
 VALUE rbs_variable(VALUE name, VALUE location);
 
+VALUE rbs_ast_directives_use(VALUE clauses, VALUE location);
+VALUE rbs_ast_directives_use_single_clause(VALUE type_name, VALUE new_name, VALUE location);
+VALUE rbs_ast_directives_use_wildcard_clause(VALUE namespace, VALUE location);
+
 #endif

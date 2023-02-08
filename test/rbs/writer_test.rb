@@ -7,9 +7,9 @@ class RBS::WriterTest < Test::Unit::TestCase
   Writer = RBS::Writer
 
   def format(sig, preserve: false)
-    Parser.parse_signature(sig).then do |decls|
+    Parser.parse_signature(sig).then do |_, dirs, decls|
       writer = Writer.new(out: StringIO.new).preserve!(preserve: preserve)
-      writer.write(decls)
+      writer.write(dirs + decls)
 
       writer.out.string
     end
@@ -233,14 +233,14 @@ end
 
   def test_smoke
     Pathname.glob('{stdlib,core,sig}/**/*.rbs').each do |path|
-      orig_decls = RBS::Parser.parse_signature(
+      _, _, orig_decls = RBS::Parser.parse_signature(
         RBS::Buffer.new(name: path, content: path.read)
       )
 
       io = StringIO.new
       w = RBS::Writer.new(out: io)
       w.write(orig_decls)
-      decls = RBS::Parser.parse_signature(RBS::Buffer.new(name: path, content: io.string))
+      _, _, decls = RBS::Parser.parse_signature(RBS::Buffer.new(name: path, content: io.string))
 
       assert_equal orig_decls, decls, "(#{path})"
     end
@@ -284,6 +284,15 @@ class Foo
 
   private attr_reader name: String
 end
+    SIG
+  end
+
+  def test_use
+    assert_writer(<<~SIG)
+      use Foo::Bar
+      use Foo::Bar as FB, Baz::*
+
+      $hoge: Foo
     SIG
   end
 end

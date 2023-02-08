@@ -58,6 +58,8 @@ enum TokenType {
   kUNCHECKED,       /* unchecked */
   kUNTYPED,         /* untyped */
   kVOID,            /* void */
+  kUSE,             /* use */
+  kAS,              /* as */
 
   tLIDENT,          /* Identifiers starting with lower case */
   tUIDENT,          /* Identifiers starting with upper case */

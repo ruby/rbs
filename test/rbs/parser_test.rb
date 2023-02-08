@@ -6,7 +6,7 @@ class RBS::ParserTest < Test::Unit::TestCase
   end
 
   def test_interface
-    RBS::Parser.parse_signature(buffer(<<-RBS)).tap do |decls|
+    RBS::Parser.parse_signature(buffer(<<-RBS)).tap do |_, _, decls|
 interface _Foo[unchecked in A]
   def bar: [A] () -> A
 
@@ -72,7 +72,7 @@ end
   end
 
   def test_interface_alias
-    RBS::Parser.parse_signature(buffer(<<-RBS)).tap do |decls|
+    RBS::Parser.parse_signature(buffer(<<-RBS)).tap do |_, _, decls|
 interface _Foo[unchecked in A]
   alias hello world
 end
@@ -90,7 +90,7 @@ end
   end
 
   def test_module_decl
-    RBS::Parser.parse_signature(buffer(<<-RBS)).tap do |decls|
+    RBS::Parser.parse_signature(buffer(<<-RBS)).tap do |_, _, decls|
 module Foo[X] : String, _Array[Symbol]
 end
     RBS
@@ -109,7 +109,7 @@ end
   end
 
   def test_module_decl_def
-    RBS::Parser.parse_signature(buffer(<<-RBS)).tap do |decls|
+    RBS::Parser.parse_signature(buffer(<<-RBS)).tap do |_, _, decls|
 module Foo[X] : String, _Array[Symbol]
   def foo: () -> void
 
@@ -125,7 +125,7 @@ end
   end
 
   def test_module_decl_vars
-    RBS::Parser.parse_signature(buffer(<<-RBS)).tap do |decls|
+    RBS::Parser.parse_signature(buffer(<<-RBS)).tap do |_, _, decls|
 module Foo[X] : String, _Array[Symbol]
   @foo: Integer
 
@@ -141,7 +141,7 @@ end
   end
 
   def test_module_decl_attributes
-    RBS::Parser.parse_signature(buffer(<<-RBS)).tap do |decls|
+    RBS::Parser.parse_signature(buffer(<<-RBS)).tap do |_, _, decls|
 module Foo
   attr_reader string: String
   attr_writer self.name (): Integer
@@ -196,7 +196,7 @@ end
   end
 
   def test_module_decl_public_private
-    RBS::Parser.parse_signature(buffer(<<-RBS)).tap do |decls|
+    RBS::Parser.parse_signature(buffer(<<-RBS)).tap do |_, _, decls|
 module Foo
   public
   private
@@ -212,7 +212,7 @@ end
   end
 
   def test_module_decl_nested
-    RBS::Parser.parse_signature(buffer(<<-RBS)).tap do |decls|
+    RBS::Parser.parse_signature(buffer(<<-RBS)).tap do |_, _, decls|
 module Foo
   type foo = bar
 
@@ -226,7 +226,7 @@ end
   end
 
   def test_module_type_var_decl
-    RBS::Parser.parse_signature(buffer(<<-RBS)).tap do |decls|
+    RBS::Parser.parse_signature(buffer(<<-RBS)).tap do |_, _, decls|
 module Foo[A]
   type t = A
 
@@ -250,7 +250,7 @@ end
   end
 
   def test_module_type_var_ivar
-    RBS::Parser.parse_signature(buffer(<<-RBS)).tap do |decls|
+    RBS::Parser.parse_signature(buffer(<<-RBS)).tap do |_, _, decls|
 module Foo[A]
   @x: A
   @@x: A
@@ -279,7 +279,7 @@ end
   end
 
   def test_module_type_var_attr
-    RBS::Parser.parse_signature(buffer(<<-RBS)).tap do |decls|
+    RBS::Parser.parse_signature(buffer(<<-RBS)).tap do |_, _, decls|
 module Foo[A]
   attr_reader foo: A
   attr_writer self.bar: A
@@ -302,7 +302,7 @@ end
   end
 
   def test_module_type_var_method
-    RBS::Parser.parse_signature(buffer(<<-RBS)).tap do |decls|
+    RBS::Parser.parse_signature(buffer(<<-RBS)).tap do |_, _, decls|
 module Foo[A]
   def foo: () -> A
 
@@ -333,7 +333,7 @@ end
   end
 
   def test_module_type_var_mixin
-    RBS::Parser.parse_signature(buffer(<<-RBS)).tap do |decls|
+    RBS::Parser.parse_signature(buffer(<<-RBS)).tap do |_, _, decls|
 module Foo[A]
   include X[A]
 
@@ -364,7 +364,7 @@ end
   end
 
   def test_class_decl
-    RBS::Parser.parse_signature(buffer(<<-RBS)).tap do |decls|
+    RBS::Parser.parse_signature(buffer(<<-RBS)).tap do |_, _, decls|
       class Foo
       end
           RBS
@@ -376,7 +376,7 @@ end
       end
     end
 
-    RBS::Parser.parse_signature(buffer(<<-RBS)).tap do |decls|
+    RBS::Parser.parse_signature(buffer(<<-RBS)).tap do |_, _, decls|
       class Foo[A] < Bar[A]
       end
           RBS
@@ -390,7 +390,7 @@ end
   end
 
   def test_method_name
-    RBS::Parser.parse_signature(buffer(<<-RBS)).tap do |decls|
+    RBS::Parser.parse_signature(buffer(<<-RBS)).tap do |_, _, decls|
       class Foo
         def |: () -> void
         def ^: () -> void
@@ -436,7 +436,7 @@ end
   end
 
   def test_parse_comment
-    RBS::Parser.parse_signature(buffer(<<-RBS)).tap do |decls|
+    RBS::Parser.parse_signature(buffer(<<-RBS)).tap do |_, _, decls|
       # Hello
       #  World
       #Yes
@@ -466,7 +466,7 @@ end
   end
 
   def test_parse_global
-    RBS::Parser.parse_signature(buffer(<<RBS)).tap do |decls|
+    RBS::Parser.parse_signature(buffer(<<RBS)).tap do |_buf, _dirs, decls|
 $日本語: String
 RBS
       decls[0].tap do |decl|
@@ -478,7 +478,7 @@ RBS
     names = %w($! $" $$ $& $' $* $+ $, $-0 $-F $-I $-W $-a $-d $-i $-l $-p $-v $-w $. $/ $0 $1 $2 $3 $4 $5 $6 $7 $8 $9 $: $; $< $= $> $? $@ $DEBUG $FILENAME $LOAD_PATH $LOADED_FEATURES $PROGRAM_NAME $VERBOSE $\\ $_ $` $stderr $stdin $stdout $~)
 
     names.each do |name|
-      RBS::Parser.parse_signature(buffer("#{name}: untyped")).tap do |decls|
+      RBS::Parser.parse_signature(buffer("#{name}: untyped")).tap do |_, _, decls|
         decls[0].tap do |decl|
           assert_instance_of RBS::AST::Declarations::Global, decl
           assert_equal name.to_sym, decl.name

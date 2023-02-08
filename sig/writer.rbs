@@ -21,7 +21,7 @@ module RBS
     # Output the array of declarations.
     # It automatically inserts empty lines between the declarations.
     #
-    def write: (Array[AST::Declarations::t]) -> void
+    def write: (Array[AST::Declarations::t | AST::Directives::t]) -> void
 
     def preserve?: () -> bool
 
@@ -95,6 +95,8 @@ module RBS
     def write_loc_source: (_Located) { () -> void } -> void
 
     def format_annotation: (AST::Annotation) -> String
+
+    def write_directive: (AST::Directives::t) -> void
 
     def write_annotation: (Array[AST::Annotation]) -> void
 

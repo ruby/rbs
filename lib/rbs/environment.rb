@@ -10,6 +10,7 @@ module RBS
     attr_reader :constant_decls
     attr_reader :global_decls
     attr_reader :class_alias_decls
+    attr_reader :buffer_directives
 
     module ContextUtil
       def calculate_context(decls)
@@ -151,6 +152,7 @@ module RBS
       @global_decls = {}
       @class_alias_decls = {}
       @normalize_module_name_cache = {}
+      @buffer_directives = {}
     end
 
     def initialize_copy(other)
@@ -163,6 +165,7 @@ module RBS
       @constant_decls = other.constant_decls.dup
       @global_decls = other.global_decls.dup
       @class_alias_decls = other.class_alias_decls.dup
+      @buffer_directives = other.buffer_directives.dup
     end
 
     def self.from_loader(loader)
@@ -425,6 +428,13 @@ module RBS
       self
     end
 
+    def add_signature(buffer:, directives:, decls:)
+      buffer_directives[buffer] = directives
+      decls.each do |decl|
+        self << decl
+      end
+    end
+
     def validate_type_params
       class_decls.each_value do |decl|
         decl.primary
@@ -435,12 +445,32 @@ module RBS
       resolver = Resolver::TypeNameResolver.new(self)
       env = Environment.new
 
-      declarations.each do |decl|
-        if only && !only.member?(decl)
-          env << decl
-        else
-          env << resolve_declaration(resolver, decl, outer: [], prefix: Namespace.root)
+      table = UseMap::Table.new()
+      table.known_types.merge(class_decls.keys)
+      table.known_types.merge(class_alias_decls.keys)
+      table.known_types.merge(type_alias_decls.keys)
+      table.known_types.merge(interface_decls.keys)
+      table.compute_children
+
+      buffers_decls.each do |buffer, decls|
+        dirs = buffer_directives.fetch(buffer)
+
+        map = UseMap.new(table: table)
+        dirs.each do |dir|
+          dir.clauses.each do |clause|
+            map.build_map(clause)
+          end
         end
+
+        decls = decls.map do |decl|
+          if only && !only.member?(decl)
+            decl
+          else
+            resolve_declaration(resolver, map, decl, outer: [], prefix: Namespace.root)
+          end
+        end
+
+        env.add_signature(buffer: buffer, directives: dirs, decls: decls)
       end
 
       env
@@ -461,12 +491,12 @@ module RBS
       end
     end
 
-    def resolve_declaration(resolver, decl, outer:, prefix:)
+    def resolve_declaration(resolver, map, decl, outer:, prefix:)
       if decl.is_a?(AST::Declarations::Global)
         # @type var decl: AST::Declarations::Global
         return AST::Declarations::Global.new(
           name: decl.name,
-          type: absolute_type(resolver, decl.type, context: nil),
+          type: absolute_type(resolver, map, decl.type, context: nil),
           location: decl.location,
           comment: decl.comment
         )
@@ -483,21 +513,22 @@ module RBS
         prefix_ = prefix + decl.name.to_namespace
         AST::Declarations::Class.new(
           name: decl.name.with_prefix(prefix),
-          type_params: resolve_type_params(resolver, decl.type_params, context: inner_context),
+          type_params: resolve_type_params(resolver, map, decl.type_params, context: inner_context),
           super_class: decl.super_class&.yield_self do |super_class|
             AST::Declarations::Class::Super.new(
-              name: absolute_type_name(resolver, super_class.name, context: outer_context),
-              args: super_class.args.map {|type| absolute_type(resolver, type, context: outer_context) },
+              name: absolute_type_name(resolver, map, super_class.name, context: outer_context),
+              args: super_class.args.map {|type| absolute_type(resolver, map, type, context: outer_context) },
               location: super_class.location
             )
           end,
           members: decl.members.map do |member|
             case member
             when AST::Members::Base
-              resolve_member(resolver, member, context: inner_context)
+              resolve_member(resolver, map, member, context: inner_context)
             when AST::Declarations::Base
               resolve_declaration(
                 resolver,
+                map,
                 member,
                 outer: outer_,
                 prefix: prefix_
@@ -519,21 +550,22 @@ module RBS
         prefix_ = prefix + decl.name.to_namespace
         AST::Declarations::Module.new(
           name: decl.name.with_prefix(prefix),
-          type_params: resolve_type_params(resolver, decl.type_params, context: inner_context),
+          type_params: resolve_type_params(resolver, map, decl.type_params, context: inner_context),
           self_types: decl.self_types.map do |module_self|
             AST::Declarations::Module::Self.new(
-              name: absolute_type_name(resolver, module_self.name, context: inner_context),
-              args: module_self.args.map {|type| absolute_type(resolver, type, context: inner_context) },
+              name: absolute_type_name(resolver, map, module_self.name, context: inner_context),
+              args: module_self.args.map {|type| absolute_type(resolver, map, type, context: inner_context) },
               location: module_self.location
             )
           end,
           members: decl.members.map do |member|
             case member
             when AST::Members::Base
-              resolve_member(resolver, member, context: inner_context)
+              resolve_member(resolver, map, member, context: inner_context)
             when AST::Declarations::Base
               resolve_declaration(
                 resolver,
+                map,
                 member,
                 outer: outer_,
                 prefix: prefix_
@@ -550,9 +582,9 @@ module RBS
       when AST::Declarations::Interface
         AST::Declarations::Interface.new(
           name: decl.name.with_prefix(prefix),
-          type_params: resolve_type_params(resolver, decl.type_params, context: context),
+          type_params: resolve_type_params(resolver, map, decl.type_params, context: context),
           members: decl.members.map do |member|
-            resolve_member(resolver, member, context: context)
+            resolve_member(resolver, map, member, context: context)
           end,
           comment: decl.comment,
           location: decl.location,
@@ -562,8 +594,8 @@ module RBS
       when AST::Declarations::TypeAlias
         AST::Declarations::TypeAlias.new(
           name: decl.name.with_prefix(prefix),
-          type_params: resolve_type_params(resolver, decl.type_params, context: context),
-          type: absolute_type(resolver, decl.type, context: context),
+          type_params: resolve_type_params(resolver, map, decl.type_params, context: context),
+          type: absolute_type(resolver, map, decl.type, context: context),
           location: decl.location,
           annotations: decl.annotations,
           comment: decl.comment
@@ -572,7 +604,7 @@ module RBS
       when AST::Declarations::Constant
         AST::Declarations::Constant.new(
           name: decl.name.with_prefix(prefix),
-          type: absolute_type(resolver, decl.type, context: context),
+          type: absolute_type(resolver, map, decl.type, context: context),
           location: decl.location,
           comment: decl.comment
         )
@@ -580,7 +612,7 @@ module RBS
       when AST::Declarations::ClassAlias
         AST::Declarations::ClassAlias.new(
           new_name: decl.new_name.with_prefix(prefix),
-          old_name: absolute_type_name(resolver, decl.old_name, context: context),
+          old_name: absolute_type_name(resolver, map, decl.old_name, context: context),
           location: decl.location,
           comment: decl.comment
         )
@@ -588,14 +620,14 @@ module RBS
       when AST::Declarations::ModuleAlias
         AST::Declarations::ModuleAlias.new(
           new_name: decl.new_name.with_prefix(prefix),
-          old_name: absolute_type_name(resolver, decl.old_name, context: context),
+          old_name: absolute_type_name(resolver, map, decl.old_name, context: context),
           location: decl.location,
           comment: decl.comment
         )
       end
     end
 
-    def resolve_member(resolver, member, context:)
+    def resolve_member(resolver, map, member, context:)
       case member
       when AST::Members::MethodDefinition
         AST::Members::MethodDefinition.new(
@@ -603,7 +635,7 @@ module RBS
           kind: member.kind,
           overloads: member.overloads.map do |overload|
             overload.update(
-              method_type: resolve_method_type(resolver, overload.method_type, context: context)
+              method_type: resolve_method_type(resolver, map, overload.method_type, context: context)
             )
           end,
           comment: member.comment,
@@ -615,7 +647,7 @@ module RBS
       when AST::Members::AttrAccessor
         AST::Members::AttrAccessor.new(
           name: member.name,
-          type: absolute_type(resolver, member.type, context: context),
+          type: absolute_type(resolver, map, member.type, context: context),
           kind: member.kind,
           annotations: member.annotations,
           comment: member.comment,
@@ -626,7 +658,7 @@ module RBS
       when AST::Members::AttrReader
         AST::Members::AttrReader.new(
           name: member.name,
-          type: absolute_type(resolver, member.type, context: context),
+          type: absolute_type(resolver, map, member.type, context: context),
           kind: member.kind,
           annotations: member.annotations,
           comment: member.comment,
@@ -637,7 +669,7 @@ module RBS
       when AST::Members::AttrWriter
         AST::Members::AttrWriter.new(
           name: member.name,
-          type: absolute_type(resolver, member.type, context: context),
+          type: absolute_type(resolver, map, member.type, context: context),
           kind: member.kind,
           annotations: member.annotations,
           comment: member.comment,
@@ -648,44 +680,44 @@ module RBS
       when AST::Members::InstanceVariable
         AST::Members::InstanceVariable.new(
           name: member.name,
-          type: absolute_type(resolver, member.type, context: context),
+          type: absolute_type(resolver, map, member.type, context: context),
           comment: member.comment,
           location: member.location
         )
       when AST::Members::ClassInstanceVariable
         AST::Members::ClassInstanceVariable.new(
           name: member.name,
-          type: absolute_type(resolver, member.type, context: context),
+          type: absolute_type(resolver, map, member.type, context: context),
           comment: member.comment,
           location: member.location
         )
       when AST::Members::ClassVariable
         AST::Members::ClassVariable.new(
           name: member.name,
-          type: absolute_type(resolver, member.type, context: context),
+          type: absolute_type(resolver, map, member.type, context: context),
           comment: member.comment,
           location: member.location
         )
       when AST::Members::Include
         AST::Members::Include.new(
-          name: absolute_type_name(resolver, member.name, context: context),
-          args: member.args.map {|type| absolute_type(resolver, type, context: context) },
+          name: absolute_type_name(resolver, map, member.name, context: context),
+          args: member.args.map {|type| absolute_type(resolver, map, type, context: context) },
           comment: member.comment,
           location: member.location,
           annotations: member.annotations
         )
       when AST::Members::Extend
         AST::Members::Extend.new(
-          name: absolute_type_name(resolver, member.name, context: context),
-          args: member.args.map {|type| absolute_type(resolver, type, context: context) },
+          name: absolute_type_name(resolver, map, member.name, context: context),
+          args: member.args.map {|type| absolute_type(resolver, map, type, context: context) },
           comment: member.comment,
           location: member.location,
           annotations: member.annotations
         )
       when AST::Members::Prepend
         AST::Members::Prepend.new(
-          name: absolute_type_name(resolver, member.name, context: context),
-          args: member.args.map {|type| absolute_type(resolver, type, context: context) },
+          name: absolute_type_name(resolver, map, member.name, context: context),
+          args: member.args.map {|type| absolute_type(resolver, map, type, context: context) },
           comment: member.comment,
           location: member.location,
           annotations: member.annotations
@@ -695,27 +727,28 @@ module RBS
       end
     end
 
-    def resolve_method_type(resolver, type, context:)
+    def resolve_method_type(resolver, map, type, context:)
       type.map_type do |ty|
-        absolute_type(resolver, ty, context: context)
+        absolute_type(resolver, map, ty, context: context)
       end.map_type_bound do |bound|
-        _ = absolute_type(resolver, bound, context: context)
+        _ = absolute_type(resolver, map, bound, context: context)
       end
     end
 
-    def resolve_type_params(resolver, params, context:)
+    def resolve_type_params(resolver, map, params, context:)
       params.map do |param|
-        param.map_type {|type| _ = absolute_type(resolver, type, context: context) }
+        param.map_type {|type| _ = absolute_type(resolver, map, type, context: context) }
       end
     end
 
-    def absolute_type_name(resolver, type_name, context:)
+    def absolute_type_name(resolver, map, type_name, context:)
+      type_name = map.resolve(type_name)
       resolver.resolve(type_name, context: context) || type_name
     end
 
-    def absolute_type(resolver, type, context:)
+    def absolute_type(resolver, map, type, context:)
       type.map_type_name do |name, _, _|
-        absolute_type_name(resolver, name, context: context)
+        absolute_type_name(resolver, map, name, context: context)
       end
     end
 

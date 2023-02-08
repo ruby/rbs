@@ -111,6 +111,8 @@ module RBS
     # Global declarations
     attr_reader global_decls: Hash[Symbol, GlobalEntry]
 
+    attr_reader buffer_directives: Hash[Buffer, Array[AST::Directives::t]]
+
     def initialize: () -> void
 
     def initialize_copy: (Environment) -> void
@@ -119,13 +121,15 @@ module RBS
     #
     def self.from_loader: (EnvironmentLoader) -> Environment
 
+    def add_signature: (buffer: Buffer, directives: Array[AST::Directives::t], decls: Array[AST::Declarations::t]) -> void
+
     # Insert a toplevel declaration into the environment
     #
     def <<: (AST::Declarations::t decl) -> self
 
     # Insert a declaration into the environment
     #
-    def insert_decl: (AST::Declarations::t, outer: Array[module_decl], namespace: Namespace) -> void
+    private def insert_decl: (AST::Declarations::t, outer: Array[module_decl], namespace: Namespace) -> void
 
     # Resolve all type names in the environment to absolute type names.
     # Relative type name will be left if absolute type name cannot be found.
@@ -234,16 +238,16 @@ module RBS
 
     def append_context: (Resolver::context, module_decl) -> Resolver::context
 
-    def resolve_declaration: (Resolver::TypeNameResolver resolver, AST::Declarations::t decl, outer: Array[module_decl], prefix: Namespace) -> AST::Declarations::t
+    def resolve_declaration: (Resolver::TypeNameResolver resolver, UseMap map, AST::Declarations::t decl, outer: Array[module_decl], prefix: Namespace) -> AST::Declarations::t
 
-    def resolve_member: (Resolver::TypeNameResolver, AST::Members::t, context: Resolver::context) -> AST::Members::t
+    def resolve_member: (Resolver::TypeNameResolver, UseMap map, AST::Members::t, context: Resolver::context) -> AST::Members::t
 
-    def resolve_method_type: (Resolver::TypeNameResolver, RBS::MethodType, context: Resolver::context) -> RBS::MethodType
+    def resolve_method_type: (Resolver::TypeNameResolver, UseMap map, RBS::MethodType, context: Resolver::context) -> RBS::MethodType
 
-    def resolve_type_params: (Resolver::TypeNameResolver resolver, Array[AST::TypeParam], context: Resolver::context) ->  Array[AST::TypeParam]
+    def resolve_type_params: (Resolver::TypeNameResolver resolver, UseMap map, Array[AST::TypeParam], context: Resolver::context) ->  Array[AST::TypeParam]
 
-    def absolute_type: (Resolver::TypeNameResolver, Types::t, context: Resolver::context) -> Types::t
+    def absolute_type: (Resolver::TypeNameResolver, UseMap map, Types::t, context: Resolver::context) -> Types::t
 
-    def absolute_type_name: (Resolver::TypeNameResolver, TypeName, context: Resolver::context) -> TypeName
+    def absolute_type_name: (Resolver::TypeNameResolver, UseMap map, TypeName, context: Resolver::context) -> TypeName
   end
 end

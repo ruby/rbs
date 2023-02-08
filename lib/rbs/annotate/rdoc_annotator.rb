@@ -16,7 +16,7 @@ module RBS
       def annotate_file(path, preserve:)
         content = path.read()
 
-        decls = Parser.parse_signature(content)
+        _, _, decls = Parser.parse_signature(content)
 
         annotate_decls(decls)
 

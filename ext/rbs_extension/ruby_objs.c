@@ -563,3 +563,29 @@ VALUE rbs_ast_decl_class(VALUE name, VALUE type_params, VALUE super_class, VALUE
     &kwargs
   );
 }
+
+VALUE rbs_ast_directives_use(VALUE clauses, VALUE location) {
+  VALUE kwargs = rb_hash_new();
+  rb_hash_aset(kwargs, ID2SYM(rb_intern("clauses")), clauses);
+  rb_hash_aset(kwargs, ID2SYM(rb_intern("location")), location);
+
+  return CLASS_NEW_INSTANCE(RBS_AST_Directives_Use, 1, &kwargs);
+}
+
+VALUE rbs_ast_directives_use_single_clause(VALUE type_name, VALUE new_name, VALUE location) {
+  VALUE kwargs = rb_hash_new();
+  rb_hash_aset(kwargs, ID2SYM(rb_intern("type_name")), type_name);
+  rb_hash_aset(kwargs, ID2SYM(rb_intern("new_name")), new_name);
+  rb_hash_aset(kwargs, ID2SYM(rb_intern("location")), location);
+
+  return CLASS_NEW_INSTANCE(RBS_AST_Directives_Use_SingleClause, 1, &kwargs);
+}
+
+VALUE rbs_ast_directives_use_wildcard_clause(VALUE namespace, VALUE location) {
+  VALUE kwargs = rb_hash_new();
+  rb_hash_aset(kwargs, ID2SYM(rb_intern("namespace")), namespace);
+  rb_hash_aset(kwargs, ID2SYM(rb_intern("location")), location);
+
+  return CLASS_NEW_INSTANCE(RBS_AST_Directives_Use_WildcardClause, 1, &kwargs);
+}
+

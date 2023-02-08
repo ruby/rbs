@@ -2228,8 +2228,8 @@ class Foo
   include Mod
 end
       DEF
-      RBS::Parser.parse_signature(rbs).each do |decl|
-        env << decl
+      RBS::Parser.parse_signature(rbs).tap do |buf, dirs, decls|
+        env.add_signature(buffer: buf, directives: dirs, decls: decls)
       end
       definition_builder = RBS::DefinitionBuilder.new(env: env.resolve_type_names)
       definition_builder.build_instance(TypeName("::Foo")).tap do |defn|

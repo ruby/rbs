@@ -76,13 +76,39 @@ module RBS
       end
     end
 
-    def write(decls)
+    def write(contents)
+      dirs = contents.select {|c| c.is_a?(AST::Directives::Base) } #: Array[AST::Directives::t]
+      decls = contents.select {|c| c.is_a?(AST::Declarations::Base) } #: Array[AST::Declarations::t]
+
+      dirs.each do |dir|
+        write_directive(dir)
+      end
+
+      puts unless dirs.empty?
+
       [nil, *decls].each_cons(2) do |prev, decl|
         raise unless decl
 
         preserve_empty_line(prev, decl)
         write_decl decl
       end
+    end
+
+    def write_directive(dir)
+      clauses = dir.clauses.map do |clause|
+        case clause
+        when AST::Directives::Use::SingleClause
+          if clause.new_name
+            "#{clause.type_name} as #{clause.new_name}"
+          else
+            "#{clause.type_name}"
+          end
+        when AST::Directives::Use::WildcardClause
+          "#{clause.namespace}*"
+        end
+      end
+      
+      puts "use #{clauses.join(", ")}"
     end
 
     def write_decl(decl)

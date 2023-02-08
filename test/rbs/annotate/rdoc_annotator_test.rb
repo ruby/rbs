@@ -28,7 +28,8 @@ class RBS::Annotate::RDocAnnotatorTest < Test::Unit::TestCase
   end
 
   def parse_rbs(src)
-    RBS::Parser.parse_signature(src)
+    _, _, decls = RBS::Parser.parse_signature(src)
+    decls
   end
 
   def tester(*false_paths)
