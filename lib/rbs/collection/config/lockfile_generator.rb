@@ -20,15 +20,15 @@ module RBS
           end
         end
 
-        attr_reader :config, :lockfile, :gemfile_lock, :existing_lockfile
+        attr_reader :config, :lockfile, :definition, :existing_lockfile, :gem_hash
 
-        def self.generate(config:, gemfile_lock_path:, with_lockfile: true)
-          generator = new(config: config, gemfile_lock_path: gemfile_lock_path, with_lockfile: with_lockfile)
+        def self.generate(config:, definition:, with_lockfile: true)
+          generator = new(config: config, definition: definition, with_lockfile: with_lockfile)
           generator.generate
           generator.lockfile
         end
 
-        def initialize(config:, gemfile_lock_path:, with_lockfile:)
+        def initialize(config:, definition:, with_lockfile:)
           @config = config
 
           lockfile_path = Config.to_lockfile_path(config.config_path)
@@ -37,7 +37,7 @@ module RBS
           @lockfile = Lockfile.new(
             lockfile_path: lockfile_path,
             path: config.repo_path_data,
-            gemfile_lock_path: gemfile_lock_path.relative_path_from(lockfile_dir)
+            gemfile_lock_path: definition.lockfile.relative_path_from(lockfile_dir)
           )
           config.sources.each do |source|
             case source
@@ -48,10 +48,13 @@ module RBS
 
           if with_lockfile && lockfile_path.file?
             @existing_lockfile = Lockfile.from_lockfile(lockfile_path: lockfile_path, data: YAML.load_file(lockfile_path.to_s))
-            validate_gemfile_lock_path!(lock: @existing_lockfile, gemfile_lock_path: gemfile_lock_path)
+            validate_gemfile_lock_path!(lock: @existing_lockfile, gemfile_lock_path: definition.lockfile)
           end
 
-          @gemfile_lock = Bundler::LockfileParser.new(gemfile_lock_path.read)
+          @definition = definition
+          @gem_hash = definition.locked_gems.specs.each.with_object({}) do |spec, hash|  #$ Hash[String, Bundler::LazySpecification]
+            hash[spec.name] = spec
+          end
         end
 
         def generate
@@ -67,8 +70,13 @@ module RBS
             end
           end
 
-          gemfile_lock_gems do |spec|
-            assign_gem(name: spec.name, version: spec.version, ignored_gems: ignored_gems, src_data: nil)
+          definition.dependencies.each do |dep|
+            if dep.autorequire && dep.autorequire.empty?
+              next
+            end
+
+            spec = gem_hash[dep.name] or raise "Cannot find `#{dep.name}` in bundler context"
+            assign_gem(name: dep.name, version: spec.version, ignored_gems: ignored_gems, src_data: nil)
           end
 
           lockfile.lockfile_path.write(YAML.dump(lockfile.to_lockfile))
@@ -82,7 +90,7 @@ module RBS
           end
         end
 
-        private def assign_gem(name:, version:, ignored_gems:, src_data:)
+        private def assign_gem(name:, version:, src_data:, ignored_gems:)
           return if ignored_gems.include?(name)
           return if lockfile.gems.key?(name)
 
@@ -99,9 +107,8 @@ module RBS
               if src_data
                 Sources.from_config_entry(src_data)
               else
-                find_source(name: name)
+                find_source(name: name) or return
               end
-            return unless source
 
             installed_version = version
             best_version = find_best_version(version: installed_version, versions: source.versions(name))
@@ -116,10 +123,14 @@ module RBS
           locked or raise
 
           lockfile.gems[name] = locked
-          source = locked[:source]
 
-          source.dependencies_of(locked[:name], locked[:version])&.each do |dep|
+          locked[:source].dependencies_of(locked[:name], locked[:version])&.each do |dep|
             assign_stdlib(name: dep["name"], from_gem: name)
+          end
+
+          gem_hash[name].dependencies.each do |dep|
+            spec = gem_hash[dep.name]
+            assign_gem(name: dep.name, version: spec.version, src_data: nil, ignored_gems: ignored_gems)
           end
         end
 
@@ -147,12 +158,6 @@ module RBS
             deps.each do |dep|
               assign_stdlib(name: dep["name"], from_gem: name)
             end
-          end
-        end
-
-        private def gemfile_lock_gems(&block)
-          gemfile_lock.specs.each do |spec|
-            yield spec
           end
         end
 

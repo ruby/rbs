@@ -31,9 +31,9 @@ module RBS
 
       # Generate a rbs lockfile from Gemfile.lock to `config_path`.
       # If `with_lockfile` is true, it respects existing rbs lockfile.
-      def self.generate_lockfile(config_path:, gemfile_lock_path:, with_lockfile: true)
+      def self.generate_lockfile(config_path:, definition:, with_lockfile: true)
         config = from_path(config_path)
-        lockfile = LockfileGenerator.generate(config: config, gemfile_lock_path: gemfile_lock_path, with_lockfile: with_lockfile)
+        lockfile = LockfileGenerator.generate(config: config, definition: definition, with_lockfile: with_lockfile)
 
         [config, lockfile]
       end
