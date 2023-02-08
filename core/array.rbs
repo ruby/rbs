@@ -850,7 +850,7 @@ class Array[unchecked out Elem] < Object
   #
   # Array#slice is an alias for Array#[].
   #
-  def []: (int index) -> Elem
+  def []: %a{implicitly-returns-nil} (int index) -> Elem
         | (int start, int length) -> ::Array[Elem]?
         | (::Range[::Integer?] range) -> ::Array[Elem]?
 
