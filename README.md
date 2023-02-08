@@ -131,6 +131,7 @@ puts singleton.methods[:gsub]
 - [Writing signatures guide](docs/sigs.md)
 - [Stdlib signatures guide](docs/stdlib.md)
 - [Syntax](docs/syntax.md)
+- [RBS by Example](docs/rbs_by_example.md)
 
 ## Development
 
