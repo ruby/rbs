@@ -6,30 +6,31 @@ module RBS
       class Local
         include Base
 
-        attr_reader :path
+        attr_reader :path, :full_path
   
         def initialize(path:, base_directory:)
           # TODO: resolve relative path from dir of rbs_collection.yaml
-          @path = base_directory / path
+          @path = Pathname(path)
+          @full_path = base_directory / path
         end
 
         def has?(name, version)
           if version
-            @path.join(name, version).directory?
+            @full_path.join(name, version).directory?
           else
             not versions(name).empty?
           end
         end
 
         def versions(name)
-          @path.join(name).glob('*/').map { |path| path.basename.to_s }
+          @full_path.join(name).glob('*/').map { |path| path.basename.to_s }
         end
 
         # Create a symlink instead of copying file to refer files in @path.
         # By avoiding copying RBS files, the users do not need re-run `rbs collection install`
         # when the RBS files are updated.
         def install(dest:, name:, version:, stdout:)
-          from = @path.join(name, version)
+          from = @full_path.join(name, version)
           gem_dir = dest.join(name, version)
 
           case
@@ -59,7 +60,7 @@ module RBS
         end
 
         def manifest_of(name, version)
-          gem_dir = @path.join(name, version)
+          gem_dir = @full_path.join(name, version)
           raise unless gem_dir.exist?
 
           manifest_path = gem_dir.join('manifest.yaml')

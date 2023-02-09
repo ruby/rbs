@@ -136,6 +136,7 @@ module RBS
         }
 
         attr_reader path: Pathname
+        attr_reader full_path: Pathname
 
         def initialize: (path: String, base_directory: Pathname) -> void
 
