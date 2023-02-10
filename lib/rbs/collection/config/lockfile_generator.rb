@@ -107,25 +107,27 @@ module RBS
               if src_data
                 Sources.from_config_entry(src_data)
               else
-                find_source(name: name) or return
+                find_source(name: name)
               end
 
-            installed_version = version
-            best_version = find_best_version(version: installed_version, versions: source.versions(name))
+            if source
+              installed_version = version
+              best_version = find_best_version(version: installed_version, versions: source.versions(name))
 
-            locked = {
-              name: name,
-              version: best_version.to_s,
-              source: source,
-            }
+              locked = {
+                name: name,
+                version: best_version.to_s,
+                source: source,
+              }
+            end
           end
 
-          locked or raise
+          if locked
+            lockfile.gems[name] = locked
 
-          lockfile.gems[name] = locked
-
-          locked[:source].dependencies_of(locked[:name], locked[:version])&.each do |dep|
-            assign_stdlib(name: dep["name"], from_gem: name)
+            locked[:source].dependencies_of(locked[:name], locked[:version])&.each do |dep|
+              assign_stdlib(name: dep["name"], from_gem: name)
+            end
           end
 
           gem_hash[name].dependencies.each do |dep|
