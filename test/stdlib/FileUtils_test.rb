@@ -19,18 +19,24 @@ class FileUtilsSingletonTest < Test::Unit::TestCase
   testing "singleton(::FileUtils)"
 
   def test_cd
-    assert_send_type  "(String) -> void",
-                      FileUtils, :cd, __dir__
-    assert_send_type  "(ToStr) -> void",
-                      FileUtils, :cd, ToStr.new(__dir__)
-    assert_send_type  "(ToPath, verbose: bool) -> void",
-                      FileUtils, :cd, ToPath.new(__dir__), verbose: false
-    assert_send_type  "(String) { (String) -> Integer } -> Integer",
-                      FileUtils, :cd, __dir__ do |dir| 1 end
-    assert_send_type  "(ToStr) { (String) -> Integer } -> Integer",
-                      FileUtils, :cd, ToStr.new(__dir__) do |dir| 1 end
-    assert_send_type  "(ToPath, verbose: nil) { (String) -> Integer } -> Integer",
-                      FileUtils, :cd, ToPath.new(__dir__), verbose: nil do |dir| 1 end
+    dir = Dir.pwd
+
+    begin
+      assert_send_type  "(String) -> void",
+                        FileUtils, :cd, __dir__
+      assert_send_type  "(ToStr) -> void",
+                        FileUtils, :cd, ToStr.new(__dir__)
+      assert_send_type  "(ToPath, verbose: bool) -> void",
+                        FileUtils, :cd, ToPath.new(__dir__), verbose: false
+      assert_send_type  "(String) { (String) -> Integer } -> Integer",
+                        FileUtils, :cd, __dir__ do |dir| 1 end
+      assert_send_type  "(ToStr) { (String) -> Integer } -> Integer",
+                        FileUtils, :cd, ToStr.new(__dir__) do |dir| 1 end
+      assert_send_type  "(ToPath, verbose: nil) { (String) -> Integer } -> Integer",
+                        FileUtils, :cd, ToPath.new(__dir__), verbose: nil do |dir| 1 end
+    ensure
+      Dir.chdir dir
+    end
   end
 
   def test_chdir
@@ -607,8 +613,14 @@ class FileUtilsInstanceTest < Test::Unit::TestCase
   end
 
   def test_cd
-    assert_send_type  "(String) -> void",
-                      Foo.new, :cd, __dir__
+    dir = Dir.pwd
+
+    begin
+      assert_send_type  "(String) -> void",
+                        Foo.new, :cd, __dir__
+    ensure
+      Dir.chdir(dir)
+    end
   end
 
   def test_chdir
