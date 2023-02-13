@@ -34,10 +34,16 @@ class FileUtilsSingletonTest < Test::Unit::TestCase
   end
 
   def test_chdir
-    assert_send_type  "(String) -> void",
-                      FileUtils, :chdir, __dir__
-    assert_send_type  "(String) { (String) -> Integer } -> Integer",
-                      FileUtils, :chdir, __dir__ do |dir| 1 end
+    dir = Dir.pwd
+
+    begin
+      assert_send_type  "(String) -> void",
+                        FileUtils, :chdir, __dir__
+      assert_send_type  "(String) { (String) -> Integer } -> Integer",
+                        FileUtils, :chdir, __dir__ do |dir| 1 end
+    ensure
+      Dir.chdir(dir)
+    end
   end
 
   def test_chmod
@@ -606,8 +612,14 @@ class FileUtilsInstanceTest < Test::Unit::TestCase
   end
 
   def test_chdir
-    assert_send_type  "(String) -> void",
-                      Foo.new, :chdir, __dir__
+    dir = Dir.pwd
+
+    begin
+      assert_send_type  "(String) -> void",
+                        Foo.new, :chdir, __dir__
+    ensure
+      Dir.chdir(dir)
+    end
   end
 
   def test_chmod

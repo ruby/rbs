@@ -31,14 +31,20 @@ class DirSingletonTest < Test::Unit::TestCase
   end
 
   def test_chdir
-    assert_send_type "() -> Integer",
-                     Dir, :chdir
-    assert_send_type "(::String) -> Integer",
-                     Dir, :chdir, __dir__
-    assert_send_type "(::ToStr) -> Integer",
-                     Dir, :chdir, ToStr.new(__dir__)
-    assert_send_type "(::ToStr) { (::String) -> 30 } -> 30",
-                     Dir, :chdir, ToStr.new(__dir__) do 30 end
+    dir = Dir.pwd
+
+    begin
+      assert_send_type "() -> Integer",
+                      Dir, :chdir
+      assert_send_type "(::String) -> Integer",
+                      Dir, :chdir, __dir__
+      assert_send_type "(::ToStr) -> Integer",
+                      Dir, :chdir, ToStr.new(__dir__)
+      assert_send_type "(::ToStr) { (::String) -> 30 } -> 30",
+                      Dir, :chdir, ToStr.new(__dir__) do 30 end
+    ensure
+      Dir.chdir(dir)
+    end
   end
 
   def test_children
