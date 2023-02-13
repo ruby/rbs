@@ -87,6 +87,7 @@ class RegexpTest < StdlibTest
   def test_equal_tilde
     /at/ =~ "input data" #=> 7
     /ax/ =~ "input data" #=> nil
+    /a/ =~ :a            #=> 0
   end
 
   def test_casefold?
