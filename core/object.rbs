@@ -1202,4 +1202,4 @@ interface _Writeable
   def write: (untyped) -> void
 end
 
-type Object::name = Symbol | String
+type Object::name = Symbol | string
