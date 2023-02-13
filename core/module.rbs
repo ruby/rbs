@@ -255,7 +255,7 @@ class Module < Object
   #     end
   #     Mod.instance_methods.sort   #=> [:one, :one=, :two, :two=]
   #
-  def attr_accessor: (*Symbol | String arg0) -> NilClass
+  def attr_accessor: (*Symbol | String arg0) -> Array[Symbol]
 
   # <!--
   #   rdoc-file=object.c
@@ -269,7 +269,7 @@ class Module < Object
   # in turn. String arguments are converted to symbols. Returns an array of
   # defined method names as symbols.
   #
-  def attr_reader: (*Symbol | String arg0) -> NilClass
+  def attr_reader: (*Symbol | String arg0) -> Array[Symbol]
 
   # <!--
   #   rdoc-file=object.c
@@ -280,7 +280,7 @@ class Module < Object
   # *symbol*`.id2name`. String arguments are converted to symbols. Returns an
   # array of defined method names as symbols.
   #
-  def attr_writer: (*Symbol | String arg0) -> NilClass
+  def attr_writer: (*Symbol | String arg0) -> Array[Symbol]
 
   # <!--
   #   rdoc-file=load.c

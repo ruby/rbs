@@ -154,4 +154,97 @@ class ModuleInstanceTest < Test::Unit::TestCase
       )
     end
   end
+
+  def test_attr_reader
+    if RUBY_VERSION >= '3.0'
+      mod = Module.new
+
+      assert_send_type(
+        "(Symbol) -> Array[Symbol]",
+        mod, :attr_reader, :foo
+      )
+
+      assert_send_type(
+        "(Symbol, Symbol) -> Array[Symbol]",
+        mod, :attr_reader, :foo, :bar
+      )
+
+      assert_send_type(
+        "(String) -> Array[Symbol]",
+        mod, :attr_reader, "foo"
+      )
+
+      assert_send_type(
+        "(String, String) -> Array[Symbol]",
+        mod, :attr_reader, "foo", "bar"
+      )
+
+      assert_send_type(
+        "(Symbol, String) -> Array[Symbol]",
+        mod, :attr_reader, :foo, "bar"
+      )
+    end
+  end
+
+  def test_attr_writer
+    if RUBY_VERSION >= '3.0'
+      mod = Module.new
+
+      assert_send_type(
+        "(Symbol) -> Array[Symbol]",
+        mod, :attr_writer, :foo
+      )
+
+      assert_send_type(
+        "(Symbol, Symbol) -> Array[Symbol]",
+        mod, :attr_writer, :foo, :bar
+      )
+
+      assert_send_type(
+        "(String) -> Array[Symbol]",
+        mod, :attr_writer, "foo"
+      )
+
+      assert_send_type(
+        "(String, String) -> Array[Symbol]",
+        mod, :attr_writer, "foo", "bar"
+      )
+
+      assert_send_type(
+        "(Symbol, String) -> Array[Symbol]",
+        mod, :attr_writer, :foo, "bar"
+      )
+    end
+  end
+
+  def test_attr_accessor
+    if RUBY_VERSION >= '3.0'
+      mod = Module.new
+
+      assert_send_type(
+        "(Symbol) -> Array[Symbol]",
+        mod, :attr_accessor, :foo
+      )
+
+      assert_send_type(
+        "(Symbol, Symbol) -> Array[Symbol]",
+        mod, :attr_accessor, :foo, :bar
+      )
+
+      assert_send_type(
+        "(String) -> Array[Symbol]",
+        mod, :attr_accessor, "foo"
+      )
+
+      assert_send_type(
+        "(String, String) -> Array[Symbol]",
+        mod, :attr_accessor, "foo", "bar"
+      )
+
+      assert_send_type(
+        "(Symbol, String) -> Array[Symbol]",
+        mod, :attr_accessor, :foo, "bar"
+      )
+    end
+  end
 end
