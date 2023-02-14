@@ -2093,11 +2093,10 @@ end
   def test_use_directive
     Parser.parse_signature(<<~RBS).tap do |_, dirs, _|
       use RBS::Namespace as NS
+      use RBS::TypeName, RBS::AST::Declarations::*
 
       module Baz
       end
-
-      use RBS::TypeName, RBS::AST::Declarations::*
 
       class Foo
       end
@@ -2119,6 +2118,17 @@ end
 
         assert_equal Namespace("RBS::AST::Declarations::"), use.clauses[1].namespace
       end
+    end
+  end
+
+  def test_use_directive_error
+    assert_raises do
+      Parser.parse_signature(<<~RBS)
+        module Baz
+        end
+
+        use RBS::Namespace as NS
+      RBS
     end
   end
 end
