@@ -961,6 +961,11 @@ class ArrayInstanceTest < Test::Unit::TestCase
 
     assert_send_type "(Array[String]) { ([Integer, String?]) -> true } -> nil",
                      [1,2,3], :zip, ["a", "b"] do true end
+
+    assert_send_type(
+      "(::_Each[String]) -> Array[[Integer, String?]]",
+      [1,2,3], :zip, Each.new("a", "b")
+    )
   end
 
   def test_vbar

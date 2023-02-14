@@ -1998,8 +1998,10 @@ module Enumerable[unchecked out Elem] : _Each[Elem]
   #     [:a2, :b2, :c2]
   #     [:a3, :b3, :c3]
   #
-  def zip: [Elem2] (::Enumerable[Elem2] enum) -> ::Array[[ Elem, Elem2 | nil ]]
-         | [U, Elem2] (::Enumerable[Elem2]) { ([ Elem, Elem2 | nil ]) -> U } -> nil
+  def zip: [Elem2] (_Each[Elem2] enum) -> Array[[ Elem, Elem2? ]]
+         | (_Each[untyped], *_Each[untyped]) -> Array[Array[untyped]]
+         | [Elem2] (_Each[Elem2]) { ([ Elem, Elem2? ]) -> void } -> nil
+         | (_Each[untyped], *_Each[untyped]) { (Array[untyped]) -> void } -> nil
 
   # <!--
   #   rdoc-file=enum.c

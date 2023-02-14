@@ -3737,10 +3737,10 @@ class Array[unchecked out Elem] < Object
   #     [:a2, :b2, :c2]
   #     [:a3, :b3, :c3]
   #
-  def zip: [U] (::Array[U] arg) -> ::Array[[ Elem, U? ]]
-         | (::Array[untyped] arg, *::Array[untyped] args) -> ::Array[::Array[untyped]]
-         | [U] (::Array[U] arg) { ([ Elem, U? ]) -> void } -> void
-         | (::Array[untyped] arg, *::Array[untyped] args) { (::Array[untyped]) -> void } -> void
+  def zip: [U] (_Each[U] arg) -> Array[[ Elem, U? ]]
+         | (_Each[untyped] arg, *_Each[untyped] args) -> Array[Array[untyped]]
+         | [U] (_Each[U] arg) { ([ Elem, U? ]) -> void } -> nil
+         | (_Each[untyped] arg, *_Each[untyped] args) { (Array[untyped]) -> void } -> nil
 
   # <!--
   #   rdoc-file=array.c
