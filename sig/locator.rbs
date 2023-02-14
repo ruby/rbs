@@ -10,14 +10,22 @@ module RBS
                    | AST::TypeParam
                    | AST::Declarations::Class::Super
                    | AST::Declarations::Module::Self
+                   | AST::Directives::t
+                   | AST::Directives::Use::clause
+
+    # The buffer the location points to
+    #
+    attr_reader buffer: Buffer
 
     # Array of _top-level_ declarations.
     #
     attr_reader decls: Array[AST::Declarations::t]
 
-    def initialize: (decls: Array[AST::Declarations::t]) -> void
+    # Array of directives.
+    #
+    attr_reader dirs: Array[AST::Directives::t]
 
-    def buffer: () -> Buffer
+    def initialize: (buffer: Buffer, decls: Array[AST::Declarations::t], dirs: Array[AST::Directives::t]) -> void
 
     # Returns list of components.
     # Inner component comes first.
@@ -28,6 +36,10 @@ module RBS
     # It ensures the array starts with a AST/type component.
     #
     def find2: (line: Integer, column: Integer) -> [Symbol?, Array[component]]?
+
+    private
+
+    def find_in_directive: (Integer pos, AST::Directives::t, Array[component]) -> bool
 
     def find_in_decl: (Integer pos, decl: AST::Declarations::t, array: Array[component]) -> bool
 
