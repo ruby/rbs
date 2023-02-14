@@ -147,10 +147,9 @@ module RBS
 
     def buffers_decls: () -> Hash[Buffer, Array[AST::Declarations::t]]
 
-    # Construct new environment without declarations tested `true` by block.
-    # Construction of new environment is done with `<<` so that nested declarations will work well.
+    # Remove declarations and directives that are loaded from `buffers`
     #
-    def reject: () { (AST::Declarations::t) -> boolish } -> Environment
+    def unload: (Set[Buffer] buffers) -> Environment
 
     # Returns true if an interface with the type name is defined
     #

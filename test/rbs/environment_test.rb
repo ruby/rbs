@@ -437,40 +437,6 @@ end
     end
   end
 
-  def test_reject
-    env = Environment.new
-
-    foo = RBS::Buffer.new(content: <<EOF, name: Pathname("foo.rbs"))
-class Hello < String
-  def hello: (String) -> Integer
-end
-EOF
-
-    RBS::Parser.parse_signature(foo)[2].each do |decl|
-      env << decl
-    end
-
-    bar = RBS::Buffer.new(content: <<EOF, name: Pathname("bar.rbs"))
-class Hello
-  def world: () -> void
-end
-EOF
-
-    RBS::Parser.parse_signature(bar)[2].each do |decl|
-      env << decl
-    end
-
-    assert env.buffers.any? {|buf| buf.name == Pathname("foo.rbs") }
-    assert env.buffers.any? {|buf| buf.name == Pathname("bar.rbs") }
-
-    env_ = env.reject do |decl|
-      decl.location.buffer.name == Pathname("foo.rbs")
-    end
-
-    assert env_.buffers.none? {|buf| buf.name == Pathname("foo.rbs") }
-    assert env_.buffers.any? {|buf| buf.name == Pathname("bar.rbs") }
-  end
-
   def test_absolute_type_generics_upper_bound
     env = Environment.new
 
