@@ -170,15 +170,18 @@ module TypeAssertions
       @target = nil
     end
 
-    def env
-      @env ||= begin
-                 loader = RBS::EnvironmentLoader.new
-                 (@libs || []).each do |lib|
-                   loader.add library: lib
-                 end
+    @@env_cache = {}
 
-                 RBS::Environment.from_loader(loader).resolve_type_names
-               end
+    def env
+      @env = @@env_cache[@libs] ||=
+        begin
+          loader = RBS::EnvironmentLoader.new
+          (@libs || []).each do |lib|
+            loader.add library: lib
+          end
+
+          RBS::Environment.from_loader(loader).resolve_type_names
+        end
     end
 
     def builder
