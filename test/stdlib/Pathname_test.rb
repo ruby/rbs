@@ -111,11 +111,11 @@ class PathnameInstanceTest < Test::Unit::TestCase
 
   def test_binread
     assert_send_type '() -> String',
-                     Pathname(File.expand_path(__FILE__, "../..")), :binread
+                     Pathname(File.expand_path(__FILE__)), :binread
     assert_send_type '(Integer) -> String',
-                     Pathname(File.expand_path(__FILE__, "../..")), :binread, 42
+                     Pathname(File.expand_path(__FILE__)), :binread, 42
     assert_send_type '(Integer, Integer) -> String',
-                     Pathname(File.expand_path(__FILE__, "../..")), :binread, 42, 43
+                     Pathname(File.expand_path(__FILE__)), :binread, 42, 43
   end
 
   def test_binwrite
@@ -241,7 +241,7 @@ class PathnameInstanceTest < Test::Unit::TestCase
   end
 
   def test_each_line
-    path = Pathname(File.expand_path(__FILE__, "../.."))
+    path = Pathname(File.expand_path(__FILE__))
 
     assert_send_type '() { (String) -> untyped } -> nil',
                      path, :each_line do end
@@ -278,14 +278,14 @@ class PathnameInstanceTest < Test::Unit::TestCase
     assert_send_type '() -> bool',
                      Pathname('/usr/bin/env'), :executable?
     assert_send_type '() -> bool',
-                     Pathname(File.expand_path(__FILE__, "../..")), :executable?
+                     Pathname(File.expand_path(__FILE__)), :executable?
   end
 
   def test_executable_real?
     assert_send_type '() -> bool',
                      Pathname('/usr/bin/env'), :executable_real?
     assert_send_type '() -> bool',
-                     Pathname(File.expand_path(__FILE__, "../..")), :executable_real?
+                     Pathname(File.expand_path(__FILE__)), :executable_real?
   end
 
   def test_exist?
@@ -309,7 +309,7 @@ class PathnameInstanceTest < Test::Unit::TestCase
 
   def test_file?
     assert_send_type '() -> bool',
-                     Pathname(File.expand_path(__FILE__, "../..")), :file?
+                     Pathname(File.expand_path(__FILE__)), :file?
     assert_send_type '() -> bool',
                      Pathname('/unknown'), :file?
   end
@@ -346,7 +346,7 @@ class PathnameInstanceTest < Test::Unit::TestCase
 
   def test_ftype
     assert_send_type '() -> String',
-                     Pathname(File.expand_path(__FILE__, "../..")), :ftype
+                     Pathname(File.expand_path(__FILE__)), :ftype
     assert_send_type '() -> String',
                      Pathname(__dir__), :ftype
   end
@@ -364,7 +364,7 @@ class PathnameInstanceTest < Test::Unit::TestCase
 
   def test_grpowned?
     assert_send_type '() -> bool',
-                     Pathname(File.expand_path(__FILE__, "../..")), :grpowned?
+                     Pathname(File.expand_path(__FILE__)), :grpowned?
     assert_send_type '() -> bool',
                      Pathname('/'), :grpowned?
   end
@@ -413,7 +413,7 @@ class PathnameInstanceTest < Test::Unit::TestCase
 
   def test_lstat
     assert_send_type '() -> ::File::Stat',
-                     Pathname(File.expand_path(__FILE__, "../..")), :lstat
+                     Pathname(File.expand_path(__FILE__)), :lstat
   end
 
   def test_make_link
@@ -521,42 +521,42 @@ class PathnameInstanceTest < Test::Unit::TestCase
 
   def test_read
     assert_send_type '() -> String',
-                     Pathname(File.expand_path(__FILE__, "../..")), :read
+                     Pathname(File.expand_path(__FILE__)), :read
     assert_send_type '(Integer) -> String',
-                     Pathname(File.expand_path(__FILE__, "../..")), :read, 42
+                     Pathname(File.expand_path(__FILE__)), :read, 42
     assert_send_type '(Integer, Integer) -> String',
-                     Pathname(File.expand_path(__FILE__, "../..")), :read, 42, 43
+                     Pathname(File.expand_path(__FILE__)), :read, 42, 43
     assert_send_type '(encoding: String) -> String',
-                     Pathname(File.expand_path(__FILE__, "../..")), :read, encoding: 'UTF-8'
+                     Pathname(File.expand_path(__FILE__)), :read, encoding: 'UTF-8'
     assert_send_type '(encoding: ToStr) -> String',
-                     Pathname(File.expand_path(__FILE__, "../..")), :read, encoding: ToStr.new('UTF-8')
+                     Pathname(File.expand_path(__FILE__)), :read, encoding: ToStr.new('UTF-8')
     assert_send_type '(encoding: Encoding) -> String',
-                     Pathname(File.expand_path(__FILE__, "../..")), :read, encoding: Encoding::UTF_8
+                     Pathname(File.expand_path(__FILE__)), :read, encoding: Encoding::UTF_8
   end
 
   def test_readable?
     assert_send_type '() -> bool',
-                     Pathname(File.expand_path(__FILE__, "../..")), :readable?
+                     Pathname(File.expand_path(__FILE__)), :readable?
   end
 
   def test_readable_real?
     assert_send_type '() -> bool',
-                     Pathname(File.expand_path(__FILE__, "../..")), :readable_real?
+                     Pathname(File.expand_path(__FILE__)), :readable_real?
   end
 
   def test_readlines
     assert_send_type '() -> Array[String]',
-                     Pathname(File.expand_path(__FILE__, "../..")), :readlines
+                     Pathname(File.expand_path(__FILE__)), :readlines
     assert_send_type '(String) -> Array[String]',
-                     Pathname(File.expand_path(__FILE__, "../..")), :readlines, 'a'
+                     Pathname(File.expand_path(__FILE__)), :readlines, 'a'
     assert_send_type '(Integer) -> Array[String]',
-                     Pathname(File.expand_path(__FILE__, "../..")), :readlines, 42
+                     Pathname(File.expand_path(__FILE__)), :readlines, 42
     assert_send_type '(String, Integer) -> Array[String]',
-                     Pathname(File.expand_path(__FILE__, "../..")), :readlines, 'a', 42
+                     Pathname(File.expand_path(__FILE__)), :readlines, 'a', 42
     assert_send_type '(String, Integer, chomp: true) -> Array[String]',
-                     Pathname(File.expand_path(__FILE__, "../..")), :readlines, 'a', 42, chomp: true
+                     Pathname(File.expand_path(__FILE__)), :readlines, 'a', 42, chomp: true
     assert_send_type '(String, Integer, binmode: true) -> Array[String]',
-                     Pathname(File.expand_path(__FILE__, "../..")), :readlines, 'a', 42, binmode: true
+                     Pathname(File.expand_path(__FILE__)), :readlines, 'a', 42, binmode: true
   end
 
   def test_readlink
@@ -574,24 +574,24 @@ class PathnameInstanceTest < Test::Unit::TestCase
 
   def test_realdirpath
     assert_send_type '() -> Pathname',
-                     Pathname(File.expand_path(__FILE__, "../..")), :realdirpath
+                     Pathname(File.expand_path(__FILE__)), :realdirpath
     assert_send_type '(String) -> Pathname',
-                     Pathname(File.expand_path(__FILE__, "../..")), :realdirpath, '.'
+                     Pathname(File.expand_path(__FILE__)), :realdirpath, '.'
     assert_send_type '(ToStr) -> Pathname',
-                     Pathname(File.expand_path(__FILE__, "../..")), :realdirpath, ToStr.new('.')
+                     Pathname(File.expand_path(__FILE__)), :realdirpath, ToStr.new('.')
     assert_send_type '(Pathname) -> Pathname',
-                     Pathname(File.expand_path(__FILE__, "../..")), :realdirpath, Pathname.new('.')
+                     Pathname(File.expand_path(__FILE__)), :realdirpath, Pathname.new('.')
   end
 
   def test_realpath
     assert_send_type '() -> Pathname',
-                     Pathname(File.expand_path(__FILE__, "../..")), :realpath
+                     Pathname(File.expand_path(__FILE__)), :realpath
     assert_send_type '(String) -> Pathname',
-                     Pathname(File.expand_path(__FILE__, "../..")), :realpath, '.'
+                     Pathname(File.expand_path(__FILE__)), :realpath, '.'
     assert_send_type '(ToStr) -> Pathname',
-                     Pathname(File.expand_path(__FILE__, "../..")), :realpath, ToStr.new('.')
+                     Pathname(File.expand_path(__FILE__)), :realpath, ToStr.new('.')
     assert_send_type '(Pathname) -> Pathname',
-                     Pathname(File.expand_path(__FILE__, "../..")), :realpath, Pathname.new('.')
+                     Pathname(File.expand_path(__FILE__)), :realpath, Pathname.new('.')
   end
 
   def test_relative?
@@ -665,12 +665,12 @@ class PathnameInstanceTest < Test::Unit::TestCase
 
   def test_size
     assert_send_type '() -> Integer',
-                     Pathname(File.expand_path(__FILE__, "../..")), :size
+                     Pathname(File.expand_path(__FILE__)), :size
   end
 
   def test_size?
     assert_send_type '() -> Integer',
-                     Pathname(File.expand_path(__FILE__, "../..")), :size?
+                     Pathname(File.expand_path(__FILE__)), :size?
 
     assert_send_type '() -> nil',
                      Pathname('/does/not/exist'), :size?
@@ -678,24 +678,24 @@ class PathnameInstanceTest < Test::Unit::TestCase
 
   def test_socket?
     assert_send_type '() -> bool',
-                     Pathname(File.expand_path(__FILE__, "../..")), :socket?
+                     Pathname(File.expand_path(__FILE__)), :socket?
   end
 
   def test_split
     assert_send_type '() -> [Pathname, Pathname]',
-                     Pathname(File.expand_path(__FILE__, "../..")), :split
+                     Pathname(File.expand_path(__FILE__)), :split
     assert_send_type '() -> [Pathname, Pathname]',
                      Pathname('/'), :split
   end
 
   def test_stat
     assert_send_type '() -> File::Stat',
-                     Pathname(File.expand_path(__FILE__, "../..")), :stat
+                     Pathname(File.expand_path(__FILE__)), :stat
   end
 
   def test_sticky?
     assert_send_type '() -> bool',
-                     Pathname(File.expand_path(__FILE__, "../..")), :sticky?
+                     Pathname(File.expand_path(__FILE__)), :sticky?
   end
 
   def test_sub
@@ -718,26 +718,26 @@ class PathnameInstanceTest < Test::Unit::TestCase
 
   def test_symlink?
     assert_send_type '() -> bool',
-                     Pathname(File.expand_path(__FILE__, "../..")), :symlink?
+                     Pathname(File.expand_path(__FILE__)), :symlink?
   end
 
   def test_sysopen
     assert_send_type '() -> Integer',
-                     Pathname(File.expand_path(__FILE__, "../..")), :sysopen
+                     Pathname(File.expand_path(__FILE__)), :sysopen
     assert_send_type '(String) -> Integer',
-                     Pathname(File.expand_path(__FILE__, "../..")), :sysopen, 'r'
+                     Pathname(File.expand_path(__FILE__)), :sysopen, 'r'
     assert_send_type '(String, Integer) -> Integer',
-                     Pathname(File.expand_path(__FILE__, "../..")), :sysopen, 'r', 0644
+                     Pathname(File.expand_path(__FILE__)), :sysopen, 'r', 0644
   end
 
   def test_taint
     assert_send_type '() -> Pathname',
-                     Pathname(File.expand_path(__FILE__, "../..")), :taint
+                     Pathname(File.expand_path(__FILE__)), :taint
   end
 
   def test_to_path
     assert_send_type '() -> String',
-                     Pathname(File.expand_path(__FILE__, "../..")), :to_path
+                     Pathname(File.expand_path(__FILE__)), :to_path
   end
 
   def test_truncate
@@ -760,7 +760,7 @@ class PathnameInstanceTest < Test::Unit::TestCase
 
   def test_untaint
     assert_send_type '() -> Pathname',
-                     Pathname(File.expand_path(__FILE__, "../..")), :untaint
+                     Pathname(File.expand_path(__FILE__)), :untaint
   end
 
   def test_utime
@@ -776,21 +776,21 @@ class PathnameInstanceTest < Test::Unit::TestCase
 
   def test_world_readable?
     assert_send_type '() -> (Integer | nil)',
-                     Pathname(File.expand_path(__FILE__, "../..")), :world_readable?
+                     Pathname(File.expand_path(__FILE__)), :world_readable?
     assert_send_type '() -> (Integer | nil)',
                      Pathname('/'), :world_readable?
   end
 
   def test_world_writable?
     assert_send_type '() -> (Integer | nil)',
-                     Pathname(File.expand_path(__FILE__, "../..")), :world_writable?
+                     Pathname(File.expand_path(__FILE__)), :world_writable?
     assert_send_type '() -> (Integer | nil)',
                      Pathname('/'), :world_writable?
   end
 
   def test_writable?
     assert_send_type '() -> bool',
-                     Pathname(File.expand_path(__FILE__, "../..")), :writable?
+                     Pathname(File.expand_path(__FILE__)), :writable?
     assert_send_type '() -> bool',
                      Pathname('/'), :writable?
   end
@@ -809,6 +809,6 @@ class PathnameInstanceTest < Test::Unit::TestCase
 
   def test_zero?
     assert_send_type '() -> bool',
-                     Pathname(File.expand_path(__FILE__, "../..")), :zero?
+                     Pathname(File.expand_path(__FILE__)), :zero?
   end
 end

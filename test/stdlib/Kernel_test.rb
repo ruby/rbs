@@ -484,9 +484,9 @@ class KernelTest < StdlibTest
   end
 
   def test_open
-    open(File.expand_path(__FILE__, "../..")).close
-    open(File.expand_path(__FILE__, "../.."), 'r').close
-    open(File.expand_path(__FILE__, "../..")) do |f|
+    open(File.expand_path(__FILE__)).close
+    open(File.expand_path(__FILE__), 'r').close
+    open(File.expand_path(__FILE__)) do |f|
       f.read
     end
   end
@@ -575,11 +575,11 @@ class KernelTest < StdlibTest
   end
 
   def test_test
-    test ?r, File.expand_path(__FILE__, "../..")
-    test ?r.ord, File.expand_path(__FILE__, "../..")
-    test ?s, File.expand_path(__FILE__, "../..")
+    test ?r, File.expand_path(__FILE__)
+    test ?r.ord, File.expand_path(__FILE__)
+    test ?s, File.expand_path(__FILE__)
 
-    File.open(File.expand_path(__FILE__, "../..")) do |f|
+    File.open(File.expand_path(__FILE__)) do |f|
       test ?r, f
       test ?=, f, f
     end
