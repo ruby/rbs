@@ -773,13 +773,14 @@ module RBS
       hash
     end
 
-    def reject
+    def unload(buffers)
       env = Environment.new
 
-      declarations.each do |decl|
-        unless yield(decl)
-          env << decl
-        end
+      buffers_decls.each do |buf, decls|
+        next if buffers.include?(buf)
+
+        dirs = buffer_directives.fetch(buf)
+        env.add_signature(buffer: buf, directives: dirs, decls: decls)
       end
 
       env
