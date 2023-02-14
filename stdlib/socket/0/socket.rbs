@@ -1416,7 +1416,7 @@ class Socket < BasicSocket
   #     Socket.new(:UNIX, :STREAM) # UNIX stream socket
   #     Socket.new(:UNIX, :DGRAM)  # UNIX datagram socket
   #
-  def initialize: (Symbol domain, Symbol socktype, ?Integer protocol) -> untyped
+  def initialize: (Symbol | Integer domain, Symbol | Integer socktype, ?Integer protocol) -> untyped
 end
 
 # <!-- rdoc-file=ext/socket/constdefs.c -->
