@@ -442,6 +442,16 @@ class ToPath
   end
 end
 
+class Each
+  def initialize(*args)
+    @args = args
+  end
+
+  def each(&block)
+    @args.each(&block)
+  end
+end
+
 class ToJson
 end
 
