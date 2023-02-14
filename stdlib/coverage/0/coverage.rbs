@@ -3,7 +3,7 @@
 # experimental, so these APIs may be changed in future.
 #
 # Caveat: Currently, only process-global coverage measurement is supported. You
-# cannot measure per-thread covearge.
+# cannot measure per-thread coverage.
 #
 # # Usage
 #
@@ -190,10 +190,10 @@ module Coverage
 
   # <!--
   #   rdoc-file=ext/coverage/coverage.c
-  #   - Coverage.start                                              => nil
-  #   - Coverage.start(:all)                                        => nil
-  #   - Coverage.start(lines: bool, branches: bool, methods: bool)  => nil
-  #   - Coverage.start(oneshot_lines: true)                         => nil
+  #   - Coverage.start                                                          => nil
+  #   - Coverage.start(:all)                                                    => nil
+  #   - Coverage.start(lines: bool, branches: bool, methods: bool, eval: bool)  => nil
+  #   - Coverage.start(oneshot_lines: true)                                     => nil
   # -->
   # Enables the coverage measurement. See the documentation of Coverage class in
   # detail. This is equivalent to Coverage.setup and Coverage.resume.
@@ -207,7 +207,7 @@ module Coverage
   # Start/resume the coverage measurement.
   #
   # Caveat: Currently, only process-global coverage measurement is supported. You
-  # cannot measure per-thread covearge. If your process has multiple thread, using
+  # cannot measure per-thread coverage. If your process has multiple thread, using
   # Coverage.resume/suspend to capture code coverage executed from only a limited
   # code block, may yield misleading results.
   #

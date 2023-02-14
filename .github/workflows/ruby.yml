@@ -13,6 +13,7 @@ jobs:
       matrix:
         container_tag:
           - master-nightly-focal
+          - 3.2-dev-focal
           - 3.1-dev-focal
           - 3.0-dev-focal
           - 2.7-dev-bionic
@@ -31,6 +32,8 @@ jobs:
           - container_tag: 2.7-dev-bionic
             job: stdlib_test
           - container_tag: 3.0-dev-focal
+            job: stdlib_test
+          - container_tag: 3.1-dev-focal
             job: stdlib_test
     container:
       image: rubylang/ruby:${{ matrix.container_tag }}

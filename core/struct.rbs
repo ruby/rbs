@@ -42,89 +42,75 @@
 #
 # First, what's elsewhere. Class Struct:
 #
-# *   Inherits from [class
-#     Object](Object.html#class-Object-label-What-27s+Here).
-# *   Includes [module
-#     Enumerable](Enumerable.html#module-Enumerable-label-What-27s+Here), which
+# *   Inherits from [class Object](rdoc-ref:Object@What-27s+Here).
+# *   Includes [module Enumerable](rdoc-ref:Enumerable@What-27s+Here), which
 #     provides dozens of additional methods.
 #
+#
+# See also Data, which is a somewhat similar, but stricter concept for defining
+# immutable value objects.
 #
 # Here, class Struct provides methods that are useful for:
 #
 # *   [Creating a Struct
-#     Subclass](#class-Struct-label-Methods+for+Creating+a+Struct+Subclass)
-# *   [Querying](#class-Struct-label-Methods+for+Querying)
-# *   [Comparing](#class-Struct-label-Methods+for+Comparing)
-# *   [Fetching](#class-Struct-label-Methods+for+Fetching)
-# *   [Assigning](#class-Struct-label-Methods+for+Assigning)
-# *   [Iterating](#class-Struct-label-Methods+for+Iterating)
-# *   [Converting](#class-Struct-label-Methods+for+Converting)
+#     Subclass](rdoc-ref:Struct@Methods+for+Creating+a+Struct+Subclass)
+# *   [Querying](rdoc-ref:Struct@Methods+for+Querying)
+# *   [Comparing](rdoc-ref:Struct@Methods+for+Comparing)
+# *   [Fetching](rdoc-ref:Struct@Methods+for+Fetching)
+# *   [Assigning](rdoc-ref:Struct@Methods+for+Assigning)
+# *   [Iterating](rdoc-ref:Struct@Methods+for+Iterating)
+# *   [Converting](rdoc-ref:Struct@Methods+for+Converting)
 #
 #
 # ### Methods for Creating a Struct Subclass
 #
-# ::new
-# :   Returns a new subclass of Struct.
+# *   ::new: Returns a new subclass of Struct.
 #
 #
 # ### Methods for Querying
 #
-# #hash
-# :   Returns the integer hash code.
-# #length, #size
-# :   Returns the number of members.
+# *   #hash: Returns the integer hash code.
+# *   #length, #size: Returns the number of members.
 #
 #
 # ### Methods for Comparing
 #
-# [#==](#method-i-3D-3D)
-# :   Returns whether a given object is equal to `self`, using `==` to compare
-#     member values.
-# #eql?
-# :   Returns whether a given object is equal to `self`, using `eql?` to compare
-#     member values.
+# *   #==: Returns whether a given object is equal to `self`, using `==` to
+#     compare member values.
+# *   #eql?: Returns whether a given object is equal to `self`, using `eql?` to
+#     compare member values.
 #
 #
 # ### Methods for Fetching
 #
-# #[]
-# :   Returns the value associated with a given member name.
-# #to_a, #values, #deconstruct
-# :   Returns the member values in `self` as an array.
-# #deconstruct_keys
-# :   Returns a hash of the name/value pairs for given member names.
-# #dig
-# :   Returns the object in nested objects that is specified by a given member
-#     name and additional arguments.
-# #members
-# :   Returns an array of the member names.
-# #select, #filter
-# :   Returns an array of member values from `self`, as selected by the given
-#     block.
-# #values_at
-# :   Returns an array containing values for given member names.
+# *   #[]: Returns the value associated with a given member name.
+# *   #to_a, #values, #deconstruct: Returns the member values in `self` as an
+#     array.
+# *   #deconstruct_keys: Returns a hash of the name/value pairs for given member
+#     names.
+# *   #dig: Returns the object in nested objects that is specified by a given
+#     member name and additional arguments.
+# *   #members: Returns an array of the member names.
+# *   #select, #filter: Returns an array of member values from `self`, as
+#     selected by the given block.
+# *   #values_at: Returns an array containing values for given member names.
 #
 #
 # ### Methods for Assigning
 #
-# #[]=
-# :   Assigns a given value to a given member name.
+# *   #[]=: Assigns a given value to a given member name.
 #
 #
 # ### Methods for Iterating
 #
-# #each
-# :   Calls a given block with each member name.
-# #each_pair
-# :   Calls a given block with each member name/value pair.
+# *   #each: Calls a given block with each member name.
+# *   #each_pair: Calls a given block with each member name/value pair.
 #
 #
 # ### Methods for Converting
 #
-# #inspect, #to_s
-# :   Returns a string representation of `self`.
-# #to_h
-# :   Returns a hash of the member name/value pairs in `self`.
+# *   #inspect, #to_s: Returns a string representation of `self`.
+# *   #to_h: Returns a hash of the member name/value pairs in `self`.
 #
 class Struct[Elem] < Object
   include Enumerable[Elem?]
@@ -142,8 +128,7 @@ class Struct[Elem] < Object
   #
   # *   May be anonymous, or may have the name given by `class_name`.
   # *   May have members as given by `member_names`.
-  # *   May have initialization via ordinary arguments (the default) or via
-  #     keyword arguments (if `keyword_init: true` is given).
+  # *   May have initialization via ordinary arguments, or via keyword arguments
   #
   #
   # The new subclass has its own method `::new`; thus:
@@ -212,6 +197,12 @@ class Struct[Elem] < Object
   #         Foo.new(0, 1)    # => #<struct Struct::Foo foo=0, bar=1>
   #         Foo.new(0, 1, 2) # Raises ArgumentError: struct size differs
   #
+  #         # Initialization with keyword arguments:
+  #         Foo.new(foo: 0)         # => #<struct Struct::Foo foo=0, bar=nil>
+  #         Foo.new(foo: 0, bar: 1) # => #<struct Struct::Foo foo=0, bar=1>
+  #         Foo.new(foo: 0, bar: 1, baz: 2)
+  #         # Raises ArgumentError: unknown keywords: baz
+  #
   #     Method `::[]` is an alias for method `::new`.
   #
   # *   Method `:inspect` returns a string representation of the subclass:
@@ -226,18 +217,31 @@ class Struct[Elem] < Object
   #
   # **Keyword Argument**
   #
-  # By default, the arguments for initializing an instance of the new subclass are
-  # ordinary arguments (not keyword arguments). With optional keyword argument
-  # `keyword_init: true`, the new subclass is initialized with keyword arguments:
+  # By default, the arguments for initializing an instance of the new subclass can
+  # be both positional and keyword arguments.
   #
-  #     # Without keyword_init: true.
-  #     Foo = Struct.new('Foo', :foo, :bar)
-  #     Foo                     # => Struct::Foo
-  #     Foo.new(0, 1)           # => #<struct Struct::Foo foo=0, bar=1>
-  #     # With keyword_init: true.
-  #     Bar = Struct.new(:foo, :bar, keyword_init: true)
-  #     Bar # =>                # => Bar(keyword_init: true)
-  #     Bar.new(bar: 1, foo: 0) # => #<struct Bar foo=0, bar=1>
+  # Optional keyword argument `keyword_init:` allows to force only one type of
+  # arguments to be accepted:
+  #
+  #     KeywordsOnly = Struct.new(:foo, :bar, keyword_init: true)
+  #     KeywordsOnly.new(bar: 1, foo: 0)
+  #     # => #<struct KeywordsOnly foo=0, bar=1>
+  #     KeywordsOnly.new(0, 1)
+  #     # Raises ArgumentError: wrong number of arguments
+  #
+  #     PositionalOnly = Struct.new(:foo, :bar, keyword_init: false)
+  #     PositionalOnly.new(0, 1)
+  #     # => #<struct PositionalOnly foo=0, bar=1>
+  #     PositionalOnly.new(bar: 1, foo: 0)
+  #     # => #<struct PositionalOnly foo={:foo=>1, :bar=>2}, bar=nil>
+  #     # Note that no error is raised, but arguments treated as one hash value
+  #
+  #     # Same as not providing keyword_init:
+  #     Any = Struct.new(:foo, :bar, keyword_init: nil)
+  #     Any.new(foo: 1, bar: 2)
+  #     # => #<struct Any foo=1, bar=2>
+  #     Any.new(1, 2)
+  #     # => #<struct Any foo=1, bar=2>
   #
   def initialize: (attribute_name, *attribute_name, ?keyword_init: boolish) ?{ () -> void } -> void
 

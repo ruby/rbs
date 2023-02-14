@@ -78,12 +78,12 @@
 #
 # You can create a Hash object explicitly with:
 #
-# *   A [hash literal](doc/syntax/literals_rdoc.html#label-Hash+Literals).
+# *   A [hash literal](rdoc-ref:syntax/literals.rdoc@Hash+Literals).
 #
 #
 # You can convert certain objects to Hashes with:
 #
-# *   Method [Hash](Kernel.html#method-i-Hash).
+# *   Method #Hash.
 #
 #
 # You can create a Hash by calling method Hash.new.
@@ -349,211 +349,152 @@
 #
 # First, what's elsewhere. Class Hash:
 #
-# *   Inherits from [class
-#     Object](Object.html#class-Object-label-What-27s+Here).
-# *   Includes [module
-#     Enumerable](Enumerable.html#module-Enumerable-label-What-27s+Here), which
+# *   Inherits from [class Object](rdoc-ref:Object@What-27s+Here).
+# *   Includes [module Enumerable](rdoc-ref:Enumerable@What-27s+Here), which
 #     provides dozens of additional methods.
 #
 #
 # Here, class Hash provides methods that are useful for:
 #
-# *   [Creating a Hash](#class-Hash-label-Methods+for+Creating+a+Hash)
-# *   [Setting Hash State](#class-Hash-label-Methods+for+Setting+Hash+State)
-# *   [Querying](#class-Hash-label-Methods+for+Querying)
-# *   [Comparing](#class-Hash-label-Methods+for+Comparing)
-# *   [Fetching](#class-Hash-label-Methods+for+Fetching)
-# *   [Assigning](#class-Hash-label-Methods+for+Assigning)
-# *   [Deleting](#class-Hash-label-Methods+for+Deleting)
-# *   [Iterating](#class-Hash-label-Methods+for+Iterating)
-# *   [Converting](#class-Hash-label-Methods+for+Converting)
+# *   [Creating a Hash](rdoc-ref:Hash@Methods+for+Creating+a+Hash)
+# *   [Setting Hash State](rdoc-ref:Hash@Methods+for+Setting+Hash+State)
+# *   [Querying](rdoc-ref:Hash@Methods+for+Querying)
+# *   [Comparing](rdoc-ref:Hash@Methods+for+Comparing)
+# *   [Fetching](rdoc-ref:Hash@Methods+for+Fetching)
+# *   [Assigning](rdoc-ref:Hash@Methods+for+Assigning)
+# *   [Deleting](rdoc-ref:Hash@Methods+for+Deleting)
+# *   [Iterating](rdoc-ref:Hash@Methods+for+Iterating)
+# *   [Converting](rdoc-ref:Hash@Methods+for+Converting)
 # *   [Transforming Keys and
-#     Values](#class-Hash-label-Methods+for+Transforming+Keys+and+Values)
-# *   [And more....](#class-Hash-label-Other+Methods)
+#     Values](rdoc-ref:Hash@Methods+for+Transforming+Keys+and+Values)
+# *   [And more....](rdoc-ref:Hash@Other+Methods)
 #
 #
 # Class Hash also includes methods from module Enumerable.
 #
 # #### Methods for Creating a Hash
 #
-# ::[]
-# :   Returns a new hash populated with given objects.
-# ::new
-# :   Returns a new empty hash.
-# ::try_convert
-# :   Returns a new hash created from a given object.
+# *   ::[]: Returns a new hash populated with given objects.
+# *   ::new: Returns a new empty hash.
+# *   ::try_convert: Returns a new hash created from a given object.
 #
 #
 # #### Methods for Setting Hash State
 #
-# #compare_by_identity
-# :   Sets `self` to consider only identity in comparing keys.
-# #default=
-# :   Sets the default to a given value.
-# #default_proc=
-# :   Sets the default proc to a given proc.
-# #rehash
-# :   Rebuilds the hash table by recomputing the hash index for each key.
+# *   #compare_by_identity: Sets `self` to consider only identity in comparing
+#     keys.
+# *   #default=: Sets the default to a given value.
+# *   #default_proc=: Sets the default proc to a given proc.
+# *   #rehash: Rebuilds the hash table by recomputing the hash index for each
+#     key.
 #
 #
 # #### Methods for Querying
 #
-# #any?
-# :   Returns whether any element satisfies a given criterion.
-# #compare_by_identity?
-# :   Returns whether the hash considers only identity when comparing keys.
-# #default
-# :   Returns the default value, or the default value for a given key.
-# #default_proc
-# :   Returns the default proc.
-# #empty?
-# :   Returns whether there are no entries.
-# #eql?
-# :   Returns whether a given object is equal to `self`.
-# #hash
-# :   Returns the integer hash code.
-# #has_value?
-# :   Returns whether a given object is a value in `self`.
-# #include?, #has_key?, #member?, #key?
-# :   Returns whether a given object is a key in `self`.
-# #length, #size
-# :   Returns the count of entries.
-# #value?
-# :   Returns whether a given object is a value in `self`.
+# *   #any?: Returns whether any element satisfies a given criterion.
+# *   #compare_by_identity?: Returns whether the hash considers only identity
+#     when comparing keys.
+# *   #default: Returns the default value, or the default value for a given key.
+# *   #default_proc: Returns the default proc.
+# *   #empty?: Returns whether there are no entries.
+# *   #eql?: Returns whether a given object is equal to `self`.
+# *   #hash: Returns the integer hash code.
+# *   #has_value?: Returns whether a given object is a value in `self`.
+# *   #include?, #has_key?, #member?, #key?: Returns whether a given object is a
+#     key in `self`.
+# *   #length, #size: Returns the count of entries.
+# *   #value?: Returns whether a given object is a value in `self`.
 #
 #
 # #### Methods for Comparing
 #
-# [#<](#method-i-3C)
-# :   Returns whether `self` is a proper subset of a given object.
-# [#<=](#method-i-3C-3D)
-# :   Returns whether `self` is a subset of a given object.
-# [#==](#method-i-3D-3D)
-# :   Returns whether a given object is equal to `self`.
-# [#>](#method-i-3E)
-# :   Returns whether `self` is a proper superset of a given object
-# [#>=](#method-i-3E-3D)
-# :   Returns whether `self` is a proper superset of a given object.
+# *   #<: Returns whether `self` is a proper subset of a given object.
+# *   #<=: Returns whether `self` is a subset of a given object.
+# *   #==: Returns whether a given object is equal to `self`.
+# *   #>: Returns whether `self` is a proper superset of a given object
+# *   #>=: Returns whether `self` is a proper superset of a given object.
 #
 #
 # #### Methods for Fetching
 #
-# #[]
-# :   Returns the value associated with a given key.
-# #assoc
-# :   Returns a 2-element array containing a given key and its value.
-# #dig
-# :   Returns the object in nested objects that is specified by a given key and
-#     additional arguments.
-# #fetch
-# :   Returns the value for a given key.
-# #fetch_values
-# :   Returns array containing the values associated with given keys.
-# #key
-# :   Returns the key for the first-found entry with a given value.
-# #keys
-# :   Returns an array containing all keys in `self`.
-# #rassoc
-# :   Returns a 2-element array consisting of the key and value of the
+# *   #[]: Returns the value associated with a given key.
+# *   #assoc: Returns a 2-element array containing a given key and its value.
+# *   #dig: Returns the object in nested objects that is specified by a given
+#     key and additional arguments.
+# *   #fetch: Returns the value for a given key.
+# *   #fetch_values: Returns array containing the values associated with given
+#     keys.
+# *   #key: Returns the key for the first-found entry with a given value.
+# *   #keys: Returns an array containing all keys in `self`.
+# *   #rassoc: Returns a 2-element array consisting of the key and value of the
 #     first-found entry having a given value.
-# #values
-# :   Returns an array containing all values in `self`/
-# #values_at
-# :   Returns an array containing values for given keys.
+# *   #values: Returns an array containing all values in `self`/
+# *   #values_at: Returns an array containing values for given keys.
 #
 #
 # #### Methods for Assigning
 #
-# #[]=, #store
-# :   Associates a given key with a given value.
-# #merge
-# :   Returns the hash formed by merging each given hash into a copy of `self`.
-# #merge!, #update
-# :   Merges each given hash into `self`.
-# #replace
-# :   Replaces the entire contents of `self` with the contents of a givan hash.
+# *   #[]=, #store: Associates a given key with a given value.
+# *   #merge: Returns the hash formed by merging each given hash into a copy of
+#     `self`.
+# *   #merge!, #update: Merges each given hash into `self`.
+# *   #replace: Replaces the entire contents of `self` with the contents of a
+#     given hash.
 #
 #
 # #### Methods for Deleting
 #
 # These methods remove entries from `self`:
 #
-# #clear
-# :   Removes all entries from `self`.
-# #compact!
-# :   Removes all `nil`-valued entries from `self`.
-# #delete
-# :   Removes the entry for a given key.
-# #delete_if
-# :   Removes entries selected by a given block.
-# #filter!, #select!
-# :   Keep only those entries selected by a given block.
-# #keep_if
-# :   Keep only those entries selected by a given block.
-# #reject!
-# :   Removes entries selected by a given block.
-# #shift
-# :   Removes and returns the first entry.
+# *   #clear: Removes all entries from `self`.
+# *   #compact!: Removes all `nil`-valued entries from `self`.
+# *   #delete: Removes the entry for a given key.
+# *   #delete_if: Removes entries selected by a given block.
+# *   #filter!, #select!: Keep only those entries selected by a given block.
+# *   #keep_if: Keep only those entries selected by a given block.
+# *   #reject!: Removes entries selected by a given block.
+# *   #shift: Removes and returns the first entry.
 #
 #
 # These methods return a copy of `self` with some entries removed:
 #
-# #compact
-# :   Returns a copy of `self` with all `nil`-valued entries removed.
-# #except
-# :   Returns a copy of `self` with entries removed for specified keys.
-# #filter, #select
-# :   Returns a copy of `self` with only those entries selected by a given
-#     block.
-# #reject
-# :   Returns a copy of `self` with entries removed as specified by a given
-#     block.
-# #slice
-# :   Returns a hash containing the entries for given keys.
+# *   #compact: Returns a copy of `self` with all `nil`-valued entries removed.
+# *   #except: Returns a copy of `self` with entries removed for specified keys.
+# *   #filter, #select: Returns a copy of `self` with only those entries
+#     selected by a given block.
+# *   #reject: Returns a copy of `self` with entries removed as specified by a
+#     given block.
+# *   #slice: Returns a hash containing the entries for given keys.
 #
 #
 # #### Methods for Iterating
-# #each, #each_pair
-# :   Calls a given block with each key-value pair.
-# #each_key
-# :   Calls a given block with each key.
-# #each_value
-# :   Calls a given block with each value.
+# *   #each, #each_pair: Calls a given block with each key-value pair.
+# *   #each_key: Calls a given block with each key.
+# *   #each_value: Calls a given block with each value.
 #
 #
 # #### Methods for Converting
 #
-# #inspect, #to_s
-# :   Returns a new String containing the hash entries.
-# #to_a
-# :   Returns a new array of 2-element arrays; each nested array contains a
-#     key-value pair from `self`.
-# #to_h
-# :   Returns `self` if a Hash; if a subclass of Hash, returns a Hash containing
-#     the entries from `self`.
-# #to_hash
-# :   Returns `self`.
-# #to_proc
-# :   Returns a proc that maps a given key to its value.
+# *   #inspect, #to_s: Returns a new String containing the hash entries.
+# *   #to_a: Returns a new array of 2-element arrays; each nested array contains
+#     a key-value pair from `self`.
+# *   #to_h: Returns `self` if a Hash; if a subclass of Hash, returns a Hash
+#     containing the entries from `self`.
+# *   #to_hash: Returns `self`.
+# *   #to_proc: Returns a proc that maps a given key to its value.
 #
 #
 # #### Methods for Transforming Keys and Values
 #
-# #transform_keys
-# :   Returns a copy of `self` with modified keys.
-# #transform_keys!
-# :   Modifies keys in `self`
-# #transform_values
-# :   Returns a copy of `self` with modified values.
-# #transform_values!
-# :   Modifies values in `self`.
+# *   #transform_keys: Returns a copy of `self` with modified keys.
+# *   #transform_keys!: Modifies keys in `self`
+# *   #transform_values: Returns a copy of `self` with modified values.
+# *   #transform_values!: Modifies values in `self`.
 #
 #
 # #### Other Methods
-# #flatten
-# :   Returns an array that is a 1-dimensional flattening of `self`.
-# #invert
-# :   Returns a hash with the each key-value pair inverted.
+# *   #flatten: Returns an array that is a 1-dimensional flattening of `self`.
+# *   #invert: Returns a hash with the each key-value pair inverted.
 #
 class Hash[unchecked out K, unchecked out V] < Object
   include Enumerable[[ K, V ]]
@@ -694,7 +635,7 @@ class Hash[unchecked out K, unchecked out V] < Object
   #     h[:foo] # => 0
   #
   # If `key` is not found, returns a default value (see [Default
-  # Values](#class-Hash-label-Default+Values)):
+  # Values](rdoc-ref:Hash@Default+Values)):
   #     h = {foo: 0, bar: 1, baz: 2}
   #     h[:nosuch] # => nil
   #
@@ -710,14 +651,14 @@ class Hash[unchecked out K, unchecked out V] < Object
   # Associates the given `value` with the given `key`; returns `value`.
   #
   # If the given `key` exists, replaces its value with the given `value`; the
-  # ordering is not affected (see [Entry Order](#class-Hash-label-Entry+Order)):
+  # ordering is not affected (see [Entry Order](rdoc-ref:Hash@Entry+Order)):
   #     h = {foo: 0, bar: 1}
   #     h[:foo] = 2 # => 2
   #     h.store(:bar, 3) # => 3
   #     h # => {:foo=>2, :bar=>3}
   #
   # If `key` does not exist, adds the `key` and `value`; the new entry is last in
-  # the order (see [Entry Order](#class-Hash-label-Entry+Order)):
+  # the order (see [Entry Order](rdoc-ref:Hash@Entry+Order)):
   #     h = {foo: 0, bar: 1}
   #     h[:baz] = 2 # => 2
   #     h.store(:bat, 3) # => 3
@@ -847,7 +788,7 @@ class Hash[unchecked out K, unchecked out V] < Object
   # -->
   # Returns the default value for the given `key`. The returned value will be
   # determined either by the default proc or by the default value. See [Default
-  # Values](#class-Hash-label-Default+Values).
+  # Values](rdoc-ref:Hash@Default+Values).
   #
   # With no argument, returns the current default value:
   #     h = {}
@@ -871,7 +812,7 @@ class Hash[unchecked out K, unchecked out V] < Object
   #     h.default = false # => false
   #     h.default # => false
   #
-  # See [Default Values](#class-Hash-label-Default+Values).
+  # See [Default Values](rdoc-ref:Hash@Default+Values).
   #
   def default=: (V arg0) -> V
 
@@ -880,7 +821,7 @@ class Hash[unchecked out K, unchecked out V] < Object
   #   - hash.default_proc -> proc or nil
   # -->
   # Returns the default proc for `self` (see [Default
-  # Values](#class-Hash-label-Default+Values)):
+  # Values](rdoc-ref:Hash@Default+Values)):
   #     h = {}
   #     h.default_proc # => nil
   #     h.default_proc = proc {|hash, key| "Default value for #{key}" }
@@ -893,7 +834,7 @@ class Hash[unchecked out K, unchecked out V] < Object
   #   - hash.default_proc = proc -> proc
   # -->
   # Sets the default proc for `self` to `proc`: (see [Default
-  # Values](#class-Hash-label-Default+Values)):
+  # Values](rdoc-ref:Hash@Default+Values)):
   #     h = {}
   #     h.default_proc # => nil
   #     h.default_proc = proc { |hash, key| "Default value for #{key}" }
@@ -970,8 +911,8 @@ class Hash[unchecked out K, unchecked out V] < Object
   #     h = {foo: {bar: [:a, :b, :c]}}
   #     h.dig(:foo, :bar, 2) # => :c
   #
-  # This method will use the [default values](#class-Hash-label-Default+Values)
-  # for keys that are not present:
+  # This method will use the [default values](rdoc-ref:Hash@Default+Values) for
+  # keys that are not present:
   #     h = {foo: {bar: [:a, :b, :c]}}
   #     h.dig(:hello) # => nil
   #     h.default_proc = -> (hash, _key) { hash }
@@ -1321,7 +1262,7 @@ class Hash[unchecked out K, unchecked out V] < Object
   #     h1 # => {0=>:foo, 1=>:bar, 2=>:baz}
   #
   # Overwrites any repeated new keys: (see [Entry
-  # Order](#class-Hash-label-Entry+Order)):
+  # Order](rdoc-ref:Hash@Entry+Order)):
   #     h = {foo: 0, bar: 0, baz: 0}
   #     h.invert # => {0=>:baz}
   #
@@ -1350,7 +1291,7 @@ class Hash[unchecked out K, unchecked out V] < Object
   #   - hash.key(value) -> key or nil
   # -->
   # Returns the key for the first-found entry with the given `value` (see [Entry
-  # Order](#class-Hash-label-Entry+Order)):
+  # Order](rdoc-ref:Hash@Entry+Order)):
   #     h = {foo: 0, bar: 2, baz: 2}
   #     h.key(0) # => :foo
   #     h.key(2) # => :bar
@@ -1505,7 +1446,7 @@ class Hash[unchecked out K, unchecked out V] < Object
   # -->
   # Returns a new 2-element Array consisting of the key and value of the
   # first-found entry whose value is `==` to value (see [Entry
-  # Order](#class-Hash-label-Entry+Order)):
+  # Order](rdoc-ref:Hash@Entry+Order)):
   #     h = {foo: 0, bar: 1, baz: 1}
   #     h.rassoc(1) # => [:bar, 1]
   #
@@ -1522,7 +1463,7 @@ class Hash[unchecked out K, unchecked out V] < Object
   #
   # The hash table becomes invalid if the hash value of a key has changed after
   # the entry was created. See [Modifying an Active Hash
-  # Key](#class-Hash-label-Modifying+an+Active+Hash+Key).
+  # Key](rdoc-ref:Hash@Modifying+an+Active+Hash+Key).
   #
   def rehash: () -> self
 
@@ -1616,17 +1557,15 @@ class Hash[unchecked out K, unchecked out V] < Object
 
   # <!--
   #   rdoc-file=hash.c
-  #   - hash.shift -> [key, value] or default_value
+  #   - hash.shift -> [key, value] or nil
   # -->
-  # Removes the first hash entry (see [Entry
-  # Order](#class-Hash-label-Entry+Order)); returns a 2-element Array containing
-  # the removed key and value:
+  # Removes the first hash entry (see [Entry Order](rdoc-ref:Hash@Entry+Order));
+  # returns a 2-element Array containing the removed key and value:
   #     h = {foo: 0, bar: 1, baz: 2}
   #     h.shift # => [:foo, 0]
   #     h # => {:bar=>1, :baz=>2}
   #
-  # Returns the default value if the hash is empty (see [Default
-  # Values](#class-Hash-label-Default+Values)).
+  # Returns nil if the hash is empty.
   #
   def shift: () -> [ K, V ]?
 
@@ -1660,14 +1599,14 @@ class Hash[unchecked out K, unchecked out V] < Object
   # Associates the given `value` with the given `key`; returns `value`.
   #
   # If the given `key` exists, replaces its value with the given `value`; the
-  # ordering is not affected (see [Entry Order](#class-Hash-label-Entry+Order)):
+  # ordering is not affected (see [Entry Order](rdoc-ref:Hash@Entry+Order)):
   #     h = {foo: 0, bar: 1}
   #     h[:foo] = 2 # => 2
   #     h.store(:bar, 3) # => 3
   #     h # => {:foo=>2, :bar=>3}
   #
   # If `key` does not exist, adds the `key` and `value`; the new entry is last in
-  # the order (see [Entry Order](#class-Hash-label-Entry+Order)):
+  # the order (see [Entry Order](rdoc-ref:Hash@Entry+Order)):
   #     h = {foo: 0, bar: 1}
   #     h[:baz] = 2 # => 2
   #     h.store(:bat, 3) # => 3
@@ -1913,8 +1852,8 @@ class Hash[unchecked out K, unchecked out V] < Object
   #     h = {foo: 0, bar: 1, baz: 2}
   #     h.values_at(:baz, :foo) # => [2, 0]
   #
-  # The [default values](#class-Hash-label-Default+Values) are returned for any
-  # keys that are not found:
+  # The [default values](rdoc-ref:Hash@Default+Values) are returned for any keys
+  # that are not found:
   #     h.values_at(:hello, :foo) # => [nil, 0]
   #
   def values_at: (*K arg0) -> ::Array[V?]
@@ -1929,8 +1868,7 @@ class Hash[unchecked out K, unchecked out V] < Object
   # Returns a new empty Hash object.
   #
   # The initial default value and initial default proc for the new hash depend on
-  # which form above was used. See [Default
-  # Values](#class-Hash-label-Default+Values).
+  # which form above was used. See [Default Values](rdoc-ref:Hash@Default+Values).
   #
   # If neither an argument nor a block given, initializes both the default value
   # and the default proc to `nil`:

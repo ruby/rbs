@@ -93,168 +93,90 @@ module RBS
     #
     # First, what's elsewhere. Class ENV:
     #
-    # *   Inherits from [class
-    #     Object](Object.html#class-Object-label-What-27s+Here).
-    # *   Extends [module
-    #     Enumerable](Enumerable.html#module-Enumerable-label-What-27s+Here),
+    # *   Inherits from [class Object](rdoc-ref:Object@What-27s+Here).
+    # *   Extends [module Enumerable](rdoc-ref:Enumerable@What-27s+Here),
     #
     #
     # Here, class ENV provides methods that are useful for:
     #
-    # *   [Querying](#class-ENV-label-Methods+for+Querying)
-    # *   [Assigning](#class-ENV-label-Methods+for+Assigning)
-    # *   [Deleting](#class-ENV-label-Methods+for+Deleting)
-    # *   [Iterating](#class-ENV-label-Methods+for+Iterating)
-    # *   [Converting](#class-ENV-label-Methods+for+Converting)
-    # *   [And more ....](#class-ENV-label-More+Methods)
+    # *   [Querying](rdoc-ref:ENV@Methods+for+Querying)
+    # *   [Assigning](rdoc-ref:ENV@Methods+for+Assigning)
+    # *   [Deleting](rdoc-ref:ENV@Methods+for+Deleting)
+    # *   [Iterating](rdoc-ref:ENV@Methods+for+Iterating)
+    # *   [Converting](rdoc-ref:ENV@Methods+for+Converting)
+    # *   [And more ....](rdoc-ref:ENV@More+Methods)
     #
     #
     # ### Methods for Querying
     #
-    #     ::[]
-    # :       Returns the value for the given environment variable name if it
-    #         exists:
-    #
-    #     ::empty?
-    # :       Returns whether ENV is empty.
-    #
-    #     ::has_value?, ::value?
-    # :       Returns whether the given value is in ENV.
-    #
-    #     ::include?, ::has_key?, ::key?, ::member?
-    # :       Returns whether the given name is in ENV.
-    #
-    #     ::key
-    # :       Returns the name of the first entry with the given value.
-    #
-    #     ::size, ::length
-    # :       Returns the number of entries.
-    #
-    #     ::value?
-    # :       Returns whether any entry has the given value.
-    #
+    # *   ::[]: Returns the value for the given environment variable name if it
+    #     exists:
+    # *   ::empty?: Returns whether ENV is empty.
+    # *   ::has_value?, ::value?: Returns whether the given value is in ENV.
+    # *   ::include?, ::has_key?, ::key?, ::member?: Returns whether the given name
+    #     is in ENV.
+    # *   ::key: Returns the name of the first entry with the given value.
+    # *   ::size, ::length: Returns the number of entries.
+    # *   ::value?: Returns whether any entry has the given value.
     #
     #
     # ### Methods for Assigning
     #
-    #     ::[]=, ::store
-    # :       Creates, updates, or deletes the named environment variable.
-    #
-    #     ::clear
-    # :       Removes every environment variable; returns ENV:
-    #
-    #     ::update, ::merge!
-    # :       Adds to ENV each key/value pair in the given hash.
-    #
-    #     ::replace
-    # :       Replaces the entire content of the ENV with the name/value pairs in
-    #         the given hash.
-    #
+    # *   ::[]=, ::store: Creates, updates, or deletes the named environment
+    #     variable.
+    # *   ::clear: Removes every environment variable; returns ENV:
+    # *   ::update, ::merge!: Adds to ENV each key/value pair in the given hash.
+    # *   ::replace: Replaces the entire content of the ENV with the name/value
+    #     pairs in the given hash.
     #
     #
     # ### Methods for Deleting
     #
-    #     ::delete
-    # :       Deletes the named environment variable name if it exists.
-    #
-    #     ::delete_if
-    # :       Deletes entries selected by the block.
-    #
-    #     ::keep_if
-    # :       Deletes entries not selected by the block.
-    #
-    #     ::reject!
-    # :       Similar to #delete_if, but returns `nil` if no change was made.
-    #
-    #     ::select!, ::filter!
-    # :       Deletes entries selected by the block.
-    #
-    #     ::shift
-    # :       Removes and returns the first entry.
-    #
+    # *   ::delete: Deletes the named environment variable name if it exists.
+    # *   ::delete_if: Deletes entries selected by the block.
+    # *   ::keep_if: Deletes entries not selected by the block.
+    # *   ::reject!: Similar to #delete_if, but returns `nil` if no change was made.
+    # *   ::select!, ::filter!: Deletes entries selected by the block.
+    # *   ::shift: Removes and returns the first entry.
     #
     #
     # ### Methods for Iterating
     #
-    #     ::each, ::each_pair
-    # :       Calls the block with each name/value pair.
-    #
-    #     ::each_key
-    # :       Calls the block with each name.
-    #
-    #     ::each_value
-    # :       Calls the block with each value.
-    #
+    # *   ::each, ::each_pair: Calls the block with each name/value pair.
+    # *   ::each_key: Calls the block with each name.
+    # *   ::each_value: Calls the block with each value.
     #
     #
     # ### Methods for Converting
     #
-    #     ::assoc
-    # :       Returns a 2-element array containing the name and value of the named
-    #         environment variable if it exists:
-    #
-    #     ::clone
-    # :       Returns ENV (and issues a warning).
-    #
-    #     ::except
-    # :       Returns a hash of all name/value pairs except those given.
-    #
-    #     ::fetch
-    # :       Returns the value for the given name.
-    #
-    #     ::inspect
-    # :       Returns the contents of ENV as a string.
-    #
-    #     ::invert
-    # :       Returns a hash whose keys are the ENV values, and whose values are the
-    #         corresponding ENV names.
-    #
-    #     ::keys
-    # :       Returns an array of all names.
-    #
-    #     ::rassoc
-    # :       Returns the name and value of the first found entry that has the given
-    #         value.
-    #
-    #     ::reject
-    # :       Returns a hash of those entries not rejected by the block.
-    #
-    #     ::select, ::filter
-    # :       Returns a hash of name/value pairs selected by the block.
-    #
-    #     ::slice
-    # :       Returns a hash of the given names and their corresponding values.
-    #
-    #     ::to_a
-    # :       Returns the entries as an array of 2-element Arrays.
-    #
-    #     ::to_h
-    # :       Returns a hash of entries selected by the block.
-    #
-    #     ::to_hash
-    # :       Returns a hash of all entries.
-    #
-    #     ::to_s
-    # :       Returns the string `'ENV'`.
-    #
-    #     ::values
-    # :       Returns all values as an array.
-    #
-    #     ::values_at
-    # :       Returns an array of the values for the given name.
-    #
+    # *   ::assoc: Returns a 2-element array containing the name and value of the
+    #     named environment variable if it exists:
+    # *   ::clone: Returns ENV (and issues a warning).
+    # *   ::except: Returns a hash of all name/value pairs except those given.
+    # *   ::fetch: Returns the value for the given name.
+    # *   ::inspect: Returns the contents of ENV as a string.
+    # *   ::invert: Returns a hash whose keys are the ENV values, and whose values
+    #     are the corresponding ENV names.
+    # *   ::keys: Returns an array of all names.
+    # *   ::rassoc: Returns the name and value of the first found entry that has the
+    #     given value.
+    # *   ::reject: Returns a hash of those entries not rejected by the block.
+    # *   ::select, ::filter: Returns a hash of name/value pairs selected by the
+    #     block.
+    # *   ::slice: Returns a hash of the given names and their corresponding values.
+    # *   ::to_a: Returns the entries as an array of 2-element Arrays.
+    # *   ::to_h: Returns a hash of entries selected by the block.
+    # *   ::to_hash: Returns a hash of all entries.
+    # *   ::to_s: Returns the string `'ENV'`.
+    # *   ::values: Returns all values as an array.
+    # *   ::values_at: Returns an array of the values for the given name.
     #
     #
     # ### More Methods
     #
-    #     ::dup
-    # :       Raises an exception.
-    #
-    #     ::freeze
-    # :       Raises an exception.
-    #
-    #     ::rehash
-    # :       Returns `nil`, without modifying ENV.
+    # *   ::dup: Raises an exception.
+    # *   ::freeze: Raises an exception.
+    # *   ::rehash: Returns `nil`, without modifying ENV.
     #
     %a{annotate:rdoc:copy:ENV}
     class ENVClass
@@ -271,7 +193,7 @@ module RBS
       # Returns `nil` if the named variable does not exist.
       #
       # Raises an exception if `name` is invalid. See [Invalid Names and
-      # Values](#class-ENV-label-Invalid+Names+and+Values).
+      # Values](rdoc-ref:ENV@Invalid+Names+and+Values).
       #
       %a{annotate:rdoc:copy:ENV.[]}
       def []: (String name) -> String?
@@ -305,7 +227,7 @@ module RBS
       #     ENV.fetch('foo') # Raises KeyError (key not found: "foo")
       #
       # Raises an exception if `name` is invalid. See [Invalid Names and
-      # Values](#class-ENV-label-Invalid+Names+and+Values).
+      # Values](rdoc-ref:ENV@Invalid+Names+and+Values).
       #
       %a{annotate:rdoc:copy:ENV.fetch}
       def fetch: (String name) -> String
@@ -321,7 +243,7 @@ module RBS
       #
       # Creates, updates, or deletes the named environment variable, returning the
       # value. Both `name` and `value` may be instances of String. See [Valid Names
-      # and Values](#class-ENV-label-Valid+Names+and+Values).
+      # and Values](rdoc-ref:ENV@Valid+Names+and+Values).
       #
       # *   If the named environment variable does not exist:
       #     *   If `value` is `nil`, does nothing.
@@ -362,7 +284,7 @@ module RBS
       #
       #
       # Raises an exception if `name` or `value` is invalid. See [Invalid Names and
-      # Values](#class-ENV-label-Invalid+Names+and+Values).
+      # Values](rdoc-ref:ENV@Invalid+Names+and+Values).
       #
       %a{annotate:rdoc:copy:ENV.[]=}
       def []=: (String name, String? value) -> String?
@@ -376,7 +298,7 @@ module RBS
       #
       # Creates, updates, or deletes the named environment variable, returning the
       # value. Both `name` and `value` may be instances of String. See [Valid Names
-      # and Values](#class-ENV-label-Valid+Names+and+Values).
+      # and Values](rdoc-ref:ENV@Valid+Names+and+Values).
       #
       # *   If the named environment variable does not exist:
       #     *   If `value` is `nil`, does nothing.
@@ -417,7 +339,7 @@ module RBS
       #
       #
       # Raises an exception if `name` or `value` is invalid. See [Invalid Names and
-      # Values](#class-ENV-label-Invalid+Names+and+Values).
+      # Values](rdoc-ref:ENV@Invalid+Names+and+Values).
       #
       %a{annotate:rdoc:copy:ENV.store}
       alias store []=
@@ -533,7 +455,7 @@ module RBS
       #     ENV.delete('foo') { |name| raise 'ignored' } # => "0"
       #
       # Raises an exception if `name` is invalid. See [Invalid Names and
-      # Values](#class-ENV-label-Invalid+Names+and+Values).
+      # Values](rdoc-ref:ENV@Invalid+Names+and+Values).
       #
       %a{annotate:rdoc:copy:ENV.delete}
       def delete: (String name) -> String?
@@ -595,7 +517,7 @@ module RBS
       #     ENV.slice('baz', 'foo') # => {"baz"=>"2", "foo"=>"0"}
       #
       # Raises an exception if any of the `names` is invalid (see [Invalid Names and
-      # Values](#class-ENV-label-Invalid+Names+and+Values)):
+      # Values](rdoc-ref:ENV@Invalid+Names+and+Values)):
       #     ENV.slice('foo', 'bar', :bat) # Raises TypeError (no implicit conversion of Symbol into String)
       #
       %a{annotate:rdoc:copy:ENV.slice}
@@ -816,7 +738,7 @@ module RBS
       #     ENV.to_hash # => {'foo' => '0'}
       #
       # Exactly which environment variable is "first" is OS-dependent. See [About
-      # Ordering](#class-ENV-label-About+Ordering).
+      # Ordering](rdoc-ref:ENV@About+Ordering).
       #
       # Returns `nil` if the environment is empty.
       #
@@ -838,7 +760,7 @@ module RBS
       #
       # Note that the order of the ENV processing is OS-dependent, which means that
       # the order of overwriting is also OS-dependent. See [About
-      # Ordering](#class-ENV-label-About+Ordering).
+      # Ordering](rdoc-ref:ENV@About+Ordering).
       #
       %a{annotate:rdoc:copy:ENV.invert}
       def invert: () -> ::Hash[String, String]
@@ -855,7 +777,7 @@ module RBS
       #     ENV.to_hash # => {"bar"=>"1", "foo"=>"0"}
       #
       # Raises an exception if a name or value is invalid (see [Invalid Names and
-      # Values](#class-ENV-label-Invalid+Names+and+Values)):
+      # Values](rdoc-ref:ENV@Invalid+Names+and+Values)):
       #     ENV.replace('foo' => '0', :bar => '1') # Raises TypeError (no implicit conversion of Symbol into String)
       #     ENV.replace('foo' => '0', 'bar' => 1) # Raises TypeError (no implicit conversion of Integer into String)
       #     ENV.to_hash # => {"bar"=>"1", "foo"=>"0"}
@@ -865,10 +787,12 @@ module RBS
 
       # <!--
       #   rdoc-file=hash.c
-      #   - ENV.update(hash)                                     -> ENV
-      #   - ENV.update(hash) { |name, env_val, hash_val| block } -> ENV
-      #   - ENV.merge!(hash)                                     -> ENV
-      #   - ENV.merge!(hash) { |name, env_val, hash_val| block } -> ENV
+      #   - ENV.update                                              -> ENV
+      #   - ENV.update(*hashes)                                     -> ENV
+      #   - ENV.update(*hashes) { |name, env_val, hash_val| block } -> ENV
+      #   - ENV.merge!                                              -> ENV
+      #   - ENV.merge!(*hashes)                                     -> ENV
+      #   - ENV.merge!(*hashes) { |name, env_val, hash_val| block } -> ENV
       # -->
       # ENV.update is an alias for ENV.merge!.
       #
@@ -887,7 +811,7 @@ module RBS
       #     ENV.merge!('foo' => '5') { |name, env_val, hash_val | env_val + hash_val } # => {"bar"=>"1", "foo"=>"45"}
       #
       # Raises an exception if a name or value is invalid (see [Invalid Names and
-      # Values](#class-ENV-label-Invalid+Names+and+Values));
+      # Values](rdoc-ref:ENV@Invalid+Names+and+Values));
       #     ENV.replace('foo' => '0', 'bar' => '1')
       #     ENV.merge!('foo' => '6', :bar => '7', 'baz' => '9') # Raises TypeError (no implicit conversion of Symbol into String)
       #     ENV # => {"bar"=>"1", "foo"=>"6"}
@@ -895,7 +819,7 @@ module RBS
       #     ENV # => {"bar"=>"1", "foo"=>"7"}
       #
       # Raises an exception if the block returns an invalid name: (see [Invalid Names
-      # and Values](#class-ENV-label-Invalid+Names+and+Values)):
+      # and Values](rdoc-ref:ENV@Invalid+Names+and+Values)):
       #     ENV.merge!('bat' => '8', 'foo' => '9') { |name, env_val, hash_val | 10 } # Raises TypeError (no implicit conversion of Integer into String)
       #     ENV # => {"bar"=>"1", "bat"=>"8", "foo"=>"7"}
       #
@@ -908,10 +832,12 @@ module RBS
 
       # <!--
       #   rdoc-file=hash.c
-      #   - ENV.update(hash)                                     -> ENV
-      #   - ENV.update(hash) { |name, env_val, hash_val| block } -> ENV
-      #   - ENV.merge!(hash)                                     -> ENV
-      #   - ENV.merge!(hash) { |name, env_val, hash_val| block } -> ENV
+      #   - ENV.update                                              -> ENV
+      #   - ENV.update(*hashes)                                     -> ENV
+      #   - ENV.update(*hashes) { |name, env_val, hash_val| block } -> ENV
+      #   - ENV.merge!                                              -> ENV
+      #   - ENV.merge!(*hashes)                                     -> ENV
+      #   - ENV.merge!(*hashes) { |name, env_val, hash_val| block } -> ENV
       # -->
       # ENV.update is an alias for ENV.merge!.
       #
@@ -930,7 +856,7 @@ module RBS
       #     ENV.merge!('foo' => '5') { |name, env_val, hash_val | env_val + hash_val } # => {"bar"=>"1", "foo"=>"45"}
       #
       # Raises an exception if a name or value is invalid (see [Invalid Names and
-      # Values](#class-ENV-label-Invalid+Names+and+Values));
+      # Values](rdoc-ref:ENV@Invalid+Names+and+Values));
       #     ENV.replace('foo' => '0', 'bar' => '1')
       #     ENV.merge!('foo' => '6', :bar => '7', 'baz' => '9') # Raises TypeError (no implicit conversion of Symbol into String)
       #     ENV # => {"bar"=>"1", "foo"=>"6"}
@@ -938,7 +864,7 @@ module RBS
       #     ENV # => {"bar"=>"1", "foo"=>"7"}
       #
       # Raises an exception if the block returns an invalid name: (see [Invalid Names
-      # and Values](#class-ENV-label-Invalid+Names+and+Values)):
+      # and Values](rdoc-ref:ENV@Invalid+Names+and+Values)):
       #     ENV.merge!('bat' => '8', 'foo' => '9') { |name, env_val, hash_val | 10 } # Raises TypeError (no implicit conversion of Integer into String)
       #     ENV # => {"bar"=>"1", "bat"=>"8", "foo"=>"7"}
       #
@@ -990,14 +916,14 @@ module RBS
       #     ENV.key('0') # => "foo"
       #
       # The order in which environment variables are examined is OS-dependent. See
-      # [About Ordering](#class-ENV-label-About+Ordering).
+      # [About Ordering](rdoc-ref:ENV@About+Ordering).
       #
       # Returns `nil` if there is no such value.
       #
       # Raises an exception if `value` is invalid:
       #     ENV.key(Object.new) # raises TypeError (no implicit conversion of Object into String)
       #
-      # See [Invalid Names and Values](#class-ENV-label-Invalid+Names+and+Values).
+      # See [Invalid Names and Values](rdoc-ref:ENV@Invalid+Names+and+Values).
       #
       %a{annotate:rdoc:copy:ENV.key}
       def key: (String value) -> String?
@@ -1050,7 +976,7 @@ module RBS
       #     ENV.keys # => ['bar', 'foo']
       #
       # The order of the names is OS-dependent. See [About
-      # Ordering](#class-ENV-label-About+Ordering).
+      # Ordering](rdoc-ref:ENV@About+Ordering).
       #
       # Returns the empty Array if ENV is empty.
       #
@@ -1066,7 +992,7 @@ module RBS
       #     ENV.values # => ['1', '0']
       #
       # The order of the values is OS-dependent. See [About
-      # Ordering](#class-ENV-label-About+Ordering).
+      # Ordering](rdoc-ref:ENV@About+Ordering).
       #
       # Returns the empty Array if ENV is empty.
       #
@@ -1088,7 +1014,7 @@ module RBS
       # Returns an empty Array if no names given.
       #
       # Raises an exception if any name is invalid. See [Invalid Names and
-      # Values](#class-ENV-label-Invalid+Names+and+Values).
+      # Values](rdoc-ref:ENV@Invalid+Names+and+Values).
       #
       %a{annotate:rdoc:copy:ENV.values_at}
       def values_at: (*String names) -> ::Array[String?]
@@ -1314,7 +1240,7 @@ module RBS
       #     ENV.rassoc('0') # => ["bar", "0"]
       #
       # The order in which environment variables are examined is OS-dependent. See
-      # [About Ordering](#class-ENV-label-About+Ordering).
+      # [About Ordering](rdoc-ref:ENV@About+Ordering).
       #
       # Returns `nil` if there is no such environment variable.
       #

@@ -233,9 +233,9 @@ module ObjectSpace
 
   # <!--
   #   rdoc-file=ext/objspace/lib/objspace.rb
-  #   - ObjectSpace.dump(obj[, output: :string]) # => "{ ... }"
-  #   - ObjectSpace.dump(obj, output: :file)     # => #<File:/tmp/rubyobj20131125-88733-1xkfmpv.json>
-  #   - ObjectSpace.dump(obj, output: :stdout)   # => nil
+  #   - ObjectSpace.dump(obj[, output: :string]) -> "{ ... }"
+  #   - ObjectSpace.dump(obj, output: :file) -> #<File:/tmp/rubyobj20131125-88733-1xkfmpv.json>
+  #   - ObjectSpace.dump(obj, output: :stdout) -> nil
   # -->
   # Dump the contents of a ruby object as JSON.
   #
@@ -247,26 +247,43 @@ module ObjectSpace
 
   # <!--
   #   rdoc-file=ext/objspace/lib/objspace.rb
-  #   - ObjectSpace.dump_all([output: :file]) # => #<File:/tmp/rubyheap20131125-88469-laoj3v.json>
-  #   - ObjectSpace.dump_all(output: :stdout) # => nil
-  #   - ObjectSpace.dump_all(output: :string) # => "{...}\n{...}\n..."
-  #   - ObjectSpace.dump_all(output:
-  #   - File.open('heap.json','w'))         # => #<File:heap.json>
-  #   - ObjectSpace.dump_all(output: :string,
-  #   - since: 42)                          # => "{...}\n{...}\n..."
+  #   - ObjectSpace.dump_all([output: :file]) -> #<File:/tmp/rubyheap20131125-88469-laoj3v.json>
+  #   - ObjectSpace.dump_all(output: :stdout) -> nil
+  #   - ObjectSpace.dump_all(output: :string) -> "{...}\n{...}\n..."
+  #   - ObjectSpace.dump_all(output: File.open('heap.json','w')) -> #<File:heap.json>
+  #   - ObjectSpace.dump_all(output: :string, since: 42) -> "{...}\n{...}\n..."
   # -->
   # Dump the contents of the ruby heap as JSON.
+  #
+  # *full* must be a boolean. If true all heap slots are dumped including the
+  # empty ones (T_NONE).
   #
   # *since* must be a non-negative integer or `nil`.
   #
   # If *since* is a positive integer, only objects of that generation and newer
   # generations are dumped. The current generation can be accessed using
-  # GC::count.
-  #
-  # Objects that were allocated without object allocation tracing enabled are
-  # ignored. See ::trace_object_allocations for more information and examples.
+  # GC::count. Objects that were allocated without object allocation tracing
+  # enabled are ignored. See ::trace_object_allocations for more information and
+  # examples.
   #
   # If *since* is omitted or is `nil`, all objects are dumped.
+  #
+  # *shapes* must be a boolean or a non-negative integer.
+  #
+  # If *shapes* is a positive integer, only shapes newer than the provided shape
+  # id are dumped. The current shape_id can be accessed using
+  # `RubyVM.stat(:next_shape_id)`.
+  #
+  # If *shapes* is `false`, no shapes are dumped.
+  #
+  # To only dump objects allocated past a certain point you can combine *since*
+  # and *shapes*:
+  #     ObjectSpace.trace_object_allocations
+  #     GC.start
+  #     gc_generation = GC.count
+  #     shape_generation = RubyVM.stat(:next_shape_id)
+  #     call_method_to_instrument
+  #     ObjectSpace.dump_all(since: gc_generation, shapes: shape_generation)
   #
   # This method is only expected to work with C Ruby. This is an experimental
   # method and is subject to change. In particular, the function signature and

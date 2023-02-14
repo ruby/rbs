@@ -52,7 +52,7 @@ class Binding
 
   # <!--
   #   rdoc-file=lib/irb.rb
-  #   - irb()
+  #   - irb(show_code: true)
   # -->
   # Opens an IRB session where `binding.irb` is called which allows for
   # interactive debugging. You can call any methods or variables available in the

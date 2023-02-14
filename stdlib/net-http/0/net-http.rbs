@@ -55,107 +55,283 @@ module Net
   end
 
   # <!-- rdoc-file=lib/net/http.rb -->
-  # ## An HTTP client API for Ruby.
+  # Class Net::HTTP provides a rich library that implements the client in a
+  # client-server model that uses the HTTP request-response protocol. For
+  # information about HTTP, see
   #
-  # Net::HTTP provides a rich library which can be used to build HTTP user-agents.
-  #  For more details about HTTP see
-  # [RFC2616](http://www.ietf.org/rfc/rfc2616.txt).
+  # *   [Hypertext Transfer
+  #     Protocol](https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol).
+  # *   [Technical
+  #     overview](https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol#Techni
+  #     cal_overview).
   #
-  # Net::HTTP is designed to work closely with URI.  URI::HTTP#host,
-  # URI::HTTP#port and URI::HTTP#request_uri are designed to work with Net::HTTP.
   #
-  # If you are only performing a few GET requests you should try OpenURI.
+  # Note: If you are performing only a few GET requests, consider using
+  # [OpenURI](rdoc-ref:OpenURI); otherwise, read on.
   #
-  # ## Simple Examples
+  # ## Synopsis
   #
-  # All examples assume you have loaded Net::HTTP with:
+  # If you are already familiar with HTTP, this synopsis may be helpful.
+  #
+  # [Session](rdoc-ref:Net::HTTP@Sessions) with multiple requests for [HTTP
+  # methods](https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol#Request_met
+  # hods):
+  #
+  #     Net::HTTP.start(hostname) do |http|
+  #       # Session started automatically before block execution.
+  #       http.get(path_or_uri, headers = {})
+  #       http.head(path_or_uri, headers = {})
+  #       http.post(path_or_uri, data, headers = {})  # Can also have a block.
+  #       http.put(path_or_uri, data, headers = {})
+  #       http.delete(path_or_uri, headers = {Depth: 'Infinity'})
+  #       http.options(path_or_uri, headers = {})
+  #       http.trace(path_or_uri, headers = {})
+  #       http.patch(path_or_uri, data, headers = {}) # Can also have a block.
+  #       # Session finished automatically at block exit.
+  #     end
+  #
+  # [Session](rdoc-ref:Net::HTTP@Sessions) with multiple requests for [WebDAV
+  # methods](https://en.wikipedia.org/wiki/WebDAV#Implementation):
+  #
+  #     Net::HTTP.start(hostname) do |http|
+  #       # Session started automatically before block execution.
+  #       http.copy(path_or_uri, headers = {})
+  #       http.lock(path_or_uri, body, headers = {})
+  #       http.mkcol(path_or_uri, body = nil, headers = {})
+  #       http.move(path_or_uri, headers = {})
+  #       http.propfind(path_or_uri, body = nil, headers = {'Depth' => '0'})
+  #       http.proppatch(path_or_uri, body, headers = {})
+  #       http.unlock(path_or_uri, body, headers = {})
+  #       # Session finished automatically at block exit.
+  #     end
+  #
+  # Each of the following methods automatically starts and finishes a
+  # [session](rdoc-ref:Net::HTTP@Sessions) that sends a single request:
+  #
+  #     # Return string response body.
+  #     Net::HTTP.get(hostname, path, port = 80)
+  #     Net::HTTP.get(uri, headers = {}, port = 80)
+  #
+  #     # Write string response body to $stdout.
+  #     Net::HTTP.get_print(hostname, path_or_uri, port = 80)
+  #     Net::HTTP.get_print(uri, headers = {}, port = 80)
+  #
+  #     # Return response as Net::HTTPResponse object.
+  #     Net::HTTP.get_response(hostname, path_or_uri, port = 80)
+  #     Net::HTTP.get_response(uri, headers = {}, port = 80)
+  #
+  #     Net::HTTP.post(uri, data, headers = {})
+  #     Net::HTTP.post_form(uri, params)
+  #
+  # ## About the Examples
+  #
+  # Examples here assume that `net/http` has been required (which also requires
+  # `uri`):
   #
   #     require 'net/http'
   #
-  # This will also require 'uri' so you don't need to require it separately.
+  # Many code examples here use these example websites:
   #
-  # The Net::HTTP methods in the following section do not persist connections.
-  # They are not recommended if you are performing many HTTP requests.
+  # *   https://jsonplaceholder.typicode.com.
+  # *   http://example.com.
   #
-  # ### GET
   #
-  #     Net::HTTP.get('example.com', '/index.html') # => String
+  # Some examples also assume these variables:
   #
-  # ### GET by URI
+  #     uri = URI('https://jsonplaceholder.typicode.com')
+  #     uri.freeze # Examples may not modify.
+  #     hostname = uri.hostname # => "jsonplaceholder.typicode.com"
+  #     port = uri.port         # => 443
   #
-  #     uri = URI('http://example.com/index.html?count=10')
-  #     Net::HTTP.get(uri) # => String
+  # So that example requests may be written as:
   #
-  # ### GET with Dynamic Parameters
-  #
-  #     uri = URI('http://example.com/index.html')
-  #     params = { :limit => 10, :page => 3 }
-  #     uri.query = URI.encode_www_form(params)
-  #
-  #     res = Net::HTTP.get_response(uri)
-  #     puts res.body if res.is_a?(Net::HTTPSuccess)
-  #
-  # ### POST
-  #
-  #     uri = URI('http://www.example.com/search.cgi')
-  #     res = Net::HTTP.post_form(uri, 'q' => 'ruby', 'max' => '50')
-  #     puts res.body
-  #
-  # ### POST with Multiple Values
-  #
-  #     uri = URI('http://www.example.com/search.cgi')
-  #     res = Net::HTTP.post_form(uri, 'q' => ['ruby', 'perl'], 'max' => '50')
-  #     puts res.body
-  #
-  # ## How to use Net::HTTP
-  #
-  # The following example code can be used as the basis of an HTTP user-agent
-  # which can perform a variety of request types using persistent connections.
-  #
-  #     uri = URI('http://example.com/some_path?query=string')
-  #
-  #     Net::HTTP.start(uri.host, uri.port) do |http|
-  #       request = Net::HTTP::Get.new uri
-  #
-  #       response = http.request request # Net::HTTPResponse object
+  #     Net::HTTP.get(uri)
+  #     Net::HTTP.get(hostname, '/index.html')
+  #     Net::HTTP.start(hostname) do |http|
+  #       http.get('/todos/1')
+  #       http.get('/todos/2')
   #     end
   #
-  # Net::HTTP::start immediately creates a connection to an HTTP server which is
-  # kept open for the duration of the block.  The connection will remain open for
-  # multiple requests in the block if the server indicates it supports persistent
-  # connections.
+  # An example that needs a modified URI first duplicates `uri`, then modifies the
+  # duplicate:
   #
-  # If you wish to re-use a connection across multiple HTTP requests without
-  # automatically closing it you can use ::new and then call #start and #finish
-  # manually.
+  #     _uri = uri.dup
+  #     _uri.path = '/todos/1'
   #
-  # The request types Net::HTTP supports are listed below in the section "HTTP
-  # Request Classes".
+  # ## URIs
   #
-  # For all the Net::HTTP request objects and shortcut request methods you may
-  # supply either a String for the request path or a URI from which Net::HTTP will
-  # extract the request path.
+  # On the internet, a URI ([Universal Resource
+  # Identifier](https://en.wikipedia.org/wiki/Uniform_Resource_Identifier)) is a
+  # string that identifies a particular resource. It consists of some or all of:
+  # scheme, hostname, path, query, and fragment; see [URI
+  # syntax](https://en.wikipedia.org/wiki/Uniform_Resource_Identifier#Syntax).
   #
-  # ### Response Data
+  # A Ruby [URI::Generic](rdoc-ref:URI::Generic) object represents an internet
+  # URI. It provides, among others, methods `scheme`, `hostname`, `path`, `query`,
+  # and `fragment`.
   #
-  #     uri = URI('http://example.com/index.html')
-  #     res = Net::HTTP.get_response(uri)
+  # ### Schemes
   #
-  #     # Headers
-  #     res['Set-Cookie']            # => String
-  #     res.get_fields('set-cookie') # => Array
-  #     res.to_hash['set-cookie']    # => Array
-  #     puts "Headers: #{res.to_hash.inspect}"
+  # An internet URI has a
+  # [scheme](https://en.wikipedia.org/wiki/List_of_URI_schemes).
   #
-  #     # Status
-  #     puts res.code       # => '200'
-  #     puts res.message    # => 'OK'
-  #     puts res.class.name # => 'HTTPOK'
+  # The two schemes supported in Net::HTTP are `'https'` and `'http'`:
   #
-  #     # Body
-  #     puts res.body
+  #     uri.scheme                       # => "https"
+  #     URI('http://example.com').scheme # => "http"
   #
-  # ### Following Redirection
+  # ### Hostnames
+  #
+  # A hostname identifies a server (host) to which requests may be sent:
+  #
+  #     hostname = uri.hostname # => "jsonplaceholder.typicode.com"
+  #     Net::HTTP.start(hostname) do |http|
+  #       # Some HTTP stuff.
+  #     end
+  #
+  # ### Paths
+  #
+  # A host-specific path identifies a resource on the host:
+  #
+  #     _uri = uri.dup
+  #     _uri.path = '/todos/1'
+  #     hostname = _uri.hostname
+  #     path = _uri.path
+  #     Net::HTTP.get(hostname, path)
+  #
+  # ### Queries
+  #
+  # A host-specific query adds name/value pairs to the URI:
+  #
+  #     _uri = uri.dup
+  #     params = {userId: 1, completed: false}
+  #     _uri.query = URI.encode_www_form(params)
+  #     _uri # => #<URI::HTTPS https://jsonplaceholder.typicode.com?userId=1&completed=false>
+  #     Net::HTTP.get(_uri)
+  #
+  # ### Fragments
+  #
+  # A [URI fragment](https://en.wikipedia.org/wiki/URI_fragment) has no effect in
+  # Net::HTTP; the same data is returned, regardless of whether a fragment is
+  # included.
+  #
+  # ## Request Headers
+  #
+  # Request headers may be used to pass additional information to the host,
+  # similar to arguments passed in a method call; each header is a name/value
+  # pair.
+  #
+  # Each of the Net::HTTP methods that sends a request to the host has optional
+  # argument `headers`, where the headers are expressed as a hash of
+  # field-name/value pairs:
+  #
+  #     headers = {Accept: 'application/json', Connection: 'Keep-Alive'}
+  #     Net::HTTP.get(uri, headers)
+  #
+  # See lists of both standard request fields and common request fields at
+  # [Request
+  # Fields](https://en.wikipedia.org/wiki/List_of_HTTP_header_fields#Request_field
+  # s). A host may also accept other custom fields.
+  #
+  # ## Sessions
+  #
+  # A *session* is a connection between a server (host) and a client that:
+  #
+  # *   Is begun by instance method Net::HTTP#start.
+  # *   May contain any number of requests.
+  # *   Is ended by instance method Net::HTTP#finish.
+  #
+  #
+  # See example sessions at the [Synopsis](rdoc-ref:Net::HTTP@Synopsis).
+  #
+  # ### Session Using Net::HTTP.start
+  #
+  # If you have many requests to make to a single host (and port), consider using
+  # singleton method Net::HTTP.start with a block; the method handles the session
+  # automatically by:
+  #
+  # *   Calling #start before block execution.
+  # *   Executing the block.
+  # *   Calling #finish after block execution.
+  #
+  #
+  # In the block, you can use these instance methods, each of which that sends a
+  # single request:
+  #
+  # *   [HTTP
+  #     methods](https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol#Request
+  #     _methods):
+  #
+  #     *   #get, #request_get: GET.
+  #     *   #head, #request_head: HEAD.
+  #     *   #post, #request_post: POST.
+  #     *   #delete: DELETE.
+  #     *   #options: OPTIONS.
+  #     *   #trace: TRACE.
+  #     *   #patch: PATCH.
+  #
+  #
+  # *   [WebDAV methods](https://en.wikipedia.org/wiki/WebDAV#Implementation):
+  #
+  #     *   #copy: COPY.
+  #     *   #lock: LOCK.
+  #     *   #mkcol: MKCOL.
+  #     *   #move: MOVE.
+  #     *   #propfind: PROPFIND.
+  #     *   #proppatch: PROPPATCH.
+  #     *   #unlock: UNLOCK.
+  #
+  #
+  #
+  # ### Session Using Net::HTTP.start and Net::HTTP.finish
+  #
+  # You can manage a session manually using methods #start and #finish:
+  #
+  #     http = Net::HTTP.new(hostname)
+  #     http.start
+  #     http.get('/todos/1')
+  #     http.get('/todos/2')
+  #     http.delete('/posts/1')
+  #     http.finish # Needed to free resources.
+  #
+  # ### Single-Request Session
+  #
+  # Certain convenience methods automatically handle a session by:
+  #
+  # *   Creating an HTTP object
+  # *   Starting a session.
+  # *   Sending a single request.
+  # *   Finishing the session.
+  # *   Destroying the object.
+  #
+  #
+  # Such methods that send GET requests:
+  #
+  # *   ::get: Returns the string response body.
+  # *   ::get_print: Writes the string response body to $stdout.
+  # *   ::get_response: Returns a Net::HTTPResponse object.
+  #
+  #
+  # Such methods that send POST requests:
+  #
+  # *   ::post: Posts data to the host.
+  # *   ::post_form: Posts form data to the host.
+  #
+  #
+  # ## HTTP Requests and Responses
+  #
+  # Many of the methods above are convenience methods, each of which sends a
+  # request and returns a string without directly using Net::HTTPRequest and
+  # Net::HTTPResponse objects.
+  #
+  # You can, however, directly create a request object, send the request, and
+  # retrieve the response object; see:
+  #
+  # *   Net::HTTPRequest.
+  # *   Net::HTTPResponse.
+  #
+  #
+  # ## Following Redirection
   #
   # Each Net::HTTPResponse object belongs to a class for its response code.
   #
@@ -186,56 +362,7 @@ module Net
   #
   #     print fetch('http://www.ruby-lang.org')
   #
-  # ### POST
-  #
-  # A POST can be made using the Net::HTTP::Post request class.  This example
-  # creates a URL encoded POST body:
-  #
-  #     uri = URI('http://www.example.com/todo.cgi')
-  #     req = Net::HTTP::Post.new(uri)
-  #     req.set_form_data('from' => '2005-01-01', 'to' => '2005-03-31')
-  #
-  #     res = Net::HTTP.start(uri.hostname, uri.port) do |http|
-  #       http.request(req)
-  #     end
-  #
-  #     case res
-  #     when Net::HTTPSuccess, Net::HTTPRedirection
-  #       # OK
-  #     else
-  #       res.value
-  #     end
-  #
-  # To send multipart/form-data use Net::HTTPHeader#set_form:
-  #
-  #     req = Net::HTTP::Post.new(uri)
-  #     req.set_form([['upload', File.open('foo.bar')]], 'multipart/form-data')
-  #
-  # Other requests that can contain a body such as PUT can be created in the same
-  # way using the corresponding request class (Net::HTTP::Put).
-  #
-  # ### Setting Headers
-  #
-  # The following example performs a conditional GET using the If-Modified-Since
-  # header.  If the files has not been modified since the time in the header a Not
-  # Modified response will be returned.  See RFC 2616 section 9.3 for further
-  # details.
-  #
-  #     uri = URI('http://example.com/cached_response')
-  #     file = File.stat 'cached_response'
-  #
-  #     req = Net::HTTP::Get.new(uri)
-  #     req['If-Modified-Since'] = file.mtime.rfc2822
-  #
-  #     res = Net::HTTP.start(uri.hostname, uri.port) {|http|
-  #       http.request(req)
-  #     }
-  #
-  #     open 'cached_response', 'w' do |io|
-  #       io.write res.body
-  #     end if res.is_a?(Net::HTTPSuccess)
-  #
-  # ### Basic Authentication
+  # ## Basic Authentication
   #
   # Basic authentication is performed according to
   # [RFC2617](http://www.ietf.org/rfc/rfc2617.txt).
@@ -250,7 +377,7 @@ module Net
   #     }
   #     puts res.body
   #
-  # ### Streaming Response Bodies
+  # ## Streaming Response Bodies
   #
   # By default Net::HTTP reads an entire response into memory.  If you are
   # handling large files or wish to implement a progress bar you can instead
@@ -270,7 +397,7 @@ module Net
   #       end
   #     end
   #
-  # ### HTTPS
+  # ## HTTPS
   #
   # HTTPS is enabled for an HTTP connection by Net::HTTP#use_ssl=.
   #
@@ -291,7 +418,7 @@ module Net
   # In previous versions of Ruby you would need to require 'net/https' to use
   # HTTPS. This is no longer true.
   #
-  # ### Proxies
+  # ## Proxies
   #
   # Net::HTTP will automatically create a proxy from the `http_proxy` environment
   # variable if it is present.  To disable use of `http_proxy`, pass `nil` for the
@@ -309,178 +436,13 @@ module Net
   # See Net::HTTP.new for further details and examples such as proxies that
   # require a username and password.
   #
-  # ### Compression
+  # ## Compression
   #
   # Net::HTTP automatically adds Accept-Encoding for compression of response
   # bodies and automatically decompresses gzip and deflate responses unless a
   # Range header was sent.
   #
   # Compression can be disabled through the Accept-Encoding: identity header.
-  #
-  # ## HTTP Request Classes
-  #
-  # Here is the HTTP request class hierarchy.
-  #
-  # *   Net::HTTPRequest
-  #     *   Net::HTTP::Get
-  #     *   Net::HTTP::Head
-  #     *   Net::HTTP::Post
-  #     *   Net::HTTP::Patch
-  #     *   Net::HTTP::Put
-  #     *   Net::HTTP::Proppatch
-  #     *   Net::HTTP::Lock
-  #     *   Net::HTTP::Unlock
-  #     *   Net::HTTP::Options
-  #     *   Net::HTTP::Propfind
-  #     *   Net::HTTP::Delete
-  #     *   Net::HTTP::Move
-  #     *   Net::HTTP::Copy
-  #     *   Net::HTTP::Mkcol
-  #     *   Net::HTTP::Trace
-  #
-  #
-  #
-  # ## HTTP Response Classes
-  #
-  # Here is HTTP response class hierarchy.  All classes are defined in Net module
-  # and are subclasses of Net::HTTPResponse.
-  #
-  # HTTPUnknownResponse
-  # :   For unhandled HTTP extensions
-  # HTTPInformation
-  # :   1xx
-  # HTTPContinue
-  # :   100
-  # HTTPSwitchProtocol
-  # :   101
-  # HTTPProcessing
-  # :   102
-  # HTTPEarlyHints
-  # :   103
-  # HTTPSuccess
-  # :   2xx
-  # HTTPOK
-  # :   200
-  # HTTPCreated
-  # :   201
-  # HTTPAccepted
-  # :   202
-  # HTTPNonAuthoritativeInformation
-  # :   203
-  # HTTPNoContent
-  # :   204
-  # HTTPResetContent
-  # :   205
-  # HTTPPartialContent
-  # :   206
-  # HTTPMultiStatus
-  # :   207
-  # HTTPAlreadyReported
-  # :   208
-  # HTTPIMUsed
-  # :   226
-  # HTTPRedirection
-  # :   3xx
-  # HTTPMultipleChoices
-  # :   300
-  # HTTPMovedPermanently
-  # :   301
-  # HTTPFound
-  # :   302
-  # HTTPSeeOther
-  # :   303
-  # HTTPNotModified
-  # :   304
-  # HTTPUseProxy
-  # :   305
-  # HTTPTemporaryRedirect
-  # :   307
-  # HTTPPermanentRedirect
-  # :   308
-  # HTTPClientError
-  # :   4xx
-  # HTTPBadRequest
-  # :   400
-  # HTTPUnauthorized
-  # :   401
-  # HTTPPaymentRequired
-  # :   402
-  # HTTPForbidden
-  # :   403
-  # HTTPNotFound
-  # :   404
-  # HTTPMethodNotAllowed
-  # :   405
-  # HTTPNotAcceptable
-  # :   406
-  # HTTPProxyAuthenticationRequired
-  # :   407
-  # HTTPRequestTimeOut
-  # :   408
-  # HTTPConflict
-  # :   409
-  # HTTPGone
-  # :   410
-  # HTTPLengthRequired
-  # :   411
-  # HTTPPreconditionFailed
-  # :   412
-  # HTTPRequestEntityTooLarge
-  # :   413
-  # HTTPRequestURITooLong
-  # :   414
-  # HTTPUnsupportedMediaType
-  # :   415
-  # HTTPRequestedRangeNotSatisfiable
-  # :   416
-  # HTTPExpectationFailed
-  # :   417
-  # HTTPMisdirectedRequest
-  # :   421
-  # HTTPUnprocessableEntity
-  # :   422
-  # HTTPLocked
-  # :   423
-  # HTTPFailedDependency
-  # :   424
-  # HTTPUpgradeRequired
-  # :   426
-  # HTTPPreconditionRequired
-  # :   428
-  # HTTPTooManyRequests
-  # :   429
-  # HTTPRequestHeaderFieldsTooLarge
-  # :   431
-  # HTTPUnavailableForLegalReasons
-  # :   451
-  # HTTPServerError
-  # :   5xx
-  # HTTPInternalServerError
-  # :   500
-  # HTTPNotImplemented
-  # :   501
-  # HTTPBadGateway
-  # :   502
-  # HTTPServiceUnavailable
-  # :   503
-  # HTTPGatewayTimeOut
-  # :   504
-  # HTTPVersionNotSupported
-  # :   505
-  # HTTPVariantAlsoNegotiates
-  # :   506
-  # HTTPInsufficientStorage
-  # :   507
-  # HTTPLoopDetected
-  # :   508
-  # HTTPNotExtended
-  # :   510
-  # HTTPNetworkAuthenticationRequired
-  # :   511
-  #
-  #
-  # There is also the Net::HTTPBadResponse exception which is raised when there is
-  # a protocol error.
   #
   class HTTP < Protocol
     # :stopdoc:
@@ -496,8 +458,7 @@ module Net
     #   rdoc-file=lib/net/http.rb
     #   - version_1_2()
     # -->
-    # Turns on net/http 1.2 (Ruby 1.8) features. Defaults to ON in Ruby 1.8 or
-    # later.
+    # Returns `true`; retained for compatibility.
     #
     def self.version_1_2: () -> ::TrueClass
 
@@ -505,7 +466,7 @@ module Net
     #   rdoc-file=lib/net/http.rb
     #   - version_1_2?()
     # -->
-    # Returns true if net/http is in version 1.2 mode. Defaults to true.
+    # Returns `true`; retained for compatibility.
     #
     def self.version_1_2?: () -> ::TrueClass
 
@@ -522,65 +483,57 @@ module Net
 
     # <!--
     #   rdoc-file=lib/net/http.rb
-    #   - get_print(uri_or_host, path_or_headers = nil, port = nil)
+    #   - Net::HTTP.get_print(hostname, path, port = 80) -> nil
+    #   - Net::HTTP:get_print(uri, headers = {}, port = uri.port) -> nil
     # -->
-    # Gets the body text from the target and outputs it to $stdout.  The target can
-    # either be specified as (`uri`, `headers`), or as (`host`, `path`, `port` =
-    # 80); so:
-    #
-    #     Net::HTTP.get_print URI('http://www.example.com/index.html')
-    #
-    # or:
-    #
-    #     Net::HTTP.get_print 'www.example.com', '/index.html'
-    #
-    # you can also specify request headers:
-    #
-    #     Net::HTTP.get_print URI('http://www.example.com/index.html'), { 'Accept' => 'text/html' }
+    # Like Net::HTTP.get, but writes the returned body to $stdout; returns `nil`.
     #
     def self.get_print: (URI::Generic uri, ?Hash[String, untyped] header) -> void
                       | (String host, String path, ?Integer port) -> void
 
     # <!--
     #   rdoc-file=lib/net/http.rb
-    #   - get(uri_or_host, path_or_headers = nil, port = nil)
+    #   - Net::HTTP.get(hostname, path, port = 80) -> body
+    #   - Net::HTTP:get(uri, headers = {}, port = uri.port) -> body
     # -->
-    # Sends a GET request to the target and returns the HTTP response as a string.
-    # The target can either be specified as (`uri`, `headers`), or as (`host`,
-    # `path`, `port` = 80); so:
+    # Sends a GET request and returns the HTTP response body as a string.
     #
-    #     print Net::HTTP.get(URI('http://www.example.com/index.html'))
+    # With string arguments `hostname` and `path`:
     #
-    # or:
+    #     hostname = 'jsonplaceholder.typicode.com'
+    #     path = '/todos/1'
+    #     puts Net::HTTP.get(hostname, path)
     #
-    #     print Net::HTTP.get('www.example.com', '/index.html')
+    # Output:
     #
-    # you can also specify request headers:
+    #     {
+    #       "userId": 1,
+    #       "id": 1,
+    #       "title": "delectus aut autem",
+    #       "completed": false
+    #     }
     #
-    #     Net::HTTP.get(URI('http://www.example.com/index.html'), { 'Accept' => 'text/html' })
+    # With URI object `uri` and optional hash argument `headers`:
+    #
+    #     uri = URI('https://jsonplaceholder.typicode.com/todos/1')
+    #     headers = {'Content-type' => 'application/json; charset=UTF-8'}
+    #     Net::HTTP.get(uri, headers)
+    #
+    # Related:
+    #
+    # *   Net::HTTP::Get: request class for HTTP method `GET`.
+    # *   Net::HTTP#get: convenience method for HTTP method `GET`.
     #
     def self.get: (URI::Generic uri, ?Hash[String, untyped] header) -> String
                 | (String host, String path, ?Integer port) -> String
 
     # <!--
     #   rdoc-file=lib/net/http.rb
-    #   - get_response(uri_or_host, path_or_headers = nil, port = nil, &block)
+    #   - Net::HTTP.get_response(hostname, path, port = 80) -> http_response
+    #   - Net::HTTP:get_response(uri, headers = {}, port = uri.port) -> http_response
     # -->
-    # Sends a GET request to the target and returns the HTTP response as a
-    # Net::HTTPResponse object.  The target can either be specified as (`uri`,
-    # `headers`), or as (`host`, `path`, `port` = 80); so:
-    #
-    #     res = Net::HTTP.get_response(URI('http://www.example.com/index.html'))
-    #     print res.body
-    #
-    # or:
-    #
-    #     res = Net::HTTP.get_response('www.example.com', '/index.html')
-    #     print res.body
-    #
-    # you can also specify request headers:
-    #
-    #     Net::HTTP.get_response(URI('http://www.example.com/index.html'), { 'Accept' => 'text/html' })
+    # Like Net::HTTP.get, but returns a Net::HTTPResponse object instead of the body
+    # string.
     #
     def self.get_response: (URI::Generic uri, ?Hash[String, untyped] header) ?{ (Net::HTTPResponse) -> void } -> Net::HTTPResponse
                          | (String host, String path, ?Integer port) -> Net::HTTPResponse
@@ -589,16 +542,30 @@ module Net
     #   rdoc-file=lib/net/http.rb
     #   - post(url, data, header = nil)
     # -->
-    # Posts data to the specified URI object.
+    # Posts data to a host; returns a Net::HTTPResponse object.
     #
-    # Example:
+    # Argument `url` must be a URL; argument `data` must be a string:
     #
-    #     require 'net/http'
-    #     require 'uri'
+    #     _uri = uri.dup
+    #     _uri.path = '/posts'
+    #     data = '{"title": "foo", "body": "bar", "userId": 1}'
+    #     headers = {'content-type': 'application/json'}
+    #     res = Net::HTTP.post(_uri, data, headers) # => #<Net::HTTPCreated 201 Created readbody=true>
+    #     puts res.body
     #
-    #     Net::HTTP.post URI('http://www.example.com/api/search'),
-    #                    { "q" => "ruby", "max" => "50" }.to_json,
-    #                    "Content-Type" => "application/json"
+    # Output:
+    #
+    #     {
+    #       "title": "foo",
+    #       "body": "bar",
+    #       "userId": 1,
+    #       "id": 101
+    #     }
+    #
+    # Related:
+    #
+    # *   Net::HTTP::Post: request class for HTTP method `POST`.
+    # *   Net::HTTP#post: convenience method for HTTP method `POST`.
     #
     def self.post: (URI::Generic url, String data, ?Hash[String, untyped] header) -> Net::HTTPResponse
 
@@ -606,21 +573,24 @@ module Net
     #   rdoc-file=lib/net/http.rb
     #   - post_form(url, params)
     # -->
-    # Posts HTML form data to the specified URI object. The form data must be
-    # provided as a Hash mapping from String to String. Example:
+    # Posts data to a host; returns a Net::HTTPResponse object.
     #
-    #     { "cmd" => "search", "q" => "ruby", "max" => "50" }
+    # Argument `url` must be a URI; argument `data` must be a hash:
     #
-    # This method also does Basic Authentication if and only if `url`.user exists.
-    # But userinfo for authentication is deprecated (RFC3986). So this feature will
-    # be removed.
+    #     _uri = uri.dup
+    #     _uri.path = '/posts'
+    #     data = {title: 'foo', body: 'bar', userId: 1}
+    #     res = Net::HTTP.post_form(_uri, data) # => #<Net::HTTPCreated 201 Created readbody=true>
+    #     puts res.body
     #
-    # Example:
+    # Output:
     #
-    #     require 'net/http'
-    #
-    #     Net::HTTP.post_form URI('http://www.example.com/search.cgi'),
-    #                         { "q" => "ruby", "max" => "50" }
+    #     {
+    #       "title": "foo",
+    #       "body": "bar",
+    #       "userId": "1",
+    #       "id": 101
+    #     }
     #
     def self.post_form: (URI::Generic url, Hash[String, untyped] params) -> Net::HTTPResponse
 
@@ -628,7 +598,9 @@ module Net
     #   rdoc-file=lib/net/http.rb
     #   - default_port()
     # -->
-    # The default port to use for HTTP requests; defaults to 80.
+    # Returns intger `80`, the default port to use for HTTP requests:
+    #
+    #     Net::HTTP.default_port # => 80
     #
     def self.default_port: () -> Integer
 
@@ -636,7 +608,9 @@ module Net
     #   rdoc-file=lib/net/http.rb
     #   - http_default_port()
     # -->
-    # The default port to use for HTTP requests; defaults to 80.
+    # Returns integer `80`, the default port to use for HTTP requests:
+    #
+    #     Net::HTTP.http_default_port # => 80
     #
     def self.http_default_port: () -> Integer
 
@@ -644,48 +618,100 @@ module Net
     #   rdoc-file=lib/net/http.rb
     #   - https_default_port()
     # -->
-    # The default port to use for HTTPS requests; defaults to 443.
+    # Returns integer `443`, the default port to use for HTTPS requests:
+    #
+    #     Net::HTTP.https_default_port # => 443
     #
     def self.https_default_port: () -> Integer
 
     # <!--
     #   rdoc-file=lib/net/http.rb
-    #   - HTTP.start(address, port, p_addr, p_port, p_user, p_pass, &block)
-    #   - HTTP.start(address, port=nil, p_addr=:ENV, p_port=nil, p_user=nil, p_pass=nil, opt, &block)
+    #   - HTTP.start(address, port = nil, p_addr = :ENV, p_port = nil, p_user = nil, p_pass = nil, opts) -> http
+    #   - HTTP.start(address, port = nil, p_addr = :ENV, p_port = nil, p_user = nil, p_pass = nil, opts) {|http| ... } -> object
     # -->
-    # Creates a new Net::HTTP object, then additionally opens the TCP connection and
-    # HTTP session.
+    # Creates a new Net::HTTP object, `http`, via Net::HTTP.new:
     #
-    # Arguments are the following:
-    # *address*
-    # :   hostname or IP address of the server
-    # *port*
-    # :   port of the server
-    # *p_addr*
-    # :   address of proxy
-    # *p_port*
-    # :   port of proxy
-    # *p_user*
-    # :   user of proxy
-    # *p_pass*
-    # :   pass of proxy
-    # *opt*
-    # :   optional hash
+    #     Net::HTTP.new(address, port, p_addr, p_port, p_user, p_pass)
+    #
+    # *   For arguments `hostname` through `p_pass`, see Net::HTTP.new.
+    # *   For argument `opts`, see below.
     #
     #
-    # *opt* sets following values by its accessor. The keys are ipaddr, ca_file,
-    # ca_path, cert, cert_store, ciphers, keep_alive_timeout,
-    # close_on_empty_response, key, open_timeout, read_timeout, write_timeout,
-    # ssl_timeout, ssl_version, use_ssl, verify_callback, verify_depth and
-    # verify_mode. If you set :use_ssl as true, you can use https and default value
-    # of verify_mode is set as OpenSSL::SSL::VERIFY_PEER.
+    # Note: If `port` is `nil` and `opts[:use_ssl]` is a truthy value, the value
+    # passed to `new` is Net::HTTP.https_default_port, not `port`.
     #
-    # If the optional block is given, the newly created Net::HTTP object is passed
-    # to it and closed when the block finishes.  In this case, the return value of
-    # this method is the return value of the block.  If no block is given, the
-    # return value of this method is the newly created Net::HTTP object itself, and
-    # the caller is responsible for closing it upon completion using the finish()
-    # method.
+    # With no block given:
+    #
+    # *   Calls `http.start` with no block (see #start), which opens a TCP
+    #     connection and HTTP session.
+    # *   Returns `http`.
+    # *   The caller should call #finish to close the session:
+    #
+    #         http = Net::HTTP.start(hostname)
+    #         http.started? # => true
+    #         http.finish
+    #         http.started? # => false
+    #
+    #
+    # With a block given:
+    #
+    # *   Calls `http.start` with the block (see #start), which:
+    #
+    #     *   Opens a TCP connection and HTTP session.
+    #     *   Calls the block, which may make any number of requests to the host.
+    #     *   Closes the HTTP session and TCP connection on block exit.
+    #     *   Returns the block's value `object`.
+    #
+    #
+    # *   Returns `object`.
+    #
+    #
+    # Example:
+    #
+    #     hostname = 'jsonplaceholder.typicode.com'
+    #     Net::HTTP.start(hostname) do |http|
+    #       puts http.get('/todos/1').body
+    #       puts http.get('/todos/2').body
+    #     end
+    #
+    # Output:
+    #
+    #     {
+    #       "userId": 1,
+    #       "id": 1,
+    #       "title": "delectus aut autem",
+    #       "completed": false
+    #     }
+    #     {
+    #       "userId": 1,
+    #       "id": 2,
+    #       "title": "quis ut nam facilis et officia qui",
+    #       "completed": false
+    #     }
+    #
+    # If the last argument given is a hash, it is the `opts` hash, where each key is
+    # a method or accessor to be called, and its value is the value to be set.
+    #
+    # The keys may include:
+    #
+    # *   #ca_file
+    # *   #ca_path
+    # *   #cert
+    # *   #cert_store
+    # *   #ciphers
+    # *   #close_on_empty_response
+    # *   `ipaddr` (calls #ipaddr=)
+    # *   #keep_alive_timeout
+    # *   #key
+    # *   #open_timeout
+    # *   #read_timeout
+    # *   #ssl_timeout
+    # *   #ssl_version
+    # *   `use_ssl` (calls #use_ssl=)
+    # *   #verify_callback
+    # *   #verify_depth
+    # *   #verify_mode
+    # *   #write_timeout
     #
     def self.start: (String address, ?Integer? port, ?String | :ENV | nil p_addr, ?Integer? p_port, ?String? p_user, ?String? p_pass, ?Hash[Symbol, untyped]? opt) -> Net::HTTP
                   | [T] (String address, ?Integer? port, ?String | :ENV | nil p_addr, ?Integer? p_port, ?String? p_user, ?String? p_pass, ?Hash[Symbol, untyped]? opt) { (Net::HTTP) -> T } -> T
@@ -711,6 +737,10 @@ module Net
     #   rdoc-file=lib/net/http.rb
     #   - inspect()
     # -->
+    # Returns a string representation of `self`:
+    #
+    #     Net::HTTP.new(hostname).inspect
+    #     # => "#<Net::HTTP jsonplaceholder.typicode.com:80 open=false>"
     #
     def inspect: () -> String
 
@@ -721,11 +751,51 @@ module Net
     # **WARNING** This method opens a serious security hole. Never use this method
     # in production code.
     #
-    # Sets an output stream for debugging.
+    # Sets the output stream for debugging:
     #
     #     http = Net::HTTP.new(hostname)
-    #     http.set_debug_output $stderr
-    #     http.start { .... }
+    #     File.open('t.tmp', 'w') do |file|
+    #       http.set_debug_output(file)
+    #       http.start
+    #       http.get('/nosuch/1')
+    #       http.finish
+    #     end
+    #     puts File.read('t.tmp')
+    #
+    # Output:
+    #
+    #     opening connection to jsonplaceholder.typicode.com:80...
+    #     opened
+    #     <- "GET /nosuch/1 HTTP/1.1\r\nAccept-Encoding: gzip;q=1.0,deflate;q=0.6,identity;q=0.3\r\nAccept: */*\r\nUser-Agent: Ruby\r\nHost: jsonplaceholder.typicode.com\r\n\r\n"
+    #     -> "HTTP/1.1 404 Not Found\r\n"
+    #     -> "Date: Mon, 12 Dec 2022 21:14:11 GMT\r\n"
+    #     -> "Content-Type: application/json; charset=utf-8\r\n"
+    #     -> "Content-Length: 2\r\n"
+    #     -> "Connection: keep-alive\r\n"
+    #     -> "X-Powered-By: Express\r\n"
+    #     -> "X-Ratelimit-Limit: 1000\r\n"
+    #     -> "X-Ratelimit-Remaining: 999\r\n"
+    #     -> "X-Ratelimit-Reset: 1670879660\r\n"
+    #     -> "Vary: Origin, Accept-Encoding\r\n"
+    #     -> "Access-Control-Allow-Credentials: true\r\n"
+    #     -> "Cache-Control: max-age=43200\r\n"
+    #     -> "Pragma: no-cache\r\n"
+    #     -> "Expires: -1\r\n"
+    #     -> "X-Content-Type-Options: nosniff\r\n"
+    #     -> "Etag: W/\"2-vyGp6PvFo4RvsFtPoIWeCReyIC8\"\r\n"
+    #     -> "Via: 1.1 vegur\r\n"
+    #     -> "CF-Cache-Status: MISS\r\n"
+    #     -> "Server-Timing: cf-q-config;dur=1.3000000762986e-05\r\n"
+    #     -> "Report-To: {\"endpoints\":[{\"url\":\"https:\\/\\/a.nel.cloudflare.com\\/report\\/v3?s=yOr40jo%2BwS1KHzhTlVpl54beJ5Wx2FcG4gGV0XVrh3X9OlR5q4drUn2dkt5DGO4GDcE%2BVXT7CNgJvGs%2BZleIyMu8CLieFiDIvOviOY3EhHg94m0ZNZgrEdpKD0S85S507l1vsEwEHkoTm%2Ff19SiO\"}],\"group\":\"cf-nel\",\"max_age\":604800}\r\n"
+    #     -> "NEL: {\"success_fraction\":0,\"report_to\":\"cf-nel\",\"max_age\":604800}\r\n"
+    #     -> "Server: cloudflare\r\n"
+    #     -> "CF-RAY: 778977dc484ce591-DFW\r\n"
+    #     -> "alt-svc: h3=\":443\"; ma=86400, h3-29=\":443\"; ma=86400\r\n"
+    #     -> "\r\n"
+    #     reading 2 bytes...
+    #     -> "{}"
+    #     read 2 bytes
+    #     Conn keep-alive
     #
     def set_debug_output: (IO output) -> void
 
@@ -771,13 +841,35 @@ module Net
     #   rdoc-file=lib/net/http.rb
     #   - ipaddr()
     # -->
-    # The IP address to connect to/used to connect to
+    # Returns the IP address for the connection.
+    #
+    # If the session has not been started, returns the value set by #ipaddr=, or
+    # `nil` if it has not been set:
+    #
+    #     http = Net::HTTP.new(hostname)
+    #     http.ipaddr # => nil
+    #     http.ipaddr = '172.67.155.76'
+    #     http.ipaddr # => "172.67.155.76"
+    #
+    # If the session has been started, returns the IP address from the socket:
+    #
+    #     http = Net::HTTP.new(hostname)
+    #     http.start
+    #     http.ipaddr # => "172.67.155.76"
+    #     http.finish
     # ----
     # <!--
     #   rdoc-file=lib/net/http.rb
     #   - ipaddr=(addr)
     # -->
-    # Set the IP address to connect to
+    # Sets the IP address for the connection:
+    #
+    #     http = Net::HTTP.new(hostname)
+    #     http.ipaddr # => nil
+    #     http.ipaddr = '172.67.155.76'
+    #     http.ipaddr # => "172.67.155.76"
+    #
+    # The IP address may not be set if the session has been started.
     #
     attr_accessor ipaddr: String?
 
@@ -799,7 +891,16 @@ module Net
     #   rdoc-file=lib/net/http.rb
     #   - read_timeout=(sec)
     # -->
-    # Setter for the read_timeout attribute.
+    # Sets the read timeout, in seconds, for `self` to integer `sec`; the initial
+    # value is 60.
+    #
+    # Argument `sec` must be a non-negative numeric value:
+    #
+    #     http = Net::HTTP.new(hostname)
+    #     http.read_timeout # => 60
+    #     http.get('/todos/1') # => #<Net::HTTPOK 200 OK readbody=true>
+    #     http.read_timeout = 0
+    #     http.get('/todos/1') # Raises Net::ReadTimeout.
     #
     attr_accessor read_timeout: Float | Integer
 
@@ -814,7 +915,10 @@ module Net
     #   rdoc-file=lib/net/http.rb
     #   - write_timeout=(sec)
     # -->
-    # Setter for the write_timeout attribute.
+    # Sets the write timeout, in seconds, for `self` to integer `sec`; the initial
+    # value is 60.
+    #
+    # Argument `sec` must be a non-negative numeric value.
     #
     attr_accessor write_timeout: Float | Integer
 
@@ -822,10 +926,15 @@ module Net
     #   rdoc-file=lib/net/http.rb
     #   - max_retries=(retries)
     # -->
-    # Maximum number of times to retry an idempotent request in case of
+    # Sets the maximum number of times to retry an idempotent request in case of
     # Net::ReadTimeout, IOError, EOFError, Errno::ECONNRESET, Errno::ECONNABORTED,
-    # Errno::EPIPE, OpenSSL::SSL::SSLError, Timeout::Error. Should be a non-negative
-    # integer number. Zero means no retries. The default value is 1.
+    # Errno::EPIPE, OpenSSL::SSL::SSLError, Timeout::Error. The initial value is 1.
+    #
+    # Argument `retries` must be a non-negative numeric value:
+    #
+    #     http = Net::HTTP.new(hostname)
+    #     http.max_retries = 2   # => 2
+    #     http.max_retries       # => 2
     #
     attr_accessor max_retries: Integer
 
@@ -1486,12 +1595,234 @@ module Net
   end
 
   # <!-- rdoc-file=lib/net/http/header.rb -->
-  # The HTTPHeader module defines methods for reading and writing HTTP headers.
+  # The HTTPHeader module provides access to HTTP headers.
   #
-  # It is used as a mixin by other classes, to provide hash-like access to HTTP
-  # header values. Unlike raw hash access, HTTPHeader provides access via
-  # case-insensitive keys. It also provides methods for accessing commonly-used
-  # HTTP header values in more convenient formats.
+  # The module is included in:
+  #
+  # *   Net::HTTPGenericRequest (and therefore Net::HTTPRequest).
+  # *   Net::HTTPResponse.
+  #
+  #
+  # The headers are a hash-like collection of key/value pairs called *fields*.
+  #
+  # ## Request and Response Fields
+  #
+  # Headers may be included in:
+  #
+  # *   A Net::HTTPRequest object: the object's headers will be sent with the
+  #     request. Any fields may be defined in the request; see
+  #     [Setters](rdoc-ref:Net::HTTPHeader@Setters).
+  # *   A Net::HTTPResponse object: the objects headers are usually those returned
+  #     from the host. Fields may be retrieved from the object; see
+  #     [Getters](rdoc-ref:Net::HTTPHeader@Getters) and
+  #     [Iterators](rdoc-ref:Net::HTTPHeader@Iterators).
+  #
+  #
+  # Exactly which fields should be sent or expected depends on the host; see:
+  #
+  # *   [Request
+  #     fields](https://en.wikipedia.org/wiki/List_of_HTTP_header_fields#Request_f
+  #     ields).
+  # *   [Response
+  #     fields](https://en.wikipedia.org/wiki/List_of_HTTP_header_fields#Response_
+  #     fields).
+  #
+  #
+  # ## About the Examples
+  #
+  # Examples here assume that `net/http` has been required (which also requires
+  # `uri`):
+  #
+  #     require 'net/http'
+  #
+  # Many code examples here use these example websites:
+  #
+  # *   https://jsonplaceholder.typicode.com.
+  # *   http://example.com.
+  #
+  #
+  # Some examples also assume these variables:
+  #
+  #     uri = URI('https://jsonplaceholder.typicode.com')
+  #     uri.freeze # Examples may not modify.
+  #     hostname = uri.hostname # => "jsonplaceholder.typicode.com"
+  #     port = uri.port         # => 443
+  #
+  # So that example requests may be written as:
+  #
+  #     Net::HTTP.get(uri)
+  #     Net::HTTP.get(hostname, '/index.html')
+  #     Net::HTTP.start(hostname) do |http|
+  #       http.get('/todos/1')
+  #       http.get('/todos/2')
+  #     end
+  #
+  # An example that needs a modified URI first duplicates `uri`, then modifies the
+  # duplicate:
+  #
+  #     _uri = uri.dup
+  #     _uri.path = '/todos/1'
+  #
+  # ## Fields
+  #
+  # A header field is a key/value pair.
+  #
+  # ### Field Keys
+  #
+  # A field key may be:
+  #
+  # *   A string: Key `'Accept'` is treated as if it were `'Accept'.downcase`;
+  #     i.e., `'accept'`.
+  # *   A symbol: Key `:Accept` is treated as if it were `:Accept.to_s.downcase`;
+  #     i.e., `'accept'`.
+  #
+  #
+  # Examples:
+  #
+  #     req = Net::HTTP::Get.new(uri)
+  #     req[:accept]  # => "*/*"
+  #     req['Accept'] # => "*/*"
+  #     req['ACCEPT'] # => "*/*"
+  #
+  #     req['accept'] = 'text/html'
+  #     req[:accept] = 'text/html'
+  #     req['ACCEPT'] = 'text/html'
+  #
+  # ### Field Values
+  #
+  # A field value may be returned as an array of strings or as a string:
+  #
+  # *   These methods return field values as arrays:
+  #
+  #     *   #get_fields: Returns the array value for the given key, or `nil` if it
+  #         does not exist.
+  #     *   #to_hash: Returns a hash of all header fields: each key is a field
+  #         name; its value is the array value for the field.
+  #
+  #
+  # *   These methods return field values as string; the string value for a field
+  #     is equivalent to `self[key.downcase.to_s].join(', '))`:
+  #
+  #     *   #[]: Returns the string value for the given key, or `nil` if it does
+  #         not exist.
+  #     *   #fetch: Like #[], but accepts a default value to be returned if the
+  #         key does not exist.
+  #
+  #
+  #
+  # The field value may be set:
+  #
+  # *   #[]=: Sets the value for the given key; the given value may be a string, a
+  #     symbol, an array, or a hash.
+  # *   #add_field: Adds a given value to a value for the given key (not
+  #     overwriting the existing value).
+  # *   #delete: Deletes the field for the given key.
+  #
+  #
+  # Example field values:
+  #
+  # *   String:
+  #
+  #         req['Accept'] = 'text/html' # => "text/html"
+  #         req['Accept']               # => "text/html"
+  #         req.get_fields('Accept')    # => ["text/html"]
+  #
+  # *   Symbol:
+  #
+  #         req['Accept'] = :text    # => :text
+  #         req['Accept']            # => "text"
+  #         req.get_fields('Accept') # => ["text"]
+  #
+  # *   Simple array:
+  #
+  #         req[:foo] = %w[bar baz bat]
+  #         req[:foo]            # => "bar, baz, bat"
+  #         req.get_fields(:foo) # => ["bar", "baz", "bat"]
+  #
+  # *   Simple hash:
+  #
+  #         req[:foo] = {bar: 0, baz: 1, bat: 2}
+  #         req[:foo]            # => "bar, 0, baz, 1, bat, 2"
+  #         req.get_fields(:foo) # => ["bar", "0", "baz", "1", "bat", "2"]
+  #
+  # *   Nested:
+  #
+  #         req[:foo] = [%w[bar baz], {bat: 0, bam: 1}]
+  #         req[:foo]            # => "bar, baz, bat, 0, bam, 1"
+  #         req.get_fields(:foo) # => ["bar", "baz", "bat", "0", "bam", "1"]
+  #
+  #         req[:foo] = {bar: %w[baz bat], bam: {bah: 0, bad: 1}}
+  #         req[:foo]            # => "bar, baz, bat, bam, bah, 0, bad, 1"
+  #         req.get_fields(:foo) # => ["bar", "baz", "bat", "bam", "bah", "0", "bad", "1"]
+  #
+  #
+  # ## Convenience Methods
+  #
+  # Various convenience methods retrieve values, set values, query values, set
+  # form values, or iterate over fields.
+  #
+  # ### Setters
+  #
+  # Method #[]= can set any field, but does little to validate the new value; some
+  # of the other setter methods provide some validation:
+  #
+  # *   #[]=: Sets the string or array value for the given key.
+  # *   #add_field: Creates or adds to the array value for the given key.
+  # *   #basic_auth: Sets the string authorization header for `'Authorization'`.
+  # *   #content_length=: Sets the integer length for field `'Content-Length`.
+  # *   #content_type=: Sets the string value for field `'Content-Type'`.
+  # *   #proxy_basic_auth: Sets the string authorization header for
+  #     `'Proxy-Authorization'`.
+  # *   #set_range: Sets the value for field `'Range'`.
+  #
+  #
+  # ### Form Setters
+  #
+  # *   #set_form: Sets an HTML form data set.
+  # *   #set_form_data: Sets header fields and a body from HTML form data.
+  #
+  #
+  # ### Getters
+  #
+  # Method #[] can retrieve the value of any field that exists, but always as a
+  # string; some of the other getter methods return something different from the
+  # simple string value:
+  #
+  # *   #[]: Returns the string field value for the given key.
+  # *   #content_length: Returns the integer value of field `'Content-Length'`.
+  # *   #content_range: Returns the Range value of field `'Content-Range'`.
+  # *   #content_type: Returns the string value of field `'Content-Type'`.
+  # *   #fetch: Returns the string field value for the given key.
+  # *   #get_fields: Returns the array field value for the given `key`.
+  # *   #main_type: Returns first part of the string value of field
+  #     `'Content-Type'`.
+  # *   #sub_type: Returns second part of the string value of field
+  #     `'Content-Type'`.
+  # *   #range: Returns an array of Range objects of field `'Range'`, or `nil`.
+  # *   #range_length: Returns the integer length of the range given in field
+  #     `'Content-Range'`.
+  # *   #type_params: Returns the string parameters for `'Content-Type'`.
+  #
+  #
+  # ### Queries
+  #
+  # *   #chunked?: Returns whether field `'Transfer-Encoding'` is set to
+  #     `'chunked'`.
+  # *   #connection_close?: Returns whether field `'Connection'` is set to
+  #     `'close'`.
+  # *   #connection_keep_alive?: Returns whether field `'Connection'` is set to
+  #     `'keep-alive'`.
+  # *   #key?: Returns whether a given key exists.
+  #
+  #
+  # ### Iterators
+  #
+  # *   #each_capitalized: Passes each field capitalized-name/value pair to the
+  #     block.
+  # *   #each_capitalized_name: Passes each capitalized field name to the block.
+  # *   #each_header: Passes each field name/value pair to the block.
+  # *   #each_name: Passes each field name to the block.
+  # *   #each_value: Passes each string field value to the block.
   #
   module HTTPHeader
     # <!--
@@ -1511,8 +1842,15 @@ module Net
     #   rdoc-file=lib/net/http/header.rb
     #   - [](key)
     # -->
-    # Returns the header field corresponding to the case-insensitive key. For
-    # example, a key of "Content-Type" might return "text/html"
+    # Returns the string field value for the case-insensitive field `key`, or `nil`
+    # if there is no such key; see [Fields](rdoc-ref:Net::HTTPHeader@Fields):
+    #
+    #     res = Net::HTTP.get_response(hostname, '/todos/1')
+    #     res['Connection'] # => "keep-alive"
+    #     res['Nosuch']     # => nil
+    #
+    # Note that some field values may be retrieved via convenience methods; see
+    # [Getters](rdoc-ref:Net::HTTPHeader@Getters).
     #
     def []: (key key) -> (nil | String)
 
@@ -1520,7 +1858,17 @@ module Net
     #   rdoc-file=lib/net/http/header.rb
     #   - []=(key, val)
     # -->
-    # Sets the header field corresponding to the case-insensitive key.
+    # Sets the value for the case-insensitive `key` to `val`, overwriting the
+    # previous value if the field exists; see
+    # [Fields](rdoc-ref:Net::HTTPHeader@Fields):
+    #
+    #     req = Net::HTTP::Get.new(uri)
+    #     req['Accept'] # => "*/*"
+    #     req['Accept'] = 'text/html'
+    #     req['Accept'] # => "text/html"
+    #
+    # Note that some field values may be set via convenience methods; see
+    # [Setters](rdoc-ref:Net::HTTPHeader@Setters).
     #
     def []=: (key key, untyped val) -> void
 
@@ -1528,20 +1876,18 @@ module Net
     #   rdoc-file=lib/net/http/header.rb
     #   - add_field(key, val)
     # -->
-    # Ruby 1.8.3
-    # :   Adds a value to a named header field, instead of replacing its value.
-    #     Second argument `val` must be a String. See also #[]=, #[] and
-    #     #get_fields.
+    # Adds value `val` to the value array for field `key` if the field exists;
+    # creates the field with the given `key` and `val` if it does not exist. see
+    # [Fields](rdoc-ref:Net::HTTPHeader@Fields):
     #
-    #         request.add_field 'X-My-Header', 'a'
-    #         p request['X-My-Header']              #=> "a"
-    #         p request.get_fields('X-My-Header')   #=> ["a"]
-    #         request.add_field 'X-My-Header', 'b'
-    #         p request['X-My-Header']              #=> "a, b"
-    #         p request.get_fields('X-My-Header')   #=> ["a", "b"]
-    #         request.add_field 'X-My-Header', 'c'
-    #         p request['X-My-Header']              #=> "a, b, c"
-    #         p request.get_fields('X-My-Header')   #=> ["a", "b", "c"]
+    #     req = Net::HTTP::Get.new(uri)
+    #     req.add_field('Foo', 'bar')
+    #     req['Foo']            # => "bar"
+    #     req.add_field('Foo', 'baz')
+    #     req['Foo']            # => "bar, baz"
+    #     req.add_field('Foo', %w[baz bam])
+    #     req['Foo']            # => "bar, baz, baz, bam"
+    #     req.get_fields('Foo') # => ["bar", "baz", "baz", "bam"]
     #
     def add_field: (key key, untyped val) -> void
 
@@ -1567,26 +1913,42 @@ module Net
     #   rdoc-file=lib/net/http/header.rb
     #   - get_fields(key)
     # -->
-    # Ruby 1.8.3
-    # :   Returns an array of header field strings corresponding to the
-    #     case-insensitive `key`.  This method allows you to get duplicated header
-    #     fields without any processing.  See also #[].
+    # Returns the array field value for the given `key`, or `nil` if there is no
+    # such field; see [Fields](rdoc-ref:Net::HTTPHeader@Fields):
     #
-    #         p response.get_fields('Set-Cookie')
-    #           #=> ["session=al98axx; expires=Fri, 31-Dec-1999 23:58:23",
-    #                "query=rubyscript; expires=Fri, 31-Dec-1999 23:58:23"]
-    #         p response['Set-Cookie']
-    #           #=> "session=al98axx; expires=Fri, 31-Dec-1999 23:58:23, query=rubyscript; expires=Fri, 31-Dec-1999 23:58:23"
+    #     res = Net::HTTP.get_response(hostname, '/todos/1')
+    #     res.get_fields('Connection') # => ["keep-alive"]
+    #     res.get_fields('Nosuch')     # => nil
     #
     def get_fields: (key key) -> (nil | Array[String])
 
     # <!--
     #   rdoc-file=lib/net/http/header.rb
-    #   - fetch(key, *args) { |key| ... }
+    #   - fetch(key, default_val = nil) {|key| ... } -> object
+    #   - fetch(key, default_val = nil) -> value or default_val
     # -->
-    # Returns the header field corresponding to the case-insensitive key. Returns
-    # the default value `args`, or the result of the block, or raises an IndexError
-    # if there's no header field named `key` See Hash#fetch
+    # With a block, returns the string value for `key` if it exists; otherwise
+    # returns the value of the block; ignores the `default_val`; see
+    # [Fields](rdoc-ref:Net::HTTPHeader@Fields):
+    #
+    #     res = Net::HTTP.get_response(hostname, '/todos/1')
+    #
+    #     # Field exists; block not called.
+    #     res.fetch('Connection') do |value|
+    #       fail 'Cannot happen'
+    #     end # => "keep-alive"
+    #
+    #     # Field does not exist; block called.
+    #     res.fetch('Nosuch') do |value|
+    #       value.downcase
+    #     end # => "nosuch"
+    #
+    # With no block, returns the string value for `key` if it exists; otherwise,
+    # returns `default_val` if it was given; otherwise raises an exception:
+    #
+    #     res.fetch('Connection', 'Foo') # => "keep-alive"
+    #     res.fetch('Nosuch', 'Foo')     # => "Foo"
+    #     res.fetch('Nosuch')            # Raises KeyError.
     #
     def fetch: (key key) -> String
              | (key key, untyped) -> untyped
@@ -1596,14 +1958,24 @@ module Net
     #   rdoc-file=lib/net/http/header.rb
     #   - each_header() { |key| ... }
     # -->
-    # Iterates through the header names and values, passing in the name and value to
-    # the code block supplied.
+    # Calls the block with each key/value pair:
+    #
+    #     res = Net::HTTP.get_response(hostname, '/todos/1')
+    #     res.each_header do |key, value|
+    #       p [key, value] if key.start_with?('c')
+    #     end
+    #
+    # Output:
+    #
+    #     ["content-type", "application/json; charset=utf-8"]
+    #     ["connection", "keep-alive"]
+    #     ["cache-control", "max-age=43200"]
+    #     ["cf-cache-status", "HIT"]
+    #     ["cf-ray", "771d17e9bc542cf5-ORD"]
     #
     # Returns an enumerator if no block is given.
     #
-    # Example:
-    #
-    #     response.header.each_header {|key,value| puts "#{key} = #{value}" }
+    # Net::HTTPHeader#each is an alias for Net::HTTPHeader#each_header.
     #
     def each_header: () { (String, String) -> untyped } -> Hash[String, Array[String]]
                    | () -> Enumerator[[ String, String ], Hash[String, Array[String]]]
@@ -1619,10 +1991,24 @@ module Net
     #   rdoc-file=lib/net/http/header.rb
     #   - each_name() { |key| ... }
     # -->
-    # Iterates through the header names in the header, passing each header name to
-    # the code block.
+    # Calls the block with each field key:
+    #
+    #     res = Net::HTTP.get_response(hostname, '/todos/1')
+    #     res.each_key do |key|
+    #       p key if key.start_with?('c')
+    #     end
+    #
+    # Output:
+    #
+    #     "content-type"
+    #     "connection"
+    #     "cache-control"
+    #     "cf-cache-status"
+    #     "cf-ray"
     #
     # Returns an enumerator if no block is given.
+    #
+    # Net::HTTPHeader#each_name is an alias for Net::HTTPHeader#each_key.
     #
     def each_name: () { (String) -> untyped } -> Hash[String, Array[String]]
                  | () -> Enumerator[String, Hash[String, Array[String]]]
@@ -1638,11 +2024,23 @@ module Net
     #   rdoc-file=lib/net/http/header.rb
     #   - each_capitalized_name() { |key| ... }
     # -->
-    # Iterates through the header names in the header, passing capitalized header
-    # names to the code block.
+    # Calls the block with each capitalized field name:
     #
-    # Note that header names are capitalized systematically; capitalization may not
-    # match that used by the remote HTTP server in its response.
+    #     res = Net::HTTP.get_response(hostname, '/todos/1')
+    #     res.each_capitalized_name do |key|
+    #       p key if key.start_with?('C')
+    #     end
+    #
+    # Output:
+    #
+    #     "Content-Type"
+    #     "Connection"
+    #     "Cache-Control"
+    #     "Cf-Cache-Status"
+    #     "Cf-Ray"
+    #
+    # The capitalization is system-dependent; see [Case
+    # Mapping](rdoc-ref:case_mapping.rdoc).
     #
     # Returns an enumerator if no block is given.
     #
@@ -1653,7 +2051,18 @@ module Net
     #   rdoc-file=lib/net/http/header.rb
     #   - each_value() { |value| ... }
     # -->
-    # Iterates through header values, passing each value to the code block.
+    # Calls the block with each string field value:
+    #
+    #     res = Net::HTTP.get_response(hostname, '/todos/1')
+    #     res.each_value do |value|
+    #       p value if value.start_with?('c')
+    #     end
+    #
+    # Output:
+    #
+    #     "chunked"
+    #     "cf-q-config;dur=6.0000002122251e-06"
+    #     "cloudflare"
     #
     # Returns an enumerator if no block is given.
     #
@@ -1664,7 +2073,13 @@ module Net
     #   rdoc-file=lib/net/http/header.rb
     #   - delete(key)
     # -->
-    # Removes a header field, specified by case-insensitive key.
+    # Removes the header for the given case-insensitive `key` (see
+    # [Fields](rdoc-ref:Net::HTTPHeader@Fields)); returns the deleted value, or
+    # `nil` if no such field exists:
+    #
+    #     req = Net::HTTP::Get.new(uri)
+    #     req.delete('Accept') # => ["*/*"]
+    #     req.delete('Nosuch') # => nil
     #
     def delete: (key key) -> (Array[String] | nil)
 
@@ -1672,7 +2087,12 @@ module Net
     #   rdoc-file=lib/net/http/header.rb
     #   - key?(key)
     # -->
-    # true if `key` header exists.
+    # Returns `true` if the field for the case-insensitive `key` exists, `false`
+    # otherwise:
+    #
+    #     req = Net::HTTP::Get.new(uri)
+    #     req.key?('Accept') # => true
+    #     req.key?('Nosuch') # => false
     #
     def key?: (key key) -> bool
 
@@ -1680,10 +2100,15 @@ module Net
     #   rdoc-file=lib/net/http/header.rb
     #   - to_hash()
     # -->
-    # Returns a Hash consisting of header names and array of values. e.g.
-    # {"cache-control" => ["private"],
-    #     "content-type" => ["text/html"],
-    #     "date" => ["Wed, 22 Jun 2005 22:11:50 GMT"]}
+    # Returns a hash of the key/value pairs:
+    #
+    #     req = Net::HTTP::Get.new(uri)
+    #     req.to_hash
+    #     # =>
+    #     {"accept-encoding"=>["gzip;q=1.0,deflate;q=0.6,identity;q=0.3"],
+    #      "accept"=>["*/*"],
+    #      "user-agent"=>["Ruby"],
+    #      "host"=>["jsonplaceholder.typicode.com"]}
     #
     def to_hash: () -> Hash[String, Array[String]]
 
@@ -1691,12 +2116,10 @@ module Net
     #   rdoc-file=lib/net/http/header.rb
     #   - each_capitalized() { |capitalize(k), join(', ')| ... }
     # -->
-    # As for #each_header, except the keys are provided in capitalized form.
+    # Like #each_header, but the keys are returned in capitalized form.
     #
-    # Note that header names are capitalized systematically; capitalization may not
-    # match that used by the remote HTTP server in its response.
-    #
-    # Returns an enumerator if no block is given.
+    # Net::HTTPHeader#canonical_each is an alias for
+    # Net::HTTPHeader#each_capitalized.
     #
     def each_capitalized: () { (String, String) -> untyped } -> Hash[String, Array[String]]
                         | () -> Enumerator[[ String, String ], Hash[String, Array[String]]]
@@ -1723,20 +2146,46 @@ module Net
     #   rdoc-file=lib/net/http/header.rb
     #   - range()
     # -->
-    # Returns an Array of Range objects which represent the Range: HTTP header
-    # field, or `nil` if there is no such header.
+    # Returns an array of Range objects that represent the value of field `'Range'`,
+    # or `nil` if there is no such field; see [Range request
+    # header](https://en.wikipedia.org/wiki/List_of_HTTP_header_fields#range-request
+    # -header):
+    #
+    #     req = Net::HTTP::Get.new(uri)
+    #     req['Range'] = 'bytes=0-99,200-299,400-499'
+    #     req.range # => [0..99, 200..299, 400..499]
+    #     req.delete('Range')
+    #     req.range # # => nil
     #
     def range: () -> (nil | Array[Range[Integer]])
 
     # <!--
     #   rdoc-file=lib/net/http/header.rb
-    #   - set_range(r, e = nil)
+    #   - set_range(length) -> length
+    #   - set_range(offset, length) -> range
+    #   - set_range(begin..length) -> range
     # -->
-    # Sets the HTTP Range: header. Accepts either a Range object as a single
-    # argument, or a beginning index and a length from that index. Example:
+    # Sets the value for field `'Range'`; see [Range request
+    # header](https://en.wikipedia.org/wiki/List_of_HTTP_header_fields#range-request
+    # -header):
     #
-    #     req.range = (0..1023)
-    #     req.set_range 0, 1023
+    # With argument `length`:
+    #
+    #     req = Net::HTTP::Get.new(uri)
+    #     req.set_range(100)      # => 100
+    #     req['Range']            # => "bytes=0-99"
+    #
+    # With arguments `offset` and `length`:
+    #
+    #     req.set_range(100, 100) # => 100...200
+    #     req['Range']            # => "bytes=100-199"
+    #
+    # With argument `range`:
+    #
+    #     req.set_range(100..199) # => 100..199
+    #     req['Range']            # => "bytes=100-199"
+    #
+    # Net::HTTPHeader#range= is an alias for Net::HTTPHeader#set_range.
     #
     def set_range: (Range[Integer] | Numeric r, ?Integer? e) -> Range[Integer]
 
@@ -1751,8 +2200,15 @@ module Net
     #   rdoc-file=lib/net/http/header.rb
     #   - content_length()
     # -->
-    # Returns an Integer object which represents the HTTP Content-Length: header
-    # field, or `nil` if that field was not provided.
+    # Returns the value of field `'Content-Length'` as an integer, or `nil` if there
+    # is no such field; see [Content-Length request
+    # header](https://en.wikipedia.org/wiki/List_of_HTTP_header_fields#content-lengt
+    # h-request-header):
+    #
+    #     res = Net::HTTP.get_response(hostname, '/nosuch/1')
+    #     res.content_length # => 2
+    #     res = Net::HTTP.get_response(hostname, '/todos/1')
+    #     res.content_length # => nil
     #
     def content_length: () -> (nil | Integer)
 
@@ -1760,6 +2216,21 @@ module Net
     #   rdoc-file=lib/net/http/header.rb
     #   - content_length=(len)
     # -->
+    # Sets the value of field `'Content-Length'` to the given numeric; see
+    # [Content-Length response
+    # header](https://en.wikipedia.org/wiki/List_of_HTTP_header_fields#content-lengt
+    # h-response-header):
+    #
+    #     _uri = uri.dup
+    #     hostname = _uri.hostname           # => "jsonplaceholder.typicode.com"
+    #     _uri.path = '/posts'               # => "/posts"
+    #     req = Net::HTTP::Post.new(_uri)    # => #<Net::HTTP::Post POST>
+    #     req.body = '{"title": "foo","body": "bar","userId": 1}'
+    #     req.content_length = req.body.size # => 42
+    #     req.content_type = 'application/json'
+    #     res = Net::HTTP.start(hostname) do |http|
+    #       http.request(req)
+    #     end # => #<Net::HTTPCreated 201 Created readbody=true>
     #
     def content_length=: (Integer len) -> void
 
@@ -1767,9 +2238,14 @@ module Net
     #   rdoc-file=lib/net/http/header.rb
     #   - chunked?()
     # -->
-    # Returns "true" if the "transfer-encoding" header is present and set to
-    # "chunked".  This is an HTTP/1.1 feature, allowing the content to be sent in
-    # "chunks" without at the outset stating the entire content length.
+    # Returns `true` if field `'Transfer-Encoding'` exists and has value
+    # `'chunked'`, `false` otherwise; see [Transfer-Encoding response
+    # header](https://en.wikipedia.org/wiki/List_of_HTTP_header_fields#transfer-enco
+    # ding-response-header):
+    #
+    #     res = Net::HTTP.get_response(hostname, '/todos/1')
+    #     res['Transfer-Encoding'] # => "chunked"
+    #     res.chunked?             # => true
     #
     def chunked?: () -> bool
 
@@ -1777,9 +2253,16 @@ module Net
     #   rdoc-file=lib/net/http/header.rb
     #   - content_range()
     # -->
-    # Returns a Range object which represents the value of the Content-Range: header
-    # field. For a partial entity body, this indicates where this fragment fits
-    # inside the full entity body, as range of byte offsets.
+    # Returns a Range object representing the value of field `'Content-Range'`, or
+    # `nil` if no such field exists; see [Content-Range response
+    # header](https://en.wikipedia.org/wiki/List_of_HTTP_header_fields#content-range
+    # -response-header):
+    #
+    #     res = Net::HTTP.get_response(hostname, '/todos/1')
+    #     res['Content-Range'] # => nil
+    #     res['Content-Range'] = 'bytes 0-499/1000'
+    #     res['Content-Range'] # => "bytes 0-499/1000"
+    #     res.content_range    # => 0..499
     #
     def content_range: () -> (Range[Integer] | nil)
 
@@ -1787,7 +2270,16 @@ module Net
     #   rdoc-file=lib/net/http/header.rb
     #   - range_length()
     # -->
-    # The length of the range represented in Content-Range: header.
+    # Returns the integer representing length of the value of field
+    # `'Content-Range'`, or `nil` if no such field exists; see [Content-Range
+    # response
+    # header](https://en.wikipedia.org/wiki/List_of_HTTP_header_fields#content-range
+    # -response-header):
+    #
+    #     res = Net::HTTP.get_response(hostname, '/todos/1')
+    #     res['Content-Range'] # => nil
+    #     res['Content-Range'] = 'bytes 0-499/1000'
+    #     res.range_length     # => 500
     #
     def range_length: () -> (nil | Integer)
 
@@ -1795,8 +2287,15 @@ module Net
     #   rdoc-file=lib/net/http/header.rb
     #   - content_type()
     # -->
-    # Returns a content type string such as "text/html". This method returns nil if
-    # Content-Type: header field does not exist.
+    # Returns the [media type](https://en.wikipedia.org/wiki/Media_type) from the
+    # value of field `'Content-Type'`, or `nil` if no such field exists; see
+    # [Content-Type response
+    # header](https://en.wikipedia.org/wiki/List_of_HTTP_header_fields#content-type-
+    # response-header):
+    #
+    #     res = Net::HTTP.get_response(hostname, '/todos/1')
+    #     res['content-type'] # => "application/json; charset=utf-8"
+    #     res.content_type    # => "application/json"
     #
     def content_type: () -> (nil | String)
 
@@ -1804,8 +2303,15 @@ module Net
     #   rdoc-file=lib/net/http/header.rb
     #   - main_type()
     # -->
-    # Returns a content type string such as "text". This method returns nil if
-    # Content-Type: header field does not exist.
+    # Returns the leading ('type') part of the [media
+    # type](https://en.wikipedia.org/wiki/Media_type) from the value of field
+    # `'Content-Type'`, or `nil` if no such field exists; see [Content-Type response
+    # header](https://en.wikipedia.org/wiki/List_of_HTTP_header_fields#content-type-
+    # response-header):
+    #
+    #     res = Net::HTTP.get_response(hostname, '/todos/1')
+    #     res['content-type'] # => "application/json; charset=utf-8"
+    #     res.main_type       # => "application"
     #
     def main_type: () -> (nil | String)
 
@@ -1813,9 +2319,15 @@ module Net
     #   rdoc-file=lib/net/http/header.rb
     #   - sub_type()
     # -->
-    # Returns a content type string such as "html". This method returns nil if
-    # Content-Type: header field does not exist or sub-type is not given (e.g.
-    # "Content-Type: text").
+    # Returns the trailing ('subtype') part of the [media
+    # type](https://en.wikipedia.org/wiki/Media_type) from the value of field
+    # `'Content-Type'`, or `nil` if no such field exists; see [Content-Type response
+    # header](https://en.wikipedia.org/wiki/List_of_HTTP_header_fields#content-type-
+    # response-header):
+    #
+    #     res = Net::HTTP.get_response(hostname, '/todos/1')
+    #     res['content-type'] # => "application/json; charset=utf-8"
+    #     res.sub_type        # => "json"
     #
     def sub_type: () -> (nil | String)
 
@@ -1823,9 +2335,14 @@ module Net
     #   rdoc-file=lib/net/http/header.rb
     #   - type_params()
     # -->
-    # Any parameters specified for the content type, returned as a Hash. For
-    # example, a header of Content-Type: text/html; charset=EUC-JP would result in
-    # type_params returning {'charset' => 'EUC-JP'}
+    # Returns the trailing ('parameters') part of the value of field
+    # `'Content-Type'`, or `nil` if no such field exists; see [Content-Type response
+    # header](https://en.wikipedia.org/wiki/List_of_HTTP_header_fields#content-type-
+    # response-header):
+    #
+    #     res = Net::HTTP.get_response(hostname, '/todos/1')
+    #     res['content-type'] # => "application/json; charset=utf-8"
+    #     res.type_params     # => {"charset"=>"utf-8"}
     #
     def type_params: () -> Hash[untyped, untyped]
 
@@ -1833,9 +2350,16 @@ module Net
     #   rdoc-file=lib/net/http/header.rb
     #   - set_content_type(type, params = {})
     # -->
-    # Sets the content type in an HTTP header. The `type` should be a full HTTP
-    # content type, e.g. "text/html". The `params` are an optional Hash of
-    # parameters to add after the content type, e.g. {'charset' => 'iso-8859-1'}
+    # Sets the value of field `'Content-Type'`; returns the new value; see
+    # [Content-Type request
+    # header](https://en.wikipedia.org/wiki/List_of_HTTP_header_fields#content-type-
+    # request-header):
+    #
+    #     req = Net::HTTP::Get.new(uri)
+    #     req.set_content_type('application/json') # => ["application/json"]
+    #
+    # Net::HTTPHeader#content_type= is an alias for
+    # Net::HTTPHeader#set_content_type.
     #
     def set_content_type: (key `type`, ?Hash[untyped, untyped] params) -> void
 
@@ -1858,9 +2382,12 @@ module Net
     # application/x-www-form-urlencoded
     #
     # Example:
+    #
     #     http.form_data = {"q" => "ruby", "lang" => "en"}
     #     http.form_data = {"q" => ["ruby", "perl"], "lang" => "en"}
     #     http.set_form_data({"q" => "ruby", "lang" => "en"}, ';')
+    #
+    # Net::HTTPHeader#form_data= is an alias for Net::HTTPHeader#set_form_data.
     #
     def set_form_data: (Hash[untyped, untyped] params, ?String sep) -> void
 
@@ -1895,12 +2422,16 @@ module Net
     #
     # Each item of params should respond to `each` and yield 2-3 arguments, or an
     # array of 2-3 elements. The arguments yielded should be:
-    #     * The name of the field.
-    #     * The value of the field, it should be a String or a File or IO-like.
-    #     * An options hash, supporting the following options, only
-    #       used for file uploads:
-    #       :filename :: The name of the file to use.
-    #       :content_type :: The content type of the uploaded file.
+    #
+    # *   The name of the field.
+    # *   The value of the field, it should be a String or a File or IO-like.
+    # *   An options hash, supporting the following options (used only for file
+    #     uploads); entries:
+    #
+    #     *   `:filename`: The name of the file to use.
+    #     *   `:content_type`: The content type of the uploaded file.
+    #
+    #
     #
     # Each item is a file field or a normal field. If `value` is a File object or
     # the `opt` hash has a :filename key, the item is treated as a file field.
@@ -1910,6 +2441,7 @@ module Net
     # that the server supports HTTP/1.1 before using chunked encoding.
     #
     # Example:
+    #
     #     req.set_form([["q", "ruby"], ["lang", "en"]])
     #
     #     req.set_form({"f"=>File.open('/path/to/filename')},
@@ -1971,9 +2503,32 @@ module Net
   end
 
   # <!-- rdoc-file=lib/net/http/request.rb -->
-  # HTTP request class. This class wraps together the request header and the
-  # request path. You cannot use this class directly. Instead, you should use one
-  # of its subclasses: Net::HTTP::Get, Net::HTTP::Post, Net::HTTP::Head.
+  # This class is the base class for Net::HTTP request classes; it wraps together
+  # the request path and the request headers.
+  #
+  # The class should not be used directly; instead you should use its subclasses.
+  #
+  # Subclasses for HTTP requests:
+  #
+  # *   Net::HTTP::Get
+  # *   Net::HTTP::Head
+  # *   Net::HTTP::Post
+  # *   Net::HTTP::Put
+  # *   Net::HTTP::Delete
+  # *   Net::HTTP::Options
+  # *   Net::HTTP::Trace
+  # *   Net::HTTP::Patch
+  #
+  #
+  # Subclasses for WebDAV requests:
+  #
+  # *   Net::HTTP::Propfind
+  # *   Net::HTTP::Proppatch
+  # *   Net::HTTP::Mkcol
+  # *   Net::HTTP::Copy
+  # *   Net::HTTP::Move
+  # *   Net::HTTP::Lock
+  # *   Net::HTTP::Unlock
   #
   class HTTPRequest < HTTPGenericRequest
     # <!--
@@ -1991,8 +2546,34 @@ module Net
   end
 
   # <!-- rdoc-file=lib/net/http/requests.rb -->
-  # See Net::HTTPGenericRequest for attributes and methods. See Net::HTTP for
-  # usage examples.
+  # Class for representing [HTTP method
+  # GET](https://en.wikipedia.org/w/index.php?title=Hypertext_Transfer_Protocol#GE
+  # T_method):
+  #
+  #     require 'net/http'
+  #     uri = URI('http://example.com')
+  #     hostname = uri.hostname # => "example.com"
+  #     req = Net::HTTP::Get.new(uri) # => #<Net::HTTP::Get GET>
+  #     res = Net::HTTP.start(hostname) do |http|
+  #       http.request(req)
+  #     end
+  #
+  # Properties:
+  #
+  # *   Request body: optional.
+  # *   Response body: yes.
+  # *   [Safe](https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol#Safe_meth
+  #     ods): yes.
+  # *   [Idempotent](https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol#Ide
+  #     mpotent_methods): yes.
+  # *   [Cacheable](https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol#Cach
+  #     eable_methods): yes.
+  #
+  #
+  # Related:
+  #
+  # *   Net::HTTP.get: sends `GET` request, returns response body.
+  # *   Net::HTTP#get: sends `GET` request, returns response object.
   #
   class HTTP::Get < HTTPRequest
     METHOD: String
@@ -2003,8 +2584,33 @@ module Net
   end
 
   # <!-- rdoc-file=lib/net/http/requests.rb -->
-  # See Net::HTTPGenericRequest for attributes and methods. See Net::HTTP for
-  # usage examples.
+  # Class for representing [HTTP method
+  # HEAD](https://en.wikipedia.org/w/index.php?title=Hypertext_Transfer_Protocol#H
+  # EAD_method):
+  #
+  #     require 'net/http'
+  #     uri = URI('http://example.com')
+  #     hostname = uri.hostname # => "example.com"
+  #     req = Net::HTTP::Head.new(uri) # => #<Net::HTTP::Head HEAD>
+  #     res = Net::HTTP.start(hostname) do |http|
+  #       http.request(req)
+  #     end
+  #
+  # Properties:
+  #
+  # *   Request body: optional.
+  # *   Response body: no.
+  # *   [Safe](https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol#Safe_meth
+  #     ods): yes.
+  # *   [Idempotent](https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol#Ide
+  #     mpotent_methods): yes.
+  # *   [Cacheable](https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol#Cach
+  #     eable_methods): yes.
+  #
+  #
+  # Related:
+  #
+  # *   Net::HTTP#head: sends `HEAD` request, returns response object.
   #
   class HTTP::Head < HTTPRequest
     METHOD: String
@@ -2015,8 +2621,37 @@ module Net
   end
 
   # <!-- rdoc-file=lib/net/http/requests.rb -->
-  # See Net::HTTPGenericRequest for attributes and methods. See Net::HTTP for
-  # usage examples.
+  # Class for representing [HTTP method
+  # POST](https://en.wikipedia.org/w/index.php?title=Hypertext_Transfer_Protocol#P
+  # OST_method):
+  #
+  #     require 'net/http'
+  #     uri = URI('http://example.com')
+  #     hostname = uri.hostname # => "example.com"
+  #     uri.path = '/posts'
+  #     req = Net::HTTP::Post.new(uri) # => #<Net::HTTP::Post POST>
+  #     req.body = '{"title": "foo","body": "bar","userId": 1}'
+  #     req.content_type = 'application/json'
+  #     res = Net::HTTP.start(hostname) do |http|
+  #       http.request(req)
+  #     end
+  #
+  # Properties:
+  #
+  # *   Request body: yes.
+  # *   Response body: yes.
+  # *   [Safe](https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol#Safe_meth
+  #     ods): no.
+  # *   [Idempotent](https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol#Ide
+  #     mpotent_methods): no.
+  # *   [Cacheable](https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol#Cach
+  #     eable_methods): yes.
+  #
+  #
+  # Related:
+  #
+  # *   Net::HTTP.post: sends `POST` request, returns response object.
+  # *   Net::HTTP#post: sends `POST` request, returns response object.
   #
   class HTTP::Post < HTTPRequest
     METHOD: String
@@ -2027,8 +2662,31 @@ module Net
   end
 
   # <!-- rdoc-file=lib/net/http/requests.rb -->
-  # See Net::HTTPGenericRequest for attributes and methods. See Net::HTTP for
-  # usage examples.
+  # Class for representing [HTTP method
+  # PUT](https://en.wikipedia.org/w/index.php?title=Hypertext_Transfer_Protocol#PU
+  # T_method):
+  #
+  #     require 'net/http'
+  #     uri = URI('http://example.com')
+  #     hostname = uri.hostname # => "example.com"
+  #     uri.path = '/posts'
+  #     req = Net::HTTP::Put.new(uri) # => #<Net::HTTP::Put PUT>
+  #     req.body = '{"title": "foo","body": "bar","userId": 1}'
+  #     req.content_type = 'application/json'
+  #     res = Net::HTTP.start(hostname) do |http|
+  #       http.request(req)
+  #     end
+  #
+  # Properties:
+  #
+  # *   Request body: yes.
+  # *   Response body: yes.
+  # *   [Safe](https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol#Safe_meth
+  #     ods): no.
+  # *   [Idempotent](https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol#Ide
+  #     mpotent_methods): yes.
+  # *   [Cacheable](https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol#Cach
+  #     eable_methods): no.
   #
   class HTTP::Put < HTTPRequest
     METHOD: String
@@ -2039,8 +2697,34 @@ module Net
   end
 
   # <!-- rdoc-file=lib/net/http/requests.rb -->
-  # See Net::HTTPGenericRequest for attributes and methods. See Net::HTTP for
-  # usage examples.
+  # Class for representing [HTTP method
+  # DELETE](https://en.wikipedia.org/w/index.php?title=Hypertext_Transfer_Protocol
+  # #DELETE_method):
+  #
+  #     require 'net/http'
+  #     uri = URI('http://example.com')
+  #     hostname = uri.hostname # => "example.com"
+  #     uri.path = '/posts/1'
+  #     req = Net::HTTP::Delete.new(uri) # => #<Net::HTTP::Delete DELETE>
+  #     res = Net::HTTP.start(hostname) do |http|
+  #       http.request(req)
+  #     end
+  #
+  # Properties:
+  #
+  # *   Request body: optional.
+  # *   Response body: yes.
+  # *   [Safe](https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol#Safe_meth
+  #     ods): no.
+  # *   [Idempotent](https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol#Ide
+  #     mpotent_methods): yes.
+  # *   [Cacheable](https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol#Cach
+  #     eable_methods): no.
+  #
+  #
+  # Related:
+  #
+  # *   Net::HTTP#delete: sends `DELETE` request, returns response object.
   #
   class HTTP::Delete < HTTPRequest
     METHOD: String
@@ -2051,7 +2735,33 @@ module Net
   end
 
   # <!-- rdoc-file=lib/net/http/requests.rb -->
-  # See Net::HTTPGenericRequest for attributes and methods.
+  # Class for representing [HTTP method
+  # OPTIONS](https://en.wikipedia.org/w/index.php?title=Hypertext_Transfer_Protoco
+  # l#OPTIONS_method):
+  #
+  #     require 'net/http'
+  #     uri = URI('http://example.com')
+  #     hostname = uri.hostname # => "example.com"
+  #     req = Net::HTTP::Options.new(uri) # => #<Net::HTTP::Options OPTIONS>
+  #     res = Net::HTTP.start(hostname) do |http|
+  #       http.request(req)
+  #     end
+  #
+  # Properties:
+  #
+  # *   Request body: optional.
+  # *   Response body: yes.
+  # *   [Safe](https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol#Safe_meth
+  #     ods): yes.
+  # *   [Idempotent](https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol#Ide
+  #     mpotent_methods): yes.
+  # *   [Cacheable](https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol#Cach
+  #     eable_methods): no.
+  #
+  #
+  # Related:
+  #
+  # *   Net::HTTP#options: sends `OPTIONS` request, returns response object.
   #
   class HTTP::Options < HTTPRequest
     METHOD: String
@@ -2062,7 +2772,33 @@ module Net
   end
 
   # <!-- rdoc-file=lib/net/http/requests.rb -->
-  # See Net::HTTPGenericRequest for attributes and methods.
+  # Class for representing [HTTP method
+  # TRACE](https://en.wikipedia.org/w/index.php?title=Hypertext_Transfer_Protocol#
+  # TRACE_method):
+  #
+  #     require 'net/http'
+  #     uri = URI('http://example.com')
+  #     hostname = uri.hostname # => "example.com"
+  #     req = Net::HTTP::Trace.new(uri) # => #<Net::HTTP::Trace TRACE>
+  #     res = Net::HTTP.start(hostname) do |http|
+  #       http.request(req)
+  #     end
+  #
+  # Properties:
+  #
+  # *   Request body: no.
+  # *   Response body: yes.
+  # *   [Safe](https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol#Safe_meth
+  #     ods): yes.
+  # *   [Idempotent](https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol#Ide
+  #     mpotent_methods): yes.
+  # *   [Cacheable](https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol#Cach
+  #     eable_methods): no.
+  #
+  #
+  # Related:
+  #
+  # *   Net::HTTP#trace: sends `TRACE` request, returns response object.
   #
   class HTTP::Trace < HTTPRequest
     METHOD: String
@@ -2073,7 +2809,36 @@ module Net
   end
 
   # <!-- rdoc-file=lib/net/http/requests.rb -->
-  # See Net::HTTPGenericRequest for attributes and methods.
+  # Class for representing [HTTP method
+  # PATCH](https://en.wikipedia.org/w/index.php?title=Hypertext_Transfer_Protocol#
+  # PATCH_method):
+  #
+  #     require 'net/http'
+  #     uri = URI('http://example.com')
+  #     hostname = uri.hostname # => "example.com"
+  #     uri.path = '/posts'
+  #     req = Net::HTTP::Patch.new(uri) # => #<Net::HTTP::Patch PATCH>
+  #     req.body = '{"title": "foo","body": "bar","userId": 1}'
+  #     req.content_type = 'application/json'
+  #     res = Net::HTTP.start(hostname) do |http|
+  #       http.request(req)
+  #     end
+  #
+  # Properties:
+  #
+  # *   Request body: yes.
+  # *   Response body: yes.
+  # *   [Safe](https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol#Safe_meth
+  #     ods): no.
+  # *   [Idempotent](https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol#Ide
+  #     mpotent_methods): no.
+  # *   [Cacheable](https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol#Cach
+  #     eable_methods): no.
+  #
+  #
+  # Related:
+  #
+  # *   Net::HTTP#patch: sends `PATCH` request, returns response object.
   #
   class HTTP::Patch < HTTPRequest
     METHOD: String
@@ -2084,7 +2849,20 @@ module Net
   end
 
   # <!-- rdoc-file=lib/net/http/requests.rb -->
-  # See Net::HTTPGenericRequest for attributes and methods.
+  # Class for representing [WebDAV method
+  # PROPFIND](http://www.webdav.org/specs/rfc4918.html#METHOD_PROPFIND):
+  #
+  #     require 'net/http'
+  #     uri = URI('http://example.com')
+  #     hostname = uri.hostname # => "example.com"
+  #     req = Net::HTTP::Propfind.new(uri) # => #<Net::HTTP::Propfind PROPFIND>
+  #     res = Net::HTTP.start(hostname) do |http|
+  #       http.request(req)
+  #     end
+  #
+  # Related:
+  #
+  # *   Net::HTTP#propfind: sends `PROPFIND` request, returns response object.
   #
   class HTTP::Propfind < HTTPRequest
     METHOD: String
@@ -2095,7 +2873,20 @@ module Net
   end
 
   # <!-- rdoc-file=lib/net/http/requests.rb -->
-  # See Net::HTTPGenericRequest for attributes and methods.
+  # Class for representing [WebDAV method
+  # PROPPATCH](http://www.webdav.org/specs/rfc4918.html#METHOD_PROPPATCH):
+  #
+  #     require 'net/http'
+  #     uri = URI('http://example.com')
+  #     hostname = uri.hostname # => "example.com"
+  #     req = Net::HTTP::Proppatch.new(uri) # => #<Net::HTTP::Proppatch PROPPATCH>
+  #     res = Net::HTTP.start(hostname) do |http|
+  #       http.request(req)
+  #     end
+  #
+  # Related:
+  #
+  # *   Net::HTTP#proppatch: sends `PROPPATCH` request, returns response object.
   #
   class HTTP::Proppatch < HTTPRequest
     METHOD: String
@@ -2106,7 +2897,20 @@ module Net
   end
 
   # <!-- rdoc-file=lib/net/http/requests.rb -->
-  # See Net::HTTPGenericRequest for attributes and methods.
+  # Class for representing [WebDAV method
+  # MKCOL](http://www.webdav.org/specs/rfc4918.html#METHOD_MKCOL):
+  #
+  #     require 'net/http'
+  #     uri = URI('http://example.com')
+  #     hostname = uri.hostname # => "example.com"
+  #     req = Net::HTTP::Mkcol.new(uri) # => #<Net::HTTP::Mkcol MKCOL>
+  #     res = Net::HTTP.start(hostname) do |http|
+  #       http.request(req)
+  #     end
+  #
+  # Related:
+  #
+  # *   Net::HTTP#mkcol: sends `MKCOL` request, returns response object.
   #
   class HTTP::Mkcol < HTTPRequest
     METHOD: String
@@ -2117,7 +2921,20 @@ module Net
   end
 
   # <!-- rdoc-file=lib/net/http/requests.rb -->
-  # See Net::HTTPGenericRequest for attributes and methods.
+  # Class for representing [WebDAV method
+  # COPY](http://www.webdav.org/specs/rfc4918.html#METHOD_COPY):
+  #
+  #     require 'net/http'
+  #     uri = URI('http://example.com')
+  #     hostname = uri.hostname # => "example.com"
+  #     req = Net::HTTP::Copy.new(uri) # => #<Net::HTTP::Copy COPY>
+  #     res = Net::HTTP.start(hostname) do |http|
+  #       http.request(req)
+  #     end
+  #
+  # Related:
+  #
+  # *   Net::HTTP#copy: sends `COPY` request, returns response object.
   #
   class HTTP::Copy < HTTPRequest
     METHOD: String
@@ -2128,7 +2945,20 @@ module Net
   end
 
   # <!-- rdoc-file=lib/net/http/requests.rb -->
-  # See Net::HTTPGenericRequest for attributes and methods.
+  # Class for representing [WebDAV method
+  # MOVE](http://www.webdav.org/specs/rfc4918.html#METHOD_MOVE):
+  #
+  #     require 'net/http'
+  #     uri = URI('http://example.com')
+  #     hostname = uri.hostname # => "example.com"
+  #     req = Net::HTTP::Move.new(uri) # => #<Net::HTTP::Move MOVE>
+  #     res = Net::HTTP.start(hostname) do |http|
+  #       http.request(req)
+  #     end
+  #
+  # Related:
+  #
+  # *   Net::HTTP#move: sends `MOVE` request, returns response object.
   #
   class HTTP::Move < HTTPRequest
     METHOD: String
@@ -2139,7 +2969,20 @@ module Net
   end
 
   # <!-- rdoc-file=lib/net/http/requests.rb -->
-  # See Net::HTTPGenericRequest for attributes and methods.
+  # Class for representing [WebDAV method
+  # LOCK](http://www.webdav.org/specs/rfc4918.html#METHOD_LOCK):
+  #
+  #     require 'net/http'
+  #     uri = URI('http://example.com')
+  #     hostname = uri.hostname # => "example.com"
+  #     req = Net::HTTP::Lock.new(uri) # => #<Net::HTTP::Lock LOCK>
+  #     res = Net::HTTP.start(hostname) do |http|
+  #       http.request(req)
+  #     end
+  #
+  # Related:
+  #
+  # *   Net::HTTP#lock: sends `LOCK` request, returns response object.
   #
   class HTTP::Lock < HTTPRequest
     METHOD: String
@@ -2150,7 +2993,20 @@ module Net
   end
 
   # <!-- rdoc-file=lib/net/http/requests.rb -->
-  # See Net::HTTPGenericRequest for attributes and methods.
+  # Class for representing [WebDAV method
+  # UNLOCK](http://www.webdav.org/specs/rfc4918.html#METHOD_UNLOCK):
+  #
+  #     require 'net/http'
+  #     uri = URI('http://example.com')
+  #     hostname = uri.hostname # => "example.com"
+  #     req = Net::HTTP::Unlock.new(uri) # => #<Net::HTTP::Unlock UNLOCK>
+  #     res = Net::HTTP.start(hostname) do |http|
+  #       http.request(req)
+  #     end
+  #
+  # Related:
+  #
+  # *   Net::HTTP#unlock: sends `UNLOCK` request, returns response object.
   #
   class HTTP::Unlock < HTTPRequest
     METHOD: String
@@ -2161,21 +3017,175 @@ module Net
   end
 
   # <!-- rdoc-file=lib/net/http/response.rb -->
-  # HTTP response class.
+  # This class is the base class for Net::HTTP request classes.
   #
-  # This class wraps together the response header and the response body (the
-  # entity requested).
+  # ## About the Examples
   #
-  # It mixes in the HTTPHeader module, which provides access to response header
-  # values both via hash-like methods and via individual readers.
+  # Examples here assume that `net/http` has been required (which also requires
+  # `uri`):
   #
-  # Note that each possible HTTP response code defines its own HTTPResponse
-  # subclass. All classes are defined under the Net module. Indentation indicates
-  # inheritance.  For a list of the classes see Net::HTTP.
+  #     require 'net/http'
   #
-  # Correspondence `HTTP code => class` is stored in CODE_TO_OBJ constant:
+  # Many code examples here use these example websites:
   #
-  #     Net::HTTPResponse::CODE_TO_OBJ['404'] #=> Net::HTTPNotFound
+  # *   https://jsonplaceholder.typicode.com.
+  # *   http://example.com.
+  #
+  #
+  # Some examples also assume these variables:
+  #
+  #     uri = URI('https://jsonplaceholder.typicode.com')
+  #     uri.freeze # Examples may not modify.
+  #     hostname = uri.hostname # => "jsonplaceholder.typicode.com"
+  #     port = uri.port         # => 443
+  #
+  # So that example requests may be written as:
+  #
+  #     Net::HTTP.get(uri)
+  #     Net::HTTP.get(hostname, '/index.html')
+  #     Net::HTTP.start(hostname) do |http|
+  #       http.get('/todos/1')
+  #       http.get('/todos/2')
+  #     end
+  #
+  # An example that needs a modified URI first duplicates `uri`, then modifies the
+  # duplicate:
+  #
+  #     _uri = uri.dup
+  #     _uri.path = '/todos/1'
+  #
+  # ## Returned Responses
+  #
+  # Method Net::HTTP.get_response returns an instance of one of the subclasses of
+  # Net::HTTPResponse:
+  #
+  #     Net::HTTP.get_response(uri)
+  #     # => #<Net::HTTPOK 200 OK readbody=true>
+  #     Net::HTTP.get_response(hostname, '/nosuch')
+  #     # => #<Net::HTTPNotFound 404 Not Found readbody=true>
+  #
+  # As does method Net::HTTP#request:
+  #
+  #     req = Net::HTTP::Get.new(uri)
+  #     Net::HTTP.start(hostname) do |http|
+  #       http.request(req)
+  #     end # => #<Net::HTTPOK 200 OK readbody=true>
+  #
+  # Class Net::HTTPResponse includes module Net::HTTPHeader, which provides access
+  # to response header values via (among others):
+  #
+  # *   Hash-like method `[]`.
+  # *   Specific reader methods, such as `content_type`.
+  #
+  #
+  # Examples:
+  #
+  #     res = Net::HTTP.get_response(uri) # => #<Net::HTTPOK 200 OK readbody=true>
+  #     res['Content-Type']               # => "text/html; charset=UTF-8"
+  #     res.content_type                  # => "text/html"
+  #
+  # ## Response Subclasses
+  #
+  # Class Net::HTTPResponse has a subclass for each [HTTP status
+  # code](https://en.wikipedia.org/wiki/List_of_HTTP_status_codes). You can look
+  # up the response class for a given code:
+  #
+  #     Net::HTTPResponse::CODE_TO_OBJ['200'] # => Net::HTTPOK
+  #     Net::HTTPResponse::CODE_TO_OBJ['400'] # => Net::HTTPBadRequest
+  #     Net::HTTPResponse::CODE_TO_OBJ['404'] # => Net::HTTPNotFound
+  #
+  # And you can retrieve the status code for a response object:
+  #
+  #     Net::HTTP.get_response(uri).code                 # => "200"
+  #     Net::HTTP.get_response(hostname, '/nosuch').code # => "404"
+  #
+  # The response subclasses (indentation shows class hierarchy):
+  #
+  # *   Net::HTTPUnknownResponse (for unhandled HTTP extensions).
+  #
+  # *   Net::HTTPInformation:
+  #
+  #     *   Net::HTTPContinue (100)
+  #     *   Net::HTTPSwitchProtocol (101)
+  #     *   Net::HTTPProcessing (102)
+  #     *   Net::HTTPEarlyHints (103)
+  #
+  #
+  # *   Net::HTTPSuccess:
+  #
+  #     *   Net::HTTPOK (200)
+  #     *   Net::HTTPCreated (201)
+  #     *   Net::HTTPAccepted (202)
+  #     *   Net::HTTPNonAuthoritativeInformation (203)
+  #     *   Net::HTTPNoContent (204)
+  #     *   Net::HTTPResetContent (205)
+  #     *   Net::HTTPPartialContent (206)
+  #     *   Net::HTTPMultiStatus (207)
+  #     *   Net::HTTPAlreadyReported (208)
+  #     *   Net::HTTPIMUsed (226)
+  #
+  #
+  # *   Net::HTTPRedirection:
+  #
+  #     *   Net::HTTPMultipleChoices (300)
+  #     *   Net::HTTPMovedPermanently (301)
+  #     *   Net::HTTPFound (302)
+  #     *   Net::HTTPSeeOther (303)
+  #     *   Net::HTTPNotModified (304)
+  #     *   Net::HTTPUseProxy (305)
+  #     *   Net::HTTPTemporaryRedirect (307)
+  #     *   Net::HTTPPermanentRedirect (308)
+  #
+  #
+  # *   Net::HTTPClientError:
+  #
+  #     *   Net::HTTPBadRequest (400)
+  #     *   Net::HTTPUnauthorized (401)
+  #     *   Net::HTTPPaymentRequired (402)
+  #     *   Net::HTTPForbidden (403)
+  #     *   Net::HTTPNotFound (404)
+  #     *   Net::HTTPMethodNotAllowed (405)
+  #     *   Net::HTTPNotAcceptable (406)
+  #     *   Net::HTTPProxyAuthenticationRequired (407)
+  #     *   Net::HTTPRequestTimeOut (408)
+  #     *   Net::HTTPConflict (409)
+  #     *   Net::HTTPGone (410)
+  #     *   Net::HTTPLengthRequired (411)
+  #     *   Net::HTTPPreconditionFailed (412)
+  #     *   Net::HTTPRequestEntityTooLarge (413)
+  #     *   Net::HTTPRequestURITooLong (414)
+  #     *   Net::HTTPUnsupportedMediaType (415)
+  #     *   Net::HTTPRequestedRangeNotSatisfiable (416)
+  #     *   Net::HTTPExpectationFailed (417)
+  #     *   Net::HTTPMisdirectedRequest (421)
+  #     *   Net::HTTPUnprocessableEntity (422)
+  #     *   Net::HTTPLocked (423)
+  #     *   Net::HTTPFailedDependency (424)
+  #     *   Net::HTTPUpgradeRequired (426)
+  #     *   Net::HTTPPreconditionRequired (428)
+  #     *   Net::HTTPTooManyRequests (429)
+  #     *   Net::HTTPRequestHeaderFieldsTooLarge (431)
+  #     *   Net::HTTPUnavailableForLegalReasons (451)
+  #
+  #
+  # *   Net::HTTPServerError:
+  #
+  #     *   Net::HTTPInternalServerError (500)
+  #     *   Net::HTTPNotImplemented (501)
+  #     *   Net::HTTPBadGateway (502)
+  #     *   Net::HTTPServiceUnavailable (503)
+  #     *   Net::HTTPGatewayTimeOut (504)
+  #     *   Net::HTTPVersionNotSupported (505)
+  #     *   Net::HTTPVariantAlsoNegotiates (506)
+  #     *   Net::HTTPInsufficientStorage (507)
+  #     *   Net::HTTPLoopDetected (508)
+  #     *   Net::HTTPNotExtended (510)
+  #     *   Net::HTTPNetworkAuthenticationRequired (511)
+  #
+  #
+  #
+  # There is also the Net::HTTPBadResponse exception which is raised when there is
+  # a protocol error.
   #
   class HTTPResponse
     # <!--
@@ -2330,294 +3340,961 @@ module Net
     EXCEPTION_TYPE: Net::HTTPError
   end
 
+  # <!-- rdoc-file=lib/net/http/responses.rb -->
+  # Parent class for informational (1xx) HTTP response classes.
+  #
+  # An informational response indicates that the request was received and
+  # understood.
+  #
+  # References:
+  #
+  # *   [RFC 9110](https://www.rfc-editor.org/rfc/rfc9110.html#status.1xx).
+  # *   [Wikipedia](https://en.wikipedia.org/wiki/List_of_HTTP_status_codes#1xx_in
+  #     formational_response).
+  #
   class HTTPInformation < HTTPResponse
     HAS_BODY: bool
 
     EXCEPTION_TYPE: Net::HTTPError
   end
 
+  # <!-- rdoc-file=lib/net/http/responses.rb -->
+  # Parent class for success (2xx) HTTP response classes.
+  #
+  # A success response indicates the action requested by the client was received,
+  # understood, and accepted.
+  #
+  # References:
+  #
+  # *   [RFC 9110](https://www.rfc-editor.org/rfc/rfc9110.html#status.2xx).
+  # *   [Wikipedia](https://en.wikipedia.org/wiki/List_of_HTTP_status_codes#2xx_su
+  #     ccess).
+  #
   class HTTPSuccess < HTTPResponse
     HAS_BODY: bool
 
     EXCEPTION_TYPE: Net::HTTPError
   end
 
+  # <!-- rdoc-file=lib/net/http/responses.rb -->
+  # Parent class for redirection (3xx) HTTP response classes.
+  #
+  # A redirection response indicates the client must take additional action to
+  # complete the request.
+  #
+  # References:
+  #
+  # *   [RFC 9110](https://www.rfc-editor.org/rfc/rfc9110.html#status.3xx).
+  # *   [Wikipedia](https://en.wikipedia.org/wiki/List_of_HTTP_status_codes#3xx_re
+  #     direction).
+  #
   class HTTPRedirection < HTTPResponse
     HAS_BODY: bool
 
     EXCEPTION_TYPE: Net::HTTPRetriableError
   end
 
+  # <!-- rdoc-file=lib/net/http/responses.rb -->
+  # Parent class for client error (4xx) HTTP response classes.
+  #
+  # A client error response indicates that the client may have caused an error.
+  #
+  # References:
+  #
+  # *   [RFC 9110](https://www.rfc-editor.org/rfc/rfc9110.html#status.4xx).
+  # *   [Wikipedia](https://en.wikipedia.org/wiki/List_of_HTTP_status_codes#4xx_cl
+  #     ient_errors).
+  #
   class HTTPClientError < HTTPResponse
     HAS_BODY: bool
 
     EXCEPTION_TYPE: untyped
   end
 
+  # <!-- rdoc-file=lib/net/http/responses.rb -->
+  # Parent class for server error (5xx) HTTP response classes.
+  #
+  # A server error response indicates that the server failed to fulfill a request.
+  #
+  # References:
+  #
+  # *   [RFC 9110](https://www.rfc-editor.org/rfc/rfc9110.html#status.5xx).
+  # *   [Wikipedia](https://en.wikipedia.org/wiki/List_of_HTTP_status_codes#5xx_se
+  #     rver_errors).
+  #
   class HTTPServerError < HTTPResponse
     HAS_BODY: bool
 
     EXCEPTION_TYPE: Net::HTTPFatalError
   end
 
+  # <!-- rdoc-file=lib/net/http/responses.rb -->
+  # Response class for `Continue` responses (status code 100).
+  #
+  # A `Continue` response indicates that the server has received the request
+  # headers.
+  #
+  # References:
+  #
+  # *   [Mozilla](https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/100).
+  # *   [RFC 9110](https://www.rfc-editor.org/rfc/rfc9110.html#name-100-continue).
+  # *   [Wikipedia](https://en.wikipedia.org/wiki/List_of_HTTP_status_codes#100).
+  #
   class HTTPContinue < HTTPInformation
     HAS_BODY: bool
   end
 
+  # <!-- rdoc-file=lib/net/http/responses.rb -->
+  # Response class for `Switching Protocol` responses (status code 101).
+  #
+  # The <tt>Switching Protocol<tt> response indicates that the server has received
+  # a request to switch protocols, and has agreed to do so.
+  #
+  # References:
+  #
+  # *   [Mozilla](https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/101).
+  # *   [RFC
+  #     9110](https://www.rfc-editor.org/rfc/rfc9110.html#name-101-switching-proto
+  #     cols).
+  # *   [Wikipedia](https://en.wikipedia.org/wiki/List_of_HTTP_status_codes#101).
+  #
   class HTTPSwitchProtocol < HTTPInformation
     HAS_BODY: bool
   end
 
+  # <!-- rdoc-file=lib/net/http/responses.rb -->
+  # Response class for `Processing` responses (status code 102).
+  #
+  # The `Processing` response indicates that the server has received and is
+  # processing the request, but no response is available yet.
+  #
+  # References:
+  #
+  # *   [Wikipedia](https://en.wikipedia.org/wiki/List_of_HTTP_status_codes#102).
+  #
   class HTTPProcessing < HTTPInformation
     HAS_BODY: bool
   end
 
+  # <!-- rdoc-file=lib/net/http/responses.rb -->
+  # Response class for `Early Hints` responses (status code 103).
+  #
+  # The `Early Hints` indicates that the server has received and is processing the
+  # request, and contains certain headers; the final response is not available
+  # yet.
+  #
+  # References:
+  #
+  # *   [Mozilla](https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/103).
+  # *   [Wikipedia](https://en.wikipedia.org/wiki/List_of_HTTP_status_codes#103).
+  #
   class HTTPEarlyHints < HTTPInformation
     HAS_BODY: bool
   end
 
+  # <!-- rdoc-file=lib/net/http/responses.rb -->
+  # Response class for `OK` responses (status code 200).
+  #
+  # The `OK` response indicates that the server has received a request and has
+  # responded successfully. See [200
+  # OK](https://en.wikipedia.org/wiki/List_of_HTTP_status_codes#200).
+  #
   class HTTPOK < HTTPSuccess
     HAS_BODY: bool
   end
 
+  # <!-- rdoc-file=lib/net/http/responses.rb -->
+  # Response class for `Created` responses (status code 201).
+  #
+  # The `Created` response indicates that the server has received and has
+  # fulfilled a request to create a new resource. See [201
+  # Created](https://en.wikipedia.org/wiki/List_of_HTTP_status_codes#201).
+  #
   class HTTPCreated < HTTPSuccess
     HAS_BODY: bool
   end
 
+  # <!-- rdoc-file=lib/net/http/responses.rb -->
+  # Response class for `Accepted` responses (status code 202).
+  #
+  # The `Accepted` response indicates that the server has received and is
+  # processing a request, but the processing has not yet been completed. See [202
+  # Accepted](https://en.wikipedia.org/wiki/List_of_HTTP_status_codes#202).
+  #
   class HTTPAccepted < HTTPSuccess
     HAS_BODY: bool
   end
 
+  # <!-- rdoc-file=lib/net/http/responses.rb -->
+  # Response class for `Non-Authoritative Information` responses (status code
+  # 203).
+  #
+  # The `Non-Authoritative Information` response indicates that the server is a
+  # transforming proxy (such as a Web accelerator) that received a 200 OK response
+  # from its origin, and is returning a modified version of the origin's response.
+  # See [203 Non-Authoritative
+  # Information](https://en.wikipedia.org/wiki/List_of_HTTP_status_codes#203).
+  #
   class HTTPNonAuthoritativeInformation < HTTPSuccess
     HAS_BODY: bool
   end
 
+  # <!-- rdoc-file=lib/net/http/responses.rb -->
+  # Response class for `No Content` responses (status code 204).
+  #
+  # The `No Content` response indicates that the server successfully processed the
+  # request, and is not returning any content. See [204 No
+  # Content](https://en.wikipedia.org/wiki/List_of_HTTP_status_codes#204).
+  #
   class HTTPNoContent < HTTPSuccess
     HAS_BODY: bool
   end
 
+  # <!-- rdoc-file=lib/net/http/responses.rb -->
+  # Response class for `Reset Content` responses (status code 205).
+  #
+  # The `Reset Content` response indicates that the server successfully processed
+  # the request, asks that the client reset its document view, and is not
+  # returning any content. See [205 Reset
+  # Content](https://en.wikipedia.org/wiki/List_of_HTTP_status_codes#205).
+  #
   class HTTPResetContent < HTTPSuccess
     HAS_BODY: bool
   end
 
+  # <!-- rdoc-file=lib/net/http/responses.rb -->
+  # Response class for `Partial Content` responses (status code 206).
+  #
+  # The `Partial Content` response indicates that the server is delivering only
+  # part of the resource (byte serving) due to a Range header in the request. See
+  # [206 Partial
+  # Content](https://en.wikipedia.org/wiki/List_of_HTTP_status_codes#206).
+  #
   class HTTPPartialContent < HTTPSuccess
     HAS_BODY: bool
   end
 
+  # <!-- rdoc-file=lib/net/http/responses.rb -->
+  # Response class for `Multi-Status (WebDAV)` responses (status code 207).
+  #
+  # The `Multi-Status (WebDAV)` response indicates that the server has received
+  # the request, and that the message body can contain a number of separate
+  # response codes. See [207 Multi-Status
+  # (WebDAV)](https://en.wikipedia.org/wiki/List_of_HTTP_status_codes#207).
+  #
   class HTTPMultiStatus < HTTPSuccess
     HAS_BODY: bool
   end
 
+  # <!-- rdoc-file=lib/net/http/responses.rb -->
+  # Response class for `Already Reported (WebDAV)` responses (status code 208).
+  #
+  # The `Already Reported (WebDAV)` response indicates that the server has
+  # received the request, and that the members of a DAV binding have already been
+  # enumerated in a preceding part of the (multi-status) response, and are not
+  # being included again. See [208 Already Reported
+  # (WebDAV)](https://en.wikipedia.org/wiki/List_of_HTTP_status_codes#208).
+  #
   class HTTPAlreadyReported < HTTPSuccess
     HAS_BODY: bool
   end
 
+  # <!-- rdoc-file=lib/net/http/responses.rb -->
+  # Response class for `IM Used` responses (status code 226).
+  #
+  # The `IM Used` response indicates that the server has fulfilled a request for
+  # the resource, and the response is a representation of the result of one or
+  # more instance-manipulations applied to the current instance. See [226 IM
+  # Used](https://en.wikipedia.org/wiki/List_of_HTTP_status_codes#226).
+  #
   class HTTPIMUsed < HTTPSuccess
     HAS_BODY: bool
   end
 
+  # <!-- rdoc-file=lib/net/http/responses.rb -->
+  # Response class for `Multiple Choices` responses (status code 300).
+  #
+  # The `Multiple Choices` response indicates that the server offers multiple
+  # options for the resource from which the client may choose. See [300 Multiple
+  # Choices](https://en.wikipedia.org/wiki/List_of_HTTP_status_codes#300).
+  #
   class HTTPMultipleChoices < HTTPRedirection
     HAS_BODY: bool
   end
 
+  # <!-- rdoc-file=lib/net/http/responses.rb -->
+  # Response class for `Multiple Choices` responses (status code 300).
+  #
+  # The `Multiple Choices` response indicates that the server offers multiple
+  # options for the resource from which the client may choose. See [300 Multiple
+  # Choices](https://en.wikipedia.org/wiki/List_of_HTTP_status_codes#300).
+  #
   HTTPMultipleChoice: HTTPMultipleChoices
 
+  # <!-- rdoc-file=lib/net/http/responses.rb -->
+  # Response class for `Moved Permanently` responses (status code 301).
+  #
+  # The `Moved Permanently` response indicates that links or records returning
+  # this response should be updated to use the given URL. See [301 Moved
+  # Permanently](https://en.wikipedia.org/wiki/List_of_HTTP_status_codes#301).
+  #
   class HTTPMovedPermanently < HTTPRedirection
     HAS_BODY: bool
   end
 
+  # <!-- rdoc-file=lib/net/http/responses.rb -->
+  # Response class for `Found` responses (status code 302).
+  #
+  # The `Found` response indicates that the client should look at (browse to)
+  # another URL. See [302
+  # Found](https://en.wikipedia.org/wiki/List_of_HTTP_status_codes#302).
+  #
   class HTTPFound < HTTPRedirection
     HAS_BODY: bool
   end
 
+  # <!-- rdoc-file=lib/net/http/responses.rb -->
+  # Response class for `See Other` responses (status code 303).
+  #
+  # The response to the request can be found under another URI using the GET
+  # method. See [303 See
+  # Other](https://en.wikipedia.org/wiki/List_of_HTTP_status_codes#303).
+  #
   class HTTPSeeOther < HTTPRedirection
     HAS_BODY: bool
   end
 
+  # <!-- rdoc-file=lib/net/http/responses.rb -->
+  # Response class for `Not Modified` responses (status code 304).
+  #
+  # Indicates that the resource has not been modified since the version specified
+  # by the request headers. See [304 Not
+  # Modified](https://en.wikipedia.org/wiki/List_of_HTTP_status_codes#304).
+  #
   class HTTPNotModified < HTTPRedirection
     HAS_BODY: bool
   end
 
+  # <!-- rdoc-file=lib/net/http/responses.rb -->
+  # Response class for `Use Proxy` responses (status code 305).
+  #
+  # The requested resource is available only through a proxy, whose address is
+  # provided in the response. See [305 Use
+  # Proxy](https://en.wikipedia.org/wiki/List_of_HTTP_status_codes#305).
+  #
   class HTTPUseProxy < HTTPRedirection
     HAS_BODY: bool
   end
 
+  # <!-- rdoc-file=lib/net/http/responses.rb -->
+  # Response class for `Temporary Redirect` responses (status code 307).
+  #
+  # The request should be repeated with another URI; however, future requests
+  # should still use the original URI. See [307 Temporary
+  # Redirect](https://en.wikipedia.org/wiki/List_of_HTTP_status_codes#307).
+  #
   class HTTPTemporaryRedirect < HTTPRedirection
     HAS_BODY: bool
   end
 
+  # <!-- rdoc-file=lib/net/http/responses.rb -->
+  # Response class for `Permanent Redirect` responses (status code 308).
+  #
+  # This and all future requests should be directed to the given URI. See [308
+  # Permanent
+  # Redirect](https://en.wikipedia.org/wiki/List_of_HTTP_status_codes#308).
+  #
   class HTTPPermanentRedirect < HTTPRedirection
     HAS_BODY: bool
   end
 
+  # <!-- rdoc-file=lib/net/http/responses.rb -->
+  # Response class for `Bad Request` responses (status code 400).
+  #
+  # The server cannot or will not process the request due to an apparent client
+  # error. See [400 Bad
+  # Request](https://en.wikipedia.org/wiki/List_of_HTTP_status_codes#400).
+  #
   class HTTPBadRequest < HTTPClientError
     HAS_BODY: bool
   end
 
+  # <!-- rdoc-file=lib/net/http/responses.rb -->
+  # Response class for `Unauthorized` responses (status code 401).
+  #
+  # Authentication is required, but either was not provided or failed. See [401
+  # Unauthorized](https://en.wikipedia.org/wiki/List_of_HTTP_status_codes#401).
+  #
   class HTTPUnauthorized < HTTPClientError
     HAS_BODY: bool
   end
 
+  # <!-- rdoc-file=lib/net/http/responses.rb -->
+  # Response class for `Payment Required` responses (status code 402).
+  #
+  # Reserved for future use. See [402 Payment
+  # Required](https://en.wikipedia.org/wiki/List_of_HTTP_status_codes#402).
+  #
   class HTTPPaymentRequired < HTTPClientError
     HAS_BODY: bool
   end
 
+  # <!-- rdoc-file=lib/net/http/responses.rb -->
+  # Response class for `Forbidden` responses (status code 403).
+  #
+  # The request contained valid data and was understood by the server, but the
+  # server is refusing action. See [403
+  # Forbidden](https://en.wikipedia.org/wiki/List_of_HTTP_status_codes#403).
+  #
   class HTTPForbidden < HTTPClientError
     HAS_BODY: bool
   end
 
+  # <!-- rdoc-file=lib/net/http/responses.rb -->
+  # Response class for `Not Found` responses (status code 404).
+  #
+  # The requested resource could not be found but may be available in the future.
+  # See [404 Not
+  # Found](https://en.wikipedia.org/wiki/List_of_HTTP_status_codes#404).
+  #
   class HTTPNotFound < HTTPClientError
     HAS_BODY: bool
   end
 
+  # <!-- rdoc-file=lib/net/http/responses.rb -->
+  # Response class for `Method Not Allowed` responses (status code 405).
+  #
+  # The request method is not supported for the requested resource. See [405
+  # Method Not
+  # Allowed](https://en.wikipedia.org/wiki/List_of_HTTP_status_codes#405).
+  #
   class HTTPMethodNotAllowed < HTTPClientError
     HAS_BODY: bool
   end
 
+  # <!-- rdoc-file=lib/net/http/responses.rb -->
+  # Response class for `Not Acceptable` responses (status code 406).
+  #
+  # The requested resource is capable of generating only content that not
+  # acceptable according to the Accept headers sent in the request. See [406 Not
+  # Acceptable](https://en.wikipedia.org/wiki/List_of_HTTP_status_codes#406).
+  #
   class HTTPNotAcceptable < HTTPClientError
     HAS_BODY: bool
   end
 
+  # <!-- rdoc-file=lib/net/http/responses.rb -->
+  # Response class for `Proxy Authentication Required` responses (status code
+  # 407).
+  #
+  # The client must first authenticate itself with the proxy. See [407 Proxy
+  # Authentication
+  # Required](https://en.wikipedia.org/wiki/List_of_HTTP_status_codes#407).
+  #
   class HTTPProxyAuthenticationRequired < HTTPClientError
     HAS_BODY: bool
   end
 
+  # <!-- rdoc-file=lib/net/http/responses.rb -->
+  # Response class for `Request Timeout` responses (status code 408).
+  #
+  # The server timed out waiting for the request. See [408 Request
+  # Timeout](https://en.wikipedia.org/wiki/List_of_HTTP_status_codes#408).
+  #
   class HTTPRequestTimeout < HTTPClientError
     HAS_BODY: bool
   end
 
+  # <!-- rdoc-file=lib/net/http/responses.rb -->
+  # Response class for `Conflict` responses (status code 409).
+  #
+  # The request could not be processed because of conflict in the current state of
+  # the resource. See [409
+  # Conflict](https://en.wikipedia.org/wiki/List_of_HTTP_status_codes#409).
+  #
   class HTTPConflict < HTTPClientError
     HAS_BODY: bool
   end
 
+  # <!-- rdoc-file=lib/net/http/responses.rb -->
+  # Response class for `Gone` responses (status code 410).
+  #
+  # The resource requested was previously in use but is no longer available and
+  # will not be available again. See [410
+  # Gone](https://en.wikipedia.org/wiki/List_of_HTTP_status_codes#410).
+  #
   class HTTPGone < HTTPClientError
     HAS_BODY: bool
   end
 
+  # <!-- rdoc-file=lib/net/http/responses.rb -->
+  # Response class for `Length Required` responses (status code 411).
+  #
+  # The request did not specify the length of its content, which is required by
+  # the requested resource. See [411 Length
+  # Required](https://en.wikipedia.org/wiki/List_of_HTTP_status_codes#411).
+  #
   class HTTPLengthRequired < HTTPClientError
     HAS_BODY: bool
   end
 
+  # <!-- rdoc-file=lib/net/http/responses.rb -->
+  # Response class for `Precondition Failed` responses (status code 412).
+  #
+  # The server does not meet one of the preconditions specified in the request
+  # headers. See [412 Precondition
+  # Failed](https://en.wikipedia.org/wiki/List_of_HTTP_status_codes#412).
+  #
   class HTTPPreconditionFailed < HTTPClientError
     HAS_BODY: bool
   end
 
+  # <!-- rdoc-file=lib/net/http/responses.rb -->
+  # Response class for `Payload Too Large` responses (status code 413).
+  #
+  # The request is larger than the server is willing or able to process. See [413
+  # Payload Too
+  # Large](https://en.wikipedia.org/wiki/List_of_HTTP_status_codes#413).
+  #
   class HTTPPayloadTooLarge < HTTPClientError
     HAS_BODY: bool
   end
 
+  # <!-- rdoc-file=lib/net/http/responses.rb -->
+  # Response class for `URI Too Long` responses (status code 414).
+  #
+  # The URI provided was too long for the server to process. See [414 URI Too
+  # Long](https://en.wikipedia.org/wiki/List_of_HTTP_status_codes#414).
+  #
   class HTTPURITooLong < HTTPClientError
     HAS_BODY: bool
   end
 
+  # <!-- rdoc-file=lib/net/http/responses.rb -->
+  # Response class for `Unsupported Media Type` responses (status code 415).
+  #
+  # The request entity has a media type which the server or resource does not
+  # support. See [415 Unsupported Media
+  # Type](https://en.wikipedia.org/wiki/List_of_HTTP_status_codes#415).
+  #
   class HTTPUnsupportedMediaType < HTTPClientError
     HAS_BODY: bool
   end
 
+  # <!-- rdoc-file=lib/net/http/responses.rb -->
+  # Response class for `Range Not Satisfiable` responses (status code 416).
+  #
+  # The request entity has a media type which the server or resource does not
+  # support. See [416 Range Not
+  # Satisfiable](https://en.wikipedia.org/wiki/List_of_HTTP_status_codes#416).
+  #
   class HTTPRangeNotSatisfiable < HTTPClientError
     HAS_BODY: bool
   end
 
+  # <!-- rdoc-file=lib/net/http/responses.rb -->
+  # Response class for `Expectation Failed` responses (status code 417).
+  #
+  # The server cannot meet the requirements of the Expect request-header field.
+  # See [417 Expectation
+  # Failed](https://en.wikipedia.org/wiki/List_of_HTTP_status_codes#417).
+  #
   class HTTPExpectationFailed < HTTPClientError
     HAS_BODY: bool
   end
 
+  # <!-- rdoc-file=lib/net/http/responses.rb -->
+  # Response class for `Misdirected Request` responses (status code 421).
+  #
+  # The request was directed at a server that is not able to produce a response.
+  # See [421 Misdirected
+  # Request](https://en.wikipedia.org/wiki/List_of_HTTP_status_codes#421).
+  #
   class HTTPMisdirectedRequest < HTTPClientError
     HAS_BODY: bool
   end
 
+  # <!-- rdoc-file=lib/net/http/responses.rb -->
+  # Response class for `Unprocessable Entity` responses (status code 422).
+  #
+  # The request was well-formed but had semantic errors. See [422 Unprocessable
+  # Entity](https://en.wikipedia.org/wiki/List_of_HTTP_status_codes#422).
+  #
   class HTTPUnprocessableEntity < HTTPClientError
     HAS_BODY: bool
   end
 
+  # <!-- rdoc-file=lib/net/http/responses.rb -->
+  # Response class for `Locked (WebDAV)` responses (status code 423).
+  #
+  # The requested resource is locked. See [423 Locked
+  # (WebDAV)](https://en.wikipedia.org/wiki/List_of_HTTP_status_codes#423).
+  #
   class HTTPLocked < HTTPClientError
     HAS_BODY: bool
   end
 
+  # <!-- rdoc-file=lib/net/http/responses.rb -->
+  # Response class for `Failed Dependency (WebDAV)` responses (status code 424).
+  #
+  # The request failed because it depended on another request and that request
+  # failed. See [424 Failed Dependency
+  # (WebDAV)](https://en.wikipedia.org/wiki/List_of_HTTP_status_codes#424).
+  #
   class HTTPFailedDependency < HTTPClientError
     HAS_BODY: bool
   end
 
+  # <!-- rdoc-file=lib/net/http/responses.rb -->
+  # Response class for `Upgrade Required` responses (status code 426).
+  #
+  # The client should switch to the protocol given in the Upgrade header field.
+  # See [426 Upgrade
+  # Required](https://en.wikipedia.org/wiki/List_of_HTTP_status_codes#426).
+  #
   class HTTPUpgradeRequired < HTTPClientError
     HAS_BODY: bool
   end
 
+  # <!-- rdoc-file=lib/net/http/responses.rb -->
+  # Response class for `Precondition Required` responses (status code 428).
+  #
+  # The origin server requires the request to be conditional. See [428
+  # Precondition
+  # Required](https://en.wikipedia.org/wiki/List_of_HTTP_status_codes#428).
+  #
   class HTTPPreconditionRequired < HTTPClientError
     HAS_BODY: bool
   end
 
+  # <!-- rdoc-file=lib/net/http/responses.rb -->
+  # Response class for `Too Many Requests` responses (status code 429).
+  #
+  # The user has sent too many requests in a given amount of time. See [429 Too
+  # Many Requests](https://en.wikipedia.org/wiki/List_of_HTTP_status_codes#429).
+  #
   class HTTPTooManyRequests < HTTPClientError
     HAS_BODY: bool
   end
 
+  # <!-- rdoc-file=lib/net/http/responses.rb -->
+  # Response class for `Request Header Fields Too Large` responses (status code
+  # 431).
+  #
+  # An individual header field is too large, or all the header fields
+  # collectively, are too large. See [431 Request Header Fields Too
+  # Large](https://en.wikipedia.org/wiki/List_of_HTTP_status_codes#431).
+  #
   class HTTPRequestHeaderFieldsTooLarge < HTTPClientError
     HAS_BODY: bool
   end
 
+  # <!-- rdoc-file=lib/net/http/responses.rb -->
+  # Response class for `Unavailable For Legal Reasons` responses (status code
+  # 451).
+  #
+  # A server operator has received a legal demand to deny access to a resource or
+  # to a set of resources that includes the requested resource. See [451
+  # Unavailable For Legal
+  # Reasons](https://en.wikipedia.org/wiki/List_of_HTTP_status_codes#451).
+  #
   class HTTPUnavailableForLegalReasons < HTTPClientError
     HAS_BODY: bool
   end
 
+  # <!-- rdoc-file=lib/net/http/responses.rb -->
+  # Response class for `Internal Server Error` responses (status code 500).
+  #
+  # An unexpected condition was encountered and no more specific message is
+  # suitable. See [500 Internal Server
+  # Error](https://en.wikipedia.org/wiki/List_of_HTTP_status_codes#500).
+  #
   class HTTPInternalServerError < HTTPServerError
     HAS_BODY: bool
   end
 
+  # <!-- rdoc-file=lib/net/http/responses.rb -->
+  # Response class for `Not Implemented` responses (status code 501).
+  #
+  # The server either does not recognize the request method, or it lacks the
+  # ability to fulfil the request. See [501 Not
+  # Implemented](https://en.wikipedia.org/wiki/List_of_HTTP_status_codes#501).
+  #
   class HTTPNotImplemented < HTTPServerError
     HAS_BODY: bool
   end
 
+  # <!-- rdoc-file=lib/net/http/responses.rb -->
+  # Response class for `Bad Gateway` responses (status code 502).
+  #
+  # The server was acting as a gateway or proxy and received an invalid response
+  # from the upstream server. See [502 Bad
+  # Gateway](https://en.wikipedia.org/wiki/List_of_HTTP_status_codes#502).
+  #
   class HTTPBadGateway < HTTPServerError
     HAS_BODY: bool
   end
 
+  # <!-- rdoc-file=lib/net/http/responses.rb -->
+  # Response class for `Service Unavailable` responses (status code 503).
+  #
+  # The server cannot handle the request (because it is overloaded or down for
+  # maintenance). See [503 Service
+  # Unavailable](https://en.wikipedia.org/wiki/List_of_HTTP_status_codes#503).
+  #
   class HTTPServiceUnavailable < HTTPServerError
     HAS_BODY: bool
   end
 
+  # <!-- rdoc-file=lib/net/http/responses.rb -->
+  # Response class for `Gateway Timeout` responses (status code 504).
+  #
+  # The server was acting as a gateway or proxy and did not receive a timely
+  # response from the upstream server. See [504 Gateway
+  # Timeout](https://en.wikipedia.org/wiki/List_of_HTTP_status_codes#504).
+  #
   class HTTPGatewayTimeout < HTTPServerError
     HAS_BODY: bool
   end
 
+  # <!-- rdoc-file=lib/net/http/responses.rb -->
+  # Response class for `HTTP Version Not Supported` responses (status code 505).
+  #
+  # The server does not support the HTTP version used in the request. See [505
+  # HTTP Version Not
+  # Supported](https://en.wikipedia.org/wiki/List_of_HTTP_status_codes#505).
+  #
   class HTTPVersionNotSupported < HTTPServerError
     HAS_BODY: bool
   end
 
+  # <!-- rdoc-file=lib/net/http/responses.rb -->
+  # Response class for `Variant Also Negotiates` responses (status code 506).
+  #
+  # Transparent content negotiation for the request results in a circular
+  # reference. See [506 Variant Also
+  # Negotiates](https://en.wikipedia.org/wiki/List_of_HTTP_status_codes#506).
+  #
   class HTTPVariantAlsoNegotiates < HTTPServerError
     HAS_BODY: bool
   end
 
+  # <!-- rdoc-file=lib/net/http/responses.rb -->
+  # Response class for `Insufficient Storage (WebDAV)` responses (status code
+  # 507).
+  #
+  # The server is unable to store the representation needed to complete the
+  # request. See [507 Insufficient Storage
+  # (WebDAV)](https://en.wikipedia.org/wiki/List_of_HTTP_status_codes#507).
+  #
   class HTTPInsufficientStorage < HTTPServerError
     HAS_BODY: bool
   end
 
+  # <!-- rdoc-file=lib/net/http/responses.rb -->
+  # Response class for `Loop Detected (WebDAV)` responses (status code 508).
+  #
+  # The server detected an infinite loop while processing the request. See [508
+  # Loop Detected
+  # (WebDAV)](https://en.wikipedia.org/wiki/List_of_HTTP_status_codes#508).
+  #
   class HTTPLoopDetected < HTTPServerError
     HAS_BODY: bool
   end
 
+  # <!-- rdoc-file=lib/net/http/responses.rb -->
+  # Response class for `Not Extended` responses (status code 510).
+  #
+  # Further extensions to the request are required for the server to fulfill it.
+  # See [510 Not
+  # Extended](https://en.wikipedia.org/wiki/List_of_HTTP_status_codes#510).
+  #
   class HTTPNotExtended < HTTPServerError
     HAS_BODY: bool
   end
 
+  # <!-- rdoc-file=lib/net/http/responses.rb -->
+  # Response class for `Network Authentication Required` responses (status code
+  # 511).
+  #
+  # The client needs to authenticate to gain network access. See [511 Network
+  # Authentication
+  # Required](https://en.wikipedia.org/wiki/List_of_HTTP_status_codes#511).
+  #
   class HTTPNetworkAuthenticationRequired < HTTPServerError
     HAS_BODY: bool
   end
 
   # <!-- rdoc-file=lib/net/http/response.rb -->
-  # HTTP response class.
+  # This class is the base class for Net::HTTP request classes.
   #
-  # This class wraps together the response header and the response body (the
-  # entity requested).
+  # ## About the Examples
   #
-  # It mixes in the HTTPHeader module, which provides access to response header
-  # values both via hash-like methods and via individual readers.
+  # Examples here assume that `net/http` has been required (which also requires
+  # `uri`):
   #
-  # Note that each possible HTTP response code defines its own HTTPResponse
-  # subclass. All classes are defined under the Net module. Indentation indicates
-  # inheritance.  For a list of the classes see Net::HTTP.
+  #     require 'net/http'
   #
-  # Correspondence `HTTP code => class` is stored in CODE_TO_OBJ constant:
+  # Many code examples here use these example websites:
   #
-  #     Net::HTTPResponse::CODE_TO_OBJ['404'] #=> Net::HTTPNotFound
+  # *   https://jsonplaceholder.typicode.com.
+  # *   http://example.com.
+  #
+  #
+  # Some examples also assume these variables:
+  #
+  #     uri = URI('https://jsonplaceholder.typicode.com')
+  #     uri.freeze # Examples may not modify.
+  #     hostname = uri.hostname # => "jsonplaceholder.typicode.com"
+  #     port = uri.port         # => 443
+  #
+  # So that example requests may be written as:
+  #
+  #     Net::HTTP.get(uri)
+  #     Net::HTTP.get(hostname, '/index.html')
+  #     Net::HTTP.start(hostname) do |http|
+  #       http.get('/todos/1')
+  #       http.get('/todos/2')
+  #     end
+  #
+  # An example that needs a modified URI first duplicates `uri`, then modifies the
+  # duplicate:
+  #
+  #     _uri = uri.dup
+  #     _uri.path = '/todos/1'
+  #
+  # ## Returned Responses
+  #
+  # Method Net::HTTP.get_response returns an instance of one of the subclasses of
+  # Net::HTTPResponse:
+  #
+  #     Net::HTTP.get_response(uri)
+  #     # => #<Net::HTTPOK 200 OK readbody=true>
+  #     Net::HTTP.get_response(hostname, '/nosuch')
+  #     # => #<Net::HTTPNotFound 404 Not Found readbody=true>
+  #
+  # As does method Net::HTTP#request:
+  #
+  #     req = Net::HTTP::Get.new(uri)
+  #     Net::HTTP.start(hostname) do |http|
+  #       http.request(req)
+  #     end # => #<Net::HTTPOK 200 OK readbody=true>
+  #
+  # Class Net::HTTPResponse includes module Net::HTTPHeader, which provides access
+  # to response header values via (among others):
+  #
+  # *   Hash-like method `[]`.
+  # *   Specific reader methods, such as `content_type`.
+  #
+  #
+  # Examples:
+  #
+  #     res = Net::HTTP.get_response(uri) # => #<Net::HTTPOK 200 OK readbody=true>
+  #     res['Content-Type']               # => "text/html; charset=UTF-8"
+  #     res.content_type                  # => "text/html"
+  #
+  # ## Response Subclasses
+  #
+  # Class Net::HTTPResponse has a subclass for each [HTTP status
+  # code](https://en.wikipedia.org/wiki/List_of_HTTP_status_codes). You can look
+  # up the response class for a given code:
+  #
+  #     Net::HTTPResponse::CODE_TO_OBJ['200'] # => Net::HTTPOK
+  #     Net::HTTPResponse::CODE_TO_OBJ['400'] # => Net::HTTPBadRequest
+  #     Net::HTTPResponse::CODE_TO_OBJ['404'] # => Net::HTTPNotFound
+  #
+  # And you can retrieve the status code for a response object:
+  #
+  #     Net::HTTP.get_response(uri).code                 # => "200"
+  #     Net::HTTP.get_response(hostname, '/nosuch').code # => "404"
+  #
+  # The response subclasses (indentation shows class hierarchy):
+  #
+  # *   Net::HTTPUnknownResponse (for unhandled HTTP extensions).
+  #
+  # *   Net::HTTPInformation:
+  #
+  #     *   Net::HTTPContinue (100)
+  #     *   Net::HTTPSwitchProtocol (101)
+  #     *   Net::HTTPProcessing (102)
+  #     *   Net::HTTPEarlyHints (103)
+  #
+  #
+  # *   Net::HTTPSuccess:
+  #
+  #     *   Net::HTTPOK (200)
+  #     *   Net::HTTPCreated (201)
+  #     *   Net::HTTPAccepted (202)
+  #     *   Net::HTTPNonAuthoritativeInformation (203)
+  #     *   Net::HTTPNoContent (204)
+  #     *   Net::HTTPResetContent (205)
+  #     *   Net::HTTPPartialContent (206)
+  #     *   Net::HTTPMultiStatus (207)
+  #     *   Net::HTTPAlreadyReported (208)
+  #     *   Net::HTTPIMUsed (226)
+  #
+  #
+  # *   Net::HTTPRedirection:
+  #
+  #     *   Net::HTTPMultipleChoices (300)
+  #     *   Net::HTTPMovedPermanently (301)
+  #     *   Net::HTTPFound (302)
+  #     *   Net::HTTPSeeOther (303)
+  #     *   Net::HTTPNotModified (304)
+  #     *   Net::HTTPUseProxy (305)
+  #     *   Net::HTTPTemporaryRedirect (307)
+  #     *   Net::HTTPPermanentRedirect (308)
+  #
+  #
+  # *   Net::HTTPClientError:
+  #
+  #     *   Net::HTTPBadRequest (400)
+  #     *   Net::HTTPUnauthorized (401)
+  #     *   Net::HTTPPaymentRequired (402)
+  #     *   Net::HTTPForbidden (403)
+  #     *   Net::HTTPNotFound (404)
+  #     *   Net::HTTPMethodNotAllowed (405)
+  #     *   Net::HTTPNotAcceptable (406)
+  #     *   Net::HTTPProxyAuthenticationRequired (407)
+  #     *   Net::HTTPRequestTimeOut (408)
+  #     *   Net::HTTPConflict (409)
+  #     *   Net::HTTPGone (410)
+  #     *   Net::HTTPLengthRequired (411)
+  #     *   Net::HTTPPreconditionFailed (412)
+  #     *   Net::HTTPRequestEntityTooLarge (413)
+  #     *   Net::HTTPRequestURITooLong (414)
+  #     *   Net::HTTPUnsupportedMediaType (415)
+  #     *   Net::HTTPRequestedRangeNotSatisfiable (416)
+  #     *   Net::HTTPExpectationFailed (417)
+  #     *   Net::HTTPMisdirectedRequest (421)
+  #     *   Net::HTTPUnprocessableEntity (422)
+  #     *   Net::HTTPLocked (423)
+  #     *   Net::HTTPFailedDependency (424)
+  #     *   Net::HTTPUpgradeRequired (426)
+  #     *   Net::HTTPPreconditionRequired (428)
+  #     *   Net::HTTPTooManyRequests (429)
+  #     *   Net::HTTPRequestHeaderFieldsTooLarge (431)
+  #     *   Net::HTTPUnavailableForLegalReasons (451)
+  #
+  #
+  # *   Net::HTTPServerError:
+  #
+  #     *   Net::HTTPInternalServerError (500)
+  #     *   Net::HTTPNotImplemented (501)
+  #     *   Net::HTTPBadGateway (502)
+  #     *   Net::HTTPServiceUnavailable (503)
+  #     *   Net::HTTPGatewayTimeOut (504)
+  #     *   Net::HTTPVersionNotSupported (505)
+  #     *   Net::HTTPVariantAlsoNegotiates (506)
+  #     *   Net::HTTPInsufficientStorage (507)
+  #     *   Net::HTTPLoopDetected (508)
+  #     *   Net::HTTPNotExtended (510)
+  #     *   Net::HTTPNetworkAuthenticationRequired (511)
+  #
+  #
+  #
+  # There is also the Net::HTTPBadResponse exception which is raised when there is
+  # a protocol error.
   #
   class HTTPResponse
     CODE_CLASS_TO_OBJ: Hash[untyped, untyped]

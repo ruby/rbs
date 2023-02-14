@@ -69,7 +69,7 @@
 # blocking and non-blocking fibers' behavior is identical.
 #
 # Ruby doesn't provide a scheduler class: it is expected to be implemented by
-# the user and correspond to Fiber::SchedulerInterface.
+# the user and correspond to Fiber::Scheduler.
 #
 # There is also Fiber.schedule method, which is expected to immediately perform
 # the given block in a non-blocking manner. Its actual implementation is up to
@@ -146,8 +146,8 @@ class Fiber < Object
   #
   # Note that the behavior described above is how the method is *expected* to
   # behave, actual behavior is up to the current scheduler's implementation of
-  # Fiber::SchedulerInterface#fiber method. Ruby doesn't enforce this method to
-  # behave in any particular way.
+  # Fiber::Scheduler#fiber method. Ruby doesn't enforce this method to behave in
+  # any particular way.
   #
   # If the scheduler is not set, the method raises `RuntimeError (No scheduler is
   # available!)`.
@@ -158,11 +158,11 @@ class Fiber < Object
   #   rdoc-file=cont.c
   #   - Fiber.scheduler -> obj or nil
   # -->
-  # Returns the Fiber scheduler, that was last set for the current thread with Fiber.set_scheduler.
-  #     Returns +nil+ if no scheduler is set (which is the default), and non-blocking fibers'
-  #
-  # #  behavior is the same as blocking.
-  #     (see "Non-blocking fibers" section in class docs for details about the scheduler concept).
+  # Returns the Fiber scheduler, that was last set for the current thread with
+  # Fiber.set_scheduler. Returns `nil` if no scheduler is set (which is the
+  # default), and non-blocking fibers' behavior is the same as blocking. (see
+  # "Non-blocking fibers" section in class docs for details about the scheduler
+  # concept).
   #
   def self.scheduler: () -> untyped?
 
@@ -177,8 +177,8 @@ class Fiber < Object
   # finalization (allowing the scheduler to properly manage all non-finished
   # fibers).
   #
-  # `scheduler` can be an object of any class corresponding to
-  # Fiber::SchedulerInterface. Its implementation is up to the user.
+  # `scheduler` can be an object of any class corresponding to Fiber::Scheduler.
+  # Its implementation is up to the user.
   #
   # See also the "Non-blocking fibers" section in class docs.
   #
@@ -197,7 +197,7 @@ class Fiber < Object
 
   # <!--
   #   rdoc-file=cont.c
-  #   - Fiber.new(blocking: false) { |*args| ... } -> fiber
+  #   - Fiber.new(blocking: false, storage: true) { |*args| ... } -> fiber
   # -->
   # Creates new Fiber. Initially, the fiber is not running and can be resumed with
   # #resume. Arguments to the first #resume call will be passed to the block:
@@ -217,6 +217,31 @@ class Fiber < Object
   # If `blocking: false` is passed to `Fiber.new`, *and* current thread has a
   # Fiber.scheduler defined, the Fiber becomes non-blocking (see "Non-blocking
   # Fibers" section in class docs).
+  #
+  # If the `storage` is unspecified, the default is to inherit a copy of the
+  # storage from the current fiber. This is the same as specifying `storage:
+  # true`.
+  #
+  #     Fiber[:x] = 1
+  #     Fiber.new do
+  #       Fiber[:x] # => 1
+  #       Fiber[:x] = 2
+  #     end.resume
+  #     Fiber[:x] # => 1
+  #
+  # If the given `storage` is `nil`, this function will lazy initialize the
+  # internal storage, which starts as an empty hash.
+  #
+  #     Fiber[:x] = "Hello World"
+  #     Fiber.new(storage: nil) do
+  #       Fiber[:x] # nil
+  #     end
+  #
+  # Otherwise, the given `storage` is used as the new fiber's storage, and it must
+  # be an instance of Hash.
+  #
+  # Explicitly using `storage: true` is currently experimental and may change in
+  # the future.
   #
   def initialize: (?blocking: boolish) { (*untyped) -> void } -> void
 

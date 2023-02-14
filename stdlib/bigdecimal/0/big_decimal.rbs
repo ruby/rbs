@@ -145,12 +145,8 @@ class BigDecimal < Numeric
 
   # <!--
   #   rdoc-file=ext/bigdecimal/bigdecimal.c
-  #   - BigDecimal.double_fig -> integer
+  #   - double_fig()
   # -->
-  # Returns the number of digits a Float object is allowed to have; the result is
-  # system-dependent:
-  #
-  #     BigDecimal.double_fig # => 16
   #
   def self.double_fig: () -> Integer
 
@@ -1007,7 +1003,9 @@ class BigDecimal < Numeric
   # -->
   # Returns the sign of the value.
   #
-  # Returns a positive value if > 0, a negative value if < 0, and a zero if == 0.
+  # Returns a positive value if > 0, a negative value if < 0. It behaves the same
+  # with zeros - it returns a positive value for a positive zero (BigDecimal('0'))
+  # and a negative value for a negative zero (BigDecimal('-0')).
   #
   # The specific value returned indicates the type and sign of the BigDecimal, as
   # follows:
@@ -1348,12 +1346,15 @@ module Kernel
   #   - BigDecimal(value, exception: true) -> bigdecimal
   #   - BigDecimal(value, ndigits, exception: true) -> bigdecimal
   # -->
-  # Returns the \BigDecimal converted from +value+
-  #     with a precision of +ndigits+ decimal digits.
+  # Returns the BigDecimal converted from `value` with a precision of `ndigits`
+  # decimal digits.
   #
-  #     When +ndigits+ is less than the number of significant digits
-  #     in the value, the result is rounded to that number of digits,
-  #     according to the current rounding mode; see BigDecimal.mode.
+  # When `ndigits` is less than the number of significant digits in the value, the
+  # result is rounded to that number of digits, according to the current rounding
+  # mode; see BigDecimal.mode.
+  #
+  # When `ndigits` is 0, the number of digits to correctly represent a float
+  # number is determined automatically.
   #
   # Returns `value` converted to a BigDecimal, depending on the type of `value`:
   #
@@ -1486,13 +1487,15 @@ class Float
   #   - float.to_d(precision)  -> bigdecimal
   # -->
   # Returns the value of `float` as a BigDecimal. The `precision` parameter is
-  # used to determine the number of significant digits for the result (the default
-  # is Float::DIG).
+  # used to determine the number of significant digits for the result. When
+  # `precision` is set to `0`, the number of digits to represent the float being
+  # converted is determined automatically. The default `precision` is `0`.
   #
   #     require 'bigdecimal'
   #     require 'bigdecimal/util'
   #
   #     0.5.to_d         # => 0.5e0
+  #     1.234.to_d       # => 0.1234e1
   #     1.234.to_d(2)    # => 0.12e1
   #
   # See also BigDecimal::new.
