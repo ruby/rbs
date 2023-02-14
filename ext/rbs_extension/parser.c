@@ -2724,13 +2724,12 @@ VALUE parse_signature(parserstate *state) {
   VALUE dirs = rb_ary_new();
   VALUE decls = rb_ary_new();
 
+  while (state->next_token.type == kUSE) {
+    rb_ary_push(dirs, parse_use_directive(state));
+  }
+
   while (state->next_token.type != pEOF) {
-    if (state->next_token.type == kUSE) {
-      VALUE use = parse_use_directive(state);
-      rb_ary_push(dirs, use);
-    } else  {
-      rb_ary_push(decls, parse_decl(state));
-    }
+    rb_ary_push(decls, parse_decl(state));
   }
 
   VALUE ret = rb_ary_new();
