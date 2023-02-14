@@ -89,9 +89,10 @@ class Module < Object
   #   rdoc-file=object.c
   #   - mod < other   ->  true, false, or nil
   # -->
-  # Returns true if *mod* is a subclass of *other*. Returns `nil` if there's no
-  # relationship between the two. (Think of the relationship in terms of the class
-  # definition: "class A < B" implies "A < B".)
+  # Returns true if *mod* is a subclass of *other*. Returns `false` if *mod* is
+  # the same as *other* or *mod* is an ancestor of *other*. Returns `nil` if
+  # there's no relationship between the two. (Think of the relationship in terms
+  # of the class definition: "class A < B" implies "A < B".)
   #
   def <: (Module other) -> bool?
 
@@ -169,9 +170,10 @@ class Module < Object
   #   rdoc-file=object.c
   #   - mod > other   ->  true, false, or nil
   # -->
-  # Returns true if *mod* is an ancestor of *other*. Returns `nil` if there's no
-  # relationship between the two. (Think of the relationship in terms of the class
-  # definition: "class A < B" implies "B > A".)
+  # Returns true if *mod* is an ancestor of *other*. Returns `false` if *mod* is
+  # the same as *other* or *mod* is a descendant of *other*. Returns `nil` if
+  # there's no relationship between the two. (Think of the relationship in terms
+  # of the class definition: "class A < B" implies "B > A".)
   #
   def >: (Module other) -> bool?
 
@@ -284,16 +286,20 @@ class Module < Object
 
   # <!--
   #   rdoc-file=load.c
-  #   - mod.autoload(module, filename)   -> nil
+  #   - mod.autoload(const, filename)   -> nil
   # -->
-  # Registers *filename* to be loaded (using Kernel::require) the first time that
-  # *module* (which may be a String or a symbol) is accessed in the namespace of
-  # *mod*.
+  # Registers _filename_ to be loaded (using Kernel::require)
+  #     the first time that _const_ (which may be a String or
+  #     a symbol) is accessed in the namespace of _mod_.
   #
-  #     module A
-  #     end
-  #     A.autoload(:B, "b")
-  #     A::B.doit            # autoloads "b"
+  #        module A
+  #        end
+  #        A.autoload(:B, "b")
+  #        A::B.doit            # autoloads "b"
+  #
+  # If *const* in *mod* is defined as autoload, the file name to be loaded is
+  # replaced with *filename*.  If *const* is defined but not as autoload, does
+  # nothing.
   #
   def autoload: (Symbol _module, String filename) -> NilClass
 
@@ -910,6 +916,15 @@ class Module < Object
   #     B.instance_methods(true).include?(:method1) #=> true
   #     C.instance_methods(false)                   #=> [:method3]
   #     C.instance_methods.include?(:method2)       #=> true
+  #
+  # Note that method visibility changes in the current class, as well as aliases,
+  # are considered as methods of the current class by this method:
+  #
+  #     class C < B
+  #       alias method4 method2
+  #       protected :method2
+  #     end
+  #     C.instance_methods(false).sort               #=> [:method2, :method3, :method4]
   #
   def instance_methods: (?boolish include_super) -> ::Array[Symbol]
 

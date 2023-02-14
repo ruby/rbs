@@ -1173,10 +1173,10 @@ end
 class Thread::Backtrace < Object
   # <!--
   #   rdoc-file=vm_backtrace.c
-  #   - Threade::Backtrace::limit -> integer
+  #   - Thread::Backtrace::limit -> integer
   # -->
   # Returns maximum backtrace length set by `--backtrace-limit` command-line
-  # option. The defalt is `-1` which means unlimited backtraces. If the value is
+  # option. The default is `-1` which means unlimited backtraces. If the value is
   # zero or positive, the error backtraces, produced by Exception#full_message,
   # are abbreviated and the extra lines are replaced by `... 3 levels... `
   #
@@ -1570,12 +1570,10 @@ class Thread::Queue < Object
   #
   def closed?: () -> bool
 
-  # <!-- rdoc-file=thread_sync.c -->
-  # Retrieves data from the queue.
-  #
-  # If the queue is empty, the calling thread is suspended until data is pushed
-  # onto the queue. If `non_block` is true, the thread isn't suspended, and
-  # `ThreadError` is raised.
+  # <!--
+  #   rdoc-file=thread_sync.rb
+  #   - deq(non_block = false, timeout: nil)
+  # -->
   #
   alias deq pop
 
@@ -1610,16 +1608,17 @@ class Thread::Queue < Object
   def num_waiting: () -> Integer
 
   # <!--
-  #   rdoc-file=thread_sync.c
-  #   - pop(non_block=false)
-  #   - deq(non_block=false)
-  #   - shift(non_block=false)
+  #   rdoc-file=thread_sync.rb
+  #   - pop(non_block=false, timeout: nil)
   # -->
   # Retrieves data from the queue.
   #
   # If the queue is empty, the calling thread is suspended until data is pushed
   # onto the queue. If `non_block` is true, the thread isn't suspended, and
   # `ThreadError` is raised.
+  #
+  # If `timeout` seconds have passed and no data is available `nil` is returned.
+  # If `timeout` is `0` it returns immediately.
   #
   def pop: (?boolish non_block) -> untyped
 
@@ -1633,12 +1632,10 @@ class Thread::Queue < Object
   #
   def push: (untyped obj) -> void
 
-  # <!-- rdoc-file=thread_sync.c -->
-  # Retrieves data from the queue.
-  #
-  # If the queue is empty, the calling thread is suspended until data is pushed
-  # onto the queue. If `non_block` is true, the thread isn't suspended, and
-  # `ThreadError` is raised.
+  # <!--
+  #   rdoc-file=thread_sync.rb
+  #   - shift(non_block = false, timeout: nil)
+  # -->
   #
   alias shift pop
 
@@ -1655,21 +1652,17 @@ end
 # See Thread::Queue for an example of how a Thread::SizedQueue works.
 #
 class Thread::SizedQueue < Thread::Queue
-  # <!-- rdoc-file=thread_sync.c -->
-  # Pushes `object` to the queue.
-  #
-  # If there is no space left in the queue, waits until space becomes available,
-  # unless `non_block` is true.  If `non_block` is true, the thread isn't
-  # suspended, and `ThreadError` is raised.
+  # <!--
+  #   rdoc-file=thread_sync.rb
+  #   - <<(object, non_block = false, timeout: nil)
+  # -->
   #
   alias << push
 
-  # <!-- rdoc-file=thread_sync.c -->
-  # Pushes `object` to the queue.
-  #
-  # If there is no space left in the queue, waits until space becomes available,
-  # unless `non_block` is true.  If `non_block` is true, the thread isn't
-  # suspended, and `ThreadError` is raised.
+  # <!--
+  #   rdoc-file=thread_sync.rb
+  #   - enq(object, non_block = false, timeout: nil)
+  # -->
   #
   alias enq push
 
@@ -1698,9 +1691,9 @@ class Thread::SizedQueue < Thread::Queue
   def max=: (Integer max) -> void
 
   # <!--
-  #   rdoc-file=thread_sync.c
-  #   - push(object, non_block=false)
-  #   - enq(object, non_block=false)
+  #   rdoc-file=thread_sync.rb
+  #   - push(object, non_block=false, timeout: nil)
+  #   - enq(object, non_block=false, timeout: nil)
   #   - <<(object)
   # -->
   # Pushes `object` to the queue.
@@ -1708,6 +1701,9 @@ class Thread::SizedQueue < Thread::Queue
   # If there is no space left in the queue, waits until space becomes available,
   # unless `non_block` is true.  If `non_block` is true, the thread isn't
   # suspended, and `ThreadError` is raised.
+  #
+  # If `timeout` seconds have passed and no space is available `nil` is returned.
+  # If `timeout` is `0` it returns immediately. Otherwise it returns `self`.
   #
   def push: (untyped obj, ?boolish non_block) -> void
 end

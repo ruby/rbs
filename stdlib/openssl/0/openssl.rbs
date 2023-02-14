@@ -689,7 +689,7 @@ module OpenSSL
   #
   # An Array that stores the name of a given tag number. These names are the same
   # as the name of the tag constant that is additionally defined, e.g.
-  # +[UNIVERSAL_TAG_NAME](2) = "INTEGER"+ and +OpenSSL::ASN1::INTEGER = 2+.
+  # `UNIVERSAL_TAG_NAME[2] = "INTEGER"` and `OpenSSL::ASN1::INTEGER = 2`.
   #
   # ## Example usage
   #
@@ -6953,7 +6953,8 @@ module OpenSSL
       #   - rsa.private_decrypt(string, padding) -> String
       # -->
       # Decrypt `string`, which has been encrypted with the public key, with the
-      # private key. `padding` defaults to PKCS1_PADDING.
+      # private key. `padding` defaults to PKCS1_PADDING, which is known to be
+      # insecure but is kept for backwards compatibility.
       #
       # **Deprecated in version 3.0**. Consider using PKey::PKey#encrypt and
       # PKey::PKey#decrypt instead.
@@ -6965,8 +6966,9 @@ module OpenSSL
       #   - rsa.private_encrypt(string)          -> String
       #   - rsa.private_encrypt(string, padding) -> String
       # -->
-      # Encrypt `string` with the private key.  `padding` defaults to PKCS1_PADDING.
-      # The encrypted string output can be decrypted using #public_decrypt.
+      # Encrypt `string` with the private key.  `padding` defaults to PKCS1_PADDING,
+      # which is known to be insecure but is kept for backwards compatibility. The
+      # encrypted string output can be decrypted using #public_decrypt.
       #
       # **Deprecated in version 3.0**. Consider using PKey::PKey#sign_raw and
       # PKey::PKey#verify_raw, and PKey::PKey#verify_recover instead.
@@ -6988,7 +6990,8 @@ module OpenSSL
       #   - rsa.public_decrypt(string, padding) -> String
       # -->
       # Decrypt `string`, which has been encrypted with the private key, with the
-      # public key.  `padding` defaults to PKCS1_PADDING.
+      # public key.  `padding` defaults to PKCS1_PADDING which is known to be insecure
+      # but is kept for backwards compatibility.
       #
       # **Deprecated in version 3.0**. Consider using PKey::PKey#sign_raw and
       # PKey::PKey#verify_raw, and PKey::PKey#verify_recover instead.
@@ -7000,8 +7003,9 @@ module OpenSSL
       #   - rsa.public_encrypt(string)          -> String
       #   - rsa.public_encrypt(string, padding) -> String
       # -->
-      # Encrypt `string` with the public key.  `padding` defaults to PKCS1_PADDING.
-      # The encrypted string output can be decrypted using #private_decrypt.
+      # Encrypt `string` with the public key.  `padding` defaults to PKCS1_PADDING,
+      # which is known to be insecure but is kept for backwards compatibility. The
+      # encrypted string output can be decrypted using #private_decrypt.
       #
       # **Deprecated in version 3.0**. Consider using PKey::PKey#encrypt and
       # PKey::PKey#decrypt instead.

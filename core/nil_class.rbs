@@ -33,6 +33,8 @@ class NilClass
   # -->
   # Dummy pattern matching -- always returns nil.
   #
+  # This method makes it possible to `while gets =~ /re/ do`.
+  #
   def =~: (untyped obj) -> nil
 
   # <!--

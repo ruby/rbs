@@ -82,6 +82,8 @@ module GC
   # count
   # :   The total number of garbage collections ran since application start (count
   #     includes both minor and major garbage collections)
+  # time
+  # :   The total time spent in garbage collections (in milliseconds)
   # heap_allocated_pages
   # :   The total number of `:heap_eden_pages` + `:heap_tomb_pages`
   # heap_sorted_length
@@ -120,6 +122,12 @@ module GC
   # :   The total number of minor garbage collections run since process start
   # major_gc_count
   # :   The total number of major garbage collections run since process start
+  # compact_count
+  # :   The total number of compactions run since process start
+  # read_barrier_faults
+  # :   The total number of times the read barrier was triggered during compaction
+  # total_moved_objects
+  # :   The total number of objects compaction has moved
   # remembered_wb_unprotected_objects
   # :   The total number of objects without write barriers
   # remembered_wb_unprotected_objects_limit
@@ -180,7 +188,7 @@ module GC
   def self.total_time: () -> Integer
 
   # <!--
-  #   rdoc-file=gc.rb
+  #   rdoc-file=gc.c
   #   - GC.compact
   # -->
   # This function compacts objects together in Ruby's heap.  It eliminates unused
@@ -191,6 +199,10 @@ module GC
   #
   # This method is implementation specific and not expected to be implemented in
   # any implementation besides MRI.
+  #
+  # To test whether GC compaction is supported, use the idiom:
+  #
+  #     GC.respond_to?(:compact)
   #
   def self.compact: () -> ::Hash[:considered | :moved, Hash[Symbol | Integer, Integer]]
 
@@ -204,7 +216,7 @@ module GC
   # moved are replaced with T_MOVED objects.  No object should have a reference to
   # a T_MOVED object after compaction.
   #
-  # This function doubles the heap to ensure room to move all objects, compacts
+  # This function expands the heap to ensure room to move all objects, compacts
   # the heap to make sure everything moves, updates all references, then performs
   # a full GC.  If any object contains a reference to a T_MOVED object, that
   # object should be pushed on the mark stack, and will make a SEGV.
@@ -231,7 +243,7 @@ module GC
 
   # <!--
   #   rdoc-file=gc.rb
-  #   - GC.latest_gc_info -> {:gc_by=>:newobj}
+  #   - GC.latest_gc_info -> hash
   #   - GC.latest_gc_info(hash) -> hash
   #   - GC.latest_gc_info(:major_by) -> :malloc
   # -->

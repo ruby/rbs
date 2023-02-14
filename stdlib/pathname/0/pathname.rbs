@@ -135,6 +135,7 @@
 # *   #make_symlink(old)
 # *   #truncate(length)
 # *   #utime(atime, mtime)
+# *   #lutime(atime, mtime)
 # *   #basename(*args)
 # *   #dirname
 # *   #extname
@@ -230,7 +231,9 @@ class Pathname
   #   rdoc-file=ext/pathname/lib/pathname.rb
   #   - +(other)
   # -->
-  # Appends a pathname fragment to `self` to produce a new Pathname object.
+  # Appends a pathname fragment to `self` to produce a new Pathname object. Since
+  # `other` is considered as a path relative to `self`, if `other` is an absolute
+  # path, the new Pathname object is created from just `other`.
   #
   #     p1 = Pathname.new("/usr")      # Pathname:/usr
   #     p2 = p1 + "bin/ruby"           # Pathname:/usr/bin/ruby
@@ -808,7 +811,9 @@ class Pathname
   #   rdoc-file=ext/pathname/lib/pathname.rb
   #   - join(*args)
   # -->
-  # Joins the given pathnames onto `self` to create a new Pathname object.
+  # Joins the given pathnames onto `self` to create a new Pathname object. This is
+  # effectively the same as using Pathname#+ to append `self` and all arguments
+  # sequentially.
   #
   #     path0 = Pathname.new("/usr")                # Pathname:/usr
   #     path0 = path0.join("bin/ruby")              # Pathname:/usr/bin/ruby
@@ -1091,11 +1096,11 @@ class Pathname
 
   # <!--
   #   rdoc-file=ext/pathname/lib/pathname.rb
-  #   - rmtree()
+  #   - rmtree(noop: nil, verbose: nil, secure: nil)
   # -->
   # Recursively deletes a directory, including all directories beneath it.
   #
-  # See FileUtils.rm_r
+  # See FileUtils.rm_rf
   #
   def rmtree: () -> void
 

@@ -51,8 +51,8 @@
 #         lambda1 = lambda {|x| x**2 }
 #
 # *   Use the [Lambda proc
-#     literal](doc/syntax/literals_rdoc.html#label-Lambda+Proc+Literals) syntax
-#     (also constructs a proc with lambda semantics):
+#     literal](rdoc-ref:syntax/literals.rdoc@Lambda+Proc+Literals) syntax (also
+#     constructs a proc with lambda semantics):
 #
 #         lambda2 = ->(x) { x**2 }
 #
@@ -421,6 +421,10 @@ class Proc < Object
   # arguments to the original proc and returns the result. Otherwise, returns
   # another curried proc that takes the rest of arguments.
   #
+  # The optional *arity* argument should be supplied when currying procs with
+  # variable arguments to determine how many arguments are needed before the proc
+  # is called.
+  #
   #     b = proc {|x, y, z| (x||0) + (y||0) + (z||0) }
   #     p b.curry[1][2][3]           #=> 6
   #     p b.curry[1, 2][3, 4]        #=> 6
@@ -583,12 +587,20 @@ class Proc < Object
 
   # <!--
   #   rdoc-file=proc.c
-  #   - prc.parameters  -> array
+  #   - prc.parameters(lambda: nil)  -> array
   # -->
-  # Returns the parameter information of this proc.
+  # Returns the parameter information of this proc.  If the lambda keyword is
+  # provided and not nil, treats the proc as a lambda if true and as a non-lambda
+  # if false.
   #
+  #     prc = proc{|x, y=42, *other|}
+  #     prc.parameters  #=> [[:opt, :x], [:opt, :y], [:rest, :other]]
   #     prc = lambda{|x, y=42, *other|}
   #     prc.parameters  #=> [[:req, :x], [:opt, :y], [:rest, :other]]
+  #     prc = proc{|x, y=42, *other|}
+  #     prc.parameters(lambda: true)  #=> [[:req, :x], [:opt, :y], [:rest, :other]]
+  #     prc = lambda{|x, y=42, *other|}
+  #     prc.parameters(lambda: false) #=> [[:opt, :x], [:opt, :y], [:rest, :other]]
   #
   def parameters: () -> ::Array[[ Symbol, Symbol ]]
 

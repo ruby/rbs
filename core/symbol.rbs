@@ -3,7 +3,7 @@
 #
 # You can create a Symbol object explicitly with:
 #
-# *   A [symbol literal](doc/syntax/literals_rdoc.html#label-Symbol+Literals).
+# *   A [symbol literal](rdoc-ref:syntax/literals.rdoc@Symbol+Literals).
 #
 #
 # The same Symbol object will be created for a given name or string for the
@@ -59,125 +59,77 @@
 #
 # First, what's elsewhere. Class Symbol:
 #
-# *   Inherits from [class
-#     Object](Object.html#class-Object-label-What-27s+Here).
-# *   Includes [module
-#     Comparable](Comparable.html#module-Comparable-label-What-27s+Here).
+# *   Inherits from [class Object](rdoc-ref:Object@What-27s+Here).
+# *   Includes [module Comparable](rdoc-ref:Comparable@What-27s+Here).
 #
 #
 # Here, class Symbol provides methods that are useful for:
 #
-# *   [Querying](#class-Symbol-label-Methods+for+Querying)
-# *   [Comparing](#class-Symbol-label-Methods+for+Comparing)
-# *   [Converting](#class-Symbol-label-Methods+for+Converting)
+# *   [Querying](rdoc-ref:Symbol@Methods+for+Querying)
+# *   [Comparing](rdoc-ref:Symbol@Methods+for+Comparing)
+# *   [Converting](rdoc-ref:Symbol@Methods+for+Converting)
 #
 #
 # ### Methods for Querying
 #
-#     ::all_symbols
-# :       Returns an array of the symbols currently in Ruby's symbol table.
-#
-#     [#=~](#method-i-3D~)
-# :       Returns the index of the first substring in symbol that matches a
-#         given Regexp or other object; returns `nil` if no match is found.
-#
-#     #[], #slice
-# :       Returns a substring of symbol determined by a given index,
-#         start/length, or range, or string.
-#
-#     #empty?
-# :       Returns `true` if `self.length` is zero; `false` otherwise.
-#
-#     #encoding
-# :       Returns the Encoding object that represents the encoding of symbol.
-#
-#     #end_with?
-# :       Returns `true` if symbol ends with any of the given strings.
-#
-#     #match
-# :       Returns a MatchData object if symbol matches a given Regexp; `nil`
-#         otherwise.
-#
-#     #match?
-# :       Returns `true` if symbol matches a given Regexp; `false` otherwise.
-#
-#     #length, #size
-# :       Returns the number of characters in symbol.
-#
-#     #start_with?
-# :       Returns `true` if symbol starts with any of the given strings.
-#
+# *   ::all_symbols: Returns an array of the symbols currently in Ruby's symbol
+#     table.
+# *   #=~: Returns the index of the first substring in symbol that matches a
+#     given Regexp or other object; returns `nil` if no match is found.
+# *   #[], #slice : Returns a substring of symbol determined by a given index,
+#     start/length, or range, or string.
+# *   #empty?: Returns `true` if `self.length` is zero; `false` otherwise.
+# *   #encoding: Returns the Encoding object that represents the encoding of
+#     symbol.
+# *   #end_with?: Returns `true` if symbol ends with any of the given strings.
+# *   #match: Returns a MatchData object if symbol matches a given Regexp; `nil`
+#     otherwise.
+# *   #match?: Returns `true` if symbol matches a given Regexp; `false`
+#     otherwise.
+# *   #length, #size: Returns the number of characters in symbol.
+# *   #start_with?: Returns `true` if symbol starts with any of the given
+#     strings.
 #
 #
 # ### Methods for Comparing
 #
-#     [#<=>](#method-i-3C-3D-3E)
-# :       Returns -1, 0, or 1 as a given symbol is smaller than, equal to, or
-#         larger than symbol.
-#
-#     [#==, #===](#method-i-3D-3D)
-# :       Returns `true` if a given symbol has the same content and encoding.
-#
-#     #casecmp
-# :       Ignoring case, returns -1, 0, or 1 as a given symbol is smaller than,
-#         equal to, or larger than symbol.
-#
-#     #casecmp?
-# :       Returns `true` if symbol is equal to a given symbol after Unicode case
-#         folding; `false` otherwise.
-#
+# *   #<=>: Returns -1, 0, or 1 as a given symbol is smaller than, equal to, or
+#     larger than symbol.
+# *   #==, #===: Returns `true` if a given symbol has the same content and
+#     encoding.
+# *   #casecmp: Ignoring case, returns -1, 0, or 1 as a given symbol is smaller
+#     than, equal to, or larger than symbol.
+# *   #casecmp?: Returns `true` if symbol is equal to a given symbol after
+#     Unicode case folding; `false` otherwise.
 #
 #
 # ### Methods for Converting
 #
-#     #capitalize
-# :       Returns symbol with the first character upcased and all other
-#         characters downcased.
-#
-#     #downcase
-# :       Returns symbol with all characters downcased.
-#
-#     #inspect
-# :       Returns the string representation of `self` as a symbol literal.
-#
-#     #name
-# :       Returns the frozen string corresponding to symbol.
-#
-#     #succ, #next
-# :       Returns the symbol that is the successor to symbol.
-#
-#     #swapcase
-# :       Returns symbol with all upcase characters downcased and all downcase
-#         characters upcased.
-#
-#     #to_proc
-# :       Returns a Proc object which responds to the method named by symbol.
-#
-#     #to_s, #id2name
-# :       Returns the string corresponding to `self`.
-#
-#     #to_sym, #intern
-# :       Returns `self`.
-#
-#     #upcase
-# :       Returns symbol with all characters upcased.
+# *   #capitalize: Returns symbol with the first character upcased and all other
+#     characters downcased.
+# *   #downcase: Returns symbol with all characters downcased.
+# *   #inspect: Returns the string representation of `self` as a symbol literal.
+# *   #name: Returns the frozen string corresponding to symbol.
+# *   #succ, #next: Returns the symbol that is the successor to symbol.
+# *   #swapcase: Returns symbol with all upcase characters downcased and all
+#     downcase characters upcased.
+# *   #to_proc: Returns a Proc object which responds to the method named by
+#     symbol.
+# *   #to_s, #id2name: Returns the string corresponding to `self`.
+# *   #to_sym, #intern: Returns `self`.
+# *   #upcase: Returns symbol with all characters upcased.
 #
 class Symbol
   include Comparable
 
   # <!--
   #   rdoc-file=string.c
-  #   - Symbol.all_symbols    => array
+  #   - Symbol.all_symbols -> array_of_symbols
   # -->
-  # Returns an array of all the symbols currently in Ruby's symbol table.
+  # Returns an array of all symbols currently in Ruby's symbol table:
   #
-  #     Symbol.all_symbols.size    #=> 903
-  #     Symbol.all_symbols[1,20]   #=> [:floor, :ARGV, :Binding, :symlink,
-  #                                     :chown, :EOFError, :$;, :String,
-  #                                     :LOCK_SH, :"setuid?", :$<,
-  #                                     :default_proc, :compact, :extend,
-  #                                     :Tms, :getwd, :$=, :ThreadGroup,
-  #                                     :wait2, :$>]
+  #     Symbol.all_symbols.size    # => 9334
+  #     Symbol.all_symbols.take(3) # => [:!, :"\"", :"#"]
   #
   def self.all_symbols: () -> ::Array[Symbol]
 
@@ -185,48 +137,59 @@ class Symbol
 
   # <!--
   #   rdoc-file=string.c
-  #   - symbol <=> other_symbol       -> -1, 0, +1, or nil
+  #   - symbol <=> object -> -1, 0, +1, or nil
   # -->
-  # Compares `symbol` with `other_symbol` after calling #to_s on each of the
-  # symbols. Returns -1, 0, +1, or `nil` depending on whether `symbol` is less
-  # than, equal to, or greater than `other_symbol`.
+  # If `object` is a symbol, returns the equivalent of `symbol.to_s <=>
+  # object.to_s`:
   #
-  # `nil` is returned if the two values are incomparable.
+  #     :bar <=> :foo # => -1
+  #     :foo <=> :foo # => 0
+  #     :foo <=> :bar # => 1
   #
-  # See String#<=> for more information.
+  # Otherwise, returns `nil`:
+  #
+  #     :foo <=> 'bar' # => nil
+  #
+  # Related: String#<=>.
   #
   def <=>: (Symbol other) -> Integer
          | (untyped other) -> Integer?
 
   # <!--
   #   rdoc-file=string.c
-  #   - sym == obj   -> true or false
+  #   - symbol == object -> true or false
   # -->
-  # Equality---If *sym* and *obj* are exactly the same symbol, returns `true`.
+  # Returns `true` if `object` is the same object as `self`, `false` otherwise.
+  #
+  # Symbol#=== is an alias for Symbol#==.
   #
   def ==: (untyped obj) -> bool
 
   # <!-- rdoc-file=string.c -->
-  # Equality---If *sym* and *obj* are exactly the same symbol, returns `true`.
+  # Returns `true` if `object` is the same object as `self`, `false` otherwise.
+  #
+  # Symbol#=== is an alias for Symbol#==.
   #
   def ===: (untyped obj) -> bool
 
   # <!--
   #   rdoc-file=string.c
-  #   - sym =~ obj   -> integer or nil
+  #   - symbol =~ object -> integer or nil
   # -->
-  # Returns `sym.to_s =~ obj`.
+  # Equivalent to `symbol.to_s =~ object`, including possible updates to global
+  # variables; see String#=~.
   #
   def =~: (untyped obj) -> Integer?
 
   # <!--
   #   rdoc-file=string.c
-  #   - sym[idx]      -> char
-  #   - sym[b, n]     -> string
-  #   - sym.slice(idx)      -> char
-  #   - sym.slice(b, n)     -> string
+  #   - symbol[index] -> string or nil
+  #   - symbol[start, length] -> string or nil
+  #   - symbol[range] -> string or nil
+  #   - symbol[regexp, capture = 0] -> string or nil
+  #   - symbol[substring] -> string or nil
   # -->
-  # Returns `sym.to_s[]`.
+  # Equivalent to `symbol.to_s[]`; see String#[].
   #
   def []: (int index) -> String?
         | (int start, int length) -> String?
@@ -250,54 +213,68 @@ class Symbol
 
   # <!--
   #   rdoc-file=string.c
-  #   - casecmp(other_symbol) -> -1, 0, 1, or nil
+  #   - casecmp(object) -> -1, 0, 1, or nil
   # -->
-  # Case-insensitive version of [Symbol#<=>](#method-i-3C-3D-3E):
+  # Like Symbol#<=>, but case-insensitive; equivalent to
+  # `self.to_s.casecmp(object.to_s)`:
   #
-  #     :aBcDeF.casecmp(:abcde)   # => 1
-  #     :aBcDeF.casecmp(:abcdef)  # => 0
-  #     :aBcDeF.casecmp(:abcdefg) # => -1
-  #     :abcdef.casecmp(:ABCDEF)  # => 0
+  #     lower = :abc
+  #     upper = :ABC
+  #     upper.casecmp(lower) # => 0
+  #     lower.casecmp(lower) # => 0
+  #     lower.casecmp(upper) # => 0
   #
-  # Returns `nil` if the two symbols have incompatible encodings, or if
-  # `other_symbol` is not a symbol:
+  # Returns nil if `self` and `object` have incompatible encodings, or if `object`
+  # is not a symbol:
   #
-  #     sym = "\u{e4 f6 fc}".encode("ISO-8859-1").to_sym
-  #     other_sym = :"\u{c4 d6 dc}"
+  #     sym = 'äöü'.encode("ISO-8859-1").to_sym
+  #     other_sym = 'ÄÖÜ'
   #     sym.casecmp(other_sym) # => nil
   #     :foo.casecmp(2)        # => nil
   #
-  # Currently, case-insensitivity only works on characters A-Z/a-z, not all of
-  # Unicode. This is different from Symbol#casecmp?.
+  # Unlike Symbol#casecmp?, case-insensitivity does not work for characters
+  # outside of 'A'..'Z' and 'a'..'z':
   #
-  # Related: Symbol#casecmp?.
+  #     lower = :äöü
+  #     upper = :ÄÖÜ
+  #     upper.casecmp(lower) # => -1
+  #     lower.casecmp(lower) # => 0
+  #     lower.casecmp(upper) # => 1
+  #
+  # Related: Symbol#casecmp?, String#casecmp.
   #
   def casecmp: (untyped other) -> Integer?
 
   # <!--
   #   rdoc-file=string.c
-  #   - casecmp?(other_symbol) -> true, false, or nil
+  #   - casecmp?(object) -> true, false, or nil
   # -->
-  # Returns `true` if `sym` and `other_symbol` are equal after Unicode case
-  # folding, `false` if they are not equal:
+  # Returns `true` if `self` and `object` are equal after Unicode case folding,
+  # otherwise `false`:
   #
-  #     :aBcDeF.casecmp?(:abcde)                  # => false
-  #     :aBcDeF.casecmp?(:abcdef)                 # => true
-  #     :aBcDeF.casecmp?(:abcdefg)                # => false
-  #     :abcdef.casecmp?(:ABCDEF)                 # => true
-  #     :"\u{e4 f6 fc}".casecmp?(:"\u{c4 d6 dc}") #=> true
+  #     lower = :abc
+  #     upper = :ABC
+  #     upper.casecmp?(lower) # => true
+  #     lower.casecmp?(lower) # => true
+  #     lower.casecmp?(upper) # => true
   #
-  # Returns `nil` if the two symbols have incompatible encodings, or if
-  # `other_symbol` is not a symbol:
+  # Returns nil if `self` and `object` have incompatible encodings, or if `object`
+  # is not a symbol:
   #
-  #     sym = "\u{e4 f6 fc}".encode("ISO-8859-1").to_sym
-  #     other_sym = :"\u{c4 d6 dc}"
+  #     sym = 'äöü'.encode("ISO-8859-1").to_sym
+  #     other_sym = 'ÄÖÜ'
   #     sym.casecmp?(other_sym) # => nil
   #     :foo.casecmp?(2)        # => nil
   #
-  # See [Case Mapping](doc/case_mapping_rdoc.html).
+  # Unlike Symbol#casecmp, works for characters outside of 'A'..'Z' and 'a'..'z':
   #
-  # Related: Symbol#casecmp.
+  #     lower = :äöü
+  #     upper = :ÄÖÜ
+  #     upper.casecmp?(lower) # => true
+  #     lower.casecmp?(lower) # => true
+  #     lower.casecmp?(upper) # => true
+  #
+  # Related: Symbol#casecmp, String#casecmp?.
   #
   def casecmp?: (untyped other) -> bool?
 
@@ -318,129 +295,129 @@ class Symbol
 
   # <!--
   #   rdoc-file=string.c
-  #   - sym.empty?   -> true or false
+  #   - empty? -> true or false
   # -->
-  # Returns whether *sym* is :"" or not.
+  # Returns `true` if `self` is `:''`, `false` otherwise.
   #
   def empty?: () -> bool
 
   # <!--
   #   rdoc-file=string.c
-  #   - sym.encoding   -> encoding
+  #   - encoding -> encoding
   # -->
-  # Returns the Encoding object that represents the encoding of *sym*.
+  # Equivalent to `self.to_s.encoding`; see String#encoding.
   #
   def encoding: () -> Encoding
 
   # <!--
   #   rdoc-file=string.c
-  #   - sym.end_with?([suffixes]+)   -> true or false
+  #   - end_with?(*string_or_regexp) -> true or false
   # -->
-  # Returns true if `sym` ends with one of the `suffixes` given.
-  #
-  #     :hello.end_with?("ello")               #=> true
-  #
-  #     # returns true if one of the +suffixes+ matches.
-  #     :hello.end_with?("heaven", "ello")     #=> true
-  #     :hello.end_with?("heaven", "paradise") #=> false
+  # Equivalent to `self.to_s.end_with?`; see String#end_with?.
   #
   def end_with?: (*string suffixes) -> bool
 
   # <!-- rdoc-file=string.c -->
-  # Returns the name or string corresponding to *sym*.
+  # Returns a string representation of `self` (not including the leading colon):
   #
-  #     :fred.id2name   #=> "fred"
-  #     :ginger.to_s    #=> "ginger"
+  #     :foo.to_s # => "foo"
   #
-  # Note that this string is not frozen (unlike the symbol itself). To get a
-  # frozen string, use #name.
+  # Symbol#id2name is an alias for Symbol#to_s.
+  #
+  # Related: Symbol#inspect, Symbol#name.
   #
   def id2name: () -> String
 
   # <!--
   #   rdoc-file=string.c
-  #   - sym.inspect    -> string
+  #   - inspect -> string
   # -->
-  # Returns the representation of *sym* as a symbol literal.
+  # Returns a string representation of `self` (including the leading colon):
   #
-  #     :fred.inspect   #=> ":fred"
+  #     :foo.inspect # => ":foo"
+  #
+  # Related:  Symbol#to_s, Symbol#name.
   #
   def inspect: () -> String
 
   # <!--
-  #   rdoc-file=string.c
-  #   - sym.to_sym   -> sym
-  #   - sym.intern   -> sym
+  #   rdoc-file=symbol.rb
+  #   - intern()
   # -->
-  # In general, `to_sym` returns the Symbol corresponding to an object. As *sym*
-  # is already a symbol, `self` is returned in this case.
   #
   def intern: () -> Symbol
 
   # <!--
   #   rdoc-file=string.c
-  #   - sym.length   -> integer
-  #   - sym.size     -> integer
+  #   - length -> integer
   # -->
-  # Same as `sym.to_s.length`.
+  # Equivalent to `self.to_s.length`; see String#length.
+  #
+  # Symbol#size is an alias for Symbol#length.
   #
   def length: () -> Integer
 
   # <!--
   #   rdoc-file=string.c
-  #   - sym.match(pattern)        -> matchdata or nil
-  #   - sym.match(pattern, pos)   -> matchdata or nil
+  #   - match(pattern, offset = 0) -> matchdata or nil
+  #   - match(pattern, offset = 0) {|matchdata| } -> object
   # -->
-  # Returns `sym.to_s.match`.
+  # Equivalent to `self.to_s.match`, including possible updates to global
+  # variables; see String#match.
   #
   def match: (Regexp | string pattern, ?int pos) -> MatchData?
            | (Regexp | string pattern, ?int pos) { (MatchData) -> void } -> untyped
 
   # <!--
   #   rdoc-file=string.c
-  #   - sym.match?(pattern)        -> true or false
-  #   - sym.match?(pattern, pos)   -> true or false
+  #   - match?(pattern, offset) -> true or false
   # -->
-  # Returns `sym.to_s.match?`.
+  # Equivalent to `sym.to_s.match?`; see String#match.
   #
   def match?: (Regexp | string pattern, ?int pos) -> bool
 
   # <!-- rdoc-file=string.c -->
-  # Same as `sym.to_s.succ.intern`.
+  # Equivalent to `self.to_s.succ.to_sym`:
+  #
+  #     :foo.succ # => :fop
+  #
+  # Symbol#next is an alias for Symbol#succ.
+  #
+  # Related: String#succ.
   #
   def next: () -> Symbol
 
   # <!-- rdoc-file=string.c -->
-  # Same as `sym.to_s.length`.
+  # Equivalent to `self.to_s.length`; see String#length.
+  #
+  # Symbol#size is an alias for Symbol#length.
   #
   alias size length
 
   # <!-- rdoc-file=string.c -->
-  # Returns `sym.to_s[]`.
+  # Equivalent to `symbol.to_s[]`; see String#[].
   #
   alias slice []
 
   # <!--
   #   rdoc-file=string.c
-  #   - sym.start_with?([prefixes]+)   -> true or false
+  #   - start_with?(*string_or_regexp) -> true or false
   # -->
-  # Returns true if `sym` starts with one of the `prefixes` given. Each of the
-  # `prefixes` should be a String or a Regexp.
-  #
-  #     :hello.start_with?("hell")               #=> true
-  #     :hello.start_with?(/H/i)                 #=> true
-  #
-  #     # returns true if one of the prefixes matches.
-  #     :hello.start_with?("heaven", "hell")     #=> true
-  #     :hello.start_with?("heaven", "paradise") #=> false
+  # Equivalent to `self.to_s.start_with?`; see String#start_with?.
   #
   def start_with?: (*string | Regexp prefixes) -> bool
 
   # <!--
   #   rdoc-file=string.c
-  #   - sym.succ
+  #   - succ
   # -->
-  # Same as `sym.to_s.succ.intern`.
+  # Equivalent to `self.to_s.succ.to_sym`:
+  #
+  #     :foo.succ # => :fop
+  #
+  # Symbol#next is an alias for Symbol#succ.
+  #
+  # Related: String#succ.
   #
   alias succ next
 
@@ -459,32 +436,41 @@ class Symbol
 
   # <!--
   #   rdoc-file=string.c
-  #   - sym.to_proc
+  #   - to_proc
   # -->
-  # Returns a *Proc* object which responds to the given method by *sym*.
+  # Returns a Proc object which calls the method with name of `self` on the first
+  # parameter and passes the remaining parameters to the method.
   #
-  #     (1..3).collect(&:to_s)  #=> ["1", "2", "3"]
+  #     proc = :to_s.to_proc   # => #<Proc:0x000001afe0e48680(&:to_s) (lambda)>
+  #     proc.call(1000)        # => "1000"
+  #     proc.call(1000, 16)    # => "3e8"
+  #     (1..3).collect(&:to_s) # => ["1", "2", "3"]
   #
   def to_proc: () -> Proc
 
   # <!--
   #   rdoc-file=string.c
-  #   - sym.id2name   -> string
-  #   - sym.to_s      -> string
+  #   - to_s -> string
   # -->
-  # Returns the name or string corresponding to *sym*.
+  # Returns a string representation of `self` (not including the leading colon):
   #
-  #     :fred.id2name   #=> "fred"
-  #     :ginger.to_s    #=> "ginger"
+  #     :foo.to_s # => "foo"
   #
-  # Note that this string is not frozen (unlike the symbol itself). To get a
-  # frozen string, use #name.
+  # Symbol#id2name is an alias for Symbol#to_s.
+  #
+  # Related: Symbol#inspect, Symbol#name.
   #
   alias to_s id2name
 
-  # <!-- rdoc-file=string.c -->
-  # In general, `to_sym` returns the Symbol corresponding to an object. As *sym*
-  # is already a symbol, `self` is returned in this case.
+  # <!--
+  #   rdoc-file=symbol.rb
+  #   - to_sym -> self
+  # -->
+  # Returns `self`.
+  #
+  # Symbol#intern is an alias for Symbol#to_sym.
+  #
+  # Related: String#to_sym.
   #
   alias to_sym intern
 

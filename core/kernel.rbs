@@ -12,266 +12,147 @@
 #
 # Module Kernel provides methods that are useful for:
 #
-# *   [Converting](#module-Kernel-label-Converting)
-# *   [Querying](#module-Kernel-label-Querying)
-# *   [Exiting](#module-Kernel-label-Exiting)
-# *   [Exceptions](#module-Kernel-label-Exceptions)
-# *   [IO](#module-Kernel-label-IO)
-# *   [Procs](#module-Kernel-label-Procs)
-# *   [Tracing](#module-Kernel-label-Tracing)
-# *   [Subprocesses](#module-Kernel-label-Subprocesses)
-# *   [Loading](#module-Kernel-label-Loading)
-# *   [Yielding](#module-Kernel-label-Yielding)
-# *   [Random Values](#module-Kernel-label-Random+Values)
-# *   [Other](#module-Kernel-label-Other)
+# *   [Converting](rdoc-ref:Kernel@Converting)
+# *   [Querying](rdoc-ref:Kernel@Querying)
+# *   [Exiting](rdoc-ref:Kernel@Exiting)
+# *   [Exceptions](rdoc-ref:Kernel@Exceptions)
+# *   [IO](rdoc-ref:Kernel@IO)
+# *   [Procs](rdoc-ref:Kernel@Procs)
+# *   [Tracing](rdoc-ref:Kernel@Tracing)
+# *   [Subprocesses](rdoc-ref:Kernel@Subprocesses)
+# *   [Loading](rdoc-ref:Kernel@Loading)
+# *   [Yielding](rdoc-ref:Kernel@Yielding)
+# *   [Random Values](rdoc-ref:Kernel@Random+Values)
+# *   [Other](rdoc-ref:Kernel@Other)
 #
 #
 # ### Converting
 #
-#     [#Array](#method-i-Array)
-# :       Returns an Array based on the given argument.
-#
-#     [#Complex](#method-i-Complex)
-# :       Returns a Complex based on the given arguments.
-#
-#     [#Float](#method-i-Float)
-# :       Returns a Float based on the given arguments.
-#
-#     [#Hash](#method-i-Hash)
-# :       Returns a Hash based on the given argument.
-#
-#     [#Integer](#method-i-Integer)
-# :       Returns an Integer based on the given arguments.
-#
-#     [#Rational](#method-i-Rational)
-# :       Returns a Rational based on the given arguments.
-#
-#     [#String](#method-i-String)
-# :       Returns a String based on the given argument.
-#
+# *   #Array: Returns an Array based on the given argument.
+# *   #Complex: Returns a Complex based on the given arguments.
+# *   #Float: Returns a Float based on the given arguments.
+# *   #Hash: Returns a Hash based on the given argument.
+# *   #Integer: Returns an Integer based on the given arguments.
+# *   #Rational: Returns a Rational based on the given arguments.
+# *   #String: Returns a String based on the given argument.
 #
 #
 # ### Querying
 #
-#     [#__callee__](#method-i-__callee__)
-# :       Returns the called name of the current method as a symbol.
-#
-#     [#__dir__](#method-i-__dir__)
-# :       Returns the path to the directory from which the current method is
-#         called.
-#
-#     [#__method__](#method-i-__method__)
-# :       Returns the name of the current method as a symbol.
-#
-#     #autoload?
-# :       Returns the file to be loaded when the given module is referenced.
-#
-#     #binding
-# :       Returns a Binding for the context at the point of call.
-#
-#     #block_given?
-# :       Returns `true` if a block was passed to the calling method.
-#
-#     #caller
-# :       Returns the current execution stack as an array of strings.
-#
-#     #caller_locations
-# :       Returns the current execution stack as an array of
-#         Thread::Backtrace::Location objects.
-#
-#     #class
-# :       Returns the class of `self`.
-#
-#     #frozen?
-# :       Returns whether `self` is frozen.
-#
-#     #global_variables
-# :       Returns an array of global variables as symbols.
-#
-#     #local_variables
-# :       Returns an array of local variables as symbols.
-#
-#     #test
-# :       Performs specified tests on the given single file or pair of files.
-#
+# *   #__callee__: Returns the called name of the current method as a symbol.
+# *   #__dir__: Returns the path to the directory from which the current method
+#     is called.
+# *   #__method__: Returns the name of the current method as a symbol.
+# *   #autoload?: Returns the file to be loaded when the given module is
+#     referenced.
+# *   #binding: Returns a Binding for the context at the point of call.
+# *   #block_given?: Returns `true` if a block was passed to the calling method.
+# *   #caller: Returns the current execution stack as an array of strings.
+# *   #caller_locations: Returns the current execution stack as an array of
+#     Thread::Backtrace::Location objects.
+# *   #class: Returns the class of `self`.
+# *   #frozen?: Returns whether `self` is frozen.
+# *   #global_variables: Returns an array of global variables as symbols.
+# *   #local_variables: Returns an array of local variables as symbols.
+# *   #test: Performs specified tests on the given single file or pair of files.
 #
 #
 # ### Exiting
 #
-#     #abort
-# :       Exits the current process after printing the given arguments.
-#
-#     #at_exit
-# :       Executes the given block when the process exits.
-#
-#     #exit
-# :       Exits the current process after calling any registered `at_exit`
-#         handlers.
-#
-#     #exit!
-# :       Exits the current process without calling any registered `at_exit`
-#         handlers.
-#
+# *   #abort: Exits the current process after printing the given arguments.
+# *   #at_exit: Executes the given block when the process exits.
+# *   #exit: Exits the current process after calling any registered `at_exit`
+#     handlers.
+# *   #exit!: Exits the current process without calling any registered `at_exit`
+#     handlers.
 #
 #
 # ### Exceptions
 #
-#     #catch
-# :       Executes the given block, possibly catching a thrown object.
-#
-#     #raise (aliased as #fail)
-# :       Raises an exception based on the given arguments.
-#
-#     #throw
-# :       Returns from the active catch block waiting for the given tag.
-#
+# *   #catch: Executes the given block, possibly catching a thrown object.
+# *   #raise (aliased as #fail): Raises an exception based on the given
+#     arguments.
+# *   #throw: Returns from the active catch block waiting for the given tag.
 #
 #
 # ### IO
 #
-#     #gets
-# :       Returns and assigns to `$_` the next line from the current input.
-#
-#     #open
-# :       Creates an IO object connected to the given stream, file, or
-#         subprocess.
-#
-#     #p
-# :       Prints the given objects' inspect output to the standard output.
-#
-#     #pp
-# :       Prints the given objects in pretty form.
-#
-#     #print
-# :       Prints the given objects to standard output without a newline.
-#
-#     #printf
-# :       Prints the string resulting from applying the given format string to
-#         any additional arguments.
-#
-#     #putc
-# :       Equivalent to <tt.$stdout.putc(object)</tt> for the given object.
-#
-#     #puts
-# :       Equivalent to `$stdout.puts(*objects)` for the given objects.
-#
-#     #readline
-# :       Similar to #gets, but raises an exception at the end of file.
-#
-#     #readlines
-# :       Returns an array of the remaining lines from the current input.
-#
-#     #select
-# :       Same as IO.select.
-#
+# *   ::pp: Prints the given objects in pretty form.
+# *   #gets: Returns and assigns to `$_` the next line from the current input.
+# *   #open: Creates an IO object connected to the given stream, file, or
+#     subprocess.
+# *   #p:  Prints the given objects' inspect output to the standard output.
+# *   #print: Prints the given objects to standard output without a newline.
+# *   #printf: Prints the string resulting from applying the given format string
+#     to any additional arguments.
+# *   #putc: Equivalent to <tt.$stdout.putc(object)</tt> for the given object.
+# *   #puts: Equivalent to `$stdout.puts(*objects)` for the given objects.
+# *   #readline: Similar to #gets, but raises an exception at the end of file.
+# *   #readlines: Returns an array of the remaining lines from the current
+#     input.
+# *   #select: Same as IO.select.
 #
 #
 # ### Procs
 #
-#     #lambda
-# :       Returns a lambda proc for the given block.
-#
-#     #proc
-# :       Returns a new Proc; equivalent to Proc.new.
-#
+# *   #lambda: Returns a lambda proc for the given block.
+# *   #proc: Returns a new Proc; equivalent to Proc.new.
 #
 #
 # ### Tracing
 #
-#     #set_trace_func
-# :       Sets the given proc as the handler for tracing, or disables tracing if
-#         given `nil`.
-#
-#     #trace_var
-# :       Starts tracing assignments to the given global variable.
-#
-#     #untrace_var
-# :       Disables tracing of assignments to the given global variable.
-#
+# *   #set_trace_func: Sets the given proc as the handler for tracing, or
+#     disables tracing if given `nil`.
+# *   #trace_var: Starts tracing assignments to the given global variable.
+# *   #untrace_var: Disables tracing of assignments to the given global
+#     variable.
 #
 #
 # ### Subprocesses
 #
-#     #`cmd`
-# :       Returns the standard output of running `cmd` in a subshell.
-#
-#     #exec
-# :       Replaces current process with a new process.
-#
-#     #fork
-# :       Forks the current process into two processes.
-#
-#     #spawn
-# :       Executes the given command and returns its pid without waiting for
-#         completion.
-#
-#     #system
-# :       Executes the given command in a subshell.
-#
+# *   [\`command`](rdoc-ref:Kernel#`): Returns the standard output of running
+#     `command` in a subshell.
+# *   #exec: Replaces current process with a new process.
+# *   #fork: Forks the current process into two processes.
+# *   #spawn: Executes the given command and returns its pid without waiting for
+#     completion.
+# *   #system: Executes the given command in a subshell.
 #
 #
 # ### Loading
 #
-#     #autoload
-# :       Registers the given file to be loaded when the given constant is first
-#         referenced.
-#
-#     #load
-# :       Loads the given Ruby file.
-#
-#     #require
-# :       Loads the given Ruby file unless it has already been loaded.
-#
-#     #require_relative
-# :       Loads the Ruby file path relative to the calling file, unless it has
-#         already been loaded.
-#
+# *   #autoload: Registers the given file to be loaded when the given constant
+#     is first referenced.
+# *   #load: Loads the given Ruby file.
+# *   #require: Loads the given Ruby file unless it has already been loaded.
+# *   #require_relative: Loads the Ruby file path relative to the calling file,
+#     unless it has already been loaded.
 #
 #
 # ### Yielding
 #
-#     #tap
-# :       Yields `self` to the given block; returns `self`.
-#
-#     #then (aliased as #yield_self)
-# :       Yields `self` to the block and returns the result of the block.
-#
+# *   #tap: Yields `self` to the given block; returns `self`.
+# *   #then (aliased as #yield_self): Yields `self` to the block and returns the
+#     result of the block.
 #
 #
 # ### Random Values
 #
-#     #rand
-# :       Returns a pseudo-random floating point number strictly between 0.0 and
-#         1.0.
-#
-#     #srand
-# :       Seeds the pseudo-random number generator with the given number.
-#
+# *   #rand: Returns a pseudo-random floating point number strictly between 0.0
+#     and 1.0.
+# *   #srand: Seeds the pseudo-random number generator with the given number.
 #
 #
 # ### Other
 #
-#     #eval
-# :       Evaluates the given string as Ruby code.
-#
-#     #loop
-# :       Repeatedly executes the given block.
-#
-#     #sleep
-# :       Suspends the current thread for the given number of seconds.
-#
-#     #sprintf (aliased as #format)
-# :       Returns the string resulting from applying the given format string to
-#         any additional arguments.
-#
-#     #syscall
-# :       Runs an operating system call.
-#
-#     #trap
-# :       Specifies the handling of system signals.
-#
-#     #warn
-# :       Issue a warning based on the given messages and options.
+# *   #eval: Evaluates the given string as Ruby code.
+# *   #loop: Repeatedly executes the given block.
+# *   #sleep: Suspends the current thread for the given number of seconds.
+# *   #sprintf (aliased as #format): Returns the string resulting from applying
+#     the given format string to any additional arguments.
+# *   #syscall: Runs an operating system call.
+# *   #trap: Specifies the handling of system signals.
+# *   #warn: Issue a warning based on the given messages and options.
 #
 %a{annotate:rdoc:source:from=object.c}
 module Kernel : BasicObject
@@ -508,21 +389,19 @@ module Kernel : BasicObject
 
   # <!--
   #   rdoc-file=object.c
-  #   - Array(arg)    -> array
+  #   - Array(object) -> object or new_array
   # -->
-  # Returns `arg` as an Array.
+  # Returns an array converted from `object`.
   #
-  # First tries to call `to_ary` on `arg`, then `to_a`. If `arg` does not respond
-  # to `to_ary` or `to_a`, returns an Array of length 1 containing `arg`.
+  # Tries to convert `object` to an array using `to_ary` first and `to_a` second:
   #
-  # If `to_ary` or `to_a` returns something other than an Array, raises a
-  # TypeError.
+  #     Array([0, 1, 2])        # => [0, 1, 2]
+  #     Array({foo: 0, bar: 1}) # => [[:foo, 0], [:bar, 1]]
+  #     Array(0..4)             # => [0, 1, 2, 3, 4]
   #
-  #     Array(["a", "b"])  #=> ["a", "b"]
-  #     Array(1..5)        #=> [1, 2, 3, 4, 5]
-  #     Array(key: :value) #=> [[:key, :value]]
-  #     Array(nil)         #=> []
-  #     Array(1)           #=> [1]
+  # Returns `object` in an array, `[object]`, if `object` cannot be converted:
+  #
+  #     Array(:foo)             # => [:foo]
   #
   def self?.Array: (NilClass x) -> [ ]
                  | [T] (::Array[T] x) -> ::Array[T]
@@ -589,46 +468,111 @@ module Kernel : BasicObject
 
   # <!--
   #   rdoc-file=object.c
-  #   - Hash(arg)    -> hash
+  #   - Hash(object) -> object or new_hash
   # -->
-  # Converts *arg* to a Hash by calling *arg*`.to_hash`. Returns an empty Hash
-  # when *arg* is `nil` or `[]`.
+  # Returns a hash converted from `object`.
   #
-  #     Hash([])          #=> {}
-  #     Hash(nil)         #=> {}
-  #     Hash(key: :value) #=> {:key => :value}
-  #     Hash([1, 2, 3])   #=> TypeError
+  # *   If `object` is:
+  #
+  #     *   A hash, returns `object`.
+  #     *   An empty array or `nil`, returns an empty hash.
+  #
+  #
+  # *   Otherwise, if `object.to_hash` returns a hash, returns that hash.
+  # *   Otherwise, returns TypeError.
+  #
+  #
+  # Examples:
+  #
+  #     Hash({foo: 0, bar: 1}) # => {:foo=>0, :bar=>1}
+  #     Hash(nil)              # => {}
+  #     Hash([])               # => {}
   #
   def self?.Hash: [K, V] (Object x) -> ::Hash[K, V]
 
   # <!--
   #   rdoc-file=object.c
-  #   - Integer(arg, base=0, exception: true)    -> integer or nil
+  #   - Integer(object, base = 0, exception: true) -> integer or nil
   # -->
-  # Converts *arg* to an Integer. Numeric types are converted directly (with
-  # floating point numbers being truncated).  *base* (0, or between 2 and 36) is a
-  # base for integer string representation.  If *arg* is a String, when *base* is
-  # omitted or equals zero, radix indicators (`0`, `0b`, and `0x`) are honored. In
-  # any case, strings should consist only of one or more digits, except for that a
-  # sign, one underscore between two digits, and leading/trailing spaces are
-  # optional.  This behavior is different from that of String#to_i.  Non string
-  # values will be converted by first trying `to_int`, then `to_i`.
+  # Returns an integer converted from `object`.
   #
-  # Passing `nil` raises a TypeError, while passing a String that does not conform
-  # with numeric representation raises an ArgumentError. This behavior can be
-  # altered by passing `exception: false`, in this case a not convertible value
-  # will return `nil`.
+  # Tries to convert `object` to an integer using `to_int` first and `to_i`
+  # second; see below for exceptions.
   #
-  #     Integer(123.999)    #=> 123
-  #     Integer("0x1a")     #=> 26
-  #     Integer(Time.new)   #=> 1204973019
-  #     Integer("0930", 10) #=> 930
-  #     Integer("111", 2)   #=> 7
-  #     Integer(" +1_0 ")   #=> 10
-  #     Integer(nil)        #=> TypeError: can't convert nil into Integer
-  #     Integer("x")        #=> ArgumentError: invalid value for Integer(): "x"
+  # With a non-zero `base`, `object` must be a string or convertible to a string.
   #
-  #     Integer("x", exception: false)        #=> nil
+  # #### numeric objects
+  #
+  # With integer argument `object` given, returns `object`:
+  #
+  #     Integer(1)                # => 1
+  #     Integer(-1)               # => -1
+  #
+  # With floating-point argument `object` given, returns `object` truncated to an
+  # intger:
+  #
+  #     Integer(1.9)              # => 1  # Rounds toward zero.
+  #     Integer(-1.9)             # => -1 # Rounds toward zero.
+  #
+  # #### string objects
+  #
+  # With string argument `object` and zero `base` given, returns `object`
+  # converted to an integer in base 10:
+  #
+  #     Integer('100')    # => 100
+  #     Integer('-100')   # => -100
+  #
+  # With `base` zero, string `object` may contain leading characters to specify
+  # the actual base (radix indicator):
+  #
+  #     Integer('0100')  # => 64  # Leading '0' specifies base 8.
+  #     Integer('0b100') # => 4   # Leading '0b', specifies base 2.
+  #     Integer('0x100') # => 256 # Leading '0x' specifies base 16.
+  #
+  # With a positive `base` (in range 2..36) given, returns `object` converted to
+  # an integer in the given base:
+  #
+  #     Integer('100', 2)   # => 4
+  #     Integer('100', 8)   # => 64
+  #     Integer('-100', 16) # => -256
+  #
+  # With a negative `base` (in range -36..-2) given, returns `object` converted to
+  # an integer in the radix indicator if exists or `-base`:
+  #
+  #     Integer('0x100', -2)   # => 256
+  #     Integer('100', -2)     # => 4
+  #     Integer('0b100', -8)   # => 4
+  #     Integer('100', -8)     # => 64
+  #     Integer('0o100', -10)  # => 64
+  #     Integer('100', -10)    # => 100
+  #
+  # `base` -1 is equal the -10 case.
+  #
+  # When converting strings, surrounding whitespace and embedded underscores are
+  # allowed and ignored:
+  #
+  #     Integer(' 100 ')      # => 100
+  #     Integer('-1_0_0', 16) # => -256
+  #
+  # #### other classes
+  #
+  # Examples with `object` of various other classes:
+  #
+  #     Integer(Rational(9, 10)) # => 0  # Rounds toward zero.
+  #     Integer(Complex(2, 0))   # => 2  # Imaginary part must be zero.
+  #     Integer(Time.now)        # => 1650974042
+  #
+  # #### keywords
+  #
+  # With optional keyword argument `exception` given as `true` (the default):
+  #
+  # *   Raises TypeError if `object` does not respond to `to_int` or `to_i`.
+  # *   Raises TypeError if `object` is `nil`.
+  # *   Raise ArgumentError if `object` is an invalid string.
+  #
+  #
+  # With `exception` given as `false`, an exception of any kind is suppressed and
+  # `nil` is returned.
   #
   def self?.Integer: (Numeric | String arg, ?exception: bool exception) -> Integer
                    | (String arg, ?Integer base, ?exception: bool exception) -> Integer
@@ -674,15 +618,17 @@ module Kernel : BasicObject
 
   # <!--
   #   rdoc-file=object.c
-  #   - String(arg)   -> string
+  #   - String(object) -> object or new_string
   # -->
-  # Returns *arg* as a String.
+  # Returns a string converted from `object`.
   #
-  # First tries to call its `to_str` method, then its `to_s` method.
+  # Tries to convert `object` to a string using `to_str` first and `to_s` second:
   #
-  #     String(self)        #=> "main"
-  #     String(self.class)  #=> "Object"
-  #     String(123456)      #=> "123456"
+  #     String([0, 1, 2])        # => "[0, 1, 2]"
+  #     String(0..5)             # => "0..5"
+  #     String({foo: 0, bar: 1}) # => "{:foo=>0, :bar=>1}"
+  #
+  # Raises `TypeError` if `object` cannot be converted to a string.
   #
   def self?.String: (_ToStr | _ToS x) -> String
 
@@ -717,15 +663,22 @@ module Kernel : BasicObject
 
   # <!--
   #   rdoc-file=io.c
-  #   - `cmd`    -> string
+  #   - `command` -> string
   # -->
-  # Returns the standard output of running *cmd* in a subshell. The built-in
-  # syntax `%x{...}` uses this method. Sets `$?` to the process status.
+  # Returns the `$stdout` output from running `command` in a subshell; sets global
+  # variable `$?` to the process status.
   #
-  #     `date`                   #=> "Wed Apr  9 08:56:30 CDT 2003\n"
-  #     `ls testdir`.split[1]    #=> "main.rb"
-  #     `echo oops && exit 99`   #=> "oops\n"
-  #     $?.exitstatus            #=> 99
+  # This method has potential security vulnerabilities if called with untrusted
+  # input; see [Command Injection](rdoc-ref:command_injection.rdoc).
+  #
+  # Examples:
+  #
+  #     $ `date`                 # => "Wed Apr  9 08:56:30 CDT 2003\n"
+  #     $ `echo oops && exit 99` # => "oops\n"
+  #     $ $?                     # => #<Process::Status: pid 17088 exit 99>
+  #     $ $?.status              # => 99>
+  #
+  # The built-in syntax `%x{...}` uses this method.
   #
   def self?.`: (String arg0) -> String
 
@@ -763,12 +716,16 @@ module Kernel : BasicObject
 
   # <!--
   #   rdoc-file=load.c
-  #   - autoload(module, filename)   -> nil
+  #   - autoload(const, filename)   -> nil
   # -->
-  # Registers *filename* to be loaded (using Kernel::require) the first time that
-  # *module* (which may be a String or a symbol) is accessed.
+  # Registers _filename_ to be loaded (using Kernel::require)
+  #     the first time that _const_ (which may be a String or
+  #     a symbol) is accessed.
   #
-  #     autoload(:MyModule, "/usr/local/lib/modules/my_module.rb")
+  #        autoload(:MyModule, "/usr/local/lib/modules/my_module.rb")
+  #
+  # If *const* is defined as autoload, the file name to be loaded is replaced with
+  # *filename*.  If *const* is defined but not as autoload, does nothing.
   #
   def self?.autoload: (String | Symbol _module, String filename) -> NilClass
 
@@ -905,512 +862,25 @@ module Kernel : BasicObject
   alias self.raise self.fail
 
   # <!-- rdoc-file=object.c -->
-  # Returns the string resulting from applying *format_string* to any additional
-  # arguments.  Within the format string, any characters other than format
-  # sequences are copied to the result.
+  # Returns the string resulting from formatting `objects` into `format_string`.
   #
-  # The syntax of a format sequence is as follows.
+  # For details on `format_string`, see [Format
+  # Specifications](rdoc-ref:format_specifications.rdoc).
   #
-  #     %[flags][width][.precision]type
-  #
-  # A format sequence consists of a percent sign, followed by optional flags,
-  # width, and precision indicators, then terminated with a field type character.
-  # The field type controls how the corresponding `sprintf` argument is to be
-  # interpreted, while the flags modify that interpretation.
-  #
-  # The field type characters are:
-  #
-  #     Field |  Integer Format
-  #     ------+--------------------------------------------------------------
-  #       b   | Convert argument as a binary number.
-  #           | Negative numbers will be displayed as a two's complement
-  #           | prefixed with `..1'.
-  #       B   | Equivalent to `b', but uses an uppercase 0B for prefix
-  #           | in the alternative format by #.
-  #       d   | Convert argument as a decimal number.
-  #       i   | Identical to `d'.
-  #       o   | Convert argument as an octal number.
-  #           | Negative numbers will be displayed as a two's complement
-  #           | prefixed with `..7'.
-  #       u   | Identical to `d'.
-  #       x   | Convert argument as a hexadecimal number.
-  #           | Negative numbers will be displayed as a two's complement
-  #           | prefixed with `..f' (representing an infinite string of
-  #           | leading 'ff's).
-  #       X   | Equivalent to `x', but uses uppercase letters.
-  #
-  #     Field |  Float Format
-  #     ------+--------------------------------------------------------------
-  #       e   | Convert floating point argument into exponential notation
-  #           | with one digit before the decimal point as [-]d.dddddde[+-]dd.
-  #           | The precision specifies the number of digits after the decimal
-  #           | point (defaulting to six).
-  #       E   | Equivalent to `e', but uses an uppercase E to indicate
-  #           | the exponent.
-  #       f   | Convert floating point argument as [-]ddd.dddddd,
-  #           | where the precision specifies the number of digits after
-  #           | the decimal point.
-  #       g   | Convert a floating point number using exponential form
-  #           | if the exponent is less than -4 or greater than or
-  #           | equal to the precision, or in dd.dddd form otherwise.
-  #           | The precision specifies the number of significant digits.
-  #       G   | Equivalent to `g', but use an uppercase `E' in exponent form.
-  #       a   | Convert floating point argument as [-]0xh.hhhhp[+-]dd,
-  #           | which is consisted from optional sign, "0x", fraction part
-  #           | as hexadecimal, "p", and exponential part as decimal.
-  #       A   | Equivalent to `a', but use uppercase `X' and `P'.
-  #
-  #     Field |  Other Format
-  #     ------+--------------------------------------------------------------
-  #       c   | Argument is the numeric code for a single character or
-  #           | a single character string itself.
-  #       p   | The valuing of argument.inspect.
-  #       s   | Argument is a string to be substituted.  If the format
-  #           | sequence contains a precision, at most that many characters
-  #           | will be copied.
-  #       %   | A percent sign itself will be displayed.  No argument taken.
-  #
-  # The flags modifies the behavior of the formats. The flag characters are:
-  #
-  #     Flag     | Applies to    | Meaning
-  #     ---------+---------------+-----------------------------------------
-  #     space    | bBdiouxX      | Leave a space at the start of
-  #              | aAeEfgG       | non-negative numbers.
-  #              | (numeric fmt) | For `o', `x', `X', `b' and `B', use
-  #              |               | a minus sign with absolute value for
-  #              |               | negative values.
-  #     ---------+---------------+-----------------------------------------
-  #     (digit)$ | all           | Specifies the absolute argument number
-  #              |               | for this field.  Absolute and relative
-  #              |               | argument numbers cannot be mixed in a
-  #              |               | sprintf string.
-  #     ---------+---------------+-----------------------------------------
-  #      #       | bBoxX         | Use an alternative format.
-  #              | aAeEfgG       | For the conversions `o', increase the precision
-  #              |               | until the first digit will be `0' if
-  #              |               | it is not formatted as complements.
-  #              |               | For the conversions `x', `X', `b' and `B'
-  #              |               | on non-zero, prefix the result with ``0x'',
-  #              |               | ``0X'', ``0b'' and ``0B'', respectively.
-  #              |               | For `a', `A', `e', `E', `f', `g', and 'G',
-  #              |               | force a decimal point to be added,
-  #              |               | even if no digits follow.
-  #              |               | For `g' and 'G', do not remove trailing zeros.
-  #     ---------+---------------+-----------------------------------------
-  #     +        | bBdiouxX      | Add a leading plus sign to non-negative
-  #              | aAeEfgG       | numbers.
-  #              | (numeric fmt) | For `o', `x', `X', `b' and `B', use
-  #              |               | a minus sign with absolute value for
-  #              |               | negative values.
-  #     ---------+---------------+-----------------------------------------
-  #     -        | all           | Left-justify the result of this conversion.
-  #     ---------+---------------+-----------------------------------------
-  #     0 (zero) | bBdiouxX      | Pad with zeros, not spaces.
-  #              | aAeEfgG       | For `o', `x', `X', `b' and `B', radix-1
-  #              | (numeric fmt) | is used for negative numbers formatted as
-  #              |               | complements.
-  #     ---------+---------------+-----------------------------------------
-  #     *        | all           | Use the next argument as the field width.
-  #              |               | If negative, left-justify the result. If the
-  #              |               | asterisk is followed by a number and a dollar
-  #              |               | sign, use the indicated argument as the width.
-  #
-  # Examples of flags:
-  #
-  #     # `+' and space flag specifies the sign of non-negative numbers.
-  #     sprintf("%d", 123)  #=> "123"
-  #     sprintf("%+d", 123) #=> "+123"
-  #     sprintf("% d", 123) #=> " 123"
-  #
-  #     # `#' flag for `o' increases number of digits to show `0'.
-  #     # `+' and space flag changes format of negative numbers.
-  #     sprintf("%o", 123)   #=> "173"
-  #     sprintf("%#o", 123)  #=> "0173"
-  #     sprintf("%+o", -123) #=> "-173"
-  #     sprintf("%o", -123)  #=> "..7605"
-  #     sprintf("%#o", -123) #=> "..7605"
-  #
-  #     # `#' flag for `x' add a prefix `0x' for non-zero numbers.
-  #     # `+' and space flag disables complements for negative numbers.
-  #     sprintf("%x", 123)   #=> "7b"
-  #     sprintf("%#x", 123)  #=> "0x7b"
-  #     sprintf("%+x", -123) #=> "-7b"
-  #     sprintf("%x", -123)  #=> "..f85"
-  #     sprintf("%#x", -123) #=> "0x..f85"
-  #     sprintf("%#x", 0)    #=> "0"
-  #
-  #     # `#' for `X' uses the prefix `0X'.
-  #     sprintf("%X", 123)  #=> "7B"
-  #     sprintf("%#X", 123) #=> "0X7B"
-  #
-  #     # `#' flag for `b' add a prefix `0b' for non-zero numbers.
-  #     # `+' and space flag disables complements for negative numbers.
-  #     sprintf("%b", 123)   #=> "1111011"
-  #     sprintf("%#b", 123)  #=> "0b1111011"
-  #     sprintf("%+b", -123) #=> "-1111011"
-  #     sprintf("%b", -123)  #=> "..10000101"
-  #     sprintf("%#b", -123) #=> "0b..10000101"
-  #     sprintf("%#b", 0)    #=> "0"
-  #
-  #     # `#' for `B' uses the prefix `0B'.
-  #     sprintf("%B", 123)  #=> "1111011"
-  #     sprintf("%#B", 123) #=> "0B1111011"
-  #
-  #     # `#' for `e' forces to show the decimal point.
-  #     sprintf("%.0e", 1)  #=> "1e+00"
-  #     sprintf("%#.0e", 1) #=> "1.e+00"
-  #
-  #     # `#' for `f' forces to show the decimal point.
-  #     sprintf("%.0f", 1234)  #=> "1234"
-  #     sprintf("%#.0f", 1234) #=> "1234."
-  #
-  #     # `#' for `g' forces to show the decimal point.
-  #     # It also disables stripping lowest zeros.
-  #     sprintf("%g", 123.4)   #=> "123.4"
-  #     sprintf("%#g", 123.4)  #=> "123.400"
-  #     sprintf("%g", 123456)  #=> "123456"
-  #     sprintf("%#g", 123456) #=> "123456."
-  #
-  # The field width is an optional integer, followed optionally by a period and a
-  # precision.  The width specifies the minimum number of characters that will be
-  # written to the result for this field.
-  #
-  # Examples of width:
-  #
-  #     # padding is done by spaces,       width=20
-  #     # 0 or radix-1.             <------------------>
-  #     sprintf("%20d", 123)   #=> "                 123"
-  #     sprintf("%+20d", 123)  #=> "                +123"
-  #     sprintf("%020d", 123)  #=> "00000000000000000123"
-  #     sprintf("%+020d", 123) #=> "+0000000000000000123"
-  #     sprintf("% 020d", 123) #=> " 0000000000000000123"
-  #     sprintf("%-20d", 123)  #=> "123                 "
-  #     sprintf("%-+20d", 123) #=> "+123                "
-  #     sprintf("%- 20d", 123) #=> " 123                "
-  #     sprintf("%020x", -123) #=> "..ffffffffffffffff85"
-  #
-  # For numeric fields, the precision controls the number of decimal places
-  # displayed.  For string fields, the precision determines the maximum number of
-  # characters to be copied from the string.  (Thus, the format sequence `%10.10s`
-  # will always contribute exactly ten characters to the result.)
-  #
-  # Examples of precisions:
-  #
-  #     # precision for `d', 'o', 'x' and 'b' is
-  #     # minimum number of digits               <------>
-  #     sprintf("%20.8d", 123)  #=> "            00000123"
-  #     sprintf("%20.8o", 123)  #=> "            00000173"
-  #     sprintf("%20.8x", 123)  #=> "            0000007b"
-  #     sprintf("%20.8b", 123)  #=> "            01111011"
-  #     sprintf("%20.8d", -123) #=> "           -00000123"
-  #     sprintf("%20.8o", -123) #=> "            ..777605"
-  #     sprintf("%20.8x", -123) #=> "            ..ffff85"
-  #     sprintf("%20.8b", -11)  #=> "            ..110101"
-  #
-  #     # "0x" and "0b" for `#x' and `#b' is not counted for
-  #     # precision but "0" for `#o' is counted.  <------>
-  #     sprintf("%#20.8d", 123)  #=> "            00000123"
-  #     sprintf("%#20.8o", 123)  #=> "            00000173"
-  #     sprintf("%#20.8x", 123)  #=> "          0x0000007b"
-  #     sprintf("%#20.8b", 123)  #=> "          0b01111011"
-  #     sprintf("%#20.8d", -123) #=> "           -00000123"
-  #     sprintf("%#20.8o", -123) #=> "            ..777605"
-  #     sprintf("%#20.8x", -123) #=> "          0x..ffff85"
-  #     sprintf("%#20.8b", -11)  #=> "          0b..110101"
-  #
-  #     # precision for `e' is number of
-  #     # digits after the decimal point           <------>
-  #     sprintf("%20.8e", 1234.56789) #=> "      1.23456789e+03"
-  #
-  #     # precision for `f' is number of
-  #     # digits after the decimal point               <------>
-  #     sprintf("%20.8f", 1234.56789) #=> "       1234.56789000"
-  #
-  #     # precision for `g' is number of
-  #     # significant digits                          <------->
-  #     sprintf("%20.8g", 1234.56789) #=> "           1234.5679"
-  #
-  #     #                                         <------->
-  #     sprintf("%20.8g", 123456789)  #=> "       1.2345679e+08"
-  #
-  #     # precision for `s' is
-  #     # maximum number of characters                    <------>
-  #     sprintf("%20.8s", "string test") #=> "            string t"
-  #
-  # Examples:
-  #
-  #     sprintf("%d %04x", 123, 123)               #=> "123 007b"
-  #     sprintf("%08b '%4s'", 123, 123)            #=> "01111011 ' 123'"
-  #     sprintf("%1$*2$s %2$d %1$s", "hello", 8)   #=> "   hello 8 hello"
-  #     sprintf("%1$*2$s %2$d", "hello", -8)       #=> "hello    -8"
-  #     sprintf("%+g:% g:%-g", 1.23, 1.23, 1.23)   #=> "+1.23: 1.23:1.23"
-  #     sprintf("%u", -123)                        #=> "-123"
-  #
-  # For more complex formatting, Ruby supports a reference by name. %<name>s style
-  # uses format style, but %{name} style doesn't.
-  #
-  # Examples:
-  #     sprintf("%<foo>d : %<bar>f", { :foo => 1, :bar => 2 })
-  #       #=> 1 : 2.000000
-  #     sprintf("%{foo}f", { :foo => 1 })
-  #       # => "1f"
+  # Kernel#format is an alias for Kernel#sprintf.
   #
   def self?.format: (String format, *untyped args) -> String
 
   # <!--
   #   rdoc-file=object.c
-  #   - format(format_string [, arguments...] )   -> string
-  #   - sprintf(format_string [, arguments...] )  -> string
+  #   - sprintf(format_string *objects)  -> string
   # -->
-  # Returns the string resulting from applying *format_string* to any additional
-  # arguments.  Within the format string, any characters other than format
-  # sequences are copied to the result.
+  # Returns the string resulting from formatting `objects` into `format_string`.
   #
-  # The syntax of a format sequence is as follows.
+  # For details on `format_string`, see [Format
+  # Specifications](rdoc-ref:format_specifications.rdoc).
   #
-  #     %[flags][width][.precision]type
-  #
-  # A format sequence consists of a percent sign, followed by optional flags,
-  # width, and precision indicators, then terminated with a field type character.
-  # The field type controls how the corresponding `sprintf` argument is to be
-  # interpreted, while the flags modify that interpretation.
-  #
-  # The field type characters are:
-  #
-  #     Field |  Integer Format
-  #     ------+--------------------------------------------------------------
-  #       b   | Convert argument as a binary number.
-  #           | Negative numbers will be displayed as a two's complement
-  #           | prefixed with `..1'.
-  #       B   | Equivalent to `b', but uses an uppercase 0B for prefix
-  #           | in the alternative format by #.
-  #       d   | Convert argument as a decimal number.
-  #       i   | Identical to `d'.
-  #       o   | Convert argument as an octal number.
-  #           | Negative numbers will be displayed as a two's complement
-  #           | prefixed with `..7'.
-  #       u   | Identical to `d'.
-  #       x   | Convert argument as a hexadecimal number.
-  #           | Negative numbers will be displayed as a two's complement
-  #           | prefixed with `..f' (representing an infinite string of
-  #           | leading 'ff's).
-  #       X   | Equivalent to `x', but uses uppercase letters.
-  #
-  #     Field |  Float Format
-  #     ------+--------------------------------------------------------------
-  #       e   | Convert floating point argument into exponential notation
-  #           | with one digit before the decimal point as [-]d.dddddde[+-]dd.
-  #           | The precision specifies the number of digits after the decimal
-  #           | point (defaulting to six).
-  #       E   | Equivalent to `e', but uses an uppercase E to indicate
-  #           | the exponent.
-  #       f   | Convert floating point argument as [-]ddd.dddddd,
-  #           | where the precision specifies the number of digits after
-  #           | the decimal point.
-  #       g   | Convert a floating point number using exponential form
-  #           | if the exponent is less than -4 or greater than or
-  #           | equal to the precision, or in dd.dddd form otherwise.
-  #           | The precision specifies the number of significant digits.
-  #       G   | Equivalent to `g', but use an uppercase `E' in exponent form.
-  #       a   | Convert floating point argument as [-]0xh.hhhhp[+-]dd,
-  #           | which is consisted from optional sign, "0x", fraction part
-  #           | as hexadecimal, "p", and exponential part as decimal.
-  #       A   | Equivalent to `a', but use uppercase `X' and `P'.
-  #
-  #     Field |  Other Format
-  #     ------+--------------------------------------------------------------
-  #       c   | Argument is the numeric code for a single character or
-  #           | a single character string itself.
-  #       p   | The valuing of argument.inspect.
-  #       s   | Argument is a string to be substituted.  If the format
-  #           | sequence contains a precision, at most that many characters
-  #           | will be copied.
-  #       %   | A percent sign itself will be displayed.  No argument taken.
-  #
-  # The flags modifies the behavior of the formats. The flag characters are:
-  #
-  #     Flag     | Applies to    | Meaning
-  #     ---------+---------------+-----------------------------------------
-  #     space    | bBdiouxX      | Leave a space at the start of
-  #              | aAeEfgG       | non-negative numbers.
-  #              | (numeric fmt) | For `o', `x', `X', `b' and `B', use
-  #              |               | a minus sign with absolute value for
-  #              |               | negative values.
-  #     ---------+---------------+-----------------------------------------
-  #     (digit)$ | all           | Specifies the absolute argument number
-  #              |               | for this field.  Absolute and relative
-  #              |               | argument numbers cannot be mixed in a
-  #              |               | sprintf string.
-  #     ---------+---------------+-----------------------------------------
-  #      #       | bBoxX         | Use an alternative format.
-  #              | aAeEfgG       | For the conversions `o', increase the precision
-  #              |               | until the first digit will be `0' if
-  #              |               | it is not formatted as complements.
-  #              |               | For the conversions `x', `X', `b' and `B'
-  #              |               | on non-zero, prefix the result with ``0x'',
-  #              |               | ``0X'', ``0b'' and ``0B'', respectively.
-  #              |               | For `a', `A', `e', `E', `f', `g', and 'G',
-  #              |               | force a decimal point to be added,
-  #              |               | even if no digits follow.
-  #              |               | For `g' and 'G', do not remove trailing zeros.
-  #     ---------+---------------+-----------------------------------------
-  #     +        | bBdiouxX      | Add a leading plus sign to non-negative
-  #              | aAeEfgG       | numbers.
-  #              | (numeric fmt) | For `o', `x', `X', `b' and `B', use
-  #              |               | a minus sign with absolute value for
-  #              |               | negative values.
-  #     ---------+---------------+-----------------------------------------
-  #     -        | all           | Left-justify the result of this conversion.
-  #     ---------+---------------+-----------------------------------------
-  #     0 (zero) | bBdiouxX      | Pad with zeros, not spaces.
-  #              | aAeEfgG       | For `o', `x', `X', `b' and `B', radix-1
-  #              | (numeric fmt) | is used for negative numbers formatted as
-  #              |               | complements.
-  #     ---------+---------------+-----------------------------------------
-  #     *        | all           | Use the next argument as the field width.
-  #              |               | If negative, left-justify the result. If the
-  #              |               | asterisk is followed by a number and a dollar
-  #              |               | sign, use the indicated argument as the width.
-  #
-  # Examples of flags:
-  #
-  #     # `+' and space flag specifies the sign of non-negative numbers.
-  #     sprintf("%d", 123)  #=> "123"
-  #     sprintf("%+d", 123) #=> "+123"
-  #     sprintf("% d", 123) #=> " 123"
-  #
-  #     # `#' flag for `o' increases number of digits to show `0'.
-  #     # `+' and space flag changes format of negative numbers.
-  #     sprintf("%o", 123)   #=> "173"
-  #     sprintf("%#o", 123)  #=> "0173"
-  #     sprintf("%+o", -123) #=> "-173"
-  #     sprintf("%o", -123)  #=> "..7605"
-  #     sprintf("%#o", -123) #=> "..7605"
-  #
-  #     # `#' flag for `x' add a prefix `0x' for non-zero numbers.
-  #     # `+' and space flag disables complements for negative numbers.
-  #     sprintf("%x", 123)   #=> "7b"
-  #     sprintf("%#x", 123)  #=> "0x7b"
-  #     sprintf("%+x", -123) #=> "-7b"
-  #     sprintf("%x", -123)  #=> "..f85"
-  #     sprintf("%#x", -123) #=> "0x..f85"
-  #     sprintf("%#x", 0)    #=> "0"
-  #
-  #     # `#' for `X' uses the prefix `0X'.
-  #     sprintf("%X", 123)  #=> "7B"
-  #     sprintf("%#X", 123) #=> "0X7B"
-  #
-  #     # `#' flag for `b' add a prefix `0b' for non-zero numbers.
-  #     # `+' and space flag disables complements for negative numbers.
-  #     sprintf("%b", 123)   #=> "1111011"
-  #     sprintf("%#b", 123)  #=> "0b1111011"
-  #     sprintf("%+b", -123) #=> "-1111011"
-  #     sprintf("%b", -123)  #=> "..10000101"
-  #     sprintf("%#b", -123) #=> "0b..10000101"
-  #     sprintf("%#b", 0)    #=> "0"
-  #
-  #     # `#' for `B' uses the prefix `0B'.
-  #     sprintf("%B", 123)  #=> "1111011"
-  #     sprintf("%#B", 123) #=> "0B1111011"
-  #
-  #     # `#' for `e' forces to show the decimal point.
-  #     sprintf("%.0e", 1)  #=> "1e+00"
-  #     sprintf("%#.0e", 1) #=> "1.e+00"
-  #
-  #     # `#' for `f' forces to show the decimal point.
-  #     sprintf("%.0f", 1234)  #=> "1234"
-  #     sprintf("%#.0f", 1234) #=> "1234."
-  #
-  #     # `#' for `g' forces to show the decimal point.
-  #     # It also disables stripping lowest zeros.
-  #     sprintf("%g", 123.4)   #=> "123.4"
-  #     sprintf("%#g", 123.4)  #=> "123.400"
-  #     sprintf("%g", 123456)  #=> "123456"
-  #     sprintf("%#g", 123456) #=> "123456."
-  #
-  # The field width is an optional integer, followed optionally by a period and a
-  # precision.  The width specifies the minimum number of characters that will be
-  # written to the result for this field.
-  #
-  # Examples of width:
-  #
-  #     # padding is done by spaces,       width=20
-  #     # 0 or radix-1.             <------------------>
-  #     sprintf("%20d", 123)   #=> "                 123"
-  #     sprintf("%+20d", 123)  #=> "                +123"
-  #     sprintf("%020d", 123)  #=> "00000000000000000123"
-  #     sprintf("%+020d", 123) #=> "+0000000000000000123"
-  #     sprintf("% 020d", 123) #=> " 0000000000000000123"
-  #     sprintf("%-20d", 123)  #=> "123                 "
-  #     sprintf("%-+20d", 123) #=> "+123                "
-  #     sprintf("%- 20d", 123) #=> " 123                "
-  #     sprintf("%020x", -123) #=> "..ffffffffffffffff85"
-  #
-  # For numeric fields, the precision controls the number of decimal places
-  # displayed.  For string fields, the precision determines the maximum number of
-  # characters to be copied from the string.  (Thus, the format sequence `%10.10s`
-  # will always contribute exactly ten characters to the result.)
-  #
-  # Examples of precisions:
-  #
-  #     # precision for `d', 'o', 'x' and 'b' is
-  #     # minimum number of digits               <------>
-  #     sprintf("%20.8d", 123)  #=> "            00000123"
-  #     sprintf("%20.8o", 123)  #=> "            00000173"
-  #     sprintf("%20.8x", 123)  #=> "            0000007b"
-  #     sprintf("%20.8b", 123)  #=> "            01111011"
-  #     sprintf("%20.8d", -123) #=> "           -00000123"
-  #     sprintf("%20.8o", -123) #=> "            ..777605"
-  #     sprintf("%20.8x", -123) #=> "            ..ffff85"
-  #     sprintf("%20.8b", -11)  #=> "            ..110101"
-  #
-  #     # "0x" and "0b" for `#x' and `#b' is not counted for
-  #     # precision but "0" for `#o' is counted.  <------>
-  #     sprintf("%#20.8d", 123)  #=> "            00000123"
-  #     sprintf("%#20.8o", 123)  #=> "            00000173"
-  #     sprintf("%#20.8x", 123)  #=> "          0x0000007b"
-  #     sprintf("%#20.8b", 123)  #=> "          0b01111011"
-  #     sprintf("%#20.8d", -123) #=> "           -00000123"
-  #     sprintf("%#20.8o", -123) #=> "            ..777605"
-  #     sprintf("%#20.8x", -123) #=> "          0x..ffff85"
-  #     sprintf("%#20.8b", -11)  #=> "          0b..110101"
-  #
-  #     # precision for `e' is number of
-  #     # digits after the decimal point           <------>
-  #     sprintf("%20.8e", 1234.56789) #=> "      1.23456789e+03"
-  #
-  #     # precision for `f' is number of
-  #     # digits after the decimal point               <------>
-  #     sprintf("%20.8f", 1234.56789) #=> "       1234.56789000"
-  #
-  #     # precision for `g' is number of
-  #     # significant digits                          <------->
-  #     sprintf("%20.8g", 1234.56789) #=> "           1234.5679"
-  #
-  #     #                                         <------->
-  #     sprintf("%20.8g", 123456789)  #=> "       1.2345679e+08"
-  #
-  #     # precision for `s' is
-  #     # maximum number of characters                    <------>
-  #     sprintf("%20.8s", "string test") #=> "            string t"
-  #
-  # Examples:
-  #
-  #     sprintf("%d %04x", 123, 123)               #=> "123 007b"
-  #     sprintf("%08b '%4s'", 123, 123)            #=> "01111011 ' 123'"
-  #     sprintf("%1$*2$s %2$d %1$s", "hello", 8)   #=> "   hello 8 hello"
-  #     sprintf("%1$*2$s %2$d", "hello", -8)       #=> "hello    -8"
-  #     sprintf("%+g:% g:%-g", 1.23, 1.23, 1.23)   #=> "+1.23: 1.23:1.23"
-  #     sprintf("%u", -123)                        #=> "-123"
-  #
-  # For more complex formatting, Ruby supports a reference by name. %<name>s style
-  # uses format style, but %{name} style doesn't.
-  #
-  # Examples:
-  #     sprintf("%<foo>d : %<bar>f", { :foo => 1, :bar => 2 })
-  #       #=> 1 : 2.000000
-  #     sprintf("%{foo}f", { :foo => 1 })
-  #       # => "1f"
+  # Kernel#format is an alias for Kernel#sprintf.
   #
   alias sprintf format
 
@@ -1462,7 +932,7 @@ module Kernel : BasicObject
 
   # <!--
   #   rdoc-file=load.c
-  #   - load(filename, wrap=false)   -> true
+  #   - load(file, wrap = false)
   # -->
   # Loads and executes the Ruby program in the file *filename*.
   #
@@ -1501,7 +971,7 @@ module Kernel : BasicObject
   #     loop do
   #       print "Input: "
   #       line = gets
-  #       break if !line or line =~ /^qQ/
+  #       break if !line or line =~ /^q/i
   #       # ...
   #     end
   #
@@ -1523,134 +993,183 @@ module Kernel : BasicObject
 
   # <!--
   #   rdoc-file=io.c
-  #   - open(path [, mode [, perm]] [, opt])                -> io or nil
-  #   - open(path [, mode [, perm]] [, opt]) {|io| block }  -> obj
+  #   - open(path, mode = 'r', perm = 0666, **opts)             -> io or nil
+  #   - open(path, mode = 'r', perm = 0666, **opts) {|io| ... } -> obj
   # -->
   # Creates an IO object connected to the given stream, file, or subprocess.
   #
-  # If `path` does not start with a pipe character (`|`), treat it as the name of
-  # a file to open using the specified mode (defaulting to "r").
+  # Required string argument `path` determines which of the following occurs:
   #
-  # The `mode` is either a string or an integer.  If it is an integer, it must be
-  # bitwise-or of open(2) flags, such as File::RDWR or File::EXCL.  If it is a
-  # string, it is either "fmode", "fmode:ext_enc", or "fmode:ext_enc:int_enc".
+  # *   The file at the specified `path` is opened.
+  # *   The process forks.
+  # *   A subprocess is created.
   #
-  # See the documentation of IO.new for full documentation of the `mode` string
-  # directives.
   #
-  # If a file is being created, its initial permissions may be set using the
-  # `perm` parameter.  See File.new and the open(2) and chmod(2) man pages for a
-  # description of permissions.
+  # Each of these is detailed below.
   #
-  # If a block is specified, it will be invoked with the IO object as a parameter,
-  # and the IO will be automatically closed when the block terminates.  The call
-  # returns the value of the block.
+  # **File Opened**
   #
-  # If `path` starts with a pipe character (`"|"`), a subprocess is created,
-  # connected to the caller by a pair of pipes.  The returned IO object may be
-  # used to write to the standard input and read from the standard output of this
-  # subprocess.
+  # If `path` does *not* start with a pipe character (`'|'`), a file stream is
+  # opened with `File.open(path, mode, perm, **opts)`.
   #
-  # If the command following the pipe is a single minus sign (`"|-"`), Ruby forks,
-  # and this subprocess is connected to the parent.  If the command is not `"-"`,
-  # the subprocess runs the command.  Note that the command may be processed by
-  # shell if it contains shell metacharacters.
+  # With no block given, file stream is returned:
   #
-  # When the subprocess is Ruby (opened via `"|-"`), the `open` call returns
-  # `nil`.  If a block is associated with the open call, that block will run twice
-  # --- once in the parent and once in the child.
+  #     open('t.txt') # => #<File:t.txt>
   #
-  # The block parameter will be an IO object in the parent and `nil` in the child.
-  # The parent's `IO` object will be connected to the child's $stdin and $stdout.
-  # The subprocess will be terminated at the end of the block.
+  # With a block given, calls the block with the open file stream, then closes the
+  # stream:
   #
-  # ### Examples
+  #     open('t.txt') {|f| p f } # => #<File:t.txt (closed)>
   #
-  # Reading from "testfile":
+  # Output:
   #
-  #     open("testfile") do |f|
-  #       print f.gets
-  #     end
+  #     #<File:t.txt>
   #
-  # Produces:
+  # See File.open for details.
   #
-  #     This is line one
+  # **Process Forked**
   #
-  # Open a subprocess and read its output:
+  # If `path` is the 2-character string `'|-'`, the process forks and the child
+  # process is connected to the parent.
   #
-  #     cmd = open("|date")
-  #     print cmd.gets
-  #     cmd.close
+  # With no block given:
   #
-  # Produces:
-  #
-  #     Wed Apr  9 08:56:31 CDT 2003
-  #
-  # Open a subprocess running the same Ruby program:
-  #
-  #     f = open("|-", "w+")
-  #     if f.nil?
-  #       puts "in Child"
-  #       exit
+  #     io = open('|-')
+  #     if io
+  #       $stderr.puts "In parent, child pid is #{io.pid}."
   #     else
-  #       puts "Got: #{f.gets}"
+  #       $stderr.puts "In child, pid is #{$$}."
   #     end
   #
-  # Produces:
+  # Output:
   #
-  #     Got: in Child
+  #     In parent, child pid is 27903.
+  #     In child, pid is 27903.
   #
-  # Open a subprocess using a block to receive the IO object:
+  # With a block given:
   #
-  #     open "|-" do |f|
-  #       if f then
-  #         # parent process
-  #         puts "Got: #{f.gets}"
+  #     open('|-') do |io|
+  #       if io
+  #         $stderr.puts "In parent, child pid is #{io.pid}."
   #       else
-  #         # child process
-  #         puts "in Child"
+  #         $stderr.puts "In child, pid is #{$$}."
   #       end
   #     end
   #
-  # Produces:
+  # Output:
   #
-  #     Got: in Child
+  #     In parent, child pid is 28427.
+  #     In child, pid is 28427.
+  #
+  # **Subprocess Created**
+  #
+  # If `path` is `'|command'` (`'command' != '-'`), a new subprocess runs the
+  # command; its open stream is returned. Note that the command may be processed
+  # by shell if it contains shell metacharacters.
+  #
+  # With no block given:
+  #
+  #     io = open('|echo "Hi!"') # => #<IO:fd 12>
+  #     print io.gets
+  #     io.close
+  #
+  # Output:
+  #
+  #     "Hi!"
+  #
+  # With a block given, calls the block with the stream, then closes the stream:
+  #
+  #     open('|echo "Hi!"') do |io|
+  #       print io.gets
+  #     end
+  #
+  # Output:
+  #
+  #     "Hi!"
   #
   def self?.open: (String name, ?String mode, ?Integer perm) -> IO?
                 | [T] (String name, ?String mode, ?Integer perm) { (IO) -> T } -> T
 
   # <!--
   #   rdoc-file=io.c
-  #   - print(obj, ...)    -> nil
+  #   - print(*objects) -> nil
   # -->
-  # Prints each object in turn to `$stdout`. If the output field separator (`$,`)
-  # is not `nil`, its contents will appear between each field. If the output
-  # record separator (`$\`) is not `nil`, it will be appended to the output. If no
-  # arguments are given, prints `$_`. Objects that aren't strings will be
-  # converted by calling their `to_s` method.
+  # Equivalent to `$stdout.print(*objects)`, this method is the straightforward
+  # way to write to `$stdout`.
   #
-  #     print "cat", [1,2,3], 99, "\n"
-  #     $, = ", "
-  #     $\ = "\n"
-  #     print "cat", [1,2,3], 99
+  # Writes the given objects to `$stdout`; returns `nil`. Appends the output
+  # record separator `$OUTPUT_RECORD_SEPARATOR` `$\`), if it is not `nil`.
   #
-  # *produces:*
+  # With argument `objects` given, for each object:
   #
-  #     cat12399
-  #     cat, 1, 2, 3, 99
+  # *   Converts via its method `to_s` if not a string.
+  # *   Writes to `stdout`.
+  # *   If not the last object, writes the output field separator
+  #     `$OUTPUT_FIELD_SEPARATOR` (`$,` if it is not `nil`.
+  #
+  #
+  # With default separators:
+  #
+  #     objects = [0, 0.0, Rational(0, 1), Complex(0, 0), :zero, 'zero']
+  #     $OUTPUT_RECORD_SEPARATOR
+  #     $OUTPUT_FIELD_SEPARATOR
+  #     print(*objects)
+  #
+  # Output:
+  #
+  #     nil
+  #     nil
+  #     00.00/10+0izerozero
+  #
+  # With specified separators:
+  #
+  #     $OUTPUT_RECORD_SEPARATOR = "\n"
+  #     $OUTPUT_FIELD_SEPARATOR = ','
+  #     print(*objects)
+  #
+  # Output:
+  #
+  #     0,0.0,0/1,0+0i,zero,zero
+  #
+  # With no argument given, writes the content of `$_` (which is usually the most
+  # recent user input):
+  #
+  #     gets  # Sets $_ to the most recent user input.
+  #     print # Prints $_.
   #
   def self?.print: (*Kernel args) -> nil
 
   # <!--
   #   rdoc-file=io.c
-  #   - printf(io, string [, obj ... ])    -> nil
-  #   - printf(string [, obj ... ])        -> nil
+  #   - printf(format_string, *objects)               -> nil
+  #   - printf(io, format_string, *objects) -> nil
   # -->
   # Equivalent to:
-  #     io.write(sprintf(string, obj, ...))
   #
-  # or
-  #     $stdout.write(sprintf(string, obj, ...))
+  #     io.write(sprintf(format_string, *objects))
+  #
+  # For details on `format_string`, see [Format
+  # Specifications](rdoc-ref:format_specifications.rdoc).
+  #
+  # With the single argument `format_string`, formats `objects` into the string,
+  # then writes the formatted string to $stdout:
+  #
+  #     printf('%4.4d %10s %2.2f', 24, 24, 24.0)
+  #
+  # Output (on $stdout):
+  #
+  #     0024         24 24.00#
+  #
+  # With arguments `io` and `format_string`, formats `objects` into the string,
+  # then writes the formatted string to `io`:
+  #
+  #     printf($stderr, '%4.4d %10s %2.2f', 24, 24, 24.0)
+  #
+  # Output (on $stderr):
+  #
+  #     0024         24 24.00# => nil
+  #
+  # With no arguments, does nothing.
   #
   def self?.printf: (IO arg0, String arg1, *untyped args) -> nil
                   | (String arg1, *untyped args) -> nil
@@ -1675,44 +1194,51 @@ module Kernel : BasicObject
 
   # <!--
   #   rdoc-file=io.c
-  #   - putc(int)   -> int
+  #   - putc(int) -> int
   # -->
   # Equivalent to:
   #
   #     $stdout.putc(int)
   #
-  # Refer to the documentation for IO#putc for important information regarding
-  # multi-byte characters.
+  # See IO#putc for important information regarding multi-byte characters.
   #
   def self?.putc: (Integer arg0) -> Integer
                 | (String arg0) -> String
 
   # <!--
   #   rdoc-file=io.c
-  #   - puts(obj, ...)    -> nil
+  #   - puts(*objects)    -> nil
   # -->
   # Equivalent to
   #
-  #     $stdout.puts(obj, ...)
+  #     $stdout.puts(objects)
   #
   def self?.puts: (*untyped arg0) -> NilClass
 
   # <!--
   #   rdoc-file=io.c
-  #   - p(obj)              -> obj
-  #   - p(obj1, obj2, ...)  -> [obj, ...]
-  #   - p()                 -> nil
+  #   - p(object)   -> obj
+  #   - p(*objects) -> array of objects
+  #   - p           -> nil
   # -->
-  # For each object, directly writes *obj*.`inspect` followed by a newline to the
-  # program's standard output.
+  # For each object `obj`, executes:
   #
-  #     S = Struct.new(:name, :state)
-  #     s = S['dave', 'TX']
-  #     p s
+  #     $stdout.write(obj.inspect, "\n")
   #
-  # *produces:*
+  # With one object given, returns the object; with multiple objects given,
+  # returns an array containing the objects; with no object given, returns `nil`.
   #
-  #     #<S name="dave", state="TX">
+  # Examples:
+  #
+  #     r = Range.new(0, 4)
+  #     p r                 # => 0..4
+  #     p [r, r, r]         # => [0..4, 0..4, 0..4]
+  #     p                   # => nil
+  #
+  # Output:
+  #
+  #     0..4
+  #     [0..4, 0..4, 0..4]
   #
   def self?.p: [T] (T arg0) -> T
              | (*untyped arg0) -> Array[untyped]
@@ -1744,7 +1270,7 @@ module Kernel : BasicObject
   #     rand(100)   #=> 12
   #
   # When `max` is a Range, `rand` returns a random number where
-  # range.member?(number) == true.
+  # `range.member?(number) == true`.
   #
   # Negative or floating point values for `max` are allowed, but may give
   # surprising results.
@@ -1765,92 +1291,142 @@ module Kernel : BasicObject
 
   # <!--
   #   rdoc-file=io.c
-  #   - readline(sep=$/)     -> string
-  #   - readline(limit)      -> string
-  #   - readline(sep, limit) -> string
+  #   - readline(sep = $/, chomp: false)   -> string
+  #   - readline(limit, chomp: false)      -> string
+  #   - readline(sep, limit, chomp: false) -> string
   # -->
-  # Equivalent to Kernel::gets, except `readline` raises `EOFError` at end of
-  # file.
+  # Equivalent to method Kernel#gets, except that it raises an exception if called
+  # at end-of-stream:
+  #
+  #     $ cat t.txt | ruby -e "p readlines; readline"
+  #     ["First line\n", "Second line\n", "\n", "Fourth line\n", "Fifth line\n"]
+  #     in `readline': end of file reached (EOFError)
+  #
+  # Optional keyword argument `chomp` specifies whether line separators are to be
+  # omitted.
   #
   def self?.readline: (?String arg0, ?Integer arg1) -> String
 
   # <!--
   #   rdoc-file=io.c
-  #   - readlines(sep=$/)     -> array
-  #   - readlines(limit)      -> array
-  #   - readlines(sep, limit) -> array
+  #   - readlines(sep = $/, chomp: false, **enc_opts)   -> array
+  #   - readlines(limit, chomp: false, **enc_opts)       -> array
+  #   - readlines(sep, limit, chomp: false, **enc_opts) -> array
   # -->
-  # Returns an array containing the lines returned by calling `Kernel.gets(*sep*)`
-  # until the end of file.
+  # Returns an array containing the lines returned by calling Kernel#gets until
+  # the end-of-stream is reached; (see [Line IO](rdoc-ref:IO@Line+IO)).
+  #
+  # With only string argument `sep` given, returns the remaining lines as
+  # determined by line separator `sep`, or `nil` if none; see [Line
+  # Separator](rdoc-ref:IO@Line+Separator):
+  #
+  #     # Default separator.
+  #     $ cat t.txt | ruby -e "p readlines"
+  #     ["First line\n", "Second line\n", "\n", "Fourth line\n", "Fifth line\n"]
+  #
+  #     # Specified separator.
+  #     $ cat t.txt | ruby -e "p readlines 'li'"
+  #     ["First li", "ne\nSecond li", "ne\n\nFourth li", "ne\nFifth li", "ne\n"]
+  #
+  #     # Get-all separator.
+  #     $ cat t.txt | ruby -e "p readlines nil"
+  #     ["First line\nSecond line\n\nFourth line\nFifth line\n"]
+  #
+  #     # Get-paragraph separator.
+  #     $ cat t.txt | ruby -e "p readlines ''"
+  #     ["First line\nSecond line\n\n", "Fourth line\nFifth line\n"]
+  #
+  # With only integer argument `limit` given, limits the number of bytes in the
+  # line; see [Line Limit](rdoc-ref:IO@Line+Limit):
+  #
+  #     $cat t.txt | ruby -e "p readlines 10"
+  #     ["First line", "\n", "Second lin", "e\n", "\n", "Fourth lin", "e\n", "Fifth line", "\n"]
+  #
+  #     $cat t.txt | ruby -e "p readlines 11"
+  #     ["First line\n", "Second line", "\n", "\n", "Fourth line", "\n", "Fifth line\n"]
+  #
+  #     $cat t.txt | ruby -e "p readlines 12"
+  #     ["First line\n", "Second line\n", "\n", "Fourth line\n", "Fifth line\n"]
+  #
+  # With arguments `sep` and `limit` given, combines the two behaviors; see [Line
+  # Separator and Line Limit](rdoc-ref:IO@Line+Separator+and+Line+Limit).
+  #
+  # Optional keyword argument `chomp` specifies whether line separators are to be
+  # omitted:
+  #
+  #     $ cat t.txt | ruby -e "p readlines(chomp: true)"
+  #     ["First line", "Second line", "", "Fourth line", "Fifth line"]
+  #
+  # Optional keyword arguments `enc_opts` specify encoding options; see [Encoding
+  # options](rdoc-ref:encodings.rdoc@Encoding+Options).
   #
   def self?.readlines: (?String arg0, ?Integer arg1) -> ::Array[String]
 
   # <!--
-  #   rdoc-file=load.c
-  #   - require(name)    -> true or false
+  #   rdoc-file=lib/rubygems/core_ext/kernel_require.rb
+  #   - require(path)
   # -->
-  # Loads the given `name`, returning `true` if successful and `false` if the
-  # feature is already loaded.
+  # When RubyGems is required, Kernel#require is replaced with our own which is
+  # capable of loading gems on demand.
   #
-  # If the filename neither resolves to an absolute path nor starts with './' or
-  # '../', the file will be searched for in the library directories listed in
-  # `$LOAD_PATH` (`$:`). If the filename starts with './' or '../', resolution is
-  # based on Dir.pwd.
+  # When you call `require 'x'`, this is what happens:
+  # *   If the file can be loaded from the existing Ruby loadpath, it is.
+  # *   Otherwise, installed gems are searched for a file that matches. If it's
+  #     found in gem 'y', that gem is activated (added to the loadpath).
   #
-  # If the filename has the extension ".rb", it is loaded as a source file; if the
-  # extension is ".so", ".o", or ".dll", or the default shared library extension
-  # on the current platform, Ruby loads the shared library as a Ruby extension.
-  # Otherwise, Ruby tries adding ".rb", ".so", and so on to the name until found.
-  # If the file named cannot be found, a LoadError will be raised.
   #
-  # For Ruby extensions the filename given may use any shared library extension.
-  # For example, on Linux the socket extension is "socket.so" and `require
-  # 'socket.dll'` will load the socket extension.
-  #
-  # The absolute path of the loaded file is added to `$LOADED_FEATURES` (`$"`).  A
-  # file will not be loaded again if its path already appears in `$"`.  For
-  # example, `require 'a'; require './a'` will not load `a.rb` again.
-  #
-  #     require "my-library.rb"
-  #     require "db-driver"
-  #
-  # Any constants or globals within the loaded source file will be available in
-  # the calling program's global namespace. However, local variables will not be
-  # propagated to the loading environment.
+  # The normal `require` functionality of returning false if that file has already
+  # been loaded is preserved.
   #
   def self?.require: (String path) -> bool
 
   # <!--
   #   rdoc-file=load.c
-  #   - require_relative(string) -> true or false
+  #   - require_relative(file)
   # -->
-  # Ruby tries to load the library named *string* relative to the requiring file's
-  # path.  If the file's path cannot be determined a LoadError is raised. If a
-  # file is loaded `true` is returned and false otherwise.
+  # Ruby tries to load the library named *string* relative to the directory
+  # containing the requiring file.  If the file does not exist a LoadError is
+  # raised. Returns `true` if the file was loaded and `false` if the file was
+  # already loaded before.
   #
   def self?.require_relative: (String feature) -> bool
 
   # <!--
   #   rdoc-file=io.c
-  #   - IO.select(read_array [, write_array [, error_array [, timeout]]]) -> array or nil
+  #   - IO.select(read_ios, write_ios = [], error_ios = [], timeout = nil) -> array or nil
   # -->
-  # Calls select(2) system call. It monitors given arrays of IO objects, waits
-  # until one or more of IO objects are ready for reading, are ready for writing,
-  # and have pending exceptions respectively, and returns an array that contains
-  # arrays of those IO objects.  It will return `nil` if optional *timeout* value
-  # is given and no IO object is ready in *timeout* seconds.
+  # Invokes system call [select(2)](https://linux.die.net/man/2/select), which
+  # monitors multiple file descriptors, waiting until one or more of the file
+  # descriptors becomes ready for some class of I/O operation.
+  #
+  # Not implemented on all platforms.
+  #
+  # Each of the arguments `read_ios`, `write_ios`, and `error_ios` is an array of
+  # IO objects.
+  #
+  # Argument `timeout` is an integer timeout interval in seconds.
+  #
+  # The method monitors the IO objects given in all three arrays, waiting for some
+  # to be ready; returns a 3-element array whose elements are:
+  #
+  # *   An array of the objects in `read_ios` that are ready for reading.
+  # *   An array of the objects in `write_ios` that are ready for writing.
+  # *   An array of the objects in `error_ios` have pending exceptions.
+  #
+  #
+  # If no object becomes ready within the given `timeout`, `nil` is returned.
   #
   # IO.select peeks the buffer of IO objects for testing readability. If the IO
   # buffer is not empty, IO.select immediately notifies readability.  This "peek"
   # only happens for IO objects.  It does not happen for IO-like objects such as
   # OpenSSL::SSL::SSLSocket.
   #
-  # The best way to use IO.select is invoking it after nonblocking methods such as
-  # #read_nonblock, #write_nonblock, etc.  The methods raise an exception which is
-  # extended by IO::WaitReadable or IO::WaitWritable.  The modules notify how the
-  # caller should wait with IO.select.  If IO::WaitReadable is raised, the caller
-  # should wait for reading.  If IO::WaitWritable is raised, the caller should
-  # wait for writing.
+  # The best way to use IO.select is invoking it after non-blocking methods such
+  # as #read_nonblock, #write_nonblock, etc.  The methods raise an exception which
+  # is extended by IO::WaitReadable or IO::WaitWritable.  The modules notify how
+  # the caller should wait with IO.select.  If IO::WaitReadable is raised, the
+  # caller should wait for reading.  If IO::WaitWritable is raised, the caller
+  # should wait for writing.
   #
   # So, blocking read (#readpartial) can be emulated using #read_nonblock and
   # IO.select as follows:
@@ -1865,7 +1441,7 @@ module Kernel : BasicObject
   #       retry
   #     end
   #
-  # Especially, the combination of nonblocking methods and IO.select is preferred
+  # Especially, the combination of non-blocking methods and IO.select is preferred
   # for IO like objects such as OpenSSL::SSL::SSLSocket.  It has #to_io method to
   # return underlying IO object.  IO.select calls #to_io to obtain the file
   # descriptor to wait.
@@ -1891,13 +1467,13 @@ module Kernel : BasicObject
   # blocking. So, the caller should wait for ready for writability as above
   # example.
   #
-  # The combination of nonblocking methods and IO.select is also useful for
+  # The combination of non-blocking methods and IO.select is also useful for
   # streams such as tty, pipe socket socket when multiple processes read from a
   # stream.
   #
   # Finally, Linux kernel developers don't guarantee that readability of select(2)
-  # means readability of following read(2) even for a single process. See
-  # select(2) manual on GNU/Linux system.
+  # means readability of following read(2) even for a single process; see
+  # [select(2)](https://linux.die.net/man/2/select)
   #
   # Invoking IO.select before IO#readpartial works well as usual. However it is
   # not the best way to use IO.select.
@@ -1924,18 +1500,7 @@ module Kernel : BasicObject
   #       string = string.byteslice(written..-1)
   #     end
   #
-  # ### Parameters
-  # read_array
-  # :   an array of IO objects that wait until ready for read
-  # write_array
-  # :   an array of IO objects that wait until ready for write
-  # error_array
-  # :   an array of IO objects that wait for exceptions
-  # timeout
-  # :   a numeric value in second
-  #
-  #
-  # ### Example
+  # Example:
   #
   #     rp, wp = IO.pipe
   #     mesg = "ping "
@@ -1957,7 +1522,7 @@ module Kernel : BasicObject
   #       end
   #     }
   #
-  # *produces:*
+  # Output:
   #
   #     ping pong
   #     ping pong
@@ -1992,31 +1557,27 @@ module Kernel : BasicObject
 
   # <!--
   #   rdoc-file=io.c
-  #   - syscall(num [, args...])   -> integer
+  #   - syscall(integer_callno, *arguments)   -> integer
   # -->
-  # Calls the operating system function identified by *num* and returns the result
-  # of the function or raises SystemCallError if it failed.
+  # Invokes Posix system call [syscall(2)](https://linux.die.net/man/2/syscall),
+  # which calls a specified function.
   #
-  # Arguments for the function can follow *num*. They must be either `String`
-  # objects or `Integer` objects. A `String` object is passed as a pointer to the
-  # byte sequence. An `Integer` object is passed as an integer whose bit size is
-  # the same as a pointer. Up to nine parameters may be passed.
+  # Calls the operating system function identified by `integer_callno`; returns
+  # the result of the function or raises SystemCallError if it failed. The effect
+  # of the call is platform-dependent. The arguments and returned value are
+  # platform-dependent.
   #
-  # The function identified by *num* is system dependent. On some Unix systems,
-  # the numbers may be obtained from a header file called `syscall.h`.
+  # For each of `arguments`: if it is an integer, it is passed directly; if it is
+  # a string, it is interpreted as a binary sequence of bytes. There may be as
+  # many as nine such arguments.
   #
-  #     syscall 4, 1, "hello\n", 6   # '4' is write(2) on our box
+  # Arguments `integer_callno` and `argument`, as well as the returned value, are
+  # platform-dependent.
   #
-  # *produces:*
+  # Note: Method `syscall` is essentially unsafe and unportable. The DL (Fiddle)
+  # library is preferred for safer and a bit more portable programming.
   #
-  #     hello
-  #
-  # Calling `syscall` on a platform which does not have any way to an arbitrary
-  # system function just fails with NotImplementedError.
-  #
-  # **Note:** `syscall` is essentially unsafe and unportable. Feel free to shoot
-  # your foot. The DL (Fiddle) library is preferred for safer and a bit more
-  # portable programming.
+  # Not implemented on all platforms.
   #
   def self?.syscall: (Integer num, *untyped args) -> untyped
 
@@ -2037,8 +1598,7 @@ module Kernel : BasicObject
   #     "d"  | boolean | True if file1 exists and is a directory
   #     "e"  | boolean | True if file1 exists
   #     "f"  | boolean | True if file1 exists and is a regular file
-  #     "g"  | boolean | True if file1 has the \CF{setgid} bit
-  #          |         | set (false under NT)
+  #     "g"  | boolean | True if file1 has the setgid bit set
   #     "G"  | boolean | True if file1 exists and has a group
   #          |         | ownership equal to the caller's group
   #     "k"  | boolean | True if file1 exists and has the sticky bit set
@@ -2149,7 +1709,7 @@ module Kernel : BasicObject
   # `exec(cmdname, arg1, ...)`
   # :   command name and one or more arguments (no shell)
   # `exec([cmdname, argv0], arg1, ...)`
-  # :   command name, [argv](0) and zero or more arguments (no shell)
+  # :   command name, `argv[0]` and zero or more arguments (no shell)
   #
   #
   # In the first form, the string is taken as a command line that is subject to
@@ -2163,10 +1723,11 @@ module Kernel : BasicObject
   # If the string from the first form (`exec("command")`) follows these simple
   # rules:
   #
-  # *   no meta characters
-  # *   not starting with shell reserved word or special built-in
-  # *   Ruby invokes the command directly without shell
+  # *   no meta characters,
+  # *   not starting with shell reserved word or special built-in,
   #
+  #
+  # Ruby invokes the command directly without shell.
   #
   # You can force shell invocation by adding ";" to the string (because ";" is a
   # meta character).
@@ -2468,6 +2029,9 @@ module Kernel : BasicObject
   #   - system([env,] command... [,options], exception: false)    -> true, false or nil
   # -->
   # Executes *command...* in a subshell. *command...* is one of following forms.
+  #
+  # This method has potential security vulnerabilities if called with untrusted
+  # input; see [Command Injection](rdoc-ref:command_injection.rdoc).
   #
   # `commandline`
   # :   command line string which is passed to the standard shell

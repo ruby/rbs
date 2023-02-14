@@ -3,13 +3,12 @@
 #
 # You can create an Integer object explicitly with:
 #
-# *   An [integer
-#     literal](doc/syntax/literals_rdoc.html#label-Integer+Literals).
+# *   An [integer literal](rdoc-ref:syntax/literals.rdoc@Integer+Literals).
 #
 #
 # You can convert certain objects to Integers with:
 #
-# *   Method [Integer](Kernel.html#method-i-Integer).
+# *   Method #Integer.
 #
 #
 # An attempt to add a singleton method to an instance of this class causes an
@@ -19,161 +18,84 @@
 #
 # First, what's elsewhere. Class Integer:
 #
-# *   Inherits from [class
-#     Numeric](Numeric.html#class-Numeric-label-What-27s+Here).
+# *   Inherits from [class Numeric](rdoc-ref:Numeric@What-27s+Here).
 #
 #
 # Here, class Integer provides methods for:
 #
-# *   [Querying](#class-Integer-label-Querying)
-# *   [Comparing](#class-Integer-label-Comparing)
-# *   [Converting](#class-Integer-label-Converting)
-# *   [Other](#class-Integer-label-Other)
+# *   [Querying](rdoc-ref:Integer@Querying)
+# *   [Comparing](rdoc-ref:Integer@Comparing)
+# *   [Converting](rdoc-ref:Integer@Converting)
+# *   [Other](rdoc-ref:Integer@Other)
 #
 #
 # ### Querying
 #
-#     #allbits?
-# :       Returns whether all bits in `self` are set.
-#
-#     #anybits?
-# :       Returns whether any bits in `self` are set.
-#
-#     #nobits?
-# :       Returns whether no bits in `self` are set.
-#
+# *   #allbits?: Returns whether all bits in `self` are set.
+# *   #anybits?: Returns whether any bits in `self` are set.
+# *   #nobits?: Returns whether no bits in `self` are set.
 #
 #
 # ### Comparing
 #
-#     [<](#method-i-3C)
-# :       Returns whether `self` is less than the given value.
+# *   #<: Returns whether `self` is less than the given value.
+# *   #<=: Returns whether `self` is less than or equal to the given value.
+# *   #<=>: Returns a number indicating whether `self` is less than, equal to,
+#     or greater than the given value.
+# *   #== (aliased as #===): Returns whether `self` is equal to the given
+#         value.
 #
-#     [<=](#method-i-3C-3D)
-# :       Returns whether `self` is less than or equal to the given value.
-#
-#     [<=>](#method-i-3C-3D-3E)
-# :       Returns a number indicating whether `self` is less than, equal to, or
-#         greater than the given value.
-#
-#     [==](#method-i-3D-3D) (aliased as #===)
-# :       Returns whether `self` is equal to the given value.
-#
-#     [>](#method-i-3E)
-# :       Returns whether `self` is greater than the given value.
-#
-#     [>=](#method-i-3E-3D)
-# :       Returns whether `self` is greater than or equal to the given value.
-#
+# *   #>: Returns whether `self` is greater than the given value.
+# *   #>=: Returns whether `self` is greater than or equal to the given value.
 #
 #
 # ### Converting
 #
-#     ::sqrt
-# :       Returns the integer square root of the given value.
-#
-#     ::try_convert
-# :       Returns the given value converted to an Integer.
-#
-#     #% (aliased as #modulo)
-# :       Returns `self` modulo the given value.
-#
-#     [&](#method-i-26)
-# :       Returns the bitwise AND of `self` and the given value.
-#
-#     #*
-# :       Returns the product of `self` and the given value.
-#
-#     [**](#method-i-2A-2A)
-# :       Returns the value of `self` raised to the power of the given value.
-#
-#     #+
-# :       Returns the sum of `self` and the given value.
-#
-#     #-
-# :       Returns the difference of `self` and the given value.
-#
-#     [/](#method-i-2F)
-# :       Returns the quotient of `self` and the given value.
-#
-#     #<<
-# :       Returns the value of `self` after a leftward bit-shift.
-#
-#     #>>
-# :       Returns the value of `self` after a rightward bit-shift.
-#
-#     #[]
-# :       Returns a slice of bits from `self`.
-#
-#     [^](#method-i-5E)
-# :       Returns the bitwise EXCLUSIVE OR of `self` and the given value.
-#
-#     #ceil
-# :       Returns the smallest number greater than or equal to `self`.
-#
-#     #chr
-# :       Returns a 1-character string containing the character represented by
-#         the value of `self`.
-#
-#     #digits
-# :       Returns an array of integers representing the base-radix digits of
-#         `self`.
-#
-#     #div
-# :       Returns the integer result of dividing `self` by the given value.
-#
-#     #divmod
-# :       Returns a 2-element array containing the quotient and remainder
-#         results of dividing `self` by the given value.
-#
-#     #fdiv
-# :       Returns the Float result of dividing `self` by the given value.
-#
-#     #floor
-# :       Returns the greatest number smaller than or equal to `self`.
-#
-#     #pow
-# :       Returns the modular exponentiation of `self`.
-#
-#     #pred
-# :       Returns the integer predecessor of `self`.
-#
-#     #remainder
-# :       Returns the remainder after dividing `self` by the given value.
-#
-#     #round
-# :       Returns `self` rounded to the nearest value with the given precision.
-#
-#     #succ (aliased as #next)
-# :       Returns the integer successor of `self`.
-#
-#     #to_f
-# :       Returns `self` converted to a Float.
-#
-#     #to_s (aliased as #inspect)
-# :       Returns a string containing the place-value representation of `self`
-#         in the given radix.
-#
-#     #truncate
-# :       Returns `self` truncated to the given precision.
-#
-#     [/](#method-i-7C)
-# :       Returns the bitwise OR of `self` and the given value.
-#
+# *   ::sqrt: Returns the integer square root of the given value.
+# *   ::try_convert: Returns the given value converted to an Integer.
+# *   #% (aliased as #modulo): Returns `self` modulo the given value.
+# *   #&: Returns the bitwise AND of `self` and the given value.
+# *   #*: Returns the product of `self` and the given value.
+# *   #**: Returns the value of `self` raised to the power of the given value.
+# *   #+: Returns the sum of `self` and the given value.
+# *   #-: Returns the difference of `self` and the given value.
+# *   #/: Returns the quotient of `self` and the given value.
+# *   #<<: Returns the value of `self` after a leftward bit-shift.
+# *   #>>: Returns the value of `self` after a rightward bit-shift.
+# *   #[]: Returns a slice of bits from `self`.
+# *   #^: Returns the bitwise EXCLUSIVE OR of `self` and the given value.
+# *   #ceil: Returns the smallest number greater than or equal to `self`.
+# *   #chr: Returns a 1-character string containing the character represented by
+#     the value of `self`.
+# *   #digits: Returns an array of integers representing the base-radix digits
+#     of `self`.
+# *   #div: Returns the integer result of dividing `self` by the given value.
+# *   #divmod: Returns a 2-element array containing the quotient and remainder
+#     results of dividing `self` by the given value.
+# *   #fdiv: Returns the Float result of dividing `self` by the given value.
+# *   #floor: Returns the greatest number smaller than or equal to `self`.
+# *   #pow: Returns the modular exponentiation of `self`.
+# *   #pred: Returns the integer predecessor of `self`.
+# *   #remainder: Returns the remainder after dividing `self` by the given
+#     value.
+# *   #round: Returns `self` rounded to the nearest value with the given
+#     precision.
+# *   #succ (aliased as #next): Returns the integer successor of `self`.
+# *   #to_f: Returns `self` converted to a Float.
+# *   #to_s (aliased as #inspect): Returns a string containing the place-value
+#     representation of `self` in the given radix.
+# *   #truncate: Returns `self` truncated to the given precision.
+# *   #|: Returns the bitwise OR of `self` and the given value.
 #
 #
 # ### Other
 #
-#     #downto
-# :       Calls the given block with each integer value from `self` down to the
-#         given value.
-#
-#     #times
-# :       Calls the given block `self` times with each integer in `(0..self-1)`.
-#
-#     #upto
-# :       Calls the given block with each integer value from `self` up to the
-#         given value.
+# *   #downto: Calls the given block with each integer value from `self` down to
+#     the given value.
+# *   #times: Calls the given block `self` times with each integer in
+#     `(0..self-1)`.
+# *   #upto: Calls the given block with each integer value from `self` up to the
+#     given value.
 #
 class Integer < Numeric
   # <!--
@@ -740,7 +662,7 @@ class Integer < Numeric
   # of `self`, according to the given `encoding`.
   #
   #     65.chr                   # => "A"
-  #     0..chr                   # => "\x00"
+  #     0.chr                    # => "\x00"
   #     255.chr                  # => "\xFF"
   #     string = 255.chr(Encoding::UTF_8)
   #     string.encoding          # => Encoding::UTF_8
@@ -753,14 +675,14 @@ class Integer < Numeric
 
   # <!--
   #   rdoc-file=bignum.c
-  #   - big.coerce(numeric)  ->  array
+  #   - int.coerce(numeric)  ->  array
   # -->
-  # Returns an array with both a `numeric` and a `big` represented as Bignum
-  # objects.
+  # Returns an array with both a `numeric` and a `int` represented as Integer
+  # objects or Float objects.
   #
-  # This is achieved by converting `numeric` to a Bignum.
+  # This is achieved by converting `numeric` to an Integer or a Float.
   #
-  # A TypeError is raised if the `numeric` is not a Fixnum or Bignum type.
+  # A TypeError is raised if the `numeric` is not an Integer or a Float type.
   #
   #     (0x3FFFFFFFFFFFFFFF+1).coerce(42)   #=> [42, 4611686018427387904]
   #
@@ -771,7 +693,7 @@ class Integer < Numeric
   def conjugate: () -> Integer
 
   # <!--
-  #   rdoc-file=rational.c
+  #   rdoc-file=numeric.rb
   #   - int.denominator  ->  1
   # -->
   # Returns 1.
@@ -1065,7 +987,7 @@ class Integer < Numeric
   def nonzero?: () -> self?
 
   # <!--
-  #   rdoc-file=rational.c
+  #   rdoc-file=numeric.rb
   #   - int.numerator  ->  self
   # -->
   # Returns self.

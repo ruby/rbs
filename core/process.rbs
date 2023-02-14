@@ -26,6 +26,12 @@ module Process
   # You can add custom code before and after fork events by overriding this
   # method.
   #
+  # Note: Process.daemon may be implemented using fork(2) BUT does not go through
+  # this method. Thus, depending on your reason to hook into this method, you may
+  # also want to hook into that one. See [this
+  # issue](https://bugs.ruby-lang.org/issues/18911) for a more detailed discussion
+  # of this.
+  #
   def self._fork: () -> Integer
 
   # <!--
@@ -229,7 +235,7 @@ module Process
   #
   # The underlying function, clock_gettime(), returns a number of nanoseconds.
   # Float object (IEEE 754 double) is not enough to represent the return value for
-  # CLOCK_REALTIME. If the exact nanoseconds value is required, use `:nanoseconds`
+  # CLOCK_REALTIME. If the exact nanoseconds value is required, use `:nanosecond`
   # as the `unit`.
   #
   # The origin (zero) of the returned value varies. For example, system start up
@@ -446,6 +452,7 @@ module Process
   # *   the result is sorted
   # *   the result includes effective GIDs
   # *   the result does not include duplicated GIDs
+  # *   the result size does not exceed the value of Process.maxgroups
   #
   #
   # You can make sure to get a sorted unique GID list of the current process by
@@ -474,7 +481,7 @@ module Process
   # Initializes the supplemental group access list by reading the system group
   # database and using all groups of which the given user is a member. The group
   # with the specified *gid* is also added to the list. Returns the resulting
-  # Array of the gids of all the groups in the supplementary group access list.
+  # Array of the GIDs of all the groups in the supplementary group access list.
   # Not available on all platforms.
   #
   #     Process.groups   #=> [0, 1, 2, 3, 4, 6, 10, 11, 20, 26, 27]
@@ -485,7 +492,7 @@ module Process
 
   # <!--
   #   rdoc-file=process.c
-  #   - Process.kill(signal, pid, ...)    -> integer
+  #   - Process.kill(signal, pid, *pids)    -> integer
   # -->
   # Sends the given signal to the specified process id(s) if *pid* is positive. If
   # *pid* is zero, *signal* is sent to all processes whose group ID is equal to
@@ -522,7 +529,7 @@ module Process
   #   rdoc-file=process.c
   #   - Process.maxgroups   -> integer
   # -->
-  # Returns the maximum number of gids allowed in the supplemental group access
+  # Returns the maximum number of GIDs allowed in the supplemental group access
   # list.
   #
   #     Process.maxgroups   #=> 32
@@ -533,7 +540,7 @@ module Process
   #   rdoc-file=process.c
   #   - Process.maxgroups= integer   -> integer
   # -->
-  # Sets the maximum number of gids allowed in the supplemental group access list.
+  # Sets the maximum number of GIDs allowed in the supplemental group access list.
   #
   def self.maxgroups=: (Integer arg0) -> Integer
 
@@ -640,6 +647,8 @@ module Process
   # :   file descriptors (number) (SUSv3)
   # NPROC
   # :   number of processes for the user (number) (4.4BSD, GNU/Linux)
+  # NPTS
+  # :   number of pseudo terminals (number) (FreeBSD)
   # RSS
   # :   resident memory size (bytes) (4.2BSD, GNU/Linux)
   # RTPRIO

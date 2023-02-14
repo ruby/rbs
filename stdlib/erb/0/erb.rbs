@@ -447,9 +447,6 @@ class ERB
   #
   def def_class: (?Class, ?String) -> Class
 
-  # <!-- rdoc-file=lib/erb.rb -->
-  # A utility module for conversion routines, often handy in HTML generation.
-  #
   module Util
     # <!--
     #   rdoc-file=lib/erb.rb
@@ -483,7 +480,7 @@ class ERB
     alias self.h self.html_escape
 
     # <!--
-    #   rdoc-file=lib/erb.rb
+    #   rdoc-file=lib/erb/util.rb
     #   - url_encode(s)
     # -->
     # A utility method for encoding the String *s* as a URL.
@@ -500,52 +497,23 @@ class ERB
     def self?.url_encode: (String) -> String
 
     # <!--
-    #   rdoc-file=lib/erb.rb
+    #   rdoc-file=lib/erb/util.rb
     #   - u(s)
     # -->
     #
     alias u url_encode
 
     # <!--
-    #   rdoc-file=lib/erb.rb
+    #   rdoc-file=lib/erb/util.rb
     #   - u(s)
     # -->
     #
     alias self.u self.url_encode
   end
 
-  # <!-- rdoc-file=lib/erb.rb -->
-  # Utility module to define eRuby script as instance method.
-  #
-  # ### Example
-  #
-  # example.rhtml:
-  #     <% for item in @items %>
-  #     <b><%= item %></b>
-  #     <% end %>
-  #
-  # example.rb:
-  #     require 'erb'
-  #     class MyClass
-  #       extend ERB::DefMethod
-  #       def_erb_method('render()', 'example.rhtml')
-  #       def initialize(items)
-  #         @items = items
-  #       end
-  #     end
-  #     print MyClass.new([10,20,30]).render()
-  #
-  # result:
-  #
-  #     <b>10</b>
-  #
-  #     <b>20</b>
-  #
-  #     <b>30</b>
-  #
   module DefMethod
     # <!--
-    #   rdoc-file=lib/erb.rb
+    #   rdoc-file=lib/erb/def_method.rb
     #   - def_erb_method(methodname, erb_or_fname)
     # -->
     # define *methodname* as instance method of current module, using ERB object or

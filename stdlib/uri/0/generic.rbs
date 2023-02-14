@@ -510,7 +510,7 @@ module URI
     #   rdoc-file=lib/uri/generic.rb
     #   - user()
     # -->
-    # Returns the user component.
+    # Returns the user component (without URI decoding).
     #
     def user: () -> String?
 
@@ -518,7 +518,7 @@ module URI
     #   rdoc-file=lib/uri/generic.rb
     #   - password()
     # -->
-    # Returns the password component.
+    # Returns the password component (without URI decoding).
     #
     def password: () -> String?
 

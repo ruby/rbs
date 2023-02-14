@@ -539,12 +539,12 @@ class OptionParser
   #   - define(*params, &block)
   # -->
   # Creates an option from the given parameters `params`. See [Parameters for New
-  # Options](./option_params.rdoc).
+  # Options](optparse/option_params.rdoc).
   #
   # The block, if given, is the handler for the created option. When the option is
   # encountered during command-line parsing, the block is called with the argument
   # given for the option, if any. See [Option
-  # Handlers](./option_params.rdoc#label-Option+Handlers).
+  # Handlers](optparse/option_params.rdoc#label-Option+Handlers).
   #
   def define: (*String params) ?{ (*untyped) -> untyped } -> untyped
             | (String params, Class | Array[String] | Hash[Symbol, untyped] | Regexp obj, ?String desc) ?{ (*untyped) -> untyped } -> untyped
@@ -556,12 +556,12 @@ class OptionParser
   #   - define_head(*params, &block)
   # -->
   # Creates an option from the given parameters `params`. See [Parameters for New
-  # Options](./option_params.rdoc).
+  # Options](optparse/option_params.rdoc).
   #
   # The block, if given, is the handler for the created option. When the option is
   # encountered during command-line parsing, the block is called with the argument
   # given for the option, if any. See [Option
-  # Handlers](./option_params.rdoc#label-Option+Handlers).
+  # Handlers](optparse/option_params.rdoc#label-Option+Handlers).
   #
   def define_head: (*String params) ?{ (*untyped) -> untyped } -> untyped
                  | (String params, Class | Array[String] | Hash[Symbol, untyped] | Regexp obj, ?String desc) ?{ (*untyped) -> untyped } -> untyped
@@ -573,12 +573,12 @@ class OptionParser
   #   - define_tail(*params, &block)
   # -->
   # Creates an option from the given parameters `params`. See [Parameters for New
-  # Options](./option_params.rdoc).
+  # Options](optparse/option_params.rdoc).
   #
   # The block, if given, is the handler for the created option. When the option is
   # encountered during command-line parsing, the block is called with the argument
   # given for the option, if any. See [Option
-  # Handlers](./option_params.rdoc#label-Option+Handlers).
+  # Handlers](optparse/option_params.rdoc#label-Option+Handlers).
   #
   def define_tail: (*String params) ?{ (*untyped) -> untyped } -> untyped
                  | (String params, Class | Array[String] | Hash[Symbol, untyped] | Regexp obj, ?String desc) ?{ (*untyped) -> untyped } -> untyped
@@ -629,7 +629,7 @@ class OptionParser
 
   # <!--
   #   rdoc-file=lib/optparse.rb
-  #   - load(filename = nil)
+  #   - load(filename = nil, into: nil)
   # -->
   # Loads options from file names as `filename`. Does nothing when the file is not
   # present. Returns whether successfully loaded.
@@ -638,6 +638,9 @@ class OptionParser
   # ~/.options, then the basename with '.options' suffix under XDG and Haiku
   # standard places.
   #
+  # The optional `into` keyword argument works exactly like that accepted in
+  # method #parse.
+  #
   def load: (?String filename) -> bool
 
   # <!--
@@ -645,12 +648,12 @@ class OptionParser
   #   - make_switch(params, block = nil)
   # -->
   # Creates an option from the given parameters `params`. See [Parameters for New
-  # Options](./option_params.rdoc).
+  # Options](optparse/option_params.rdoc).
   #
   # The block, if given, is the handler for the created option. When the option is
   # encountered during command-line parsing, the block is called with the argument
   # given for the option, if any. See [Option
-  # Handlers](./option_params.rdoc#label-Option+Handlers).
+  # Handlers](optparse/option_params.rdoc#label-Option+Handlers).
   #
   def make_switch: (Array[untyped] opts, ?Proc block) -> [ untyped, untyped, untyped, untyped, untyped ]
 
@@ -668,12 +671,12 @@ class OptionParser
   #   - on(*params, &block)
   # -->
   # Creates an option from the given parameters `params`. See [Parameters for New
-  # Options](./option_params.rdoc).
+  # Options](optparse/option_params.rdoc).
   #
   # The block, if given, is the handler for the created option. When the option is
   # encountered during command-line parsing, the block is called with the argument
   # given for the option, if any. See [Option
-  # Handlers](./option_params.rdoc#label-Option+Handlers).
+  # Handlers](optparse/option_params.rdoc#label-Option+Handlers).
   #
   def on: (*String params) ?{ (*untyped) -> untyped } -> self
         | (String params, Class | Array[String] | Hash[Symbol, untyped] | Regexp obj, ?String desc) ?{ (*untyped) -> untyped } -> self
@@ -687,12 +690,12 @@ class OptionParser
   #   - on_head(*params, &block)
   # -->
   # Creates an option from the given parameters `params`. See [Parameters for New
-  # Options](./option_params.rdoc).
+  # Options](optparse/option_params.rdoc).
   #
   # The block, if given, is the handler for the created option. When the option is
   # encountered during command-line parsing, the block is called with the argument
   # given for the option, if any. See [Option
-  # Handlers](./option_params.rdoc#label-Option+Handlers).
+  # Handlers](optparse/option_params.rdoc#label-Option+Handlers).
   #
   # The new option is added at the head of the summary.
   #
@@ -708,12 +711,12 @@ class OptionParser
   #   - on_tail(*params, &block)
   # -->
   # Creates an option from the given parameters `params`. See [Parameters for New
-  # Options](./option_params.rdoc).
+  # Options](optparse/option_params.rdoc).
   #
   # The block, if given, is the handler for the created option. When the option is
   # encountered during command-line parsing, the block is called with the argument
   # given for the option, if any. See [Option
-  # Handlers](./option_params.rdoc#label-Option+Handlers).
+  # Handlers](optparse/option_params.rdoc#label-Option+Handlers).
   #
   # The new option is added at the tail of the summary.
   #
@@ -1660,7 +1663,7 @@ class OptionParser::Switch::OptionalArgument < OptionParser::Switch
 end
 
 # <!-- rdoc-file=lib/optparse.rb -->
-# Switch that takes an argument, which does not begin with '-'.
+# Switch that takes an argument, which does not begin with '-' or is '-'.
 #
 class OptionParser::Switch::PlacedArgument < OptionParser::Switch
   public
@@ -1669,7 +1672,7 @@ class OptionParser::Switch::PlacedArgument < OptionParser::Switch
   #   rdoc-file=lib/optparse.rb
   #   - parse(arg, argv, &error)
   # -->
-  # Returns nil if argument is not present or begins with '-'.
+  # Returns nil if argument is not present or begins with '-' and is not '-'.
   #
   def parse: (untyped arg, untyped argv) { (*untyped) -> untyped } -> untyped
 end
