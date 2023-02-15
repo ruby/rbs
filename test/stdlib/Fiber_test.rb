@@ -5,6 +5,30 @@ class FiberSingletonTest < Test::Unit::TestCase
 
   testing "singleton(::Fiber)"
 
+  def test_aref
+    assert_send_type(
+      "(Symbol, Integer) -> Integer",
+      Fiber, :[]=, :key, 123
+    )
+
+    assert_send_type(
+      "(Symbol) -> Integer",
+      Fiber, :[], :key
+    )
+
+    key = "string"
+
+    assert_send_type(
+      "(String, Integer) -> Integer",
+      Fiber, :[]=, key, 123
+    )
+
+    assert_send_type(
+      "(String) -> Integer",
+      Fiber, :[], key
+    )
+  end
+
   def test_blocking?
     assert_send_type "() -> 1",
                      Fiber, :blocking?
@@ -47,7 +71,13 @@ class FiberSingletonTest < Test::Unit::TestCase
                       Fiber, :new do 42 end
     assert_send_type  "(blocking: String) { () -> void } -> Fiber",
                       Fiber, :new, blocking: "false" do 42 end
-   end
+    assert_send_type  "(storage: Hash[untyped, untyped]) { () -> void } -> Fiber",
+                      Fiber, :new, storage: {} do 42 end
+    assert_send_type  "(storage: true) { () -> void } -> Fiber",
+                      Fiber, :new, storage: true do 42 end
+    assert_send_type  "(storage: nil) { () -> void } -> Fiber",
+                      Fiber, :new, storage: nil do 42 end
+  end
 end
 
 class FiberTest < Test::Unit::TestCase
