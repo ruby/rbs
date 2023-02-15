@@ -203,6 +203,46 @@ class IOInstanceTest < Test::Unit::TestCase
     end
   end
 
+  def test_timeout
+    io, _ = IO.pipe()
+
+    assert_send_type(
+      "(Integer) -> IO",
+      io, :timeout=, 1
+    )
+    assert_send_type(
+      "() -> Integer",
+      io, :timeout
+    )
+
+    assert_send_type(
+      "(Float) -> IO",
+      io, :timeout=, 1.2
+    )
+    assert_send_type(
+      "() -> Float",
+      io, :timeout
+    )
+
+    assert_send_type(
+      "(Rational) -> IO",
+      io, :timeout=, 3r
+    )
+    assert_send_type(
+      "() -> Rational",
+      io, :timeout
+    )
+
+    assert_send_type(
+      "(nil) -> IO",
+      io, :timeout=, nil
+    )
+    assert_send_type(
+      "() -> nil",
+      io, :timeout
+    )
+  end
+
   def test_write
     Dir.mktmpdir do |dir|
       File.open(File.join(dir, "some_file"), "w") do |io|

@@ -2181,6 +2181,34 @@ class IO < Object
 
   # <!--
   #   rdoc-file=io.c
+  #   - timeout -> duration or nil
+  # -->
+  # Get the internal timeout duration or nil if it was not set.
+  #
+  def timeout: () -> Numeric?
+
+  # <!--
+  #   rdoc-file=io.c
+  #   - timeout = duration -> duration
+  #   - timeout = nil -> nil
+  # -->
+  # Set the internal timeout to the specified duration or nil. The timeout applies
+  # to all blocking operations where possible.
+  #
+  # This affects the following methods (but is not limited to): #gets, #puts,
+  # #read, #write, #wait_readable and #wait_writable. This also affects blocking
+  # socket operations like Socket#accept and Socket#connect.
+  #
+  # Some operations like File#open and IO#close are not affected by the timeout. A
+  # timeout during a write operation may leave the IO in an inconsistent state,
+  # e.g. data was partially written. Generally speaking, a timeout is a last ditch
+  # effort to prevent an application from hanging on slow I/O operations, such as
+  # those that occur during a slowloris attack.
+  #
+  def timeout=: (Numeric?) -> void
+
+  # <!--
+  #   rdoc-file=io.c
   #   - to_io -> self
   # -->
   # Returns `self`.
