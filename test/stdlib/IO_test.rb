@@ -41,8 +41,14 @@ class IOSingletonTest < Test::Unit::TestCase
                        IO, :open, fd
       assert_send_type "(ToInt, String) -> IO",
                        IO, :open, ToInt.new(fd), "r"
-      assert_send_type "(Integer) { (IO) -> String } -> String",
-                       IO, :open, fd do |io| io.read end
+      assert_send_type "(Integer) { (IO) -> Integer } -> Integer",
+                       IO, :open, fd do |io| io.read.size end
+
+      fd = IO.sysopen(File.expand_path(__FILE__))
+      assert_send_type(
+        "(ToInt, path: String) -> IO",
+        IO, :open, ToInt.new(fd), path: "<<TEST>>"
+      )
     end
   end
 
@@ -86,6 +92,29 @@ class IOSingletonTest < Test::Unit::TestCase
                            IO, :copy_stream, src_io, dst_io, 1, 0
         end
       end
+    end
+  end
+
+  def test_new
+    IO.sysopen(File.expand_path(__FILE__)).tap do |fd|
+      assert_send_type(
+        "(Integer) -> IO",
+        IO, :new, fd
+      )
+    end
+
+    IO.sysopen(File.expand_path(__FILE__)).tap do |fd|
+      assert_send_type(
+        "(ToInt, ToStr, path: ToStr) -> IO",
+        IO, :new, ToInt.new(fd), ToStr.new("r"), path: ToStr.new("<<TEST>>")
+      )
+    end
+
+    IO.sysopen(File.expand_path(__FILE__)).tap do |fd|
+      assert_send_type(
+        "(Integer, path: nil) -> IO",
+        IO, :new, fd, path: nil
+      )
     end
   end
 
@@ -172,6 +201,22 @@ class IOInstanceTest < Test::Unit::TestCase
     IO.open(IO.sysopen(File.expand_path(__FILE__))) do |io|
       assert_send_type "() -> bool",
                        io, :autoclose?
+    end
+  end
+
+  def test_path
+    IO.open(IO.sysopen(File.expand_path(__FILE__)), path: "foo") do |io|
+      assert_send_type(
+        "() -> String",
+        io, :path
+      )
+    end
+
+    IO.open(IO.sysopen(File.expand_path(__FILE__)), path: nil) do |io|
+      assert_send_type(
+        "() -> nil",
+        io, :path
+      )
     end
   end
 
