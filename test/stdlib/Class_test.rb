@@ -25,4 +25,8 @@ class ClassTest < StdlibTest
   def test_subclasses
     Class.new.subclasses
   end
+
+  def test_attached_object
+    Class.new.singleton_class.attached_object
+  end
 end

@@ -108,6 +108,24 @@ class Class < Module
 
   # <!--
   #   rdoc-file=object.c
+  #   - attached_object -> object
+  # -->
+  # Returns the object for which the receiver is the singleton class.
+  #
+  # Raises an TypeError if the class is not a singleton class.
+  #
+  #     class Foo; end
+  #
+  #     Foo.singleton_class.attached_object        #=> Foo
+  #     Foo.attached_object                        #=> TypeError: `Foo' is not a singleton class
+  #     Foo.new.singleton_class.attached_object    #=> #<Foo:0x000000010491a370>
+  #     TrueClass.attached_object                  #=> TypeError: `TrueClass' is not a singleton class
+  #     NilClass.attached_object                   #=> TypeError: `NilClass' is not a singleton class
+  #
+  def attached_object: () -> untyped
+
+  # <!--
+  #   rdoc-file=object.c
   #   - inherited(subclass)
   # -->
   # Callback invoked whenever a subclass of the current class is created.
