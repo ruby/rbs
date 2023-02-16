@@ -1006,6 +1006,14 @@ Process::RLIMIT_NOFILE: Integer
 Process::RLIMIT_NPROC: Integer
 
 # <!-- rdoc-file=process.c -->
+# The maximum number of pseudo-terminals that can be created for the real user
+# ID of the calling process.
+#
+# see the system getrlimit(2) manual for details.
+#
+Process::RLIMIT_NPTS: Integer
+
+# <!-- rdoc-file=process.c -->
 # Specifies the limit (in pages) of the process's resident set.
 #
 # see the system getrlimit(2) manual for details.
