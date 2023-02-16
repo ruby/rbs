@@ -34,6 +34,10 @@ interface _Each[out A]
   def each: () { (A) -> void } -> void
 end
 
+interface _EachEntry[out A]
+  def each_entry: () { (A) -> void } -> self
+end
+
 interface _Reader
   def read: (?int? length, ?string outbuf) -> String?
 end

@@ -20,6 +20,19 @@ class EnumeratorTest < Test::Unit::TestCase
   end
 end
 
+class EnumeratorSingletonTest < Test::Unit::TestCase
+  include TypeAssertions
+
+  testing "singleton(::Enumerator)"
+
+  def test_product
+    assert_send_type(
+      "(Array[String], Array[Integer]) -> Enumerator::Product[String | Integer]",
+      Enumerator, :product, ["a", "b"], [1, 2]
+    )
+  end
+end
+
 class EnumeratorYielderTest < Test::Unit::TestCase
   include TypeAssertions
 
