@@ -471,6 +471,26 @@ class Module < Object
 
   # <!--
   #   rdoc-file=object.c
+  #   - const_added(const_name)
+  # -->
+  # Invoked as a callback whenever a constant is assigned on the receiver
+  #
+  #     module Chatty
+  #       def self.const_added(const_name)
+  #         super
+  #         puts "Added #{const_name.inspect}"
+  #       end
+  #       FOO = 1
+  #     end
+  #
+  # *produces:*
+  #
+  #     Added :FOO
+  #
+  def const_added: (Symbol) -> void
+
+  # <!--
+  #   rdoc-file=object.c
   #   - mod.const_defined?(sym, inherit=true)   -> true or false
   #   - mod.const_defined?(str, inherit=true)   -> true or false
   # -->
