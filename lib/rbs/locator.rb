@@ -2,21 +2,24 @@
 
 module RBS
   class Locator
-    attr_reader :decls
+    attr_reader :decls, :dirs, :buffer
 
-    def initialize(decls:)
+    def initialize(buffer:, dirs:, decls:)
+      @buffer = buffer
+      @dirs = dirs
       @decls = decls
-    end
-
-    def buffer
-      decls[0].location&.buffer or raise
     end
 
     def find(line:, column:)
       pos = buffer.loc_to_pos([line, column])
 
+      dirs.each do |dir|
+        array = [] #: Array[component]
+        find_in_directive(pos, dir, array) and return array
+      end
+
       decls.each do |decl|
-        array = []
+        array = [] #: Array[component]
         find_in_decl(pos, decl: decl, array: array) and return array
       end
 
@@ -34,6 +37,22 @@ module RBS
       else
         [nil, path]
       end
+    end
+
+    def find_in_directive(pos, dir, array)
+      if test_loc(pos, location: dir.location)
+        array.unshift(dir)
+
+        dir.clauses.each do |clause|
+          if test_loc(pos, location: clause.location)
+            array.unshift(clause)
+            find_in_loc(pos, location: clause.location, array: array)
+            return true
+          end
+        end
+      end
+
+      false
     end
 
     def find_in_decl(pos, decl:, array:)

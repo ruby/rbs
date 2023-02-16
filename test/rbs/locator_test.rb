@@ -5,8 +5,8 @@ class RBS::LocatorTest < Test::Unit::TestCase
   include TestHelper
 
   def locator(src)
-    _, _, decls = Parser.parse_signature(src)
-    Locator.new(decls: decls)
+    buffer, dirs, decls = Parser.parse_signature(src)
+    Locator.new(buffer: buffer, dirs: dirs, decls: decls)
   end
 
   def test_find_class
