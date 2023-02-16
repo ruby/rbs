@@ -9,6 +9,13 @@ class ModuleSingletonTest < Test::Unit::TestCase
     assert_send_type "() -> Array[Module]",
                      Module, :used_modules
   end
+
+  def test_used_refinements
+    assert_send_type(
+      "() -> Array[Refinement]",
+      Module, :used_refinements
+    )
+  end
 end
 
 class ModuleInstanceTest < Test::Unit::TestCase
