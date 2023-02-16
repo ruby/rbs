@@ -32,6 +32,13 @@ class ModuleInstanceTest < Test::Unit::TestCase
                      Foo, :refine, String do nil end
   end
 
+  def test_refinements
+    assert_send_type(
+      "() -> Array[Refinement]",
+      Foo, :refinements
+    )
+  end
+
   def test_const_source_location
     assert_send_type "(Symbol) -> [String, Integer]",
                      Foo, :const_source_location, :BAR

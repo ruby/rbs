@@ -1446,6 +1446,28 @@ class Module < Object
   def refine: (Module mod) { () -> void } -> Refinement
 
   # <!--
+  #   rdoc-file=eval.c
+  #   - refinements -> array
+  # -->
+  # Returns an array of modules defined within the receiver.
+  #
+  #     module A
+  #       refine Integer do
+  #       end
+  #
+  #       refine String do
+  #       end
+  #     end
+  #
+  #     p A.refinements
+  #
+  # *produces:*
+  #
+  #     [#<refinement:Integer@A>, #<refinement:String@A>]
+  #
+  def refinements: () -> Array[Refinement]
+
+  # <!--
   #   rdoc-file=object.c
   #   - remove_class_variable(sym)    -> obj
   # -->

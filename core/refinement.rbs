@@ -41,4 +41,12 @@ class Refinement < Module
   #     end
   #
   def import_methods: (*Module) -> self
+
+  # <!--
+  #   rdoc-file=eval.c
+  #   - refined_class    -> class
+  # -->
+  # Return the class refined by the receiver.
+  #
+  def refined_class: () -> Module
 end
