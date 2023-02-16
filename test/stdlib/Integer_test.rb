@@ -166,6 +166,11 @@ class IntegerTest < StdlibTest
     3.ceil(ToInt.new)
   end
 
+  def test_ceildiv
+    3.ceildiv(10)
+    3.ceildiv(1.3)
+  end
+
   def test_chr
     3.chr
     3.chr(Encoding::UTF_8)
