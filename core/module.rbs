@@ -1594,6 +1594,15 @@ class Module < Object
   def undef_method: (*Symbol | String arg0) -> self
 
   # <!--
+  #   rdoc-file=object.c
+  #   - mod.undefined_instance_methods   -> array
+  # -->
+  # Returns a list of the undefined instance methods defined in *mod*. The
+  # undefined methods of any ancestors are not included.
+  #
+  def undefined_instance_methods: () -> Array[Symbol]
+
+  # <!--
   #   rdoc-file=eval.c
   #   - using(module)    -> self
   # -->
