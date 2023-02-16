@@ -6,16 +6,16 @@ class RegexpTest < StdlibTest
   def test_new
     Regexp.new('dog')
     Regexp.new('dog', option = Regexp::IGNORECASE)
-    Regexp.new('dog', option = nil, code = 'n')
-    Regexp.new('dog', option = Regexp::IGNORECASE, code = 'n')
+    Regexp.new('dog', option = nil)
+    Regexp.new('dog', option = Regexp::IGNORECASE)
     Regexp.new(/^a-z+:\\s+\w+/)
   end
 
   def test_compile
     Regexp.compile('dog')
     Regexp.compile('dog', option = Regexp::IGNORECASE)
-    Regexp.compile('dog', option = nil, code = 'n')
-    Regexp.compile('dog', option = Regexp::IGNORECASE, code = 'n')
+    Regexp.compile('dog', option = nil)
+    Regexp.compile('dog', option = Regexp::IGNORECASE)
     Regexp.compile(/^a-z+:\\s+\w+/)
   end
 

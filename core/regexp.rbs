@@ -822,7 +822,7 @@ class Regexp
   #
   # Regexp.compile is an alias for Regexp.new.
   #
-  def initialize: (String string, ?Integer | nil | false | top options, ?String kcode) -> Object
+  def initialize: (String string, ?String | Integer | nil | false options) -> Object
                 | (Regexp regexp) -> void
 
   # <!--
