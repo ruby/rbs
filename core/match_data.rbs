@@ -156,6 +156,35 @@ class MatchData
   #
   def captures: () -> ::Array[String?]
 
+  # <!-- rdoc-file=re.c -->
+  # Returns the array of captures, which are all matches except `m[0]`:
+  #
+  #     m = /(.)(.)(\d+)(\d)/.match("THX1138.")
+  #     # => #<MatchData "HX1138" 1:"H" 2:"X" 3:"113" 4:"8">
+  #     m[0]       # => "HX1138"
+  #     m.captures # => ["H", "X", "113", "8"]
+  #
+  # Related: MatchData.to_a.
+  #
+  alias deconstruct captures
+
+  # <!--
+  #   rdoc-file=re.c
+  #   - deconstruct_keys(array_of_names) -> hash
+  # -->
+  # Returns a hash of the named captures for the given names.
+  #
+  #     m = /(?<hours>\d{2}):(?<minutes>\d{2}):(?<seconds>\d{2})/.match("18:37:22")
+  #     m.deconstruct_keys([:hours, :minutes]) # => {:hours => "18", :minutes => "37"}
+  #     m.deconstruct_keys(nil) # => {:hours => "18", :minutes => "37", :seconds => "22"}
+  #
+  # Returns an empty hash of no named captures were defined:
+  #
+  #     m = /(\d{2}):(\d{2}):(\d{2})/.match("18:37:22")
+  #     m.deconstruct_keys(nil) # => {}
+  #
+  def deconstruct_keys: (Array[Symbol]?) -> Hash[Symbol, String?]
+
   # <!--
   #   rdoc-file=re.c
   #   - end(n) -> integer
