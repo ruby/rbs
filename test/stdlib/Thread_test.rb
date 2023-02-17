@@ -23,6 +23,13 @@ class ThreadSingletonTest < Test::Unit::TestCase
     assert_send_type "() { () -> Integer } -> untyped",
                      Class.new(Thread), :start do 1 end
   end
+
+  def test_each_caller_location
+    assert_send_type(
+      "() { (Thread::Backtrace::Location) -> Integer } -> nil",
+      Thread, :each_caller_location, &-> (loc) { 3 }
+    )
+  end
 end
 
 class ThreadTest < Test::Unit::TestCase

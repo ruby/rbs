@@ -817,6 +817,15 @@ class Thread < Object
   #
   def self.abort_on_exception=: (untyped abort_on_exception) -> untyped
 
+  # <!--
+  #   rdoc-file=vm_backtrace.c
+  #   - Thread.each_caller_location{ |loc| ... } -> nil
+  # -->
+  # Yields each frame of the current execution stack as a backtrace location
+  # object.
+  #
+  def self.each_caller_location: () { (Backtrace::Location) -> void } -> nil
+
   # Wraps the block in a single, VM-global
   # [Mutex\#synchronize](https://ruby-doc.org/core-2.6.3/Mutex.html#method-i-synchronize)
   # , returning the value of the block. A thread executing inside the
