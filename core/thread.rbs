@@ -1714,7 +1714,7 @@ class Thread::SizedQueue < Thread::Queue
   # If `timeout` seconds have passed and no space is available `nil` is returned.
   # If `timeout` is `0` it returns immediately. Otherwise it returns `self`.
   #
-  def push: (untyped obj, ?boolish non_block) -> void
+  def push: (untyped obj, ?boolish non_block, timeout: _ToF?) -> void
 end
 
 ConditionVariable: singleton(Thread::ConditionVariable)
