@@ -147,17 +147,6 @@ class Object < BasicObject
   #
   def ===: (untyped) -> bool
 
-  # <!--
-  #   rdoc-file=object.c
-  #   - obj =~ other  -> nil
-  # -->
-  # This method is deprecated.
-  #
-  # This is not only useless but also troublesome because it may hide a type
-  # error.
-  #
-  def =~: (untyped) -> bool
-
   # Returns the class of *obj*. This method must always be called with an explicit
   # receiver, as `class` is also a reserved word in Ruby.
   #
@@ -1013,38 +1002,6 @@ class Object < BasicObject
   #
   def singleton_methods: () -> Array[Symbol]
 
-  # <!--
-  #   rdoc-file=object.c
-  #   - obj.taint -> obj
-  # -->
-  # Returns object. This method is deprecated and will be removed in Ruby 3.2.
-  #
-  def taint: () -> self
-
-  # <!--
-  #   rdoc-file=object.c
-  #   - obj.untrust -> obj
-  # -->
-  # Returns object. This method is deprecated and will be removed in Ruby 3.2.
-  #
-  alias untrust taint
-
-  # <!--
-  #   rdoc-file=object.c
-  #   - obj.tainted?    -> false
-  # -->
-  # Returns false.  This method is deprecated and will be removed in Ruby 3.2.
-  #
-  def tainted?: () -> bool
-
-  # <!--
-  #   rdoc-file=object.c
-  #   - obj.untrusted?    -> false
-  # -->
-  # Returns false.  This method is deprecated and will be removed in Ruby 3.2.
-  #
-  alias untrusted? tainted?
-
   # Yields self to the block, and then returns self. The primary purpose of this
   # method is to "tap into" a method chain, in order to perform operations on
   # intermediate results within the chain.
@@ -1091,22 +1048,6 @@ class Object < BasicObject
   # ``main''.
   #
   def to_s: () -> String
-
-  # <!--
-  #   rdoc-file=object.c
-  #   - obj.untaint    -> obj
-  # -->
-  # Returns object. This method is deprecated and will be removed in Ruby 3.2.
-  #
-  def untaint: () -> self
-
-  # <!--
-  #   rdoc-file=object.c
-  #   - obj.trust    -> obj
-  # -->
-  # Returns object. This method is deprecated and will be removed in Ruby 3.2.
-  #
-  alias trust untaint
 
   # Yields self to the block and returns the result of the block.
   #
