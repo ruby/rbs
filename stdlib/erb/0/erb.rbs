@@ -521,4 +521,13 @@ class ERB
     #
     def self.def_erb_method: (String methodname, (String | ERB) erb_or_fname) -> untyped
   end
+
+  module Escape
+    # <!--
+    #   rdoc-file=lib/erb/util.rb
+    #   - html_escape(s)
+    # -->
+    #
+    def self?.html_escape: (String) -> String
+  end
 end
