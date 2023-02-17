@@ -38,8 +38,8 @@ class IO
   #
   # You must require 'io/wait' to use this method.
   #
-  def wait: (Integer events, ?Numeric timeout) -> (self | bool | nil)
-          | (?Numeric? timeout, *wait_mode mode) -> (self | bool | nil)
+  def wait: (Integer events, ?Numeric timeout) -> (Integer | false | nil)
+          | (?Numeric? timeout, *wait_mode mode) -> (self | true | false)
 
   type wait_mode = :read | :r | :readable | :write | :w | :writable | :read_write | :rw | :readable_writable
 
@@ -54,7 +54,7 @@ class IO
   #
   # You must require 'io/wait' to use this method.
   #
-  def wait_readable: (?Numeric? timeout) -> (self | bool | nil)?
+  def wait_readable: (?Numeric? timeout) -> boolish
 
   # <!--
   #   rdoc-file=ext/io/wait/wait.c
