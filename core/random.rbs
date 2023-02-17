@@ -167,8 +167,6 @@ class Random < RBS::Unnamed::Random_Base
   def state: () -> untyped
 end
 
-Random::DEFAULT: Random
-
 class Random::Base < RBS::Unnamed::Random_Base
 end
 
