@@ -884,6 +884,14 @@ class CGI
 
     # <!--
     #   rdoc-file=ext/cgi/escape/escape.c
+    #   - CGI.escapeURIComponent(string) -> string
+    # -->
+    # Returns URL-escaped string following RFC 3986.
+    #
+    def escapeURIComponent: (string) -> String
+
+    # <!--
+    #   rdoc-file=ext/cgi/escape/escape.c
     #   - CGI.unescape(string, encoding=@@accept_charset) -> string
     # -->
     # Returns URL-unescaped string (`application/x-www-form-urlencoded`).
@@ -897,6 +905,14 @@ class CGI
     # Returns HTML-unescaped string.
     #
     def unescapeHTML: (string str) -> String
+
+    # <!--
+    #   rdoc-file=ext/cgi/escape/escape.c
+    #   - CGI.unescapeURIComponent(string, encoding=@@accept_charset) -> string
+    # -->
+    # Returns URL-unescaped string following RFC 3986.
+    #
+    def unescapeURIComponent: (string) -> String
   end
 
   # <!-- rdoc-file=lib/cgi/core.rb -->
