@@ -269,6 +269,25 @@ class StringInstanceTest < Test::Unit::TestCase
                      "\x03\u3042\xff", :byteslice, (11..)
   end
 
+  def test_bytesplice
+    assert_send_type(
+      "(Integer, Integer, String) -> String",
+      "hello", :bytesplice, 1, 2, ""
+    )
+    assert_send_type(
+      "(ToInt, ToInt, ToStr) -> String",
+      "hello", :bytesplice, ToInt.new(1), ToInt.new(2), ToStr.new("")
+    )
+    assert_send_type(
+      "(Range[Integer], String) -> String",
+      "hello", :bytesplice, 1..2, ""
+    )
+    assert_send_type(
+      "(Range[Integer?], String) -> String",
+      "hello", :bytesplice, 1.., ""
+    )
+  end
+
   def test_capitalize
     assert_send_type "() -> String",
                      "a", :capitalize

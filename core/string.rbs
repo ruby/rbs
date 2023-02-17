@@ -1086,6 +1086,23 @@ class String
 
   # <!--
   #   rdoc-file=string.c
+  #   - bytesplice(index, length, str) -> string
+  #   - bytesplice(range, str)         -> string
+  # -->
+  # Replaces some or all of the content of `self` with `str`, and returns `self`.
+  # The portion of the string affected is determined using the same criteria as
+  # String#byteslice, except that `length` cannot be omitted. If the replacement
+  # string is not the same length as the text it is replacing, the string will be
+  # adjusted accordingly. The form that take an Integer will raise an IndexError
+  # if the value is out of range; the Range form will raise a RangeError. If the
+  # beginning or ending offset does not land on character (codepoint) boundary, an
+  # IndexError will be raised.
+  #
+  def bytesplice: (int index, int length, string str) -> String
+                | (Range[int?], string str) -> String
+
+  # <!--
+  #   rdoc-file=string.c
   #   - capitalize(*options) -> string
   # -->
   # Returns a string containing the characters in `self`; the first character is
