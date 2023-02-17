@@ -48,6 +48,22 @@
 class UnboundMethod
   # <!--
   #   rdoc-file=proc.c
+  #   - meth.eql?(other_meth)  -> true or false
+  #   - meth == other_meth  -> true or false
+  # -->
+  # Two unbound method objects are equal if they refer to the same method
+  # definition.
+  #
+  #     Array.instance_method(:each_slice) == Enumerable.instance_method(:each_slice)
+  #     #=> true
+  #
+  #     Array.instance_method(:sum) == Enumerable.instance_method(:sum)
+  #     #=> false, Array redefines the method for efficiency
+  #
+  def ==: (untyped) -> bool
+
+  # <!--
+  #   rdoc-file=proc.c
   #   - method.clone -> new_method
   # -->
   # Returns a clone of this method.
