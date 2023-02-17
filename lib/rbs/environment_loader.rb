@@ -47,8 +47,9 @@ module RBS
       when path
         dirs << path
       when library
-        if library == 'rubygems'
-          RBS.logger.warn '`rubygems` has been moved to core library, so it is always loaded. Remove explicit loading `rubygems`'
+        case library
+        when 'rubygems', 'set'
+          RBS.logger.warn "`#{library}` has been moved to core library, so it is always loaded. Remove explicit loading `#{library}`"
           return
         end
 

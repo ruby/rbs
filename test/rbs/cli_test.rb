@@ -47,7 +47,7 @@ class RBS::CliTest < Test::Unit::TestCase
 
   def test_ast
     with_cli do |cli|
-      cli.run(%w(-r set ast))
+      cli.run(%w(ast))
 
       # Outputs a JSON
       JSON.parse stdout.string
@@ -94,7 +94,7 @@ class RBS::CliTest < Test::Unit::TestCase
 
   def test_ancestors
     with_cli do |cli|
-      cli.run(%w(-r set ancestors ::Set))
+      cli.run(%w(ancestors ::Set))
       assert_equal <<-EOF, stdout.string
 ::Set[A]
 ::Enumerable[A]
@@ -105,7 +105,7 @@ class RBS::CliTest < Test::Unit::TestCase
     end
 
     with_cli do |cli|
-      cli.run(%w(-r set ancestors --instance ::Set))
+      cli.run(%w(ancestors --instance ::Set))
       assert_equal <<-EOF, stdout.string
 ::Set[A]
 ::Enumerable[A]
@@ -116,7 +116,7 @@ class RBS::CliTest < Test::Unit::TestCase
     end
 
     with_cli do |cli|
-      cli.run(%w(-r set ancestors --singleton ::Set))
+      cli.run(%w(ancestors --singleton ::Set))
       assert_equal <<-EOF, stdout.string
 singleton(::Set)
 singleton(::Object)
@@ -132,15 +132,15 @@ singleton(::BasicObject)
 
   def test_methods
     with_cli do |cli|
-      cli.run(%w(-r set methods ::Set))
-      cli.run(%w(-r set methods --instance ::Set))
-      cli.run(%w(-r set methods --singleton ::Set))
+      cli.run(%w(methods ::Set))
+      cli.run(%w(methods --instance ::Set))
+      cli.run(%w(methods --singleton ::Set))
     end
   end
 
   def test_method
     with_cli do |cli|
-      cli.run(%w(-r set method ::Object yield_self))
+      cli.run(%w(method ::Object yield_self))
       assert_equal <<-EOF, stdout.string
 ::Object#yield_self
   defined_in: ::Object
@@ -155,7 +155,7 @@ singleton(::BasicObject)
 
   def test_validate
     with_cli do |cli|
-      cli.run(%w(-r set validate))
+      cli.run(%w(validate))
       assert_match(/Validating/, stdout.string)
     end
 
@@ -317,22 +317,22 @@ singleton(::BasicObject)
 
   def test_constant
     with_cli do |cli|
-      cli.run(%w(-r set constant Pathname))
-      cli.run(%w(-r set constant --context File IO))
+      cli.run(%w(constant Pathname))
+      cli.run(%w(constant --context File IO))
     end
   end
 
   def test_version
     with_cli do |cli|
-      cli.run(%w(-r set version))
+      cli.run(%w(version))
     end
   end
 
   def test_paths
     with_cli do |cli|
-      cli.run(%w(-r set -I sig/test paths))
+      cli.run(%w(-r pathname -I sig/test paths))
       assert_match %r{/rbs/core \(dir, core\)$}, stdout.string
-      assert_match %r{/rbs/stdlib/set/0 \(dir, library, name=set\)$}, stdout.string
+      assert_match %r{/rbs/stdlib/pathname/0 \(dir, library, name=pathname\)$}, stdout.string
       assert_match %r{^sig/test \(absent\)$}, stdout.string
     end
   end
