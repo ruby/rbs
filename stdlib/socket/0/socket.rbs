@@ -3345,6 +3345,16 @@ Socket::SO_ERROR: Integer
 Socket::SO_GET_FILTER: Integer
 
 # <!-- rdoc-file=ext/socket/constdefs.c -->
+# Receive the cpu attached to the socket (Linux 3.19)
+#
+Socket::SO_INCOMING_CPU: Integer
+
+# <!-- rdoc-file=ext/socket/constdefs.c -->
+# Receive the napi ID attached to a RX queue (Linux 4.12)
+#
+Socket::SO_INCOMING_NAPI_ID: Integer
+
+# <!-- rdoc-file=ext/socket/constdefs.c -->
 # Keep connections alive
 #
 Socket::SO_KEEPALIVE: Integer
@@ -3480,6 +3490,11 @@ Socket::SO_REUSEADDR: Integer
 Socket::SO_REUSEPORT: Integer
 
 # <!-- rdoc-file=ext/socket/constdefs.c -->
+# Set the routing table for this socket (OpenBSD)
+#
+Socket::SO_RTABLE: Integer
+
+# <!-- rdoc-file=ext/socket/constdefs.c -->
 # Toggle cmsg for number of packets dropped (Linux 2.6.33)
 #
 Socket::SO_RXQ_OVFL: Integer
@@ -3491,6 +3506,11 @@ Socket::SO_SECURITY_ENCRYPTION_TRANSPORT: Integer
 # Make select() detect socket error queue with errorfds (Linux 3.10)
 #
 Socket::SO_SELECT_ERR_QUEUE: Integer
+
+# <!-- rdoc-file=ext/socket/constdefs.c -->
+# Set the associated routing table for the socket (FreeBSD)
+#
+Socket::SO_SETFIB: Integer
 
 # <!-- rdoc-file=ext/socket/constdefs.c -->
 # Send buffer size
@@ -3538,6 +3558,11 @@ Socket::SO_TYPE: Integer
 Socket::SO_USELOOPBACK: Integer
 
 # <!-- rdoc-file=ext/socket/constdefs.c -->
+# Setting an identifier for ipfw purpose mainly
+#
+Socket::SO_USER_COOKIE: Integer
+
+# <!-- rdoc-file=ext/socket/constdefs.c -->
 # Give a hint when more data is ready
 #
 Socket::SO_WANTMORE: Integer
@@ -3551,6 +3576,11 @@ Socket::SO_WANTOOBFLAG: Integer
 # Toggle cmsg for wifi status (Linux 3.3)
 #
 Socket::SO_WIFI_STATUS: Integer
+
+# <!-- rdoc-file=ext/socket/constdefs.c -->
+# Retrieve information about this socket (macOS)
+#
+Socket::TCP_CONNECTION_INFO: Integer
 
 # <!-- rdoc-file=ext/socket/constdefs.c -->
 # TCP congestion control algorithm (Linux 2.6.13, glibc 2.6)
@@ -3581,6 +3611,11 @@ Socket::TCP_FASTOPEN: Integer
 # Retrieve information about this socket (Linux 2.4, glibc 2.2)
 #
 Socket::TCP_INFO: Integer
+
+# <!-- rdoc-file=ext/socket/constdefs.c -->
+# Idle time before keepalive probes are sent (macOS)
+#
+Socket::TCP_KEEPALIVE: Integer
 
 # <!-- rdoc-file=ext/socket/constdefs.c -->
 # Maximum number of keepalive probes allowed before dropping a connection (Linux
