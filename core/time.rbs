@@ -650,6 +650,41 @@ class Time < Object
   #
   def day: () -> Integer
 
+  # <!--
+  #   rdoc-file=time.c
+  #   - deconstruct_keys(array_of_names_or_nil) -> hash
+  # -->
+  # Returns a hash of the name/value pairs, to use in pattern matching. Possible
+  # keys are: `:year`, `:month`, `:day`, `:yday`, `:wday`, `:hour`, `:min`,
+  # `:sec`, `:subsec`, `:dst`, `:zone`.
+  #
+  # Possible usages:
+  #
+  #     t = Time.utc(2022, 10, 5, 21, 25, 30)
+  #
+  #     if t in wday: 3, day: ..7  # uses deconstruct_keys underneath
+  #       puts "first Wednesday of the month"
+  #     end
+  #     #=> prints "first Wednesday of the month"
+  #
+  #     case t
+  #     in year: ...2022
+  #       puts "too old"
+  #     in month: ..9
+  #       puts "quarter 1-3"
+  #     in wday: 1..5, month:
+  #       puts "working day in month #{month}"
+  #     end
+  #     #=> prints "working day in month 10"
+  #
+  # Note that deconstruction by pattern can also be combined with class check:
+  #
+  #     if t in Time(wday: 3, day: ..7)
+  #       puts "first Wednesday of the month"
+  #     end
+  #
+  def deconstruct_keys: (Array[Symbol]?) -> Hash[Symbol, Integer]
+
   # <!-- rdoc-file=time.c -->
   # Returns `true` if `self` is in daylight saving time, `false` otherwise:
   #
