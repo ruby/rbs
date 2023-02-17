@@ -79,6 +79,10 @@ sources:
     revision: main
     repo_dir: gems
 
+  # You can also add a local path as a collection source optionaly.
+  - type: local
+    path: path/to/local/dir
+
 # A directory to install the downloaded RBSs
 path: .gem_rbs_collection
 
