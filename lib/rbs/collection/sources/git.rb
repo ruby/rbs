@@ -45,7 +45,12 @@ module RBS
 
           gem_dir = dest.join(name, version)
 
-          if gem_dir.directory?
+          case
+          when gem_dir.symlink?
+            stdout.puts "Updating to #{format_config_entry(name, version)} from a local source"
+            gem_dir.unlink
+            _install(dest: dest, name: name, version: version)
+          when gem_dir.directory?
             prev = load_metadata(dir: gem_dir)
 
             if prev == metadata_content(name: name, version: version)
@@ -55,9 +60,11 @@ module RBS
               FileUtils.remove_entry_secure(gem_dir.to_s)
               _install(dest: dest, name: name, version: version)
             end
-          else
+          when !gem_dir.exist?
             stdout.puts "Installing #{format_config_entry(name, version)}"
             _install(dest: dest, name: name, version: version)
+          else
+            raise
           end
         end
 

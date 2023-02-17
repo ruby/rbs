@@ -1,8 +1,8 @@
 module RBS
   module Collection
     module Sources
-      def self.from_config_entry: (Git::source_entry) -> Git
-                                | (source_entry) -> t
+      def self.from_config_entry: (Git::source_entry, base_directory: Pathname) -> Git
+                                | (source_entry, base_directory: Pathname) -> t
 
       interface _Source
         def has?: (String name, String? version) -> boolish
@@ -13,11 +13,12 @@ module RBS
         def dependencies_of: (String name, String version) -> Array[manifest_dependency]?
       end
 
-      type t = Git | Stdlib | Rubygems
+      type t = Git | Stdlib | Rubygems | Local
 
       type source_entry = Git::source_entry
                         | Stdlib::source_entry
                         | Rubygems::source_entry
+                        | Local::source_entry
 
       type manifest_entry = {
         "dependencies" => Array[manifest_dependency]?,
@@ -124,6 +125,34 @@ module RBS
         def load_metadata: (dir: Pathname) -> metadata
 
         def gems_versions: () -> Hash[String, Set[String]]
+      end
+
+      class Local
+        include Base
+
+        type source_entry = {
+          'type' => 'local',
+          'path' => String,
+        }
+
+        attr_reader path: Pathname
+        attr_reader full_path: Pathname
+
+        def initialize: (path: String, base_directory: Pathname) -> void
+
+        def has?: (String name, String? version) -> boolish
+
+        def versions: (String name) -> Array[String]
+
+        def install: (dest: Pathname, name: String, version: String, stdout: CLI::_IO) -> void
+
+        def to_lockfile: () -> source_entry
+
+        def manifest_of: (String name, String version) -> manifest_entry?
+
+        private
+
+        def _install: (Pathname src, Pathname dest) -> void
       end
 
       # signatures that are bundled in rbs gem under the stdlib/ directory
