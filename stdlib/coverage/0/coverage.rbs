@@ -153,7 +153,7 @@ module Coverage
   #   - line_stub(file)
   # -->
   #
-  def self.line_stub: () -> Array[Integer?]
+  def self.line_stub: (String) -> Array[Integer?]
 
   # <!--
   #   rdoc-file=ext/coverage/coverage.c
@@ -190,6 +190,24 @@ module Coverage
 
   # <!--
   #   rdoc-file=ext/coverage/coverage.c
+  #   - Coverage.setup                                                          => nil
+  #   - Coverage.setup(:all)                                                    => nil
+  #   - Coverage.setup(lines: bool, branches: bool, methods: bool, eval: bool)  => nil
+  #   - Coverage.setup(oneshot_lines: true)                                     => nil
+  # -->
+  # Set up the coverage measurement.
+  #
+  # Note that this method does not start the measurement itself. Use
+  # Coverage.resume to start the measurement.
+  #
+  # You may want to use Coverage.start to setup and then start the measurement.
+  #
+  def self.setup: (?lines: bool, ?branches: bool, ?methods: bool, ?eval: bool) -> nil
+                | (oneshot_lines: bool, ?branches: bool, ?methods: bool, ?eval: bool) -> nil
+                | (:all) -> nil
+
+  # <!--
+  #   rdoc-file=ext/coverage/coverage.c
   #   - Coverage.start                                                          => nil
   #   - Coverage.start(:all)                                                    => nil
   #   - Coverage.start(lines: bool, branches: bool, methods: bool, eval: bool)  => nil
@@ -198,7 +216,15 @@ module Coverage
   # Enables the coverage measurement. See the documentation of Coverage class in
   # detail. This is equivalent to Coverage.setup and Coverage.resume.
   #
-  def self.start: (?lines: boolish, ?branches: boolish, ?methods: boolish, ?oneshot_lines: boolish) -> nil
+  alias self.start self.setup
+
+  # <!--
+  #   rdoc-file=ext/coverage/coverage.c
+  #   - Coverage.state  => :idle, :suspended, :running
+  # -->
+  # Returns the state of the coverage measurement.
+  #
+  def self.state: () -> (:idle | :suspended | :running)
 
   # <!--
   #   rdoc-file=ext/coverage/coverage.c
@@ -212,6 +238,22 @@ module Coverage
   # code block, may yield misleading results.
   #
   def self.resume: () -> nil
+
+  # <!--
+  #   rdoc-file=ext/coverage/coverage.c
+  #   - Coverage.supported?(mode) -> true or false
+  # -->
+  # Returns true if coverage measurement is supported for the given mode.
+  #
+  # The mode should be one of the following symbols: `:lines`, `:branches`,
+  # `:methods`, `:eval`.
+  #
+  # Example:
+  #
+  #     Coverage.supported?(:lines)  #=> true
+  #     Coverage.supported?(:all)    #=> false
+  #
+  def self.supported?: (Symbol) -> bool
 
   # <!--
   #   rdoc-file=ext/coverage/coverage.c

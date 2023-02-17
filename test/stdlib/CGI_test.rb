@@ -35,6 +35,28 @@ class CGISingletonTest < Test::Unit::TestCase
     assert_send_type  "(::String query) -> ::Hash[::String, String | Array[String]]",
                       CGI, :parse, 'a=hoge&b=1&c[]=test1&c[]=test2'
   end
+
+  def test_escapeURIComponent
+    assert_send_type(
+      "(String) -> String",
+      CGI, :escapeURIComponent, "hogehoge"
+    )
+    assert_send_type(
+      "(ToStr) -> String",
+      CGI, :escapeURIComponent, ToStr.new("hogehoge")
+    )
+  end
+
+  def test_unescapeURIComponent
+    assert_send_type(
+      "(String) -> String",
+      CGI, :unescapeURIComponent, "hogehoge"
+    )
+    assert_send_type(
+      "(ToStr) -> String",
+      CGI, :unescapeURIComponent, ToStr.new("hogehoge")
+    )
+  end
 end
 
 class CGITest < Test::Unit::TestCase

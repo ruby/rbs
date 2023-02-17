@@ -1,11 +1,8 @@
-require_relative "../test_helper"
-
-require "set"
+require_relative "test_helper"
 
 class SetTest < Test::Unit::TestCase
   include TypeAssertions
 
-  library "set"
   testing "::Set[::Integer]"
 
   def test_each

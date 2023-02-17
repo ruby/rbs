@@ -392,6 +392,41 @@ class DateTime < Date
 
   # <!--
   #   rdoc-file=ext/date/date_core.c
+  #   - deconstruct_keys(array_of_names_or_nil) -> hash
+  # -->
+  # Returns a hash of the name/value pairs, to use in pattern matching. Possible
+  # keys are: `:year`, `:month`, `:day`, `:wday`, `:yday`, `:hour`, `:min`,
+  # `:sec`, `:sec_fraction`, `:zone`.
+  #
+  # Possible usages:
+  #
+  #     dt = DateTime.new(2022, 10, 5, 13, 30)
+  #
+  #     if d in wday: 1..5, hour: 10..18  # uses deconstruct_keys underneath
+  #       puts "Working time"
+  #     end
+  #     #=> prints "Working time"
+  #
+  #     case dt
+  #     in year: ...2022
+  #       puts "too old"
+  #     in month: ..9
+  #       puts "quarter 1-3"
+  #     in wday: 1..5, month:
+  #       puts "working day in month #{month}"
+  #     end
+  #     #=> prints "working day in month 10"
+  #
+  # Note that deconstruction by pattern can also be combined with class check:
+  #
+  #     if d in DateTime(wday: 1..5, hour: 10..18, day: ..7)
+  #       puts "Working time, first week of the month"
+  #     end
+  #
+  def deconstruct_keys: (Array[Symbol]?) -> Hash[Symbol, untyped]
+
+  # <!--
+  #   rdoc-file=ext/date/date_core.c
   #   - hour -> integer
   # -->
   # Returns the hour in range (0..23):

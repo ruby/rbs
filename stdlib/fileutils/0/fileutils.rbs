@@ -1161,7 +1161,7 @@ module FileUtils
   #
   # Related: FileUtils.ln_sf.
   #
-  def self?.ln_s: (pathlist src, path dest, ?force: boolish, ?noop: boolish, ?verbose: boolish) -> void
+  def self?.ln_s: (pathlist src, path dest, ?force: boolish, ?relative: boolish, ?target_directory: boolish, ?noop: boolish, ?verbose: boolish) -> void
 
   # <!--
   #   rdoc-file=lib/fileutils.rb
@@ -1184,6 +1184,14 @@ module FileUtils
   # Like FileUtils.ln_s, but always with keyword argument `force: true` given.
   #
   def self?.ln_sf: (pathlist src, path dest, ?noop: boolish, ?verbose: boolish) -> void
+
+  # <!--
+  #   rdoc-file=lib/fileutils.rb
+  #   - ln_sr(src, dest, target_directory: true, force: nil, noop: nil, verbose: nil)
+  # -->
+  # Like FileUtils.ln_s, but create links relative to `dest`.
+  #
+  def self?.ln_sr: (pathlist src, path dest, ?target_directory: boolish, ?noop: boolish, ?verbose: boolish) -> void
 
   # <!--
   #   rdoc-file=lib/fileutils.rb
