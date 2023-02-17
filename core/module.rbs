@@ -86,6 +86,33 @@ class Module < Object
   def self.used_modules: () -> ::Array[Module]
 
   # <!--
+  #   rdoc-file=eval.c
+  #   - used_refinements -> array
+  # -->
+  # Returns an array of all modules used in the current scope. The ordering of
+  # modules in the resulting array is not defined.
+  #
+  #     module A
+  #       refine Object do
+  #       end
+  #     end
+  #
+  #     module B
+  #       refine Object do
+  #       end
+  #     end
+  #
+  #     using A
+  #     using B
+  #     p Module.used_refinements
+  #
+  # *produces:*
+  #
+  #     [#<refinement:Object@B>, #<refinement:Object@A>]
+  #
+  def self.used_refinements: () -> Array[Refinement]
+
+  # <!--
   #   rdoc-file=object.c
   #   - mod < other   ->  true, false, or nil
   # -->
@@ -441,6 +468,26 @@ class Module < Object
   #     Two.class_variables(false)   #=> [:@@var2]
   #
   def class_variables: (?boolish inherit) -> ::Array[Symbol]
+
+  # <!--
+  #   rdoc-file=object.c
+  #   - const_added(const_name)
+  # -->
+  # Invoked as a callback whenever a constant is assigned on the receiver
+  #
+  #     module Chatty
+  #       def self.const_added(const_name)
+  #         super
+  #         puts "Added #{const_name.inspect}"
+  #       end
+  #       FOO = 1
+  #     end
+  #
+  # *produces:*
+  #
+  #     Added :FOO
+  #
+  def const_added: (Symbol) -> void
 
   # <!--
   #   rdoc-file=object.c
@@ -1419,6 +1466,28 @@ class Module < Object
   def refine: (Module mod) { () -> void } -> Refinement
 
   # <!--
+  #   rdoc-file=eval.c
+  #   - refinements -> array
+  # -->
+  # Returns an array of modules defined within the receiver.
+  #
+  #     module A
+  #       refine Integer do
+  #       end
+  #
+  #       refine String do
+  #       end
+  #     end
+  #
+  #     p A.refinements
+  #
+  # *produces:*
+  #
+  #     [#<refinement:Integer@A>, #<refinement:String@A>]
+  #
+  def refinements: () -> Array[Refinement]
+
+  # <!--
   #   rdoc-file=object.c
   #   - remove_class_variable(sym)    -> obj
   # -->
@@ -1523,6 +1592,15 @@ class Module < Object
   #     prog.rb:23: undefined method `hello' for #<Child:0x401b3bb4> (NoMethodError)
   #
   def undef_method: (*Symbol | String arg0) -> self
+
+  # <!--
+  #   rdoc-file=object.c
+  #   - mod.undefined_instance_methods   -> array
+  # -->
+  # Returns a list of the undefined instance methods defined in *mod*. The
+  # undefined methods of any ancestors are not included.
+  #
+  def undefined_instance_methods: () -> Array[Symbol]
 
   # <!--
   #   rdoc-file=eval.c

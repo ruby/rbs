@@ -602,7 +602,7 @@ class Proc < Object
   #     prc = lambda{|x, y=42, *other|}
   #     prc.parameters(lambda: false) #=> [[:opt, :x], [:opt, :y], [:rest, :other]]
   #
-  def parameters: () -> ::Array[[ Symbol, Symbol ]]
+  def parameters: (lambda: boolish) -> ::Array[[ Symbol, Symbol ]]
 
   # <!--
   #   rdoc-file=proc.c

@@ -78,6 +78,31 @@
 class Fiber < Object
   # <!--
   #   rdoc-file=cont.c
+  #   - Fiber[key] -> value
+  # -->
+  # Returns the value of the fiber storage variable identified by `key`.
+  #
+  # The `key` must be a symbol, and the value is set by Fiber#[]= or Fiber#store.
+  #
+  # See also Fiber::[]=.
+  #
+  def self.[]: (Symbol | String) -> untyped
+
+  # <!--
+  #   rdoc-file=cont.c
+  #   - Fiber[key] = value
+  # -->
+  # Assign `value` to the fiber storage variable identified by `key`. The variable
+  # is created if it doesn't exist.
+  #
+  # `key` must be a Symbol, otherwise a TypeError is raised.
+  #
+  # See also Fiber::[].
+  #
+  def self.[]=: [A] (Symbol | String, A) -> A
+
+  # <!--
+  #   rdoc-file=cont.c
   #   - Fiber.blocking? -> false or 1
   # -->
   # Returns `false` if the current fiber is non-blocking. Fiber is non-blocking if
@@ -243,7 +268,7 @@ class Fiber < Object
   # Explicitly using `storage: true` is currently experimental and may change in
   # the future.
   #
-  def initialize: (?blocking: boolish) { (*untyped) -> void } -> void
+  def initialize: (?blocking: boolish, ?storage: true | Hash[Symbol | String, untyped] | nil) { (*untyped) -> void } -> void
 
   # <!--
   #   rdoc-file=cont.c
@@ -381,6 +406,39 @@ class Fiber < Object
   # if it runs to completion without any Fiber.yield
   #
   def resume: (*untyped) -> untyped
+
+  # <!--
+  #   rdoc-file=cont.c
+  #   - fiber.storage -> hash (dup)
+  # -->
+  # Returns a copy of the storage hash for the fiber. The method can only be
+  # called on the Fiber.current.
+  #
+  def storage: () -> Hash[Symbol | String, untyped]
+
+  # <!--
+  #   rdoc-file=cont.c
+  #   - fiber.storage = hash
+  # -->
+  # Sets the storage hash for the fiber. This feature is experimental and may
+  # change in the future. The method can only be called on the Fiber.current.
+  #
+  # You should be careful about using this method as you may inadvertently clear
+  # important fiber-storage state. You should mostly prefer to assign specific
+  # keys in the storage using Fiber::[]=.
+  #
+  # You can also use `Fiber.new(storage: nil)` to create a fiber with an empty
+  # storage.
+  #
+  # Example:
+  #
+  #     while request = request_queue.pop
+  #       # Reset the per-request state:
+  #       Fiber.current.storage = nil
+  #       handle_request(request)
+  #     end
+  #
+  def storage=: (Hash[Symbol | String, untyped]) -> Hash[Symbol | String, untyped]
 
   # <!--
   #   rdoc-file=cont.c

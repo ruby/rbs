@@ -126,6 +126,23 @@ class Enumerator[unchecked out Elem, out Return] < Object
 
   # <!--
   #   rdoc-file=enumerator.c
+  #   - Enumerator.product(*enums) -> enumerator
+  #   - Enumerator.product(*enums) { |elts| ... } -> enumerator
+  # -->
+  # Generates a new enumerator object that generates a Cartesian product of given
+  # enumerable objects.  This is equivalent to Enumerator::Product.new.
+  #
+  #     e = Enumerator.product(1..3, [4, 5])
+  #     e.to_a #=> [[1, 4], [1, 5], [2, 4], [2, 5], [3, 4], [3, 5]]
+  #     e.size #=> 6
+  #
+  # When a block is given, calls the block with each N-element array generated and
+  # returns `nil`.
+  #
+  def self.product: [Elem] (*_EachEntry[Elem]) -> Product[Elem]
+
+  # <!--
+  #   rdoc-file=enumerator.c
   #   - enum.each { |elm| block }                    -> obj
   #   - enum.each                                    -> enum
   #   - enum.each(*appending_args) { |elm| block }   -> obj

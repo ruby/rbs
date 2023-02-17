@@ -568,6 +568,11 @@ class SyntaxError < ScriptError
   # Construct a SyntaxError exception.
   #
   def initialize: (?string msg) -> void
+
+  # <!-- rdoc-file=error.c -->
+  # the path failed to parse
+  #
+  def path: () -> String?
 end
 
 # <!-- rdoc-file=error.c -->

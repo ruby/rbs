@@ -402,6 +402,16 @@ class ToInt
   end
 end
 
+class ToF
+  def initialize(value = 0.1)
+    @value = value
+  end
+
+  def to_f
+    @value
+  end
+end
+
 class ToStr
   def initialize(value = "")
     @value = value

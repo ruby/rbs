@@ -14,6 +14,10 @@ interface _ToS
   def to_s: () -> String
 end
 
+interface _ToF
+  def to_f: () -> Float
+end
+
 interface _ToStr
   def to_str: () -> String
 end
@@ -32,6 +36,10 @@ end
 
 interface _Each[out A]
   def each: () { (A) -> void } -> void
+end
+
+interface _EachEntry[out A]
+  def each_entry: () { (A) -> void } -> self
 end
 
 interface _Reader

@@ -41,8 +41,14 @@ class IOSingletonTest < Test::Unit::TestCase
                        IO, :open, fd
       assert_send_type "(ToInt, String) -> IO",
                        IO, :open, ToInt.new(fd), "r"
-      assert_send_type "(Integer) { (IO) -> String } -> String",
-                       IO, :open, fd do |io| io.read end
+      assert_send_type "(Integer) { (IO) -> Integer } -> Integer",
+                       IO, :open, fd do |io| io.read.size end
+
+      fd = IO.sysopen(File.expand_path(__FILE__))
+      assert_send_type(
+        "(ToInt, path: String) -> IO",
+        IO, :open, ToInt.new(fd), path: "<<TEST>>"
+      )
     end
   end
 
@@ -86,6 +92,29 @@ class IOSingletonTest < Test::Unit::TestCase
                            IO, :copy_stream, src_io, dst_io, 1, 0
         end
       end
+    end
+  end
+
+  def test_new
+    IO.sysopen(File.expand_path(__FILE__)).tap do |fd|
+      assert_send_type(
+        "(Integer) -> IO",
+        IO, :new, fd
+      )
+    end
+
+    IO.sysopen(File.expand_path(__FILE__)).tap do |fd|
+      assert_send_type(
+        "(ToInt, ToStr, path: ToStr) -> IO",
+        IO, :new, ToInt.new(fd), ToStr.new("r"), path: ToStr.new("<<TEST>>")
+      )
+    end
+
+    IO.sysopen(File.expand_path(__FILE__)).tap do |fd|
+      assert_send_type(
+        "(Integer, path: nil) -> IO",
+        IO, :new, fd, path: nil
+      )
     end
   end
 
@@ -175,6 +204,22 @@ class IOInstanceTest < Test::Unit::TestCase
     end
   end
 
+  def test_path
+    IO.open(IO.sysopen(File.expand_path(__FILE__)), path: "foo") do |io|
+      assert_send_type(
+        "() -> String",
+        io, :path
+      )
+    end
+
+    IO.open(IO.sysopen(File.expand_path(__FILE__)), path: nil) do |io|
+      assert_send_type(
+        "() -> nil",
+        io, :path
+      )
+    end
+  end
+
   def test_read
     IO.open(IO.sysopen(File.expand_path(__FILE__))) do |io|
       assert_send_type "() -> String",
@@ -201,6 +246,46 @@ class IOInstanceTest < Test::Unit::TestCase
       assert_send_type "(Integer, String) -> String",
                        io, :readpartial, 10, "buffer"
     end
+  end
+
+  def test_timeout
+    io, _ = IO.pipe()
+
+    assert_send_type(
+      "(Integer) -> IO",
+      io, :timeout=, 1
+    )
+    assert_send_type(
+      "() -> Integer",
+      io, :timeout
+    )
+
+    assert_send_type(
+      "(Float) -> IO",
+      io, :timeout=, 1.2
+    )
+    assert_send_type(
+      "() -> Float",
+      io, :timeout
+    )
+
+    assert_send_type(
+      "(Rational) -> IO",
+      io, :timeout=, 3r
+    )
+    assert_send_type(
+      "() -> Rational",
+      io, :timeout
+    )
+
+    assert_send_type(
+      "(nil) -> IO",
+      io, :timeout=, nil
+    )
+    assert_send_type(
+      "() -> nil",
+      io, :timeout
+    )
   end
 
   def test_write

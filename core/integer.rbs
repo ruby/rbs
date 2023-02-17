@@ -654,6 +654,24 @@ class Integer < Numeric
           | (int digits) -> (Integer | Float)
 
   # <!--
+  #   rdoc-file=numeric.rb
+  #   - ceildiv(other) -> integer
+  # -->
+  # Returns the result of division `self` by `other`. The result is rounded up to
+  # the nearest integer.
+  #
+  #     3.ceildiv(3) # => 1
+  #     4.ceildiv(3) # => 2
+  #
+  #     4.ceildiv(-3) # => -1
+  #     -4.ceildiv(3) # => -1
+  #     -4.ceildiv(-3) # => 2
+  #
+  #     3.ceildiv(1.2) # => 3
+  #
+  def ceildiv: (Numeric other) -> Integer
+
+  # <!--
   #   rdoc-file=numeric.c
   #   - chr           -> string
   #   - chr(encoding) -> string

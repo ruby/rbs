@@ -822,8 +822,8 @@ class Regexp
   #
   # Regexp.compile is an alias for Regexp.new.
   #
-  def initialize: (String string, ?String | Integer | nil | false options) -> Object
-                | (Regexp regexp) -> void
+  def initialize: (String string, ?String | Integer | nil | false options, ?timeout: Float?) -> Object
+                | (Regexp regexp, ?timeout: Float?) -> void
 
   # <!--
   #   rdoc-file=re.c
@@ -893,6 +893,27 @@ class Regexp
 
   # <!--
   #   rdoc-file=re.c
+  #   - Regexp.linear_time?(re)
+  #   - Regexp.linear_time?(string, options = 0)
+  # -->
+  # Returns `true` if matching against `re` can be done in linear time to the
+  # input string.
+  #
+  #     Regexp.linear_time?(/re/) # => true
+  #
+  # Note that this is a property of the ruby interpreter, not of the argument
+  # regular expression.  Identical regexp can or cannot run in linear time
+  # depending on your ruby binary.  Neither forward nor backward compatibility is
+  # guaranteed about the return value of this method.  Our current algorithm is
+  # (*1) but this is subject to change in the future.  Alternative implementations
+  # can also behave differently.  They might always return false for everything.
+  #
+  # (*1): https://doi.org/10.1109/SP40001.2021.00032
+  #
+  def self.linear_time?: () -> bool
+
+  # <!--
+  #   rdoc-file=re.c
   #   - Regexp.escape(string) -> new_string
   # -->
   # Returns a new string that escapes any characters that have special meaning in
@@ -927,6 +948,29 @@ class Regexp
   # Raises an exception unless `object.to_regexp` returns a regexp.
   #
   def self.try_convert: (untyped obj) -> Regexp?
+
+  # <!--
+  #   rdoc-file=re.c
+  #   - Regexp.timeout  -> float or nil
+  # -->
+  # It returns the current default timeout interval for Regexp matching in second.
+  # `nil` means no default timeout configuration.
+  #
+  def self.timeout: () -> Float?
+
+  # <!--
+  #   rdoc-file=re.c
+  #   - Regexp.timeout = float or nil
+  # -->
+  # It sets the default timeout interval for Regexp matching in second. `nil`
+  # means no default timeout configuration. This configuration is process-global.
+  # If you want to set timeout for each Regexp, use `timeout` keyword for
+  # `Regexp.new`.
+  #
+  #     Regexp.timeout = 1
+  #     /^a*b?a*$/ =~ "a" * 100000 + "x" #=> regexp match timeout (RuntimeError)
+  #
+  def self.timeout=: (Float?) -> Float?
 
   # <!--
   #   rdoc-file=re.c
@@ -1310,6 +1354,23 @@ class Regexp
   # Related: Regexp#inspect.
   #
   def to_s: () -> String
+
+  # <!--
+  #   rdoc-file=re.c
+  #   - rxp.timeout  -> float or nil
+  # -->
+  # It returns the timeout interval for Regexp matching in second. `nil` means no
+  # default timeout configuration.
+  #
+  # This configuration is per-object. The global configuration set by
+  # Regexp.timeout= is ignored if per-object configuration is set.
+  #
+  #     re = Regexp.new("^a*b?a*$", timeout: 1)
+  #     re.timeout               #=> 1.0
+  #     re =~ "a" * 100000 + "x" #=> regexp match timeout (RuntimeError)
+  #
+  %a{pure}
+  def timeout: () -> Float?
 
   # <!--
   #   rdoc-file=re.c

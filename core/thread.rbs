@@ -817,6 +817,15 @@ class Thread < Object
   #
   def self.abort_on_exception=: (untyped abort_on_exception) -> untyped
 
+  # <!--
+  #   rdoc-file=vm_backtrace.c
+  #   - Thread.each_caller_location{ |loc| ... } -> nil
+  # -->
+  # Yields each frame of the current execution stack as a backtrace location
+  # object.
+  #
+  def self.each_caller_location: () { (Backtrace::Location) -> void } -> nil
+
   # Wraps the block in a single, VM-global
   # [Mutex\#synchronize](https://ruby-doc.org/core-2.6.3/Mutex.html#method-i-synchronize)
   # , returning the value of the block. A thread executing inside the
@@ -1620,7 +1629,7 @@ class Thread::Queue < Object
   # If `timeout` seconds have passed and no data is available `nil` is returned.
   # If `timeout` is `0` it returns immediately.
   #
-  def pop: (?boolish non_block) -> untyped
+  def pop: (?boolish non_block, ?timeout: _ToF?) -> untyped
 
   # <!--
   #   rdoc-file=thread_sync.c
@@ -1705,7 +1714,7 @@ class Thread::SizedQueue < Thread::Queue
   # If `timeout` seconds have passed and no space is available `nil` is returned.
   # If `timeout` is `0` it returns immediately. Otherwise it returns `self`.
   #
-  def push: (untyped obj, ?boolish non_block) -> void
+  def push: (untyped obj, ?boolish non_block, timeout: _ToF?) -> void
 end
 
 ConditionVariable: singleton(Thread::ConditionVariable)

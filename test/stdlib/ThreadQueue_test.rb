@@ -62,6 +62,8 @@ class ThreadQueueTest < StdlibTest
     q.pop
     q.pop(true)
     q.pop(false)
+    q.pop(timeout: 0.2)
+    q.pop(timeout: ToF.new(0.1))
   end
 
   def test_push

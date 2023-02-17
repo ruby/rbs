@@ -200,6 +200,36 @@ class StringInstanceTest < Test::Unit::TestCase
                      "a", :b
   end
 
+  def test_byteindex
+    assert_send_type(
+      "(String) -> Integer",
+      "a", :byteindex, "a"
+    )
+    assert_send_type(
+      "(Regexp) -> nil",
+      "a", :byteindex, /x/
+    )
+    assert_send_type(
+      "(ToStr) -> Integer",
+      "a", :byteindex, ToStr.new("a")
+    )
+  end
+
+  def test_byterindex
+    assert_send_type(
+      "(String) -> Integer",
+      "a", :byterindex, "a"
+    )
+    assert_send_type(
+      "(Regexp) -> nil",
+      "a", :byterindex, /x/
+    )
+    assert_send_type(
+      "(ToStr) -> Integer",
+      "a", :byterindex, ToStr.new("a")
+    )
+  end
+
   def test_bytes
     assert_send_type "() -> Array[Integer]",
                      "a", :bytes
@@ -237,6 +267,27 @@ class StringInstanceTest < Test::Unit::TestCase
                      "\x03\u3042\xff", :byteslice, 11..13
     assert_send_type "(Range[Integer?]) -> nil",
                      "\x03\u3042\xff", :byteslice, (11..)
+  end
+
+  def test_bytesplice
+    assert_send_type(
+      "(Integer, Integer, String) -> String",
+      "hello", :bytesplice, 1, 2, ""
+    )
+    if_ruby(3.2...3.3) do
+      assert_send_type(
+        "(ToInt, ToInt, ToStr) -> String",
+        "hello", :bytesplice, ToInt.new(1), ToInt.new(2), ToStr.new("")
+      )
+    end
+    assert_send_type(
+      "(Range[Integer], String) -> String",
+      "hello", :bytesplice, 1..2, ""
+    )
+    assert_send_type(
+      "(Range[Integer?], String) -> String",
+      "hello", :bytesplice, 1.., ""
+    )
   end
 
   def test_capitalize

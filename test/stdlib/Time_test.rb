@@ -332,6 +332,14 @@ class TimeSingletonTest < Test::Unit::TestCase
       "(Integer, Integer, Integer, in: String) -> Time",
       Time, :new, 2022, 1, 3, in: "Z"
     )
+    assert_send_type(
+      "(String) -> Time",
+      Time, :new, "2000-12-31 23:59:59.5"
+    )
+    assert_send_type(
+      "(String, in: ToStr, precision: ToInt) -> Time",
+      Time, :new, "2000-12-31 23:59:59.5", in: ToStr.new("+0900"), precision: ToInt.new(2)
+    )
   end
 end
 

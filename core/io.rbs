@@ -1309,7 +1309,7 @@ class IO < Object
   #     IO.new(fd, internal_encoding: nil) # => #<IO:fd 3>
   #     IO.new(fd, autoclose: true)        # => #<IO:fd 3>
   #
-  def initialize: (Integer fd, ?Integer mode, ?Integer opt) -> void
+  def initialize: (int fd, ?string | int mode, ?path: string?, **untyped opts) -> void
 
   # <!--
   #   rdoc-file=io.c
@@ -1384,6 +1384,20 @@ class IO < Object
   # Number](rdoc-ref:IO@Line+Number).
   #
   def lineno=: (Integer arg0) -> Integer
+
+  # <!--
+  #   rdoc-file=io.c
+  #   - path -> string or nil
+  # -->
+  # Returns the path associated with the IO, or `nil` if there is no path
+  # associated with the IO. It is not guaranteed that the path exists on the
+  # filesystem.
+  #
+  #     $stdin.path # => "<STDIN>"
+  #
+  #     File.open("testfile") {|f| f.path} # => "testfile"
+  #
+  def path: () -> String?
 
   # <!--
   #   rdoc-file=io.c
@@ -2178,6 +2192,34 @@ class IO < Object
   # IO#pos is an alias for IO#tell.
   #
   def tell: () -> Integer
+
+  # <!--
+  #   rdoc-file=io.c
+  #   - timeout -> duration or nil
+  # -->
+  # Get the internal timeout duration or nil if it was not set.
+  #
+  def timeout: () -> Numeric?
+
+  # <!--
+  #   rdoc-file=io.c
+  #   - timeout = duration -> duration
+  #   - timeout = nil -> nil
+  # -->
+  # Set the internal timeout to the specified duration or nil. The timeout applies
+  # to all blocking operations where possible.
+  #
+  # This affects the following methods (but is not limited to): #gets, #puts,
+  # #read, #write, #wait_readable and #wait_writable. This also affects blocking
+  # socket operations like Socket#accept and Socket#connect.
+  #
+  # Some operations like File#open and IO#close are not affected by the timeout. A
+  # timeout during a write operation may leave the IO in an inconsistent state,
+  # e.g. data was partially written. Generally speaking, a timeout is a last ditch
+  # effort to prevent an application from hanging on slow I/O operations, such as
+  # those that occur during a slowloris attack.
+  #
+  def timeout=: (Numeric?) -> void
 
   # <!--
   #   rdoc-file=io.c
@@ -3148,7 +3190,7 @@ class IO < Object
   # -->
   # Synonym for IO.new.
   #
-  def self.for_fd: (int fd, ?string | int mode, **untyped opt) -> instance
+  alias self.for_fd self.new
 
   # <!--
   #   rdoc-file=io.c
@@ -3162,22 +3204,8 @@ class IO < Object
   # With a block given, calls the block with the IO object and returns the block's
   # value.
   #
-  alias self.open self.for_fd
-
-  # <!--
-  #   rdoc-file=io.c
-  #   - IO.open(fd, mode = 'r', **opts)             -> io
-  #   - IO.open(fd, mode = 'r', **opts) {|io| ... } -> object
-  # -->
-  # Creates a new IO object, via IO.new with the given arguments.
-  #
-  # With no block given, returns the IO object.
-  #
-  # With a block given, calls the block with the IO object and returns the block's
-  # value.
-  #
-  def self.open: [A] (int fd, ?string | int mode, **untyped opt) { (instance) -> A } -> A
-               | ...
+  def self.open: (int fd, ?string | int mode, ?path: string?, **untyped opts) -> instance
+               | [A] (int fd, ?string | int mode, ?path: string?, **untyped opts) { (instance) -> A } -> A
 
   def bytes: () { (Integer arg0) -> untyped } -> self
            | () -> ::Enumerator[Integer, self]
