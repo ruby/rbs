@@ -200,6 +200,36 @@ class StringInstanceTest < Test::Unit::TestCase
                      "a", :b
   end
 
+  def test_byteindex
+    assert_send_type(
+      "(String) -> Integer",
+      "a", :byteindex, "a"
+    )
+    assert_send_type(
+      "(Regexp) -> nil",
+      "a", :byteindex, /x/
+    )
+    assert_send_type(
+      "(ToStr) -> Integer",
+      "a", :byteindex, ToStr.new("a")
+    )
+  end
+
+  def test_byterindex
+    assert_send_type(
+      "(String) -> Integer",
+      "a", :byterindex, "a"
+    )
+    assert_send_type(
+      "(Regexp) -> nil",
+      "a", :byterindex, /x/
+    )
+    assert_send_type(
+      "(ToStr) -> Integer",
+      "a", :byterindex, ToStr.new("a")
+    )
+  end
+
   def test_bytes
     assert_send_type "() -> Array[Integer]",
                      "a", :bytes

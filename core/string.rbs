@@ -907,6 +907,109 @@ class String
 
   # <!--
   #   rdoc-file=string.c
+  #   - byteindex(substring, offset = 0) -> integer or nil
+  #   - byteindex(regexp, offset = 0) -> integer or nil
+  # -->
+  # Returns the Integer byte-based index of the first occurrence of the given
+  # `substring`, or `nil` if none found:
+  #
+  #     'foo'.byteindex('f') # => 0
+  #     'foo'.byteindex('o') # => 1
+  #     'foo'.byteindex('oo') # => 1
+  #     'foo'.byteindex('ooo') # => nil
+  #
+  # Returns the Integer byte-based index of the first match for the given Regexp
+  # `regexp`, or `nil` if none found:
+  #
+  #     'foo'.byteindex(/f/) # => 0
+  #     'foo'.byteindex(/o/) # => 1
+  #     'foo'.byteindex(/oo/) # => 1
+  #     'foo'.byteindex(/ooo/) # => nil
+  #
+  # Integer argument `offset`, if given, specifies the byte-based position in the
+  # string to begin the search:
+  #
+  #     'foo'.byteindex('o', 1) # => 1
+  #     'foo'.byteindex('o', 2) # => 2
+  #     'foo'.byteindex('o', 3) # => nil
+  #
+  # If `offset` is negative, counts backward from the end of `self`:
+  #
+  #     'foo'.byteindex('o', -1) # => 2
+  #     'foo'.byteindex('o', -2) # => 1
+  #     'foo'.byteindex('o', -3) # => 1
+  #     'foo'.byteindex('o', -4) # => nil
+  #
+  # If `offset` does not land on character (codepoint) boundary, `IndexError` is
+  # raised.
+  #
+  # Related: String#index, String#byterindex.
+  #
+  def byteindex: (Regexp | string substr_or_regexp, ?int offset) -> Integer?
+
+  # <!--
+  #   rdoc-file=string.c
+  #   - byterindex(substring, offset = self.bytesize) -> integer or nil
+  #   - byterindex(regexp, offset = self.bytesize) -> integer or nil
+  # -->
+  # Returns the Integer byte-based index of the *last* occurrence of the given
+  # `substring`, or `nil` if none found:
+  #
+  #     'foo'.byterindex('f') # => 0
+  #     'foo'.byterindex('o') # => 2
+  #     'foo'.byterindex('oo') # => 1
+  #     'foo'.byterindex('ooo') # => nil
+  #
+  # Returns the Integer byte-based index of the *last* match for the given Regexp
+  # `regexp`, or `nil` if none found:
+  #
+  #     'foo'.byterindex(/f/) # => 0
+  #     'foo'.byterindex(/o/) # => 2
+  #     'foo'.byterindex(/oo/) # => 1
+  #     'foo'.byterindex(/ooo/) # => nil
+  #
+  # The *last* match means starting at the possible last position, not the last of
+  # longest matches.
+  #
+  #     'foo'.byterindex(/o+/) # => 2
+  #     $~ #=> #<MatchData "o">
+  #
+  # To get the last longest match, needs to combine with negative lookbehind.
+  #
+  #     'foo'.byterindex(/(?<!o)o+/) # => 1
+  #     $~ #=> #<MatchData "oo">
+  #
+  # Or String#byteindex with negative lookforward.
+  #
+  #     'foo'.byteindex(/o+(?!.*o)/) # => 1
+  #     $~ #=> #<MatchData "oo">
+  #
+  # Integer argument `offset`, if given and non-negative, specifies the maximum
+  # starting byte-based position in the
+  #     string to _end_ the search:
+  #
+  #      'foo'.byterindex('o', 0) # => nil
+  #      'foo'.byterindex('o', 1) # => 1
+  #      'foo'.byterindex('o', 2) # => 2
+  #      'foo'.byterindex('o', 3) # => 2
+  #
+  # If `offset` is a negative Integer, the maximum starting position in the string
+  # to *end* the search is the sum of the string's length and `offset`:
+  #
+  #     'foo'.byterindex('o', -1) # => 2
+  #     'foo'.byterindex('o', -2) # => 1
+  #     'foo'.byterindex('o', -3) # => nil
+  #     'foo'.byterindex('o', -4) # => nil
+  #
+  # If `offset` does not land on character (codepoint) boundary, `IndexError` is
+  # raised.
+  #
+  # Related: String#byteindex.
+  #
+  def byterindex: (Regexp | string substr_or_regexp, ?int offset) -> Integer?
+
+  # <!--
+  #   rdoc-file=string.c
   #   - bytes -> array_of_bytes
   # -->
   # Returns an array of the bytes in `self`:
