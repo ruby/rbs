@@ -77,25 +77,6 @@ class MethodTest < StdlibTest
     Foo.new.method(:foo_with_arg_and_rest).parameters
   end
 
-
-  def test_public?
-    if_ruby31 do
-      Foo.new.method(:foo).public?
-    end
-  end
-
-  def test_private?
-    if_ruby31 do
-      Foo.new.method(:foo).private?
-    end
-  end
-
-  def test_protected?
-    if_ruby31 do
-      Foo.new.method(:foo).protected?
-    end
-  end
-
   def test_source_location
     Foo.new.method(:foo).source_location
     method(:puts).source_location

@@ -256,30 +256,6 @@ class Method < Object
 
   # <!--
   #   rdoc-file=proc.c
-  #   - meth.private? -> true or false
-  # -->
-  # Returns whether the method is private.
-  #
-  def private?: () -> bool
-
-  # <!--
-  #   rdoc-file=proc.c
-  #   - meth.protected? -> true or false
-  # -->
-  # Returns whether the method is protected.
-  #
-  def protected?: () -> bool
-
-  # <!--
-  #   rdoc-file=proc.c
-  #   - meth.public? -> true or false
-  # -->
-  # Returns whether the method is public.
-  #
-  def public?: () -> bool
-
-  # <!--
-  #   rdoc-file=proc.c
   #   - meth.receiver    -> object
   # -->
   # Returns the bound receiver of the method object.
