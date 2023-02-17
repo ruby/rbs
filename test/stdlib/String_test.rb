@@ -274,10 +274,12 @@ class StringInstanceTest < Test::Unit::TestCase
       "(Integer, Integer, String) -> String",
       "hello", :bytesplice, 1, 2, ""
     )
-    assert_send_type(
-      "(ToInt, ToInt, ToStr) -> String",
-      "hello", :bytesplice, ToInt.new(1), ToInt.new(2), ToStr.new("")
-    )
+    if_ruby(3.2...3.3) do
+      assert_send_type(
+        "(ToInt, ToInt, ToStr) -> String",
+        "hello", :bytesplice, ToInt.new(1), ToInt.new(2), ToStr.new("")
+      )
+    end
     assert_send_type(
       "(Range[Integer], String) -> String",
       "hello", :bytesplice, 1..2, ""
