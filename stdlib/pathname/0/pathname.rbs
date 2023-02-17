@@ -854,6 +854,18 @@ class Pathname
 
   # <!--
   #   rdoc-file=ext/pathname/pathname.c
+  #   - lutime(p1, p2)
+  # -->
+  # Update the access and modification times of the file.
+  #
+  # Same as Pathname#utime, but does not follow symbolic links.
+  #
+  # See File.lutime.
+  #
+  def lutime: (Time | Numeric atime, Time | Numeric mtime) -> Integer
+
+  # <!--
+  #   rdoc-file=ext/pathname/pathname.c
   #   - pathname.make_link(old)
   # -->
   # Creates a hard link at *pathname*.
