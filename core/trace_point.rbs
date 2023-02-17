@@ -211,7 +211,7 @@ class TracePoint < Object
   # binding of the nearest Ruby method calling the C method, since C methods
   # themselves do not have bindings.
   #
-  def binding: () -> Binding
+  def binding: () -> Binding?
 
   # <!--
   #   rdoc-file=trace_point.rb
