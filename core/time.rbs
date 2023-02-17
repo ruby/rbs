@@ -934,6 +934,7 @@ class Time < Object
   #
   def initialize: (?Integer? year, ?Integer? month, ?Integer? day, ?Integer? hour, ?Integer? min, ?Numeric? sec, ?String | Integer | nil) -> void
                 | (?Integer? year, ?Integer? month, ?Integer? day, ?Integer? hour, ?Integer? min, ?Numeric? sec, in: String | Integer | nil) -> void
+                | (String, ?in: string | int | nil, ?precision: int) -> void
 
   # <!--
   #   rdoc-file=time.c
