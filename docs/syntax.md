@@ -501,6 +501,8 @@ private alias foo bar       # Syntax error
 ```markdown
 _decl_ ::= _class-decl_                         # Class declaration
          | _module-decl_                        # Module declaration
+         | _class-alias-decl_                   # Class alias declaration
+         | _module-alias-decl_                  # Module alias declaration
          | _interface-decl_                     # Interface declaration
          | _type-alias-decl_                    # Type alias declaration
          | _const-decl_                         # Constant declaration
@@ -511,6 +513,10 @@ _class-decl_ ::= `class` _class-name_ _module-type-parameters_ _members_ `end`
 
 _module-decl_ ::= `module` _module-name_ _module-type-parameters_ _members_ `end`
                 | `module` _module-name_ _module-type-parameters_ `:` _module-self-types_ _members_ `end`
+
+_class-alias-decl_ ::= `class` _class-name_ `=` _class-name_
+
+_module-alias-decl_ ::= `module` _module-name_ `=` _module-name_
 
 _module-self-types_ ::= _class-name_ _type-arguments_ `,` _module-self-types_            (Class instance)
                       | _interface-name_ _type-arguments_ `,` _module-self-types_        (Interface)
@@ -553,6 +559,32 @@ end
 ```
 
 The `Enumerable` module above requires `each` method for enumerating objects.
+
+### Class/module alias declaration
+
+An alias of a class or module can be defined in RBS.
+
+```rbs
+module Foo = Kernel
+
+class Bar = Array
+```
+
+The syntax defines a class and the definition is equivalent to the right-hand-side.
+
+```
+class Baz < Bar[String]    # Class alias can be inherited
+  include Foo              # Module alias can be included
+end
+```
+
+ This is a definition corresponding to the following Ruby code.
+
+ ```ruby
+ Foo = Kernel
+
+ Bar = Array
+ ```
 
 ### Interface declaration
 
@@ -695,6 +727,29 @@ type int_printer = PrettyPrint[Integer]      # Type error
 ```
 
 The upper bound must be one of a class instance type, interface type, or class singleton type.
+
+### Directives
+
+Directives are placed at the top of a file and provides per-file-basis features.
+
+```
+_use-directive_ ::= `use` _use-clauses_
+
+_use-clauses_ ::= _use-clause_ `,` ... `,` _use-clause_
+
+_use-clause_ ::= _type-name_                           # Single use clause
+               | _type-name_ `as` _simple-type-name_   # Single use clause with alias
+               | _namespace_                           # Wildcard use clause
+```
+
+The *use directive* defines relative type names that is an alias of other type names.
+We can use the simple type names if it is declared with *use*.
+
+```
+use RBS::Namespace        # => Defines `Namespace`
+use RBS::TypeName as TN   # => Defines `TN`
+use RBS::AST::*           # => Defines modules under `::RBS::AST::` namespace
+```
 
 ### Comments
 
