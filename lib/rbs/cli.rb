@@ -260,6 +260,11 @@ EOU
         opts.on("--singleton", "Ancestors of singleton of the given type_name") { kind = :singleton }
       end.order!(args)
 
+      unless args.size == 1
+        stdout.puts "Expected one argument."
+        return
+      end
+
       loader = options.loader()
 
       env = Environment.from_loader(loader).resolve_type_names
