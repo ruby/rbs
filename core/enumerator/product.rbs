@@ -30,7 +30,7 @@ class Enumerator[unchecked out Elem, out Return]
   #
   # This type of objects can be created by Enumerator.product.
   #
-  class Product[unchecked out Elem] < Enumerator[Elem, Product[Elem]]
+  class Product[unchecked out Elem] < Enumerator[Array[Elem], Product[Elem]]
     # <!--
     #   rdoc-file=enumerator.c
     #   - Enumerator::Product.new(*enums) -> enum
@@ -43,8 +43,6 @@ class Enumerator[unchecked out Elem, out Return]
     #     e.size #=> 6
     #
     def initialize: (*_EachEntry[Elem]) -> void
-
-    include Enumerable[Elem]
 
     public
 
