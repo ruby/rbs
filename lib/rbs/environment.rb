@@ -10,7 +10,8 @@ module RBS
     attr_reader :constant_decls
     attr_reader :global_decls
     attr_reader :class_alias_decls
-    attr_reader :buffer_directives
+
+    attr_reader :signatures
 
     module ContextUtil
       def calculate_context(decls)
@@ -142,7 +143,7 @@ module RBS
     end
 
     def initialize
-      @buffers = []
+      @signatures = {}
       @declarations = []
 
       @class_decls = {}
@@ -152,11 +153,10 @@ module RBS
       @global_decls = {}
       @class_alias_decls = {}
       @normalize_module_name_cache = {}
-      @buffer_directives = {}
     end
 
     def initialize_copy(other)
-      @buffers = other.buffers.dup
+      @signatures = other.signatures.dup
       @declarations = other.declarations.dup
 
       @class_decls = other.class_decls.dup
@@ -165,7 +165,6 @@ module RBS
       @constant_decls = other.constant_decls.dup
       @global_decls = other.global_decls.dup
       @class_alias_decls = other.class_alias_decls.dup
-      @buffer_directives = other.buffer_directives.dup
     end
 
     def self.from_loader(loader)
@@ -429,7 +428,7 @@ module RBS
     end
 
     def add_signature(buffer:, directives:, decls:)
-      buffer_directives[buffer] = directives
+      signatures[buffer] = [directives, decls]
       decls.each do |decl|
         self << decl
       end
@@ -452,9 +451,7 @@ module RBS
       table.known_types.merge(interface_decls.keys)
       table.compute_children
 
-      buffers_decls.each do |buffer, decls|
-        dirs = buffer_directives.fetch(buffer)
-
+      signatures.each do |buffer, (dirs, decls)|
         map = UseMap.new(table: table)
         dirs.each do |dir|
           dir.clauses.each do |clause|
@@ -758,28 +755,14 @@ module RBS
     end
 
     def buffers
-      buffers_decls.keys.compact
-    end
-
-    def buffers_decls
-      # @type var hash: Hash[Buffer, Array[AST::Declarations::t]]
-      hash = {}
-
-      declarations.each do |decl|
-        location = decl.location or next
-        (hash[location.buffer] ||= []) << decl
-      end
-
-      hash
+      signatures.keys
     end
 
     def unload(buffers)
       env = Environment.new
 
-      buffers_decls.each do |buf, decls|
+      signatures.each do |buf, (dirs, decls)|
         next if buffers.include?(buf)
-
-        dirs = buffer_directives.fetch(buf)
         env.add_signature(buffer: buf, directives: dirs, decls: decls)
       end
 
