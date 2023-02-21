@@ -111,7 +111,9 @@ module RBS
     # Global declarations
     attr_reader global_decls: Hash[Symbol, GlobalEntry]
 
-    attr_reader buffer_directives: Hash[Buffer, Array[AST::Directives::t]]
+    # A hash from Buffer to it's contents
+    #
+    attr_reader signatures: Hash[Buffer, [Array[AST::Directives::t], Array[AST::Declarations::t]]]
 
     def initialize: () -> void
 
@@ -141,11 +143,7 @@ module RBS
 
     def inspect: () -> String
 
-    @buffers: Array[Buffer]
-
     def buffers: () -> Array[Buffer]
-
-    def buffers_decls: () -> Hash[Buffer, Array[AST::Declarations::t]]
 
     # Remove declarations and directives that are loaded from `buffers`
     #
