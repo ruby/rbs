@@ -2,6 +2,73 @@
 
 ## master
 
+## 3.0.0 (2023-02-22)
+
+Read [the release note](https://github.com/ruby/rbs/wiki/Release-Note-3.0) for the overview of the changes.
+
+### Signature updates
+
+* Ruby 3.2 core updates ([#1238](https://github.com/ruby/rbs/pull/1238), [#1246](https://github.com/ruby/rbs/pull/1246), [#1242](https://github.com/ruby/rbs/pull/1242))
+* Ruby 3.2 stdlib updates ([#1240](https://github.com/ruby/rbs/pull/1240))
+* Ruby 3.2 incompatibilities ([#1241](https://github.com/ruby/rbs/pull/1241))
+* ripper ([#1193](https://github.com/ruby/rbs/pull/1193))
+* `RubyVM::AbstractSyntaxTree` ([#1189](https://github.com/ruby/rbs/pull/1189))
+* `Array#zip` ([#1232](https://github.com/ruby/rbs/pull/1232))
+* `Enumerable#zip` ([#1232](https://github.com/ruby/rbs/pull/1232))
+* `Module#attr_*` ([#1218](https://github.com/ruby/rbs/pull/1218), [#1229](https://github.com/ruby/rbs/pull/1229))
+* `Regexp.new` ([#1237](https://github.com/ruby/rbs/pull/1237))
+* `Regexp#=~` ([#1195](https://github.com/ruby/rbs/pull/1195))
+* `Socket.new` ([#1185](https://github.com/ruby/rbs/pull/1185))
+* `Object::name` ([#1204](https://github.com/ruby/rbs/pull/1204))
+* `_ToProc#to_proc` ([#1223](https://github.com/ruby/rbs/pull/1223))
+* Add `implicitly-returns-nil` annotations ([#1226](https://github.com/ruby/rbs/pull/1226))
+
+### Language updates
+
+#### Class/module alias declaration
+
+* Spec: https://hackmd.io/SAE7AGD6SMSJFnYiR2M5-Q?view
+* Pull requests: [#1219](https://github.com/ruby/rbs/pull/1219), [#1220](https://github.com/ruby/rbs/pull/1220)
+
+#### `use` directives
+
+* Spec: https://hackmd.io/pQehT1u1RfSj6lBcdgW8hg
+* Pull requests: [#1224](https://github.com/ruby/rbs/pull/1224), [#1234](https://github.com/ruby/rbs/pull/1234), [#1235](https://github.com/ruby/rbs/pull/1235)
+
+#### Per-overload annotations
+
+* Pull requests: [#1174](https://github.com/ruby/rbs/pull/1174)
+
+### Library changes
+
+* `Environment` cleanup ([#1209](https://github.com/ruby/rbs/pull/1209), [#1236](https://github.com/ruby/rbs/pull/1236), [#1247](https://github.com/ruby/rbs/pull/1247))
+* Add "Expected one argument." to `rbs ancestors` command ([#1245](https://github.com/ruby/rbs/pull/1245))
+* Implement `#detailed_message` for `ParsingError` ([#1166](https://github.com/ruby/rbs/pull/1166))
+* Support interface in class/module for `Sorter` ([#1191](https://github.com/ruby/rbs/pull/1191))
+* Use `-std=gnu99` instead of `-std=c99` ([#973](https://github.com/ruby/rbs/pull/973))
+* Add `rbs_` prefix to `skip` function ([#1186](https://github.com/ruby/rbs/pull/1186))
+* Better method definition resolution for overload/mixin combination ([#1199](https://github.com/ruby/rbs/pull/1199))
+* Escaping for keywords is no longer necessary ([#1178](https://github.com/ruby/rbs/pull/1178))
+* Fix super-class location ([#1172](https://github.com/ruby/rbs/pull/1172))
+
+#### rbs prototype
+
+* Introduce new heuristics for block types ([#1180](https://github.com/ruby/rbs/pull/1180))
+
+#### rbs collection
+
+* Install only *library* dependencies ([#1222](https://github.com/ruby/rbs/pull/1222), [#1228](https://github.com/ruby/rbs/pull/1228))
+* Add *local source* ([#854](https://github.com/ruby/rbs/pull/854))
+* Refactor collection ([#1149](https://github.com/ruby/rbs/pull/1149))
+* Let `#resolved_revision` return the last fetched commit ([#1215](https://github.com/ruby/rbs/pull/1215))
+
+### Miscellaneous
+
+* Update `syntax.md` ([#1243](https://github.com/ruby/rbs/pull/1243))
+* Add link to `RBS by Example` to `README.md` [#1225](https://github.com/ruby/rbs/pull/1225)
+* Make `rake stdlib_test` run with single process ([#1207](https://github.com/ruby/rbs/pull/1207), [#1211](https://github.com/ruby/rbs/pull/1211), [#1231](https://github.com/ruby/rbs/pull/1231))
+* Remove `steep/*` files from `.gem` ([#1214](https://github.com/ruby/rbs/pull/1214), [#1216](https://github.com/ruby/rbs/pull/1216))
+
 ## 2.8.4 (2023-01-20)
 
 ### Miscellaneous
