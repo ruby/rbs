@@ -921,7 +921,9 @@ Options:
     end
 
     def run_parse(args, options)
+      parse_method = :parse_signature
       e_code = nil
+
       OptionParser.new do |opts|
         opts.banner = <<-EOB
 Usage: rbs parse [files...]
@@ -936,6 +938,8 @@ Options:
         EOB
 
         opts.on('-e CODE', 'One line RBS script to parse') { |e| e_code = e }
+        opts.on('--type', 'Parse code as a type') { |e| parse_method = :parse_type }
+        opts.on('--method-type', 'Parse code as a method type') { |e| parse_method = :parse_method_type }
       end.parse!(args)
 
       loader = options.loader()
@@ -951,7 +955,7 @@ Options:
 
       bufs.each do |buf|
         RBS.logger.info "Parsing #{buf.name}..."
-        Parser.parse_signature(buf)
+        Parser.public_send(parse_method, buf)
       rescue RBS::ParsingError => ex
         stdout.puts ex.message
         syntax_error = true

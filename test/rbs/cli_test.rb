@@ -500,6 +500,30 @@ singleton(::BasicObject)
     end
   end
 
+  def test_parse_type
+    with_cli do |cli|
+      cli.run(['parse', '--type', '-e', 'bool'])
+      assert_empty stdout.string
+
+      assert_raises(SystemExit) { cli.run(['parse', '--type', '-e', '?']) }
+      assert_equal [
+        "-e:1:0...1:1: Syntax error: unexpected token for simple type, token=`?` (pQUESTION)",
+      ], stdout.string.split("\n").sort
+    end
+  end
+
+  def test_parse_method_type
+    with_cli do |cli|
+      cli.run(['parse', '--method-type', '-e', '() -> void'])
+      assert_empty stdout.string
+
+      assert_raises(SystemExit) { cli.run(['parse', '--method-type', '-e', '()']) }
+      assert_equal [
+        "-e:1:2...1:3: Syntax error: expected a token `pARROW`, token=`` (pEOF)",
+      ], stdout.string.split("\n").sort
+    end
+  end
+
   def test_prototype_no_parser
     Dir.mktmpdir do |dir|
       with_cli do |cli|
