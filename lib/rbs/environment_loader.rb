@@ -130,6 +130,8 @@ module RBS
     end
 
     def each_file(path, immediate:, skip_hidden:, &block)
+      return enum_for(__method__, path, immediate: immediate, skip_hidden: skip_hidden) unless block
+
       case
       when path.file?
         if path.extname == ".rbs" || immediate

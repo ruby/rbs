@@ -105,5 +105,6 @@ module RBS
     def each_dir: { (source, Pathname) -> void } -> void
 
     def each_file: (Pathname path, immediate: boolish, skip_hidden: boolish) { (Pathname) -> void } -> void
+                 | (Pathname path, immediate: boolish, skip_hidden: boolish) -> Enumerator[Pathname, void]
   end
 end

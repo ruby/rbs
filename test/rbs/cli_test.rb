@@ -488,6 +488,18 @@ singleton(::BasicObject)
     end
   end
 
+  def test_parse_e
+    with_cli do |cli|
+      cli.run(['parse', '-e', 'class C end'])
+      assert_empty stdout.string
+
+      assert_raises(SystemExit) { cli.run(['parse', '-e', 'class C en']) }
+      assert_equal [
+        "-e:1:8...1:10: Syntax error: unexpected token for class/module declaration member, token=`en` (tLIDENT)"
+      ], stdout.string.split("\n").sort
+    end
+  end
+
   def test_prototype_no_parser
     Dir.mktmpdir do |dir|
       with_cli do |cli|
