@@ -139,12 +139,11 @@ module RBS
         private def assign_stdlib(name:, from_gem:)
           return if lockfile.gems.key?(name)
 
-          if name == 'rubygems'
-            if from_gem
-                RBS.logger.warn "`rubygems` has been moved to core library, so it is always loaded. Remove explicit loading `rubygems` from `#{from_gem}`"
-            else
-              RBS.logger.warn '`rubygems` has been moved to core library, so it is always loaded. Remove explicit loading `rubygems`'
-            end
+          case name
+          when 'rubygems', 'set'
+            msg = "`#{name}` has been moved to core library, so it is always loaded. Remove explicit loading `#{name}`"
+            msg << " from `#{from_gem}`" if from_gem
+            RBS.logger.warn msg
 
             return
           end

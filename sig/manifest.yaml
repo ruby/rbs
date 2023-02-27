@@ -1,6 +1,5 @@
 dependencies:
   - name: logger
-  - name: set
   - name: pathname
   - name: json
   - name: optparse
