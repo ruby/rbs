@@ -2,6 +2,12 @@
 
 ## master
 
+## 3.0.1 (2023-02-27)
+
+### Library changes
+
+* Ignore `set` library on loading ([#1251](https://github.com/ruby/rbs/pull/1251))
+
 ## 3.0.0 (2023-02-22)
 
 Read [the release note](https://github.com/ruby/rbs/wiki/Release-Note-3.0) for the overview of the changes.
