@@ -58,10 +58,11 @@ task :validate => :compile do
 
   sh "#{ruby} #{rbs} validate --silent"
 
-  FileList["stdlib/*"].each do |path|
-    lib = [File.basename(path).to_s]
+  libs = FileList["stdlib/*"].map {|path| File.basename(path).to_s }
+  libs << "rbs"
 
-    sh "#{ruby} #{rbs} #{lib.map {|l| "-r #{l}"}.join(" ")} validate --silent"
+  libs.each do |lib|
+    sh "#{ruby} #{rbs} -r #{lib} validate --silent"
   end
 end
 
