@@ -59,7 +59,11 @@ task :validate => :compile do
   sh "#{ruby} #{rbs} validate --silent"
 
   libs = FileList["stdlib/*"].map {|path| File.basename(path).to_s }
-  libs << "rbs"
+  if Gem::Specification.find_by_name("rbs")
+    libs << "rbs"
+  else
+    STDERR.puts "⚠️⚠️⚠️⚠️ Skipping validation with `rbs` library because the gem is not found ⚠️⚠️⚠️⚠️"
+  end
 
   libs.each do |lib|
     sh "#{ruby} #{rbs} -r #{lib} validate --silent"
