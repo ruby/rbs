@@ -2,6 +2,12 @@
 
 ## master
 
+## 3.0.2 (2023-03-01)
+
+### Library changes
+
+* Delete `RubyVM::AbstractSyntaxTree` stub type definition ([#1259](https://github.com/ruby/rbs/pull/1259))
+
 ## 3.0.1 (2023-02-27)
 
 ### Library changes
