@@ -59,10 +59,16 @@ task :validate => :compile do
   sh "#{ruby} #{rbs} validate --silent"
 
   libs = FileList["stdlib/*"].map {|path| File.basename(path).to_s }
-  if Gem::Specification.find_by_name("rbs")
+
+  # Skip RBS validation because Ruby CI runs without rubygems
+  case skip_rbs_validation = ENV["SKIP_RBS_VALIDATION"]
+  when nil
     libs << "rbs"
+  when "true"
+    # Skip
   else
-    STDERR.puts "⚠️⚠️⚠️⚠️ Skipping validation with `rbs` library because the gem is not found ⚠️⚠️⚠️⚠️"
+    STDERR.puts "🚨🚨🚨🚨 SKIP_RBS_VALIDATION is expected to be `true` or unset, given `#{skip_rbs_validation}` 🚨🚨🚨🚨"
+    libs << "rbs"
   end
 
   libs.each do |lib|
