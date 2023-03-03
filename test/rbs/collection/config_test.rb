@@ -649,6 +649,59 @@ class RBS::Collection::ConfigTest < Test::Unit::TestCase
     end
   end
 
+  def test_generate_lockfile_dependency_with_platform
+    mktmpdir do |tmpdir|
+      config_path = tmpdir / 'rbs_collection.yaml'
+      config_path.write [CONFIG, <<~YAML].join("\n")
+        sources:
+          - type: git
+            name: ruby/gem_rbs_collection
+            remote: https://github.com/ruby/gem_rbs_collection.git
+            revision: cde6057e7546843ace6420c5783dd945c6ccda54
+            repo_dir: gems
+        path: '.gem_rbs_collection'
+        gems: []
+      YAML
+      gemfile_path = tmpdir / 'Gemfile'
+      gemfile_path.write <<~GEMFILE
+        source 'https://rubygems.org'
+
+        # Dependencies with platform may not appear in Gemfile.lock
+        gem "parser", platforms: [:jruby]
+      GEMFILE
+      gemfile_lock_path = tmpdir / 'Gemfile.lock'
+      gemfile_lock_path.write <<~GEMFILE_LOCK
+        GEM
+          remote: https://rubygems.org/
+          specs:
+
+        PLATFORMS
+          x86_64-linux
+
+        DEPENDENCIES
+          parser
+
+        BUNDLED WITH
+           2.2.0
+      GEMFILE_LOCK
+
+      definition = Bundler::Definition.build(gemfile_path, gemfile_lock_path, false)
+      _config, lockfile = RBS::Collection::Config.generate_lockfile(config_path: config_path, definition: definition)
+      string = YAML.dump(lockfile.to_lockfile)
+
+      assert_config <<~YAML, string
+        sources:
+          - type: git
+            name: ruby/gem_rbs_collection
+            remote: https://github.com/ruby/gem_rbs_collection.git
+            revision: cde6057e7546843ace6420c5783dd945c6ccda54
+            repo_dir: gems
+        path: ".gem_rbs_collection"
+        gemfile_lock_path: 'Gemfile.lock'
+      YAML
+    end
+  end
+
   private def assert_config(expected_str, actual_str)
     assert_equal YAML.load(expected_str), YAML.load(actual_str)
   end

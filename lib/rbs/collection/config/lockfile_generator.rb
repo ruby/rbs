@@ -75,8 +75,9 @@ module RBS
               next
             end
 
-            spec = gem_hash[dep.name] or raise "Cannot find `#{dep.name}` in bundler context"
-            assign_gem(name: dep.name, version: spec.version, ignored_gems: ignored_gems, src_data: nil)
+            if spec = gem_hash[dep.name]
+              assign_gem(name: dep.name, version: spec.version, ignored_gems: ignored_gems, src_data: nil)
+            end
           end
 
           lockfile.lockfile_path.write(YAML.dump(lockfile.to_lockfile))
@@ -131,8 +132,9 @@ module RBS
           end
 
           gem_hash[name].dependencies.each do |dep|
-            spec = gem_hash[dep.name]
-            assign_gem(name: dep.name, version: spec.version, src_data: nil, ignored_gems: ignored_gems)
+            if spec = gem_hash[dep.name]
+              assign_gem(name: dep.name, version: spec.version, src_data: nil, ignored_gems: ignored_gems)
+            end
           end
         end
 
