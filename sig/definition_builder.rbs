@@ -142,6 +142,10 @@ module RBS
     #
     def define_instance: (Definition definition, TypeName type_name, Substitution subst) -> void
 
+    # Updates `definition` with methods defined in an interface `type_name`
+    #
+    # It processes includes recursively
+    #
     def define_interface: (Definition definition, TypeName type_name, Substitution subst) -> void
 
     # Returns a substitution that corresponds to type application

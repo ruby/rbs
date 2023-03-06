@@ -2395,4 +2395,62 @@ end
       end
     end
   end
+
+  def test_build_instance_interface_mixin_transitive
+    SignatureManager.new do |manager|
+      manager.files[Pathname("foo.rbs")] = <<~EOF
+        interface _X
+          def x: () -> void
+
+          include _Y
+        end
+
+        interface _Y
+          def y: () -> void
+
+          include _Z
+        end
+
+        interface _Z
+          def z: () -> void
+        end
+
+        class A
+          include _X
+          extend _X
+        end
+      EOF
+
+      manager.build do |env|
+        builder = DefinitionBuilder.new(env: env)
+
+        builder.build_instance(type_name("::A")).tap do |definition|
+          assert_instance_of Definition, definition
+
+          assert_operator Set[:x, :y, :z], :<=, Set.new(definition.methods.keys)
+        end
+      end
+
+      manager.build do |env|
+        builder = DefinitionBuilder.new(env: env)
+
+        builder.build_singleton(type_name("::A")).tap do |definition|
+          assert_instance_of Definition, definition
+
+          assert_operator Set[:x, :y, :z], :<=, Set.new(definition.methods.keys)
+        end
+      end
+
+      manager.build do |env|
+        builder = DefinitionBuilder.new(env: env)
+
+        builder.build_interface(type_name("::_X")).tap do |definition|
+          assert_instance_of Definition, definition
+
+          assert_operator Set[:x, :y, :z], :<=, Set.new(definition.methods.keys)
+        end
+      end
+    end
+  end
+  end
 end
