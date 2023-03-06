@@ -694,8 +694,8 @@ module RBS
             Definition::Method::TypeDef.new(
               type: method_type,
               member: original,
-              defined_in: definition.type_name,
-              implemented_in: definition.type_name
+              defined_in: defined_in,
+              implemented_in: implemented_in
             )
           ],
           accessibility: method.accessibility,
@@ -724,7 +724,7 @@ module RBS
         method_definition = Definition::Method.new(
           super_method: super_method,
           defs: existing_method.defs.map do |defn|
-            defn.update(implemented_in: definition.type_name)
+            defn.update(implemented_in: implemented_in)
           end,
           accessibility: existing_method.accessibility,
           alias_of: existing_method.alias_of
@@ -736,8 +736,8 @@ module RBS
           type_def = Definition::Method::TypeDef.new(
             type: subst.empty? ? overload.method_type : overload.method_type.sub(subst),
             member: overloading_def,
-            defined_in: definition.type_name,
-            implemented_in: definition.type_name
+            defined_in: defined_in,
+            implemented_in: implemented_in
           )
 
           method_definition.defs.unshift(type_def)
