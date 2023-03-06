@@ -432,8 +432,9 @@ module RBS
             super_name = super_class.name
             super_args = super_class.args
 
-            super_ancestors = instance_ancestors(super_name, building_ancestors: building_ancestors)
-            ancestors.unshift(*super_ancestors.apply(super_args, location: entry.primary.decl.location))
+            super_ancestors = instance_ancestors(super_name, building_ancestors: building_ancestors).apply(super_args, location: entry.primary.decl.location)
+            super_ancestors.map! {|ancestor| fill_ancestor_source(ancestor, name: super_name, source: :super) }
+            ancestors.unshift(*super_ancestors)
           end
         end
 
@@ -450,8 +451,9 @@ module RBS
           included_modules.each do |mod|
             name = mod.name
             arg_types = mod.args
-            mod_ancestors = instance_ancestors(name, building_ancestors: building_ancestors)
-            ancestors.unshift(*mod_ancestors.apply(arg_types, location: entry.primary.decl.location))
+            mod_ancestors = instance_ancestors(name, building_ancestors: building_ancestors).apply(arg_types, location: entry.primary.decl.location)
+            mod_ancestors.map! {|ancestor| fill_ancestor_source(ancestor, name: name, source: mod.source) }
+            ancestors.unshift(*mod_ancestors)
           end
         end
 
@@ -461,8 +463,9 @@ module RBS
           prepended_modules.each do |mod|
             name = mod.name
             arg_types = mod.args
-            mod_ancestors = instance_ancestors(name, building_ancestors: building_ancestors)
-            ancestors.unshift(*mod_ancestors.apply(arg_types, location: entry.primary.decl.location))
+            mod_ancestors = instance_ancestors(name, building_ancestors: building_ancestors).apply(arg_types, location: entry.primary.decl.location)
+            mod_ancestors.map! {|ancestor| fill_ancestor_source(ancestor, name: name, source: mod.source) }
+            ancestors.unshift(*mod_ancestors)
           end
         end
 
@@ -495,8 +498,9 @@ module RBS
           super_name = super_class.name
           super_args = super_class.args
 
-          super_ancestors = instance_ancestors(super_name, building_ancestors: building_ancestors)
-          ancestors.unshift(*super_ancestors.apply(super_args, location: entry.primary.decl.location))
+          super_ancestors = instance_ancestors(super_name, building_ancestors: building_ancestors).apply(super_args, location: entry.primary.decl.location)
+          super_ancestors.map! {|ancestor| fill_ancestor_source(ancestor, name: super_name, source: :super) }
+          ancestors.unshift(*super_ancestors)
 
         when Definition::Ancestor::Singleton
           super_name = super_class.name
@@ -509,8 +513,9 @@ module RBS
         extended_modules.each do |mod|
           name = mod.name
           args = mod.args
-          mod_ancestors = instance_ancestors(name, building_ancestors: building_ancestors)
-          ancestors.unshift(*mod_ancestors.apply(args, location: entry.primary.decl.location))
+          mod_ancestors = instance_ancestors(name, building_ancestors: building_ancestors).apply(args, location: entry.primary.decl.location)
+          mod_ancestors.map! {|ancestor| fill_ancestor_source(ancestor, name: name, source: mod.source) }
+          ancestors.unshift(*mod_ancestors)
         end
 
         ancestors.unshift(self_ancestor)
@@ -541,9 +546,9 @@ module RBS
 
         included_interfaces = one_ancestors.included_interfaces or raise
         included_interfaces.each do |a|
-          included_ancestors = interface_ancestors(a.name, building_ancestors: building_ancestors)
-
-          ancestors.unshift(*included_ancestors.apply(a.args, location: entry.decl.location))
+          included_ancestors = interface_ancestors(a.name, building_ancestors: building_ancestors).apply(a.args, location: entry.decl.location)
+          included_ancestors.map! {|ancestor| fill_ancestor_source(ancestor, name: a.name, source: a.source) }
+          ancestors.unshift(*included_ancestors)
         end
 
         ancestors.unshift(self_ancestor)
@@ -554,6 +559,19 @@ module RBS
           params: params,
           ancestors: ancestors
         )
+      end
+
+      def fill_ancestor_source(ancestor, name:, source:, &block)
+        case ancestor
+        when Definition::Ancestor::Instance
+          if ancestor.name == name && !ancestor.source
+            Definition::Ancestor::Instance.new(name: ancestor.name, args: ancestor.args, source: source)
+          else
+            ancestor
+          end
+        else
+          ancestor
+        end
       end
     end
   end

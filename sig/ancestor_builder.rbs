@@ -154,6 +154,10 @@ module RBS
                         prepended_modules: Array[Definition::Ancestor::Instance]?,
                          extended_modules: Array[Definition::Ancestor::Instance]?,
                       extended_interfaces: Array[Definition::Ancestor::Instance]?) -> void
+
+      # Fill `#source` of instance ancestor if `ancestor.name == name` and its `source` is `nil`
+      #
+      def fill_ancestor_source: (Definition::Ancestor::t, name: TypeName, source: Definition::Ancestor::Instance::source)  -> Definition::Ancestor::t
     end
   end
 end
