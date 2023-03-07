@@ -83,8 +83,9 @@ module RBS
       type t = Instance | Singleton
 
       class Instance
-        type source = :super | nil
-                    | AST::Members::Include | AST::Members::Extend | AST::Members::Prepend
+        type source = :super     # Inheritance
+                    | nil        # Itself
+                    | AST::Members::Include | AST::Members::Extend | AST::Members::Prepend  # AST
                     | AST::Declarations::Module::Self
 
         attr_reader name: TypeName

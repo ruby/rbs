@@ -274,38 +274,100 @@ EOF
         builder.instance_ancestors(type_name("::Object")).tap do |a|
           assert_equal type_name("::Object"), a.type_name
           assert_equal [], a.params
-          assert_equal [
-                         Ancestor::Instance.new(name: BuiltinNames::Object.name, args: [], source: nil),
-                         Ancestor::Instance.new(name: BuiltinNames::Kernel.name, args: [], source: nil),
-                         Ancestor::Instance.new(name: BuiltinNames::BasicObject.name, args: [], source: nil)
-                       ],
-                       a.ancestors
+
+          assert_equal 3, a.ancestors.size
+          a.ancestors[0].tap do |ancestor|
+            assert_instance_of Ancestor::Instance, ancestor
+            assert_equal BuiltinNames::Object.name, ancestor.name
+            assert_equal [], ancestor.args
+            assert_nil ancestor.source
+          end
+          a.ancestors[1].tap do |ancestor|
+            assert_instance_of Ancestor::Instance, ancestor
+            assert_equal BuiltinNames::Kernel.name, ancestor.name
+            assert_equal [], ancestor.args
+            assert_instance_of AST::Members::Include, ancestor.source
+          end
+          a.ancestors[2].tap do |ancestor|
+            assert_instance_of Ancestor::Instance, ancestor
+            assert_equal BuiltinNames::BasicObject.name, ancestor.name
+            assert_equal [], ancestor.args
+            assert_equal :super, ancestor.source
+          end
         end
 
         builder.instance_ancestors(type_name("::String")).tap do |a|
           assert_equal type_name("::String"), a.type_name
           assert_equal [], a.params
-          assert_equal [
-                         Ancestor::Instance.new(name: BuiltinNames::String.name, args: [], source: nil),
-                         Ancestor::Instance.new(name: BuiltinNames::Comparable.name, args: [], source: nil),
-                         Ancestor::Instance.new(name: BuiltinNames::Object.name, args: [], source: nil),
-                         Ancestor::Instance.new(name: BuiltinNames::Kernel.name, args: [], source: nil),
-                         Ancestor::Instance.new(name: BuiltinNames::BasicObject.name, args: [], source: nil)
-                       ],
-                       a.ancestors
+
+          assert_equal 5, a.ancestors.size
+          a.ancestors[0].tap do |ancestor|
+            assert_instance_of Ancestor::Instance, ancestor
+            assert_equal BuiltinNames::String.name, ancestor.name
+            assert_equal [], ancestor.args
+            assert_nil ancestor.source
+          end
+          a.ancestors[1].tap do |ancestor|
+            assert_instance_of Ancestor::Instance, ancestor
+            assert_equal BuiltinNames::Comparable.name, ancestor.name
+            assert_equal [], ancestor.args
+            assert_instance_of AST::Members::Include, ancestor.source
+          end
+          a.ancestors[2].tap do |ancestor|
+            assert_instance_of Ancestor::Instance, ancestor
+            assert_equal BuiltinNames::Object.name, ancestor.name
+            assert_equal [], ancestor.args
+            assert_equal :super, ancestor.source
+          end
+          a.ancestors[3].tap do |ancestor|
+            assert_instance_of Ancestor::Instance, ancestor
+            assert_equal BuiltinNames::Kernel.name, ancestor.name
+            assert_equal [], ancestor.args
+            assert_instance_of AST::Members::Include, ancestor.source
+          end
+          a.ancestors[4].tap do |ancestor|
+            assert_instance_of Ancestor::Instance, ancestor
+            assert_equal BuiltinNames::BasicObject.name, ancestor.name
+            assert_equal [], ancestor.args
+            assert_equal :super, ancestor.source
+          end
         end
 
         builder.instance_ancestors(type_name("::Foo")).tap do |a|
           assert_equal type_name("::Foo"), a.type_name
           assert_equal [:X], a.params
-          assert_equal [
-                         Ancestor::Instance.new(name: type_name("::Foo"), args: [Types::Variable.build(:X)], source: nil),
-                         Ancestor::Instance.new(name: type_name("::Bar"), args: [Types::Variable.build(:X), parse_type("::String")], source: nil),
-                         Ancestor::Instance.new(name: BuiltinNames::Object.name, args: [], source: nil),
-                         Ancestor::Instance.new(name: BuiltinNames::Kernel.name, args: [], source: nil),
-                         Ancestor::Instance.new(name: BuiltinNames::BasicObject.name, args: [], source: nil)
-                       ],
-                       a.ancestors
+
+          assert_equal 5, a.ancestors.size
+          a.ancestors[0].tap do |ancestor|
+            assert_instance_of Ancestor::Instance, ancestor
+            assert_equal TypeName("::Foo"), ancestor.name
+            assert_equal [Types::Variable.build(:X)], ancestor.args
+            assert_nil ancestor.source
+          end
+          a.ancestors[1].tap do |ancestor|
+            assert_instance_of Ancestor::Instance, ancestor
+            assert_equal TypeName("::Bar"), ancestor.name
+            assert_equal [Types::Variable.build(:X), parse_type("::String")], ancestor.args
+            assert_instance_of AST::Members::Include, ancestor.source
+          end
+          a.ancestors[2].tap do |ancestor|
+            assert_instance_of Ancestor::Instance, ancestor
+            assert_equal BuiltinNames::Object.name, ancestor.name
+            assert_equal [], ancestor.args
+            assert_equal :super, ancestor.source
+          end
+          a.ancestors[3].tap do |ancestor|
+            assert_instance_of Ancestor::Instance, ancestor
+            assert_equal BuiltinNames::Kernel.name, ancestor.name
+            assert_equal [], ancestor.args
+            assert_instance_of AST::Members::Include, ancestor.source
+          end
+          a.ancestors[4].tap do |ancestor|
+            assert_instance_of Ancestor::Instance, ancestor
+            assert_equal BuiltinNames::BasicObject.name, ancestor.name
+            assert_equal [], ancestor.args
+            assert_equal :super, ancestor.source
+          end
         end
       end
     end
@@ -364,53 +426,153 @@ EOF
 
         builder.singleton_ancestors(type_name("::BasicObject")).tap do |a|
           assert_equal type_name("::BasicObject"), a.type_name
-          assert_equal [
-                         Ancestor::Singleton.new(name: BuiltinNames::BasicObject.name),
-                         Ancestor::Instance.new(name: BuiltinNames::Class.name, args: [], source: nil),
-                         Ancestor::Instance.new(name: BuiltinNames::Module.name, args: [], source: nil),
-                         Ancestor::Instance.new(name: BuiltinNames::Object.name, args: [], source: nil),
-                         Ancestor::Instance.new(name: BuiltinNames::Kernel.name, args: [], source: nil),
-                         Ancestor::Instance.new(name: BuiltinNames::BasicObject.name, args: [], source: nil),
-                       ], a.ancestors
+
+          assert_equal 6, a.ancestors.size
+          assert_equal Ancestor::Singleton.new(name: BuiltinNames::BasicObject.name), a.ancestors[0]
+          a.ancestors[1].tap do |ancestor|
+            assert_instance_of Ancestor::Instance, ancestor
+            assert_equal BuiltinNames::Class.name, ancestor.name
+            assert_equal [], ancestor.args
+            assert_equal :super, ancestor.source
+          end
+          a.ancestors[2].tap do |ancestor|
+            assert_instance_of Ancestor::Instance, ancestor
+            assert_equal BuiltinNames::Module.name, ancestor.name
+            assert_equal [], ancestor.args
+            assert_equal :super, ancestor.source
+          end
+          a.ancestors[3].tap do |ancestor|
+            assert_instance_of Ancestor::Instance, ancestor
+            assert_equal BuiltinNames::Object.name, ancestor.name
+            assert_equal [], ancestor.args
+            assert_equal :super, ancestor.source
+          end
+          a.ancestors[4].tap do |ancestor|
+            assert_instance_of Ancestor::Instance, ancestor
+            assert_equal BuiltinNames::Kernel.name, ancestor.name
+            assert_equal [], ancestor.args
+            assert_instance_of AST::Members::Include, ancestor.source
+          end
+          a.ancestors[5].tap do |ancestor|
+            assert_instance_of Ancestor::Instance, ancestor
+            assert_equal BuiltinNames::BasicObject.name, ancestor.name
+            assert_equal [], ancestor.args
+            assert_equal :super, ancestor.source
+          end
         end
 
         builder.singleton_ancestors(type_name("::Object")).tap do |a|
           assert_equal type_name("::Object"), a.type_name
-          assert_equal [
-                         Ancestor::Singleton.new(name: BuiltinNames::Object.name),
-                         Ancestor::Singleton.new(name: BuiltinNames::BasicObject.name),
-                         Ancestor::Instance.new(name: BuiltinNames::Class.name, args: [], source: nil),
-                         Ancestor::Instance.new(name: BuiltinNames::Module.name, args: [], source: nil),
-                         Ancestor::Instance.new(name: BuiltinNames::Object.name, args: [], source: nil),
-                         Ancestor::Instance.new(name: BuiltinNames::Kernel.name, args: [], source: nil),
-                         Ancestor::Instance.new(name: BuiltinNames::BasicObject.name, args: [], source: nil),
-                       ], a.ancestors
+
+          assert_equal 7, a.ancestors.size
+          assert_equal Ancestor::Singleton.new(name: BuiltinNames::Object.name), a.ancestors[0]
+          assert_equal Ancestor::Singleton.new(name: BuiltinNames::BasicObject.name), a.ancestors[1]
+          a.ancestors[2].tap do |ancestor|
+            assert_instance_of Ancestor::Instance, ancestor
+            assert_equal BuiltinNames::Class.name, ancestor.name
+            assert_equal [], ancestor.args
+            assert_equal :super, ancestor.source
+          end
+          a.ancestors[3].tap do |ancestor|
+            assert_instance_of Ancestor::Instance, ancestor
+            assert_equal BuiltinNames::Module.name, ancestor.name
+            assert_equal [], ancestor.args
+            assert_equal :super, ancestor.source
+          end
+          a.ancestors[4].tap do |ancestor|
+            assert_instance_of Ancestor::Instance, ancestor
+            assert_equal BuiltinNames::Object.name, ancestor.name
+            assert_equal [], ancestor.args
+            assert_equal :super, ancestor.source
+          end
+          a.ancestors[5].tap do |ancestor|
+            assert_instance_of Ancestor::Instance, ancestor
+            assert_equal BuiltinNames::Kernel.name, ancestor.name
+            assert_equal [], ancestor.args
+            assert_instance_of AST::Members::Include, ancestor.source
+          end
+          a.ancestors[6].tap do |ancestor|
+            assert_instance_of Ancestor::Instance, ancestor
+            assert_equal BuiltinNames::BasicObject.name, ancestor.name
+            assert_equal [], ancestor.args
+            assert_equal :super, ancestor.source
+          end
         end
 
         builder.singleton_ancestors(type_name("::Kernel")).tap do |a|
           assert_equal type_name("::Kernel"), a.type_name
-          assert_equal [
-                         Ancestor::Singleton.new(name: BuiltinNames::Kernel.name),
-                         Ancestor::Instance.new(name: BuiltinNames::Module.name, args: [], source: nil),
-                         Ancestor::Instance.new(name: BuiltinNames::Object.name, args: [], source: nil),
-                         Ancestor::Instance.new(name: BuiltinNames::Kernel.name, args: [], source: nil),
-                         Ancestor::Instance.new(name: BuiltinNames::BasicObject.name, args: [], source: nil),
-                       ], a.ancestors
+
+          assert_equal 5, a.ancestors.size
+          assert_equal Ancestor::Singleton.new(name: BuiltinNames::Kernel.name), a.ancestors[0]
+          a.ancestors[1].tap do |ancestor|
+            assert_instance_of Ancestor::Instance, ancestor
+            assert_equal BuiltinNames::Module.name, ancestor.name
+            assert_equal [], ancestor.args
+            assert_equal :super, ancestor.source
+          end
+          a.ancestors[2].tap do |ancestor|
+            assert_instance_of Ancestor::Instance, ancestor
+            assert_equal BuiltinNames::Object.name, ancestor.name
+            assert_equal [], ancestor.args
+            assert_equal :super, ancestor.source
+          end
+          a.ancestors[3].tap do |ancestor|
+            assert_instance_of Ancestor::Instance, ancestor
+            assert_equal BuiltinNames::Kernel.name, ancestor.name
+            assert_equal [], ancestor.args
+            assert_instance_of AST::Members::Include, ancestor.source
+          end
+          a.ancestors[4].tap do |ancestor|
+            assert_instance_of Ancestor::Instance, ancestor
+            assert_equal BuiltinNames::BasicObject.name, ancestor.name
+            assert_equal [], ancestor.args
+            assert_equal :super, ancestor.source
+          end
         end
 
         builder.singleton_ancestors(type_name("::Foo")).tap do |a|
           assert_equal type_name("::Foo"), a.type_name
-          assert_equal [
-                         Ancestor::Singleton.new(name: type_name("::Foo")),
-                         Ancestor::Instance.new(name: type_name("::Bar"), args: [parse_type("::String"), parse_type("::Symbol")], source: nil),
-                         Ancestor::Singleton.new(name: BuiltinNames::Object.name),
-                         Ancestor::Singleton.new(name: BuiltinNames::BasicObject.name),
-                         Ancestor::Instance.new(name: BuiltinNames::Class.name, args: [], source: nil),
-                         Ancestor::Instance.new(name: BuiltinNames::Module.name, args: [], source: nil),
-                         Ancestor::Instance.new(name: BuiltinNames::Object.name, args: [], source: nil),
-                         Ancestor::Instance.new(name: BuiltinNames::Kernel.name, args: [], source: nil),
-                         Ancestor::Instance.new(name: BuiltinNames::BasicObject.name, args: [], source: nil),
-                       ], a.ancestors
+
+          assert_equal 9, a.ancestors.size
+          assert_equal Ancestor::Singleton.new(name: type_name("::Foo")), a.ancestors[0]
+          a.ancestors[1].tap do |ancestor|
+            assert_instance_of Ancestor::Instance, ancestor
+            assert_equal type_name("::Bar"), ancestor.name
+            assert_equal [parse_type("::String"), parse_type("::Symbol")], ancestor.args
+            assert_instance_of AST::Members::Extend, ancestor.source
+          end
+          assert_equal Ancestor::Singleton.new(name: BuiltinNames::Object.name), a.ancestors[2]
+          assert_equal Ancestor::Singleton.new(name: BuiltinNames::BasicObject.name), a.ancestors[3]
+          a.ancestors[4].tap do |ancestor|
+            assert_instance_of Ancestor::Instance, ancestor
+            assert_equal BuiltinNames::Class.name, ancestor.name
+            assert_equal [], ancestor.args
+            assert_equal :super, ancestor.source
+          end
+          a.ancestors[5].tap do |ancestor|
+            assert_instance_of Ancestor::Instance, ancestor
+            assert_equal BuiltinNames::Module.name, ancestor.name
+            assert_equal [], ancestor.args
+            assert_equal :super, ancestor.source
+          end
+          a.ancestors[6].tap do |ancestor|
+            assert_instance_of Ancestor::Instance, ancestor
+            assert_equal BuiltinNames::Object.name, ancestor.name
+            assert_equal [], ancestor.args
+            assert_equal :super, ancestor.source
+          end
+          a.ancestors[7].tap do |ancestor|
+            assert_instance_of Ancestor::Instance, ancestor
+            assert_equal BuiltinNames::Kernel.name, ancestor.name
+            assert_equal [], ancestor.args
+            assert_instance_of AST::Members::Include, ancestor.source
+          end
+          a.ancestors[8].tap do |ancestor|
+            assert_instance_of Ancestor::Instance, ancestor
+            assert_equal BuiltinNames::BasicObject.name, ancestor.name
+            assert_equal [], ancestor.args
+            assert_equal :super, ancestor.source
+          end
         end
       end
     end
@@ -437,12 +599,26 @@ EOF
           assert_instance_of Definition::InstanceAncestors, a
           assert_equal type_name("::_I3"), a.type_name
           assert_equal [:X], a.params
-          assert_equal [
-                         Ancestor::Instance.new(name: type_name("::_I3"), args: [parse_type("X", variables: [:X])], source: nil),
-                         Ancestor::Instance.new(name: type_name("::_I2"), args: [parse_type("::Integer"), parse_type("X", variables: [:X])], source: nil),
-                         Ancestor::Instance.new(name: type_name("::_I1"), args: [parse_type("::Hash[::Integer, X]", variables: [:X])], source: nil)
-                       ],
-                       a.ancestors
+
+          assert_equal 3, a.ancestors.size
+          a.ancestors[0].tap do |ancestor|
+            assert_instance_of Ancestor::Instance, ancestor
+            assert_equal type_name("::_I3"), ancestor.name
+            assert_equal [parse_type("X", variables: [:X])], ancestor.args
+            assert_nil ancestor.source
+          end
+          a.ancestors[1].tap do |ancestor|
+            assert_instance_of Ancestor::Instance, ancestor
+            assert_equal type_name("::_I2"), ancestor.name
+            assert_equal [parse_type("::Integer"), parse_type("X", variables: [:X])], ancestor.args
+            assert_instance_of AST::Members::Include, ancestor.source
+          end
+          a.ancestors[2].tap do |ancestor|
+            assert_instance_of Ancestor::Instance, ancestor
+            assert_equal type_name("::_I1"), ancestor.name
+            assert_equal [parse_type("::Hash[::Integer, X]", variables: [:X])], ancestor.args
+            assert_instance_of AST::Members::Include, ancestor.source
+          end
         end
       end
     end

@@ -31,9 +31,10 @@ module RBS
     end
 
     def define_interface(definition, type_name, subst)
-      included_interfaces = ancestor_builder.one_interface_ancestors(type_name).included_interfaces or raise
-      interface_methods = interface_methods(included_interfaces)
+      included_interfaces = ancestor_builder.interface_ancestors(type_name).ancestors #: Array[Definition::Ancestor::Instance]
+      included_interfaces = included_interfaces.reject {|ancestor| ancestor.source == nil }
 
+      interface_methods = interface_methods(included_interfaces)
       methods = method_builder.build_interface(type_name)
 
       import_methods(definition, type_name, methods, interface_methods, subst)
@@ -55,7 +56,6 @@ module RBS
         Definition.new(type_name: type_name, entry: entry, self_type: self_type, ancestors: ancestors).tap do |definition|
           methods = method_builder.build_interface(type_name)
           one_ancestors = ancestor_builder.one_interface_ancestors(type_name)
-
           validate_type_params(definition, methods: methods, ancestors: one_ancestors)
 
           define_interface(definition, type_name, subst)
@@ -94,7 +94,12 @@ module RBS
         define_instance(definition, mod.name, subst + tapp_subst(mod.name, mod.args))
       end
 
-      interface_methods = interface_methods(one_ancestors.each_included_interface.to_a)
+      all_interfaces = one_ancestors.each_included_interface.flat_map do |interface|
+        other_interfaces = ancestor_builder.interface_ancestors(interface.name).ancestors #: Array[Definition::Ancestor::Instance]
+        other_interfaces = other_interfaces.select {|ancestor| ancestor.source }
+        [interface, *other_interfaces]
+      end
+      interface_methods = interface_methods(all_interfaces)
       import_methods(definition, type_name, methods, interface_methods, subst)
 
       one_ancestors.each_prepended_module do |mod|
@@ -219,6 +224,7 @@ module RBS
 
         Definition.new(type_name: type_name, entry: entry, self_type: self_type, ancestors: ancestors).tap do |definition|
           one_ancestors = ancestor_builder.one_singleton_ancestors(type_name)
+          methods = method_builder.build_singleton(type_name)
 
           if super_class = one_ancestors.super_class
             case super_class
@@ -233,8 +239,13 @@ module RBS
             definition.class_variables.merge!(defn.class_variables)
           end
 
-          one_ancestors = ancestor_builder.one_singleton_ancestors(type_name)
-          methods = method_builder.build_singleton(type_name)
+          all_interfaces = one_ancestors.each_extended_interface.flat_map do |interface|
+            other_interfaces = ancestor_builder.interface_ancestors(interface.name).ancestors #: Array[Definition::Ancestor::Instance]
+            other_interfaces = other_interfaces.select {|ancestor| ancestor.source }
+            [interface, *other_interfaces]
+          end
+          interface_methods = interface_methods(all_interfaces)
+          import_methods(definition, type_name, methods, interface_methods, Substitution.new)
 
           one_ancestors.each_extended_module do |mod|
             mod.args.each do |arg|
@@ -279,7 +290,7 @@ module RBS
 
     def build_singleton(type_name)
       type_name = env.normalize_module_name(type_name)
-      
+
       try_cache type_name, cache: singleton_cache do
         entry = env.class_decls[type_name] or raise "Unknown name for build_singleton: #{type_name}"
         ensure_namespace!(type_name.namespace, location: entry.decls[0].decl.location)
@@ -683,8 +694,8 @@ module RBS
             Definition::Method::TypeDef.new(
               type: method_type,
               member: original,
-              defined_in: definition.type_name,
-              implemented_in: definition.type_name
+              defined_in: defined_in,
+              implemented_in: implemented_in
             )
           ],
           accessibility: method.accessibility,
@@ -713,7 +724,7 @@ module RBS
         method_definition = Definition::Method.new(
           super_method: super_method,
           defs: existing_method.defs.map do |defn|
-            defn.update(implemented_in: definition.type_name)
+            defn.update(implemented_in: implemented_in)
           end,
           accessibility: existing_method.accessibility,
           alias_of: existing_method.alias_of
@@ -725,8 +736,8 @@ module RBS
           type_def = Definition::Method::TypeDef.new(
             type: subst.empty? ? overload.method_type : overload.method_type.sub(subst),
             member: overloading_def,
-            defined_in: definition.type_name,
-            implemented_in: definition.type_name
+            defined_in: defined_in,
+            implemented_in: implemented_in
           )
 
           method_definition.defs.unshift(type_def)
