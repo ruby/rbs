@@ -2,6 +2,20 @@
 
 ## master
 
+## 3.0.3 (2023-03-07)
+
+### Library changes
+
+* Fix `DefinitionBuilder` ([\#1268](https://github.com/ruby/rbs/pull/1268))
+
+#### rbs collection
+
+* Skip dependencies not included in `Gemfile.lock` ([\#1266](https://github.com/ruby/rbs/pull/1266))
+
+### Miscellaneous
+
+* Skip RBS validation on Ruby CI ([\#1264](https://github.com/ruby/rbs/pull/1264), [\#1263](https://github.com/ruby/rbs/pull/1263))
+
 ## 3.0.2 (2023-03-01)
 
 ### Library changes

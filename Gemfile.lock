@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    rbs (3.0.2)
+    rbs (3.0.3)
 
 PATH
   remote: test/assets/test-gem
@@ -115,4 +115,4 @@ DEPENDENCIES
   test-unit
 
 BUNDLED WITH
-   2.4.6
+   2.4.7
