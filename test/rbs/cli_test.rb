@@ -90,6 +90,24 @@ class RBS::CliTest < Test::Unit::TestCase
       refute_match %r{^::Kernel \(module\)$}, stdout.string
       assert_match %r{^::_Each \(interface\)$}, stdout.string
     end
+
+    Dir.mktmpdir do |dir|
+      dir = Pathname(dir)
+      dir.join('alias.rbs').write(<<~RBS)
+        class Foo = String
+
+        module Bar = Kernel
+      RBS
+
+      Dir.chdir(dir) do
+        with_cli do |cli|
+          cli.run(%w(-I. list))
+
+          assert_match %r{^::Foo \(class alias\)$}, stdout.string
+          assert_match %r{^::Bar \(module alias\)$}, stdout.string
+        end
+      end
+    end
   end
 
   def test_ancestors
@@ -128,6 +146,30 @@ singleton(::BasicObject)
 ::BasicObject
       EOF
     end
+
+    Dir.mktmpdir do |dir|
+      dir = Pathname(dir)
+      dir.join('alias.rbs').write(<<~RBS)
+        class Foo = String
+
+        class Bar
+        end
+      RBS
+
+      Dir.chdir(dir) do
+        with_cli do |cli|
+          cli.run(%w(-I. ancestors ::Foo))
+
+          assert_equal <<~EOF, stdout.string
+            ::String
+            ::Comparable
+            ::Object
+            ::Kernel
+            ::BasicObject
+          EOF
+        end
+      end
+    end
   end
 
   def test_methods
@@ -135,6 +177,27 @@ singleton(::BasicObject)
       cli.run(%w(methods ::Set))
       cli.run(%w(methods --instance ::Set))
       cli.run(%w(methods --singleton ::Set))
+    end
+
+    Dir.mktmpdir do |dir|
+      dir = Pathname(dir)
+      dir.join('alias.rbs').write(<<~RBS)
+        class Foo = String
+
+        module Bar = Kernel
+      RBS
+
+      Dir.chdir(dir) do
+        with_cli do |cli|
+          cli.run(%w(-I. methods ::Foo))
+          assert_match %r{^puts \(private\)$}, stdout.string
+        end
+
+        with_cli do |cli|
+          cli.run(%w(-I. methods --singleton ::Bar))
+          assert_match %r{^puts \(public\)$}, stdout.string
+        end
+      end
     end
   end
 
@@ -151,6 +214,28 @@ singleton(::BasicObject)
     | () -> ::Enumerator[self, untyped]
       EOF
     end
+
+    Dir.mktmpdir do |dir|
+      dir = Pathname(dir)
+      dir.join('alias.rbs').write(<<~RBS)
+        class Foo = String
+
+        module Bar = Kernel
+      RBS
+
+      Dir.chdir(dir) do
+        with_cli do |cli|
+          cli.run(%w(-I. method ::Foo puts))
+          assert_match %r{^::Foo#puts$}, stdout.string
+        end
+
+        with_cli do |cli|
+          cli.run(%w(-I. method --singleton ::Bar puts))
+          assert_match %r{^::Bar\.puts$}, stdout.string
+        end
+      end
+    end
+
   end
 
   def test_validate

@@ -230,6 +230,19 @@ EOB
             end
           end
         end
+
+        env.class_alias_decls.each do |name, entry|
+          case entry
+          when Environment::ModuleAliasEntry
+            if list.include?(:module)
+              stdout.puts "#{name} (module alias)"
+            end
+          when Environment::ClassAliasEntry
+            if list.include?(:class)
+              stdout.puts "#{name} (class alias)"
+            end
+          end
+        end
       end
 
       if list.include?(:interface)
@@ -272,7 +285,10 @@ EOU
       builder = DefinitionBuilder::AncestorBuilder.new(env: env)
       type_name = TypeName(args[0]).absolute!
 
-      if env.class_decls.key?(type_name)
+      case env.constant_entry(type_name)
+      when Environment::ClassEntry, Environment::ModuleEntry, Environment::ClassAliasEntry, Environment::ModuleAliasEntry
+        type_name = env.normalize_module_name(type_name)
+
         ancestors = case kind
                     when :instance
                       builder.instance_ancestors(type_name)
@@ -334,7 +350,7 @@ EOU
       builder = DefinitionBuilder.new(env: env)
       type_name = TypeName(args[0]).absolute!
 
-      if env.class_decls.key?(type_name)
+      if env.module_name?(type_name)
         definition = case kind
                      when :instance
                        builder.build_instance(type_name)
@@ -388,7 +404,7 @@ EOU
       type_name = TypeName(args[0]).absolute!
       method_name = args[1].to_sym
 
-      unless env.class_decls.key?(type_name)
+      unless env.module_name?(type_name)
         stdout.puts "Cannot find class: #{type_name}"
         return
       end
