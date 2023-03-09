@@ -272,7 +272,10 @@ EOU
       builder = DefinitionBuilder::AncestorBuilder.new(env: env)
       type_name = TypeName(args[0]).absolute!
 
-      if env.class_decls.key?(type_name)
+      case env.constant_entry(type_name)
+      when Environment::ClassEntry, Environment::ModuleEntry, Environment::ClassAliasEntry, Environment::ModuleAliasEntry
+        type_name = env.normalize_module_name(type_name)
+        
         ancestors = case kind
                     when :instance
                       builder.instance_ancestors(type_name)

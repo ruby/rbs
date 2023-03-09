@@ -128,6 +128,30 @@ singleton(::BasicObject)
 ::BasicObject
       EOF
     end
+
+    Dir.mktmpdir do |dir|
+      dir = Pathname(dir)
+      dir.join('alias.rbs').write(<<~RBS)
+        class Foo = String
+
+        class Bar
+        end
+      RBS
+
+      Dir.chdir(dir) do
+        with_cli do |cli|
+          cli.run(%w(-I. ancestors ::Foo))
+
+          assert_equal <<~EOF, stdout.string
+            ::String
+            ::Comparable
+            ::Object
+            ::Kernel
+            ::BasicObject
+          EOF
+        end
+      end
+    end
   end
 
   def test_methods
