@@ -230,6 +230,19 @@ EOB
             end
           end
         end
+
+        env.class_alias_decls.each do |name, entry|
+          case entry
+          when Environment::ModuleAliasEntry
+            if list.include?(:module)
+              stdout.puts "#{name} (module alias)"
+            end
+          when Environment::ClassAliasEntry
+            if list.include?(:class)
+              stdout.puts "#{name} (class alias)"
+            end
+          end
+        end
       end
 
       if list.include?(:interface)
@@ -275,7 +288,7 @@ EOU
       case env.constant_entry(type_name)
       when Environment::ClassEntry, Environment::ModuleEntry, Environment::ClassAliasEntry, Environment::ModuleAliasEntry
         type_name = env.normalize_module_name(type_name)
-        
+
         ancestors = case kind
                     when :instance
                       builder.instance_ancestors(type_name)

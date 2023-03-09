@@ -90,6 +90,24 @@ class RBS::CliTest < Test::Unit::TestCase
       refute_match %r{^::Kernel \(module\)$}, stdout.string
       assert_match %r{^::_Each \(interface\)$}, stdout.string
     end
+
+    Dir.mktmpdir do |dir|
+      dir = Pathname(dir)
+      dir.join('alias.rbs').write(<<~RBS)
+        class Foo = String
+
+        module Bar = Kernel
+      RBS
+
+      Dir.chdir(dir) do
+        with_cli do |cli|
+          cli.run(%w(-I. list))
+
+          assert_match %r{^::Foo \(class alias\)$}, stdout.string
+          assert_match %r{^::Bar \(module alias\)$}, stdout.string
+        end
+      end
+    end
   end
 
   def test_ancestors
