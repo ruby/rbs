@@ -14,6 +14,8 @@ end
 
 module Bar[out X, in Y, Z]
 end
+
+module Baz = Bar
 EOF
       manager.build do |env|
         builder = DefinitionBuilder.new(env: env)
@@ -49,6 +51,10 @@ EOF
 
         calculator.in_method_type(method_type: parse_method_type("() -> ::Foo[A, B, C, D]", variables: [:A, :B, :C, :D]), variables: [:A, :B, :C, :D]).tap do |result|
           assert_equal({ A: :covariant, B: :contravariant, C: :invariant, D: :unused }, result.result)
+        end
+
+        calculator.in_method_type(method_type: parse_method_type("() -> ::Baz[A, B, C]", variables: [:A, :B, :C]), variables: [:A, :B, :C]).tap do |result|
+          assert_equal({ A: :covariant, B: :contravariant, C: :invariant }, result.result)
         end
       end
     end

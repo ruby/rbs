@@ -135,7 +135,7 @@ module RBS
 
         type_params = case type
                       when Types::ClassInstance
-                        env.class_decls[type.name].type_params
+                        env.class_decls[env.normalize_module_name(type.name)].type_params
                       when Types::Interface
                         env.interface_decls[type.name].decl.type_params
                       when Types::Alias
