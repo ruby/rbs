@@ -178,6 +178,27 @@ singleton(::BasicObject)
       cli.run(%w(methods --instance ::Set))
       cli.run(%w(methods --singleton ::Set))
     end
+
+    Dir.mktmpdir do |dir|
+      dir = Pathname(dir)
+      dir.join('alias.rbs').write(<<~RBS)
+        class Foo = String
+
+        module Bar = Kernel
+      RBS
+
+      Dir.chdir(dir) do
+        with_cli do |cli|
+          cli.run(%w(-I. methods ::Foo))
+          assert_match %r{^puts \(private\)$}, stdout.string
+        end
+
+        with_cli do |cli|
+          cli.run(%w(-I. methods --singleton ::Bar))
+          assert_match %r{^puts \(public\)$}, stdout.string
+        end
+      end
+    end
   end
 
   def test_method

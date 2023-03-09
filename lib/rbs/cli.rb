@@ -350,7 +350,7 @@ EOU
       builder = DefinitionBuilder.new(env: env)
       type_name = TypeName(args[0]).absolute!
 
-      if env.class_decls.key?(type_name)
+      if env.module_name?(type_name)
         definition = case kind
                      when :instance
                        builder.build_instance(type_name)
