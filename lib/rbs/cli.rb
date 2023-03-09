@@ -404,7 +404,7 @@ EOU
       type_name = TypeName(args[0]).absolute!
       method_name = args[1].to_sym
 
-      unless env.class_decls.key?(type_name)
+      unless env.module_name?(type_name)
         stdout.puts "Cannot find class: #{type_name}"
         return
       end

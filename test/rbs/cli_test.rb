@@ -214,6 +214,28 @@ singleton(::BasicObject)
     | () -> ::Enumerator[self, untyped]
       EOF
     end
+
+    Dir.mktmpdir do |dir|
+      dir = Pathname(dir)
+      dir.join('alias.rbs').write(<<~RBS)
+        class Foo = String
+
+        module Bar = Kernel
+      RBS
+
+      Dir.chdir(dir) do
+        with_cli do |cli|
+          cli.run(%w(-I. method ::Foo puts))
+          assert_match %r{^::Foo#puts$}, stdout.string
+        end
+
+        with_cli do |cli|
+          cli.run(%w(-I. method --singleton ::Bar puts))
+          assert_match %r{^::Bar\.puts$}, stdout.string
+        end
+      end
+    end
+
   end
 
   def test_validate
