@@ -89,7 +89,7 @@ class GemSingletonTest < Test::Unit::TestCase
                       Gem, :datadir, ""
     assert_send_type  "(String) -> String",
                       Gem, :datadir, "test-unit"
-  end
+  end if Gem.respond_to?(:datadir)
 
   def test_default_bindir
     assert_send_type  "() -> String",
