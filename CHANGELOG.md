@@ -2,6 +2,12 @@
 
 ## master
 
+## 3.0.4 (2023-03-13)
+
+### Library changes
+
+* Add missing implementation to support class/module alias ([#1271](https://github.com/ruby/rbs/pull/1271))
+
 ## 3.0.3 (2023-03-07)
 
 ### Library changes
