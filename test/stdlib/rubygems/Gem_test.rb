@@ -84,13 +84,6 @@ class GemSingletonTest < Test::Unit::TestCase
                       Gem, :data_home
   end
 
-  def test_datadir
-    assert_send_type  "(String) -> nil",
-                      Gem, :datadir, ""
-    assert_send_type  "(String) -> String",
-                      Gem, :datadir, "test-unit"
-  end
-
   def test_default_bindir
     assert_send_type  "() -> String",
                       Gem, :default_bindir

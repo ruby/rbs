@@ -262,15 +262,6 @@ module Gem
   def self.data_home: () -> String
 
   # <!--
-  #   rdoc-file=lib/rubygems.rb
-  #   - datadir(gem_name)
-  # -->
-  # The path to the data directory specified by the gem name.  If the package is
-  # not available as a gem, return nil.
-  #
-  def self.datadir: (String gem_name) -> String?
-
-  # <!--
   #   rdoc-file=lib/rubygems/defaults.rb
   #   - default_bindir()
   # -->
