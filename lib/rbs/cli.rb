@@ -1079,12 +1079,12 @@ EOB
       lock_path = Collection::Config.to_lockfile_path(config_path)
 
       case args[0]
-      when 'install'
+      when *abbr_matcher('install')
         unless params[:frozen]
           Collection::Config.generate_lockfile(config_path: config_path, definition: Bundler.definition)
         end
         Collection::Installer.new(lockfile_path: lock_path, stdout: stdout).install_from_lockfile
-      when 'update'
+      when *abbr_matcher('update')
         # TODO: Be aware of argv to update only specified gem
         Collection::Config.generate_lockfile(config_path: config_path, definition: Bundler.definition, with_lockfile: false)
         Collection::Installer.new(lockfile_path: lock_path, stdout: stdout).install_from_lockfile
@@ -1123,7 +1123,7 @@ EOB
           exit 1
         end
         Collection::Cleaner.new(lockfile_path: lock_path)
-      when 'help'
+      when *abbr_matcher('help')
         puts opts.help
       else
         puts opts.help
@@ -1153,6 +1153,10 @@ EOB
         HELP
         opts.on('--frozen') if args[0] == 'install'
       end
+    end
+
+    def abbr_matcher(str)
+      str.chars.inject(['']) { |r, ch|  [*r, r.last+ch] }[1..] or raise
     end
   end
 end
