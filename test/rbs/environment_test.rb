@@ -175,6 +175,20 @@ EOF
     end
   end
 
+  def test_type_alias_twice_duplication_error
+    env = Environment.new
+
+    _, _, decls = RBS::Parser.parse_signature(<<EOF)
+type foo = String
+type foo = Integer
+EOF
+
+    assert_raises RBS::DuplicatedDeclarationError do
+      env << decls[0]
+      env << decls[1]
+    end
+  end
+
   def test_generic_class
     env = Environment.new
 

@@ -374,7 +374,7 @@ module RBS
         name = decl.name.with_prefix(namespace)
 
         if entry = type_alias_decls[name]
-          DuplicatedDeclarationError.new(name, decl, entry.decl)
+          raise DuplicatedDeclarationError.new(name, decl, entry.decl)
         end
 
         type_alias_decls[name] = TypeAliasEntry.new(name: name, decl: decl, outer: outer)
