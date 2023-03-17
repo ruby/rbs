@@ -79,7 +79,5 @@ module RBS
     def test_opt: (LibraryOptions) -> String?
 
     def collection_options: (Array[String]) -> OptionParser
-
-    def abbr_matcher: (String) -> Array[String]
   end
 end
