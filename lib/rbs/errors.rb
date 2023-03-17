@@ -207,6 +207,8 @@ module RBS
   end
 
   class NoMixinFoundError < DefinitionError
+    include DetailedMessageable
+
     attr_reader :type_name
     attr_reader :member
 
