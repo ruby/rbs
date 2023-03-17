@@ -187,6 +187,8 @@ module RBS
   end
 
   class NoSelfTypeFoundError < DefinitionError
+    include DetailedMessageable
+
     attr_reader :type_name
     attr_reader :location
 

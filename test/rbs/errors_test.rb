@@ -83,4 +83,21 @@ class RBS::ErrorsTest < Test::Unit::TestCase
                     ^^^^^^
     DETAILED_MESSAGE
   end
+
+  def test_no_self_type_found_error_with_detailed_message
+    omit "Exception#detailed_message does not supported" unless Exception.method_defined?(:detailed_message)
+
+    _, _, decls = RBS::Parser.parse_signature(<<~SIGNATURE)
+      module Foo : NotFound
+      end
+    SIGNATURE
+    self_type_decl = decls.first.self_types.first
+    error = RBS::NoSelfTypeFoundError.new(type_name: self_type_decl.name, location: self_type_decl.location)
+    assert_equal <<~DETAILED_MESSAGE, error.detailed_message
+      #{error.message} (RBS::NoSelfTypeFoundError)
+
+        module Foo : NotFound
+                     ^^^^^^^^
+    DETAILED_MESSAGE
+  end
 end
