@@ -67,4 +67,20 @@ class RBS::ErrorsTest < Test::Unit::TestCase
                    ^^^^^^^^
     DETAILED_MESSAGE
   end
+
+  def test_inherit_module_error_with_detailed_message
+    omit "Exception#detailed_message does not supported" unless Exception.method_defined?(:detailed_message)
+
+    _, _, decls = RBS::Parser.parse_signature(<<~SIGNATURE)
+      class Foo < Kernel
+      end
+    SIGNATURE
+    error = RBS::InheritModuleError.new(decls.first.super_class)
+    assert_equal <<~DETAILED_MESSAGE, error.detailed_message
+      #{error.message} (RBS::InheritModuleError)
+
+        class Foo < Kernel
+                    ^^^^^^
+    DETAILED_MESSAGE
+  end
 end

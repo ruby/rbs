@@ -165,12 +165,18 @@ module RBS
   end
 
   class InheritModuleError < DefinitionError
+    include DetailedMessageable
+
     attr_reader :super_decl
 
     def initialize(super_decl)
       @super_decl = super_decl
 
       super "#{Location.to_string(super_decl.location)}: Cannot inherit a module: #{super_decl.name}"
+    end
+
+    def location
+      @super_decl.location
     end
 
     def self.check!(super_decl, env:)
