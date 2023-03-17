@@ -126,6 +126,8 @@ module RBS
   end
 
   class NoTypeFoundError < BaseError
+    include DetailedMessageable
+
     attr_reader :type_name
     attr_reader :location
 
