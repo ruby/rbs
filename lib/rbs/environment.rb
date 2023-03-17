@@ -365,7 +365,7 @@ module RBS
         name = decl.name.with_prefix(namespace)
 
         if interface_entry = interface_decls[name]
-          DuplicatedDeclarationError.new(name, decl, interface_entry.decl)
+          raise DuplicatedDeclarationError.new(name, decl, interface_entry.decl)
         end
 
         interface_decls[name] = InterfaceEntry.new(name: name, decl: decl, outer: outer)
