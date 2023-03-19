@@ -1666,6 +1666,13 @@ end
 
         assert_raises RBS::DuplicatedInterfaceMethodDefinitionError do
           builder.build_instance(type_name("::Hello"))
+        end.tap do |error|
+          assert_equal error.detailed_message, <<~DETAILED_MESSAGE if Exception.method_defined?(:detailed_message)
+            #{error.message} (RBS::DuplicatedInterfaceMethodDefinitionError)
+
+                include _I2
+                ^^^^^^^^^^^
+          DETAILED_MESSAGE
         end
       end
     end

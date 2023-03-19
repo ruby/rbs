@@ -258,6 +258,8 @@ module RBS
   end
 
   class DuplicatedInterfaceMethodDefinitionError < DefinitionError
+    include DetailedMessageable
+
     attr_reader :type
     attr_reader :method_name
     attr_reader :member
@@ -268,6 +270,10 @@ module RBS
       @member = member
 
       super "#{member.location}: Duplicated method definition: #{qualified_method_name}"
+    end
+
+    def location
+      member.location
     end
 
     def qualified_method_name
