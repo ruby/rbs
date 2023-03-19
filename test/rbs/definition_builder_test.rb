@@ -1689,6 +1689,13 @@ end
 
         assert_raises RBS::DuplicatedMethodDefinitionError do
           builder.build_instance(type_name("::Hello"))
+        end.tap do |error|
+          assert_equal error.detailed_message, <<~DETAILED_MESSAGE if Exception.method_defined?(:detailed_message)
+            #{error.message} (RBS::DuplicatedMethodDefinitionError)
+
+                def foo: () -> String
+                ^^^^^^^^^^^^^^^^^^^^^
+          DETAILED_MESSAGE
         end
       end
     end

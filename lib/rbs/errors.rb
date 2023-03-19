@@ -217,6 +217,8 @@ module RBS
   end
 
   class DuplicatedMethodDefinitionError < DefinitionError
+    include DetailedMessageable
+
     attr_reader :type
     attr_reader :method_name
     attr_reader :members
