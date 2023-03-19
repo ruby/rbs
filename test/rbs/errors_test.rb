@@ -57,6 +57,14 @@ class RBS::ErrorsTest < Test::Unit::TestCase
   def test_no_type_found_error_with_detailed_message
     omit "Exception#detailed_message does not supported" unless Exception.method_defined?(:detailed_message)
 
+    _, _, decls = RBS::Parser.parse_signature(<<~SIGNATURE)
+      class NotFound
+      end
+    SIGNATURE
+    type = decls.first
+    error = RBS::NoTypeFoundError.new(type_name: type.name, location: type.location)
+    assert_equal "#{error.message} (RBS::NoTypeFoundError)", error.detailed_message
+
     _, _, decls = RBS::Parser.parse_signature("type foo = NotFound")
     type = decls.first.type
     error = RBS::NoTypeFoundError.new(type_name: type.name, location: type.location)

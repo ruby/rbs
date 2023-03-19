@@ -22,11 +22,16 @@ module RBS
 
   module DetailedMessageable
     def detailed_message(highlight: false, **)
+      msg = super
+
+      # Support only one line
+      return msg unless location.start_line == location.end_line
+
       indent = " " * location.start_column
       marker = "^" * (location.end_column - location.start_column)
 
       io = StringIO.new
-      io.puts super
+      io.puts msg
       io.puts
       io.print "\e[1m" if highlight
       io.puts "  #{location.buffer.lines[location.end_line - 1]}"
