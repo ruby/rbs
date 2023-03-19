@@ -1542,6 +1542,13 @@ end
 
         assert_raises RBS::InvalidOverloadMethodError do
           builder.build_instance(type_name("::Hello"))
+        end.tap do |error|
+          assert_equal error.detailed_message, <<~DETAILED_MESSAGE if Exception.method_defined?(:detailed_message)
+            #{error.message} (RBS::InvalidOverloadMethodError)
+
+                def foo: (Integer) -> String | ...
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+          DETAILED_MESSAGE
         end
       end
     end

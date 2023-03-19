@@ -320,6 +320,8 @@ module RBS
   end
 
   class InvalidOverloadMethodError < DefinitionError
+    include DetailedMessageable
+
     attr_reader :type_name
     attr_reader :method_name
     attr_reader :kind
@@ -339,6 +341,10 @@ module RBS
                   end
 
       super "#{Location.to_string members[0].location}: Invalid method overloading: #{type_name}#{delimiter}#{method_name}"
+    end
+
+    def location
+      members[0].location
     end
   end
 
