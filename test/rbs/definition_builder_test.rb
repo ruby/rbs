@@ -971,6 +971,13 @@ EOF
 
         assert_raises UnknownMethodAliasError do
           builder.build_singleton(type_name("::Error"))
+        end.tap do |error|
+          assert_equal error.detailed_message, <<~DETAILED_MESSAGE if Exception.method_defined?(:detailed_message)
+            #{error.message} (RBS::UnknownMethodAliasError)
+
+                alias self.xxx self.yyy
+                ^^^^^^^^^^^^^^^^^^^^^^^
+          DETAILED_MESSAGE
         end
       end
     end

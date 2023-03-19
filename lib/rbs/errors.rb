@@ -291,6 +291,8 @@ module RBS
   end
 
   class UnknownMethodAliasError < DefinitionError
+    include DetailedMessageable
+
     attr_reader :type_name
     attr_reader :original_name
     attr_reader :aliased_name
