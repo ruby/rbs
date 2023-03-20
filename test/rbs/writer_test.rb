@@ -36,6 +36,8 @@ $name: String
   def test_alias_decl
     assert_writer <<-SIG
 type ::Module::foo = String | Integer
+class A = B
+module C = D
     SIG
   end
 

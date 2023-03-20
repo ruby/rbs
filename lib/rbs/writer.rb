@@ -167,6 +167,18 @@ module RBS
           puts "type #{name_and_params(decl.name, decl.type_params)} = #{decl.type}"
         }
 
+      when AST::Declarations::ClassAlias
+        write_comment decl.comment
+        write_loc_source(decl) {
+          puts "class #{decl.new_name} = #{decl.old_name}"
+        }
+
+      when AST::Declarations::ModuleAlias
+        write_comment decl.comment
+        write_loc_source(decl) {
+          puts "module #{decl.new_name} = #{decl.old_name}"
+        }
+
       when AST::Declarations::Interface
         write_comment decl.comment
         write_annotation decl.annotations
