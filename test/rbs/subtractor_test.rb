@@ -158,6 +158,35 @@ class RBS::SubtractorTest < Test::Unit::TestCase
     RBS
   end
 
+  def test_alias
+    decls = to_decls(<<~RBS)
+      class C
+        def x: () -> untyped
+        alias y x
+
+        def self.a: () -> untyped
+        alias self.b self.a
+      end
+    RBS
+
+    env = to_env(<<~RBS)
+      class C
+        def y: () -> String
+        def self.b: () -> String
+      end
+    RBS
+
+    subtracted = RBS::Subtractor.new(decls, env).call
+
+    assert_subtracted <<~RBS, subtracted
+      class C
+        def x: () -> untyped
+
+        def self.a: () -> untyped
+      end
+    RBS
+  end
+
   def test_public_and_private
     decls = to_decls(<<~RBS)
       class C

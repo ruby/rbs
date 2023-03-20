@@ -48,6 +48,8 @@ module RBS
       case member
       when AST::Members::MethodDefinition
         method_exist?(owner, member.name, member.kind)
+      when AST::Members::Alias
+        method_exist?(owner, member.new_name, member.kind)
       when AST::Members::Include, AST::Members::Extend, AST::Members::Prepend
         # Duplicated mixin is allowed. So do nothing
         false
