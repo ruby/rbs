@@ -234,6 +234,8 @@ module RBS
   end
 
   class DuplicatedMethodDefinitionError < DefinitionError
+    include DetailedMessageable
+
     attr_reader :type
     attr_reader :method_name
     attr_reader :members
@@ -273,6 +275,8 @@ module RBS
   end
 
   class DuplicatedInterfaceMethodDefinitionError < DefinitionError
+    include DetailedMessageable
+
     attr_reader :type
     attr_reader :method_name
     attr_reader :member
@@ -283,6 +287,10 @@ module RBS
       @member = member
 
       super "#{member.location}: Duplicated method definition: #{qualified_method_name}"
+    end
+
+    def location
+      member.location
     end
 
     def qualified_method_name
@@ -300,6 +308,8 @@ module RBS
   end
 
   class UnknownMethodAliasError < DefinitionError
+    include DetailedMessageable
+
     attr_reader :type_name
     attr_reader :original_name
     attr_reader :aliased_name
@@ -327,6 +337,8 @@ module RBS
   end
 
   class InvalidOverloadMethodError < DefinitionError
+    include DetailedMessageable
+
     attr_reader :type_name
     attr_reader :method_name
     attr_reader :kind
@@ -346,6 +358,10 @@ module RBS
                   end
 
       super "#{Location.to_string members[0].location}: Invalid method overloading: #{type_name}#{delimiter}#{method_name}"
+    end
+
+    def location
+      members[0].location
     end
   end
 
