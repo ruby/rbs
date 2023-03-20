@@ -24,9 +24,12 @@ module RBS
           decl unless @subtrahend.type_alias_decls[name]
         when AST::Declarations::ClassAlias
           name = absolute_typename(decl.new_name, context: context)
-          decl unless @subtrahend.class_alias_decls[name] || @subtrahend.class_decl?(name)
+          decl unless @subtrahend.class_alias?(name) || @subtrahend.class_decl?(name)
+        when AST::Declarations::ModuleAlias
+          name = absolute_typename(decl.new_name, context: context)
+          decl unless @subtrahend.module_alias?(name) || @subtrahend.module_decl?(name)
         else
-          raise "unknwon decl: #{decl.class}"
+          raise "unknwon decl: #{(_ = decl).class}"
         end
       end
     end

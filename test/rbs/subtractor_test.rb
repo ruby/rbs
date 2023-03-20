@@ -106,6 +106,37 @@ class RBS::SubtractorTest < Test::Unit::TestCase
     RBS
   end
 
+  def test_module_aliases
+    decls = to_decls(<<~RBS)
+      module A = X
+      module B = X
+      module C = X
+      module N
+        module A = X
+        module B = X
+        module C = X
+      end
+    RBS
+
+    env = to_env(<<~RBS)
+      module A = Y
+      module B end
+      module N
+        module A = Y
+        module B end
+      end
+    RBS
+
+    subtracted = RBS::Subtractor.new(decls, env).call
+
+    assert_subtracted <<~RBS, subtracted
+      module C = X
+      module N
+        module C = X
+      end
+    RBS
+  end
+
   def test_methods_in_class
     decls = to_decls(<<~RBS)
       class C
