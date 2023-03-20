@@ -13,6 +13,8 @@ module RBS
 
     private def filter_members: (decl_with_members, context: Resolver::context) -> decl_with_members
 
+    private def member_exist?: (TypeName, AST::Members::t, context: Resolver::context) -> boolish
+
     private def update_decl: (decl_with_members, members: Array[AST::Declarations::t | AST::Members::t]) -> decl_with_members
 
     private def absolute_typename: (TypeName, context: Resolver::context) -> TypeName

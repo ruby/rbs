@@ -29,12 +29,31 @@ module RBS
       when AST::Declarations::Class, AST::Declarations::Module
         # @type var children: Array[RBS::AST::Declarations::t | RBS::AST::Members::t]
         children = call(decl.each_decl.to_a, context: [context, decl.name])
-        children.concat decl.each_member.to_a
+
+        owner = absolute_typename(decl.name, context: context)
+        children.concat(decl.each_member.reject { |m| member_exist?(owner, m, context: context) })
+
         update_decl(decl, members: children)
       when AST::Declarations::Interface
         decl
       else
         raise
+      end
+    end
+
+    private def member_exist?(owner, member, context:)
+      case member
+      when AST::Members::MethodDefinition
+        decls = owner.interface? ?
+          [@subtrahend.interface_decls[owner].decl] :
+          @subtrahend.class_decls[owner].decls.map { |d| d.decl }
+
+        # TODO: performance
+        decls.any? { |d|
+          d.members.any? { |m|
+            m.is_a?(AST::Members::MethodDefinition) && m.name == member.name && m.kind == member.kind
+          }
+        }
       end
     end
 
