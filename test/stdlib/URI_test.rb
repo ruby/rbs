@@ -139,5 +139,5 @@ class URIInstanceTest < Test::Unit::TestCase
       "() -> String",
       uri, :fragment
     )
-end
+  end
 end
