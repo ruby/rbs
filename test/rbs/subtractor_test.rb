@@ -430,6 +430,40 @@ class RBS::SubtractorTest < Test::Unit::TestCase
     RBS
   end
 
+  def test_nonexist_class
+    decls = to_decls(<<~RBS)
+      class C
+        def x: () -> void
+      end
+
+      interface _I
+        def x: () -> void
+      end
+    RBS
+
+    env = to_env(<<~RBS)
+      class X
+        def x: () -> void
+      end
+
+      interface _IX
+        def x: () -> void
+      end
+    RBS
+
+    subtracted = RBS::Subtractor.new(decls, env).call
+
+    assert_subtracted <<~RBS, subtracted
+      class C
+        def x: () -> void
+      end
+
+      interface _I
+        def x: () -> void
+      end
+    RBS
+  end
+
   private def to_decls(rbs)
     # It ignores directives, is it ok?
     RBS::Parser.parse_signature(rbs).last

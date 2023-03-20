@@ -1,4 +1,4 @@
-# fronzen_string_literal: true
+# frozen_string_literal: true
 
 module RBS
   class Subtractor
@@ -126,9 +126,16 @@ module RBS
     private def each_member(owner, &block)
       return enum_for((__method__ or raise), owner) unless block
 
-      decls = owner.interface? ?
-        [@subtrahend.interface_decls[owner].decl] :
-        @subtrahend.class_decls[owner].decls.map { |d| d.decl }
+      decls =
+        if owner.interface?
+          entry = @subtrahend.interface_decls[owner]
+          return unless entry
+          [entry.decl]
+        else
+          entry = @subtrahend.class_decls[owner]
+          return unless entry
+          entry.decls.map { |d| d.decl }
+        end
 
       # TODO: performance
       decls.each { |d| d.members.each { |m| block.call(m) } }
