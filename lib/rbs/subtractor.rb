@@ -50,6 +50,13 @@ module RBS
         method_exist?(owner, member.name, member.kind)
       when AST::Members::Alias
         method_exist?(owner, member.new_name, member.kind)
+      when AST::Members::AttrReader
+        method_exist?(owner, member.name, member.kind)
+      when AST::Members::AttrWriter
+        method_exist?(owner, :"#{member.name}=", member.kind)
+      when AST::Members::AttrAccessor
+        # TODO: It unexpectedly removes attr_accessor even if either reader or writer does not exist in the subtrahend.
+        method_exist?(owner, member.name, member.kind) || method_exist?(owner, :"#{member.name}=", member.kind)
       when AST::Members::Include, AST::Members::Extend, AST::Members::Prepend
         # Duplicated mixin is allowed. So do nothing
         false
