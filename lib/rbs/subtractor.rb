@@ -49,10 +49,14 @@ module RBS
           @subtrahend.class_decls[owner].decls.map { |d| d.decl }
 
         # TODO: performance
-        # TODO: Treat methods defined by alias or attr_*
         decls.any? { |d|
           d.members.any? { |m|
-            m.is_a?(AST::Members::MethodDefinition) && m.name == member.name && m.kind == member.kind
+            case m
+            when AST::Members::MethodDefinition
+              m.name == member.name && m.kind == member.kind
+            when AST::Members::Alias
+              m.new_name == member.name && m.kind == member.kind
+            end
           }
         }
       when AST::Members::Public, AST::Members::Private
