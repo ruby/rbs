@@ -922,6 +922,7 @@ Options:
 
     def run_parse(args, options)
       parse_method = :parse_signature
+      # @type var e_code: String?
       e_code = nil
 
       OptionParser.new do |opts|
@@ -955,7 +956,12 @@ Options:
 
       bufs.each do |buf|
         RBS.logger.info "Parsing #{buf.name}..."
-        Parser.public_send(parse_method, buf)
+        case parse_method
+        when :parse_signature
+          Parser.parse_signature(buf)
+        else
+          Parser.public_send(parse_method, buf, require_eof: true)
+        end
       rescue RBS::ParsingError => ex
         stdout.puts ex.message
         syntax_error = true
