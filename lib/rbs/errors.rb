@@ -465,6 +465,8 @@ module RBS
   end
 
   class RecursiveTypeAliasError < BaseError
+    include DetailedMessageable
+
     attr_reader :alias_names
     attr_reader :location
 
