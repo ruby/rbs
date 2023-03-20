@@ -19,6 +19,9 @@ module RBS
           filter_members(decl, context: context)
         when AST::Declarations::Global
           decl unless @subtrahend.global_decls[decl.name]
+        when AST::Declarations::TypeAlias
+          name = absolute_typename(decl.name, context: context)
+          decl unless @subtrahend.type_alias_decls[name]
         else
           raise "unknwon decl: #{decl.class}"
         end
