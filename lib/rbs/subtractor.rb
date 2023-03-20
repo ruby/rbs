@@ -12,13 +12,13 @@ module RBS
     def call(minuend = @minuend, context: nil)
       minuend.filter_map do |decl|
         case decl
-        #when AST::Declarations::AliasDecl
         when AST::Declarations::Constant
           name = absolute_typename(decl.name, context: context)
           decl unless @subtrahend.constant_decl?(name)
-        #when AST::Declarations::Global
         when AST::Declarations::Class, AST::Declarations::Module, AST::Declarations::Interface
           filter_members(decl, context: context)
+        when AST::Declarations::Global
+          decl unless @subtrahend.global_decls[decl.name]
         else
           raise "unknwon decl: #{decl.class}"
         end

@@ -31,6 +31,23 @@ class RBS::SubtractorTest < Test::Unit::TestCase
     RBS
   end
 
+  def test_globals
+    decls = to_decls(<<~RBS)
+      $a: untyped
+      $b: untyped
+    RBS
+
+    env = to_env(<<~RBS)
+      $a: String
+    RBS
+
+    subtracted = RBS::Subtractor.new(decls, env).call
+
+    assert_subtracted <<~RBS, subtracted
+      $b: untyped
+    RBS
+  end
+
   def test_methods_in_class
     decls = to_decls(<<~RBS)
       class C
