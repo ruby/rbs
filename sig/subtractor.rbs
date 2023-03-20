@@ -13,9 +13,11 @@ module RBS
 
     private def filter_members: (decl_with_members, context: Resolver::context) -> decl_with_members
 
-    private def member_exist?: (TypeName, AST::Members::t, context: Resolver::context) -> boolish
+    private def member_exist?: (TypeName owner, AST::Members::t, context: Resolver::context) -> boolish
 
-    private def method_exist?: (TypeName, Symbol, AST::Members::MethodDefinition::kind) -> boolish
+    private def method_exist?: (TypeName owner, Symbol method_name, AST::Members::MethodDefinition::kind) -> boolish
+
+    private def ivar_exist?: (TypeName owner, Symbol ivar_name, AST::Members::Attribute::kind) -> boolish
 
     private def update_decl: (decl_with_members, members: Array[AST::Declarations::t | AST::Members::t]) -> decl_with_members
 

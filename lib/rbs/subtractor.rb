@@ -57,6 +57,10 @@ module RBS
       when AST::Members::AttrAccessor
         # TODO: It unexpectedly removes attr_accessor even if either reader or writer does not exist in the subtrahend.
         method_exist?(owner, member.name, member.kind) || method_exist?(owner, :"#{member.name}=", member.kind)
+      when AST::Members::InstanceVariable
+        ivar_exist?(owner, member.name, :instance)
+      when AST::Members::ClassInstanceVariable
+        ivar_exist?(owner, member.name, :singleton)
       when AST::Members::Include, AST::Members::Extend, AST::Members::Prepend
         # Duplicated mixin is allowed. So do nothing
         false
@@ -87,6 +91,25 @@ module RBS
             :"#{m.name}=" == method_name && m.kind == kind
           when AST::Members::AttrAccessor
             (m.name == method_name || :"#{m.name}=" == method_name) && m.kind == kind
+          end
+        }
+      }
+    end
+
+    private def ivar_exist?(owner, name, kind)
+      decls = owner.interface? ?
+        [@subtrahend.interface_decls[owner].decl] :
+        @subtrahend.class_decls[owner].decls.map { |d| d.decl }
+
+      # TODO: performance
+      decls.any? { |d|
+        d.members.any? { |m|
+          case m
+          when AST::Members::InstanceVariable
+            m.name == name
+          when AST::Members::Attribute
+            ivar_name = m.ivar_name == false ? nil : m.ivar_name || :"@#{m.name}"
+            ivar_name == name && m.kind == kind
           end
         }
       }
