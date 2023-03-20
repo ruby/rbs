@@ -390,6 +390,8 @@ module RBS
   end
 
   class InvalidVarianceAnnotationError < DefinitionError
+    include DetailedMessageable
+
     attr_reader :type_name
     attr_reader :param
     attr_reader :location
