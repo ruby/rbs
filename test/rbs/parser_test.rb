@@ -713,4 +713,16 @@ RBS
       assert_nil type
     end
   end
+
+  def test_parse_require_eof
+    RBS::Parser.parse_type("String", range: 0..., require_eof: false)
+    assert_raises(RBS::ParsingError) do
+      RBS::Parser.parse_type("String void", range: 0..., require_eof: true)
+    end
+
+    RBS::Parser.parse_method_type("() -> void () -> void", range: 0..., require_eof: false)
+    assert_raises(RBS::ParsingError) do
+      RBS::Parser.parse_method_type("() -> void () -> void", range: 0..., require_eof: true)
+    end
+  end
 end
