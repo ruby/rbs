@@ -35,6 +35,7 @@ module RBS
 
         update_decl(decl, members: children)
       when AST::Declarations::Interface
+        # TODO: Implement
         decl
       else
         raise "unknwon decl: #{(_ = decl).class}"
@@ -56,6 +57,12 @@ module RBS
               m.name == member.name && m.kind == member.kind
             when AST::Members::Alias
               m.new_name == member.name && m.kind == member.kind
+            when AST::Members::AttrReader
+              m.name == member.name && m.kind == member.kind
+            when AST::Members::AttrWriter
+              :"#{m.name}=" == member.name && m.kind == member.kind
+            when AST::Members::AttrAccessor
+              (m.name == member.name || :"#{m.name}=" == member.name) && m.kind == member.kind
             end
           }
         }
