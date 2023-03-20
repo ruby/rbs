@@ -86,6 +86,29 @@ class RBS::SubtractorTest < Test::Unit::TestCase
     RBS
   end
 
+  def test_methods_in_interface
+    decls = to_decls(<<~RBS)
+      interface _I
+        def x: () -> untyped
+        def y: () -> untyped
+      end
+    RBS
+
+    env = to_env(<<~RBS)
+      interface _I
+        def x: () -> String
+      end
+    RBS
+
+    subtracted = RBS::Subtractor.new(decls, env).call
+
+    assert_subtracted <<~RBS, subtracted
+      interface _I
+        def y: () -> untyped
+      end
+    RBS
+  end
+
   def test_methods_alias
     decls = to_decls(<<~RBS)
       class C

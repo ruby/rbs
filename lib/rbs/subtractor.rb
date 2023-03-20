@@ -35,8 +35,9 @@ module RBS
 
         update_decl(decl, members: children)
       when AST::Declarations::Interface
-        # TODO: Implement
-        decl
+        owner = absolute_typename(decl.name, context: context)
+        children = decl.members.reject { |m| member_exist?(owner, m, context: context) }
+        update_decl(decl, members: children)
       else
         raise "unknwon decl: #{(_ = decl).class}"
       end
