@@ -5,6 +5,7 @@ module RBS
       @minuend = minuend
       @subtrahend = subtrahend
 
+      # TODO: Is it necessary?
       @type_name_resolver = Resolver::TypeNameResolver.new(@subtrahend)
     end
 
@@ -25,22 +26,21 @@ module RBS
     end
 
     private def filter_members(decl, context:)
+      # @type var children: Array[RBS::AST::Declarations::t | RBS::AST::Members::t]
+      children = []
+      owner = absolute_typename(decl.name, context: context)
+
       case decl
       when AST::Declarations::Class, AST::Declarations::Module
-        # @type var children: Array[RBS::AST::Declarations::t | RBS::AST::Members::t]
-        children = call(decl.each_decl.to_a, context: [context, decl.name])
-
-        owner = absolute_typename(decl.name, context: context)
+        children.concat(call(decl.each_decl.to_a, context: [context, decl.name]))
         children.concat(decl.each_member.reject { |m| member_exist?(owner, m, context: context) })
-
-        update_decl(decl, members: children)
       when AST::Declarations::Interface
-        owner = absolute_typename(decl.name, context: context)
-        children = decl.members.reject { |m| member_exist?(owner, m, context: context) }
-        update_decl(decl, members: children)
+        children.concat(decl.members.reject { |m| member_exist?(owner, m, context: context) })
       else
         raise "unknwon decl: #{(_ = decl).class}"
       end
+
+      update_decl(decl, members: children)
     end
 
     private def member_exist?(owner, member, context:)
