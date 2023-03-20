@@ -5,16 +5,29 @@ class RBS::SubtractorTest < Test::Unit::TestCase
     decls = to_decls(<<~RBS)
       C1: untyped
       C2: untyped
+
+      class X
+        C3: untyped
+        C4: untyped
+      end
     RBS
 
     env = to_env(<<~RBS)
       C1: String
+
+      class X
+        C3: Integer
+      end
     RBS
 
     subtracted = RBS::Subtractor.new(decls, env).call
 
     assert_subtracted <<~RBS, subtracted
       C2: untyped
+
+      class X
+        C4: untyped
+      end
     RBS
   end
 
