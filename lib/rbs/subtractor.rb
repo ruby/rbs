@@ -43,30 +43,11 @@ module RBS
       update_decl(decl, members: children)
     end
 
+    # Is context used?
     private def member_exist?(owner, member, context:)
       case member
       when AST::Members::MethodDefinition
-        decls = owner.interface? ?
-          [@subtrahend.interface_decls[owner].decl] :
-          @subtrahend.class_decls[owner].decls.map { |d| d.decl }
-
-        # TODO: performance
-        decls.any? { |d|
-          d.members.any? { |m|
-            case m
-            when AST::Members::MethodDefinition
-              m.name == member.name && m.kind == member.kind
-            when AST::Members::Alias
-              m.new_name == member.name && m.kind == member.kind
-            when AST::Members::AttrReader
-              m.name == member.name && m.kind == member.kind
-            when AST::Members::AttrWriter
-              :"#{m.name}=" == member.name && m.kind == member.kind
-            when AST::Members::AttrAccessor
-              (m.name == member.name || :"#{m.name}=" == member.name) && m.kind == member.kind
-            end
-          }
-        }
+        method_exist?(owner, member.name, member.kind)
       when AST::Members::Include, AST::Members::Extend, AST::Members::Prepend
         # Duplicated mixin is allowed. So do nothing
         false
@@ -76,6 +57,30 @@ module RBS
       else
         raise "unknown member: #{member.class}"
       end
+    end
+
+    private def method_exist?(owner, method_name, kind)
+      decls = owner.interface? ?
+        [@subtrahend.interface_decls[owner].decl] :
+        @subtrahend.class_decls[owner].decls.map { |d| d.decl }
+
+      # TODO: performance
+      decls.any? { |d|
+        d.members.any? { |m|
+          case m
+          when AST::Members::MethodDefinition
+            m.name == method_name && m.kind == kind
+          when AST::Members::Alias
+            m.new_name == method_name && m.kind == kind
+          when AST::Members::AttrReader
+            m.name == method_name && m.kind == kind
+          when AST::Members::AttrWriter
+            :"#{m.name}=" == method_name && m.kind == kind
+          when AST::Members::AttrAccessor
+            (m.name == method_name || :"#{m.name}=" == method_name) && m.kind == kind
+          end
+        }
+      }
     end
 
     private def update_decl(decl, members:)
