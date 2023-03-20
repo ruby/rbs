@@ -19,7 +19,7 @@ module RBS
         when AST::Declarations::Class, AST::Declarations::Module, AST::Declarations::Interface
           filter_members(decl, context: context)
         else
-          raise
+          raise "unknwon decl: #{decl.class}"
         end
       end
     end
@@ -37,7 +37,7 @@ module RBS
       when AST::Declarations::Interface
         decl
       else
-        raise
+        raise "unknwon decl: #{(_ = decl).class}"
       end
     end
 
@@ -49,11 +49,17 @@ module RBS
           @subtrahend.class_decls[owner].decls.map { |d| d.decl }
 
         # TODO: performance
+        # TODO: Treat methods defined by alias or attr_*
         decls.any? { |d|
           d.members.any? { |m|
             m.is_a?(AST::Members::MethodDefinition) && m.name == member.name && m.kind == member.kind
           }
         }
+      when AST::Members::Public, AST::Members::Private
+        # They should not be removed even if the subtrahend has them.
+        false
+      else
+        raise "unknown member: #{member.class}"
       end
     end
 
