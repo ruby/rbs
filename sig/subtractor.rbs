@@ -1,0 +1,5 @@
+module RBS
+  class Subtractor
+    def subtract: (Array[AST::Directives::t] minuend, Array[AST::Directives::t] subtrahend) -> Array[AST::Directives::t]
+  end
+end
