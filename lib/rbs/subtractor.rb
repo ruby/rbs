@@ -75,62 +75,52 @@ module RBS
     end
 
     private def method_exist?(owner, method_name, kind)
-      decls = owner.interface? ?
-        [@subtrahend.interface_decls[owner].decl] :
-        @subtrahend.class_decls[owner].decls.map { |d| d.decl }
-
-      # TODO: performance
-      decls.any? { |d|
-        d.members.any? { |m|
-          case m
-          when AST::Members::MethodDefinition
-            m.name == method_name && m.kind == kind
-          when AST::Members::Alias
-            m.new_name == method_name && m.kind == kind
-          when AST::Members::AttrReader
-            m.name == method_name && m.kind == kind
-          when AST::Members::AttrWriter
-            :"#{m.name}=" == method_name && m.kind == kind
-          when AST::Members::AttrAccessor
-            (m.name == method_name || :"#{m.name}=" == method_name) && m.kind == kind
-          end
-        }
-      }
+      each_member(owner).any? do |m|
+        case m
+        when AST::Members::MethodDefinition
+          m.name == method_name && m.kind == kind
+        when AST::Members::Alias
+          m.new_name == method_name && m.kind == kind
+        when AST::Members::AttrReader
+          m.name == method_name && m.kind == kind
+        when AST::Members::AttrWriter
+          :"#{m.name}=" == method_name && m.kind == kind
+        when AST::Members::AttrAccessor
+          (m.name == method_name || :"#{m.name}=" == method_name) && m.kind == kind
+        end
+      end
     end
 
     private def ivar_exist?(owner, name, kind)
-      decls = owner.interface? ?
-        [@subtrahend.interface_decls[owner].decl] :
-        @subtrahend.class_decls[owner].decls.map { |d| d.decl }
-
-      # TODO: performance
-      decls.any? { |d|
-        d.members.any? { |m|
-          case m
-          when AST::Members::InstanceVariable
-            m.name == name
-          when AST::Members::Attribute
-            ivar_name = m.ivar_name == false ? nil : m.ivar_name || :"@#{m.name}"
-            ivar_name == name && m.kind == kind
-          end
-        }
-      }
+      each_member(owner).any? do |m|
+        case m
+        when AST::Members::InstanceVariable
+          m.name == name
+        when AST::Members::Attribute
+          ivar_name = m.ivar_name == false ? nil : m.ivar_name || :"@#{m.name}"
+          ivar_name == name && m.kind == kind
+        end
+      end
     end
 
     private def cvar_exist?(owner, name)
+      each_member(owner).any? do |m|
+        case m
+        when AST::Members::ClassVariable
+          m.name == name
+        end
+      end
+    end
+
+    private def each_member(owner, &block)
+      return enum_for((__method__ or raise), owner) unless block
+
       decls = owner.interface? ?
         [@subtrahend.interface_decls[owner].decl] :
         @subtrahend.class_decls[owner].decls.map { |d| d.decl }
 
       # TODO: performance
-      decls.any? { |d|
-        d.members.any? { |m|
-          case m
-          when AST::Members::ClassVariable
-            m.name == name
-          end
-        }
-      }
+      decls.each { |d| d.members.each { |m| block.call(m) } }
     end
 
     private def update_decl(decl, members:)
