@@ -1,5 +1,10 @@
 module RBS
   class Subtractor
-    def subtract: (Array[AST::Directives::t] minuend, Array[AST::Directives::t] subtrahend) -> Array[AST::Directives::t]
+    @minuend: Array[AST::Declarations::t]
+    @subtrahend: Environment
+
+    def initialize: (Array[AST::Declarations::t] minuend, Environment subtrahend) -> void
+
+    def call: () -> Array[AST::Declarations::t]
   end
 end

@@ -1,12 +1,23 @@
 module RBS
   class Subtractor
-    def subtract(minuend, subtrahend)
-      minuend.select do |decl|
-        decl
-      end
+    # TODO: Should minuend consider use directive?
+    def initialize(minuend, subtrahend)
+      @minuend = minuend
+      @subtrahend = subtrahend
     end
 
-    private def build_substrahend_map!
+    def call
+      @minuend.filter_map do |decl|
+        case decl
+        #when AST::Declarations::AliasDecl
+        when AST::Declarations::Constant
+          decl unless @subtrahend.constant_decl?(decl.name.absolute!)
+        #when AST::Declarations::Global
+        #when AST::Declarations::Class
+        else
+          raise
+        end
+      end
     end
   end
 end
