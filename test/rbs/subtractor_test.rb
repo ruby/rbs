@@ -242,6 +242,33 @@ class RBS::SubtractorTest < Test::Unit::TestCase
     RBS
   end
 
+  def test_cvar
+    decls = to_decls(<<~RBS)
+      class C
+        @@v1: untyped
+        @@v2: untyped
+        @@v3: untyped
+      end
+    RBS
+
+    env = to_env(<<~RBS)
+      class C
+        @@v1: String
+        @v2: String
+        self.@v3: String
+      end
+    RBS
+
+    subtracted = RBS::Subtractor.new(decls, env).call
+
+    assert_subtracted <<~RBS, subtracted
+      class C
+        @@v2: untyped
+        @@v3: untyped
+      end
+    RBS
+  end
+
   def test_public_and_private
     decls = to_decls(<<~RBS)
       class C

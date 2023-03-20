@@ -61,6 +61,8 @@ module RBS
         ivar_exist?(owner, member.name, :instance)
       when AST::Members::ClassInstanceVariable
         ivar_exist?(owner, member.name, :singleton)
+      when AST::Members::ClassVariable
+        cvar_exist?(owner, member.name)
       when AST::Members::Include, AST::Members::Extend, AST::Members::Prepend
         # Duplicated mixin is allowed. So do nothing
         false
@@ -68,7 +70,7 @@ module RBS
         # They should not be removed even if the subtrahend has them.
         false
       else
-        raise "unknown member: #{member.class}"
+        raise "unknown member: #{(_ = member).class}"
       end
     end
 
@@ -110,6 +112,22 @@ module RBS
           when AST::Members::Attribute
             ivar_name = m.ivar_name == false ? nil : m.ivar_name || :"@#{m.name}"
             ivar_name == name && m.kind == kind
+          end
+        }
+      }
+    end
+
+    private def cvar_exist?(owner, name)
+      decls = owner.interface? ?
+        [@subtrahend.interface_decls[owner].decl] :
+        @subtrahend.class_decls[owner].decls.map { |d| d.decl }
+
+      # TODO: performance
+      decls.any? { |d|
+        d.members.any? { |m|
+          case m
+          when AST::Members::ClassVariable
+            m.name == name
           end
         }
       }

@@ -19,6 +19,8 @@ module RBS
 
     private def ivar_exist?: (TypeName owner, Symbol ivar_name, AST::Members::Attribute::kind) -> boolish
 
+    private def cvar_exist?: (TypeName owner, Symbol cvar_name) -> boolish
+
     private def update_decl: (decl_with_members, members: Array[AST::Declarations::t | AST::Members::t]) -> decl_with_members
 
     private def absolute_typename: (TypeName, context: Resolver::context) -> TypeName
