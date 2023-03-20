@@ -3,6 +3,7 @@
 require "open3"
 require "optparse"
 require "shellwords"
+require "abbrev"
 
 module RBS
   class CLI
@@ -1078,7 +1079,8 @@ EOB
       config_path = options.config_path or raise
       lock_path = Collection::Config.to_lockfile_path(config_path)
 
-      case args[0]
+      subcommand = Abbrev.abbrev(['install', 'update', 'help'])[args[0]] || args[0]
+      case subcommand
       when 'install'
         unless params[:frozen]
           Collection::Config.generate_lockfile(config_path: config_path, definition: Bundler.definition)

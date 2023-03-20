@@ -5,3 +5,4 @@ dependencies:
   - name: optparse
   - name: tsort
   - name: rdoc
+  - name: abbrev
