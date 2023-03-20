@@ -2,14 +2,14 @@
 
 module RBS
   class Parser
-    def self.parse_type(source, range: 0..., variables: [])
+    def self.parse_type(source, range: 0..., variables: [], require_eof: false)
       buf = buffer(source)
-      _parse_type(buf, range.begin || 0, range.end || buf.last_position, variables)
+      _parse_type(buf, range.begin || 0, range.end || buf.last_position, variables, require_eof)
     end
 
-    def self.parse_method_type(source, range: 0..., variables: [])
+    def self.parse_method_type(source, range: 0..., variables: [], require_eof: false)
       buf = buffer(source)
-      _parse_method_type(buf, range.begin || 0, range.end || buf.last_position, variables)
+      _parse_method_type(buf, range.begin || 0, range.end || buf.last_position, variables, require_eof)
     end
 
     def self.parse_signature(source)
