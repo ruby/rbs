@@ -1,3 +1,5 @@
+# fronzen_string_literal: true
+
 module RBS
   class Subtractor
     # TODO: Should minuend consider use directive?
