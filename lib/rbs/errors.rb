@@ -426,6 +426,8 @@ module RBS
   end
 
   class MixinClassError < DefinitionError
+    include DetailedMessageable
+
     attr_reader :type_name
     attr_reader :member
 
