@@ -2,8 +2,7 @@ module RBS
   class Parser
     # Parse a method type and return it
     #
-    # When `pos` keyword is specified, skips the first `pos` characters from the input.
-    # If no token is left in the input, it returns `nil`.
+    # When `range` keyword is specified, it starts parsing from the `begin` to the `endo` the range.
     #
     # ```ruby
     # RBS::Parser.parse_method_type("() -> void")                                # => `() -> void`
@@ -12,18 +11,37 @@ module RBS
     # RBS::Parser.parse_method_type("() -> void () -> String", range: 23...)     # => nil
     # ```
     #
+    # When `require_eof` is `true`, an error is raised if more tokens are left in the input.
+    # (Defaults to `false`.)
+    #
+    # ```ruby
+    # RBS::Parser.parse_method_type("() -> void () -> String", require_eof: false)    # => `() -> void`
+    # RBS::Parser.parse_method_type("() -> void () -> String", require_eof: true)     # => Raises an error
+    #
+    # RBS::Parser.parse_method_type("", require_eof: true)                            # => nil
+    # ```
+    #
     def self.parse_method_type: (Buffer | String, ?range: Range[Integer?], ?variables: Array[Symbol], ?require_eof: bool) -> MethodType?
 
     # Parse a type and return it
     #
-    # When `pos` keyword is specified, skips the first `pos` characters from the input.
-    # If no token is left in the input, it returns `nil`.
+    # When `range` keyword is specified, it starts parsing from the `begin` to the `endo` the range.
     #
     # ```ruby
     # RBS::Parser.parse_type("String")                          # => `String`
     # RBS::Parser.parse_type("String", range: 0...)             # => `String`
     # RBS::Parser.parse_type("String Integer", pos: 7...)       # => `Integer`
     # RBS::Parser.parse_type("String Integer", pos: 14...)      # => nil
+    # ```
+    #
+    # When `require_eof` is `true`, an error is raised if more tokens are left in the input.
+    # (Defaults to `false`.)
+    #
+    # ```ruby
+    # RBS::Parser.parse_type("String untyped", require_eof: false)    # => `String`
+    # RBS::Parser.parse_type("String untyped", require_eof: true)     # => Raises an error
+    #
+    # RBS::Parser.parse_type("", require_eof: true)                   # => nil
     # ```
     #
     def self.parse_type: (Buffer | String, ?range: Range[Integer?], ?variables: Array[Symbol], ?require_eof: bool) -> Types::t?
