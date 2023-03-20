@@ -238,6 +238,13 @@ EOF
 
         assert_raises(RBS::RecursiveAliasDefinitionError) do
           builder.build_interface(type_name("::_I3"))
+        end.tap do |error|
+          assert_equal <<~DETAILED_MESSAGE, error.detailed_message if Exception.method_defined?(:detailed_message)
+            #{error.message} (RBS::RecursiveAliasDefinitionError)
+
+                alias a b
+                ^^^^^^^^^
+          DETAILED_MESSAGE
         end
 
         assert_raises(RBS::DuplicatedMethodDefinitionError) do

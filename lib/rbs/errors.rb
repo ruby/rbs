@@ -406,6 +406,8 @@ module RBS
   end
 
   class RecursiveAliasDefinitionError < DefinitionError
+    include DetailedMessageable
+
     attr_reader :type
     attr_reader :defs
 
