@@ -22,11 +22,16 @@ module RBS
 
   module DetailedMessageable
     def detailed_message(highlight: false, **)
+      msg = super
+
+      # Support only one line
+      return msg unless location.start_line == location.end_line
+
       indent = " " * location.start_column
       marker = "^" * (location.end_column - location.start_column)
 
       io = StringIO.new
-      io.puts super
+      io.puts msg
       io.puts
       io.print "\e[1m" if highlight
       io.puts "  #{location.buffer.lines[location.end_line - 1]}"
@@ -126,6 +131,8 @@ module RBS
   end
 
   class NoTypeFoundError < BaseError
+    include DetailedMessageable
+
     attr_reader :type_name
     attr_reader :location
 
@@ -163,12 +170,18 @@ module RBS
   end
 
   class InheritModuleError < DefinitionError
+    include DetailedMessageable
+
     attr_reader :super_decl
 
     def initialize(super_decl)
       @super_decl = super_decl
 
       super "#{Location.to_string(super_decl.location)}: Cannot inherit a module: #{super_decl.name}"
+    end
+
+    def location
+      @super_decl.location
     end
 
     def self.check!(super_decl, env:)
@@ -179,6 +192,8 @@ module RBS
   end
 
   class NoSelfTypeFoundError < DefinitionError
+    include DetailedMessageable
+
     attr_reader :type_name
     attr_reader :location
 
@@ -197,6 +212,8 @@ module RBS
   end
 
   class NoMixinFoundError < DefinitionError
+    include DetailedMessageable
+
     attr_reader :type_name
     attr_reader :member
 
