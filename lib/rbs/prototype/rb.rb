@@ -215,7 +215,8 @@ module RBS
           when :include
             args.each do |arg|
               if (name = const_to_name(arg, context: context))
-                decls << AST::Members::Include.new(
+                klass = context.singleton ? AST::Members::Extend : AST::Members::Include
+                decls << klass.new(
                   name: name,
                   args: [],
                   annotations: [],

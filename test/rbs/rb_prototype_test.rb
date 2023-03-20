@@ -378,6 +378,8 @@ class Hello
   attr_writer foo, :a, 'b'
 
   class << self
+    include FooBar
+
     attr_reader :x2
     attr_accessor :y2, :z2
     attr_writer foo2, :a2, 'b2'
@@ -412,6 +414,8 @@ class Hello
   attr_writer a: untyped
 
   attr_writer b: untyped
+
+  extend FooBar
 
   attr_reader self.x2: untyped
 
