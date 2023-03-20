@@ -22,6 +22,9 @@ module RBS
         when AST::Declarations::TypeAlias
           name = absolute_typename(decl.name, context: context)
           decl unless @subtrahend.type_alias_decls[name]
+        when AST::Declarations::ClassAlias
+          name = absolute_typename(decl.new_name, context: context)
+          decl unless @subtrahend.class_alias_decls[name] || @subtrahend.class_decl?(name)
         else
           raise "unknwon decl: #{decl.class}"
         end
@@ -46,7 +49,7 @@ module RBS
       update_decl(decl, members: children)
     end
 
-    # Is context used?
+    # TODO: Is context used?
     private def member_exist?(owner, member, context:)
       case member
       when AST::Members::MethodDefinition

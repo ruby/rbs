@@ -75,6 +75,37 @@ class RBS::SubtractorTest < Test::Unit::TestCase
     RBS
   end
 
+  def test_class_aliases
+    decls = to_decls(<<~RBS)
+      class A = X
+      class B = X
+      class C = X
+      class N
+        class A = X
+        class B = X
+        class C = X
+      end
+    RBS
+
+    env = to_env(<<~RBS)
+      class A = Y
+      class B end
+      class N
+        class A = Y
+        class B end
+      end
+    RBS
+
+    subtracted = RBS::Subtractor.new(decls, env).call
+
+    assert_subtracted <<~RBS, subtracted
+      class C = X
+      class N
+        class C = X
+      end
+    RBS
+  end
+
   def test_methods_in_class
     decls = to_decls(<<~RBS)
       class C
