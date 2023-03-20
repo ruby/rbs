@@ -67,6 +67,9 @@ module RBS
             end
           }
         }
+      when AST::Members::Include, AST::Members::Extend, AST::Members::Prepend
+        # Duplicated mixin is allowed. So do nothing
+        false
       when AST::Members::Public, AST::Members::Private
         # They should not be removed even if the subtrahend has them.
         false
