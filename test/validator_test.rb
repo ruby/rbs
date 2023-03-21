@@ -257,6 +257,13 @@ class Baz = Baz
         env.class_alias_decls[TypeName("::Baz")].tap do |entry|
           assert_raises RBS::CyclicClassAliasDefinitionError do
             validator.validate_class_alias(entry: entry)
+          end.tap do |error|
+            assert_equal <<~DETAILED_MESSAGE, error.detailed_message if Exception.method_defined?(:detailed_message)
+              #{error.message} (RBS::CyclicClassAliasDefinitionError)
+
+                class Baz = Baz
+                ^^^^^^^^^^^^^^^
+            DETAILED_MESSAGE
           end
         end
       end

@@ -528,12 +528,18 @@ module RBS
   end
 
   class CyclicClassAliasDefinitionError < BaseError
+    include DetailedMessageable
+
     attr_reader :alias_entry
 
     def initialize(entry)
       @alias_entry = entry
 
       super "#{Location.to_string(entry.decl.location&.[](:old_name))}: A #{alias_entry.decl.new_name} is a cyclic definition"
+    end
+
+    def location
+      @alias_entry.decl.location
     end
   end
 end
