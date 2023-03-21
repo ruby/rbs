@@ -134,6 +134,13 @@ type baz[out T] = ^(T) -> void
 
         assert_raises RBS::NonregularTypeAliasError do
           validator.validate_type_alias(entry: env.type_alias_decls[type_name("::bar")])
+        end.tap do |error|
+          assert_equal <<~DETAILED_MESSAGE, error.detailed_message if Exception.method_defined?(:detailed_message)
+            #{error.message} (RBS::NonregularTypeAliasError)
+
+              type bar[T] = [bar[T?]]
+              ^^^^^^^^^^^^^^^^^^^^^^^
+          DETAILED_MESSAGE
         end
 
         assert_raises RBS::InvalidVarianceAnnotationError do

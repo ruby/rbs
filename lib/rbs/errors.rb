@@ -475,6 +475,8 @@ module RBS
   end
 
   class NonregularTypeAliasError < BaseError
+    include DetailedMessageable
+
     attr_reader :diagnostic
     attr_reader :location
 
