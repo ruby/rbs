@@ -170,6 +170,12 @@ type bar[T < _Foo[S], S < _Bar[T]] = nil
 
         assert_equal error.type_name, TypeName("::bar")
         assert_equal "[T < _Foo[S], S < _Bar[T]]", error.location.source
+        assert_equal <<~DETAILED_MESSAGE, error.detailed_message if Exception.method_defined?(:detailed_message)
+          #{error.message} (RBS::CyclicTypeParameterBound)
+
+            type bar[T < _Foo[S], S < _Bar[T]] = nil
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^
+        DETAILED_MESSAGE
       end
     end
   end

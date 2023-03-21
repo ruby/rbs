@@ -489,6 +489,8 @@ module RBS
   end
 
   class CyclicTypeParameterBound < BaseError
+    include DetailedMessageable
+
     attr_reader :params, :type_name, :method_name, :location
 
     def initialize(type_name:, method_name:, params:, location:)
