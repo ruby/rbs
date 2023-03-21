@@ -238,6 +238,13 @@ class Baz = Baz
         env.class_alias_decls[TypeName("::Foo")].tap do |entry|
           assert_raises RBS::InconsistentClassModuleAliasError do
             validator.validate_class_alias(entry: entry)
+          end.tap do |error|
+            assert_equal <<~DETAILED_MESSAGE, error.detailed_message if Exception.method_defined?(:detailed_message)
+              #{error.message} (RBS::InconsistentClassModuleAliasError)
+
+                class Foo = Kernel
+                ^^^^^^^^^^^^^^^^^^
+            DETAILED_MESSAGE
           end
         end
 
