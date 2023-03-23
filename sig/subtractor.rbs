@@ -5,8 +5,6 @@ module RBS
     @minuend: Array[AST::Declarations::t]
     @subtrahend: Environment
 
-    @type_name_resolver: Resolver::TypeNameResolver
-
     def initialize: (Array[AST::Declarations::t] minuend, Environment subtrahend) -> void
 
     def call: (?Array[AST::Declarations::t], ?context: Resolver::context) -> Array[AST::Declarations::t]

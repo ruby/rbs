@@ -6,9 +6,6 @@ module RBS
     def initialize(minuend, subtrahend)
       @minuend = minuend
       @subtrahend = subtrahend
-
-      # TODO: Is it necessary?
-      @type_name_resolver = Resolver::TypeNameResolver.new(@subtrahend)
     end
 
     def call(minuend = @minuend, context: nil)
