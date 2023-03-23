@@ -17,7 +17,13 @@ module RBS
         when AST::Declarations::Interface
           name = absolute_typename(decl.name, context: context)
           decl unless @subtrahend.interface_name?(name)
-        when AST::Declarations::Class, AST::Declarations::Module
+        when AST::Declarations::Class
+          name = absolute_typename(decl.name, context: context)
+          next nil if @subtrahend.constant_name?(name) && !@subtrahend.class_decl?(name)
+          filter_members(decl, context: context)
+        when AST::Declarations::Module
+          name = absolute_typename(decl.name, context: context)
+          next nil if @subtrahend.constant_name?(name) && !@subtrahend.module_decl?(name)
           filter_members(decl, context: context)
         when AST::Declarations::Global
           decl unless @subtrahend.global_decls[decl.name]

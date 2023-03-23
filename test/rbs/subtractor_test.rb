@@ -60,6 +60,90 @@ class RBS::SubtractorTest < Test::Unit::TestCase
     RBS
   end
 
+  def test_duplicated_class
+    decls = to_decls(<<~RBS)
+      class C1
+        def x: () -> void
+      end
+
+      class C2
+        def x: () -> void
+      end
+
+      class C3
+        def x: () -> void
+      end
+
+      class C4
+        def x: () -> void
+      end
+
+      class C5
+        def x: () -> void
+      end
+    RBS
+
+    env = to_env(<<~RBS)
+      class C1 = String
+
+      module C2
+      end
+
+      module C3 = Enumerable
+      C4: String
+    RBS
+
+    subtracted = RBS::Subtractor.new(decls, env).call
+
+    assert_subtracted <<~RBS, subtracted
+      class C5
+        def x: () -> void
+      end
+    RBS
+  end
+
+  def test_duplicated_module
+    decls = to_decls(<<~RBS)
+      module M1
+        def x: () -> void
+      end
+
+      module M2
+        def x: () -> void
+      end
+
+      module M3
+        def x: () -> void
+      end
+
+      module M4
+        def x: () -> void
+      end
+
+      module M5
+        def x: () -> void
+      end
+    RBS
+
+    env = to_env(<<~RBS)
+      module M1 = Enumerable
+
+      class M2
+      end
+
+      class M3 = String
+      M4: String
+    RBS
+
+    subtracted = RBS::Subtractor.new(decls, env).call
+
+    assert_subtracted <<~RBS, subtracted
+      module M5
+        def x: () -> void
+      end
+    RBS
+  end
+
   def test_globals
     decls = to_decls(<<~RBS)
       $a: untyped
