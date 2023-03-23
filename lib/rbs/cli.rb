@@ -89,7 +89,7 @@ module RBS
       @stderr = stderr
     end
 
-    COMMANDS = [:ast, :annotate, :list, :ancestors, :methods, :method, :validate, :constant, :paths, :prototype, :vendor, :parse, :test, :collection]
+    COMMANDS = [:ast, :annotate, :list, :ancestors, :methods, :method, :validate, :constant, :paths, :prototype, :vendor, :parse, :test, :collection, :subtract]
 
     def parse_logging_options(opts)
       opts.on("--log-level LEVEL", "Specify log level (defaults to `warn`)") do |level|
@@ -1173,6 +1173,48 @@ EOB
           Options:
         HELP
         opts.on('--frozen') if args[0] == 'install'
+      end
+    end
+
+    def run_subtract(args, _)
+      write_to_file = false
+      OptionParser.new do |opts|
+        opts.banner = <<~HELP
+        HELP
+        opts.on('-w', '--write', 'Overwrite files directry') { write_write_to_file = true }
+        opts.parse!(args)
+      end
+
+      *minuend_paths, subtrahend_path = args
+
+      subtrahend_path or raise
+      subtrahend = Environment.new.tap do |env|
+        loader = EnvironmentLoader.new(core_root: nil)
+        loader.add(path: Pathname(subtrahend_path))
+        loader.load(env: env)
+      end
+
+      minuend_paths.each do |minuend_path|
+        FileFinder.each_file(Pathname(minuend_path), immediate: true, skip_hidden: true) do |rbs_path|
+          buf = Buffer.new(name: rbs_path, content: rbs_path.read)
+          _, dirs, decls = Parser.parse_signature(buf)
+          subtracted = Subtractor.new(decls, subtrahend).call
+
+          with_io(write_to_file ? rbs_path : stdout) do |io|
+            Writer.new(out: io).write(subtracted)
+          end
+        end
+      end
+    end
+
+    def with_io(io_or_pathname, &block)
+      case io_or_pathname
+      when IO
+        yield io_or_pathname
+      when Pathname
+        io_or_pathname.open('w') do |io|
+          yield io
+        end
       end
     end
   end

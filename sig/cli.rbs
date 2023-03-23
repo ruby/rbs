@@ -76,8 +76,12 @@ module RBS
 
     def run_annotate: (Array[String], top) -> void
 
+    def run_subtract: (Array[String], top) -> void
+
     def test_opt: (LibraryOptions) -> String?
 
     def collection_options: (Array[String]) -> OptionParser
+
+    def with_io: (Pathname | _IO) { (IO) -> void } -> void
   end
 end

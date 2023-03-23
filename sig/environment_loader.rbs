@@ -105,8 +105,5 @@ module RBS
     def each_signature: () { (source, Pathname, Buffer, Array[AST::Declarations::t], Array[AST::Directives::t]) -> void } -> void
 
     def each_dir: { (source, Pathname) -> void } -> void
-
-    def each_file: (Pathname path, immediate: boolish, skip_hidden: boolish) { (Pathname) -> void } -> void
-                 | (Pathname path, immediate: boolish, skip_hidden: boolish) -> Enumerator[Pathname, void]
   end
 end
