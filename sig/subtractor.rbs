@@ -9,7 +9,7 @@ module RBS
 
     def call: (?Array[AST::Declarations::t], ?context: Resolver::context) -> Array[AST::Declarations::t]
 
-    private def filter_members: (decl_with_members, context: Resolver::context) -> decl_with_members
+    private def filter_members: (decl_with_members, context: Resolver::context) -> decl_with_members?
 
     private def member_exist?: (TypeName owner, AST::Members::t, context: Resolver::context) -> boolish
 

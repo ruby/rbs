@@ -17,14 +17,18 @@ module RBS
         when AST::Declarations::Interface
           name = absolute_typename(decl.name, context: context)
           decl unless @subtrahend.interface_name?(name)
-        when AST::Declarations::Class
+        when AST::Declarations::Class, AST::Declarations::Module
           name = absolute_typename(decl.name, context: context)
-          next nil if @subtrahend.constant_name?(name) && !@subtrahend.class_decl?(name)
-          filter_members(decl, context: context)
-        when AST::Declarations::Module
-          name = absolute_typename(decl.name, context: context)
-          next nil if @subtrahend.constant_name?(name) && !@subtrahend.module_decl?(name)
-          filter_members(decl, context: context)
+          case
+          when @subtrahend.class_decl?(name) && decl.is_a?(AST::Declarations::Class)
+            filter_members(decl, context: context)
+          when @subtrahend.module_decl?(name) && decl.is_a?(AST::Declarations::Module)
+            filter_members(decl, context: context)
+          when @subtrahend.constant_name?(name)
+            nil
+          else
+            decl
+          end
         when AST::Declarations::Global
           decl unless @subtrahend.global_decls[decl.name]
         when AST::Declarations::TypeAlias
@@ -47,6 +51,7 @@ module RBS
 
       children = call(decl.each_decl.to_a, context: [context, decl.name]) +
         decl.each_member.reject { |m| member_exist?(owner, m, context: context) }
+      return nil if children.empty?
 
       update_decl(decl, members: children)
     end

@@ -362,6 +362,7 @@ class RBS::SubtractorTest < Test::Unit::TestCase
         def y=: () -> untyped
         def z: () -> untyped
         def z=: () -> untyped
+        def a: () -> untyped
       end
     RBS
 
@@ -377,6 +378,7 @@ class RBS::SubtractorTest < Test::Unit::TestCase
 
     assert_subtracted <<~RBS, subtracted
       class C
+        def a: () -> untyped
       end
     RBS
   end
@@ -415,6 +417,8 @@ class RBS::SubtractorTest < Test::Unit::TestCase
       class C
         attr_reader a: untyped
         attr_writer b: untyped
+        attr_writer c: untyped
+        attr_accessor d: untyped
       end
     RBS
 
@@ -422,6 +426,8 @@ class RBS::SubtractorTest < Test::Unit::TestCase
       class C
         def a: () -> Integer
         def b=: (String) -> String
+        def c: (String) -> String
+        def d: (String) -> String
       end
     RBS
 
@@ -429,6 +435,7 @@ class RBS::SubtractorTest < Test::Unit::TestCase
 
     assert_subtracted <<~RBS, subtracted
       class C
+        attr_writer c: untyped
       end
     RBS
   end
@@ -575,6 +582,44 @@ class RBS::SubtractorTest < Test::Unit::TestCase
 
       interface _I
         def x: () -> void
+      end
+    RBS
+  end
+
+  def test_empty_class_module
+    decls = to_decls(<<~RBS)
+      class C1
+        def x: () -> void
+      end
+
+      class C2
+      end
+
+      module M1
+        def x: () -> void
+      end
+
+      module M2
+      end
+    RBS
+
+    env = to_env(<<~RBS)
+      class C1
+        def x: () -> void
+      end
+
+      module M1
+        def x: () -> void
+      end
+    RBS
+
+    subtracted = RBS::Subtractor.new(decls, env).call
+
+    assert_subtracted <<~RBS, subtracted
+      class C2
+      end
+
+      module M2
       end
     RBS
   end
