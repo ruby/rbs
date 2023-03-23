@@ -43,17 +43,10 @@ module RBS
     end
 
     private def filter_members(decl, context:)
-      # @type var children: Array[RBS::AST::Declarations::t | RBS::AST::Members::t]
-      children = []
       owner = absolute_typename(decl.name, context: context)
 
-      case decl
-      when AST::Declarations::Class, AST::Declarations::Module
-        children.concat(call(decl.each_decl.to_a, context: [context, decl.name]))
-        children.concat(decl.each_member.reject { |m| member_exist?(owner, m, context: context) })
-      else
-        raise "unknwon decl: #{(_ = decl).class}"
-      end
+      children = call(decl.each_decl.to_a, context: [context, decl.name]) +
+        decl.each_member.reject { |m| member_exist?(owner, m, context: context) }
 
       update_decl(decl, members: children)
     end
