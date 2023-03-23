@@ -33,6 +33,33 @@ class RBS::SubtractorTest < Test::Unit::TestCase
     RBS
   end
 
+  def test_constants_duplicated_with_class
+    decls = to_decls(<<~RBS)
+      C1: untyped
+      C2: untyped
+      C3: untyped
+      C4: untyped
+      C5: untyped
+    RBS
+
+    env = to_env(<<~RBS)
+      class C1
+      end
+
+      module C2
+      end
+
+      class C3 = String
+      module C4 = Enumerable
+    RBS
+
+    subtracted = RBS::Subtractor.new(decls, env).call
+
+    assert_subtracted <<~RBS, subtracted
+      C5: untyped
+    RBS
+  end
+
   def test_globals
     decls = to_decls(<<~RBS)
       $a: untyped

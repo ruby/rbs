@@ -13,7 +13,7 @@ module RBS
         case decl
         when AST::Declarations::Constant
           name = absolute_typename(decl.name, context: context)
-          decl unless @subtrahend.constant_decl?(name)
+          decl unless @subtrahend.constant_name?(name)
         when AST::Declarations::Class, AST::Declarations::Module, AST::Declarations::Interface
           filter_members(decl, context: context)
         when AST::Declarations::Global
