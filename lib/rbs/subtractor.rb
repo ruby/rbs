@@ -123,16 +123,9 @@ module RBS
     private def each_member(owner, &block)
       return enum_for((__method__ or raise), owner) unless block
 
-      decls =
-        if owner.interface?
-          entry = @subtrahend.interface_decls[owner]
-          return unless entry
-          [entry.decl]
-        else
-          entry = @subtrahend.class_decls[owner]
-          return unless entry
-          entry.decls.map { |d| d.decl }
-        end
+      entry = @subtrahend.class_decls[owner]
+      return unless entry
+      decls = entry.decls.map { |d| d.decl }
 
       # TODO: performance
       decls.each { |d| d.members.each { |m| block.call(m) } }
