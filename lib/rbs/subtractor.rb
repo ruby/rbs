@@ -14,7 +14,10 @@ module RBS
         when AST::Declarations::Constant
           name = absolute_typename(decl.name, context: context)
           decl unless @subtrahend.constant_name?(name)
-        when AST::Declarations::Class, AST::Declarations::Module, AST::Declarations::Interface
+        when AST::Declarations::Interface
+          name = absolute_typename(decl.name, context: context)
+          decl unless @subtrahend.interface_name?(name)
+        when AST::Declarations::Class, AST::Declarations::Module
           filter_members(decl, context: context)
         when AST::Declarations::Global
           decl unless @subtrahend.global_decls[decl.name]
@@ -42,8 +45,6 @@ module RBS
       when AST::Declarations::Class, AST::Declarations::Module
         children.concat(call(decl.each_decl.to_a, context: [context, decl.name]))
         children.concat(decl.each_member.reject { |m| member_exist?(owner, m, context: context) })
-      when AST::Declarations::Interface
-        children.concat(decl.members.reject { |m| member_exist?(owner, m, context: context) })
       else
         raise "unknwon decl: #{(_ = decl).class}"
       end
@@ -146,10 +147,6 @@ module RBS
                         members: members)
       when AST::Declarations::Module
         decl.class.new(name: decl.name, type_params: decl.type_params, self_types: decl.self_types,
-                        annotations: decl.annotations, location: decl.location, comment: decl.comment,
-                        members: members)
-      when AST::Declarations::Interface
-        decl.class.new(name: decl.name, type_params: decl.type_params,
                         annotations: decl.annotations, location: decl.location, comment: decl.comment,
                         members: members)
       end

@@ -1,6 +1,6 @@
 module RBS
   class Subtractor
-    type decl_with_members = AST::Declarations::Class | AST::Declarations::Module | AST::Declarations::Interface
+    type decl_with_members = AST::Declarations::Class | AST::Declarations::Module
 
     @minuend: Array[AST::Declarations::t]
     @subtrahend: Environment
