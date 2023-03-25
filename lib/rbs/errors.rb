@@ -130,7 +130,7 @@ module RBS
     end
   end
 
-  class NoTypeFoundError < BaseError
+  class NoTypeFoundError < DefinitionError
     include DetailedMessageable
 
     attr_reader :type_name
