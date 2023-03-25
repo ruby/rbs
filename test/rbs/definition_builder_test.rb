@@ -238,6 +238,13 @@ EOF
 
         assert_raises(RBS::RecursiveAliasDefinitionError) do
           builder.build_interface(type_name("::_I3"))
+        end.tap do |error|
+          assert_equal <<~DETAILED_MESSAGE, error.detailed_message if Exception.method_defined?(:detailed_message)
+            #{error.message} (RBS::RecursiveAliasDefinitionError)
+
+                alias a b
+                ^^^^^^^^^
+          DETAILED_MESSAGE
         end
 
         assert_raises(RBS::DuplicatedMethodDefinitionError) do
@@ -572,16 +579,34 @@ end
         assert_raises(InvalidVarianceAnnotationError) { builder.build_instance(type_name("::Test1")) }.tap do |error|
           assert_equal :X, error.param.name
           assert_equal "C[X]", error.location.source
+          assert_equal <<~DETAILED_MESSAGE, error.detailed_message if Exception.method_defined?(:detailed_message)
+            #{error.message} (RBS::InvalidVarianceAnnotationError)
+
+              class Test1[in X] < C[X]
+                                  ^^^^
+          DETAILED_MESSAGE
         end
 
         assert_raises(InvalidVarianceAnnotationError) { builder.build_instance(type_name("::Test2")) }.tap do |error|
           assert_equal :X, error.param.name
           assert_equal "include M[X]", error.location.source
+          assert_equal <<~DETAILED_MESSAGE, error.detailed_message if Exception.method_defined?(:detailed_message)
+            #{error.message} (RBS::InvalidVarianceAnnotationError)
+
+                include M[X]
+                ^^^^^^^^^^^^
+          DETAILED_MESSAGE
         end
 
         assert_raises(InvalidVarianceAnnotationError) { builder.build_instance(type_name("::Test3")) }.tap do |error|
           assert_equal :X, error.param.name
           assert_equal "include _I[X]", error.location.source
+          assert_equal <<~DETAILED_MESSAGE, error.detailed_message if Exception.method_defined?(:detailed_message)
+            #{error.message} (RBS::InvalidVarianceAnnotationError)
+
+                include _I[X]
+                ^^^^^^^^^^^^^
+          DETAILED_MESSAGE
         end
       end
     end
@@ -614,11 +639,23 @@ end
         assert_raises(InvalidVarianceAnnotationError) { builder.build_instance(type_name("::Test1")) }.tap do |error|
           assert_equal :X, error.param.name
           assert_equal "(X) -> void", error.location.source
+          assert_equal <<~DETAILED_MESSAGE, error.detailed_message if Exception.method_defined?(:detailed_message)
+            #{error.message} (RBS::InvalidVarianceAnnotationError)
+
+                def foo: (X) -> void
+                         ^^^^^^^^^^^
+          DETAILED_MESSAGE
         end
 
         assert_raises(InvalidVarianceAnnotationError) { builder.build_instance(type_name("::Test2")) }.tap do |error|
           assert_equal :X, error.param.name
           assert_equal "attr_reader x: X", error.location.source
+          assert_equal <<~DETAILED_MESSAGE, error.detailed_message if Exception.method_defined?(:detailed_message)
+            #{error.message} (RBS::InvalidVarianceAnnotationError)
+
+                attr_reader x: X
+                ^^^^^^^^^^^^^^^^
+          DETAILED_MESSAGE
         end
       end
     end

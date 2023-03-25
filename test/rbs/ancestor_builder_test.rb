@@ -700,6 +700,13 @@ EOF
 
         assert_raises MixinClassError do
           builder.instance_ancestors(type_name("::Qux"))
+        end.tap do |error|
+          assert_equal <<~DETAILED_MESSAGE, error.detailed_message if Exception.method_defined?(:detailed_message)
+            #{error.message} (RBS::MixinClassError)
+
+                include Foo
+                ^^^^^^^^^^^
+          DETAILED_MESSAGE
         end
       end
     end
@@ -723,6 +730,13 @@ EOF
 
           assert_raises MixinClassError do
             builder.instance_ancestors(type_name("::Qux"))
+          end.tap do |error|
+            assert_equal <<~DETAILED_MESSAGE, error.detailed_message if Exception.method_defined?(:detailed_message)
+              #{error.message} (RBS::MixinClassError)
+
+                  prepend Foo
+                  ^^^^^^^^^^^
+            DETAILED_MESSAGE
           end
         end
       end
@@ -747,6 +761,13 @@ EOF
 
           assert_raises MixinClassError do
             builder.one_singleton_ancestors(type_name("::Qux"))
+          end.tap do |error|
+            assert_equal <<~DETAILED_MESSAGE, error.detailed_message if Exception.method_defined?(:detailed_message)
+              #{error.message} (RBS::MixinClassError)
+
+                  extend Foo
+                  ^^^^^^^^^^
+            DETAILED_MESSAGE
           end
         end
       end

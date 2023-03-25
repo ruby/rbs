@@ -390,6 +390,8 @@ module RBS
   end
 
   class InvalidVarianceAnnotationError < DefinitionError
+    include DetailedMessageable
+
     attr_reader :type_name
     attr_reader :param
     attr_reader :location
@@ -404,6 +406,8 @@ module RBS
   end
 
   class RecursiveAliasDefinitionError < DefinitionError
+    include DetailedMessageable
+
     attr_reader :type
     attr_reader :defs
 
@@ -422,6 +426,8 @@ module RBS
   end
 
   class MixinClassError < DefinitionError
+    include DetailedMessageable
+
     attr_reader :type_name
     attr_reader :member
 
@@ -459,6 +465,8 @@ module RBS
   end
 
   class RecursiveTypeAliasError < BaseError
+    include DetailedMessageable
+
     attr_reader :alias_names
     attr_reader :location
 

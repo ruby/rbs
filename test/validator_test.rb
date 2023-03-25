@@ -88,6 +88,13 @@ type u_2 = string & u & Numeric
         env.type_alias_decls.each do |name, decl|
           assert_raises RBS::RecursiveTypeAliasError do
             validator.validate_type_alias(entry: decl)
+          end.tap do |error|
+            assert_equal <<~DETAILED_MESSAGE, error.detailed_message if Exception.method_defined?(:detailed_message)
+              #{error.message} (RBS::RecursiveTypeAliasError)
+
+                #{decl.decl.location.source}
+                #{"^" * decl.decl.location.source.length}
+            DETAILED_MESSAGE
           end
         end
       end
