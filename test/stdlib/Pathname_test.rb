@@ -731,8 +731,10 @@ class PathnameInstanceTest < Test::Unit::TestCase
   end
 
   def test_taint
-    assert_send_type '() -> Pathname',
-                     Pathname(File.expand_path(__FILE__)), :taint
+    if Pathname.method_defined?(:taint)
+      assert_send_type '() -> Pathname',
+                      Pathname(File.expand_path(__FILE__)), :taint
+    end
   end
 
   def test_to_path
@@ -759,8 +761,10 @@ class PathnameInstanceTest < Test::Unit::TestCase
   end
 
   def test_untaint
-    assert_send_type '() -> Pathname',
-                     Pathname(File.expand_path(__FILE__)), :untaint
+    if Pathname.method_defined?(:untaint)
+      assert_send_type '() -> Pathname',
+                      Pathname(File.expand_path(__FILE__)), :untaint
+    end
   end
 
   def test_utime
