@@ -31,7 +31,7 @@ module RBS
 
       if core_root = loader.core_root
         RBS.logger.info "Vendoring core RBSs in #{vendor_dir + "core"}..."
-        loader.each_file(core_root, immediate: false, skip_hidden: true) do |file_path|
+        FileFinder.each_file(core_root, immediate: false, skip_hidden: true) do |file_path|
           paths << [file_path, Pathname("core") + file_path.relative_path_from(core_root)]
         end
       end
@@ -43,7 +43,7 @@ module RBS
 
           RBS.logger.info "Vendoring #{lib.name}(#{spec.version}) RBSs in #{vendor_dir + dest_dir}..."
 
-          loader.each_file(path, skip_hidden: true, immediate: false) do |file_path|
+          FileFinder.each_file(path, skip_hidden: true, immediate: false) do |file_path|
             paths << [file_path, dest_dir + file_path.relative_path_from(path)]
           end
 
@@ -52,7 +52,7 @@ module RBS
 
           RBS.logger.info "Vendoring #{lib.name}(#{path.version}) RBSs in #{vendor_dir + dest_dir}..."
 
-          loader.each_file(path.path, skip_hidden: true, immediate: false) do |file_path|
+          FileFinder.each_file(path.path, skip_hidden: true, immediate: false) do |file_path|
             paths << [file_path, dest_dir + file_path.relative_path_from(path.path)]
           end
         else

@@ -943,12 +943,10 @@ Options:
         opts.on('--method-type', 'Parse code as a method type') { |e| parse_method = :parse_method_type }
       end.parse!(args)
 
-      loader = options.loader()
-
       syntax_error = false
       bufs = args.flat_map do |path|
         path = Pathname(path)
-        loader.each_file(path, skip_hidden: false, immediate: true).map do |file_path|
+        FileFinder.each_file(path, skip_hidden: false, immediate: true).map do |file_path|
           Buffer.new(content: file_path.read, name: file_path)
         end
       end
@@ -1201,7 +1199,9 @@ EOB
           subtracted = Subtractor.new(decls, subtrahend).call
 
           with_io(write_to_file ? rbs_path : stdout) do |io|
-            Writer.new(out: io).write(subtracted)
+            w = Writer.new(out: io)
+            w.write(dirs)
+            w.write(subtracted)
           end
         end
       end
