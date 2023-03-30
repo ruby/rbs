@@ -530,6 +530,13 @@ class RBS::SubtractorTest < Test::Unit::TestCase
         include M1
         prepend M2
         extend M3
+        include M4
+
+        class C2
+          include M5
+          include M6
+          include M7
+        end
       end
     RBS
 
@@ -538,6 +545,13 @@ class RBS::SubtractorTest < Test::Unit::TestCase
         include M1
         prepend M2
         extend M3
+        extend M4
+
+        class C2
+          include ::M5
+          include C2::M6
+          include C::C2::M7
+        end
       end
     RBS
 
@@ -545,9 +559,7 @@ class RBS::SubtractorTest < Test::Unit::TestCase
 
     assert_subtracted <<~RBS, subtracted
       class C
-        include M1
-        prepend M2
-        extend M3
+        include M4
       end
     RBS
   end

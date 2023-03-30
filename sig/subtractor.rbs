@@ -22,8 +22,12 @@ module RBS
     private def each_member: (TypeName owner) { (AST::Members::t | AST::Declarations::t) -> void } -> void
                            | (TypeName owner) -> Enumerator[(AST::Members::t | AST::Declarations::t), void]
 
+    private def mixin_exist?: (TypeName owner, AST::Members::Include | AST::Members::Extend | AST::Members::Prepend, context: Resolver::context) -> boolish
+
     private def update_decl: (decl_with_members, members: Array[AST::Declarations::t | AST::Members::t]) -> decl_with_members
 
     private def absolute_typename: (TypeName, context: Resolver::context) -> TypeName
+
+    private def typename_candidates: (TypeName, context: Resolver::context) -> Array[TypeName]
   end
 end

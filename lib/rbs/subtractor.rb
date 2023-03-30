@@ -49,7 +49,8 @@ module RBS
     private def filter_members(decl, context:)
       owner = absolute_typename(decl.name, context: context)
 
-      children = call(decl.each_decl.to_a, context: [context, decl.name]) +
+      context = _ = [context, decl.name]
+      children = call(decl.each_decl.to_a, context: context) +
         decl.each_member.reject { |m| member_exist?(owner, m, context: context) }
       return nil if children.empty?
 
@@ -77,8 +78,7 @@ module RBS
       when AST::Members::ClassVariable
         cvar_exist?(owner, member.name)
       when AST::Members::Include, AST::Members::Extend, AST::Members::Prepend
-        # Duplicated mixin is allowed. So do nothing
-        false
+        mixin_exist?(owner, member, context: context)
       when AST::Members::Public, AST::Members::Private
         # They should not be removed even if the subtrahend has them.
         false
@@ -136,6 +136,17 @@ module RBS
       decls.each { |d| d.members.each { |m| block.call(m) } }
     end
 
+    private def mixin_exist?(owner, mixin, context:)
+      candidates = typename_candidates(mixin.name, context: context)
+      each_member(owner).any? do |m|
+        case m
+        when mixin.class
+          # @type var m: AST::Members::Include | AST::Members::Extend | AST::Members::Prepend
+          candidates.include?(m.name)
+        end
+      end
+    end
+
     private def update_decl(decl, members:)
       case decl
       when AST::Declarations::Class
@@ -156,6 +167,21 @@ module RBS
         context = _ = context[0]
       end
       name.absolute!
+    end
+
+    private def typename_candidates(name, context:)
+      ret = [name.absolute!, name.relative!]
+      return ret if name.absolute?
+
+      while context
+        ns = context[1] or raise
+        name = name.with_prefix(ns.to_namespace)
+        ret.concat [name.absolute!, name.relative!]
+
+        context = _ = context[0]
+      end
+
+      ret
     end
   end
 end
