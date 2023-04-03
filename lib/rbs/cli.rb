@@ -1179,7 +1179,7 @@ EOB
       OptionParser.new do |opts|
         opts.banner = <<~HELP
         HELP
-        opts.on('-w', '--write', 'Overwrite files directry') { write_write_to_file = true }
+        opts.on('-w', '--write', 'Overwrite files directry') { write_to_file = true }
         opts.parse!(args)
       end
 
