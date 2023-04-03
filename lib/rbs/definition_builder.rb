@@ -239,14 +239,6 @@ module RBS
             definition.class_variables.merge!(defn.class_variables)
           end
 
-          all_interfaces = one_ancestors.each_extended_interface.flat_map do |interface|
-            other_interfaces = ancestor_builder.interface_ancestors(interface.name).ancestors #: Array[Definition::Ancestor::Instance]
-            other_interfaces = other_interfaces.select {|ancestor| ancestor.source }
-            [interface, *other_interfaces]
-          end
-          interface_methods = interface_methods(all_interfaces)
-          import_methods(definition, type_name, methods, interface_methods, Substitution.new)
-
           one_ancestors.each_extended_module do |mod|
             mod.args.each do |arg|
               validate_type_presence(arg)
@@ -256,7 +248,12 @@ module RBS
             define_instance(definition, mod.name, subst)
           end
 
-          interface_methods = interface_methods(one_ancestors.each_extended_interface.to_a)
+          all_interfaces = one_ancestors.each_extended_interface.flat_map do |interface|
+            other_interfaces = ancestor_builder.interface_ancestors(interface.name).ancestors #: Array[Definition::Ancestor::Instance]
+            other_interfaces = other_interfaces.select {|ancestor| ancestor.source }
+            [interface, *other_interfaces]
+          end
+          interface_methods = interface_methods(all_interfaces)
           import_methods(definition, type_name, methods, interface_methods, Substitution.new)
 
           entry.decls.each do |d|
