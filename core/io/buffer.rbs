@@ -541,12 +541,10 @@ class IO
 
     # <!--
     #   rdoc-file=io_buffer.c
-    #   - read(io, [length, [offset]]) -> read length or -errno
+    #   - read(io, length, [offset]) -> read length or -errno
     # -->
     # Read at most `length` bytes from `io` into the buffer, starting at `offset`.
     # If an error occurs, return `-errno`.
-    #
-    # If `length` is not given, read until the end of the buffer.
     #
     # If `offset` is not given, read from the beginning of the buffer.
     #
