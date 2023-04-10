@@ -2566,4 +2566,31 @@ end
       end
     end
   end
+
+  def test_extend_overload
+    SignatureManager.new do |manager|
+      manager.files[Pathname("foo.rbs")] = <<~EOF
+        module M
+          def f: () -> Integer
+        end
+        class A
+          extend M
+          def self.f: () -> String | ...
+        end
+      EOF
+
+      manager.build do |env|
+        builder = DefinitionBuilder.new(env: env)
+
+        builder.build_singleton(type_name("::A")).tap do |definition|
+          assert_instance_of Definition, definition
+
+          definition.methods[:f].tap do |method|
+            assert_equal [TypeName("::A"), TypeName("::M")], method.defs.map(&:defined_in)
+            assert_equal [TypeName("::A"), TypeName("::A")], method.defs.map(&:implemented_in)
+          end
+        end
+      end
+    end
+  end
 end
