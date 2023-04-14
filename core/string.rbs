@@ -2600,8 +2600,10 @@ class String
   #     <<cruel>> <<world>>
   #     rceu lowlr
   #
-  def scan: (Regexp | string pattern) -> Array[String | Array[String]]
-          | (Regexp | string pattern) { (String | Array[String]) -> void } -> self
+  def scan: (Regexp pattern) -> Array[String | Array[String]]
+          | (Regexp pattern) { (String | Array[String]) -> void } -> self
+          | (string pattern) -> Array[String]
+          | (string pattern) { (String) -> void } -> self
 
   # <!--
   #   rdoc-file=string.c
