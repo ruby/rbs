@@ -9,7 +9,7 @@ module RBS
     end
 
     def call(minuend = @minuend, context: nil)
-      minuend.filter_map do |decl|
+      minuend.map do |decl|
         case decl
         when AST::Declarations::Constant
           name = absolute_typename(decl.name, context: context)
@@ -43,7 +43,7 @@ module RBS
         else
           raise "unknwon decl: #{(_ = decl).class}"
         end
-      end
+      end.compact
     end
 
     private def filter_members(decl, context:)
