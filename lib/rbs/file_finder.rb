@@ -2,6 +2,8 @@
 
 module RBS
   module FileFinder
+    module_function
+
     def self.each_file(path, immediate:, skip_hidden:, &block)
       return enum_for(__method__, path, immediate: immediate, skip_hidden: skip_hidden) unless block
 

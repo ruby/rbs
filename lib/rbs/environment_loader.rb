@@ -12,6 +12,8 @@ module RBS
       end
     end
 
+    include FileFinder
+
     Library = _ = Struct.new(:name, :version, keyword_init: true)
 
     attr_reader :core_root

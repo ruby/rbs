@@ -37,6 +37,8 @@ module RBS
       def initialize: (name: String, version: String?) -> void
     end
 
+    include FileFinder
+
     DEFAULT_CORE_ROOT: Pathname
 
     attr_reader core_root: Pathname?
