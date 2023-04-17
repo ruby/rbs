@@ -1176,16 +1176,35 @@ EOB
 
     def run_subtract(args, _)
       write_to_file = false
-      OptionParser.new do |opts|
+      opts = OptionParser.new do |opts|
         opts.banner = <<~HELP
+          Usage: rbs subtract minuend.rbs [minuend2.rbs, ...] subtrahend.rbs
+
+          Remove duplications between RBS files.
+
+          Examples:
+
+            # Generate RBS files from the codebase.
+            $ rbs prototype rb lib/ > generated.rbs
+
+            # Write more descrictive types by hand.
+            $ $EDITOR handwritten.rbs
+
+            # Remove hand-written method definitions from generated.rbs.
+            $ rbs subtract --write generated.rbs handwritten.rbs
+
+          Options:
         HELP
         opts.on('-w', '--write', 'Overwrite files directry') { write_to_file = true }
         opts.parse!(args)
       end
 
       *minuend_paths, subtrahend_path = args
+      if !subtrahend_path || minuend_paths.empty?
+        stdout.puts opts.help
+        exit 1
+      end
 
-      subtrahend_path or raise
       subtrahend = Environment.new.tap do |env|
         loader = EnvironmentLoader.new(core_root: nil)
         loader.add(path: Pathname(subtrahend_path))
