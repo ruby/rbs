@@ -2106,17 +2106,33 @@ end
 
       dirs[0].tap do |use|
         assert_equal 1, use.clauses.size
-        assert_equal TypeName("RBS::Namespace"), use.clauses[0].type_name
-        assert_equal :NS, use.clauses[0].new_name
+
+        use.clauses[0].tap do |clause|
+          assert_equal TypeName("RBS::Namespace"), clause.type_name
+          assert_equal :NS, clause.new_name
+          assert_equal "RBS::Namespace as NS", clause.location.source
+          assert_equal "RBS::Namespace", clause.location[:type_name].source
+          assert_equal "as", clause.location[:keyword].source
+          assert_equal "NS", clause.location[:new_name].source
+        end
       end
 
       dirs[1].tap do |use|
         assert_equal 2, use.clauses.size
 
-        assert_equal TypeName("RBS::TypeName"), use.clauses[0].type_name
-        assert_nil use.clauses[0].new_name
+        use.clauses[0].tap do |clause|
+          assert_equal TypeName("RBS::TypeName"), clause.type_name
+          assert_nil clause.new_name
+          assert_equal "RBS::TypeName", clause.location[:type_name].source
+          assert_nil clause.location[:keyword]
+          assert_nil clause.location[:new_name]
+        end
 
-        assert_equal Namespace("RBS::AST::Declarations::"), use.clauses[1].namespace
+        use.clauses[1].tap do |clause|
+          assert_equal Namespace("RBS::AST::Declarations::"), clause.namespace
+          assert_equal "RBS::AST::Declarations::", clause.location[:namespace].source
+          assert_equal "*", clause.location[:star].source
+        end
       end
     end
   end

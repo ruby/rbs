@@ -2649,13 +2649,9 @@ void parse_use_clauses(parserstate *state, VALUE clauses) {
 
         VALUE location = rbs_new_location(state->buffer, clause_range);
         rbs_loc *loc = rbs_check_location(location);
-        rbs_loc_add_required_child(loc, rb_intern("type_name"), state->current_token.range);
-        if (!null_range_p(keyword_range)) {
-          rbs_loc_add_optional_child(loc, rb_intern("keyword"), keyword_range);
-        }
-        if (!null_range_p(new_name_range)) {
-          rbs_loc_add_optional_child(loc, rb_intern("new_name"), new_name_range);
-        }
+        rbs_loc_add_required_child(loc, rb_intern("type_name"), type_name_range);
+        rbs_loc_add_optional_child(loc, rb_intern("keyword"), keyword_range);
+        rbs_loc_add_optional_child(loc, rb_intern("new_name"), new_name_range);
 
         rb_ary_push(clauses, rbs_ast_directives_use_single_clause(type_name, new_name, location));
 
