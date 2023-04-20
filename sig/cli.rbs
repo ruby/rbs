@@ -81,7 +81,5 @@ module RBS
     def test_opt: (LibraryOptions) -> String?
 
     def collection_options: (Array[String]) -> OptionParser
-
-    def with_io: (Pathname | _IO) { (IO) -> void } -> void
   end
 end

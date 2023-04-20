@@ -881,6 +881,44 @@ Processing `test/a_test.rb`...
     end
   end
 
+  def test_subtract_several_subtrahends
+    Dir.mktmpdir do |dir|
+      dir = Pathname(dir)
+
+      minuend = dir.join('minuend.rbs')
+      minuend.write(<<~RBS)
+        use A::B
+        class C
+          def x: () -> untyped
+          def y: () -> untyped
+          def z: () -> untyped
+        end
+      RBS
+      subtrahend_1 = dir.join('subtrahend_1.rbs')
+      subtrahend_1.write(<<~RBS)
+        class C
+          def x: () -> untyped
+        end
+      RBS
+      subtrahend_2 = dir.join('subtrahend_2.rbs')
+      subtrahend_2.write(<<~RBS)
+        class C
+          def y: () -> untyped
+        end
+      RBS
+
+      stdout, stderr = run_rbs('subtract', minuend.to_s, '--subtrahend', subtrahend_1.to_s, '--subtrahend', subtrahend_2.to_s)
+      assert_empty stderr
+      assert_equal <<~RBS, stdout
+        use A::B
+
+        class C
+          def z: () -> untyped
+        end
+      RBS
+    end
+  end
+
   def test_subtract_write
     Dir.mktmpdir do |dir|
       dir = Pathname(dir)

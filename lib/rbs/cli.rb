@@ -4,6 +4,7 @@ require "open3"
 require "optparse"
 require "shellwords"
 require "abbrev"
+require "stringio"
 
 module RBS
   class CLI
@@ -451,7 +452,6 @@ Examples:
 EOU
 
         opts.on("--silent") do
-          require "stringio"
           @stdout = StringIO.new
         end
       end.parse!(args)
@@ -1176,9 +1176,14 @@ EOB
 
     def run_subtract(args, _)
       write_to_file = false
+      # @type var subtrahend_paths: Array[String]
+      subtrahend_paths = []
+
       opts = OptionParser.new do |opts|
         opts.banner = <<~HELP
-          Usage: rbs subtract minuend.rbs [minuend2.rbs, ...] subtrahend.rbs
+          Usage:
+            rbs subtract [options...] minuend.rbs [minuend2.rbs, ...] subtrahend.rbs
+            rbs subtract [options...] minuend.rbs [minuend2.rbs, ...] --subtrahend subtrahend_1.rbs --subtrahend subtrahend_2.rbs
 
           Remove duplications between RBS files.
 
@@ -1196,18 +1201,31 @@ EOB
           Options:
         HELP
         opts.on('-w', '--write', 'Overwrite files directry') { write_to_file = true }
+        opts.on('--subtrahend=PATH', '') { |path| subtrahend_paths << path }
         opts.parse!(args)
       end
 
-      *minuend_paths, subtrahend_path = args
-      if !subtrahend_path || minuend_paths.empty?
+      if subtrahend_paths.empty?
+        *minuend_paths, subtrahend_path = args
+        unless subtrahend_path
+          stdout.puts opts.help
+          exit 1
+        end
+        subtrahend_paths << subtrahend_path
+      else
+        minuend_paths = args
+      end
+
+      if minuend_paths.empty?
         stdout.puts opts.help
         exit 1
       end
 
       subtrahend = Environment.new.tap do |env|
         loader = EnvironmentLoader.new(core_root: nil)
-        loader.add(path: Pathname(subtrahend_path))
+        subtrahend_paths.each do |path|
+          loader.add(path: Pathname(path))
+        end
         loader.load(env: env)
       end
 
@@ -1217,22 +1235,16 @@ EOB
           _, dirs, decls = Parser.parse_signature(buf)
           subtracted = Subtractor.new(decls, subtrahend).call
 
-          with_io(write_to_file ? rbs_path : stdout) do |io|
-            w = Writer.new(out: io)
-            w.write(dirs)
-            w.write(subtracted)
-          end
-        end
-      end
-    end
+          io = StringIO.new
+          w = Writer.new(out: io)
+          w.write(dirs)
+          w.write(subtracted)
 
-    def with_io(io_or_pathname, &block)
-      case io_or_pathname
-      when IO
-        yield io_or_pathname
-      when Pathname
-        io_or_pathname.open('w') do |io|
-          yield io
+          if write_to_file
+            rbs_path.write(io.string)
+          else
+            stdout.puts(io.string)
+          end
         end
       end
     end
