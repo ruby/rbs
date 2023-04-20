@@ -3,12 +3,14 @@ module RBS
   #
   # A repository object can handle multiple repository roots.
   #
-  #   repo = RBS::Repository.new()
-  #   repo.add(Pathname("vendor/rbs/gem-rbs"))
-  #   repo.add(Pathname("vendor/rbs/internal-rbs"))
-  #   repo.add(Pathname("vendor/rbs/definitely-rbs"))
+  # ```ruby
+  # repo = RBS::Repository.new()
+  # repo.add(Pathname("vendor/rbs/gem-rbs"))
+  # repo.add(Pathname("vendor/rbs/internal-rbs"))
+  # repo.add(Pathname("vendor/rbs/definitely-rbs"))
   #
-  #   repo.lookup("minitest", "2.1.3") => Pathname or nil
+  # repo.lookup("minitest", "2.1.3") # => Pathname or nil
+  # ```
   #
   # If one gem version can resolve to several directories, the last added dir wins.
   #

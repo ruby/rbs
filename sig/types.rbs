@@ -18,9 +18,11 @@ module RBS
       # Yields all direct sub types included in the type.
       # It doesn't yield the type itself.
       #
-      #   parse("Hash[String, Array[Symbol]]").each_type do |ty|
-      #     ...       # Yields String and Array[Symbol]
-      #   end
+      # ```ruby
+      # parse("Hash[String, Array[Symbol]]").each_type do |ty|
+      #   ...       # Yields String and Array[Symbol]
+      # end
+      # ```
       #
       def each_type: () { (t) -> void } -> void
                    | () -> Enumerator[t, void]
@@ -32,9 +34,11 @@ module RBS
       # Returns a String representation.
       # `level` is used internally.
       #
-      #   parse("String").to_s               # => "String"
-      #   parse("String | Integer").to_s()   # => "String | Integer"
-      #   parse("String | Integer").to_s(1)  # => "(String | Integer)"
+      # ```ruby
+      # parse("String").to_s               # => "String"
+      # parse("String | Integer").to_s()   # => "String | Integer"
+      # parse("String | Integer").to_s(1)  # => "(String | Integer)"
+      # ```
       #
       def to_s: (?Integer level) -> String
     end

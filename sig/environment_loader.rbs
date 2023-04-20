@@ -3,23 +3,25 @@ module RBS
   #
   # Set up your configuration through repository and `#add` method.
   #
-  #   # Set up the repository to load library RBSs from.
-  #   repo = RBS::Repository.default
-  #   repo.add(Pathname("vendor/rbs/gem-rbs"))
-  #   repo.add(Pathname("vendor/rbs/internal-rbs"))
+  # ```ruby
+  # # Set up the repository to load library RBSs from.
+  # repo = RBS::Repository.default
+  # repo.add(Pathname("vendor/rbs/gem-rbs"))
+  # repo.add(Pathname("vendor/rbs/internal-rbs"))
   #
-  #   loader = RBS::EnvironmentLoader.new(repository: repo)
+  # loader = RBS::EnvironmentLoader.new(repository: repo)
   #
-  #   # Add libraries to load RBS files.
-  #   loader.add(library: "minitest")
-  #   loader.add(library: "rbs", version: "1.0.0")
+  # # Add libraries to load RBS files.
+  # loader.add(library: "minitest")
+  # loader.add(library: "rbs", version: "1.0.0")
   #
-  #   # Add dirs to load RBS files from.
-  #   loader.add(path: Pathname("sig"))
+  # # Add dirs to load RBS files from.
+  # loader.add(path: Pathname("sig"))
   #
-  #   # Load RBSs into an environment.
-  #   environment = RBS::Environment.new()
-  #   loader.load(env: environment)
+  # # Load RBSs into an environment.
+  # environment = RBS::Environment.new()
+  # loader.load(env: environment)
+  # ```
   #
   class EnvironmentLoader
     class UnknownLibraryError < StandardError
