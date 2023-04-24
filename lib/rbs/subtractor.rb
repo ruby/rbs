@@ -2,7 +2,6 @@
 
 module RBS
   class Subtractor
-    # TODO: Should minuend consider use directive?
     def initialize(minuend, subtrahend)
       @minuend = minuend
       @subtrahend = subtrahend
@@ -57,7 +56,6 @@ module RBS
       update_decl(decl, members: children)
     end
 
-    # TODO: Is context used?
     private def member_exist?(owner, member, context:)
       case member
       when AST::Members::MethodDefinition
@@ -132,7 +130,6 @@ module RBS
       return unless entry
       decls = entry.decls.map { |d| d.decl }
 
-      # TODO: performance
       decls.each { |d| d.members.each { |m| block.call(m) } }
     end
 
