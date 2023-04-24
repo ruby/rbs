@@ -11,7 +11,11 @@ class RBS::TypesTest < Test::Unit::TestCase
     assert_equal '"foo"?', parse_type('"foo" ?').to_s
     assert_equal '"foo\\\\n"', parse_type(%q{'foo\n'}).to_s
     assert_equal '"foo\\n"', parse_type('"foo\n"').to_s
+    assert_equal '"\a"', parse_type(%Q{"\x07"}).to_s
+    assert_equal %Q{"\x03"}, parse_type(%Q{"\x03"}).to_s
     assert_equal ":foo ?", parse_type(":foo ?").to_s
+    assert_equal ':":C"', parse_type(':":C"').to_s
+    assert_equal %Q{:"x\\n"}, parse_type(%Q{:"x\\n"}).to_s
     assert_equal "[ Integer, bool? ]", parse_type("[Integer, bool?]").to_s
     assert_equal "[ ]", parse_type("[   ]").to_s
     assert_equal "{ }", Types::Record.new(fields: {}, location: nil).to_s # NOTE: parse_type("{ }") is syntax error

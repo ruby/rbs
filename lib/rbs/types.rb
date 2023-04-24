@@ -1212,7 +1212,57 @@ module RBS
       end
 
       def to_s(level = 0)
-        literal.inspect
+        case literal
+        when String
+          string_to_s(literal)
+        when Symbol
+          symbol_to_s(literal)
+        else
+          literal.inspect
+        end
+      end
+
+      private
+
+      def string_to_s(str)
+        content = str.chars.map do |c|
+          case c
+          when "\a"
+            "\\a"
+          when "\b"
+            "\\b"
+          when "\e"
+            "\\e"
+          when "\f"
+            "\\f"
+          when "\n"
+            "\\n"
+          when "\r"
+            "\\r"
+          when "\t"
+            "\\t"
+          when "\v"
+            "\\v"
+          when '"'
+            '\\"'
+          when '\\'
+            '\\\\'
+          else
+            c
+          end
+        end.join
+        '"' + content + '"'
+      end
+
+      def symbol_to_s(sym)
+        begin
+          r = ":#{sym}"
+          node = Parser.parse_type(r, require_eof: true)
+          return r if node.is_a?(self.class) && node.literal == sym
+        rescue RBS::ParsingError
+        end
+
+        ":" + string_to_s(sym.to_s)
       end
     end
   end
