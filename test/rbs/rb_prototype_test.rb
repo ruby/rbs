@@ -234,36 +234,36 @@ end
   end
 
   def test_defs_return_type_with_block_optional
-      parser = RB.new
+    parser = RB.new
 
-      rb = <<~'EOR'
-        class Hello
-          def with_optional_block1
-            # `block_given?` call makes the block optional
-            if block_given?
-              yield 1
-            end
-          end
-
-          def with_optional_block2(&block)
-            # testing block var makes the block optional
-            if block
-              yield 1
-            end
+    rb = <<~'EOR'
+      class Hello
+        def with_optional_block1
+          # `block_given?` call makes the block optional
+          if block_given?
+            yield 1
           end
         end
-      EOR
 
-      parser.parse(rb)
-
-      assert_write parser.decls, <<~EOF
-        class Hello
-          def with_optional_block1: () ?{ (untyped) -> untyped } -> (untyped | nil)
-
-          def with_optional_block2: () ?{ (untyped) -> untyped } -> (untyped | nil)
+        def with_optional_block2(&block)
+          # testing block var makes the block optional
+          if block
+            yield 1
+          end
         end
-      EOF
-    end
+      end
+    EOR
+
+    parser.parse(rb)
+
+    assert_write parser.decls, <<~EOF
+      class Hello
+        def with_optional_block1: () ?{ (untyped) -> untyped } -> (untyped | nil)
+
+        def with_optional_block2: () ?{ (untyped) -> untyped } -> (untyped | nil)
+      end
+    EOF
+  end
 
   def test_defs_return_type_with_if
     parser = RB.new
