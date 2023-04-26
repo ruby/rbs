@@ -4,6 +4,7 @@ require "open3"
 require "optparse"
 require "shellwords"
 require "abbrev"
+require "stringio"
 
 module RBS
   class CLI
@@ -89,7 +90,7 @@ module RBS
       @stderr = stderr
     end
 
-    COMMANDS = [:ast, :annotate, :list, :ancestors, :methods, :method, :validate, :constant, :paths, :prototype, :vendor, :parse, :test, :collection]
+    COMMANDS = [:ast, :annotate, :list, :ancestors, :methods, :method, :validate, :constant, :paths, :prototype, :vendor, :parse, :test, :collection, :subtract]
 
     def parse_logging_options(opts)
       opts.on("--log-level LEVEL", "Specify log level (defaults to `warn`)") do |level|
@@ -451,7 +452,6 @@ Examples:
 EOU
 
         opts.on("--silent") do
-          require "stringio"
           @stdout = StringIO.new
         end
       end.parse!(args)
@@ -943,12 +943,10 @@ Options:
         opts.on('--method-type', 'Parse code as a method type') { |e| parse_method = :parse_method_type }
       end.parse!(args)
 
-      loader = options.loader()
-
       syntax_error = false
       bufs = args.flat_map do |path|
         path = Pathname(path)
-        loader.each_file(path, skip_hidden: false, immediate: true).map do |file_path|
+        FileFinder.each_file(path, skip_hidden: false, immediate: true).map do |file_path|
           Buffer.new(content: file_path.read, name: file_path)
         end
       end
@@ -1173,6 +1171,81 @@ EOB
           Options:
         HELP
         opts.on('--frozen') if args[0] == 'install'
+      end
+    end
+
+    def run_subtract(args, _)
+      write_to_file = false
+      # @type var subtrahend_paths: Array[String]
+      subtrahend_paths = []
+
+      opts = OptionParser.new do |opts|
+        opts.banner = <<~HELP
+          Usage:
+            rbs subtract [options...] minuend.rbs [minuend2.rbs, ...] subtrahend.rbs
+            rbs subtract [options...] minuend.rbs [minuend2.rbs, ...] --subtrahend subtrahend_1.rbs --subtrahend subtrahend_2.rbs
+
+          Remove duplications between RBS files.
+
+          Examples:
+
+            # Generate RBS files from the codebase.
+            $ rbs prototype rb lib/ > generated.rbs
+
+            # Write more descrictive types by hand.
+            $ $EDITOR handwritten.rbs
+
+            # Remove hand-written method definitions from generated.rbs.
+            $ rbs subtract --write generated.rbs handwritten.rbs
+
+          Options:
+        HELP
+        opts.on('-w', '--write', 'Overwrite files directry') { write_to_file = true }
+        opts.on('--subtrahend=PATH', '') { |path| subtrahend_paths << path }
+        opts.parse!(args)
+      end
+
+      if subtrahend_paths.empty?
+        *minuend_paths, subtrahend_path = args
+        unless subtrahend_path
+          stdout.puts opts.help
+          exit 1
+        end
+        subtrahend_paths << subtrahend_path
+      else
+        minuend_paths = args
+      end
+
+      if minuend_paths.empty?
+        stdout.puts opts.help
+        exit 1
+      end
+
+      subtrahend = Environment.new.tap do |env|
+        loader = EnvironmentLoader.new(core_root: nil)
+        subtrahend_paths.each do |path|
+          loader.add(path: Pathname(path))
+        end
+        loader.load(env: env)
+      end
+
+      minuend_paths.each do |minuend_path|
+        FileFinder.each_file(Pathname(minuend_path), immediate: true, skip_hidden: true) do |rbs_path|
+          buf = Buffer.new(name: rbs_path, content: rbs_path.read)
+          _, dirs, decls = Parser.parse_signature(buf)
+          subtracted = Subtractor.new(decls, subtrahend).call
+
+          io = StringIO.new
+          w = Writer.new(out: io)
+          w.write(dirs)
+          w.write(subtracted)
+
+          if write_to_file
+            rbs_path.write(io.string)
+          else
+            stdout.puts(io.string)
+          end
+        end
       end
     end
   end

@@ -12,6 +12,8 @@ module RBS
       end
     end
 
+    include FileFinder
+
     Library = _ = Struct.new(:name, :version, keyword_init: true)
 
     attr_reader :core_root
@@ -129,37 +131,13 @@ module RBS
       end
     end
 
-    def each_file(path, immediate:, skip_hidden:, &block)
-      return enum_for(__method__, path, immediate: immediate, skip_hidden: skip_hidden) unless block
-
-      case
-      when path.file?
-        if path.extname == ".rbs" || immediate
-          yield path
-        end
-
-      when path.directory?
-        if path.basename.to_s.start_with?("_")
-          if skip_hidden
-            unless immediate
-              return
-            end
-          end
-        end
-
-        path.children.sort.each do |child|
-          each_file(child, immediate: false, skip_hidden: skip_hidden, &block)
-        end
-      end
-    end
-
     def each_signature
       files = Set[]
 
       each_dir do |source, dir|
         skip_hidden = !source.is_a?(Pathname)
 
-        each_file(dir, skip_hidden: skip_hidden, immediate: true) do |path|
+        FileFinder.each_file(dir, skip_hidden: skip_hidden, immediate: true) do |path|
           next if files.include?(path)
 
           files << path
