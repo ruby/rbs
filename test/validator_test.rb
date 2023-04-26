@@ -141,6 +141,13 @@ type baz[out T] = ^(T) -> void
 
         assert_raises RBS::NonregularTypeAliasError do
           validator.validate_type_alias(entry: env.type_alias_decls[type_name("::bar")])
+        end.tap do |error|
+          assert_equal <<~DETAILED_MESSAGE, error.detailed_message if Exception.method_defined?(:detailed_message)
+            #{error.message} (RBS::NonregularTypeAliasError)
+
+              type bar[T] = [bar[T?]]
+              ^^^^^^^^^^^^^^^^^^^^^^^
+          DETAILED_MESSAGE
         end
 
         assert_raises RBS::InvalidVarianceAnnotationError do
@@ -170,6 +177,12 @@ type bar[T < _Foo[S], S < _Bar[T]] = nil
 
         assert_equal error.type_name, TypeName("::bar")
         assert_equal "[T < _Foo[S], S < _Bar[T]]", error.location.source
+        assert_equal <<~DETAILED_MESSAGE, error.detailed_message if Exception.method_defined?(:detailed_message)
+          #{error.message} (RBS::CyclicTypeParameterBound)
+
+            type bar[T < _Foo[S], S < _Bar[T]] = nil
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^
+        DETAILED_MESSAGE
       end
     end
   end
@@ -232,6 +245,13 @@ class Baz = Baz
         env.class_alias_decls[TypeName("::Foo")].tap do |entry|
           assert_raises RBS::InconsistentClassModuleAliasError do
             validator.validate_class_alias(entry: entry)
+          end.tap do |error|
+            assert_equal <<~DETAILED_MESSAGE, error.detailed_message if Exception.method_defined?(:detailed_message)
+              #{error.message} (RBS::InconsistentClassModuleAliasError)
+
+                class Foo = Kernel
+                ^^^^^^^^^^^^^^^^^^
+            DETAILED_MESSAGE
           end
         end
 
@@ -244,6 +264,13 @@ class Baz = Baz
         env.class_alias_decls[TypeName("::Baz")].tap do |entry|
           assert_raises RBS::CyclicClassAliasDefinitionError do
             validator.validate_class_alias(entry: entry)
+          end.tap do |error|
+            assert_equal <<~DETAILED_MESSAGE, error.detailed_message if Exception.method_defined?(:detailed_message)
+              #{error.message} (RBS::CyclicClassAliasDefinitionError)
+
+                class Baz = Baz
+                ^^^^^^^^^^^^^^^
+            DETAILED_MESSAGE
           end
         end
       end
