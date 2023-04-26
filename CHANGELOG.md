@@ -2,6 +2,43 @@
 
 ## master
 
+## 3.1.0 (2023-04-26)
+
+### Signature updates
+
+* `Module#attr_*` methods ([#1300](https://github.com/ruby/rbs/pull/1300))
+* `Object#define_singleton_method` ([#1299](https://github.com/ruby/rbs/pull/1299))
+* `String#scan` ([#1297](https://github.com/ruby/rbs/pull/1297))
+* Removed `Gem.datadir` ([#1273](https://github.com/ruby/rbs/pull/1273))
+
+### Language updates
+
+### Library changes
+
+* Use fenced code block instead of indented one in .rbs files ([#1312](https://github.com/ruby/rbs/pull/1312))
+* Fix single use clause `:type_name` location ([#1307](https://github.com/ruby/rbs/pull/1307))
+* Fix `InvalidOverloadMethodError` on overloading extended method ([#1294](https://github.com/ruby/rbs/pull/1294))
+* Fix super class of `NoTypeFoundError` from `BaseError` to `DefinitionError` ([#1290](https://github.com/ruby/rbs/pull/1290))
+* Support `#detailed_message` for `NonregularTypeAliasError`, `CyclicTypeParameterBound`, `InconsistentClassModuleAliasError` and `CyclicClassAliasDefinitionError` ([#1289](https://github.com/ruby/rbs/pull/1289))
+* Implement `rbs subtract` command ([#1287](https://github.com/ruby/rbs/pull/1287))
+* Support `#detailed_message` for `InvalidVarianceAnnotationError`, `RecursiveAliasDefinitionError`, `MixinClassError` and `RecursiveTypeAliasError` ([#1285](https://github.com/ruby/rbs/pull/1285))
+* Support `#detailed_message` for `NoTypeError`, `InheritModuleError`, `NoSelfTypeFoundError` and `NoMixinFoundError` ([#1280](https://github.com/ruby/rbs/pull/1280))
+* Validate duplicate type aliases ([#1279](https://github.com/ruby/rbs/pull/1279))
+* Add `-e`, `--type`, and `--method-type` options to `rbs parse` ([#1252](https://github.com/ruby/rbs/pull/1252))
+
+#### rbs prototype
+
+* Convert `include` in `class << self` to `extend` by `prototype rb` ([#1255](https://github.com/ruby/rbs/pull/1255))
+
+#### rbs collection
+
+* Skip loading `#gemspec` gems via RBS collection ([#1319](https://github.com/ruby/rbs/pull/1319))
+
+### Miscellaneous
+
+* Run `bundle install` automatically in `bin/steep` ([#1308](https://github.com/ruby/rbs/pull/1308))
+* Fix warnings ([#1314](https://github.com/ruby/rbs/pull/1314))
+
 ## 3.0.4 (2023-03-13)
 
 ### Library changes
