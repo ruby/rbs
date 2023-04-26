@@ -921,6 +921,10 @@ Options:
     end
 
     def run_parse(args, options)
+      parse_method = :parse_signature
+      # @type var e_code: String?
+      e_code = nil
+
       OptionParser.new do |opts|
         opts.banner = <<-EOB
 Usage: rbs parse [files...]
@@ -930,22 +934,37 @@ Parse given RBS files and print syntax errors.
 Examples:
 
   $ rbs parse sig/app/models.rbs sig/app/controllers.rbs
+
+Options:
         EOB
+
+        opts.on('-e CODE', 'One line RBS script to parse') { |e| e_code = e }
+        opts.on('--type', 'Parse code as a type') { |e| parse_method = :parse_type }
+        opts.on('--method-type', 'Parse code as a method type') { |e| parse_method = :parse_method_type }
       end.parse!(args)
 
       loader = options.loader()
 
       syntax_error = false
-      args.each do |path|
+      bufs = args.flat_map do |path|
         path = Pathname(path)
-        loader.each_file(path, skip_hidden: false, immediate: true) do |file_path|
-          RBS.logger.info "Parsing #{file_path}..."
-          buffer = Buffer.new(content: file_path.read, name: file_path)
-          Parser.parse_signature(buffer)
-        rescue RBS::ParsingError => ex
-          stdout.puts ex.message
-          syntax_error = true
+        loader.each_file(path, skip_hidden: false, immediate: true).map do |file_path|
+          Buffer.new(content: file_path.read, name: file_path)
         end
+      end
+      bufs << Buffer.new(content: e_code, name: '-e') if e_code
+
+      bufs.each do |buf|
+        RBS.logger.info "Parsing #{buf.name}..."
+        case parse_method
+        when :parse_signature
+          Parser.parse_signature(buf)
+        else
+          Parser.public_send(parse_method, buf, require_eof: true)
+        end
+      rescue RBS::ParsingError => ex
+        stdout.puts ex.message
+        syntax_error = true
       end
 
       exit 1 if syntax_error
