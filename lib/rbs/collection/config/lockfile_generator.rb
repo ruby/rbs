@@ -76,7 +76,7 @@ module RBS
             end
 
             if spec = gem_hash[dep.name]
-              assign_gem(name: dep.name, version: spec.version, ignored_gems: ignored_gems, src_data: nil)
+              assign_gem(name: dep.name, version: spec.version, ignored_gems: ignored_gems, src_data: nil, skip: dep.source.is_a?(Bundler::Source::Gemspec))
             end
           end
 
@@ -91,43 +91,45 @@ module RBS
           end
         end
 
-        private def assign_gem(name:, version:, src_data:, ignored_gems:)
+        private def assign_gem(name:, version:, src_data:, ignored_gems:, skip: false)
           return if ignored_gems.include?(name)
           return if lockfile.gems.key?(name)
 
-          # @type var locked: Lockfile::library?
+          unless skip
+            # @type var locked: Lockfile::library?
 
-          if existing_lockfile
-            locked = existing_lockfile.gems[name]
-          end
-
-          # If rbs_collection.lock.yaml contain the gem, use it.
-          # Else find the gem from gem_collection.
-          unless locked
-            source =
-              if src_data
-                Sources.from_config_entry(src_data, base_directory: config.config_path.dirname)
-              else
-                find_source(name: name)
-              end
-
-            if source
-              installed_version = version
-              best_version = find_best_version(version: installed_version, versions: source.versions(name))
-
-              locked = {
-                name: name,
-                version: best_version.to_s,
-                source: source,
-              }
+            if existing_lockfile
+              locked = existing_lockfile.gems[name]
             end
-          end
 
-          if locked
-            lockfile.gems[name] = locked
+            # If rbs_collection.lock.yaml contain the gem, use it.
+            # Else find the gem from gem_collection.
+            unless locked
+              source =
+                if src_data
+                  Sources.from_config_entry(src_data, base_directory: config.config_path.dirname)
+                else
+                  find_source(name: name)
+                end
 
-            locked[:source].dependencies_of(locked[:name], locked[:version])&.each do |dep|
-              assign_stdlib(name: dep["name"], from_gem: name)
+              if source
+                installed_version = version
+                best_version = find_best_version(version: installed_version, versions: source.versions(name))
+
+                locked = {
+                  name: name,
+                  version: best_version.to_s,
+                  source: source,
+                }
+              end
+            end
+
+            if locked
+              lockfile.gems[name] = locked
+
+              locked[:source].dependencies_of(locked[:name], locked[:version])&.each do |dep|
+                assign_stdlib(name: dep["name"], from_gem: name)
+              end
             end
           end
 

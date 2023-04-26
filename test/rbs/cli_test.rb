@@ -747,6 +747,73 @@ Processing `test/a_test.rb`...
     end
   end
 
+  def test_collection_install_gemspec
+    Dir.mktmpdir do |dir|
+      Dir.chdir(dir) do
+        dir = Pathname(dir)
+        dir.join(RBS::Collection::Config::PATH).write(<<~YAML)
+          sources:
+            - name: ruby/gem_rbs_collection
+              remote: https://github.com/ruby/gem_rbs_collection.git
+              revision: b4d3b346d9657543099a35a1fd20347e75b8c523
+              repo_dir: gems
+
+          path: #{dir.join('gem_rbs_collection')}
+        YAML
+        dir.join('Gemfile').write(<<~GEMFILE)
+          source 'https://rubygems.org'
+          gemspec
+        GEMFILE
+        dir.join('Gemfile.lock').write(<<~LOCK)
+          PATH
+            remote: .
+            specs:
+              hola (0.0.0)
+                ast (>= 2)
+
+          GEM
+            remote: https://rubygems.org/
+            specs:
+              ast (2.4.2)
+
+          PLATFORMS
+            arm64-darwin-22
+
+          DEPENDENCIES
+            hola!
+
+          BUNDLED WITH
+            2.2.0
+        LOCK
+        gemspec_path = dir / "hola.gemspec"
+        gemspec_path.write <<~RUBY
+          Gem::Specification.new do |s|
+            s.name        = "hola"
+            s.version     = "0.0.0"
+            s.summary     = "Hola!"
+            s.description = "A simple hello world gem"
+            s.authors     = ["Nick Quaranto"]
+            s.email       = "nick@quaran.to"
+            s.files       = ["lib/hola.rb", "sig/hola.rbs"]
+            s.homepage    =
+              "https://rubygems.org/gems/hola"
+            s.license       = "MIT"
+            s.add_dependency "ast", "> 2"
+          end
+        RUBY
+        (dir/"sig").mkdir
+
+        stdout, _ = run_rbs("collection", "install", bundler: true)
+
+        assert_match /^Installing ast:(\d(\.\d)*)/, stdout
+        refute_match /^Using hola:(\d(\.\d)*)/, stdout
+
+        assert dir.join('rbs_collection.lock.yaml').exist?
+        assert dir.join('gem_rbs_collection/ast').exist?
+      end
+    end
+  end
+
   def assert_rbs_test_no_errors cli, dir, arg_array
     args = ['-I', dir.to_s, 'test', *arg_array]
     assert_instance_of Process::Status, cli.run(args)

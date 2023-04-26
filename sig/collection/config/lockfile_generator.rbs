@@ -36,7 +36,9 @@ module RBS
 
         # Inserts a entry to lockfile of a gem and its dependencies, if not included in `ignored_gems:`
         #
-        def assign_gem: (name: String, version: String?, src_data: Sources::source_entry?, ignored_gems: Set[String]) -> void
+        # * If `skip:` is true, it skips adding the gem, but adds it's dependencies.
+        #
+        def assign_gem: (name: String, version: String?, src_data: Sources::source_entry?, ignored_gems: Set[String], ?skip: bool) -> void
 
         def assign_stdlib: (name: String, from_gem: String?) -> void
 
