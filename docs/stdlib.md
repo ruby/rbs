@@ -47,7 +47,6 @@ end
 class StringTest < Test::Unit::TestCase
   include TypeAssertions
 
-  # library "pathname", "set", "securerandom"     # Declare library signatures to load
   testing "::String"
 
   def test_gsub
