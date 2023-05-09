@@ -320,7 +320,7 @@ class Object < BasicObject
   #     enum.first(4) # => [1, 1, 1, 2]
   #     enum.size # => 42
   #
-  def enum_for: (Symbol method, *untyped args) ?{ (*untyped args) -> Integer } -> Enumerator[untyped, untyped]
+  def enum_for: (Symbol method, *untyped, **untyped) ?{ (*untyped, **untyped) -> Integer } -> Enumerator[untyped, untyped]
               | () ?{ () -> Integer } -> Enumerator[untyped, self]
 
   # <!--
