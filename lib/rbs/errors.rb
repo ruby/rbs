@@ -26,7 +26,7 @@ module RBS
         super
       else
         # Failback to `#message` in Ruby 3.1 or earlier
-        message
+        "#{message} (#{self.class.name})"
       end
 
       # Support only one line
