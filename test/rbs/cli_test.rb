@@ -485,7 +485,6 @@ singleton(::BasicObject)
           "",
           "    def self.foo: () -> void",
           "            ^",
-          "",
           "#{dir}/syntax_error.rbs:3:0...3:3: Syntax error: unexpected token for simple type, token=`end` (kEND) (RBS::ParsingError)",
           "",
           "  end",
