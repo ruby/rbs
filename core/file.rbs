@@ -1971,67 +1971,171 @@ File::SEPARATOR: String
 #
 File::Separator: String
 
+# <!-- rdoc-file=file.c -->
+# File::Constants provides file-related constants.  All possible file constants
+# are listed in the documentation but they may not all be present on your
+# platform.
+#
+# If the underlying platform doesn't define a constant the corresponding Ruby
+# constant is not defined.
+#
+# Your platform documentations (e.g. man open(2)) may describe more detailed
+# information.
+#
 module File::Constants
 end
 
+# <!-- rdoc-file=file.c -->
+# append on each write
+#
 File::Constants::APPEND: Integer
 
+# <!-- rdoc-file=file.c -->
+# disable line code conversion
+#
 File::Constants::BINARY: Integer
 
+# <!-- rdoc-file=file.c -->
+# create file if it does not exist
+#
 File::Constants::CREAT: Integer
 
+# <!-- rdoc-file=file.c -->
+# Try to minimize cache effects of the I/O to and from this file.
+#
 File::Constants::DIRECT: Integer
 
+# <!-- rdoc-file=file.c -->
+# any write operation perform synchronously except some meta data
+#
 File::Constants::DSYNC: Integer
 
+# <!-- rdoc-file=file.c -->
+# error if CREAT and the file exists
+#
 File::Constants::EXCL: Integer
 
+# <!-- rdoc-file=dir.c -->
+# Makes File.fnmatch patterns case insensitive (but not Dir.glob patterns).
+#
 File::Constants::FNM_CASEFOLD: Integer
 
+# <!-- rdoc-file=dir.c -->
+# The '*' wildcard matches filenames starting with "." in File.fnmatch and
+# Dir.glob patterns
+#
 File::Constants::FNM_DOTMATCH: Integer
 
+# <!-- rdoc-file=dir.c -->
+# Allows file globbing through "{a,b}" in File.fnmatch patterns.
+#
 File::Constants::FNM_EXTGLOB: Integer
 
+# <!-- rdoc-file=dir.c -->
+# Disables escapes in File.fnmatch and Dir.glob patterns
+#
 File::Constants::FNM_NOESCAPE: Integer
 
+# <!-- rdoc-file=dir.c -->
+# Wildcards in File.fnmatch and Dir.glob patterns do not match directory
+# separators
+#
 File::Constants::FNM_PATHNAME: Integer
 
+# <!-- rdoc-file=dir.c -->
+# Makes patterns to match short names if existing.  Valid only on Microsoft
+# Windows.
+#
 File::Constants::FNM_SHORTNAME: Integer
 
+# <!-- rdoc-file=dir.c -->
+# System default case insensitiveness, equals to FNM_CASEFOLD or 0.
+#
 File::Constants::FNM_SYSCASE: Integer
 
+# <!-- rdoc-file=file.c -->
+# exclusive lock. see File#flock
+#
 File::Constants::LOCK_EX: Integer
 
+# <!-- rdoc-file=file.c -->
+# non-blocking lock. used with LOCK_SH or LOCK_EX. see File#flock
+#
 File::Constants::LOCK_NB: Integer
 
+# <!-- rdoc-file=file.c -->
+# shared lock. see File#flock
+#
 File::Constants::LOCK_SH: Integer
 
+# <!-- rdoc-file=file.c -->
+# unlock. see File#flock
+#
 File::Constants::LOCK_UN: Integer
 
+# <!-- rdoc-file=file.c -->
+# do not change atime
+#
 File::Constants::NOATIME: Integer
 
+# <!-- rdoc-file=file.c -->
+# not to make opened IO the controlling terminal device
+#
 File::Constants::NOCTTY: Integer
 
+# <!-- rdoc-file=file.c -->
+# do not follow symlinks
+#
 File::Constants::NOFOLLOW: Integer
 
+# <!-- rdoc-file=file.c -->
+# do not block on open or for data to become available
+#
 File::Constants::NONBLOCK: Integer
 
+# <!-- rdoc-file=file.c -->
+# Name of the null device
+#
 File::Constants::NULL: String
 
+# <!-- rdoc-file=file.c -->
+# open for reading only
+#
 File::Constants::RDONLY: Integer
 
+# <!-- rdoc-file=file.c -->
+# open for reading and writing
+#
 File::Constants::RDWR: Integer
 
+# <!-- rdoc-file=file.c -->
+# any read operation perform synchronously. used with SYNC or DSYNC.
+#
 File::Constants::RSYNC: Integer
 
+# <!-- rdoc-file=file.c -->
+# can delete opened file
+#
 File::Constants::SHARE_DELETE: Integer
 
+# <!-- rdoc-file=file.c -->
+# any write operation perform synchronously
+#
 File::Constants::SYNC: Integer
 
+# <!-- rdoc-file=file.c -->
+# Create an unnamed temporary file
+#
 File::Constants::TMPFILE: Integer
 
+# <!-- rdoc-file=file.c -->
+# truncate size to 0
+#
 File::Constants::TRUNC: Integer
 
+# <!-- rdoc-file=file.c -->
+# open for writing only
+#
 File::Constants::WRONLY: Integer
 
 # <!-- rdoc-file=file.c -->
