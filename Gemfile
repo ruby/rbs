@@ -18,7 +18,7 @@ gem "dbm"
 gem 'digest'
 gem 'tempfile'
 gem "prime"
-gem "rdoc"
+gem "rdoc", "~> 6.4.0"
 
 # Test gems
 gem "rbs-amber", path: "test/assets/test-gem"
