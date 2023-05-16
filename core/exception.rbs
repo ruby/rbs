@@ -230,7 +230,7 @@ class Exception < Object
   # sequences to express essential information; the message should be readable
   # even if all escape sequences are ignored.
   #
-  def detailed_message: () -> String
+  def detailed_message: (?highlight: boolish, **untyped) -> String
 
   # <!--
   #   rdoc-file=error.c
