@@ -961,7 +961,7 @@ Options:
           Parser.public_send(parse_method, buf, require_eof: true)
         end
       rescue RBS::ParsingError => ex
-        stdout.puts ex.message
+        stdout.print ex.detailed_message(highlight: true)
         syntax_error = true
       end
 

@@ -22,7 +22,12 @@ module RBS
 
   module DetailedMessageable
     def detailed_message(highlight: false, **)
-      msg = super
+      msg = if Exception.method_defined?(:detailed_message)
+        super
+      else
+        # Failback to `#message` in Ruby 3.1 or earlier
+        "#{message} (#{self.class.name})"
+      end
 
       # Support only one line
       return msg unless location.start_line == location.end_line

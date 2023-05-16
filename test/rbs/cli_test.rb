@@ -481,9 +481,15 @@ singleton(::BasicObject)
         assert_raises(SystemExit) { cli.run(%W(parse #{dir})) }
 
         assert_equal [
-          "#{dir}/semantics_error.rbs:2:10...2:11: Syntax error: expected a token `pCOLON`, token=`.` (pDOT)",
-          "#{dir}/syntax_error.rbs:3:0...3:3: Syntax error: unexpected token for simple type, token=`end` (kEND)",
-        ], stdout.string.split("\n").sort
+          "#{dir}/semantics_error.rbs:2:10...2:11: Syntax error: expected a token `pCOLON`, token=`.` (pDOT) (RBS::ParsingError)",
+          "",
+          "    def self.foo: () -> void",
+          "            ^",
+          "#{dir}/syntax_error.rbs:3:0...3:3: Syntax error: unexpected token for simple type, token=`end` (kEND) (RBS::ParsingError)",
+          "",
+          "  end",
+          "  ^^^"
+        ], stdout.string.gsub(/\e\[.*?m/, '').split("\n")
       end
     end
   end
@@ -495,8 +501,11 @@ singleton(::BasicObject)
 
       assert_raises(SystemExit) { cli.run(['parse', '-e', 'class C en']) }
       assert_equal [
-        "-e:1:8...1:10: Syntax error: unexpected token for class/module declaration member, token=`en` (tLIDENT)"
-      ], stdout.string.split("\n").sort
+        "-e:1:8...1:10: Syntax error: unexpected token for class/module declaration member, token=`en` (tLIDENT) (RBS::ParsingError)",
+        "",
+        "  class C en",
+        "          ^^"
+      ], stdout.string.gsub(/\e\[.*?m/, '').split("\n")
     end
   end
 
@@ -507,8 +516,11 @@ singleton(::BasicObject)
 
       assert_raises(SystemExit) { cli.run(['parse', '--type', '-e', '?']) }
       assert_equal [
-        "-e:1:0...1:1: Syntax error: unexpected token for simple type, token=`?` (pQUESTION)",
-      ], stdout.string.split("\n").sort
+        "-e:1:0...1:1: Syntax error: unexpected token for simple type, token=`?` (pQUESTION) (RBS::ParsingError)",
+        "",
+        "  ?",
+        "  ^"
+      ], stdout.string.gsub(/\e\[.*?m/, '').split("\n")
     end
   end
 
@@ -519,8 +531,11 @@ singleton(::BasicObject)
 
       assert_raises(SystemExit) { cli.run(['parse', '--method-type', '-e', '()']) }
       assert_equal [
-        "-e:1:2...1:3: Syntax error: expected a token `pARROW`, token=`` (pEOF)",
-      ], stdout.string.split("\n").sort
+        "-e:1:2...1:3: Syntax error: expected a token `pARROW`, token=`` (pEOF) (RBS::ParsingError)",
+        "",
+        "  ()",
+        "    ^"
+      ], stdout.string.gsub(/\e\[.*?m/, '').split("\n")
     end
   end
 
