@@ -1645,6 +1645,9 @@ module Process::UID
   def self.eid=: (Integer user) -> Integer
 end
 
+# <!-- rdoc-file=process.c -->
+# Placeholder for rusage
+#
 class Process::Tms < Struct[Float]
 end
 
