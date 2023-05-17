@@ -133,6 +133,10 @@ module RBS
             end
           end
 
+          unless gem_hash.include?(name)
+            raise "Cannot find `#{name}` gem"
+          end
+
           gem_hash[name].dependencies.each do |dep|
             if spec = gem_hash[dep.name]
               assign_gem(name: dep.name, version: spec.version, src_data: nil, ignored_gems: ignored_gems)

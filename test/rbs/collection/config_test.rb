@@ -435,6 +435,33 @@ class RBS::Collection::ConfigTest < Test::Unit::TestCase
     end
   end
 
+  def test_generate_lock_for_non_existent_gem
+    mktmpdir do |tmpdir|
+      config_path = tmpdir / 'rbs_collection.yaml'
+      config_path.write <<~YAML
+        sources:
+          - name: ruby/gem_rbs_collection
+            remote: https://github.com/ruby/gem_rbs_collection.git
+            revision: cde6057e7546843ace6420c5783dd945c6ccda54
+            repo_dir: gems
+
+        path: /path/to/somewhere
+
+        gems:
+          - name: nonexistent-foobarbazquxquux
+      YAML
+      gemfile_path = tmpdir / 'Gemfile'
+      gemfile_path.write GEMFILE
+      gemfile_lock_path = tmpdir / 'Gemfile.lock'
+      gemfile_lock_path.write GEMFILE_LOCK
+
+      definition = Bundler::Definition.build(gemfile_path, gemfile_lock_path, false)
+      assert_raise("Cannot find `nonexistent-foobarbazquxquux` gem") do
+        RBS::Collection::Config.generate_lockfile(config_path: config_path, definition: definition)
+      end
+    end
+  end
+
   def test_generate_lock_with_empty_gemfile_lock
     mktmpdir do |tmpdir|
       config_path = tmpdir / 'rbs_collection.yaml'
