@@ -914,6 +914,54 @@ end
     RBS
   end
 
+  def test_instance_variables
+    parser = RB.new
+
+    rb = <<-EOR
+class Hello
+  def message(message)
+    # comment for ivar
+    @message = message
+  end
+end
+    EOR
+
+    parser.parse(rb)
+
+    assert_write parser.decls, <<-EOF
+class Hello
+  def message: (untyped message) -> untyped
+
+  # comment for ivar
+  @message: untyped
+end
+    EOF
+  end
+
+  def test_class_variables
+    parser = RB.new
+
+    rb = <<-EOR
+class Hello
+  def message(message)
+    # comment for cvar
+    @@message = message
+  end
+end
+    EOR
+
+    parser.parse(rb)
+
+    assert_write parser.decls, <<-EOF
+class Hello
+  def message: (untyped message) -> untyped
+
+  # comment for cvar
+  @@message: untyped
+end
+    EOF
+  end
+
   def test_literal_to_type
     parser = RBS::Prototype::RB.new
     [

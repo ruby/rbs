@@ -195,6 +195,10 @@ module RBS
 
           decls.push member unless decls.include?(member)
 
+          each_node def_body.children do |child|
+            process child, decls: decls, comments: comments, context: context
+          end
+
         when :ALIAS
           new_name, old_name = node.children.map { |c| literal_to_symbol(c) }
           member = AST::Members::Alias.new(
@@ -377,6 +381,23 @@ module RBS
             comment: comments[node.first_lineno - 1]
           )
 
+        when :IASGN
+          member = AST::Members::InstanceVariable.new(
+            name: node.children.first,
+            type: Types::Bases::Any.new(location: nil),
+            location: nil,
+            comment: comments[node.first_lineno - 1]
+          )
+          decls.push member unless decls.include?(member)
+
+        when :CVASGN
+          member = AST::Members::ClassVariable.new(
+            name: node.children.first,
+            type: Types::Bases::Any.new(location: nil),
+            location: nil,
+            comment: comments[node.first_lineno - 1]
+          )
+          decls.push member unless decls.include?(member)
         else
           process_children(node, decls: decls, comments: comments, context: context)
         end
