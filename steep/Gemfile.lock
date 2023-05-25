@@ -26,7 +26,7 @@ GEM
     rb-fsevent (0.11.2)
     rb-inotify (0.10.1)
       ffi (~> 1.0)
-    rbs (3.0.4)
+    rbs (3.1.0)
     securerandom (0.2.2)
     steep (1.4.0)
       activesupport (>= 5.1)
@@ -54,7 +54,7 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
-  rbs (~> 3.0.4)
+  rbs (~> 3.1.0)
   steep (~> 1.4.0)
 
 BUNDLED WITH
