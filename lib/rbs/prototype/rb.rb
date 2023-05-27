@@ -126,6 +126,7 @@ module RBS
             process child, decls: kls.members, comments: comments, context: new_ctx
           end
           remove_unnecessary_accessibility_methods! kls.members
+          sort_members! kls.members
 
         when :MODULE
           module_name, *module_body = node.children
@@ -764,6 +765,16 @@ module RBS
           ]
         end
       end
+
+      def sort_members!(decls)
+        i = 0
+        orders = {
+          AST::Members::ClassVariable => -2,
+          AST::Members::InstanceVariable => -1,
+        }
+        decls.sort_by! { |decl| [orders.fetch(decl.class, 0), i += 1] }
+      end
     end
   end
 end
+

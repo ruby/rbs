@@ -930,10 +930,10 @@ end
 
     assert_write parser.decls, <<-EOF
 class Hello
-  def message: (untyped message) -> untyped
-
   # comment for ivar
   @message: untyped
+
+  def message: (untyped message) -> untyped
 end
     EOF
   end
@@ -954,10 +954,10 @@ end
 
     assert_write parser.decls, <<-EOF
 class Hello
-  def message: (untyped message) -> untyped
-
   # comment for cvar
   @@message: untyped
+
+  def message: (untyped message) -> untyped
 end
     EOF
   end

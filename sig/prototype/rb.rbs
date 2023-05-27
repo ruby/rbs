@@ -83,6 +83,8 @@ module RBS
       def is_accessibility?: (decl) -> bool
 
       def find_def_index_by_name: (Array[decl] decls, Symbol name) -> [Integer, AST::Members::MethodDefinition | AST::Members::AttrReader | AST::Members::AttrWriter]?
+
+      def sort_members!: (Array[decl] decls) -> void
     end
   end
 end
