@@ -943,6 +943,18 @@ end
 
     rb = <<-EOR
 class Hello
+  def self.foo
+    @foo = 42
+  end
+
+  class << self
+    def bar
+      @bar = 42
+    end
+  end
+
+  @baz = 42
+
   def message(message)
     # comment for cvar
     @@message = message
@@ -954,8 +966,18 @@ end
 
     assert_write parser.decls, <<-EOF
 class Hello
+  @@foo: untyped
+
+  @@bar: untyped
+
+  @@baz: untyped
+
   # comment for cvar
   @@message: untyped
+
+  def self.foo: () -> untyped
+
+  def self.bar: () -> untyped
 
   def message: (untyped message) -> untyped
 end

@@ -196,8 +196,9 @@ module RBS
 
           decls.push member unless decls.include?(member)
 
+          new_ctx = Context.initial.tap { |ctx| ctx.singleton = kind == :singleton }
           each_node def_body.children do |child|
-            process child, decls: decls, comments: comments, context: context
+            process child, decls: decls, comments: comments, context: new_ctx
           end
 
         when :ALIAS
@@ -383,12 +384,21 @@ module RBS
           )
 
         when :IASGN
-          member = AST::Members::InstanceVariable.new(
-            name: node.children.first,
-            type: Types::Bases::Any.new(location: nil),
-            location: nil,
-            comment: comments[node.first_lineno - 1]
-          )
+          if context.singleton || !context.namespace.empty?
+            member = AST::Members::ClassVariable.new(
+              name: "@#{node.children.first}".to_sym,
+              type: Types::Bases::Any.new(location: nil),
+              location: nil,
+              comment: comments[node.first_lineno - 1]
+            )
+          else
+            member = AST::Members::InstanceVariable.new(
+              name: node.children.first,
+              type: Types::Bases::Any.new(location: nil),
+              location: nil,
+              comment: comments[node.first_lineno - 1]
+            )
+          end
           decls.push member unless decls.include?(member)
 
         when :CVASGN
