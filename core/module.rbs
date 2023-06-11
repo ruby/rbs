@@ -1229,6 +1229,7 @@ class Module < Object
              | (Symbol, Symbol, *Symbol method_name) -> Array[Symbol]
              | (string method_name) -> string
              | (string | Symbol, string | Symbol, *string | Symbol method_name) -> Array[string | Symbol]
+             | (Array[string | Symbol]) -> Array[string | Symbol]
 
   # <!--
   #   rdoc-file=vm_method.c
@@ -1251,6 +1252,7 @@ class Module < Object
   #     end
   #
   def private_class_method: (*Symbol | String arg0) -> self
+                          | (Array[string | Symbol] arg0) -> self
 
   # <!--
   #   rdoc-file=object.c
@@ -1335,6 +1337,7 @@ class Module < Object
     | (Symbol, Symbol, *Symbol method_name) -> Array[Symbol]
     | (string method_name) -> string
     | (string | Symbol, string | Symbol, *string | Symbol method_name) -> Array[string | Symbol]
+    | (Array[string | Symbol]) -> Array[string | Symbol]
 
   # <!--
   #   rdoc-file=object.c
@@ -1394,6 +1397,7 @@ class Module < Object
             | (Symbol, Symbol, *Symbol method_name) -> Array[Symbol]
             | (string method_name) -> string
             | (string | Symbol, string | Symbol, *string | Symbol method_name) -> Array[string | Symbol]
+            | (Array[string | Symbol]) -> Array[string | Symbol]
 
   # <!--
   #   rdoc-file=vm_method.c
@@ -1407,6 +1411,7 @@ class Module < Object
   # is also accepted.
   #
   def public_class_method: (*Symbol | String arg0) -> self
+                         | (Array[string | Symbol] arg0) -> self
 
   # <!--
   #   rdoc-file=object.c

@@ -157,6 +157,49 @@ class ModuleInstanceTest < Test::Unit::TestCase
       "(Symbol, String) -> Array[Symbol | String]",
       mod, :private, :foo, "bar"
     )
+
+    assert_send_type(
+      "(Array[Symbol | String]) -> Array[Symbol | String]",
+      mod, :private, [:foo, "bar"]
+    )
+
+
+    assert_send_type(
+      "(Array[Symbol]) -> Array[Symbol]",
+      mod, :private, mod.attr_reader(:baz, :qux)
+    )
+  end
+
+  def test_private_class_method
+    mod = Module.new do
+      def self.foo; end
+      def self.bar; end
+    end
+
+    assert_send_type(
+      "(Symbol) -> self",
+      mod, :private_class_method, :foo
+    )
+
+    assert_send_type(
+      "(Symbol, Symbol) -> self",
+      mod, :private_class_method, :foo, :bar
+    )
+
+    assert_send_type(
+      "(String) -> self",
+      mod, :private_class_method, "foo"
+    )
+
+    assert_send_type(
+      "(String, String) -> self",
+      mod, :private_class_method, "foo", "bar"
+    )
+
+    assert_send_type(
+      "(Array[Symbol | String]) -> self",
+      mod, :private_class_method, [:foo, "bar"]
+    )
   end
 
   def test_protected
@@ -187,6 +230,16 @@ class ModuleInstanceTest < Test::Unit::TestCase
       "(Symbol, String) -> Array[Symbol | String]",
       mod, :protected, :foo, "bar"
     )
+
+    assert_send_type(
+      "(Array[Symbol | String]) -> Array[Symbol | String]",
+      mod, :protected, [:foo, "bar"]
+    )
+
+    assert_send_type(
+      "(Array[Symbol]) -> Array[Symbol]",
+      mod, :protected, mod.attr_reader(:baz, :qux)
+    )
   end
 
   def test_public
@@ -216,6 +269,48 @@ class ModuleInstanceTest < Test::Unit::TestCase
     assert_send_type(
       "(Symbol, String) -> Array[Symbol | String]",
       mod, :public, :foo, "bar"
+    )
+
+    assert_send_type(
+      "(Array[Symbol | String]) -> Array[Symbol | String]",
+      mod, :public, [:foo, "bar"]
+    )
+
+    assert_send_type(
+      "(Array[Symbol]) -> Array[Symbol]",
+      mod, :public, mod.attr_reader(:baz, :qux)
+    )
+  end
+
+  def test_public_class_method
+    mod = Module.new do
+      def self.foo; end
+      def self.bar; end
+    end
+
+    assert_send_type(
+      "(Symbol) -> self",
+      mod, :public_class_method, :foo
+    )
+
+    assert_send_type(
+      "(Symbol, Symbol) -> self",
+      mod, :public_class_method, :foo, :bar
+    )
+
+    assert_send_type(
+      "(String) -> self",
+      mod, :public_class_method, "foo"
+    )
+
+    assert_send_type(
+      "(String, String) -> self",
+      mod, :public_class_method, "foo", "bar"
+    )
+
+    assert_send_type(
+      "(Array[Symbol | String]) -> self",
+      mod, :public_class_method, [:foo, "bar"]
     )
   end
 
