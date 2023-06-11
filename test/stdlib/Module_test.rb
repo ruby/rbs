@@ -74,6 +74,36 @@ class ModuleInstanceTest < Test::Unit::TestCase
                      Foo, :module_eval do nil end
   end
 
+  def test_module_function
+    mod = Module.new do
+      def foo; end
+
+      def bar; end
+    end
+
+    assert_send_type(
+      "() -> nil",
+      mod, :module_function
+    )
+    assert_send_type(
+      "(Symbol) -> Symbol",
+      mod, :module_function, :foo
+    )
+    assert_send_type(
+      "(String) -> String",
+      mod, :module_function, "foo"
+    )
+    assert_send_type(
+      "(ToStr) -> ToStr",
+      mod, :module_function, ToStr.new("foo")
+    )
+
+    assert_send_type(
+      "(Symbol, String) -> Array[Symbol | String]",
+      mod, :protected, :foo, "bar"
+    )
+  end
+
   def test_class_eval
     assert_send_type "(String) -> nil",
                      Foo, :class_eval, 'nil'
@@ -126,6 +156,36 @@ class ModuleInstanceTest < Test::Unit::TestCase
     assert_send_type(
       "(Symbol, String) -> Array[Symbol | String]",
       mod, :private, :foo, "bar"
+    )
+  end
+
+  def test_protected
+    mod = Module.new do
+      def foo; end
+
+      def bar; end
+    end
+
+    assert_send_type(
+      "() -> nil",
+      mod, :protected
+    )
+    assert_send_type(
+      "(Symbol) -> Symbol",
+      mod, :protected, :foo
+    )
+    assert_send_type(
+      "(String) -> String",
+      mod, :protected, "foo"
+    )
+    assert_send_type(
+      "(ToStr) -> ToStr",
+      mod, :protected, ToStr.new("foo")
+    )
+
+    assert_send_type(
+      "(Symbol, String) -> Array[Symbol | String]",
+      mod, :protected, :foo, "bar"
     )
   end
 

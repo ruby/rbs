@@ -1147,7 +1147,11 @@ class Module < Object
   #     Mod.one     #=> "This is one"
   #     c.call_one  #=> "This is the new one"
   #
-  def module_function: (*Symbol | String arg0) -> self
+  def module_function: () -> nil
+    | (Symbol method_name) -> Symbol
+    | (Symbol, Symbol, *Symbol method_name) -> Array[Symbol]
+    | (string method_name) -> string
+    | (string | Symbol, string | Symbol, *string | Symbol method_name) -> Array[string | Symbol]
 
   # <!--
   #   rdoc-file=object.c
@@ -1326,7 +1330,11 @@ class Module < Object
   #
   # To show a private method on RDoc, use `:doc:` instead of this.
   #
-  def protected: (*Symbol | String arg0) -> self
+  def protected: () -> nil
+    | (Symbol method_name) -> Symbol
+    | (Symbol, Symbol, *Symbol method_name) -> Array[Symbol]
+    | (string method_name) -> string
+    | (string | Symbol, string | Symbol, *string | Symbol method_name) -> Array[string | Symbol]
 
   # <!--
   #   rdoc-file=object.c
