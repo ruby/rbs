@@ -83,7 +83,7 @@ GEM
     singleton (0.1.1)
     sorbet-runtime (0.5.10827)
     stackprof (0.2.25)
-    stringio (3.0.6)
+    stringio (3.0.7)
     strong_json (2.1.2)
     syntax_tree (6.1.1)
       prettier_print (>= 1.2.0)
