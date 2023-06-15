@@ -17,7 +17,6 @@ gem "goodcheck"
 gem "dbm"
 gem 'digest'
 gem 'tempfile'
-gem "prime"
 gem "rdoc", "~> 6.4.0"
 
 # Test gems
