@@ -1,6 +1,6 @@
 # RBS
 
-RBS (*R*u*B*y *S*ignature) is a language to describe the structure of Ruby programs.
+RBS ([the name is originated from *R*u*B*y *S*ignature](https://github.com/ruby/rbs/issues/670)) is a language to describe the structure of Ruby programs.
 You can write down the definition of a class or module: methods defined in the class, instance variables and their types, and inheritance/mix-in relations.
 It also allows declaring constants and global variables.
 
