@@ -2,7 +2,7 @@ module RBS
   class Parser
     # Parse a method type and return it
     #
-    # When `range` keyword is specified, it starts parsing from the `begin` to the `endo` the range.
+    # When `range` keyword is specified, it starts parsing from the `begin` to the `end` of the range.
     #
     # ```ruby
     # RBS::Parser.parse_method_type("() -> void")                                # => `() -> void`
@@ -25,7 +25,7 @@ module RBS
 
     # Parse a type and return it
     #
-    # When `range` keyword is specified, it starts parsing from the `begin` to the `endo` the range.
+    # When `range` keyword is specified, it starts parsing from the `begin` to the `end` of the range.
     #
     # ```ruby
     # RBS::Parser.parse_type("String")                          # => `String`
