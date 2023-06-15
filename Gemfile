@@ -14,6 +14,7 @@ gem "json"
 gem "json-schema"
 gem 'stackprof'
 gem "goodcheck"
+gem "dbm" # for yaml
 gem 'digest'
 gem 'tempfile'
 gem "rdoc", "~> 6.4.0"
