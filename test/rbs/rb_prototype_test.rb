@@ -970,10 +970,10 @@ class Hello
 
   @@bar: untyped
 
-  @@baz: untyped
-
   # comment for cvar
   @@message: untyped
+
+  @baz: untyped
 
   def self.foo: () -> untyped
 

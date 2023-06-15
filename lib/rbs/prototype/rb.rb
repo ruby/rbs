@@ -384,7 +384,7 @@ module RBS
           )
 
         when :IASGN
-          if context.singleton || !context.namespace.empty?
+          if context.singleton
             member = AST::Members::ClassVariable.new(
               name: "@#{node.children.first}".to_sym,
               type: Types::Bases::Any.new(location: nil),
