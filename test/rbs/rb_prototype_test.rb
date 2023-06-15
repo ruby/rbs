@@ -966,12 +966,12 @@ end
 
     assert_write parser.decls, <<-EOF
 class Hello
-  @@foo: untyped
-
-  @@bar: untyped
-
   # comment for cvar
   @@message: untyped
+
+  self.@foo: untyped
+
+  self.@bar: untyped
 
   @baz: untyped
 

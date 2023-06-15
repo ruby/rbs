@@ -385,8 +385,8 @@ module RBS
 
         when :IASGN
           if context.singleton
-            member = AST::Members::ClassVariable.new(
-              name: "@#{node.children.first}".to_sym,
+            member = AST::Members::ClassInstanceVariable.new(
+              name: node.children.first,
               type: Types::Bases::Any.new(location: nil),
               location: nil,
               comment: comments[node.first_lineno - 1]
@@ -779,7 +779,8 @@ module RBS
       def sort_members!(decls)
         i = 0
         orders = {
-          AST::Members::ClassVariable => -2,
+          AST::Members::ClassVariable => -3,
+          AST::Members::ClassInstanceVariable => -2,
           AST::Members::InstanceVariable => -1,
         }
         decls.sort_by! { |decl| [orders.fetch(decl.class, 0), i += 1] }
