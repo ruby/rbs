@@ -196,7 +196,7 @@ module RBS
 
           decls.push member unless decls.include?(member)
 
-          new_ctx = Context.initial.tap { |ctx| ctx.singleton = kind == :singleton }
+          new_ctx = context.dup.tap { |ctx| ctx.singleton = kind == :singleton }
           each_node def_body.children do |child|
             process child, decls: decls, comments: comments, context: new_ctx
           end
