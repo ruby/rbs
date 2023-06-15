@@ -14,7 +14,6 @@ gem "json"
 gem "json-schema"
 gem 'stackprof'
 gem "goodcheck"
-gem "dbm"
 gem 'digest'
 gem 'tempfile'
 gem "prime"
