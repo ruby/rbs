@@ -980,6 +980,8 @@ class Hello
   end
 
   class << self
+    @foobar = 42 # It should be ignored
+
     def bar
       @bar = 42
     end
@@ -1005,7 +1007,7 @@ class Hello
 
   self.@bar: untyped
 
-  @baz: untyped
+  self.@baz: untyped
 
   def self.foo: () -> untyped
 
