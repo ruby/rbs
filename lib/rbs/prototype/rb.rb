@@ -29,6 +29,14 @@ module RBS
             :instance
           end
         end
+
+        def enter_namespace(namespace)
+          Context.initial(namespace: self.namespace + namespace)
+        end
+
+        def update(module_function: self.module_function, singleton: self.singleton)
+          Context.new(module_function: module_function, singleton: singleton, namespace: namespace)
+        end
       end
 
       attr_reader :source_decls
@@ -121,7 +129,7 @@ module RBS
 
           decls.push kls
 
-          new_ctx = Context.initial(namespace: context.namespace + kls.name.to_namespace)
+          new_ctx = context.enter_namespace(kls.name.to_namespace)
           each_node class_body do |child|
             process child, decls: kls.members, comments: comments, context: new_ctx
           end
@@ -143,7 +151,7 @@ module RBS
 
           decls.push mod
 
-          new_ctx = Context.initial(namespace: context.namespace + mod.name.to_namespace)
+          new_ctx = context.enter_namespace(mod.name.to_namespace)
           each_node module_body do |child|
             process child, decls: mod.members, comments: comments, context: new_ctx
           end
@@ -197,7 +205,7 @@ module RBS
 
           decls.push member unless decls.include?(member)
 
-          new_ctx = context.dup.tap { |ctx| ctx.singleton = kind == :singleton }
+          new_ctx = context.update(singleton: kind == :singleton)
           each_node def_body.children do |child|
             process child, decls: decls, comments: comments, context: new_ctx
           end
@@ -313,7 +321,7 @@ module RBS
             if args.empty?
               context.module_function = true
             else
-              module_func_context = context.dup.tap { |ctx| ctx.module_function = true }
+              module_func_context = context.update(module_function: true)
               args.each do |arg|
                 if arg && (name = literal_to_symbol(arg))
                   if (i, defn = find_def_index_by_name(decls, name))

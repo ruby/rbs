@@ -18,6 +18,10 @@ module RBS
 
         def attribute_kind: () -> (:singleton | :instance)
 
+        def enter_namespace: (Namespace) -> Context
+
+        def update: (?module_function: bool, ?singleton: bool) -> Context
+
         def self.initial: (?namespace: Namespace) -> Context
       end
 
