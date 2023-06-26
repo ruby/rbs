@@ -148,6 +148,7 @@ module RBS
             process child, decls: mod.members, comments: comments, context: new_ctx
           end
           remove_unnecessary_accessibility_methods! mod.members
+          sort_members! mod.members
 
         when :SCLASS
           this, body = node.children
@@ -788,4 +789,3 @@ module RBS
     end
   end
 end
-

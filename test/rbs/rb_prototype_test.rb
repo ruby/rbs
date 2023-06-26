@@ -938,6 +938,38 @@ end
     EOF
   end
 
+  def test_instance_variables_in_module
+    parser = RB.new
+
+    rb = <<-EOR
+module Hello
+  def message(message)
+    # comment for ivar
+    @message = message
+  end
+
+  def foo
+    @foo = 42
+  end
+end
+    EOR
+
+    parser.parse(rb)
+
+    assert_write parser.decls, <<-EOF
+module Hello
+  # comment for ivar
+  @message: untyped
+
+  @foo: untyped
+
+  def message: (untyped message) -> untyped
+
+  def foo: () -> untyped
+end
+    EOF
+  end
+
   def test_class_variables
     parser = RB.new
 
