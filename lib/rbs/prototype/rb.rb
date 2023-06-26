@@ -126,6 +126,7 @@ module RBS
             process child, decls: kls.members, comments: comments, context: new_ctx
           end
           remove_unnecessary_accessibility_methods! kls.members
+          sort_members! kls.members
 
         when :MODULE
           module_name, *module_body = node.children
@@ -194,6 +195,11 @@ module RBS
           )
 
           decls.push member unless decls.include?(member)
+
+          new_ctx = context.dup.tap { |ctx| ctx.singleton = kind == :singleton }
+          each_node def_body.children do |child|
+            process child, decls: decls, comments: comments, context: new_ctx
+          end
 
         when :ALIAS
           new_name, old_name = node.children.map { |c| literal_to_symbol(c) }
@@ -377,6 +383,32 @@ module RBS
             comment: comments[node.first_lineno - 1]
           )
 
+        when :IASGN
+          if context.singleton
+            member = AST::Members::ClassInstanceVariable.new(
+              name: node.children.first,
+              type: Types::Bases::Any.new(location: nil),
+              location: nil,
+              comment: comments[node.first_lineno - 1]
+            )
+          else
+            member = AST::Members::InstanceVariable.new(
+              name: node.children.first,
+              type: Types::Bases::Any.new(location: nil),
+              location: nil,
+              comment: comments[node.first_lineno - 1]
+            )
+          end
+          decls.push member unless decls.include?(member)
+
+        when :CVASGN
+          member = AST::Members::ClassVariable.new(
+            name: node.children.first,
+            type: Types::Bases::Any.new(location: nil),
+            location: nil,
+            comment: comments[node.first_lineno - 1]
+          )
+          decls.push member unless decls.include?(member)
         else
           process_children(node, decls: decls, comments: comments, context: context)
         end
@@ -743,6 +775,17 @@ module RBS
           ]
         end
       end
+
+      def sort_members!(decls)
+        i = 0
+        orders = {
+          AST::Members::ClassVariable => -3,
+          AST::Members::ClassInstanceVariable => -2,
+          AST::Members::InstanceVariable => -1,
+        }
+        decls.sort_by! { |decl| [orders.fetch(decl.class, 0), i += 1] }
+      end
     end
   end
 end
+
