@@ -5,11 +5,11 @@ module RBS
     class RB
       include Helpers
 
-      Context = _ = Struct.new(:module_function, :singleton, :namespace, keyword_init: true) do
+      Context = _ = Struct.new(:module_function, :singleton, :namespace, :in_def, keyword_init: true) do
         # @implements Context
 
         def self.initial(namespace: Namespace.root)
-          self.new(module_function: false, singleton: false, namespace: namespace)
+          self.new(module_function: false, singleton: false, namespace: namespace, in_def: false)
         end
 
         def method_kind
@@ -28,6 +28,14 @@ module RBS
           else
             :instance
           end
+        end
+
+        def enter_namespace(namespace)
+          Context.initial(namespace: self.namespace + namespace)
+        end
+
+        def update(module_function: self.module_function, singleton: self.singleton, in_def: self.in_def)
+          Context.new(module_function: module_function, singleton: singleton, namespace: namespace, in_def: in_def)
         end
       end
 
@@ -121,7 +129,7 @@ module RBS
 
           decls.push kls
 
-          new_ctx = Context.initial(namespace: context.namespace + kls.name.to_namespace)
+          new_ctx = context.enter_namespace(kls.name.to_namespace)
           each_node class_body do |child|
             process child, decls: kls.members, comments: comments, context: new_ctx
           end
@@ -143,11 +151,12 @@ module RBS
 
           decls.push mod
 
-          new_ctx = Context.initial(namespace: context.namespace + mod.name.to_namespace)
+          new_ctx = context.enter_namespace(mod.name.to_namespace)
           each_node module_body do |child|
             process child, decls: mod.members, comments: comments, context: new_ctx
           end
           remove_unnecessary_accessibility_methods! mod.members
+          sort_members! mod.members
 
         when :SCLASS
           this, body = node.children
@@ -196,7 +205,7 @@ module RBS
 
           decls.push member unless decls.include?(member)
 
-          new_ctx = context.dup.tap { |ctx| ctx.singleton = kind == :singleton }
+          new_ctx = context.update(singleton: kind == :singleton, in_def: true)
           each_node def_body.children do |child|
             process child, decls: decls, comments: comments, context: new_ctx
           end
@@ -312,7 +321,7 @@ module RBS
             if args.empty?
               context.module_function = true
             else
-              module_func_context = context.dup.tap { |ctx| ctx.module_function = true }
+              module_func_context = context.update(module_function: true)
               args.each do |arg|
                 if arg && (name = literal_to_symbol(arg))
                   if (i, defn = find_def_index_by_name(decls, name))
@@ -384,22 +393,29 @@ module RBS
           )
 
         when :IASGN
-          if context.singleton
+          case [context.singleton, context.in_def]
+          when [true, true], [false, false]
             member = AST::Members::ClassInstanceVariable.new(
               name: node.children.first,
               type: Types::Bases::Any.new(location: nil),
               location: nil,
               comment: comments[node.first_lineno - 1]
             )
-          else
+          when [false, true]
             member = AST::Members::InstanceVariable.new(
               name: node.children.first,
               type: Types::Bases::Any.new(location: nil),
               location: nil,
               comment: comments[node.first_lineno - 1]
             )
+          when [true, false]
+            # The variable is for the singleton class of the class object.
+            # RBS does not have a way to represent it. So we ignore it.
+          else
+            raise 'unreachable'
           end
-          decls.push member unless decls.include?(member)
+
+          decls.push member if member && !decls.include?(member)
 
         when :CVASGN
           member = AST::Members::ClassVariable.new(
@@ -788,4 +804,3 @@ module RBS
     end
   end
 end
-

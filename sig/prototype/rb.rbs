@@ -12,11 +12,17 @@ module RBS
 
         attr_accessor namespace: Namespace
 
-        def initialize: (module_function: bool, singleton: bool, namespace: Namespace) -> void
+        attr_accessor in_def: bool
+
+        def initialize: (module_function: bool, singleton: bool, namespace: Namespace, in_def: bool) -> void
 
         def method_kind: () -> method_kind
 
         def attribute_kind: () -> (:singleton | :instance)
+
+        def enter_namespace: (Namespace) -> Context
+
+        def update: (?module_function: bool, ?singleton: bool, ?in_def: bool) -> Context
 
         def self.initial: (?namespace: Namespace) -> Context
       end
