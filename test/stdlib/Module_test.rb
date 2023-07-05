@@ -100,7 +100,7 @@ class ModuleInstanceTest < Test::Unit::TestCase
 
     assert_send_type(
       "(Symbol, String) -> Array[Symbol | String]",
-      mod, :protected, :foo, "bar"
+      mod, :module_function, :foo, "bar"
     )
   end
 
