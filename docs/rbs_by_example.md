@@ -6,20 +6,20 @@ The purpose of this doc is to teach you how to write RBS signatures by using the
 
 ## Examples
 
+In each example, the first snippet is for *Ruby* and the second one is for *RBS*.
+
 ### Zero argument methods
 
 **Example:** `String#empty?`
 
 ```ruby
-# .rb
 "".empty?
 # => true
 "hello".empty?
 # => false
 ```
 
-```ruby
-# .rbs
+```rbs
 class String
   def empty?: () -> bool
 end
@@ -32,14 +32,13 @@ end
 **Example:** `String#include?`
 
 ```ruby
-# .rb
 "homeowner".include?("house")
 # => false
 "homeowner".include?("meow")
 # => true
 ```
 
-```ruby
+```rbs
 class String
   def include?: (String) -> bool
 end
@@ -53,7 +52,6 @@ boolean value
 **Example:** `String#end_with?`
 
 ```ruby
-# .rb
 "hello?".end_with?("!")
 # => false
 "hello?".end_with?("?")
@@ -64,8 +62,7 @@ boolean value
 # => false
 ```
 
-```ruby
-# .rbs
+```rbs
 class String
   def end_with?: (*String) -> bool
 end
@@ -79,7 +76,6 @@ returns a boolean value.
 **Example:** `String#ljust`
 
 ```ruby
-# .rb
 "hello".ljust(4)
 #=> "hello"
 "hello".ljust(20)
@@ -88,8 +84,7 @@ returns a boolean value.
 #=> "hello123412341234123"
 ```
 
-```ruby
-# .rbs
+```rbs
 class String
   def ljust: (Integer, ?String) -> String
 end
@@ -102,7 +97,6 @@ end
 **Example:** `Array#*`
 
 ```ruby
-# .rb
 [1, 2, 3] * ","
 # => "1,2,3"
 [1, 2, 3] * 2
@@ -112,8 +106,7 @@ end
 *Note:* Some of the signatures after this point include type variables (e.g. `Elem`, `T`).
 For now, it's safe to ignore them, but they're included for completeness.
 
-```ruby
-# .rbs
+```rbs
 class Array[Elem]
   def *: (String) -> String
        | (Integer) -> Array[Elem]
@@ -128,7 +121,6 @@ end
 **Example:** `String#<<`
 
 ```ruby
-# .rb
 a = "hello "
 a << "world"
 #=> "hello world"
@@ -136,8 +128,7 @@ a << 33
 #=> "hello world!"
 ```
 
-```ruby
-# .rbs
+```rbs
 class String
   def <<: (String | Integer) -> String
 end
@@ -148,7 +139,6 @@ end
 ### Nilable types
 
 ```ruby
-# .rb
 [1, 2, 3].first
 # => 1
 [].first
@@ -159,8 +149,7 @@ end
 # => []
 ```
 
-```ruby
-# .rbs
+```rbs
 class Enumerable[Elem]
   def first: () -> Elem?
            | (Integer) -> Array[Elem]
@@ -183,7 +172,6 @@ The `?` syntax is a convenient shorthand for a union with nil. An equivalent uni
 **Example**: `String#lines`
 
 ```ruby
-# .rb
 "hello\nworld\n".lines
 # => ["hello\n", "world\n"]
 "hello  world".lines(' ')
@@ -192,8 +180,7 @@ The `?` syntax is a convenient shorthand for a union with nil. An equivalent uni
 # => ["hello", "world"]
 ```
 
-```ruby
-# .rbs
+```rbs
 class String
   def lines: (?String, ?chomp: bool) -> Array[String]
 end
@@ -209,12 +196,11 @@ Keyword arguments are declared similar to in ruby, with the keyword immediately 
 **Example**: `Time.now`
 
 ```ruby
-# .rb
 Time.now
 # => 2009-06-24 12:39:54 +0900
 ```
 
-```ruby
+```rbs
 class Time
   def self.now: () -> Time
 end
@@ -228,7 +214,6 @@ end
 **Example**: `Array#filter`
 
 ```ruby
-# .rb
 [1,2,3,4,5].filter {|num| num.even? }
 # => [2, 4]
 %w[ a b c d e f ].filter {|v| v =~ /[aeiou]/ }
@@ -236,8 +221,7 @@ end
 [1,2,3,4,5].filter
 ```
 
-```ruby
-# .rbs
+```rbs
 class Array[Elem]
   def filter: () { (Elem) -> boolish } -> ::Array[Elem]
             | () -> ::Enumerator[Elem, ::Array[Elem]]
@@ -260,8 +244,7 @@ h.keys
 # => ["a", "b", "c", "d"]
 ```
 
-```ruby
-# .rbs
+```rbs
 class Hash[K, V]
   def keys: () -> Array[K]
 end
@@ -273,7 +256,6 @@ Generic types in RBS are parameterized at declaration time. These type variables
 
 
 ```ruby
-# .rb
 a = [ "a", "b", "c", "d" ]
 a.collect {|x| x + "!"}
 # => ["a!", "b!", "c!", "d!"]
@@ -281,8 +263,7 @@ a.collect.with_index {|x, i| x * i}
 # => ["", "b", "cc", "ddd"]
 ```
 
-```ruby
-# .rbs
+```rbs
 class Array[Elem]
   def collect: [U] () { (Elem) -> U } -> Array[U]
              | () -> Enumerator[Elem, Array[untyped]]
@@ -302,7 +283,7 @@ In this example, the method receives its signature from the inferred return type
 # => [[2, 4, 6], [1, 3, 5]]
 ```
 
-```ruby
+```rbs
 class Enumerable[Elem]
   def partition: () { (Elem) -> boolish } -> [Array[Elem], Array[Elem]]
                | () -> ::Enumerator[Elem, [Array[Elem], Array[Elem] ]]
@@ -318,7 +299,7 @@ Tuples can be of any size, and they can have mixed types.
 # => {1=>1, 2=>4, 3=>9, 4=>16, 5=>25}
 ```
 
-```ruby
+```rbs
 class Enumerable[Elem]
   def to_h: () -> ::Hash[untyped, untyped]
           | [T, U] () { (Elem) -> [T, U] } -> ::Hash[T, U]

@@ -69,7 +69,7 @@ We define the standard members order so that ordering doesn't bother reading dif
 5. `public` & public instance methods
 6. `private` & private instance methods
 
-```
+```rbs
 class HelloWorld[X]
   def self.new: [A] () { (void) -> A } -> HelloWorld[A]         # new or initialize comes first
   def initialize: () -> void

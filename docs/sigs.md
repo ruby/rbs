@@ -18,7 +18,7 @@ See [syntax guide](syntax.md).
 When you finish writing signature, you may want to test the signature.
 rbs provides a feature to test your signature.
 
-```
+```console
 $ RBS_TEST_TARGET='Foo::*' bundle exec ruby -r rbs/test/setup test/foo_test.rb
 ```
 
@@ -74,7 +74,7 @@ The `rbs` test framework tries to the best error message for overloaded methods 
 
 The error is reported when a method is defined multiple times, as RBS does not allow duplicate method definitions. When you need to overload a method, use the `...` syntax:
 
-```ruby
+```rbs
 # First definition
 class C
   def foo: () -> untyped
@@ -99,14 +99,14 @@ The design of the signature testing aims to be non-intrusive. The setup is done 
 You need to require `rbs/test/setup` for signature testing.
 You can do it using `-r` option through command line argument or the `RUBYOPT` environment variable.
 
-```
+```console
 $ ruby -r rbs/test/setup run_tests.rb
 $ RUBYOPT='-rrbs/test/setup' rake test
 ```
 
 When you are using Bundler, you may need to require `bundler/setup` explicitly.
 
-```
+```console
 $ RUBYOPT='-rbundler/setup -rrbs/test/setup' bundle exec rake test
 ```
 
@@ -130,7 +130,7 @@ You need to specify `RBS_TEST_TARGET` to run the test, and you can customize the
 You may need to specify `-r` or `-I` to load signatures.
 The default is `-I sig`.
 
-```
+```shell
 RBS_TEST_OPT='-r pathname -I sig'
 ```
 
@@ -144,7 +144,7 @@ You can see the backtrace how the type error is caused and debug your program or
 
 So, a typical command line to start the test would look like the following:
 
-```
+```console
 $ RBS_TEST_LOGLEVEL=error \
   RBS_TEST_TARGET='Kaigi::*' \
   RBS_TEST_SKIP='Kaigi::MonkeyPatch' \
@@ -160,7 +160,7 @@ $ RBS_TEST_LOGLEVEL=error \
 
 You can skip installing the instrumentation per-method basis using `rbs:test:skip` annotation.
 
-```
+```rbs
 class String
   %a{rbs:test:skip} def =~: (Regexp) -> Integer?
 end
