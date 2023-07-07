@@ -18,7 +18,7 @@ Created: test/stdlib/String_test.rb
 It generates `test/stdlib/[class_name]_test.rb`.
 The test scripts would look like the following:
 
-```rbs
+```rb
 class StringSingletonTest < Test::Unit::TestCase
   include TypeAssertions
 
