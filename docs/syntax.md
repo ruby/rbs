@@ -51,7 +51,7 @@ _proc_ ::= _parameters?_ _self-type-binding?_ _block?_ `->` _type_
 
 Class instance type denotes _an instance of a class_.
 
-```
+```rbs
 Integer                      # Instance of Integer class
 ::Integer                    # Instance of ::Integer class
 Hash[Symbol, String]         # Instance of Hash class with type application of Symbol and String
@@ -61,7 +61,7 @@ Hash[Symbol, String]         # Instance of Hash class with type application of S
 
 Interface type denotes _type of a value which can be a subtype of the interface_.
 
-```
+```rbs
 _ToS                          # _ToS interface
 ::MyApp::_Each[String]        # Interface name with namespace and type application
 ```
@@ -72,7 +72,7 @@ Alias type denotes an alias declared with _alias declaration_.
 
 The name of type aliases starts with lowercase `[a-z]`.
 
-```
+```rbs
 name
 ::JSON::t                    # Alias name with namespace
 list[Integer]                # Type alias can be generic
@@ -82,7 +82,7 @@ list[Integer]                # Type alias can be generic
 
 Class singleton type denotes _the type of a singleton object of a class_.
 
-```
+```rbs
 singleton(String)
 singleton(::Hash)            # Class singleton type cannot be parametrized.
 ```
@@ -91,7 +91,7 @@ singleton(::Hash)            # Class singleton type cannot be parametrized.
 
 Literal type denotes _a type with only one value of the literal_.
 
-```
+```rbs
 123                         # Integer
 "hello world"               # A string
 :to_s                       # A symbol
@@ -102,7 +102,7 @@ true                        # true or false
 
 Union type denotes _a type of one of the given types_.
 
-```
+```rbs
 Integer | String           # Integer or String
 Array[Integer | String]    # Array of Integer or String
 ```
@@ -111,7 +111,7 @@ Array[Integer | String]    # Array of Integer or String
 
 Intersection type denotes _a type of all of the given types_.
 
-```
+```rbs
 _Reader & _Writer           # _Reader and _Writer
 ```
 
@@ -121,7 +121,7 @@ Note that `&` has higher precedence than `|` that `A & B | C` is `(A & B) | C`.
 
 Optional type denotes _a type of value or nil_.
 
-```
+```rbs
 Integer?
 Array[Integer?]
 ```
@@ -130,7 +130,7 @@ Array[Integer?]
 
 Records are `Hash` objects, fixed set of keys, and heterogeneous.
 
-```
+```rbs
 { id: Integer, name: String }     # Hash object like `{ id: 31, name: String }`
 ```
 
@@ -138,7 +138,7 @@ Records are `Hash` objects, fixed set of keys, and heterogeneous.
 
 Tuples are `Array` objects, fixed size and heterogeneous.
 
-```
+```rbs
 [ ]                               # Empty like `[]`
 [String]                          # Single string like `["hi"]`
 [Integer, Integer]                # Pair of integers like `[1, 2]`
@@ -149,7 +149,7 @@ Tuples are `Array` objects, fixed size and heterogeneous.
 
 ### Type variable
 
-```
+```rbs
 U
 T
 S
@@ -159,7 +159,7 @@ Elem
 Type variables cannot be distinguished from _class instance types_.
 They are scoped in _class/module/interface/alias declaration_ or _generic method types_.
 
-```
+```rbs
 class Ref[T]              # Object is scoped in the class declaration.
   @value: T               # Type variable `T`
   def map: [X] { (T) -> X } -> Ref[X]   # X is a type variable scoped in the method type.
@@ -193,7 +193,7 @@ It is an alias of `top` type, and you can use `boolish` if we want to allow any 
 
 We can see an example at the definition of `Enumerable#find`:
 
-```
+```rbs
 module Enumerable[Elem, Return]
   def find: () { (Elem) -> boolish } -> Elem?
 end
@@ -201,7 +201,7 @@ end
 
 We want to write something like:
 
-```
+```ruby
 array.find {|x| x && x.some_test? }               # The block will return (bool | nil)
 ```
 
@@ -218,7 +218,7 @@ They are all equivalent for the type system; they are all _top type_.
 
 Proc type denotes type of procedures, `Proc` instances.
 
-```
+```rbs
 ^(Integer) -> String                  # A procedure with an `Integer` parameter and returns `String`
 ^(?String, size: Integer) -> bool     # A procedure with `String` optional parameter, `size` keyword of `Integer`, and returns `bool`
 ```
@@ -266,7 +266,7 @@ Variable name can be used for documentation.
 
 #### Examples
 
-```
+```rbs
 # Two required positional `Integer` parameters, and returns `String`
 (Integer, Integer) -> String
 
@@ -359,7 +359,7 @@ _method-name_ ::= ...
 
 An instance variable definition consists of the name of an instance variable and its type.
 
-```
+```rbs
 @name: String
 @value: Hash[Symbol, Key]
 ```
@@ -370,7 +370,7 @@ Method definition has several syntax variations.
 
 You can write `self.` or `self?.` before the name of the method to specify the kind of method: instance, singleton, or module function.
 
-```
+```rbs
 def to_s: () -> String                        # Defines a instance method
 def self.new: () -> AnObject                  # Defines singleton method
 def self?.sqrt: (Numeric) -> Numeric          # self? is for `module_function`s
@@ -380,7 +380,7 @@ def self?.sqrt: (Numeric) -> Numeric          # self? is for `module_function`s
 
 The method type can be connected with `|`s to define an overloaded method.
 
-```
+```rbs
 def +: (Float) -> Float
      | (Integer) -> Integer
      | (Numeric) -> Numeric
@@ -388,7 +388,7 @@ def +: (Float) -> Float
 
 Overloaded method can have `...` to overload an existing method. It is useful for monkey-patching.
 
-```
+```rbs
 def +: (Float) -> Float
 def +: (BigDecimal) -> BigDecimal
      | ...
@@ -396,14 +396,14 @@ def +: (BigDecimal) -> BigDecimal
 
 You need extra parentheses on return type to avoid ambiguity.
 
-```
+```rbs
 def +: (Float | Integer) -> (Float | Integer)
      | (Numeric) -> Numeric
 ```
 
 Adding `public` and `private` modifier changes the visibility of the method.
 
-```
+```rbs
 private def puts: (*untyped) -> void       # Defines private instance method
 
 public def self.puts: (*untyped) -> void   # Defines public singleton method
@@ -417,7 +417,7 @@ Attribute definitions help to define methods and instance variables based on the
 
 You can specify the name of instance variable using `(@some_name)` syntax and also omit the instance variable definition by specifying `()`.
 
-```
+```rbs
 # Defines `id` method and `@id` instance variable.
 attr_reader id: Integer
 # @id: Integer
@@ -436,7 +436,7 @@ attr_accessor people (): Array[Person]
 
 Attribute definitions can have the `public` and `private` modifiers like method definitions:
 
-```
+```rbs
 private attr_accessor id: Integer
 
 private attr_reader self.name: String
@@ -446,7 +446,7 @@ private attr_reader self.name: String
 
 You can define mixins between class and modules.
 
-```
+```rbs
 include Kernel
 include Enumerable[String, void]
 extend ActiveSupport::Concern
@@ -454,7 +454,7 @@ extend ActiveSupport::Concern
 
 You can also `include` or `extend` an interface.
 
-```
+```rbs
 include _Hashing
 extend _LikeString
 ```
@@ -465,7 +465,7 @@ This allows importing `def`s from the interface to help developer implementing a
 
 You can define an alias between methods.
 
-```
+```rbs
 def map: [X] () { (String) -> X } -> Array[X]
 alias collect map                                   # `#collect` has the same type with `map`
 ```
@@ -548,7 +548,7 @@ Class declaration can have type parameters and superclass. When you omit supercl
 
 Module declaration takes optional _self type_ parameter, which defines a constraint about a class when the module is mixed.
 
-```
+```rbs
 interface _Each[A, B]
   def each: { (A) -> void } -> B
 end
@@ -572,7 +572,7 @@ class Bar = Array
 
 The syntax defines a class and the definition is equivalent to the right-hand-side.
 
-```
+```rbs
 class Baz < Bar[String]    # Class alias can be inherited
   include Foo              # Module alias can be included
 end
@@ -590,7 +590,7 @@ end
 
 Interface declaration can have parameters but allows only a few of the members.
 
-```
+```rbs
 interface _Hashing
   def hash: () -> Integer
   def eql?: (untyped) -> bool
@@ -602,7 +602,7 @@ There are several limitations which are not described in the grammar.
 1. Interface cannot `include` modules
 2. Interface cannot have singleton method definitions
 
-```
+```rbs
 interface _Foo
   include Bar                  # Error: cannot include modules
   def self.new: () -> Foo      # Error: cannot include singleton method definitions
@@ -613,14 +613,14 @@ end
 
 You can declare an alias of types.
 
-```
+```rbs
 type subject = Attendee | Speaker
 type JSON::t = Integer | TrueClass | FalseClass | String | Hash[Symbol, t] | Array[t]
 ```
 
 Type alias can be generic like class, module, and interface.
 
-```
+```rbs
 type list[out T] = [T, list[T]] | nil
 ```
 
@@ -628,7 +628,7 @@ type list[out T] = [T, list[T]] | nil
 
 You can declare a constant.
 
-```
+```rbs
 Person::DefaultEmailAddress: String
 ```
 
@@ -636,13 +636,13 @@ Person::DefaultEmailAddress: String
 
 You can declare a global variable.
 
-```
+```rbs
 $LOAD_PATH: Array[String]
 ```
 
 ### Generics
 
-```md
+```markdown
 _module-type-parameter_ ::= _generics-unchecked_ _generics-variance_ _type-variable_ _generics-bound_
 
 _method-type-param_ ::= _type-variable_ _generics-bound_
@@ -677,7 +677,7 @@ For classes with type parameters, you may specify if they are "invariant" (defau
 
 For example, an `Array` of `String` can almost be considered to be an `Array` of `Object`, but not the reverse, so we can think of:
 
-```
+```rbs
 # The `T` type parameter is covariant.
 class Array[out T]
   # etc.
@@ -732,7 +732,7 @@ The upper bound must be one of a class instance type, interface type, or class s
 
 Directives are placed at the top of a file and provides per-file-basis features.
 
-```
+```markdown
 _use-directive_ ::= `use` _use-clauses_
 
 _use-clauses_ ::= _use-clause_ `,` ... `,` _use-clause_
@@ -745,7 +745,7 @@ _use-clause_ ::= _type-name_                           # Single use clause
 The *use directive* defines relative type names that is an alias of other type names.
 We can use the simple type names if it is declared with *use*.
 
-```
+```rbs
 use RBS::Namespace        # => Defines `Namespace`
 use RBS::TypeName as TN   # => Defines `TN`
 use RBS::AST::*           # => Defines modules under `::RBS::AST::` namespace
@@ -755,7 +755,7 @@ use RBS::AST::*           # => Defines modules under `::RBS::AST::` namespace
 
 You can write single line comments. Comments must be on their own line. Comments can lead with whitespace.
 
-```
+```rbs
 # This if interface Foo
 # Usage of Foo is bar
 interface _Foo

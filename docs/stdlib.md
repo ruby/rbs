@@ -10,7 +10,7 @@ We support writing tests for core/stdlib signatures.
 
 First, execute `generate:stdlib_test` rake task with a class name that you want to test.
 
-```bash
+```console
 $ bundle exec rake 'generate:stdlib_test[String]'
 Created: test/stdlib/String_test.rb
 ```
@@ -83,7 +83,7 @@ If the execution of the program escape from the class definition, the instrument
 
 You can run the test with:
 
-```
+```console
 $ bundle exec rake stdlib_test                # Run all tests
 $ bundle exec ruby test/stdlib/String_test.rb # Run specific tests
 ```
