@@ -37,10 +37,6 @@ class GCTest < StdlibTest
     GC.verify_internal_consistency
   end
 
-  def test_verify_transient_heap_internal_consistency
-    GC.verify_transient_heap_internal_consistency
-  end
-
   def test_latest_gc_info
     GC.latest_gc_info
     GC.latest_gc_info({})
