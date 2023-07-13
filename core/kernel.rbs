@@ -1770,7 +1770,8 @@ module Kernel : BasicObject
   #     exec "echo", "*"    # echoes an asterisk
   #     # never get here
   #
-  def self?.exec: (*String args) -> bot
+  def self?.exec: (String command, *String args, ?unsetenv_others: boolish, ?pgroup: true | Integer, ?umask: Integer, ?in: redirect_fd, ?out: redirect_fd, ?err: redirect_fd, ?close_others: boolish, ?chdir: String) -> bot
+                | (Hash[string, string?] env, String command, *String args, ?unsetenv_others: boolish, ?pgroup: true | Integer, ?umask: Integer, ?in: redirect_fd, ?out: redirect_fd, ?err: redirect_fd, ?close_others: boolish, ?chdir: String) -> bot
 
   type redirect_fd = Integer | :in | :out | :err | IO | String | [ String ] | [ String, string | int ] | [ String, string | int, int ] | [ :child, int ] | :close
 
