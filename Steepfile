@@ -4,7 +4,6 @@ target :lib do
   signature "sig"
   check "lib"
   ignore(
-    "lib/rbs/prototype/runtime.rb",
     "lib/rbs/test",
     "lib/rbs/test.rb"
   )
@@ -16,11 +15,7 @@ target :lib do
   signature "stdlib/rdoc/0/"
   signature "stdlib/ripper/0"
 
-  configure_code_diagnostics do |config|
-    config[D::Ruby::MethodDefinitionMissing] = :hint
-    config[D::Ruby::ElseOnExhaustiveCase] = :hint
-    config[D::Ruby::FallbackAny] = :hint
-  end
+  configure_code_diagnostics(D::Ruby.default)
 end
 
 # target :lib do
