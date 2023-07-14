@@ -1241,7 +1241,8 @@ module Kernel : BasicObject
   #     [0..4, 0..4, 0..4]
   #
   def self?.p: [T] (T arg0) -> T
-             | (*untyped arg0) -> Array[untyped]
+             | (untyped, untyped, *untyped) -> Array[untyped]
+             | () -> nil
 
   # <!--
   #   rdoc-file=lib/pp.rb
@@ -1252,7 +1253,8 @@ module Kernel : BasicObject
   # pp returns argument(s).
   #
   def self?.pp: [T] (T arg0) -> T
-              | (*untyped arg0) -> Array[untyped]
+              | (untyped, untyped, *untyped) -> Array[untyped]
+              | () -> nil
 
   # <!--
   #   rdoc-file=random.c
