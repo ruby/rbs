@@ -1,0 +1,71 @@
+module RBS
+  module Prototype
+    class Runtime
+      @decls: Array[AST::Declarations::t]?
+
+      @modules: Array[Module]
+
+      @builder: DefinitionBuilder
+
+      @module_name_method: UnboundMethod
+
+      include Helpers
+
+      attr_reader patterns: Array[String]
+
+      attr_reader env: Environment
+
+      attr_reader merge: bool
+
+      attr_reader owners_included: Array[Module]
+
+      def initialize: (patterns: Array[String], env: Environment, merge: bool, ?owners_included: Array[Symbol]) -> void
+
+      def target?: (Module const) -> bool
+
+      def builder: () -> DefinitionBuilder
+
+      def parse: (String file) -> void
+
+      def decls: () -> Array[AST::Declarations::t]
+
+      def to_type_name: (String name, ?full_name: bool) -> TypeName
+
+      def each_included_module: (TypeName type_name, Module mod) { (TypeName, TypeName, Module) -> void } -> void
+
+      def method_type: (UnboundMethod method) -> MethodType
+
+      def merge_rbs: [A] (TypeName module_name, Array[AST::Declarations::Class::member] members, singleton: Symbol) { () -> A } -> A?
+                   | [A] (TypeName module_name, Array[AST::Declarations::Class::member] members, instance: Symbol) { () -> A } -> A?
+
+      def target_method?: (Module mod, instance: Symbol) -> bool
+                        | (Module mod, singleton: Symbol) -> bool
+
+      def generate_methods: (Module mod, TypeName module_name, Array[AST::Declarations::Class::member] members) -> void
+
+      def generate_constants: (Module mod, Array[AST::Declarations::Class::member] decls) -> void
+
+      def generate_super_class: (Class mod) -> AST::Declarations::Class::Super?
+
+      def generate_class: (Class mod) -> void
+
+      def generate_module: (Module mod) -> void
+
+      # Generate/find outer module declarations
+      # This is broken down into another method to comply with `DRY`
+      # This generates/finds declarations in nested form & returns the last array of declarations
+      def ensure_outer_module_declarations: (Module mod) -> Array[AST::Declarations::Class::member]
+
+      # Returns the exact name & not compactly declared name
+      def only_name: (Module mod) -> String
+
+      def const_name: (Module const) -> String?
+
+      def const_name!: (Module const) -> String
+
+      def type_args: (TypeName type_name) -> Array[Types::t]
+
+      def block_from_ast_of: (UnboundMethod method) -> Types::Block?
+    end
+  end
+end
