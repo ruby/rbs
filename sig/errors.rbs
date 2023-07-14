@@ -16,15 +16,19 @@ module RBS
   class BaseError < StandardError
   end
 
-  interface _Location
-    %a{pure} def location: () -> Location[untyped, untyped]?
-  end
+  module DetailedMessageable : _Location, _DetailedMessage, _Message
+    interface _DetailedMessage
+      def detailed_message: (**untyped) -> String
+    end
 
-  interface _DetailedMessage
-    def detailed_message: (**untyped) -> String
-  end
+    interface _Message
+      def message: () -> String
+    end
 
-  module DetailedMessageable : _Location, _DetailedMessage
+    interface _Location
+      %a{pure} def location: () -> Location[untyped, untyped]?
+    end
+
     def detailed_message: (?highlight: boolish, **untyped) -> String
   end
 
@@ -82,7 +86,7 @@ module RBS
 
   class NoTypeFoundError < DefinitionError
     include DetailedMessageable
-    
+
     attr_reader type_name: TypeName
     attr_reader location: Location[untyped, untyped]?
 
@@ -177,7 +181,7 @@ module RBS
     def type_name: () -> TypeName
 
     def qualified_method_name: () -> String
-                             
+
     def location: () -> AST::Members::Mixin::loc?
   end
 
@@ -212,7 +216,7 @@ module RBS
     attr_reader members: Array[AST::Members::MethodDefinition]
 
     def initialize: (type_name: TypeName, method_name: Symbol, kind: :instance | :singleton, members: Array[AST::Members::MethodDefinition]) -> void
-                  
+
     def location: () -> AST::Members::MethodDefinition::loc?
   end
 
@@ -352,7 +356,7 @@ module RBS
     attr_reader alias_entry: Environment::ModuleAliasEntry | Environment::ClassAliasEntry
 
     def initialize: (Environment::ModuleAliasEntry | Environment::ClassAliasEntry) -> void
-                  
+
     def location: () -> AST::Declarations::AliasDecl::loc?
   end
 end
