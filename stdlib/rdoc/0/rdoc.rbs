@@ -387,6 +387,11 @@ module RDoc
     #
     def full_name: () -> String
 
+    # <!-- rdoc-file=lib/rdoc/top_level.rb -->
+    # Relative name of this file
+    #
+    def relative_name: () -> String
+
     def to_s: () -> ::String
   end
 

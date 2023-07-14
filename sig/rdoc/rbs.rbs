@@ -12,6 +12,10 @@ module RBS
                          | RBS::AST::Declarations::Module
                          | RBS::AST::Declarations::Constant
 
+      attr_reader top_level: RDoc::TopLevel
+
+      attr_reader content: String
+
       def initialize: (RDoc::TopLevel top_level, String content) -> void
 
       def scan: () -> RDoc::TopLevel
