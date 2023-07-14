@@ -89,8 +89,7 @@ module RBS
               body = "\n" if body.empty?
 
               comment = AST::Comment.new(string: body, location: nil)
-              if (prev_comment = hash[line - 1])
-                hash[line - 1] = nil
+              if prev_comment = hash.delete(line - 1)
                 hash[line] = AST::Comment.new(string: prev_comment.string + comment.string,
                                               location: nil)
               else
