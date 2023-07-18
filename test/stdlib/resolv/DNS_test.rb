@@ -28,6 +28,8 @@ class ResolvDNSSingletonTest < Test::Unit::TestCase
       Resolv::DNS, :open, :nameserver => ["8.8.8.8"]
     assert_send_type  '(Hash[Symbol, untyped]) { (Resolv::DNS) -> void } -> void',
       Resolv::DNS, :open, :nameserver => ["8.8.8.8"] do |c| c; end
+  rescue Errno::ECONNREFUSED
+    omit "Connection refused with environmental issue"
   end
 
   def test_random
@@ -133,6 +135,8 @@ class ResolvDNSinstanceTest < Test::Unit::TestCase
   def test_make_tcp_requester
     assert_send_type "(String, Integer) -> Resolv::DNS::Requester::TCP",
       resolv_dns, :make_tcp_requester, "8.8.8.8", 53
+  rescue Errno::ECONNREFUSED
+    omit "Connection refused with environmental issue"
   end
 
   def test_make_udp_requester
@@ -140,6 +144,8 @@ class ResolvDNSinstanceTest < Test::Unit::TestCase
       resolv_dns(nameserver: ["8.8.8.8"]), :make_udp_requester
     assert_send_type "() -> Resolv::DNS::Requester::UnconnectedUDP",
       resolv_dns(nameserver: ["127.0.0.1", "8.8.8.8"]), :make_udp_requester
+  rescue Errno::ECONNREFUSED
+      omit "Connection refused with environmental issue"
   end
 
   def test_timeouts=

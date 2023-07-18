@@ -12,4 +12,8 @@ module Gem
   class Dependency
     def name: () -> String
   end
+
+  module ::Kernel
+    def self?.gem: (String, *String) -> void
+  end
 end

@@ -235,13 +235,6 @@ module GC
   def self.verify_internal_consistency: () -> nil
 
   # <!--
-  #   rdoc-file=gc.c
-  #   - verify_transient_heap_internal_consistency()
-  # -->
-  #
-  def self.verify_transient_heap_internal_consistency: () -> nil
-
-  # <!--
   #   rdoc-file=gc.rb
   #   - GC.latest_gc_info -> hash
   #   - GC.latest_gc_info(hash) -> hash
