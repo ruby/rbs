@@ -133,10 +133,14 @@ module RBS
             end
           end
 
-          gem_hash[name].dependencies.each do |dep|
-            if spec = gem_hash[dep.name]
-              assign_gem(name: dep.name, version: spec.version, src_data: nil, ignored_gems: ignored_gems)
+          if spec = gem_hash.fetch(name, nil)
+            spec.dependencies.each do |dep|
+              if dep_spec = gem_hash[dep.name]
+                assign_gem(name: dep.name, version: dep_spec.version, src_data: nil, ignored_gems: ignored_gems)
+              end
             end
+          else
+            RBS.logger.warn "Cannot find `#{name}` gem. Using incorrect Bundler context? (#{definition.lockfile})"
           end
         end
 
