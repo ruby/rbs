@@ -2,6 +2,25 @@
 
 ## master
 
+## 3.1.1 (2023-07-18)
+
+### Signature updates
+
+* Removed `GC.verify_transient_heap_internal_consistency` ([#1374](https://github.com/ruby/rbs/pull/1374))
+
+### Library changes
+
+* Relax rdoc version requirement in RDoc plugin ([#1333](https://github.com/ruby/rbs/pull/1333))
+
+#### rbs collection
+
+* Spec may be missing when rbs_collection.yaml declares dependency ([#1378](https://github.com/ruby/rbs/pull/1378))
+
+### Miscellaneous
+
+* Handle connection error with Resolv_test.rb ([#1356](https://github.com/ruby/rbs/pull/1356))
+* Fix broken CI ([#1353](https://github.com/ruby/rbs/pull/1353))
+
 ## 3.1.0 (2023-04-26)
 
 ### Signature updates
