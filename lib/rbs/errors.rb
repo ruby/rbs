@@ -29,6 +29,8 @@ module RBS
         "#{message} (#{self.class.name})"
       end
 
+      return msg unless location
+
       # Support only one line
       return msg unless location.start_line == location.end_line
 

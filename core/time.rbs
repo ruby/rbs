@@ -1093,7 +1093,7 @@ class Time < Object
   #
   # Related: Time#ceil, Time#floor.
   #
-  def round: (?Integer arg0) -> Time
+  def round: (?int ndigits) -> Time
 
   # <!--
   #   rdoc-file=time.c
@@ -1503,7 +1503,7 @@ class Time < Object
   #
   # Related: Time#ceil, Time#round.
   #
-  def floor: (?Integer ndigits) -> Time
+  def floor: (?int ndigits) -> Time
 
   # <!--
   #   rdoc-file=time.c
@@ -1530,7 +1530,7 @@ class Time < Object
   #
   # Related: Time#floor, Time#round.
   #
-  def ceil: (?Integer ndigits) -> Time
+  def ceil: (?int ndigits) -> Time
 end
 
 Time::RFC2822_DAY_NAME: Array[String]

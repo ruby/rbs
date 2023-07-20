@@ -42,6 +42,26 @@ EOF
     end
   end
 
+  def test_resolve_failure
+    SignatureManager.new do |manager|
+      manager.files[Pathname("foo.rbs")] = <<EOF
+class Foo
+  class Foo
+  end
+
+  class Bar
+  end
+end
+EOF
+      manager.build do |env|
+        resolver = Resolver::TypeNameResolver.new(env)
+
+        assert_nil resolver.resolve(type_name("Foo::Bar"), context: [[nil, TypeName("::Foo")], TypeName("::Foo::Foo")])
+      end
+    end
+  end
+
+
   def test_duplicated_resolve
     SignatureManager.new do |manager|
       manager.files[Pathname("foo.rbs")] = <<EOF
