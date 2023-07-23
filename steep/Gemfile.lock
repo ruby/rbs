@@ -30,7 +30,7 @@ GEM
       ffi (~> 1.0)
     rbs (3.1.0)
     securerandom (0.2.2)
-    steep (1.5.0)
+    steep (1.5.1)
       activesupport (>= 5.1)
       concurrent-ruby (>= 1.1.10)
       csv (>= 3.0.9)
@@ -57,7 +57,7 @@ PLATFORMS
 
 DEPENDENCIES
   rbs (~> 3.1.0)
-  steep (~> 1.5.0)
+  steep (~> 1.5.1)
 
 BUNDLED WITH
    2.3.14
