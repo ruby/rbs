@@ -753,12 +753,14 @@ module RBS
     end
 
     def expand_alias1(type_name)
+      type_name = env.normalize_type_name(type_name)
       entry = env.type_alias_decls[type_name] or raise "Unknown alias name: #{type_name}"
       as = entry.decl.type_params.each.map { Types::Bases::Any.new(location: nil) }
       expand_alias2(type_name, as)
     end
 
     def expand_alias2(type_name, args)
+      type_name = env.normalize_type_name(type_name)
       entry = env.type_alias_decls[type_name] or raise "Unknown alias name: #{type_name}"
 
       ensure_namespace!(type_name.namespace, location: entry.decl.location)

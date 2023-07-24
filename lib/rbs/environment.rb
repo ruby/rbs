@@ -275,13 +275,33 @@ module RBS
       class_entry(type_name) || module_entry(type_name) || constant_decls[type_name]
     end
 
+    def normalize_type_name?(name)
+      if name.class?
+        normalize_module_name?(name)
+      else
+        unless name.namespace.empty?
+          parent = name.namespace.to_type_name
+          parent = normalize_module_name?(parent)
+          return parent unless parent
+
+          TypeName.new(namespace: parent.to_namespace, name: name.name)
+        else
+          name
+        end
+      end
+    end
+
+    def normalize_type_name(name)
+      normalize_type_name?(name) || name
+    end
+
     def normalize_module_name(name)
       normalize_module_name?(name) or name
     end
 
     def normalize_module_name?(name)
       raise "Class/module name is expected: #{name}" unless name.class?
-      name = name.absolute! if name.relative!
+      name = name.absolute! unless name.absolute?
 
       if @normalize_module_name_cache.key?(name)
         return @normalize_module_name_cache[name]
