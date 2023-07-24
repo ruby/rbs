@@ -307,41 +307,33 @@ module RBS
         return @normalize_module_name_cache[name]
       end
 
+      unless name.namespace.empty?
+        parent = name.namespace.to_type_name
+        if normalized_parent = normalize_module_name?(parent)
+          type_name = TypeName.new(namespace: normalized_parent.to_namespace, name: name.name)
+        else
+          @normalize_module_name_cache[name] = nil
+          return
+        end
+      else
+        type_name = name
+      end
+
       @normalize_module_name_cache[name] = false
 
-      entry = constant_entry(name)
-      case entry
-      when ClassEntry, ModuleEntry
-        @normalize_module_name_cache[name] = entry.name
-        entry.name
+      entry = constant_entry(type_name)
 
-      when ClassAliasEntry, ModuleAliasEntry
-        old_name = entry.decl.old_name
-        if old_name.namespace.empty?
-          @normalize_module_name_cache[name] = normalize_module_name?(old_name)
+      normalized_type_name =
+        case entry
+        when ClassEntry, ModuleEntry
+          type_name
+        when ClassAliasEntry, ModuleAliasEntry
+          normalize_module_name?(entry.decl.old_name)
         else
-          parent = old_name.namespace.to_type_name
-
-          if normalized_parent = normalize_module_name?(parent)
-            @normalize_module_name_cache[name] =
-              if normalized_parent == parent
-                normalize_module_name?(old_name)
-              else
-                normalize_module_name?(
-                  TypeName.new(name: old_name.name, namespace: normalized_parent.to_namespace)
-                )
-              end
-          else
-            @normalize_module_name_cache[name] = nil
-          end
+          nil
         end
 
-      when ConstantEntry
-        raise "#{name} is a constant name"
-
-      else
-        @normalize_module_name_cache[name] = nil
-      end
+      @normalize_module_name_cache[name] = normalized_type_name
     end
 
     def insert_decl(decl, outer:, namespace:)
