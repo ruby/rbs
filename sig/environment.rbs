@@ -236,8 +236,16 @@ module RBS
     #
     # * Calls `#absolute!` for relative module names
     # * Returns the typename itself if the name cannot be normalized
-    # 
+    #
     def normalize_type_name: (TypeName) -> TypeName
+
+    # Returns `true` if given type name is normalized
+    #
+    def normalized_type_name?: (TypeName) -> bool
+
+    # Returns the given type name if it's normalized, or raises
+    #
+    def normalized_type_name!: (TypeName) -> TypeName
 
     # Runs generics type params validation over each class definitions
     def validate_type_params: () -> void

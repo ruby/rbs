@@ -291,6 +291,24 @@ module RBS
       end
     end
 
+    def normalized_type_name?(type_name)
+      case
+      when type_name.interface?
+        interface_decls.key?(type_name)
+      when type_name.class?
+        class_decls.key?(type_name)
+      when type_name.alias?
+        type_alias_decls.key?(type_name)
+      else
+        false
+      end
+    end
+
+    def normalized_type_name!(name)
+      normalized_type_name?(name) or raise "Normalized type name is expected but given `#{name}`, which is normalized to `#{normalize_type_name?(name)}`"
+      name
+    end
+
     def normalize_type_name(name)
       normalize_type_name?(name) || name
     end
