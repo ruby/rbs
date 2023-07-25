@@ -224,3 +224,31 @@ SIG
     assert_empty(sample - array)
   end
 end
+
+if $0.end_with?("_test.rb")
+  at_exit do
+    argv = ARGV.dup
+    test_unit_args = []
+
+    OptionParser.new do |opts|
+      opts.on("--name NAME") do |name|
+        name = name.gsub(/(\A\/)|(\/\Z)/, '')
+
+        constant = (Object.const_get(name) rescue nil)
+
+        if constant
+          test_unit_args << "--testcase"
+          test_unit_args << name
+        else
+          test_unit_args << "--name"
+          test_unit_args << name
+        end
+      end
+    end.order!(argv)
+    test_unit_args.push(*argv)
+
+    RBS.logger.info { "Forwarding to test-unit command line: #{test_unit_args.inspect}" }
+
+    Test::Unit::AutoRunner.run(false, nil, test_unit_args)
+  end
+end
