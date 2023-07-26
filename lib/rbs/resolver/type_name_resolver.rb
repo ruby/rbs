@@ -5,10 +5,12 @@ module RBS
     class TypeNameResolver
       attr_reader :all_names
       attr_reader :cache
+      attr_reader :env
 
       def initialize(env)
         @all_names = Set[]
         @cache = {}
+        @env = env
 
         all_names.merge(env.class_decls.keys)
         all_names.merge(env.interface_decls.keys)
@@ -35,7 +37,10 @@ module RBS
 
           if head
             if tail
-              has_name?(tail.with_prefix(head.to_namespace))
+              absolute_name = tail.with_prefix(head.to_namespace)
+              if env.normalize_type_name?(absolute_name)
+                absolute_name
+              end
             else
               head
             end
