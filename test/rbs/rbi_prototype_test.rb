@@ -329,6 +329,12 @@ class Test
 
   sig { returns(::Foo) }
   def m2; end
+
+  sig { returns(Foo::Bar) }
+  def m3; end
+
+  sig { returns(::Foo::Bar) }
+  def m4; end
 end
     EOF
 
@@ -337,6 +343,10 @@ class Test
   def m1: () -> Foo
 
   def m2: () -> ::Foo
+
+  def m3: () -> Foo::Bar
+
+  def m4: () -> ::Foo::Bar
 end
     EOF
   end

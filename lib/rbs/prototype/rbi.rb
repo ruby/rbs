@@ -553,11 +553,7 @@ module RBS
           TypeName.new(name: node.children[0], namespace: Namespace.empty)
         when :COLON2
           if node.children[0]
-            if node.children[0].type == :COLON3
-              namespace = Namespace.root
-            else
-              namespace = const_to_name(node.children[0]).to_namespace
-            end
+            namespace = const_to_name(node.children[0]).to_namespace
           else
             namespace = Namespace.empty
           end
