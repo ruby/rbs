@@ -71,11 +71,15 @@ module RBS
     # Assumes the type names are already resolved.
     # Raises NoTypeFoundError in case of failure.
     #
+    # Normalizes type names in the given type automatically.
+    #
     def validate_type_presence: (Types::t) -> void
 
     # Validates presence of an absolute type name
     #
     # Raises NoTypeFoundError in case of error.
+    #
+    # Normalizes the given type name automatically.
     #
     def validate_type_name: (TypeName, Location[untyped, untyped]?) -> void
 

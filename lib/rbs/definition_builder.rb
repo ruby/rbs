@@ -813,9 +813,8 @@ module RBS
     end
 
     def validate_type_name(name, location)
-      name = name.absolute!
-
-      return if env.type_name?(name)
+      name = name.absolute! unless name.absolute?
+      return if env.type_name?(env.normalize_type_name(name))
 
       raise NoTypeFoundError.new(type_name: name, location: location)
     end
