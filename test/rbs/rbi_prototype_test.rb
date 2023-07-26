@@ -319,6 +319,28 @@ end
     EOF
   end
 
+  def test_colon
+    parser = RBI.new
+
+    parser.parse(<<-EOF)
+class Test
+  sig { returns(Foo) }
+  def m1; end
+
+  sig { returns(::Foo) }
+  def m2; end
+end
+    EOF
+
+    assert_write parser.decls, <<-EOF
+class Test
+  def m1: () -> Foo
+
+  def m2: () -> ::Foo
+end
+    EOF
+  end
+
   def test_attached_class
     parser = RBI.new
 
