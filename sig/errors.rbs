@@ -82,7 +82,7 @@ module RBS
 
   class NoTypeFoundError < DefinitionError
     include DetailedMessageable
-    
+
     attr_reader type_name: TypeName
     attr_reader location: Location[untyped, untyped]?
 
@@ -108,6 +108,8 @@ module RBS
 
     def initialize: (type_name: TypeName, location: Location[untyped, untyped]?) -> void
 
+    # The type name in `self` is automatically normalized
+    #
     def self.check!: (AST::Declarations::Module::Self, env: Environment) -> void
   end
 
@@ -177,7 +179,7 @@ module RBS
     def type_name: () -> TypeName
 
     def qualified_method_name: () -> String
-                             
+
     def location: () -> AST::Members::Mixin::loc?
   end
 
@@ -212,7 +214,7 @@ module RBS
     attr_reader members: Array[AST::Members::MethodDefinition]
 
     def initialize: (type_name: TypeName, method_name: Symbol, kind: :instance | :singleton, members: Array[AST::Members::MethodDefinition]) -> void
-                  
+
     def location: () -> AST::Members::MethodDefinition::loc?
   end
 
@@ -356,7 +358,7 @@ module RBS
     attr_reader alias_entry: Environment::ModuleAliasEntry | Environment::ClassAliasEntry
 
     def initialize: (Environment::ModuleAliasEntry | Environment::ClassAliasEntry) -> void
-                  
+
     def location: () -> AST::Declarations::AliasDecl::loc?
   end
 end

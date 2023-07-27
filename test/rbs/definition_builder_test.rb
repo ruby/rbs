@@ -2618,4 +2618,24 @@ end
       end
     end
   end
+
+  def test_module_alias__module_self
+    SignatureManager.new do |manager|
+      manager.add_file("foo.rbs", <<-EOF)
+class Foo = Integer
+
+module Bar : Foo
+end
+      EOF
+
+      manager.build do |env|
+        root = nil
+
+        builder = DefinitionBuilder.new(env: env)
+
+        builder.build_instance(type_name("::Bar"))
+        builder.build_singleton(type_name("::Bar"))
+      end
+    end
+  end
 end
