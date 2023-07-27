@@ -36,6 +36,9 @@ module RBS
 
     attr_reader builder: DefinitionBuilder
 
+    # Diagnostics of each type aliases.
+    # The type names are normalized.
+    #
     attr_reader diagnostics: Hash[TypeName, Diagnostic]
 
     # `Diagnostic` represents an non-regular type alias declaration error.
@@ -70,6 +73,8 @@ module RBS
     # Returns `Diagnostic` instance if the alias type is nonregular.
     # Regurns `nil` if the alias type is regular.
     #
+    # Normalizes the given type name automatically.
+    #
     def nonregular?: (TypeName) -> Diagnostic?
 
     def validate: () -> void
@@ -87,6 +92,7 @@ module RBS
 
     def each_alias_type: (Types::t) { (Types::Alias) -> void } -> void
 
+    # Yields set of normalized type names
     def each_mutual_alias_defs: () { (Set[TypeName]) -> void } -> void
   end
 end
