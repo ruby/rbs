@@ -108,8 +108,11 @@ module RBS
     end
 
     def in_type_alias(name:)
+      env.normalized_type_name!(name)
+
       decl = env.type_alias_decls[name].decl or raise
       variables = decl.type_params.each.map(&:name)
+
       Result.new(variables: variables).tap do |result|
         type(decl.type, result: result, context: :covariant)
       end
@@ -129,30 +132,30 @@ module RBS
           end
         end
       when Types::ClassInstance, Types::Interface, Types::Alias
-        NoTypeFoundError.check!(type.name,
-                                env: env,
-                                location: type.location)
+        if type_name = env.normalize_type_name?(type.name)
+          type_params = case type
+                        when Types::ClassInstance
+                          env.class_decls[type_name].type_params
+                        when Types::Interface
+                          env.interface_decls[type_name].decl.type_params
+                        when Types::Alias
+                          env.type_alias_decls[type_name].decl.type_params
+                        end
 
-        type_params = case type
-                      when Types::ClassInstance
-                        env.class_decls[env.normalize_module_name(type.name)].type_params
-                      when Types::Interface
-                        env.interface_decls[type.name].decl.type_params
-                      when Types::Alias
-                        env.type_alias_decls[type.name].decl.type_params
-                      end
-
-        type.args.each.with_index do |ty, i|
-          if var = type_params[i]
-            case var.variance
-            when :invariant
-              type(ty, result: result, context: :invariant)
-            when :covariant
-              type(ty, result: result, context: context)
-            when :contravariant
-              type(ty, result: result, context: negate(context))
+          type.args.each.with_index do |ty, i|
+            if var = type_params[i]
+              case var.variance
+              when :invariant
+                type(ty, result: result, context: :invariant)
+              when :covariant
+                type(ty, result: result, context: context)
+              when :contravariant
+                type(ty, result: result, context: negate(context))
+              end
             end
           end
+        else
+          raise NoTypeFoundError.new(type_name: type.name, location: type.location)
         end
       when Types::Proc
         function(type.type, result: result, context: context)

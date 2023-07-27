@@ -128,4 +128,24 @@ EOF
       end
     end
   end
+
+  def test_module_alias
+    SignatureManager.new do |manager|
+      manager.files[Pathname("foo.rbs")] = <<EOF
+class MyObject
+  type name2 = ::Symbol
+end
+
+class Alias = MyObject
+
+type foo = Alias::name2
+EOF
+      manager.build do |env|
+        resolver = Resolver::TypeNameResolver.new(env)
+
+        assert_equal type_name("::Alias::name2"),
+                     resolver.resolve(type_name("Alias::name2"), context: nil)
+      end
+    end
+  end
 end
