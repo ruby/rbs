@@ -17,6 +17,8 @@ module RBS
 
       private
 
+      attr_reader env: Environment
+
       attr_reader all_names: Set[TypeName]
 
       attr_reader cache: Hash[query, TypeName?]

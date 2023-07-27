@@ -46,7 +46,7 @@ module RBS
     #
     # - The right hand side can be normalized
     # - No mixing alias declaration between class and modules
-    # 
+    #
     def validate_class_alias: (entry: Environment::ClassAliasEntry | Environment::ModuleAliasEntry) -> void
 
     private
@@ -54,6 +54,6 @@ module RBS
     # Resolves relative type names to absolute type names in given context.
     # Yields the type when the type name resolution using `#resolver` fails.
     #
-    def absolute_type: (Types::t, context: Resolver::context) { (Types::t) -> TypeName } -> Types::t
+    def absolute_type: (Types::t, context: Resolver::context) ?{ (Types::t) -> TypeName } -> Types::t
   end
 end
