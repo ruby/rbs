@@ -90,6 +90,8 @@ module RBS
 
     def initialize: (type_name: TypeName, location: Location[untyped, untyped]?) -> void
 
+    # The type name in `self` is automatically normalized
+    #
     def self.check!: (AST::Declarations::Module::Self, env: Environment) -> void
   end
 
@@ -244,6 +246,10 @@ module RBS
 
     def location: () -> Location[untyped, untyped]?
 
+    # Confirms if `super` inherits specifies a class
+    #
+    # Automatically normalize the name of super.
+    #
     def self.check!: (AST::Declarations::Class::Super, env: Environment) -> void
   end
 

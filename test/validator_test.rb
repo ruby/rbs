@@ -276,4 +276,95 @@ class Baz = Baz
       end
     end
   end
+
+  def test_validate_type__presence__module_alias_instance
+    SignatureManager.new do |manager|
+      manager.add_file("foo.rbs", <<-EOF)
+module Foo
+end
+
+module Bar = Foo
+
+class Foo::Baz = Integer
+
+type foo = Bar::Baz
+      EOF
+
+      manager.build do |env|
+        root = nil
+
+        resolver = RBS::Resolver::TypeNameResolver.new(env)
+        validator = RBS::Validator.new(env: env, resolver: resolver)
+
+        validator.validate_type(parse_type("Bar::Baz"), context: root)
+      end
+    end
+  end
+
+  def test_validate_type__presence__module_alias_singleton
+    SignatureManager.new do |manager|
+      manager.add_file("foo.rbs", <<-EOF)
+module Foo
+end
+
+module Bar = Foo
+
+class Foo::Baz = Integer
+      EOF
+
+      manager.build do |env|
+        root = nil
+
+        resolver = RBS::Resolver::TypeNameResolver.new(env)
+        validator = RBS::Validator.new(env: env, resolver: resolver)
+
+        validator.validate_type(parse_type("singleton(Bar::Baz)"), context: root)
+      end
+    end
+  end
+
+  def test_validate_type__ality_module_alias
+    SignatureManager.new do |manager|
+      manager.add_file("foo.rbs", <<-EOF)
+module Foo
+  type list[T] = nil | [T, list[T]]
+end
+
+module Bar = Foo
+      EOF
+
+      manager.build do |env|
+        root = nil
+
+        resolver = RBS::Resolver::TypeNameResolver.new(env)
+        validator = RBS::Validator.new(env: env, resolver: resolver)
+
+        validator.validate_type(parse_type("Bar::list[Bar]"), context: root)
+      end
+    end
+  end
+
+  def test_validate_type_alias__1
+    SignatureManager.new do |manager|
+      manager.add_file("foo.rbs", <<-EOF)
+module Foo
+end
+
+module Bar = Foo
+
+class Baz = Numeric
+
+type Foo::list[T < Baz] = nil | [T, Bar::list[T]]
+      EOF
+
+      manager.build do |env|
+        root = nil
+
+        resolver = RBS::Resolver::TypeNameResolver.new(env)
+        validator = RBS::Validator.new(env: env, resolver: resolver)
+
+        validator.validate_type_alias(entry: env.type_alias_decls[TypeName("::Foo::list")])
+      end
+    end
+  end
 end

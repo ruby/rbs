@@ -2593,4 +2593,74 @@ end
       end
     end
   end
+
+  def test_module_alias__superclass
+    SignatureManager.new do |manager|
+      manager.add_file("foo.rbs", <<-EOF)
+module Foo
+  class Bar
+  end
+end
+
+module Baz = Foo
+
+class Hoge < Baz::Bar
+end
+      EOF
+
+      manager.build do |env|
+        root = nil
+
+        builder = DefinitionBuilder.new(env: env)
+
+        builder.build_instance(type_name("::Hoge"))
+        builder.build_singleton(type_name("::Hoge"))
+      end
+    end
+  end
+
+  def test_module_alias__mixin
+    SignatureManager.new do |manager|
+      manager.add_file("foo.rbs", <<-EOF)
+module Foo
+end
+
+module Bar = Foo
+
+class Baz
+  include Bar
+  include Bar
+end
+      EOF
+
+      manager.build do |env|
+        root = nil
+
+        builder = DefinitionBuilder.new(env: env)
+
+        builder.build_instance(type_name("::Baz"))
+        builder.build_singleton(type_name("::Baz"))
+      end
+    end
+  end
+
+  def test_module_alias__module_self
+    SignatureManager.new do |manager|
+      manager.add_file("foo.rbs", <<-EOF)
+class Foo = Integer
+
+module Bar : Foo
+end
+      EOF
+
+      manager.build do |env|
+        root = nil
+
+        builder = DefinitionBuilder.new(env: env)
+
+        builder.build_instance(type_name("::Bar"))
+        builder.build_singleton(type_name("::Bar"))
+      end
+    end
+  end
 end

@@ -52,4 +52,40 @@ type baz[T] = foo[Array[T]]
       end
     end
   end
+
+  def test_validate__module_aliases
+    SignatureManager.new do |manager|
+      manager.add_file("foo.rbs", <<-EOF)
+module Foo
+end
+
+module Bar = Foo
+
+type Foo::foo = Integer
+
+type Foo::bar[T] = [Foo::bar[T], T, Bar::bar[T]]
+                 | nil
+
+type Foo::baz[T] = Bar::baz[Foo::bar[T]]
+                 | nil
+      EOF
+
+      manager.build do |env|
+        validator = TypeAliasRegularity.validate(env: env)
+
+        refute_operator validator, :nonregular?, TypeName("::Foo::foo")
+        refute_operator validator, :nonregular?, TypeName("::Bar::foo")
+        refute_operator validator, :nonregular?, TypeName("::Foo::bar")
+        refute_operator validator, :nonregular?, TypeName("::Bar::bar")
+
+        assert_operator validator, :nonregular?, TypeName("::Foo::baz")
+        assert_operator validator, :nonregular?, TypeName("::Bar::baz")
+
+        assert_equal(
+          parse_type("::Bar::baz[::Foo::bar[T]]", variables: [:T]),
+          validator.nonregular?(TypeName("::Foo::baz")).nonregular_type
+        )
+      end
+    end
+  end
 end
