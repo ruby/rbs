@@ -19,7 +19,7 @@ GEM
       rb-fsevent (~> 0.10, >= 0.10.3)
       rb-inotify (~> 0.9, >= 0.9.10)
     logger (1.5.3)
-    minitest (5.18.1)
+    minitest (5.19.0)
     parser (3.2.2.3)
       ast (~> 2.4.1)
       racc
@@ -30,7 +30,7 @@ GEM
       ffi (~> 1.0)
     rbs (3.1.0)
     securerandom (0.2.2)
-    steep (1.5.1)
+    steep (1.5.2)
       activesupport (>= 5.1)
       concurrent-ruby (>= 1.1.10)
       csv (>= 3.0.9)
@@ -57,7 +57,7 @@ PLATFORMS
 
 DEPENDENCIES
   rbs (~> 3.1.0)
-  steep (~> 1.5.1)
+  steep (~> 1.5.2)
 
 BUNDLED WITH
    2.3.14
