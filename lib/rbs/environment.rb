@@ -291,6 +291,19 @@ module RBS
       end
     end
 
+    def normalize_type_name!(name)
+      result = normalize_type_name?(name)
+
+      case result
+      when TypeName
+        result
+      when false
+        raise "Type name `#{name}` cannot be normalized because it's a cyclic definition"
+      when nil
+        raise "Type name `#{name}` cannot be normalized because of unknown type name in the path"
+      end
+    end
+
     def normalized_type_name?(type_name)
       case
       when type_name.interface?

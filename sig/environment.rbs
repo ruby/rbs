@@ -232,6 +232,10 @@ module RBS
     #
     def normalize_type_name?: (TypeName) -> (TypeName | nil | false)
 
+    # Normalize the type name or raises an error
+    # 
+    def normalize_type_name!: (TypeName) -> TypeName
+
     # Returns a normalized module/class name or a type name with a normalized namespace
     #
     # * Calls `#absolute!` for relative module names

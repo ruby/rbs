@@ -20,7 +20,7 @@ module RBS
       # Construct transitive closure, if not constructed already
       transitive_closure() unless @dependencies
 
-      # Check for recursive type alias
+      alias_name = env.normalize_type_name!(alias_name)
       @dependencies[alias_name][alias_name]
     end
 
@@ -49,6 +49,16 @@ module RBS
       end
     end
 
+    def direct_dependencies_of(name)
+      name = env.normalize_type_name!(name)
+      @direct_dependencies[name]
+    end
+
+    def dependencies_of(name)
+      name = env.normalize_type_name!(name)
+      @dependencies[name].each_key.to_set
+    end
+
     private
 
     # Constructs directed graph recursively
@@ -61,7 +71,7 @@ module RBS
         end
       when RBS::Types::Alias
         # Append type name if the type is an alias
-        result << type.name
+        result << env.normalize_type_name(type.name)
       end
 
       result
