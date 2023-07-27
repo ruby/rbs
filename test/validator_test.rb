@@ -343,4 +343,28 @@ module Bar = Foo
       end
     end
   end
+
+  def test_validate_type_alias__1
+    SignatureManager.new do |manager|
+      manager.add_file("foo.rbs", <<-EOF)
+module Foo
+end
+
+module Bar = Foo
+
+class Baz = Numeric
+
+type Foo::list[T < Baz] = nil | [T, Bar::list[T]]
+      EOF
+
+      manager.build do |env|
+        root = nil
+
+        resolver = RBS::Resolver::TypeNameResolver.new(env)
+        validator = RBS::Validator.new(env: env, resolver: resolver)
+
+        validator.validate_type_alias(entry: env.type_alias_decls[TypeName("::Foo::list")])
+      end
+    end
+  end
 end
