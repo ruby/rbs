@@ -2593,4 +2593,29 @@ end
       end
     end
   end
+
+  def test_module_alias__superclass
+    SignatureManager.new do |manager|
+      manager.add_file("foo.rbs", <<-EOF)
+module Foo
+  class Bar
+  end
+end
+
+module Baz = Foo
+
+class Hoge < Baz::Bar
+end
+      EOF
+
+      manager.build do |env|
+        root = nil
+
+        builder = DefinitionBuilder.new(env: env)
+
+        builder.build_instance(type_name("::Hoge"))
+        builder.build_singleton(type_name("::Hoge"))
+      end
+    end
+  end
 end

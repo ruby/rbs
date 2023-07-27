@@ -192,7 +192,8 @@ module RBS
     end
 
     def self.check!(super_decl, env:)
-      return if env.class_decl?(super_decl.name) || env.class_alias?(super_decl.name)
+      super_name = env.normalize_type_name(super_decl.name)
+      return if env.class_decl?(super_name) || env.class_alias?(super_name)
 
       raise new(super_decl)
     end

@@ -284,6 +284,10 @@ module RBS
 
     def location: () -> Location[untyped, untyped]?
 
+    # Confirms if `super` inherits specifies a class
+    #
+    # Automatically normalize the name of super.
+    #
     def self.check!: (AST::Declarations::Class::Super, env: Environment) -> void
   end
 
