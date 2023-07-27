@@ -116,14 +116,14 @@ module RBS
     end
 
     def validate_type_params(params, type_name: , method_name: nil, location:)
-      # @type var each_node: TSort::_EachNode[Symbol]
-      each_node = __skip__ = -> (&block) do
+      # @type var each_node: ^() { (Symbol) -> void } -> void
+      each_node = -> (&block) do
         params.each do |param|
           block[param.name]
         end
       end
-      # @type var each_child: TSort::_EachChild[Symbol]
-      each_child = __skip__ = -> (name, &block) do
+      # @type var each_child: ^(Symbol) { (Symbol) -> void } -> void
+      each_child = -> (name, &block) do
         if param = params.find {|p| p.name == name }
           if b = param.upper_bound
             b.free_variables.each do |tv|
