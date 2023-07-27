@@ -2,6 +2,15 @@
 
 ## master
 
+## 3.1.2 (2023-07-27)
+
+⚠️ Note that this patch level release may report additional validation errors that is caused by fix of type name resolution ([#1373](https://github.com/ruby/rbs/pull/1373)).
+
+### Library changes
+
+* Make `TypeNameResolver` more compatible with Ruby ([#1373](https://github.com/ruby/rbs/pull/1373))
+* Fix module alias normalizations ([#1393](https://github.com/ruby/rbs/pull/1393))
+
 ## 3.1.1 (2023-07-18)
 
 ### Signature updates
