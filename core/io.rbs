@@ -879,7 +879,7 @@ class IO < Object
   # Related: IO#close_read, IO#close_write, IO#close.
   #
   def closed?: () -> bool
-  
+
   # <!--
   #   rdoc-file=io.c
   #   - each_byte {|byte| ... } -> self
@@ -2544,6 +2544,7 @@ class IO < Object
                 | (Hash[string, string?] env, string cmd, ?string | int mode, ?path: string?, ?external_encoding: String external_encoding, ?internal_encoding: String internal_encoding, ?encoding: String encoding, ?textmode: boolish textmode, ?binmode: boolish binmode, ?autoclose: boolish autoclose, ?mode: String mode, ?unsetenv_others: boolish, ?pgroup: true | Integer, ?umask: Integer, ?in: Kernel::redirect_fd, ?out: Kernel::redirect_fd, ?err: Kernel::redirect_fd, ?close_others: boolish, ?chdir: String) -> instance
                 | [X] (string cmd, ?string | int mode, ?path: string?, ?external_encoding: String external_encoding, ?internal_encoding: String internal_encoding, ?encoding: String encoding, ?textmode: boolish textmode, ?binmode: boolish binmode, ?autoclose: boolish autoclose, ?mode: String mode, ?unsetenv_others: boolish, ?pgroup: true | Integer, ?umask: Integer, ?in: Kernel::redirect_fd, ?out: Kernel::redirect_fd, ?err: Kernel::redirect_fd, ?close_others: boolish, ?chdir: String) { (instance) -> X } -> X
                 | [X] (Hash[string, string?] env, string cmd, ?string | int mode, ?path: string?, ?external_encoding: String external_encoding, ?internal_encoding: String internal_encoding, ?encoding: String encoding, ?textmode: boolish textmode, ?binmode: boolish binmode, ?autoclose: boolish autoclose, ?mode: String mode, ?unsetenv_others: boolish, ?pgroup: true | Integer, ?umask: Integer, ?in: Kernel::redirect_fd, ?out: Kernel::redirect_fd, ?err: Kernel::redirect_fd, ?close_others: boolish, ?chdir: String) { (instance) -> X } -> X
+
   # <!--
   #   rdoc-file=io.c
   #   - IO.foreach(path, sep = $/, **opts) {|line| block }       -> nil
@@ -3203,6 +3204,111 @@ class IO < Object
   #
   def each_line: (?String sep, ?Integer limit) { (String line) -> void } -> self
                | (?String sep, ?Integer limit) -> ::Enumerator[String, self]
+
+  # <!--
+  #   rdoc-file=io.c
+  #   - each_line(sep = $/, chomp: false) {|line| ... }   -> self
+  #   - each_line(limit, chomp: false) {|line| ... }      -> self
+  #   - each_line(sep, limit, chomp: false) {|line| ... } -> self
+  #   - each_line                                   -> enumerator
+  # -->
+  # Calls the block with each remaining line read from the stream; returns `self`.
+  # Does nothing if already at end-of-stream; See [Line IO](rdoc-ref:IO@Line+IO).
+  #
+  # With no arguments given, reads lines as determined by line separator `$/`:
+  #
+  #     f = File.new('t.txt')
+  #     f.each_line {|line| p line }
+  #     f.each_line {|line| fail 'Cannot happen' }
+  #     f.close
+  #
+  # Output:
+  #
+  #     "First line\n"
+  #     "Second line\n"
+  #     "\n"
+  #     "Fourth line\n"
+  #     "Fifth line\n"
+  #
+  # With only string argument `sep` given, reads lines as determined by line
+  # separator `sep`; see [Line Separator](rdoc-ref:IO@Line+Separator):
+  #
+  #     f = File.new('t.txt')
+  #     f.each_line('li') {|line| p line }
+  #     f.close
+  #
+  # Output:
+  #
+  #     "First li"
+  #     "ne\nSecond li"
+  #     "ne\n\nFourth li"
+  #     "ne\nFifth li"
+  #     "ne\n"
+  #
+  # The two special values for `sep` are honored:
+  #
+  #     f = File.new('t.txt')
+  #     # Get all into one string.
+  #     f.each_line(nil) {|line| p line }
+  #     f.close
+  #
+  # Output:
+  #
+  #     "First line\nSecond line\n\nFourth line\nFifth line\n"
+  #
+  #     f.rewind
+  #     # Get paragraphs (up to two line separators).
+  #     f.each_line('') {|line| p line }
+  #
+  # Output:
+  #
+  #     "First line\nSecond line\n\n"
+  #     "Fourth line\nFifth line\n"
+  #
+  # With only integer argument `limit` given, limits the number of bytes in each
+  # line; see [Line Limit](rdoc-ref:IO@Line+Limit):
+  #
+  #     f = File.new('t.txt')
+  #     f.each_line(8) {|line| p line }
+  #     f.close
+  #
+  # Output:
+  #
+  #     "First li"
+  #     "ne\n"
+  #     "Second l"
+  #     "ine\n"
+  #     "\n"
+  #     "Fourth l"
+  #     "ine\n"
+  #     "Fifth li"
+  #     "ne\n"
+  #
+  # With arguments `sep` and `limit` given, combines the two behaviors:
+  #
+  # *   Calls with the next line as determined by line separator `sep`.
+  # *   But returns no more bytes than are allowed by the limit.
+  #
+  #
+  # Optional keyword argument `chomp` specifies whether line separators are to be
+  # omitted:
+  #
+  #     f = File.new('t.txt')
+  #     f.each_line(chomp: true) {|line| p line }
+  #     f.close
+  #
+  # Output:
+  #
+  #     "First line"
+  #     "Second line"
+  #     ""
+  #     "Fourth line"
+  #     "Fifth line"
+  #
+  # Returns an Enumerator if no block is given.
+  #
+  # IO#each is an alias for IO#each_line.
+  #
   alias each each_line
 
   # <!-- rdoc-file=io.c -->
