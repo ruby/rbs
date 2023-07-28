@@ -1314,22 +1314,6 @@ class IO < Object
   #
   def pid: () -> Integer
 
-  # <!-- rdoc-file=io.c -->
-  # Returns the current position (in bytes) in `self` (see
-  # [Position](rdoc-ref:IO@Position)):
-  #
-  #     f = File.open('t.txt')
-  #     f.tell # => 0
-  #     f.gets # => "First line\n"
-  #     f.tell # => 12
-  #     f.close
-  #
-  # Related: IO#pos=, IO#seek.
-  #
-  # IO#pos is an alias for IO#tell.
-  #
-  def pos: () -> Integer
-
   # <!--
   #   rdoc-file=io.c
   #   - pos = new_position -> new_position
@@ -2086,6 +2070,22 @@ class IO < Object
   #
   def tell: () -> Integer
 
+  # <!-- rdoc-file=io.c -->
+  # Returns the current position (in bytes) in `self` (see
+  # [Position](rdoc-ref:IO@Position)):
+  #
+  #     f = File.open('t.txt')
+  #     f.tell # => 0
+  #     f.gets # => "First line\n"
+  #     f.tell # => 12
+  #     f.close
+  #
+  # Related: IO#pos=, IO#seek.
+  #
+  # IO#pos is an alias for IO#tell.
+  #
+  alias pos tell
+
   # <!--
   #   rdoc-file=io.c
   #   - timeout -> duration or nil
@@ -2133,7 +2133,7 @@ class IO < Object
   #
   # IO#tty? is an alias for IO#isatty.
   #
-  def tty?: () -> bool
+  alias tty? isatty
 
   # <!--
   #   rdoc-file=io.c
@@ -3344,7 +3344,7 @@ class IO < Object
   #
   # IO#eof? is an alias for IO#eof.
   #
-  def eof?: () -> bool
+  alias eof? eof
 
   # <!-- rdoc-file=io.c -->
   # Returns the integer file descriptor for the stream:
@@ -3357,7 +3357,7 @@ class IO < Object
   #
   # IO#to_i is an alias for IO#fileno.
   #
-  def to_i: () -> Integer
+  alias to_i fileno
 end
 
 IO::APPEND: Integer
