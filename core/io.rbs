@@ -694,7 +694,7 @@ class IO < Object
   #     # ...
   #     f.gets # won't cause Errno::EBADF
   #
-  def autoclose=: (boolish) -> untyped
+  def autoclose=: (boolish) -> boolish
 
   # <!--
   #   rdoc-file=io.c
@@ -756,7 +756,7 @@ class IO < Object
   #
   # Related: IO#close_read, IO#close_write, IO#closed?.
   #
-  def close: () -> NilClass
+  def close: () -> nil
 
   # <!--
   #   rdoc-file=io.c
@@ -775,7 +775,7 @@ class IO < Object
   # (via system() method for example). If you really needs file descriptor
   # inheritance to child process, use spawn()'s argument such as fd=>fd.
   #
-  def close_on_exec=: (boolish) -> untyped
+  def close_on_exec=: (boolish) -> nil
 
   # <!--
   #   rdoc-file=io.c
@@ -821,7 +821,7 @@ class IO < Object
   #
   # Related: IO#close, IO#close_write, IO#closed?.
   #
-  def close_read: () -> NilClass
+  def close_read: () -> nil
 
   # <!--
   #   rdoc-file=io.c
@@ -853,7 +853,7 @@ class IO < Object
   #
   # Related: IO#close, IO#close_read, IO#closed?.
   #
-  def close_write: () -> NilClass
+  def close_write: () -> nil
 
   # <!--
   #   rdoc-file=io.c
@@ -984,7 +984,7 @@ class IO < Object
   #
   # IO#each is an alias for IO#each_line.
   #
-  def each: (?String sep, ?Integer limit) { (String arg0) -> untyped } -> self
+  def each: (?String sep, ?Integer limit) { (String arg0) -> void } -> self
           | (?String sep, ?Integer limit) -> ::Enumerator[String, self]
 
   # <!--
@@ -1005,7 +1005,7 @@ class IO < Object
   #
   # Related: IO#each_char, IO#each_codepoint.
   #
-  def each_byte: () { (Integer arg0) -> untyped } -> self
+  def each_byte: () { (Integer arg0) -> void } -> self
                | () -> ::Enumerator[Integer, self]
 
   # <!--
@@ -1026,7 +1026,7 @@ class IO < Object
   #
   # Related: IO#each_byte, IO#each_codepoint.
   #
-  def each_char: () { (String arg0) -> untyped } -> self
+  def each_char: () { (String arg0) -> void } -> self
                | () -> ::Enumerator[String, self]
 
   # <!--
@@ -1046,7 +1046,7 @@ class IO < Object
   #
   # Related: IO#each_byte, IO#each_char.
   #
-  def each_codepoint: () { (Integer arg0) -> untyped } -> self
+  def each_codepoint: () { (Integer arg0) -> void } -> self
                     | () -> ::Enumerator[Integer, self]
 
   # <!--
@@ -1309,7 +1309,7 @@ class IO < Object
   #     IO.new(fd, internal_encoding: nil) # => #<IO:fd 3>
   #     IO.new(fd, autoclose: true)        # => #<IO:fd 3>
   #
-  def initialize: (int fd, ?string | int mode, ?path: string?, **untyped opts) -> void
+  def initialize: (int fd, ?string | int mode, ?path: string?, ?external_encoding: String external_encoding, ?internal_encoding: String internal_encoding, ?encoding: String encoding, ?textmode: boolish textmode, ?binmode: boolish binmode, ?autoclose: boolish autoclose, ?mode: String mode) -> void
 
   # <!--
   #   rdoc-file=io.c
@@ -1508,7 +1508,7 @@ class IO < Object
   #     f.print
   #     f.close
   #
-  def print: (*untyped arg0) -> NilClass
+  def print: (*untyped args) -> nil
 
   # <!--
   #   rdoc-file=io.c
@@ -1519,7 +1519,7 @@ class IO < Object
   # For details on `format_string`, see [Format
   # Specifications](rdoc-ref:format_specifications.rdoc).
   #
-  def printf: (String format_string, *untyped arg0) -> NilClass
+  def printf: (String format_string, *untyped args) -> nil
 
   # <!--
   #   rdoc-file=io.c
@@ -1539,7 +1539,7 @@ class IO < Object
   #
   #     AA
   #
-  def putc: (Numeric | String arg0) -> untyped
+  def putc: (Numeric | String arg0) -> (Numeric | String)
 
   # <!--
   #   rdoc-file=io.c
@@ -1586,7 +1586,7 @@ class IO < Object
   #     # Nested arrays.
   #     show([[[0, 1], 2, 3], 4, 5])  # => "0\n1\n2\n3\n4\n5\n"
   #
-  def puts: (*untyped arg0) -> NilClass
+  def puts: (*untyped args) -> nil
 
   # <!--
   #   rdoc-file=io.c
@@ -2132,7 +2132,7 @@ class IO < Object
   #
   # Related: IO#fsync.
   #
-  def sync=: (boolish) -> untyped
+  def sync=: (boolish) -> boolish
 
   # <!--
   #   rdoc-file=io.c
@@ -2280,7 +2280,7 @@ class IO < Object
   #     f.read              # => "BCDE012"
   #     f.close
   #
-  def ungetbyte: (String | Integer arg0) -> NilClass
+  def ungetbyte: (String | Integer arg0) -> nil
 
   # <!--
   #   rdoc-file=io.c
@@ -2323,7 +2323,7 @@ class IO < Object
   #     f.getc.ord      # => 1090
   #     f.close
   #
-  def ungetc: (String arg0) -> NilClass
+  def ungetc: (String arg0) -> nil
 
   # <!--
   #   rdoc-file=io.c
@@ -2647,8 +2647,10 @@ class IO < Object
   #
   # Raises exceptions that IO.pipe and Kernel.spawn raise.
   #
-  def self.popen: (*untyped args) -> untyped
-
+  def self.popen: (string cmd, ?string | int mode, ?path: string?, ?external_encoding: String external_encoding, ?internal_encoding: String internal_encoding, ?encoding: String encoding, ?textmode: boolish textmode, ?binmode: boolish binmode, ?autoclose: boolish autoclose, ?mode: String mode, ?unsetenv_others: boolish, ?pgroup: true | Integer, ?umask: Integer, ?in: Kernel::redirect_fd, ?out: Kernel::redirect_fd, ?err: Kernel::redirect_fd, ?close_others: boolish, ?chdir: String) -> instance
+                | (Hash[string, string?] env, string cmd, ?string | int mode, ?path: string?, ?external_encoding: String external_encoding, ?internal_encoding: String internal_encoding, ?encoding: String encoding, ?textmode: boolish textmode, ?binmode: boolish binmode, ?autoclose: boolish autoclose, ?mode: String mode, ?unsetenv_others: boolish, ?pgroup: true | Integer, ?umask: Integer, ?in: Kernel::redirect_fd, ?out: Kernel::redirect_fd, ?err: Kernel::redirect_fd, ?close_others: boolish, ?chdir: String) -> instance
+                | [X] (string cmd, ?string | int mode, ?path: string?, ?external_encoding: String external_encoding, ?internal_encoding: String internal_encoding, ?encoding: String encoding, ?textmode: boolish textmode, ?binmode: boolish binmode, ?autoclose: boolish autoclose, ?mode: String mode, ?unsetenv_others: boolish, ?pgroup: true | Integer, ?umask: Integer, ?in: Kernel::redirect_fd, ?out: Kernel::redirect_fd, ?err: Kernel::redirect_fd, ?close_others: boolish, ?chdir: String) { (instance) -> X } -> X
+                | [X] (Hash[string, string?] env, string cmd, ?string | int mode, ?path: string?, ?external_encoding: String external_encoding, ?internal_encoding: String internal_encoding, ?encoding: String encoding, ?textmode: boolish textmode, ?binmode: boolish binmode, ?autoclose: boolish autoclose, ?mode: String mode, ?unsetenv_others: boolish, ?pgroup: true | Integer, ?umask: Integer, ?in: Kernel::redirect_fd, ?out: Kernel::redirect_fd, ?err: Kernel::redirect_fd, ?close_others: boolish, ?chdir: String) { (instance) -> X } -> X
   # <!--
   #   rdoc-file=io.c
   #   - IO.foreach(path, sep = $/, **opts) {|line| block }       -> nil
@@ -2740,8 +2742,8 @@ class IO < Object
   #
   # Returns an Enumerator if no block is given.
   #
-  def self.foreach: (string | _ToPath path, ?String sep, ?Integer limit, ?external_encoding: String external_encoding, ?internal_encoding: String internal_encoding, ?encoding: String encoding, ?textmode: untyped textmode, ?binmode: untyped binmode, ?autoclose: untyped autoclose, ?mode: String mode, ?chomp: boolish) { (String line) -> void } -> nil
-                  | (string | _ToPath path, ?String sep, ?Integer limit, ?external_encoding: String external_encoding, ?internal_encoding: String internal_encoding, ?encoding: String encoding, ?textmode: untyped textmode, ?binmode: untyped binmode, ?autoclose: untyped autoclose, ?mode: String mode, ?chomp: boolish) -> ::Enumerator[String, nil]
+  def self.foreach: (string | _ToPath path, ?String sep, ?Integer limit, ?external_encoding: String external_encoding, ?internal_encoding: String internal_encoding, ?encoding: String encoding, ?textmode: boolish textmode, ?binmode: boolish binmode, ?autoclose: boolish autoclose, ?mode: String mode, ?chomp: boolish) { (String line) -> void } -> nil
+                  | (string | _ToPath path, ?String sep, ?Integer limit, ?external_encoding: String external_encoding, ?internal_encoding: String internal_encoding, ?encoding: String encoding, ?textmode: boolish textmode, ?binmode: boolish binmode, ?autoclose: boolish autoclose, ?mode: String mode, ?chomp: boolish) -> ::Enumerator[String, nil]
 
   # <!--
   #   rdoc-file=io.c
@@ -2821,8 +2823,8 @@ class IO < Object
   #     Sending message to parent
   #     Parent got: <Hi Dad>
   #
-  def self.pipe: (?String | Encoding ext_or_ext_int_enc, ?String | Encoding int_enc, ?external_encoding: String external_encoding, ?internal_encoding: String internal_encoding, ?encoding: String encoding, ?textmode: untyped textmode, ?binmode: untyped binmode, ?autoclose: untyped autoclose, ?mode: String mode, ?chomp: boolish) -> [IO, IO]
-               | [X] (?String | Encoding ext_or_ext_int_enc, ?String | Encoding int_enc, ?external_encoding: String external_encoding, ?internal_encoding: String internal_encoding, ?encoding: String encoding, ?textmode: untyped textmode, ?binmode: untyped binmode, ?autoclose: untyped autoclose, ?mode: String mode, ?chomp: boolish) { (IO read_io, IO write_io) -> X } -> X
+  def self.pipe: (?String | Encoding ext_or_ext_int_enc, ?String | Encoding int_enc, ?external_encoding: String external_encoding, ?internal_encoding: String internal_encoding, ?encoding: String encoding, ?textmode: boolish textmode, ?binmode: boolish binmode, ?autoclose: boolish autoclose, ?mode: String mode, ?chomp: boolish) -> [IO, IO]
+               | [X] (?String | Encoding ext_or_ext_int_enc, ?String | Encoding int_enc, ?external_encoding: String external_encoding, ?internal_encoding: String internal_encoding, ?encoding: String encoding, ?textmode: boolish textmode, ?binmode: boolish binmode, ?autoclose: boolish autoclose, ?mode: String mode, ?chomp: boolish) { (IO read_io, IO write_io) -> X } -> X
 
   # <!--
   #   rdoc-file=io.c
@@ -2879,7 +2881,7 @@ class IO < Object
   # *   [Open Options](rdoc-ref:IO@Open+Options).
   # *   [Encoding options](rdoc-ref:encodings.rdoc@Encoding+Options).
   #
-  def self.read: (String name, ?Integer length, ?Integer offset, ?external_encoding: String external_encoding, ?internal_encoding: String internal_encoding, ?encoding: String encoding, ?textmode: untyped textmode, ?binmode: untyped binmode, ?autoclose: untyped autoclose, ?mode: String mode) -> String
+  def self.read: (String name, ?Integer length, ?Integer offset, ?external_encoding: String external_encoding, ?internal_encoding: String internal_encoding, ?encoding: String encoding, ?textmode: boolish textmode, ?binmode: boolish binmode, ?autoclose: boolish autoclose, ?mode: String mode) -> String
 
   # <!--
   #   rdoc-file=io.c
@@ -2950,7 +2952,7 @@ class IO < Object
   # *   [Encoding options](rdoc-ref:encodings.rdoc@Encoding+Options).
   # *   [Line Options](rdoc-ref:IO@Line+Options).
   #
-  def self.readlines: (String | _ToPath name, ?String sep, ?Integer limit, ?external_encoding: String external_encoding, ?internal_encoding: String internal_encoding, ?encoding: String encoding, ?textmode: untyped textmode, ?binmode: untyped binmode, ?autoclose: untyped autoclose, ?mode: String mode, ?chomp: boolish) -> ::Array[String]
+  def self.readlines: (String | _ToPath name, ?String sep, ?Integer limit, ?external_encoding: String external_encoding, ?internal_encoding: String internal_encoding, ?encoding: String encoding, ?textmode: boolish textmode, ?binmode: boolish binmode, ?autoclose: boolish autoclose, ?mode: String mode, ?chomp: boolish) -> ::Array[String]
 
   # <!--
   #   rdoc-file=io.c
@@ -3121,7 +3123,8 @@ class IO < Object
   #     IO.try_convert(ARGF)     # => #<IO:<STDIN>>
   #     IO.try_convert('STDOUT') # => nil
   #
-  def self.try_convert: (untyped arg0) -> IO?
+  def self.try_convert: (_ToIO obj) -> IO
+                      | (untyped obj) -> IO?
 
   # <!--
   #   rdoc-file=io.c
@@ -3182,7 +3185,7 @@ class IO < Object
   # *   [Open Options](rdoc-ref:IO@Open+Options).
   # *   [Encoding options](rdoc-ref:encodings.rdoc@Encoding+Options).
   #
-  def self.write: (String name, _ToS arg0, ?Integer offset, ?external_encoding: String external_encoding, ?internal_encoding: String internal_encoding, ?encoding: String encoding, ?textmode: untyped textmode, ?binmode: untyped binmode, ?autoclose: untyped autoclose, ?mode: String mode) -> Integer
+  def self.write: (String name, _ToS arg0, ?Integer offset, ?external_encoding: String external_encoding, ?internal_encoding: String internal_encoding, ?encoding: String encoding, ?textmode: boolish textmode, ?binmode: boolish binmode, ?autoclose: boolish autoclose, ?mode: String mode) -> Integer
 
   # <!--
   #   rdoc-file=io.c
@@ -3204,16 +3207,16 @@ class IO < Object
   # With a block given, calls the block with the IO object and returns the block's
   # value.
   #
-  def self.open: (int fd, ?string | int mode, ?path: string?, **untyped opts) -> instance
-               | [A] (int fd, ?string | int mode, ?path: string?, **untyped opts) { (instance) -> A } -> A
+  def self.open: (int fd, ?string | int mode, ?path: string?, ?external_encoding: String external_encoding, ?internal_encoding: String internal_encoding, ?encoding: String encoding, ?textmode: boolish textmode, ?binmode: boolish binmode, ?autoclose: boolish autoclose, ?mode: String mode) -> instance
+               | [X] (int fd, ?string | int mode, ?path: string?, ?external_encoding: String external_encoding, ?internal_encoding: String internal_encoding, ?encoding: String encoding, ?textmode: boolish textmode, ?binmode: boolish binmode, ?autoclose: boolish autoclose, ?mode: String mode) { (instance) -> X } -> X
 
-  def bytes: () { (Integer arg0) -> untyped } -> self
+  def bytes: () { (Integer arg0) -> void } -> self
            | () -> ::Enumerator[Integer, self]
 
-  def chars: () { (String arg0) -> untyped } -> self
+  def chars: () { (String arg0) -> void } -> self
            | () -> ::Enumerator[String, self]
 
-  def codepoints: () { (Integer arg0) -> untyped } -> self
+  def codepoints: () { (Integer arg0) -> void } -> self
                 | () -> ::Enumerator[Integer, self]
 
   # <!-- rdoc-file=io.c -->
@@ -3314,7 +3317,7 @@ class IO < Object
   #
   # IO#each is an alias for IO#each_line.
   #
-  def each_line: (?String sep, ?Integer limit) { (String arg0) -> untyped } -> self
+  def each_line: (?String sep, ?Integer limit) { (String arg0) -> void } -> self
                | (?String sep, ?Integer limit) -> ::Enumerator[String, self]
 
   # <!-- rdoc-file=io.c -->
@@ -3352,7 +3355,7 @@ class IO < Object
   #
   def eof?: () -> bool
 
-  def lines: (?String sep, ?Integer limit) { (String arg0) -> untyped } -> self
+  def lines: (?String sep, ?Integer limit) { (String arg0) -> void } -> self
            | (?String sep, ?Integer limit) -> ::Enumerator[String, self]
 
   # <!-- rdoc-file=io.c -->
