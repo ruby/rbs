@@ -20,7 +20,7 @@ module RBS
           end
         end
 
-        attr_reader :config, :lockfile, :definition, :existing_lockfile, :gem_hash
+        attr_reader :config, :lockfile, :definition, :existing_lockfile, :gem_hash, :gem_entries
 
         def self.generate(config:, definition:, with_lockfile: true)
           generator = new(config: config, definition: definition, with_lockfile: with_lockfile)
@@ -30,6 +30,11 @@ module RBS
 
         def initialize(config:, definition:, with_lockfile:)
           @config = config
+
+          @gem_entries = config.gems.each.with_object({}) do |entry, hash| #$ Hash[String, gem_entry?]
+            name = entry["name"]
+            hash[name] = entry
+          end
 
           lockfile_path = Config.to_lockfile_path(config.config_path)
           lockfile_dir = lockfile_path.parent
@@ -58,15 +63,13 @@ module RBS
         end
 
         def generate
-          ignored_gems = config.gems.select {|gem| gem["ignore"] }.map {|gem| gem["name"] }.to_set
-
           config.gems.each do |gem|
             if Sources::Stdlib.instance.has?(gem["name"], nil) || gem.dig("source", "type") == "stdlib"
-              unless ignored_gems.include?(gem["name"])
+              unless gem.fetch("ignore", false)
                 assign_stdlib(name: gem["name"], from_gem: nil)
               end
             else
-              assign_gem(name: gem["name"], version: gem["version"], ignored_gems: ignored_gems, src_data: gem["source"])
+              assign_gem(name: gem["name"], version: gem["version"])
             end
           end
 
@@ -76,7 +79,7 @@ module RBS
             end
 
             if spec = gem_hash[dep.name]
-              assign_gem(name: dep.name, version: spec.version, ignored_gems: ignored_gems, src_data: nil, skip: dep.source.is_a?(Bundler::Source::Gemspec))
+              assign_gem(name: dep.name, version: spec.version, skip: dep.source.is_a?(Bundler::Source::Gemspec))
             end
           end
 
@@ -91,8 +94,12 @@ module RBS
           end
         end
 
-        private def assign_gem(name:, version:, src_data:, ignored_gems:, skip: false)
-          return if ignored_gems.include?(name)
+        private def assign_gem(name:, version:, skip: false)
+          entry = gem_entries[name]
+          src_data = entry&.fetch("source", nil)
+          ignored = entry&.fetch("ignore", false)
+
+          return if ignored
           return if lockfile.gems.key?(name)
 
           unless skip
@@ -136,7 +143,7 @@ module RBS
           if spec = gem_hash.fetch(name, nil)
             spec.dependencies.each do |dep|
               if dep_spec = gem_hash[dep.name]
-                assign_gem(name: dep.name, version: dep_spec.version, src_data: nil, ignored_gems: ignored_gems)
+                assign_gem(name: dep.name, version: dep_spec.version)
               end
             end
           else
