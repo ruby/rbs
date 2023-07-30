@@ -15,6 +15,20 @@
 
 ::CROSS_COMPILING: NilClass
 
+# <!-- rdoc-file=ruby.c -->
+# DATA is a File that contains the data section of the executed file. To create
+# a data section use `__END__`:
+#
+#     $ cat t.rb
+#     puts DATA.gets
+#     __END__
+#     hello world!
+#
+#     $ ruby t.rb
+#     hello world!
+#
+::DATA: File
+
 ::FALSE: FalseClass
 
 ::NIL: NilClass
