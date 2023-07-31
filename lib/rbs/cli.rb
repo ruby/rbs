@@ -645,6 +645,7 @@ EOU
         relative_libs = []
         merge = false
         owners_included = []
+        outline = false
 
         OptionParser.new do |opts|
           opts.banner = <<EOU
@@ -657,7 +658,7 @@ Examples:
 
   $ rbs prototype runtime String
   $ rbs prototype runtime --require set Set
-  $ rbs prototype runtime -R lib/rbs RBS::*
+  $ rbs prototype runtime -R lib/rbs RBS RBS::*
 
 Options:
 EOU
@@ -673,6 +674,9 @@ EOU
           opts.on("--method-owner CLASS", "Generate method prototypes if the owner of the method is [CLASS]") do |klass|
             owners_included << klass
           end
+          opts.on("--outline", "Generates only module/class/constant declaration (no method definition)") do
+            outline = true
+          end
         end.parse!(args)
 
         loader = options.loader()
@@ -686,7 +690,10 @@ EOU
           eval("require_relative(lib)", binding, "rbs")
         end
 
-        decls = Prototype::Runtime.new(patterns: args, env: env, merge: merge, owners_included: owners_included).decls
+        runtime = Prototype::Runtime.new(patterns: args, env: env, merge: merge, owners_included: owners_included)
+        runtime.outline = outline
+
+        decls = runtime.decls
 
         writer = Writer.new(out: stdout)
         writer.write decls
