@@ -22,6 +22,9 @@ module RBS
         # A hash table to look up a spec from name of the gem
         attr_reader gem_hash: Hash[String, Bundler::LazySpecification]
 
+        # A hash table to look up a gem entry in collection config from the name of the gem
+        attr_reader gem_entries: Hash[String, gem_entry?]
+
         def self.generate: (config: Config, definition: Bundler::Definition, ?with_lockfile: boolish) -> Lockfile
 
         def initialize: (config: Config, definition: Bundler::Definition, with_lockfile: boolish) -> void
@@ -38,7 +41,7 @@ module RBS
         #
         # * If `skip:` is true, it skips adding the gem, but adds it's dependencies.
         #
-        def assign_gem: (name: String, version: String?, src_data: Sources::source_entry?, ignored_gems: Set[String], ?skip: bool) -> void
+        def assign_gem: (name: String, version: String?, ?skip: bool) -> void
 
         def assign_stdlib: (name: String, from_gem: String?) -> void
 
