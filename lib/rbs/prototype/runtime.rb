@@ -9,6 +9,7 @@ module RBS
       attr_reader :env
       attr_reader :merge
       attr_reader :owners_included
+      attr_accessor :outline
 
       def initialize(patterns:, env:, merge:, owners_included: [])
         @patterns = patterns
@@ -19,6 +20,7 @@ module RBS
         @owners_included = owners_included.map do |name|
           Object.const_get(name)
         end
+        @outline = false
       end
 
       def target?(const)
@@ -426,7 +428,7 @@ module RBS
           )
         end
 
-        generate_methods(mod, type_name, decl.members)
+        generate_methods(mod, type_name, decl.members) unless outline
 
         generate_constants mod, decl.members
       end
@@ -480,7 +482,7 @@ module RBS
           )
         end
 
-        generate_methods(mod, type_name, decl.members)
+        generate_methods(mod, type_name, decl.members) unless outline
 
         generate_constants mod, decl.members
       end
