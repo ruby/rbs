@@ -474,4 +474,48 @@ end
       end
     end
   end
+
+  class TestTypeParams
+    class TestTypeParams
+    end
+  end
+
+  def test_type_params
+    SignatureManager.new do |manager|
+      manager.files[Pathname("foo.rbs")] = <<~RBS
+        module RBS
+          class RuntimePrototypeTest < ::Test::Unit::TestCase
+            class TestTypeParams[unchecked out Elem]
+              class TestTypeParams
+              end
+            end
+          end
+        end
+      RBS
+
+      manager.build do |env|
+        p = Runtime.new(patterns: ["RBS::RuntimePrototypeTest::TestTypeParams"], env: env, merge: true)
+        assert_write p.decls, <<~RBS
+          module RBS
+            class RuntimePrototypeTest < ::Test::Unit::TestCase
+              class TestTypeParams[unchecked out Elem]
+              end
+            end
+          end
+        RBS
+
+        p = Runtime.new(patterns: ["RBS::RuntimePrototypeTest::TestTypeParams::TestTypeParams"], env: env, merge: true)
+        assert_write p.decls, <<~RBS
+          module RBS
+            class RuntimePrototypeTest < ::Test::Unit::TestCase
+              class TestTypeParams[unchecked out Elem]
+                class TestTypeParams
+                end
+              end
+            end
+          end
+        RBS
+      end
+    end
+  end
 end
