@@ -7,7 +7,7 @@ It also allows declaring constants and global variables.
 The following is a small example of RBS for a chat app.
 
 <!-- run-start:a.rbs:bundle exec rbs -I a.rbs validate -->
-```rb
+```rbs
 module ChatApp
   VERSION: String
 
