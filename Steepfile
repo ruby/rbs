@@ -1,5 +1,19 @@
 D = Steep::Diagnostic
 
+libs = [
+  "set", "pathname", "json", "logger", "monitor",
+  "tsort", "uri", 'dbm', 'pstore', 'singleton',
+  'shellwords', 'fileutils', 'find', 'digest', 'abbrev',
+]
+
+libs_from_local_path = [
+  'stdlib/yaml/0',
+  "stdlib/strscan/0/",
+  "stdlib/optparse/0/",
+  "stdlib/rdoc/0/",
+  "stdlib/ripper/0",
+]
+
 target :lib do
   signature "sig"
   check "lib"
@@ -9,18 +23,31 @@ target :lib do
     "lib/rbs/test.rb"
   )
 
-  library "set", "pathname", "json", "logger", "monitor", "tsort", "uri", 'dbm', 'pstore', 'singleton', 'shellwords', 'fileutils', 'find', 'digest', 'abbrev'
-  signature 'stdlib/yaml/0'
-  signature "stdlib/strscan/0/"
-  signature "stdlib/optparse/0/"
-  signature "stdlib/rdoc/0/"
-  signature "stdlib/ripper/0"
+  library(*libs)
+  libs_from_local_path.each do |path|
+    signature path
+  end
 
   configure_code_diagnostics do |config|
     config[D::Ruby::MethodDefinitionMissing] = :hint
     config[D::Ruby::ElseOnExhaustiveCase] = :hint
     config[D::Ruby::FallbackAny] = :hint
   end
+end
+
+target :test do
+  signature 'sig'
+  check 'test'
+
+  # Ignore the following file because Steep causes SystemStackError on this file.
+  ignore "test/stdlib/enumerator/Product_test.rb"
+
+  library(*libs)
+  libs_from_local_path.each do |path|
+    signature path
+  end
+
+  configure_code_diagnostics(D::Ruby.all_error.transform_values { nil })
 end
 
 # target :lib do
