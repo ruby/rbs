@@ -134,8 +134,12 @@ module RBS
             if locked
               lockfile.gems[name] = locked
 
-              locked[:source].dependencies_of(locked[:name], locked[:version])&.each do |dep|
-                assign_stdlib(name: dep["name"], from_gem: name)
+              begin
+                locked[:source].dependencies_of(locked[:name], locked[:version])&.each do |dep|
+                  assign_stdlib(name: dep["name"], from_gem: name)
+                end
+              rescue
+                RBS.logger.warn "Cannot find `#{locked[:name]}-#{locked[:version]}` gem. Using incorrect Bundler context? (#{definition.lockfile})"
               end
             end
           end
