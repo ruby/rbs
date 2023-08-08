@@ -380,7 +380,7 @@ module RBS
           RBS.logger.warn("Skipping anonymous superclass #{mod.superclass} of #{mod}")
           nil
         else
-          super_name = to_type_name(const_name(mod.superclass), full_name: true)
+          super_name = to_type_name(const_name(mod.superclass), full_name: true).absolute!
           super_args = type_args(super_name)
           AST::Declarations::Class::Super.new(name: super_name, args: super_args, location: nil)
         end
