@@ -1035,6 +1035,21 @@ end
     end
   end
 
+  def test_const_to_name
+    parser = RBS::Prototype::RB.new
+    [
+      ["self", TypeName("::Foo")],
+      ["Bar", TypeName("Bar")],
+      ["::Bar", TypeName("::Bar")],
+      ["Bar::Baz", TypeName("Bar::Baz")],
+      ["obj::Baz", nil],
+    ].each do |rb, name|
+      node = RubyVM::AbstractSyntaxTree.parse("_ = #{rb}").children[2]
+      context = RBS::Prototype::RB::Context.initial(namespace: RBS::Namespace.new(path: [:Foo], absolute: true))
+      assert_equal name, parser.const_to_name(node.children[1], context: context)
+    end
+  end
+
   if RUBY_VERSION >= '2.7'
     def test_argument_forwarding
       parser = RB.new
