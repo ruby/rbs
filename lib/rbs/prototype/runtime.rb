@@ -541,7 +541,17 @@ module RBS
 
       def const_name(const)
         @module_name_method ||= Module.instance_method(:name)
-        @module_name_method.bind(const).call
+        name = @module_name_method.bind(const).call
+        return nil unless name
+
+        begin
+          Object.const_get(name)
+        rescue NameError
+          # Should generate const name if anonymous or internal module (e.g. NameError::message)
+          nil
+        else
+          name
+        end
       end
 
       def type_args(type_name)
