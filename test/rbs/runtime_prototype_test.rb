@@ -460,4 +460,18 @@ end
       end
     end
   end
+
+  def test_nameerror_message
+    SignatureManager.new do |manager|
+      manager.build do |env|
+        p = Runtime.new(patterns: ["NameError*"], env: env, merge: true)
+
+        writer = RBS::Writer.new(out: StringIO.new)
+        writer.write(p.decls)
+        RBS::Parser.parse_signature(writer.out.string) # check syntax
+
+        assert !writer.out.string.include?("class message")
+      end
+    end
+  end
 end
