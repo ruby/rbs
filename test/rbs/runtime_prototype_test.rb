@@ -47,7 +47,7 @@ class RBS::RuntimePrototypeTest < Test::Unit::TestCase
 
         assert_write p.decls, <<-EOF
 module RBS
-  class RuntimePrototypeTest < Test::Unit::TestCase
+  class RuntimePrototypeTest < ::Test::Unit::TestCase
     module TestTargets
       module Bar
       end
@@ -58,7 +58,7 @@ module RBS
         extend Comparable
       end
 
-      class Test < String
+      class Test < ::String
         include RBS::RuntimePrototypeTest::TestTargets::Foo
 
         extend RBS::RuntimePrototypeTest::TestTargets::Bar
@@ -91,7 +91,7 @@ end
     SignatureManager.new do |manager|
       manager.files[Pathname("foo.rbs")] = <<EOF
 class RBS
-  class RuntimePrototypeTest < Test::Unit::TestCase
+  class RuntimePrototypeTest < ::Test::Unit::TestCase
     class TestTargets
       class Test
         def self.baz: () -> void
@@ -111,7 +111,7 @@ EOF
 
         assert_write p.decls, <<-EOF
 module RBS
-  class RuntimePrototypeTest < Test::Unit::TestCase
+  class RuntimePrototypeTest < ::Test::Unit::TestCase
     module TestTargets
       module Bar
       end
@@ -122,7 +122,7 @@ module RBS
         extend Comparable
       end
 
-      class Test < String
+      class Test < ::String
         include RBS::RuntimePrototypeTest::TestTargets::Foo
 
         extend RBS::RuntimePrototypeTest::TestTargets::Bar
@@ -172,9 +172,9 @@ end
 
         assert_write p.decls, <<-EOF
 module RBS
-  class RuntimePrototypeTest < Test::Unit::TestCase
+  class RuntimePrototypeTest < ::Test::Unit::TestCase
     module IncludeTests
-      class ChildClass < RBS::RuntimePrototypeTest::IncludeTests::SuperClass
+      class ChildClass < ::RBS::RuntimePrototypeTest::IncludeTests::SuperClass
         def self.foo: () -> untyped
 
         public
@@ -250,7 +250,7 @@ end
 
           assert_write p.decls, <<-EOF
 module RBS
-  class RuntimePrototypeTest < Test::Unit::TestCase
+  class RuntimePrototypeTest < ::Test::Unit::TestCase
     class TestForArgumentForwarding
       public
 
@@ -291,7 +291,7 @@ end
 
         assert_write p.decls, <<~RBS
           module RBS
-            class RuntimePrototypeTest < Test::Unit::TestCase
+            class RuntimePrototypeTest < ::Test::Unit::TestCase
               module TestForOverrideModuleName
                 class C
                   include RBS::RuntimePrototypeTest::TestForOverrideModuleName::M
@@ -303,7 +303,7 @@ end
                   INSTANCE: C
                 end
 
-                class C2 < RBS::RuntimePrototypeTest::TestForOverrideModuleName::C
+                class C2 < ::RBS::RuntimePrototypeTest::TestForOverrideModuleName::C
                 end
 
                 module M
@@ -341,9 +341,9 @@ end
 
         assert_write p.decls, <<~RBS
           module RBS
-            class RuntimePrototypeTest < Test::Unit::TestCase
+            class RuntimePrototypeTest < ::Test::Unit::TestCase
               module TestForTypeParameters
-                class C < Hash[untyped, untyped]
+                class C < ::Hash[untyped, untyped]
                 end
 
                 class C2
@@ -372,7 +372,7 @@ end
 
         assert_write p.decls, <<~RBS
           module RBS
-            class RuntimePrototypeTest < Test::Unit::TestCase
+            class RuntimePrototypeTest < ::Test::Unit::TestCase
               class TestForInitialize
                 private
 
@@ -400,7 +400,7 @@ end
 
           assert_write p.decls, <<~RBS
             module RBS
-              class RuntimePrototypeTest < Test::Unit::TestCase
+              class RuntimePrototypeTest < ::Test::Unit::TestCase
                 class TestForYield
                   public
 
