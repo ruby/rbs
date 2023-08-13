@@ -395,7 +395,7 @@ module RBS
         unless decl
           decl = AST::Declarations::Class.new(
             name: to_type_name(only_name(mod)),
-            type_params: [],
+            type_params: type_params(mod),
             super_class: generate_super_class(mod),
             members: [],
             annotations: [],
@@ -449,7 +449,7 @@ module RBS
         unless decl
           decl = AST::Declarations::Module.new(
             name: to_type_name(only_name(mod)),
-            type_params: [],
+            type_params: type_params(mod),
             self_types: [],
             members: [],
             annotations: [],
@@ -504,7 +504,7 @@ module RBS
             if outer_module.is_a?(Class)
               outer_decl = AST::Declarations::Class.new(
                 name: to_type_name(outer_module_name),
-                type_params: [],
+                type_params: type_params(outer_module),
                 super_class: generate_super_class(outer_module),
                 members: [],
                 annotations: [],
@@ -514,7 +514,7 @@ module RBS
             else
               outer_decl = AST::Declarations::Module.new(
                 name: to_type_name(outer_module_name),
-                type_params: [],
+                type_params: type_params(outer_module),
                 self_types: [],
                 members: [],
                 annotations: [],
@@ -557,6 +557,15 @@ module RBS
       def type_args(type_name)
         if class_decl = env.class_decls[type_name.absolute!]
           class_decl.type_params.size.times.map { :untyped }
+        else
+          []
+        end
+      end
+
+      def type_params(mod)
+        type_name = to_type_name(const_name(mod), full_name: true)
+        if class_decl = env.class_decls[type_name.absolute!]
+          class_decl.type_params
         else
           []
         end
