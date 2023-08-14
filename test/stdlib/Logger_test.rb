@@ -10,6 +10,8 @@ class LoggerSingletonTest < Test::Unit::TestCase
   testing "singleton(::Logger)"
 
   def test_new
+    assert_send_type  "(nil) -> Logger",
+                      Logger, :new, nil
     assert_send_type  "(String logdev) -> void",
                       Logger, :new, '/dev/null'
     assert_send_type  "(StringIO logdev) -> void",
