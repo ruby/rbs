@@ -14,7 +14,10 @@ module RBS
       def install_from_lockfile
         install_to = lockfile.fullpath
         install_to.mkpath
-        lockfile.gems.each_value do |gem|
+        selected = lockfile.gems.select do |name, gem|
+          gem[:source].has?(name, gem[:version])
+        end
+        selected.each_value do |gem|
           gem[:source].install(
             dest: install_to,
             name: gem[:name],
@@ -22,7 +25,7 @@ module RBS
             stdout: stdout
           )
         end
-        stdout.puts "It's done! #{lockfile.gems.size} gems' RBSs now installed."
+        stdout.puts "It's done! #{selected.size} gems' RBSs now installed."
       end
     end
   end
