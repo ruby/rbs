@@ -9,7 +9,7 @@ target :lib do
     "lib/rbs/test.rb"
   )
 
-  library "set", "pathname", "json", "logger", "monitor", "tsort", "uri", 'dbm', 'pstore', 'singleton', 'shellwords', 'fileutils', 'find', 'digest', 'abbrev'
+  library "pathname", "json", "logger", "monitor", "tsort", "uri", 'dbm', 'pstore', 'singleton', 'shellwords', 'fileutils', 'find', 'digest', 'abbrev'
   signature 'stdlib/yaml/0'
   signature "stdlib/strscan/0/"
   signature "stdlib/optparse/0/"
@@ -31,7 +31,7 @@ end
 #   check "app/models/**/*.rb"        # Glob
 #   # ignore "lib/templates/*.rb"
 #
-#   # library "pathname", "set"       # Standard libraries
+#   # library "pathname", "uri"       # Standard libraries
 #   # library "strong_json"           # Gems
 # end
 
@@ -40,6 +40,6 @@ end
 #
 #   check "spec"
 #
-#   # library "pathname", "set"       # Standard libraries
+#   # library "pathname", "uri"       # Standard libraries
 #   # library "rspec"
 # end
