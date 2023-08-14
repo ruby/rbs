@@ -1202,7 +1202,7 @@ class IO < Object
   #     IO.new(fd, internal_encoding: nil) # => #<IO:fd 3>
   #     IO.new(fd, autoclose: true)        # => #<IO:fd 3>
   #
-  def initialize: (int fd, ?string | int mode, ?path: string?, ?external_encoding: String external_encoding, ?internal_encoding: String internal_encoding, ?encoding: String encoding, ?textmode: boolish textmode, ?binmode: boolish binmode, ?autoclose: boolish autoclose, ?mode: String mode) -> void
+  def initialize: ( int fd, ?string | int mode, ?path: string?, ?external_encoding: String | Encoding | nil, ?internal_encoding: String | Encoding | nil, ?encoding: String | Encoding | nil, ?textmode: boolish, ?binmode: boolish, ?autoclose: boolish, ?mode: String) -> void
 
   # <!--
   #   rdoc-file=io.c
@@ -2540,10 +2540,10 @@ class IO < Object
   #
   # Raises exceptions that IO.pipe and Kernel.spawn raise.
   #
-  def self.popen: (string cmd, ?string | int mode, ?path: string?, ?external_encoding: String external_encoding, ?internal_encoding: String internal_encoding, ?encoding: String encoding, ?textmode: boolish textmode, ?binmode: boolish binmode, ?autoclose: boolish autoclose, ?mode: String mode, ?unsetenv_others: boolish, ?pgroup: true | Integer, ?umask: Integer, ?in: Kernel::redirect_fd, ?out: Kernel::redirect_fd, ?err: Kernel::redirect_fd, ?close_others: boolish, ?chdir: String) -> instance
-                | (Hash[string, string?] env, string cmd, ?string | int mode, ?path: string?, ?external_encoding: String external_encoding, ?internal_encoding: String internal_encoding, ?encoding: String encoding, ?textmode: boolish textmode, ?binmode: boolish binmode, ?autoclose: boolish autoclose, ?mode: String mode, ?unsetenv_others: boolish, ?pgroup: true | Integer, ?umask: Integer, ?in: Kernel::redirect_fd, ?out: Kernel::redirect_fd, ?err: Kernel::redirect_fd, ?close_others: boolish, ?chdir: String) -> instance
-                | [X] (string cmd, ?string | int mode, ?path: string?, ?external_encoding: String external_encoding, ?internal_encoding: String internal_encoding, ?encoding: String encoding, ?textmode: boolish textmode, ?binmode: boolish binmode, ?autoclose: boolish autoclose, ?mode: String mode, ?unsetenv_others: boolish, ?pgroup: true | Integer, ?umask: Integer, ?in: Kernel::redirect_fd, ?out: Kernel::redirect_fd, ?err: Kernel::redirect_fd, ?close_others: boolish, ?chdir: String) { (instance) -> X } -> X
-                | [X] (Hash[string, string?] env, string cmd, ?string | int mode, ?path: string?, ?external_encoding: String external_encoding, ?internal_encoding: String internal_encoding, ?encoding: String encoding, ?textmode: boolish textmode, ?binmode: boolish binmode, ?autoclose: boolish autoclose, ?mode: String mode, ?unsetenv_others: boolish, ?pgroup: true | Integer, ?umask: Integer, ?in: Kernel::redirect_fd, ?out: Kernel::redirect_fd, ?err: Kernel::redirect_fd, ?close_others: boolish, ?chdir: String) { (instance) -> X } -> X
+  def self.popen: (string cmd, ?string | int mode, ?path: string?, ?external_encoding: String | Encoding | nil, ?internal_encoding: String | Encoding | nil, ?encoding: String | Encoding | nil, ?textmode: boolish, ?binmode: boolish, ?autoclose: boolish, ?mode: String, ?unsetenv_others: boolish, ?pgroup: true | Integer, ?umask: Integer, ?in: Kernel::redirect_fd, ?out: Kernel::redirect_fd, ?err: Kernel::redirect_fd, ?close_others: boolish, ?chdir: String) -> instance
+                | (Hash[string, string?] env, string cmd, ?string | int mode, ?path: string?, ?external_encoding: String | Encoding | nil, ?internal_encoding: String | Encoding | nil, ?encoding: String | Encoding | nil, ?textmode: boolish, ?binmode: boolish, ?autoclose: boolish, ?mode: String, ?unsetenv_others: boolish, ?pgroup: true | Integer, ?umask: Integer, ?in: Kernel::redirect_fd, ?out: Kernel::redirect_fd, ?err: Kernel::redirect_fd, ?close_others: boolish, ?chdir: String) -> instance
+                | [X] (string cmd, ?string | int mode, ?path: string?, ?external_encoding: String | Encoding | nil, ?internal_encoding: String | Encoding | nil, ?encoding: String | Encoding | nil, ?textmode: boolish, ?binmode: boolish, ?autoclose: boolish, ?mode: String, ?unsetenv_others: boolish, ?pgroup: true | Integer, ?umask: Integer, ?in: Kernel::redirect_fd, ?out: Kernel::redirect_fd, ?err: Kernel::redirect_fd, ?close_others: boolish, ?chdir: String) { (instance) -> X } -> X
+                | [X] (Hash[string, string?] env, string cmd, ?string | int mode, ?path: string?, ?external_encoding: String | Encoding | nil, ?internal_encoding: String | Encoding | nil, ?encoding: String | Encoding | nil, ?textmode: boolish, ?binmode: boolish, ?autoclose: boolish, ?mode: String, ?unsetenv_others: boolish, ?pgroup: true | Integer, ?umask: Integer, ?in: Kernel::redirect_fd, ?out: Kernel::redirect_fd, ?err: Kernel::redirect_fd, ?close_others: boolish, ?chdir: String) { (instance) -> X } -> X
 
   # <!--
   #   rdoc-file=io.c
@@ -2636,8 +2636,8 @@ class IO < Object
   #
   # Returns an Enumerator if no block is given.
   #
-  def self.foreach: (string | _ToPath path, ?String sep, ?Integer limit, ?external_encoding: String external_encoding, ?internal_encoding: String internal_encoding, ?encoding: String encoding, ?textmode: boolish textmode, ?binmode: boolish binmode, ?autoclose: boolish autoclose, ?mode: String mode, ?chomp: boolish) { (String line) -> void } -> nil
-                  | (string | _ToPath path, ?String sep, ?Integer limit, ?external_encoding: String external_encoding, ?internal_encoding: String internal_encoding, ?encoding: String encoding, ?textmode: boolish textmode, ?binmode: boolish binmode, ?autoclose: boolish autoclose, ?mode: String mode, ?chomp: boolish) -> ::Enumerator[String, nil]
+  def self.foreach: (string | _ToPath path, ?String sep, ?Integer limit, ?external_encoding: String | Encoding | nil, ?internal_encoding: String | Encoding | nil, ?encoding: String | Encoding | nil, ?textmode: boolish, ?binmode: boolish, ?autoclose: boolish, ?mode: String, ?chomp: boolish) { (String line) -> void } -> nil
+                  | (string | _ToPath path, ?String sep, ?Integer limit, ?external_encoding: String | Encoding | nil, ?internal_encoding: String | Encoding | nil, ?encoding: String | Encoding | nil, ?textmode: boolish, ?binmode: boolish, ?autoclose: boolish, ?mode: String, ?chomp: boolish) -> ::Enumerator[String, nil]
 
   # <!--
   #   rdoc-file=io.c
@@ -2717,8 +2717,8 @@ class IO < Object
   #     Sending message to parent
   #     Parent got: <Hi Dad>
   #
-  def self.pipe: (?String | Encoding ext_or_ext_int_enc, ?String | Encoding int_enc, ?external_encoding: String external_encoding, ?internal_encoding: String internal_encoding, ?encoding: String encoding, ?textmode: boolish textmode, ?binmode: boolish binmode, ?autoclose: boolish autoclose, ?mode: String mode, ?chomp: boolish) -> [IO, IO]
-               | [X] (?String | Encoding ext_or_ext_int_enc, ?String | Encoding int_enc, ?external_encoding: String external_encoding, ?internal_encoding: String internal_encoding, ?encoding: String encoding, ?textmode: boolish textmode, ?binmode: boolish binmode, ?autoclose: boolish autoclose, ?mode: String mode, ?chomp: boolish) { (IO read_io, IO write_io) -> X } -> X
+  def self.pipe: (?String | Encoding | nil ext_or_ext_int_enc, ?String | Encoding | nil int_enc, ?external_encoding: String | Encoding | nil, ?internal_encoding: String | Encoding | nil, ?encoding: String | Encoding | nil, ?textmode: boolish, ?binmode: boolish, ?autoclose: boolish, ?mode: String, ?chomp: boolish) -> [IO, IO]
+               | [X] (?String | Encoding | nil ext_or_ext_int_enc, ?String | Encoding | nil int_enc, ?external_encoding: String | Encoding | nil, ?internal_encoding: String | Encoding | nil, ?encoding: String | Encoding | nil, ?textmode: boolish, ?binmode: boolish, ?autoclose: boolish, ?mode: String, ?chomp: boolish) { (IO read_io, IO write_io) -> X } -> X
 
   # <!--
   #   rdoc-file=io.c
@@ -2775,7 +2775,7 @@ class IO < Object
   # *   [Open Options](rdoc-ref:IO@Open+Options).
   # *   [Encoding options](rdoc-ref:encodings.rdoc@Encoding+Options).
   #
-  def self.read: (String name, ?Integer length, ?Integer offset, ?external_encoding: String external_encoding, ?internal_encoding: String internal_encoding, ?encoding: String encoding, ?textmode: boolish textmode, ?binmode: boolish binmode, ?autoclose: boolish autoclose, ?mode: String mode) -> String
+  def self.read: (String name, ?Integer length, ?Integer offset, ?external_encoding: String | Encoding | nil, ?internal_encoding: String | Encoding | nil, ?encoding: String | Encoding | nil, ?textmode: boolish, ?binmode: boolish, ?autoclose: boolish, ?mode: String) -> String
 
   # <!--
   #   rdoc-file=io.c
@@ -2846,7 +2846,7 @@ class IO < Object
   # *   [Encoding options](rdoc-ref:encodings.rdoc@Encoding+Options).
   # *   [Line Options](rdoc-ref:IO@Line+Options).
   #
-  def self.readlines: (String | _ToPath name, ?String sep, ?Integer limit, ?external_encoding: String external_encoding, ?internal_encoding: String internal_encoding, ?encoding: String encoding, ?textmode: boolish textmode, ?binmode: boolish binmode, ?autoclose: boolish autoclose, ?mode: String mode, ?chomp: boolish) -> ::Array[String]
+  def self.readlines: (String | _ToPath name, ?String sep, ?Integer limit, ?external_encoding: String | Encoding | nil, ?internal_encoding: String | Encoding | nil, ?encoding: String | Encoding | nil, ?textmode: boolish, ?binmode: boolish, ?autoclose: boolish, ?mode: String, ?chomp: boolish) -> ::Array[String]
 
   # <!--
   #   rdoc-file=io.c
@@ -3079,7 +3079,7 @@ class IO < Object
   # *   [Open Options](rdoc-ref:IO@Open+Options).
   # *   [Encoding options](rdoc-ref:encodings.rdoc@Encoding+Options).
   #
-  def self.write: (String path, _ToS data, ?Integer offset, ?external_encoding: String external_encoding, ?internal_encoding: String internal_encoding, ?encoding: String encoding, ?textmode: boolish textmode, ?binmode: boolish binmode, ?autoclose: boolish autoclose, ?mode: String mode) -> Integer
+  def self.write: (String path, _ToS data, ?Integer offset, ?external_encoding: String | Encoding | nil, ?internal_encoding: String | Encoding | nil, ?encoding: String | Encoding | nil, ?textmode: boolish, ?binmode: boolish, ?autoclose: boolish, ?mode: String) -> Integer
 
   # <!--
   #   rdoc-file=io.c
@@ -3101,8 +3101,8 @@ class IO < Object
   # With a block given, calls the block with the IO object and returns the block's
   # value.
   #
-  def self.open: (int fd, ?string | int mode, ?path: string?, ?external_encoding: String external_encoding, ?internal_encoding: String internal_encoding, ?encoding: String encoding, ?textmode: boolish textmode, ?binmode: boolish binmode, ?autoclose: boolish autoclose, ?mode: String mode) -> instance
-               | [X] (int fd, ?string | int mode, ?path: string?, ?external_encoding: String external_encoding, ?internal_encoding: String internal_encoding, ?encoding: String encoding, ?textmode: boolish textmode, ?binmode: boolish binmode, ?autoclose: boolish autoclose, ?mode: String mode) { (instance) -> X } -> X
+  def self.open: (int fd, ?string | int mode, ?path: string?, ?external_encoding: String | Encoding | nil, ?internal_encoding: String | Encoding | nil, ?encoding: String | Encoding | nil, ?textmode: boolish, ?binmode: boolish, ?autoclose: boolish, ?mode: String) -> instance
+               | [X] (int fd, ?string | int mode, ?path: string?, ?external_encoding: String | Encoding | nil, ?internal_encoding: String | Encoding | nil, ?encoding: String | Encoding | nil, ?textmode: boolish, ?binmode: boolish, ?autoclose: boolish, ?mode: String) { (instance) -> X } -> X
 
   # <!-- rdoc-file=io.c -->
   # Calls the block with each remaining line read from the stream; returns `self`.
