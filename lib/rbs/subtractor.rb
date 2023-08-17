@@ -51,6 +51,7 @@ module RBS
       context = _ = [context, decl.name]
       children = call(decl.each_decl.to_a, context: context) +
         decl.each_member.reject { |m| member_exist?(owner, m, context: context) }
+      children = filter_redundunt_access_modifiers(children)
       return nil if children.empty?
 
       update_decl(decl, members: children)
@@ -142,6 +143,22 @@ module RBS
           candidates.include?(m.name)
         end
       end
+    end
+
+    private def filter_redundunt_access_modifiers(decls)
+      decls = decls.dup
+      decls.pop while access_modifier?(decls.last)
+      decls = decls.map.with_index do |decl, i|
+        if access_modifier?(decl) && access_modifier?(decls[i + 1])
+          nil
+        else
+          decl
+        end
+      end.compact
+    end
+
+    private def access_modifier?(decl)
+      decl.is_a?(AST::Members::Public) || decl.is_a?(AST::Members::Private)
     end
 
     private def update_decl(decl, members:)
