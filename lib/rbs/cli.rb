@@ -1248,7 +1248,11 @@ EOB
           w.write(subtracted)
 
           if write_to_file
-            rbs_path.write(io.string)
+            if io.string.empty?
+              rbs_path.delete
+            else
+              rbs_path.write(io.string)
+            end
           else
             stdout.puts(io.string)
           end
