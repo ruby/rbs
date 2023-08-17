@@ -972,6 +972,30 @@ class Thread < Object
   def self.handle_interrupt: (untyped hash) -> untyped
 
   # <!--
+  # rdoc-file=thread.c
+  #    thr.raise
+  #    thr.raise(string)
+  #    thr.raise(exception [, string [, array]])
+  # -->
+  # Raises an exception from the given thread. The caller does not have to be
+  # +thr+. See Kernel#raise for more information.
+  #
+  #    Thread.abort_on_exception = true
+  #    a = Thread.new { sleep(200) }
+  #    a.raise("Gotcha")
+  #
+  # This will produce:
+  #
+  #    prog.rb:3: Gotcha (RuntimeError)
+  #     from prog.rb:2:in `initialize'
+  #     from prog.rb:2:in `new'
+  #     from prog.rb:2
+  #
+  def self?.raise: () -> bot
+                 | (String message, ?cause: Exception?) -> bot
+                 | (_Exception exception, ?untyped message, ?::Array[String] backtrace, ?cause: Exception?) -> bot
+
+  # <!--
   #   rdoc-file=thread.c
   #   - Thread.kill(thread)   -> thread
   # -->
