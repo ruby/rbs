@@ -50,4 +50,13 @@ class StringIOTypeTest < Test::Unit::TestCase
     assert_send_type "(*String data) -> Integer",
                      io, :write, "a", "b"
   end
+
+  def test_truncate
+    io = StringIO.new
+
+    assert_send_type(
+      "(Integer) -> 0",
+      io, :truncate, 10
+    )
+  end
 end
