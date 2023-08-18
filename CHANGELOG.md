@@ -2,6 +2,42 @@
 
 ## master
 
+## 3.1.3 (2023-07-31)
+
+### Library changes
+
+#### rbs collection
+
+* Generate gem specific sources in lockfile (Backport [#1402](https://github.com/ruby/rbs/pull/1402))
+
+## 3.1.2 (2023-07-27)
+
+⚠️ Note that this patch level release may report additional validation errors that is caused by fix of type name resolution ([#1373](https://github.com/ruby/rbs/pull/1373)).
+
+### Library changes
+
+* Make `TypeNameResolver` more compatible with Ruby (Backport [#1373](https://github.com/ruby/rbs/pull/1373))
+* Fix module alias normalizations (Backport [#1393](https://github.com/ruby/rbs/pull/1393))
+
+## 3.1.1 (2023-07-18)
+
+### Signature updates
+
+* Removed `GC.verify_transient_heap_internal_consistency` (Backport [#1374](https://github.com/ruby/rbs/pull/1374))
+
+### Library changes
+
+* Relax rdoc version requirement in RDoc plugin (Backport [#1333](https://github.com/ruby/rbs/pull/1333))
+
+#### rbs collection
+
+* Spec may be missing when rbs_collection.yaml declares dependency (Backport [#1378](https://github.com/ruby/rbs/pull/1378))
+
+### Miscellaneous
+
+* Handle connection error with Resolv_test.rb (Backport [#1356](https://github.com/ruby/rbs/pull/1356))
+* Fix broken CI (Backport [#1353](https://github.com/ruby/rbs/pull/1353))
+
 ## 3.1.0 (2023-04-26)
 
 ### Signature updates
