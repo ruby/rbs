@@ -446,7 +446,11 @@ module Kernel : BasicObject
   #
   # See String#to_c.
   #
-  def self?.Complex: (Numeric | String x, ?Numeric | String y, ?exception: bool exception) -> Complex
+  def self?.Complex: (_ToC x, exception: false) -> Complex?
+                   | (_ToC x, ?exception: bool) -> Complex
+                   | (Numeric | String real, ?Numeric | String imag, exception: false) -> Complex?
+                   | (Numeric | String real, ?Numeric | String imag, ?exception: bool) -> Complex
+                   | (untyped, ?untyped, exception: false) -> nil
 
   # <!--
   #   rdoc-file=kernel.rb
