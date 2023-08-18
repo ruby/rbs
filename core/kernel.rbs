@@ -383,7 +383,7 @@ module Kernel : BasicObject
   # 4. Therefore you should use spawn() instead of fork().
   #
   def self?.fork: () -> Integer?
-                | () { () -> untyped } -> Integer?
+                | () { () -> void } -> Integer
 
   def initialize_copy: (self object) -> self
 
