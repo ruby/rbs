@@ -614,7 +614,15 @@ module Kernel : BasicObject
   #
   # See also String#to_r.
   #
-  def self?.Rational: (Numeric | String | Object x, ?Numeric | String y, ?exception: bool exception) -> Rational
+  def self?.Rational: (_ToInt | _ToR numer, ?_ToInt | _ToR denom, exception: false) -> Rational?
+                    | (_ToInt | _ToR numer, ?_ToInt | _ToR denom, ?exception: bool) -> Rational
+                    | [T] (Numeric&_RationalDiv[T] numer, Numeric denom, ?exception: bool) -> T
+                    | [T < Numeric] (T value, 1, ?exception: bool) -> T
+                    | (untyped, ?untyped, exception: false) -> nil
+  interface _RationalDiv[T]
+    def /: (Numeric) -> T
+  end
+  #: (Numeric | String | Object x, ?Numeric | String y, ?exception: bool exception) -> Rational
 
   # <!--
   #   rdoc-file=object.c
