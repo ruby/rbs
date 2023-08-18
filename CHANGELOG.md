@@ -2,6 +2,74 @@
 
 ## master
 
+## 3.2.0.pre.1 (2023-08-18)
+
+### Signature updates
+
+* observable ([#1424](https://github.com/ruby/rbs/pull/1424))
+* uri ([#1371](https://github.com/ruby/rbs/pull/1371))
+* zlib ([#1389](https://github.com/ruby/rbs/pull/1389))
+* `IO` ([#1399](https://github.com/ruby/rbs/pull/1399))
+* `::DATA` ([#1395](https://github.com/ruby/rbs/pull/1395))
+* `$DEBUG` ([#1427](https://github.com/ruby/rbs/pull/1427))
+* `ConditionVariable#wait` ([#1397](https://github.com/ruby/rbs/pull/1397))
+* `Kernel::exit!` ([#1396](https://github.com/ruby/rbs/pull/1396))
+* `Kernel#exec` ([#1368](https://github.com/ruby/rbs/pull/1368))
+* `Kernel#p`, `Kernel#pp` ([#1342](https://github.com/ruby/rbs/pull/1342))
+* `Logger.new` ([#1423](https://github.com/ruby/rbs/pull/1423))
+* `Module` ([#1321](https://github.com/ruby/rbs/pull/1321))
+* `Object#define_singleton_method` ([#1431](https://github.com/ruby/rbs/pull/1431))
+* `Object#enum_for` ([#1327](https://github.com/ruby/rbs/pull/1327))
+* `StringIO#truncate` ([#1425](https://github.com/ruby/rbs/pull/1425))
+* `Thread#raise` ([#1426](https://github.com/ruby/rbs/pull/1426))
+* `Time#round`, `Time#floor`, `Time#ceil` ([#1337](https://github.com/ruby/rbs/pull/1337))
+* Remove `TRUE`, `FALSE`, and `NIL` constants ([#1432](https://github.com/ruby/rbs/pull/1432))
+* Updated builtin.rbs's interfaces ([#1429](https://github.com/ruby/rbs/pull/1429))
+* Convert `| nil` to `?` in global_variables.rbs ([#1430](https://github.com/ruby/rbs/pull/1430))
+* Remove references to the transient heap ([#1374](https://github.com/ruby/rbs/pull/1374))
+
+### Library changes
+
+* subtract: Remove RBS file if the subtracted definition is empty ([#1385](https://github.com/ruby/rbs/pull/1385))
+* subtract: Filter redundant access modifiers ([#1384](https://github.com/ruby/rbs/pull/1384))
+* Fix module alias normalizations ([#1393](https://github.com/ruby/rbs/pull/1393))
+* Reduce memory allocation on TypeName#initialize ([#1363](https://github.com/ruby/rbs/pull/1363))
+* Fix a type error in FileFinder ([#1326](https://github.com/ruby/rbs/pull/1326))
+* Add signatures about DetailedMessage ([#1323](https://github.com/ruby/rbs/pull/1323))
+* Make TypeNameResolver more compatible with Ruby ([#1373](https://github.com/ruby/rbs/pull/1373))
+* Drop support of Ruby 2.x ([#1364](https://github.com/ruby/rbs/pull/1364))
+* Print detailed_message on parse command ([#1329](https://github.com/ruby/rbs/pull/1329))
+* Relax rdoc version requirement ([#1333](https://github.com/ruby/rbs/pull/1333))
+* Support keyword argument to #detailed_message ([#1328](https://github.com/ruby/rbs/pull/1328))
+
+#### rbs prototype
+
+* Avoid to generate anonymous or internal module ([#1421](https://github.com/ruby/rbs/pull/1421))
+* Fix type name for prototype rbi ([#1386](https://github.com/ruby/rbs/pull/1386))
+* Support type params for known signatures ([#1408](https://github.com/ruby/rbs/pull/1408))
+* Super class should be absolute paths. ([#1415](https://github.com/ruby/rbs/pull/1415))
+* prototype rb: Fix a crash by "include foo" ([#1419](https://github.com/ruby/rbs/pull/1419))
+* Add `--outline` option to `prototype runtime` to skip generating method definition ([#1404](https://github.com/ruby/rbs/pull/1404))
+* [rbs prototype] Follow up ivar/cvar feature ([#1361](https://github.com/ruby/rbs/pull/1361))
+* prototype rb: Extract instance variables and class variables ([#1343](https://github.com/ruby/rbs/pull/1343))
+
+#### rbs collection
+
+* Print warning when specified gem not found ([#1367](https://github.com/ruby/rbs/pull/1367))
+* Generate gem specific sources in lockfile ([#1402](https://github.com/ruby/rbs/pull/1402))
+* Spec may be missing when `rbs_collection.yaml` declares dependency ([#1378](https://github.com/ruby/rbs/pull/1378))
+
+### Miscellaneous
+
+* Remove ruby-lsp && bundle update --bundler ([#1420](https://github.com/ruby/rbs/pull/1420))
+* Delete all remaining set-related descriptions. ([#1324](https://github.com/ruby/rbs/pull/1324))
+* Add customized test runner to accept minitest options ([#1392](https://github.com/ruby/rbs/pull/1392))
+* Specify `rbs` syntax to code snippets in Markdown files ([#1366](https://github.com/ruby/rbs/pull/1366))
+* Fix typo in parser.rbs ([#1352](https://github.com/ruby/rbs/pull/1352))
+* Fix broken CI ([#1353](https://github.com/ruby/rbs/pull/1353))
+* Handle connection error with Resolv_test.rb ([#1356](https://github.com/ruby/rbs/pull/1356))
+* Removed Prime signature and tests ([#1355](https://github.com/ruby/rbs/pull/1355))
+
 ## 3.1.3 (2023-07-31)
 
 ### Library changes
