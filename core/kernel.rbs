@@ -488,7 +488,7 @@ module Kernel : BasicObject
   #     Hash(nil)              # => {}
   #     Hash([])               # => {}
   #
-  def self?.Hash: [K, V] (Object x) -> ::Hash[K, V]
+  def self?.Hash: [K, V] (nil | [] | _ToHash[K, V])  -> Hash[K, V]
 
   # <!--
   #   rdoc-file=object.c
