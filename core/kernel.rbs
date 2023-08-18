@@ -358,7 +358,7 @@ module Kernel : BasicObject
   #     srand 1234               # => 1234
   #     [ rand, rand ]           # => [0.1915194503788923, 0.6221087710398319]
   #
-  def self?.srand: (?Numeric number) -> Numeric
+  def self?.srand: (?int number) -> Integer
 
   # <!--
   #   rdoc-file=process.c
