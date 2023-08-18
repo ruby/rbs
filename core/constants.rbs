@@ -29,10 +29,6 @@
 #
 ::DATA: File
 
-::FALSE: FalseClass
-
-::NIL: NilClass
-
 # <!-- rdoc-file=version.c -->
 # The copyright string for ruby
 #
@@ -98,5 +94,3 @@
 # The Binding of the top level scope
 #
 ::TOPLEVEL_BINDING: Binding
-
-::TRUE: TrueClass
