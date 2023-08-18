@@ -464,7 +464,9 @@ module Kernel : BasicObject
   #     Float(nil)               #=> TypeError: can't convert nil into Float
   #     Float("123.0_badstring", exception: false)  #=> nil
   #
-  def self?.Float: (Numeric | String x, ?exception: bool exception) -> Float
+  def self?.Float: (_ToF arg, exception: false) -> Float?
+                 | (_ToF arg, ?exception: bool) -> Float
+                 | (untyped, exception: false) -> nil
 
   # <!--
   #   rdoc-file=object.c
