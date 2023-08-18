@@ -622,7 +622,6 @@ module Kernel : BasicObject
   interface _RationalDiv[T]
     def /: (Numeric) -> T
   end
-  #: (Numeric | String | Object x, ?Numeric | String y, ?exception: bool exception) -> Rational
 
   # <!--
   #   rdoc-file=object.c
