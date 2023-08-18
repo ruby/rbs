@@ -630,7 +630,7 @@ module Kernel : BasicObject
   #
   # Raises `TypeError` if `object` cannot be converted to a string.
   #
-  def self?.String: (_ToStr | _ToS x) -> String
+  def self?.String: (string | _ToS object) -> String
 
   # <!--
   #   rdoc-file=eval.c
