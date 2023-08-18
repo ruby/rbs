@@ -205,7 +205,7 @@ class Object < BasicObject
   #     chris.define_singleton_method(:greet) {|greeting| "#{greeting}, I'm Chris!" }
   #     chris.greet("Hi") #=> "Hi, I'm Chris!"
   #
-  def define_singleton_method: (name, Method | UnboundMethod) -> Symbol
+  def define_singleton_method: (name, Method | UnboundMethod | Proc method) -> Symbol
                              | (name) { (*untyped) -> untyped } -> Symbol
 
   # <!--
