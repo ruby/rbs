@@ -1,3 +1,15 @@
+interface _ToC
+  def to_c: () -> Complex
+end
+
+interface _ToR
+  def to_r: () -> Rational
+end
+
+interface _ToF
+  def to_f: () -> Float
+end
+
 interface _ToI
   def to_i: () -> Integer
 end
@@ -6,24 +18,28 @@ interface _ToInt
   def to_int: () -> Integer
 end
 
-interface _ToR
-  def to_r: () -> Rational
-end
-
 interface _ToS
   def to_s: () -> String
-end
-
-interface _ToF
-  def to_f: () -> Float
 end
 
 interface _ToStr
   def to_str: () -> String
 end
 
+interface _ToH[K, V]
+  def to_h: () -> Hash[K, V]
+end
+
 interface _ToHash[K, V]
   def to_hash: () -> Hash[K, V]
+end
+
+interface _ToA[T]
+  def to_a: () -> Array[T]
+end
+
+interface _ToAry[T]
+  def to_ary: () -> Array[T]
 end
 
 interface _ToProc
