@@ -726,8 +726,8 @@ class Module < Object
   #     I'm Dino!
   #     #<B:0x401b39e8>
   #
-  def define_method: (id arg0, ?Proc | Method | UnboundMethod arg1) -> Symbol
-                   | (id arg0) { () -> untyped } -> Symbol
+  def define_method: (id symbol, Proc | Method | UnboundMethod method) -> Symbol
+                   | (id symbol) { () -> untyped } -> Symbol
 
   # <!--
   #   rdoc-file=object.c
