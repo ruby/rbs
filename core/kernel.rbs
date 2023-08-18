@@ -403,12 +403,11 @@ module Kernel : BasicObject
   #
   #     Array(:foo)             # => [:foo]
   #
-  def self?.Array: (NilClass x) -> [ ]
+  def self?.Array: (nil) -> []
                  | [T] (::Array[T] x) -> ::Array[T]
-                 | [T] (::Range[T] x) -> ::Array[T]
-                 | [T] (_Each[T] x) -> ::Array[T]
-                 | [K, V] (::Hash[K, V] x) -> ::Array[[ K, V ]]
-                 | [T] (T x) -> ::Array[T]
+                 | [T] (::_ToAry[T] x) -> ::Array[T]
+                 | [T] (::_ToA[T] x) -> ::Array[T]
+                 | [T] (T x) -> [T]
 
   # <!--
   #   rdoc-file=complex.c
