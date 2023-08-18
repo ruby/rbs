@@ -45,7 +45,7 @@ $-a: bool
 # backtrace).  Setting this to a true value enables debug output as
 # if <tt>-d</tt> were given on the command line.  Setting this to a false
 # value disables debug output.
-$-d: bool
+$-d: boolish
 
 # In in-place-edit mode, this variable holds the extension, otherwise +nil+.
 $-i: String?
@@ -134,7 +134,7 @@ $@: Array[String] | nil
 # backtrace).  Setting this to a true value enables debug output as
 # if <tt>-d</tt> were given on the command line.  Setting this to a false
 # value disables debug output. Aliased to $-d.
-$DEBUG: bool
+$DEBUG: boolish
 
 # Current input filename from ARGF. Same as ARGF.filename.
 $FILENAME: String
