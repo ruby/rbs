@@ -574,9 +574,11 @@ module Kernel : BasicObject
   # With `exception` given as `false`, an exception of any kind is suppressed and
   # `nil` is returned.
   #
-  def self?.Integer: (Numeric | String arg, ?exception: bool exception) -> Integer
-                   | (String arg, ?Integer base, ?exception: bool exception) -> Integer
-
+  def self?.Integer: (string | int | _ToI arg, exception: false) -> Integer?
+                   | (string | int | _ToI arg, ?exception: bool) -> Integer
+                   | (string str, int base, exception: false) -> Integer?
+                   | (string str, int base, ?exception: bool) -> Integer
+                   | (untyped, ?untyped, exception: false) -> nil
   # <!--
   #   rdoc-file=rational.c
   #   - Rational(x, y, exception: true)  ->  rational or nil
