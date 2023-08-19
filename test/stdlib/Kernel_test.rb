@@ -492,8 +492,10 @@ class KernelTest < StdlibTest
   end
 
   def test_print
+    print
     print 1
     print 'a', 2
+    print ToS.new
   end
 
   def test_printf
@@ -501,11 +503,13 @@ class KernelTest < StdlibTest
       printf io, 'a'
       printf io, '%d', 2
     end
-    # TODO
-    #   printf 's'
-    #   printf '%d', 2
-    #   printf '%d%s', 2, 1
-    #   printf
+
+    printf
+    printf "123"
+    printf "%s%d%f", "A", 2, 3.0
+
+    def (writer = Object.new).write(*) end
+    printf writer, ToStr.new("%s%d"), '1', 2
   end
 
   def test_proc
@@ -519,16 +523,32 @@ class KernelTest < StdlibTest
   def test_putc
     putc 1
     putc 'a'
+    putc ToInt.new
   end
 
   def test_puts
-    puts 1
-    puts Object.new
+    puts
+    puts 1, nil, false, "yes!", ToS.new
   end
 
   def test_p
+    p
     p 1
     p 'a', 2
+
+    def (obj = BasicObject.new).inspect
+      "foo"
+    end
+
+    p obj
+  end
+
+  def test_pp
+    pp
+    pp 1
+    pp 'a', 2 
+
+    pp Object.new
   end
 
   def test_rand
@@ -590,10 +610,13 @@ class KernelTest < StdlibTest
     warn 'foo'
     warn 'foo', 'bar'
     warn 'foo', uplevel: 1
+    warn ToS.new, uplevel: ToInt.new
+    warn ToS.new, uplevel: nil
 
     omit_if(RUBY_VERSION < "3.0")
 
     warn 'foo', uplevel: 1, category: :deprecated
+    warn 'foo', uplevel: 1, category: nil
   end
 
   def test_exec
