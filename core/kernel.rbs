@@ -383,7 +383,7 @@ module Kernel : BasicObject
   # 4. Therefore you should use spawn() instead of fork().
   #
   def self?.fork: () -> Integer?
-                | () { () -> untyped } -> Integer?
+                | () { () -> void } -> Integer
 
   def initialize_copy: (self object) -> self
 
@@ -691,7 +691,7 @@ module Kernel : BasicObject
   # Terminate execution immediately, effectively by calling `Kernel.exit(false)`.
   # If *msg* is given, it is written to STDERR prior to terminating.
   #
-  def self?.abort: (?String msg) -> bot
+  def self?.abort: (?string msg) -> bot
 
   # <!--
   #   rdoc-file=eval_jump.c
@@ -712,7 +712,7 @@ module Kernel : BasicObject
   #
   #     goodbye cruel world
   #
-  def self?.at_exit: () { () -> untyped } -> Proc
+  def self?.at_exit: () { () -> void } -> Proc
 
   # <!--
   #   rdoc-file=load.c
@@ -795,8 +795,7 @@ module Kernel : BasicObject
   #     at_exit function
   #     in finalizer
   #
-  def self?.exit: () -> bot
-                | (?Integer | TrueClass | FalseClass status) -> bot
+  def self?.exit: (?int | bool status) -> bot
 
   # <!--
   #   rdoc-file=process.c
@@ -807,7 +806,7 @@ module Kernel : BasicObject
   #
   #     Process.exit!(true)
   #
-  def self?.exit!: (?Integer | TrueClass | FalseClass status) -> bot
+  def self?.exit!: (?int | bool status) -> bot
 
   # <!-- rdoc-file=eval.c -->
   # With no arguments, raises the exception in `$!` or raises a RuntimeError if
@@ -828,8 +827,8 @@ module Kernel : BasicObject
   #     raise ArgumentError, "No parameters", caller
   #
   def self?.fail: () -> bot
-                | (String message, ?cause: Exception?) -> bot
-                | (_Exception exception, ?untyped message, ?::Array[String] backtrace, ?cause: Exception?) -> bot
+                | (string message, ?cause: Exception?) -> bot
+                | (_Exception exception, ?_ToS? message, ?nil | String | Array[String] backtrace, ?cause: Exception?) -> bot
 
   # <!--
   #   rdoc-file=eval.c
@@ -988,7 +987,7 @@ module Kernel : BasicObject
   #       puts enum.next
   #     } #=> :ok
   #
-  def self?.loop: () { (nil) -> untyped } -> bot
+  def self?.loop: () { () -> void } -> bot
                 | () -> ::Enumerator[nil, bot]
 
   # <!--
@@ -1550,7 +1549,7 @@ module Kernel : BasicObject
   #     sleep 1.9   #=> 2
   #     Time.new    #=> 2008-03-08 19:56:22 +0900
   #
-  def self?.sleep: () -> bot
+  def self?.sleep: (?nil) -> bot
                  | ((Integer | Float | _Divmod) duration) -> Integer
 
   interface _Divmod
@@ -1650,7 +1649,7 @@ module Kernel : BasicObject
   # optional second parameter supplies a return value for the `catch` block, which
   # otherwise defaults to `nil`. For examples, see Kernel::catch.
   #
-  def self?.throw: (Object tag, ?untyped obj) -> bot
+  def self?.throw: (untyped tag, ?untyped obj) -> bot
 
   # <!--
   #   rdoc-file=warning.rb
