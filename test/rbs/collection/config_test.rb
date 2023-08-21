@@ -885,6 +885,54 @@ class RBS::Collection::ConfigTest < Test::Unit::TestCase
     end
   end
 
+  def test_generate_lockfile_from_mismatched_lockfiles
+    mktmpdir do |tmpdir|
+      config_path = tmpdir / 'rbs_collection.yaml'
+      config_path.write CONFIG
+      gemfile_path = tmpdir / 'Gemfile'
+      gemfile_path.write GEMFILE
+      gemfile_lock_path = tmpdir / 'Gemfile.lock'
+      gemfile_lock_path.write GEMFILE_LOCK
+
+      # Version mismatched rbs_collection.lock.yaml (Gemfile.lock expects rainbow-3.0.0, but this expects 2.0)
+      lockfile_yaml = <<~YAML
+        sources:
+          - type: git
+            name: ruby/gem_rbs_collection
+            remote: https://github.com/ruby/gem_rbs_collection.git
+            revision: cde6057e7546843ace6420c5783dd945c6ccda54
+            repo_dir: gems
+        path: "/path/to/somewhere"
+        gemfile_lock_path: 'Gemfile.lock'
+        gems:
+          - name: ast
+            version: "2.4"
+            source:
+              name: ruby/gem_rbs_collection
+              remote: https://github.com/ruby/gem_rbs_collection.git
+              revision: cde6057e7546843ace6420c5783dd945c6ccda54
+              repo_dir: gems
+              type: git
+          - name: rainbow
+            version: "2.0"
+            source:
+              name: ruby/gem_rbs_collection
+              remote: https://github.com/ruby/gem_rbs_collection.git
+              revision: cde6057e7546843ace6420c5783dd945c6ccda54
+              repo_dir: gems
+              type: git
+      YAML
+      tmpdir.join('rbs_collection.lock.yaml').write lockfile_yaml
+
+      definition = Bundler::Definition.build(gemfile_path, gemfile_lock_path, false)
+
+      _config, lockfile = RBS::Collection::Config.generate_lockfile(config_path: config_path, definition: definition)
+      string = YAML.dump(lockfile.to_lockfile)
+
+      assert_config lockfile_yaml, string
+    end
+  end
+
   private def assert_config(expected_str, actual_str)
     assert_equal YAML.load(expected_str), YAML.load(actual_str)
   end
