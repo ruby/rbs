@@ -314,7 +314,7 @@ end
 
 desc "Generate changelog template from GH pull requests"
 task :changelog do
-  major, minor, patch, pre = RBS::VERSION.split(".", 4)
+  major, minor, patch, _pre = RBS::VERSION.split(".", 4)
   major = major.to_i
   minor = minor.to_i
   patch = patch.to_i
