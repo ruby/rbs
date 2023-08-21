@@ -3,7 +3,6 @@ require_relative "test_helper"
 class Thread::Backtrace::LocationTest < Test::Unit::TestCase
   include TypeAssertions
 
-  # library "pathname", "set", "securerandom"     # Declare library signatures to load
   testing "::Thread::Backtrace::Location"
 
   def test_absolute_path

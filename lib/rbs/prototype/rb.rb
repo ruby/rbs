@@ -461,7 +461,7 @@ module RBS
           when :SELF
             context.namespace.to_type_name
           when :CONST, :COLON2, :COLON3
-            const_to_name!(node)
+            const_to_name!(node) rescue nil
           end
         end
       end

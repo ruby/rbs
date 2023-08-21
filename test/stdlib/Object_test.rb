@@ -206,3 +206,41 @@ class ObjectTest < StdlibTest
     Object.new.to_s
   end
 end
+
+
+class ObjectInstanceTest < Test::Unit::TestCase
+  include TypeAssertions
+
+  testing "::Object"
+
+  def test_define_singleton_method
+    obj = Object.new
+
+    assert_send_type(
+      "(::Symbol) { () -> void } -> Symbol",
+      obj, :define_singleton_method,
+      :foo
+    ) do end
+
+    assert_send_type(
+      "(::Symbol, ::Proc) -> Symbol",
+      obj, :define_singleton_method,
+      :bar,
+      -> {}
+    )
+
+    assert_send_type(
+      "(::Symbol, ::Method) -> Symbol",
+      obj, :define_singleton_method,
+      :bar,
+      obj.method(:to_s)
+    )
+
+    assert_send_type(
+      "(::Symbol, ::UnboundMethod) -> Symbol",
+      obj, :define_singleton_method,
+      :bar,
+      Object.instance_method(:to_s)
+    )
+  end
+end

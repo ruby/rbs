@@ -72,12 +72,12 @@ end
   def test_loading_stdlib
     mktmpdir do |path|
       loader = EnvironmentLoader.new
-      loader.add(library: "set")
+      loader.add(library: "uri")
 
       env = Environment.new
       loader.load(env: env)
 
-      assert_operator env.class_decls, :key?, TypeName("::Set")
+      assert_operator env.class_decls, :key?, TypeName("::URI")
     end
   end
 

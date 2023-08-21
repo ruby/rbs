@@ -807,7 +807,7 @@ module Kernel : BasicObject
   #
   #     Process.exit!(true)
   #
-  def self?.exit!: (Integer | TrueClass | FalseClass status) -> bot
+  def self?.exit!: (?Integer | TrueClass | FalseClass status) -> bot
 
   # <!-- rdoc-file=eval.c -->
   # With no arguments, raises the exception in `$!` or raises a RuntimeError if

@@ -4,7 +4,6 @@ require_relative "test_helper"
 class Encoding::InvalidByteSequenceErrorTest < Test::Unit::TestCase
   include TypeAssertions
 
-  # library "pathname", "set", "securerandom"     # Declare library signatures to load
   testing "::Encoding::InvalidByteSequenceError"
 
   def test_destination_encoding
