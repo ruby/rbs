@@ -2,6 +2,20 @@
 
 ## master
 
+## 3.2.0 (2023-08-22)
+
+### Signature updates
+
+* `Binding` ([#1451](https://github.com/ruby/rbs/pull/1451))
+* `Kernel` ([#1445](https://github.com/ruby/rbs/pull/1445), [#1444](https://github.com/ruby/rbs/pull/1444), [#1443](https://github.com/ruby/rbs/pull/1443), [#1441](https://github.com/ruby/rbs/pull/1441), [#1440](https://github.com/ruby/rbs/pull/1440))
+* `Errno` ([#1450](https://github.com/ruby/rbs/pull/1450))
+
+### Library changes
+
+#### rbs collection
+
+* Fix LockfileGenerator crashes if failed to get deps for locked source ([#1413](https://github.com/ruby/rbs/pull/1413))
+
 ## 3.2.0.pre.1 (2023-08-18)
 
 ### Signature updates
