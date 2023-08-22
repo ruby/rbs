@@ -300,7 +300,7 @@ module Kernel : BasicObject
   #     eval "str + ' Fred'"                      #=> "hello Fred"
   #     eval "str + ' Fred'", get_binding("bye")  #=> "bye Fred"
   #
-  def self?.eval: (String arg0, ?Binding arg1, ?String filename, ?Integer lineno) -> untyped
+  def self?.eval: (string src, ?Binding? scope, ?string filename, ?int lineno) -> untyped
 
   # <!--
   #   rdoc-file=vm_eval.c
