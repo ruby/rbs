@@ -356,6 +356,11 @@ class KernelTest < StdlibTest
       abort 'foo'
     rescue SystemExit
     end
+
+    begin
+      abort ToStr.new
+    rescue SystemExit
+    end
   end
 
   def test_at_exit
@@ -388,6 +393,11 @@ class KernelTest < StdlibTest
     end
 
     begin
+      exit ToInt.new
+    rescue SystemExit
+    end
+
+    begin
       exit true
     rescue SystemExit
     end
@@ -413,6 +423,16 @@ class KernelTest < StdlibTest
     rescue RuntimeError
     end
 
+    begin
+      fail 'error', cause: nil
+    rescue RuntimeError
+    end
+
+    begin
+      fail 'error', cause: RuntimeError.new("oops!")
+    rescue RuntimeError
+    end
+
     test_error = Class.new(StandardError)
     begin
       fail test_error
@@ -425,7 +445,27 @@ class KernelTest < StdlibTest
     end
 
     begin
-      fail test_error, 'a', ['1.rb, 2.rb']
+      fail test_error, ToS.new, ['1.rb, 2.rb']
+    rescue test_error
+    end
+
+    begin
+      fail test_error, 'b', '1.rb'
+    rescue test_error
+    end
+
+    begin
+      fail test_error, 'b', nil
+    rescue test_error
+    end
+
+    begin
+      fail test_error, 'b', cause: RuntimeError.new("?")
+    rescue test_error
+    end
+
+    begin
+      fail test_error, 'b', cause: nil
     rescue test_error
     end
 
@@ -588,6 +628,9 @@ class KernelTest < StdlibTest
       [0.001, 0.001]
     end
     sleep o
+
+    omit_if(RUBY_VERSION < "3.3.0")
+    sleep nil
   end
 
   def test_syscall
