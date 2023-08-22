@@ -99,6 +99,7 @@ type real = Integer | Float | Rational
 
 type string = String | _ToStr
 type encoding = Encoding | string
+type path = string | _ToPath
 
 type io = IO | _ToIO
 

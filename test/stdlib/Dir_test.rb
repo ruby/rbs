@@ -24,10 +24,6 @@ class DirSingletonTest < Test::Unit::TestCase
                      Dir, :[], "*/*"
     assert_send_type "(::ToStr) -> ::Array[::String]",
                      Dir, :[], ToStr.new("*/*")
-    assert_send_type "(::String) { (::String) -> void } -> Array[String]",
-                     Dir, :[], "*/*" do end
-    assert_send_type "(::String, ::String, base: ::String) -> ::Array[::String]",
-                     Dir, :[], "*/*", "*", base: __dir__
   end
 
   def test_chdir
