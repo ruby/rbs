@@ -1137,7 +1137,7 @@ module Kernel : BasicObject
   #     gets  # Sets $_ to the most recent user input.
   #     print # Prints $_.
   #
-  def self?.print: (*Kernel args) -> nil
+  def self?.print: (*_ToS args) -> nil
 
   # <!--
   #   rdoc-file=io.c
@@ -1171,9 +1171,9 @@ module Kernel : BasicObject
   #
   # With no arguments, does nothing.
   #
-  def self?.printf: (IO arg0, String arg1, *untyped args) -> nil
-                  | (String arg1, *untyped args) -> nil
-                  | () -> nil
+  def self?.printf: () -> nil
+                  | (String fmt, *untyped args) -> nil
+                  | (_Writer io, string fmt, *untyped args) -> nil
 
   # <!--
   #   rdoc-file=proc.c
@@ -1202,8 +1202,8 @@ module Kernel : BasicObject
   #
   # See IO#putc for important information regarding multi-byte characters.
   #
-  def self?.putc: (Integer arg0) -> Integer
-                | (String arg0) -> String
+  def self?.putc: [T < _ToInt] (T chr) -> T
+                | (String chr) -> String
 
   # <!--
   #   rdoc-file=io.c
@@ -1213,7 +1213,7 @@ module Kernel : BasicObject
   #
   #     $stdout.puts(objects)
   #
-  def self?.puts: (*untyped arg0) -> NilClass
+  def self?.puts: (*_ToS objects) -> nil
 
   # <!--
   #   rdoc-file=io.c
@@ -1240,8 +1240,8 @@ module Kernel : BasicObject
   #     0..4
   #     [0..4, 0..4, 0..4]
   #
-  def self?.p: [T] (T arg0) -> T
-             | (untyped, untyped, *untyped) -> Array[untyped]
+  def self?.p: [T < _Inspect] (T arg0) -> T
+             | (_Inspect arg0, _Inspect arg1, *_Inspect rest) -> Array[_Inspect]
              | () -> nil
 
   # <!--
@@ -1697,7 +1697,7 @@ module Kernel : BasicObject
   # :experimental
   # :   Used for experimental features that may change in future releases.
   #
-  def self?.warn: (*untyped msg, ?uplevel: Integer | nil, ?category: :deprecated | :experimental | nil) -> NilClass
+  def self?.warn: (*_ToS msg, ?uplevel: int?, ?category: Warning::category?) -> nil
 
   # <!--
   #   rdoc-file=process.c
