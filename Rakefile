@@ -82,7 +82,7 @@ FileList["test/stdlib/**/*_test.rb"].each do |test|
   end
 end
 
-task :stdlib_test do
+task :stdlib_test => :compile do
   test_files = FileList["test/stdlib/**/*_test.rb"].reject do |path|
     path =~ %r{Ractor}
   end
