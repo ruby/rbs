@@ -449,6 +449,7 @@ module Kernel : BasicObject
                    | (Numeric | String real, ?Numeric | String imag, ?exception: true) -> Complex
                    | (Numeric | String real, ?Numeric | String imag, exception: bool) -> Complex?
                    | (untyped, ?untyped, exception: false) -> nil
+
   # <!--
   #   rdoc-file=kernel.rb
   #   - Float(arg, exception: true)    -> float or nil
@@ -468,6 +469,7 @@ module Kernel : BasicObject
   def self?.Float: (_ToF float_like, ?exception: true) -> Float
                  | (_ToF float_like, exception: bool) -> Float?
                  | (untyped, exception: false) -> nil
+
   # <!--
   #   rdoc-file=object.c
   #   - Hash(object) -> object or new_hash
@@ -582,6 +584,7 @@ module Kernel : BasicObject
                    | (string str, ?int base, ?exception: true) -> Integer
                    | (string str, ?int base, exception: bool) -> Integer?
                    | (untyped, ?untyped, exception: false) -> nil
+
   # <!--
   #   rdoc-file=rational.c
   #   - Rational(x, y, exception: true)  ->  rational or nil
