@@ -392,6 +392,16 @@ module TypeAssertions
   include VersionHelper
 end
 
+class ToI
+  def initialize(value = 3)
+    @value = value
+  end
+
+  def to_i
+    @value
+  end
+end
+
 class ToInt
   def initialize(value = 3)
     @value = value
@@ -432,6 +442,16 @@ class ToS
   end
 end
 
+class ToA
+  def initialize(*args)
+    @args = args
+  end
+
+  def to_a
+    @args
+  end
+end
+
 class ToArray
   def initialize(*args)
     @args = args
@@ -439,6 +459,16 @@ class ToArray
 
   def to_ary
     @args
+  end
+end 
+
+class ToHash
+  def initialize(hash = { 'hello' => 'world' })
+    @hash = hash
+  end
+
+  def to_hash
+    @hash
   end
 end
 

@@ -285,49 +285,125 @@ class KernelTest < StdlibTest
 
   def test_Array
     Array(nil)
-    Array('foo')
-    Array(['foo'])
-    Array(1..4)
-    Array({foo: 1})
+
+    # We add the `.first.whatever` tests to make sure that we're being returned the right type.
+    Array([1,2,3]).first.even?
+    Array(ToArray.new(1,2)).first.even?
+    Array(ToA.new(1,2)).first.even?
+    Array(1..4).first.even?
+    Array({34 => 'hello'}).first.first.even?
+
+    Array('foo').first.upcase
+    Array(['foo']).first.upcase
   end
 
   def test_Complex
-    Complex(1.3)
-    Complex(42)
-    Complex(1, 2)
-    Complex('42', exception: true)
+    Complex(1.3).real?
+    Complex(1.3, exception: true).real?
+    Complex(1.3, exception: false)&.real?
+    Complex(1.3, exception: $VERBOSE)&.real? # `$VERBOSE` is an undecidable-at-compile-time bool.
+
+    Complex('1+2i')
+    Complex(1r)
+    Complex(Class.new(Numeric).new)
+
+    # The `Kernel#Complex` function is the only place in the entire stdlib that uses `.to_c`
+    def (obj = BasicObject.new).to_c
+      1+3i
+    end
+    Complex(obj)
+
+    Complex(1.3, '1i')
+    Complex(Class.new(Numeric).new, "1")
   end
 
   def test_Float
-    Float(42)
+    Float(42).infinite?
+    Float(42, exception: true).real?
+    Float(42, exception: false)&.real?
+    Float(42, exception: $VERBOSE)&.real? # `$VERBOSE` is an undecidable-at-compile-time bool.
+
     Float(1.4)
     Float('1.4')
-    Float('1.4', exception: true)
+    Float(ToF.new)
   end
 
   def test_Hash
     Hash(nil)
     Hash([])
+
     Hash({key: 1})
+    Hash(ToHash.new)
   end
 
   def test_Integer
-    Integer(42)
+    Integer(42).even?
+    Integer(42, exception: true).even?
+    Integer(42, exception: false)&.even?
+    Integer(42, exception: $VERBOSE)&.even? # `$VERBOSE` is an undecidable-at-compile-time bool.
+
     Integer(2.3)
-    Integer('2', exception: true)
-    Integer('11', 2, exception: true)
+    Integer(ToInt.new)
+    Integer(ToI.new)
+
+    Integer('2').even?
+    Integer('2', exception: true).even?
+    Integer('2', exception: false)&.even?
+    Integer('2', exception: $VERBOSE)&.even? # `$VERBOSE` is an undecidable-at-compile-time bool.
+
+    Integer('11', 2)
+    Integer(ToStr.new('11'), ToInt.new(12))
+  end
+
+  # These two classes are required to for `test_Rational`, and the `Class.new(Numeric)` construct
+  # doesn't type check them properly (yet.)
+  class Rational_RationalDiv < Numeric
+    def /(numeric) "Hello!" end
+  end
+  class Rational_OneCase < Numeric
+    def __unique_method_name__; 34 end
   end
 
   def test_Rational
-    Rational(42)
+    Rational(42).integer?
+    Rational(42, exception: true).integer?
+    Rational(42, exception: false)&.integer?
+    Rational(42, exception: $VERBOSE)&.integer? # `$VERBOSE` is an undecidable-at-compile-time bool.
+
+    def (test_rational = BasicObject.new).to_r
+      1r
+    end
+
+    Rational(ToInt.new)
+    Rational(test_rational)
+
     Rational(42.0, 3)
     Rational('42.0', 3, exception: true)
+    Rational(ToInt.new, test_rational)
+    Rational(test_rational, ToInt.new, exception: false)
+
+    rational_div = Rational_RationalDiv.new
+    # `Rational` ignores `exception:` in the `_RationalDiv` variant.
+    Rational(rational_div, Class.new(Numeric).new).upcase
+    Rational(rational_div, Class.new(Numeric).new, exception: true).upcase
+    Rational(rational_div, Class.new(Numeric).new, exception: false).upcase
+    Rational(rational_div, Class.new(Numeric).new, exception: $VERBOSE).upcase
+
+    one_case = Rational_OneCase.new
+    # `Rational` also ignores `exception:` in the `(Numeric, 1)` variant.
+    Rational(one_case, 1).__unique_method_name__
+    Rational(one_case, 1, exception: true).__unique_method_name__
+    Rational(one_case, 1, exception: false).__unique_method_name__
+    Rational(one_case, 1, exception: $VERBOSE).__unique_method_name__
   end
 
   def test_String
     String('foo')
     String([])
     String(nil)
+
+    String(ToS.new)
+    String(ToStr.new)
   end
 
   def test___callee__
