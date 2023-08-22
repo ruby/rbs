@@ -764,3 +764,19 @@ interface _Foo
   def new: () -> Foo
 end
 ```
+
+### Annotations
+
+Annotations are placed before declarations, members, and method types to mark up a metadata for the declaration, the member, or method types.
+The meaning of annotations are defined by the toolchain (ex. steep).
+
+```markdown
+_annotations_ ::= _annotation_ ...
+_annotation_ ::= `%a{` _annotation-text_ `}`  # Annotation using {}
+               | `%a(` _annotation-text_ `)`  # Annotation using ()
+               | `%a[` _annotation-text_ `]`  # Annotation using []
+               | `%a|` _annotation-text_ `|`  # Annotation using ||
+               | `%a<` _annotation-text_ `>`  # Annotation using <>
+
+_annotation-text_ ::= /[^\x00]*/              # Any characters except NUL (and parenthesis)
+```
