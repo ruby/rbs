@@ -90,7 +90,7 @@ module RBS
       @stderr = stderr
     end
 
-    COMMANDS = [:ast, :annotate, :list, :ancestors, :methods, :method, :validate, :constant, :paths, :prototype, :vendor, :parse, :test, :collection, :subtract]
+    COMMANDS = [:ast, :annotate, :list, :ancestors, :methods, :method, :validate, :constant, :paths, :prototype, :vendor, :parse, :test, :collection, :subtract, :diff]
 
     def parse_logging_options(opts)
       opts.on("--log-level LEVEL", "Specify log level (defaults to `warn`)") do |level|
@@ -1381,6 +1381,10 @@ EOB
           end
         end
       end
+    end
+
+    def run_diff(argv, library_options)
+      Diff::CLI.new(argv: argv, library_options: library_options, stdout: stdout, stderr: stderr).run
     end
   end
 end

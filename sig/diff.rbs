@@ -1,0 +1,45 @@
+module RBS
+  class Diff
+    class CLI
+      interface _Puts
+        def puts: (*untyped) -> void
+      end
+
+      @format: String
+      @stdout: _Puts
+      @stderr: _Puts
+      @diff: Diff
+
+      def initialize: (
+        argv: Array[String],
+        library_options: RBS::CLI::LibraryOptions,
+        ?stdout: _Puts,
+        ?stderr: _Puts,
+      ) -> void
+
+      def run: () -> void
+      def run_diff: () -> void
+      def run_markdown: () -> void
+    end
+
+    @type_name: TypeName
+    @library_options: RBS::CLI::LibraryOptions
+    @after_path: Array[String]
+    @before_path: Array[String]
+
+    def initialize: (
+      type_name: TypeName,
+      library_options: RBS::CLI::LibraryOptions,
+      ?after_path: Array[String],
+      ?before_path: Array[String]
+    ) -> void
+
+    def each_diff: () { (String before, String after) -> void } -> void
+
+    private def each_diff_by: (Symbol kind, Hash[::Symbol, Definition::Method] before_methods, Hash[::Symbol, Definition::Method] after_methods) { (String before, String after) -> void } -> void
+    private def build_methods: (Array[String] path) -> [ Hash[::Symbol, Definition::Method], Hash[::Symbol, Definition::Method] ]
+    private def build_env: (Array[String] path) -> Environment
+    private def build_builder: (Environment env) -> DefinitionBuilder
+    private def definition_method_to_s: (Symbol key, Symbol kind, Definition::Method definition_method) -> String?
+  end
+end
