@@ -75,8 +75,19 @@ module RBS
         end
       end
 
-      def each_included_module(type_name, mod)
+      private def each_mixined_module(type_name, mod)
+        each_mixined_module_one(type_name, mod) do |module_name, module_full_name, is_prepend|
+          yield module_name, module_full_name, is_prepend ? AST::Members::Prepend : AST::Members::Include
+        end
+        each_mixined_module_one(type_name, mod.singleton_class) do |module_name, module_full_name, _|
+          yield module_name, module_full_name, AST::Members::Extend
+        end
+      end
+
+      private def each_mixined_module_one(type_name, mod)
         supers = Set[]
+
+        prepends = mod.ancestors.take_while { |m| !mod.equal?(m) }.to_set
 
         mod.included_modules.each do |mix|
           supers.merge(mix.included_modules)
@@ -89,8 +100,8 @@ module RBS
           end
         end
 
-        mod.included_modules.each do |mix|
-          unless supers.include?(mix)
+        mod.included_modules.uniq.each do |mix|
+          if !supers.include?(mix) || prepends.include?(mix)
             unless const_name(mix)
               RBS.logger.warn("Skipping anonymous module #{mix} included in #{mod}")
             else
@@ -99,7 +110,7 @@ module RBS
                 module_name = TypeName.new(name: module_full_name.name, namespace: Namespace.empty)
               end
 
-              yield module_name, module_full_name, mix
+              yield module_name, module_full_name, prepends.include?(mix)
             end
           end
         end
@@ -406,20 +417,9 @@ module RBS
           outer_decls << decl
         end
 
-        each_included_module(type_name, mod) do |module_name, module_full_name, _|
+        each_mixined_module(type_name, mod) do |module_name, module_full_name, mixin_class|
           args = type_args(module_full_name)
-          decl.members << AST::Members::Include.new(
-            name: module_name,
-            args: args,
-            location: nil,
-            comment: nil,
-            annotations: []
-          )
-        end
-
-        each_included_module(type_name, mod.singleton_class) do |module_name, module_full_name ,_|
-          args = type_args(module_full_name)
-          decl.members << AST::Members::Extend.new(
+          decl.members << mixin_class.new(
             name: module_name,
             args: args,
             location: nil,
@@ -460,20 +460,9 @@ module RBS
           outer_decls << decl
         end
 
-        each_included_module(type_name, mod) do |module_name, module_full_name, _|
+        each_mixined_module(type_name, mod) do |module_name, module_full_name, mixin_class|
           args = type_args(module_full_name)
-          decl.members << AST::Members::Include.new(
-            name: module_name,
-            args: args,
-            location: nil,
-            comment: nil,
-            annotations: []
-          )
-        end
-
-        each_included_module(type_name, mod.singleton_class) do |module_name, module_full_name, _|
-          args = type_args(module_full_name)
-          decl.members << AST::Members::Extend.new(
+          decl.members << mixin_class.new(
             name: module_name,
             args: args,
             location: nil,

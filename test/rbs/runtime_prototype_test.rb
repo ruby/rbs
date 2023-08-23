@@ -16,9 +16,13 @@ class RBS::RuntimePrototypeTest < Test::Unit::TestCase
     module Bar
     end
 
+    module Baz
+    end
+
     class Test < String
       include Foo
       extend Bar
+      prepend Baz
 
       NAME = "Hello"
 
@@ -52,6 +56,9 @@ module RBS
       module Bar
       end
 
+      module Baz
+      end
+
       module Foo
         include Enumerable[untyped]
 
@@ -59,6 +66,8 @@ module RBS
       end
 
       class Test < ::String
+        prepend RBS::RuntimePrototypeTest::TestTargets::Baz
+
         include RBS::RuntimePrototypeTest::TestTargets::Foo
 
         extend RBS::RuntimePrototypeTest::TestTargets::Bar
@@ -116,6 +125,9 @@ module RBS
       module Bar
       end
 
+      module Baz
+      end
+
       module Foo
         include Enumerable[untyped]
 
@@ -123,6 +135,8 @@ module RBS
       end
 
       class Test < ::String
+        prepend RBS::RuntimePrototypeTest::TestTargets::Baz
+
         include RBS::RuntimePrototypeTest::TestTargets::Foo
 
         extend RBS::RuntimePrototypeTest::TestTargets::Bar
