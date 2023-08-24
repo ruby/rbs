@@ -662,7 +662,7 @@ class KernelTest < StdlibTest
   def test_pp
     pp
     pp 1
-    pp 'a', 2 
+    pp 'a', 2
 
     pp Object.new
   end
@@ -704,9 +704,6 @@ class KernelTest < StdlibTest
       [0.001, 0.001]
     end
     sleep o
-
-    omit_if(RUBY_VERSION < "3.3.0")
-    sleep nil
   end
 
   def test_syscall
