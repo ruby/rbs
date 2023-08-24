@@ -18,7 +18,7 @@ class Test::Unit::TestCase
     end
   end
 
-  prepend Printer
+  # prepend Printer
 end
 
 module Spy
