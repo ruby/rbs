@@ -132,7 +132,8 @@ module RBS
           end
         end
       when Types::ClassInstance, Types::Interface, Types::Alias
-        if type_name = env.normalize_type_name?(type.name)
+        type_name = env.normalize_type_name?(type.name)
+        if type_name && env.normalized_type_name?(type_name)
           type_params = case type
                         when Types::ClassInstance
                           env.class_decls[type_name].type_params
