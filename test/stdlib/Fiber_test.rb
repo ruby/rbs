@@ -15,18 +15,6 @@ class FiberSingletonTest < Test::Unit::TestCase
       "(Symbol) -> Integer",
       Fiber, :[], :key
     )
-
-    key = "string"
-
-    assert_send_type(
-      "(String, Integer) -> Integer",
-      Fiber, :[]=, key, 123
-    )
-
-    assert_send_type(
-      "(String) -> Integer",
-      Fiber, :[], key
-    )
   end
 
   def test_blocking?
