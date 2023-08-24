@@ -10,6 +10,17 @@ class Test::Unit::TestCase
   prepend TestSkip
 end
 
+class Test::Unit::TestCase
+  module Printer
+    def setup
+      STDERR.puts name
+      super
+    end
+  end
+
+  prepend Printer
+end
+
 module Spy
   def self.wrap(object, method_name)
     spy = WrapSpy.new(object: object, method_name: method_name)
@@ -460,7 +471,7 @@ class ToArray
   def to_ary
     @args
   end
-end 
+end
 
 class ToHash
   def initialize(hash = { 'hello' => 'world' })
@@ -578,6 +589,11 @@ class StdlibTest < Test::Unit::TestCase
               end
   end
 
+  # def setup
+  #   STDERR.puts name
+  #   super
+  # end
+
   def hook
     self.class.hook
   end
@@ -591,9 +607,11 @@ class StdlibTest < Test::Unit::TestCase
       null = StringIO.new
       @stdout, @stderr = $stdout, $stderr
       $stderr = $stdout = null
+      super
     end
 
     def teardown
+      super
       $stderr, $stdout = @stderr, @stdout
     end
   end
