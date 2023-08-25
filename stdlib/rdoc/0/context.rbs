@@ -109,6 +109,16 @@ module RDoc
     #
     def add_module: (singleton(RDoc::NormalModule) class_type, String name) -> RDoc::NormalModule
 
+    # <!-- rdoc-file=lib/rdoc/context.rb -->
+    # All attr* methods
+    #
+    def attributes: () -> Array[Attr]
+
+    # <!-- rdoc-file=lib/rdoc/context.rb -->
+    # Constants defined
+    #
+    def constants: () -> Array[Constant]
+
     # <!--
     #   rdoc-file=lib/rdoc/context.rb
     #   - find_module_named(name)
@@ -124,6 +134,11 @@ module RDoc
     # The full name for this context.  This method is overridden by subclasses.
     #
     def full_name: () -> "(unknown)"
+
+    # <!-- rdoc-file=lib/rdoc/context.rb -->
+    # Methods defined in this context
+    #
+    def method_list: () -> Array[AnyMethod]
 
     def to_s: () -> ::String
 
