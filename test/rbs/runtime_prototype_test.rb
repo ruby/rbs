@@ -532,4 +532,42 @@ end
       end
     end
   end
+
+  module AliasTargetModule
+    def foo; end
+  end
+
+  class DefineMethodAlias
+    define_singleton_method(:qux, AliasTargetModule.instance_method(:foo))
+
+    define_method(:bar, AliasTargetModule.instance_method(:foo))
+
+    define_method(:baz, AliasTargetModule.instance_method(:foo))
+    private :baz
+  end
+
+  def test_define_method_alias
+    SignatureManager.new do |manager|
+      manager.build do |env|
+        p = Runtime.new(patterns: ["RBS::RuntimePrototypeTest::DefineMethodAlias"], env: env, merge: true)
+        assert_write p.decls, <<~RBS
+          module RBS
+            class RuntimePrototypeTest < ::Test::Unit::TestCase
+              class DefineMethodAlias
+                def self.qux: () -> untyped
+
+                public
+
+                def bar: () -> untyped
+
+                private
+
+                def baz: () -> untyped
+              end
+            end
+          end
+        RBS
+      end
+    end
+  end
 end

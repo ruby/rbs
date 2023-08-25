@@ -242,7 +242,16 @@ module RBS
         mod.singleton_methods.select {|name| target_method?(mod, singleton: name) }.sort.each do |name|
           method = mod.singleton_class.instance_method(name)
 
-          if method.name == method.original_name
+          if can_alias?(mod.singleton_class, method)
+            members << AST::Members::Alias.new(
+              new_name: method.name,
+              old_name: method.original_name,
+              kind: :singleton,
+              location: nil,
+              comment: nil,
+              annotations: [],
+            )
+          else
             merge_rbs(module_name, members, singleton: name) do
               RBS.logger.info "missing #{module_name}.#{name} #{method.source_location}"
 
@@ -259,15 +268,6 @@ module RBS
                 visibility: nil
               )
             end
-          else
-            members << AST::Members::Alias.new(
-              new_name: method.name,
-              old_name: method.original_name,
-              kind: :singleton,
-              location: nil,
-              comment: nil,
-              annotations: [],
-              )
           end
         end
 
@@ -278,7 +278,16 @@ module RBS
           public_instance_methods.sort.each do |name|
             method = mod.instance_method(name)
 
-            if method.name == method.original_name
+            if can_alias?(mod, method)
+              members << AST::Members::Alias.new(
+                new_name: method.name,
+                old_name: method.original_name,
+                kind: :instance,
+                location: nil,
+                comment: nil,
+                annotations: [],
+              )
+            else
               merge_rbs(module_name, members, instance: name) do
                 RBS.logger.info "missing #{module_name}##{name} #{method.source_location}"
 
@@ -295,15 +304,6 @@ module RBS
                   visibility: nil
                 )
               end
-            else
-              members << AST::Members::Alias.new(
-                new_name: method.name,
-                old_name: method.original_name,
-                kind: :instance,
-                location: nil,
-                comment: nil,
-                annotations: [],
-                )
             end
           end
         end
@@ -315,7 +315,16 @@ module RBS
           private_instance_methods.sort.each do |name|
             method = mod.instance_method(name)
 
-            if method.name == method.original_name
+            if can_alias?(mod, method)
+              members << AST::Members::Alias.new(
+                new_name: method.name,
+                old_name: method.original_name,
+                kind: :instance,
+                location: nil,
+                comment: nil,
+                annotations: [],
+              )
+            else
               merge_rbs(module_name, members, instance: name) do
                 RBS.logger.info "missing #{module_name}##{name} #{method.source_location}"
 
@@ -332,17 +341,18 @@ module RBS
                   visibility: nil
                 )
               end
-            else
-              members << AST::Members::Alias.new(
-                new_name: method.name,
-                old_name: method.original_name,
-                kind: :instance,
-                location: nil,
-                comment: nil,
-                annotations: [],
-                )
             end
           end
+        end
+      end
+
+      private def can_alias?(mod, method)
+        return false if method.name == method.original_name
+
+        begin
+          mod.instance_method(method.original_name) && true
+        rescue NameError
+          false
         end
       end
 
