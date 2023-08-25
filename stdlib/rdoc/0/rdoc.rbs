@@ -145,7 +145,7 @@ module RDoc
     # <!-- rdoc-file=lib/rdoc/code_object.rb -->
     # Our comment
     #
-    attr_reader comment: RDoc::Comment
+    attr_reader comment: Markup::Document | Comment | String
 
     # <!--
     #   rdoc-file=lib/rdoc/code_object.rb
@@ -161,7 +161,7 @@ module RDoc
     # -->
     # Replaces our comment with `comment`, unless it is empty.
     #
-    def comment=: (RDoc::Comment | String) -> RDoc::Comment
+    def comment=: (Markup::Document | Comment | String | nil) -> (Markup::Document | Comment | String)
   end
 
   # <!-- rdoc-file=lib/rdoc/context.rb -->
@@ -305,6 +305,11 @@ module RDoc
   #
   class TopLevel < Context
     MARSHAL_VERSION: 0
+
+    # <!-- rdoc-file=lib/rdoc/top_level.rb -->
+    # Relative name of this file
+    #
+    attr_accessor relative_name: String
 
     # <!--
     #   rdoc-file=lib/rdoc/top_level.rb
@@ -459,6 +464,25 @@ module RDoc
     # Sets the format of this comment and resets any parsed document
     #
     def format=: (String format) -> void
+
+    def normalized?: () -> bool
+
+    # <!--
+    #   rdoc-file=lib/rdoc/comment.rb
+    #   - normalize()
+    # -->
+    # Normalizes the text.  See RDoc::Text#normalize_comment for details
+    #
+    def normalize: () -> self
+
+    # <!--
+    #   rdoc-file=lib/rdoc/comment.rb
+    #   - parse()
+    # -->
+    # Parses the comment into an RDoc::Markup::Document.  The parsed document is
+    # cached until the text is changed.
+    #
+    def parse: () -> Markup::Document
   end
 
   # <!-- rdoc-file=lib/rdoc/class_module.rb -->
