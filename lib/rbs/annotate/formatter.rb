@@ -59,10 +59,20 @@ module RBS
 
       def self.each_part(doc, &block)
         if block
-          if doc.file
-            yield doc
+          document =
+            case doc
+            when String
+              raise
+            when RDoc::Comment
+              document = doc.parse
+            when RDoc::Markup::Document
+              document = doc
+            end
+
+          if document.file
+            yield document
           else
-            doc.each do |d|
+            document.each do |d|
               each_part(d, &block)
             end
           end
