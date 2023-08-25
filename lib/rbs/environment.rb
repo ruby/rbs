@@ -289,7 +289,9 @@ module RBS
           name
         end
 
-      type_name?(type_name) ? type_name : false
+      if type_name?(type_name)
+        type_name
+      end
     end
 
     def normalize_type_name!(name)
