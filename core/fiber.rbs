@@ -86,7 +86,7 @@ class Fiber < Object
   #
   # See also Fiber::[]=.
   #
-  def self.[]: (Symbol | String) -> untyped
+  def self.[]: (Symbol) -> untyped
 
   # <!--
   #   rdoc-file=cont.c
@@ -99,7 +99,7 @@ class Fiber < Object
   #
   # See also Fiber::[].
   #
-  def self.[]=: [A] (Symbol | String, A) -> A
+  def self.[]=: [A] (Symbol, A) -> A
 
   # <!--
   #   rdoc-file=cont.c
