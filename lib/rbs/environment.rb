@@ -276,9 +276,9 @@ module RBS
     end
 
     def normalize_type_name?(name)
-      if name.class?
-        normalize_module_name?(name)
-      else
+      return normalize_module_name?(name) if name.class?
+
+      type_name =
         unless name.namespace.empty?
           parent = name.namespace.to_type_name
           parent = normalize_module_name?(parent)
@@ -288,7 +288,8 @@ module RBS
         else
           name
         end
-      end
+
+      type_name?(type_name) ? type_name : false
     end
 
     def normalize_type_name!(name)
