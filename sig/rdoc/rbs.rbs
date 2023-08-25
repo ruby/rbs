@@ -8,6 +8,10 @@ end
 module RBS
   module RDocPlugin
     class Parser
+      @top_level: RDoc::TopLevel
+
+      @content: String
+
       type allowed_decls = RBS::AST::Declarations::Class
                          | RBS::AST::Declarations::Module
                          | RBS::AST::Declarations::Constant
