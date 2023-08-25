@@ -441,7 +441,7 @@ module RBS
 
       when AST::Declarations::Global
         if entry = global_decls[decl.name]
-          raise DuplicatedDeclarationError.new(name, decl, entry.decl)
+          raise DuplicatedDeclarationError.new(decl.name, decl, entry.decl)
         end
 
         global_decls[decl.name] = GlobalEntry.new(name: decl.name, decl: decl, outer: outer)
