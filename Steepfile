@@ -16,11 +16,11 @@ target :lib do
   signature "stdlib/rdoc/0/"
   signature "stdlib/ripper/0"
 
-  configure_code_diagnostics do |config|
-    config[D::Ruby::MethodDefinitionMissing] = :hint
-    config[D::Ruby::ElseOnExhaustiveCase] = :hint
-    config[D::Ruby::FallbackAny] = :hint
-  end
+  # configure_code_diagnostics do |config|
+  #   config[D::Ruby::MethodDefinitionMissing] = :hint
+  #   config[D::Ruby::ElseOnExhaustiveCase] = :hint
+  #   config[D::Ruby::FallbackAny] = :hint
+  # end
 end
 
 # target :lib do
