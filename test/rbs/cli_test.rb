@@ -400,6 +400,40 @@ singleton(::BasicObject)
     end
   end
 
+  def test_undefined_interface
+    with_cli do |cli|
+      Dir.mktmpdir do |dir|
+        (Pathname(dir) + 'a.rbs').write(<<~RBS)
+        class Foo
+          def void: () -> _Void
+        end
+        RBS
+
+        error = assert_raises RBS::NoTypeFoundError do
+          cli.run(["-I", dir, "validate"])
+        end
+        assert_equal "_Void", error.type_name.to_s
+      end
+    end
+  end
+
+  def test_undefined_alias
+    with_cli do |cli|
+      Dir.mktmpdir do |dir|
+        (Pathname(dir) + 'a.rbs').write(<<~RBS)
+        class Foo
+          def void: () -> voida
+        end
+        RBS
+
+        error = assert_raises RBS::NoTypeFoundError do
+          cli.run(["-I", dir, "validate"])
+        end
+        assert_equal "voida", error.type_name.to_s
+      end
+    end
+  end
+
   def test_constant
     with_cli do |cli|
       cli.run(%w(constant Pathname))
