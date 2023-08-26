@@ -377,11 +377,13 @@ module RBS
 
         private_instance_methods = mod.private_instance_methods.select {|name| target_method?(mod, instance: name) }
         unless private_instance_methods.empty?
+          added = false
           members << AST::Members::Private.new(location: nil)
 
           private_instance_methods.sort.each do |name|
             next if todo_object&.skip_instance_method?(module_name: module_name_absolute, name: name)
 
+            added = true
             method = mod.instance_method(name)
 
             if can_alias?(mod, method)
@@ -412,6 +414,8 @@ module RBS
               end
             end
           end
+
+          members.pop unless added
         end
       end
 
