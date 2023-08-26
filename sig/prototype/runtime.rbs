@@ -1,6 +1,26 @@
 module RBS
   module Prototype
     class Runtime
+      class Todo
+        @builder: DefinitionBuilder
+
+        @mixin_decls_cache: Hash[TypeName, Array[untyped]]
+
+        def initialize: (builder: DefinitionBuilder) -> void
+
+        def skip_mixin?: (type_name: TypeName, module_name: TypeName, mixin_class: mixin_class) -> bool
+
+        def skip_singleton_method?: (module_name: TypeName, name: Symbol) -> bool
+
+        def skip_instance_method?: (module_name: TypeName, name: Symbol) -> bool
+
+        def skip_constant?: (module_name: String, name: Symbol) -> bool
+
+        private def mixin_decls: (TypeName type_name) -> Array[AST::Members::Include | AST::Members::Extend | AST::Members::Prepend]
+      end
+
+      type mixin_class = singleton(AST::Members::Include) | singleton(AST::Members::Prepend) | singleton(AST::Members::Extend)
+
       @decls: Array[AST::Declarations::t]?
 
       @modules: Hash[String, Module]
@@ -10,6 +30,8 @@ module RBS
       @module_name_method: UnboundMethod
       @object_class: UnboundMethod
 
+      @todo_object: Todo?
+
       include Helpers
 
       attr_reader patterns: Array[String]
@@ -18,13 +40,17 @@ module RBS
 
       attr_reader merge: bool
 
+      attr_reader todo: bool
+
       attr_accessor outline: bool
 
       attr_reader owners_included: Array[Module]
 
-      def initialize: (patterns: Array[String], env: Environment, merge: bool, ?owners_included: Array[Symbol]) -> void
+      def initialize: (patterns: Array[String], env: Environment, merge: bool, ?todo: bool, ?owners_included: Array[Symbol]) -> void
 
       def target?: (Module const) -> bool
+
+      def todo_object: () -> Todo?
 
       def builder: () -> DefinitionBuilder
 
@@ -34,17 +60,7 @@ module RBS
 
       def to_type_name: (String name, ?full_name: bool) -> TypeName
 
-      interface _MixinFactory
-        def new: (
-          name: TypeName,
-          args: Array[Types::t],
-          location: Location[untyped, untyped]?,
-          comment: AST::Comment?,
-          annotations: Array[AST::Annotation]
-        ) -> (AST::Members::Include | AST::Members::Prepend | AST::Members::Extend)
-      end
-
-      def each_mixined_module: (TypeName type_name, Module mod) { (TypeName, TypeName, _MixinFactory) -> void } -> void
+      def each_mixined_module: (TypeName type_name, Module mod) { (TypeName, TypeName, mixin_class) -> void } -> void
 
       def each_mixined_module_one: (TypeName type_name, Module mod) { (TypeName, TypeName, bool) -> void } -> void
 

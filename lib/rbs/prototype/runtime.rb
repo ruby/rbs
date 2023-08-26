@@ -3,15 +3,60 @@
 module RBS
   module Prototype
     class Runtime
+      class Todo
+        def initialize(builder:)
+          @builder = builder
+        end
+
+        def skip_mixin?(type_name:, module_name:, mixin_class:)
+          return false unless @builder.env.module_class_entry(type_name.absolute!)
+          return false unless @builder.env.module_class_entry(module_name.absolute!)
+
+          mixin_decls(type_name).any? do |decl|
+            decl.instance_of?(mixin_class) && decl.name == module_name.absolute!
+          end
+        end
+
+        def skip_singleton_method?(module_name:, name:)
+          return false unless @builder.env.module_class_entry(module_name.absolute!)
+
+          @builder.build_singleton(module_name.absolute!).methods.has_key?(name)
+        end
+
+        def skip_instance_method?(module_name:, name:)
+          return false unless @builder.env.module_class_entry(module_name.absolute!)
+
+          @builder.build_instance(module_name.absolute!).methods.has_key?(name)
+        end
+
+        def skip_constant?(module_name:, name:)
+          namespace = Namespace.new(path: module_name.split('::').map(&:to_sym), absolute: true)
+          @builder.env.constant_decl?(TypeName.new(namespace: namespace, name: name))
+        end
+
+        private
+
+        def mixin_decls(type_name)
+          type_name_absolute = type_name.absolute!
+          (@mixin_decls_cache ||= {}).fetch(type_name_absolute) do
+            @mixin_decls_cache[type_name_absolute] = @builder.env.class_decls[type_name_absolute].decls.flat_map do |d|
+              d.decl.members.select { |m| m.kind_of?(AST::Members::Mixin) }
+            end
+          end
+        end
+      end
+      private_constant :Todo
+
       include Helpers
 
       attr_reader :patterns
       attr_reader :env
       attr_reader :merge
+      attr_reader :todo
       attr_reader :owners_included
       attr_accessor :outline
 
-      def initialize(patterns:, env:, merge:, owners_included: [])
+      def initialize(patterns:, env:, merge:, todo: false, owners_included: [])
         @patterns = patterns
         @decls = nil
         @modules = {}
@@ -21,6 +66,7 @@ module RBS
           Object.const_get(name)
         end
         @outline = false
+        @todo = todo
       end
 
       def target?(const)
@@ -34,6 +80,10 @@ module RBS
             name == pattern
           end
         end
+      end
+
+      def todo_object
+        @todo_object ||= Todo.new(builder: builder) if todo
       end
 
       def builder
@@ -251,7 +301,10 @@ module RBS
       end
 
       def generate_methods(mod, module_name, members)
+        module_name_absolute = to_type_name(const_name!(mod), full_name: true).absolute!
         mod.singleton_methods.select {|name| target_method?(mod, singleton: name) }.sort.each do |name|
+          next if todo_object&.skip_singleton_method?(module_name: module_name_absolute, name: name)
+
           method = mod.singleton_class.instance_method(name)
 
           if can_alias?(mod.singleton_class, method)
@@ -288,6 +341,8 @@ module RBS
           members << AST::Members::Public.new(location: nil)
 
           public_instance_methods.sort.each do |name|
+            next if todo_object&.skip_instance_method?(module_name: module_name_absolute, name: name)
+
             method = mod.instance_method(name)
 
             if can_alias?(mod, method)
@@ -325,6 +380,8 @@ module RBS
           members << AST::Members::Private.new(location: nil)
 
           private_instance_methods.sort.each do |name|
+            next if todo_object&.skip_instance_method?(module_name: module_name_absolute, name: name)
+
             method = mod.instance_method(name)
 
             if can_alias?(mod, method)
@@ -369,7 +426,10 @@ module RBS
       end
 
       def generate_constants(mod, decls)
+        module_name = const_name!(mod)
         mod.constants(false).sort.each do |name|
+          next if todo_object&.skip_constant?(module_name: module_name, name: name)
+
           begin
             value = mod.const_get(name)
           rescue StandardError, LoadError => e
@@ -428,6 +488,7 @@ module RBS
       end
 
       def generate_class(mod)
+        type_name_absolute = to_type_name(const_name!(mod), full_name: true).absolute!
         type_name = to_type_name(const_name!(mod))
         outer_decls = ensure_outer_module_declarations(mod)
 
@@ -451,6 +512,8 @@ module RBS
         end
 
         each_mixined_module(type_name, mod) do |module_name, module_full_name, mixin_class|
+          next if todo_object&.skip_mixin?(type_name: type_name_absolute, module_name: module_full_name, mixin_class: mixin_class)
+
           args = type_args(module_full_name)
           decl.members << mixin_class.new(
             name: module_name,
@@ -474,6 +537,7 @@ module RBS
           return
         end
 
+        type_name_absolute = to_type_name(name, full_name: true).absolute!
         type_name = to_type_name(name)
         outer_decls = ensure_outer_module_declarations(mod)
 
@@ -497,6 +561,8 @@ module RBS
         end
 
         each_mixined_module(type_name, mod) do |module_name, module_full_name, mixin_class|
+          next if todo_object&.skip_mixin?(type_name: type_name_absolute, module_name: module_full_name, mixin_class: mixin_class)
+
           args = type_args(module_full_name)
           decl.members << mixin_class.new(
             name: module_name,
