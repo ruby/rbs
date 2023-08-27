@@ -533,6 +533,30 @@ end
     end
   end
 
+  class Unnamed
+    A = ARGF
+    B = ENV
+  end
+
+  def test_unnamed
+    SignatureManager.new do |manager|
+      manager.build do |env|
+        p = Runtime.new(patterns: ["RBS::RuntimePrototypeTest::Unnamed"], env: env, merge: false)
+        assert_write p.decls, <<~RBS
+          module RBS
+            class RuntimePrototypeTest < ::Test::Unit::TestCase
+              class Unnamed
+                A: ::RBS::Unnamed::ARGFClass
+
+                B: ::RBS::Unnamed::ENVClass
+              end
+            end
+          end
+        RBS
+      end
+    end
+  end
+
   module AliasTargetModule
     def foo; end
   end
