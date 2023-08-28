@@ -388,6 +388,10 @@ module RBS
                      type: Types::Bases::Any.new(location: nil),
                      location: nil
                    )
+                 when ARGF
+                   Types::ClassInstance.new(name: TypeName("::RBS::Unnamed::ARGFClass"), args: [], location: nil)
+                 when ENV
+                   Types::ClassInstance.new(name: TypeName("::RBS::Unnamed::ENVClass"), args: [], location: nil)
                  else
                    value_type_name = to_type_name(const_name!(value.class))
                    args = type_args(value_type_name)
