@@ -1,71 +1,113 @@
 require_relative "test_helper"
 
-class NilClassTest < StdlibTest
-  target NilClass
+class NilClassInstanceTest < Test::Unit::TestCase
+  include TypeAssertions
+
+  testing '::NilClass'
+
+  def test_not
+    assert_send_type "() -> true",
+                     nil, :!
+  end
 
   def test_and
-    nil & true
+    assert_send_type "(nil) -> false",
+                     nil, :&, nil
+    assert_send_type "(false) -> false",
+                     nil, :&, false
+    assert_send_type "(true) -> false",
+                     nil, :&, true
+    assert_send_type "(untyped) -> false",
+                     nil, :&, Object.new
   end
 
   def test_eqq
-    nil === nil
-    nil === false
+    assert_send_type "(nil) -> true",
+                     nil, :===, nil
+    assert_send_type "(false) -> false",
+                     nil, :===, false
+    assert_send_type "(true) -> false",
+                     nil, :===, true
+    assert_send_type "(untyped) -> false",
+                     nil, :===, Object.new
   end
 
   def test_match
-    nil =~ 42
+    assert_send_type "(untyped) -> nil",
+                     nil, :=~, Object.new
   end
 
   def test_xor
-    nil ^ nil
-    nil ^ false
-    nil ^ 42
+    assert_send_type "(nil) -> false",
+                     nil, :^, nil
+    assert_send_type "(false) -> false",
+                     nil, :^, false
+    assert_send_type "(true) -> true",
+                     nil, :^, true
+    assert_send_type "(untyped) -> true",
+                     nil, :^, Object.new
   end
 
   def test_inspect
-    nil.inspect
+    assert_send_type "() -> 'nil'",
+                     nil, :inspect
   end
 
   def test_nil?
-    nil.nil?
+    assert_send_type "() -> true",
+                     nil, :nil?
   end
 
   def test_rationalize
-    nil.rationalize
-    nil.rationalize(0.01)
+    assert_send_type "() -> Rational",
+                     nil, :rationalize
+    assert_send_type "(untyped) -> Rational",
+                     nil, :rationalize, Object.new
   end
 
   def test_to_a
-    nil.to_a
+    assert_send_type "() -> []",
+                     nil, :to_a
   end
 
   def test_to_c
-    nil.to_c
+    assert_send_type "() -> Complex",
+                     nil, :to_c
   end
 
   def test_to_f
-    nil.to_f
+    assert_send_type "() -> Float",
+                     nil, :to_f
   end
 
   def test_to_h
-    nil.to_h
+    assert_send_type "() -> Hash[untyped, untyped]",
+                     nil, :to_h
   end
 
   def test_to_i
-    nil.to_i
+    assert_send_type "() -> 0",
+                     nil, :to_i
   end
 
   def test_to_r
-    nil.to_r
+    assert_send_type "() -> Rational",
+                     nil, :to_r
   end
 
   def test_to_s
-    nil.to_s
+    assert_send_type "() -> ''",
+                     nil, :to_s
   end
 
   def test_or
-    nil | nil
-    nil | false
-    nil | 42
+    assert_send_type "(nil) -> false",
+                     nil, :|, nil
+    assert_send_type "(false) -> false",
+                     nil, :|, false
+    assert_send_type "(true) -> true",
+                     nil, :|, true
+    assert_send_type "(untyped) -> true",
+                     nil, :|, Object.new
   end
 end
