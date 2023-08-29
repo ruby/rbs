@@ -198,6 +198,22 @@ interface _Rewindable
   def rewind: () -> Integer
 end
 
+# A type that's usable like a `Range[T]`.
+#
+# Implicit `_Range` usage is usable frequently in ruby's stdlib, such as `Comparable#clamp`,
+# `String#[]`, and `Kernel#rand`.
+#
+interface _Range[T]
+  # The beginning value, `nil` if there is no beginning.
+  def begin: () -> T?
+
+  # The ending value, `nil` if there is no ending.
+  def end: () -> T?
+
+  # Whether or not to include the end in the range.
+  def exclude_end?: () -> bool
+end
+
 interface _Exception
   def exception: () -> Exception
                | (String arg0) -> Exception
@@ -206,6 +222,14 @@ end
 # Represents an `Integer`, or a type convertible to it (via `.to_int`).
 #
 type int = Integer | _ToInt
+
+# Represents a `Float`, or a type convertible to it (via `.to_f`).
+#
+type float = Float | _ToF
+
+# Represents a `Range[T]`, or a type that acts like it (via `.begin`, `.end`, and `.exclude_end?`).
+#
+type range[T] = Range[T] | _Range[T]
 
 # Represents a `String`, or a type convertible to it (via `.to_str`).
 #
@@ -237,6 +261,12 @@ type encoding = Encoding | string
 # A real number, ie not a `Complex`.
 #
 type real = Integer | Float | Rational
+
+# Represents a `Symbol` or a `string`.
+#
+# A lot of builtin functions accept either a Symbol, a String, or something which has `.to_str`
+# defined.
+type interned = Symbol | string
 
 # `boolish` is a type for documentation.
 # It means the value of this type is only for testing a condition.
