@@ -77,7 +77,7 @@ end
 # There are only two places that `Symbol | _ToSym`, and they're quite obscure:
 # - `Kernel#warn`'s `category:` optional parameter. (Oddly enough, not for  `Warning.warn`, though.)
 # - `TracePoint#trace`'s `event`s parameter.
-# Additionally, the `rb_iseq_load` C function, only accessible through `Fiddle`, uses `.to_sym` 
+# Additionally, the `rb_iseq_load` C function, only accessible through `Fiddle`, uses `.to_sym`
 # internally.
 #
 interface _ToSym
@@ -115,7 +115,7 @@ end
 
 # A type that's implicitly convertible to an `Array`.
 #
-# Implicit `.to_ary` conversions are usable semi-frequently in Ruby's stdlib, such as `Dir#glob`, 
+# Implicit `.to_ary` conversions are usable semi-frequently in Ruby's stdlib, such as `Dir#glob`,
 # `Regex#union`, and `Class#private`. It's also used with the `*` "splat" operator.
 #
 interface _ToAry[T]
@@ -217,13 +217,13 @@ type array[T] = Array[T] | _ToAry[T]
 
 # Represents a `Hash[K, V]`, or a type convertible to it (via `.to_hash`).
 #
-type hash[K, V] = Hash[K, V] | _ToHash[T, V]
+type hash[K, V] = Hash[K, V] | _ToHash[K, V]
 
 # Represents an `IO`, or a type convertible to it (via `.to_io`).
 #
 type io = IO | _ToIO
 
-# A filesystem path: Either something that defines `.to_path`, or a `String` (or a type that is 
+# A filesystem path: Either something that defines `.to_path`, or a `String` (or a type that is
 # convertible to a string via `.to_str`).
 #
 # If a type defines both `.to_path` and `.to_str`, the `.to_path` function is called.
@@ -233,7 +233,6 @@ type path = string | _ToPath
 # An `Encoding`, or a `String` (or type that defines `.to_str`) that represents it.
 #
 type encoding = Encoding | string
-type path = string | _ToPath
 
 # A real number, ie not a `Complex`.
 #
