@@ -2,6 +2,21 @@
 
 ## master
 
+## 3.2.1 (2023-08-29)
+
+### Signature updates
+
+* `Fiber` (Backport [#1463](https://github.com/ruby/rbs/pull/1463))
+
+### Library changes
+
+* Fix error when undefined interface or alias (Backport [#1465](https://github.com/ruby/rbs/pull/1465))
+
+### Miscellaneous
+
+* Improve skip test message (Backport [#1476](https://github.com/ruby/rbs/pull/1476))
+* Fix CI failure (Backport [#1464](https://github.com/ruby/rbs/pull/1464))
+
 ## 3.2.0 (2023-08-22)
 
 ### Signature updates
