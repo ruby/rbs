@@ -453,6 +453,17 @@ class ToS
   end
 end
 
+
+class ToSym
+  def initialize(value = :&)
+    @value = value
+  end
+
+  def to_sym
+    @value
+  end
+end
+
 class ToA
   def initialize(*args)
     @args = args
