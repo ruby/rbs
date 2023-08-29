@@ -50,7 +50,10 @@ module TestSkip
     end
 
     def teardown
-      unless current_result.passed?
+      case
+      when passed?
+        # nop
+      else
         puts "💡You can skip this test `#{name}` by adding the name to `#{SKIP_TESTS_FILE}`"
       end
 
