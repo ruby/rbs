@@ -233,15 +233,22 @@ if $0.end_with?("_test.rb")
     OptionParser.new do |opts|
       opts.on("--name NAME") do |name|
         name = name.gsub(/(\A\/)|(\/\Z)/, '')
+        klass_name, method_name = name.split("#", 2)
 
-        constant = (Object.const_get(name) rescue nil)
+        constant = ObjectSpace.each_object(Class).find do |klass|
+          if klass.name
+            klass.name == klass_name || klass.name.end_with?("::#{klass_name}")
+          end
+        end
 
         if constant
-          test_unit_args << "--testcase"
-          test_unit_args << name
-        else
-          test_unit_args << "--name"
-          test_unit_args << name
+          if method_name
+            test_unit_args << "--name"
+            test_unit_args << "#{constant.name}##{method_name}"
+          else
+            test_unit_args << "--testcase"
+            test_unit_args << constant.name
+          end
         end
       end
     end.order!(argv)
