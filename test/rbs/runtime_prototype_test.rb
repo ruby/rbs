@@ -533,29 +533,34 @@ end
     end
   end
 
-  class Unnamed
+  class Constants
     module Name
       class Space
       end
     end
     A = ARGF
     B = ENV
+    C = BasicObject.new
     D = Name::Space.new
+    E = Class.new # skip
+    F = Module.new # skip
   end
 
-  def test_unnamed
+  def test_constants
     SignatureManager.new do |manager|
       manager.build do |env|
-        p = Runtime.new(patterns: ["RBS::RuntimePrototypeTest::Unnamed"], env: env, merge: false)
+        p = Runtime.new(patterns: ["RBS::RuntimePrototypeTest::Constants"], env: env, merge: false)
         assert_write p.decls, <<~RBS
           module RBS
             class RuntimePrototypeTest < ::Test::Unit::TestCase
-              class Unnamed
+              class Constants
                 A: ::RBS::Unnamed::ARGFClass
 
                 B: ::RBS::Unnamed::ENVClass
 
-                D: ::RBS::RuntimePrototypeTest::Unnamed::Name::Space
+                C: ::BasicObject
+
+                D: ::RBS::RuntimePrototypeTest::Constants::Name::Space
               end
             end
           end

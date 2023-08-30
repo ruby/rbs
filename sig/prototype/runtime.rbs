@@ -8,6 +8,7 @@ module RBS
       @builder: DefinitionBuilder
 
       @module_name_method: UnboundMethod
+      @object_class: UnboundMethod
 
       include Helpers
 
@@ -76,6 +77,8 @@ module RBS
       def const_name: (Module const) -> String?
 
       def const_name!: (Module const) -> String
+
+      def object_class: (untyped) -> untyped
 
       def type_args: (TypeName type_name) -> Array[Types::t]
 
