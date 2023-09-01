@@ -66,7 +66,7 @@ class Binding
   #
   #     binding.eval("defined?(#{symbol}) == 'local-variable'")
   #
-  def local_variable_defined?: (Symbol | string varname) -> bool
+  def local_variable_defined?: (interned varname) -> bool
 
   # <!--
   #   rdoc-file=proc.c
@@ -84,7 +84,7 @@ class Binding
   #
   #     binding.eval("#{symbol}")
   #
-  def local_variable_get: (Symbol | string varname) -> untyped
+  def local_variable_get: (interned varname) -> untyped
 
   # <!--
   #   rdoc-file=proc.c
@@ -111,7 +111,7 @@ class Binding
   #
   # if `obj` can be dumped in Ruby code.
   #
-  def local_variable_set: [U] (Symbol | string varname, U obj) -> U
+  def local_variable_set: [U] (interned varname, U obj) -> U
 
   # <!--
   #   rdoc-file=proc.c

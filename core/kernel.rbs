@@ -493,7 +493,7 @@ module Kernel : BasicObject
   #     Hash([])               # => {}
   #
   def self?.Hash: [K, V] (nil | [] _empty) -> Hash[K, V]
-                | [K, V] (_ToHash[K, V] hash_like) -> Hash[K, V]
+                | [K, V] (hash[K, V] hash_like) -> Hash[K, V]
 
   # <!--
   #   rdoc-file=object.c
@@ -846,7 +846,7 @@ module Kernel : BasicObject
   #
   def self?.fail: () -> bot
                 | (string message, ?cause: Exception?) -> bot
-                | (_Exception exception, ?_ToS? message, ?nil | String | Array[String] backtrace, ?cause: Exception?) -> bot
+                | (_Exception exception, ?_ToS? message, ?String | Array[String] | nil backtrace, ?cause: Exception?) -> bot
 
   # <!--
   #   rdoc-file=eval.c
@@ -1568,7 +1568,7 @@ module Kernel : BasicObject
   #     Time.new    #=> 2008-03-08 19:56:22 +0900
   #
   def self?.sleep: (?nil) -> bot
-                 | ((Integer | Float | _Divmod) duration) -> Integer
+                 | (Integer | Float | _Divmod duration) -> Integer
 
   interface _Divmod
     def divmod: (Numeric) -> [ Numeric, Numeric ]
