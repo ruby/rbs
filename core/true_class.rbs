@@ -13,7 +13,7 @@ class TrueClass
   # And---Returns `false` if *obj* is `nil` or `false`, `true` otherwise.
   #
   def &: (false | nil) -> false
-       | (untyped obj) -> true
+       | (untyped obj) -> bool
 
   # <!--
   #   rdoc-file=object.c
@@ -24,7 +24,7 @@ class TrueClass
   # statements.
   #
   def ===: (true) -> true
-         | (untyped obj) -> false
+         | (untyped obj) -> bool
 
   # <!--
   #   rdoc-file=object.c
@@ -33,7 +33,7 @@ class TrueClass
   # Exclusive Or---Returns `true` if *obj* is `nil` or `false`, `false` otherwise.
   #
   def ^: (false | nil) -> true
-       | (untyped obj) -> false
+       | (untyped obj) -> bool
 
   # <!-- rdoc-file=object.c -->
   # The string representation of `true` is "true".

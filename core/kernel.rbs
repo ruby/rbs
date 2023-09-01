@@ -448,7 +448,7 @@ module Kernel : BasicObject
                    | (_ToC complex_like, exception: bool) -> Complex?
                    | (Numeric | String real, ?Numeric | String imag, ?exception: true) -> Complex
                    | (Numeric | String real, ?Numeric | String imag, exception: bool) -> Complex?
-                   | (untyped, ?untyped, exception: false) -> nil
+                   | (untyped, ?untyped, ?exception: bool) -> Complex?
 
   # <!--
   #   rdoc-file=kernel.rb
@@ -468,7 +468,7 @@ module Kernel : BasicObject
   #
   def self?.Float: (_ToF float_like, ?exception: true) -> Float
                  | (_ToF float_like, exception: bool) -> Float?
-                 | (untyped, exception: false) -> nil
+                 | (untyped, ?exception: bool) -> Float?
 
   # <!--
   #   rdoc-file=object.c
@@ -579,11 +579,11 @@ module Kernel : BasicObject
   # With `exception` given as `false`, an exception of any kind is suppressed and
   # `nil` is returned.
   #
-  def self?.Integer: (_ToInt | _ToI int_like, ?exception: true) -> Integer
-                   | (_ToInt | _ToI int_like, exception: bool) -> Integer?
+  def self?.Integer: (int | _ToI int_like, ?exception: true) -> Integer
+                   | (int | _ToI int_like, exception: bool) -> Integer?
                    | (string str, ?int base, ?exception: true) -> Integer
                    | (string str, ?int base, exception: bool) -> Integer?
-                   | (untyped, ?untyped, exception: false) -> nil
+                   | (untyped, ?untyped, ?exception: bool) -> Integer?
 
   # <!--
   #   rdoc-file=rational.c
@@ -622,13 +622,13 @@ module Kernel : BasicObject
   #
   # See also String#to_r.
   #
-  def self?.Rational: (_ToInt | _ToR rational_like, ?exception: true) -> Rational
-                    | (_ToInt | _ToR rational_like, exception: bool) -> Rational?
-                    | (_ToInt | _ToR numer, ?_ToInt | _ToR denom, ?exception: true) -> Rational
-                    | (_ToInt | _ToR numer, ?_ToInt | _ToR denom, exception: bool) -> Rational?
+  def self?.Rational: (int | _ToR rational_like, ?exception: true) -> Rational
+                    | (int | _ToR rational_like, exception: bool) -> Rational?
+                    | (int | _ToR numer, ?int | _ToR denom, ?exception: true) -> Rational
+                    | (int | _ToR numer, ?int | _ToR denom, exception: bool) -> Rational?
                     | [T] (Numeric&_RationalDiv[T] numer, Numeric denom, ?exception: bool) -> T
                     | [T < Numeric] (T value, 1, ?exception: bool) -> T
-                    | (untyped, ?untyped, exception: false) -> nil
+                    | (untyped, ?untyped, ?exception: bool) -> Rational?
 
   interface _RationalDiv[T]
     def /: (Numeric) -> T

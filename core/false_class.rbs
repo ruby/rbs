@@ -25,7 +25,7 @@ class FalseClass
   # statements.
   #
   def ===: (false) -> true
-         | (untyped obj) -> false
+         | (untyped obj) -> bool
 
   # <!--
   #   rdoc-file=object.c
@@ -36,7 +36,7 @@ class FalseClass
   # returns `true`.
   #
   def ^: (false | nil) -> false
-       | (untyped obj) -> true
+       | (untyped obj) -> bool
 
   # <!-- rdoc-file=object.c -->
   # The string representation of `false` is "false".
@@ -59,5 +59,5 @@ class FalseClass
   # Or---Returns `false` if *obj* is `nil` or `false`; `true` otherwise.
   #
   def |: (nil | false) -> false
-       | (untyped obj) -> true
+       | (untyped obj) -> bool
 end
