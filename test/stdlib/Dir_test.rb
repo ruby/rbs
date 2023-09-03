@@ -97,8 +97,10 @@ class DirSingletonTest < Test::Unit::TestCase
   end
 
   def test_exist?
-    assert_send_type "(::ToStr) -> bool",
-                     Dir, :exist?, ToStr.new(__dir__)
+    with_path.chain(with_io).each do |path|
+      assert_send_type "(::path | ::io) -> bool",
+                       Dir, :exist?, path
+    end
   end
 
   def test_foreach
