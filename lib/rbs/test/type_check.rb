@@ -318,7 +318,7 @@ module RBS
         when Types::Optional
           Test.call(val, IS_AP, ::NilClass) || value(val, type.type)
         when Types::Alias
-          value(val, builder.expand_alias(type.name))
+          value(val, builder.expand_alias2(type.name, type.args))
         when Types::Tuple
           Test.call(val, IS_AP, ::Array) &&
             type.types.map.with_index {|ty, index| value(val[index], ty) }.all?
