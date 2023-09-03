@@ -393,7 +393,7 @@ module RBS
                  when ENV
                    Types::ClassInstance.new(name: TypeName("::RBS::Unnamed::ENVClass"), args: [], location: nil)
                  else
-                   value_type_name = to_type_name(const_name!(value.class))
+                   value_type_name = to_type_name(const_name!(value.class), full_name: true).absolute!
                    args = type_args(value_type_name)
                    Types::ClassInstance.new(name: value_type_name, args: args, location: nil)
                  end
@@ -531,7 +531,7 @@ module RBS
           # Insert AST::Declarations if declarations are not added previously
           unless outer_decl
             outer_module or raise
-            
+
             if outer_module.is_a?(Class)
               outer_decl = AST::Declarations::Class.new(
                 name: to_type_name(outer_module_name),
