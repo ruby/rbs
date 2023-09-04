@@ -24,6 +24,10 @@ module RBS
 
     private def mixin_exist?: (TypeName owner, AST::Members::Include | AST::Members::Extend | AST::Members::Prepend, context: Resolver::context) -> boolish
 
+    private def filter_redundunt_access_modifiers: (Array[AST::Declarations::t | AST::Members::t]) -> Array[AST::Declarations::t | AST::Members::t]
+
+    private def access_modifier?: (AST::Declarations::t | AST::Members::t?) -> bool
+
     private def update_decl: (decl_with_members, members: Array[AST::Declarations::t | AST::Members::t]) -> decl_with_members
 
     private def absolute_typename: (TypeName, context: Resolver::context) -> TypeName

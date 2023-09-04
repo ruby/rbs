@@ -16,9 +16,13 @@ class RBS::RuntimePrototypeTest < Test::Unit::TestCase
     module Bar
     end
 
+    module Baz
+    end
+
     class Test < String
       include Foo
       extend Bar
+      prepend Baz
 
       NAME = "Hello"
 
@@ -47,9 +51,12 @@ class RBS::RuntimePrototypeTest < Test::Unit::TestCase
 
         assert_write p.decls, <<-EOF
 module RBS
-  class RuntimePrototypeTest < Test::Unit::TestCase
+  class RuntimePrototypeTest < ::Test::Unit::TestCase
     module TestTargets
       module Bar
+      end
+
+      module Baz
       end
 
       module Foo
@@ -58,7 +65,9 @@ module RBS
         extend Comparable
       end
 
-      class Test < String
+      class Test < ::String
+        prepend RBS::RuntimePrototypeTest::TestTargets::Baz
+
         include RBS::RuntimePrototypeTest::TestTargets::Foo
 
         extend RBS::RuntimePrototypeTest::TestTargets::Bar
@@ -91,7 +100,7 @@ end
     SignatureManager.new do |manager|
       manager.files[Pathname("foo.rbs")] = <<EOF
 class RBS
-  class RuntimePrototypeTest < Test::Unit::TestCase
+  class RuntimePrototypeTest < ::Test::Unit::TestCase
     class TestTargets
       class Test
         def self.baz: () -> void
@@ -111,9 +120,12 @@ EOF
 
         assert_write p.decls, <<-EOF
 module RBS
-  class RuntimePrototypeTest < Test::Unit::TestCase
+  class RuntimePrototypeTest < ::Test::Unit::TestCase
     module TestTargets
       module Bar
+      end
+
+      module Baz
       end
 
       module Foo
@@ -122,7 +134,9 @@ module RBS
         extend Comparable
       end
 
-      class Test < String
+      class Test < ::String
+        prepend RBS::RuntimePrototypeTest::TestTargets::Baz
+
         include RBS::RuntimePrototypeTest::TestTargets::Foo
 
         extend RBS::RuntimePrototypeTest::TestTargets::Bar
@@ -172,9 +186,9 @@ end
 
         assert_write p.decls, <<-EOF
 module RBS
-  class RuntimePrototypeTest < Test::Unit::TestCase
+  class RuntimePrototypeTest < ::Test::Unit::TestCase
     module IncludeTests
-      class ChildClass < RBS::RuntimePrototypeTest::IncludeTests::SuperClass
+      class ChildClass < ::RBS::RuntimePrototypeTest::IncludeTests::SuperClass
         def self.foo: () -> untyped
 
         public
@@ -250,7 +264,7 @@ end
 
           assert_write p.decls, <<-EOF
 module RBS
-  class RuntimePrototypeTest < Test::Unit::TestCase
+  class RuntimePrototypeTest < ::Test::Unit::TestCase
     class TestForArgumentForwarding
       public
 
@@ -291,7 +305,7 @@ end
 
         assert_write p.decls, <<~RBS
           module RBS
-            class RuntimePrototypeTest < Test::Unit::TestCase
+            class RuntimePrototypeTest < ::Test::Unit::TestCase
               module TestForOverrideModuleName
                 class C
                   include RBS::RuntimePrototypeTest::TestForOverrideModuleName::M
@@ -303,7 +317,7 @@ end
                   INSTANCE: C
                 end
 
-                class C2 < RBS::RuntimePrototypeTest::TestForOverrideModuleName::C
+                class C2 < ::RBS::RuntimePrototypeTest::TestForOverrideModuleName::C
                 end
 
                 module M
@@ -341,9 +355,9 @@ end
 
         assert_write p.decls, <<~RBS
           module RBS
-            class RuntimePrototypeTest < Test::Unit::TestCase
+            class RuntimePrototypeTest < ::Test::Unit::TestCase
               module TestForTypeParameters
-                class C < Hash[untyped, untyped]
+                class C < ::Hash[untyped, untyped]
                 end
 
                 class C2
@@ -372,7 +386,7 @@ end
 
         assert_write p.decls, <<~RBS
           module RBS
-            class RuntimePrototypeTest < Test::Unit::TestCase
+            class RuntimePrototypeTest < ::Test::Unit::TestCase
               class TestForInitialize
                 private
 
@@ -400,7 +414,7 @@ end
 
           assert_write p.decls, <<~RBS
             module RBS
-              class RuntimePrototypeTest < Test::Unit::TestCase
+              class RuntimePrototypeTest < ::Test::Unit::TestCase
                 class TestForYield
                   public
 
@@ -457,6 +471,126 @@ end
         end
         env.resolve_type_names
         assert(true) # nothing raised above
+      end
+    end
+  end
+
+  def test_nameerror_message
+    SignatureManager.new do |manager|
+      manager.build do |env|
+        p = Runtime.new(patterns: ["NameError*"], env: env, merge: true)
+
+        writer = RBS::Writer.new(out: StringIO.new)
+        writer.write(p.decls)
+        RBS::Parser.parse_signature(writer.out.string) # check syntax
+
+        assert !writer.out.string.include?("class message")
+      end
+    end
+  end
+
+  class TestTypeParams
+    class TestTypeParams
+    end
+  end
+
+  def test_type_params
+    SignatureManager.new do |manager|
+      manager.files[Pathname("foo.rbs")] = <<~RBS
+        module RBS
+          class RuntimePrototypeTest < ::Test::Unit::TestCase
+            class TestTypeParams[unchecked out Elem]
+              class TestTypeParams
+              end
+            end
+          end
+        end
+      RBS
+
+      manager.build do |env|
+        p = Runtime.new(patterns: ["RBS::RuntimePrototypeTest::TestTypeParams"], env: env, merge: true)
+        assert_write p.decls, <<~RBS
+          module RBS
+            class RuntimePrototypeTest < ::Test::Unit::TestCase
+              class TestTypeParams[unchecked out Elem]
+              end
+            end
+          end
+        RBS
+
+        p = Runtime.new(patterns: ["RBS::RuntimePrototypeTest::TestTypeParams::TestTypeParams"], env: env, merge: true)
+        assert_write p.decls, <<~RBS
+          module RBS
+            class RuntimePrototypeTest < ::Test::Unit::TestCase
+              class TestTypeParams[unchecked out Elem]
+                class TestTypeParams
+                end
+              end
+            end
+          end
+        RBS
+      end
+    end
+  end
+
+  class Unnamed
+    A = ARGF
+    B = ENV
+  end
+
+  def test_unnamed
+    SignatureManager.new do |manager|
+      manager.build do |env|
+        p = Runtime.new(patterns: ["RBS::RuntimePrototypeTest::Unnamed"], env: env, merge: false)
+        assert_write p.decls, <<~RBS
+          module RBS
+            class RuntimePrototypeTest < ::Test::Unit::TestCase
+              class Unnamed
+                A: ::RBS::Unnamed::ARGFClass
+
+                B: ::RBS::Unnamed::ENVClass
+              end
+            end
+          end
+        RBS
+      end
+    end
+  end
+
+  module AliasTargetModule
+    def foo; end
+  end
+
+  class DefineMethodAlias
+    define_singleton_method(:qux, AliasTargetModule.instance_method(:foo))
+
+    define_method(:bar, AliasTargetModule.instance_method(:foo))
+
+    define_method(:baz, AliasTargetModule.instance_method(:foo))
+    private :baz
+  end
+
+  def test_define_method_alias
+    SignatureManager.new do |manager|
+      manager.build do |env|
+        p = Runtime.new(patterns: ["RBS::RuntimePrototypeTest::DefineMethodAlias"], env: env, merge: true)
+        assert_write p.decls, <<~RBS
+          module RBS
+            class RuntimePrototypeTest < ::Test::Unit::TestCase
+              class DefineMethodAlias
+                def self.qux: () -> untyped
+
+                public
+
+                def bar: () -> untyped
+
+                private
+
+                def baz: () -> untyped
+              end
+            end
+          end
+        RBS
       end
     end
   end

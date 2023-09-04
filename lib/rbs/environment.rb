@@ -276,9 +276,9 @@ module RBS
     end
 
     def normalize_type_name?(name)
-      if name.class?
-        normalize_module_name?(name)
-      else
+      return normalize_module_name?(name) if name.class?
+
+      type_name =
         unless name.namespace.empty?
           parent = name.namespace.to_type_name
           parent = normalize_module_name?(parent)
@@ -288,6 +288,9 @@ module RBS
         else
           name
         end
+
+      if type_name?(type_name)
+        type_name
       end
     end
 
@@ -438,7 +441,7 @@ module RBS
 
       when AST::Declarations::Global
         if entry = global_decls[decl.name]
-          raise DuplicatedDeclarationError.new(name, decl, entry.decl)
+          raise DuplicatedDeclarationError.new(decl.name, decl, entry.decl)
         end
 
         global_decls[decl.name] = GlobalEntry.new(name: decl.name, decl: decl, outer: outer)

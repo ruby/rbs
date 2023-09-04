@@ -2,8 +2,6 @@
 # The class of the singleton object `nil`.
 #
 class NilClass
-  public
-
   def !: () -> true
 
   # <!--
@@ -25,7 +23,7 @@ class NilClass
   # statements.
   #
   def ===: (nil) -> true
-         | (untyped obj) -> false
+         | (untyped obj) -> bool
 
   # <!--
   #   rdoc-file=object.c
@@ -45,9 +43,8 @@ class NilClass
   # Exclusive Or---If *obj* is `nil` or `false`, returns `false`; otherwise,
   # returns `true`.
   #
-  def ^: (nil) -> false
-       | (false) -> false
-       | (untyped obj) -> true
+  def ^: (false | nil) -> false
+       | (untyped obj) -> bool
 
   # <!--
   #   rdoc-file=object.c
@@ -81,7 +78,7 @@ class NilClass
   #
   #     nil.to_a   #=> []
   #
-  def to_a: () -> [ ]
+  def to_a: () -> []
 
   # <!--
   #   rdoc-file=complex.c
@@ -109,7 +106,7 @@ class NilClass
   #
   #     nil.to_h   #=> {}
   #
-  def to_h: () -> ::Hash[untyped, untyped]
+  def to_h: () -> {}
 
   # <!--
   #   rdoc-file=nilclass.rb
@@ -144,9 +141,6 @@ class NilClass
   # -->
   # Or---Returns `false` if *obj* is `nil` or `false`; `true` otherwise.
   #
-  def |: (nil) -> false
-       | (false) -> false
-       | (untyped obj) -> true
-
-  def clone: (?freeze: true?) -> self
+  def |: (nil | false) -> false
+       | (untyped obj) -> bool
 end

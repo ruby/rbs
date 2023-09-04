@@ -3,7 +3,6 @@ require_relative "test_helper"
 class Encoding::UndefinedConversionErrorTest < Test::Unit::TestCase
   include TypeAssertions
 
-  # library "pathname", "set", "securerandom"     # Declare library signatures to load
   testing "::Encoding::UndefinedConversionError"
 
   def test_destination_encoding

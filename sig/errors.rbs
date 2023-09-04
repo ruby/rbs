@@ -20,11 +20,7 @@ module RBS
     %a{pure} def location: () -> Location[untyped, untyped]?
   end
 
-  interface _DetailedMessage
-    def detailed_message: (**untyped) -> String
-  end
-
-  module DetailedMessageable : _Location, _DetailedMessage
+  module DetailedMessageable : _Location, Exception
     def detailed_message: (?highlight: boolish, **untyped) -> String
   end
 

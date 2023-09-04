@@ -29,6 +29,41 @@
 # The `warning` gem provides convenient ways to customize Warning.warn.
 #
 module Warning
+  # The types of categories the `Warning` module understands.
+  #
+  type category = :deprecated | :experimental
+
+  # <!--
+  #   rdoc-file=error.c
+  #   - Warning[category]  -> true or false
+  # -->
+  # Returns the flag to show the warning messages for `category`. Supported
+  # categories are:
+  #
+  # `:deprecated`
+  # :   deprecation warnings
+  #
+  # *   assignment of non-nil value to `$,` and `$;`
+  # *   keyword arguments
+  # *   proc/lambda without block
+  #
+  # etc.
+  #
+  # `:experimental`
+  # :   experimental features
+  #
+  # *   Pattern matching
+  #
+  def self.[]: (category) -> bool
+
+  # <!--
+  #   rdoc-file=error.c
+  #   - Warning[category] = flag -> flag
+  # -->
+  # Sets the warning flags for `category`. See Warning.[] for the categories.
+  #
+  def self.[]=: [T] (category, T flag) -> T
+
   # <!--
   #   rdoc-file=error.c
   #   - warn(msg, category: nil)  -> nil
@@ -38,5 +73,5 @@ module Warning
   #
   # See the documentation of the Warning module for how to customize this.
   #
-  def self?.warn: (String message, ?category: :deprecated | :experimental | nil) -> nil
+  def self?.warn: (String message, ?category: category?) -> nil
 end

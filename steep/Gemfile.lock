@@ -1,7 +1,7 @@
 GEM
   remote: https://rubygems.org/
   specs:
-    activesupport (7.0.6)
+    activesupport (7.0.7.2)
       concurrent-ruby (~> 1.0, >= 1.0.2)
       i18n (>= 1.6, < 2)
       minitest (>= 5.1)
@@ -28,9 +28,9 @@ GEM
     rb-fsevent (0.11.2)
     rb-inotify (0.10.1)
       ffi (~> 1.0)
-    rbs (3.1.0)
+    rbs (3.2.1)
     securerandom (0.2.2)
-    steep (1.5.2)
+    steep (1.5.3)
       activesupport (>= 5.1)
       concurrent-ruby (>= 1.1.10)
       csv (>= 3.0.9)
@@ -56,8 +56,8 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
-  rbs (~> 3.1.0)
-  steep (~> 1.5.2)
+  rbs (~> 3.2.1)
+  steep (~> 1.5.3)
 
 BUNDLED WITH
-   2.3.14
+   2.4.18

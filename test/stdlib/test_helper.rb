@@ -10,6 +10,17 @@ class Test::Unit::TestCase
   prepend TestSkip
 end
 
+class Test::Unit::TestCase
+  module Printer
+    def setup
+      STDERR.puts name
+      super
+    end
+  end
+
+  # prepend Printer
+end
+
 module Spy
   def self.wrap(object, method_name)
     spy = WrapSpy.new(object: object, method_name: method_name)
@@ -392,6 +403,16 @@ module TypeAssertions
   include VersionHelper
 end
 
+class ToI
+  def initialize(value = 3)
+    @value = value
+  end
+
+  def to_i
+    @value
+  end
+end
+
 class ToInt
   def initialize(value = 3)
     @value = value
@@ -432,6 +453,27 @@ class ToS
   end
 end
 
+
+class ToSym
+  def initialize(value = :&)
+    @value = value
+  end
+
+  def to_sym
+    @value
+  end
+end
+
+class ToA
+  def initialize(*args)
+    @args = args
+  end
+
+  def to_a
+    @args
+  end
+end
+
 class ToArray
   def initialize(*args)
     @args = args
@@ -439,6 +481,16 @@ class ToArray
 
   def to_ary
     @args
+  end
+end
+
+class ToHash
+  def initialize(hash = { 'hello' => 'world' })
+    @hash = hash
+  end
+
+  def to_hash
+    @hash
   end
 end
 
@@ -548,6 +600,11 @@ class StdlibTest < Test::Unit::TestCase
               end
   end
 
+  # def setup
+  #   STDERR.puts name
+  #   super
+  # end
+
   def hook
     self.class.hook
   end
@@ -561,9 +618,11 @@ class StdlibTest < Test::Unit::TestCase
       null = StringIO.new
       @stdout, @stderr = $stdout, $stderr
       $stderr = $stdout = null
+      super
     end
 
     def teardown
+      super
       $stderr, $stdout = @stderr, @stdout
     end
   end

@@ -82,7 +82,7 @@ FileList["test/stdlib/**/*_test.rb"].each do |test|
   end
 end
 
-task :stdlib_test do
+task :stdlib_test => :compile do
   test_files = FileList["test/stdlib/**/*_test.rb"].reject do |path|
     path =~ %r{Ractor}
   end
@@ -308,5 +308,49 @@ NOTES
     if status.success?
       puts "  >> Done! Open #{output.chomp} and publish the release!"
     end
+  end
+end
+
+
+desc "Generate changelog template from GH pull requests"
+task :changelog do
+  major, minor, patch, _pre = RBS::VERSION.split(".", 4)
+  major = major.to_i
+  minor = minor.to_i
+  patch = patch.to_i
+
+  if patch == 0
+    milestone = "RBS #{major}.#{minor}"
+  else
+    milestone = "RBS #{major}.#{minor}.x"
+  end
+
+  puts "🔍 Finding pull requests that is associated to milestone `#{milestone}`..."
+
+  command = [
+    "gh",
+    "pr",
+    "list",
+    "--limit=10000",
+    "--json",
+    "url,title,number",
+    "--search" ,
+    "milestone:\"#{milestone}\" is:merged sort:updated-desc -label:Released"
+  ]
+
+  require "open3"
+  output, status = Open3.capture2(*command)
+  raise status.inspect unless status.success?
+
+  require "json"
+  json = JSON.parse(output, symbolize_names: true)
+
+  unless json.empty?
+    puts
+    json.each do |line|
+      puts "* #{line[:title]} ([##{line[:number]}](#{line[:url]}))"
+    end
+  else
+    puts "  (🤑 There is no *unreleased* pull request associated to the milestone.)"
   end
 end

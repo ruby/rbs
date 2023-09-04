@@ -47,7 +47,16 @@ module RBS
       def docs
         if ds = yield
           unless ds.empty?
-            ds.map(&:comment)
+            ds.map do |code_object|
+              case comment = code_object.comment
+              when String
+                raise
+              when RDoc::Comment
+                comment.parse
+              when RDoc::Markup::Document
+                comment
+              end
+            end
           end
         end
       end

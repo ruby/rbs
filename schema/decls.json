@@ -60,7 +60,7 @@
       "required": ["declaration", "name", "type", "comment", "location"]
     },
     "global": {
-      "title": "Global declaration: `$DEBUG: bool`, ...",
+      "title": "Global declaration: `$DEBUG: boolish`, ...",
       "type": "object",
       "properties": {
         "declaration": {

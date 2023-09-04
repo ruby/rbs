@@ -1,3 +1,27 @@
+# <!-- rdoc-file=lib/uri/common.rb -->
+# Base class for all URI exceptions.
+#
+class URI::Error < StandardError
+end
+
+# <!-- rdoc-file=lib/uri/common.rb -->
+# Not a URI.
+#
+class URI::InvalidURIError < URI::Error
+end
+
+# <!-- rdoc-file=lib/uri/common.rb -->
+# Not a URI component.
+#
+class URI::InvalidComponentError < URI::Error
+end
+
+# <!-- rdoc-file=lib/uri/common.rb -->
+# URI is valid, bad usage is not.
+#
+class URI::BadURIError < URI::Error
+end
+
 # <!-- rdoc-file=lib/uri.rb -->
 # URI is a module providing classes to handle Uniform Resource Identifiers
 # ([RFC2396](http://tools.ietf.org/html/rfc2396)).

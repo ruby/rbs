@@ -4,8 +4,6 @@
 # allowing `true` to be used in logical expressions.
 #
 class TrueClass
-  public
-
   def !: () -> false
 
   # <!--
@@ -14,9 +12,8 @@ class TrueClass
   # -->
   # And---Returns `false` if *obj* is `nil` or `false`, `true` otherwise.
   #
-  def &: (nil) -> false
-       | (false) -> false
-       | (untyped obj) -> true
+  def &: (false | nil) -> false
+       | (untyped obj) -> bool
 
   # <!--
   #   rdoc-file=object.c
@@ -27,7 +24,7 @@ class TrueClass
   # statements.
   #
   def ===: (true) -> true
-         | (untyped obj) -> false
+         | (untyped obj) -> bool
 
   # <!--
   #   rdoc-file=object.c
@@ -35,9 +32,8 @@ class TrueClass
   # -->
   # Exclusive Or---Returns `true` if *obj* is `nil` or `false`, `false` otherwise.
   #
-  def ^: (nil) -> true
-       | (false) -> true
-       | (untyped obj) -> false
+  def ^: (false | nil) -> true
+       | (untyped obj) -> bool
 
   # <!-- rdoc-file=object.c -->
   # The string representation of `true` is "true".
@@ -67,6 +63,4 @@ class TrueClass
   #     or
   #
   def |: (untyped obj) -> true
-
-  def clone: (?freeze: true?) -> self
 end

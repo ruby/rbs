@@ -22,10 +22,6 @@ gem "rdoc", "~> 6.4.0"
 # Test gems
 gem "rbs-amber", path: "test/assets/test-gem"
 
-group :development do
-  gem "ruby-lsp", require: false
-end
-
 group :minitest do
   gem "minitest"
 end

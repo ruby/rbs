@@ -973,6 +973,30 @@ class Thread < Object
 
   # <!--
   #   rdoc-file=thread.c
+  #   - thr.raise
+  #   - thr.raise(string)
+  #   - thr.raise(exception [, string [, array]])
+  # -->
+  # Raises an exception from the given thread. The caller does not have to be
+  # `thr`. See Kernel#raise for more information.
+  #
+  #     Thread.abort_on_exception = true
+  #     a = Thread.new { sleep(200) }
+  #     a.raise("Gotcha")
+  #
+  # This will produce:
+  #
+  #     prog.rb:3: Gotcha (RuntimeError)
+  #      from prog.rb:2:in `initialize'
+  #      from prog.rb:2:in `new'
+  #      from prog.rb:2
+  #
+  def self?.raise: () -> bot
+                 | (String message, ?cause: Exception?) -> bot
+                 | (_Exception exception, ?untyped message, ?::Array[String] backtrace, ?cause: Exception?) -> bot
+
+  # <!--
+  #   rdoc-file=thread.c
   #   - Thread.kill(thread)   -> thread
   # -->
   # Causes the given `thread` to exit, see also Thread::exit.
@@ -1414,7 +1438,7 @@ class Thread::ConditionVariable < Object
   #
   # Returns the slept result on `mutex`.
   #
-  def wait: (Thread::Mutex mutex, ?Integer timeout) -> self
+  def wait: (Thread::Mutex mutex, ?Integer | Float? timeout) -> self
 end
 
 # <!-- rdoc-file=thread_sync.c -->
@@ -1717,10 +1741,10 @@ class Thread::SizedQueue < Thread::Queue
   def push: (untyped obj, ?boolish non_block, timeout: _ToF?) -> void
 end
 
-ConditionVariable: singleton(Thread::ConditionVariable)
+class ConditionVariable = Thread::ConditionVariable
 
-Mutex: singleton(Thread::Mutex)
+class Mutex = Thread::Mutex
 
-Queue: singleton(Thread::Queue)
+class Queue = Thread::Queue
 
-SizedQueue: singleton(Thread::SizedQueue)
+class SizedQueue = Thread::SizedQueue

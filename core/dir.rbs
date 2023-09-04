@@ -102,7 +102,7 @@ class Dir
   # The optional *encoding* keyword argument specifies the encoding of the
   # directory. If not specified, the filesystem encoding is used.
   #
-  def initialize: (string, ?encoding: encoding | nil) -> void
+  def initialize: (path dir, ?encoding: encoding?) -> self
 
   # <!--
   #   rdoc-file=dir.rb
@@ -110,7 +110,7 @@ class Dir
   # -->
   # Equivalent to calling `Dir.glob([`*string,...*`], 0)`.
   #
-  def self.[]: (*string patterns, ?base: string) ?{ (String path) -> void } -> Array[String]
+  def self.[]: (*path patterns, ?base: path?, ?sort: bool) -> Array[String]
 
   # <!--
   #   rdoc-file=dir.c
@@ -149,8 +149,8 @@ class Dir
   #     /tmp
   #     /var/spool/mail
   #
-  def self.chdir: (?string) -> void
-                | [U] (?string) { (String) -> U } -> U
+  def self.chdir: (?path dir) -> 0
+                | [U] (?path dir) { (String dir) -> U } -> U
 
   # <!--
   #   rdoc-file=dir.c
@@ -166,7 +166,7 @@ class Dir
   #
   #     Dir.children("testdir")   #=> ["config.h", "main.rb"]
   #
-  def self.children: (string dirname, ?encoding: string | Encoding | nil enc) -> Array[String]
+  def self.children: (path dirname, ?encoding: encoding?) -> Array[String]
 
   # <!--
   #   rdoc-file=dir.c
@@ -176,7 +176,7 @@ class Dir
   # may make this call. Not available on all platforms. On Unix systems, see
   # `chroot(2)` for more information.
   #
-  def self.chroot: (string) -> void
+  def self.chroot: (path root) -> 0
 
   # <!--
   #   rdoc-file=dir.c
@@ -187,7 +187,7 @@ class Dir
   # Deletes the named directory. Raises a subclass of SystemCallError if the
   # directory isn't empty.
   #
-  def self.delete: (string) -> void
+  def self.delete: (path dirname) -> 0
 
   # <!--
   #   rdoc-file=dir.c
@@ -208,8 +208,8 @@ class Dir
   #     Got config.h
   #     Got main.rb
   #
-  def self.each_child: (string dirname, ?encoding: string | Encoding | nil enc) -> Enumerator[String, void]
-                     | (string dirname, ?encoding: string | Encoding | nil enc) { (String filename) -> void } -> void
+  def self.each_child: (path dirname, ?encoding: encoding?) -> Enumerator[String, nil]
+                     | (path dirname, ?encoding: encoding?) { (String filename) -> void } -> nil
 
   # <!--
   #   rdoc-file=dir.c
@@ -218,7 +218,7 @@ class Dir
   # Returns `true` if the named file is an empty directory, `false` if it is not a
   # directory or non-empty.
   #
-  def self.empty?: (string path_name) -> bool
+  def self.empty?: (path path_name) -> bool
 
   # <!--
   #   rdoc-file=dir.c
@@ -233,7 +233,7 @@ class Dir
   #
   #     Dir.entries("testdir")   #=> [".", "..", "config.h", "main.rb"]
   #
-  def self.entries: (string dirname, ?encoding: encoding | nil enc) -> ::Array[String]
+  def self.entries: (path dirname, ?encoding: encoding?) -> Array[String]
 
   # <!--
   #   rdoc-file=dir.c
@@ -241,7 +241,7 @@ class Dir
   # -->
   # Returns `true` if the named file is a directory, `false` otherwise.
   #
-  def self.exist?: (string file) -> bool
+  def self.exist?: (path | _ToIO file_name) -> bool
 
   # <!--
   #   rdoc-file=dir.c
@@ -371,8 +371,8 @@ class Dir
   #
   #     Dir.glob("**/lib/*.rb")             #=> ["lib/song.rb"]
   #
-  def self.glob: (string | ::Array[string] pattern, ?Integer flags, ?base: string) -> ::Array[String]
-               | (string | ::Array[string] pattern, ?Integer flags, ?base: string) { (String) -> void } -> void
+  def self.glob: (array[path] | path pattern, ?int flags, ?base: path?, ?sort: bool) -> Array[String]
+               | (array[path] | path pattern, ?int flags, ?base: path?, ?sort: bool) { (String pathname) -> void } -> nil
 
   # <!--
   #   rdoc-file=dir.c
@@ -381,7 +381,7 @@ class Dir
   # -->
   # Returns the home directory of the current user or the named user if given.
   #
-  def self.home: (?string user) -> String
+  def self.home: (?string? user) -> String
 
   # <!--
   #   rdoc-file=dir.c
@@ -395,7 +395,7 @@ class Dir
   #
   #     Dir.mkdir(File.join(Dir.home, ".foo"), 0700) #=> 0
   #
-  def self.mkdir: (string, ?Integer permissions) -> void
+  def self.mkdir: (path dirname, ?int permissions) -> 0
 
   # <!--
   #   rdoc-file=dir.rb
@@ -411,8 +411,8 @@ class Dir
   # passed *aDir* as a parameter. The directory is closed at the end of the block,
   # and Dir::open returns the value of the block.
   #
-  def self.open: (string, ?encoding: encoding | nil) -> Dir
-               | [U] (string, ?encoding: encoding | nil) { (Dir) -> U } -> U
+  def self.open: (path dirname, ?encoding: encoding?) -> instance
+               | [U] (path dirname, ?encoding: encoding?) { (instance) -> U } -> U
 
   # <!--
   #   rdoc-file=dir.c
@@ -425,7 +425,7 @@ class Dir
   #     Dir.getwd           #=> "/tmp"
   #     Dir.pwd             #=> "/tmp"
   #
-  def self.pwd: () -> String
+  alias self.pwd self.getwd
 
   # <!--
   #   rdoc-file=dir.c
@@ -473,7 +473,7 @@ class Dir
   #     d = Dir.new("testdir")
   #     d.close   #=> nil
   #
-  def close: () -> void
+  def close: () -> nil
 
   # <!--
   #   rdoc-file=dir.c
@@ -496,7 +496,7 @@ class Dir
   #     Got main.rb
   #
   def each: () { (String) -> void } -> self
-          | () -> ::Enumerator[String, self]
+          | () -> Enumerator[String, self]
 
   # <!--
   #   rdoc-file=dir.c
@@ -517,7 +517,7 @@ class Dir
   #     Got main.rb
   #
   def each_child: () { (String) -> void } -> self
-                | () -> ::Enumerator[String, self]
+                | () -> Enumerator[String, self]
 
   # <!--
   #   rdoc-file=dir.c
@@ -577,7 +577,7 @@ class Dir
   #     d.pos = i                #=> 12
   #     d.read                   #=> ".."
   #
-  def pos=: (Integer pos) -> Integer
+  def pos=: [U < _ToInt] (U pos) -> U
 
   # <!--
   #   rdoc-file=dir.c
@@ -620,7 +620,7 @@ class Dir
   #     d.seek(i)                #=> #<Dir:0x401b3c40>
   #     d.read                   #=> ".."
   #
-  def seek: (Integer) -> self
+  def seek: (int pos) -> self
 
   # <!--
   #   rdoc-file=dir.c
@@ -634,7 +634,7 @@ class Dir
   #     d.read   #=> "."
   #     d.tell   #=> 12
   #
-  def tell: () -> Integer
+  alias tell pos
 
   # <!-- rdoc-file=dir.c -->
   # Returns the path parameter passed to *dir*'s constructor.

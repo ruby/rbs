@@ -400,6 +400,40 @@ singleton(::BasicObject)
     end
   end
 
+  def test_undefined_interface
+    with_cli do |cli|
+      Dir.mktmpdir do |dir|
+        (Pathname(dir) + 'a.rbs').write(<<~RBS)
+        class Foo
+          def void: () -> _Void
+        end
+        RBS
+
+        error = assert_raises RBS::NoTypeFoundError do
+          cli.run(["-I", dir, "validate"])
+        end
+        assert_equal "_Void", error.type_name.to_s
+      end
+    end
+  end
+
+  def test_undefined_alias
+    with_cli do |cli|
+      Dir.mktmpdir do |dir|
+        (Pathname(dir) + 'a.rbs').write(<<~RBS)
+        class Foo
+          def void: () -> voida
+        end
+        RBS
+
+        error = assert_raises RBS::NoTypeFoundError do
+          cli.run(["-I", dir, "validate"])
+        end
+        assert_equal "voida", error.type_name.to_s
+      end
+    end
+  end
+
   def test_constant
     with_cli do |cli|
       cli.run(%w(constant Pathname))
@@ -963,6 +997,31 @@ Processing `test/a_test.rb`...
           def y: () -> untyped
         end
       RBS
+    end
+  end
+
+
+  def test_subtract_write_removes_definition_if_empty
+    Dir.mktmpdir do |dir|
+      dir = Pathname(dir)
+
+      minuend = dir.join('minuend.rbs')
+      minuend.write(<<~RBS)
+        class C
+          def x: () -> untyped
+        end
+      RBS
+      subtrahend = dir.join('subtrahend.rbs')
+      subtrahend.write(<<~RBS)
+        class C
+          def x: () -> untyped
+        end
+      RBS
+
+      stdout, stderr = run_rbs('subtract', '--write', minuend.to_s, subtrahend.to_s)
+      assert_empty stderr
+      assert_empty stdout
+      assert_equal minuend.exist?, false
     end
   end
 

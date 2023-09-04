@@ -300,7 +300,7 @@ module Kernel : BasicObject
   #     eval "str + ' Fred'"                      #=> "hello Fred"
   #     eval "str + ' Fred'", get_binding("bye")  #=> "bye Fred"
   #
-  def self?.eval: (String arg0, ?Binding arg1, ?String filename, ?Integer lineno) -> untyped
+  def self?.eval: (string src, ?Binding? scope, ?string filename, ?int lineno) -> untyped
 
   # <!--
   #   rdoc-file=vm_eval.c
@@ -358,7 +358,7 @@ module Kernel : BasicObject
   #     srand 1234               # => 1234
   #     [ rand, rand ]           # => [0.1915194503788923, 0.6221087710398319]
   #
-  def self?.srand: (?Numeric number) -> Numeric
+  def self?.srand: (?int number) -> Integer
 
   # <!--
   #   rdoc-file=process.c
@@ -383,7 +383,7 @@ module Kernel : BasicObject
   # 4. Therefore you should use spawn() instead of fork().
   #
   def self?.fork: () -> Integer?
-                | () { () -> untyped } -> Integer?
+                | () { () -> void } -> Integer
 
   def initialize_copy: (self object) -> self
 
@@ -403,12 +403,10 @@ module Kernel : BasicObject
   #
   #     Array(:foo)             # => [:foo]
   #
-  def self?.Array: (NilClass x) -> [ ]
-                 | [T] (::Array[T] x) -> ::Array[T]
-                 | [T] (::Range[T] x) -> ::Array[T]
-                 | [T] (_Each[T] x) -> ::Array[T]
-                 | [K, V] (::Hash[K, V] x) -> ::Array[[ K, V ]]
-                 | [T] (T x) -> ::Array[T]
+  def self?.Array: (nil) -> []
+                 | [T] (Array[T] ary) -> Array[T]
+                 | [T] (_ToAry[T] | _ToA[T] array_like) -> Array[T]
+                 | [T] (T ele) -> [T]
 
   # <!--
   #   rdoc-file=complex.c
@@ -446,7 +444,11 @@ module Kernel : BasicObject
   #
   # See String#to_c.
   #
-  def self?.Complex: (Numeric | String x, ?Numeric | String y, ?exception: bool exception) -> Complex
+  def self?.Complex: (_ToC complex_like, ?exception: true) -> Complex
+                   | (_ToC complex_like, exception: bool) -> Complex?
+                   | (Numeric | String real, ?Numeric | String imag, ?exception: true) -> Complex
+                   | (Numeric | String real, ?Numeric | String imag, exception: bool) -> Complex?
+                   | (untyped, ?untyped, ?exception: bool) -> Complex?
 
   # <!--
   #   rdoc-file=kernel.rb
@@ -464,7 +466,9 @@ module Kernel : BasicObject
   #     Float(nil)               #=> TypeError: can't convert nil into Float
   #     Float("123.0_badstring", exception: false)  #=> nil
   #
-  def self?.Float: (Numeric | String x, ?exception: bool exception) -> Float
+  def self?.Float: (_ToF float_like, ?exception: true) -> Float
+                 | (_ToF float_like, exception: bool) -> Float?
+                 | (untyped, ?exception: bool) -> Float?
 
   # <!--
   #   rdoc-file=object.c
@@ -488,7 +492,8 @@ module Kernel : BasicObject
   #     Hash(nil)              # => {}
   #     Hash([])               # => {}
   #
-  def self?.Hash: [K, V] (Object x) -> ::Hash[K, V]
+  def self?.Hash: [K, V] (nil | [] _empty) -> Hash[K, V]
+                | [K, V] (hash[K, V] hash_like) -> Hash[K, V]
 
   # <!--
   #   rdoc-file=object.c
@@ -574,8 +579,11 @@ module Kernel : BasicObject
   # With `exception` given as `false`, an exception of any kind is suppressed and
   # `nil` is returned.
   #
-  def self?.Integer: (Numeric | String arg, ?exception: bool exception) -> Integer
-                   | (String arg, ?Integer base, ?exception: bool exception) -> Integer
+  def self?.Integer: (int | _ToI int_like, ?exception: true) -> Integer
+                   | (int | _ToI int_like, exception: bool) -> Integer?
+                   | (string str, ?int base, ?exception: true) -> Integer
+                   | (string str, ?int base, exception: bool) -> Integer?
+                   | (untyped, ?untyped, ?exception: bool) -> Integer?
 
   # <!--
   #   rdoc-file=rational.c
@@ -614,7 +622,17 @@ module Kernel : BasicObject
   #
   # See also String#to_r.
   #
-  def self?.Rational: (Numeric | String | Object x, ?Numeric | String y, ?exception: bool exception) -> Rational
+  def self?.Rational: (int | _ToR rational_like, ?exception: true) -> Rational
+                    | (int | _ToR rational_like, exception: bool) -> Rational?
+                    | (int | _ToR numer, ?int | _ToR denom, ?exception: true) -> Rational
+                    | (int | _ToR numer, ?int | _ToR denom, exception: bool) -> Rational?
+                    | [T] (Numeric&_RationalDiv[T] numer, Numeric denom, ?exception: bool) -> T
+                    | [T < Numeric] (T value, 1, ?exception: bool) -> T
+                    | (untyped, ?untyped, ?exception: bool) -> Rational?
+
+  interface _RationalDiv[T]
+    def /: (Numeric) -> T
+  end
 
   # <!--
   #   rdoc-file=object.c
@@ -630,7 +648,7 @@ module Kernel : BasicObject
   #
   # Raises `TypeError` if `object` cannot be converted to a string.
   #
-  def self?.String: (_ToStr | _ToS x) -> String
+  def self?.String: (string | _ToS string_like) -> String
 
   # <!--
   #   rdoc-file=eval.c
@@ -691,7 +709,7 @@ module Kernel : BasicObject
   # Terminate execution immediately, effectively by calling `Kernel.exit(false)`.
   # If *msg* is given, it is written to STDERR prior to terminating.
   #
-  def self?.abort: (?String msg) -> bot
+  def self?.abort: (?string msg) -> bot
 
   # <!--
   #   rdoc-file=eval_jump.c
@@ -712,7 +730,7 @@ module Kernel : BasicObject
   #
   #     goodbye cruel world
   #
-  def self?.at_exit: () { () -> untyped } -> Proc
+  def self?.at_exit: () { () -> void } -> Proc
 
   # <!--
   #   rdoc-file=load.c
@@ -795,8 +813,7 @@ module Kernel : BasicObject
   #     at_exit function
   #     in finalizer
   #
-  def self?.exit: () -> bot
-                | (?Integer | TrueClass | FalseClass status) -> bot
+  def self?.exit: (?int | bool status) -> bot
 
   # <!--
   #   rdoc-file=process.c
@@ -807,7 +824,7 @@ module Kernel : BasicObject
   #
   #     Process.exit!(true)
   #
-  def self?.exit!: (Integer | TrueClass | FalseClass status) -> bot
+  def self?.exit!: (?int | bool status) -> bot
 
   # <!-- rdoc-file=eval.c -->
   # With no arguments, raises the exception in `$!` or raises a RuntimeError if
@@ -828,8 +845,8 @@ module Kernel : BasicObject
   #     raise ArgumentError, "No parameters", caller
   #
   def self?.fail: () -> bot
-                | (String message, ?cause: Exception?) -> bot
-                | (_Exception exception, ?untyped message, ?::Array[String] backtrace, ?cause: Exception?) -> bot
+                | (string message, ?cause: Exception?) -> bot
+                | (_Exception exception, ?_ToS? message, ?String | Array[String] | nil backtrace, ?cause: Exception?) -> bot
 
   # <!--
   #   rdoc-file=eval.c
@@ -988,7 +1005,7 @@ module Kernel : BasicObject
   #       puts enum.next
   #     } #=> :ok
   #
-  def self?.loop: () { (nil) -> untyped } -> bot
+  def self?.loop: () { () -> void } -> bot
                 | () -> ::Enumerator[nil, bot]
 
   # <!--
@@ -1137,7 +1154,7 @@ module Kernel : BasicObject
   #     gets  # Sets $_ to the most recent user input.
   #     print # Prints $_.
   #
-  def self?.print: (*Kernel args) -> nil
+  def self?.print: (*_ToS args) -> nil
 
   # <!--
   #   rdoc-file=io.c
@@ -1171,9 +1188,9 @@ module Kernel : BasicObject
   #
   # With no arguments, does nothing.
   #
-  def self?.printf: (IO arg0, String arg1, *untyped args) -> nil
-                  | (String arg1, *untyped args) -> nil
-                  | () -> nil
+  def self?.printf: () -> nil
+                  | (String fmt, *untyped args) -> nil
+                  | (_Writer io, string fmt, *untyped args) -> nil
 
   # <!--
   #   rdoc-file=proc.c
@@ -1202,8 +1219,8 @@ module Kernel : BasicObject
   #
   # See IO#putc for important information regarding multi-byte characters.
   #
-  def self?.putc: (Integer arg0) -> Integer
-                | (String arg0) -> String
+  def self?.putc: [T < _ToInt] (T chr) -> T
+                | (String chr) -> String
 
   # <!--
   #   rdoc-file=io.c
@@ -1213,7 +1230,7 @@ module Kernel : BasicObject
   #
   #     $stdout.puts(objects)
   #
-  def self?.puts: (*untyped arg0) -> NilClass
+  def self?.puts: (*_ToS objects) -> nil
 
   # <!--
   #   rdoc-file=io.c
@@ -1240,8 +1257,8 @@ module Kernel : BasicObject
   #     0..4
   #     [0..4, 0..4, 0..4]
   #
-  def self?.p: [T] (T arg0) -> T
-             | (untyped, untyped, *untyped) -> Array[untyped]
+  def self?.p: [T < _Inspect] (T arg0) -> T
+             | (_Inspect arg0, _Inspect arg1, *_Inspect rest) -> Array[_Inspect]
              | () -> nil
 
   # <!--
@@ -1550,8 +1567,8 @@ module Kernel : BasicObject
   #     sleep 1.9   #=> 2
   #     Time.new    #=> 2008-03-08 19:56:22 +0900
   #
-  def self?.sleep: () -> bot
-                 | ((Integer | Float | _Divmod) duration) -> Integer
+  def self?.sleep: (?nil) -> bot
+                 | (Integer | Float | _Divmod duration) -> Integer
 
   interface _Divmod
     def divmod: (Numeric) -> [ Numeric, Numeric ]
@@ -1650,7 +1667,7 @@ module Kernel : BasicObject
   # optional second parameter supplies a return value for the `catch` block, which
   # otherwise defaults to `nil`. For examples, see Kernel::catch.
   #
-  def self?.throw: (Object tag, ?untyped obj) -> bot
+  def self?.throw: (untyped tag, ?untyped obj) -> bot
 
   # <!--
   #   rdoc-file=warning.rb
@@ -1697,7 +1714,7 @@ module Kernel : BasicObject
   # :experimental
   # :   Used for experimental features that may change in future releases.
   #
-  def self?.warn: (*untyped msg, ?uplevel: Integer | nil, ?category: :deprecated | :experimental | nil) -> NilClass
+  def self?.warn: (*_ToS msg, ?uplevel: int?, ?category: Warning::category?) -> nil
 
   # <!--
   #   rdoc-file=process.c

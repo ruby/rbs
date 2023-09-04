@@ -479,7 +479,7 @@ module RBS
           else
             Types::ClassInstance.new(name: const_to_name(type_node), args: [], location: nil)
           end
-        when type_node.type == :COLON2
+        when type_node.type == :COLON2 || type_node.type == :COLON3
           Types::ClassInstance.new(name: const_to_name(type_node), args: [], location: nil)
         when call_node?(type_node, name: :[], receiver: -> (_) { true })
           # The type_node represents a type application
@@ -553,11 +553,7 @@ module RBS
           TypeName.new(name: node.children[0], namespace: Namespace.empty)
         when :COLON2
           if node.children[0]
-            if node.children[0].type == :COLON3
-              namespace = Namespace.root
-            else
-              namespace = const_to_name(node.children[0]).to_namespace
-            end
+            namespace = const_to_name(node.children[0]).to_namespace
           else
             namespace = Namespace.empty
           end

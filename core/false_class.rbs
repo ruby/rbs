@@ -4,8 +4,6 @@
 # operators allowing `false` to participate correctly in logical expressions.
 #
 class FalseClass
-  public
-
   def !: () -> true
 
   # <!--
@@ -27,7 +25,7 @@ class FalseClass
   # statements.
   #
   def ===: (false) -> true
-         | (untyped obj) -> false
+         | (untyped obj) -> bool
 
   # <!--
   #   rdoc-file=object.c
@@ -37,9 +35,8 @@ class FalseClass
   # Exclusive Or---If *obj* is `nil` or `false`, returns `false`; otherwise,
   # returns `true`.
   #
-  def ^: (nil) -> false
-       | (false) -> false
-       | (untyped obj) -> true
+  def ^: (false | nil) -> false
+       | (untyped obj) -> bool
 
   # <!-- rdoc-file=object.c -->
   # The string representation of `false` is "false".
@@ -61,9 +58,6 @@ class FalseClass
   # -->
   # Or---Returns `false` if *obj* is `nil` or `false`; `true` otherwise.
   #
-  def |: (nil) -> false
-       | (false) -> false
-       | (untyped obj) -> true
-
-  def clone: (?freeze: true?) -> self
+  def |: (nil | false) -> false
+       | (untyped obj) -> bool
 end

@@ -205,7 +205,7 @@ class Object < BasicObject
   #     chris.define_singleton_method(:greet) {|greeting| "#{greeting}, I'm Chris!" }
   #     chris.greet("Hi") #=> "Hi, I'm Chris!"
   #
-  def define_singleton_method: (name, Method | UnboundMethod) -> Symbol
+  def define_singleton_method: (name, Method | UnboundMethod | Proc method) -> Symbol
                              | (name) { (*untyped) -> untyped } -> Symbol
 
   # <!--
@@ -223,7 +223,7 @@ class Object < BasicObject
   #
   #     1cat[4, 5, 6]
   #
-  def display: (?_Writeable port) -> void
+  def display: (?_Writer port) -> void
 
   # <!--
   #   rdoc-file=object.c
@@ -1072,10 +1072,6 @@ class Object < BasicObject
   #     2.yield_self.detect(&:odd?)            # => nil
   #
   alias then yield_self
-end
-
-interface _Writeable
-  def write: (untyped) -> void
 end
 
 type Object::name = Symbol | string

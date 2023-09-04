@@ -4,23 +4,22 @@ target :lib do
   signature "sig"
   check "lib"
   ignore(
-    "lib/rbs/prototype/runtime.rb",
     "lib/rbs/test",
     "lib/rbs/test.rb"
   )
 
-  library "set", "pathname", "json", "logger", "monitor", "tsort", "uri", 'dbm', 'pstore', 'singleton', 'shellwords', 'fileutils', 'find', 'digest', 'abbrev'
+  library "pathname", "json", "logger", "monitor", "tsort", "uri", 'dbm', 'pstore', 'singleton', 'shellwords', 'fileutils', 'find', 'digest', 'abbrev'
   signature 'stdlib/yaml/0'
   signature "stdlib/strscan/0/"
   signature "stdlib/optparse/0/"
   signature "stdlib/rdoc/0/"
   signature "stdlib/ripper/0"
 
-  configure_code_diagnostics do |config|
-    config[D::Ruby::MethodDefinitionMissing] = :hint
-    config[D::Ruby::ElseOnExhaustiveCase] = :hint
-    config[D::Ruby::FallbackAny] = :hint
-  end
+  # configure_code_diagnostics do |config|
+  #   config[D::Ruby::MethodDefinitionMissing] = :hint
+  #   config[D::Ruby::ElseOnExhaustiveCase] = :hint
+  #   config[D::Ruby::FallbackAny] = :hint
+  # end
 end
 
 # target :lib do
@@ -31,7 +30,7 @@ end
 #   check "app/models/**/*.rb"        # Glob
 #   # ignore "lib/templates/*.rb"
 #
-#   # library "pathname", "set"       # Standard libraries
+#   # library "pathname", "uri"       # Standard libraries
 #   # library "strong_json"           # Gems
 # end
 
@@ -40,6 +39,6 @@ end
 #
 #   check "spec"
 #
-#   # library "pathname", "set"       # Standard libraries
+#   # library "pathname", "uri"       # Standard libraries
 #   # library "rspec"
 # end

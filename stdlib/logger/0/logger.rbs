@@ -796,7 +796,7 @@ class Logger
   #     periodic log file rotation; default is `'%Y%m%d'`. See [Periodic
   #     Rotation](rdoc-ref:Logger@Periodic+Rotation).
   #
-  def initialize: (logdev logdev, ?Numeric | String shift_age, ?Integer shift_size, ?shift_period_suffix: String, ?binmode: boolish, ?datetime_format: String, ?formatter: _Formatter, ?progname: String, ?level: Integer | String | Symbol) -> void
+  def initialize: (logdev? logdev, ?Numeric | String shift_age, ?Integer shift_size, ?shift_period_suffix: String, ?binmode: boolish, ?datetime_format: String, ?formatter: _Formatter, ?progname: String, ?level: Integer | String | Symbol) -> void
 end
 
 Logger::ProgName: String

@@ -495,6 +495,15 @@ class StringIO
   #
   def tell: () -> Integer
 
+  # <!--
+  #   rdoc-file=ext/stringio/stringio.c
+  #   - strio.truncate(integer)    -> 0
+  # -->
+  # Truncates the buffer string to at most *integer* bytes. The stream must be
+  # opened for writing.
+  #
+  def truncate: (Integer) -> 0
+
   # <!-- rdoc-file=ext/stringio/stringio.c -->
   # Returns `false`.  Just for compatibility to IO.
   #
