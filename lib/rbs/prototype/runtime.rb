@@ -14,7 +14,7 @@ module RBS
       def initialize(patterns:, env:, merge:, owners_included: [])
         @patterns = patterns
         @decls = nil
-        @modules = []
+        @modules = {}
         @env = env
         @merge = merge
         @owners_included = owners_included.map do |name|
@@ -47,8 +47,11 @@ module RBS
       def decls
         unless @decls
           @decls = []
-          @modules = ObjectSpace.each_object(Module).to_a
-          @modules.select {|mod| target?(mod) }.sort_by{|mod| const_name!(mod) }.each do |mod|
+          @modules = ObjectSpace.each_object(Module)
+            .map { |mod| [const_name(mod), mod] }
+            .select { |name, _| name }
+            .to_h
+          @modules.select { |name, mod| target?(mod) }.sort_by { |name, _| name }.each do |_, mod|
             case mod
             when Class
               generate_class mod
@@ -518,7 +521,7 @@ module RBS
 
         outer_module_names&.each_with_index do |outer_module_name, i|
           current_name = outer_module_names.take(i+1).join('::')
-          outer_module = @modules.detect { |x| const_name(x) == current_name }
+          outer_module = @modules[current_name]
           outer_decl = destination.detect do |decl|
             case outer_module
             when Class
@@ -531,7 +534,7 @@ module RBS
           # Insert AST::Declarations if declarations are not added previously
           unless outer_decl
             outer_module or raise
-            
+
             if outer_module.is_a?(Class)
               outer_decl = AST::Declarations::Class.new(
                 name: to_type_name(outer_module_name),
