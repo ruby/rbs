@@ -2299,12 +2299,12 @@ end
       definition_builder = RBS::DefinitionBuilder.new(env: env.resolve_type_names)
       definition_builder.build_instance(TypeName("::Foo")).tap do |defn|
         defn.methods[:request].tap do |m|
-          assert_equal ["(::Object::name name, *untyped args) ?{ (*untyped) -> untyped } -> untyped"], m.method_types.map(&:to_s)
+          assert_equal ["(::interned name, *untyped args) ?{ (*untyped) -> untyped } -> untyped"], m.method_types.map(&:to_s)
         end
       end
       definition_builder.build_instance(TypeName("::Mod")).tap do |defn|
         defn.methods[:request].tap do |m|
-          assert_equal ["(::Object::name name, *untyped args) ?{ (*untyped) -> untyped } -> untyped"], m.method_types.map(&:to_s)
+          assert_equal ["(::interned name, *untyped args) ?{ (*untyped) -> untyped } -> untyped"], m.method_types.map(&:to_s)
         end
       end
   end
