@@ -401,7 +401,7 @@ module Process
   # Process::RLIM_SAVED_MAX or Process::RLIM_SAVED_CUR. See Process.setrlimit and
   # the system getrlimit(2) manual for details.
   #
-  def self.getrlimit: (Symbol | String | Integer resource) -> [ Integer, Integer ]
+  def self.getrlimit: (interned | Integer resource) -> [ Integer, Integer ]
 
   # <!--
   #   rdoc-file=process.c
@@ -523,7 +523,7 @@ module Process
   # because of no privilege, will be raised.  In these cases, signals may have
   # been sent to preceding processes.
   #
-  def self.kill: (Integer | Symbol | String signal, *Integer pids) -> Integer
+  def self.kill: (Integer | interned signal, *Integer pids) -> Integer
 
   # <!--
   #   rdoc-file=process.c
@@ -673,7 +673,7 @@ module Process
   #
   #     Process.setrlimit(:CORE, Process.getrlimit(:CORE)[1])
   #
-  def self.setrlimit: (Symbol | String | Integer resource, Integer cur_limit, ?Integer max_limit) -> nil
+  def self.setrlimit: (interned | Integer resource, Integer cur_limit, ?Integer max_limit) -> nil
 
   # <!--
   #   rdoc-file=process.c

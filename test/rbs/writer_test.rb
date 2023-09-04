@@ -158,7 +158,7 @@ module RBS
   VERSION: String
 
   class TypeName
-    type t = Symbol | String
+    type t = interned
   end
 end
     SIG

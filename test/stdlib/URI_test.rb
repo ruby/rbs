@@ -48,7 +48,7 @@ class URISingletonTest < Test::Unit::TestCase
   def test_encode_www_form
     assert_send_type "(Array[[String, String | Numeric]]) -> String",
                      URI, :encode_www_form, [["a", "1"], ["a", 2], ["b", "3"]]
-    assert_send_type "(Hash[String | Symbol, String | Numeric]) -> String",
+    assert_send_type "(Hash[interned, String | Numeric]) -> String",
                      URI, :encode_www_form, { a: "1", "b" => 2 }
   end
 

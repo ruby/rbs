@@ -599,7 +599,7 @@ class Ractor
   # -->
   # get a value from ractor-local storage
   #
-  def []: (Symbol | String sym) -> untyped
+  def []: (interned sym) -> untyped
 
   # <!--
   #   rdoc-file=ractor.rb
@@ -607,7 +607,7 @@ class Ractor
   # -->
   # set a value in ractor-local storage
   #
-  def []=: [T] (Symbol | String sym, T val) -> T
+  def []=: [T] (interned sym, T val) -> T
 
   # <!--
   #   rdoc-file=ractor.rb

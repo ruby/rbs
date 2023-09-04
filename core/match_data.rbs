@@ -83,7 +83,7 @@ class MatchData
   def []: (Integer idx) -> String?
         | (Integer start, Integer length) -> ::Array[String?]
         | (::Range[Integer] range) -> ::Array[String?]
-        | (String | Symbol name) -> String?
+        | (interned name) -> String?
 
   # <!--
   #   rdoc-file=re.c
@@ -121,7 +121,7 @@ class MatchData
   #
   # Related: MatchData#end, MatchData#offset, MatchData#byteoffset.
   #
-  def begin: (Integer | String | Symbol n_or_name) -> Integer?
+  def begin: (Integer | interned n_or_name) -> Integer?
 
   # <!--
   #   rdoc-file=re.c
@@ -139,7 +139,7 @@ class MatchData
   #     p m.byteoffset(:foo) #=> [0, 1]
   #     p m.byteoffset(:bar) #=> [2, 3]
   #
-  def byteoffset: (Integer | Symbol | String n_or_name) -> ([ Integer, Integer ] | [ nil, nil ])
+  def byteoffset: (Integer | interned n_or_name) -> ([ Integer, Integer ] | [ nil, nil ])
 
   # <!--
   #   rdoc-file=re.c
@@ -221,7 +221,7 @@ class MatchData
   #
   # Related: MatchData#begin, MatchData#offset, MatchData#byteoffset.
   #
-  def end: (Integer | String | Symbol n_or_name) -> Integer?
+  def end: (Integer | interned n_or_name) -> Integer?
 
   # <!--
   #   rdoc-file=re.c
@@ -348,7 +348,7 @@ class MatchData
   #     m.match('foo') # => "h"
   #     m.match(:bar)  # => "ge"
   #
-  def match: (int | String | Symbol) -> String?
+  def match: (int | interned) -> String?
 
   # <!--
   #   rdoc-file=re.c
@@ -375,7 +375,7 @@ class MatchData
   #     m.match_length('foo') # => 1
   #     m.match_length(:bar)  # => 2
   #
-  def match_length: (int | String | Symbol) -> Integer?
+  def match_length: (int | interned) -> Integer?
 
   # <!--
   #   rdoc-file=re.c
@@ -414,7 +414,7 @@ class MatchData
   #
   # Related: MatchData#byteoffset, MatchData#begin, MatchData#end.
   #
-  def offset: (Integer | Symbol | String n_or_name) -> ([ Integer, Integer ] | [ nil, nil ])
+  def offset: (Integer | interned n_or_name) -> ([ Integer, Integer ] | [ nil, nil ])
 
   # <!--
   #   rdoc-file=re.c
@@ -544,7 +544,7 @@ class MatchData
   #     m.values_at(0, 1..2, :a, :b, :op)
   #     # => ["1 + 2", "1", "+", "1", "2", "+"]
   #
-  def values_at: (*Integer | Symbol | String n_or_name) -> ::Array[String?]
+  def values_at: (*Integer | interned n_or_name) -> ::Array[String?]
 
   private
 

@@ -1128,7 +1128,7 @@ module Net
     # This class is obsolete.  You may pass these same parameters directly to
     # Net::HTTP.new.  See Net::HTTP.new for details of the arguments.
     #
-    def self.Proxy: (?Symbol | String p_addr, ?Integer? p_port, ?String? p_user, ?String? p_pass) -> untyped
+    def self.Proxy: (?interned p_addr, ?Integer? p_port, ?String? p_user, ?String? p_pass) -> untyped
 
     # <!--
     #   rdoc-file=lib/net/http.rb
@@ -1836,8 +1836,6 @@ module Net
 
     alias length size
 
-    type key = String | Symbol
-
     # <!--
     #   rdoc-file=lib/net/http/header.rb
     #   - [](key)
@@ -1852,7 +1850,7 @@ module Net
     # Note that some field values may be retrieved via convenience methods; see
     # [Getters](rdoc-ref:Net::HTTPHeader@Getters).
     #
-    def []: (key key) -> (nil | String)
+    def []: (interned key) -> (nil | String)
 
     # <!--
     #   rdoc-file=lib/net/http/header.rb
@@ -1870,7 +1868,7 @@ module Net
     # Note that some field values may be set via convenience methods; see
     # [Setters](rdoc-ref:Net::HTTPHeader@Setters).
     #
-    def []=: (key key, untyped val) -> void
+    def []=: (interned key, untyped val) -> void
 
     # <!--
     #   rdoc-file=lib/net/http/header.rb
@@ -1889,7 +1887,7 @@ module Net
     #     req['Foo']            # => "bar, baz, baz, bam"
     #     req.get_fields('Foo') # => ["bar", "baz", "baz", "bam"]
     #
-    def add_field: (key key, untyped val) -> void
+    def add_field: (interned key, untyped val) -> void
 
     private
 
@@ -1898,7 +1896,7 @@ module Net
     #   - set_field(key, val)
     # -->
     #
-    def set_field: (key key, untyped val) -> void
+    def set_field: (interned key, untyped val) -> void
 
     # <!--
     #   rdoc-file=lib/net/http/header.rb
@@ -1920,7 +1918,7 @@ module Net
     #     res.get_fields('Connection') # => ["keep-alive"]
     #     res.get_fields('Nosuch')     # => nil
     #
-    def get_fields: (key key) -> (nil | Array[String])
+    def get_fields: (interned key) -> (nil | Array[String])
 
     # <!--
     #   rdoc-file=lib/net/http/header.rb
@@ -1950,9 +1948,9 @@ module Net
     #     res.fetch('Nosuch', 'Foo')     # => "Foo"
     #     res.fetch('Nosuch')            # Raises KeyError.
     #
-    def fetch: (key key) -> String
-             | (key key, untyped) -> untyped
-             | (key key) { (String) -> untyped } -> untyped
+    def fetch: (interned key) -> String
+             | (interned key, untyped) -> untyped
+             | (interned key) { (String) -> untyped } -> untyped
 
     # <!--
     #   rdoc-file=lib/net/http/header.rb
@@ -2081,7 +2079,7 @@ module Net
     #     req.delete('Accept') # => ["*/*"]
     #     req.delete('Nosuch') # => nil
     #
-    def delete: (key key) -> (Array[String] | nil)
+    def delete: (interned key) -> (Array[String] | nil)
 
     # <!--
     #   rdoc-file=lib/net/http/header.rb
@@ -2094,7 +2092,7 @@ module Net
     #     req.key?('Accept') # => true
     #     req.key?('Nosuch') # => false
     #
-    def key?: (key key) -> bool
+    def key?: (interned key) -> bool
 
     # <!--
     #   rdoc-file=lib/net/http/header.rb
@@ -2138,7 +2136,7 @@ module Net
     #   - capitalize(name)
     # -->
     #
-    def capitalize: (key name) -> String
+    def capitalize: (interned name) -> String
 
     public
 
@@ -2361,7 +2359,7 @@ module Net
     # Net::HTTPHeader#content_type= is an alias for
     # Net::HTTPHeader#set_content_type.
     #
-    def set_content_type: (key `type`, ?Hash[untyped, untyped] params) -> void
+    def set_content_type: (interned `type`, ?Hash[untyped, untyped] params) -> void
 
     # <!--
     #   rdoc-file=lib/net/http/header.rb

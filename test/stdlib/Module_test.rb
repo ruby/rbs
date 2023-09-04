@@ -124,7 +124,7 @@ class ModuleInstanceTest < Test::Unit::TestCase
     )
 
     assert_send_type(
-      "(Symbol, String) -> Array[Symbol | String]",
+      "(Symbol, String) -> Array[interned]",
       mod, :private, :foo, "bar"
     )
   end
@@ -154,7 +154,7 @@ class ModuleInstanceTest < Test::Unit::TestCase
     )
 
     assert_send_type(
-      "(Symbol, String) -> Array[Symbol | String]",
+      "(Symbol, String) -> Array[interned]",
       mod, :public, :foo, "bar"
     )
   end
@@ -163,7 +163,7 @@ class ModuleInstanceTest < Test::Unit::TestCase
     if RUBY_VERSION >= '3.0'
       mod = Module.new
       assert_send_type(
-        "(*Symbol | String arg0) -> Array[Symbol]",
+        "(*interned arg0) -> Array[Symbol]",
         mod, :attr, :foo
       )
     end

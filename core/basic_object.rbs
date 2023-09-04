@@ -163,7 +163,7 @@ class BasicObject
   #     k = Klass.new
   #     k.send :hello, "gentle", "readers"   #=> "Hello gentle readers"
   #
-  def __send__: (String | Symbol arg0, *untyped args) -> untyped
+  def __send__: (interned arg0, *untyped args) -> untyped
 
   # <!-- rdoc-file=object.c -->
   # Equality --- At the Object level, #== returns `true` only if `obj` and `other`

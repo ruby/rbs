@@ -89,6 +89,6 @@ module Signal
   #     Child died
   #     Terminating: 27460
   #
-  def self.trap: (Integer | String | Symbol signal, ?untyped command) -> (String | Proc)
-               | (Integer | String | Symbol signal) { (Integer arg0) -> untyped } -> (String | Proc)
+  def self.trap: (Integer | interned signal, ?untyped command) -> (String | Proc)
+               | (Integer | interned signal) { (Integer arg0) -> untyped } -> (String | Proc)
 end

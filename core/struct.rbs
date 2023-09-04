@@ -115,7 +115,7 @@
 class Struct[Elem] < Object
   include Enumerable[Elem?]
 
-  type attribute_name = Symbol | String
+  type attribute_name = interned
 
   # <!--
   #   rdoc-file=struct.c

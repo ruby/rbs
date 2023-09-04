@@ -579,7 +579,7 @@ class BasicSocket < IO
   #
   #     }
   #
-  def shutdown: (Symbol | String | Integer flags) -> void
+  def shutdown: (interned | Integer flags) -> void
 
   private
 

@@ -266,14 +266,14 @@ module DidYouMean
     #   - new(dictionary:)
     # -->
     #
-    def initialize: (dictionary: Array[String | Symbol]) -> void
+    def initialize: (dictionary: Array[interned]) -> void
 
     # <!--
     #   rdoc-file=lib/did_you_mean/spell_checker.rb
     #   - correct(input)
     # -->
     #
-    def correct: (String | Symbol input) -> Array[String]
+    def correct: (interned input) -> Array[String]
   end
 
   # <!-- rdoc-file=lib/did_you_mean/tree_spell_checker.rb -->

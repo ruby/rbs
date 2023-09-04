@@ -226,7 +226,7 @@ class Thread < Object
   # For thread-local variables, please see #thread_variable_get and
   # #thread_variable_set.
   #
-  def []: (String | Symbol key) -> untyped
+  def []: (interned key) -> untyped
 
   # <!--
   #   rdoc-file=thread.c
@@ -240,7 +240,7 @@ class Thread < Object
   # For thread-local variables, please see #thread_variable_set and
   # #thread_variable_get.
   #
-  def []=: (String | Symbol key, untyped value) -> untyped
+  def []=: (interned key, untyped value) -> untyped
 
   # <!--
   #   rdoc-file=thread.c
@@ -676,7 +676,7 @@ class Thread < Object
   # Note that these are not fiber local variables.  Please see Thread#[] and
   # Thread#thread_variable_get for more details.
   #
-  def thread_variable?: (String | Symbol key) -> bool
+  def thread_variable?: (interned key) -> bool
 
   # <!--
   #   rdoc-file=thread.c
