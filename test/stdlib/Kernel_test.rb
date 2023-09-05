@@ -2,6 +2,101 @@ require_relative "test_helper"
 
 require "securerandom"
 
+class KernelSingletonTest < Test::Unit::TestCase
+  include TypeAssertions
+
+  testing "singleton(::Kernel)"
+
+  def test_Array
+    assert_send_type "(nil) -> []",
+                     Kernel, :Array, nil
+
+    with_array(1r, 2r).chain([ToA.new(1r,2r)]).each do |ary|
+      assert_send_type "(::array[Rational] | ::_ToA[Rational]) -> Array[Rational]",
+                       Kernel, :Array, ary
+    end
+
+    assert_send_type "(Rational) -> [Rational]",
+                     Kernel, :Array, 1r
+  end
+
+  def test_Float
+    with_float 1.0 do |float|
+      assert_send_type "(::float) -> Float",
+                       Kernel, :Float, float
+      assert_send_type "(::float, exception: true) -> Float",
+                       Kernel, :Float, float, exception: true
+      assert_send_type "(::float, exception: bool) -> Float?",
+                       Kernel, :Float, float, exception: false
+    end
+
+    assert_send_type "(untyped, ?exception: bool) -> Float?",
+                     Kernel, :Float, :hello, exception: false
+  end
+
+  def test_Hash
+    assert_send_type "(nil) -> Hash[untyped, untyped]",
+                     Kernel, :Hash, nil
+    assert_send_type "([]) -> Hash[untyped, untyped]",
+                     Kernel, :Hash, []
+
+    with_hash 'a' => 3 do |hash|
+      assert_send_type "(::hash[String, Integer]) -> Hash[String, Integer]",
+                       Kernel, :Hash, hash
+    end
+  end
+
+  def test_Integer
+    with_int(1).chain([ToI.new(1)]).each do |int|
+      assert_send_type "(::int | ::_ToI) -> Integer",
+                       Kernel, :Integer, int
+      assert_send_type "(::int | ::_ToI, exception: true) -> Integer",
+                       Kernel, :Integer, int, exception: true
+      assert_send_type "(::int | ::_ToI, exception: bool) -> Integer?",
+                       Kernel, :Integer, int, exception: false
+    end
+
+    with_string "123" do |string|
+      with_int 8 do |base|
+        assert_send_type "(::string, ::int) -> Integer",
+                         Kernel, :Integer, string, base
+        assert_send_type "(::string, ::int, exception: true) -> Integer",
+                         Kernel, :Integer, string, base, exception: true
+        assert_send_type "(::string, ::int, exception: bool) -> Integer?",
+                         Kernel, :Integer, string, base, exception: false
+      end
+    end
+
+    assert_send_type "(untyped, ?exception: bool) -> Integer?",
+                     Kernel, :Integer, :hello, exception: false
+  end
+
+
+  def test_String
+    with_string do |string|
+      assert_send_type "(::string) -> String",
+                       Kernel, :String, string
+    end
+
+    assert_send_type "(::_ToS) -> String",
+                     Kernel, :String, ToS.new
+  end
+
+  def test_autoload?
+    with_interned :TestModuleForAutoload do |interned|
+      assert_send_type "(::interned) -> String?",
+                       Kernel, :autoload?, interned
+    end
+
+    autoload :TestModuleForAutoload, '/shouldnt/be/executed'
+
+    with_interned :TestModuleForAutoload do |interned|
+      assert_send_type "(::interned) -> String?",
+                       Kernel, :autoload?, interned
+    end
+  end
+end
+
 class KernelTest < StdlibTest
   target Kernel
   discard_output

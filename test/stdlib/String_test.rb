@@ -652,6 +652,11 @@ class StringInstanceTest < Test::Unit::TestCase
   end
 
   def test_encode
+    with_encoding Encoding::UTF_8 do |encoding|
+      assert_send_type "(::encoding) -> String",
+                       "string", :encode, encoding
+    end
+
     assert_send_type "(String) -> String",
                      "string", :encode, "ascii"
     assert_send_type "(String, Encoding) -> String",
