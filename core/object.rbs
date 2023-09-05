@@ -1073,3 +1073,7 @@ class Object < BasicObject
   #
   alias then yield_self
 end
+
+# A previous incarnation of `interned` for backward-compatibility (see #1499)
+%a{steep:deprecated}
+type Object::name = interned

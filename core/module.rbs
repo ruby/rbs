@@ -1630,4 +1630,8 @@ class Module < Object
   # as symbols.
   #
   def attr: (*interned arg0) -> Array[Symbol]
+
+  # A previous incarnation of `interned` for backward-compatibility (see #1499)
+  %a{steep:deprecated}
+  type id = interned
 end

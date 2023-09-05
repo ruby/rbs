@@ -266,12 +266,8 @@ type real = Integer | Float | Rational
 #
 # A lot of builtin functions accept either a Symbol, a String, or something which has `.to_str`
 # defined.
-# 
+#
 type interned = Symbol | string
-# Previous incarnations of `interned` for backward-compatibility (see #1499)
-%a{steep:deprecated} type Object::name = interned
-%a{steep:deprecated} type Module::id = interned
-%a{steep:deprecated} type Net::HTTPHeader::key = interned
 
 # `boolish` is a type for documentation.
 # It means the value of this type is only for testing a condition.
