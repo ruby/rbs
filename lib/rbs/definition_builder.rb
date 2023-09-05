@@ -239,6 +239,19 @@ module RBS
             definition.class_variables.merge!(defn.class_variables)
           end
 
+          one_ancestors.each_included_module do |mod|
+            included_module = env.class_decls[mod.name] or raise "Unknown name for one_ancestors.included_module: #{type_name}"
+            included_module.decls.each do |decl|
+              decl.decl.annotations.each do |annotation|
+                if annotation.string.start_with? "autoextend:"
+                  mod_name = TypeName("::" + annotation.string.split(":", 2)[1])
+                  subst = tapp_subst(mod_name, [])
+                  define_instance(definition, mod_name, subst)
+                end
+              end
+            end
+          end
+
           one_ancestors.each_extended_module do |mod|
             mod.args.each do |arg|
               validate_type_presence(arg)

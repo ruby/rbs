@@ -780,3 +780,17 @@ _annotation_ ::= `%a{` _annotation-text_ `}`  # Annotation using {}
 
 _annotation-text_ ::= /[^\x00]*/              # Any characters except NUL (and parenthesis)
 ```
+
+#### Auto extending modules
+
+Module having "autoextend:..." annotation is considered as an auto extending module.
+When such auto extending modules are included, the including class will be extended by annotated modules.
+
+```
+%a{autoextend:Mod::ClassMethods}
+module Mod
+  module ClassMethods
+    def foo: () -> void
+  end
+end
+```
