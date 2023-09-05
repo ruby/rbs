@@ -3,7 +3,7 @@ module RBS
     class Runtime
       @decls: Array[AST::Declarations::t]?
 
-      @modules: Array[Module]
+      @modules: Hash[String, Module]
 
       @builder: DefinitionBuilder
 
