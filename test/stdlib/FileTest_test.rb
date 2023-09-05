@@ -5,177 +5,195 @@ class FileTestSingletonTest < Test::Unit::TestCase
 
   testing "singleton(::FileTest)"
 
+
+  def with_path_io(path: __FILE__, io: default=IO.open(IO.sysopen(File.expand_path(__FILE__))), &block)
+    with_path(path, &block)
+    with_io(io, &block)
+  ensure
+    io.close if default
+  end
+
   def test_blockdev?
-    assert_send_type  "(::String file_name) -> bool",
-                      FileTest, :blockdev?, File.expand_path(__FILE__)
-    assert_send_type  "(::IO file_name) -> bool",
-                      FileTest, :blockdev?, io_open
+    with_path_io do |path_or_io|
+      assert_send_type  "(::path | ::io) -> bool",
+                        FileTest, :blockdev?, path_or_io
+    end
   end
 
   def test_chardev?
-    assert_send_type  "(::String file_name) -> bool",
-                      FileTest, :chardev?, File.expand_path(__FILE__)
-    assert_send_type  "(::IO file_name) -> bool",
-                      FileTest, :chardev?, io_open
+    with_path_io do |path_or_io|
+      assert_send_type  "(::path | ::io) -> bool",
+                        FileTest, :chardev?, path_or_io
+    end
   end
 
   def test_directory?
-    assert_send_type  "(::String file_name) -> bool",
-                      FileTest, :directory?, File.expand_path(__FILE__)
-    assert_send_type  "(::IO file_name) -> bool",
-                      FileTest, :directory?, io_open
+    with_path_io do |path_or_io|
+      assert_send_type  "(::path | ::io) -> bool",
+                        FileTest, :directory?, path_or_io
+    end
   end
 
   def test_empty?
-    assert_send_type  "(::String file_name) -> bool",
-                      FileTest, :empty?, File.expand_path(__FILE__)
-    assert_send_type  "(::IO file_name) -> bool",
-                      FileTest, :empty?, io_open
+    with_path_io do |path_or_io|
+      assert_send_type  "(::path | ::io) -> bool",
+                        FileTest, :empty?, path_or_io
+    end
   end
 
   def test_executable?
-    assert_send_type  "(::String file_name) -> bool",
-                      FileTest, :executable?, File.expand_path(__FILE__)
+    with_path do |path|
+      assert_send_type  "(::path) -> bool",
+                        FileTest, :executable?, path
+    end
   end
 
   def test_executable_real?
-    assert_send_type  "(::String file_name) -> bool",
-                      FileTest, :executable_real?, File.expand_path(__FILE__)
+    with_path do |path|
+      assert_send_type  "(::path) -> bool",
+                        FileTest, :executable_real?, path
+    end
   end
 
   def test_exist?
-    assert_send_type  "(::String file_name) -> bool",
-                      FileTest, :exist?, File.expand_path(__FILE__)
-    assert_send_type  "(::IO file_name) -> bool",
-                      FileTest, :exist?, io_open
+    with_path_io do |path_or_io|
+      assert_send_type  "(::path | ::io) -> bool",
+                        FileTest, :exist?, path_or_io
+    end
   end
 
   def test_file?
-    assert_send_type  "(::String file) -> bool",
-                      FileTest, :file?, File.expand_path(__FILE__)
-    assert_send_type  "(::IO file) -> bool",
-                      FileTest, :file?, io_open
+    with_path_io do |path_or_io|
+      assert_send_type  "(::path | ::io) -> bool",
+                        FileTest, :file?, path_or_io
+    end
   end
 
   def test_grpowned?
-    assert_send_type  "(::String file_name) -> bool",
-                      FileTest, :grpowned?, File.expand_path(__FILE__)
-    assert_send_type  "(::IO file_name) -> bool",
-                      FileTest, :grpowned?, io_open
+    with_path_io do |path_or_io|
+      assert_send_type  "(::path | ::io) -> bool",
+                        FileTest, :grpowned?, path_or_io
+    end
   end
 
   def test_identical?
-    assert_send_type  "(::String file_1, ::String file_2) -> bool",
-                      FileTest, :identical?, File.expand_path(__FILE__), File.expand_path(__FILE__)
-    assert_send_type  "(::IO file_1, ::IO file_2) -> bool",
-                      FileTest, :identical?, io_open, io_open
+    with_path_io do |path_or_io1|
+      with_path_io do |path_or_io2|
+        assert_send_type  "(::path | ::io, ::path | ::io) -> bool",
+                          FileTest, :identical?, path_or_io1, path_or_io2
+      end
+    end
   end
 
   def test_owned?
-    assert_send_type  "(::String file_name) -> bool",
-                      FileTest, :owned?, File.expand_path(__FILE__)
-    assert_send_type  "(::IO file_name) -> bool",
-                      FileTest, :owned?, io_open
+    with_path_io do |path_or_io|
+      assert_send_type  "(::path | ::io) -> bool",
+                        FileTest, :owned?, path_or_io
+    end
   end
 
   def test_pipe?
-    assert_send_type  "(::String file_name) -> bool",
-                      FileTest, :pipe?, File.expand_path(__FILE__)
-    assert_send_type  "(::IO file_name) -> bool",
-                      FileTest, :pipe?, io_open
+    with_path_io do |path_or_io|
+      assert_send_type  "(::path | ::io) -> bool",
+                        FileTest, :pipe?, path_or_io
+    end
   end
 
   def test_readable?
-    assert_send_type  "(::String file_name) -> bool",
-                      FileTest, :readable?, File.expand_path(__FILE__)
+    with_path do |path|
+      assert_send_type  "(::path) -> bool",
+                        FileTest, :readable?, path
+    end
   end
 
   def test_readable_real?
-    assert_send_type  "(::String file_name) -> bool",
-                      FileTest, :readable_real?, File.expand_path(__FILE__)
+    with_path do |path|
+      assert_send_type  "(::path) -> bool",
+                        FileTest, :readable_real?, path
+    end
   end
 
   def test_setgid?
-    assert_send_type  "(::String file_name) -> bool",
-                      FileTest, :setgid?, File.expand_path(__FILE__)
-    assert_send_type  "(::IO file_name) -> bool",
-                      FileTest, :setgid?, io_open
+    with_path_io do |path_or_io|
+      assert_send_type  "(::path | ::io) -> bool",
+                        FileTest, :setgid?, path_or_io
+    end
   end
 
   def test_setuid?
-    assert_send_type  "(::String file_name) -> bool",
-                      FileTest, :setuid?, File.expand_path(__FILE__)
-    assert_send_type  "(::IO file_name) -> bool",
-                      FileTest, :setuid?, io_open
+    with_path_io do |path_or_io|
+      assert_send_type  "(::path | ::io) -> bool",
+                        FileTest, :setuid?, path_or_io
+    end
   end
 
   def test_size
-    assert_send_type  "(::String file_name) -> ::Integer",
-                      FileTest, :size, File.expand_path(__FILE__)
-    assert_send_type  "(::IO file_name) -> ::Integer",
-                      FileTest, :size, io_open
+    with_path_io do |path_or_io|
+      assert_send_type  "(::path | ::io) -> Integer",
+                        FileTest, :size, path_or_io
+    end
   end
 
   def test_size?
-    assert_send_type  "(::String file_name) -> ::Integer?",
-                      FileTest, :size?, File.expand_path(__FILE__)
-    assert_send_type  "(::IO file_name) -> ::Integer?",
-                      FileTest, :size?, io_open
+    with_path_io do |path_or_io|
+      assert_send_type  "(::path | ::io) -> Integer?",
+                        FileTest, :size?, path_or_io
+    end
   end
 
   def test_socket?
-    assert_send_type  "(::String file_name) -> bool",
-                      FileTest, :socket?, File.expand_path(__FILE__)
-    assert_send_type  "(::IO file_name) -> bool",
-                      FileTest, :socket?, io_open
+    with_path_io do |path_or_io|
+      assert_send_type  "(::path | ::io) -> bool",
+                        FileTest, :socket?, path_or_io
+    end
   end
 
   def test_sticky?
-    assert_send_type  "(::String file_name) -> bool",
-                      FileTest, :sticky?, File.expand_path(__FILE__)
-    assert_send_type  "(::IO file_name) -> bool",
-                      FileTest, :sticky?, io_open
+    with_path_io do |path_or_io|
+      assert_send_type  "(::path | ::io) -> bool",
+                        FileTest, :sticky?, path_or_io
+    end
   end
 
   def test_symlink?
-    assert_send_type  "(::String file_name) -> bool",
-                      FileTest, :symlink?, File.expand_path(__FILE__)
+    with_path do |path|
+      assert_send_type  "(::path) -> bool",
+                        FileTest, :symlink?, path
+    end
   end
 
   def test_world_readable?
-    assert_send_type  "(::String file_name) -> ::Integer?",
-                      FileTest, :world_readable?, File.expand_path(__FILE__)
-    assert_send_type  "(::IO file_name) -> ::Integer?",
-                      FileTest, :world_readable?, io_open
+    with_path_io do |path_or_io|
+      assert_send_type  "(::path | ::io) -> Integer?",
+                        FileTest, :world_readable?, path_or_io
+    end
   end
 
   def test_world_writable?
-    assert_send_type  "(::String file_name) -> ::Integer?",
-                      FileTest, :world_writable?, File.expand_path(__FILE__)
-    assert_send_type  "(::IO file_name) -> ::Integer?",
-                      FileTest, :world_writable?, io_open
+    with_path_io do |path_or_io|
+      assert_send_type  "(::path | ::io) -> Integer?",
+                        FileTest, :world_writable?, path_or_io
+    end
   end
 
   def test_writable?
-    assert_send_type  "(::String file_name) -> bool",
-                      FileTest, :writable?, File.expand_path(__FILE__)
+    with_path do |path|
+      assert_send_type  "(::path) -> bool",
+                        FileTest, :writable?, path
+    end
   end
 
   def test_writable_real?
-    assert_send_type  "(::String file_name) -> bool",
-                      FileTest, :writable_real?, File.expand_path(__FILE__)
+    with_path do |path|
+      assert_send_type  "(::path) -> bool",
+                        FileTest, :writable_real?, path
+    end
   end
 
   def test_zero?
-    assert_send_type  "(::String file_name) -> bool",
-                      FileTest, :zero?, File.expand_path(__FILE__)
-    assert_send_type  "(::IO file_name) -> bool",
-                      FileTest, :zero?, io_open
-  end
-
-  private
-
-  def io_open
-    IO.open(IO.sysopen(File.expand_path(__FILE__)))
+    with_path_io do |path_or_io|
+      assert_send_type  "(::path | ::io) -> bool",
+                        FileTest, :zero?, path_or_io
+    end
   end
 end

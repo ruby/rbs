@@ -13,7 +13,7 @@ module FileTest
   #     File.blockdev?('/dev/sda1')       # => true
   #     File.blockdev?(File.new('t.tmp')) # => false
   #
-  def self?.blockdev?: (String | IO file_name) -> bool
+  def self?.blockdev?: (path | io file_name) -> bool
 
   # <!--
   #   rdoc-file=file.c
@@ -24,7 +24,7 @@ module FileTest
   #     File.chardev?($stdin)     # => true
   #     File.chardev?('t.txt')     # => false
   #
-  def self?.chardev?: (String | IO file_name) -> bool
+  def self?.chardev?: (path | io file_name) -> bool
 
   # <!--
   #   rdoc-file=file.c
@@ -42,14 +42,16 @@ module FileTest
   #
   # Argument `path` can be an IO object.
   #
-  def self?.directory?: (String | IO file_name) -> bool
+  def self?.directory?: (path | io file_name) -> bool
 
   # <!-- rdoc-file=file.c -->
   # Returns `true` if the named file exists and has a zero size.
   #
   # *file_name* can be an IO object.
   #
-  def self?.empty?: (String | IO file_name) -> bool
+  alias empty? zero?
+
+  alias self.empty? self.zero?
 
   # <!--
   #   rdoc-file=file.c
@@ -65,7 +67,7 @@ module FileTest
   # Note that some OS-level security features may cause this to return true even
   # though the file is not executable by the effective user/group.
   #
-  def self?.executable?: (String file_name) -> bool
+  def self?.executable?: (path file_name) -> bool
 
   # <!--
   #   rdoc-file=file.c
@@ -81,7 +83,7 @@ module FileTest
   # Note that some OS-level security features may cause this to return true even
   # though the file is not executable by the real user/group.
   #
-  def self?.executable_real?: (String file_name) -> bool
+  def self?.executable_real?: (path file_name) -> bool
 
   # <!--
   #   rdoc-file=file.c
@@ -93,7 +95,7 @@ module FileTest
   #
   # "file exists" means that stat() or fstat() system call is successful.
   #
-  def self?.exist?: (String | IO file_name) -> bool
+  def self?.exist?: (path | io file_name) -> bool
 
   # <!--
   #   rdoc-file=file.c
@@ -106,7 +108,7 @@ module FileTest
   # If the `file` argument is a symbolic link, it will resolve the symbolic link
   # and use the file referenced by the link.
   #
-  def self?.file?: (String | IO file) -> bool
+  def self?.file?: (path | io file) -> bool
 
   # <!--
   #   rdoc-file=file.c
@@ -117,7 +119,7 @@ module FileTest
   #
   # *file_name* can be an IO object.
   #
-  def self?.grpowned?: (String | IO file_name) -> bool
+  def self?.grpowned?: (path | io file_name) -> bool
 
   # <!--
   #   rdoc-file=file.c
@@ -137,7 +139,7 @@ module FileTest
   #     open("d", "w") {}
   #     p File.identical?("a", "d")      #=> false
   #
-  def self?.identical?: (String | IO file_1, String | IO file_2) -> bool
+  def self?.identical?: (path | io file_1, path | io file_2) -> bool
 
   # <!--
   #   rdoc-file=file.c
@@ -148,7 +150,7 @@ module FileTest
   #
   # *file_name* can be an IO object.
   #
-  def self?.owned?: (String | IO file_name) -> bool
+  def self?.owned?: (path | io file_name) -> bool
 
   # <!--
   #   rdoc-file=file.c
@@ -160,7 +162,7 @@ module FileTest
   #     File.pipe?('tmp/fifo') # => true
   #     File.pipe?('t.txt')    # => false
   #
-  def self?.pipe?: (String | IO file_name) -> bool
+  def self?.pipe?: (path | io file_name) -> bool
 
   # <!--
   #   rdoc-file=file.c
@@ -172,7 +174,7 @@ module FileTest
   # Note that some OS-level security features may cause this to return true even
   # though the file is not readable by the effective user/group.
   #
-  def self?.readable?: (String file_name) -> bool
+  def self?.readable?: (path file_name) -> bool
 
   # <!--
   #   rdoc-file=file.c
@@ -184,7 +186,7 @@ module FileTest
   # Note that some OS-level security features may cause this to return true even
   # though the file is not readable by the real user/group.
   #
-  def self?.readable_real?: (String file_name) -> bool
+  def self?.readable_real?: (path file_name) -> bool
 
   # <!--
   #   rdoc-file=file.c
@@ -194,7 +196,7 @@ module FileTest
   #
   # *file_name* can be an IO object.
   #
-  def self?.setgid?: (String | IO file_name) -> bool
+  def self?.setgid?: (path | io file_name) -> bool
 
   # <!--
   #   rdoc-file=file.c
@@ -204,7 +206,7 @@ module FileTest
   #
   # *file_name* can be an IO object.
   #
-  def self?.setuid?: (String | IO file_name) -> bool
+  def self?.setuid?: (path | io file_name) -> bool
 
   # <!--
   #   rdoc-file=file.c
@@ -214,7 +216,7 @@ module FileTest
   #
   # *file_name* can be an IO object.
   #
-  def self?.size: (String | IO file_name) -> Integer
+  def self?.size: (path | io file_name) -> Integer
 
   # <!--
   #   rdoc-file=file.c
@@ -225,7 +227,7 @@ module FileTest
   #
   # *file_name* can be an IO object.
   #
-  def self?.size?: (String | IO file_name) -> Integer?
+  def self?.size?: (path | io file_name) -> Integer?
 
   # <!--
   #   rdoc-file=file.c
@@ -237,7 +239,7 @@ module FileTest
   #     File.socket?(Socket.new(:INET, :STREAM)) # => true
   #     File.socket?(File.new('t.txt'))          # => false
   #
-  def self?.socket?: (String | IO file_name) -> bool
+  def self?.socket?: (path | io file_name) -> bool
 
   # <!--
   #   rdoc-file=file.c
@@ -247,7 +249,7 @@ module FileTest
   #
   # *file_name* can be an IO object.
   #
-  def self?.sticky?: (String | IO file_name) -> bool
+  def self?.sticky?: (path | io file_name) -> bool
 
   # <!--
   #   rdoc-file=file.c
@@ -259,7 +261,7 @@ module FileTest
   #     File.symlink?('symlink') # => true
   #     File.symlink?('t.txt')   # => false
   #
-  def self?.symlink?: (String file_name) -> bool
+  def self?.symlink?: (path file_name) -> bool
 
   # <!--
   #   rdoc-file=file.c
@@ -275,7 +277,7 @@ module FileTest
   #     m = File.world_readable?("/etc/passwd")
   #     sprintf("%o", m)                              #=> "644"
   #
-  def self?.world_readable?: (String | IO file_name) -> Integer?
+  def self?.world_readable?: (path | io file_name) -> Integer?
 
   # <!--
   #   rdoc-file=file.c
@@ -291,7 +293,7 @@ module FileTest
   #     m = File.world_writable?("/tmp")
   #     sprintf("%o", m)                              #=> "777"
   #
-  def self?.world_writable?: (String | IO file_name) -> Integer?
+  def self?.world_writable?: (path | io file_name) -> Integer?
 
   # <!--
   #   rdoc-file=file.c
@@ -303,7 +305,7 @@ module FileTest
   # Note that some OS-level security features may cause this to return true even
   # though the file is not writable by the effective user/group.
   #
-  def self?.writable?: (String file_name) -> bool
+  def self?.writable?: (path file_name) -> bool
 
   # <!--
   #   rdoc-file=file.c
@@ -315,7 +317,7 @@ module FileTest
   # Note that some OS-level security features may cause this to return true even
   # though the file is not writable by the real user/group.
   #
-  def self?.writable_real?: (String file_name) -> bool
+  def self?.writable_real?: (path file_name) -> bool
 
   # <!--
   #   rdoc-file=file.c
@@ -325,5 +327,5 @@ module FileTest
   #
   # *file_name* can be an IO object.
   #
-  def self?.zero?: (String | IO file_name) -> bool
+  def self?.zero?: (path | io file_name) -> bool
 end
