@@ -274,6 +274,14 @@ end
     SIG
   end
 
+  def test_record_type
+    assert_writer <<-SIG, preserve: false
+class Foo
+  type t = { m1: ::Message::init? }
+end
+    SIG
+  end
+
   def test_write_method_def
     assert_writer <<-SIG, preserve: true
 class Foo
