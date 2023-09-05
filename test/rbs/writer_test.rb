@@ -124,6 +124,22 @@ module XYZZY[X, Y]
   def `foo!=`: () -> Integer
 
   def `: (String) -> untyped
+
+  attr_accessor `a-b`: String
+
+  attr_reader `a-b`: String
+
+  attr_writer `a-b`: String
+
+  attr_accessor self.`a-b`: String
+
+  attr_reader self.`a-b`: String
+
+  attr_writer self.`a-b`: String
+
+  alias `b-a` `a-b`
+
+  alias self.`b-a` self.`a-b`
 end
     SIG
   end
