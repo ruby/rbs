@@ -302,7 +302,7 @@ module RBS
           val.is_a?(singleton_class)
         when Types::Interface
           methods = Set.new(Test.call(val, METHODS))
-          if (definition = builder.build_interface(type.name))
+          if (definition = builder.build_interface(type.name.absolute!))
             definition.methods.each_key.all? do |method_name|
               methods.member?(method_name)
             end
@@ -318,7 +318,7 @@ module RBS
         when Types::Optional
           Test.call(val, IS_AP, ::NilClass) || value(val, type.type)
         when Types::Alias
-          value(val, builder.expand_alias2(type.name, type.args))
+          value(val, builder.expand_alias2(type.name.absolute!, type.args))
         when Types::Tuple
           Test.call(val, IS_AP, ::Array) &&
             type.types.map.with_index {|ty, index| value(val[index], ty) }.all?
