@@ -6,51 +6,105 @@ class MarshalSingletonTest < Test::Unit::TestCase
   include TypeAssertions
   testing "singleton(::Marshal)"
 
-  def test_dump
-    assert_send_type "(::String) -> ::String",
-                     Marshal, :dump, ""
-
-    assert_send_type "(::String, ::Integer) -> ::String",
-                     Marshal, :dump, "", 3
-
-    io = (Pathname(Dir.mktmpdir) + "foo").open("w")
-
-    assert_send_type "(::String, ::File) -> ::File",
-                     Marshal, :dump, "", io
+  def test_MAJOR_VERSION
+    assert_const_type 'Integer', 'Marshal::MAJOR_VERSION'
   end
 
-  def test_load
-    dump = Marshal.dump([1,2,3])
+  def test_MINOR_VERSION
+    assert_const_type 'Integer', 'Marshal::MINOR_VERSION'
+  end
 
-    assert_send_type(
-      "(::String) -> ::Array[::Integer]",
-      Marshal, :load, dump
-    )
+  def test_dump
+    obj = Object.new
 
-    assert_send_type(
-      "(::String, freeze: bool) -> ::Array[::Integer]",
-      Marshal, :load, dump, freeze: true
-    )
-    assert_send_type(
-      "(::String, freeze: Symbol) -> ::Array[::Integer]",
-      Marshal, :load, dump, freeze: :true
-    )
+    assert_send_type  '(untyped) -> String',
+                      Marshal, :dump, obj
+    assert_send_type  '(untyped, Integer) -> String',
+                      Marshal, :dump, obj, 123
 
-    assert_send_type(
-      "(::String, ^(untyped) -> void) -> ::Integer",
-      Marshal, :load, dump, -> (_x) { 123 }
-    )
+    writer = Writer.new
+    assert_send_type  '(untyped, Writer) -> Writer',
+                      Marshal, :dump, obj, writer
 
-    name = Pathname(Dir.mktmpdir) + "foo"
-
-    File.open(name, "w") do |io|
-      Marshal.dump([1,2,3], io)
+    with_int.chain([nil]).each do |limit|
+      assert_send_type  '(untyped, Writer, int?) -> Writer',
+                        Marshal, :dump, obj, writer, limit
     end
-    File.open(name) do |io|
-      assert_send_type(
-        "(IO) -> ::Array[::Integer]",
-        Marshal, :load, io
-      )
+  end
+
+  def with_source(src = Marshal.dump(Object.new))
+    with_string src do |string|
+      def string.reset!; end
+      yield string
+    end
+
+    src = src.chars
+    source = Struct.new(:source).new(src.dup)
+    source.define_singleton_method(:reset!) do
+      self.source = src.dup
+    end
+
+    # String, String
+    def source.getbyte; source.shift end
+    def source.read(x) source.shift(x).join end
+    yield source
+
+    # int, string
+    source.reset!
+    def source.getbyte; ToInt.new(source.shift.ord) end
+    def source.read(x) ToStr.new(source.shift(x).join) end
+    yield source
+  end
+
+  def test_load(meth = :load)
+    result_proc = Object.new
+    def result_proc.call(loaded) 1r end
+
+    with_source do |source|
+      assert_send_type  '(string | Marshal::_Source) -> untyped',
+                        Marshal, meth, source
+      source.reset!
+
+      assert_send_type  '(string | Marshal::_Source, Marshal::_Proc[Rational]) -> Rational',
+                        Marshal, meth, source, result_proc
+      source.reset!
+
+      [nil, :yep, true, "hello"].each do |freeze|
+        assert_send_type  '(string | Marshal::_Source, freeze: boolish) -> untyped',
+                          Marshal, meth, source, freeze: freeze
+        source.reset!
+
+        assert_send_type  '(string | Marshal::_Source, Marshal::_Proc[Rational], freeze: boolish) -> Rational',
+                          Marshal, meth, source, result_proc, freeze: freeze
+        source.reset!
+      end
+    end
+  end
+
+  def test_restore
+    test_load :restore
+  end
+end
+
+class MarshalIncludeTest < Test::Unit::TestCase
+  include TypeAssertions
+  testing "::Marshal"
+
+  def test_dump
+    obj = Object.new
+
+    assert_send_type  '(untyped) -> String',
+                      Marshal, :dump, obj
+    assert_send_type  '(untyped, Integer) -> String',
+                      Marshal, :dump, obj, 123
+
+    writer = Writer.new
+    assert_send_type  '(untyped, Writer) -> Writer',
+                      Marshal, :dump, obj, writer
+
+    with_int.chain([nil]).each do |limit|
+      assert_send_type  '(untyped, Writer, int?) -> Writer',
+                        Marshal, :dump, obj, writer, limit
     end
   end
 end
