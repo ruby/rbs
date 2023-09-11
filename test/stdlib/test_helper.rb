@@ -167,6 +167,67 @@ module VersionHelper
   end
 end
 
+module WithAliases
+  def with_int(value = 3)
+    return to_enum(__method__, value) unless block_given?
+    yield value
+    yield ToInt.new(value)
+  end
+
+  def with_float(value = 0.1)
+    return to_enum(__method__, value) unless block_given?
+    yield value
+    yield ToF.new(value)
+  end
+
+  def with_string(value = "")
+    return to_enum(__method__, value) unless block_given?
+    yield value
+    yield ToStr.new(value)
+  end
+
+  def with_array(*elements)
+    return to_enum(__method__, *elements) unless block_given?
+
+    yield elements
+    yield ToArray.new(*elements)
+  end
+
+  def with_hash(hash = {})
+    return to_enum(__method__, hash) unless block_given?
+
+    yield hash
+    yield ToHash.new(hash)
+  end
+
+  def with_io(io = $stdout)
+    return to_enum(__method__, io) unless block_given?
+    yield io
+    yield ToIO.new(io)
+  end
+
+  def with_path(path = "/tmp/foo.txt", &block)
+    return to_enum(__method__, path) unless block_given?
+
+    with_string(path, &block)
+    block.call ToPath.new(path)
+  end
+
+  def with_encoding(encoding = Encoding::UTF_8, &block)
+    return to_enum(__method__, encoding) unless block_given?
+
+    block.call encoding
+    with_string(encoding.to_s, &block)
+  end
+
+  def with_interned(value = :&, &block)
+    return to_enum(__method__, value) unless block_given?
+
+    with_string(value.to_s, &block)
+    block.call value.to_sym
+  end
+end
+
 module TypeAssertions
   module ClassMethods
     attr_reader :target
@@ -401,6 +462,17 @@ module TypeAssertions
   end
 
   include VersionHelper
+  include WithAliases
+end
+
+class ToIO
+  def initialize(io = $stdout)
+    @io = io
+  end
+
+  def to_io
+    @io
+  end
 end
 
 class ToI

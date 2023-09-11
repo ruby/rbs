@@ -478,7 +478,7 @@ module RBS
         return "{ }" if self.fields.empty?
 
         fields = self.fields.map do |key, type|
-          if key.is_a?(Symbol) && key.match?(/\A[A-Za-z_][A-Za-z_]*\z/)
+          if key.is_a?(Symbol) && key.match?(/\A[A-Za-z_][A-Za-z_0-9]*\z/)
             "#{key}: #{type}"
           else
             "#{key.inspect} => #{type}"

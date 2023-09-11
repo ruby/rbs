@@ -28,11 +28,10 @@ sources:
 # A directory to install the downloaded RBSs
 path: .gem_rbs_collection
 
-gems:
-  # Skip loading rbs gem's RBS.
-  # It's unnecessary if you don't use rbs as a library.
-  - name: rbs
-    ignore: true
+# gems:
+#   # If you want to avoid installing rbs files for gems, you can specify them here.
+#   - name: GEM_NAME
+#     ignore: true
 ```
 
 I also recommend updating `.gitignore`.
@@ -98,6 +97,57 @@ gems:
   - name: nokogiri
     ignore: true
 ```
+
+### Avoid installing RBS
+
+There are two ways to avoid RBS installation.
+
+#### `require: false` in `Gemfile`
+
+First, you can specify `require: false` in `Gemfile`. It is the recommended way to avoid installing RBS.
+For example:
+
+```ruby
+# Gemfile
+
+gem 'GEM_NAME', require: false
+```
+
+In this case, `rbs collection` doesn't install the RBS of `GEM_NAME`.
+We recommend to specify `require: false` for `rbs` gem itself because `rbs` gem's RBS file is not necessary in most cases.
+
+#### `ignore: true` in `rbs_collection.yaml`
+
+Second, you can write `ignore: true` in `rbs_collection.yaml`. It is useful if you want to avoid installing RBS but you need to require the gem.
+
+```yaml
+# rbs_collection.yaml
+
+gems:
+  - name: GEM_NAME
+    ignore: true
+```
+
+#### Load RBS specified `require: false`
+
+You can also use `ignore: false` if you want to install RBS for a gem which you specify `require: false` in `Gemfile`.
+For example:
+
+```ruby
+# Gemfile
+
+gem 'GEM_NAME', require: false
+```
+
+```yaml
+# rbs_collection.yaml
+
+gems:
+  - name: GEM_NAME
+    ignore: false
+```
+
+In this case, `rbs collection` installs the RBS of `GEM_NAME`.
 
 ### `manifest.yaml`
 

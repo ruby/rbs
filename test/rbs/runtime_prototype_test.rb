@@ -86,7 +86,7 @@ module RBS
 
         def a: () -> untyped
 
-        NAME: String
+        NAME: ::String
       end
     end
   end
@@ -155,7 +155,7 @@ module RBS
 
         def a: () -> untyped
 
-        NAME: String
+        NAME: ::String
       end
     end
   end
@@ -314,7 +314,7 @@ end
 
                   def self.to_s: () -> untyped
 
-                  INSTANCE: C
+                  INSTANCE: ::RBS::RuntimePrototypeTest::TestForOverrideModuleName::C
                 end
 
                 class C2 < ::RBS::RuntimePrototypeTest::TestForOverrideModuleName::C
@@ -325,7 +325,7 @@ end
 
                   def self.to_s: () -> untyped
 
-                  X: Integer
+                  X: ::Integer
                 end
               end
             end
@@ -365,7 +365,7 @@ end
                 end
 
                 module M
-                  HASH: Hash[untyped, untyped]
+                  HASH: ::Hash[untyped, untyped]
                 end
               end
             end
@@ -534,8 +534,13 @@ end
   end
 
   class Unnamed
+    module Name
+      class Space
+      end
+    end
     A = ARGF
     B = ENV
+    D = Name::Space.new
   end
 
   def test_unnamed
@@ -549,6 +554,8 @@ end
                 A: ::RBS::Unnamed::ARGFClass
 
                 B: ::RBS::Unnamed::ENVClass
+
+                D: ::RBS::RuntimePrototypeTest::Unnamed::Name::Space
               end
             end
           end
