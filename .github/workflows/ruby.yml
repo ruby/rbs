@@ -33,7 +33,7 @@ jobs:
     container:
       image: rubylang/ruby:${{ matrix.container_tag }}
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Set working directory as safe
         run: git config --global --add safe.directory $(pwd)
       - name: Install dependencies
@@ -75,7 +75,7 @@ jobs:
         os: [windows-2019, windows-2022]
         ruby: [ucrt, mswin]
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: load ruby
         uses: ruby/setup-ruby@v1
         with:

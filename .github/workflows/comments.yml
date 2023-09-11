@@ -13,7 +13,7 @@ jobs:
     container:
       image: rubylang/ruby:3.2-dev-focal
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Install dependencies
         run: |
           apt-get update
