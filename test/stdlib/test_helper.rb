@@ -463,6 +463,45 @@ module TypeAssertions
 
   include VersionHelper
   include WithAliases
+
+  def assert_const_type(type, constant_name)
+    constant = Object.const_get(constant_name)
+
+    typecheck = RBS::Test::TypeCheck.new(
+      self_class: constant.class,
+      instance_class: instance_class,
+      class_class: class_class,
+      builder: builder,
+      sample_size: 100,
+      unchecked_classes: []
+    )
+
+    value_type =
+      case type
+      when String
+        RBS::Parser.parse_type(type, variables: [])
+      when RBS::MethodType
+        type
+      end
+
+    assert typecheck.value(constant, value_type), "`#{constant_name}` (#{constant.inspect}) must be compatible with given type `#{value_type}`"
+
+    type_name = TypeName(constant_name).absolute!
+    definition = env.constant_entry(type_name)
+    assert definition, "Cannot find RBS type definition of `#{constant_name}`"
+
+    case definition
+    when RBS::Environment::ClassEntry, RBS::Environment::ModuleEntry
+      definition_type = RBS::Types::ClassSingleton.new(name: type_name, location: nil)
+    when RBS::Environment::ClassAliasEntry, RBS::Environment::ModuleAliasEntry
+      type_name = env.normalize_type_name!(type_name)
+      definition_type = RBS::Types::ClassSingleton.new(name: type_name, location: nil)
+    when RBS::Environment::ConstantEntry
+      definition_type = definition.decl.type
+    end
+
+    assert typecheck.value(constant, definition_type), "`#{constant_name}` (#{constant.inspect}) must be compatible with RBS type definition `#{definition_type}`"
+  end
 end
 
 class ToIO

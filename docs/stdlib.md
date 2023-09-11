@@ -72,11 +72,54 @@ end
 
 You need include `TypeAssertions` which provide useful methods for you.
 `testing` method call tells which class is the subject of the class.
-`assert_send_type` method call asserts to be valid types and confirms to be able to execute without exceptions.
-And you write the sample programs which calls all of the patterns of overloads.
+You may need `library` call to test a library if the type definition is provided as a library (under `stdlib` dir).
 
 Note that the instrumentation is based on refinements and you need to write all method calls in the unit class definitions.
 If the execution of the program escape from the class definition, the instrumentation is disabled and no check will be done.
+
+#### 📣 Method type assertions
+
+`assert_send_type` method call asserts to be valid types and confirms to be able to execute without exceptions.
+And you write the sample programs which calls all of the patterns of overloads.
+
+We recommend write method types as _simple_ as possible inside the assertion.
+It's not very easy to define _simple_, but we try to explain it with a few examples.
+
+* Instead of `(String | Integer) -> Symbol?`, use `(String) -> Symbol` or `(Integer) -> nil`, because we know the exact argument type we are passing in the test
+* Instead of `self`, `instance`, or `class`, use concrete types like `String`, `singleton(IO)`, because we know the exact type of the receiver
+* Sometimes, you need union types if the method is nondeterministic -- `() -> (Integer | String)` for `[1, ""].sample` (But you can rewrite the test code as `[1].sample` instead)
+* Sometimes, you need union types for heterogeneous collections -- `() { (Integer | String) -> String } -> Array[String | Integer]` for `[1, "2"].each {|i| i.to_s }` (But you can rewrite the test code as `[1, 2].each {|i| i.to_s }`)
+* Using `void` is allowed if the RBS definition is `void`
+
+Generally _simple_ means:
+
+* The type doesn't contain `self`, `instance`, `class`, `top`, `bot`, and `untyped`
+* The type doesn't contain unions and optionals
+
+Use them if you cannot write the test without them.
+
+#### 📣 Constant type assertions
+
+We also have `assert_const_type` method, to test the type of constant is correct with respect to RBS type definition.
+
+```ruby
+class FloatConstantTest < Test::Unit::TestCase
+  include TypeAssertions
+
+  def test_infinity
+    assert_const_type "Float", "Float::INFINITY"
+  end
+end
+```
+
+It confirms:
+
+1. The type of constant `Float::INFINITY` is `Float`
+2. The type of constant `Float::INFINITY` is correct with respect to RBS definition
+
+We don't have any strong recommendation about where the constants test should be written in.
+The `FloatConstantTest` example defines a test case only for the constant tests.
+You may write the tests inside `FloatInstanceTest` or `FloatSingletonTest`.
 
 ### Running tests
 
