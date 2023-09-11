@@ -78,7 +78,7 @@ sources:
     revision: main
     repo_dir: gems
 
-  # You can also add a local path as a collection source optionaly.
+  # You can also add a local path as a collection source optionally.
   - type: local
     path: path/to/local/dir
 
