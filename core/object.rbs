@@ -796,7 +796,7 @@ class Object < BasicObject
   # Note: that some objects of builtin classes are reused for optimization. This
   # is the case for immediate values and frozen string literals.
   #
-  # BasicObject implements +__id__+, Kernel implements `object_id`.
+  # BasicObject implements `__id__`, Kernel implements `object_id`.
   #
   # Immediate values are not passed by reference but are passed by value: `nil`,
   # `true`, `false`, Fixnums, Symbols, and some Floats.
@@ -913,7 +913,7 @@ class Object < BasicObject
   # When the method is identified by a string, the string is converted to a
   # symbol.
   #
-  # BasicObject implements +__send__+, Kernel implements `send`. `__send__` is
+  # BasicObject implements `__send__`, Kernel implements `send`. `__send__` is
   # safer than `send` when *obj* has the same method name like `Socket`. See also
   # `public_send`.
   #
