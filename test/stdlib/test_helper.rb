@@ -167,6 +167,67 @@ module VersionHelper
   end
 end
 
+module WithAliases
+  def with_int(value = 3)
+    return to_enum(__method__, value) unless block_given?
+    yield value
+    yield ToInt.new(value)
+  end
+
+  def with_float(value = 0.1)
+    return to_enum(__method__, value) unless block_given?
+    yield value
+    yield ToF.new(value)
+  end
+
+  def with_string(value = "")
+    return to_enum(__method__, value) unless block_given?
+    yield value
+    yield ToStr.new(value)
+  end
+
+  def with_array(*elements)
+    return to_enum(__method__, *elements) unless block_given?
+
+    yield elements
+    yield ToArray.new(*elements)
+  end
+
+  def with_hash(hash = {})
+    return to_enum(__method__, hash) unless block_given?
+
+    yield hash
+    yield ToHash.new(hash)
+  end
+
+  def with_io(io = $stdout)
+    return to_enum(__method__, io) unless block_given?
+    yield io
+    yield ToIO.new(io)
+  end
+
+  def with_path(path = "/tmp/foo.txt", &block)
+    return to_enum(__method__, path) unless block_given?
+
+    with_string(path, &block)
+    block.call ToPath.new(path)
+  end
+
+  def with_encoding(encoding = Encoding::UTF_8, &block)
+    return to_enum(__method__, encoding) unless block_given?
+
+    block.call encoding
+    with_string(encoding.to_s, &block)
+  end
+
+  def with_interned(value = :&, &block)
+    return to_enum(__method__, value) unless block_given?
+
+    with_string(value.to_s, &block)
+    block.call value.to_sym
+  end
+end
+
 module TypeAssertions
   module ClassMethods
     attr_reader :target
@@ -401,6 +462,56 @@ module TypeAssertions
   end
 
   include VersionHelper
+  include WithAliases
+
+  def assert_const_type(type, constant_name)
+    constant = Object.const_get(constant_name)
+
+    typecheck = RBS::Test::TypeCheck.new(
+      self_class: constant.class,
+      instance_class: instance_class,
+      class_class: class_class,
+      builder: builder,
+      sample_size: 100,
+      unchecked_classes: []
+    )
+
+    value_type =
+      case type
+      when String
+        RBS::Parser.parse_type(type, variables: [])
+      when RBS::MethodType
+        type
+      end
+
+    assert typecheck.value(constant, value_type), "`#{constant_name}` (#{constant.inspect}) must be compatible with given type `#{value_type}`"
+
+    type_name = TypeName(constant_name).absolute!
+    definition = env.constant_entry(type_name)
+    assert definition, "Cannot find RBS type definition of `#{constant_name}`"
+
+    case definition
+    when RBS::Environment::ClassEntry, RBS::Environment::ModuleEntry
+      definition_type = RBS::Types::ClassSingleton.new(name: type_name, location: nil)
+    when RBS::Environment::ClassAliasEntry, RBS::Environment::ModuleAliasEntry
+      type_name = env.normalize_type_name!(type_name)
+      definition_type = RBS::Types::ClassSingleton.new(name: type_name, location: nil)
+    when RBS::Environment::ConstantEntry
+      definition_type = definition.decl.type
+    end
+
+    assert typecheck.value(constant, definition_type), "`#{constant_name}` (#{constant.inspect}) must be compatible with RBS type definition `#{definition_type}`"
+  end
+end
+
+class ToIO
+  def initialize(io = $stdout)
+    @io = io
+  end
+
+  def to_io
+    @io
+  end
 end
 
 class ToI

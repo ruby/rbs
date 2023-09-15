@@ -404,8 +404,7 @@ module Kernel : BasicObject
   #     Array(:foo)             # => [:foo]
   #
   def self?.Array: (nil) -> []
-                 | [T] (Array[T] ary) -> Array[T]
-                 | [T] (_ToAry[T] | _ToA[T] array_like) -> Array[T]
+                 | [T] (array[T] | _ToA[T] array_like) -> Array[T]
                  | [T] (T ele) -> [T]
 
   # <!--
@@ -581,8 +580,8 @@ module Kernel : BasicObject
   #
   def self?.Integer: (int | _ToI int_like, ?exception: true) -> Integer
                    | (int | _ToI int_like, exception: bool) -> Integer?
-                   | (string str, ?int base, ?exception: true) -> Integer
-                   | (string str, ?int base, exception: bool) -> Integer?
+                   | (string str, int base, ?exception: true) -> Integer
+                   | (string str, int base, exception: bool) -> Integer?
                    | (untyped, ?untyped, ?exception: bool) -> Integer?
 
   # <!--
