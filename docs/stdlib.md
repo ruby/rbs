@@ -98,6 +98,22 @@ Generally _simple_ means:
 
 Use them if you cannot write the test without them.
 
+One clear exception to using _simple_ types is when you use `with_int` or family helpers, that yield values with each case of the given union:
+
+```ruby
+def test_something
+  with_int(3) do |int|
+    # Yields twice with `Integer` and `ToInt`
+    assert_send_type(
+      "(int) -> Integer",
+      some, :test, int
+    )
+  end
+end
+```
+
+It's clear having type aliases makes sense.
+
 #### 📣 Constant type assertions
 
 We also have `assert_const_type` method, to test the type of constant is correct with respect to RBS type definition.
