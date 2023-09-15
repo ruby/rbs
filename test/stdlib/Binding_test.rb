@@ -6,12 +6,12 @@ class BindingInstanceTest < Test::Unit::TestCase
   testing 'Binding'
 
   def test_clone
-    assert_send_type  '() -> instance',
+    assert_send_type  '() -> Binding',
                       binding, :clone
   end
 
   def test_dup
-    assert_send_type  '() -> instance',
+    assert_send_type  '() -> Binding',
                       binding, :dup
   end
 
@@ -19,7 +19,7 @@ class BindingInstanceTest < Test::Unit::TestCase
     with_string '123' do |src|
       assert_send_type  '(string) -> untyped',
                         binding, :eval, src
-      
+
       with_string 'my file' do |filename|
         assert_send_type  '(string, string) -> untyped',
                           binding, :eval, src, filename
