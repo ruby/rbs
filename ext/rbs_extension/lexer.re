@@ -95,6 +95,7 @@ start:
       "void"          { return next_token(state, kVOID); }
       "use"           { return next_token(state, kUSE); }
       "as"            { return next_token(state, kAS); }
+      "__todo__"      { return next_token(state, k__TODO__); }
 
       dqstring = ["] ("\\"[abefnrstv"\\] | [^"\\\x00])* ["];
       sqstring = ['] ("\\"['\\] | [^'\x00])* ['];

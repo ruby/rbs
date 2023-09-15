@@ -321,4 +321,12 @@ end
       $hoge: Foo
     SIG
   end
+
+  def test___todo__
+    assert_writer <<-SIG
+class Foo
+  attr_reader name: __todo__
+end
+    SIG
+  end
 end

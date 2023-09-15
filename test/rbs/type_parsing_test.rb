@@ -754,4 +754,11 @@ class RBS::TypeParsingTest < Test::Unit::TestCase
       assert_equal "::Foo", type.location[:name].source
     end
   end
+
+  def test_untyped__todo
+    Parser.parse_type("__todo__").yield_self do |type|
+      assert_instance_of Types::Bases::Any, type
+      assert_equal "__todo__", type.location.source
+    end
+  end
 end

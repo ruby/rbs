@@ -73,7 +73,7 @@ module RBS
           when Types::Bases::Void
             'void'
           when Types::Bases::Any
-            'untyped'
+            raise
           when Types::Bases::Nil
             'nil'
           when Types::Bases::Top
@@ -106,7 +106,16 @@ module RBS
 
       class Bool < Base; end
       class Void < Base; end
-      class Any < Base; end
+      class Any < Base
+        def to_s(level=0)
+          @string || "untyped"
+        end
+
+        def todo!
+          @string = '__todo__'
+          self
+        end
+      end
       class Nil < Base; end
       class Top < Base; end
       class Bottom < Base; end
