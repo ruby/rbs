@@ -673,6 +673,7 @@ EOU
             merge = true
           end
           opts.on("--todo", "Generates only undefined methods compared to objects") do
+            Warning.warn("Geneating prototypes with `--todo` option is experimental\n", category: :experimental)
             todo = true
           end
           opts.on("--method-owner CLASS", "Generate method prototypes if the owner of the method is [CLASS]") do |klass|
