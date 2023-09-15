@@ -129,13 +129,6 @@ class KernelTest < StdlibTest
     Object.new.class
   end
 
-  def test_define_singleton_method
-    define_singleton_method("_#{SecureRandom.hex(10)}") {}
-    define_singleton_method(:"_#{SecureRandom.hex(10)}") {}
-    define_singleton_method("_#{SecureRandom.hex(10)}", proc {})
-    define_singleton_method(:"_#{SecureRandom.hex(10)}", proc {})
-  end
-
   def test_eval
     eval "p"
     eval "p", binding, "fname", 1
@@ -178,6 +171,14 @@ class KernelTest < StdlibTest
   def test_display
     1.display
     1.display($stderr)
+
+    stdout = STDOUT.dup
+    STDOUT.reopen(IO::NULL)
+    Object.new.display()
+    Object.new.display(STDOUT)
+    Object.new.display(StringIO.new)
+  ensure
+    STDOUT.reopen(stdout)
   end
 
   def test_dup
@@ -193,6 +194,16 @@ class KernelTest < StdlibTest
 
     enum_for :each, 1
     enum_for(:each, 1) { 2 }
+
+    obj = Object.new
+
+    obj.enum_for(:instance_exec)
+    obj.enum_for(:instance_exec, 1,2,3)
+    obj.enum_for(:instance_exec, 1,2,3) { |x,y,z| x + y + z }
+
+    obj.to_enum(:instance_exec)
+    obj.to_enum(:instance_exec, 1, 2, 3)
+    obj.to_enum(:instance_exec, 1, 2, 3) { |x, y, z| x + y + z }
   end
 
   def test_eql?
@@ -836,5 +847,98 @@ class KernelTest < StdlibTest
 
   def test_system
     # TODO
+  end
+
+  def test_operators
+    if RUBY_VERSION < "3.2.0"
+      Object.new !~ 123
+    end
+
+    Object.new <=> 123
+    Object.new <=> Object.new
+
+    Object.new === false
+  end
+
+  def test_eql
+    Object.new.eql?(1)
+  end
+
+  def test_frozen
+    Object.new.frozen?
+  end
+
+  def test_itself
+    Object.new.itself
+  end
+
+  def test_kind_of?
+    Object.new.kind_of?(String)
+  end
+
+  def test_object_id
+    Object.new.object_id
+  end
+
+  def test_respond_to?
+    obj = Object.new
+
+    obj.respond_to?(:to_s)
+    obj.respond_to?('to_s')
+    obj.respond_to?('to_s', true)
+  end
+
+  if Kernel.method_defined?(:taint)
+    def test_taint
+      obj = Object.new
+
+      obj.taint
+      obj.tainted?
+      obj.untaint
+    end
+  end
+
+  def test_yield_self
+    obj = Object.new
+
+    obj.yield_self { }
+    obj.then { }
+  end
+end
+
+class KernelInstanceTest < Test::Unit::TestCase
+  include TypeAssertions
+
+  testing "::Kernel"
+
+  def test_define_singleton_method
+    obj = Object.new
+
+    assert_send_type(
+      "(::Symbol) { () -> void } -> Symbol",
+      obj, :define_singleton_method,
+      :foo
+    ) do end
+
+    assert_send_type(
+      "(::Symbol, ::Proc) -> Symbol",
+      obj, :define_singleton_method,
+      :bar,
+      -> {}
+    )
+
+    assert_send_type(
+      "(::Symbol, ::Method) -> Symbol",
+      obj, :define_singleton_method,
+      :bar,
+      obj.method(:to_s)
+    )
+
+    assert_send_type(
+      "(::Symbol, ::UnboundMethod) -> Symbol",
+      obj, :define_singleton_method,
+      :bar,
+      Object.instance_method(:to_s)
+    )
   end
 end
