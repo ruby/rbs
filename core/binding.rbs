@@ -30,9 +30,9 @@
 # Binding objects have no class-specific methods.
 #
 class Binding
-  def clone: () -> instance
+  def clone: () -> self
 
-  def dup: () -> instance
+  def dup: () -> self
 
   # <!--
   #   rdoc-file=proc.c
