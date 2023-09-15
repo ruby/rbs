@@ -681,6 +681,28 @@ Processing `test/a_test.rb`...
     end
   end
 
+  def test_prototype__runtime__todo
+    Dir.mktmpdir do |dir|
+      Dir.chdir(dir) do
+        with_cli do |cli|
+          begin
+            old = $stderr
+            $stderr = cli.stderr
+            cli.run(%w(prototype runtime --todo ::Object))
+          ensure
+            $stderr = old
+          end
+
+          assert_equal <<~EOM, cli.stdout.string
+          EOM
+
+          assert_match Regexp.new(Regexp.escape "Geneating prototypes with `--todo` option is experimental"), cli.stderr.string
+        end
+      end
+    end
+  end
+
+
   def test_test
     Dir.mktmpdir do |dir|
       dir = Pathname(dir)

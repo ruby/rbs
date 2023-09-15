@@ -606,4 +606,89 @@ end
       end
     end
   end
+
+  class TodoClass
+    module MixinDefined
+    end
+    include MixinDefined
+    module MixinTodo
+    end
+    extend MixinTodo
+
+    def public_defined; end
+    def public_todo; end
+    private def private_defined; end
+    private def private_todo; end
+    def self.singleton_defined; end
+    def self.singleton_todo; end
+
+    CONST_DEFINED = 1
+    CONST_TODO = 1
+  end
+
+  module TodoModule
+    def public_defined; end
+    def public_todo; end
+  end
+
+  def test_todo
+    SignatureManager.new do |manager|
+      manager.files[Pathname("foo.rbs")] = <<~RBS
+        module RBS
+          class RuntimePrototypeTest < ::Test::Unit::TestCase
+            class TodoClass
+              module MixinDefined
+              end
+              include MixinDefined
+              def public_defined: () -> void
+              private def private_defined: () -> void
+              def self.singleton_defined: () -> void
+              CONST_DEFINED: Integer
+            end
+            module TodoModule
+              def public_defined: () -> void
+            end
+          end
+        end
+      RBS
+
+      manager.build do |env|
+        p = Runtime.new(patterns: ["RBS::RuntimePrototypeTest::TodoClass"], env: env, merge: false, todo: true)
+        assert_write p.decls, <<~RBS
+          module RBS
+            class RuntimePrototypeTest < ::Test::Unit::TestCase
+              class TodoClass
+                extend RBS::RuntimePrototypeTest::TodoClass::MixinTodo
+
+                def self.singleton_todo: () -> untyped
+
+                public
+
+                def public_todo: () -> untyped
+
+                private
+
+                def private_todo: () -> untyped
+
+                CONST_TODO: ::Integer
+              end
+            end
+          end
+        RBS
+
+        p = Runtime.new(patterns: ["RBS::RuntimePrototypeTest::TodoModule"], env: env, merge: false, todo: true)
+        assert_write p.decls, <<~RBS
+          module RBS
+            class RuntimePrototypeTest < ::Test::Unit::TestCase
+              module TodoModule
+                public
+
+                def public_todo: () -> untyped
+              end
+            end
+          end
+        RBS
+      end
+    end
+  end
 end

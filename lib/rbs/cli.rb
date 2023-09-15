@@ -644,6 +644,7 @@ EOU
         require_libs = []
         relative_libs = []
         merge = false
+        todo = false
         owners_included = []
         outline = false
 
@@ -671,6 +672,10 @@ EOU
           opts.on("--merge", "Merge generated prototype RBS with existing RBS") do
             merge = true
           end
+          opts.on("--todo", "Generates only undefined methods compared to objects") do
+            Warning.warn("Geneating prototypes with `--todo` option is experimental\n", category: :experimental)
+            todo = true
+          end
           opts.on("--method-owner CLASS", "Generate method prototypes if the owner of the method is [CLASS]") do |klass|
             owners_included << klass
           end
@@ -690,7 +695,7 @@ EOU
           eval("require_relative(lib)", binding, "rbs")
         end
 
-        runtime = Prototype::Runtime.new(patterns: args, env: env, merge: merge, owners_included: owners_included)
+        runtime = Prototype::Runtime.new(patterns: args, env: env, merge: merge, todo: todo, owners_included: owners_included)
         runtime.outline = outline
 
         decls = runtime.decls
