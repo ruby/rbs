@@ -2806,6 +2806,8 @@ module Kernel : BasicObject
   #
   def respond_to?: (interned name, ?boolish include_all) -> bool
 
+  private def respond_to_missing?: (Symbol, bool) -> bool
+
   # <!--
   #   rdoc-file=vm_eval.c
   #   - foo.send(symbol [, args...])       -> obj
