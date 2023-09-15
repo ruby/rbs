@@ -633,7 +633,7 @@ class ArrayInstanceTest < Test::Unit::TestCase
                      [1,2,3], :product, ["a", "b"]
     assert_send_type "(Array[String], Array[Symbol]) -> Array[[Integer, String, Symbol]]",
                      [1,2,3], :product, ["a", "b"], [:a, :b]
-    assert_send_type "(Array[String], Array[Symbol], Array[true | false]) -> Array[Array[Integer | String | Symbol | true | false]]",
+    assert_send_type "(Array[String], Array[Symbol], Array[true | false]) -> Array[Array[Integer | interned | true | false]]",
                      [1,2,3], :product, ["a", "b"], [:a, :b], [true, false]
   end
 

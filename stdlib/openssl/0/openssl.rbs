@@ -8418,7 +8418,7 @@ module OpenSSL
       # -->
       # See BasicSocket#shutdown for details.
       #
-      def shutdown: (Symbol | String | Integer how) -> void
+      def shutdown: (interned | Integer how) -> void
 
       # <!-- rdoc-file=ext/openssl/lib/openssl/ssl.rb -->
       # When true then #accept works exactly the same as TCPServer#accept

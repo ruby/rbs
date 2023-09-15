@@ -1157,7 +1157,7 @@ EOF
   def test_parsing_quoted_method_name
     Parser.parse_signature(<<-EOF).yield_self do |foo_decl,|
 module Kernel
-  def `: (Symbol | String name) -> String?
+  def `: (interned name) -> String?
 
   # Returns a `Binding` object, describing the variable and method bindings
   # at the point of call. This object can be used when calling `eval` to

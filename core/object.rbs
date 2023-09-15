@@ -205,8 +205,8 @@ class Object < BasicObject
   #     chris.define_singleton_method(:greet) {|greeting| "#{greeting}, I'm Chris!" }
   #     chris.greet("Hi") #=> "Hi, I'm Chris!"
   #
-  def define_singleton_method: (name, Method | UnboundMethod | Proc method) -> Symbol
-                             | (name) { (*untyped) -> untyped } -> Symbol
+  def define_singleton_method: (interned, Method | UnboundMethod | Proc method) -> Symbol
+                             | (interned) { (*untyped) -> untyped } -> Symbol
 
   # <!--
   #   rdoc-file=io.c
@@ -576,7 +576,7 @@ class Object < BasicObject
   #     fred.instance_variable_defined?("@b")   #=> true
   #     fred.instance_variable_defined?("@c")   #=> false
   #
-  def instance_variable_defined?: (String | Symbol var) -> bool
+  def instance_variable_defined?: (interned var) -> bool
 
   # <!--
   #   rdoc-file=object.c
@@ -598,7 +598,7 @@ class Object < BasicObject
   #     fred.instance_variable_get(:@a)    #=> "cat"
   #     fred.instance_variable_get("@b")   #=> 99
   #
-  def instance_variable_get: (String | Symbol var) -> untyped
+  def instance_variable_get: (interned var) -> untyped
 
   # <!--
   #   rdoc-file=object.c
@@ -621,7 +621,7 @@ class Object < BasicObject
   #     fred.instance_variable_set(:@c, 'cat')   #=> "cat"
   #     fred.inspect                             #=> "#<Fred:0x401b3da8 @a=\"dog\", @b=99, @c=\"cat\">"
   #
-  def instance_variable_set: [X] (String | Symbol var, X value) -> X
+  def instance_variable_set: [X] (interned var, X value) -> X
 
   # <!--
   #   rdoc-file=object.c
@@ -740,7 +740,7 @@ class Object < BasicObject
   #     %w[2017-03-01 2017-03-02].collect(&Date.method(:parse))
   #     #=> [#<Date: 2017-03-01 ((2457814j,0s,0n),+0s,2299161j)>, #<Date: 2017-03-02 ((2457815j,0s,0n),+0s,2299161j)>]
   #
-  def method: (String | Symbol name) -> Method
+  def method: (interned name) -> Method
 
   # <!--
   #   rdoc-file=object.c
@@ -834,7 +834,7 @@ class Object < BasicObject
   # -->
   # Similar to *method*, searches public method only.
   #
-  def public_method: (name name) -> Method
+  def public_method: (interned name) -> Method
 
   # <!--
   #   rdoc-file=object.c
@@ -856,7 +856,7 @@ class Object < BasicObject
   #
   #     1.public_send(:puts, "hello")  # causes NoMethodError
   #
-  def public_send: (name name, *untyped args) ?{ (*untyped) -> untyped } -> untyped
+  def public_send: (interned name, *untyped args) ?{ (*untyped) -> untyped } -> untyped
 
   # <!--
   #   rdoc-file=object.c
@@ -880,7 +880,7 @@ class Object < BasicObject
   #     d.remove   #=> 99
   #     d.var      #=> nil
   #
-  def remove_instance_variable: (name name) -> untyped
+  def remove_instance_variable: (interned name) -> untyped
 
   # <!--
   #   rdoc-file=vm_method.c
@@ -900,7 +900,7 @@ class Object < BasicObject
   # When the method name parameter is given as a string, the string is converted
   # to a symbol.
   #
-  def respond_to?: (name name, ?boolish include_all) -> bool
+  def respond_to?: (interned name, ?boolish include_all) -> bool
 
   # <!--
   #   rdoc-file=vm_eval.c
@@ -925,7 +925,7 @@ class Object < BasicObject
   #     k = Klass.new
   #     k.send :hello, "gentle", "readers"   #=> "Hello gentle readers"
   #
-  def send: (name name, *untyped args) ?{ (*untyped) -> untyped } -> untyped
+  def send: (interned name, *untyped args) ?{ (*untyped) -> untyped } -> untyped
 
   # <!--
   #   rdoc-file=object.c
@@ -967,7 +967,7 @@ class Object < BasicObject
   #     m.call   #=> "Hi, @iv = 99"
   #     m = k.singleton_method(:hello) #=> NameError
   #
-  def singleton_method: (name name) -> Method
+  def singleton_method: (interned name) -> Method
 
   # <!--
   #   rdoc-file=object.c
@@ -1074,4 +1074,6 @@ class Object < BasicObject
   alias then yield_self
 end
 
-type Object::name = Symbol | string
+# A previous incarnation of `interned` for backward-compatibility (see #1499)
+%a{steep:deprecated}
+type Object::name = interned

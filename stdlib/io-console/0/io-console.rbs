@@ -270,7 +270,7 @@ class IO
   #   - pressed?(p1)
   # -->
   #
-  def pressed?: (Integer | Symbol | String) -> bool
+  def pressed?: (Integer | interned) -> bool
 
   # <!--
   #   rdoc-file=ext/io/console/console.c

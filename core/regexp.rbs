@@ -849,7 +849,7 @@ class Regexp
   #
   # Regexp.quote is an alias for Regexp.escape.
   #
-  def self.escape: (String | Symbol str) -> String
+  def self.escape: (interned str) -> String
 
   # <!--
   #   rdoc-file=re.c
@@ -889,7 +889,7 @@ class Regexp
   #
   def self.last_match: () -> MatchData?
                      | (Integer n) -> String?
-                     | (Symbol | String n) -> String?
+                     | (interned n) -> String?
 
   # <!--
   #   rdoc-file=re.c
@@ -928,7 +928,7 @@ class Regexp
   #
   # Regexp.quote is an alias for Regexp.escape.
   #
-  def self.quote: (String | Symbol str) -> String
+  def self.quote: (interned str) -> String
 
   # <!--
   #   rdoc-file=re.c

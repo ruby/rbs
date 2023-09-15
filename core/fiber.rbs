@@ -268,7 +268,7 @@ class Fiber < Object
   # Explicitly using `storage: true` is currently experimental and may change in
   # the future.
   #
-  def initialize: (?blocking: boolish, ?storage: true | Hash[Symbol | String, untyped] | nil) { (*untyped) -> void } -> void
+  def initialize: (?blocking: boolish, ?storage: true | Hash[interned, untyped] | nil) { (*untyped) -> void } -> void
 
   # <!--
   #   rdoc-file=cont.c
@@ -414,7 +414,7 @@ class Fiber < Object
   # Returns a copy of the storage hash for the fiber. The method can only be
   # called on the Fiber.current.
   #
-  def storage: () -> Hash[Symbol | String, untyped]
+  def storage: () -> Hash[interned, untyped]
 
   # <!--
   #   rdoc-file=cont.c
@@ -438,7 +438,7 @@ class Fiber < Object
   #       handle_request(request)
   #     end
   #
-  def storage=: (Hash[Symbol | String, untyped]) -> Hash[Symbol | String, untyped]
+  def storage=: (Hash[interned, untyped]) -> Hash[interned, untyped]
 
   # <!--
   #   rdoc-file=cont.c

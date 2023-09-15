@@ -13,9 +13,9 @@ rules:
     glob:
       - "{core,stdlib}/**/*.rbs"
     fail:
-      - "def `send`: (String | Symbol arg0, *untyped arg1) -> untyped"
+      - "def `send`: (interned arg0, *untyped arg1) -> untyped"
     pass:
-      - "def `send`: (String | Symbol, *untyped) -> untyped"
+      - "def `send`: (interned, *untyped) -> untyped"
 
   - id: rbs.prefer_boolish
     pattern:

@@ -744,7 +744,7 @@ module Kernel : BasicObject
   # If *const* is defined as autoload, the file name to be loaded is replaced with
   # *filename*.  If *const* is defined but not as autoload, does nothing.
   #
-  def self?.autoload: (String | Symbol _module, String filename) -> NilClass
+  def self?.autoload: (interned _module, String filename) -> NilClass
 
   # <!--
   #   rdoc-file=load.c
