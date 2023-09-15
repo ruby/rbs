@@ -670,7 +670,7 @@ end
 
                 def private_todo: () -> untyped
 
-                CONST_TODO: Integer
+                CONST_TODO: ::Integer
               end
             end
           end
