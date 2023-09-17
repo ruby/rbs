@@ -780,3 +780,8 @@ _annotation_ ::= `%a{` _annotation-text_ `}`  # Annotation using {}
 
 _annotation-text_ ::= /[^\x00]*/              # Any characters except NUL (and parenthesis)
 ```
+
+Supported annotations are:
+
+* `implicitly-returns-nil`: This annotation tells the method may return nil (ex. `Array#[]` and `Hash#[]`).
+  RBS itself doesn't do anything for this annotation. The type checkers may give precise types of the methods with the annotations.
