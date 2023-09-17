@@ -941,4 +941,15 @@ class KernelInstanceTest < Test::Unit::TestCase
       Object.instance_method(:to_s)
     )
   end
+  
+  def test_respond_to_missing?
+    obj = Object.new
+    
+    # The default implementation always returns `false` regardless of the args,
+    # let alone their types; though overrides only have to support Symbol + bool
+    assert_send_type(
+      "(::Symbol, bool) -> bool",
+      obj, :respond_to_missing?, :to_s, true
+    )
+  end
 end
