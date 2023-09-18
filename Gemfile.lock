@@ -11,7 +11,7 @@ PATH
 GEM
   remote: https://rubygems.org/
   specs:
-    addressable (2.8.4)
+    addressable (2.8.5)
       public_suffix (>= 2.0.2, < 6.0)
     ast (2.4.2)
     base64 (0.1.1)
@@ -24,7 +24,7 @@ GEM
       rainbow (>= 3.0, < 4.0)
       strong_json (>= 1.1, < 2.2)
     json (2.6.3)
-    json-schema (4.0.0)
+    json-schema (4.1.1)
       addressable (>= 2.8)
     language_server-protocol (3.17.0.3)
     marcel (1.0.2)
@@ -36,7 +36,7 @@ GEM
     power_assert (2.0.3)
     psych (4.0.6)
       stringio
-    public_suffix (5.0.1)
+    public_suffix (5.0.3)
     racc (1.7.1)
     rainbow (3.1.1)
     rake (13.0.6)
