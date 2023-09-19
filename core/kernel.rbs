@@ -2806,6 +2806,21 @@ module Kernel : BasicObject
   #
   def respond_to?: (interned name, ?boolish include_all) -> bool
 
+  # <!--
+  #   rdoc-file=vm_method.c
+  #   - obj.respond_to_missing?(symbol, include_all) -> true or false
+  #   - obj.respond_to_missing?(string, include_all) -> true or false
+  # -->
+  # DO NOT USE THIS DIRECTLY.
+  #
+  # Hook method to return whether the *obj* can respond to *id* method or not.
+  #
+  # When the method name parameter is given as a string, the string is converted
+  # to a symbol.
+  #
+  # See #respond_to?, and the example of BasicObject.
+  #
+  %a{annotate:rdoc:copy:Object#respond_to_missing?}
   private def respond_to_missing?: (Symbol, bool) -> bool
 
   # <!--
