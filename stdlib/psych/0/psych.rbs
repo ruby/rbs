@@ -47,7 +47,7 @@
 #
 # Syck can also be found on github: https://github.com/ruby/syck
 #
-module YAML
+module Psych
   # <!--
   #   rdoc-file=ext/psych/lib/psych.rb
   #   - Psych.dump(o)               -> string of yaml
