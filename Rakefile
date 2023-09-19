@@ -84,11 +84,12 @@ end
 
 task :stdlib_test => :compile do
   test_files = FileList["test/stdlib/**/*_test.rb"].reject do |path|
-    path =~ %r{Ractor}
+    path =~ %r{Ractor} || path =~ %r{Encoding}
   end
   sh "#{ruby} -Ilib #{bin}/test_runner.rb #{test_files.join(' ')}"
   # TODO: Ractor tests need to be run in a separate process
   sh "#{ruby} -Ilib #{bin}/test_runner.rb test/stdlib/Ractor_test.rb"
+  sh "#{ruby} -Ilib #{bin}/test_runner.rb test/stdlib/Encoding_test.rb"
 end
 
 task :rubocop do

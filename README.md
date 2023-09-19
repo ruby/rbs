@@ -54,8 +54,8 @@ end
 
 ## The Target Version
 
-* The standard library signatures targets Ruby 3.1. (The latest release of Ruby.)
-* The library code targets Ruby 3.1, 3.0, and 2.7. (It runs on 2.6 in fact.)
+* The standard library signatures targets the latest release of Ruby. (`3.2` as of 2023.)
+* The library code targets non-EOL versions of Ruby. (`>= 3.0` as of 2023.)
 
 ## Installation
 
