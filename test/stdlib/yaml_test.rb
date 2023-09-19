@@ -59,6 +59,22 @@ foo: 123
     )
   end
 
+  def test_unsafe_load
+    assert_send_type(
+      "(::String) -> untyped",
+      YAML, :unsafe_load, <<-YAML
+foo: 123
+      YAML
+    )
+
+    assert_send_type(
+      "(::String, filename: ::_ToS, fallback: ::Symbol, symbolize_names: bool, freeze: bool, strict_integer: bool) -> untyped",
+      YAML, :unsafe_load, <<-YAML, filename: ToS.new("foo.yaml"), fallback: :foo, symbolize_names: true, freeze: false, strict_integer: false
+foo: 123
+      YAML
+    )
+  end
+
   def test_dump
     assert_send_type(
       "(::Array[::Integer]) -> ::String",
