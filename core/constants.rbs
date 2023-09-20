@@ -4,16 +4,16 @@
 #
 # See ARGF (the class) for more details.
 #
-::ARGF: RBS::Unnamed::ARGFClass
+ARGF: RBS::Unnamed::ARGFClass
 
 # <!-- rdoc-file=ruby.c -->
 # ARGV contains the command line arguments used to run ruby.
 #
 # A library like OptionParser can be used to process command-line arguments.
 #
-::ARGV: Array[String]
+ARGV: Array[String]
 
-::CROSS_COMPILING: NilClass
+CROSS_COMPILING: true?
 
 # <!-- rdoc-file=ruby.c -->
 # DATA is a File that contains the data section of the executed file. To create
@@ -27,70 +27,70 @@
 #     $ ruby t.rb
 #     hello world!
 #
-::DATA: File
+DATA: File
 
 # <!-- rdoc-file=version.c -->
 # The copyright string for ruby
 #
-::RUBY_COPYRIGHT: String
+RUBY_COPYRIGHT: String
 
 # <!-- rdoc-file=version.c -->
 # The full ruby version string, like `ruby -v` prints
 #
-::RUBY_DESCRIPTION: String
+RUBY_DESCRIPTION: String
 
 # <!-- rdoc-file=version.c -->
 # The engine or interpreter this ruby uses.
 #
-::RUBY_ENGINE: String
+RUBY_ENGINE: String
 
 # <!-- rdoc-file=version.c -->
 # The version of the engine or interpreter this ruby uses.
 #
-::RUBY_ENGINE_VERSION: String
+RUBY_ENGINE_VERSION: String
 
 # <!-- rdoc-file=version.c -->
 # The patchlevel for this ruby.  If this is a development build of ruby the
 # patchlevel will be -1
 #
-::RUBY_PATCHLEVEL: Integer
+RUBY_PATCHLEVEL: Integer
 
 # <!-- rdoc-file=version.c -->
 # The platform for this ruby
 #
-::RUBY_PLATFORM: String
+RUBY_PLATFORM: String
 
 # <!-- rdoc-file=version.c -->
 # The date this ruby was released
 #
-::RUBY_RELEASE_DATE: String
+RUBY_RELEASE_DATE: String
 
 # <!-- rdoc-file=version.c -->
 # The GIT commit hash for this ruby.
 #
-::RUBY_REVISION: Integer
+RUBY_REVISION: String
 
 # <!-- rdoc-file=version.c -->
 # The running version of ruby
 #
-::RUBY_VERSION: String
+RUBY_VERSION: String
 
 # <!-- rdoc-file=io.c -->
 # Holds the original stderr
 #
-::STDERR: IO
+STDERR: IO
 
 # <!-- rdoc-file=io.c -->
 # Holds the original stdin
 #
-::STDIN: IO
+STDIN: IO
 
 # <!-- rdoc-file=io.c -->
 # Holds the original stdout
 #
-::STDOUT: IO
+STDOUT: IO
 
 # <!-- rdoc-file=vm.c -->
 # The Binding of the top level scope
 #
-::TOPLEVEL_BINDING: Binding
+TOPLEVEL_BINDING: Binding
