@@ -480,7 +480,7 @@ module TypeAssertions
       case type
       when String
         RBS::Parser.parse_type(type, variables: [])
-      when RBS::MethodType
+      else
         type
       end
 
