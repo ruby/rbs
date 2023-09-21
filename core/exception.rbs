@@ -105,7 +105,7 @@
 # *   SystemStackError
 # *   fatal
 #
-class Exception < Object
+class Exception
   # <!--
   #   rdoc-file=error.c
   #   - Exception.to_tty?   ->  true or false
@@ -122,7 +122,7 @@ class Exception < Object
   # receiver. Otherwise, create a new exception object of the same class as the
   # receiver, but with a message equal to `string.to_str`.
   #
-  def self.exception: (?String msg) -> Exception
+  def self.exception: (?string | _ToS msg) -> instance
 
   # <!--
   #   rdoc-file=error.c
@@ -131,7 +131,7 @@ class Exception < Object
   # Equality---If *obj* is not an Exception, returns `false`. Otherwise, returns
   # `true` if *exc* and *obj* share same class, messages, and backtrace.
   #
-  def ==: (untyped arg0) -> bool
+  def ==: (untyped obj) -> bool
 
   # <!--
   #   rdoc-file=error.c
@@ -167,7 +167,7 @@ class Exception < Object
   #     ex.backtrace
   #     #=> nil
   #
-  def backtrace: () -> ::Array[String]?
+  def backtrace: () -> Array[String]?
 
   # <!--
   #   rdoc-file=error.c
@@ -179,7 +179,7 @@ class Exception < Object
   #
   # This method is not affected by Exception#set_backtrace().
   #
-  def backtrace_locations: () -> ::Array[Thread::Backtrace::Location]?
+  def backtrace_locations: () -> Array[Thread::Backtrace::Location]?
 
   # <!--
   #   rdoc-file=error.c
@@ -230,7 +230,7 @@ class Exception < Object
   # sequences to express essential information; the message should be readable
   # even if all escape sequences are ignored.
   #
-  def detailed_message: (?highlight: boolish, **untyped) -> String
+  def detailed_message: (?highlight: bool?, **untyped ignored) -> String
 
   # <!--
   #   rdoc-file=error.c
@@ -240,8 +240,8 @@ class Exception < Object
   # receiver. Otherwise, create a new exception object of the same class as the
   # receiver, but with a message equal to `string.to_str`.
   #
-  def exception: () -> self
-               | (String arg0) -> Exception
+  def exception: (?self) -> self
+               | (string | _ToS message) -> instance
 
   # <!--
   #   rdoc-file=error.c
@@ -250,7 +250,7 @@ class Exception < Object
   # -->
   # Construct a new Exception object, optionally passing in a message.
   #
-  def initialize: (?String arg0) -> void
+  def initialize: (?string | _ToS message) -> self
 
   # <!--
   #   rdoc-file=error.c
@@ -277,7 +277,7 @@ class Exception < Object
   # an array of String objects or a single String in the format described in
   # Exception#backtrace.
   #
-  def set_backtrace: (String | ::Array[String] arg0) -> ::Array[String]
+  def set_backtrace: (String | Array[String] backtrace) -> Array[String]
                    | (nil) -> nil
 
   # <!--
@@ -306,5 +306,5 @@ class Exception < Object
   # The default values of these options depend on `$stderr` and its `tty?` at the
   # timing of a call.
   #
-  def full_message: (?highlight: bool, ?order: :top | :bottom) -> String
+  def full_message: (?highlight: bool?, ?order: (:top | :bottom | string)?) -> String
 end
