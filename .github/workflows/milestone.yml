@@ -3,10 +3,10 @@ name: Confirm PRs have milestones
 on:
   pull_request:
     paths:
-      - lib
-      - core
-      - stdlib
-      - sig
+      - lib/**/*
+      - core/**/*
+      - stdlib/**/*
+      - sig/**/*
       - rbs.gemspec
 
 jobs:
