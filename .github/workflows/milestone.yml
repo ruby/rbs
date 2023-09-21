@@ -1,0 +1,22 @@
+name: Confirm PRs have milestones
+
+on:
+  pull_request:
+    paths:
+      - lib
+      - core
+      - stdlib
+      - sig
+      - rbs.gemspec
+
+jobs:
+  check:
+    runs-on: "ubuntu-latest"
+    steps:
+      - if: github.event.pull_request.milestone == null
+        run: |
+          echo "No milestone is given"
+          exit 1
+      - if: github.event.pull_request.milestone != null
+        run: |
+          echo "Milestone is given 💪"
