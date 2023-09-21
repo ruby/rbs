@@ -2,6 +2,11 @@ name: Confirm PRs have milestones
 
 on:
   pull_request:
+    types:
+      - edited
+      - opened
+      - reopened
+      - synchronize
     paths:
       - lib/**/*
       - core/**/*
