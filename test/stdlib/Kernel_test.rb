@@ -952,4 +952,11 @@ class KernelInstanceTest < Test::Unit::TestCase
       obj, :respond_to_missing?, :to_s, true
     )
   end
+
+  def test_initialize_copy
+    assert_send_type(
+      "(self) -> self",
+      Object.new, :initialize_copy, Object.new
+    )
+  end
 end
