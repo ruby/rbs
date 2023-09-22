@@ -646,6 +646,18 @@ class Each
   end
 end
 
+class Writer
+  attr_reader :buffer
+
+  def initialize
+    @buffer = ""
+  end
+
+  def write(*vals)
+    @buffer.concat vals.join
+  end
+end
+
 class ToJson
 end
 
