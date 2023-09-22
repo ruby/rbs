@@ -433,8 +433,9 @@ EOU
       stdout.puts "  accessibility: #{method.accessibility}"
       stdout.puts "  types:"
       separator = " "
-      for type in method.method_types
-        stdout.puts "    #{separator} #{type}"
+      length_max = method.method_types.map { |type| type.to_s.length }.max or raise
+      method.method_types.each do |type|
+        stdout.puts format("    %s %-#{length_max}s   at %s", separator, type, type.location)
         separator = "|"
       end
     end
