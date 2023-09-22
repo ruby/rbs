@@ -1084,7 +1084,7 @@ class Pathname
   # Note that this method does not handle situations where the case sensitivity of
   # the filesystem in use differs from the operating system default.
   #
-  def relative_path_from: (Pathname | string base_directory) -> Pathname
+  def relative_path_from: (Pathname | (string & _IsA) base_directory) -> Pathname
 
   # <!--
   #   rdoc-file=ext/pathname/pathname.c

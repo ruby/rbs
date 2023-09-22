@@ -969,7 +969,7 @@ module JSON
   #        #<Admin:0x00000000064c41f8
   #        @attributes={"type"=>"Admin", "password"=>"0wn3d"}>}
   #
-  def self?.load: (string | _JsonReadableIO | _JsonRead source, ?Proc proc, ?json_options options) -> untyped
+  def self?.load: (Object & (string | _JsonReadableIO | _JsonRead) source, ?Proc proc, ?json_options options) -> untyped
 
   # <!-- rdoc-file=ext/json/lib/json/common.rb -->
   # Sets or returns default options for the JSON.load method. Initially:

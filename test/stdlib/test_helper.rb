@@ -504,7 +504,14 @@ module TypeAssertions
   end
 end
 
-class ToIO
+class BlankSlate < BasicObject
+  instance_methods.each do |im|
+    next if %i[__send__ __id__].include? im
+    undef_method im
+  end
+end
+
+class ToIO < BlankSlate
   def initialize(io = $stdout)
     @io = io
   end
@@ -514,7 +521,7 @@ class ToIO
   end
 end
 
-class ToI
+class ToI < BlankSlate
   def initialize(value = 3)
     @value = value
   end
@@ -524,7 +531,7 @@ class ToI
   end
 end
 
-class ToInt
+class ToInt < BlankSlate
   def initialize(value = 3)
     @value = value
   end
@@ -534,7 +541,7 @@ class ToInt
   end
 end
 
-class ToF
+class ToF < BlankSlate
   def initialize(value = 0.1)
     @value = value
   end
@@ -544,7 +551,7 @@ class ToF
   end
 end
 
-class ToStr
+class ToStr < BlankSlate
   def initialize(value = "")
     @value = value
   end
@@ -554,7 +561,7 @@ class ToStr
   end
 end
 
-class ToS
+class ToS < BlankSlate
   def initialize(value = "")
     @value = value
   end
@@ -564,8 +571,7 @@ class ToS
   end
 end
 
-
-class ToSym
+class ToSym < BlankSlate
   def initialize(value = :&)
     @value = value
   end
@@ -575,7 +581,7 @@ class ToSym
   end
 end
 
-class ToA
+class ToA < BlankSlate
   def initialize(*args)
     @args = args
   end
@@ -585,7 +591,7 @@ class ToA
   end
 end
 
-class ToArray
+class ToArray < BlankSlate
   def initialize(*args)
     @args = args
   end
@@ -595,7 +601,7 @@ class ToArray
   end
 end
 
-class ToHash
+class ToHash < BlankSlate
   def initialize(hash = { 'hello' => 'world' })
     @hash = hash
   end
@@ -605,7 +611,7 @@ class ToHash
   end
 end
 
-class ToPath
+class ToPath < BlankSlate
   def initialize(value = "")
     @value = value
   end
@@ -615,7 +621,7 @@ class ToPath
   end
 end
 
-class Each
+class Each < BlankSlate
   def initialize(*args)
     @args = args
   end
@@ -628,7 +634,7 @@ end
 class ToJson
 end
 
-class Rand
+class Rand < BlankSlate
   def rand(max)
     max - 1
   end
@@ -657,19 +663,19 @@ class JsonToReadableIO
   end
 end
 
-class Enum
+class Enum < BlankSlate
   def initialize(*args)
     @args = args
   end
 
-  include Enumerable
+  include ::Enumerable
 
   def each(&block)
     @args.each(&block)
   end
 end
 
-class ArefFromStringToString
+class ArefFromStringToString < BlankSlate
   def [](str)
     "!"
   end

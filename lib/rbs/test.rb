@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require "securerandom"
+require "rbs/test/guaranteed"
 require "rbs/test/observer"
 require "rbs/test/spy"
 require "rbs/test/errors"
@@ -23,6 +24,8 @@ module RBS
     METHODS = Kernel.instance_method(:methods)
 
     class ArgumentsReturn
+      include Guaranteed::Inspect
+
       attr_reader :arguments
       attr_reader :exit_value
       attr_reader :exit_type

@@ -606,8 +606,14 @@ class PathnameInstanceTest < Test::Unit::TestCase
                      Pathname('.'), :relative_path_from, Pathname('.')
     assert_send_type '(String) -> Pathname',
                      Pathname('.'), :relative_path_from, '.'
-    assert_send_type '(ToStr) -> Pathname',
-                     Pathname('.'), :relative_path_from, ToStr.new('.')
+
+    mystr = ToStr.new('.')
+    def mystr.is_a?(cls)
+      ::Kernel.instance_method(:is_a?).bind_call(self, cls)
+    end
+
+    assert_send_type '(ToStr & ::_IsA) -> Pathname',
+                     Pathname('.'), :relative_path_from, mystr
   end
 
   def test_rename

@@ -167,7 +167,7 @@ module Gem
     # -->
     # True if the `version` string matches RubyGems' requirements.
     #
-    def self.correct?: (_ToS version) -> bool
+    def self.correct?: (_ToS & Object version) -> bool
 
     # <!--
     #   rdoc-file=lib/rubygems/version.rb
@@ -180,7 +180,7 @@ module Gem
     #     ver2 = Version.create(ver1)       # -> (ver1)
     #     ver3 = Version.create(nil)        # -> nil
     #
-    def self.create: (_ToS | Version input) -> instance
+    def self.create: (_ToS & Object | Version input) -> instance
                    | (nil input) -> nil
 
     # <!--
@@ -190,7 +190,7 @@ module Gem
     # Constructs a Version from the `version` string.  A version string is a series
     # of digits or ASCII letters separated by dots.
     #
-    def initialize: (_ToS version) -> void
+    def initialize: (_ToS & Object version) -> void
 
     # <!--
     #   rdoc-file=lib/rubygems/version.rb

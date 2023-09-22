@@ -170,6 +170,10 @@ interface _Inspect
   def inspect: () -> String
 end
 
+interface _IsA
+  def is_a?: (Class cls) -> boolish
+end
+
 interface _Each[out A]
   def each: () { (A) -> void } -> void
 end
