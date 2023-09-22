@@ -2971,6 +2971,10 @@ module Kernel : BasicObject
   alias then yield_self
 
   private def initialize_copy: (self object) -> self
+
+  private def initialize_clone: (self object, ?freeze: bool?) -> self
+
+  private def initialize_dup: (self object) -> self
 end
 
 Kernel::RUBYGEMS_ACTIVATION_MONITOR: untyped

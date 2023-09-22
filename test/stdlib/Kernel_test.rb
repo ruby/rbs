@@ -941,10 +941,10 @@ class KernelInstanceTest < Test::Unit::TestCase
       Object.instance_method(:to_s)
     )
   end
-  
+
   def test_respond_to_missing?
     obj = Object.new
-    
+
     # The default implementation always returns `false` regardless of the args,
     # let alone their types; though overrides only have to support Symbol + bool
     assert_send_type(
@@ -957,6 +957,25 @@ class KernelInstanceTest < Test::Unit::TestCase
     assert_send_type(
       "(self) -> self",
       Object.new, :initialize_copy, Object.new
+    )
+  end
+
+  def test_initialize_clone
+    assert_send_type(
+      "(self) -> self",
+      Object.new, :initialize_clone, Object.new
+    )
+
+    assert_send_type(
+      "(self, freeze: bool) -> self",
+      Object.new, :initialize_clone, Object.new, freeze: true
+    )
+  end
+
+  def test_initialize_dup
+    assert_send_type(
+      "(self) -> self",
+      Object.new, :initialize_dup, Object.new
     )
   end
 end
