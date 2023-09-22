@@ -480,7 +480,7 @@ module TypeAssertions
       case type
       when String
         RBS::Parser.parse_type(type, variables: [])
-      when RBS::MethodType
+      else
         type
       end
 
@@ -501,6 +501,27 @@ module TypeAssertions
     end
 
     assert typecheck.value(constant, definition_type), "`#{constant_name}` (#{constant.inspect}) must be compatible with RBS type definition `#{definition_type}`"
+  end
+
+  def assert_type(type, value)
+    typecheck = RBS::Test::TypeCheck.new(
+      self_class: value.class,
+      instance_class: "No `instance` class allowed",
+      class_class: "No `class` class allowed",
+      builder: builder,
+      sample_size: 100,
+      unchecked_classes: []
+    )
+
+    type =
+      case type
+      when String
+        RBS::Parser.parse_type(type, variables: [])
+      else
+        type
+      end
+
+    assert typecheck.value(value, type), "`#{value.inspect}` must be compatible with given type `#{type}`"
   end
 end
 
