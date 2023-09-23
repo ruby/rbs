@@ -1,13 +1,6 @@
 module RBS
   module Test
     module Guaranteed
-      IS_AP = ::Kernel.instance_method(:is_a?)
-      private_constant :IS_AP
-
-      def self.value_is_a?(value, kind)
-        IS_AP.bind_call(value, kind)
-      end
-
       module Inspect
         EQUAL = ::BasicObject.instance_method(:equal?)
         INSPECT = ::Kernel.instance_method(:inspect)

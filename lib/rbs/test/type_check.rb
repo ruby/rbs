@@ -136,7 +136,7 @@ module RBS
       end
 
       def keyword?(value)
-        Guaranteed.value_is_a?(value, Hash) && value.keys.all? {|key| Guaranteed.value_is_a?(key, Symbol) }
+        Hash === value and value.each_key.all?(Symbol)
       end
 
       def zip_args(args, fun, &block)
