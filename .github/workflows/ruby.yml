@@ -11,6 +11,7 @@ jobs:
   test:
     runs-on: "ubuntu-latest"
     strategy:
+      fail-fast: false
       matrix:
         container_tag:
           - master-nightly-focal
@@ -30,6 +31,9 @@ jobs:
             job: stdlib_test
           - container_tag: 3.1-dev-focal
             job: stdlib_test
+        include:
+          - container_tag: master-nightly-focal
+            allow_failures: "true"
     container:
       image: rubylang/ruby:${{ matrix.container_tag }}
     steps:
@@ -66,6 +70,7 @@ jobs:
       - name: Run test
         run: |
           bundle exec rake ${{ matrix.job }}
+        continue-on-error: ${{ matrix.allow_failures == 'true' && (github.event_name == 'push' || github.event_name == 'merge_group') }}
 
   windows:
     runs-on: ${{ matrix.os }}

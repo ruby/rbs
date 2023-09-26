@@ -108,6 +108,16 @@
 # which is Marshal.loaded in _load for complex objects.
 #
 module Marshal
+  # <!-- rdoc-file=marshal.c -->
+  # major version
+  #
+  MAJOR_VERSION: Integer
+
+  # <!-- rdoc-file=marshal.c -->
+  # minor version
+  #
+  MINOR_VERSION: Integer
+
   # <!--
   #   rdoc-file=marshal.c
   #   - dump( obj [, anIO] , limit=-1 ) -> anIO
@@ -141,8 +151,8 @@ module Marshal
   #     ThreadGroup, Continuation
   # *   objects which define singleton methods
   #
-  def self.dump: (untyped obj, untyped port, ?Integer limit) -> untyped
-               | (untyped obj, ?Integer limit) -> String
+  def self?.dump: [W < _Writer] (untyped obj, W port, ?int? limit) -> W
+                | (untyped obj, ?Integer limit) -> String
 
   # <!--
   #   rdoc-file=marshal.rb
@@ -175,8 +185,18 @@ module Marshal
   #     deserialized.map(&:object_id)
   #     # => [1039360, 1039380, 1039360, 1039380] -- only 2 different objects, object_ids repeating
   #
-  def self.load: (String | untyped port, ?freeze: boolish) -> untyped
-               | [A] (String | untyped port, ^(untyped) -> A, ?freeze: boolish) -> A
+  def self.load: (string | _Source source, ?freeze: boolish) -> untyped
+               | [A] (string | _Source source, _Proc[A] proc, ?freeze: boolish) -> A
+
+  interface _Proc[T]
+    def call: (untyped loaded) -> T
+  end
+
+  interface _Source
+    def getbyte: () -> (String | int)
+
+    def read: (Integer) -> string
+  end
 
   # <!--
   #   rdoc-file=marshal.rb
@@ -185,13 +205,3 @@ module Marshal
   #
   alias self.restore self.load
 end
-
-# <!-- rdoc-file=marshal.c -->
-# major version
-#
-Marshal::MAJOR_VERSION: Integer
-
-# <!-- rdoc-file=marshal.c -->
-# minor version
-#
-Marshal::MINOR_VERSION: Integer
