@@ -44,12 +44,6 @@ module RBS
             path: config.repo_path_data,
             gemfile_lock_path: definition.lockfile.relative_path_from(lockfile_dir)
           )
-          config.sources.each do |source|
-            case source
-            when Sources::Git
-              lockfile.sources[source.name] = source
-            end
-          end
 
           if with_lockfile && lockfile_path.file?
             @existing_lockfile = Lockfile.from_lockfile(lockfile_path: lockfile_path, data: YAML.load_file(lockfile_path.to_s))

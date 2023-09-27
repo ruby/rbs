@@ -58,12 +58,6 @@ class RBS::Collection::ConfigTest < Test::Unit::TestCase
       string = YAML.dump(lockfile.to_lockfile)
 
       assert_config <<~YAML, string
-        sources:
-          - type: git
-            name: ruby/gem_rbs_collection
-            remote: https://github.com/ruby/gem_rbs_collection.git
-            revision: cde6057e7546843ace6420c5783dd945c6ccda54
-            repo_dir: gems
         path: "/path/to/somewhere"
         gemfile_lock_path: 'Gemfile.lock'
         gems:
@@ -115,12 +109,6 @@ class RBS::Collection::ConfigTest < Test::Unit::TestCase
         string = YAML.dump(lockfile.to_lockfile)
 
         assert_config <<~YAML, string
-          sources:
-            - type: git
-              name: ruby/gem_rbs_collection
-              remote: #{remote}
-              revision: b4d3b346d9657543099a35a1fd20347e75b8c523
-              repo_dir: gems
           path: "/path/to/somewhere"
           gemfile_lock_path: 'Gemfile.lock'
           gems:
@@ -155,12 +143,6 @@ class RBS::Collection::ConfigTest < Test::Unit::TestCase
       gemfile_lock_path.write GEMFILE_LOCK
 
       lockfile_yaml = <<~YAML
-        sources:
-          - type: git
-            name: ruby/gem_rbs_collection
-            remote: https://github.com/ruby/gem_rbs_collection.git
-            revision: cde6057e7546843ace6420c5783dd945c6ccda54
-            repo_dir: gems
         path: "/path/to/somewhere"
         gemfile_lock_path: 'Gemfile.lock'
         gems:
@@ -212,12 +194,6 @@ class RBS::Collection::ConfigTest < Test::Unit::TestCase
       string = YAML.dump(lockfile.to_lockfile)
 
       assert_config <<~YAML, string
-        sources:
-          - type: git
-            name: ruby/gem_rbs_collection
-            remote: https://github.com/ruby/gem_rbs_collection.git
-            revision: cde6057e7546843ace6420c5783dd945c6ccda54
-            repo_dir: gems
         path: "/path/to/somewhere"
         gemfile_lock_path: 'Gemfile.lock'
         gems:
@@ -277,12 +253,6 @@ class RBS::Collection::ConfigTest < Test::Unit::TestCase
       string = YAML.dump(lockfile.to_lockfile)
 
       assert_config <<~YAML, string
-        sources:
-          - type: git
-            name: ruby/gem_rbs_collection
-            remote: https://github.com/ruby/gem_rbs_collection.git
-            revision: cde6057e7546843ace6420c5783dd945c6ccda54
-            repo_dir: gems
         path: "/path/to/somewhere"
         gemfile_lock_path: 'Gemfile.lock'
         gems:
@@ -359,12 +329,6 @@ class RBS::Collection::ConfigTest < Test::Unit::TestCase
       string = YAML.dump(lockfile.to_lockfile)
 
       assert_config <<~YAML, string
-        sources:
-          - type: git
-            name: ruby/gem_rbs_collection
-            remote: https://github.com/ruby/gem_rbs_collection.git
-            revision: cde6057e7546843ace6420c5783dd945c6ccda54
-            repo_dir: gems
         path: "/path/to/somewhere"
         gemfile_lock_path: 'Gemfile.lock'
         gems:
@@ -414,12 +378,6 @@ class RBS::Collection::ConfigTest < Test::Unit::TestCase
       string = YAML.dump(lockfile.to_lockfile)
 
       assert_config <<~YAML, string
-        sources:
-          - type: git
-            name: ruby/gem_rbs_collection
-            remote: https://github.com/ruby/gem_rbs_collection.git
-            revision: cde6057e7546843ace6420c5783dd945c6ccda54
-            repo_dir: gems
         path: "/path/to/somewhere"
         gemfile_lock_path: 'Gemfile.lock'
         gems:
@@ -461,12 +419,6 @@ class RBS::Collection::ConfigTest < Test::Unit::TestCase
       string = YAML.dump(lockfile.to_lockfile)
 
       assert_config <<~YAML, string
-        sources:
-          - type: git
-            name: ruby/gem_rbs_collection
-            remote: https://github.com/ruby/gem_rbs_collection.git
-            revision: cde6057e7546843ace6420c5783dd945c6ccda54
-            repo_dir: gems
         path: "/path/to/somewhere"
         gemfile_lock_path: 'Gemfile.lock'
       YAML
@@ -564,12 +516,6 @@ class RBS::Collection::ConfigTest < Test::Unit::TestCase
       string = YAML.dump(lockfile.to_lockfile)
 
       assert_config <<~YAML, string
-        sources:
-          - type: git
-            name: ruby/gem_rbs_collection
-            remote: https://github.com/ruby/gem_rbs_collection.git
-            revision: cde6057e7546843ace6420c5783dd945c6ccda54
-            repo_dir: gems
         path: ".gem_rbs_collection"
         gemfile_lock_path: 'Gemfile.lock'
         gems:
@@ -628,12 +574,6 @@ class RBS::Collection::ConfigTest < Test::Unit::TestCase
       string = YAML.dump(lockfile.to_lockfile)
 
       assert_config <<~YAML, string
-        sources:
-          - type: git
-            name: ruby/gem_rbs_collection
-            remote: https://github.com/ruby/gem_rbs_collection.git
-            revision: cde6057e7546843ace6420c5783dd945c6ccda54
-            repo_dir: gems
         path: ".gem_rbs_collection"
         gemfile_lock_path: 'Gemfile.lock'
         gems:
@@ -690,12 +630,6 @@ class RBS::Collection::ConfigTest < Test::Unit::TestCase
       string = YAML.dump(lockfile.to_lockfile)
 
       assert_config <<~YAML, string
-        sources:
-          - type: git
-            name: ruby/gem_rbs_collection
-            remote: https://github.com/ruby/gem_rbs_collection.git
-            revision: cde6057e7546843ace6420c5783dd945c6ccda54
-            repo_dir: gems
         path: ".gem_rbs_collection"
         gemfile_lock_path: 'Gemfile.lock'
       YAML
@@ -740,12 +674,6 @@ class RBS::Collection::ConfigTest < Test::Unit::TestCase
       string = YAML.dump(lockfile.to_lockfile)
 
       assert_config <<~YAML, string
-        sources:
-          - type: git
-            name: ruby/gem_rbs_collection
-            remote: https://github.com/ruby/gem_rbs_collection.git
-            revision: cde6057e7546843ace6420c5783dd945c6ccda54
-            repo_dir: gems
         path: ".gem_rbs_collection"
         gemfile_lock_path: 'Gemfile.lock'
         gems:
@@ -824,12 +752,6 @@ class RBS::Collection::ConfigTest < Test::Unit::TestCase
       string = YAML.dump(lockfile.to_lockfile)
 
       assert_config <<~YAML, string
-        sources:
-          - type: git
-            name: ruby/gem_rbs_collection
-            remote: https://github.com/ruby/gem_rbs_collection.git
-            revision: 9612e5e67697153dcc7464c01115db44d29b1e34
-            repo_dir: gems
         path: ".gem_rbs_collection"
         gemfile_lock_path: 'Gemfile.lock'
         gems:
@@ -896,12 +818,6 @@ class RBS::Collection::ConfigTest < Test::Unit::TestCase
 
       # Version mismatched rbs_collection.lock.yaml (Gemfile.lock expects rainbow-3.0.0, but this expects 2.0)
       lockfile_yaml = <<~YAML
-        sources:
-          - type: git
-            name: ruby/gem_rbs_collection
-            remote: https://github.com/ruby/gem_rbs_collection.git
-            revision: cde6057e7546843ace6420c5783dd945c6ccda54
-            repo_dir: gems
         path: "/path/to/somewhere"
         gemfile_lock_path: 'Gemfile.lock'
         gems:
