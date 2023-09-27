@@ -723,7 +723,7 @@ If a type parameter has an upper bound, the type parameter must be instantiated 
 
 ```rbs
 type str_printer = PrettyPrint[String]    # OK
-type int_printer = PrettyPrint[Integer]      # Type error
+type int_printer = PrettyPrint[Integer]   # Type error
 ```
 
 The upper bound must be one of a class instance type, interface type, or class singleton type.
