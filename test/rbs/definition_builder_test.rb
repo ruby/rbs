@@ -2609,8 +2609,6 @@ end
       EOF
 
       manager.build do |env|
-        root = nil
-
         builder = DefinitionBuilder.new(env: env)
 
         builder.build_instance(type_name("::Hoge"))
@@ -2634,8 +2632,6 @@ end
       EOF
 
       manager.build do |env|
-        root = nil
-
         builder = DefinitionBuilder.new(env: env)
 
         builder.build_instance(type_name("::Baz"))
@@ -2654,8 +2650,6 @@ end
       EOF
 
       manager.build do |env|
-        root = nil
-
         builder = DefinitionBuilder.new(env: env)
 
         builder.build_instance(type_name("::Bar"))
