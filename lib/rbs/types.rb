@@ -552,6 +552,8 @@ module RBS
           when Symbol
             return "#{type.to_s(1)} ?"
           end
+        when RBS::Types::Proc
+          return "(#{type.to_s(1)})?"
         end
 
         "#{type.to_s(1)}?"
