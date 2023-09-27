@@ -912,8 +912,8 @@ Processing `test/a_test.rb`...
 
         stdout, _ = run_rbs("collection", "install", bundler: true)
 
-        assert_match /^Installing ast:(\d(\.\d)*)/, stdout
-        refute_match /^Using hola:(\d(\.\d)*)/, stdout
+        assert_match(/^Installing ast:(\d(\.\d)*)/, stdout)
+        refute_match(/^Using hola:(\d(\.\d)*)/, stdout)
 
         assert dir.join('rbs_collection.lock.yaml').exist?
         assert dir.join('gem_rbs_collection/ast').exist?
