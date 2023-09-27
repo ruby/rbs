@@ -204,15 +204,15 @@ singleton(::BasicObject)
   def test_method
     with_cli do |cli|
       cli.run(%w(method ::Object yield_self))
-      assert_equal <<-EOF, stdout.string
-::Object#yield_self
-  defined_in: ::Kernel
-  implementation: ::Kernel
-  accessibility: public
-  types:
-      [X] () { (self) -> X } -> X
-    | () -> ::Enumerator[self, untyped]
-      EOF
+      assert_includes stdout.string, '::Object#yield_self'
+      assert_includes stdout.string, 'defined_in: ::Kernel'
+      assert_includes stdout.string, 'implementation: ::Kernel'
+      assert_includes stdout.string, 'accessibility: public'
+      assert_includes stdout.string, 'types:'
+      assert_includes stdout.string, '  [X] () { (self) -> X } -> X'
+      assert_includes stdout.string, 'rbs/core/kernel.rbs'
+      assert_includes stdout.string, '| () -> ::Enumerator[self, untyped]'
+      assert_includes stdout.string, 'rbs/core/kernel.rbs'
     end
 
     Dir.mktmpdir do |dir|
