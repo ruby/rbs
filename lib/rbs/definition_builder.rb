@@ -239,12 +239,14 @@ module RBS
             definition.class_variables.merge!(defn.class_variables)
           end
 
+          resolver = Resolver::TypeNameResolver.new(env)
           one_ancestors.each_included_module do |mod|
             included_module = env.class_decls[mod.name] or raise "Unknown name for one_ancestors.included_module: #{type_name}"
             included_module.decls.each do |decl|
               decl.decl.annotations.each do |annotation|
                 if annotation.string.start_with? "autoextend:"
-                  mod_name = TypeName("::" + annotation.string.split(":", 2)[1])
+                  mod_name = TypeName(annotation.string.split(":", 2)[1])
+                  mod_name = resolver.resolve(mod_name, context: decl.context) || mod_name
                   subst = tapp_subst(mod_name, [])
                   define_instance(definition, mod_name, subst)
                 end
