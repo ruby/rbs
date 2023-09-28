@@ -158,7 +158,8 @@ class Enumerator[unchecked out Elem, out Return] < Object
   #     Enumerator.produce { scanner.scan(PATTERN) }.slice_after { scanner.eos? }.first
   #     # => ["7", "+", "38", "/", "6"]
   #
-  def self.produce: (?untyped initial) { (untyped prev) -> untyped } -> Enumerator[untyped, bot]
+  def self.produce: [T] () { (T? prev) -> T } -> Enumerator[T, nil]
+                  | [T] (T initial) { (T prev) -> T } -> Enumerator[T, nil]
 
   # <!--
   #   rdoc-file=enumerator.c
