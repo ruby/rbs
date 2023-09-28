@@ -240,8 +240,10 @@ module RBS
           end
 
           resolver = Resolver::TypeNameResolver.new(env)
-          one_ancestors.each_included_module do |mod|
-            included_module = env.class_decls[mod.name] or raise "Unknown name for one_ancestors.included_module: #{type_name}"
+          ancestor_builder.instance_ancestors(type_name).ancestors.each do |ancestor|
+            next unless RBS::Definition::Ancestor::Instance === ancestor && RBS::AST::Members::Include === ancestor.source
+
+            included_module = env.class_decls[ancestor.name] or raise "Unknown name for instance_ancestors: #{ancestor.name}"
             included_module.decls.each do |decl|
               decl.decl.annotations.each do |annotation|
                 if annotation.string.start_with? "autoextend:"
