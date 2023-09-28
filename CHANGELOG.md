@@ -2,6 +2,12 @@
 
 ## master
 
+## 3.2.2 (2023-09-28)
+
+### Library changes
+
+* Mark global variables ([\#1552](https://github.com/ruby/rbs/pull/1552), Backport [\#1551](https://github.com/ruby/rbs/pull/1551))
+
 ## 3.2.1 (2023-08-29)
 
 ### Signature updates
