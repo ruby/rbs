@@ -240,6 +240,7 @@ module RBS
           end
 
           resolver = Resolver::TypeNameResolver.new(env)
+          singleton_ancestors = ancestor_builder.singleton_ancestors(type_name)
           ancestor_builder.instance_ancestors(type_name).ancestors.each do |ancestor|
             next unless RBS::Definition::Ancestor::Instance === ancestor && RBS::AST::Members::Include === ancestor.source
 
@@ -249,8 +250,11 @@ module RBS
                 if annotation.string.start_with? "autoextend:"
                   mod_name = TypeName(annotation.string.split(":", 2)[1])
                   mod_name = resolver.resolve(mod_name, context: decl.context) || mod_name
-                  subst = tapp_subst(mod_name, [])
-                  define_instance(definition, mod_name, subst)
+
+                  if singleton_ancestors.ancestors.none? { |ancestor| RBS::Definition::Ancestor::Instance === ancestor && RBS::AST::Members::Extend === ancestor.source && ancestor.name == mod_name }
+                    subst = tapp_subst(mod_name, [])
+                    define_instance(definition, mod_name, subst)
+                  end
                 end
               end
             end
