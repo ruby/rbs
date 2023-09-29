@@ -310,7 +310,7 @@ module RBS
         when Types::Variable
           true
         when Types::Literal
-          val == type.literal
+          type.literal == val
         when Types::Union
           type.types.any? {|type| value(val, type) }
         when Types::Intersection
