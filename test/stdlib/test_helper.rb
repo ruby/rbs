@@ -509,6 +509,16 @@ class BlankSlate < BasicObject
     next if %i[__send__ __id__].include? im
     undef_method im
   end
+
+  def __with_object_methods(*methods)
+    methods.each do |method|
+      singleton_class = ::Object.instance_method(:singleton_class).bind_call(self)
+      singleton_class.instance_eval do
+        define_method method, ::Object.instance_method(method)
+      end
+    end
+    self
+  end
 end
 
 class ToIO < BlankSlate
