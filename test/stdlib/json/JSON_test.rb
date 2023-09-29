@@ -1,6 +1,26 @@
 require_relative "../test_helper"
 require "json"
 
+class JsonToStr
+  def initialize(value = "")
+    @value = value
+  end
+
+  def to_str
+    @value
+  end
+end
+
+class JsonToS
+  def initialize(value = "")
+    @value = value
+  end
+
+  def to_s
+    @value
+  end
+end
+
 class JSONSingletonTest < Test::Unit::TestCase
   include TypeAssertions
 
@@ -9,26 +29,26 @@ class JSONSingletonTest < Test::Unit::TestCase
 
   def test_aref
     assert_send_type "(String) -> 42", JSON, :[], "42"
-    assert_send_type "(ToStr) -> 42", JSON, :[], ToStr.new("42")
+    assert_send_type "(_ToStr) -> 42", JSON, :[], JsonToStr.new("42")
     assert_send_type "(ToJson) -> String", JSON, :[], ToJson.new
     assert_send_type "(ToJson, indent: String) -> String", JSON, :[], ToJson.new, { indent: "\t" }
   end
 
   def test_create_id
-    JSON.create_id = ToS.new("json_class")
-    assert_send_type "() -> ToS", JSON, :create_id
+    JSON.create_id = JsonToS.new("json_class")
+    assert_send_type "() -> _ToS", JSON, :create_id
     JSON.create_id = "json_class"
     assert_send_type "() -> String", JSON, :create_id
   end
 
   def test_create_id_eq
-    assert_send_type "(ToS) -> ToS", JSON, :create_id=, ToS.new("json_class")
+    assert_send_type "(_ToS) -> _ToS", JSON, :create_id=, JsonToS.new("json_class")
     assert_send_type "(String) -> String", JSON, :create_id=, "json_class"
   end
 
   def test_deep_const_get
     assert_send_type "(String) -> String", JSON, :deep_const_get, "File::SEPARATOR"
-    assert_send_type "(ToS) -> String", JSON, :deep_const_get, ToS.new("File::SEPARATOR")
+    assert_send_type "(_ToS) -> String", JSON, :deep_const_get, JsonToS.new("File::SEPARATOR")
   end
 
   def test_dump
@@ -76,12 +96,12 @@ class JSONSingletonTest < Test::Unit::TestCase
   def test_iconv
     assert_send_type "(Encoding, Encoding, String) -> String", JSON, :iconv, Encoding::UTF_8, Encoding::UTF_16, "".encode(Encoding::UTF_16)
     assert_send_type "(String, String, String) -> String", JSON, :iconv, 'UTF-8', 'UTF-16', "".encode(Encoding::UTF_16)
-    assert_send_type "(ToStr, ToStr, String) -> String", JSON, :iconv, ToStr.new('UTF-8'), ToStr.new('UTF-16'), "".encode(Encoding::UTF_16)
+    assert_send_type "(_ToStr, _ToStr, String) -> String", JSON, :iconv, JsonToStr.new('UTF-8'), JsonToStr.new('UTF-16'), "".encode(Encoding::UTF_16)
   end
 
   def test_load
     assert_send_type "(String) -> 42", JSON, :load, "42"
-    assert_send_type "(ToStr) -> 42", JSON, :load, ToStr.new("42")
+    assert_send_type "(_ToStr) -> 42", JSON, :load, JsonToStr.new("42")
     assert_send_type "(JsonToReadableIO) -> 42", JSON, :load, JsonToReadableIO.new
     assert_send_type "(JsonRead) -> 42", JSON, :load, JsonRead.new
     assert_send_type "(String, Proc) -> 42", JSON, :load, "42", proc { }
@@ -98,13 +118,13 @@ class JSONSingletonTest < Test::Unit::TestCase
 
   def test_parse
     assert_send_type "(String) -> 42", JSON, :parse, "42"
-    assert_send_type "(ToStr) -> 42", JSON, :parse, ToStr.new("42")
+    assert_send_type "(_ToStr) -> 42", JSON, :parse, JsonToStr.new("42")
     assert_send_type "(String, Hash[untyped, untyped]) -> 42", JSON, :parse, "42", { allow_nan: true }
   end
 
   def test_parse!
     assert_send_type "(String) -> 42", JSON, :parse!, "42"
-    assert_send_type "(ToStr) -> 42", JSON, :parse!, ToStr.new("42")
+    assert_send_type "(_ToStr) -> 42", JSON, :parse!, JsonToStr.new("42")
     assert_send_type "(String, Hash[untyped, untyped]) -> 42", JSON, :parse!, "42", { allow_nan: true }
   end
 
@@ -132,7 +152,7 @@ class JSONSingletonTest < Test::Unit::TestCase
 
   def test_restore
     assert_send_type "(String) -> 42", JSON, :restore, "42"
-    assert_send_type "(ToStr) -> 42", JSON, :restore, ToStr.new("42")
+    assert_send_type "(_ToStr) -> 42", JSON, :restore, JsonToStr.new("42")
     assert_send_type "(JsonToReadableIO) -> 42", JSON, :restore, JsonToReadableIO.new
     assert_send_type "(JsonRead) -> 42", JSON, :restore, JsonRead.new
     assert_send_type "(String, Proc) -> 42", JSON, :restore, "42", proc { }
@@ -192,7 +212,7 @@ class JSONInstanceTest < Test::Unit::TestCase
 
   def test_load
     assert_send_type "(String) -> 42", MyJSON.new, :load, "42"
-    assert_send_type "(ToStr) -> 42", MyJSON.new, :load, ToStr.new("42")
+    assert_send_type "(_ToStr) -> 42", MyJSON.new, :load, JsonToStr.new("42")
     assert_send_type "(JsonToReadableIO) -> 42", MyJSON.new, :load, JsonToReadableIO.new
     assert_send_type "(JsonRead) -> 42", MyJSON.new, :load, JsonRead.new
     assert_send_type "(String, Proc) -> 42", MyJSON.new, :load, "42", proc { }
@@ -201,13 +221,13 @@ class JSONInstanceTest < Test::Unit::TestCase
 
   def test_parse
     assert_send_type "(String) -> 42", MyJSON.new, :parse, "42"
-    assert_send_type "(ToStr) -> 42", MyJSON.new, :parse, ToStr.new("42")
+    assert_send_type "(_ToStr) -> 42", MyJSON.new, :parse, JsonToStr.new("42")
     assert_send_type "(String, Hash[untyped, untyped]) -> 42", MyJSON.new, :parse, "42", { allow_nan: true }
   end
 
   def test_parse!
     assert_send_type "(String) -> 42", MyJSON.new, :parse!, "42"
-    assert_send_type "(ToStr) -> 42", MyJSON.new, :parse!, ToStr.new("42")
+    assert_send_type "(_ToStr) -> 42", MyJSON.new, :parse!, JsonToStr.new("42")
     assert_send_type "(String, Hash[untyped, untyped]) -> 42", MyJSON.new, :parse!, "42", { allow_nan: true }
   end
 
@@ -227,7 +247,7 @@ class JSONInstanceTest < Test::Unit::TestCase
 
   def test_restore
     assert_send_type "(String) -> 42", MyJSON.new, :restore, "42"
-    assert_send_type "(ToStr) -> 42", MyJSON.new, :restore, ToStr.new("42")
+    assert_send_type "(_ToStr) -> 42", MyJSON.new, :restore, JsonToStr.new("42")
     assert_send_type "(JsonToReadableIO) -> 42", MyJSON.new, :restore, JsonToReadableIO.new
     assert_send_type "(JsonRead) -> 42", MyJSON.new, :restore, JsonRead.new
     assert_send_type "(String, Proc) -> 42", MyJSON.new, :restore, "42", proc { }

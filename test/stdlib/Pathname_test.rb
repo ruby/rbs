@@ -606,8 +606,9 @@ class PathnameInstanceTest < Test::Unit::TestCase
                      Pathname('.'), :relative_path_from, Pathname('.')
     assert_send_type '(String) -> Pathname',
                      Pathname('.'), :relative_path_from, '.'
-    assert_send_type '(ToStr) -> Pathname',
-                     Pathname('.'), :relative_path_from, ToStr.new('.')
+
+    assert_send_type '(_ToStr) -> Pathname',
+                     Pathname('.'), :relative_path_from, ToStr.new('.').__with_object_methods(:is_a?)
   end
 
   def test_rename
