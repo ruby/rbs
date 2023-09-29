@@ -612,7 +612,7 @@ class PathnameInstanceTest < Test::Unit::TestCase
       ::Kernel.instance_method(:is_a?).bind_call(self, cls)
     end
 
-    assert_send_type '(ToStr & ::_IsA) -> Pathname',
+    assert_send_type '(_ToStr) -> Pathname',
                      Pathname('.'), :relative_path_from, mystr
   end
 

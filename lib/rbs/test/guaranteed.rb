@@ -12,7 +12,7 @@ module RBS
           obj.inspect
         rescue NoMethodError => err
           raise unless err.name == :inspect && EQUAL.bind_call(obj, err.receiver)
-          GUARANTEED_INSPECT.bind_call(obj)
+          INSPECT.bind_call(obj)
         end
 
         def inspect

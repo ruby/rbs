@@ -136,7 +136,7 @@ module RBS
       end
 
       def keyword?(value)
-        Hash === value and value.each_key.all?(Symbol)
+        Hash === value && value.each_key.all?(Symbol)
       end
 
       def zip_args(args, fun, &block)
