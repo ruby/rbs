@@ -1,0 +1,7 @@
+module RBS
+  module Collection
+    module Color
+      def green: (String) -> String
+    end
+  end
+end
