@@ -7,7 +7,7 @@ module RBS
         include Base
 
         attr_reader :path, :full_path
-  
+
         def initialize(path:, base_directory:)
           # TODO: resolve relative path from dir of rbs_collection.yaml
           @path = Pathname(path)
@@ -40,15 +40,15 @@ module RBS
             prev = gem_dir.readlink
             gem_dir.unlink
             _install(from, dest.join(name, version))
-            stdout.puts "Updating #{name}:#{version} to #{from} from #{prev}"
+            stdout.puts green("Updating #{name}:#{version} to #{from} from #{prev}")
           when gem_dir.directory?
             # TODO: Show version of git source
             FileUtils.remove_entry_secure(gem_dir.to_s)
             _install(from, dest.join(name, version))
-            stdout.puts "Updating #{name}:#{version} from git source"
+            stdout.puts green("Updating #{name}:#{version} from git source")
           when !gem_dir.exist?
             _install(from, dest.join(name, version))
-            stdout.puts "Installing #{name}:#{version} (#{from})"
+            stdout.puts green("Installing #{name}:#{version} (#{from})")
           else
             raise
           end

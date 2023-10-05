@@ -3,6 +3,7 @@
 require 'yaml'
 require 'bundler'
 
+require_relative './collection/color'
 require_relative './collection/sources'
 require_relative './collection/config'
 require_relative './collection/config/lockfile'
