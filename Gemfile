@@ -22,6 +22,9 @@ gem "rdoc", "~> 6.4.0"
 # Test gems
 gem "rbs-amber", path: "test/assets/test-gem"
 
+# Bundled gems
+gem "net-smtp"
+
 group :minitest do
   gem "minitest"
 end
