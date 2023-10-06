@@ -701,13 +701,15 @@ EOU
               end
             end
             ::Module.prepend(hook)
+            ::Kernel.prepend(hook)
 
             arguments = []
             TracePoint.new(:call) do |tp|
-              base = tp.self
+              base = tp.self.kind_of?(Module) ? tp.self : Kernel
               name = (tp.binding or raise).local_variable_get(:name)
               arguments << [base, name]
             end.enable(target: hook.instance_method(:autoload), &block)
+
             arguments.each do |(base, name)|
               begin
                 base.const_get(name)
