@@ -864,7 +864,7 @@ end
     EOF
   end
 
-  def test_refinements
+  def test_ITER
     parser = RB.new
 
     rb = <<~'RUBY'
@@ -874,6 +874,11 @@ module M
 
   refine Array do
     def by_refinements
+    end
+  end
+
+  included do
+    def in_included
     end
   end
 end

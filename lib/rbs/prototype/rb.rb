@@ -361,13 +361,7 @@ module RBS
           end
 
         when :ITER
-          method_name = node.children.first.children.first
-          case method_name
-          when :refine
-            # ignore
-          else
-            process_children(node, decls: decls, comments: comments, context: context)
-          end
+          # ignore
 
         when :CDECL
           const_name = case
