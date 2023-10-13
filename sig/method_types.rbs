@@ -48,5 +48,11 @@ module RBS
     def to_s: () -> String
 
     def type_param_names: () -> Array[Symbol]
+
+    def has_self_type?: () -> bool
+
+    def has_classish_type?: () -> bool
+
+    def with_nonreturn_void?: () -> bool
   end
 end
