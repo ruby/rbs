@@ -386,6 +386,61 @@ singleton(::BasicObject)
     end
   end
 
+  def test_context_validation
+    tests = [
+      <<~RBS,
+        class Foo
+          def foo: (void) -> untyped
+        end
+      RBS
+      <<~RBS,
+        class Bar[A]
+        end
+        class Foo < Bar[instance]
+        end
+      RBS
+      <<~RBS,
+        module Bar : _Each[instance]
+        end
+      RBS
+      <<~RBS,
+        module Foo[A < _Each[self]]
+        end
+      RBS
+      <<~RBS,
+        class Foo
+          @@bar: self
+        end
+      RBS
+      <<~RBS,
+        type foo = instance
+      RBS
+      <<~RBS,
+        BAR: instance
+      RBS
+      <<~RBS,
+        class Foo
+          include Enumerable[self]
+        end
+      RBS
+      <<~RBS,
+        $FOO: instance
+      RBS
+    ]
+
+    tests.each do |rbs|
+      with_cli do |cli|
+        Dir.mktmpdir do |dir|
+          (Pathname(dir) + 'a.rbs').write(rbs)
+          error = assert_raises RuntimeError do
+            cli.run(["-I", dir, "validate"])
+          end
+          assert_match /void|self|instance|class/, error.message
+        end
+      end
+    end
+  end
+
   def test_validate_878
     with_cli do |cli|
       Dir.mktmpdir do |dir|
