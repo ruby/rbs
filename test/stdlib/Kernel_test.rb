@@ -656,6 +656,11 @@ class KernelTest < StdlibTest
     rescue test_error
     end
 
+    begin
+      fail test_error.new('a'), foo: 1, bar: 2, baz: 3, cause: RuntimeError.new("?")
+    rescue test_error
+    end
+
     exception_container = Class.new do
       define_method :exception do |arg = 'a'|
         test_error.new(arg)
