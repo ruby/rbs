@@ -45,7 +45,7 @@
 # See also "Special global variables" section in Regexp documentation.
 #
 class MatchData
-  public
+  type backref = String | Symbol | int
 
   # <!-- rdoc-file=re.c -->
   # Returns `true` if `object` is another MatchData object whose target string,
@@ -80,10 +80,9 @@ class MatchData
   #     m['foo'] # => "h"
   #     m[:bar]  # => "ge"
   #
-  def []: (Integer idx) -> String?
-        | (Integer start, Integer length) -> ::Array[String?]
-        | (::Range[Integer] range) -> ::Array[String?]
-        | (interned name) -> String?
+  def []: (backref idx, ?nil) -> String?
+        | (range[int?] range, ?nil) -> Array[String?]?
+        | (int start, int length) -> Array[String?]?
 
   # <!--
   #   rdoc-file=re.c
@@ -121,7 +120,7 @@ class MatchData
   #
   # Related: MatchData#end, MatchData#offset, MatchData#byteoffset.
   #
-  def begin: (Integer | interned n_or_name) -> Integer?
+  def begin: (backref index) -> Integer?
 
   # <!--
   #   rdoc-file=re.c
@@ -139,7 +138,7 @@ class MatchData
   #     p m.byteoffset(:foo) #=> [0, 1]
   #     p m.byteoffset(:bar) #=> [2, 3]
   #
-  def byteoffset: (Integer | interned n_or_name) -> ([ Integer, Integer ] | [ nil, nil ])
+  def byteoffset: (backref index) -> ([Integer, Integer] | [nil, nil])
 
   # <!--
   #   rdoc-file=re.c
@@ -154,7 +153,7 @@ class MatchData
   #
   # Related: MatchData.to_a.
   #
-  def captures: () -> ::Array[String?]
+  def captures: () -> Array[String?]
 
   # <!-- rdoc-file=re.c -->
   # Returns the array of captures, which are all matches except `m[0]`:
@@ -183,7 +182,7 @@ class MatchData
   #     m = /(\d{2}):(\d{2}):(\d{2})/.match("18:37:22")
   #     m.deconstruct_keys(nil) # => {}
   #
-  def deconstruct_keys: (Array[Symbol]?) -> Hash[Symbol, String?]
+  def deconstruct_keys: (Array[Symbol]? keys) -> Hash[Symbol, String?]
 
   # <!--
   #   rdoc-file=re.c
@@ -221,7 +220,7 @@ class MatchData
   #
   # Related: MatchData#begin, MatchData#offset, MatchData#byteoffset.
   #
-  def end: (Integer | interned n_or_name) -> Integer?
+  def end: (backref index) -> Integer?
 
   # <!--
   #   rdoc-file=re.c
@@ -232,7 +231,7 @@ class MatchData
   #
   # MatchData#eql? is an alias for MatchData#==.
   #
-  def eql?: (untyped other) -> bool
+  alias eql? ==
 
   # <!--
   #   rdoc-file=re.c
@@ -276,7 +275,7 @@ class MatchData
   #
   # MatchData#length is an alias for MatchData.size.
   #
-  def length: () -> Integer
+  alias length size
 
   # <!--
   #   rdoc-file=re.c
@@ -301,7 +300,13 @@ class MatchData
   #     # => #<MatchData "01" a:"0" a:"1">
   #     m.named_captures #=> {"a" => "1"}
   #
-  def named_captures: () -> ::Hash[String, String?]
+  %a{ruby:version:>=3.3.0 }
+  def named_captures: (symbolize_names: true) -> Hash[Symbol, String?]
+                    | (?symbolize_names: false) -> Hash[String, String?]
+                    | (symbolize_names: boolish) -> Hash[Symbol | String, String?]
+
+  %a{ruby:version:<3.3}
+  def named_captures: () -> Hash[String, String?]
 
   # <!--
   #   rdoc-file=re.c
@@ -322,7 +327,7 @@ class MatchData
   #     m = /(?<foo>.)(?<bar>.)(?<baz>.)/.match("hoge")
   #     m.regexp.names # => ["foo", "bar", "baz"]
   #
-  def names: () -> ::Array[String]
+  def names: () -> Array[String]
 
   # <!--
   #   rdoc-file=re.c
@@ -348,7 +353,7 @@ class MatchData
   #     m.match('foo') # => "h"
   #     m.match(:bar)  # => "ge"
   #
-  def match: (int | interned) -> String?
+  def match: (backref index) -> String?
 
   # <!--
   #   rdoc-file=re.c
@@ -375,7 +380,7 @@ class MatchData
   #     m.match_length('foo') # => 1
   #     m.match_length(:bar)  # => 2
   #
-  def match_length: (int | interned) -> Integer?
+  def match_length: (backref index) -> Integer?
 
   # <!--
   #   rdoc-file=re.c
@@ -414,7 +419,7 @@ class MatchData
   #
   # Related: MatchData#byteoffset, MatchData#begin, MatchData#end.
   #
-  def offset: (Integer | interned n_or_name) -> ([ Integer, Integer ] | [ nil, nil ])
+  def offset: (backref index) -> ([Integer, Integer] | [nil, nil])
 
   # <!--
   #   rdoc-file=re.c
@@ -500,7 +505,7 @@ class MatchData
   #
   # Related: MatchData#captures.
   #
-  def to_a: () -> ::Array[String?]
+  def to_a: () -> Array[String?]
 
   # <!--
   #   rdoc-file=re.c
@@ -544,9 +549,9 @@ class MatchData
   #     m.values_at(0, 1..2, :a, :b, :op)
   #     # => ["1 + 2", "1", "+", "1", "2", "+"]
   #
-  def values_at: (*Integer | interned n_or_name) -> ::Array[String?]
+  def values_at: (*backref | range[int?] indices) -> Array[String?]
 
   private
 
-  def initialize_copy: (self object) -> void
+  def initialize_copy: (instance object) -> self
 end

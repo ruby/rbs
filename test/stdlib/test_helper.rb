@@ -200,6 +200,11 @@ module WithAliases
     yield ToHash.new(hash)
   end
 
+  def with_range(*args)
+    yield Range.new(*args)
+    yield CustomRange.new(*args)
+  end
+
   def with_io(io = $stdout)
     return to_enum(__method__, io) unless block_given?
     yield io
@@ -671,6 +676,20 @@ class Writer
 
   def write(*vals)
     @buffer.concat vals.join
+  end
+end
+
+class CustomRange < BlankSlate
+  attr_reader :begin, :end
+
+  def initialize(begin_, end_, exclude_end=false)
+    @begin = begin_
+    @end = end_
+    @exclude_end = exclude_end_
+  end
+
+  def exclude_end?
+    @exclude_end
   end
 end
 

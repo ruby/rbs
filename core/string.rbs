@@ -820,6 +820,10 @@ class String
   #
   def =~: (untyped obj) -> Integer?
 
+  interface _Match[O]
+    def =~: (String) -> O
+  end
+
   # <!--
   #   rdoc-file=string.c
   #   - string[index] -> new_string or nil
