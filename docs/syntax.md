@@ -296,7 +296,7 @@ class Foo
 end
 ```
 
-The following `self` types are prohibited.
+The following `class`/`instance` types are prohibited.
 
 ```rbs
 class Foo
