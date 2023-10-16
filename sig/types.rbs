@@ -41,6 +41,20 @@ module RBS
       # ```
       #
       def to_s: (?Integer level) -> String
+
+      # Returns `true` if it has `self` type
+      #
+      def has_self_type?: () -> bool
+
+      # Returns `true` if it has `instance` or `class` types
+      def has_classish_type?: () -> bool
+
+      # Returns `true` if it has `void` types other than *return* position
+      #
+      # * The function return type is a return position (`() -> void`)
+      # * Generic parameter is a return position (`Enumerator[Integer, void]`)
+      # 
+      def with_nonreturn_void?: () -> bool
     end
 
     # t represents union of all possible types.
@@ -191,6 +205,12 @@ module RBS
 
       def each_type: () { (t) -> void } -> void
                    | () -> Enumerator[t, void]
+
+      def has_self_type?: () -> bool
+
+      def has_classish_type?: () -> bool
+
+      def with_nonreturn_void?: () -> bool
     end
 
     class Interface
@@ -412,6 +432,12 @@ module RBS
       def amap: [A, B] (Array[A]) { (A) -> B } -> Array[B]
 
       def hmapv: [X, Y, Z] (Hash[X, Y]) { (Y) -> Z } -> Hash[X, Z]
+
+      def has_self_type?: () -> bool
+
+      def has_classish_type?: () -> bool
+
+      def with_nonreturn_void?: () -> bool
     end
 
     class Block
