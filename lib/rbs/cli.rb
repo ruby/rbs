@@ -733,6 +733,7 @@ EOU
         todo = false
         owners_included = []
         outline = false
+        autoload = false
 
         OptionParser.new do |opts|
           opts.banner = <<EOU
@@ -768,17 +769,49 @@ EOU
           opts.on("--outline", "Generates only module/class/constant declaration (no method definition)") do
             outline = true
           end
+          opts.on("--autoload", "Load all autoload path") do
+            autoload = true
+          end
         end.parse!(args)
 
         loader = options.loader()
         env = Environment.from_loader(loader).resolve_type_names
 
-        require_libs.each do |lib|
-          require(lib)
-        end
+        # @type var autoloader: ^() { () -> void } -> void
+        autoloader = ->(&block) {
+          if autoload
+            hook = Module.new do
+              def autoload(name, path)
+                super
+              end
+            end
+            ::Module.prepend(hook)
+            ::Kernel.prepend(hook)
 
-        relative_libs.each do |lib|
-          eval("require_relative(lib)", binding, "rbs")
+            arguments = []
+            TracePoint.new(:call) do |tp|
+              base = tp.self.kind_of?(Module) ? tp.self : Kernel
+              name = (tp.binding or raise).local_variable_get(:name)
+              arguments << [base, name]
+            end.enable(target: hook.instance_method(:autoload), &block)
+
+            arguments.each do |(base, name)|
+              begin
+                base.const_get(name)
+              rescue LoadError, StandardError
+              end
+            end
+          else
+            block.call
+          end
+        }
+        autoloader.call do
+          require_libs.each do |lib|
+            require(lib)
+          end
+          relative_libs.each do |lib|
+            eval("require_relative(lib)", binding, "rbs")
+          end
         end
 
         runtime = Prototype::Runtime.new(patterns: args, env: env, merge: merge, todo: todo, owners_included: owners_included)
