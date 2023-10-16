@@ -3,7 +3,6 @@
 module RBS
   module Collection
     class Installer
-      include Color
       attr_reader :lockfile
       attr_reader :stdout
 
@@ -26,7 +25,7 @@ module RBS
             stdout: stdout
           )
         end
-        stdout.puts green("It's done! #{selected.size} gems' RBSs now installed.")
+        ColoredIO.new(stdout: stdout).puts_green("It's done! #{selected.size} gems' RBSs now installed.")
       end
     end
   end
