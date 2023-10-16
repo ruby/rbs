@@ -1507,7 +1507,7 @@ module FileUtils
   #
   # Related: [methods for deleting](rdoc-ref:FileUtils@Deleting).
   #
-  def self?.remove_file: (path path, ?void force) -> void
+  def self?.remove_file: (path path, ?boolish force) -> void
 
   # <!--
   #   rdoc-file=lib/fileutils.rb
