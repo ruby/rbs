@@ -162,7 +162,7 @@ module RBS
           "def #{prefix}#{key}: #{definition_method.method_types.join(" | ")}"
         end
       else
-        "-"
+        +"-"
       end
     end
 
@@ -170,7 +170,7 @@ module RBS
       if constant
         "#{key}: #{constant.decl.type}"
       else
-        "-"
+        +"-"
       end
     end
   end

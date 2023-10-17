@@ -1119,6 +1119,8 @@ Processing `test/a_test.rb`...
           def self.baz: () -> (Integer | String)
           def qux: (untyped) -> untyped
           def quux: () -> void
+
+          CONST: Array[Integer]
         end
       RBS
 
@@ -1137,6 +1139,7 @@ Processing `test/a_test.rb`...
           include Bar
           extend Baz
           alias quux bar
+          CONST: Array[String]
         end
       RBS
 
@@ -1154,6 +1157,7 @@ Processing `test/a_test.rb`...
         | `def qux: (untyped) -> untyped` | `-` |
         | `def quux: () -> void` | `alias quux bar` |
         | `def self.baz: () -> (::Integer \\| ::String)` | `def self.baz: (::Integer) -> ::Integer?` |
+        | `::Foo::CONST: Array[Integer]` | `::Foo::CONST: Array[String]` |
       MARKDOWN
     end
   end
@@ -1171,6 +1175,9 @@ Processing `test/a_test.rb`...
 
         - def self.baz: () -> (::Integer | ::String)
         + def self.baz: (::Integer) -> ::Integer?
+
+        - ::Foo::CONST: Array[Integer]
+        + ::Foo::CONST: Array[String]
       DIFF
     end
   end
