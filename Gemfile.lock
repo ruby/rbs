@@ -2,6 +2,7 @@ PATH
   remote: .
   specs:
     rbs (3.2.0)
+      abbrev
 
 PATH
   remote: test/assets/test-gem
@@ -11,6 +12,7 @@ PATH
 GEM
   remote: https://rubygems.org/
   specs:
+    abbrev (0.1.1)
     addressable (2.8.5)
       public_suffix (>= 2.0.2, < 6.0)
     ast (2.4.2)
