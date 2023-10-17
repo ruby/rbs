@@ -691,4 +691,142 @@ end
       end
     end
   end
+
+  class StructInheritWithNil < Struct.new(:foo, :bar, keyword_init: nil)
+  end
+  StructKeywordInitTrue = Struct.new(:foo, :bar, keyword_init: true)
+  StructKeywordInitFalse = Struct.new(:foo, :bar, keyword_init: false)
+
+  def test_struct
+    SignatureManager.new do |manager|
+      manager.build do |env|
+        p = Runtime.new(patterns: ["RBS::RuntimePrototypeTest::StructInheritWithNil"], env: env, merge: false)
+        assert_write p.decls, <<~RBS
+          module RBS
+            class RuntimePrototypeTest < ::Test::Unit::TestCase
+              class StructInheritWithNil < ::Struct[untyped]
+                def self.new: (?untyped foo, ?untyped bar) -> instance
+                            | (?foo: untyped foo, ?bar: untyped bar) -> instance
+
+                def self.[]: (?untyped foo, ?untyped bar) -> instance
+                           | (?foo: untyped foo, ?bar: untyped bar) -> instance
+
+                def self.keyword_init?: () -> nil
+
+                def self.members: () -> [ :foo, :bar ]
+
+                def members: () -> [ :foo, :bar ]
+
+                attr_accessor foo: untyped
+
+                attr_accessor bar: untyped
+              end
+            end
+          end
+        RBS
+
+        p = Runtime.new(patterns: ["RBS::RuntimePrototypeTest::StructKeywordInitTrue"], env: env, merge: false)
+        assert_write p.decls, <<~RBS
+          module RBS
+            class RuntimePrototypeTest < ::Test::Unit::TestCase
+              class StructKeywordInitTrue < ::Struct[untyped]
+                def self.new: (?foo: untyped foo, ?bar: untyped bar) -> instance
+
+                def self.[]: (?foo: untyped foo, ?bar: untyped bar) -> instance
+
+                def self.keyword_init?: () -> true
+
+                def self.members: () -> [ :foo, :bar ]
+
+                def members: () -> [ :foo, :bar ]
+
+                attr_accessor foo: untyped
+
+                attr_accessor bar: untyped
+              end
+            end
+          end
+        RBS
+
+        p = Runtime.new(patterns: ["RBS::RuntimePrototypeTest::StructKeywordInitFalse"], env: env, merge: false)
+        assert_write p.decls, <<~RBS
+          module RBS
+            class RuntimePrototypeTest < ::Test::Unit::TestCase
+              class StructKeywordInitFalse < ::Struct[untyped]
+                def self.new: (?untyped foo, ?untyped bar) -> instance
+
+                def self.[]: (?untyped foo, ?untyped bar) -> instance
+
+                def self.keyword_init?: () -> false
+
+                def self.members: () -> [ :foo, :bar ]
+
+                def members: () -> [ :foo, :bar ]
+
+                attr_accessor foo: untyped
+
+                attr_accessor bar: untyped
+              end
+            end
+          end
+        RBS
+      end
+    end
+  end
+
+  class DataInherit < Data.define(:foo, :bar)
+  end
+  DataConst = Data.define(:foo, :bar)
+
+  def test_data
+    SignatureManager.new do |manager|
+      manager.build do |env|
+        p = Runtime.new(patterns: ["RBS::RuntimePrototypeTest::DataInherit"], env: env, merge: false)
+        assert_write p.decls, <<~RBS
+          module RBS
+            class RuntimePrototypeTest < ::Test::Unit::TestCase
+              class DataInherit < ::Data
+                def self.new: (untyped foo, untyped bar) -> instance
+                            | (foo: untyped, bar: untyped) -> instance
+
+                def self.[]: (untyped foo, untyped bar) -> instance
+                           | (foo: untyped, bar: untyped) -> instance
+
+                def self.members: () -> [ :foo, :bar ]
+
+                def members: () -> [ :foo, :bar ]
+
+                attr_reader foo: untyped
+
+                attr_reader bar: untyped
+              end
+            end
+          end
+        RBS
+
+        p = Runtime.new(patterns: ["RBS::RuntimePrototypeTest::DataConst"], env: env, merge: false)
+        assert_write p.decls, <<~RBS
+          module RBS
+            class RuntimePrototypeTest < ::Test::Unit::TestCase
+              class DataConst < ::Data
+                def self.new: (untyped foo, untyped bar) -> instance
+                            | (foo: untyped, bar: untyped) -> instance
+
+                def self.[]: (untyped foo, untyped bar) -> instance
+                           | (foo: untyped, bar: untyped) -> instance
+
+                def self.members: () -> [ :foo, :bar ]
+
+                def members: () -> [ :foo, :bar ]
+
+                attr_reader foo: untyped
+
+                attr_reader bar: untyped
+              end
+            end
+          end
+        RBS
+      end
+    end
+  end
 end
