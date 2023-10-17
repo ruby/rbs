@@ -25,6 +25,13 @@ class EnumeratorSingletonTest < Test::Unit::TestCase
 
   testing "singleton(::Enumerator)"
 
+  def test_produce
+    assert_send_type(
+      "(Integer initial) { (Integer) -> Integer } -> Enumerator[Integer, bot]",
+      Enumerator, :produce, 1, &:succ
+    )
+  end
+
   def test_product
     assert_send_type(
       "(Array[String], Array[Integer]) -> Enumerator::Product[String | Integer]",

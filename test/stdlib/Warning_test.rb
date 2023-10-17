@@ -16,7 +16,7 @@ class WarningSingletonTest < Test::Unit::TestCase
     refute_send_type "(Symbol) -> bool",
         Warning, :[], :unknown_category
 
-    refute_send_type "(ToSym) -> bool",
+    refute_send_type "(_ToSym) -> bool",
         Warning, :[], ToSym.new(WARNING_CATEGORIES.first)
   end
 
@@ -29,7 +29,7 @@ class WarningSingletonTest < Test::Unit::TestCase
     refute_send_type "(Symbol, Rational) -> Rational",
         Warning, :[]=, :unknown_category, 1r
 
-    refute_send_type "(ToSym, Rational) -> Rational",
+    refute_send_type "(_ToSym, Rational) -> Rational",
         Warning, :[]=, ToSym.new(WARNING_CATEGORIES.first), 1r
   end
 end
@@ -66,7 +66,7 @@ class WarningTest < Test::Unit::TestCase
     assert_send_type "(::String, category: nil) -> nil",
         Warning, :warn, 'message', category: nil
 
-    refute_send_type "(::String, category: ToSym) -> nil",
+    refute_send_type "(::String, category: _ToSym) -> nil",
         Warning, :warn, 'message', category: ToSym.new(WARNING_CATEGORIES.first)
 
     refute_send_type "(::String, category: ::Symbol) -> nil",

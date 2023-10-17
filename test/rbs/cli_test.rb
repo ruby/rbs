@@ -204,15 +204,15 @@ singleton(::BasicObject)
   def test_method
     with_cli do |cli|
       cli.run(%w(method ::Object yield_self))
-      assert_equal <<-EOF, stdout.string
-::Object#yield_self
-  defined_in: ::Kernel
-  implementation: ::Kernel
-  accessibility: public
-  types:
-      [X] () { (self) -> X } -> X
-    | () -> ::Enumerator[self, untyped]
-      EOF
+      assert_includes stdout.string, '::Object#yield_self'
+      assert_includes stdout.string, 'defined_in: ::Kernel'
+      assert_includes stdout.string, 'implementation: ::Kernel'
+      assert_includes stdout.string, 'accessibility: public'
+      assert_includes stdout.string, 'types:'
+      assert_includes stdout.string, '  [X] () { (self) -> X } -> X'
+      assert_includes stdout.string, 'rbs/core/kernel.rbs'
+      assert_includes stdout.string, '| () -> ::Enumerator[self, untyped]'
+      assert_includes stdout.string, 'rbs/core/kernel.rbs'
     end
 
     Dir.mktmpdir do |dir|
@@ -382,6 +382,61 @@ singleton(::BasicObject)
         assert_equal TypeName("::_Foo"), error.type_name
         assert_equal :bar, error.method_name
         assert_equal "[X < _Foo[Y], Y < _Bar[Z], Z < _Baz[X]]", error.location.source
+      end
+    end
+  end
+
+  def test_context_validation
+    tests = [
+      <<~RBS,
+        class Foo
+          def foo: (void) -> untyped
+        end
+      RBS
+      <<~RBS,
+        class Bar[A]
+        end
+        class Foo < Bar[instance]
+        end
+      RBS
+      <<~RBS,
+        module Bar : _Each[instance]
+        end
+      RBS
+      <<~RBS,
+        module Foo[A < _Each[self]]
+        end
+      RBS
+      <<~RBS,
+        class Foo
+          @@bar: self
+        end
+      RBS
+      <<~RBS,
+        type foo = instance
+      RBS
+      <<~RBS,
+        BAR: instance
+      RBS
+      <<~RBS,
+        class Foo
+          include Enumerable[self]
+        end
+      RBS
+      <<~RBS,
+        $FOO: instance
+      RBS
+    ]
+
+    tests.each do |rbs|
+      with_cli do |cli|
+        Dir.mktmpdir do |dir|
+          (Pathname(dir) + 'a.rbs').write(rbs)
+          error = assert_raises RuntimeError do
+            cli.run(["-I", dir, "validate"])
+          end
+          assert_match /void|self|instance|class/, error.message
+        end
       end
     end
   end
@@ -912,8 +967,8 @@ Processing `test/a_test.rb`...
 
         stdout, _ = run_rbs("collection", "install", bundler: true)
 
-        assert_match /^Installing ast:(\d(\.\d)*)/, stdout
-        refute_match /^Using hola:(\d(\.\d)*)/, stdout
+        assert_match(/Installing ast:(\d(\.\d)*)/, stdout)
+        refute_match(/^Using hola:(\d(\.\d)*)/, stdout)
 
         assert dir.join('rbs_collection.lock.yaml').exist?
         assert dir.join('gem_rbs_collection/ast').exist?

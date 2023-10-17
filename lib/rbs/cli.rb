@@ -433,8 +433,9 @@ EOU
       stdout.puts "  accessibility: #{method.accessibility}"
       stdout.puts "  types:"
       separator = " "
-      for type in method.method_types
-        stdout.puts "    #{separator} #{type}"
+      length_max = method.method_types.map { |type| type.to_s.length }.max or raise
+      method.method_types.each do |type|
+        stdout.puts format("    %s %-#{length_max}s   at %s", separator, type, type.location)
         separator = "|"
       end
     end
@@ -462,6 +463,30 @@ EOU
       builder = DefinitionBuilder.new(env: env)
       validator = Validator.new(env: env, resolver: Resolver::TypeNameResolver.new(env))
 
+      no_self_type_validator = ->(type) {
+        # @type var type: Types::t | MethodType
+        if type.has_self_type?
+          raise "#{type.location}: `self` type is not allowed in this context"
+        end
+      }
+
+      no_classish_type_validator = ->(type) {
+        # @type var type: Types::t | MethodType
+        if type.has_classish_type?
+          raise "#{type.location}: `instance` or `class` type is not allowed in this context"
+        end
+      }
+
+      void_type_context_validator = ->(type, allowed_here = false) {
+        # @type var type: Types::t | MethodType
+        if allowed_here
+          next if type.is_a?(Types::Bases::Void)
+        end
+        if type.with_nonreturn_void?
+          raise "#{type.location}: `void` type is only allowed in return type or generics parameter"
+        end
+      }
+
       env.class_decls.each do |name, decl|
         stdout.puts "Validating class/module definition: `#{name}`..."
         builder.build_instance(name).each_type do |type|
@@ -469,6 +494,29 @@ EOU
         end
         builder.build_singleton(name).each_type do |type|
           validator.validate_type type, context: nil
+        end
+
+        case decl
+        when Environment::ClassEntry
+          decl.decls.each do |decl|
+            if super_class = decl.decl.super_class
+              super_class.args.each do |arg|
+                void_type_context_validator[arg, true]
+                no_self_type_validator[arg]
+                no_classish_type_validator[arg]
+              end
+            end
+          end
+        when Environment::ModuleEntry
+          decl.decls.each do |decl|
+            decl.decl.self_types.each do |self_type|
+              self_type.args.each do |arg|
+                void_type_context_validator[arg, true]
+                no_self_type_validator[arg]
+                no_classish_type_validator[arg]
+              end
+            end
+          end
         end
 
         d = decl.primary.decl
@@ -479,11 +527,36 @@ EOU
           location: d.location&.aref(:type_params)
         )
 
+        d.type_params.each do |param|
+          if ub = param.upper_bound
+            void_type_context_validator[ub]
+            no_self_type_validator[ub]
+            no_classish_type_validator[ub]
+          end
+        end
+
         decl.decls.each do |d|
           d.decl.each_member do |member|
             case member
             when AST::Members::MethodDefinition
               validator.validate_method_definition(member, type_name: name)
+              member.overloads.each do |ov|
+                void_type_context_validator[ov.method_type]
+              end
+            when AST::Members::Attribute
+              void_type_context_validator[member.type]
+            when AST::Members::Mixin
+              member.args.each do |arg|
+                no_self_type_validator[arg]
+                unless arg.is_a?(Types::Bases::Void)
+                  void_type_context_validator[arg, true]
+                end
+              end
+            when AST::Members::Var
+              void_type_context_validator[member.type]
+              if member.is_a?(AST::Members::ClassVariable)
+                no_self_type_validator[member.type]
+              end
             end
           end
         end
@@ -510,6 +583,10 @@ EOU
           case member
           when AST::Members::MethodDefinition
             validator.validate_method_definition(member, type_name: name)
+            member.overloads.each do |ov|
+              void_type_context_validator[ov.method_type]
+              no_classish_type_validator[ov.method_type]
+            end
           end
         end
       end
@@ -518,11 +595,17 @@ EOU
         stdout.puts "Validating constant: `#{name}`..."
         validator.validate_type const.decl.type, context: const.context
         builder.ensure_namespace!(name.namespace, location: const.decl.location)
+        no_self_type_validator[const.decl.type]
+        no_classish_type_validator[const.decl.type]
+        void_type_context_validator[const.decl.type]
       end
 
       env.global_decls.each do |name, global|
         stdout.puts "Validating global: `#{name}`..."
         validator.validate_type global.decl.type, context: nil
+        no_self_type_validator[global.decl.type]
+        no_classish_type_validator[global.decl.type]
+        void_type_context_validator[global.decl.type]
       end
 
       env.type_alias_decls.each do |name, decl|
@@ -531,6 +614,9 @@ EOU
           validator.validate_type type, context: nil
         end
         validator.validate_type_alias(entry: decl)
+        no_self_type_validator[decl.decl.type]
+        no_classish_type_validator[decl.decl.type]
+        void_type_context_validator[decl.decl.type]
       end
     end
 
@@ -647,6 +733,7 @@ EOU
         todo = false
         owners_included = []
         outline = false
+        autoload = false
 
         OptionParser.new do |opts|
           opts.banner = <<EOU
@@ -682,17 +769,49 @@ EOU
           opts.on("--outline", "Generates only module/class/constant declaration (no method definition)") do
             outline = true
           end
+          opts.on("--autoload", "Load all autoload path") do
+            autoload = true
+          end
         end.parse!(args)
 
         loader = options.loader()
         env = Environment.from_loader(loader).resolve_type_names
 
-        require_libs.each do |lib|
-          require(lib)
-        end
+        # @type var autoloader: ^() { () -> void } -> void
+        autoloader = ->(&block) {
+          if autoload
+            hook = Module.new do
+              def autoload(name, path)
+                super
+              end
+            end
+            ::Module.prepend(hook)
+            ::Kernel.prepend(hook)
 
-        relative_libs.each do |lib|
-          eval("require_relative(lib)", binding, "rbs")
+            arguments = []
+            TracePoint.new(:call) do |tp|
+              base = tp.self.kind_of?(Module) ? tp.self : Kernel
+              name = (tp.binding or raise).local_variable_get(:name)
+              arguments << [base, name]
+            end.enable(target: hook.instance_method(:autoload), &block)
+
+            arguments.each do |(base, name)|
+              begin
+                base.const_get(name)
+              rescue LoadError, StandardError
+              end
+            end
+          else
+            block.call
+          end
+        }
+        autoloader.call do
+          require_libs.each do |lib|
+            require(lib)
+          end
+          relative_libs.each do |lib|
+            eval("require_relative(lib)", binding, "rbs")
+          end
         end
 
         runtime = Prototype::Runtime.new(patterns: args, env: env, merge: merge, todo: todo, owners_included: owners_included)

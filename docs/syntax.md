@@ -225,6 +225,87 @@ Proc type denotes type of procedures, `Proc` instances.
 
 See the next section for details.
 
+### Types and contexts
+
+We have contextual limitations on some types:
+
+* `void` is only allowed as a return type or a generic parameter
+* `self` is only allowed in *self-context*
+* `class` and `instance` is only allowed in *classish-context*
+
+These contextual limitation is introduced at RBS 3.3.
+The parser accepts those types even if it doesn't satisfy contextual limitation, but warning is reported with `rbs validate` command.
+We plan to change the parser to reject those types if it breaks the contextual limitations in next release -- `3.4`.
+
+#### Limitations on `void` types
+
+The following `void` types are allowed.
+
+```rbs
+type t1 = ^() -> void
+type t2 = Enumerator[Integer, void]
+```
+
+The following `void` types are prohibited.
+
+```rbs
+type t1 = ^(void) -> untyped                   # void as a function parameter is prohibited
+type t2 = ^() -> void?                         # void cannot be used inside an optional type
+type t3 = Enumerator[Integer, void | String]   # void cannot be used inside a union type
+```
+
+#### Examples of *self-context*
+
+The following `self` types are allowed.
+
+```rbs
+class Foo
+  attr_reader parent: self
+
+  def foo: () -> self
+end
+```
+
+The following `self` types are prohibited.
+
+```rbs
+class Foo
+  include Enumerable[self]                    # Mixin argument is not self-context
+
+  VERSION: self                               # Constant type is not self-context
+
+  @@foos: Array[self]                         # Class variable type is not self-context
+
+  type list = nil | [self, list]              # Type alias is not self-context
+end
+```
+
+#### Examples of *classish-context*
+
+The following `class`/`instance` types are allowed.
+
+```rbs
+class Foo
+  attr_reader parent: class
+
+  def foo: () -> instance
+
+  @@foos: Array[instances]
+
+  include Enumerable[class]
+end
+```
+
+The following `class`/`instance` types are prohibited.
+
+```rbs
+class Foo
+  VERSION: class                              # Constant type is not classish-context
+
+  type list = nil | [instance, list]          # Type alias is not classish-context
+end
+```
+
 ## Method Types and Proc Types
 
 ```markdown
@@ -319,6 +400,8 @@ _member_ ::= _ivar-member_                # Ivar definition
            | _visibility-member_          # Visibility member
 
 _ivar-member_ ::= _ivar-name_ `:` _type_
+                | `self` `.` _ivar-name_ `:` _type_
+                | _cvar-name_ `:` _type_
 
 _method-member_ ::= _visibility_ `def` _method-name_ `:` _method-types_            # Instance method
                   | _visibility_ `def self.` _method-name_ `:` _method-types_      # Singleton method
@@ -351,6 +434,7 @@ _alias-member_ ::= `alias` _method-name_ _method-name_
 _visibility-member_ ::= _visibility_
 
 _ivar-name_ ::= /@\w+/
+_cvar-name_ ::= /@@\w+/
 _method-name_ ::= ...
                 | /`[^`]+`/
 ```
@@ -361,8 +445,13 @@ An instance variable definition consists of the name of an instance variable and
 
 ```rbs
 @name: String
-@value: Hash[Symbol, Key]
+self.@value: Hash[Symbol, Key]
+@@instances: Array[instance]
 ```
+
+* Instance variables definition is *self-context* and *classish-context*
+* Class instance variables definition is *self-context* and *classish-context*
+* Class variables definition is *classish-context*, but NOT *self-context*
 
 ### Method definition
 
@@ -411,6 +500,8 @@ public def self.puts: (*untyped) -> void   # Defines public singleton method
 public def self?.puts: (*untyped) -> void  # 🚨🚨🚨 Error: `?.` has own visibility semantics (== `module_function`) 🚨🚨🚨
 ```
 
+* Method types are *self-context* and *classish-context*
+
 ### Attribute definition
 
 Attribute definitions help to define methods and instance variables based on the convention of `attr_reader`, `attr_writer` and `attr_accessor` methods in Ruby.
@@ -442,6 +533,8 @@ private attr_accessor id: Integer
 private attr_reader self.name: String
 ```
 
+* Attribute types are *self-context* and *classish-context*
+
 ### Mixin (include), Mixin (extend), Mixin (prepend)
 
 You can define mixins between class and modules.
@@ -460,6 +553,8 @@ extend _LikeString
 ```
 
 This allows importing `def`s from the interface to help developer implementing a set of methods.
+
+* Mixin arguments are *classish-context*, but not *self-context*
 
 ### Alias
 
@@ -544,6 +639,8 @@ _module-type-parameters_ ::=                                                  # 
 
 Class declaration can have type parameters and superclass. When you omit superclass, `::Object` is assumed.
 
+* Super class arguments and generic class upperbounds are not *classish-context* nor *self-context*
+
 ### Module declaration
 
 Module declaration takes optional _self type_ parameter, which defines a constraint about a class when the module is mixed.
@@ -559,6 +656,8 @@ end
 ```
 
 The `Enumerable` module above requires `each` method for enumerating objects.
+
+* Self type arguments and generic class upperbounds are not *classish-context* nor *self-context*
 
 ### Class/module alias declaration
 
@@ -624,6 +723,8 @@ Type alias can be generic like class, module, and interface.
 type list[out T] = [T, list[T]] | nil
 ```
 
+* Alias types are not *classish-context* nor *self-context*
+
 ### Constant type declaration
 
 You can declare a constant.
@@ -632,6 +733,8 @@ You can declare a constant.
 Person::DefaultEmailAddress: String
 ```
 
+* Constant types are not *classish-context* nor *self-context*
+
 ### Global type declaration
 
 You can declare a global variable.
@@ -639,6 +742,8 @@ You can declare a global variable.
 ```rbs
 $LOAD_PATH: Array[String]
 ```
+
+* Constant types are not *classish-context* nor *self-context*
 
 ### Generics
 
@@ -723,7 +828,7 @@ If a type parameter has an upper bound, the type parameter must be instantiated 
 
 ```rbs
 type str_printer = PrettyPrint[String]    # OK
-type int_printer = PrettyPrint[Integer]      # Type error
+type int_printer = PrettyPrint[Integer]   # Type error
 ```
 
 The upper bound must be one of a class instance type, interface type, or class singleton type.

@@ -45,23 +45,25 @@ module RBS
 
           gem_dir = dest.join(name, version)
 
+          colored_io = ColoredIO.new(stdout: stdout)
+
           case
           when gem_dir.symlink?
-            stdout.puts "Updating to #{format_config_entry(name, version)} from a local source"
+            colored_io.puts_green("Updating to #{format_config_entry(name, version)} from a local source")
             gem_dir.unlink
             _install(dest: dest, name: name, version: version)
           when gem_dir.directory?
             prev = load_metadata(dir: gem_dir)
 
             if prev == metadata_content(name: name, version: version)
-              stdout.puts "Using #{format_config_entry(name, version)}"
+              colored_io.puts "Using #{format_config_entry(name, version)}"
             else
-              stdout.puts "Updating to #{format_config_entry(name, version)} from #{format_config_entry(prev["name"], prev["version"])}"
+              colored_io.puts_green("Updating to #{format_config_entry(name, version)} from #{format_config_entry(prev["name"], prev["version"])}")
               FileUtils.remove_entry_secure(gem_dir.to_s)
               _install(dest: dest, name: name, version: version)
             end
           when !gem_dir.exist?
-            stdout.puts "Installing #{format_config_entry(name, version)}"
+            colored_io.puts_green("Installing #{format_config_entry(name, version)}")
             _install(dest: dest, name: name, version: version)
           else
             raise

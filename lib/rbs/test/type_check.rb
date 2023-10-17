@@ -136,7 +136,7 @@ module RBS
       end
 
       def keyword?(value)
-        value.is_a?(Hash) && value.keys.all? {|key| key.is_a?(Symbol) }
+        Hash === value && value.each_key.all?(Symbol)
       end
 
       def zip_args(args, fun, &block)
@@ -310,7 +310,7 @@ module RBS
         when Types::Variable
           true
         when Types::Literal
-          val == type.literal
+          type.literal == val
         when Types::Union
           type.types.any? {|type| value(val, type) }
         when Types::Intersection

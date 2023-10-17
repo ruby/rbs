@@ -90,6 +90,18 @@ module RBS
             raise "Unexpected base type: #{inspect}"
           end
         end
+
+        def has_self_type?
+          self.is_a?(Types::Bases::Self)
+        end
+
+        def has_classish_type?
+          self.is_a?(Bases::Instance) || self.is_a?(Bases::Class)
+        end
+
+        def with_nonreturn_void?
+          self.is_a?(Bases::Void)
+        end
       end
 
       class Bool < Base; end
@@ -162,6 +174,18 @@ module RBS
       end
 
       include EmptyEachType
+
+      def has_self_type?
+        false
+      end
+
+      def has_classish_type?
+        false
+      end
+
+      def with_nonreturn_void?
+        false
+      end
     end
 
     class ClassSingleton
@@ -202,6 +226,18 @@ module RBS
           location: location
         )
       end
+
+      def has_self_type?
+        false
+      end
+
+      def has_classish_type?
+        false
+      end
+
+      def with_nonreturn_void?
+        false
+      end
     end
 
     module Application
@@ -239,6 +275,25 @@ module RBS
           args.each(&block)
         else
           enum_for :each_type
+        end
+      end
+
+      def has_self_type?
+        each_type.any? {|type| type.has_self_type? }
+      end
+
+      def has_classish_type?
+        each_type.any? {|type| type.has_classish_type? }
+      end
+
+      def with_nonreturn_void?
+        each_type.any? do |type|
+          if type.is_a?(Bases::Void)
+            # `void` in immediate generics parameter is allowed
+            false
+          else
+            type.with_nonreturn_void?
+          end
         end
       end
     end
@@ -436,6 +491,18 @@ module RBS
           enum_for :map_type
         end
       end
+
+      def has_self_type?
+        each_type.any? {|type| type.has_self_type? }
+      end
+
+      def has_classish_type?
+        each_type.any? {|type| type.has_classish_type? }
+      end
+
+      def with_nonreturn_void?
+        each_type.any? {|type| type.with_nonreturn_void? }
+      end
     end
 
     class Record
@@ -512,6 +579,18 @@ module RBS
           enum_for :map_type
         end
       end
+
+      def has_self_type?
+        each_type.any? {|type| type.has_self_type? }
+      end
+
+      def has_classish_type?
+        each_type.any? {|type| type.has_classish_type? }
+      end
+
+      def with_nonreturn_void?
+        each_type.any? {|type| type.with_nonreturn_void? }
+      end
     end
 
     class Optional
@@ -584,6 +663,18 @@ module RBS
           enum_for :map_type
         end
       end
+
+      def has_self_type?
+        each_type.any? {|type| type.has_self_type? }
+      end
+
+      def has_classish_type?
+        each_type.any? {|type| type.has_classish_type? }
+      end
+
+      def with_nonreturn_void?
+        each_type.any? {|type| type.with_nonreturn_void? }
+      end
     end
 
     class Union
@@ -651,6 +742,18 @@ module RBS
           types: types.map {|type| type.map_type_name(&block) },
           location: location
         )
+      end
+
+      def has_self_type?
+        each_type.any? {|type| type.has_self_type? }
+      end
+
+      def has_classish_type?
+        each_type.any? {|type| type.has_classish_type? }
+      end
+
+      def with_nonreturn_void?
+        each_type.any? {|type| type.with_nonreturn_void? }
       end
     end
 
@@ -720,6 +823,18 @@ module RBS
           types: types.map {|type| type.map_type_name(&block) },
           location: location
         )
+      end
+
+      def has_self_type?
+        each_type.any? {|type| type.has_self_type? }
+      end
+
+      def has_classish_type?
+        each_type.any? {|type| type.has_classish_type? }
+      end
+
+      def with_nonreturn_void?
+        each_type.any? {|type| type.with_nonreturn_void? }
       end
     end
 
@@ -1031,6 +1146,26 @@ module RBS
           false
         end
       end
+
+      def has_self_type?
+        each_type.any? {|type| type.has_self_type? }
+      end
+
+      def has_classish_type?
+        each_type.any? {|type| type.has_classish_type? }
+      end
+
+      def with_nonreturn_void?
+        if each_param.any? {|param| param.type.with_nonreturn_void? }
+          true
+        else
+          if return_type.is_a?(Bases::Void)
+            false
+          else
+            return_type.with_nonreturn_void?
+          end
+        end
+      end
     end
 
     class Block
@@ -1157,6 +1292,9 @@ module RBS
         if block
           type.each_type(&block)
           self.block&.type&.each_type(&block)
+          if self_type = self.block&.self_type
+            yield self_type
+          end
         else
           enum_for :each_type
         end
@@ -1181,6 +1319,26 @@ module RBS
           )
         else
           enum_for :map_type
+        end
+      end
+
+      def has_self_type?
+        each_type.any? {|type| type.has_self_type? }
+      end
+
+      def has_classish_type?
+        each_type.any? {|type| type.has_classish_type? }
+      end
+
+      def with_nonreturn_void?
+        if type.with_nonreturn_void?
+          true
+        else
+          if block = block()
+            block.type.with_nonreturn_void? || block.self_type&.with_nonreturn_void? || false
+          else
+            false
+          end
         end
       end
     end
@@ -1215,6 +1373,18 @@ module RBS
 
       def to_s(level = 0)
         literal.inspect
+      end
+
+      def has_self_type?
+        false
+      end
+
+      def has_classish_type?
+        false
+      end
+
+      def with_nonreturn_void?
+        false
       end
     end
   end

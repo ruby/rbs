@@ -385,8 +385,6 @@ module Kernel : BasicObject
   def self?.fork: () -> Integer?
                 | () { () -> void } -> Integer
 
-  def initialize_copy: (self object) -> self
-
   # <!--
   #   rdoc-file=object.c
   #   - Array(object) -> object or new_array
@@ -846,6 +844,7 @@ module Kernel : BasicObject
   def self?.fail: () -> bot
                 | (string message, ?cause: Exception?) -> bot
                 | (_Exception exception, ?_ToS? message, ?String | Array[String] | nil backtrace, ?cause: Exception?) -> bot
+                | (_Exception exception, ?cause: Exception?, **untyped) -> bot
 
   # <!--
   #   rdoc-file=eval.c
@@ -2971,6 +2970,12 @@ module Kernel : BasicObject
 
   %a{annotate:rdoc:skip}
   alias then yield_self
+
+  private def initialize_copy: (self object) -> self
+
+  private def initialize_clone: (self object, ?freeze: bool?) -> self
+
+  private def initialize_dup: (self object) -> self
 end
 
 Kernel::RUBYGEMS_ACTIVATION_MONITOR: untyped

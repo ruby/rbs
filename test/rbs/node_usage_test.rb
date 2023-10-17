@@ -9,7 +9,7 @@ class RBS::NodeUsageTest < Test::Unit::TestCase
 
   def test_conditional
     NodeUsage.new(parse(<<~RB))
-      if block
+      def block
         yield
       end
 

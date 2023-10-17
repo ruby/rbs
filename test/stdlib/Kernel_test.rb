@@ -656,6 +656,11 @@ class KernelTest < StdlibTest
     rescue test_error
     end
 
+    begin
+      fail test_error.new('a'), foo: 1, bar: 2, baz: 3, cause: RuntimeError.new("?")
+    rescue test_error
+    end
+
     exception_container = Class.new do
       define_method :exception do |arg = 'a'|
         test_error.new(arg)
@@ -967,5 +972,31 @@ class KernelInstanceTest < Test::Unit::TestCase
                      self, :pp, 123, :foo, nil
   ensure
     $stdout = original_stdout
+  end
+
+  def test_initialize_copy
+    assert_send_type(
+      "(self) -> self",
+      Object.new, :initialize_copy, Object.new
+    )
+  end
+
+  def test_initialize_clone
+    assert_send_type(
+      "(self) -> self",
+      Object.new, :initialize_clone, Object.new
+    )
+
+    assert_send_type(
+      "(self, freeze: bool) -> self",
+      Object.new, :initialize_clone, Object.new, freeze: true
+    )
+  end
+
+  def test_initialize_dup
+    assert_send_type(
+      "(self) -> self",
+      Object.new, :initialize_dup, Object.new
+    )
   end
 end

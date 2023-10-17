@@ -25,7 +25,7 @@ module RBS
             stdout: stdout
           )
         end
-        stdout.puts "It's done! #{selected.size} gems' RBSs now installed."
+        ColoredIO.new(stdout: stdout).puts_green("It's done! #{selected.size} gems' RBSs now installed.")
       end
     end
   end
