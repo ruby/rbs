@@ -492,7 +492,7 @@ module RBS
         unless decl
           if mod < Struct
             decl = StructGenerator.new(mod).build_decl
-          elsif mod < Data
+          elsif RUBY_VERSION >= '3.2' && mod < Data
             decl = DataGenerator.new(mod).build_decl
           else
             decl = AST::Declarations::Class.new(
@@ -511,7 +511,7 @@ module RBS
 
         generate_mixin(mod, decl, type_name, type_name_absolute)
 
-        unless mod < Struct || mod < Data
+        unless mod < Struct || (RUBY_VERSION >= '3.2' && mod < Data)
           generate_methods(mod, type_name, decl.members) unless outline
         end
 

@@ -85,6 +85,8 @@ module RBS
       end
 
       class StructGenerator < ValueObjectBase
+        CAN_CALL_KEYWORD_INIT_P = Struct.new(:tmp).respond_to?(:keyword_init?)
+
         def build_super_class
           AST::Declarations::Class::Super.new(name: TypeName("::Struct"), args: [untyped], location: nil)
         end
@@ -102,7 +104,7 @@ module RBS
           [:new, :[]].map do |name|
             new_overloads = []
 
-            if @target_class.keyword_init? == false || @target_class.keyword_init? == nil
+            if CAN_CALL_KEYWORD_INIT_P ? (@target_class.keyword_init? == false || @target_class.keyword_init? == nil) : true
               new_overloads << AST::Members::MethodDefinition::Overload.new(
                 annotations: [],
                 method_type: MethodType.new(
@@ -115,7 +117,7 @@ module RBS
                 )
               )
             end
-            if @target_class.keyword_init? == true || @target_class.keyword_init? == nil
+            if CAN_CALL_KEYWORD_INIT_P ? (@target_class.keyword_init? == true || @target_class.keyword_init? == nil) : true
               new_overloads << AST::Members::MethodDefinition::Overload.new(
                 annotations: [],
                 method_type: MethodType.new(
@@ -144,6 +146,8 @@ module RBS
 
         # def self.keyword_init?: () -> bool?
         def build_s_keyword_init_p
+          return [] unless CAN_CALL_KEYWORD_INIT_P
+
           return_type = @target_class.keyword_init?.nil? \
                       ? Types::Bases::Nil.new(location: nil)
                       : Types::Literal.new(literal: @target_class.keyword_init?, location: nil)
