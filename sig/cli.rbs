@@ -18,6 +18,8 @@ module RBS
     interface _IO
       def puts: (*untyped) -> void
 
+      def tty?: () -> bool
+
       def print: (*untyped) -> void
 
       def flush: () -> void
