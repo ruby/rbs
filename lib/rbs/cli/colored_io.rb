@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module RBS
-  module Collection
+  class CLI
     class ColoredIO
       attr_reader :stdout
 
@@ -36,6 +36,5 @@ module RBS
         !ENV['NO_COLOR'].nil? && !ENV.fetch('NO_COLOR', '').empty?
       end
     end
-    private_constant :ColoredIO
   end
 end

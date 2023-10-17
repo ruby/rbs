@@ -6,6 +6,8 @@ require "shellwords"
 require "abbrev"
 require "stringio"
 
+require_relative 'cli/colored_io'
+
 module RBS
   class CLI
     class LibraryOptions
