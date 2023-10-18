@@ -1,6 +1,6 @@
 require_relative "test_helper"
 
-WARNING_CATEGORIES = %i[deprecated experimental]
+WARNING_CATEGORIES = %i[deprecated experimental performance]
 
 class WarningSingletonTest < Test::Unit::TestCase
   include TypeAssertions
