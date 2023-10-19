@@ -200,9 +200,30 @@ module WithAliases
     yield ToHash.new(hash)
   end
 
-  def with_range(*args)
-    yield Range.new(*args)
-    yield CustomRange.new(*args)
+  def with_range(begin_, end_, exclude_end=false, iter: false, &block)
+    if iter
+      unless begin_.is_a?(Enumerator) && end_.is_a?(Enumerator)
+        raise TypeError, "begin_ and end_ must be Enumerators"
+      end
+
+      begin_.zip(end_) do |b, e|
+        with_range(b, e, exclude_end, iter: false, &block)
+      end
+
+      return
+    end
+
+    yield CustomRange.new(begin_, end_, exclude_end)
+
+    unless Class.instance_method(:respond_to?).bind_call(begin_, :<=>)
+      def (begin_ = begin_.clone).<=>(r) = 0 # you just need a non-nil return value.
+      def (end_   = end_.clone).<=>(r)   = 0
+    end
+
+    yield Range.new(begin_, end_, exclude_end)
+  rescue
+    require 'pry'
+    binding.pry
   end
 
   def with_io(io = $stdout)
@@ -685,7 +706,7 @@ class CustomRange < BlankSlate
   def initialize(begin_, end_, exclude_end=false)
     @begin = begin_
     @end = end_
-    @exclude_end = exclude_end_
+    @exclude_end = exclude_end
   end
 
   def exclude_end?

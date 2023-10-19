@@ -229,7 +229,7 @@ type float = Float | _ToF
 
 # Represents a `Range[T]`, or a type that acts like it (via `.begin`, `.end`, and `.exclude_end?`).
 #
-type range[T] = Range[T] | _Range[T]
+type range[T] = Range[T & Range::_Spaceship] | _Range[T]
 
 # Represents a `String`, or a type convertible to it (via `.to_str`).
 #

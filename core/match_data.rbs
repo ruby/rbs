@@ -300,13 +300,14 @@ class MatchData
   #     # => #<MatchData "01" a:"0" a:"1">
   #     m.named_captures #=> {"a" => "1"}
   #
-  %a{ruby:version:>=3.3.0 }
-  def named_captures: (symbolize_names: true) -> Hash[Symbol, String?]
-                    | (?symbolize_names: false) -> Hash[String, String?]
-                    | (symbolize_names: boolish) -> Hash[Symbol | String, String?]
-
   %a{ruby:version:<3.3}
   def named_captures: () -> Hash[String, String?]
+
+  # %a{ruby:version:>=3.3.0}
+  # def named_captures: (symbolize_names: true) -> Hash[Symbol, String?]
+  #                   | (?symbolize_names: false) -> Hash[String, String?]
+  #                   | (symbolize_names: boolish) -> Hash[Symbol | String, String?]
+
 
   # <!--
   #   rdoc-file=re.c

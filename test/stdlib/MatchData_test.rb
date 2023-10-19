@@ -24,7 +24,7 @@ class MatchDataInstanceTest < Test::Unit::TestCase
   end
 
   def test_eq(meth: :==)
-    with_instance do |isntance|
+    with_instance do |instance|
       [KW_INSTANCE, INSTANCE, true, BasicObject.new, nil, :hello].each do |obj|
         assert_send_type '(untyped) -> bool',
                          instance, meth, obj
@@ -32,30 +32,53 @@ class MatchDataInstanceTest < Test::Unit::TestCase
     end
   end
 
-=begin
   def test_aref
-    with_backref 'greet', 1 do |bref|
-      assert_send_type  '(backref) -> String',
-                        INSTANCE, :[], bref
-      assert_send_type  '(backref, nil) -> String',
-                        INSTANCE, :[], bref, nil
+    # []: (backref, ?nil) -> String
+    with_backref :whom, 2 do |bref|
+      assert_send_type '(MatchData::backref) -> String',
+                       KW_INSTANCE, :[], bref
+      assert_send_type '(MatchData::backref, nil) -> String',
+                       KW_INSTANCE, :[], bref, nil
+    end
+    with_int 2 do |bref|
+      assert_send_type '(MatchData::backref) -> String',
+                       INSTANCE, :[], bref
+      assert_send_type '(MatchData::backref, nil) -> String',
+                       INSTANCE, :[], bref, nil
     end
 
-    with_backref 'invalid', 999 do |bref|
-      assert_send_type  '(backref) -> nil',
-                        INSTANCE, :[], bref
-      assert_send_type  '(backref, nil) -> nil',
-                        INSTANCE, :[], bref, nil
+    # []: (backref, ?nil) -> nil
+    with_backref :punct, 3 do |bref|
+      assert_send_type '(MatchData::backref) -> nil',
+                       KW_INSTANCE, :[], bref
+      assert_send_type '(MatchData::backref, nil) -> nil',
+                       KW_INSTANCE, :[], bref, nil
+    end
+    with_int 3 do |bref|
+      assert_send_type '(MatchData::backref) -> nil',
+                       INSTANCE, :[], bref
+      assert_send_type '(MatchData::backref, nil) -> nil',
+                       INSTANCE, :[], bref, nil
     end
 
-    with_int()
+    # []: (range[int?] range, ?nil) -> Array[String?]
+    [true,false].each do |exclude_end|
+      with_range with_int(1).chain([nil]), with_int(3).chain([nil]), exclude_end, iter: true do |rng|
+        with_instance do |instance|
+          assert_send_type '(range[int?]) -> Array[String?]',
+            INSTANCE, :[], rng
+          assert_send_type '(range[int?], nil) -> Array[String?]',
+            INSTANCE, :[], rng, nil
+        end
+      end
+    end
 
-    with_range
-
-  def []: (backref idx, ?nil) -> String?
-        | (range[int?] range, ?nil) -> Array[String?]?
-        | (int start, int length) -> Array[String?]?
-=end
+    # []: (int, int) -> Array[String?]?
+  end
+#   def []: (backref idx, ?nil) -> String?
+#         | (range[int?] range, ?nil) -> Array[String?]?
+#         | (int start, int length) -> Array[String?]?
+# =end
 
   def test_begin
     with_backref :whom, 2 do |bref|

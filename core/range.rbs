@@ -225,7 +225,12 @@
 # *   #to_a (aliased as #entries): Returns elements of `self` in an array.
 # *   #to_s: Returns a string representation of `self` (uses #to_s).
 #
-class Range[out Elem] < Object
+class Range[out Elem < _Spaceship] < Object
+  interface _Spaceship
+    def <=>: (instance rhs) -> Integer
+           | (untyped rhs) -> Integer?
+  end
+
   include Enumerable[Elem]
 
   # <!--
