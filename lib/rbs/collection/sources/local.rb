@@ -30,29 +30,29 @@ module RBS
         # By avoiding copying RBS files, the users do not need re-run `rbs collection install`
         # when the RBS files are updated.
         def install(dest:, name:, version:, stdout:)
-          from = @full_path.join(name, version)
-          gem_dir = dest.join(name, version)
+          switch_io(stdout) do
+            from = @full_path.join(name, version)
+            gem_dir = dest.join(name, version)
 
-          colored_io = ColoredIO.new(stdout: stdout)
-
-          case
-          when gem_dir.symlink? && gem_dir.readlink == from
-            colored_io.puts "Using #{name}:#{version} (#{from})"
-          when gem_dir.symlink?
-            prev = gem_dir.readlink
-            gem_dir.unlink
-            _install(from, dest.join(name, version))
-            colored_io.puts_green("Updating #{name}:#{version} to #{from} from #{prev}")
-          when gem_dir.directory?
-            # TODO: Show version of git source
-            FileUtils.remove_entry_secure(gem_dir.to_s)
-            _install(from, dest.join(name, version))
-            colored_io.puts_green("Updating #{name}:#{version} from git source")
-          when !gem_dir.exist?
-            _install(from, dest.join(name, version))
-            colored_io.puts_green("Installing #{name}:#{version} (#{from})")
-          else
-            raise
+            case
+            when gem_dir.symlink? && gem_dir.readlink == from
+              Bundler.ui.info "Using #{name}:#{version} (#{from})"
+            when gem_dir.symlink?
+              prev = gem_dir.readlink
+              gem_dir.unlink
+              _install(from, dest.join(name, version))
+              Bundler.ui.confirm "Updating #{name}:#{version} to #{from} from #{prev}"
+            when gem_dir.directory?
+              # TODO: Show version of git source
+              FileUtils.remove_entry_secure(gem_dir.to_s)
+              _install(from, dest.join(name, version))
+              Bundler.ui.confirm "Updating #{name}:#{version} from git source"
+            when !gem_dir.exist?
+              _install(from, dest.join(name, version))
+              Bundler.ui.confirm "Installing #{name}:#{version} (#{from})"
+            else
+              raise
+            end
           end
         end
 

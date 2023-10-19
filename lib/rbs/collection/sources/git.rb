@@ -45,28 +45,28 @@ module RBS
 
           gem_dir = dest.join(name, version)
 
-          colored_io = ColoredIO.new(stdout: stdout)
-
-          case
-          when gem_dir.symlink?
-            colored_io.puts_green("Updating to #{format_config_entry(name, version)} from a local source")
-            gem_dir.unlink
-            _install(dest: dest, name: name, version: version)
-          when gem_dir.directory?
-            prev = load_metadata(dir: gem_dir)
-
-            if prev == metadata_content(name: name, version: version)
-              colored_io.puts "Using #{format_config_entry(name, version)}"
-            else
-              colored_io.puts_green("Updating to #{format_config_entry(name, version)} from #{format_config_entry(prev["name"], prev["version"])}")
-              FileUtils.remove_entry_secure(gem_dir.to_s)
+          switch_io(stdout) do
+            case
+            when gem_dir.symlink?
+              Bundler.ui.confirm "Updating to #{format_config_entry(name, version)} from a local source"
+              gem_dir.unlink
               _install(dest: dest, name: name, version: version)
+            when gem_dir.directory?
+              prev = load_metadata(dir: gem_dir)
+
+              if prev == metadata_content(name: name, version: version)
+                Bundler.ui.info "Using #{format_config_entry(name, version)}"
+              else
+                Bundler.ui.confirm "Updating to #{format_config_entry(name, version)} from #{format_config_entry(prev["name"], prev["version"])}"
+                FileUtils.remove_entry_secure(gem_dir.to_s)
+                _install(dest: dest, name: name, version: version)
+              end
+            when !gem_dir.exist?
+              Bundler.ui.confirm "Installing #{format_config_entry(name, version)}"
+              _install(dest: dest, name: name, version: version)
+            else
+              raise
             end
-          when !gem_dir.exist?
-            colored_io.puts_green("Installing #{format_config_entry(name, version)}")
-            _install(dest: dest, name: name, version: version)
-          else
-            raise
           end
         end
 

@@ -25,7 +25,20 @@ module RBS
             stdout: stdout
           )
         end
-        ColoredIO.new(stdout: stdout).puts_green("It's done! #{selected.size} gems' RBSs now installed.")
+
+        switch_io(stdout) do
+          Bundler.ui.confirm "It's done! #{selected.size} gems' RBSs now installed."
+        end
+      end
+
+      private
+
+      def switch_io(stdout)
+        orig_stdout = $stdout
+        $stdout = stdout
+        yield
+      ensure
+        $stdout = orig_stdout
       end
     end
   end
