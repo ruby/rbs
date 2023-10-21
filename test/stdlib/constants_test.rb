@@ -3,7 +3,7 @@ require_relative 'test_helper'
 # initialize temporary class
 module RBS
   module Unnamed
-    ARGFClass = ARGF.class
+    ARGFClass ||= ARGF.class
   end
 end
 
