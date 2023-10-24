@@ -275,3 +275,9 @@ type interned = Symbol | string
 # Any Ruby object can have `boolish` type.
 #
 type boolish = top
+
+# `_Top` is an internal type for the `top` type.
+# It provides `!` operator to support inverting `top` and `boolish` objects.
+interface _Top
+  def !: () -> bool
+end
