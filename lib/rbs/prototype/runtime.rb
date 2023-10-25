@@ -545,12 +545,15 @@ module RBS
         return nil unless name
 
         begin
+          deprecated, Warning[:deprecated] = Warning[:deprecated], false
           Object.const_get(name)
         rescue NameError
           # Should generate const name if anonymous or internal module (e.g. NameError::message)
           nil
         else
           name
+        ensure
+          Warning[:deprecated] = deprecated
         end
       end
 
