@@ -435,7 +435,7 @@ singleton(::BasicObject)
           error = assert_raises RuntimeError do
             cli.run(["-I", dir, "validate"])
           end
-          assert_match /void|self|instance|class/, error.message
+          assert_match(/void|self|instance|class/, error.message)
         end
       end
     end
