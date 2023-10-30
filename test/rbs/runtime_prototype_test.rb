@@ -621,6 +621,7 @@ end
     private def private_todo; end
     def self.singleton_defined; end
     def self.singleton_todo; end
+    private def accessibility_mismatch; end
 
     CONST_DEFINED = 1
     CONST_TODO = 1
@@ -643,6 +644,7 @@ end
               def public_defined: () -> void
               private def private_defined: () -> void
               def self.singleton_defined: () -> void
+              def accessibility_mismatch: () -> void
               CONST_DEFINED: Integer
             end
             module TodoModule
@@ -667,6 +669,8 @@ end
                 def public_todo: () -> untyped
 
                 private
+
+                def accessibility_mismatch: () -> untyped
 
                 def private_todo: () -> untyped
 

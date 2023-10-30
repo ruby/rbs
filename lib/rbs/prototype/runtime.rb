@@ -20,16 +20,22 @@ module RBS
           end
         end
 
-        def skip_singleton_method?(module_name:, name:)
+        def skip_singleton_method?(module_name:, method:, accessibility:)
           return false unless @builder.env.module_class_entry(module_name.absolute!)
 
-          @builder.build_singleton(module_name.absolute!).methods.has_key?(name)
+          method_definition = @builder.build_singleton(module_name.absolute!).methods[method.name]
+          return false unless method_definition
+
+          method_definition.accessibility == accessibility
         end
 
-        def skip_instance_method?(module_name:, name:)
+        def skip_instance_method?(module_name:, method:, accessibility:)
           return false unless @builder.env.module_class_entry(module_name.absolute!)
 
-          @builder.build_instance(module_name.absolute!).methods.has_key?(name)
+          method_definition = @builder.build_instance(module_name.absolute!).methods[method.name]
+          return false unless method_definition
+
+          method_definition.accessibility == accessibility
         end
 
         def skip_constant?(module_name:, name:)
@@ -291,9 +297,8 @@ module RBS
       def generate_methods(mod, module_name, members)
         module_name_absolute = to_type_name(const_name!(mod), full_name: true).absolute!
         mod.singleton_methods.select {|name| target_method?(mod, singleton: name) }.sort.each do |name|
-          next if todo_object&.skip_singleton_method?(module_name: module_name_absolute, name: name)
-
           method = mod.singleton_class.instance_method(name)
+          next if todo_object&.skip_singleton_method?(module_name: module_name_absolute, method: method, accessibility: :public)
 
           if can_alias?(mod.singleton_class, method)
             members << AST::Members::Alias.new(
@@ -329,9 +334,8 @@ module RBS
           members << AST::Members::Public.new(location: nil)
 
           public_instance_methods.sort.each do |name|
-            next if todo_object&.skip_instance_method?(module_name: module_name_absolute, name: name)
-
             method = mod.instance_method(name)
+            next if todo_object&.skip_instance_method?(module_name: module_name_absolute, method: method, accessibility: :public)
 
             if can_alias?(mod, method)
               members << AST::Members::Alias.new(
@@ -369,11 +373,10 @@ module RBS
           members << AST::Members::Private.new(location: nil)
 
           private_instance_methods.sort.each do |name|
-            next if todo_object&.skip_instance_method?(module_name: module_name_absolute, name: name)
+            method = mod.instance_method(name)
+            next if todo_object&.skip_instance_method?(module_name: module_name_absolute, method: method, accessibility: :private)
 
             added = true
-            method = mod.instance_method(name)
-
             if can_alias?(mod, method)
               members << AST::Members::Alias.new(
                 new_name: method.name,
