@@ -60,7 +60,7 @@ enum TokenType {
   kVOID,            /* void */
   kUSE,             /* use */
   kAS,              /* as */
-  k__TODO__,         /* __todo__ */
+  k__TODO__,        /* __todo__ */
 
   tLIDENT,          /* Identifiers starting with lower case */
   tUIDENT,          /* Identifiers starting with upper case */
