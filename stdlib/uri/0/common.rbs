@@ -278,7 +278,7 @@ module URI
   #     URI.join('http://example.com', '/foo/', 'bar')
   #     # => #<URI::HTTP http://example.com/foo/bar>
   #
-  def self.join: (String str, *String strs) -> URI::Generic
+  def self.join: (_ToStr | URI::Generic str, *_ToStr | URI::Generic strs) -> URI::Generic
 
   # <!--
   #   rdoc-file=lib/uri/common.rb
