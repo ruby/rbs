@@ -8,6 +8,8 @@ require "stringio"
 
 module RBS
   class CLI
+    autoload :ColoredIO, 'rbs/cli/colored_io'
+
     class LibraryOptions
       attr_accessor :core_root
       attr_accessor :config_path
