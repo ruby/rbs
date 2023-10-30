@@ -8,12 +8,13 @@ target :lib do
     "lib/rbs/test.rb"
   )
 
-  library "pathname", "json", "logger", "monitor", "tsort", "uri", 'dbm', 'pstore', 'singleton', 'shellwords', 'fileutils', 'find', 'digest', 'abbrev'
+  library "pathname", "json", "logger", "monitor", "tsort", "uri", 'dbm', 'pstore', 'singleton', 'shellwords', 'fileutils', 'find', 'digest', 'abbrev', 'prettyprint'
   signature 'stdlib/yaml/0'
   signature "stdlib/strscan/0/"
   signature "stdlib/optparse/0/"
   signature "stdlib/rdoc/0/"
   signature "stdlib/ripper/0"
+  signature "stdlib/pp/0"
 
   # configure_code_diagnostics do |config|
   #   config[D::Ruby::MethodDefinitionMissing] = :hint
