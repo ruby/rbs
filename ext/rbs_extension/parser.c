@@ -39,6 +39,7 @@
   case kUNTYPED: \
   case kUSE: \
   case kAS: \
+  case k__TODO__: \
   /* nop */
 
 typedef struct {
@@ -898,6 +899,11 @@ static VALUE parse_simple(parserstate *state) {
     return rbs_base_type(RBS_Types_Bases_Void, rbs_location_current_token(state));
   case kUNTYPED:
     return rbs_base_type(RBS_Types_Bases_Any, rbs_location_current_token(state));
+  case k__TODO__: {
+    VALUE type = rbs_base_type(RBS_Types_Bases_Any, rbs_location_current_token(state));
+    rb_funcall(type, rb_intern("todo!"), 0);
+    return type;
+  }
   case tINTEGER: {
     VALUE literal = rb_funcall(
       string_of_loc(state, state->current_token.range.start, state->current_token.range.end),

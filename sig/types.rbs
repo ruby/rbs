@@ -111,6 +111,9 @@ module RBS
       end
 
       class Any < Base
+        @string: String?
+
+        def todo!: () -> self
       end
 
       class Nil < Base
