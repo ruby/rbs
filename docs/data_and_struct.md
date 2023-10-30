@@ -11,8 +11,10 @@ Unfortunately, supporting `Data` and `Struct` in RBS is not straightforward. You
 
 ```rbs
 class Measure
+  # `attr_accessor amount: Integer` in the case of Struct
   attr_reader amount: Integer
   
+  # `attr_accessor unit: String` in the case of Struct
   attr_reader unit: String
   
   def initialize: (Integer amount, String unit) -> void
