@@ -9,6 +9,14 @@ module RBS
         @stdout = stdout
       end
 
+      def puts_red(string)
+        if can_display_colors?
+          puts "\e[31m#{string}\e[m"
+        else
+          puts string
+        end
+      end
+
       def puts_green(string)
         if can_display_colors?
           puts "\e[32m#{string}\e[m"

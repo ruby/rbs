@@ -55,10 +55,11 @@ module RBS
 
       def run_diff
         first = true
+        io = RBS::CLI::ColoredIO.new(stdout: @stdout)
         @diff.each_diff do |before, after|
-          @stdout.puts if !first
-          @stdout.puts "- #{before}"
-          @stdout.puts "+ #{after}"
+          io.puts if !first
+          io.puts_red   "- #{before}"
+          io.puts_green "+ #{after}"
           first = false
         end
       end
