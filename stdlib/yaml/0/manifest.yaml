@@ -1,3 +1,2 @@
 dependencies:
-  - name: dbm
-  - name: pstore
+  - name: psych

@@ -184,12 +184,12 @@ end
   def test_loading_dependencies
     mktmpdir do |path|
       loader = EnvironmentLoader.new
-      loader.add(library: "yaml")
+      loader.add(library: "psych")
 
       env = Environment.new
       loader.load(env: env)
 
-      assert_operator env.class_decls, :key?, TypeName("::YAML")
+      assert_operator env.class_decls, :key?, TypeName("::Psych")
       assert_operator env.class_decls, :key?, TypeName("::DBM")
       assert_operator env.class_decls, :key?, TypeName("::PStore")
     end

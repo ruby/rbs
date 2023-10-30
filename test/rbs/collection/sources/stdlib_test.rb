@@ -17,7 +17,7 @@ class RBS::Collection::Sources::StdlibTest < Test::Unit::TestCase
   def test_manifest_of__exist
     s = source
     assert_equal({ 'dependencies' => [{ 'name' => 'dbm'}, { 'name' => 'pstore'}] },
-                 s.manifest_of('yaml', '0'))
+                 s.manifest_of('psych', '0'))
   end
 
   def test_manifest_of__nonexist
