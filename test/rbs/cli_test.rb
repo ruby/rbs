@@ -1132,4 +1132,79 @@ Processing `lib`...
     args = ['-I', dir.to_s, 'test', *arg_array]
     assert_instance_of Process::Status, cli.run(args)
   end
+
+  def mktmp_diff_case
+    Dir.mktmpdir do |path|
+      path = Pathname(path)
+
+      dir1 = (path / "dir1")
+      dir1.mkdir
+      (dir1 / 'before.rbs').write(<<~RBS)
+        class Foo
+          def bar: () -> void
+          def self.baz: () -> (Integer | String)
+          def qux: (untyped) -> untyped
+          def quux: () -> void
+
+          CONST: Array[Integer]
+        end
+      RBS
+
+      dir2 = (path / "dir2")
+      dir2.mkdir
+      (dir2 / 'after.rbs').write(<<~RBS)
+        module Bar
+          def bar: () -> void
+        end
+
+        module Baz
+          def baz: (Integer) -> Integer?
+        end
+
+        class Foo
+          include Bar
+          extend Baz
+          alias quux bar
+          CONST: Array[String]
+        end
+      RBS
+
+      yield dir1, dir2
+    end
+  end
+
+  def test_diff_markdown
+    mktmp_diff_case do |dir1, dir2|
+      stdout, stderr = run_rbs('diff', '--format', 'markdown', '--type-name', 'Foo', '--before', dir1.to_s, '--after', dir2.to_s)
+
+      assert_equal <<~MARKDOWN, stdout
+        | before | after |
+        | --- | --- |
+        | `def qux: (untyped) -> untyped` | `-` |
+        | `def quux: () -> void` | `alias quux bar` |
+        | `def self.baz: () -> (::Integer \\| ::String)` | `def self.baz: (::Integer) -> ::Integer?` |
+        | `::Foo::CONST: Array[Integer]` | `::Foo::CONST: Array[String]` |
+      MARKDOWN
+    end
+  end
+
+  def test_diff_diff
+    mktmp_diff_case do |dir1, dir2|
+      stdout, stderr = run_rbs('diff', '--format', 'diff', '--type-name', 'Foo', '--before', dir1.to_s, '--after', dir2.to_s)
+
+      assert_equal <<~DIFF, stdout
+        - def qux: (untyped) -> untyped
+        + -
+
+        - def quux: () -> void
+        + alias quux bar
+
+        - def self.baz: () -> (::Integer | ::String)
+        + def self.baz: (::Integer) -> ::Integer?
+
+        - ::Foo::CONST: Array[Integer]
+        + ::Foo::CONST: Array[String]
+      DIFF
+    end
+  end
 end
