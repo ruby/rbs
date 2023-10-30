@@ -736,6 +736,32 @@ Processing `test/a_test.rb`...
     end
   end
 
+  def test_prototype_batch_syntax_error
+    Dir.mktmpdir do |dir|
+      dir = Pathname(dir)
+
+      (dir + "lib").mkdir
+      (dir + "lib/a.rb").write(<<-RUBY)
+class A < <%= @superclass %>
+end
+      RUBY
+
+      Dir.chdir(dir) do
+        with_cli do |cli|
+          cli.run(%w(prototype rb --out_dir=sig lib))
+
+          assert_equal <<-EOM, cli.stdout.string
+Processing `lib`...
+  Generating RBS for `lib/a.rb`...
+  ⚠️  Unable to parse due to SyntaxError: `lib/a.rb`
+          EOM
+        end
+      end
+
+      refute_predicate dir + "sig", :directory?
+    end
+  end
+
   def test_prototype__runtime__todo
     Dir.mktmpdir do |dir|
       Dir.chdir(dir) do

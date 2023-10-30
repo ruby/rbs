@@ -951,7 +951,12 @@ EOU
             output_path = (output_dir + relative_path).sub_ext(".rbs")
 
             parser = new_parser[]
-            parser.parse file_path.read()
+            begin
+              parser.parse file_path.read()
+            rescue SyntaxError
+              stdout.puts "  ⚠️  Unable to parse due to SyntaxError: `#{file_path}`"
+              next
+            end
 
             if output_path.file?
               if force
