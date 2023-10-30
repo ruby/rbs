@@ -1165,6 +1165,43 @@ JSON::VERSION_MAJOR: Integer
 JSON::VERSION_MINOR: Integer
 
 %a{annotate:rdoc:skip}
+module Kernel
+  private
+
+  # <!--
+  #   rdoc-file=ext/json/lib/json/common.rb
+  #   - j(*objs)
+  # -->
+  # Outputs *objs* to STDOUT as JSON strings in the shortest form, that is in one
+  # line.
+  #
+  def j: (*_ToJson) -> nil
+
+  # <!--
+  #   rdoc-file=ext/json/lib/json/common.rb
+  #   - jj(*objs)
+  # -->
+  # Outputs *objs* to STDOUT as JSON strings in a pretty format, with indentation
+  # and over many lines.
+  #
+  def jj: (*_ToJson) -> nil
+
+  # <!--
+  #   rdoc-file=ext/json/lib/json/common.rb
+  #   - JSON(object, *args)
+  # -->
+  # If *object* is string-like, parse the string and return the parsed result as a
+  # Ruby data structure. Otherwise, generate a JSON text from the Ruby data
+  # structure object and return it.
+  #
+  # The *opts* argument is passed through to generate/parse respectively. See
+  # generate and parse for their documentation.
+  #
+  def JSON: (string source, ?json_options opts) -> untyped
+          | (_ToJson obj, ?json_options opts) -> String
+end
+
+%a{annotate:rdoc:skip}
 class Object
   # Converts this object to a string (calling #to_s), converts
   # it to a JSON string, and returns the result. This is a fallback, if no
