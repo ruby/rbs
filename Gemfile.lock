@@ -40,7 +40,7 @@ GEM
     public_suffix (5.0.3)
     racc (1.7.1)
     rainbow (3.1.1)
-    rake (13.0.6)
+    rake (13.1.0)
     rake-compiler (1.2.5)
       rake
     rdoc (6.4.0)
