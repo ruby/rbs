@@ -45,7 +45,7 @@ module RBS
 
           gem_dir = dest.join(name, version)
 
-          colored_io = ColoredIO.new(stdout: stdout)
+          colored_io = CLI::ColoredIO.new(stdout: stdout)
 
           case
           when gem_dir.symlink?

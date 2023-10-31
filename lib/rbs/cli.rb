@@ -8,6 +8,9 @@ require "stringio"
 
 module RBS
   class CLI
+    autoload :ColoredIO, 'rbs/cli/colored_io'
+    autoload :Diff, 'rbs/cli/diff'
+
     class LibraryOptions
       attr_accessor :core_root
       attr_accessor :config_path
@@ -1389,7 +1392,7 @@ EOB
     end
 
     def run_diff(argv, library_options)
-      Diff::CLI.new(argv: argv, library_options: library_options, stdout: stdout, stderr: stderr).run
+      Diff.new(argv: argv, library_options: library_options, stdout: stdout, stderr: stderr).run
     end
   end
 end

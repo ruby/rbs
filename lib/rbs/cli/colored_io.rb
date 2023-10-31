@@ -1,12 +1,20 @@
 # frozen_string_literal: true
 
 module RBS
-  module Collection
+  class CLI
     class ColoredIO
       attr_reader :stdout
 
       def initialize(stdout:)
         @stdout = stdout
+      end
+
+      def puts_red(string)
+        if can_display_colors?
+          puts "\e[31m#{string}\e[m"
+        else
+          puts string
+        end
       end
 
       def puts_green(string)
@@ -17,8 +25,8 @@ module RBS
         end
       end
 
-      def puts(string)
-        stdout.puts(string)
+      def puts(...)
+        stdout.puts(...)
       end
 
       private
@@ -36,6 +44,5 @@ module RBS
         !ENV['NO_COLOR'].nil? && !ENV.fetch('NO_COLOR', '').empty?
       end
     end
-    private_constant :ColoredIO
   end
 end
