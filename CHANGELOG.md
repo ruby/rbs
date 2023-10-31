@@ -2,6 +2,91 @@
 
 ## master
 
+## 3.3.0.pre.1 (2023-10-31)
+
+### Signature updates
+
+* json ([#1575](https://github.com/ruby/rbs/pull/1575))
+* net-protocol ([#1559](https://github.com/ruby/rbs/pull/1559))
+* pp ([#1545](https://github.com/ruby/rbs/pull/1545))
+* psych ([#1527](https://github.com/ruby/rbs/pull/1527))
+* `BasicObject` ([#1506](https://github.com/ruby/rbs/pull/1506))
+* `ConditionVariable` ([#1468](https://github.com/ruby/rbs/pull/1468))
+* `Encoding` ([#1510](https://github.com/ruby/rbs/pull/1510))
+* `Exception` ([#1529](https://github.com/ruby/rbs/pull/1529))
+* `FalseClass` ([#1478](https://github.com/ruby/rbs/pull/1478), [#1487](https://github.com/ruby/rbs/pull/1487))
+* `Fiber` ([#1463](https://github.com/ruby/rbs/pull/1463))
+* `FileTest` ([#1500](https://github.com/ruby/rbs/pull/1500))
+* `Kernel` ([#1567](https://github.com/ruby/rbs/pull/1567), [#1518](https://github.com/ruby/rbs/pull/1518), [#1504](https://github.com/ruby/rbs/pull/1504), [#1487](https://github.com/ruby/rbs/pull/1487))
+* `Marshal` ([#1524](https://github.com/ruby/rbs/pull/1524))
+* `Math` ([#1533](https://github.com/ruby/rbs/pull/1533))
+* `Mutex` ([#1468](https://github.com/ruby/rbs/pull/1468))
+* `NilClass` ([#1478](https://github.com/ruby/rbs/pull/1478), [#1487](https://github.com/ruby/rbs/pull/1487))
+* `Object` ([#1504](https://github.com/ruby/rbs/pull/1504))
+* `Queue` ([#1468](https://github.com/ruby/rbs/pull/1468))
+* `RbConfig` ([#1534](https://github.com/ruby/rbs/pull/1534))
+* `Signal` ([#1512](https://github.com/ruby/rbs/pull/1512))
+* `SizedQueue` ([#1468](https://github.com/ruby/rbs/pull/1468))
+* `ThreadGroup` ([#1509](https://github.com/ruby/rbs/pull/1509))
+* `TrueClass` ([#1478](https://github.com/ruby/rbs/pull/1478), [#1487](https://github.com/ruby/rbs/pull/1487))
+* `Warning` ([#1477](https://github.com/ruby/rbs/pull/1477))
+* `Enumerator.produce` ([#1516](https://github.com/ruby/rbs/pull/1516))
+* `Module.define_method` ([#1557](https://github.com/ruby/rbs/pull/1557))
+* `URI.join` ([#1580](https://github.com/ruby/rbs/pull/1580))
+* `YAML.unsafe_load` ([#1528](https://github.com/ruby/rbs/pull/1528))
+* `builtin.rbs`([#1455](https://github.com/ruby/rbs/pull/1455), [#1469](https://github.com/ruby/rbs/pull/1469))
+* `constants.rbs` ([#1531](https://github.com/ruby/rbs/pull/1531))
+* `::interned` ([#1499](https://github.com/ruby/rbs/pull/1499), [#1488](https://github.com/ruby/rbs/pull/1488))
+
+
+### Language updates
+
+* Add `__todo__` type ([#1520](https://github.com/ruby/rbs/pull/1520))
+
+### Library changes
+
+* Colored diff ([#1589](https://github.com/ruby/rbs/pull/1589))
+* Fix the issue where ::array[T] would be interpreted as ::array, and type mismatch ([#1491](https://github.com/ruby/rbs/pull/1491))
+* Add `Abbrev` to runtime dependency ([#1573](https://github.com/ruby/rbs/pull/1573))
+* Avoid an error when parsing files including SyntaxError ([#1574](https://github.com/ruby/rbs/pull/1574))
+* Implement rbs diff command ([#1459](https://github.com/ruby/rbs/pull/1459))
+* Add another type syntax validation ([#1566](https://github.com/ruby/rbs/pull/1566))* Mark global variables ([#1551](https://github.com/ruby/rbs/pull/1551))
+* Show location of type by method command ([#1537](https://github.com/ruby/rbs/pull/1537))* Make alias and interface names absolute ([#1502](https://github.com/ruby/rbs/pull/1502))
+* Better record type format ([#1501](https://github.com/ruby/rbs/pull/1501))
+* Should keep escape of alias and attr family ([#1486](https://github.com/ruby/rbs/pull/1486))
+* Fix error when undefined interface or alias ([#1465](https://github.com/ruby/rbs/pull/1465))
+
+#### rbs prototype
+
+* [prototype runtime --todo] Consider accessibility mismatch ([#1539](https://github.com/ruby/rbs/pull/1539))
+* Better support for inherited class of `Struct` or `Data` by prototype runtime ([#1571](https://github.com/ruby/rbs/pull/1571))
+* prototype rb: Ignore ITER (method call with block) ([#1562](https://github.com/ruby/rbs/pull/1562))
+* [prototype runtime] Add --autoload option ([#1561](https://github.com/ruby/rbs/pull/1561))
+* Implement todo option ([#1470](https://github.com/ruby/rbs/pull/1470))
+* [prototype runtime] Fix error when constant is a BasicObject instance. ([#1485](https://github.com/ruby/rbs/pull/1485))
+* [prototype runtime] Const name should be absolute ([#1490](https://github.com/ruby/rbs/pull/1490))
+* [prototype runtime] Optimize performance ([#1495](https://github.com/ruby/rbs/pull/1495))
+* [prototype runtime] Fix error when output Object constants ([#1472](https://github.com/ruby/rbs/pull/1472))
+* [prototype runtime] Support prepend mixin ([#1460](https://github.com/ruby/rbs/pull/1460))
+* [prototype runtime] Avoid alias for methods defined in another module ([#1457](https://github.com/ruby/rbs/pull/1457))
+
+#### rbs collection
+
+* [Collection] Simple colorize collection text like Bundler ([#1558](https://github.com/ruby/rbs/pull/1558))
+* Delete `sources` section from lockfile ([#1544](https://github.com/ruby/rbs/pull/1544))
+
+### Miscellaneous
+
+* Add in with_XXX methods ([#1492](https://github.com/ruby/rbs/pull/1492))
+* Updated binding to use modern kernel tests ([#1507](https://github.com/ruby/rbs/pull/1507))
+* Remove all non-required methods from testing types ([#1541](https://github.com/ruby/rbs/pull/1541))
+* Add `assert_type` assertion to confirm if the value has a type ([#1532](https://github.com/ruby/rbs/pull/1532))
+* Add `#assert_const_type` and guide to use type assertions ([#1514](https://github.com/ruby/rbs/pull/1514))
+* Improve skip test message ([#1476](https://github.com/ruby/rbs/pull/1476))
+* Type check ([#1467](https://github.com/ruby/rbs/pull/1467))
+* Type check RDoc related Ruby code ([#1466](https://github.com/ruby/rbs/pull/1466))
+* Fix CI failure ([#1464](https://github.com/ruby/rbs/pull/1464))
+
 ## 3.2.2 (2023-09-28)
 
 ### Library changes
