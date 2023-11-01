@@ -86,7 +86,11 @@ module RBS
 
       class StructGenerator < ValueObjectBase
         def self.generatable?(target)
-          target < Struct && target.respond_to?(:members)
+          return false unless target < Struct
+          # Avoid direct inherited class like `class Option < Struct`
+          return false unless target.respond_to?(:members)
+
+          true
         end
 
         private
@@ -110,7 +114,7 @@ module RBS
           [:new, :[]].map do |name|
             new_overloads = []
 
-            if CAN_CALL_KEYWORD_INIT_P && @target_class.respond_to?(:keyword_init?)
+            if CAN_CALL_KEYWORD_INIT_P
               case @target_class.keyword_init?
               when false
                 new_overloads << build_overload_for_positional_arguments
@@ -171,7 +175,6 @@ module RBS
         # def self.keyword_init?: () -> bool?
         def build_s_keyword_init_p
           return [] unless CAN_CALL_KEYWORD_INIT_P
-          return [] unless @target_class.respond_to?(:keyword_init?)
 
           return_type = @target_class.keyword_init?.nil? \
                       ? Types::Bases::Nil.new(location: nil)
@@ -205,7 +208,12 @@ module RBS
 
       class DataGenerator < ValueObjectBase
         def self.generatable?(target)
-          RUBY_VERSION >= '3.2' && target < Data && target.respond_to?(:members)
+          return false unless RUBY_VERSION >= '3.2'
+          return false unless target < Data
+          # Avoid direct inherited class like `class Option < Data`
+          return false unless target.respond_to?(:members)
+
+          true
         end
 
         private
