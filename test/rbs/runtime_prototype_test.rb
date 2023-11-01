@@ -931,4 +931,30 @@ end
       end
     end
   end
+
+  class Redefined
+    def self.constants = raise
+    def class = raise
+  end
+
+  def test_reflection
+    SignatureManager.new do |manager|
+      manager.build do |env|
+        p = Runtime.new(patterns: ["RBS::RuntimePrototypeTest::Redefined"], env: env, merge: false)
+        assert_write p.decls, <<~RBS
+          module RBS
+            class RuntimePrototypeTest < ::Test::Unit::TestCase
+              class Redefined
+                def self.constants: () -> untyped
+
+                public
+
+                def class: () -> untyped
+              end
+            end
+          end
+        RBS
+      end
+    end
+  end
 end

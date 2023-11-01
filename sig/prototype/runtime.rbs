@@ -1,6 +1,12 @@
 module RBS
   module Prototype
     class Runtime
+      module Reflection
+        def self.object_class: (Module value) -> Class
+
+        def self.constants_of: (Module mod, ?bool inherit) -> Array[Symbol]
+      end
+
       module Helpers
         private
 
