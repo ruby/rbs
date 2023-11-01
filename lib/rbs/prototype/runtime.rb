@@ -2,6 +2,7 @@
 
 require_relative 'runtime/helpers'
 require_relative 'runtime/value_object_generator'
+require_relative 'runtime/reflection'
 
 module RBS
   module Prototype
@@ -422,7 +423,7 @@ module RBS
 
       def generate_constants(mod, decls)
         module_name = const_name!(mod)
-        mod.constants(false).sort.each do |name|
+        Reflection.constants_of(mod, false).sort.each do |name|
           next if todo_object&.skip_constant?(module_name: module_name, name: name)
 
           begin
@@ -432,10 +433,10 @@ module RBS
             next
           end
 
-          next if object_class(value).equal?(Class)
-          next if object_class(value).equal?(Module)
+          next if Reflection.object_class(value).equal?(Class)
+          next if Reflection.object_class(value).equal?(Module)
 
-          unless object_class(value).name
+          unless Reflection.object_class(value).name
             RBS.logger.warn("Skipping constant #{name} #{value} of #{mod} as an instance of anonymous class")
             next
           end
@@ -453,7 +454,7 @@ module RBS
                  when ENV
                    Types::ClassInstance.new(name: TypeName("::RBS::Unnamed::ENVClass"), args: [], location: nil)
                  else
-                   value_type_name = to_type_name(const_name!(object_class(value)), full_name: true).absolute!
+                   value_type_name = to_type_name(const_name!(Reflection.object_class(value)), full_name: true).absolute!
                    args = type_args(value_type_name)
                    Types::ClassInstance.new(name: value_type_name, args: args, location: nil)
                  end
@@ -629,11 +630,6 @@ module RBS
 
         # Return the array of declarations checked out at the end
         destination
-      end
-
-      def object_class(value)
-        @object_class ||= Object.instance_method(:class)
-        @object_class.bind_call(value)
       end
 
       def type_args(type_name)
