@@ -246,7 +246,7 @@ module RBS
               end
             end
             value_node = node.children.last
-            type = if value_node.type == :CALL && value_node.children[1] == :let
+            type = if value_node && value_node.type == :CALL && value_node.children[1] == :let
                      type_node = each_arg(value_node.children[2]).to_a[1]
                      type_of type_node, variables: current_module&.type_params || []
                    else
