@@ -494,9 +494,9 @@ module RBS
         end #: AST::Declarations::Class?
 
         unless decl
-          if mod < Struct
+          if StructGenerator.generatable?(mod)
             decl = StructGenerator.new(mod).build_decl
-          elsif RUBY_VERSION >= '3.2' && mod < Data
+          elsif DataGenerator.generatable?(mod)
             decl = DataGenerator.new(mod).build_decl
           else
             decl = AST::Declarations::Class.new(

@@ -700,6 +700,8 @@ end
   end
   StructKeywordInitTrue = Struct.new(:foo, :bar, keyword_init: true)
   StructKeywordInitFalse = Struct.new(:foo, :bar, keyword_init: false)
+  class StructDirectInherited < Struct
+  end
 
   def test_struct
     SignatureManager.new do |manager|
@@ -846,6 +848,16 @@ end
             end
           RBS
         end
+
+        p = Runtime.new(patterns: ["RBS::RuntimePrototypeTest::StructDirectInherited"], env: env, merge: false)
+        assert_write p.decls, <<~RBS
+          module RBS
+            class RuntimePrototypeTest < ::Test::Unit::TestCase
+              class StructDirectInherited < ::Struct[untyped]
+              end
+            end
+          end
+        RBS
       end
     end
   end
@@ -854,6 +866,8 @@ end
     class DataInherit < Data.define(:foo, :bar)
     end
     DataConst = Data.define(:foo, :bar)
+    class DataDirectInherit < Data
+    end
 
     def test_data
       SignatureManager.new do |manager|
@@ -899,6 +913,16 @@ end
                   attr_reader foo: untyped
 
                   attr_reader bar: untyped
+                end
+              end
+            end
+          RBS
+
+          p = Runtime.new(patterns: ["RBS::RuntimePrototypeTest::DataDirectInherit"], env: env, merge: false)
+          assert_write p.decls, <<~RBS
+            module RBS
+              class RuntimePrototypeTest < ::Test::Unit::TestCase
+                class DataDirectInherit < ::Data
                 end
               end
             end
