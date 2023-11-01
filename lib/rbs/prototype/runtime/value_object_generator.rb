@@ -85,6 +85,16 @@ module RBS
       end
 
       class StructGenerator < ValueObjectBase
+        def self.generatable?(target)
+          return false unless target < Struct
+          # Avoid direct inherited class like `class Option < Struct`
+          return false unless target.respond_to?(:members)
+
+          true
+        end
+
+        private
+
         CAN_CALL_KEYWORD_INIT_P = Struct.new(:tmp).respond_to?(:keyword_init?)
 
         def build_super_class
@@ -104,31 +114,21 @@ module RBS
           [:new, :[]].map do |name|
             new_overloads = []
 
-            if CAN_CALL_KEYWORD_INIT_P ? (@target_class.keyword_init? == false || @target_class.keyword_init? == nil) : true
-              new_overloads << AST::Members::MethodDefinition::Overload.new(
-                annotations: [],
-                method_type: MethodType.new(
-                  type: Types::Function.empty(Types::Bases::Instance.new(location: nil)).update(
-                    optional_positionals: @target_class.members.map { |m| Types::Function::Param.new(name: m, type: untyped) },
-                  ),
-                  type_params: [],
-                  block: nil,
-                  location: nil,
-                )
-              )
-            end
-            if CAN_CALL_KEYWORD_INIT_P ? (@target_class.keyword_init? == true || @target_class.keyword_init? == nil) : true
-              new_overloads << AST::Members::MethodDefinition::Overload.new(
-                annotations: [],
-                method_type: MethodType.new(
-                  type: Types::Function.empty(Types::Bases::Instance.new(location: nil)).update(
-                    optional_keywords: @target_class.members.to_h { |m| [m, Types::Function::Param.new(name: nil, type: untyped)] },
-                  ),
-                  type_params: [],
-                  block: nil,
-                  location: nil,
-                )
-              )
+            if CAN_CALL_KEYWORD_INIT_P
+              case @target_class.keyword_init?
+              when false
+                new_overloads << build_overload_for_positional_arguments
+              when true
+                new_overloads << build_overload_for_keyword_arguments
+              when nil
+                new_overloads << build_overload_for_positional_arguments
+                new_overloads << build_overload_for_keyword_arguments
+              else
+                raise
+              end
+            else
+              new_overloads << build_overload_for_positional_arguments
+              new_overloads << build_overload_for_keyword_arguments
             end
 
             AST::Members::MethodDefinition.new(
@@ -142,6 +142,34 @@ module RBS
               visibility: nil
             )
           end
+        end
+
+        def build_overload_for_positional_arguments
+          AST::Members::MethodDefinition::Overload.new(
+            annotations: [],
+            method_type: MethodType.new(
+              type: Types::Function.empty(Types::Bases::Instance.new(location: nil)).update(
+                optional_positionals: @target_class.members.map { |m| Types::Function::Param.new(name: m, type: untyped) },
+              ),
+              type_params: [],
+              block: nil,
+              location: nil,
+            )
+          )
+        end
+
+        def build_overload_for_keyword_arguments
+          AST::Members::MethodDefinition::Overload.new(
+            annotations: [],
+            method_type: MethodType.new(
+              type: Types::Function.empty(Types::Bases::Instance.new(location: nil)).update(
+                optional_keywords: @target_class.members.to_h { |m| [m, Types::Function::Param.new(name: nil, type: untyped)] },
+              ),
+              type_params: [],
+              block: nil,
+              location: nil,
+            )
+          )
         end
 
         # def self.keyword_init?: () -> bool?
@@ -179,6 +207,17 @@ module RBS
       end
 
       class DataGenerator < ValueObjectBase
+        def self.generatable?(target)
+          return false unless RUBY_VERSION >= '3.2'
+          return false unless target < Data
+          # Avoid direct inherited class like `class Option < Data`
+          return false unless target.respond_to?(:members)
+
+          true
+        end
+
+        private
+
         def build_super_class
           AST::Declarations::Class::Super.new(name: TypeName("::Data"), args: [], location: nil)
         end

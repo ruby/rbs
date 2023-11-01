@@ -146,6 +146,10 @@ end
 class Hash[unchecked out K, unchecked out V]
   include Enumerable[[K, V]]
 end
+
+class Struct[Elem]
+  include Enumerable[Elem?]
+end
 SIG
 
     def add_file(path, content)
