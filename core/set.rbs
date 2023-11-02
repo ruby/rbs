@@ -439,7 +439,7 @@ class Set[unchecked out A]
   #     Set[1, 2, 3].disjoint? [3, 4]      #=> false
   #     Set[1, 2, 3].disjoint? 4..5        #=> true
   #
-  def disjoint?: (self) -> bool
+  def disjoint?: (_Each[A]) -> bool
 
   # <!--
   #   rdoc-file=lib/set.rb
@@ -502,7 +502,7 @@ class Set[unchecked out A]
   #     Set[1, 2, 3].intersect? 4..5        #=> false
   #     Set[1, 2, 3].intersect? [3, 4]      #=> true
   #
-  def intersect?: (self) -> bool
+  def intersect?: (_Each[A]) -> bool
 
   # <!--
   #   rdoc-file=lib/set.rb
@@ -625,4 +625,5 @@ module Enumerable[unchecked out Elem]
   # Needs to `require "set"` to use this method.
   #
   def to_set: () -> Set[Elem]
+            | [T] { (Elem) -> T } -> Set[T]
 end
