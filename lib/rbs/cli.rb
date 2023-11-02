@@ -466,17 +466,19 @@ EOU
       builder = DefinitionBuilder.new(env: env)
       validator = Validator.new(env: env, resolver: Resolver::TypeNameResolver.new(env))
 
+      syntax_errors = [] #: Array[String]
+
       no_self_type_validator = ->(type) {
         # @type var type: Types::t | MethodType
         if type.has_self_type?
-          raise "#{type.location}: `self` type is not allowed in this context"
+          syntax_errors << "#{type.location}: `self` type is not allowed in this context"
         end
       }
 
       no_classish_type_validator = ->(type) {
         # @type var type: Types::t | MethodType
         if type.has_classish_type?
-          raise "#{type.location}: `instance` or `class` type is not allowed in this context"
+          syntax_errors << "#{type.location}: `instance` or `class` type is not allowed in this context"
         end
       }
 
@@ -486,7 +488,7 @@ EOU
           next if type.is_a?(Types::Bases::Void)
         end
         if type.with_nonreturn_void?
-          raise "#{type.location}: `void` type is only allowed in return type or generics parameter"
+          syntax_errors << "#{type.location}: `void` type is only allowed in return type or generics parameter"
         end
       }
 
@@ -620,6 +622,14 @@ EOU
         no_self_type_validator[decl.decl.type]
         no_classish_type_validator[decl.decl.type]
         void_type_context_validator[decl.decl.type]
+      end
+
+      unless syntax_errors.empty?
+        syntax_errors.sort!
+        syntax_errors.uniq!
+        syntax_errors.each do |message|
+          stdout.puts message
+        end
       end
     end
 
