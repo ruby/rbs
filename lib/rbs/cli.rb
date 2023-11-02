@@ -630,6 +630,7 @@ EOU
         syntax_errors.each do |message|
           stdout.puts message
         end
+        exit(1)
       end
     end
 
