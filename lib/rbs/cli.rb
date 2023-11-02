@@ -444,6 +444,8 @@ EOU
     end
 
     def run_validate(args, options)
+      stdout = stdout()
+
       OptionParser.new do |opts|
         opts.banner = <<EOU
 Usage: rbs validate
@@ -456,7 +458,7 @@ Examples:
 EOU
 
         opts.on("--silent") do
-          @stdout = StringIO.new
+          stdout = StringIO.new
         end
       end.parse!(args)
 
@@ -628,8 +630,9 @@ EOU
         syntax_errors.sort!
         syntax_errors.uniq!
         syntax_errors.each do |message|
-          stdout.puts message
+          self.stdout.puts message
         end
+        exit(1)
       end
     end
 
