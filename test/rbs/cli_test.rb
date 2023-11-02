@@ -432,10 +432,10 @@ singleton(::BasicObject)
       with_cli do |cli|
         Dir.mktmpdir do |dir|
           (Pathname(dir) + 'a.rbs').write(rbs)
-          error = assert_raises RuntimeError do
-            cli.run(["-I", dir, "validate"])
-          end
-          assert_match(/void|self|instance|class/, error.message)
+          cli.run(["-I", dir, "validate"])
+
+          last_lines = stdout.string.lines.last(3)
+          assert_match(/void|self|instance|class/, last_lines.join("\n"))
         end
       end
     end
