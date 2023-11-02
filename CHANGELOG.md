@@ -2,6 +2,25 @@
 
 ## master
 
+## 3.3.0.pre.2 (2023-11-02)
+
+### Signature updates
+
+* net/smtp ([#1560](https://github.com/ruby/rbs/pull/1560))
+* open-uri ([#1592](https://github.com/ruby/rbs/pull/1592))
+* `Set` ([#1595](https://github.com/ruby/rbs/pull/1595))
+
+### Library changes
+
+* Fixup validation ([#1596](https://github.com/ruby/rbs/pull/1596))
+* Print type syntax errors instead of raising error ([#1594](https://github.com/ruby/rbs/pull/1594))
+
+#### rbs prototype
+
+* Fix error when MASGN ([#1593](https://github.com/ruby/rbs/pull/1593))
+* Support cases where `Module#constants` has been redefined ([#1591](https://github.com/ruby/rbs/pull/1591))
+* [prototype runtime] Fix error if direct inherited ([#1590](https://github.com/ruby/rbs/pull/1590))
+
 ## 3.3.0.pre.1 (2023-10-31)
 
 ### Signature updates
@@ -38,7 +57,6 @@
 * `constants.rbs` ([#1531](https://github.com/ruby/rbs/pull/1531))
 * `::interned` ([#1499](https://github.com/ruby/rbs/pull/1499), [#1488](https://github.com/ruby/rbs/pull/1488))
 
-
 ### Language updates
 
 * Add `__todo__` type ([#1520](https://github.com/ruby/rbs/pull/1520))
@@ -50,8 +68,10 @@
 * Add `Abbrev` to runtime dependency ([#1573](https://github.com/ruby/rbs/pull/1573))
 * Avoid an error when parsing files including SyntaxError ([#1574](https://github.com/ruby/rbs/pull/1574))
 * Implement rbs diff command ([#1459](https://github.com/ruby/rbs/pull/1459))
-* Add another type syntax validation ([#1566](https://github.com/ruby/rbs/pull/1566))* Mark global variables ([#1551](https://github.com/ruby/rbs/pull/1551))
-* Show location of type by method command ([#1537](https://github.com/ruby/rbs/pull/1537))* Make alias and interface names absolute ([#1502](https://github.com/ruby/rbs/pull/1502))
+* Add another type syntax validation ([#1566](https://github.com/ruby/rbs/pull/1566))
+* Mark global variables ([#1551](https://github.com/ruby/rbs/pull/1551))
+* Show location of type by method command ([#1537](https://github.com/ruby/rbs/pull/1537))
+* Make alias and interface names absolute ([#1502](https://github.com/ruby/rbs/pull/1502))
 * Better record type format ([#1501](https://github.com/ruby/rbs/pull/1501))
 * Should keep escape of alias and attr family ([#1486](https://github.com/ruby/rbs/pull/1486))
 * Fix error when undefined interface or alias ([#1465](https://github.com/ruby/rbs/pull/1465))
