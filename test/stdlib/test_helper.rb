@@ -176,14 +176,14 @@ module WithAliases
     def each(&block) = @enum.each(&block)
 
     def and_nil(&block)
-      and_chain(nil, &block)
+      self.and(nil, &block)
     end
 
-    def and_chain(*args, &block)
-      return WithEnum.new chain(args) unless block_given?
+    def and(*args, &block)
+      return WithEnum.new to_enum(__method__, args) unless block_given?
       each(&block)
       args.each do |arg|
-        if WithEnum === arg || Enumerable === arg
+        if WithEnum === arg
           arg.each(&block)
         else
           block.call(arg)
@@ -193,12 +193,6 @@ module WithAliases
   end
 
   def with_int(value = 3)
-    return WithEnum.new to_enum(__method__, value) unless block_given?
-    yield value
-    yield ToInt.new(value)
-  end
-
-  def with_int2(value = 3)
     return WithEnum.new to_enum(__method__, value) unless block_given?
     yield value
     yield ToInt.new(value)

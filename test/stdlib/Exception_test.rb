@@ -16,7 +16,7 @@ class ExceptionSingletonTest < Test::Unit::TestCase
     assert_send_type  '() -> ExceptionSingletonTest::MyException',
                       MyException, :exception
 
-    with_string.chain([1r]).each do |message|
+    with_string.and(1r) do |message|
       assert_send_type  '(string | _ToS) -> ExceptionSingletonTest::MyException',
                         MyException, :exception, message
     end
@@ -83,7 +83,7 @@ class ExceptionInstanceTest < Test::Unit::TestCase
     assert_send_type  '() -> String',
                       INSTANCE, :detailed_message
 
-    [true, false, nil].each do |highlight|
+    with_bool.and_nil do |highlight|
       assert_send_type  '(highlight: bool?) -> String',
                         INSTANCE, :detailed_message, highlight: highlight
       assert_send_type  '(highlight: bool?, **untyped) -> String',
@@ -99,14 +99,14 @@ class ExceptionInstanceTest < Test::Unit::TestCase
     assert_send_type  '(self) -> self',
                       INSTANCE, :exception, INSTANCE
 
-    with_string.chain([Object.new, 1r]).each do |message|
+    with_string.and(Object.new, 1r) do |message|
       assert_send_type  '(string | _ToS) -> ExceptionInstanceTest::MyException',
                         MyException.new, :exception, message
     end
   end
 
   def test_initialize
-    with_string.chain([Object.new, 1r]).each do |message|
+    with_string.and(Object.new, 1r) do |message|
       assert_send_type  '(string | _ToS) -> self',
                         Exception.allocate, :initialize, message
     end
@@ -144,11 +144,11 @@ class ExceptionInstanceTest < Test::Unit::TestCase
     assert_send_type  '() -> String',
                       INSTANCE, :full_message
 
-    [true, false, nil].each do |highlight|
+    with_bool.and_nil do |highlight|
       assert_send_type  '(highlight: bool?) -> String',
                         INSTANCE, :full_message, highlight: highlight
       
-      with_string('top').chain(with_string('bottom'), [:top, :bottom, nil]).each do |order|
+      with_string('top').and(nil, with_string('bottom'), :top, :bottom) do |order|
         assert_send_type  '(highlight: bool?, order: (:top | :bottom | string)?) -> String',
                           INSTANCE, :full_message, highlight: highlight, order: order
       end
