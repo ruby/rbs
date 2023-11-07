@@ -168,63 +168,105 @@ module VersionHelper
 end
 
 module WithAliases
+  class WithEnum
+    include Enumerable
+
+    def initialize(enum) = @enum = enum
+
+    def each(&block) = @enum.each(&block)
+
+    def and_nil(&block)
+      and_chain(nil, &block)
+    end
+
+    def and_chain(*args, &block)
+      return WithEnum.new chain(args) unless block_given?
+      each(&block)
+      args.each do |arg|
+        if WithEnum === arg || Enumerable === arg
+          arg.each(&block)
+        else
+          block.call(arg)
+        end
+      end
+    end
+  end
+
   def with_int(value = 3)
-    return to_enum(__method__, value) unless block_given?
+    return WithEnum.new to_enum(__method__, value) unless block_given?
+    yield value
+    yield ToInt.new(value)
+  end
+
+  def with_int2(value = 3)
+    return WithEnum.new to_enum(__method__, value) unless block_given?
     yield value
     yield ToInt.new(value)
   end
 
   def with_float(value = 0.1)
-    return to_enum(__method__, value) unless block_given?
+    return WithEnum.new to_enum(__method__, value) unless block_given?
     yield value
     yield ToF.new(value)
   end
 
-  def with_string(value = "")
-    return to_enum(__method__, value) unless block_given?
+  def with_string(value = '')
+    return WithEnum.new to_enum(__method__, value) unless block_given?
     yield value
     yield ToStr.new(value)
   end
 
   def with_array(*elements)
-    return to_enum(__method__, *elements) unless block_given?
+    return WithEnum.new to_enum(__method__, *elements) unless block_given?
 
     yield elements
     yield ToArray.new(*elements)
   end
 
   def with_hash(hash = {})
-    return to_enum(__method__, hash) unless block_given?
+    return WithEnum.new to_enum(__method__, hash) unless block_given?
 
     yield hash
     yield ToHash.new(hash)
   end
 
   def with_io(io = $stdout)
-    return to_enum(__method__, io) unless block_given?
+    return WithEnum.new to_enum(__method__, io) unless block_given?
     yield io
     yield ToIO.new(io)
   end
 
   def with_path(path = "/tmp/foo.txt", &block)
-    return to_enum(__method__, path) unless block_given?
+    return WithEnum.new to_enum(__method__, path) unless block_given?
 
     with_string(path, &block)
     block.call ToPath.new(path)
   end
 
   def with_encoding(encoding = Encoding::UTF_8, &block)
-    return to_enum(__method__, encoding) unless block_given?
+    return WithEnum.new to_enum(__method__, encoding) unless block_given?
 
     block.call encoding
     with_string(encoding.to_s, &block)
   end
 
   def with_interned(value = :&, &block)
-    return to_enum(__method__, value) unless block_given?
+    return WithEnum.new to_enum(__method__, value) unless block_given?
 
     with_string(value.to_s, &block)
     block.call value.to_sym
+  end
+
+  def with_bool
+    return WithEnum.new to_enum(__method__) unless block_given?
+    yield true
+    yield false
+  end
+
+  def with_boolish(&block)
+    return WithEnum.new to_enum(__method__, value) unless block_given?
+    with_bool(&block)
+    [nil, 1, Object.new, BlankSlate.new, "hello, world!"].each(&block)
   end
 end
 
@@ -581,6 +623,17 @@ class ToF < BlankSlate
     @value
   end
 end
+
+class ToC < BlankSlate
+  def initialize(value = 1i)
+    @value = value
+  end
+
+  def to_c
+    @value
+  end
+end
+
 
 class ToStr < BlankSlate
   def initialize(value = "")

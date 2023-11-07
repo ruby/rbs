@@ -191,9 +191,9 @@ module Kernel : BasicObject
   #     c(4)   #=> []
   #     c(5)   #=> nil
   #
-  def self?.caller: (Integer start_or_range, ?Integer length) -> ::Array[String]?
-                  | (::Range[Integer] start_or_range) -> ::Array[String]?
-                  | () -> ::Array[String]
+  def self?.caller: () -> Array[String]
+                  | (int start, ?int? length) -> Array[String]?
+                  | (range[int?] range) -> Array[String]?
 
   # <!--
   #   rdoc-file=vm_backtrace.c
@@ -216,8 +216,9 @@ module Kernel : BasicObject
   # Optionally you can pass a range, which will return an array containing the
   # entries within the specified range.
   #
-  def self?.caller_locations: (?Integer start_or_range, ?Integer length) -> ::Array[Thread::Backtrace::Location]?
-                            | (?::Range[Integer] start_or_range) -> ::Array[Thread::Backtrace::Location]?
+  def self?.caller_locations: () -> Array[Thread::Backtrace::Location]
+                            | (int start, ?int? length) -> Array[Thread::Backtrace::Location]?
+                            | (range[int?] range) -> Array[Thread::Backtrace::Location]?
 
   # <!--
   #   rdoc-file=vm_eval.c
@@ -271,18 +272,6 @@ module Kernel : BasicObject
   #
   def self?.catch: [T] (T tag) { (T tag) -> untyped } -> untyped
                  | () { (Object tag) -> untyped } -> untyped
-
-  # <!--
-  #   rdoc-file=kernel.rb
-  #   - obj.class    -> class
-  # -->
-  # Returns the class of *obj*. This method must always be called with an explicit
-  # receiver, as #class is also a reserved word in Ruby.
-  #
-  #     1.class      #=> Integer
-  #     self.class   #=> Object
-  #
-  def class: () -> untyped
 
   # <!--
   #   rdoc-file=vm_eval.c
@@ -489,7 +478,7 @@ module Kernel : BasicObject
   #     Hash(nil)              # => {}
   #     Hash([])               # => {}
   #
-  def self?.Hash: [K, V] (nil | [] _empty) -> Hash[K, V]
+  def self?.Hash: [K, V] (nil | []) -> Hash[K, V]
                 | [K, V] (hash[K, V] hash_like) -> Hash[K, V]
 
   # <!--
@@ -623,7 +612,7 @@ module Kernel : BasicObject
                     | (int | _ToR rational_like, exception: bool) -> Rational?
                     | (int | _ToR numer, ?int | _ToR denom, ?exception: true) -> Rational
                     | (int | _ToR numer, ?int | _ToR denom, exception: bool) -> Rational?
-                    | [T] (Numeric&_RationalDiv[T] numer, Numeric denom, ?exception: bool) -> T
+                    | [T] (Numeric & _RationalDiv[T] numer, Numeric denom, ?exception: bool) -> T
                     | [T < Numeric] (T value, 1, ?exception: bool) -> T
                     | (untyped, ?untyped, ?exception: bool) -> Rational?
 
@@ -695,7 +684,7 @@ module Kernel : BasicObject
   #
   # The built-in syntax `%x{...}` uses this method.
   #
-  def self?.`: (String arg0) -> String
+  def self?.`: (string command) -> String
 
   # <!--
   #   rdoc-file=process.c
@@ -727,7 +716,7 @@ module Kernel : BasicObject
   #
   #     goodbye cruel world
   #
-  def self?.at_exit: () { () -> void } -> Proc
+  def self?.at_exit: () { () -> void } -> ^() -> void
 
   # <!--
   #   rdoc-file=load.c
@@ -742,7 +731,7 @@ module Kernel : BasicObject
   # If *const* is defined as autoload, the file name to be loaded is replaced with
   # *filename*.  If *const* is defined but not as autoload, does nothing.
   #
-  def self?.autoload: (interned _module, String filename) -> NilClass
+  def self?.autoload: (interned module_name, path filename) -> nil
 
   # <!--
   #   rdoc-file=load.c
@@ -753,7 +742,7 @@ module Kernel : BasicObject
   #     autoload(:B, "b")
   #     autoload?(:B)            #=> "b"
   #
-  def self?.autoload?: (interned name) -> String?
+  def self?.autoload?: (interned name, ?boolish inherit) -> String?
 
   # <!--
   #   rdoc-file=proc.c
@@ -845,6 +834,7 @@ module Kernel : BasicObject
                 | (string message, ?cause: Exception?) -> bot
                 | (_Exception exception, ?_ToS? message, ?String | Array[String] | nil backtrace, ?cause: Exception?) -> bot
                 | (_Exception exception, ?cause: Exception?, **untyped) -> bot
+  # ^ TODO
 
   # <!--
   #   rdoc-file=eval.c
@@ -884,7 +874,7 @@ module Kernel : BasicObject
   #
   # Kernel#format is an alias for Kernel#sprintf.
   #
-  def self?.format: (String format, *untyped args) -> String
+  def self?.format: (string format, *untyped args) -> String
 
   # <!--
   #   rdoc-file=object.c
@@ -931,7 +921,8 @@ module Kernel : BasicObject
   # The style of programming using `$_` as an implicit parameter is gradually
   # losing favor in the Ruby community.
   #
-  def self?.gets: (?String arg0, ?Integer arg1) -> String?
+  def self?.gets: (?string? sep, ?int? limit, ?chomp: boolish) -> String?
+                | (int limit, ?chomp: boolish) -> String? 
 
   # <!--
   #   rdoc-file=eval.c
@@ -943,7 +934,7 @@ module Kernel : BasicObject
   #
   #     global_variables.grep /std/   #=> [:$stdin, :$stdout, :$stderr]
   #
-  def self?.global_variables: () -> ::Array[Symbol]
+  def self?.global_variables: () -> Array[Symbol]
 
   # <!--
   #   rdoc-file=load.c
@@ -972,7 +963,7 @@ module Kernel : BasicObject
   # executed under the given module. In no circumstance will any local variables
   # in the loaded file be propagated to the loading environment.
   #
-  def self?.load: (String filename, ?Module | bool) -> bool
+  def self?.load: (path filename, ?Module | bool wrap) -> true
 
   # <!--
   #   rdoc-file=vm_eval.c
@@ -1004,7 +995,7 @@ module Kernel : BasicObject
   #     } #=> :ok
   #
   def self?.loop: () { () -> void } -> bot
-                | () -> ::Enumerator[nil, bot]
+                | () -> Enumerator[nil, bot]
 
   # <!--
   #   rdoc-file=io.c
@@ -1104,6 +1095,7 @@ module Kernel : BasicObject
   #
   def self?.open: (String name, ?String mode, ?Integer perm) -> IO?
                 | [T] (String name, ?String mode, ?Integer perm) { (IO) -> T } -> T
+  # ^ TODO, there's also `to_open`.
 
   # <!--
   #   rdoc-file=io.c
@@ -1196,7 +1188,7 @@ module Kernel : BasicObject
   # -->
   # Equivalent to Proc.new.
   #
-  def self?.proc: () { () -> untyped } -> Proc
+  def self?.proc: () { (*untyped, **untyped) -> untyped } -> Proc
 
   # <!--
   #   rdoc-file=proc.c
@@ -1205,7 +1197,7 @@ module Kernel : BasicObject
   # Equivalent to Proc.new, except the resulting Proc objects check the number of
   # parameters passed when called.
   #
-  def self?.lambda: () { () -> untyped } -> Proc
+  def self?.lambda: () { (*untyped, **untyped) -> untyped } -> Proc
 
   # <!--
   #   rdoc-file=io.c
@@ -1217,8 +1209,8 @@ module Kernel : BasicObject
   #
   # See IO#putc for important information regarding multi-byte characters.
   #
-  def self?.putc: [T < _ToInt] (T chr) -> T
-                | (String chr) -> String
+  def self?.putc: (String chr) -> String
+                | [T < _ToInt] (T chr) -> T
 
   # <!--
   #   rdoc-file=io.c
@@ -1255,9 +1247,9 @@ module Kernel : BasicObject
   #     0..4
   #     [0..4, 0..4, 0..4]
   #
-  def self?.p: [T < _Inspect] (T arg0) -> T
-             | (_Inspect arg0, _Inspect arg1, *_Inspect rest) -> Array[_Inspect]
-             | () -> nil
+  def self?.p: () -> nil
+             | [T < _Inspect] (T object) -> T
+             | (_Inspect object1, _Inspect object2, *_Inspect objects) -> Array[_Inspect]
 
   # <!--
   #   rdoc-file=lib/pp.rb
@@ -1267,9 +1259,10 @@ module Kernel : BasicObject
   #
   # pp returns argument(s).
   #
-  def self?.pp: [T] (T arg0) -> T
+  def self?.pp: () -> nil
+              | [T] (T arg0) -> T
               | (untyped, untyped, *untyped) -> Array[untyped]
-              | () -> nil
+  # ^ TODO
 
   # <!--
   #   rdoc-file=random.c
@@ -1301,10 +1294,36 @@ module Kernel : BasicObject
   #
   # See also Random.rand.
   #
-  def self?.rand: () -> Float
-                | (Integer arg0) -> Integer
-                | (::Range[Integer] arg0) -> Integer
-                | (::Range[Float] arg0) -> Float
+  def self?.rand: (?nil | 0) -> Float
+  #               | (int max_exclusive) -> Integer # technically returns `0` if given a zero max value.
+  #               | [B < (_Sub[B, int], U] (range[B] rng) -> U
+  #               | [B < _Sub[B, Float]]
+  #               # | [T < _RandFloat1 & _ToF & Numeric] (range[T] rng) -> Float
+  #               # | [T < _RandFloat2[U] & Numeric, U] (range[T] rng) -> U
+  #               # | [B] (range[_RandInt[B]] range) -> B
+  #               # | [F < (Float | (Numeric & _ToF)), U] (range[_RandFloat[F, U]] range) -> Float
+  #               # | [T, B < _RandFloat[T]] (range[B] range) -> T
+  #               # F < (Float | (Numeric & _ToF)), U, T < _ToF] (range[_RandFloat[F, U]] range) -> Float
+  #               # | (::Range[Float] arg0) -> Float
+
+  # interface _RandInt[T]
+  #   def -: (instance rhs) -> int
+  #   def +: (Integer rhs) -> T
+  # end
+  # interface _Sub[I, O]
+  #   def -: (I input) -> O
+  # end
+  # interface _Add[I, O]
+  #   def +: (I input) -> O
+  # end
+  # interface _RandFloat1
+  #   def -: (instance rhs) -> F
+  #   def +: (Float rhs) -> T
+  # end
+  # interface _RandFloat[T]# < Numeric #F < (Float | (_ToF & !_ToInt), T]
+  #   def -: (instance rhs) -> F
+  #   def +: (Float rhs) -> T
+  # end
 
   # <!--
   #   rdoc-file=io.c
@@ -1322,7 +1341,8 @@ module Kernel : BasicObject
   # Optional keyword argument `chomp` specifies whether line separators are to be
   # omitted.
   #
-  def self?.readline: (?String arg0, ?Integer arg1) -> String
+  def self?.readline: (?string? sep, ?int? limit, ?chomp: boolish) -> String
+                    | (int limit, ?chomp: boolish) -> String
 
   # <!--
   #   rdoc-file=io.c
@@ -1377,7 +1397,8 @@ module Kernel : BasicObject
   # Optional keyword arguments `enc_opts` specify encoding options; see [Encoding
   # options](rdoc-ref:encodings.rdoc@Encoding+Options).
   #
-  def self?.readlines: (?String arg0, ?Integer arg1) -> ::Array[String]
+  def self?.readlines: (?string? sep, ?int? limit, ?chomp: boolish, **untyped enc_opts) -> Array[String]
+                     | (int limit, ?chomp: boolish, **untyped enc_opts) -> Array[String]
 
   # <!--
   #   rdoc-file=lib/rubygems/core_ext/kernel_require.rb
@@ -1395,7 +1416,7 @@ module Kernel : BasicObject
   # The normal `require` functionality of returning false if that file has already
   # been loaded is preserved.
   #
-  def self?.require: (String path) -> bool
+  def self?.require: (path path) -> bool
 
   # <!--
   #   rdoc-file=load.c
@@ -1406,7 +1427,7 @@ module Kernel : BasicObject
   # raised. Returns `true` if the file was loaded and `false` if the file was
   # already loaded before.
   #
-  def self?.require_relative: (String feature) -> bool
+  def self?.require_relative: (path feature) -> bool
 
   # <!--
   #   rdoc-file=io.c
@@ -1547,7 +1568,20 @@ module Kernel : BasicObject
   #     (snipped)
   #     ping
   #
-  def self?.select: (::Array[IO] read, ?::Array[IO] write, ?::Array[IO] error, ?Integer timeout) -> ::Array[String]
+  def self?.select: [T < _ToIO] (
+    Array[T]? read,
+    ?Array[T]? write,
+    ?Array[T]? errors,
+    ?_Timeout? timeout
+  ) -> [Array[T], Array[T], Array[T]]
+
+  interface _Timeout
+    def divmod: (1) -> [int, _TimeoutNSecs] # technically should return `array[int | _TimeoutNSecs]`
+  end
+
+  interface _TimeoutNSecs
+    def *: (1000000000) -> int
+  end
 
   # <!--
   #   rdoc-file=process.c
@@ -1566,11 +1600,7 @@ module Kernel : BasicObject
   #     Time.new    #=> 2008-03-08 19:56:22 +0900
   #
   def self?.sleep: (?nil) -> bot
-                 | (Integer | Float | _Divmod duration) -> Integer
-
-  interface _Divmod
-    def divmod: (Numeric) -> [ Numeric, Numeric ]
-  end
+                 | (_Timeout duration) -> Integer
 
   # <!--
   #   rdoc-file=io.c
@@ -1596,7 +1626,17 @@ module Kernel : BasicObject
   #
   # Not implemented on all platforms.
   #
-  def self?.syscall: (Integer num, *untyped args) -> untyped
+  def self?.syscall: (
+    int callno,
+    ?string | int arg1, 
+    ?string | int arg2, 
+    ?string | int arg3,
+    ?string | int arg4, 
+    ?string | int arg5, 
+    ?string | int arg6, 
+    ?string | int arg7, 
+    ?string | int arg8
+  ) -> Integer
 
   # <!--
   #   rdoc-file=file.c
@@ -1654,8 +1694,15 @@ module Kernel : BasicObject
   #     ">"  | boolean | True if the modification time of file1
   #          |         | is after that of file2
   #
-  def self?.test: (String | Integer cmd, String | IO file1, ?String | IO file2) -> (TrueClass | FalseClass | Time | nil | Integer)
-
+  def self?.test: (
+      'b' | 'c' | 'd' | 'e' | 'f' | 'g' | 'G' | 'k' | 'o' | 'O' | 'p' | 'S' | 'u' | 'z' |
+       98 |  99 | 100 | 101 | 102 | 103 |  71 | 107 | 111 |  79 | 112 |  83 | 117 | 122,
+      io | path file) -> bool
+    | ('l' | 'r' | 'R' | 'w' | 'W' | 'x' | 'X' | 108 | 114 | 82 | 119 | 87 | 120 | 88, path filename) -> bool
+    | ('s' | 115, io | path filename) -> Integer?
+    | ('M' | 'A' | 'C' | 77  | 65 | 67, io | path file) -> Time
+    | ('-' | '=' | '<' | '>' | 45 | 60 | 61 | 62, io | path file1, io | path file2) -> bool
+    | (String | int cmd, io | path file1, ?io | path file2) -> (bool | Integer? | Time)
   # <!--
   #   rdoc-file=vm_eval.c
   #   - throw(tag [, obj])
@@ -1787,10 +1834,97 @@ module Kernel : BasicObject
   #     exec "echo", "*"    # echoes an asterisk
   #     # never get here
   #
-  def self?.exec: (String command, *String args, ?unsetenv_others: boolish, ?pgroup: true | Integer, ?umask: Integer, ?in: redirect_fd, ?out: redirect_fd, ?err: redirect_fd, ?close_others: boolish, ?chdir: String) -> bot
-                | (Hash[string, string?] env, String command, *String args, ?unsetenv_others: boolish, ?pgroup: true | Integer, ?umask: Integer, ?in: redirect_fd, ?out: redirect_fd, ?err: redirect_fd, ?close_others: boolish, ?chdir: String) -> bot
 
-  type redirect_fd = Integer | :in | :out | :err | IO | String | [ String ] | [ String, string | int ] | [ String, string | int, int ] | [ :child, int ] | :close
+  # def self?.exec: (
+  #   ?Hash[string, string]? env,
+  #   [string, string] | string prog_arg0,
+  #   *string args,
+  #   ?Hash[Symbol | redirect_key, bool? | int | path | redirect_val] opts,
+  # ) -> bot
+  # | (
+  #   ?Hash[string, string]? env,
+  #   [string, string] | string prog_arg0,
+  #   *string args,
+  #   ?pgroup: int | bool?,
+  #   ?unsetenv_others: bool?,
+  #   ?chdir: path,
+  #   ?umask: int,
+  #   ?close_others: bool?,
+  #   ?in: redirect_val,
+  #   ?out: redirect_val,
+  #   ?err: redirect_val,
+  #   ?uid: string | int,
+  #   ?gid: string | int,
+  #   ?exception: bool?,
+  #   **redirect_key => redirect_val opts
+  # ) -> bot
+
+  # def self?.exec
+  #   : (string prog, *string args, ?Hash[Symbol | redirect_key, bool? | int | path | redirect_val] opts) -> bot
+  #   | ([string, string] prog_arg0, *string args, ?Hash[Symbol | redirect_key, bool? | int | path | redirect_val] opts) -> bot
+  #   : (
+  #     [string, string] | string prog_maybe_arg0,
+  #     *string args,
+  #     **(redirect_key => redirect_key)
+  #     # ?Hash[Symbol | redirect_key, bool? | int | path | string | redirect_val] opts
+  #   ) -> bot
+  #   | ([string, string] prog_arg0, *string args, ?Hash[Symbol | redirect_key, bool? | int | path | string | redirect_val] opts) -> bot
+
+  #   ?Hash[string, string?] env,
+  #   ([string, string] | string) maybe_prog_also_arg0, # Technically is an `array[string]` that's convertible into length 2.
+  #   *string args,
+  #   ?Hash[Symbol | redirect_key, bool? | int | path | string | redirect_val] opts) -> bot
+  #  | (
+  #   ?Hash[string, string?] env,
+  #   ([string, string] | string) maybe_prog_also_arg0, # Technically is an `array[string]` that's convertible into length 2.
+  #   *string args,
+
+  #   ?Hash[redirect_key, redirect_val] opts
+  #   ?pgroup: bool? | int,
+  #   ?unsetenv_others: bool?,
+  #   ?chdir: path,
+  #   ?umask: int,
+  #   ?close_others: bool?,
+  #   ?in: redirect_val,
+  #   ?out: redirect_val,
+  #   ?err: redirect_val,
+  #   ?uid: string | int,
+  #   ?gid: string | int,
+  #   ?exception: bool?) -> bot
+
+  #  # TODO: HAVE_SETRLIMIT
+  # type redirect_key = :in | :out | :err | Integer | io
+  # type redirect_val = :close | :in | :out | :err | File | Integer | String | io | [:child, redirect_key] | [path, String | int?] | [path, String | int?, int]
+
+  # def self?.exec
+  # # : (String command, *String args, ?unsetenv_others: boolish, ?pgroup: true | Integer, ?umask: Integer, ?in: redirect_fd, ?out: redirect_fd, ?err: redirect_fd, ?close_others: boolish, ?chdir: String) -> bot
+  # #               | (Hash[string, string?] env, String command, *String args, ?unsetenv_others: boolish, ?pgroup: true | Integer, ?umask: Integer, ?in: redirect_fd, ?out: redirect_fd, ?err: redirect_fd, ?close_others: boolish, ?chdir: String) -> bot
+  #  : (
+  #   ?Hash[string, string?] env,
+  #   ([string, string] | string) maybe_prog_also_arg0, # Technically is an `array[string]` that's convertible into length 2.
+  #   *string args,
+  #   ?Hash[Symbol | redirect_key, bool? | int | path | string | redirect_val] opts) -> bot
+  #  | (
+  #   ?Hash[string, string?] env,
+  #   ([string, string] | string) maybe_prog_also_arg0, # Technically is an `array[string]` that's convertible into length 2.
+  #   *string args,
+
+  #   ?Hash[redirect_key, redirect_val] opts
+  #   ?pgroup: bool? | int,
+  #   ?unsetenv_others: bool?,
+  #   ?chdir: path,
+  #   ?umask: int,
+  #   ?close_others: bool?,
+  #   ?in: redirect_val,
+  #   ?out: redirect_val,
+  #   ?err: redirect_val,
+  #   ?uid: string | int,
+  #   ?gid: string | int,
+  #   ?exception: bool?) -> bot
+
+  #  # TODO: HAVE_SETRLIMIT
+  # type redirect_key = :in | :out | :err | Integer | io
+  # type redirect_val = :close | :in | :out | :err | File | Integer | String | io | [:child, redirect_key] | [path, String | nil | int] | [path, String | nil | int, int]
 
   # <!--
   #   rdoc-file=process.c
@@ -2103,7 +2237,11 @@ module Kernel : BasicObject
   # Returns true if two objects do not match (using the *=~* method), otherwise
   # false.
   #
-  def !~: (untyped) -> bool
+  def !~: [T] (T other) -> bool #where self < _Match[T, untyped]
+
+  # interface _Match[I, O]
+  #   def =~: (I) -> O
+  # end
 
   # <!--
   #   rdoc-file=object.c
@@ -2123,7 +2261,7 @@ module Kernel : BasicObject
   # When you define #<=>, you can include Comparable to gain the methods #<=, #<,
   # #==, #>=, #> and #between?.
   #
-  def <=>: (untyped) -> Integer?
+  def <=>: (untyped other) -> 0?
 
   # <!--
   #   rdoc-file=object.c
@@ -2133,7 +2271,19 @@ module Kernel : BasicObject
   # typically overridden by descendants to provide meaningful semantics in `case`
   # statements.
   #
-  def ===: (untyped) -> bool
+  def ===: (untyped other) -> bool
+
+  # <!--
+  #   rdoc-file=kernel.rb
+  #   - obj.class    -> class
+  # -->
+  # Returns the class of *obj*. This method must always be called with an explicit
+  # receiver, as #class is also a reserved word in Ruby.
+  #
+  #     1.class      #=> Integer
+  #     self.class   #=> Object
+  #
+  def class: () -> Class
 
   # <!--
   #   rdoc-file=kernel.rb
@@ -2157,7 +2307,7 @@ module Kernel : BasicObject
   # This method may have class-specific behavior.  If so, that behavior will be
   # documented under the #`initialize_copy` method of the class.
   #
-  def clone: (?freeze: bool?) -> self
+  def clone: (?freeze: bool?) -> instance
 
   # <!--
   #   rdoc-file=proc.c
@@ -2189,8 +2339,8 @@ module Kernel : BasicObject
   #     chris.define_singleton_method(:greet) {|greeting| "#{greeting}, I'm Chris!" }
   #     chris.greet("Hi") #=> "Hi, I'm Chris!"
   #
-  def define_singleton_method: (interned, Method | UnboundMethod | Proc method) -> Symbol
-                             | (interned) { (*untyped) -> untyped } -> Symbol
+  def define_singleton_method: (interned name, Method | UnboundMethod | Proc method) -> Symbol
+                             | (interned name) { (*untyped) -> untyped } -> Symbol
 
   # <!--
   #   rdoc-file=io.c
@@ -2207,7 +2357,7 @@ module Kernel : BasicObject
   #
   #     1cat[4, 5, 6]
   #
-  def display: (?_Writer port) -> void
+  def display: (?_Writer port) -> nil
 
   # <!--
   #   rdoc-file=object.c
@@ -2247,7 +2397,7 @@ module Kernel : BasicObject
   #     s3 = s1.dup #=> #<Klass:0x401c1084>
   #     s3.foo #=> NoMethodError: undefined method `foo' for #<Klass:0x401c1084>
   #
-  def dup: () -> self
+  def dup: () -> instance
 
   # <!-- rdoc-file=enumerator.c -->
   # Creates a new Enumerator which will enumerate by calling `method` on `obj`,
@@ -2306,7 +2456,9 @@ module Kernel : BasicObject
   #
   def enum_for: (Symbol method, *untyped, **untyped) ?{ (*untyped, **untyped) -> Integer } -> Enumerator[untyped, untyped]
               | () ?{ () -> Integer } -> Enumerator[untyped, self]
-
+ # if no method is given, defaults to `each`
+ # size is enum's yield
+ # ^ todo
   %a{annotate:rdoc:skip}
   alias to_enum enum_for
 
@@ -2345,7 +2497,7 @@ module Kernel : BasicObject
   #     1 == 1.0     #=> true
   #     1.eql? 1.0   #=> false
   #
-  def eql?: (untyped) -> bool
+  def eql?: (untyped other) -> bool
 
   # <!--
   #   rdoc-file=eval.c
@@ -2370,7 +2522,7 @@ module Kernel : BasicObject
   #     k.extend(Mod)   #=> #<Klass:0x401b3bc8>
   #     k.hello         #=> "Hello from Mod.\n"
   #
-  def extend: (*Module) -> self
+  def extend: (*Module modules) -> self
 
   # <!--
   #   rdoc-file=object.c
@@ -2484,7 +2636,7 @@ module Kernel : BasicObject
   #     b.instance_of? B   #=> true
   #     b.instance_of? C   #=> false
   #
-  def instance_of?: (Module) -> bool
+  def instance_of?: (Module module_or_class) -> bool
 
   # <!--
   #   rdoc-file=object.c
@@ -2504,7 +2656,7 @@ module Kernel : BasicObject
   #     fred.instance_variable_defined?("@b")   #=> true
   #     fred.instance_variable_defined?("@c")   #=> false
   #
-  def instance_variable_defined?: (interned var) -> bool
+  def instance_variable_defined?: (interned name) -> bool
 
   # <!--
   #   rdoc-file=object.c
@@ -2526,7 +2678,7 @@ module Kernel : BasicObject
   #     fred.instance_variable_get(:@a)    #=> "cat"
   #     fred.instance_variable_get("@b")   #=> 99
   #
-  def instance_variable_get: (interned var) -> untyped
+  def instance_variable_get: (interned name) -> untyped
 
   # <!--
   #   rdoc-file=object.c
@@ -2549,7 +2701,7 @@ module Kernel : BasicObject
   #     fred.instance_variable_set(:@c, 'cat')   #=> "cat"
   #     fred.inspect                             #=> "#<Fred:0x401b3da8 @a=\"dog\", @b=99, @c=\"cat\">"
   #
-  def instance_variable_set: [X] (interned var, X value) -> X
+  def instance_variable_set: [T] (interned name, T value) -> T
 
   # <!--
   #   rdoc-file=object.c
@@ -2590,7 +2742,7 @@ module Kernel : BasicObject
   #     b.kind_of? C       #=> false
   #     b.kind_of? M       #=> true
   #
-  def is_a?: (Module) -> bool
+  def is_a?: (Module class_or_module) -> bool
 
   %a{annotate:rdoc:skip}
   alias kind_of? is_a?
@@ -2673,7 +2825,7 @@ module Kernel : BasicObject
   #     k.extend M123
   #     k.methods(false)   #=> [:singleton_method]
   #
-  def methods: () -> Array[Symbol]
+  def methods: (?boolish include_super) -> Array[Symbol]
 
   # <!--
   #   rdoc-file=object.c
@@ -2684,7 +2836,7 @@ module Kernel : BasicObject
   #     Object.new.nil?   #=> false
   #     nil.nil?          #=> true
   #
-  def nil?: () -> bool
+  def nil?: () -> false
 
   # <!--
   #   rdoc-file=gc.c
@@ -2709,7 +2861,7 @@ module Kernel : BasicObject
   #     "hello".object_id     == "hello".object_id     # => false
   #     "hi".freeze.object_id == "hi".freeze.object_id # => true
   #
-  def object_id: () -> Integer
+  alias object_id __id__
 
   # <!--
   #   rdoc-file=object.c
@@ -2719,7 +2871,7 @@ module Kernel : BasicObject
   # parameter is set to `false`, only those methods in the receiver will be
   # listed.
   #
-  def private_methods: () -> Array[Symbol]
+  def private_methods: (?boolish all) -> Array[Symbol]
 
   # <!--
   #   rdoc-file=object.c
@@ -2729,7 +2881,7 @@ module Kernel : BasicObject
   # parameter is set to `false`, only those methods in the receiver will be
   # listed.
   #
-  def protected_methods: () -> Array[Symbol]
+  def protected_methods: (?boolish all) -> Array[Symbol]
 
   # <!--
   #   rdoc-file=proc.c
@@ -2803,24 +2955,8 @@ module Kernel : BasicObject
   # When the method name parameter is given as a string, the string is converted
   # to a symbol.
   #
-  def respond_to?: (interned name, ?boolish include_all) -> bool
-
-  # <!--
-  #   rdoc-file=vm_method.c
-  #   - obj.respond_to_missing?(symbol, include_all) -> true or false
-  #   - obj.respond_to_missing?(string, include_all) -> true or false
-  # -->
-  # DO NOT USE THIS DIRECTLY.
-  #
-  # Hook method to return whether the *obj* can respond to *id* method or not.
-  #
-  # When the method name parameter is given as a string, the string is converted
-  # to a symbol.
-  #
-  # See #respond_to?, and the example of BasicObject.
-  #
-  %a{annotate:rdoc:copy:Object#respond_to_missing?}
-  private def respond_to_missing?: (Symbol, bool) -> bool
+  def respond_to?: (interned name, ?boolish include_all) -> boolish
+  # ^ repsonds with boolish via # c=Class.new{def respond_to_missing?(*)=:lol}.new; p c.respond_to? "a{3}"
 
   # <!--
   #   rdoc-file=vm_eval.c
@@ -2845,7 +2981,7 @@ module Kernel : BasicObject
   #     k = Klass.new
   #     k.send :hello, "gentle", "readers"   #=> "Hello gentle readers"
   #
-  def send: (interned name, *untyped args) ?{ (*untyped) -> untyped } -> untyped
+  alias send __send__
 
   # <!--
   #   rdoc-file=object.c
@@ -2920,7 +3056,7 @@ module Kernel : BasicObject
   #     a.singleton_methods(false)  #=> [:two, :one]
   #     a.singleton_methods         #=> [:two, :one, :three]
   #
-  def singleton_methods: () -> Array[Symbol]
+  def singleton_methods: (?boolish all) -> Array[Symbol]
 
   # <!--
   #   rdoc-file=kernel.rb
@@ -2965,17 +3101,34 @@ module Kernel : BasicObject
   #       then {|url| URI(url).read }.
   #       then {|response| JSON.parse(response) }
   #
-  def yield_self: [X] () { (self) -> X } -> X
+  def yield_self: [T] () { (self) -> T } -> T
                 | () -> Enumerator[self, untyped]
 
   %a{annotate:rdoc:skip}
   alias then yield_self
 
-  private def initialize_copy: (self object) -> self
+  private
 
-  private def initialize_clone: (self object, ?freeze: bool?) -> self
+  # <!--
+  #   rdoc-file=vm_method.c
+  #   - obj.respond_to_missing?(symbol, include_all) -> true or false
+  #   - obj.respond_to_missing?(string, include_all) -> true or false
+  # -->
+  # DO NOT USE THIS DIRECTLY.
+  #
+  # Hook method to return whether the *obj* can respond to *id* method or not.
+  #
+  # When the method name parameter is given as a string, the string is converted
+  # to a symbol.
+  #
+  # See #respond_to?, and the example of BasicObject.
+  #
+  %a{annotate:rdoc:copy:Object#respond_to_missing?}
+  def respond_to_missing?: (interned name, boolish include_all) -> boolish
 
-  private def initialize_dup: (self object) -> self
+  def initialize_copy: (instance object) -> self
+
+  def initialize_clone: (instance object, ?freeze: bool?) -> self
+
+  def initialize_dup: (instance object) -> self
 end
-
-Kernel::RUBYGEMS_ACTIVATION_MONITOR: untyped
