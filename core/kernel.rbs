@@ -1835,6 +1835,8 @@ module Kernel : BasicObject
   #     # never get here
   #
 
+  type redirect_fd = Integer | :in | :out | :err | IO | String | [ String ] | [ String, string | int ] | [ String, string | int, int ] | [ :child, int ] | :close
+
   # def self?.exec: (
   #   ?Hash[string, string]? env,
   #   [string, string] | string prog_arg0,
@@ -2261,7 +2263,7 @@ module Kernel : BasicObject
   # When you define #<=>, you can include Comparable to gain the methods #<=, #<,
   # #==, #>=, #> and #between?.
   #
-  def <=>: (untyped other) -> 0?
+  def <=>: (untyped other) -> 0? # where self < _Eq[untyped, untyped]
 
   # <!--
   #   rdoc-file=object.c
@@ -2271,7 +2273,7 @@ module Kernel : BasicObject
   # typically overridden by descendants to provide meaningful semantics in `case`
   # statements.
   #
-  def ===: (untyped other) -> bool
+  def ===: (untyped other) -> bool # where self < _Eq[untyped, untyped]
 
   # <!--
   #   rdoc-file=kernel.rb
@@ -2340,7 +2342,7 @@ module Kernel : BasicObject
   #     chris.greet("Hi") #=> "Hi, I'm Chris!"
   #
   def define_singleton_method: (interned name, Method | UnboundMethod | Proc method) -> Symbol
-                             | (interned name) { (*untyped) -> untyped } -> Symbol
+                             | (interned name) { (*untyped, **untyped) -> untyped } -> Symbol
 
   # <!--
   #   rdoc-file=io.c
@@ -2497,7 +2499,7 @@ module Kernel : BasicObject
   #     1 == 1.0     #=> true
   #     1.eql? 1.0   #=> false
   #
-  def eql?: (untyped other) -> bool
+  alias eql? equal?
 
   # <!--
   #   rdoc-file=eval.c
@@ -2522,7 +2524,7 @@ module Kernel : BasicObject
   #     k.extend(Mod)   #=> #<Klass:0x401b3bc8>
   #     k.hello         #=> "Hello from Mod.\n"
   #
-  def extend: (*Module modules) -> self
+  def extend: (Module module1, *Module modules) -> self
 
   # <!--
   #   rdoc-file=object.c
@@ -2911,7 +2913,7 @@ module Kernel : BasicObject
   #
   #     1.public_send(:puts, "hello")  # causes NoMethodError
   #
-  def public_send: (interned name, *untyped args) ?{ (*untyped) -> untyped } -> untyped
+  def public_send: (interned name, *untyped args, **untyped kwargs) ?{ (*untyped, **untyped) -> untyped } -> untyped
 
   # <!--
   #   rdoc-file=object.c

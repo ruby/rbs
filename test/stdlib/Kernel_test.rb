@@ -554,41 +554,94 @@ class KernelSingletonTest < Test::Unit::TestCase
   end
 end
 
+
 class KernelInstanceTest < Test::Unit::TestCase
   include TypeAssertions
 
+  class KernelTest < BlankSlate
+    include ::Kernel
+  end
+
   testing '::Kernel'
 
+  INSTANCE = KernelTest.new
+
   def test_nmatch
-    omit 'todo'
+    kt = KernelTest.new
+    def kt.=~(*) = 1
+
+    with_untyped do |other|
+      assert_send_type  '(untyped) -> bool',
+                        kt, :!~, other
+    end
   end
 
   def test_cmp
-    omit 'todo'
+    kt = KernelTest.new.__with_object_methods(:==)
+
+    assert_send_type  '(untyped) -> 0',
+                      kt, :<=>, kt
+
+    with_untyped do |other|
+      assert_send_type  '(untyped) -> nil',
+                        kt, :<=>, other
+    end
   end
 
   def test_eqq
-    omit 'todo'
+    kt = KernelTest.new.__with_object_methods(:==)
+
+    with_untyped.and_chain(kt) do |other|
+      assert_send_type  '(untyped) -> bool',
+                        kt, :===, other
+    end
   end
 
   def test_class
-    omit 'todo'
+    assert_send_type  '() -> Class',
+                      INSTANCE, :class
   end
 
   def test_clone
-    omit 'todo'
+    assert_send_type  '() -> instance',
+                      INSTANCE, :clone
+
+    with_bool.and_nil do |freeze|
+      assert_send_type  '(freeze: bool?) -> instance',
+                        INSTANCE, :clone, freeze: freeze
+    end
   end
 
   def test_define_singleton_method
-    omit 'todo'
+    with_interned :foo do |name|
+      assert_send_type  '(interned, Method) -> Symbol',
+                        KernelTest.new, :define_singleton_method, name, method(:__id__)
+      assert_send_type  '(interned, UnboundMethod) -> Symbol',
+                        KernelTest.new, :define_singleton_method, name, method(:__id__).unbind
+      assert_send_type  '(interned, Proc) -> Symbol',
+                        KernelTest.new, :define_singleton_method, name, proc{}
+
+      assert_send_type  '(interned) { (*untyped, **untyped) -> untyped } -> Symbol',
+                        KernelTest.new, :define_singleton_method, name do end
+    end
   end
 
   def test_display
-    omit 'todo'
+    old_stdout = $stdout
+    $stdout = Writer.new
+
+    assert_send_type  '() -> nil',
+                      INSTANCE, :display
+    assert_send_type  '(_Writer) -> nil',
+                      INSTANCE, :display, Writer.new
+
+  ensure
+    $stdout = old_stdout
   end
 
   def test_dup
-    omit 'todo'
+    assert_send_type  '() -> instance',
+                      INSTANCE, :dup
   end
 
   def test_enum_for(method = :enum_for)
@@ -600,51 +653,84 @@ class KernelInstanceTest < Test::Unit::TestCase
   end
 
   def test_eql?
-    omit 'todo'
+    with_untyped.and_chain(INSTANCE) do |other|
+      assert_send_type  '(untyped) -> bool',
+                        INSTANCE, :eql?, other
+    end
   end
 
   def test_extend
-    omit 'todo'
+    assert_send_type  '(Module) -> self',
+                      KernelTest.new, :extend, Module.new
+
+    assert_send_type  '(Module, *Module) -> self',
+                      KernelTest.new, :extend, Module.new, Module.new
   end
 
   def test_freeze
-    omit 'todo'
+    assert_send_type  '() -> self',
+                      KernelTest.new, :freeze
   end
 
   def test_frozen?
-    omit 'todo'
+    assert_send_type  '() -> bool',
+                      INSTANCE, :frozen?
+    assert_send_type  '() -> bool',
+                      KernelTest.new.tap(&:freeze), :frozen?
   end
 
   def test_hash
-    omit 'todo'
+    assert_send_type  '() -> Integer',
+                      INSTANCE, :hash
   end
 
   def test_inspect
-    omit 'todo'
+    assert_send_type  '() -> String',
+                      INSTANCE, :inspect
   end
 
   def test_instance_of?
-    omit 'todo'
+    [Module.new, KernelTest, Kernel].each do |module_or_class|
+      assert_send_type  '(Module) -> bool',
+                        INSTANCE, :instance_of?, module_or_class
+    end
   end
 
   def test_instance_variable_defined?
-    omit 'todo'
+    with_interned :@foo do |name|
+      assert_send_type  '(interned) -> bool',
+                        INSTANCE, :instance_variable_defined?, name
+    end
   end
 
   def test_instance_variable_get
-    omit 'todo'
+    with_interned :@foo do |name|
+      assert_send_type  '(interned) -> untyped',
+                        INSTANCE, :instance_variable_get, name
+    end
   end
 
   def test_instance_variable_set
-    omit 'todo'
+    with_interned :@foo do |name|
+      assert_send_type  '[T] (interned, T) -> T',
+                        KernelTest.new, :instance_variable_set, name, 1r
+    end
   end
 
   def test_instance_variables
-    omit 'todo'
+    class << (kt = KernelTest)
+      @foo = 3 # So it's an `Array[Symbol]` and not an empty array.
+    end
+
+    assert_send_type  '() -> Array[Symbol]',
+                      kt, :instance_variables
   end
 
   def test_is_a?(method = :is_a?)
-    omit 'todo'
+    [Module.new, KernelTest, Kernel].each do |module_or_class|
+      assert_send_type  '(Module) -> bool',
+                        INSTANCE, method, module_or_class
+    end
   end
 
   def test_kind_of?
@@ -652,79 +738,194 @@ class KernelInstanceTest < Test::Unit::TestCase
   end
 
   def test_itself
-    omit 'todo'
+    assert_send_type  '() -> self',
+                      INSTANCE, :itself
   end
 
   def test_method
-    omit 'todo'
+    with_interned :eql? do |name|
+      assert_send_type  '(interned) -> Method',
+                        INSTANCE, :method, name
+    end
+
+    # Make sure that `ToSym` isn't permitted.
+    refute_send_type  '(_ToSym) -> Method',
+                      INSTANCE, :method, ToSym.new(:eql?)
   end
 
   def test_methods
-    omit 'todo'
+    def (kt = KernelTest.new).foo = 3
+
+    assert_send_type  '() -> Array[Symbol]',
+                      kt, :methods
+
+    with_boolish do |include_super|
+      assert_send_type  '(boolish) -> Array[Symbol]',
+                        kt, :methods, include_super
+    end
   end
 
   def test_nil?
-    omit 'todo'
+    assert_send_type  '() -> false',
+                      INSTANCE, :nil?
   end
 
   def test_object_id
-    omit 'todo'
+    assert_send_type  '() -> Integer',
+                      INSTANCE, :object_id
   end
 
   def test_private_methods
-    omit 'todo'
+    class << (kt = KernelTest.new)
+      private def foo = 3
+    end
+
+    assert_send_type  '() -> Array[Symbol]',
+                      kt, :private_methods
+
+    with_boolish do |all|
+      assert_send_type  '(boolish) -> Array[Symbol]',
+                        kt, :private_methods, all
+    end
   end
 
   def test_protected_methods
-    omit 'todo'
+    class << (kt = KernelTest.new)
+      protected def foo = 3
+    end
+
+    assert_send_type  '() -> Array[Symbol]',
+                      kt, :protected_methods
+
+    with_boolish do |all|
+      assert_send_type  '(boolish) -> Array[Symbol]',
+                        kt, :protected_methods, all
+    end
   end
 
   def test_public_method
-    omit 'todo'
+    with_interned :eql? do |name|
+      assert_send_type  '(interned) -> Method',
+                        INSTANCE, :public_method, name
+    end
+
+    # Make sure that `ToSym` isn't permitted.
+    refute_send_type  '(_ToSym) -> Method',
+                      INSTANCE, :public_method, ToSym.new(:eql?)
   end
 
   def test_public_methods
-    omit 'todo'
+    class << (kt = KernelTest.new)
+      def foo = 3
+    end
+
+    assert_send_type  '() -> Array[Symbol]',
+                      kt, :public_methods
+
+    with_boolish do |all|
+      assert_send_type  '(boolish) -> Array[Symbol]',
+                        kt, :public_methods, all
+    end
   end
 
   def test_public_send
-    omit 'todo'
+    class << (kt = KernelTest.new)
+      def foo(*a, **k, &b) = 3
+    end
+
+    with_interned :foo do |name|
+      assert_send_type  '(interned, *untyped, **untyped) ?{ (*untyped, **untyped) -> untyped } -> untyped',
+                        kt, :public_send, name, 3, b: 4 do end
+    end
   end
 
   def test_remove_instance_variable
-    omit 'todo'
+    kt = KernelTest.new
+    with_interned :@foo do |name|
+      kt.instance_variable_set(:@foo, 34)
+
+      assert_send_type  '(interned) -> untyped',
+                        kt, :remove_instance_variable, name
+    end
   end
 
   def test_respond_to?
-    omit 'todo'
+    def (kt = KernelTest.new).respond_to_missing?(*) = :yes
+
+    # You can get `.respond_to?` to return a `boolish` value by defining a custom
+    # `respond_to_missing?` method and calling `.respond_to?` by a dynamically-created symbol (just
+    # a simple `:"foo#{3}"` is good enough.)
+
+    with_interned :"foo#{3}" do |name|
+      assert_send_type  '(interned) -> bool',
+                        INSTANCE, :respond_to?, name
+      assert_send_type  '(interned) -> :yes',
+                        kt, :respond_to?, name
+
+      with_boolish do |include_all|
+        assert_send_type  '(interned, boolish) -> bool',
+                          INSTANCE, :respond_to?, name, include_all
+        assert_send_type  '(interned, boolish) -> :yes',
+                          kt, :respond_to?, name, include_all
+      end
+    end
   end
 
   def test_send
-    omit 'todo'
+    class << (kt = KernelTest.new)
+      def foo(*a, **k, &b) = 3
+    end
+
+    with_interned :foo do |name|
+      assert_send_type  '(interned, *untyped, **untyped) ?{ (*untyped, **untyped) -> untyped } -> untyped',
+                        kt, :send, name, 3, b: 4 do end
+    end
   end
 
   def test_singleton_class
-    omit 'todo'
+    assert_send_type  '() -> Class',
+                      INSTANCE, :singleton_class
   end
 
   def test_singleton_method
-    omit 'todo'
+    def (kt = KernelTest.new).a_singleton_method = 3
+    with_interned :a_singleton_method do |name|
+      assert_send_type  '(interned) -> Method',
+                        kt, :singleton_method, name
+    end
+
+    # Make sure that `ToSym` isn't permitted.
+    refute_send_type  '(_ToSym) -> Method',
+                      kt, :singleton_method, ToSym.new(:a_singleton_method)
   end
 
   def test_singleton_methods
-    omit 'todo'
+    def (kt = KernelTest.new).a_singleton_method = 3
+
+    assert_send_type  '() -> Array[Symbol]',
+                      kt, :singleton_methods
+
+    with_boolish do |all|
+      assert_send_type  '(boolish) -> Array[Symbol]',
+                        kt, :singleton_methods, all
+    end
   end
 
   def test_tap
-    omit 'todo'
+    assert_send_type  '() { (self) -> void } -> self',
+                      INSTANCE, :tap do end
   end
 
   def test_to_s
-    omit 'todo'
+    assert_send_type  '() -> String',
+                      INSTANCE, :to_s
   end
 
   def test_yield_self(method = :yield_self)
-    omit 'todo'
+    assert_send_type  '() -> Enumerator[self, untyped]',
+                      INSTANCE, method
+    assert_send_type  '[T] () { (self) -> T } -> T',
+                      INSTANCE, method do 1r end
   end
 
   def test_then
@@ -732,18 +933,35 @@ class KernelInstanceTest < Test::Unit::TestCase
   end
 
   def test_respond_to_missing?
-    omit 'todo'
+    with_interned :foobar do |name|
+      with_boolish do |include_all|
+        assert_send_type  '(interned, boolish) -> boolish',
+                          INSTANCE, :respond_to_missing?, name, include_all
+      end
+
+      # unlike `respond_to?`, `respond_to_missing?` always expects two arguments.
+      refute_send_type  '(interned) -> boolish',
+                        INSTANCE, :respond_to_missing?, name
+    end
   end
 
   def test_initialize_copy
-    omit 'todo'
+    assert_send_type  '(instance) -> self',
+                      KernelTest.allocate, :initialize_copy, INSTANCE
   end
 
   def test_initialize_clone
-    omit 'todo'
+    assert_send_type  '(instance) -> self',
+                      KernelTest.allocate, :initialize_clone, INSTANCE
+
+    with_bool.and_nil do |freeze|
+      assert_send_type  '(instance, freeze: bool?) -> self',
+                        KernelTest.allocate, :initialize_clone, INSTANCE, freeze: freeze
+    end
   end
 
   def test_initialize_dup
-    omit 'todo'
+    assert_send_type  '(instance) -> self',
+                      KernelTest.allocate, :initialize_dup, INSTANCE
   end
 end

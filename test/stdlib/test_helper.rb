@@ -264,10 +264,12 @@ module WithAliases
   end
 
   def with_boolish(&block)
-    return WithEnum.new to_enum(__method__, value) unless block_given?
+    return WithEnum.new to_enum(__method__) unless block_given?
     with_bool(&block)
     [nil, 1, Object.new, BlankSlate.new, "hello, world!"].each(&block)
   end
+
+  alias with_untyped with_boolish
 end
 
 module TypeAssertions
