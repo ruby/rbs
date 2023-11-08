@@ -22,7 +22,7 @@ module RBS
 
             unless name.namespace.empty?
               parent = name.namespace.to_type_name
-              table = children_table[parent] or raise
+              table = children_table[parent] or raise "#{parent} not found by #{name}"
             else
               table = toplevel
             end

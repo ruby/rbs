@@ -67,11 +67,10 @@ class RBS::DiffTest < Test::Unit::TestCase
         ["def qux: (untyped) -> untyped", "-"],
         ["def quux: () -> void", "alias quux bar"],
         ["def self.baz: () -> (::Integer | ::String)", "def self.baz: (::Integer) -> ::Integer?"],
-        ["::Foo::SAME_MOD_OTHER_VALUE: 2", "::Foo::SAME_MOD_OTHER_VALUE: String"],
-        ["::Foo::SAME_MOD_BEFORE_ONLY: 3", "-"],
-        ["::Foo::OTHER_MOD_SAME_VALUE: 4", "-"],
-        ["::Foo::OTHER_MOD_OTHER_VALUE: 5", "-"],
-        ["-", "::Foo::SAME_MOD_AFTER_ONLY: 3"]
+        ["SAME_MOD_OTHER_VALUE: 2", "SAME_MOD_OTHER_VALUE: ::String"],
+        ["SAME_MOD_BEFORE_ONLY: 3", "-"],
+        ["OTHER_MOD_OTHER_VALUE: 5", "OTHER_MOD_OTHER_VALUE: ::Array[::Integer]"],
+        ["-", "SAME_MOD_AFTER_ONLY: 3"]
       ], results
     end
   end

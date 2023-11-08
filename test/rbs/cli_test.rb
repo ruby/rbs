@@ -1185,7 +1185,7 @@ Processing `lib`...
         | `def qux: (untyped) -> untyped` | `-` |
         | `def quux: () -> void` | `alias quux bar` |
         | `def self.baz: () -> (::Integer \\| ::String)` | `def self.baz: (::Integer) -> ::Integer?` |
-        | `::Foo::CONST: Array[Integer]` | `::Foo::CONST: Array[String]` |
+        | `CONST: ::Array[::Integer]` | `CONST: ::Array[::String]` |
       MARKDOWN
     end
   end
@@ -1204,8 +1204,8 @@ Processing `lib`...
         - def self.baz: () -> (::Integer | ::String)
         + def self.baz: (::Integer) -> ::Integer?
 
-        - ::Foo::CONST: Array[Integer]
-        + ::Foo::CONST: Array[String]
+        - CONST: ::Array[::Integer]
+        + CONST: ::Array[::String]
       DIFF
     end
   end
