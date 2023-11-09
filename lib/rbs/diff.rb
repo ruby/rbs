@@ -76,7 +76,18 @@ module RBS
     def build_env(path)
       loader = @library_options.loader()
       path&.each do |dir|
-        loader.add(path: Pathname(dir))
+        dir_pathname = Pathname(dir)
+        loader.add(path: dir_pathname)
+
+        manifest_pathname = dir_pathname / 'manifest.yaml'
+        if manifest_pathname.exist?
+          manifest = YAML.safe_load(manifest_pathname.read)
+          if manifest['dependencies']
+            manifest['dependencies'].each do |dependency|
+              loader.add(library: dependency['name'], version: nil)
+            end
+          end
+        end
       end
       Environment.from_loader(loader)
     end
