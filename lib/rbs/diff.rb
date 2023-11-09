@@ -12,13 +12,13 @@ module RBS
     def each_diff(&block)
       return to_enum(:each_diff) unless block
 
-      before_instance_methods, before_singleton_methods, before_constant_decls = build_methods(@before_path)
-      after_instance_methods, after_singleton_methods, after_constant_decls = build_methods(@after_path)
+      before_instance_methods, before_singleton_methods, before_constant_children = build_methods(@before_path)
+      after_instance_methods, after_singleton_methods, after_constant_children = build_methods(@after_path)
 
       each_diff_methods(:instance, before_instance_methods, after_instance_methods, &block)
       each_diff_methods(:singleton, before_singleton_methods, after_singleton_methods, &block)
 
-      each_diff_constants(before_constant_decls, after_constant_decls, &block)
+      each_diff_constants(before_constant_children, after_constant_children, &block)
     end
 
     private
@@ -34,11 +34,11 @@ module RBS
       end
     end
 
-    def each_diff_constants(before_constant_decls, after_constant_decls)
-      all_keys = before_constant_decls.keys.to_set + after_constant_decls.keys.to_set
+    def each_diff_constants(before_constant_children, after_constant_children)
+      all_keys = before_constant_children.keys.to_set + after_constant_children.keys.to_set
       all_keys.each do |key|
-        before = constant_to_s(key, before_constant_decls[key]) or next
-        after = constant_to_s(key, after_constant_decls[key]) or next
+        before = constant_to_s(before_constant_children[key]) or next
+        after = constant_to_s(after_constant_children[key]) or next
         next if before == after
 
         yield before, after
@@ -52,19 +52,25 @@ module RBS
       instance_methods = begin
         builder.build_instance(@type_name).methods
       rescue => e
-        RBS.logger.warn("#{path}: #{e.message}")
+        RBS.logger.warn("#{path}: (#{e.class}) #{e.message}")
         {}
       end
       singleton_methods = begin
         builder.build_singleton(@type_name).methods
       rescue => e
-        RBS.logger.warn("#{path}: #{e.message}")
+        RBS.logger.warn("#{path}: (#{e.class}) #{e.message}")
         {}
       end
-      type_name_to_s = @type_name.to_s
-      constant_decls = env.constant_decls.select { |key| key.to_s.start_with?(type_name_to_s) }
 
-      [ instance_methods, singleton_methods, constant_decls ]
+      constant_children = begin
+        constant_resolver = RBS::Resolver::ConstantResolver.new(builder: builder)
+        constant_resolver.children(@type_name)
+      rescue => e
+        RBS.logger.warn("#{path}: (#{e.class}) #{e.message}")
+        {}
+      end
+
+      [ instance_methods, singleton_methods, constant_children ]
     end
 
     def build_env(path)
@@ -93,9 +99,9 @@ module RBS
       end
     end
 
-    def constant_to_s(key, constant)
+    def constant_to_s(constant)
       if constant
-        "#{key}: #{constant.decl.type}"
+        "#{constant.name.name}: #{constant.type}"
       else
         +"-"
       end
