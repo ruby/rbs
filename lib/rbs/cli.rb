@@ -445,6 +445,7 @@ EOU
 
     def run_validate(args, options)
       stdout = stdout()
+      exit_error = false
 
       OptionParser.new do |opts|
         opts.banner = <<EOU
@@ -460,6 +461,9 @@ EOU
         opts.on("--silent") do
           stdout = StringIO.new
         end
+        opts.on("--[no-]exit-error-on-syntax-error", "exit(1) if syntax error is detected") {|bool|
+          exit_error = bool
+        }
       end.parse!(args)
 
       loader = options.loader()
@@ -632,7 +636,7 @@ EOU
         syntax_errors.each do |message|
           self.stdout.puts message
         end
-        exit(1)
+        exit 1 if exit_error
       end
     end
 

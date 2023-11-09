@@ -432,12 +432,16 @@ singleton(::BasicObject)
       with_cli do |cli|
         Dir.mktmpdir do |dir|
           (Pathname(dir) + 'a.rbs').write(rbs)
-          assert_raises SystemExit do
-            cli.run(["-I", dir, "validate"])
-          end
+
+          cli.run(["-I", dir, "validate"])
 
           last_lines = stdout.string.lines.last(3)
           assert_match(/void|self|instance|class/, last_lines.join("\n"))
+
+          cli.run(["-I", dir, "validate", "--no-exit-error-on-syntax-error"])
+          assert_raises SystemExit do
+            cli.run(["-I", dir, "validate", "--exit-error-on-syntax-error"])
+          end
         end
       end
     end
