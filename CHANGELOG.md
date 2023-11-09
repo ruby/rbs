@@ -2,6 +2,14 @@
 
 ## master
 
+## 3.3.0 (2023-11-09)
+
+### Library changes
+
+* Stop exiting with error when syntax error detected during validation ([#1603](https://github.com/ruby/rbs/pull/1603))
+* [rbs diff] Load dependencies from manifest.yaml ([#1602](https://github.com/ruby/rbs/pull/1602))
+* [rbs diff] Resolve constants name ([#1601](https://github.com/ruby/rbs/pull/1601))
+
 ## 3.3.0.pre.2 (2023-11-02)
 
 ### Signature updates
