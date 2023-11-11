@@ -444,7 +444,6 @@ EOU
     end
 
     def run_validate(args, options)
-      stdout = stdout()
       exit_error = false
 
       OptionParser.new do |opts|
@@ -459,6 +458,8 @@ Examples:
 EOU
 
         opts.on("--silent") do
+          RBS.print_warning { "`--silent` option is deprecated. Please use --log-level=error instead." }
+          RBS.logger_level = :error
           stdout = StringIO.new
         end
         opts.on("--[no-]exit-error-on-syntax-error", "exit(1) if syntax error is detected") {|bool|
@@ -472,19 +473,21 @@ EOU
       builder = DefinitionBuilder.new(env: env)
       validator = Validator.new(env: env, resolver: Resolver::TypeNameResolver.new(env))
 
-      syntax_errors = [] #: Array[String]
+      has_warnings = false
 
       no_self_type_validator = ->(type) {
         # @type var type: Types::t | MethodType
         if type.has_self_type?
-          syntax_errors << "#{type.location}: `self` type is not allowed in this context"
+          RBS.print_warning { "#{type.location}: `self` type is not allowed in this context" }
+          has_warnings = true
         end
       }
 
       no_classish_type_validator = ->(type) {
         # @type var type: Types::t | MethodType
         if type.has_classish_type?
-          syntax_errors << "#{type.location}: `instance` or `class` type is not allowed in this context"
+          RBS.print_warning { "#{type.location}: `instance` or `class` type is not allowed in this context" }
+          has_warnings = true
         end
       }
 
@@ -494,12 +497,13 @@ EOU
           next if type.is_a?(Types::Bases::Void)
         end
         if type.with_nonreturn_void?
-          syntax_errors << "#{type.location}: `void` type is only allowed in return type or generics parameter"
+          RBS.print_warning { "#{type.location}: `void` type is only allowed in return type or generics parameter" }
+          has_warnings = true
         end
       }
 
       env.class_decls.each do |name, decl|
-        stdout.puts "Validating class/module definition: `#{name}`..."
+        RBS.logger.info "Validating class/module definition: `#{name}`..."
         builder.build_instance(name).each_type do |type|
           validator.validate_type type, context: nil
         end
@@ -574,12 +578,12 @@ EOU
       end
 
       env.class_alias_decls.each do |name, entry|
-        stdout.puts "Validating class/module alias definition: `#{name}`..."
+        RBS.logger.info "Validating class/module alias definition: `#{name}`..."
         validator.validate_class_alias(entry: entry)
       end
 
       env.interface_decls.each do |name, decl|
-        stdout.puts "Validating interface: `#{name}`..."
+        RBS.logger.info "Validating interface: `#{name}`..."
         builder.build_interface(name).each_type do |type|
           validator.validate_type type, context: nil
         end
@@ -603,7 +607,7 @@ EOU
       end
 
       env.constant_decls.each do |name, const|
-        stdout.puts "Validating constant: `#{name}`..."
+        RBS.logger.info "Validating constant: `#{name}`..."
         validator.validate_type const.decl.type, context: const.context
         builder.ensure_namespace!(name.namespace, location: const.decl.location)
         no_self_type_validator[const.decl.type]
@@ -612,7 +616,7 @@ EOU
       end
 
       env.global_decls.each do |name, global|
-        stdout.puts "Validating global: `#{name}`..."
+        RBS.logger.info "Validating global: `#{name}`..."
         validator.validate_type global.decl.type, context: nil
         no_self_type_validator[global.decl.type]
         no_classish_type_validator[global.decl.type]
@@ -620,7 +624,7 @@ EOU
       end
 
       env.type_alias_decls.each do |name, decl|
-        stdout.puts "Validating alias: `#{name}`..."
+        RBS.logger.info "Validating alias: `#{name}`..."
         builder.expand_alias1(name).tap do |type|
           validator.validate_type type, context: nil
         end
@@ -630,14 +634,7 @@ EOU
         void_type_context_validator[decl.decl.type]
       end
 
-      unless syntax_errors.empty?
-        syntax_errors.sort!
-        syntax_errors.uniq!
-        syntax_errors.each do |message|
-          self.stdout.puts message
-        end
-        exit 1 if exit_error
-      end
+      exit 1 if exit_error && has_warnings
     end
 
     def run_constant(args, options)

@@ -39,6 +39,7 @@ class RBS::CliTest < Test::Unit::TestCase
   end
 
   def with_cli
+    RBS.logger_output = stdout
     yield CLI.new(stdout: stdout, stderr: stderr)
   ensure
     @stdout = nil
@@ -240,13 +241,13 @@ singleton(::BasicObject)
 
   def test_validate
     with_cli do |cli|
-      cli.run(%w(validate))
+      cli.run(%w(--log-level=info validate))
       assert_match(/Validating/, stdout.string)
     end
 
     with_cli do |cli|
       cli.run(%w(validate --silent))
-      assert_equal "", stdout.string
+      assert_match /`--silent` option is deprecated. Please use --log-level=error instead.$/, stdout.string
     end
 
     with_cli do |cli|
