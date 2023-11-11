@@ -478,7 +478,7 @@ module Kernel : BasicObject
   #     Hash(nil)              # => {}
   #     Hash([])               # => {}
   #
-  def self?.Hash: [K, V] (nil | []) -> Hash[K, V]
+  def self?.Hash: (nil | []) -> {}
                 | [K, V] (hash[K, V] hash_like) -> Hash[K, V]
 
   # <!--
@@ -612,8 +612,8 @@ module Kernel : BasicObject
                     | (int | _ToR rational_like, exception: bool) -> Rational?
                     | (int | _ToR numer, ?int | _ToR denom, ?exception: true) -> Rational
                     | (int | _ToR numer, ?int | _ToR denom, exception: bool) -> Rational?
-                    | [T] (Numeric & _RationalDiv[T] numer, Numeric denom, ?exception: bool) -> T
                     | [T < Numeric] (T value, 1, ?exception: bool) -> T
+                    | [T] (Numeric & _RationalDiv[T] numer, Numeric denom, ?exception: bool) -> T
                     | (untyped, ?untyped, ?exception: bool) -> Rational?
 
   interface _RationalDiv[T]
@@ -832,9 +832,19 @@ module Kernel : BasicObject
   #
   def self?.fail: () -> bot
                 | (string message, ?cause: Exception?) -> bot
-                | (_Exception exception, ?_ToS? message, ?String | Array[String] | nil backtrace, ?cause: Exception?) -> bot
-                | (_Exception exception, ?cause: Exception?, **untyped) -> bot
-  # ^ TODO
+                | [M] (_Exception[M] exception, ?M message, ?nil, ?cause: Exception?) -> bot
+                | [M, B] (_Exception[M] & _Backtrace[B] exception, M message, B backtrace, ?cause: Exception?) -> bot
+
+  interface _Exception[M]
+    def exception: (?M message) -> Exception
+  end
+
+  interface _Backtrace[B]
+    # Note: If a custom `set_bactrace` method is used, and it _doesn't_ somehow call `Exception#set_backtrace`
+    # (e.g. thru `super`), then it will be recalled with `Array[String]`. Since we can't statically
+    # verify whether `set_backtrace` is being called, `| Array[String]` is added to the method.
+    def set_backtrace: (B | Array[String] backtrace) -> void
+  end
 
   # <!--
   #   rdoc-file=eval.c
@@ -963,7 +973,7 @@ module Kernel : BasicObject
   # executed under the given module. In no circumstance will any local variables
   # in the loaded file be propagated to the loading environment.
   #
-  def self?.load: (path filename, ?Module | bool wrap) -> true
+  def self?.load: (path filename, ?Module | boolish wrap) -> true
 
   # <!--
   #   rdoc-file=vm_eval.c
@@ -1093,9 +1103,38 @@ module Kernel : BasicObject
   #
   #     "Hi!"
   #
-  def self?.open: (String name, ?String mode, ?Integer perm) -> IO?
-                | [T] (String name, ?String mode, ?Integer perm) { (IO) -> T } -> T
-  # ^ TODO, there's also `to_open`.
+  def self?.open: [A, K, R] (_ToOpen[A, K, R] obj, *A, **K) -> R
+                | [A, K, R, T] (_ToOpen[A, K, R] obj, *A, **K) { (R) -> T } -> T
+                | (
+                  path file,
+                  ?(int | string)? vmode,
+                  ?int vperm,
+                  ?mode: (int | string)?,
+                  ?perm: int?,
+                  ?flags: int?,
+                  ?textmode: boolish,
+                  ?binmode: boolish,
+                  ?encoding: encoding?,
+                  ?extenc: encoding?,
+                  ?intenc: encoding?,
+                  ) -> File
+                | [T] (
+                  path file,
+                  ?(int | string)? vmode,
+                  ?int vperm,
+                  ?mode: (int | string)?,
+                  ?perm: int?,
+                  ?flags: int?,
+                  ?textmode: boolish,
+                  ?binmode: boolish,
+                  ?encoding: encoding?,
+                  ?extenc: encoding?,
+                  ?intenc: encoding?,
+                  ) { (File) -> T } -> T
+
+  interface _ToOpen[A, K, T]
+    def to_open: (*A args, **K kwargs) -> T
+  end
 
   # <!--
   #   rdoc-file=io.c
@@ -1568,12 +1607,8 @@ module Kernel : BasicObject
   #     (snipped)
   #     ping
   #
-  def self?.select: [T < _ToIO] (
-    Array[T]? read,
-    ?Array[T]? write,
-    ?Array[T]? errors,
-    ?_Timeout? timeout
-  ) -> [Array[T], Array[T], Array[T]]
+  def self?.select: (nil, nil, nil, _Timeout timeout) -> nil
+                  | [T < _ToIO] (Array[T]? read, ?Array[T]? write, ?Array[T]? errors, ?_Timeout? timeout) -> [Array[T], Array[T], Array[T]]
 
   interface _Timeout
     def divmod: (1) -> [int, _TimeoutNSecs] # technically should return `array[int | _TimeoutNSecs]`
@@ -1599,8 +1634,7 @@ module Kernel : BasicObject
   #     sleep 1.9   #=> 2
   #     Time.new    #=> 2008-03-08 19:56:22 +0900
   #
-  def self?.sleep: (?nil) -> bot
-                 | (_Timeout duration) -> Integer
+  def self?.sleep: (?_Timeout? duration) -> Integer
 
   # <!--
   #   rdoc-file=io.c
@@ -1697,12 +1731,12 @@ module Kernel : BasicObject
   def self?.test: (
       'b' | 'c' | 'd' | 'e' | 'f' | 'g' | 'G' | 'k' | 'o' | 'O' | 'p' | 'S' | 'u' | 'z' |
        98 |  99 | 100 | 101 | 102 | 103 |  71 | 107 | 111 |  79 | 112 |  83 | 117 | 122,
-      io | path file) -> bool
+      IO | path file) -> bool
     | ('l' | 'r' | 'R' | 'w' | 'W' | 'x' | 'X' | 108 | 114 | 82 | 119 | 87 | 120 | 88, path filename) -> bool
-    | ('s' | 115, io | path filename) -> Integer?
-    | ('M' | 'A' | 'C' | 77  | 65 | 67, io | path file) -> Time
-    | ('-' | '=' | '<' | '>' | 45 | 60 | 61 | 62, io | path file1, io | path file2) -> bool
-    | (String | int cmd, io | path file1, ?io | path file2) -> (bool | Integer? | Time)
+    | ('s' | 115, IO | path filename) -> Integer?
+    | ('M' | 'A' | 'C' | 77  | 65 | 67, IO | path file) -> Time
+    | ('-' | '=' | '<' | '>' | 45 | 60 | 61 | 62, IO | path file1, IO | path file2) -> bool
+    | (String | int cmd, IO | path file1, ?IO | path file2) -> (bool | Integer? | Time)
   # <!--
   #   rdoc-file=vm_eval.c
   #   - throw(tag [, obj])

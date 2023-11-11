@@ -5,6 +5,25 @@ class KernelSingletonTest < Test::Unit::TestCase
 
   testing 'singleton(::Kernel)'
 
+  def capture_stdin(method)
+    old_stdin = $stdin
+
+    $stdin = BlankSlate.new
+    file = ::File.open(__FILE__)
+
+    ::Kernel.instance_method(:define_singleton_method).bind_call($stdin, method) do |*a, **k|
+      file.send(method, *a, **k)
+    rescue EOFError # `__FILE__` isn't large enough to be read in one pass.
+      file.rewind
+      retry
+    end
+
+    yield
+  ensure
+    file.close
+    $stdin = old_stdin
+  end
+
   def test_caller
     assert_send_type  '() -> Array[String]',
                       Kernel, :caller
@@ -101,25 +120,41 @@ class KernelSingletonTest < Test::Unit::TestCase
 
   def test_fork
     assert_send_type  '() { () -> void } -> Integer',
-                      Kernel, :fork do 3 end
-    omit 'todo'
-    begin
-      child = assert_send_type  '() -> Integer',
-                               Kernel, :fork
-    rescue Test::Unit::AssertionFailedError
-      child = assert_send_type  '() -> Integer',
-                               Kernel, :fork
-      exit! 123
-    else
-      exit! 12 if child.nil?
-    end
+                      Kernel, :fork do :foo end
+    
+    # There's no real easy way to test the no-argument variation of `fork()`, as it spawns a whole
+    # new process. We have to test to make sure both `nil` and `Integer` are returned, so to do that
+    # we have the child process exit with a predetermined exit code 
+
+    # Keep track of the parent pid so the child knows to `exit!`
+    parent_pid = Process.pid
+
+    # Fork, we'll have both a child process and parent process.
+    pid = Kernel.fork
+
+    # In the child process, we exit truthy if the pid is `nil` (i.e. what we expect), and falsey if
+    # it's anything else. (Note we do `nil.equal?` instead of `pid.nil?` to ensure that `pid` is
+    # actually `nil`, and isn't just overwriting `.nil?` (or anything else).)
+    exit! nil.equal?(pid) unless Process.pid == parent_pid
+
+    # -- Here and below, we know we're just the parent process --
+
+    # Wait for the child to finish.
+    _pid, status = Process.waitpid2 pid
+
+    # Make sure the `pid` is actually an integer (check the `-> Integer` variant)
+    assert_type 'Integer', pid
+
+    # If `status` is successful, that means that the `nil.equal?(pid)` is true, and thus the child
+    # process exited successfully.
+    assert status.success?
   end
 
   def test_Array
     assert_send_type  '(nil) -> []',
                       Kernel, :Array, nil
 
-    with_array(1r, 2r).and_chain(ToA.new(3r)) do |array_like|
+    with_array(1r, 2r).and(ToA.new(3r)) do |array_like|
       assert_send_type  '[T] (array[T] | _ToA[T]) -> []',
                         Kernel, :Array, array_like
     end
@@ -186,7 +221,7 @@ class KernelSingletonTest < Test::Unit::TestCase
 
   def test_Integer
     omit 'todo'
-    with_int.and_chain(ToI.new) do |int_like|
+    with_int.and(ToI.new) do |int_like|
       assert_send_type  '(int | _ToI) -> Integer',
                         Kernel, :Integer, int_like
       assert_send_type  '(int | _ToI, exception: true) -> Integer',
@@ -220,11 +255,66 @@ class KernelSingletonTest < Test::Unit::TestCase
   end
 
   def test_Rational
-    omit 'todo'
+    # (int | _ToR, ?exception: true) -> Rational
+    with_int.and(ToR.new) do |rational_like|
+      assert_send_type  '(int | _ToR) -> Rational',
+                        Kernel, :Rational, rational_like
+      assert_send_type  '(int | _ToR, exception: true) -> Rational',
+                        Kernel, :Rational, rational_like, exception: true
+    end
+
+    def (bad_int = BlankSlate.new).to_int = fail
+    def (bad_rat = BlankSlate.new).to_r = fail
+
+    # (int | _ToR, ?exception: bool) -> Rational?
+    with bad_int, bad_rat do |rational_like|
+      assert_send_type  '(int | _ToR, exception: false) -> nil',
+                        Kernel, :Rational, rational_like, exception: false
+    end
+
+    #  (int | _ToR numer, ?int | _ToR denom, ?exception: true) -> Rational
+    with_int.and(ToR.new) do |numer|
+      with_int(1).and(ToR.new(1r)) do |denom|
+        assert_send_type  '(int | _ToR, int | _ToR) -> Rational',
+                          Kernel, :Rational, numer, denom
+        assert_send_type  '(int | _ToR, int | _ToR, exception: true) -> Rational',
+                          Kernel, :Rational, numer, denom, exception: true
+      end
+    end
+
+    # (int | _ToR numer, ?int | _ToR denom, ?exception: bool) -> Rational?
+    with bad_int, bad_rat do |bad|
+      with_int(1).and(ToR.new(1r)) do |good|
+        assert_send_type  '(int | _ToR, int | _ToR, exception: false) -> nil',
+                          Kernel, :Rational, bad, good
+        assert_send_type  '(int | _ToR, int | _ToR, exception: false) -> nil',
+                          Kernel, :Rational, good, bad
+        assert_send_type  '(int | _ToR, int | _ToR, exception: false) -> nil',
+                          Kernel, :Rational, bad, bad
+      end
+    end
+
+    # [T < Numeric] (T value, 1, ?exception: bool) -> T
+    normal_numeric = Class.new(Numeric).new
+    assert_send_type  '[T < Numeric] (T, 1) -> T',
+                      Kernel, :Rational, normal_numeric, 1
+    with_bool do |exception|
+      assert_send_type  '[T < Numeric] (T, 1, exception: bool) -> T',
+                        Kernel, :Rational, normal_numeric, 1, exception: exception
+    end
+
+    # [T] (Numeric & _RationalDiv[T] numer, Numeric denom, ?exception: bool) -> T
+    rational_div = Class.new(Numeric){def /(rhs) = BlankSlate.new}.new
+    assert_send_type  '[T] (Numeric & Kernel::_RationalDiv[T], Numeric) -> T',
+                      Kernel, :Rational, rational_div, normal_numeric
+    with_bool do |exception|
+      assert_send_type  '[T] (Numeric & Kernel::_RationalDiv[T], Numeric, exception: bool) -> T',
+                        Kernel, :Rational, rational_div, normal_numeric, exception: exception
+    end
   end
 
   def test_String
-    with_string.and_chain(ToS.new) do |string_like|
+    with_string.and(ToS.new) do |string_like|
       assert_send_type  '(string | _ToS) -> String',
                         Kernel, :String, string_like
     end
@@ -239,7 +329,10 @@ class KernelSingletonTest < Test::Unit::TestCase
   end
 
   def test___dir__
-    omit 'todo'
+    assert_send_type '() -> String',
+                     Kernel, :__dir__
+
+    assert_type 'nil', eval('__dir__')
   end
 
   METHOD_OUTSIDE_OF_A_METHOD = __method__
@@ -251,29 +344,63 @@ class KernelSingletonTest < Test::Unit::TestCase
   end
 
   def test_backtick
-    # `cd` is on linux, macos, and windows, so it seems like a safe choice.
-    omit 'todo' unless system 'cd', %i[out err in] => :close
-
-    with_string 'cd' do |cmd|
+    with_string "#{RUBY_EXE} -e '1'" do |cmd|
       assert_send_type  '(string) -> String',
                         Kernel, :`, cmd
     end
   end
 
   def test_abort
-    omit 'todo'
+    old_stderr = $stderr
+    $stderr = open File::NULL, 'w'
+
+    with_string 'oopsies' do |message|
+      abort message
+    rescue SystemExit
+      pass 'abort raised `SystemExit` correctly'
+    else
+      flunk '`abort` should raise `SystemExit`'
+    end
+
+  ensure
+    $stderr.close rescue nil
+    $stderr = old_stderr
   end
 
   def test_at_exit
-    omit 'todo'
+    assert_send_type '() { () -> void } -> ^() -> void',
+                     Kernel, :at_exit do end
   end
 
   def test_autoload
-    omit 'todo'
+    with_interned :Some_Module_Name1 do |module_name|
+      with_path do |path|
+        assert_send_type  '(interned, path) -> nil',
+                          Kernel, :autoload, module_name, path
+      end
+    end
   end
 
   def test_autoload?
-    omit 'todo'
+    # Note: `autoload` and `autoload?` are based off the module/class they're being called on,
+    # and `assert_send_type` wraps the type we pass in. So we have to do do everything manually.
+    Kernel.autoload :Some_Module_Name2, File::NULL
+
+    with_interned :Some_Module_Name2 do |module_name|
+      assert_type 'String', Kernel.autoload?(module_name)
+      
+      with_boolish do |inherit|
+        assert_type 'String', Kernel.autoload?(module_name, inherit)
+      end
+    end
+
+    with_interned :Some_Other_Module_Name do |module_name|
+      assert_type 'nil', Kernel.autoload?(module_name)
+      
+      with_boolish do |inherit|
+        assert_type 'nil', Kernel.autoload?(module_name, inherit)
+      end
+    end
   end
 
   def test_binding
@@ -282,21 +409,83 @@ class KernelSingletonTest < Test::Unit::TestCase
   end
 
   def test_exit
-    with_int.and_chain(with_bool) do |status|
+    with_int.and(with_bool) do |status|
       exit status
     rescue SystemExit
-      assert true
+      pass 'exit raised `SystemExit` correctly'
     else
       flunk '`exit` should raise `SystemExit`'
     end
   end
 
   def test_exit!
-    omit 'todo'
+    with_int(12).and(with_bool) do |status|
+      _pid, proc_status = Process.waitpid2 fork { Kernel.exit! status }
+      case status
+      when true  then assert proc_status.success?
+      when false then refute proc_status.success?
+      else            assert proc_status.exitstatus.equal?(status.to_int)
+      end
+    end
+  end
+
+  def assert_fail_method(method, *args, errclass: RuntimeError, **kwargs)
+    Kernel.__send__(method, *args, **kwargs)
+  rescue errclass => err
+    # Ensure it's actually a `errclass`, and not some subclass that indicates some other
+    # problem (like `ArgumentError < RuntimeError`).
+    assert err.instance_of?(errclass), "#{err} should be a #{errclass}"
+    err
+  else
+    flunk "`#{method}` doesn't return `bot`"
   end
 
   def test_fail(method = :fail)
-    omit 'todo'
+    # () -> bot
+    assert_fail_method method
+
+    # (string message, ?cause: Exception?) -> bot
+    with_string 'oopsies!' do |message|
+      assert_fail_method method, message
+
+      with(Exception.new).and_nil do |cause|
+        assert_fail_method method, message, cause: cause
+      end
+    end
+
+    assertfn = method(:assert)
+    myerror = Class.new(Exception)
+    myerror.define_singleton_method :exception do |message = (unset=true)|
+      assertfn.(1r == message) unless unset
+      super()
+    end
+
+    # [M] (_Exception[M] exception, ?M message, ?cause: Exception?) -> bot
+    assert_fail_method method, myerror, errclass: myerror
+
+    assert_fail_method method, myerror, 1r, errclass: myerror
+    with(Exception.new).and_nil do |cause|
+      assert_fail_method method, myerror, cause: cause, errclass: myerror
+      assert_fail_method method, myerror, 1r, cause: cause, errclass: myerror
+      assert_fail_method method, myerror, 1r, nil, cause: cause, errclass: myerror
+    end
+
+    passfn = method(:pass)
+    assert_typefn = method(:assert_type)
+    myerror.define_method :set_backtrace do |bt|
+      if 2r == bt
+        passfn.("called with 2r")
+      else
+        assert_typefn.('Array[String]', bt)
+      end
+    end
+
+    assert_fail_method method, myerror, 1r, 2r, errclass: myerror
+    assert_fail_method method, myerror, 1r, %w[array of strings], errclass: myerror
+    with(Exception.new).and_nil do |cause|
+      assert_fail_method method, myerror, 1r, 2r, cause: cause, errclass: myerror
+      assert_fail_method method, myerror, 1r, %w[array of strings], cause: cause, errclass: myerror
+    end
   end
 
   def test_raise
@@ -315,7 +504,82 @@ class KernelSingletonTest < Test::Unit::TestCase
   end
 
   def test_gets
-    omit 'todo'
+    old_stdin = $stdin
+
+    $stdin = BlankSlate.new
+    file = ::File.open(__FILE__)
+
+    def $stdin.nil! = @nil=true
+    def $stdin.notnil! = @nil=false
+
+    ::Kernel.instance_method(:define_singleton_method).bind_call($stdin, :gets) do |*a, **k|
+      next nil if @nil
+      file.gets(*a, **k) or (file.rewind; redo)
+    end
+
+    $stdin.notnil!
+    assert_send_type  '() -> String',
+                      Kernel, :gets
+    $stdin.nil!
+    assert_send_type  '() -> nil',
+                      Kernel, :gets
+    
+    with_string("\n").and_nil do |sep|
+      $stdin.notnil!
+      assert_send_type  '(string?) -> String',
+                        Kernel, :gets, sep
+      $stdin.nil!
+      assert_send_type  '(string?) -> nil',
+                        Kernel, :gets, sep
+
+      with_boolish do |chomp|
+        $stdin.notnil!
+        assert_send_type  '(string?, chomp: boolish) -> String',
+                          Kernel, :gets, sep, chomp: chomp
+        $stdin.nil!
+        assert_send_type  '(string?, chomp: boolish) -> nil',
+                          Kernel, :gets, sep, chomp: chomp
+      end
+
+      with_int(10).and_nil do |limit|
+        $stdin.notnil!
+        assert_send_type  '(string?, int?) -> String',
+                          Kernel, :gets, sep, limit
+        $stdin.nil!
+        assert_send_type  '(string?, int?) -> nil',
+                          Kernel, :gets, sep, limit
+
+        with_boolish do |chomp|
+          $stdin.notnil!
+          assert_send_type  '(string?, int?, chomp: boolish) -> String',
+                            Kernel, :gets, sep, limit, chomp: chomp
+          $stdin.nil!
+          assert_send_type  '(string?, int?, chomp: boolish) -> nil',
+                            Kernel, :gets, sep, limit, chomp: chomp
+        end
+      end
+    end
+
+    with_int(10).and_nil do |limit|
+      $stdin.notnil!
+      assert_send_type  '(int?) -> String',
+                        Kernel, :gets, limit
+      $stdin.nil!
+      assert_send_type  '(int?) -> nil',
+                        Kernel, :gets, limit
+
+      with_boolish do |chomp|
+        $stdin.notnil!
+        assert_send_type  '(int?, chomp: boolish) -> String',
+                          Kernel, :gets, limit, chomp: chomp
+        $stdin.nil!
+        assert_send_type  '(int?, chomp: boolish) -> nil',
+                          Kernel, :gets, limit, chomp: chomp
+      end
+    end
+  ensure
+    file.close
+    $stdin = old_stdin
   end
 
   def test_global_variables
@@ -324,7 +588,14 @@ class KernelSingletonTest < Test::Unit::TestCase
   end
 
   def test_load
-    omit 'todo'
+    with_path File.join(__dir__, 'util', 'valid.rb') do |path|
+      assert_send_type  '(path) -> true',
+                        Kernel, :load, path
+      with_boolish.and(Module.new) do |wrap|
+        assert_send_type  '(path, Module | boolish) -> true',
+                          Kernel, :load, path, wrap
+      end
+    end
   end
 
   def test_loop
@@ -335,6 +606,53 @@ class KernelSingletonTest < Test::Unit::TestCase
   end
 
   def test_open
+    omit 'todo'
+    toopen = BlankSlate.new.__with_object_methods(:define_singleton_method)
+    toopen.define_singleton_method(:to_open) do |*a, **k, &b|
+      # NB: Can't use `block_given?` as that'd be whether `test_open` was given a block
+      flunk 'no blocks should be given' if b.nil?
+      flunk "expected `1` and :foo for arguments, got: #{a}" unless a == [1, :foo]
+      flunk "expected {2r => :hi, yes: 3} for kwargs, got: #{k}" unless k == {2r => :hi, yes: 3}
+      BlankSlate.new
+    end
+
+    assert_send_type  '(Kernel::_ToOpen[1 | :foo, untyped, ::BlankSlate], 1, :foo, **untyped) -> ::BlankSlate',
+                      Kernel, :open, toopen, 1, :foo, 2r => :hi, yes: 3
+
+
+  # def self?.open: [A, K, R] (_ToOpen[A, K, R] obj, *A, **K) -> R
+  #               | [A, K, R, T] (_ToOpen[A, K, R] obj, *A, **K) { (R) -> T } -> T
+  #               | (
+  #                 path file,
+  #                 ?(int | string)? vmode,
+  #                 ?int vperm,
+  #                 ?mode: (int | string)?,
+  #                 ?perm: int?,
+  #                 ?flags: int?,
+  #                 ?textmode: boolish,
+  #                 ?binmode: boolish,
+  #                 ?encoding: encoding?,
+  #                 ?extenc: encoding?,
+  #                 ?intenc: encoding?,
+  #                 ) -> File
+  #               | [T] (
+  #                 path file,
+  #                 ?(int | string)? vmode,
+  #                 ?int vperm,
+  #                 ?mode: (int | string)?,
+  #                 ?perm: int?,
+  #                 ?flags: int?,
+  #                 ?textmode: boolish,
+  #                 ?binmode: boolish,
+  #                 ?encoding: encoding?,
+  #                 ?extenc: encoding?,
+  #                 ?intenc: encoding?,
+  #                 ) { (File) -> T } -> T
+
+  # interface _ToOpen[A, K, T]
+  #   def to_open: (*A args, **K kwargs) -> T
+  # end
+
     omit 'todo'
   end
 
@@ -471,12 +789,7 @@ class KernelSingletonTest < Test::Unit::TestCase
     $stdin = BlankSlate.new
     file = ::File.open(__FILE__)
 
-    ::Kernel.instance_method(:define_singleton_method).bind_call($stdin, :readlines) do |*a, **k|
-      file.readlines(*a, **k)
-    rescue EOFError # `__FILE__` isn't large enough to be read in one pass.
-      file.rewind
-      retry
-    end
+    ::Kernel.instance_method(:define_singleton_method).bind_call($stdin, :readlines, &file.method(:readlines))
 
     assert_send_type  '() -> Array[String]',
                       Kernel, :readlines
@@ -530,11 +843,73 @@ class KernelSingletonTest < Test::Unit::TestCase
   end
 
   def test_select
-    omit 'todo'
+    with_timeout do |timeout|
+      assert_send_type  '(nil, nil, nil, Kernel::_Timeout) -> nil',
+                        Kernel, :select, nil, nil, nil, timeout
+    end
+
+    open __FILE__, 'r' do |input|
+      open File::NULL, 'w' do |output|
+
+        with_io(input).map{[_1]}.and_nil do |read|
+          unless [read].compact.empty?
+            assert_send_type  '[T < _ToIo] (Array[T]?) -> [Array[T], Array[T], Array[T]]',
+                              Kernel, :select, read
+          end
+
+          with_io(output).map{[_1]}.and_nil do |write|
+            unless [read, write].compact.empty?
+              assert_send_type  '[T < _ToIo] (Array[T]?, Array[T]?) -> [Array[T], Array[T], Array[T]]',
+                                Kernel, :select, read, write
+            end
+
+            with_io(output).map{[_1]}.and_nil do |error|
+              unless [read, write, error].compact.empty?
+                assert_send_type  '[T < _ToIo] (Array[T]?, Array[T]?, Array[T]?) -> [Array[T], Array[T], Array[T]]',
+                                  Kernel, :select, read, write, error
+              end
+
+              with_timeout.and_nil do |timeout|
+                unless [read, write, error].compact.empty?
+                  assert_send_type  '[T < _ToIo] (Array[T]?, Array[T]?, Array[T]?, Kernel::_Timeout?) -> [Array[T], Array[T], Array[T]]',
+                                    Kernel, :select, read, write, error, timeout
+                end
+              end
+            end
+          end
+        end
+      end
+    end
   end
 
   def test_sleep
-    omit 'todo'
+    with_timeout do |timeout|
+      assert_send_type  '(Kernel::_Timeout) -> Integer',
+                        Kernel, :sleep, timeout
+    end
+    
+    # `Kernel.sleep(nil)` was only introduced in 3.3
+    [[], *(RUBY_VERSION >= '3.3.0' ? [[nil]] : [])].each do |args_to_sleep|
+      # We don't rely on the return value of `Thread#join` in case it's buggy.
+      sleep_return_value = nil
+      thread = Thread.new { sleep_return_value = Kernel.sleep(*args_to_sleep) }
+
+      i = 0
+      until thread.stop?
+        sleep 0.1
+        flunk "thread didn't begin sleeping" unless (i += 1) <= 10
+      end
+
+      thread.wakeup
+
+      i = 0
+      while thread.alive?
+        sleep 0.1
+        flunk "thread didn't wake up" unless (i += 1) <= 10
+      end
+
+      assert_type 'Integer', sleep_return_value
+    end
   end
 
   def test_syscall
@@ -542,15 +917,106 @@ class KernelSingletonTest < Test::Unit::TestCase
   end
 
   def test_test
-    omit 'todo'
+    each_var = proc do |variants_string, &block|
+      variants = variants_string.chars.concat(variants_string.bytes)
+      source = variants.map(&:inspect).join('|')
+
+      variants.each do |variant|
+        block.(variant, source)
+      end
+    end
+
+    open __FILE__ do |opened_file|
+      each_var.call 'bcdefgGkoOpSuz' do |chr, source|
+        with_path.and(opened_file) do |file|
+          assert_send_type  "(#{source}, IO | path) -> bool",
+                            Kernel, :test, chr, file
+        rescue
+          require 'pry'; binding.pry
+        end
+      end
+
+      each_var.call 'lrRwWxX' do |chr, source|
+        with_path do |path|
+          assert_send_type  "(#{source}, path) -> bool",
+                            Kernel, :test, chr, path
+        end
+      end
+
+      each_var.call 's' do |chr, source|
+        with_path.and(opened_file) do |file|
+          assert_send_type  "(#{source}, IO | path) -> Integer",
+                            Kernel, :test, chr, file
+        end
+
+        empty = File.join(__dir__, 'util', 'empty-file.txt')
+        open empty do |empty_io|
+          with_path(empty).and(empty_io) do |file|
+            assert_send_type  "(#{source}, IO | path) -> nil",
+                              Kernel, :test, chr, file
+          end
+        end
+      end
+
+      each_var.call 'MAC' do |chr, source|
+        with_path.and(opened_file) do |file|
+          assert_send_type  "(#{source}, io | path) -> Time",
+                            Kernel, :test, chr, file
+        end
+      end
+
+      each_var.call '-=<>' do |chr, source|
+        with_path.and(opened_file) do |file1|
+          with_path.and(opened_file) do |file2|
+            assert_send_type  "(#{source}, io | path, io | path) -> bool",
+                              Kernel, :test, chr, file1, file2
+          end
+        end
+      end
+    end
   end
 
   def test_throw
-    omit 'todo'
+    # You can't use `assert_send_type` with `throw` because it returns `bot`.
+
+    catch do |tag|
+      Kernel.throw tag
+      flunk "`throw` didn't return `bot`?"
+    end
+    pass
+
+    catch do |tag|
+      Kernel.throw tag, :foo
+      flunk "`throw` didn't return `bot` when given a value?"
+    end
+    pass
   end
 
   def test_warn
-    omit 'todo'
+    old_stderr = $stderr
+    $stderr = open(File::NULL, 'w')
+
+    assert_send_type  '(*_ToS) -> nil',
+                      Kernel, :warn, 'a', ToS.new('b'), 1r
+    
+    with_int.and_nil do |uplevel|
+      assert_send_type  '(*_ToS, uplevel: int?) -> nil',
+                        Kernel, :warn, 'a', ToS.new('b'), 1r, uplevel: uplevel
+      
+      with(:deprecated, :experimental).and_nil do |category|
+        assert_send_type  '(*_ToS, uplevel: int?, category: Warning::category?) -> nil',
+                          Kernel, :warn, 'a', ToS.new('b'), 1r, uplevel: uplevel, category: category
+      end
+    end
+
+    with(:deprecated, :experimental).and_nil do |category|
+      assert_send_type  '(*_ToS, category: Warning::category?) -> nil',
+                        Kernel, :warn, 'a', ToS.new('b'), 1r, category: category
+    end
+
+  ensure
+    $stderr.close rescue nil
+    $stderr = old_stderr
   end
 end
 
@@ -591,7 +1057,7 @@ class KernelInstanceTest < Test::Unit::TestCase
   def test_eqq
     kt = KernelTest.new.__with_object_methods(:==)
 
-    with_untyped.and_chain(kt) do |other|
+    with_untyped.and(kt) do |other|
       assert_send_type  '(untyped) -> bool',
                         kt, :===, other
     end
@@ -634,7 +1100,6 @@ class KernelInstanceTest < Test::Unit::TestCase
                       INSTANCE, :display
     assert_send_type  '(_Writer) -> nil',
                       INSTANCE, :display, Writer.new
-
   ensure
     $stdout = old_stdout
   end
@@ -653,7 +1118,7 @@ class KernelInstanceTest < Test::Unit::TestCase
   end
 
   def test_eql?
-    with_untyped.and_chain(INSTANCE) do |other|
+    with_untyped.and(INSTANCE) do |other|
       assert_send_type  '(untyped) -> bool',
                         INSTANCE, :eql?, other
     end
