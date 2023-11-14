@@ -1027,15 +1027,17 @@ Processing `lib`...
         end
       RBS
 
-      stdout, stderr = run_rbs('subtract', minuend.to_s, subtrahend.to_s)
-      assert_empty stderr
-      assert_equal <<~RBS, stdout
-        use A::B
+      with_cli do |cli|
+        cli.run(['subtract', minuend.to_s, subtrahend.to_s])
+        assert_empty stderr.string
+        assert_equal <<~RBS, stdout.string
+          use A::B
 
-        class C
-          def y: () -> untyped
-        end
-      RBS
+          class C
+            def y: () -> untyped
+          end
+        RBS
+      end
     end
   end
 
@@ -1065,15 +1067,17 @@ Processing `lib`...
         end
       RBS
 
-      stdout, stderr = run_rbs('subtract', minuend.to_s, '--subtrahend', subtrahend_1.to_s, '--subtrahend', subtrahend_2.to_s)
-      assert_empty stderr
-      assert_equal <<~RBS, stdout
-        use A::B
+      with_cli do |cli|
+        cli.run(['subtract', minuend.to_s, '--subtrahend', subtrahend_1.to_s, '--subtrahend', subtrahend_2.to_s])
+        assert_empty stderr.string
+        assert_equal <<~RBS, stdout.string
+          use A::B
 
-        class C
-          def z: () -> untyped
-        end
-      RBS
+          class C
+            def z: () -> untyped
+          end
+        RBS
+      end
     end
   end
 
@@ -1096,16 +1100,18 @@ Processing `lib`...
         end
       RBS
 
-      stdout, stderr = run_rbs('subtract', '--write', minuend.to_s, subtrahend.to_s)
-      assert_empty stderr
-      assert_empty stdout
-      assert_equal minuend.read, <<~RBS
-        use A::B
+      with_cli do |cli|
+        cli.run(['subtract', '--write', minuend.to_s, subtrahend.to_s])
+        assert_empty stderr.string
+        assert_empty stdout.string
+        assert_equal minuend.read, <<~RBS
+          use A::B
 
-        class C
-          def y: () -> untyped
-        end
-      RBS
+          class C
+            def y: () -> untyped
+          end
+        RBS
+      end
     end
   end
 
@@ -1127,10 +1133,12 @@ Processing `lib`...
         end
       RBS
 
-      stdout, stderr = run_rbs('subtract', '--write', minuend.to_s, subtrahend.to_s)
-      assert_empty stderr
-      assert_empty stdout
-      assert_equal minuend.exist?, false
+      with_cli do |cli|
+        cli.run(['subtract', '--write', minuend.to_s, subtrahend.to_s])
+        assert_empty stderr.string
+        assert_empty stdout.string
+        refute_predicate minuend, :exist?
+    end
     end
   end
 
@@ -1181,36 +1189,40 @@ Processing `lib`...
 
   def test_diff_markdown
     mktmp_diff_case do |dir1, dir2|
-      stdout, stderr = run_rbs('diff', '--format', 'markdown', '--type-name', 'Foo', '--before', dir1.to_s, '--after', dir2.to_s)
+      with_cli do |cli|
+        cli.run(['diff', '--format', 'markdown', '--type-name', 'Foo', '--before', dir1.to_s, '--after', dir2.to_s])
 
-      assert_equal <<~MARKDOWN, stdout
-        | before | after |
-        | --- | --- |
-        | `def qux: (untyped) -> untyped` | `-` |
-        | `def quux: () -> void` | `alias quux bar` |
-        | `def self.baz: () -> (::Integer \\| ::String)` | `def self.baz: (::Integer) -> ::Integer?` |
-        | `CONST: ::Array[::Integer]` | `CONST: ::Array[::String]` |
-      MARKDOWN
+        assert_equal <<~MARKDOWN, stdout.string
+          | before | after |
+          | --- | --- |
+          | `def qux: (untyped) -> untyped` | `-` |
+          | `def quux: () -> void` | `alias quux bar` |
+          | `def self.baz: () -> (::Integer \\| ::String)` | `def self.baz: (::Integer) -> ::Integer?` |
+          | `CONST: ::Array[::Integer]` | `CONST: ::Array[::String]` |
+        MARKDOWN
+      end
     end
   end
 
   def test_diff_diff
     mktmp_diff_case do |dir1, dir2|
-      stdout, stderr = run_rbs('diff', '--format', 'diff', '--type-name', 'Foo', '--before', dir1.to_s, '--after', dir2.to_s)
+      with_cli do |cli|
+        cli.run(['diff', '--format', 'diff', '--type-name', 'Foo', '--before', dir1.to_s, '--after', dir2.to_s])
 
-      assert_equal <<~DIFF, stdout
-        - def qux: (untyped) -> untyped
-        + -
+        assert_equal <<~DIFF, stdout.string
+          - def qux: (untyped) -> untyped
+          + -
 
-        - def quux: () -> void
-        + alias quux bar
+          - def quux: () -> void
+          + alias quux bar
 
-        - def self.baz: () -> (::Integer | ::String)
-        + def self.baz: (::Integer) -> ::Integer?
+          - def self.baz: () -> (::Integer | ::String)
+          + def self.baz: (::Integer) -> ::Integer?
 
-        - CONST: ::Array[::Integer]
-        + CONST: ::Array[::String]
-      DIFF
+          - CONST: ::Array[::Integer]
+          + CONST: ::Array[::String]
+        DIFF
+      end
     end
   end
 end
