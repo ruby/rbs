@@ -2,12 +2,17 @@ module RBS
   module Prototype
     class Runtime
       module Reflection
+        self.@object_class: UnboundMethod
         def self.object_class: (Module value) -> Class
 
+        self.@constants_of: UnboundMethod
         def self.constants_of: (Module mod, ?bool inherit) -> Array[Symbol]
       end
 
       module Helpers
+        @module_name_method: UnboundMethod
+        @untyped: Types::Bases::Any
+
         private
 
         def const_name: (Module const) -> String?
@@ -19,11 +24,14 @@ module RBS
 
         def to_type_name: (String name, ?full_name: bool) -> TypeName
 
-        def untyped: () -> untyped
+        def untyped: () -> Types::Bases::Any
       end
 
       class ValueObjectBase
         include Helpers
+
+        # @target_class stores the singleton object of `Data` or `Struct` subclass
+        @target_class: untyped
 
         def build_decl: () -> AST::Declarations::Class
 
@@ -32,6 +40,10 @@ module RBS
         def build_member_accessors: (untyped ast_members_class) -> untyped
 
         def build_s_members: () -> Array[AST::Members::MethodDefinition]
+
+        def build_super_class: () -> AST::Declarations::Class::Super
+
+        def add_decl_members: (AST::Declarations::Class) -> void
 
         def initialize: (Class target_class) -> void
       end
@@ -77,9 +89,9 @@ module RBS
 
         def skip_mixin?: (type_name: TypeName, module_name: TypeName, mixin_class: mixin_class) -> bool
 
-        def skip_singleton_method?: (module_name: TypeName, name: Symbol) -> bool
+        def skip_singleton_method?: (module_name: TypeName, method: UnboundMethod, accessibility: Definition::accessibility) -> bool
 
-        def skip_instance_method?: (module_name: TypeName, name: Symbol) -> bool
+        def skip_instance_method?: (module_name: TypeName, method: UnboundMethod, accessibility: Definition::accessibility) -> bool
 
         def skip_constant?: (module_name: String, name: Symbol) -> bool
 
@@ -147,6 +159,8 @@ module RBS
 
       def generate_module: (Module mod) -> void
 
+      def generate_mixin: (Module mod, AST::Declarations::Class | AST::Declarations::Module, TypeName, TypeName) -> void
+
       # Generate/find outer module declarations
       # This is broken down into another method to comply with `DRY`
       # This generates/finds declarations in nested form & returns the last array of declarations
@@ -157,6 +171,8 @@ module RBS
       def type_args: (TypeName type_name) -> Array[Types::t]
 
       def block_from_ast_of: (UnboundMethod method) -> Types::Block?
+
+      def block_from_body: (RubyVM::AbstractSyntaxTree::Node) -> Types::Block?
 
       def can_alias?: (Module, UnboundMethod) -> bool
 
