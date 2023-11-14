@@ -15,7 +15,17 @@ class RBS::CliTest < Test::Unit::TestCase
     @stderr ||= StringIO.new
   end
 
-  def run_rbs(*commands, bundler: true)
+  # Run `rbs collection` with fresh bundler environment
+  #
+  # You need this method to test `rbs collection` features.
+  # `rbs collection` loads gems from Bundler context, so re-using the currenr Bundler context (used to develop rbs gem) causes issues.
+  #
+  # - If `bundler: true` is given, it runs `rbs collection` command with `bundle exec`
+  # - If `bundler: false` is given, it runs `rbs collection` command without `bundle exec`
+  #
+  # We cannot run tests that uses this method in ruby CI.
+  #
+  def run_rbs_collection(*commands, bundler:)
     stdout, stderr, status =
       Bundler.with_unbundled_env do
         bundle_exec = []
@@ -26,7 +36,7 @@ class RBS::CliTest < Test::Unit::TestCase
           rbs_path << (":" + rblib)
         end
 
-        Open3.capture3({ "RUBYLIB" => rbs_path }, *bundle_exec, "#{__dir__}/../../exe/rbs", *commands, chdir: Dir.pwd)
+        Open3.capture3({ "RUBYLIB" => rbs_path }, *bundle_exec, "#{__dir__}/../../exe/rbs", "collection", *commands, chdir: Dir.pwd)
       end
 
     if block_given?
@@ -849,7 +859,7 @@ Processing `lib`...
              2.2.0
         LOCK
 
-        _stdout, _stderr = run_rbs("collection", "install")
+        _stdout, _stderr = run_rbs_collection("install", bundler: true)
 
         rbs_collection_lock = dir.join('rbs_collection.lock.yaml')
         assert rbs_collection_lock.exist?
@@ -861,7 +871,7 @@ Processing `lib`...
 
         Dir.mkdir("child")
         Dir.chdir("child") do
-          _stdout, _stderr = run_rbs("collection", "install")
+          _stdout, _stderr = run_rbs_collection("install", bundler: true)
           assert rbs_collection_lock.exist?
           assert collection_dir.exist?
         end
@@ -891,7 +901,7 @@ Processing `lib`...
         YAML
         dir.join('rbs_collection.lock.yaml').write(lock_content)
 
-        run_rbs("collection", "install", "--frozen", bundler: false)
+        run_rbs_collection("install", "--frozen", bundler: false)
 
         refute dir.join(RBS::Collection::Config::PATH).exist?
         assert dir.join('gem_rbs_collection/ast').exist?
@@ -933,7 +943,7 @@ Processing `lib`...
              2.2.0
         LOCK
 
-        run_rbs("collection", "update", bundler: true)
+        run_rbs_collection("update", bundler: true)
 
         assert dir.join('rbs_collection.lock.yaml').exist?
         assert dir.join('gem_rbs_collection/ast').exist?
@@ -997,7 +1007,7 @@ Processing `lib`...
         RUBY
         (dir/"sig").mkdir
 
-        stdout, _ = run_rbs("collection", "install", bundler: true)
+        stdout, _ = run_rbs_collection("install", bundler: true)
 
         assert_match(/Installing ast:(\d(\.\d)*)/, stdout)
         refute_match(/^Using hola:(\d(\.\d)*)/, stdout)
