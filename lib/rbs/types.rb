@@ -883,7 +883,11 @@ module RBS
 
         def to_s
           if name
-            "#{type} #{name}"
+            if name.match?(/\A[a-zA-Z0-9_]+\z/)
+              "#{type} #{name}"
+            else
+              "#{type} `#{name}`"
+            end
           else
             "#{type}"
           end

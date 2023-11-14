@@ -696,7 +696,7 @@ end
     end
   end
 
-  class StructInheritWithNil < Struct.new(:foo, :bar, keyword_init: nil)
+  class StructInheritWithNil < Struct.new(:foo, :bar, :baz?, keyword_init: nil)
   end
   StructKeywordInitTrue = Struct.new(:foo, :bar, keyword_init: true)
   StructKeywordInitFalse = Struct.new(:foo, :bar, keyword_init: false)
@@ -712,21 +712,23 @@ end
             module RBS
               class RuntimePrototypeTest < ::Test::Unit::TestCase
                 class StructInheritWithNil < ::Struct[untyped]
-                  def self.new: (?untyped foo, ?untyped bar) -> instance
-                              | (?foo: untyped, ?bar: untyped) -> instance
+                  def self.new: (?untyped foo, ?untyped bar, ?untyped `baz?`) -> instance
+                              | (?foo: untyped, ?bar: untyped, ?baz?: untyped) -> instance
 
-                  def self.[]: (?untyped foo, ?untyped bar) -> instance
-                             | (?foo: untyped, ?bar: untyped) -> instance
+                  def self.[]: (?untyped foo, ?untyped bar, ?untyped `baz?`) -> instance
+                             | (?foo: untyped, ?bar: untyped, ?baz?: untyped) -> instance
 
                   def self.keyword_init?: () -> nil
 
-                  def self.members: () -> [ :foo, :bar ]
+                  def self.members: () -> [ :foo, :bar, :baz? ]
 
-                  def members: () -> [ :foo, :bar ]
+                  def members: () -> [ :foo, :bar, :baz? ]
 
                   attr_accessor foo: untyped
 
                   attr_accessor bar: untyped
+
+                  attr_accessor baz?: untyped
                 end
               end
             end
@@ -863,7 +865,7 @@ end
   end
 
   if RUBY_VERSION >= '3.2'
-    class DataInherit < Data.define(:foo, :bar)
+    class DataInherit < Data.define(:foo, :bar, :baz?)
     end
     DataConst = Data.define(:foo, :bar)
     class DataDirectInherit < Data
@@ -877,19 +879,21 @@ end
             module RBS
               class RuntimePrototypeTest < ::Test::Unit::TestCase
                 class DataInherit < ::Data
-                  def self.new: (untyped foo, untyped bar) -> instance
-                              | (foo: untyped, bar: untyped) -> instance
+                  def self.new: (untyped foo, untyped bar, untyped `baz?`) -> instance
+                              | (foo: untyped, bar: untyped, baz?: untyped) -> instance
 
-                  def self.[]: (untyped foo, untyped bar) -> instance
-                             | (foo: untyped, bar: untyped) -> instance
+                  def self.[]: (untyped foo, untyped bar, untyped `baz?`) -> instance
+                             | (foo: untyped, bar: untyped, baz?: untyped) -> instance
 
-                  def self.members: () -> [ :foo, :bar ]
+                  def self.members: () -> [ :foo, :bar, :baz? ]
 
-                  def members: () -> [ :foo, :bar ]
+                  def members: () -> [ :foo, :bar, :baz? ]
 
                   attr_reader foo: untyped
 
                   attr_reader bar: untyped
+
+                  attr_reader baz?: untyped
                 end
               end
             end
