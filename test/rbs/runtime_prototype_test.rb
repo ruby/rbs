@@ -738,19 +738,21 @@ end
             module RBS
               class RuntimePrototypeTest < ::Test::Unit::TestCase
                 class StructInheritWithNil < ::Struct[untyped]
-                  def self.new: (?untyped foo, ?untyped bar) -> instance
-                              | (?foo: untyped, ?bar: untyped) -> instance
+                  def self.new: (?untyped foo, ?untyped bar, ?untyped `baz?`) -> instance
+                              | (?foo: untyped, ?bar: untyped, ?baz?: untyped) -> instance
 
-                  def self.[]: (?untyped foo, ?untyped bar) -> instance
-                             | (?foo: untyped, ?bar: untyped) -> instance
+                  def self.[]: (?untyped foo, ?untyped bar, ?untyped `baz?`) -> instance
+                             | (?foo: untyped, ?bar: untyped, ?baz?: untyped) -> instance
 
-                  def self.members: () -> [ :foo, :bar ]
+                  def self.members: () -> [ :foo, :bar, :baz? ]
 
-                  def members: () -> [ :foo, :bar ]
+                  def members: () -> [ :foo, :bar, :baz? ]
 
                   attr_accessor foo: untyped
 
                   attr_accessor bar: untyped
+
+                  attr_accessor baz?: untyped
                 end
               end
             end
