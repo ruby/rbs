@@ -1246,6 +1246,8 @@ EOB
     end
 
     def run_collection(args, options)
+      require 'bundler'
+
       opts = collection_options(args)
       params = {}
       opts.order args.drop(1), into: params
