@@ -932,7 +932,7 @@ module Kernel : BasicObject
   # losing favor in the Ruby community.
   #
   def self?.gets: (?string? sep, ?int? limit, ?chomp: boolish) -> String?
-                | (int limit, ?chomp: boolish) -> String? 
+                | (int limit, ?chomp: boolish) -> String?
 
   # <!--
   #   rdoc-file=eval.c
@@ -1301,7 +1301,6 @@ module Kernel : BasicObject
   def self?.pp: () -> nil
               | [T] (T arg0) -> T
               | (untyped, untyped, *untyped) -> Array[untyped]
-  # ^ TODO
 
   # <!--
   #   rdoc-file=random.c
@@ -1334,35 +1333,6 @@ module Kernel : BasicObject
   # See also Random.rand.
   #
   def self?.rand: (?nil | 0) -> Float
-  #               | (int max_exclusive) -> Integer # technically returns `0` if given a zero max value.
-  #               | [B < (_Sub[B, int], U] (range[B] rng) -> U
-  #               | [B < _Sub[B, Float]]
-  #               # | [T < _RandFloat1 & _ToF & Numeric] (range[T] rng) -> Float
-  #               # | [T < _RandFloat2[U] & Numeric, U] (range[T] rng) -> U
-  #               # | [B] (range[_RandInt[B]] range) -> B
-  #               # | [F < (Float | (Numeric & _ToF)), U] (range[_RandFloat[F, U]] range) -> Float
-  #               # | [T, B < _RandFloat[T]] (range[B] range) -> T
-  #               # F < (Float | (Numeric & _ToF)), U, T < _ToF] (range[_RandFloat[F, U]] range) -> Float
-  #               # | (::Range[Float] arg0) -> Float
-
-  # interface _RandInt[T]
-  #   def -: (instance rhs) -> int
-  #   def +: (Integer rhs) -> T
-  # end
-  # interface _Sub[I, O]
-  #   def -: (I input) -> O
-  # end
-  # interface _Add[I, O]
-  #   def +: (I input) -> O
-  # end
-  # interface _RandFloat1
-  #   def -: (instance rhs) -> F
-  #   def +: (Float rhs) -> T
-  # end
-  # interface _RandFloat[T]# < Numeric #F < (Float | (_ToF & !_ToInt), T]
-  #   def -: (instance rhs) -> F
-  #   def +: (Float rhs) -> T
-  # end
 
   # <!--
   #   rdoc-file=io.c
@@ -1611,7 +1581,7 @@ module Kernel : BasicObject
                   | [T < _ToIO] (Array[T]? read, ?Array[T]? write, ?Array[T]? errors, ?_Timeout? timeout) -> [Array[T], Array[T], Array[T]]
 
   interface _Timeout
-    def divmod: (1) -> [int, _TimeoutNSecs] # technically should return `array[int | _TimeoutNSecs]`
+    def divmod: (1) -> [int, _TimeoutNSecs]
   end
 
   interface _TimeoutNSecs
@@ -1662,13 +1632,13 @@ module Kernel : BasicObject
   #
   def self?.syscall: (
     int callno,
-    ?string | int arg1, 
-    ?string | int arg2, 
+    ?string | int arg1,
+    ?string | int arg2,
     ?string | int arg3,
-    ?string | int arg4, 
-    ?string | int arg5, 
-    ?string | int arg6, 
-    ?string | int arg7, 
+    ?string | int arg4,
+    ?string | int arg5,
+    ?string | int arg6,
+    ?string | int arg7,
     ?string | int arg8
   ) -> Integer
 
@@ -1737,6 +1707,7 @@ module Kernel : BasicObject
     | ('M' | 'A' | 'C' | 77  | 65 | 67, IO | path file) -> Time
     | ('-' | '=' | '<' | '>' | 45 | 60 | 61 | 62, IO | path file1, IO | path file2) -> bool
     | (String | int cmd, IO | path file1, ?IO | path file2) -> (bool | Integer? | Time)
+
   # <!--
   #   rdoc-file=vm_eval.c
   #   - throw(tag [, obj])
@@ -1795,172 +1766,7 @@ module Kernel : BasicObject
   #
   def self?.warn: (*_ToS msg, ?uplevel: int?, ?category: Warning::category?) -> nil
 
-  # <!--
-  #   rdoc-file=process.c
-  #   - exec([env,] command... [,options])
-  # -->
-  # Replaces the current process by running the given external *command*, which
-  # can take one of the following forms:
-  #
-  # `exec(commandline)`
-  # :   command line string which is passed to the standard shell
-  # `exec(cmdname, arg1, ...)`
-  # :   command name and one or more arguments (no shell)
-  # `exec([cmdname, argv0], arg1, ...)`
-  # :   command name, `argv[0]` and zero or more arguments (no shell)
-  #
-  #
-  # In the first form, the string is taken as a command line that is subject to
-  # shell expansion before being executed.
-  #
-  # The standard shell always means `"/bin/sh"` on Unix-like systems, otherwise,
-  # `ENV["RUBYSHELL"]` or `ENV["COMSPEC"]` on Windows and similar.  The command is
-  # passed as an argument to the `"-c"` switch to the shell, except in the case of
-  # `COMSPEC`.
-  #
-  # If the string from the first form (`exec("command")`) follows these simple
-  # rules:
-  #
-  # *   no meta characters,
-  # *   not starting with shell reserved word or special built-in,
-  #
-  #
-  # Ruby invokes the command directly without shell.
-  #
-  # You can force shell invocation by adding ";" to the string (because ";" is a
-  # meta character).
-  #
-  # Note that this behavior is observable by pid obtained (return value of spawn()
-  # and IO#pid for IO.popen) is the pid of the invoked command, not shell.
-  #
-  # In the second form (`exec("command1", "arg1", ...)`), the first is taken as a
-  # command name and the rest are passed as parameters to command with no shell
-  # expansion.
-  #
-  # In the third form (`exec(["command", "argv0"], "arg1", ...)`), starting a
-  # two-element array at the beginning of the command, the first element is the
-  # command to be executed, and the second argument is used as the `argv[0]`
-  # value, which may show up in process listings.
-  #
-  # In order to execute the command, one of the `exec(2)` system calls are used,
-  # so the running command may inherit some of the environment of the original
-  # program (including open file descriptors).
-  #
-  # This behavior is modified by the given `env` and `options` parameters. See
-  # ::spawn for details.
-  #
-  # If the command fails to execute (typically Errno::ENOENT when it was not
-  # found) a SystemCallError exception is raised.
-  #
-  # This method modifies process attributes according to given `options` before
-  # `exec(2)` system call. See ::spawn for more details about the given `options`.
-  #
-  # The modified attributes may be retained when `exec(2)` system call fails.
-  #
-  # For example, hard resource limits are not restorable.
-  #
-  # Consider to create a child process using ::spawn or Kernel#system if this is
-  # not acceptable.
-  #
-  #     exec "echo *"       # echoes list of files in current directory
-  #     # never get here
-  #
-  #     exec "echo", "*"    # echoes an asterisk
-  #     # never get here
-  #
-
   type redirect_fd = Integer | :in | :out | :err | IO | String | [ String ] | [ String, string | int ] | [ String, string | int, int ] | [ :child, int ] | :close
-
-  # def self?.exec: (
-  #   ?Hash[string, string]? env,
-  #   [string, string] | string prog_arg0,
-  #   *string args,
-  #   ?Hash[Symbol | redirect_key, bool? | int | path | redirect_val] opts,
-  # ) -> bot
-  # | (
-  #   ?Hash[string, string]? env,
-  #   [string, string] | string prog_arg0,
-  #   *string args,
-  #   ?pgroup: int | bool?,
-  #   ?unsetenv_others: bool?,
-  #   ?chdir: path,
-  #   ?umask: int,
-  #   ?close_others: bool?,
-  #   ?in: redirect_val,
-  #   ?out: redirect_val,
-  #   ?err: redirect_val,
-  #   ?uid: string | int,
-  #   ?gid: string | int,
-  #   ?exception: bool?,
-  #   **redirect_key => redirect_val opts
-  # ) -> bot
-
-  # def self?.exec
-  #   : (string prog, *string args, ?Hash[Symbol | redirect_key, bool? | int | path | redirect_val] opts) -> bot
-  #   | ([string, string] prog_arg0, *string args, ?Hash[Symbol | redirect_key, bool? | int | path | redirect_val] opts) -> bot
-  #   : (
-  #     [string, string] | string prog_maybe_arg0,
-  #     *string args,
-  #     **(redirect_key => redirect_key)
-  #     # ?Hash[Symbol | redirect_key, bool? | int | path | string | redirect_val] opts
-  #   ) -> bot
-  #   | ([string, string] prog_arg0, *string args, ?Hash[Symbol | redirect_key, bool? | int | path | string | redirect_val] opts) -> bot
-
-  #   ?Hash[string, string?] env,
-  #   ([string, string] | string) maybe_prog_also_arg0, # Technically is an `array[string]` that's convertible into length 2.
-  #   *string args,
-  #   ?Hash[Symbol | redirect_key, bool? | int | path | string | redirect_val] opts) -> bot
-  #  | (
-  #   ?Hash[string, string?] env,
-  #   ([string, string] | string) maybe_prog_also_arg0, # Technically is an `array[string]` that's convertible into length 2.
-  #   *string args,
-
-  #   ?Hash[redirect_key, redirect_val] opts
-  #   ?pgroup: bool? | int,
-  #   ?unsetenv_others: bool?,
-  #   ?chdir: path,
-  #   ?umask: int,
-  #   ?close_others: bool?,
-  #   ?in: redirect_val,
-  #   ?out: redirect_val,
-  #   ?err: redirect_val,
-  #   ?uid: string | int,
-  #   ?gid: string | int,
-  #   ?exception: bool?) -> bot
-
-  #  # TODO: HAVE_SETRLIMIT
-  # type redirect_key = :in | :out | :err | Integer | io
-  # type redirect_val = :close | :in | :out | :err | File | Integer | String | io | [:child, redirect_key] | [path, String | int?] | [path, String | int?, int]
-
-  # def self?.exec
-  # # : (String command, *String args, ?unsetenv_others: boolish, ?pgroup: true | Integer, ?umask: Integer, ?in: redirect_fd, ?out: redirect_fd, ?err: redirect_fd, ?close_others: boolish, ?chdir: String) -> bot
-  # #               | (Hash[string, string?] env, String command, *String args, ?unsetenv_others: boolish, ?pgroup: true | Integer, ?umask: Integer, ?in: redirect_fd, ?out: redirect_fd, ?err: redirect_fd, ?close_others: boolish, ?chdir: String) -> bot
-  #  : (
-  #   ?Hash[string, string?] env,
-  #   ([string, string] | string) maybe_prog_also_arg0, # Technically is an `array[string]` that's convertible into length 2.
-  #   *string args,
-  #   ?Hash[Symbol | redirect_key, bool? | int | path | string | redirect_val] opts) -> bot
-  #  | (
-  #   ?Hash[string, string?] env,
-  #   ([string, string] | string) maybe_prog_also_arg0, # Technically is an `array[string]` that's convertible into length 2.
-  #   *string args,
-
-  #   ?Hash[redirect_key, redirect_val] opts
-  #   ?pgroup: bool? | int,
-  #   ?unsetenv_others: bool?,
-  #   ?chdir: path,
-  #   ?umask: int,
-  #   ?close_others: bool?,
-  #   ?in: redirect_val,
-  #   ?out: redirect_val,
-  #   ?err: redirect_val,
-  #   ?uid: string | int,
-  #   ?gid: string | int,
-  #   ?exception: bool?) -> bot
-
-  #  # TODO: HAVE_SETRLIMIT
-  # type redirect_key = :in | :out | :err | Integer | io
-  # type redirect_val = :close | :in | :out | :err | File | Integer | String | io | [:child, redirect_key] | [path, String | nil | int] | [path, String | nil | int, int]
 
   # <!--
   #   rdoc-file=process.c
@@ -2273,11 +2079,7 @@ module Kernel : BasicObject
   # Returns true if two objects do not match (using the *=~* method), otherwise
   # false.
   #
-  def !~: [T] (T other) -> bool #where self < _Match[T, untyped]
-
-  # interface _Match[I, O]
-  #   def =~: (I) -> O
-  # end
+  def !~: [T] (T other) -> bool
 
   # <!--
   #   rdoc-file=object.c
@@ -2297,7 +2099,7 @@ module Kernel : BasicObject
   # When you define #<=>, you can include Comparable to gain the methods #<=, #<,
   # #==, #>=, #> and #between?.
   #
-  def <=>: (untyped other) -> 0? # where self < _Eq[untyped, untyped]
+  def <=>: (untyped other) -> 0?
 
   # <!--
   #   rdoc-file=object.c
@@ -2307,7 +2109,7 @@ module Kernel : BasicObject
   # typically overridden by descendants to provide meaningful semantics in `case`
   # statements.
   #
-  def ===: (untyped other) -> bool # where self < _Eq[untyped, untyped]
+  def ===: (untyped other) -> bool
 
   # <!--
   #   rdoc-file=kernel.rb
@@ -2492,9 +2294,10 @@ module Kernel : BasicObject
   #
   def enum_for: (Symbol method, *untyped, **untyped) ?{ (*untyped, **untyped) -> Integer } -> Enumerator[untyped, untyped]
               | () ?{ () -> Integer } -> Enumerator[untyped, self]
- # if no method is given, defaults to `each`
- # size is enum's yield
- # ^ todo
+
+  # if no method is given, defaults to `each`
+  # size is enum's yield
+  # ^ todo
   %a{annotate:rdoc:skip}
   alias to_enum enum_for
 
@@ -2992,7 +2795,6 @@ module Kernel : BasicObject
   # to a symbol.
   #
   def respond_to?: (interned name, ?boolish include_all) -> boolish
-  # ^ repsonds with boolish via # c=Class.new{def respond_to_missing?(*)=:lol}.new; p c.respond_to? "a{3}"
 
   # <!--
   #   rdoc-file=vm_eval.c
