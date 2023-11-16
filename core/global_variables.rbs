@@ -33,7 +33,7 @@ $-F: Regexp | String | nil
 # Has a singleton method <code>$LOAD_PATH.resolve_feature_path(feature)</code>
 # that returns [+:rb+ or +:so+, path], which resolves the feature to
 # the path the original Kernel#require method would load.
-$-I: Array[String]
+$-I: Array[String] & _LoadPathAPI
 
 $-W: 0 | 1 | 2
 
@@ -109,7 +109,7 @@ $9: String?
 # Has a singleton method <code>$LOAD_PATH.resolve_feature_path(feature)</code>
 # that returns [+:rb+ or +:so+, path], which resolves the feature to
 # the path the original Kernel#require method would load.
-$:: Array[String]
+$:: Array[String] & _LoadPathAPI
 
 # The default separator for String#split. Non-nil $; will be deprecated. Aliased to $-F.
 $;: Regexp | String | nil
@@ -118,7 +118,7 @@ $;: Regexp | String | nil
 $<: RBS::Unnamed::ARGFClass
 
 # This variable is no longer effective. Deprecated.
-$=: bool
+$=: false
 
 # The default output stream for Kernel#print and Kernel#printf. $stdout by default.
 $>: IO

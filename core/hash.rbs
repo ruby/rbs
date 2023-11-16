@@ -499,6 +499,12 @@
 class Hash[unchecked out K, unchecked out V] < Object
   include Enumerable[[ K, V ]]
 
+  interface _Key
+    def hash: () -> Integer
+
+    def eql?: (untyped rhs) -> boolish
+  end
+
   # <!--
   #   rdoc-file=hash.c
   #   - Hash[] -> new_empty_hash
