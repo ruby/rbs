@@ -4,12 +4,14 @@ module RBS
     @library_options: RBS::CLI::LibraryOptions
     @after_path: Array[String]
     @before_path: Array[String]
+    @detail: boolish
 
     def initialize: (
       type_name: TypeName,
       library_options: RBS::CLI::LibraryOptions,
       ?after_path: Array[String],
-      ?before_path: Array[String]
+      ?before_path: Array[String],
+      ?detail: boolish
     ) -> void
 
     def each_diff: () { (String before, String after) -> void } -> void

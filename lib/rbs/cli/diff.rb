@@ -13,6 +13,7 @@ module RBS
         library_options = library_options
         before_path = []
         after_path = []
+        detail = false
 
         opt = OptionParser.new do |o|
           o.banner = <<~HELP
@@ -35,6 +36,7 @@ module RBS
           o.on("--type-name NAME") { |arg| type_name = arg }
           o.on("--before DIR")     { |arg| before_path << arg }
           o.on("--after DIR")      { |arg| after_path << arg }
+          o.on("--[no-]detail")    { |arg| detail = arg }
         end
         opt.parse!(argv)
 
@@ -47,7 +49,8 @@ module RBS
           type_name: TypeName(type_name).absolute!,
           library_options: library_options,
           after_path: after_path,
-          before_path: before_path
+          before_path: before_path,
+          detail: detail,
         )
       end
 
