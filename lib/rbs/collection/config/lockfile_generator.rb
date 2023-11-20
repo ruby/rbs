@@ -83,7 +83,7 @@ module RBS
         private def validate_gemfile_lock_path!(lock:, gemfile_lock_path:)
           return unless lock
           return unless lock.gemfile_lock_fullpath
-          unless lock.gemfile_lock_fullpath == gemfile_lock_path
+          unless File.realpath(lock.gemfile_lock_fullpath) == File.realpath(gemfile_lock_path)
             raise GemfileLockMismatchError.new(expected: lock.gemfile_lock_fullpath, actual: gemfile_lock_path)
           end
         end
