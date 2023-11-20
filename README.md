@@ -77,6 +77,53 @@ $ rbs methods ::Object
 $ rbs method Object then
 ```
 
+An end user of `rbs` will probably find `rbs prototype` the most useful. This command generates boilerplate signature declarations for ruby files. For example, say you have written the below ruby script.
+
+```ruby
+# person.rb
+class Person
+  attr_reader :name
+  attr_reader :contacts
+
+  def initialize(name:)
+    @name = name
+    @contacts = []
+  end
+
+  def speak
+    "I'm #{@name} and I love Ruby!"
+  end
+end
+```
+
+Running prototype on the above will automatically generate
+
+```
+$ rbs prototype rb person.rb
+class Person
+  @name: untyped
+
+  @contacts: untyped
+
+  attr_reader name: untyped
+
+  attr_reader contacts: untyped
+
+  def initialize: (name: untyped) -> void
+
+  def speak: () -> ::String
+end
+```
+
+It prints signatures for all methods, classes, instance variables, and constants.
+This is only a starting point, and you should edit the output to match your signature more accurately.
+
+`rbs prototpe` offers three options.
+
+- `rb` generates from just the available Ruby code
+- `rbi` generates from Sorbet RBI
+- `runtime` generates from runtime API
+
 ## Library
 
 There are two important concepts, _environment_ and _definition_.
