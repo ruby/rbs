@@ -115,6 +115,8 @@ module XYZZY[X, Y]
 
   def def: () -> Symbol
 
+  def foo: (untyped `include?`) -> void
+
   def self: () -> void
 
   def self?: () -> void
