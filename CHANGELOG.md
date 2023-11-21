@@ -2,6 +2,12 @@
 
 ## master
 
+## 3.3.2 (2023-11-21)
+
+### Miscellaneous
+
+* Require `bundler` explicitly for ruby/ruby CI ([#1629](https://github.com/ruby/rbs/pull/1629))
+
 ## 3.3.1 (2023-11-21)
 
 ### Library changes
