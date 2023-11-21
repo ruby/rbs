@@ -15,7 +15,17 @@ class RBS::CliTest < Test::Unit::TestCase
     @stderr ||= StringIO.new
   end
 
-  def run_rbs(*commands, bundler: true)
+  # Run `rbs collection` with fresh bundler environment
+  #
+  # You need this method to test `rbs collection` features.
+  # `rbs collection` loads gems from Bundler context, so re-using the currenr Bundler context (used to develop rbs gem) causes issues.
+  #
+  # - If `bundler: true` is given, it runs `rbs collection` command with `bundle exec`
+  # - If `bundler: false` is given, it runs `rbs collection` command without `bundle exec`
+  #
+  # We cannot run tests that uses this method in ruby CI.
+  #
+  def run_rbs_collection(*commands, bundler:)
     stdout, stderr, status =
       Bundler.with_unbundled_env do
         bundle_exec = []
@@ -26,7 +36,7 @@ class RBS::CliTest < Test::Unit::TestCase
           rbs_path << (":" + rblib)
         end
 
-        Open3.capture3({ "RUBYLIB" => rbs_path }, *bundle_exec, "#{__dir__}/../../exe/rbs", *commands, chdir: Dir.pwd)
+        Open3.capture3({ "RUBYLIB" => rbs_path }, *bundle_exec, "#{__dir__}/../../exe/rbs", "collection", *commands, chdir: Dir.pwd)
       end
 
     if block_given?
@@ -849,7 +859,7 @@ Processing `lib`...
              2.2.0
         LOCK
 
-        _stdout, _stderr = run_rbs("collection", "install")
+        _stdout, _stderr = run_rbs_collection("install", bundler: true)
 
         rbs_collection_lock = dir.join('rbs_collection.lock.yaml')
         assert rbs_collection_lock.exist?
@@ -861,7 +871,7 @@ Processing `lib`...
 
         Dir.mkdir("child")
         Dir.chdir("child") do
-          _stdout, _stderr = run_rbs("collection", "install")
+          _stdout, _stderr = run_rbs_collection("install", bundler: true)
           assert rbs_collection_lock.exist?
           assert collection_dir.exist?
         end
@@ -891,7 +901,7 @@ Processing `lib`...
         YAML
         dir.join('rbs_collection.lock.yaml').write(lock_content)
 
-        run_rbs("collection", "install", "--frozen", bundler: false)
+        run_rbs_collection("install", "--frozen", bundler: false)
 
         refute dir.join(RBS::Collection::Config::PATH).exist?
         assert dir.join('gem_rbs_collection/ast').exist?
@@ -933,7 +943,7 @@ Processing `lib`...
              2.2.0
         LOCK
 
-        run_rbs("collection", "update", bundler: true)
+        run_rbs_collection("update", bundler: true)
 
         assert dir.join('rbs_collection.lock.yaml').exist?
         assert dir.join('gem_rbs_collection/ast').exist?
@@ -997,7 +1007,7 @@ Processing `lib`...
         RUBY
         (dir/"sig").mkdir
 
-        stdout, _ = run_rbs("collection", "install", bundler: true)
+        stdout, _ = run_rbs_collection("install", bundler: true)
 
         assert_match(/Installing ast:(\d(\.\d)*)/, stdout)
         refute_match(/^Using hola:(\d(\.\d)*)/, stdout)
@@ -1027,15 +1037,17 @@ Processing `lib`...
         end
       RBS
 
-      stdout, stderr = run_rbs('subtract', minuend.to_s, subtrahend.to_s)
-      assert_empty stderr
-      assert_equal <<~RBS, stdout
-        use A::B
+      with_cli do |cli|
+        cli.run(['subtract', minuend.to_s, subtrahend.to_s])
+        assert_empty stderr.string
+        assert_equal <<~RBS, stdout.string
+          use A::B
 
-        class C
-          def y: () -> untyped
-        end
-      RBS
+          class C
+            def y: () -> untyped
+          end
+        RBS
+      end
     end
   end
 
@@ -1065,15 +1077,17 @@ Processing `lib`...
         end
       RBS
 
-      stdout, stderr = run_rbs('subtract', minuend.to_s, '--subtrahend', subtrahend_1.to_s, '--subtrahend', subtrahend_2.to_s)
-      assert_empty stderr
-      assert_equal <<~RBS, stdout
-        use A::B
+      with_cli do |cli|
+        cli.run(['subtract', minuend.to_s, '--subtrahend', subtrahend_1.to_s, '--subtrahend', subtrahend_2.to_s])
+        assert_empty stderr.string
+        assert_equal <<~RBS, stdout.string
+          use A::B
 
-        class C
-          def z: () -> untyped
-        end
-      RBS
+          class C
+            def z: () -> untyped
+          end
+        RBS
+      end
     end
   end
 
@@ -1096,16 +1110,18 @@ Processing `lib`...
         end
       RBS
 
-      stdout, stderr = run_rbs('subtract', '--write', minuend.to_s, subtrahend.to_s)
-      assert_empty stderr
-      assert_empty stdout
-      assert_equal minuend.read, <<~RBS
-        use A::B
+      with_cli do |cli|
+        cli.run(['subtract', '--write', minuend.to_s, subtrahend.to_s])
+        assert_empty stderr.string
+        assert_empty stdout.string
+        assert_equal minuend.read, <<~RBS
+          use A::B
 
-        class C
-          def y: () -> untyped
-        end
-      RBS
+          class C
+            def y: () -> untyped
+          end
+        RBS
+      end
     end
   end
 
@@ -1127,10 +1143,12 @@ Processing `lib`...
         end
       RBS
 
-      stdout, stderr = run_rbs('subtract', '--write', minuend.to_s, subtrahend.to_s)
-      assert_empty stderr
-      assert_empty stdout
-      assert_equal minuend.exist?, false
+      with_cli do |cli|
+        cli.run(['subtract', '--write', minuend.to_s, subtrahend.to_s])
+        assert_empty stderr.string
+        assert_empty stdout.string
+        refute_predicate minuend, :exist?
+    end
     end
   end
 
@@ -1181,36 +1199,40 @@ Processing `lib`...
 
   def test_diff_markdown
     mktmp_diff_case do |dir1, dir2|
-      stdout, stderr = run_rbs('diff', '--format', 'markdown', '--type-name', 'Foo', '--before', dir1.to_s, '--after', dir2.to_s)
+      with_cli do |cli|
+        cli.run(['diff', '--format', 'markdown', '--type-name', 'Foo', '--before', dir1.to_s, '--after', dir2.to_s])
 
-      assert_equal <<~MARKDOWN, stdout
-        | before | after |
-        | --- | --- |
-        | `def qux: (untyped) -> untyped` | `-` |
-        | `def quux: () -> void` | `alias quux bar` |
-        | `def self.baz: () -> (::Integer \\| ::String)` | `def self.baz: (::Integer) -> ::Integer?` |
-        | `CONST: ::Array[::Integer]` | `CONST: ::Array[::String]` |
-      MARKDOWN
+        assert_equal <<~MARKDOWN, stdout.string
+          | before | after |
+          | --- | --- |
+          | `def qux: (untyped) -> untyped` | `-` |
+          | `def quux: () -> void` | `alias quux bar` |
+          | `def self.baz: () -> (::Integer \\| ::String)` | `def self.baz: (::Integer) -> ::Integer?` |
+          | `CONST: ::Array[::Integer]` | `CONST: ::Array[::String]` |
+        MARKDOWN
+      end
     end
   end
 
   def test_diff_diff
     mktmp_diff_case do |dir1, dir2|
-      stdout, stderr = run_rbs('diff', '--format', 'diff', '--type-name', 'Foo', '--before', dir1.to_s, '--after', dir2.to_s)
+      with_cli do |cli|
+        cli.run(['diff', '--format', 'diff', '--type-name', 'Foo', '--before', dir1.to_s, '--after', dir2.to_s])
 
-      assert_equal <<~DIFF, stdout
-        - def qux: (untyped) -> untyped
-        + -
+        assert_equal <<~DIFF, stdout.string
+          - def qux: (untyped) -> untyped
+          + -
 
-        - def quux: () -> void
-        + alias quux bar
+          - def quux: () -> void
+          + alias quux bar
 
-        - def self.baz: () -> (::Integer | ::String)
-        + def self.baz: (::Integer) -> ::Integer?
+          - def self.baz: () -> (::Integer | ::String)
+          + def self.baz: (::Integer) -> ::Integer?
 
-        - CONST: ::Array[::Integer]
-        + CONST: ::Array[::String]
-      DIFF
+          - CONST: ::Array[::Integer]
+          + CONST: ::Array[::String]
+        DIFF
+      end
     end
   end
 end

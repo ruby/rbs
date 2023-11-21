@@ -33,7 +33,9 @@ module RBS
         # def self.members: () -> [ :foo, :bar ]
         # def members: () -> [ :foo, :bar ]
         def build_s_members
-          [:singleton, :instance].map do |kind|
+          (
+            [:singleton, :instance] #: Array[AST::Members::MethodDefinition::kind]
+          ).map do |kind|
             AST::Members::MethodDefinition.new(
               name: :members,
               overloads: [
