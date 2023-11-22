@@ -54,13 +54,13 @@ module RBS
         builder.build_instance(@type_name).methods
       rescue => e
         RBS.logger.warn("#{path}: (#{e.class}) #{e.message}")
-        {}
+        {} #: Hash[Symbol, Definition::Method]
       end
       singleton_methods = begin
         builder.build_singleton(@type_name).methods
       rescue => e
         RBS.logger.warn("#{path}: (#{e.class}) #{e.message}")
-        {}
+        {} #: Hash[Symbol, Definition::Method]
       end
 
       constant_children = begin
@@ -68,7 +68,7 @@ module RBS
         constant_resolver.children(@type_name)
       rescue => e
         RBS.logger.warn("#{path}: (#{e.class}) #{e.message}")
-        {}
+        {} #: Hash[Symbol, Constant]
       end
 
       [ instance_methods, singleton_methods, constant_children ]
@@ -103,7 +103,8 @@ module RBS
 
         detail_to_s = @detail ? "[#{definition_method.defined_in} #{definition_method.accessibility}] " : ""
         if definition_method.alias_of
-          "#{detail_to_s}alias #{prefix}#{key} #{prefix}#{definition_method.alias_of.defs.first.member.name}"
+          first_def = definition_method.alias_of.defs.first #: Definition::Method::TypeDef
+          "#{detail_to_s}alias #{prefix}#{key} #{prefix}#{first_def.member.name}"
         else
           "#{detail_to_s}def #{prefix}#{key}: #{definition_method.method_types.join(" | ")}"
         end

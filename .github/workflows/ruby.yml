@@ -63,7 +63,7 @@ jobs:
         run: |
           echo "NO_MINITEST=true" >> $GITHUB_ENV
           bundle config set --local without 'minitest'
-        if: "contains(matrix.container_tag, 'master-nightly')"
+        if: ${{ contains(matrix.container_tag, 'master-nightly') }}
       - name: bin/setup
         run: |
           bin/setup

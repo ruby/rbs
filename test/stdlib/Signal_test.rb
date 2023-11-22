@@ -25,11 +25,11 @@ class SignalSingletonTest < Test::Unit::TestCase
   def test_trap
     old_usr2 = trap(:USR2, nil)
 
-    with_interned(:USR2).chain([Signal.list['USR2']]).each do |signal|
+    with_interned(:USR2).and(Signal.list['USR2']) do |signal|
       assert_send_type  '(Integer | ::interned) { (Integer) -> void } -> Signal::trap_command',
                         Signal, :trap, signal do |n| end
 
-      with_string('').chain([true, false, nil, Class.new{def call(x)end}.new]).each do |command|
+      with_string('').and(with_bool, nil, Class.new { def call(x) end }.new) do |command|
         assert_send_type  '(Integer | ::interned, Signal::trap_command) -> Signal::trap_command',
                           Signal, :trap, signal, command
       end
