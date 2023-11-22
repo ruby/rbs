@@ -1,0 +1,156 @@
+# A module that contains the interfaces for all overloadable operators in Ruby.
+#
+# Even though many of these operators have traditional return types (eg `<` would traditionally
+# returns a `bool` or `boolish` value), it's valid Ruby to have them return some other type. As
+# such, the return types are all also parameters.
+module Ops
+  # The interface that represents the `+` operator.
+  interface _Add[Rhs, Output]
+    # Perform the operation `self + other`, which returns an `Output`.
+    def +: (Rhs other) -> Output
+  end
+
+  # The interface that represents the `-` operator.
+  interface _Sub[Rhs, Output]
+    # Perform the operation `self - other`, which returns an `Output`.
+    def -: (Rhs other) -> Output
+  end
+
+  # The interface that represents the `*` operator.
+  interface _Mul[Rhs, Output]
+    # Perform the operation `self * other`, which returns an `Output`.
+    def *: (Rhs other) -> Output
+  end
+
+  # The interface that represents the `/` operator.
+  interface _Div[Rhs, Output]
+    # Perform the operation `self / other`, which returns an `Output`.
+    def /: (Rhs other) -> Output
+  end
+
+  # The interface that represents the `%` operator.
+  interface _Mod[Rhs, Output]
+    # Perform the operation `self % other`, which returns an `Output`.
+    def %: (Rhs other) -> Output
+  end
+
+  # The interface that represents the `**` operator.
+  interface _Pow[Rhs, Output]
+    # Perform the operation `self ** other`, which returns an `Output`.
+    def **: (Rhs other) -> Output
+  end
+
+  # The interface that represents the `==` operator.
+  interface _Equal[Rhs, Output]
+    # Perform the operation `self == other`, which returns an `Output`.
+    def ==: (Rhs other) -> Output
+  end
+
+  # The interface that represents the `!=` operator.
+  interface _NotEqual[Rhs, Output]
+    # Perform the operation `self != other`, which returns an `Output`.
+    def !=: (Rhs other) -> Output
+  end
+
+  # The interface that represents the `=~` operator.
+  interface _Match[Rhs, Output]
+    # Perform the operation `self =~ other`, which returns an `Output`.
+    def =~: (Rhs rhs) -> Output
+  end
+
+  # The interface that represents the `!~` operator.
+  interface _NotMatch[Rhs, Output]
+    # Perform the operation `self !~ other`, which returns an `Output`.
+    def !~: (Rhs rhs) -> Output
+  end
+
+  # The interface that represents the `===` operator.
+  interface _CaseEqual[Rhs, Output]
+    # Perform the operation `self === other`, which returns an `Output`.
+    def ===: (Rhs rhs) -> Output
+  end
+
+  # The interface that represents the `<` operator.
+  interface _LessThan[Rhs, Output]
+    # Perform the operation `self < other`, which returns an `Output`.
+    def <: (Rhs other) -> Output
+  end
+
+  # The interface that represents the `>` operator.
+  interface _GreaterThan[Rhs, Output]
+    # Perform the operation `self > other`, which returns an `Output`.
+    def >: (Rhs other) -> Output
+  end
+
+  # The interface that represents the `<=` operator.
+  interface _LessEqual[Rhs, Output]
+    # Perform the operation `self <= other`, which returns an `Output`.
+    def <=: (Rhs other) -> Output
+  end
+
+  # The interface that represents the `>=` operator.
+  interface _GreaterEqual[Rhs, Output]
+    # Perform the operation `self >= other` which returns an `Output`.
+    def >=: (Rhs other) -> Output
+  end
+
+  # The interface that represents the `<=>` operator.
+  interface _Spaceship[Rhs, Output]
+    # Perform the operation `self <=> other`, which returns an `Output`.
+    def <=>: (Rhs other) -> Output
+  end
+
+  # The interface that represents the `<<` operator.
+  interface _LeftShift[Rhs, Output]
+    # Perform the operation `self << other`, which returns an `Output`.
+    def <<: (Rhs other) -> Output
+  end
+
+  # The interface that represents the `>>` operator.
+  interface _RightShift[Rhs, Output]
+    # Perform the operation `self >> other`, which returns an `Output`.
+    def >>: (Rhs other) -> Output
+  end
+
+  # The interface that represents the `&` operator.
+  interface _BitAnd[Rhs, Output]
+    # Perform the operation `self & other`, which returns an `Output`.
+    def &: (Rhs other) -> Output
+  end
+
+  # The interface that represents the `|` operator.
+  interface _BitOR[Rhs, Output]
+    # Perform the operation `self | other`, which returns an `Output`.
+    def |: (Rhs other) -> Output
+  end
+
+  # The interface that represents the `^` operator.
+  interface _BitXor[Rhs, Output]
+    # Perform the operation `self ^ other`, which returns an `Output`.
+    def ^: (Rhs other) -> Output
+  end
+
+  # The interface that represents the `~` operator.
+  interface _BitNot[Output]
+    # Perform the operation `~self`, which returns an `Output`.
+    def ~: () -> Output
+  end
+
+  # The interface that represents the `!` operator.
+  interface _LogicalNot[Output]
+    # Perform the operation `!self`, which returns an `Output`.
+    def !: () -> Output
+  end
+
+  # The interface that represents the `-@` operator.
+  interface _Negate[Output]
+    # Perform the operation `-self`, which returns an `Output`.
+    def -@: () -> Output
+  end
+
+  # The interface that represents the `+@` operator.
+  interface _UnaryPlus[Output]
+    # Perform the operation `+self`, which returns an `Output`.
+    def +@: () -> Output
+  end
+end
