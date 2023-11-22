@@ -246,12 +246,8 @@ class Struct[Elem]
   #     Any.new(1, 2)
   #     # => #<struct Any foo=1, bar=2>
   #
-  def self.new: [K < _StructClass[Elem]] (string? classname, *interned fields, ?keyword_init: boolish?) ?{ (K) -> void } -> K
-              | [K < _StructClass[Elem]] (Symbol field1, *interned fields, ?keyword_init: boolish?) ?{ (K) -> void } -> K
-
-  interface _StructClass[Elem]
-    def new: (*Elem fields, **Elem keyword_fields) -> instance
-  end
+  def self.new: (string? classname, *interned fields, ?keyword_init: boolish?) ?{ (singleton(Struct)) [self: singleton(Struct)] -> void } -> untyped
+              | (Symbol field1, *interned fields, ?keyword_init: boolish?) ?{ (singleton(Struct)) [self: singleton(Struct)] -> void } -> untyped
 
   # <!--
   #   rdoc-file=struct.c
