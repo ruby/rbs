@@ -46,10 +46,12 @@
 # *   Includes [module Enumerable](rdoc-ref:Enumerable@What-27s+Here), which
 #     provides dozens of additional methods.
 #
+#
 # See also Data, which is a somewhat similar, but stricter concept for defining
 # immutable value objects.
 #
 # Here, class Struct provides methods that are useful for:
+#
 # *   [Creating a Struct
 #     Subclass](rdoc-ref:Struct@Methods+for+Creating+a+Struct+Subclass)
 # *   [Querying](rdoc-ref:Struct@Methods+for+Querying)
@@ -59,23 +61,25 @@
 # *   [Iterating](rdoc-ref:Struct@Methods+for+Iterating)
 # *   [Converting](rdoc-ref:Struct@Methods+for+Converting)
 #
+#
 # ### Methods for Creating a Struct Subclass
 #
-# *   ::new: Returns a new subclass of Struct.#
+# *   ::new: Returns a new subclass of Struct.
+#
 #
 # ### Methods for Querying
 #
 # *   #hash: Returns the integer hash code.
-# *   #length, #size: Returns the number of members.#
+# *   #length, #size: Returns the number of members.
+#
 #
 # ### Methods for Comparing
 #
-# [#==](#method-i-3D-3D)
-# :   Returns whether a given object is equal to `self`, using `==` to compare
-#     member values.
-# #eql?
-# :   Returns whether a given object is equal to `self`, using `eql?` to compare
-#     member values.#
+# *   #==: Returns whether a given object is equal to `self`, using `==` to
+#     compare member values.
+# *   #eql?: Returns whether a given object is equal to `self`, using `eql?` to
+#     compare member values.
+#
 #
 # ### Methods for Fetching
 #
@@ -99,16 +103,14 @@
 #
 # ### Methods for Iterating
 #
-# *   #inspect, #to_s: Returns a string representation of `self`.
-# *   #to_h: Returns a hash of the member name/value pairs in `self`.
+# *   #each: Calls a given block with each member name.
+# *   #each_pair: Calls a given block with each member name/value pair.
 #
 #
 # ### Methods for Converting
 #
-# #inspect, #to_s
-# :   Returns a string representation of `self`.
-# #to_h
-# :   Returns a hash of the member name/value pairs in `self`.
+# *   #inspect, #to_s: Returns a string representation of `self`.
+# *   #to_h: Returns a hash of the member name/value pairs in `self`.
 #
 class Struct[Elem]
   include Enumerable[Elem]
@@ -129,8 +131,6 @@ class Struct[Elem]
   #
   # *   May be anonymous, or may have the name given by `class_name`.
   # *   May have members as given by `member_names`.
-  # *   May have initialization via ordinary arguments (the default) or via
-  #     keyword arguments (if `keyword_init: true` is given).
   # *   May have initialization via ordinary arguments, or via keyword arguments
   #
   #
@@ -206,7 +206,6 @@ class Struct[Elem]
   #         Foo.new(foo: 0, bar: 1, baz: 2)
   #         # Raises ArgumentError: unknown keywords: baz
   #
-  #
   #     Method `::[]` is an alias for method `::new`.
   #
   # *   Method `:inspect` returns a string representation of the subclass:
@@ -223,6 +222,7 @@ class Struct[Elem]
   #
   # By default, the arguments for initializing an instance of the new subclass can
   # be both positional and keyword arguments.
+  #
   # Optional keyword argument `keyword_init:` allows to force only one type of
   # arguments to be accepted:
   #
