@@ -2,6 +2,27 @@
 
 ## master
 
+## 3.3.2 (2023-11-21)
+
+### Miscellaneous
+
+* Require `bundler` explicitly for ruby/ruby CI ([#1629](https://github.com/ruby/rbs/pull/1629))
+
+## 3.3.1 (2023-11-21)
+
+### Library changes
+
+* Allow to use RBS in symlinked tree ([#1624](https://github.com/ruby/rbs/pull/1624))
+* Should escape if param name include not simple-word ([#1618](https://github.com/ruby/rbs/pull/1618))
+
+#### rbs collection
+
+* Load Bundler lazily ([#1612](https://github.com/ruby/rbs/pull/1612))
+
+### Miscellaneous
+
+* Stop using `bundle` command ([#1619](https://github.com/ruby/rbs/pull/1619))
+
 ## 3.3.0 (2023-11-09)
 
 ### Library changes

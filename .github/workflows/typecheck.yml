@@ -1,0 +1,37 @@
+name: Type check
+
+on:
+  push:
+    branches:
+      - master
+  pull_request: {}
+  merge_group: {}
+
+jobs:
+  test:
+    runs-on: "ubuntu-latest"
+    strategy:
+      fail-fast: false
+      matrix:
+        container_tag:
+          - 3.2-dev-focal
+    container:
+      image: rubylang/ruby:${{ matrix.container_tag }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set working directory as safe
+        run: git config --global --add safe.directory $(pwd)
+      - name: Install dependencies
+        run: |
+          apt-get update
+          apt-get install -y libdb-dev curl autoconf automake m4 libtool
+      - name: Update rubygems & bundler
+        run: |
+          ruby -v
+          gem update --system
+      - name: bin/setup
+        run: |
+          bin/setup
+      - name: Run steep check
+        run: |
+          bin/steep check -j 2

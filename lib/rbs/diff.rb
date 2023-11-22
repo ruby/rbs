@@ -2,11 +2,12 @@
 
 module RBS
   class Diff
-    def initialize(type_name:, library_options:, after_path: [], before_path: [])
+    def initialize(type_name:, library_options:, after_path: [], before_path: [], detail: false)
       @type_name = type_name
       @library_options = library_options
       @after_path = after_path
       @before_path = before_path
+      @detail = detail
     end
 
     def each_diff(&block)
@@ -53,13 +54,13 @@ module RBS
         builder.build_instance(@type_name).methods
       rescue => e
         RBS.logger.warn("#{path}: (#{e.class}) #{e.message}")
-        {}
+        {} #: Hash[Symbol, Definition::Method]
       end
       singleton_methods = begin
         builder.build_singleton(@type_name).methods
       rescue => e
         RBS.logger.warn("#{path}: (#{e.class}) #{e.message}")
-        {}
+        {} #: Hash[Symbol, Definition::Method]
       end
 
       constant_children = begin
@@ -67,7 +68,7 @@ module RBS
         constant_resolver.children(@type_name)
       rescue => e
         RBS.logger.warn("#{path}: (#{e.class}) #{e.message}")
-        {}
+        {} #: Hash[Symbol, Constant]
       end
 
       [ instance_methods, singleton_methods, constant_children ]
@@ -100,10 +101,12 @@ module RBS
       if definition_method
         prefix = kind == :instance ? "" : "self."
 
+        detail_to_s = @detail ? "[#{definition_method.defined_in} #{definition_method.accessibility}] " : ""
         if definition_method.alias_of
-          "alias #{prefix}#{key} #{prefix}#{definition_method.alias_of.defs.first.member.name}"
+          first_def = definition_method.alias_of.defs.first #: Definition::Method::TypeDef
+          "#{detail_to_s}alias #{prefix}#{key} #{prefix}#{first_def.member.name}"
         else
-          "def #{prefix}#{key}: #{definition_method.method_types.join(" | ")}"
+          "#{detail_to_s}def #{prefix}#{key}: #{definition_method.method_types.join(" | ")}"
         end
       else
         +"-"
@@ -112,7 +115,8 @@ module RBS
 
     def constant_to_s(constant)
       if constant
-        "#{constant.name.name}: #{constant.type}"
+        detail_to_s = @detail ? "[#{constant.name.namespace.to_type_name.to_s}] " : ""
+        "#{detail_to_s}#{constant.name.name}: #{constant.type}"
       else
         +"-"
       end

@@ -626,6 +626,14 @@ RBS
       assert_equal "?foo, ?foo: String", method_type.type.param_to_s
     end
 
+    RBS::Parser.parse_method_type(buffer("(`foo`: String) -> void")).tap do |method_type|
+      assert_equal "`foo`: String", method_type.type.param_to_s
+    end
+
+    RBS::Parser.parse_method_type(buffer("(?`foo`: String) -> void")).tap do |method_type|
+      assert_equal "?`foo`: String", method_type.type.param_to_s
+    end
+
     RBS::Parser.parse_method_type(buffer("(1) -> void")).tap do |method_type|
       assert_equal "1", method_type.type.param_to_s
     end

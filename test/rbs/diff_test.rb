@@ -74,4 +74,70 @@ class RBS::DiffTest < Test::Unit::TestCase
       ], results
     end
   end
+
+  def test_detail
+    mktmpdir do |path|
+      dir1 = (path / "dir1")
+      dir1.mkdir
+      (dir1 / 'before.rbs').write(<<~RBS)
+        class Foo
+          def bar: () -> void
+          def self.baz: () -> (Integer | String)
+          def qux: (untyped) -> untyped
+          def quux: () -> void
+
+          SAME_MOD_SAME_VALUE: 1
+          SAME_MOD_OTHER_VALUE: 2
+          SAME_MOD_BEFORE_ONLY: 3
+          OTHER_MOD_SAME_VALUE: 4
+          OTHER_MOD_OTHER_VALUE: 5
+        end
+      RBS
+
+      dir2 = (path / "dir2")
+      dir2.mkdir
+      (dir2 / 'after.rbs').write(<<~RBS)
+        module Bar
+          def bar: () -> void
+          OTHER_MOD_SAME_VALUE: 4
+          OTHER_MOD_OTHER_VALUE: Array[Integer]
+        end
+
+        module Baz
+          def baz: (Integer) -> Integer?
+        end
+
+        class Foo
+          include Bar
+          extend Baz
+          alias quux bar
+          SAME_MOD_SAME_VALUE: 1
+          SAME_MOD_OTHER_VALUE: String
+          SAME_MOD_AFTER_ONLY: 3
+        end
+      RBS
+
+      diff = Diff.new(
+        type_name: TypeName("::Foo"),
+        library_options: RBS::CLI::LibraryOptions.new,
+        before_path: [dir1],
+        after_path: [dir2],
+        detail: true,
+      )
+      results = diff.each_diff.map do |before, after|
+        [before, after]
+      end
+      assert_equal [
+        ["[::Foo public] def bar: () -> void", "[::Bar public] def bar: () -> void"],
+        ["[::Foo public] def qux: (untyped) -> untyped", "-"],
+        ["[::Foo public] def quux: () -> void", "[::Foo public] alias quux bar"],
+        ["[::Foo public] def self.baz: () -> (::Integer | ::String)", "[::Baz public] def self.baz: (::Integer) -> ::Integer?"],
+        ["[::Foo] SAME_MOD_OTHER_VALUE: 2", "[::Foo] SAME_MOD_OTHER_VALUE: ::String"],
+        ["[::Foo] SAME_MOD_BEFORE_ONLY: 3", "-"],
+        ["[::Foo] OTHER_MOD_SAME_VALUE: 4", "[::Bar] OTHER_MOD_SAME_VALUE: 4"],
+        ["[::Foo] OTHER_MOD_OTHER_VALUE: 5", "[::Bar] OTHER_MOD_OTHER_VALUE: ::Array[::Integer]"],
+        ["-", "[::Foo] SAME_MOD_AFTER_ONLY: 3"]
+      ], results
+    end
+  end
 end
