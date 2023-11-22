@@ -330,6 +330,31 @@ class IOInstanceTest < Test::Unit::TestCase
                        io, :sync
     end
   end
+
+  def test_gets
+    IO.open(IO.sysopen(File.expand_path(__FILE__))) do |io|
+      assert_send_type '() -> String',
+                       io, :gets
+      assert_send_type '(String) -> String',
+                       io, :gets, ""
+      assert_send_type '(Integer) -> String',
+                       io, :gets, 10
+      assert_send_type '(chomp: bool) -> String',
+                       io, :gets, chomp: true
+
+      assert_send_type '(Integer, chomp: bool) -> String',
+                       io, :gets, 42, chomp: true
+      assert_send_type '(String, Integer, chomp: bool) -> String',
+                       io, :gets, "", 42, chomp: true
+      assert_send_type '(String, chomp: bool) -> String',
+                       io, :gets, "", chomp: true
+
+      assert_send_type '(nil) -> String',
+                       io, :gets, nil
+      assert_send_type '(nil, chomp: bool) -> nil',
+                       io, :gets, nil, chomp: true
+    end
+  end
 end
 
 class IOWaitTest < Test::Unit::TestCase
