@@ -17,14 +17,14 @@ class UnboundMethodInstanceTest < Test::Unit::TestCase
   end
 
   def test_eq
-    [UMETH, proc{}, Object.new, nil].each do |other|
+    with_untyped.and(UMETH) do |other|
       assert_send_type  '(untyped) -> bool',
                         UMETH, :==, other
     end
   end
 
   def test_eql?
-    [UMETH, proc{}, Object.new, nil].each do |other|
+    with_untyped.and(UMETH) do |other|
       assert_send_type  '(untyped) -> bool',
                         UMETH, :eql?, other
     end
