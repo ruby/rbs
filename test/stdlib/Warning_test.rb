@@ -1,6 +1,7 @@
 require_relative "test_helper"
 
 WARNING_CATEGORIES = %i[deprecated experimental]
+WARNING_CATEGORIES << :performance if RUBY_VERSION >= '3.3'
 
 class WarningSingletonTest < Test::Unit::TestCase
   include TypeAssertions
