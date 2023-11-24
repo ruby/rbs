@@ -2674,7 +2674,7 @@ module Kernel : BasicObject
   #     Object.new.nil?   #=> false
   #     nil.nil?          #=> true
   #
-  def nil?: () -> false
+  def nil?: () -> false # Overriden by NilClass#nil?
 
   # <!--
   #   rdoc-file=gc.c
