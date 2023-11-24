@@ -1287,8 +1287,7 @@ module Kernel : BasicObject
   #     [0..4, 0..4, 0..4]
   #
   def self?.p: () -> nil
-             | [T < _Inspect] (T object) -> T
-             | (_Inspect object1, _Inspect object2, *_Inspect objects) -> Array[_Inspect]
+             | [T < _Inspect] (T object1, *T objects) -> Array[T]
 
   # <!--
   #   rdoc-file=lib/pp.rb
