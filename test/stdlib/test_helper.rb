@@ -582,6 +582,26 @@ class ToF < BlankSlate
   end
 end
 
+class ToR < BlankSlate
+  def initialize(value = 1r)
+    @value = value
+  end
+
+  def to_r
+    @value
+  end
+end
+
+class ToC < BlankSlate
+  def initialize(value = 1i)
+    @value = value
+  end
+
+  def to_c
+    @value
+  end
+end
+
 class ToStr < BlankSlate
   def initialize(value = "")
     @value = value
