@@ -23,7 +23,7 @@ end
 
 module Spy
   def self.wrap(object, method_name)
-    spy = WrapSpy.new(object: object, method_name: method_name)
+    spy = WrapSpy.new(object: object, method_name: method_name).tap { $x&.(_1) }
 
     if block_given?
       begin
@@ -175,6 +175,8 @@ module WithAliases
 
     def each(&block) = @enum.each(&block)
 
+    def map(&block) = WithEnum.new(@enum.map(&block).each)
+
     def and_nil(&block)
       self.and(nil, &block)
     end
@@ -190,6 +192,11 @@ module WithAliases
         end
       end
     end
+  end
+
+  def with(*args, &block)
+    return WithEnum.new to_enum(__method__, *args) unless block_given?
+    args.each(&block)
   end
 
   def with_int(value = 3)
@@ -224,10 +231,12 @@ module WithAliases
     yield ToHash.new(hash)
   end
 
-  def with_io(io = $stdout)
+  def with_io(io = $stdout, close: false)
     return WithEnum.new to_enum(__method__, io) unless block_given?
     yield io
     yield ToIO.new(io)
+  ensure
+    io.close if close
   end
 
   def with_path(path = "/tmp/foo.txt", &block)
@@ -264,8 +273,23 @@ module WithAliases
   end
 
   alias with_untyped with_boolish
+
+  def with_timeout(seconds = 0, nanoseconds = 1)
+    return WithEnum.new to_enum(__method__) unless block_given?
+
+    with_int seconds do |secs|
+      with_int nanoseconds do |nsecs|
+        with_array secs, Timeout::NSecs.new(nsecs) do |divmod_return_value|
+          yield Timeout.new(divmod_return_value)
+        end
+      end
+    end
+  end
 end
+
 module TypeAssertions
+  RUBY_EXE = ENV['RUBY'] || RbConfig.ruby
+
   module ClassMethods
     attr_reader :target
 
@@ -384,6 +408,10 @@ module TypeAssertions
     when RBS::Types::ClassSingleton, RBS::Types::ClassInstance
       Object.const_get(type.name.to_s).singleton_class
     end
+  end
+
+  def pass(msg = nil)
+    assert true
   end
 
   ruby2_keywords def assert_send_type(method_type, receiver, method, *args, &block)
@@ -599,6 +627,16 @@ class ToI < BlankSlate
   end
 end
 
+class ToR < BlankSlate
+  def initialize(value = 1r)
+    @value = value
+  end
+
+  def to_r
+    @value
+  end
+end
+
 class ToInt < BlankSlate
   def initialize(value = 3)
     @value = value
@@ -618,6 +656,17 @@ class ToF < BlankSlate
     @value
   end
 end
+
+class ToC < BlankSlate
+  def initialize(value = 1i)
+    @value = value
+  end
+
+  def to_c
+    @value
+  end
+end
+
 
 class ToStr < BlankSlate
   def initialize(value = "")
@@ -708,6 +757,28 @@ class Writer
 
   def write(*vals)
     @buffer.concat vals.join
+  end
+end
+
+class Timeout < BlankSlate
+  class NSecs < ::BlankSlate
+    def initialize(nsecs)
+      @nsecs = nsecs
+    end
+
+    def *(r)
+      raise ArgumentError, '`*` for nsecs should only be called with `1000000000`' unless 1000000000.equal?(r)
+      @nsecs
+    end
+  end
+
+  def initialize(divmod_return_value)
+    @divmod_return_value = divmod_return_value
+  end
+
+  def divmod(x)
+    raise ArgumentError, '`divmod` for timeouts should only be called with `1`' unless 1.equal?(x)
+    @divmod_return_value
   end
 end
 
