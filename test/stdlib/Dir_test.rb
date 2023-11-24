@@ -97,7 +97,7 @@ class DirSingletonTest < Test::Unit::TestCase
   end
 
   def test_exist?
-    with_path.chain(with_io).each do |path|
+    with_path.and with_io do |path|
       assert_send_type "(::path | ::io) -> bool",
                        Dir, :exist?, path
     end

@@ -11,7 +11,7 @@ class KernelSingletonTest < Test::Unit::TestCase
     assert_send_type "(nil) -> []",
                      Kernel, :Array, nil
 
-    with_array(1r, 2r).chain([ToA.new(1r,2r)]).each do |ary|
+    with_array(1r, 2r).and ToA.new(1r, 2r) do |ary|
       assert_send_type "(::array[Rational] | ::_ToA[Rational]) -> Array[Rational]",
                        Kernel, :Array, ary
     end
@@ -47,7 +47,7 @@ class KernelSingletonTest < Test::Unit::TestCase
   end
 
   def test_Integer
-    with_int(1).chain([ToI.new(1)]).each do |int|
+    with_int(1).and ToI.new(1) do |int|
       assert_send_type "(::int | ::_ToI) -> Integer",
                        Kernel, :Integer, int
       assert_send_type "(::int | ::_ToI, exception: true) -> Integer",

@@ -26,7 +26,7 @@ class MarshalSingletonTest < Test::Unit::TestCase
     assert_send_type  '(untyped, Writer) -> Writer',
                       Marshal, :dump, obj, writer
 
-    with_int.chain([nil]).each do |limit|
+    with_int.and_nil do |limit|
       assert_send_type  '(untyped, Writer, int?) -> Writer',
                         Marshal, :dump, obj, writer, limit
     end
@@ -102,7 +102,7 @@ class MarshalIncludeTest < Test::Unit::TestCase
     assert_send_type  '(untyped, Writer) -> Writer',
                       Marshal, :dump, obj, writer
 
-    with_int.chain([nil]).each do |limit|
+    with_int.and_nil do |limit|
       assert_send_type  '(untyped, Writer, int?) -> Writer',
                         Marshal, :dump, obj, writer, limit
     end
