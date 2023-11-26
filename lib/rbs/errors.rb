@@ -557,4 +557,15 @@ module RBS
       @alias_entry.decl.location
     end
   end
+
+  class WillSyntaxError < DefinitionError
+    include DetailedMessageable
+
+    attr_reader :location
+
+    def initialize(message, location:)
+      super "#{Location.to_string(location)}: #{message}"
+      @location = location
+    end
+  end
 end
