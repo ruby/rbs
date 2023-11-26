@@ -179,17 +179,31 @@ module WithAliases
       self.and(nil, &block)
     end
 
+    def but(*cases)
+      return WithEnum.new to_enum(__method__, *args) unless block_given?
+
+      each do |arg|
+        yield arg unless cases.any? { _1 === arg }
+      end
+    end
+
     def and(*args, &block)
-      return WithEnum.new to_enum(__method__, args) unless block_given?
+      return WithEnum.new to_enum(__method__, *args) unless block_given?
+
       each(&block)
       args.each do |arg|
-        if WithEnum === arg
+        if WithEnum === arg # use `===` as `arg` might not have `.is_a?` on it
           arg.each(&block)
         else
           block.call(arg)
         end
       end
     end
+  end
+
+  def with(*args, &block)
+    return WithEnum.new to_enum(__method__, *args) unless block_given?
+    args.each(&block)
   end
 
   def with_int(value = 3)
@@ -264,7 +278,31 @@ module WithAliases
   end
 
   alias with_untyped with_boolish
+
+  def with_range(start, stop, exclude_end = false)
+    # If you need fixed starting and stopping points, you can just do `with_range with(1), with(2)`.
+    raise ArgumentError, '`start` must be from a `with` method' unless start.is_a? WithEnum
+    raise ArgumentError, '`stop` must be from a `with` method' unless stop.is_a? WithEnum
+
+    start.each do |lower|
+      stop.each do |upper|
+        yield CustomRange.new(lower, upper, exclude_end)
+
+        # `Range` requires `begin <=> end` to return non-nil, but doesn't actually
+        # end up using the return value of it. This is to add that in when needed.
+        def lower.<=>(rhs) = :not_nil unless defined? lower.<=>
+
+        # If `lower <=> rhs` is defined but nil, then that means we're going to be constructing
+        # an illegal range (eg `3..ToInt.new(4)`). So, we need to skip yielding an invalid range
+        # in that case.
+        next if defined?(lower.<=>) && nil == (lower <=> upper)
+
+        yield Range.new(lower, upper, exclude_end)
+      end
+    end
+  end
 end
+
 module TypeAssertions
   module ClassMethods
     attr_reader :target
@@ -687,6 +725,18 @@ class ToPath < BlankSlate
   def to_path
     @value
   end
+end
+
+class CustomRange < BlankSlate
+  attr_reader :begin, :end
+
+  def initialize(begin_, end_, exclude_end = false)
+    @begin = begin_
+    @end = end_
+    @exclude_end = exclude_end
+  end
+
+  def exclude_end? = @exclude_end
 end
 
 class Each < BlankSlate
