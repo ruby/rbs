@@ -43,7 +43,7 @@ module RBS
             highlight = RBS.logger_output ? RBS.logger_output.tty? : true
             error.detailed_message(highlight: highlight)
           else
-            error.message
+            "#{error.message} (#{error.class})"
           end
         end
       end
