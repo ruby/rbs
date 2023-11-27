@@ -276,6 +276,14 @@ static VALUE parse_function_param(parserstate *state) {
     param_range.start = type_range.start;
     param_range.end = name_range.end;
 
+    if (!is_keyword_token(state->current_token.type)) {
+      raise_syntax_error(
+        state,
+        state->current_token,
+        "unexpected token for function parameter name"
+      );
+    }
+
     VALUE name = rb_to_symbol(rbs_unquote_string(state, state->current_token.range, 0));
     VALUE location = rbs_new_location(state->buffer, param_range);
     rbs_loc *loc = rbs_check_location(location);

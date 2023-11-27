@@ -641,13 +641,25 @@ RBS
     assert_raises RBS::ParsingError do
       RBS::Parser.parse_method_type(buffer("(foo + 1) -> void"))
     end.tap do |exn|
-      assert_equal "test.rbs:1:7...1:8: Syntax error: unexpected token for method type parameters, token=`1` (tINTEGER)", exn.message
+      assert_equal "test.rbs:1:5...1:6: Syntax error: unexpected token for function parameter name, token=`+` (tOPERATOR)", exn.message
     end
 
     assert_raises RBS::ParsingError do
       RBS::Parser.parse_method_type(buffer("(foo: untyped, Bar) -> void"))
     end.tap do |exn|
       assert_equal "test.rbs:1:15...1:18: Syntax error: required keyword argument type is expected, token=`Bar` (tUIDENT)", exn.message
+    end
+
+    assert_raises RBS::ParsingError do
+      RBS::Parser.parse_method_type(buffer("(foo`: untyped) -> void"))
+    end.tap do |exn|
+      assert_equal "test.rbs:1:4...1:5: Syntax error: unexpected token for function parameter name, token=``` (tOPERATOR)", exn.message
+    end
+
+    assert_raises RBS::ParsingError do
+      RBS::Parser.parse_method_type(buffer("(?foo\": untyped) -> void"))
+    end.tap do |exn|
+      assert_equal "test.rbs:1:5...1:6: Syntax error: unexpected token for function parameter name, token=`\"` (ErrorToken)", exn.message
     end
 
     assert_raises RBS::ParsingError do
