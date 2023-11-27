@@ -1,146 +1,247 @@
-require_relative "test_helper"
+require_relative 'test_helper'
 
-class MatchDataTest < StdlibTest
-  target MatchData
+class MatchDataInstanceTest < Test::Unit::TestCase
+  include TypeAssertions
 
-  # test_==
-  def test_equal
-    foo = 'foo'
-    foo.match('f') == foo.match('f')
+  testing '::MatchData'
+
+  INSTANCE = /[^q](?<a>.)(.)(?<b>.)/.match('qwerty')
+  INSTANCE2 = /u\K(?<a>a)?./.match('uiop')
+
+  def with_backref(name: 'a', idx: 1, &block)
+    yield name.to_s
+    yield name.to_sym
+    with_int(idx, &block)
   end
 
-  # test_[]
-  def test_square_bracket
-    /(?<first>foo)(?<second>bar)(?<third>Baz)?/ =~ "foobarbaz"
-    $~[0]
-    $~[3]
-    $~[0..3]
-    $~[0, 4]
-    $~['first']
-    $~['third']
-    $~[:first]
-    $~[:third]
+  def test_initalize_copy
+    instance = /./.match('&')
+
+    assert_send_type  '(MatchData) -> self',
+                      instance, :initialize_copy, INSTANCE
   end
 
-  # test_begin
+  def test_eq(method: :==)
+    with INSTANCE, INSTANCE2 do |instance|
+      assert_send_type  '(MatchData) -> bool',
+                        INSTANCE, method, instance
+    end
+
+    with_untyped.but MatchData do |untyped|
+      assert_send_type  '(untyped) -> false',
+                        INSTANCE, method, untyped
+    end
+  end
+
+  def test_aref
+    with_int 1 do |start|
+      with_int 2 do |length|
+        assert_send_type  '(int, int) -> Array[String]',
+                          INSTANCE, :[], start, length
+        assert_send_type  '(int, int) -> Array[nil]',
+                          INSTANCE2, :[], start, length
+      end
+    end
+
+    with_backref do |backref|
+      assert_send_type  '(MatchData::capture) -> String',
+                        INSTANCE, :[], backref
+      assert_send_type  '(MatchData::capture, nil) -> String',
+                        INSTANCE, :[], backref, nil
+
+      assert_send_type  '(MatchData::capture) -> nil',
+                        INSTANCE2, :[], backref
+      assert_send_type  '(MatchData::capture, nil) -> nil',
+                        INSTANCE2, :[], backref, nil
+    end
+
+    with_range with_int(1).and_nil, with_int(2).and_nil do |range|
+      assert_send_type  '(range[int?]) -> Array[String]',
+                        INSTANCE, :[], range
+
+      # if the beginning is `nil`, then it'll include index `0`, which is the entire capture,
+      # and thus will be `Array[String?]`.
+      next if nil.equal?(range.begin)
+      assert_send_type  '(range[int?]) -> Array[String?]',
+                        INSTANCE2, :[], range
+    end
+  end
+
   def test_begin
-    /(?<first>foo)(?<second>bar)(?<third>Baz)?/ =~ "foobarbaz"
-    $~.begin 0
-    $~.begin 3
-    $~.begin 'first'
-    $~.begin 'third'
-    $~.begin :first
-    $~.begin :third
+    with_backref do |backref|
+      assert_send_type  '(MatchData::capture) -> Integer',
+                        INSTANCE, :begin, backref
+      assert_send_type  '(MatchData::capture) -> nil',
+                        INSTANCE2, :begin, backref
+    end
   end
 
-  def test_caputres
-    /(?<first>foo)(?<second>bar)(?<third>Baz)?/ =~ "foobarbaz"
-    $~.captures
+  def test_byteoffset
+    with_backref do |backref|
+      assert_send_type  '(MatchData::capture) -> [Integer, Integer]',
+                        INSTANCE, :byteoffset, backref
+      assert_send_type  '(MatchData::capture) -> [nil, nil]',
+                        INSTANCE2, :byteoffset, backref
+    end
+  end
+
+  def test_captures(method: :captures)
+    assert_send_type  '() -> Array[String]',
+                      INSTANCE, method
+    assert_send_type  '() -> Array[nil]',
+                      INSTANCE2, method
+  end
+
+  def test_deconstruct
+    test_captures(method: :deconstruct)
+  end
+
+  def test_deconstruct_keys
+    assert_send_type  '(nil) -> Hash[Symbol, String]',
+                      INSTANCE, :deconstruct_keys, nil
+    assert_send_type  '(nil) -> Hash[Symbol, nil]',
+                      INSTANCE2, :deconstruct_keys, nil
+
+    assert_send_type  '(Array[Symbol]) -> Hash[Symbol, String]',
+                      INSTANCE, :deconstruct_keys, [:a]
+    assert_send_type  '(Array[Symbol]) -> Hash[Symbol, nil]',
+                      INSTANCE2, :deconstruct_keys, [:a]
   end
 
   def test_end
-    /(?<first>foo)(?<second>bar)(?<third>Baz)?/ =~ "foobarbaz"
-    $~.end 0
-    $~.end 3
-    $~.end 'first'
-    $~.end 'third'
-    $~.end :first
-    $~.end :third
+    with_backref do |backref|
+      assert_send_type  '(MatchData::capture) -> Integer',
+                        INSTANCE, :end, backref
+      assert_send_type  '(MatchData::capture) -> nil',
+                        INSTANCE2, :end, backref
+    end
   end
 
   def test_eql?
-    foo = 'foo'
-    foo.match('f').eql? foo.match('f')
+    test_eq(method: :eql?)
   end
 
   def test_hash
-    'foo'.match('f').hash
+    assert_send_type  '() -> Integer',
+                      INSTANCE, :hash
   end
 
   def test_inspect
-    'foo'.match('f').inspect
+    assert_send_type  '() -> String',
+                      INSTANCE, :inspect
   end
 
   def test_length
-    'foo'.match('f').length
+    test_size(method: :length)
   end
 
   def test_named_captures
-    'foo'.match('(?<a>foo)').named_captures
+    assert_send_type  '() -> Hash[String, String]',
+                      INSTANCE, :named_captures
+    assert_send_type  '() -> Hash[String, nil]',
+                      INSTANCE2, :named_captures
   end
 
   def test_names
-    'foo'.match('(?<a>foo)').names
+    with INSTANCE, INSTANCE2 do |instance|
+      assert_send_type  '() -> Array[String]',
+                        instance, :names
+    end
   end
 
   def test_match
-    m = /(.)(.)(\d+)(\d)(\w)?/.match("THX1138.")
-    m.match(0)
-    m.match(4.0)
-    m.match(ToInt.new(5))
-
-    m = /(?<foo>.)(.)(?<bar>.+)/.match("hoge")
-    m.match(:foo)
-    m.match("bar")
+    with_backref do |backref|
+      assert_send_type  '(MatchData::capture) -> String',
+                        INSTANCE, :match, backref
+      assert_send_type  '(MatchData::capture) -> nil',
+                        INSTANCE2, :match, backref
+    end
   end
 
   def test_match_length
-    m = /(.)(.)(\d+)(\d)(\w)?/.match("THX1138.")
-    m.match_length(0)
-    m.match_length(4.0)
-    m.match_length(ToInt.new(5))
-
-    m = /(?<foo>.)(.)(?<bar>.+)/.match("hoge")
-    m.match_length(:foo)
-    m.match_length("bar")
+    with_backref do |backref|
+      assert_send_type  '(MatchData::capture) -> Integer',
+                        INSTANCE, :match_length, backref
+      assert_send_type  '(MatchData::capture) -> nil',
+                        INSTANCE2, :match_length, backref
+    end
   end
 
   def test_offset
-    /(?<first>foo)(?<second>bar)(?<third>Baz)?/ =~ "foobarbaz"
-    $~.offset 0
-    $~.offset 3
-    $~.offset 'first'
-    $~.offset 'third'
-    $~.offset :first
-    $~.offset :third
+    with_backref do |backref|
+      assert_send_type  '(MatchData::capture) -> [Integer, Integer]',
+                        INSTANCE, :offset, backref
+      assert_send_type  '(MatchData::capture) -> [nil, nil]',
+                        INSTANCE2, :offset, backref
+    end
   end
 
   def test_post_match
-    'foo'.match('f').post_match
+    assert_send_type  '() -> String',
+                      INSTANCE, :post_match
   end
 
   def test_pre_match
-    'foo'.match('o').pre_match
+    assert_send_type  '() -> String',
+                      INSTANCE, :pre_match
   end
 
   def test_regexp
-    'foo'.match('f').regexp
+    with INSTANCE, INSTANCE2 do |instance|
+      assert_send_type  '() -> Regexp',
+                        instance, :regexp
+    end
   end
 
-  def test_size
-    'foo'.match('f').size
+  def test_size(method: :size)
+    with INSTANCE, INSTANCE2 do |instance|
+      assert_send_type  '() -> Integer',
+                        instance, :size
+    end
   end
 
   def test_string
-    'foo'.match('f').string
+    with INSTANCE, INSTANCE2 do |instance|
+      assert_send_type  '() -> String',
+                        instance, :string
+    end
   end
 
   def test_to_a
-    /(?<first>foo)(?<second>bar)(?<third>Baz)?/ =~ "foobarbaz"
-    $~.to_a
+    assert_send_type  '() -> Array[String]',
+                      INSTANCE, :to_a
+
+    # In `.to_a`, the first field is always non-nil.
+    assert_send_type  '() -> Array[String?]',
+                      INSTANCE2, :to_a
+    assert_type 'Array[nil]',
+                INSTANCE2.to_a[1..]
   end
 
   def test_to_s
-    'foo'.match('f').to_s
+    with INSTANCE, INSTANCE2 do |instance|
+      assert_send_type  '() -> String',
+                        instance, :to_s
+    end
   end
 
   def test_values_at
-    /(?<first>foo)(?<second>bar)(?<third>Baz)?/ =~ "foobarbaz"
-    $~.values_at 0
-    $~.values_at 3
-    $~.values_at 'first'
-    $~.values_at 'third'
-    $~.values_at :first
-    $~.values_at :third
+    with INSTANCE, INSTANCE2 do |instance|
+        assert_send_type  '(*MatchData::capture) -> []',
+                          instance, :values_at
+    end
+
+    with_backref do |backref|
+      with_range with_int(1).and_nil, with_int(2).and_nil do |range|
+        assert_send_type  '(*MatchData::capture | range[int?]) -> Array[String]',
+                          INSTANCE, :values_at, backref, range
+
+        # if the beginning is `nil`, then it'll include index `0`, which is the entire capture,
+        # and thus will be `Array[String?]`.
+        next if nil.equal?(range.begin)
+        assert_send_type  '(*MatchData::capture | range[int?]) -> Array[nil]',
+                          INSTANCE2, :values_at, backref, range
+      end
+    end
   end
 end
