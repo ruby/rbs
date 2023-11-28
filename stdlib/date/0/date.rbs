@@ -533,7 +533,7 @@ class Date
   #
   # Related: Date._parse (returns a hash).
   #
-  def self.parse: (String str, ?boolish complete, ?Integer start) -> Date
+  def self.parse: (?String str, ?boolish complete, ?Integer start) -> Date
 
   # <!--
   #   rdoc-file=ext/date/date_core.c
