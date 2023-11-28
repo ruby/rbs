@@ -629,6 +629,9 @@
 class String
   include Comparable
 
+  # A `selector` is a special type of string, used within methods like `String#tr`.
+  type selector = string
+
   # <!--
   #   rdoc-file=string.c
   #   - String.try_convert(object) -> object, new_string, or nil
@@ -642,9 +645,76 @@ class String
   #
   # Raises an exception unless `object.to_str` returns a String object.
   #
-  def self.try_convert: (untyped obj) -> String?
+  def self.try_convert: (String object) -> String # technically will return `object` unchanged.
+                      | (_ToStr object) -> String
+                      | (untyped object) -> String?
 
-  public
+  # <!--
+  #   rdoc-file=string.c
+  #   - String.new(string = '', **opts) -> new_string
+  # -->
+  # Returns a new String that is a copy of `string`.
+  #
+  # With no arguments, returns the empty string with the Encoding `ASCII-8BIT`:
+  #
+  #     s = String.new
+  #     s # => ""
+  #     s.encoding # => #<Encoding:ASCII-8BIT>
+  #
+  # With optional argument `string` and no keyword arguments, returns a copy of
+  # `string` with the same encoding:
+  #
+  #     String.new('foo')               # => "foo"
+  #     String.new('тест')              # => "тест"
+  #     String.new('こんにちは')          # => "こんにちは"
+  #
+  # (Unlike String.new, a [string
+  # literal](rdoc-ref:syntax/literals.rdoc@String+Literals) like `''` or a [here
+  # document literal](rdoc-ref:syntax/literals.rdoc@Here+Document+Literals) always
+  # has [script encoding](rdoc-ref:encodings.rdoc@Script+Encoding).)
+  #
+  # With optional keyword argument `encoding`, returns a copy of `string` with the
+  # specified encoding; the `encoding` may be an Encoding object, an encoding
+  # name, or an encoding name alias:
+  #
+  #     String.new('foo', encoding: Encoding::US_ASCII).encoding # => #<Encoding:US-ASCII>
+  #     String.new('foo', encoding: 'US-ASCII').encoding         # => #<Encoding:US-ASCII>
+  #     String.new('foo', encoding: 'ASCII').encoding            # => #<Encoding:US-ASCII>
+  #
+  # The given encoding need not be valid for the string's content, and that
+  # validity is not checked:
+  #
+  #     s = String.new('こんにちは', encoding: 'ascii')
+  #     s.valid_encoding? # => false
+  #
+  # But the given `encoding` itself is checked:
+  #
+  #     String.new('foo', encoding: 'bar') # Raises ArgumentError.
+  #
+  # With optional keyword argument `capacity`, returns a copy of `string` (or an
+  # empty string, if `string` is not given); the given `capacity` is advisory
+  # only, and may or may not set the size of the internal buffer, which may in
+  # turn affect performance:
+  #
+  #     String.new(capacity: 1)
+  #     String.new('foo', capacity: 4096)
+  #
+  # The `string`, `encoding`, and `capacity` arguments may all be used together:
+  #
+  #     String.new('hello', encoding: 'UTF-8', capacity: 25)
+  #
+  def initialize: (?string source, ?encoding: encoding?, ?capacity: int?) -> self
+
+  # <!--
+  #   rdoc-file=string.c
+  #   - replace(other_string) -> self
+  # -->
+  # Replaces the contents of `self` with the contents of `other_string`:
+  #
+  #     s = 'foo'        # => "foo"
+  #     s.replace('bar') # => "bar"
+  #
+  alias initialize_copy replace
 
   # <!--
   #   rdoc-file=string.c
@@ -662,8 +732,8 @@ class String
   #     "foo = %{foo}" % {foo: 'bar'} # => "foo = bar"
   #     "foo = %{foo}, baz = %{baz}" % {foo: 'bar', baz: 'bat'} # => "foo = bar, baz = bat"
   #
-  def %: (Hash[Symbol, untyped]) -> String
-       | (Array[untyped]) -> String
+  def %: (array[untyped] positional_args) -> String
+       | (hash[Symbol, untyped] named_args) -> String
        | (untyped arg) -> String
 
   # <!--
@@ -675,7 +745,7 @@ class String
   #     "Ho! " * 3 # => "Ho! Ho! Ho! "
   #     "Ho! " * 0 # => ""
   #
-  def *: (int n) -> String
+  def *: (int amount) -> String
 
   # <!--
   #   rdoc-file=string.c
@@ -685,7 +755,7 @@ class String
   #
   #     "Hello from " + self.to_s # => "Hello from main"
   #
-  def +: (string other_str) -> String
+  def +: (string other_string) -> String
 
   # <!--
   #   rdoc-file=string.c
@@ -695,7 +765,7 @@ class String
   #
   # Otherwise returns `self.dup`, which is not frozen.
   #
-  def +@: () -> String
+  def +@: () -> (self | instance)
 
   # <!--
   #   rdoc-file=string.c
@@ -708,7 +778,7 @@ class String
   #
   # String#dedup is an alias for String#-@.
   #
-  def -@: () -> String
+  def -@: () -> (self | instance)
 
   # <!--
   #   rdoc-file=string.c
@@ -728,7 +798,8 @@ class String
   #
   # Related: String#concat, which takes multiple arguments.
   #
-  def <<: (string | Integer str_or_codepoint) -> String
+  def <<: (Integer codepoint) -> self
+        | (string other_string) -> self
 
   # <!--
   #   rdoc-file=string.c
@@ -751,8 +822,18 @@ class String
   #     'foo' <=> 'FOO' # => 1
   #     'foo' <=> 1 # => nil
   #
-  def <=>: (string other) -> Integer
-         | (untyped other) -> Integer?
+  def <=>: (string | _Spaceship[self] other) -> (-1 | 0 | 1)?
+         | (untyped) -> (-1 | 0 | 1)?
+
+  interface _Spaceship[T]
+    def <=>: (T rhs) -> _CompareWithZero?
+  end
+
+  interface _CompareWithZero
+    def >: (0) -> boolish
+
+    def <: (0) -> boolish
+  end
 
   # <!--
   #   rdoc-file=string.c
@@ -773,7 +854,7 @@ class String
   # If `object` is not an instance of String but responds to `to_str`, then the
   # two strings are compared using `object.==`.
   #
-  def ==: (untyped obj) -> bool
+  def ==: (untyped other) -> bool
 
   # <!-- rdoc-file=string.c -->
   # Returns `true` if `object` has the same length and content; as `self`; `false`
@@ -790,7 +871,7 @@ class String
   # If `object` is not an instance of String but responds to `to_str`, then the
   # two strings are compared using `object.==`.
   #
-  def ===: (untyped obj) -> bool
+  alias === ==
 
   # <!--
   #   rdoc-file=string.c
@@ -818,7 +899,12 @@ class String
   #     /(?<number>\d+)/ =~ "no. 9"
   #     number #=> "9"
   #
-  def =~: (untyped obj) -> Integer?
+  def =~: (Regexp regex) -> Integer?
+        | [T] (_MatchAgainst[self, T] object) -> T
+
+  interface _MatchAgainst[O, T]
+    def =~: (O string) -> T
+  end
 
   # <!--
   #   rdoc-file=string.c
@@ -831,12 +917,10 @@ class String
   # Returns the substring of `self` specified by the arguments. See examples at
   # [String Slices](rdoc-ref:String@String+Slices).
   #
-  def []: (int index) -> String?
-        | (int start, int length) -> String?
-        | (Range[Integer] | Range[Integer?] range) -> String?
-        | (Regexp regexp) -> String?
-        | (Regexp regexp, int | String capture) -> String?
-        | (String match_str) -> String?
+  def []: (int start, ?int length) -> String?
+        | (range[int?] range) -> String?
+        | (Regexp regexp, ?MatchData::capture backref) -> String?
+        | (String substring) -> String?
 
   # <!--
   #   rdoc-file=string.c
@@ -865,13 +949,12 @@ class String
   #
   # String#slice is an alias for String#[].
   #
-  def []=: (int pos, String new_str) -> String
-         | (int begin_pos, int end_pos, String new_str) -> String
-         | (Range[Integer] | Range[Integer?] range, String new_str) -> String
-         | (Regexp regexp, String new_str) -> String
-         | (Regexp regexp, int capture, String new_str) -> String
-         | (Regexp regexp, String name, String new_str) -> String
-         | (String other_str, String new_str) -> String
+  def []=: [T < _ToStr] (int index, T replacement) -> T
+         | [T < _ToStr] (int start, int length, T replacement) -> T
+         | [T < _ToStr] (range[int?] range, T replacement) -> T
+         | [T < _ToStr] (Regexp regexp, T replacement) -> T
+         | [T < _ToStr] (Regexp regexp, MatchData::capture backref, T replacement) -> T
+         | [T < _ToStr] (String substring, T replacement) -> T
 
   # <!--
   #   rdoc-file=string.c
@@ -945,7 +1028,7 @@ class String
   #
   # Related: String#index, String#byterindex.
   #
-  def byteindex: (Regexp | string substr_or_regexp, ?int offset) -> Integer?
+  def byteindex: (Regexp | string pattern, ?int offset) -> Integer?
 
   # <!--
   #   rdoc-file=string.c
@@ -1006,7 +1089,7 @@ class String
   #
   # Related: String#byteindex.
   #
-  def byterindex: (Regexp | string substr_or_regexp, ?int offset) -> Integer?
+  def byterindex: (Regexp | string pattern, ?int offset) -> Integer?
 
   # <!--
   #   rdoc-file=string.c
@@ -1020,7 +1103,7 @@ class String
   #     # => [227, 129, 147, 227, 130, 147, 227, 129, 171, 227, 129, 161, 227, 129, 175]
   #
   def bytes: () -> Array[Integer]
-           | () { (Integer byte) -> void } -> String
+           | () { (Integer byte) -> void } -> self
 
   # <!--
   #   rdoc-file=string.c
@@ -1082,7 +1165,7 @@ class String
   #     s.byteslice(4).encoding # => #<Encoding:UTF-8>
   #
   def byteslice: (int start, ?int length) -> String?
-               | (Range[Integer] | Range[Integer?] range) -> String?
+               | (range[int?] range) -> String?
 
   # <!--
   #   rdoc-file=string.c
@@ -1098,8 +1181,9 @@ class String
   # beginning or ending offset does not land on character (codepoint) boundary, an
   # IndexError will be raised.
   #
-  def bytesplice: (int index, int length, string str) -> String
-                | (Range[int?], string str) -> String
+  def bytesplice: (int start, int length, string str) -> String
+                | (int start, int length, string str, int str_start, int str_length) -> String
+                | (range[int?] range, string str, ?range[int?] str_range) -> String
 
   # <!--
   #   rdoc-file=string.c
@@ -1120,6 +1204,7 @@ class String
                 | (:ascii | :lithuanian | :turkic) -> String
                 | (:lithuanian, :turkic) -> String
                 | (:turkic, :lithuanian) -> String
+  # ^^ TODO (arbitrary constraints): | () -> self where self := ""
 
   # <!--
   #   rdoc-file=string.c
@@ -1138,10 +1223,11 @@ class String
   #
   # Related: String#capitalize.
   #
-  def capitalize!: () -> String?
-                 | (:ascii | :lithuanian | :turkic) -> String?
-                 | (:lithuanian, :turkic) -> String?
-                 | (:turkic, :lithuanian) -> String?
+  def capitalize!: () -> self?
+                 | (:ascii | :lithuanian | :turkic) -> self?
+                 | (:lithuanian, :turkic) -> self?
+                 | (:turkic, :lithuanian) -> self?
+  # ^^ TODO (arbitrary constraints): | () -> nil where self := ""
 
   # <!--
   #   rdoc-file=string.c
@@ -1168,7 +1254,8 @@ class String
   #
   # Related: String#casecmp?.
   #
-  def casecmp: (untyped other) -> Integer?
+  def casecmp: (string other) -> (-1 | 0 | 1)?
+             | (untyped) -> (-1 | 0 | 1)?
 
   # <!--
   #   rdoc-file=string.c
@@ -1191,7 +1278,8 @@ class String
   #
   # Related: String#casecmp.
   #
-  def casecmp?: (untyped other) -> bool?
+  def casecmp?: (string other) -> bool?
+              | (untyped) -> bool?
 
   # <!--
   #   rdoc-file=string.c
@@ -1216,7 +1304,7 @@ class String
   #
   # Related: String#ljust, String#rjust.
   #
-  def center: (int width, ?string padstr) -> String
+  def center: (int width, ?string pad_string) -> String
 
   # <!--
   #   rdoc-file=string.c
@@ -1229,7 +1317,7 @@ class String
   #     'こんにちは'.chars # => ["こ", "ん", "に", "ち", "は"]
   #
   def chars: () -> Array[String]
-           | () { (String char) -> void } -> String
+           | () { (String char) -> void } -> self
 
   # <!--
   #   rdoc-file=string.c
@@ -1264,7 +1352,7 @@ class String
   #     'abcd'.chomp('d')  # => "abc"
   #     'abcdd'.chomp('d') # => "abcd"
   #
-  def chomp: (?string separator) -> String
+  def chomp: (?string? separator) -> String
 
   # <!--
   #   rdoc-file=string.c
@@ -1273,7 +1361,8 @@ class String
   # Like String#chomp, but modifies `self` in place; returns `nil` if no
   # modification made, `self` otherwise.
   #
-  def chomp!: (?string separator) -> String?
+  def chomp!: (?string separator) -> self?
+            | (nil) -> nil
 
   # <!--
   #   rdoc-file=string.c
@@ -1309,7 +1398,11 @@ class String
   #
   # Related: String#chomp!.
   #
-  def chop!: () -> String?
+  def chop!: () -> self?
+  # ^^ TODO (arbitrary constraints):
+  #   | () -> nil where self = ""
+  #   | () -> self where self != ""
+  #   | () -> self?
 
   # <!--
   #   rdoc-file=string.c
@@ -1331,7 +1424,7 @@ class String
   #     s = 'foo' # => "foo"
   #     s.clear   # => ""
   #
-  def clear: () -> String
+  def clear: () -> self
 
   # <!--
   #   rdoc-file=string.c
@@ -1344,8 +1437,8 @@ class String
   #     'тест'.codepoints      # => [1090, 1077, 1089, 1090]
   #     'こんにちは'.codepoints # => [12371, 12435, 12395, 12385, 12399]
   #
-  def codepoints: () -> ::Array[Integer]
-                | () { (Integer codepoint) -> void } -> String
+  def codepoints: () -> Array[Integer]
+                | () { (Integer codepoint) -> void } -> self
 
   # <!--
   #   rdoc-file=string.c
@@ -1365,7 +1458,7 @@ class String
   #
   # Related: String#<<, which takes a single argument.
   #
-  def concat: (*string | Integer str_or_codepoint) -> String
+  def concat: (*string | Integer string_or_codepoints) -> self
 
   # <!--
   #   rdoc-file=string.c
@@ -1389,7 +1482,7 @@ class String
   #     c.count "\\A"                  #=> 0
   #     c.count "X-\\w"                #=> 3
   #
-  def count: (string other_str, *string other_strs) -> Integer
+  def count: (selector selector_0, *selector more_selectors) -> Integer
 
   # <!--
   #   rdoc-file=string.c
@@ -1470,7 +1563,7 @@ class String
   #     "hello".delete "aeiou", "^e"   #=> "hell"
   #     "hello".delete "ej-m"          #=> "ho"
   #
-  def delete: (string other_str, *string other_strs) -> String
+  def delete: (selector selector_0, *selector more_selectors) -> String
 
   # <!--
   #   rdoc-file=string.c
@@ -1479,7 +1572,7 @@ class String
   # Like String#delete, but modifies `self` in place. Returns `self` if any
   # changes were made, `nil` otherwise.
   #
-  def delete!: (string other_str, *string other_strs) -> String?
+  def delete!: (selector selector_0, *selector more_selectors) -> self?
 
   # <!--
   #   rdoc-file=string.c
@@ -1503,7 +1596,7 @@ class String
   # Like String#delete_prefix, except that `self` is modified in place. Returns
   # `self` if the prefix is removed, `nil` otherwise.
   #
-  def delete_prefix!: (string prefix) -> String?
+  def delete_prefix!: (string prefix) -> self?
 
   # <!--
   #   rdoc-file=string.c
@@ -1527,7 +1620,7 @@ class String
   # Like String#delete_suffix, except that `self` is modified in place. Returns
   # `self` if the suffix is removed, `nil` otherwise.
   #
-  def delete_suffix!: (string suffix) -> String?
+  def delete_suffix!: (string suffix) -> self?
 
   # <!--
   #   rdoc-file=string.c
@@ -1565,10 +1658,10 @@ class String
   #
   # Related: String#downcase, String#upcase, String#upcase!.
   #
-  def downcase!: () -> String?
-               | (:ascii | :fold | :lithuanian | :turkic) -> String?
-               | (:lithuanian, :turkic) -> String?
-               | (:turkic, :lithuanian) -> String?
+  def downcase!: () -> self?
+               | (:ascii | :fold | :lithuanian | :turkic) -> self?
+               | (:lithuanian, :turkic) -> self?
+               | (:turkic, :lithuanian) -> self?
 
   # <!--
   #   rdoc-file=string.c
@@ -1607,8 +1700,8 @@ class String
   #
   # Returns an enumerator if no block is given.
   #
-  def each_byte: () { (Integer byte) -> void } -> self
-               | () -> ::Enumerator[Integer, self]
+  def each_byte: () -> Enumerator[Integer, self]
+               | () { (Integer byte) -> void } -> self
 
   # <!--
   #   rdoc-file=string.c
@@ -1633,8 +1726,8 @@ class String
   #
   # Returns an enumerator if no block is given.
   #
-  def each_char: () { (String char) -> void } -> self
-               | () -> ::Enumerator[String, self]
+  def each_char: () -> Enumerator[String, self]
+               | () { (String char) -> void } -> self
 
   # <!--
   #   rdoc-file=string.c
@@ -1659,8 +1752,8 @@ class String
   #
   # Returns an enumerator if no block is given.
   #
-  def each_codepoint: () { (Integer codepoint) -> void } -> self
-                    | () -> ::Enumerator[Integer, self]
+  def each_codepoint: () -> Enumerator[Integer, self]
+                    | () { (Integer codepoint) -> void } -> self
 
   # <!--
   #   rdoc-file=string.c
@@ -1681,8 +1774,8 @@ class String
   #
   # Returns an enumerator if no block is given.
   #
-  def each_grapheme_cluster: () { (String grapheme) -> void } -> self
-                           | () -> ::Enumerator[String, self]
+  def each_grapheme_cluster: () -> Enumerator[String, self]
+                           | () { (String grapheme_cluter) -> void } -> self
 
   # <!--
   #   rdoc-file=string.c
@@ -1747,8 +1840,10 @@ class String
   #
   # With no block given, returns an enumerator.
   #
-  def each_line: (?string separator, ?chomp: boolish) { (String line) -> void } -> self
-               | (?string separator, ?chomp: boolish) -> Enumerator[String, self]
+  def each_line: (?string? separator, ?chomp: boolish) -> Enumerator[String, self]
+               | (?string? separator, ?chomp: boolish) { (String line) -> void } -> self
+  # NOTE: ^ technically you can get `instance` yielded via a `nil` separator, or `$/` being set to
+  # `nil`, but annotating those cases seems pedantic, and this is technically valid.
 
   # <!--
   #   rdoc-file=string.c
@@ -1809,7 +1904,24 @@ class String
   # Optional keyword arguments `enc_opts` specify encoding options; see [Encoding
   # Options](rdoc-ref:encodings.rdoc@Encoding+Options).
   #
-  def encode: (?encoding encoding, ?encoding from_encoding, ?invalid: :replace ?, ?undef: :replace ?, ?replace: String, ?fallback: String::encode_fallback, ?xml: :text | :attr, ?universal_newline: true, ?cr_newline: true, ?crlf_newline: true) -> String
+  def encode: (
+    ?encoding source_encoding,
+    ?encoding? from_encoding,
+    ?invalid: :replace ?,
+    ?undef: :replace ?,
+    ?replace: string?,
+    ?xml: (:text | :attr)?,
+    ?newline: (:universal | :crlf | :cr | :lf)?,
+    ?universal_newline: boolish,
+    ?cr_newline: boolish,
+    ?crlf_newline: boolish,
+    ?lf_newline: boolish,
+    ?fallback: ^(String) -> string? | Method | _EncodeFallbackAref
+  ) -> instance
+
+  interface _EncodeFallbackAref
+    def []: (String) -> string?
+  end
 
   # <!--
   #   rdoc-file=transcode.c
@@ -1818,7 +1930,20 @@ class String
   # -->
   # Like #encode, but applies encoding changes to `self`; returns `self`.
   #
-  def encode!: (?encoding encoding, ?encoding from_encoding, ?invalid: :replace ?, ?undef: :replace ?, ?replace: String, ?fallback: String::encode_fallback, ?xml: :text | :attr, ?universal_newline: true, ?cr_newline: true, ?crlf_newline: true) -> self
+  def encode!: (
+    ?encoding source_encoding,
+    ?encoding? from_encoding,
+    ?invalid: :replace ?,
+    ?undef: :replace ?,
+    ?replace: string?,
+    ?xml: (:text | :attr)?,
+    ?newline: (:universal | :crlf | :cr | :lf)?,
+    ?universal_newline: boolish,
+    ?cr_newline: boolish,
+    ?crlf_newline: boolish,
+    ?lf_newline: boolish,
+    ?fallback: ^(String) -> string? | Method | _EncodeFallbackAref
+  ) -> self
 
   # <!--
   #   rdoc-file=string.c
@@ -1888,7 +2013,7 @@ class String
   #     s.force_encoding(Encoding::UTF_8) # => "łał"
   #     s.valid_encoding?                 # => true
   #
-  def force_encoding: (string | Encoding encoding) -> self
+  def force_encoding: (encoding enc) -> self
 
   # <!--
   #   rdoc-file=string.c
@@ -1926,7 +2051,8 @@ class String
   #     s.grapheme_clusters
   #     # => ["ä", "-", "p", "q", "r", "-", "b̈", "-", "x", "y", "z", "-", "c̈"]
   #
-  def grapheme_clusters: () -> ::Array[::String]
+  def grapheme_clusters: () -> Array[String]
+                       | () { (String grapheme_cluter) -> void } -> self
 
   # <!--
   #   rdoc-file=string.c
@@ -1942,10 +2068,9 @@ class String
   #
   # Related: String#sub, String#sub!, String#gsub!.
   #
-  def gsub: (Regexp | string pattern, string replacement) -> String
-          | (Regexp | string pattern, Hash[String, String] hash) -> String
+  def gsub: (Regexp | string pattern, string | hash[String, _ToS] replacement) -> String
+          | (Regexp | string pattern) -> Enumerator[String, String]
           | (Regexp | string pattern) { (String match) -> _ToS } -> String
-          | (Regexp | string pattern) -> ::Enumerator[String, self]
 
   # <!--
   #   rdoc-file=string.c
@@ -1962,10 +2087,9 @@ class String
   #
   # Related: String#sub, String#gsub, String#sub!.
   #
-  def gsub!: (Regexp | string pattern, string replacement) -> String?
-           | (Regexp | string pattern, Hash[String, String] hash) -> String?
-           | (Regexp | string pattern) { (String match) -> _ToS } -> String?
-           | (Regexp | string pattern) -> ::Enumerator[String, self]
+  def gsub!: (Regexp | string pattern, string | hash[String, _ToS] replacement) -> self?
+           | (Regexp | string pattern) -> Enumerator[String, self]
+           | (Regexp | string pattern) { (String match) -> _ToS } -> self?
 
   # <!--
   #   rdoc-file=string.c
@@ -2006,7 +2130,7 @@ class String
   #     s.include?('fo')   # => true
   #     s.include?('food') # => false
   #
-  def include?: (string other_str) -> bool
+  def include?: (string other_string) -> bool
 
   # <!--
   #   rdoc-file=string.c
@@ -2052,7 +2176,7 @@ class String
   #
   # Related: String#rindex.
   #
-  def index: (Regexp | string substr_or_regexp, ?int offset) -> Integer?
+  def index: (Regexp | string pattern, ?int offset) -> Integer?
 
   # <!--
   #   rdoc-file=string.c
@@ -2069,7 +2193,7 @@ class String
   #
   #     'foo'.insert(-2, 'bar') # => "fobaro"
   #
-  def insert: (int index, string other_str) -> String
+  def insert: (int index, string other_str) -> self
 
   # <!--
   #   rdoc-file=string.c
@@ -2132,7 +2256,10 @@ class String
   # Forms substrings ("lines") of `self` according to the given arguments (see
   # String#each_line for details); returns the lines in an array.
   #
-  def lines: (?string separator, ?chomp: boolish) -> Array[String]
+  def lines: (?string? separator, ?chomp: boolish) -> Array[String]
+           | (?string? separator, ?chomp: boolish) { (String line) -> void } -> self
+  # NOTE: ^ technically you can get `instance` yielded via a `nil` separator, or `$/` being set to
+  # `nil`, but annotating those cases seems pedantic, and this is technically valid.
 
   # <!--
   #   rdoc-file=string.c
@@ -2157,7 +2284,7 @@ class String
   #
   # Related: String#rjust, String#center.
   #
-  def ljust: (int integer, ?string padstr) -> String
+  def ljust: (int size, ?string pad_string) -> String
 
   # <!--
   #   rdoc-file=string.c
@@ -2221,8 +2348,8 @@ class String
   #     'foo'.match(/x/) {|matchdata| matchdata } # => nil
   #     'foo'.match(/f/, 1) {|matchdata| matchdata } # => nil
   #
-  def match: (Regexp | string pattern, ?int pos) -> MatchData?
-           | [A] (Regexp | string pattern, ?int pos) { (MatchData) -> A } -> A
+  def match: (Regexp | string pattern, ?int offset) -> MatchData?
+           | [T] (Regexp | string pattern, ?int offset) { (MatchData matchdata) -> T } -> T?
 
   # <!--
   #   rdoc-file=string.c
@@ -2247,7 +2374,7 @@ class String
   #     'foo'.match?('f', 1) # => false
   #     'foo'.match?('o', 1) # => true
   #
-  def match?: (Regexp | string pattern, ?int pos) -> bool
+  def match?: (Regexp | string pattern, ?int offset) -> bool
 
   # <!-- rdoc-file=string.c -->
   # Returns the successor to `self`. The successor is calculated by incrementing
@@ -2303,14 +2430,14 @@ class String
   #
   # String#next is an alias for String#succ.
   #
-  def next: () -> String
+  alias next succ
 
   # <!-- rdoc-file=string.c -->
   # Equivalent to String#succ, but modifies `self` in place; returns `self`.
   #
   # String#next! is an alias for String#succ!.
   #
-  def next!: () -> self
+  alias next! succ!
 
   # <!--
   #   rdoc-file=string.c
@@ -2373,7 +2500,7 @@ class String
   #
   # Related: String#rpartition, String#split.
   #
-  def partition: (Regexp | string sep_or_regexp) -> [ String, String, String ]
+  def partition: (Regexp | string pattern) -> [String, String, String]
 
   # <!--
   #   rdoc-file=string.c
@@ -2387,7 +2514,7 @@ class String
   #
   # Related: String#concat.
   #
-  def prepend: (*string other_strs) -> String
+  def prepend: (*string other_strings) -> self
 
   # <!-- rdoc-file=string.c -->
   # Replaces the contents of `self` with the contents of `other_string`:
@@ -2395,7 +2522,7 @@ class String
   #     s = 'foo'        # => "foo"
   #     s.replace('bar') # => "bar"
   #
-  def replace: (string other_str) -> String
+  def replace: (string other_string) -> self
 
   # <!--
   #   rdoc-file=string.c
@@ -2475,7 +2602,7 @@ class String
   #
   # Related: String#index.
   #
-  def rindex: (string | Regexp substr_or_regexp, ?int pos) -> Integer?
+  def rindex: (Regexp | string pattern, ?int offset) -> Integer?
 
   # <!--
   #   rdoc-file=string.c
@@ -2500,7 +2627,7 @@ class String
   #
   # Related: String#ljust, String#center.
   #
-  def rjust: (int integer, ?string padstr) -> String
+  def rjust: (int size, ?string pad_string) -> String
 
   # <!--
   #   rdoc-file=string.c
@@ -2532,7 +2659,7 @@ class String
   #
   # Related: String#partition, String#split.
   #
-  def rpartition: (string | Regexp sep_or_regexp) -> [ String, String, String ]
+  def rpartition: (Regexp | string pattern) -> [String, String, String]
 
   # <!--
   #   rdoc-file=string.c
@@ -2601,9 +2728,9 @@ class String
   #     rceu lowlr
   #
   def scan: (Regexp pattern) -> Array[String | Array[String]]
-          | (Regexp pattern) { (String | Array[String]) -> void } -> self
+          | (Regexp pattern) { (String | Array[String] matches) -> void } -> self
           | (string pattern) -> Array[String]
-          | (string pattern) { (String) -> void } -> self
+          | (string pattern) { (String match) -> void } -> self
 
   # <!--
   #   rdoc-file=string.c
@@ -2635,8 +2762,8 @@ class String
   #     "\x81"
   #     "\x81"
   #
-  def scrub: (?string repl) -> String
-           | () { (String bytes) -> string } -> String
+  def scrub: (?string replacement) -> String
+           | (?nil) { (String bytes) -> string } -> String
 
   # <!--
   #   rdoc-file=string.c
@@ -2646,8 +2773,8 @@ class String
   # -->
   # Like String#scrub, except that any replacements are made in `self`.
   #
-  def scrub!: (?string repl) -> self
-            | () { (String bytes) -> string } -> self
+  def scrub!: (?string? replacement) -> self
+            | (?nil) { (String bytes) -> string } -> self
 
   # <!--
   #   rdoc-file=string.c
@@ -2661,7 +2788,7 @@ class String
   #
   # Related: String#getbyte.
   #
-  def setbyte: (int index, int integer) -> int
+  def setbyte: [T < _ToInt] (int index, T byte) -> T
 
   # <!-- rdoc-file=string.c -->
   # Returns the count of characters (not bytes) in `self`:
@@ -2706,10 +2833,10 @@ class String
   #     string.slice!("r")      #=> "r"
   #     string                  #=> "Thing"
   #
-  def slice!: (int integer, ?int integer) -> String?
-            | (Range[Integer] | Range[Integer?] range) -> String?
-            | (Regexp regexp, ?int | String capture) -> String?
-            | (String other_str) -> String?
+  def slice!: (int index, ?int length) -> String?
+            | (range[int?] range) -> String?
+            | (String substring) -> String?
+            | (Regexp regexp, ?MatchData::capture backref) -> String?
 
   # <!--
   #   rdoc-file=string.c
@@ -2797,8 +2924,8 @@ class String
   #
   # Related: String#partition, String#rpartition.
   #
-  def split: (?Regexp | string pattern, ?int limit) -> Array[String]
-           | (?Regexp | string pattern, ?int limit) { (String) -> void } -> self
+  def split: (?Regexp | string | nil pattern, ?int limit) -> Array[String]
+           | (?Regexp | string | nil pattern, ?int limit) { (String substring) -> void } -> self
 
   # <!--
   #   rdoc-file=string.c
@@ -2816,7 +2943,7 @@ class String
   #     "  now   is  the".squeeze(" ")         #=> " now is the"
   #     "putters shoot balls".squeeze("m-z")   #=> "puters shot balls"
   #
-  def squeeze: (*string other_str) -> String
+  def squeeze: (*selector selectors) -> String
 
   # <!--
   #   rdoc-file=string.c
@@ -2825,7 +2952,7 @@ class String
   # Like String#squeeze, but modifies `self` in place. Returns `self` if any
   # changes were made, `nil` otherwise.
   #
-  def squeeze!: (*string other_str) -> self?
+  def squeeze!: (*selector selectors) -> self?
 
   # <!--
   #   rdoc-file=string.c
@@ -2851,7 +2978,7 @@ class String
   #
   # Related: String#end_with?.
   #
-  def start_with?: (*string prefixes) -> bool
+  def start_with?: (*Regexp | string prefixes) -> bool
 
   # <!--
   #   rdoc-file=string.c
@@ -2892,7 +3019,7 @@ class String
   #
   # Related: String#sub!, String#gsub, String#gsub!.
   #
-  def sub: (Regexp | string pattern, string | Hash[String, String] replacement) -> String
+  def sub: (Regexp | string pattern, string | hash[String, _ToS] replacement) -> String
          | (Regexp | string pattern) { (String match) -> _ToS } -> String
 
   # <!--
@@ -2907,8 +3034,8 @@ class String
   #
   # Related: String#sub, String#gsub, String#gsub!.
   #
-  def sub!: (Regexp | string pattern, string | Hash[String, String] replacement) -> self?
-          | (Regexp | string pattern) { (String match) -> _ToS } -> String?
+  def sub!: (Regexp | string pattern, string | hash[String, _ToS] replacement) -> self?
+          | (Regexp | string pattern) { (String match) -> _ToS } -> self?
 
   # <!--
   #   rdoc-file=string.c
@@ -2977,7 +3104,7 @@ class String
   #
   # String#next! is an alias for String#succ!.
   #
-  def succ!: () -> String
+  def succ!: () -> self
 
   # <!--
   #   rdoc-file=string.c
@@ -2994,7 +3121,7 @@ class String
   #
   # This is not a particularly strong checksum.
   #
-  def sum: (?int n) -> Integer
+  def sum: (?int bits) -> Integer
 
   # <!--
   #   rdoc-file=string.c
@@ -3117,7 +3244,7 @@ class String
   #     'abcdef'.to_i # => 0
   #     '2'.to_i(2)   # => 0
   #
-  def to_i: (?int base) -> Integer
+  def to_i: (?int radix) -> Integer
 
   # <!--
   #   rdoc-file=rational.c
@@ -3157,7 +3284,7 @@ class String
   #
   # String#to_str is an alias for String#to_s.
   #
-  def to_s: () -> String
+  def to_s: () -> (self | String)
 
   # <!-- rdoc-file=string.c -->
   # Returns `self` if `self` is a String, or `self` converted to a String if
@@ -3165,7 +3292,7 @@ class String
   #
   # String#to_str is an alias for String#to_s.
   #
-  def to_str: () -> String
+  alias to_str to_s
 
   # <!-- rdoc-file=string.c -->
   # Returns the Symbol corresponding to *str*, creating the symbol if it did not
@@ -3182,7 +3309,7 @@ class String
   #
   #     'cat and dog'.to_sym   #=> :"cat and dog"
   #
-  def to_sym: () -> Symbol
+  alias to_sym intern
 
   # <!--
   #   rdoc-file=string.c
@@ -3222,7 +3349,7 @@ class String
   #     'i-b-m'.tr('b\-z', 'a-z')       # => "ibabm"     # Escaped embedded hyphen.
   #     'foo\\bar'.tr('ab\\', 'XYZ')    # => "fooZYXr"   # Escaped backslash.
   #
-  def tr: (string from_str, string to_str) -> String
+  def tr: (selector source, string relpacement) -> String
 
   # <!--
   #   rdoc-file=string.c
@@ -3231,7 +3358,7 @@ class String
   # Like String#tr, but modifies `self` in place. Returns `self` if any changes
   # were made, `nil` otherwise.
   #
-  def tr!: (string from_str, string to_str) -> String?
+  def tr!: (selector source, string relpacement) -> self?
 
   # <!--
   #   rdoc-file=string.c
@@ -3246,7 +3373,7 @@ class String
   #
   # Related: String#squeeze.
   #
-  def tr_s: (string from_str, string to_str) -> String
+  def tr_s: (selector source, string replacement) -> String
 
   # <!--
   #   rdoc-file=string.c
@@ -3257,7 +3384,7 @@ class String
   #
   # Related: String#squeeze!.
   #
-  def tr_s!: (string from_str, string to_str) -> String?
+  def tr_s!: (selector source, string replacement) -> self?
 
   # <!--
   #   rdoc-file=string.c
@@ -3309,7 +3436,8 @@ class String
   #
   # Related: String#unicode_normalize!, String#unicode_normalized?.
   #
-  def unicode_normalize: (?:nfc | :nfd | :nfkc | :nfkd) -> String
+  def unicode_normalize: (?:nfc | :nfd | :nfkc | :nfkd form) -> (self | String)
+  # NOTE: ^ technically can return `self` if `self.encoding` is ascii.
 
   # <!--
   #   rdoc-file=string.c
@@ -3320,7 +3448,7 @@ class String
   #
   # Related String#unicode_normalized?.
   #
-  def unicode_normalize!: (?:nfc | :nfd | :nfkc | :nfkd) -> String
+  def unicode_normalize!: (?:nfc | :nfd | :nfkc | :nfkd form) -> self
 
   # <!--
   #   rdoc-file=string.c
@@ -3353,7 +3481,8 @@ class String
   # Extracts data from `self`, forming objects that become the elements of a new
   # array; returns that array. See [Packed Data](rdoc-ref:packed_data.rdoc).
   #
-  def unpack: (String format, ?offset: Integer) -> Array[Integer | Float | String | nil]
+  def unpack: (string template, ?offset: int) -> Array[Integer | Float | String | nil]
+            | (string template, ?offset: int) { (Integer | Float | String | nil value) -> void } -> nil
 
   # <!--
   #   rdoc-file=pack.rb
@@ -3362,7 +3491,7 @@ class String
   # Like String#unpack, but unpacks and returns only the first extracted object.
   # See [Packed Data](rdoc-ref:packed_data.rdoc).
   #
-  def unpack1: (String format) -> (Integer | Float | String | nil)
+  def unpack1: (string template, ?offset: int) -> (Integer | Float | String)?
 
   # <!--
   #   rdoc-file=string.c
@@ -3439,8 +3568,8 @@ class String
   #
   #     'a8'.upto('b6') # => #<Enumerator: "a8":upto("b6")>
   #
-  def upto: (string other_str, ?boolish exclusive) -> Enumerator[String, self]
-          | (string other_str, ?boolish exclusive) { (String s) -> void } -> self
+  def upto: (string other_string, ?boolish exclusive) -> Enumerator[String, self]
+          | (string other_string, ?boolish exclusive) { (String s) -> void } -> self
 
   # <!--
   #   rdoc-file=string.c
@@ -3453,75 +3582,6 @@ class String
   #     "\x80".force_encoding("UTF-8").valid_encoding?     # => false
   #
   def valid_encoding?: () -> bool
-
-  private
-
-  # <!--
-  #   rdoc-file=string.c
-  #   - String.new(string = '', **opts) -> new_string
-  # -->
-  # Returns a new String that is a copy of `string`.
-  #
-  # With no arguments, returns the empty string with the Encoding `ASCII-8BIT`:
-  #
-  #     s = String.new
-  #     s # => ""
-  #     s.encoding # => #<Encoding:ASCII-8BIT>
-  #
-  # With optional argument `string` and no keyword arguments, returns a copy of
-  # `string` with the same encoding:
-  #
-  #     String.new('foo')               # => "foo"
-  #     String.new('тест')              # => "тест"
-  #     String.new('こんにちは')          # => "こんにちは"
-  #
-  # (Unlike String.new, a [string
-  # literal](rdoc-ref:syntax/literals.rdoc@String+Literals) like `''` or a [here
-  # document literal](rdoc-ref:syntax/literals.rdoc@Here+Document+Literals) always
-  # has [script encoding](rdoc-ref:encodings.rdoc@Script+Encoding).)
-  #
-  # With optional keyword argument `encoding`, returns a copy of `string` with the
-  # specified encoding; the `encoding` may be an Encoding object, an encoding
-  # name, or an encoding name alias:
-  #
-  #     String.new('foo', encoding: Encoding::US_ASCII).encoding # => #<Encoding:US-ASCII>
-  #     String.new('foo', encoding: 'US-ASCII').encoding         # => #<Encoding:US-ASCII>
-  #     String.new('foo', encoding: 'ASCII').encoding            # => #<Encoding:US-ASCII>
-  #
-  # The given encoding need not be valid for the string's content, and that
-  # validity is not checked:
-  #
-  #     s = String.new('こんにちは', encoding: 'ascii')
-  #     s.valid_encoding? # => false
-  #
-  # But the given `encoding` itself is checked:
-  #
-  #     String.new('foo', encoding: 'bar') # Raises ArgumentError.
-  #
-  # With optional keyword argument `capacity`, returns a copy of `string` (or an
-  # empty string, if `string` is not given); the given `capacity` is advisory
-  # only, and may or may not set the size of the internal buffer, which may in
-  # turn affect performance:
-  #
-  #     String.new(capacity: 1)
-  #     String.new('foo', capacity: 4096)
-  #
-  # The `string`, `encoding`, and `capacity` arguments may all be used together:
-  #
-  #     String.new('hello', encoding: 'UTF-8', capacity: 25)
-  #
-  def initialize: (?string str, ?encoding: encoding, ?capacity: int) -> void
-
-  # <!--
-  #   rdoc-file=string.c
-  #   - replace(other_string) -> self
-  # -->
-  # Replaces the contents of `self` with the contents of `other_string`:
-  #
-  #     s = 'foo'        # => "foo"
-  #     s.replace('bar') # => "bar"
-  #
-  alias initialize_copy replace
 end
 
 interface _ArefFromStringToString

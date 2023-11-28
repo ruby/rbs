@@ -30,19 +30,19 @@ module RBS
       type target_type = Types::ClassInstance | Types::ClassSingleton
 
       interface _BaseAssertions
-        def assert: (untyped, ?String) -> void
+        def assert: (untyped, ?String?) -> void
 
-        def refute: (untyped, ?String) -> void
+        def refute: (untyped, ?String?) -> void
 
-        def assert_empty: (untyped, ?String) -> void
+        def assert_empty: (untyped, ?String?) -> void
 
         def assert_operator: (untyped, Symbol, *untyped) -> void
 
         def notify: (untyped) -> void
 
-        def assert_predicate: (untyped, Symbol, ?String) -> void
+        def assert_predicate: (untyped, Symbol, ?String?) -> void
 
-        def refute_predicate: (untyped, Symbol, ?String) -> void
+        def refute_predicate: (untyped, Symbol, ?String?) -> void
       end
 
       module ClassMethods
@@ -148,7 +148,7 @@ module RBS
       # 3. Validates if it's not compatible with **none** of the overloads defined in RBS type definition
       #
       # See `assert_send_type` for the details.
-      # 
+      #
       def refute_send_type: (String | MethodType method_type, untyped receiver, Symbol method_name, *untyped args) ?{ () -> untyped } -> void
 
       # Asserts if the constant `constant_name` has `constant_type`, and the RBS definition has compatible type
@@ -187,6 +187,8 @@ module RBS
       @break_tag: untyped
 
       def send_setup: [T] (String | RBS::MethodType method_type, untyped receiver, Symbol method_name, Array[untyped] args, Proc?) { (RBS::MethodType, Test::CallTrace, untyped, Exception?) -> T } -> T
+
+      def pass: (?String? message) -> void
     end
   end
 end
