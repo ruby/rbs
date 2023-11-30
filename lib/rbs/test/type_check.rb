@@ -10,8 +10,6 @@ module RBS
       attr_reader :instance_class
       attr_reader :class_class
 
-      attr_reader :const_cache
-
       DEFAULT_SAMPLE_SIZE = 100
 
       def initialize(self_class:, builder:, sample_size:, unchecked_classes:, instance_class: Object, class_class: Module)
@@ -21,7 +19,6 @@ module RBS
         @builder = builder
         @sample_size = sample_size
         @unchecked_classes = unchecked_classes.uniq
-        @const_cache = {}
       end
 
       def overloaded_call(method, method_name, call, errors:)
@@ -208,11 +205,9 @@ module RBS
       end
 
       def get_class(type_name)
-        const_cache[type_name] ||= begin
-                                     Object.const_get(type_name.to_s)
-                                   rescue NameError
-                                     nil
-                                   end
+        Object.const_get(type_name.to_s)
+      rescue NameError
+        nil
       end
 
       def is_double?(value)
