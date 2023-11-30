@@ -5,10 +5,10 @@ target :lib do
   check "lib"
   ignore(
     "lib/rbs/test",
-    "lib/rbs/test.rb"
+    # "lib/rbs/test.rb"
   )
 
-  library "pathname", "json", "logger", "monitor", "tsort", "uri", 'dbm', 'pstore', 'singleton', 'shellwords', 'fileutils', 'find', 'digest', 'abbrev', 'prettyprint', 'yaml'
+  library "pathname", "json", "logger", "monitor", "tsort", "uri", 'dbm', 'pstore', 'singleton', 'shellwords', 'fileutils', 'find', 'digest', 'abbrev', 'prettyprint', 'yaml', "psych", "securerandom"
   signature "stdlib/strscan/0/"
   signature "stdlib/optparse/0/"
   signature "stdlib/rdoc/0/"

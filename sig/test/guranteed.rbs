@@ -1,0 +1,8 @@
+module RBS
+  module Test
+    module Guaranteed
+      module Inspect
+      end
+    end
+  end
+end
