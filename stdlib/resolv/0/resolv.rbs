@@ -921,7 +921,7 @@ end
 # A generic resource abstract class.
 #
 class Resolv::DNS::Resource::Generic < Resolv::DNS::Resource
-  def self.create: (Integer type_value, Integer class_value) -> instance
+  def self.create: (Integer type_value, Integer class_value) -> Class
 
   def self.decode_rdata: (Resolv::DNS::Message::MessageDecoder msg) -> instance
 

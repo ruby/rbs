@@ -490,3 +490,16 @@ class ResolvDNSRequesterInstanceTest < Test::Unit::TestCase
       requester, :close
   end
 end
+
+class ResolvDNSResourceGenericSigletonTest < Test::Unit::TestCase
+  include TypeAssertions
+  library 'resolv'
+  testing 'singleton(::Resolv::DNS::Resource::Generic)'
+
+  def test_create
+    rrtype = assert_send_type "(Integer, Integer) -> Class",
+      Resolv::DNS::Resource::Generic, :create, Resolv::DNS::Resource::IN::ClassValue, 65280
+    assert_send_type "(String) -> ::Resolv::DNS::Resource::Generic",
+      rrtype, :new, ''
+  end
+end
