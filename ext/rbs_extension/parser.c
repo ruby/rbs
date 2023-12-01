@@ -1485,8 +1485,8 @@ InstanceSingletonKind parse_instance_singleton_kind(parserstate *state, bool all
 
 /**
  * def_member ::= {kDEF} method_name `:` <method_types>
- *              | {kPRIVATE2} kDEF method_name `:` <method_types>
- *              | {kPUBLIC2} kDEF method_name `:` <method_types>
+ *              | {kPRIVATE} kDEF method_name `:` <method_types>
+ *              | {kPUBLIC} kDEF method_name `:` <method_types>
  *
  * method_types ::= {} <method_type>
  *                | {} <`...`>
