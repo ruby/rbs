@@ -64,12 +64,11 @@ module RBS
       end
 
       def sources
-        @sources ||= (
-          @data['sources']
-            .map { |c| Sources.from_config_entry(c, base_directory: @config_path.dirname) }
-            .push(Sources::Stdlib.instance)
-            .push(Sources::Rubygems.instance)
-        )
+        @sources ||= [
+          Sources::Stdlib.instance,
+          Sources::Rubygems.instance,
+          *@data['sources'].map { |c| Sources.from_config_entry(c, base_directory: @config_path.dirname) }
+        ]
       end
 
       def gems
