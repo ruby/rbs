@@ -5,11 +5,11 @@ module RBS
         @limit: Integer?
         @exit_error: boolish
         @has_syntax_error: bool
-        @errors: Array[untyped]
+        @errors: Array[BaseError]
 
         def initialize: (limit: Integer?, exit_error: boolish) -> void
 
-        def add: (untyped) -> void
+        def add: (BaseError) -> void
 
         def finish: () -> void
 
@@ -28,7 +28,6 @@ module RBS
       def run: () -> void
 
       private
-
 
       def validate_class_module_definition: () -> void
       def validate_class_module_alias_definition: () -> void
