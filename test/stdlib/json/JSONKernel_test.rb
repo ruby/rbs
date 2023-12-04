@@ -2,7 +2,7 @@ require_relative "../test_helper"
 require "json"
 
 class JSONKernelInstanceTest < Test::Unit::TestCase
-  include TypeAssertions
+  include TestHelper
 
   library "json"
   testing "::Kernel"

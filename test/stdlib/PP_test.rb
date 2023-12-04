@@ -2,7 +2,7 @@ require_relative "test_helper"
 require "pp"
 
 class PPSingletonTest < Test::Unit::TestCase
-  include TypeAssertions
+  include TestHelper
 
   library "pp"
   testing "singleton(::PP)"
@@ -42,7 +42,7 @@ class PPSingletonTest < Test::Unit::TestCase
 end
 
 class PP::PPMethodsTest < Test::Unit::TestCase
-  include TypeAssertions
+  include TestHelper
 
   library "pp"
   testing "::PP::PPMethods"
@@ -90,9 +90,9 @@ class PP::PPMethodsTest < Test::Unit::TestCase
   def test_seplist
     assert_send_type "(untyped list) { (*untyped, **untyped) -> void } -> void",
                      PP.new, :seplist, [] do end
-    assert_send_type "(untyped list, ^() -> void? sep) { (*untyped, **untyped) -> void } -> void",
+    assert_send_type "(untyped list, ^() -> void sep) { (*untyped, **untyped) -> void } -> void",
                      PP.new, :seplist, [], lambda {} do end
-    assert_send_type "(untyped list, ^() -> void? sep, ::interned iter_method) { (*untyped, **untyped) -> void } -> void",
+    assert_send_type "(untyped list, ^() -> void sep, ::interned iter_method) { (*untyped, **untyped) -> void } -> void",
                      PP.new, :seplist, [], lambda {}, :each do end
   end
 
@@ -108,7 +108,7 @@ class PP::PPMethodsTest < Test::Unit::TestCase
 end
 
 class PP::ObjectMixinTest < Test::Unit::TestCase
-  include TypeAssertions
+  include TestHelper
 
   library "pp"
   testing "::PP::ObjectMixin"

@@ -1,7 +1,7 @@
 require_relative 'test_helper'
 
 class MatchDataInstanceTest < Test::Unit::TestCase
-  include TypeAssertions
+  include TestHelper
 
   testing '::MatchData'
 
@@ -17,7 +17,7 @@ class MatchDataInstanceTest < Test::Unit::TestCase
   def test_initalize_copy
     instance = /./.match('&')
 
-    assert_send_type  '(MatchData) -> self',
+    assert_send_type  '(MatchData) -> MatchData',
                       instance, :initialize_copy, INSTANCE
   end
 

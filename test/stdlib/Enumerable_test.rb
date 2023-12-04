@@ -127,7 +127,7 @@ class EnumerableTest < StdlibTest
 end
 
 class EnumerableTest2 < Test::Unit::TestCase
-  include TypeAssertions
+  include TestHelper
 
   class TestEnumerable
     include Enumerable

@@ -40,7 +40,7 @@ class StringIOTest < StdlibTest
 end
 
 class StringIOTypeTest < Test::Unit::TestCase
-  include TypeAssertions
+  include TestHelper
 
   testing '::StringIO'
 

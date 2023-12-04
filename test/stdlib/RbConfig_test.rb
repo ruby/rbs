@@ -1,7 +1,7 @@
 require_relative 'test_helper'
 
 class RbConfigSingletonTest < Test::Unit::TestCase
-  include TypeAssertions
+  include TestHelper
 
   testing 'singleton(::RbConfig)'
 

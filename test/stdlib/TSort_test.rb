@@ -3,7 +3,7 @@ require_relative "test_helper"
 require "tsort"
 
 class TSortSingletonTest < Test::Unit::TestCase
-  include TypeAssertions
+  include TestHelper
 
   library 'tsort'
   testing "singleton(::TSort)"
@@ -80,7 +80,7 @@ class TSortSingletonTest < Test::Unit::TestCase
 end
 
 class TSortInstanceTest < Test::Unit::TestCase
-  include TypeAssertions
+  include TestHelper
 
   library 'tsort'
   testing "::TSort[::Integer]"

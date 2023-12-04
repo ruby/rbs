@@ -3,7 +3,7 @@ require "json"
 require "json/add/range"
 
 class JSONRangeSingletonTest < Test::Unit::TestCase
-  include TypeAssertions
+  include TestHelper
 
   library "json"
   testing "singleton(::Range)"
@@ -15,7 +15,7 @@ class JSONRangeSingletonTest < Test::Unit::TestCase
 end
 
 class JSONRangeInstanceTest < Test::Unit::TestCase
-  include TypeAssertions
+  include TestHelper
 
   library "json"
   testing "::Range[Integer]"

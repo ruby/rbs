@@ -2,7 +2,7 @@ require_relative "test_helper"
 require "socket"
 
 class FileSingletonTest < Test::Unit::TestCase
-  include TypeAssertions
+  include TestHelper
 
   testing "singleton(::File)"
 
@@ -839,7 +839,7 @@ class FileSingletonTest < Test::Unit::TestCase
 end
 
 class FileInstanceTest < Test::Unit::TestCase
-  include TypeAssertions
+  include TestHelper
 
   testing "::File"
 

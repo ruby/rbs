@@ -2,7 +2,7 @@ require_relative "test_helper"
 require "dbm"
 
 class DBMSingletonTest < Test::Unit::TestCase
-  include TypeAssertions
+  include TestHelper
   library "dbm"
   testing "singleton(::DBM)"
 
@@ -19,7 +19,7 @@ class DBMSingletonTest < Test::Unit::TestCase
 end
 
 class DBMTest < Test::Unit::TestCase
-  include TypeAssertions
+  include TestHelper
   library "dbm"
   testing "::DBM"
 
@@ -38,7 +38,7 @@ class DBMTest < Test::Unit::TestCase
   end
 
   def test_clear
-    assert_send_type "() -> self", @dbm, :clear
+    assert_send_type "() -> DBM", @dbm, :clear
   end
 
   def test_closed?

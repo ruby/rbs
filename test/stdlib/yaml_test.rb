@@ -4,7 +4,7 @@ require "yaml"
 require "tmpdir"
 
 class YAMLSingletonTest < Test::Unit::TestCase
-  include TypeAssertions
+  include TestHelper
 
   library "yaml"
   testing "singleton(::YAML)"

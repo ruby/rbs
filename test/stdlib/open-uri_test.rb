@@ -2,7 +2,7 @@ require_relative "test_helper"
 require "open-uri"
 
 class OpenURISingletonTest < Test::Unit::TestCase
-  include TypeAssertions
+  include TestHelper
 
   library "open-uri"
   testing "singleton(::URI)"

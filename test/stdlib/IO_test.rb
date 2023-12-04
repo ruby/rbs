@@ -4,7 +4,7 @@ require 'tempfile'
 require "io/wait"
 
 class IOSingletonTest < Test::Unit::TestCase
-  include TypeAssertions
+  include TestHelper
 
   testing "singleton(::IO)"
 
@@ -148,16 +148,16 @@ class IOSingletonTest < Test::Unit::TestCase
 end
 
 class IOInstanceTest < Test::Unit::TestCase
-  include TypeAssertions
+  include TestHelper
 
   testing "::IO"
 
   def test_append_symbol
     Dir.mktmpdir do |dir|
       File.open(File.join(dir, "some_file"), "w") do |io|
-        assert_send_type "(String) -> self",
+        assert_send_type "(String) -> File",
                          io, :<<, "foo"
-        assert_send_type "(Object) -> self",
+        assert_send_type "(Object) -> File",
                          io, :<<, Object.new
       end
     end
@@ -358,7 +358,7 @@ class IOInstanceTest < Test::Unit::TestCase
 end
 
 class IOWaitTest < Test::Unit::TestCase
-  include TypeAssertions
+  include TestHelper
 
   testing "::IO"
 

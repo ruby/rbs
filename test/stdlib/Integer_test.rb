@@ -350,7 +350,7 @@ end
 
 
 class IntegerSingletonTest < Test::Unit::TestCase
-  include TypeAssertions
+  include TestHelper
 
   testing "singleton(::Integer)"
 
