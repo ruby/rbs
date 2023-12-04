@@ -1,5 +1,6 @@
 require "rbs"
 require "rbs/test"
+require "rbs/unit_test"
 require "test/unit"
 require "tmpdir"
 require "stringio"
@@ -413,6 +414,16 @@ end
 class ArefFromStringToString < BlankSlate
   def [](str)
     "!"
+  end
+end
+
+module TestHelper
+  include RBS::UnitTest::TypeAssertions
+  include WithAliases
+  include VersionHelper
+
+  def self.included(base)
+    base.extend RBS::UnitTest::TypeAssertions::ClassMethods
   end
 end
 
