@@ -812,7 +812,7 @@ module OpenSSL
     #       puts "Header length: #{header_len} Tag: #{tag} Tag class: #{tag_class} Constructed: #{constructed}"
     #     end
     #
-    def self.traverse: (String | _ToDer der) { (::Integer, ::Integer, ::Integer, ::Integer, bool, tag_class, ::Integer) -> void } -> void
+    def self.traverse: (String | _ToDer der) { ([::Integer, ::Integer, ::Integer, ::Integer, bool, tag_class, ::Integer]) -> void } -> void
 
     BIT_STRING: Integer
 
