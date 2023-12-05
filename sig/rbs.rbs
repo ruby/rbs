@@ -5,7 +5,7 @@ module RBS
 
   def self.logger_level=: (Integer?) -> Integer?
 
-  def self.logger_output: () -> IO
+  %a{pure} def self.logger_output: () -> IO?
 
   def self.logger_output=: (IO) -> IO
 
