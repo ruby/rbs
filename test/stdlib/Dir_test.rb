@@ -1,7 +1,7 @@
 require_relative "test_helper"
 
 class DirSingletonTest < Test::Unit::TestCase
-  include TypeAssertions
+  include TestHelper
 
   testing "singleton(::Dir)"
 
@@ -163,7 +163,7 @@ class DirSingletonTest < Test::Unit::TestCase
 end
 
 class DirInstanceTest < Test::Unit::TestCase
-  include TypeAssertions
+  include TestHelper
 
   testing "::Dir"
 

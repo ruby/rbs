@@ -2,7 +2,7 @@ require_relative "test_helper"
 
 
 class BasicObjectSingletonTest < Test::Unit::TestCase
-  include TypeAssertions
+  include TestHelper
 
   testing 'BasicObject'
 
@@ -62,12 +62,12 @@ class BasicObjectSingletonTest < Test::Unit::TestCase
       end
     end
 
-    assert_send_type  '() { (self) [self: self] -> Integer } -> Integer',
+    assert_send_type  '() { (BasicObject) [self: BasicObject] -> Integer } -> Integer',
                       BOBJ, :instance_eval do _1.__id__ end
   end
 
   def test_instance_exec
-    assert_send_type  '(*String) { (*String) [self: self] -> Integer } -> Integer',
+    assert_send_type  '(*String) { (*String) [self: BasicObject] -> Integer } -> Integer',
                       BOBJ, :instance_exec, '1', '2' do |*x| x.join.to_i end
   end
 end

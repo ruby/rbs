@@ -3,7 +3,7 @@ require 'digest'
 require 'digest/bubblebabble'
 
 class DigestSHA256SingletonTest < Test::Unit::TestCase
-  include TypeAssertions
+  include TestHelper
 
   library 'digest'
   testing 'singleton(::Digest::SHA256)'
@@ -35,13 +35,13 @@ class DigestSHA256SingletonTest < Test::Unit::TestCase
 end
 
 class DigestSHA256InstanceTest < Test::Unit::TestCase
-  include TypeAssertions
+  include TestHelper
 
   library 'digest'
   testing '::Digest::SHA256'
 
   def test_left_shift
-    assert_send_type '(::String) -> self',
+    assert_send_type '(::String) -> Digest::SHA256',
                      ::Digest::SHA256.new, :<<, '_binary_left_shift_'
   end
 
@@ -56,12 +56,12 @@ class DigestSHA256InstanceTest < Test::Unit::TestCase
   end
 
   def test_reset
-    assert_send_type '() -> self',
+    assert_send_type '() -> Digest::SHA256',
                      ::Digest::SHA256.new, :reset
   end
 
   def test_update
-    assert_send_type '(::String) -> self',
+    assert_send_type '(::String) -> Digest::SHA256',
                      ::Digest::SHA256.new, :update, '_update_'
   end
 
@@ -71,7 +71,7 @@ class DigestSHA256InstanceTest < Test::Unit::TestCase
   end
 
   def test_initialize_copy
-    assert_send_type '(::Digest::Base) -> self',
+    assert_send_type '(::Digest::Base) -> Digest::SHA256',
                      ::Digest::SHA256.new, :initialize_copy, ::Digest::SHA256.new
   end
 
@@ -118,7 +118,7 @@ class DigestSHA256InstanceTest < Test::Unit::TestCase
   end
 
   def test_file
-    assert_send_type '(::String) -> self',
+    assert_send_type '(::String) -> Digest::SHA256',
                      ::Digest::SHA256.new, :file, 'README.md'
   end
 

@@ -4,7 +4,7 @@ require "psych"
 require "tmpdir"
 
 class PsychSingletonTest < Test::Unit::TestCase
-  include TypeAssertions
+  include TestHelper
 
   library "psych"
   testing "singleton(::Psych)"

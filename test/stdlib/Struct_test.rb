@@ -1,7 +1,7 @@
 require_relative "test_helper"
 
 class StructSingletonTest < Test::Unit::TestCase
-  include TypeAssertions
+  include TestHelper
 
   testing "singleton(::Struct)"
 
@@ -16,26 +16,26 @@ class StructSingletonTest < Test::Unit::TestCase
         with_interned :field2 do |field2|
           assert_send_type  "(::string?, *::interned) -> singleton(Struct)",
                             Struct, :new, classname, field1, field2
-          assert_send_type  "(::string?, *::interned) { (self) -> void } -> singleton(Struct)",
+          assert_send_type  "(::string?, *::interned) { (untyped) -> void } -> singleton(Struct)",
                             Struct, :new, classname, field1, field2 do end
 
           if Symbol === field1 # can't use `.is_a?` since `ToStr` doesn't define it.
             assert_send_type  "(Symbol, *::interned) -> singleton(Struct)",
                               Struct, :new, field1, field2
-            assert_send_type  "(Symbol, *::interned) { (self) -> void } -> singleton(Struct)",
+            assert_send_type  "(Symbol, *::interned) { (untyped) -> void } -> singleton(Struct)",
                               Struct, :new, field1, field2 do end
           end
 
           ['yes', false, nil].each do |kwinit|
-            assert_send_type  "(::string?, *::interned, keyword_init: ::boolish?) ?{ (self) -> void } -> singleton(Struct)",
+            assert_send_type  "(::string?, *::interned, keyword_init: ::boolish?) ?{ (untyped) -> void } -> singleton(Struct)",
                               Struct, :new, classname, field1, field2, keyword_init: kwinit
-            assert_send_type  "(::string?, *::interned, keyword_init: ::boolish?) ?{ (self) -> void } -> singleton(Struct)",
+            assert_send_type  "(::string?, *::interned, keyword_init: ::boolish?) ?{ (untyped) -> void } -> singleton(Struct)",
                               Struct, :new, classname, field1, field2, keyword_init: kwinit do end
-            
+
             if Symbol === field1 # can't use `.is_a?` since `ToStr` doesn't define it.
               assert_send_type  "(Symbol, *::interned, keyword_init: ::boolish?) -> singleton(Struct)",
                                 Struct, :new, field1, field2, keyword_init: kwinit
-              assert_send_type  "(Symbol, *::interned, keyword_init: ::boolish?) { (self) -> void } -> singleton(Struct)",
+              assert_send_type  "(Symbol, *::interned, keyword_init: ::boolish?) { (untyped) -> void } -> singleton(Struct)",
                                 Struct, :new, field1, field2, keyword_init: kwinit do end
             end
           end
@@ -64,13 +64,12 @@ class StructSingletonTest < Test::Unit::TestCase
 end
 
 class StructInstanceTest < Test::Unit::TestCase
-  include TypeAssertions
+  include TestHelper
 
   testing "::Struct[Rational]"
 
   MyStruct = Struct.new(:foo, :bar)
   Instance = MyStruct.new(1r, 2r)
-
 
   def with_index(int=1, str=:bar, &block)
     block.call str.to_s
@@ -131,16 +130,16 @@ class StructInstanceTest < Test::Unit::TestCase
   end
 
   def test_each
-    assert_send_type  "() -> Enumerator[Rational, self]",
+    assert_send_type  "() -> Enumerator[Rational, untyped]",
                       Instance, :each
-    assert_send_type  "() { (Rational) -> void } -> self",
+    assert_send_type  "() { (Rational) -> void } -> untyped",
                       Instance, :each do end
   end
 
   def test_each_pair
-    assert_send_type  "() -> Enumerator[[Symbol, Rational], self]",
+    assert_send_type  "() -> Enumerator[[Symbol, Rational], untyped]",
                       Instance, :each_pair
-    assert_send_type  "() { ([Symbol, Rational]) -> void } -> self",
+    assert_send_type  "() { ([Symbol, Rational]) -> void } -> untyped",
                       Instance, :each_pair do end
   end
 
@@ -176,7 +175,7 @@ class StructInstanceTest < Test::Unit::TestCase
   def test_values_at
     assert_send_type  "() -> Array[Rational]",
                       Instance, :values_at
-  
+
     with_int 1 do |idx|
       assert_send_type  "(*::int | ::range[::int?]) -> Array[Rational]",
                         Instance, :values_at, idx, idx..nil
@@ -210,7 +209,7 @@ class StructInstanceTest < Test::Unit::TestCase
     with_index do |idx|
       # Ensure that the `ToInt` variants have `hash` and `eql?` defined.
       def idx.hash = 0 unless defined? idx.hash
-      def idx.eql?(r) = false unless defined? idx.eql? 
+      def idx.eql?(r) = false unless defined? idx.eql?
 
       assert_send_type  "(Array[Struct::index & Hash::_Key]) -> Hash[Struct::index & Hash::_Key, Rational]",
                         Instance, :deconstruct_keys, [idx]

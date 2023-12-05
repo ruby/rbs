@@ -1,7 +1,7 @@
 require_relative "../test_helper"
 
 class IO_Buffer_SingletonTest < Test::Unit::TestCase
-  include TypeAssertions
+  include TestHelper
   testing "singleton(::IO::Buffer)"
 
   def test_for
@@ -36,7 +36,7 @@ class IO_Buffer_SingletonTest < Test::Unit::TestCase
 end
 
 class IO_Buffer_InstanceTest < Test::Unit::TestCase
-  include TypeAssertions
+  include TestHelper
   testing "::IO::Buffer"
 
   def test_spaceship

@@ -1,7 +1,7 @@
 require_relative 'test_helper'
 
 class MathSingletonTest < Test::Unit::TestCase
-  include TypeAssertions
+  include TestHelper
 
   testing 'singleton(::Math)'
 
@@ -32,7 +32,7 @@ class MathSingletonTest < Test::Unit::TestCase
       assert_send_type  '(Math::double) -> Float',
                         Math, :acos, double
     end
-  
+
     refute_send_type  '(_ToF) -> Float',
                       Math, :acos, ToF.new(0.0)
   end
@@ -222,7 +222,7 @@ class MathSingletonTest < Test::Unit::TestCase
     with_double 0.0 do |double|
       assert_send_type  '(Math::double) -> Float',
                         Math, :log, double
-  
+
       with_double 0.0 do |base|
         assert_send_type  '(Math::double, Math::double) -> Float',
                           Math, :log, double, base

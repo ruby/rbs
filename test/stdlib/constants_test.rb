@@ -8,7 +8,7 @@ module RBS
 end
 
 class ConstantsTest < Test::Unit::TestCase
-  include TypeAssertions
+  include TestHelper
 
   testing 'singleton(Object)'
 

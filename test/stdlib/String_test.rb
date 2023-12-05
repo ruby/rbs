@@ -1,7 +1,7 @@
 require_relative "test_helper"
 
 class StringSingletonTest < Test::Unit::TestCase
-  include TypeAssertions
+  include TestHelper
 
   testing "singleton(::String)"
 
@@ -35,7 +35,7 @@ class StringSingletonTest < Test::Unit::TestCase
 end
 
 class StringInstanceTest < Test::Unit::TestCase
-  include TypeAssertions
+  include TestHelper
 
   testing "::String"
 
@@ -576,71 +576,71 @@ class StringInstanceTest < Test::Unit::TestCase
   end
 
   def test_each_byte
-    assert_send_type "() -> Enumerator[Integer, self]",
+    assert_send_type "() -> Enumerator[Integer, String]",
                      "hello", :each_byte
-    assert_send_type "() { (Integer) -> void } -> self",
+    assert_send_type "() { (Integer) -> void } -> String",
                      "hello", :each_byte do |c| c end
   end
 
   def test_each_char
-    assert_send_type "() -> Enumerator[String, self]",
+    assert_send_type "() -> Enumerator[String, String]",
                      "hello", :each_char
-    assert_send_type "() { (String) -> void } -> self",
+    assert_send_type "() { (String) -> void } -> String",
                      "hello", :each_char do |c| c end
   end
 
   def test_each_codepoint
-    assert_send_type "() -> Enumerator[Integer, self]",
+    assert_send_type "() -> Enumerator[Integer, String]",
                      "hello", :each_codepoint
-    assert_send_type "() { (Integer) -> void } -> self",
+    assert_send_type "() { (Integer) -> void } -> String",
                      "hello", :each_codepoint do |c| c end
   end
 
   def test_each_grapheme_cluster
-    assert_send_type "() -> Enumerator[String, self]",
+    assert_send_type "() -> Enumerator[String, String]",
                      "hello", :each_grapheme_cluster
-    assert_send_type "() { (String) -> void } -> self",
+    assert_send_type "() { (String) -> void } -> String",
                      "hello", :each_grapheme_cluster do |c| c end
   end
 
   def test_each_line
-    assert_send_type "() -> Enumerator[String, self]",
+    assert_send_type "() -> Enumerator[String, String]",
                      "hello", :each_line
-    assert_send_type "() { (String) -> void } -> self",
+    assert_send_type "() { (String) -> void } -> String",
                      "hello", :each_line do |line| line end
-    assert_send_type "(String) -> Enumerator[String, self]",
+    assert_send_type "(String) -> Enumerator[String, String]",
                      "hello", :each_line, "l"
-    assert_send_type "(ToStr) -> Enumerator[String, self]",
+    assert_send_type "(ToStr) -> Enumerator[String, String]",
                      "hello", :each_line, ToStr.new("l")
-    assert_send_type "(String) { (String) -> void } -> self",
+    assert_send_type "(String) { (String) -> void } -> String",
                      "hello", :each_line, "l" do |line| line end
-    assert_send_type "(ToStr) { (String) -> void } -> self",
+    assert_send_type "(ToStr) { (String) -> void } -> String",
                      "hello", :each_line, ToStr.new("l") do |line| line end
-    assert_send_type "(chomp: true) -> Enumerator[String, self]",
+    assert_send_type "(chomp: true) -> Enumerator[String, String]",
                      "hello", :each_line, chomp: true
-    assert_send_type "(chomp: false) -> Enumerator[String, self]",
+    assert_send_type "(chomp: false) -> Enumerator[String, String]",
                      "hello", :each_line, chomp: false
-    assert_send_type "(chomp: true) { (String) -> void } -> self",
+    assert_send_type "(chomp: true) { (String) -> void } -> String",
                      "hello", :each_line, chomp: true do |line| line end
-    assert_send_type "(chomp: false){ (String)  -> void } -> self",
+    assert_send_type "(chomp: false){ (String)  -> void } -> String",
                      "hello", :each_line, chomp: false do |line| line end
-    assert_send_type "(String, chomp: true) -> Enumerator[String, self]",
+    assert_send_type "(String, chomp: true) -> Enumerator[String, String]",
                      "hello", :each_line, "l", chomp: true
-    assert_send_type "(ToStr, chomp: true) -> Enumerator[String, self]",
+    assert_send_type "(ToStr, chomp: true) -> Enumerator[String, String]",
                      "hello", :each_line, ToStr.new("l"), chomp: true
-    assert_send_type "(String, chomp: false) -> Enumerator[String, self]",
+    assert_send_type "(String, chomp: false) -> Enumerator[String, String]",
                      "hello", :each_line, "l", chomp: false
-    assert_send_type "(ToStr, chomp: false) -> Enumerator[String, self]",
+    assert_send_type "(ToStr, chomp: false) -> Enumerator[String, String]",
                      "hello", :each_line, ToStr.new("l"), chomp: false
-    assert_send_type "(String, chomp: true) { (String) -> void } -> self",
+    assert_send_type "(String, chomp: true) { (String) -> void } -> String",
                      "hello", :each_line, "l", chomp: true do |line| line end
-    assert_send_type "(ToStr, chomp: true) { (String) -> void } -> self",
+    assert_send_type "(ToStr, chomp: true) { (String) -> void } -> String",
                      "hello", :each_line, ToStr.new("l"), chomp: true do |line| line end
-    assert_send_type "(ToStr, chomp: Symbol) { (String) -> void } -> self",
+    assert_send_type "(ToStr, chomp: Symbol) { (String) -> void } -> String",
                      "hello", :each_line, ToStr.new("l"), chomp: :true do |line| line end
-    assert_send_type "(String, chomp: false) { (String) -> void } -> self",
+    assert_send_type "(String, chomp: false) { (String) -> void } -> String",
                      "hello", :each_line, "l", chomp: false do |line| line end
-    assert_send_type "(ToStr, chomp: false) { (String) -> void } -> self",
+    assert_send_type "(ToStr, chomp: false) { (String) -> void } -> String",
                      "hello", :each_line, ToStr.new("l"), chomp: false do |line| line end
   end
 
@@ -692,17 +692,17 @@ class StringInstanceTest < Test::Unit::TestCase
   end
 
   def test_encode!
-    assert_send_type "(String) -> self",
+    assert_send_type "(String) -> String",
                      "string", :encode!, "ascii"
-    assert_send_type "(String, Encoding) -> self",
+    assert_send_type "(String, Encoding) -> String",
                      "string", :encode!, "ascii", Encoding::ASCII_8BIT
-    assert_send_type "(Encoding, String) -> self",
+    assert_send_type "(Encoding, String) -> String",
                      "string", :encode!, Encoding::ASCII_8BIT, "ascii"
-    assert_send_type "(String, invalid: :replace) -> self",
+    assert_send_type "(String, invalid: :replace) -> String",
                      "string", :encode!, "ascii", invalid: :replace
-    assert_send_type "(Encoding, Encoding, undef: nil) -> self",
+    assert_send_type "(Encoding, Encoding, undef: nil) -> String",
                      "string", :encode!, Encoding::ASCII_8BIT, Encoding::ASCII_8BIT, undef: nil
-    assert_send_type "(invalid: nil, undef: :replace, replace: String, fallback: Hash[String, String], xml: :text, universal_newline: true) -> self",
+    assert_send_type "(invalid: nil, undef: :replace, replace: String, fallback: Hash[String, String], xml: :text, universal_newline: true) -> String",
                      "string", :encode!,
                      invalid: nil,
                      undef: :replace,
@@ -710,19 +710,19 @@ class StringInstanceTest < Test::Unit::TestCase
                      fallback: {"a" => "a"},
                      xml: :text,
                      universal_newline: true
-    assert_send_type "(xml: :attr) -> self",
+    assert_send_type "(xml: :attr) -> String",
                      "string", :encode!, xml: :attr
-    assert_send_type "(fallback: Proc) -> self",
+    assert_send_type "(fallback: Proc) -> String",
                      "string", :encode!, fallback: proc { |s| s }
-    assert_send_type "(fallback: Method) -> self",
+    assert_send_type "(fallback: Method) -> String",
                      "string", :encode!, fallback: "test".method(:+)
     assert_send_type "(fallback: ArefFromStringToString) -> String",
                      "string", :encode, fallback: ArefFromStringToString.new
-    assert_send_type "(cr_newline: true) -> self",
+    assert_send_type "(cr_newline: true) -> String",
                      "string", :encode!, cr_newline: true
-    assert_send_type "(crlf_newline: true) -> self",
+    assert_send_type "(crlf_newline: true) -> String",
                      "string", :encode!, crlf_newline: true
-    assert_send_type "(ToStr, ToStr) -> self",
+    assert_send_type "(ToStr, ToStr) -> String",
                      "string", :encode!, ToStr.new("ascii"), ToStr.new("ascii")
   end
 
@@ -751,16 +751,16 @@ class StringInstanceTest < Test::Unit::TestCase
   end
 
   def test_force_encoding
-    assert_send_type "(String) -> self",
+    assert_send_type "(String) -> String",
                      "", :force_encoding, "ASCII-8BIT"
-    assert_send_type "(Encoding) -> self",
+    assert_send_type "(Encoding) -> String",
                      "", :force_encoding, Encoding::ASCII_8BIT
-    assert_send_type "(ToStr) -> self",
+    assert_send_type "(ToStr) -> String",
                      "", :force_encoding, ToStr.new("ASCII-8BIT")
   end
 
   def test_freeze
-    assert_send_type "() -> self",
+    assert_send_type "() -> String",
                      "test", :freeze
   end
 
@@ -791,9 +791,9 @@ class StringInstanceTest < Test::Unit::TestCase
                      "string", :gsub, /./ do |x| ToS.new("") end
     assert_send_type "(Regexp, Hash[String, String]) -> String",
                      "string", :gsub, /./, {"foo" => "bar"}
-    assert_send_type "(Regexp) -> Enumerator[String, self]",
+    assert_send_type "(Regexp) -> Enumerator[String, String]",
                      "string", :gsub, /./
-    assert_send_type "(String) -> Enumerator[String, self]",
+    assert_send_type "(String) -> Enumerator[String, String]",
                      "string", :gsub, ""
     assert_send_type "(ToStr, ToStr) -> String",
                      "string", :gsub, ToStr.new("a"), ToStr.new("b")
@@ -802,21 +802,21 @@ class StringInstanceTest < Test::Unit::TestCase
   def test_gsub!
     assert_send_type "(Regexp, String) -> nil",
                      "string", :gsub!, /z/, "s"
-    assert_send_type "(Regexp, String) -> self",
+    assert_send_type "(Regexp, String) -> String",
                      "string", :gsub!, /s/, "s"
     assert_send_type "(String, String) -> nil",
                      "string", :gsub!, "z", "s"
-    assert_send_type "(String, String) -> self",
+    assert_send_type "(String, String) -> String",
                      "string", :gsub!, "s", "s"
     assert_send_type "(Regexp) { (String) -> String } -> nil",
                      "string", :gsub!, /z/ do |x| "s" end
-    assert_send_type "(Regexp) { (String) -> String } -> self",
+    assert_send_type "(Regexp) { (String) -> String } -> String",
                      "string", :gsub!, /s/ do |x| "s" end
-    assert_send_type "(Regexp) { (String) -> ToS } -> self",
+    assert_send_type "(Regexp) { (String) -> ToS } -> String",
                      "string", :gsub!, /s/ do |x| ToS.new("s") end
     assert_send_type "(Regexp, Hash[String, String]) -> nil",
                      "string", :gsub!, /z/, {"z" => "s"}
-    assert_send_type "(Regexp, Hash[String, String]) -> self",
+    assert_send_type "(Regexp, Hash[String, String]) -> String",
                      "string", :gsub!, /s/, {"s" => "s"}
     # assert_send_type "(Regexp) -> Enumerator[String, self]",
     #                  "string", :gsub!, /s/
@@ -922,7 +922,7 @@ class StringInstanceTest < Test::Unit::TestCase
   def test_lstrip!
     assert_send_type "() -> nil",
                      "", :lstrip!
-    assert_send_type "() -> self",
+    assert_send_type "() -> String",
                      " test ", :lstrip!
   end
 
@@ -1012,7 +1012,7 @@ class StringInstanceTest < Test::Unit::TestCase
   end
 
   def test_next!
-    assert_send_type "() -> self",
+    assert_send_type "() -> String",
                      "a", :next!
   end
 
@@ -1061,7 +1061,7 @@ class StringInstanceTest < Test::Unit::TestCase
   end
 
   def test_reverse!
-    assert_send_type "() -> self",
+    assert_send_type "() -> String",
                      "test", :reverse!
   end
 
@@ -1108,7 +1108,7 @@ class StringInstanceTest < Test::Unit::TestCase
   end
 
   def test_rstrip!
-    assert_send_type "() -> self",
+    assert_send_type "() -> String",
                      " hello ", :rstrip!
     assert_send_type "() -> nil",
                      "", :rstrip!
@@ -1123,13 +1123,13 @@ class StringInstanceTest < Test::Unit::TestCase
                      "a", :scan, "a"
     assert_send_type "(ToStr) -> Array[String]",
                      "a", :scan, ToStr.new("a")
-    assert_send_type "(Regexp) { (String) -> void } -> self",
+    assert_send_type "(Regexp) { (String) -> void } -> String",
                      "a", :scan, /a/ do |arg| arg end
-    assert_send_type "(Regexp) { (Array[String]) -> void } -> self",
+    assert_send_type "(Regexp) { (Array[String]) -> void } -> String",
                      "a", :scan, /(a)/ do |arg| arg end
-    assert_send_type "(String) { (String) -> void } -> self",
+    assert_send_type "(String) { (String) -> void } -> String",
                      "a", :scan, "a" do |arg| arg end
-    assert_send_type "(ToStr) { (String) -> void } -> self",
+    assert_send_type "(ToStr) { (String) -> void } -> String",
                      "a", :scan, ToStr.new("a") do |arg| arg end
   end
 
@@ -1147,15 +1147,15 @@ class StringInstanceTest < Test::Unit::TestCase
   end
 
   def test_scrub!
-    assert_send_type "() -> self",
+    assert_send_type "() -> String",
                      "\x81", :scrub!
-    assert_send_type "(String) -> self",
+    assert_send_type "(String) -> String",
                      "\x81", :scrub!, "*"
-    assert_send_type "(ToStr) -> self",
+    assert_send_type "(ToStr) -> String",
                      "\x81", :scrub!, ToStr.new("*")
-    assert_send_type "() { (String) -> String } -> self",
+    assert_send_type "() { (String) -> String } -> String",
                      "\x81", :scrub! do |s| "*" end
-    assert_send_type "() { (String) -> ToStr } -> self",
+    assert_send_type "() { (String) -> ToStr } -> String",
                      "\x81", :scrub! do |s| ToStr.new("*") end
   end
 
@@ -1228,25 +1228,25 @@ class StringInstanceTest < Test::Unit::TestCase
                      "a b c", :split, ToStr.new(" "), ToInt.new(2)
     assert_send_type "(Regexp, ToInt) -> Array[String]",
                      "a b c", :split, / /, ToInt.new(2)
-    assert_send_type "() { (String) -> void } -> self",
+    assert_send_type "() { (String) -> void } -> String",
                      "a b c", :split do |str| str end
-    assert_send_type "(String) { (String) -> void } -> self",
+    assert_send_type "(String) { (String) -> void } -> String",
                      "a b c", :split, " " do |str| str end
-    assert_send_type "(ToStr) { (String) -> void } -> self",
+    assert_send_type "(ToStr) { (String) -> void } -> String",
                      "a b c", :split, ToStr.new(" ") do |str| str end
-    assert_send_type "(Regexp) { (String) -> void } -> self",
+    assert_send_type "(Regexp) { (String) -> void } -> String",
                      "a b c", :split, / / do |str| str end
-    assert_send_type "(String, Integer) { (String) -> void } -> self",
+    assert_send_type "(String, Integer) { (String) -> void } -> String",
                      "a b c", :split, " ", 2 do |str| str end
-    assert_send_type "(ToStr, Integer) { (String) -> void } -> self",
+    assert_send_type "(ToStr, Integer) { (String) -> void } -> String",
                      "a b c", :split, ToStr.new(" "), 2 do |str| str end
-    assert_send_type "(Regexp, Integer) { (String) -> void } -> self",
+    assert_send_type "(Regexp, Integer) { (String) -> void } -> String",
                      "a b c", :split, / /, 2 do |str| str end
-    assert_send_type "(String, ToInt) { (String) -> void } -> self",
+    assert_send_type "(String, ToInt) { (String) -> void } -> String",
                      "a b c", :split, " ", ToInt.new(2) do |str| str end
-    assert_send_type "(ToStr, ToInt) { (String) -> void } -> self",
+    assert_send_type "(ToStr, ToInt) { (String) -> void } -> String",
                      "a b c", :split, ToStr.new(" "), ToInt.new(2) do |str| str end
-    assert_send_type "(Regexp, ToInt) { (String) -> void } -> self",
+    assert_send_type "(Regexp, ToInt) { (String) -> void } -> String",
                      "a b c", :split, / /, ToInt.new(2) do |str| str end
   end
 
@@ -1264,15 +1264,15 @@ class StringInstanceTest < Test::Unit::TestCase
   end
 
   def test_squeeze!
-    assert_send_type "() -> self",
+    assert_send_type "() -> String",
                      "aa  bb  cc", :squeeze!
-    assert_send_type "(String) -> self",
+    assert_send_type "(String) -> String",
                      "aa  bb  cc", :squeeze!, " "
-    assert_send_type "(ToStr) -> self",
+    assert_send_type "(ToStr) -> String",
                      "aa  bb  cc", :squeeze!, ToStr.new(" ")
-    assert_send_type "(String, String) -> self",
+    assert_send_type "(String, String) -> String",
                      "aa  bb  cc", :squeeze!, "a-z", "b"
-    assert_send_type "(ToStr, ToStr) -> self",
+    assert_send_type "(ToStr, ToStr) -> String",
                      "aa  bb  cc", :squeeze!, ToStr.new("a-z"), ToStr.new("b")
     assert_send_type "() -> nil",
                      "", :squeeze!
@@ -1309,7 +1309,7 @@ class StringInstanceTest < Test::Unit::TestCase
   end
 
   def test_strip!
-    assert_send_type "() -> self",
+    assert_send_type "() -> String",
                      " a ", :strip!
     assert_send_type "() -> nil",
                      "a", :strip!
@@ -1344,29 +1344,29 @@ class StringInstanceTest < Test::Unit::TestCase
 
 
   def test_sub!
-    assert_send_type "(Regexp, String) -> self",
+    assert_send_type "(Regexp, String) -> String",
                      "a", :sub!, /a/, "a"
-    assert_send_type "(String, String) -> self",
+    assert_send_type "(String, String) -> String",
                      "a", :sub!, "a", "a"
-    assert_send_type "(ToStr, String) -> self",
+    assert_send_type "(ToStr, String) -> String",
                      "a", :sub!, ToStr.new("a"), "a"
-    assert_send_type "(Regexp, ToStr) -> self",
+    assert_send_type "(Regexp, ToStr) -> String",
                      "a", :sub!, /a/, ToStr.new("a")
-    assert_send_type "(String, ToStr) -> self",
+    assert_send_type "(String, ToStr) -> String",
                      "a", :sub!, "a", ToStr.new("a")
-    assert_send_type "(ToStr, ToStr) -> self",
+    assert_send_type "(ToStr, ToStr) -> String",
                      "a", :sub!, ToStr.new("a"), ToStr.new("a")
-    assert_send_type "(Regexp, Hash[String, String]) -> self",
+    assert_send_type "(Regexp, Hash[String, String]) -> String",
                      "a", :sub!, /a/, { "a" => "a" }
-    assert_send_type "(String, Hash[String, String]) -> self",
+    assert_send_type "(String, Hash[String, String]) -> String",
                      "a", :sub!, "a", { "a" => "a" }
-    assert_send_type "(ToStr, Hash[String, String]) -> self",
+    assert_send_type "(ToStr, Hash[String, String]) -> String",
                      "a", :sub!, ToStr.new("a"), { "a" => "a" }
-    assert_send_type "(Regexp) { (String) -> ToS } -> self",
+    assert_send_type "(Regexp) { (String) -> ToS } -> String",
                      "a", :sub!, /a/ do |str| ToS.new(str) end
-    assert_send_type "(String) { (String) -> ToS } -> self",
+    assert_send_type "(String) { (String) -> ToS } -> String",
                      "a", :sub!, "a" do |str| ToS.new(str) end
-    assert_send_type "(ToStr) { (String) -> ToS } -> self",
+    assert_send_type "(ToStr) { (String) -> ToS } -> String",
                      "a", :sub!, ToStr.new("a") do |str| ToS.new(str) end
     assert_send_type "(Regexp, String) -> nil",
                      "a", :sub!, /b/, "a"
@@ -1400,7 +1400,7 @@ class StringInstanceTest < Test::Unit::TestCase
   end
 
   def test_succ!
-    assert_send_type "() -> self",
+    assert_send_type "() -> String",
                      "", :succ!
   end
 
@@ -1429,17 +1429,17 @@ class StringInstanceTest < Test::Unit::TestCase
   end
 
   def test_swapcase!
-    assert_send_type "() -> self",
+    assert_send_type "() -> String",
                      "a", :swapcase!
-    assert_send_type "(Symbol) -> self",
+    assert_send_type "(Symbol) -> String",
                      "a", :swapcase!, :ascii
-    assert_send_type "(Symbol) -> self",
+    assert_send_type "(Symbol) -> String",
                      "a", :swapcase!, :lithuanian
-    assert_send_type "(Symbol) -> self",
+    assert_send_type "(Symbol) -> String",
                      "a", :swapcase!, :turkic
-    assert_send_type "(Symbol, Symbol) -> self",
+    assert_send_type "(Symbol, Symbol) -> String",
                      "a", :swapcase!, :lithuanian, :turkic
-    assert_send_type "(Symbol, Symbol) -> self",
+    assert_send_type "(Symbol, Symbol) -> String",
                      "a", :swapcase!, :turkic, :lithuanian
     assert_send_type "() -> nil",
                      "", :swapcase!
@@ -1502,9 +1502,9 @@ class StringInstanceTest < Test::Unit::TestCase
   end
 
   def test_tr!
-    assert_send_type "(String, String) -> self",
+    assert_send_type "(String, String) -> String",
                      "ruby", :tr!, "r", "j"
-    assert_send_type "(ToStr, ToStr) -> self",
+    assert_send_type "(ToStr, ToStr) -> String",
                      "ruby", :tr!, ToStr.new("r"), ToStr.new("j")
     assert_send_type "(String, String) -> nil",
                      "", :tr!, "r", "j"
@@ -1520,9 +1520,9 @@ class StringInstanceTest < Test::Unit::TestCase
   end
 
   def test_tr_s!
-    assert_send_type "(String, String) -> self",
+    assert_send_type "(String, String) -> String",
                      "ruby", :tr_s!, "r", "j"
-    assert_send_type "(ToStr, ToStr) -> self",
+    assert_send_type "(ToStr, ToStr) -> String",
                      "ruby", :tr_s!, ToStr.new("r"), ToStr.new("j")
     assert_send_type "(String, String) -> nil",
                      "", :tr_s!, "r", "j"
@@ -1657,21 +1657,21 @@ class StringInstanceTest < Test::Unit::TestCase
   end
 
   def test_upto
-    assert_send_type "(String) -> Enumerator[String, self]",
+    assert_send_type "(String) -> Enumerator[String, String]",
                      "1", :upto, "2"
-    assert_send_type "(String, true) -> Enumerator[String, self]",
+    assert_send_type "(String, true) -> Enumerator[String, String]",
                      "1", :upto, "2", true
-    assert_send_type "(String, false) -> Enumerator[String, self]",
+    assert_send_type "(String, false) -> Enumerator[String, String]",
                      "1", :upto, "2", false
-    assert_send_type "(String) { (String) -> void } -> self",
+    assert_send_type "(String) { (String) -> void } -> String",
                      "1", :upto, "2" do |s| s end
-    assert_send_type "(String, true) { (String) -> void } -> self",
+    assert_send_type "(String, true) { (String) -> void } -> String",
                      "1", :upto, "2", true do |s| s end
-    assert_send_type "(String, false) { (String) -> void } -> self",
+    assert_send_type "(String, false) { (String) -> void } -> String",
                      "1", :upto, "2", false do |s| s end
-    assert_send_type "(ToStr) -> Enumerator[String, self]",
+    assert_send_type "(ToStr) -> Enumerator[String, String]",
                      "1", :upto, ToStr.new("2")
-    assert_send_type "(ToStr) { (String) -> void } -> self",
+    assert_send_type "(ToStr) { (String) -> void } -> String",
                      "1", :upto, ToStr.new("2") do |s| s end
   end
 

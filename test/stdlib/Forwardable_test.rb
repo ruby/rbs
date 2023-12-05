@@ -2,7 +2,7 @@ require_relative "test_helper"
 require "forwardable"
 
 class ForwardableTest < Test::Unit::TestCase
-  include TypeAssertions
+  include TestHelper
 
   library "forwardable"
   testing "::Forwardable"
@@ -65,7 +65,7 @@ class ForwardableTest < Test::Unit::TestCase
 end
 
 class SingleForwardableTest < Test::Unit::TestCase
-  include TypeAssertions
+  include TestHelper
 
   library "forwardable"
   testing "::SingleForwardable"

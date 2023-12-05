@@ -653,10 +653,10 @@ singleton(::BasicObject)
 
   def test_paths
     with_cli do |cli|
-      cli.run(%w(-r pathname -I sig/test paths))
+      cli.run(%w(-r pathname -I no-such-dir paths))
       assert_match %r{/rbs/core \(dir, core\)$}, stdout.string
       assert_match %r{/rbs/stdlib/pathname/0 \(dir, library, name=pathname\)$}, stdout.string
-      assert_match %r{^sig/test \(absent\)$}, stdout.string
+      assert_match %r{^no-such-dir \(absent\)$}, stdout.string
     end
   end
 

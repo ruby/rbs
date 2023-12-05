@@ -195,7 +195,7 @@ class FloatTest < StdlibTest
 end
 
 class FloatConstantTest < Test::Unit::TestCase
-  include TypeAssertions
+  include TestHelper
 
   def test_constant
     assert_const_type "Float", "Float::INFINITY"

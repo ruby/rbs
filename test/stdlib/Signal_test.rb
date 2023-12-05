@@ -1,7 +1,7 @@
 require_relative 'test_helper'
 
 class SignalSingletonTest < Test::Unit::TestCase
-  include TypeAssertions
+  include TestHelper
 
   testing 'singleton(::Signal)'
 
