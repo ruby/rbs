@@ -3263,7 +3263,7 @@ class String
   #
   # String#to_str is an alias for String#to_s.
   #
-  def to_s: () -> self
+  def to_s: () -> String
 
   # <!-- rdoc-file=string.c -->
   # Returns `self` if `self` is a String, or `self` converted to a String if
