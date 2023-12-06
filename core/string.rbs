@@ -765,7 +765,7 @@ class String
   #
   # Otherwise returns `self.dup`, which is not frozen.
   #
-  def +@: () -> (self | instance)
+  def +@: () -> self
 
   # <!--
   #   rdoc-file=string.c
@@ -778,7 +778,7 @@ class String
   #
   # String#dedup is an alias for String#-@.
   #
-  def -@: () -> (self | instance)
+  def -@: () -> self
 
   # <!--
   #   rdoc-file=string.c
@@ -798,8 +798,7 @@ class String
   #
   # Related: String#concat, which takes multiple arguments.
   #
-  def <<: (Integer codepoint) -> self
-        | (string other_string) -> self
+  def <<: (string | Integer str_or_codepoint) -> self
 
   # <!--
   #   rdoc-file=string.c
@@ -822,18 +821,8 @@ class String
   #     'foo' <=> 'FOO' # => 1
   #     'foo' <=> 1 # => nil
   #
-  def <=>: (string | _Spaceship[self] other) -> (-1 | 0 | 1)?
+  def <=>: (string) -> (-1 | 0 | 1)
          | (untyped) -> (-1 | 0 | 1)?
-
-  interface _Spaceship[T]
-    def <=>: (T rhs) -> _CompareWithZero?
-  end
-
-  interface _CompareWithZero
-    def >: (0) -> boolish
-
-    def <: (0) -> boolish
-  end
 
   # <!--
   #   rdoc-file=string.c
@@ -1204,7 +1193,6 @@ class String
                 | (:ascii | :lithuanian | :turkic) -> String
                 | (:lithuanian, :turkic) -> String
                 | (:turkic, :lithuanian) -> String
-  # ^^ TODO (arbitrary constraints): | () -> self where self := ""
 
   # <!--
   #   rdoc-file=string.c
@@ -1227,7 +1215,6 @@ class String
                  | (:ascii | :lithuanian | :turkic) -> self?
                  | (:lithuanian, :turkic) -> self?
                  | (:turkic, :lithuanian) -> self?
-  # ^^ TODO (arbitrary constraints): | () -> nil where self := ""
 
   # <!--
   #   rdoc-file=string.c
@@ -1254,7 +1241,7 @@ class String
   #
   # Related: String#casecmp?.
   #
-  def casecmp: (string other) -> (-1 | 0 | 1)?
+  def casecmp: (string other) -> (-1 | 0 | 1)
              | (untyped) -> (-1 | 0 | 1)?
 
   # <!--
@@ -1278,7 +1265,7 @@ class String
   #
   # Related: String#casecmp.
   #
-  def casecmp?: (string other) -> bool?
+  def casecmp?: (string other) -> bool
               | (untyped) -> bool?
 
   # <!--
@@ -1361,8 +1348,8 @@ class String
   # Like String#chomp, but modifies `self` in place; returns `nil` if no
   # modification made, `self` otherwise.
   #
-  def chomp!: (?string separator) -> self?
-            | (nil) -> nil
+  def chomp!: (nil) -> nil
+            | (?string? separator) -> self?
 
   # <!--
   #   rdoc-file=string.c
@@ -1399,10 +1386,6 @@ class String
   # Related: String#chomp!.
   #
   def chop!: () -> self?
-  # ^^ TODO (arbitrary constraints):
-  #   | () -> nil where self = ""
-  #   | () -> self where self != ""
-  #   | () -> self?
 
   # <!--
   #   rdoc-file=string.c
@@ -1842,8 +1825,6 @@ class String
   #
   def each_line: (?string? separator, ?chomp: boolish) -> Enumerator[String, self]
                | (?string? separator, ?chomp: boolish) { (String line) -> void } -> self
-  # NOTE: ^ technically you can get `instance` yielded via a `nil` separator, or `$/` being set to
-  # `nil`, but annotating those cases seems pedantic, and this is technically valid.
 
   # <!--
   #   rdoc-file=string.c
@@ -2258,8 +2239,6 @@ class String
   #
   def lines: (?string? separator, ?chomp: boolish) -> Array[String]
            | (?string? separator, ?chomp: boolish) { (String line) -> void } -> self
-  # NOTE: ^ technically you can get `instance` yielded via a `nil` separator, or `$/` being set to
-  # `nil`, but annotating those cases seems pedantic, and this is technically valid.
 
   # <!--
   #   rdoc-file=string.c
@@ -3284,7 +3263,7 @@ class String
   #
   # String#to_str is an alias for String#to_s.
   #
-  def to_s: () -> (self | String)
+  def to_s: () -> self
 
   # <!-- rdoc-file=string.c -->
   # Returns `self` if `self` is a String, or `self` converted to a String if
@@ -3436,8 +3415,7 @@ class String
   #
   # Related: String#unicode_normalize!, String#unicode_normalized?.
   #
-  def unicode_normalize: (?:nfc | :nfd | :nfkc | :nfkd form) -> (self | String)
-  # NOTE: ^ technically can return `self` if `self.encoding` is ascii.
+  def unicode_normalize: (?:nfc | :nfd | :nfkc | :nfkd form) -> self
 
   # <!--
   #   rdoc-file=string.c
