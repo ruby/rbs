@@ -158,6 +158,8 @@ class DateSingletonTest < Test::Unit::TestCase
                       Date, :parse, "2020-08-15", :true
     assert_send_type  "(::String str, bool complete, ::Integer start) -> ::Date",
                       Date, :parse, "2020-08-15", true, Date::ITALY
+    assert_send_type  "() -> ::Date",
+                      Date, :parse
   end
 
   def test_rfc2822
