@@ -375,7 +375,7 @@ class StringInstanceTest < Test::Unit::TestCase
   end
 
   def test_bytesplice
-    omit_if 'String#bytesplice was added in 3.2' unless RUBY_VERSION >= '3.2'
+    omit_if(RUBY_VERSION < '3.2', 'String#bytesplice was added in 3.2')
 
     # In 3.3 and onwards (and backported to 3.2.16), the return type is `self`. This variable
     # is in case the test suite is run in a version under 3.2.16; tests for the variants only
@@ -384,7 +384,7 @@ class StringInstanceTest < Test::Unit::TestCase
     with_string ', world! :-D' do |string|
       with_int 1 do |start|
         with_int 2 do |length|
-          assert_send_type  "(int, int, string) -> #{String}",
+          assert_send_type  "(int, int, string) -> String",
                             +'hello', :bytesplice,  start, length, string
 
           next if RUBY_VERSION < '3.3'
@@ -399,8 +399,8 @@ class StringInstanceTest < Test::Unit::TestCase
       end
 
       with_range with_int(1).and_nil, with_int(2).and_nil do |range|
-          assert_send_type  "(range[int?], string) -> String",
-                            +'hello', :bytesplice, range, string
+        assert_send_type  "(range[int?], string) -> String",
+                          +'hello', :bytesplice, range, string
 
         next if RUBY_VERSION < '3.3'
 
