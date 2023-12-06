@@ -179,7 +179,7 @@ class StringInstanceTest < Test::Unit::TestCase
         ret
       end
 
-      assert_send_type  '(String::_Spaceship[String] other) -> (-1 | 0 | 1)',
+      assert_send_type  '(untyped other) -> (-1 | 0 | 1)',
                         's', :<=>, blank
     end
   end
