@@ -382,31 +382,23 @@ class StringInstanceTest < Test::Unit::TestCase
     # supported in 3.3 and onwards use `self`. If we ever stop supporting 3.2, we can remove this.
 
     with_string ', world! :-D' do |string|
-      with_int 1 do |start|
-        with_int 2 do |length|
-          assert_send_type  "(int, int, string) -> String",
-                            +'hello', :bytesplice,  start, length, string
+      assert_send_type  "(Integer, Integer, string) -> String",
+                        +'hello', :bytesplice,  1, 2, string
 
-          next if RUBY_VERSION < '3.3'
-
-          with_int 3 do |str_start|
-            with_int 4 do |str_length|
-              assert_send_type  '(int, int, string, int, int) -> String',
-                                +'hello', :bytesplice,  start, length, string, str_start, str_length
-            end
-          end
-        end
+      if RUBY_VERSION >= "3.3.0"
+        assert_send_type  '(Integer, Integer, string, Integer, Integer) -> String',
+                          +'hello', :bytesplice,  1, 2, string, 3, 4
       end
 
       with_range with_int(1).and_nil, with_int(2).and_nil do |range|
         assert_send_type  "(range[int?], string) -> String",
                           +'hello', :bytesplice, range, string
 
-        next if RUBY_VERSION < '3.3'
-
-        with_range with_int(3).and_nil, with_int(4).and_nil do |string_range|
+        if RUBY_VERSION >= '3.3.0'
+          with_range with_int(3).and_nil, with_int(4).and_nil do |string_range|
             assert_send_type  '(range[int?], string, range[int?]) -> String',
                               +'hello', :bytesplice, range, string, string_range
+          end
         end
       end
     end
