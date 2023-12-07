@@ -55,17 +55,17 @@ class ThreadTest < Test::Unit::TestCase
     t.report_on_exception = false
 
     assert_send_type "() -> nil",
-    t, :raise
+                     t, :raise
     assert_send_type "(String) -> nil",
-    t, :raise, "Error!"
+                     t, :raise, "Error!"
     assert_send_type "(singleton(StandardError)) -> nil",
-    t, :raise, StandardError
+                     t, :raise, StandardError
     assert_send_type "(StandardError) -> nil",
-    t, :raise, StandardError.new('Error!')
+                     t, :raise, StandardError.new('Error!')
     assert_send_type "(singleton(StandardError), String) -> nil",
-    t, :raise, StandardError, 'Error!'
+                     t, :raise, StandardError, 'Error!'
     assert_send_type "(singleton(StandardError), String, Array[String]) -> nil",
-    t, :raise, StandardError, 'Error!', caller
+                     t, :raise, StandardError, 'Error!', caller
 
     t.kill
   end
