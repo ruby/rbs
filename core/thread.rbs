@@ -991,9 +991,8 @@ class Thread < Object
   #      from prog.rb:2:in `new'
   #      from prog.rb:2
   #
-  def self?.raise: () -> bot
-                 | (String message, ?cause: Exception?) -> bot
-                 | (_Exception exception, ?untyped message, ?::Array[String] backtrace, ?cause: Exception?) -> bot
+  def raise: (?String message) -> nil
+           | (_Exception, ?_ToS message, ?Array[String] backtrace) -> nil
 
   # <!--
   #   rdoc-file=thread.c
