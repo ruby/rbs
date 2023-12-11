@@ -1281,6 +1281,11 @@ class StringInstanceTest < Test::Unit::TestCase
     assert_send_type  '() -> String',
                       invalid, :scrub
 
+    assert_send_type  '(nil) -> String',
+                      valid, :scrub, nil
+    assert_send_type  '(nil) -> String',
+                      invalid, :scrub, nil
+
     with_string '&' do |replacement|
       assert_send_type  '(string) -> String',
                         valid, :scrub, replacement
@@ -1309,6 +1314,11 @@ class StringInstanceTest < Test::Unit::TestCase
                       valid.dup, :scrub!
     assert_send_type  '() -> String',
                       invalid.dup, :scrub!
+
+    assert_send_type  '(nil) -> String',
+                      valid.dup, :scrub!, nil
+    assert_send_type  '(nil) -> String',
+                      invalid.dup, :scrub!, nil
 
     with_string '&' do |replacement|
       assert_send_type  '(string) -> String',
