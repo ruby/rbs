@@ -332,6 +332,10 @@ module RBS
         raise "Cannot break without `@break_tag`" unless @break_tag
         throw @break_tag, value
       end
+
+      def pass(message = nil)
+        assert true, message
+      end
     end
   end
 end
