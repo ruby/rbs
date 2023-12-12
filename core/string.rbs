@@ -1349,7 +1349,8 @@ class String
   # modification made, `self` otherwise.
   #
   def chomp!: (nil) -> nil
-            | (?string? separator) -> self? # https://github.com/ruby/rbs/pull/1672#discussion_r1423324796
+          # | (?string separator) -> self? # https://github.com/ruby/rbs/pull/1672#discussion_r1423324796
+            | (?string? separator) -> self?
 
   # <!--
   #   rdoc-file=string.c
