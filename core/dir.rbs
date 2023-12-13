@@ -454,6 +454,28 @@ class Dir
 
   # <!--
   #   rdoc-file=dir.c
+  #   - Dir.for_fd(fd) -> dir
+  # -->
+  # Returns a new Dir object representing the directory specified by the given
+  # integer directory file descriptor `fd`:
+  #
+  #     d0 = Dir.new('..')
+  #     d1 = Dir.for_fd(d0.fileno)
+  #
+  # Note that the returned `d1` does not have an associated path:
+  #
+  #     d0.path # => '..'
+  #     d1.path # => nil
+  #
+  # This method uses the
+  # [fdopendir()](https://www.man7.org/linux/man-pages/man3/fdopendir.3p.html)
+  # function defined by POSIX 2008; the method is not implemented on non-POSIX
+  # platforms (raises NotImplementedError).
+  #
+  def self.for_fd: (int) -> Dir
+
+  # <!--
+  #   rdoc-file=dir.c
   #   - Dir.pwd -> string
   # -->
   # Returns the path to the current working directory:

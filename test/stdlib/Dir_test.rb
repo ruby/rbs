@@ -129,6 +129,17 @@ class DirSingletonTest < Test::Unit::TestCase
                      Dir, :foreach, "."
   end
 
+  def test_for_fd
+    fd = Dir.new(Dir.pwd).fileno
+
+    with_int(fd) do |int|
+      assert_send_type(
+        "(::int) -> ::Dir",
+        Dir, :for_fd, int
+      )
+    end
+  end
+
   def test_getwd
     assert_send_type "() -> ::String",
                      Dir, :getwd
