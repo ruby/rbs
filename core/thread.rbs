@@ -1709,6 +1709,15 @@ class Thread::SizedQueue < Thread::Queue
 
   # <!--
   #   rdoc-file=thread_sync.c
+  #   - freeze
+  # -->
+  # Raises an exception:
+  #     Queue.new.freeze # Raises TypeError (cannot freeze #<Thread::Queue:0x...>)
+  #
+  def freeze: () -> bot
+
+  # <!--
+  #   rdoc-file=thread_sync.c
   #   - new(max)
   # -->
   # Creates a fixed-length queue with a maximum size of `max`.
