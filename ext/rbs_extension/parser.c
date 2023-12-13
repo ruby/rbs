@@ -723,7 +723,7 @@ VALUE parse_record_attributes(parserstate *state) {
       case tINTEGER:
       case kTRUE:
       case kFALSE:
-        key = rb_funcall(parse_type(state), rb_intern("literal"), 0);
+        key = rb_funcall(parse_simple(state), rb_intern("literal"), 0);
         break;
       default:
         raise_syntax_error(
