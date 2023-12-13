@@ -872,6 +872,27 @@ class Range[out Elem] < Object
 
   # <!--
   #   rdoc-file=range.c
+  #   - reverse_each {|element| ... } -> self
+  #   - reverse_each                  -> an_enumerator
+  # -->
+  # With a block given, passes each element of `self` to the block in reverse
+  # order:
+  #
+  #     a = []
+  #     (1..4).reverse_each {|element| a.push(element) } # => 1..4
+  #     a # => [4, 3, 2, 1]
+  #
+  #     a = []
+  #     (1...4).reverse_each {|element| a.push(element) } # => 1...4
+  #     a # => [3, 2, 1]
+  #
+  # With no block given, returns an enumerator.
+  #
+  def reverse_each: () { (Elem) -> void } -> self
+                  | () -> ::Enumerator[Elem, self]
+
+  # <!--
+  #   rdoc-file=range.c
   #   - size -> non_negative_integer or Infinity or nil
   # -->
   # Returns the count of elements in `self` if both begin and end values are
