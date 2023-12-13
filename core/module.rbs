@@ -1463,7 +1463,7 @@ class Module < Object
   #
   # Returns a module, where refined methods are defined.
   #
-  def refine: (Module mod) { () -> void } -> Refinement
+  def refine: (Module mod) { () [self: Refinement] -> void } -> Refinement
 
   # <!--
   #   rdoc-file=eval.c

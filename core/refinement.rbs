@@ -49,4 +49,12 @@ class Refinement < Module
   # Return the class refined by the receiver.
   #
   def refined_class: () -> Module
+
+  # <!--
+  #   rdoc-file=eval.c
+  #   - target    -> class
+  # -->
+  # Return the class or module refined by the receiver.
+  #
+  def target: () -> Module
 end
