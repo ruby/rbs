@@ -1349,6 +1349,7 @@ class String
   # modification made, `self` otherwise.
   #
   def chomp!: (nil) -> nil
+          # | (?string separator) -> self? # https://github.com/ruby/rbs/pull/1672#discussion_r1423324796
             | (?string? separator) -> self?
 
   # <!--
@@ -2741,7 +2742,7 @@ class String
   #     "\x81"
   #     "\x81"
   #
-  def scrub: (?string replacement) -> String
+  def scrub: (?string? replacement) -> String
            | (?nil) { (String bytes) -> string } -> String
 
   # <!--
