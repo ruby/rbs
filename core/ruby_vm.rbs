@@ -371,4 +371,7 @@ module RubyVM::AbstractSyntaxTree
     #
     def self.stats_string: () -> String
   end
+
+  module RJIT
+  end
 end
