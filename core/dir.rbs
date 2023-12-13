@@ -366,6 +366,61 @@ class Dir
 
   # <!--
   #   rdoc-file=dir.c
+  #   - Dir.fchdir(fd) -> 0
+  #   - Dir.fchdir(fd) { ... } -> object
+  # -->
+  # Changes the current working directory to the directory specified by the
+  # integer file descriptor `fd`.
+  #
+  # When passing a file descriptor over a UNIX socket or to a child process, using
+  # `fchdir` instead of `chdir` avoids the [time-of-check to time-of-use
+  # vulnerability](https://en.wikipedia.org/wiki/Time-of-check_to_time-of-use)
+  #
+  # With no block, changes to the directory given by `fd`:
+  #
+  #     Dir.chdir('/var/spool/mail')
+  #     Dir.pwd # => "/var/spool/mail"
+  #     dir  = Dir.new('/usr')
+  #     fd = dir.fileno
+  #     Dir.fchdir(fd) do
+  #       Dir.pwd # => "/usr"
+  #     end
+  #     Dir.pwd # => "/var/spool/mail"
+  #
+  # With a block, temporarily changes the working directory:
+  #
+  # *   Calls the block with the argument.
+  # *   Changes to the given directory.
+  # *   Executes the block
+  # *   Restores the previous working directory.
+  # *   Returns the block's return value.
+  #
+  #
+  # Example:
+  #
+  #     Dir.chdir('/var/spool/mail')
+  #     Dir.pwd # => "/var/spool/mail"
+  #     Dir.chdir('/tmp') do
+  #       Dir.pwd # => "/tmp"
+  #     end
+  #     Dir.pwd # => "/var/spool/mail"
+  #
+  # This method uses the
+  # [fchdir()](https://www.man7.org/linux/man-pages/man3/fchdir.3p.html) function
+  # defined by POSIX 2008; the method is not implemented on non-POSIX platforms
+  # (raises NotImplementedError).
+  #
+  # Raises an exception if the file descriptor is not valid.
+  #
+  # In a multi-threaded program an error is raised if a thread attempts to open a
+  # `chdir` block while another thread has one open, or a call to `chdir` without
+  # a block occurs inside a block passed to `chdir` (even in the same thread).
+  #
+  def self.fchdir: (int) -> Integer
+                 | [T] (int) { () -> T } -> T
+
+  # <!--
+  #   rdoc-file=dir.c
   #   - Dir.foreach(dirpath, encoding: 'UTF-8') {|entry_name| ... }  -> nil
   # -->
   # Calls the block with each entry name in the directory at `dirpath`; sets the
