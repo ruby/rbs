@@ -194,6 +194,20 @@ class DirInstanceTest < Test::Unit::TestCase
 
   testing "::Dir"
 
+  def test_chdir
+    dir = Dir.new(Dir.pwd)
+
+    assert_send_type(
+      "() -> Integer",
+      dir, :chdir
+    )
+
+    assert_send_type(
+      "() { () -> String } -> String",
+      dir, :chdir, &proc { "hello" }
+    )
+  end
+
   def test_children
     assert_send_type "() -> ::Array[::String]",
                      Dir.new("."), :children

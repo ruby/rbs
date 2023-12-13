@@ -757,6 +757,20 @@ class Dir
 
   # <!--
   #   rdoc-file=dir.c
+  #   - chdir -> nil
+  # -->
+  # Changes the current working directory to the path of `self`:
+  #
+  #     Dir.pwd # => "/"
+  #     dir = Dir.new('example')
+  #     dir.chdir
+  #     dir.pwd # => "/example"
+  #
+  def chdir: () -> Integer
+           | [T] { () -> T } -> T
+
+  # <!--
+  #   rdoc-file=dir.c
   #   - children -> array
   # -->
   # Returns an array of the entry names in `self` except for `'.'` and `'..'`:
