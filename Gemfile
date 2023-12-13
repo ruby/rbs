@@ -17,7 +17,7 @@ gem "goodcheck"
 gem "dbm"
 gem 'digest'
 gem 'tempfile'
-gem "rdoc", "~> 6.4.0"
+gem "rdoc", "~> 6.6.1"
 
 # Test gems
 gem "rbs-amber", path: "test/assets/test-gem"
