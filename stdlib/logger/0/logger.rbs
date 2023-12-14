@@ -245,8 +245,7 @@
 #     logger.error! # => 3
 #     logger.fatal! # => 4
 #
-# You can retrieve the log level with method
-# [level](Logger.html#attribute-i-level):
+# You can retrieve the log level with method #level.
 #
 #     logger.level = Logger::ERROR
 #     logger.level # => 3
@@ -619,7 +618,10 @@ class Logger
   #
   def info?: () -> bool
 
-  # <!-- rdoc-file=lib/logger.rb -->
+  # <!--
+  #   rdoc-file=lib/logger.rb
+  #   - level()
+  # -->
   # Logging severity threshold (e.g. `Logger::INFO`).
   #
   def level: () -> Integer
@@ -689,8 +691,10 @@ class Logger
   def reopen: () -> self
             | (logdev?) -> self
 
-  # <!-- rdoc-file=lib/logger.rb -->
-  # Logging severity threshold (e.g. `Logger::INFO`).
+  # <!--
+  #   rdoc-file=lib/logger.rb
+  #   - sev_threshold()
+  # -->
   #
   alias sev_threshold level
 

@@ -6,8 +6,8 @@
 # should know its esoteric system. See following:
 #
 # *   https://docs.oracle.com/cd/E19957-01/806-3568/ncg_goldberg.html
-# *   https://github.com/rdp/ruby_tutorials_core/wiki/Ruby-Talk-FAQ#floats_impre
-#     cise
+# *   https://github.com/rdp/ruby_tutorials_core/wiki/Ruby-Talk-FAQ#-why-are-rub
+#     ys-floats-imprecise
 # *   https://en.wikipedia.org/wiki/Floating_point#Accuracy_problems
 #
 #
@@ -109,8 +109,6 @@ class Float < Numeric
   #     10.0 % 4.0            # => 2.0
   #     10.0 % Rational(4, 1) # => 2.0
   #
-  # Float#modulo is an alias for Float#%.
-  #
   def %: (Integer) -> Float
        | (Float) -> Float
        | (Rational) -> Float
@@ -181,9 +179,9 @@ class Float < Numeric
 
   # <!--
   #   rdoc-file=numeric.rb
-  #   - -float  ->  float
+  #   - -float -> float
   # -->
-  # Returns `float`, negated.
+  # Returns `self`, negated.
   #
   def -@: () -> Float
 
@@ -326,16 +324,13 @@ class Float < Numeric
 
   # <!--
   #   rdoc-file=numeric.rb
-  #   - float.abs        ->  float
-  #   - float.magnitude  ->  float
+  #   - float.abs ->  float
   # -->
-  # Returns the absolute value of `float`.
+  # Returns the absolute value of `self`:
   #
-  #     (-34.56).abs   #=> 34.56
-  #     -34.56.abs     #=> 34.56
-  #     34.56.abs      #=> 34.56
-  #
-  # Float#magnitude is an alias for Float#abs.
+  #     (-34.56).abs # => 34.56
+  #     -34.56.abs   # => 34.56
+  #     34.56.abs    # => 34.56
   #
   def abs: () -> Float
 
@@ -480,8 +475,6 @@ class Float < Numeric
   #     f.quo(-2)             # => -1.57
   #     f.quo(Rational(2, 1)) # => 1.57
   #     f.quo(Complex(2, 0))  # => (1.57+0.0i)
-  #
-  # Float#fdiv is an alias for Float#quo.
   #
   def fdiv: (Complex) -> Complex
           | (Numeric) -> Float
@@ -630,8 +623,6 @@ class Float < Numeric
   #     10.0 % 4.0            # => 2.0
   #     10.0 % Rational(4, 1) # => 2.0
   #
-  # Float#modulo is an alias for Float#%.
-  #
   def modulo: (Numeric) -> Float
 
   # <!--
@@ -649,9 +640,9 @@ class Float < Numeric
 
   # <!--
   #   rdoc-file=numeric.rb
-  #   - float.negative?  ->  true or false
+  #   - negative? -> true or false
   # -->
-  # Returns `true` if `float` is less than 0.
+  # Returns `true` if `self` is less than 0, `false` otherwise.
   #
   def negative?: () -> bool
 
@@ -725,9 +716,9 @@ class Float < Numeric
 
   # <!--
   #   rdoc-file=numeric.rb
-  #   - float.positive?  ->  true or false
+  #   - positive? -> true or false
   # -->
-  # Returns `true` if `float` is greater than 0.
+  # Returns `true` if `self` is greater than 0, `false` otherwise.
   #
   def positive?: () -> bool
 
@@ -778,8 +769,6 @@ class Float < Numeric
   #     f.quo(-2)             # => -1.57
   #     f.quo(Rational(2, 1)) # => 1.57
   #     f.quo(Complex(2, 0))  # => (1.57+0.0i)
-  #
-  # Float#fdiv is an alias for Float#quo.
   #
   def quo: (Complex) -> Complex
          | (Numeric) -> Float
@@ -875,9 +864,9 @@ class Float < Numeric
 
   # <!--
   #   rdoc-file=numeric.rb
-  #   - float.to_f  ->  self
+  #   - to_f -> self
   # -->
-  # Since `float` is already a Float, returns `self`.
+  # Returns `self` (which is already a Float).
   #
   def to_f: () -> Float
 
@@ -895,8 +884,6 @@ class Float < Numeric
   #
   #     (0.3 / 0.1).to_i  # => 2 (!)
   #
-  # Float#to_int is an alias for Float#to_i.
-  #
   def to_i: () -> Integer
 
   # <!-- rdoc-file=numeric.c -->
@@ -909,8 +896,6 @@ class Float < Numeric
   # surprising results:
   #
   #     (0.3 / 0.1).to_i  # => 2 (!)
-  #
-  # Float#to_int is an alias for Float#to_i.
   #
   alias to_int to_i
 
@@ -994,9 +979,9 @@ class Float < Numeric
 
   # <!--
   #   rdoc-file=numeric.rb
-  #   - float.zero?  ->  true or false
+  #   - zero? -> true or false
   # -->
-  # Returns `true` if `float` is 0.0.
+  # Returns `true` if `self` is 0.0, `false` otherwise.
   #
   def zero?: () -> bool
 end

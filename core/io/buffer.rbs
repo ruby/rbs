@@ -4,8 +4,8 @@ class IO
   # IO::Buffer is a low-level efficient buffer for input/output. There are three
   # ways of using buffer:
   #
-  # *   Create an empty buffer with ::new, fill it with data using #copy or
-  #     #set_value, #set_string, get data with #get_string;
+  # *   Create an empty buffer with ::new, fill it with buffer using #copy or
+  #     #set_value, #set_string, get buffer with #get_string;
   # *   Create a buffer mapped to some string with ::for, then it could be used
   #     both for reading with #get_string or #get_value, and writing (writing will
   #     change the source string, too);
@@ -39,7 +39,7 @@ class IO
   #
   # Buffer from string:
   #
-  #     string = 'data'
+  #     string = 'buffer'
   #     buffer = IO::Buffer.for(string)
   #     # =>
   #     # #<IO::Buffer 0x00007f3f02be9b18+4 SLICE>
@@ -47,7 +47,7 @@ class IO
   #     buffer
   #     # =>
   #     # #<IO::Buffer 0x00007f3f02be9b18+4 SLICE>
-  #     # 0x00000000  64 61 74 61                                     data
+  #     # 0x00000000  64 61 74 61                                     buffer
   #
   #     buffer.get_string(2)  # read content starting from offset 2
   #     # => "ta"
@@ -62,7 +62,7 @@ class IO
   #
   # Buffer from file:
   #
-  #     File.write('test.txt', 'test data')
+  #     File.write('test.txt', 'test buffer')
   #     # => 9
   #     buffer = IO::Buffer.map(File.open('test.txt'))
   #     # =>
@@ -79,7 +79,7 @@ class IO
   #     buffer.set_string('---', 1)
   #     # => 3 -- bytes written
   #     File.read('test.txt')
-  #     # => "t--- data"
+  #     # => "t--- buffer"
   #
   # **The class is experimental and the interface is subject to change.**
   #
@@ -94,13 +94,14 @@ class IO
     # Creates a IO::Buffer from the given string's memory. Without a block a frozen
     # internal copy of the string is created efficiently and used as the buffer
     # source. When a block is provided, the buffer is associated directly with the
-    # string's internal data and updating the buffer will update the string.
+    # string's internal buffer and updating the buffer will update the string.
     #
     # Until #free is invoked on the buffer, either explicitly or via the garbage
     # collector, the source string will be locked and cannot be modified.
     #
     # If the string is frozen, it will create a read-only buffer which cannot be
-    # modified.
+    # modified. If the string is shared, it may trigger a copy-on-write when using
+    # the block form.
     #
     #     string = 'test'
     #     buffer = IO::Buffer.for(string)
@@ -212,8 +213,8 @@ class IO
     #   rdoc-file=io_buffer.c
     #   - copy(source, [offset, [length, [source_offset]]]) -> size
     # -->
-    # Efficiently copy data from a source IO::Buffer into the buffer, at `offset`
-    # using `memcpy`. For copying String instances, see #set_string.
+    # Efficiently copy from a source IO::Buffer into the buffer, at `offset` using
+    # `memcpy`. For copying String instances, see #set_string.
     #
     #     buffer = IO::Buffer.new(32)
     #     # =>
@@ -222,22 +223,22 @@ class IO
     #     # 0x00000010  00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 ................  *
     #
     #     buffer.copy(IO::Buffer.for("test"), 8)
-    #     # => 4 -- size of data copied
+    #     # => 4 -- size of buffer copied
     #     buffer
     #     # =>
     #     # #<IO::Buffer 0x0000555f5cf8fe40+32 INTERNAL>
     #     # 0x00000000  00 00 00 00 00 00 00 00 74 65 73 74 00 00 00 00 ........test....
     #     # 0x00000010  00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 ................ *
     #
-    # #copy can be used to put data into strings associated with buffer:
+    # #copy can be used to put buffer into strings associated with buffer:
     #
-    #     string= "data:    "
-    #     # => "data:    "
+    #     string= "buffer:    "
+    #     # => "buffer:    "
     #     buffer = IO::Buffer.for(string)
     #     buffer.copy(IO::Buffer.for("test"), 5)
     #     # => 4
     #     string
-    #     # => "data:test"
+    #     # => "buffer:test"
     #
     # Attempt to copy into a read-only buffer will fail:
     #
@@ -254,12 +255,12 @@ class IO
     #     File.read('test.txt')
     #     # => "boom"
     #
-    # Attempt to copy the data which will need place outside of buffer's bounds will
-    # fail:
+    # Attempt to copy the buffer which will need place outside of buffer's bounds
+    # will fail:
     #
     #     buffer = IO::Buffer.new(2)
     #     buffer.copy(IO::Buffer.for('test'), 0)
-    #     # in `copy': Specified offset+length exceeds source size! (ArgumentError)
+    #     # in `copy': Specified offset+length is bigger than the buffer size! (ArgumentError)
     #
     def copy: (Buffer source, ?Integer offset, ?Integer length, ?Integer source_offset) -> Integer
 
@@ -336,9 +337,9 @@ class IO
 
     # <!--
     #   rdoc-file=io_buffer.c
-    #   - get_value(data_type, offset) -> numeric
+    #   - get_value(buffer_type, offset) -> numeric
     # -->
-    # Read from buffer a value of `type` at `offset`. `data_type` should be one of
+    # Read from buffer a value of `type` at `offset`. `buffer_type` should be one of
     # symbols:
     #
     # *   `:U8`: unsigned integer, 1 byte
@@ -361,9 +362,9 @@ class IO
     # *   `:F64`: double, 8 bytes, big-endian
     #
     #
-    # A data type refers specifically to the type of binary data that is stored in
-    # the buffer. For example, a `:u32` data type is a 32-bit unsigned integer in
-    # little-endian format.
+    # A buffer type refers specifically to the type of binary buffer that is stored
+    # in the buffer. For example, a `:u32` buffer type is a 32-bit unsigned integer
+    # in little-endian format.
     #
     # Example:
     #
@@ -493,13 +494,19 @@ class IO
 
     # <!--
     #   rdoc-file=io_buffer.c
-    #   - pread(io, from, length, [offset]) -> read length or -errno
+    #   - pread(io, from, [length, [offset]]) -> read length or -errno
     # -->
-    # Read at most `length` bytes from `io` into the buffer, starting at `from`, and
-    # put it in buffer starting from specified `offset`. If an error occurs, return
+    # Read at least `length` bytes from the `io` starting at the specified `from`
+    # position, into the buffer starting at `offset`. If an error occurs, return
     # `-errno`.
     #
-    # If `offset` is not given, put it at the beginning of the buffer.
+    # If `length` is not given or `nil`, it defaults to the size of the buffer minus
+    # the offset, i.e. the entire buffer.
+    #
+    # If `length` is zero, exactly one `pread` operation will occur.
+    #
+    # If `offset` is not given, it defaults to zero, i.e. the beginning of the
+    # buffer.
     #
     # Example:
     #
@@ -522,14 +529,24 @@ class IO
 
     # <!--
     #   rdoc-file=io_buffer.c
-    #   - pwrite(io, from, length, [offset]) -> written length or -errno
+    #   - pwrite(io, from, [length, [offset]]) -> written length or -errno
     # -->
-    # Writes `length` bytes from buffer into `io`, starting at `offset` in the
-    # buffer. If an error occurs, return `-errno`.
+    # Write at least `length` bytes from the buffer starting at `offset`, into the
+    # `io` starting at the specified `from` position. If an error occurs, return
+    # `-errno`.
     #
-    # If `offset` is not given, the bytes are taken from the beginning of the
-    # buffer. If the `offset` is given and is beyond the end of the file, the gap
-    # will be filled with null (0 value) bytes.
+    # If `length` is not given or `nil`, it defaults to the size of the buffer minus
+    # the offset, i.e. the entire buffer.
+    #
+    # If `length` is zero, exactly one `pwrite` operation will occur.
+    #
+    # If `offset` is not given, it defaults to zero, i.e. the beginning of the
+    # buffer.
+    #
+    # If the `from` position is beyond the end of the file, the gap will be filled
+    # with null (0 value) bytes.
+    #
+    # Example:
     #
     #     out = File.open('output.txt', File::RDWR) # open for read/write, no truncation
     #     IO::Buffer.for('1234567').pwrite(out, 2, 3, 1)
@@ -541,14 +558,18 @@ class IO
 
     # <!--
     #   rdoc-file=io_buffer.c
-    #   - read(io, length, [offset]) -> read length or -errno
+    #   - read(io, [length, [offset]]) -> read length or -errno
     # -->
-    # Read at most `length` bytes from `io` into the buffer, starting at `offset`.
-    # If an error occurs, return `-errno`.
+    # Read at least `length` bytes from the `io`, into the buffer starting at
+    # `offset`. If an error occurs, return `-errno`.
     #
-    # If `offset` is not given, read from the beginning of the buffer.
+    # If `length` is not given or `nil`, it defaults to the size of the buffer minus
+    # the offset, i.e. the entire buffer.
     #
-    # If `length` is 0, read nothing.
+    # If `length` is zero, exactly one `read` operation will occur.
+    #
+    # If `offset` is not given, it defaults to zero, i.e. the beginning of the
+    # buffer.
     #
     # Example:
     #
@@ -600,15 +621,15 @@ class IO
     #   rdoc-file=io_buffer.c
     #   - set_string(string, [offset, [length, [source_offset]]]) -> size
     # -->
-    # Efficiently copy data from a source String into the buffer, at `offset` using
-    # `memcpy`.
+    # Efficiently copy buffer from a source String into the buffer, at `offset`
+    # using `memcpy`.
     #
     #     buf = IO::Buffer.new(8)
     #     # =>
     #     # #<IO::Buffer 0x0000557412714a20+8 INTERNAL>
     #     # 0x00000000  00 00 00 00 00 00 00 00                         ........
     #
-    #     # set data starting from offset 1, take 2 bytes starting from string's
+    #     # set buffer starting from offset 1, take 2 bytes starting from string's
     #     # second
     #     buf.set_string('test', 1, 2, 1)
     #     # => 2
@@ -667,7 +688,7 @@ class IO
 
     # <!--
     #   rdoc-file=io_buffer.c
-    #   - slice([offset = 0, [length]]) -> io_buffer
+    #   - slice([offset, [length]]) -> io_buffer
     # -->
     # Produce another IO::Buffer which is a slice (or view into) the current one
     # starting at `offset` bytes and going for `length` bytes.
@@ -762,7 +783,7 @@ class IO
     #   rdoc-file=io_buffer.c
     #   - valid? -> true or false
     # -->
-    # Returns whether the buffer data is accessible.
+    # Returns whether the buffer buffer is accessible.
     #
     # A buffer becomes invalid if it is a slice of another buffer which has been
     # freed.
@@ -771,13 +792,20 @@ class IO
 
     # <!--
     #   rdoc-file=io_buffer.c
-    #   - write(io, length, [offset]) -> written length or -errno
+    #   - write(io, [length, [offset]]) -> written length or -errno
     # -->
-    # Writes `length` bytes from buffer into `io`, starting at `offset` in the
-    # buffer. If an error occurs, return `-errno`.
+    # Write at least `length` bytes from the buffer starting at `offset`, into the
+    # `io`. If an error occurs, return `-errno`.
     #
-    # If `offset` is not given, the bytes are taken from the beginning of the
+    # If `length` is not given or `nil`, it defaults to the size of the buffer minus
+    # the offset, i.e. the entire buffer.
+    #
+    # If `length` is zero, exactly one `write` operation will occur.
+    #
+    # If `offset` is not given, it defaults to zero, i.e. the beginning of the
     # buffer.
+    #
+    # Example:
     #
     #     out = File.open('output.txt', 'wb')
     #     IO::Buffer.for('1234567').write(out, 3)

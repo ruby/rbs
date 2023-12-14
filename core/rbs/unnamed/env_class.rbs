@@ -239,8 +239,6 @@ module RBS
       #   - ENV[name] = value      -> value
       #   - ENV.store(name, value) -> value
       # -->
-      # ENV.store is an alias for ENV.[]=.
-      #
       # Creates, updates, or deletes the named environment variable, returning the
       # value. Both `name` and `value` may be instances of String. See [Valid Names
       # and Values](rdoc-ref:ENV@Valid+Names+and+Values).
@@ -294,8 +292,6 @@ module RBS
       #   - ENV[name] = value      -> value
       #   - ENV.store(name, value) -> value
       # -->
-      # ENV.store is an alias for ENV.[]=.
-      #
       # Creates, updates, or deletes the named environment variable, returning the
       # value. Both `name` and `value` may be instances of String. See [Valid Names
       # and Values](rdoc-ref:ENV@Valid+Names+and+Values).
@@ -601,8 +597,6 @@ module RBS
       #   - ENV.filter { |name, value| block } -> hash of name/value pairs
       #   - ENV.filter                         -> an_enumerator
       # -->
-      # ENV.filter is an alias for ENV.select.
-      #
       # Yields each environment variable name and its value as a 2-element Array,
       # returning a Hash of the names and values for which the block returns a truthy
       # value:
@@ -627,8 +621,6 @@ module RBS
       #   - ENV.filter { |name, value| block } -> hash of name/value pairs
       #   - ENV.filter                         -> an_enumerator
       # -->
-      # ENV.filter is an alias for ENV.select.
-      #
       # Yields each environment variable name and its value as a 2-element Array,
       # returning a Hash of the names and values for which the block returns a truthy
       # value:
@@ -652,8 +644,6 @@ module RBS
       #   - ENV.filter! { |name, value| block } -> ENV or nil
       #   - ENV.filter!                         -> an_enumerator
       # -->
-      # ENV.filter! is an alias for ENV.select!.
-      #
       # Yields each environment variable name and its value as a 2-element Array,
       # deleting each entry for which the block returns `false` or `nil`, and
       # returning ENV if any deletions made, or `nil` otherwise:
@@ -693,8 +683,6 @@ module RBS
       #   - ENV.filter! { |name, value| block } -> ENV or nil
       #   - ENV.filter!                         -> an_enumerator
       # -->
-      # ENV.filter! is an alias for ENV.select!.
-      #
       # Yields each environment variable name and its value as a 2-element Array,
       # deleting each entry for which the block returns `false` or `nil`, and
       # returning ENV if any deletions made, or `nil` otherwise:
@@ -794,8 +782,6 @@ module RBS
       #   - ENV.merge!(*hashes)                                     -> ENV
       #   - ENV.merge!(*hashes) { |name, env_val, hash_val| block } -> ENV
       # -->
-      # ENV.update is an alias for ENV.merge!.
-      #
       # Adds to ENV each key/value pair in the given `hash`; returns ENV:
       #     ENV.replace('foo' => '0', 'bar' => '1')
       #     ENV.merge!('baz' => '2', 'bat' => '3') # => {"bar"=>"1", "bat"=>"3", "baz"=>"2", "foo"=>"0"}
@@ -839,8 +825,6 @@ module RBS
       #   - ENV.merge!(*hashes)                                     -> ENV
       #   - ENV.merge!(*hashes) { |name, env_val, hash_val| block } -> ENV
       # -->
-      # ENV.update is an alias for ENV.merge!.
-      #
       # Adds to ENV each key/value pair in the given `hash`; returns ENV:
       #     ENV.replace('foo' => '0', 'bar' => '1')
       #     ENV.merge!('baz' => '2', 'bat' => '3') # => {"bar"=>"1", "bat"=>"3", "baz"=>"2", "foo"=>"0"}
@@ -1026,8 +1010,6 @@ module RBS
       #   - ENV.member?(name)  -> true or false
       #   - ENV.key?(name)     -> true or false
       # -->
-      # ENV.has_key?, ENV.member?, and ENV.key? are aliases for ENV.include?.
-      #
       # Returns `true` if there is an environment variable with the given `name`:
       #     ENV.replace('foo' => '0', 'bar' => '1')
       #     ENV.include?('foo') # => true
@@ -1061,8 +1043,6 @@ module RBS
       #   - ENV.member?(name)  -> true or false
       #   - ENV.key?(name)     -> true or false
       # -->
-      # ENV.has_key?, ENV.member?, and ENV.key? are aliases for ENV.include?.
-      #
       # Returns `true` if there is an environment variable with the given `name`:
       #     ENV.replace('foo' => '0', 'bar' => '1')
       #     ENV.include?('foo') # => true
@@ -1096,8 +1076,6 @@ module RBS
       #   - ENV.member?(name)  -> true or false
       #   - ENV.key?(name)     -> true or false
       # -->
-      # ENV.has_key?, ENV.member?, and ENV.key? are aliases for ENV.include?.
-      #
       # Returns `true` if there is an environment variable with the given `name`:
       #     ENV.replace('foo' => '0', 'bar' => '1')
       #     ENV.include?('foo') # => true
@@ -1163,8 +1141,6 @@ module RBS
       #   - ENV.member?(name)  -> true or false
       #   - ENV.key?(name)     -> true or false
       # -->
-      # ENV.has_key?, ENV.member?, and ENV.key? are aliases for ENV.include?.
-      #
       # Returns `true` if there is an environment variable with the given `name`:
       #     ENV.replace('foo' => '0', 'bar' => '1')
       #     ENV.include?('foo') # => true

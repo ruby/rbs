@@ -38,7 +38,8 @@
 # ## Output Customization
 #
 # To define a customized pretty printing function for your classes, redefine
-# method `#pretty_print(pp)` in the class.
+# method `#pretty_print(pp)` in the class. Note that `require 'pp'` is needed
+# before redefining `#pretty_print(pp)`.
 #
 # `#pretty_print` takes the `pp` argument, which is an instance of the PP class.
 # The method uses #text, #breakable, #nest, #group and #pp to print the object.
@@ -290,10 +291,6 @@ module Kernel
   #   - pretty_inspect()
   # -->
   # Returns a pretty printed object as a string.
-  #
-  # In order to use this method you must first require the PP module:
-  #
-  #     require 'pp'
   #
   # See the PP module for more information.
   #

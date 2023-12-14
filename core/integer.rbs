@@ -131,7 +131,7 @@ class Integer < Numeric
   def self.sqrt: (int n) -> Integer
 
   # <!--
-  #   rdoc-file=numeric.rb
+  #   rdoc-file=numeric.c
   #   - Integer.try_convert(object) -> object, integer, or nil
   # -->
   # If `object` is an Integer object, returns `object`.
@@ -177,8 +177,6 @@ class Integer < Numeric
   #
   #     10 % 3.0            # => 1.0
   #     10 % Rational(3, 1) # => (1/1)
-  #
-  # Integer#modulo is an alias for Integer#%.
   #
   def %: (Float) -> Float
        | (Rational) -> Rational
@@ -277,9 +275,9 @@ class Integer < Numeric
 
   # <!--
   #   rdoc-file=numeric.rb
-  #   - -int  ->  integer
+  #   - -int -> integer
   # -->
-  # Returns `int`, negated.
+  # Returns `self`, negated.
   #
   def -@: () -> Integer
 
@@ -391,8 +389,6 @@ class Integer < Numeric
   #
   # Related: Integer#eql? (requires `other` to be an Integer).
   #
-  # Integer#=== is an alias for Integer#==.
-  #
   def ==: (untyped) -> bool
 
   # <!--
@@ -405,8 +401,6 @@ class Integer < Numeric
   #     1 == 1.0   #=> true
   #
   # Related: Integer#eql? (requires `other` to be an Integer).
-  #
-  # Integer#=== is an alias for Integer#==.
   #
   def ===: (untyped) -> bool
 
@@ -519,16 +513,13 @@ class Integer < Numeric
 
   # <!--
   #   rdoc-file=numeric.rb
-  #   - int.abs        ->  integer
-  #   - int.magnitude  ->  integer
+  #   - abs -> integer
   # -->
-  # Returns the absolute value of `int`.
+  # Returns the absolute value of `self`.
   #
-  #     (-12345).abs   #=> 12345
-  #     -12345.abs     #=> 12345
-  #     12345.abs      #=> 12345
-  #
-  # Integer#magnitude is an alias for Integer#abs.
+  #     (-12345).abs # => 12345
+  #     -12345.abs   # => 12345
+  #     12345.abs    # => 12345
   #
   def abs: () -> Integer
 
@@ -586,44 +577,43 @@ class Integer < Numeric
 
   # <!--
   #   rdoc-file=numeric.rb
-  #   - int.bit_length  ->  integer
+  #   - bit_length -> integer
   # -->
-  # Returns the number of bits of the value of `int`.
+  # Returns the number of bits of the value of `self`, which is the bit position
+  # of the highest-order bit that is different from the sign bit (where the least
+  # significant bit has bit position 1). If there is no such bit (zero or minus
+  # one), returns zero.
   #
-  # "Number of bits" means the bit position of the highest bit which is different
-  # from the sign bit (where the least significant bit has bit position 1). If
-  # there is no such bit (zero or minus one), zero is returned.
+  # This method returns `ceil(log2(self < 0 ? -self : self + 1))`>.
   #
-  # I.e. this method returns *ceil(log2(int < 0 ? -int : int+1))*.
+  #     (-2**1000-1).bit_length   # => 1001
+  #     (-2**1000).bit_length     # => 1000
+  #     (-2**1000+1).bit_length   # => 1000
+  #     (-2**12-1).bit_length     # => 13
+  #     (-2**12).bit_length       # => 12
+  #     (-2**12+1).bit_length     # => 12
+  #     -0x101.bit_length         # => 9
+  #     -0x100.bit_length         # => 8
+  #     -0xff.bit_length          # => 8
+  #     -2.bit_length             # => 1
+  #     -1.bit_length             # => 0
+  #     0.bit_length              # => 0
+  #     1.bit_length              # => 1
+  #     0xff.bit_length           # => 8
+  #     0x100.bit_length          # => 9
+  #     (2**12-1).bit_length      # => 12
+  #     (2**12).bit_length        # => 13
+  #     (2**12+1).bit_length      # => 13
+  #     (2**1000-1).bit_length    # => 1000
+  #     (2**1000).bit_length      # => 1001
+  #     (2**1000+1).bit_length    # => 1001
   #
-  #     (-2**1000-1).bit_length   #=> 1001
-  #     (-2**1000).bit_length     #=> 1000
-  #     (-2**1000+1).bit_length   #=> 1000
-  #     (-2**12-1).bit_length     #=> 13
-  #     (-2**12).bit_length       #=> 12
-  #     (-2**12+1).bit_length     #=> 12
-  #     -0x101.bit_length         #=> 9
-  #     -0x100.bit_length         #=> 8
-  #     -0xff.bit_length          #=> 8
-  #     -2.bit_length             #=> 1
-  #     -1.bit_length             #=> 0
-  #     0.bit_length              #=> 0
-  #     1.bit_length              #=> 1
-  #     0xff.bit_length           #=> 8
-  #     0x100.bit_length          #=> 9
-  #     (2**12-1).bit_length      #=> 12
-  #     (2**12).bit_length        #=> 13
-  #     (2**12+1).bit_length      #=> 13
-  #     (2**1000-1).bit_length    #=> 1000
-  #     (2**1000).bit_length      #=> 1001
-  #     (2**1000+1).bit_length    #=> 1001
-  #
-  # This method can be used to detect overflow in Array#pack as follows:
+  # For Integer *n*, this method can be used to detect overflow in Array#pack:
   #
   #     if n.bit_length < 32
-  #       [n].pack("l") # no overflow
+  #       [n].pack('l') # No overflow.
   #     else
-  #       raise "overflow"
+  #       raise 'Overflow'
   #     end
   #
   def bit_length: () -> Integer
@@ -655,16 +645,16 @@ class Integer < Numeric
 
   # <!--
   #   rdoc-file=numeric.rb
-  #   - ceildiv(other) -> integer
+  #   - ceildiv(numeric) -> integer
   # -->
-  # Returns the result of division `self` by `other`. The result is rounded up to
-  # the nearest integer.
+  # Returns the result of division `self` by `numeric`. rounded up to the nearest
+  # integer.
   #
-  #     3.ceildiv(3) # => 1
-  #     4.ceildiv(3) # => 2
+  #     3.ceildiv(3)   # => 1
+  #     4.ceildiv(3)   # => 2
   #
-  #     4.ceildiv(-3) # => -1
-  #     -4.ceildiv(3) # => -1
+  #     4.ceildiv(-3)  # => -1
+  #     -4.ceildiv(3)  # => -1
   #     -4.ceildiv(-3) # => 2
   #
   #     3.ceildiv(1.2) # => 3
@@ -712,9 +702,9 @@ class Integer < Numeric
 
   # <!--
   #   rdoc-file=numeric.rb
-  #   - int.denominator  ->  1
+  #   - denominator -> 1
   # -->
-  # Returns 1.
+  # Returns `1`.
   #
   def denominator: () -> Integer
 
@@ -806,9 +796,9 @@ class Integer < Numeric
 
   # <!--
   #   rdoc-file=numeric.rb
-  #   - int.even?  ->  true or false
+  #   - even? -> true or false
   # -->
-  # Returns `true` if `int` is an even number.
+  # Returns `true` if `self` is an even number, `false` otherwise.
   #
   def even?: () -> bool
 
@@ -904,15 +894,13 @@ class Integer < Numeric
   #
   # Raises an exception if `base` is out of range.
   #
-  # Integer#inspect is an alias for Integer#to_s.
-  #
   alias inspect to_s
 
   # <!--
   #   rdoc-file=numeric.rb
-  #   - int.integer?  ->  true
+  #   - integer? -> true
   # -->
-  # Since `int` is already an Integer, this always returns `true`.
+  # Since `self` is already an Integer, always returns `true`.
   #
   def integer?: () -> true
 
@@ -961,8 +949,6 @@ class Integer < Numeric
   #     10 % 3.0            # => 1.0
   #     10 % Rational(3, 1) # => (1/1)
   #
-  # Integer#modulo is an alias for Integer#%.
-  #
   alias modulo %
 
   def negative?: () -> bool
@@ -972,8 +958,6 @@ class Integer < Numeric
   #
   #     1.succ  #=> 2
   #     -1.succ #=> 0
-  #
-  # Integer#next is an alias for Integer#succ.
   #
   # Related: Integer#pred (predecessor value).
   #
@@ -1006,31 +990,25 @@ class Integer < Numeric
 
   # <!--
   #   rdoc-file=numeric.rb
-  #   - int.numerator  ->  self
+  #   - numerator -> self
   # -->
-  # Returns self.
+  # Returns `self`.
   #
   def numerator: () -> Integer
 
   # <!--
   #   rdoc-file=numeric.rb
-  #   - int.odd?  ->  true or false
+  #   - odd? -> true or false
   # -->
-  # Returns `true` if `int` is an odd number.
+  # Returns `true` if `self` is an odd number, `false` otherwise.
   #
   def odd?: () -> bool
 
   # <!--
   #   rdoc-file=numeric.rb
-  #   - int.ord  ->  self
+  #   - ord -> self
   # -->
-  # Returns the `int` itself.
-  #
-  #     97.ord   #=> 97
-  #
-  # This method is intended for compatibility to character literals in Ruby 1.9.
-  #
-  # For example, `?a.ord` returns 97 both in 1.8 and 1.9.
+  # Returns `self`; intended for compatibility to character literals in Ruby 1.9.
   #
   def ord: () -> Integer
 
@@ -1168,19 +1146,17 @@ class Integer < Numeric
 
   # <!--
   #   rdoc-file=numeric.rb
-  #   - int.size  ->  int
+  #   - size -> integer
   # -->
-  # Document-method: Integer#size
+  # Returns the number of bytes in the machine representation of `self`; the value
+  # is system-dependent:
   #
-  # Returns the number of bytes in the machine representation of `int` (machine
-  # dependent).
-  #
-  #     1.size               #=> 8
-  #     -1.size              #=> 8
-  #     2147483647.size      #=> 8
-  #     (256**10 - 1).size   #=> 10
-  #     (256**20 - 1).size   #=> 20
-  #     (256**40 - 1).size   #=> 40
+  #     1.size             # => 8
+  #     -1.size            # => 8
+  #     2147483647.size    # => 8
+  #     (256**10 - 1).size # => 10
+  #     (256**20 - 1).size # => 20
+  #     (256**40 - 1).size # => 40
   #
   def size: () -> Integer
 
@@ -1204,14 +1180,12 @@ class Integer < Numeric
   #     1.succ  #=> 2
   #     -1.succ #=> 0
   #
-  # Integer#next is an alias for Integer#succ.
-  #
   # Related: Integer#pred (predecessor value).
   #
   def succ: () -> Integer
 
   # <!--
-  #   rdoc-file=numeric.c
+  #   rdoc-file=numeric.rb
   #   - times {|i| ... } -> self
   #   - times            -> enumerator
   # -->
@@ -1246,19 +1220,17 @@ class Integer < Numeric
 
   # <!--
   #   rdoc-file=numeric.rb
-  #   - int.to_i    ->  integer
+  #   - to_i -> self
   # -->
-  # Since `int` is already an Integer, returns `self`.
-  #
-  # #to_int is an alias for #to_i.
+  # Returns `self` (which is already an Integer).
   #
   def to_i: () -> Integer
 
   # <!--
   #   rdoc-file=numeric.rb
-  #   - int.to_int  ->  integer
+  #   - to_int -> self
   # -->
-  # Since `int` is already an Integer, returns `self`.
+  # Returns `self` (which is already an Integer).
   #
   alias to_int to_i
 
@@ -1289,8 +1261,6 @@ class Integer < Numeric
   #     78546939656932.to_s(36)  # => "rubyrules"
   #
   # Raises an exception if `base` is out of range.
-  #
-  # Integer#inspect is an alias for Integer#to_s.
   #
   def to_s: () -> String
           | (2) -> String
@@ -1377,9 +1347,9 @@ class Integer < Numeric
 
   # <!--
   #   rdoc-file=numeric.rb
-  #   - int.zero? -> true or false
+  #   - zero? -> true or false
   # -->
-  # Returns `true` if `int` has a zero value.
+  # Returns `true` if `self` has a zero value, `false` otherwise.
   #
   def zero?: () -> bool
 
@@ -1400,16 +1370,15 @@ class Integer < Numeric
 
   # <!--
   #   rdoc-file=numeric.rb
-  #   - ~int  ->  integer
+  #   - ~int -> integer
   # -->
-  # One's complement: returns a number where each bit is flipped.
+  # One's complement: returns the value of `self` with each bit inverted.
   #
-  # Inverts the bits in an Integer. As integers are conceptually of infinite
-  # length, the result acts as if it had an infinite number of one bits to the
-  # left. In hex representations, this is displayed as two periods to the left of
-  # the digits.
+  # Because an integer value is conceptually of infinite length, the result acts
+  # as if it had an infinite number of one bits to the left. In hex
+  # representations, this is displayed as two periods to the left of the digits:
   #
-  #     sprintf("%X", ~0x1122334455)    #=> "..FEEDDCCBBAA"
+  #     sprintf("%X", ~0x1122334455)    # => "..FEEDDCCBBAA"
   #
   def ~: () -> Integer
 end

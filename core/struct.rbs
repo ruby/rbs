@@ -122,8 +122,8 @@ class Struct[Elem]
 
   # <!--
   #   rdoc-file=struct.c
-  #   - Struct.new(*member_names, keyword_init: false){|Struct_subclass| ... } -> Struct_subclass
-  #   - Struct.new(class_name, *member_names, keyword_init: false){|Struct_subclass| ... } -> Struct_subclass
+  #   - Struct.new(*member_names, keyword_init: nil){|Struct_subclass| ... } -> Struct_subclass
+  #   - Struct.new(class_name, *member_names, keyword_init: nil){|Struct_subclass| ... } -> Struct_subclass
   #   - Struct_subclass.new(*member_names) -> Struct_subclass_instance
   #   - Struct_subclass.new(**member_names) -> Struct_subclass_instance
   # -->
@@ -205,8 +205,6 @@ class Struct[Elem]
   #         Foo.new(foo: 0, bar: 1) # => #<struct Struct::Foo foo=0, bar=1>
   #         Foo.new(foo: 0, bar: 1, baz: 2)
   #         # Raises ArgumentError: unknown keywords: baz
-  #
-  #     Method `::[]` is an alias for method `::new`.
   #
   # *   Method `:inspect` returns a string representation of the subclass:
   #
@@ -352,8 +350,6 @@ class Struct[Elem]
   #     joe = Customer.new("Joe Smith", "123 Maple, Anytown NC", 12345)
   #     joe.inspect # => "#<struct Customer name=\"Joe Smith\", address=\"123 Maple, Anytown NC\", zip=12345>"
   #
-  # Struct#to_s is an alias for Struct#inspect.
-  #
   def inspect: () -> String
 
   # <!-- rdoc-file=struct.c -->
@@ -362,8 +358,6 @@ class Struct[Elem]
   #     Customer = Struct.new(:name, :address, :zip) # => Customer
   #     joe = Customer.new("Joe Smith", "123 Maple, Anytown NC", 12345)
   #     joe.inspect # => "#<struct Customer name=\"Joe Smith\", address=\"123 Maple, Anytown NC\", zip=12345>"
-  #
-  # Struct#to_s is an alias for Struct#inspect.
   #
   alias to_s inspect
 
@@ -376,8 +370,6 @@ class Struct[Elem]
   #     Customer = Struct.new(:name, :address, :zip)
   #     joe = Customer.new("Joe Smith", "123 Maple, Anytown NC", 12345)
   #     joe.to_a # => ["Joe Smith", "123 Maple, Anytown NC", 12345]
-  #
-  # Struct#values and Struct#deconstruct are aliases for Struct#to_a.
   #
   # Related: #members.
   #
@@ -414,8 +406,6 @@ class Struct[Elem]
   #     joe = Customer.new("Joe Smith", "123 Maple, Anytown NC", 12345)
   #     joe.to_a # => ["Joe Smith", "123 Maple, Anytown NC", 12345]
   #
-  # Struct#values and Struct#deconstruct are aliases for Struct#to_a.
-  #
   # Related: #members.
   #
   alias values to_a
@@ -430,8 +420,6 @@ class Struct[Elem]
   #     joe = Customer.new("Joe Smith", "123 Maple, Anytown NC", 12345)
   #     joe.size #=> 3
   #
-  # Struct#length is an alias for Struct#size.
-  #
   def size: () -> Integer
 
   # <!-- rdoc-file=struct.c -->
@@ -440,8 +428,6 @@ class Struct[Elem]
   #     Customer = Struct.new(:name, :address, :zip)
   #     joe = Customer.new("Joe Smith", "123 Maple, Anytown NC", 12345)
   #     joe.size #=> 3
-  #
-  # Struct#length is an alias for Struct#size.
   #
   alias length size
 
@@ -565,8 +551,6 @@ class Struct[Elem]
   #
   # With no block given, returns an Enumerator.
   #
-  # Struct#filter is an alias for Struct#select.
-  #
   def select: () -> Enumerator[Elem, Array[Elem]]
             | () { (Elem value) -> boolish } -> Array[Elem]
 
@@ -582,8 +566,6 @@ class Struct[Elem]
   #     a # => [12345]
   #
   # With no block given, returns an Enumerator.
-  #
-  # Struct#filter is an alias for Struct#select.
   #
   alias filter select
 
@@ -672,8 +654,6 @@ class Struct[Elem]
   #     Customer = Struct.new(:name, :address, :zip)
   #     joe = Customer.new("Joe Smith", "123 Maple, Anytown NC", 12345)
   #     joe.to_a # => ["Joe Smith", "123 Maple, Anytown NC", 12345]
-  #
-  # Struct#values and Struct#deconstruct are aliases for Struct#to_a.
   #
   # Related: #members.
   #

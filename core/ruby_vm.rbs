@@ -73,7 +73,7 @@ end
 module RubyVM::AbstractSyntaxTree
   # <!--
   #   rdoc-file=ast.rb
-  #   - RubyVM::AbstractSyntaxTree.parse(string, keep_script_lines: false, error_tolerant: false, keep_tokens: false) -> RubyVM::AbstractSyntaxTree::Node
+  #   - RubyVM::AbstractSyntaxTree.parse(string, keep_script_lines: RubyVM.keep_script_lines, error_tolerant: false, keep_tokens: false) -> RubyVM::AbstractSyntaxTree::Node
   # -->
   # Parses the given *string* into an abstract syntax tree, returning the root
   # node of that tree.
@@ -106,13 +106,13 @@ module RubyVM::AbstractSyntaxTree
   #     #  (ERROR@1:7-1:11),
   #     #  (LASGN@1:12-1:15 :y (LIT@1:14-1:15 2))]
   #
-  # Note that parsing continues even after the errored expresion.
+  # Note that parsing continues even after the errored expression.
   #
   def self.parse: (String string, ?keep_script_lines: bool, ?error_tolerant: bool, ?keep_tokens: bool) -> Node
 
   # <!--
   #   rdoc-file=ast.rb
-  #   - RubyVM::AbstractSyntaxTree.parse_file(pathname, keep_script_lines: false, error_tolerant: false, keep_tokens: false) -> RubyVM::AbstractSyntaxTree::Node
+  #   - RubyVM::AbstractSyntaxTree.parse_file(pathname, keep_script_lines: RubyVM.keep_script_lines, error_tolerant: false, keep_tokens: false) -> RubyVM::AbstractSyntaxTree::Node
   # -->
   # Reads the file from *pathname*, then parses it like ::parse, returning the
   # root node of the abstract syntax tree.
@@ -128,8 +128,8 @@ module RubyVM::AbstractSyntaxTree
 
   # <!--
   #   rdoc-file=ast.rb
-  #   - RubyVM::AbstractSyntaxTree.of(proc, keep_script_lines: false, error_tolerant: false, keep_tokens: false)   -> RubyVM::AbstractSyntaxTree::Node
-  #   - RubyVM::AbstractSyntaxTree.of(method, keep_script_lines: false, error_tolerant: false, keep_tokens: false) -> RubyVM::AbstractSyntaxTree::Node
+  #   - RubyVM::AbstractSyntaxTree.of(proc, keep_script_lines: RubyVM.keep_script_lines, error_tolerant: false, keep_tokens: false)   -> RubyVM::AbstractSyntaxTree::Node
+  #   - RubyVM::AbstractSyntaxTree.of(method, keep_script_lines: RubyVM.keep_script_lines, error_tolerant: false, keep_tokens: false) -> RubyVM::AbstractSyntaxTree::Node
   # -->
   # Returns AST nodes of the given *proc* or *method*.
   #

@@ -1,7 +1,7 @@
 # <!-- rdoc-file=lib/optparse.rb -->
 # ## OptionParser
 #
-# ### New to OptionParser?
+# ### New to `OptionParser`?
 #
 # See the [Tutorial](optparse/tutorial.rdoc).
 #
@@ -106,13 +106,17 @@
 # OptionParser supports the ability to coerce command line arguments into
 # objects for us.
 #
-# OptionParser comes with a few ready-to-use kinds of  type coercion. They are:
+# OptionParser comes with a few ready-to-use kinds of type coercion. They are:
 #
-# *   Date  -- Anything accepted by `Date.parse`
-# *   DateTime -- Anything accepted by `DateTime.parse`
-# *   Time -- Anything accepted by `Time.httpdate` or `Time.parse`
-# *   URI  -- Anything accepted by `URI.parse`
-# *   Shellwords -- Anything accepted by `Shellwords.shellwords`
+# *   Date  -- Anything accepted by `Date.parse` (need to require
+#     `optparse/date`)
+# *   DateTime -- Anything accepted by `DateTime.parse` (need to require
+#     `optparse/date`)
+# *   Time -- Anything accepted by `Time.httpdate` or `Time.parse` (need to
+#     require `optparse/time`)
+# *   URI  -- Anything accepted by `URI.parse` (need to require `optparse/uri`)
+# *   Shellwords -- Anything accepted by `Shellwords.shellwords` (need to
+#     require `optparse/shellwords`)
 # *   String -- Any non-empty string
 # *   Integer -- Any integer. Will convert octal. (e.g. 124, -3, 040)
 # *   Float -- Any float. (e.g. 10, 3.14, -100E+13)
@@ -400,7 +404,7 @@ class OptionParser
 
   # <!--
   #   rdoc-file=lib/optparse.rb
-  #   - getopts(*args)
+  #   - getopts(*args, symbolize_names: false)
   # -->
   # See #getopts.
   #
@@ -598,7 +602,7 @@ class OptionParser
 
   # <!--
   #   rdoc-file=lib/optparse.rb
-  #   - getopts(*args)
+  #   - getopts(*args, symbolize_names: false)
   # -->
   # Wrapper method for getopts.rb.
   #
@@ -608,6 +612,16 @@ class OptionParser
   #     # params["foo"] = "1"  # --foo
   #     # params["bar"] = "x"  # --bar x
   #     # params["zot"] = "z"  # --zot Z
+  #
+  # Option `symbolize_names` (boolean) specifies whether returned Hash keys should
+  # be Symbols; defaults to `false` (use Strings).
+  #
+  #     params = ARGV.getopts("ab:", "foo", "bar:", "zot:Z;zot option", symbolize_names: true)
+  #     # params[:a] = true   # -a
+  #     # params[:b] = "1"    # -b1
+  #     # params[:foo] = "1"  # --foo
+  #     # params[:bar] = "x"  # --bar x
+  #     # params[:zot] = "z"  # --zot Z
   #
   def getopts: (*String options) -> Hash[String, untyped]
              | (Array[String] args, *String options) -> Hash[String, untyped]
@@ -1099,7 +1113,7 @@ module OptionParser::Arguable
 
   # <!--
   #   rdoc-file=lib/optparse.rb
-  #   - getopts(*args)
+  #   - getopts(*args, symbolize_names: false)
   # -->
   # Substitution of getopts is possible as follows. Also see OptionParser#getopts.
   #
