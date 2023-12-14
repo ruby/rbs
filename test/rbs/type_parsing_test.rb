@@ -669,6 +669,33 @@ class RBS::TypeParsingTest < Test::Unit::TestCase
     assert_equal "a.rbs:1:2...1:5: Syntax error: unexpected record key token, token=`foo` (tLIDENT)", error.message
   end
 
+  def test_record_with_optional_key
+    error = assert_raises(RBS::ParsingError) do
+      Parser.parse_type("{ 1?: untyped }")
+    end
+    assert_equal "pQUESTION", error.token_type
+    assert_equal "?", error.location.source
+    assert_equal "a.rbs:1:3...1:4: Syntax error: expected a token `pFATARROW`, token=`?` (pQUESTION)", error.message
+  end
+
+  def test_record_with_intersection_key
+    error = assert_raises(RBS::ParsingError) do
+      Parser.parse_type("{ 1&2: untyped }")
+    end
+    assert_equal "pAMP", error.token_type
+    assert_equal "&", error.location.source
+    assert_equal "a.rbs:1:3...1:4: Syntax error: expected a token `pFATARROW`, token=`&` (pAMP)", error.message
+  end
+
+  def test_record_with_union_key
+    error = assert_raises(RBS::ParsingError) do
+      Parser.parse_type("{ 1|2: untyped }")
+    end
+    assert_equal "pBAR", error.token_type
+    assert_equal "|", error.location.source
+    assert_equal "a.rbs:1:3...1:4: Syntax error: expected a token `pFATARROW`, token=`|` (pBAR)", error.message
+  end
+
   def test_type_var
     Parser.parse_type("Array[A]", variables: []).yield_self do |type|
       assert_instance_of Types::ClassInstance, type
