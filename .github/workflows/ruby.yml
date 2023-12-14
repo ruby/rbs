@@ -31,9 +31,8 @@ jobs:
             job: stdlib_test
           - container_tag: 3.1-dev-focal
             job: stdlib_test
-        include:
-          - container_tag: master-nightly-focal
-            allow_failures: "true"
+          - container_tag: 3.2-dev-focal
+            job: stdlib_test
     container:
       image: rubylang/ruby:${{ matrix.container_tag }}
     steps:
