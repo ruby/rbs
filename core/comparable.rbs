@@ -40,8 +40,8 @@
 # *   #<: Returns whether `self` is less than the given object.
 # *   #<=: Returns whether `self` is less than or equal to the given object.
 # *   #==: Returns whether `self` is equal to the given object.
-# *   #>: Returns whether `self` is greater than or equal to the given object.
-# *   #>=: Returns whether `self` is greater than the given object.
+# *   #>: Returns whether `self` is greater than the given object.
+# *   #>=: Returns whether `self` is greater than or equal to the given object.
 # *   #between?: Returns `true` if `self` is between two given objects.
 # *   #clamp: For given objects `min` and `max`, or range `(min..max)`, returns:
 #
@@ -123,6 +123,12 @@ module Comparable : _WithSpaceshipOperator
   #
   #     'd'.clamp('a', 'f')      #=> 'd'
   #     'z'.clamp('a', 'f')      #=> 'f'
+  #
+  # If *min* is `nil`, it is considered smaller than *obj*, and if *max* is `nil`,
+  # it is considered greater than *obj*.
+  #
+  #     -20.clamp(0, nil)           #=> 0
+  #     523.clamp(nil, 100)         #=> 100
   #
   # In `(range)` form, returns *range.begin* if *obj* `<=>` *range.begin* is less
   # than zero, *range.end* if *obj* `<=>` *range.end* is greater than zero, and

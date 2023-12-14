@@ -92,7 +92,7 @@
 #     text.
 # *   `\'` corresponds to `$'`, which contains string after match.
 # *   `\`` corresponds to `$``, which contains string before match.
-# *   `+` corresponds to `$+`, which contains last capture group.
+# *   `\+` corresponds to `$+`, which contains last capture group.
 #
 #
 # See regexp.rdoc for details.
@@ -279,7 +279,7 @@
 #
 # If argument `capture` is given and not `0`, it should be either an capture
 # group index (integer) or a capture group name (string or symbol); the slice is
-# the specified capture (see Regexp@Capturing):
+# the specified capture (see Regexp@Groups+and+Captures):
 #
 #     s = 'hello there'
 #     s[/[aeiou](.)\1/, 1] # => "l"
@@ -770,13 +770,21 @@ class String
   # <!--
   #   rdoc-file=string.c
   #   - -string -> frozen_string
+  #   - dedup -> frozen_string
   # -->
   # Returns a frozen, possibly pre-existing copy of the string.
   #
   # The returned String will be deduplicated as long as it does not have any
   # instance variables set on it and is not a String subclass.
   #
-  # String#dedup is an alias for String#-@.
+  # Note that `-string` variant is more convenient for defining constants:
+  #
+  #     FILENAME = -'config/database.yml'
+  #
+  # while `dedup` is better suitable for using the method in chains of
+  # calculations:
+  #
+  #     @url_list.concat(urls.map(&:dedup))
   #
   def -@: () -> self
 
@@ -874,7 +882,7 @@ class String
   #     'foo' =~ /o/ # => 1
   #     'foo' =~ /x/ # => nil
   #
-  # Note: also updates Regexp@Special+global+variables.
+  # Note: also updates Regexp@Global+Variables.
   #
   # If the given `object` is not a Regexp, returns the value returned by `object
   # =~ self`.
@@ -935,8 +943,6 @@ class String
   #     s                  # => "finally"
   #     s['lly'] = 'ncial' # => "ncial"
   #     s                  # => "financial"
-  #
-  # String#slice is an alias for String#[].
   #
   def []=: [T < _ToStr] (int index, T replacement) -> T
          | [T < _ToStr] (int start, int length, T replacement) -> T
@@ -1159,16 +1165,25 @@ class String
   # <!--
   #   rdoc-file=string.c
   #   - bytesplice(index, length, str) -> string
-  #   - bytesplice(range, str)         -> string
+  #   - bytesplice(index, length, str, str_index, str_length) -> string
+  #   - bytesplice(range, str) -> string
+  #   - bytesplice(range, str, str_range) -> string
   # -->
   # Replaces some or all of the content of `self` with `str`, and returns `self`.
   # The portion of the string affected is determined using the same criteria as
   # String#byteslice, except that `length` cannot be omitted. If the replacement
   # string is not the same length as the text it is replacing, the string will be
-  # adjusted accordingly. The form that take an Integer will raise an IndexError
-  # if the value is out of range; the Range form will raise a RangeError. If the
-  # beginning or ending offset does not land on character (codepoint) boundary, an
-  # IndexError will be raised.
+  # adjusted accordingly.
+  #
+  # If `str_index` and `str_length`, or `str_range` are given, the content of
+  # `self` is replaced by str.byteslice(str_index, str_length) or
+  # str.byteslice(str_range); however the substring of `str` is not allocated as a
+  # new string.
+  #
+  # The form that take an Integer will raise an IndexError if the value is out of
+  # range; the Range form will raise a RangeError. If the beginning or ending
+  # offset does not land on character (codepoint) boundary, an IndexError will be
+  # raised.
   #
   def bytesplice: (int start, int length, string str) -> String
                 | (int start, int length, string str, int str_start, int str_length) -> String
@@ -1530,7 +1545,14 @@ class String
   # The returned String will be deduplicated as long as it does not have any
   # instance variables set on it and is not a String subclass.
   #
-  # String#dedup is an alias for String#-@.
+  # Note that `-string` variant is more convenient for defining constants:
+  #
+  #     FILENAME = -'config/database.yml'
+  #
+  # while `dedup` is better suitable for using the method in chains of
+  # calculations:
+  #
+  #     @url_list.concat(urls.map(&:dedup))
   #
   alias dedup -@
 
@@ -1840,7 +1862,7 @@ class String
   def empty?: () -> bool
 
   # <!--
-  #   rdoc-file=transcode.rdoc
+  #   rdoc-file=transcode.c
   #   - encode(dst_encoding = Encoding.default_internal, **enc_opts) -> string
   #   - encode(dst_encoding, src_encoding, **enc_opts)   -> string
   # -->
@@ -1885,6 +1907,12 @@ class String
   #
   # Optional keyword arguments `enc_opts` specify encoding options; see [Encoding
   # Options](rdoc-ref:encodings.rdoc@Encoding+Options).
+  #
+  # Please note that, unless `invalid: :replace` option is given, conversion from
+  # an encoding `enc` to the same encoding `enc` (independent of whether `enc` is
+  # given explicitly or implicitly) is a no-op, i.e. the string is simply copied
+  # without any changes, and no exceptions are raised, even if there are invalid
+  # bytes.
   #
   def encode: (
     ?encoding source_encoding,
@@ -2227,8 +2255,6 @@ class String
   #     'тест'.bytesize       # => 8
   #     'こんにちは'.bytesize   # => 15
   #
-  # String#size is an alias for String#length.
-  #
   def length: () -> Integer
 
   # <!--
@@ -2300,7 +2326,7 @@ class String
   # -->
   # Returns a MatchData object (or `nil`) based on `self` and the given `pattern`.
   #
-  # Note: also updates Regexp@Special+global+variables.
+  # Note: also updates Regexp@Global+Variables.
   #
   # *   Computes `regexp` by converting `pattern` (if not already a Regexp).
   #         regexp = Regexp.new(pattern)
@@ -2338,7 +2364,7 @@ class String
   # Returns `true` or `false` based on whether a match is found for `self` and
   # `pattern`.
   #
-  # Note: does not update Regexp@Special+global+variables.
+  # Note: does not update Regexp@Global+Variables.
   #
   # Computes `regexp` by converting `pattern` (if not already a Regexp).
   #     regexp = Regexp.new(pattern)
@@ -2408,14 +2434,10 @@ class String
   #
   #     ''.succ # => ""
   #
-  # String#next is an alias for String#succ.
-  #
   alias next succ
 
   # <!-- rdoc-file=string.c -->
   # Equivalent to String#succ, but modifies `self` in place; returns `self`.
-  #
-  # String#next! is an alias for String#succ!.
   #
   alias next! succ!
 
@@ -2783,8 +2805,6 @@ class String
   #     'тест'.bytesize       # => 8
   #     'こんにちは'.bytesize   # => 15
   #
-  # String#size is an alias for String#length.
-  #
   alias size length
 
   # <!-- rdoc-file=string.c -->
@@ -3072,8 +3092,6 @@ class String
   #
   #     ''.succ # => ""
   #
-  # String#next is an alias for String#succ.
-  #
   def succ: () -> String
 
   # <!--
@@ -3081,8 +3099,6 @@ class String
   #   - succ! -> self
   # -->
   # Equivalent to String#succ, but modifies `self` in place; returns `self`.
-  #
-  # String#next! is an alias for String#succ!.
   #
   def succ!: () -> self
 
@@ -3262,15 +3278,11 @@ class String
   # Returns `self` if `self` is a String, or `self` converted to a String if
   # `self` is a subclass of String.
   #
-  # String#to_str is an alias for String#to_s.
-  #
   def to_s: () -> String
 
   # <!-- rdoc-file=string.c -->
   # Returns `self` if `self` is a String, or `self` converted to a String if
   # `self` is a subclass of String.
-  #
-  # String#to_str is an alias for String#to_s.
   #
   alias to_str to_s
 

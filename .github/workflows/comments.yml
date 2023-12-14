@@ -12,6 +12,8 @@ jobs:
     runs-on: "ubuntu-latest"
     container:
       image: rubylang/ruby:3.2-dev-focal
+    env:
+      RUBY_COMMIT: v3_3_0_preview3
     steps:
       - uses: actions/checkout@v4
       - name: Install dependencies
@@ -22,11 +24,6 @@ jobs:
         run: |
           ruby -v
           gem update --system
-      - name: bundle config set with
-        run: |
-          echo "NO_MINITEST=true" >> $GITHUB_ENV
-          bundle config set --local without 'minitest'
-        if: "contains(matrix.container_tag, 'master-nightly')"
       - name: bin/setup
         run: |
           bin/setup

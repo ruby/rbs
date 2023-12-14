@@ -1,11 +1,8 @@
 # <!-- rdoc-file=lib/set.rb -->
-# This library provides the Set class, which deals with a collection
+# This library provides the Set class, which implements a collection
 # of unordered values with no duplicates. It is a hybrid of Array's
 # intuitive inter-operation facilities and Hash's fast lookup.
 # The method `to_set` is added to Enumerable for convenience.
-# Set implements a collection of unordered values with no duplicates.
-# This is a hybrid of Array's intuitive inter-operation facilities and
-# Hash's fast lookup.
 # Set is easy to use with Enumerable objects (implementing `each`).
 # Most of the initializer methods and binary operators accept generic
 # Enumerable objects besides sets and arrays. An Enumerable object
@@ -60,7 +57,7 @@
 #
 # ### Methods for Creating a Set
 # *   ::[]:
-#  Returns a new set containing the given objects.
+#      Returns a new set containing the given objects.
 # *   ::new:
 #      Returns a new set containing either the given objects
 #      (if no block given) or the return values from the called block
@@ -89,13 +86,13 @@
 #      as determined by Object#eql?.
 # *   #compare_by_identity?:
 #      Returns whether the set considers only identity
-#  when comparing elements.
+#      when comparing elements.
 #
 # ### Methods for Querying
 # *   #length (aliased as #size):
-#  Returns the count of elements.
+#      Returns the count of elements.
 # *   #empty?:
-#  Returns whether the set has no elements.
+#      Returns whether the set has no elements.
 # *   #include? (aliased as #member? and #===):
 #      Returns whether a given object is an element in the set.
 # *   #subset? (aliased as [<=](#method-i-3C-3D)):
@@ -114,37 +111,38 @@
 #      have any common elements, `false` otherwise.
 # *   #compare_by_identity?:
 #      Returns whether the set considers only identity
-#  when comparing elements.
+#      when comparing elements.
 #
 # ### Methods for Assigning
 # *   #add (aliased as #<<):
-#  Adds a given object to the set; returns `self`.
+#      Adds a given object to the set; returns `self`.
 # *   #add?:
 #      If the given object is not an element in the set,
 #      adds it and returns `self`; otherwise, returns `nil`.
 # *   #merge:
-#  Adds each given object to the set; returns `self`.
+#      Merges the elements of each given enumerable object to the set; returns
+#     `self`.
 # *   #replace:
 #      Replaces the contents of the set with the contents
 #      of a given enumerable.
 #
 # ### Methods for Deleting
 # *   #clear:
-#  Removes all elements in the set; returns `self`.
+#      Removes all elements in the set; returns `self`.
 # *   #delete:
-#  Removes a given object from the set; returns `self`.
+#      Removes a given object from the set; returns `self`.
 # *   #delete?:
 #      If the given object is an element in the set,
 #      removes it and returns `self`; otherwise, returns `nil`.
 # *   #subtract:
-#  Removes each given object from the set; returns `self`.
+#      Removes each given object from the set; returns `self`.
 # *   #delete_if - Removes elements specified by a given block.
 # *   #select! (aliased as #filter!):
 #      Removes elements not specified by a given block.
 # *   #keep_if:
-#  Removes elements not specified by a given block.
+#      Removes elements not specified by a given block.
 # *   #reject!
-#  Removes elements specified by a given block.
+#      Removes elements specified by a given block.
 #
 # ### Methods for Converting
 # *   #classify:
@@ -162,20 +160,20 @@
 #      #flatten!:
 #      Replaces each nested set in `self` with the elements from that set.
 # *   #inspect (aliased as #to_s):
-#  Returns a string displaying the elements.
+#      Returns a string displaying the elements.
 # *   #join:
 #      Returns a string containing all elements, converted to strings
 #      as needed, and joined by the given record separator.
 # *   #to_a:
-#  Returns an array containing all set elements.
+#      Returns an array containing all set elements.
 # *   #to_set:
 #      Returns `self` if given no arguments and no block;
 #      with a block given, returns a new set consisting of block
-#  return values.
+#      return values.
 #
 # ### Methods for Iterating
 # *   #each:
-#  Calls the block with each successive element; returns `self`.
+#      Calls the block with each successive element; returns `self`.
 #
 # ### Other Methods
 # *   #reset:
@@ -531,9 +529,9 @@ class Set[unchecked out A]
 
   # <!--
   #   rdoc-file=lib/set.rb
-  #   - merge(enum)
+  #   - merge(*enums, **nil)
   # -->
-  # Merges the elements of the given enumerable object to the set and
+  # Merges the elements of the given enumerable objects to the set and
   # returns self.
   #
   def merge: (_Each[A]) -> self

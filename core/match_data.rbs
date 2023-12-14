@@ -53,8 +53,6 @@ class MatchData
   # Returns `true` if `object` is another MatchData object whose target string,
   # regexp, match, and captures are the same as `self`, `false` otherwise.
   #
-  # MatchData#eql? is an alias for MatchData#==.
-  #
   def ==: (MatchData other) -> bool
         | (untyped) -> false
 
@@ -180,7 +178,7 @@ class MatchData
   #     m.deconstruct_keys([:hours, :minutes]) # => {:hours => "18", :minutes => "37"}
   #     m.deconstruct_keys(nil) # => {:hours => "18", :minutes => "37", :seconds => "22"}
   #
-  # Returns an empty hash of no named captures were defined:
+  # Returns an empty hash if no named captures were defined:
   #
   #     m = /(\d{2}):(\d{2}):(\d{2})/.match("18:37:22")
   #     m.deconstruct_keys(nil) # => {}
@@ -232,8 +230,6 @@ class MatchData
   # Returns `true` if `object` is another MatchData object whose target string,
   # regexp, match, and captures are the same as `self`, `false` otherwise.
   #
-  # MatchData#eql? is an alias for MatchData#==.
-  #
   alias eql? ==
 
   # <!--
@@ -253,19 +249,19 @@ class MatchData
   # -->
   # Returns a string representation of `self`:
   #
-  #       m = /.$/.match("foo")
-  #       # => #<MatchData "o">
-  #       m.inspect # => "#<MatchData \"o\">"
+  #     m = /.$/.match("foo")
+  #     # => #<MatchData "o">
+  #     m.inspect # => "#<MatchData \"o\">"
   #
-  #       m = /(.)(.)(.)/.match("foo")
-  #       # => #<MatchData "foo" 1:"f" 2:"o" 3:"o">
-  #       m.inspect # => "#<MatchData \"foo\" 1:\"f\" 2:\"o\
+  #     m = /(.)(.)(.)/.match("foo")
+  #     # => #<MatchData "foo" 1:"f" 2:"o" 3:"o">
+  #     m.inspect # => "#<MatchData \"foo\" 1:\"f\" 2:\"o\
   #
-  #       m = /(.)(.)?(.)/.match("fo")
-  #       # => #<MatchData "fo" 1:"f" 2:nil 3:"o">
-  #       m.inspect # => "#<MatchData \"fo\" 1:\"f\" 2:nil 3:\"o\">"
+  #     m = /(.)(.)?(.)/.match("fo")
+  #     # => #<MatchData "fo" 1:"f" 2:nil 3:"o">
+  #     m.inspect # => "#<MatchData \"fo\" 1:\"f\" 2:nil 3:\"o\">"
   #
-  #     Related: MatchData#to_s.
+  # Related: MatchData#to_s.
   #
   def inspect: () -> String
 
@@ -276,32 +272,37 @@ class MatchData
   #     # => #<MatchData "HX1138" 1:"H" 2:"X" 3:"113" 4:"8">
   #     m.size # => 5
   #
-  # MatchData#length is an alias for MatchData.size.
-  #
   alias length size
 
   # <!--
   #   rdoc-file=re.c
-  #   - named_captures -> hash
+  #   - named_captures(symbolize_names: false) -> hash
   # -->
-  # Returns a hash of the named captures; each key is a capture name; each value
-  # is its captured string or `nil`:
+  # Returns a hash of the named captures;
+  #     each key is a capture name; each value is its captured string or +nil+:
   #
-  #     m = /(?<foo>.)(.)(?<bar>.+)/.match("hoge")
-  #     # => #<MatchData "hoge" foo:"h" bar:"ge">
-  #     m.named_captures # => {"foo"=>"h", "bar"=>"ge"}
+  #       m = /(?<foo>.)(.)(?<bar>.+)/.match("hoge")
+  #       # => #<MatchData "hoge" foo:"h" bar:"ge">
+  #       m.named_captures # => {"foo"=>"h", "bar"=>"ge"}
   #
-  #     m = /(?<a>.)(?<b>.)/.match("01")
-  #     # => #<MatchData "01" a:"0" b:"1">
-  #     m.named_captures #=> {"a" => "0", "b" => "1"}
+  #       m = /(?<a>.)(?<b>.)/.match("01")
+  #       # => #<MatchData "01" a:"0" b:"1">
+  #       m.named_captures #=> {"a" => "0", "b" => "1"}
   #
-  #     m = /(?<a>.)(?<b>.)?/.match("0")
-  #     # => #<MatchData "0" a:"0" b:nil>
-  #     m.named_captures #=> {"a" => "0", "b" => nil}
+  #       m = /(?<a>.)(?<b>.)?/.match("0")
+  #       # => #<MatchData "0" a:"0" b:nil>
+  #       m.named_captures #=> {"a" => "0", "b" => nil}
+  #
+  #       m = /(?<a>.)(?<a>.)/.match("01")
+  #       # => #<MatchData "01" a:"0" a:"1">
+  #       m.named_captures #=> {"a" => "1"}
+  #
+  # If keyword argument `symbolize_names` is given a true value, the keys in the
+  # resulting hash are Symbols:
   #
   #     m = /(?<a>.)(?<a>.)/.match("01")
   #     # => #<MatchData "01" a:"0" a:"1">
-  #     m.named_captures #=> {"a" => "1"}
+  #     m.named_captures(symbolize_names: true) #=> {:a => "1"}
   #
   def named_captures: () -> Hash[String, String?]
 
@@ -472,8 +473,6 @@ class MatchData
   #     m = /(.)(.)(\d+)(\d)/.match("THX1138.")
   #     # => #<MatchData "HX1138" 1:"H" 2:"X" 3:"113" 4:"8">
   #     m.size # => 5
-  #
-  # MatchData#length is an alias for MatchData.size.
   #
   def size: () -> Integer
 

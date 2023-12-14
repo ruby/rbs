@@ -247,7 +247,7 @@
 #       alias eql? ==
 #
 #       def hash
-#         @author.hash ^ @title.hash # XOR
+#         [self.class, @author, @title].hash
 #       end
 #     end
 #
@@ -345,6 +345,10 @@
 # Note that setting the default proc will clear the default value and vice
 # versa.
 #
+# Be aware that a default proc that modifies the hash is not thread-safe in the
+# sense that multiple threads can call into the default proc concurrently for
+# the same key.
+#
 # ### What's Here
 #
 # First, what's elsewhere. Class Hash:
@@ -412,7 +416,7 @@
 # *   #<=: Returns whether `self` is a subset of a given object.
 # *   #==: Returns whether a given object is equal to `self`.
 # *   #>: Returns whether `self` is a proper superset of a given object
-# *   #>=: Returns whether `self` is a proper superset of a given object.
+# *   #>=: Returns whether `self` is a superset of a given object.
 #
 #
 # #### Methods for Fetching
@@ -652,8 +656,6 @@ class Hash[unchecked out K, unchecked out V] < Object
   #   - hash[key] = value -> value
   #   - hash.store(key, value)
   # -->
-  # Hash#store is an alias for Hash#[]=.
-  #
   # Associates the given `value` with the given `key`; returns `value`.
   #
   # If the given `key` exists, replaces its value with the given `value`; the
@@ -680,6 +682,8 @@ class Hash[unchecked out K, unchecked out V] < Object
   # -->
   # Returns `true` if any element satisfies a given criterion; `false` otherwise.
   #
+  # If `self` has no element, returns `false` and argument or block are not used.
+  #
   # With no argument and no block, returns `true` if `self` is non-empty; `false`
   # if empty.
   #
@@ -695,6 +699,8 @@ class Hash[unchecked out K, unchecked out V] < Object
   #     h = {foo: 0, bar: 1, baz: 2}
   #     h.any? {|key, value| value < 3 } # => true
   #     h.any? {|key, value| value > 3 } # => false
+  #
+  # Related: Enumerable#any?
   #
   def any?: () -> bool
           | (untyped pattern) -> bool
@@ -928,8 +934,6 @@ class Hash[unchecked out K, unchecked out V] < Object
   def dig: (K, *untyped) -> untyped
 
   # <!-- rdoc-file=hash.c -->
-  # Hash#each is an alias for Hash#each_pair.
-  #
   # Calls the given block with each key-value pair; returns `self`:
   #     h = {foo: 0, bar: 1, baz: 2}
   #     h.each_pair {|key, value| puts "#{key}: #{value}"} # => {:foo=>0, :bar=>1, :baz=>2}
@@ -988,8 +992,6 @@ class Hash[unchecked out K, unchecked out V] < Object
   #   - hash.each -> new_enumerator
   #   - hash.each_pair -> new_enumerator
   # -->
-  # Hash#each is an alias for Hash#each_pair.
-  #
   # Calls the given block with each key-value pair; returns `self`:
   #     h = {foo: 0, bar: 1, baz: 2}
   #     h.each_pair {|key, value| puts "#{key}: #{value}"} # => {:foo=>0, :bar=>1, :baz=>2}
@@ -1133,8 +1135,6 @@ class Hash[unchecked out K, unchecked out V] < Object
                   | [X] (*K) { (K) -> X } -> ::Array[V | X]
 
   # <!-- rdoc-file=hash.c -->
-  # Hash#filter is an alias for Hash#select.
-  #
   # Returns a new Hash object whose entries are those for which the block returns
   # a truthy value:
   #     h = {foo: 0, bar: 1, baz: 2}
@@ -1149,8 +1149,6 @@ class Hash[unchecked out K, unchecked out V] < Object
             | () -> ::Enumerator[[ K, V ], ::Hash[K, V]]
 
   # <!-- rdoc-file=hash.c -->
-  # Hash#filter! is an alias for Hash#select!.
-  #
   # Returns `self`, whose entries are those for which the block returns a truthy
   # value:
   #     h = {foo: 0, bar: 1, baz: 2}
@@ -1201,8 +1199,6 @@ class Hash[unchecked out K, unchecked out V] < Object
              | (Integer level) -> Array[untyped]
 
   # <!-- rdoc-file=hash.c -->
-  # Methods #has_key?, #key?, and #member? are aliases for #include?.
-  #
   # Returns `true` if `key` is a key in `self`, otherwise `false`.
   #
   def has_key?: (K arg0) -> bool
@@ -1212,8 +1208,6 @@ class Hash[unchecked out K, unchecked out V] < Object
   #   - hash.has_value?(value) -> true or false
   #   - hash.value?(value) -> true or false
   # -->
-  # Method #value? is an alias for #has_value?.
-  #
   # Returns `true` if `value` is a value in `self`, otherwise `false`.
   #
   def has_value?: (V arg0) -> bool
@@ -1225,7 +1219,7 @@ class Hash[unchecked out K, unchecked out V] < Object
   # Returns the Integer hash-code for the hash.
   #
   # Two Hash objects have the same hash-code if their content is the same
-  # (regardless or order):
+  # (regardless of order):
   #     h1 = {foo: 0, bar: 1, baz: 2}
   #     h2 = {baz: 2, bar: 1, foo: 0}
   #     h2.hash == h1.hash # => true
@@ -1240,8 +1234,6 @@ class Hash[unchecked out K, unchecked out V] < Object
   #   - hash.key?(key) -> true or false
   #   - hash.member?(key) -> true or false
   # -->
-  # Methods #has_key?, #key?, and #member? are aliases for #include?.
-  #
   # Returns `true` if `key` is a key in `self`, otherwise `false`.
   #
   alias include? has_key?
@@ -1251,10 +1243,9 @@ class Hash[unchecked out K, unchecked out V] < Object
   #   - hash.inspect -> new_string
   # -->
   # Returns a new String containing the hash entries:
+  #
   #     h = {foo: 0, bar: 1, baz: 2}
   #     h.inspect # => "{:foo=>0, :bar=>1, :baz=>2}"
-  #
-  # Hash#to_s is an alias for Hash#inspect.
   #
   def inspect: () -> String
 
@@ -1302,13 +1293,11 @@ class Hash[unchecked out K, unchecked out V] < Object
   #     h.key(0) # => :foo
   #     h.key(2) # => :bar
   #
-  # Returns `nil` if so such value is found.
+  # Returns `nil` if no such value is found.
   #
   def key: (V) -> K?
 
   # <!-- rdoc-file=hash.c -->
-  # Methods #has_key?, #key?, and #member? are aliases for #include?.
-  #
   # Returns `true` if `key` is a key in `self`, otherwise `false`.
   #
   alias key? has_key?
@@ -1325,15 +1314,12 @@ class Hash[unchecked out K, unchecked out V] < Object
 
   # <!-- rdoc-file=hash.c -->
   # Returns the count of entries in `self`:
-  #     {foo: 0, bar: 1, baz: 2}.length # => 3
   #
-  # Hash#length is an alias for Hash#size.
+  #     {foo: 0, bar: 1, baz: 2}.length # => 3
   #
   def length: () -> Integer
 
   # <!-- rdoc-file=hash.c -->
-  # Methods #has_key?, #key?, and #member? are aliases for #include?.
-  #
   # Returns `true` if `key` is a key in `self`, otherwise `false`.
   #
   alias member? has_key?
@@ -1399,8 +1385,6 @@ class Hash[unchecked out K, unchecked out V] < Object
   # Merges each of `other_hashes` into `self`; returns `self`.
   #
   # Each argument in `other_hashes` must be a Hash.
-  #
-  # Method #update is an alias for #merge!.
   #
   # With arguments and no block:
   # *   Returns `self`, after the given hashes are merged into it.
@@ -1526,8 +1510,6 @@ class Hash[unchecked out K, unchecked out V] < Object
   #   - hash.select {|key, value| ... } -> new_hash
   #   - hash.select -> new_enumerator
   # -->
-  # Hash#filter is an alias for Hash#select.
-  #
   # Returns a new Hash object whose entries are those for which the block returns
   # a truthy value:
   #     h = {foo: 0, bar: 1, baz: 2}
@@ -1545,8 +1527,6 @@ class Hash[unchecked out K, unchecked out V] < Object
   #   - hash.select! {|key, value| ... } -> self or nil
   #   - hash.select! -> new_enumerator
   # -->
-  # Hash#filter! is an alias for Hash#select!.
-  #
   # Returns `self`, whose entries are those for which the block returns a truthy
   # value:
   #     h = {foo: 0, bar: 1, baz: 2}
@@ -1581,9 +1561,8 @@ class Hash[unchecked out K, unchecked out V] < Object
   #   - hash.size -> integer
   # -->
   # Returns the count of entries in `self`:
-  #     {foo: 0, bar: 1, baz: 2}.length # => 3
   #
-  # Hash#length is an alias for Hash#size.
+  #     {foo: 0, bar: 1, baz: 2}.length # => 3
   #
   alias size length
 
@@ -1600,8 +1579,6 @@ class Hash[unchecked out K, unchecked out V] < Object
   def slice: (*K) -> ::Hash[K, V]
 
   # <!-- rdoc-file=hash.c -->
-  # Hash#store is an alias for Hash#[]=.
-  #
   # Associates the given `value` with the given `key`; returns `value`.
   #
   # If the given `key` exists, replaces its value with the given `value`; the
@@ -1674,10 +1651,9 @@ class Hash[unchecked out K, unchecked out V] < Object
 
   # <!-- rdoc-file=hash.c -->
   # Returns a new String containing the hash entries:
+  #
   #     h = {foo: 0, bar: 1, baz: 2}
   #     h.inspect # => "{:foo=>0, :bar=>1, :baz=>2}"
-  #
-  # Hash#to_s is an alias for Hash#inspect.
   #
   alias to_s inspect
 
@@ -1788,8 +1764,6 @@ class Hash[unchecked out K, unchecked out V] < Object
   #
   # Each argument in `other_hashes` must be a Hash.
   #
-  # Method #update is an alias for #merge!.
-  #
   # With arguments and no block:
   # *   Returns `self`, after the given hashes are merged into it.
   # *   The given hashes are merged left to right.
@@ -1834,8 +1808,6 @@ class Hash[unchecked out K, unchecked out V] < Object
   alias update merge!
 
   # <!-- rdoc-file=hash.c -->
-  # Method #value? is an alias for #has_value?.
-  #
   # Returns `true` if `value` is a value in `self`, otherwise `false`.
   #
   alias value? has_value?

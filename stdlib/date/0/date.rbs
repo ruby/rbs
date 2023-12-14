@@ -92,8 +92,6 @@ class Date
   #
   # See argument [start](rdoc-ref:calendars.rdoc@Argument+start).
   #
-  # Date.civil is an alias for Date.new.
-  #
   # Related: Date.jd.
   #
   def initialize: (?Integer year, ?Integer month, ?Integer mday, ?Integer start) -> void
@@ -192,8 +190,6 @@ class Date
   #
   # See argument [limit](rdoc-ref:Date@Argument+limit).
   #
-  # Date._rfc822 is an alias for Date._rfc2822.
-  #
   # Related: Date.rfc2822 (returns a Date object).
   #
   def self._rfc2822: (String str) -> Hash[Symbol, Integer | String]
@@ -229,8 +225,6 @@ class Date
   #     # => {:wday=>6, :mday=>3, :mon=>2, :year=>2001, :hour=>0, :min=>0, :sec=>0, :zone=>"+0000", :offset=>0}
   #
   # See argument [limit](rdoc-ref:Date@Argument+limit).
-  #
-  # Date._rfc822 is an alias for Date._rfc2822.
   #
   # Related: Date.rfc2822 (returns a Date object).
   #
@@ -334,8 +328,6 @@ class Date
   #
   #     Date.gregorian_leap?(2000) # => true
   #     Date.gregorian_leap?(2001) # => false
-  #
-  # Date.leap? is an alias for Date.gregorian_leap?.
   #
   # Related: Date.julian_leap?.
   #
@@ -465,8 +457,6 @@ class Date
   #     Date.gregorian_leap?(2000) # => true
   #     Date.gregorian_leap?(2001) # => false
   #
-  # Date.leap? is an alias for Date.gregorian_leap?.
-  #
   # Related: Date.julian_leap?.
   #
   def self.leap?: (Integer year) -> bool
@@ -553,8 +543,6 @@ class Date
   # *   Argument [limit](rdoc-ref:Date@Argument+limit).
   #
   #
-  # Date.rfc822 is an alias for Date.rfc2822.
-  #
   # Related: Date._rfc2822 (returns a hash).
   #
   def self.rfc2822: (String str, ?Integer start) -> Date
@@ -597,8 +585,6 @@ class Date
   # *   Argument [start](rdoc-ref:calendars.rdoc@Argument+start).
   # *   Argument [limit](rdoc-ref:Date@Argument+limit).
   #
-  #
-  # Date.rfc822 is an alias for Date.rfc2822.
   #
   # Related: Date._rfc2822 (returns a hash).
   #
@@ -656,8 +642,6 @@ class Date
   #
   # See argument [start](rdoc-ref:calendars.rdoc@Argument+start).
   #
-  # Date.valid_date? is an alias for Date.valid_civil?.
-  #
   # Related: Date.jd, Date.new.
   #
   def self.valid_civil?: (Integer year, Integer month, Integer mday, ?Integer start) -> bool
@@ -692,8 +676,6 @@ class Date
   #     Date.valid_date?(2001, 2, -1) # => true
   #
   # See argument [start](rdoc-ref:calendars.rdoc@Argument+start).
-  #
-  # Date.valid_date? is an alias for Date.valid_civil?.
   #
   # Related: Date.jd, Date.new.
   #
@@ -962,8 +944,6 @@ class Date
   #
   # See [asctime](https://linux.die.net/man/3/asctime).
   #
-  # Date#ctime is an alias for Date#asctime.
-  #
   def asctime: () -> String
 
   # <!-- rdoc-file=ext/date/date_core.c -->
@@ -974,8 +954,6 @@ class Date
   #     Date.new(2001, 2, 3).asctime # => "Sat Feb  3 00:00:00 2001"
   #
   # See [asctime](https://linux.die.net/man/3/asctime).
-  #
-  # Date#ctime is an alias for Date#asctime.
   #
   def ctime: () -> String
 
@@ -1015,8 +993,6 @@ class Date
   # Returns the day of the month in range (1..31):
   #
   #     Date.new(2001, 2, 3).mday # => 3
-  #
-  # Date#day is an alias for Date#mday.
   #
   def day: () -> Integer
 
@@ -1131,8 +1107,6 @@ class Date
   #
   #     Date.new(2001, 2, 3).iso8601 # => "2001-02-03"
   #
-  # Date#xmlschema is an alias for Date#iso8601.
-  #
   def iso8601: () -> String
 
   # <!--
@@ -1216,8 +1190,6 @@ class Date
   #
   #     Date.new(2001, 2, 3).mday # => 3
   #
-  # Date#day is an alias for Date#mday.
-  #
   def mday: () -> Integer
 
   # <!--
@@ -1240,8 +1212,6 @@ class Date
   #
   #     Date.new(2001, 2, 3).mon # => 2
   #
-  # Date#month is an alias for Date#mon.
-  #
   def mon: () -> Integer
 
   # <!--
@@ -1256,8 +1226,6 @@ class Date
   # Returns the month in range (1..12):
   #
   #     Date.new(2001, 2, 3).mon # => 2
-  #
-  # Date#month is an alias for Date#mon.
   #
   def month: () -> Integer
 
@@ -1285,8 +1253,6 @@ class Date
   #     d = Date.new(2001, 2, 3)
   #     d.to_s      # => "2001-02-03"
   #     d.next.to_s # => "2001-02-04"
-  #
-  # Date#succ is an alias for Date#next.
   #
   def next: () -> Date
 
@@ -1347,8 +1313,6 @@ class Date
   #
   #     Date.new(2001, 2, 3).rfc2822 # => "Sat, 3 Feb 2001 00:00:00 +0000"
   #
-  # Date#rfc822 is an alias for Date#rfc2822.
-  #
   def rfc2822: () -> String
 
   # <!--
@@ -1376,8 +1340,6 @@ class Date
   # *   Argument [start](rdoc-ref:calendars.rdoc@Argument+start).
   # *   Argument [limit](rdoc-ref:Date@Argument+limit).
   #
-  #
-  # Date.rfc822 is an alias for Date.rfc2822.
   #
   # Related: Date._rfc2822 (returns a hash).
   #
@@ -1466,8 +1428,6 @@ class Date
   #     d = Date.new(2001, 2, 3)
   #     d.to_s      # => "2001-02-03"
   #     d.next.to_s # => "2001-02-04"
-  #
-  # Date#succ is an alias for Date#next.
   #
   def succ: () -> Date
 
@@ -1570,8 +1530,6 @@ class Date
   # `'%F'`);
   #
   #     Date.new(2001, 2, 3).iso8601 # => "2001-02-03"
-  #
-  # Date#xmlschema is an alias for Date#iso8601.
   #
   def xmlschema: () -> String
 

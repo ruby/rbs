@@ -161,14 +161,10 @@ class Symbol
   # -->
   # Returns `true` if `object` is the same object as `self`, `false` otherwise.
   #
-  # Symbol#=== is an alias for Symbol#==.
-  #
   def ==: (untyped obj) -> bool
 
   # <!-- rdoc-file=string.c -->
   # Returns `true` if `object` is the same object as `self`, `false` otherwise.
-  #
-  # Symbol#=== is an alias for Symbol#==.
   #
   def ===: (untyped obj) -> bool
 
@@ -311,7 +307,7 @@ class Symbol
 
   # <!--
   #   rdoc-file=string.c
-  #   - end_with?(*string_or_regexp) -> true or false
+  #   - end_with?(*strings) -> true or false
   # -->
   # Equivalent to `self.to_s.end_with?`; see String#end_with?.
   #
@@ -321,8 +317,6 @@ class Symbol
   # Returns a string representation of `self` (not including the leading colon):
   #
   #     :foo.to_s # => "foo"
-  #
-  # Symbol#id2name is an alias for Symbol#to_s.
   #
   # Related: Symbol#inspect, Symbol#name.
   #
@@ -353,8 +347,6 @@ class Symbol
   # -->
   # Equivalent to `self.to_s.length`; see String#length.
   #
-  # Symbol#size is an alias for Symbol#length.
-  #
   def length: () -> Integer
 
   # <!--
@@ -381,16 +373,12 @@ class Symbol
   #
   #     :foo.succ # => :fop
   #
-  # Symbol#next is an alias for Symbol#succ.
-  #
   # Related: String#succ.
   #
   def next: () -> Symbol
 
   # <!-- rdoc-file=string.c -->
   # Equivalent to `self.to_s.length`; see String#length.
-  #
-  # Symbol#size is an alias for Symbol#length.
   #
   alias size length
 
@@ -414,8 +402,6 @@ class Symbol
   # Equivalent to `self.to_s.succ.to_sym`:
   #
   #     :foo.succ # => :fop
-  #
-  # Symbol#next is an alias for Symbol#succ.
   #
   # Related: String#succ.
   #
@@ -456,8 +442,6 @@ class Symbol
   #
   #     :foo.to_s # => "foo"
   #
-  # Symbol#id2name is an alias for Symbol#to_s.
-  #
   # Related: Symbol#inspect, Symbol#name.
   #
   alias to_s id2name
@@ -467,8 +451,6 @@ class Symbol
   #   - to_sym -> self
   # -->
   # Returns `self`.
-  #
-  # Symbol#intern is an alias for Symbol#to_sym.
   #
   # Related: String#to_sym.
   #

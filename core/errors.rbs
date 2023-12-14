@@ -188,6 +188,10 @@ end
 #
 #     LoadError: no such file to load -- this/file/does/not/exist
 #
+# <!-- rdoc-file=lib/bundled_gems.rb -->
+# for RubyGems without Bundler environment. If loading library is not part of
+# the default gems and the bundled gems, warn it.
+#
 class LoadError < ScriptError
   # <!-- rdoc-file=error.c -->
   # the path failed to load
