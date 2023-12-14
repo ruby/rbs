@@ -136,10 +136,20 @@ class MatchDataInstanceTest < Test::Unit::TestCase
   end
 
   def test_named_captures
-    assert_send_type  '() -> Hash[String, String]',
-                      INSTANCE, :named_captures
-    assert_send_type  '() -> Hash[String, nil]',
-                      INSTANCE2, :named_captures
+    assert_send_type '() -> Hash[String, String]',
+                     INSTANCE, :named_captures
+    assert_send_type '() -> Hash[String, nil]',
+                     INSTANCE2, :named_captures
+    assert_send_type(
+      '(symbolize_names: true) -> Hash[Symbol, String]',
+      INSTANCE, :named_captures, symbolize_names: true
+    )
+    with_boolish do
+      assert_send_type(
+        '(symbolize_names: boolish) -> Hash[Symbol | String, String]',
+        INSTANCE, :named_captures, symbolize_names: _1
+      )
+    end
   end
 
   def test_names

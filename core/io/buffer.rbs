@@ -165,6 +165,21 @@ class IO
     #
     def self.map: (File file, ?Integer? size, ?Integer offset, ?Integer flags) -> Buffer
 
+    # <!--
+    #   rdoc-file=io_buffer.c
+    #   - IO::Buffer.string(length) {|io_buffer| ... read/write io_buffer ...} -> string
+    # -->
+    # Creates a new string of the given length and yields a IO::Buffer instance to
+    # the block which uses the string as a source. The block is expected to write to
+    # the buffer and the string will be returned.
+    #
+    #     IO::Buffer.string(4) do |buffer|
+    #       buffer.set_string("Ruby")
+    #     end
+    #     # => "Ruby"
+    #
+    def self.string: (int) { (Buffer) -> void } -> String
+
     public
 
     # <!--

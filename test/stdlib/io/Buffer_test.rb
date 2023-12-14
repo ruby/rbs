@@ -33,6 +33,15 @@ class IO_Buffer_SingletonTest < Test::Unit::TestCase
       IO::Buffer, :new, 10, IO::Buffer::INTERNAL
     )
   end
+
+  def test_string
+    with_int 10 do |int|
+      assert_send_type(
+        "(int) { (IO::Buffer) -> nil } -> String",
+        IO::Buffer, :string, int, &proc { nil }
+      )
+    end
+  end
 end
 
 class IO_Buffer_InstanceTest < Test::Unit::TestCase

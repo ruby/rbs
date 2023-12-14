@@ -260,4 +260,118 @@ module RubyVM::AbstractSyntaxTree
     #
     def children: () -> Array[untyped]
   end
+
+  # <!-- rdoc-file=yjit.rb -->
+  # This module allows for introspection of YJIT, CRuby's just-in-time compiler.
+  # Everything in the module is highly implementation specific and the API might
+  # be less stable compared to the standard library.
+  # This module may not exist if YJIT does not support the particular platform
+  # for which CRuby is built.
+  #
+  module YJIT
+    # <!--
+    #   rdoc-file=yjit.rb
+    #   - code_gc()
+    # -->
+    # Discard existing compiled code to reclaim memory
+    # and allow for recompilations in the future.
+    #
+    def self.code_gc: () -> void
+
+    # <!--
+    #   rdoc-file=yjit.rb
+    #   - dump_exit_locations(filename)
+    # -->
+    # Marshal dumps exit locations to the given filename.
+    # Usage:
+    # If `--yjit-exit-locations` is passed, a file named
+    # "yjit_exit_locations.dump" will automatically be generated.
+    # If you want to collect traces manually, call `dump_exit_locations`
+    # directly.
+    # Note that calling this in a script will generate stats after the
+    # dump is created, so the stats data may include exits from the
+    # dump itself.
+    # In a script call:
+    #     at_exit do
+    #       RubyVM::YJIT.dump_exit_locations("my_file.dump")
+    #     end
+    #
+    # Then run the file with the following options:
+    #     ruby --yjit --yjit-trace-exits test.rb
+    #
+    # Once the code is done running, use Stackprof to read the dump file.
+    # See Stackprof documentation for options.
+    #
+    def self.dump_exit_locations: (untyped filename) -> void
+
+    # <!--
+    #   rdoc-file=yjit.rb
+    #   - enable()
+    # -->
+    # Enable YJIT compilation.
+    #
+    def self.enable: () -> void
+
+    # <!--
+    #   rdoc-file=yjit.rb
+    #   - enabled?()
+    # -->
+    # Check if YJIT is enabled.
+    #
+    def self.enabled?: () -> bool
+
+    # <!--
+    #   rdoc-file=yjit.rb
+    #   - format_number(pad, number)
+    # -->
+    # Format large numbers with comma separators for readability
+    #
+    def self.format_number: (untyped pad, untyped number) -> untyped
+
+    # <!--
+    #   rdoc-file=yjit.rb
+    #   - format_number_pct(pad, number, total)
+    # -->
+    # Format a number along with a percentage over a total value
+    #
+    def self.format_number_pct: (untyped pad, untyped number, untyped total) -> untyped
+
+    # <!--
+    #   rdoc-file=yjit.rb
+    #   - reset_stats!()
+    # -->
+    # Discard statistics collected for `--yjit-stats`.
+    #
+    def self.reset_stats!: () -> void
+
+    # <!--
+    #   rdoc-file=yjit.rb
+    #   - runtime_stats(context: false)
+    # -->
+    # Return a hash for statistics generated for the `--yjit-stats` command line
+    # option.
+    # Return `nil` when option is not passed or unavailable.
+    #
+    def self.runtime_stats: (?context: bool) -> Hash[untyped, untyped]?
+
+    # <!--
+    #   rdoc-file=yjit.rb
+    #   - stats_enabled?()
+    # -->
+    # Check if `--yjit-stats` is used.
+    #
+    def self.stats_enabled?: () -> bool
+
+    # <!--
+    #   rdoc-file=yjit.rb
+    #   - stats_string()
+    # -->
+    # Format and print out counters as a String. This returns a non-empty
+    # content only when `--yjit-stats` is enabled.
+    #
+    def self.stats_string: () -> String
+  end
+
+  module RJIT
+  end
 end

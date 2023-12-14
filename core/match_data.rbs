@@ -305,6 +305,8 @@ class MatchData
   #     m.named_captures(symbolize_names: true) #=> {:a => "1"}
   #
   def named_captures: () -> Hash[String, String?]
+                    | (symbolize_names: true) -> Hash[Symbol, String?]
+                    | (symbolize_names: boolish) -> Hash[String | Symbol, String?]
 
   # <!--
   #   rdoc-file=re.c

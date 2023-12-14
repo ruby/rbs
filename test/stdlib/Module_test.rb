@@ -261,4 +261,20 @@ class ModuleInstanceTest < Test::Unit::TestCase
       )
     end
   end
+
+  def test_set_temporary_name
+    mod = Module.new
+
+    with_string "fake_name" do |name|
+      assert_send_type(
+        "(::string) -> ::Module",
+        mod, :set_temporary_name, name
+      )
+    end
+
+    assert_send_type(
+      "(nil) -> Module",
+      mod, :set_temporary_name, nil
+    )
+  end
 end

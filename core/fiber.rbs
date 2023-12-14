@@ -371,6 +371,20 @@ class Fiber < Object
 
   # <!--
   #   rdoc-file=cont.c
+  #   - fiber.kill -> nil
+  # -->
+  # Terminates `fiber` by raising an uncatchable exception, returning the
+  # terminated Fiber.
+  #
+  # If the fiber has not been started, transition directly to the terminated
+  # state.
+  #
+  # If the fiber is already terminated, does nothing.
+  #
+  def kill: () -> nil
+
+  # <!--
+  #   rdoc-file=cont.c
   #   - fiber.raise                                 -> obj
   #   - fiber.raise(string)                         -> obj
   #   - fiber.raise(exception [, string [, array]]) -> obj
