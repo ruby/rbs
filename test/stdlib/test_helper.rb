@@ -162,6 +162,29 @@ module WithAliases
 
   alias with_untyped with_boolish
 
+  def with_duration(seconds: 1, nanoseconds: 0)
+    duration_obj = BlankSlate.new.__with_object_methods(:define_singleton_method)
+    nanosecs_obj = BlankSlate.new.__with_object_methods(:define_singleton_method)
+
+    secs = nanosecs = nil
+    duration_obj.define_singleton_method :divmod do |x|
+      flunk "Expected `1` for argument to divmod, got #{x.inspect}" unless 1.equal? x
+      [secs, nanosecs_obj]
+    end
+    nanosecs_obj.define_singleton_method :* do |x|
+      flunk "Expected `1000000000` for argument to *, got #{x.inspect}" unless 1000000000.equal? x
+      nanosecs
+    end
+
+    with_int seconds do |s|
+      secs = s
+      with_int nanoseconds do |ns|
+        nanosecs = ns
+        yield duration_obj
+      end
+    end
+  end
+
   def with_range(start, stop, exclude_end = false)
     # If you need fixed starting and stopping points, you can just do `with_range with(1), with(2)`.
     raise ArgumentError, '`start` must be from a `with` method' unless start.is_a? WithEnum

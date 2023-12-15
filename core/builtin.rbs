@@ -219,6 +219,26 @@ interface _Exception
                | (String arg0) -> Exception
 end
 
+# A type that's used for durations.
+#
+# All numeric types implement this, but custom classes can also implement it if desired.
+#
+# Usage of `_Duration` is fairly common throughout the stdlib, such as in `Kernel#sleep`,
+# `IO#timeout=`, and `TCPSocket#new`'s `connet_timeout` field.
+interface _Duration
+  # Returns `[seconds, nanoseconds]`.
+  #
+  # The `seconds` should be a whole number of seconds, whereas the `nanoseconds` should be smaller
+  # than one. For example, `3.125.divmod(1)` would yield `[3, 0.125]`
+  def divmod: (1) -> [int, _DurationNSecs]
+end
+
+# The nanoseconds part of `_Duration`'s return value. See it for details
+interface _DurationNSecs
+  # Convert `self` into a whole number of seconds.
+  def *: (1_000_000_000) -> int
+end
+
 # Represents an `Integer`, or a type convertible to it (via `.to_int`).
 #
 type int = Integer | _ToInt
