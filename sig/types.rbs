@@ -497,6 +497,11 @@ module RBS
       include NoTypeName
 
       attr_reader location: loc?
+
+      private
+
+      def string_to_s: (String) -> String
+      def symbol_to_s: (Symbol) -> String
     end
   end
 end
