@@ -3562,9 +3562,3 @@ class String
   #
   def valid_encoding?: () -> bool
 end
-
-interface _ArefFromStringToString
-  def []: (String) -> String
-end
-
-type String::encode_fallback = Hash[String, String] | Proc | Method | _ArefFromStringToString
