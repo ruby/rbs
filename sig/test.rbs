@@ -30,6 +30,9 @@ module RBS
     # Kernel#singleton_class
     SINGLETON_CLASS: UnboundMethod
 
+    # Kernel#respond_to?
+    RESPOND_TOP: UnboundMethod
+
     class ArgumentsReturn
       type exit_type = :return | :exception | :break
 

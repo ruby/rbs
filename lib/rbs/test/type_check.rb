@@ -296,10 +296,9 @@ module RBS
                             end
           val.is_a?(singleton_class)
         when Types::Interface
-          methods = Set.new(Test.call(val, METHODS))
           if (definition = builder.build_interface(type.name.absolute!))
             definition.methods.each_key.all? do |method_name|
-              methods.member?(method_name)
+              Test.call(val, RESPOND_TOP, method_name)
             end
           end
         when Types::Variable
