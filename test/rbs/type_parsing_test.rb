@@ -788,4 +788,22 @@ class RBS::TypeParsingTest < Test::Unit::TestCase
       assert_equal "__todo__", type.location.source
     end
   end
+
+  def test_escape_sequences
+    Parser.parse_type('"escape sequences \a\b\e\f\n\r\s\t\v\""').yield_self do |type|
+      assert_instance_of Types::Literal, type
+      assert_equal "escape sequences \a\b\e\f\n\r\s\t\v\"", type.literal
+    end
+
+    Parser.parse_type(%q{'not escape sequences \a\b\e\f\n\r\s\t\v\"'}).yield_self do |type|
+      assert_instance_of Types::Literal, type
+      assert_equal 'not escape sequences \a\b\e\f\n\r\s\t\v\"', type.literal
+    end
+
+    Parser.parse_type('["\u0000", "\00", "\x00"]').yield_self do |type|
+      assert_equal "\u0000", type.types[0].literal
+      assert_equal "\00", type.types[1].literal
+      assert_equal "\x00", type.types[2].literal
+    end
+  end
 end
