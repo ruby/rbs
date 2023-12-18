@@ -35,6 +35,17 @@ module RBS
         if es.size == 1
           errors.push(*es[0])
         else
+          RBS.logger.warn do
+            message = +"[#{self_class}#{method_name}] UnresolvedOverloadingError "
+            message << method.method_types.zip(es).map do |method_type, es|
+              msg = +"method_type=`#{method_type}`"
+              details = es.map do |e|
+                "\"#{Errors.to_string(e).sub("[#{e.klass.name}#{e.method_name}] ", "") }\""
+              end.join(', ')
+              msg << " details=[#{details}]"
+            end.join(', ')
+            message
+          end
           errors << Errors::UnresolvedOverloadingError.new(
             klass: self_class,
             method_name: method_name,
