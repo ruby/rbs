@@ -21,6 +21,7 @@ module RBS
     PP = Kernel.instance_method(:pp)
     INSPECT = Kernel.instance_method(:inspect)
     METHODS = Kernel.instance_method(:methods)
+    RESPOND_TOP = Kernel.instance_method(:respond_to?)
 
     class ArgumentsReturn
       include Guaranteed::Inspect
