@@ -47,7 +47,7 @@ GEM
     rake (13.1.0)
     rake-compiler (1.2.5)
       rake
-    rdoc (6.6.1)
+    rdoc (6.6.2)
       psych (>= 4.0.0)
     regexp_parser (2.8.3)
     rexml (3.2.6)
