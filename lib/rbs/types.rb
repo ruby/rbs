@@ -1399,6 +1399,35 @@ module RBS
       def with_nonreturn_void?
         false
       end
+
+      TABLE = {
+        "\\a" => "\a",
+        "\\b" => "\b",
+        "\\e" => "\033",
+        "\\f" => "\f",
+        "\\n" => "\n",
+        "\\r" => "\r",
+        "\\s" => " ",
+        "\\t" => "\t",
+        "\\v" => "\v",
+        "\\\"" => "\"",
+        "\\\'" => "'",
+        "\\\\" => "\\",
+        "\\" => ""
+      }
+
+      def self.unescape_string(string, is_double_quote)
+        if is_double_quote
+          string.gsub!(/\\([0-9]{1,3})/) { ($1 || "").to_i(8).chr }
+          string.gsub!(/\\x([0-9a-f]{1,2})/) { ($1 || "").to_i(16).chr }
+          string.gsub!(/\\u([0-9a-fA-F]{4})/) { ($1 || "").to_i(16).chr(Encoding::UTF_8) }
+          string.gsub!(/\\[abefnrstv"'\\]?/, TABLE)
+          string
+        else
+          string.gsub!(/\\['\\]/, TABLE)
+          string
+        end
+      end
     end
   end
 end

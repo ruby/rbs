@@ -53,7 +53,7 @@ module RBS
       #
       # * The function return type is a return position (`() -> void`)
       # * Generic parameter is a return position (`Enumerator[Integer, void]`)
-      # 
+      #
       def with_nonreturn_void?: () -> bool
     end
 
@@ -497,6 +497,11 @@ module RBS
       include NoTypeName
 
       attr_reader location: loc?
+
+      TABLE: Hash[String, String]
+
+      # Unescape string type body
+      def self.unescape_string: (String, bool is_double_quote) -> String
     end
   end
 end
