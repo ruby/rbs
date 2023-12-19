@@ -42,14 +42,14 @@ jobs:
       - name: Install dependencies
         run: |
           apt-get update
-          apt-get install -y libdb-dev curl autoconf automake m4 libtool
+          apt-get install -y libdb-dev curl autoconf automake m4 libtool python3
       - name: Install Re2c
         if: contains(matrix.job, 'lexer')
         run: |
           cd /tmp
-          curl -L https://github.com/skvadrik/re2c/archive/refs/tags/3.0.tar.gz > re2c-3.0.tar.gz
-          tar xf re2c-3.0.tar.gz
-          cd re2c-3.0
+          curl -L https://github.com/skvadrik/re2c/archive/refs/tags/3.1.tar.gz > re2c-3.1.tar.gz
+          tar xf re2c-3.1.tar.gz
+          cd re2c-3.1
           autoreconf -i -W all
           ./configure
           make
