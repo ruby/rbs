@@ -2,6 +2,56 @@
 
 ## master
 
+## 3.4.0.pre.1 (2023-12-19)
+
+### Signature updates
+
+* Changes in ruby-3.3 ([#1684](https://github.com/ruby/rbs/pull/1684), [#1674](https://github.com/ruby/rbs/pull/1674))
+* Embedded docs update ([#1689](https://github.com/ruby/rbs/pull/1689), [#1676](https://github.com/ruby/rbs/pull/1676))
+* delegate ([#1677](https://github.com/ruby/rbs/pull/1677))
+* `MatchData` ([#1651](https://github.com/ruby/rbs/pull/1651))
+* `String` ([#1672](https://github.com/ruby/rbs/pull/1672), [#1641](https://github.com/ruby/rbs/pull/1641))
+* `Struct` ([#1621](https://github.com/ruby/rbs/pull/1621))
+* `Warning` categories ([#1576](https://github.com/ruby/rbs/pull/1576))
+* `ConditionVariable#wait` ([#1670](https://github.com/ruby/rbs/pull/1670))
+* `Date.parse` ([#1653](https://github.com/ruby/rbs/pull/1653))
+* `IO#gets` ([#1620](https://github.com/ruby/rbs/pull/1620))
+* `Kernel.Pathname` ([#1681](https://github.com/ruby/rbs/pull/1681))
+* `Resolv::DNS::Resource::Generic.create` ([#1655](https://github.com/ruby/rbs/pull/1655))
+* `Thread#raise` ([#1668](https://github.com/ruby/rbs/pull/1668))
+* Builtin types ([#1680](https://github.com/ruby/rbs/pull/1680), [#1644](https://github.com/ruby/rbs/pull/1644))
+
+### Library changes
+
+* Add more details error message for `UnresolvedOverloadingError` ([#1688](https://github.com/ruby/rbs/pull/1688))
+* Add `with_***` helpers ([#1687](https://github.com/ruby/rbs/pull/1687))
+* Fix lexer ([#1685](https://github.com/ruby/rbs/pull/1685))
+* Support `Delegator` object ([#1682](https://github.com/ruby/rbs/pull/1682))
+* Should raise `ParsingError` instead of NoMethodError ([#1675](https://github.com/ruby/rbs/pull/1675))
+* Implement multiple validate ([#1648](https://github.com/ruby/rbs/pull/1648))
+* Add `RBS::UnitTest` modules ([#1660](https://github.com/ruby/rbs/pull/1660))
+* Not cached as it may be replaced ([#1656](https://github.com/ruby/rbs/pull/1656))
+* Should raise `ParsingError` instead of ArgumentError ([#1652](https://github.com/ruby/rbs/pull/1652))
+* Added `WithEnum#but` and `with_range` ([#1649](https://github.com/ruby/rbs/pull/1649))
+* Bugfix; `.respond_to` is no longer used in `Rbs::Test::Errors#inspect_` ([#1650](https://github.com/ruby/rbs/pull/1650))
+* Add `--detail` option to rbs diff ([#1623](https://github.com/ruby/rbs/pull/1623))
+* Fix parse error when quoted required keywords ([#1627](https://github.com/ruby/rbs/pull/1627))
+
+#### rbs collection
+
+* Fix order for collection sources ([#1659](https://github.com/ruby/rbs/pull/1659))
+* [collection] Ignore directory starting with `_` as version from git source ([#1657](https://github.com/ruby/rbs/pull/1657))
+
+### Miscellaneous
+
+* Fix token names in comments ([#1658](https://github.com/ruby/rbs/pull/1658))
+* Small bugfix to have guaranteed print out instance variables ([#1642](https://github.com/ruby/rbs/pull/1642))
+* Fix flaky test ([#1616](https://github.com/ruby/rbs/pull/1616))
+* Update syntax.md ([#1634](https://github.com/ruby/rbs/pull/1634))
+* Add steep typecheck workflow ([#1632](https://github.com/ruby/rbs/pull/1632))
+* Add doc for Generating RBS ([#1617](https://github.com/ruby/rbs/pull/1617))
+* updated test harness utils ([#1600](https://github.com/ruby/rbs/pull/1600))
+
 ## 3.3.2 (2023-11-21)
 
 ### Miscellaneous

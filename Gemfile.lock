@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    rbs (3.4.0.dev)
+    rbs (3.4.0.pre.1)
       abbrev
 
 PATH
