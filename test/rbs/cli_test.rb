@@ -259,7 +259,7 @@ singleton(::BasicObject)
 
     with_cli do |cli|
       cli.run(%w(--log-level=warn validate --silent))
-      assert_match /`--silent` option is deprecated.$/, stdout.string
+      assert_match(/`--silent` option is deprecated.$/, stdout.string)
     end
   end
 
@@ -287,7 +287,7 @@ singleton(::BasicObject)
         Hello::World: Integer
         RBS
 
-        error = assert_raises SystemExit do
+        assert_raises SystemExit do
           cli.run(["-I", dir, "validate"])
         end
 
@@ -630,7 +630,7 @@ singleton(::BasicObject)
         end
         RBS
 
-        error = assert_raises SystemExit do
+        assert_raises SystemExit do
           cli.run(["-I", dir, "validate"])
         end
         assert_match %r{a.rbs:2:18...2:23: Could not find voida \(.*RBS::NoTypeFoundError.*\)}, stdout.string
