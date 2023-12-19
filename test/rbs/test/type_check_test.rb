@@ -517,22 +517,28 @@ EOF
             assert_instance_of RBS::Test::Errors::ReturnTypeError, errors[0]
           end
 
-          typecheck.overloaded_call(
-            foo.methods[:foo],
-            "#foo",
-            Test::CallTrace.new(
-              method_name: :foo,
-              method_call: Test::ArgumentsReturn.return(
-                arguments: [3],
-                value: 30
+          begin
+            RBS.logger_output = logger = StringIO.new
+            typecheck.overloaded_call(
+              foo.methods[:foo],
+              "#foo",
+              Test::CallTrace.new(
+                method_name: :foo,
+                method_call: Test::ArgumentsReturn.return(
+                  arguments: [3],
+                  value: 30
+                ),
+                block_calls: [],
+                block_given: false
               ),
-              block_calls: [],
-              block_given: false
-            ),
-            errors: []
-          ).tap do |errors|
-            assert_equal 1, errors.size
-            assert_instance_of RBS::Test::Errors::UnresolvedOverloadingError, errors[0]
+              errors: []
+            ).tap do |errors|
+              assert_equal 1, errors.size
+              assert_instance_of RBS::Test::Errors::UnresolvedOverloadingError, errors[0]
+              assert_match '[Object#foo] UnresolvedOverloadingError method_type=`() -> ::String` details=["ArgumentError: expected method type () -> ::String", "ReturnTypeError: expected `::String` but returns `30`"], method_type=`(::Integer) -> ::String` details=["ReturnTypeError: expected `::String` but returns `30`"]', logger.string
+            end
+          ensure
+            RBS.logger_output = nil
           end
         end
       end
