@@ -1,77 +1,107 @@
 # <!-- rdoc-file=complex.c -->
-# A complex number can be represented as a paired real number with imaginary
-# unit; a+bi.  Where a is real part, b is imaginary part and i is imaginary
-# unit.  Real a equals complex a+0i mathematically.
+# A Complex object houses a pair of values, given when the object is created as
+# either *rectangular coordinates* or *polar coordinates*.
 #
-# You can create a Complex object explicitly with:
+# ## Rectangular Coordinates
 #
-# *   A [complex literal](rdoc-ref:syntax/literals.rdoc@Complex+Literals).
+# The rectangular coordinates of a complex number are called the *real* and
+# *imaginary* parts; see [Complex number
+# definition](https://en.wikipedia.org/wiki/Complex_number#Definition).
+#
+# You can create a Complex object from rectangular coordinates with:
+#
+# *   A [complex literal](rdoc-ref:doc/syntax/literals.rdoc@Complex+Literals).
+# *   Method Complex.rect.
+# *   Method Kernel#Complex, either with numeric arguments or with certain
+#     string arguments.
+# *   Method String#to_c, for certain strings.
 #
 #
-# You can convert certain objects to Complex objects with:
+# Note that each of the stored parts may be a an instance one of the classes
+# Complex, Float, Integer, or Rational; they may be retrieved:
 #
-# *   Method #Complex.
+# *   Separately, with methods Complex#real and Complex#imaginary.
+# *   Together, with method Complex#rect.
 #
 #
-# Complex object can be created as literal, and also by using Kernel#Complex,
-# Complex::rect, Complex::polar or to_c method.
+# The corresponding (computed) polar values may be retrieved:
 #
-#     2+1i                 #=> (2+1i)
-#     Complex(1)           #=> (1+0i)
-#     Complex(2, 3)        #=> (2+3i)
-#     Complex.polar(2, 3)  #=> (-1.9799849932008908+0.2822400161197344i)
-#     3.to_c               #=> (3+0i)
+# *   Separately, with methods Complex#abs and Complex#arg.
+# *   Together, with method Complex#polar.
 #
-# You can also create complex object from floating-point numbers or strings.
 #
-#     Complex(0.3)         #=> (0.3+0i)
-#     Complex('0.3-0.5i')  #=> (0.3-0.5i)
-#     Complex('2/3+3/4i')  #=> ((2/3)+(3/4)*i)
-#     Complex('1@2')       #=> (-0.4161468365471424+0.9092974268256817i)
+# ## Polar Coordinates
 #
-#     0.3.to_c             #=> (0.3+0i)
-#     '0.3-0.5i'.to_c      #=> (0.3-0.5i)
-#     '2/3+3/4i'.to_c      #=> ((2/3)+(3/4)*i)
-#     '1@2'.to_c           #=> (-0.4161468365471424+0.9092974268256817i)
+# The polar coordinates of a complex number are called the *absolute* and
+# *argument* parts; see [Complex polar
+# plane](https://en.wikipedia.org/wiki/Complex_number#Polar_complex_plane).
 #
-# A complex object is either an exact or an inexact number.
+# You can create a Complex object from polar coordinates with:
 #
-#     Complex(1, 1) / 2    #=> ((1/2)+(1/2)*i)
-#     Complex(1, 1) / 2.0  #=> (0.5+0.5i)
+# *   Method Complex.polar.
+# *   Method Kernel#Complex, with certain string arguments.
+# *   Method String#to_c, for certain strings.
+#
+#
+# Note that each of the stored parts may be a an instance one of the classes
+# Complex, Float, Integer, or Rational; they may be retrieved:
+#
+# *   Separately, with methods Complex#abs and Complex#arg.
+# *   Together, with method Complex#polar.
+#
+#
+# The corresponding (computed) rectangular values may be retrieved:
+#
+# *   Separately, with methods Complex#real and Complex#imag.
+# *   Together, with method Complex#rect.
 #
 class Complex < Numeric
   # <!--
   #   rdoc-file=complex.c
-  #   - Complex.polar(abs[, arg])  ->  complex
+  #   - Complex.polar(abs, arg = 0) -> complex
   # -->
-  # Returns a complex object which denotes the given polar form.
+  # Returns a new Complex object formed from the arguments, each of which must be
+  # an instance of Numeric, or an instance of one of its subclasses: Complex,
+  # Float, Integer, Rational; see [Polar
+  # Coordinates](rdoc-ref:Complex@Polar+Coordinates):
   #
-  #     Complex.polar(3, 0)            #=> (3.0+0.0i)
-  #     Complex.polar(3, Math::PI/2)   #=> (1.836909530733566e-16+3.0i)
-  #     Complex.polar(3, Math::PI)     #=> (-3.0+3.673819061467132e-16i)
-  #     Complex.polar(3, -Math::PI/2)  #=> (1.836909530733566e-16-3.0i)
+  #     Complex.polar(3)        # => (3+0i)
+  #     Complex.polar(3, 2.0)   # => (-1.2484405096414273+2.727892280477045i)
+  #     Complex.polar(-3, -2.0) # => (1.2484405096414273+2.727892280477045i)
   #
   def self.polar: (Numeric, ?Numeric) -> Complex
 
   # <!--
   #   rdoc-file=complex.c
-  #   - Complex.rect(real[, imag])         ->  complex
-  #   - Complex.rectangular(real[, imag])  ->  complex
+  #   - Complex.rect(real, imag = 0) -> complex
   # -->
-  # Returns a complex object which denotes the given rectangular form.
+  # Returns a new Complex object formed from the arguments, each of which must be
+  # an instance of Numeric, or an instance of one of its subclasses: Complex,
+  # Float, Integer, Rational; see [Rectangular
+  # Coordinates](rdoc-ref:Complex@Rectangular+Coordinates):
   #
-  #     Complex.rectangular(1, 2)  #=> (1+2i)
+  #     Complex.rect(3)             # => (3+0i)
+  #     Complex.rect(3, Math::PI)   # => (3+3.141592653589793i)
+  #     Complex.rect(-3, -Math::PI) # => (-3-3.141592653589793i)
+  #
+  # Complex.rectangular is an alias for Complex.rect.
   #
   def self.rect: (Numeric, ?Numeric) -> Complex
 
   # <!--
   #   rdoc-file=complex.c
-  #   - Complex.rect(real[, imag])         ->  complex
-  #   - Complex.rectangular(real[, imag])  ->  complex
+  #   - Complex.rect(real, imag = 0) -> complex
   # -->
-  # Returns a complex object which denotes the given rectangular form.
+  # Returns a new Complex object formed from the arguments, each of which must be
+  # an instance of Numeric, or an instance of one of its subclasses: Complex,
+  # Float, Integer, Rational; see [Rectangular
+  # Coordinates](rdoc-ref:Complex@Rectangular+Coordinates):
   #
-  #     Complex.rectangular(1, 2)  #=> (1+2i)
+  #     Complex.rect(3)             # => (3+0i)
+  #     Complex.rect(3, Math::PI)   # => (3+3.141592653589793i)
+  #     Complex.rect(-3, -Math::PI) # => (-3-3.141592653589793i)
+  #
+  # Complex.rectangular is an alias for Complex.rect.
   #
   alias self.rectangular self.rect
 
@@ -462,9 +492,16 @@ class Complex < Numeric
   def real?: () -> false
 
   # <!-- rdoc-file=complex.c -->
-  # Returns a complex object which denotes the given rectangular form.
+  # Returns a new Complex object formed from the arguments, each of which must be
+  # an instance of Numeric, or an instance of one of its subclasses: Complex,
+  # Float, Integer, Rational; see [Rectangular
+  # Coordinates](rdoc-ref:Complex@Rectangular+Coordinates):
   #
-  #     Complex.rectangular(1, 2)  #=> (1+2i)
+  #     Complex.rect(3)             # => (3+0i)
+  #     Complex.rect(3, Math::PI)   # => (3+3.141592653589793i)
+  #     Complex.rect(-3, -Math::PI) # => (-3-3.141592653589793i)
+  #
+  # Complex.rectangular is an alias for Complex.rect.
   #
   def rect: () -> [ Numeric, Numeric ]
 
@@ -559,6 +596,8 @@ class Complex < Numeric
 end
 
 # <!-- rdoc-file=complex.c -->
-# The imaginary unit.
+# Equivalent to `Complex(0, 1)`:
+#
+#     Complex::I # => (0+1i)
 #
 Complex::I: Complex

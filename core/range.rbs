@@ -176,6 +176,8 @@
 # *   [Comparing](rdoc-ref:Range@Methods+for+Comparing)
 # *   [Iterating](rdoc-ref:Range@Methods+for+Iterating)
 # *   [Converting](rdoc-ref:Range@Methods+for+Converting)
+# *   [Methods for Working with
+#     JSON](rdoc-ref:Range@Methods+for+Working+with+JSON)
 #
 #
 # ### Methods for Creating a Range
@@ -224,6 +226,19 @@
 # *   #inspect: Returns a string representation of `self` (uses #inspect).
 # *   #to_a (aliased as #entries): Returns elements of `self` in an array.
 # *   #to_s: Returns a string representation of `self` (uses #to_s).
+#
+#
+# ### Methods for Working with JSON
+#
+# *   ::json_create: Returns a new Range object constructed from the given
+#     object.
+# *   #as_json: Returns a 2-element hash representing `self`.
+# *   #to_json: Returns a JSON string representing `self`.
+#
+#
+# To make these methods available:
+#
+#     require 'json/add/range'
 #
 class Range[out Elem] < Object
   include Enumerable[Elem]
@@ -859,12 +874,12 @@ class Range[out Elem] < Object
   # This method assumes that there is no minimum value because Ruby lacks a
   # standard method for determining minimum values. This assumption is invalid.
   # For example, there is no value smaller than `-Float::INFINITY`, making
-  # +(...-Float::INFINITY)+ an empty set. Consequently, +(...-Float::INFINITY)+
+  # `(...-Float::INFINITY)` an empty set. Consequently, `(...-Float::INFINITY)`
   # has no elements in common with itself, yet
-  # +(...-Float::INFINITY).overlap?((...-Float::INFINITY))+ returns true due to
-  # this assumption. In general, if +r = (...minimum); r.overlap?(r)+ returns
+  # `(...-Float::INFINITY).overlap?((...-Float::INFINITY))<tt> returns true due to
+  # this assumption. In general, if <tt>r = (...minimum); r.overlap?(r)` returns
   # `true`, where `minimum` is a value that no value is smaller than. Such values
-  # include `-Float::INFINITY`, `[]`, +""+, and classes without subclasses.
+  # include `-Float::INFINITY`, `[]`, `""`, and classes without subclasses.
   #
   # Related: Range#cover?.
   #
