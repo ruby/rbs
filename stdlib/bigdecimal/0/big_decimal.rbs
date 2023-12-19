@@ -145,8 +145,12 @@ class BigDecimal < Numeric
 
   # <!--
   #   rdoc-file=ext/bigdecimal/bigdecimal.c
-  #   - double_fig()
+  #   - BigDecimal.double_fig -> integer
   # -->
+  # Returns the number of digits a Float object is allowed to have; the result is
+  # system-dependent:
+  #
+  #     BigDecimal.double_fig # => 16
   #
   def self.double_fig: () -> Integer
 
