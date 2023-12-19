@@ -373,13 +373,20 @@ class Fiber < Object
   #   rdoc-file=cont.c
   #   - fiber.kill -> nil
   # -->
-  # Terminates `fiber` by raising an uncatchable exception, returning the
-  # terminated Fiber.
+  # Terminates the fiber by raising an uncatchable exception. It only terminates
+  # the given fiber and no other fiber, returning `nil` to another fiber if that
+  # fiber was calling #resume or #transfer.
+  #
+  # `Fiber#kill` only interrupts another fiber when it is in Fiber.yield. If
+  # called on the current fiber then it raises that exception at the `Fiber#kill`
+  # call site.
   #
   # If the fiber has not been started, transition directly to the terminated
   # state.
   #
   # If the fiber is already terminated, does nothing.
+  #
+  # Raises FiberError if called on a fiber belonging to another thread.
   #
   def kill: () -> nil
 
@@ -402,6 +409,8 @@ class Fiber < Object
   # second parameter sets the message associated with the exception, and the third
   # parameter is an array of callback information. Exceptions are caught by the
   # `rescue` clause of `begin...end` blocks.
+  #
+  # Raises `FiberError` if called on a Fiber belonging to another `Thread`.
   #
   def raise: (?string msg) -> untyped
            | (_Exception, ?string msg, ?Array[string] backtrace) -> untyped

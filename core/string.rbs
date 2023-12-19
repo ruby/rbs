@@ -81,7 +81,7 @@
 # *   `\k<name>` refers to the named capture `name`.
 #
 #
-# See regexp.rdoc for details.
+# See Regexp for details.
 #
 # Note that within the string `replacement`, a character combination such as
 # `$&` is treated as ordinary text, and not as a special match variable.
@@ -95,7 +95,7 @@
 # *   `\+` corresponds to `$+`, which contains last capture group.
 #
 #
-# See regexp.rdoc for details.
+# See Regexp for details.
 #
 # Note that `\\\` is interpreted as an escape, i.e., a single backslash.
 #

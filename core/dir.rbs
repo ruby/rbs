@@ -362,6 +362,8 @@ class Dir
   #     Dir.exist?('/nosuch')          # => false
   #     Dir.exist?('/example/main.rb') # => false
   #
+  # Same as File.directory?.
+  #
   def self.exist?: (path | io file_name) -> bool
 
   # <!--
@@ -580,14 +582,14 @@ class Dir
   #         Dir.glob('io.?') # => ["io.c"]
   #
   # *   `'[*set*]'`: Matches any one character in the string *set*; behaves like a
-  #     [Regexp character class](rdoc-ref:regexp.rdoc@Character+Classes),
-  #     including set negation (`'[^a-z]'`):
+  #     [Regexp character class](rdoc-ref:Regexp@Character+Classes), including set
+  #     negation (`'[^a-z]'`):
   #
   #         Dir.glob('*.[a-z][a-z]').take(3)
   #         # => ["CONTRIBUTING.md", "COPYING.ja", "KNOWNBUGS.rb"]
   #
   # *   `'{*abc*,*xyz*}'`: Matches either string *abc* or string *xyz*; behaves
-  #     like [Regexp alternation](rdoc-ref:regexp.rdoc@Alternation):
+  #     like [Regexp alternation](rdoc-ref:Regexp@Alternation):
   #
   #         Dir.glob('{LEGAL,BSDL}') # => ["LEGAL", "BSDL"]
   #
@@ -666,9 +668,13 @@ class Dir
   # <!--
   #   rdoc-file=dir.c
   #   - Dir.home(user_name = nil) -> dirpath
-  #   - Dir.home         # => "/home/me"
-  #   - Dir.home('root') # => "/root"
   # -->
+  # Retruns the home directory path of the user specified with `user_name` if it
+  # is not `nil`, or the current login user:
+  #
+  #     Dir.home         # => "/home/me"
+  #     Dir.home('root') # => "/root"
+  #
   # Raises ArgumentError if `user_name` is not a user name.
   #
   def self.home: (?string? user) -> String
@@ -764,7 +770,7 @@ class Dir
   #     Dir.pwd # => "/"
   #     dir = Dir.new('example')
   #     dir.chdir
-  #     dir.pwd # => "/example"
+  #     Dir.pwd # => "/example"
   #
   def chdir: () -> Integer
            | [T] { () -> T } -> T

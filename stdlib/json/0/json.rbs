@@ -385,6 +385,15 @@ type json_state = singleton(JSON::Ext::Generator::State) | singleton(JSON::Pure:
 #     # Raises JSON::NestingError (nesting of 2 is too deep):
 #     JSON.generate(obj, max_nesting: 2)
 #
+# ###### Escaping Options
+#
+# Options `script_safe` (boolean) specifies wether `'\u2028'`, `'\u2029'` and
+# `'/'` should be escaped as to make the JSON object safe to interpolate in
+# script tags.
+#
+# Options `ascii_only` (boolean) specifies wether all characters outside the
+# ASCII range should be escaped.
+#
 # ###### Output Options
 #
 # The default formatting options generate the most compact JSON data, all on one
@@ -747,14 +756,14 @@ module JSON
   # <!-- rdoc-file=ext/json/lib/json/common.rb -->
   # Sets or returns the default options for the JSON.dump method. Initially:
   #     opts = JSON.dump_default_options
-  #     opts # => {:max_nesting=>false, :allow_nan=>true, :escape_slash=>false}
+  #     opts # => {:max_nesting=>false, :allow_nan=>true, :script_safe=>false}
   #
   def self.dump_default_options: () -> json_options
 
   # <!-- rdoc-file=ext/json/lib/json/common.rb -->
   # Sets or returns the default options for the JSON.dump method. Initially:
   #     opts = JSON.dump_default_options
-  #     opts # => {:max_nesting=>false, :allow_nan=>true, :escape_slash=>false}
+  #     opts # => {:max_nesting=>false, :allow_nan=>true, :script_safe=>false}
   #
   def self.dump_default_options=: (json_options) -> json_options
 
@@ -1280,9 +1289,7 @@ class BigDecimal
   #   rdoc-file=ext/json/lib/json/add/bigdecimal.rb
   #   - json_create(object)
   # -->
-  # Import a JSON Marshalled object.
-  #
-  # method used for JSON marshalling support.
+  # See #as_json.
   #
   def self.json_create: (Hash[String, String] object) -> instance
 
@@ -1290,9 +1297,23 @@ class BigDecimal
   #   rdoc-file=ext/json/lib/json/add/bigdecimal.rb
   #   - as_json(*)
   # -->
-  # Marshal the object to JSON.
+  # Methods `BigDecimal#as_json` and `BigDecimal.json_create` may be used to
+  # serialize and deserialize a BigDecimal object; see
+  # [Marshal](rdoc-ref:Marshal).
   #
-  # method used for JSON marshalling support.
+  # Method `BigDecimal#as_json` serializes `self`, returning a 2-element hash
+  # representing `self`:
+  #
+  #     require 'json/add/bigdecimal'
+  #     x = BigDecimal(2).as_json             # => {"json_class"=>"BigDecimal", "b"=>"27:0.2e1"}
+  #     y = BigDecimal(2.0, 4).as_json        # => {"json_class"=>"BigDecimal", "b"=>"36:0.2e1"}
+  #     z = BigDecimal(Complex(2, 0)).as_json # => {"json_class"=>"BigDecimal", "b"=>"27:0.2e1"}
+  #
+  # Method `JSON.create` deserializes such a hash, returning a BigDecimal object:
+  #
+  #     BigDecimal.json_create(x) # => 0.2e1
+  #     BigDecimal.json_create(y) # => 0.2e1
+  #     BigDecimal.json_create(z) # => 0.2e1
   #
   def as_json: (*untyped) -> Hash[String, String]
 
@@ -1300,7 +1321,18 @@ class BigDecimal
   #   rdoc-file=ext/json/lib/json/add/bigdecimal.rb
   #   - to_json(*args)
   # -->
-  # return the JSON value
+  # Returns a JSON string representing `self`:
+  #
+  #     require 'json/add/bigdecimal'
+  #     puts BigDecimal(2).to_json
+  #     puts BigDecimal(2.0, 4).to_json
+  #     puts BigDecimal(Complex(2, 0)).to_json
+  #
+  # Output:
+  #
+  #     {"json_class":"BigDecimal","b":"27:0.2e1"}
+  #     {"json_class":"BigDecimal","b":"36:0.2e1"}
+  #     {"json_class":"BigDecimal","b":"27:0.2e1"}
   #
   def to_json: (?JSON::State state) -> String
 end
@@ -1311,8 +1343,7 @@ class Complex
   #   rdoc-file=ext/json/lib/json/add/complex.rb
   #   - json_create(object)
   # -->
-  # Deserializes JSON string by converting Real value `r`, imaginary value `i`, to
-  # a Complex object.
+  # See #as_json.
   #
   def self.json_create: (Hash[String, String | Numeric] object) -> instance
 
@@ -1320,8 +1351,20 @@ class Complex
   #   rdoc-file=ext/json/lib/json/add/complex.rb
   #   - as_json(*)
   # -->
-  # Returns a hash, that will be turned into a JSON object and represent this
-  # object.
+  # Methods `Complex#as_json` and `Complex.json_create` may be used to serialize
+  # and deserialize a Complex object; see [Marshal](rdoc-ref:Marshal).
+  #
+  # Method `Complex#as_json` serializes `self`, returning a 2-element hash
+  # representing `self`:
+  #
+  #     require 'json/add/complex'
+  #     x = Complex(2).as_json      # => {"json_class"=>"Complex", "r"=>2, "i"=>0}
+  #     y = Complex(2.0, 4).as_json # => {"json_class"=>"Complex", "r"=>2.0, "i"=>4}
+  #
+  # Method `JSON.create` deserializes such a hash, returning a Complex object:
+  #
+  #     Complex.json_create(x) # => (2+0i)
+  #     Complex.json_create(y) # => (2.0+4i)
   #
   def as_json: (*untyped) -> Hash[String, String | Numeric]
 
@@ -1329,8 +1372,16 @@ class Complex
   #   rdoc-file=ext/json/lib/json/add/complex.rb
   #   - to_json(*args)
   # -->
-  # Stores class name (Complex) along with real value `r` and imaginary value `i`
-  # as JSON string
+  # Returns a JSON string representing `self`:
+  #
+  #     require 'json/add/complex'
+  #     puts Complex(2).to_json
+  #     puts Complex(2.0, 4).to_json
+  #
+  # Output:
+  #
+  #     {"json_class":"Complex","r":2,"i":0}
+  #     {"json_class":"Complex","r":2.0,"i":4}
   #
   def to_json: (?JSON::State state) -> String
 end
@@ -1341,8 +1392,7 @@ class Date
   #   rdoc-file=ext/json/lib/json/add/date.rb
   #   - json_create(object)
   # -->
-  # Deserializes JSON string by converting Julian year `y`, month `m`, day `d` and
-  # Day of Calendar Reform `sg` to Date.
+  # See #as_json.
   #
   def self.json_create: (Hash[String, String | Integer | Float] object) -> instance
 
@@ -1350,8 +1400,20 @@ class Date
   #   rdoc-file=ext/json/lib/json/add/date.rb
   #   - as_json(*)
   # -->
-  # Returns a hash, that will be turned into a JSON object and represent this
-  # object.
+  # Methods `Date#as_json` and `Date.json_create` may be used to serialize and
+  # deserialize a Date object; see [Marshal](rdoc-ref:Marshal).
+  #
+  # Method `Date#as_json` serializes `self`, returning a 2-element hash
+  # representing `self`:
+  #
+  #     require 'json/add/date'
+  #     x = Date.today.as_json
+  #     # => {"json_class"=>"Date", "y"=>2023, "m"=>11, "d"=>21, "sg"=>2299161.0}
+  #
+  # Method `JSON.create` deserializes such a hash, returning a Date object:
+  #
+  #     Date.json_create(x)
+  #     # => #<Date: 2023-11-21 ((2460270j,0s,0n),+0s,2299161j)>
   #
   def as_json: (*untyped) -> Hash[String, String | Integer | Float]
 
@@ -1359,8 +1421,14 @@ class Date
   #   rdoc-file=ext/json/lib/json/add/date.rb
   #   - to_json(*args)
   # -->
-  # Stores class name (Date) with Julian year `y`, month `m`, day `d` and Day of
-  # Calendar Reform `sg` as JSON string
+  # Returns a JSON string representing `self`:
+  #
+  #     require 'json/add/date'
+  #     puts Date.today.to_json
+  #
+  # Output:
+  #
+  #     {"json_class":"Date","y":2023,"m":11,"d":21,"sg":2299161.0}
   #
   def to_json: (?JSON::State state) -> String
 end
@@ -1371,9 +1439,7 @@ class DateTime
   #   rdoc-file=ext/json/lib/json/add/date_time.rb
   #   - json_create(object)
   # -->
-  # Deserializes JSON string by converting year `y`, month `m`, day `d`, hour `H`,
-  # minute `M`, second `S`, offset `of` and Day of Calendar Reform `sg` to
-  # DateTime.
+  # See #as_json.
   #
   def self.json_create: (Hash[String, String | Integer | Float] object) -> instance
 
@@ -1381,8 +1447,19 @@ class DateTime
   #   rdoc-file=ext/json/lib/json/add/date_time.rb
   #   - as_json(*)
   # -->
-  # Returns a hash, that will be turned into a JSON object and represent this
-  # object.
+  # Methods `DateTime#as_json` and `DateTime.json_create` may be used to serialize
+  # and deserialize a DateTime object; see [Marshal](rdoc-ref:Marshal).
+  #
+  # Method `DateTime#as_json` serializes `self`, returning a 2-element hash
+  # representing `self`:
+  #
+  #     require 'json/add/datetime'
+  #     x = DateTime.now.as_json
+  #     # => {"json_class"=>"DateTime", "y"=>2023, "m"=>11, "d"=>21, "sg"=>2299161.0}
+  #
+  # Method `JSON.create` deserializes such a hash, returning a DateTime object:
+  #
+  #     DateTime.json_create(x) # BUG? Raises Date::Error "invalid date"
   #
   def as_json: (*untyped) -> Hash[String, String | Integer | Float]
 
@@ -1390,9 +1467,14 @@ class DateTime
   #   rdoc-file=ext/json/lib/json/add/date_time.rb
   #   - to_json(*args)
   # -->
-  # Stores class name (DateTime) with Julian year `y`, month `m`, day `d`, hour
-  # `H`, minute `M`, second `S`, offset `of` and Day of Calendar Reform `sg` as
-  # JSON string
+  # Returns a JSON string representing `self`:
+  #
+  #     require 'json/add/datetime'
+  #     puts DateTime.now.to_json
+  #
+  # Output:
+  #
+  #     {"json_class":"DateTime","y":2023,"m":11,"d":21,"sg":2299161.0}
   #
   def to_json: (?JSON::State state) -> String
 end
@@ -1403,8 +1485,7 @@ class Exception
   #   rdoc-file=ext/json/lib/json/add/exception.rb
   #   - json_create(object)
   # -->
-  # Deserializes JSON string by constructing new Exception object with message `m`
-  # and backtrace `b` serialized with `to_json`
+  # See #as_json.
   #
   def self.json_create: (Hash[String, String | Array[String] | nil] object) -> instance
 
@@ -1412,8 +1493,18 @@ class Exception
   #   rdoc-file=ext/json/lib/json/add/exception.rb
   #   - as_json(*)
   # -->
-  # Returns a hash, that will be turned into a JSON object and represent this
-  # object.
+  # Methods `Exception#as_json` and `Exception.json_create` may be used to
+  # serialize and deserialize a Exception object; see [Marshal](rdoc-ref:Marshal).
+  #
+  # Method `Exception#as_json` serializes `self`, returning a 2-element hash
+  # representing `self`:
+  #
+  #     require 'json/add/exception'
+  #     x = Exception.new('Foo').as_json # => {"json_class"=>"Exception", "m"=>"Foo", "b"=>nil}
+  #
+  # Method `JSON.create` deserializes such a hash, returning a Exception object:
+  #
+  #     Exception.json_create(x) # => #<Exception: Foo>
   #
   def as_json: (*untyped) -> Hash[String, String | Array[String] | nil]
 
@@ -1421,8 +1512,14 @@ class Exception
   #   rdoc-file=ext/json/lib/json/add/exception.rb
   #   - to_json(*args)
   # -->
-  # Stores class name (Exception) with message `m` and backtrace array `b` as JSON
-  # string
+  # Returns a JSON string representing `self`:
+  #
+  #     require 'json/add/exception'
+  #     puts Exception.new('Foo').to_json
+  #
+  # Output:
+  #
+  #     {"json_class":"Exception","m":"Foo","b":null}
   #
   def to_json: (?JSON::State state) -> String
 end
@@ -1433,8 +1530,7 @@ class OpenStruct
   #   rdoc-file=ext/json/lib/json/add/ostruct.rb
   #   - json_create(object)
   # -->
-  # Deserializes JSON string by constructing new Struct object with values `t`
-  # serialized by `to_json`.
+  # See #as_json.
   #
   def self.json_create: (Hash[String, String | Hash[Symbol, untyped]] object) -> instance
 
@@ -1442,8 +1538,21 @@ class OpenStruct
   #   rdoc-file=ext/json/lib/json/add/ostruct.rb
   #   - as_json(*)
   # -->
-  # Returns a hash, that will be turned into a JSON object and represent this
-  # object.
+  # Methods `OpenStruct#as_json` and `OpenStruct.json_create` may be used to
+  # serialize and deserialize a OpenStruct object; see
+  # [Marshal](rdoc-ref:Marshal).
+  #
+  # Method `OpenStruct#as_json` serializes `self`, returning a 2-element hash
+  # representing `self`:
+  #
+  #     require 'json/add/ostruct'
+  #     x = OpenStruct.new('name' => 'Rowdy', :age => nil).as_json
+  #     # => {"json_class"=>"OpenStruct", "t"=>{:name=>'Rowdy', :age=>nil}}
+  #
+  # Method `JSON.create` deserializes such a hash, returning a OpenStruct object:
+  #
+  #     OpenStruct.json_create(x)
+  #     # => #<OpenStruct name='Rowdy', age=nil>
   #
   def as_json: (*untyped) -> Hash[String, String | Hash[Symbol, untyped]]
 
@@ -1451,7 +1560,14 @@ class OpenStruct
   #   rdoc-file=ext/json/lib/json/add/ostruct.rb
   #   - to_json(*args)
   # -->
-  # Stores class name (OpenStruct) with this struct's values `t` as a JSON string.
+  # Returns a JSON string representing `self`:
+  #
+  #     require 'json/add/ostruct'
+  #     puts OpenStruct.new('name' => 'Rowdy', :age => nil).to_json
+  #
+  # Output:
+  #
+  #     {"json_class":"OpenStruct","t":{'name':'Rowdy',"age":null}}
   #
   def to_json: (?JSON::State state) -> String
 end
@@ -1462,13 +1578,7 @@ class Range[out Elem]
   #   rdoc-file=ext/json/lib/json/add/range.rb
   #   - json_create(object)
   # -->
-  # Returns a new Range object constructed from `object['a']`, which must be an
-  # array of values suitable for a call to Range.new:
-  #
-  #     require 'json/add/range'
-  #     Range.json_create({"a"=>[1, 4]})        # => 1..4
-  #     Range.json_create({"a"=>[1, 4, true]}) # => 1...4
-  #     Range.json_create({"a" => ['a', 'd']})  # => "a".."d"
+  # See #as_json.
   #
   def self.json_create: [A] (Hash[String, String | [ A, A, bool ]] object) -> Range[A]
 
@@ -1476,12 +1586,22 @@ class Range[out Elem]
   #   rdoc-file=ext/json/lib/json/add/range.rb
   #   - as_json(*)
   # -->
-  # Returns a 2-element hash representing `self`:
+  # Methods `Range#as_json` and `Range.json_create` may be used to serialize and
+  # deserialize a Range object; see [Marshal](rdoc-ref:Marshal).
+  #
+  # Method `Range#as_json` serializes `self`, returning a 2-element hash
+  # representing `self`:
   #
   #     require 'json/add/range'
-  #     (1..4).as_json     # => {"json_class"=>"Range", "a"=>[1, 4, false]}
-  #     (1...4).as_json    # => {"json_class"=>"Range", "a"=>[1, 4, true]}
-  #     ('a'..'d').as_json # => {"json_class"=>"Range", "a"=>["a", "d", false]}
+  #     x = (1..4).as_json     # => {"json_class"=>"Range", "a"=>[1, 4, false]}
+  #     y = (1...4).as_json    # => {"json_class"=>"Range", "a"=>[1, 4, true]}
+  #     z = ('a'..'d').as_json # => {"json_class"=>"Range", "a"=>["a", "d", false]}
+  #
+  # Method `JSON.create` deserializes such a hash, returning a Range object:
+  #
+  #     Range.json_create(x) # => 1..4
+  #     Range.json_create(y) # => 1...4
+  #     Range.json_create(z) # => "a".."d"
   #
   def as_json: (*untyped) -> Hash[String, String | [ Elem, Elem, bool ]]
 
@@ -1492,9 +1612,15 @@ class Range[out Elem]
   # Returns a JSON string representing `self`:
   #
   #     require 'json/add/range'
-  #     (1..4).to_json   # => "{\"json_class\":\"Range\",\"a\":[1,4,false]}"
-  #     (1...4).to_json    # => "{\"json_class\":\"Range\",\"a\":[1,4,true]}"
-  #     ('a'..'d').to_json # => "{\"json_class\":\"Range\",\"a\":[\"a\",\"d\",false]}"
+  #     puts (1..4).to_json
+  #     puts (1...4).to_json
+  #     puts ('a'..'d').to_json
+  #
+  # Output:
+  #
+  #     {"json_class":"Range","a":[1,4,false]}
+  #     {"json_class":"Range","a":[1,4,true]}
+  #     {"json_class":"Range","a":["a","d",false]}
   #
   def to_json: (?JSON::State state) -> String
 end
@@ -1505,8 +1631,7 @@ class Rational
   #   rdoc-file=ext/json/lib/json/add/rational.rb
   #   - json_create(object)
   # -->
-  # Deserializes JSON string by converting numerator value `n`, denominator value
-  # `d`, to a Rational object.
+  # See #as_json.
   #
   def self.json_create: (Hash[String, String | Integer] object) -> instance
 
@@ -1514,8 +1639,20 @@ class Rational
   #   rdoc-file=ext/json/lib/json/add/rational.rb
   #   - as_json(*)
   # -->
-  # Returns a hash, that will be turned into a JSON object and represent this
-  # object.
+  # Methods `Rational#as_json` and `Rational.json_create` may be used to serialize
+  # and deserialize a Rational object; see [Marshal](rdoc-ref:Marshal).
+  #
+  # Method `Rational#as_json` serializes `self`, returning a 2-element hash
+  # representing `self`:
+  #
+  #     require 'json/add/rational'
+  #     x = Rational(2, 3).as_json
+  #     # => {"json_class"=>"Rational", "n"=>2, "d"=>3}
+  #
+  # Method `JSON.create` deserializes such a hash, returning a Rational object:
+  #
+  #     Rational.json_create(x)
+  #     # => (2/3)
   #
   def as_json: (*untyped) -> Hash[String, String | Integer]
 
@@ -1523,8 +1660,14 @@ class Rational
   #   rdoc-file=ext/json/lib/json/add/rational.rb
   #   - to_json(*args)
   # -->
-  # Stores class name (Rational) along with numerator value `n` and denominator
-  # value `d` as JSON string
+  # Returns a JSON string representing `self`:
+  #
+  #     require 'json/add/rational'
+  #     puts Rational(2, 3).to_json
+  #
+  # Output:
+  #
+  #     {"json_class":"Rational","n":2,"d":3}
   #
   def to_json: (?JSON::State state) -> String
 end
@@ -1535,8 +1678,7 @@ class Regexp
   #   rdoc-file=ext/json/lib/json/add/regexp.rb
   #   - json_create(object)
   # -->
-  # Deserializes JSON string by constructing new Regexp object with source `s`
-  # (Regexp or String) and options `o` serialized by `to_json`
+  # See #as_json.
   #
   def self.json_create: (Hash[String, String | Integer] object) -> instance
 
@@ -1544,8 +1686,19 @@ class Regexp
   #   rdoc-file=ext/json/lib/json/add/regexp.rb
   #   - as_json(*)
   # -->
-  # Returns a hash, that will be turned into a JSON object and represent this
-  # object.
+  # Methods `Regexp#as_json` and `Regexp.json_create` may be used to serialize and
+  # deserialize a Regexp object; see [Marshal](rdoc-ref:Marshal).
+  #
+  # Method `Regexp#as_json` serializes `self`, returning a 2-element hash
+  # representing `self`:
+  #
+  #     require 'json/add/regexp'
+  #     x = /foo/.as_json
+  #     # => {"json_class"=>"Regexp", "o"=>0, "s"=>"foo"}
+  #
+  # Method `JSON.create` deserializes such a hash, returning a Regexp object:
+  #
+  #     Regexp.json_create(x) # => /foo/
   #
   def as_json: (*untyped) -> Hash[String, String | Integer]
 
@@ -1553,8 +1706,14 @@ class Regexp
   #   rdoc-file=ext/json/lib/json/add/regexp.rb
   #   - to_json(*args)
   # -->
-  # Stores class name (Regexp) with options `o` and source `s` (Regexp or String)
-  # as JSON string
+  # Returns a JSON string representing `self`:
+  #
+  #     require 'json/add/regexp'
+  #     puts /foo/.to_json
+  #
+  # Output:
+  #
+  #     {"json_class":"Regexp","o":0,"s":"foo"}
   #
   def to_json: (?JSON::State state) -> String
 end
@@ -1565,9 +1724,7 @@ class Set[unchecked out A]
   #   rdoc-file=ext/json/lib/json/add/set.rb
   #   - json_create(object)
   # -->
-  # Import a JSON Marshalled object.
-  #
-  # method used for JSON marshalling support.
+  # See #as_json.
   #
   def self.json_create: [A] (Hash[String, String | Array[A]] object) -> Set[A]
 
@@ -1575,9 +1732,19 @@ class Set[unchecked out A]
   #   rdoc-file=ext/json/lib/json/add/set.rb
   #   - as_json(*)
   # -->
-  # Marshal the object to JSON.
+  # Methods `Set#as_json` and `Set.json_create` may be used to serialize and
+  # deserialize a Set object; see [Marshal](rdoc-ref:Marshal).
   #
-  # method used for JSON marshalling support.
+  # Method `Set#as_json` serializes `self`, returning a 2-element hash
+  # representing `self`:
+  #
+  #     require 'json/add/set'
+  #     x = Set.new(%w/foo bar baz/).as_json
+  #     # => {"json_class"=>"Set", "a"=>["foo", "bar", "baz"]}
+  #
+  # Method `JSON.create` deserializes such a hash, returning a Set object:
+  #
+  #     Set.json_create(x) # => #<Set: {"foo", "bar", "baz"}>
   #
   def as_json: (*untyped) -> Hash[String, String | Array[A]]
 
@@ -1585,7 +1752,14 @@ class Set[unchecked out A]
   #   rdoc-file=ext/json/lib/json/add/set.rb
   #   - to_json(*args)
   # -->
-  # return the JSON value
+  # Returns a JSON string representing `self`:
+  #
+  #     require 'json/add/set'
+  #     puts Set.new(%w/foo bar baz/).to_json
+  #
+  # Output:
+  #
+  #     {"json_class":"Set","a":["foo","bar","baz"]}
   #
   def to_json: (?JSON::State state) -> String
 end
@@ -1596,8 +1770,7 @@ class Struct[Elem]
   #   rdoc-file=ext/json/lib/json/add/struct.rb
   #   - json_create(object)
   # -->
-  # Deserializes JSON string by constructing new Struct object with values `v`
-  # serialized by `to_json`.
+  # See #as_json.
   #
   def self.json_create: [Elem] (Hash[String, String | Array[Elem]] object) -> Struct[Elem]
 
@@ -1605,8 +1778,21 @@ class Struct[Elem]
   #   rdoc-file=ext/json/lib/json/add/struct.rb
   #   - as_json(*)
   # -->
-  # Returns a hash, that will be turned into a JSON object and represent this
-  # object.
+  # Methods `Struct#as_json` and `Struct.json_create` may be used to serialize and
+  # deserialize a Struct object; see [Marshal](rdoc-ref:Marshal).
+  #
+  # Method `Struct#as_json` serializes `self`, returning a 2-element hash
+  # representing `self`:
+  #
+  #     require 'json/add/struct'
+  #     Customer = Struct.new('Customer', :name, :address, :zip)
+  #     x = Struct::Customer.new.as_json
+  #     # => {"json_class"=>"Struct::Customer", "v"=>[nil, nil, nil]}
+  #
+  # Method `JSON.create` deserializes such a hash, returning a Struct object:
+  #
+  #     Struct::Customer.json_create(x)
+  #     # => #<struct Struct::Customer name=nil, address=nil, zip=nil>
   #
   def as_json: (*untyped) -> Hash[String, String | Array[Elem]]
 
@@ -1614,8 +1800,15 @@ class Struct[Elem]
   #   rdoc-file=ext/json/lib/json/add/struct.rb
   #   - to_json(*args)
   # -->
-  # Stores class name (Struct) with Struct values `v` as a JSON string. Only named
-  # structs are supported.
+  # Returns a JSON string representing `self`:
+  #
+  #     require 'json/add/struct'
+  #     Customer = Struct.new('Customer', :name, :address, :zip)
+  #     puts Struct::Customer.new.to_json
+  #
+  # Output:
+  #
+  #     {"json_class":"Struct","t":{'name':'Rowdy',"age":null}}
   #
   def to_json: (?JSON::State state) -> String
 end
@@ -1626,8 +1819,7 @@ class Symbol
   #   rdoc-file=ext/json/lib/json/add/symbol.rb
   #   - json_create(o)
   # -->
-  # Deserializes JSON string by converting the `string` value stored in the object
-  # to a Symbol
+  # See #as_json.
   #
   def self.json_create: (Hash[String, String] object) -> instance
 
@@ -1635,8 +1827,19 @@ class Symbol
   #   rdoc-file=ext/json/lib/json/add/symbol.rb
   #   - as_json(*)
   # -->
-  # Returns a hash, that will be turned into a JSON object and represent this
-  # object.
+  # Methods `Symbol#as_json` and `Symbol.json_create` may be used to serialize and
+  # deserialize a Symbol object; see [Marshal](rdoc-ref:Marshal).
+  #
+  # Method `Symbol#as_json` serializes `self`, returning a 2-element hash
+  # representing `self`:
+  #
+  #     require 'json/add/symbol'
+  #     x = :foo.as_json
+  #     # => {"json_class"=>"Symbol", "s"=>"foo"}
+  #
+  # Method `JSON.create` deserializes such a hash, returning a Symbol object:
+  #
+  #     Symbol.json_create(x) # => :foo
   #
   def as_json: (*untyped) -> Hash[String, String]
 
@@ -1644,8 +1847,14 @@ class Symbol
   #   rdoc-file=ext/json/lib/json/add/symbol.rb
   #   - to_json(*a)
   # -->
-  # Stores class name (Symbol) with String representation of Symbol as a JSON
-  # string.
+  # Returns a JSON string representing `self`:
+  #
+  #     require 'json/add/symbol'
+  #     puts :foo.to_json
+  #
+  # Output:
+  #
+  #     # {"json_class":"Symbol","s":"foo"}
   #
   def to_json: (?JSON::State state) -> String
 end
@@ -1656,7 +1865,7 @@ class Time
   #   rdoc-file=ext/json/lib/json/add/time.rb
   #   - json_create(object)
   # -->
-  # Deserializes JSON string by converting time since epoch to Time
+  # See #as_json.
   #
   def self.json_create: (Hash[String, String | Integer] object) -> instance
 
@@ -1664,8 +1873,20 @@ class Time
   #   rdoc-file=ext/json/lib/json/add/time.rb
   #   - as_json(*)
   # -->
-  # Returns a hash, that will be turned into a JSON object and represent this
-  # object.
+  # Methods `Time#as_json` and `Time.json_create` may be used to serialize and
+  # deserialize a Time object; see [Marshal](rdoc-ref:Marshal).
+  #
+  # Method `Time#as_json` serializes `self`, returning a 2-element hash
+  # representing `self`:
+  #
+  #     require 'json/add/time'
+  #     x = Time.now.as_json
+  #     # => {"json_class"=>"Time", "s"=>1700931656, "n"=>472846644}
+  #
+  # Method `JSON.create` deserializes such a hash, returning a Time object:
+  #
+  #     Time.json_create(x)
+  #     # => 2023-11-25 11:00:56.472846644 -0600
   #
   def as_json: (*untyped) -> Hash[String, String | Integer]
 
@@ -1673,8 +1894,14 @@ class Time
   #   rdoc-file=ext/json/lib/json/add/time.rb
   #   - to_json(*args)
   # -->
-  # Stores class name (Time) with number of seconds since epoch and number of
-  # microseconds for Time as JSON string
+  # Returns a JSON string representing `self`:
+  #
+  #     require 'json/add/time'
+  #     puts Time.now.to_json
+  #
+  # Output:
+  #
+  #     {"json_class":"Time","s":1700931678,"n":980650786}
   #
   def to_json: (?JSON::State state) -> String
 end

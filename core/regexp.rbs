@@ -25,34 +25,34 @@
 #         re.match('food')        # => #<MatchData "foo">
 #         re.match('good')        # => nil
 #
-#     See sections [Method match](rdoc-ref:regexp.rdoc@Method+match) and
-#     [Operator =~](rdoc-ref:regexp.rdoc@Operator+-3D~).
+#     See sections [Method match](rdoc-ref:Regexp@Method+match) and [Operator
+#     =~](rdoc-ref:Regexp@Operator+-3D~).
 #
 # *   To determine whether a string matches a given pattern:
 #
 #         re.match?('food') # => true
 #         re.match?('good') # => false
 #
-#     See section [Method match?](rdoc-ref:regexp.rdoc@Method+match-3F).
+#     See section [Method match?](rdoc-ref:Regexp@Method+match-3F).
 #
 # *   As an argument for calls to certain methods in other classes and modules;
 #     most such methods accept an argument that may be either a string or the
 #     (much more powerful) regexp.
 #
-#     See [Regexp Methods](./Regexp/methods_rdoc.html).
+#     See [Regexp Methods](rdoc-ref:regexp/methods.rdoc).
 #
 #
 # ## Regexp Objects
 #
 # A regexp object has:
 #
-# *   A source; see [Sources](rdoc-ref:regexp.rdoc@Sources).
+# *   A source; see [Sources](rdoc-ref:Regexp@Sources).
 #
-# *   Several modes; see [Modes](rdoc-ref:regexp.rdoc@Modes).
+# *   Several modes; see [Modes](rdoc-ref:Regexp@Modes).
 #
-# *   A timeout; see [Timeouts](rdoc-ref:regexp.rdoc@Timeouts).
+# *   A timeout; see [Timeouts](rdoc-ref:Regexp@Timeouts).
 #
-# *   An encoding; see [Encodings](rdoc-ref:regexp.rdoc@Encodings).
+# *   An encoding; see [Encodings](rdoc-ref:Regexp@Encodings).
 #
 #
 # ## Creating a Regexp
@@ -60,15 +60,13 @@
 # A regular expression may be created with:
 #
 # *   A regexp literal using slash characters (see [Regexp
-#     Literals](https://docs.ruby-lang.org/en/master/syntax/literals_rdoc.html#l
-#     abel-Regexp+Literals)):
+#     Literals](rdoc-ref:syntax/literals.rdoc@Regexp+Literals)):
 #
 #         # This is a very common usage.
 #         /foo/ # => /foo/
 #
 # *   A `%r` regexp literal (see [%r: Regexp
-#     Literals](https://docs.ruby-lang.org/en/master/syntax/literals_rdoc.html#l
-#     abel-25r-3A+Regexp+Literals)):
+#     Literals](rdoc-ref:syntax/literals.rdoc@25r-3A+Regexp+Literals)):
 #
 #         # Same delimiter character at beginning and end;
 #         # useful for avoiding escaping characters
@@ -89,7 +87,7 @@
 #
 # Each of the methods Regexp#match, String#match, and Symbol#match returns a
 # MatchData object if a match was found, `nil` otherwise; each also sets [global
-# variables](rdoc-ref:regexp.rdoc@Global+Variables):
+# variables](rdoc-ref:Regexp@Global+Variables):
 #
 #     'food'.match(/foo/) # => #<MatchData "foo">
 #     'food'.match(/bar/) # => nil
@@ -98,7 +96,7 @@
 #
 # Each of the operators Regexp#=~, String#=~, and Symbol#=~ returns an integer
 # offset if a match was found, `nil` otherwise; each also sets [global
-# variables](rdoc-ref:regexp.rdoc@Global+Variables):
+# variables](rdoc-ref:Regexp@Global+Variables):
 #
 #     /bar/ =~ 'foo bar' # => 4
 #     'foo bar' =~ /bar/ # => 4
@@ -108,7 +106,7 @@
 #
 # Each of the methods Regexp#match?, String#match?, and Symbol#match? returns
 # `true` if a match was found, `false` otherwise; none sets [global
-# variables](rdoc-ref:regexp.rdoc@Global+Variables):
+# variables](rdoc-ref:Regexp@Global+Variables):
 #
 #     'food'.match?(/foo/) # => true
 #     'food'.match?(/bar/) # => false
@@ -117,8 +115,8 @@
 #
 # Certain regexp-oriented methods assign values to global variables:
 #
-# *   `#match`: see [Method match](rdoc-ref:regexp.rdoc@Method+match).
-# *   `#=~`: see [Operator =~](rdoc-ref:regexp.rdoc@Operator+-3D~).
+# *   `#match`: see [Method match](rdoc-ref:Regexp@Method+match).
+# *   `#=~`: see [Operator =~](rdoc-ref:Regexp@Operator+-3D~).
 #
 #
 # The affected global variables are:
@@ -178,19 +176,17 @@
 # A rich collection of available *subexpressions* gives the regexp great power
 # and flexibility:
 #
-# *   [Special characters](rdoc-ref:regexp.rdoc@Special+Characters)
-# *   [Source literals](rdoc-ref:regexp.rdoc@Source+Literals)
-# *   [Character classes](rdoc-ref:regexp.rdoc@Character+Classes)
-# *   [Shorthand character
-#     classes](rdoc-ref:regexp.rdoc@Shorthand+Character+Classes)
-# *   [Anchors](rdoc-ref:regexp.rdoc@Anchors)
-# *   [Alternation](rdoc-ref:regexp.rdoc@Alternation)
-# *   [Quantifiers](rdoc-ref:regexp.rdoc@Quantifiers)
-# *   [Groups and captures](rdoc-ref:regexp.rdoc@Groups+and+Captures)
-# *   [Unicode](rdoc-ref:regexp.rdoc@Unicode)
-# *   [POSIX Bracket
-#     Expressions](rdoc-ref:regexp.rdoc@POSIX+Bracket+Expressions)
-# *   [Comments](rdoc-ref:regexp.rdoc@Comments)
+# *   [Special characters](rdoc-ref:Regexp@Special+Characters)
+# *   [Source literals](rdoc-ref:Regexp@Source+Literals)
+# *   [Character classes](rdoc-ref:Regexp@Character+Classes)
+# *   [Shorthand character classes](rdoc-ref:Regexp@Shorthand+Character+Classes)
+# *   [Anchors](rdoc-ref:Regexp@Anchors)
+# *   [Alternation](rdoc-ref:Regexp@Alternation)
+# *   [Quantifiers](rdoc-ref:Regexp@Quantifiers)
+# *   [Groups and captures](rdoc-ref:Regexp@Groups+and+Captures)
+# *   [Unicode](rdoc-ref:Regexp@Unicode)
+# *   [POSIX Bracket Expressions](rdoc-ref:Regexp@POSIX+Bracket+Expressions)
+# *   [Comments](rdoc-ref:Regexp@Comments)
 #
 #
 # ### Special Characters
@@ -232,7 +228,7 @@
 #
 # There are differences between an ordinary string literal and a source literal;
 # see [Shorthand Character
-# Classes](rdoc-ref:regexp.rdoc@Shorthand+Character+Classes).
+# Classes](rdoc-ref:Regexp@Shorthand+Character+Classes).
 #
 # *   `\s` in an ordinary string literal is equivalent to a space character; in
 #     a source literal, it's shorthand for matching a whitespace character.
@@ -288,8 +284,8 @@
 #         /./.match('foo') # => #<MatchData "f">
 #         /./.match("\n")  # => nil
 #
-# *   `/./m`: Matches any character, including a newline; see {Multiline
-#     Mode}[regexp.rdoc@Multiline+Mode}:
+# *   `/./m`: Matches any character, including a newline; see [Multiline
+#     Mode](rdoc-ref:Regexp@Multiline+Mode):
 #
 #         /./m.match("\n") # => #<MatchData "\n">
 #
@@ -599,7 +595,7 @@
 # The first capture is the entire matched string; the other captures are the
 # matched substrings from the groups.
 #
-# A group may have a [quantifier](rdoc-ref:regexp.rdoc@Quantifiers):
+# A group may have a [quantifier](rdoc-ref:Regexp@Quantifiers):
 #
 #     re = /July 4(th)?/
 #     re.match('July 4')   # => #<MatchData "July 4" 1:nil>
@@ -838,7 +834,7 @@
 #     /\P{Alpha}/.match('1') # => #<MatchData "1">
 #     /\P{Alpha}/.match('a') # => nil
 #
-# See [Unicode Properties](./Regexp/unicode_properties_rdoc.html) for regexps
+# See [Unicode Properties](rdoc-ref:regexp/unicode_properties.rdoc) for regexps
 # based on the numerous properties.
 #
 # Some commonly-used properties correspond to POSIX bracket expressions:
@@ -862,13 +858,19 @@
 # *   `/\p{Emoji}/`: Unicode emoji.
 # *   `/\p{Graph}/`: Non-blank character (excludes spaces, control characters,
 #     and similar).
-# *   `/\p{Word}/`: A member of one of the following Unicode character
-#     categories (see below):
+# *   `/\p{Word}/`: A member in one of these Unicode character categories (see
+#     below) or having one of these Unicode properties:
 #
-#     *   `Mark` (`M`).
-#     *   `Letter` (`L`).
-#     *   `Number` (`N`)
-#     *   `Connector Punctuation` (`Pc`).
+#     *   Unicode categories:
+#         *   `Mark` (`M`).
+#         *   `Decimal Number` (`Nd`)
+#         *   `Connector Punctuation` (`Pc`).
+#
+#
+#     *   Unicode properties:
+#         *   `Alpha`
+#         *   `Join_Control`
+#
 #
 #
 # *   `/\p{ASCII}/`: A character in the ASCII character set.
@@ -1033,12 +1035,18 @@
 #
 # *   `/[[:ascii:]]/`: Matches a character in the ASCII character set.
 # *   `/[[:word:]]/`: Matches a character in one of these Unicode character
-#     categories (see below):
+#     categories or having one of these Unicode properties:
 #
-#     *   `Mark` (`M`).
-#     *   `Letter` (`L`).
-#     *   `Number` (`N`)
-#     *   `Connector Punctuation` (`Pc`).
+#     *   Unicode categories:
+#         *   `Mark` (`M`).
+#         *   `Decimal Number` (`Nd`)
+#         *   `Connector Punctuation` (`Pc`).
+#
+#
+#     *   Unicode properties:
+#         *   `Alpha`
+#         *   `Join_Control`
+#
 #
 #
 #
@@ -1052,20 +1060,18 @@
 #
 # The comment may not include an unescaped terminator character.
 #
-# See also [Extended Mode](rdoc-ref:regexp.rdoc@Extended+Mode).
+# See also [Extended Mode](rdoc-ref:Regexp@Extended+Mode).
 #
 # ## Modes
 #
 # Each of these modifiers sets a mode for the regexp:
 #
 # *   `i`: `/*pattern*/i` sets [Case-Insensitive
-#     Mode](rdoc-ref:regexp.rdoc@Case-Insensitive+Mode).
-# *   `m`: `/*pattern*/m` sets [Multiline
-#     Mode](rdoc-ref:regexp.rdoc@Multiline+Mode).
-# *   `x`: `/*pattern*/x` sets [Extended
-#     Mode](rdoc-ref:regexp.rdoc@Extended+Mode).
+#     Mode](rdoc-ref:Regexp@Case-Insensitive+Mode).
+# *   `m`: `/*pattern*/m` sets [Multiline Mode](rdoc-ref:Regexp@Multiline+Mode).
+# *   `x`: `/*pattern*/x` sets [Extended Mode](rdoc-ref:Regexp@Extended+Mode).
 # *   `o`: `/*pattern*/o` sets [Interpolation
-#     Mode](rdoc-ref:regexp.rdoc@Interpolation+Mode).
+#     Mode](rdoc-ref:Regexp@Interpolation+Mode).
 #
 #
 # Any, all, or none of these may be applied.
@@ -1884,7 +1890,7 @@ class Regexp
   #
   # The returned string may be used as an argument to Regexp.new, or as
   # interpolated text for a [Regexp
-  # interpolation](rdoc-ref:regexp.rdoc@Interpolation+Mode):
+  # interpolation](rdoc-ref:Regexp@Interpolation+Mode):
   #
   #     r1 = Regexp.new(s0) # => /(?ix-m:ab+c)/
   #     r2 = /#{s0}/        # => /(?ix-m:ab+c)/
