@@ -381,17 +381,26 @@ class FileSingletonTest < Test::Unit::TestCase
   end
 
   def test_link
-    assert_send_type "(String, String) -> 0",
-                     File, :link, File.expand_path(__FILE__), "new_name"
-    File.unlink("new_name")
+    begin
+      assert_send_type "(String, String) -> 0",
+                       File, :link, File.expand_path(__FILE__), "new_name"
+    ensure
+      File.unlink("new_name")
+    end
 
-    assert_send_type "(ToStr, ToStr) -> 0",
-                     File, :link, ToStr.new(File.expand_path(__FILE__)), ToStr.new("new_name")
-    File.unlink("new_name")
+    begin
+      assert_send_type "(ToStr, ToStr) -> 0",
+                       File, :link, ToStr.new(File.expand_path(__FILE__)), ToStr.new("new_name")
+    ensure
+      File.unlink("new_name")
+    end
 
-    assert_send_type "(ToPath, ToPath) -> 0",
-                     File, :link, ToPath.new(File.expand_path(__FILE__)), ToPath.new("new_name")
-    File.unlink("new_name")
+    begin
+      assert_send_type "(ToPath, ToPath) -> 0",
+                       File, :link, ToPath.new(File.expand_path(__FILE__)), ToPath.new("new_name")
+    ensure
+      File.unlink("new_name")
+    end
   end
 
   def test_lstat
