@@ -181,6 +181,7 @@ puts singleton.methods[:gsub]
 - [RBS by Example](docs/rbs_by_example.md)
 - [RBS collection](docs/collection.md)
 - [Using `Data` and `Struct`](docs/data_and_struct.md)
+- [Releasing a gem with RBS](docs/gem.md)
 
 ## Community
 
