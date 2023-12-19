@@ -817,3 +817,23 @@ class PathnameInstanceTest < Test::Unit::TestCase
                      Pathname(File.expand_path(__FILE__)), :zero?
   end
 end
+
+class PathnameKernelTest < Test::Unit::TestCase
+  include TestHelper
+  library 'pathname'
+  testing '::Kernel'
+
+  def test_Pathname
+    with_string("Gemfile") do
+      assert_send_type(
+        "(::string) -> ::Pathname",
+        self, :Pathname, _1
+      )
+    end
+
+    assert_send_type(
+      "(::Pathname) -> ::Pathname",
+      self, :Pathname, Pathname.pwd
+    )
+  end
+end
