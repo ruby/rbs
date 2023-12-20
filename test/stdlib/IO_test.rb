@@ -52,6 +52,38 @@ class IOSingletonTest < Test::Unit::TestCase
     end
   end
 
+  def ruby
+    ENV["RUBY"] || RbConfig.ruby
+  end
+
+  def test_popen
+    with_string("#{ruby} -v") do |command|
+      assert_send_type(
+        "(string) { (IO) -> nil } -> nil",
+        IO, :popen, command, &proc { nil }
+      )
+
+      assert_send_type(
+        "(Hash[String, String], string) { (IO) -> nil } -> nil",
+        IO, :popen, { "RUBYOPT" => "-I lib" }, command, &proc { nil }
+      )
+    end
+
+    with_string("ruby") do |ruby|
+      with_array(ruby, "-v") do |cmd|
+        assert_send_type(
+          "(array[string]) { (IO) -> nil } -> nil",
+          IO, :popen, cmd, &proc { nil }
+        )
+
+        assert_send_type(
+          "(Hash[String, String], array[string]) { (IO) -> nil } -> nil",
+          IO, :popen, { "RUBYOPT" => "-I lib" }, cmd, &proc { nil }
+        )
+      end
+    end
+  end
+
   def test_copy_stream
     Dir.mktmpdir do |dir|
       src_name = File.join(dir, "src_file").tap { |f| IO.write(f, "foo") }
