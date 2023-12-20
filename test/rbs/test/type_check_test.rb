@@ -231,6 +231,32 @@ EOF
     end
   end
 
+  def test_typecheck_return_singleton
+    SignatureManager.new do |manager|
+      manager.build do |env|
+        typecheck = Test::TypeCheck.new(
+          self_class: Object.singleton_class,
+          builder: DefinitionBuilder.new(env: env),
+          sample_size: 100,
+          unchecked_classes: []
+        )
+
+        parse_method_type("() -> Integer").tap do |method_type|
+          errors = []
+          typecheck.return ".foo",
+                           method_type,
+                           method_type.type,
+                           Test::ArgumentsReturn.return(arguments: [], value: 'a'),
+                           errors,
+                           return_error: Test::Errors::ReturnTypeError
+
+          assert_equal 1, errors.size
+          assert_equal "[Object.foo] ReturnTypeError: expected `Integer` but returns `\"a\"`", RBS::Test::Errors.to_string(errors.first)
+        end
+      end
+    end
+  end
+
   def test_type_check_record
     SignatureManager.new do |manager|
       manager.files[Pathname("foo.rbs")] = <<EOF
