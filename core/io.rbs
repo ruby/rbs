@@ -1532,7 +1532,8 @@ class IO < Object
   #
   # Related: IO#write.
   #
-  def read: (?int? length, ?string outbuf) -> String?
+  def read: (?nil, ?string outbuf) -> String
+          | (int? length, ?string outbuf) -> String?
 
   # <!--
   #   rdoc-file=io.rb
