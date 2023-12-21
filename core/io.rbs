@@ -2087,7 +2087,14 @@ class IO < Object
   # -->
   # Get the internal timeout duration or nil if it was not set.
   #
-  def timeout: () -> Numeric?
+  def timeout: () -> io_timeout
+
+  # The type used for timeouts in `IO`.
+  #
+  # Technically, this type should be `Time::_Timeout?`. However, in the vast majority of use-cases,
+  # people aren't going to pass their own `_Timeout` in, so `Numeric` is returned for ergonomics
+  # (eg `io.timeout += 10`).
+  type io_timeout = Numeric?
 
   # <!--
   #   rdoc-file=io.c
@@ -2110,7 +2117,7 @@ class IO < Object
   # effort to prevent an application from hanging on slow I/O operations, such as
   # those that occur during a slowloris attack.
   #
-  def timeout=: (Numeric? duration) -> void
+  def timeout=: (io_timeout duration) -> void
 
   # <!--
   #   rdoc-file=io.c
@@ -2945,7 +2952,7 @@ class IO < Object
   #     ping
   #
   def self.select: [X, Y, Z] (::Array[X & io]? read_array, ?::Array[Y & io]? write_array, ?::Array[Z & io]? error_array) -> [ Array[X], Array[Y], Array[Z] ]
-                 | [X, Y, Z] (::Array[X & io]? read_array, ?::Array[Y & io]? write_array, ?::Array[Z & io]? error_array, Numeric? timeout) -> [ Array[X], Array[Y], Array[Z] ]?
+                 | [X, Y, Z] (::Array[X & io]? read_array, ?::Array[Y & io]? write_array, ?::Array[Z & io]? error_array, Time::_Timeout? timeout) -> [ Array[X], Array[Y], Array[Z] ]?
 
   # <!--
   #   rdoc-file=io.c

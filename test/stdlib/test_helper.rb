@@ -50,6 +50,37 @@ module VersionHelper
   end
 end
 
+module WithStdlibAliases
+  def with_timeout(seconds: 1, nanoseconds: 0)
+    unless block_given?    
+      return RBS::UnitTest::Convertibles::WithAliases::WithEnum.new(
+        to_enum(__method__, seconds: seconds, nanoseconds: nanoseconds)
+      )
+    end
+
+    timeout_obj = RBS::UnitTest::Convertibles::BlankSlate.new.__with_object_methods(:define_singleton_method)
+    nanosecs_obj = RBS::UnitTest::Convertibles::BlankSlate.new.__with_object_methods(:define_singleton_method)
+
+    secs = nanosecs = nil
+    timeout_obj.define_singleton_method :divmod do |x|
+      flunk "Expected `1` for argument to divmod, got #{x.inspect}" unless 1.equal? x
+      [secs, nanosecs_obj]
+    end
+    nanosecs_obj.define_singleton_method :* do |x|
+      flunk "Expected `1000000000` for argument to *, got #{x.inspect}" unless 1000000000.equal? x
+      nanosecs
+    end
+
+    with_int seconds do |s|
+      secs = s
+      with_int nanoseconds do |ns|
+        nanosecs = ns
+        yield timeout_obj
+      end
+    end
+  end
+end
+
 class Writer
   attr_reader :buffer
 
@@ -119,6 +150,7 @@ module TestHelper
   include RBS::UnitTest::Convertibles
   include RBS::UnitTest::WithAliases
   include VersionHelper
+  include WithStdlibAliases
 
   def self.included(base)
     base.extend RBS::UnitTest::TypeAssertions::ClassMethods

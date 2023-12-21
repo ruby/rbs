@@ -482,8 +482,8 @@ class Socket < BasicSocket
   #       puts sock.read
   #     }
   #
-  def self.tcp: (String host, Integer port, ?String local_host, ?Integer local_port, ?resolv_timeout: Numeric, ?connect_timeout: Numeric) -> instance
-              | (String host, Integer port, ?String local_host, ?Integer local_port, ?resolv_timeout: Numeric, ?connect_timeout: Numeric) { (instance) -> void } -> void
+  def self.tcp: (String host, Integer port, ?String local_host, ?Integer local_port, ?resolv_timeout: Time::_Timeout, ?connect_timeout: Time::_Timeout) -> instance
+              | (String host, Integer port, ?String local_host, ?Integer local_port, ?resolv_timeout: Time::_Timeout, ?connect_timeout: Time::_Timeout) { (instance) -> void } -> void
 
   # <!--
   #   rdoc-file=ext/socket/lib/socket.rb
