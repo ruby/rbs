@@ -152,29 +152,31 @@ class IOSingletonTest < Test::Unit::TestCase
 
   def test_select
     if_ruby "3.0.0"..."3.2.0" do
-      r, w = IO.pipe
-      assert_send_type "(Array[IO], nil, nil, Float) -> nil",
-        IO, :select, [r], nil, nil, 0.5
-      assert_send_type "(nil, Array[IO]) -> [Array[IO], Array[IO], Array[IO]]",
-        IO, :select, nil, [w]
-      assert_send_type "(nil, Array[IO], Array[IO]) -> [Array[IO], Array[IO], Array[IO]]",
-        IO, :select, nil, [w], [r]
-      assert_send_type "(nil, Array[IO], Array[IO], Float) -> [Array[IO], Array[IO], Array[IO]]",
-        IO, :select, nil, [w], [r], 0.5
-      w.write("x")
-      assert_send_type "(Array[IO], nil, nil, Float) -> [Array[IO], Array[IO], Array[IO]]",
-        IO, :select, [r], nil, nil, 0.5
-      assert_send_type "(Array[IO], nil, nil, nil) -> [Array[IO], Array[IO], Array[IO]]",
-        IO, :select, [r], nil, nil, nil
-      assert_send_type "(Array[IO], Array[IO]) -> [Array[IO], Array[IO], Array[IO]]",
-        IO, :select, [r], [w]
-      assert_send_type "(Array[IO], Array[IO], Array[IO]) -> [Array[IO], Array[IO], Array[IO]]",
-        IO, :select, [r], [w], [r]
-      assert_send_type "(Array[IO], Array[IO], Array[IO], Float) -> [Array[IO], Array[IO], Array[IO]]",
-        IO, :select, [r], [w], [r], 0.5
-    ensure
-      r.close
-      w.close
+      with_timeout.and_nil do |timeout|
+        r, w = IO.pipe
+        assert_send_type "(Array[IO], nil, nil, Time::_Timeout?) -> nil",
+          IO, :select, [r], nil, nil, timeout
+        assert_send_type "(nil, Array[IO]) -> [Array[IO], Array[IO], Array[IO]]",
+          IO, :select, nil, [w]
+        assert_send_type "(nil, Array[IO], Array[IO]) -> [Array[IO], Array[IO], Array[IO]]",
+          IO, :select, nil, [w], [r]
+        assert_send_type "(nil, Array[IO], Array[IO], Time::_Timeout?) -> [Array[IO], Array[IO], Array[IO]]",
+          IO, :select, nil, [w], [r], timeout
+        w.write("x")
+        assert_send_type "(Array[IO], nil, nil, Time::_Timeout?) -> [Array[IO], Array[IO], Array[IO]]",
+          IO, :select, [r], nil, nil, timeout
+        assert_send_type "(Array[IO], nil, nil, nil) -> [Array[IO], Array[IO], Array[IO]]",
+          IO, :select, [r], nil, nil, nil
+        assert_send_type "(Array[IO], Array[IO]) -> [Array[IO], Array[IO], Array[IO]]",
+          IO, :select, [r], [w]
+        assert_send_type "(Array[IO], Array[IO], Array[IO]) -> [Array[IO], Array[IO], Array[IO]]",
+          IO, :select, [r], [w], [r]
+        assert_send_type "(Array[IO], Array[IO], Array[IO], Time::_Timeout?) -> [Array[IO], Array[IO], Array[IO]]",
+          IO, :select, [r], [w], [r], timeout
+      ensure
+        r.close
+        w.close
+      end
     end
   end
 end

@@ -1564,7 +1564,7 @@ module Kernel : BasicObject
   #     (snipped)
   #     ping
   #
-  def self?.select: (::Array[IO] read, ?::Array[IO] write, ?::Array[IO] error, ?Integer timeout) -> ::Array[String]
+  def self?.select: (::Array[IO] read, ?::Array[IO] write, ?::Array[IO] error, ?Time::_Timeout timeout) -> ::Array[String]
 
   # <!--
   #   rdoc-file=process.c
@@ -1581,8 +1581,9 @@ module Kernel : BasicObject
   #     Time.new  # => 2008-03-08 19:56:22 +0900
   #
   def self?.sleep: (?nil) -> bot
-                 | (Integer | Float | _Divmod duration) -> Integer
+                 | (Time::_Timeout duration) -> Integer
 
+  %a{steep:deprecated}
   interface _Divmod
     def divmod: (Numeric) -> [ Numeric, Numeric ]
   end

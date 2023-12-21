@@ -1437,7 +1437,7 @@ class Thread::ConditionVariable < Object
   #
   # Returns the slept result on `mutex`.
   #
-  def wait: (Thread::Mutex mutex, ?Integer | Float? timeout) -> Integer?
+  def wait: (Thread::Mutex mutex, ?Time::_Timeout? timeout) -> Integer?
 end
 
 # <!-- rdoc-file=thread_sync.c -->
