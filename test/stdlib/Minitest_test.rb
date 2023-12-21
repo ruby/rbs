@@ -43,3 +43,20 @@ class MinitestSingletonTest < Test::Unit::TestCase
   end
 end
 
+class MinitestTestLifecycleHooksTest < Test::Unit::TestCase
+  include TestHelper
+
+  library "minitest"
+  testing "Minitest::Test::LifecycleHooks"
+
+  class LifecycleSetup < Minitest::Test
+    def setup
+      @foo = 123
+    end
+  end  
+
+  def test_setup_return_type_void
+    test = LifecycleSetup.new("setup")
+    assert_send_type  "() -> void", test, :setup
+  end
+end
