@@ -41,7 +41,12 @@ module RBS
       end
 
       def self.to_string(error)
-        method = "#{error.klass.name}#{error.method_name}"
+        name = if error.klass.singleton_class?
+          inspect_(error.klass).sub(/\A#<Class:(.*)>\z/, '\1')
+        else
+          error.klass.name
+        end
+        method = "#{name}#{error.method_name}"
         case error
         when ArgumentTypeError
           "[#{method}] ArgumentTypeError: expected #{format_param error.param} but given `#{inspect_(error.value)}`"
