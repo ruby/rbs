@@ -2,6 +2,21 @@
 
 ## master
 
+## 3.4.0 (2023-12-21)
+
+### Signature updates
+
+* minitest's lifecycle hooks ([#1694](https://github.com/ruby/rbs/pull/1694))
+* `IO.popen`, `IO#read` ([#1693](https://github.com/ruby/rbs/pull/1693))
+
+### Library changes
+
+* Fix klass name if klass is singleton_class ([#1695](https://github.com/ruby/rbs/pull/1695))
+
+### Miscellaneous
+
+* Suppress warnings on testing ([#1691](https://github.com/ruby/rbs/pull/1691))
+
 ## 3.4.0.pre.1 (2023-12-19)
 
 ### Signature updates
