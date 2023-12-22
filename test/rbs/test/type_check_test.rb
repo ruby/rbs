@@ -69,6 +69,174 @@ EOF
     end
   end
 
+  def test_type_check_interface
+    SignatureManager.new do |manager|
+      manager.files[Pathname("foo.rbs")] = <<EOF
+interface _NoArgs
+  def args: () -> void
+end
+interface _PosArgs
+  def args: (Integer) -> void
+end
+interface _OptArgs
+  def args: (?Integer) -> void
+end
+interface _PosOptArgs
+  def args: (Integer, ?String) -> void
+end
+interface _RestArgs
+  def args: (*Integer) -> void
+end
+interface _TrailingArgs
+  def args: (*Integer, Integer) -> void
+end
+interface _ReqKeyArgs
+  def args: (a: Integer, b: String) -> void
+end
+interface _OptKeyArgs
+  def args: (?a: Integer, ?b: String) -> void
+end
+interface _PosReqKeyArgs
+  def args: (Integer a, b: Integer) -> void
+end
+interface _RestKeyArgs
+  def args: (**Integer) -> void
+end
+interface _PosRestKeyArgs
+  def args: (Integer, **Integer) -> void
+end
+interface _ReqKeyRestKeyArgs
+  def args: (a: Integer, **Integer) -> void
+end
+interface _ReqBlockArgs
+  def args: () { (Integer) -> void } -> void
+end
+interface _OptBlockArgs
+  def args: () ?{ (Integer) -> void } -> void
+end
+interface _AllArgs
+  def args: (Integer, ?Integer, *Integer, Integer, e: Integer, ?f: Integer, **Integer) -> void
+end
+interface _Overload
+  def args: (Integer) -> void
+          | (Integer, Integer) -> void
+end
+EOF
+      manager.build do |env|
+        typecheck = Test::TypeCheck.new(
+          self_class: Integer,
+          builder: DefinitionBuilder.new(env: env),
+          sample_size: 100,
+          unchecked_classes: []
+        )
+
+        [
+          [ ->(o) { def o.args(); end }, '::_NoArgs' ],
+          [ ->(o) { def o.args(a); end }, '::_PosArgs' ],
+          [ ->(o) { def o.args(a, &b); end }, '::_PosArgs' ],
+          [ ->(o) { def o.args(a = nil); end }, '::_OptArgs' ],
+          [ ->(o) { def o.args(a, b = nil); end }, '::_PosOptArgs' ],
+          [ ->(o) { def o.args(*r); end }, '::_RestArgs' ],
+          [ ->(o) { def o.args(*r, a); end }, '::_TrailingArgs' ],
+          [ ->(o) { def o.args(a:, b:); end }, '::_ReqKeyArgs' ],
+          [ ->(o) { def o.args(b:, a:); end }, '::_ReqKeyArgs' ],
+          [ ->(o) { def o.args(a: 1, b: 'b'); end }, '::_OptKeyArgs' ],
+          [ ->(o) { def o.args(b: 'b', a: 1); end }, '::_OptKeyArgs' ],
+          [ ->(o) { def o.args(a, b:); end }, '::_PosReqKeyArgs' ],
+          [ ->(o) { def o.args(**rk); end }, '::_RestKeyArgs' ],
+          [ ->(o) { def o.args(a, **rk); end }, '::_PosRestKeyArgs' ],
+          [ ->(o) { def o.args(a:, **rk); end }, '::_ReqKeyRestKeyArgs' ],
+          [ ->(o) { def o.args(); end }, '::_ReqBlockArgs' ],
+          [ ->(o) { def o.args(&b); end }, '::_ReqBlockArgs' ],
+          [ ->(o) { def o.args(); end }, '::_OptBlockArgs' ],
+          [ ->(o) { def o.args(&b); end }, '::_OptBlockArgs' ],
+          [ ->(o) { def o.args(a, b = nil, *c, d, e:, f: nil, **g); end }, '::_AllArgs' ],
+          [ ->(o) { def o.args(a); end }, '::_Overload' ],
+          [ ->(o) { def o.args(a, b); end }, '::_Overload' ],
+        ].each do |definer, interface|
+          success = Object.new
+          definer.call(success)
+          assert typecheck.value(success, parse_type(interface))
+        end
+
+        [
+          [ ->(o) { def o.args(a = nil); end }, '::_NoArgs' ],
+          [ ->(o) { def o.args(*r); end }, '::_NoArgs' ],
+          [ ->(o) { def o.args(**rk); end }, '::_NoArgs' ],
+          [ ->(o) { def o.args(*r, **rk); end }, '::_NoArgs' ],
+          [ ->(o) { def o.args(...); end }, '::_NoArgs' ],
+          [ ->(o) { def o.args(a); end }, '::_NoArgs' ],
+          [ ->(o) { def o.args(a:); end }, '::_NoArgs' ],
+          [ ->(o) { def o.args(a, b = nil); end }, '::_PosArgs' ],
+          [ ->(o) { def o.args(*a); end }, '::_PosArgs' ],
+          [ ->(o) { def o.args(a, *r); end }, '::_PosArgs' ],
+          [ ->(o) { def o.args(a, **kr); end }, '::_PosArgs' ],
+          [ ->(o) { def o.args(); end }, '::_PosArgs' ],
+          [ ->(o) { def o.args(a, b); end }, '::_PosArgs' ],
+          [ ->(o) { def o.args(a, b, *r); end }, '::_PosArgs' ],
+          [ ->(o) { def o.args(a: 1); end }, '::_PosArgs' ],
+          [ ->(o) { def o.args(a, &b); end }, '::_OptArgs' ],
+          [ ->(o) { def o.args(*a); end }, '::_PosOptArgs' ],
+          [ ->(o) { def o.args(a, *r); end }, '::_PosOptArgs' ],
+          [ ->(o) { def o.args(); end }, '::_PosOptArgs' ],
+          [ ->(o) { def o.args(a); end }, '::_PosOptArgs' ],
+          [ ->(o) { def o.args(a, b); end }, '::_PosOptArgs' ],
+          [ ->(o) { def o.args(); end }, '::_RestArgs' ],
+          [ ->(o) { def o.args(a, *r); end }, '::_RestArgs' ],
+          [ ->(o) { def o.args(*r, a); end }, '::_RestArgs' ],
+          [ ->(o) { def o.args(a); end }, '::_TrailingArgs' ],
+          [ ->(o) { def o.args(a, *b, c); end }, '::_TrailingArgs' ],
+          [ ->(o) { def o.args(a:, b: 1); end }, '::_ReqKeyArgs' ],
+          [ ->(o) { def o.args(*a); end }, '::_ReqKeyArgs' ],
+          [ ->(o) { def o.args(**rk); end }, '::_ReqKeyArgs' ],
+          [ ->(o) { def o.args(a); end }, '::_ReqKeyArgs' ],
+          [ ->(o) { def o.args(a = {}); end }, '::_ReqKeyArgs' ],
+          [ ->(o) { def o.args(a = {}, b = {}); end }, '::_ReqKeyArgs' ],
+          [ ->(o) { def o.args(a:, b:, c:); end }, '::_ReqKeyArgs' ],
+          [ ->(o) { def o.args(b:); end }, '::_ReqKeyArgs' ],
+          [ ->(o) { def o.args(b: 1); end }, '::_ReqKeyArgs' ],
+          [ ->(o) { def o.args(*r); end }, '::_OptKeyArgs' ],
+          [ ->(o) { def o.args(**rk); end }, '::_OptKeyArgs' ],
+          [ ->(o) { def o.args(a = {}); end }, '::_OptKeyArgs' ],
+          [ ->(o) { def o.args(); end }, '::_OptKeyArgs' ],
+          [ ->(o) { def o.args(a); end }, '::_OptKeyArgs' ],
+          [ ->(o) { def o.args(a:, b: 'b'); end }, '::_OptKeyArgs' ],
+          [ ->(o) { def o.args(a, b); end }, '::_PosReqKeyArgs' ],
+          [ ->(o) { def o.args(a, b = nil); end }, '::_PosReqKeyArgs' ],
+          [ ->(o) { def o.args(a); end }, '::_PosReqKeyArgs' ],
+          [ ->(o) { def o.args(a, z:); end }, '::_PosReqKeyArgs' ],
+          [ ->(o) { def o.args(*a, **rk); end }, '::_RestKeyArgs' ],
+          [ ->(o) { def o.args(a: nil, **rk); end }, '::_RestKeyArgs' ],
+          [ ->(o) { def o.args(a = {}); end }, '::_RestKeyArgs' ],
+          [ ->(o) { def o.args(); end }, '::_RestKeyArgs' ],
+          [ ->(o) { def o.args(a); end }, '::_RestKeyArgs' ],
+          [ ->(o) { def o.args(a:); end }, '::_RestKeyArgs' ],
+          [ ->(o) { def o.args(a:, **rk); end }, '::_RestKeyArgs' ],
+          [ ->(o) { def o.args(a: nil, **rk); end }, '::_ReqKeyRestKeyArgs' ],
+          [ ->(o) { def o.args(a); end }, '::_ReqKeyRestKeyArgs' ],
+          [ ->(o) { def o.args(a = nil); end }, '::_ReqKeyRestKeyArgs' ],
+          [ ->(o) { def o.args(); end }, '::_ReqKeyRestKeyArgs' ],
+          [ ->(o) { def o.args(a:); end }, '::_ReqKeyRestKeyArgs' ],
+          [ ->(o) { def o.args(a, b = {}); end }, '::_PosRestKeyArgs' ],
+          [ ->(o) { def o.args(**rk); end }, '::_PosRestKeyArgs' ],
+          [ ->(o) { def o.args(*r); end }, '::_AllArgs' ],
+          [ ->(o) { def o.args(...); end }, '::_AllArgs' ],
+          [ ->(o) { def o.args(); end }, '::_AllArgs' ],
+          [ ->(o) { def o.args(**rk); end }, '::_AllArgs' ],
+          [ ->(o) { def o.args(a = nil); end }, '::_Overload' ],
+          [ ->(o) { def o.args(a = nil, b = nil); end }, '::_Overload' ],
+          [ ->(o) { def o.args(*r); end }, '::_Overload' ],
+          [ ->(o) { def o.args(); end }, '::_Overload' ],
+          [ ->(o) { def o.args(a, b, c); end }, '::_Overload' ],
+        ].each do |definer, interface|
+          failure = Object.new
+          definer.call(failure)
+          refute typecheck.value(failure, parse_type(interface))
+        end
+      end
+    end
+  end
+
   def test_type_check_instance_class
     SignatureManager.new do |manager|
       manager.build do |env|

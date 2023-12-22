@@ -309,7 +309,14 @@ module RBS
         when Types::Interface
           if (definition = builder.build_interface(type.name.absolute!))
             definition.methods.each_key.all? do |method_name|
-              Test.call(val, RESPOND_TOP, method_name)
+              next false unless Test.call(val, RESPOND_TOP, method_name)
+
+              meth = Test.call(val, METHOD, method_name)
+              definition.methods[method_name].defs.all? do |type_def|
+                type_def.member.overloads.any? do |overload|
+                  match_method_parameters?(meth.parameters, overload.method_type)
+                end
+              end
             end
           end
         when Types::Variable
@@ -335,6 +342,46 @@ module RBS
         else
           false
         end
+      end
+
+      private
+
+      def match_method_parameters?(parameters, method_type)
+        fun = method_type.type.dup
+
+        fun.required_positionals.each do |param|
+          op, _ = parameters.shift
+          return false unless op == :req
+        end
+        fun.optional_positionals.each do |param|
+          op, _ = parameters.shift
+          return false unless op == :opt
+        end
+        if fun.rest_positionals
+          op, _ = parameters.shift
+          return false unless op == :rest
+        end
+        fun.trailing_positionals.each do |param|
+          op, _ = parameters.shift
+          return false unless op == :req
+        end
+
+        fun.required_keywords.each do |key, param|
+          return false unless parameters.reject! { |op, name| op == :keyreq && name == key }
+        end
+        fun.optional_keywords.each do |key, param|
+          return false unless parameters.reject! { |op, name| op == :key && name == key }
+        end
+        if fun.rest_keywords
+          op, _ = parameters.shift
+          return false unless op == :keyrest
+        end
+
+        parameters.delete_if do |op, _|
+          op == :block
+        end
+
+        parameters.empty?
       end
     end
   end
