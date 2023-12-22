@@ -174,6 +174,7 @@ puts singleton.methods[:gsub]
 
 ## Guides
 
+- [Architecture](docs/architecture.md)
 - [Core and standard library signature contribution guide](docs/CONTRIBUTING.md)
 - [Writing signatures guide](docs/sigs.md)
 - [Stdlib signatures guide](docs/stdlib.md)
