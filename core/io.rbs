@@ -621,1683 +621,111 @@
 # *   #inspect: Returns the string representation of `self`.
 #
 %a{annotate:rdoc:source:from=io.c}
-class IO < Object
+class IO
   include File::Constants
 
   include Enumerable[String]
 
-  # <!--
-  #   rdoc-file=io.c
-  #   - self << object -> self
-  # -->
-  # Writes the given `object` to `self`, which must be opened for writing (see
-  # [Access Modes](rdoc-ref:File@Access+Modes)); returns `self`; if `object` is
-  # not a string, it is converted via method `to_s`:
-  #
-  #     $stdout << 'Hello' << ', ' << 'World!' << "\n"
-  #     $stdout << 'foo' << :bar << 2 << "\n"
-  #
-  # Output:
-  #
-  #     Hello, World!
-  #     foobar2
-  #
-  def <<: (_ToS obj) -> self
+  # open_mode is used to represent the modes that can be used when opening files/streams, such as
+  # `"w"`, `"r"`, `IO::RDONLY`, etc.
+  type open_mode = int | string | nil
 
-  # <!--
-  #   rdoc-file=io.c
-  #   - advise(advice, offset = 0, len = 0) -> nil
-  # -->
-  # Invokes Posix system call
-  # [posix_fadvise(2)](https://linux.die.net/man/2/posix_fadvise), which announces
-  # an intention to access data from the current file in a particular manner.
-  #
-  # The arguments and results are platform-dependent.
-  #
-  # The relevant data is specified by:
-  #
-  # *   `offset`: The offset of the first byte of data.
-  # *   `len`: The number of bytes to be accessed; if `len` is zero, or is larger
-  #     than the number of bytes remaining, all remaining bytes will be accessed.
-  #
-  #
-  # Argument `advice` is one of the following symbols:
-  #
-  # *   `:normal`: The application has no advice to give about its access pattern
-  #     for the specified data. If no advice is given for an open file, this is
-  #     the default assumption.
-  # *   `:sequential`: The application expects to access the specified data
-  #     sequentially (with lower offsets read before higher ones).
-  # *   `:random`: The specified data will be accessed in random order.
-  # *   `:noreuse`: The specified data will be accessed only once.
-  # *   `:willneed`: The specified data will be accessed in the near future.
-  # *   `:dontneed`: The specified data will not be accessed in the near future.
-  #
-  #
-  # Not implemented on all platforms.
-  #
-  def advise: (:normal | :sequential | :random | :willneed | :dontneed | :noreuse advise, ?Integer offset, ?Integer len) -> nil
+  READABLE: Integer
 
-  # <!--
-  #   rdoc-file=io.c
-  #   - io.autoclose = bool    -> true or false
-  # -->
-  # Sets auto-close flag.
-  #
-  #     f = File.open(File::NULL)
-  #     IO.for_fd(f.fileno).close
-  #     f.gets # raises Errno::EBADF
-  #
-  #     f = File.open(File::NULL)
-  #     g = IO.for_fd(f.fileno)
-  #     g.autoclose = false
-  #     g.close
-  #     f.gets # won't cause Errno::EBADF
-  #
-  def autoclose=: (boolish bool) -> boolish
+  WRITABLE: Integer
 
-  # <!--
-  #   rdoc-file=io.c
-  #   - ios.autoclose?   -> true or false
-  # -->
-  # Returns `true` if the underlying file descriptor of *ios* will be closed at
-  # its finalization or at calling #close, otherwise `false`.
-  #
-  def autoclose?: () -> bool
-
-  # <!--
-  #   rdoc-file=io.c
-  #   - binmode -> self
-  # -->
-  # Sets the stream's data mode as binary (see [Data
-  # Mode](rdoc-ref:File@Data+Mode)).
-  #
-  # A stream's data mode may not be changed from binary to text.
-  #
-  def binmode: () -> self
-
-  # <!--
-  #   rdoc-file=io.c
-  #   - binmode? -> true or false
-  # -->
-  # Returns `true` if the stream is on binary mode, `false` otherwise. See [Data
-  # Mode](rdoc-ref:File@Data+Mode).
-  #
-  def binmode?: () -> bool
-
-  # <!--
-  #   rdoc-file=io.c
-  #   - close -> nil
-  # -->
-  # Closes the stream for both reading and writing if open for either or both;
-  # returns `nil`. See [Open and Closed
-  # Streams](rdoc-ref:IO@Open+and+Closed+Streams).
-  #
-  # If the stream is open for writing, flushes any buffered writes to the
-  # operating system before closing.
-  #
-  # If the stream was opened by IO.popen, sets global variable `$?` (child exit
-  # status).
-  #
-  # Example:
-  #
-  #     IO.popen('ruby', 'r+') do |pipe|
-  #       puts pipe.closed?
-  #       pipe.close
-  #       puts $?
-  #       puts pipe.closed?
-  #     end
-  #
-  # Output:
-  #
-  #     false
-  #     pid 13760 exit 0
-  #     true
-  #
-  # Related: IO#close_read, IO#close_write, IO#closed?.
-  #
-  def close: () -> nil
-
-  # <!--
-  #   rdoc-file=io.c
-  #   - self.close_on_exec = bool -> true or false
-  # -->
-  # Sets a close-on-exec flag.
-  #
-  #     f = File.open(File::NULL)
-  #     f.close_on_exec = true
-  #     system("cat", "/proc/self/fd/#{f.fileno}") # cat: /proc/self/fd/3: No such file or directory
-  #     f.closed?                #=> false
-  #
-  # Ruby sets close-on-exec flags of all file descriptors by default since Ruby
-  # 2.0.0. So you don't need to set by yourself. Also, unsetting a close-on-exec
-  # flag can cause file descriptor leak if another thread use fork() and exec()
-  # (via system() method for example). If you really needs file descriptor
-  # inheritance to child process, use spawn()'s argument such as fd=>fd.
-  #
-  def close_on_exec=: (boolish bool) -> nil
-
-  # <!--
-  #   rdoc-file=io.c
-  #   - close_on_exec? -> true or false
-  # -->
-  # Returns `true` if the stream will be closed on exec, `false` otherwise:
-  #
-  #     f = File.open('t.txt')
-  #     f.close_on_exec? # => true
-  #     f.close_on_exec = false
-  #     f.close_on_exec? # => false
-  #     f.close
-  #
-  def close_on_exec?: () -> bool
-
-  # <!--
-  #   rdoc-file=io.c
-  #   - close_read -> nil
-  # -->
-  # Closes the stream for reading if open for reading; returns `nil`. See [Open
-  # and Closed Streams](rdoc-ref:IO@Open+and+Closed+Streams).
-  #
-  # If the stream was opened by IO.popen and is also closed for writing, sets
-  # global variable `$?` (child exit status).
-  #
-  # Example:
-  #
-  #     IO.popen('ruby', 'r+') do |pipe|
-  #       puts pipe.closed?
-  #       pipe.close_write
-  #       puts pipe.closed?
-  #       pipe.close_read
-  #       puts $?
-  #       puts pipe.closed?
-  #     end
-  #
-  # Output:
-  #
-  #     false
-  #     false
-  #     pid 14748 exit 0
-  #     true
-  #
-  # Related: IO#close, IO#close_write, IO#closed?.
-  #
-  def close_read: () -> nil
-
-  # <!--
-  #   rdoc-file=io.c
-  #   - close_write -> nil
-  # -->
-  # Closes the stream for writing if open for writing; returns `nil`. See [Open
-  # and Closed Streams](rdoc-ref:IO@Open+and+Closed+Streams).
-  #
-  # Flushes any buffered writes to the operating system before closing.
-  #
-  # If the stream was opened by IO.popen and is also closed for reading, sets
-  # global variable `$?` (child exit status).
-  #
-  #     IO.popen('ruby', 'r+') do |pipe|
-  #       puts pipe.closed?
-  #       pipe.close_read
-  #       puts pipe.closed?
-  #       pipe.close_write
-  #       puts $?
-  #       puts pipe.closed?
-  #     end
-  #
-  # Output:
-  #
-  #     false
-  #     false
-  #     pid 15044 exit 0
-  #     true
-  #
-  # Related: IO#close, IO#close_read, IO#closed?.
-  #
-  def close_write: () -> nil
-
-  # <!--
-  #   rdoc-file=io.c
-  #   - closed? -> true or false
-  # -->
-  # Returns `true` if the stream is closed for both reading and writing, `false`
-  # otherwise. See [Open and Closed Streams](rdoc-ref:IO@Open+and+Closed+Streams).
-  #
-  #     IO.popen('ruby', 'r+') do |pipe|
-  #       puts pipe.closed?
-  #       pipe.close_read
-  #       puts pipe.closed?
-  #       pipe.close_write
-  #       puts pipe.closed?
-  #     end
-  #
-  # Output:
-  #
-  #     false
-  #     false
-  #     true
-  #
-  # Related: IO#close_read, IO#close_write, IO#close.
-  #
-  def closed?: () -> bool
-
-  # <!--
-  #   rdoc-file=io.c
-  #   - each_byte {|byte| ... } -> self
-  #   - each_byte               -> enumerator
-  # -->
-  # Calls the given block with each byte (0..255) in the stream; returns `self`.
-  # See [Byte IO](rdoc-ref:IO@Byte+IO).
-  #
-  #     f = File.new('t.rus')
-  #     a = []
-  #     f.each_byte {|b| a << b }
-  #     a # => [209, 130, 208, 181, 209, 129, 209, 130]
-  #     f.close
-  #
-  # Returns an Enumerator if no block is given.
-  #
-  # Related: IO#each_char, IO#each_codepoint.
-  #
-  def each_byte: () { (Integer byte) -> void } -> self
-               | () -> ::Enumerator[Integer, self]
-
-  # <!--
-  #   rdoc-file=io.c
-  #   - each_char {|c| ... } -> self
-  #   - each_char            -> enumerator
-  # -->
-  # Calls the given block with each character in the stream; returns `self`. See
-  # [Character IO](rdoc-ref:IO@Character+IO).
-  #
-  #     f = File.new('t.rus')
-  #     a = []
-  #     f.each_char {|c| a << c.ord }
-  #     a # => [1090, 1077, 1089, 1090]
-  #     f.close
-  #
-  # Returns an Enumerator if no block is given.
-  #
-  # Related: IO#each_byte, IO#each_codepoint.
-  #
-  def each_char: () { (String c) -> void } -> self
-               | () -> ::Enumerator[String, self]
-
-  # <!--
-  #   rdoc-file=io.c
-  #   - each_codepoint {|c| ... } -> self
-  #   - each_codepoint            -> enumerator
-  # -->
-  # Calls the given block with each codepoint in the stream; returns `self`:
-  #
-  #     f = File.new('t.rus')
-  #     a = []
-  #     f.each_codepoint {|c| a << c }
-  #     a # => [1090, 1077, 1089, 1090]
-  #     f.close
-  #
-  # Returns an Enumerator if no block is given.
-  #
-  # Related: IO#each_byte, IO#each_char.
-  #
-  def each_codepoint: () { (Integer c) -> void } -> self
-                    | () -> ::Enumerator[Integer, self]
-
-  # <!--
-  #   rdoc-file=io.c
-  #   - eof -> true or false
-  # -->
-  # Returns `true` if the stream is positioned at its end, `false` otherwise; see
-  # [Position](rdoc-ref:IO@Position):
-  #
-  #     f = File.open('t.txt')
-  #     f.eof           # => false
-  #     f.seek(0, :END) # => 0
-  #     f.eof           # => true
-  #     f.close
-  #
-  # Raises an exception unless the stream is opened for reading; see
-  # [Mode](rdoc-ref:File@Access+Modes).
-  #
-  # If `self` is a stream such as pipe or socket, this method blocks until the
-  # other end sends some data or closes it:
-  #
-  #     r, w = IO.pipe
-  #     Thread.new { sleep 1; w.close }
-  #     r.eof? # => true # After 1-second wait.
-  #
-  #     r, w = IO.pipe
-  #     Thread.new { sleep 1; w.puts "a" }
-  #     r.eof?  # => false # After 1-second wait.
-  #
-  #     r, w = IO.pipe
-  #     r.eof?  # blocks forever
-  #
-  # Note that this method reads data to the input byte buffer.  So IO#sysread may
-  # not behave as you intend with IO#eof?, unless you call IO#rewind first (which
-  # is not available for some streams).
-  #
-  def eof: () -> bool
-
-  # <!--
-  #   rdoc-file=io.c
-  #   - fcntl(integer_cmd, argument) -> integer
-  # -->
-  # Invokes Posix system call [fcntl(2)](https://linux.die.net/man/2/fcntl), which
-  # provides a mechanism for issuing low-level commands to control or query a
-  # file-oriented I/O stream. Arguments and results are platform dependent.
-  #
-  # If `argument` is a number, its value is passed directly; if it is a string, it
-  # is interpreted as a binary sequence of bytes. (Array#pack might be a useful
-  # way to build this string.)
-  #
-  # Not implemented on all platforms.
-  #
-  def fcntl: (Integer integer_cmd, String | Integer argument) -> Integer
-
-  # <!--
-  #   rdoc-file=io.c
-  #   - fdatasync -> 0
-  # -->
-  # Immediately writes to disk all data buffered in the stream, via the operating
-  # system's: `fdatasync(2)`, if supported, otherwise via `fsync(2)`, if
-  # supported; otherwise raises an exception.
-  #
-  def fdatasync: () -> Integer?
-
-  # <!--
-  #   rdoc-file=io.c
-  #   - fileno -> integer
-  # -->
-  # Returns the integer file descriptor for the stream:
-  #
-  #     $stdin.fileno             # => 0
-  #     $stdout.fileno            # => 1
-  #     $stderr.fileno            # => 2
-  #     File.open('t.txt').fileno # => 10
-  #     f.close
-  #
-  def fileno: () -> Integer
-
-  # <!--
-  #   rdoc-file=io.c
-  #   - flush -> self
-  # -->
-  # Flushes data buffered in `self` to the operating system (but does not
-  # necessarily flush data buffered in the operating system):
-  #
-  #     $stdout.print 'no newline' # Not necessarily flushed.
-  #     $stdout.flush              # Flushed.
-  #
-  def flush: () -> self
-
-  # <!--
-  #   rdoc-file=io.c
-  #   - fsync -> 0
-  # -->
-  # Immediately writes to disk all data buffered in the stream, via the operating
-  # system's `fsync(2)`.
-  #
-  # Note this difference:
-  #
-  # *   IO#sync=: Ensures that data is flushed from the stream's internal buffers,
-  #     but does not guarantee that the operating system actually writes the data
-  #     to disk.
-  # *   IO#fsync: Ensures both that data is flushed from internal buffers, and
-  #     that data is written to disk.
-  #
-  #
-  # Raises an exception if the operating system does not support `fsync(2)`.
-  #
-  def fsync: () -> Integer?
-
-  # <!--
-  #   rdoc-file=io.c
-  #   - getbyte -> integer or nil
-  # -->
-  # Reads and returns the next byte (in range 0..255) from the stream; returns
-  # `nil` if already at end-of-stream. See [Byte IO](rdoc-ref:IO@Byte+IO).
-  #
-  #     f = File.open('t.txt')
-  #     f.getbyte # => 70
-  #     f.close
-  #     f = File.open('t.rus')
-  #     f.getbyte # => 209
-  #     f.close
-  #
-  # Related: IO#readbyte (may raise EOFError).
-  #
-  def getbyte: () -> Integer?
-
-  # <!--
-  #   rdoc-file=io.c
-  #   - getc -> character or nil
-  # -->
-  # Reads and returns the next 1-character string from the stream; returns `nil`
-  # if already at end-of-stream. See [Character IO](rdoc-ref:IO@Character+IO).
-  #
-  #     f = File.open('t.txt')
-  #     f.getc     # => "F"
-  #     f.close
-  #     f = File.open('t.rus')
-  #     f.getc.ord # => 1090
-  #     f.close
-  #
-  # Related:  IO#readchar (may raise EOFError).
-  #
-  def getc: () -> String?
-
-  # <!--
-  #   rdoc-file=io.c
-  #   - gets(sep = $/, chomp: false)   -> string or nil
-  #   - gets(limit, chomp: false)      -> string or nil
-  #   - gets(sep, limit, chomp: false) -> string or nil
-  # -->
-  # Reads and returns a line from the stream; assigns the return value to `$_`.
-  # See [Line IO](rdoc-ref:IO@Line+IO).
-  #
-  # With no arguments given, returns the next line as determined by line separator
-  # `$/`, or `nil` if none:
-  #
-  #     f = File.open('t.txt')
-  #     f.gets # => "First line\n"
-  #     $_     # => "First line\n"
-  #     f.gets # => "\n"
-  #     f.gets # => "Fourth line\n"
-  #     f.gets # => "Fifth line\n"
-  #     f.gets # => nil
-  #     f.close
-  #
-  # With only string argument `sep` given, returns the next line as determined by
-  # line separator `sep`, or `nil` if none; see [Line
-  # Separator](rdoc-ref:IO@Line+Separator):
-  #
-  #     f = File.new('t.txt')
-  #     f.gets('l')   # => "First l"
-  #     f.gets('li')  # => "ine\nSecond li"
-  #     f.gets('lin') # => "ne\n\nFourth lin"
-  #     f.gets        # => "e\n"
-  #     f.close
-  #
-  # The two special values for `sep` are honored:
-  #
-  #     f = File.new('t.txt')
-  #     # Get all.
-  #     f.gets(nil) # => "First line\nSecond line\n\nFourth line\nFifth line\n"
-  #     f.rewind
-  #     # Get paragraph (up to two line separators).
-  #     f.gets('')  # => "First line\nSecond line\n\n"
-  #     f.close
-  #
-  # With only integer argument `limit` given, limits the number of bytes in the
-  # line; see [Line Limit](rdoc-ref:IO@Line+Limit):
-  #
-  #     # No more than one line.
-  #     File.open('t.txt') {|f| f.gets(10) } # => "First line"
-  #     File.open('t.txt') {|f| f.gets(11) } # => "First line\n"
-  #     File.open('t.txt') {|f| f.gets(12) } # => "First line\n"
-  #
-  # With arguments `sep` and `limit` given, combines the two behaviors:
-  #
-  # *   Returns the next line as determined by line separator `sep`, or `nil` if
-  #     none.
-  # *   But returns no more bytes than are allowed by the limit.
-  #
-  #
-  # Optional keyword argument `chomp` specifies whether line separators are to be
-  # omitted:
-  #
-  #     f = File.open('t.txt')
-  #     # Chomp the lines.
-  #     f.gets(chomp: true) # => "First line"
-  #     f.gets(chomp: true) # => "Second line"
-  #     f.gets(chomp: true) # => ""
-  #     f.gets(chomp: true) # => "Fourth line"
-  #     f.gets(chomp: true) # => "Fifth line"
-  #     f.gets(chomp: true) # => nil
-  #     f.close
-  #
-  def gets: (string? sep, ?int limit, ?chomp: boolish) -> String?
-          | (?int limit, ?chomp: boolish) -> String?
-
-  # <!--
-  #   rdoc-file=io.c
-  #   - IO.new(fd, mode = 'r', **opts) -> io
-  # -->
-  # Creates and returns a new IO object (file stream) from a file descriptor.
-  #
-  # IO.new may be useful for interaction with low-level libraries. For
-  # higher-level interactions, it may be simpler to create the file stream using
-  # File.open.
-  #
-  # Argument `fd` must be a valid file descriptor (integer):
-  #
-  #     path = 't.tmp'
-  #     fd = IO.sysopen(path) # => 3
-  #     IO.new(fd)            # => #<IO:fd 3>
-  #
-  # The new IO object does not inherit encoding (because the integer file
-  # descriptor does not have an encoding):
-  #
-  #     fd = IO.sysopen('t.rus', 'rb')
-  #     io = IO.new(fd)
-  #     io.external_encoding # => #<Encoding:UTF-8> # Not ASCII-8BIT.
-  #
-  # Optional argument `mode` (defaults to 'r') must specify a valid mode; see
-  # [Access Modes](rdoc-ref:File@Access+Modes):
-  #
-  #     IO.new(fd, 'w')         # => #<IO:fd 3>
-  #     IO.new(fd, File::WRONLY) # => #<IO:fd 3>
-  #
-  # Optional keyword arguments `opts` specify:
-  #
-  # *   [Open Options](rdoc-ref:IO@Open+Options).
-  # *   [Encoding options](rdoc-ref:encodings.rdoc@Encoding+Options).
-  #
-  #
-  # Examples:
-  #
-  #     IO.new(fd, internal_encoding: nil) # => #<IO:fd 3>
-  #     IO.new(fd, autoclose: true)        # => #<IO:fd 3>
-  #
-  def initialize: ( int fd, ?string | int mode, ?path: string?, ?external_encoding: String | Encoding | nil, ?internal_encoding: String | Encoding | nil, ?encoding: String | Encoding | nil, ?textmode: boolish, ?binmode: boolish, ?autoclose: boolish, ?mode: String) -> void
-
-  # <!--
-  #   rdoc-file=io.c
-  #   - inspect -> string
-  # -->
-  # Returns a string representation of `self`:
-  #
-  #     f = File.open('t.txt')
-  #     f.inspect # => "#<File:t.txt>"
-  #     f.close
-  #
-  def inspect: () -> String
-
-  # <!--
-  #   rdoc-file=io.c
-  #   - internal_encoding -> encoding or nil
-  # -->
-  # Returns the Encoding object that represents the encoding of the internal
-  # string, if conversion is specified, or `nil` otherwise.
-  #
-  # See [Encodings](rdoc-ref:File@Encodings).
-  #
-  def internal_encoding: () -> Encoding
-
-  # <!--
-  #   rdoc-file=io.c
-  #   - ioctl(integer_cmd, argument) -> integer
-  # -->
-  # Invokes Posix system call [ioctl(2)](https://linux.die.net/man/2/ioctl), which
-  # issues a low-level command to an I/O device.
-  #
-  # Issues a low-level command to an I/O device. The arguments and returned value
-  # are platform-dependent. The effect of the call is platform-dependent.
-  #
-  # If argument `argument` is an integer, it is passed directly; if it is a
-  # string, it is interpreted as a binary sequence of bytes.
-  #
-  # Not implemented on all platforms.
-  #
-  def ioctl: (Integer integer_cmd, String | Integer argument) -> Integer
-
-  # <!--
-  #   rdoc-file=io.c
-  #   - isatty -> true or false
-  # -->
-  # Returns `true` if the stream is associated with a terminal device (tty),
-  # `false` otherwise:
-  #
-  #     f = File.new('t.txt').isatty    #=> false
-  #     f.close
-  #     f = File.new('/dev/tty').isatty #=> true
-  #     f.close
-  #
-  def isatty: () -> bool
-
-  # <!--
-  #   rdoc-file=io.c
-  #   - lineno -> integer
-  # -->
-  # Returns the current line number for the stream; see [Line
-  # Number](rdoc-ref:IO@Line+Number).
-  #
-  def lineno: () -> Integer
-
-  # <!--
-  #   rdoc-file=io.c
-  #   - lineno = integer -> integer
-  # -->
-  # Sets and returns the line number for the stream; see [Line
-  # Number](rdoc-ref:IO@Line+Number).
-  #
-  def lineno=: (Integer integer) -> Integer
-
-  # <!--
-  #   rdoc-file=io.c
-  #   - path -> string or nil
-  # -->
-  # Returns the path associated with the IO, or `nil` if there is no path
-  # associated with the IO. It is not guaranteed that the path exists on the
-  # filesystem.
-  #
-  #     $stdin.path # => "<STDIN>"
-  #
-  #     File.open("testfile") {|f| f.path} # => "testfile"
-  #
-  def path: () -> String?
-
-  # <!--
-  #   rdoc-file=io.c
-  #   - pid -> integer or nil
-  # -->
-  # Returns the process ID of a child process associated with the stream, which
-  # will have been set by IO#popen, or `nil` if the stream was not created by
-  # IO#popen:
-  #
-  #     pipe = IO.popen("-")
-  #     if pipe
-  #       $stderr.puts "In parent, child pid is #{pipe.pid}"
-  #     else
-  #       $stderr.puts "In child, pid is #{$$}"
-  #     end
-  #
-  # Output:
-  #
-  #     In child, pid is 26209
-  #     In parent, child pid is 26209
-  #
-  def pid: () -> Integer
-
-  # <!--
-  #   rdoc-file=io.c
-  #   - pos = new_position -> new_position
-  # -->
-  # Seeks to the given `new_position` (in bytes); see
-  # [Position](rdoc-ref:IO@Position):
-  #
-  #     f = File.open('t.txt')
-  #     f.tell     # => 0
-  #     f.pos = 20 # => 20
-  #     f.tell     # => 20
-  #     f.close
-  #
-  # Related: IO#seek, IO#tell.
-  #
-  def pos=: (Integer new_position) -> Integer
-
-  # <!--
-  #   rdoc-file=io.c
-  #   - print(*objects) -> nil
-  # -->
-  # Writes the given objects to the stream; returns `nil`. Appends the output
-  # record separator `$OUTPUT_RECORD_SEPARATOR` (`$\`), if it is not `nil`. See
-  # [Line IO](rdoc-ref:IO@Line+IO).
-  #
-  # With argument `objects` given, for each object:
-  #
-  # *   Converts via its method `to_s` if not a string.
-  # *   Writes to the stream.
-  # *   If not the last object, writes the output field separator
-  #     `$OUTPUT_FIELD_SEPARATOR` (`$,`) if it is not `nil`.
-  #
-  #
-  # With default separators:
-  #
-  #     f = File.open('t.tmp', 'w+')
-  #     objects = [0, 0.0, Rational(0, 1), Complex(0, 0), :zero, 'zero']
-  #     p $OUTPUT_RECORD_SEPARATOR
-  #     p $OUTPUT_FIELD_SEPARATOR
-  #     f.print(*objects)
-  #     f.rewind
-  #     p f.read
-  #     f.close
-  #
-  # Output:
-  #
-  #     nil
-  #     nil
-  #     "00.00/10+0izerozero"
-  #
-  # With specified separators:
-  #
-  #     $\ = "\n"
-  #     $, = ','
-  #     f.rewind
-  #     f.print(*objects)
-  #     f.rewind
-  #     p f.read
-  #
-  # Output:
-  #
-  #     "0,0.0,0/1,0+0i,zero,zero\n"
-  #
-  # With no argument given, writes the content of `$_` (which is usually the most
-  # recent user input):
-  #
-  #     f = File.open('t.tmp', 'w+')
-  #     gets # Sets $_ to the most recent user input.
-  #     f.print
-  #     f.close
-  #
-  def print: (*untyped objects) -> nil
-
-  # <!--
-  #   rdoc-file=io.c
-  #   - printf(format_string, *objects) -> nil
-  # -->
-  # Formats and writes `objects` to the stream.
-  #
-  # For details on `format_string`, see [Format
-  # Specifications](rdoc-ref:format_specifications.rdoc).
-  #
-  def printf: (String format_string, *untyped objects) -> nil
-
-  # <!--
-  #   rdoc-file=io.c
-  #   - putc(object) -> object
-  # -->
-  # Writes a character to the stream. See [Character
-  # IO](rdoc-ref:IO@Character+IO).
-  #
-  # If `object` is numeric, converts to integer if necessary, then writes the
-  # character whose code is the least significant byte; if `object` is a string,
-  # writes the first character:
-  #
-  #     $stdout.putc "A"
-  #     $stdout.putc 65
-  #
-  # Output:
-  #
-  #     AA
-  #
-  def putc: (Numeric | String object) -> (Numeric | String)
-
-  # <!--
-  #   rdoc-file=io.c
-  #   - puts(*objects) -> nil
-  # -->
-  # Writes the given `objects` to the stream, which must be open for writing;
-  # returns `nil`.\ Writes a newline after each that does not already end with a
-  # newline sequence. If called without arguments, writes a newline. See [Line
-  # IO](rdoc-ref:IO@Line+IO).
-  #
-  # Note that each added newline is the character `"\n"<//tt>, not the output
-  # record separator (<tt>$\`).
-  #
-  # Treatment for each object:
-  #
-  # *   String: writes the string.
-  # *   Neither string nor array: writes `object.to_s`.
-  # *   Array: writes each element of the array; arrays may be nested.
-  #
-  #
-  # To keep these examples brief, we define this helper method:
-  #
-  #     def show(*objects)
-  #       # Puts objects to file.
-  #       f = File.new('t.tmp', 'w+')
-  #       f.puts(objects)
-  #       # Return file content.
-  #       f.rewind
-  #       p f.read
-  #       f.close
-  #     end
-  #
-  #     # Strings without newlines.
-  #     show('foo', 'bar', 'baz')     # => "foo\nbar\nbaz\n"
-  #     # Strings, some with newlines.
-  #     show("foo\n", 'bar', "baz\n") # => "foo\nbar\nbaz\n"
-  #
-  #     # Neither strings nor arrays:
-  #     show(0, 0.0, Rational(0, 1), Complex(9, 0), :zero)
-  #     # => "0\n0.0\n0/1\n9+0i\nzero\n"
-  #
-  #     # Array of strings.
-  #     show(['foo', "bar\n", 'baz']) # => "foo\nbar\nbaz\n"
-  #     # Nested arrays.
-  #     show([[[0, 1], 2, 3], 4, 5])  # => "0\n1\n2\n3\n4\n5\n"
-  #
-  def puts: (*untyped objects) -> nil
-
-  # <!--
-  #   rdoc-file=io.c
-  #   - read(maxlen = nil, out_string = nil) -> new_string, out_string, or nil
-  # -->
-  # Reads bytes from the stream; the stream must be opened for reading (see
-  # [Access Modes](rdoc-ref:File@Access+Modes)):
-  #
-  # *   If `maxlen` is `nil`, reads all bytes using the stream's data mode.
-  # *   Otherwise reads up to `maxlen` bytes in binary mode.
-  #
-  #
-  # Returns a string (either a new string or the given `out_string`) containing
-  # the bytes read. The encoding of the string depends on both `maxLen` and
-  # `out_string`:
-  #
-  # *   `maxlen` is `nil`: uses internal encoding of `self` (regardless of whether
-  #     `out_string` was given).
-  # *   `maxlen` not `nil`:
-  #
-  #     *   `out_string` given: encoding of `out_string` not modified.
-  #     *   `out_string` not given: ASCII-8BIT is used.
-  #
-  #
-  #
-  # **Without Argument `out_string`**
-  #
-  # When argument `out_string` is omitted, the returned value is a new string:
-  #
-  #     f = File.new('t.txt')
-  #     f.read
-  #     # => "First line\nSecond line\n\nFourth line\nFifth line\n"
-  #     f.rewind
-  #     f.read(30) # => "First line\r\nSecond line\r\n\r\nFou"
-  #     f.read(30) # => "rth line\r\nFifth line\r\n"
-  #     f.read(30) # => nil
-  #     f.close
-  #
-  # If `maxlen` is zero, returns an empty string.
-  #
-  # ** With Argument `out_string`**
-  #
-  # When argument `out_string` is given, the returned value is `out_string`, whose
-  # content is replaced:
-  #
-  #     f = File.new('t.txt')
-  #     s = 'foo'      # => "foo"
-  #     f.read(nil, s) # => "First line\nSecond line\n\nFourth line\nFifth line\n"
-  #     s              # => "First line\nSecond line\n\nFourth line\nFifth line\n"
-  #     f.rewind
-  #     s = 'bar'
-  #     f.read(30, s)  # => "First line\r\nSecond line\r\n\r\nFou"
-  #     s              # => "First line\r\nSecond line\r\n\r\nFou"
-  #     s = 'baz'
-  #     f.read(30, s)  # => "rth line\r\nFifth line\r\n"
-  #     s              # => "rth line\r\nFifth line\r\n"
-  #     s = 'bat'
-  #     f.read(30, s)  # => nil
-  #     s              # => ""
-  #     f.close
-  #
-  # Note that this method behaves like the fread() function in C. This means it
-  # retries to invoke read(2) system calls to read data with the specified maxlen
-  # (or until EOF).
-  #
-  # This behavior is preserved even if the stream is in non-blocking mode. (This
-  # method is non-blocking-flag insensitive as other methods.)
-  #
-  # If you need the behavior like a single read(2) system call, consider
-  # #readpartial, #read_nonblock, and #sysread.
-  #
-  # Related: IO#write.
-  #
-  def read: (?nil, ?string outbuf) -> String
-          | (int? length, ?string outbuf) -> String?
-
-  # <!--
-  #   rdoc-file=io.rb
-  #   - ios.read_nonblock(maxlen [, options])              -> string
-  #   - ios.read_nonblock(maxlen, outbuf [, options])      -> outbuf
-  # -->
-  # Reads at most *maxlen* bytes from *ios* using the read(2) system call after
-  # O_NONBLOCK is set for the underlying file descriptor.
-  #
-  # If the optional *outbuf* argument is present, it must reference a String,
-  # which will receive the data. The *outbuf* will contain only the received data
-  # after the method call even if it is not empty at the beginning.
-  #
-  # read_nonblock just calls the read(2) system call. It causes all errors the
-  # read(2) system call causes: Errno::EWOULDBLOCK, Errno::EINTR, etc. The caller
-  # should care such errors.
-  #
-  # If the exception is Errno::EWOULDBLOCK or Errno::EAGAIN, it is extended by
-  # IO::WaitReadable. So IO::WaitReadable can be used to rescue the exceptions for
-  # retrying read_nonblock.
-  #
-  # read_nonblock causes EOFError on EOF.
-  #
-  # On some platforms, such as Windows, non-blocking mode is not supported on IO
-  # objects other than sockets. In such cases, Errno::EBADF will be raised.
-  #
-  # If the read byte buffer is not empty, read_nonblock reads from the buffer like
-  # readpartial. In this case, the read(2) system call is not called.
-  #
-  # When read_nonblock raises an exception kind of IO::WaitReadable, read_nonblock
-  # should not be called until io is readable for avoiding busy loop. This can be
-  # done as follows.
-  #
-  #     # emulates blocking read (readpartial).
-  #     begin
-  #       result = io.read_nonblock(maxlen)
-  #     rescue IO::WaitReadable
-  #       IO.select([io])
-  #       retry
-  #     end
-  #
-  # Although IO#read_nonblock doesn't raise IO::WaitWritable.
-  # OpenSSL::Buffering#read_nonblock can raise IO::WaitWritable. If IO and SSL
-  # should be used polymorphically, IO::WaitWritable should be rescued too. See
-  # the document of OpenSSL::Buffering#read_nonblock for sample code.
-  #
-  # Note that this method is identical to readpartial except the non-blocking flag
-  # is set.
-  #
-  # By specifying a keyword argument *exception* to `false`, you can indicate that
-  # read_nonblock should not raise an IO::WaitReadable exception, but return the
-  # symbol `:wait_readable` instead. At EOF, it will return nil instead of raising
-  # EOFError.
-  #
-  def read_nonblock: (int len, ?string buf, ?exception: true) -> String
-                   | (int len, ?string buf, exception: false) -> (String | :wait_readable | nil)
-
-  # <!--
-  #   rdoc-file=io.c
-  #   - readbyte -> integer
-  # -->
-  # Reads and returns the next byte (in range 0..255) from the stream; raises
-  # EOFError if already at end-of-stream. See [Byte IO](rdoc-ref:IO@Byte+IO).
-  #
-  #     f = File.open('t.txt')
-  #     f.readbyte # => 70
-  #     f.close
-  #     f = File.open('t.rus')
-  #     f.readbyte # => 209
-  #     f.close
-  #
-  # Related: IO#getbyte (will not raise EOFError).
-  #
-  def readbyte: () -> Integer
-
-  # <!--
-  #   rdoc-file=io.c
-  #   - readchar -> string
-  # -->
-  # Reads and returns the next 1-character string from the stream; raises EOFError
-  # if already at end-of-stream. See [Character IO](rdoc-ref:IO@Character+IO).
-  #
-  #     f = File.open('t.txt')
-  #     f.readchar     # => "F"
-  #     f.close
-  #     f = File.open('t.rus')
-  #     f.readchar.ord # => 1090
-  #     f.close
-  #
-  # Related:  IO#getc (will not raise EOFError).
-  #
-  def readchar: () -> String
-
-  # <!--
-  #   rdoc-file=io.rb
-  #   - readline(sep = $/, chomp: false)   -> string
-  #   - readline(limit, chomp: false)      -> string
-  #   - readline(sep, limit, chomp: false) -> string
-  # -->
-  # Reads a line as with IO#gets, but raises EOFError if already at end-of-stream.
-  #
-  # Optional keyword argument `chomp` specifies whether line separators are to be
-  # omitted.
-  #
-  def readline: (?String sep, ?Integer limit) -> String
-
-  # <!--
-  #   rdoc-file=io.c
-  #   - readlines(sep = $/, chomp: false)   -> array
-  #   - readlines(limit, chomp: false)       -> array
-  #   - readlines(sep, limit, chomp: false) -> array
-  # -->
-  # Reads and returns all remaining line from the stream; does not modify `$_`.
-  # See [Line IO](rdoc-ref:IO@Line+IO).
-  #
-  # With no arguments given, returns lines as determined by line separator `$/`,
-  # or `nil` if none:
-  #
-  #     f = File.new('t.txt')
-  #     f.readlines
-  #     # => ["First line\n", "Second line\n", "\n", "Fourth line\n", "Fifth line\n"]
-  #     f.readlines # => []
-  #     f.close
-  #
-  # With only string argument `sep` given, returns lines as determined by line
-  # separator `sep`, or `nil` if none; see [Line
-  # Separator](rdoc-ref:IO@Line+Separator):
-  #
-  #     f = File.new('t.txt')
-  #     f.readlines('li')
-  #     # => ["First li", "ne\nSecond li", "ne\n\nFourth li", "ne\nFifth li", "ne\n"]
-  #     f.close
-  #
-  # The two special values for `sep` are honored:
-  #
-  #     f = File.new('t.txt')
-  #     # Get all into one string.
-  #     f.readlines(nil)
-  #     # => ["First line\nSecond line\n\nFourth line\nFifth line\n"]
-  #     # Get paragraphs (up to two line separators).
-  #     f.rewind
-  #     f.readlines('')
-  #     # => ["First line\nSecond line\n\n", "Fourth line\nFifth line\n"]
-  #     f.close
-  #
-  # With only integer argument `limit` given, limits the number of bytes in each
-  # line; see [Line Limit](rdoc-ref:IO@Line+Limit):
-  #
-  #     f = File.new('t.txt')
-  #     f.readlines(8)
-  #     # => ["First li", "ne\n", "Second l", "ine\n", "\n", "Fourth l", "ine\n", "Fifth li", "ne\n"]
-  #     f.close
-  #
-  # With arguments `sep` and `limit` given, combines the two behaviors:
-  #
-  # *   Returns lines as determined by line separator `sep`.
-  # *   But returns no more bytes in a line than are allowed by the limit.
-  #
-  #
-  # Optional keyword argument `chomp` specifies whether line separators are to be
-  # omitted:
-  #
-  #     f = File.new('t.txt')
-  #     f.readlines(chomp: true)
-  #     # => ["First line", "Second line", "", "Fourth line", "Fifth line"]
-  #     f.close
-  #
-  def readlines: (?String sep, ?Integer limit) -> ::Array[String]
-
-  # <!--
-  #   rdoc-file=io.c
-  #   - readpartial(maxlen)             -> string
-  #   - readpartial(maxlen, out_string) -> out_string
-  # -->
-  # Reads up to `maxlen` bytes from the stream; returns a string (either a new
-  # string or the given `out_string`). Its encoding is:
-  #
-  # *   The unchanged encoding of `out_string`, if `out_string` is given.
-  # *   ASCII-8BIT, otherwise.
-  #
-  # *   Contains `maxlen` bytes from the stream, if available.
-  # *   Otherwise contains all available bytes, if any available.
-  # *   Otherwise is an empty string.
-  #
-  #
-  # With the single non-negative integer argument `maxlen` given, returns a new
-  # string:
-  #
-  #     f = File.new('t.txt')
-  #     f.readpartial(20) # => "First line\nSecond l"
-  #     f.readpartial(20) # => "ine\n\nFourth line\n"
-  #     f.readpartial(20) # => "Fifth line\n"
-  #     f.readpartial(20) # Raises EOFError.
-  #     f.close
-  #
-  # With both argument `maxlen` and string argument `out_string` given, returns
-  # modified `out_string`:
-  #
-  #     f = File.new('t.txt')
-  #     s = 'foo'
-  #     f.readpartial(20, s) # => "First line\nSecond l"
-  #     s = 'bar'
-  #     f.readpartial(0, s)  # => ""
-  #     f.close
-  #
-  # This method is useful for a stream such as a pipe, a socket, or a tty. It
-  # blocks only when no data is immediately available. This means that it blocks
-  # only when *all* of the following are true:
-  #
-  # *   The byte buffer in the stream is empty.
-  # *   The content of the stream is empty.
-  # *   The stream is not at EOF.
-  #
-  #
-  # When blocked, the method waits for either more data or EOF on the stream:
-  #
-  # *   If more data is read, the method returns the data.
-  # *   If EOF is reached, the method raises EOFError.
-  #
-  #
-  # When not blocked, the method responds immediately:
-  #
-  # *   Returns data from the buffer if there is any.
-  # *   Otherwise returns data from the stream if there is any.
-  # *   Otherwise raises EOFError if the stream has reached EOF.
-  #
-  #
-  # Note that this method is similar to sysread. The differences are:
-  #
-  # *   If the byte buffer is not empty, read from the byte buffer instead of
-  #     "sysread for buffered IO (IOError)".
-  # *   It doesn't cause Errno::EWOULDBLOCK and Errno::EINTR.  When readpartial
-  #     meets EWOULDBLOCK and EINTR by read system call, readpartial retries the
-  #     system call.
-  #
-  #
-  # The latter means that readpartial is non-blocking-flag insensitive. It blocks
-  # on the situation IO#sysread causes Errno::EWOULDBLOCK as if the fd is blocking
-  # mode.
-  #
-  # Examples:
-  #
-  #     #                        # Returned      Buffer Content    Pipe Content
-  #     r, w = IO.pipe           #
-  #     w << 'abc'               #               ""                "abc".
-  #     r.readpartial(4096)      # => "abc"      ""                ""
-  #     r.readpartial(4096)      # (Blocks because buffer and pipe are empty.)
-  #
-  #     #                        # Returned      Buffer Content    Pipe Content
-  #     r, w = IO.pipe           #
-  #     w << 'abc'               #               ""                "abc"
-  #     w.close                  #               ""                "abc" EOF
-  #     r.readpartial(4096)      # => "abc"      ""                 EOF
-  #     r.readpartial(4096)      # raises EOFError
-  #
-  #     #                        # Returned      Buffer Content    Pipe Content
-  #     r, w = IO.pipe           #
-  #     w << "abc\ndef\n"        #               ""                "abc\ndef\n"
-  #     r.gets                   # => "abc\n"    "def\n"           ""
-  #     w << "ghi\n"             #               "def\n"           "ghi\n"
-  #     r.readpartial(4096)      # => "def\n"    ""                "ghi\n"
-  #     r.readpartial(4096)      # => "ghi\n"    ""                ""
-  #
-  def readpartial: (int maxlen, ?string outbuf) -> String
-
-  # <!--
-  #   rdoc-file=io.c
-  #   - reopen(other_io)                 -> self
-  #   - reopen(path, mode = 'r', **opts) -> self
-  # -->
-  # Reassociates the stream with another stream, which may be of a different
-  # class. This method may be used to redirect an existing stream to a new
-  # destination.
-  #
-  # With argument `other_io` given, reassociates with that stream:
-  #
-  #     # Redirect $stdin from a file.
-  #     f = File.open('t.txt')
-  #     $stdin.reopen(f)
-  #     f.close
-  #
-  #     # Redirect $stdout to a file.
-  #     f = File.open('t.tmp', 'w')
-  #     $stdout.reopen(f)
-  #     f.close
-  #
-  # With argument `path` given, reassociates with a new stream to that file path:
-  #
-  #     $stdin.reopen('t.txt')
-  #     $stdout.reopen('t.tmp', 'w')
-  #
-  # Optional keyword arguments `opts` specify:
-  #
-  # *   [Open Options](rdoc-ref:IO@Open+Options).
-  # *   [Encoding options](rdoc-ref:encodings.rdoc@Encoding+Options).
-  #
-  def reopen: (IO other_IO_or_path) -> IO
-            | (String other_IO_or_path, ?String mode_str) -> IO
-
-  # <!--
-  #   rdoc-file=io.c
-  #   - rewind -> 0
-  # -->
-  # Repositions the stream to its beginning, setting both the position and the
-  # line number to zero; see [Position](rdoc-ref:IO@Position) and [Line
-  # Number](rdoc-ref:IO@Line+Number):
-  #
-  #     f = File.open('t.txt')
-  #     f.tell     # => 0
-  #     f.lineno   # => 0
-  #     f.gets     # => "First line\n"
-  #     f.tell     # => 12
-  #     f.lineno   # => 1
-  #     f.rewind   # => 0
-  #     f.tell     # => 0
-  #     f.lineno   # => 0
-  #     f.close
-  #
-  # Note that this method cannot be used with streams such as pipes, ttys, and
-  # sockets.
-  #
-  def rewind: () -> Integer
-
-  # <!--
-  #   rdoc-file=io.c
-  #   - seek(offset, whence = IO::SEEK_SET) -> 0
-  # -->
-  # Seeks to the position given by integer `offset` (see
-  # [Position](rdoc-ref:IO@Position)) and constant `whence`, which is one of:
-  #
-  # *   `:CUR` or `IO::SEEK_CUR`: Repositions the stream to its current position
-  #     plus the given `offset`:
-  #
-  #         f = File.open('t.txt')
-  #         f.tell            # => 0
-  #         f.seek(20, :CUR)  # => 0
-  #         f.tell            # => 20
-  #         f.seek(-10, :CUR) # => 0
-  #         f.tell            # => 10
-  #         f.close
-  #
-  # *   `:END` or `IO::SEEK_END`: Repositions the stream to its end plus the given
-  #     `offset`:
-  #
-  #         f = File.open('t.txt')
-  #         f.tell            # => 0
-  #         f.seek(0, :END)   # => 0  # Repositions to stream end.
-  #         f.tell            # => 52
-  #         f.seek(-20, :END) # => 0
-  #         f.tell            # => 32
-  #         f.seek(-40, :END) # => 0
-  #         f.tell            # => 12
-  #         f.close
-  #
-  # *   `:SET` or `IO:SEEK_SET`: Repositions the stream to the given `offset`:
-  #
-  #         f = File.open('t.txt')
-  #         f.tell            # => 0
-  #         f.seek(20, :SET) # => 0
-  #         f.tell           # => 20
-  #         f.seek(40, :SET) # => 0
-  #         f.tell           # => 40
-  #         f.close
-  #
-  #
-  # Related: IO#pos=, IO#tell.
-  #
-  def seek: (Integer amount, ?Integer whence) -> Integer
-
-  # <!--
-  #   rdoc-file=io.c
-  #   - set_encoding(ext_enc)                   -> self
-  #   - set_encoding(ext_enc, int_enc, **enc_opts)  -> self
-  #   - set_encoding('ext_enc:int_enc', **enc_opts) -> self
-  # -->
-  # See [Encodings](rdoc-ref:File@Encodings).
-  #
-  # Argument `ext_enc`, if given, must be an Encoding object or a String with the
-  # encoding name; it is assigned as the encoding for the stream.
-  #
-  # Argument `int_enc`, if given, must be an Encoding object or a String with the
-  # encoding name; it is assigned as the encoding for the internal string.
-  #
-  # Argument `'ext_enc:int_enc'`, if given, is a string containing two
-  # colon-separated encoding names; corresponding Encoding objects are assigned as
-  # the external and internal encodings for the stream.
-  #
-  # If the external encoding of a string is binary/ASCII-8BIT, the internal
-  # encoding of the string is set to nil, since no transcoding is needed.
-  #
-  # Optional keyword arguments `enc_opts` specify [Encoding
-  # options](rdoc-ref:encodings.rdoc@Encoding+Options).
-  #
-  def set_encoding: (?String | Encoding ext_or_ext_int_enc) -> self
-                  | (?String | Encoding ext_or_ext_int_enc, ?String | Encoding int_enc) -> self
-
-  # <!--
-  #   rdoc-file=io.c
-  #   - set_encoding_by_bom -> encoding or nil
-  # -->
-  # If the stream begins with a BOM ([byte order
-  # marker](https://en.wikipedia.org/wiki/Byte_order_mark)), consumes the BOM and
-  # sets the external encoding accordingly; returns the result encoding if found,
-  # or `nil` otherwise:
-  #
-  #     File.write('t.tmp', "\u{FEFF}abc")
-  #     io = File.open('t.tmp', 'rb')
-  #     io.set_encoding_by_bom # => #<Encoding:UTF-8>
-  #     io.close
-  #
-  #     File.write('t.tmp', 'abc')
-  #     io = File.open('t.tmp', 'rb')
-  #     io.set_encoding_by_bom # => nil
-  #     io.close
-  #
-  # Raises an exception if the stream is not binmode or its encoding has already
-  # been set.
-  #
-  def set_encoding_by_bom: () -> Encoding?
-
-  # <!--
-  #   rdoc-file=file.c
-  #   - ios.stat    -> stat
-  # -->
-  # Returns status information for *ios* as an object of type File::Stat.
-  #
-  #     f = File.new("testfile")
-  #     s = f.stat
-  #     "%o" % s.mode   #=> "100644"
-  #     s.blksize       #=> 4096
-  #     s.atime         #=> Wed Apr 09 08:53:54 CDT 2003
-  #
-  def stat: () -> File::Stat
-
-  # <!--
-  #   rdoc-file=io.c
-  #   - sync -> true or false
-  # -->
-  # Returns the current sync mode of the stream. When sync mode is true, all
-  # output is immediately flushed to the underlying operating system and is not
-  # buffered by Ruby internally. See also #fsync.
-  #
-  #     f = File.open('t.tmp', 'w')
-  #     f.sync # => false
-  #     f.sync = true
-  #     f.sync # => true
-  #     f.close
-  #
-  def sync: () -> bool
-
-  # <!--
-  #   rdoc-file=io.c
-  #   - sync = boolean -> boolean
-  # -->
-  # Sets the *sync* *mode* for the stream to the given value; returns the given
-  # value.
-  #
-  # Values for the sync mode:
-  #
-  # *   `true`: All output is immediately flushed to the underlying operating
-  #     system and is not buffered internally.
-  # *   `false`: Output may be buffered internally.
-  #
-  #
-  # Example;
-  #
-  #     f = File.open('t.tmp', 'w')
-  #     f.sync # => false
-  #     f.sync = true
-  #     f.sync # => true
-  #     f.close
-  #
-  # Related: IO#fsync.
-  #
-  def sync=: (boolish boolean) -> boolish
-
-  # <!--
-  #   rdoc-file=io.c
-  #   - sysread(maxlen)             -> string
-  #   - sysread(maxlen, out_string) -> string
-  # -->
-  # Behaves like IO#readpartial, except that it uses low-level system functions.
-  #
-  # This method should not be used with other stream-reader methods.
-  #
-  def sysread: (Integer maxlen, String outbuf) -> String
-
-  # <!--
-  #   rdoc-file=io.c
-  #   - sysseek(offset, whence = IO::SEEK_SET) -> integer
-  # -->
-  # Behaves like IO#seek, except that it:
-  #
-  # *   Uses low-level system functions.
-  # *   Returns the new position.
-  #
-  def sysseek: (Integer amount, ?Integer whence) -> Integer
-
-  # <!--
-  #   rdoc-file=io.c
-  #   - syswrite(object) -> integer
-  # -->
-  # Writes the given `object` to self, which must be opened for writing (see
-  # Modes); returns the number bytes written. If `object` is not a string is
-  # converted via method to_s:
-  #
-  #     f = File.new('t.tmp', 'w')
-  #     f.syswrite('foo') # => 3
-  #     f.syswrite(30)    # => 2
-  #     f.syswrite(:foo)  # => 3
-  #     f.close
-  #
-  # This methods should not be used with other stream-writer methods.
-  #
-  def syswrite: (_ToS object) -> Integer
-
-  # <!--
-  #   rdoc-file=io.c
-  #   - tell -> integer
-  # -->
-  # Returns the current position (in bytes) in `self` (see
-  # [Position](rdoc-ref:IO@Position)):
-  #
-  #     f = File.open('t.txt')
-  #     f.tell # => 0
-  #     f.gets # => "First line\n"
-  #     f.tell # => 12
-  #     f.close
-  #
-  # Related: IO#pos=, IO#seek.
-  #
-  def tell: () -> Integer
+  PRIORITY: Integer
 
   # <!-- rdoc-file=io.c -->
-  # Returns the current position (in bytes) in `self` (see
-  # [Position](rdoc-ref:IO@Position)):
+  # Set I/O position from the current position
   #
-  #     f = File.open('t.txt')
-  #     f.tell # => 0
-  #     f.gets # => "First line\n"
-  #     f.tell # => 12
-  #     f.close
-  #
-  # Related: IO#pos=, IO#seek.
-  #
-  alias pos tell
-
-  # <!--
-  #   rdoc-file=io.c
-  #   - timeout -> duration or nil
-  # -->
-  # Get the internal timeout duration or nil if it was not set.
-  #
-  def timeout: () -> io_timeout
-
-  # The type used for timeouts in `IO`.
-  #
-  # Technically, this type should be `Time::_Timeout?`. However, in the vast majority of use-cases,
-  # people aren't going to pass their own `_Timeout` in, so `Numeric` is returned for ergonomics
-  # (eg `io.timeout += 10`).
-  type io_timeout = Numeric?
-
-  # <!--
-  #   rdoc-file=io.c
-  #   - timeout = duration -> duration
-  #   - timeout = nil -> nil
-  # -->
-  # Sets the internal timeout to the specified duration or nil. The timeout
-  # applies to all blocking operations where possible.
-  #
-  # When the operation performs longer than the timeout set, IO::TimeoutError is
-  # raised.
-  #
-  # This affects the following methods (but is not limited to): #gets, #puts,
-  # #read, #write, #wait_readable and #wait_writable. This also affects blocking
-  # socket operations like Socket#accept and Socket#connect.
-  #
-  # Some operations like File#open and IO#close are not affected by the timeout. A
-  # timeout during a write operation may leave the IO in an inconsistent state,
-  # e.g. data was partially written. Generally speaking, a timeout is a last ditch
-  # effort to prevent an application from hanging on slow I/O operations, such as
-  # those that occur during a slowloris attack.
-  #
-  def timeout=: (io_timeout duration) -> void
-
-  # <!--
-  #   rdoc-file=io.c
-  #   - to_io -> self
-  # -->
-  # Returns `self`.
-  #
-  def to_io: () -> self
+  SEEK_CUR: Integer
 
   # <!-- rdoc-file=io.c -->
-  # Returns `true` if the stream is associated with a terminal device (tty),
-  # `false` otherwise:
+  # Set I/O position to the next location containing data
   #
-  #     f = File.new('t.txt').isatty    #=> false
-  #     f.close
-  #     f = File.new('/dev/tty').isatty #=> true
-  #     f.close
-  #
-  alias tty? isatty
+  SEEK_DATA: Integer
 
-  # <!--
-  #   rdoc-file=io.c
-  #   - ungetbyte(integer) -> nil
-  #   - ungetbyte(string)  -> nil
-  # -->
-  # Pushes back ("unshifts") the given data onto the stream's buffer, placing the
-  # data so that it is next to be read; returns `nil`. See [Byte
-  # IO](rdoc-ref:IO@Byte+IO).
+  # <!-- rdoc-file=io.c -->
+  # Set I/O position from the end
   #
-  # Note that:
-  #
-  # *   Calling the method has no effect with unbuffered reads (such as
-  #     IO#sysread).
-  # *   Calling #rewind on the stream discards the pushed-back data.
-  #
-  #
-  # When argument `integer` is given, uses only its low-order byte:
-  #
-  #     File.write('t.tmp', '012')
-  #     f = File.open('t.tmp')
-  #     f.ungetbyte(0x41)   # => nil
-  #     f.read              # => "A012"
-  #     f.rewind
-  #     f.ungetbyte(0x4243) # => nil
-  #     f.read              # => "C012"
-  #     f.close
-  #
-  # When argument `string` is given, uses all bytes:
-  #
-  #     File.write('t.tmp', '012')
-  #     f = File.open('t.tmp')
-  #     f.ungetbyte('A')    # => nil
-  #     f.read              # => "A012"
-  #     f.rewind
-  #     f.ungetbyte('BCDE') # => nil
-  #     f.read              # => "BCDE012"
-  #     f.close
-  #
-  def ungetbyte: (String | Integer object) -> nil
+  SEEK_END: Integer
 
-  # <!--
-  #   rdoc-file=io.c
-  #   - ungetc(integer) -> nil
-  #   - ungetc(string)  -> nil
-  # -->
-  # Pushes back ("unshifts") the given data onto the stream's buffer, placing the
-  # data so that it is next to be read; returns `nil`. See [Character
-  # IO](rdoc-ref:IO@Character+IO).
+  # <!-- rdoc-file=io.c -->
+  # Set I/O position to the next hole
   #
-  # Note that:
-  #
-  # *   Calling the method has no effect with unbuffered reads (such as
-  #     IO#sysread).
-  # *   Calling #rewind on the stream discards the pushed-back data.
-  #
-  #
-  # When argument `integer` is given, interprets the integer as a character:
-  #
-  #     File.write('t.tmp', '012')
-  #     f = File.open('t.tmp')
-  #     f.ungetc(0x41)     # => nil
-  #     f.read             # => "A012"
-  #     f.rewind
-  #     f.ungetc(0x0442)   # => nil
-  #     f.getc.ord         # => 1090
-  #     f.close
-  #
-  # When argument `string` is given, uses all characters:
-  #
-  #     File.write('t.tmp', '012')
-  #     f = File.open('t.tmp')
-  #     f.ungetc('A')      # => nil
-  #     f.read      # => "A012"
-  #     f.rewind
-  #     f.ungetc("\u0442\u0435\u0441\u0442") # => nil
-  #     f.getc.ord      # => 1090
-  #     f.getc.ord      # => 1077
-  #     f.getc.ord      # => 1089
-  #     f.getc.ord      # => 1090
-  #     f.close
-  #
-  def ungetc: (String object) -> nil
+  SEEK_HOLE: Integer
 
-  # <!--
-  #   rdoc-file=io.c
-  #   - write(*objects) -> integer
-  # -->
-  # Writes each of the given `objects` to `self`, which must be opened for writing
-  # (see [Access Modes](rdoc-ref:File@Access+Modes)); returns the total number
-  # bytes written; each of `objects` that is not a string is converted via method
-  # `to_s`:
+  # <!-- rdoc-file=io.c -->
+  # Set I/O position from the beginning
   #
-  #     $stdout.write('Hello', ', ', 'World!', "\n") # => 14
-  #     $stdout.write('foo', :bar, 2, "\n")          # => 8
-  #
-  # Output:
-  #
-  #     Hello, World!
-  #     foobar2
-  #
-  # Related: IO#read.
-  #
-  def write: (*_ToS string) -> Integer
+  SEEK_SET: Integer
 
-  # <!--
-  #   rdoc-file=io.rb
-  #   - ios.write_nonblock(string)   -> integer
-  #   - ios.write_nonblock(string [, options])   -> integer
-  # -->
-  # Writes the given string to *ios* using the write(2) system call after
-  # O_NONBLOCK is set for the underlying file descriptor.
+  # <!-- rdoc-file=io.c -->
+  # exception to wait for reading. see IO.select.
   #
-  # It returns the number of bytes written.
+  module WaitReadable
+  end
+
+  # <!-- rdoc-file=io.c -->
+  # exception to wait for writing. see IO.select.
   #
-  # write_nonblock just calls the write(2) system call. It causes all errors the
-  # write(2) system call causes: Errno::EWOULDBLOCK, Errno::EINTR, etc. The result
-  # may also be smaller than string.length (partial write). The caller should care
-  # such errors and partial write.
+  module WaitWritable
+  end
+
+  # <!-- rdoc-file=io.c -->
+  # exception to wait for reading by EAGAIN. see IO.select.
   #
-  # If the exception is Errno::EWOULDBLOCK or Errno::EAGAIN, it is extended by
-  # IO::WaitWritable. So IO::WaitWritable can be used to rescue the exceptions for
-  # retrying write_nonblock.
+  class EAGAINWaitReadable < Errno::EAGAIN
+    include WaitReadable
+
+    Errno: Integer
+  end
+
+  # <!-- rdoc-file=io.c -->
+  # exception to wait for writing by EAGAIN. see IO.select.
   #
-  #     # Creates a pipe.
-  #     r, w = IO.pipe
+  class EAGAINWaitWritable < Errno::EAGAIN
+    include WaitWritable
+
+    Errno: Integer
+  end
+
+  # <!-- rdoc-file=io.c -->
+  # exception to wait for reading by EWOULDBLOCK. see IO.select.
   #
-  #     # write_nonblock writes only 65536 bytes and return 65536.
-  #     # (The pipe size is 65536 bytes on this environment.)
-  #     s = "a" * 100000
-  #     p w.write_nonblock(s)     #=> 65536
+  class EWOULDBLOCKWaitReadable < Errno
+    include WaitReadable
+
+    Errno: Integer
+  end
+
+  # <!-- rdoc-file=io.c -->
+  # exception to wait for writing by EWOULDBLOCK. see IO.select.
   #
-  #     # write_nonblock cannot write a byte and raise EWOULDBLOCK (EAGAIN).
-  #     p w.write_nonblock("b")   # Resource temporarily unavailable (Errno::EAGAIN)
+  class EWOULDBLOCKWaitWriteable < Errno
+    include WaitWriteable
+
+    Errno: Integer
+  end
+
+  # <!-- rdoc-file=io.c -->
+  # exception to wait for reading by EINPROGRESS. see IO.select.
   #
-  # If the write buffer is not empty, it is flushed at first.
+  class EINPROGRESSWaitReadable < Errno::EINPROGRESS
+    include WaitReadable
+
+    Errno: Integer
+  end
+
+  # <!-- rdoc-file=io.c -->
+  # exception to wait for writing by EINPROGRESS. see IO.select.
   #
-  # When write_nonblock raises an exception kind of IO::WaitWritable,
-  # write_nonblock should not be called until io is writable for avoiding busy
-  # loop. This can be done as follows.
-  #
-  #     begin
-  #       result = io.write_nonblock(string)
-  #     rescue IO::WaitWritable, Errno::EINTR
-  #       IO.select(nil, [io])
-  #       retry
-  #     end
-  #
-  # Note that this doesn't guarantee to write all data in string. The length
-  # written is reported as result and it should be checked later.
-  #
-  # On some platforms such as Windows, write_nonblock is not supported according
-  # to the kind of the IO object. In such cases, write_nonblock raises
-  # `Errno::EBADF`.
-  #
-  # By specifying a keyword argument *exception* to `false`, you can indicate that
-  # write_nonblock should not raise an IO::WaitWritable exception, but return the
-  # symbol `:wait_writable` instead.
-  #
-  def write_nonblock: (_ToS s, ?exception: true) -> Integer
-                    | (_ToS s, exception: false) -> (Integer | :wait_writable | nil)
+  class EINPROGRESSWaitWritable < Errno::EINPROGRESS
+    include WaitWritable
+
+    Errno: Integer
+  end
 
   # <!--
   #   rdoc-file=io.c
@@ -2378,7 +806,18 @@ class IO < Object
   #     IO.copy_stream('t.txt', 't.tmp', 11, 11) # => 11
   #     IO.read('t.tmp')                         # => "Second line"
   #
-  def self.copy_stream: (String | _Reader | _ReaderPartial src, String | _Writer dst, ?Integer copy_length, ?Integer src_offset) -> Integer
+  def self.copy_stream: (String | _Reader | _Readpartial src, String | _Writer dst, ?Integer copy_length, ?Integer src_offset) -> Integer
+
+  # An interface used for reading only parts of a stream at a time; used in `IO#copy_stream`.
+  #
+  # The `readpartial` function should concat at most `maxlen` bytes into `outbuf`
+  interface _Readpartial
+    # Read at most `maxlen` bytes, and concat them onto the end of `String`.
+    #
+    # Unlike almost every other standard lib function, the return value of this is entirely ignored
+    # by ruby, and is `void`.
+    def readpartial: (Integer maxlen, String outbuf) -> void
+  end
 
   # <!--
   #   rdoc-file=io.c
@@ -2952,7 +1391,7 @@ class IO < Object
   #     ping
   #
   def self.select: [X, Y, Z] (::Array[X & io]? read_array, ?::Array[Y & io]? write_array, ?::Array[Z & io]? error_array) -> [ Array[X], Array[Y], Array[Z] ]
-                 | [X, Y, Z] (::Array[X & io]? read_array, ?::Array[Y & io]? write_array, ?::Array[Z & io]? error_array, Time::_Timeout? timeout) -> [ Array[X], Array[Y], Array[Z] ]?
+                 | [X, Y, Z] (::Array[X & io]? read_array, ?::Array[Y & io]? write_array, ?::Array[Z & io]? error_array, Numeric? timeout) -> [ Array[X], Array[Y], Array[Z] ]?
 
   # <!--
   #   rdoc-file=io.c
@@ -3052,6 +1491,397 @@ class IO < Object
   def self.open: (int fd, ?string | int mode, ?path: string?, ?external_encoding: String | Encoding | nil, ?internal_encoding: String | Encoding | nil, ?encoding: String | Encoding | nil, ?textmode: boolish, ?binmode: boolish, ?autoclose: boolish, ?mode: String) -> instance
                | [X] (int fd, ?string | int mode, ?path: string?, ?external_encoding: String | Encoding | nil, ?internal_encoding: String | Encoding | nil, ?encoding: String | Encoding | nil, ?textmode: boolish, ?binmode: boolish, ?autoclose: boolish, ?mode: String) { (instance) -> X } -> X
 
+  # <!--
+  #   rdoc-file=io.c
+  #   - IO.new(fd, mode = 'r', **opts) -> io
+  # -->
+  # Creates and returns a new IO object (file stream) from a file descriptor.
+  #
+  # IO.new may be useful for interaction with low-level libraries. For
+  # higher-level interactions, it may be simpler to create the file stream using
+  # File.open.
+  #
+  # Argument `fd` must be a valid file descriptor (integer):
+  #
+  #     path = 't.tmp'
+  #     fd = IO.sysopen(path) # => 3
+  #     IO.new(fd)            # => #<IO:fd 3>
+  #
+  # The new IO object does not inherit encoding (because the integer file
+  # descriptor does not have an encoding):
+  #
+  #     fd = IO.sysopen('t.rus', 'rb')
+  #     io = IO.new(fd)
+  #     io.external_encoding # => #<Encoding:UTF-8> # Not ASCII-8BIT.
+  #
+  # Optional argument `mode` (defaults to 'r') must specify a valid mode; see
+  # [Access Modes](rdoc-ref:File@Access+Modes):
+  #
+  #     IO.new(fd, 'w')         # => #<IO:fd 3>
+  #     IO.new(fd, File::WRONLY) # => #<IO:fd 3>
+  #
+  # Optional keyword arguments `opts` specify:
+  #
+  # *   [Open Options](rdoc-ref:IO@Open+Options).
+  # *   [Encoding options](rdoc-ref:encodings.rdoc@Encoding+Options).
+  #
+  #
+  # Examples:
+  #
+  #     IO.new(fd, internal_encoding: nil) # => #<IO:fd 3>
+  #     IO.new(fd, autoclose: true)        # => #<IO:fd 3>
+  #
+  def initialize: (
+    int fd,
+    ?open_mode mode,
+    ?autoclose: boolish, # NOTE: only `false`, not `nil`, disables autoclose
+    ?path: string?,
+    ?mode: open_mode,
+    ?flags: int?,
+    ?textmode: boolish,
+    ?binmode: boolish,
+    ?encoding: encoding?,
+    ?external_encoding: encoding?,
+    ?internal_encoding: encoding?,
+    ?replace: string?,
+    ?fallback: Proc | Method | Encoding::_EncodeFallbackAref,
+    ?invalid: :replace | nil,
+    ?undef: :replace | nil,
+    ?xml: :text | :attr | nil,
+    ?newline: :universal | :crlf | :cr | :lf | nil,
+    ?universal_newline: boolish,
+    ?crlf_newline: boolish,
+    ?cr_newline: boolish,
+    ?lf_newline: boolish,
+    **untyped
+  ) -> self
+
+  def initialize_copy: (io stream) -> self
+
+  # <!--
+  #   rdoc-file=io.c
+  #   - self << object -> self
+  # -->
+  # Writes the given `object` to `self`, which must be opened for writing (see
+  # [Access Modes](rdoc-ref:File@Access+Modes)); returns `self`; if `object` is
+  # not a string, it is converted via method `to_s`:
+  #
+  #     $stdout << 'Hello' << ', ' << 'World!' << "\n"
+  #     $stdout << 'foo' << :bar << 2 << "\n"
+  #
+  # Output:
+  #
+  #     Hello, World!
+  #     foobar2
+  #
+  def <<: (_ToS obj) -> self
+
+  # <!--
+  #   rdoc-file=io.c
+  #   - advise(advice, offset = 0, len = 0) -> nil
+  # -->
+  # Invokes Posix system call
+  # [posix_fadvise(2)](https://linux.die.net/man/2/posix_fadvise), which announces
+  # an intention to access data from the current file in a particular manner.
+  #
+  # The arguments and results are platform-dependent.
+  #
+  # The relevant data is specified by:
+  #
+  # *   `offset`: The offset of the first byte of data.
+  # *   `len`: The number of bytes to be accessed; if `len` is zero, or is larger
+  #     than the number of bytes remaining, all remaining bytes will be accessed.
+  #
+  #
+  # Argument `advice` is one of the following symbols:
+  #
+  # *   `:normal`: The application has no advice to give about its access pattern
+  #     for the specified data. If no advice is given for an open file, this is
+  #     the default assumption.
+  # *   `:sequential`: The application expects to access the specified data
+  #     sequentially (with lower offsets read before higher ones).
+  # *   `:random`: The specified data will be accessed in random order.
+  # *   `:noreuse`: The specified data will be accessed only once.
+  # *   `:willneed`: The specified data will be accessed in the near future.
+  # *   `:dontneed`: The specified data will not be accessed in the near future.
+  #
+  #
+  # Not implemented on all platforms.
+  #
+  def advise: (advice, ?int? offset, ?int? len) -> nil
+
+  # How an `IO` intends to access its data; used in `IO#advise`.
+  type advice = :normal | :sequential | :random | :noreuse | :willneed | :dontneed
+
+  # <!--
+  #   rdoc-file=io.c
+  #   - io.autoclose = bool    -> true or false
+  # -->
+  # Sets auto-close flag.
+  #
+  #     f = open("/dev/null")
+  #     IO.for_fd(f.fileno)
+  #     # ...
+  #     f.gets # may cause Errno::EBADF
+  #
+  #     f = open("/dev/null")
+  #     IO.for_fd(f.fileno).autoclose = false
+  #     # ...
+  #     f.gets # won't cause Errno::EBADF
+  #
+  def autoclose=: [T] (T enabled) -> T
+
+  # <!--
+  #   rdoc-file=io.c
+  #   - ios.autoclose?   -> true or false
+  # -->
+  # Returns `true` if the underlying file descriptor of *ios* will be closed
+  # automatically at its finalization, otherwise `false`.
+  #
+  def autoclose?: () -> bool
+
+  # <!--
+  #   rdoc-file=io.c
+  #   - binmode -> self
+  # -->
+  # Sets the stream's data mode as binary (see [Data
+  # Mode](rdoc-ref:File@Data+Mode)).
+  #
+  # A stream's data mode may not be changed from binary to text.
+  #
+  def binmode: () -> self
+
+  # <!--
+  #   rdoc-file=io.c
+  #   - binmode? -> true or false
+  # -->
+  # Returns `true` if the stream is on binary mode, `false` otherwise. See [Data
+  # Mode](rdoc-ref:File@Data+Mode).
+  #
+  def binmode?: () -> bool
+
+  # <!--
+  #   rdoc-file=io.c
+  #   - close -> nil
+  # -->
+  # Closes the stream for both reading and writing if open for either or both;
+  # returns `nil`. See [Open and Closed
+  # Streams](rdoc-ref:IO@Open+and+Closed+Streams).
+  #
+  # If the stream is open for writing, flushes any buffered writes to the
+  # operating system before closing.
+  #
+  # If the stream was opened by IO.popen, sets global variable `$?` (child exit
+  # status).
+  #
+  # Example:
+  #
+  #     IO.popen('ruby', 'r+') do |pipe|
+  #       puts pipe.closed?
+  #       pipe.close
+  #       puts $?
+  #       puts pipe.closed?
+  #     end
+  #
+  # Output:
+  #
+  #     false
+  #     pid 13760 exit 0
+  #     true
+  #
+  # Related: IO#close_read, IO#close_write, IO#closed?.
+  #
+  def close: () -> nil
+
+  # <!--
+  #   rdoc-file=io.c
+  #   - self.close_on_exec = bool -> true or false
+  # -->
+  # Sets a close-on-exec flag.
+  #
+  #     f = open("/dev/null")
+  #     f.close_on_exec = true
+  #     system("cat", "/proc/self/fd/#{f.fileno}") # cat: /proc/self/fd/3: No such file or directory
+  #     f.closed?                #=> false
+  #
+  # Ruby sets close-on-exec flags of all file descriptors by default since Ruby
+  # 2.0.0. So you don't need to set by yourself. Also, unsetting a close-on-exec
+  # flag can cause file descriptor leak if another thread use fork() and exec()
+  # (via system() method for example). If you really needs file descriptor
+  # inheritance to child process, use spawn()'s argument such as fd=>fd.
+  #
+  def close_on_exec=: (boolish enabled) -> nil
+
+  # <!--
+  #   rdoc-file=io.c
+  #   - close_on_exec? -> true or false
+  # -->
+  # Returns `true` if the stream will be closed on exec, `false` otherwise:
+  #
+  #     f = File.open('t.txt')
+  #     f.close_on_exec? # => true
+  #     f.close_on_exec = false
+  #     f.close_on_exec? # => false
+  #     f.close
+  #
+  def close_on_exec?: () -> bool
+
+  # <!--
+  #   rdoc-file=io.c
+  #   - close_read -> nil
+  # -->
+  # Closes the stream for reading if open for reading; returns `nil`. See [Open
+  # and Closed Streams](rdoc-ref:IO@Open+and+Closed+Streams).
+  #
+  # If the stream was opened by IO.popen and is also closed for writing, sets
+  # global variable `$?` (child exit status).
+  #
+  # Example:
+  #
+  #     IO.popen('ruby', 'r+') do |pipe|
+  #       puts pipe.closed?
+  #       pipe.close_write
+  #       puts pipe.closed?
+  #       pipe.close_read
+  #       puts $?
+  #       puts pipe.closed?
+  #     end
+  #
+  # Output:
+  #
+  #     false
+  #     false
+  #     pid 14748 exit 0
+  #     true
+  #
+  # Related: IO#close, IO#close_write, IO#closed?.
+  #
+  def close_read: () -> nil
+
+  # <!--
+  #   rdoc-file=io.c
+  #   - close_write -> nil
+  # -->
+  # Closes the stream for writing if open for writing; returns `nil`. See [Open
+  # and Closed Streams](rdoc-ref:IO@Open+and+Closed+Streams).
+  #
+  # Flushes any buffered writes to the operating system before closing.
+  #
+  # If the stream was opened by IO.popen and is also closed for reading, sets
+  # global variable `$?` (child exit status).
+  #
+  #     IO.popen('ruby', 'r+') do |pipe|
+  #       puts pipe.closed?
+  #       pipe.close_read
+  #       puts pipe.closed?
+  #       pipe.close_write
+  #       puts $?
+  #       puts pipe.closed?
+  #     end
+  #
+  # Output:
+  #
+  #     false
+  #     false
+  #     pid 15044 exit 0
+  #     true
+  #
+  # Related: IO#close, IO#close_read, IO#closed?.
+  #
+  def close_write: () -> nil
+
+  # <!--
+  #   rdoc-file=io.c
+  #   - closed? -> true or false
+  # -->
+  # Returns `true` if the stream is closed for both reading and writing, `false`
+  # otherwise. See [Open and Closed Streams](rdoc-ref:IO@Open+and+Closed+Streams).
+  #
+  #     IO.popen('ruby', 'r+') do |pipe|
+  #       puts pipe.closed?
+  #       pipe.close_read
+  #       puts pipe.closed?
+  #       pipe.close_write
+  #       puts pipe.closed?
+  #     end
+  #
+  # Output:
+  #
+  #     false
+  #     false
+  #     true
+  #
+  # Related: IO#close_read, IO#close_write, IO#close.
+  #
+  def closed?: () -> bool
+
+  def each: (?string? delim, ?int? limit, ?chomp: boolish) -> Enumerator[String, self]
+          | (int limit, ?chomp: boolish) -> Enumerator[String, self]
+          | (?string? delim, ?int? limit, ?chomp: boolish) { (String line) -> void } -> self
+          | (int limit, ?chomp: boolish) { (String line) -> void } -> self
+
+  # <!--
+  #   rdoc-file=io.c
+  #   - each_byte {|byte| ... } -> self
+  #   - each_byte               -> enumerator
+  # -->
+  # Calls the given block with each byte (0..255) in the stream; returns `self`.
+  # See [Byte IO](rdoc-ref:IO@Byte+IO).
+  #
+  #     f = File.new('t.rus')
+  #     a = []
+  #     f.each_byte {|b| a << b }
+  #     a # => [209, 130, 208, 181, 209, 129, 209, 130]
+  #     f.close
+  #
+  # Returns an Enumerator if no block is given.
+  #
+  # Related: IO#each_char, IO#each_codepoint.
+  #
+  def each_byte: () -> Enumerator[Integer, self]
+               | () { (Integer byte) -> void } -> self
+
+  # <!--
+  #   rdoc-file=io.c
+  #   - each_char {|c| ... } -> self
+  #   - each_char            -> enumerator
+  # -->
+  # Calls the given block with each character in the stream; returns `self`. See
+  # [Character IO](rdoc-ref:IO@Character+IO).
+  #
+  #     f = File.new('t.rus')
+  #     a = []
+  #     f.each_char {|c| a << c.ord }
+  #     a # => [1090, 1077, 1089, 1090]
+  #     f.close
+  #
+  # Returns an Enumerator if no block is given.
+  #
+  # Related: IO#each_byte, IO#each_codepoint.
+  #
+  def each_char: () -> Enumerator[String, self]
+               | () { (String c) -> void } -> self
+
+  # <!--
+  #   rdoc-file=io.c
+  #   - each_codepoint {|c| ... } -> self
+  #   - each_codepoint            -> enumerator
+  # -->
+  # Calls the given block with each codepoint in the stream; returns `self`:
+  #
+  #     f = File.new('t.rus')
+  #     a = []
+  #     f.each_codepoint {|c| a << c }
+  #     a # => [1090, 1077, 1089, 1090]
+  #     f.close
+  #
+  # Returns an Enumerator if no block is given.
+  #
+  # Related: IO#each_byte, IO#each_char.
+  #
+  def each_codepoint: () -> Enumerator[Integer, self]
+                    | () { (Integer c) -> void } -> self
+
   # <!-- rdoc-file=io.c -->
   # Calls the block with each remaining line read from the stream; returns `self`.
   # Does nothing if already at end-of-stream; See [Line IO](rdoc-ref:IO@Line+IO).
@@ -3148,112 +1978,47 @@ class IO < Object
   #
   # Returns an Enumerator if no block is given.
   #
-  def each_line: (?String sep, ?Integer limit) { (String line) -> void } -> self
-               | (?String sep, ?Integer limit) -> ::Enumerator[String, self]
+  # IO#each is an alias for IO#each_line.
+  #
+  alias each_line each
 
   # <!--
   #   rdoc-file=io.c
-  #   - each_line(sep = $/, chomp: false) {|line| ... }   -> self
-  #   - each_line(limit, chomp: false) {|line| ... }      -> self
-  #   - each_line(sep, limit, chomp: false) {|line| ... } -> self
-  #   - each_line                                   -> enumerator
+  #   - eof -> true or false
   # -->
-  # Calls the block with each remaining line read from the stream; returns `self`.
-  # Does nothing if already at end-of-stream; See [Line IO](rdoc-ref:IO@Line+IO).
+  # Returns `true` if the stream is positioned at its end, `false` otherwise; see
+  # [Position](rdoc-ref:IO@Position):
   #
-  # With no arguments given, reads lines as determined by line separator `$/`:
-  #
-  #     f = File.new('t.txt')
-  #     f.each_line {|line| p line }
-  #     f.each_line {|line| fail 'Cannot happen' }
+  #     f = File.open('t.txt')
+  #     f.eof           # => false
+  #     f.seek(0, :END) # => 0
+  #     f.eof           # => true
   #     f.close
   #
-  # Output:
+  # Raises an exception unless the stream is opened for reading; see
+  # [Mode](rdoc-ref:File@Access+Modes).
   #
-  #     "First line\n"
-  #     "Second line\n"
-  #     "\n"
-  #     "Fourth line\n"
-  #     "Fifth line\n"
+  # If `self` is a stream such as pipe or socket, this method blocks until the
+  # other end sends some data or closes it:
   #
-  # With only string argument `sep` given, reads lines as determined by line
-  # separator `sep`; see [Line Separator](rdoc-ref:IO@Line+Separator):
+  #     r, w = IO.pipe
+  #     Thread.new { sleep 1; w.close }
+  #     r.eof? # => true # After 1-second wait.
   #
-  #     f = File.new('t.txt')
-  #     f.each_line('li') {|line| p line }
-  #     f.close
+  #     r, w = IO.pipe
+  #     Thread.new { sleep 1; w.puts "a" }
+  #     r.eof?  # => false # After 1-second wait.
   #
-  # Output:
+  #     r, w = IO.pipe
+  #     r.eof?  # blocks forever
   #
-  #     "First li"
-  #     "ne\nSecond li"
-  #     "ne\n\nFourth li"
-  #     "ne\nFifth li"
-  #     "ne\n"
+  # Note that this method reads data to the input byte buffer.  So IO#sysread may
+  # not behave as you intend with IO#eof?, unless you call IO#rewind first (which
+  # is not available for some streams).
   #
-  # The two special values for `sep` are honored:
+  # IO#eof? is an alias for IO#eof.
   #
-  #     f = File.new('t.txt')
-  #     # Get all into one string.
-  #     f.each_line(nil) {|line| p line }
-  #     f.close
-  #
-  # Output:
-  #
-  #     "First line\nSecond line\n\nFourth line\nFifth line\n"
-  #
-  #     f.rewind
-  #     # Get paragraphs (up to two line separators).
-  #     f.each_line('') {|line| p line }
-  #
-  # Output:
-  #
-  #     "First line\nSecond line\n\n"
-  #     "Fourth line\nFifth line\n"
-  #
-  # With only integer argument `limit` given, limits the number of bytes in each
-  # line; see [Line Limit](rdoc-ref:IO@Line+Limit):
-  #
-  #     f = File.new('t.txt')
-  #     f.each_line(8) {|line| p line }
-  #     f.close
-  #
-  # Output:
-  #
-  #     "First li"
-  #     "ne\n"
-  #     "Second l"
-  #     "ine\n"
-  #     "\n"
-  #     "Fourth l"
-  #     "ine\n"
-  #     "Fifth li"
-  #     "ne\n"
-  #
-  # With arguments `sep` and `limit` given, combines the two behaviors:
-  #
-  # *   Calls with the next line as determined by line separator `sep`.
-  # *   But returns no more bytes than are allowed by the limit.
-  #
-  #
-  # Optional keyword argument `chomp` specifies whether line separators are to be
-  # omitted:
-  #
-  #     f = File.new('t.txt')
-  #     f.each_line(chomp: true) {|line| p line }
-  #     f.close
-  #
-  # Output:
-  #
-  #     "First line"
-  #     "Second line"
-  #     ""
-  #     "Fourth line"
-  #     "Fifth line"
-  #
-  # Returns an Enumerator if no block is given.
-  #
-  alias each each_line
+  def eof: () -> bool
 
   # <!-- rdoc-file=io.c -->
   # Returns `true` if the stream is positioned at its end, `false` otherwise; see
@@ -3288,6 +2053,1156 @@ class IO < Object
   #
   alias eof? eof
 
+  def external_encoding: () -> Encoding?
+
+  # <!--
+  #   rdoc-file=io.c
+  #   - fcntl(integer_cmd, argument) -> integer
+  # -->
+  # Invokes Posix system call [fcntl(2)](https://linux.die.net/man/2/fcntl), which
+  # provides a mechanism for issuing low-level commands to control or query a
+  # file-oriented I/O stream. Arguments and results are platform dependent.
+  #
+  # If +argument is a number, its value is passed directly; if it is a string, it
+  # is interpreted as a binary sequence of bytes. (Array#pack might be a useful
+  # way to build this string.)
+  #
+  # Not implemented on all platforms.
+  #
+  def fcntl: (int integer_cmd, int | string | bool | nil argument) -> Integer
+
+  # <!--
+  #   rdoc-file=io.c
+  #   - fdatasync -> 0
+  # -->
+  # Immediately writes to disk all data buffered in the stream, via the operating
+  # system's: `fdatasync(2)`, if supported, otherwise via `fsync(2)`, if
+  # supported; otherwise raises an exception.
+  #
+  def fdatasync: () -> 0
+
+  # <!--
+  #   rdoc-file=io.c
+  #   - fileno -> integer
+  # -->
+  # Returns the integer file descriptor for the stream:
+  #
+  #     $stdin.fileno             # => 0
+  #     $stdout.fileno            # => 1
+  #     $stderr.fileno            # => 2
+  #     File.open('t.txt').fileno # => 10
+  #     f.close
+  #
+  # IO#to_i is an alias for IO#fileno.
+  #
+  def fileno: () -> Integer
+
+  # <!--
+  #   rdoc-file=io.c
+  #   - flush -> self
+  # -->
+  # Flushes data buffered in `self` to the operating system (but does not
+  # necessarily flush data buffered in the operating system):
+  #
+  #     $stdout.print 'no newline' # Not necessarily flushed.
+  #     $stdout.flush              # Flushed.
+  #
+  def flush: () -> self
+
+  # <!--
+  #   rdoc-file=io.c
+  #   - fsync -> 0
+  # -->
+  # Immediately writes to disk all data buffered in the stream, via the operating
+  # system's `fsync(2)`.
+  #
+  # Note this difference:
+  #
+  # *   IO#sync=: Ensures that data is flushed from the stream's internal buffers,
+  #     but does not guarantee that the operating system actually writes the data
+  #     to disk.
+  # *   IO#fsync: Ensures both that data is flushed from internal buffers, and
+  #     that data is written to disk.
+  #
+  #
+  # Raises an exception if the operating system does not support `fsync(2)`.
+  #
+  def fsync: () -> 0
+
+  # <!--
+  #   rdoc-file=io.c
+  #   - getbyte -> integer or nil
+  # -->
+  # Reads and returns the next byte (in range 0..255) from the stream; returns
+  # `nil` if already at end-of-stream. See [Byte IO](rdoc-ref:IO@Byte+IO).
+  #
+  #     f = File.open('t.txt')
+  #     f.getbyte # => 70
+  #     f.close
+  #     f = File.open('t.rus')
+  #     f.getbyte # => 209
+  #     f.close
+  #
+  # Related: IO#readbyte (may raise EOFError).
+  #
+  def getbyte: () -> Integer?
+
+  # <!--
+  #   rdoc-file=io.c
+  #   - getc -> character or nil
+  # -->
+  # Reads and returns the next 1-character string from the stream; returns `nil`
+  # if already at end-of-stream. See [Character IO](rdoc-ref:IO@Character+IO).
+  #
+  #     f = File.open('t.txt')
+  #     f.getc     # => "F"
+  #     f.close
+  #     f = File.open('t.rus')
+  #     f.getc.ord # => 1090
+  #     f.close
+  #
+  # Related:  IO#readchar (may raise EOFError).
+  #
+  def getc: () -> String?
+
+  # <!--
+  #   rdoc-file=io.c
+  #   - gets(sep = $/, chomp: false)   -> string or nil
+  #   - gets(limit, chomp: false)      -> string or nil
+  #   - gets(sep, limit, chomp: false) -> string or nil
+  # -->
+  # Reads and returns a line from the stream; assigns the return value to `$_`.
+  # See [Line IO](rdoc-ref:IO@Line+IO).
+  #
+  # With no arguments given, returns the next line as determined by line separator
+  # `$/`, or `nil` if none:
+  #
+  #     f = File.open('t.txt')
+  #     f.gets # => "First line\n"
+  #     $_     # => "First line\n"
+  #     f.gets # => "\n"
+  #     f.gets # => "Fourth line\n"
+  #     f.gets # => "Fifth line\n"
+  #     f.gets # => nil
+  #     f.close
+  #
+  # With only string argument `sep` given, returns the next line as determined by
+  # line separator `sep`, or `nil` if none; see [Line
+  # Separator](rdoc-ref:IO@Line+Separator):
+  #
+  #     f = File.new('t.txt')
+  #     f.gets('l')   # => "First l"
+  #     f.gets('li')  # => "ine\nSecond li"
+  #     f.gets('lin') # => "ne\n\nFourth lin"
+  #     f.gets        # => "e\n"
+  #     f.close
+  #
+  # The two special values for `sep` are honored:
+  #
+  #     f = File.new('t.txt')
+  #     # Get all.
+  #     f.gets(nil) # => "First line\nSecond line\n\nFourth line\nFifth line\n"
+  #     f.rewind
+  #     # Get paragraph (up to two line separators).
+  #     f.gets('')  # => "First line\nSecond line\n\n"
+  #     f.close
+  #
+  # With only integer argument `limit` given, limits the number of bytes in the
+  # line; see [Line Limit](rdoc-ref:IO@Line+Limit):
+  #
+  #     # No more than one line.
+  #     File.open('t.txt') {|f| f.gets(10) } # => "First line"
+  #     File.open('t.txt') {|f| f.gets(11) } # => "First line\n"
+  #     File.open('t.txt') {|f| f.gets(12) } # => "First line\n"
+  #
+  # With arguments `sep` and `limit` given, combines the two behaviors:
+  #
+  # *   Returns the next line as determined by line separator `sep`, or `nil` if
+  #     none.
+  # *   But returns no more bytes than are allowed by the limit.
+  #
+  #
+  # Optional keyword argument `chomp` specifies whether line separators are to be
+  # omitted:
+  #
+  #     f = File.open('t.txt')
+  #     # Chomp the lines.
+  #     f.gets(chomp: true) # => "First line"
+  #     f.gets(chomp: true) # => "Second line"
+  #     f.gets(chomp: true) # => ""
+  #     f.gets(chomp: true) # => "Fourth line"
+  #     f.gets(chomp: true) # => "Fifth line"
+  #     f.gets(chomp: true) # => nil
+  #     f.close
+  #
+  def gets: (?string? delim, ?int? limit, ?chomp: boolish) -> String?
+          | (int limit, ?chomp: boolish) -> String?
+
+  # <!--
+  #   rdoc-file=io.c
+  #   - inspect -> string
+  # -->
+  # Returns a string representation of `self`:
+  #
+  #     f = File.open('t.txt')
+  #     f.inspect # => "#<File:t.txt>"
+  #     f.close
+  #
+  def inspect: () -> String
+
+  # <!--
+  #   rdoc-file=io.c
+  #   - internal_encoding -> encoding or nil
+  # -->
+  # Returns the Encoding object that represents the encoding of the internal
+  # string, if conversion is specified, or `nil` otherwise.
+  #
+  # See [Encodings](rdoc-ref:File@Encodings).
+  #
+  def internal_encoding: () -> Encoding?
+
+  # <!--
+  #   rdoc-file=io.c
+  #   - ioctl(integer_cmd, argument) -> integer
+  # -->
+  # Invokes Posix system call [ioctl(2)](https://linux.die.net/man/2/ioctl), which
+  # issues a low-level command to an I/O device.
+  #
+  # Issues a low-level command to an I/O device. The arguments and returned value
+  # are platform-dependent. The effect of the call is platform-dependent.
+  #
+  # If argument `argument` is an integer, it is passed directly; if it is a
+  # string, it is interpreted as a binary sequence of bytes.
+  #
+  # Not implemented on all platforms.
+  #
+  def ioctl: (int integer_cmd, int | string | bool | nil argument) -> Integer
+
+  # <!--
+  #   rdoc-file=io.c
+  #   - isatty -> true or false
+  # -->
+  # Returns `true` if the stream is associated with a terminal device (tty),
+  # `false` otherwise:
+  #
+  #     f = File.new('t.txt').isatty    #=> false
+  #     f.close
+  #     f = File.new('/dev/tty').isatty #=> true
+  #     f.close
+  #
+  # IO#tty? is an alias for IO#isatty.
+  #
+  def isatty: () -> bool
+
+  # <!--
+  #   rdoc-file=io.c
+  #   - lineno -> integer
+  # -->
+  # Returns the current line number for the stream; see [Line
+  # Number](rdoc-ref:IO@Line+Number).
+  #
+  def lineno: () -> Integer
+
+  # <!--
+  #   rdoc-file=io.c
+  #   - lineno = integer -> integer
+  # -->
+  # Sets and returns the line number for the stream; see [Line
+  # Number](rdoc-ref:IO@Line+Number).
+  #
+  def lineno=: [T < _ToInt] (T integer) -> T
+
+  # <!--
+  #   rdoc-file=io.c
+  #   - path -> string or nil
+  # -->
+  # Returns the path associated with the IO, or `nil` if there is no path
+  # associated with the IO. It is not guaranteed that the path exists on the
+  # filesystem.
+  #
+  #     $stdin.path # => "<STDIN>"
+  #
+  #     File.open("testfile") {|f| f.path} # => "testfile"
+  #
+  %a{ruby:since:3.2.0}
+  def path: () -> String?
+
+  # <!--
+  #   rdoc-file=io.c
+  #   - pid -> integer or nil
+  # -->
+  # Returns the process ID of a child process associated with the stream, which
+  # will have been set by IO#popen, or `nil` if the stream was not created by
+  # IO#popen:
+  #
+  #     pipe = IO.popen("-")
+  #     if pipe
+  #       $stderr.puts "In parent, child pid is #{pipe.pid}"
+  #     else
+  #       $stderr.puts "In child, pid is #{$$}"
+  #     end
+  #
+  # Output:
+  #
+  #     In child, pid is 26209
+  #     In parent, child pid is 26209
+  #
+  def pid: () -> Integer?
+
+  # <!-- rdoc-file=io.c -->
+  # Returns the current position (in bytes) in `self` (see
+  # [Position](rdoc-ref:IO@Position)):
+  #
+  #     f = File.open('t.txt')
+  #     f.tell # => 0
+  #     f.gets # => "First line\n"
+  #     f.tell # => 12
+  #     f.close
+  #
+  # Related: IO#pos=, IO#seek.
+  #
+  # IO#pos is an alias for IO#tell.
+  #
+  alias pos tell
+
+  # <!--
+  #   rdoc-file=io.c
+  #   - pos = new_position -> new_position
+  # -->
+  # Seeks to the given `new_position` (in bytes); see
+  # [Position](rdoc-ref:IO@Position):
+  #
+  #     f = File.open('t.txt')
+  #     f.tell     # => 0
+  #     f.pos = 20 # => 20
+  #     f.tell     # => 20
+  #     f.close
+  #
+  # Related: IO#seek, IO#tell.
+  #
+  def pos=: (int new_position) -> Integer
+
+  def pread: (int len, int offset, ?string? out_string) -> String
+
+  # <!--
+  #   rdoc-file=io.c
+  #   - print(*objects) -> nil
+  # -->
+  # Writes the given objects to the stream; returns `nil`. Appends the output
+  # record separator `$OUTPUT_RECORD_SEPARATOR` (`$\`), if it is not `nil`. See
+  # [Line IO](rdoc-ref:IO@Line+IO).
+  #
+  # With argument `objects` given, for each object:
+  #
+  # *   Converts via its method `to_s` if not a string.
+  # *   Writes to the stream.
+  # *   If not the last object, writes the output field separator
+  #     `$OUTPUT_FIELD_SEPARATOR` (`$,`) if it is not `nil`.
+  #
+  #
+  # With default separators:
+  #
+  #     f = File.open('t.tmp', 'w+')
+  #     objects = [0, 0.0, Rational(0, 1), Complex(0, 0), :zero, 'zero']
+  #     p $OUTPUT_RECORD_SEPARATOR
+  #     p $OUTPUT_FIELD_SEPARATOR
+  #     f.print(*objects)
+  #     f.rewind
+  #     p f.read
+  #     f.close
+  #
+  # Output:
+  #
+  #     nil
+  #     nil
+  #     "00.00/10+0izerozero"
+  #
+  # With specified separators:
+  #
+  #     $\ = "\n"
+  #     $, = ','
+  #     f.rewind
+  #     f.print(*objects)
+  #     f.rewind
+  #     p f.read
+  #
+  # Output:
+  #
+  #     "0,0.0,0/1,0+0i,zero,zero\n"
+  #
+  # With no argument given, writes the content of `$_` (which is usually the most
+  # recent user input):
+  #
+  #     f = File.open('t.tmp', 'w+')
+  #     gets # Sets $_ to the most recent user input.
+  #     f.print
+  #     f.close
+  #
+  def print: (*_ToS objects) -> nil
+
+  # <!--
+  #   rdoc-file=io.c
+  #   - printf(format_string, *objects) -> nil
+  # -->
+  # Formats and writes `objects` to the stream.
+  #
+  # For details on `format_string`, see [Format
+  # Specifications](rdoc-ref:format_specifications.rdoc).
+  #
+  def printf: (string format_string, *untyped objects) -> nil
+
+  # <!--
+  #   rdoc-file=io.c
+  #   - putc(object) -> object
+  # -->
+  # Writes a character to the stream. See [Character
+  # IO](rdoc-ref:IO@Character+IO).
+  #
+  # If `object` is numeric, converts to integer if necessary, then writes the
+  # character whose code is the least significant byte; if `object` is a string,
+  # writes the first character:
+  #
+  #     $stdout.putc "A"
+  #     $stdout.putc 65t4
+  #
+  #     AA
+  #
+  def putc: (String str) -> String
+          | [T < _ToInt] (T chr) -> T
+
+  # <!--
+  #   rdoc-file=io.c
+  #   - puts(*objects) -> nil
+  # -->
+  # Writes the given `objects` to the stream, which must be open for writing;
+  # returns `nil`.\ Writes a newline after each that does not already end with a
+  # newline sequence. If called without arguments, writes a newline. See [Line
+  # IO](rdoc-ref:IO@Line+IO).
+  #
+  # Note that each added newline is the character `"\n"<//tt>, not the output
+  # record separator (<tt>$\`).
+  #
+  # Treatment for each object:
+  #
+  # *   String: writes the string.
+  # *   Neither string nor array: writes `object.to_s`.
+  # *   Array: writes each element of the array; arrays may be nested.
+  #
+  #
+  # To keep these examples brief, we define this helper method:
+  #
+  #     def show(*objects)
+  #       # Puts objects to file.
+  #       f = File.new('t.tmp', 'w+')
+  #       f.puts(objects)
+  #       # Return file content.
+  #       f.rewind
+  #       p f.read
+  #       f.close
+  #     end
+  #
+  #     # Strings without newlines.
+  #     show('foo', 'bar', 'baz')     # => "foo\nbar\nbaz\n"
+  #     # Strings, some with newlines.
+  #     show("foo\n", 'bar', "baz\n") # => "foo\nbar\nbaz\n"
+  #
+  #     # Neither strings nor arrays:
+  #     show(0, 0.0, Rational(0, 1), Complex(9, 0), :zero)
+  #     # => "0\n0.0\n0/1\n9+0i\nzero\n"
+  #
+  #     # Array of strings.
+  #     show(['foo', "bar\n", 'baz']) # => "foo\nbar\nbaz\n"
+  #     # Nested arrays.
+  #     show([[[0, 1], 2, 3], 4, 5])  # => "0\n1\n2\n3\n4\n5\n"
+  #
+  def puts: (*_ToS objects) -> nil
+
+  def pwrite: (_ToS object, int offset) -> Integer
+
+  # <!--
+  #   rdoc-file=io.c
+  #   - read(maxlen = nil, out_string = nil) -> new_string, out_string, or nil
+  # -->
+  # Reads bytes from the stream; the stream must be opened for reading (see
+  # [Access Modes](rdoc-ref:File@Access+Modes)):
+  #
+  # *   If `maxlen` is `nil`, reads all bytes using the stream's data mode.
+  # *   Otherwise reads up to `maxlen` bytes in binary mode.
+  #
+  #
+  # Returns a string (either a new string or the given `out_string`) containing
+  # the bytes read. The encoding of the string depends on both `maxLen` and
+  # `out_string`:
+  #
+  # *   `maxlen` is `nil`: uses internal encoding of `self` (regardless of whether
+  #     `out_string` was given).
+  # *   `maxlen` not `nil`:
+  #
+  #     *   `out_string` given: encoding of `out_string` not modified.
+  #     *   `out_string` not given: ASCII-8BIT is used.
+  #
+  #
+  #
+  # **Without Argument `out_string`**
+  #
+  # When argument `out_string` is omitted, the returned value is a new string:
+  #
+  #     f = File.new('t.txt')
+  #     f.read
+  #     # => "First line\nSecond line\n\nFourth line\nFifth line\n"
+  #     f.rewind
+  #     f.read(30) # => "First line\r\nSecond line\r\n\r\nFou"
+  #     f.read(30) # => "rth line\r\nFifth line\r\n"
+  #     f.read(30) # => nil
+  #     f.close
+  #
+  # If `maxlen` is zero, returns an empty string.
+  #
+  # ** With Argument `out_string`**
+  #
+  # When argument `out_string` is given, the returned value is `out_string`, whose
+  # content is replaced:
+  #
+  #     f = File.new('t.txt')
+  #     s = 'foo'      # => "foo"
+  #     f.read(nil, s) # => "First line\nSecond line\n\nFourth line\nFifth line\n"
+  #     s              # => "First line\nSecond line\n\nFourth line\nFifth line\n"
+  #     f.rewind
+  #     s = 'bar'
+  #     f.read(30, s)  # => "First line\r\nSecond line\r\n\r\nFou"
+  #     s              # => "First line\r\nSecond line\r\n\r\nFou"
+  #     s = 'baz'
+  #     f.read(30, s)  # => "rth line\r\nFifth line\r\n"
+  #     s              # => "rth line\r\nFifth line\r\n"
+  #     s = 'bat'
+  #     f.read(30, s)  # => nil
+  #     s              # => ""
+  #     f.close
+  #
+  # Note that this method behaves like the fread() function in C. This means it
+  # retries to invoke read(2) system calls to read data with the specified maxlen
+  # (or until EOF).
+  #
+  # This behavior is preserved even if the stream is in non-blocking mode. (This
+  # method is non-blocking-flag insensitive as other methods.)
+  #
+  # If you need the behavior like a single read(2) system call, consider
+  # #readpartial, #read_nonblock, and #sysread.
+  #
+  # Related: IO#write.
+  #
+  def read: (?int length, ?string? outbuf) -> String?
+          | (nil, ?string? outbuf) -> String
+
+  # <!--
+  #   rdoc-file=io.rb
+  #   - ios.read_nonblock(maxlen [, options])              -> string
+  #   - ios.read_nonblock(maxlen, outbuf [, options])      -> outbuf
+  # -->
+  # Reads at most *maxlen* bytes from *ios* using the read(2) system call after
+  # O_NONBLOCK is set for the underlying file descriptor.
+  #
+  # If the optional *outbuf* argument is present, it must reference a String,
+  # which will receive the data. The *outbuf* will contain only the received data
+  # after the method call even if it is not empty at the beginning.
+  #
+  # read_nonblock just calls the read(2) system call. It causes all errors the
+  # read(2) system call causes: Errno::EWOULDBLOCK, Errno::EINTR, etc. The caller
+  # should care such errors.
+  #
+  # If the exception is Errno::EWOULDBLOCK or Errno::EAGAIN, it is extended by
+  # IO::WaitReadable. So IO::WaitReadable can be used to rescue the exceptions for
+  # retrying read_nonblock.
+  #
+  # read_nonblock causes EOFError on EOF.
+  #
+  # On some platforms, such as Windows, non-blocking mode is not supported on IO
+  # objects other than sockets. In such cases, Errno::EBADF will be raised.
+  #
+  # If the read byte buffer is not empty, read_nonblock reads from the buffer like
+  # readpartial. In this case, the read(2) system call is not called.
+  #
+  # When read_nonblock raises an exception kind of IO::WaitReadable, read_nonblock
+  # should not be called until io is readable for avoiding busy loop. This can be
+  # done as follows.
+  #
+  #     # emulates blocking read (readpartial).
+  #     begin
+  #       result = io.read_nonblock(maxlen)
+  #     rescue IO::WaitReadable
+  #       IO.select([io])
+  #       retry
+  #     end
+  #
+  # Although IO#read_nonblock doesn't raise IO::WaitWritable.
+  # OpenSSL::Buffering#read_nonblock can raise IO::WaitWritable. If IO and SSL
+  # should be used polymorphically, IO::WaitWritable should be rescued too. See
+  # the document of OpenSSL::Buffering#read_nonblock for sample code.
+  #
+  # Note that this method is identical to readpartial except the non-blocking flag
+  # is set.
+  #
+  # By specifying a keyword argument *exception* to `false`, you can indicate that
+  # read_nonblock should not raise an IO::WaitReadable exception, but return the
+  # symbol `:wait_readable` instead. At EOF, it will return nil instead of raising
+  # EOFError.
+  #
+  def read_nonblock: (int len, ?string? outbuf, ?exception: true) -> String
+                   | (int len, ?string? outbuf, exception: bool) -> (String | :wait_readable | nil)
+
+  # <!--
+  #   rdoc-file=io.c
+  #   - readbyte -> integer
+  # -->
+  # Reads and returns the next byte (in range 0..255) from the stream; raises
+  # EOFError if already at end-of-stream. See [Byte IO](rdoc-ref:IO@Byte+IO).
+  #
+  #     f = File.open('t.txt')
+  #     f.readbyte # => 70
+  #     f.close
+  #     f = File.open('t.rus')
+  #     f.readbyte # => 209
+  #     f.close
+  #
+  # Related: IO#getbyte (will not raise EOFError).
+  #
+  def readbyte: () -> Integer
+
+  # <!--
+  #   rdoc-file=io.c
+  #   - readchar -> string
+  # -->
+  # Reads and returns the next 1-character string from the stream; raises EOFError
+  # if already at end-of-stream. See [Character IO](rdoc-ref:IO@Character+IO).
+  #
+  #     f = File.open('t.txt')
+  #     f.readchar     # => "F"
+  #     f.close
+  #     f = File.open('t.rus')
+  #     f.readchar.ord # => 1090
+  #     f.close
+  #
+  # Related:  IO#getc (will not raise EOFError).
+  #
+  def readchar: () -> String
+
+  # <!--
+  #   rdoc-file=io.c
+  #   - readline(sep = $/, chomp: false)   -> string
+  #   - readline(limit, chomp: false)      -> string
+  #   - readline(sep, limit, chomp: false) -> string
+  # -->
+  # Reads a line as with IO#gets, but raises EOFError if already at end-of-stream.
+  #
+  # Optional keyword argument `chomp` specifies whether line separators are to be
+  # omitted.
+  #
+  def readline: (?string? delim, ?int? limit, ?chomp: boolish) -> String
+              | (int limit, ?chomp: boolish) -> String
+
+  # <!--
+  #   rdoc-file=io.c
+  #   - readlines(sep = $/, chomp: false)   -> array
+  #   - readlines(limit, chomp: false)       -> array
+  #   - readlines(sep, limit, chomp: false) -> array
+  # -->
+  # Reads and returns all remaining line from the stream; does not modify `$_`.
+  # See [Line IO](rdoc-ref:IO@Line+IO).
+  #
+  # With no arguments given, returns lines as determined by line separator `$/`,
+  # or `nil` if none:
+  #
+  #     f = File.new('t.txt')
+  #     f.readlines
+  #     # => ["First line\n", "Second line\n", "\n", "Fourth line\n", "Fifth line\n"]
+  #     f.readlines # => []
+  #     f.close
+  #
+  # With only string argument `sep` given, returns lines as determined by line
+  # separator `sep`, or `nil` if none; see [Line
+  # Separator](rdoc-ref:IO@Line+Separator):
+  #
+  #     f = File.new('t.txt')
+  #     f.readlines('li')
+  #     # => ["First li", "ne\nSecond li", "ne\n\nFourth li", "ne\nFifth li", "ne\n"]
+  #     f.close
+  #
+  # The two special values for `sep` are honored:
+  #
+  #     f = File.new('t.txt')
+  #     # Get all into one string.
+  #     f.readlines(nil)
+  #     # => ["First line\nSecond line\n\nFourth line\nFifth line\n"]
+  #     # Get paragraphs (up to two line separators).
+  #     f.rewind
+  #     f.readlines('')
+  #     # => ["First line\nSecond line\n\n", "Fourth line\nFifth line\n"]
+  #     f.close
+  #
+  # With only integer argument `limit` given, limits the number of bytes in each
+  # line; see [Line Limit](rdoc-ref:IO@Line+Limit):
+  #
+  #     f = File.new('t.txt')
+  #     f.readlines(8)
+  #     # => ["First li", "ne\n", "Second l", "ine\n", "\n", "Fourth l", "ine\n", "Fifth li", "ne\n"]
+  #     f.close
+  #
+  # With arguments `sep` and `limit` given, combines the two behaviors:
+  #
+  # *   Returns lines as determined by line separator `sep`.
+  # *   But returns no more bytes in a line than are allowed by the limit.
+  #
+  #
+  # Optional keyword argument `chomp` specifies whether line separators are to be
+  # omitted:
+  #
+  #     f = File.new('t.txt')
+  #     f.readlines(chomp: true)
+  #     # => ["First line", "Second line", "", "Fourth line", "Fifth line"]
+  #     f.close
+  #
+  def readlines: (?string? delim, ?int? limit, ?chomp: boolish) -> Array[String]
+               | (int limit, ?chomp: boolish) -> Array[String]
+
+  # <!--
+  #   rdoc-file=io.c
+  #   - readpartial(maxlen)             -> string
+  #   - readpartial(maxlen, out_string) -> out_string
+  # -->
+  # Reads up to `maxlen` bytes from the stream; returns a string (either a new
+  # string or the given `out_string`). Its encoding is:
+  #
+  # *   The unchanged encoding of `out_string`, if `out_string` is given.
+  # *   ASCII-8BIT, otherwise.
+  #
+  # *   Contains `maxlen` bytes from the stream, if available.
+  # *   Otherwise contains all available bytes, if any available.
+  # *   Otherwise is an empty string.
+  #
+  #
+  # With the single non-negative integer argument `maxlen` given, returns a new
+  # string:
+  #
+  #     f = File.new('t.txt')
+  #     f.readpartial(20) # => "First line\nSecond l"
+  #     f.readpartial(20) # => "ine\n\nFourth line\n"
+  #     f.readpartial(20) # => "Fifth line\n"
+  #     f.readpartial(20) # Raises EOFError.
+  #     f.close
+  #
+  # With both argument `maxlen` and string argument `out_string` given, returns
+  # modified `out_string`:
+  #
+  #     f = File.new('t.txt')
+  #     s = 'foo'
+  #     f.readpartial(20, s) # => "First line\nSecond l"
+  #     s = 'bar'
+  #     f.readpartial(0, s)  # => ""
+  #     f.close
+  #
+  # This method is useful for a stream such as a pipe, a socket, or a tty. It
+  # blocks only when no data is immediately available. This means that it blocks
+  # only when *all* of the following are true:
+  #
+  # *   The byte buffer in the stream is empty.
+  # *   The content of the stream is empty.
+  # *   The stream is not at EOF.
+  #
+  #
+  # When blocked, the method waits for either more data or EOF on the stream:
+  #
+  # *   If more data is read, the method returns the data.
+  # *   If EOF is reached, the method raises EOFError.
+  #
+  #
+  # When not blocked, the method responds immediately:
+  #
+  # *   Returns data from the buffer if there is any.
+  # *   Otherwise returns data from the stream if there is any.
+  # *   Otherwise raises EOFError if the stream has reached EOF.
+  #
+  #
+  # Note that this method is similar to sysread. The differences are:
+  #
+  # *   If the byte buffer is not empty, read from the byte buffer instead of
+  #     "sysread for buffered IO (IOError)".
+  # *   It doesn't cause Errno::EWOULDBLOCK and Errno::EINTR.  When readpartial
+  #     meets EWOULDBLOCK and EINTR by read system call, readpartial retries the
+  #     system call.
+  #
+  #
+  # The latter means that readpartial is non-blocking-flag insensitive. It blocks
+  # on the situation IO#sysread causes Errno::EWOULDBLOCK as if the fd is blocking
+  # mode.
+  #
+  # Examples:
+  #
+  #     #                        # Returned      Buffer Content    Pipe Content
+  #     r, w = IO.pipe           #
+  #     w << 'abc'               #               ""                "abc".
+  #     r.readpartial(4096)      # => "abc"      ""                ""
+  #     r.readpartial(4096)      # (Blocks because buffer and pipe are empty.)
+  #
+  #     #                        # Returned      Buffer Content    Pipe Content
+  #     r, w = IO.pipe           #
+  #     w << 'abc'               #               ""                "abc"
+  #     w.close                  #               ""                "abc" EOF
+  #     r.readpartial(4096)      # => "abc"      ""                 EOF
+  #     r.readpartial(4096)      # raises EOFError
+  #
+  #     #                        # Returned      Buffer Content    Pipe Content
+  #     r, w = IO.pipe           #
+  #     w << "abc\ndef\n"        #               ""                "abc\ndef\n"
+  #     r.gets                   # => "abc\n"    "def\n"           ""
+  #     w << "ghi\n"             #               "def\n"           "ghi\n"
+  #     r.readpartial(4096)      # => "def\n"    ""                "ghi\n"
+  #     r.readpartial(4096)      # => "ghi\n"    ""                ""
+  #
+  def readpartial: (int maxlen, ?string? out_string) -> String
+
+  # <!--
+  #   rdoc-file=io.c
+  #   - reopen(other_io)                 -> self
+  #   - reopen(path, mode = 'r', **opts) -> self
+  # -->
+  # Reassociates the stream with another stream, which may be of a different
+  # class. This method may be used to redirect an existing stream to a new
+  # destination.
+  #
+  # With argument `other_io` given, reassociates with that stream:
+  #
+  #     # Redirect $stdin from a file.
+  #     f = File.open('t.txt')
+  #     $stdin.reopen(f)
+  #     f.close
+  #
+  #     # Redirect $stdout to a file.
+  #     f = File.open('t.tmp', 'w')
+  #     $stdout.reopen(f)
+  #     f.close
+  #
+  # With argument `path` given, reassociates with a new stream to that file path:
+  #
+  #     $stdin.reopen('t.txt')
+  #     $stdout.reopen('t.tmp', 'w')
+  #
+  # Optional keyword arguments `opts` specify:
+  #
+  # *   [Open Options](rdoc-ref:IO@Open+Options).
+  # *   [Encoding options](rdoc-ref:encodings.rdoc@Encoding+Options).
+  #
+  def reopen: (io other_io) -> self
+            | (
+              path filepath,
+              ?open_mode mode,
+              ?mode: open_mode,
+              ?flags: int?,
+              ?textmode: boolish,
+              ?binmode: boolish,
+              ?encoding: encoding?,
+              ?external_encoding: encoding?,
+              ?internal_encoding: encoding?,
+              ?replace: string?,
+              ?fallback: Proc | Method | Encoding::_EncodeFallbackAref,
+              ?invalid: :replace | nil,
+              ?undef: :replace | nil,
+              ?xml: :text | :attr | nil,
+              ?newline: :universal | :crlf | :cr | :lf | nil,
+              ?universal_newline: boolish,
+              ?crlf_newline: boolish,
+              ?cr_newline: boolish,
+              ?lf_newline: boolish,
+              **untyped
+            ) -> self
+
+  # <!--
+  #   rdoc-file=io.c
+  #   - rewind -> 0
+  # -->
+  # Repositions the stream to its beginning, setting both the position and the
+  # line number to zero; see [Position](rdoc-ref:IO@Position) and [Line
+  # Number](rdoc-ref:IO@Line+Number):
+  #
+  #     f = File.open('t.txt')
+  #     f.tell     # => 0
+  #     f.lineno   # => 0
+  #     f.gets     # => "First line\n"
+  #     f.tell     # => 12
+  #     f.lineno   # => 1
+  #     f.rewind   # => 0
+  #     f.tell     # => 0
+  #     f.lineno   # => 0
+  #     f.close
+  #
+  # Note that this method cannot be used with streams such as pipes, ttys, and
+  # sockets.
+  #
+  def rewind: () -> 0
+
+  # <!--
+  #   rdoc-file=io.c
+  #   - seek(offset, whence = IO::SEEK_SET) -> 0
+  # -->
+  # Seeks to the position given by integer `offset` (see
+  # [Position](rdoc-ref:IO@Position)) and constant `whence`, which is one of:
+  #
+  # *   `:CUR` or `IO::SEEK_CUR`: Repositions the stream to its current position
+  #     plus the given `offset`:
+  #
+  #         f = File.open('t.txt')
+  #         f.tell            # => 0
+  #         f.seek(20, :CUR)  # => 0
+  #         f.tell            # => 20
+  #         f.seek(-10, :CUR) # => 0
+  #         f.tell            # => 10
+  #         f.close
+  #
+  # *   `:END` or `IO::SEEK_END`: Repositions the stream to its end plus the given
+  #     `offset`:
+  #
+  #         f = File.open('t.txt')
+  #         f.tell            # => 0
+  #         f.seek(0, :END)   # => 0  # Repositions to stream end.
+  #         f.tell            # => 52
+  #         f.seek(-20, :END) # => 0
+  #         f.tell            # => 32
+  #         f.seek(-40, :END) # => 0
+  #         f.tell            # => 12
+  #         f.close
+  #
+  # *   `:SET` or `IO:SEEK_SET`: Repositions the stream to the given `offset`:
+  #
+  #         f = File.open('t.txt')
+  #         f.tell            # => 0
+  #         f.seek(20, :SET) # => 0
+  #         f.tell           # => 20
+  #         f.seek(40, :SET) # => 0
+  #         f.tell           # => 40
+  #         f.close
+  #
+  #
+  # Related: IO#pos=, IO#tell.
+  #
+  def seek: (int amount, ?whence) -> Integer
+
+  # Where to seek from. Can be an integer (one of the `IO::SEEK_XXX` constants) or one of these
+  # symbols.
+  type whence = int | :SET | :CUR | :END | :DATA | :HOLE
+
+  # <!--
+  #   rdoc-file=io.c
+  #   - set_encoding(ext_enc)                   -> self
+  #   - set_encoding(ext_enc, int_enc, **enc_opts)  -> self
+  #   - set_encoding('ext_enc:int_enc', **enc_opts) -> self
+  # -->
+  # See [Encodings](rdoc-ref:File@Encodings).
+  #
+  # Argument `ext_enc`, if given, must be an Encoding object; it is assigned as
+  # the encoding for the stream.
+  #
+  # Argument `int_enc`, if given, must be an Encoding object; it is assigned as
+  # the encoding for the internal string.
+  #
+  # Argument `'ext_enc:int_enc'`, if given, is a string containing two
+  # colon-separated encoding names; corresponding Encoding objects are assigned as
+  # the external and internal encodings for the stream.
+  #
+  # Optional keyword arguments `enc_opts` specify [Encoding
+  # options](rdoc-ref:encodings.rdoc@Encoding+Options).
+  #
+  def set_encoding: (Encoding? ext_enc, ?nil, **untyped) -> self
+                  | (
+                    encoding ext_enc,
+                    encoding | '-' | nil int_enc,
+                    ?replace: string?,
+                    ?fallback: Proc | Method | Encoding::_EncodeFallbackAref,
+                    ?invalid: :replace | nil,
+                    ?undef: :replace | nil,
+                    ?xml: :text | :attr | nil,
+                    ?newline: :universal | :crlf | :cr | :lf | nil,
+                    ?universal_newline: boolish,
+                    ?crlf_newline: boolish,
+                    ?cr_newline: boolish,
+                    ?lf_newline: boolish,
+                    **untyped
+                  ) -> self
+
+  # <!--
+  #   rdoc-file=io.c
+  #   - set_encoding_by_bom -> encoding or nil
+  # -->
+  # If the stream begins with a BOM ([byte order
+  # marker](https://en.wikipedia.org/wiki/Byte_order_mark)), consumes the BOM and
+  # sets the external encoding accordingly; returns the result encoding if found,
+  # or `nil` otherwise:
+  #
+  #     File.write('t.tmp', "\u{FEFF}abc")
+  #     io = File.open('t.tmp', 'rb')
+  #     io.set_encoding_by_bom # => #<Encoding:UTF-8>
+  #     io.close
+  #
+  #     File.write('t.tmp', 'abc')
+  #     io = File.open('t.tmp', 'rb')
+  #     io.set_encoding_by_bom # => nil
+  #     io.close
+  #
+  # Raises an exception if the stream is not binmode or its encoding has already
+  # been set.
+  #
+  def set_encoding_by_bom: () -> Encoding?
+
+  # <!--
+  #   rdoc-file=file.c
+  #   - ios.stat    -> stat
+  # -->
+  # Returns status information for *ios* as an object of type File::Stat.
+  #
+  #     f = File.new("testfile")
+  #     s = f.stat
+  #     "%o" % s.mode   #=> "100644"
+  #     s.blksize       #=> 4096
+  #     s.atime         #=> Wed Apr 09 08:53:54 CDT 2003
+  #
+  def stat: () -> File::Stat
+
+  # <!--
+  #   rdoc-file=io.c
+  #   - sync -> true or false
+  # -->
+  # Returns the current sync mode of the stream. When sync mode is true, all
+  # output is immediately flushed to the underlying operating system and is not
+  # buffered by Ruby internally. See also #fsync.
+  #
+  #     f = File.open('t.tmp', 'w')
+  #     f.sync # => false
+  #     f.sync = true
+  #     f.sync # => true
+  #     f.close
+  #
+  def sync: () -> bool
+
+  # <!--
+  #   rdoc-file=io.c
+  #   - sync = boolean -> boolean
+  # -->
+  # Sets the *sync* *mode* for the stream to the given value; returns the given
+  # value.
+  #
+  # Values for the sync mode:
+  #
+  # *   `true`: All output is immediately flushed to the underlying operating
+  #     system and is not buffered internally.
+  # *   `false`: Output may be buffered internally.
+  #
+  #
+  # Example;
+  #
+  #     f = File.open('t.tmp', 'w')
+  #     f.sync # => false
+  #     f.sync = true
+  #     f.sync # => true
+  #     f.close
+  #
+  # Related: IO#fsync.
+  #
+  def sync=: [T] (T boolean) -> T
+
+  # <!--
+  #   rdoc-file=io.c
+  #   - sysread(maxlen)             -> string
+  #   - sysread(maxlen, out_string) -> string
+  # -->
+  # Behaves like IO#readpartial, except that it uses low-level system functions.
+  #
+  # This method should not be used with other stream-reader methods.
+  #
+  def sysread: (int maxlen, ?string? out_string) -> String
+
+  # <!--
+  #   rdoc-file=io.c
+  #   - sysseek(offset, whence = IO::SEEK_SET) -> integer
+  # -->
+  # Behaves like IO#seek, except that it:
+  #
+  # *   Uses low-level system functions.
+  # *   Returns the new position.
+  #
+  def sysseek: (int offset, ?whence whence) -> Integer
+
+  # <!--
+  #   rdoc-file=io.c
+  #   - syswrite(object) -> integer
+  # -->
+  # Writes the given `object` to self, which must be opened for writing (see
+  # Modes); returns the number bytes written. If `object` is not a string is
+  # converted via method to_s:
+  #
+  #     f = File.new('t.tmp', 'w')
+  #     f.syswrite('foo') # => 3
+  #     f.syswrite(30)    # => 2
+  #     f.syswrite(:foo)  # => 3
+  #     f.close
+  #
+  # This methods should not be used with other stream-writer methods.
+  #
+  def syswrite: (_ToS object) -> Integer
+
+  # <!--
+  #   rdoc-file=io.c
+  #   - tell -> integer
+  # -->
+  # Returns the current position (in bytes) in `self` (see
+  # [Position](rdoc-ref:IO@Position)):
+  #
+  #     f = File.open('t.txt')
+  #     f.tell # => 0
+  #     f.gets # => "First line\n"
+  #     f.tell # => 12
+  #     f.close
+  #
+  # Related: IO#pos=, IO#seek.
+  #
+  # IO#pos is an alias for IO#tell.
+  #
+  def tell: () -> Integer
+
+  # <!--
+  #   rdoc-file=io.c
+  #   - timeout -> duration or nil
+  # -->
+  # Get the internal timeout duration or nil if it was not set.
+  #
+  %a{ruby:since:3.2.0}
+  def timeout: () -> io_timeout
+
+  # The type used for timeouts in `IO`.
+  #
+  # Technically, this type should be `Time::_Timeout?`. However, in the vast majority of use-cases,
+  # people aren't going to pass their own `_Timeout` in, so `Numeric` is returned for ergonomics
+  # (eg `io.timeout += 10`).
+  type io_timeout = Numeric?
+
+  # <!--
+  #   rdoc-file=io.c
+  #   - timeout = duration -> duration
+  #   - timeout = nil -> nil
+  # -->
+  # Set the internal timeout to the specified duration or nil. The timeout applies
+  # to all blocking operations where possible.
+  #
+  # This affects the following methods (but is not limited to): #gets, #puts,
+  # #read, #write, #wait_readable and #wait_writable. This also affects blocking
+  # socket operations like Socket#accept and Socket#connect.
+  #
+  # Some operations like File#open and IO#close are not affected by the timeout. A
+  # timeout during a write operation may leave the IO in an inconsistent state,
+  # e.g. data was partially written. Generally speaking, a timeout is a last ditch
+  # effort to prevent an application from hanging on slow I/O operations, such as
+  # those that occur during a slowloris attack.
+  #
+  %a{ruby:since:3.2.0}
+  def timeout=: (io_timeout duration) -> self
+
   # <!-- rdoc-file=io.c -->
   # Returns the integer file descriptor for the stream:
   #
@@ -3298,152 +3213,242 @@ class IO < Object
   #     f.close
   #
   alias to_i fileno
-end
 
-IO::APPEND: Integer
+  # <!--
+  #   rdoc-file=io.c
+  #   - to_io -> self
+  # -->
+  # Returns `self`.
+  #
+  %a{pure}
+  def to_io: () -> self
 
-IO::BINARY: Integer
+  %a{ruby:since:3.2.0}
+  alias to_path path
 
-IO::CREAT: Integer
+  # <!-- rdoc-file=io.c -->
+  # Returns `true` if the stream is associated with a terminal device (tty),
+  # `false` otherwise:
+  #
+  #     f = File.new('t.txt').isatty    #=> false
+  #     f.close
+  #     f = File.new('/dev/tty').isatty #=> true
+  #     f.close
+  #
+  # IO#tty? is an alias for IO#isatty.
+  #
+  alias tty? isatty
 
-IO::DIRECT: Integer
+  # <!--
+  #   rdoc-file=io.c
+  #   - ungetbyte(integer) -> nil
+  #   - ungetbyte(string)  -> nil
+  # -->
+  # Pushes back ("unshifts") the given data onto the stream's buffer, placing the
+  # data so that it is next to be read; returns `nil`. See [Byte
+  # IO](rdoc-ref:IO@Byte+IO).
+  #
+  # Note that:
+  #
+  # *   Calling the method has no effect with unbuffered reads (such as
+  #     IO#sysread).
+  # *   Calling #rewind on the stream discards the pushed-back data.
+  #
+  #
+  # When argument `integer` is given, uses only its low-order byte:
+  #
+  #     File.write('t.tmp', '012')
+  #     f = File.open('t.tmp')
+  #     f.ungetbyte(0x41)   # => nil
+  #     f.read              # => "A012"
+  #     f.rewind
+  #     f.ungetbyte(0x4243) # => nil
+  #     f.read              # => "C012"
+  #     f.close
+  #
+  # When argument `string` is given, uses all bytes:
+  #
+  #     File.write('t.tmp', '012')
+  #     f = File.open('t.tmp')
+  #     f.ungetbyte('A')    # => nil
+  #     f.read              # => "A012"
+  #     f.rewind
+  #     f.ungetbyte('BCDE') # => nil
+  #     f.read              # => "BCDE012"
+  #     f.close
+  #
+  def ungetbyte: (Integer | string | nil byte) -> nil
 
-IO::DSYNC: Integer
+  # <!--
+  #   rdoc-file=io.c
+  #   - ungetc(integer) -> nil
+  #   - ungetc(string)  -> nil
+  # -->
+  # Pushes back ("unshifts") the given data onto the stream's buffer, placing the
+  # data so that it is next to be read; returns `nil`. See [Character
+  # IO](rdoc-ref:IO@Character+IO).
+  #
+  # Note that:
+  #
+  # *   Calling the method has no effect with unbuffered reads (such as
+  #     IO#sysread).
+  # *   Calling #rewind on the stream discards the pushed-back data.
+  #
+  #
+  # When argument `integer` is given, interprets the integer as a character:
+  #
+  #     File.write('t.tmp', '012')
+  #     f = File.open('t.tmp')
+  #     f.ungetc(0x41)     # => nil
+  #     f.read             # => "A012"
+  #     f.rewind
+  #     f.ungetc(0x0442)   # => nil
+  #     f.getc.ord         # => 1090
+  #     f.close
+  #
+  # When argument `string` is given, uses all characters:
+  #
+  #     File.write('t.tmp', '012')
+  #     f = File.open('t.tmp')
+  #     f.ungetc('A')      # => nil
+  #     f.read      # => "A012"
+  #     f.rewind
+  #     f.ungetc("\u0442\u0435\u0441\u0442") # => nil
+  #     f.getc.ord      # => 1090
+  #     f.getc.ord      # => 1077
+  #     f.getc.ord      # => 1089
+  #     f.getc.ord      # => 1090
+  #     f.close
+  #
+  def ungetc: (Integer | string char) -> nil
 
-IO::EXCL: Integer
+  # <!--
+  #   rdoc-file=io.c
+  #   - write(*objects) -> integer
+  # -->
+  # Writes each of the given `objects` to `self`, which must be opened for writing
+  # (see [Access Modes](rdoc-ref:File@Access+Modes)); returns the total number
+  # bytes written; each of `objects` that is not a string is converted via method
+  # `to_s`:
+  #
+  #     $stdout.write('Hello', ', ', 'World!', "\n") # => 14
+  #     $stdout.write('foo', :bar, 2, "\n")          # => 8
+  #
+  # Output:
+  #
+  #     Hello, World!
+  #     foobar2
+  #
+  # Related: IO#read.
+  #
+  def write: (*_ToS objects) -> Integer
 
-IO::FNM_CASEFOLD: Integer
+  # <!--
+  #   rdoc-file=io.rb
+  #   - ios.write_nonblock(string)   -> integer
+  #   - ios.write_nonblock(string [, options])   -> integer
+  # -->
+  # Writes the given string to *ios* using the write(2) system call after
+  # O_NONBLOCK is set for the underlying file descriptor.
+  #
+  # It returns the number of bytes written.
+  #
+  # write_nonblock just calls the write(2) system call. It causes all errors the
+  # write(2) system call causes: Errno::EWOULDBLOCK, Errno::EINTR, etc. The result
+  # may also be smaller than string.length (partial write). The caller should care
+  # such errors and partial write.
+  #
+  # If the exception is Errno::EWOULDBLOCK or Errno::EAGAIN, it is extended by
+  # IO::WaitWritable. So IO::WaitWritable can be used to rescue the exceptions for
+  # retrying write_nonblock.
+  #
+  #     # Creates a pipe.
+  #     r, w = IO.pipe
+  #
+  #     # write_nonblock writes only 65536 bytes and return 65536.
+  #     # (The pipe size is 65536 bytes on this environment.)
+  #     s = "a" * 100000
+  #     p w.write_nonblock(s)     #=> 65536
+  #
+  #     # write_nonblock cannot write a byte and raise EWOULDBLOCK (EAGAIN).
+  #     p w.write_nonblock("b")   # Resource temporarily unavailable (Errno::EAGAIN)
+  #
+  # If the write buffer is not empty, it is flushed at first.
+  #
+  # When write_nonblock raises an exception kind of IO::WaitWritable,
+  # write_nonblock should not be called until io is writable for avoiding busy
+  # loop. This can be done as follows.
+  #
+  #     begin
+  #       result = io.write_nonblock(string)
+  #     rescue IO::WaitWritable, Errno::EINTR
+  #       IO.select(nil, [io])
+  #       retry
+  #     end
+  #
+  # Note that this doesn't guarantee to write all data in string. The length
+  # written is reported as result and it should be checked later.
+  #
+  # On some platforms such as Windows, write_nonblock is not supported according
+  # to the kind of the IO object. In such cases, write_nonblock raises
+  # `Errno::EBADF`.
+  #
+  # By specifying a keyword argument *exception* to `false`, you can indicate that
+  # write_nonblock should not raise an IO::WaitWritable exception, but return the
+  # symbol `:wait_writable` instead.
+  #
+  def write_nonblock: (_ToS string, ?exception: true) -> Integer
+                    | (_ToS string, exception: false) -> (Integer | :wait_writable)
 
-IO::FNM_DOTMATCH: Integer
+  # <!--
+  #   rdoc-file=ext/io/wait/wait.c
+  #   - io.wait(events, timeout) -> event mask, false or nil
+  #   - io.wait(timeout = nil, mode = :read) -> self, true, or false
+  # -->
+  # Waits until the IO becomes ready for the specified events and returns the
+  # subset of events that become ready, or a falsy value when times out.
+  #
+  # The events can be a bit mask of `IO::READABLE`, `IO::WRITABLE` or
+  # `IO::PRIORITY`.
+  #
+  # Returns a truthy value immediately when buffered data is available.
+  #
+  # Optional parameter `mode` is one of `:read`, `:write`, or `:read_write`.
+  #
+  %a{ruby:since:3.2.0}
+  def wait: (int events, Time::_Timeout timeout) -> Integer
+          | (int events, Time::_Timeout? timeout) -> Integer?
+          | (*wait_mode | Time::_Timeout events_or_timeout) -> (self | bool)?
 
-IO::FNM_EXTGLOB: Integer
+  # The mode to use in `IO#wait`.
+  type wait_mode = :r | :read | :readable | :w | :write | :writable | :rw | :read_write | :readable_writable
 
-IO::FNM_NOESCAPE: Integer
+  # <!--
+  #   rdoc-file=ext/io/wait/wait.c
+  #   - io.wait_readable          -> truthy or falsy
+  #   - io.wait_readable(timeout) -> truthy or falsy
+  # -->
+  # Waits until IO is readable and returns a truthy value, or a falsy value when
+  # times out.  Returns a truthy value immediately when buffered data is
+  # available.
+  #
+  %a{ruby:since:3.2.0}
+  def wait_readable: (?nil) -> (self | bool)
+                   | (Time::_Timeout timeout) -> (self | bool)?
 
-IO::FNM_PATHNAME: Integer
+  # <!--
+  #   rdoc-file=ext/io/wait/wait.c
+  #   - io.wait_writable          -> truthy or falsy
+  #   - io.wait_writable(timeout) -> truthy or falsy
+  # -->
+  # Waits until IO is writable and returns a truthy value or a falsy value when
+  # times out.
+  #
+  %a{ruby:since:3.2.0}
+  def wait_writable: (?nil) -> (self | bool)
+                   | (Time::_Timeout timeout) -> (self | bool)?
 
-IO::FNM_SHORTNAME: Integer
-
-IO::FNM_SYSCASE: Integer
-
-IO::LOCK_EX: Integer
-
-IO::LOCK_NB: Integer
-
-IO::LOCK_SH: Integer
-
-IO::LOCK_UN: Integer
-
-IO::NOATIME: Integer
-
-IO::NOCTTY: Integer
-
-IO::NOFOLLOW: Integer
-
-IO::NONBLOCK: Integer
-
-IO::NULL: String
-
-IO::RDONLY: Integer
-
-IO::RDWR: Integer
-
-IO::RSYNC: Integer
-
-# <!-- rdoc-file=io.c -->
-# Set I/O position from the current position
-#
-IO::SEEK_CUR: Integer
-
-# <!-- rdoc-file=io.c -->
-# Set I/O position to the next location containing data
-#
-IO::SEEK_DATA: Integer
-
-# <!-- rdoc-file=io.c -->
-# Set I/O position from the end
-#
-IO::SEEK_END: Integer
-
-# <!-- rdoc-file=io.c -->
-# Set I/O position to the next hole
-#
-IO::SEEK_HOLE: Integer
-
-# <!-- rdoc-file=io.c -->
-# Set I/O position from the beginning
-#
-IO::SEEK_SET: Integer
-
-IO::SHARE_DELETE: Integer
-
-IO::SYNC: Integer
-
-IO::TMPFILE: Integer
-
-IO::TRUNC: Integer
-
-IO::WRONLY: Integer
-
-# <!-- rdoc-file=io.c -->
-# Readable event mask for IO#wait.
-#
-IO::READABLE: Integer
-
-# <!-- rdoc-file=io.c -->
-# Writable event mask for IO#wait.
-#
-IO::WRITABLE: Integer
-
-# <!-- rdoc-file=io.c -->
-# Priority event mask for IO#wait.
-#
-IO::PRIORITY: Integer
-
-# <!-- rdoc-file=io.c -->
-# exception to wait for reading by EAGAIN. see IO.select.
-#
-class IO::EAGAINWaitReadable < Errno::EAGAIN
-  include IO::WaitReadable
-end
-
-IO::EAGAINWaitReadable::Errno: Integer
-
-# <!-- rdoc-file=io.c -->
-# exception to wait for writing by EAGAIN. see IO.select.
-#
-class IO::EAGAINWaitWritable < Errno::EAGAIN
-  include IO::WaitWritable
-end
-
-IO::EAGAINWaitWritable::Errno: Integer
-
-# <!-- rdoc-file=io.c -->
-# exception to wait for reading by EINPROGRESS. see IO.select.
-#
-class IO::EINPROGRESSWaitReadable < Errno::EINPROGRESS
-  include IO::WaitReadable
-end
-
-IO::EINPROGRESSWaitReadable::Errno: Integer
-
-# <!-- rdoc-file=io.c -->
-# exception to wait for writing by EINPROGRESS. see IO.select.
-#
-class IO::EINPROGRESSWaitWritable < Errno::EINPROGRESS
-  include IO::WaitWritable
-end
-
-IO::EINPROGRESSWaitWritable::Errno: Integer
-
-# <!-- rdoc-file=io.c -->
-# exception to wait for reading. see IO.select.
-#
-module IO::WaitReadable
-end
-
-# <!-- rdoc-file=io.c -->
-# exception to wait for writing. see IO.select.
-#
-module IO::WaitWritable
+  %a{ruby:since:3.2.0}
+  def wait_priority: (?nil) -> (self | bool)
+                   | (Time::_Timeout timeout) -> (self | bool)?
 end

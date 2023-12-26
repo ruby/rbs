@@ -1926,9 +1926,10 @@ class String
     ?cr_newline: boolish,
     ?crlf_newline: boolish,
     ?lf_newline: boolish,
-    ?fallback: ^(String) -> string? | Method | _EncodeFallbackAref
+    ?fallback: ^(String) -> string? | Method | Encoding::_EncodeFallbackAref
   ) -> instance
 
+  %a{steep:deprecated} # use `Encoding::_EncodeFallbackAref`
   interface _EncodeFallbackAref
     def []: (String) -> string?
   end
