@@ -2,6 +2,12 @@
 
 ## master
 
+## 3.4.1 (2023-12-26)
+
+### Signature updates
+
+* Update embedded RDoc based on ruby-3.3.0 (Backport #1699) ([#1700](https://github.com/ruby/rbs/pull/1700))
+
 ## 3.4.0 (2023-12-21)
 
 ### Signature updates
