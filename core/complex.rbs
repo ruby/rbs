@@ -36,6 +36,10 @@
 # *argument* parts; see [Complex polar
 # plane](https://en.wikipedia.org/wiki/Complex_number#Polar_complex_plane).
 #
+# In this class, the argument part in expressed
+# [radians](https://en.wikipedia.org/wiki/Radian) (not
+# [degrees](https://en.wikipedia.org/wiki/Degree_(angle))).
+#
 # You can create a Complex object from polar coordinates with:
 #
 # *   Method Complex.polar.
@@ -62,7 +66,7 @@ class Complex < Numeric
   # -->
   # Returns a new Complex object formed from the arguments, each of which must be
   # an instance of Numeric, or an instance of one of its subclasses: Complex,
-  # Float, Integer, Rational; see [Polar
+  # Float, Integer, Rational. Argument `arg` is given in radians; see [Polar
   # Coordinates](rdoc-ref:Complex@Polar+Coordinates):
   #
   #     Complex.polar(3)        # => (3+0i)
@@ -109,40 +113,40 @@ class Complex < Numeric
 
   # <!--
   #   rdoc-file=complex.c
-  #   - cmp * numeric  ->  complex
+  #   - complex * numeric -> new_complex
   # -->
-  # Performs multiplication.
+  # Returns the product of `self` and `numeric`:
   #
-  #     Complex(2, 3)  * Complex(2, 3)   #=> (-5+12i)
-  #     Complex(900)   * Complex(1)      #=> (900+0i)
-  #     Complex(-2, 9) * Complex(-9, 2)  #=> (0-85i)
-  #     Complex(9, 8)  * 4               #=> (36+32i)
-  #     Complex(20, 9) * 9.8             #=> (196.0+88.2i)
+  #     Complex(2, 3)  * Complex(2, 3)  # => (-5+12i)
+  #     Complex(900)   * Complex(1)     # => (900+0i)
+  #     Complex(-2, 9) * Complex(-9, 2) # => (0-85i)
+  #     Complex(9, 8)  * 4              # => (36+32i)
+  #     Complex(20, 9) * 9.8            # => (196.0+88.2i)
   #
   def *: (Numeric) -> Complex
 
   # <!--
   #   rdoc-file=complex.c
-  #   - cmp ** numeric  ->  complex
+  #   - complex ** numeric -> new_complex
   # -->
-  # Performs exponentiation.
+  # Returns `self` raised to power `numeric`:
   #
-  #     Complex('i') ** 2              #=> (-1+0i)
-  #     Complex(-8) ** Rational(1, 3)  #=> (1.0000000000000002+1.7320508075688772i)
+  #     Complex('i') ** 2             # => (-1+0i)
+  #     Complex(-8) ** Rational(1, 3) # => (1.0000000000000002+1.7320508075688772i)
   #
   def **: (Numeric) -> Complex
 
   # <!--
   #   rdoc-file=complex.c
-  #   - cmp + numeric  ->  complex
+  #   - complex + numeric -> new_complex
   # -->
-  # Performs addition.
+  # Returns the sum of `self` and `numeric`:
   #
-  #     Complex(2, 3)  + Complex(2, 3)   #=> (4+6i)
-  #     Complex(900)   + Complex(1)      #=> (901+0i)
-  #     Complex(-2, 9) + Complex(-9, 2)  #=> (-11+11i)
-  #     Complex(9, 8)  + 4               #=> (13+8i)
-  #     Complex(20, 9) + 9.8             #=> (29.8+9i)
+  #     Complex(2, 3)  + Complex(2, 3)  # => (4+6i)
+  #     Complex(900)   + Complex(1)     # => (901+0i)
+  #     Complex(-2, 9) + Complex(-9, 2) # => (-11+11i)
+  #     Complex(9, 8)  + 4              # => (13+8i)
+  #     Complex(20, 9) + 9.8            # => (29.8+9i)
   #
   def +: (Numeric) -> Complex
 
@@ -150,40 +154,40 @@ class Complex < Numeric
 
   # <!--
   #   rdoc-file=complex.c
-  #   - cmp - numeric  ->  complex
+  #   - complex - numeric -> new_complex
   # -->
-  # Performs subtraction.
+  # Returns the difference of `self` and `numeric`:
   #
-  #     Complex(2, 3)  - Complex(2, 3)   #=> (0+0i)
-  #     Complex(900)   - Complex(1)      #=> (899+0i)
-  #     Complex(-2, 9) - Complex(-9, 2)  #=> (7+7i)
-  #     Complex(9, 8)  - 4               #=> (5+8i)
-  #     Complex(20, 9) - 9.8             #=> (10.2+9i)
+  #     Complex(2, 3)  - Complex(2, 3)  # => (0+0i)
+  #     Complex(900)   - Complex(1)     # => (899+0i)
+  #     Complex(-2, 9) - Complex(-9, 2) # => (7+7i)
+  #     Complex(9, 8)  - 4              # => (5+8i)
+  #     Complex(20, 9) - 9.8            # => (10.2+9i)
   #
   def -: (Numeric) -> Complex
 
   # <!--
   #   rdoc-file=complex.c
-  #   - -cmp  ->  complex
+  #   - -complex -> new_complex
   # -->
-  # Returns negation of the value.
+  # Returns the negation of `self`, which is the negation of each of its parts:
   #
-  #     -Complex(1, 2)  #=> (-1-2i)
+  #     -Complex(1, 2)   # => (-1-2i)
+  #     -Complex(-1, -2) # => (1+2i)
   #
   def -@: () -> Complex
 
   # <!--
   #   rdoc-file=complex.c
-  #   - cmp / numeric     ->  complex
-  #   - cmp.quo(numeric)  ->  complex
+  #   - complex / numeric -> new_complex
   # -->
-  # Performs division.
+  # Returns the quotient of `self` and `numeric`:
   #
-  #     Complex(2, 3)  / Complex(2, 3)   #=> ((1/1)+(0/1)*i)
-  #     Complex(900)   / Complex(1)      #=> ((900/1)+(0/1)*i)
-  #     Complex(-2, 9) / Complex(-9, 2)  #=> ((36/85)-(77/85)*i)
-  #     Complex(9, 8)  / 4               #=> ((9/4)+(2/1)*i)
-  #     Complex(20, 9) / 9.8             #=> (2.0408163265306123+0.9183673469387754i)
+  #     Complex(2, 3)  / Complex(2, 3)  # => ((1/1)+(0/1)*i)
+  #     Complex(900)   / Complex(1)     # => ((900/1)+(0/1)*i)
+  #     Complex(-2, 9) / Complex(-9, 2) # => ((36/85)-(77/85)*i)
+  #     Complex(9, 8)  / 4              # => ((9/4)+(2/1)*i)
+  #     Complex(20, 9) / 9.8            # => (2.0408163265306123+0.9183673469387754i)
   #
   def /: (Numeric) -> Complex
 
@@ -193,31 +197,38 @@ class Complex < Numeric
 
   # <!--
   #   rdoc-file=complex.c
-  #   - cmp <=> object  ->  0, 1, -1, or nil
+  #   - complex <=> object -> -1, 0, 1, or nil
   # -->
-  # If `cmp`'s imaginary part is zero, and `object` is also a real number (or a
-  # Complex number where the imaginary part is zero), compare the real part of
-  # `cmp` to object.  Otherwise, return nil.
+  # Returns:
   #
-  #     Complex(2, 3)  <=> Complex(2, 3)   #=> nil
-  #     Complex(2, 3)  <=> 1               #=> nil
-  #     Complex(2)     <=> 1               #=> 1
-  #     Complex(2)     <=> 2               #=> 0
-  #     Complex(2)     <=> 3               #=> -1
+  # *   `self.real <=> object.real` if both of the following are true:
+  #
+  #     *   `self.imag == 0`.
+  #     *   `object.imag == 0`. # Always true if object is numeric but not
+  #         complex.
+  #
+  #
+  # *   `nil` otherwise.
+  #
+  #
+  # Examples:
+  #
+  #     Complex(2) <=> 3             # => -1
+  #     Complex(2) <=> 2             # => 0
+  #     Complex(2) <=> 1             # => 1
+  #     Complex(2, 1) <=> 1          # => nil # self.imag not zero.
+  #     Complex(1) <=> Complex(1, 1) # => nil # object.imag not zero.
+  #     Complex(1) <=> 'Foo'         # => nil # object.imag not defined.
   #
   def <=>: (untyped) -> Integer?
 
   # <!--
   #   rdoc-file=complex.c
-  #   - cmp == object  ->  true or false
+  #   - complex == object -> true or false
   # -->
-  # Returns true if cmp equals object numerically.
+  # Returns `true` if `self.real == object.real` and `self.imag == object.imag`:
   #
-  #     Complex(2, 3)  == Complex(2, 3)   #=> true
-  #     Complex(5)     == 5               #=> true
-  #     Complex(0)     == 0.0             #=> true
-  #     Complex('1/3') == 0.33            #=> false
-  #     Complex('1/2') == '1/2'           #=> false
+  #     Complex(2, 3)  == Complex(2.0, 3.0)      # => true
   #
   def ==: (untyped) -> bool
 
@@ -227,43 +238,66 @@ class Complex < Numeric
 
   # <!--
   #   rdoc-file=complex.c
-  #   - cmp.abs        ->  real
-  #   - cmp.magnitude  ->  real
+  #   - abs -> float
   # -->
-  # Returns the absolute part of its polar form.
+  # Returns the absolute value (magnitude) for `self`; see [polar
+  # coordinates](rdoc-ref:Complex@Polar+Coordinates):
   #
-  #     Complex(-1).abs         #=> 1
-  #     Complex(3.0, -4.0).abs  #=> 5.0
+  #     Complex.polar(-1, 0).abs # => 1.0
+  #
+  # If `self` was created with [rectangular
+  # coordinates](rdoc-ref:Complex@Rectangular+Coordinates), the returned value is
+  # computed, and may be inexact:
+  #
+  #     Complex.rectangular(1, 1).abs # => 1.4142135623730951 # The square root of 2.
   #
   def abs: () -> Numeric
 
   # <!--
   #   rdoc-file=complex.c
-  #   - cmp.abs2  ->  real
+  #   - abs2 -> float
   # -->
-  # Returns square of the absolute value.
+  # Returns square of the absolute value (magnitude) for `self`; see [polar
+  # coordinates](rdoc-ref:Complex@Polar+Coordinates):
   #
-  #     Complex(-1).abs2         #=> 1
-  #     Complex(3.0, -4.0).abs2  #=> 25.0
+  #     Complex.polar(2, 2).abs2 # => 4.0
+  #
+  # If `self` was created with [rectangular
+  # coordinates](rdoc-ref:Complex@Rectangular+Coordinates), the returned value is
+  # computed, and may be inexact:
+  #
+  #     Complex.rectangular(1.0/3, 1.0/3).abs2 # => 0.2222222222222222
   #
   def abs2: () -> Numeric
 
   # <!-- rdoc-file=complex.c -->
-  # Returns the angle part of its polar form.
+  # Returns the argument (angle) for `self` in radians; see [polar
+  # coordinates](rdoc-ref:Complex@Polar+Coordinates):
   #
-  #     Complex.polar(3, Math::PI/2).arg  #=> 1.5707963267948966
+  #     Complex.polar(3, Math::PI/2).arg  # => 1.57079632679489660
+  #
+  # If `self` was created with [rectangular
+  # coordinates](rdoc-ref:Complex@Rectangular+Coordinates), the returned value is
+  # computed, and may be inexact:
+  #
+  #     Complex.polar(1, 1.0/3).arg # => 0.33333333333333326
   #
   def angle: () -> Float
 
   # <!--
   #   rdoc-file=complex.c
-  #   - cmp.arg    ->  float
-  #   - cmp.angle  ->  float
-  #   - cmp.phase  ->  float
+  #   - arg -> float
   # -->
-  # Returns the angle part of its polar form.
+  # Returns the argument (angle) for `self` in radians; see [polar
+  # coordinates](rdoc-ref:Complex@Polar+Coordinates):
   #
-  #     Complex.polar(3, Math::PI/2).arg  #=> 1.5707963267948966
+  #     Complex.polar(3, Math::PI/2).arg  # => 1.57079632679489660
+  #
+  # If `self` was created with [rectangular
+  # coordinates](rdoc-ref:Complex@Rectangular+Coordinates), the returned value is
+  # computed, and may be inexact:
+  #
+  #     Complex.polar(1, 1.0/3).arg # => 0.33333333333333326
   #
   alias arg angle
 
@@ -272,30 +306,35 @@ class Complex < Numeric
   def coerce: (Numeric) -> [ Complex, Complex ]
 
   # <!-- rdoc-file=complex.c -->
-  # Returns the complex conjugate.
+  # Returns the conjugate of `self`, `Complex.rect(self.imag, self.real)`:
   #
-  #     Complex(1, 2).conjugate  #=> (1-2i)
+  #     Complex.rect(1, 2).conj # => (1-2i)
   #
   def conj: () -> Complex
 
   # <!--
   #   rdoc-file=complex.c
-  #   - cmp.conj       ->  complex
-  #   - cmp.conjugate  ->  complex
+  #   - conj -> complex
   # -->
-  # Returns the complex conjugate.
+  # Returns the conjugate of `self`, `Complex.rect(self.imag, self.real)`:
   #
-  #     Complex(1, 2).conjugate  #=> (1-2i)
+  #     Complex.rect(1, 2).conj # => (1-2i)
   #
   def conjugate: () -> Complex
 
   # <!--
   #   rdoc-file=complex.c
-  #   - cmp.denominator  ->  integer
+  #   - denominator -> integer
   # -->
-  # Returns the denominator (lcm of both denominator - real and imag).
+  # Returns the denominator of `self`, which is the [least common
+  # multiple](https://en.wikipedia.org/wiki/Least_common_multiple) of
+  # `self.real.denominator` and `self.imag.denominator`:
   #
-  # See numerator.
+  #     Complex.rect(Rational(1, 2), Rational(2, 3)).denominator # => 6
+  #
+  # Note that `n.denominator` of a non-rational numeric is `1`.
+  #
+  # Related: Complex#numerator.
   #
   def denominator: () -> Integer
 
@@ -309,20 +348,25 @@ class Complex < Numeric
 
   # <!--
   #   rdoc-file=complex.c
-  #   - cmp.fdiv(numeric)  ->  complex
+  #   - fdiv(numeric) -> new_complex
   # -->
-  # Performs division as each part is a float, never returns a float.
+  # Returns `Complex(self.real/numeric, self.imag/numeric)`:
   #
-  #     Complex(11, 22).fdiv(3)  #=> (3.6666666666666665+7.333333333333333i)
+  #     Complex(11, 22).fdiv(3) # => (3.6666666666666665+7.333333333333333i)
   #
   def fdiv: (Numeric) -> Complex
 
   # <!--
   #   rdoc-file=complex.c
-  #   - cmp.finite?  ->  true or false
+  #   - finite? -> true or false
   # -->
-  # Returns `true` if `cmp`'s real and imaginary parts are both finite numbers,
-  # otherwise returns `false`.
+  # Returns `true` if both `self.real.finite?` and `self.imag.finite?` are true,
+  # `false` otherwise:
+  #
+  #     Complex(1, 1).finite?               # => true
+  #     Complex(Float::INFINITY, 0).finite? # => false
+  #
+  # Related: Numeric#finite?, Float#finite?.
   #
   def finite?: () -> bool
 
@@ -330,68 +374,91 @@ class Complex < Numeric
 
   # <!--
   #   rdoc-file=complex.c
-  #   - hash()
+  #   - hash -> integer
   # -->
+  # Returns the integer hash value for `self`.
+  #
+  # Two Complex objects created from the same values will have the same hash value
+  # (and will compare using #eql?):
+  #
+  #     Complex(1, 2).hash == Complex(1, 2).hash # => true
   #
   def hash: () -> Integer
 
   def i: () -> bot
 
   # <!-- rdoc-file=complex.c -->
-  # Returns the imaginary part.
+  # Returns the imaginary value for `self`:
   #
   #     Complex(7).imaginary      #=> 0
   #     Complex(9, -4).imaginary  #=> -4
+  #
+  # If `self` was created with [polar
+  # coordinates](rdoc-ref:Complex@Polar+Coordinates), the returned value is
+  # computed, and may be inexact:
+  #
+  #     Complex.polar(1, Math::PI/4).imag # => 0.7071067811865476 # Square root of 2.
   #
   def imag: () -> Numeric
 
   # <!--
   #   rdoc-file=complex.c
-  #   - cmp.imag       ->  real
-  #   - cmp.imaginary  ->  real
+  #   - imag -> numeric
   # -->
-  # Returns the imaginary part.
+  # Returns the imaginary value for `self`:
   #
   #     Complex(7).imaginary      #=> 0
   #     Complex(9, -4).imaginary  #=> -4
+  #
+  # If `self` was created with [polar
+  # coordinates](rdoc-ref:Complex@Polar+Coordinates), the returned value is
+  # computed, and may be inexact:
+  #
+  #     Complex.polar(1, Math::PI/4).imag # => 0.7071067811865476 # Square root of 2.
   #
   def imaginary: () -> Numeric
 
   # <!--
   #   rdoc-file=complex.c
-  #   - cmp.infinite?  ->  nil or 1
+  #   - infinite? -> 1 or nil
   # -->
-  # Returns `1` if `cmp`'s real or imaginary part is an infinite number, otherwise
-  # returns `nil`.
+  # Returns `1` if either `self.real.infinite?` or `self.imag.infinite?` is true,
+  # `nil` otherwise:
   #
-  #     For example:
+  #     Complex(Float::INFINITY, 0).infinite? # => 1
+  #     Complex(1, 1).infinite?               # => nil
   #
-  #        (1+1i).infinite?                   #=> nil
-  #        (Float::INFINITY + 1i).infinite?   #=> 1
+  # Related: Numeric#infinite?, Float#infinite?.
   #
   def infinite?: () -> Integer?
 
   # <!--
   #   rdoc-file=complex.c
-  #   - cmp.inspect  ->  string
+  #   - inspect -> string
   # -->
-  # Returns the value as a string for inspection.
+  # Returns a string representation of `self`:
   #
-  #     Complex(2).inspect                       #=> "(2+0i)"
-  #     Complex('-8/6').inspect                  #=> "((-4/3)+0i)"
-  #     Complex('1/2i').inspect                  #=> "(0+(1/2)*i)"
-  #     Complex(0, Float::INFINITY).inspect      #=> "(0+Infinity*i)"
-  #     Complex(Float::NAN, Float::NAN).inspect  #=> "(NaN+NaN*i)"
+  #     Complex(2).inspect                      # => "(2+0i)"
+  #     Complex('-8/6').inspect                 # => "((-4/3)+0i)"
+  #     Complex('1/2i').inspect                 # => "(0+(1/2)*i)"
+  #     Complex(0, Float::INFINITY).inspect     # => "(0+Infinity*i)"
+  #     Complex(Float::NAN, Float::NAN).inspect # => "(NaN+NaN*i)"
   #
   def inspect: () -> String
 
   def integer?: () -> bool
 
   # <!-- rdoc-file=complex.c -->
-  # Returns the absolute part of its polar form.
+  # Returns the absolute value (magnitude) for `self`; see [polar
+  # coordinates](rdoc-ref:Complex@Polar+Coordinates):
   #
-  #     Complex(-1).abs         #=> 1
-  #     Complex(3.0, -4.0).abs  #=> 5.0
+  #     Complex.polar(-1, 0).abs # => 1.0
+  #
+  # If `self` was created with [rectangular
+  # coordinates](rdoc-ref:Complex@Rectangular+Coordinates), the returned value is
+  # computed, and may be inexact:
+  #
+  #     Complex.rectangular(1, 1).abs # => 1.4142135623730951 # The square root of 2.
   #
   alias magnitude abs
 
@@ -403,39 +470,54 @@ class Complex < Numeric
 
   # <!--
   #   rdoc-file=complex.c
-  #   - cmp.numerator  ->  numeric
+  #   - numerator -> new_complex
   # -->
-  # Returns the numerator.
+  # Returns the Complex object created from the numerators of the real and
+  # imaginary parts of `self`, after converting each part to the [lowest common
+  # denominator](https://en.wikipedia.org/wiki/Lowest_common_denominator) of the
+  # two:
   #
-  #         1   2       3+4i  <-  numerator
-  #         - + -i  ->  ----
-  #         2   3        6    <-  denominator
+  #     c = Complex(Rational(2, 3), Rational(3, 4)) # => ((2/3)+(3/4)*i)
+  #     c.numerator                                 # => (8+9i)
   #
-  #     c = Complex('1/2+2/3i')  #=> ((1/2)+(2/3)*i)
-  #     n = c.numerator          #=> (3+4i)
-  #     d = c.denominator        #=> 6
-  #     n / d                    #=> ((1/2)+(2/3)*i)
-  #     Complex(Rational(n.real, d), Rational(n.imag, d))
-  #                              #=> ((1/2)+(2/3)*i)
+  # In this example, the lowest common denominator of the two parts is 12; the two
+  # converted parts may be thought of as Rational(8, 12) and Rational(9, 12),
+  # whose numerators, respectively, are 8 and 9; so the returned value of
+  # `c.numerator` is `Complex(8, 9)`.
   #
-  # See denominator.
+  # Related: Complex#denominator.
   #
   def numerator: () -> Complex
 
   # <!-- rdoc-file=complex.c -->
-  # Returns the angle part of its polar form.
+  # Returns the argument (angle) for `self` in radians; see [polar
+  # coordinates](rdoc-ref:Complex@Polar+Coordinates):
   #
-  #     Complex.polar(3, Math::PI/2).arg  #=> 1.5707963267948966
+  #     Complex.polar(3, Math::PI/2).arg  # => 1.57079632679489660
+  #
+  # If `self` was created with [rectangular
+  # coordinates](rdoc-ref:Complex@Rectangular+Coordinates), the returned value is
+  # computed, and may be inexact:
+  #
+  #     Complex.polar(1, 1.0/3).arg # => 0.33333333333333326
   #
   alias phase angle
 
   # <!--
   #   rdoc-file=complex.c
-  #   - cmp.polar  ->  array
+  #   - polar -> array
   # -->
-  # Returns an array; [cmp.abs, cmp.arg].
+  # Returns the array `[self.abs, self.arg]`:
   #
-  #     Complex(1, 2).polar  #=> [2.23606797749979, 1.1071487177940904]
+  #     Complex.polar(1, 2).polar # => [1.0, 2.0]
+  #
+  # See [Polar Coordinates](rdoc-ref:Complex@Polar+Coordinates).
+  #
+  # If `self` was created with [rectangular
+  # coordinates](rdoc-ref:Complex@Rectangular+Coordinates), the returned value is
+  # computed, and may be inexact:
+  #
+  #     Complex.rect(1, 1).polar # => [1.4142135623730951, 0.7853981633974483]
   #
   def polar: () -> [ Numeric, Float ]
 
@@ -443,51 +525,73 @@ class Complex < Numeric
 
   # <!--
   #   rdoc-file=complex.c
-  #   - cmp / numeric     ->  complex
-  #   - cmp.quo(numeric)  ->  complex
+  #   - complex / numeric -> new_complex
   # -->
-  # Performs division.
+  # Returns the quotient of `self` and `numeric`:
   #
-  #     Complex(2, 3)  / Complex(2, 3)   #=> ((1/1)+(0/1)*i)
-  #     Complex(900)   / Complex(1)      #=> ((900/1)+(0/1)*i)
-  #     Complex(-2, 9) / Complex(-9, 2)  #=> ((36/85)-(77/85)*i)
-  #     Complex(9, 8)  / 4               #=> ((9/4)+(2/1)*i)
-  #     Complex(20, 9) / 9.8             #=> (2.0408163265306123+0.9183673469387754i)
+  #     Complex(2, 3)  / Complex(2, 3)  # => ((1/1)+(0/1)*i)
+  #     Complex(900)   / Complex(1)     # => ((900/1)+(0/1)*i)
+  #     Complex(-2, 9) / Complex(-9, 2) # => ((36/85)-(77/85)*i)
+  #     Complex(9, 8)  / 4              # => ((9/4)+(2/1)*i)
+  #     Complex(20, 9) / 9.8            # => (2.0408163265306123+0.9183673469387754i)
   #
   def quo: (Numeric) -> Complex
 
   # <!--
   #   rdoc-file=complex.c
-  #   - cmp.rationalize([eps])  ->  rational
+  #   - rationalize(epsilon = nil) -> rational
   # -->
-  # Returns the value as a rational if possible (the imaginary part should be
-  # exactly zero).
+  # Returns a Rational object whose value is exactly or approximately equivalent
+  # to that of `self.real`.
   #
-  #     Complex(1.0/3, 0).rationalize  #=> (1/3)
-  #     Complex(1, 0.0).rationalize    # RangeError
-  #     Complex(1, 2).rationalize      # RangeError
+  # With no argument `epsilon` given, returns a Rational object whose value is
+  # exactly equal to that of `self.real.rationalize`:
   #
-  # See to_r.
+  #     Complex(1, 0).rationalize              # => (1/1)
+  #     Complex(1, Rational(0, 1)).rationalize # => (1/1)
+  #     Complex(3.14159, 0).rationalize        # => (314159/100000)
+  #
+  # With argument `epsilon` given, returns a Rational object whose value is
+  # exactly or approximately equal to that of `self.real` to the given precision:
+  #
+  #     Complex(3.14159, 0).rationalize(0.1)          # => (16/5)
+  #     Complex(3.14159, 0).rationalize(0.01)         # => (22/7)
+  #     Complex(3.14159, 0).rationalize(0.001)        # => (201/64)
+  #     Complex(3.14159, 0).rationalize(0.0001)       # => (333/106)
+  #     Complex(3.14159, 0).rationalize(0.00001)      # => (355/113)
+  #     Complex(3.14159, 0).rationalize(0.000001)     # => (7433/2366)
+  #     Complex(3.14159, 0).rationalize(0.0000001)    # => (9208/2931)
+  #     Complex(3.14159, 0).rationalize(0.00000001)   # => (47460/15107)
+  #     Complex(3.14159, 0).rationalize(0.000000001)  # => (76149/24239)
+  #     Complex(3.14159, 0).rationalize(0.0000000001) # => (314159/100000)
+  #     Complex(3.14159, 0).rationalize(0.0)          # => (3537115888337719/1125899906842624)
+  #
+  # Related: Complex#to_r.
   #
   def rationalize: (?Numeric eps) -> Rational
 
   # <!--
   #   rdoc-file=complex.c
-  #   - cmp.real  ->  real
+  #   - real -> numeric
   # -->
-  # Returns the real part.
+  # Returns the real value for `self`:
   #
   #     Complex(7).real      #=> 7
   #     Complex(9, -4).real  #=> 9
+  #
+  # If `self` was created with [polar
+  # coordinates](rdoc-ref:Complex@Polar+Coordinates), the returned value is
+  # computed, and may be inexact:
+  #
+  #     Complex.polar(1, Math::PI/4).real # => 0.7071067811865476 # Square root of 2.
   #
   def real: () -> Numeric
 
   # <!--
   #   rdoc-file=complex.c
-  #   - Complex(1).real?     ->  false
-  #   - Complex(1, 2).real?  ->  false
+  #   - real? -> false
   # -->
-  # Returns false, even if the complex number has no imaginary part.
+  # Returns `false`; for compatibility with Numeric#real?.
   #
   def real?: () -> false
 
@@ -507,12 +611,21 @@ class Complex < Numeric
 
   # <!--
   #   rdoc-file=complex.c
-  #   - cmp.rect         ->  array
-  #   - cmp.rectangular  ->  array
+  #   - rect -> array
   # -->
-  # Returns an array; [cmp.real, cmp.imag].
+  # Returns the array `[self.real, self.imag]`:
   #
-  #     Complex(1, 2).rectangular  #=> [1, 2]
+  #     Complex.rect(1, 2).rect # => [1, 2]
+  #
+  # See [Rectangular Coordinates](rdoc-ref:Complex@Rectangular+Coordinates).
+  #
+  # If `self` was created with [polar
+  # coordinates](rdoc-ref:Complex@Polar+Coordinates), the returned value is
+  # computed, and may be inexact:
+  #
+  #     Complex.polar(1.0, 1.0).rect # => [0.5403023058681398, 0.8414709848078965]
+  #
+  # Complex#rectangular is an alias for Complex#rect.
   #
   alias rectangular rect
 
@@ -524,38 +637,37 @@ class Complex < Numeric
 
   # <!--
   #   rdoc-file=complex.c
-  #   - complex.to_c  ->  self
+  #   - to_c -> self
   # -->
-  # Returns self.
-  #
-  #     Complex(2).to_c      #=> (2+0i)
-  #     Complex(-8, 6).to_c  #=> (-8+6i)
+  # Returns `self`.
   #
   def to_c: () -> Complex
 
   # <!--
   #   rdoc-file=complex.c
-  #   - cmp.to_f  ->  float
+  #   - to_f -> float
   # -->
-  # Returns the value as a float if possible (the imaginary part should be exactly
-  # zero).
+  # Returns the value of `self.real` as a Float, if possible:
   #
-  #     Complex(1, 0).to_f    #=> 1.0
-  #     Complex(1, 0.0).to_f  # RangeError
-  #     Complex(1, 2).to_f    # RangeError
+  #     Complex(1, 0).to_f              # => 1.0
+  #     Complex(1, Rational(0, 1)).to_f # => 1.0
+  #
+  # Raises RangeError if `self.imag` is not exactly zero (either `Integer(0)` or
+  # `Rational(0, *n*)`).
   #
   def to_f: () -> Float
 
   # <!--
   #   rdoc-file=complex.c
-  #   - cmp.to_i  ->  integer
+  #   - to_i -> integer
   # -->
-  # Returns the value as an integer if possible (the imaginary part should be
-  # exactly zero).
+  # Returns the value of `self.real` as an Integer, if possible:
   #
-  #     Complex(1, 0).to_i    #=> 1
-  #     Complex(1, 0.0).to_i  # RangeError
-  #     Complex(1, 2).to_i    # RangeError
+  #     Complex(1, 0).to_i              # => 1
+  #     Complex(1, Rational(0, 1)).to_i # => 1
+  #
+  # Raises RangeError if `self.imag` is not exactly zero (either `Integer(0)` or
+  # `Rational(0, *n*)`).
   #
   def to_i: () -> Integer
 
@@ -563,30 +675,31 @@ class Complex < Numeric
 
   # <!--
   #   rdoc-file=complex.c
-  #   - cmp.to_r  ->  rational
+  #   - to_r -> rational
   # -->
-  # Returns the value as a rational if possible (the imaginary part should be
-  # exactly zero).
+  # Returns the value of `self.real` as a Rational, if possible:
   #
-  #     Complex(1, 0).to_r    #=> (1/1)
-  #     Complex(1, 0.0).to_r  # RangeError
-  #     Complex(1, 2).to_r    # RangeError
+  #     Complex(1, 0).to_r              # => (1/1)
+  #     Complex(1, Rational(0, 1)).to_r # => (1/1)
   #
-  # See rationalize.
+  # Raises RangeError if `self.imag` is not exactly zero (either `Integer(0)` or
+  # `Rational(0, *n*)`).
+  #
+  # Related: Complex#rationalize.
   #
   def to_r: () -> Rational
 
   # <!--
   #   rdoc-file=complex.c
-  #   - cmp.to_s  ->  string
+  #   - to_s -> string
   # -->
-  # Returns the value as a string.
+  # Returns a string representation of `self`:
   #
-  #     Complex(2).to_s                       #=> "2+0i"
-  #     Complex('-8/6').to_s                  #=> "-4/3+0i"
-  #     Complex('1/2i').to_s                  #=> "0+1/2i"
-  #     Complex(0, Float::INFINITY).to_s      #=> "0+Infinity*i"
-  #     Complex(Float::NAN, Float::NAN).to_s  #=> "NaN+NaN*i"
+  #     Complex(2).to_s                      # => "2+0i"
+  #     Complex('-8/6').to_s                 # => "-4/3+0i"
+  #     Complex('1/2i').to_s                 # => "0+1/2i"
+  #     Complex(0, Float::INFINITY).to_s     # => "0+Infinity*i"
+  #     Complex(Float::NAN, Float::NAN).to_s # => "NaN+NaN*i"
   #
   def to_s: () -> String
 

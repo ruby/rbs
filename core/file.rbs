@@ -1836,43 +1836,64 @@ class File < IO
 
   # <!--
   #   rdoc-file=file.c
-  #   - file.flock(locking_constant) -> 0 or false
+  #   - flock(locking_constant) -> 0 or false
   # -->
-  # Locks or unlocks a file according to *locking_constant* (a logical *or* of the
-  # values in the table below). Returns `false` if File::LOCK_NB is specified and
-  # the operation would otherwise have blocked. Not available on all platforms.
+  # Locks or unlocks a file according to the given `locking_constant`,
+  # a bitwise OR of the values in the table below.
+  # Not available on all platforms.
+  # Returns `false` if `File::LOCK_NB` is specified and the operation would have
+  # blocked;
+  # otherwise returns `0`.
   #
-  # Locking constants (in class File):
+  # <table>
+  #   <tr>
+  #     <th colspan="3">Locking Constants</th>
+  #   </tr>
+  #   <tr>
+  #     <th>Constant</th>
+  #     <th>Lock</th>
+  #     <th>Effect</th>
+  #   </tr>
+  #   <tr>
+  #   <td><tt>File::LOCK_EX</tt></td>
+  #   <td>Exclusive</td>
+  #     <td>Only one process may hold an exclusive lock for <tt>self</tt> at a time.</td>
+  #   </tr>
+  #   <tr>
+  #     <td><tt>File::LOCK_NB</tt></td>
+  #     <td>Non-blocking</td>
+  #     <td>
+  #       No blocking; may be combined with other <tt>File::LOCK_SH</tt> or <tt>File::LOCK_EX</tt>
+  #       using the bitwise OR operator <tt>|</tt>.
+  #     </td>
+  #   </tr>
+  #   <tr>
+  #     <td><tt>File::LOCK_SH</tt></td>
+  #     <td>Shared</td>
+  #     <td>Multiple processes may each hold a shared lock for <tt>self</tt> at the same time.</td>
+  #   </tr>
+  #   <tr>
+  #     <td><tt>File::LOCK_UN</tt></td>
+  #     <td>Unlock</td>
+  #     <td>Remove an existing lock held by this process.</td>
+  #   </tr>
+  # </table>
+  #     # Update a counter using an exclusive lock.
+  # # Don't use File::WRONLY because it truncates the file.
+  # File.open('counter', File::RDWR | File::CREAT, 0644) do |f|
+  #   f.flock(File::LOCK_EX)
+  #   value = f.read.to_i + 1
+  #   f.rewind
+  #   f.write("#{value}\n")
+  #   f.flush
+  #   f.truncate(f.pos)
+  # end
   #
-  #     LOCK_EX   | Exclusive lock. Only one process may hold an
-  #               | exclusive lock for a given file at a time.
-  #     ----------+------------------------------------------------
-  #     LOCK_NB   | Don't block when locking. May be combined
-  #               | with other lock options using logical or.
-  #     ----------+------------------------------------------------
-  #     LOCK_SH   | Shared lock. Multiple processes may each hold a
-  #               | shared lock for a given file at the same time.
-  #     ----------+------------------------------------------------
-  #     LOCK_UN   | Unlock.
-  #
-  # Example:
-  #
-  #     # update a counter using write lock
-  #     # don't use "w" because it truncates the file before lock.
-  #     File.open("counter", File::RDWR|File::CREAT, 0644) {|f|
-  #       f.flock(File::LOCK_EX)
-  #       value = f.read.to_i + 1
-  #       f.rewind
-  #       f.write("#{value}\n")
-  #       f.flush
-  #       f.truncate(f.pos)
-  #     }
-  #
-  #     # read the counter using read lock
-  #     File.open("counter", "r") {|f|
-  #       f.flock(File::LOCK_SH)
-  #       p f.read
-  #     }
+  # # Read the counter using a shared lock.
+  # File.open('counter', 'r') do |f|
+  #   f.flock(File::LOCK_SH)
+  #   f.read
+  # end
   #
   def flock: (int locking_constant) -> (0 | false)
 
@@ -2292,64 +2313,158 @@ File::Separator: String
 module File::Constants
 end
 
+# <!-- rdoc-file=file.c -->
+# [File::APPEND](rdoc-ref:File::Constants@File-3A-3AAPPEND)
+#
 File::Constants::APPEND: Integer
 
+# <!-- rdoc-file=file.c -->
+# [File::BINARY](rdoc-ref:File::Constants@File-3A-3ABINARY)
+#
 File::Constants::BINARY: Integer
 
+# <!-- rdoc-file=file.c -->
+# [File::CREAT](rdoc-ref:File::Constants@File-3A-3ACREAT)
+#
 File::Constants::CREAT: Integer
 
+# <!-- rdoc-file=file.c -->
+# [File::DIRECT](rdoc-ref:File::Constants@File-3A-3ADIRECT)
+#
 File::Constants::DIRECT: Integer
 
+# <!-- rdoc-file=file.c -->
+# [File::DSYNC](rdoc-ref:File::Constants@File-3A-3ASYNC-2C+File-3A-3ARSYNC-2C+an
+# d+File-3A-3ADSYNC)
+#
 File::Constants::DSYNC: Integer
 
+# <!-- rdoc-file=file.c -->
+# [File::EXCL](rdoc-ref:File::Constants@File-3A-3AEXCL)
+#
 File::Constants::EXCL: Integer
 
+# <!-- rdoc-file=dir.c -->
+# [File::FNM_CASEFOLD](rdoc-ref:File::Constants@File-3A-3AFNM_CASEFOLD)
+#
 File::Constants::FNM_CASEFOLD: Integer
 
+# <!-- rdoc-file=dir.c -->
+# [File::FNM_DOTMATCH](rdoc-ref:File::Constants@File-3A-3AFNM_DOTMATCH)
+#
 File::Constants::FNM_DOTMATCH: Integer
 
+# <!-- rdoc-file=dir.c -->
+# [File::FNM_EXTGLOB](rdoc-ref:File::Constants@File-3A-3AFNM_EXTGLOB)
+#
 File::Constants::FNM_EXTGLOB: Integer
 
+# <!-- rdoc-file=dir.c -->
+# [File::FNM_NOESCAPE](rdoc-ref:File::Constants@File-3A-3AFNM_NOESCAPE)
+#
 File::Constants::FNM_NOESCAPE: Integer
 
+# <!-- rdoc-file=dir.c -->
+# [File::FNM_PATHNAME](rdoc-ref:File::Constants@File-3A-3AFNM_PATHNAME)
+#
 File::Constants::FNM_PATHNAME: Integer
 
+# <!-- rdoc-file=dir.c -->
+# [File::FNM_SHORTNAME](rdoc-ref:File::Constants@File-3A-3AFNM_SHORTNAME)
+#
 File::Constants::FNM_SHORTNAME: Integer
 
+# <!-- rdoc-file=dir.c -->
+# [File::FNM_SYSCASE](rdoc-ref:File::Constants@File-3A-3AFNM_SYSCASE)
+#
 File::Constants::FNM_SYSCASE: Integer
 
+# <!-- rdoc-file=file.c -->
+# [File::LOCK_EX](rdoc-ref:File::Constants@File-3A-3ALOCK_EX)
+#
 File::Constants::LOCK_EX: Integer
 
+# <!-- rdoc-file=file.c -->
+# [File::LOCK_NB](rdoc-ref:File::Constants@File-3A-3ALOCK_NB)
+#
 File::Constants::LOCK_NB: Integer
 
+# <!-- rdoc-file=file.c -->
+# [File::LOCK_SH](rdoc-ref:File::Constants@File-3A-3ALOCK_SH)
+#
 File::Constants::LOCK_SH: Integer
 
+# <!-- rdoc-file=file.c -->
+# [File::LOCK_UN](rdoc-ref:File::Constants@File-3A-3ALOCK_UN)
+#
 File::Constants::LOCK_UN: Integer
 
+# <!-- rdoc-file=file.c -->
+# [File::NOATIME](rdoc-ref:File::Constants@File-3A-3ANOATIME)
+#
 File::Constants::NOATIME: Integer
 
+# <!-- rdoc-file=file.c -->
+# [File::NOCTTY](rdoc-ref:File::Constants@File-3A-3ANOCTTY)
+#
 File::Constants::NOCTTY: Integer
 
+# <!-- rdoc-file=file.c -->
+# [File::NOFOLLOW](rdoc-ref:File::Constants@File-3A-3ANOFOLLOW)
+#
 File::Constants::NOFOLLOW: Integer
 
+# <!-- rdoc-file=file.c -->
+# [File::NONBLOCK](rdoc-ref:File::Constants@File-3A-3ANONBLOCK)
+#
 File::Constants::NONBLOCK: Integer
 
+# <!-- rdoc-file=file.c -->
+# [File::NULL](rdoc-ref:File::Constants@File-3A-3ANULL)
+#
 File::Constants::NULL: String
 
+# <!-- rdoc-file=file.c -->
+# [File::RDONLY](rdoc-ref:File::Constants@File-3A-3ARDONLY)
+#
 File::Constants::RDONLY: Integer
 
+# <!-- rdoc-file=file.c -->
+# [File::RDWR](rdoc-ref:File::Constants@File-3A-3ARDWR)
+#
 File::Constants::RDWR: Integer
 
+# <!-- rdoc-file=file.c -->
+# [File::RSYNC](rdoc-ref:File::Constants@File-3A-3ASYNC-2C+File-3A-3ARSYNC-2C+an
+# d+File-3A-3ADSYNC)
+#
 File::Constants::RSYNC: Integer
 
+# <!-- rdoc-file=file.c -->
+# [File::SHARE_DELETE](rdoc-ref:File::Constants@File-3A-3ASHARE_DELETE+-28Window
+# s+Only-29)
+#
 File::Constants::SHARE_DELETE: Integer
 
+# <!-- rdoc-file=file.c -->
+# [File::SYNC](rdoc-ref:File::Constants@File-3A-3ASYNC-2C+File-3A-3ARSYNC-2C+and
+# +File-3A-3ADSYNC)
+#
 File::Constants::SYNC: Integer
 
+# <!-- rdoc-file=file.c -->
+# [File::TMPFILE](rdoc-ref:File::Constants@File-3A-3ATMPFILE)
+#
 File::Constants::TMPFILE: Integer
 
+# <!-- rdoc-file=file.c -->
+# [File::TRUNC](rdoc-ref:File::Constants@File-3A-3ATRUNC)
+#
 File::Constants::TRUNC: Integer
 
+# <!-- rdoc-file=file.c -->
+# [File::WRONLY](rdoc-ref:File::Constants@File-3A-3AWRONLY)
+#
 File::Constants::WRONLY: Integer
 
 # <!-- rdoc-file=file.c -->

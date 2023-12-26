@@ -221,7 +221,7 @@ class Dir
   #
   # *   Calls the block with the argument.
   # *   Changes to the given directory.
-  # *   Executes the block
+  # *   Executes the block (yielding the new path).
   # *   Restores the previous working directory.
   # *   Returns the block's return value.
   #
@@ -384,16 +384,14 @@ class Dir
   #     Dir.pwd # => "/var/spool/mail"
   #     dir  = Dir.new('/usr')
   #     fd = dir.fileno
-  #     Dir.fchdir(fd) do
-  #       Dir.pwd # => "/usr"
-  #     end
-  #     Dir.pwd # => "/var/spool/mail"
+  #     Dir.fchdir(fd)
+  #     Dir.pwd # => "/usr"
   #
   # With a block, temporarily changes the working directory:
   #
   # *   Calls the block with the argument.
   # *   Changes to the given directory.
-  # *   Executes the block
+  # *   Executes the block (yields no args).
   # *   Restores the previous working directory.
   # *   Returns the block's return value.
   #
@@ -402,7 +400,9 @@ class Dir
   #
   #     Dir.chdir('/var/spool/mail')
   #     Dir.pwd # => "/var/spool/mail"
-  #     Dir.chdir('/tmp') do
+  #     dir  = Dir.new('/tmp')
+  #     fd = dir.fileno
+  #     Dir.fchdir(fd) do
   #       Dir.pwd # => "/tmp"
   #     end
   #     Dir.pwd # => "/var/spool/mail"
@@ -763,14 +763,27 @@ class Dir
 
   # <!--
   #   rdoc-file=dir.c
-  #   - chdir -> nil
+  #   - chdir -> 0
+  #   - chdir { ... } -> object
   # -->
-  # Changes the current working directory to the path of `self`:
+  # Changes the current working directory to `self`:
   #
   #     Dir.pwd # => "/"
   #     dir = Dir.new('example')
   #     dir.chdir
   #     Dir.pwd # => "/example"
+  #
+  # With a block, temporarily changes the working directory:
+  #
+  # *   Calls the block.
+  # *   Changes to the given directory.
+  # *   Executes the block (yields no args).
+  # *   Restores the previous working directory.
+  # *   Returns the block's return value.
+  #
+  #
+  # Uses Dir.fchdir if available, and Dir.chdir if not, see those methods for
+  # caveats.
   #
   def chdir: () -> Integer
            | [T] { () -> T } -> T

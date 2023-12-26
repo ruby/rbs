@@ -1,26 +1,29 @@
 %a{annotate:rdoc:skip}
 class IO
   # <!-- rdoc-file=io_buffer.c -->
-  # IO::Buffer is a low-level efficient buffer for input/output. There are three
-  # ways of using buffer:
+  # IO::Buffer is a efficient zero-copy buffer for input/output. There are typical
+  # use cases:
   #
   # *   Create an empty buffer with ::new, fill it with buffer using #copy or
-  #     #set_value, #set_string, get buffer with #get_string;
+  #     #set_value, #set_string, get buffer with #get_string or write it directly
+  #     to some file with #write.
   # *   Create a buffer mapped to some string with ::for, then it could be used
   #     both for reading with #get_string or #get_value, and writing (writing will
-  #     change the source string, too);
+  #     change the source string, too).
   # *   Create a buffer mapped to some file with ::map, then it could be used for
   #     reading and writing the underlying file.
+  # *   Create a string of a fixed size with ::string, then #read into it, or
+  #     modify it using #set_value.
   #
   #
   # Interaction with string and file memory is performed by efficient low-level C
   # mechanisms like `memcpy`.
   #
   # The class is meant to be an utility for implementing more high-level
-  # mechanisms like Fiber::SchedulerInterface#io_read and
-  # Fiber::SchedulerInterface#io_write.
+  # mechanisms like Fiber::Scheduler#io_read and Fiber::Scheduler#io_write and
+  # parsing binary protocols.
   #
-  # **Examples of usage:**
+  # ## Examples of Usage
   #
   # Empty buffer:
   #
@@ -81,7 +84,9 @@ class IO
   #     File.read('test.txt')
   #     # => "t--- buffer"
   #
-  # **The class is experimental and the interface is subject to change.**
+  # **The class is experimental and the interface is subject to change, this is
+  # especially true of file mappings which may be removed entirely in the
+  # future.**
   #
   class Buffer
     include Comparable
@@ -91,10 +96,11 @@ class IO
     #   - IO::Buffer.for(string) -> readonly io_buffer
     #   - IO::Buffer.for(string) {|io_buffer| ... read/write io_buffer ...}
     # -->
-    # Creates a IO::Buffer from the given string's memory. Without a block a frozen
-    # internal copy of the string is created efficiently and used as the buffer
-    # source. When a block is provided, the buffer is associated directly with the
-    # string's internal buffer and updating the buffer will update the string.
+    # Creates a zero-copy IO::Buffer from the given string's memory. Without a block
+    # a frozen internal copy of the string is created efficiently and used as the
+    # buffer source. When a block is provided, the buffer is associated directly
+    # with the string's internal buffer and updating the buffer will update the
+    # string.
     #
     # Until #free is invoked on the buffer, either explicitly or via the garbage
     # collector, the source string will be locked and cannot be modified.
@@ -136,8 +142,6 @@ class IO
     # mapping, you need to open a file in read-write mode, and explicitly pass
     # `flags` argument without IO::Buffer::IMMUTABLE.
     #
-    # Example:
-    #
     #     File.write('test.txt', 'test')
     #
     #     buffer = IO::Buffer.map(File.open('test.txt'), nil, 0, IO::Buffer::READONLY)
@@ -169,9 +173,9 @@ class IO
     #   rdoc-file=io_buffer.c
     #   - IO::Buffer.string(length) {|io_buffer| ... read/write io_buffer ...} -> string
     # -->
-    # Creates a new string of the given length and yields a IO::Buffer instance to
-    # the block which uses the string as a source. The block is expected to write to
-    # the buffer and the string will be returned.
+    # Creates a new string of the given length and yields a zero-copy IO::Buffer
+    # instance to the block which uses the string as a source. The block is expected
+    # to write to the buffer and the string will be returned.
     #
     #     IO::Buffer.string(4) do |buffer|
     #       buffer.set_string("Ruby")
@@ -316,8 +320,6 @@ class IO
     #
     # You can resize a freed buffer to re-allocate it.
     #
-    # Example:
-    #
     #     buffer = IO::Buffer.for('test')
     #     buffer.free
     #     # => #<IO::Buffer 0x0000000000000000+0 NULL>
@@ -381,8 +383,6 @@ class IO
     # in the buffer. For example, a `:u32` buffer type is a 32-bit unsigned integer
     # in little-endian format.
     #
-    # Example:
-    #
     #     string = [1.5].pack('f')
     #     # => "\x00\x00\xC0?"
     #     IO::Buffer.for(string).get_value(:f32, 0)
@@ -400,15 +400,35 @@ class IO
 
     # <!--
     #   rdoc-file=io_buffer.c
-    #   - hexdump()
+    #   - hexdump([offset, [length, [width]]]) -> string
     # -->
+    # Returns a human-readable string representation of the buffer. The exact format
+    # is subject to change.
+    #
+    #     buffer = IO::Buffer.for("Hello World")
+    #     puts buffer.hexdump
+    #     # 0x00000000  48 65 6c 6c 6f 20 57 6f 72 6c 64                Hello World
+    #
+    # As buffers are usually fairly big, you may want to limit the output by
+    # specifying the offset and length:
+    #
+    #     puts buffer.hexdump(6, 5)
+    #     # 0x00000006  57 6f 72 6c 64                                  World
     #
     def hexdump: () -> String
 
     # <!--
     #   rdoc-file=io_buffer.c
-    #   - inspect()
+    #   - inspect -> string
     # -->
+    # Inspect the buffer and report useful information about it's internal state.
+    # Only a limited portion of the buffer will be displayed in a hexdump style
+    # format.
+    #
+    #     buffer = IO::Buffer.for("Hello World")
+    #     puts buffer.inspect
+    #     # #<IO::Buffer 0x000000010198ccd8+11 EXTERNAL READONLY SLICE>
+    #     # 0x00000000  48 65 6c 6c 6f 20 57 6f 72 6c 64                Hello World
     #
     def inspect: () -> String
 
@@ -445,8 +465,6 @@ class IO
     # system calls. You can only share a buffer between threads with appropriate
     # synchronisation techniques.
     #
-    # Example:
-    #
     #     buffer = IO::Buffer.new(4)
     #     buffer.locked? #=> false
     #
@@ -476,8 +494,6 @@ class IO
     # Locking is not thread safe, but is a semantic used to ensure buffers don't
     # move while being used by a system call.
     #
-    # Example:
-    #
     #     buffer.locked do
     #       buffer.write(io) # theoretical system call interface
     #     end
@@ -503,7 +519,16 @@ class IO
     #   rdoc-file=io_buffer.c
     #   - null? -> true or false
     # -->
-    # If the buffer was freed with #free or was never allocated in the first place.
+    # If the buffer was freed with #free, transferred with #transfer, or was never
+    # allocated in the first place.
+    #
+    #     buffer = IO::Buffer.new(0)
+    #     buffer.null? #=> true
+    #
+    #     buffer = IO::Buffer.new(4)
+    #     buffer.null? #=> false
+    #     buffer.free
+    #     buffer.null? #=> true
     #
     def null?: () -> bool
 
@@ -522,8 +547,6 @@ class IO
     #
     # If `offset` is not given, it defaults to zero, i.e. the beginning of the
     # buffer.
-    #
-    # Example:
     #
     #     IO::Buffer.for('test') do |buffer|
     #       p buffer
@@ -561,8 +584,6 @@ class IO
     # If the `from` position is beyond the end of the file, the gap will be filled
     # with null (0 value) bytes.
     #
-    # Example:
-    #
     #     out = File.open('output.txt', File::RDWR) # open for read/write, no truncation
     #     IO::Buffer.for('1234567').pwrite(out, 2, 3, 1)
     #
@@ -585,8 +606,6 @@ class IO
     #
     # If `offset` is not given, it defaults to zero, i.e. the beginning of the
     # buffer.
-    #
-    # Example:
     #
     #     IO::Buffer.for('test') do |buffer|
     #       p buffer
@@ -636,8 +655,8 @@ class IO
     #   rdoc-file=io_buffer.c
     #   - set_string(string, [offset, [length, [source_offset]]]) -> size
     # -->
-    # Efficiently copy buffer from a source String into the buffer, at `offset`
-    # using `memcpy`.
+    # Efficiently copy from a source String into the buffer, at `offset` using
+    # `memcpy`.
     #
     #     buf = IO::Buffer.new(8)
     #     # =>
@@ -721,8 +740,6 @@ class IO
     # Raises RuntimeError if the `offset+length` is out of the current buffer's
     # bounds.
     #
-    # Example:
-    #
     #     string = 'test'
     #     buffer = IO::Buffer.for(string)
     #
@@ -776,9 +793,8 @@ class IO
     #   rdoc-file=io_buffer.c
     #   - transfer -> new_io_buffer
     # -->
-    # Transfers ownership to a new buffer, deallocating the current one.
-    #
-    # Example:
+    # Transfers ownership of the underlying memory to a new buffer, causing the
+    # current buffer to become uninitialized.
     #
     #     buffer = IO::Buffer.new('test')
     #     other = buffer.transfer
@@ -800,8 +816,8 @@ class IO
     # -->
     # Returns whether the buffer buffer is accessible.
     #
-    # A buffer becomes invalid if it is a slice of another buffer which has been
-    # freed.
+    # A buffer becomes invalid if it is a slice of another buffer (or string) which
+    # has been freed or re-allocated at a different address.
     #
     def valid?: () -> bool
 
@@ -819,8 +835,6 @@ class IO
     #
     # If `offset` is not given, it defaults to zero, i.e. the beginning of the
     # buffer.
-    #
-    # Example:
     #
     #     out = File.open('output.txt', 'wb')
     #     IO::Buffer.for('1234567').write(out, 3)
@@ -842,8 +856,6 @@ class IO
     # Unix, `VirtualAlloc` on Windows). The behavior can be forced by passing
     # IO::Buffer::MAPPED as a second parameter.
     #
-    # Examples
-    #
     #     buffer = IO::Buffer.new(4)
     #     # =>
     #     # #<IO::Buffer 0x000055b34497ea10+4 INTERNAL>
@@ -859,42 +871,109 @@ class IO
     #
     def initialize: (?Integer size, ?Integer flags) -> void
 
+    # <!-- rdoc-file=io_buffer.c -->
+    # Refers to big endian byte order, where the most significant byte is stored
+    # first. See #get_value for more details.
+    #
     BIG_ENDIAN: Integer
 
+    # <!-- rdoc-file=io_buffer.c -->
+    # The default buffer size, typically a (small) multiple of the PAGE_SIZE. Can be
+    # explicitly specified by setting the RUBY_IO_BUFFER_DEFAULT_SIZE environment
+    # variable.
+    #
     DEFAULT_SIZE: Integer
 
+    # <!-- rdoc-file=io_buffer.c -->
+    # Indicates that the memory in the buffer is owned by someone else. See
+    # #external? for more details.
+    #
     EXTERNAL: Integer
 
+    # <!-- rdoc-file=io_buffer.c -->
+    # Refers to the byte order of the host machine. See #get_value for more details.
+    #
     HOST_ENDIAN: Integer
 
+    # <!-- rdoc-file=io_buffer.c -->
+    # Indicates that the memory in the buffer is owned by the buffer. See #internal?
+    # for more details.
+    #
     INTERNAL: Integer
 
+    # <!-- rdoc-file=io_buffer.c -->
+    # Refers to little endian byte order, where the least significant byte is stored
+    # first. See #get_value for more details.
+    #
     LITTLE_ENDIAN: Integer
 
+    # <!-- rdoc-file=io_buffer.c -->
+    # Indicates that the memory in the buffer is locked and cannot be resized or
+    # freed. See #locked? and #locked for more details.
+    #
     LOCKED: Integer
 
+    # <!-- rdoc-file=io_buffer.c -->
+    # Indicates that the memory in the buffer is mapped by the operating system. See
+    # #mapped? for more details.
+    #
     MAPPED: Integer
 
+    # <!-- rdoc-file=io_buffer.c -->
+    # Refers to network byte order, which is the same as big endian. See #get_value
+    # for more details.
+    #
     NETWORK_ENDIAN: Integer
 
+    # <!-- rdoc-file=io_buffer.c -->
+    # The operating system page size. Used for efficient page-aligned memory
+    # allocations.
+    #
     PAGE_SIZE: Integer
 
+    # <!-- rdoc-file=io_buffer.c -->
+    # Indicates that the memory in the buffer is mapped privately and changes won't
+    # be replicated to the underlying file. See #private? for more details.
+    #
     PRIVATE: Integer
 
+    # <!-- rdoc-file=io_buffer.c -->
+    # Indicates that the memory in the buffer is read only, and attempts to modify
+    # it will fail. See #readonly? for more details.
+    #
     READONLY: Integer
 
+    # <!-- rdoc-file=io_buffer.c -->
+    # Raised when an operation would resize or re-allocate a locked buffer.
+    #
     class LockedError < RuntimeError
     end
 
+    # <!-- rdoc-file=io_buffer.c -->
+    # Raised when the buffer cannot be allocated for some reason, or you try to use
+    # a buffer that's not allocated.
+    #
     class AllocationError < RuntimeError
     end
 
+    # <!-- rdoc-file=io_buffer.c -->
+    # Raised when you try to write to a read-only buffer, or resize an external
+    # buffer.
+    #
     class AccessError < RuntimeError
     end
 
+    # <!-- rdoc-file=io_buffer.c -->
+    # Raised if you try to access a buffer slice which no longer references a valid
+    # memory range of the underlying source.
+    #
     class InvalidatedError < RuntimeError
     end
 
+    # <!-- rdoc-file=io_buffer.c -->
+    # Raised if the mask given to a binary operation is invalid, e.g. zero length or
+    # overlaps the target buffer.
+    #
     class MaskError < ArgumentError
     end
   end
