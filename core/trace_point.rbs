@@ -44,6 +44,8 @@
 # :   return from a C-language routine
 # `:raise`
 # :   raise an exception
+# `:rescue`
+# :   rescue an exception
 # `:b_call`
 # :   event hook at block entry
 # `:b_return`
@@ -205,7 +207,7 @@ class TracePoint < Object
   # -->
   # Return the generated binding object from event.
   #
-  # Note that for `c_call` and `c_return` events, the method will return `nil`,
+  # Note that for `:c_call` and `:c_return` events, the method will return `nil`,
   # since C methods themselves do not have bindings.
   #
   def binding: () -> Binding?
@@ -416,7 +418,8 @@ class TracePoint < Object
   #   rdoc-file=trace_point.rb
   #   - raised_exception()
   # -->
-  # Value from exception raised on the `:raise` event
+  # Value from exception raised on the `:raise` event, or rescued on the `:rescue`
+  # event.
   #
   def raised_exception: () -> untyped
 
@@ -424,7 +427,7 @@ class TracePoint < Object
   #   rdoc-file=trace_point.rb
   #   - return_value()
   # -->
-  # Return value from `:return`, `c_return`, and `b_return` event
+  # Return value from `:return`, `:c_return`, and `:b_return` event
   #
   def return_value: () -> untyped
 
@@ -435,7 +438,7 @@ class TracePoint < Object
   # Return the trace object during event
   #
   # Same as the following, except it returns the correct object (the method
-  # receiver) for `c_call` and `c_return` events:
+  # receiver) for `:c_call` and `:c_return` events:
   #
   #     trace.binding.eval('self')
   #
