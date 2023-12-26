@@ -81,6 +81,16 @@ class MatchData
   #     m['foo'] # => "h"
   #     m[:bar]  # => "ge"
   #
+  # If multiple captures have the same name, returns the last matched substring.
+  #
+  #     m = /(?<foo>.)(?<foo>.+)/.match("hoge")
+  #     # => #<MatchData "hoge" foo:"h" foo:"oge">
+  #     m[:foo] #=> "oge"
+  #
+  #     m = /\W(?<foo>.+)|\w(?<foo>.+)|(?<foo>.+)/.match("hoge")
+  #     #<MatchData "hoge" foo:nil foo:"oge" foo:nil>
+  #     m[:foo] #=> "oge"
+  #
   def []: (capture backref, ?nil) -> String?
         | (int start, int length) -> Array[String?]
         | (range[int?] range) -> Array[String?]
@@ -278,24 +288,24 @@ class MatchData
   #   rdoc-file=re.c
   #   - named_captures(symbolize_names: false) -> hash
   # -->
-  # Returns a hash of the named captures;
-  #     each key is a capture name; each value is its captured string or +nil+:
+  # Returns a hash of the named captures; each key is a capture name; each value
+  # is its captured string or `nil`:
   #
-  #       m = /(?<foo>.)(.)(?<bar>.+)/.match("hoge")
-  #       # => #<MatchData "hoge" foo:"h" bar:"ge">
-  #       m.named_captures # => {"foo"=>"h", "bar"=>"ge"}
+  #     m = /(?<foo>.)(.)(?<bar>.+)/.match("hoge")
+  #     # => #<MatchData "hoge" foo:"h" bar:"ge">
+  #     m.named_captures # => {"foo"=>"h", "bar"=>"ge"}
   #
-  #       m = /(?<a>.)(?<b>.)/.match("01")
-  #       # => #<MatchData "01" a:"0" b:"1">
-  #       m.named_captures #=> {"a" => "0", "b" => "1"}
+  #     m = /(?<a>.)(?<b>.)/.match("01")
+  #     # => #<MatchData "01" a:"0" b:"1">
+  #     m.named_captures #=> {"a" => "0", "b" => "1"}
   #
-  #       m = /(?<a>.)(?<b>.)?/.match("0")
-  #       # => #<MatchData "0" a:"0" b:nil>
-  #       m.named_captures #=> {"a" => "0", "b" => nil}
+  #     m = /(?<a>.)(?<b>.)?/.match("0")
+  #     # => #<MatchData "0" a:"0" b:nil>
+  #     m.named_captures #=> {"a" => "0", "b" => nil}
   #
-  #       m = /(?<a>.)(?<a>.)/.match("01")
-  #       # => #<MatchData "01" a:"0" a:"1">
-  #       m.named_captures #=> {"a" => "1"}
+  #     m = /(?<a>.)(?<a>.)/.match("01")
+  #     # => #<MatchData "01" a:"0" a:"1">
+  #     m.named_captures #=> {"a" => "1"}
   #
   # If keyword argument `symbolize_names` is given a true value, the keys in the
   # resulting hash are Symbols:
