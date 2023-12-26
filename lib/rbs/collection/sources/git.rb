@@ -152,12 +152,7 @@ module RBS
         private def need_to_fetch?(revision)
           return true unless commit_hash?
 
-          begin
-            git('cat-file', '-e', revision)
-            false
-          rescue CommandError
-            true
-          end
+          !git?('cat-file', '-e', revision)
         end
 
         private def git_dir
