@@ -337,17 +337,15 @@ class Float < Numeric
   def abs2: () -> Float
 
   # <!-- rdoc-file=complex.c -->
-  # Returns 0 if the value is positive, pi otherwise.
+  # Returns 0 if `self` is positive, Math::PI otherwise.
   #
   def angle: () -> (Integer | Float)
 
   # <!--
   #   rdoc-file=complex.c
-  #   - flo.arg    ->  0 or float
-  #   - flo.angle  ->  0 or float
-  #   - flo.phase  ->  0 or float
+  #   - arg -> 0 or Math::PI
   # -->
-  # Returns 0 if the value is positive, pi otherwise.
+  # Returns 0 if `self` is positive, Math::PI otherwise.
   #
   alias arg angle
 
@@ -708,7 +706,7 @@ class Float < Numeric
   def numerator: () -> Integer
 
   # <!-- rdoc-file=complex.c -->
-  # Returns 0 if the value is positive, pi otherwise.
+  # Returns 0 if `self` is positive, Math::PI otherwise.
   #
   alias phase angle
 

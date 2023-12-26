@@ -3378,10 +3378,19 @@ IO::TRUNC: Integer
 
 IO::WRONLY: Integer
 
+# <!-- rdoc-file=io.c -->
+# Readable event mask for IO#wait.
+#
 IO::READABLE: Integer
 
+# <!-- rdoc-file=io.c -->
+# Writable event mask for IO#wait.
+#
 IO::WRITABLE: Integer
 
+# <!-- rdoc-file=io.c -->
+# Priority event mask for IO#wait.
+#
 IO::PRIORITY: Integer
 
 # <!-- rdoc-file=io.c -->

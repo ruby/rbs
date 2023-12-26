@@ -13,7 +13,7 @@ jobs:
     container:
       image: rubylang/ruby:3.2-dev-focal
     env:
-      RUBY_COMMIT: v3_3_0_rc1
+      RUBY_COMMIT: v3_3_0
     steps:
       - uses: actions/checkout@v4
       - name: Install dependencies

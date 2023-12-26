@@ -248,24 +248,22 @@ class Numeric
 
   # <!--
   #   rdoc-file=complex.c
-  #   - num.abs2  ->  real
+  #   - abs2 -> real
   # -->
-  # Returns square of self.
+  # Returns the square of `self`.
   #
   def abs2: () -> Numeric
 
   # <!-- rdoc-file=complex.c -->
-  # Returns 0 if the value is positive, pi otherwise.
+  # Returns zero if `self` is positive, Math::PI otherwise.
   #
   def angle: () -> Numeric
 
   # <!--
   #   rdoc-file=complex.c
-  #   - num.arg    ->  0 or float
-  #   - num.angle  ->  0 or float
-  #   - num.phase  ->  0 or float
+  #   - arg -> 0 or Math::PI
   # -->
-  # Returns 0 if the value is positive, pi otherwise.
+  # Returns zero if `self` is positive, Math::PI otherwise.
   #
   alias arg angle
 
@@ -559,15 +557,15 @@ class Numeric
   def numerator: () -> Numeric
 
   # <!-- rdoc-file=complex.c -->
-  # Returns 0 if the value is positive, pi otherwise.
+  # Returns zero if `self` is positive, Math::PI otherwise.
   #
   alias phase angle
 
   # <!--
   #   rdoc-file=complex.c
-  #   - num.polar  ->  array
+  #   - polar -> array
   # -->
-  # Returns an array; [num.abs, num.arg].
+  # Returns array `[self.abs, self.arg]`.
   #
   def polar: () -> [ Numeric, Numeric ]
 
@@ -605,16 +603,15 @@ class Numeric
   def real?: () -> bool
 
   # <!-- rdoc-file=complex.c -->
-  # Returns an array; [num, 0].
+  # Returns array `[self, 0]`.
   #
   def rect: () -> [ Numeric, Numeric ]
 
   # <!--
   #   rdoc-file=complex.c
-  #   - num.rect  ->  array
-  #   - num.rectangular  ->  array
+  #   - rect -> array
   # -->
-  # Returns an array; [num, 0].
+  # Returns array `[self, 0]`.
   #
   alias rectangular rect
 
@@ -763,9 +760,9 @@ class Numeric
 
   # <!--
   #   rdoc-file=complex.c
-  #   - num.to_c  ->  complex
+  #   - to_c -> complex
   # -->
-  # Returns the value as a complex.
+  # Returns `self` as a Complex object.
   #
   def to_c: () -> Complex
 
