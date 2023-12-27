@@ -128,7 +128,7 @@ module RBS
                 end
               end.ruby2_keywords
             )
-          end.new()
+          end.allocate()
         end
       end
     end
