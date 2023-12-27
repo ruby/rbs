@@ -151,13 +151,10 @@ module TestHelper
   include RBS::UnitTest::WithAliases
   include VersionHelper
   include WithStdlibAliases
-<<<<<<< HEAD
 
   # The current ruby executable path; used in some functions which spawn shells, as the only 
   # executable we can be guaranteed to exist is ruby itself.
   RUBY_EXE = ENV['RUBY'] || RbConfig.ruby
-=======
->>>>>>> master
 
   def self.included(base)
     base.extend RBS::UnitTest::TypeAssertions::ClassMethods
