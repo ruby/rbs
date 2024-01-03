@@ -584,6 +584,18 @@ module RBS
           Types::Literal.new(literal: false, location: nil)
         when :NIL
           Types::Bases::Nil.new(location: nil)
+        when :INTEGER
+          Types::Literal.new(literal: node.children[0], location: nil)
+        when :FLOAT
+          BuiltinNames::Float.instance_type
+        when :RATIONAL
+          lit = node.children[0]
+          type_name = TypeName.new(name: lit.class.name.to_sym, namespace: Namespace.root)
+          Types::ClassInstance.new(name: type_name, args: [], location: nil)
+        when :IMAGINARY
+          lit = node.children[0]
+          type_name = TypeName.new(name: lit.class.name.to_sym, namespace: Namespace.root)
+          Types::ClassInstance.new(name: type_name, args: [], location: nil)
         when :LIT
           lit = node.children[0]
           case lit
@@ -593,8 +605,6 @@ module RBS
             else
               BuiltinNames::Symbol.instance_type
             end
-          when Integer
-            Types::Literal.new(literal: lit, location: nil)
           else
             type_name = TypeName.new(name: lit.class.name.to_sym, namespace: Namespace.root)
             Types::ClassInstance.new(name: type_name, args: [], location: nil)
@@ -686,14 +696,18 @@ module RBS
 
       def param_type(node, default: Types::Bases::Any.new(location: nil))
         case node.type
+        when :INTEGER
+          BuiltinNames::Integer.instance_type
+        when :FLOAT
+          BuiltinNames::Float.instance_type
+        when :RATIONAL
+          BuiltinNames::Numeric.instance_type
+        when :IMAGINARY
+          BuiltinNames::Numeric.instance_type
         when :LIT
           case node.children[0]
           when Symbol
             BuiltinNames::Symbol.instance_type
-          when Integer
-            BuiltinNames::Integer.instance_type
-          when Float
-            BuiltinNames::Float.instance_type
           else
             default
           end
