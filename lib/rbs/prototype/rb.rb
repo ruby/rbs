@@ -698,8 +698,10 @@ module RBS
           BuiltinNames::Integer.instance_type
         when :FLOAT
           BuiltinNames::Float.instance_type
-        when :RATIONAL, :IMAGINARY
-          BuiltinNames::Numeric.instance_type
+        when :RATIONAL
+          Types::ClassInstance.new(name: TypeName("::Rational"), args: [], location: nil)
+        when :IMAGINARY
+          Types::ClassInstance.new(name: TypeName("::Complex"), args: [], location: nil)
         when :LIT
           case node.children[0]
           when Symbol
