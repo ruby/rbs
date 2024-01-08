@@ -584,6 +584,14 @@ module RBS
           Types::Literal.new(literal: false, location: nil)
         when :NIL
           Types::Bases::Nil.new(location: nil)
+        when :INTEGER
+          Types::Literal.new(literal: node.children[0], location: nil)
+        when :FLOAT
+          BuiltinNames::Float.instance_type
+        when :RATIONAL, :IMAGINARY
+          lit = node.children[0]
+          type_name = TypeName.new(name: lit.class.name.to_sym, namespace: Namespace.root)
+          Types::ClassInstance.new(name: type_name, args: [], location: nil)
         when :LIT
           lit = node.children[0]
           case lit
@@ -686,6 +694,14 @@ module RBS
 
       def param_type(node, default: Types::Bases::Any.new(location: nil))
         case node.type
+        when :INTEGER
+          BuiltinNames::Integer.instance_type
+        when :FLOAT
+          BuiltinNames::Float.instance_type
+        when :RATIONAL
+          Types::ClassInstance.new(name: TypeName("::Rational"), args: [], location: nil)
+        when :IMAGINARY
+          Types::ClassInstance.new(name: TypeName("::Complex"), args: [], location: nil)
         when :LIT
           case node.children[0]
           when Symbol
