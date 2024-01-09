@@ -4,7 +4,7 @@ module RBS
   class DefinitionBuilder
     class MethodBuilder
       class Methods
-        Definition = _ = Struct.new(:name, :type, :originals, :overloads, :accessibilities, keyword_init: true) do
+        class Definition < Struct.new(:name, :type, :originals, :overloads, :accessibilities, keyword_init: true)
           # @implements Definition
 
           def original
