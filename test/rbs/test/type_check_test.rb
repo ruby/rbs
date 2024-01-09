@@ -375,7 +375,7 @@ EOF
 
         parse_method_type("(Integer) -> String").tap do |method_type|
           errors = []
-          typecheck.return "#foo",
+          typecheck.return :foo,
                            method_type,
                            method_type.type,
                            Test::ArgumentsReturn.exception(arguments: [1], exception: RuntimeError.new("test")),
@@ -384,7 +384,7 @@ EOF
           assert_empty errors
 
           errors.clear
-          typecheck.return "#foo",
+          typecheck.return :foo,
                            method_type,
                            method_type.type,
                            Test::ArgumentsReturn.return(arguments: [1], value: "5"),
@@ -395,7 +395,7 @@ EOF
 
         parse_method_type("(Integer) -> bot").tap do |method_type|
           errors = []
-          typecheck.return "#foo",
+          typecheck.return :foo,
                            method_type,
                            method_type.type,
                            Test::ArgumentsReturn.exception(arguments: [1], exception: RuntimeError.new("test")),
@@ -404,7 +404,7 @@ EOF
           assert_empty errors
 
           errors.clear
-          typecheck.return "#foo",
+          typecheck.return :foo,
                            method_type,
                            method_type.type,
                            Test::ArgumentsReturn.return(arguments: [1], value: "5"),
@@ -428,7 +428,7 @@ EOF
 
         parse_method_type("() -> Integer").tap do |method_type|
           errors = []
-          typecheck.return ".foo",
+          typecheck.return :foo,
                            method_type,
                            method_type.type,
                            Test::ArgumentsReturn.return(arguments: [], value: 'a'),
@@ -494,7 +494,7 @@ EOF
 
         parse_method_type("(Integer) -> String").tap do |method_type|
           errors = []
-          typecheck.args "#foo",
+          typecheck.args :foo,
                          method_type,
                          method_type.type,
                          Test::ArgumentsReturn.return(arguments: [1], value: "1"),
@@ -504,7 +504,7 @@ EOF
           assert_empty errors
 
           errors = []
-          typecheck.args "#foo",
+          typecheck.args :foo,
                          method_type,
                          method_type.type,
                          Test::ArgumentsReturn.return(arguments: ["1"], value: "1"),
@@ -514,7 +514,7 @@ EOF
           assert errors.any? {|error| error.is_a?(Test::Errors::ArgumentTypeError) }
 
           errors = []
-          typecheck.args "#foo",
+          typecheck.args :foo,
                          method_type,
                          method_type.type,
                          Test::ArgumentsReturn.return(arguments: [1, 2], value: "1"),
@@ -524,7 +524,7 @@ EOF
           assert errors.any? {|error| error.is_a?(Test::Errors::ArgumentError) }
 
           errors = []
-          typecheck.args "#foo",
+          typecheck.args :foo,
                          method_type,
                          method_type.type,
                          Test::ArgumentsReturn.return(arguments: [{ hello: :world }], value: "1"),
@@ -536,7 +536,7 @@ EOF
 
         parse_method_type("(foo: Integer, ?bar: String, **Symbol) -> String").tap do |method_type|
           errors = []
-          typecheck.args "#foo",
+          typecheck.args :foo,
                          method_type,
                          method_type.type,
                          Test::ArgumentsReturn.return(arguments: [{ foo: 31, baz: :baz }], value: "1"),
@@ -546,7 +546,7 @@ EOF
           assert_empty errors
 
           errors = []
-          typecheck.args "#foo",
+          typecheck.args :foo,
                          method_type,
                          method_type.type,
                          Test::ArgumentsReturn.return(arguments: [{ foo: "foo" }], value: "1"),
@@ -556,7 +556,7 @@ EOF
           assert errors.any? {|error| error.is_a?(Test::Errors::ArgumentTypeError) }
 
           errors = []
-          typecheck.args "#foo",
+          typecheck.args :foo,
                          method_type,
                          method_type.type,
                          Test::ArgumentsReturn.return(arguments: [{ bar: "bar" }], value: "1"),
@@ -568,7 +568,7 @@ EOF
 
         parse_method_type("(?String, ?encoding: String) -> String").tap do |method_type|
           errors = []
-          typecheck.args "#foo",
+          typecheck.args :foo,
                          method_type,
                          method_type.type,
                          Test::ArgumentsReturn.return(arguments: [{ encoding: "ASCII-8BIT" }], value: "foo"),
@@ -580,7 +580,7 @@ EOF
 
         parse_method_type("(parent: untyped, type: untyped) -> untyped").tap do |method_type|
           errors = []
-          typecheck.args "#foo",
+          typecheck.args :foo,
                          method_type,
                          method_type.type,
                          Test::ArgumentsReturn.return(arguments: [{ parent: nil, type: nil }], value: nil),
@@ -592,7 +592,7 @@ EOF
 
         parse_method_type("(Integer?, *String) -> String").tap do |method_type|
           errors = []
-          typecheck.args "#foo",
+          typecheck.args :foo,
                          method_type,
                          method_type.type,
                          Test::ArgumentsReturn.return(arguments: [1], value: "1"),
@@ -601,7 +601,7 @@ EOF
                          argument_error: Test::Errors::ArgumentError
           assert_empty errors
 
-          typecheck.args "#foo",
+          typecheck.args :foo,
                          method_type,
                          method_type.type,
                          Test::ArgumentsReturn.return(arguments: [1, ''], value: "1"),
@@ -610,7 +610,7 @@ EOF
                          argument_error: Test::Errors::ArgumentError
           assert_empty errors
 
-          typecheck.args "#foo",
+          typecheck.args :foo,
                          method_type,
                          method_type.type,
                          Test::ArgumentsReturn.return(arguments: [1, '', ''], value: "1"),
@@ -695,7 +695,7 @@ EOF
         builder.build_instance(type_name("::Foo")).tap do |foo|
           typecheck.overloaded_call(
             foo.methods[:foo],
-            "#foo",
+            :foo,
             Test::CallTrace.new(
               method_name: :foo,
               method_call: Test::ArgumentsReturn.return(
@@ -732,7 +732,7 @@ EOF
             RBS.logger_output = logger = StringIO.new
             typecheck.overloaded_call(
               foo.methods[:foo],
-              "#foo",
+              :foo,
               Test::CallTrace.new(
                 method_name: :foo,
                 method_call: Test::ArgumentsReturn.return(
@@ -746,7 +746,7 @@ EOF
             ).tap do |errors|
               assert_equal 1, errors.size
               assert_instance_of RBS::Test::Errors::UnresolvedOverloadingError, errors[0]
-              assert_match '[Object#foo] UnresolvedOverloadingError method_type=`() -> ::String` details=["ArgumentError: expected method type () -> ::String", "ReturnTypeError: expected `::String` but returns `30`"], method_type=`(::Integer) -> ::String` details=["ReturnTypeError: expected `::String` but returns `30`"]', logger.string
+              assert_include logger.string, '[Object#foo] UnresolvedOverloadingError method_type=`() -> ::String` details=["ArgumentError: expected method type () -> ::String", "ReturnTypeError: expected `::String` but returns `30`"], method_type=`(::Integer) -> ::String` details=["ReturnTypeError: expected `::String` but returns `30`"]'
             end
           ensure
             RBS.logger_output = nil
