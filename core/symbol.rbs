@@ -175,7 +175,8 @@ class Symbol
   # Equivalent to `symbol.to_s =~ object`, including possible updates to global
   # variables; see String#=~.
   #
-  def =~: (untyped obj) -> Integer?
+  def =~: (Regexp regex) -> Integer?
+        | [T] (String::_MatchAgainst[self, T] object) -> T
 
   # <!--
   #   rdoc-file=string.c
