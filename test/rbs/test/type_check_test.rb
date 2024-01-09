@@ -198,9 +198,6 @@ EOF
           end
           assert yes
           assert typecheck.value(success, parse_type(interface))
-        rescue
-          p [:success, definer, interface]
-          raise
         end
 
         [
@@ -252,9 +249,6 @@ EOF
           end
           refute no
           refute typecheck.value(failure, parse_type(interface))
-        rescue
-          p [:failure, definer, interface]
-          raise
         end
       end
     end
