@@ -14,7 +14,8 @@ module RBS
 
     include FileFinder
 
-    Library = _ = Struct.new(:name, :version, keyword_init: true)
+    class Library < Struct.new(:name, :version, keyword_init: true)
+    end
 
     attr_reader :core_root
     attr_reader :repository

@@ -5,7 +5,7 @@ module RBS
     class RB
       include Helpers
 
-      Context = _ = Struct.new(:module_function, :singleton, :namespace, :in_def, keyword_init: true) do
+      class Context < Struct.new(:module_function, :singleton, :namespace, :in_def, keyword_init: true)
         # @implements Context
 
         def self.initial(namespace: Namespace.root)
