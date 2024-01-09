@@ -1028,9 +1028,10 @@ class Integer < Numeric
   #     a.pow(b)     #=> same as a**b
   #     a.pow(b, m)  #=> same as (a**b) % m, but avoids huge temporary values
   #
-  def pow: (Integer other, ?Integer modulo) -> Integer
-         | (Float) -> Float
-         | (Rational) -> Rational
+  def pow: (Integer other) -> (Integer | Rational)
+         | (Integer other, Integer modulo) -> Integer
+         | (Float) -> (Float | Complex)
+         | (Rational) -> (Float | Rational | Complex)
          | (Complex) -> Complex
 
   # <!--
