@@ -603,6 +603,11 @@ module RBS
             end
           when Integer
             Types::Literal.new(literal: lit, location: nil)
+          when String
+            # For Ruby <=3.3 which generates `LIT` node for string literals inside Hash literal.
+            # "a"             => STR node
+            # { "a" => nil }  => LIT node
+            Types::Literal.new(literal: lit, location: nil)
           else
             type_name = TypeName.new(name: lit.class.name.to_sym, namespace: Namespace.root)
             Types::ClassInstance.new(name: type_name, args: [], location: nil)
