@@ -16,19 +16,15 @@ jobs:
         ruby: ['3.0', '3.1', '3.2', '3.3', head]
         job:
           - test
-          - stdlib_test
-          - rubocop validate test_doc build test_generate_stdlib
-          - lexer confirm_lexer
-          - lexer compile
-        exclude:
+        include:
           - ruby: head
-            job: confirm_lexer
-          - ruby: "3.0"
+            job: stdlib_test rubocop
+          - ruby: "3.3"
             job: stdlib_test
-          - ruby: "3.1"
-            job: stdlib_test
-          - ruby: "3.2"
-            job: stdlib_test
+          - ruby: "3.3"
+            job: lexer compile confirm_lexer
+          - ruby: "3.3"
+            job: rubocop validate test_doc build test_generate_stdlib
     steps:
       - uses: actions/checkout@v4
       - uses: ruby/setup-ruby@v1
@@ -42,7 +38,7 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y libdb-dev curl autoconf automake m4 libtool python3
       - name: Install Re2c
-        if: contains(matrix.job, 'lexer')
+        if: ${{ contains(matrix.job, 'lexer') }}
         run: |
           cd /tmp
           curl -L https://github.com/skvadrik/re2c/archive/refs/tags/3.1.tar.gz > re2c-3.1.tar.gz
