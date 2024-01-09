@@ -1,3 +1,7 @@
+# <!-- rdoc-file=ext/socket/raddrinfo.c -->
+# The Addrinfo class maps `struct addrinfo` to ruby.  This structure identifies
+# an Internet host and a service.
+#
 class Addrinfo
   # <!--
   #   rdoc-file=ext/socket/lib/socket.rb

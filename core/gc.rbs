@@ -259,6 +259,7 @@ module GC
   #   rdoc-file=gc.rb
   #   - garbage_collect(full_mark: true, immediate_mark: true, immediate_sweep: true)
   # -->
+  # Alias of GC.start
   #
   def garbage_collect: (?immediate_sweep: boolish immediate_sweep, ?immediate_mark: boolish immediate_mark, ?full_mark: boolish full_mark) -> nil
 end
