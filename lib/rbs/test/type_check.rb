@@ -35,22 +35,24 @@ module RBS
         if es.size == 1
           errors.push(*es[0])
         else
+          error = Errors::UnresolvedOverloadingError.new(
+            klass: self_class,
+            method_name: method_name,
+            method_types: method.method_types
+          )
           RBS.logger.warn do
-            message = +"[#{self_class}#{method_name}] UnresolvedOverloadingError "
+            tag = Errors.method_tag(error)
+            message = +"#{tag} UnresolvedOverloadingError "
             message << method.method_types.zip(es).map do |method_type, es|
               msg = +"method_type=`#{method_type}`"
               details = es.map do |e|
-                "\"#{Errors.to_string(e).sub("[#{e.klass.name}#{e.method_name}] ", "") }\""
+                "\"#{Errors.to_string(e).sub("#{tag} ", "") }\""
               end.join(', ')
               msg << " details=[#{details}]"
             end.join(', ')
             message
           end
-          errors << Errors::UnresolvedOverloadingError.new(
-            klass: self_class,
-            method_name: method_name,
-            method_types: method.method_types
-          )
+          errors << error
         end
 
         errors
@@ -308,8 +310,15 @@ module RBS
           val.is_a?(singleton_class)
         when Types::Interface
           if (definition = builder.build_interface(type.name.absolute!))
-            definition.methods.each_key.all? do |method_name|
-              Test.call(val, RESPOND_TOP, method_name)
+            definition.methods.each.all? do |method_name, method|
+              next false unless Test.call(val, RESPOND_TOP, method_name)
+
+              meth = Test.call(val, METHOD, method_name)
+              method.defs.all? do |type_def|
+                type_def.member.overloads.all? do |overload|
+                  callable_argument?(meth.parameters, overload.method_type)
+                end
+              end
             end
           end
         when Types::Variable
@@ -335,6 +344,73 @@ module RBS
         else
           false
         end
+      end
+
+      private
+
+      def callable_argument?(parameters, method_type)
+        fun = method_type.type
+        take_has_rest = !!parameters.find { |(op, _)| op == :rest }
+
+        fun.required_positionals.each do
+          op, _ = parameters.first
+          return false if op.nil? || op == :keyreq || op == :key || op == :keyrest
+          parameters.shift if op == :req || op == :opt
+        end
+
+        fun.optional_positionals.each do
+          op, _ = parameters.first
+          return false if op.nil? || op == :req || op == :keyreq || op == :key || op == :keyrest
+          parameters.shift if op == :opt
+        end
+
+        if fun.rest_positionals
+          op, _ = parameters.shift
+          return false if op.nil? || op != :rest
+        end
+
+        fun.trailing_positionals.each do
+          op, _ = parameters.first
+          return false if !take_has_rest && (op.nil? || op == :keyreq || op == :key || op == :keyrest)
+          index = parameters.find_index { |(op, _)| op == :req }
+          parameters.delete_at(index) if index
+        end
+
+        if fun.has_keyword?
+          return false if !take_has_rest && parameters.empty?
+
+          fun.required_keywords.each do |name, _|
+            return false if !take_has_rest && parameters.empty?
+            index = parameters.find_index { |(op, n)| (op == :keyreq || op == :key) && n == name }
+            parameters.delete_at(index) if index
+          end
+
+          if !fun.optional_keywords.empty?
+            fun.optional_keywords.each do |name, _|
+              return false if !take_has_rest && parameters.empty?
+              index = parameters.find_index { |(op, n)| op == :key && n == name }
+              parameters.delete_at(index) if index
+            end
+            op, _ = parameters.first
+            return false if op == :req
+          end
+
+          if fun.rest_keywords
+            op, _ = parameters.first
+            return false if (!take_has_rest && op.nil?)
+            # f(a) allows (Integer, a: Integer)
+            return false if op == :req && fun.required_keywords.empty?
+          end
+
+          op, _ = parameters.first
+          return true if (op == :req || op == :opt) && parameters.length == 1
+        end
+
+        # rest required arguments
+        op, _ = parameters.first
+        return false if op == :req || op == :keyreq
+
+        true
       end
     end
   end

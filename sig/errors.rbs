@@ -363,6 +363,6 @@ module RBS
 
     def initialize: (String message, location: Location[untyped, untyped]?) -> void
 
-    def location: () -> Location[untyped, untyped]?
+    attr_reader location: Location[untyped, untyped]?
   end
 end

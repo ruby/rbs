@@ -961,8 +961,8 @@ class Range[out Elem] < Object
   #
   # Related: Range#%.
   #
-  def step: (?Integer n) { (Elem arg0) -> untyped } -> self
-          | (?Integer n) -> ::Enumerator[Elem, void]
+  def step: (?Numeric | int n) -> Enumerator[Elem, self]
+          | (?Numeric | int n) { (Elem element) -> void } -> self
 
   # <!--
   #   rdoc-file=range.c

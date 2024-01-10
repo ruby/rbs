@@ -1033,7 +1033,7 @@ end
       [%{1..2}, %{::Range[::Integer]}],
       [%{{}}, %{::Hash[untyped, untyped]}],
       [%{{a: nil}}, %{ { a: nil } }],
-      [%{{"a" => /b/}}, %{ ::Hash[::String, ::Regexp] }],
+      [%({"a" => /b/}), %({ 'a' => ::Regexp })],
     ].each do |rb, rbs|
       node = RubyVM::AbstractSyntaxTree.parse("_ = #{rb}").children[2]
       assert_equal RBS::Parser.parse_type(rbs), parser.literal_to_type(node.children[1])

@@ -30,9 +30,9 @@ GEM
     language_server-protocol (3.17.0.3)
     marcel (1.0.2)
     minitest (5.20.0)
-    net-protocol (0.2.1)
+    net-protocol (0.2.2)
       timeout
-    net-smtp (0.4.0)
+    net-smtp (0.4.0.1)
       net-protocol
     parallel (1.23.0)
     parser (3.2.2.4)
@@ -86,7 +86,7 @@ GEM
     tempfile (0.2.1)
     test-unit (3.6.1)
       power_assert
-    timeout (0.4.0)
+    timeout (0.4.1)
     unicode-display_width (2.5.0)
 
 PLATFORMS
