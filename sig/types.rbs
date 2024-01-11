@@ -301,15 +301,20 @@ module RBS
     end
 
     class Record
-      attr_reader fields: Hash[Symbol, t]
+      attr_reader all_fields: Hash[Symbol, [t, bool]]
 
       type loc = Location[bot, bot]
 
       def initialize: (fields: Hash[Symbol, t], location: loc?) -> void
+                    | (all_fields: Hash[Symbol, [t, bool]], location: loc?) -> void
 
       include _TypeBase
 
       attr_reader location: loc?
+
+      def fields: () -> Hash[Symbol, t]
+
+      def optional_fields: () -> Hash[Symbol, t]?
 
       def map_type: () { (t) -> t } -> Record
                   | () -> Enumerator[t, Record]
