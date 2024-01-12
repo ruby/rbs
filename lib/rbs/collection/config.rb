@@ -65,8 +65,8 @@ module RBS
 
       def sources
         @sources ||= [
-          Sources::Stdlib.instance,
           Sources::Rubygems.instance,
+          Sources::Stdlib.instance,
           *@data['sources'].map { |c| Sources.from_config_entry(c, base_directory: @config_path.dirname) }
         ]
       end
