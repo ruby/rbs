@@ -461,6 +461,8 @@ module RBS
 
       def literal_to_symbol(node)
         case node.type
+        when :SYM
+          node.children[0]
         when :LIT
           node.children[0] if node.children[0].is_a?(Symbol)
         when :STR
@@ -574,6 +576,13 @@ module RBS
           end
         when :DSTR, :XSTR
           BuiltinNames::String.instance_type
+        when :SYM
+          lit = node.children[0]
+          if lit.to_s.ascii_only?
+            Types::Literal.new(literal: lit, location: nil)
+          else
+            BuiltinNames::Symbol.instance_type
+          end
         when :DSYM
           BuiltinNames::Symbol.instance_type
         when :DREGX
@@ -718,6 +727,8 @@ module RBS
           else
             default
           end
+        when :SYM
+          BuiltinNames::Symbol.instance_type
         when :STR, :DSTR
           BuiltinNames::String.instance_type
         when :NIL
