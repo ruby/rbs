@@ -118,7 +118,7 @@ end
 It prints signatures for all methods, classes, instance variables, and constants.
 This is only a starting point, and you should edit the output to match your signature more accurately.
 
-`rbs prototpe` offers three options.
+`rbs prototype` offers three options.
 
 - `rb` generates from just the available Ruby code
 - `rbi` generates from Sorbet RBI
