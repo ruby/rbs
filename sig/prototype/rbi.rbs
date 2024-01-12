@@ -1,6 +1,8 @@
 module RBS
   module Prototype
     class RBI
+      include Helpers
+      
       attr_reader decls: Array[AST::Declarations::t]
 
       type module_decl = AST::Declarations::Class | AST::Declarations::Module

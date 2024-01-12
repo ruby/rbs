@@ -3,6 +3,8 @@
 module RBS
   module Prototype
     class RBI
+      include Helpers
+
       attr_reader :decls
       attr_reader :modules
       attr_reader :last_sig
@@ -218,11 +220,11 @@ module RBS
           if (send = node.children.last) && send.type == :FCALL && send.children[0] == :type_member
             unless each_arg(send.children[1]).any? {|node|
               node.type == :HASH &&
-                each_arg(node.children[0]).each_slice(2).any? {|a, _| a.type == :LIT && a.children[0] == :fixed }
+                each_arg(node.children[0]).each_slice(2).any? {|a, _| symbol_literal_node?(a) == :fixed }
             }
               # @type var variance: AST::TypeParam::variance?
-              if (a0 = each_arg(send.children[1]).to_a[0]) && a0.type == :LIT
-                variance = case a0.children[0]
+              if (a0 = each_arg(send.children[1]).to_a[0]) && (v = symbol_literal_node?(a0))
+                variance = case v
                            when :out
                              :covariant
                            when :in
@@ -321,8 +323,8 @@ module RBS
             type_params = []
 
             each_arg args do |node|
-              if node.type == :LIT
-                type_params << node.children[0]
+              if name = symbol_literal_node?(node)
+                type_params << name
               end
             end
 
@@ -613,8 +615,8 @@ module RBS
           each_arg(node.children[0]).each_slice(2) do |var, type|
             var or raise
 
-            if var.type == :LIT && type
-              hash[var.children[0]] = type
+            if (name = symbol_literal_node?(var)) && type
+              hash[name] = type
             end
           end
 
