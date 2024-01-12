@@ -14,7 +14,7 @@ unless IS_LATEST_RUBY
   end
 end
 
-KNOWN_FAILS = %w(dbm).map do |lib|
+KNOWN_FAILS = %w(dbm mutex_m).map do |lib|
   /cannot load such file -- #{lib}/
 end
 
