@@ -80,7 +80,7 @@ GEM
     rubocop-rubycw (0.1.6)
       rubocop (~> 1.0)
     ruby-progressbar (1.13.0)
-    stackprof (0.2.25)
+    stackprof (0.2.26)
     stringio (3.1.0)
     strong_json (2.1.2)
     tempfile (0.2.1)
