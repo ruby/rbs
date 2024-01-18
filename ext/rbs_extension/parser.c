@@ -698,15 +698,22 @@ static VALUE parse_proc_type(parserstate *state) {
                      | {} literal_type `=>` <type>
 */
 VALUE parse_record_attributes(parserstate *state) {
-  VALUE hash = rb_hash_new();
+  VALUE fields = rb_hash_new();
 
   if (state->next_token.type == pRBRACE) {
-    return hash;
+    return fields;
   }
 
   while (true) {
-    VALUE key;
-    VALUE type;
+    VALUE key, type,
+          value = rb_ary_new(),
+          required = Qtrue;
+
+    if (state->next_token.type == pQUESTION) {
+      // { ?foo: type } syntax
+      required = Qfalse;
+      parser_advance(state);
+    }
 
     if (is_keyword(state)) {
       // { foo: type } syntax
@@ -735,7 +742,9 @@ VALUE parse_record_attributes(parserstate *state) {
       parser_advance_assert(state, pFATARROW);
     }
     type = parse_type(state);
-    rb_hash_aset(hash, key, type);
+    rb_ary_push(value, type);
+    rb_ary_push(value, required);
+    rb_hash_aset(fields, key, value);
 
     if (parser_advance_if(state, pCOMMA)) {
       if (state->next_token.type == pRBRACE) {
@@ -745,8 +754,7 @@ VALUE parse_record_attributes(parserstate *state) {
       break;
     }
   }
-
-  return hash;
+  return fields;
 }
 
 /*

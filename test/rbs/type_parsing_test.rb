@@ -670,6 +670,15 @@ class RBS::TypeParsingTest < Test::Unit::TestCase
   end
 
   def test_record_with_optional_key
+    Parser.parse_type("{ ?foo: untyped }").yield_self do |type|
+      assert_instance_of Types::Record, type
+      assert_equal({}, type.fields)
+      assert_equal({
+                     foo: Types::Bases::Any.new(location: nil),
+                   }, type.optional_fields)
+      assert_equal "{ ?foo: untyped }", type.location.source
+    end
+
     error = assert_raises(RBS::ParsingError) do
       Parser.parse_type("{ 1?: untyped }")
     end
