@@ -29,7 +29,7 @@ GEM
       addressable (>= 2.8)
     language_server-protocol (3.17.0.3)
     marcel (1.0.2)
-    minitest (5.21.1)
+    minitest (5.21.2)
     net-protocol (0.2.2)
       timeout
     net-smtp (0.4.0.1)
