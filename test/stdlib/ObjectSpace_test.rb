@@ -212,11 +212,15 @@ class ObjectSpaceTest < Test::Unit::TestCase
   def test_trace_object_allocations_debug_start
     assert_send_type "() -> void",
       ObjectSpace, :trace_object_allocations_debug_start
+  ensure
+    ObjectSpace.trace_object_allocations_stop
   end
 
   def test_trace_object_allocations_start
     assert_send_type "() -> void",
       ObjectSpace, :trace_object_allocations_start
+  ensure
+    ObjectSpace.trace_object_allocations_stop
   end
 
   def test_trace_object_allocations_stop
