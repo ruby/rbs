@@ -515,34 +515,24 @@ module RBS
     end
 
     class Record
-      attr_reader :all_fields
+      attr_reader :all_fields, :fields, :optional_fields
       attr_reader :location
 
       def initialize(all_fields: nil, fields: nil, location:)
-        if (all_fields && fields) || (all_fields.nil? && fields.nil?)
+        case
+        when fields && all_fields.nil?
+          @all_fields = fields.map { |k, v| [k, [v, true]] }.to_h
+          @fields = fields
+          @optional_fields = {}
+        when all_fields && fields.nil?
+          @all_fields = all_fields
+          @fields = all_fields.filter_map { |k, (v, required)| [k, v] if required }.to_h
+          @optional_fields = all_fields.filter_map { |k, (v, required)| [k, v] unless required }.to_h
+        else
           raise ArgumentError, "only one of `:fields` or `:all_fields` is requireds"
         end
 
-        if fields
-          @all_fields = fields.map { |k, v| [k, [v, true]] }.to_h
-          @fields = fields
-        else
-          @all_fields = all_fields
-          @fields = nil
-        end
-
         @location = location
-        @optional_fields = nil
-      end
-
-      def fields
-        @fields ||= all_fields.filter_map { |k, (v, required)| [k, v] if required }.to_h
-      end
-
-      def optional_fields
-        return if all_fields.size == fields.size
-
-        @optional_fields ||= all_fields.filter_map { |k, (v, required)| [k, v] unless required }.to_h
       end
 
       def ==(other)
@@ -560,7 +550,7 @@ module RBS
           fields.each_value do |type|
             type.free_variables set
           end
-          optional_fields&.each_value do |type|
+          optional_fields.each_value do |type|
             type.free_variables set
           end
         end
@@ -596,7 +586,7 @@ module RBS
       def each_type(&block)
         if block
           fields.each_value(&block)
-          optional_fields&.each_value(&block)
+          optional_fields.each_value(&block)
         else
           enum_for :each_type
         end
