@@ -16,9 +16,12 @@ GEM
     addressable (2.8.5)
       public_suffix (>= 2.0.2, < 6.0)
     ast (2.4.2)
+    base64 (0.2.0)
+    bigdecimal (3.1.6)
     dbm (1.1.0)
     diff-lcs (1.5.0)
     digest (3.1.1)
+    fileutils (1.7.2)
     goodcheck (3.1.0)
       marcel (>= 1.0, < 2.0)
       psych (>= 3.1, < 5.0)
@@ -30,10 +33,12 @@ GEM
     language_server-protocol (3.17.0.3)
     marcel (1.0.2)
     minitest (5.21.2)
+    mutex_m (0.2.0)
     net-protocol (0.2.2)
       timeout
     net-smtp (0.4.0.1)
       net-protocol
+    nkf (0.2.0)
     parallel (1.24.0)
     parser (3.3.0.4)
       ast (~> 2.4.1)
@@ -94,13 +99,19 @@ PLATFORMS
   x86_64-darwin-20
 
 DEPENDENCIES
+  abbrev
+  base64
+  bigdecimal
   dbm
   digest
+  fileutils
   goodcheck
   json
   json-schema
   minitest
+  mutex_m
   net-smtp
+  nkf
   rake
   rake-compiler
   rbs!
