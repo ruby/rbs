@@ -18,6 +18,12 @@ gem "dbm"
 gem 'digest'
 gem 'tempfile'
 gem "rdoc"
+gem "bigdecimal"
+gem "abbrev"
+gem "base64"
+gem "mutex_m"
+gem "nkf"
+gem "fileutils"
 
 # Test gems
 gem "rbs-amber", path: "test/assets/test-gem"
