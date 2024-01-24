@@ -1,181 +1,411 @@
-require_relative "test_helper"
+require_relative 'test_helper'
 
-class RegexpTest < StdlibTest
-  target Regexp
+class RegexpSingletonTest < Test::Unit::TestCase
+  include TestHelper
 
-  def test_new
-    Regexp.new('dog')
-    Regexp.new('dog', option = Regexp::IGNORECASE)
-    Regexp.new('dog', option = nil)
-    Regexp.new('dog', option = Regexp::IGNORECASE)
-    Regexp.new(/^a-z+:\\s+\w+/)
+  testing 'singleton(::Regexp)'
+
+  def test_TimeoutError
+    assert Regexp::TimeoutError.superclass.equal?(RegexpError)
+  end
+
+  def test_EXTENDED
+    assert_const_type 'Integer',
+                      'Regexp::EXTENDED'
+  end
+
+  def test_FIXEDENCODING
+    assert_const_type 'Integer',
+                      'Regexp::FIXEDENCODING'
+  end
+
+  def test_IGNORECASE
+    assert_const_type 'Integer',
+                      'Regexp::IGNORECASE'
+  end
+
+  def test_MULTILINE
+    assert_const_type 'Integer',
+                      'Regexp::MULTILINE'
+  end
+
+  def test_NOENCODING
+    assert_const_type 'Integer',
+                      'Regexp::NOENCODING'
   end
 
   def test_compile
-    Regexp.compile('dog')
-    Regexp.compile('dog', option = Regexp::IGNORECASE)
-    Regexp.compile('dog', option = nil)
-    Regexp.compile('dog', option = Regexp::IGNORECASE)
-    Regexp.compile(/^a-z+:\\s+\w+/)
+    assert_send_type  '(Regexp) -> Regexp',
+                      Regexp, :compile, /a/
+
+    with_float(12.34).and_nil do |timeout|
+      assert_send_type  '(Regexp, timeout: _ToF?) -> Regexp',
+                        Regexp, :compile, /a/, timeout: timeout
+    end
+
+    with_string 'a' do |pattern|
+      assert_send_type  '(string) -> Regexp',
+                        Regexp, :compile, pattern
+
+      with_int(Regexp::IGNORECASE).and with_string('i'), true, false, nil do |options|
+        assert_send_type  '(string, int | string | bool | nil) -> Regexp',
+                          Regexp, :compile, pattern, options
+
+        # In older versions of ruby, `Regexp.{new,compile}` could take an additional third argument,
+        # which indicated "no encoding". Due to weirdnesses with how keyword arguments are passed
+        # around in Ruby, along with how `compile` is registered internally, the `timeout: _ToF?`
+        # argument is interpreted as this optional third argument in older versions. So, to prevent
+        # any issues, this `next` skips it. Note that this issue doesn't occur in `test_initialize`
+        # because the implicit argument passing isn't done.
+        next if RUBY_VERSION < '3.3'
+
+        with_float(12.34).and_nil do |timeout|
+          assert_send_type  '(string, int | string | bool | nil, timeout: _ToF?) -> Regexp',
+                            Regexp, :compile, pattern, options, timeout: timeout
+        end
+      end
+    end
   end
 
-  def test_escape
-    Regexp.escape('\*?{}.')
-    Regexp.escape(:[])
+  def test_escape(method: :escape)
+    with_interned 'hello.world!\K!' do |str|
+      assert_send_type  '(interned) -> String',
+                        Regexp, method, str
+    end
   end
 
   def test_last_match
-    /c(.)t/ =~ 'cat'
-    Regexp.last_match
-    Regexp.last_match(0)
-    /(?<lhs>\w+)\s*=\s*(?<rhs>\w+)/ =~ "var = val"
-    Regexp.last_match(:lhs)
-    Regexp.last_match('rhs')
+    # We can't use `assert_send_type` as `Regexp.last_match` depends on the current function's stackframe.
+    assert_type 'nil',
+                Regexp.last_match
+
+    /(?<a>a)(?<b>b)?/ =~ 'a'
+    assert_type 'MatchData',
+                Regexp.last_match
+
+    with_int(1).and :a, 'a' do |capture|
+      assert_type 'String',
+                  Regexp.last_match(capture)
+    end
+
+    with_int(2).and :b, 'b' do |capture|
+      assert_type 'nil',
+                  Regexp.last_match(capture)
+    end
+  end
+
+  def test_linear_time?
+    assert_send_type  '(Regexp) -> bool',
+                      Regexp, :linear_time?, /(.+)++/
+
+    assert_send_type  '(Regexp, nil) -> bool',
+                      Regexp, :linear_time?, /(.+)++/, nil
+    
+    with_untyped do |timeout|
+      assert_send_type  '(Regexp, timeout: untyped) -> bool',
+                        Regexp, :linear_time?, /(.+)++/, timeout: timeout
+
+      assert_send_type  '(Regexp, nil, timeout: untyped) -> bool',
+                        Regexp, :linear_time?, /(.+)++/, nil, timeout: timeout
+    end
+
+    with_string '(.+)++' do |regexp|
+      assert_send_type  '(string) -> bool',
+                        Regexp, :linear_time?, regexp
+
+      with_untyped do |timeout|
+        assert_send_type  '(string, timeout: untyped) -> bool',
+                          Regexp, :linear_time?, regexp, timeout: timeout
+      end
+
+      with_int(Regexp::IGNORECASE).and(with_string('i'), true, false, nil) do |options|
+        assert_send_type  '(string, int | string | bool | nil) -> bool',
+                          Regexp, :linear_time?, regexp, options
+        
+        with_untyped do |timeout|
+          assert_send_type  '(string, int | string | bool | nil, timeout: untyped) -> bool',
+                            Regexp, :linear_time?, regexp, options, timeout: timeout
+        end
+      end
+    end
   end
 
   def test_quote
-    Regexp.quote('\*?{}.')
-    Regexp.quote(:[])
+    test_escape(method: :quote)
   end
 
   def test_try_convert
-    Regexp.try_convert(/re/)
-    Regexp.try_convert("re")
+    assert_send_type  '(Regexp) -> Regexp',
+                      Regexp, :try_convert, /regexp/
 
-    o = Object.new
-    Regexp.try_convert(o)
-    def o.to_regexp() /foo/ end
-    Regexp.try_convert(o)
+    def (toregexp = BlankSlate.new).to_regexp = /a/
+    assert_send_type  '(Regexp::_ToRegexp) -> Regexp',
+                      Regexp, :try_convert, toregexp
+
+    with_untyped.but Regexp, proc{!defined? _1.to_regexp} do |untyped|
+      assert_send_type  '(untyped) -> nil',
+                        Regexp, :try_convert, untyped
+    end
+  end
+
+  def test_timeout
+    omit_if RUBY_VERSION < '3.2'
+
+    begin
+      old_timeout = Regexp.timeout
+
+      Regexp.timeout = nil
+      assert_send_type  '() -> nil',
+                        Regexp, :timeout
+
+      Regexp.timeout = 1.3
+      assert_send_type  '() -> Float',
+                        Regexp, :timeout
+    ensure
+      Regexp.timeout = old_timeout
+    end
+  end
+
+  def test_timeout=
+    omit_if RUBY_VERSION < '3.2'
+
+    begin
+      old_timeout = Regexp.timeout
+
+      assert_send_type  '(nil) -> nil',
+                        Regexp, :timeout=, nil
+
+      with_float 1.2 do |timeout|
+        assert_send_type  '[T < _ToF] (T) -> T',
+                          Regexp, :timeout=, timeout
+      end
+    ensure
+      Regexp.timeout = old_timeout
+    end
   end
 
   def test_union
-    Regexp.union
-    Regexp.union("penzance")
-    Regexp.union(/penzance/i)
-    Regexp.union("skiing", "sledding")
-    Regexp.union("dogs", /cats/i)
-    Regexp.union(/cats/i, "dogs")
-    Regexp.union(/dogs/, /cats/i)
-    Regexp.union("skiing", "sledding", "sky")
-    Regexp.union([/dogs/i, /cats/i])
-    Regexp.union(["skiing", "sledding"])
-    Regexp.union(["dogs", /cats/i])
-  end
+    assert_send_type  '() -> Regexp',
+                      Regexp, :union
 
-  # test_==
-  def test_double_equal
-    /abc/  == /abc/x #=> false
-    /abc/  == /abc/i #=> false
-    /abc/  == /abc/u #=> false
-    /abc/u == /abc/n #=> false
-  end
+    assert_send_type  '(Symbol) -> Regexp',
+                      Regexp, :union, :&
+    assert_send_type  '([Symbol]) -> Regexp',
+                      Regexp, :union, [:&]
 
-  # test_===
-  def test_triple_equal
-    a = "HELLO"
-    if (/\A[a-z]*\z/ === a)
-      "Lower case\n"
-    elsif (/\A[A-Z]*\z/ === a)
-      "Upper case\n"
-    else
-      "Mixed case\n"
+    def (toregexp = BlankSlate.new).to_regexp = /a/
+    with_string 'b' do |string|
+      assert_send_type  '(*Regexp::_ToRegexp | string) -> Regexp',
+                        Regexp, :union, string, toregexp, string
+
+      with_array string, toregexp, string do |array|
+        assert_send_type  '(array[Regexp::_ToRegexp | string]) -> Regexp',
+                          Regexp, :union, array
+      end
     end
-    #=> "Upper case"
   end
 
-  # test_=~
-  def test_equal_tilde
-    /at/ =~ "input data" #=> 7
-    /ax/ =~ "input data" #=> nil
-    /a/ =~ :a            #=> 0
+  def test_new
+    assert_send_type  '(Regexp) -> Regexp',
+                      Regexp, :new, /a/
+
+    with_float(12.34).and_nil do |timeout|
+      assert_send_type  '(Regexp, timeout: _ToF?) -> Regexp',
+                        Regexp, :new, /a/, timeout: timeout
+    end
+
+    with_string 'a' do |pattern|
+      assert_send_type  '(string) -> Regexp',
+                        Regexp, :new, pattern
+
+      with_int(Regexp::IGNORECASE).and with_string('i'), true, false, nil do |options|
+        assert_send_type  '(string, int | string | bool | nil) -> Regexp',
+                          Regexp, :new, pattern, options
+
+        with_float(12.34).and_nil do |timeout|
+          assert_send_type  '(string, int | string | bool | nil, timeout: _ToF?) -> Regexp',
+                            Regexp, :new, pattern, options, timeout: timeout
+        end
+      end
+    end
+  end
+
+end
+
+class RegexpInstanceTest < Test::Unit::TestCase
+  include TestHelper
+
+  testing '::Regexp'
+
+  def test_initialize_copy
+    assert_send_type  '(Regexp) -> Regexp',
+                      Regexp.allocate, :initialize_copy, /a/
+  end
+
+  def test_eq(method: :==)
+    with_untyped do |rhs|
+      assert_send_type  '(untyped) -> bool',
+                        /a/, method, rhs
+    end
+  end
+
+  def test_eqq
+    with_untyped do |rhs|
+      assert_send_type  '(untyped) -> bool',
+                        /a/, :===, rhs
+    end
+  end
+
+  def test_matchop
+    assert_send_type  '(nil) -> nil',
+                      /a/, :=~, nil
+
+    with_interned 'a' do |str|
+      assert_send_type  '(interned) -> Integer',
+                        /a/, :=~, str
+      assert_send_type  '(interned) -> nil',
+                        /b/, :=~, str
+    end
   end
 
   def test_casefold?
-    /a/.casefold?      #=> false
-    /a/i.casefold?     #=> true
-    /(?i:a)/.casefold? #=> false
+    assert_send_type  '() -> bool',
+                      /a/, :casefold?
+    assert_send_type  '() -> bool',
+                      /a/i, :casefold?
   end
 
   def test_encoding
-    /(?i:a)/.encoding
+    assert_send_type  '() -> Encoding',
+                      /a/, :encoding
   end
 
   def test_eql?
-    /abc/.eql?(/abc/x)  #=> false
-    /abc/.eql?(/abc/i)  #=> false
-    /abc/.eql?(/abc/u)  #=> false
-    /abc/u.eql?(/abc/n) #=> false
+    test_eq(method: :==)
   end
 
   def test_fixed_encoding?
-    /a/.fixed_encoding?  #=> false
-    /a/u.fixed_encoding? #=> true
+    assert_send_type  '() -> bool',
+                      /a/, :fixed_encoding?
+    assert_send_type  '() -> bool',
+                      /a/u, :fixed_encoding?
   end
 
   def test_hash
-    /a/.hash
+    assert_send_type  '() -> Integer',
+                      /a/, :hash
   end
 
   def test_inspect
-    /ab+c/ix.inspect #=> "/ab+c/ix"
+    assert_send_type  '() -> String',
+                      /a/, :inspect
   end
 
   def test_match
-    /R.../.match("Ruby")    #=> MatchData
-    /P.../.match("Ruby")    #=> nil
-    /R.../.match(:Ruby)     #=> MatchData
-    /R.../.match(nil)       #=> nil
-    o = Class.new { def to_str; "object"; end }.new
-    /R.../.match(o)         #=> nil
-    /R.../.match("Ruby", 1) #=> nil
-    /M(.*)/.match("Matz") { |m| 'match' }
-    /M(.*)/.match("Matz", 1) { |m| 'match' }
-    /N(.*)/.match("Matz") { |m| 'match' }
-    /N(.*)/.match("Matz", 1) { |m| 'match' }
+    with_interned 'a' do |str|
+      assert_send_type  '(interned) -> MatchData',
+                        /a/, :match, str
+      assert_send_type  '(interned) -> nil',
+                        /b/, :match, str
+      assert_send_type  '[T] (interned) { (MatchData) -> T } -> T',
+                        /a/, :match, str do 1r end
+      assert_send_type  '[T] (interned) { (MatchData) -> T } -> nil',
+                        /b/, :match, str do 1r end
+     
+      with_int 0 do |offset|
+        assert_send_type  '(interned, int) -> MatchData',
+                          /a/, :match, str, offset
+        assert_send_type  '(interned, int) -> nil',
+                          /b/, :match, str, offset
+        assert_send_type  '[T] (interned, int) { (MatchData) -> T } -> T',
+                          /a/, :match, str, offset do 1r end
+        assert_send_type  '[T] (interned, int) { (MatchData) -> T } -> nil',
+                          /b/, :match, str, offset do 1r end
+      end
+    end
+
+    assert_send_type  '(nil) -> nil',
+                      /a/, :match, nil
+    assert_send_type  '(nil) { (MatchData) -> void } -> nil',
+                      /a/, :match, nil do end
+
+    with_int 0 do |offset|
+      assert_send_type  '(nil, int) -> nil',
+                        /a/, :match, nil, offset
+      assert_send_type  '(nil, int) { (MatchData) -> void } -> nil',
+                        /a/, :match, nil, offset do end
+    end
   end
 
   def test_match?
-    /R.../.match?("Ruby")    #=> true
-    /P.../.match?("Ruby")    #=> false
-    /R.../.match?(:Ruby)     #=> true
-    /R.../.match?(nil)       #=> false
-    o = Class.new { def to_str; "object"; end }.new
-    /R.../.match?(o)         #=> false
-    /R.../.match?("Ruby", 1) #=> false
+    with_interned 'a' do |str|
+      assert_send_type  '(interned) -> true',
+                        /a/, :match?, str
+      assert_send_type  '(interned) -> false',
+                        /b/, :match?, str
+     
+      with_int 0 do |offset|
+        assert_send_type  '(interned, int) -> true',
+                          /a/, :match?, str, offset
+        assert_send_type  '(interned, int) -> false',
+                          /b/, :match?, str, offset
+      end
+    end
+
+    assert_send_type  '(nil) -> false',
+                      /a/, :match?, nil
+
+    with_int 0 do |offset|
+      assert_send_type  '(nil, int) -> false',
+                        /a/, :match?, nil, offset
+    end
   end
 
   def test_named_captures
-    /(?<foo>.)(?<bar>.)/.named_captures #=> {"foo"=>[1], "bar"=>[2]}
-    /(?<foo>.)(?<foo>.)/.named_captures #=> {"foo"=>[1, 2]}
-    /(.)(.)/.named_captures             #=> {}
+    assert_send_type  '() -> Hash[String, Array[Integer]]',
+                      /(.)/, :named_captures
+    assert_send_type  '() -> Hash[String, Array[Integer]]',
+                      /(?<a>.)(?<a>.)(?<b>.)/, :named_captures
   end
 
   def test_names
-    /(?<foo>.)(?<bar>.)(?<baz>.)/.names #=> ["foo", "bar", "baz"]
-    /(?<foo>.)(?<foo>.)/.names          #=> ["foo"]
-    /(.)(.)/.names                      #=> []
+    assert_send_type  '() -> Array[String]',
+                      /(.)/, :names
+    assert_send_type  '() -> Array[String]',
+                      /(?<a>.)(?<a>.)(?<b>.)/, :names
   end
 
   def test_options
-    /cat/.options                   #=> 0
-    /cat/ix.options                 #=> 3
-    Regexp.new('cat', true).options #=> 1
-    /\xa1\xa2/e.options             #=> 16
+    assert_send_type  '() -> Integer',
+                      /a/euiosxnm, :options # _all_ the options! haha
   end
 
   def test_source
-    /ab+c/ix.source #=> "ab+c"
-    /\x20\+/.source #=> "\\x20\\+"
+    assert_send_type  '() -> String',
+                      /a/, :source
   end
 
   def test_to_s
-    /ab+c/ix.to_s #=> "(?ix-m:ab+c)"
+    assert_send_type  '() -> String',
+                      /a/, :to_s
   end
 
-  # test_~
-  def test_tilde
-    $_ = "input data"
-    ~ /at/
-    ~ /b/
+  def test_timeout
+    assert_send_type  '() -> nil',
+                      /a/, :timeout
+    assert_send_type  '() -> Float',
+                      Regexp.new('a', timeout: 1.3), :timeout
+  end
+
+  def test_matchop2
+    # Since `$_` is function-local, you cant use `assert_send_type` here.
+
+    $_ = 'a'
+    assert_type 'Integer',
+                ~/a/
+
+    $_ = 'b'
+    assert_type 'nil',
+                ~/a/
   end
 end
