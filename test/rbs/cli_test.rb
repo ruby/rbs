@@ -259,7 +259,7 @@ singleton(::BasicObject)
 
     with_cli do |cli|
       cli.run(%w(--log-level=warn validate --silent))
-      assert_match(/`--silent` option is deprecated.$/, stdout.string)
+      assert_match(/`--silent` option is deprecated because it's silent by default\. You can use --log-level option of rbs command to display more information\.$/, stdout.string)
     end
   end
 

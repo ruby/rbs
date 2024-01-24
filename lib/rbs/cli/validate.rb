@@ -66,8 +66,8 @@ Examples:
   $ rbs validate
 EOU
 
-          opts.on("--silent") do
-            RBS.print_warning { "`--silent` option is deprecated." }
+          opts.on("--silent", "This option has been deprecated and does nothing.") do
+            RBS.print_warning { "`--silent` option is deprecated because it's silent by default. You can use --log-level option of rbs command to display more information." }
           end
           opts.on("--[no-]exit-error-on-syntax-error", "exit(1) if syntax error is detected") {|bool|
             exit_error = bool
