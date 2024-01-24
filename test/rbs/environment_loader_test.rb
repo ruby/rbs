@@ -240,6 +240,48 @@ end
     end
   end
 
+  def test_loading_from_rbs_collection__gem_version_mismatch
+    mktmpdir do |path|
+      lockfile_path = path.join('rbs_collection.lock.yaml')
+      lockfile_path.write(<<~YAML)
+        sources:
+          - name: ruby/gem_rbs_collection
+            remote: https://github.com/ruby/gem_rbs_collection.git
+            revision: b4d3b346d9657543099a35a1fd20347e75b8c523
+            repo_dir: gems
+        path: '.gem_rbs_collection'
+        gems:
+          - name: rbs-amber
+            version: "1.1"
+            source:
+              type: "rubygems"
+      YAML
+      RBS::Collection::Installer.new(lockfile_path: lockfile_path, stdout: StringIO.new).install_from_lockfile
+      lock = RBS::Collection::Config::Lockfile.from_lockfile(lockfile_path: lockfile_path, data: YAML.load_file(lockfile_path))
+
+      repo = RBS::Repository.new()
+
+      loader = EnvironmentLoader.new(repository: repo)
+
+      io = StringIO.new
+      old_output = RBS.logger_output
+      RBS.logger_output = io
+      begin
+        loader.add_collection(lock)
+        env = Environment.new
+        loader.load(env: env)
+      ensure
+        RBS.logger_output = old_output
+      end
+
+      assert_operator(
+        io.string,
+        :include?,
+        "Loading type definition from gem `rbs-amber-1.0.0` because locked version `1.1` is unavailable. Try `rbs collection update` to fix the (potential) issue."
+      )
+    end
+  end
+
   def test_loading_from_rbs_collection_git_source_without_install
     mktmpdir do |path|
       lockfile_path = path.join('rbs_collection.lock.yaml')
