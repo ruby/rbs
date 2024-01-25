@@ -82,7 +82,21 @@ module RBS
       repository.add(lockfile.fullpath)
 
       lockfile.gems.each_value do |gem|
-        add(library: gem[:name], version: gem[:version], resolve_dependencies: false)
+        name = gem[:name]
+        locked_version = gem[:version]
+
+        if (source = gem[:source]).is_a?(Collection::Sources::Rubygems)
+          # allow loading different version of a gem
+
+          unless source.has?(name, locked_version)
+            if (spec, _ = self.class.gem_sig_path(name, nil))
+              RBS.logger.warn { "Loading type definition from gem `#{name}-#{spec.version}` because locked version `#{locked_version}` is unavailable. Try `rbs collection update` to fix the (potential) issue." }
+              locked_version = spec.version.to_s
+            end
+          end
+        end
+
+        add(library: gem[:name], version: locked_version, resolve_dependencies: false)
       end
     end
 

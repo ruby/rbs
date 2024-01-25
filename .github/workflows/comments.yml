@@ -8,18 +8,20 @@ on:
   merge_group: {}
 
 jobs:
-  test:
+  comments:
     runs-on: "ubuntu-latest"
-    container:
-      image: rubylang/ruby:3.2-dev-focal
-    env:
-      RUBY_COMMIT: v3_3_0
+    # env:
+    #   RUBY_COMMIT: v3_3_0
     steps:
       - uses: actions/checkout@v4
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "3.3"
+          bundler: none
       - name: Install dependencies
         run: |
-          apt-get update
-          apt-get install -y libdb-dev curl
+          sudo apt-get update
+          sudo apt-get install -y libdb-dev curl
       - name: Update rubygems & bundler
         run: |
           ruby -v
