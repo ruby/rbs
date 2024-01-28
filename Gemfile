@@ -30,6 +30,7 @@ gem "rbs-amber", path: "test/assets/test-gem"
 
 # Bundled gems
 gem "net-smtp"
+gem 'csv'
 
 group :minitest do
   gem "minitest"
