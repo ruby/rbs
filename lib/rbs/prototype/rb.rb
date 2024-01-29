@@ -497,7 +497,7 @@ module RBS
         end
 
         if rest
-          rest_name = rest == :* ? nil : rest # # For `def f(...) end` syntax
+          rest_name = rest == :* ? nil : rest # `def f(...)` syntax has `*` name
           fun = fun.update(rest_positionals: Types::Function::Param.new(name: rest_name, type: untyped))
         end
 
@@ -520,7 +520,9 @@ module RBS
         end
 
         if kwrest && kwrest.children.any?
-          fun = fun.update(rest_keywords: Types::Function::Param.new(name: kwrest.children[0], type: untyped))
+          kwrest_name = kwrest.children[0] #: Symbol?
+          kwrest_name = nil if kwrest_name == :** # `def f(...)` syntax has `**` name
+          fun = fun.update(rest_keywords: Types::Function::Param.new(name: kwrest_name, type: untyped))
         end
 
         fun
