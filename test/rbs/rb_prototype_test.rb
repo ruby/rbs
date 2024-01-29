@@ -1055,31 +1055,31 @@ end
     end
   end
 
-  if RUBY_VERSION >= '2.7'
-    def test_argument_forwarding
-      parser = RB.new
+  def test_argument_forwarding
+    parser = RB.new
 
-      rb = <<~'RUBY'
+    rb = <<~'RUBY'
 module M
-  def foo(...) end
+def foo(...) end
 end
-      RUBY
+    RUBY
 
-      parser.parse(rb)
+    parser.parse(rb)
 
-      if support_argument_forwarding_with_anonymous_kwrest?
-        assert_write parser.decls, <<~RBS
-module M
-  def foo: (*untyped, **untyped **) ?{ () -> untyped } -> nil
-end
-        RBS
-      else
-        assert_write parser.decls, <<~RBS
-module M
-  def foo: (*untyped) ?{ () -> untyped } -> nil
-end
-        RBS
-      end
+    if RUBY_VERSION < '3.4'
+      # Ruby <=3.3 generates AST without kwrest args for `...` args
+      assert_write parser.decls, <<~RBS
+        module M
+          def foo: (*untyped) ?{ () -> untyped } -> nil
+        end
+      RBS
+    else
+      # Ruby 3.4 generates AST with kwrest args for `...` args
+      assert_write parser.decls, <<~RBS
+        module M
+          def foo: (*untyped, **untyped) ?{ () -> untyped } -> nil
+        end
+      RBS
     end
   end
 
@@ -1099,14 +1099,5 @@ module M
 end
       RBS
     end
-  end
-
-  private
-
-  def support_argument_forwarding_with_anonymous_kwrest?
-    eval("def foo(...); bar(**); end")
-    true
-  rescue Exception
-    false
   end
 end
