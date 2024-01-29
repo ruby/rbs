@@ -149,7 +149,7 @@ end
   end
 
   def test_loading_from_gem
-    omit unless has_gem?("rbs-amber")
+    omit "Test gem `rbs-amber` is unavailable" unless has_gem?("rbs-amber")
 
     mktmpdir do |path|
       repo = RBS::Repository.new()
@@ -241,6 +241,8 @@ end
   end
 
   def test_loading_from_rbs_collection__gem_version_mismatch
+    omit "Test gem `rbs-amber` is unavailable" unless has_gem?("rbs-amber")
+    
     mktmpdir do |path|
       lockfile_path = path.join('rbs_collection.lock.yaml')
       lockfile_path.write(<<~YAML)
