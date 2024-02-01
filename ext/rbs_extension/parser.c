@@ -2763,6 +2763,7 @@ rbsparser_parse_type(VALUE self, VALUE buffer, VALUE start_pos, VALUE end_pos, V
   parserstate *parser = alloc_parser(buffer, FIX2INT(start_pos), FIX2INT(end_pos), variables);
 
   if (parser->next_token.type == pEOF) {
+    free_parser(parser);
     return Qnil;
   }
 
@@ -2783,6 +2784,7 @@ rbsparser_parse_method_type(VALUE self, VALUE buffer, VALUE start_pos, VALUE end
   parserstate *parser = alloc_parser(buffer, FIX2INT(start_pos), FIX2INT(end_pos), variables);
 
   if (parser->next_token.type == pEOF) {
+    free_parser(parser);
     return Qnil;
   }
 
