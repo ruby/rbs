@@ -307,7 +307,7 @@ module RubyVM::YJIT
 
   # <!--
   #   rdoc-file=yjit.rb
-  #   - enable()
+  #   - enable(stats: false)
   # -->
   # Enable YJIT compilation.
   #
