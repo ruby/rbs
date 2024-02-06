@@ -1,203 +1,507 @@
 require_relative "test_helper"
 
-class FloatTest < StdlibTest
-  target Float
+class FloatConstantsTest < Test::Unit::TestCase
+  include TestHelper
 
-  def test_calc
-    10.0 % 3
-    10.0 % 3.1
-    10.0 % 3r
+  testing 'singleton(::Float)'
 
-    3.0 * 1
-    3.0 * 1.1
-    3.0 * Complex.rect(1,2)
-    3.0 * 2r
-
-    3.1 ** 2
-    3.1 ** 1.2
-    3.1 ** Complex.rect(1,2)
-    3.1 ** 2r
-
-    3.0 + 1
-    3.0 + 1.1
-    3.0 + 2r
-    3.0 + Complex.rect(1,2)
-
-    3.0 - 1
-    3.0 - 1.1
-    3.0 - 2r
-    3.0 - Complex.rect(1,2)
-
-    3.0 / 1
-    3.0 / 1.1
-    3.0 / 2r
-    3.0 / Complex.rect(1,2)
+  def test_DIG
+    assert_const_type 'Integer',
+                      'Float::DIG'
   end
 
-  def test_compare
-    1.0 <=> 1
-    1.0 < 1
-    1.0 <= 3r
-    1.0 > 3.1
+  def test_EPSILON
+    assert_const_type 'Float',
+                      'Float::EPSILON'
   end
 
-  def test_eq
-    a = 1.0
-
-    a == 1
-    a == Object.new
-
-    a === 1
-    a === Object.new
+  def test_INFINITY
+    assert_const_type 'Float',
+                      'Float::INFINITY'
   end
 
-  def test_abs
-    a = 3.1
-
-    a.abs
-    a.abs2
+  def test_MANT_DIG
+    assert_const_type 'Integer',
+                      'Float::MANT_DIG'
   end
 
-  def test_angle
-    a = 3.1
+  def test_MAX
+    assert_const_type 'Float',
+                      'Float::MAX'
+  end
 
-    a.angle
-    a.arg
-    -a.phase
+  def test_MAX_10_EXP
+    assert_const_type 'Integer',
+                      'Float::MAX_10_EXP'
+  end
+
+  def test_MAX_EXP
+    assert_const_type 'Integer',
+                      'Float::MAX_EXP'
+  end
+
+  def test_MIN
+    assert_const_type 'Float',
+                      'Float::MIN'
+  end
+
+  def test_MIN_10_EXP
+    assert_const_type 'Integer',
+                      'Float::MIN_10_EXP'
+  end
+
+  def test_MIN_EXP
+    assert_const_type 'Integer',
+                      'Float::MIN_EXP'
+  end
+
+  def test_NAN
+    assert_const_type 'Float',
+                      'Float::NAN'
+  end
+
+  def test_RADIX
+    assert_const_type 'Integer',
+                      'Float::RADIX'
+  end
+end
+
+class FloatInstanceTest < Test::Unit::TestCase
+  include TestHelper
+
+  testing '::Float'
+
+  def test_mod(method: :%)
+    assert_send_type  '(Integer) -> Float',
+                      1.2, method, 3
+    assert_send_type  '(Float) -> Float',
+                      1.2, method, 4.5
+    # use `:%` and not `methofd` as `Float#modulo` relies on `%` being defined not `modulo` when coercing
+    with_coercible :% do |coercible|
+      assert_send_type '[O < Numeric::_Modulo[S, R], R] (Numeric::_Coerce[Float, O, S] other) -> R',
+                       1.2, method, coercible
+    end
+  end
+
+  def test_mul
+    assert_send_type  '(Integer) -> Float',
+                      1.2, :*, 3
+    assert_send_type  '(Float) -> Float',
+                      1.2, :*, 4.5
+
+    with_coercible :* do |coercible|
+      assert_send_type '[O < Numeric::_Multiply[S, R], R] (Numeric::_Coerce[Float, O, S] other) -> R',
+                       1.2, :*, coercible
+    end
+  end
+
+  def test_pow
+    assert_send_type  '(Integer) -> Float',
+                      7.8, :**, 12
+    assert_send_type  '(Float) -> Float',
+                      7.8, :**, 12.3
+    assert_send_type  '(Float) -> Complex',
+                      -7.8, :**, 0.5
+
+    with_coercible :** do |coercible|
+      assert_send_type '[O < Numeric::_Power[S, R], R] (Numeric::_Coerce[Float, O, S] other) -> R',
+                       1.2, :**, coercible
+    end
+  end
+
+  def test_add
+    assert_send_type  '(Integer) -> Float',
+                      7.8, :+, 12
+    assert_send_type  '(Float) -> Float',
+                      7.8, :+, 12.3
+
+    with_coercible :+ do |coercible|
+      assert_send_type '[O < Numeric::_Add[S, R], R] (Numeric::_Coerce[Float, O, S] other) -> R',
+                       1.2, :+, coercible
+    end
+  end
+
+  def test_sub
+    assert_send_type  '(Integer) -> Float',
+                      7.8, :-, 12
+    assert_send_type  '(Float) -> Float',
+                      7.8, :-, 12.3
+
+    with_coercible :- do |coercible|
+      assert_send_type '[O < Numeric::_Sub[S, R], R] (Numeric::_Coerce[Float, O, S] other) -> R',
+                       1.2, :-, coercible
+    end
+  end
+
+  def test_uneg
+    with -1.2, 0.0, 3.4 do |float|
+      assert_send_type  '() -> Float',
+                        float, :-@
+    end
+  end
+
+  def test_div(method: :/)
+    assert_send_type  '(Integer) -> Float',
+                      7.8, method, 12
+    assert_send_type  '(Float) -> Float',
+                      7.8, method, 12.3
+
+    with_coercible :/ do |coercible|
+      assert_send_type '[O < Numeric::_Div[S, R], R] (Numeric::_Coerce[Float, O, S] other) -> R',
+                       1.2, method, coercible
+    end
+  end
+
+  def test_lth
+    assert_send_type  '(Integer) -> bool',
+                      7.8, :<, 12
+    assert_send_type  '(Float) -> bool',
+                      7.8, :<, 12.3
+
+    with_coercible :< do |coercible|
+      assert_send_type '[O < Numeric::_LessThan[S, R], R] (Numeric::_Coerce[Float, O, S] other) -> R',
+                       1.2, :<, coercible
+    end
+  end
+
+  def test_leq
+    assert_send_type  '(Integer) -> bool',
+                      7.8, :<=, 12
+    assert_send_type  '(Float) -> bool',
+                      7.8, :<=, 12.3
+
+    with_coercible :<= do |coercible|
+      assert_send_type '[O < Numeric::_LessOrEqualTo[S, R], R] (Numeric::_Coerce[Float, O, S] other) -> R',
+                       1.2, :<=, coercible
+    end
+  end
+
+  def test_cmp
+    assert_send_type  '(Integer) -> -1',
+                      7.8, :<=>, 12
+    assert_send_type  '(Integer) -> nil',
+                      Float::NAN, :<=>, 12
+
+    assert_send_type  '(Float) -> 1',
+                      7.8, :<=>, 1.3
+    assert_send_type  '(Float) -> nil',
+                      Float::NAN, :<=>, 1.3
+
+    with_coercible :<=>, return_value: -1 do |coercible|
+      assert_send_type '[O < Numeric::_Compare[S]] (Numeric::_Coerce[Float, O, S] other) -> (-1 | 0 | 1)',
+                       1.2, :<=>, coercible
+    end
+
+    assert_send_type  '(untyped) -> nil',
+                      1.2, :<=>, :hello
+  end
+
+  def test_eq(method: :==)
+    with_untyped.and 1.2 do |other|
+      def other.==(x) = true unless defined? other.==
+
+      assert_send_type  '(untyped) -> bool',
+                        1.2, method, other
+    end
+  end
+
+  def test_eqq
+    test_eq(method: :===)
+  end
+
+  def test_gth
+    assert_send_type  '(Integer) -> bool',
+                      7.8, :>, 12
+    assert_send_type  '(Float) -> bool',
+                      7.8, :>, 12.3
+
+    with_coercible :> do |coercible|
+      assert_send_type '[O < Numeric::_GreaterThan[S, R], R] (Numeric::_Coerce[Float, O, S] other) -> R',
+                       1.2, :>, coercible
+    end
+  end
+
+  def test_geq
+    assert_send_type  '(Integer) -> bool',
+                      7.8, :>=, 12
+    assert_send_type  '(Float) -> bool',
+                      7.8, :>=, 12.3
+
+    with_coercible :>= do |coercible|
+      assert_send_type '[O < Numeric::_GreaterOrEqualTo[S, R], R] (Numeric::_Coerce[Float, O, S] other) -> R',
+                       1.2, :>=, coercible
+    end
+  end
+
+  def test_abs(method: :abs)
+    with -1.2, 0.0, 3.4 do |float|
+      assert_send_type  '() -> Float',
+                        float, method
+    end
+  end
+
+  def test_angle(method: :angle)
+    assert_send_type  '() -> 0',
+                      1.0, method
+    assert_send_type  '() -> Float',
+                      -1.0, method
+  end
+
+  def test_arg
+    test_angle(method: :arg)
   end
 
   def test_ceil
-    a = 31.2
+    assert_send_type  '() -> Integer',
+                      1.2, :ceil
+    
+    with_int -1 do |digits|
+      assert_send_type  '(int) -> Integer',
+                        1.2, :ceil, digits
+    end
 
-    a.ceil
-    a.ceil(3)
-    a.ceil(ToInt.new)
+    with_int 2 do |digits|
+      assert_send_type  '(int) -> Float',
+                        1.2, :ceil, digits
+    end
   end
 
   def test_coerce
-    1.2.coerce(3)
-    2.5.coerce(1.1)
-  end
+    custom_to_f = BlankSlate.new
+    def custom_to_f.to_f = 3.4
 
-  def test_conj
-    a = 31.4
-
-    a.conj
-    a.conjugate
+    with 1, 0i, 1r, custom_to_f do |other|
+      assert_send_type  '(_ToF) -> [Float, Float]',
+                        1.2, :coerce, other
+    end
   end
 
   def test_denominator
-    a = 13.3
-
-    a.denominator
+    assert_send_type  '() -> Integer',
+                      1.2, :denominator
   end
 
-  def test_div
-    a = 12.3
+  def test_divmod
+    assert_send_type  '(Integer) -> [Integer, Float]',
+                      7.8, :divmod, 12
+    assert_send_type  '(Float) -> [Integer, Float]',
+                      7.8, :divmod, 12.3
 
-    a.div(3)
-    a.div(3.1)
-    a.div(12r)
+    with_coercible :divmod, return_value: [1r, 2r] do |coercible|
+      assert_send_type '[O < Numeric::_DivMod[S, W, P], S, W, P] (Numeric::_Coerce[Float, O, S] other) -> [W, P]',
+                       1.2, :divmod, coercible
+    end
+  end
 
-    a.divmod(3)
-    a.divmod(3.1)
-    a.divmod(1r/5)
+  def test_eql?
+    with_untyped.and 1.2 do |other|
+      assert_send_type  '(untyped) -> bool',
+                        1.2, :eql?, other
+    end
   end
 
   def test_fdiv
-    a = 3.2
+    test_quo(method: :fdiv)
+  end
 
-    a.fdiv(3)
-    a.fdiv(3.1)
-    a.fdiv(1r/3)
-    a.fdiv(Complex.rect(1,2))
+  def test_finite?
+    with Float::INFINITY, Float::NAN, 1.2, 3.4 do |float|
+      assert_send_type  '() -> bool',
+                        float, :finite?
+    end
   end
 
   def test_floor
-    a = 3.2
+    assert_send_type  '() -> Integer',
+                      1.2, :floor
+    
+    with_int -1 do |digits|
+      assert_send_type  '(int) -> Integer',
+                        1.2, :floor, digits
+    end
 
-    a.floor()
-    a.floor(-1)
-    a.floor(ToInt.new) # No to_int support
+    with_int 2 do |digits|
+      assert_send_type  '(int) -> Float',
+                        1.2, :floor, digits
+    end
+  end
+
+  def test_hash
+    assert_send_type  '() -> Integer',
+                      1.2, :hash
+  end
+
+  def test_infinite?
+    assert_send_type  '() -> 1',
+                      Float::INFINITY, :infinite?
+    assert_send_type  '() -> -1',
+                      -Float::INFINITY, :infinite?
+    with Float::NAN, 1.2, 3.4 do |float|
+      assert_send_type  '() -> nil',
+                        float, :infinite?
+    end
+  end
+
+  def test_inspect
+    test_to_s(method: :inspect)
+  end
+
+  def test_magnitude
+    test_abs(method: :magnitude)
   end
 
   def test_modulo
-    a = 3.2
+    test_mod(method: :modulo)
+  end
 
-    a.modulo(2)
-    a.modulo(1.1)
-    a.modulo(a)
+  def test_nan?
+    with Float::INFINITY, Float::NAN, 1.2, 3.4 do |float|
+      assert_send_type  '() -> bool',
+                        float, :nan?
+    end
+  end
+
+  def test_negative?
+    with Float::INFINITY, Float::NAN, 1.2, 3.4 do |float|
+      assert_send_type  '() -> bool',
+                        float, :negative?
+    end
+  end
+
+  def test_next_float
+    assert_send_type  '() -> Float',
+                      1.2, :next_float
   end
 
   def test_numerator
-    a = 3.2
+    assert_send_type  '() -> Integer',
+                      1.23, :numerator
 
-    a.numerator
+    assert_send_type  '() -> Float',
+                      Float::INFINITY, :numerator
   end
 
-  def test_polar
-    3.1.polar
-    (-3.12).polar
+  def test_phase
+    test_angle(method: :phase)
   end
 
-  def test_quo
-    a = 1.11
+  def test_positive?
+    with Float::INFINITY, Float::NAN, 1.2, 3.4 do |float|
+      assert_send_type  '() -> bool',
+                        float, :positive?
+    end
+  end
 
-    a.quo(3)
-    a.quo(1.3)
-    a.quo(1r/3)
-    a.quo(Complex.rect(1,2))
+  def test_prev_float
+    assert_send_type  '() -> Float',
+                      1.2, :prev_float
+  end
+
+  def test_quo(method: :quo)
+    # Technically `quo` is not an alias of `/`, however all it does is call `/` internally. This is
+    # only relevant if you subclass `Float` and override `/`, then `quo` (and `fdiv`) will follow
+    # suit. Since we're not testing subclasses, and their signature are identical, we just pretend
+    # like they're aliases for the test.
+    test_div(method: method)
   end
 
   def test_rationalize
-    a = 1.22232.next_float
+    assert_send_type  '() -> Rational',
+                      1.2, :rationalize
 
-    a.rationalize
-    a.rationalize(3.11)
-  end
+    eps = BlankSlate.new
+    def eps.abs = 1.2
 
-  def test_reminder
-    a = 1.4
-
-    a.remainder(3)
-    a.remainder(3.1)
-    a.remainder(3r/5)
+    assert_send_type  '(Numeric::_Eps) -> Rational',
+                      1.2, :rationalize, eps
   end
 
   def test_round
-    a = 1.3
+    assert_send_type  '() -> Integer',
+                      1.2, :round
 
-    a.round(half: :up)
-    a.round(2, half: :up)
-    a.round(ToInt.new(-2), half: :up)
+    with_int -1 do |digits|
+      assert_send_type  '(int) -> Integer',
+                        1.2, :round, digits
+    end
+
+    with_int 2 do |digits|
+      assert_send_type  '(int) -> Float',
+                        1.2, :round, digits
+    end
+
+    with(:up, :down, :even, nil).and with_string('up'), with_string('down'), with_string('even') do |dir|
+      unless defined?(dir.==)
+        def dir.==(rhs) = rhs == to_str
+      end
+
+      assert_send_type  '(half: Numeric::round_direction) -> Integer',
+                        1.2, :round, half: dir
+      assert_send_type  '(half: Numeric::round_direction) -> Integer',
+                        1.2, :round, half: dir
+
+      with_int -1 do |digits|
+        assert_send_type  '(int, half: Numeric::round_direction) -> Integer',
+                          1.2, :round, digits, half: dir
+      end
+
+      with_int 2 do |digits|
+        assert_send_type  '(int, half: Numeric::round_direction) -> Float',
+                          1.2, :round, digits, half: dir
+      end
+    end
   end
 
-  def test_step
-    a = 1.3
-
-    a.step { break }
-    a.step(1, 2) { }
-    a.step(by: 3, to: 100) { }
+  def test_to_f
+    assert_send_type  '() -> Float',
+                      1.2, :to_f
   end
 
-  def test_to_s
-    a = 1.3
+  def test_to_i(method: :to_i)
+    assert_send_type  '() -> Integer',
+                      1.2, method
+  end
 
-    a.to_s
+  def test_to_int
+    test_to_i(method: :to_int)
+  end
+
+  def test_to_r
+    assert_send_type  '() -> Rational',
+                      1.2, :to_r
+  end
+
+  def test_to_s(method: :to_s)
+    assert_send_type  '() -> String',
+                      1.2, method
   end
 
   def test_truncate
-    a = 1.3
+    assert_send_type  '() -> Integer',
+                      1.2, :truncate
+    assert_send_type  '() -> Integer',
+                      -1.2, :truncate
+    
+    with_int -1 do |digits|
+      assert_send_type  '(int) -> Integer',
+                        1.2, :truncate, digits
+      assert_send_type  '(int) -> Integer',
+                        -1.2, :truncate, digits
+    end
 
-    a.truncate
-    a.truncate(1)
+    with_int 2 do |digits|
+      assert_send_type  '(int) -> Float',
+                        1.2, :truncate, digits
+      assert_send_type  '(int) -> Float',
+                        -1.2, :truncate, digits
+    end
+  end
+
+  def test_zero?
+    assert_send_type  '() -> bool',
+                      0.0, :zero?
+    assert_send_type  '() -> bool',
+                      0.1, :zero?
   end
 end
 
-class FloatConstantTest < Test::Unit::TestCase
-  include TestHelper
-
-  def test_constant
-    assert_const_type "Float", "Float::INFINITY"
-  end
-end
