@@ -128,7 +128,7 @@ class Resolv
 
   # <!--
   #   rdoc-file=lib/resolv.rb
-  #   - new(resolvers=[Hosts.new, DNS.new])
+  #   - new(resolvers=nil, use_ipv6: nil)
   # -->
   # Creates a new Resolv using `resolvers`.
   #
@@ -351,6 +351,8 @@ class Resolv::DNS
   # :   Must contain :nameserver, :search and :ndots keys.
   #
   # :nameserver_port can be used to specify port number of nameserver address.
+  # :raise_timeout_errors can be used to raise timeout errors as exceptions
+  # instead of treating the same as an NXDOMAIN response.
   #
   # The value of :nameserver should be an address string or an array of address
   # strings.
@@ -921,7 +923,7 @@ end
 # A generic resource abstract class.
 #
 class Resolv::DNS::Resource::Generic < Resolv::DNS::Resource
-  def self.create: (Integer type_value, Integer class_value) -> instance
+  def self.create: (Integer type_value, Integer class_value) -> Class
 
   def self.decode_rdata: (Resolv::DNS::Message::MessageDecoder msg) -> instance
 

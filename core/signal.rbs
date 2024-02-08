@@ -26,9 +26,9 @@
 #     # ...
 #     Process.kill("TERM", pid)
 #
-# produces:
-#      Debug now: true
-#      Debug now: false
+# *produces:*
+#     Debug now: true
+#     Debug now: false
 #     Terminating...
 #
 # The list of available signal names and their interpretation is system
@@ -84,7 +84,7 @@ module Signal
   #     Signal.trap("CLD")  { puts "Child died" }
   #     fork && Process.wait
   #
-  # produces:
+  # *produces:*
   #     Terminating: 27461
   #     Child died
   #     Terminating: 27460

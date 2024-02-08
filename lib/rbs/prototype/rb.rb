@@ -5,7 +5,7 @@ module RBS
     class RB
       include Helpers
 
-      Context = _ = Struct.new(:module_function, :singleton, :namespace, :in_def, keyword_init: true) do
+      class Context < Struct.new(:module_function, :singleton, :namespace, :in_def, keyword_init: true)
         # @implements Context
 
         def self.initial(namespace: Namespace.root)
@@ -461,6 +461,8 @@ module RBS
 
       def literal_to_symbol(node)
         case node.type
+        when :SYM
+          node.children[0]
         when :LIT
           node.children[0] if node.children[0].is_a?(Symbol)
         when :STR
@@ -495,7 +497,7 @@ module RBS
         end
 
         if rest
-          rest_name = rest == :* ? nil : rest # # For `def f(...) end` syntax
+          rest_name = rest == :* ? nil : rest # `def f(...)` syntax has `*` name
           fun = fun.update(rest_positionals: Types::Function::Param.new(name: rest_name, type: untyped))
         end
 
@@ -518,7 +520,9 @@ module RBS
         end
 
         if kwrest && kwrest.children.any?
-          fun = fun.update(rest_keywords: Types::Function::Param.new(name: kwrest.children[0], type: untyped))
+          kwrest_name = kwrest.children[0] #: Symbol?
+          kwrest_name = nil if kwrest_name == :** # `def f(...)` syntax has `**` name
+          fun = fun.update(rest_keywords: Types::Function::Param.new(name: kwrest_name, type: untyped))
         end
 
         fun
@@ -574,6 +578,13 @@ module RBS
           end
         when :DSTR, :XSTR
           BuiltinNames::String.instance_type
+        when :SYM
+          lit = node.children[0]
+          if lit.to_s.ascii_only?
+            Types::Literal.new(literal: lit, location: nil)
+          else
+            BuiltinNames::Symbol.instance_type
+          end
         when :DSYM
           BuiltinNames::Symbol.instance_type
         when :DREGX
@@ -584,6 +595,14 @@ module RBS
           Types::Literal.new(literal: false, location: nil)
         when :NIL
           Types::Bases::Nil.new(location: nil)
+        when :INTEGER
+          Types::Literal.new(literal: node.children[0], location: nil)
+        when :FLOAT
+          BuiltinNames::Float.instance_type
+        when :RATIONAL, :IMAGINARY
+          lit = node.children[0]
+          type_name = TypeName.new(name: lit.class.name.to_sym, namespace: Namespace.root)
+          Types::ClassInstance.new(name: type_name, args: [], location: nil)
         when :LIT
           lit = node.children[0]
           case lit
@@ -594,6 +613,11 @@ module RBS
               BuiltinNames::Symbol.instance_type
             end
           when Integer
+            Types::Literal.new(literal: lit, location: nil)
+          when String
+            # For Ruby <=3.3 which generates `LIT` node for string literals inside Hash literal.
+            # "a"             => STR node
+            # { "a" => nil }  => LIT node
             Types::Literal.new(literal: lit, location: nil)
           else
             type_name = TypeName.new(name: lit.class.name.to_sym, namespace: Namespace.root)
@@ -686,6 +710,14 @@ module RBS
 
       def param_type(node, default: Types::Bases::Any.new(location: nil))
         case node.type
+        when :INTEGER
+          BuiltinNames::Integer.instance_type
+        when :FLOAT
+          BuiltinNames::Float.instance_type
+        when :RATIONAL
+          Types::ClassInstance.new(name: TypeName("::Rational"), args: [], location: nil)
+        when :IMAGINARY
+          Types::ClassInstance.new(name: TypeName("::Complex"), args: [], location: nil)
         when :LIT
           case node.children[0]
           when Symbol
@@ -697,6 +729,8 @@ module RBS
           else
             default
           end
+        when :SYM
+          BuiltinNames::Symbol.instance_type
         when :STR, :DSTR
           BuiltinNames::String.instance_type
         when :NIL

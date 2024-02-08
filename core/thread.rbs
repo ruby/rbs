@@ -991,9 +991,8 @@ class Thread < Object
   #      from prog.rb:2:in `new'
   #      from prog.rb:2
   #
-  def self?.raise: () -> bot
-                 | (String message, ?cause: Exception?) -> bot
-                 | (_Exception exception, ?untyped message, ?::Array[String] backtrace, ?cause: Exception?) -> bot
+  def raise: (?String message) -> nil
+           | (_Exception, ?_ToS message, ?Array[String] backtrace) -> nil
 
   # <!--
   #   rdoc-file=thread.c
@@ -1438,7 +1437,7 @@ class Thread::ConditionVariable < Object
   #
   # Returns the slept result on `mutex`.
   #
-  def wait: (Thread::Mutex mutex, ?Integer | Float? timeout) -> self
+  def wait: (Thread::Mutex mutex, ?Time::_Timeout? timeout) -> Integer?
 end
 
 # <!-- rdoc-file=thread_sync.c -->
@@ -1521,8 +1520,8 @@ end
 # exchanged safely between multiple threads. The Thread::Queue class implements
 # all the required locking semantics.
 #
-# The class implements FIFO type of queue. In a FIFO queue, the first tasks
-# added are the first retrieved.
+# The class implements FIFO (first in, first out) type of queue. In a FIFO
+# queue, the first tasks added are the first retrieved.
 #
 # Example:
 #
@@ -1530,17 +1529,17 @@ end
 #
 #     producer = Thread.new do
 #       5.times do |i|
-#          sleep rand(i) # simulate expense
-#          queue << i
-#          puts "#{i} produced"
+#         sleep rand(i) # simulate expense
+#         queue << i
+#         puts "#{i} produced"
 #       end
 #     end
 #
 #     consumer = Thread.new do
 #       5.times do |i|
-#          value = queue.pop
-#          sleep rand(i/2) # simulate expense
-#          puts "consumed #{value}"
+#         value = queue.pop
+#         sleep rand(i/2) # simulate expense
+#         puts "consumed #{value}"
 #       end
 #     end
 #
@@ -1625,6 +1624,15 @@ class Thread::Queue < Object
 
   # <!--
   #   rdoc-file=thread_sync.c
+  #   - freeze
+  # -->
+  # The queue can't be frozen, so this method raises an exception:
+  #     Thread::Queue.new.freeze # Raises TypeError (cannot freeze #<Thread::Queue:0x...>)
+  #
+  def freeze: () -> bot
+
+  # <!--
+  #   rdoc-file=thread_sync.c
   #   - length
   #   - size
   # -->
@@ -1698,6 +1706,15 @@ class Thread::SizedQueue < Thread::Queue
   # -->
   #
   alias enq push
+
+  # <!--
+  #   rdoc-file=thread_sync.c
+  #   - freeze
+  # -->
+  # The queue can't be frozen, so this method raises an exception:
+  #     Thread::Queue.new.freeze # Raises TypeError (cannot freeze #<Thread::Queue:0x...>)
+  #
+  def freeze: () -> bot
 
   # <!--
   #   rdoc-file=thread_sync.c

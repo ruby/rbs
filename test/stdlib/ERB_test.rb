@@ -93,7 +93,7 @@ class ERBTest < StdlibTest
 end
 
 class ERBUtilSingletonTest < Test::Unit::TestCase
-  include TypeAssertions
+  include TestHelper
 
   library "erb"
   testing "singleton(::ERB::Util)"
@@ -114,7 +114,7 @@ class ERBUtilSingletonTest < Test::Unit::TestCase
 end
 
 class ERBUtilTest < Test::Unit::TestCase
-  include TypeAssertions
+  include TestHelper
   class Mock
     include ERB::Util
   end
@@ -138,7 +138,7 @@ class ERBUtilTest < Test::Unit::TestCase
 end
 
 class ERBDefMethodSingletonTest < Test::Unit::TestCase
-  include TypeAssertions
+  include TestHelper
 
   library "erb"
   testing "singleton(::ERB::DefMethod)"

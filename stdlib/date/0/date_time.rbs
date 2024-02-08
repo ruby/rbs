@@ -468,16 +468,12 @@ class DateTime < Date
   #
   #     DateTime.new(2001, 2, 3, 4, 5, 6).min # => 5
   #
-  # Date#minute is an alias for Date#min.
-  #
   def min: () -> Integer
 
   # <!-- rdoc-file=ext/date/date_core.c -->
   # Returns the minute in range (0..59):
   #
   #     DateTime.new(2001, 2, 3, 4, 5, 6).min # => 5
-  #
-  # Date#minute is an alias for Date#min.
   #
   def minute: () -> Integer
 
@@ -523,8 +519,6 @@ class DateTime < Date
   #
   #     DateTime.new(2001, 2, 3, 4, 5, 6).sec # => 6
   #
-  # Date#second is an alias for Date#sec.
-  #
   def sec: () -> Integer
 
   # <!--
@@ -536,16 +530,12 @@ class DateTime < Date
   #
   #     DateTime.new(2001, 2, 3, 4, 5, 6.5).sec_fraction # => (1/2)
   #
-  # Date#second_fraction is an alias for Date#sec_fraction.
-  #
   def sec_fraction: () -> Rational
 
   # <!-- rdoc-file=ext/date/date_core.c -->
   # Returns the second in range (0..59):
   #
   #     DateTime.new(2001, 2, 3, 4, 5, 6).sec # => 6
-  #
-  # Date#second is an alias for Date#sec.
   #
   def second: () -> Integer
 
@@ -554,8 +544,6 @@ class DateTime < Date
   # 1)...Rational(1, 1)):
   #
   #     DateTime.new(2001, 2, 3, 4, 5, 6.5).sec_fraction # => (1/2)
-  #
-  # Date#second_fraction is an alias for Date#sec_fraction.
   #
   def second_fraction: () -> Rational
 
@@ -569,7 +557,7 @@ class DateTime < Date
   #     DateTime.now.strftime # => "2022-07-01T11:03:19-05:00"
   #
   # For other formats, see [Formats for Dates and
-  # Times](doc/strftime_formatting.rdoc).
+  # Times](rdoc-ref:strftime_formatting.rdoc):
   #
   def strftime: (?String format) -> String
 

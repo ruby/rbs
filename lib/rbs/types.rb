@@ -73,7 +73,7 @@ module RBS
           when Types::Bases::Void
             'void'
           when Types::Bases::Any
-            'untyped'
+            raise
           when Types::Bases::Nil
             'nil'
           when Types::Bases::Top
@@ -106,7 +106,16 @@ module RBS
 
       class Bool < Base; end
       class Void < Base; end
-      class Any < Base; end
+      class Any < Base
+        def to_s(level=0)
+          @string || "untyped"
+        end
+
+        def todo!
+          @string = '__todo__'
+          self
+        end
+      end
       class Nil < Base; end
       class Top < Base; end
       class Bottom < Base; end
@@ -506,22 +515,34 @@ module RBS
     end
 
     class Record
-      attr_reader :fields
+      attr_reader :all_fields, :fields, :optional_fields
       attr_reader :location
 
-      def initialize(fields:, location:)
-        @fields = fields
+      def initialize(all_fields: nil, fields: nil, location:)
+        case
+        when fields && all_fields.nil?
+          @all_fields = fields.map { |k, v| [k, [v, true]] }.to_h
+          @fields = fields
+          @optional_fields = {}
+        when all_fields && fields.nil?
+          @all_fields = all_fields
+          @fields = all_fields.filter_map { |k, (v, required)| [k, v] if required }.to_h
+          @optional_fields = all_fields.filter_map { |k, (v, required)| [k, v] unless required }.to_h
+        else
+          raise ArgumentError, "only one of `:fields` or `:all_fields` is requireds"
+        end
+
         @location = location
       end
 
       def ==(other)
-        other.is_a?(Record) && other.fields == fields
+        other.is_a?(Record) && other.fields == fields && other.optional_fields == optional_fields
       end
 
       alias eql? ==
 
       def hash
-        self.class.hash ^ fields.hash
+        self.class.hash ^ all_fields.hash
       end
 
       def free_variables(set = Set.new)
@@ -529,27 +550,35 @@ module RBS
           fields.each_value do |type|
             type.free_variables set
           end
+          optional_fields.each_value do |type|
+            type.free_variables set
+          end
         end
       end
 
       def to_json(state = _ = nil)
-        { class: :record, fields: fields, location: location }.to_json(state)
+        { class: :record, fields: fields, optional_fields: optional_fields, location: location }.to_json(state)
       end
 
       def sub(s)
-        self.class.new(fields: fields.transform_values {|ty| ty.sub(s) },
-                       location: location)
+        self.class.new(
+          all_fields: all_fields.transform_values {|ty, required| [ty.sub(s), required] },
+          location: location
+        )
       end
 
       def to_s(level = 0)
-        return "{ }" if self.fields.empty?
+        return "{ }" if all_fields.empty?
 
-        fields = self.fields.map do |key, type|
-          if key.is_a?(Symbol) && key.match?(/\A[A-Za-z_][A-Za-z_0-9]*\z/)
+        fields = all_fields.map do |key, (type, required)|
+          field = if key.is_a?(Symbol) && key.match?(/\A[A-Za-z_][A-Za-z_0-9]*\z/)
             "#{key}: #{type}"
           else
             "#{key.inspect} => #{type}"
           end
+
+          field = "?#{field}" unless required
+          field
         end
         "{ #{fields.join(", ")} }"
       end
@@ -557,6 +586,7 @@ module RBS
       def each_type(&block)
         if block
           fields.each_value(&block)
+          optional_fields.each_value(&block)
         else
           enum_for :each_type
         end
@@ -564,7 +594,7 @@ module RBS
 
       def map_type_name(&block)
         Record.new(
-          fields: fields.transform_values {|ty| ty.map_type_name(&block) },
+          all_fields: all_fields.transform_values {|ty, required| [ty.map_type_name(&block), required] },
           location: location
         )
       end
@@ -572,7 +602,7 @@ module RBS
       def map_type(&block)
         if block
           Record.new(
-            fields: fields.transform_values {|type| yield type },
+            all_fields: all_fields.transform_values {|type, required| [yield(type), required] },
             location: location
           )
         else
@@ -631,6 +661,8 @@ module RBS
           when Symbol
             return "#{type.to_s(1)} ?"
           end
+        when RBS::Types::Proc
+          return "(#{type.to_s(1)})?"
         end
 
         "#{type.to_s(1)}?"
@@ -872,7 +904,11 @@ module RBS
 
         def to_s
           if name
-            "#{type} #{name}"
+            if name.match?(/\A[a-zA-Z0-9_]+\z/)
+              "#{type} #{name}"
+            else
+              "#{type} `#{name}`"
+            end
           else
             "#{type}"
           end
@@ -1383,6 +1419,35 @@ module RBS
 
       def with_nonreturn_void?
         false
+      end
+
+      TABLE = {
+        "\\a" => "\a",
+        "\\b" => "\b",
+        "\\e" => "\033",
+        "\\f" => "\f",
+        "\\n" => "\n",
+        "\\r" => "\r",
+        "\\s" => " ",
+        "\\t" => "\t",
+        "\\v" => "\v",
+        "\\\"" => "\"",
+        "\\\'" => "'",
+        "\\\\" => "\\",
+        "\\" => ""
+      }
+
+      def self.unescape_string(string, is_double_quote)
+        if is_double_quote
+          string.gsub!(/\\([0-9]{1,3})/) { ($1 || "").to_i(8).chr }
+          string.gsub!(/\\x([0-9a-f]{1,2})/) { ($1 || "").to_i(16).chr }
+          string.gsub!(/\\u([0-9a-fA-F]{4})/) { ($1 || "").to_i(16).chr(Encoding::UTF_8) }
+          string.gsub!(/\\[abefnrstv"'\\]?/, TABLE)
+          string
+        else
+          string.gsub!(/\\['\\]/, TABLE)
+          string
+        end
       end
     end
   end

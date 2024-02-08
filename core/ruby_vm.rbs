@@ -11,21 +11,21 @@ class RubyVM < Object
 end
 
 # <!-- rdoc-file=vm.c -->
-# DEFAULT_PARAMS This constant exposes the VM's default parameters. Note that
-# changing these values does not affect VM execution. Specification is not
-# stable and you should not depend on this value. Of course, this constant is
-# MRI specific.
+# ::RubyVM::DEFAULT_PARAMS This constant exposes the VM's default parameters.
+# Note that changing these values does not affect VM execution. Specification is
+# not stable and you should not depend on this value. Of course, this constant
+# is MRI specific.
 #
 RubyVM::DEFAULT_PARAMS: Hash[Symbol, Integer]
 
 # <!-- rdoc-file=vm.c -->
-# INSTRUCTION_NAMES A list of bytecode instruction names in MRI. This constant
-# is MRI specific.
+# ::RubyVM::INSTRUCTION_NAMES A list of bytecode instruction names in MRI. This
+# constant is MRI specific.
 #
 RubyVM::INSTRUCTION_NAMES: Array[String]
 
 # <!-- rdoc-file=vm.c -->
-# OPTS An Array of VM build options. This constant is MRI specific.
+# ::RubyVM::OPTS An Array of VM build options. This constant is MRI specific.
 #
 RubyVM::OPTS: Array[String]
 
@@ -73,7 +73,7 @@ end
 module RubyVM::AbstractSyntaxTree
   # <!--
   #   rdoc-file=ast.rb
-  #   - RubyVM::AbstractSyntaxTree.parse(string, keep_script_lines: false, error_tolerant: false, keep_tokens: false) -> RubyVM::AbstractSyntaxTree::Node
+  #   - RubyVM::AbstractSyntaxTree.parse(string, keep_script_lines: RubyVM.keep_script_lines, error_tolerant: false, keep_tokens: false) -> RubyVM::AbstractSyntaxTree::Node
   # -->
   # Parses the given *string* into an abstract syntax tree, returning the root
   # node of that tree.
@@ -106,13 +106,13 @@ module RubyVM::AbstractSyntaxTree
   #     #  (ERROR@1:7-1:11),
   #     #  (LASGN@1:12-1:15 :y (LIT@1:14-1:15 2))]
   #
-  # Note that parsing continues even after the errored expresion.
+  # Note that parsing continues even after the errored expression.
   #
   def self.parse: (String string, ?keep_script_lines: bool, ?error_tolerant: bool, ?keep_tokens: bool) -> Node
 
   # <!--
   #   rdoc-file=ast.rb
-  #   - RubyVM::AbstractSyntaxTree.parse_file(pathname, keep_script_lines: false, error_tolerant: false, keep_tokens: false) -> RubyVM::AbstractSyntaxTree::Node
+  #   - RubyVM::AbstractSyntaxTree.parse_file(pathname, keep_script_lines: RubyVM.keep_script_lines, error_tolerant: false, keep_tokens: false) -> RubyVM::AbstractSyntaxTree::Node
   # -->
   # Reads the file from *pathname*, then parses it like ::parse, returning the
   # root node of the abstract syntax tree.
@@ -128,8 +128,8 @@ module RubyVM::AbstractSyntaxTree
 
   # <!--
   #   rdoc-file=ast.rb
-  #   - RubyVM::AbstractSyntaxTree.of(proc, keep_script_lines: false, error_tolerant: false, keep_tokens: false)   -> RubyVM::AbstractSyntaxTree::Node
-  #   - RubyVM::AbstractSyntaxTree.of(method, keep_script_lines: false, error_tolerant: false, keep_tokens: false) -> RubyVM::AbstractSyntaxTree::Node
+  #   - RubyVM::AbstractSyntaxTree.of(proc, keep_script_lines: RubyVM.keep_script_lines, error_tolerant: false, keep_tokens: false)   -> RubyVM::AbstractSyntaxTree::Node
+  #   - RubyVM::AbstractSyntaxTree.of(method, keep_script_lines: RubyVM.keep_script_lines, error_tolerant: false, keep_tokens: false) -> RubyVM::AbstractSyntaxTree::Node
   # -->
   # Returns AST nodes of the given *proc* or *method*.
   #
@@ -260,4 +260,118 @@ module RubyVM::AbstractSyntaxTree
     #
     def children: () -> Array[untyped]
   end
+end
+
+# <!-- rdoc-file=yjit.rb -->
+# This module allows for introspection of YJIT, CRuby's just-in-time compiler.
+# Everything in the module is highly implementation specific and the API might
+# be less stable compared to the standard library.
+# This module may not exist if YJIT does not support the particular platform
+# for which CRuby is built.
+#
+module RubyVM::YJIT
+  # <!--
+  #   rdoc-file=yjit.rb
+  #   - code_gc()
+  # -->
+  # Discard existing compiled code to reclaim memory
+  # and allow for recompilations in the future.
+  #
+  def self.code_gc: () -> void
+
+  # <!--
+  #   rdoc-file=yjit.rb
+  #   - dump_exit_locations(filename)
+  # -->
+  # Marshal dumps exit locations to the given filename.
+  # Usage:
+  # If `--yjit-exit-locations` is passed, a file named
+  # "yjit_exit_locations.dump" will automatically be generated.
+  # If you want to collect traces manually, call `dump_exit_locations`
+  # directly.
+  # Note that calling this in a script will generate stats after the
+  # dump is created, so the stats data may include exits from the
+  # dump itself.
+  # In a script call:
+  #     at_exit do
+  #       RubyVM::YJIT.dump_exit_locations("my_file.dump")
+  #     end
+  #
+  # Then run the file with the following options:
+  #     ruby --yjit --yjit-trace-exits test.rb
+  #
+  # Once the code is done running, use Stackprof to read the dump file.
+  # See Stackprof documentation for options.
+  #
+  def self.dump_exit_locations: (untyped filename) -> void
+
+  # <!--
+  #   rdoc-file=yjit.rb
+  #   - enable(stats: false)
+  # -->
+  # Enable YJIT compilation.
+  #
+  def self.enable: () -> void
+
+  # <!--
+  #   rdoc-file=yjit.rb
+  #   - enabled?()
+  # -->
+  # Check if YJIT is enabled.
+  #
+  def self.enabled?: () -> bool
+
+  # <!--
+  #   rdoc-file=yjit.rb
+  #   - format_number(pad, number)
+  # -->
+  # Format large numbers with comma separators for readability
+  #
+  def self.format_number: (untyped pad, untyped number) -> untyped
+
+  # <!--
+  #   rdoc-file=yjit.rb
+  #   - format_number_pct(pad, number, total)
+  # -->
+  # Format a number along with a percentage over a total value
+  #
+  def self.format_number_pct: (untyped pad, untyped number, untyped total) -> untyped
+
+  # <!--
+  #   rdoc-file=yjit.rb
+  #   - reset_stats!()
+  # -->
+  # Discard statistics collected for `--yjit-stats`.
+  #
+  def self.reset_stats!: () -> void
+
+  # <!--
+  #   rdoc-file=yjit.rb
+  #   - runtime_stats(context: false)
+  # -->
+  # Return a hash for statistics generated for the `--yjit-stats` command line
+  # option.
+  # Return `nil` when option is not passed or unavailable.
+  #
+  def self.runtime_stats: (?context: bool) -> Hash[untyped, untyped]?
+
+  # <!--
+  #   rdoc-file=yjit.rb
+  #   - stats_enabled?()
+  # -->
+  # Check if `--yjit-stats` is used.
+  #
+  def self.stats_enabled?: () -> bool
+
+  # <!--
+  #   rdoc-file=yjit.rb
+  #   - stats_string()
+  # -->
+  # Format and print out counters as a String. This returns a non-empty
+  # content only when `--yjit-stats` is enabled.
+  #
+  def self.stats_string: () -> String
+end
+
+module RubyVM::RJIT
 end

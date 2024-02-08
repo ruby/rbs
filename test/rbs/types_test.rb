@@ -28,8 +28,10 @@ class RBS::TypesTest < Test::Unit::TestCase
     assert_equal "(Integer | String & bool)?", parse_type("(Integer | String & bool)?").to_s
     assert_equal "((Integer | String) & bool)?", parse_type("((Integer | String) & bool)?").to_s
     assert_equal "^() -> void", parse_type("^() -> void").to_s
+    assert_equal "(^() -> void)?", parse_type("(^() -> void)?").to_s
     assert_equal "^(bool flag, ?untyped, *Symbol, name: String, ?email: nil, **Symbol) -> void", parse_type("^(bool flag, ?untyped, *Symbol, name: String, ?email: nil, **Symbol) -> void").to_s
     assert_equal "^(untyped untyped, untyped footype) -> void", parse_type("^(untyped `untyped`, untyped footype) -> void").to_s
+    assert_equal "^(`foo`: untyped) -> void", parse_type("^(`foo`: untyped) -> void").to_s
   end
 
   def test_has_self_type?

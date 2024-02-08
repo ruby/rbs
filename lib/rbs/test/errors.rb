@@ -29,35 +29,48 @@ module RBS
         end
       end
 
+      RESPOND_TO = ::Kernel.instance_method :respond_to?
+      private_constant :RESPOND_TO
+
       def self.inspect_(obj)
-        if obj.respond_to?(:inspect)
+        if RESPOND_TO.bind_call(obj, :inspect)
           obj.inspect
         else
           Test::INSPECT.bind(obj).call     # For the case inspect is not defined (like BasicObject)
         end
       end
 
+      def self.method_tag(error)
+        if error.klass.singleton_class?
+          name = inspect_(error.klass).sub(/\A#<Class:(.*)>\z/, '\1')
+          method_name = ".#{error.method_name}"
+        else
+          name = error.klass.name
+          method_name = "##{error.method_name}"
+        end
+        "[#{name}#{method_name}]"
+      end
+
       def self.to_string(error)
-        method = "#{error.klass.name}#{error.method_name}"
         case error
         when ArgumentTypeError
-          "[#{method}] ArgumentTypeError: expected #{format_param error.param} but given `#{inspect_(error.value)}`"
+          "#{method_tag(error)} ArgumentTypeError: expected #{format_param error.param} but given `#{inspect_(error.value)}`"
         when BlockArgumentTypeError
-          "[#{method}] BlockArgumentTypeError: expected #{format_param error.param} but given `#{inspect_(error.value)}`"
+          "#{method_tag(error)} BlockArgumentTypeError: expected #{format_param error.param} but given `#{inspect_(error.value)}`"
         when ArgumentError
-          "[#{method}] ArgumentError: expected method type #{error.method_type}"
+          "#{method_tag(error)} ArgumentError: expected method type #{error.method_type}"
         when BlockArgumentError
-          "[#{method}] BlockArgumentError: expected method type #{error.method_type}"
+          "#{method_tag(error)} BlockArgumentError: expected method type #{error.method_type}"
         when ReturnTypeError
-          "[#{method}] ReturnTypeError: expected `#{error.type}` but returns `#{inspect_(error.value)}`"
+          "#{method_tag(error)} ReturnTypeError: expected `#{error.type}` but returns `#{inspect_(error.value)}`"
         when BlockReturnTypeError
-          "[#{method}] BlockReturnTypeError: expected `#{error.type}` but returns `#{inspect_(error.value)}`"
+          "#{method_tag(error)} BlockReturnTypeError: expected `#{error.type}` but returns `#{inspect_(error.value)}`"
         when UnexpectedBlockError
-          "[#{method}] UnexpectedBlockError: unexpected block is given for `#{error.method_type}`"
+          "#{method_tag(error)} UnexpectedBlockError: unexpected block is given for `#{error.method_type}`"
         when MissingBlockError
-          "[#{method}] MissingBlockError: required block is missing for `#{error.method_type}`"
+          "#{method_tag(error)} MissingBlockError: required block is missing for `#{error.method_type}`"
         when UnresolvedOverloadingError
-          "[#{method}] UnresolvedOverloadingError: couldn't find a suitable overloading"
+          "#{method_tag(error)} UnresolvedOverloadingError: couldn't find a suitable overloading"
         else
           raise "Unexpected error: #{inspect_(error)}"
         end

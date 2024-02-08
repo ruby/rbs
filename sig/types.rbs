@@ -53,7 +53,7 @@ module RBS
       #
       # * The function return type is a return position (`() -> void`)
       # * Generic parameter is a return position (`Enumerator[Integer, void]`)
-      # 
+      #
       def with_nonreturn_void?: () -> bool
     end
 
@@ -111,6 +111,9 @@ module RBS
       end
 
       class Any < Base
+        @string: String?
+
+        def todo!: () -> self
       end
 
       class Nil < Base
@@ -298,11 +301,16 @@ module RBS
     end
 
     class Record
+      attr_reader all_fields: Hash[Symbol, [t, bool]]
+
       attr_reader fields: Hash[Symbol, t]
+
+      attr_reader optional_fields: Hash[Symbol, t]
 
       type loc = Location[bot, bot]
 
       def initialize: (fields: Hash[Symbol, t], location: loc?) -> void
+                    | (all_fields: Hash[Symbol, [t, bool]], location: loc?) -> void
 
       include _TypeBase
 
@@ -494,6 +502,11 @@ module RBS
       include NoTypeName
 
       attr_reader location: loc?
+
+      TABLE: Hash[String, String]
+
+      # Unescape string type body
+      def self.unescape_string: (String, bool is_double_quote) -> String
     end
   end
 end

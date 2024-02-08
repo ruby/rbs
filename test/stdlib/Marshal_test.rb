@@ -3,7 +3,7 @@ require "pathname"
 require "tmpdir"
 
 class MarshalSingletonTest < Test::Unit::TestCase
-  include TypeAssertions
+  include TestHelper
   testing "singleton(::Marshal)"
 
   def test_MAJOR_VERSION
@@ -26,7 +26,7 @@ class MarshalSingletonTest < Test::Unit::TestCase
     assert_send_type  '(untyped, Writer) -> Writer',
                       Marshal, :dump, obj, writer
 
-    with_int.chain([nil]).each do |limit|
+    with_int.and_nil do |limit|
       assert_send_type  '(untyped, Writer, int?) -> Writer',
                         Marshal, :dump, obj, writer, limit
     end
@@ -69,7 +69,7 @@ class MarshalSingletonTest < Test::Unit::TestCase
                         Marshal, meth, source, result_proc
       source.reset!
 
-      [nil, :yep, true, "hello"].each do |freeze|
+      with_boolish do |freeze|
         assert_send_type  '(string | Marshal::_Source, freeze: boolish) -> untyped',
                           Marshal, meth, source, freeze: freeze
         source.reset!
@@ -87,7 +87,7 @@ class MarshalSingletonTest < Test::Unit::TestCase
 end
 
 class MarshalIncludeTest < Test::Unit::TestCase
-  include TypeAssertions
+  include TestHelper
   testing "::Marshal"
 
   def test_dump
@@ -102,7 +102,7 @@ class MarshalIncludeTest < Test::Unit::TestCase
     assert_send_type  '(untyped, Writer) -> Writer',
                       Marshal, :dump, obj, writer
 
-    with_int.chain([nil]).each do |limit|
+    with_int.and_nil do |limit|
       assert_send_type  '(untyped, Writer, int?) -> Writer',
                         Marshal, :dump, obj, writer, limit
     end

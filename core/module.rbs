@@ -726,8 +726,8 @@ class Module < Object
   #     I'm Dino!
   #     #<B:0x401b39e8>
   #
-  def define_method: (interned symbol, Proc | Method | UnboundMethod method) -> Symbol
-                   | (interned symbol) { () -> untyped } -> Symbol
+  def define_method: (interned symbol, ^() [self: instance] -> untyped | Method | UnboundMethod method) -> Symbol
+                   | (interned symbol) { () [self: instance] -> untyped } -> Symbol
 
   # <!--
   #   rdoc-file=object.c
@@ -1463,7 +1463,7 @@ class Module < Object
   #
   # Returns a module, where refined methods are defined.
   #
-  def refine: (Module mod) { () -> void } -> Refinement
+  def refine: (Module mod) { () [self: Refinement] -> void } -> Refinement
 
   # <!--
   #   rdoc-file=eval.c
@@ -1526,6 +1526,55 @@ class Module < Object
   # example, see Module#undef_method. String arguments are converted to symbols.
   #
   def remove_method: (*interned arg0) -> self
+
+  # <!--
+  #   rdoc-file=object.c
+  #   - mod.set_temporary_name(string) -> self
+  #   - mod.set_temporary_name(nil) -> self
+  # -->
+  # Sets the temporary name of the module. This name is reflected in introspection
+  # of the module and the values that are related to it, such as instances,
+  # constants, and methods.
+  #
+  # The name should be `nil` or non-empty string that is not a valid constant name
+  # (to avoid confusing between permanent and temporary names).
+  #
+  # The method can be useful to distinguish dynamically generated classes and
+  # modules without assigning them to constants.
+  #
+  # If the module is given a permanent name by assigning it to a constant, the
+  # temporary name is discarded. A temporary name can't be assigned to modules
+  # that have a permanent name.
+  #
+  # If the given name is `nil`, the module becomes anonymous again.
+  #
+  # Example:
+  #
+  #     m = Module.new # => #<Module:0x0000000102c68f38>
+  #     m.name #=> nil
+  #
+  #     m.set_temporary_name("fake_name") # => fake_name
+  #     m.name #=> "fake_name"
+  #
+  #     m.set_temporary_name(nil) # => #<Module:0x0000000102c68f38>
+  #     m.name #=> nil
+  #
+  #     c = Class.new
+  #     c.set_temporary_name("MyClass(with description)")
+  #
+  #     c.new # => #<MyClass(with description):0x0....>
+  #
+  #     c::M = m
+  #     c::M.name #=> "MyClass(with description)::M"
+  #
+  #     # Assigning to a constant replaces the name with a permanent one
+  #     C = c
+  #
+  #     C.name #=> "C"
+  #     C::M.name #=> "C::M"
+  #     c.new # => #<C:0x0....>
+  #
+  def set_temporary_name: (string?) -> self
 
   # <!--
   #   rdoc-file=object.c

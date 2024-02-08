@@ -357,4 +357,12 @@ module RBS
 
     def location: () -> AST::Declarations::AliasDecl::loc?
   end
+
+  class WillSyntaxError < BaseError
+    include RBS::DetailedMessageable
+
+    def initialize: (String message, location: Location[untyped, untyped]?) -> void
+
+    attr_reader location: Location[untyped, untyped]?
+  end
 end

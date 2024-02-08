@@ -14,3 +14,4 @@ This documentation describes major tools related to RBS. They are listed alphabe
 * Sublime Text: [sublime-rbs-plugin](https://github.com/soutaro/sublime-rbs-plugin)
 * Vim: [rbs.vim](https://github.com/pocke/rbs.vim)
 * Visual Studio Code: [vscode-rbs-syntax](https://github.com/soutaro/vscode-rbs-syntax)
+* NeoVim: [tree-sitter-rbs](https://github.com/joker1007/tree-sitter-rbs)

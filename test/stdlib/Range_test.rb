@@ -126,3 +126,16 @@ class RangeTest < StdlibTest
     (1..).member?(-2)
   end
 end
+
+class RangeInstanceTest < Test::Unit::TestCase
+  include TestHelper
+
+  testing "::Range[::Integer]"
+
+  def test_overlap?
+    assert_send_type(
+      "(::Range[::Integer]) -> bool",
+      (2..5), :overlap?, (3..4)
+    )
+  end
+end

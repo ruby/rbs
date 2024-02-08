@@ -1,7 +1,7 @@
 require_relative 'test_helper'
 
 class EncodingSingletonTest < Test::Unit::TestCase
-  include TypeAssertions
+  include TestHelper
 
   testing 'singleton(::Encoding)'
 
@@ -36,7 +36,7 @@ class EncodingSingletonTest < Test::Unit::TestCase
 
     assert_send_type  '() -> Encoding',
                       Encoding, :default_external
-    
+
     assert_send_type  '(Encoding) -> Encoding',
                       Encoding, :default_external=, Encoding::UTF_8
 
@@ -57,7 +57,7 @@ class EncodingSingletonTest < Test::Unit::TestCase
                       Encoding, :default_internal=, nil
     assert_send_type  '() -> Encoding?',
                       Encoding, :default_internal
-  
+
     assert_send_type  '(Encoding) -> Encoding',
                       Encoding, :default_internal=, Encoding::UTF_8
 
@@ -86,7 +86,7 @@ class EncodingSingletonTest < Test::Unit::TestCase
                           Encoding, :find, enc
       end
     ensure
-      Encoding.default_internal = old_enc 
+      Encoding.default_internal = old_enc
     end
   end
 
@@ -102,7 +102,7 @@ class EncodingSingletonTest < Test::Unit::TestCase
 end
 
 class EncodingInstanceTest < Test::Unit::TestCase
-  include TypeAssertions
+  include TestHelper
 
   testing '::Encoding'
 
@@ -177,19 +177,19 @@ class EncodingInstanceTest < Test::Unit::TestCase
 end
 
 class Encoding_CompatibilityErrorInstanceTest < Test::Unit::TestCase
-  include TypeAssertions
+  include TestHelper
 
   testing '::Encoding::CompatibilityError'
 end
 
 class Encoding_ConverterNotFoundErrorInstanceTest < Test::Unit::TestCase
-  include TypeAssertions
+  include TestHelper
 
   testing '::Encoding::ConverterNotFoundError'
 end
 
 class Encoding_InvalidByteSequenceErrorInstanceTest < Test::Unit::TestCase
-  include TypeAssertions
+  include TestHelper
 
   testing '::Encoding::InvalidByteSequenceError'
 
@@ -238,7 +238,7 @@ class Encoding_InvalidByteSequenceErrorInstanceTest < Test::Unit::TestCase
 end
 
 class Encoding_UndefinedConversionErrorTest < Test::Unit::TestCase
-  include TypeAssertions
+  include TestHelper
 
   testing '::Encoding::UndefinedConversionError'
 

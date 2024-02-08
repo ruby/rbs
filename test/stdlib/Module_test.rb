@@ -1,7 +1,7 @@
 require_relative "test_helper"
 
 class ModuleSingletonTest < Test::Unit::TestCase
-  include TypeAssertions
+  include TestHelper
 
   testing "singleton(::Module)"
 
@@ -19,7 +19,7 @@ class ModuleSingletonTest < Test::Unit::TestCase
 end
 
 class ModuleInstanceTest < Test::Unit::TestCase
-  include TypeAssertions
+  include TestHelper
 
   testing "::Module"
 
@@ -260,5 +260,21 @@ class ModuleInstanceTest < Test::Unit::TestCase
         mod, :attr_accessor, :foo, "bar"
       )
     end
+  end
+
+  def test_set_temporary_name
+    mod = Module.new
+
+    with_string "fake_name" do |name|
+      assert_send_type(
+        "(::string) -> ::Module",
+        mod, :set_temporary_name, name
+      )
+    end
+
+    assert_send_type(
+      "(nil) -> Module",
+      mod, :set_temporary_name, nil
+    )
   end
 end

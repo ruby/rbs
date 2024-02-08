@@ -15,7 +15,17 @@ class RBS::CliTest < Test::Unit::TestCase
     @stderr ||= StringIO.new
   end
 
-  def run_rbs(*commands, bundler: true)
+  # Run `rbs collection` with fresh bundler environment
+  #
+  # You need this method to test `rbs collection` features.
+  # `rbs collection` loads gems from Bundler context, so re-using the currenr Bundler context (used to develop rbs gem) causes issues.
+  #
+  # - If `bundler: true` is given, it runs `rbs collection` command with `bundle exec`
+  # - If `bundler: false` is given, it runs `rbs collection` command without `bundle exec`
+  #
+  # We cannot run tests that uses this method in ruby CI.
+  #
+  def run_rbs_collection(*commands, bundler:)
     stdout, stderr, status =
       Bundler.with_unbundled_env do
         bundle_exec = []
@@ -26,7 +36,7 @@ class RBS::CliTest < Test::Unit::TestCase
           rbs_path << (":" + rblib)
         end
 
-        Open3.capture3({ "RUBYLIB" => rbs_path }, *bundle_exec, "#{__dir__}/../../exe/rbs", *commands, chdir: Dir.pwd)
+        Open3.capture3({ "RUBYLIB" => rbs_path }, *bundle_exec, "#{__dir__}/../../exe/rbs", "collection", *commands, chdir: Dir.pwd)
       end
 
     if block_given?
@@ -38,9 +48,37 @@ class RBS::CliTest < Test::Unit::TestCase
     [stdout, stderr]
   end
 
+  def bundle_install(*gems)
+    stdout, stderr, status =
+      Bundler.with_unbundled_env do
+        gems = gems.map do |gem|
+          if gem == :gemspec
+            "gemspec"
+          else
+            "gem '#{gem}'"
+          end
+        end
+
+        (Pathname(Dir.pwd) + "Gemfile").write(<<~RUBY)
+          source "https://rubygems.org"
+
+          #{gems.join("\n")}
+        RUBY
+
+        Open3.capture3("bundle", "install", chdir: Dir.pwd)
+      end
+
+    assert_predicate status, :success?, stderr
+
+    [stdout, stderr]
+  end
+
   def with_cli
+    orig_logger_output = RBS.logger_output
+    RBS.logger_output = stdout
     yield CLI.new(stdout: stdout, stderr: stderr)
   ensure
+    RBS.logger_output = orig_logger_output
     @stdout = nil
     @stderr = nil
   end
@@ -240,15 +278,17 @@ singleton(::BasicObject)
 
   def test_validate
     with_cli do |cli|
-      cli.run(%w(validate))
+      cli.run(%w(--log-level=info validate))
       assert_match(/Validating/, stdout.string)
     end
 
     with_cli do |cli|
-      cli.run(%w(validate --silent))
-      assert_equal "", stdout.string
+      cli.run(%w(--log-level=warn validate --silent))
+      assert_match(/`--silent` option is deprecated.$/, stdout.string)
     end
+  end
 
+  def test_validate_no_type_found_error_1
     with_cli do |cli|
       Dir.mktmpdir do |dir|
         (Pathname(dir) + 'a.rbs').write(<<~RBS)
@@ -256,42 +296,48 @@ singleton(::BasicObject)
         end
         RBS
 
-        error = assert_raises RBS::NoTypeFoundError do
+        assert_raises SystemExit do
           cli.run(["-I", dir, "validate"])
         end
 
-        assert_equal "::Hello", error.type_name.to_s
+        assert_include stdout.string, "a.rbs:1:0...2:3: Could not find ::Hello (RBS::NoTypeFoundError)"
       end
     end
+  end
 
+  def test_validate_no_type_found_error_2
     with_cli do |cli|
       Dir.mktmpdir do |dir|
         (Pathname(dir) + 'a.rbs').write(<<~RBS)
         Hello::World: Integer
         RBS
 
-        error = assert_raises RBS::NoTypeFoundError do
+        assert_raises SystemExit do
           cli.run(["-I", dir, "validate"])
         end
 
-        assert_equal "::Hello", error.type_name.to_s
+        assert_include stdout.string, "a.rbs:1:0...1:21: Could not find ::Hello (RBS::NoTypeFoundError)"
       end
     end
+  end
 
+  def test_validate_no_type_found_error_3
     with_cli do |cli|
       Dir.mktmpdir do |dir|
         (Pathname(dir) + 'a.rbs').write(<<~RBS)
         type Hello::t = Integer
         RBS
 
-        error = assert_raises RBS::NoTypeFoundError do
+        assert_raises SystemExit do
           cli.run(["-I", dir, "validate"])
         end
 
-        assert_equal "::Hello", error.type_name.to_s
+        assert_include stdout.string, "a.rbs:1:0...1:23: Could not find ::Hello (RBS::NoTypeFoundError)"
       end
     end
+  end
 
+  def test_validate_no_type_found_error_4
     with_cli do |cli|
       Dir.mktmpdir do |dir|
         (Pathname(dir) + 'a.rbs').write(<<~RBS)
@@ -303,14 +349,16 @@ singleton(::BasicObject)
         end
         RBS
 
-        error = assert_raises RBS::NoTypeFoundError do
+        assert_raises SystemExit do
           cli.run(["-I", dir, "validate"])
         end
 
-        assert_equal "::A", error.type_name.to_s
+        assert_include stdout.string, "a.rbs:2:13...2:14: Could not find ::A (RBS::NoTypeFoundError)"
       end
     end
+  end
 
+  def test_validate_with_cyclic_type_parameter_bound_1
     with_cli do |cli|
       Dir.mktmpdir do |dir|
         (Pathname(dir) + 'a.rbs').write(<<~RBS)
@@ -318,16 +366,16 @@ singleton(::BasicObject)
         end
         RBS
 
-        error = assert_raises RBS::CyclicTypeParameterBound do
+        assert_raises SystemExit do
           cli.run(["-I", dir, "validate"])
         end
 
-        assert_equal TypeName("::Foo"), error.type_name
-        assert_nil error.method_name
-        assert_equal "[A < _Each[B], B < _Foo[A]]", error.location.source
+        assert_include stdout.string, "a.rbs:1:9...1:36: Cyclic type parameter bound is prohibited (RBS::CyclicTypeParameterBound)"
       end
     end
+  end
 
+  def test_validate_with_cyclic_type_parameter_bound_2
     with_cli do |cli|
       Dir.mktmpdir do |dir|
         (Pathname(dir) + 'a.rbs').write(<<~RBS)
@@ -338,16 +386,16 @@ singleton(::BasicObject)
         end
         RBS
 
-        error = assert_raises RBS::CyclicTypeParameterBound do
+        assert_raises SystemExit do
           cli.run(["-I", dir, "validate"])
         end
 
-        assert_equal TypeName("::Foo"), error.type_name
-        assert_equal :bar, error.method_name
-        assert_equal "[X < _Foo[Y], Y < _Bar[Z], Z < _Baz[X]]", error.location.source
+        assert_include stdout.string, "a.rbs:4:11...4:50: Cyclic type parameter bound is prohibited (RBS::CyclicTypeParameterBound)"
       end
     end
+  end
 
+  def test_validate_with_cyclic_type_parameter_bound_3
     with_cli do |cli|
       Dir.mktmpdir do |dir|
         (Pathname(dir) + 'a.rbs').write(<<~RBS)
@@ -355,16 +403,16 @@ singleton(::BasicObject)
         end
         RBS
 
-        error = assert_raises RBS::CyclicTypeParameterBound do
+        assert_raises SystemExit do
           cli.run(["-I", dir, "validate"])
         end
 
-        assert_equal TypeName("::_Foo"), error.type_name
-        assert_nil error.method_name
-        assert_equal "[A < _Each[B], B < _Baz[A]]", error.location.source
+        assert_include stdout.string, "a.rbs:1:14...1:41: Cyclic type parameter bound is prohibited (RBS::CyclicTypeParameterBound)"
       end
     end
+  end
 
+  def test_validate_with_cyclic_type_parameter_bound_4
     with_cli do |cli|
       Dir.mktmpdir do |dir|
         (Pathname(dir) + 'a.rbs').write(<<~RBS)
@@ -375,14 +423,135 @@ singleton(::BasicObject)
         end
         RBS
 
-        error = assert_raises RBS::CyclicTypeParameterBound do
+        assert_raises SystemExit do
           cli.run(["-I", dir, "validate"])
         end
 
-        assert_equal TypeName("::_Foo"), error.type_name
-        assert_equal :bar, error.method_name
-        assert_equal "[X < _Foo[Y], Y < _Bar[Z], Z < _Baz[X]]", error.location.source
+        assert_include stdout.string, "a.rbs:4:11...4:50: Cyclic type parameter bound is prohibited (RBS::CyclicTypeParameterBound)"
       end
+    end
+  end
+
+  def test_validate_multiple
+    with_cli do |cli|
+      Dir.mktmpdir do |dir|
+        (Pathname(dir) + 'a.rbs').write(<<~RBS)
+          class Foo
+            def foo: (void) -> void
+            def bar: (void) -> void
+          end
+        RBS
+
+        cli.run(["-I", dir, "--log-level=warn", "validate"])
+
+        assert_include stdout.string, "a.rbs:2:11...2:25: `void` type is only allowed in return type or generics parameter (RBS::WillSyntaxError)"
+        assert_include stdout.string, "a.rbs:3:11...3:25: `void` type is only allowed in return type or generics parameter (RBS::WillSyntaxError)"
+      end
+    end
+  end
+
+  def test_validate_multiple_with_fail_fast
+    with_cli do |cli|
+      Dir.mktmpdir do |dir|
+        (Pathname(dir) + 'a.rbs').write(<<~RBS)
+          class Foo
+            def foo: (void) -> void
+            def bar: (void) -> void
+          end
+        RBS
+
+        cli.run(["-I", dir, "--log-level=warn", "validate", "--fail-fast"])
+        assert_include stdout.string, "a.rbs:2:11...2:25: `void` type is only allowed in return type or generics parameter (RBS::WillSyntaxError)"
+        assert_include stdout.string, "a.rbs:3:11...3:25: `void` type is only allowed in return type or generics parameter (RBS::WillSyntaxError)"
+      end
+    end
+  end
+
+  def test_validate_multiple_with_exit_error_on_syntax_error
+    with_cli do |cli|
+      Dir.mktmpdir do |dir|
+        (Pathname(dir) + 'a.rbs').write(<<~RBS)
+          class Foo
+            def foo: (void) -> void
+            def bar: (void) -> void
+          end
+        RBS
+
+        assert_raises SystemExit do
+          cli.run(["-I", dir, "--log-level=warn", "validate", "--exit-error-on-syntax-error"])
+        end
+        assert_include stdout.string, "a.rbs:2:11...2:25: `void` type is only allowed in return type or generics parameter (RBS::WillSyntaxError)"
+        assert_include stdout.string, "a.rbs:3:11...3:25: `void` type is only allowed in return type or generics parameter (RBS::WillSyntaxError)"
+      end
+    end
+  end
+
+  def test_validate_multiple_with_fail_fast_and_exit_error_on_syntax_error
+    with_cli do |cli|
+      Dir.mktmpdir do |dir|
+        (Pathname(dir) + 'a.rbs').write(<<~RBS)
+          class Foo
+            def foo: (void) -> void
+            def bar: (void) -> void
+          end
+        RBS
+
+        assert_raises SystemExit do
+          cli.run(["-I", dir, "--log-level=warn", "validate", "--fail-fast", "--exit-error-on-syntax-error"])
+        end
+        assert_include stdout.string, "a.rbs:2:11...2:25: `void` type is only allowed in return type or generics parameter (RBS::WillSyntaxError)"
+        assert_not_include stdout.string, "a.rbs:3:11...3:25: `void` type is only allowed in return type or generics parameter (RBS::WillSyntaxError)"
+      end
+    end
+  end
+
+  def test_validate_multiple_with_many_errors
+    with_cli do |cli|
+      assert_raise SystemExit do
+        cli.run(%w(--log-level=warn -I test/multiple_error.rbs validate))
+      end
+      assert_include(stdout.string, "`void` type is only allowed in return type or generics parameter")
+      assert_include(stdout.string, "test/multiple_error.rbs:6:17...6:24: ::TypeArg expects parameters [T], but given args [] (RBS::InvalidTypeApplicationError)")
+      assert_include(stdout.string, "test/multiple_error.rbs:8:0...9:3: Detected recursive ancestors: ::RecursiveAncestor < ::RecursiveAncestor (RBS::RecursiveAncestorError)")
+      assert_include(stdout.string, "test/multiple_error.rbs:11:15...11:22: Could not find Nothing (RBS::NoTypeFoundError)")
+      assert_include(stdout.string, "test/multiple_error.rbs:13:0...14:3: Could not find super class: Nothing (RBS::NoSuperclassFoundError)")
+      assert_include(stdout.string, "test/multiple_error.rbs:15:22...15:28: Cannot inherit a module: ::Kernel (RBS::InheritModuleError)")
+      assert_include(stdout.string, "test/multiple_error.rbs:17:25...17:32: Could not find self type: Nothing (RBS::NoSelfTypeFoundError)")
+      assert_include(stdout.string, "test/multiple_error.rbs:20:2...20:17: Could not find mixin: Nothing (RBS::NoMixinFoundError)")
+      assert_include(stdout.string, "test/multiple_error.rbs:23:2...23:19: ::DuplicatedMethodDefinition#a has duplicated definitions in test/multiple_error.rbs:24:2...24:19 (RBS::DuplicatedMethodDefinitionError)")
+      assert_include(stdout.string, "test/multiple_error.rbs:34:2...34:48: Duplicated method definition: ::DuplicatedInterfaceMethodDefinition_3#a (RBS::DuplicatedInterfaceMethodDefinitionError)")
+      assert_include(stdout.string, "test/multiple_error.rbs:37:2...37:17: Unknown method alias name: nothing => a (::UnknownMethodAlias) (RBS::UnknownMethodAliasError)")
+      assert_include(stdout.string, "test/multiple_error.rbs:43:0...44:3: Superclass mismatch: ::SuperclassMismatch (RBS::SuperclassMismatchError)")
+      assert_include(stdout.string, "test/multiple_error.rbs:52:0...53:3: Generic parameters mismatch: ::GenericParameterMismatch (RBS::GenericParameterMismatchError)")
+      assert_include(stdout.string, "test/multiple_error.rbs:58:9...58:20: Type parameter variance error: T is covariant but used as incompatible variance (RBS::InvalidVarianceAnnotationError)")
+      assert_include(stdout.string, "test/multiple_error.rbs:61:2...61:11: Unknown method alias name: a => a (::RecursiveAliasDefinition) (RBS::UnknownMethodAliasError)")
+      assert_include(stdout.string, "test/multiple_error.rbs:66:2...66:25: Cannot include a class `::MixinClassClass` in the definition of `::MixinClassModule` (RBS::MixinClassError)")
+      assert_include(stdout.string, "test/multiple_error.rbs:77:37...77:44: Could not find Nothing (RBS::NoTypeFoundError)")
+      assert_include(stdout.string, "test/multiple_error.rbs:78:35...78:61: A ::CyclicClassAliasDefinition is a cyclic definition (RBS::CyclicClassAliasDefinitionError)")
+      assert_include(stdout.string, "test/multiple_error.rbs:48:2...48:27: Invalid method overloading: ::_InvalidOverloadMethod#foo (RBS::InvalidOverloadMethodError)")
+      assert_include(stdout.string, "test/multiple_error.rbs:75:11...75:50: Cyclic type parameter bound is prohibited (RBS::CyclicTypeParameterBound)")
+      assert_include(stdout.string, "test/multiple_error.rbs:69:2...69:12: Recursive type alias definition found for: a (RBS::RecursiveTypeAliasError)")
+      assert_include(stdout.string, "test/multiple_error.rbs:72:2...72:25: Nonregular generic type alias is prohibited: ::NonregularTypeAlias::bar, ::NonregularTypeAlias::bar[T?] (RBS::NonregularTypeAliasError)")
+    end
+  end
+
+  def test_validate_multiple_fail_fast
+    with_cli do |cli|
+      assert_raise SystemExit do
+        cli.run(%w(--log-level=warn -I test/multiple_error.rbs validate --fail-fast))
+      end
+      assert_include(stdout.string, "test/multiple_error.rbs:2:11...2:25: `void` type is only allowed in return type or generics parameter (RBS::WillSyntaxError)")
+      assert_include(stdout.string, "test/multiple_error.rbs:3:11...3:25: `void` type is only allowed in return type or generics parameter (RBS::WillSyntaxError)")
+      assert_include(stdout.string, "test/multiple_error.rbs:6:17...6:24: ::TypeArg expects parameters [T], but given args []")
+    end
+  end
+
+  def test_validate_multiple_fail_fast_and_exit_error_on_syntax_error
+    with_cli do |cli|
+      assert_raise SystemExit do
+        cli.run(%w(--log-level=warn -I test/multiple_error.rbs validate --fail-fast --exit-error-on-syntax-error))
+      end
+      assert_include(stdout.string, "test/multiple_error.rbs:2:11...2:25: `void` type is only allowed in return type or generics parameter (RBS::WillSyntaxError)")
     end
   end
 
@@ -432,10 +601,15 @@ singleton(::BasicObject)
       with_cli do |cli|
         Dir.mktmpdir do |dir|
           (Pathname(dir) + 'a.rbs').write(rbs)
-          error = assert_raises RuntimeError do
-            cli.run(["-I", dir, "validate"])
+
+          cli.run(["-I", dir, "validate"])
+
+          assert_match(/void|self|instance|class/, stdout.string)
+
+          cli.run(["-I", dir, "validate", "--no-exit-error-on-syntax-error"])
+          assert_raises SystemExit do
+            cli.run(["-I", dir, "validate", "--exit-error-on-syntax-error"])
           end
-          assert_match /void|self|instance|class/, error.message
         end
       end
     end
@@ -464,10 +638,10 @@ singleton(::BasicObject)
         end
         RBS
 
-        error = assert_raises RBS::NoTypeFoundError do
+        assert_raises SystemExit do
           cli.run(["-I", dir, "validate"])
         end
-        assert_equal "_Void", error.type_name.to_s
+        assert_match %r{a.rbs:2:18...2:23: Could not find _Void \(.*RBS::NoTypeFoundError.*\)}, stdout.string
       end
     end
   end
@@ -481,10 +655,10 @@ singleton(::BasicObject)
         end
         RBS
 
-        error = assert_raises RBS::NoTypeFoundError do
+        assert_raises SystemExit do
           cli.run(["-I", dir, "validate"])
         end
-        assert_equal "voida", error.type_name.to_s
+        assert_match %r{a.rbs:2:18...2:23: Could not find voida \(.*RBS::NoTypeFoundError.*\)}, stdout.string
       end
     end
   end
@@ -504,10 +678,10 @@ singleton(::BasicObject)
 
   def test_paths
     with_cli do |cli|
-      cli.run(%w(-r pathname -I sig/test paths))
+      cli.run(%w(-r pathname -I no-such-dir paths))
       assert_match %r{/rbs/core \(dir, core\)$}, stdout.string
       assert_match %r{/rbs/stdlib/pathname/0 \(dir, library, name=pathname\)$}, stdout.string
-      assert_match %r{^sig/test \(absent\)$}, stdout.string
+      assert_match %r{^no-such-dir \(absent\)$}, stdout.string
     end
   end
 
@@ -736,6 +910,32 @@ Processing `test/a_test.rb`...
     end
   end
 
+  def test_prototype_batch_syntax_error
+    Dir.mktmpdir do |dir|
+      dir = Pathname(dir)
+
+      (dir + "lib").mkdir
+      (dir + "lib/a.rb").write(<<-RUBY)
+class A < <%= @superclass %>
+end
+      RUBY
+
+      Dir.chdir(dir) do
+        with_cli do |cli|
+          cli.run(%w(prototype rb --out_dir=sig lib))
+
+          assert_equal <<-EOM, cli.stdout.string
+Processing `lib`...
+  Generating RBS for `lib/a.rb`...
+  ⚠️  Unable to parse due to SyntaxError: `lib/a.rb`
+          EOM
+        end
+      end
+
+      refute_predicate dir + "sig", :directory?
+    end
+  end
+
   def test_prototype__runtime__todo
     Dir.mktmpdir do |dir|
       Dir.chdir(dir) do
@@ -797,27 +997,9 @@ Processing `test/a_test.rb`...
 
           path: #{dir.join('gem_rbs_collection')}
         YAML
-        dir.join('Gemfile').write(<<~GEMFILE)
-          source 'https://rubygems.org'
-          gem 'ast'
-        GEMFILE
-        dir.join('Gemfile.lock').write(<<~LOCK)
-          GEM
-            remote: https://rubygems.org/
-            specs:
-              ast (2.4.2)
 
-          PLATFORMS
-            x86_64-linux
-
-          DEPENDENCIES
-            ast
-
-          BUNDLED WITH
-             2.2.0
-        LOCK
-
-        _stdout, _stderr = run_rbs("collection", "install")
+        bundle_install('ast', 'abbrev', 'bigdecimal')
+        _stdout, _stderr = run_rbs_collection("install", bundler: true)
 
         rbs_collection_lock = dir.join('rbs_collection.lock.yaml')
         assert rbs_collection_lock.exist?
@@ -829,7 +1011,7 @@ Processing `test/a_test.rb`...
 
         Dir.mkdir("child")
         Dir.chdir("child") do
-          _stdout, _stderr = run_rbs("collection", "install")
+          _stdout, _stderr = run_rbs_collection("install", bundler: true)
           assert rbs_collection_lock.exist?
           assert collection_dir.exist?
         end
@@ -859,7 +1041,7 @@ Processing `test/a_test.rb`...
         YAML
         dir.join('rbs_collection.lock.yaml').write(lock_content)
 
-        run_rbs("collection", "install", "--frozen", bundler: false)
+        run_rbs_collection("install", "--frozen", bundler: false)
 
         refute dir.join(RBS::Collection::Config::PATH).exist?
         assert dir.join('gem_rbs_collection/ast').exist?
@@ -881,27 +1063,9 @@ Processing `test/a_test.rb`...
 
           path: #{dir.join('gem_rbs_collection')}
         YAML
-        dir.join('Gemfile').write(<<~GEMFILE)
-          source 'https://rubygems.org'
-          gem 'ast'
-        GEMFILE
-        dir.join('Gemfile.lock').write(<<~LOCK)
-          GEM
-            remote: https://rubygems.org/
-            specs:
-              ast (2.4.2)
 
-          PLATFORMS
-            x86_64-linux
-
-          DEPENDENCIES
-            ast
-
-          BUNDLED WITH
-             2.2.0
-        LOCK
-
-        run_rbs("collection", "update", bundler: true)
+        bundle_install('ast', 'abbrev', 'bigdecimal')
+        run_rbs_collection("update", bundler: true)
 
         assert dir.join('rbs_collection.lock.yaml').exist?
         assert dir.join('gem_rbs_collection/ast').exist?
@@ -922,31 +1086,6 @@ Processing `test/a_test.rb`...
 
           path: #{dir.join('gem_rbs_collection')}
         YAML
-        dir.join('Gemfile').write(<<~GEMFILE)
-          source 'https://rubygems.org'
-          gemspec
-        GEMFILE
-        dir.join('Gemfile.lock').write(<<~LOCK)
-          PATH
-            remote: .
-            specs:
-              hola (0.0.0)
-                ast (>= 2)
-
-          GEM
-            remote: https://rubygems.org/
-            specs:
-              ast (2.4.2)
-
-          PLATFORMS
-            arm64-darwin-22
-
-          DEPENDENCIES
-            hola!
-
-          BUNDLED WITH
-            2.2.0
-        LOCK
         gemspec_path = dir / "hola.gemspec"
         gemspec_path.write <<~RUBY
           Gem::Specification.new do |s|
@@ -965,7 +1104,8 @@ Processing `test/a_test.rb`...
         RUBY
         (dir/"sig").mkdir
 
-        stdout, _ = run_rbs("collection", "install", bundler: true)
+        bundle_install(:gemspec, "abbrev", "bigdecimal")
+        stdout, _ = run_rbs_collection("install", bundler: true)
 
         assert_match(/Installing ast:(\d(\.\d)*)/, stdout)
         refute_match(/^Using hola:(\d(\.\d)*)/, stdout)
@@ -995,15 +1135,17 @@ Processing `test/a_test.rb`...
         end
       RBS
 
-      stdout, stderr = run_rbs('subtract', minuend.to_s, subtrahend.to_s)
-      assert_empty stderr
-      assert_equal <<~RBS, stdout
-        use A::B
+      with_cli do |cli|
+        cli.run(['subtract', minuend.to_s, subtrahend.to_s])
+        assert_empty stderr.string
+        assert_equal <<~RBS, stdout.string
+          use A::B
 
-        class C
-          def y: () -> untyped
-        end
-      RBS
+          class C
+            def y: () -> untyped
+          end
+        RBS
+      end
     end
   end
 
@@ -1033,15 +1175,17 @@ Processing `test/a_test.rb`...
         end
       RBS
 
-      stdout, stderr = run_rbs('subtract', minuend.to_s, '--subtrahend', subtrahend_1.to_s, '--subtrahend', subtrahend_2.to_s)
-      assert_empty stderr
-      assert_equal <<~RBS, stdout
-        use A::B
+      with_cli do |cli|
+        cli.run(['subtract', minuend.to_s, '--subtrahend', subtrahend_1.to_s, '--subtrahend', subtrahend_2.to_s])
+        assert_empty stderr.string
+        assert_equal <<~RBS, stdout.string
+          use A::B
 
-        class C
-          def z: () -> untyped
-        end
-      RBS
+          class C
+            def z: () -> untyped
+          end
+        RBS
+      end
     end
   end
 
@@ -1064,16 +1208,18 @@ Processing `test/a_test.rb`...
         end
       RBS
 
-      stdout, stderr = run_rbs('subtract', '--write', minuend.to_s, subtrahend.to_s)
-      assert_empty stderr
-      assert_empty stdout
-      assert_equal minuend.read, <<~RBS
-        use A::B
+      with_cli do |cli|
+        cli.run(['subtract', '--write', minuend.to_s, subtrahend.to_s])
+        assert_empty stderr.string
+        assert_empty stdout.string
+        assert_equal minuend.read, <<~RBS
+          use A::B
 
-        class C
-          def y: () -> untyped
-        end
-      RBS
+          class C
+            def y: () -> untyped
+          end
+        RBS
+      end
     end
   end
 
@@ -1095,15 +1241,96 @@ Processing `test/a_test.rb`...
         end
       RBS
 
-      stdout, stderr = run_rbs('subtract', '--write', minuend.to_s, subtrahend.to_s)
-      assert_empty stderr
-      assert_empty stdout
-      assert_equal minuend.exist?, false
+      with_cli do |cli|
+        cli.run(['subtract', '--write', minuend.to_s, subtrahend.to_s])
+        assert_empty stderr.string
+        assert_empty stdout.string
+        refute_predicate minuend, :exist?
+    end
     end
   end
 
   def assert_rbs_test_no_errors cli, dir, arg_array
     args = ['-I', dir.to_s, 'test', *arg_array]
     assert_instance_of Process::Status, cli.run(args)
+  end
+
+  def mktmp_diff_case
+    Dir.mktmpdir do |path|
+      path = Pathname(path)
+
+      dir1 = (path / "dir1")
+      dir1.mkdir
+      (dir1 / 'before.rbs').write(<<~RBS)
+        class Foo
+          def bar: () -> void
+          def self.baz: () -> (Integer | String)
+          def qux: (untyped) -> untyped
+          def quux: () -> void
+
+          CONST: Array[Integer]
+        end
+      RBS
+
+      dir2 = (path / "dir2")
+      dir2.mkdir
+      (dir2 / 'after.rbs').write(<<~RBS)
+        module Bar
+          def bar: () -> void
+        end
+
+        module Baz
+          def baz: (Integer) -> Integer?
+        end
+
+        class Foo
+          include Bar
+          extend Baz
+          alias quux bar
+          CONST: Array[String]
+        end
+      RBS
+
+      yield dir1, dir2
+    end
+  end
+
+  def test_diff_markdown
+    mktmp_diff_case do |dir1, dir2|
+      with_cli do |cli|
+        cli.run(['diff', '--format', 'markdown', '--type-name', 'Foo', '--before', dir1.to_s, '--after', dir2.to_s])
+
+        assert_equal <<~MARKDOWN, stdout.string
+          | before | after |
+          | --- | --- |
+          | `def qux: (untyped) -> untyped` | `-` |
+          | `def quux: () -> void` | `alias quux bar` |
+          | `def self.baz: () -> (::Integer \\| ::String)` | `def self.baz: (::Integer) -> ::Integer?` |
+          | `CONST: ::Array[::Integer]` | `CONST: ::Array[::String]` |
+        MARKDOWN
+      end
+    end
+  end
+
+  def test_diff_diff
+    mktmp_diff_case do |dir1, dir2|
+      with_cli do |cli|
+        cli.run(['diff', '--format', 'diff', '--type-name', 'Foo', '--before', dir1.to_s, '--after', dir2.to_s])
+
+        assert_equal <<~DIFF, stdout.string
+          - def qux: (untyped) -> untyped
+          + -
+
+          - def quux: () -> void
+          + alias quux bar
+
+          - def self.baz: () -> (::Integer | ::String)
+          + def self.baz: (::Integer) -> ::Integer?
+
+          - CONST: ::Array[::Integer]
+          + CONST: ::Array[::String]
+        DIFF
+      end
+    end
   end
 end

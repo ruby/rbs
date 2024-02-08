@@ -44,21 +44,27 @@ module GC
 
   # <!--
   #   rdoc-file=gc.rb
-  #   - GC.start                     -> nil
-  #   - ObjectSpace.garbage_collect  -> nil
-  #   - include GC; garbage_collect  -> nil
-  #   - GC.start(full_mark: true, immediate_sweep: true)           -> nil
-  #   - ObjectSpace.garbage_collect(full_mark: true, immediate_sweep: true) -> nil
-  #   - include GC; garbage_collect(full_mark: true, immediate_sweep: true) -> nil
+  #   - start(full_mark: true, immediate_mark: true, immediate_sweep: true)
   # -->
   # Initiates garbage collection, even if manually disabled.
   #
-  # This method is defined with keyword arguments that default to true:
+  # The `full_mark` keyword argument determines whether or not to perform a major
+  # garbage collection cycle. When set to `true`, a major garbage collection cycle
+  # is ran, meaning all objects are marked. When set to `false`, a minor garbage
+  # collection cycle is ran, meaning only young objects are marked.
   #
-  #     def GC.start(full_mark: true, immediate_sweep: true); end
+  # The `immediate_mark` keyword argument determines whether or not to perform
+  # incremental marking. When set to `true`, marking is completed during the call
+  # to this method. When set to `false`, marking is performed in steps that is
+  # interleaved with future Ruby code execution, so marking might not be completed
+  # during this method call. Note that if `full_mark` is `false` then marking will
+  # always be immediate, regardless of the value of `immediate_mark`.
   #
-  # Use full_mark: false to perform a minor GC. Use immediate_sweep: false to
-  # defer sweeping (use lazy sweep).
+  # The `immedate_sweep` keyword argument determines whether or not to defer
+  # sweeping (using lazy sweep). When set to `true`, sweeping is performed in
+  # steps that is interleaved with future Ruby code execution, so sweeping might
+  # not be completed during this method call. When set to `false`, sweeping is
+  # completed during the call to this method.
   #
   # Note: These keyword arguments are implementation and version dependent. They
   # are not guaranteed to be future-compatible, and may be ignored if the
@@ -253,12 +259,13 @@ module GC
   #   rdoc-file=gc.rb
   #   - garbage_collect(full_mark: true, immediate_mark: true, immediate_sweep: true)
   # -->
+  # Alias of GC.start
   #
   def garbage_collect: (?immediate_sweep: boolish immediate_sweep, ?immediate_mark: boolish immediate_mark, ?full_mark: boolish full_mark) -> nil
 end
 
 # <!-- rdoc-file=gc.c -->
-# internal constants
+# Internal constants in the garbage collector.
 #
 GC::INTERNAL_CONSTANTS: Hash[Symbol, Integer]
 

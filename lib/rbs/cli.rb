@@ -8,6 +8,10 @@ require "stringio"
 
 module RBS
   class CLI
+    autoload :ColoredIO, 'rbs/cli/colored_io'
+    autoload :Diff, 'rbs/cli/diff'
+    autoload :Validate, 'rbs/cli/validate'
+
     class LibraryOptions
       attr_accessor :core_root
       attr_accessor :config_path
@@ -90,7 +94,7 @@ module RBS
       @stderr = stderr
     end
 
-    COMMANDS = [:ast, :annotate, :list, :ancestors, :methods, :method, :validate, :constant, :paths, :prototype, :vendor, :parse, :test, :collection, :subtract]
+    COMMANDS = [:ast, :annotate, :list, :ancestors, :methods, :method, :validate, :constant, :paths, :prototype, :vendor, :parse, :test, :collection, :subtract, :diff]
 
     def parse_logging_options(opts)
       opts.on("--log-level LEVEL", "Specify log level (defaults to `warn`)") do |level|
@@ -441,183 +445,7 @@ EOU
     end
 
     def run_validate(args, options)
-      OptionParser.new do |opts|
-        opts.banner = <<EOU
-Usage: rbs validate
-
-Validate RBS files. It ensures the type names in RBS files are present and the type applications have correct arity.
-
-Examples:
-
-  $ rbs validate
-EOU
-
-        opts.on("--silent") do
-          @stdout = StringIO.new
-        end
-      end.parse!(args)
-
-      loader = options.loader()
-      env = Environment.from_loader(loader).resolve_type_names
-
-      builder = DefinitionBuilder.new(env: env)
-      validator = Validator.new(env: env, resolver: Resolver::TypeNameResolver.new(env))
-
-      no_self_type_validator = ->(type) {
-        # @type var type: Types::t | MethodType
-        if type.has_self_type?
-          raise "#{type.location}: `self` type is not allowed in this context"
-        end
-      }
-
-      no_classish_type_validator = ->(type) {
-        # @type var type: Types::t | MethodType
-        if type.has_classish_type?
-          raise "#{type.location}: `instance` or `class` type is not allowed in this context"
-        end
-      }
-
-      void_type_context_validator = ->(type, allowed_here = false) {
-        # @type var type: Types::t | MethodType
-        if allowed_here
-          next if type.is_a?(Types::Bases::Void)
-        end
-        if type.with_nonreturn_void?
-          raise "#{type.location}: `void` type is only allowed in return type or generics parameter"
-        end
-      }
-
-      env.class_decls.each do |name, decl|
-        stdout.puts "Validating class/module definition: `#{name}`..."
-        builder.build_instance(name).each_type do |type|
-          validator.validate_type type, context: nil
-        end
-        builder.build_singleton(name).each_type do |type|
-          validator.validate_type type, context: nil
-        end
-
-        case decl
-        when Environment::ClassEntry
-          decl.decls.each do |decl|
-            if super_class = decl.decl.super_class
-              super_class.args.each do |arg|
-                void_type_context_validator[arg, true]
-                no_self_type_validator[arg]
-                no_classish_type_validator[arg]
-              end
-            end
-          end
-        when Environment::ModuleEntry
-          decl.decls.each do |decl|
-            decl.decl.self_types.each do |self_type|
-              self_type.args.each do |arg|
-                void_type_context_validator[arg, true]
-                no_self_type_validator[arg]
-                no_classish_type_validator[arg]
-              end
-            end
-          end
-        end
-
-        d = decl.primary.decl
-
-        validator.validate_type_params(
-          d.type_params,
-          type_name: name,
-          location: d.location&.aref(:type_params)
-        )
-
-        d.type_params.each do |param|
-          if ub = param.upper_bound
-            void_type_context_validator[ub]
-            no_self_type_validator[ub]
-            no_classish_type_validator[ub]
-          end
-        end
-
-        decl.decls.each do |d|
-          d.decl.each_member do |member|
-            case member
-            when AST::Members::MethodDefinition
-              validator.validate_method_definition(member, type_name: name)
-              member.overloads.each do |ov|
-                void_type_context_validator[ov.method_type]
-              end
-            when AST::Members::Attribute
-              void_type_context_validator[member.type]
-            when AST::Members::Mixin
-              member.args.each do |arg|
-                no_self_type_validator[arg]
-                unless arg.is_a?(Types::Bases::Void)
-                  void_type_context_validator[arg, true]
-                end
-              end
-            when AST::Members::Var
-              void_type_context_validator[member.type]
-              if member.is_a?(AST::Members::ClassVariable)
-                no_self_type_validator[member.type]
-              end
-            end
-          end
-        end
-      end
-
-      env.class_alias_decls.each do |name, entry|
-        stdout.puts "Validating class/module alias definition: `#{name}`..."
-        validator.validate_class_alias(entry: entry)
-      end
-
-      env.interface_decls.each do |name, decl|
-        stdout.puts "Validating interface: `#{name}`..."
-        builder.build_interface(name).each_type do |type|
-          validator.validate_type type, context: nil
-        end
-
-        validator.validate_type_params(
-          decl.decl.type_params,
-          type_name: name,
-          location: decl.decl.location&.aref(:type_params)
-        )
-
-        decl.decl.members.each do |member|
-          case member
-          when AST::Members::MethodDefinition
-            validator.validate_method_definition(member, type_name: name)
-            member.overloads.each do |ov|
-              void_type_context_validator[ov.method_type]
-              no_classish_type_validator[ov.method_type]
-            end
-          end
-        end
-      end
-
-      env.constant_decls.each do |name, const|
-        stdout.puts "Validating constant: `#{name}`..."
-        validator.validate_type const.decl.type, context: const.context
-        builder.ensure_namespace!(name.namespace, location: const.decl.location)
-        no_self_type_validator[const.decl.type]
-        no_classish_type_validator[const.decl.type]
-        void_type_context_validator[const.decl.type]
-      end
-
-      env.global_decls.each do |name, global|
-        stdout.puts "Validating global: `#{name}`..."
-        validator.validate_type global.decl.type, context: nil
-        no_self_type_validator[global.decl.type]
-        no_classish_type_validator[global.decl.type]
-        void_type_context_validator[global.decl.type]
-      end
-
-      env.type_alias_decls.each do |name, decl|
-        stdout.puts "Validating alias: `#{name}`..."
-        builder.expand_alias1(name).tap do |type|
-          validator.validate_type type, context: nil
-        end
-        validator.validate_type_alias(entry: decl)
-        no_self_type_validator[decl.decl.type]
-        no_classish_type_validator[decl.decl.type]
-        void_type_context_validator[decl.decl.type]
-      end
+      CLI::Validate.new(args: args, options: options).run
     end
 
     def run_constant(args, options)
@@ -951,7 +779,12 @@ EOU
             output_path = (output_dir + relative_path).sub_ext(".rbs")
 
             parser = new_parser[]
-            parser.parse file_path.read()
+            begin
+              parser.parse file_path.read()
+            rescue SyntaxError
+              stdout.puts "  ⚠️  Unable to parse due to SyntaxError: `#{file_path}`"
+              next
+            end
 
             if output_path.file?
               if force
@@ -1221,6 +1054,8 @@ EOB
     end
 
     def run_collection(args, options)
+      require 'bundler'
+
       opts = collection_options(args)
       params = {}
       opts.order args.drop(1), into: params
@@ -1381,6 +1216,10 @@ EOB
           end
         end
       end
+    end
+
+    def run_diff(argv, library_options)
+      Diff.new(argv: argv, library_options: library_options, stdout: stdout, stderr: stderr).run
     end
   end
 end

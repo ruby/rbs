@@ -270,7 +270,7 @@ class TimeTest < StdlibTest
 end
 
 class TimeSingletonTest < Test::Unit::TestCase
-  include TypeAssertions
+  include TestHelper
   testing "singleton(::Time)"
 
   def test_now
@@ -344,7 +344,7 @@ class TimeSingletonTest < Test::Unit::TestCase
 end
 
 class TimeInDateTest < Test::Unit::TestCase
-  include TypeAssertions
+  include TestHelper
 
   require "date"
 

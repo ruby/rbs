@@ -2,7 +2,7 @@ require_relative "test_helper"
 require "uri"
 
 class URISingletonTest < Test::Unit::TestCase
-  include TypeAssertions
+  include TestHelper
 
   library "uri"
   testing "singleton(::URI)"
@@ -84,6 +84,8 @@ class URISingletonTest < Test::Unit::TestCase
                      URI, :join, "http://example.com"
     assert_send_type "(String, String) -> URI::Generic",
                      URI, :join, "http://example.com", "foo"
+    assert_send_type "(URI::Generic, URI::Generic) -> URI::Generic",
+                     URI, :join, URI("http://example.com"), URI("foo")
   end
 
   def test_parse
@@ -117,7 +119,7 @@ class URISingletonTest < Test::Unit::TestCase
 end
 
 class URIInstanceTest < Test::Unit::TestCase
-  include TypeAssertions
+  include TestHelper
 
   library "uri"
   testing "::URI::Generic"

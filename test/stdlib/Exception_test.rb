@@ -1,7 +1,7 @@
 require_relative 'test_helper'
 
 class ExceptionSingletonTest < Test::Unit::TestCase
-  include TypeAssertions
+  include TestHelper
 
   testing 'singleton(::Exception)'
 
@@ -16,7 +16,7 @@ class ExceptionSingletonTest < Test::Unit::TestCase
     assert_send_type  '() -> ExceptionSingletonTest::MyException',
                       MyException, :exception
 
-    with_string.chain([1r]).each do |message|
+    with_string.and(1r) do |message|
       assert_send_type  '(string | _ToS) -> ExceptionSingletonTest::MyException',
                         MyException, :exception, message
     end
@@ -24,7 +24,7 @@ class ExceptionSingletonTest < Test::Unit::TestCase
 end
 
 class ExceptionInstanceTest < Test::Unit::TestCase
-  include TypeAssertions
+  include TestHelper
 
   testing '::Exception'
 
@@ -41,7 +41,7 @@ class ExceptionInstanceTest < Test::Unit::TestCase
 
     assert_send_type  '() -> nil',
                       exception, :backtrace
-    
+
     exception.set_backtrace caller
     assert_send_type  '() -> Array[String]',
                       exception, :backtrace
@@ -64,7 +64,7 @@ class ExceptionInstanceTest < Test::Unit::TestCase
   def test_cause
     assert_send_type  '() -> nil',
                       INSTANCE, :cause
-    
+
     exception = begin
       raise "oops"
     rescue
@@ -83,7 +83,7 @@ class ExceptionInstanceTest < Test::Unit::TestCase
     assert_send_type  '() -> String',
                       INSTANCE, :detailed_message
 
-    [true, false, nil].each do |highlight|
+    with_bool.and_nil do |highlight|
       assert_send_type  '(highlight: bool?) -> String',
                         INSTANCE, :detailed_message, highlight: highlight
       assert_send_type  '(highlight: bool?, **untyped) -> String',
@@ -94,20 +94,20 @@ class ExceptionInstanceTest < Test::Unit::TestCase
   class MyException < Exception; end
 
   def test_exception
-    assert_send_type  '() -> self',
+    assert_send_type  '() -> Exception',
                       INSTANCE, :exception
-    assert_send_type  '(self) -> self',
+    assert_send_type  '(Exception) -> Exception',
                       INSTANCE, :exception, INSTANCE
 
-    with_string.chain([Object.new, 1r]).each do |message|
+    with_string.and(Object.new, 1r) do |message|
       assert_send_type  '(string | _ToS) -> ExceptionInstanceTest::MyException',
                         MyException.new, :exception, message
     end
   end
 
   def test_initialize
-    with_string.chain([Object.new, 1r]).each do |message|
-      assert_send_type  '(string | _ToS) -> self',
+    with_string.and(Object.new, 1r) do |message|
+      assert_send_type  '(string | _ToS) -> Exception',
                         Exception.allocate, :initialize, message
     end
   end
@@ -144,11 +144,11 @@ class ExceptionInstanceTest < Test::Unit::TestCase
     assert_send_type  '() -> String',
                       INSTANCE, :full_message
 
-    [true, false, nil].each do |highlight|
+    with_bool.and_nil do |highlight|
       assert_send_type  '(highlight: bool?) -> String',
                         INSTANCE, :full_message, highlight: highlight
-      
-      with_string('top').chain(with_string('bottom'), [:top, :bottom, nil]).each do |order|
+
+      with_string('top').and(nil, with_string('bottom'), :top, :bottom) do |order|
         assert_send_type  '(highlight: bool?, order: (:top | :bottom | string)?) -> String',
                           INSTANCE, :full_message, highlight: highlight, order: order
       end

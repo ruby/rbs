@@ -1,9 +1,8 @@
 # frozen_string_literal: true
 
 require 'yaml'
-require 'bundler'
 
-require_relative './collection/colored_io'
+require_relative './cli/colored_io'
 require_relative './collection/sources'
 require_relative './collection/config'
 require_relative './collection/config/lockfile'

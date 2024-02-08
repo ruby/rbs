@@ -362,25 +362,63 @@ module Kernel : BasicObject
 
   # <!--
   #   rdoc-file=process.c
-  #   - Kernel.fork  [{ block }]   -> integer or nil
-  #   - Process.fork [{ block }]   -> integer or nil
+  #   - Process.fork { ... } -> integer or nil
+  #   - Process.fork -> integer or nil
   # -->
-  # Creates a subprocess. If a block is specified, that block is run in the
-  # subprocess, and the subprocess terminates with a status of zero. Otherwise,
-  # the `fork` call returns twice, once in the parent, returning the process ID of
-  # the child, and once in the child, returning *nil*. The child process can exit
-  # using Kernel.exit! to avoid running any `at_exit` functions. The parent
-  # process should use Process.wait to collect the termination statuses of its
-  # children or use Process.detach to register disinterest in their status;
-  # otherwise, the operating system may accumulate zombie processes.
+  # Creates a child process.
   #
-  # The thread calling fork is the only thread in the created child process. fork
-  # doesn't copy other threads.
+  # With a block given, runs the block in the child process; on block exit, the
+  # child terminates with a status of zero:
   #
-  # If fork is not usable, Process.respond_to?(:fork) returns false.
+  #     puts "Before the fork: #{Process.pid}"
+  #     fork do
+  #       puts "In the child process: #{Process.pid}"
+  #     end                   # => 382141
+  #     puts "After the fork: #{Process.pid}"
   #
-  # Note that fork(2) is not available on some platforms like Windows and NetBSD
-  # 4. Therefore you should use spawn() instead of fork().
+  # Output:
+  #
+  #     Before the fork: 420496
+  #     After the fork: 420496
+  #     In the child process: 420520
+  #
+  # With no block given, the `fork` call returns twice:
+  #
+  # *   Once in the parent process, returning the pid of the child process.
+  # *   Once in the child process, returning `nil`.
+  #
+  #
+  # Example:
+  #
+  #     puts "This is the first line before the fork (pid #{Process.pid})"
+  #     puts fork
+  #     puts "This is the second line after the fork (pid #{Process.pid})"
+  #
+  # Output:
+  #
+  #     This is the first line before the fork (pid 420199)
+  #     420223
+  #     This is the second line after the fork (pid 420199)
+  #
+  #     This is the second line after the fork (pid 420223)
+  #
+  # In either case, the child process may exit using Kernel.exit! to avoid the
+  # call to Kernel#at_exit.
+  #
+  # To avoid zombie processes, the parent process should call either:
+  #
+  # *   Process.wait, to collect the termination statuses of its children.
+  # *   Process.detach, to register disinterest in their status.
+  #
+  #
+  # The thread calling `fork` is the only thread in the created child process;
+  # `fork` doesn't copy other threads.
+  #
+  # Note that method `fork` is available on some platforms, but not on others:
+  #
+  #     Process.respond_to?(:fork) # => true # Would be false on some.
+  #
+  # If not, you may use ::spawn instead of `fork`.
   #
   def self?.fork: () -> Integer?
                 | () { () -> void } -> Integer
@@ -407,39 +445,53 @@ module Kernel : BasicObject
 
   # <!--
   #   rdoc-file=complex.c
-  #   - Complex(x[, y], exception: true)  ->  numeric or nil
+  #   - Complex(real, imag = 0, exception: true) -> complex or nil
+  #   - Complex(s, exception: true) -> complex or nil
   # -->
-  # Returns x+i*y;
+  # Returns a new Complex object if the arguments are valid; otherwise raises an
+  # exception if `exception` is `true`; otherwise returns `nil`.
   #
-  #     Complex(1, 2)    #=> (1+2i)
-  #     Complex('1+2i')  #=> (1+2i)
-  #     Complex(nil)     #=> TypeError
-  #     Complex(1, nil)  #=> TypeError
+  # With Numeric arguments `real` and `imag`, returns `Complex.rect(real, imag)`
+  # if the arguments are valid.
   #
-  #     Complex(1, nil, exception: false)  #=> nil
-  #     Complex('1+2', exception: false)   #=> nil
+  # With string argument `s`, returns a new Complex object if the argument is
+  # valid; the string may have:
   #
-  # Syntax of string form:
+  # *   One or two numeric substrings, each of which specifies a Complex, Float,
+  #     Integer, Numeric, or Rational value, specifying [rectangular
+  #     coordinates](rdoc-ref:Complex@Rectangular+Coordinates):
   #
-  #     string form = extra spaces , complex , extra spaces ;
-  #     complex = real part | [ sign ] , imaginary part
-  #             | real part , sign , imaginary part
-  #             | rational , "@" , rational ;
-  #     real part = rational ;
-  #     imaginary part = imaginary unit | unsigned rational , imaginary unit ;
-  #     rational = [ sign ] , unsigned rational ;
-  #     unsigned rational = numerator | numerator , "/" , denominator ;
-  #     numerator = integer part | fractional part | integer part , fractional part ;
-  #     denominator = digits ;
-  #     integer part = digits ;
-  #     fractional part = "." , digits , [ ( "e" | "E" ) , [ sign ] , digits ] ;
-  #     imaginary unit = "i" | "I" | "j" | "J" ;
-  #     sign = "-" | "+" ;
-  #     digits = digit , { digit | "_" , digit };
-  #     digit = "0" | "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9" ;
-  #     extra spaces = ? \s* ? ;
+  #     *   Sign-separated real and imaginary numeric substrings (with trailing
+  #         character `'i'`):
   #
-  # See String#to_c.
+  #             Complex('1+2i')  # => (1+2i)
+  #             Complex('+1+2i') # => (1+2i)
+  #             Complex('+1-2i') # => (1-2i)
+  #             Complex('-1+2i') # => (-1+2i)
+  #             Complex('-1-2i') # => (-1-2i)
+  #
+  #     *   Real-only numeric string (without trailing character `'i'`):
+  #
+  #             Complex('1')  # => (1+0i)
+  #             Complex('+1') # => (1+0i)
+  #             Complex('-1') # => (-1+0i)
+  #
+  #     *   Imaginary-only numeric string (with trailing character `'i'`):
+  #
+  #             Complex('1i')  # => (0+1i)
+  #             Complex('+1i') # => (0+1i)
+  #             Complex('-1i') # => (0-1i)
+  #
+  #
+  # *   At-sign separated real and imaginary rational substrings, each of which
+  #     specifies a Rational value, specifying [polar
+  #     coordinates](rdoc-ref:Complex@Polar+Coordinates):
+  #
+  #         Complex('1/2@3/4')   # => (0.36584443443691045+0.34081938001166706i)
+  #         Complex('+1/2@+3/4') # => (0.36584443443691045+0.34081938001166706i)
+  #         Complex('+1/2@-3/4') # => (0.36584443443691045-0.34081938001166706i)
+  #         Complex('-1/2@+3/4') # => (-0.36584443443691045-0.34081938001166706i)
+  #         Complex('-1/2@-3/4') # => (-0.36584443443691045+0.34081938001166706i)
   #
   def self?.Complex: (_ToC complex_like, ?exception: true) -> Complex
                    | (_ToC complex_like, exception: bool) -> Complex?
@@ -493,7 +545,7 @@ module Kernel : BasicObject
                 | [K, V] (hash[K, V] hash_like) -> Hash[K, V]
 
   # <!--
-  #   rdoc-file=object.c
+  #   rdoc-file=kernel.rb
   #   - Integer(object, base = 0, exception: true) -> integer or nil
   # -->
   # Returns an integer converted from `object`.
@@ -511,7 +563,7 @@ module Kernel : BasicObject
   #     Integer(-1)               # => -1
   #
   # With floating-point argument `object` given, returns `object` truncated to an
-  # intger:
+  # integer:
   #
   #     Integer(1.9)              # => 1  # Rounds toward zero.
   #     Integer(-1.9)             # => -1 # Rounds toward zero.
@@ -700,11 +752,13 @@ module Kernel : BasicObject
   # <!--
   #   rdoc-file=process.c
   #   - abort
-  #   - Kernel::abort([msg])
-  #   - Process.abort([msg])
+  #   - Process.abort(msg = nil)
   # -->
-  # Terminate execution immediately, effectively by calling `Kernel.exit(false)`.
-  # If *msg* is given, it is written to STDERR prior to terminating.
+  # Terminates execution immediately, effectively by calling `Kernel.exit(false)`.
+  #
+  # If string argument `msg` is given, it is written to STDERR prior to
+  # termination; otherwise, if an exception was raised, prints its message and
+  # backtrace.
   #
   def self?.abort: (?string msg) -> bot
 
@@ -759,67 +813,101 @@ module Kernel : BasicObject
   #   rdoc-file=proc.c
   #   - binding -> a_binding
   # -->
-  # Returns a `Binding` object, describing the variable and method bindings at the
-  # point of call. This object can be used when calling `eval` to execute the
-  # evaluated command in this environment. See also the description of class
-  # `Binding`.
+  # Returns a Binding object, describing the variable and method bindings at the
+  # point of call. This object can be used when calling Binding#eval to execute
+  # the evaluated command in this environment, or extracting its local variables.
   #
-  #     def get_binding(param)
-  #       binding
+  #     class User
+  #       def initialize(name, position)
+  #         @name = name
+  #         @position = position
+  #       end
+  #
+  #       def get_binding
+  #         binding
+  #       end
   #     end
-  #     b = get_binding("hello")
-  #     eval("param", b)   #=> "hello"
+  #
+  #     user = User.new('Joan', 'manager')
+  #     template = '{name: @name, position: @position}'
+  #
+  #     # evaluate template in context of the object
+  #     eval(template, user.get_binding)
+  #     #=> {:name=>"Joan", :position=>"manager"}
+  #
+  # Binding#local_variable_get can be used to access the variables whose names are
+  # reserved Ruby keywords:
+  #
+  #     # This is valid parameter declaration, but `if` parameter can't
+  #     # be accessed by name, because it is a reserved word.
+  #     def validate(field, validation, if: nil)
+  #       condition = binding.local_variable_get('if')
+  #       return unless condition
+  #
+  #       # ...Some implementation ...
+  #     end
+  #
+  #     validate(:name, :empty?, if: false) # skips validation
+  #     validate(:name, :empty?, if: true) # performs validation
   #
   def self?.binding: () -> Binding
 
   # <!--
   #   rdoc-file=process.c
-  #   - exit(status=true)
-  #   - Kernel::exit(status=true)
-  #   - Process::exit(status=true)
+  #   - exit(status = true)
+  #   - Process.exit(status = true)
   # -->
-  # Initiates the termination of the Ruby script by raising the SystemExit
-  # exception. This exception may be caught. The optional parameter is used to
-  # return a status code to the invoking environment. `true` and `FALSE` of
-  # *status* means success and failure respectively.  The interpretation of other
-  # integer values are system dependent.
+  # Initiates termination of the Ruby script by raising SystemExit; the exception
+  # may be caught. Returns exit status `status` to the underlying operating
+  # system.
+  #
+  # Values `true` and `false` for argument `status` indicate, respectively,
+  # success and failure; The meanings of integer values are system-dependent.
+  #
+  # Example:
   #
   #     begin
   #       exit
-  #       puts "never get here"
+  #       puts 'Never get here.'
   #     rescue SystemExit
-  #       puts "rescued a SystemExit exception"
+  #       puts 'Rescued a SystemExit exception.'
   #     end
-  #     puts "after begin block"
+  #     puts 'After begin block.'
   #
-  # *produces:*
+  # Output:
   #
-  #     rescued a SystemExit exception
-  #     after begin block
+  #     Rescued a SystemExit exception.
+  #     After begin block.
   #
-  # Just prior to termination, Ruby executes any `at_exit` functions (see
-  # Kernel::at_exit) and runs any object finalizers (see
+  # Just prior to final termination, Ruby executes any at-exit procedures (see
+  # Kernel::at_exit) and any object finalizers (see
   # ObjectSpace::define_finalizer).
   #
-  #     at_exit { puts "at_exit function" }
-  #     ObjectSpace.define_finalizer("string",  proc { puts "in finalizer" })
+  # Example:
+  #
+  #     at_exit { puts 'In at_exit function.' }
+  #     ObjectSpace.define_finalizer('string', proc { puts 'In finalizer.' })
   #     exit
   #
-  # *produces:*
+  # Output:
   #
-  #     at_exit function
-  #     in finalizer
+  #     In at_exit function.
+  #     In finalizer.
   #
   def self?.exit: (?int | bool status) -> bot
 
   # <!--
   #   rdoc-file=process.c
-  #   - Process.exit!(status=false)
+  #   - exit!(status = false)
+  #   - Process.exit!(status = false)
   # -->
-  # Exits the process immediately. No exit handlers are run. *status* is returned
-  # to the underlying system as the exit status.
+  # Exits the process immediately; no exit handlers are called. Returns exit
+  # status `status` to the underlying operating system.
   #
   #     Process.exit!(true)
+  #
+  # Values `true` and `false` for argument `status` indicate, respectively,
+  # success and failure; The meanings of integer values are system-dependent.
   #
   def self?.exit!: (?int | bool status) -> bot
 
@@ -882,8 +970,6 @@ module Kernel : BasicObject
   # For details on `format_string`, see [Format
   # Specifications](rdoc-ref:format_specifications.rdoc).
   #
-  # Kernel#format is an alias for Kernel#sprintf.
-  #
   def self?.format: (String format, *untyped args) -> String
 
   # <!--
@@ -894,8 +980,6 @@ module Kernel : BasicObject
   #
   # For details on `format_string`, see [Format
   # Specifications](rdoc-ref:format_specifications.rdoc).
-  #
-  # Kernel#format is an alias for Kernel#sprintf.
   #
   alias sprintf format
 
@@ -947,7 +1031,7 @@ module Kernel : BasicObject
 
   # <!--
   #   rdoc-file=load.c
-  #   - load(file, wrap = false)
+  #   - load(filename, wrap=false)   -> true
   # -->
   # Loads and executes the Ruby program in the file *filename*.
   #
@@ -975,7 +1059,7 @@ module Kernel : BasicObject
   def self?.load: (String filename, ?Module | bool) -> bool
 
   # <!--
-  #   rdoc-file=vm_eval.c
+  #   rdoc-file=kernel.rb
   #   - loop { block }
   #   - loop            -> an_enumerator
   # -->
@@ -1011,21 +1095,10 @@ module Kernel : BasicObject
   #   - open(path, mode = 'r', perm = 0666, **opts)             -> io or nil
   #   - open(path, mode = 'r', perm = 0666, **opts) {|io| ... } -> obj
   # -->
-  # Creates an IO object connected to the given stream, file, or subprocess.
+  # Creates an IO object connected to the given file.
   #
-  # Required string argument `path` determines which of the following occurs:
-  #
-  # *   The file at the specified `path` is opened.
-  # *   The process forks.
-  # *   A subprocess is created.
-  #
-  #
-  # Each of these is detailed below.
-  #
-  # **File Opened**
-  #
-  # If `path` does *not* start with a pipe character (`'|'`), a file stream is
-  # opened with `File.open(path, mode, perm, **opts)`.
+  # This method has potential security vulnerabilities if called with untrusted
+  # input; see [Command Injection](rdoc-ref:command_injection.rdoc).
   #
   # With no block given, file stream is returned:
   #
@@ -1041,66 +1114,6 @@ module Kernel : BasicObject
   #     #<File:t.txt>
   #
   # See File.open for details.
-  #
-  # **Process Forked**
-  #
-  # If `path` is the 2-character string `'|-'`, the process forks and the child
-  # process is connected to the parent.
-  #
-  # With no block given:
-  #
-  #     io = open('|-')
-  #     if io
-  #       $stderr.puts "In parent, child pid is #{io.pid}."
-  #     else
-  #       $stderr.puts "In child, pid is #{$$}."
-  #     end
-  #
-  # Output:
-  #
-  #     In parent, child pid is 27903.
-  #     In child, pid is 27903.
-  #
-  # With a block given:
-  #
-  #     open('|-') do |io|
-  #       if io
-  #         $stderr.puts "In parent, child pid is #{io.pid}."
-  #       else
-  #         $stderr.puts "In child, pid is #{$$}."
-  #       end
-  #     end
-  #
-  # Output:
-  #
-  #     In parent, child pid is 28427.
-  #     In child, pid is 28427.
-  #
-  # **Subprocess Created**
-  #
-  # If `path` is `'|command'` (`'command' != '-'`), a new subprocess runs the
-  # command; its open stream is returned. Note that the command may be processed
-  # by shell if it contains shell metacharacters.
-  #
-  # With no block given:
-  #
-  #     io = open('|echo "Hi!"') # => #<IO:fd 12>
-  #     print io.gets
-  #     io.close
-  #
-  # Output:
-  #
-  #     "Hi!"
-  #
-  # With a block given, calls the block with the stream, then closes the stream:
-  #
-  #     open('|echo "Hi!"') do |io|
-  #       print io.gets
-  #     end
-  #
-  # Output:
-  #
-  #     "Hi!"
   #
   def self?.open: (String name, ?String mode, ?Integer perm) -> IO?
                 | [T] (String name, ?String mode, ?Integer perm) { (IO) -> T } -> T
@@ -1255,6 +1268,10 @@ module Kernel : BasicObject
   #     0..4
   #     [0..4, 0..4, 0..4]
   #
+  # Kernel#p is designed for debugging purposes. Ruby implementations may define
+  # Kernel#p to be uninterruptible in whole or in part. On CRuby, Kernel#p's
+  # writing of data is uninterruptible.
+  #
   def self?.p: [T < _Inspect] (T arg0) -> T
              | (_Inspect arg0, _Inspect arg1, *_Inspect rest) -> Array[_Inspect]
              | () -> nil
@@ -1399,7 +1416,7 @@ module Kernel : BasicObject
 
   # <!--
   #   rdoc-file=load.c
-  #   - require_relative(file)
+  #   - require_relative(string) -> true or false
   # -->
   # Ruby tries to load the library named *string* relative to the directory
   # containing the requiring file.  If the file does not exist a LoadError is
@@ -1547,27 +1564,26 @@ module Kernel : BasicObject
   #     (snipped)
   #     ping
   #
-  def self?.select: (::Array[IO] read, ?::Array[IO] write, ?::Array[IO] error, ?Integer timeout) -> ::Array[String]
+  def self?.select: (::Array[IO] read, ?::Array[IO] write, ?::Array[IO] error, ?Time::_Timeout timeout) -> ::Array[String]
 
   # <!--
   #   rdoc-file=process.c
-  #   - sleep([duration])    -> integer
+  #   - sleep(secs = nil) -> slept_secs
   # -->
-  # Suspends the current thread for *duration* seconds (which may be any number,
-  # including a `Float` with fractional seconds). Returns the actual number of
-  # seconds slept (rounded), which may be less than that asked for if another
-  # thread calls Thread#run. Called without an argument, sleep() will sleep
-  # forever.
+  # Suspends execution of the current thread for the number of seconds specified
+  # by numeric argument `secs`, or forever if `secs` is `nil`; returns the integer
+  # number of seconds suspended (rounded).
   #
-  #     Time.new    #=> 2008-03-08 19:56:19 +0900
-  #     sleep 1.2   #=> 1
-  #     Time.new    #=> 2008-03-08 19:56:20 +0900
-  #     sleep 1.9   #=> 2
-  #     Time.new    #=> 2008-03-08 19:56:22 +0900
+  #     Time.new  # => 2008-03-08 19:56:19 +0900
+  #     sleep 1.2 # => 1
+  #     Time.new  # => 2008-03-08 19:56:20 +0900
+  #     sleep 1.9 # => 2
+  #     Time.new  # => 2008-03-08 19:56:22 +0900
   #
   def self?.sleep: (?nil) -> bot
-                 | (Integer | Float | _Divmod duration) -> Integer
+                 | (Time::_Timeout duration) -> Integer
 
+  %a{steep:deprecated}
   interface _Divmod
     def divmod: (Numeric) -> [ Numeric, Numeric ]
   end
@@ -1676,31 +1692,31 @@ module Kernel : BasicObject
   # newline character to the string if the string does not end in a newline, and
   # calls Warning.warn with the string.
   #
-  #       warn("warning 1", "warning 2")
+  #     warn("warning 1", "warning 2")
   #
-  #     <em>produces:</em>
+  # *produces:*
   #
-  #       warning 1
-  #       warning 2
+  #     warning 1
+  #     warning 2
   #
   # If the `uplevel` keyword argument is given, the string will be prepended with
   # information for the given caller frame in the same format used by the
   # `rb_warn` C function.
   #
-  #       # In baz.rb
-  #       def foo
-  #         warn("invalid call to foo", uplevel: 1)
-  #       end
+  #     # In baz.rb
+  #     def foo
+  #       warn("invalid call to foo", uplevel: 1)
+  #     end
   #
-  #       def bar
-  #         foo
-  #       end
+  #     def bar
+  #       foo
+  #     end
   #
-  #       bar
+  #     bar
   #
-  #     <em>produces:</em>
+  # *produces:*
   #
-  #       baz.rb:6: warning: invalid call to foo
+  #     baz.rb:6: warning: invalid call to foo
   #
   # If `category` keyword argument is given, passes the category to
   # `Warning.warn`.  The category given must be be one of the following
@@ -1716,76 +1732,92 @@ module Kernel : BasicObject
 
   # <!--
   #   rdoc-file=process.c
-  #   - exec([env,] command... [,options])
+  #   - exec([env, ] command_line, options = {})
+  #   - exec([env, ] exe_path, *args, options  = {})
   # -->
-  # Replaces the current process by running the given external *command*, which
-  # can take one of the following forms:
+  # Replaces the current process by doing one of the following:
   #
-  # `exec(commandline)`
-  # :   command line string which is passed to the standard shell
-  # `exec(cmdname, arg1, ...)`
-  # :   command name and one or more arguments (no shell)
-  # `exec([cmdname, argv0], arg1, ...)`
-  # :   command name, `argv[0]` and zero or more arguments (no shell)
+  # *   Passing string `command_line` to the shell.
+  # *   Invoking the executable at `exe_path`.
   #
   #
-  # In the first form, the string is taken as a command line that is subject to
-  # shell expansion before being executed.
+  # This method has potential security vulnerabilities if called with untrusted
+  # input; see [Command Injection](rdoc-ref:command_injection.rdoc).
   #
-  # The standard shell always means `"/bin/sh"` on Unix-like systems, otherwise,
-  # `ENV["RUBYSHELL"]` or `ENV["COMSPEC"]` on Windows and similar.  The command is
-  # passed as an argument to the `"-c"` switch to the shell, except in the case of
-  # `COMSPEC`.
+  # The new process is created using the [exec system
+  # call](https://pubs.opengroup.org/onlinepubs/9699919799.2018edition/functions/e
+  # xecve.html); it may inherit some of its environment from the calling program
+  # (possibly including open file descriptors).
   #
-  # If the string from the first form (`exec("command")`) follows these simple
-  # rules:
+  # Argument `env`, if given, is a hash that affects `ENV` for the new process;
+  # see [Execution Environment](rdoc-ref:Process@Execution+Environment).
   #
-  # *   no meta characters,
-  # *   not starting with shell reserved word or special built-in,
+  # Argument `options` is a hash of options for the new process; see [Execution
+  # Options](rdoc-ref:Process@Execution+Options).
+  #
+  # The first required argument is one of the following:
+  #
+  # *   `command_line` if it is a string, and if it begins with a shell reserved
+  #     word or special built-in, or if it contains one or more meta characters.
+  # *   `exe_path` otherwise.
   #
   #
-  # Ruby invokes the command directly without shell.
+  # **Argument `command_line`**
   #
-  # You can force shell invocation by adding ";" to the string (because ";" is a
-  # meta character).
+  # String argument `command_line` is a command line to be passed to a shell; it
+  # must begin with a shell reserved word, begin with a special built-in, or
+  # contain meta characters:
   #
-  # Note that this behavior is observable by pid obtained (return value of spawn()
-  # and IO#pid for IO.popen) is the pid of the invoked command, not shell.
+  #     exec('if true; then echo "Foo"; fi') # Shell reserved word.
+  #     exec('echo')                         # Built-in.
+  #     exec('date > date.tmp')              # Contains meta character.
   #
-  # In the second form (`exec("command1", "arg1", ...)`), the first is taken as a
-  # command name and the rest are passed as parameters to command with no shell
-  # expansion.
+  # The command line may also contain arguments and options for the command:
   #
-  # In the third form (`exec(["command", "argv0"], "arg1", ...)`), starting a
-  # two-element array at the beginning of the command, the first element is the
-  # command to be executed, and the second argument is used as the `argv[0]`
-  # value, which may show up in process listings.
+  #     exec('echo "Foo"')
   #
-  # In order to execute the command, one of the `exec(2)` system calls are used,
-  # so the running command may inherit some of the environment of the original
-  # program (including open file descriptors).
+  # Output:
   #
-  # This behavior is modified by the given `env` and `options` parameters. See
-  # ::spawn for details.
+  #     Foo
   #
-  # If the command fails to execute (typically Errno::ENOENT when it was not
-  # found) a SystemCallError exception is raised.
+  # See [Execution Shell](rdoc-ref:Process@Execution+Shell) for details about the
+  # shell.
   #
-  # This method modifies process attributes according to given `options` before
-  # `exec(2)` system call. See ::spawn for more details about the given `options`.
+  # Raises an exception if the new process could not execute.
   #
-  # The modified attributes may be retained when `exec(2)` system call fails.
+  # **Argument `exe_path`**
   #
-  # For example, hard resource limits are not restorable.
+  # Argument `exe_path` is one of the following:
   #
-  # Consider to create a child process using ::spawn or Kernel#system if this is
-  # not acceptable.
+  # *   The string path to an executable to be called.
+  # *   A 2-element array containing the path to an executable and the string to
+  #     be used as the name of the executing process.
   #
-  #     exec "echo *"       # echoes list of files in current directory
-  #     # never get here
   #
-  #     exec "echo", "*"    # echoes an asterisk
-  #     # never get here
+  # Example:
+  #
+  #     exec('/usr/bin/date')
+  #
+  # Output:
+  #
+  #     Sat Aug 26 09:38:00 AM CDT 2023
+  #
+  # Ruby invokes the executable directly, with no shell and no shell expansion:
+  #
+  #     exec('doesnt_exist') # Raises Errno::ENOENT
+  #
+  # If one or more `args` is given, each is an argument or option to be passed to
+  # the executable:
+  #
+  #     exec('echo', 'C*')
+  #     exec('echo', 'hello', 'world')
+  #
+  # Output:
+  #
+  #     C*
+  #     hello world
+  #
+  # Raises an exception if the new process could not execute.
   #
   def self?.exec: (String command, *String args, ?unsetenv_others: boolish, ?pgroup: true | Integer, ?umask: Integer, ?in: redirect_fd, ?out: redirect_fd, ?err: redirect_fd, ?close_others: boolish, ?chdir: String) -> bot
                 | (Hash[string, string?] env, String command, *String args, ?unsetenv_others: boolish, ?pgroup: true | Integer, ?umask: Integer, ?in: redirect_fd, ?out: redirect_fd, ?err: redirect_fd, ?close_others: boolish, ?chdir: String) -> bot
@@ -1794,304 +1826,235 @@ module Kernel : BasicObject
 
   # <!--
   #   rdoc-file=process.c
-  #   - spawn([env,] command... [,options])     -> pid
-  #   - Process.spawn([env,] command... [,options])     -> pid
+  #   - spawn([env, ] command_line, options = {}) -> pid
+  #   - spawn([env, ] exe_path, *args, options  = {}) -> pid
   # -->
-  # spawn executes specified command and return its pid.
+  # Creates a new child process by doing one of the following in that process:
   #
-  #     pid = spawn("tar xf ruby-2.0.0-p195.tar.bz2")
-  #     Process.wait pid
+  # *   Passing string `command_line` to the shell.
+  # *   Invoking the executable at `exe_path`.
   #
-  #     pid = spawn(RbConfig.ruby, "-eputs'Hello, world!'")
-  #     Process.wait pid
   #
-  # This method is similar to Kernel#system but it doesn't wait for the command to
-  # finish.
+  # This method has potential security vulnerabilities if called with untrusted
+  # input; see [Command Injection](rdoc-ref:command_injection.rdoc).
   #
-  # The parent process should use Process.wait to collect the termination status
-  # of its child or use Process.detach to register disinterest in their status;
-  # otherwise, the operating system may accumulate zombie processes.
+  # Returns the process ID (pid) of the new process, without waiting for it to
+  # complete.
   #
-  # spawn has bunch of options to specify process attributes:
+  # To avoid zombie processes, the parent process should call either:
   #
-  #     env: hash
-  #       name => val : set the environment variable
-  #       name => nil : unset the environment variable
+  # *   Process.wait, to collect the termination statuses of its children.
+  # *   Process.detach, to register disinterest in their status.
   #
-  #       the keys and the values except for +nil+ must be strings.
-  #     command...:
-  #       commandline                 : command line string which is passed to the standard shell
-  #       cmdname, arg1, ...          : command name and one or more arguments (This form does not use the shell. See below for caveats.)
-  #       [cmdname, argv0], arg1, ... : command name, argv[0] and zero or more arguments (no shell)
-  #     options: hash
-  #       clearing environment variables:
-  #         :unsetenv_others => true   : clear environment variables except specified by env
-  #         :unsetenv_others => false  : don't clear (default)
-  #       process group:
-  #         :pgroup => true or 0 : make a new process group
-  #         :pgroup => pgid      : join the specified process group
-  #         :pgroup => nil       : don't change the process group (default)
-  #       create new process group: Windows only
-  #         :new_pgroup => true  : the new process is the root process of a new process group
-  #         :new_pgroup => false : don't create a new process group (default)
-  #       resource limit: resourcename is core, cpu, data, etc.  See Process.setrlimit.
-  #         :rlimit_resourcename => limit
-  #         :rlimit_resourcename => [cur_limit, max_limit]
-  #       umask:
-  #         :umask => int
-  #       redirection:
-  #         key:
-  #           FD              : single file descriptor in child process
-  #           [FD, FD, ...]   : multiple file descriptor in child process
-  #         value:
-  #           FD                        : redirect to the file descriptor in parent process
-  #           string                    : redirect to file with open(string, "r" or "w")
-  #           [string]                  : redirect to file with open(string, File::RDONLY)
-  #           [string, open_mode]       : redirect to file with open(string, open_mode, 0644)
-  #           [string, open_mode, perm] : redirect to file with open(string, open_mode, perm)
-  #           [:child, FD]              : redirect to the redirected file descriptor
-  #           :close                    : close the file descriptor in child process
-  #         FD is one of follows
-  #           :in     : the file descriptor 0 which is the standard input
-  #           :out    : the file descriptor 1 which is the standard output
-  #           :err    : the file descriptor 2 which is the standard error
-  #           integer : the file descriptor of specified the integer
-  #           io      : the file descriptor specified as io.fileno
-  #       file descriptor inheritance: close non-redirected non-standard fds (3, 4, 5, ...) or not
-  #         :close_others => false  : inherit
-  #       current directory:
-  #         :chdir => str
   #
-  # The `cmdname, arg1, ...` form does not use the shell. However, on different
-  # OSes, different things are provided as built-in commands. An example of this
-  # is +'echo'+, which is a built-in on Windows, but is a normal program on Linux
-  # and Mac OS X. This means that `Process.spawn 'echo', '%Path%'` will display
-  # the contents of the `%Path%` environment variable on Windows, but
-  # `Process.spawn 'echo', '$PATH'` prints the literal `$PATH`.
+  # The new process is created using the [exec system
+  # call](https://pubs.opengroup.org/onlinepubs/9699919799.2018edition/functions/e
+  # xecve.html); it may inherit some of its environment from the calling program
+  # (possibly including open file descriptors).
   #
-  # If a hash is given as `env`, the environment is updated by `env` before
-  # `exec(2)` in the child process. If a pair in `env` has nil as the value, the
-  # variable is deleted.
+  # Argument `env`, if given, is a hash that affects `ENV` for the new process;
+  # see [Execution Environment](rdoc-ref:Process@Execution+Environment).
   #
-  #     # set FOO as BAR and unset BAZ.
-  #     pid = spawn({"FOO"=>"BAR", "BAZ"=>nil}, command)
+  # Argument `options` is a hash of options for the new process; see [Execution
+  # Options](rdoc-ref:Process@Execution+Options).
   #
-  # If a hash is given as `options`, it specifies process group, create new
-  # process group, resource limit, current directory, umask and redirects for the
-  # child process. Also, it can be specified to clear environment variables.
+  # The first required argument is one of the following:
   #
-  # The `:unsetenv_others` key in `options` specifies to clear environment
-  # variables, other than specified by `env`.
+  # *   `command_line` if it is a string, and if it begins with a shell reserved
+  #     word or special built-in, or if it contains one or more meta characters.
+  # *   `exe_path` otherwise.
   #
-  #     pid = spawn(command, :unsetenv_others=>true) # no environment variable
-  #     pid = spawn({"FOO"=>"BAR"}, command, :unsetenv_others=>true) # FOO only
   #
-  # The `:pgroup` key in `options` specifies a process group. The corresponding
-  # value should be true, zero, a positive integer, or nil. true and zero cause
-  # the process to be a process leader of a new process group. A non-zero positive
-  # integer causes the process to join the provided process group. The default
-  # value, nil, causes the process to remain in the same process group.
+  # **Argument `command_line`**
   #
-  #     pid = spawn(command, :pgroup=>true) # process leader
-  #     pid = spawn(command, :pgroup=>10) # belongs to the process group 10
+  # String argument `command_line` is a command line to be passed to a shell; it
+  # must begin with a shell reserved word, begin with a special built-in, or
+  # contain meta characters:
   #
-  # The `:new_pgroup` key in `options` specifies to pass
-  # `CREATE_NEW_PROCESS_GROUP` flag to `CreateProcessW()` that is Windows API.
-  # This option is only for Windows. true means the new process is the root
-  # process of the new process group. The new process has CTRL+C disabled. This
-  # flag is necessary for `Process.kill(:SIGINT, pid)` on the subprocess.
-  # :new_pgroup is false by default.
+  #     spawn('if true; then echo "Foo"; fi') # => 798847 # Shell reserved word.
+  #     Process.wait                          # => 798847
+  #     spawn('echo')                         # => 798848 # Built-in.
+  #     Process.wait                          # => 798848
+  #     spawn('date > /tmp/date.tmp')         # => 798879 # Contains meta character.
+  #     Process.wait                          # => 798849
+  #     spawn('date > /nop/date.tmp')         # => 798882 # Issues error message.
+  #     Process.wait                          # => 798882
   #
-  #     pid = spawn(command, :new_pgroup=>true)  # new process group
-  #     pid = spawn(command, :new_pgroup=>false) # same process group
+  # The command line may also contain arguments and options for the command:
   #
-  # The `:rlimit_`*foo* key specifies a resource limit. *foo* should be one of
-  # resource types such as `core`. The corresponding value should be an integer or
-  # an array which have one or two integers: same as cur_limit and max_limit
-  # arguments for Process.setrlimit.
+  #     spawn('echo "Foo"') # => 799031
+  #     Process.wait        # => 799031
   #
-  #     cur, max = Process.getrlimit(:CORE)
-  #     pid = spawn(command, :rlimit_core=>[0,max]) # disable core temporary.
-  #     pid = spawn(command, :rlimit_core=>max) # enable core dump
-  #     pid = spawn(command, :rlimit_core=>0) # never dump core.
+  # Output:
   #
-  # The `:umask` key in `options` specifies the umask.
+  #     Foo
   #
-  #     pid = spawn(command, :umask=>077)
+  # See [Execution Shell](rdoc-ref:Process@Execution+Shell) for details about the
+  # shell.
   #
-  # The :in, :out, :err, an integer, an IO and an array key specifies a
-  # redirection. The redirection maps a file descriptor in the child process.
+  # Raises an exception if the new process could not execute.
   #
-  # For example, stderr can be merged into stdout as follows:
+  # **Argument `exe_path`**
   #
-  #     pid = spawn(command, :err=>:out)
-  #     pid = spawn(command, 2=>1)
-  #     pid = spawn(command, STDERR=>:out)
-  #     pid = spawn(command, STDERR=>STDOUT)
+  # Argument `exe_path` is one of the following:
   #
-  # The hash keys specifies a file descriptor in the child process started by
-  # #spawn. :err, 2 and STDERR specifies the standard error stream (stderr).
+  # *   The string path to an executable to be called:
   #
-  # The hash values specifies a file descriptor in the parent process which
-  # invokes #spawn. :out, 1 and STDOUT specifies the standard output stream
-  # (stdout).
+  #         spawn('/usr/bin/date') # Path to date on Unix-style system.
+  #         Process.wait
   #
-  # In the above example, the standard output in the child process is not
-  # specified. So it is inherited from the parent process.
+  #     Output:
   #
-  # The standard input stream (stdin) can be specified by :in, 0 and STDIN.
+  #         Thu Aug 31 10:06:48 AM CDT 2023
   #
-  # A filename can be specified as a hash value.
+  # *   A 2-element array containing the path to an executable and the string to
+  #     be used as the name of the executing process:
   #
-  #     pid = spawn(command, :in=>"/dev/null") # read mode
-  #     pid = spawn(command, :out=>"/dev/null") # write mode
-  #     pid = spawn(command, :err=>"log") # write mode
-  #     pid = spawn(command, [:out, :err]=>"/dev/null") # write mode
-  #     pid = spawn(command, 3=>"/dev/null") # read mode
+  #         pid = spawn(['sleep', 'Hello!'], '1') # 2-element array.
+  #         p `ps -p #{pid} -o command=`
   #
-  # For stdout and stderr (and combination of them), it is opened in write mode.
-  # Otherwise read mode is used.
+  #     Output:
   #
-  # For specifying flags and permission of file creation explicitly, an array is
-  # used instead.
+  #         "Hello! 1\n"
   #
-  #     pid = spawn(command, :in=>["file"]) # read mode is assumed
-  #     pid = spawn(command, :in=>["file", "r"])
-  #     pid = spawn(command, :out=>["log", "w"]) # 0644 assumed
-  #     pid = spawn(command, :out=>["log", "w", 0600])
-  #     pid = spawn(command, :out=>["log", File::WRONLY|File::EXCL|File::CREAT, 0600])
   #
-  # The array specifies a filename, flags and permission. The flags can be a
-  # string or an integer. If the flags is omitted or nil, File::RDONLY is assumed.
-  # The permission should be an integer. If the permission is omitted or nil, 0644
-  # is assumed.
+  # Ruby invokes the executable directly, with no shell and no shell expansion.
   #
-  # If an array of IOs and integers are specified as a hash key, all the elements
-  # are redirected.
+  # If one or more `args` is given, each is an argument or option to be passed to
+  # the executable:
   #
-  #     # stdout and stderr is redirected to log file.
-  #     # The file "log" is opened just once.
-  #     pid = spawn(command, [:out, :err]=>["log", "w"])
+  #     spawn('echo', 'C*')             # => 799392
+  #     Process.wait                    # => 799392
+  #     spawn('echo', 'hello', 'world') # => 799393
+  #     Process.wait                    # => 799393
   #
-  # Another way to merge multiple file descriptors is [:child, fd]. [:child, fd]
-  # means the file descriptor in the child process. This is different from fd. For
-  # example, :err=>:out means redirecting child stderr to parent stdout. But
-  # :err=>[:child, :out] means redirecting child stderr to child stdout. They
-  # differ if stdout is redirected in the child process as follows.
+  # Output:
   #
-  #     # stdout and stderr is redirected to log file.
-  #     # The file "log" is opened just once.
-  #     pid = spawn(command, :out=>["log", "w"], :err=>[:child, :out])
+  #     C*
+  #     hello world
   #
-  # [:child, :out] can be used to merge stderr into stdout in IO.popen. In this
-  # case, IO.popen redirects stdout to a pipe in the child process and [:child,
-  # :out] refers the redirected stdout.
-  #
-  #     io = IO.popen(["sh", "-c", "echo out; echo err >&2", :err=>[:child, :out]])
-  #     p io.read #=> "out\nerr\n"
-  #
-  # The `:chdir` key in `options` specifies the current directory.
-  #
-  #     pid = spawn(command, :chdir=>"/var/tmp")
-  #
-  # spawn closes all non-standard unspecified descriptors by default. The
-  # "standard" descriptors are 0, 1 and 2. This behavior is specified by
-  # :close_others option. :close_others doesn't affect the standard descriptors
-  # which are closed only if :close is specified explicitly.
-  #
-  #     pid = spawn(command, :close_others=>true)  # close 3,4,5,... (default)
-  #     pid = spawn(command, :close_others=>false) # don't close 3,4,5,...
-  #
-  # :close_others is false by default for spawn and IO.popen.
-  #
-  # Note that fds which close-on-exec flag is already set are closed regardless of
-  # :close_others option.
-  #
-  # So IO.pipe and spawn can be used as IO.popen.
-  #
-  #     # similar to r = IO.popen(command)
-  #     r, w = IO.pipe
-  #     pid = spawn(command, :out=>w)   # r, w is closed in the child process.
-  #     w.close
-  #
-  # :close is specified as a hash value to close a fd individually.
-  #
-  #     f = open(foo)
-  #     system(command, f=>:close)        # don't inherit f.
-  #
-  # If a file descriptor need to be inherited, io=>io can be used.
-  #
-  #     # valgrind has --log-fd option for log destination.
-  #     # log_w=>log_w indicates log_w.fileno inherits to child process.
-  #     log_r, log_w = IO.pipe
-  #     pid = spawn("valgrind", "--log-fd=#{log_w.fileno}", "echo", "a", log_w=>log_w)
-  #     log_w.close
-  #     p log_r.read
-  #
-  # It is also possible to exchange file descriptors.
-  #
-  #     pid = spawn(command, :out=>:err, :err=>:out)
-  #
-  # The hash keys specify file descriptors in the child process. The hash values
-  # specifies file descriptors in the parent process. So the above specifies
-  # exchanging stdout and stderr. Internally, `spawn` uses an extra file
-  # descriptor to resolve such cyclic file descriptor mapping.
-  #
-  # See Kernel.exec for the standard shell.
+  # Raises an exception if the new process could not execute.
   #
   def self?.spawn: (String command, *String args, ?unsetenv_others: boolish, ?pgroup: true | Integer, ?umask: Integer, ?in: redirect_fd, ?out: redirect_fd, ?err: redirect_fd, ?close_others: boolish, ?chdir: String) -> Integer
                  | (Hash[string, string?] env, String command, *String args, ?unsetenv_others: boolish, ?pgroup: true | Integer, ?umask: Integer, ?in: redirect_fd, ?out: redirect_fd, ?err: redirect_fd, ?close_others: boolish, ?chdir: String) -> Integer
 
   # <!--
   #   rdoc-file=process.c
-  #   - system([env,] command... [,options], exception: false)    -> true, false or nil
+  #   - system([env, ] command_line, options = {}, exception: false) -> true, false, or nil
+  #   - system([env, ] exe_path, *args, options  = {}, exception: false) -> true, false, or nil
   # -->
-  # Executes *command...* in a subshell. *command...* is one of following forms.
+  # Creates a new child process by doing one of the following in that process:
+  #
+  # *   Passing string `command_line` to the shell.
+  # *   Invoking the executable at `exe_path`.
+  #
   #
   # This method has potential security vulnerabilities if called with untrusted
   # input; see [Command Injection](rdoc-ref:command_injection.rdoc).
   #
-  # `commandline`
-  # :   command line string which is passed to the standard shell
-  # `cmdname, arg1, ...`
-  # :   command name and one or more arguments (no shell)
-  # `[cmdname, argv0], arg1, ...`
-  # :   command name, `argv[0]` and zero or more arguments (no shell)
+  # Returns:
+  #
+  # *   `true` if the command exits with status zero.
+  # *   `false` if the exit status is a non-zero integer.
+  # *   `nil` if the command could not execute.
   #
   #
-  # system returns `true` if the command gives zero exit status, `false` for non
-  # zero exit status. Returns `nil` if command execution fails. An error status is
-  # available in `$?`.
+  # Raises an exception (instead of returning `false` or `nil`) if keyword
+  # argument `exception` is set to `true`.
   #
-  # If the `exception: true` argument is passed, the method raises an exception
-  # instead of returning `false` or `nil`.
+  # Assigns the command's error status to `$?`.
   #
-  # The arguments are processed in the same way as for Kernel#spawn.
+  # The new process is created using the [system system
+  # call](https://pubs.opengroup.org/onlinepubs/9699919799.2018edition/functions/s
+  # ystem.html); it may inherit some of its environment from the calling program
+  # (possibly including open file descriptors).
   #
-  # The hash arguments, env and options, are same as #exec and #spawn. See
-  # Kernel#spawn for details.
+  # Argument `env`, if given, is a hash that affects `ENV` for the new process;
+  # see [Execution Environment](rdoc-ref:Process@Execution+Environment).
   #
-  #     system("echo *")
-  #     system("echo", "*")
+  # Argument `options` is a hash of options for the new process; see [Execution
+  # Options](rdoc-ref:Process@Execution+Options).
   #
-  # *produces:*
+  # The first required argument is one of the following:
   #
-  #     config.h main.rb
-  #     *
+  # *   `command_line` if it is a string, and if it begins with a shell reserved
+  #     word or special built-in, or if it contains one or more meta characters.
+  # *   `exe_path` otherwise.
   #
-  # Error handling:
   #
-  #     system("cat nonexistent.txt")
-  #     # => false
-  #     system("catt nonexistent.txt")
-  #     # => nil
+  # **Argument `command_line`**
   #
-  #     system("cat nonexistent.txt", exception: true)
-  #     # RuntimeError (Command failed with exit 1: cat)
-  #     system("catt nonexistent.txt", exception: true)
-  #     # Errno::ENOENT (No such file or directory - catt)
+  # String argument `command_line` is a command line to be passed to a shell; it
+  # must begin with a shell reserved word, begin with a special built-in, or
+  # contain meta characters:
   #
-  # See Kernel#exec for the standard shell.
+  #     system('if true; then echo "Foo"; fi')          # => true  # Shell reserved word.
+  #     system('echo')                                  # => true  # Built-in.
+  #     system('date > /tmp/date.tmp')                  # => true  # Contains meta character.
+  #     system('date > /nop/date.tmp')                  # => false
+  #     system('date > /nop/date.tmp', exception: true) # Raises RuntimeError.
+  #
+  # Assigns the command's error status to `$?`:
+  #
+  #     system('echo')                             # => true  # Built-in.
+  #     $?                                         # => #<Process::Status: pid 640610 exit 0>
+  #     system('date > /nop/date.tmp')             # => false
+  #     $?                                         # => #<Process::Status: pid 640742 exit 2>
+  #
+  # The command line may also contain arguments and options for the command:
+  #
+  #     system('echo "Foo"') # => true
+  #
+  # Output:
+  #
+  #     Foo
+  #
+  # See [Execution Shell](rdoc-ref:Process@Execution+Shell) for details about the
+  # shell.
+  #
+  # Raises an exception if the new process could not execute.
+  #
+  # **Argument `exe_path`**
+  #
+  # Argument `exe_path` is one of the following:
+  #
+  # *   The string path to an executable to be called.
+  # *   A 2-element array containing the path to an executable and the string to
+  #     be used as the name of the executing process.
+  #
+  #
+  # Example:
+  #
+  #     system('/usr/bin/date') # => true # Path to date on Unix-style system.
+  #     system('foo')           # => nil  # Command failed.
+  #
+  # Output:
+  #
+  #     Mon Aug 28 11:43:10 AM CDT 2023
+  #
+  # Assigns the command's error status to `$?`:
+  #
+  #     system('/usr/bin/date') # => true
+  #     $?                      # => #<Process::Status: pid 645605 exit 0>
+  #     system('foo')           # => nil
+  #     $?                      # => #<Process::Status: pid 645608 exit 127>
+  #
+  # Ruby invokes the executable directly, with no shell and no shell expansion:
+  #
+  #     system('doesnt_exist') # => nil
+  #
+  # If one or more `args` is given, each is an argument or option to be passed to
+  # the executable:
+  #
+  #     system('echo', 'C*')             # => true
+  #     system('echo', 'hello', 'world') # => true
+  #
+  # Output:
+  #
+  #     C*
+  #     hello world
+  #
+  # Raises an exception if the new process could not execute.
   #
   def self?.system: (String command, *String args, ?unsetenv_others: boolish, ?pgroup: true | Integer, ?umask: Integer, ?in: redirect_fd, ?out: redirect_fd, ?err: redirect_fd, ?close_others: boolish, ?chdir: String) -> (NilClass | FalseClass | TrueClass)
                   | (Hash[string, string?] env, String command, *String args, ?unsetenv_others: boolish, ?pgroup: true | Integer, ?umask: Integer, ?in: redirect_fd, ?out: redirect_fd, ?err: redirect_fd, ?close_others: boolish, ?chdir: String) -> (NilClass | FalseClass | TrueClass)
@@ -2955,15 +2918,6 @@ module Kernel : BasicObject
   # Yields self to the block and returns the result of the block.
   #
   #     "my string".yield_self {|s| s.upcase }   #=> "MY STRING"
-  #
-  # Good usage for `then` is value piping in method chains:
-  #
-  #     require 'open-uri'
-  #     require 'json'
-  #
-  #     construct_url(arguments).
-  #       then {|url| URI(url).read }.
-  #       then {|response| JSON.parse(response) }
   #
   def yield_self: [X] () { (self) -> X } -> X
                 | () -> Enumerator[self, untyped]

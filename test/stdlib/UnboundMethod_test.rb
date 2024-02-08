@@ -1,7 +1,7 @@
 require_relative 'test_helper'
 
 class UnboundMethodInstanceTest < Test::Unit::TestCase
-  include TypeAssertions
+  include TestHelper
 
   testing '::UnboundMethod'
 
@@ -17,14 +17,14 @@ class UnboundMethodInstanceTest < Test::Unit::TestCase
   end
 
   def test_eq
-    [UMETH, proc{}, Object.new, nil].each do |other|
+    with_untyped.and(UMETH) do |other|
       assert_send_type  '(untyped) -> bool',
                         UMETH, :==, other
     end
   end
 
   def test_eql?
-    [UMETH, proc{}, Object.new, nil].each do |other|
+    with_untyped.and(UMETH) do |other|
       assert_send_type  '(untyped) -> bool',
                         UMETH, :eql?, other
     end
@@ -36,7 +36,7 @@ class UnboundMethodInstanceTest < Test::Unit::TestCase
   end
 
   def test_clone
-    assert_send_type  '() -> instance',
+    assert_send_type  '() -> ::UnboundMethod',
                       UMETH, :clone
   end
 
@@ -83,7 +83,7 @@ class UnboundMethodInstanceTest < Test::Unit::TestCase
                       ParamMeths.instance_method(:tailing_ddd), :parameters
     assert_send_type  '() -> ::Method::param_types',
                       ParamMeths.instance_method(:no_kwargs), :parameters
-    
+
     omit_if(RUBY_VERSION < '3.1')
 
     assert_send_type  '() -> ::Method::param_types',

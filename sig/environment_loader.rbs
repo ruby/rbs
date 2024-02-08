@@ -30,7 +30,7 @@ module RBS
       def initialize: (lib: Library) -> void
     end
 
-    class Library < Struct[String | String?]
+    class Library
       attr_reader name: String
       attr_reader version: String?
 

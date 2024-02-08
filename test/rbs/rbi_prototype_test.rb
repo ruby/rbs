@@ -546,4 +546,25 @@ class Dir[out X, in Y, Z]
 end
     EOF
   end
+
+  def test_masgn
+    parser = RBI.new
+
+    parser.parse <<-EOF
+class Test
+  A, B, C = [1, 2, 3]
+end
+    EOF
+
+    assert_write parser.decls, <<-EOF
+class Test
+end
+
+Test::A: untyped
+
+Test::B: untyped
+
+Test::C: untyped
+    EOF
+  end
 end

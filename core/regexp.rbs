@@ -1,116 +1,271 @@
 # <!-- rdoc-file=re.c -->
-# Regular expressions (*regexp*s) are patterns which describe the contents of a
-# string. They're used for testing whether a string contains a given pattern, or
-# extracting the portions that match. They are created with the `/`*pat*`/` and
-# `%r{`*pat*`}` literals or the `Regexp.new` constructor.
+# A [regular expression](https://en.wikipedia.org/wiki/Regular_expression) (also
+# called a *regexp*) is a *match pattern* (also simply called a *pattern*).
 #
-# A regexp is usually delimited with forward slashes (`/`). For example:
+# A common notation for a regexp uses enclosing slash characters:
 #
-#     /hay/ =~ 'haystack'   #=> 0
-#     /y/.match('haystack') #=> #<MatchData "y">
+#     /foo/
 #
-# If a string contains the pattern it is said to *match*. A literal string
-# matches itself.
+# A regexp may be applied to a *target string*; The part of the string (if any)
+# that matches the pattern is called a *match*, and may be said *to match*:
 #
-# Here 'haystack' does not contain the pattern 'needle', so it doesn't match:
+#     re = /red/
+#     re.match?('redirect') # => true   # Match at beginning of target.
+#     re.match?('bored')    # => true   # Match at end of target.
+#     re.match?('credit')   # => true   # Match within target.
+#     re.match?('foo')      # => false  # No match.
 #
-#     /needle/.match('haystack') #=> nil
+# ## Regexp Uses
 #
-# Here 'haystack' contains the pattern 'hay', so it matches:
+# A regexp may be used:
 #
-#     /hay/.match('haystack')    #=> #<MatchData "hay">
+# *   To extract substrings based on a given pattern:
 #
-# Specifically, `/st/` requires that the string contains the letter *s* followed
-# by the letter *t*, so it matches *haystack*, also.
+#         re = /foo/              # => /foo/
+#         re.match('food')        # => #<MatchData "foo">
+#         re.match('good')        # => nil
 #
-# Note that any Regexp matching will raise a RuntimeError if timeout is set and
-# exceeded. See ["Timeout"](#label-Timeout) section in detail.
+#     See sections [Method match](rdoc-ref:Regexp@Method+match) and [Operator
+#     =~](rdoc-ref:Regexp@Operator+-3D~).
 #
-# ## Regexp Interpolation
+# *   To determine whether a string matches a given pattern:
 #
-# A regexp may contain interpolated strings; trivially:
+#         re.match?('food') # => true
+#         re.match?('good') # => false
 #
-#     foo = 'bar'
-#     /#{foo}/ # => /bar/
+#     See section [Method match?](rdoc-ref:Regexp@Method+match-3F).
 #
-# ## `=~` and Regexp#match
+# *   As an argument for calls to certain methods in other classes and modules;
+#     most such methods accept an argument that may be either a string or the
+#     (much more powerful) regexp.
 #
-# Pattern matching may be achieved by using `=~` operator or Regexp#match
-# method.
+#     See [Regexp Methods](rdoc-ref:regexp/methods.rdoc).
 #
-# ### `=~` Operator
 #
-# `=~` is Ruby's basic pattern-matching operator.  When one operand is a regular
-# expression and the other is a string then the regular expression is used as a
-# pattern to match against the string.  (This operator is equivalently defined
-# by Regexp and String so the order of String and Regexp do not matter. Other
-# classes may have different implementations of `=~`.)  If a match is found, the
-# operator returns index of first match in string, otherwise it returns `nil`.
+# ## Regexp Objects
 #
-#     /hay/ =~ 'haystack'   #=> 0
-#     'haystack' =~ /hay/   #=> 0
-#     /a/   =~ 'haystack'   #=> 1
-#     /u/   =~ 'haystack'   #=> nil
+# A regexp object has:
 #
-# Using `=~` operator with a String and Regexp the `$~` global variable is set
-# after a successful match.  `$~` holds a MatchData object. Regexp.last_match is
-# equivalent to `$~`.
+# *   A source; see [Sources](rdoc-ref:Regexp@Sources).
 #
-# ### Regexp#match Method
+# *   Several modes; see [Modes](rdoc-ref:Regexp@Modes).
 #
-# The #match method returns a MatchData object:
+# *   A timeout; see [Timeouts](rdoc-ref:Regexp@Timeouts).
 #
-#     /st/.match('haystack')   #=> #<MatchData "st">
+# *   An encoding; see [Encodings](rdoc-ref:Regexp@Encodings).
 #
-# ## Metacharacters and Escapes
 #
-# The following are *metacharacters* `(`, `)`, `[`, `]`, `{`, `}`, `.`, `?`,
-# `+`, `*`. They have a specific meaning when appearing in a pattern. To match
-# them literally they must be backslash-escaped. To match a backslash literally,
-# backslash-escape it: `\\\`.
+# ## Creating a Regexp
 #
-#     /1 \+ 2 = 3\?/.match('Does 1 + 2 = 3?') #=> #<MatchData "1 + 2 = 3?">
-#     /a\\\\b/.match('a\\\\b')                    #=> #<MatchData "a\\b">
+# A regular expression may be created with:
 #
-# Patterns behave like double-quoted strings and can contain the same backslash
-# escapes (the meaning of `\s` is different, however, see
-# [below](#label-Character+Classes)).
+# *   A regexp literal using slash characters (see [Regexp
+#     Literals](rdoc-ref:syntax/literals.rdoc@Regexp+Literals)):
 #
-#     /\s\u{6771 4eac 90fd}/.match("Go to 東京都")
-#         #=> #<MatchData " 東京都">
+#         # This is a very common usage.
+#         /foo/ # => /foo/
 #
-# Arbitrary Ruby expressions can be embedded into patterns with the `#{...}`
-# construct.
+# *   A `%r` regexp literal (see [%r: Regexp
+#     Literals](rdoc-ref:syntax/literals.rdoc@25r-3A+Regexp+Literals)):
 #
-#     place = "東京都"
-#     /#{place}/.match("Go to 東京都")
-#         #=> #<MatchData "東京都">
+#         # Same delimiter character at beginning and end;
+#         # useful for avoiding escaping characters
+#         %r/name\/value pair/ # => /name\/value pair/
+#         %r:name/value pair:  # => /name\/value pair/
+#         %r|name/value pair|  # => /name\/value pair/
 #
-# ## Character Classes
+#         # Certain "paired" characters can be delimiters.
+#         %r[foo] # => /foo/
+#         %r{foo} # => /foo/
+#         %r(foo) # => /foo/
+#         %r<foo> # => /foo/
 #
-# A *character class* is delimited with square brackets (`[`, `]`) and lists
-# characters that may appear at that point in the match. `/[ab]/` means *a* or
-# *b*, as opposed to `/ab/` which means *a* followed by *b*.
+# *   Method Regexp.new.
 #
-#     /W[aeiou]rd/.match("Word") #=> #<MatchData "Word">
 #
-# Within a character class the hyphen (`-`) is a metacharacter denoting an
-# inclusive range of characters. `[abcd]` is equivalent to `[a-d]`. A range can
-# be followed by another range, so `[abcdwxyz]` is equivalent to `[a-dw-z]`. The
-# order in which ranges or individual characters appear inside a character class
-# is irrelevant.
+# ## Method `match`
 #
-#     /[0-9a-f]/.match('9f') #=> #<MatchData "9">
-#     /[9f]/.match('9f')     #=> #<MatchData "9">
+# Each of the methods Regexp#match, String#match, and Symbol#match returns a
+# MatchData object if a match was found, `nil` otherwise; each also sets [global
+# variables](rdoc-ref:Regexp@Global+Variables):
 #
-# If the first character of a character class is a caret (`^`) the class is
-# inverted: it matches any character *except* those named.
+#     'food'.match(/foo/) # => #<MatchData "foo">
+#     'food'.match(/bar/) # => nil
 #
-#     /[^a-eg-z]/.match('f') #=> #<MatchData "f">
+# ## Operator `=~`
+#
+# Each of the operators Regexp#=~, String#=~, and Symbol#=~ returns an integer
+# offset if a match was found, `nil` otherwise; each also sets [global
+# variables](rdoc-ref:Regexp@Global+Variables):
+#
+#     /bar/ =~ 'foo bar' # => 4
+#     'foo bar' =~ /bar/ # => 4
+#     /baz/ =~ 'foo bar' # => nil
+#
+# ## Method `match?`
+#
+# Each of the methods Regexp#match?, String#match?, and Symbol#match? returns
+# `true` if a match was found, `false` otherwise; none sets [global
+# variables](rdoc-ref:Regexp@Global+Variables):
+#
+#     'food'.match?(/foo/) # => true
+#     'food'.match?(/bar/) # => false
+#
+# ## Global Variables
+#
+# Certain regexp-oriented methods assign values to global variables:
+#
+# *   `#match`: see [Method match](rdoc-ref:Regexp@Method+match).
+# *   `#=~`: see [Operator =~](rdoc-ref:Regexp@Operator+-3D~).
+#
+#
+# The affected global variables are:
+#
+# *   `$~`: Returns a MatchData object, or `nil`.
+# *   `$&`: Returns the matched part of the string, or `nil`.
+# *   `$``: Returns the part of the string to the left of the match, or `nil`.
+# *   `$'`: Returns the part of the string to the right of the match, or `nil`.
+# *   `$+`: Returns the last group matched, or `nil`.
+# *   `$1`, `$2`, etc.: Returns the first, second, etc., matched group, or
+#     `nil`. Note that `$0` is quite different; it returns the name of the
+#     currently executing program.
+#
+#
+# Examples:
+#
+#     # Matched string, but no matched groups.
+#     'foo bar bar baz'.match('bar')
+#     $~ # => #<MatchData "bar">
+#     $& # => "bar"
+#     $` # => "foo "
+#     $' # => " bar baz"
+#     $+ # => nil
+#     $1 # => nil
+#
+#     # Matched groups.
+#     /s(\w{2}).*(c)/.match('haystack')
+#     $~ # => #<MatchData "stac" 1:"ta" 2:"c">
+#     $& # => "stac"
+#     $` # => "hay"
+#     $' # => "k"
+#     $+ # => "c"
+#     $1 # => "ta"
+#     $2 # => "c"
+#     $3 # => nil
+#
+#     # No match.
+#     'foo'.match('bar')
+#     $~ # => nil
+#     $& # => nil
+#     $` # => nil
+#     $' # => nil
+#     $+ # => nil
+#     $1 # => nil
+#
+# Note that Regexp#match?, String#match?, and Symbol#match? do not set global
+# variables.
+#
+# ## Sources
+#
+# As seen above, the simplest regexp uses a literal expression as its source:
+#
+#     re = /foo/              # => /foo/
+#     re.match('food')        # => #<MatchData "foo">
+#     re.match('good')        # => nil
+#
+# A rich collection of available *subexpressions* gives the regexp great power
+# and flexibility:
+#
+# *   [Special characters](rdoc-ref:Regexp@Special+Characters)
+# *   [Source literals](rdoc-ref:Regexp@Source+Literals)
+# *   [Character classes](rdoc-ref:Regexp@Character+Classes)
+# *   [Shorthand character classes](rdoc-ref:Regexp@Shorthand+Character+Classes)
+# *   [Anchors](rdoc-ref:Regexp@Anchors)
+# *   [Alternation](rdoc-ref:Regexp@Alternation)
+# *   [Quantifiers](rdoc-ref:Regexp@Quantifiers)
+# *   [Groups and captures](rdoc-ref:Regexp@Groups+and+Captures)
+# *   [Unicode](rdoc-ref:Regexp@Unicode)
+# *   [POSIX Bracket Expressions](rdoc-ref:Regexp@POSIX+Bracket+Expressions)
+# *   [Comments](rdoc-ref:Regexp@Comments)
+#
+#
+# ### Special Characters
+#
+# Regexp special characters, called *metacharacters*, have special meanings in
+# certain contexts; depending on the context, these are sometimes
+# metacharacters:
+#
+#     . ? - + * ^ \ | $ ( ) [ ] { }
+#
+# To match a metacharacter literally, backslash-escape it:
+#
+#     # Matches one or more 'o' characters.
+#     /o+/.match('foo')  # => #<MatchData "oo">
+#     # Would match 'o+'.
+#     /o\+/.match('foo') # => nil
+#
+# To match a backslash literally, backslash-escape it:
+#
+#     /\./.match('\.')  # => #<MatchData ".">
+#     /\\./.match('\.') # => #<MatchData "\\.">
+#
+# Method Regexp.escape returns an escaped string:
+#
+#     Regexp.escape('.?-+*^\|$()[]{}')
+#     # => "\\.\\?\\-\\+\\*\\^\\\\\\|\\$\\(\\)\\[\\]\\{\\}"
+#
+# ### Source Literals
+#
+# The source literal largely behaves like a double-quoted string; see [String
+# Literals](rdoc-ref:syntax/literals.rdoc@String+Literals).
+#
+# In particular, a source literal may contain interpolated expressions:
+#
+#     s = 'foo'         # => "foo"
+#     /#{s}/            # => /foo/
+#     /#{s.capitalize}/ # => /Foo/
+#     /#{2 + 2}/        # => /4/
+#
+# There are differences between an ordinary string literal and a source literal;
+# see [Shorthand Character
+# Classes](rdoc-ref:Regexp@Shorthand+Character+Classes).
+#
+# *   `\s` in an ordinary string literal is equivalent to a space character; in
+#     a source literal, it's shorthand for matching a whitespace character.
+# *   In an ordinary string literal, these are (needlessly) escaped characters;
+#     in a source literal, they are shorthands for various matching characters:
+#
+#         \w \W \d \D \h \H \S \R
+#
+#
+# ### Character Classes
+#
+# A *character class* is delimited by square brackets; it specifies that certain
+# characters match at a given point in the target string:
+#
+#     # This character class will match any vowel.
+#     re = /B[aeiou]rd/
+#     re.match('Bird') # => #<MatchData "Bird">
+#     re.match('Bard') # => #<MatchData "Bard">
+#     re.match('Byrd') # => nil
+#
+# A character class may contain hyphen characters to specify ranges of
+# characters:
+#
+#     # These regexps have the same effect.
+#     /[abcdef]/.match('foo') # => #<MatchData "f">
+#     /[a-f]/.match('foo')    # => #<MatchData "f">
+#     /[a-cd-f]/.match('foo') # => #<MatchData "f">
+#
+# When the first character of a character class is a caret (`^`), the sense of
+# the class is inverted: it matches any character *except* those specified.
+#
+#     /[^a-eg-z]/.match('f') # => #<MatchData "f">
 #
 # A character class may contain another character class. By itself this isn't
-# useful because `[a-z[0-9]]` describes the same set as `[a-z0-9]`. However,
-# character classes also support the `&&` operator which performs set
+# useful because `[a-z[0-9]]` describes the same set as `[a-z0-9]`.
+#
+# However, character classes also support the `&&` operator, which performs set
 # intersection on its arguments. The two can be combined as follows:
 #
 #     /[a-w&&[^c-g]z]/ # ([a-w] AND ([^c-g] OR z))
@@ -119,238 +274,481 @@
 #
 #     /[abh-w]/
 #
-# The following metacharacters also behave like character classes:
+# ### Shorthand Character Classes
 #
-# *   `/./` - Any character except a newline.
-# *   `/./m` - Any character (the `m` modifier enables multiline mode)
-# *   `/\w/` - A word character (`[a-zA-Z0-9_]`)
-# *   `/\W/` - A non-word character (`[^a-zA-Z0-9_]`). Please take a look at
-#     [Bug #4044](https://bugs.ruby-lang.org/issues/4044) if using `/\W/` with
-#     the `/i` modifier.
-# *   `/\d/` - A digit character (`[0-9]`)
-# *   `/\D/` - A non-digit character (`[^0-9]`)
-# *   `/\h/` - A hexdigit character (`[0-9a-fA-F]`)
-# *   `/\H/` - A non-hexdigit character (`[^0-9a-fA-F]`)
-# *   `/\s/` - A whitespace character: `/[ \t\r\n\f\v]/`
-# *   `/\S/` - A non-whitespace character: `/[^ \t\r\n\f\v]/`
-# *   `/\R/` - A linebreak: `\n`, `\v`, `\f`, `\r` `\u0085` (NEXT LINE),
-#     `\u2028` (LINE SEPARATOR), `\u2029` (PARAGRAPH SEPARATOR) or `\r\n`.
+# Each of the following metacharacters serves as a shorthand for a character
+# class:
+#
+# *   `/./`: Matches any character except a newline:
+#
+#         /./.match('foo') # => #<MatchData "f">
+#         /./.match("\n")  # => nil
+#
+# *   `/./m`: Matches any character, including a newline; see [Multiline
+#     Mode](rdoc-ref:Regexp@Multiline+Mode):
+#
+#         /./m.match("\n") # => #<MatchData "\n">
+#
+# *   `/\w/`: Matches a word character: equivalent to `[a-zA-Z0-9_]`:
+#
+#         /\w/.match(' foo') # => #<MatchData "f">
+#         /\w/.match(' _')   # => #<MatchData "_">
+#         /\w/.match(' ')    # => nil
+#
+# *   `/\W/`: Matches a non-word character: equivalent to `[^a-zA-Z0-9_]`:
+#
+#         /\W/.match(' ') # => #<MatchData " ">
+#         /\W/.match('_') # => nil
+#
+# *   `/\d/`: Matches a digit character: equivalent to `[0-9]`:
+#
+#         /\d/.match('THX1138') # => #<MatchData "1">
+#         /\d/.match('foo')     # => nil
+#
+# *   `/\D/`: Matches a non-digit character: equivalent to `[^0-9]`:
+#
+#         /\D/.match('123Jump!') # => #<MatchData "J">
+#         /\D/.match('123')      # => nil
+#
+# *   `/\h/`: Matches a hexdigit character: equivalent to `[0-9a-fA-F]`:
+#
+#         /\h/.match('xyz fedcba9876543210') # => #<MatchData "f">
+#         /\h/.match('xyz')                  # => nil
+#
+# *   `/\H/`: Matches a non-hexdigit character: equivalent to `[^0-9a-fA-F]`:
+#
+#         /\H/.match('fedcba9876543210xyz') # => #<MatchData "x">
+#         /\H/.match('fedcba9876543210')    # => nil
+#
+# *   `/\s/`: Matches a whitespace character: equivalent to `/[ \t\r\n\f\v]/`:
+#
+#         /\s/.match('foo bar') # => #<MatchData " ">
+#         /\s/.match('foo')     # => nil
+#
+# *   `/\S/`: Matches a non-whitespace character: equivalent to `/[^
+#     \t\r\n\f\v]/`:
+#
+#         /\S/.match(" \t\r\n\f\v foo") # => #<MatchData "f">
+#         /\S/.match(" \t\r\n\f\v")     # => nil
+#
+# *   `/\R/`: Matches a linebreak, platform-independently:
+#
+#         /\R/.match("\r")     # => #<MatchData "\r">     # Carriage return (CR)
+#         /\R/.match("\n")     # => #<MatchData "\n">     # Newline (LF)
+#         /\R/.match("\f")     # => #<MatchData "\f">     # Formfeed (FF)
+#         /\R/.match("\v")     # => #<MatchData "\v">     # Vertical tab (VT)
+#         /\R/.match("\r\n")   # => #<MatchData "\r\n">   # CRLF
+#         /\R/.match("\u0085") # => #<MatchData "\u0085"> # Next line (NEL)
+#         /\R/.match("\u2028") # => #<MatchData "\u2028"> # Line separator (LSEP)
+#         /\R/.match("\u2029") # => #<MatchData "\u2029"> # Paragraph separator (PSEP)
 #
 #
-# POSIX *bracket expressions* are also similar to character classes. They
-# provide a portable alternative to the above, with the added benefit that they
-# encompass non-ASCII characters. For instance, `/\d/` matches only the ASCII
-# decimal digits (0-9); whereas `/[[:digit:]]/` matches any character in the
-# Unicode *Nd* category.
+# ### Anchors
 #
-# *   `/[[:alnum:]]/` - Alphabetic and numeric character
-# *   `/[[:alpha:]]/` - Alphabetic character
-# *   `/[[:blank:]]/` - Space or tab
-# *   `/[[:cntrl:]]/` - Control character
-# *   `/[[:digit:]]/` - Digit
-# *   `/[[:graph:]]/` - Non-blank character (excludes spaces, control
-#     characters, and similar)
-# *   `/[[:lower:]]/` - Lowercase alphabetical character
-# *   `/[[:print:]]/` - Like [:graph:], but includes the space character
-# *   `/[[:punct:]]/` - Punctuation character
-# *   `/[[:space:]]/` - Whitespace character (`[:blank:]`, newline, carriage
-#     return, etc.)
-# *   `/[[:upper:]]/` - Uppercase alphabetical
-# *   `/[[:xdigit:]]/` - Digit allowed in a hexadecimal number (i.e., 0-9a-fA-F)
+# An anchor is a metasequence that matches a zero-width position between
+# characters in the target string.
+#
+# For a subexpression with no anchor, matching may begin anywhere in the target
+# string:
+#
+#     /real/.match('surrealist') # => #<MatchData "real">
+#
+# For a subexpression with an anchor, matching must begin at the matched anchor.
+#
+# #### Boundary Anchors
+#
+# Each of these anchors matches a boundary:
+#
+# *   `^`: Matches the beginning of a line:
+#
+#         /^bar/.match("foo\nbar") # => #<MatchData "bar">
+#         /^ar/.match("foo\nbar")  # => nil
+#
+# *   `$`: Matches the end of a line:
+#
+#         /bar$/.match("foo\nbar") # => #<MatchData "bar">
+#         /ba$/.match("foo\nbar")  # => nil
+#
+# *   `\A`: Matches the beginning of the string:
+#
+#         /\Afoo/.match('foo bar')  # => #<MatchData "foo">
+#         /\Afoo/.match(' foo bar') # => nil
+#
+# *   `\Z`: Matches the end of the string; if string ends with a single newline,
+#     it matches just before the ending newline:
+#
+#         /foo\Z/.match('bar foo')     # => #<MatchData "foo">
+#         /foo\Z/.match('foo bar')     # => nil
+#         /foo\Z/.match("bar foo\n")   # => #<MatchData "foo">
+#         /foo\Z/.match("bar foo\n\n") # => nil
+#
+# *   `\z`: Matches the end of the string:
+#
+#         /foo\z/.match('bar foo')   # => #<MatchData "foo">
+#         /foo\z/.match('foo bar')   # => nil
+#         /foo\z/.match("bar foo\n") # => nil
+#
+# *   `\b`: Matches word boundary when not inside brackets; matches backspace
+#     (`"0x08"`) when inside brackets:
+#
+#         /foo\b/.match('foo bar') # => #<MatchData "foo">
+#         /foo\b/.match('foobar')  # => nil
+#
+# *   `\B`: Matches non-word boundary:
+#
+#         /foo\B/.match('foobar')  # => #<MatchData "foo">
+#         /foo\B/.match('foo bar') # => nil
+#
+# *   `\G`: Matches first matching position:
+#
+#     In methods like String#gsub and String#scan, it changes on each iteration.
+#     It initially matches the beginning of subject, and in each following
+#     iteration it matches where the last match finished.
+#
+#         "    a b c".gsub(/ /, '_')   # => "____a_b_c"
+#         "    a b c".gsub(/\G /, '_') # => "____a b c"
+#
+#     In methods like Regexp#match and String#match that take an optional
+#     offset, it matches where the search begins.
+#
+#         "hello, world".match(/,/, 3)   # => #<MatchData ",">
+#         "hello, world".match(/\G,/, 3) # => nil
 #
 #
-# Ruby also supports the following non-POSIX character classes:
+# #### Lookaround Anchors
 #
-# *   `/[[:word:]]/` - A character in one of the following Unicode general
-#     categories *Letter*, *Mark*, *Number*, *Connector_Punctuation*
-# *   `/[[:ascii:]]/` - A character in the ASCII character set
+# Lookahead anchors:
 #
-#         # U+06F2 is "EXTENDED ARABIC-INDIC DIGIT TWO"
-#         /[[:digit:]]/.match("\u06F2")    #=> #<MatchData "\u{06F2}">
-#         /[[:upper:]][[:lower:]]/.match("Hello") #=> #<MatchData "He">
-#         /[[:xdigit:]][[:xdigit:]]/.match("A6")  #=> #<MatchData "A6">
+# *   `(?=*pat*)`: Positive lookahead assertion: ensures that the following
+#     characters match *pat*, but doesn't include those characters in the
+#     matched substring.
 #
-#
-# ## Repetition
-#
-# The constructs described so far match a single character. They can be followed
-# by a repetition metacharacter to specify how many times they need to occur.
-# Such metacharacters are called *quantifiers*.
-#
-# *   `*` - Zero or more times
-# *   `+` - One or more times
-# *   `?` - Zero or one times (optional)
-# *   `{`*n*`}` - Exactly *n* times
-# *   `{`*n*`,}` - *n* or more times
-# *   `{,`*m*`}` - *m* or less times
-# *   `{`*n*`,`*m*`}` - At least *n* and at most *m* times
+# *   `(?!*pat*)`: Negative lookahead assertion: ensures that the following
+#     characters *do not* match *pat*, but doesn't include those characters in
+#     the matched substring.
 #
 #
-# At least one uppercase character ('H'), at least one lowercase character
-# ('e'), two 'l' characters, then one 'o':
+# Lookbehind anchors:
 #
-#     "Hello".match(/[[:upper:]]+[[:lower:]]+l{2}o/) #=> #<MatchData "Hello">
+# *   `(?<=*pat*)`: Positive lookbehind assertion: ensures that the preceding
+#     characters match *pat*, but doesn't include those characters in the
+#     matched substring.
 #
-# ### Greedy Match
+# *   `(?<!*pat*)`: Negative lookbehind assertion: ensures that the preceding
+#     characters do not match *pat*, but doesn't include those characters in the
+#     matched substring.
 #
-# Repetition is *greedy* by default: as many occurrences as possible are matched
-# while still allowing the overall match to succeed. By contrast, *lazy*
-# matching makes the minimal amount of matches necessary for overall success.
-# Most greedy metacharacters can be made lazy by following them with `?`. For
-# the `{n}` pattern, because it specifies an exact number of characters to match
-# and not a variable number of characters, the `?` metacharacter instead makes
-# the repeated pattern optional.
 #
-# Both patterns below match the string. The first uses a greedy quantifier so
-# '.+' matches '<a><b>'; the second uses a lazy quantifier so '.+?' matches
-# '<a>':
+# The pattern below uses positive lookahead and positive lookbehind to match
+# text appearing in **...** tags without including the tags in the match:
 #
-#     /<.+>/.match("<a><b>")  #=> #<MatchData "<a><b>">
-#     /<.+?>/.match("<a><b>") #=> #<MatchData "<a>">
+#     /(?<=<b>)\w+(?=<\/b>)/.match("Fortune favors the <b>bold</b>.")
+#     # => #<MatchData "bold">
 #
-# ### Possessive Match
+# #### Match-Reset Anchor
 #
-# A quantifier followed by `+` matches *possessively*: once it has matched it
-# does not backtrack. They behave like greedy quantifiers, but having matched
-# they refuse to "give up" their match even if this jeopardises the overall
-# match.
+# *   `\K`: Match reset: the matched content preceding `\K` in the regexp is
+#     excluded from the result. For example, the following two regexps are
+#     almost equivalent:
 #
-#     /<.*><.+>/.match("<a><b>") #=> #<MatchData "<a><b>">
-#     /<.*+><.+>/.match("<a><b>") #=> nil
-#     /<.*><.++>/.match("<a><b>") #=> nil
+#         /ab\Kc/.match('abc')    # => #<MatchData "c">
+#         /(?<=ab)c/.match('abc') # => #<MatchData "c">
 #
-# ## Capturing
+#     These match same string and `$&` equals `'c'`, while the matched position
+#     is different.
 #
-# Parentheses can be used for *capturing*. The text enclosed by the *n*th group
-# of parentheses can be subsequently referred to with *n*. Within a pattern use
-# the *backreference* `\n` (e.g. `\1`); outside of the pattern use
-# `MatchData[n]` (e.g. `MatchData[1]`).
+#     As are the following two regexps:
 #
-# In this example, `'at'` is captured by the first group of parentheses, then
-# referred to later with `\1`:
+#         /(a)\K(b)\Kc/
+#         /(?<=(?<=(a))(b))c/
 #
-#     /[csh](..) [csh]\1 in/.match("The cat sat in the hat")
-#         #=> #<MatchData "cat sat in" 1:"at">
 #
-# Regexp#match returns a MatchData object which makes the captured text
-# available with its #[] method:
+# ### Alternation
 #
-#     /[csh](..) [csh]\1 in/.match("The cat sat in the hat")[1] #=> 'at'
+# The vertical bar metacharacter (`|`) may be used within parentheses to express
+# alternation: two or more subexpressions any of which may match the target
+# string.
 #
-# While Ruby supports an arbitrary number of numbered captured groups, only
-# groups 1-9 are supported using the `\n` backreference syntax.
+# Two alternatives:
 #
-# Ruby also supports `\0` as a special backreference, which references the
-# entire matched string.  This is also available at `MatchData[0]`.  Note that
-# the `\0` backreference cannot be used inside the regexp, as backreferences can
-# only be used after the end of the capture group, and the `\0` backreference
-# uses the implicit capture group of the entire match.  However, you can use
-# this backreference when doing substitution:
+#     re = /(a|b)/
+#     re.match('foo') # => nil
+#     re.match('bar') # => #<MatchData "b" 1:"b">
 #
-#     "The cat sat in the hat".gsub(/[csh]at/, '\0s')
-#       # => "The cats sats in the hats"
+# Four alternatives:
 #
-# ### Named Captures
+#     re = /(a|b|c|d)/
+#     re.match('shazam') # => #<MatchData "a" 1:"a">
+#     re.match('cold')   # => #<MatchData "c" 1:"c">
 #
-# Capture groups can be referred to by name when defined with the
-# `(?<`*name*`>)` or `(?'`*name*`')` constructs.
+# Each alternative is a subexpression, and may be composed of other
+# subexpressions:
 #
-#     /\$(?<dollars>\d+)\.(?<cents>\d+)/.match("$3.67")
-#         #=> #<MatchData "$3.67" dollars:"3" cents:"67">
-#     /\$(?<dollars>\d+)\.(?<cents>\d+)/.match("$3.67")[:dollars] #=> "3"
+#     re = /([a-c]|[x-z])/
+#     re.match('bar') # => #<MatchData "b" 1:"b">
+#     re.match('ooz') # => #<MatchData "z" 1:"z">
 #
-# Named groups can be backreferenced with `\k<`*name*`>`, where *name* is the
-# group name.
+# Method Regexp.union provides a convenient way to construct a regexp with
+# alternatives.
+#
+# ### Quantifiers
+#
+# A simple regexp matches one character:
+#
+#     /\w/.match('Hello')  # => #<MatchData "H">
+#
+# An added *quantifier* specifies how many matches are required or allowed:
+#
+# *   `*` - Matches zero or more times:
+#
+#         /\w*/.match('')
+#         # => #<MatchData "">
+#         /\w*/.match('x')
+#         # => #<MatchData "x">
+#         /\w*/.match('xyz')
+#         # => #<MatchData "yz">
+#
+# *   `+` - Matches one or more times:
+#
+#         /\w+/.match('')    # => nil
+#         /\w+/.match('x')   # => #<MatchData "x">
+#         /\w+/.match('xyz') # => #<MatchData "xyz">
+#
+# *   `?` - Matches zero or one times:
+#
+#         /\w?/.match('')    # => #<MatchData "">
+#         /\w?/.match('x')   # => #<MatchData "x">
+#         /\w?/.match('xyz') # => #<MatchData "x">
+#
+# *   `{`*n*`}` - Matches exactly *n* times:
+#
+#         /\w{2}/.match('')    # => nil
+#         /\w{2}/.match('x')   # => nil
+#         /\w{2}/.match('xyz') # => #<MatchData "xy">
+#
+# *   `{`*min*`,}` - Matches *min* or more times:
+#
+#         /\w{2,}/.match('')    # => nil
+#         /\w{2,}/.match('x')   # => nil
+#         /\w{2,}/.match('xy')  # => #<MatchData "xy">
+#         /\w{2,}/.match('xyz') # => #<MatchData "xyz">
+#
+# *   `{,`*max*`}` - Matches *max* or fewer times:
+#
+#         /\w{,2}/.match('')    # => #<MatchData "">
+#         /\w{,2}/.match('x')   # => #<MatchData "x">
+#         /\w{,2}/.match('xyz') # => #<MatchData "xy">
+#
+# *   `{`*min*`,`*max*`}` - Matches at least *min* times and at most *max*
+#     times:
+#
+#         /\w{1,2}/.match('')    # => nil
+#         /\w{1,2}/.match('x')   # => #<MatchData "x">
+#         /\w{1,2}/.match('xyz') # => #<MatchData "xy">
+#
+#
+# #### Greedy, Lazy, or Possessive Matching
+#
+# Quantifier matching may be greedy, lazy, or possessive:
+#
+# *   In *greedy* matching, as many occurrences as possible are matched while
+#     still allowing the overall match to succeed. Greedy quantifiers: `*`, `+`,
+#     `?`, `{min, max}` and its variants.
+# *   In *lazy* matching, the minimum number of occurrences are matched. Lazy
+#     quantifiers: `*?`, `+?`, `??`, `{min, max}?` and its variants.
+# *   In *possessive* matching, once a match is found, there is no backtracking;
+#     that match is retained, even if it jeopardises the overall match.
+#     Possessive quantifiers: `*+`, `++`, `?+`. Note that `{min, max}` and its
+#     variants do *not* support possessive matching.
+#
+#
+# More:
+#
+# *   About greedy and lazy matching, see [Choosing Minimal or Maximal
+#     Repetition](https://doc.lagout.org/programmation/Regular%20Expressions/Reg
+#     ular%20Expressions%20Cookbook_%20Detailed%20Solutions%20in%20Eight%20Progr
+#     amming%20Languages%20%282nd%20ed.%29%20%5BGoyvaerts%20%26%20Levithan%20201
+#     2-09-06%5D.pdf#tutorial-backtrack).
+# *   About possessive matching, see [Eliminate Needless
+#     Backtracking](https://doc.lagout.org/programmation/Regular%20Expressions/R
+#     egular%20Expressions%20Cookbook_%20Detailed%20Solutions%20in%20Eight%20Pro
+#     gramming%20Languages%20%282nd%20ed.%29%20%5BGoyvaerts%20%26%20Levithan%202
+#     012-09-06%5D.pdf#tutorial-backtrack).
+#
+#
+# ### Groups and Captures
+#
+# A simple regexp has (at most) one match:
+#
+#     re = /\d\d\d\d-\d\d-\d\d/
+#     re.match('1943-02-04')      # => #<MatchData "1943-02-04">
+#     re.match('1943-02-04').size # => 1
+#     re.match('foo')             # => nil
+#
+# Adding one or more pairs of parentheses, `(*subexpression*)`, defines
+# *groups*, which may result in multiple matched substrings, called *captures*:
+#
+#     re = /(\d\d\d\d)-(\d\d)-(\d\d)/
+#     re.match('1943-02-04')      # => #<MatchData "1943-02-04" 1:"1943" 2:"02" 3:"04">
+#     re.match('1943-02-04').size # => 4
+#
+# The first capture is the entire matched string; the other captures are the
+# matched substrings from the groups.
+#
+# A group may have a [quantifier](rdoc-ref:Regexp@Quantifiers):
+#
+#     re = /July 4(th)?/
+#     re.match('July 4')   # => #<MatchData "July 4" 1:nil>
+#     re.match('July 4th') # => #<MatchData "July 4th" 1:"th">
+#
+#     re = /(foo)*/
+#     re.match('')       # => #<MatchData "" 1:nil>
+#     re.match('foo')    # => #<MatchData "foo" 1:"foo">
+#     re.match('foofoo') # => #<MatchData "foofoo" 1:"foo">
+#
+#     re = /(foo)+/
+#     re.match('')       # => nil
+#     re.match('foo')    # => #<MatchData "foo" 1:"foo">
+#     re.match('foofoo') # => #<MatchData "foofoo" 1:"foo">
+#
+# The returned MatchData object gives access to the matched substrings:
+#
+#     re = /(\d\d\d\d)-(\d\d)-(\d\d)/
+#     md = re.match('1943-02-04')
+#     # => #<MatchData "1943-02-04" 1:"1943" 2:"02" 3:"04">
+#     md[0] # => "1943-02-04"
+#     md[1] # => "1943"
+#     md[2] # => "02"
+#     md[3] # => "04"
+#
+# #### Non-Capturing Groups
+#
+# A group may be made non-capturing; it is still a group (and, for example, can
+# have a quantifier), but its matching substring is not included among the
+# captures.
+#
+# A non-capturing group begins with `?:` (inside the parentheses):
+#
+#     # Don't capture the year.
+#     re = /(?:\d\d\d\d)-(\d\d)-(\d\d)/
+#     md = re.match('1943-02-04') # => #<MatchData "1943-02-04" 1:"02" 2:"04">
+#
+# #### Backreferences
+#
+# A group match may also be referenced within the regexp itself; such a
+# reference is called a `backreference`:
+#
+#     /[csh](..) [csh]\1 in/.match('The cat sat in the hat')
+#     # => #<MatchData "cat sat in" 1:"at">
+#
+# This table shows how each subexpression in the regexp above matches a
+# substring in the target string:
+#
+#     | Subexpression in Regexp   | Matching Substring in Target String |
+#     |---------------------------|-------------------------------------|
+#     |       First '[csh]'       |            Character 'c'            |
+#     |          '(..)'           |        First substring 'at'         |
+#     |      First space ' '      |      First space character ' '      |
+#     |       Second '[csh]'      |            Character 's'            |
+#     | '\1' (backreference 'at') |        Second substring 'at'        |
+#     |           ' in'           |            Substring ' in'          |
+#
+# A regexp may contain any number of groups:
+#
+# *   For a large number of groups:
+#
+#     *   The ordinary `\*n`* notation applies only for *n* in range (1..9).
+#     *   The `MatchData[*n*]` notation applies for any non-negative *n*.
+#
+#
+# *   `\0` is a special backreference, referring to the entire matched string;
+#     it may not be used within the regexp itself, but may be used outside it
+#     (for example, in a substitution method call):
+#
+#         'The cat sat in the hat'.gsub(/[csh]at/, '\0s')
+#         # => "The cats sats in the hats"
+#
+#
+# #### Named Captures
+#
+# As seen above, a capture can be referred to by its number. A capture can also
+# have a name, prefixed as `?<*name*>` or `?'*name*'`, and the name (symbolized)
+# may be used as an index in `MatchData[]`:
+#
+#     md = /\$(?<dollars>\d+)\.(?'cents'\d+)/.match("$3.67")
+#     # => #<MatchData "$3.67" dollars:"3" cents:"67">
+#     md[:dollars]  # => "3"
+#     md[:cents]    # => "67"
+#     # The capture numbers are still valid.
+#     md[2]         # => "67"
+#
+# When a regexp contains a named capture, there are no unnamed captures:
+#
+#     /\$(?<dollars>\d+)\.(\d+)/.match("$3.67")
+#     # => #<MatchData "$3.67" dollars:"3">
+#
+# A named group may be backreferenced as `\k<*name*>`:
 #
 #     /(?<vowel>[aeiou]).\k<vowel>.\k<vowel>/.match('ototomy')
-#         #=> #<MatchData "ototo" vowel:"o">
+#     # => #<MatchData "ototo" vowel:"o">
 #
-# **Note**: A regexp can't use named backreferences and numbered backreferences
-# simultaneously. Also, if a named capture is used in a regexp, then parentheses
-# used for grouping which would otherwise result in a unnamed capture are
-# treated as non-capturing.
+# When (and only when) a regexp contains named capture groups and appears before
+# the `=~` operator, the captured substrings are assigned to local variables
+# with corresponding names:
 #
-#     /(\w)(\w)/.match("ab").captures # => ["a", "b"]
-#     /(\w)(\w)/.match("ab").named_captures # => {}
+#     /\$(?<dollars>\d+)\.(?<cents>\d+)/ =~ '$3.67'
+#     dollars # => "3"
+#     cents   # => "67"
 #
-#     /(?<c>\w)(\w)/.match("ab").captures # => ["a"]
-#     /(?<c>\w)(\w)/.match("ab").named_captures # => {"c"=>"a"}
+# Method Regexp#named_captures returns a hash of the capture names and
+# substrings; method Regexp#names returns an array of the capture names.
 #
-# When named capture groups are used with a literal regexp on the left-hand side
-# of an expression and the `=~` operator, the captured text is also assigned to
-# local variables with corresponding names.
+# #### Atomic Grouping
 #
-#     /\$(?<dollars>\d+)\.(?<cents>\d+)/ =~ "$3.67" #=> 0
-#     dollars #=> "3"
+# A group may be made *atomic* with `(?>`*subexpression*`)`.
 #
-# ## Grouping
+# This causes the subexpression to be matched independently of the rest of the
+# expression, so that the matched substring becomes fixed for the remainder of
+# the match, unless the entire subexpression must be abandoned and subsequently
+# revisited.
 #
-# Parentheses also *group* the terms they enclose, allowing them to be
-# quantified as one *atomic* whole.
+# In this way *subexpression* is treated as a non-divisible whole. Atomic
+# grouping is typically used to optimise patterns to prevent needless
+# backtracking .
 #
-# The pattern below matches a vowel followed by 2 word characters:
+# Example (without atomic grouping):
 #
-#     /[aeiou]\w{2}/.match("Caenorhabditis elegans") #=> #<MatchData "aen">
+#     /".*"/.match('"Quote"') # => #<MatchData "\"Quote\"">
 #
-# Whereas the following pattern matches a vowel followed by a word character,
-# twice, i.e. `[aeiou]\w[aeiou]\w`: 'enor'.
+# Analysis:
 #
-#     /([aeiou]\w){2}/.match("Caenorhabditis elegans")
-#         #=> #<MatchData "enor" 1:"or">
+# 1.  The leading subexpression `"` in the pattern matches the first character
+#     `"` in the target string.
+# 2.  The next subexpression `.*` matches the next substring `Quote“` (including
+#     the trailing double-quote).
+# 3.  Now there is nothing left in the target string to match the trailing
+#     subexpression `"` in the pattern; this would cause the overall match to
+#     fail.
+# 4.  The matched substring is backtracked by one position: `Quote`.
+# 5.  The final subexpression `"` now matches the final substring `"`, and the
+#     overall match succeeds.
 #
-# The `(?:`...`)` construct provides grouping without capturing. That is, it
-# combines the terms it contains into an atomic whole without creating a
-# backreference. This benefits performance at the slight expense of readability.
 #
-# The first group of parentheses captures 'n' and the second 'ti'. The second
-# group is referred to later with the backreference `\2`:
+# If subexpression `.*` is grouped atomically, the backtracking is disabled, and
+# the overall match fails:
 #
-#     /I(n)ves(ti)ga\2ons/.match("Investigations")
-#         #=> #<MatchData "Investigations" 1:"n" 2:"ti">
+#     /"(?>.*)"/.match('"Quote"') # => nil
 #
-# The first group of parentheses is now made non-capturing with '?:', so it
-# still matches 'n', but doesn't create the backreference. Thus, the
-# backreference `\1` now refers to 'ti'.
+# Atomic grouping can affect performance; see [Atomic
+# Group](https://www.regular-expressions.info/atomic.html).
 #
-#     /I(?:n)ves(ti)ga\1ons/.match("Investigations")
-#         #=> #<MatchData "Investigations" 1:"ti">
+# #### Subexpression Calls
 #
-# ### Atomic Grouping
+# As seen above, a backreference number (`\*n`*) or name (`\k<*name*>`) gives
+# access to a captured *substring*; the corresponding regexp *subexpression* may
+# also be accessed, via the number (`\\g*n`*) or name (`\g<*name*>`):
 #
-# Grouping can be made *atomic* with `(?>`*pat*`)`. This causes the
-# subexpression *pat* to be matched independently of the rest of the expression
-# such that what it matches becomes fixed for the remainder of the match, unless
-# the entire subexpression must be abandoned and subsequently revisited. In this
-# way *pat* is treated as a non-divisible whole. Atomic grouping is typically
-# used to optimise patterns so as to prevent the regular expression engine from
-# backtracking needlessly.
-#
-# The `"` in the pattern below matches the first character of the string, then
-# `.*` matches *Quote"*. This causes the overall match to fail, so the text
-# matched by `.*` is backtracked by one position, which leaves the final
-# character of the string available to match `"`
-#
-#     /".*"/.match('"Quote"')     #=> #<MatchData "\"Quote\"">
-#
-# If `.*` is grouped atomically, it refuses to backtrack *Quote"*, even though
-# this means that the overall match fails
-#
-#     /"(?>.*)"/.match('"Quote"') #=> nil
-#
-# ## Subexpression Calls
-#
-# The `\g<`*name*`>` syntax matches the previous subexpression named *name*,
-# which can be a group name or number, again. This differs from backreferences
-# in that it re-executes the group rather than simply trying to re-match the
-# same text.
-#
-# This pattern matches a *(* character and assigns it to the `paren` group,
-# tries to call that the `paren` sub-expression again but fails, then matches a
-# literal *)*:
-#
-#     /\A(?<paren>\(\g<paren>*\))*\z/ =~ '()'
-#
-#     /\A(?<paren>\(\g<paren>*\))*\z/ =~ '(())' #=> 0
+#     /\A(?<paren>\(\g<paren>*\))*\z/.match('(())')
 #     # ^1
 #     #      ^2
 #     #           ^3
@@ -362,468 +760,613 @@
 #     #                       ^9
 #     #                           ^10
 #
+# The pattern:
+#
 # 1.  Matches at the beginning of the string, i.e. before the first character.
-# 2.  Enters a named capture group called `paren`
-# 3.  Matches a literal *(*, the first character in the string
-# 4.  Calls the `paren` group again, i.e. recurses back to the second step
-# 5.  Re-enters the `paren` group
-# 6.  Matches a literal *(*, the second character in the string
-# 7.  Try to call `paren` a third time, but fail because doing so would prevent
-#     an overall successful match
-# 8.  Match a literal *)*, the third character in the string. Marks the end of
-#     the second recursive call
-# 9.  Match a literal *)*, the fourth character in the string
-# 10. Match the end of the string
+# 2.  Enters a named group `paren`.
+# 3.  Matches the first character in the string, `'('`.
+# 4.  Calls the `paren` group again, i.e. recurses back to the  second step.
+# 5.  Re-enters the `paren` group.
+# 6.  Matches the second character in the string, `'('`.
+# 7.  Attempts to call `paren` a third time, but fails because doing so would
+#     prevent an overall successful match.
+# 8.  Matches the third character in the string, `')'`; marks the end of the
+#     second recursive call
+# 9.  Matches the fourth character in the string, `')'`.
+# 10. Matches the end of the string.
 #
 #
-# ## Alternation
+# See [Subexpression
+# calls](https://learnbyexample.github.io/Ruby_Regexp/groupings-and-backreferenc
+# es.html?highlight=subexpression#subexpression-calls).
 #
-# The vertical bar metacharacter (`|`) combines several expressions into a
-# single one that matches any of the expressions. Each expression is an
-# *alternative*.
+# #### Conditionals
 #
-#     /\w(and|or)\w/.match("Feliformia") #=> #<MatchData "form" 1:"or">
-#     /\w(and|or)\w/.match("furandi")    #=> #<MatchData "randi" 1:"and">
-#     /\w(and|or)\w/.match("dissemblance") #=> nil
+# The conditional construct takes the form `(?(*cond*)*yes*|*no*)`, where:
 #
-# ## Character Properties
+# *   *cond* may be a capture number or name.
+# *   The match to be applied is *yes* if *cond* is captured; otherwise the
+#     match to be applied is *no*.
+# *   If not needed, `|*no`* may be omitted.
 #
-# The `\p{}` construct matches characters with the named property, much like
-# POSIX bracket classes.
 #
-# *   `/\p{Alnum}/` - Alphabetic and numeric character
-# *   `/\p{Alpha}/` - Alphabetic character
-# *   `/\p{Blank}/` - Space or tab
-# *   `/\p{Cntrl}/` - Control character
-# *   `/\p{Digit}/` - Digit
-# *   `/\p{Emoji}/` - Unicode emoji
-# *   `/\p{Graph}/` - Non-blank character (excludes spaces, control characters,
-#     and similar)
-# *   `/\p{Lower}/` - Lowercase alphabetical character
-# *   `/\p{Print}/` - Like `\p{Graph}`, but includes the space character
-# *   `/\p{Punct}/` - Punctuation character
-# *   `/\p{Space}/` - Whitespace character (`[:blank:]`, newline, carriage
+# Examples:
+#
+#     re = /\A(foo)?(?(1)(T)|(F))\z/
+#     re.match('fooT') # => #<MatchData "fooT" 1:"foo" 2:"T" 3:nil>
+#     re.match('F')    # => #<MatchData "F" 1:nil 2:nil 3:"F">
+#     re.match('fooF') # => nil
+#     re.match('T')    # => nil
+#
+#     re = /\A(?<xyzzy>foo)?(?(<xyzzy>)(T)|(F))\z/
+#     re.match('fooT') # => #<MatchData "fooT" xyzzy:"foo">
+#     re.match('F')    # => #<MatchData "F" xyzzy:nil>
+#     re.match('fooF') # => nil
+#     re.match('T')    # => nil
+#
+# #### Absence Operator
+#
+# The absence operator is a special group that matches anything which does *not*
+# match the contained subexpressions.
+#
+#     /(?~real)/.match('surrealist') # => #<MatchData "surrea">
+#     /(?~real)ist/.match('surrealist') # => #<MatchData "ealist">
+#     /sur(?~real)ist/.match('surrealist') # => nil
+#
+# ### Unicode
+#
+# #### Unicode Properties
+#
+# The `/\p{*property_name*}/` construct (with lowercase `p`) matches characters
+# using a Unicode property name, much like a character class; property `Alpha`
+# specifies alphabetic characters:
+#
+#     /\p{Alpha}/.match('a') # => #<MatchData "a">
+#     /\p{Alpha}/.match('1') # => nil
+#
+# A property can be inverted by prefixing the name with a caret character (`^`):
+#
+#     /\p{^Alpha}/.match('1') # => #<MatchData "1">
+#     /\p{^Alpha}/.match('a') # => nil
+#
+# Or by using `\P` (uppercase `P`):
+#
+#     /\P{Alpha}/.match('1') # => #<MatchData "1">
+#     /\P{Alpha}/.match('a') # => nil
+#
+# See [Unicode Properties](rdoc-ref:regexp/unicode_properties.rdoc) for regexps
+# based on the numerous properties.
+#
+# Some commonly-used properties correspond to POSIX bracket expressions:
+#
+# *   `/\p{Alnum}/`: Alphabetic and numeric character
+# *   `/\p{Alpha}/`: Alphabetic character
+# *   `/\p{Blank}/`: Space or tab
+# *   `/\p{Cntrl}/`: Control character
+# *   `/\p{Digit}/`: Digit characters, and similar)
+# *   `/\p{Lower}/`: Lowercase alphabetical character
+# *   `/\p{Print}/`: Like `\p{Graph}`, but includes the space character
+# *   `/\p{Punct}/`: Punctuation character
+# *   `/\p{Space}/`: Whitespace character (`[:blank:]`, newline, carriage
 #     return, etc.)
-# *   `/\p{Upper}/` - Uppercase alphabetical
-# *   `/\p{XDigit}/` - Digit allowed in a hexadecimal number (i.e., 0-9a-fA-F)
-# *   `/\p{Word}/` - A member of one of the following Unicode general category
-#     *Letter*, *Mark*, *Number*, *Connector_Punctuation*
-# *   `/\p{ASCII}/` - A character in the ASCII character set
-# *   `/\p{Any}/` - Any Unicode character (including unassigned characters)
-# *   `/\p{Assigned}/` - An assigned character
-#
-#
-# A Unicode character's *General Category* value can also be matched with
-# `\p{`*Ab*`}` where *Ab* is the category's abbreviation as described below:
-#
-# *   `/\p{L}/` - 'Letter'
-# *   `/\p{Ll}/` - 'Letter: Lowercase'
-# *   `/\p{Lm}/` - 'Letter: Mark'
-# *   `/\p{Lo}/` - 'Letter: Other'
-# *   `/\p{Lt}/` - 'Letter: Titlecase'
-# *   `/\p{Lu}/` - 'Letter: Uppercase
-# *   `/\p{Lo}/` - 'Letter: Other'
-# *   `/\p{M}/` - 'Mark'
-# *   `/\p{Mn}/` - 'Mark: Nonspacing'
-# *   `/\p{Mc}/` - 'Mark: Spacing Combining'
-# *   `/\p{Me}/` - 'Mark: Enclosing'
-# *   `/\p{N}/` - 'Number'
-# *   `/\p{Nd}/` - 'Number: Decimal Digit'
-# *   `/\p{Nl}/` - 'Number: Letter'
-# *   `/\p{No}/` - 'Number: Other'
-# *   `/\p{P}/` - 'Punctuation'
-# *   `/\p{Pc}/` - 'Punctuation: Connector'
-# *   `/\p{Pd}/` - 'Punctuation: Dash'
-# *   `/\p{Ps}/` - 'Punctuation: Open'
-# *   `/\p{Pe}/` - 'Punctuation: Close'
-# *   `/\p{Pi}/` - 'Punctuation: Initial Quote'
-# *   `/\p{Pf}/` - 'Punctuation: Final Quote'
-# *   `/\p{Po}/` - 'Punctuation: Other'
-# *   `/\p{S}/` - 'Symbol'
-# *   `/\p{Sm}/` - 'Symbol: Math'
-# *   `/\p{Sc}/` - 'Symbol: Currency'
-# *   `/\p{Sc}/` - 'Symbol: Currency'
-# *   `/\p{Sk}/` - 'Symbol: Modifier'
-# *   `/\p{So}/` - 'Symbol: Other'
-# *   `/\p{Z}/` - 'Separator'
-# *   `/\p{Zs}/` - 'Separator: Space'
-# *   `/\p{Zl}/` - 'Separator: Line'
-# *   `/\p{Zp}/` - 'Separator: Paragraph'
-# *   `/\p{C}/` - 'Other'
-# *   `/\p{Cc}/` - 'Other: Control'
-# *   `/\p{Cf}/` - 'Other: Format'
-# *   `/\p{Cn}/` - 'Other: Not Assigned'
-# *   `/\p{Co}/` - 'Other: Private Use'
-# *   `/\p{Cs}/` - 'Other: Surrogate'
-#
-#
-# Lastly, `\p{}` matches a character's Unicode *script*. The following scripts
-# are supported: *Arabic*, *Armenian*, *Balinese*, *Bengali*, *Bopomofo*,
-# *Braille*, *Buginese*, *Buhid*, *Canadian_Aboriginal*, *Carian*, *Cham*,
-# *Cherokee*, *Common*, *Coptic*, *Cuneiform*, *Cypriot*, *Cyrillic*, *Deseret*,
-# *Devanagari*, *Ethiopic*, *Georgian*, *Glagolitic*, *Gothic*, *Greek*,
-# *Gujarati*, *Gurmukhi*, *Han*, *Hangul*, *Hanunoo*, *Hebrew*, *Hiragana*,
-# *Inherited*, *Kannada*, *Katakana*, *Kayah_Li*, *Kharoshthi*, *Khmer*, *Lao*,
-# *Latin*, *Lepcha*, *Limbu*, *Linear_B*, *Lycian*, *Lydian*, *Malayalam*,
-# *Mongolian*, *Myanmar*, *New_Tai_Lue*, *Nko*, *Ogham*, *Ol_Chiki*,
-# *Old_Italic*, *Old_Persian*, *Oriya*, *Osmanya*, *Phags_Pa*, *Phoenician*,
-# *Rejang*, *Runic*, *Saurashtra*, *Shavian*, *Sinhala*, *Sundanese*,
-# *Syloti_Nagri*, *Syriac*, *Tagalog*, *Tagbanwa*, *Tai_Le*, *Tamil*, *Telugu*,
-# *Thaana*, *Thai*, *Tibetan*, *Tifinagh*, *Ugaritic*, *Vai*, and *Yi*.
-#
-# Unicode codepoint U+06E9 is named "ARABIC PLACE OF SAJDAH" and belongs to the
-# Arabic script:
-#
-#     /\p{Arabic}/.match("\u06E9") #=> #<MatchData "\u06E9">
-#
-# All character properties can be inverted by prefixing their name with a caret
-# (`^`).
-#
-# Letter 'A' is not in the Unicode Ll (Letter; Lowercase) category, so this
-# match succeeds:
-#
-#     /\p{^Ll}/.match("A") #=> #<MatchData "A">
-#
-# ## Anchors
-#
-# Anchors are metacharacter that match the zero-width positions between
-# characters, *anchoring* the match to a specific position.
-#
-# *   `^` - Matches beginning of line
-# *   `$` - Matches end of line
-# *   `\A` - Matches beginning of string.
-# *   `\Z` - Matches end of string. If string ends with a newline, it matches
-#     just before newline
-# *   `\z` - Matches end of string
-# *   `\G` - Matches first matching position:
-#
-#     In methods like `String#gsub` and `String#scan`, it changes on each
-#     iteration. It initially matches the beginning of subject, and in each
-#     following iteration it matches where the last match finished.
-#
-#         "    a b c".gsub(/ /, '_')    #=> "____a_b_c"
-#         "    a b c".gsub(/\G /, '_')  #=> "____a b c"
-#
-#     In methods like `Regexp#match` and `String#match` that take an (optional)
-#     offset, it matches where the search begins.
+# *   `/\p{Upper}/`: Uppercase alphabetical
+# *   `/\p{XDigit}/`: Digit allowed in a hexadecimal number (i.e., 0-9a-fA-F)
 #
-#         "hello, world".match(/,/, 3)    #=> #<MatchData ",">
-#         "hello, world".match(/\G,/, 3)  #=> nil
 #
-# *   `\b` - Matches word boundaries when outside brackets; backspace (0x08)
-#     when inside brackets
-# *   `\B` - Matches non-word boundaries
-# *   `(?=`*pat*`)` - *Positive lookahead* assertion: ensures that the following
-#     characters match *pat*, but doesn't include those characters in the
-#     matched text
-# *   `(?!`*pat*`)` - *Negative lookahead* assertion: ensures that the following
-#     characters do not match *pat*, but doesn't include those characters in the
-#     matched text
-# *   `(?<=`*pat*`)` - *Positive lookbehind* assertion: ensures that the
-#     preceding characters match *pat*, but doesn't include those characters in
-#     the matched text
-# *   `(?<!`*pat*`)` - *Negative lookbehind* assertion: ensures that the
-#     preceding characters do not match *pat*, but doesn't include those
-#     characters in the matched text
+# These are also commonly used:
 #
-# *   `\K` - *Match reset*: the matched content preceding `\K` in the regexp is
-#     excluded from the result.  For example, the following two regexps are
-#     almost equivalent:
+# *   `/\p{Emoji}/`: Unicode emoji.
+# *   `/\p{Graph}/`: Non-blank character (excludes spaces, control characters,
+#     and similar).
+# *   `/\p{Word}/`: A member in one of these Unicode character categories (see
+#     below) or having one of these Unicode properties:
 #
-#         /ab\Kc/ =~ "abc"     #=> 0
-#         /(?<=ab)c/ =~ "abc"  #=> 2
+#     *   Unicode categories:
+#         *   `Mark` (`M`).
+#         *   `Decimal Number` (`Nd`)
+#         *   `Connector Punctuation` (`Pc`).
 #
-#     These match same string and *$&* equals `"c"`, while the matched position
-#     is different.
 #
-#     As are the following two regexps:
+#     *   Unicode properties:
+#         *   `Alpha`
+#         *   `Join_Control`
 #
-#         /(a)\K(b)\Kc/
-#         /(?<=(?<=(a))(b))c/
 #
 #
-# If a pattern isn't anchored it can begin at any point in the string:
+# *   `/\p{ASCII}/`: A character in the ASCII character set.
+# *   `/\p{Any}/`: Any Unicode character (including unassigned characters).
+# *   `/\p{Assigned}/`: An assigned character.
 #
-#     /real/.match("surrealist") #=> #<MatchData "real">
 #
-# Anchoring the pattern to the beginning of the string forces the match to start
-# there. 'real' doesn't occur at the beginning of the string, so now the match
-# fails:
+# #### Unicode Character Categories
 #
-#     /\Areal/.match("surrealist") #=> nil
+# A Unicode character category name:
 #
-# The match below fails because although 'Demand' contains 'and', the pattern
-# does not occur at a word boundary.
+# *   May be either its full name or its abbreviated name.
+# *   Is case-insensitive.
+# *   Treats a space, a hyphen, and an underscore as equivalent.
 #
-#     /\band/.match("Demand")
 #
-# Whereas in the following example 'and' has been anchored to a non-word
-# boundary so instead of matching the first 'and' it matches from the fourth
-# letter of 'demand' instead:
+# Examples:
 #
-#     /\Band.+/.match("Supply and demand curve") #=> #<MatchData "and curve">
+#     /\p{lu}/                # => /\p{lu}/
+#     /\p{LU}/                # => /\p{LU}/
+#     /\p{Uppercase Letter}/  # => /\p{Uppercase Letter}/
+#     /\p{Uppercase_Letter}/  # => /\p{Uppercase_Letter}/
+#     /\p{UPPERCASE-LETTER}/  # => /\p{UPPERCASE-LETTER}/
 #
-# The pattern below uses positive lookahead and positive lookbehind to match
-# text appearing in  tags without including the tags in the match:
+# Below are the Unicode character category abbreviations and names. Enumerations
+# of characters in each category are at the links.
 #
-#     /(?<=<b>)\w+(?=<\/b>)/.match("Fortune favours the <b>bold</b>")
-#         #=> #<MatchData "bold">
+# Letters:
 #
-# ## Options
+# *   `L`, `Letter`: `LC`, `Lm`, or `Lo`.
+# *   `LC`, `Cased_Letter`: `Ll`, `Lt`, or `Lu`.
+# *   [Lu, Lowercase_Letter](https://www.compart.com/en/unicode/category/Ll).
+# *   [Lu, Modifier_Letter](https://www.compart.com/en/unicode/category/Lm).
+# *   [Lu, Other_Letter](https://www.compart.com/en/unicode/category/Lo).
+# *   [Lu, Titlecase_Letter](https://www.compart.com/en/unicode/category/Lt).
+# *   [Lu, Uppercase_Letter](https://www.compart.com/en/unicode/category/Lu).
 #
-# The end delimiter for a regexp can be followed by one or more single-letter
-# options which control how the pattern can match.
 #
-# *   `/pat/i` - Ignore case
-# *   `/pat/m` - Treat a newline as a character matched by `.`
-# *   `/pat/x` - Ignore whitespace and comments in the pattern
-# *   `/pat/o` - Perform `#{}` interpolation only once
+# Marks:
 #
+# *   `M`, `Mark`: `Mc`, `Me`, or `Mn`.
+# *   [Mc, Spacing_Mark](https://www.compart.com/en/unicode/category/Mc).
+# *   [Me, Enclosing_Mark](https://www.compart.com/en/unicode/category/Me).
+# *   [Mn, Nonapacing_Mark](https://www.compart.com/en/unicode/category/Mn).
 #
-# `i`, `m`, and `x` can also be applied on the subexpression level with the
-# `(?`*on*`-`*off*`)` construct, which enables options *on*, and disables
-# options *off* for the expression enclosed by the parentheses:
 #
-#     /a(?i:b)c/.match('aBc')   #=> #<MatchData "aBc">
-#     /a(?-i:b)c/i.match('ABC') #=> nil
+# Numbers:
 #
-# Additionally, these options can also be toggled for the remainder of the
-# pattern:
+# *   `N`, `Number`: `Nd`, `Nl`, or `No`.
+# *   [Nd, Decimal_Number](https://www.compart.com/en/unicode/category/Nd).
+# *   [Nl, Letter_Number](https://www.compart.com/en/unicode/category/Nl).
+# *   [No, Other_Number](https://www.compart.com/en/unicode/category/No).
 #
-#     /a(?i)bc/.match('abC') #=> #<MatchData "abC">
 #
-# Options may also be used with `Regexp.new`:
+# Punctation:
 #
-#     Regexp.new("abc", Regexp::IGNORECASE)                     #=> /abc/i
-#     Regexp.new("abc", Regexp::MULTILINE)                      #=> /abc/m
-#     Regexp.new("abc # Comment", Regexp::EXTENDED)             #=> /abc # Comment/x
-#     Regexp.new("abc", Regexp::IGNORECASE | Regexp::MULTILINE) #=> /abc/mi
+# *   `P`, `Punctuation`: `Pc`, `Pd`, `Pe`, `Pf`, `Pi`, `Po`, or `Ps`.
+# *   [Pc,
+#     Connector_Punctuation](https://www.compart.com/en/unicode/category/Pc).
+# *   [Pd, Dash_Punctuation](https://www.compart.com/en/unicode/category/Pd).
+# *   [Pe, Close_Punctuation](https://www.compart.com/en/unicode/category/Pe).
+# *   [Pf, Final_Punctuation](https://www.compart.com/en/unicode/category/Pf).
+# *   [Pi, Initial_Punctuation](https://www.compart.com/en/unicode/category/Pi).
+# *   [Po, Other_Punctuation](https://www.compart.com/en/unicode/category/Po).
+# *   [Ps, Open_Punctuation](https://www.compart.com/en/unicode/category/Ps).
 #
-#     Regexp.new("abc", "i")           #=> /abc/i
-#     Regexp.new("abc", "m")           #=> /abc/m
-#     Regexp.new("abc # Comment", "x") #=> /abc # Comment/x
-#     Regexp.new("abc", "im")          #=> /abc/mi
+# *   `S`, `Symbol`: `Sc`, `Sk`, `Sm`, or `So`.
+# *   [Sc, Currency_Symbol](https://www.compart.com/en/unicode/category/Sc).
+# *   [Sk, Modifier_Symbol](https://www.compart.com/en/unicode/category/Sk).
+# *   [Sm, Math_Symbol](https://www.compart.com/en/unicode/category/Sm).
+# *   [So, Other_Symbol](https://www.compart.com/en/unicode/category/So).
 #
-# ## Free-Spacing Mode and Comments
+# *   `Z`, `Separator`: `Zl`, `Zp`, or `Zs`.
+# *   [Zl, Line_Separator](https://www.compart.com/en/unicode/category/Zl).
+# *   [Zp, Paragraph_Separator](https://www.compart.com/en/unicode/category/Zp).
+# *   [Zs, Space_Separator](https://www.compart.com/en/unicode/category/Zs).
 #
-# As mentioned above, the `x` option enables *free-spacing* mode. Literal white
-# space inside the pattern is ignored, and the octothorpe (`#`) character
-# introduces a comment until the end of the line. This allows the components of
-# the pattern to be organized in a potentially more readable fashion.
+# *   `C`, `Other`: `Cc`, `Cf`, `Cn`, `Co`, or `Cs`.
+# *   [Cc, Control](https://www.compart.com/en/unicode/category/Cc).
+# *   [Cf, Format](https://www.compart.com/en/unicode/category/Cf).
+# *   [Cn, Unassigned](https://www.compart.com/en/unicode/category/Cn).
+# *   [Co, Private_Use](https://www.compart.com/en/unicode/category/Co).
+# *   [Cs, Surrogate](https://www.compart.com/en/unicode/category/Cs).
 #
-# A contrived pattern to match a number with optional decimal places:
 #
-#     float_pat = /\A
-#         [[:digit:]]+ # 1 or more digits before the decimal point
-#         (\.          # Decimal point
-#             [[:digit:]]+ # 1 or more digits after the decimal point
-#         )? # The decimal point and following digits are optional
-#     \Z/x
-#     float_pat.match('3.14') #=> #<MatchData "3.14" 1:".14">
+# #### Unicode Scripts and Blocks
 #
-# There are a number of strategies for matching whitespace:
+# Among the Unicode properties are:
 #
-# *   Use a pattern such as `\s` or `\p{Space}`.
-# *   Use escaped whitespace such as `\ `, i.e. a space preceded by a backslash.
-# *   Use a character class such as `[ ]`.
+# *   [Unicode scripts](https://en.wikipedia.org/wiki/Script_(Unicode)); see
+#     [supported scripts](https://www.unicode.org/standard/supported.html).
+# *   [Unicode blocks](https://en.wikipedia.org/wiki/Unicode_block); see
+#     [supported blocks](http://www.unicode.org/Public/UNIDATA/Blocks.txt).
 #
 #
-# Comments can be included in a non-`x` pattern with the `(?#`*comment*`)`
-# construct, where *comment* is arbitrary text ignored by the regexp engine.
+# ### POSIX Bracket Expressions
 #
-# Comments in regexp literals cannot include unescaped terminator characters.
+# A POSIX *bracket expression* is also similar to a character class. These
+# expressions provide a portable alternative to the above, with the added
+# benefit of encompassing non-ASCII characters:
 #
-# ## Encoding
+# *   `/\d/` matches only ASCII decimal digits `0` through `9`.
+# *   `/[[:digit:]]/` matches any character in the Unicode `Decimal Number`
+#     (`Nd`) category; see below.
 #
-# Regular expressions are assumed to use the source encoding. This can be
-# overridden with one of the following modifiers.
 #
-# *   `/`*pat*`/u` - UTF-8
-# *   `/`*pat*`/e` - EUC-JP
-# *   `/`*pat*`/s` - Windows-31J
-# *   `/`*pat*`/n` - ASCII-8BIT
+# The POSIX bracket expressions:
 #
+# *   `/[[:digit:]]/`: Matches a [Unicode
+#     digit](https://www.compart.com/en/unicode/category/Nd):
 #
-# A regexp can be matched against a string when they either share an encoding,
-# or the regexp's encoding is *US-ASCII* and the string's encoding is
-# ASCII-compatible.
+#         /[[:digit:]]/.match('9')       # => #<MatchData "9">
+#         /[[:digit:]]/.match("\u1fbf9") # => #<MatchData "9">
 #
-# If a match between incompatible encodings is attempted an
-# `Encoding::CompatibilityError` exception is raised.
+# *   `/[[:xdigit:]]/`: Matches a digit allowed in a hexadecimal number;
+#     equivalent to `[0-9a-fA-F]`.
 #
-# The `Regexp#fixed_encoding?` predicate indicates whether the regexp has a
-# *fixed* encoding, that is one incompatible with ASCII. A regexp's encoding can
-# be explicitly fixed by supplying `Regexp::FIXEDENCODING` as the second
-# argument of `Regexp.new`:
+# *   `/[[:upper:]]/`: Matches a [Unicode uppercase
+#     letter](https://www.compart.com/en/unicode/category/Lu):
 #
-#     r = Regexp.new("a".force_encoding("iso-8859-1"),Regexp::FIXEDENCODING)
-#     r =~ "a\u3042"
-#        # raises Encoding::CompatibilityError: incompatible encoding regexp match
-#        #         (ISO-8859-1 regexp with UTF-8 string)
+#         /[[:upper:]]/.match('A')      # => #<MatchData "A">
+#         /[[:upper:]]/.match("\u00c6") # => #<MatchData "Æ">
 #
-# ## Regexp Global Variables
+# *   `/[[:lower:]]/`: Matches a [Unicode lowercase
+#     letter](https://www.compart.com/en/unicode/category/Ll):
 #
-# Pattern matching sets some global variables :
+#         /[[:lower:]]/.match('a')      # => #<MatchData "a">
+#         /[[:lower:]]/.match("\u01fd") # => #<MatchData "ǽ">
 #
-# *   `$~` is equivalent to Regexp.last_match;
-# *   `$&` contains the complete matched text;
-# *   `$`` contains string before match;
-# *   `$'` contains string after match;
-# *   `$1`, `$2` and so on contain text matching first, second, etc capture
-#     group;
-# *   `$+` contains last capture group.
+# *   `/[[:alpha:]]/`: Matches `/[[:upper:]]/` or `/[[:lower:]]/`.
+#
+# *   `/[[:alnum:]]/`: Matches `/[[:alpha:]]/` or `/[[:digit:]]/`.
+#
+# *   `/[[:space:]]/`: Matches [Unicode space
+#     character](https://www.compart.com/en/unicode/category/Zs):
+#
+#         /[[:space:]]/.match(' ')      # => #<MatchData " ">
+#         /[[:space:]]/.match("\u2005") # => #<MatchData " ">
+#
+# *   `/[[:blank:]]/`: Matches `/[[:space:]]/` or tab character:
+#
+#         /[[:blank:]]/.match(' ')      # => #<MatchData " ">
+#         /[[:blank:]]/.match("\u2005") # => #<MatchData " ">
+#         /[[:blank:]]/.match("\t")     # => #<MatchData "\t">
+#
+# *   `/[[:cntrl:]]/`: Matches [Unicode control
+#     character](https://www.compart.com/en/unicode/category/Cc):
+#
+#         /[[:cntrl:]]/.match("\u0000") # => #<MatchData "\u0000">
+#         /[[:cntrl:]]/.match("\u009f") # => #<MatchData "\u009F">
+#
+# *   `/[[:graph:]]/`: Matches any character except `/[[:space:]]/` or
+#     `/[[:cntrl:]]/`.
+#
+# *   `/[[:print:]]/`: Matches `/[[:graph:]]/` or space character.
+#
+# *   `/[[:punct:]]/`: Matches any (Unicode punctuation
+#     character}[https://www.compart.com/en/unicode/category/Po]:
+#
+#
+# Ruby also supports these (non-POSIX) bracket expressions:
+#
+# *   `/[[:ascii:]]/`: Matches a character in the ASCII character set.
+# *   `/[[:word:]]/`: Matches a character in one of these Unicode character
+#     categories or having one of these Unicode properties:
+#
+#     *   Unicode categories:
+#         *   `Mark` (`M`).
+#         *   `Decimal Number` (`Nd`)
+#         *   `Connector Punctuation` (`Pc`).
+#
+#
+#     *   Unicode properties:
+#         *   `Alpha`
+#         *   `Join_Control`
+#
+#
+#
+#
+# ### Comments
+#
+# A comment may be included in a regexp pattern using the `(?#`*comment*`)`
+# construct, where *comment* is a substring that is to be ignored. arbitrary
+# text ignored by the regexp engine:
+#
+#     /foo(?#Ignore me)bar/.match('foobar') # => #<MatchData "foobar">
+#
+# The comment may not include an unescaped terminator character.
+#
+# See also [Extended Mode](rdoc-ref:Regexp@Extended+Mode).
+#
+# ## Modes
+#
+# Each of these modifiers sets a mode for the regexp:
+#
+# *   `i`: `/*pattern*/i` sets [Case-Insensitive
+#     Mode](rdoc-ref:Regexp@Case-Insensitive+Mode).
+# *   `m`: `/*pattern*/m` sets [Multiline Mode](rdoc-ref:Regexp@Multiline+Mode).
+# *   `x`: `/*pattern*/x` sets [Extended Mode](rdoc-ref:Regexp@Extended+Mode).
+# *   `o`: `/*pattern*/o` sets [Interpolation
+#     Mode](rdoc-ref:Regexp@Interpolation+Mode).
+#
+#
+# Any, all, or none of these may be applied.
+#
+# Modifiers `i`, `m`, and `x` may be applied to subexpressions:
+#
+# *   `(?*modifier*)` turns the mode "on" for ensuing subexpressions
+# *   `(?-*modifier*)` turns the mode "off" for ensuing subexpressions
+# *   `(?*modifier*:*subexp*)` turns the mode "on" for *subexp* within the group
+# *   `(?-*modifier*:*subexp*)` turns the mode "off" for *subexp* within the
+#     group
 #
 #
 # Example:
 #
-#     m = /s(\w{2}).*(c)/.match('haystack') #=> #<MatchData "stac" 1:"ta" 2:"c">
-#     $~                                    #=> #<MatchData "stac" 1:"ta" 2:"c">
-#     Regexp.last_match                     #=> #<MatchData "stac" 1:"ta" 2:"c">
+#     re = /(?i)te(?-i)st/
+#     re.match('test') # => #<MatchData "test">
+#     re.match('TEst') # => #<MatchData "TEst">
+#     re.match('TEST') # => nil
+#     re.match('teST') # => nil
 #
-#     $&      #=> "stac"
-#             # same as m[0]
-#     $`      #=> "hay"
-#             # same as m.pre_match
-#     $'      #=> "k"
-#             # same as m.post_match
-#     $1      #=> "ta"
-#             # same as m[1]
-#     $2      #=> "c"
-#             # same as m[2]
-#     $3      #=> nil
-#             # no third group in pattern
-#     $+      #=> "c"
-#             # same as m[-1]
+#     re = /t(?i:e)st/
+#     re.match('test') # => #<MatchData "test">
+#     re.match('tEst') # => #<MatchData "tEst">
+#     re.match('tEST') # => nil
 #
-# These global variables are thread-local and method-local variables.
+# Method Regexp#options returns an integer whose value showing the settings for
+# case-insensitivity mode, multiline mode, and extended mode.
 #
-# ## Performance
+# ### Case-Insensitive Mode
 #
-# Certain pathological combinations of constructs can lead to abysmally bad
-# performance.
+# By default, a regexp is case-sensitive:
 #
-# Consider a string of 25 *a*s, a *d*, 4 *a*s, and a *c*.
+#     /foo/.match('FOO')  # => nil
 #
-#     s = 'a' * 25 + 'd' + 'a' * 4 + 'c'
-#     #=> "aaaaaaaaaaaaaaaaaaaaaaaaadaaaac"
+# Modifier `i` enables case-insensitive mode:
 #
-# The following patterns match instantly as you would expect:
+#     /foo/i.match('FOO')
+#     # => #<MatchData "FOO">
 #
-#     /(b|a)/ =~ s #=> 0
-#     /(b|a+)/ =~ s #=> 0
-#     /(b|a+)*/ =~ s #=> 0
+# Method Regexp#casefold? returns whether the mode is case-insensitive.
 #
-# However, the following pattern takes appreciably longer:
+# ### Multiline Mode
 #
-#     /(b|a+)*c/ =~ s #=> 26
+# The multiline-mode in Ruby is what is commonly called a "dot-all mode":
 #
-# This happens because an atom in the regexp is quantified by both an immediate
-# `+` and an enclosing `*` with nothing to differentiate which is in control of
-# any particular character. The nondeterminism that results produces
-# super-linear performance. (Consult *Mastering Regular Expressions* (3rd ed.),
-# pp 222, by *Jeffery Friedl*, for an in-depth analysis). This particular case
-# can be fixed by use of atomic grouping, which prevents the unnecessary
-# backtracking:
+# *   Without the `m` modifier, the subexpression `.` does not match newlines:
 #
-#     (start = Time.now) && /(b|a+)*c/ =~ s && (Time.now - start)
-#        #=> 24.702736882
-#     (start = Time.now) && /(?>b|a+)*c/ =~ s && (Time.now - start)
-#        #=> 0.000166571
+#         /a.c/.match("a\nc")  # => nil
 #
-# A similar case is typified by the following example, which takes approximately
-# 60 seconds to execute for me:
+# *   With the modifier, it does match:
 #
-# Match a string of 29 *a*s against a pattern of 29 optional *a*s followed by 29
-# mandatory *a*s:
+#         /a.c/m.match("a\nc") # => #<MatchData "a\nc">
 #
-#     Regexp.new('a?' * 29 + 'a' * 29) =~ 'a' * 29
 #
-# The 29 optional *a*s match the string, but this prevents the 29 mandatory *a*s
-# that follow from matching. Ruby must then backtrack repeatedly so as to
-# satisfy as many of the optional matches as it can while still matching the
-# mandatory 29. It is plain to us that none of the optional matches can succeed,
-# but this fact unfortunately eludes Ruby.
+# Unlike other languages, the modifier `m` does not affect the anchors `^` and
+# `$`. These anchors always match at line-boundaries in Ruby.
 #
-# The best way to improve performance is to significantly reduce the amount of
-# backtracking needed.  For this case, instead of individually matching 29
-# optional *a*s, a range of optional *a*s can be matched all at once with
-# *a{0,29}*:
+# ### Extended Mode
 #
-#     Regexp.new('a{0,29}' + 'a' * 29) =~ 'a' * 29
+# Modifier `x` enables extended mode, which means that:
 #
-# ## Timeout
+# *   Literal white space in the pattern is to be ignored.
+# *   Character `#` marks the remainder of its containing line as a comment,
+#     which is also to be ignored for matching purposes.
 #
-# There are two APIs to set timeout. One is Regexp.timeout=, which is
-# process-global configuration of timeout for Regexp matching.
 #
-#     Regexp.timeout = 3
-#     s = 'a' * 25 + 'd' + 'a' * 4 + 'c'
-#     /(b|a+)*c/ =~ s  #=> This raises an exception in three seconds
+# In extended mode, whitespace and comments may be used to form a
+# self-documented regexp.
 #
-# The other is timeout keyword of Regexp.new.
+# Regexp not in extended mode (matches some Roman numerals):
 #
-#     re = Regexp.new("(b|a+)*c", timeout: 3)
-#     s = 'a' * 25 + 'd' + 'a' * 4 + 'c'
-#     /(b|a+)*c/ =~ s  #=> This raises an exception in three seconds
+#     pattern = '^M{0,3}(CM|CD|D?C{0,3})(XC|XL|L?X{0,3})(IX|IV|V?I{0,3})$'
+#     re = /#{pattern}/
+#     re.match('MCMXLIII') # => #<MatchData "MCMXLIII" 1:"CM" 2:"XL" 3:"III">
 #
-# When using Regexps to process untrusted input, you should use the timeout
-# feature to avoid excessive backtracking. Otherwise, a malicious user can
-# provide input to Regexp causing Denial-of-Service attack. Note that the
-# timeout is not set by default because an appropriate limit highly depends on
-# an application requirement and context.
+# Regexp in extended mode:
+#
+#     pattern = <<-EOT
+#       ^                   # beginning of string
+#       M{0,3}              # thousands - 0 to 3 Ms
+#       (CM|CD|D?C{0,3})    # hundreds - 900 (CM), 400 (CD), 0-300 (0 to 3 Cs),
+#                           #            or 500-800 (D, followed by 0 to 3 Cs)
+#       (XC|XL|L?X{0,3})    # tens - 90 (XC), 40 (XL), 0-30 (0 to 3 Xs),
+#                           #        or 50-80 (L, followed by 0 to 3 Xs)
+#       (IX|IV|V?I{0,3})    # ones - 9 (IX), 4 (IV), 0-3 (0 to 3 Is),
+#                           #        or 5-8 (V, followed by 0 to 3 Is)
+#       $                   # end of string
+#     EOT
+#     re = /#{pattern}/x
+#     re.match('MCMXLIII') # => #<MatchData "MCMXLIII" 1:"CM" 2:"XL" 3:"III">
+#
+# ### Interpolation Mode
+#
+# Modifier `o` means that the first time a literal regexp with interpolations is
+# encountered, the generated Regexp object is saved and used for all future
+# evaluations of that literal regexp. Without modifier `o`, the generated Regexp
+# is not saved, so each evaluation of the literal regexp generates a new Regexp
+# object.
+#
+# Without modifier `o`:
+#
+#     def letters; sleep 5; /[A-Z][a-z]/; end
+#     words = %w[abc def xyz]
+#     start = Time.now
+#     words.each {|word| word.match(/\A[#{letters}]+\z/) }
+#     Time.now - start # => 15.0174892
+#
+# With modifier `o`:
+#
+#     start = Time.now
+#     words.each {|word| word.match(/\A[#{letters}]+\z/o) }
+#     Time.now - start # => 5.0010866
+#
+# Note that if the literal regexp does not have interpolations, the `o` behavior
+# is the default.
+#
+# ## Encodings
+#
+# By default, a regexp with only US-ASCII characters has US-ASCII encoding:
+#
+#     re = /foo/
+#     re.source.encoding # => #<Encoding:US-ASCII>
+#     re.encoding        # => #<Encoding:US-ASCII>
+#
+# A regular expression containing non-US-ASCII characters is assumed to use the
+# source encoding. This can be overridden with one of the following modifiers.
+#
+# *   `/*pat*/n`: US-ASCII if only containing US-ASCII characters, otherwise
+#     ASCII-8BIT:
+#
+#         /foo/n.encoding     # => #<Encoding:US-ASCII>
+#         /foo\xff/n.encoding # => #<Encoding:ASCII-8BIT>
+#         /foo\x7f/n.encoding # => #<Encoding:US-ASCII>
+#
+# *   `/*pat*/u`: UTF-8
+#
+#         /foo/u.encoding # => #<Encoding:UTF-8>
+#
+# *   `/*pat*/e`: EUC-JP
+#
+#         /foo/e.encoding # => #<Encoding:EUC-JP>
+#
+# *   `/*pat*/s`: Windows-31J
+#
+#         /foo/s.encoding # => #<Encoding:Windows-31J>
+#
+#
+# A regexp can be matched against a target string when either:
+#
+# *   They have the same encoding.
+# *   The regexp's encoding is a fixed encoding and the string contains only
+#     ASCII characters. Method Regexp#fixed_encoding? returns whether the regexp
+#     has a *fixed* encoding.
+#
+#
+# If a match between incompatible encodings is attempted an
+# `Encoding::CompatibilityError` exception is raised.
+#
+# Example:
+#
+#     re = eval("# encoding: ISO-8859-1\n/foo\\xff?/")
+#     re.encoding                 # => #<Encoding:ISO-8859-1>
+#     re =~ "foo".encode("UTF-8") # => 0
+#     re =~ "foo\u0100"           # Raises Encoding::CompatibilityError
+#
+# The encoding may be explicitly fixed by including Regexp::FIXEDENCODING in the
+# second argument for Regexp.new:
+#
+#     # Regexp with encoding ISO-8859-1.
+#     re = Regexp.new("a".force_encoding('iso-8859-1'), Regexp::FIXEDENCODING)
+#     re.encoding  # => #<Encoding:ISO-8859-1>
+#     # Target string with encoding UTF-8.
+#     s = "a\u3042"
+#     s.encoding   # => #<Encoding:UTF-8>
+#     re.match(s)  # Raises Encoding::CompatibilityError.
+#
+# ## Timeouts
+#
+# When either a regexp source or a target string comes from untrusted input,
+# malicious values could become a denial-of-service attack; to prevent such an
+# attack, it is wise to set a timeout.
+#
+# Regexp has two timeout values:
+#
+# *   A class default timeout, used for a regexp whose instance timeout is
+#     `nil`; this default is initially `nil`, and may be set by method
+#     Regexp.timeout=:
+#
+#         Regexp.timeout # => nil
+#         Regexp.timeout = 3.0
+#         Regexp.timeout # => 3.0
+#
+# *   An instance timeout, which defaults to `nil` and may be set in Regexp.new:
+#
+#         re = Regexp.new('foo', timeout: 5.0)
+#         re.timeout # => 5.0
+#
+#
+# When regexp.timeout is `nil`, the timeout "falls through" to Regexp.timeout;
+# when regexp.timeout is non-`nil`, that value controls timing out:
+#
+#     | regexp.timeout Value | Regexp.timeout Value |            Result           |
+#     |----------------------|----------------------|-----------------------------|
+#     |         nil          |          nil         |       Never times out.      |
+#     |         nil          |         Float        | Times out in Float seconds. |
+#     |        Float         |          Any         | Times out in Float seconds. |
+#
+# ## Optimization
+#
+# For certain values of the pattern and target string, matching time can grow
+# polynomially or exponentially in relation to the input size; the potential
+# vulnerability arising from this is the [regular expression
+# denial-of-service](https://en.wikipedia.org/wiki/ReDoS) (ReDoS) attack.
+#
+# Regexp matching can apply an optimization to prevent ReDoS attacks. When the
+# optimization is applied, matching time increases linearly (not polynomially or
+# exponentially) in relation to the input size, and a ReDoS attach is not
+# possible.
+#
+# This optimization is applied if the pattern meets these criteria:
+#
+# *   No backreferences.
+# *   No subexpression calls.
+# *   No nested lookaround anchors or atomic groups.
+# *   No nested quantifiers with counting (i.e. no nested `{n}`, `{min,}`,
+#     `{,max}`, or `{min,max}` style quantifiers)
+#
+#
+# You can use method Regexp.linear_time? to determine whether a pattern meets
+# these criteria:
+#
+#     Regexp.linear_time?(/a*/)     # => true
+#     Regexp.linear_time?('a*')     # => true
+#     Regexp.linear_time?(/(a*)\1/) # => false
+#
+# However, an untrusted source may not be safe even if the method returns
+# `true`, because the optimization uses memoization (which may invoke large
+# memory consumption).
+#
+# ## References
+#
+# Read (online PDF books):
+#
+# *   [Mastering Regular
+#     Expressions](https://ia902508.us.archive.org/10/items/allitebooks-02/Maste
+#     ring%20Regular%20Expressions%2C%203rd%20Edition.pdf) by Jeffrey E.F.
+#     Friedl.
+# *   [Regular Expressions
+#     Cookbook](https://doc.lagout.org/programmation/Regular%20Expressions/Regul
+#     ar%20Expressions%20Cookbook_%20Detailed%20Solutions%20in%20Eight%20Program
+#     ming%20Languages%20%282nd%20ed.%29%20%5BGoyvaerts%20%26%20Levithan%202012-
+#     09-06%5D.pdf) by Jan Goyvaerts & Steven Levithan.
+#
+#
+# Explore, test (interactive online editor):
+#
+# *   [Rubular](https://rubular.com/).
 #
 class Regexp
-  # <!--
-  #   rdoc-file=re.c
-  #   - Regexp.new(string, options = 0, timeout: nil) -> regexp
-  #   - Regexp.new(regexp, timeout: nil) -> regexp
-  # -->
-  # With argument `string` given, returns a new regexp with the given string and
-  # options:
+  # Represents an object's ability to be converted to a `Regexp`.
   #
-  #     r = Regexp.new('foo') # => /foo/
-  #     r.source              # => "foo"
-  #     r.options             # => 0
+  # This is only used in `Regexp.try_convert` and `Regexp.union` within the standard library.
+  interface _ToRegexp
+    # Converts `self` to a `Regexp`.
+    def to_regexp: () -> Regexp
+  end
+
+  class TimeoutError < RegexpError
+  end
+
+  # <!-- rdoc-file=re.c -->
+  # see Regexp.options and Regexp.new
   #
-  # Optional argument `options` is one of the following:
+  EXTENDED: Integer
+
+  # <!-- rdoc-file=re.c -->
+  # see Regexp.options and Regexp.new
   #
-  # *   A String of options:
+  FIXEDENCODING: Integer
+
+  # <!-- rdoc-file=re.c -->
+  # see Regexp.options and Regexp.new
   #
-  #         Regexp.new('foo', 'i')  # => /foo/i
-  #         Regexp.new('foo', 'im') # => /foo/im
+  IGNORECASE: Integer
+
+  # <!-- rdoc-file=re.c -->
+  # see Regexp.options and Regexp.new
   #
-  # *   The logical OR of one or more of the constants Regexp::EXTENDED,
-  #     Regexp::IGNORECASE, Regexp::MULTILINE, and Regexp::NOENCODING:
+  MULTILINE: Integer
+
+  # <!-- rdoc-file=re.c -->
+  # see Regexp.options and Regexp.new
   #
-  #         Regexp.new('foo', Regexp::IGNORECASE) # => /foo/i
-  #         Regexp.new('foo', Regexp::EXTENDED)   # => /foo/x
-  #         Regexp.new('foo', Regexp::MULTILINE)  # => /foo/m
-  #         Regexp.new('foo', Regexp::NOENCODING)  # => /foo/n
-  #         flags = Regexp::IGNORECASE | Regexp::EXTENDED |  Regexp::MULTILINE
-  #         Regexp.new('foo', flags)              # => /foo/mix
-  #
-  # *   `nil` or `false`, which is ignored.
-  #
-  #
-  # If optional keyword argument `timeout` is given, its float value overrides the
-  # timeout interval for the class, Regexp.timeout. If `nil` is passed as
-  # +timeout, it uses the timeout interval for the class, Regexp.timeout.
-  #
-  # With argument `regexp` given, returns a new regexp. The source, options,
-  # timeout are the same as `regexp`. `options` and `n_flag` arguments are
-  # ineffective.  The timeout can be overridden by `timeout` keyword.
-  #
-  #     options = Regexp::MULTILINE
-  #     r = Regexp.new('foo', options, timeout: 1.1) # => /foo/m
-  #     r2 = Regexp.new(r)                           # => /foo/m
-  #     r2.timeout                                   # => 1.1
-  #     r3 = Regexp.new(r, timeout: 3.14)            # => /foo/m
-  #     r3.timeout                                   # => 3.14
-  #
-  # Regexp.compile is an alias for Regexp.new.
-  #
-  def initialize: (String string, ?String | Integer | nil | false options, ?timeout: Float?) -> Object
-                | (Regexp regexp, ?timeout: Float?) -> void
+  NOENCODING: Integer
 
   # <!--
   #   rdoc-file=re.c
@@ -847,8 +1390,6 @@ class Regexp
   #     r = Regexp.new(Regexp.escape(s)) # => /\\\\\\\*\\\?\\\{\\\}\\\./
   #     r.match(s)                       # => #<MatchData "\\\\\\*\\?\\{\\}\\.">
   #
-  # Regexp.quote is an alias for Regexp.escape.
-  #
   def self.escape: (interned str) -> String
 
   # <!--
@@ -858,8 +1399,8 @@ class Regexp
   #   - Regexp.last_match(name) -> string or nil
   # -->
   # With no argument, returns the value of `$!`, which is the result of the most
-  # recent pattern match (see [Regexp Global
-  # Variables](rdoc-ref:Regexp@Regexp+Global+Variables)):
+  # recent pattern match (see [Regexp global
+  # variables](rdoc-ref:Regexp@Global+Variables)):
   #
   #     /c(.)t/ =~ 'cat'  # => 0
   #     Regexp.last_match # => #<MatchData "cat" 1:"a">
@@ -888,8 +1429,7 @@ class Regexp
   #     Regexp.last_match('foo') # Raises IndexError.
   #
   def self.last_match: () -> MatchData?
-                     | (Integer n) -> String?
-                     | (interned n) -> String?
+                     | (MatchData::capture capture) -> String?
 
   # <!--
   #   rdoc-file=re.c
@@ -910,7 +1450,8 @@ class Regexp
   #
   # (*1): https://doi.org/10.1109/SP40001.2021.00032
   #
-  def self.linear_time?: () -> bool
+  def self.linear_time?: (Regexp regex, ?nil, ?timeout: untyped) -> bool
+                       | (string regex, ?int | string | bool | nil options, ?timeout: untyped) -> bool
 
   # <!--
   #   rdoc-file=re.c
@@ -926,9 +1467,7 @@ class Regexp
   #     r = Regexp.new(Regexp.escape(s)) # => /\\\\\\\*\\\?\\\{\\\}\\\./
   #     r.match(s)                       # => #<MatchData "\\\\\\*\\?\\{\\}\\.">
   #
-  # Regexp.quote is an alias for Regexp.escape.
-  #
-  def self.quote: (interned str) -> String
+  alias self.quote self.escape
 
   # <!--
   #   rdoc-file=re.c
@@ -947,7 +1486,8 @@ class Regexp
   #
   # Raises an exception unless `object.to_regexp` returns a regexp.
   #
-  def self.try_convert: (untyped obj) -> Regexp?
+  def self.try_convert: (Regexp | _ToRegexp regexp_like) -> Regexp
+                      | (untyped other) -> Regexp?
 
   # <!--
   #   rdoc-file=re.c
@@ -970,7 +1510,7 @@ class Regexp
   #     Regexp.timeout = 1
   #     /^a*b?a*$/ =~ "a" * 100000 + "x" #=> regexp match timeout (RuntimeError)
   #
-  def self.timeout=: (Float?) -> Float?
+  def self.timeout=: [T < _ToF] (T timeout) -> T
 
   # <!--
   #   rdoc-file=re.c
@@ -1004,11 +1544,62 @@ class Regexp
   #
   # If any regexp pattern contains captures, the behavior is unspecified.
   #
-  def self.union: () -> Regexp
-                | (String | Regexp pat1, *String | Regexp pat2) -> Regexp
-                | (::Array[String | Regexp]) -> Regexp
+  def self.union: (*_ToRegexp | string patterns) -> Regexp
+                | (array[_ToRegexp | string] patterns) -> Regexp
+                | (Symbol | [Symbol] symbol_pattern) -> Regexp
 
-  public
+  # <!--
+  #   rdoc-file=re.c
+  #   - Regexp.new(string, options = 0, timeout: nil) -> regexp
+  #   - Regexp.new(regexp, timeout: nil) -> regexp
+  # -->
+  # With argument `string` given, returns a new regexp with the given string and
+  # options:
+  #
+  #     r = Regexp.new('foo') # => /foo/
+  #     r.source              # => "foo"
+  #     r.options             # => 0
+  #
+  # Optional argument `options` is one of the following:
+  #
+  # *   A String of options:
+  #
+  #         Regexp.new('foo', 'i')  # => /foo/i
+  #         Regexp.new('foo', 'im') # => /foo/im
+  #
+  # *   The bit-wise OR of one or more of the constants Regexp::EXTENDED,
+  #     Regexp::IGNORECASE, Regexp::MULTILINE, and Regexp::NOENCODING:
+  #
+  #         Regexp.new('foo', Regexp::IGNORECASE) # => /foo/i
+  #         Regexp.new('foo', Regexp::EXTENDED)   # => /foo/x
+  #         Regexp.new('foo', Regexp::MULTILINE)  # => /foo/m
+  #         Regexp.new('foo', Regexp::NOENCODING)  # => /foo/n
+  #         flags = Regexp::IGNORECASE | Regexp::EXTENDED |  Regexp::MULTILINE
+  #         Regexp.new('foo', flags)              # => /foo/mix
+  #
+  # *   `nil` or `false`, which is ignored.
+  # *   Any other truthy value, in which case the regexp will be case-insensitive.
+  #
+  #
+  # If optional keyword argument `timeout` is given, its float value overrides the
+  # timeout interval for the class, Regexp.timeout. If `nil` is passed as
+  # +timeout, it uses the timeout interval for the class, Regexp.timeout.
+  #
+  # With argument `regexp` given, returns a new regexp. The source, options,
+  # timeout are the same as `regexp`. `options` and `n_flag` arguments are
+  # ineffective.  The timeout can be overridden by `timeout` keyword.
+  #
+  #     options = Regexp::MULTILINE
+  #     r = Regexp.new('foo', options, timeout: 1.1) # => /foo/m
+  #     r2 = Regexp.new(r)                           # => /foo/m
+  #     r2.timeout                                   # => 1.1
+  #     r3 = Regexp.new(r, timeout: 3.14)            # => /foo/m
+  #     r3.timeout                                   # => 3.14
+  #
+  def initialize: (Regexp regexp, ?timeout: _ToF?) -> self
+                | (string pattern, ?int | string | bool | nil options, ?timeout: _ToF?) -> self
+
+  def initialize_copy: (self object) -> self
 
   # <!-- rdoc-file=re.c -->
   # Returns `true` if `object` is another Regexp whose pattern, flags, and
@@ -1018,8 +1609,6 @@ class Regexp
   #     /foo/ == /foo/i                                     # => false
   #     /foo/ == Regexp.new('food')                         # => false
   #     /foo/ == Regexp.new("abc".force_encoding("euc-jp")) # => false
-  #
-  # Regexp#eql? is an alias for Regexp#==.
   #
   def ==: (untyped other) -> bool
 
@@ -1048,8 +1637,8 @@ class Regexp
   #   - regexp =~ string -> integer or nil
   # -->
   # Returns the integer index (in characters) of the first match for `self` and
-  # `string`, or `nil` if none; also sets the [rdoc-ref:Regexp Global
-  # Variables](rdoc-ref:Regexp@Regexp+Global+Variables):
+  # `string`, or `nil` if none; also sets the [rdoc-ref:Regexp global
+  # variables](rdoc-ref:Regexp@Global+Variables):
   #
   #     /at/ =~ 'input data' # => 7
   #     $~                   # => #<MatchData "at">
@@ -1062,7 +1651,7 @@ class Regexp
   # *   Is a regexp literal; see [Regexp
   #     Literals](rdoc-ref:literals.rdoc@Regexp+Literals).
   # *   Does not contain interpolations; see [Regexp
-  #     Interpolation](rdoc-ref:Regexp@Regexp+Interpolation).
+  #     interpolation](rdoc-ref:Regexp@Interpolation+Mode).
   # *   Is at the left of the expression.
   #
   #
@@ -1096,7 +1685,8 @@ class Regexp
   #     /(?<foo>\w+)\s*=\s*#{r}/ =~ 'x = y'
   #     p foo # Undefined local variable
   #
-  def =~: (String? | Symbol | _ToStr str) -> Integer?
+  def =~: (interned? string) -> Integer?
+        | (nil) -> nil
 
   # <!--
   #   rdoc-file=re.c
@@ -1131,9 +1721,7 @@ class Regexp
   #     /foo/ == Regexp.new('food')                         # => false
   #     /foo/ == Regexp.new("abc".force_encoding("euc-jp")) # => false
   #
-  # Regexp#eql? is an alias for Regexp#==.
-  #
-  def eql?: (untyped other) -> bool
+  alias eql? ==
 
   # <!--
   #   rdoc-file=re.c
@@ -1224,8 +1812,9 @@ class Regexp
   #      /(.)(.)(.)/.match("abc")[2] # => "b"
   #      /(.)(.)/.match("abc", 1)[2] # => "c"
   #
-  def match: (String? | Symbol | _ToStr str, ?Integer pos) -> MatchData?
-           | [T] (String? | Symbol | _ToStr str, ?Integer pos) { (MatchData) -> T } -> T?
+  def match: (interned? str, ?int offset) -> MatchData?
+           | [T] (interned? str, ?int offset) { (MatchData matchdata) -> T } -> T?
+           | (nil, ?int offset) ?{ (MatchData matchdata) -> void } -> nil
 
   # <!--
   #   rdoc-file=re.c
@@ -1241,7 +1830,8 @@ class Regexp
   #     /P.../.match?("Ruby")    # => false
   #     $&                       # => nil
   #
-  def match?: (String? | Symbol | _ToStr str, ?Integer pos) -> bool
+  def match?: (interned str, ?int offset) -> bool
+            | (nil, ?int offset) -> false
 
   # <!--
   #   rdoc-file=re.c
@@ -1260,7 +1850,7 @@ class Regexp
   #     /(?<foo>.)(?<foo>.)/.named_captures # => {"foo"=>[1, 2]}
   #     /(.)(.)/.named_captures             # => {}
   #
-  def named_captures: () -> ::Hash[String, ::Array[Integer]]
+  def named_captures: () -> Hash[String, Array[Integer]]
 
   # <!--
   #   rdoc-file=re.c
@@ -1273,7 +1863,7 @@ class Regexp
   #     /(?<foo>.)(?<foo>.)/.names          # => ["foo"]
   #     /(.)(.)/.names                      # => []
   #
-  def names: () -> ::Array[String]
+  def names: () -> Array[String]
 
   # <!--
   #   rdoc-file=re.c
@@ -1296,8 +1886,8 @@ class Regexp
   #     /foo/mix.options # => 7
   #
   # Note that additional bits may be set in the returned integer; these are
-  # maintained internally internally in `self`, are ignored if passed to
-  # Regexp.new, and may be ignored by the caller:
+  # maintained internally in `self`, are ignored if passed to Regexp.new, and may
+  # be ignored by the caller:
   #
   # Returns the set of bits corresponding to the options used when creating this
   # regexp (see Regexp::new for details). Note that additional bits may be set in
@@ -1339,7 +1929,8 @@ class Regexp
   #     s0 = r0.to_s # => "(?ix-m:ab+c)"
   #
   # The returned string may be used as an argument to Regexp.new, or as
-  # interpolated text for a [Regexp literal](rdoc-ref:regexp.rdoc@Regexp+Literal):
+  # interpolated text for a [Regexp
+  # interpolation](rdoc-ref:Regexp@Interpolation+Mode):
   #
   #     r1 = Regexp.new(s0) # => /(?ix-m:ab+c)/
   #     r2 = /#{s0}/        # => /(?ix-m:ab+c)/
@@ -1382,33 +1973,4 @@ class Regexp
   #     ~ /at/ # => 7
   #
   def ~: () -> Integer?
-
-  private
-
-  def initialize_copy: (self object) -> self
 end
-
-# <!-- rdoc-file=re.c -->
-# see Regexp.options and Regexp.new
-#
-Regexp::EXTENDED: Integer
-
-# <!-- rdoc-file=re.c -->
-# see Regexp.options and Regexp.new
-#
-Regexp::FIXEDENCODING: Integer
-
-# <!-- rdoc-file=re.c -->
-# see Regexp.options and Regexp.new
-#
-Regexp::IGNORECASE: Integer
-
-# <!-- rdoc-file=re.c -->
-# see Regexp.options and Regexp.new
-#
-Regexp::MULTILINE: Integer
-
-# <!-- rdoc-file=re.c -->
-# see Regexp.options and Regexp.new
-#
-Regexp::NOENCODING: Integer

@@ -3,12 +3,12 @@ require_relative 'test_helper'
 # initialize temporary class
 module RBS
   module Unnamed
-    ARGFClass = ARGF.class
+    ARGFClass ||= ARGF.class
   end
 end
 
 class ConstantsTest < Test::Unit::TestCase
-  include TypeAssertions
+  include TestHelper
 
   testing 'singleton(Object)'
 

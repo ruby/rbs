@@ -2,7 +2,7 @@ require_relative '../test_helper'
 require 'uri'
 
 class URILDAPSingletonTest < Test::Unit::TestCase
-  include TypeAssertions
+  include TestHelper
   library 'uri'
   testing 'singleton(::URI::LDAP)'
 
@@ -58,7 +58,7 @@ class URILDAPSingletonTest < Test::Unit::TestCase
 end
 
 class URILDAPInstanceTest < Test::Unit::TestCase
-  include TypeAssertions
+  include TestHelper
   library 'uri'
   testing '::URI::LDAP'
 

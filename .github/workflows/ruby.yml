@@ -13,48 +13,41 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        container_tag:
-          - master-nightly-focal
-          - 3.2-dev-focal
-          - 3.1-dev-focal
-          - 3.0-dev-focal
+        ruby: ['3.0', '3.1', '3.2', '3.3', head]
         job:
           - test
-          - stdlib_test
-          - rubocop validate test_doc build test_generate_stdlib
-          - lexer confirm_lexer
-          - lexer compile
-        exclude:
-          - container_tag: master-nightly-focal
-            job: confirm_lexer
-          - container_tag: 3.0-dev-focal
-            job: stdlib_test
-          - container_tag: 3.1-dev-focal
-            job: stdlib_test
         include:
-          - container_tag: master-nightly-focal
-            allow_failures: "true"
-    container:
-      image: rubylang/ruby:${{ matrix.container_tag }}
+          - ruby: head
+            job: stdlib_test rubocop
+          - ruby: "3.3"
+            job: stdlib_test
+          - ruby: "3.3"
+            job: lexer compile confirm_lexer
+          - ruby: "3.3"
+            job: rubocop validate test_doc build test_generate_stdlib
     steps:
       - uses: actions/checkout@v4
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: ${{ matrix.ruby }}
+          bundler: none
       - name: Set working directory as safe
         run: git config --global --add safe.directory $(pwd)
       - name: Install dependencies
         run: |
-          apt-get update
-          apt-get install -y libdb-dev curl autoconf automake m4 libtool
+          sudo apt-get update
+          sudo apt-get install -y libdb-dev curl autoconf automake m4 libtool python3
       - name: Install Re2c
-        if: contains(matrix.job, 'lexer')
+        if: ${{ contains(matrix.job, 'lexer') }}
         run: |
           cd /tmp
-          curl -L https://github.com/skvadrik/re2c/archive/refs/tags/3.0.tar.gz > re2c-3.0.tar.gz
-          tar xf re2c-3.0.tar.gz
-          cd re2c-3.0
+          curl -L https://github.com/skvadrik/re2c/archive/refs/tags/3.1.tar.gz > re2c-3.1.tar.gz
+          tar xf re2c-3.1.tar.gz
+          cd re2c-3.1
           autoreconf -i -W all
           ./configure
           make
-          make install
+          sudo make install
       - name: Update rubygems & bundler
         run: |
           ruby -v
@@ -63,14 +56,13 @@ jobs:
         run: |
           echo "NO_MINITEST=true" >> $GITHUB_ENV
           bundle config set --local without 'minitest'
-        if: "contains(matrix.container_tag, 'master-nightly')"
+        if: ${{ contains(matrix.ruby, 'head') }}
       - name: bin/setup
         run: |
           bin/setup
       - name: Run test
         run: |
           bundle exec rake ${{ matrix.job }}
-        continue-on-error: ${{ matrix.allow_failures == 'true' && (github.event_name == 'push' || github.event_name == 'merge_group') }}
 
   windows:
     runs-on: ${{ matrix.os }}

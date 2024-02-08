@@ -3,7 +3,7 @@ require "json"
 require "json/add/rational"
 
 class JSONRationalSingletonTest < Test::Unit::TestCase
-  include TypeAssertions
+  include TestHelper
 
   library "json"
   testing "singleton(::Rational)"
@@ -15,7 +15,7 @@ class JSONRationalSingletonTest < Test::Unit::TestCase
 end
 
 class JSONRationalInstanceTest < Test::Unit::TestCase
-  include TypeAssertions
+  include TestHelper
 
   library "json"
   testing "::Rational"

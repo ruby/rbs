@@ -30,7 +30,7 @@
 #     greeting:
 #       hello: world
 #
-class YAML::Store < ::PStore
+class Psych::Store < ::PStore
   # <!--
   #   rdoc-file=lib/yaml/store.rb
   #   - initialize( file_name, yaml_opts = {} )
@@ -45,7 +45,7 @@ class YAML::Store < ::PStore
   # Options passed in through `yaml_opts` will be used when converting the store
   # to YAML via Hash#to_yaml().
   #
-  def initialize: (*untyped o) -> YAML::Store
+  def initialize: (*untyped o) -> Psych::Store
 
   def dump: (untyped table) -> String
 

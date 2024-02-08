@@ -350,7 +350,7 @@ end
 
 
 class IntegerSingletonTest < Test::Unit::TestCase
-  include TypeAssertions
+  include TestHelper
 
   testing "singleton(::Integer)"
 
@@ -367,5 +367,32 @@ class IntegerSingletonTest < Test::Unit::TestCase
       "(String) -> nil",
       Integer, :try_convert, "10"
     )
+  end
+end
+
+class IntegerInstanceTest < Test::Unit::TestCase
+  include TestHelper
+
+  testing "::Integer"
+
+  def test_pow
+    assert_send_type "(Integer) -> Integer",
+                     1, :pow, 2
+    assert_send_type "(Integer) -> Rational",
+                     -2, :pow, -1
+    assert_send_type "(Integer, Integer) -> Integer",
+                     1, :pow, 2, 10
+    assert_send_type "(Float) -> Float",
+                     1, :pow, 1.0
+    assert_send_type "(Float) -> Complex",
+                     -9, :pow, 0.1
+    assert_send_type "(Rational) -> Float",
+                     2, :pow, 1/2r
+    assert_send_type "(Rational) -> Rational",
+                     1, :pow, 1r
+    assert_send_type "(Rational) -> Complex",
+                     -3, :pow, -4/3r
+    assert_send_type "(Complex) -> Complex",
+                     1, :pow, 1i
   end
 end

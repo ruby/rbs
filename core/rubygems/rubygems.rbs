@@ -156,7 +156,7 @@ module Gem
   #   - activated_gem_paths()
   # -->
   # The number of paths in the +$LOAD_PATH+ from activated gems. Used to
-  # prioritize `-I` and +[ENV]('RUBYLIB')+ entries during `require`.
+  # prioritize `-I` and `ENV['RUBYLIB']` entries during `require`.
   #
   def self.activated_gem_paths: () -> Integer
 

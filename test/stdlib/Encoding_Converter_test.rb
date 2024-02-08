@@ -1,7 +1,7 @@
 require_relative "test_helper"
 
 class Encoding::ConverterSingletonTest < Test::Unit::TestCase
-  include TypeAssertions
+  include TestHelper
 
   testing "singleton(::Encoding::Converter)"
 
@@ -175,7 +175,7 @@ class Encoding::ConverterSingletonTest < Test::Unit::TestCase
 end
 
 class Encoding::ConverterTest < Test::Unit::TestCase
-  include TypeAssertions
+  include TestHelper
 
   testing "::Encoding::Converter"
 

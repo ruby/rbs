@@ -115,6 +115,8 @@ module XYZZY[X, Y]
 
   def def: () -> Symbol
 
+  def foo: (untyped `include?`) -> void
+
   def self: () -> void
 
   def self?: () -> void
@@ -319,6 +321,14 @@ end
       use Foo::Bar as FB, Baz::*
 
       $hoge: Foo
+    SIG
+  end
+
+  def test___todo__
+    assert_writer <<-SIG
+class Foo
+  attr_reader name: __todo__
+end
     SIG
   end
 end

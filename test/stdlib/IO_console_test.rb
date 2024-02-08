@@ -4,7 +4,7 @@ require "io/console/size"
 require 'pty'
 
 class IOConsoleSingletonTest < Test::Unit::TestCase
-  include TypeAssertions
+  include TestHelper
 
   library 'io-console'
   testing "singleton(::IO)"
@@ -28,7 +28,7 @@ class IOConsoleSingletonTest < Test::Unit::TestCase
 end
 
 class IOConsoleTest < Test::Unit::TestCase
-  include TypeAssertions
+  include TestHelper
 
   library 'io-console'
   testing "::IO"
@@ -60,7 +60,7 @@ class IOConsoleTest < Test::Unit::TestCase
 
   def test_io_cooked
     helper { |m, s|
-      assert_send_type "() { (self) -> void } -> void",
+      assert_send_type "() { (IO) -> void } -> void",
                        s, :cooked do end
     }
   end
@@ -74,14 +74,14 @@ class IOConsoleTest < Test::Unit::TestCase
 
   def test_io_noecho
     helper { |m, s|
-      assert_send_type "() { (self) -> void } -> void",
+      assert_send_type "() { (IO) -> void } -> void",
                        s, :noecho do end
     }
   end
 
   def test_io_raw
     helper { |m, s|
-      assert_send_type "() { (self) -> void } -> void",
+      assert_send_type "() { (IO) -> void } -> void",
                        s, :raw do end
     }
   end

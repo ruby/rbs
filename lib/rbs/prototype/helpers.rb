@@ -109,7 +109,7 @@ module RBS
       def keyword_hash?(node)
         if node && node.type == :HASH
           node.children[0].children.compact.each_slice(2).all? {|key, _|
-            key.type == :LIT && key.children[0].is_a?(Symbol)
+            symbol_literal_node?(key)
           }
         else
           false
@@ -120,6 +120,17 @@ module RBS
       #       https://bugs.ruby-lang.org/issues/17495
       def args_from_node(args_node)
         args_node&.children || [0, nil, nil, nil, 0, nil, nil, nil, nil, nil]
+      end
+
+      def symbol_literal_node?(node)
+        case node.type
+        when :LIT
+          if node.children[0].is_a?(Symbol)
+            node.children[0]
+          end
+        when :SYM
+          node.children[0]
+        end
       end
 
       def untyped

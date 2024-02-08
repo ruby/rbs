@@ -2,7 +2,7 @@ require_relative "test_helper"
 require "prettyprint"
 
 class PrettyPrintSingletonTest < Test::Unit::TestCase
-  include TypeAssertions
+  include TestHelper
 
   library "prettyprint"
   testing "singleton(::PrettyPrint)"
@@ -48,7 +48,7 @@ class PrettyPrintSingletonTest < Test::Unit::TestCase
 end
 
 class PrettyPrintTest < Test::Unit::TestCase
-  include TypeAssertions
+  include TestHelper
 
   library "prettyprint"
   testing "::PrettyPrint"

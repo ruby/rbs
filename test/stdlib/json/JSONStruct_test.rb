@@ -3,7 +3,7 @@ require "json"
 require "json/add/struct"
 
 class JSONStructSingletonTest < Test::Unit::TestCase
-  include TypeAssertions
+  include TestHelper
 
   Foo = Struct.new(:a)
 
@@ -17,7 +17,7 @@ class JSONStructSingletonTest < Test::Unit::TestCase
 end
 
 class JSONStructInstanceTest < Test::Unit::TestCase
-  include TypeAssertions
+  include TestHelper
 
   Foo = Struct.new(:a)
 
