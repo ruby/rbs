@@ -2,6 +2,12 @@
 
 ## master
 
+## 3.4.4 (2024-02-08)
+
+### Miscellaneous
+
+* Backport [#1752](https://github.com/ruby/rbs/pull/1752) ([#1753](https://github.com/ruby/rbs/pull/1753))
+
 ## 3.4.3 (2024-01-25)
 
 ### Library changes
