@@ -47,9 +47,11 @@ module RBS
           singleton_new_methods: [],
           public_singleton_methods: [],
           private_singleton_methods: [],
+          protected_singleton_methods: [],
           instance_initialize_methods: [],
           public_instance_methods: [],
           private_instance_methods: [],
+          protected_instance_methods: [],
         } #: partitioned
 
         decl.members.each { |m| sort_decl! m }
@@ -62,6 +64,8 @@ module RBS
             :public
           when Members::Private
             :private
+          when Members::Protected
+            :protected
           when Members::MethodDefinition, Members::AttrReader, Members::AttrWriter, Members::AttrAccessor
             visibility_annotated_members << member.update(visibility: member.visibility || current_visibility)
             current_visibility
@@ -106,16 +110,20 @@ module RBS
                 partitioned[:singleton_new_methods] << member.update(visibility: nil)
               elsif member.visibility == :public
                 partitioned[:public_singleton_methods] << member.update(visibility: nil)
-              else
+              elsif member.visibility == :private
                 partitioned[:private_singleton_methods] << member.update(visibility: nil)
+              else
+                partitioned[:protected_singleton_methods] << member.update(visibility: nil)
               end
             else
               if member.name == :initialize
                 partitioned[:instance_initialize_methods] << member.update(visibility: nil)
               elsif member.visibility == :public
                 partitioned[:public_instance_methods] << member.update(visibility: nil)
-              else
+              elsif member.visibility == :private
                 partitioned[:private_instance_methods] << member.update(visibility: nil)
+              else
+                partitioned[:protected_instance_methods] << member.update(visibility: nil)
               end
             end
           when Members::Alias
@@ -124,7 +132,7 @@ module RBS
             else
               partitioned[:public_instance_methods] << member
             end
-          when Members::Public, Members::Private
+          when Members::Public, Members::Private, Members::Protected
             raise
           else
             partitioned[:other_decls] << member
@@ -145,8 +153,10 @@ module RBS
         partitioned[:module_functions].sort_by! {|decl| decl.name.to_s }
         partitioned[:public_singleton_methods].sort_by! {|decl| decl.is_a?(Members::MethodDefinition) ? decl.name.to_s : decl.new_name.to_s }
         partitioned[:private_singleton_methods].sort_by! {|decl| decl.name.to_s }
+        partitioned[:protected_singleton_methods].sort_by! {|decl| decl.name.to_s }
         partitioned[:public_instance_methods].sort_by! {|decl| decl.is_a?(Members::MethodDefinition) ? decl.name.to_s : decl.new_name.to_s }
         partitioned[:private_instance_methods].sort_by! {|decl| decl.name.to_s }
+        partitioned[:protected_instance_methods].sort_by! {|decl| decl.name.to_s }
 
         members = [] #: Array[member]
         members.push(*partitioned[:type_alias_decls])
@@ -172,7 +182,13 @@ module RBS
         end
         members.push(*partitioned[:private_singleton_methods])
 
-        if current_visibility == :private && !partitioned[:public_instance_methods].empty?
+        if !partitioned[:protected_singleton_methods].empty?
+          current_visibility = :protected
+          members.push Members::Protected.new(location: nil)
+        end
+        members.push(*partitioned[:protected_singleton_methods])
+
+        if current_visibility != :public && !partitioned[:public_instance_methods].empty?
           current_visibility = :public
           members.push Members::Public.new(location: nil)
         end
@@ -180,11 +196,17 @@ module RBS
         members.push(*partitioned[:instance_initialize_methods])
         members.push(*partitioned[:public_instance_methods])
 
-        if current_visibility == :public && !partitioned[:private_instance_methods].empty?
+        if current_visibility != :private && !partitioned[:private_instance_methods].empty?
           current_visibility = :private
           members.push Members::Private.new(location: nil)
         end
         members.push(*partitioned[:private_instance_methods])
+
+        if current_visibility != :protected && !partitioned[:protected_instance_methods].empty?
+          current_visibility = :protected
+          members.push Members::Protected.new(location: nil)
+        end
+        members.push(*partitioned[:protected_instance_methods])
 
         members.push(*partitioned[:other_decls])
 
