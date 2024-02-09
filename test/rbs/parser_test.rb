@@ -200,6 +200,7 @@ end
 module Foo
   public
   private
+  protected
 end
     RBS
       decls[0].tap do |decl|
@@ -207,6 +208,7 @@ end
 
         assert_instance_of RBS::AST::Members::Public, decl.members[0]
         assert_instance_of RBS::AST::Members::Private, decl.members[1]
+        assert_instance_of RBS::AST::Members::Protected, decl.members[2]
       end
     end
   end

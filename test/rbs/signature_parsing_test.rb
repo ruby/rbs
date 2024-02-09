@@ -529,18 +529,19 @@ end
     end
   end
 
-  def test_private_public
+  def test_private_public_protected
     Parser.parse_signature(<<~SIG).tap do |_, _, decls|
       class Foo
         public
         private
+        protected
       end
     SIG
 
       decls[0].yield_self do |decl|
         assert_instance_of Declarations::Class, decl
 
-        assert_equal 2, decl.members.size
+        assert_equal 3, decl.members.size
 
         decl.members[0].yield_self do |m|
           assert_instance_of Members::Public, m
@@ -548,6 +549,10 @@ end
 
         decl.members[1].yield_self do |m|
           assert_instance_of Members::Private, m
+        end
+
+        decl.members[2].yield_self do |m|
+          assert_instance_of Members::Protected, m
         end
       end
     end
@@ -559,13 +564,14 @@ end
         public def foo: () -> void
         private def bar: () -> void
         def baz: () -> void
+        protected def quux: () -> void
       end
     SIG
 
       decls[0].tap do |decl|
         assert_instance_of Declarations::Class, decl
 
-        assert_equal 3, decl.members.size
+        assert_equal 4, decl.members.size
 
         decl.members[0].tap do |m|
           assert_instance_of Members::MethodDefinition, m
@@ -583,6 +589,12 @@ end
           assert_instance_of Members::MethodDefinition, m
           assert_equal :baz, m.name
           assert_nil m.visibility
+        end
+
+        decl.members[3].tap do |m|
+          assert_instance_of Members::MethodDefinition, m
+          assert_equal :quux, m.name
+          assert_equal :protected, m.visibility
         end
       end
     end
@@ -604,13 +616,14 @@ end
         public attr_reader foo: String
         private attr_reader bar: String
         attr_reader baz: String
+        protected attr_reader quux: String
       end
     SIG
 
       decls[0].tap do |decl|
         assert_instance_of Declarations::Class, decl
 
-        assert_equal 3, decl.members.size
+        assert_equal 4, decl.members.size
 
         decl.members[0].tap do |m|
           assert_instance_of Members::AttrReader, m
@@ -628,6 +641,12 @@ end
           assert_instance_of Members::AttrReader, m
           assert_equal :baz, m.name
           assert_nil m.visibility
+        end
+
+        decl.members[3].tap do |m|
+          assert_instance_of Members::AttrReader, m
+          assert_equal :quux, m.name
+          assert_equal :protected, m.visibility
         end
       end
     end
@@ -649,6 +668,8 @@ end
         public
 
         private
+
+        protected
 
         public    # comment can follow
       end
@@ -704,6 +725,7 @@ end
         def type: -> String
         def module: -> String
         def private: -> String
+        def protected: -> String
         def public: -> untyped
         def interface: -> untyped
         def super: -> untyped
@@ -747,6 +769,7 @@ end
         :type,
         :module,
         :private,
+        :protected,
         :public,
         :interface,
         :super,
