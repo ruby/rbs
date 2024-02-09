@@ -36,6 +36,7 @@
   case kATTRACCESSOR: \
   case kPUBLIC: \
   case kPRIVATE: \
+  case kPROTECTED: \
   case kUNTYPED: \
   case kUSE: \
   case kAS: \
@@ -1495,6 +1496,7 @@ InstanceSingletonKind parse_instance_singleton_kind(parserstate *state, bool all
  * def_member ::= {kDEF} method_name `:` <method_types>
  *              | {kPRIVATE} kDEF method_name `:` <method_types>
  *              | {kPUBLIC} kDEF method_name `:` <method_types>
+ *              | {kPROTECTED} kDEF method_name `:` <method_types>
  *
  * method_types ::= {} <method_type>
  *                | {} <`...`>
@@ -1528,6 +1530,12 @@ VALUE parse_member_def(parserstate *state, bool instance_only, bool accept_overl
   case kPUBLIC:
     visibility_range = state->current_token.range;
     visibility = ID2SYM(rb_intern("public"));
+    member_range.start = visibility_range.start;
+    parser_advance(state);
+    break;
+  case kPROTECTED:
+    visibility_range = state->current_token.range;
+    visibility = ID2SYM(rb_intern("protected"));
     member_range.start = visibility_range.start;
     parser_advance(state);
     break;
@@ -1915,6 +1923,7 @@ VALUE parse_variable_member(parserstate *state, position comment_pos, VALUE anno
 /*
   visibility_member ::= {<`public`>}
                       | {<`private`>}
+                      | {<`protected`>}
 */
 VALUE parse_visibility_member(parserstate *state, VALUE annotations) {
   if (rb_array_len(annotations) > 0) {
@@ -1935,6 +1944,9 @@ VALUE parse_visibility_member(parserstate *state, VALUE annotations) {
   case kPRIVATE:
     klass = RBS_AST_Members_Private;
     break;
+  case kPROTECTED:
+    klass = RBS_AST_Members_Protected;
+    break;
   default:
     rbs_abort();
   }
@@ -1953,7 +1965,7 @@ VALUE parse_visibility_member(parserstate *state, VALUE annotations) {
 
   attr_keyword ::= `attr_reader` | `attr_writer` | `attr_accessor`
 
-  visibility ::= `public` | `private`
+  visibility ::= `public` | `private` | `protected`
 
   attr_var ::=                    # empty
              | `(` tAIDENT `)`    # Ivar name
@@ -1988,6 +2000,11 @@ VALUE parse_attribute_member(parserstate *state, position comment_pos, VALUE ann
     break;
   case kPUBLIC:
     visibility = ID2SYM(rb_intern("public"));
+    visibility_range = state->current_token.range;
+    parser_advance(state);
+    break;
+  case kPROTECTED:
+    visibility = ID2SYM(rb_intern("protected"));
     visibility_range = state->current_token.range;
     parser_advance(state);
     break;
@@ -2217,6 +2234,7 @@ VALUE parse_nested_decl(parserstate *state, const char *nested_in, position anno
                   | attribute_member
                   | `public`
                   | `private`
+                  | `protected`
 */
 VALUE parse_module_members(parserstate *state) {
   VALUE members = rb_ary_new();
@@ -2260,6 +2278,7 @@ VALUE parse_module_members(parserstate *state) {
 
     case kPUBLIC:
     case kPRIVATE:
+    case kPROTECTED:
       if (state->next_token.range.start.line == state->current_token.range.start.line) {
         switch (state->next_token.type)
         {

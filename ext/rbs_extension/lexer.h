@@ -49,6 +49,7 @@ enum TokenType {
   kOUT,             /* out */
   kPREPEND,         /* prepend */
   kPRIVATE,         /* private */
+  kPROTECTED,       /* protected */
   kPUBLIC,          /* public */
   kSELF,            /* self */
   kSINGLETON,       /* singleton */
