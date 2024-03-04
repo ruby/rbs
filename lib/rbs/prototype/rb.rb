@@ -587,7 +587,7 @@ module RBS
           end
         when :DSYM
           BuiltinNames::Symbol.instance_type
-        when :DREGX
+        when :DREGX, :REGX
           BuiltinNames::Regexp.instance_type
         when :TRUE
           Types::Literal.new(literal: true, location: nil)
