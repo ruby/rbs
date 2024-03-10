@@ -28,6 +28,13 @@
 # useful when you use other ASCII-compatible encodings.
 #
 class Encoding
+  # The `_EncodeFallbackAref` is used in functions such as `String::encode` to get the fallback
+  # value when a charcater can't be converted between encodings.
+  interface _EncodeFallbackAref
+    # Returns a string to use as a replacement, or `nil` if a replacement isn't possible.
+    def []: (String) -> string?
+  end
+
   def self._load: [T] (T) -> T
 
   # <!--

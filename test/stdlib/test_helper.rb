@@ -79,6 +79,12 @@ module WithStdlibAliases
       end
     end
   end
+
+  def with_to_s(&block)
+    return WithEnum.new to_enum(__method__ || raise) unless block
+    with_bool(&block)
+    [nil, 1, Object.new, ToS.new, "hello, world!"].each(&block)
+  end
 end
 
 class Writer
@@ -137,12 +143,6 @@ class Enum < RBS::UnitTest::Convertibles::BlankSlate
   end
 end
 
-class ArefFromStringToString < RBS::UnitTest::Convertibles::BlankSlate
-  def [](str)
-    "!"
-  end
-end
-
 include RBS::UnitTest::Convertibles
 
 module TestHelper
@@ -151,6 +151,10 @@ module TestHelper
   include RBS::UnitTest::WithAliases
   include VersionHelper
   include WithStdlibAliases
+
+  # The current ruby executable path; used in some functions which spawn shells, as the only 
+  # executable we can be guaranteed to exist is ruby itself.
+  RUBY_EXE = ENV['RUBY'] || RbConfig.ruby
 
   def self.included(base)
     base.extend RBS::UnitTest::TypeAssertions::ClassMethods
