@@ -140,4 +140,73 @@ class RBS::DiffTest < Test::Unit::TestCase
       ], results
     end
   end
+
+  def test_with_manifest_yaml
+    mktmpdir do |path|
+      dir1 = (path / "dir1")
+      dir1.mkdir
+      (dir1 / 'before.rbs').write(<<~RBS)
+        class Pathname
+        end
+      RBS
+      (dir1 / 'manifest.yaml').write(<<~RBS)
+        dependencies:
+          - name: pathname
+      RBS
+
+      dir2 = (path / "dir2")
+      dir2.mkdir
+      (dir2 / 'after.rbs').write(<<~RBS)
+        class Pathname
+          def foooooooo: () -> void
+        end
+      RBS
+      (dir2 / 'manifest.yaml').write(<<~RBS)
+        dependencies:
+          - name: pathname
+      RBS
+
+      diff = Diff.new(
+        type_name: TypeName("::Pathname"),
+        library_options: RBS::CLI::LibraryOptions.new,
+        before_path: [dir1],
+        after_path: [dir2],
+        detail: true,
+      )
+      assert_equal [["-", "[::Pathname public] def foooooooo: () -> void"]], diff.each_diff.to_a
+    end
+  end
+
+  def test_with_empty_manifest_yaml
+    mktmpdir do |path|
+      dir1 = (path / "dir1")
+      dir1.mkdir
+      (dir1 / 'before.rbs').write(<<~RBS)
+        class Foo
+        end
+      RBS
+      (dir1 / 'manifest.yaml').write(<<~RBS)
+        # empty
+      RBS
+
+      dir2 = (path / "dir2")
+      dir2.mkdir
+      (dir2 / 'after.rbs').write(<<~RBS)
+        class Foo
+        end
+      RBS
+      (dir2 / 'manifest.yaml').write(<<~RBS)
+        # empty
+      RBS
+
+      diff = Diff.new(
+        type_name: TypeName("::Foo"),
+        library_options: RBS::CLI::LibraryOptions.new,
+        before_path: [dir1],
+        after_path: [dir2],
+        detail: true,
+      )
+      assert_equal [], diff.each_diff.to_a
+    end
+  end
 end
