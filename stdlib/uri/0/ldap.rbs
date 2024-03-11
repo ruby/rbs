@@ -71,7 +71,7 @@ module URI
     #
     # See also URI::Generic.new.
     #
-    def initialize: (String schema, String? userinfo, String host, Integer? port, String? registry, String? path, String? opaque, String query, String? fragment) -> URI::LDAP
+    def initialize: (String schema, String? userinfo, String host, Integer? port, String? registry, String? path, String? opaque, String query, String? fragment) -> void
 
     # <!--
     #   rdoc-file=lib/uri/ldap.rb

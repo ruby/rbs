@@ -2076,7 +2076,7 @@ module Net
     #   - new(m, reqbody, resbody, uri_or_path, initheader = nil)
     # -->
     #
-    def initialize: (String m, boolish reqbody, boolish resbody, URI::Generic | String uri_or_path, ?Hash[String, untyped] initheader) -> Net::HTTP
+    def initialize: (String m, boolish reqbody, boolish resbody, URI::Generic | String uri_or_path, ?Hash[String, untyped] initheader) -> void
 
     # <!-- rdoc-file=lib/net/http/generic_request.rb -->
     # Returns the string method name for the request:
@@ -5599,7 +5599,7 @@ module Net
   # instead, you must use its subclasses.
   #
   module HTTPExceptions
-    def initialize: (untyped msg, untyped res) -> untyped
+    def initialize: (untyped msg, untyped res) -> void
 
     attr_reader response: untyped
 

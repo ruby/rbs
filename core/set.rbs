@@ -197,9 +197,9 @@ class Set[unchecked out A]
   #     Set.new(1..5)                         #=> #<Set: {1, 2, 3, 4, 5}>
   #     Set.new([1, 2, 3]) { |x| x * x }      #=> #<Set: {1, 4, 9}>
   #
-  def initialize: (_Each[A]) -> untyped
-                | [X] (_Each[X]) { (X) -> A } -> untyped
-                | (?nil) -> untyped
+  def initialize: (_Each[A] & Object) -> void
+                | [X] (_Each[X] & Object) { (X) -> A } -> void
+                | (?nil) -> void
 
   # <!--
   #   rdoc-file=lib/set.rb

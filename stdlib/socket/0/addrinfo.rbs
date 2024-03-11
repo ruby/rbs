@@ -665,5 +665,5 @@ class Addrinfo
   # omitted, 0 is assumed. Note that 0 is reasonable value for most protocols,
   # except raw socket.
   #
-  def initialize: (String sockaddr, ?Symbol family, ?(Symbol | Integer)? socktype, ?Integer? protocol) -> untyped
+  def initialize: (String sockaddr, ?Symbol family, ?(Symbol | Integer)? socktype, ?Integer? protocol) -> void
 end

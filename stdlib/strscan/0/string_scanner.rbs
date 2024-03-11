@@ -769,7 +769,7 @@ class StringScanner
   #
   # `dup` argument is obsolete and not used now.
   #
-  def initialize: (String, ?bool dup, ?fixed_anchor: bool) -> untyped
+  def initialize: (String, ?bool dup, ?fixed_anchor: bool) -> void
 
   # <!--
   #   rdoc-file=ext/strscan/strscan.c

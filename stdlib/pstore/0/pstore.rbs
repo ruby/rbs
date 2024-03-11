@@ -539,7 +539,7 @@ class PStore
   #
   #     store = PStore.new(path, true)
   #
-  def initialize: (untyped file, ?boolish thread_safe) -> untyped
+  def initialize: (untyped file, ?boolish thread_safe) -> void
 
   def load: (untyped content) -> untyped
 

@@ -1415,7 +1415,7 @@ class Socket < BasicSocket
   #     Socket.new(:UNIX, :STREAM) # UNIX stream socket
   #     Socket.new(:UNIX, :DGRAM)  # UNIX datagram socket
   #
-  def initialize: (Symbol | Integer domain, Symbol | Integer socktype, ?Integer protocol) -> untyped
+  def initialize: (Symbol | Integer domain, Symbol | Integer socktype, ?Integer protocol) -> void
 end
 
 # <!-- rdoc-file=ext/socket/constdefs.c -->
@@ -4156,5 +4156,5 @@ class Socket::AncillaryData
   #     p Socket::AncillaryData.new(:INET6, :IPV6, :PKTINFO, "")
   #     #=> #<Socket::AncillaryData: INET6 IPV6 PKTINFO "">
   #
-  def initialize: (interned | Integer family, interned | Integer cmsg_level, interned | Integer cmsg_data, String cmsg_data) -> untyped
+  def initialize: (interned | Integer family, interned | Integer cmsg_level, interned | Integer cmsg_data, String cmsg_data) -> void
 end

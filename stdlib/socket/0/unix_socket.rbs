@@ -168,5 +168,5 @@ class UNIXSocket < BasicSocket
   #     s = UNIXSocket.new("/tmp/sock")
   #     s.send "hello", 0
   #
-  def initialize: (String path) -> untyped
+  def initialize: (String path) -> void
 end

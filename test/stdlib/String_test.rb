@@ -73,21 +73,21 @@ class StringInstanceTest < Test::Unit::TestCase
   end
 
   def test_initialize
-    assert_send_type  '() -> String',
+    assert_send_type  '() -> void',
                       String.allocate, :initialize
 
     with_string do |source|
-      assert_send_type  '(string) -> String',
+      assert_send_type  '(string) -> void',
                         String.allocate, :initialize, source
     end
 
     with_encoding.and_nil do |encoding|
-      assert_send_type  '(encoding: encoding?) -> String',
+      assert_send_type  '(encoding: encoding?) -> void',
                         String.allocate, :initialize, encoding: encoding
     end
 
     with_int.and_nil do |capacity|
-      assert_send_type  '(capacity: int?) -> String',
+      assert_send_type  '(capacity: int?) -> void',
                         String.allocate, :initialize, capacity: capacity
     end
   end

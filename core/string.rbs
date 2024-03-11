@@ -703,7 +703,7 @@ class String
   #
   #     String.new('hello', encoding: 'UTF-8', capacity: 25)
   #
-  def initialize: (?string source, ?encoding: encoding?, ?capacity: int?) -> self
+  def initialize: (?string source, ?encoding: encoding?, ?capacity: int?) -> void
 
   # <!--
   #   rdoc-file=string.c

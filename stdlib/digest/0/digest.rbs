@@ -363,7 +363,7 @@ class Digest::Class
 
   private
 
-  def initialize: () -> self
+  def initialize: () -> void
 end
 
 # <!-- rdoc-file=ext/digest/digest.c -->

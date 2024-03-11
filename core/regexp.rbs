@@ -1596,8 +1596,8 @@ class Regexp
   #     r3 = Regexp.new(r, timeout: 3.14)            # => /foo/m
   #     r3.timeout                                   # => 3.14
   #
-  def initialize: (Regexp regexp, ?timeout: _ToF?) -> self
-                | (string pattern, ?int | string | bool | nil options, ?timeout: _ToF?) -> self
+  def initialize: (Regexp regexp, ?timeout: _ToF?) -> void
+                | (string pattern, ?int | string | bool | nil options, ?timeout: _ToF?) -> void
 
   def initialize_copy: (self object) -> self
 

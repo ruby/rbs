@@ -42,5 +42,5 @@ class TCPSocket < IPSocket
   #   - new(host, serv, *rest)
   # -->
   #
-  def initialize: (String remote_host, Integer remote_port, ?String local_host, ?Integer local_port) -> untyped
+  def initialize: (String remote_host, Integer remote_port, ?String local_host, ?Integer local_port) -> void
 end
