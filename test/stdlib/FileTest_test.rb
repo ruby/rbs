@@ -5,17 +5,12 @@ class FileTestSingletonTest < Test::Unit::TestCase
 
   testing "singleton(::FileTest)"
 
-  def with_path_io(path: __FILE__, io: default=IO.open(IO.sysopen(File.expand_path(__FILE__)), path: File.expand_path(__FILE__)), &block)
+
+  def with_path_io(path: __FILE__, io: default=IO.open(IO.sysopen(File.expand_path(__FILE__))), &block)
     with_path(path, &block)
     with_io(io, &block)
   ensure
-    if default
-      begin
-        io.close
-      rescue Errno::EBADF => exn
-        STDERR.puts "Closing io failed with #{exn.inspect}; ignoring"
-      end
-    end
+    io.close if default
   end
 
   def test_blockdev?
