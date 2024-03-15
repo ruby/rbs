@@ -232,7 +232,7 @@ class Encoding_InvalidByteSequenceErrorInstanceTest < Test::Unit::TestCase
 
   def error_object
     ec = Encoding::Converter.new('UTF-8', 'ISO-8859-1')
-    ec.primitive_convert("\xf1abcd", '')
+    ec.primitive_convert(+"\xf1abcd", +'')
     ec.last_error
   end
 end
@@ -271,7 +271,7 @@ class Encoding_UndefinedConversionErrorTest < Test::Unit::TestCase
 
   def error_object
     ec = Encoding::Converter.new('EUC-JP', 'ISO-8859-1')
-    ec.primitive_convert("\xa4\xa2", '')
+    ec.primitive_convert(+"\xa4\xa2", +'')
     ec.last_error
   end
 end

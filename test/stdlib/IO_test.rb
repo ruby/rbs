@@ -260,11 +260,11 @@ class IOInstanceTest < Test::Unit::TestCase
       assert_send_type "(nil) -> String",
                        io, :read, nil
       assert_send_type "(Integer, String) -> String",
-                       io, :read, 0, "buffer"
+                       io, :read, 0, +"buffer"
       assert_send_type "(Integer, String) -> nil",
-                       io, :read, 1, "buffer"
+                       io, :read, 1, +"buffer"
       assert_send_type "(nil, String) -> String",
-                       io, :read, nil, "buffer"
+                       io, :read, nil, +"buffer"
     end
   end
 
@@ -273,7 +273,7 @@ class IOInstanceTest < Test::Unit::TestCase
       assert_send_type "(Integer) -> String",
                        io, :readpartial, 10
       assert_send_type "(Integer, String) -> String",
-                       io, :readpartial, 10, "buffer"
+                       io, :readpartial, 10, +"buffer"
     end
   end
 
