@@ -263,7 +263,7 @@ class ARGFTest < Test::Unit::TestCase
     assert_send_type  "(::int length) -> ::String",
                       ARGF.class.new(__FILE__), :read, 1
     assert_send_type  "(::int length, ::string outbuf) -> ::String",
-                      ARGF.class.new(__FILE__), :read, 1, ""
+                      ARGF.class.new(__FILE__), :read, 1, +""
     assert_send_type  "(::int length) -> nil",
                       ARGF.class.new(Tempfile.new), :read, 1
   end
@@ -272,7 +272,7 @@ class ARGFTest < Test::Unit::TestCase
     assert_send_type  "(::int maxlen) -> ::String",
                       ARGF.class.new(__FILE__), :read_nonblock, 1
     assert_send_type  "(::int maxlen, ::string buf) -> ::String",
-                      ARGF.class.new(__FILE__), :read_nonblock, 1, ""
+                      ARGF.class.new(__FILE__), :read_nonblock, 1, +""
   end
 
   def test_readbyte
@@ -289,7 +289,7 @@ class ARGFTest < Test::Unit::TestCase
     assert_send_type  "(::int maxlen) -> ::String",
                       ARGF.class.new(__FILE__), :readpartial, 1
     assert_send_type  "(::int maxlen, ::string buf) -> ::String",
-                      ARGF.class.new(__FILE__), :readpartial, 1, ""
+                      ARGF.class.new(__FILE__), :readpartial, 1, +""
   end
 
   def test_rewind
