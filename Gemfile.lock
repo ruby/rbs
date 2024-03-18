@@ -90,7 +90,7 @@ GEM
     stringio (3.1.0)
     strong_json (2.1.2)
     tempfile (0.2.1)
-    test-unit (3.6.1)
+    test-unit (3.6.2)
       power_assert
     timeout (0.4.1)
     unicode-display_width (2.5.0)
