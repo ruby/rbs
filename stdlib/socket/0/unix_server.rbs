@@ -170,5 +170,5 @@ class UNIXServer < UNIXSocket
   #     s = serv.accept
   #     p s.read
   #
-  def initialize: (untyped) -> untyped
+  def initialize: (untyped) -> void
 end

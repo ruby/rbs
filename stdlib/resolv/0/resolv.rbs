@@ -132,7 +132,7 @@ class Resolv
   # -->
   # Creates a new Resolv using `resolvers`.
   #
-  def initialize: (?Resolv::Hosts | Resolv::DNS resolvers) -> untyped
+  def initialize: (?Resolv::Hosts | Resolv::DNS resolvers) -> void
 end
 
 # <!-- rdoc-file=lib/resolv.rb -->
@@ -371,7 +371,7 @@ class Resolv::DNS
   #                     :search => ['ruby-lang.org'],
   #                     :ndots => 1)
   #
-  def initialize: (?String | Hash[Symbol, untyped] config_info) -> untyped
+  def initialize: (?String | Hash[Symbol, untyped] config_info) -> void
 
   def use_ipv6?: () -> untyped
 end
@@ -413,7 +413,7 @@ class Resolv::DNS::Config
 
   private
 
-  def initialize: (?String | Hash[Symbol, untyped] config_info) -> untyped
+  def initialize: (?String | Hash[Symbol, untyped] config_info) -> void
 end
 
 Resolv::DNS::Config::InitialTimeout: Integer
@@ -465,7 +465,7 @@ class Resolv::DNS::Label::Str
 
   private
 
-  def initialize: (String string) -> untyped
+  def initialize: (String string) -> void
 end
 
 class Resolv::DNS::Message
@@ -537,7 +537,7 @@ class Resolv::DNS::Message
 
   private
 
-  def initialize: (?Integer id) -> untyped
+  def initialize: (?Integer id) -> void
 end
 
 class Resolv::DNS::Message::MessageDecoder
@@ -567,7 +567,7 @@ class Resolv::DNS::Message::MessageDecoder
 
   private
 
-  def initialize: (String data) { (instance) -> void } -> untyped
+  def initialize: (String data) { (instance) -> void } -> void
 end
 
 class Resolv::DNS::Message::MessageEncoder
@@ -593,7 +593,7 @@ class Resolv::DNS::Message::MessageEncoder
 
   private
 
-  def initialize: () -> untyped
+  def initialize: () -> void
 end
 
 # <!-- rdoc-file=lib/resolv.rb -->
@@ -673,7 +673,7 @@ class Resolv::DNS::Name
 
   private
 
-  def initialize: (Array[Resolv::DNS::Label::Str] labels, ?bool absolute) -> untyped
+  def initialize: (Array[Resolv::DNS::Label::Str] labels, ?bool absolute) -> void
 end
 
 module Resolv::DNS::OpCode
@@ -750,7 +750,7 @@ class Resolv::DNS::Requester
 
   private
 
-  def initialize: () -> untyped
+  def initialize: () -> void
 end
 
 class Resolv::DNS::Requester::ConnectedUDP < Resolv::DNS::Requester
@@ -766,7 +766,7 @@ class Resolv::DNS::Requester::ConnectedUDP < Resolv::DNS::Requester
 
   private
 
-  def initialize: (String host, ?Integer port) -> untyped
+  def initialize: (String host, ?Integer port) -> void
 end
 
 class Resolv::DNS::Requester::ConnectedUDP::Sender < Resolv::DNS::Requester::Sender
@@ -794,7 +794,7 @@ end
 class Resolv::DNS::Requester::Sender
   private
 
-  def initialize: (Resolv::DNS::Message msg, String data, Socket sock) -> untyped
+  def initialize: (Resolv::DNS::Message msg, String data, Socket sock) -> void
 end
 
 class Resolv::DNS::Requester::TCP < Resolv::DNS::Requester
@@ -808,7 +808,7 @@ class Resolv::DNS::Requester::TCP < Resolv::DNS::Requester
 
   private
 
-  def initialize: (String host, ?Integer port) -> untyped
+  def initialize: (String host, ?Integer port) -> void
 end
 
 class Resolv::DNS::Requester::TCP::Sender < Resolv::DNS::Requester::Sender
@@ -832,7 +832,7 @@ class Resolv::DNS::Requester::UnconnectedUDP < Resolv::DNS::Requester
 
   private
 
-  def initialize: (*[ String, Integer ] nameserver_port) -> untyped
+  def initialize: (*[ String, Integer ] nameserver_port) -> void
 end
 
 class Resolv::DNS::Requester::UnconnectedUDP::Sender < Resolv::DNS::Requester::Sender
@@ -844,7 +844,7 @@ class Resolv::DNS::Requester::UnconnectedUDP::Sender < Resolv::DNS::Requester::S
 
   private
 
-  def initialize: (Resolv::DNS::Message msg, String data, UDPSocket sock, String host, Integer port) -> untyped
+  def initialize: (Resolv::DNS::Message msg, String data, UDPSocket sock, String host, Integer port) -> void
 end
 
 # <!-- rdoc-file=lib/resolv.rb -->
@@ -916,7 +916,7 @@ class Resolv::DNS::Resource::DomainName < Resolv::DNS::Resource
   # -->
   # Creates a new DomainName from `name`.
   #
-  def initialize: (String name) -> untyped
+  def initialize: (String name) -> void
 end
 
 # <!-- rdoc-file=lib/resolv.rb -->
@@ -944,7 +944,7 @@ class Resolv::DNS::Resource::Generic < Resolv::DNS::Resource
   # -->
   # Creates a new generic resource.
   #
-  def initialize: (String data) -> untyped
+  def initialize: (String data) -> void
 end
 
 # <!-- rdoc-file=lib/resolv.rb -->
@@ -975,7 +975,7 @@ class Resolv::DNS::Resource::HINFO < Resolv::DNS::Resource
   # -->
   # Creates a new HINFO running `os` on `cpu`.
   #
-  def initialize: (String cpu, String os) -> untyped
+  def initialize: (String cpu, String os) -> void
 end
 
 Resolv::DNS::Resource::HINFO::TypeValue: Integer
@@ -1011,7 +1011,7 @@ class Resolv::DNS::Resource::IN::A < Resolv::DNS::Resource
   # -->
   # Creates a new A for `address`.
   #
-  def initialize: (String | Resolv::IPv4 address) -> untyped
+  def initialize: (String | Resolv::IPv4 address) -> void
 end
 
 Resolv::DNS::Resource::IN::A::ClassValue: Integer
@@ -1041,7 +1041,7 @@ class Resolv::DNS::Resource::IN::AAAA < Resolv::DNS::Resource
   # -->
   # Creates a new AAAA for `address`.
   #
-  def initialize: (String | Resolv::IPv6 address) -> untyped
+  def initialize: (String | Resolv::IPv6 address) -> void
 end
 
 Resolv::DNS::Resource::IN::AAAA::ClassValue: Integer
@@ -1171,7 +1171,7 @@ class Resolv::DNS::Resource::IN::SRV < Resolv::DNS::Resource
   # See the documentation for #priority, #weight, #port and #target for
   # `priority`, `weight`, +port and `target` respectively.
   #
-  def initialize: (Integer priority, Integer weight, Integer port, String target) -> untyped
+  def initialize: (Integer priority, Integer weight, Integer port, String target) -> void
 end
 
 Resolv::DNS::Resource::IN::SRV::ClassValue: Integer
@@ -1221,7 +1221,7 @@ class Resolv::DNS::Resource::IN::WKS < Resolv::DNS::Resource
   #   - new(address, protocol, bitmap)
   # -->
   #
-  def initialize: (String | Resolv::IPv4 address, Integer protocol, Integer bitmap) -> untyped
+  def initialize: (String | Resolv::IPv4 address, Integer protocol, Integer bitmap) -> void
 end
 
 Resolv::DNS::Resource::IN::WKS::ClassValue: Integer
@@ -1286,7 +1286,7 @@ class Resolv::DNS::Resource::LOC < Resolv::DNS::Resource
   #   - new(version, ssize, hprecision, vprecision, latitude, longitude, altitude)
   # -->
   #
-  def initialize: (Integer version, Integer ssize, Integer hprecision, Integer vprecision, Integer latitude, Integer longitude, Integer altitude) -> untyped
+  def initialize: (Integer version, Integer ssize, Integer hprecision, Integer vprecision, Integer latitude, Integer longitude, Integer altitude) -> void
 end
 
 Resolv::DNS::Resource::LOC::TypeValue: Integer
@@ -1318,7 +1318,7 @@ class Resolv::DNS::Resource::MINFO < Resolv::DNS::Resource
   #   - new(rmailbx, emailbx)
   # -->
   #
-  def initialize: (String rmailbx, String emailbx) -> untyped
+  def initialize: (String rmailbx, String emailbx) -> void
 end
 
 Resolv::DNS::Resource::MINFO::TypeValue: Integer
@@ -1351,7 +1351,7 @@ class Resolv::DNS::Resource::MX < Resolv::DNS::Resource
   # -->
   # Creates a new MX record with `preference`, accepting mail at `exchange`.
   #
-  def initialize: (Integer preference, String exchange) -> untyped
+  def initialize: (Integer preference, String exchange) -> void
 end
 
 Resolv::DNS::Resource::MX::TypeValue: Integer
@@ -1429,7 +1429,7 @@ class Resolv::DNS::Resource::SOA < Resolv::DNS::Resource
   # Creates a new SOA record.  See the attr documentation for the details of each
   # argument.
   #
-  def initialize: (String mname, String rname, Integer serial, Integer refresh, Integer retry_, Integer expire, Integer minimum) -> untyped
+  def initialize: (String mname, String rname, Integer serial, Integer refresh, Integer retry_, Integer expire, Integer minimum) -> void
 end
 
 Resolv::DNS::Resource::SOA::TypeValue: Integer
@@ -1464,7 +1464,7 @@ class Resolv::DNS::Resource::TXT < Resolv::DNS::Resource
   #   - new(first_string, *rest_strings)
   # -->
   #
-  def initialize: (String first_string, *String rest_strings) -> untyped
+  def initialize: (String first_string, *String rest_strings) -> void
 end
 
 Resolv::DNS::Resource::TXT::TypeValue: Integer
@@ -1533,7 +1533,7 @@ class Resolv::Hosts
   # -->
   # Creates a new Resolv::Hosts, using `filename` for its data source.
   #
-  def initialize: (?String filename) -> untyped
+  def initialize: (?String filename) -> void
 end
 
 Resolv::Hosts::DefaultFileName: String
@@ -1576,7 +1576,7 @@ class Resolv::IPv4
 
   private
 
-  def initialize: (String address) -> untyped
+  def initialize: (String address) -> void
 end
 
 Resolv::IPv4::Regex: Regexp
@@ -1630,7 +1630,7 @@ class Resolv::IPv6
 
   private
 
-  def initialize: (untyped address) -> untyped
+  def initialize: (untyped address) -> void
 end
 
 # <!-- rdoc-file=lib/resolv.rb -->
@@ -1712,7 +1712,7 @@ class Resolv::LOC::Alt
   #   - new(altitude)
   # -->
   #
-  def initialize: (Integer altitude) -> untyped
+  def initialize: (Integer altitude) -> void
 end
 
 Resolv::LOC::Alt::Regex: Regexp
@@ -1765,7 +1765,7 @@ class Resolv::LOC::Coord
   #   - new(coordinates,orientation)
   # -->
   #
-  def initialize: (String coordinates, orientation orientation) -> untyped
+  def initialize: (String coordinates, orientation orientation) -> void
 end
 
 Resolv::LOC::Coord::Regex: Regexp
@@ -1811,7 +1811,7 @@ class Resolv::LOC::Size
   #   - new(scalar)
   # -->
   #
-  def initialize: (String scalar) -> untyped
+  def initialize: (String scalar) -> void
 end
 
 Resolv::LOC::Size::Regex: Regexp
@@ -1859,7 +1859,7 @@ class Resolv::MDNS < Resolv::DNS
   # Hash
   # :   Must contain :nameserver or :nameserver_port like Resolv::DNS#initialize.
   #
-  def initialize: (?String | Hash[Symbol, untyped] config_info) -> untyped
+  def initialize: (?String | Hash[Symbol, untyped] config_info) -> void
 end
 
 # <!-- rdoc-file=lib/resolv.rb -->

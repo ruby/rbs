@@ -132,5 +132,5 @@ class UDPSocket < IPSocket
   #     UDPSocket.new                   #=> #<UDPSocket:fd 3>
   #     UDPSocket.new(Socket::AF_INET6) #=> #<UDPSocket:fd 4>
   #
-  def initialize: (?Integer family) -> untyped
+  def initialize: (?Integer family) -> void
 end

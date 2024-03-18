@@ -3036,7 +3036,7 @@ class CSV::Table[out Elem] < Object
   #     # Raises NoMethodError (undefined method `headers' for :foo:Symbol):
   #     CSV::Table.new([:foo])
   #
-  def initialize: (untyped array_of_rows, ?headers: untyped) -> untyped
+  def initialize: (untyped array_of_rows, ?headers: untyped) -> void
 
   # <!--
   #   rdoc-file=lib/csv/table.rb

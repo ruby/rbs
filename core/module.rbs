@@ -904,7 +904,7 @@ class Module < Object
   # Assign the module to a constant (name starting uppercase) if you want to treat
   # it like a regular module.
   #
-  def initialize: () -> Object
+  def initialize: () -> void
                 | () { (Module arg0) -> untyped } -> void
 
   # <!--

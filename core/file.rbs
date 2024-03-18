@@ -875,7 +875,7 @@ class File < IO
   # *   [Open Options](rdoc-ref:IO@Open+Options).
   # *   [Encoding options](rdoc-ref:encodings.rdoc@Encoding+Options).
   #
-  def initialize: (string | _ToPath | int file_name, ?string | int mode, ?int perm) -> File
+  def initialize: (string | _ToPath | int file_name, ?string | int mode, ?int perm) -> void
 
   # <!--
   #   rdoc-file=file.c

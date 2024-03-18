@@ -193,5 +193,5 @@ class TCPServer < TCPSocket
   # getaddrinfo() returns multiple addresses, TCPServer.new tries to create a
   # server socket for each address and returns first one that is successful.
   #
-  def initialize: (?String host, Integer port) -> untyped
+  def initialize: (?String host, Integer port) -> void
 end

@@ -256,7 +256,7 @@ class BasicObject
   # -->
   # Returns a new BasicObject.
   #
-  def initialize: () -> nil
+  def initialize: () -> void
 
   private
 

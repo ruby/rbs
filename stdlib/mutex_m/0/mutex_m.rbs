@@ -98,7 +98,7 @@ module Mutex_m
 
   private
 
-  def initialize: (*untyped args) -> untyped
+  def initialize: (*untyped args) -> void
 
   def mu_initialize: () -> untyped
 end
