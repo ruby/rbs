@@ -85,7 +85,7 @@ class Writer
   attr_reader :buffer
 
   def initialize
-    @buffer = ""
+    @buffer = +""
   end
 
   def write(*vals)

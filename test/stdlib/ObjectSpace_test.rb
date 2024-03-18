@@ -23,9 +23,9 @@ class ObjectSpaceTest < Test::Unit::TestCase
 
   def test_define_finalizer
     assert_send_type "(top, ^(Integer) -> void) -> [Integer, Proc]",
-                     ObjectSpace, :define_finalizer, "abc", ->(id) { "id: #{id}" }
+                     ObjectSpace, :define_finalizer, +"abc", ->(id) { "id: #{id}" }
     assert_send_type "(top) { (Integer) -> void } -> [Integer, Proc]",
-                     ObjectSpace, :define_finalizer, "abc" do |id| "id: #{id}" end
+                     ObjectSpace, :define_finalizer, +"abc" do |id| "id: #{id}" end
   end
 
   def test_each_object
@@ -53,7 +53,7 @@ class ObjectSpaceTest < Test::Unit::TestCase
 
   def test_undefine_finalizer
     assert_send_type "(String) -> String",
-                     ObjectSpace, :undefine_finalizer, "abc"
+                     ObjectSpace, :undefine_finalizer, +"abc"
     assert_send_type "(Array) -> Array",
                      ObjectSpace, :undefine_finalizer, []
   end
