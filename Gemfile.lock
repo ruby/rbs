@@ -17,7 +17,7 @@ GEM
       public_suffix (>= 2.0.2, < 6.0)
     ast (2.4.2)
     base64 (0.2.0)
-    bigdecimal (3.1.6)
+    bigdecimal (3.1.7)
     csv (3.2.8)
     dbm (1.1.0)
     diff-lcs (1.5.1)
