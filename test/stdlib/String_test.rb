@@ -959,8 +959,6 @@ class StringInstanceTest < Test::Unit::TestCase
   end
 
   def test_gsub!
-    omit 'There is currently a bug that prevents `.gsub!` from being testable'
-
     with_string('l').and /l/ do |pattern|
       assert_send_type  '(Regexp | string) -> Enumerator[String, String]',
                         +'hello', :gsub!, pattern

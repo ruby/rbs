@@ -283,19 +283,22 @@ module RBS
                 end
               end
 
-              each_sample(values).all? do |v|
+              value_check = values.empty? || each_sample(values).all? do |v|
                 if v.size == 1
                   # Only one block argument.
                   value(v[0], type.args[0]) || value(v, type.args[0])
                 else
                   value(v, type.args[0])
                 end
-              end &&
-                if ret.equal?(self)
-                  type.args[1].is_a?(Types::Bases::Bottom)
-                else
-                  value(ret, type.args[1])
-                end
+              end
+
+              return_check = if ret.equal?(self)
+                type.args[1].is_a?(Types::Bases::Bottom)
+              else
+                value(ret, type.args[1])
+              end
+
+              value_check && return_check
             end
           else
             Test.call(val, IS_AP, klass)

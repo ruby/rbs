@@ -60,6 +60,8 @@ EOF
 
         assert typecheck.value([1,2,3].each, parse_type("Enumerator[Integer, Array[Integer]]"))
         assert typecheck.value(loop, parse_type("Enumerator[nil, bot]"))
+        assert typecheck.value([].each, parse_type("Enumerator[String, Array[String]]"))
+        assert typecheck.value([].each, parse_type("Enumerator[Integer, Array[Integer]]"))
 
         assert typecheck.value(true, parse_type("bool"))
         assert typecheck.value(false, parse_type("bool"))
