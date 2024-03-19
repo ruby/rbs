@@ -1353,7 +1353,7 @@ class Time < Object
   # The returned array is suitable for use as an argument to Time.utc or
   # Time.local to create a new `Time` object.
   #
-  def to_a: () -> [ Integer, Integer, Integer, Integer, Integer, Integer, Integer, Integer, bool, String ]
+  def to_a: () -> [ Integer, Integer, Integer, Integer, Integer, Integer, Integer, Integer, bool, String? ]
 
   # <!--
   #   rdoc-file=time.c
@@ -1584,7 +1584,7 @@ class Time < Object
   #     Time.utc(2000, 1, 1).zone # => "UTC"
   #     Time.new(2000, 1, 1).zone # => "Central Standard Time"
   #
-  def zone: () -> String
+  def zone: () -> String?
 
   # <!-- rdoc-file=time.c -->
   # Like Time.utc, except that the returned `Time` object has the local timezone,
