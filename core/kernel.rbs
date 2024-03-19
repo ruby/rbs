@@ -2333,7 +2333,7 @@ module Kernel : BasicObject
   #     k.extend(Mod)   #=> #<Klass:0x401b3bc8>
   #     k.hello         #=> "Hello from Mod.\n"
   #
-  def extend: (*Module) -> self
+  def extend: (Module, *Module) -> self
 
   # <!--
   #   rdoc-file=object.c

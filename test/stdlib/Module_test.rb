@@ -27,6 +27,20 @@ class ModuleInstanceTest < Test::Unit::TestCase
     BAR = 1
   end
 
+  def test_include
+    assert_send_type "(Module) -> Module",
+                     Module.new, :include, Module.new
+    assert_send_type "(Module, Module) -> Module",
+                     Module.new, :include, Module.new, Module.new
+  end
+
+  def test_prepend
+    assert_send_type "(Module) -> Module",
+                     Module.new, :prepend, Module.new
+    assert_send_type "(Module, Module) -> Module",
+                     Module.new, :prepend, Module.new, Module.new
+  end
+
   def test_refine
     assert_send_type "(Module) { () -> void } -> Refinement",
                      Foo, :refine, String do nil end
