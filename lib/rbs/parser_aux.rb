@@ -60,6 +60,7 @@ module RBS
       attr_accessor
       public
       private
+      protected
       untyped
       true
       false

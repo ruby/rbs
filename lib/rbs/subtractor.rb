@@ -78,7 +78,7 @@ module RBS
         cvar_exist?(owner, member.name)
       when AST::Members::Include, AST::Members::Extend, AST::Members::Prepend
         mixin_exist?(owner, member, context: context)
-      when AST::Members::Public, AST::Members::Private
+      when AST::Members::Public, AST::Members::Private, AST::Members::Protected
         # They should not be removed even if the subtrahend has them.
         false
       else
@@ -158,7 +158,7 @@ module RBS
     end
 
     private def access_modifier?(decl)
-      decl.is_a?(AST::Members::Public) || decl.is_a?(AST::Members::Private)
+      decl.is_a?(AST::Members::Public) || decl.is_a?(AST::Members::Private) || decl.is_a?(AST::Members::Protected)
     end
 
     private def update_decl(decl, members:)

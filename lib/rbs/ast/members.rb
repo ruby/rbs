@@ -394,6 +394,14 @@ module RBS
         end
       end
 
+      class Protected < Base
+        include LocationOnly
+
+        def to_json(state = _ = nil)
+          { member: :protected, location: location }.to_json(state)
+        end
+      end
+
       class Alias < Base
         attr_reader :new_name
         attr_reader :old_name

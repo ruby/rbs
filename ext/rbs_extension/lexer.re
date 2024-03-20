@@ -84,6 +84,7 @@ start:
       "out"           { return next_token(state, kOUT); }
       "prepend"       { return next_token(state, kPREPEND); }
       "private"       { return next_token(state, kPRIVATE); }
+      "protected"     { return next_token(state, kPROTECTED); }
       "public"        { return next_token(state, kPUBLIC); }
       "self"          { return next_token(state, kSELF); }
       "singleton"     { return next_token(state, kSINGLETON); }
