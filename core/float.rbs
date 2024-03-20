@@ -80,7 +80,95 @@
 # *   #truncate: Returns `self` truncated to a given precision.
 #
 class Float < Numeric
-  public
+  # <!-- rdoc-file=numeric.c -->
+  # The minimum number of significant decimal digits in a double-precision
+  # floating point.
+  #
+  # Usually defaults to 15.
+  #
+  DIG: Integer
+
+  # <!-- rdoc-file=numeric.c -->
+  # The difference between 1 and the smallest double-precision floating point
+  # number greater than 1.
+  #
+  # Usually defaults to 2.2204460492503131e-16.
+  #
+  EPSILON: Float
+
+  # <!-- rdoc-file=numeric.c -->
+  # An expression representing positive infinity.
+  #
+  INFINITY: Float
+
+  # <!-- rdoc-file=numeric.c -->
+  # The number of base digits for the `double` data type.
+  #
+  # Usually defaults to 53.
+  #
+  MANT_DIG: Integer
+
+  # <!-- rdoc-file=numeric.c -->
+  # The largest possible integer in a double-precision floating point number.
+  #
+  # Usually defaults to 1.7976931348623157e+308.
+  #
+  MAX: Float
+
+  # <!-- rdoc-file=numeric.c -->
+  # The largest positive exponent in a double-precision floating point where 10
+  # raised to this power minus 1.
+  #
+  # Usually defaults to 308.
+  #
+  MAX_10_EXP: Integer
+
+  # <!-- rdoc-file=numeric.c -->
+  # The largest possible exponent value in a double-precision floating point.
+  #
+  # Usually defaults to 1024.
+  #
+  MAX_EXP: Integer
+
+  # <!-- rdoc-file=numeric.c -->
+  # The smallest positive normalized number in a double-precision floating point.
+  #
+  # Usually defaults to 2.2250738585072014e-308.
+  #
+  # If the platform supports denormalized numbers, there are numbers between zero
+  # and Float::MIN. 0.0.next_float returns the smallest positive floating point
+  # number including denormalized numbers.
+  #
+  MIN: Float
+
+  # <!-- rdoc-file=numeric.c -->
+  # The smallest negative exponent in a double-precision floating point where 10
+  # raised to this power minus 1.
+  #
+  # Usually defaults to -307.
+  #
+  MIN_10_EXP: Integer
+
+  # <!-- rdoc-file=numeric.c -->
+  # The smallest possible exponent value in a double-precision floating point.
+  #
+  # Usually defaults to -1021.
+  #
+  MIN_EXP: Integer
+
+  # <!-- rdoc-file=numeric.c -->
+  # An expression representing a value which is "not a number".
+  #
+  NAN: Float
+
+  # <!-- rdoc-file=numeric.c -->
+  # The base of the floating point, or number of unique digits used to represent
+  # the number.
+  #
+  # Usually defaults to 2 on most systems, which would represent a base-10
+  # decimal.
+  #
+  RADIX: Integer
 
   # <!--
   #   rdoc-file=numeric.c
@@ -109,10 +197,8 @@ class Float < Numeric
   #     10.0 % 4.0            # => 2.0
   #     10.0 % Rational(4, 1) # => 2.0
   #
-  def %: (Integer) -> Float
-       | (Float) -> Float
-       | (Rational) -> Float
-       | (Numeric) -> Numeric
+  def %: (Integer | Float other) -> Float
+       | [O < Numeric::_Modulo[S, R], S, R] (Numeric::_Coerce[self, O, S] other) -> R
 
   # <!--
   #   rdoc-file=numeric.c
@@ -126,8 +212,8 @@ class Float < Numeric
   #     f * Rational(1, 2) # => 1.57
   #     f * Complex(2, 0)  # => (6.28+0.0i)
   #
-  def *: (Complex) -> Complex
-       | (Numeric) -> Float
+  def *: (Integer | Float other) -> Float
+       | [O < Numeric::_Multiply[S, R], S, R] (Numeric::_Coerce[self, O, S] other) -> R
 
   # <!--
   #   rdoc-file=numeric.c
@@ -142,8 +228,9 @@ class Float < Numeric
   #     f ** Rational(2, 1) # => 9.8596
   #     f ** Complex(2, 0)  # => (9.8596+0i)
   #
-  def **: (Complex) -> Complex
-        | (Numeric) -> Float
+  def **: (Integer other) -> Float
+        | (Float other) -> (Float | Complex)
+        | [O < Numeric::_Power[S, R], S, R] (Numeric::_Coerce[self, O, S] other) -> R
 
   # <!--
   #   rdoc-file=numeric.c
@@ -157,10 +244,8 @@ class Float < Numeric
   #     f + Rational(1, 1)    # => 4.140000000000001
   #     f + Complex(1, 0)     # => (4.140000000000001+0i)
   #
-  def +: (Complex) -> Complex
-       | (Numeric) -> Float
-
-  def +@: () -> Float
+  def +: (Integer | Float other) -> Float
+       | [O < Numeric::_Add[S, R], S, R] (Numeric::_Coerce[self, O, S] other) -> R
 
   # <!--
   #   rdoc-file=numeric.c
@@ -174,8 +259,8 @@ class Float < Numeric
   #     f - Rational(1, 1)    # => 2.14
   #     f - Complex(1, 0)     # => (2.14+0i)
   #
-  def -: (Complex) -> Complex
-       | (Numeric) -> Float
+  def -: (Integer | Float other) -> Float
+       | [O < Numeric::_Subtract[S, R], S, R] (Numeric::_Coerce[self, O, S] other) -> R
 
   # <!--
   #   rdoc-file=numeric.rb
@@ -197,8 +282,8 @@ class Float < Numeric
   #     f / Rational(2, 1) # => 1.57
   #     f / Complex(2, 0)  # => (1.57+0.0i)
   #
-  def /: (Complex) -> Complex
-       | (Numeric) -> Float
+  def /: (Integer | Float other) -> Float
+       | [O < Numeric::_Divide[S, R], S, R] (Numeric::_Coerce[self, O, S] other) -> R
 
   # <!--
   #   rdoc-file=numeric.c
@@ -213,7 +298,8 @@ class Float < Numeric
   #
   # `Float::NAN < Float::NAN` returns an implementation-dependent value.
   #
-  def <: (Numeric) -> bool
+  def <: (Integer | Float other) -> Float
+       | [O < Numeric::_LessThan[S, R], S, R] (Numeric::_Coerce[self, O, S] other) -> R
 
   # <!--
   #   rdoc-file=numeric.c
@@ -229,7 +315,8 @@ class Float < Numeric
   #
   # `Float::NAN <= Float::NAN` returns an implementation-dependent value.
   #
-  def <=: (Numeric) -> bool
+  def <=: (Integer | Float other) -> Float
+        | [O < Numeric::_LessOrEqualTo[S, R], S, R] (Numeric::_Coerce[self, O, S] other) -> R
 
   # <!--
   #   rdoc-file=numeric.c
@@ -258,7 +345,9 @@ class Float < Numeric
   #
   # `Float::NAN <=> Float::NAN` returns an implementation-dependent value.
   #
-  def <=>: (Numeric) -> Integer?
+  def <=>: (Integer | Float other) -> (-1 | 0 | 1)?
+         | [O < Numeric::_Compare[S], S] (Numeric::_Coerce[self, O, S] other) -> (-1 | 0 | 1)?
+         | (untyped other) -> (-1 | 0 | 1)?
 
   # <!--
   #   rdoc-file=numeric.c
@@ -275,7 +364,7 @@ class Float < Numeric
   #
   # Related: Float#eql? (requires `other` to be a Float).
   #
-  def ==: (untyped) -> bool
+  def ==: (untyped other) -> bool
 
   # <!-- rdoc-file=numeric.c -->
   # Returns `true` if `other` has the same value as `self`, `false` otherwise:
@@ -289,7 +378,7 @@ class Float < Numeric
   #
   # Related: Float#eql? (requires `other` to be a Float).
   #
-  def ===: (untyped) -> bool
+  alias === ==
 
   # <!--
   #   rdoc-file=numeric.c
@@ -304,7 +393,8 @@ class Float < Numeric
   #
   # `Float::NAN > Float::NAN` returns an implementation-dependent value.
   #
-  def >: (Numeric) -> bool
+  def >: (Integer | Float other) -> Float
+       | [O < Numeric::_GreaterThan[S, R], S, R] (Numeric::_Coerce[self, O, S] other) -> R
 
   # <!--
   #   rdoc-file=numeric.c
@@ -320,7 +410,8 @@ class Float < Numeric
   #
   # `Float::NAN >= Float::NAN` returns an implementation-dependent value.
   #
-  def >=: (Numeric) -> bool
+  def >=: (Integer | Float other) -> Float
+        | [O < Numeric::_GreaterOrEqualTo[S, R], S, R] (Numeric::_Coerce[self, O, S] other) -> R
 
   # <!--
   #   rdoc-file=numeric.rb
@@ -334,12 +425,10 @@ class Float < Numeric
   #
   def abs: () -> Float
 
-  def abs2: () -> Float
-
   # <!-- rdoc-file=complex.c -->
   # Returns 0 if `self` is positive, Math::PI otherwise.
   #
-  def angle: () -> (Integer | Float)
+  def angle: () -> (0 | Float)
 
   # <!--
   #   rdoc-file=complex.c
@@ -384,7 +473,7 @@ class Float < Numeric
   # Related: Float#floor.
   #
   def ceil: () -> Integer
-          | (int digits) -> (Integer | Float)
+          | (int digits) -> (Float | Integer)
 
   # <!--
   #   rdoc-file=numeric.c
@@ -400,11 +489,7 @@ class Float < Numeric
   #
   # Raises an exception if a type conversion fails.
   #
-  def coerce: (Numeric) -> [ Float, Float ]
-
-  def conj: () -> Float
-
-  def conjugate: () -> Float
+  def coerce: (_ToF other) -> [Float, self]
 
   # <!--
   #   rdoc-file=rational.c
@@ -415,8 +500,6 @@ class Float < Numeric
   # See also Float#numerator.
   #
   def denominator: () -> Integer
-
-  def div: (Numeric) -> Integer
 
   # <!--
   #   rdoc-file=numeric.c
@@ -442,9 +525,8 @@ class Float < Numeric
   #     13.0.divmod(4.0)            # => [3, 1.0]
   #     13.0.divmod(Rational(4, 1)) # => [3, 1.0]
   #
-  def divmod: (Numeric) -> [ Numeric, Numeric ]
-
-  def dup: () -> self
+  def divmod: (Integer | Float other) -> [Integer, Float]
+            | [O < Numeric::_DivMod[S, Whole, Part], S, Whole, Part] (Numeric::_Coerce[self, O, S] other) -> [Whole, Part]
 
   # <!--
   #   rdoc-file=numeric.c
@@ -463,7 +545,7 @@ class Float < Numeric
   #
   # Related: Float#== (performs type conversions).
   #
-  def eql?: (untyped) -> bool
+  def eql?: (untyped other) -> bool
 
   # <!-- rdoc-file=numeric.c -->
   # Returns the quotient from dividing `self` by `other`:
@@ -474,8 +556,7 @@ class Float < Numeric
   #     f.quo(Rational(2, 1)) # => 1.57
   #     f.quo(Complex(2, 0))  # => (1.57+0.0i)
   #
-  def fdiv: (Complex) -> Complex
-          | (Numeric) -> Float
+  alias fdiv quo
 
   # <!--
   #   rdoc-file=numeric.c
@@ -530,7 +611,7 @@ class Float < Numeric
   # Related: Float#ceil.
   #
   def floor: () -> Integer
-           | (int digits) -> (Integer | Numeric)
+           | (int digits) -> (Float | Integer)
 
   # <!--
   #   rdoc-file=numeric.c
@@ -541,12 +622,6 @@ class Float < Numeric
   # See also Object#hash.
   #
   def hash: () -> Integer
-
-  def i: () -> Complex
-
-  def imag: () -> Integer
-
-  def imaginary: () -> Integer
 
   # <!--
   #   rdoc-file=numeric.c
@@ -570,7 +645,7 @@ class Float < Numeric
   #     f = 0.0/0.0  # => NaN
   #     f.infinite?  # => nil
   #
-  def infinite?: () -> Integer?
+  def infinite?: () -> (-1 | 1 | nil)
 
   # <!-- rdoc-file=numeric.c -->
   # Returns a string containing a representation of `self`; depending of the value
@@ -587,8 +662,6 @@ class Float < Numeric
   #     (-10.1**500).to_s # => "-Infinity" (0.0/0.0).to_s    # => "NaN"
   #
   alias inspect to_s
-
-  def integer?: () -> bool
 
   # <!--
   #   rdoc-file=numeric.rb
@@ -621,7 +694,7 @@ class Float < Numeric
   #     10.0 % 4.0            # => 2.0
   #     10.0 % Rational(4, 1) # => 2.0
   #
-  def modulo: (Numeric) -> Float
+  alias modulo %
 
   # <!--
   #   rdoc-file=numeric.c
@@ -689,8 +762,6 @@ class Float < Numeric
   #
   def next_float: () -> Float
 
-  def nonzero?: () -> self?
-
   # <!--
   #   rdoc-file=rational.c
   #   - flo.numerator  ->  integer
@@ -703,14 +774,12 @@ class Float < Numeric
   #
   # See also Float#denominator.
   #
-  def numerator: () -> Integer
+  def numerator: () -> (Integer | self)
 
   # <!-- rdoc-file=complex.c -->
   # Returns 0 if `self` is positive, Math::PI otherwise.
   #
   alias phase angle
-
-  def polar: () -> [ Float, Integer | Float ]
 
   # <!--
   #   rdoc-file=numeric.rb
@@ -768,8 +837,8 @@ class Float < Numeric
   #     f.quo(Rational(2, 1)) # => 1.57
   #     f.quo(Complex(2, 0))  # => (1.57+0.0i)
   #
-  def quo: (Complex) -> Complex
-         | (Numeric) -> Float
+  def quo: (Integer | Float other) -> Float
+         | [O < Numeric::_Divide[S, R], S, R] (Numeric::_Coerce[self, O, S] other) -> R
 
   # <!--
   #   rdoc-file=rational.c
@@ -785,17 +854,7 @@ class Float < Numeric
   #
   # See also Float#to_r.
   #
-  def rationalize: (?Numeric eps) -> Rational
-
-  def real: () -> Float
-
-  def real?: () -> true
-
-  def rect: () -> [ Float, Numeric ]
-
-  alias rectangular rect
-
-  def remainder: (Numeric) -> Float
+  def rationalize: (?Numeric::_Eps eps) -> Rational
 
   # <!--
   #   rdoc-file=numeric.c
@@ -850,15 +909,8 @@ class Float < Numeric
   #
   # Related: Float#truncate.
   #
-  def round: (?half: :up | :down | :even) -> Integer
-           | (int digits, ?half: :up | :down | :even) -> (Integer | Float)
-
-  def step: (?Numeric limit, ?Numeric step) { (Float) -> void } -> self
-          | (?Numeric limit, ?Numeric step) -> Enumerator[Float, self]
-          | (?by: Numeric, ?to: Numeric) { (Float) -> void } -> self
-          | (?by: Numeric, ?to: Numeric) -> Enumerator[Float, self]
-
-  def to_c: () -> Complex
+  def round: (?half: Numeric::round_direction) -> Integer
+           | (int digits, ?half: Numeric::round_direction) -> (Integer | Float)
 
   # <!--
   #   rdoc-file=numeric.rb
@@ -866,7 +918,7 @@ class Float < Numeric
   # -->
   # Returns `self` (which is already a Float).
   #
-  def to_f: () -> Float
+  def to_f: () -> self
 
   # <!--
   #   rdoc-file=numeric.c
@@ -973,7 +1025,7 @@ class Float < Numeric
   # Related: Float#round.
   #
   def truncate: () -> Integer
-              | (Integer ndigits) -> (Integer | Float)
+              | (int ndigits) -> (Integer | Float)
 
   # <!--
   #   rdoc-file=numeric.rb
@@ -982,118 +1034,61 @@ class Float < Numeric
   # Returns `true` if `self` is 0.0, `false` otherwise.
   #
   def zero?: () -> bool
+
+  %a{steep:deprecated}
+  def +@: () -> Float
+
+  %a{steep:deprecated}
+  def abs2: () -> Float
+
+  %a{steep:deprecated}
+  def conj: () -> Float
+
+  %a{steep:deprecated}
+  def conjugate: () -> Float
+
+  %a{steep:deprecated}
+  def div: (Numeric) -> Integer
+
+  %a{steep:deprecated}
+  def dup: () -> self
+
+  %a{steep:deprecated}
+  def i: () -> Complex
+
+  %a{steep:deprecated}
+  def imag: () -> Integer
+
+  %a{steep:deprecated}
+  def imaginary: () -> Integer
+
+  %a{steep:deprecated}
+  def nonzero?: () -> self?
+
+  %a{steep:deprecated}
+  def polar: () -> [ Float, Integer | Float ]
+
+  %a{steep:deprecated}
+  def real: () -> Float
+
+  %a{steep:deprecated}
+  def real?: () -> true
+
+  %a{steep:deprecated}
+  def rect: () -> [ Float, Numeric ]
+
+  %a{steep:deprecated}
+  alias rectangular rect
+
+  %a{steep:deprecated}
+  def remainder: (Numeric) -> Float
+
+  %a{steep:deprecated}
+  def step: (?Numeric limit, ?Numeric step) { (Float) -> void } -> self
+          | (?Numeric limit, ?Numeric step) -> Enumerator[Float, self]
+          | (?by: Numeric, ?to: Numeric) { (Float) -> void } -> self
+          | (?by: Numeric, ?to: Numeric) -> Enumerator[Float, self]
+
+  %a{steep:deprecated}
+  def to_c: () -> Complex
 end
-
-# <!-- rdoc-file=numeric.c -->
-# The minimum number of significant decimal digits in a double-precision
-# floating point.
-#
-# Usually defaults to 15.
-#
-Float::DIG: Integer
-
-# <!-- rdoc-file=numeric.c -->
-# The difference between 1 and the smallest double-precision floating point
-# number greater than 1.
-#
-# Usually defaults to 2.2204460492503131e-16.
-#
-Float::EPSILON: Float
-
-# <!-- rdoc-file=numeric.c -->
-# An expression representing positive infinity.
-#
-Float::INFINITY: Float
-
-Float::Infinity: Float
-
-# <!-- rdoc-file=numeric.c -->
-# The number of base digits for the `double` data type.
-#
-# Usually defaults to 53.
-#
-Float::MANT_DIG: Integer
-
-# <!-- rdoc-file=numeric.c -->
-# The largest possible integer in a double-precision floating point number.
-#
-# Usually defaults to 1.7976931348623157e+308.
-#
-Float::MAX: Float
-
-# <!-- rdoc-file=numeric.c -->
-# The largest positive exponent in a double-precision floating point where 10
-# raised to this power minus 1.
-#
-# Usually defaults to 308.
-#
-Float::MAX_10_EXP: Integer
-
-# <!-- rdoc-file=numeric.c -->
-# The largest possible exponent value in a double-precision floating point.
-#
-# Usually defaults to 1024.
-#
-Float::MAX_EXP: Integer
-
-# <!-- rdoc-file=numeric.c -->
-# The smallest positive normalized number in a double-precision floating point.
-#
-# Usually defaults to 2.2250738585072014e-308.
-#
-# If the platform supports denormalized numbers, there are numbers between zero
-# and Float::MIN. 0.0.next_float returns the smallest positive floating point
-# number including denormalized numbers.
-#
-Float::MIN: Float
-
-# <!-- rdoc-file=numeric.c -->
-# The smallest negative exponent in a double-precision floating point where 10
-# raised to this power minus 1.
-#
-# Usually defaults to -307.
-#
-Float::MIN_10_EXP: Integer
-
-# <!-- rdoc-file=numeric.c -->
-# The smallest possible exponent value in a double-precision floating point.
-#
-# Usually defaults to -1021.
-#
-Float::MIN_EXP: Integer
-
-# <!-- rdoc-file=numeric.c -->
-# An expression representing a value which is "not a number".
-#
-Float::NAN: Float
-
-# <!-- rdoc-file=numeric.c -->
-# The base of the floating point, or number of unique digits used to represent
-# the number.
-#
-# Usually defaults to 2 on most systems, which would represent a base-10
-# decimal.
-#
-Float::RADIX: Integer
-
-# Deprecated, do not use.
-#
-# Represents the rounding mode for floating point addition at the start time.
-#
-# Usually defaults to 1, rounding to the nearest number.
-#
-# Other modes include:
-#
-# -1
-# :   Indeterminable
-# 0
-# :   Rounding towards zero
-# 1
-# :   Rounding to the nearest number
-# 2
-# :   Rounding towards positive infinity
-# 3
-# :   Rounding towards negative infinity
-#
-#
-Float::ROUNDS: Integer

@@ -162,6 +162,70 @@
 class Numeric
   include Comparable
 
+  interface _Coerce[Other, EquivOther, EquivSelf]
+    def coerce: (Other rhs) -> [EquivOther, EquivSelf]
+  end
+
+  interface _Add[Other, Return]
+    def +: (Other other) -> Return
+  end
+
+  interface _Subtract[Other, Return]
+    def -: (Other other) -> Return
+  end
+
+  interface _Multiply[Other, Return]
+    def *: (Other other) -> Return
+  end
+
+  interface _Divide[Other, Return]
+    def /: (Other other) -> Return
+  end
+
+  interface _Modulo[Other, Return]
+    def %: (Other other) -> Return
+  end
+
+  interface _Power[Other, Return]
+    def **: (Other other) -> Return
+  end
+
+  interface _Divmod[Other, Whole, Part]
+    def divmod: (Other other) -> [Whole, Part]
+  end
+
+  interface _Compare[Other]
+    def <=>: (Other other) -> (-1 | 0 | 1)
+           | (untyped other) -> (-1 | 0 | 1)?
+  end
+
+  interface _GreaterThan[Other, Return]
+    def >: (Other other) -> Return
+  end
+
+  interface _GreaterOrEqualTo[Other, Return]
+    def >=: (Other other) -> Return
+  end
+
+  interface _LessThan[Other, Return]
+    def <: (Other other) -> Return
+  end
+
+  interface _LessOrEqualTo[Other, Return]
+    def <=: (Other other) -> Return
+  end
+
+  type round_direction = :up | :down | :even | 'up' | 'down' | 'even' | string | nil
+
+  # The interface for the sole optional argument to subclasses of `Numeric`'s `rationalize` function.
+  interface _Eps
+    # Get the absolute value of this variable.
+    #
+    # Technically, the return value needs to be usable within `<subclass>#-` and `<subclass>#+`, but
+    # it's a bit specific; if you have a usecase for this please create a PR 
+    def abs: () -> Numeric
+  end
+
   public
 
   # <!--
