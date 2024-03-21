@@ -1,9 +1,8 @@
 require_relative "test_helper"
 
 class Thread::BacktraceSingletonTest < Test::Unit::TestCase
-  include TypeAssertions
+  include TestHelper
 
-  # library "pathname", "set", "securerandom"     # Declare library signatures to load
   testing "singleton(::Thread::Backtrace)"
 
   def test_limit

@@ -352,8 +352,7 @@ class PStore
   #   - abort()
   # -->
   # Exits the current transaction block, discarding any changes specified in the
-  # transaction block. See [Committing or
-  # Aborting](rdoc-ref:PStore@Committing+or+Aborting).
+  # [transaction block](rdoc-ref:PStore@The+Transaction+Block).
   #
   # Raises an exception if called outside a transaction block.
   #
@@ -364,8 +363,7 @@ class PStore
   #   - commit()
   # -->
   # Exits the current transaction block, committing any changes specified in the
-  # transaction block. See [Committing or
-  # Aborting](rdoc-ref:PStore@Committing+or+Aborting).
+  # [transaction block](rdoc-ref:PStore@The+Transaction+Block).
   #
   # Raises an exception if called outside a transaction block.
   #

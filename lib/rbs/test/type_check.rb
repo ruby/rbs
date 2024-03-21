@@ -10,8 +10,6 @@ module RBS
       attr_reader :instance_class
       attr_reader :class_class
 
-      attr_reader :const_cache
-
       DEFAULT_SAMPLE_SIZE = 100
 
       def initialize(self_class:, builder:, sample_size:, unchecked_classes:, instance_class: Object, class_class: Module)
@@ -21,7 +19,6 @@ module RBS
         @builder = builder
         @sample_size = sample_size
         @unchecked_classes = unchecked_classes.uniq
-        @const_cache = {}
       end
 
       def overloaded_call(method, method_name, call, errors:)
@@ -38,11 +35,24 @@ module RBS
         if es.size == 1
           errors.push(*es[0])
         else
-          errors << Errors::UnresolvedOverloadingError.new(
+          error = Errors::UnresolvedOverloadingError.new(
             klass: self_class,
             method_name: method_name,
             method_types: method.method_types
           )
+          RBS.logger.warn do
+            tag = Errors.method_tag(error)
+            message = +"#{tag} UnresolvedOverloadingError "
+            message << method.method_types.zip(es).map do |method_type, es|
+              msg = +"method_type=`#{method_type}`"
+              details = es.map do |e|
+                "\"#{Errors.to_string(e).sub("#{tag} ", "") }\""
+              end.join(', ')
+              msg << " details=[#{details}]"
+            end.join(', ')
+            message
+          end
+          errors << error
         end
 
         errors
@@ -136,7 +146,7 @@ module RBS
       end
 
       def keyword?(value)
-        value.is_a?(Hash) && value.keys.all? {|key| key.is_a?(Symbol) }
+        Hash === value && value.each_key.all?(Symbol)
       end
 
       def zip_args(args, fun, &block)
@@ -208,11 +218,9 @@ module RBS
       end
 
       def get_class(type_name)
-        const_cache[type_name] ||= begin
-                                     Object.const_get(type_name.to_s)
-                                   rescue NameError
-                                     nil
-                                   end
+        Object.const_get(type_name.to_s)
+      rescue NameError
+        nil
       end
 
       def is_double?(value)
@@ -301,16 +309,22 @@ module RBS
                             end
           val.is_a?(singleton_class)
         when Types::Interface
-          methods = Set.new(Test.call(val, METHODS))
-          if (definition = builder.build_interface(type.name))
-            definition.methods.each_key.all? do |method_name|
-              methods.member?(method_name)
+          if (definition = builder.build_interface(type.name.absolute!))
+            definition.methods.each.all? do |method_name, method|
+              next false unless Test.call(val, RESPOND_TOP, method_name)
+
+              meth = Test.call(val, METHOD, method_name)
+              method.defs.all? do |type_def|
+                type_def.member.overloads.all? do |overload|
+                  callable_argument?(meth.parameters, overload.method_type)
+                end
+              end
             end
           end
         when Types::Variable
           true
         when Types::Literal
-          val == type.literal
+          type.literal == val
         when Types::Union
           type.types.any? {|type| value(val, type) }
         when Types::Intersection
@@ -318,7 +332,7 @@ module RBS
         when Types::Optional
           Test.call(val, IS_AP, ::NilClass) || value(val, type.type)
         when Types::Alias
-          value(val, builder.expand_alias(type.name))
+          value(val, builder.expand_alias2(type.name.absolute!, type.args))
         when Types::Tuple
           Test.call(val, IS_AP, ::Array) &&
             type.types.map.with_index {|ty, index| value(val[index], ty) }.all?
@@ -330,6 +344,73 @@ module RBS
         else
           false
         end
+      end
+
+      private
+
+      def callable_argument?(parameters, method_type)
+        fun = method_type.type
+        take_has_rest = !!parameters.find { |(op, _)| op == :rest }
+
+        fun.required_positionals.each do
+          op, _ = parameters.first
+          return false if op.nil? || op == :keyreq || op == :key || op == :keyrest
+          parameters.shift if op == :req || op == :opt
+        end
+
+        fun.optional_positionals.each do
+          op, _ = parameters.first
+          return false if op.nil? || op == :req || op == :keyreq || op == :key || op == :keyrest
+          parameters.shift if op == :opt
+        end
+
+        if fun.rest_positionals
+          op, _ = parameters.shift
+          return false if op.nil? || op != :rest
+        end
+
+        fun.trailing_positionals.each do
+          op, _ = parameters.first
+          return false if !take_has_rest && (op.nil? || op == :keyreq || op == :key || op == :keyrest)
+          index = parameters.find_index { |(op, _)| op == :req }
+          parameters.delete_at(index) if index
+        end
+
+        if fun.has_keyword?
+          return false if !take_has_rest && parameters.empty?
+
+          fun.required_keywords.each do |name, _|
+            return false if !take_has_rest && parameters.empty?
+            index = parameters.find_index { |(op, n)| (op == :keyreq || op == :key) && n == name }
+            parameters.delete_at(index) if index
+          end
+
+          if !fun.optional_keywords.empty?
+            fun.optional_keywords.each do |name, _|
+              return false if !take_has_rest && parameters.empty?
+              index = parameters.find_index { |(op, n)| op == :key && n == name }
+              parameters.delete_at(index) if index
+            end
+            op, _ = parameters.first
+            return false if op == :req
+          end
+
+          if fun.rest_keywords
+            op, _ = parameters.first
+            return false if (!take_has_rest && op.nil?)
+            # f(a) allows (Integer, a: Integer)
+            return false if op == :req && fun.required_keywords.empty?
+          end
+
+          op, _ = parameters.first
+          return true if (op == :req || op == :opt) && parameters.length == 1
+        end
+
+        # rest required arguments
+        op, _ = parameters.first
+        return false if op == :req || op == :keyreq
+
+        true
       end
     end
   end

@@ -8,6 +8,10 @@ require "stringio"
 
 module RBS
   class CLI
+    autoload :ColoredIO, 'rbs/cli/colored_io'
+    autoload :Diff, 'rbs/cli/diff'
+    autoload :Validate, 'rbs/cli/validate'
+
     class LibraryOptions
       attr_accessor :core_root
       attr_accessor :config_path
@@ -90,7 +94,7 @@ module RBS
       @stderr = stderr
     end
 
-    COMMANDS = [:ast, :annotate, :list, :ancestors, :methods, :method, :validate, :constant, :paths, :prototype, :vendor, :parse, :test, :collection, :subtract]
+    COMMANDS = [:ast, :annotate, :list, :ancestors, :methods, :method, :validate, :constant, :paths, :prototype, :vendor, :parse, :test, :collection, :subtract, :diff]
 
     def parse_logging_options(opts)
       opts.on("--log-level LEVEL", "Specify log level (defaults to `warn`)") do |level|
@@ -433,105 +437,15 @@ EOU
       stdout.puts "  accessibility: #{method.accessibility}"
       stdout.puts "  types:"
       separator = " "
-      for type in method.method_types
-        stdout.puts "    #{separator} #{type}"
+      length_max = method.method_types.map { |type| type.to_s.length }.max or raise
+      method.method_types.each do |type|
+        stdout.puts format("    %s %-#{length_max}s   at %s", separator, type, type.location)
         separator = "|"
       end
     end
 
     def run_validate(args, options)
-      OptionParser.new do |opts|
-        opts.banner = <<EOU
-Usage: rbs validate
-
-Validate RBS files. It ensures the type names in RBS files are present and the type applications have correct arity.
-
-Examples:
-
-  $ rbs validate
-EOU
-
-        opts.on("--silent") do
-          @stdout = StringIO.new
-        end
-      end.parse!(args)
-
-      loader = options.loader()
-      env = Environment.from_loader(loader).resolve_type_names
-
-      builder = DefinitionBuilder.new(env: env)
-      validator = Validator.new(env: env, resolver: Resolver::TypeNameResolver.new(env))
-
-      env.class_decls.each do |name, decl|
-        stdout.puts "Validating class/module definition: `#{name}`..."
-        builder.build_instance(name).each_type do |type|
-          validator.validate_type type, context: nil
-        end
-        builder.build_singleton(name).each_type do |type|
-          validator.validate_type type, context: nil
-        end
-
-        d = decl.primary.decl
-
-        validator.validate_type_params(
-          d.type_params,
-          type_name: name,
-          location: d.location&.aref(:type_params)
-        )
-
-        decl.decls.each do |d|
-          d.decl.each_member do |member|
-            case member
-            when AST::Members::MethodDefinition
-              validator.validate_method_definition(member, type_name: name)
-            end
-          end
-        end
-      end
-
-      env.class_alias_decls.each do |name, entry|
-        stdout.puts "Validating class/module alias definition: `#{name}`..."
-        validator.validate_class_alias(entry: entry)
-      end
-
-      env.interface_decls.each do |name, decl|
-        stdout.puts "Validating interface: `#{name}`..."
-        builder.build_interface(name).each_type do |type|
-          validator.validate_type type, context: nil
-        end
-
-        validator.validate_type_params(
-          decl.decl.type_params,
-          type_name: name,
-          location: decl.decl.location&.aref(:type_params)
-        )
-
-        decl.decl.members.each do |member|
-          case member
-          when AST::Members::MethodDefinition
-            validator.validate_method_definition(member, type_name: name)
-          end
-        end
-      end
-
-      env.constant_decls.each do |name, const|
-        stdout.puts "Validating constant: `#{name}`..."
-        validator.validate_type const.decl.type, context: const.context
-        builder.ensure_namespace!(name.namespace, location: const.decl.location)
-      end
-
-      env.global_decls.each do |name, global|
-        stdout.puts "Validating global: `#{name}`..."
-        validator.validate_type global.decl.type, context: nil
-      end
-
-      env.type_alias_decls.each do |name, decl|
-        stdout.puts "Validating alias: `#{name}`..."
-        builder.expand_alias1(name).tap do |type|
-          validator.validate_type type, context: nil
-        end
-        validator.validate_type_alias(entry: decl)
-      end
+      CLI::Validate.new(args: args, options: options).run
     end
 
     def run_constant(args, options)
@@ -644,7 +558,10 @@ EOU
         require_libs = []
         relative_libs = []
         merge = false
+        todo = false
         owners_included = []
+        outline = false
+        autoload = false
 
         OptionParser.new do |opts|
           opts.banner = <<EOU
@@ -657,7 +574,7 @@ Examples:
 
   $ rbs prototype runtime String
   $ rbs prototype runtime --require set Set
-  $ rbs prototype runtime -R lib/rbs RBS::*
+  $ rbs prototype runtime -R lib/rbs RBS RBS::*
 
 Options:
 EOU
@@ -670,23 +587,65 @@ EOU
           opts.on("--merge", "Merge generated prototype RBS with existing RBS") do
             merge = true
           end
+          opts.on("--todo", "Generates only undefined methods compared to objects") do
+            Warning.warn("Geneating prototypes with `--todo` option is experimental\n", category: :experimental)
+            todo = true
+          end
           opts.on("--method-owner CLASS", "Generate method prototypes if the owner of the method is [CLASS]") do |klass|
             owners_included << klass
+          end
+          opts.on("--outline", "Generates only module/class/constant declaration (no method definition)") do
+            outline = true
+          end
+          opts.on("--autoload", "Load all autoload path") do
+            autoload = true
           end
         end.parse!(args)
 
         loader = options.loader()
         env = Environment.from_loader(loader).resolve_type_names
 
-        require_libs.each do |lib|
-          require(lib)
+        # @type var autoloader: ^() { () -> void } -> void
+        autoloader = ->(&block) {
+          if autoload
+            hook = Module.new do
+              def autoload(name, path)
+                super
+              end
+            end
+            ::Module.prepend(hook)
+            ::Kernel.prepend(hook)
+
+            arguments = []
+            TracePoint.new(:call) do |tp|
+              base = tp.self.kind_of?(Module) ? tp.self : Kernel
+              name = (tp.binding or raise).local_variable_get(:name)
+              arguments << [base, name]
+            end.enable(target: hook.instance_method(:autoload), &block)
+
+            arguments.each do |(base, name)|
+              begin
+                base.const_get(name)
+              rescue LoadError, StandardError
+              end
+            end
+          else
+            block.call
+          end
+        }
+        autoloader.call do
+          require_libs.each do |lib|
+            require(lib)
+          end
+          relative_libs.each do |lib|
+            eval("require_relative(lib)", binding, "rbs")
+          end
         end
 
-        relative_libs.each do |lib|
-          eval("require_relative(lib)", binding, "rbs")
-        end
+        runtime = Prototype::Runtime.new(patterns: args, env: env, merge: merge, todo: todo, owners_included: owners_included)
+        runtime.outline = outline
 
-        decls = Prototype::Runtime.new(patterns: args, env: env, merge: merge, owners_included: owners_included).decls
+        decls = runtime.decls
 
         writer = Writer.new(out: stdout)
         writer.write decls
@@ -820,7 +779,12 @@ EOU
             output_path = (output_dir + relative_path).sub_ext(".rbs")
 
             parser = new_parser[]
-            parser.parse file_path.read()
+            begin
+              parser.parse file_path.read()
+            rescue SyntaxError
+              stdout.puts "  ⚠️  Unable to parse due to SyntaxError: `#{file_path}`"
+              next
+            end
 
             if output_path.file?
               if force
@@ -1090,6 +1054,8 @@ EOB
     end
 
     def run_collection(args, options)
+      require 'bundler'
+
       opts = collection_options(args)
       params = {}
       opts.order args.drop(1), into: params
@@ -1129,11 +1095,10 @@ EOB
           # A directory to install the downloaded RBSs
           path: .gem_rbs_collection
 
-          gems:
-            # Skip loading rbs gem's RBS.
-            # It's unnecessary if you don't use rbs as a library.
-            - name: rbs
-              ignore: true
+          # gems:
+          #   # If you want to avoid installing rbs files for gems, you can specify them here.
+          #   - name: GEM_NAME
+          #     ignore: true
         YAML
         stdout.puts "created: #{config_path}"
       when 'clean'
@@ -1241,12 +1206,20 @@ EOB
           w.write(subtracted)
 
           if write_to_file
-            rbs_path.write(io.string)
+            if io.string.empty?
+              rbs_path.delete
+            else
+              rbs_path.write(io.string)
+            end
           else
             stdout.puts(io.string)
           end
         end
       end
+    end
+
+    def run_diff(argv, library_options)
+      Diff.new(argv: argv, library_options: library_options, stdout: stdout, stderr: stderr).run
     end
   end
 end

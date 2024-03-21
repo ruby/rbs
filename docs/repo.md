@@ -13,7 +13,7 @@ Assume there is a rubygem called `bug-free-doodle` and our application depends o
 
 One workaround is to add type definitions of the library in the application signatures.
 
-```
+```rbs
 # sig/polyfill/bug-free-doodle.rbs
 
 module Bug

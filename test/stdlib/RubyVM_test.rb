@@ -1,7 +1,7 @@
 require_relative "test_helper"
 
 class RubyVM::AbstractSyntaxTreeSingletonTest < Test::Unit::TestCase
-  include TypeAssertions
+  include TestHelper
 
   testing "singleton(::RubyVM::AbstractSyntaxTree)"
 
@@ -29,7 +29,7 @@ class RubyVM::AbstractSyntaxTreeSingletonTest < Test::Unit::TestCase
 end
 
 class RubyVM::AbstractSyntaxTree::NodeTest < Test::Unit::TestCase
-  include TypeAssertions
+  include TestHelper
 
   testing "::RubyVM::AbstractSyntaxTree::Node"
 

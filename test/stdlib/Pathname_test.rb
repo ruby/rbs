@@ -2,7 +2,7 @@ require_relative "test_helper"
 require 'pathname'
 
 class PathnameSingletonTest < Test::Unit::TestCase
-  include TypeAssertions
+  include TestHelper
   library 'pathname'
   testing 'singleton(::Pathname)'
 
@@ -38,7 +38,7 @@ class PathnameSingletonTest < Test::Unit::TestCase
 end
 
 class PathnameInstanceTest < Test::Unit::TestCase
-  include TypeAssertions
+  include TestHelper
   library 'pathname'
   testing '::Pathname'
 
@@ -606,8 +606,9 @@ class PathnameInstanceTest < Test::Unit::TestCase
                      Pathname('.'), :relative_path_from, Pathname('.')
     assert_send_type '(String) -> Pathname',
                      Pathname('.'), :relative_path_from, '.'
-    assert_send_type '(ToStr) -> Pathname',
-                     Pathname('.'), :relative_path_from, ToStr.new('.')
+
+    assert_send_type '(_ToStr) -> Pathname',
+                     Pathname('.'), :relative_path_from, ToStr.new('.').__with_object_methods(:is_a?)
   end
 
   def test_rename
@@ -814,5 +815,25 @@ class PathnameInstanceTest < Test::Unit::TestCase
   def test_zero?
     assert_send_type '() -> bool',
                      Pathname(File.expand_path(__FILE__)), :zero?
+  end
+end
+
+class PathnameKernelTest < Test::Unit::TestCase
+  include TestHelper
+  library 'pathname'
+  testing '::Kernel'
+
+  def test_Pathname
+    with_string("Gemfile") do
+      assert_send_type(
+        "(::string) -> ::Pathname",
+        self, :Pathname, _1
+      )
+    end
+
+    assert_send_type(
+      "(::Pathname) -> ::Pathname",
+      self, :Pathname, Pathname.pwd
+    )
   end
 end

@@ -1,38 +1,66 @@
 require_relative "test_helper"
 
-class FalseClassTest < StdlibTest
-  target FalseClass
+class FalseClassInstanceTest < Test::Unit::TestCase
+  include TestHelper
+
+  testing '::FalseClass'
 
   def test_not
-    !false
+    assert_send_type "() -> true",
+                     false, :!
   end
 
   def test_and
-    false & true
+    assert_send_type "(false) -> false",
+                     false, :&, false
+    assert_send_type "(true) -> false",
+                     false, :&, true
+    assert_send_type "(nil) -> false",
+                     false, :&, nil
+    assert_send_type "(untyped) -> false",
+                     false, :&, Object.new
   end
 
   def test_eqq
-    false === false
-    false === true
+    assert_send_type "(false) -> true",
+                     false, :===, false
+    assert_send_type "(true) -> false",
+                     false, :===, true
+    assert_send_type "(nil) -> false",
+                     false, :===, nil
+    assert_send_type "(untyped) -> false",
+                     false, :===, Object.new
   end
 
   def test_xor
-    false ^ false
-    false ^ nil
-    false ^ 42
+    assert_send_type "(false) -> false",
+                     false, :^, false
+    assert_send_type "(true) -> true",
+                     false, :^, true
+    assert_send_type "(nil) -> false",
+                     false, :^, nil
+    assert_send_type "(untyped) -> true",
+                     false, :^, Object.new
   end
 
   def test_inspect
-    false.inspect
+    assert_send_type "() -> 'false'",
+                     false, :inspect
   end
 
   def test_to_s
-    false.to_s
+    assert_send_type "() -> 'false'",
+                     false, :to_s
   end
 
   def test_or
-    false | false
-    false | nil
-    false | 42
+    assert_send_type "(false) -> false",
+                     false, :|, false
+    assert_send_type "(true) -> true",
+                     false, :|, true
+    assert_send_type "(nil) -> false",
+                     false, :|, nil
+    assert_send_type "(untyped) -> true",
+                     false, :|, Object.new
   end
 end

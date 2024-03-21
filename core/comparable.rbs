@@ -8,25 +8,28 @@
 # implement the conventional comparison operators (`<`, `<=`, `==`, `>=`, and
 # `>`) and the method `between?`.
 #
-#     class SizeMatters
+#     class StringSorter
 #       include Comparable
+#
 #       attr :str
 #       def <=>(other)
 #         str.size <=> other.str.size
 #       end
+#
 #       def initialize(str)
 #         @str = str
 #       end
+#
 #       def inspect
 #         @str
 #       end
 #     end
 #
-#     s1 = SizeMatters.new("Z")
-#     s2 = SizeMatters.new("YY")
-#     s3 = SizeMatters.new("XXX")
-#     s4 = SizeMatters.new("WWWW")
-#     s5 = SizeMatters.new("VVVVV")
+#     s1 = StringSorter.new("Z")
+#     s2 = StringSorter.new("YY")
+#     s3 = StringSorter.new("XXX")
+#     s4 = StringSorter.new("WWWW")
+#     s5 = StringSorter.new("VVVVV")
 #
 #     s1 < s2                       #=> true
 #     s4.between?(s1, s3)           #=> false
@@ -40,8 +43,8 @@
 # *   #<: Returns whether `self` is less than the given object.
 # *   #<=: Returns whether `self` is less than or equal to the given object.
 # *   #==: Returns whether `self` is equal to the given object.
-# *   #>: Returns whether `self` is greater than or equal to the given object.
-# *   #>=: Returns whether `self` is greater than the given object.
+# *   #>: Returns whether `self` is greater than the given object.
+# *   #>=: Returns whether `self` is greater than or equal to the given object.
 # *   #between?: Returns `true` if `self` is between two given objects.
 # *   #clamp: For given objects `min` and `max`, or range `(min..max)`, returns:
 #
@@ -123,6 +126,12 @@ module Comparable : _WithSpaceshipOperator
   #
   #     'd'.clamp('a', 'f')      #=> 'd'
   #     'z'.clamp('a', 'f')      #=> 'f'
+  #
+  # If *min* is `nil`, it is considered smaller than *obj*, and if *max* is `nil`,
+  # it is considered greater than *obj*.
+  #
+  #     -20.clamp(0, nil)           #=> 0
+  #     523.clamp(nil, 100)         #=> 100
   #
   # In `(range)` form, returns *range.begin* if *obj* `<=>` *range.begin* is less
   # than zero, *range.end* if *obj* `<=>` *range.end* is greater than zero, and

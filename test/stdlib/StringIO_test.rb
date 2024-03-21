@@ -16,12 +16,12 @@ class StringIOTest < StdlibTest
   end
 
   def test_close_write
-    io = StringIO.new('example')
+    io = StringIO.new(+'example')
     io.close_write
   end
 
   def test_closed_write?
-    io = StringIO.new('example')
+    io = StringIO.new(+'example')
     io.closed_write?
     io.close_write
     io.closed_write?
@@ -40,7 +40,7 @@ class StringIOTest < StdlibTest
 end
 
 class StringIOTypeTest < Test::Unit::TestCase
-  include TypeAssertions
+  include TestHelper
 
   testing '::StringIO'
 
@@ -49,5 +49,14 @@ class StringIOTypeTest < Test::Unit::TestCase
 
     assert_send_type "(*String data) -> Integer",
                      io, :write, "a", "b"
+  end
+
+  def test_truncate
+    io = StringIO.new
+
+    assert_send_type(
+      "(Integer) -> 0",
+      io, :truncate, 10
+    )
   end
 end

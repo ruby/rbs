@@ -1,7 +1,7 @@
 require_relative "../test_helper"
 
 class IO_Buffer_SingletonTest < Test::Unit::TestCase
-  include TypeAssertions
+  include TestHelper
   testing "singleton(::IO::Buffer)"
 
   def test_for
@@ -33,10 +33,19 @@ class IO_Buffer_SingletonTest < Test::Unit::TestCase
       IO::Buffer, :new, 10, IO::Buffer::INTERNAL
     )
   end
+
+  def test_string
+    with_int 10 do |int|
+      assert_send_type(
+        "(int) { (IO::Buffer) -> nil } -> String",
+        IO::Buffer, :string, int, &proc { nil }
+      )
+    end
+  end
 end
 
 class IO_Buffer_InstanceTest < Test::Unit::TestCase
-  include TypeAssertions
+  include TestHelper
   testing "::IO::Buffer"
 
   def test_spaceship

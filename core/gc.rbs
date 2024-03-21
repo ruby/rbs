@@ -7,6 +7,151 @@
 # You may obtain information about the operation of the GC through GC::Profiler.
 #
 module GC
+  # <!-- rdoc-file=gc.c -->
+  # The GC profiler provides access to information on GC runs including time,
+  # length and object space size.
+  #
+  # Example:
+  #
+  #     GC::Profiler.enable
+  #
+  #     require 'rdoc/rdoc'
+  #
+  #     GC::Profiler.report
+  #
+  #     GC::Profiler.disable
+  #
+  # See also GC.count, GC.malloc_allocated_size and GC.malloc_allocations
+  #
+  module Profiler
+    # <!--
+    #   rdoc-file=gc.c
+    #   - GC::Profiler.clear          -> nil
+    # -->
+    # Clears the GC profiler data.
+    #
+    def self.clear: () -> nil
+
+    # <!--
+    #   rdoc-file=gc.c
+    #   - GC::Profiler.disable      -> nil
+    # -->
+    # Stops the GC profiler.
+    #
+    def self.disable: () -> nil
+
+    # <!--
+    #   rdoc-file=gc.c
+    #   - GC::Profiler.enable       -> nil
+    # -->
+    # Starts the GC profiler.
+    #
+    def self.enable: () -> nil
+
+    # <!--
+    #   rdoc-file=gc.c
+    #   - GC::Profiler.enabled?     -> true or false
+    # -->
+    # The current status of GC profile mode.
+    #
+    def self.enabled?: () -> bool
+
+    # <!--
+    #   rdoc-file=gc.c
+    #   - GC::Profiler.raw_data    -> [Hash, ...]
+    # -->
+    # Returns an Array of individual raw profile data Hashes ordered from earliest
+    # to latest by `:GC_INVOKE_TIME`.
+    #
+    # For example:
+    #
+    #     [
+    #       {
+    #          :GC_TIME=>1.3000000000000858e-05,
+    #          :GC_INVOKE_TIME=>0.010634999999999999,
+    #          :HEAP_USE_SIZE=>289640,
+    #          :HEAP_TOTAL_SIZE=>588960,
+    #          :HEAP_TOTAL_OBJECTS=>14724,
+    #          :GC_IS_MARKED=>false
+    #       },
+    #       # ...
+    #     ]
+    #
+    # The keys mean:
+    #
+    # `:GC_TIME`
+    # :   Time elapsed in seconds for this GC run
+    # `:GC_INVOKE_TIME`
+    # :   Time elapsed in seconds from startup to when the GC was invoked
+    # `:HEAP_USE_SIZE`
+    # :   Total bytes of heap used
+    # `:HEAP_TOTAL_SIZE`
+    # :   Total size of heap in bytes
+    # `:HEAP_TOTAL_OBJECTS`
+    # :   Total number of objects
+    # `:GC_IS_MARKED`
+    # :   Returns `true` if the GC is in mark phase
+    #
+    #
+    # If ruby was built with `GC_PROFILE_MORE_DETAIL`, you will also have access to
+    # the following hash keys:
+    #
+    # `:GC_MARK_TIME`
+    # `:GC_SWEEP_TIME`
+    # `:ALLOCATE_INCREASE`
+    # `:ALLOCATE_LIMIT`
+    # `:HEAP_USE_PAGES`
+    # `:HEAP_LIVE_OBJECTS`
+    # `:HEAP_FREE_OBJECTS`
+    # `:HAVE_FINALIZE`
+    # :
+    #
+    def self.raw_data: () -> Array[Hash[Symbol, untyped]]
+
+    # <!--
+    #   rdoc-file=gc.c
+    #   - GC::Profiler.report
+    #   - GC::Profiler.report(io)
+    # -->
+    # Writes the GC::Profiler.result to `$stdout` or the given IO object.
+    #
+    def self.report: (?_Reporter io) -> nil
+
+    interface _Reporter
+      def write: (String msg) -> void
+    end
+
+    # <!--
+    #   rdoc-file=gc.c
+    #   - GC::Profiler.result  -> String
+    # -->
+    # Returns a profile data report such as:
+    #
+    #     GC 1 invokes.
+    #     Index    Invoke Time(sec)       Use Size(byte)     Total Size(byte)         Total Object                    GC time(ms)
+    #         1               0.012               159240               212940                10647         0.00000000000001530000
+    #
+    def self.result: () -> String
+
+    # <!--
+    #   rdoc-file=gc.c
+    #   - GC::Profiler.total_time  -> float
+    # -->
+    # The total time used for garbage collection in seconds
+    #
+    def self.total_time: () -> Float
+  end
+
+  # <!-- rdoc-file=gc.c -->
+  # Internal constants in the garbage collector.
+  #
+  INTERNAL_CONSTANTS: Hash[Symbol, untyped]
+
+  # <!-- rdoc-file=gc.c -->
+  # GC build options
+  #
+  OPTS: Array[String]
+
   # <!--
   #   rdoc-file=gc.rb
   #   - GC.count -> Integer
@@ -44,27 +189,33 @@ module GC
 
   # <!--
   #   rdoc-file=gc.rb
-  #   - GC.start                     -> nil
-  #   - ObjectSpace.garbage_collect  -> nil
-  #   - include GC; garbage_collect  -> nil
-  #   - GC.start(full_mark: true, immediate_sweep: true)           -> nil
-  #   - ObjectSpace.garbage_collect(full_mark: true, immediate_sweep: true) -> nil
-  #   - include GC; garbage_collect(full_mark: true, immediate_sweep: true) -> nil
+  #   - start(full_mark: true, immediate_mark: true, immediate_sweep: true)
   # -->
   # Initiates garbage collection, even if manually disabled.
   #
-  # This method is defined with keyword arguments that default to true:
+  # The `full_mark` keyword argument determines whether or not to perform a major
+  # garbage collection cycle. When set to `true`, a major garbage collection cycle
+  # is ran, meaning all objects are marked. When set to `false`, a minor garbage
+  # collection cycle is ran, meaning only young objects are marked.
   #
-  #     def GC.start(full_mark: true, immediate_sweep: true); end
+  # The `immediate_mark` keyword argument determines whether or not to perform
+  # incremental marking. When set to `true`, marking is completed during the call
+  # to this method. When set to `false`, marking is performed in steps that is
+  # interleaved with future Ruby code execution, so marking might not be completed
+  # during this method call. Note that if `full_mark` is `false` then marking will
+  # always be immediate, regardless of the value of `immediate_mark`.
   #
-  # Use full_mark: false to perform a minor GC. Use immediate_sweep: false to
-  # defer sweeping (use lazy sweep).
+  # The `immedate_sweep` keyword argument determines whether or not to defer
+  # sweeping (using lazy sweep). When set to `true`, sweeping is performed in
+  # steps that is interleaved with future Ruby code execution, so sweeping might
+  # not be completed during this method call. When set to `false`, sweeping is
+  # completed during the call to this method.
   #
   # Note: These keyword arguments are implementation and version dependent. They
   # are not guaranteed to be future-compatible, and may be ignored if the
   # underlying implementation does not support them.
   #
-  def self.start: (?immediate_sweep: boolish immediate_sweep, ?immediate_mark: boolish immediate_mark, ?full_mark: boolish full_mark) -> nil
+  def self.start: (?immediate_sweep: boolish, ?immediate_mark: boolish, ?full_mark: boolish) -> nil
 
   # <!--
   #   rdoc-file=gc.rb
@@ -150,8 +301,122 @@ module GC
   #
   # This method is only expected to work on CRuby.
   #
-  def self.stat: (?::Hash[Symbol, Integer] arg0) -> ::Hash[Symbol, Integer]
-               | (?Symbol arg0) -> Integer
+  def self.stat: (?Hash[Symbol, untyped]? hash) -> Hash[Symbol, untyped]
+               | (Symbol key) -> Integer
+
+  # <!--
+  #   rdoc-file=gc.rb
+  #   - GC.measure_total_time = true/false
+  # -->
+  # Enable to measure GC time. You can get the result with `GC.stat(:time)`. Note
+  # that GC time measurement can cause some performance overhead.
+  #
+  def self.measure_total_time=: [T] (T enable) -> T
+
+  # <!--
+  #   rdoc-file=gc.rb
+  #   - GC.measure_total_time -> true/false
+  # -->
+  # Return measure_total_time flag (default: `true`). Note that measurement can
+  # affect the application performance.
+  #
+  def self.measure_total_time: () -> bool
+
+  # <!--
+  #   rdoc-file=gc.c
+  #   - GC.auto_compact = flag
+  # -->
+  # Updates automatic compaction mode.
+  #
+  # When enabled, the compactor will execute on every major collection.
+  #
+  # Enabling compaction will degrade performance on major collections.
+  #
+  def self.auto_compact=: [T] (T enable) -> T
+
+  # <!--
+  #   rdoc-file=gc.c
+  #   - GC.auto_compact    -> true or false
+  # -->
+  # Returns whether or not automatic compaction has been enabled.
+  #
+  def self.auto_compact: () -> bool
+
+  # <!--
+  #   rdoc-file=gc.rb
+  #   - GC.stat_heap -> Hash
+  #   - GC.stat_heap(nil, hash) -> Hash
+  #   - GC.stat_heap(heap_name) -> Hash
+  #   - GC.stat_heap(heap_name, hash) -> Hash
+  #   - GC.stat_heap(heap_name, :key) -> Numeric
+  # -->
+  # Returns information for heaps in the GC.
+  #
+  # If the first optional argument, `heap_name`, is passed in and not `nil`, it
+  # returns a `Hash` containing information about the particular heap. Otherwise,
+  # it will return a `Hash` with heap names as keys and a `Hash` containing
+  # information about the heap as values.
+  #
+  # If the second optional argument, `hash_or_key`, is given as `Hash`, it will be
+  # overwritten and returned. This is intended to avoid the probe effect.
+  #
+  # If both optional arguments are passed in and the second optional argument is a
+  # symbol, it will return a `Numeric` of the value for the particular heap.
+  #
+  # On CRuby, `heap_name` is of the type `Integer` but may be of type `String` on
+  # other implementations.
+  #
+  # The contents of the hash are implementation specific and may change in the
+  # future without notice.
+  #
+  # If the optional argument, hash, is given, it is overwritten and returned.
+  #
+  # This method is only expected to work on CRuby.
+  #
+  # The hash includes the following keys about the internal information in the GC:
+  #
+  # slot_size
+  # :   The slot size of the heap in bytes.
+  # heap_allocatable_pages
+  # :   The number of pages that can be allocated without triggering a new garbage
+  #     collection cycle.
+  # heap_eden_pages
+  # :   The number of pages in the eden heap.
+  # heap_eden_slots
+  # :   The total number of slots in all of the pages in the eden heap.
+  # heap_tomb_pages
+  # :   The number of pages in the tomb heap. The tomb heap only contains pages
+  #     that do not have any live objects.
+  # heap_tomb_slots
+  # :   The total number of slots in all of the pages in the tomb heap.
+  # total_allocated_pages
+  # :   The total number of pages that have been allocated in the heap.
+  # total_freed_pages
+  # :   The total number of pages that have been freed and released back to the
+  #     system in the heap.
+  # force_major_gc_count
+  # :   The number of times major garbage collection cycles this heap has forced
+  #     to start due to running out of free slots.
+  # force_incremental_marking_finish_count
+  # :   The number of times this heap has forced incremental marking to complete
+  #     due to running out of pooled slots.
+  #
+  def self.stat_heap: (?Integer? heap_name, ?Hash[Symbol, untyped]? hash) -> Hash[Symbol, untyped]
+                    | (Integer heap_name, Symbol key) -> Integer
+
+  # <!--
+  #   rdoc-file=gc.c
+  #   - GC.latest_compact_info -> hash
+  # -->
+  # Returns information about object moved in the most recent GC compaction.
+  #
+  # The returned hash has two keys :considered and :moved.  The hash for
+  # :considered lists the number of objects that were considered for movement by
+  # the compactor, and the :moved hash lists the number of objects that were
+  # actually moved.  Some objects can't be moved (maybe they were pinned) so these
+  # numbers can be used to calculate compaction efficiency.
+  #
+  def self.latest_compact_info: () -> compact_info
 
   # <!--
   #   rdoc-file=gc.rb
@@ -159,7 +424,7 @@ module GC
   # -->
   # Returns current status of GC stress mode.
   #
-  def self.stress: () -> (Integer | TrueClass | FalseClass)
+  def self.stress: () -> (Integer | bool)
 
   # <!--
   #   rdoc-file=gc.rb
@@ -177,7 +442,8 @@ module GC
   #     0x02:: no immediate sweep
   #     0x04:: full mark after malloc/calloc/realloc
   #
-  def self.stress=: (Integer | TrueClass | FalseClass flag) -> (Integer | TrueClass | FalseClass)
+  def self.stress=: (Integer flag) -> Integer
+                  | (bool flag) -> bool
 
   # <!--
   #   rdoc-file=gc.rb
@@ -204,7 +470,11 @@ module GC
   #
   #     GC.respond_to?(:compact)
   #
-  def self.compact: () -> ::Hash[:considered | :moved, Hash[Symbol | Integer, Integer]]
+  def self.compact: () -> compact_info
+
+  # The type that `GC.compact` and related functions can return.
+  #
+  type compact_info = Hash[:considered | :moved |:moved_up | :moved_down, Hash[Symbol, Integer]]
 
   # <!--
   #   rdoc-file=gc.rb
@@ -221,7 +491,7 @@ module GC
   # a full GC.  If any object contains a reference to a T_MOVED object, that
   # object should be pushed on the mark stack, and will make a SEGV.
   #
-  def self.verify_compaction_references: () -> ::Hash[:considered | :moved, Hash[Symbol | Integer, Integer]]
+  def self.verify_compaction_references: (?toward: :empty | untyped, ?double_heap: boolish, ?expand_heap: boolish) -> compact_info
 
   # <!--
   #   rdoc-file=gc.c
@@ -235,13 +505,6 @@ module GC
   def self.verify_internal_consistency: () -> nil
 
   # <!--
-  #   rdoc-file=gc.c
-  #   - verify_transient_heap_internal_consistency()
-  # -->
-  #
-  def self.verify_transient_heap_internal_consistency: () -> nil
-
-  # <!--
   #   rdoc-file=gc.rb
   #   - GC.latest_gc_info -> hash
   #   - GC.latest_gc_info(hash) -> hash
@@ -252,155 +515,14 @@ module GC
   # If the optional argument, hash, is given, it is overwritten and returned. This
   # is intended to avoid probe effect.
   #
-  def self.latest_gc_info: () -> ::Hash[::Symbol, untyped]
-                         | [K] (?Hash[K, untyped] hash) -> ::Hash[::Symbol | K, untyped]
+  def self.latest_gc_info: (?Hash[Symbol, untyped]? hash) -> Hash[Symbol, untyped]
                          | (Symbol key) -> untyped
 
   # <!--
   #   rdoc-file=gc.rb
   #   - garbage_collect(full_mark: true, immediate_mark: true, immediate_sweep: true)
   # -->
+  # Alias of GC.start
   #
   def garbage_collect: (?immediate_sweep: boolish immediate_sweep, ?immediate_mark: boolish immediate_mark, ?full_mark: boolish full_mark) -> nil
-end
-
-# <!-- rdoc-file=gc.c -->
-# internal constants
-#
-GC::INTERNAL_CONSTANTS: Hash[Symbol, Integer]
-
-# <!-- rdoc-file=gc.c -->
-# GC build options
-#
-GC::OPTS: Array[String]
-
-# <!-- rdoc-file=gc.c -->
-# The GC profiler provides access to information on GC runs including time,
-# length and object space size.
-#
-# Example:
-#
-#     GC::Profiler.enable
-#
-#     require 'rdoc/rdoc'
-#
-#     GC::Profiler.report
-#
-#     GC::Profiler.disable
-#
-# See also GC.count, GC.malloc_allocated_size and GC.malloc_allocations
-#
-module GC::Profiler
-  # <!--
-  #   rdoc-file=gc.c
-  #   - GC::Profiler.clear          -> nil
-  # -->
-  # Clears the GC profiler data.
-  #
-  def self.clear: () -> void
-
-  # <!--
-  #   rdoc-file=gc.c
-  #   - GC::Profiler.disable      -> nil
-  # -->
-  # Stops the GC profiler.
-  #
-  def self.disable: () -> void
-
-  # <!--
-  #   rdoc-file=gc.c
-  #   - GC::Profiler.enable       -> nil
-  # -->
-  # Starts the GC profiler.
-  #
-  def self.enable: () -> void
-
-  # <!--
-  #   rdoc-file=gc.c
-  #   - GC::Profiler.enabled?     -> true or false
-  # -->
-  # The current status of GC profile mode.
-  #
-  def self.enabled?: () -> bool
-
-  # <!--
-  #   rdoc-file=gc.c
-  #   - GC::Profiler.raw_data    -> [Hash, ...]
-  # -->
-  # Returns an Array of individual raw profile data Hashes ordered from earliest
-  # to latest by `:GC_INVOKE_TIME`.
-  #
-  # For example:
-  #
-  #     [
-  #       {
-  #          :GC_TIME=>1.3000000000000858e-05,
-  #          :GC_INVOKE_TIME=>0.010634999999999999,
-  #          :HEAP_USE_SIZE=>289640,
-  #          :HEAP_TOTAL_SIZE=>588960,
-  #          :HEAP_TOTAL_OBJECTS=>14724,
-  #          :GC_IS_MARKED=>false
-  #       },
-  #       # ...
-  #     ]
-  #
-  # The keys mean:
-  #
-  # `:GC_TIME`
-  # :   Time elapsed in seconds for this GC run
-  # `:GC_INVOKE_TIME`
-  # :   Time elapsed in seconds from startup to when the GC was invoked
-  # `:HEAP_USE_SIZE`
-  # :   Total bytes of heap used
-  # `:HEAP_TOTAL_SIZE`
-  # :   Total size of heap in bytes
-  # `:HEAP_TOTAL_OBJECTS`
-  # :   Total number of objects
-  # `:GC_IS_MARKED`
-  # :   Returns `true` if the GC is in mark phase
-  #
-  #
-  # If ruby was built with `GC_PROFILE_MORE_DETAIL`, you will also have access to
-  # the following hash keys:
-  #
-  # `:GC_MARK_TIME`
-  # `:GC_SWEEP_TIME`
-  # `:ALLOCATE_INCREASE`
-  # `:ALLOCATE_LIMIT`
-  # `:HEAP_USE_PAGES`
-  # `:HEAP_LIVE_OBJECTS`
-  # `:HEAP_FREE_OBJECTS`
-  # `:HAVE_FINALIZE`
-  # :
-  #
-  def self.raw_data: () -> ::Array[::Hash[Symbol, untyped]]
-
-  # <!--
-  #   rdoc-file=gc.c
-  #   - GC::Profiler.report
-  #   - GC::Profiler.report(io)
-  # -->
-  # Writes the GC::Profiler.result to `$stdout` or the given IO object.
-  #
-  def self.report: (?IO io) -> void
-
-  # <!--
-  #   rdoc-file=gc.c
-  #   - GC::Profiler.result  -> String
-  # -->
-  # Returns a profile data report such as:
-  #
-  #     GC 1 invokes.
-  #     Index    Invoke Time(sec)       Use Size(byte)     Total Size(byte)         Total Object                    GC time(ms)
-  #         1               0.012               159240               212940                10647         0.00000000000001530000
-  #
-  def self.result: () -> String
-
-  # <!--
-  #   rdoc-file=gc.c
-  #   - GC::Profiler.total_time  -> float
-  # -->
-  # The total time used for garbage collection in seconds
-  #
-  def self.total_time: () -> Float
 end

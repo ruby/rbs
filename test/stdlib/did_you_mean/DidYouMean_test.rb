@@ -1,7 +1,7 @@
 require_relative "../test_helper"
 
 class DidYouMean::CorrectableTest < Test::Unit::TestCase
-  include TypeAssertions
+  include TestHelper
 
   library "did_you_mean"
   testing "::DidYouMean::Correctable"
@@ -14,7 +14,7 @@ class DidYouMean::CorrectableTest < Test::Unit::TestCase
 end
 
 class DidYouMean::FormatterSingletonTest < Test::Unit::TestCase
-  include TypeAssertions
+  include TestHelper
 
   library "did_you_mean"
   testing "singleton(::DidYouMean::Formatter)"
@@ -26,7 +26,7 @@ class DidYouMean::FormatterSingletonTest < Test::Unit::TestCase
 end
 
 class DidYouMean::JaroSingletonTest < Test::Unit::TestCase
-  include TypeAssertions
+  include TestHelper
 
   library "did_you_mean"
   testing "singleton(::DidYouMean::Jaro)"
@@ -38,7 +38,7 @@ class DidYouMean::JaroSingletonTest < Test::Unit::TestCase
 end
 
 class DidYouMean::JaroTest < Test::Unit::TestCase
-  include TypeAssertions
+  include TestHelper
 
   library "did_you_mean"
   testing "::DidYouMean::Jaro"
@@ -51,7 +51,7 @@ class DidYouMean::JaroTest < Test::Unit::TestCase
 end
 
 class DidYouMean::JaroWinklerSingletonTest < Test::Unit::TestCase
-  include TypeAssertions
+  include TestHelper
 
   library "did_you_mean"
   testing "singleton(::DidYouMean::JaroWinkler)"
@@ -63,7 +63,7 @@ class DidYouMean::JaroWinklerSingletonTest < Test::Unit::TestCase
 end
 
 class DidYouMean::JaroWinklerTest < Test::Unit::TestCase
-  include TypeAssertions
+  include TestHelper
 
   library "did_you_mean"
   testing "::DidYouMean::JaroWinkler"
@@ -76,7 +76,7 @@ class DidYouMean::JaroWinklerTest < Test::Unit::TestCase
 end
 
 class DidYouMean::KeyErrorCheckerSingletonTest < Test::Unit::TestCase
-  include TypeAssertions
+  include TestHelper
 
   library "did_you_mean"
   testing "singleton(::DidYouMean::KeyErrorChecker)"
@@ -88,7 +88,7 @@ class DidYouMean::KeyErrorCheckerSingletonTest < Test::Unit::TestCase
 end
 
 class DidYouMean::KeyErrorCheckerTest < Test::Unit::TestCase
-  include TypeAssertions
+  include TestHelper
 
   library "did_you_mean"
   testing "::DidYouMean::KeyErrorChecker"
@@ -100,7 +100,7 @@ class DidYouMean::KeyErrorCheckerTest < Test::Unit::TestCase
 end
 
 class DidYouMean::LevenshteinSingletonTest < Test::Unit::TestCase
-  include TypeAssertions
+  include TestHelper
 
   library "did_you_mean"
   testing "singleton(::DidYouMean::Levenshtein)"
@@ -112,7 +112,7 @@ class DidYouMean::LevenshteinSingletonTest < Test::Unit::TestCase
 end
 
 class DidYouMean::LevenshteinTest < Test::Unit::TestCase
-  include TypeAssertions
+  include TestHelper
 
   library "did_you_mean"
   testing "::DidYouMean::Levenshtein"
@@ -125,7 +125,7 @@ class DidYouMean::LevenshteinTest < Test::Unit::TestCase
 end
 
 class DidYouMean::MethodNameCheckerSingletonTest < Test::Unit::TestCase
-  include TypeAssertions
+  include TestHelper
 
   library "did_you_mean"
   testing "singleton(::DidYouMean::MethodNameChecker)"
@@ -137,7 +137,7 @@ class DidYouMean::MethodNameCheckerSingletonTest < Test::Unit::TestCase
 end
 
 class DidYouMean::MethodNameCheckerTest < Test::Unit::TestCase
-  include TypeAssertions
+  include TestHelper
 
   library "did_you_mean"
   testing "::DidYouMean::MethodNameChecker"
@@ -149,7 +149,7 @@ class DidYouMean::MethodNameCheckerTest < Test::Unit::TestCase
 end
 
 class DidYouMean::NullCheckerSingletonTest < Test::Unit::TestCase
-  include TypeAssertions
+  include TestHelper
 
   library "did_you_mean"
   testing "singleton(::DidYouMean::NullChecker)"
@@ -161,7 +161,7 @@ class DidYouMean::NullCheckerSingletonTest < Test::Unit::TestCase
 end
 
 class DidYouMean::NullCheckerTest < Test::Unit::TestCase
-  include TypeAssertions
+  include TestHelper
 
   library "did_you_mean"
   testing "::DidYouMean::NullChecker"
@@ -173,7 +173,7 @@ class DidYouMean::NullCheckerTest < Test::Unit::TestCase
 end
 
 class DidYouMean::PatternKeyNameCheckerSingletonTest < Test::Unit::TestCase
-  include TypeAssertions
+  include TestHelper
 
   library "did_you_mean"
   testing "singleton(::DidYouMean::PatternKeyNameChecker)"
@@ -186,7 +186,7 @@ class DidYouMean::PatternKeyNameCheckerSingletonTest < Test::Unit::TestCase
 end
 
 class DidYouMean::PatternKeyNameCheckerTest < Test::Unit::TestCase
-  include TypeAssertions
+  include TestHelper
 
   library "did_you_mean"
   testing "::DidYouMean::PatternKeyNameChecker"
@@ -199,7 +199,7 @@ class DidYouMean::PatternKeyNameCheckerTest < Test::Unit::TestCase
 end
 
 class DidYouMean::RequirePathCheckerSingletonTest < Test::Unit::TestCase
-  include TypeAssertions
+  include TestHelper
 
   library "did_you_mean"
   testing "singleton(::DidYouMean::RequirePathChecker)"
@@ -217,7 +217,7 @@ class DidYouMean::RequirePathCheckerSingletonTest < Test::Unit::TestCase
 end
 
 class DidYouMean::RequirePathCheckerTest < Test::Unit::TestCase
-  include TypeAssertions
+  include TestHelper
 
   library "did_you_mean"
   testing "::DidYouMean::RequirePathChecker"
@@ -230,7 +230,7 @@ class DidYouMean::RequirePathCheckerTest < Test::Unit::TestCase
 end
 
 class DidYouMean::SpellCheckerSingletonTest < Test::Unit::TestCase
-  include TypeAssertions
+  include TestHelper
 
   library "did_you_mean"
   testing "singleton(::DidYouMean::SpellChecker)"
@@ -242,7 +242,7 @@ class DidYouMean::SpellCheckerSingletonTest < Test::Unit::TestCase
 end
 
 class DidYouMean::SpellCheckerTest < Test::Unit::TestCase
-  include TypeAssertions
+  include TestHelper
 
   library "did_you_mean"
   testing "::DidYouMean::SpellChecker"
@@ -254,7 +254,7 @@ class DidYouMean::SpellCheckerTest < Test::Unit::TestCase
 end
 
 class DidYouMean::TreeSpellCheckerSingletonTest < Test::Unit::TestCase
-  include TypeAssertions
+  include TestHelper
 
   library "did_you_mean"
   testing "singleton(::DidYouMean::TreeSpellChecker)"
@@ -266,7 +266,7 @@ class DidYouMean::TreeSpellCheckerSingletonTest < Test::Unit::TestCase
 end
 
 class DidYouMean::TreeSpellCheckerTest < Test::Unit::TestCase
-  include TypeAssertions
+  include TestHelper
 
   library "did_you_mean"
   testing "::DidYouMean::TreeSpellChecker"
@@ -278,7 +278,7 @@ class DidYouMean::TreeSpellCheckerTest < Test::Unit::TestCase
 end
 
 class DidYouMean::VariableNameCheckerSingletonTest < Test::Unit::TestCase
-  include TypeAssertions
+  include TestHelper
 
   library "did_you_mean"
   testing "singleton(::DidYouMean::VariableNameChecker)"
@@ -290,7 +290,7 @@ class DidYouMean::VariableNameCheckerSingletonTest < Test::Unit::TestCase
 end
 
 class DidYouMean::VariableNameCheckerTest < Test::Unit::TestCase
-  include TypeAssertions
+  include TestHelper
 
   library "did_you_mean"
   testing "::DidYouMean::VariableNameChecker"

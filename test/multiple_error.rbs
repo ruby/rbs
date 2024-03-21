@@ -1,0 +1,78 @@
+class TypeArg[T]
+  def foo: (void) -> void
+  def bar: (void) -> void
+end
+class InvalidTypeApplication
+  def foo: () -> TypeArg
+end
+module RecursiveAncestor : RecursiveAncestor
+end
+class NoTypeFound
+  def c: () -> Nothing
+end
+class NoSuperclassFound < Nothing
+end
+class InheritModule < Kernel
+end
+module NoSelfTypeFound : Nothing
+end
+module NoMixinFound
+  include Nothing
+end
+module DuplicatedMethodDefinition
+  def a: () -> void
+  def a: () -> void
+end
+interface _DuplicatedInterfaceMethodDefinition_1
+  def a: () -> void
+end
+interface _DuplicatedInterfaceMethodDefinition_2
+  def a: () -> void
+end
+module DuplicatedInterfaceMethodDefinition_3
+  include _DuplicatedInterfaceMethodDefinition_1
+  include _DuplicatedInterfaceMethodDefinition_2
+end
+class UnknownMethodAlias
+  alias a nothing
+end
+class Superclass1
+end
+class Superclass2
+end
+class SuperclassMismatch < Superclass1
+end
+class SuperclassMismatch < Superclass2
+end
+interface _InvalidOverloadMethod
+  def foo: () -> void | ...
+end
+class GenericParameterMismatch[T]
+end
+class GenericParameterMismatch
+end
+# class DuplicatedDeclaration
+# end
+# DuplicatedDeclaration: 1
+class InvalidVarianceAnnotation[out T]
+  def a: (T) -> void
+end
+class RecursiveAliasDefinition
+  alias a a
+end
+class MixinClassClass
+end
+module MixinClassModule
+  include MixinClassClass
+end
+class RecursiveTypeAlias
+  type a = a
+end
+module NonregularTypeAlias
+  type bar[T] = [bar[T?]]
+end
+interface _CyclicTypeParameterBound[A]
+  def foo: [X < _Foo[Y], Y < _Bar[Z], Z < _Baz[X]] () -> void
+end
+class InconsistentClassModuleAlias = Nothing
+class CyclicClassAliasDefinition = CyclicClassAliasDefinition

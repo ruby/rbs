@@ -226,7 +226,7 @@ class Thread < Object
   # For thread-local variables, please see #thread_variable_get and
   # #thread_variable_set.
   #
-  def []: (String | Symbol key) -> untyped
+  def []: (interned key) -> untyped
 
   # <!--
   #   rdoc-file=thread.c
@@ -240,7 +240,7 @@ class Thread < Object
   # For thread-local variables, please see #thread_variable_set and
   # #thread_variable_get.
   #
-  def []=: (String | Symbol key, untyped value) -> untyped
+  def []=: (interned key, untyped value) -> untyped
 
   # <!--
   #   rdoc-file=thread.c
@@ -676,7 +676,7 @@ class Thread < Object
   # Note that these are not fiber local variables.  Please see Thread#[] and
   # Thread#thread_variable_get for more details.
   #
-  def thread_variable?: (String | Symbol key) -> bool
+  def thread_variable?: (interned key) -> bool
 
   # <!--
   #   rdoc-file=thread.c
@@ -970,6 +970,29 @@ class Thread < Object
   # ExceptionClass, as kill/terminate interrupts are not handled by `Exception`.
   #
   def self.handle_interrupt: (untyped hash) -> untyped
+
+  # <!--
+  #   rdoc-file=thread.c
+  #   - thr.raise
+  #   - thr.raise(string)
+  #   - thr.raise(exception [, string [, array]])
+  # -->
+  # Raises an exception from the given thread. The caller does not have to be
+  # `thr`. See Kernel#raise for more information.
+  #
+  #     Thread.abort_on_exception = true
+  #     a = Thread.new { sleep(200) }
+  #     a.raise("Gotcha")
+  #
+  # This will produce:
+  #
+  #     prog.rb:3: Gotcha (RuntimeError)
+  #      from prog.rb:2:in `initialize'
+  #      from prog.rb:2:in `new'
+  #      from prog.rb:2
+  #
+  def raise: (?String message) -> nil
+           | (_Exception, ?_ToS message, ?Array[String] backtrace) -> nil
 
   # <!--
   #   rdoc-file=thread.c
@@ -1414,7 +1437,7 @@ class Thread::ConditionVariable < Object
   #
   # Returns the slept result on `mutex`.
   #
-  def wait: (Thread::Mutex mutex, ?Integer timeout) -> self
+  def wait: (Thread::Mutex mutex, ?Time::_Timeout? timeout) -> Integer?
 end
 
 # <!-- rdoc-file=thread_sync.c -->
@@ -1497,8 +1520,8 @@ end
 # exchanged safely between multiple threads. The Thread::Queue class implements
 # all the required locking semantics.
 #
-# The class implements FIFO type of queue. In a FIFO queue, the first tasks
-# added are the first retrieved.
+# The class implements FIFO (first in, first out) type of queue. In a FIFO
+# queue, the first tasks added are the first retrieved.
 #
 # Example:
 #
@@ -1506,17 +1529,17 @@ end
 #
 #     producer = Thread.new do
 #       5.times do |i|
-#          sleep rand(i) # simulate expense
-#          queue << i
-#          puts "#{i} produced"
+#         sleep rand(i) # simulate expense
+#         queue << i
+#         puts "#{i} produced"
 #       end
 #     end
 #
 #     consumer = Thread.new do
 #       5.times do |i|
-#          value = queue.pop
-#          sleep rand(i/2) # simulate expense
-#          puts "consumed #{value}"
+#         value = queue.pop
+#         sleep rand(i/2) # simulate expense
+#         puts "consumed #{value}"
 #       end
 #     end
 #
@@ -1601,6 +1624,15 @@ class Thread::Queue < Object
 
   # <!--
   #   rdoc-file=thread_sync.c
+  #   - freeze
+  # -->
+  # The queue can't be frozen, so this method raises an exception:
+  #     Thread::Queue.new.freeze # Raises TypeError (cannot freeze #<Thread::Queue:0x...>)
+  #
+  def freeze: () -> bot
+
+  # <!--
+  #   rdoc-file=thread_sync.c
   #   - length
   #   - size
   # -->
@@ -1677,6 +1709,15 @@ class Thread::SizedQueue < Thread::Queue
 
   # <!--
   #   rdoc-file=thread_sync.c
+  #   - freeze
+  # -->
+  # The queue can't be frozen, so this method raises an exception:
+  #     Thread::Queue.new.freeze # Raises TypeError (cannot freeze #<Thread::Queue:0x...>)
+  #
+  def freeze: () -> bot
+
+  # <!--
+  #   rdoc-file=thread_sync.c
   #   - new(max)
   # -->
   # Creates a fixed-length queue with a maximum size of `max`.
@@ -1717,10 +1758,10 @@ class Thread::SizedQueue < Thread::Queue
   def push: (untyped obj, ?boolish non_block, timeout: _ToF?) -> void
 end
 
-ConditionVariable: singleton(Thread::ConditionVariable)
+class ConditionVariable = Thread::ConditionVariable
 
-Mutex: singleton(Thread::Mutex)
+class Mutex = Thread::Mutex
 
-Queue: singleton(Thread::Queue)
+class Queue = Thread::Queue
 
-SizedQueue: singleton(Thread::SizedQueue)
+class SizedQueue = Thread::SizedQueue

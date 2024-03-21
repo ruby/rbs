@@ -3,7 +3,7 @@ require "json"
 require "json/add/exception"
 
 class JSONExceptionSingletonTest < Test::Unit::TestCase
-  include TypeAssertions
+  include TestHelper
 
   library "json"
   testing "singleton(::Exception)"
@@ -22,7 +22,7 @@ class JSONExceptionSingletonTest < Test::Unit::TestCase
 end
 
 class JSONExceptionInstanceTest < Test::Unit::TestCase
-  include TypeAssertions
+  include TestHelper
 
   library "json"
   testing "::Exception"

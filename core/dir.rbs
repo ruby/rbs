@@ -1,11 +1,85 @@
 # <!-- rdoc-file=dir.rb -->
-# Objects of class Dir are directory streams representing directories in the
-# underlying file system. They provide a variety of ways to list directories and
-# their contents. See also File.
+# An object of class Dir represents a directory in the underlying file system.
 #
-# The directory used in these examples contains the two regular files
-# (`config.h` and `main.rb`), the parent directory (`..`), and the directory
-# itself (`.`).
+# It consists mainly of:
+#
+# *   A string *path*, given when the object is created, that specifies a
+#     directory in the underlying file system; method #path returns the path.
+# *   A collection of string *entry names*, each of which is the name of a
+#     directory or file in the underlying file system; the entry names may be
+#     retrieved in an [array-like fashion](rdoc-ref:Dir@Dir+As+Array-Like) or in
+#     a [stream-like fashion](rdoc-ref:Dir@Dir+As+Stream-Like).
+#
+#
+# ## About the Examples
+#
+# Some examples on this page use this simple file tree:
+#
+#     example/
+#     ├── config.h
+#     ├── lib/
+#     │   ├── song/
+#     │   │   └── karaoke.rb
+#     │   └── song.rb
+#     └── main.rb
+#
+# Others use the file tree for the [Ruby project
+# itself](https://github.com/ruby/ruby).
+#
+# ## Dir As Array-Like
+#
+# A Dir object is in some ways array-like:
+#
+# *   It has instance methods #children, #each, and #each_child.
+# *   It includes [module Enumerable](rdoc-ref:Enumerable@What-27s+Here).
+#
+#
+# ## Dir As Stream-Like
+#
+# A Dir object is in some ways stream-like.
+#
+# The stream is initially open for reading, but may be closed manually (using
+# method #close), and will be closed on block exit if created by Dir.open called
+# with a block. The closed stream may not be further manipulated, and may not be
+# reopened.
+#
+# The stream has a *position*, which is the index of an entry in the directory:
+#
+# *   The initial position is zero (before the first entry).
+# *   Method #tell (aliased as #pos) returns the position.
+# *   Method #pos= sets the position (but ignores a value outside the stream),
+#     and returns the position.
+# *   Method #seek is like #pos=, but returns `self` (convenient for chaining).
+# *   Method #read, if not at end-of-stream, reads the next entry and increments
+#     the position; if at end-of-stream, does not increment the position.
+# *   Method #rewind sets the position to zero.
+#
+#
+# Examples (using the [simple file tree](rdoc-ref:Dir@About+the+Examples)):
+#
+#     dir = Dir.new('example') # => #<Dir:example>
+#     dir.pos                  # => 0
+#
+#     dir.read # => "."
+#     dir.read # => ".."
+#     dir.read # => "config.h"
+#     dir.read # => "lib"
+#     dir.read # => "main.rb"
+#     dir.pos  # => 5
+#     dir.read # => nil
+#     dir.pos  # => 5
+#
+#     dir.rewind # => #<Dir:example>
+#     dir.pos    # => 0
+#
+#     dir.pos = 3 # => 3
+#     dir.pos     # => 3
+#
+#     dir.seek(4) # => #<Dir:example>
+#     dir.pos     # => 4
+#
+#     dir.close # => nil
+#     dir.read  # Raises IOError.
 #
 # ## What's Here
 #
@@ -94,358 +168,594 @@ class Dir
 
   # <!--
   #   rdoc-file=dir.rb
-  #   - Dir.new( string ) -> aDir
-  #   - Dir.new( string, encoding: enc ) -> aDir
+  #   - Dir.new(dirpath) -> dir
+  #   - Dir.new(dirpath, encoding: nil) -> dir
   # -->
-  # Returns a new directory object for the named directory.
+  # Returns a new Dir object for the directory at `dirpath`:
   #
-  # The optional *encoding* keyword argument specifies the encoding of the
-  # directory. If not specified, the filesystem encoding is used.
+  #     Dir.new('.') # => #<Dir:.>
   #
-  def initialize: (string, ?encoding: encoding | nil) -> void
+  # The value given with optional keyword argument `encoding` specifies the
+  # encoding for the directory entry names; if `nil` (the default), the file
+  # system's encoding is used:
+  #
+  #     Dir.new('.').read.encoding                       # => #<Encoding:UTF-8>
+  #     Dir.new('.', encoding: 'US-ASCII').read.encoding # => #<Encoding:US-ASCII>
+  #
+  def initialize: (path dir, ?encoding: encoding?) -> self
 
   # <!--
   #   rdoc-file=dir.rb
-  #   - Dir[ string [, string ...] [, base: path] [, sort: true] ] -> array
+  #   - Dir[*patterns, base: nil, sort: true] -> array
   # -->
-  # Equivalent to calling `Dir.glob([`*string,...*`], 0)`.
+  # Calls Dir.glob with argument `patterns` and the values of keyword arguments
+  # `base` and `sort`; returns the array of selected entry names.
   #
-  def self.[]: (*string patterns, ?base: string) ?{ (String path) -> void } -> Array[String]
+  def self.[]: (*path patterns, ?base: path?, ?sort: bool) -> Array[String]
 
   # <!--
   #   rdoc-file=dir.c
-  #   - Dir.chdir( [ string] ) -> 0
-  #   - Dir.chdir( [ string] ) {| path | block }  -> anObject
+  #   - Dir.chdir(new_dirpath) -> 0
+  #   - Dir.chdir -> 0
+  #   - Dir.chdir(new_dirpath) {|new_dirpath| ... } -> object
+  #   - Dir.chdir {|cur_dirpath| ... } -> object
   # -->
-  # Changes the current working directory of the process to the given string. When
-  # called without an argument, changes the directory to the value of the
-  # environment variable `HOME`, or `LOGDIR`. SystemCallError (probably
-  # Errno::ENOENT) if the target directory does not exist.
+  # Changes the current working directory.
   #
-  # If a block is given, it is passed the name of the new current directory, and
-  # the block is executed with that as the current directory. The original working
-  # directory is restored when the block exits. The return value of `chdir` is the
-  # value of the block. `chdir` blocks can be nested, but in a multi-threaded
-  # program an error will be raised if a thread attempts to open a `chdir` block
-  # while another thread has one open or a call to `chdir` without a block occurs
-  # inside a block passed to `chdir` (even in the same thread).
+  # With argument `new_dirpath` and no block, changes to the given `dirpath`:
   #
-  #     Dir.chdir("/var/spool/mail")
-  #     puts Dir.pwd
-  #     Dir.chdir("/tmp") do
-  #       puts Dir.pwd
-  #       Dir.chdir("/usr") do
-  #         puts Dir.pwd
-  #       end
-  #       puts Dir.pwd
+  #     Dir.pwd         # => "/example"
+  #     Dir.chdir('..') # => 0
+  #     Dir.pwd         # => "/"
+  #
+  # With no argument and no block:
+  #
+  # *   Changes to the value of environment variable `HOME` if defined.
+  # *   Otherwise changes to the value of environment variable `LOGDIR` if
+  #     defined.
+  # *   Otherwise makes no change.
+  #
+  #
+  # With argument `new_dirpath` and a block, temporarily changes the working
+  # directory:
+  #
+  # *   Calls the block with the argument.
+  # *   Changes to the given directory.
+  # *   Executes the block (yielding the new path).
+  # *   Restores the previous working directory.
+  # *   Returns the block's return value.
+  #
+  #
+  # Example:
+  #
+  #     Dir.chdir('/var/spool/mail')
+  #     Dir.pwd   # => "/var/spool/mail"
+  #     Dir.chdir('/tmp') do
+  #       Dir.pwd # => "/tmp"
   #     end
-  #     puts Dir.pwd
+  #     Dir.pwd   # => "/var/spool/mail"
   #
-  # *produces:*
+  # With no argument and a block, calls the block with the current working
+  # directory (string) and returns the block's return value.
   #
-  #     /var/spool/mail
-  #     /tmp
-  #     /usr
-  #     /tmp
-  #     /var/spool/mail
+  # Calls to Dir.chdir with blocks may be nested:
   #
-  def self.chdir: (?string) -> void
-                | [U] (?string) { (String) -> U } -> U
+  #     Dir.chdir('/var/spool/mail')
+  #     Dir.pwd     # => "/var/spool/mail"
+  #     Dir.chdir('/tmp') do
+  #       Dir.pwd   # => "/tmp"
+  #       Dir.chdir('/usr') do
+  #         Dir.pwd # => "/usr"
+  #       end
+  #       Dir.pwd   # => "/tmp"
+  #     end
+  #     Dir.pwd     # => "/var/spool/mail"
+  #
+  # In a multi-threaded program an error is raised if a thread attempts to open a
+  # `chdir` block while another thread has one open, or a call to `chdir` without
+  # a block occurs inside a block passed to `chdir` (even in the same thread).
+  #
+  # Raises an exception if the target directory does not exist.
+  #
+  def self.chdir: (?path dir) -> 0
+                | [U] (?path dir) { (String dir) -> U } -> U
 
   # <!--
   #   rdoc-file=dir.c
-  #   - Dir.children( dirname )                -> array
-  #   - Dir.children( dirname, encoding: enc ) -> array
+  #   - Dir.children(dirpath) -> array
+  #   - Dir.children(dirpath, encoding: 'UTF-8') -> array
   # -->
-  # Returns an array containing all of the filenames except for "." and ".." in
-  # the given directory. Will raise a SystemCallError if the named directory
-  # doesn't exist.
+  # Returns an array of the entry names in the directory at `dirpath` except for
+  # `'.'` and `'..'`; sets the given encoding onto each returned entry name:
   #
-  # The optional *encoding* keyword argument specifies the encoding of the
-  # directory. If not specified, the filesystem encoding is used.
+  #     Dir.children('/example') # => ["config.h", "lib", "main.rb"]
+  #     Dir.children('/example').first.encoding
+  #     # => #<Encoding:UTF-8>
+  #     Dir.children('/example', encoding: 'US-ASCII').first.encoding
+  #     # => #<Encoding:US-ASCII>
   #
-  #     Dir.children("testdir")   #=> ["config.h", "main.rb"]
+  # See [String Encoding](rdoc-ref:encodings.rdoc@String+Encoding).
   #
-  def self.children: (string dirname, ?encoding: string | Encoding | nil enc) -> Array[String]
+  # Raises an exception if the directory does not exist.
+  #
+  def self.children: (path dirname, ?encoding: encoding?) -> Array[String]
 
   # <!--
   #   rdoc-file=dir.c
-  #   - Dir.chroot( string ) -> 0
+  #   - Dir.chroot(dirpath) -> 0
   # -->
-  # Changes this process's idea of the file system root. Only a privileged process
-  # may make this call. Not available on all platforms. On Unix systems, see
-  # `chroot(2)` for more information.
+  # Changes the root directory of the calling process to that specified in
+  # `dirpath`. The new root directory is used for pathnames beginning with `'/'`.
+  # The root directory is inherited by all children of the calling process.
   #
-  def self.chroot: (string) -> void
+  # Only a privileged process may call `chroot`.
+  #
+  # See [Linux chroot](https://man7.org/linux/man-pages/man2/chroot.2.html).
+  #
+  def self.chroot: (path root) -> 0
 
   # <!--
   #   rdoc-file=dir.c
-  #   - Dir.delete( string ) -> 0
-  #   - Dir.rmdir( string ) -> 0
-  #   - Dir.unlink( string ) -> 0
+  #   - Dir.rmdir(dirpath) -> 0
   # -->
-  # Deletes the named directory. Raises a subclass of SystemCallError if the
-  # directory isn't empty.
+  # Removes the directory at `dirpath` from the underlying file system:
   #
-  def self.delete: (string) -> void
+  #     Dir.rmdir('foo') # => 0
+  #
+  # Raises an exception if the directory is not empty.
+  #
+  def self.delete: (path dirname) -> 0
 
   # <!--
   #   rdoc-file=dir.c
-  #   - Dir.each_child( dirname ) {| filename | block }                 -> nil
-  #   - Dir.each_child( dirname, encoding: enc ) {| filename | block }  -> nil
-  #   - Dir.each_child( dirname )                                       -> an_enumerator
-  #   - Dir.each_child( dirname, encoding: enc )                        -> an_enumerator
+  #   - Dir.each_child(dirpath) {|entry_name| ... } -> nil
+  #   - Dir.each_child(dirpath, encoding: 'UTF-8') {|entry_name| ... }  -> nil
   # -->
-  # Calls the block once for each entry except for "." and ".." in the named
-  # directory, passing the filename of each entry as a parameter to the block.
+  # Like Dir.foreach, except that entries `'.'` and `'..'` are not included.
   #
-  # If no block is given, an enumerator is returned instead.
-  #
-  #     Dir.each_child("testdir") {|x| puts "Got #{x}" }
-  #
-  # *produces:*
-  #
-  #     Got config.h
-  #     Got main.rb
-  #
-  def self.each_child: (string dirname, ?encoding: string | Encoding | nil enc) -> Enumerator[String, void]
-                     | (string dirname, ?encoding: string | Encoding | nil enc) { (String filename) -> void } -> void
+  def self.each_child: (path dirname, ?encoding: encoding?) -> Enumerator[String, nil]
+                     | (path dirname, ?encoding: encoding?) { (String filename) -> void } -> nil
 
   # <!--
   #   rdoc-file=dir.c
-  #   - Dir.empty?(path_name)  ->  true or false
+  #   - Dir.empty?(dirpath) ->  true or false
   # -->
-  # Returns `true` if the named file is an empty directory, `false` if it is not a
-  # directory or non-empty.
+  # Returns whether `dirpath` specifies an empty directory:
   #
-  def self.empty?: (string path_name) -> bool
+  #     dirpath = '/tmp/foo'
+  #     Dir.mkdir(dirpath)
+  #     Dir.empty?(dirpath)            # => true
+  #     Dir.empty?('/example')         # => false
+  #     Dir.empty?('/example/main.rb') # => false
+  #
+  # Raises an exception if `dirpath` does not specify a directory or file in the
+  # underlying file system.
+  #
+  def self.empty?: (path path_name) -> bool
 
   # <!--
   #   rdoc-file=dir.c
-  #   - Dir.entries( dirname )                -> array
-  #   - Dir.entries( dirname, encoding: enc ) -> array
+  #   - Dir.entries(dirname, encoding: 'UTF-8') -> array
   # -->
-  # Returns an array containing all of the filenames in the given directory. Will
-  # raise a SystemCallError if the named directory doesn't exist.
+  # Returns an array of the entry names in the directory at `dirpath`; sets the
+  # given encoding onto each returned entry name:
   #
-  # The optional *encoding* keyword argument specifies the encoding of the
-  # directory. If not specified, the filesystem encoding is used.
+  #     Dir.entries('/example') # => ["config.h", "lib", "main.rb", "..", "."]
+  #     Dir.entries('/example').first.encoding
+  #     # => #<Encoding:UTF-8>
+  #     Dir.entries('/example', encoding: 'US-ASCII').first.encoding
+  #     # => #<Encoding:US-ASCII>
   #
-  #     Dir.entries("testdir")   #=> [".", "..", "config.h", "main.rb"]
+  # See [String Encoding](rdoc-ref:encodings.rdoc@String+Encoding).
   #
-  def self.entries: (string dirname, ?encoding: encoding | nil enc) -> ::Array[String]
+  # Raises an exception if the directory does not exist.
+  #
+  def self.entries: (path dirname, ?encoding: encoding?) -> Array[String]
 
   # <!--
   #   rdoc-file=dir.c
-  #   - Dir.exist?(file_name)   ->  true or false
+  #   - Dir.exist?(dirpath) ->  true or false
   # -->
-  # Returns `true` if the named file is a directory, `false` otherwise.
+  # Returns whether `dirpath` is a directory in the underlying file system:
   #
-  def self.exist?: (string file) -> bool
+  #     Dir.exist?('/example')         # => true
+  #     Dir.exist?('/nosuch')          # => false
+  #     Dir.exist?('/example/main.rb') # => false
+  #
+  # Same as File.directory?.
+  #
+  def self.exist?: (path | io file_name) -> bool
 
   # <!--
   #   rdoc-file=dir.c
-  #   - Dir.foreach( dirname ) {| filename | block }                 -> nil
-  #   - Dir.foreach( dirname, encoding: enc ) {| filename | block }  -> nil
-  #   - Dir.foreach( dirname )                                       -> an_enumerator
-  #   - Dir.foreach( dirname, encoding: enc )                        -> an_enumerator
+  #   - Dir.fchdir(fd) -> 0
+  #   - Dir.fchdir(fd) { ... } -> object
   # -->
-  # Calls the block once for each entry in the named directory, passing the
-  # filename of each entry as a parameter to the block.
+  # Changes the current working directory to the directory specified by the
+  # integer file descriptor `fd`.
   #
-  # If no block is given, an enumerator is returned instead.
+  # When passing a file descriptor over a UNIX socket or to a child process, using
+  # `fchdir` instead of `chdir` avoids the [time-of-check to time-of-use
+  # vulnerability](https://en.wikipedia.org/wiki/Time-of-check_to_time-of-use)
   #
-  #     Dir.foreach("testdir") {|x| puts "Got #{x}" }
+  # With no block, changes to the directory given by `fd`:
   #
-  # *produces:*
+  #     Dir.chdir('/var/spool/mail')
+  #     Dir.pwd # => "/var/spool/mail"
+  #     dir  = Dir.new('/usr')
+  #     fd = dir.fileno
+  #     Dir.fchdir(fd)
+  #     Dir.pwd # => "/usr"
   #
-  #     Got .
-  #     Got ..
-  #     Got config.h
-  #     Got main.rb
+  # With a block, temporarily changes the working directory:
+  #
+  # *   Calls the block with the argument.
+  # *   Changes to the given directory.
+  # *   Executes the block (yields no args).
+  # *   Restores the previous working directory.
+  # *   Returns the block's return value.
+  #
+  #
+  # Example:
+  #
+  #     Dir.chdir('/var/spool/mail')
+  #     Dir.pwd # => "/var/spool/mail"
+  #     dir  = Dir.new('/tmp')
+  #     fd = dir.fileno
+  #     Dir.fchdir(fd) do
+  #       Dir.pwd # => "/tmp"
+  #     end
+  #     Dir.pwd # => "/var/spool/mail"
+  #
+  # This method uses the
+  # [fchdir()](https://www.man7.org/linux/man-pages/man3/fchdir.3p.html) function
+  # defined by POSIX 2008; the method is not implemented on non-POSIX platforms
+  # (raises NotImplementedError).
+  #
+  # Raises an exception if the file descriptor is not valid.
+  #
+  # In a multi-threaded program an error is raised if a thread attempts to open a
+  # `chdir` block while another thread has one open, or a call to `chdir` without
+  # a block occurs inside a block passed to `chdir` (even in the same thread).
+  #
+  def self.fchdir: (int) -> Integer
+                 | [T] (int) { () -> T } -> T
+
+  # <!--
+  #   rdoc-file=dir.c
+  #   - Dir.foreach(dirpath, encoding: 'UTF-8') {|entry_name| ... }  -> nil
+  # -->
+  # Calls the block with each entry name in the directory at `dirpath`; sets the
+  # given encoding onto each passed `entry_name`:
+  #
+  #     Dir.foreach('/example') {|entry_name| p entry_name }
+  #
+  # Output:
+  #
+  #     "config.h"
+  #     "lib"
+  #     "main.rb"
+  #     ".."
+  #     "."
+  #
+  # Encoding:
+  #
+  #     Dir.foreach('/example') {|entry_name| p entry_name.encoding; break }
+  #     Dir.foreach('/example', encoding: 'US-ASCII') {|entry_name| p entry_name.encoding; break }
+  #
+  # Output:
+  #
+  #     #<Encoding:UTF-8>
+  #     #<Encoding:US-ASCII>
+  #
+  # See [String Encoding](rdoc-ref:encodings.rdoc@String+Encoding).
+  #
+  # Returns an enumerator if no block is given.
   #
   alias self.foreach self.each_child
 
   # <!--
   #   rdoc-file=dir.c
-  #   - Dir.getwd -> string
+  #   - Dir.for_fd(fd) -> dir
+  # -->
+  # Returns a new Dir object representing the directory specified by the given
+  # integer directory file descriptor `fd`:
+  #
+  #     d0 = Dir.new('..')
+  #     d1 = Dir.for_fd(d0.fileno)
+  #
+  # Note that the returned `d1` does not have an associated path:
+  #
+  #     d0.path # => '..'
+  #     d1.path # => nil
+  #
+  # This method uses the
+  # [fdopendir()](https://www.man7.org/linux/man-pages/man3/fdopendir.3p.html)
+  # function defined by POSIX 2008; the method is not implemented on non-POSIX
+  # platforms (raises NotImplementedError).
+  #
+  def self.for_fd: (int) -> Dir
+
+  # <!--
+  #   rdoc-file=dir.c
   #   - Dir.pwd -> string
   # -->
-  # Returns the path to the current working directory of this process as a string.
+  # Returns the path to the current working directory:
   #
-  #     Dir.chdir("/tmp")   #=> 0
-  #     Dir.getwd           #=> "/tmp"
-  #     Dir.pwd             #=> "/tmp"
+  #     Dir.chdir("/tmp") # => 0
+  #     Dir.pwd           # => "/tmp"
   #
   def self.getwd: () -> String
 
   # <!--
   #   rdoc-file=dir.rb
-  #   - Dir.glob( pattern, [flags], [base: path] [, sort: true] )                       -> array
-  #   - Dir.glob( pattern, [flags], [base: path] [, sort: true] ) { |filename| block }  -> nil
+  #   - Dir.glob(*patterns, flags: 0, base: nil, sort: true) -> array
+  #   - Dir.glob(*patterns, flags: 0, base: nil, sort: true) {|entry_name| ... } -> nil
   # -->
-  # Expands `pattern`, which is a pattern string or an Array of pattern strings,
-  # and returns an array containing the matching filenames. If a block is given,
-  # calls the block once for each matching filename, passing the filename as a
-  # parameter to the block.
+  # Forms an array *entry_names* of the entry names selected by the arguments.
   #
-  # The optional `base` keyword argument specifies the base directory for
-  # interpreting relative pathnames instead of the current working directory. As
-  # the results are not prefixed with the base directory name in this case, you
-  # will need to prepend the base directory name if you want real paths.
+  # Argument `patterns` is a string pattern or an array of string patterns; note
+  # that these are not regexps; see below.
   #
-  # The results which matched single wildcard or character set are sorted in
-  # binary ascending order, unless `false` is given as the optional `sort` keyword
-  # argument.  The order of an Array of pattern strings and braces are preserved.
+  # Notes for the following examples:
   #
-  # Note that the pattern is not a regexp, it's closer to a shell glob. See
-  # File::fnmatch for the meaning of the `flags` parameter. Case sensitivity
-  # depends on your system (`File::FNM_CASEFOLD` is ignored).
-  #
-  # `*`
-  # :   Matches any file. Can be restricted by other values in the glob.
-  #     Equivalent to `/.*/mx` in regexp.
-  #
-  #     `*`
-  # :       Matches all files
-  #     `c*`
-  # :       Matches all files beginning with `c`
-  #     `*c`
-  # :       Matches all files ending with `c`
-  #     `*c*`
-  # :       Match all files that have `c` in them (including at the beginning or
-  #         end).
+  # *   `'*'` is the pattern that matches any entry name except those that begin
+  #     with `'.'`.
+  # *   We use method Array#take to shorten returned arrays that otherwise would
+  #     be very large.
   #
   #
-  #     Note, this will not match Unix-like hidden files (dotfiles).  In order to
-  #     include those in the match results, you must use the File::FNM_DOTMATCH
-  #     flag or something like `"{*,.*}"`.
+  # With no block, returns array *entry_names*; example (using the [simple file
+  # tree](rdoc-ref:Dir@About+the+Examples)):
   #
-  # `**`
-  # :   Matches directories recursively if followed by `/`.  If this path segment
-  #     contains any other characters, it is the same as the usual `*`.
+  #     Dir.glob('*') # => ["config.h", "lib", "main.rb"]
   #
-  # `?`
-  # :   Matches any one character. Equivalent to `/.{1}/` in regexp.
+  # With a block, calls the block with each of the *entry_names* and returns
+  # `nil`:
   #
-  # `[set]`
-  # :   Matches any one character in `set`.  Behaves exactly like character sets
-  #     in Regexp, including set negation (`[^a-z]`).
+  #     Dir.glob('*') {|entry_name| puts entry_name } # => nil
   #
-  # `{p,q}`
-  # :   Matches either literal `p` or literal `q`. Equivalent to pattern
-  #     alternation in regexp.
+  # Output:
   #
-  #     Matching literals may be more than one character in length.  More than two
-  #     literals may be specified.
+  #     config.h
+  #     lib
+  #     main.rb
   #
-  # `\`
-  # :   Escapes the next metacharacter.
+  # If optional keyword argument `flags` is given, the value modifies the
+  # matching; see below.
   #
-  #     Note that this means you cannot use backslash on windows as part of a
-  #     glob, i.e.  `Dir["c:\\foo*"]` will not work, use `Dir["c:/foo*"]` instead.
+  # If optional keyword argument `base` is given, its value specifies the base
+  # directory. Each pattern string specifies entries relative to the base
+  # directory; the default is `'.'`. The base directory is not prepended to the
+  # entry names in the result:
+  #
+  #     Dir.glob(pattern, base: 'lib').take(5)
+  #     # => ["abbrev.gemspec", "abbrev.rb", "base64.gemspec", "base64.rb", "benchmark.gemspec"]
+  #     Dir.glob(pattern, base: 'lib/irb').take(5)
+  #     # => ["cmd", "color.rb", "color_printer.rb", "completion.rb", "context.rb"]
+  #
+  # If optional keyword `sort` is given, its value specifies whether the array is
+  # to be sorted; the default is `true`. Passing value `false` with that keyword
+  # disables sorting (though the underlying file system may already have sorted
+  # the array).
+  #
+  # **Patterns**
+  #
+  # Each pattern string is expanded according to certain metacharacters; examples
+  # below use the [Ruby file tree](rdoc-ref:Dir@About+the+Examples):
+  #
+  # *   `'*'`: Matches any substring in an entry name, similar in meaning to
+  #     regexp `/.*/mx`; may be restricted by other values in the pattern strings:
+  #
+  #     *   `'*'` matches all entry names:
+  #
+  #             Dir.glob('*').take(3)  # => ["BSDL", "CONTRIBUTING.md", "COPYING"]
+  #
+  #     *   `'c*'` matches entry names beginning with `'c'`:
+  #
+  #             Dir.glob('c*').take(3) # => ["CONTRIBUTING.md", "COPYING", "COPYING.ja"]
+  #
+  #     *   `'*c'` matches entry names ending with `'c'`:
+  #
+  #             Dir.glob('*c').take(3) # => ["addr2line.c", "array.c", "ast.c"]
+  #
+  #     *   `'*c*'` matches entry names that contain `'c'`, even at the beginning
+  #         or end:
+  #
+  #             Dir.glob('*c*').take(3) # => ["CONTRIBUTING.md", "COPYING", "COPYING.ja"]
   #
   #
-  # Examples:
+  #     Does not match Unix-like hidden entry names ("dot files"). To include
+  #     those in the matched entry names, use flag IO::FNM_DOTMATCH or something
+  #     like `'{*,.*}'`.
   #
-  #     Dir["config.?"]                     #=> ["config.h"]
-  #     Dir.glob("config.?")                #=> ["config.h"]
-  #     Dir.glob("*.[a-z][a-z]")            #=> ["main.rb"]
-  #     Dir.glob("*.[^r]*")                 #=> ["config.h"]
-  #     Dir.glob("*.{rb,h}")                #=> ["main.rb", "config.h"]
-  #     Dir.glob("*")                       #=> ["config.h", "main.rb"]
-  #     Dir.glob("*", File::FNM_DOTMATCH)   #=> [".", "config.h", "main.rb"]
-  #     Dir.glob(["*.rb", "*.h"])           #=> ["main.rb", "config.h"]
+  # *   `'**'`: Matches entry names recursively if followed by  the slash
+  #     character `'/'`:
   #
-  #     Dir.glob("**/*.rb")                 #=> ["main.rb",
-  #                                         #    "lib/song.rb",
-  #                                         #    "lib/song/karaoke.rb"]
+  #         Dir.glob('**/').take(3) # => ["basictest/", "benchmark/", "benchmark/gc/"]
   #
-  #     Dir.glob("**/*.rb", base: "lib")    #=> ["song.rb",
-  #                                         #    "song/karaoke.rb"]
+  #     If the string pattern contains other characters or is not followed by a
+  #     slash character, it is equivalent to `'*'`.
   #
-  #     Dir.glob("**/lib")                  #=> ["lib"]
+  # *   `'?'` Matches any single character; similar in meaning to regexp `/./`:
   #
-  #     Dir.glob("**/lib/**/*.rb")          #=> ["lib/song.rb",
-  #                                         #    "lib/song/karaoke.rb"]
+  #         Dir.glob('io.?') # => ["io.c"]
   #
-  #     Dir.glob("**/lib/*.rb")             #=> ["lib/song.rb"]
+  # *   `'[*set*]'`: Matches any one character in the string *set*; behaves like a
+  #     [Regexp character class](rdoc-ref:Regexp@Character+Classes), including set
+  #     negation (`'[^a-z]'`):
   #
-  def self.glob: (string | ::Array[string] pattern, ?Integer flags, ?base: string) -> ::Array[String]
-               | (string | ::Array[string] pattern, ?Integer flags, ?base: string) { (String) -> void } -> void
+  #         Dir.glob('*.[a-z][a-z]').take(3)
+  #         # => ["CONTRIBUTING.md", "COPYING.ja", "KNOWNBUGS.rb"]
+  #
+  # *   `'{*abc*,*xyz*}'`: Matches either string *abc* or string *xyz*; behaves
+  #     like [Regexp alternation](rdoc-ref:Regexp@Alternation):
+  #
+  #         Dir.glob('{LEGAL,BSDL}') # => ["LEGAL", "BSDL"]
+  #
+  #     More than two alternatives may be given.
+  #
+  # *   `\`: Escapes the following metacharacter.
+  #
+  #     Note that on Windows, the backslash character may not be used in a string
+  #     pattern: `Dir['c:\\foo*']` will not work, use `Dir['c:/foo*']` instead.
+  #
+  #
+  # More examples (using the [simple file tree](rdoc-ref:Dir@About+the+Examples)):
+  #
+  #     # We're in the example directory.
+  #     File.basename(Dir.pwd) # => "example"
+  #     Dir.glob('config.?')              # => ["config.h"]
+  #     Dir.glob('*.[a-z][a-z]')          # => ["main.rb"]
+  #     Dir.glob('*.[^r]*')               # => ["config.h"]
+  #     Dir.glob('*.{rb,h}')              # => ["main.rb", "config.h"]
+  #     Dir.glob('*')                     # => ["config.h", "lib", "main.rb"]
+  #     Dir.glob('*', File::FNM_DOTMATCH) # => [".", "config.h", "lib", "main.rb"]
+  #     Dir.glob(["*.rb", "*.h"])         # => ["main.rb", "config.h"]
+  #
+  #     Dir.glob('**/*.rb')
+  #     => ["lib/song/karaoke.rb", "lib/song.rb", "main.rb"]
+  #
+  #     Dir.glob('**/*.rb', base: 'lib')  #   => ["song/karaoke.rb", "song.rb"]
+  #
+  #     Dir.glob('**/lib')                # => ["lib"]
+  #
+  #     Dir.glob('**/lib/**/*.rb')        # => ["lib/song/karaoke.rb", "lib/song.rb"]
+  #
+  #     Dir.glob('**/lib/*.rb')           # => ["lib/song.rb"]
+  #
+  # **Flags**
+  #
+  # If optional keyword argument `flags` is given (the default is zero -- no
+  # flags), its value should be the bitwise OR of one or more of the constants
+  # defined in module File::Constants.
+  #
+  # Example:
+  #
+  #     flags = File::FNM_EXTGLOB | File::FNM_DOTMATCH
+  #
+  # Specifying flags can extend, restrict, or otherwise modify the matching.
+  #
+  # The flags for this method (other constants in File::Constants do not apply):
+  #
+  # *   File::FNM_DOTMATCH: specifies that entry names beginning with `'.'` should
+  #     be considered for matching:
+  #
+  #         Dir.glob('*').take(5)
+  #         # => ["BSDL", "CONTRIBUTING.md", "COPYING", "COPYING.ja", "GPL"]
+  #         Dir.glob('*', flags: File::FNM_DOTMATCH).take(5)
+  #         # => [".", ".appveyor.yml", ".cirrus.yml", ".dir-locals.el", ".document"]
+  #
+  # *   File::FNM_EXTGLOB: enables the pattern extension `'{*a*,*b*}'`, which
+  #     matches pattern *a* and pattern *b*; behaves like a [regexp
+  #     union](rdoc-ref:Regexp.union) (e.g., `'(?:*a*|*b*)'`):
+  #
+  #         pattern = '{LEGAL,BSDL}'
+  #         Dir.glob(pattern)      # => ["LEGAL", "BSDL"]
+  #
+  # *   File::FNM_NOESCAPE: specifies that escaping with the backslash character
+  #     `'\'` is disabled; the character is not an escape character.
+  #
+  # *   File::FNM_PATHNAME: specifies that metacharacters `'*'` and `'?'` do not
+  #     match directory separators.
+  #
+  # *   File::FNM_SHORTNAME: specifies that patterns may match short names if they
+  #     exist; Windows only.
+  #
+  def self.glob: (array[path] | path pattern, ?int flags, ?base: path?, ?sort: bool) -> Array[String]
+               | (array[path] | path pattern, ?int flags, ?base: path?, ?sort: bool) { (String pathname) -> void } -> nil
 
   # <!--
   #   rdoc-file=dir.c
-  #   - Dir.home()       -> "/home/me"
-  #   - Dir.home("root") -> "/root"
+  #   - Dir.home(user_name = nil) -> dirpath
   # -->
-  # Returns the home directory of the current user or the named user if given.
+  # Retruns the home directory path of the user specified with `user_name` if it
+  # is not `nil`, or the current login user:
   #
-  def self.home: (?string user) -> String
+  #     Dir.home         # => "/home/me"
+  #     Dir.home('root') # => "/root"
+  #
+  # Raises ArgumentError if `user_name` is not a user name.
+  #
+  def self.home: (?string? user) -> String
 
   # <!--
   #   rdoc-file=dir.c
-  #   - Dir.mkdir( string [, integer] ) -> 0
+  #   - Dir.mkdir(dirpath, permissions = 0775) -> 0
   # -->
-  # Makes a new directory named by *string*, with permissions specified by the
-  # optional parameter *anInteger*. The permissions may be modified by the value
-  # of File::umask, and are ignored on NT. Raises a SystemCallError if the
-  # directory cannot be created. See also the discussion of permissions in the
-  # class documentation for File.
+  # Creates a directory in the underlying file system at `dirpath` with the given
+  # `permissions`; returns zero:
   #
-  #     Dir.mkdir(File.join(Dir.home, ".foo"), 0700) #=> 0
+  #     Dir.mkdir('foo')
+  #     File.stat(Dir.new('foo')).mode.to_s(8)[1..4] # => "0755"
+  #     Dir.mkdir('bar', 0644)
+  #     File.stat(Dir.new('bar')).mode.to_s(8)[1..4] # => "0644"
   #
-  def self.mkdir: (string, ?Integer permissions) -> void
+  # See [File Permissions](rdoc-ref:File@File+Permissions). Note that argument
+  # `permissions` is ignored on Windows.
+  #
+  def self.mkdir: (path dirname, ?int permissions) -> 0
 
   # <!--
   #   rdoc-file=dir.rb
-  #   - Dir.open( string ) -> aDir
-  #   - Dir.open( string, encoding: enc ) -> aDir
-  #   - Dir.open( string ) {| aDir | block } -> anObject
-  #   - Dir.open( string, encoding: enc ) {| aDir | block } -> anObject
+  #   - Dir.open(dirpath) -> dir
+  #   - Dir.open(dirpath, encoding: nil) -> dir
+  #   - Dir.open(dirpath) {|dir| ... } -> object
+  #   - Dir.open(dirpath, encoding: nil) {|dir| ... } -> object
   # -->
-  # The optional *encoding* keyword argument specifies the encoding of the
-  # directory. If not specified, the filesystem encoding is used.
+  # Creates a new Dir object *dir* for the directory at `dirpath`.
   #
-  # With no block, `open` is a synonym for Dir::new. If a block is present, it is
-  # passed *aDir* as a parameter. The directory is closed at the end of the block,
-  # and Dir::open returns the value of the block.
+  # With no block, the method equivalent to Dir.new(dirpath, encoding):
   #
-  def self.open: (string, ?encoding: encoding | nil) -> Dir
-               | [U] (string, ?encoding: encoding | nil) { (Dir) -> U } -> U
+  #     Dir.open('.') # => #<Dir:.>
+  #
+  # With a block given, the block is called with the created *dir*; on block exit
+  # *dir* is closed and the block's value is returned:
+  #
+  #     Dir.open('.') {|dir| dir.inspect } # => "#<Dir:.>"
+  #
+  # The value given with optional keyword argument `encoding` specifies the
+  # encoding for the directory entry names; if `nil` (the default), the file
+  # system's encoding is used:
+  #
+  #     Dir.open('.').read.encoding                       # => #<Encoding:UTF-8>
+  #     Dir.open('.', encoding: 'US-ASCII').read.encoding # => #<Encoding:US-ASCII>
+  #
+  def self.open: (path dirname, ?encoding: encoding?) -> instance
+               | [U] (path dirname, ?encoding: encoding?) { (instance) -> U } -> U
 
   # <!--
   #   rdoc-file=dir.c
-  #   - Dir.getwd -> string
   #   - Dir.pwd -> string
   # -->
-  # Returns the path to the current working directory of this process as a string.
+  # Returns the path to the current working directory:
   #
-  #     Dir.chdir("/tmp")   #=> 0
-  #     Dir.getwd           #=> "/tmp"
-  #     Dir.pwd             #=> "/tmp"
+  #     Dir.chdir("/tmp") # => 0
+  #     Dir.pwd           # => "/tmp"
   #
-  def self.pwd: () -> String
+  alias self.pwd self.getwd
 
   # <!--
   #   rdoc-file=dir.c
-  #   - Dir.delete( string ) -> 0
-  #   - Dir.rmdir( string ) -> 0
-  #   - Dir.unlink( string ) -> 0
+  #   - Dir.rmdir(dirpath) -> 0
   # -->
-  # Deletes the named directory. Raises a subclass of SystemCallError if the
-  # directory isn't empty.
+  # Removes the directory at `dirpath` from the underlying file system:
+  #
+  #     Dir.rmdir('foo') # => 0
+  #
+  # Raises an exception if the directory is not empty.
   #
   alias self.rmdir self.delete
 
   # <!--
   #   rdoc-file=dir.c
-  #   - Dir.delete( string ) -> 0
-  #   - Dir.rmdir( string ) -> 0
-  #   - Dir.unlink( string ) -> 0
+  #   - Dir.rmdir(dirpath) -> 0
   # -->
-  # Deletes the named directory. Raises a subclass of SystemCallError if the
-  # directory isn't empty.
+  # Removes the directory at `dirpath` from the underlying file system:
+  #
+  #     Dir.rmdir('foo') # => 0
+  #
+  # Raises an exception if the directory is not empty.
   #
   alias self.unlink self.delete
 
@@ -453,194 +763,237 @@ class Dir
 
   # <!--
   #   rdoc-file=dir.c
-  #   - dir.children  -> array
+  #   - chdir -> 0
+  #   - chdir { ... } -> object
   # -->
-  # Returns an array containing all of the filenames except for "." and ".." in
-  # this directory.
+  # Changes the current working directory to `self`:
   #
-  #     d = Dir.new("testdir")
-  #     d.children   #=> ["config.h", "main.rb"]
+  #     Dir.pwd # => "/"
+  #     dir = Dir.new('example')
+  #     dir.chdir
+  #     Dir.pwd # => "/example"
+  #
+  # With a block, temporarily changes the working directory:
+  #
+  # *   Calls the block.
+  # *   Changes to the given directory.
+  # *   Executes the block (yields no args).
+  # *   Restores the previous working directory.
+  # *   Returns the block's return value.
+  #
+  #
+  # Uses Dir.fchdir if available, and Dir.chdir if not, see those methods for
+  # caveats.
+  #
+  def chdir: () -> Integer
+           | [T] { () -> T } -> T
+
+  # <!--
+  #   rdoc-file=dir.c
+  #   - children -> array
+  # -->
+  # Returns an array of the entry names in `self` except for `'.'` and `'..'`:
+  #
+  #     dir = Dir.new('/example')
+  #     dir.children # => ["config.h", "lib", "main.rb"]
   #
   def children: () -> Array[String]
 
   # <!--
   #   rdoc-file=dir.c
-  #   - dir.close -> nil
+  #   - close -> nil
   # -->
-  # Closes the directory stream. Calling this method on closed Dir object is
-  # ignored since Ruby 2.3.
+  # Closes the stream in `self`, if it is open, and returns `nil`; ignored if
+  # `self` is already closed:
   #
-  #     d = Dir.new("testdir")
-  #     d.close   #=> nil
+  #     dir = Dir.new('example')
+  #     dir.read     # => "."
+  #     dir.close     # => nil
+  #     dir.close     # => nil
+  #     dir.read # Raises IOError.
   #
-  def close: () -> void
+  def close: () -> nil
 
   # <!--
   #   rdoc-file=dir.c
-  #   - dir.each { |filename| block }  -> dir
-  #   - dir.each                       -> an_enumerator
+  #   - each {|entry_name| ... } -> self
   # -->
-  # Calls the block once for each entry in this directory, passing the filename of
-  # each entry as a parameter to the block.
+  # Calls the block with each entry name in `self`:
   #
-  # If no block is given, an enumerator is returned instead.
+  #     Dir.new('example').each {|entry_name| p entry_name }
   #
-  #     d = Dir.new("testdir")
-  #     d.each  {|x| puts "Got #{x}" }
+  # Output:
   #
-  # *produces:*
+  #     "."
+  #     ".."
+  #     "config.h"
+  #     "lib"
+  #     "main.rb"
   #
-  #     Got .
-  #     Got ..
-  #     Got config.h
-  #     Got main.rb
+  # With no block given, returns an Enumerator.
   #
   def each: () { (String) -> void } -> self
-          | () -> ::Enumerator[String, self]
+          | () -> Enumerator[String, self]
 
   # <!--
   #   rdoc-file=dir.c
-  #   - dir.each_child {| filename | block }  -> dir
-  #   - dir.each_child                        -> an_enumerator
+  #   - each_child {|entry_name| ... } -> self
   # -->
-  # Calls the block once for each entry except for "." and ".." in this directory,
-  # passing the filename of each entry as a parameter to the block.
+  # Calls the block with each entry name in `self` except `'.'` and `'..'`:
   #
-  # If no block is given, an enumerator is returned instead.
+  #     dir = Dir.new('/example')
+  #     dir.each_child {|entry_name| p entry_name }
   #
-  #     d = Dir.new("testdir")
-  #     d.each_child  {|x| puts "Got #{x}" }
+  # Output:
   #
-  # *produces:*
+  #     "config.h"
+  #     "lib"
+  #     "main.rb"
   #
-  #     Got config.h
-  #     Got main.rb
+  # If no block is given, returns an enumerator.
   #
   def each_child: () { (String) -> void } -> self
-                | () -> ::Enumerator[String, self]
+                | () -> Enumerator[String, self]
 
   # <!--
   #   rdoc-file=dir.c
-  #   - dir.fileno -> integer
+  #   - fileno -> integer
   # -->
   # Returns the file descriptor used in *dir*.
   #
-  #     d = Dir.new("..")
-  #     d.fileno   #=> 8
+  #     d = Dir.new('..')
+  #     d.fileno # => 8
   #
-  # This method uses dirfd() function defined by POSIX 2008. NotImplementedError
-  # is raised on other platforms, such as Windows, which doesn't provide the
-  # function.
+  # This method uses the
+  # [dirfd()](https://www.man7.org/linux/man-pages/man3/dirfd.3.html) function
+  # defined by POSIX 2008; the method is not implemented on non-POSIX platforms
+  # (raises NotImplementedError).
   #
   def fileno: () -> Integer
 
   # <!--
   #   rdoc-file=dir.c
-  #   - dir.inspect -> string
+  #   - inspect -> string
   # -->
-  # Return a string describing this Dir object.
+  # Returns a string description of `self`:
+  #
+  #     Dir.new('example').inspect # => "#<Dir:example>"
   #
   def inspect: () -> String
 
   # <!--
   #   rdoc-file=dir.c
-  #   - dir.path -> string or nil
-  #   - dir.to_path -> string or nil
+  #   - path -> string or nil
   # -->
-  # Returns the path parameter passed to *dir*'s constructor.
+  # Returns the `dirpath` string that was used to create `self` (or `nil` if
+  # created by method Dir.for_fd):
   #
-  #     d = Dir.new("..")
-  #     d.path   #=> ".."
+  #     Dir.new('example').path # => "example"
   #
   def path: () -> String?
 
   # <!-- rdoc-file=dir.c -->
-  # Returns the current position in *dir*. See also Dir#seek.
+  # Returns the current position of `self`; see [Dir As
+  # Stream-Like](rdoc-ref:Dir@Dir+As+Stream-Like):
   #
-  #     d = Dir.new("testdir")
-  #     d.tell   #=> 0
-  #     d.read   #=> "."
-  #     d.tell   #=> 12
+  #     dir = Dir.new('example')
+  #     dir.tell  # => 0
+  #     dir.read  # => "."
+  #     dir.tell  # => 1
   #
   def pos: () -> Integer
 
   # <!--
   #   rdoc-file=dir.c
-  #   - dir.pos = integer  -> integer
+  #   - pos = position -> integer
   # -->
-  # Synonym for Dir#seek, but returns the position parameter.
+  # Sets the position in `self` and returns `position`. The value of `position`
+  # should have been returned from an earlier call to #tell; if not, the return
+  # values from subsequent calls to #read are unspecified.
   #
-  #     d = Dir.new("testdir")   #=> #<Dir:0x401b3c40>
-  #     d.read                   #=> "."
-  #     i = d.pos                #=> 12
-  #     d.read                   #=> ".."
-  #     d.pos = i                #=> 12
-  #     d.read                   #=> ".."
+  # See [Dir As Stream-Like](rdoc-ref:Dir@Dir+As+Stream-Like).
   #
-  def pos=: (Integer pos) -> Integer
+  # Examples:
+  #
+  #     dir = Dir.new('example')
+  #     dir.pos      # => 0
+  #     dir.pos = 3  # => 3
+  #     dir.pos      # => 3
+  #     dir.pos = 30 # => 30
+  #     dir.pos      # => 5
+  #
+  def pos=: [U < _ToInt] (U pos) -> U
 
   # <!--
   #   rdoc-file=dir.c
-  #   - dir.read -> string or nil
+  #   - read -> string or nil
   # -->
-  # Reads the next entry from *dir* and returns it as a string. Returns `nil` at
-  # the end of the stream.
+  # Reads and returns the next entry name from `self`; returns `nil` if at
+  # end-of-stream; see [Dir As Stream-Like](rdoc-ref:Dir@Dir+As+Stream-Like):
   #
-  #     d = Dir.new("testdir")
-  #     d.read   #=> "."
-  #     d.read   #=> ".."
-  #     d.read   #=> "config.h"
+  #     dir = Dir.new('example')
+  #     dir.read # => "."
+  #     dir.read # => ".."
+  #     dir.read # => "config.h"
   #
   def read: () -> String?
 
   # <!--
   #   rdoc-file=dir.c
-  #   - dir.rewind -> dir
+  #   - rewind -> self
   # -->
-  # Repositions *dir* to the first entry.
+  # Sets the position in `self` to zero; see [Dir As
+  # Stream-Like](rdoc-ref:Dir@Dir+As+Stream-Like):
   #
-  #     d = Dir.new("testdir")
-  #     d.read     #=> "."
-  #     d.rewind   #=> #<Dir:0x401b3fb0>
-  #     d.read     #=> "."
+  #     dir = Dir.new('example')
+  #     dir.read    # => "."
+  #     dir.read    # => ".."
+  #     dir.pos     # => 2
+  #     dir.rewind  # => #<Dir:example>
+  #     dir.pos     # => 0
   #
   def rewind: () -> self
 
   # <!--
   #   rdoc-file=dir.c
-  #   - dir.seek( integer ) -> dir
+  #   - seek(position) -> self
   # -->
-  # Seeks to a particular location in *dir*. *integer* must be a value returned by
-  # Dir#tell.
+  # Sets the position in `self` and returns `self`. The value of `position` should
+  # have been returned from an earlier call to #tell; if not, the return values
+  # from subsequent calls to #read are unspecified.
   #
-  #     d = Dir.new("testdir")   #=> #<Dir:0x401b3c40>
-  #     d.read                   #=> "."
-  #     i = d.tell               #=> 12
-  #     d.read                   #=> ".."
-  #     d.seek(i)                #=> #<Dir:0x401b3c40>
-  #     d.read                   #=> ".."
+  # See [Dir As Stream-Like](rdoc-ref:Dir@Dir+As+Stream-Like).
   #
-  def seek: (Integer) -> self
+  # Examples:
+  #
+  #     dir = Dir.new('example')
+  #     dir.pos      # => 0
+  #     dir.seek(3)  # => #<Dir:example>
+  #     dir.pos      # => 3
+  #     dir.seek(30) # => #<Dir:example>
+  #     dir.pos      # => 5
+  #
+  def seek: (int pos) -> self
 
   # <!--
   #   rdoc-file=dir.c
-  #   - dir.pos -> integer
-  #   - dir.tell -> integer
+  #   - tell -> integer
   # -->
-  # Returns the current position in *dir*. See also Dir#seek.
+  # Returns the current position of `self`; see [Dir As
+  # Stream-Like](rdoc-ref:Dir@Dir+As+Stream-Like):
   #
-  #     d = Dir.new("testdir")
-  #     d.tell   #=> 0
-  #     d.read   #=> "."
-  #     d.tell   #=> 12
+  #     dir = Dir.new('example')
+  #     dir.tell  # => 0
+  #     dir.read  # => "."
+  #     dir.tell  # => 1
   #
-  def tell: () -> Integer
+  alias tell pos
 
   # <!-- rdoc-file=dir.c -->
-  # Returns the path parameter passed to *dir*'s constructor.
+  # Returns the `dirpath` string that was used to create `self` (or `nil` if
+  # created by method Dir.for_fd):
   #
-  #     d = Dir.new("..")
-  #     d.path   #=> ".."
+  #     Dir.new('example').path # => "example"
   #
   alias to_path path
 end

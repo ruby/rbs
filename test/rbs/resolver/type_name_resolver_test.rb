@@ -42,6 +42,26 @@ EOF
     end
   end
 
+  def test_resolve_failure
+    SignatureManager.new do |manager|
+      manager.files[Pathname("foo.rbs")] = <<EOF
+class Foo
+  class Foo
+  end
+
+  class Bar
+  end
+end
+EOF
+      manager.build do |env|
+        resolver = Resolver::TypeNameResolver.new(env)
+
+        assert_nil resolver.resolve(type_name("Foo::Bar"), context: [[nil, TypeName("::Foo")], TypeName("::Foo::Foo")])
+      end
+    end
+  end
+
+
   def test_duplicated_resolve
     SignatureManager.new do |manager|
       manager.files[Pathname("foo.rbs")] = <<EOF
@@ -105,6 +125,26 @@ EOF
                      resolver.resolve(type_name("name"), context: [nil, TypeName("::MyObject")])
         assert_equal type_name("::MyObject::name2"),
                      resolver.resolve(type_name("name2"), context: [nil, TypeName("::MyObject")])
+      end
+    end
+  end
+
+  def test_module_alias
+    SignatureManager.new do |manager|
+      manager.files[Pathname("foo.rbs")] = <<EOF
+class MyObject
+  type name2 = ::Symbol
+end
+
+class Alias = MyObject
+
+type foo = Alias::name2
+EOF
+      manager.build do |env|
+        resolver = Resolver::TypeNameResolver.new(env)
+
+        assert_equal type_name("::Alias::name2"),
+                     resolver.resolve(type_name("Alias::name2"), context: nil)
       end
     end
   end

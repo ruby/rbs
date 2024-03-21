@@ -319,6 +319,38 @@ end
     EOF
   end
 
+  def test_colon
+    parser = RBI.new
+
+    parser.parse(<<-EOF)
+class Test
+  sig { returns(Foo) }
+  def m1; end
+
+  sig { returns(::Foo) }
+  def m2; end
+
+  sig { returns(Foo::Bar) }
+  def m3; end
+
+  sig { returns(::Foo::Bar) }
+  def m4; end
+end
+    EOF
+
+    assert_write parser.decls, <<-EOF
+class Test
+  def m1: () -> Foo
+
+  def m2: () -> ::Foo
+
+  def m3: () -> Foo::Bar
+
+  def m4: () -> ::Foo::Bar
+end
+    EOF
+  end
+
   def test_attached_class
     parser = RBI.new
 
@@ -512,6 +544,27 @@ end
 class Dir[out X, in Y, Z]
   include Enumerable
 end
+    EOF
+  end
+
+  def test_masgn
+    parser = RBI.new
+
+    parser.parse <<-EOF
+class Test
+  A, B, C = [1, 2, 3]
+end
+    EOF
+
+    assert_write parser.decls, <<-EOF
+class Test
+end
+
+Test::A: untyped
+
+Test::B: untyped
+
+Test::C: untyped
     EOF
   end
 end

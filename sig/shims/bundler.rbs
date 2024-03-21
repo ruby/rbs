@@ -30,4 +30,9 @@ module Bundler
   def self.default_lockfile: () -> Pathname
 
   def self.definition: () -> Definition
+
+  module Source
+    class Gemspec
+    end
+  end
 end

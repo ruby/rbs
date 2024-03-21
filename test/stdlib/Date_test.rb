@@ -2,7 +2,7 @@ require_relative "test_helper"
 require "date"
 
 class DateSingletonTest < Test::Unit::TestCase
-  include TypeAssertions
+  include TestHelper
 
   library "date"
   testing "singleton(::Date)"
@@ -158,6 +158,8 @@ class DateSingletonTest < Test::Unit::TestCase
                       Date, :parse, "2020-08-15", :true
     assert_send_type  "(::String str, bool complete, ::Integer start) -> ::Date",
                       Date, :parse, "2020-08-15", true, Date::ITALY
+    assert_send_type  "() -> ::Date",
+                      Date, :parse
   end
 
   def test_rfc2822
@@ -239,7 +241,7 @@ class DateSingletonTest < Test::Unit::TestCase
 end
 
 class DateTest < Test::Unit::TestCase
-  include TypeAssertions
+  include TestHelper
 
   library "date"
   testing "::Date"

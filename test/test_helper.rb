@@ -1,9 +1,12 @@
 $LOAD_PATH.unshift File.expand_path("../lib", __FILE__)
-require "rbs"
-require "rbs/annotate"
+
 require "tmpdir"
 require "stringio"
 require "open3"
+require "bundler" # Explicitly require bundler because ruby CI runs without bundler
+
+require "rbs"
+require "rbs/annotate"
 require "test_skip"
 
 unless ENV["XDG_CACHE_HOME"]
@@ -146,6 +149,10 @@ end
 class Hash[unchecked out K, unchecked out V]
   include Enumerable[[K, V]]
 end
+
+class Struct[Elem]
+  include Enumerable[Elem?]
+end
 SIG
 
     def add_file(path, content)
@@ -222,5 +229,104 @@ SIG
     assert_operator(sample.size, :<=, array.size)
     assert_operator(sample.size, :<=, sample_size) unless sample_size.nil?
     assert_empty(sample - array)
+  end
+
+  class ArgumentChecker
+    def initialize(builder:, interface:)
+      @builder = builder
+      @interface = interface
+    end
+
+    def no_argument_error?(method_name)
+      method = @builder.build_interface(TypeName(@interface)).methods[method_name]
+      method.defs.any? do |type_def|
+        type_def.member.overloads.all? do |overload|
+          fun = overload.method_type.type
+          build_args(fun) do |args|
+            build_kwargs(fun) do |kwargs|
+              yield args, kwargs, nil
+            end
+          end
+          true
+        rescue ArgumentError
+          false
+        end
+      end
+    end
+
+    private
+
+    def build_args(fun)
+      reqs = fun.required_positionals.map { :req }
+      tras = fun.trailing_positionals.map { :trail }
+      opts = [[]].concat(fun.optional_positionals.map.with_index do |_, i|
+        fun.optional_positionals[0..i].map { :opt }
+      end)
+      rest = [[]]
+      if fun.rest_positionals
+        rest << [:rest, :rest, :rest]
+      end
+      opts.each do |o|
+        rest.each do |r|
+          yield (reqs + o + r + tras).flatten
+        end
+      end
+    end
+
+    def build_kwargs(fun)
+      reqs = fun.required_keywords.map { |name, _| [name, :req] }
+      opts = fun.optional_keywords.map { |name, _| [name, :opt] }
+      opts_comb = opts.filter_map.with_index do |_, i|
+        next if i == 0
+        opts.combination(i).map(&:to_h)
+      end.flatten
+      opts_comb.unshift({})
+      opts_comb.each do |opt|
+        kwargs = reqs.to_h.merge(opt)
+        yield kwargs
+        if fun.rest_keywords
+          yield kwargs.merge({ random_key => :rest, random_key => :rest, random_key => :rest })
+        end
+      end
+    end
+
+    def random_key
+      ('a'..'z').to_a.shuffle.take(5).join.to_sym
+    end
+  end
+end
+
+if $0.end_with?("_test.rb")
+  at_exit do
+    argv = ARGV.dup
+    test_unit_args = []
+
+    OptionParser.new do |opts|
+      opts.on("--name NAME") do |name|
+        name = name.gsub(/(\A\/)|(\/\Z)/, '')
+        klass_name, method_name = name.split("#", 2)
+
+        constant = ObjectSpace.each_object(Class).find do |klass|
+          if klass.name
+            klass.name == klass_name || klass.name.end_with?("::#{klass_name}")
+          end
+        end
+
+        if constant
+          if method_name
+            test_unit_args << "--name"
+            test_unit_args << "#{constant.name}##{method_name}"
+          else
+            test_unit_args << "--testcase"
+            test_unit_args << constant.name
+          end
+        end
+      end
+    end.order!(argv)
+    test_unit_args.push(*argv)
+
+    RBS.logger.info { "Forwarding to test-unit command line: #{test_unit_args.inspect}" }
+
+    Test::Unit::AutoRunner.run(false, nil, test_unit_args)
   end
 end

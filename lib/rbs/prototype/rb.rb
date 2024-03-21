@@ -5,11 +5,11 @@ module RBS
     class RB
       include Helpers
 
-      Context = _ = Struct.new(:module_function, :singleton, :namespace, keyword_init: true) do
+      class Context < Struct.new(:module_function, :singleton, :namespace, :in_def, keyword_init: true)
         # @implements Context
 
         def self.initial(namespace: Namespace.root)
-          self.new(module_function: false, singleton: false, namespace: namespace)
+          self.new(module_function: false, singleton: false, namespace: namespace, in_def: false)
         end
 
         def method_kind
@@ -28,6 +28,14 @@ module RBS
           else
             :instance
           end
+        end
+
+        def enter_namespace(namespace)
+          Context.initial(namespace: self.namespace + namespace)
+        end
+
+        def update(module_function: self.module_function, singleton: self.singleton, in_def: self.in_def)
+          Context.new(module_function: module_function, singleton: singleton, namespace: namespace, in_def: in_def)
         end
       end
 
@@ -81,8 +89,7 @@ module RBS
               body = "\n" if body.empty?
 
               comment = AST::Comment.new(string: body, location: nil)
-              if (prev_comment = hash[line - 1])
-                hash[line - 1] = nil
+              if prev_comment = hash.delete(line - 1)
                 hash[line] = AST::Comment.new(string: prev_comment.string + comment.string,
                                               location: nil)
               else
@@ -121,11 +128,12 @@ module RBS
 
           decls.push kls
 
-          new_ctx = Context.initial(namespace: context.namespace + kls.name.to_namespace)
+          new_ctx = context.enter_namespace(kls.name.to_namespace)
           each_node class_body do |child|
             process child, decls: kls.members, comments: comments, context: new_ctx
           end
           remove_unnecessary_accessibility_methods! kls.members
+          sort_members! kls.members
 
         when :MODULE
           module_name, *module_body = node.children
@@ -142,11 +150,12 @@ module RBS
 
           decls.push mod
 
-          new_ctx = Context.initial(namespace: context.namespace + mod.name.to_namespace)
+          new_ctx = context.enter_namespace(mod.name.to_namespace)
           each_node module_body do |child|
             process child, decls: mod.members, comments: comments, context: new_ctx
           end
           remove_unnecessary_accessibility_methods! mod.members
+          sort_members! mod.members
 
         when :SCLASS
           this, body = node.children
@@ -194,6 +203,11 @@ module RBS
           )
 
           decls.push member unless decls.include?(member)
+
+          new_ctx = context.update(singleton: kind == :singleton, in_def: true)
+          each_node def_body.children do |child|
+            process child, decls: decls, comments: comments, context: new_ctx
+          end
 
         when :ALIAS
           new_name, old_name = node.children.map { |c| literal_to_symbol(c) }
@@ -306,7 +320,7 @@ module RBS
             if args.empty?
               context.module_function = true
             else
-              module_func_context = context.dup.tap { |ctx| ctx.module_function = true }
+              module_func_context = context.update(module_function: true)
               args.each do |arg|
                 if arg && (name = literal_to_symbol(arg))
                   if (i, defn = find_def_index_by_name(decls, name))
@@ -347,13 +361,7 @@ module RBS
           end
 
         when :ITER
-          method_name = node.children.first.children.first
-          case method_name
-          when :refine
-            # ignore
-          else
-            process_children(node, decls: decls, comments: comments, context: context)
-          end
+          # ignore
 
         when :CDECL
           const_name = case
@@ -377,6 +385,39 @@ module RBS
             comment: comments[node.first_lineno - 1]
           )
 
+        when :IASGN
+          case [context.singleton, context.in_def]
+          when [true, true], [false, false]
+            member = AST::Members::ClassInstanceVariable.new(
+              name: node.children.first,
+              type: Types::Bases::Any.new(location: nil),
+              location: nil,
+              comment: comments[node.first_lineno - 1]
+            )
+          when [false, true]
+            member = AST::Members::InstanceVariable.new(
+              name: node.children.first,
+              type: Types::Bases::Any.new(location: nil),
+              location: nil,
+              comment: comments[node.first_lineno - 1]
+            )
+          when [true, false]
+            # The variable is for the singleton class of the class object.
+            # RBS does not have a way to represent it. So we ignore it.
+          else
+            raise 'unreachable'
+          end
+
+          decls.push member if member && !decls.include?(member)
+
+        when :CVASGN
+          member = AST::Members::ClassVariable.new(
+            name: node.children.first,
+            type: Types::Bases::Any.new(location: nil),
+            location: nil,
+            comment: comments[node.first_lineno - 1]
+          )
+          decls.push member unless decls.include?(member)
         else
           process_children(node, decls: decls, comments: comments, context: context)
         end
@@ -413,13 +454,15 @@ module RBS
           when :SELF
             context.namespace.to_type_name
           when :CONST, :COLON2, :COLON3
-            const_to_name!(node)
+            const_to_name!(node) rescue nil
           end
         end
       end
 
       def literal_to_symbol(node)
         case node.type
+        when :SYM
+          node.children[0]
         when :LIT
           node.children[0] if node.children[0].is_a?(Symbol)
         when :STR
@@ -454,7 +497,7 @@ module RBS
         end
 
         if rest
-          rest_name = rest == :* ? nil : rest # # For `def f(...) end` syntax
+          rest_name = rest == :* ? nil : rest # `def f(...)` syntax has `*` name
           fun = fun.update(rest_positionals: Types::Function::Param.new(name: rest_name, type: untyped))
         end
 
@@ -477,7 +520,9 @@ module RBS
         end
 
         if kwrest && kwrest.children.any?
-          fun = fun.update(rest_keywords: Types::Function::Param.new(name: kwrest.children[0], type: untyped))
+          kwrest_name = kwrest.children[0] #: Symbol?
+          kwrest_name = nil if kwrest_name == :** # `def f(...)` syntax has `**` name
+          fun = fun.update(rest_keywords: Types::Function::Param.new(name: kwrest_name, type: untyped))
         end
 
         fun
@@ -533,9 +578,16 @@ module RBS
           end
         when :DSTR, :XSTR
           BuiltinNames::String.instance_type
+        when :SYM
+          lit = node.children[0]
+          if lit.to_s.ascii_only?
+            Types::Literal.new(literal: lit, location: nil)
+          else
+            BuiltinNames::Symbol.instance_type
+          end
         when :DSYM
           BuiltinNames::Symbol.instance_type
-        when :DREGX
+        when :DREGX, :REGX
           BuiltinNames::Regexp.instance_type
         when :TRUE
           Types::Literal.new(literal: true, location: nil)
@@ -543,6 +595,14 @@ module RBS
           Types::Literal.new(literal: false, location: nil)
         when :NIL
           Types::Bases::Nil.new(location: nil)
+        when :INTEGER
+          Types::Literal.new(literal: node.children[0], location: nil)
+        when :FLOAT
+          BuiltinNames::Float.instance_type
+        when :RATIONAL, :IMAGINARY
+          lit = node.children[0]
+          type_name = TypeName.new(name: lit.class.name.to_sym, namespace: Namespace.root)
+          Types::ClassInstance.new(name: type_name, args: [], location: nil)
         when :LIT
           lit = node.children[0]
           case lit
@@ -553,6 +613,11 @@ module RBS
               BuiltinNames::Symbol.instance_type
             end
           when Integer
+            Types::Literal.new(literal: lit, location: nil)
+          when String
+            # For Ruby <=3.3 which generates `LIT` node for string literals inside Hash literal.
+            # "a"             => STR node
+            # { "a" => nil }  => LIT node
             Types::Literal.new(literal: lit, location: nil)
           else
             type_name = TypeName.new(name: lit.class.name.to_sym, namespace: Namespace.root)
@@ -645,6 +710,14 @@ module RBS
 
       def param_type(node, default: Types::Bases::Any.new(location: nil))
         case node.type
+        when :INTEGER
+          BuiltinNames::Integer.instance_type
+        when :FLOAT
+          BuiltinNames::Float.instance_type
+        when :RATIONAL
+          Types::ClassInstance.new(name: TypeName("::Rational"), args: [], location: nil)
+        when :IMAGINARY
+          Types::ClassInstance.new(name: TypeName("::Complex"), args: [], location: nil)
         when :LIT
           case node.children[0]
           when Symbol
@@ -656,6 +729,8 @@ module RBS
           else
             default
           end
+        when :SYM
+          BuiltinNames::Symbol.instance_type
         when :STR, :DSTR
           BuiltinNames::String.instance_type
         when :NIL
@@ -742,6 +817,16 @@ module RBS
             _ = decls[index]
           ]
         end
+      end
+
+      def sort_members!(decls)
+        i = 0
+        orders = {
+          AST::Members::ClassVariable => -3,
+          AST::Members::ClassInstanceVariable => -2,
+          AST::Members::InstanceVariable => -1,
+        }
+        decls.sort_by! { |decl| [orders.fetch(decl.class, 0), i += 1] }
       end
     end
   end

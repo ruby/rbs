@@ -1,9 +1,8 @@
 require_relative "test_helper"
 
 class Encoding::ConverterSingletonTest < Test::Unit::TestCase
-  include TypeAssertions
+  include TestHelper
 
-  # library "pathname", "set", "securerandom"     # Declare library signatures to load
   testing "singleton(::Encoding::Converter)"
 
   def test_new
@@ -176,9 +175,8 @@ class Encoding::ConverterSingletonTest < Test::Unit::TestCase
 end
 
 class Encoding::ConverterTest < Test::Unit::TestCase
-  include TypeAssertions
+  include TestHelper
 
-  # library "pathname", "set", "securerandom"     # Declare library signatures to load
   testing "::Encoding::Converter"
 
   def test_double_equal

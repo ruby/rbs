@@ -293,8 +293,10 @@ class BasicSocket < IO
   # is set for the underlying file descriptor. *flags* is zero or more of the
   # `MSG_` options. The result, *mesg*, is the data received.
   #
-  # When recvfrom(2) returns 0, Socket#recv_nonblock returns an empty string as
-  # data. The meaning depends on the socket: EOF on TCP, empty packet on UDP, etc.
+  # When recvfrom(2) returns 0, Socket#recv_nonblock returns nil. In most cases it
+  # means the connection was closed, but for UDP connections it may mean an empty
+  # packet was received, as the underlying API makes it impossible to distinguish
+  # these two cases.
   #
   # ### Parameters
   # *   `maxlen` - the number of bytes to receive from the socket
@@ -579,7 +581,7 @@ class BasicSocket < IO
   #
   #     }
   #
-  def shutdown: (Symbol | String | Integer flags) -> void
+  def shutdown: (interned | Integer flags) -> void
 
   private
 

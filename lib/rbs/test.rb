@@ -1,8 +1,8 @@
 # frozen_string_literal: true
 
 require "securerandom"
+require "rbs/test/guaranteed"
 require "rbs/test/observer"
-require "rbs/test/spy"
 require "rbs/test/errors"
 require "rbs/test/type_check"
 require "rbs/test/tester"
@@ -21,8 +21,11 @@ module RBS
     PP = Kernel.instance_method(:pp)
     INSPECT = Kernel.instance_method(:inspect)
     METHODS = Kernel.instance_method(:methods)
+    RESPOND_TOP = Kernel.instance_method(:respond_to?)
 
     class ArgumentsReturn
+      include Guaranteed::Inspect
+
       attr_reader :arguments
       attr_reader :exit_value
       attr_reader :exit_type
@@ -82,11 +85,11 @@ module RBS
 
     if ::UnboundMethod.instance_methods.include?(:bind_call)
       def self.call(receiver, method, *args, &block)
-        method.bind_call(receiver, *args, &block)
+        __skip__ = method.bind_call(receiver, *args, &block)
       end
     else
       def self.call(receiver, method, *args, &block)
-        method.bind(receiver).call(*args, &block)
+        __skip__ = method.bind(receiver).call(*args, &block)
       end
     end
   end

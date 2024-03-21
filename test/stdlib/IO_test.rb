@@ -4,7 +4,7 @@ require 'tempfile'
 require "io/wait"
 
 class IOSingletonTest < Test::Unit::TestCase
-  include TypeAssertions
+  include TestHelper
 
   testing "singleton(::IO)"
 
@@ -35,20 +35,49 @@ class IOSingletonTest < Test::Unit::TestCase
 
   def test_open
     Dir.mktmpdir do |dir|
-      fd = IO.sysopen(File.expand_path(__FILE__))
-
       assert_send_type "(Integer) -> IO",
-                       IO, :open, fd
+                       IO, :open, IO.sysopen(File.expand_path(__FILE__))
       assert_send_type "(ToInt, String) -> IO",
-                       IO, :open, ToInt.new(fd), "r"
+                       IO, :open, ToInt.new(IO.sysopen(File.expand_path(__FILE__))), "r"
       assert_send_type "(Integer) { (IO) -> Integer } -> Integer",
-                       IO, :open, fd do |io| io.read.size end
+                       IO, :open, IO.sysopen(File.expand_path(__FILE__)), &proc {|io| io.read.size }
 
-      fd = IO.sysopen(File.expand_path(__FILE__))
       assert_send_type(
         "(ToInt, path: String) -> IO",
-        IO, :open, ToInt.new(fd), path: "<<TEST>>"
+        IO, :open, ToInt.new(IO.sysopen(File.expand_path(__FILE__))), path: "<<TEST>>"
       )
+    end
+  end
+
+  def ruby
+    ENV["RUBY"] || RbConfig.ruby
+  end
+
+  def test_popen
+    with_string("#{ruby} -v") do |command|
+      assert_send_type(
+        "(string) { (IO) -> nil } -> nil",
+        IO, :popen, command, &proc { nil }
+      )
+
+      assert_send_type(
+        "(Hash[String, String], string) { (IO) -> nil } -> nil",
+        IO, :popen, { "RUBYOPT" => "-I lib" }, command, &proc { nil }
+      )
+    end
+
+    with_string("ruby") do |ruby|
+      with_array(ruby, "-v") do |cmd|
+        assert_send_type(
+          "(array[string]) { (IO) -> nil } -> nil",
+          IO, :popen, cmd, &proc { nil }
+        )
+
+        assert_send_type(
+          "(Hash[String, String], array[string]) { (IO) -> nil } -> nil",
+          IO, :popen, { "RUBYOPT" => "-I lib" }, cmd, &proc { nil }
+        )
+      end
     end
   end
 
@@ -120,44 +149,46 @@ class IOSingletonTest < Test::Unit::TestCase
 
   def test_select
     if_ruby "3.0.0"..."3.2.0" do
-      r, w = IO.pipe
-      assert_send_type "(Array[IO], nil, nil, Float) -> nil",
-        IO, :select, [r], nil, nil, 0.5
-      assert_send_type "(nil, Array[IO]) -> [Array[IO], Array[IO], Array[IO]]",
-        IO, :select, nil, [w]
-      assert_send_type "(nil, Array[IO], Array[IO]) -> [Array[IO], Array[IO], Array[IO]]",
-        IO, :select, nil, [w], [r]
-      assert_send_type "(nil, Array[IO], Array[IO], Float) -> [Array[IO], Array[IO], Array[IO]]",
-        IO, :select, nil, [w], [r], 0.5
-      w.write("x")
-      assert_send_type "(Array[IO], nil, nil, Float) -> [Array[IO], Array[IO], Array[IO]]",
-        IO, :select, [r], nil, nil, 0.5
-      assert_send_type "(Array[IO], nil, nil, nil) -> [Array[IO], Array[IO], Array[IO]]",
-        IO, :select, [r], nil, nil, nil
-      assert_send_type "(Array[IO], Array[IO]) -> [Array[IO], Array[IO], Array[IO]]",
-        IO, :select, [r], [w]
-      assert_send_type "(Array[IO], Array[IO], Array[IO]) -> [Array[IO], Array[IO], Array[IO]]",
-        IO, :select, [r], [w], [r]
-      assert_send_type "(Array[IO], Array[IO], Array[IO], Float) -> [Array[IO], Array[IO], Array[IO]]",
-        IO, :select, [r], [w], [r], 0.5
-    ensure
-      r.close
-      w.close
+      with_timeout.and_nil do |timeout|
+        r, w = IO.pipe
+        assert_send_type "(Array[IO], nil, nil, Time::_Timeout?) -> nil",
+          IO, :select, [r], nil, nil, timeout
+        assert_send_type "(nil, Array[IO]) -> [Array[IO], Array[IO], Array[IO]]",
+          IO, :select, nil, [w]
+        assert_send_type "(nil, Array[IO], Array[IO]) -> [Array[IO], Array[IO], Array[IO]]",
+          IO, :select, nil, [w], [r]
+        assert_send_type "(nil, Array[IO], Array[IO], Time::_Timeout?) -> [Array[IO], Array[IO], Array[IO]]",
+          IO, :select, nil, [w], [r], timeout
+        w.write("x")
+        assert_send_type "(Array[IO], nil, nil, Time::_Timeout?) -> [Array[IO], Array[IO], Array[IO]]",
+          IO, :select, [r], nil, nil, timeout
+        assert_send_type "(Array[IO], nil, nil, nil) -> [Array[IO], Array[IO], Array[IO]]",
+          IO, :select, [r], nil, nil, nil
+        assert_send_type "(Array[IO], Array[IO]) -> [Array[IO], Array[IO], Array[IO]]",
+          IO, :select, [r], [w]
+        assert_send_type "(Array[IO], Array[IO], Array[IO]) -> [Array[IO], Array[IO], Array[IO]]",
+          IO, :select, [r], [w], [r]
+        assert_send_type "(Array[IO], Array[IO], Array[IO], Time::_Timeout?) -> [Array[IO], Array[IO], Array[IO]]",
+          IO, :select, [r], [w], [r], timeout
+      ensure
+        r.close
+        w.close
+      end
     end
   end
 end
 
 class IOInstanceTest < Test::Unit::TestCase
-  include TypeAssertions
+  include TestHelper
 
   testing "::IO"
 
   def test_append_symbol
     Dir.mktmpdir do |dir|
       File.open(File.join(dir, "some_file"), "w") do |io|
-        assert_send_type "(String) -> self",
+        assert_send_type "(String) -> File",
                          io, :<<, "foo"
-        assert_send_type "(Object) -> self",
+        assert_send_type "(Object) -> File",
                          io, :<<, Object.new
       end
     end
@@ -231,11 +262,11 @@ class IOInstanceTest < Test::Unit::TestCase
       assert_send_type "(nil) -> String",
                        io, :read, nil
       assert_send_type "(Integer, String) -> String",
-                       io, :read, 0, "buffer"
+                       io, :read, 0, +"buffer"
       assert_send_type "(Integer, String) -> nil",
-                       io, :read, 1, "buffer"
+                       io, :read, 1, +"buffer"
       assert_send_type "(nil, String) -> String",
-                       io, :read, nil, "buffer"
+                       io, :read, nil, +"buffer"
     end
   end
 
@@ -244,7 +275,7 @@ class IOInstanceTest < Test::Unit::TestCase
       assert_send_type "(Integer) -> String",
                        io, :readpartial, 10
       assert_send_type "(Integer, String) -> String",
-                       io, :readpartial, 10, "buffer"
+                       io, :readpartial, 10, +"buffer"
     end
   end
 
@@ -330,10 +361,35 @@ class IOInstanceTest < Test::Unit::TestCase
                        io, :sync
     end
   end
+
+  def test_gets
+    IO.open(IO.sysopen(File.expand_path(__FILE__))) do |io|
+      assert_send_type '() -> String',
+                       io, :gets
+      assert_send_type '(String) -> String',
+                       io, :gets, ""
+      assert_send_type '(Integer) -> String',
+                       io, :gets, 10
+      assert_send_type '(chomp: bool) -> String',
+                       io, :gets, chomp: true
+
+      assert_send_type '(Integer, chomp: bool) -> String',
+                       io, :gets, 42, chomp: true
+      assert_send_type '(String, Integer, chomp: bool) -> String',
+                       io, :gets, "", 42, chomp: true
+      assert_send_type '(String, chomp: bool) -> String',
+                       io, :gets, "", chomp: true
+
+      assert_send_type '(nil) -> String',
+                       io, :gets, nil
+      assert_send_type '(nil, chomp: bool) -> nil',
+                       io, :gets, nil, chomp: true
+    end
+  end
 end
 
 class IOWaitTest < Test::Unit::TestCase
-  include TypeAssertions
+  include TestHelper
 
   testing "::IO"
 

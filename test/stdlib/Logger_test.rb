@@ -4,12 +4,14 @@ require 'logger'
 require 'stringio'
 
 class LoggerSingletonTest < Test::Unit::TestCase
-  include TypeAssertions
+  include TestHelper
 
   library 'logger'
   testing "singleton(::Logger)"
 
   def test_new
+    assert_send_type  "(nil) -> Logger",
+                      Logger, :new, nil
     assert_send_type  "(String logdev) -> void",
                       Logger, :new, '/dev/null'
     assert_send_type  "(StringIO logdev) -> void",
@@ -32,7 +34,7 @@ class LoggerSingletonTest < Test::Unit::TestCase
 end
 
 class LoggerTest < Test::Unit::TestCase
-  include TypeAssertions
+  include TestHelper
 
   library 'logger'
   testing "::Logger"
@@ -234,11 +236,11 @@ class LoggerTest < Test::Unit::TestCase
   end
 
   def test_reopen
-    assert_send_type  "() -> self",
+    assert_send_type  "() -> Logger",
                       logger, :reopen
-    assert_send_type  "(nil) -> self",
+    assert_send_type  "(nil) -> Logger",
                       logger, :reopen, nil
-    assert_send_type  "(LoggerTest::WriteCloser) -> self",
+    assert_send_type  "(LoggerTest::WriteCloser) -> Logger",
                       logger, :reopen, WriteCloser.new
   end
 

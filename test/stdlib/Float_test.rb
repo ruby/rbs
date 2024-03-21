@@ -193,3 +193,11 @@ class FloatTest < StdlibTest
     a.truncate(1)
   end
 end
+
+class FloatConstantTest < Test::Unit::TestCase
+  include TestHelper
+
+  def test_constant
+    assert_const_type "Float", "Float::INFINITY"
+  end
+end

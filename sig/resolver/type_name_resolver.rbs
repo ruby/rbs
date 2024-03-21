@@ -17,6 +17,8 @@ module RBS
 
       private
 
+      attr_reader env: Environment
+
       attr_reader all_names: Set[TypeName]
 
       attr_reader cache: Hash[query, TypeName?]
@@ -25,7 +27,9 @@ module RBS
 
       def try_cache: (query) { () -> TypeName? } -> TypeName?
 
-      def resolve_in: (TypeName, context) -> TypeName?
+      def resolve_in: (Symbol, context) -> TypeName?
+
+      def partition: (TypeName) -> [Symbol, TypeName?]
     end
   end
 end

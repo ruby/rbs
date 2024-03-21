@@ -2,7 +2,7 @@ require_relative "test_helper"
 require "cgi"
 
 class CGISingletonTest < Test::Unit::TestCase
-  include TypeAssertions
+  include TestHelper
 
   library "cgi"
   testing "singleton(::CGI)"
@@ -60,7 +60,7 @@ class CGISingletonTest < Test::Unit::TestCase
 end
 
 class CGITest < Test::Unit::TestCase
-  include TypeAssertions
+  include TestHelper
 
   library "cgi"
   testing "::CGI"

@@ -3,7 +3,7 @@ require "net/http"
 require "uri"
 
 class NetSingletonTest < Test::Unit::TestCase
-  include TypeAssertions
+  include TestHelper
 
   library "net-http", "uri"
   testing "singleton(::Net::HTTP)"
@@ -46,7 +46,7 @@ class NetSingletonTest < Test::Unit::TestCase
 end
 
 class NetInstanceTest < Test::Unit::TestCase
-  include TypeAssertions
+  include TestHelper
 
   library "net-http", "uri"
   testing "::Net::HTTP"
@@ -308,7 +308,7 @@ class NetInstanceTest < Test::Unit::TestCase
 end
 
 class TestHTTPRequest < Test::Unit::TestCase
-  include TypeAssertions
+  include TestHelper
 
   library "net-http", "uri"
   testing "::Net::HTTPRequest"
@@ -454,7 +454,7 @@ class TestHTTPRequest < Test::Unit::TestCase
 end
 
 class TestSingletonNetHTTPResponse < Test::Unit::TestCase
-  include TypeAssertions
+  include TestHelper
 
   library "net-http", "uri"
   testing "singleton(::Net::HTTPResponse)"
@@ -466,7 +466,7 @@ class TestSingletonNetHTTPResponse < Test::Unit::TestCase
 end
 
 class TestInstanceNetHTTPResponse < Test::Unit::TestCase
-  include TypeAssertions
+  include TestHelper
 
   library "net-http", "uri"
   testing "::Net::HTTPResponse"

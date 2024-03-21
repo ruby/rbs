@@ -245,8 +245,8 @@ module Coverage
   # -->
   # Returns true if coverage measurement is supported for the given mode.
   #
-  # The mode should be one of the following symbols: `:lines`, `:branches`,
-  # `:methods`, `:eval`.
+  # The mode should be one of the following symbols: `:lines`, `:oneshot_lines`,
+  # `:branches`, `:methods`, `:eval`.
   #
   # Example:
   #

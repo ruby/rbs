@@ -9,12 +9,12 @@ module RBS
     def initialize(namespace:, name:)
       @namespace = namespace
       @name = name
-      @kind = case name.to_s[0,1]
-              when /[A-Z]/
+      @kind = case
+              when name.match?(/\A[A-Z]/)
                 :class
-              when /[a-z]/
+              when name.match?(/\A[a-z]/)
                 :alias
-              when "_"
+              when name.start_with?("_")
                 :interface
               else
                 # Defaults to :class

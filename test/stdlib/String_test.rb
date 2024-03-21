@@ -1,1679 +1,1753 @@
-require_relative "test_helper"
+# frozen_string_literal: false
+require_relative 'test_helper'
 
+# TODO: encode, encode!, byteslice
 class StringSingletonTest < Test::Unit::TestCase
-  include TypeAssertions
+  include TestHelper
 
-  testing "singleton(::String)"
-
-  def test_initialize
-    assert_send_type "() -> String",
-                     String, :new
-    assert_send_type "(String) -> String",
-                     String, :new, ""
-    assert_send_type "(String, encoding: Encoding) -> String",
-                     String, :new, "", encoding: Encoding::ASCII_8BIT
-    assert_send_type "(String, encoding: Encoding, capacity: Integer) -> String",
-                     String, :new, "", encoding: Encoding::ASCII_8BIT, capacity: 123
-    assert_send_type "(encoding: Encoding, capacity: Integer) -> String",
-                     String, :new, encoding: Encoding::ASCII_8BIT, capacity: 123
-    assert_send_type "(ToStr) -> String",
-                     String, :new, ToStr.new("")
-    assert_send_type "(encoding: ToStr) -> String",
-                     String, :new, encoding: ToStr.new('Shift_JIS')
-    assert_send_type "(capacity: ToInt) -> String",
-                     String, :new, capacity: ToInt.new(123)
-  end
+  testing 'singleton(::String)'
 
   def test_try_convert
-    assert_send_type "(String) -> String",
-                     String, :try_convert, "str"
-    assert_send_type "(ToStr) -> String",
-                     String, :try_convert, ToStr.new("str")
-    assert_send_type "(Regexp) -> nil",
-                     String, :try_convert, /re/
+    assert_send_type  '(String) -> String',
+                      String, :try_convert, 'foo'
+
+    assert_send_type  '(_ToStr) -> String',
+                      String, :try_convert, ToStr.new
+
+    with_untyped do |object|
+      # These are covered by the previous cases.
+      next if ::Kernel.instance_method(:respond_to?).bind_call(object, :to_str)
+
+      assert_send_type  '(untyped) -> nil',
+                        String, :try_convert, object
+    end
   end
 end
 
+# Note, all methods which modify string literals have `+'string'` in case we later add
+# `frozen_string_literal: true` to the top (or ruby makes frozen strings default).
 class StringInstanceTest < Test::Unit::TestCase
-  include TypeAssertions
+  include TestHelper
 
-  testing "::String"
+  testing '::String'
 
-  def test_format_m
-    assert_send_type "(Integer) -> String",
-                     "%05d", :%, 123
-    assert_send_type "(Array[String | Integer]) -> String",
-                     "%-5s: %016x", :%, [ "ID", self.object_id ]
-    assert_send_type "(Hash[Symbol, untyped]) -> String",
-                     "foo = %{foo}", :%, { :foo => 'bar' }
+  def assert_case_method(method, include_fold: false)
+    assert_send_type  '() -> String',
+                      'hello', method
+    options = %i[ascii lithuanian turkic] + (include_fold ? [:fold] : [])
+
+    options.each do |option|
+      assert_send_type  "(#{options.map(&:inspect).join('|')}) -> String",
+                        'hello', method, option
+    end
+
+    assert_send_type  '(:lithuanian, :turkic) -> String',
+                      'hello', method, :lithuanian, :turkic
+    assert_send_type  '(:turkic, :lithuanian) -> String',
+                      'hello', method, :turkic, :lithuanian
   end
 
-  def test_times
-    assert_send_type "(Integer) -> String",
-                     "Ho! ", :*, 3
-    assert_send_type "(ToInt) -> String",
-                     "Ho! ", :*, ToInt.new(0)
+  def assert_case_method!(method, normal:, nochange:, include_fold: false)
+    assert_send_type  '() -> String',
+                      normal.dup, method
+    assert_send_type  '() -> nil',
+                      nochange.dup, method
+
+    options = %i[ascii lithuanian turkic] + (include_fold ? [:fold] : [])
+
+    options.each do |option|
+      assert_send_type  "(#{options.map(&:inspect).join('|')}) -> String",
+                        normal.dup, method, option
+      assert_send_type  "(#{options.map(&:inspect).join('|')}) -> nil",
+                        nochange.dup, method, option
+    end
+
+    assert_send_type  '(:lithuanian, :turkic) -> String',
+                      normal.dup, method, :lithuanian, :turkic
+    assert_send_type  '(:lithuanian, :turkic) -> nil',
+                      nochange.dup, method, :lithuanian, :turkic
+
+    assert_send_type  '(:turkic, :lithuanian) -> String',
+                      normal.dup, method, :turkic, :lithuanian
+    assert_send_type  '(:turkic, :lithuanian) -> nil',
+                      nochange.dup, method, :turkic, :lithuanian
   end
 
-  def test_plus
-    assert_send_type "(String) -> String",
-                     "Hello from ", :+, self.to_s
-    assert_send_type "(ToStr) -> String",
-                     "Hello from ", :+, ToStr.new(self.to_s)
+  def test_initialize
+    assert_send_type  '() -> String',
+                      String.allocate, :initialize
+
+    with_string do |source|
+      assert_send_type  '(string) -> String',
+                        String.allocate, :initialize, source
+    end
+
+    with_encoding.and_nil do |encoding|
+      assert_send_type  '(encoding: encoding?) -> String',
+                        String.allocate, :initialize, encoding: encoding
+    end
+
+    with_int.and_nil do |capacity|
+      assert_send_type  '(capacity: int?) -> String',
+                        String.allocate, :initialize, capacity: capacity
+    end
   end
 
-  def test_unary_plus
-    assert_send_type "() -> String",
-                     '', :+@
+  def test_initialize_copy
+    test_replace(:initialize_copy)
   end
 
-  def test_unary_minus
-    assert_send_type "() -> String",
-                     '', :-@
+  def test_mod
+    with_array 1, 2 do |ary|
+      assert_send_type  '(array[untyped]) -> String',
+                        '%d %d', :%, ary
+    end
+
+    with_hash a: 3, b: 4 do |named|
+      assert_send_type  '(hash[Symbol, untyped]) -> String',
+                        '%<a>d %<b>d', :%, named
+    end
+
+    with_untyped do |arg|
+      # Our test uses `'%s'` so we need to make sure the thing can respond to it.
+      def arg.to_s = "A" unless defined? arg.to_s
+
+      assert_send_type  '(untyped) -> String',
+                        '%s', :%, arg
+    end
   end
 
-  def test_concat_op
-    a = "hello "
-    assert_send_type "(String) -> String",
-                     a, :<<, "world"
-    assert_send_type "(ToStr) -> String",
-                     a, :<<, ToStr.new("world")
-    assert_send_type "(Integer) -> String",
-                     a, :<<, 33
-    refute_send_type "(ToInt) -> String",
-                     a, :<<, ToInt.new(33)
+  def test_mul
+    with_int do |amount|
+      assert_send_type  '(int) -> String',
+                        'hello', :*, amount
+    end
+  end
+
+  def test_add
+    with_string do |str|
+      assert_send_type  '(string) -> String',
+                        'hello', :+, str
+    end
+  end
+
+  def test_upos
+    assert_send_type  '() -> String',
+                      'hi'.dup, :+@ # `.dup` in case we have frozen_string_literal as we're testing `+@`
+
+    assert_send_type  '() -> String',
+                      Class.new(String).new('hi').freeze, :+@
+  end
+
+  def test_uneg(method = :-@)
+    assert_send_type  '() -> String',
+                      Class.new(String).new('hi'), method
+
+    assert_send_type  '() -> String',
+                      'hi'.freeze, method
+  end
+
+  def test_lshift
+    assert_send_type  '(Integer) -> String',
+                      +'hi', :<<, 38
+
+    refute_send_type  '(_ToInt) -> untyped',
+                      +'hi', :<<, ToInt.new(38)
+
+    with_string do |string|
+      assert_send_type  '(string) -> String',
+                        +'hi', :<<, string
+    end
   end
 
   def test_cmp
-    assert_send_type "(String) -> Integer",
-                     "abcdef", :<=>, "abcde"
-    assert_send_type "(ToStr) -> Integer",
-                     "abcdef", :<=>, ToStr.new('foo')
-    assert_send_type "(Integer) -> nil",
-                     "abcdef", :<=>, 1
+    with_string 's' do |other|
+      assert_send_type  '(string) -> -1',
+                        'a', :<=>, other
+      assert_send_type  '(string) -> 0',
+                        's', :<=>, other
+      assert_send_type  '(string) -> 1',
+                        'z', :<=>, other
+    end
+
+    blank = BlankSlate.new.__with_object_methods(:define_singleton_method)
+    [-123, 0, 123].each do |comparison|
+      blank.define_singleton_method(:<=>) do |x|
+        raise '`x` must be `s`' unless 's' == x
+        ret = BlankSlate.new.__with_object_methods(:define_singleton_method)
+        ret.define_singleton_method(:>) { |x| comparison > x ? :some_truthy_value : nil }
+        ret.define_singleton_method(:<) { |x| comparison < x ? :some_truthy_value : nil }
+        ret
+      end
+
+      assert_send_type  '(untyped other) -> (-1 | 0 | 1)',
+                        's', :<=>, blank
+    end
   end
 
-  def test_eq
-    assert_send_type "(String) -> true",
-                     "a", :==, "a"
-    assert_send_type "(nil) -> false",
-                     "a", :==, nil
+  def test_eq(method = :==)
+    with_untyped do |other|
+      assert_send_type  '(untyped) -> bool',
+                        'hello', method, other
+    end
   end
 
   def test_eqq
-    assert_send_type "(String) -> true",
-                     "a", :===, "a"
-    assert_send_type "(nil) -> false",
-                     "a", :===, nil
+    test_eq :===
   end
 
   def test_match_op
-    assert_send_type "(Regexp) -> Integer",
-                     "a", :=~, /a/
-    assert_send_type "(nil) -> nil",
-                     "a", :=~, nil
+    assert_send_type  '(Regexp) -> Integer',
+                      'hello', :=~, /./
+    assert_send_type  '(Regexp) -> nil',
+                      'hello', :=~, /doesn't match/
+
+    matcher = BlankSlate.new
+    def matcher.=~(rhs)
+      fail unless rhs == 'hello'
+      :world
+    end
+
+    assert_send_type  '[T] (String::_MatchAgainst[String, T]) -> T',
+                      'hello', :=~, matcher
   end
 
-  def test_aref
-    assert_send_type "(Integer) -> String",
-                     "a", :[], 0
-    assert_send_type "(ToInt) -> String",
-                     "a", :[], ToInt.new(0)
-    assert_send_type "(Integer) -> nil",
-                     "a", :[], 1
-    assert_send_type "(ToInt) -> nil",
-                     "a", :[], ToInt.new(1)
-    assert_send_type "(Integer, Integer) -> String",
-                     "a", :[], 0, 1
-    assert_send_type "(Integer, Integer) -> nil",
-                     "a", :[], 2, 1
-    assert_send_type "(ToInt, ToInt) -> String",
-                     "a", :[], ToInt.new(0), ToInt.new(1)
-    assert_send_type "(ToInt, ToInt) -> nil",
-                     "a", :[], ToInt.new(2), ToInt.new(1)
-    assert_send_type "(Range[Integer]) -> String",
-                     "a", :[], 0..1
-    assert_send_type "(Range[Integer]) -> nil",
-                     "a", :[], 2..1
-    assert_send_type "(Range[Integer?]) -> String",
-                     "a", :[], (0...)
-    assert_send_type "(Range[Integer?]) -> nil",
-                     "a", :[], (2...)
-    assert_send_type "(Range[Integer?]) -> String",
-                     "a", :[], (...0)
-    assert_send_type "(Regexp) -> String",
-                     "a", :[], /a/
-    assert_send_type "(Regexp) -> nil",
-                     "a", :[], /b/
-    assert_send_type "(Regexp, Integer) -> String",
-                     "a", :[], /a/, 0
-    assert_send_type "(Regexp, Integer) -> nil",
-                     "a", :[], /b/, 0
-    assert_send_type "(Regexp, ToInt) -> String",
-                     "a", :[], /a/, ToInt.new(0)
-    assert_send_type "(Regexp, ToInt) -> nil",
-                     "a", :[], /b/, ToInt.new(0)
-    assert_send_type "(Regexp, String) -> String",
-                     "a", :[], /(?<a>a)/, "a"
-    assert_send_type "(Regexp, String) -> nil",
-                     "a", :[], /(?<b>b)/, "b"
-    assert_send_type "(String) -> String",
-                     "a", :[], "a"
-    assert_send_type "(String) -> nil",
-                     "a", :[], "b"
+  def test_aref(method = :[])
+    # (int start, ?int length) -> String?
+    with_int(3) do |start|
+      assert_send_type  '(int) -> String',
+                        'hello, world', method, start
+      assert_send_type  '(int) -> nil',
+                        'q', method, start
+
+      with_int 3 do |length|
+        assert_send_type  '(int, int) -> String',
+                          'hello, world', method, start, length
+        assert_send_type  '(int, int) -> nil',
+                          'q', method, start, length
+      end
+    end
+
+    # (range[int?] range) -> String?
+    with_range with_int(3).and_nil, with_int(5).and_nil do |range|
+      assert_send_type  '(range[int?]) -> String',
+                        'hello', method, range
+
+      next if nil == range.begin # if the starting value is `nil`, you can't get `nil` outputs.
+      assert_send_type  '(range[int?]) -> nil',
+                        'hi', method, range
+    end
+
+    # (Regexp regexp, ?MatchData::capture backref) -> String?
+    assert_send_type  '(Regexp) -> String',
+                      'hello', method, /./
+    assert_send_type  '(Regexp) -> nil',
+                      'hello', method, /doesn't match/
+    with_int(1).and 'a', :a do |backref|
+      assert_send_type  '(Regexp, MatchData::capture) -> String',
+                        'hallo', method, /(?<a>)./, backref
+      assert_send_type  '(Regexp, MatchData::capture) -> nil',
+                        'hallo', method, /(?<a>)doesn't match/, backref
+    end
+
+    # (String substring) -> String?
+    assert_send_type  '(String) -> String',
+                      'hello', method, 'hello'
+    assert_send_type  '(String) -> nil',
+                      'hello', method, 'does not exist'
+    refute_send_type  '(_ToStr) -> untyped',
+                      'hello', method, ToStr.new('e')
   end
 
-  def test_aset_m
-    assert_send_type "(Integer, String) -> String",
-                     "foo", :[]=, 0, "bar"
-    assert_send_type "(ToInt, String) -> String",
-                     "foo", :[]=, ToInt.new(0), "bar"
-    assert_send_type "(Integer, Integer, String) -> String",
-                     "foo", :[]=, 0, 3, "bar"
-    assert_send_type "(ToInt, ToInt, String) -> String",
-                     "foo", :[]=, ToInt.new(0), ToInt.new(3), "bar"
-    assert_send_type "(Range[Integer], String) -> String",
-                     "foo", :[]=, 0..3, "bar"
-    assert_send_type "(Range[Integer?], String) -> String",
-                    "foo", :[]=, (0..), "bar"
-    assert_send_type "(Regexp, String) -> String",
-                     "foo", :[]=, /foo/, "bar"
-    assert_send_type "(Regexp, Integer, String) -> String",
-                     "foo", :[]=, /(foo)/, 1, "bar"
-    assert_send_type "(Regexp, ToInt, String) -> String",
-                     "foo", :[]=, /(foo)/, ToInt.new(1), "bar"
-    assert_send_type "(Regexp, String, String) -> String",
-                     "foo", :[]=, /(?<foo>foo)/, "foo", "bar"
-    assert_send_type "(String, String) -> String",
-                     "foo", :[]=, "foo", "bar"
+  def test_aset
+    with_string 'world' do |replacement|
+      # [T < _ToStr] (int index, T replacement) -> T
+      with_int(3) do |start|
+        assert_send_type  '[T < _ToStr] (int, T) -> T',
+                          'hello, world', :[]=, start, replacement
+
+        # [T < _ToStr] (int start, int length, T replacement) -> T
+        with_int 3 do |length|
+          assert_send_type  '[T < _ToStr] (int, int, T) -> T',
+                            'hello, world', :[]=, start, length, replacement
+        end
+      end
+
+      # [T < _ToStr] (range[int?] range, T replacement) -> T
+      with_range with_int(3).and_nil, with_int(5).and_nil do |range|
+        assert_send_type  '[T < _ToStr] (range[int?] range, T replacement) -> T',
+                          'hello', :[]=, range, replacement
+      end
+
+      # [T < _ToStr] (Regexp regexp, T replacement) -> T
+      assert_send_type  '[T < _ToStr] (Regexp regexp, T replacement) -> T',
+                        'hello', :[]=, /./, replacement
+
+      # [T < _ToStr] (Regexp regexp, MatchData::capture backref, T replacement) -> T
+      with_int(1).and 'a', :a do |backref|
+        assert_send_type  '[T < _ToStr] (Regexp regexp, MatchData::capture backref, T replacement) -> T',
+                          'hallo', :[]=, /(?<a>)./, backref, replacement
+      end
+
+      # [T < _ToStr] (String substring, T replacement) -> T
+      assert_send_type  '[T < _ToStr] (String substring, T replacement) -> T',
+                        'hello', :[]=, 'hello', replacement
+      refute_send_type  '[T < _ToStr] (_ToStr, T replacement) -> untyped',
+                        'hello', :[]=, ToStr.new('e'), replacement
+    end
   end
 
   def test_ascii_only?
-    assert_send_type "() -> true",
-                     "abc".force_encoding("UTF-8"), :ascii_only?
-    assert_send_type "() -> false",
-                     "abc\u{6666}".force_encoding("UTF-8"), :ascii_only?
+    assert_send_type  '() -> bool',
+                      'hello', :ascii_only?
+    assert_send_type  '() -> bool',
+                      "hello\u{6666}", :ascii_only?
   end
 
   def test_b
-    assert_send_type "() -> String",
-                     "a", :b
+    assert_send_type  '() -> String',
+                      'hello', :b
   end
 
   def test_byteindex
-    assert_send_type(
-      "(String) -> Integer",
-      "a", :byteindex, "a"
-    )
-    assert_send_type(
-      "(Regexp) -> nil",
-      "a", :byteindex, /x/
-    )
-    assert_send_type(
-      "(ToStr) -> Integer",
-      "a", :byteindex, ToStr.new("a")
-    )
+    omit_if RUBY_VERSION < '3.2'
+
+    with_string('e').and /e/ do |pattern|
+      assert_send_type  '(Regexp | string) -> Integer',
+                        'hello', :byteindex, pattern
+      assert_send_type  '(Regexp | string) -> nil',
+                        'hallo', :byteindex, pattern
+
+      with_int(1) do |offset|
+        assert_send_type  '(Regexp | string, int) -> Integer',
+                          'hello', :byteindex, pattern, offset
+        assert_send_type  '(Regexp | string, int) -> nil',
+                          'hallo', :byteindex, pattern, offset
+      end
+    end
   end
 
   def test_byterindex
-    assert_send_type(
-      "(String) -> Integer",
-      "a", :byterindex, "a"
-    )
-    assert_send_type(
-      "(Regexp) -> nil",
-      "a", :byterindex, /x/
-    )
-    assert_send_type(
-      "(ToStr) -> Integer",
-      "a", :byterindex, ToStr.new("a")
-    )
+    omit_if RUBY_VERSION < '3.2'
+
+    with_string('e').and /e/ do |pattern|
+      assert_send_type  '(Regexp | string) -> Integer',
+                        'hello', :byterindex, pattern
+      assert_send_type  '(Regexp | string) -> nil',
+                        'hallo', :byterindex, pattern
+
+      with_int(1) do |offset|
+        assert_send_type  '(Regexp | string, int) -> Integer',
+                          'hello', :byterindex, pattern, offset
+        assert_send_type  '(Regexp | string, int) -> nil',
+                          'hallo', :byterindex, pattern, offset
+      end
+    end
   end
 
   def test_bytes
-    assert_send_type "() -> Array[Integer]",
-                     "a", :bytes
-    assert_send_type "() { (Integer) -> void } -> String",
-                     "a", :bytes do |b| b end
+    assert_send_type  '() -> Array[Integer]',
+                      'hello', :bytes
+    assert_send_type  '() { (Integer) -> void } -> String',
+                      'hello', :bytes do end
   end
 
   def test_bytesize
-    assert_send_type "() -> Integer",
-                     "string", :bytesize
+    assert_send_type  '() -> Integer',
+                      'hello', :bytesize
   end
 
   def test_byteslice
-    assert_send_type "(Integer) -> String",
-                     "hello", :byteslice, 1
-    assert_send_type "(ToInt) -> String",
-                     "hello", :byteslice, ToInt.new(1)
-    assert_send_type "(Integer) -> nil",
-                     "hello", :byteslice, 10
-    assert_send_type "(ToInt) -> nil",
-                     "hello", :byteslice, ToInt.new(10)
-    assert_send_type "(Integer, Integer) -> String",
-                     "hello", :byteslice, 1, 2
-    assert_send_type "(ToInt, ToInt) -> String",
-                     "hello", :byteslice, ToInt.new(1), ToInt.new(2)
-    assert_send_type "(Integer, Integer) -> nil",
-                     "hello", :byteslice, 10, 2
-    assert_send_type "(ToInt, ToInt) -> nil",
-                     "hello", :byteslice, ToInt.new(10), ToInt.new(2)
-    assert_send_type "(Range[Integer]) -> String",
-                     "\x03\u3042\xff", :byteslice, 1..3
-    assert_send_type "(Range[Integer?]) -> String",
-                     "\x03\u3042\xff", :byteslice, (1..)
-    assert_send_type "(Range[Integer]) -> nil",
-                     "\x03\u3042\xff", :byteslice, 11..13
-    assert_send_type "(Range[Integer?]) -> nil",
-                     "\x03\u3042\xff", :byteslice, (11..)
+    with_int 3 do |start|
+      assert_send_type  '(int) -> String',
+                        'hello', :byteslice, start
+      assert_send_type  '(int) -> nil',
+                        'q', :byteslice, start
+
+      with_int 3 do |length|
+        assert_send_type  '(int, int) -> String',
+                          'hello', :byteslice, start, length
+        assert_send_type  '(int, int) -> nil',
+                          'q', :byteslice, start, length
+      end
+    end
+
+    # TODO: | (range[int?] range) -> String?
   end
 
   def test_bytesplice
-    assert_send_type(
-      "(Integer, Integer, String) -> String",
-      "hello", :bytesplice, 1, 2, ""
-    )
-    if_ruby(3.2...3.3) do
-      assert_send_type(
-        "(ToInt, ToInt, ToStr) -> String",
-        "hello", :bytesplice, ToInt.new(1), ToInt.new(2), ToStr.new("")
-      )
+    omit_if(RUBY_VERSION < '3.2', 'String#bytesplice was added in 3.2')
+
+    # In 3.3 and onwards (and backported to 3.2.16), the return type is `self`. This variable
+    # is in case the test suite is run in a version under 3.2.16; tests for the variants only
+    # supported in 3.3 and onwards use `self`. If we ever stop supporting 3.2, we can remove this.
+
+    with_string ', world! :-D' do |string|
+      assert_send_type  "(Integer, Integer, string) -> String",
+                        +'hello', :bytesplice,  1, 2, string
+
+      if RUBY_VERSION >= "3.3.0"
+        assert_send_type  '(Integer, Integer, string, Integer, Integer) -> String',
+                          +'hello', :bytesplice,  1, 2, string, 3, 4
+      end
+
+      with_range with_int(1).and_nil, with_int(2).and_nil do |range|
+        assert_send_type  "(range[int?], string) -> String",
+                          +'hello', :bytesplice, range, string
+
+        if RUBY_VERSION >= '3.3.0'
+          with_range with_int(3).and_nil, with_int(4).and_nil do |string_range|
+            assert_send_type  '(range[int?], string, range[int?]) -> String',
+                              +'hello', :bytesplice, range, string, string_range
+          end
+        end
+      end
     end
-    assert_send_type(
-      "(Range[Integer], String) -> String",
-      "hello", :bytesplice, 1..2, ""
-    )
-    assert_send_type(
-      "(Range[Integer?], String) -> String",
-      "hello", :bytesplice, 1.., ""
-    )
   end
 
   def test_capitalize
-    assert_send_type "() -> String",
-                     "a", :capitalize
-    assert_send_type "(:ascii) -> String",
-                     "a", :capitalize, :ascii
-    assert_send_type "(:lithuanian) -> String",
-                     "a", :capitalize, :lithuanian
-    assert_send_type "(:turkic) -> String",
-                     "a", :capitalize, :turkic
-    assert_send_type "(:lithuanian, :turkic) -> String",
-                     "a", :capitalize, :lithuanian, :turkic
-    assert_send_type "(:turkic, :lithuanian) -> String",
-                     "a", :capitalize, :turkic, :lithuanian
+    assert_case_method :capitalize
   end
 
   def test_capitalize!
-    assert_send_type "() -> String",
-                     "a", :capitalize!
-    assert_send_type "(:ascii) -> String",
-                     "a", :capitalize!, :ascii
-    assert_send_type "(:lithuanian) -> String",
-                     "a", :capitalize!, :lithuanian
-    assert_send_type "(:turkic) -> String",
-                     "a", :capitalize!, :turkic
-    assert_send_type "(:lithuanian, :turkic) -> String",
-                     "a", :capitalize!, :lithuanian, :turkic
-    assert_send_type "(:turkic, :lithuanian) -> String",
-                     "a", :capitalize!, :turkic, :lithuanian
-    assert_send_type "() -> nil",
-                     "", :capitalize!
-    assert_send_type "(:ascii) -> nil",
-                     "", :capitalize!, :ascii
-    assert_send_type "(:lithuanian) -> nil",
-                     "", :capitalize!, :lithuanian
-    assert_send_type "(:turkic) -> nil",
-                     "", :capitalize!, :turkic
-    assert_send_type "(:lithuanian, :turkic) -> nil",
-                     "", :capitalize!, :lithuanian, :turkic
-    assert_send_type "(:turkic, :lithuanian) -> nil",
-                     "", :capitalize!, :turkic, :lithuanian
+    assert_case_method! :capitalize!, normal: 'hello', nochange: 'Hello'
   end
 
   def test_casecmp
-    assert_send_type "(String) -> 0",
-                     "a", :casecmp, "A"
-    assert_send_type "(String) -> -1",
-                     "a", :casecmp, "B"
-    assert_send_type "(String) -> 1",
-                     "b", :casecmp, "A"
-    assert_send_type "(String) -> nil",
-                     "\u{e4 f6 fc}".encode("ISO-8859-1"), :casecmp, "\u{c4 d6 dc}"
-    assert_send_type "(Integer) -> nil",
-                     "a", :casecmp , 42
+    with_string 's' do |other|
+      assert_send_type  '(string) -> -1',
+                        'a', :casecmp, other
+      assert_send_type  '(string) -> 1',
+                        'z', :casecmp, other
+      assert_send_type  '(string) -> 0',
+                        's', :casecmp, other
+    end
+
+    # incompatible encodings yield nil
+    with_string '😊'.force_encoding('IBM437') do |other|
+      assert_send_type  '(string) -> nil',
+                        '😊'.force_encoding('UTF-8'), :casecmp, other
+    end
+
+    with_untyped do |other|
+      next if defined? other.to_str # omit the string cases of `with_untyped`.
+
+      assert_send_type  '(untyped) -> nil',
+                        's', :casecmp, other
+    end
   end
 
   def test_casecmp?
-    assert_send_type "(String) -> false",
-                     "aBcDeF", :casecmp?, "abcde"
-    assert_send_type "(String) -> true",
-                     "aBcDeF", :casecmp?, "abcdef"
-    assert_send_type "(String) -> nil",
-                     "\u{e4 f6 fc}".encode("ISO-8859-1"), :casecmp?, "\u{c4 d6 dc}"
-    assert_send_type "(Integer) -> nil",
-                     "foo", :casecmp?, 2
+    with_string 's' do |other|
+      assert_send_type  '(string) -> bool',
+                        'a', :casecmp?, other
+      assert_send_type  '(string) -> bool',
+                        'z', :casecmp?, other
+      assert_send_type  '(string) -> bool',
+                        's', :casecmp?, other
+    end
+
+    # incompatible encodings yield nil
+    with_string '😊'.force_encoding('IBM437') do |other|
+      assert_send_type  '(string) -> nil',
+                        '😊'.force_encoding('UTF-8'), :casecmp?, other
+    end
+
+    with_untyped do |other|
+      next if defined? other.to_str # omit the string cases of `with_untyped`.
+
+      assert_send_type  '(untyped) -> nil',
+                        's', :casecmp?, other
+    end
   end
 
   def test_center
-    assert_send_type "(Integer) -> String",
-                     "hello", :center, 4
-    assert_send_type "(ToInt) -> String",
-                     "hello", :center, ToInt.new(4)
-    assert_send_type "(Integer, String) -> String",
-                     "hello", :center, 20, '123'
-    assert_send_type "(ToInt, ToStr) -> String",
-                     "hello", :center, ToInt.new(20), ToStr.new('123')
+    with_int 10 do |width|
+      assert_send_type  '(int) -> String',
+                        'hello', :center, width
+
+      with_string '&' do |padding|
+        assert_send_type  '(int, string) -> String',
+                          'hello', :center, width, padding
+      end
+    end
   end
 
   def test_chars
-    assert_send_type "() -> Array[String]",
-                     "a", :chars
-    assert_send_type "() { (String) -> void } -> String",
-                     "a", :chars do |c| c end
+    assert_send_type  '() -> Array[String]',
+                      'hello', :chars
+    assert_send_type  '() { (String) -> void } -> String',
+                      'hello', :chars do end
   end
 
   def test_chomp
-    assert_send_type "() -> String",
-                     "a", :chomp
-    assert_send_type "(String) -> String",
-                     "a", :chomp, ""
-    assert_send_type "(ToStr) -> String",
-                     "a", :chomp, ToStr.new("")
+    assert_send_type  '() -> String',
+                      "hello\n", :chomp
+    assert_send_type  '() -> String',
+                      "hello", :chomp
+
+    with_string("\n").and_nil do |separator|
+      assert_send_type  '(string?) -> String',
+                        "hello\n", :chomp, separator
+      assert_send_type  '(string?) -> String',
+                        "hello", :chomp, separator
+    end
   end
 
   def test_chomp!
-    assert_send_type "() -> String",
-                     "a\n", :chomp!
-    assert_send_type "(String) -> String",
-                     "a\n", :chomp!, "\n"
-    assert_send_type "(String) -> nil",
-                     "a\n", :chomp!, "\r"
-    assert_send_type "(ToStr) -> String",
-                     "a\n", :chomp!, ToStr.new("\n")
-    assert_send_type "(ToStr) -> nil",
-                     "a\n", :chomp!, ToStr.new("\r")
+    assert_send_type  '() -> String',
+                      +"hello\n", :chomp!
+    assert_send_type  '() -> nil',
+                      +'hello', :chomp!
+
+    with_string(".") do |separator|
+      assert_send_type  '(string) -> String',
+                        +"hello.", :chomp!, separator
+      assert_send_type  '(string) -> nil',
+                        +"hello", :chomp!, separator
+    end
+
+    assert_send_type  '(nil) -> nil',
+                      "a\n", :chomp!, nil
   end
 
   def test_chop
-    assert_send_type "() -> String",
-                     "a", :chop
+    assert_send_type  '() -> String',
+                      'hello', :chop
+    assert_send_type  '() -> String',
+                      '', :chop
   end
 
   def test_chop!
-    assert_send_type "() -> String",
-                     "a", :chop!
-    assert_send_type "() -> nil",
-                     "", :chop!
+    assert_send_type  '() -> String',
+                      +'hello', :chop!
+    assert_send_type  '() -> nil',
+                      +'', :chop!
   end
 
   def test_chr
-    assert_send_type "() -> String",
-                     "a", :chr
+    assert_send_type  '() -> String',
+                      'hello', :chr
   end
 
   def test_clear
-    assert_send_type "() -> String",
-                     "a", :clear
+    assert_send_type  '() -> String',
+                      +'hello', :clear
   end
 
   def test_codepoints
-    assert_send_type "() -> Array[Integer]",
-                     "a", :codepoints
-    assert_send_type "() { (Integer) -> void } -> String",
-                     "a", :codepoints do |cp| cp end
+    assert_send_type  '() -> Array[Integer]',
+                      'hello', :codepoints
+    assert_send_type  '() { (Integer) -> void } -> String',
+                      'hello', :codepoints do end
   end
 
   def test_concat
-    assert_send_type "() -> String",
-                     "hello", :concat
-    assert_send_type "(String) -> String",
-                     "hello", :concat, " "
-    assert_send_type "(ToStr) -> String",
-                     "hello", :concat, ToStr.new(" ")
-    assert_send_type "(String, Integer) -> String",
-                     "hello", :concat, "world", 33
-    refute_send_type "(ToInt) -> String",
-                     "hello", :concat, ToInt.new
+    with_string do |str|
+      assert_send_type  '(*string | Integer) -> String',
+                        +'hello', :concat, str, 38
+    end
   end
 
   def test_count
-    assert_send_type "(String) -> Integer",
-                     "hello world", :count, "lo"
-    assert_send_type "(ToStr) -> Integer",
-                     "hello world", :count, ToStr.new("lo")
-    assert_send_type "(String, String) -> Integer",
-                     "hello world", :count, "lo", "o"
-    assert_send_type "(ToStr, ToStr) -> Integer",
-                     "hello world", :count, ToStr.new("lo"), ToStr.new("o")
-    assert_send_type "(String, String, String) -> Integer",
-                     "hello world", :count, "lo", "o", "o"
-    assert_send_type "(ToStr, ToStr, ToStr) -> Integer",
-                     "hello world", :count, ToStr.new("lo"), ToStr.new("o"), ToStr.new("o")
+    with_string 'l' do |selector|
+      assert_send_type  '(String::selector) -> Integer',
+                        'hello', :count, selector
+      assert_send_type  '(String::selector, *String::selector) -> Integer',
+                        'hello', :count, selector, selector
+    end
+  end
+
+  def test_dedup
+    omit_if RUBY_VERSION < '3.2.0'
+    test_uneg :dedup
   end
 
   def test_crypt
-    assert_send_type "(String) -> String",
-                     "foo", :crypt, "bar"
-    assert_send_type "(ToStr) -> String",
-                     "foo", :crypt, ToStr.new("bar")
+    with_string 'hello' do |salt|
+      assert_send_type  '(string) -> String',
+                        'world', :crypt, salt
+    end
   end
 
   def test_delete
-    assert_send_type "(String, String) -> String",
-                     "hello", :delete, "l", "lo"
-    assert_send_type "(ToStr, ToStr) -> String",
-                     "hello", :delete, ToStr.new("l"), ToStr.new("lo")
-    assert_send_type "(String) -> String",
-                     "hello", :delete, "lo"
-    assert_send_type "(ToStr) -> String",
-                     "hello", :delete, ToStr.new("lo")
+    with_string 'l' do |selector|
+      assert_send_type  '(String::selector) -> String',
+                        'hello', :delete, selector
+      assert_send_type  '(String::selector, *String::selector) -> String',
+                        'hello', :delete, selector, selector
+    end
   end
 
   def test_delete!
-    assert_send_type "(String, String) -> String",
-                     "hello", :delete!, "l", "lo"
-    assert_send_type "(ToStr, ToStr) -> String",
-                     "hello", :delete!, ToStr.new("l"), ToStr.new("lo")
-    assert_send_type "(String) -> String",
-                     "hello", :delete!, "lo"
-    assert_send_type "(ToStr) -> String",
-                     "hello", :delete!, ToStr.new("lo")
-    assert_send_type "(String) -> nil",
-                     "hello", :delete!, "a"
-    assert_send_type "(ToStr) -> nil",
-                     "hello", :delete!, ToStr.new("a")
+    with_string 'l' do |selector|
+      assert_send_type  '(String::selector) -> String',
+                        +'hello', :delete!, selector
+      assert_send_type  '(String::selector, *String::selector) -> String',
+                        +'hello', :delete!, selector, selector
+
+      assert_send_type  '(String::selector) -> nil',
+                        +'heya', :delete!, selector
+      assert_send_type  '(String::selector, *String::selector) -> nil',
+                        +'heya', :delete!, selector, selector
+    end
   end
 
   def test_delete_prefix
-    assert_send_type "(String) -> String",
-                     "foo", :delete_prefix, "f"
-    assert_send_type "(ToStr) -> String",
-                     "foo", :delete_prefix, ToStr.new("f")
+    with_string 'he' do |prefix|
+      assert_send_type  '(string) -> String',
+                        'hello', :delete_prefix, prefix
+    end
   end
 
   def test_delete_prefix!
-    assert_send_type "(String) -> String",
-                     "foo", :delete_prefix!, "f"
-    assert_send_type "(ToStr) -> String",
-                     "foo", :delete_prefix!, ToStr.new("f")
-    assert_send_type "(String) -> nil",
-                     "foo", :delete_prefix!, "a"
-    assert_send_type "(ToStr) -> nil",
-                     "foo", :delete_prefix!, ToStr.new("a")
+    with_string 'he' do |prefix|
+      assert_send_type  '(string) -> String',
+                        +'hello', :delete_prefix!, prefix
+      assert_send_type  '(string) -> nil',
+                        +'ello', :delete_prefix!, prefix
+    end
   end
 
   def test_delete_suffix
-    assert_send_type "(String) -> String",
-                     "foo", :delete_suffix, "o"
-    assert_send_type "(ToStr) -> String",
-                     "foo", :delete_suffix, ToStr.new("o")
+    with_string 'lo' do |suffix|
+      assert_send_type  '(string) -> String',
+                        'hello', :delete_suffix, suffix
+    end
   end
 
   def test_delete_suffix!
-    assert_send_type "(String) -> String",
-                     "foo", :delete_suffix!, "o"
-    assert_send_type "(ToStr) -> String",
-                     "foo", :delete_suffix!, ToStr.new("o")
-    assert_send_type "(String) -> nil",
-                     "foo", :delete_suffix!, "a"
-    assert_send_type "(ToStr) -> nil",
-                     "foo", :delete_suffix!, ToStr.new("a")
+    with_string 'lo' do |suffix|
+      assert_send_type  '(string) -> String',
+                        +'hello', :delete_suffix!, suffix
+      assert_send_type  '(string) -> nil',
+                        +'heya', :delete_suffix!, suffix
+    end
   end
 
   def test_downcase
-    assert_send_type "() -> String",
-                     "a", :downcase
-    assert_send_type "(:ascii) -> String",
-                     "a", :downcase, :ascii
-    assert_send_type "(:fold) -> String",
-                     "a", :downcase, :fold
-    assert_send_type "(:lithuanian) -> String",
-                     "a", :downcase, :lithuanian
-    assert_send_type "(:turkic) -> String",
-                     "a", :downcase, :turkic
-    assert_send_type "(:lithuanian, :turkic) -> String",
-                     "a", :downcase, :lithuanian, :turkic
-    assert_send_type "(:turkic, :lithuanian) -> String",
-                     "a", :downcase, :turkic, :lithuanian
+    assert_case_method :downcase, include_fold: true
   end
 
   def test_downcase!
-    assert_send_type "() -> nil",
-                     "a", :downcase!
-    assert_send_type "(:ascii) -> nil",
-                     "a", :downcase!, :ascii
-    assert_send_type "(:fold) -> nil",
-                     "a", :downcase!, :fold
-    assert_send_type "(:lithuanian) -> nil",
-                     "a", :downcase!, :lithuanian
-    assert_send_type "(:turkic) -> nil",
-                     "a", :downcase!, :turkic
-    assert_send_type "(:lithuanian, :turkic) -> nil",
-                     "a", :downcase!, :lithuanian, :turkic
-    assert_send_type "(:turkic, :lithuanian) -> nil",
-                     "a", :downcase!, :turkic, :lithuanian
-    assert_send_type "() -> String",
-                     "A", :downcase!
-    assert_send_type "(:ascii) -> String",
-                     "A", :downcase!, :ascii
-    assert_send_type "(:fold) -> String",
-                     "A", :downcase!, :fold
-    assert_send_type "(:lithuanian) -> String",
-                     "A", :downcase!, :lithuanian
-    assert_send_type "(:turkic) -> String",
-                     "A", :downcase!, :turkic
-    assert_send_type "(:lithuanian, :turkic) -> String",
-                     "A", :downcase!, :lithuanian, :turkic
-    assert_send_type "(:turkic, :lithuanian) -> String",
-                     "A", :downcase!, :turkic, :lithuanian
+    assert_case_method! :downcase!, normal: 'HELLO', nochange: 'hello', include_fold: true
   end
 
   def test_dump
-    assert_send_type "() -> String",
-                     "foo", :dump
+    assert_send_type  '() -> String',
+                      'hello', :dump
   end
 
   def test_each_byte
-    assert_send_type "() -> Enumerator[Integer, self]",
+    assert_send_type "() -> Enumerator[Integer, String]",
                      "hello", :each_byte
-    assert_send_type "() { (Integer) -> void } -> self",
+    assert_send_type "() { (Integer) -> void } -> String",
                      "hello", :each_byte do |c| c end
   end
 
   def test_each_char
-    assert_send_type "() -> Enumerator[String, self]",
+    assert_send_type "() -> Enumerator[String, String]",
                      "hello", :each_char
-    assert_send_type "() { (String) -> void } -> self",
+    assert_send_type "() { (String) -> void } -> String",
                      "hello", :each_char do |c| c end
   end
 
   def test_each_codepoint
-    assert_send_type "() -> Enumerator[Integer, self]",
+    assert_send_type "() -> Enumerator[Integer, String]",
                      "hello", :each_codepoint
-    assert_send_type "() { (Integer) -> void } -> self",
+    assert_send_type "() { (Integer) -> void } -> String",
                      "hello", :each_codepoint do |c| c end
   end
 
   def test_each_grapheme_cluster
-    assert_send_type "() -> Enumerator[String, self]",
+    assert_send_type "() -> Enumerator[String, String]",
                      "hello", :each_grapheme_cluster
-    assert_send_type "() { (String) -> void } -> self",
+    assert_send_type "() { (String) -> void } -> String",
                      "hello", :each_grapheme_cluster do |c| c end
   end
 
   def test_each_line
-    assert_send_type "() -> Enumerator[String, self]",
-                     "hello", :each_line
-    assert_send_type "() { (String) -> void } -> self",
-                     "hello", :each_line do |line| line end
-    assert_send_type "(String) -> Enumerator[String, self]",
-                     "hello", :each_line, "l"
-    assert_send_type "(ToStr) -> Enumerator[String, self]",
-                     "hello", :each_line, ToStr.new("l")
-    assert_send_type "(String) { (String) -> void } -> self",
-                     "hello", :each_line, "l" do |line| line end
-    assert_send_type "(ToStr) { (String) -> void } -> self",
-                     "hello", :each_line, ToStr.new("l") do |line| line end
-    assert_send_type "(chomp: true) -> Enumerator[String, self]",
-                     "hello", :each_line, chomp: true
-    assert_send_type "(chomp: false) -> Enumerator[String, self]",
-                     "hello", :each_line, chomp: false
-    assert_send_type "(chomp: true) { (String) -> void } -> self",
-                     "hello", :each_line, chomp: true do |line| line end
-    assert_send_type "(chomp: false){ (String)  -> void } -> self",
-                     "hello", :each_line, chomp: false do |line| line end
-    assert_send_type "(String, chomp: true) -> Enumerator[String, self]",
-                     "hello", :each_line, "l", chomp: true
-    assert_send_type "(ToStr, chomp: true) -> Enumerator[String, self]",
-                     "hello", :each_line, ToStr.new("l"), chomp: true
-    assert_send_type "(String, chomp: false) -> Enumerator[String, self]",
-                     "hello", :each_line, "l", chomp: false
-    assert_send_type "(ToStr, chomp: false) -> Enumerator[String, self]",
-                     "hello", :each_line, ToStr.new("l"), chomp: false
-    assert_send_type "(String, chomp: true) { (String) -> void } -> self",
-                     "hello", :each_line, "l", chomp: true do |line| line end
-    assert_send_type "(ToStr, chomp: true) { (String) -> void } -> self",
-                     "hello", :each_line, ToStr.new("l"), chomp: true do |line| line end
-    assert_send_type "(ToStr, chomp: Symbol) { (String) -> void } -> self",
-                     "hello", :each_line, ToStr.new("l"), chomp: :true do |line| line end
-    assert_send_type "(String, chomp: false) { (String) -> void } -> self",
-                     "hello", :each_line, "l", chomp: false do |line| line end
-    assert_send_type "(ToStr, chomp: false) { (String) -> void } -> self",
-                     "hello", :each_line, ToStr.new("l"), chomp: false do |line| line end
+    assert_send_type  '() -> Enumerator[String, String]',
+                      "hello\nworld", :each_line
+    assert_send_type  '() { (String) -> void } -> String',
+                      "hello\nworld", :each_line do end
+
+    with_string('_').and_nil do |separator|
+      assert_send_type  '(string?) -> Enumerator[String, String]',
+                        "hello\nworld", :each_line, separator
+      assert_send_type  '(string?) { (String) -> void } -> String',
+                        "hello\nworld", :each_line, separator do end
+
+      with_boolish do |chomp|
+        assert_send_type  '(string?, chomp: boolish) -> Enumerator[String, String]',
+                          "hello\nworld", :each_line, separator, chomp: chomp
+        assert_send_type  '(string?, chomp: boolish) { (String) -> void } -> String',
+                          "hello\nworld", :each_line, separator, chomp: chomp do end
+      end
+    end
+
+    with_boolish do |chomp|
+      assert_send_type  '(chomp: boolish) -> Enumerator[String, String]',
+                        "hello\nworld", :each_line, chomp: chomp
+      assert_send_type  '(chomp: boolish) { (String) -> void } -> String',
+                        "hello\nworld", :each_line, chomp: chomp do end
+    end
   end
 
   def test_empty?
-    assert_send_type "() -> true",
-                     "", :empty?
-    assert_send_type "() -> false",
-                     " ", :empty?
+    assert_send_type '() -> bool',
+                     'hello', :empty?
+    assert_send_type '() -> bool',
+                     '', :empty?
   end
 
   def test_encode
-    assert_send_type "(String) -> String",
-                     "string", :encode, "ascii"
-    assert_send_type "(String, Encoding) -> String",
-                     "string", :encode, "ascii", Encoding::ASCII_8BIT
-    assert_send_type "(Encoding, String) -> String",
-                     "string", :encode, Encoding::ASCII_8BIT, "ascii"
-    assert_send_type "(String, invalid: :replace) -> String",
-                     "string", :encode, "ascii", invalid: :replace
-    assert_send_type "(Encoding, Encoding, undef: nil) -> String",
-                     "string", :encode, Encoding::ASCII_8BIT, Encoding::ASCII_8BIT, undef: nil
-    assert_send_type "(invalid: nil, undef: :replace, replace: String, fallback: Hash[String, String], xml: :text, universal_newline: true) -> String",
-                     "string", :encode,
-                     invalid: nil,
-                     undef: :replace,
-                     replace: "foo",
-                     fallback: {"a" => "a"},
-                     xml: :text,
-                     universal_newline: true
-    assert_send_type "(xml: :attr) -> String",
-                     "string", :encode, xml: :attr
-    assert_send_type "(fallback: Proc) -> String",
-                     "string", :encode, fallback: proc { |s| s }
-    assert_send_type "(fallback: Method) -> String",
-                     "string", :encode, fallback: "test".method(:+)
-    assert_send_type "(fallback: ArefFromStringToString) -> String",
-                     "string", :encode, fallback: ArefFromStringToString.new
-    assert_send_type "(cr_newline: true) -> String",
-                     "string", :encode, cr_newline: true
-    assert_send_type "(crlf_newline: true) -> String",
-                     "string", :encode, crlf_newline: true
-    assert_send_type "(ToStr, ToStr) -> String",
-                     "string", :encode, ToStr.new("ascii"), ToStr.new("ascii")
+    # `encode` returns an `instance`, not a `String`, unlike most other functions.
+    ruby = Class.new(String).new "Ruby\u05E2"
+
+    assert_send_type  '() -> String',
+                      ruby, :encode
+
+    with_encoding 'UTF-8' do |source|
+      assert_send_type  '(encoding) -> String',
+                        ruby, :encode, source
+
+      with_encoding 'ISO-8859-1' do |target|
+        assert_send_type  '(encoding, encoding) -> String',
+                          ruby, :encode, source, target
+      end
+    end
+
+    # There's no real way to know (without inspecting the output of `.encode`) whether or not the
+    # keyword arguments that're supplied are defined, as `.encode` (and `.encode!`) silently swallow
+    # any unknown arguments. So there's no way to know for sure if tests are passing because we have
+    # the correct signature, or if the arguments are unknown (and thus accepted).
+    #
+    # We're also going to do all keywords individually, as it's too hard to do all possible
+    # combinations.
+
+    with(:replace).and_nil do |replace|
+      assert_send_type  '(invalid: :replace ?) -> String',
+                        ruby, :encode, invalid: replace
+      assert_send_type  '(undef: :replace ?) -> String',
+                        ruby, :encode, undef: replace
+                      rescue; require 'pry'; binding.pry
+    end
+
+    with_string('&').and_nil do |replace|
+      assert_send_type  '(replace: string?) -> String',
+                        ruby, :encode, replace: replace
+    end
+
+    with(:text, :attr).and_nil do |xml|
+      assert_send_type  '(xml: (:text | :attr)?) -> String',
+                        ruby, :encode, xml: xml
+    end
+
+    with(:universal, :crlf, :cr, :lf).and_nil do |newline|
+      assert_send_type  '(newline: (:universal | :crlf | :cr | :lf)?) -> String',
+                        ruby, :encode, newline: newline
+    end
+
+    with_boolish do |boolish|
+      assert_send_type  '(universal_newline: boolish) -> String',
+                        ruby, :encode, universal_newline: boolish
+      assert_send_type  '(cr_newline: boolish) -> String',
+                        ruby, :encode, cr_newline: boolish
+      assert_send_type  '(crlf_newline: boolish) -> String',
+                        ruby, :encode, crlf_newline: boolish
+      assert_send_type  '(lf_newline: boolish) -> String',
+                        ruby, :encode, lf_newline: boolish
+    end
+
+    iso_8859_1 = Encoding::ISO_8859_1
+
+    test_fallback = proc do |type, &block|
+      with_string('&') do |string|
+        assert_send_type  "(Encoding, fallback: #{type}) -> String",
+                          ruby, :encode, iso_8859_1, fallback: block.call(string)
+      end
+
+      begin
+        ruby.encode iso_8859_1, fallback: block.call(nil)
+      rescue Encoding::UndefinedConversionError => err
+        pass '`nil` causes an error to be thrown'
+      else
+        flunk 'fallback of nil should cause an error'
+      end
+    end
+
+    test_fallback.call '^(String) -> string?' do |string|
+      ->_ignore { string }
+    end
+
+    test_fallback.call 'Method' do |string|
+      bs = BlankSlate.new.__with_object_methods(:method, :define_singleton_method)
+      bs.define_singleton_method(:method_name) { |_ignore| string }
+      bs.method(:method_name)
+    end
+
+    test_fallback.call '::String::_EncodeFallbackAref' do |string|
+      bs = BlankSlate.new.__with_object_methods(:define_singleton_method)
+      bs.define_singleton_method(:[]) { |_ignore| string  }
+      bs
+    end
   end
 
   def test_encode!
-    assert_send_type "(String) -> self",
-                     "string", :encode!, "ascii"
-    assert_send_type "(String, Encoding) -> self",
-                     "string", :encode!, "ascii", Encoding::ASCII_8BIT
-    assert_send_type "(Encoding, String) -> self",
-                     "string", :encode!, Encoding::ASCII_8BIT, "ascii"
-    assert_send_type "(String, invalid: :replace) -> self",
-                     "string", :encode!, "ascii", invalid: :replace
-    assert_send_type "(Encoding, Encoding, undef: nil) -> self",
-                     "string", :encode!, Encoding::ASCII_8BIT, Encoding::ASCII_8BIT, undef: nil
-    assert_send_type "(invalid: nil, undef: :replace, replace: String, fallback: Hash[String, String], xml: :text, universal_newline: true) -> self",
-                     "string", :encode!,
-                     invalid: nil,
-                     undef: :replace,
-                     replace: "foo",
-                     fallback: {"a" => "a"},
-                     xml: :text,
-                     universal_newline: true
-    assert_send_type "(xml: :attr) -> self",
-                     "string", :encode!, xml: :attr
-    assert_send_type "(fallback: Proc) -> self",
-                     "string", :encode!, fallback: proc { |s| s }
-    assert_send_type "(fallback: Method) -> self",
-                     "string", :encode!, fallback: "test".method(:+)
-    assert_send_type "(fallback: ArefFromStringToString) -> String",
-                     "string", :encode, fallback: ArefFromStringToString.new
-    assert_send_type "(cr_newline: true) -> self",
-                     "string", :encode!, cr_newline: true
-    assert_send_type "(crlf_newline: true) -> self",
-                     "string", :encode!, crlf_newline: true
-    assert_send_type "(ToStr, ToStr) -> self",
-                     "string", :encode!, ToStr.new("ascii"), ToStr.new("ascii")
+    # `encode` returns an `instance`, not a `String`, unlike most other functions.
+    ruby = Class.new(String).new "Ruby\u05E2"
+
+    assert_send_type  '() -> String',
+                      ruby.dup, :encode!
+
+    with_encoding 'UTF-8' do |source|
+      assert_send_type  '(encoding) -> String',
+                        ruby.dup, :encode!, source
+
+      with_encoding 'ISO-8859-1' do |target|
+        assert_send_type  '(encoding, encoding) -> String',
+                          ruby.dup, :encode!, source, target
+      end
+    end
+
+    # There's no real way to know (without inspecting the output of `.encode`) whether or not the
+    # keyword arguments that're supplied are defined, as `.encode` (and `.encode!`) silently swallow
+    # any unknown arguments. So there's no way to know for sure if tests are passing because we have
+    # the correct signature, or if the arguments are unknown (and thus accepted).
+    #
+    # We're also going to do all keywords individually, as it's too hard to do all possible
+    # combinations.
+
+    with(:replace).and_nil do |replace|
+      assert_send_type  '(invalid: :replace ?) -> String',
+                        ruby.dup, :encode!, invalid: replace
+      assert_send_type  '(undef: :replace ?) -> String',
+                        ruby.dup, :encode!, undef: replace
+                      rescue; require 'pry'; binding.pry
+    end
+
+    with_string('&').and_nil do |replace|
+      assert_send_type  '(replace: string?) -> String',
+                        ruby.dup, :encode!, replace: replace
+    end
+
+    with(:text, :attr).and_nil do |xml|
+      assert_send_type  '(xml: (:text | :attr)?) -> String',
+                        ruby.dup, :encode!, xml: xml
+    end
+
+    with(:universal, :crlf, :cr, :lf).and_nil do |newline|
+      assert_send_type  '(newline: (:universal | :crlf | :cr | :lf)?) -> String',
+                        ruby.dup, :encode!, newline: newline
+    end
+
+    with_boolish do |boolish|
+      assert_send_type  '(universal_newline: boolish) -> String',
+                        ruby.dup, :encode!, universal_newline: boolish
+      assert_send_type  '(cr_newline: boolish) -> String',
+                        ruby.dup, :encode!, cr_newline: boolish
+      assert_send_type  '(crlf_newline: boolish) -> String',
+                        ruby.dup, :encode!, crlf_newline: boolish
+      assert_send_type  '(lf_newline: boolish) -> String',
+                        ruby.dup, :encode!, lf_newline: boolish
+    end
+
+    iso_8859_1 = Encoding::ISO_8859_1
+
+    test_fallback = proc do |type, &block|
+      with_string('&') do |string|
+        assert_send_type  "(Encoding, fallback: #{type}) -> String",
+                          ruby.dup, :encode!, iso_8859_1, fallback: block.call(string)
+      end
+
+      begin
+        ruby.encode iso_8859_1, fallback: block.call(nil)
+      rescue Encoding::UndefinedConversionError => err
+        pass '`nil` causes an error to be thrown'
+      else
+        flunk 'fallback of nil should cause an error'
+      end
+    end
+
+    test_fallback.call '^(String) -> string?' do |string|
+      ->_ignore { string }
+    end
+
+    test_fallback.call 'Method' do |string|
+      bs = BlankSlate.new.__with_object_methods(:method, :define_singleton_method)
+      bs.define_singleton_method(:method_name) { |_ignore| string }
+      bs.method(:method_name)
+    end
+
+    test_fallback.call '::String::_EncodeFallbackAref' do |string|
+      bs = BlankSlate.new.__with_object_methods(:define_singleton_method)
+      bs.define_singleton_method(:[]) { |_ignore| string  }
+      bs
+    end
   end
 
   def test_encoding
-    assert_send_type "() -> Encoding",
-                     "test", :encoding
+    assert_send_type  '() -> Encoding',
+                      'hello', :encoding
   end
 
   def test_end_with?
-    assert_send_type "() -> false",
-                     "string", :end_with?
-    assert_send_type "(String) -> true",
-                     "string", :end_with?, "string"
-    assert_send_type "(String, String) -> false",
-                     "string", :end_with?, "foo", "bar"
-    assert_send_type "(ToStr) -> true",
-                     "string", :end_with?, ToStr.new("string")
+    assert_send_type  '() -> bool',
+                      'hello', :end_with?
+
+    with_string 'lo' do |suffix|
+      assert_send_type  '(*string) -> bool',
+                        'hello', :end_with?, suffix
+      assert_send_type  '(*string) -> bool',
+                        'hello', :end_with?, suffix, suffix
+    end
   end
 
   def test_eql?
-    str = "string"
-    assert_send_type "(String) -> true",
-                     str, :eql?, str
-    assert_send_type "(Integer) -> false",
-                     "string", :eql?, 42
+    with_untyped do |other|
+      assert_send_type  '(untyped) -> bool',
+                        'hello', :eql?, other
+    end
   end
 
   def test_force_encoding
-    assert_send_type "(String) -> self",
-                     "", :force_encoding, "ASCII-8BIT"
-    assert_send_type "(Encoding) -> self",
-                     "", :force_encoding, Encoding::ASCII_8BIT
-    assert_send_type "(ToStr) -> self",
-                     "", :force_encoding, ToStr.new("ASCII-8BIT")
+    with_encoding do |encoding|
+      assert_send_type  '(encoding) -> String',
+                        'hello', :force_encoding, encoding
+    end
   end
 
   def test_freeze
-    assert_send_type "() -> self",
-                     "test", :freeze
+    assert_send_type  '() -> String',
+                      'hello', :freeze
   end
 
   def test_getbyte
-    assert_send_type "(Integer) -> Integer",
-                     "a", :getbyte, 0
-    assert_send_type "(Integer) -> nil",
-                     "a", :getbyte, 1
-    assert_send_type "(ToInt) -> Integer",
-                     "a", :getbyte, ToInt.new(0)
-    assert_send_type "(ToInt) -> nil",
-                     "a", :getbyte, ToInt.new(1)
+    with_int 3 do |index|
+      assert_send_type  '(int) -> Integer',
+                        'hello', :getbyte, index
+      assert_send_type  '(int) -> nil',
+                        'hi', :getbyte, index
+    end
   end
 
   def test_grapheme_clusters
-    assert_send_type "() -> Array[String]",
-                     "\u{1F1EF}\u{1F1F5}", :grapheme_clusters
+    assert_send_type  '() -> Array[String]',
+                      'hello', :grapheme_clusters
+    assert_send_type  '() { (String) -> void } -> String',
+                      'hello', :grapheme_clusters do end
   end
 
   def test_gsub
-    assert_send_type "(Regexp, String) -> String",
-                     "string", :gsub, /./, ""
-    assert_send_type "(String, String) -> String",
-                     "string", :gsub, "a", "b"
-    assert_send_type "(Regexp) { (String) -> String } -> String",
-                     "string", :gsub, /./ do |x| "" end
-    assert_send_type "(Regexp) { (String) -> ToS } -> String",
-                     "string", :gsub, /./ do |x| ToS.new("") end
-    assert_send_type "(Regexp, Hash[String, String]) -> String",
-                     "string", :gsub, /./, {"foo" => "bar"}
-    assert_send_type "(Regexp) -> Enumerator[String, self]",
-                     "string", :gsub, /./
-    assert_send_type "(String) -> Enumerator[String, self]",
-                     "string", :gsub, ""
-    assert_send_type "(ToStr, ToStr) -> String",
-                     "string", :gsub, ToStr.new("a"), ToStr.new("b")
+    with_string('l').and /l/ do |pattern|
+      assert_send_type  '(Regexp | string) -> Enumerator[String, String]',
+                        'hello', :gsub, pattern
+      assert_send_type  '(Regexp | string) { (String) -> _ToS } -> String',
+                        'hello', :gsub, pattern do ToS.new end
+
+      with_string '!' do |replacement|
+        assert_send_type  '(Regexp | string, string) -> String',
+                          'hello', :gsub, pattern, replacement
+      end
+
+      with_hash 'l' => ToS.new('!') do |replacement|
+        assert_send_type  '(Regexp | string, hash[String, _ToS]) -> String',
+                          'hello', :gsub, pattern, replacement
+      end
+    end
   end
 
   def test_gsub!
-    assert_send_type "(Regexp, String) -> nil",
-                     "string", :gsub!, /z/, "s"
-    assert_send_type "(Regexp, String) -> self",
-                     "string", :gsub!, /s/, "s"
-    assert_send_type "(String, String) -> nil",
-                     "string", :gsub!, "z", "s"
-    assert_send_type "(String, String) -> self",
-                     "string", :gsub!, "s", "s"
-    assert_send_type "(Regexp) { (String) -> String } -> nil",
-                     "string", :gsub!, /z/ do |x| "s" end
-    assert_send_type "(Regexp) { (String) -> String } -> self",
-                     "string", :gsub!, /s/ do |x| "s" end
-    assert_send_type "(Regexp) { (String) -> ToS } -> self",
-                     "string", :gsub!, /s/ do |x| ToS.new("s") end
-    assert_send_type "(Regexp, Hash[String, String]) -> nil",
-                     "string", :gsub!, /z/, {"z" => "s"}
-    assert_send_type "(Regexp, Hash[String, String]) -> self",
-                     "string", :gsub!, /s/, {"s" => "s"}
-    # assert_send_type "(Regexp) -> Enumerator[String, self]",
-    #                  "string", :gsub!, /s/
-    # assert_send_type "(String) -> Enumerator[String, self]",
-    #                  "string", :gsub!, "s"
-    assert_send_type "(ToStr, ToStr) -> String",
-                     "string", :gsub!, ToStr.new("s"), ToStr.new("s")
+    omit 'There is currently a bug that prevents `.gsub!` from being testable'
+
+    with_string('l').and /l/ do |pattern|
+      assert_send_type  '(Regexp | string) -> Enumerator[String, String]',
+                        +'hello', :gsub!, pattern
+      assert_send_type  '(Regexp | string) -> Enumerator[String, String]',
+                        +'heya', :gsub!, pattern
+
+      assert_send_type  '(Regexp | string) { (String) -> _ToS } -> String',
+                        +'hello', :gsub!, pattern do ToS.new end
+      assert_send_type  '(Regexp | string) { (String) -> _ToS } -> nil',
+                        +'heya', :gsub!, pattern do ToS.new end
+
+      with_string '!' do |replacement|
+        assert_send_type  '(Regexp | string, string) -> String',
+                          +'hello', :gsub!, pattern, replacement
+        assert_send_type  '(Regexp | string, string) -> nil',
+                          +'heya', :gsub!, pattern, replacement
+      end
+
+      with_hash 'l' => ToS.new('!') do |replacement|
+        assert_send_type  '(Regexp | string, hash[String, _ToS]) -> String',
+                          +'hello', :gsub!, pattern, replacement
+        assert_send_type  '(Regexp | string, hash[String, _ToS]) -> nil',
+                          +'heya', :gsub!, pattern, replacement
+      end
+    end
   end
 
   def test_hash
-    assert_send_type "() -> Integer",
-                     "", :hash
+    assert_send_type  '() -> Integer',
+                      'hello', :hash
   end
 
   def test_hex
-    assert_send_type "() -> Integer",
-                     "0x0a", :hex
+    assert_send_type  '() -> Integer',
+                      '0x12', :hex
   end
 
   def test_include?
-    assert_send_type "(String) -> true",
-                     "", :include?, ""
-    assert_send_type "(String) -> false",
-                     "", :include?, "a"
-    assert_send_type "(ToStr) -> true",
-                     "", :include?, ToStr.new("")
-    assert_send_type "(ToStr) -> false",
-                     "", :include?, ToStr.new("a")
+    with_string 'el' do |other|
+      assert_send_type  '(string) -> bool',
+                        'hello', :include?, other
+      assert_send_type  '(string) -> bool',
+                        'heya', :include?, other
+    end
   end
 
   def test_index
-    assert_send_type "(String) -> Integer",
-                     "a", :index, "a"
-    assert_send_type "(String, Integer) -> Integer",
-                     "a", :index, "a", 0
-    assert_send_type "(String) -> nil",
-                     "a", :index, "b"
-    assert_send_type "(Regexp) -> Integer",
-                     "a", :index, /a/
-    assert_send_type "(Regexp, Integer) -> Integer",
-                     "a", :index, /a/, 0
-    assert_send_type "(ToStr) -> Integer",
-                     "a", :index, ToStr.new("a")
-    assert_send_type "(ToStr, ToInt) -> nil",
-                     "a", :index, ToStr.new("a"), ToInt.new(1)
+    with_string('l').and /l/ do |pattern|
+      assert_send_type  '(Regexp | string) -> Integer',
+                        'hello', :index, pattern
+      assert_send_type  '(Regexp | string) -> nil',
+                        'heya', :index, pattern
+
+      with_int 1 do |offset|
+        assert_send_type  '(Regexp | string, int) -> Integer',
+                          'hello', :index, pattern, offset
+        assert_send_type  '(Regexp | string, int) -> nil',
+                          'heya', :index, pattern, offset
+      end
+    end
   end
 
   def test_insert
-    assert_send_type "(Integer, String) -> String",
-                     "abcd", :insert, 0, "X"
-    assert_send_type "(ToInt, ToStr) -> String",
-                     "abcd", :insert, ToInt.new(0), ToStr.new("X")
+    with_int -1 do |index|
+      with_string ', world' do |string|
+        assert_send_type  '(int, string) -> String',
+                          'hello', :insert, index, string
+      end
+    end
   end
 
   def test_inspect
-    assert_send_type "() -> String",
-                     "", :inspect
+    assert_send_type  '() -> String',
+                      'hello', :inspect
   end
 
-  def test_intern
-    assert_send_type "() -> Symbol",
-                     "", :intern
+  def test_intern(method = :intern)
+    assert_send_type  '() -> Symbol',
+                      'hello', method
   end
 
-  def test_length
-    assert_send_type "() -> Integer",
-                     "", :length
+  def test_length(method = :length)
+    assert_send_type  '() -> Integer',
+                      'hello', method
   end
 
   def test_lines
-    assert_send_type "() -> Array[String]",
-                     "", :lines
-    assert_send_type "(chomp: true) -> Array[String]",
-                     "", :lines, chomp: true
-    assert_send_type "(chomp: false) -> Array[String]",
-                     "", :lines, chomp: false
-    assert_send_type "(String) -> Array[String]",
-                     "", :lines, "\n"
-    assert_send_type "(String, chomp: true) -> Array[String]",
-                     "", :lines, "\n", chomp: true
-    assert_send_type "(String, chomp: Symbol) -> Array[String]",
-                     "", :lines, "\n", chomp: :true
-    assert_send_type "(String, chomp: false) -> Array[String]",
-                     "", :lines, "\n", chomp: false
-    assert_send_type "(ToStr) -> Array[String]",
-                     "", :lines, ToStr.new("\n")
+    assert_send_type  '() -> Array[String]',
+                      "hello\nworld", :lines
+    assert_send_type  '() { (String) -> void } -> String',
+                      "hello\nworld", :lines do end
+
+    with_string('_').and_nil do |separator|
+      assert_send_type  '(string?) -> Array[String]',
+                        "hello\nworld", :lines, separator
+      assert_send_type  '(string?) { (String) -> void } -> String',
+                        "hello\nworld", :lines, separator do end
+
+      with_boolish do |chomp|
+        assert_send_type  '(string?, chomp: boolish) -> Array[String]',
+                          "hello\nworld", :lines, separator, chomp: chomp
+        assert_send_type  '(string?, chomp: boolish) { (String) -> void } -> String',
+                          "hello\nworld", :lines, separator, chomp: chomp do end
+      end
+    end
+
+    with_boolish do |chomp|
+      assert_send_type  '(chomp: boolish) -> Array[String]',
+                        "hello\nworld", :lines, chomp: chomp
+      assert_send_type  '(chomp: boolish) { (String) -> void } -> String',
+                        "hello\nworld", :lines, chomp: chomp do end
+    end
   end
 
   def test_ljust
-    assert_send_type "(Integer) -> String",
-                     "hello", :ljust, 20
-    assert_send_type "(Integer, String) -> String",
-                     "hello", :ljust, 20, " "
-    assert_send_type "(ToInt, ToStr) -> String",
-                     "hello", :ljust, ToInt.new(20), ToStr.new(" ")
+    with_int 10 do |width|
+      assert_send_type  '(int) -> String',
+                        'hello', :ljust, width
+
+      with_string '&' do |padding|
+        assert_send_type  '(int, string) -> String',
+                          'hello', :ljust, width, padding
+      end
+    end
   end
 
   def test_lstrip
-    assert_send_type "() -> String",
-                     "", :lstrip
+    assert_send_type  '() -> String',
+                      ' hello', :lstrip
+    assert_send_type  '() -> String',
+                      'hello', :lstrip
   end
 
   def test_lstrip!
-    assert_send_type "() -> nil",
-                     "", :lstrip!
-    assert_send_type "() -> self",
-                     " test ", :lstrip!
+    assert_send_type  '() -> String',
+                      +' hello', :lstrip!
+    assert_send_type  '() -> nil',
+                      +'hello', :lstrip!
   end
 
   def test_match
-    assert_send_type "(Regexp) -> MatchData",
-                     "a", :match, /a/
-    assert_send_type "(Regexp) -> nil",
-                     "a", :match, /b/
-    assert_send_type "(String) -> MatchData",
-                     "a", :match, "a"
-    assert_send_type "(String) -> nil",
-                     "a", :match, "b"
-    assert_send_type "(ToStr) -> MatchData",
-                     "a", :match, ToStr.new("a")
-    assert_send_type "(ToStr) -> nil",
-                     "a", :match, ToStr.new("b")
-    assert_send_type "(Regexp, Integer) -> MatchData",
-                     "a", :match, /a/, 0
-    assert_send_type "(Regexp, Integer) -> nil",
-                     "a", :match, /a/, 1
-    assert_send_type "(String, Integer) -> MatchData",
-                     "a", :match, "a", 0
-    assert_send_type "(String, Integer) -> nil",
-                     "a", :match, "a", 1
-    assert_send_type "(ToStr, Integer) -> MatchData",
-                     "a", :match, ToStr.new("a"), 0
-    assert_send_type "(ToStr, Integer) -> nil",
-                     "a", :match, ToStr.new("a"), 1
-    assert_send_type "(Regexp, ToInt) -> MatchData",
-                     "a", :match, /a/, ToInt.new(0)
-    assert_send_type "(Regexp, ToInt) -> nil",
-                     "a", :match, /a/, ToInt.new(1)
-    assert_send_type "(String, ToInt) -> MatchData",
-                     "a", :match, "a", ToInt.new(0)
-    assert_send_type "(String, ToInt) -> nil",
-                     "a", :match, "a", ToInt.new(1)
-    assert_send_type "(ToStr, ToInt) -> MatchData",
-                     "a", :match, ToStr.new("a"), ToInt.new(0)
-    assert_send_type "(ToStr, ToInt) -> nil",
-                     "a", :match, ToStr.new("a"), ToInt.new(1)
-    assert_send_type "(Regexp) { (MatchData) -> void } -> untyped",
-                     "a", :match, /a/ do |_m| end
+    with_string('l').and /l/ do |pattern|
+      assert_send_type  '(Regexp | string) -> MatchData',
+                        'hello', :match, pattern
+      assert_send_type  '(Regexp | string) -> nil',
+                        'heya', :match, pattern
+
+      assert_send_type  '[T] (Regexp | string) { (MatchData) -> T } -> T',
+                        'hello', :match, pattern do 1r end
+      assert_send_type  '[T] (Regexp | string) { (MatchData) -> T } -> nil',
+                        'heya', :match, pattern do 1r end
+
+      with_int 0 do |offset|
+        assert_send_type  '(Regexp | string, int) -> MatchData',
+                          'hello', :match, pattern, offset
+        assert_send_type  '(Regexp | string, int) -> nil',
+                          'heya', :match, pattern, offset
+
+        assert_send_type  '[T] (Regexp | string, int) { (MatchData) -> T } -> T',
+                          'hello', :match, pattern, offset do 1r end
+        assert_send_type  '[T] (Regexp | string, int) { (MatchData) -> T } -> nil',
+                          'heya', :match, pattern, offset do 1r end
+      end
+    end
   end
 
   def test_match?
-    assert_send_type "(Regexp) -> true",
-                     "a", :match?, /a/
-    assert_send_type "(Regexp) -> false",
-                     "a", :match?, /b/
-    assert_send_type "(String) -> true",
-                     "a", :match?, "a"
-    assert_send_type "(String) -> false",
-                     "a", :match?, "b"
-    assert_send_type "(ToStr) -> true",
-                     "a", :match?, ToStr.new("a")
-    assert_send_type "(ToStr) -> false",
-                     "a", :match?, ToStr.new("b")
-    assert_send_type "(Regexp, Integer) -> true",
-                     "a", :match?, /a/, 0
-    assert_send_type "(Regexp, Integer) -> false",
-                     "a", :match?, /a/, 1
-    assert_send_type "(String, Integer) -> true",
-                     "a", :match?, "a", 0
-    assert_send_type "(String, Integer) -> false",
-                     "a", :match?, "a", 1
-    assert_send_type "(ToStr, Integer) -> true",
-                     "a", :match?, ToStr.new("a"), 0
-    assert_send_type "(ToStr, Integer) -> false",
-                     "a", :match?, ToStr.new("a"), 1
-    assert_send_type "(Regexp, ToInt) -> true",
-                     "a", :match?, /a/, ToInt.new(0)
-    assert_send_type "(Regexp, ToInt) -> false",
-                     "a", :match?, /a/, ToInt.new(1)
-    assert_send_type "(String, ToInt) -> true",
-                     "a", :match?, "a", ToInt.new(0)
-    assert_send_type "(String, ToInt) -> false",
-                     "a", :match?, "a", ToInt.new(1)
-    assert_send_type "(ToStr, ToInt) -> true",
-                     "a", :match?, ToStr.new("a"), ToInt.new(0)
-    assert_send_type "(ToStr, ToInt) -> false",
-                     "a", :match?, ToStr.new("a"), ToInt.new(1)
+    with_string('l').and /l/ do |pattern|
+      assert_send_type  '(Regexp | string) -> bool',
+                        'hello', :match?, pattern
+      assert_send_type  '(Regexp | string) -> bool',
+                        'heya', :match?, pattern
+
+      with_int 0 do |offset|
+        assert_send_type  '(Regexp | string, int) -> bool',
+                          'hello', :match?, pattern, offset
+        assert_send_type  '(Regexp | string, int) -> bool',
+                          'heya', :match?, pattern, offset
+      end
+    end
   end
 
   def test_next
-    assert_send_type "() -> String",
-                     "a", :next
+    test_succ :next
   end
 
   def test_next!
-    assert_send_type "() -> self",
-                     "a", :next!
+    test_succ! :next!
   end
 
   def test_oct
-    assert_send_type "() -> Integer",
-                     "123", :oct
+    assert_send_type  '() -> Integer',
+                      '0x12', :oct
   end
 
   def test_ord
-    assert_send_type "() -> Integer",
-                     "a", :ord
+    assert_send_type  '() -> Integer',
+                      'a', :ord
   end
 
   def test_partition
-    assert_send_type "(String) -> [ String, String, String ]",
-                     "hello", :partition, "l"
-    assert_send_type "(ToStr) -> [ String, String, String ]",
-                     "hello", :partition, ToStr.new("l")
-    assert_send_type "(Regexp) -> [ String, String, String ]",
-                     "hello", :partition, /.l/
+    with_string('l').and /l/ do |pattern|
+      assert_send_type  '(Regexp | string) -> [String, String, String]',
+                        'hello', :partition, pattern
+      assert_send_type  '(Regexp | string) -> [String, String, String]',
+                        'heya', :partition, pattern
+    end
   end
 
   def test_prepend
-    assert_send_type "() -> String",
-                     "a", :prepend
-    assert_send_type "(String) -> String",
-                     "a", :prepend, "b"
-    assert_send_type "(String, String) -> String",
-                     "a", :prepend, "b", "c"
-    assert_send_type "(ToStr) -> String",
-                     "a", :prepend, ToStr.new("b")
-    assert_send_type "(ToStr, ToStr) -> String",
-                     "a", :prepend, ToStr.new("b"), ToStr.new("c")
+    assert_send_type  '() -> String',
+                      +'hello', :prepend
+
+    with_string 'world' do |other_string|
+      assert_send_type  '(*string) -> String',
+                        +'hello', :prepend, other_string
+      assert_send_type  '(*string) -> String',
+                        +'hello', :prepend, other_string, other_string
+    end
   end
 
-  def test_replace
-    assert_send_type "(String) -> String",
-                     "a", :replace, "b"
-    assert_send_type "(ToStr) -> String",
-                     "a", :replace, ToStr.new("b")
+  def test_replace(method = :replace)
+    with_string 'world' do |string|
+      assert_send_type  '(string) -> String',
+                        +'hello', method, string
+    end
   end
 
   def test_reverse
-    assert_send_type "() -> String",
-                     "test", :reverse
+    assert_send_type  '() -> String',
+                      'hello', :reverse
+    assert_send_type  '() -> String',
+                      '', :reverse
   end
 
   def test_reverse!
-    assert_send_type "() -> self",
-                     "test", :reverse!
+    assert_send_type  '() -> String',
+                      +'hello', :reverse!
+    assert_send_type  '() -> String',
+                      +'', :reverse!
   end
 
   def test_rindex
-    assert_send_type "(String) -> Integer",
-                     "a", :rindex, "a"
-    assert_send_type "(String, Integer) -> Integer",
-                     "a", :rindex, "a", 0
-    assert_send_type "(String) -> nil",
-                     "a", :rindex, "b"
-    assert_send_type "(Regexp) -> Integer",
-                     "a", :rindex, /a/
-    assert_send_type "(Regexp, Integer) -> Integer",
-                     "a", :rindex, /a/, 0
-    assert_send_type "(ToStr) -> Integer",
-                     "a", :rindex, ToStr.new("a")
-    assert_send_type "(ToStr, ToInt) -> nil",
-                     "a", :rindex, ToStr.new("a"), ToInt.new(-2)
+    with_string('l').and /l/ do |pattern|
+      assert_send_type  '(Regexp | string) -> Integer',
+                        'hello', :rindex, pattern
+      assert_send_type  '(Regexp | string) -> nil',
+                        'heya', :rindex, pattern
+
+      with_int 4 do |offset|
+        assert_send_type  '(Regexp | string, int) -> Integer',
+                          'hello', :rindex, pattern, offset
+        assert_send_type  '(Regexp | string, int) -> nil',
+                          'heya', :rindex, pattern, offset
+      end
+    end
   end
 
   def test_rjust
-    assert_send_type "(Integer) -> String",
-                     "hello", :rjust, 20
-    assert_send_type "(ToInt) -> String",
-                     "hello", :rjust, ToInt.new(20)
-    assert_send_type "(Integer, String) -> String",
-                     "hello", :rjust, 20, " "
-    assert_send_type "(ToInt, ToStr) -> String",
-                     "hello", :rjust, ToInt.new(20), ToStr.new(" ")
+    with_int 10 do |width|
+      assert_send_type  '(int) -> String',
+                        'hello', :rjust, width
+
+      with_string '&' do |padding|
+        assert_send_type  '(int, string) -> String',
+                          'hello', :rjust, width, padding
+      end
+    end
   end
 
   def test_rpartition
-    assert_send_type "(String) -> [ String, String, String ]",
-                     "hello", :rpartition, "l"
-    assert_send_type "(ToStr) -> [ String, String, String ]",
-                     "hello", :rpartition, ToStr.new("l")
-    assert_send_type "(Regexp) -> [ String, String, String ]",
-                     "hello", :rpartition, /.l/
+    with_string('l').and /l/ do |pattern|
+      assert_send_type  '(Regexp | string) -> [String, String, String]',
+                        'hello', :rpartition, pattern
+      assert_send_type  '(Regexp | string) -> [String, String, String]',
+                        'heya', :rpartition, pattern
+    end
   end
 
   def test_rstrip
-    assert_send_type "() -> String",
-                     " hello ", :rstrip
+    assert_send_type  '() -> String',
+                      'hello ', :rstrip
+    assert_send_type  '() -> String',
+                      'hello', :rstrip
   end
 
   def test_rstrip!
-    assert_send_type "() -> self",
-                     " hello ", :rstrip!
-    assert_send_type "() -> nil",
-                     "", :rstrip!
+    assert_send_type  '() -> String',
+                      +'hello ', :rstrip!
+    assert_send_type  '() -> nil',
+                      +'hello', :rstrip!
   end
 
   def test_scan
-    assert_send_type "(Regexp) -> Array[String]",
-                     "a", :scan, /a/
-    assert_send_type "(Regexp) -> Array[Array[String]]",
-                     "a", :scan, /(a)/
-    assert_send_type "(String) -> Array[String]",
-                     "a", :scan, "a"
-    assert_send_type "(ToStr) -> Array[String]",
-                     "a", :scan, ToStr.new("a")
-    assert_send_type "(Regexp) { (String) -> void } -> self",
-                     "a", :scan, /a/ do |arg| arg end
-    assert_send_type "(Regexp) { (Array[String]) -> void } -> self",
-                     "a", :scan, /(a)/ do |arg| arg end
-    assert_send_type "(String) { (String) -> void } -> self",
-                     "a", :scan, "a" do |arg| arg end
-    assert_send_type "(ToStr) { (String) -> void } -> self",
-                     "a", :scan, ToStr.new("a") do |arg| arg end
+    assert_send_type  '(Regexp) -> Array[String]',
+                      'hello', :scan, /l/
+    assert_send_type  '(Regexp) -> Array[Array[String]]',
+                      'hello', :scan, /(l)/
+
+    assert_send_type  '(Regexp) { (String) -> void } -> String',
+                      'hello', :scan, /l/ do end
+    assert_send_type  '(Regexp) { (Array[String]) -> void } -> String',
+                      'hello', :scan, /(l)/ do end
+
+    with_string 'l' do |pattern|
+      assert_send_type  '(string) -> Array[String]',
+                        'hello', :scan, pattern
+      assert_send_type  '(string) { (String) -> void } -> String',
+                        'hello', :scan, pattern do end
+    end
   end
 
   def test_scrub
-    assert_send_type "() -> String",
-                     "\x81", :scrub
-    assert_send_type "(String) -> String",
-                     "\x81", :scrub, "*"
-    assert_send_type "(ToStr) -> String",
-                     "\x81", :scrub, ToStr.new("*")
-    assert_send_type "() { (String) -> String } -> String",
-                     "\x81", :scrub do |s| "*" end
-    assert_send_type "() { (String) -> ToStr } -> String",
-                     "\x81", :scrub do |s| ToStr.new("*") end
+    valid = 'hello'
+    invalid = "hel\x81\x81lo"
+
+    assert_send_type  '() -> String',
+                      valid, :scrub
+    assert_send_type  '() -> String',
+                      invalid, :scrub
+
+    assert_send_type  '(nil) -> String',
+                      valid, :scrub, nil
+    assert_send_type  '(nil) -> String',
+                      invalid, :scrub, nil
+
+    with_string '&' do |replacement|
+      assert_send_type  '(string) -> String',
+                        valid, :scrub, replacement
+      assert_send_type  '(string) -> String',
+                        invalid, :scrub, replacement
+    end
+
+    with_string '&' do |replacement|
+      assert_send_type  '() { (String) -> string } -> String',
+                        valid, :scrub do replacement end
+      assert_send_type  '() { (String) -> string } -> String',
+                        invalid, :scrub do replacement end
+
+      assert_send_type  '(nil) { (String) -> string } -> String',
+                        valid, :scrub, nil do replacement end
+      assert_send_type  '(nil) { (String) -> string } -> String',
+                        invalid, :scrub, nil do replacement end
+    end
   end
 
   def test_scrub!
-    assert_send_type "() -> self",
-                     "\x81", :scrub!
-    assert_send_type "(String) -> self",
-                     "\x81", :scrub!, "*"
-    assert_send_type "(ToStr) -> self",
-                     "\x81", :scrub!, ToStr.new("*")
-    assert_send_type "() { (String) -> String } -> self",
-                     "\x81", :scrub! do |s| "*" end
-    assert_send_type "() { (String) -> ToStr } -> self",
-                     "\x81", :scrub! do |s| ToStr.new("*") end
+    valid = 'hello'
+    invalid = "hel\x81\x81lo"
+
+    assert_send_type  '() -> String',
+                      valid.dup, :scrub!
+    assert_send_type  '() -> String',
+                      invalid.dup, :scrub!
+
+    assert_send_type  '(nil) -> String',
+                      valid.dup, :scrub!, nil
+    assert_send_type  '(nil) -> String',
+                      invalid.dup, :scrub!, nil
+
+    with_string '&' do |replacement|
+      assert_send_type  '(string) -> String',
+                        valid.dup, :scrub!, replacement
+      assert_send_type  '(string) -> String',
+                        invalid.dup, :scrub!, replacement
+    end
+
+    with_string '&' do |replacement|
+      assert_send_type  '() { (String) -> string } -> String',
+                        valid.dup, :scrub! do replacement end
+      assert_send_type  '() { (String) -> string } -> String',
+                        invalid.dup, :scrub! do replacement end
+
+      assert_send_type  '(nil) { (String) -> string } -> String',
+                        valid.dup, :scrub!, nil do replacement end
+      assert_send_type  '(nil) { (String) -> string } -> String',
+                        invalid.dup, :scrub!, nil do replacement end
+    end
   end
 
   def test_setbyte
-    assert_send_type "(Integer, Integer) -> Integer",
-                     " ", :setbyte, 0, 0x20
-    assert_send_type "(ToInt, ToInt) -> ToInt",
-                     " ", :setbyte, ToInt.new(0), ToInt.new(0x20)
+    with_int 0 do |index|
+      with_int 38 do |byte|
+        assert_send_type  '[T < _ToStr] (int, T) -> T',
+                          +'hello', :setbyte, index, byte
+      end
+    end
+  end
+
+  def test_size
+    test_length :size
+  end
+
+  def test_slice
+    test_aref :slice
   end
 
   def test_slice!
-    assert_send_type "(Integer) -> String",
-                     "a", :slice!, 0
-    assert_send_type "(ToInt) -> String",
-                     "a", :slice!, ToInt.new(0)
-    assert_send_type "(Integer) -> nil",
-                     "a", :slice!, 1
-    assert_send_type "(ToInt) -> nil",
-                     "a", :slice!, ToInt.new(1)
-    assert_send_type "(Integer, Integer) -> String",
-                     "a", :slice!, 0, 1
-    assert_send_type "(ToInt, ToInt) -> String",
-                     "a", :slice!, ToInt.new(0), ToInt.new(1)
-    assert_send_type "(Integer, Integer) -> nil",
-                     "a", :slice!, 2, 1
-    assert_send_type "(ToInt, ToInt) -> nil",
-                     "a", :slice!, ToInt.new(2), ToInt.new(1)
-    assert_send_type "(Range[Integer]) -> String",
-                     "a", :slice!, 0..1
-    assert_send_type "(Range[Integer]) -> nil",
-                     "a", :slice!, 2..3
-    assert_send_type "(Range[Integer?]) -> String",
-                     "a", :slice!, (0..)
-    assert_send_type "(Range[Integer?]) -> String",
-                     "a", :slice!, (..1)
-    assert_send_type "(Regexp) -> String",
-                     "a", :slice!, /a/
-    assert_send_type "(Regexp, Integer) -> String",
-                     "a", :slice!, /(a)/, 1
-    assert_send_type "(Regexp, ToInt) -> String",
-                     "a", :slice!, /(a)/, ToInt.new(1)
-    assert_send_type "(Regexp, String) -> String",
-                     "a", :slice!, /(?<a>a)/, "a"
-    assert_send_type "(Regexp) -> nil",
-                     "a", :slice!, /b/
-    assert_send_type "(String) -> String",
-                     "a", :slice!, "a"
-    assert_send_type "(String) -> nil",
-                     "a", :slice!, "b"
+    # (int start, ?int length) -> String?
+    with_int(3) do |start|
+      assert_send_type  '(int) -> String',
+                        +'hello, world', :slice!, start
+      assert_send_type  '(int) -> nil',
+                        +'hi', :slice!, start
+
+      with_int 3 do |length|
+        assert_send_type  '(int, int) -> String',
+                          +'hello, world', :slice!, start, length
+        assert_send_type  '(int, int) -> nil',
+                          +'q', :slice!, start, length
+      end
+    end
+
+    # (range[int?] range) -> String?
+    with_range with_int(3).and_nil, with_int(5).and_nil do |range|
+      assert_send_type  '(range[int?]) -> String',
+                        +'hello', :slice!, range
+
+      next if nil == range.begin # if the starting value is `nil`, you can't get `nil` outputs.
+      assert_send_type  '(range[int?]) -> nil',
+                        +'hi', :slice!, range
+    end
+
+    # (Regexp regexp, ?MatchData::capture backref) -> String?
+    assert_send_type  '(Regexp) -> String',
+                      +'hello', :slice!, /./
+    assert_send_type  '(Regexp) -> nil',
+                      +'hello', :slice!, /doesn't match/
+    with_int(1).and 'a', :a do |backref|
+      assert_send_type  '(Regexp, MatchData::capture) -> String',
+                        +'hallo', :slice!, /(?<a>)./, backref
+      assert_send_type  '(Regexp, MatchData::capture) -> nil',
+                        +'hallo', :slice!, /(?<a>)doesn't match/, backref
+    end
+
+    # (String substring) -> String?
+    assert_send_type  '(String) -> String',
+                      +'hello', :slice!, 'hello'
+    assert_send_type  '(String) -> nil',
+                      +'hello', :slice!, 'does not exist'
+    refute_send_type  '(_ToStr) -> untyped',
+                      +'hello', :slice!, ToStr.new('e')
   end
 
   def test_split
-    assert_send_type "() -> Array[String]",
-                     "a b c", :split
-    assert_send_type "(String) -> Array[String]",
-                     "a b c", :split, " "
-    assert_send_type "(ToStr) -> Array[String]",
-                     "a b c", :split, ToStr.new(" ")
-    assert_send_type "(Regexp) -> Array[String]",
-                     "a b c", :split, / /
-    assert_send_type "(String, Integer) -> Array[String]",
-                     "a b c", :split, " ", 2
-    assert_send_type "(ToStr, Integer) -> Array[String]",
-                     "a b c", :split, ToStr.new(" "), 2
-    assert_send_type "(Regexp, Integer) -> Array[String]",
-                     "a b c", :split, / /, 2
-    assert_send_type "(String, ToInt) -> Array[String]",
-                     "a b c", :split, " ", ToInt.new(2)
-    assert_send_type "(ToStr, ToInt) -> Array[String]",
-                     "a b c", :split, ToStr.new(" "), ToInt.new(2)
-    assert_send_type "(Regexp, ToInt) -> Array[String]",
-                     "a b c", :split, / /, ToInt.new(2)
-    assert_send_type "() { (String) -> void } -> self",
-                     "a b c", :split do |str| str end
-    assert_send_type "(String) { (String) -> void } -> self",
-                     "a b c", :split, " " do |str| str end
-    assert_send_type "(ToStr) { (String) -> void } -> self",
-                     "a b c", :split, ToStr.new(" ") do |str| str end
-    assert_send_type "(Regexp) { (String) -> void } -> self",
-                     "a b c", :split, / / do |str| str end
-    assert_send_type "(String, Integer) { (String) -> void } -> self",
-                     "a b c", :split, " ", 2 do |str| str end
-    assert_send_type "(ToStr, Integer) { (String) -> void } -> self",
-                     "a b c", :split, ToStr.new(" "), 2 do |str| str end
-    assert_send_type "(Regexp, Integer) { (String) -> void } -> self",
-                     "a b c", :split, / /, 2 do |str| str end
-    assert_send_type "(String, ToInt) { (String) -> void } -> self",
-                     "a b c", :split, " ", ToInt.new(2) do |str| str end
-    assert_send_type "(ToStr, ToInt) { (String) -> void } -> self",
-                     "a b c", :split, ToStr.new(" "), ToInt.new(2) do |str| str end
-    assert_send_type "(Regexp, ToInt) { (String) -> void } -> self",
-                     "a b c", :split, / /, ToInt.new(2) do |str| str end
+    with_string('l').and nil, /l/ do |pattern|
+      assert_send_type  '(Regexp | string | nil) -> Array[String]',
+                        'hello', :split, pattern
+      assert_send_type  '(Regexp | string | nil) { (String) -> void } -> String',
+                        'hello', :split, pattern do end
+
+      assert_send_type  '(Regexp | string | nil) -> Array[String]',
+                        'heya', :split, pattern
+      assert_send_type  '(Regexp | string | nil) { (String) -> void } -> String',
+                        'heya', :split, pattern do end
+
+      with_int 3 do |limit|
+        assert_send_type  '(Regexp | string | nil, int) -> Array[String]',
+                          'hello', :split, pattern, limit
+        assert_send_type  '(Regexp | string | nil, int) { (String) -> void } -> String',
+                          'hello', :split, pattern, limit do end
+
+        assert_send_type  '(Regexp | string | nil, int) -> Array[String]',
+                          'heya', :split, pattern, limit
+        assert_send_type  '(Regexp | string | nil, int) { (String) -> void } -> String',
+                          'heya', :split, pattern, limit do end
+      end
+    end
   end
 
   def test_squeeze
-    assert_send_type "() -> String",
-                     "aa  bb  cc", :squeeze
-    assert_send_type "(String) -> String",
-                     "aa  bb  cc", :squeeze, " "
-    assert_send_type "(ToStr) -> String",
-                     "aa  bb  cc", :squeeze, ToStr.new(" ")
-    assert_send_type "(String, String) -> String",
-                     "aa  bb  cc", :squeeze, "a-z", "b"
-    assert_send_type "(ToStr, ToStr) -> String",
-                     "aa  bb  cc", :squeeze, ToStr.new("a-z"), ToStr.new("b")
+    assert_send_type  '() -> String',
+                      'hello', :squeeze
+
+    with_string 'l' do |selector|
+      assert_send_type  '(*String::selector) -> String',
+                        'hello', :squeeze, selector
+      assert_send_type  '(*String::selector) -> String',
+                        'hello', :squeeze, selector, selector
+    end
   end
 
   def test_squeeze!
-    assert_send_type "() -> self",
-                     "aa  bb  cc", :squeeze!
-    assert_send_type "(String) -> self",
-                     "aa  bb  cc", :squeeze!, " "
-    assert_send_type "(ToStr) -> self",
-                     "aa  bb  cc", :squeeze!, ToStr.new(" ")
-    assert_send_type "(String, String) -> self",
-                     "aa  bb  cc", :squeeze!, "a-z", "b"
-    assert_send_type "(ToStr, ToStr) -> self",
-                     "aa  bb  cc", :squeeze!, ToStr.new("a-z"), ToStr.new("b")
-    assert_send_type "() -> nil",
-                     "", :squeeze!
-    assert_send_type "(String) -> nil",
-                     "", :squeeze!, " "
-    assert_send_type "(ToStr) -> nil",
-                     "", :squeeze!, ToStr.new(" ")
-    assert_send_type "(String, String) -> nil",
-                     "", :squeeze!, "a-z", "b"
-    assert_send_type "(ToStr, ToStr) -> nil",
-                     "", :squeeze!, ToStr.new("a-z"), ToStr.new("b")
+    assert_send_type  '() -> String',
+                      +'hello', :squeeze!
+    assert_send_type  '() -> nil',
+                      +'heya', :squeeze!
+
+    with_string 'l' do |selector|
+      assert_send_type  '(*String::selector) -> String',
+                        +'hello', :squeeze!, selector
+      assert_send_type  '(*String::selector) -> String',
+                        +'hello', :squeeze!, selector, selector
+
+      assert_send_type  '(*String::selector) -> nil',
+                        +'heya', :squeeze!, selector
+      assert_send_type  '(*String::selector) -> nil',
+                        +'heya', :squeeze!, selector, selector
+    end
   end
 
+
   def test_start_with?
-    assert_send_type "() -> false",
-                     "a", :start_with?
-    assert_send_type "(String) -> true",
-                     "a", :start_with?, "a"
-    assert_send_type "(String) -> false",
-                     "a", :start_with?, "b"
-    assert_send_type "(String, String) -> true",
-                     "a", :start_with?, "b", "a"
-    assert_send_type "(ToStr) -> true",
-                     "a", :start_with?, ToStr.new("a")
-    assert_send_type "(ToStr) -> false",
-                     "a", :start_with?, ToStr.new("b")
-    assert_send_type "(ToStr, ToStr) -> true",
-                     "a", :start_with?, ToStr.new("b"), ToStr.new("a")
+    assert_send_type  '() -> bool',
+                      'hello', :start_with?
+
+    with_string('he').and /he/ do |prefix|
+      assert_send_type  '(*string | Regexp) -> bool',
+                        'hello', :start_with?, prefix
+      assert_send_type  '(*string | Regexp) -> bool',
+                        'hello', :start_with?, prefix, prefix
+    end
   end
 
   def test_strip
-    assert_send_type "() -> String",
-                     " a ", :strip
+    assert_send_type  '() -> String',
+                      ' hello ', :strip
+    assert_send_type  '() -> String',
+                      'hello', :strip
   end
 
   def test_strip!
-    assert_send_type "() -> self",
-                     " a ", :strip!
-    assert_send_type "() -> nil",
-                     "a", :strip!
+    assert_send_type  '() -> String',
+                      ' hello ', :strip!
+    assert_send_type  '() -> nil',
+                      'hello', :strip!
   end
 
   def test_sub
-    assert_send_type "(Regexp, String) -> String",
-                     "a", :sub, /a/, "a"
-    assert_send_type "(String, String) -> String",
-                     "a", :sub, "a", "a"
-    assert_send_type "(ToStr, String) -> String",
-                     "a", :sub, ToStr.new("a"), "a"
-    assert_send_type "(Regexp, ToStr) -> String",
-                     "a", :sub, /a/, ToStr.new("a")
-    assert_send_type "(String, ToStr) -> String",
-                     "a", :sub, "a", ToStr.new("a")
-    assert_send_type "(ToStr, ToStr) -> String",
-                     "a", :sub, ToStr.new("a"), ToStr.new("a")
-    assert_send_type "(Regexp, Hash[String, String]) -> String",
-                     "a", :sub, /a/, { "a" => "a" }
-    assert_send_type "(String, Hash[String, String]) -> String",
-                     "a", :sub, "a", { "a" => "a" }
-    assert_send_type "(ToStr, Hash[String, String]) -> String",
-                     "a", :sub, ToStr.new("a"), { "a" => "a" }
-    assert_send_type "(Regexp) { (String) -> ToS } -> String",
-                     "a", :sub, /a/ do |str| ToS.new(str) end
-    assert_send_type "(String) { (String) -> ToS } -> String",
-                     "a", :sub, "a" do |str| ToS.new(str) end
-    assert_send_type "(ToStr) { (String) -> ToS } -> String",
-                     "a", :sub, ToStr.new("a") do |str| ToS.new(str) end
-  end
+    with_string('l').and /l/ do |pattern|
+      assert_send_type  '(Regexp | string) { (String) -> _ToS } -> String',
+                        'hello', :sub, pattern do ToS.new end
 
+      with_string '!' do |replacement|
+        assert_send_type  '(Regexp | string, string) -> String',
+                          'hello', :sub, pattern, replacement
+      end
+
+      with_hash 'l' => ToS.new('!') do |replacement|
+        assert_send_type  '(Regexp | string, hash[String, _ToS]) -> String',
+                          'hello', :sub, pattern, replacement
+      end
+    end
+  end
 
   def test_sub!
-    assert_send_type "(Regexp, String) -> self",
-                     "a", :sub!, /a/, "a"
-    assert_send_type "(String, String) -> self",
-                     "a", :sub!, "a", "a"
-    assert_send_type "(ToStr, String) -> self",
-                     "a", :sub!, ToStr.new("a"), "a"
-    assert_send_type "(Regexp, ToStr) -> self",
-                     "a", :sub!, /a/, ToStr.new("a")
-    assert_send_type "(String, ToStr) -> self",
-                     "a", :sub!, "a", ToStr.new("a")
-    assert_send_type "(ToStr, ToStr) -> self",
-                     "a", :sub!, ToStr.new("a"), ToStr.new("a")
-    assert_send_type "(Regexp, Hash[String, String]) -> self",
-                     "a", :sub!, /a/, { "a" => "a" }
-    assert_send_type "(String, Hash[String, String]) -> self",
-                     "a", :sub!, "a", { "a" => "a" }
-    assert_send_type "(ToStr, Hash[String, String]) -> self",
-                     "a", :sub!, ToStr.new("a"), { "a" => "a" }
-    assert_send_type "(Regexp) { (String) -> ToS } -> self",
-                     "a", :sub!, /a/ do |str| ToS.new(str) end
-    assert_send_type "(String) { (String) -> ToS } -> self",
-                     "a", :sub!, "a" do |str| ToS.new(str) end
-    assert_send_type "(ToStr) { (String) -> ToS } -> self",
-                     "a", :sub!, ToStr.new("a") do |str| ToS.new(str) end
-    assert_send_type "(Regexp, String) -> nil",
-                     "a", :sub!, /b/, "a"
-    assert_send_type "(String, String) -> nil",
-                     "a", :sub!, "b", "a"
-    assert_send_type "(ToStr, String) -> nil",
-                     "a", :sub!, ToStr.new("b"), "a"
-    assert_send_type "(Regexp, ToStr) -> nil",
-                     "a", :sub!, /b/, ToStr.new("a")
-    assert_send_type "(String, ToStr) -> nil",
-                     "a", :sub!, "b", ToStr.new("a")
-    assert_send_type "(ToStr, ToStr) -> nil",
-                     "a", :sub!, ToStr.new("b"), ToStr.new("a")
-    assert_send_type "(Regexp, Hash[String, String]) -> nil",
-                     "a", :sub!, /b/, { "a" => "a" }
-    assert_send_type "(String, Hash[String, String]) -> nil",
-                     "a", :sub!, "b", { "a" => "a" }
-    assert_send_type "(ToStr, Hash[String, String]) -> nil",
-                     "a", :sub!, ToStr.new("b"), { "a" => "a" }
-    assert_send_type "(Regexp) { (String) -> ToS } -> nil",
-                     "a", :sub!, /b/ do |str| ToS.new(str) end
-    assert_send_type "(String) { (String) -> ToS } -> nil",
-                     "a", :sub!, "b" do |str| ToS.new(str) end
-    assert_send_type "(ToStr) { (String) -> ToS } -> nil",
-                     "a", :sub!, ToStr.new("b") do |str| ToS.new(str) end
+    with_string('l').and /l/ do |pattern|
+      assert_send_type  '(Regexp | string) { (String) -> _ToS } -> String',
+                        'hello', :sub!, pattern do ToS.new end
+      assert_send_type  '(Regexp | string) { (String) -> _ToS } -> nil',
+                        'heya', :sub!, pattern do ToS.new end
+
+      with_string '!' do |replacement|
+        assert_send_type  '(Regexp | string, string) -> String',
+                          'hello', :sub!, pattern, replacement
+        assert_send_type  '(Regexp | string, string) -> nil',
+                          'heya', :sub!, pattern, replacement
+      end
+
+      with_hash 'l' => ToS.new('!') do |replacement|
+        assert_send_type  '(Regexp | string, hash[String, _ToS]) -> String',
+                          'hello', :sub!, pattern, replacement
+        assert_send_type  '(Regexp | string, hash[String, _ToS]) -> nil',
+                          'heya', :sub!, pattern, replacement
+      end
+    end
   end
 
-  def test_succ
-    assert_send_type "() -> String",
-                     "", :succ
+  def test_succ(method = :succ)
+    assert_send_type  '() -> String',
+                      'hello', method
   end
 
-  def test_succ!
-    assert_send_type "() -> self",
-                     "", :succ!
+  def test_succ!(method = :succ!)
+    assert_send_type  '() -> String',
+                      'hello', method
+    assert_send_type  '() -> String',
+                      '', method
   end
 
   def test_sum
-    assert_send_type "() -> Integer",
-                     " ", :sum
-    assert_send_type "(Integer) -> Integer",
-                     " ", :sum, 16
-    assert_send_type "(ToInt) -> Integer",
-                     " ", :sum, ToInt.new(16)
+    assert_send_type  '() -> Integer',
+                      'hello', :sum
+
+    with_int 15 do |bits|
+      assert_send_type  '(int) -> Integer',
+                        'hello', :sum, bits
+    end
   end
 
   def test_swapcase
-    assert_send_type "() -> String",
-                     "a", :swapcase
-    assert_send_type "(Symbol) -> String",
-                     "a", :swapcase, :ascii
-    assert_send_type "(Symbol) -> String",
-                     "a", :swapcase, :lithuanian
-    assert_send_type "(Symbol) -> String",
-                     "a", :swapcase, :turkic
-    assert_send_type "(Symbol, Symbol) -> String",
-                     "a", :swapcase, :lithuanian, :turkic
-    assert_send_type "(Symbol, Symbol) -> String",
-                     "a", :swapcase, :turkic, :lithuanian
+    assert_case_method :swapcase
   end
 
   def test_swapcase!
-    assert_send_type "() -> self",
-                     "a", :swapcase!
-    assert_send_type "(Symbol) -> self",
-                     "a", :swapcase!, :ascii
-    assert_send_type "(Symbol) -> self",
-                     "a", :swapcase!, :lithuanian
-    assert_send_type "(Symbol) -> self",
-                     "a", :swapcase!, :turkic
-    assert_send_type "(Symbol, Symbol) -> self",
-                     "a", :swapcase!, :lithuanian, :turkic
-    assert_send_type "(Symbol, Symbol) -> self",
-                     "a", :swapcase!, :turkic, :lithuanian
-    assert_send_type "() -> nil",
-                     "", :swapcase!
-    assert_send_type "(Symbol) -> nil",
-                     "", :swapcase!, :ascii
-    assert_send_type "(Symbol) -> nil",
-                     "", :swapcase!, :lithuanian
-    assert_send_type "(Symbol) -> nil",
-                     "", :swapcase!, :turkic
-    assert_send_type "(Symbol, Symbol) -> nil",
-                     "", :swapcase!, :lithuanian, :turkic
-    assert_send_type "(Symbol, Symbol) -> nil",
-                     "", :swapcase!, :turkic, :lithuanian
+    assert_case_method! :swapcase!, normal: 'HeLlO', nochange: '0123'
   end
 
   def test_to_c
-    assert_send_type "() -> Complex",
-                     "ruby", :to_c
+    assert_send_type  '() -> Complex',
+                      'hello', :to_c
+    assert_send_type  '() -> Complex',
+                      '1159710911210111411597110100', :to_c
   end
 
   def test_to_f
-    assert_send_type "() -> Float",
-                     "ruby", :to_f
+    assert_send_type  '() -> Float',
+                      'hello', :to_f
+    assert_send_type  '() -> Float',
+                      '1159710911210111411597110100', :to_f
   end
 
   def test_to_i
-    assert_send_type "() -> Integer",
-                     "ruby", :to_i
-    assert_send_type "(Integer) -> Integer",
-                     "ruby", :to_i, 10
-    assert_send_type "(ToInt) -> Integer",
-                     "ruby", :to_i, ToInt.new(10)
+    assert_send_type  '() -> Integer',
+                      'hello', :to_i
+    assert_send_type  '() -> Integer',
+                      '1159710911210111411597110100', :to_i
   end
 
   def test_to_r
-    assert_send_type "() -> Rational",
-                     "ruby", :to_r
+    assert_send_type  '() -> Rational',
+                      'hello', :to_r
+    assert_send_type  '() -> Rational',
+                      '1159710911210111411597110100', :to_r
   end
 
-  def test_to_s
-    assert_send_type "() -> String",
-                     "ruby", :to_s
+  def test_to_s(method = :to_s)
+    assert_send_type  '() -> String',
+                      'hello', method
+    assert_send_type  '() -> String',
+                      Class.new(String).new('hello'), method
   end
 
   def test_to_str
-    assert_send_type "() -> String",
-                     "ruby", :to_str
+    test_to_s :to_str
   end
 
   def test_to_sym
-    assert_send_type "() -> Symbol",
-                     "ruby", :to_sym
+    test_intern :to_sym
   end
 
   def test_tr
-    assert_send_type "(String, String) -> String",
-                     "ruby", :tr, "r", "j"
-    assert_send_type "(ToStr, ToStr) -> String",
-                     "ruby", :tr, ToStr.new("r"), ToStr.new("j")
+    with_string 'aeiouy' do |source|
+      with_string '-' do |replacement|
+        assert_send_type  '(string, string) -> String',
+                          'hello', :tr, source, replacement
+      end
+    end
   end
 
   def test_tr!
-    assert_send_type "(String, String) -> self",
-                     "ruby", :tr!, "r", "j"
-    assert_send_type "(ToStr, ToStr) -> self",
-                     "ruby", :tr!, ToStr.new("r"), ToStr.new("j")
-    assert_send_type "(String, String) -> nil",
-                     "", :tr!, "r", "j"
-    assert_send_type "(ToStr, ToStr) -> nil",
-                     "", :tr!, ToStr.new("r"), ToStr.new("j")
+    with_string 'aeiouy' do |source|
+      with_string '-' do |replacement|
+        assert_send_type  '(string, string) -> String',
+                          +'hello', :tr!, source, replacement
+        assert_send_type  '(string, string) -> nil',
+                          +'crwth', :tr!, source, replacement # fun fact: crwth is a word.
+      end
+    end
   end
 
   def test_tr_s
-    assert_send_type "(String, String) -> String",
-                     "ruby", :tr_s, "r", "j"
-    assert_send_type "(ToStr, ToStr) -> String",
-                     "ruby", :tr_s, ToStr.new("r"), ToStr.new("j")
+    with_string 'aeiouy' do |source|
+      with_string '-' do |replacement|
+        assert_send_type  '(string, string) -> String',
+                          'hello', :tr_s, source, replacement
+      end
+    end
   end
 
   def test_tr_s!
-    assert_send_type "(String, String) -> self",
-                     "ruby", :tr_s!, "r", "j"
-    assert_send_type "(ToStr, ToStr) -> self",
-                     "ruby", :tr_s!, ToStr.new("r"), ToStr.new("j")
-    assert_send_type "(String, String) -> nil",
-                     "", :tr_s!, "r", "j"
-    assert_send_type "(ToStr, ToStr) -> nil",
-                     "", :tr_s!, ToStr.new("r"), ToStr.new("j")
+    with_string 'aeiouy' do |source|
+      with_string '-' do |replacement|
+        assert_send_type  '(string, string) -> String',
+                          +'hello', :tr_s!, source, replacement
+        assert_send_type  '(string, string) -> nil',
+                          +'crwth', :tr_s!, source, replacement # fun fact: crwth is a word.
+      end
+    end
   end
 
   def test_undump
-    assert_send_type "() -> String",
-                     "\"hello \\n ''\"", :undump
+    assert_send_type  '() -> String',
+                      'hello'.dump, :undump
   end
 
   def test_unicode_normalize
-    assert_send_type "() -> String",
-                     "a\u0300", :unicode_normalize
-    assert_send_type "(:nfc) -> String",
-                     "a\u0300", :unicode_normalize, :nfc
-    assert_send_type "(:nfd) -> String",
-                     "a\u0300", :unicode_normalize, :nfd
-    assert_send_type "(:nfkc) -> String",
-                     "a\u0300", :unicode_normalize, :nfkc
-    assert_send_type "(:nfkd) -> String",
-                     "a\u0300", :unicode_normalize, :nfkd
+    assert_send_type  '() -> String',
+                      'a'.encode('ASCII'), :unicode_normalize
+
+    assert_send_type  '() -> String',
+                      "\u00E0", :unicode_normalize
+
+    %i[nfc nfd nfkc nfkd].each do |form|
+      assert_send_type  '(:nfc | :nfd | :nfkc | :nfkd) -> String',
+                        "\u00E0", :unicode_normalize, form
+      assert_send_type  '(:nfc | :nfd | :nfkc | :nfkd) -> String',
+                        'a'.encode('ASCII'), :unicode_normalize, form
+    end
   end
 
   def test_unicode_normalize!
-    assert_send_type "() -> String",
-                     "a\u0300", :unicode_normalize!
-    assert_send_type "(:nfc) -> String",
-                     "a\u0300", :unicode_normalize!, :nfc
-    assert_send_type "(:nfd) -> String",
-                     "a\u0300", :unicode_normalize!, :nfd
-    assert_send_type "(:nfkc) -> String",
-                     "a\u0300", :unicode_normalize!, :nfkc
-    assert_send_type "(:nfkd) -> String",
-                     "a\u0300", :unicode_normalize!, :nfkd
+    assert_send_type  '() -> String',
+                      +"\u00E0", :unicode_normalize!
+
+    %i[nfc nfd nfkc nfkd].each do |form|
+      assert_send_type  '(:nfc | :nfd | :nfkc | :nfkd) -> String',
+                        +"\u00E0", :unicode_normalize!, form
+    end
   end
 
   def test_unicode_normalized?
-    assert_send_type "() -> false",
-                     "a\u0300", :unicode_normalized?
-    assert_send_type "(:nfc) -> false",
-                     "a\u0300", :unicode_normalized?, :nfc
-    assert_send_type "(:nfd) -> true",
-                     "a\u0300", :unicode_normalized?, :nfd
-    assert_send_type "(:nfkc) -> false",
-                     "a\u0300", :unicode_normalized?, :nfkc
-    assert_send_type "(:nfkd) -> true",
-                     "a\u0300", :unicode_normalized?, :nfkd
+    assert_send_type  '() -> bool',
+                      "\u00E0", :unicode_normalized?
+
+    %i[nfc nfd nfkc nfkd].each do |form|
+      assert_send_type  '(:nfc | :nfd | :nfkc | :nfkd) -> bool',
+                        "\u00E0", :unicode_normalized?, form
+    end
   end
 
   def test_unpack
-    assert_send_type(
-      "(String) -> [ ]",
-      "a", :unpack, ""
-    )
-    assert_send_type(
-      "(String) -> [ nil ]",
-      "", :unpack, "f"
-    )
-    assert_send_type(
-      "(String) -> Array[Integer]",
-      "a", :unpack, "c"
-    )
-    assert_send_type(
-      "(String) -> Array[String]",
-      "a", :unpack, "A"
-    )
-    assert_send_type(
-      "(String) -> Array[Float]",
-      "\x00\x00\x00\x00", :unpack, "f"
-    )
-    assert_send_type(
-      "(String, offset: Integer) -> Array[String]",
-      "  a", :unpack, "A", offset: 2
-    )
+    packed = [0, 1.0, 'hello', 'p'].pack('IFA*P')
+
+    with_string 'IFA*P' do |template|
+      assert_send_type  '(string) -> Array[Integer | Float | String | nil]',
+                        packed, :unpack, template
+      assert_send_type  '(string) { (Integer | Float | String | nil) -> void } -> nil',
+                        packed, :unpack, template do end
+
+      next if RUBY_VERSION < '3.1'
+
+      with_int 0 do |offset|
+        assert_send_type  '(string, offset: int) -> Array[Integer | Float | String | nil]',
+                          packed, :unpack, template, offset: offset
+        assert_send_type  '(string, offset: int) { (Integer | Float | String | nil) -> void } -> nil',
+                          packed, :unpack, template, offset: offset do end
+      end
+    end
   end
 
   def test_unpack1
-    assert_send_type "(String) -> nil",
-                     "a", :unpack1, ""
-    assert_send_type "(String) -> nil",
-                     "", :unpack1, "f"
-    assert_send_type "(String) -> Integer",
-                     "a", :unpack1, "c"
-    assert_send_type "(String) -> String",
-                     "a", :unpack1, "A"
-    assert_send_type "(String) -> Float",
-                     "\x00\x00\x00\x00", :unpack1, "f"
+    [[0, 'I', 'Integer'], [1.0, 'F', 'Float'], ['hello', 'A*', 'String'], [nil, 'P', 'nil']].each do |value, template, type|
+      packed = [value].pack template
+
+      with_string template do |template_string|
+        assert_send_type  "(string) -> #{type}",
+                          packed, :unpack1, template_string
+
+        next if RUBY_VERSION < '3.1'
+
+        with_int 0 do |offset|
+          assert_send_type  "(string, offset: int) -> #{type}",
+                            packed, :unpack1, template_string, offset: offset
+        end
+      end
+    end
   end
 
   def test_upcase
-    assert_send_type "() -> String",
-                     "a", :upcase
-    assert_send_type "(:ascii) -> String",
-                     "a", :upcase, :ascii
-    assert_send_type "(:lithuanian) -> String",
-                     "a", :upcase, :lithuanian
-    assert_send_type "(:turkic) -> String",
-                     "a", :upcase, :turkic
-    assert_send_type "(:lithuanian, :turkic) -> String",
-                     "a", :upcase, :lithuanian, :turkic
-    assert_send_type "(:turkic, :lithuanian) -> String",
-                     "a", :upcase, :turkic, :lithuanian
+    assert_case_method :upcase
   end
 
   def test_upcase!
-    assert_send_type "() -> String",
-                     "a", :upcase!
-    assert_send_type "(:ascii) -> String",
-                     "a", :upcase!, :ascii
-    assert_send_type "(:lithuanian) -> String",
-                     "a", :upcase!, :lithuanian
-    assert_send_type "(:turkic) -> String",
-                     "a", :upcase!, :turkic
-    assert_send_type "(:lithuanian, :turkic) -> String",
-                     "a", :upcase!, :lithuanian, :turkic
-    assert_send_type "(:turkic, :lithuanian) -> String",
-                     "a", :upcase!, :turkic, :lithuanian
-    assert_send_type "() -> nil",
-                     "", :upcase!
-    assert_send_type "(:ascii) -> nil",
-                     "", :upcase!, :ascii
-    assert_send_type "(:lithuanian) -> nil",
-                     "", :upcase!, :lithuanian
-    assert_send_type "(:turkic) -> nil",
-                     "", :upcase!, :turkic
-    assert_send_type "(:lithuanian, :turkic) -> nil",
-                     "", :upcase!, :lithuanian, :turkic
-    assert_send_type "(:turkic, :lithuanian) -> nil",
-                     "", :upcase!, :turkic, :lithuanian
+    assert_case_method! :upcase!, normal: 'hello', nochange: 'HELLO'
   end
 
   def test_upto
-    assert_send_type "(String) -> Enumerator[String, self]",
-                     "1", :upto, "2"
-    assert_send_type "(String, true) -> Enumerator[String, self]",
-                     "1", :upto, "2", true
-    assert_send_type "(String, false) -> Enumerator[String, self]",
-                     "1", :upto, "2", false
-    assert_send_type "(String) { (String) -> void } -> self",
-                     "1", :upto, "2" do |s| s end
-    assert_send_type "(String, true) { (String) -> void } -> self",
-                     "1", :upto, "2", true do |s| s end
-    assert_send_type "(String, false) { (String) -> void } -> self",
-                     "1", :upto, "2", false do |s| s end
-    assert_send_type "(ToStr) -> Enumerator[String, self]",
-                     "1", :upto, ToStr.new("2")
-    assert_send_type "(ToStr) { (String) -> void } -> self",
-                     "1", :upto, ToStr.new("2") do |s| s end
+    with_string 'z' do |endpoint|
+      assert_send_type  '(string) -> Enumerator[String, String]',
+                        'a', :upto, endpoint
+      assert_send_type  '(string) { (String) -> void } -> String',
+                        'a', :upto, endpoint do end
+
+      with_boolish do |exclude_end|
+        assert_send_type  '(string, boolish) -> Enumerator[String, String]',
+                          'a', :upto, endpoint, exclude_end
+        assert_send_type  '(string, boolish) { (String) -> void } -> String',
+                          'a', :upto, endpoint, exclude_end do end
+      end
+    end
   end
 
   def test_valid_encoding?
-    assert_send_type "() -> true",
-                     "", :valid_encoding?
-    assert_send_type "() -> false",
-                     "あ".force_encoding(Encoding::Shift_JIS), :valid_encoding?
+    assert_send_type  '() -> bool',
+                      'hello', :valid_encoding?
+    assert_send_type  '() -> bool',
+                      "\xc2".force_encoding("UTF-8"), :valid_encoding?
   end
 end

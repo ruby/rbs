@@ -118,4 +118,26 @@ EOF
     assert result.compatible?(:B, with_annotation: :invariant)
     assert result.compatible?(:C, with_annotation: :invariant)
   end
+
+  def test_type_alias
+    SignatureManager.new do |manager|
+      manager.files[Pathname("foo.rbs")] = <<EOF
+module Foo
+end
+
+module Bar = Foo
+
+type Foo::foo[out T] = String?
+
+type Foo::bar[in T] = ^(Bar::foo[T]) -> Integer
+EOF
+      manager.build do |env|
+        builder = DefinitionBuilder.new(env: env)
+        calculator = VarianceCalculator.new(builder: builder)
+
+        calculator.in_type_alias(name: TypeName("::Foo::foo"))
+        calculator.in_type_alias(name: TypeName("::Foo::bar"))
+      end
+    end
+  end
 end

@@ -39,6 +39,7 @@
   case kUNTYPED: \
   case kUSE: \
   case kAS: \
+  case k__TODO__: \
   /* nop */
 
 typedef struct {
@@ -275,6 +276,14 @@ static VALUE parse_function_param(parserstate *state) {
     param_range.start = type_range.start;
     param_range.end = name_range.end;
 
+    if (!is_keyword_token(state->current_token.type)) {
+      raise_syntax_error(
+        state,
+        state->current_token,
+        "unexpected token for function parameter name"
+      );
+    }
+
     VALUE name = rb_to_symbol(rbs_unquote_string(state, state->current_token.range, 0));
     VALUE location = rbs_new_location(state->buffer, param_range);
     rbs_loc *loc = rbs_check_location(location);
@@ -502,6 +511,7 @@ PARSE_KEYWORDS:
 
     case tUIDENT:
     case tLIDENT:
+    case tQIDENT:
     case tULIDENT:
     case tULLIDENT:
     case tBANGIDENT:
@@ -688,15 +698,22 @@ static VALUE parse_proc_type(parserstate *state) {
                      | {} literal_type `=>` <type>
 */
 VALUE parse_record_attributes(parserstate *state) {
-  VALUE hash = rb_hash_new();
+  VALUE fields = rb_hash_new();
 
   if (state->next_token.type == pRBRACE) {
-    return hash;
+    return fields;
   }
 
   while (true) {
-    VALUE key;
-    VALUE type;
+    VALUE key, type,
+          value = rb_ary_new(),
+          required = Qtrue;
+
+    if (state->next_token.type == pQUESTION) {
+      // { ?foo: type } syntax
+      required = Qfalse;
+      parser_advance(state);
+    }
 
     if (is_keyword(state)) {
       // { foo: type } syntax
@@ -713,7 +730,7 @@ VALUE parse_record_attributes(parserstate *state) {
       case tINTEGER:
       case kTRUE:
       case kFALSE:
-        key = rb_funcall(parse_type(state), rb_intern("literal"), 0);
+        key = rb_funcall(parse_simple(state), rb_intern("literal"), 0);
         break;
       default:
         raise_syntax_error(
@@ -725,7 +742,9 @@ VALUE parse_record_attributes(parserstate *state) {
       parser_advance_assert(state, pFATARROW);
     }
     type = parse_type(state);
-    rb_hash_aset(hash, key, type);
+    rb_ary_push(value, type);
+    rb_ary_push(value, required);
+    rb_hash_aset(fields, key, value);
 
     if (parser_advance_if(state, pCOMMA)) {
       if (state->next_token.type == pRBRACE) {
@@ -735,8 +754,7 @@ VALUE parse_record_attributes(parserstate *state) {
       break;
     }
   }
-
-  return hash;
+  return fields;
 }
 
 /*
@@ -898,6 +916,11 @@ static VALUE parse_simple(parserstate *state) {
     return rbs_base_type(RBS_Types_Bases_Void, rbs_location_current_token(state));
   case kUNTYPED:
     return rbs_base_type(RBS_Types_Bases_Any, rbs_location_current_token(state));
+  case k__TODO__: {
+    VALUE type = rbs_base_type(RBS_Types_Bases_Any, rbs_location_current_token(state));
+    rb_funcall(type, rb_intern("todo!"), 0);
+    return type;
+  }
   case tINTEGER: {
     VALUE literal = rb_funcall(
       string_of_loc(state, state->current_token.range.start, state->current_token.range.end),
@@ -1470,8 +1493,8 @@ InstanceSingletonKind parse_instance_singleton_kind(parserstate *state, bool all
 
 /**
  * def_member ::= {kDEF} method_name `:` <method_types>
- *              | {kPRIVATE2} kDEF method_name `:` <method_types>
- *              | {kPUBLIC2} kDEF method_name `:` <method_types>
+ *              | {kPRIVATE} kDEF method_name `:` <method_types>
+ *              | {kPUBLIC} kDEF method_name `:` <method_types>
  *
  * method_types ::= {} <method_type>
  *                | {} <`...`>
@@ -2740,6 +2763,7 @@ rbsparser_parse_type(VALUE self, VALUE buffer, VALUE start_pos, VALUE end_pos, V
   parserstate *parser = alloc_parser(buffer, FIX2INT(start_pos), FIX2INT(end_pos), variables);
 
   if (parser->next_token.type == pEOF) {
+    free_parser(parser);
     return Qnil;
   }
 
@@ -2760,6 +2784,7 @@ rbsparser_parse_method_type(VALUE self, VALUE buffer, VALUE start_pos, VALUE end
   parserstate *parser = alloc_parser(buffer, FIX2INT(start_pos), FIX2INT(end_pos), variables);
 
   if (parser->next_token.type == pEOF) {
+    free_parser(parser);
     return Qnil;
   }
 

@@ -27,7 +27,11 @@ module RBS
         end
 
         def manifest_of(name, version)
-          manifest_path = (lookup(name, version) or raise).join('manifest.yaml')
+          unless path = lookup(name, version)
+            RBS.logger.warn "`#{name}` is specified in rbs_collection.lock.yaml. But it is not found in #{REPO.dirs.join(",")}"
+            return
+          end
+          manifest_path = path.join('manifest.yaml')
           YAML.safe_load(manifest_path.read) if manifest_path.exist?
         end
 

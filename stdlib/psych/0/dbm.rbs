@@ -1,5 +1,5 @@
 %a{annotate:rdoc:skip}
-module YAML
+module Psych
   # <!-- rdoc-file=lib/yaml/dbm.rb -->
   # YAML + DBM = YDBM
   #
@@ -169,7 +169,7 @@ module YAML
     # object. Takes any object which implements the each_pair method, including Hash
     # and DBM objects.
     #
-    def replace: (Hash[untyped, untyped] | DBM hsh) -> YAML::DBM
+    def replace: (Hash[untyped, untyped] | DBM hsh) -> Psych::DBM
 
     # <!--
     #   rdoc-file=lib/yaml/dbm.rb
@@ -214,7 +214,7 @@ module YAML
     #
     # Returns `self`.
     #
-    def update: (Hash[untyped, untyped]) -> YAML::DBM
+    def update: (Hash[untyped, untyped]) -> Psych::DBM
 
     # <!--
     #   rdoc-file=lib/yaml/dbm.rb

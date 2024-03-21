@@ -86,7 +86,7 @@ class Fiber < Object
   #
   # See also Fiber::[]=.
   #
-  def self.[]: (Symbol | String) -> untyped
+  def self.[]: (Symbol) -> untyped
 
   # <!--
   #   rdoc-file=cont.c
@@ -99,7 +99,7 @@ class Fiber < Object
   #
   # See also Fiber::[].
   #
-  def self.[]=: [A] (Symbol | String, A) -> A
+  def self.[]=: [A] (Symbol, A) -> A
 
   # <!--
   #   rdoc-file=cont.c
@@ -268,7 +268,7 @@ class Fiber < Object
   # Explicitly using `storage: true` is currently experimental and may change in
   # the future.
   #
-  def initialize: (?blocking: boolish, ?storage: true | Hash[Symbol | String, untyped] | nil) { (*untyped) -> void } -> void
+  def initialize: (?blocking: boolish, ?storage: true | Hash[interned, untyped] | nil) { (*untyped) -> void } -> void
 
   # <!--
   #   rdoc-file=cont.c
@@ -371,6 +371,27 @@ class Fiber < Object
 
   # <!--
   #   rdoc-file=cont.c
+  #   - fiber.kill -> nil
+  # -->
+  # Terminates the fiber by raising an uncatchable exception. It only terminates
+  # the given fiber and no other fiber, returning `nil` to another fiber if that
+  # fiber was calling #resume or #transfer.
+  #
+  # `Fiber#kill` only interrupts another fiber when it is in Fiber.yield. If
+  # called on the current fiber then it raises that exception at the `Fiber#kill`
+  # call site.
+  #
+  # If the fiber has not been started, transition directly to the terminated
+  # state.
+  #
+  # If the fiber is already terminated, does nothing.
+  #
+  # Raises FiberError if called on a fiber belonging to another thread.
+  #
+  def kill: () -> nil
+
+  # <!--
+  #   rdoc-file=cont.c
   #   - fiber.raise                                 -> obj
   #   - fiber.raise(string)                         -> obj
   #   - fiber.raise(exception [, string [, array]]) -> obj
@@ -388,6 +409,8 @@ class Fiber < Object
   # second parameter sets the message associated with the exception, and the third
   # parameter is an array of callback information. Exceptions are caught by the
   # `rescue` clause of `begin...end` blocks.
+  #
+  # Raises `FiberError` if called on a Fiber belonging to another `Thread`.
   #
   def raise: (?string msg) -> untyped
            | (_Exception, ?string msg, ?Array[string] backtrace) -> untyped
@@ -414,7 +437,7 @@ class Fiber < Object
   # Returns a copy of the storage hash for the fiber. The method can only be
   # called on the Fiber.current.
   #
-  def storage: () -> Hash[Symbol | String, untyped]
+  def storage: () -> Hash[interned, untyped]
 
   # <!--
   #   rdoc-file=cont.c
@@ -438,7 +461,7 @@ class Fiber < Object
   #       handle_request(request)
   #     end
   #
-  def storage=: (Hash[Symbol | String, untyped]) -> Hash[Symbol | String, untyped]
+  def storage=: (Hash[interned, untyped]) -> Hash[interned, untyped]
 
   # <!--
   #   rdoc-file=cont.c

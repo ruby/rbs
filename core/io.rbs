@@ -110,7 +110,7 @@
 #
 #
 # Also available are the options offered in String#encode, which may control
-# conversion between external internal encoding.
+# conversion between external and internal encoding.
 #
 # ## Basic IO
 #
@@ -398,7 +398,7 @@
 #         # => 41
 #         f.close
 #
-# *   When a stream is read, `#.` is set to the line number for that stream:
+# *   When a stream is read, `$.` is set to the line number for that stream:
 #
 #         f0 = File.new('t.txt')
 #         f1 = File.new('t.dat')
@@ -684,24 +684,24 @@ class IO < Object
   # -->
   # Sets auto-close flag.
   #
-  #     f = open("/dev/null")
-  #     IO.for_fd(f.fileno)
-  #     # ...
-  #     f.gets # may cause Errno::EBADF
+  #     f = File.open(File::NULL)
+  #     IO.for_fd(f.fileno).close
+  #     f.gets # raises Errno::EBADF
   #
-  #     f = open("/dev/null")
-  #     IO.for_fd(f.fileno).autoclose = false
-  #     # ...
+  #     f = File.open(File::NULL)
+  #     g = IO.for_fd(f.fileno)
+  #     g.autoclose = false
+  #     g.close
   #     f.gets # won't cause Errno::EBADF
   #
-  def autoclose=: (boolish) -> untyped
+  def autoclose=: (boolish bool) -> boolish
 
   # <!--
   #   rdoc-file=io.c
   #   - ios.autoclose?   -> true or false
   # -->
-  # Returns `true` if the underlying file descriptor of *ios* will be closed
-  # automatically at its finalization, otherwise `false`.
+  # Returns `true` if the underlying file descriptor of *ios* will be closed at
+  # its finalization or at calling #close, otherwise `false`.
   #
   def autoclose?: () -> bool
 
@@ -756,7 +756,7 @@ class IO < Object
   #
   # Related: IO#close_read, IO#close_write, IO#closed?.
   #
-  def close: () -> NilClass
+  def close: () -> nil
 
   # <!--
   #   rdoc-file=io.c
@@ -764,7 +764,7 @@ class IO < Object
   # -->
   # Sets a close-on-exec flag.
   #
-  #     f = open("/dev/null")
+  #     f = File.open(File::NULL)
   #     f.close_on_exec = true
   #     system("cat", "/proc/self/fd/#{f.fileno}") # cat: /proc/self/fd/3: No such file or directory
   #     f.closed?                #=> false
@@ -775,7 +775,7 @@ class IO < Object
   # (via system() method for example). If you really needs file descriptor
   # inheritance to child process, use spawn()'s argument such as fd=>fd.
   #
-  def close_on_exec=: (boolish) -> untyped
+  def close_on_exec=: (boolish bool) -> nil
 
   # <!--
   #   rdoc-file=io.c
@@ -821,7 +821,7 @@ class IO < Object
   #
   # Related: IO#close, IO#close_write, IO#closed?.
   #
-  def close_read: () -> NilClass
+  def close_read: () -> nil
 
   # <!--
   #   rdoc-file=io.c
@@ -853,7 +853,7 @@ class IO < Object
   #
   # Related: IO#close, IO#close_read, IO#closed?.
   #
-  def close_write: () -> NilClass
+  def close_write: () -> nil
 
   # <!--
   #   rdoc-file=io.c
@@ -882,113 +882,6 @@ class IO < Object
 
   # <!--
   #   rdoc-file=io.c
-  #   - each_line(sep = $/, chomp: false) {|line| ... }   -> self
-  #   - each_line(limit, chomp: false) {|line| ... }      -> self
-  #   - each_line(sep, limit, chomp: false) {|line| ... } -> self
-  #   - each_line                                   -> enumerator
-  # -->
-  # Calls the block with each remaining line read from the stream; returns `self`.
-  # Does nothing if already at end-of-stream; See [Line IO](rdoc-ref:IO@Line+IO).
-  #
-  # With no arguments given, reads lines as determined by line separator `$/`:
-  #
-  #     f = File.new('t.txt')
-  #     f.each_line {|line| p line }
-  #     f.each_line {|line| fail 'Cannot happen' }
-  #     f.close
-  #
-  # Output:
-  #
-  #     "First line\n"
-  #     "Second line\n"
-  #     "\n"
-  #     "Fourth line\n"
-  #     "Fifth line\n"
-  #
-  # With only string argument `sep` given, reads lines as determined by line
-  # separator `sep`; see [Line Separator](rdoc-ref:IO@Line+Separator):
-  #
-  #     f = File.new('t.txt')
-  #     f.each_line('li') {|line| p line }
-  #     f.close
-  #
-  # Output:
-  #
-  #     "First li"
-  #     "ne\nSecond li"
-  #     "ne\n\nFourth li"
-  #     "ne\nFifth li"
-  #     "ne\n"
-  #
-  # The two special values for `sep` are honored:
-  #
-  #     f = File.new('t.txt')
-  #     # Get all into one string.
-  #     f.each_line(nil) {|line| p line }
-  #     f.close
-  #
-  # Output:
-  #
-  #     "First line\nSecond line\n\nFourth line\nFifth line\n"
-  #
-  #     f.rewind
-  #     # Get paragraphs (up to two line separators).
-  #     f.each_line('') {|line| p line }
-  #
-  # Output:
-  #
-  #     "First line\nSecond line\n\n"
-  #     "Fourth line\nFifth line\n"
-  #
-  # With only integer argument `limit` given, limits the number of bytes in each
-  # line; see [Line Limit](rdoc-ref:IO@Line+Limit):
-  #
-  #     f = File.new('t.txt')
-  #     f.each_line(8) {|line| p line }
-  #     f.close
-  #
-  # Output:
-  #
-  #     "First li"
-  #     "ne\n"
-  #     "Second l"
-  #     "ine\n"
-  #     "\n"
-  #     "Fourth l"
-  #     "ine\n"
-  #     "Fifth li"
-  #     "ne\n"
-  #
-  # With arguments `sep` and `limit` given, combines the two behaviors:
-  #
-  # *   Calls with the next line as determined by line separator `sep`.
-  # *   But returns no more bytes than are allowed by the limit.
-  #
-  #
-  # Optional keyword argument `chomp` specifies whether line separators are to be
-  # omitted:
-  #
-  #     f = File.new('t.txt')
-  #     f.each_line(chomp: true) {|line| p line }
-  #     f.close
-  #
-  # Output:
-  #
-  #     "First line"
-  #     "Second line"
-  #     ""
-  #     "Fourth line"
-  #     "Fifth line"
-  #
-  # Returns an Enumerator if no block is given.
-  #
-  # IO#each is an alias for IO#each_line.
-  #
-  def each: (?String sep, ?Integer limit) { (String arg0) -> untyped } -> self
-          | (?String sep, ?Integer limit) -> ::Enumerator[String, self]
-
-  # <!--
-  #   rdoc-file=io.c
   #   - each_byte {|byte| ... } -> self
   #   - each_byte               -> enumerator
   # -->
@@ -1005,7 +898,7 @@ class IO < Object
   #
   # Related: IO#each_char, IO#each_codepoint.
   #
-  def each_byte: () { (Integer arg0) -> untyped } -> self
+  def each_byte: () { (Integer byte) -> void } -> self
                | () -> ::Enumerator[Integer, self]
 
   # <!--
@@ -1026,7 +919,7 @@ class IO < Object
   #
   # Related: IO#each_byte, IO#each_codepoint.
   #
-  def each_char: () { (String arg0) -> untyped } -> self
+  def each_char: () { (String c) -> void } -> self
                | () -> ::Enumerator[String, self]
 
   # <!--
@@ -1046,7 +939,7 @@ class IO < Object
   #
   # Related: IO#each_byte, IO#each_char.
   #
-  def each_codepoint: () { (Integer arg0) -> untyped } -> self
+  def each_codepoint: () { (Integer c) -> void } -> self
                     | () -> ::Enumerator[Integer, self]
 
   # <!--
@@ -1083,8 +976,6 @@ class IO < Object
   # not behave as you intend with IO#eof?, unless you call IO#rewind first (which
   # is not available for some streams).
   #
-  # IO#eof? is an alias for IO#eof.
-  #
   def eof: () -> bool
 
   # <!--
@@ -1095,13 +986,13 @@ class IO < Object
   # provides a mechanism for issuing low-level commands to control or query a
   # file-oriented I/O stream. Arguments and results are platform dependent.
   #
-  # If +argument is a number, its value is passed directly; if it is a string, it
+  # If `argument` is a number, its value is passed directly; if it is a string, it
   # is interpreted as a binary sequence of bytes. (Array#pack might be a useful
   # way to build this string.)
   #
   # Not implemented on all platforms.
   #
-  def fcntl: (Integer integer_cmd, String | Integer arg) -> Integer
+  def fcntl: (Integer integer_cmd, String | Integer argument) -> Integer
 
   # <!--
   #   rdoc-file=io.c
@@ -1124,8 +1015,6 @@ class IO < Object
   #     $stderr.fileno            # => 2
   #     File.open('t.txt').fileno # => 10
   #     f.close
-  #
-  # IO#to_i is an alias for IO#fileno.
   #
   def fileno: () -> Integer
 
@@ -1267,7 +1156,8 @@ class IO < Object
   #     f.gets(chomp: true) # => nil
   #     f.close
   #
-  def gets: (?String sep, ?Integer limit) -> String?
+  def gets: (string? sep, ?int limit, ?chomp: boolish) -> String?
+          | (?int limit, ?chomp: boolish) -> String?
 
   # <!--
   #   rdoc-file=io.c
@@ -1309,7 +1199,7 @@ class IO < Object
   #     IO.new(fd, internal_encoding: nil) # => #<IO:fd 3>
   #     IO.new(fd, autoclose: true)        # => #<IO:fd 3>
   #
-  def initialize: (int fd, ?string | int mode, ?path: string?, **untyped opts) -> void
+  def initialize: ( int fd, ?string | int mode, ?path: string?, ?external_encoding: String | Encoding | nil, ?internal_encoding: String | Encoding | nil, ?encoding: String | Encoding | nil, ?textmode: boolish, ?binmode: boolish, ?autoclose: boolish, ?mode: String) -> void
 
   # <!--
   #   rdoc-file=io.c
@@ -1349,7 +1239,7 @@ class IO < Object
   #
   # Not implemented on all platforms.
   #
-  def ioctl: (Integer integer_cmd, String | Integer arg) -> Integer
+  def ioctl: (Integer integer_cmd, String | Integer argument) -> Integer
 
   # <!--
   #   rdoc-file=io.c
@@ -1362,8 +1252,6 @@ class IO < Object
   #     f.close
   #     f = File.new('/dev/tty').isatty #=> true
   #     f.close
-  #
-  # IO#tty? is an alias for IO#isatty.
   #
   def isatty: () -> bool
 
@@ -1383,7 +1271,7 @@ class IO < Object
   # Sets and returns the line number for the stream; see [Line
   # Number](rdoc-ref:IO@Line+Number).
   #
-  def lineno=: (Integer arg0) -> Integer
+  def lineno=: (Integer integer) -> Integer
 
   # <!--
   #   rdoc-file=io.c
@@ -1421,22 +1309,6 @@ class IO < Object
   #
   def pid: () -> Integer
 
-  # <!-- rdoc-file=io.c -->
-  # Returns the current position (in bytes) in `self` (see
-  # [Position](rdoc-ref:IO@Position)):
-  #
-  #     f = File.open('t.txt')
-  #     f.tell # => 0
-  #     f.gets # => "First line\n"
-  #     f.tell # => 12
-  #     f.close
-  #
-  # Related: IO#pos=, IO#seek.
-  #
-  # IO#pos is an alias for IO#tell.
-  #
-  def pos: () -> Integer
-
   # <!--
   #   rdoc-file=io.c
   #   - pos = new_position -> new_position
@@ -1452,7 +1324,7 @@ class IO < Object
   #
   # Related: IO#seek, IO#tell.
   #
-  def pos=: (Integer arg0) -> Integer
+  def pos=: (Integer new_position) -> Integer
 
   # <!--
   #   rdoc-file=io.c
@@ -1508,7 +1380,7 @@ class IO < Object
   #     f.print
   #     f.close
   #
-  def print: (*untyped arg0) -> NilClass
+  def print: (*untyped objects) -> nil
 
   # <!--
   #   rdoc-file=io.c
@@ -1519,7 +1391,7 @@ class IO < Object
   # For details on `format_string`, see [Format
   # Specifications](rdoc-ref:format_specifications.rdoc).
   #
-  def printf: (String format_string, *untyped arg0) -> NilClass
+  def printf: (String format_string, *untyped objects) -> nil
 
   # <!--
   #   rdoc-file=io.c
@@ -1539,7 +1411,7 @@ class IO < Object
   #
   #     AA
   #
-  def putc: (Numeric | String arg0) -> untyped
+  def putc: (Numeric | String object) -> (Numeric | String)
 
   # <!--
   #   rdoc-file=io.c
@@ -1586,7 +1458,7 @@ class IO < Object
   #     # Nested arrays.
   #     show([[[0, 1], 2, 3], 4, 5])  # => "0\n1\n2\n3\n4\n5\n"
   #
-  def puts: (*untyped arg0) -> NilClass
+  def puts: (*untyped objects) -> nil
 
   # <!--
   #   rdoc-file=io.c
@@ -1660,7 +1532,8 @@ class IO < Object
   #
   # Related: IO#write.
   #
-  def read: (?int? length, ?string outbuf) -> String?
+  def read: (?nil, ?string outbuf) -> String
+          | (int? length, ?string outbuf) -> String?
 
   # <!--
   #   rdoc-file=io.rb
@@ -1755,7 +1628,7 @@ class IO < Object
   def readchar: () -> String
 
   # <!--
-  #   rdoc-file=io.c
+  #   rdoc-file=io.rb
   #   - readline(sep = $/, chomp: false)   -> string
   #   - readline(limit, chomp: false)      -> string
   #   - readline(sep, limit, chomp: false) -> string
@@ -2038,15 +1911,18 @@ class IO < Object
   # -->
   # See [Encodings](rdoc-ref:File@Encodings).
   #
-  # Argument `ext_enc`, if given, must be an Encoding object; it is assigned as
-  # the encoding for the stream.
+  # Argument `ext_enc`, if given, must be an Encoding object or a String with the
+  # encoding name; it is assigned as the encoding for the stream.
   #
-  # Argument `int_enc`, if given, must be an Encoding object; it is assigned as
-  # the encoding for the internal string.
+  # Argument `int_enc`, if given, must be an Encoding object or a String with the
+  # encoding name; it is assigned as the encoding for the internal string.
   #
   # Argument `'ext_enc:int_enc'`, if given, is a string containing two
   # colon-separated encoding names; corresponding Encoding objects are assigned as
   # the external and internal encodings for the stream.
+  #
+  # If the external encoding of a string is binary/ASCII-8BIT, the internal
+  # encoding of the string is set to nil, since no transcoding is needed.
   #
   # Optional keyword arguments `enc_opts` specify [Encoding
   # options](rdoc-ref:encodings.rdoc@Encoding+Options).
@@ -2132,7 +2008,7 @@ class IO < Object
   #
   # Related: IO#fsync.
   #
-  def sync=: (boolish) -> untyped
+  def sync=: (boolish boolean) -> boolish
 
   # <!--
   #   rdoc-file=io.c
@@ -2172,7 +2048,7 @@ class IO < Object
   #
   # This methods should not be used with other stream-writer methods.
   #
-  def syswrite: (_ToS arg0) -> Integer
+  def syswrite: (_ToS object) -> Integer
 
   # <!--
   #   rdoc-file=io.c
@@ -2189,9 +2065,21 @@ class IO < Object
   #
   # Related: IO#pos=, IO#seek.
   #
-  # IO#pos is an alias for IO#tell.
-  #
   def tell: () -> Integer
+
+  # <!-- rdoc-file=io.c -->
+  # Returns the current position (in bytes) in `self` (see
+  # [Position](rdoc-ref:IO@Position)):
+  #
+  #     f = File.open('t.txt')
+  #     f.tell # => 0
+  #     f.gets # => "First line\n"
+  #     f.tell # => 12
+  #     f.close
+  #
+  # Related: IO#pos=, IO#seek.
+  #
+  alias pos tell
 
   # <!--
   #   rdoc-file=io.c
@@ -2199,15 +2087,25 @@ class IO < Object
   # -->
   # Get the internal timeout duration or nil if it was not set.
   #
-  def timeout: () -> Numeric?
+  def timeout: () -> io_timeout
+
+  # The type used for timeouts in `IO`.
+  #
+  # Technically, this type should be `Time::_Timeout?`. However, in the vast majority of use-cases,
+  # people aren't going to pass their own `_Timeout` in, so `Numeric` is returned for ergonomics
+  # (eg `io.timeout += 10`).
+  type io_timeout = Numeric?
 
   # <!--
   #   rdoc-file=io.c
   #   - timeout = duration -> duration
   #   - timeout = nil -> nil
   # -->
-  # Set the internal timeout to the specified duration or nil. The timeout applies
-  # to all blocking operations where possible.
+  # Sets the internal timeout to the specified duration or nil. The timeout
+  # applies to all blocking operations where possible.
+  #
+  # When the operation performs longer than the timeout set, IO::TimeoutError is
+  # raised.
   #
   # This affects the following methods (but is not limited to): #gets, #puts,
   # #read, #write, #wait_readable and #wait_writable. This also affects blocking
@@ -2219,7 +2117,7 @@ class IO < Object
   # effort to prevent an application from hanging on slow I/O operations, such as
   # those that occur during a slowloris attack.
   #
-  def timeout=: (Numeric?) -> void
+  def timeout=: (io_timeout duration) -> void
 
   # <!--
   #   rdoc-file=io.c
@@ -2238,9 +2136,7 @@ class IO < Object
   #     f = File.new('/dev/tty').isatty #=> true
   #     f.close
   #
-  # IO#tty? is an alias for IO#isatty.
-  #
-  def tty?: () -> bool
+  alias tty? isatty
 
   # <!--
   #   rdoc-file=io.c
@@ -2280,7 +2176,7 @@ class IO < Object
   #     f.read              # => "BCDE012"
   #     f.close
   #
-  def ungetbyte: (String | Integer arg0) -> NilClass
+  def ungetbyte: (String | Integer object) -> nil
 
   # <!--
   #   rdoc-file=io.c
@@ -2323,7 +2219,7 @@ class IO < Object
   #     f.getc.ord      # => 1090
   #     f.close
   #
-  def ungetc: (String arg0) -> NilClass
+  def ungetc: (String object) -> nil
 
   # <!--
   #   rdoc-file=io.c
@@ -2405,7 +2301,6 @@ class IO < Object
 
   # <!--
   #   rdoc-file=io.c
-  #   - IO.binread(command, length = nil, offset = 0) -> string or nil
   #   - IO.binread(path, length = nil, offset = 0)    -> string or nil
   # -->
   # Behaves like IO.read, except that the stream is opened in binary mode with
@@ -2419,7 +2314,6 @@ class IO < Object
 
   # <!--
   #   rdoc-file=io.c
-  #   - IO.binwrite(command, string, offset = 0) -> integer
   #   - IO.binwrite(path, string, offset = 0)    -> integer
   # -->
   # Behaves like IO.write, except that the stream is opened in binary mode with
@@ -2647,16 +2541,25 @@ class IO < Object
   #
   # Raises exceptions that IO.pipe and Kernel.spawn raise.
   #
-  def self.popen: (*untyped args) -> untyped
+  def self.popen: (string | cmd_array cmd, ?string | int mode, ?path: string?, ?external_encoding: String | Encoding | nil, ?internal_encoding: String | Encoding | nil, ?encoding: String | Encoding | nil, ?textmode: boolish, ?binmode: boolish, ?autoclose: boolish, ?mode: String, ?unsetenv_others: boolish, ?pgroup: true | Integer, ?umask: Integer, ?in: Kernel::redirect_fd, ?out: Kernel::redirect_fd, ?err: Kernel::redirect_fd, ?close_others: boolish, ?chdir: String) -> instance
+                | (Hash[string, string?] env, string | cmd_array cmd, ?string | int mode, ?path: string?, ?external_encoding: String | Encoding | nil, ?internal_encoding: String | Encoding | nil, ?encoding: String | Encoding | nil, ?textmode: boolish, ?binmode: boolish, ?autoclose: boolish, ?mode: String, ?unsetenv_others: boolish, ?pgroup: true | Integer, ?umask: Integer, ?in: Kernel::redirect_fd, ?out: Kernel::redirect_fd, ?err: Kernel::redirect_fd, ?close_others: boolish, ?chdir: String) -> instance
+                | [X] (string | cmd_array cmd, ?string | int mode, ?path: string?, ?external_encoding: String | Encoding | nil, ?internal_encoding: String | Encoding | nil, ?encoding: String | Encoding | nil, ?textmode: boolish, ?binmode: boolish, ?autoclose: boolish, ?mode: String, ?unsetenv_others: boolish, ?pgroup: true | Integer, ?umask: Integer, ?in: Kernel::redirect_fd, ?out: Kernel::redirect_fd, ?err: Kernel::redirect_fd, ?close_others: boolish, ?chdir: String) { (instance) -> X } -> X
+                | [X] (Hash[string, string?] env, string | cmd_array cmd, ?string | int mode, ?path: string?, ?external_encoding: String | Encoding | nil, ?internal_encoding: String | Encoding | nil, ?encoding: String | Encoding | nil, ?textmode: boolish, ?binmode: boolish, ?autoclose: boolish, ?mode: String, ?unsetenv_others: boolish, ?pgroup: true | Integer, ?umask: Integer, ?in: Kernel::redirect_fd, ?out: Kernel::redirect_fd, ?err: Kernel::redirect_fd, ?close_others: boolish, ?chdir: String) { (instance) -> X } -> X
+
+  # The command can be given as:
+  #
+  # * Array of string `["ruby", "-v"]`, or
+  # * Array of string with the first element of array `[["ruby", "RUBY"], "-v"]`
+  #
+  # But RBS cannot define such a type. So this is simply a union of `string` or `[String, String]`.
+  #
+  type cmd_array = array[string | [String, String]]
 
   # <!--
   #   rdoc-file=io.c
   #   - IO.foreach(path, sep = $/, **opts) {|line| block }       -> nil
   #   - IO.foreach(path, limit, **opts) {|line| block }          -> nil
   #   - IO.foreach(path, sep, limit, **opts) {|line| block }     -> nil
-  #   - IO.foreach(command, sep = $/, **opts) {|line| block }    -> nil
-  #   - IO.foreach(command, limit, **opts) {|line| block }       -> nil
-  #   - IO.foreach(command, sep, limit, **opts) {|line| block }  -> nil
   #   - IO.foreach(...)                                          -> an_enumerator
   # -->
   # Calls the block with each successive line read from the stream.
@@ -2665,17 +2568,7 @@ class IO < Object
   # potential security vulnerabilities if called with untrusted input; see
   # [Command Injection](rdoc-ref:command_injection.rdoc).
   #
-  # The first argument must be a string that is one of the following:
-  #
-  # *   Path: if `self` is a subclass of IO (File, for example), or if the string
-  #     *does* *not* start with the pipe character (`'|'`), the string is the path
-  #     to a file.
-  # *   Command: if `self` is the class IO, and if the string starts with the pipe
-  #     character, the rest of the string is a command to be executed as a
-  #     subprocess. This usage has potential security vulnerabilities if called
-  #     with untrusted input; see [Command
-  #     Injection](rdoc-ref:command_injection.rdoc).
-  #
+  # The first argument must be a string that is the path to a file.
   #
   # With only argument `path` given, parses lines from the file at the given
   # `path`, as determined by the default line separator, and calls the block with
@@ -2735,22 +2628,22 @@ class IO < Object
   #
   # *   [Open Options](rdoc-ref:IO@Open+Options).
   # *   [Encoding options](rdoc-ref:encodings.rdoc@Encoding+Options).
-  # *   [Line Options](rdoc-ref:IO@Line+Options).
+  # *   [Line Options](rdoc-ref:IO@Line+IO).
   #
   #
   # Returns an Enumerator if no block is given.
   #
-  def self.foreach: (string | _ToPath path, ?String sep, ?Integer limit, ?external_encoding: String external_encoding, ?internal_encoding: String internal_encoding, ?encoding: String encoding, ?textmode: untyped textmode, ?binmode: untyped binmode, ?autoclose: untyped autoclose, ?mode: String mode, ?chomp: boolish) { (String line) -> void } -> nil
-                  | (string | _ToPath path, ?String sep, ?Integer limit, ?external_encoding: String external_encoding, ?internal_encoding: String internal_encoding, ?encoding: String encoding, ?textmode: untyped textmode, ?binmode: untyped binmode, ?autoclose: untyped autoclose, ?mode: String mode, ?chomp: boolish) -> ::Enumerator[String, nil]
+  def self.foreach: (string | _ToPath path, ?String sep, ?Integer limit, ?external_encoding: String | Encoding | nil, ?internal_encoding: String | Encoding | nil, ?encoding: String | Encoding | nil, ?textmode: boolish, ?binmode: boolish, ?autoclose: boolish, ?mode: String, ?chomp: boolish) { (String line) -> void } -> nil
+                  | (string | _ToPath path, ?String sep, ?Integer limit, ?external_encoding: String | Encoding | nil, ?internal_encoding: String | Encoding | nil, ?encoding: String | Encoding | nil, ?textmode: boolish, ?binmode: boolish, ?autoclose: boolish, ?mode: String, ?chomp: boolish) -> ::Enumerator[String, nil]
 
   # <!--
   #   rdoc-file=io.c
   #   - IO.pipe(**opts) -> [read_io, write_io]
   #   - IO.pipe(enc, **opts) -> [read_io, write_io]
   #   - IO.pipe(ext_enc, int_enc, **opts) -> [read_io, write_io]
-  #   - IO.pipe(**opts) {|read_io, write_io] ...} -> object
-  #   - IO.pipe(enc, **opts) {|read_io, write_io] ...} -> object
-  #   - IO.pipe(ext_enc, int_enc, **opts) {|read_io, write_io] ...} -> object
+  #   - IO.pipe(**opts) {|read_io, write_io| ...} -> object
+  #   - IO.pipe(enc, **opts) {|read_io, write_io| ...} -> object
+  #   - IO.pipe(ext_enc, int_enc, **opts) {|read_io, write_io| ...} -> object
   # -->
   # Creates a pair of pipe endpoints, `read_io` and `write_io`, connected to each
   # other.
@@ -2821,12 +2714,11 @@ class IO < Object
   #     Sending message to parent
   #     Parent got: <Hi Dad>
   #
-  def self.pipe: (?String | Encoding ext_or_ext_int_enc, ?String | Encoding int_enc, ?external_encoding: String external_encoding, ?internal_encoding: String internal_encoding, ?encoding: String encoding, ?textmode: untyped textmode, ?binmode: untyped binmode, ?autoclose: untyped autoclose, ?mode: String mode, ?chomp: boolish) -> [IO, IO]
-               | [X] (?String | Encoding ext_or_ext_int_enc, ?String | Encoding int_enc, ?external_encoding: String external_encoding, ?internal_encoding: String internal_encoding, ?encoding: String encoding, ?textmode: untyped textmode, ?binmode: untyped binmode, ?autoclose: untyped autoclose, ?mode: String mode, ?chomp: boolish) { (IO read_io, IO write_io) -> X } -> X
+  def self.pipe: (?String | Encoding | nil ext_or_ext_int_enc, ?String | Encoding | nil int_enc, ?external_encoding: String | Encoding | nil, ?internal_encoding: String | Encoding | nil, ?encoding: String | Encoding | nil, ?textmode: boolish, ?binmode: boolish, ?autoclose: boolish, ?mode: String, ?chomp: boolish) -> [IO, IO]
+               | [X] (?String | Encoding | nil ext_or_ext_int_enc, ?String | Encoding | nil int_enc, ?external_encoding: String | Encoding | nil, ?internal_encoding: String | Encoding | nil, ?encoding: String | Encoding | nil, ?textmode: boolish, ?binmode: boolish, ?autoclose: boolish, ?mode: String, ?chomp: boolish) { (IO read_io, IO write_io) -> X } -> X
 
   # <!--
   #   rdoc-file=io.c
-  #   - IO.read(command, length = nil, offset = 0, **opts) -> string or nil
   #   - IO.read(path, length = nil, offset = 0, **opts)    -> string or nil
   # -->
   # Opens the stream, reads and returns some or all of its content, and closes the
@@ -2836,19 +2728,7 @@ class IO < Object
   # potential security vulnerabilities if called with untrusted input; see
   # [Command Injection](rdoc-ref:command_injection.rdoc).
   #
-  # The first argument must be a string; its meaning depends on whether it starts
-  # with the pipe character (`'|'`):
-  #
-  # *   If so (and if `self` is IO), the rest of the string is a command to be
-  #     executed as a subprocess.
-  # *   Otherwise, the string is the path to a file.
-  #
-  #
-  # With only argument `command` given, executes the command in a shell, returns
-  # its entire $stdout:
-  #
-  #     IO.read('| cat t.txt')
-  #     # => "First line\nSecond line\n\nThird line\nFourth line\n"
+  # The first argument must be a string that is the path to a file.
   #
   # With only argument `path` given, reads in text mode and returns the entire
   # content of the file at the given path:
@@ -2859,8 +2739,6 @@ class IO < Object
   # On Windows, text mode can terminate reading and leave bytes in the file unread
   # when encountering certain special bytes. Consider using IO.binread if all
   # bytes in the file should be read.
-  #
-  # For both forms, command and path, the remaining arguments are the same.
   #
   # With argument `length`, returns `length` bytes if available:
   #
@@ -2879,13 +2757,10 @@ class IO < Object
   # *   [Open Options](rdoc-ref:IO@Open+Options).
   # *   [Encoding options](rdoc-ref:encodings.rdoc@Encoding+Options).
   #
-  def self.read: (String name, ?Integer length, ?Integer offset, ?external_encoding: String external_encoding, ?internal_encoding: String internal_encoding, ?encoding: String encoding, ?textmode: untyped textmode, ?binmode: untyped binmode, ?autoclose: untyped autoclose, ?mode: String mode) -> String
+  def self.read: (String name, ?Integer length, ?Integer offset, ?external_encoding: String | Encoding | nil, ?internal_encoding: String | Encoding | nil, ?encoding: String | Encoding | nil, ?textmode: boolish, ?binmode: boolish, ?autoclose: boolish, ?mode: String) -> String
 
   # <!--
   #   rdoc-file=io.c
-  #   - IO.readlines(command, sep = $/, **opts)     -> array
-  #   - IO.readlines(command, limit, **opts)      -> array
-  #   - IO.readlines(command, sep, limit, **opts) -> array
   #   - IO.readlines(path, sep = $/, **opts)     -> array
   #   - IO.readlines(path, limit, **opts)      -> array
   #   - IO.readlines(path, sep, limit, **opts) -> array
@@ -2896,20 +2771,7 @@ class IO < Object
   # potential security vulnerabilities if called with untrusted input; see
   # [Command Injection](rdoc-ref:command_injection.rdoc).
   #
-  # The first argument must be a string; its meaning depends on whether it starts
-  # with the pipe character (`'|'`):
-  #
-  # *   If so (and if `self` is IO), the rest of the string is a command to be
-  #     executed as a subprocess.
-  # *   Otherwise, the string is the path to a file.
-  #
-  #
-  # With only argument `command` given, executes the command in a shell, parses
-  # its $stdout into lines, as determined by the default line separator, and
-  # returns those lines in an array:
-  #
-  #     IO.readlines('| cat t.txt')
-  #     # => ["First line\n", "Second line\n", "\n", "Third line\n", "Fourth line\n"]
+  # The first argument must be a string that is the path to a file.
   #
   # With only argument `path` given, parses lines from the file at the given
   # `path`, as determined by the default line separator, and returns those lines
@@ -2917,8 +2779,6 @@ class IO < Object
   #
   #     IO.readlines('t.txt')
   #     # => ["First line\n", "Second line\n", "\n", "Third line\n", "Fourth line\n"]
-  #
-  # For both forms, command and path, the remaining arguments are the same.
   #
   # With argument `sep` given, parses lines as determined by that line separator
   # (see [Line Separator](rdoc-ref:IO@Line+Separator)):
@@ -2948,9 +2808,9 @@ class IO < Object
   #
   # *   [Open Options](rdoc-ref:IO@Open+Options).
   # *   [Encoding options](rdoc-ref:encodings.rdoc@Encoding+Options).
-  # *   [Line Options](rdoc-ref:IO@Line+Options).
+  # *   [Line Options](rdoc-ref:IO@Line+IO).
   #
-  def self.readlines: (String | _ToPath name, ?String sep, ?Integer limit, ?external_encoding: String external_encoding, ?internal_encoding: String internal_encoding, ?encoding: String encoding, ?textmode: untyped textmode, ?binmode: untyped binmode, ?autoclose: untyped autoclose, ?mode: String mode, ?chomp: boolish) -> ::Array[String]
+  def self.readlines: (String | _ToPath name, ?String sep, ?Integer limit, ?external_encoding: String | Encoding | nil, ?internal_encoding: String | Encoding | nil, ?encoding: String | Encoding | nil, ?textmode: boolish, ?binmode: boolish, ?autoclose: boolish, ?mode: String, ?chomp: boolish) -> ::Array[String]
 
   # <!--
   #   rdoc-file=io.c
@@ -3092,7 +2952,7 @@ class IO < Object
   #     ping
   #
   def self.select: [X, Y, Z] (::Array[X & io]? read_array, ?::Array[Y & io]? write_array, ?::Array[Z & io]? error_array) -> [ Array[X], Array[Y], Array[Z] ]
-                 | [X, Y, Z] (::Array[X & io]? read_array, ?::Array[Y & io]? write_array, ?::Array[Z & io]? error_array, Numeric? timeout) -> [ Array[X], Array[Y], Array[Z] ]?
+                 | [X, Y, Z] (::Array[X & io]? read_array, ?::Array[Y & io]? write_array, ?::Array[Z & io]? error_array, Time::_Timeout? timeout) -> [ Array[X], Array[Y], Array[Z] ]?
 
   # <!--
   #   rdoc-file=io.c
@@ -3121,11 +2981,11 @@ class IO < Object
   #     IO.try_convert(ARGF)     # => #<IO:<STDIN>>
   #     IO.try_convert('STDOUT') # => nil
   #
-  def self.try_convert: (untyped arg0) -> IO?
+  def self.try_convert: (_ToIO obj) -> IO
+                      | (untyped obj) -> IO?
 
   # <!--
   #   rdoc-file=io.c
-  #   - IO.write(command, data, **opts)             -> integer
   #   - IO.write(path, data, offset = 0, **opts)    -> integer
   # -->
   # Opens the stream, writes the given `data` to it, and closes the stream;
@@ -3135,25 +2995,10 @@ class IO < Object
   # potential security vulnerabilities if called with untrusted input; see
   # [Command Injection](rdoc-ref:command_injection.rdoc).
   #
-  # The first argument must be a string; its meaning depends on whether it starts
-  # with the pipe character (`'|'`):
+  # The first argument must be a string that is the path to a file.
   #
-  # *   If so (and if `self` is IO), the rest of the string is a command to be
-  #     executed as a subprocess.
-  # *   Otherwise, the string is the path to a file.
-  #
-  #
-  # With argument `command` given, executes the command in a shell, passes `data`
-  # through standard input, writes its output to $stdout, and returns the length
-  # of the given `data`:
-  #
-  #     IO.write('| cat', 'Hello World!') # => 12
-  #
-  # Output:
-  #
-  #     Hello World!
-  #
-  # With argument `path` given, writes the given `data` to the file at that path:
+  # With only argument `path` given, writes the given `data` to the file at that
+  # path:
   #
   #     IO.write('t.tmp', 'abc')    # => 3
   #     File.read('t.tmp')          # => "abc"
@@ -3182,7 +3027,7 @@ class IO < Object
   # *   [Open Options](rdoc-ref:IO@Open+Options).
   # *   [Encoding options](rdoc-ref:encodings.rdoc@Encoding+Options).
   #
-  def self.write: (String name, _ToS arg0, ?Integer offset, ?external_encoding: String external_encoding, ?internal_encoding: String internal_encoding, ?encoding: String encoding, ?textmode: untyped textmode, ?binmode: untyped binmode, ?autoclose: untyped autoclose, ?mode: String mode) -> Integer
+  def self.write: (String path, _ToS data, ?Integer offset, ?external_encoding: String | Encoding | nil, ?internal_encoding: String | Encoding | nil, ?encoding: String | Encoding | nil, ?textmode: boolish, ?binmode: boolish, ?autoclose: boolish, ?mode: String) -> Integer
 
   # <!--
   #   rdoc-file=io.c
@@ -3204,17 +3049,8 @@ class IO < Object
   # With a block given, calls the block with the IO object and returns the block's
   # value.
   #
-  def self.open: (int fd, ?string | int mode, ?path: string?, **untyped opts) -> instance
-               | [A] (int fd, ?string | int mode, ?path: string?, **untyped opts) { (instance) -> A } -> A
-
-  def bytes: () { (Integer arg0) -> untyped } -> self
-           | () -> ::Enumerator[Integer, self]
-
-  def chars: () { (String arg0) -> untyped } -> self
-           | () -> ::Enumerator[String, self]
-
-  def codepoints: () { (Integer arg0) -> untyped } -> self
-                | () -> ::Enumerator[Integer, self]
+  def self.open: (int fd, ?string | int mode, ?path: string?, ?external_encoding: String | Encoding | nil, ?internal_encoding: String | Encoding | nil, ?encoding: String | Encoding | nil, ?textmode: boolish, ?binmode: boolish, ?autoclose: boolish, ?mode: String) -> instance
+               | [X] (int fd, ?string | int mode, ?path: string?, ?external_encoding: String | Encoding | nil, ?internal_encoding: String | Encoding | nil, ?encoding: String | Encoding | nil, ?textmode: boolish, ?binmode: boolish, ?autoclose: boolish, ?mode: String) { (instance) -> X } -> X
 
   # <!-- rdoc-file=io.c -->
   # Calls the block with each remaining line read from the stream; returns `self`.
@@ -3312,10 +3148,112 @@ class IO < Object
   #
   # Returns an Enumerator if no block is given.
   #
-  # IO#each is an alias for IO#each_line.
-  #
-  def each_line: (?String sep, ?Integer limit) { (String arg0) -> untyped } -> self
+  def each_line: (?String sep, ?Integer limit) { (String line) -> void } -> self
                | (?String sep, ?Integer limit) -> ::Enumerator[String, self]
+
+  # <!--
+  #   rdoc-file=io.c
+  #   - each_line(sep = $/, chomp: false) {|line| ... }   -> self
+  #   - each_line(limit, chomp: false) {|line| ... }      -> self
+  #   - each_line(sep, limit, chomp: false) {|line| ... } -> self
+  #   - each_line                                   -> enumerator
+  # -->
+  # Calls the block with each remaining line read from the stream; returns `self`.
+  # Does nothing if already at end-of-stream; See [Line IO](rdoc-ref:IO@Line+IO).
+  #
+  # With no arguments given, reads lines as determined by line separator `$/`:
+  #
+  #     f = File.new('t.txt')
+  #     f.each_line {|line| p line }
+  #     f.each_line {|line| fail 'Cannot happen' }
+  #     f.close
+  #
+  # Output:
+  #
+  #     "First line\n"
+  #     "Second line\n"
+  #     "\n"
+  #     "Fourth line\n"
+  #     "Fifth line\n"
+  #
+  # With only string argument `sep` given, reads lines as determined by line
+  # separator `sep`; see [Line Separator](rdoc-ref:IO@Line+Separator):
+  #
+  #     f = File.new('t.txt')
+  #     f.each_line('li') {|line| p line }
+  #     f.close
+  #
+  # Output:
+  #
+  #     "First li"
+  #     "ne\nSecond li"
+  #     "ne\n\nFourth li"
+  #     "ne\nFifth li"
+  #     "ne\n"
+  #
+  # The two special values for `sep` are honored:
+  #
+  #     f = File.new('t.txt')
+  #     # Get all into one string.
+  #     f.each_line(nil) {|line| p line }
+  #     f.close
+  #
+  # Output:
+  #
+  #     "First line\nSecond line\n\nFourth line\nFifth line\n"
+  #
+  #     f.rewind
+  #     # Get paragraphs (up to two line separators).
+  #     f.each_line('') {|line| p line }
+  #
+  # Output:
+  #
+  #     "First line\nSecond line\n\n"
+  #     "Fourth line\nFifth line\n"
+  #
+  # With only integer argument `limit` given, limits the number of bytes in each
+  # line; see [Line Limit](rdoc-ref:IO@Line+Limit):
+  #
+  #     f = File.new('t.txt')
+  #     f.each_line(8) {|line| p line }
+  #     f.close
+  #
+  # Output:
+  #
+  #     "First li"
+  #     "ne\n"
+  #     "Second l"
+  #     "ine\n"
+  #     "\n"
+  #     "Fourth l"
+  #     "ine\n"
+  #     "Fifth li"
+  #     "ne\n"
+  #
+  # With arguments `sep` and `limit` given, combines the two behaviors:
+  #
+  # *   Calls with the next line as determined by line separator `sep`.
+  # *   But returns no more bytes than are allowed by the limit.
+  #
+  #
+  # Optional keyword argument `chomp` specifies whether line separators are to be
+  # omitted:
+  #
+  #     f = File.new('t.txt')
+  #     f.each_line(chomp: true) {|line| p line }
+  #     f.close
+  #
+  # Output:
+  #
+  #     "First line"
+  #     "Second line"
+  #     ""
+  #     "Fourth line"
+  #     "Fifth line"
+  #
+  # Returns an Enumerator if no block is given.
+  #
+  alias each each_line
 
   # <!-- rdoc-file=io.c -->
   # Returns `true` if the stream is positioned at its end, `false` otherwise; see
@@ -3348,12 +3286,7 @@ class IO < Object
   # not behave as you intend with IO#eof?, unless you call IO#rewind first (which
   # is not available for some streams).
   #
-  # IO#eof? is an alias for IO#eof.
-  #
-  def eof?: () -> bool
-
-  def lines: (?String sep, ?Integer limit) { (String arg0) -> untyped } -> self
-           | (?String sep, ?Integer limit) -> ::Enumerator[String, self]
+  alias eof? eof
 
   # <!-- rdoc-file=io.c -->
   # Returns the integer file descriptor for the stream:
@@ -3364,9 +3297,7 @@ class IO < Object
   #     File.open('t.txt').fileno # => 10
   #     f.close
   #
-  # IO#to_i is an alias for IO#fileno.
-  #
-  def to_i: () -> Integer
+  alias to_i fileno
 end
 
 IO::APPEND: Integer
@@ -3454,10 +3385,19 @@ IO::TRUNC: Integer
 
 IO::WRONLY: Integer
 
+# <!-- rdoc-file=io.c -->
+# Readable event mask for IO#wait.
+#
 IO::READABLE: Integer
 
+# <!-- rdoc-file=io.c -->
+# Writable event mask for IO#wait.
+#
 IO::WRITABLE: Integer
 
+# <!-- rdoc-file=io.c -->
+# Priority event mask for IO#wait.
+#
 IO::PRIORITY: Integer
 
 # <!-- rdoc-file=io.c -->

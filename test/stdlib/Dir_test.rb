@@ -1,7 +1,7 @@
 require_relative "test_helper"
 
 class DirSingletonTest < Test::Unit::TestCase
-  include TypeAssertions
+  include TestHelper
 
   testing "singleton(::Dir)"
 
@@ -24,10 +24,6 @@ class DirSingletonTest < Test::Unit::TestCase
                      Dir, :[], "*/*"
     assert_send_type "(::ToStr) -> ::Array[::String]",
                      Dir, :[], ToStr.new("*/*")
-    assert_send_type "(::String) { (::String) -> void } -> Array[String]",
-                     Dir, :[], "*/*" do end
-    assert_send_type "(::String, ::String, base: ::String) -> ::Array[::String]",
-                     Dir, :[], "*/*", "*", base: __dir__
   end
 
   def test_chdir
@@ -101,8 +97,26 @@ class DirSingletonTest < Test::Unit::TestCase
   end
 
   def test_exist?
-    assert_send_type "(::ToStr) -> bool",
-                     Dir, :exist?, ToStr.new(__dir__)
+    with_path.and(with_io) do |path|
+      assert_send_type "(::path | ::io) -> bool",
+                       Dir, :exist?, path
+    end
+  end
+
+  def test_fchdir
+    fd = Dir.new(Dir.pwd).fileno
+
+    with_int(fd) do |int|
+      assert_send_type(
+        "(::int) -> ::Integer",
+        Dir, :fchdir, int
+      )
+
+      assert_send_type(
+        "(::int) { () -> ::String } -> ::String",
+        Dir, :fchdir, int, &proc { "string" }
+      )
+    end
   end
 
   def test_foreach
@@ -113,6 +127,17 @@ class DirSingletonTest < Test::Unit::TestCase
 
     assert_send_type "(::String) -> ::Enumerator[::String, nil]",
                      Dir, :foreach, "."
+  end
+
+  def test_for_fd
+    fd = Dir.new(Dir.pwd).fileno
+
+    with_int(fd) do |int|
+      assert_send_type(
+        "(::int) -> ::Dir",
+        Dir, :for_fd, int
+      )
+    end
   end
 
   def test_getwd
@@ -165,9 +190,23 @@ class DirSingletonTest < Test::Unit::TestCase
 end
 
 class DirInstanceTest < Test::Unit::TestCase
-  include TypeAssertions
+  include TestHelper
 
   testing "::Dir"
+
+  def test_chdir
+    dir = Dir.new(Dir.pwd)
+
+    assert_send_type(
+      "() -> Integer",
+      dir, :chdir
+    )
+
+    assert_send_type(
+      "() { () -> String } -> String",
+      dir, :chdir, &proc { "hello" }
+    )
+  end
 
   def test_children
     assert_send_type "() -> ::Array[::String]",

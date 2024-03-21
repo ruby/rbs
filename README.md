@@ -7,7 +7,7 @@ It also allows declaring constants and global variables.
 The following is a small example of RBS for a chat app.
 
 <!-- run-start:a.rbs:bundle exec rbs -I a.rbs validate -->
-```rb
+```rbs
 module ChatApp
   VERSION: String
 
@@ -54,8 +54,8 @@ end
 
 ## The Target Version
 
-* The standard library signatures targets Ruby 3.1. (The latest release of Ruby.)
-* The library code targets Ruby 3.1, 3.0, and 2.7. (It runs on 2.6 in fact.)
+* The standard library signatures targets the latest release of Ruby. (`3.2` as of 2023.)
+* The library code targets non-EOL versions of Ruby. (`>= 3.0` as of 2023.)
 
 ## Installation
 
@@ -76,6 +76,53 @@ $ rbs ancestors ::Object
 $ rbs methods ::Object
 $ rbs method Object then
 ```
+
+An end user of `rbs` will probably find `rbs prototype` the most useful. This command generates boilerplate signature declarations for ruby files. For example, say you have written the below ruby script.
+
+```ruby
+# person.rb
+class Person
+  attr_reader :name
+  attr_reader :contacts
+
+  def initialize(name:)
+    @name = name
+    @contacts = []
+  end
+
+  def speak
+    "I'm #{@name} and I love Ruby!"
+  end
+end
+```
+
+Running prototype on the above will automatically generate
+
+```
+$ rbs prototype rb person.rb
+class Person
+  @name: untyped
+
+  @contacts: untyped
+
+  attr_reader name: untyped
+
+  attr_reader contacts: untyped
+
+  def initialize: (name: untyped) -> void
+
+  def speak: () -> ::String
+end
+```
+
+It prints signatures for all methods, classes, instance variables, and constants.
+This is only a starting point, and you should edit the output to match your signature more accurately.
+
+`rbs prototype` offers three options.
+
+- `rb` generates from just the available Ruby code
+- `rbi` generates from Sorbet RBI
+- `runtime` generates from runtime API
 
 ## Library
 
@@ -127,11 +174,22 @@ puts singleton.methods[:gsub]
 
 ## Guides
 
+- [Architecture](docs/architecture.md)
 - [Core and standard library signature contribution guide](docs/CONTRIBUTING.md)
 - [Writing signatures guide](docs/sigs.md)
 - [Stdlib signatures guide](docs/stdlib.md)
 - [Syntax](docs/syntax.md)
 - [RBS by Example](docs/rbs_by_example.md)
+- [RBS collection](docs/collection.md)
+- [Using `Data` and `Struct`](docs/data_and_struct.md)
+- [Releasing a gem with RBS](docs/gem.md)
+
+## Community
+
+Here is a list of some places you can talk with active maintainers.
+
+- [Ruby Discord Server (invite link)](https://discord.gg/ad2acQFtkh) -- We have `rbs` channel in Ruby Discord server.
+- [ruby-jp Slack Workspace (in Japanese)](https://ruby-jp.github.io/) -- We have `types` channel in ruby-jp slack workspace.
 
 ## Development
 

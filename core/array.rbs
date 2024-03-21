@@ -607,7 +607,8 @@ class Array[unchecked out Elem] < Object
   #   - array & other_array -> new_array
   # -->
   # Returns a new Array containing each element found in both `array` and Array
-  # `other_array`; duplicates are omitted; items are compared using `eql?`:
+  # `other_array`; duplicates are omitted; items are compared using `eql?` (items
+  # must also implement `hash` correctly):
   #
   #     [0, 1, 2, 3] & [1, 2] # => [1, 2]
   #     [0, 1, 0, 1] & [0, 1] # => [0, 1]
@@ -837,8 +838,6 @@ class Array[unchecked out Elem] < Object
   #     # Raises TypeError (no implicit conversion of Symbol into Integer):
   #     a[:foo]
   #
-  # Array#slice is an alias for Array#[].
-  #
   def []: %a{implicitly-returns-nil} (int index) -> Elem
         | (int start, int length) -> ::Array[Elem]?
         | (::Range[::Integer?] range) -> ::Array[Elem]?
@@ -972,6 +971,8 @@ class Array[unchecked out Elem] < Object
   # -->
   # Returns `true` if all elements of `self` meet a given criterion.
   #
+  # If `self` has no element, returns `true` and argument or block are not used.
+  #
   # With no block given and no argument, returns `true` if `self` contains only
   # truthy elements, `false` otherwise:
   #
@@ -1008,6 +1009,8 @@ class Array[unchecked out Elem] < Object
   #   - array.any?(obj) -> true or false
   # -->
   # Returns `true` if any element of `self` meets a given criterion.
+  #
+  # If `self` has no element, returns `false` and argument or block are not used.
   #
   # With no block given and no argument, returns `true` if `self` has any truthy
   # element, `false` otherwise:
@@ -1049,8 +1052,6 @@ class Array[unchecked out Elem] < Object
   #     a = [:foo, 'bar', 2]
   #     a1 = a.push([:baz, :bat], [:bam, :bad])
   #     a1 # => [:foo, "bar", 2, [:baz, :bat], [:bam, :bad]]
-  #
-  # Array#append is an alias for Array#push.
   #
   # Related: #pop, #shift, #unshift.
   #
@@ -1135,8 +1136,6 @@ class Array[unchecked out Elem] < Object
   #     a1 = a.map
   #     a1 # => #<Enumerator: [:foo, "bar", 2]:map>
   #
-  # Array#collect is an alias for Array#map.
-  #
   def collect: [U] () { (Elem item) -> U } -> ::Array[U]
              | () -> ::Enumerator[Elem, ::Array[untyped]]
 
@@ -1156,8 +1155,6 @@ class Array[unchecked out Elem] < Object
   #     a = [:foo, 'bar', 2]
   #     a1 = a.map!
   #     a1 # => #<Enumerator: [:foo, "bar", 2]:map!>
-  #
-  # Array#collect! is an alias for Array#map!.
   #
   def collect!: () { (Elem item) -> Elem } -> self
               | () -> ::Enumerator[Elem, self]
@@ -1388,18 +1385,16 @@ class Array[unchecked out Elem] < Object
   #   - array.delete_if {|element| ... } -> self
   #   - array.delete_if -> Enumerator
   # -->
-  # Removes each element in +self+ for which the block returns a truthy value;
-  #     returns +self+:
+  # Removes each element in `self` for which the block returns a truthy value;
+  # returns `self`:
   #
-  #       a = [:foo, 'bar', 2, 'bat']
-  #       a.delete_if {|element| element.to_s.start_with?('b') } # => [:foo, 2]
+  #     a = [:foo, 'bar', 2, 'bat']
+  #     a.delete_if {|element| element.to_s.start_with?('b') } # => [:foo, 2]
   #
-  #     Returns a new \Enumerator if no block given:
+  # Returns a new Enumerator if no block given:
   #
-  #       a = [:foo, 'bar', 2]
-  #       a.delete_if # => #<Enumerator: [:foo, "bar", 2]:delete_if>
-  #
-  # 3
+  #     a = [:foo, 'bar', 2]
+  #     a.delete_if # => #<Enumerator: [:foo, "bar", 2]:delete_if>
   #
   def delete_if: () { (Elem item) -> boolish } -> self
                | () -> ::Enumerator[Elem, self]
@@ -1854,8 +1849,6 @@ class Array[unchecked out Elem] < Object
   #     a = [:foo, 'bar', 2, :bam]
   #     a.select # => #<Enumerator: [:foo, "bar", 2, :bam]:select>
   #
-  # Array#filter is an alias for Array#select.
-  #
   def filter: () { (Elem item) -> boolish } -> ::Array[Elem]
             | () -> ::Enumerator[Elem, ::Array[Elem]]
 
@@ -1874,8 +1867,6 @@ class Array[unchecked out Elem] < Object
   #
   #     a = [:foo, 'bar', 2, :bam]
   #     a.select! # => #<Enumerator: [:foo, "bar", 2, :bam]:select!>
-  #
-  # Array#filter! is an alias for Array#select!.
   #
   def filter!: () { (Elem item) -> boolish } -> self?
              | () -> ::Enumerator[Elem, self?]
@@ -1912,8 +1903,6 @@ class Array[unchecked out Elem] < Object
   #     e # => #<Enumerator: [:foo, "bar", 2]:index>
   #     e.each {|element| element == 'bar' } # => 1
   #
-  # Array#find_index is an alias for Array#index.
-  #
   # Related: #rindex.
   #
   def find_index: (untyped obj) -> ::Integer?
@@ -1921,7 +1910,7 @@ class Array[unchecked out Elem] < Object
                 | () -> ::Enumerator[Elem, ::Integer?]
 
   # <!--
-  #   rdoc-file=array.c
+  #   rdoc-file=array.rb
   #   - array.first -> object or nil
   #   - array.first(n) -> new_array
   # -->
@@ -2078,8 +2067,6 @@ class Array[unchecked out Elem] < Object
   #     e # => #<Enumerator: [:foo, "bar", 2]:index>
   #     e.each {|element| element == 'bar' } # => 1
   #
-  # Array#find_index is an alias for Array#index.
-  #
   # Related: #rindex.
   #
   alias index find_index
@@ -2130,8 +2117,6 @@ class Array[unchecked out Elem] < Object
   #     a = [:foo, 'bar', 2]
   #     a.inspect # => "[:foo, \"bar\", 2]"
   #
-  # Array#to_s is an alias for Array#inspect.
-  #
   def inspect: () -> String
 
   # <!--
@@ -2147,6 +2132,9 @@ class Array[unchecked out Elem] < Object
   #     a.intersect?(b)   #=> true
   #     a.intersect?(c)   #=> false
   #
+  # Array elements are compared using `eql?` (items must also implement `hash`
+  # correctly).
+  #
   def intersect?: (_ToAry[untyped]) -> bool
 
   # <!--
@@ -2155,7 +2143,7 @@ class Array[unchecked out Elem] < Object
   # -->
   # Returns a new Array containing each element found both in `self` and in all of
   # the given Arrays `other_arrays`; duplicates are omitted; items are compared
-  # using `eql?`:
+  # using `eql?` (items must also implement `hash` correctly):
   #
   #     [0, 1, 2, 3].intersection([0, 1, 2], [0, 1, 3]) # => [0, 1]
   #     [0, 0, 1, 1, 2, 3].intersection([0, 1, 2], [0, 1, 3]) # => [0, 1]
@@ -2221,7 +2209,7 @@ class Array[unchecked out Elem] < Object
              | () -> ::Enumerator[Elem, self]
 
   # <!--
-  #   rdoc-file=array.c
+  #   rdoc-file=array.rb
   #   - array.last  -> object or nil
   #   - array.last(n) -> new_array
   # -->
@@ -2277,8 +2265,6 @@ class Array[unchecked out Elem] < Object
   #     a1 = a.map
   #     a1 # => #<Enumerator: [:foo, "bar", 2]:map>
   #
-  # Array#collect is an alias for Array#map.
-  #
   alias map collect
 
   # <!-- rdoc-file=array.c -->
@@ -2293,8 +2279,6 @@ class Array[unchecked out Elem] < Object
   #     a = [:foo, 'bar', 2]
   #     a1 = a.map!
   #     a1 # => #<Enumerator: [:foo, "bar", 2]:map!>
-  #
-  # Array#collect! is an alias for Array#map!.
   #
   alias map! collect!
 
@@ -2608,8 +2592,6 @@ class Array[unchecked out Elem] < Object
   #     a = [:foo, 'bar', 2]
   #     a.unshift(:bam, :bat) # => [:bam, :bat, :foo, "bar", 2]
   #
-  # Array#prepend is an alias for Array#unshift.
-  #
   # Related: #push, #pop, #shift.
   #
   alias prepend unshift
@@ -2694,8 +2676,6 @@ class Array[unchecked out Elem] < Object
   #     a = [:foo, 'bar', 2]
   #     a1 = a.push([:baz, :bat], [:bam, :bad])
   #     a1 # => [:foo, "bar", 2, [:baz, :bat], [:bam, :bad]]
-  #
-  # Array#append is an alias for Array#push.
   #
   # Related: #pop, #shift, #unshift.
   #
@@ -3159,8 +3139,6 @@ class Array[unchecked out Elem] < Object
   #     a = [:foo, 'bar', 2, :bam]
   #     a.select # => #<Enumerator: [:foo, "bar", 2, :bam]:select>
   #
-  # Array#filter is an alias for Array#select.
-  #
   def select: () { (Elem item) -> boolish } -> ::Array[Elem]
             | () -> ::Enumerator[Elem, ::Array[Elem]]
 
@@ -3183,8 +3161,6 @@ class Array[unchecked out Elem] < Object
   #
   #     a = [:foo, 'bar', 2, :bam]
   #     a.select! # => #<Enumerator: [:foo, "bar", 2, :bam]:select!>
-  #
-  # Array#filter! is an alias for Array#select!.
   #
   def select!: () { (Elem item) -> boolish } -> self?
              | () -> ::Enumerator[Elem, self?]
@@ -3346,8 +3322,6 @@ class Array[unchecked out Elem] < Object
   #     a = [:foo, 'bar', 2]
   #     # Raises TypeError (no implicit conversion of Symbol into Integer):
   #     a[:foo]
-  #
-  # Array#slice is an alias for Array#[].
   #
   def slice: (int index) -> Elem?
            | (int start, int length) -> ::Array[Elem]?
@@ -3682,8 +3656,6 @@ class Array[unchecked out Elem] < Object
   #     a = [:foo, 'bar', 2]
   #     a.inspect # => "[:foo, \"bar\", 2]"
   #
-  # Array#to_s is an alias for Array#inspect.
-  #
   alias to_s inspect
 
   # <!--
@@ -3779,8 +3751,6 @@ class Array[unchecked out Elem] < Object
   #
   #     a = [:foo, 'bar', 2]
   #     a.unshift(:bam, :bat) # => [:bam, :bat, :foo, "bar", 2]
-  #
-  # Array#prepend is an alias for Array#unshift.
   #
   # Related: #push, #pop, #shift.
   #
@@ -3918,14 +3888,6 @@ class Array[unchecked out Elem] < Object
   #     a.replace(['foo', :bar, 3]) # => ["foo", :bar, 3]
   #
   def initialize_copy: (self other_ary) -> void
-end
-
-interface _ToA[T]
-  def to_a: () -> Array[T]
-end
-
-interface _ToAry[T]
-  def to_ary: () -> ::Array[T]
 end
 
 interface _Rand

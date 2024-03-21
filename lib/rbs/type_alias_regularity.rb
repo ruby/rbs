@@ -37,10 +37,12 @@ module RBS
     end
 
     def validate_alias_type(alias_type, names, types)
-      if names.include?(alias_type.name)
-        if ex_type = types[alias_type.name]
+      alias_name = env.normalize_type_name?(alias_type.name) or return
+
+      if names.include?(alias_name)
+        if ex_type = types[alias_name]
           unless compatible_args?(ex_type.args, alias_type.args)
-            diagnostics[alias_type.name] ||=
+            diagnostics[alias_name] ||=
               Diagnostic.new(type_name: alias_type.name, nonregular_type: alias_type)
           end
 
@@ -49,7 +51,7 @@ module RBS
           types[alias_type.name] = alias_type
         end
 
-        expanded = builder.expand_alias2(alias_type.name, alias_type.args)
+        expanded = builder.expand_alias2(alias_name, alias_type.args)
         each_alias_type(expanded) do |at|
           validate_alias_type(at, names, types)
         end
@@ -75,22 +77,27 @@ module RBS
     end
 
     def nonregular?(type_name)
-      diagnostics[type_name]
+      diagnostics[env.normalize_type_name!(type_name)]
     end
 
     def each_mutual_alias_defs(&block)
-      # @type var each_node: TSort::_EachNode[TypeName]
-      each_node = __skip__ = -> (&block) do
+      # @type var each_node: ^() { (TypeName) -> void } -> void
+      each_node = -> (&block) do
         env.type_alias_decls.each_value do |decl|
-          block[decl.name]
+          if normalized = env.normalize_type_name?(decl.name)
+            block[normalized]
+          end
         end
       end
-      # @type var each_child: TSort::_EachChild[TypeName]
-      each_child = __skip__ = -> (name, &block) do
+
+      # @type var each_child: ^(TypeName) { (TypeName) -> void } -> void
+      each_child = -> (name, &block) do
         if env.type_alias_decls.key?(name)
           type = builder.expand_alias1(name)
           each_alias_type(type) do |ty|
-            block[ty.name]
+            if normalized = env.normalize_type_name?(ty.name)
+              block[normalized]
+            end
           end
         end
       end

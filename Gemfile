@@ -17,14 +17,20 @@ gem "goodcheck"
 gem "dbm"
 gem 'digest'
 gem 'tempfile'
-gem "rdoc", "~> 6.4.0"
+gem "rdoc"
+gem "bigdecimal"
+gem "abbrev"
+gem "base64"
+gem "mutex_m"
+gem "nkf"
+gem "fileutils"
 
 # Test gems
 gem "rbs-amber", path: "test/assets/test-gem"
 
-group :development do
-  gem "ruby-lsp", require: false
-end
+# Bundled gems
+gem "net-smtp"
+gem 'csv'
 
 group :minitest do
   gem "minitest"

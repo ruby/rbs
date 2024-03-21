@@ -56,7 +56,7 @@ end
 task :validate => :compile do
   require 'yaml'
 
-  sh "#{ruby} #{rbs} validate --silent"
+  sh "#{ruby} #{rbs} validate"
 
   libs = FileList["stdlib/*"].map {|path| File.basename(path).to_s }
 
@@ -72,7 +72,7 @@ task :validate => :compile do
   end
 
   libs.each do |lib|
-    sh "#{ruby} #{rbs} -r #{lib} validate --silent"
+    sh "#{ruby} #{rbs} -r #{lib} validate"
   end
 end
 
@@ -82,13 +82,14 @@ FileList["test/stdlib/**/*_test.rb"].each do |test|
   end
 end
 
-task :stdlib_test do
+task :stdlib_test => :compile do
   test_files = FileList["test/stdlib/**/*_test.rb"].reject do |path|
-    path =~ %r{Ractor}
+    path =~ %r{Ractor} || path =~ %r{Encoding}
   end
   sh "#{ruby} -Ilib #{bin}/test_runner.rb #{test_files.join(' ')}"
   # TODO: Ractor tests need to be run in a separate process
   sh "#{ruby} -Ilib #{bin}/test_runner.rb test/stdlib/Ractor_test.rb"
+  sh "#{ruby} -Ilib #{bin}/test_runner.rb test/stdlib/Encoding_test.rb"
 end
 
 task :rubocop do
@@ -157,13 +158,14 @@ namespace :generate do
             # library "pathname", "securerandom"     # Declare library signatures to load
             testing "singleton(::<%= target %>)"
 
-          <%- class_methods.each do |method_name, definition| %>
+          <%- class_methods.each do |method_name, definition| -%>
             def test_<%= test_name_for(method_name) %>
           <%- definition.method_types.each do |method_type| -%>
-              assert_send_type  "<%= method_type %>",
-                                <%= target %>, :<%= method_name %>
+              assert_send_type "<%= method_type %>",
+                               <%= target %>, :<%= method_name %>
           <%- end -%>
             end
+
           <%- end -%>
           end
           <%- end -%>
@@ -175,13 +177,14 @@ namespace :generate do
             # library "pathname", "securerandom"     # Declare library signatures to load
             testing "::<%= target %>"
 
-          <%- instance_methods.each do |method_name, definition| %>
+          <%- instance_methods.each do |method_name, definition| -%>
             def test_<%= test_name_for(method_name) %>
           <%- definition.method_types.each do |method_type| -%>
-              assert_send_type  "<%= method_type %>",
-                                <%= target %>.new, :<%= method_name %>
+              assert_send_type "<%= method_type %>",
+                               <%= target %>.new, :<%= method_name %>
           <%- end -%>
             end
+
           <%- end -%>
           end
           <%- end -%>
@@ -308,5 +311,49 @@ NOTES
     if status.success?
       puts "  >> Done! Open #{output.chomp} and publish the release!"
     end
+  end
+end
+
+
+desc "Generate changelog template from GH pull requests"
+task :changelog do
+  major, minor, patch, _pre = RBS::VERSION.split(".", 4)
+  major = major.to_i
+  minor = minor.to_i
+  patch = patch.to_i
+
+  if patch == 0
+    milestone = "RBS #{major}.#{minor}"
+  else
+    milestone = "RBS #{major}.#{minor}.x"
+  end
+
+  puts "🔍 Finding pull requests that is associated to milestone `#{milestone}`..."
+
+  command = [
+    "gh",
+    "pr",
+    "list",
+    "--limit=10000",
+    "--json",
+    "url,title,number",
+    "--search" ,
+    "milestone:\"#{milestone}\" is:merged sort:updated-desc -label:Released"
+  ]
+
+  require "open3"
+  output, status = Open3.capture2(*command)
+  raise status.inspect unless status.success?
+
+  require "json"
+  json = JSON.parse(output, symbolize_names: true)
+
+  unless json.empty?
+    puts
+    json.each do |line|
+      puts "* #{line[:title]} ([##{line[:number]}](#{line[:url]}))"
+    end
+  else
+    puts "  (🤑 There is no *unreleased* pull request associated to the milestone.)"
   end
 end

@@ -2,7 +2,7 @@ require_relative '../test_helper'
 require 'resolv'
 
 class ResolvDNSSingletonTest < Test::Unit::TestCase
-  include TypeAssertions
+  include TestHelper
   library 'resolv'
   testing 'singleton(::Resolv::DNS)'
 
@@ -28,6 +28,8 @@ class ResolvDNSSingletonTest < Test::Unit::TestCase
       Resolv::DNS, :open, :nameserver => ["8.8.8.8"]
     assert_send_type  '(Hash[Symbol, untyped]) { (Resolv::DNS) -> void } -> void',
       Resolv::DNS, :open, :nameserver => ["8.8.8.8"] do |c| c; end
+  rescue Errno::ECONNREFUSED
+    omit "Connection refused with environmental issue"
   end
 
   def test_random
@@ -37,7 +39,7 @@ class ResolvDNSSingletonTest < Test::Unit::TestCase
 end
 
 class ResolvDNSinstanceTest < Test::Unit::TestCase
-  include TypeAssertions
+  include TestHelper
   library 'resolv'
   testing '::Resolv::DNS'
 
@@ -133,6 +135,8 @@ class ResolvDNSinstanceTest < Test::Unit::TestCase
   def test_make_tcp_requester
     assert_send_type "(String, Integer) -> Resolv::DNS::Requester::TCP",
       resolv_dns, :make_tcp_requester, "8.8.8.8", 53
+  rescue Errno::ECONNREFUSED
+    omit "Connection refused with environmental issue"
   end
 
   def test_make_udp_requester
@@ -140,6 +144,8 @@ class ResolvDNSinstanceTest < Test::Unit::TestCase
       resolv_dns(nameserver: ["8.8.8.8"]), :make_udp_requester
     assert_send_type "() -> Resolv::DNS::Requester::UnconnectedUDP",
       resolv_dns(nameserver: ["127.0.0.1", "8.8.8.8"]), :make_udp_requester
+  rescue Errno::ECONNREFUSED
+      omit "Connection refused with environmental issue"
   end
 
   def test_timeouts=
@@ -152,7 +158,7 @@ class ResolvDNSinstanceTest < Test::Unit::TestCase
 end
 
 class ResolvDNSConfigSingletonTest < Test::Unit::TestCase
-  include TypeAssertions
+  include TestHelper
   library 'resolv'
   testing 'singleton(::Resolv::DNS::Config)'
 
@@ -170,7 +176,7 @@ class ResolvDNSConfigSingletonTest < Test::Unit::TestCase
 end
 
 class ResolvDNSConfigInstanceTest < Test::Unit::TestCase
-  include TypeAssertions
+  include TestHelper
   library 'resolv'
   testing '::Resolv::DNS::Config'
 
@@ -215,7 +221,7 @@ class ResolvDNSConfigInstanceTest < Test::Unit::TestCase
 end
 
 # class ResolvDNSMessageSingletonTest < Test::Unit::TestCase
-#   include TypeAssertions
+#   include TestHelper
 #   library 'resolv'
 #   testing 'singleton(::Resolv::DNS::Message)'
 
@@ -226,7 +232,7 @@ end
 # end
 
 class ResolvDNSMessageInstanceTest < Test::Unit::TestCase
-  include TypeAssertions
+  include TestHelper
   library 'resolv'
   testing '::Resolv::DNS::Message'
 
@@ -296,7 +302,7 @@ class ResolvDNSMessageInstanceTest < Test::Unit::TestCase
 end
 
 class ResolvDNSMessageEncoderInstanceTest < Test::Unit::TestCase
-  include TypeAssertions
+  include TestHelper
   library 'resolv'
   testing '::Resolv::DNS::Message::MessageEncoder'
 
@@ -346,7 +352,7 @@ class ResolvDNSMessageEncoderInstanceTest < Test::Unit::TestCase
 end
 
 class ResolvDNSMessageDecoderInstanceTest < Test::Unit::TestCase
-  include TypeAssertions
+  include TestHelper
   library 'resolv'
   testing '::Resolv::DNS::Message::MessageDecoder'
 
@@ -398,7 +404,7 @@ class ResolvDNSMessageDecoderInstanceTest < Test::Unit::TestCase
 end
 
 class ResolvDNSNameInstanceTest < Test::Unit::TestCase
-  include TypeAssertions
+  include TestHelper
   library 'resolv'
   testing '::Resolv::DNS::Name'
 
@@ -440,7 +446,7 @@ class ResolvDNSNameInstanceTest < Test::Unit::TestCase
 end
 
 class ResolvDNSLabelStrInstanceTest < Test::Unit::TestCase
-  include TypeAssertions
+  include TestHelper
   library 'resolv'
   testing '::Resolv::DNS::Label::Str'
 
@@ -471,7 +477,7 @@ end
 
 
 class ResolvDNSRequesterInstanceTest < Test::Unit::TestCase
-  include TypeAssertions
+  include TestHelper
   library 'resolv'
   testing '::Resolv::DNS::Requester'
 
@@ -482,5 +488,18 @@ class ResolvDNSRequesterInstanceTest < Test::Unit::TestCase
   def test_close
     assert_send_type "() -> void",
       requester, :close
+  end
+end
+
+class ResolvDNSResourceGenericSigletonTest < Test::Unit::TestCase
+  include TestHelper
+  library 'resolv'
+  testing 'singleton(::Resolv::DNS::Resource::Generic)'
+
+  def test_create
+    rrtype = assert_send_type "(Integer, Integer) -> Class",
+      Resolv::DNS::Resource::Generic, :create, Resolv::DNS::Resource::IN::ClassValue, 65280
+    assert_send_type "(String) -> ::Resolv::DNS::Resource::Generic",
+      rrtype, :new, ''
   end
 end

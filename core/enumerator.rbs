@@ -37,10 +37,10 @@
 # list's elements to strings containing the index and the element as a string
 # via:
 #
-#      puts %w[foo bar baz].map.with_index { |w, i| "#{i}:#{w}" }
-#      # => ["0:foo", "1:bar", "2:baz"]
+#     puts %w[foo bar baz].map.with_index { |w, i| "#{i}:#{w}" }
+#     # => ["0:foo", "1:bar", "2:baz"]
 #
-#     == External Iteration
+# ## External Iteration
 #
 # An Enumerator can also be used as an external iterator. For example,
 # Enumerator#next returns the next value of the iterator or raises StopIteration
@@ -52,42 +52,48 @@
 #     puts e.next   # => 3
 #     puts e.next   # raises StopIteration
 #
-# `next`, `next_values`, `peek` and `peek_values` are the only methods which use
-# external iteration (and Array#zip(Enumerable-not-Array) which uses `next`).
+# `next`, `next_values`, `peek`, and `peek_values` are the only methods which
+# use external iteration (and Array#zip(Enumerable-not-Array) which uses `next`
+# internally).
 #
 # These methods do not affect other internal enumeration methods, unless the
 # underlying iteration method itself has side-effect, e.g. IO#each_line.
 #
+# FrozenError will be raised if these methods are called against a frozen
+# enumerator. Since `rewind` and `feed` also change state for external
+# iteration, these methods may raise FrozenError too.
+#
 # External iteration differs **significantly** from internal iteration due to
 # using a Fiber:
-#     - The Fiber adds some overhead compared to internal enumeration.
-#     - The stacktrace will only include the stack from the Enumerator, not above.
-#     - Fiber-local variables are *not* inherited inside the Enumerator Fiber,
-#       which instead starts with no Fiber-local variables.
-#     - Fiber storage variables *are* inherited and are designed
-#       to handle Enumerator Fibers. Assigning to a Fiber storage variable
-#       only affects the current Fiber, so if you want to change state
-#       in the caller Fiber of the Enumerator Fiber, you need to use an
-#       extra indirection (e.g., use some object in the Fiber storage
-#       variable and mutate some ivar of it).
+# *   The Fiber adds some overhead compared to internal enumeration.
+# *   The stacktrace will only include the stack from the Enumerator, not above.
+# *   Fiber-local variables are **not** inherited inside the Enumerator Fiber,
+#     which instead starts with no Fiber-local variables.
+# *   Fiber storage variables **are** inherited and are designed to handle
+#     Enumerator Fibers. Assigning to a Fiber storage variable only affects the
+#     current Fiber, so if you want to change state in the caller Fiber of the
+#     Enumerator Fiber, you need to use an extra indirection (e.g., use some
+#     object in the Fiber storage variable and mutate some ivar of it).
+#
 #
 # Concretely:
-#      Thread.current[:fiber_local] = 1
-#      Fiber[:storage_var] = 1
-#      e = Enumerator.new do |y|
-#        p Thread.current[:fiber_local] # for external iteration: nil, for internal iteration: 1
-#        p Fiber[:storage_var] # => 1, inherited
-#        Fiber[:storage_var] += 1
-#        y << 42
-#      end
 #
-#      p e.next # => 42
-#      p Fiber[:storage_var] # => 1 (it ran in a different Fiber)
+#     Thread.current[:fiber_local] = 1
+#     Fiber[:storage_var] = 1
+#     e = Enumerator.new do |y|
+#       p Thread.current[:fiber_local] # for external iteration: nil, for internal iteration: 1
+#       p Fiber[:storage_var] # => 1, inherited
+#       Fiber[:storage_var] += 1
+#       y << 42
+#     end
 #
-#      e.each { p _1 }
-#      p Fiber[:storage_var] # => 2 (it ran in the same Fiber/"stack" as the current Fiber)
+#     p e.next # => 42
+#     p Fiber[:storage_var] # => 1 (it ran in a different Fiber)
 #
-#     == Convert External Iteration to Internal Iteration
+#     e.each { p _1 }
+#     p Fiber[:storage_var] # => 2 (it ran in the same Fiber/"stack" as the current Fiber)
+#
+# ## Convert External Iteration to Internal Iteration
 #
 # You can use an external iterator to implement an internal iterator as follows:
 #
@@ -123,6 +129,43 @@
 #
 class Enumerator[unchecked out Elem, out Return] < Object
   include Enumerable[Elem]
+
+  # <!--
+  #   rdoc-file=enumerator.c
+  #   - Enumerator.produce(initial = nil) { |prev| block } -> enumerator
+  # -->
+  # Creates an infinite enumerator from any block, just called over and over.  The
+  # result of the previous iteration is passed to the next one. If `initial` is
+  # provided, it is passed to the first iteration, and becomes the first element
+  # of the enumerator; if it is not provided, the first iteration receives `nil`,
+  # and its result becomes the first element of the iterator.
+  #
+  # Raising StopIteration from the block stops an iteration.
+  #
+  #     Enumerator.produce(1, &:succ)   # => enumerator of 1, 2, 3, 4, ....
+  #
+  #     Enumerator.produce { rand(10) } # => infinite random number sequence
+  #
+  #     ancestors = Enumerator.produce(node) { |prev| node = prev.parent or raise StopIteration }
+  #     enclosing_section = ancestors.find { |n| n.type == :section }
+  #
+  # Using ::produce together with Enumerable methods like Enumerable#detect,
+  # Enumerable#slice_after, Enumerable#take_while can provide Enumerator-based
+  # alternatives for `while` and `until` cycles:
+  #
+  #     # Find next Tuesday
+  #     require "date"
+  #     Enumerator.produce(Date.today, &:succ).detect(&:tuesday?)
+  #
+  #     # Simple lexer:
+  #     require "strscan"
+  #     scanner = StringScanner.new("7+38/6")
+  #     PATTERN = %r{\d+|[-/+*]}
+  #     Enumerator.produce { scanner.scan(PATTERN) }.slice_after { scanner.eos? }.first
+  #     # => ["7", "+", "38", "/", "6"]
+  #
+  def self.produce: [T] () { (T? prev) -> T } -> Enumerator[T, bot]
+                  | [T] (T initial) { (T prev) -> T } -> Enumerator[T, bot]
 
   # <!--
   #   rdoc-file=enumerator.c

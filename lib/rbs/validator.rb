@@ -12,9 +12,9 @@ module RBS
       @definition_builder = DefinitionBuilder.new(env: env)
     end
 
-    def absolute_type(type, context:)
+    def absolute_type(type, context:, &block)
       type.map_type_name do |type_name, _, type|
-        resolver.resolve(type_name, context: context) || yield(type)
+        resolver.resolve(type_name, context: context) || (block ? yield(type) : type_name)
       end
     end
 
@@ -22,33 +22,34 @@ module RBS
     def validate_type(type, context:)
       case type
       when Types::ClassInstance, Types::Interface, Types::Alias
-        # @type var type: Types::ClassInstance | Types::Interface | Types::Alias
-        if type.name.namespace.relative?
-          type = _ = absolute_type(type, context: context) do |_|
-            NoTypeFoundError.check!(type.name.absolute!, env: env, location: type.location)
-          end
-        end
+        type = absolute_type(type, context: context) #: Types::ClassInstance | Types::Interface | Types::Alias
 
         definition_builder.validate_type_name(type.name, type.location)
 
-        type_params = case type
-                      when Types::ClassInstance
-                        entry = env.normalized_module_class_entry(type.name) or raise
-                        entry.type_params
-                      when Types::Interface
-                        env.interface_decls[type.name].decl.type_params
-                      when Types::Alias
-                        env.type_alias_decls[type.name].decl.type_params
-                      end
+        normalized_type_name = env.normalize_type_name?(type.name)
 
-        InvalidTypeApplicationError.check!(
-          type_name: type.name,
-          args: type.args,
-          params: type_params.each.map(&:name),
-          location: type.location
-        )
+        if normalized_type_name
+          type_params =
+            case type
+            when Types::ClassInstance
+              entry = env.class_decls[normalized_type_name] or raise
+              entry.type_params
+            when Types::Interface
+              env.interface_decls[normalized_type_name].decl.type_params
+            when Types::Alias
+              env.type_alias_decls[normalized_type_name].decl.type_params
+            end
+
+          InvalidTypeApplicationError.check!(
+            type_name: type.name,
+            args: type.args,
+            params: type_params.each.map(&:name),
+            location: type.location
+          )
+        end
 
       when Types::ClassSingleton
+        type = absolute_type(type, context: context) #: Types::ClassSingleton
         definition_builder.validate_type_presence(type)
       end
 
@@ -115,14 +116,14 @@ module RBS
     end
 
     def validate_type_params(params, type_name: , method_name: nil, location:)
-      # @type var each_node: TSort::_EachNode[Symbol]
-      each_node = __skip__ = -> (&block) do
+      # @type var each_node: ^() { (Symbol) -> void } -> void
+      each_node = -> (&block) do
         params.each do |param|
           block[param.name]
         end
       end
-      # @type var each_child: TSort::_EachChild[Symbol]
-      each_child = __skip__ = -> (name, &block) do
+      # @type var each_child: ^(Symbol) { (Symbol) -> void } -> void
+      each_child = -> (name, &block) do
         if param = params.find {|p| p.name == name }
           if b = param.upper_bound
             b.free_variables.each do |tv|

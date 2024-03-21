@@ -1,7 +1,7 @@
 require_relative "test_helper"
 
 class FiberSingletonTest < Test::Unit::TestCase
-  include TypeAssertions
+  include TestHelper
 
   testing "singleton(::Fiber)"
 
@@ -14,18 +14,6 @@ class FiberSingletonTest < Test::Unit::TestCase
     assert_send_type(
       "(Symbol) -> Integer",
       Fiber, :[], :key
-    )
-
-    key = "string"
-
-    assert_send_type(
-      "(String, Integer) -> Integer",
-      Fiber, :[]=, key, 123
-    )
-
-    assert_send_type(
-      "(String) -> Integer",
-      Fiber, :[], key
     )
   end
 
@@ -81,7 +69,7 @@ class FiberSingletonTest < Test::Unit::TestCase
 end
 
 class FiberTest < Test::Unit::TestCase
-  include TypeAssertions
+  include TestHelper
 
   testing "::Fiber"
 

@@ -16,9 +16,19 @@ module RBS
   class BaseError < StandardError
   end
 
+  interface _Location
+    %a{pure} def location: () -> Location[untyped, untyped]?
+  end
+
+  module DetailedMessageable : _Location, Exception
+    def detailed_message: (?highlight: boolish, **untyped) -> String
+  end
+
   # Error class for errors raised during parsing.
   #
   class ParsingError < BaseError
+    include DetailedMessageable
+
     attr_reader location: Location[untyped, untyped]
     attr_reader error_message: String
     attr_reader token_type: String
@@ -67,6 +77,8 @@ module RBS
   end
 
   class NoTypeFoundError < DefinitionError
+    include DetailedMessageable
+
     attr_reader type_name: TypeName
     attr_reader location: Location[untyped, untyped]?
 
@@ -85,15 +97,21 @@ module RBS
   end
 
   class NoSelfTypeFoundError < DefinitionError
+    include DetailedMessageable
+
     attr_reader type_name: TypeName
     attr_reader location: Location[untyped, untyped]?
 
     def initialize: (type_name: TypeName, location: Location[untyped, untyped]?) -> void
 
+    # The type name in `self` is automatically normalized
+    #
     def self.check!: (AST::Declarations::Module::Self, env: Environment) -> void
   end
 
   class NoMixinFoundError < DefinitionError
+    include DetailedMessageable
+
     attr_reader type_name: TypeName
     attr_reader member: AST::Members::t
 
@@ -105,6 +123,8 @@ module RBS
   end
 
   class DuplicatedMethodDefinitionError < DefinitionError
+    include DetailedMessageable
+
     type ty = Types::ClassSingleton | Types::ClassInstance | Types::Interface
     type original = DefinitionBuilder::MethodBuilder::Methods::Definition::original
 
@@ -141,6 +161,8 @@ module RBS
   # ```
   #
   class DuplicatedInterfaceMethodDefinitionError < DefinitionError
+    include DetailedMessageable
+
     type ty = Types::ClassSingleton | Types::ClassInstance | Types::Interface
     type mixin_member = AST::Members::Include | AST::Members::Extend
 
@@ -153,11 +175,15 @@ module RBS
     def type_name: () -> TypeName
 
     def qualified_method_name: () -> String
+
+    def location: () -> AST::Members::Mixin::loc?
   end
 
   # The `alias` member declares an alias from unknown method
   #
   class UnknownMethodAliasError < DefinitionError
+    include DetailedMessageable
+
     attr_reader type_name: TypeName
     attr_reader original_name: Symbol
     attr_reader aliased_name: Symbol
@@ -176,12 +202,16 @@ module RBS
   # The *overloading* method definition cannot find *non-overloading* method definition
   #
   class InvalidOverloadMethodError < DefinitionError
+    include DetailedMessageable
+
     attr_reader type_name: TypeName
     attr_reader method_name: Symbol
     attr_reader kind: :instance | :singleton
     attr_reader members: Array[AST::Members::MethodDefinition]
 
     def initialize: (type_name: TypeName, method_name: Symbol, kind: :instance | :singleton, members: Array[AST::Members::MethodDefinition]) -> void
+
+    def location: () -> AST::Members::MethodDefinition::loc?
   end
 
   class GenericParameterMismatchError < LoadingError
@@ -199,6 +229,8 @@ module RBS
   end
 
   class InvalidVarianceAnnotationError < DefinitionError
+    include DetailedMessageable
+
     attr_reader type_name: TypeName
     attr_reader param: AST::TypeParam
     attr_reader location: Location[untyped, untyped]?
@@ -207,6 +239,8 @@ module RBS
   end
 
   class RecursiveAliasDefinitionError < DefinitionError
+    include DetailedMessageable
+
     type ty = Types::ClassInstance | Types::ClassSingleton | Types::Interface
     type defn = DefinitionBuilder::MethodBuilder::Methods::Definition
 
@@ -221,6 +255,8 @@ module RBS
   # MixinClassError is raised if a include/prepend/extend has a class (not a module) to mix-in
   #
   class MixinClassError < DefinitionError
+    include DetailedMessageable
+
     type member = AST::Members::Include | AST::Members::Prepend | AST::Members::Extend
 
     attr_reader type_name: TypeName
@@ -238,16 +274,24 @@ module RBS
   # InheritModuleError is raised if a class definition inherits a module (not a class)
   #
   class InheritModuleError < DefinitionError
+    include DetailedMessageable
+
     attr_reader super_decl: AST::Declarations::Class::Super
 
     def initialize: (AST::Declarations::Class::Super) -> void
 
     def location: () -> Location[untyped, untyped]?
 
+    # Confirms if `super` inherits specifies a class
+    #
+    # Automatically normalize the name of super.
+    #
     def self.check!: (AST::Declarations::Class::Super, env: Environment) -> void
   end
 
   class RecursiveTypeAliasError < BaseError
+    include DetailedMessageable
+
     attr_reader alias_names: Array[TypeName]
     attr_reader location: Location[untyped, untyped]?
 
@@ -257,6 +301,8 @@ module RBS
   end
 
   class NonregularTypeAliasError < BaseError
+    include DetailedMessageable
+
     # Diagnostic reported from `TypeAliasRegularity`.
     attr_reader diagnostic: TypeAliasRegularity::Diagnostic
 
@@ -267,6 +313,8 @@ module RBS
   end
 
   class CyclicTypeParameterBound < BaseError
+    include DetailedMessageable
+
     attr_reader location: Location[untyped, untyped]?
 
     # Array of parameters which contains cyclic dependencies.
@@ -289,16 +337,32 @@ module RBS
   # ```
   #
   class InconsistentClassModuleAliasError < BaseError
+    include DetailedMessageable
+
     attr_reader alias_entry: Environment::ModuleAliasEntry | Environment::ClassAliasEntry
 
     def initialize: (Environment::ModuleAliasEntry | Environment::ClassAliasEntry) -> void
+
+    def location: () -> AST::Declarations::AliasDecl::loc?
   end
 
   # A module/class alias declaration is cyclic
   #
   class CyclicClassAliasDefinitionError < BaseError
+    include DetailedMessageable
+
     attr_reader alias_entry: Environment::ModuleAliasEntry | Environment::ClassAliasEntry
 
     def initialize: (Environment::ModuleAliasEntry | Environment::ClassAliasEntry) -> void
+
+    def location: () -> AST::Declarations::AliasDecl::loc?
+  end
+
+  class WillSyntaxError < BaseError
+    include RBS::DetailedMessageable
+
+    def initialize: (String message, location: Location[untyped, untyped]?) -> void
+
+    attr_reader location: Location[untyped, untyped]?
   end
 end

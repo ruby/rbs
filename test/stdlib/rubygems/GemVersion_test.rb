@@ -1,22 +1,22 @@
 require_relative "../test_helper"
 
 class GemVersionSingletonTest < Test::Unit::TestCase
-  include TypeAssertions
+  include TestHelper
 
   testing "singleton(::Gem::Version)"
 
   def test_correct?
     assert_send_type  "(String) -> bool",
                       Gem::Version, :correct?, "1.2.3"
-    assert_send_type  "(ToS) -> bool",
-                      Gem::Version, :correct?, ToS.new
+    assert_send_type  "(_ToS) -> bool",
+                      Gem::Version, :correct?, ToS.new.__with_object_methods(:respond_to?, :nil?)
   end
 
   def test_create
     assert_send_type  "(String) -> Gem::Version",
                       Gem::Version, :create, "1.2.3"
-    assert_send_type  "(ToS) -> Gem::Version",
-                      Gem::Version, :create, ToS.new("1.2.3")
+    assert_send_type  "(_ToS) -> Gem::Version",
+                      Gem::Version, :create, ToS.new("1.2.3").__with_object_methods(:respond_to?, :hash, :nil?, :is_a?)
     assert_send_type  "(Gem::Version) -> Gem::Version",
                       Gem::Version, :create, Gem::Version.new("1.2.3")
   end
@@ -24,13 +24,13 @@ class GemVersionSingletonTest < Test::Unit::TestCase
   def test_new
     assert_send_type  "(String) -> Gem::Version",
                       Gem::Version, :new, "1.2.3"
-    assert_send_type  "(ToS) -> Gem::Version",
-                      Gem::Version, :new, ToS.new("1.2.3")
+    assert_send_type  "(_ToS) -> Gem::Version",
+                      Gem::Version, :new, ToS.new("1.2.3").__with_object_methods(:respond_to?, :hash, :nil?, :is_a?)
   end
 end
 
 class GemVersionInstanceTest < Test::Unit::TestCase
-  include TypeAssertions
+  include TestHelper
 
   testing "::Gem::Version"
 

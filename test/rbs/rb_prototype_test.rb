@@ -864,7 +864,7 @@ end
     EOF
   end
 
-  def test_refinements
+  def test_ITER
     parser = RB.new
 
     rb = <<~'RUBY'
@@ -874,6 +874,11 @@ module M
 
   refine Array do
     def by_refinements
+    end
+  end
+
+  included do
+    def in_included
     end
   end
 end
@@ -914,6 +919,110 @@ end
     RBS
   end
 
+  def test_instance_variables
+    parser = RB.new
+
+    rb = <<-EOR
+class Hello
+  def message(message)
+    # comment for ivar
+    @message = message
+  end
+end
+    EOR
+
+    parser.parse(rb)
+
+    assert_write parser.decls, <<-EOF
+class Hello
+  # comment for ivar
+  @message: untyped
+
+  def message: (untyped message) -> untyped
+end
+    EOF
+  end
+
+  def test_instance_variables_in_module
+    parser = RB.new
+
+    rb = <<-EOR
+module Hello
+  def message(message)
+    # comment for ivar
+    @message = message
+  end
+
+  def foo
+    @foo = 42
+  end
+end
+    EOR
+
+    parser.parse(rb)
+
+    assert_write parser.decls, <<-EOF
+module Hello
+  # comment for ivar
+  @message: untyped
+
+  @foo: untyped
+
+  def message: (untyped message) -> untyped
+
+  def foo: () -> untyped
+end
+    EOF
+  end
+
+  def test_class_variables
+    parser = RB.new
+
+    rb = <<-EOR
+class Hello
+  def self.foo
+    @foo = 42
+  end
+
+  class << self
+    @foobar = 42 # It should be ignored
+
+    def bar
+      @bar = 42
+    end
+  end
+
+  @baz = 42
+
+  def message(message)
+    # comment for cvar
+    @@message = message
+  end
+end
+    EOR
+
+    parser.parse(rb)
+
+    assert_write parser.decls, <<-EOF
+class Hello
+  # comment for cvar
+  @@message: untyped
+
+  self.@foo: untyped
+
+  self.@bar: untyped
+
+  self.@baz: untyped
+
+  def self.foo: () -> untyped
+
+  def self.bar: () -> untyped
+
+  def message: (untyped message) -> untyped
+end
+    EOF
+  end
+
   def test_literal_to_type
     parser = RBS::Prototype::RB.new
     [
@@ -924,38 +1033,53 @@ end
       [%{1..2}, %{::Range[::Integer]}],
       [%{{}}, %{::Hash[untyped, untyped]}],
       [%{{a: nil}}, %{ { a: nil } }],
-      [%{{"a" => /b/}}, %{ ::Hash[::String, ::Regexp] }],
+      [%({"a" => /b/}), %({ 'a' => ::Regexp })],
     ].each do |rb, rbs|
       node = RubyVM::AbstractSyntaxTree.parse("_ = #{rb}").children[2]
       assert_equal RBS::Parser.parse_type(rbs), parser.literal_to_type(node.children[1])
     end
   end
 
-  if RUBY_VERSION >= '2.7'
-    def test_argument_forwarding
-      parser = RB.new
+  def test_const_to_name
+    parser = RBS::Prototype::RB.new
+    [
+      ["self", TypeName("::Foo")],
+      ["Bar", TypeName("Bar")],
+      ["::Bar", TypeName("::Bar")],
+      ["Bar::Baz", TypeName("Bar::Baz")],
+      ["obj::Baz", nil],
+    ].each do |rb, name|
+      node = RubyVM::AbstractSyntaxTree.parse("_ = #{rb}").children[2]
+      context = RBS::Prototype::RB::Context.initial(namespace: RBS::Namespace.new(path: [:Foo], absolute: true))
+      assert_equal name, parser.const_to_name(node.children[1], context: context)
+    end
+  end
 
-      rb = <<~'RUBY'
-module M
-  def foo(...) end
-end
-      RUBY
+  def test_argument_forwarding
+    parser = RB.new
 
-      parser.parse(rb)
+    rb = <<~'RUBY'
+module M
+def foo(...) end
+end
+    RUBY
 
-      if support_argument_forwarding_with_anonymous_kwrest?
-        assert_write parser.decls, <<~RBS
-module M
-  def foo: (*untyped, **untyped **) ?{ () -> untyped } -> nil
-end
-        RBS
-      else
-        assert_write parser.decls, <<~RBS
-module M
-  def foo: (*untyped) ?{ () -> untyped } -> nil
-end
-        RBS
-      end
+    parser.parse(rb)
+
+    if RUBY_VERSION < '3.4'
+      # Ruby <=3.3 generates AST without kwrest args for `...` args
+      assert_write parser.decls, <<~RBS
+        module M
+          def foo: (*untyped) ?{ () -> untyped } -> nil
+        end
+      RBS
+    else
+      # Ruby 3.4 generates AST with kwrest args for `...` args
+      assert_write parser.decls, <<~RBS
+        module M
+          def foo: (*untyped, **untyped) ?{ () -> untyped } -> nil
+        end
+      RBS
     end
   end
 
@@ -975,14 +1099,5 @@ module M
 end
       RBS
     end
-  end
-
-  private
-
-  def support_argument_forwarding_with_anonymous_kwrest?
-    eval("def foo(...); bar(**); end")
-    true
-  rescue Exception
-    false
   end
 end

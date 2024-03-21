@@ -20,7 +20,7 @@ module RBS
           end
         end
 
-        attr_reader :config, :lockfile, :definition, :existing_lockfile, :gem_hash
+        attr_reader :config, :lockfile, :definition, :existing_lockfile, :gem_hash, :gem_entries
 
         def self.generate(config:, definition:, with_lockfile: true)
           generator = new(config: config, definition: definition, with_lockfile: with_lockfile)
@@ -31,6 +31,11 @@ module RBS
         def initialize(config:, definition:, with_lockfile:)
           @config = config
 
+          @gem_entries = config.gems.each.with_object({}) do |entry, hash| #$ Hash[String, gem_entry?]
+            name = entry["name"]
+            hash[name] = entry
+          end
+
           lockfile_path = Config.to_lockfile_path(config.config_path)
           lockfile_dir = lockfile_path.parent
 
@@ -39,12 +44,6 @@ module RBS
             path: config.repo_path_data,
             gemfile_lock_path: definition.lockfile.relative_path_from(lockfile_dir)
           )
-          config.sources.each do |source|
-            case source
-            when Sources::Git
-              lockfile.sources[source.name] = source
-            end
-          end
 
           if with_lockfile && lockfile_path.file?
             @existing_lockfile = Lockfile.from_lockfile(lockfile_path: lockfile_path, data: YAML.load_file(lockfile_path.to_s))
@@ -58,15 +57,13 @@ module RBS
         end
 
         def generate
-          ignored_gems = config.gems.select {|gem| gem["ignore"] }.map {|gem| gem["name"] }.to_set
-
           config.gems.each do |gem|
             if Sources::Stdlib.instance.has?(gem["name"], nil) || gem.dig("source", "type") == "stdlib"
-              unless ignored_gems.include?(gem["name"])
+              unless gem.fetch("ignore", false)
                 assign_stdlib(name: gem["name"], from_gem: nil)
               end
             else
-              assign_gem(name: gem["name"], version: gem["version"], ignored_gems: ignored_gems, src_data: gem["source"])
+              assign_gem(name: gem["name"], version: gem["version"])
             end
           end
 
@@ -76,7 +73,7 @@ module RBS
             end
 
             if spec = gem_hash[dep.name]
-              assign_gem(name: dep.name, version: spec.version, ignored_gems: ignored_gems, src_data: nil, skip: dep.source.is_a?(Bundler::Source::Gemspec))
+              assign_gem(name: dep.name, version: spec.version, skip: dep.source.is_a?(Bundler::Source::Gemspec))
             end
           end
 
@@ -86,13 +83,17 @@ module RBS
         private def validate_gemfile_lock_path!(lock:, gemfile_lock_path:)
           return unless lock
           return unless lock.gemfile_lock_fullpath
-          unless lock.gemfile_lock_fullpath == gemfile_lock_path
+          unless File.realpath(lock.gemfile_lock_fullpath) == File.realpath(gemfile_lock_path)
             raise GemfileLockMismatchError.new(expected: lock.gemfile_lock_fullpath, actual: gemfile_lock_path)
           end
         end
 
-        private def assign_gem(name:, version:, src_data:, ignored_gems:, skip: false)
-          return if ignored_gems.include?(name)
+        private def assign_gem(name:, version:, skip: false)
+          entry = gem_entries[name]
+          src_data = entry&.fetch("source", nil)
+          ignored = entry&.fetch("ignore", false)
+
+          return if ignored
           return if lockfile.gems.key?(name)
 
           unless skip
@@ -127,16 +128,24 @@ module RBS
             if locked
               lockfile.gems[name] = locked
 
-              locked[:source].dependencies_of(locked[:name], locked[:version])&.each do |dep|
-                assign_stdlib(name: dep["name"], from_gem: name)
+              begin
+                locked[:source].dependencies_of(locked[:name], locked[:version])&.each do |dep|
+                  assign_stdlib(name: dep["name"], from_gem: name)
+                end
+              rescue
+                RBS.logger.warn "Cannot find `#{locked[:name]}-#{locked[:version]}` gem. Using incorrect Bundler context? (#{definition.lockfile})"
               end
             end
           end
 
-          gem_hash[name].dependencies.each do |dep|
-            if spec = gem_hash[dep.name]
-              assign_gem(name: dep.name, version: spec.version, src_data: nil, ignored_gems: ignored_gems)
+          if spec = gem_hash.fetch(name, nil)
+            spec.dependencies.each do |dep|
+              if dep_spec = gem_hash[dep.name]
+                assign_gem(name: dep.name, version: dep_spec.version)
+              end
             end
+          else
+            RBS.logger.warn "Cannot find `#{name}` gem. Using incorrect Bundler context? (#{definition.lockfile})"
           end
         end
 

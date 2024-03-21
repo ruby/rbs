@@ -29,6 +29,8 @@ module RBS
         "#{message} (#{self.class.name})"
       end
 
+      return msg unless location
+
       # Support only one line
       return msg unless location.start_line == location.end_line
 
@@ -190,7 +192,8 @@ module RBS
     end
 
     def self.check!(super_decl, env:)
-      return if env.class_decl?(super_decl.name) || env.class_alias?(super_decl.name)
+      super_name = env.normalize_type_name(super_decl.name)
+      return if env.class_decl?(super_name) || env.class_alias?(super_name)
 
       raise new(super_decl)
     end
@@ -210,9 +213,8 @@ module RBS
     end
 
     def self.check!(self_type, env:)
-      type_name = self_type.name
-
-      (env.module_name?(type_name) || env.interface_name?(type_name)) or raise new(type_name: type_name, location: self_type.location)
+      self_name = env.normalize_type_name(self_type.name)
+      (env.module_name?(self_name) || env.interface_name?(self_name)) or raise new(type_name: self_type.name, location: self_type.location)
     end
   end
 
@@ -553,6 +555,17 @@ module RBS
 
     def location
       @alias_entry.decl.location
+    end
+  end
+
+  class WillSyntaxError < DefinitionError
+    include DetailedMessageable
+
+    attr_reader :location
+
+    def initialize(message, location:)
+      super "#{Location.to_string(location)}: #{message}"
+      @location = location
     end
   end
 end

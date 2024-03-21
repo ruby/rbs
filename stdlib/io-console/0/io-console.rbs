@@ -106,8 +106,14 @@ class IO
 
   # <!--
   #   rdoc-file=ext/io/console/console.c
-  #   - cursor()
+  #   - io.cursor -> [row, column]
   # -->
+  # Returns the current cursor position as a two-element array of integers (row,
+  # column)
+  #
+  #     io.cursor # => [3, 5]
+  #
+  # You must require 'io/console' to use this method.
   #
   def cursor: () -> [ Integer, Integer ]
 
@@ -205,6 +211,11 @@ class IO
   #
   # You must require 'io/console' to use this method.
   #
+  #     require 'io/console'
+  #     IO::console.getpass("Enter password:")
+  #     Enter password:
+  #     # => "mypassword"
+  #
   def getpass: (?String) -> String
 
   # <!--
@@ -270,7 +281,7 @@ class IO
   #   - pressed?(p1)
   # -->
   #
-  def pressed?: (Integer | Symbol | String) -> bool
+  def pressed?: (Integer | interned) -> bool
 
   # <!--
   #   rdoc-file=ext/io/console/console.c
