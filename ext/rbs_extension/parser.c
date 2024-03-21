@@ -284,7 +284,7 @@ static VALUE parse_function_param(parserstate *state) {
       );
     }
 
-    VALUE name = rb_to_symbol(rbs_unquote_string(state, state->current_token.range, 0));
+    VALUE name = rbs_unquote_symbol(state, state->current_token.range, 0);
     VALUE location = rbs_new_location(state->buffer, param_range);
     rbs_loc *loc = rbs_check_location(location);
     rbs_loc_add_optional_child(loc, rb_intern("name"), name_range);
@@ -778,11 +778,7 @@ static VALUE parse_symbol(parserstate *state) {
   }
   case tDQSYMBOL:
   case tSQSYMBOL: {
-    literal = rb_funcall(
-      rbs_unquote_string(state, state->current_token.range, offset_bytes),
-      rb_intern("to_sym"),
-      0
-    );
+    literal = rbs_unquote_symbol(state, state->current_token.range, offset_bytes);
     break;
   }
   default:
@@ -1425,7 +1421,7 @@ VALUE parse_method_name(parserstate *state, range *range) {
     return ID2SYM(INTERN_TOKEN(state, state->current_token));
 
   case tQIDENT:
-    return rb_to_symbol(rbs_unquote_string(state, state->current_token.range, 0));
+    return rbs_unquote_symbol(state, state->current_token.range, 0);
 
   case pBAR:
   case pHAT:

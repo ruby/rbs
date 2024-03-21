@@ -30,6 +30,8 @@ void rbs_unescape_string(VALUE string, bool dq_string);
  * */
 VALUE rbs_unquote_string(parserstate *state, range rg, int offset_bytes);
 
+VALUE rbs_unquote_symbol(parserstate *state, range rg, int offset_bytes);
+
 /**
  * Raises RBS::ParsingError on `tok` with message constructed with given `fmt`.
  *
