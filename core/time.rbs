@@ -1103,8 +1103,8 @@ class Time < Object
   #     More digits will be truncated, as other operations of `Time`. Ignored
   #     unless the first argument is a string.
   #
-  def initialize: (?Integer? year, ?Integer? month, ?Integer? day, ?Integer? hour, ?Integer? min, ?Numeric? sec, ?String | Integer | nil) -> void
-                | (?Integer? year, ?Integer? month, ?Integer? day, ?Integer? hour, ?Integer? min, ?Numeric? sec, in: String | Integer | nil) -> void
+  def initialize: (?Integer year, ?Integer? month, ?Integer? day, ?Integer? hour, ?Integer? min, ?Numeric? sec, ?String | Integer | nil) -> void
+                | (?Integer year, ?Integer? month, ?Integer? day, ?Integer? hour, ?Integer? min, ?Numeric? sec, in: String | Integer | nil) -> void
                 | (String, ?in: string | int | nil, ?precision: int) -> void
 
   # <!--
