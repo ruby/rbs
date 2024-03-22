@@ -1,5 +1,5 @@
 module Net
-  type headers = (Hash[String, untyped] | Hash[Symbol, untyped])
+  type headers = Hash[String | Symbol, untyped]
 
   class HTTPBadResponse < StandardError
   end
