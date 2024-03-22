@@ -2098,7 +2098,7 @@ class String
   # Related: String#sub, String#gsub, String#sub!.
   #
   def gsub!: (Regexp | string pattern, string | hash[String, _ToS] replacement) -> self?
-           | (Regexp | string pattern) -> Enumerator[String, self]
+           | (Regexp | string pattern) -> Enumerator[String, self?]
            | (Regexp | string pattern) { (String match) -> _ToS } -> self?
 
   # <!--
