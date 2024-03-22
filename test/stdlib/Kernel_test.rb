@@ -916,6 +916,13 @@ class KernelInstanceTest < Test::Unit::TestCase
 
   testing "::Kernel"
 
+  def test_extend
+    assert_send_type "(Module) -> Object",
+                      Object.new, :extend, Module.new
+    assert_send_type "(Module, Module) -> Object",
+                      Object.new, :extend, Module.new, Module.new
+  end
+
   def test_define_singleton_method
     obj = Object.new
 
