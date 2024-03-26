@@ -1134,7 +1134,19 @@ EOF
     SignatureManager.new do |manager|
       manager.files[Pathname("foo.rbs")] = <<EOF
 class Hello
+  public
+
   def initialize: (String) -> void
+  def initialize_copy: (self) -> self
+  def initialize_clone: (self) -> self
+  def initialize_dup: (self) -> self
+  def respond_to_missing?: () -> bool
+
+  def self.initialize: (String) -> void
+  def self.initialize_copy: (self) -> self
+  def self.initialize_clone: (self) -> self
+  def self.initialize_dup: (self) -> self
+  def self.respond_to_missing?: () -> bool
 end
 EOF
 
@@ -1144,11 +1156,20 @@ EOF
         builder.build_instance(type_name("::Hello")).tap do |definition|
           assert_instance_of Definition, definition
           assert_method_definition definition.methods[:initialize], ["(::String) -> void"], accessibility: :private
+          assert_method_definition definition.methods[:initialize_copy], ["(self) -> self"], accessibility: :private
+          assert_method_definition definition.methods[:initialize_clone], ["(self) -> self"], accessibility: :private
+          assert_method_definition definition.methods[:initialize_dup], ["(self) -> self"], accessibility: :private
+          assert_method_definition definition.methods[:respond_to_missing?], ["() -> bool"], accessibility: :private
         end
 
         builder.build_singleton(type_name("::Hello")).yield_self do |definition|
           assert_instance_of Definition, definition
           assert_method_definition definition.methods[:new], ["(::String) -> ::Hello"], accessibility: :public
+          assert_method_definition definition.methods[:initialize], ["(::String) -> void"], accessibility: :public
+          assert_method_definition definition.methods[:initialize_copy], ["(self) -> self"], accessibility: :public
+          assert_method_definition definition.methods[:initialize_clone], ["(self) -> self"], accessibility: :public
+          assert_method_definition definition.methods[:initialize_dup], ["(self) -> self"], accessibility: :public
+          assert_method_definition definition.methods[:respond_to_missing?], ["() -> bool"], accessibility: :public
         end
       end
     end
