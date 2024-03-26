@@ -171,27 +171,27 @@ class ModuleInstanceTest < Test::Unit::TestCase
     end
 
     assert_send_type(
-      "(Symbol) -> self",
+      "(Symbol) -> Module",
       mod, :private_class_method, :foo
     )
 
     assert_send_type(
-      "(Symbol, Symbol) -> self",
+      "(Symbol, Symbol) -> Module",
       mod, :private_class_method, :foo, :bar
     )
 
     assert_send_type(
-      "(String) -> self",
+      "(String) -> Module",
       mod, :private_class_method, "foo"
     )
 
     assert_send_type(
-      "(String, String) -> self",
+      "(String, String) -> Module",
       mod, :private_class_method, "foo", "bar"
     )
 
     assert_send_type(
-      "(Array[Symbol | String]) -> self",
+      "(Array[Symbol | String]) -> Module",
       mod, :private_class_method, [:foo, "bar"]
     )
   end
@@ -273,27 +273,27 @@ class ModuleInstanceTest < Test::Unit::TestCase
     end
 
     assert_send_type(
-      "(Symbol) -> self",
+      "(Symbol) -> Module",
       mod, :public_class_method, :foo
     )
 
     assert_send_type(
-      "(Symbol, Symbol) -> self",
+      "(Symbol, Symbol) -> Module",
       mod, :public_class_method, :foo, :bar
     )
 
     assert_send_type(
-      "(String) -> self",
+      "(String) -> Module",
       mod, :public_class_method, "foo"
     )
 
     assert_send_type(
-      "(String, String) -> self",
+      "(String, String) -> Module",
       mod, :public_class_method, "foo", "bar"
     )
 
     assert_send_type(
-      "(Array[Symbol | String]) -> self",
+      "(Array[Symbol | String]) -> Module",
       mod, :public_class_method, [:foo, "bar"]
     )
   end
