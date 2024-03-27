@@ -8,24 +8,23 @@ class DigestSingletonTest < Test::Unit::TestCase
   library 'digest'
   testing 'singleton(::Digest)'
 
-
   def test_const_missing
-    assert_send_type  '(::Symbol name) -> singleton(::Digest::Base)',
+    assert_send_type  '(::Symbol name) -> singleton(::Digest::Class)',
                       ::Digest, :const_missing, :SHA1
 
-    assert_send_type  '(::Symbol name) -> singleton(::Digest::Base)',
+    assert_send_type  '(::Symbol name) -> singleton(::Digest::Class)',
                       ::Digest, :const_missing, :MD5
 
-    assert_send_type  '(::Symbol name) -> singleton(::Digest::Base)',
+    assert_send_type  '(::Symbol name) -> singleton(::Digest::Class)',
                       ::Digest, :const_missing, :RMD160
 
-    assert_send_type  '(::Symbol name) -> singleton(::Digest::Base)',
+    assert_send_type  '(::Symbol name) -> singleton(::Digest::Class)',
                       ::Digest, :const_missing, :SHA256
 
-    assert_send_type  '(::Symbol name) -> singleton(::Digest::Base)',
+    assert_send_type  '(::Symbol name) -> singleton(::Digest::Class)',
                       ::Digest, :const_missing, :SHA384
 
-    assert_send_type  '(::Symbol name) -> singleton(::Digest::Base)',
+    assert_send_type  '(::Symbol name) -> singleton(::Digest::Class)',
                       ::Digest, :const_missing, :SHA512
   end
 
@@ -59,6 +58,9 @@ class DigestInstanceTest < Test::Unit::TestCase
   end
 end
 
+class ::Digest::Foo < ::Digest::Class
+end
+
 class DigestRootTest < Test::Unit::TestCase
   include TestHelper
 
@@ -66,40 +68,9 @@ class DigestRootTest < Test::Unit::TestCase
   testing '::Object'
 
   def test_digest
-    assert_send_type  '(::String | ::Symbol name) -> singleton(::Digest::Base)',
-                      ::Digest, :Digest, :SHA1
-
-    assert_send_type  '(::String | ::Symbol name) -> singleton(::Digest::Base)',
-                      ::Digest, :Digest, 'SHA1'
-
-    assert_send_type  '(::String | ::Symbol name) -> singleton(::Digest::Base)',
-                      ::Digest, :Digest, :MD5
-
-    assert_send_type  '(::String | ::Symbol name) -> singleton(::Digest::Base)',
-                      ::Digest, :Digest, 'MD5'
-
-    assert_send_type  '(::String | ::Symbol name) -> singleton(::Digest::Base)',
-                      ::Digest, :Digest, :RMD160
-
-    assert_send_type  '(::String | ::Symbol name) -> singleton(::Digest::Base)',
-                      ::Digest, :Digest, 'RMD160'
-
-    assert_send_type  '(::String | ::Symbol name) -> singleton(::Digest::Base)',
-                      ::Digest, :Digest, :SHA256
-
-    assert_send_type  '(::String | ::Symbol name) -> singleton(::Digest::Base)',
-                      ::Digest, :Digest, 'SHA256'
-
-    assert_send_type  '(::String | ::Symbol name) -> singleton(::Digest::Base)',
-                      ::Digest, :Digest, :SHA384
-
-    assert_send_type  '(::String | ::Symbol name) -> singleton(::Digest::Base)',
-                      ::Digest, :Digest, 'SHA384'
-
-    assert_send_type  '(::String | ::Symbol name) -> singleton(::Digest::Base)',
-                      ::Digest, :Digest, :SHA512
-
-    assert_send_type  '(::String | ::Symbol name) -> singleton(::Digest::Base)',
-                      ::Digest, :Digest, 'SHA512'
+    with_interned(:Foo) do |sym|
+      assert_send_type '(interned name) -> singleton(::Digest::Class)',
+                       ::Object, :Digest, :Foo
+    end
   end
 end
