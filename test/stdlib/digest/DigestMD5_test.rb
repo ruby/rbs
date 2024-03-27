@@ -9,28 +9,38 @@ class DigestMD5SingletonTest < Test::Unit::TestCase
   testing 'singleton(::Digest::MD5)'
 
   def test_base64digest
-    assert_send_type '(::String str) -> ::String',
-                     ::Digest::MD5, :base64digest, '_base64digest_'
+    with_string('_base64digest_') do |str|
+      assert_send_type '(::string str) -> ::String',
+                       ::Digest::MD5, :base64digest, str
+    end
   end
 
   def test_bubblebabble
-    assert_send_type '(::String) -> ::String',
-                     ::Digest::MD5, :bubblebabble, '_bubblebabble_'
+    with_string('_bubblebabble_') do |str|
+      assert_send_type '(::string) -> ::String',
+                      ::Digest::MD5, :bubblebabble, str
+    end
   end
 
   def test_digest
-    assert_send_type '(::String) -> ::String',
-                     ::Digest::MD5, :digest, '_digest_'
+    with_string('_digest_') do |str|
+      assert_send_type '(::string) -> ::String',
+                      ::Digest::MD5, :digest, str
+    end
   end
 
   def test_file
-    assert_send_type '(::String) -> ::Digest::Class',
-                     ::Digest::MD5, :file, 'README.md'
+    with_string('README.md') do |str|
+      assert_send_type '(::string) -> ::Digest::MD5',
+                      ::Digest::MD5, :file, str
+    end
   end
 
   def test_hexdigest
-    assert_send_type '(::String) -> ::String',
-                     ::Digest::MD5, :hexdigest, '_hexdigest_'
+    with_string('_hexdigest_') do |str|
+      assert_send_type '(::string) -> ::String',
+                      ::Digest::MD5, :hexdigest, str
+    end
   end
 end
 
@@ -41,8 +51,10 @@ class DigestMD5InstanceTest < Test::Unit::TestCase
   testing '::Digest::MD5'
 
   def test_left_shift
-    assert_send_type '(::String) -> Digest::MD5',
-                     ::Digest::MD5.new, :<<, '_binary_left_shift_'
+    with_string('_binary_left_shift_') do |str|
+      assert_send_type '(::string) -> Digest::MD5',
+                        ::Digest::MD5.new, :<<, str
+    end
   end
 
   def test_block_length
@@ -61,8 +73,10 @@ class DigestMD5InstanceTest < Test::Unit::TestCase
   end
 
   def test_update
-    assert_send_type '(::String) -> Digest::MD5',
-                     ::Digest::MD5.new, :update, '_update_'
+    with_string('_update_') do |str|
+      assert_send_type '(::string) -> Digest::MD5',
+                      ::Digest::MD5.new, :update, str
+    end
   end
 
   def test_finish
@@ -71,27 +85,31 @@ class DigestMD5InstanceTest < Test::Unit::TestCase
   end
 
   def test_initialize_copy
-    assert_send_type '(::Digest::Base) -> Digest::MD5',
+    assert_send_type '(Digest::MD5) -> Digest::MD5',
                      ::Digest::MD5.new, :initialize_copy, ::Digest::MD5.new
   end
 
   def test_equal
-    assert_send_type '(::Digest::Instance | ::String) -> bool',
+    assert_send_type '(::Digest::MD5) -> bool',
                      ::Digest::MD5.new, :==, ::Digest::MD5.new
 
-    assert_send_type '(::Digest::Instance | ::String) -> bool',
-                     ::Digest::MD5.new, :==, '_equal_'
+    with_string('_equal_') do |str|
+      assert_send_type '(::string) -> bool',
+                      ::Digest::MD5.new, :==, str
+    end
   end
 
   def test_base64digest
-    assert_send_type '(?::String? str) -> ::String',
+    assert_send_type '() -> ::String',
                      ::Digest::MD5.new, :base64digest
 
-    assert_send_type '(?::String? str) -> ::String',
+    assert_send_type '(nil) -> ::String',
                      ::Digest::MD5.new, :base64digest, nil
 
-    assert_send_type '(?::String? str) -> ::String',
-                     ::Digest::MD5.new, :base64digest, '_base64digest_'
+    with_string('_base64digest_') do |str|
+      assert_send_type '(::string str) -> ::String',
+                      ::Digest::MD5.new, :base64digest, str
+    end
   end
 
   def test_base64digest_bang
@@ -105,29 +123,35 @@ class DigestMD5InstanceTest < Test::Unit::TestCase
   end
 
   def test_digest
-    assert_send_type '(?::String) -> ::String',
+    assert_send_type '() -> ::String',
                      ::Digest::MD5.new, :digest
 
-    assert_send_type '(?::String) -> ::String',
-                     ::Digest::MD5.new, :digest, '_digest_'
+    with_string('_digest_') do |str|
+      assert_send_type '(::string) -> ::String',
+                       ::Digest::MD5.new, :digest, str
+    end
   end
 
   def test_digest_bang
     assert_send_type '() -> ::String',
-                     ::Digest::MD5.new, :digest
+                     ::Digest::MD5.new, :digest!
   end
 
   def test_file
-    assert_send_type '(::String) -> Digest::MD5',
-                     ::Digest::MD5.new, :file, 'README.md'
+    with_string('README.md') do |str|
+      assert_send_type '(::string) -> Digest::MD5',
+                       ::Digest::MD5.new, :file, str
+    end
   end
 
   def test_hexdigest
-    assert_send_type '(?::String) -> ::String',
+    assert_send_type '() -> ::String',
                      ::Digest::MD5.new, :hexdigest
 
-    assert_send_type '(?::String) -> ::String',
-                     ::Digest::MD5.new, :hexdigest, '_hexdigest_'
+    with_string('_hexdigest_') do |str|
+      assert_send_type '(::string) -> ::String',
+                       ::Digest::MD5.new, :hexdigest, str
+    end
   end
 
   def test_hexdigest_bang

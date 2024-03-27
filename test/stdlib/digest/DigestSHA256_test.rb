@@ -9,28 +9,38 @@ class DigestSHA256SingletonTest < Test::Unit::TestCase
   testing 'singleton(::Digest::SHA256)'
 
   def test_base64digest
-    assert_send_type '(::String str) -> ::String',
-                     ::Digest::SHA256, :base64digest, '_base64digest_'
+    with_string('_base64digest_') do |str|
+      assert_send_type '(::string str) -> ::String',
+                       ::Digest::SHA256, :base64digest, str
+    end
   end
 
   def test_bubblebabble
-    assert_send_type '(::String) -> ::String',
-                     ::Digest::SHA256, :bubblebabble, '_bubblebabble_'
+    with_string('_bubblebabble_') do |str|
+      assert_send_type '(::string) -> ::String',
+                      ::Digest::SHA256, :bubblebabble, str
+    end
   end
 
   def test_digest
-    assert_send_type '(::String) -> ::String',
-                     ::Digest::SHA256, :digest, '_digest_'
+    with_string('_digest_') do |str|
+      assert_send_type '(::string) -> ::String',
+                      ::Digest::SHA256, :digest, str
+    end
   end
 
   def test_file
-    assert_send_type '(::String) -> ::Digest::Class',
-                     ::Digest::SHA256, :file, 'README.md'
+    with_string('README.md') do |str|
+      assert_send_type '(::string) -> ::Digest::SHA256',
+                      ::Digest::SHA256, :file, str
+    end
   end
 
   def test_hexdigest
-    assert_send_type '(::String) -> ::String',
-                     ::Digest::SHA256, :hexdigest, '_hexdigest_'
+    with_string('_hexdigest_') do |str|
+      assert_send_type '(::string) -> ::String',
+                      ::Digest::SHA256, :hexdigest, str
+    end
   end
 end
 
@@ -41,8 +51,10 @@ class DigestSHA256InstanceTest < Test::Unit::TestCase
   testing '::Digest::SHA256'
 
   def test_left_shift
-    assert_send_type '(::String) -> Digest::SHA256',
-                     ::Digest::SHA256.new, :<<, '_binary_left_shift_'
+    with_string('_binary_left_shift_') do |str|
+      assert_send_type '(::string) -> Digest::SHA256',
+                        ::Digest::SHA256.new, :<<, str
+    end
   end
 
   def test_block_length
@@ -61,8 +73,10 @@ class DigestSHA256InstanceTest < Test::Unit::TestCase
   end
 
   def test_update
-    assert_send_type '(::String) -> Digest::SHA256',
-                     ::Digest::SHA256.new, :update, '_update_'
+    with_string('_update_') do |str|
+      assert_send_type '(::string) -> Digest::SHA256',
+                      ::Digest::SHA256.new, :update, str
+    end
   end
 
   def test_finish
@@ -71,27 +85,31 @@ class DigestSHA256InstanceTest < Test::Unit::TestCase
   end
 
   def test_initialize_copy
-    assert_send_type '(::Digest::Base) -> Digest::SHA256',
+    assert_send_type '(Digest::SHA256) -> Digest::SHA256',
                      ::Digest::SHA256.new, :initialize_copy, ::Digest::SHA256.new
   end
 
   def test_equal
-    assert_send_type '(::Digest::Instance | ::String) -> bool',
+    assert_send_type '(::Digest::SHA256) -> bool',
                      ::Digest::SHA256.new, :==, ::Digest::SHA256.new
 
-    assert_send_type '(::Digest::Instance | ::String) -> bool',
-                     ::Digest::SHA256.new, :==, '_equal_'
+    with_string('_equal_') do |str|
+      assert_send_type '(::string) -> bool',
+                      ::Digest::SHA256.new, :==, str
+    end
   end
 
   def test_base64digest
-    assert_send_type '(?::String? str) -> ::String',
+    assert_send_type '() -> ::String',
                      ::Digest::SHA256.new, :base64digest
 
-    assert_send_type '(?::String? str) -> ::String',
+    assert_send_type '(nil) -> ::String',
                      ::Digest::SHA256.new, :base64digest, nil
 
-    assert_send_type '(?::String? str) -> ::String',
-                     ::Digest::SHA256.new, :base64digest, '_base64digest_'
+    with_string('_base64digest_') do |str|
+      assert_send_type '(::string str) -> ::String',
+                      ::Digest::SHA256.new, :base64digest, str
+    end
   end
 
   def test_base64digest_bang
@@ -105,29 +123,35 @@ class DigestSHA256InstanceTest < Test::Unit::TestCase
   end
 
   def test_digest
-    assert_send_type '(?::String) -> ::String',
+    assert_send_type '() -> ::String',
                      ::Digest::SHA256.new, :digest
 
-    assert_send_type '(?::String) -> ::String',
-                     ::Digest::SHA256.new, :digest, '_digest_'
+    with_string('_digest_') do |str|
+      assert_send_type '(::string) -> ::String',
+                       ::Digest::SHA256.new, :digest, str
+    end
   end
 
   def test_digest_bang
     assert_send_type '() -> ::String',
-                     ::Digest::SHA256.new, :digest
+                     ::Digest::SHA256.new, :digest!
   end
 
   def test_file
-    assert_send_type '(::String) -> Digest::SHA256',
-                     ::Digest::SHA256.new, :file, 'README.md'
+    with_string('README.md') do |str|
+      assert_send_type '(::string) -> Digest::SHA256',
+                       ::Digest::SHA256.new, :file, str
+    end
   end
 
   def test_hexdigest
-    assert_send_type '(?::String) -> ::String',
+    assert_send_type '() -> ::String',
                      ::Digest::SHA256.new, :hexdigest
 
-    assert_send_type '(?::String) -> ::String',
-                     ::Digest::SHA256.new, :hexdigest, '_hexdigest_'
+    with_string('_hexdigest_') do |str|
+      assert_send_type '(::string) -> ::String',
+                       ::Digest::SHA256.new, :hexdigest, str
+    end
   end
 
   def test_hexdigest_bang
