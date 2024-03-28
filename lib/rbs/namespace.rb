@@ -2,42 +2,45 @@
 
 module RBS
   class Namespace
-    attr_reader :path
-
-    def initialize(path:, absolute:)
-      @path = path
-      @absolute = absolute ? true : false
+    def initialize(string)
+      @string = string
     end
 
     def self.empty
-      @empty ||= new(path: [], absolute: false)
+      Namespace("")
     end
 
     def self.root
-      @root ||= new(path: [], absolute: true)
+      Namespace("::")
     end
 
     def +(other)
       if other.absolute?
         other
       else
-        self.class.new(path: path + other.path, absolute: absolute?)
+        Namespace(@string + other.to_s)
+      end
+    end
+
+    def path
+      if empty?
+        []
+      else
+        to_s.delete_prefix("::").delete_suffix("::").split("::").map(&:to_sym)
       end
     end
 
     def append(component)
-      self.class.new(path: path + [component], absolute: absolute?)
+      Namespace("#{@string}#{component}::")
     end
 
     def parent
-      @parent ||= begin
-        raise "Parent with empty namespace" if empty?
-        self.class.new(path: path.take(path.size - 1), absolute: absolute?)
-      end
+      raise "Parent with empty namespace" if empty?
+      to_type_name.namespace
     end
 
     def absolute?
-      @absolute
+      @string.start_with?("::")
     end
 
     def relative?
@@ -45,57 +48,71 @@ module RBS
     end
 
     def absolute!
-      self.class.new(path: path, absolute: true)
+      if absolute?
+        self
+      else
+        Namespace("::" + @string)
+      end
     end
 
     def relative!
-      self.class.new(path: path, absolute: false)
+      if relative?
+        self
+      else
+        Namespace(@string[2..] || raise)
+      end
     end
 
     def empty?
-      path.empty?
+      @string == "" || @string == "::"
     end
 
     def ==(other)
-      other.is_a?(Namespace) && other.path == path && other.absolute? == absolute?
+      other.is_a?(Namespace) && @string == other.to_s
     end
 
     alias eql? ==
 
     def hash
-      path.hash ^ absolute?.hash
+      @string.hash
     end
 
     def split
-      last = path.last or return
-      parent = self.parent
-      [parent, last]
+      return if empty?
+
+      name = to_type_name()
+      [name.namespace, name.name]
+    end
+
+    def head_tail
+      return if empty?
+
+      head, *tail = path
+      head or raise
+
+      if tail.empty?
+        namespace = ""
+      else
+        namespace = tail.join("::") + "::"
+      end
+
+      [
+        head,
+        Namespace(namespace)
+      ]
     end
 
     def to_s
-      if empty?
-        absolute? ? "::" : ""
-      else
-        s = path.join("::")
-        absolute? ? "::#{s}::" : "#{s}::"
-      end
+      @string
     end
 
     def to_type_name
-      parent, name = split
-
-      raise unless name
-      raise unless parent
-
-      TypeName.new(name: name, namespace: parent)
+      raise @string.inspect if empty?
+      TypeName @string.delete_suffix("::")
     end
 
     def self.parse(string)
-      if string.start_with?("::")
-        new(path: string.split("::").drop(1).map(&:to_sym), absolute: true)
-      else
-        new(path: string.split("::").map(&:to_sym), absolute: false)
-      end
+      Namespace(string)
     end
 
     def ascend
@@ -119,6 +136,6 @@ end
 
 module Kernel
   def Namespace(name)
-    RBS::Namespace.parse(name)
+    RBS::ALL_NAMESPACES[name] ||= RBS::Namespace.new(name)
   end
 end

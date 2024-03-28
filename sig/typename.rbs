@@ -1,4 +1,7 @@
 module RBS
+  ALL_NAMESPACES: Hash[String, Namespace]
+  ALL_NAMES: Hash[String, TypeName]
+
   # TypeName represents name of types in RBS.
   #
   # TypeNames are one of the three kind, class, alias, and interface.
@@ -10,8 +13,12 @@ module RBS
     #
     type kind = :class | :alias | :interface
 
+    attr_reader string: String
+
+    @namespace_str: String
+
     # The namespace the type name is defined in.
-    attr_reader namespace: Namespace
+    def namespace: () -> Namespace
 
     # Name of type name.
     attr_reader name: Symbol
@@ -26,7 +33,7 @@ module RBS
     # If the name starts with lower case alphabet, it is _alias_.
     # If the name starts with an underscore, it is _interface_.
     #
-    def initialize: (namespace: Namespace, name: Symbol) -> void
+    def initialize: (String) -> void
 
     def ==: (untyped other) -> bool
 

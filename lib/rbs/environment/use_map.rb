@@ -59,10 +59,7 @@ module RBS
           # namespace is not empty
           if tn = @map[hd]
             path = [*tn.namespace.path, tn.name, *tl]
-            TypeName.new(
-              namespace: Namespace.new(absolute: true, path: path),
-              name: type_name.name
-            )
+            TypeName("::" + path.join("::") + "::" + type_name.name.to_s)
           end
         else
           @map[type_name.name]

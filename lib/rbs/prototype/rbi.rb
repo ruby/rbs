@@ -242,7 +242,7 @@ module RBS
           else
             name = node.children[0].yield_self do |n|
               if n.is_a?(Symbol)
-                TypeName.new(namespace: current_namespace, name: n)
+                TypeName(current_namespace.to_s + n.to_s)
               else
                 const_to_name(n)
               end

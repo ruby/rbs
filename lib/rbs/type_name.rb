@@ -1,14 +1,27 @@
 # frozen_string_literal: true
 
 module RBS
-  class TypeName
-    attr_reader :namespace
-    attr_reader :name
-    attr_reader :kind
+  ALL_NAMES = {}
+  ALL_NAMESPACES = {}
 
-    def initialize(namespace:, name:)
-      @namespace = namespace
-      @name = name
+  class TypeName
+    attr_reader :kind
+    attr_reader :string, :name
+
+    def namespace
+      Namespace(@namespace_str)
+    end
+
+    def initialize(string)
+      @string = string
+      separator_index = string.rindex("::")
+      if separator_index
+        @namespace_str = string[0, separator_index + 2]
+        @name = (string[(separator_index + 2)..] || raise).to_sym
+      else
+        @namespace_str = ""
+        @name = string.to_sym
+      end
       @kind = case
               when name.match?(/\A[A-Z]/)
                 :class
@@ -23,25 +36,25 @@ module RBS
     end
 
     def ==(other)
-      other.is_a?(self.class) && other.namespace == namespace && other.name == name
+      other.is_a?(self.class) && other.string == string
     end
 
     alias eql? ==
 
     def hash
-      namespace.hash ^ name.hash
+      string.hash
     end
 
     def to_s
-      "#{namespace.to_s}#{name}"
+      string
     end
 
     def to_json(state = _ = nil)
-      to_s.to_json(state)
+      string.to_json(state)
     end
 
     def to_namespace
-      namespace.append(self.name)
+      Namespace(string + "::")
     end
 
     def class?
@@ -53,15 +66,23 @@ module RBS
     end
 
     def absolute!
-      self.class.new(namespace: namespace.absolute!, name: name)
+      if absolute?
+        self
+      else
+        TypeName("::" + string)
+      end
     end
 
     def absolute?
-      namespace.absolute?
+      string.start_with?("::")
     end
 
     def relative!
-      self.class.new(namespace: namespace.relative!, name: name)
+      if absolute?
+        TypeName(string.delete_prefix("::"))
+      else
+        self
+      end
     end
 
     def interface?
@@ -69,7 +90,11 @@ module RBS
     end
 
     def with_prefix(namespace)
-      self.class.new(namespace: namespace + self.namespace, name: name)
+      if absolute?
+        self
+      else
+        TypeName(namespace.to_s + string)
+      end
     end
 
     def split
@@ -80,10 +105,7 @@ module RBS
       if other.absolute?
         other
       else
-        TypeName.new(
-          namespace: self.to_namespace + other.namespace,
-          name: other.name
-        )
+        TypeName(string + "::" + other.string)
       end
     end
   end
@@ -91,14 +113,7 @@ end
 
 module Kernel
   def TypeName(string)
-    absolute = string.start_with?("::")
-
-    *path, name = string.delete_prefix("::").split("::").map(&:to_sym)
-    raise unless name
-
-    RBS::TypeName.new(
-      name: name,
-      namespace: RBS::Namespace.new(path: path, absolute: absolute)
-    )
+    string.freeze
+    RBS::ALL_NAMES[string] ||= RBS::TypeName.new(string)
   end
 end

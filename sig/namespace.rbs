@@ -32,13 +32,9 @@ module RBS
   # ```
   #
   class Namespace
-    attr_reader path: Array[Symbol]
+    def initialize: (String) -> void
 
-    def initialize: (path: Array[Symbol], absolute: boolish) -> void
-
-    @absolute: bool
-
-    @parent: Namespace?
+    @string: String
 
     self.@root: Namespace?
 
@@ -114,9 +110,15 @@ module RBS
     # Returns a pair of parent namespace and a symbol of last component.
     #
     # ```rb
-    # Namespace("::A::B::C").split    # => [Namespace("::A::B::"), :C]
+    # Namespace("::A::B::C::").split    # => [Namespace("::A::B::"), :C]
     # ```
     def split: () -> [Namespace, Symbol]?
+
+    # Returns a pair of the first component and the rest namespace
+    #
+    # The returned namespace is always relative.
+    #
+    def head_tail: () -> [Symbol, Namespace]?
 
     def to_s: () -> String
 
@@ -137,6 +139,8 @@ module RBS
     # ```
     def ascend: () { (Namespace) -> void } -> void
               | () -> Enumerator[Namespace, void]
+
+    def path: () -> Array[Symbol]
   end
 end
 

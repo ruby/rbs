@@ -54,10 +54,7 @@ module TestHelper
   end
 
   def type_name(string)
-    RBS::Namespace.parse(string).yield_self do |namespace|
-      last = namespace.path.last
-      RBS::TypeName.new(name: last, namespace: namespace.parent)
-    end
+    TypeName(string)
   end
 
   def silence_warnings

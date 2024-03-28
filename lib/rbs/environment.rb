@@ -284,7 +284,7 @@ module RBS
           parent = normalize_module_name?(parent)
           return parent unless parent
 
-          TypeName.new(namespace: parent.to_namespace, name: name.name)
+          TypeName(parent.to_s + "::" + name.name.to_s)
         else
           name
         end
@@ -344,7 +344,7 @@ module RBS
       unless name.namespace.empty?
         parent = name.namespace.to_type_name
         if normalized_parent = normalize_module_name?(parent)
-          type_name = TypeName.new(namespace: normalized_parent.to_namespace, name: name.name)
+          type_name = TypeName(normalized_parent.to_s + "::" + name.name.to_s)
         else
           @normalize_module_name_cache[name] = nil
           return

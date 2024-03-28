@@ -21,7 +21,7 @@ class RBS::SignatureParsingTest < Test::Unit::TestCase
       type_decl = decls[0]
 
       assert_instance_of Declarations::TypeAlias, type_decl
-      assert_equal TypeName.new(name: :foo, namespace: Namespace.parse("Steep")), type_decl.name
+      assert_equal "Steep::foo", type_decl.name.string
       assert_equal [], type_decl.type_params.each.map(&:name)
       assert_equal Types::Bases::Any.new(location: nil), type_decl.type
       assert_equal "type Steep::foo = untyped", type_decl.location.source

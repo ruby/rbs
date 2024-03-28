@@ -17,7 +17,7 @@ module RBS
 
       def singleton_type?: (Types::t) -> bool
 
-      def self.define: (Symbol, ?namespace: Namespace) -> instance
+      def self.define: (String) -> instance
     end
 
     BasicObject: Name

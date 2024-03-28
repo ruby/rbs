@@ -22,27 +22,24 @@ VALUE rbs_base_type(VALUE klass, VALUE location) {
 }
 
 VALUE rbs_namespace(VALUE path, VALUE absolute) {
-  VALUE args = rb_hash_new();
-  rb_hash_aset(args, ID2SYM(rb_intern("path")), path);
-  rb_hash_aset(args, ID2SYM(rb_intern("absolute")), absolute);
+  VALUE string = rb_str_new("", 0);
+  if (RB_TEST(absolute)) {
+    rb_str_append(string, rb_str_new_cstr("::"));
+  }
+  rb_str_append(string, rb_ary_join(path, rb_str_new_cstr("::")));
+  if (rb_array_len(path) > 0) {
+    rb_str_append(string, rb_str_new_cstr("::"));
+  }
 
-  return CLASS_NEW_INSTANCE(
-    RBS_Namespace,
-    1,
-    &args
-  );
+  return rb_funcall(rb_mKernel, rb_intern("Namespace"), 1, string);
 }
 
 VALUE rbs_type_name(VALUE namespace, VALUE name) {
-  VALUE args = rb_hash_new();
-  rb_hash_aset(args, ID2SYM(rb_intern("namespace")), namespace);
-  rb_hash_aset(args, ID2SYM(rb_intern("name")), name);
+  VALUE string = rb_str_new("", 0);
+  rb_str_append(string, rb_funcall(namespace, rb_intern("to_s"), 0));
+  rb_str_append(string, rb_funcall(name, rb_intern("to_s"), 0));
 
-  return CLASS_NEW_INSTANCE(
-    RBS_TypeName,
-    1,
-    &args
-  );
+  return rb_funcall(rb_mKernel, rb_intern("TypeName"), 1, string);
 }
 
 VALUE rbs_class_instance(VALUE typename, VALUE type_args, VALUE location) {

@@ -53,14 +53,12 @@ module RBS
           head = type_name.name
           tail = nil
         else
-          head, *tail = type_name.namespace.path
+          head, tail = type_name.namespace.head_tail
 
           head or raise
+          tail or raise
 
-          tail = TypeName.new(
-            name: type_name.name,
-            namespace: Namespace.new(absolute: false, path: tail)
-          )
+          tail = TypeName(tail.to_s + type_name.name.to_s)
         end
 
         [head, tail]
@@ -73,11 +71,11 @@ module RBS
           when false
             resolve_in(head, parent)
           when TypeName
-            name = TypeName.new(name: head, namespace: child.to_namespace)
+            name = TypeName(child.string + "::" + head.to_s)
             has_name?(name) || resolve_in(head, parent)
           end
         else
-          has_name?(TypeName.new(name: head, namespace: Namespace.root))
+          has_name?(TypeName("::#{head}"))
         end
       end
 

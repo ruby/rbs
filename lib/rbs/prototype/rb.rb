@@ -58,7 +58,7 @@ module RBS
 
         unless top_members.empty?
           top = AST::Declarations::Class.new(
-            name: TypeName.new(name: :Object, namespace: Namespace.empty),
+            name: TypeName("Object"),
             super_class: nil,
             members: top_members,
             annotations: [],
@@ -366,7 +366,7 @@ module RBS
         when :CDECL
           const_name = case
                        when node.children[0].is_a?(Symbol)
-                         TypeName.new(name: node.children[0], namespace: Namespace.empty)
+                         TypeName(node.children[0].to_s)
                        else
                          const_to_name!(node.children[0])
                        end
@@ -432,7 +432,7 @@ module RBS
       def const_to_name!(node)
         case node.type
         when :CONST
-          TypeName.new(name: node.children[0], namespace: Namespace.empty)
+          TypeName(node.children[0].to_s)
         when :COLON2
           if node.children[0]
             namespace = const_to_name!(node.children[0]).to_namespace
@@ -440,9 +440,9 @@ module RBS
             namespace = Namespace.empty
           end
 
-          TypeName.new(name: node.children[1], namespace: namespace)
+          TypeName(namespace.to_s + node.children[1].to_s)
         when :COLON3
-          TypeName.new(name: node.children[0], namespace: Namespace.root)
+          TypeName.new("::#{node.children[0]}")
         else
           raise
         end
@@ -601,7 +601,7 @@ module RBS
           BuiltinNames::Float.instance_type
         when :RATIONAL, :IMAGINARY
           lit = node.children[0]
-          type_name = TypeName.new(name: lit.class.name.to_sym, namespace: Namespace.root)
+          type_name = TypeName("::#{lit.class.name}")
           Types::ClassInstance.new(name: type_name, args: [], location: nil)
         when :LIT
           lit = node.children[0]
@@ -620,7 +620,7 @@ module RBS
             # { "a" => nil }  => LIT node
             Types::Literal.new(literal: lit, location: nil)
           else
-            type_name = TypeName.new(name: lit.class.name.to_sym, namespace: Namespace.root)
+            type_name = TypeName("::#{lit.class.name}")
             Types::ClassInstance.new(name: type_name, args: [], location: nil)
           end
         when :ZLIST, :ZARRAY
