@@ -244,30 +244,11 @@ comment *comment_get_comment(comment *com, int line) {
 
 VALUE comment_to_ruby(comment *com, VALUE buffer) {
   VALUE content = rb_funcall(buffer, rb_intern("content"), 0);
-  rb_encoding *enc = rb_enc_get(content);
-  VALUE string = rb_enc_str_new_cstr("", enc);
-
-  int hash_bytes = rb_enc_codelen('#', enc);
-  int space_bytes = rb_enc_codelen(' ', enc);
-
-  for (size_t i = 0; i < com->line_count; i++) {
-    token tok = com->tokens[i];
-
-    char *comment_start = RSTRING_PTR(content) + tok.range.start.byte_pos + hash_bytes;
-    int comment_bytes = RANGE_BYTES(tok.range) - hash_bytes;
-    unsigned char c = rb_enc_mbc_to_codepoint(comment_start, RSTRING_END(content), enc);
-
-    if (c == ' ') {
-      comment_start += space_bytes;
-      comment_bytes -= space_bytes;
-    }
-
-    rb_str_cat(string, comment_start, comment_bytes);
-    rb_str_cat_cstr(string, "\n");
-  }
 
   return rbs_ast_comment(
-    string,
+    content,
+    INT2FIX(com->start.line),
+    INT2FIX(com->end.line),
     rbs_location_pp(buffer, &com->start, &com->end)
   );
 }
