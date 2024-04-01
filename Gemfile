@@ -13,6 +13,7 @@ gem "rubocop-rubycw"
 gem "json"
 gem "json-schema"
 gem 'stackprof'
+gem 'memory_profiler'
 gem "goodcheck"
 gem "dbm"
 gem 'digest'
