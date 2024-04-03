@@ -95,6 +95,19 @@ class KernelSingletonTest < Test::Unit::TestCase
                        Kernel, :autoload?, interned
     end
   end
+
+  def test_rand
+    assert_send_type "() -> Float", Kernel, :rand
+    assert_send_type "(0) -> Float", Kernel, :rand, 0
+    assert_send_type "(_ToInt) -> Float", Kernel, :rand, 0.0
+    assert_send_type "(_ToInt) -> Float", Kernel, :rand, 0r
+    assert_send_type "(_ToInt) -> Float", Kernel, :rand, 0i
+    assert_send_type "(_ToInt) -> Integer", Kernel, :rand, 10
+    assert_send_type "(Range[Integer]) -> Integer", Kernel, :rand, 1..10
+    assert_send_type "(Range[Integer]) -> nil", Kernel, :rand, 0...0
+    assert_send_type "(Range[Float]) -> Float", Kernel, :rand, 0.0...10.0
+    assert_send_type "(Range[Float]) -> nil", Kernel, :rand, 0.0...0.0
+  end
 end
 
 class KernelTest < StdlibTest
