@@ -4,7 +4,7 @@ tmpdir = prepare_collection!
 
 require 'memory_profiler'
 
-env = nil
+_ = env = nil
 
 r = MemoryProfiler.report do
   env = new_rails_env(tmpdir)
