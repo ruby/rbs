@@ -1,5 +1,8 @@
 #include "rbs_extension.h"
 
+#define RBS_LOC_REQUIRED_P(loc, i) ((loc)->list->required_p & (1 << (i)))
+#define RBS_LOC_OPTIONAL_P(loc, i) (!RBS_LOC_REQUIRED_P((loc), (i)))
+
 VALUE RBS_Location;
 
 position rbs_loc_position(int char_pos) {
@@ -220,7 +223,7 @@ static VALUE location_aref(VALUE self, VALUE name) {
     if (loc->list->entries[i].name == id) {
       range result = loc->list->entries[i].rg;
 
-      if (!(loc->list->required_p & (1 << i)) && null_range_p(result)) {
+      if (RBS_LOC_OPTIONAL_P(loc, i) && null_range_p(result)) {
         return Qnil;
       } else {
         return rbs_new_location(loc->buffer, result);
@@ -239,7 +242,7 @@ static VALUE location_optional_keys(VALUE self) {
   rbs_loc_list *list = loc->list;
 
   for (unsigned short i = 0; i < list->len; i++) {
-    if (!(list->required_p & (1 << i))) {
+    if (RBS_LOC_OPTIONAL_P(loc, i)) {
       rb_ary_push(keys, ID2SYM(list->entries[i].name));
 
     }
@@ -255,7 +258,7 @@ static VALUE location_required_keys(VALUE self) {
   rbs_loc_list *list = loc->list;
 
   for (unsigned short i = 0; i < list->len; i++) {
-    if (list->required_p & (1 << i)) {
+    if (RBS_LOC_REQUIRED_P(loc, i)) {
       rb_ary_push(keys, ID2SYM(list->entries[i].name));
     }
   }
