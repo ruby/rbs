@@ -9,17 +9,22 @@
  * */
 extern VALUE RBS_Location;
 
-typedef struct rbs_loc_list {
+typedef struct {
   ID name;
   range rg;
-  struct rbs_loc_list *next;
+} rbs_loc_entry;
+
+typedef struct {
+  unsigned short len;
+  unsigned short cap;
+  unsigned int required_p;
+  rbs_loc_entry entries[0];
 } rbs_loc_list;
 
 typedef struct {
   VALUE buffer;
   range rg;
-  rbs_loc_list *requireds;
-  rbs_loc_list *optionals;
+  rbs_loc_list *list;
 } rbs_loc;
 
 /**
