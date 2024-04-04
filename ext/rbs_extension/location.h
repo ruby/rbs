@@ -14,10 +14,12 @@ typedef struct {
   range rg;
 } rbs_loc_entry;
 
+typedef unsigned int rbs_loc_entry_bitmap;
+
 typedef struct {
   unsigned short len;
   unsigned short cap;
-  unsigned int required_p;
+  rbs_loc_entry_bitmap required_p;
   rbs_loc_entry entries[0];
 } rbs_loc_list;
 

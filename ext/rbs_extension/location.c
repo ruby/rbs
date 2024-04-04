@@ -12,8 +12,16 @@ position rbs_loc_position3(int char_pos, int line, int column) {
   return pos;
 }
 
-// TODO: check max size
+static void check_children_max(unsigned short n) {
+  size_t max = sizeof(rbs_loc_entry_bitmap) * 8;
+  if (n > max) {
+    rb_raise(rb_eRuntimeError, "Too many children added to location: %d", n);
+  }
+}
+
 void rbs_loc_alloc_children(rbs_loc *loc, unsigned short size) {
+  check_children_max(size);
+
   size_t s = sizeof(rbs_loc_list) + sizeof(rbs_loc_entry) * size;
   loc->list = malloc(s);
 
@@ -22,12 +30,12 @@ void rbs_loc_alloc_children(rbs_loc *loc, unsigned short size) {
   loc->list->cap = size;
 }
 
-// TODO: check max size
-void rbs_loc_alloc_adding_children(rbs_loc *loc) {
+static void rbs_loc_alloc_adding_children(rbs_loc *loc) {
   if (loc->list == NULL) {
     rbs_loc_alloc_children(loc, 1);
   } else {
     if (loc->list->len == loc->list->cap) {
+      check_children_max(loc->list->cap + 1);
       size_t s = sizeof(rbs_loc_list) + sizeof(rbs_loc_entry) * (++loc->list->cap);
       loc->list = realloc(loc->list, s);
     }
@@ -71,7 +79,11 @@ static void rbs_loc_mark(void *ptr)
 
 static size_t rbs_loc_memsize(const void *ptr) {
   const rbs_loc *loc = ptr;
-  return sizeof(rbs_loc) + sizeof(rbs_loc_list) + sizeof(rbs_loc_entry) * loc->list->cap;
+  if (loc->list == NULL) {
+    return sizeof(rbs_loc);
+  } else {
+    return sizeof(rbs_loc) + sizeof(rbs_loc_list) + sizeof(rbs_loc_entry) * loc->list->cap;
+  }
 }
 
 static rb_data_type_t location_type = {
