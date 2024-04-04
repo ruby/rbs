@@ -12,6 +12,7 @@ position rbs_loc_position3(int char_pos, int line, int column) {
   return pos;
 }
 
+// TODO: check max size
 void rbs_loc_alloc_children(rbs_loc *loc, unsigned short size) {
   size_t s = sizeof(rbs_loc_list) + sizeof(rbs_loc_entry) * size;
   loc->list = malloc(s);
@@ -21,6 +22,7 @@ void rbs_loc_alloc_children(rbs_loc *loc, unsigned short size) {
   loc->list->cap = size;
 }
 
+// TODO: check max size
 void rbs_loc_alloc_adding_children(rbs_loc *loc) {
   if (loc->list == NULL) {
     rbs_loc_alloc_children(loc, 1);
@@ -156,7 +158,6 @@ static VALUE location_end_loc(VALUE self) {
   }
 }
 
-// TODO: Check if we need to allocate more space
 static VALUE location_add_required_child(VALUE self, VALUE name, VALUE start, VALUE end) {
   rbs_loc *loc = rbs_check_location(self);
 
@@ -169,7 +170,6 @@ static VALUE location_add_required_child(VALUE self, VALUE name, VALUE start, VA
   return Qnil;
 }
 
-// TODO: Check if we need to allocate more space
 static VALUE location_add_optional_child(VALUE self, VALUE name, VALUE start, VALUE end) {
   rbs_loc *loc = rbs_check_location(self);
 
@@ -224,11 +224,12 @@ static VALUE location_optional_keys(VALUE self) {
   VALUE keys = rb_ary_new();
 
   rbs_loc *loc = rbs_check_location(self);
-  rbs_loc_list list = *loc->list;
+  rbs_loc_list *list = loc->list;
 
-  for (unsigned short i = 0; i < list.len; i++) {
-    if (!(list.required_p & (1 << i))) {
-      rb_ary_push(keys, ID2SYM(list.entries[i].name));
+  for (unsigned short i = 0; i < list->len; i++) {
+    if (!(list->required_p & (1 << i))) {
+      rb_ary_push(keys, ID2SYM(list->entries[i].name));
+
     }
   }
 
@@ -239,11 +240,11 @@ static VALUE location_required_keys(VALUE self) {
   VALUE keys = rb_ary_new();
 
   rbs_loc *loc = rbs_check_location(self);
-  rbs_loc_list list = *loc->list;
+  rbs_loc_list *list = loc->list;
 
-  for (unsigned short i = 0; i < list.len; i++) {
-    if (list.required_p & (1 << i)) {
-      rb_ary_push(keys, ID2SYM(list.entries[i].name));
+  for (unsigned short i = 0; i < list->len; i++) {
+    if (list->required_p & (1 << i)) {
+      rb_ary_push(keys, ID2SYM(list->entries[i].name));
     }
   }
 
