@@ -1,6 +1,6 @@
 #include "rbs_extension.h"
 
-#define RBS_LOC_REQUIRED_P(loc, i) ((loc)->list->required_p & (1 << (i)))
+#define RBS_LOC_REQUIRED_P(loc, i) ((loc)->children->required_p & (1 << (i)))
 #define RBS_LOC_OPTIONAL_P(loc, i) (!RBS_LOC_REQUIRED_P((loc), (i)))
 
 VALUE RBS_Location;
@@ -25,52 +25,52 @@ static void check_children_max(unsigned short n) {
 void rbs_loc_alloc_children(rbs_loc *loc, unsigned short size) {
   check_children_max(size);
 
-  size_t s = sizeof(rbs_loc_list) + sizeof(rbs_loc_entry) * size;
-  loc->list = malloc(s);
+  size_t s = sizeof(rbs_loc_children) + sizeof(rbs_loc_entry) * size;
+  loc->children = malloc(s);
 
-  loc->list->len = 0;
-  loc->list->required_p = 0;
-  loc->list->cap = size;
+  loc->children->len = 0;
+  loc->children->required_p = 0;
+  loc->children->cap = size;
 }
 
-static void rbs_loc_alloc_adding_children(rbs_loc *loc) {
-  if (loc->list == NULL) {
+static void check_children_cap(rbs_loc *loc) {
+  if (loc->children == NULL) {
     rbs_loc_alloc_children(loc, 1);
   } else {
-    if (loc->list->len == loc->list->cap) {
-      check_children_max(loc->list->cap + 1);
-      size_t s = sizeof(rbs_loc_list) + sizeof(rbs_loc_entry) * (++loc->list->cap);
-      loc->list = realloc(loc->list, s);
+    if (loc->children->len == loc->children->cap) {
+      check_children_max(loc->children->cap + 1);
+      size_t s = sizeof(rbs_loc_children) + sizeof(rbs_loc_entry) * (++loc->children->cap);
+      loc->children = realloc(loc->children, s);
     }
   }
 }
 
 void rbs_loc_add_required_child(rbs_loc *loc, ID name, range r) {
-  rbs_loc_alloc_adding_children(loc);
+  check_children_cap(loc);
 
-  unsigned short i = loc->list->len++;
-  loc->list->entries[i].name = name;
-  loc->list->entries[i].rg = r;
+  unsigned short i = loc->children->len++;
+  loc->children->entries[i].name = name;
+  loc->children->entries[i].rg = r;
 
-  loc->list->required_p |= 1 << i;
+  loc->children->required_p |= 1 << i;
 }
 
 void rbs_loc_add_optional_child(rbs_loc *loc, ID name, range r) {
-  rbs_loc_alloc_adding_children(loc);
+  check_children_cap(loc);
 
-  unsigned short i = loc->list->len++;
-  loc->list->entries[i].name = name;
-  loc->list->entries[i].rg = r;
+  unsigned short i = loc->children->len++;
+  loc->children->entries[i].name = name;
+  loc->children->entries[i].rg = r;
 }
 
 void rbs_loc_init(rbs_loc *loc, VALUE buffer, range rg) {
   loc->buffer = buffer;
   loc->rg = rg;
-  loc->list = NULL;
+  loc->children = NULL;
 }
 
 void rbs_loc_free(rbs_loc *loc) {
-  free(loc->list);
+  free(loc->children);
   ruby_xfree(loc);
 }
 
@@ -82,10 +82,10 @@ static void rbs_loc_mark(void *ptr)
 
 static size_t rbs_loc_memsize(const void *ptr) {
   const rbs_loc *loc = ptr;
-  if (loc->list == NULL) {
+  if (loc->children == NULL) {
     return sizeof(rbs_loc);
   } else {
-    return sizeof(rbs_loc) + sizeof(rbs_loc_list) + sizeof(rbs_loc_entry) * loc->list->cap;
+    return sizeof(rbs_loc) + sizeof(rbs_loc_children) + sizeof(rbs_loc_entry) * loc->children->cap;
   }
 }
 
@@ -127,7 +127,7 @@ static VALUE location_initialize_copy(VALUE self, VALUE other) {
 
   self_loc->buffer = other_loc->buffer;
   self_loc->rg = other_loc->rg;
-  rbs_loc_alloc_children(self_loc, other_loc->list->cap);
+  rbs_loc_alloc_children(self_loc, other_loc->children->cap);
 
   return Qnil;
 }
@@ -219,9 +219,9 @@ static VALUE location_aref(VALUE self, VALUE name) {
 
   ID id = SYM2ID(name);
 
-  for (unsigned short i = 0; i < loc->list->len; i++) {
-    if (loc->list->entries[i].name == id) {
-      range result = loc->list->entries[i].rg;
+  for (unsigned short i = 0; i < loc->children->len; i++) {
+    if (loc->children->entries[i].name == id) {
+      range result = loc->children->entries[i].rg;
 
       if (RBS_LOC_OPTIONAL_P(loc, i) && null_range_p(result)) {
         return Qnil;
@@ -239,11 +239,11 @@ static VALUE location_optional_keys(VALUE self) {
   VALUE keys = rb_ary_new();
 
   rbs_loc *loc = rbs_check_location(self);
-  rbs_loc_list *list = loc->list;
+  rbs_loc_children *children = loc->children;
 
-  for (unsigned short i = 0; i < list->len; i++) {
+  for (unsigned short i = 0; i < children->len; i++) {
     if (RBS_LOC_OPTIONAL_P(loc, i)) {
-      rb_ary_push(keys, ID2SYM(list->entries[i].name));
+      rb_ary_push(keys, ID2SYM(children->entries[i].name));
 
     }
   }
@@ -255,11 +255,11 @@ static VALUE location_required_keys(VALUE self) {
   VALUE keys = rb_ary_new();
 
   rbs_loc *loc = rbs_check_location(self);
-  rbs_loc_list *list = loc->list;
+  rbs_loc_children *children = loc->children;
 
-  for (unsigned short i = 0; i < list->len; i++) {
+  for (unsigned short i = 0; i < children->len; i++) {
     if (RBS_LOC_REQUIRED_P(loc, i)) {
-      rb_ary_push(keys, ID2SYM(list->entries[i].name));
+      rb_ary_push(keys, ID2SYM(children->entries[i].name));
     }
   }
 

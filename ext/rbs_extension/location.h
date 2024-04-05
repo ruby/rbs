@@ -21,12 +21,12 @@ typedef struct {
   unsigned short cap;
   rbs_loc_entry_bitmap required_p;
   rbs_loc_entry entries[0];
-} rbs_loc_list;
+} rbs_loc_children;
 
 typedef struct {
   VALUE buffer;
   range rg;
-  rbs_loc_list *list;
+  rbs_loc_children *children;
 } rbs_loc;
 
 /**
