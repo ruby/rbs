@@ -39,6 +39,8 @@ VALUE rbs_new_location(VALUE buffer, range rg);
  * */
 rbs_loc *rbs_check_location(VALUE location);
 
+void rbs_loc_alloc_children(rbs_loc *loc, unsigned short cap);
+
 /**
  * Add a required child range with given name.
  * */

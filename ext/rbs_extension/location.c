@@ -22,15 +22,15 @@ static void check_children_max(unsigned short n) {
   }
 }
 
-void rbs_loc_alloc_children(rbs_loc *loc, unsigned short size) {
-  check_children_max(size);
+void rbs_loc_alloc_children(rbs_loc *loc, unsigned short cap) {
+  check_children_max(cap);
 
-  size_t s = sizeof(rbs_loc_children) + sizeof(rbs_loc_entry) * size;
+  size_t s = sizeof(rbs_loc_children) + sizeof(rbs_loc_entry) * cap;
   loc->children = malloc(s);
 
   loc->children->len = 0;
   loc->children->required_p = 0;
-  loc->children->cap = size;
+  loc->children->cap = cap;
 }
 
 static void check_children_cap(rbs_loc *loc) {
