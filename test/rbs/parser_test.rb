@@ -717,6 +717,12 @@ RBS
     end
   end
 
+  def test_negative_range
+    assert_raises ArgumentError do
+      RBS::Parser.parse_type("a", range: -2...-1)
+    end
+  end
+
   def test_parse_eof_nil
     code = buffer("type1   ")
 
