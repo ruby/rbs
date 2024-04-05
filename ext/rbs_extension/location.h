@@ -39,15 +39,24 @@ VALUE rbs_new_location(VALUE buffer, range rg);
  * */
 rbs_loc *rbs_check_location(VALUE location);
 
+/**
+ * Allocate memory for child locations.
+ *
+ * Do not call twice for the same location.
+ * */
 void rbs_loc_alloc_children(rbs_loc *loc, unsigned short cap);
 
 /**
  * Add a required child range with given name.
+ *
+ * Allocate memory for children with rbs_loc_alloc_children before calling this function.
  * */
 void rbs_loc_add_required_child(rbs_loc *loc, ID name, range r);
 
 /**
  * Add an optional child range with given name.
+ *
+ * Allocate memory for children with rbs_loc_alloc_children before calling this function.
  * */
 void rbs_loc_add_optional_child(rbs_loc *loc, ID name, range r);
 
