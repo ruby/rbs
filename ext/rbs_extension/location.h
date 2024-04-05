@@ -10,8 +10,13 @@
 extern VALUE RBS_Location;
 
 typedef struct {
+  int start;
+  int end;
+} rbs_loc_range;
+
+typedef struct {
   ID name;
-  range rg;
+  rbs_loc_range rg;
 } rbs_loc_entry;
 
 typedef unsigned int rbs_loc_entry_bitmap;
@@ -25,7 +30,7 @@ typedef struct {
 
 typedef struct {
   VALUE buffer;
-  range rg;
+  rbs_loc_range rg;
   rbs_loc_children *children;
 } rbs_loc;
 
