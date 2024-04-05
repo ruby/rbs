@@ -17,6 +17,7 @@ GEM
       public_suffix (>= 2.0.2, < 6.0)
     ast (2.4.2)
     base64 (0.2.0)
+    benchmark-ips (2.13.0)
     bigdecimal (3.1.7)
     csv (3.3.0)
     dbm (1.1.0)
@@ -33,6 +34,7 @@ GEM
       addressable (>= 2.8)
     language_server-protocol (3.17.0.3)
     marcel (1.0.2)
+    memory_profiler (1.0.1)
     minitest (5.22.3)
     mutex_m (0.2.0)
     net-protocol (0.2.2)
@@ -102,6 +104,7 @@ PLATFORMS
 DEPENDENCIES
   abbrev
   base64
+  benchmark-ips
   bigdecimal
   csv
   dbm
@@ -110,6 +113,7 @@ DEPENDENCIES
   goodcheck
   json
   json-schema
+  memory_profiler
   minitest
   mutex_m
   net-smtp

@@ -12,7 +12,6 @@ gem "rubocop"
 gem "rubocop-rubycw"
 gem "json"
 gem "json-schema"
-gem 'stackprof'
 gem "goodcheck"
 gem "dbm"
 gem 'digest'
@@ -24,6 +23,11 @@ gem "base64"
 gem "mutex_m"
 gem "nkf"
 gem "fileutils"
+
+# Performance profiling and benchmarking
+gem 'stackprof'
+gem 'memory_profiler'
+gem 'benchmark-ips'
 
 # Test gems
 gem "rbs-amber", path: "test/assets/test-gem"
