@@ -153,7 +153,7 @@ namespace :generate do
 
           <%- unless class_methods.empty? -%>
           class <%= target %>SingletonTest < Test::Unit::TestCase
-            include TypeAssertions
+            include TestHelper
 
             # library "pathname", "securerandom"     # Declare library signatures to load
             testing "singleton(::<%= target %>)"
@@ -172,7 +172,7 @@ namespace :generate do
 
           <%- unless instance_methods.empty? -%>
           class <%= target %>Test < Test::Unit::TestCase
-            include TypeAssertions
+            include TestHelper
 
             # library "pathname", "securerandom"     # Declare library signatures to load
             testing "::<%= target %>"
