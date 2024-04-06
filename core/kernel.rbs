@@ -1318,10 +1318,10 @@ module Kernel : BasicObject
   #
   # See also Random.rand.
   #
-  def self?.rand: () -> Float
-                | (Integer arg0) -> Integer
-                | (::Range[Integer] arg0) -> Integer
-                | (::Range[Float] arg0) -> Float
+  def self?.rand: (?0) -> Float
+                | (int arg0) -> (Integer | Float)
+                | (::Range[Integer] arg0) -> Integer?
+                | (::Range[Float] arg0) -> Float?
 
   # <!--
   #   rdoc-file=io.c
