@@ -7,6 +7,26 @@ class StringSingletonTest < Test::Unit::TestCase
 
   testing 'singleton(::String)'
 
+  def test_new
+    assert_send_type  '() -> String',
+                      String, :new
+
+    with_string do |source|
+      assert_send_type  '(string) -> String',
+                        String, :new, source
+    end
+
+    with_encoding do |encoding|
+      assert_send_type  '(encoding: encoding) -> String',
+                        String, :new, encoding: encoding
+    end
+
+    with_int do |capacity|
+      assert_send_type  '(capacity: int) -> String',
+                        String, :new, capacity: capacity
+    end
+  end
+
   def test_try_convert
     assert_send_type  '(String) -> String',
                       String, :try_convert, 'foo'
@@ -71,26 +91,6 @@ class StringInstanceTest < Test::Unit::TestCase
                       normal.dup, method, :turkic, :lithuanian
     assert_send_type  '(:turkic, :lithuanian) -> nil',
                       nochange.dup, method, :turkic, :lithuanian
-  end
-
-  def test_initialize
-    assert_send_type  '() -> String',
-                      String.allocate, :initialize
-
-    with_string do |source|
-      assert_send_type  '(string) -> String',
-                        String.allocate, :initialize, source
-    end
-
-    with_encoding.and_nil do |encoding|
-      assert_send_type  '(encoding: encoding?) -> String',
-                        String.allocate, :initialize, encoding: encoding
-    end
-
-    with_int.and_nil do |capacity|
-      assert_send_type  '(capacity: int?) -> String',
-                        String.allocate, :initialize, capacity: capacity
-    end
   end
 
   def test_initialize_copy
