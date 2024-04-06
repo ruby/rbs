@@ -669,7 +669,7 @@ module RBS
                 ]
               ),
               block: nil,
-              location: nil
+              location: original.location
             )
           else
             # getter
@@ -677,7 +677,7 @@ module RBS
               type_params: [],
               type: Types::Function.empty(attr_type),
               block: nil,
-              location: nil
+              location: original.location
             )
           end
 

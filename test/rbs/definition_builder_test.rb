@@ -1088,13 +1088,17 @@ EOF
           assert_instance_of Definition, definition
 
           assert_method_definition definition.methods[:instance_reader], ["() -> ::String"]
+          assert_equal definition.methods[:instance_reader].method_types.first.location.source, "attr_reader instance_reader: String"
           assert_ivar_definition definition.instance_variables[:@instance_reader], "::String"
 
           assert_method_definition definition.methods[:instance_writer=], ["(::Integer instance_writer) -> ::Integer"]
+          assert_equal definition.methods[:instance_writer=].method_types.first.location.source, "attr_writer instance_writer(@writer): Integer"
           assert_ivar_definition definition.instance_variables[:@writer], "::Integer"
 
           assert_method_definition definition.methods[:instance_accessor], ["() -> ::Symbol"]
+          assert_equal definition.methods[:instance_accessor].method_types.first.location.source, "attr_accessor instance_accessor(): Symbol"
           assert_method_definition definition.methods[:instance_accessor=], ["(::Symbol instance_accessor) -> ::Symbol"]
+          assert_equal definition.methods[:instance_accessor=].method_types.first.location.source, "attr_accessor instance_accessor(): Symbol"
           assert_nil definition.instance_variables[:@instance_accessor]
         end
       end
@@ -1117,13 +1121,17 @@ EOF
           assert_instance_of Definition, definition
 
           assert_method_definition definition.methods[:reader], ["() -> ::String"]
+          assert_equal definition.methods[:reader].method_types.first.location.source, "attr_reader self.reader: String"
           assert_ivar_definition definition.instance_variables[:@reader], "::String"
 
           assert_method_definition definition.methods[:writer=], ["(::Integer writer) -> ::Integer"]
+          assert_equal definition.methods[:writer=].method_types.first.location.source, "attr_writer self.writer(@writer): Integer"
           assert_ivar_definition definition.instance_variables[:@writer], "::Integer"
 
           assert_method_definition definition.methods[:accessor], ["() -> ::Symbol"]
+          assert_equal definition.methods[:accessor].method_types.first.location.source, "attr_accessor self.accessor(): Symbol"
           assert_method_definition definition.methods[:accessor=], ["(::Symbol accessor) -> ::Symbol"]
+          assert_equal definition.methods[:accessor=].method_types.first.location.source, "attr_accessor self.accessor(): Symbol"
           assert_nil definition.instance_variables[:@accessor]
         end
       end
