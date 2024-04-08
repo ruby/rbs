@@ -127,7 +127,10 @@ static VALUE location_initialize_copy(VALUE self, VALUE other) {
 
   self_loc->buffer = other_loc->buffer;
   self_loc->rg = other_loc->rg;
-  rbs_loc_alloc_children(self_loc, other_loc->children->cap);
+  if (other_loc->children != NULL) {
+    rbs_loc_alloc_children(self_loc, other_loc->children->cap);
+    memcpy(self_loc->children, other_loc->children, sizeof(rbs_loc_children) + sizeof(rbs_loc_entry) * other_loc->children->cap);
+  }
 
   return Qnil;
 }
@@ -219,14 +222,16 @@ static VALUE location_aref(VALUE self, VALUE name) {
 
   ID id = SYM2ID(name);
 
-  for (unsigned short i = 0; i < loc->children->len; i++) {
-    if (loc->children->entries[i].name == id) {
-      range result = loc->children->entries[i].rg;
+  if (loc->children != NULL) {
+    for (unsigned short i = 0; i < loc->children->len; i++) {
+      if (loc->children->entries[i].name == id) {
+        range result = loc->children->entries[i].rg;
 
-      if (RBS_LOC_OPTIONAL_P(loc, i) && null_range_p(result)) {
-        return Qnil;
-      } else {
-        return rbs_new_location(loc->buffer, result);
+        if (RBS_LOC_OPTIONAL_P(loc, i) && null_range_p(result)) {
+          return Qnil;
+        } else {
+          return rbs_new_location(loc->buffer, result);
+        }
       }
     }
   }
@@ -240,6 +245,9 @@ static VALUE location_optional_keys(VALUE self) {
 
   rbs_loc *loc = rbs_check_location(self);
   rbs_loc_children *children = loc->children;
+  if (children == NULL) {
+    return keys;
+  }
 
   for (unsigned short i = 0; i < children->len; i++) {
     if (RBS_LOC_OPTIONAL_P(loc, i)) {
@@ -256,6 +264,9 @@ static VALUE location_required_keys(VALUE self) {
 
   rbs_loc *loc = rbs_check_location(self);
   rbs_loc_children *children = loc->children;
+  if (children == NULL) {
+    return keys;
+  }
 
   for (unsigned short i = 0; i < children->len; i++) {
     if (RBS_LOC_REQUIRED_P(loc, i)) {
