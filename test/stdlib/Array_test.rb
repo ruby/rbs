@@ -240,15 +240,54 @@ class ArrayInstanceTest < Test::Unit::TestCase
   end
 
   def test_cycle
+    yield_self do
+      # when empty receiver
+      assert_send_type(
+        "() -> Enumerator[Integer, nil]",
+        [], :cycle
+      )
+      assert_send_type(
+        "(nil) -> Enumerator[Integer, nil]",
+        [], :cycle, nil
+      )
+      assert_send_type(
+        "() { (Integer) -> void } -> nil",
+        [], :cycle, &proc {}
+      )
+      assert_send_type(
+        "(nil) { (Integer) -> void } -> nil",
+        [], :cycle, nil, &proc {}
+      )
+    end
+
+    assert_send_type(
+      "() -> Enumerator[Integer, bot]",
+      [1,2,3], :cycle
+    )
     assert_send_type(
       "() { (Integer) -> void } -> nil",
       [1,2,3], :cycle, &proc { break_from_block }
     )
 
-    assert_send_type "(Integer) { (Integer) -> void } -> nil",
-                     [1,2,3], :cycle, 3 do end
-    assert_send_type "(ToInt) { (Integer) -> void } -> nil",
-                     [1,2,3], :cycle, ToInt.new(2) do end
+    assert_send_type(
+      "(nil) -> Enumerator[Integer, bot]",
+      [1,2,3], :cycle, nil
+    )
+    assert_send_type(
+      "(nil) { (Integer) -> void } -> nil",
+      [1,2,3], :cycle, nil, &proc { break_from_block }
+    )
+
+    with_int(3) do |int|
+      assert_send_type(
+        "(int) -> Enumerator[Integer, nil]",
+        [1,2,3], :cycle, int
+      )
+      assert_send_type(
+        "(int) { (Integer) -> void } -> nil",
+        [1,2,3], :cycle, int, &proc {}
+      )
+    end
   end
 
   def test_deconstruct

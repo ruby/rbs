@@ -1311,7 +1311,7 @@ class Array[unchecked out Elem] < Object
   #     [0, 1].cycle.first(5) # => [0, 1, 0, 1, 0]
   #
   def cycle: (?int? n) { (Elem) -> void } -> nil
-           | (?int? n) -> ::Enumerator[Elem, nil]
+           | (?int? n) -> (::Enumerator[Elem, nil] | ::Enumerator[Elem, bot])
 
   # <!--
   #   rdoc-file=array.c
