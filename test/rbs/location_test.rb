@@ -15,16 +15,16 @@ abc
       assert_equal 4, location.end_pos
       assert_equal 1, location.start_line
       assert_equal 0, location.start_column
-      assert_equal 2, location.end_line
-      assert_equal 0, location.end_column
+      assert_equal 1, location.end_line
+      assert_equal 3, location.end_column
       assert_equal "123\n", location.source
     end
 
     Location.new(buffer, 4, 8).yield_self do |location|
       assert_equal 2, location.start_line
       assert_equal 0, location.start_column
-      assert_equal 3, location.end_line
-      assert_equal 0, location.end_column
+      assert_equal 2, location.end_line
+      assert_equal 3, location.end_column
       assert_equal "abc\n", location.source
     end
   end

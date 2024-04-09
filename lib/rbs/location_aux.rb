@@ -51,7 +51,7 @@ module RBS
 
     def end_loc
       @end_loc ||= begin
-        _end_loc || buffer.pos_to_loc(end_pos)
+        _end_loc || buffer.pos_to_loc(end_pos - 1)
       end
     end
 
