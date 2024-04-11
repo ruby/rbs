@@ -72,6 +72,7 @@ module RBS
     end
 
     CallTrace = Struct.new(:method_name, :method_call, :block_calls, :block_given, keyword_init: true)
+    CallTrace.include Guaranteed::Inspect
 
     class <<self
       attr_accessor :suffix
