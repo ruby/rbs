@@ -39,6 +39,7 @@ VALUE rbs_optional(VALUE type, VALUE location);
 VALUE rbs_proc(VALUE function, VALUE block, VALUE location, VALUE self_type);
 VALUE rbs_record(VALUE fields, VALUE location);
 VALUE rbs_tuple(VALUE types, VALUE location);
+VALUE rbs_tuple2(VALUE types, VALUE location, VALUE rest_type);
 VALUE rbs_type_name(VALUE namespace, VALUE name);
 VALUE rbs_union(VALUE types, VALUE location);
 VALUE rbs_variable(VALUE name, VALUE location);
