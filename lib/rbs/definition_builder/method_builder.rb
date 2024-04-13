@@ -230,6 +230,8 @@ module RBS
             accessibility = :public
           when AST::Members::Private
             accessibility = :private
+          when AST::Members::Protected
+            accessibility = :protected
           else
             yield member, accessibility
           end

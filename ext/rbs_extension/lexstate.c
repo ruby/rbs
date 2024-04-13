@@ -48,6 +48,7 @@ static const char *RBS_TOKENTYPE_NAMES[] = {
   "kOUT",             /* out */
   "kPREPEND",         /* prepend */
   "kPRIVATE",         /* private */
+  "kPROTECTED",       /* protected */
   "kPUBLIC",          /* public */
   "kSELF",            /* self */
   "kSINGLETON",       /* singleton */

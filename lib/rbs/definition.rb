@@ -139,6 +139,14 @@ module RBS
         @accessibility == :private
       end
 
+      def protected?
+        @accessibility == :protected
+      end
+
+      def undef?
+        @accessibility == :undef
+      end
+
       def sub(s)
         self.class.new(
           super_method: super_method&.sub(s),

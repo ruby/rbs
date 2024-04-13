@@ -761,6 +761,11 @@ module RBS
         @public ||= AST::Members::Public.new(location: nil)
       end
 
+      def protected
+        @protected ||= AST::Members::Public.new(location: nil)
+      end
+
+      # TODO
       def current_accessibility(decls, index = decls.size)
         slice = decls.slice(0, index) or raise
         idx = slice.rindex { |decl| decl == private || decl == public }
