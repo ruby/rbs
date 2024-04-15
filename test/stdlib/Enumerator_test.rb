@@ -32,7 +32,7 @@ class EnumeratorSingletonTest < Test::Unit::TestCase
   testing "singleton(::Enumerator)"
 
   def test_new
-    assert_send_type "() { (Enumerator::Yielder) -> 12345 } -> void",
+    assert_send_type "() { (Enumerator::Yielder) -> 12345 } -> Enumerator[untyped, 12345]",
                      Enumerator, :new do 12345 end
   end
 
