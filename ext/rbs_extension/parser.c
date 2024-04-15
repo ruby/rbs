@@ -78,7 +78,7 @@ static VALUE string_of_loc(parserstate *state, position start, position end) {
 }
 
 /**
- * Raises RuntimeError with "Unexpected error " messsage.
+ * Raises RuntimeError with "Unexpected error " message.
  * */
 static NORETURN(void) rbs_abort(void) {
   rb_raise(
