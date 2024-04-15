@@ -387,8 +387,10 @@ class StringInstanceTest < Test::Unit::TestCase
                         +'hello', :bytesplice,  1, 2, string
 
       if RUBY_VERSION >= "3.3.0"
-        assert_send_type  '(Integer, Integer, string, Integer, Integer) -> String',
-                          +'hello', :bytesplice,  1, 2, string, 3, 4
+        with_int 1 do |start|
+          assert_send_type  '(int, Integer, string, Integer, Integer) -> String',
+                            +'hello', :bytesplice,  start, 2, string, 3, 4
+        end
       end
 
       with_range with_int(1).and_nil, with_int(2).and_nil do |range|
