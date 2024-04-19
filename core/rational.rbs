@@ -48,13 +48,6 @@
 #                        #=> (1.0000000000000002+1.7320508075688772i)
 #
 class Rational < Numeric
-  public
-
-  def %: (Integer) -> Rational
-       | (Float) -> Float
-       | (Rational) -> Rational
-       | (Numeric) -> Numeric
-
   # <!--
   #   rdoc-file=rational.c
   #   - rat * numeric  ->  numeric
@@ -67,9 +60,9 @@ class Rational < Numeric
   #     Rational(9, 8)  * 4                #=> (9/2)
   #     Rational(20, 9) * 9.8              #=> 21.77777777777778
   #
-  def *: (Integer) -> Rational
-       | (Rational) -> Rational
-       | [T < Numeric](T) -> T
+  def *: (Integer | Rational other) -> instance
+       | (Float other) -> Float
+       | [O < Numeric::_Multiply[S, R], S, R] (Numeric::_Coerce[self, O, S] other) -> R
 
   # <!--
   #   rdoc-file=rational.c
@@ -84,8 +77,10 @@ class Rational < Numeric
   #     Rational(1, 2) ** 0               #=> (1/1)
   #     Rational(1, 2) ** 0.0             #=> 1.0
   #
-  def **: (Complex) -> Complex
-        | (Numeric) -> Numeric
+  def **: (Integer other) -> instance
+        | (Rational other) -> (instance | Float | Complex)
+        | (Float other) -> (Float | Complex)
+        | [O < Numeric::_Power[S, R], S, R] (Numeric::_Coerce[self, O, S] other) -> R
 
   # <!--
   #   rdoc-file=rational.c
@@ -99,11 +94,9 @@ class Rational < Numeric
   #     Rational(9, 8)  + 4                #=> (41/8)
   #     Rational(20, 9) + 9.8              #=> 12.022222222222222
   #
-  def +: (Float) -> Float
-       | (Complex) -> Complex
-       | (Numeric) -> Rational
-
-  def +@: () -> Rational
+  def +: (Integer | Rational other) -> instance
+       | (Float other) -> Float
+       | [O < Numeric::_Add[S, R], S, R] (Numeric::_Coerce[self, O, S] other) -> R
 
   # <!--
   #   rdoc-file=rational.c
@@ -117,9 +110,9 @@ class Rational < Numeric
   #     Rational(9, 8)  - 4                #=> (-23/8)
   #     Rational(20, 9) - 9.8              #=> -7.577777777777778
   #
-  def -: (Float) -> Float
-       | (Complex) -> Complex
-       | (Numeric) -> Rational
+  def -: (Integer | Rational other) -> instance
+       | (Float other) -> Float
+       | [O < Numeric::_Subtract[S, R], S, R] (Numeric::_Coerce[self, O, S] other) -> R
 
   # <!--
   #   rdoc-file=rational.c
@@ -127,7 +120,7 @@ class Rational < Numeric
   # -->
   # Negates `rat`.
   #
-  def -@: () -> Rational
+  def -@: () -> instance
 
   # <!--
   #   rdoc-file=rational.c
@@ -142,9 +135,9 @@ class Rational < Numeric
   #     Rational(9, 8)  / 4                #=> (9/32)
   #     Rational(20, 9) / 9.8              #=> 0.22675736961451246
   #
-  def /: (Float) -> Float
-       | (Complex) -> Complex
-       | (Numeric) -> Rational
+  def /: (Integer | Rational other) -> instance
+       | (Float other) -> Float
+       | [O < Numeric::_Divide[S, R], S, R] (Numeric::_Coerce[self, O, S] other) -> R
 
   # <!--
   #   rdoc-file=rational.c
@@ -163,8 +156,8 @@ class Rational < Numeric
   #
   #     Rational(1, 3) <=> "0.3"           #=> nil
   #
-  def <=>: (Integer | Rational) -> Integer
-         | (untyped) -> Integer?
+  def <=>: (Integer | Rational other) -> (-1 | 0 | 1)
+         | (untyped other) -> (-1 | 0 | 1)?
 
   # <!--
   #   rdoc-file=rational.c
@@ -178,7 +171,7 @@ class Rational < Numeric
   #     Rational('1/3') == 0.33             #=> false
   #     Rational('1/2') == '1/2'            #=> false
   #
-  def ==: (untyped) -> bool
+  def ==: (untyped object) -> bool
 
   # <!--
   #   rdoc-file=rational.c
@@ -190,13 +183,7 @@ class Rational < Numeric
   #     (1/2r).abs    #=> (1/2)
   #     (-1/2r).abs   #=> (1/2)
   #
-  def abs: () -> Rational
-
-  def abs2: () -> Rational
-
-  def angle: () -> (Integer | Float)
-
-  alias arg angle
+  def abs: () -> (instance | self)
 
   # <!--
   #   rdoc-file=rational.c
@@ -222,13 +209,12 @@ class Rational < Numeric
   #     Rational('-123.456').ceil(-1)       #=> -120
   #
   def ceil: () -> Integer
-          | (Integer digits) -> (Integer | Rational)
+          | (Integer digits) -> (Integer | instance)
 
-  def coerce: (Numeric) -> [ Numeric, Numeric ]
-
-  def conj: () -> Rational
-
-  def conjugate: () -> Rational
+  def coerce: (Integer other) -> [instance, instance]
+            | (Float other) -> [Float, Float]
+            | [R < Rational] (R other) -> [R, self]
+            | (Complex other) -> ([Complex, Complex] | [instance, instance])
 
   # <!--
   #   rdoc-file=rational.c
@@ -243,14 +229,6 @@ class Rational < Numeric
   #
   def denominator: () -> Integer
 
-  def div: (Numeric) -> Integer
-
-  def divmod: (Numeric) -> [ Numeric, Numeric ]
-
-  def dup: () -> self
-
-  def eql?: (untyped) -> bool
-
   # <!--
   #   rdoc-file=rational.c
   #   - rat.fdiv(numeric)  ->  float
@@ -261,9 +239,8 @@ class Rational < Numeric
   #     Rational(2, 3).fdiv(0.5)     #=> 1.3333333333333333
   #     Rational(2).fdiv(3)          #=> 0.6666666666666666
   #
-  def fdiv: (Numeric) -> Float
-
-  def finite?: () -> bool
+  def fdiv: (Integer | Rational | Float other) -> Float
+          | [O < Numeric::_Divide[S, R], S, R < _ToF] (Numeric::_Coerce[self, O, S] other) -> Float
 
   # <!--
   #   rdoc-file=rational.c
@@ -289,7 +266,7 @@ class Rational < Numeric
   #     Rational('-123.456').floor(-1)       #=> -130
   #
   def floor: () -> Integer
-           | (Integer digits) -> (Integer | Rational)
+           | (Integer digits) -> (Integer | instance)
 
   # <!--
   #   rdoc-file=rational.c
@@ -297,14 +274,6 @@ class Rational < Numeric
   # -->
   #
   def hash: () -> Integer
-
-  def i: () -> Complex
-
-  def imag: () -> Integer
-
-  def imaginary: () -> Integer
-
-  def infinite?: () -> Integer?
 
   # <!--
   #   rdoc-file=rational.c
@@ -318,8 +287,6 @@ class Rational < Numeric
   #
   def inspect: () -> String
 
-  def integer?: () -> bool
-
   # <!-- rdoc-file=rational.c -->
   # Returns the absolute value of `rat`.
   #
@@ -328,9 +295,6 @@ class Rational < Numeric
   #
   alias magnitude abs
 
-  def modulo: (Float) -> Float
-            | (Numeric) -> Rational
-
   # <!--
   #   rdoc-file=rational.c
   #   - rat.negative?  ->  true or false
@@ -338,8 +302,6 @@ class Rational < Numeric
   # Returns `true` if `rat` is less than 0.
   #
   def negative?: () -> bool
-
-  def nonzero?: () -> self?
 
   # <!--
   #   rdoc-file=rational.c
@@ -353,10 +315,6 @@ class Rational < Numeric
   #     Rational(-2, -10).numerator  #=> 1
   #
   def numerator: () -> Integer
-
-  alias phase angle
-
-  def polar: () -> [ Rational, Integer | Float ]
 
   # <!--
   #   rdoc-file=rational.c
@@ -375,9 +333,7 @@ class Rational < Numeric
   #     Rational(9, 8)  / 4                #=> (9/32)
   #     Rational(20, 9) / 9.8              #=> 0.22675736961451246
   #
-  def quo: (Float) -> Float
-         | (Complex) -> Complex
-         | (Numeric) -> Rational
+  alias quo /
 
   # <!--
   #   rdoc-file=rational.c
@@ -392,18 +348,8 @@ class Rational < Numeric
   #     r.rationalize(Rational('0.01'))  #=> (3/10)
   #     r.rationalize(Rational('0.1'))   #=> (1/3)
   #
-  def rationalize: (?Numeric eps) -> Rational
-
-  def real: () -> Rational
-
-  def real?: () -> true
-
-  def rect: () -> [ Rational, Numeric ]
-
-  alias rectangular rect
-
-  def remainder: (Float) -> Float
-               | (Numeric) -> Rational
+  def rationalize: () -> self
+                 | (Numeric::_Eps eps) -> instance
 
   # <!--
   #   rdoc-file=rational.c
@@ -440,15 +386,8 @@ class Rational < Numeric
   #     Rational(-25, 100).round(1, half: :down) #=> (-1/5)
   #     Rational(-25, 100).round(1, half: :even) #=> (-1/5)
   #
-  def round: (?half: :up | :down | :even) -> Integer
-           | (Integer digits, ?half: :up | :down | :even) -> (Integer | Rational)
-
-  def step: (?Numeric limit, ?Numeric step) { (Rational) -> void } -> self
-          | (?Numeric limit, ?Numeric step) -> Enumerator[Rational, self]
-          | (?by: Numeric, ?to: Numeric) { (Rational) -> void } -> self
-          | (?by: Numeric, ?to: Numeric) -> Enumerator[Rational, self]
-
-  def to_c: () -> Complex
+  def round: (?half: Numeric::round_direction) -> Integer
+           | (Integer digits, ?half: Numeric::round_direction) -> (Integer | instance)
 
   # <!--
   #   rdoc-file=rational.c
@@ -479,8 +418,6 @@ class Rational < Numeric
   #
   def to_i: () -> Integer
 
-  alias to_int to_i
-
   # <!--
   #   rdoc-file=rational.c
   #   - rat.to_r  ->  self
@@ -490,7 +427,7 @@ class Rational < Numeric
   #     Rational(2).to_r      #=> (2/1)
   #     Rational(-8, 6).to_r  #=> (-4/3)
   #
-  def to_r: () -> Rational
+  def to_r: () -> self
 
   # <!--
   #   rdoc-file=rational.c
@@ -528,7 +465,103 @@ class Rational < Numeric
   #     Rational('-123.456').truncate(-1)       #=> -120
   #
   def truncate: () -> Integer
-              | (Integer ndigits) -> (Integer | Rational)
+              | (Integer digits) -> (Integer | instance)
 
+  %a{steep:deprecated}
+  def %: (Integer) -> Rational
+       | (Float) -> Float
+       | (Rational) -> Rational
+       | (Numeric) -> Numeric
+
+  %a{steep:deprecated}
+  def +@: () -> Rational
+
+  %a{steep:deprecated}
+  def abs2: () -> Rational
+
+  %a{steep:deprecated}
+  def angle: () -> (Integer | Float)
+
+  %a{steep:deprecated}
+  alias arg angle
+
+  %a{steep:deprecated}
+  def conj: () -> Rational
+
+  %a{steep:deprecated}
+  def conjugate: () -> Rational
+
+  %a{steep:deprecated}
+  def div: (Numeric) -> Integer
+
+  %a{steep:deprecated}
+  def divmod: (Numeric) -> [ Numeric, Numeric ]
+
+  %a{steep:deprecated}
+  def dup: () -> self
+
+  %a{steep:deprecated}
+  def eql?: (untyped) -> bool
+
+  %a{steep:deprecated}
+  def finite?: () -> bool
+
+  %a{steep:deprecated}
+  def i: () -> Complex
+
+  %a{steep:deprecated}
+  def imag: () -> Integer
+
+  %a{steep:deprecated}
+  def imaginary: () -> Integer
+
+  %a{steep:deprecated}
+  def infinite?: () -> Integer?
+
+  %a{steep:deprecated}
+  def integer?: () -> bool
+
+  %a{steep:deprecated}
+  def modulo: (Float) -> Float
+            | (Numeric) -> Rational
+
+  %a{steep:deprecated}
+  def nonzero?: () -> self?
+
+  %a{steep:deprecated}
+  alias phase angle
+
+  %a{steep:deprecated}
+  def polar: () -> [ Rational, Integer | Float ]
+
+  %a{steep:deprecated}
+  def real: () -> Rational
+
+  %a{steep:deprecated}
+  def real?: () -> true
+
+  %a{steep:deprecated}
+  def rect: () -> [ Rational, Numeric ]
+
+  %a{steep:deprecated}
+  alias rectangular rect
+
+  %a{steep:deprecated}
+  def remainder: (Float) -> Float
+               | (Numeric) -> Rational
+
+  %a{steep:deprecated}
+  def step: (?Numeric limit, ?Numeric step) { (Rational) -> void } -> self
+          | (?Numeric limit, ?Numeric step) -> Enumerator[Rational, self]
+          | (?by: Numeric, ?to: Numeric) { (Rational) -> void } -> self
+          | (?by: Numeric, ?to: Numeric) -> Enumerator[Rational, self]
+
+  %a{steep:deprecated}
+  def to_c: () -> Complex
+
+  %a{steep:deprecated}
+  alias to_int to_i
+
+  %a{steep:deprecated}
   def zero?: () -> bool
 end
