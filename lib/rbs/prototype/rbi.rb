@@ -317,7 +317,11 @@ module RBS
                 Types::Function::Param.new(name: name, type: type)
               end
 
-              method_type.update(type: method_type.type.update(required_positionals: required_positionals))
+              if method_type.type.is_a?(RBS::Types::Function)
+                method_type.update(type: method_type.type.update(required_positionals: required_positionals))
+              else
+                method_type
+              end
             end
           when :type_parameters
             type_params = []
@@ -446,18 +450,22 @@ module RBS
           end
         end
 
-        method_type.update(
-          type: method_type.type.update(
-            required_positionals: required_positionals,
-            optional_positionals: optional_positionals,
-            rest_positionals: rest_positionals,
-            trailing_positionals: trailing_positionals,
-            required_keywords: required_keywords,
-            optional_keywords: optional_keywords,
-            rest_keywords: rest_keywords
-          ),
-          block: method_block
-        )
+        if method_type.type.is_a?(Types::Function)
+          method_type.update(
+            type: method_type.type.update(
+              required_positionals: required_positionals,
+              optional_positionals: optional_positionals,
+              rest_positionals: rest_positionals,
+              trailing_positionals: trailing_positionals,
+              required_keywords: required_keywords,
+              optional_keywords: optional_keywords,
+              rest_keywords: rest_keywords
+            ),
+            block: method_block
+          )
+        else
+          method_type
+        end
       end
 
       def type_of(type_node, variables:)

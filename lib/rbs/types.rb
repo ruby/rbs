@@ -1202,6 +1202,84 @@ module RBS
       end
     end
 
+    class UntypedFunction
+      attr_reader :return_type
+
+      def initialize(return_type:)
+        @return_type = return_type
+      end
+
+      def free_variables(acc = Set.new)
+        return_type.free_variables(acc)
+      end
+
+      def map_type(&block)
+        if block
+          update(return_type: yield(return_type))
+        else
+          enum_for :map_type
+        end
+      end
+
+      def each_type(&block)
+        if block
+          yield return_type
+        else
+          enum_for :each_type
+        end
+      end
+
+      def each_param(&block)
+        if block
+          # noop
+        else
+          enum_for :each_param
+        end
+      end
+
+      def to_json(state = _ = nil)
+        {
+          return_type: return_type
+        }.to_json(state)
+      end
+
+      def sub(subst)
+        map_type { _1.sub(subst) }
+      end
+
+      def with_return_type(ty)
+        update(return_type: ty)
+      end
+
+      def update(return_type: self.return_type)
+        UntypedFunction.new(return_type: return_type)
+      end
+
+      def empty?
+        true
+      end
+
+      def has_self_type?
+        return_type.has_self_type?
+      end
+
+      def has_classish_type?
+        return_type.has_classish_type?
+      end
+
+      def with_nonreturn_void
+        false
+      end
+
+      def param_to_s
+        "?"
+      end
+
+      def return_to_s
+        return_type.to_s(1)
+      end
+    end
+
     class Block
       attr_reader :type
       attr_reader :required
