@@ -45,7 +45,7 @@ _literal_ ::= _string-literal_
             | `false`
 
 _proc_ ::= `^` _parameters?_ _self-type-binding?_ _block?_ `->` _type_
-         | `^` `(` `?` `)` _self-type-binding?_ _block?_ `->` _type_      # Proc type with untyped parameter
+         | `^` `(` `?` `)` `->` _type_                                   # Proc type with untyped parameter
 ```
 
 ### Class instance type
