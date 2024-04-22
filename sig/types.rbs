@@ -448,13 +448,58 @@ module RBS
       def with_nonreturn_void?: () -> bool
     end
 
+    # Function type without type checking arguments
+    #
+    class UntypedFunction
+      attr_reader return_type: t
+
+      def initialize: (return_type: t) -> void
+
+      def free_variables: (?Set[Symbol]) -> Set[Symbol]
+
+      def map_type: { (t) -> t } -> UntypedFunction
+                  | -> Enumerator[t, UntypedFunction]
+
+      def map_type_name: () { (TypeName, Location[untyped, untyped]?, t) -> TypeName } -> UntypedFunction
+
+      def each_type: () { (t) -> void } -> void
+                   | -> Enumerator[t, void]
+
+      def each_param: () { (Function::Param) -> void } -> void
+                    | -> Enumerator[Function::Param, void]
+
+      include _ToJson
+
+      def sub: (Substitution) -> UntypedFunction
+
+      def with_return_type: (t) -> UntypedFunction
+
+      def update: (?return_type: t) -> UntypedFunction
+
+      def empty?: () -> bool
+
+      def has_self_type?: () -> bool
+
+      def has_classish_type?: () -> bool
+
+      def with_nonreturn_void?: () -> bool
+
+      # Returns `?`
+      def param_to_s: () -> String
+
+      # Returns `return_type.to_s(1)`
+      def return_to_s: () -> String
+    end
+
+    type function = Types::Function | Types::UntypedFunction
+
     class Block
-      attr_reader type: Types::Function
+      attr_reader type: function
       attr_reader required: bool
 
       attr_reader self_type: t?
 
-      def initialize: (type: Types::Function, ?self_type: t?, required: boolish) -> void
+      def initialize: (type: function, ?self_type: t?, required: boolish) -> void
 
       def ==: (untyped other) -> bool
 
@@ -470,14 +515,14 @@ module RBS
     end
 
     class Proc
-      attr_reader type: Function
+      attr_reader type: function
       attr_reader block: Block?
 
       attr_reader self_type: t?
 
       type loc = Location[bot, bot]
 
-      def initialize: (location: loc?, type: Function, ?self_type: t?, block: Block?) -> void
+      def initialize: (location: loc?, type: function, ?self_type: t?, block: Block?) -> void
 
       include _TypeBase
 

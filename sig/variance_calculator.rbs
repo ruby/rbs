@@ -73,14 +73,14 @@ module RBS
     def in_inherit: (name: TypeName, args: Array[Types::t], variables: Array[Symbol]) -> Result
 
     # The type name must be normalized
-    # 
+    #
     def in_type_alias: (name: TypeName) -> Result
 
     private
 
     def type: (Types::t, result: Result, context: variance) -> void
 
-    def function: (Types::Function, result: Result, context: variance) -> void
+    def function: (Types::function, result: Result, context: variance) -> void
 
     def negate: (variance) -> variance
   end

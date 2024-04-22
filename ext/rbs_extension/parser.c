@@ -52,6 +52,10 @@ typedef struct {
   VALUE rest_keywords;
 } method_params;
 
+static bool rbs_is_untyped_params(method_params *params) {
+  return NIL_P(params->required_positionals);
+}
+
 // /**
 //  * Returns RBS::Location object of `current_token` of a parser state.
 //  *
@@ -362,6 +366,7 @@ static bool is_keyword(parserstate *state) {
 
 /*
   params ::= {} `)`
+           | {} `?` `)`               -- Untyped function params (assign params.required = nil)
            | <required_params> `)`
            | <required_params> `,` `)`
 
@@ -389,6 +394,11 @@ static bool is_keyword(parserstate *state) {
              | {} `**` <function_param>
 */
 static void parse_params(parserstate *state, method_params *params) {
+  if (state->next_token.type == pQUESTION && state->next_token2.type == pRPAREN) {
+    params->required_positionals = Qnil;
+    parser_advance(state);
+    return;
+  }
   if (state->next_token.type == pRPAREN) {
     return;
   }
@@ -613,6 +623,13 @@ static void parse_function(parserstate *state, VALUE *function, VALUE *block, VA
     parser_advance_assert(state, pRPAREN);
   }
 
+  // Untyped method parameter means it cannot have block
+  if (rbs_is_untyped_params(&params)) {
+    if (state->next_token.type != pARROW) {
+      raise_syntax_error(state, state->next_token2, "A method type with untyped method parameter cannot have block");
+    }
+  }
+
   // Passing NULL to function_self_type means the function itself doesn't accept self type binding. (== method type)
   if (function_self_type) {
     *function_self_type = parse_self_type_binding(state);
@@ -641,8 +658,11 @@ static void parse_function(parserstate *state, VALUE *function, VALUE *block, VA
     parser_advance_assert(state, pARROW);
     VALUE block_return_type = parse_optional(state);
 
-    *block = rbs_block(
-      rbs_function(
+    VALUE block_function = Qnil;
+    if (rbs_is_untyped_params(&block_params)) {
+      block_function = rbs_untyped_function(block_return_type);
+    } else {
+      block_function = rbs_function(
         block_params.required_positionals,
         block_params.optional_positionals,
         block_params.rest_positionals,
@@ -651,10 +671,10 @@ static void parse_function(parserstate *state, VALUE *function, VALUE *block, VA
         block_params.optional_keywords,
         block_params.rest_keywords,
         block_return_type
-      ),
-      required,
-      block_self_type
-    );
+      );
+    }
+
+    *block = rbs_block(block_function, required, block_self_type);
 
     parser_advance_assert(state, pRBRACE);
   }
@@ -662,16 +682,20 @@ static void parse_function(parserstate *state, VALUE *function, VALUE *block, VA
   parser_advance_assert(state, pARROW);
   VALUE type = parse_optional(state);
 
-  *function = rbs_function(
-    params.required_positionals,
-    params.optional_positionals,
-    params.rest_positionals,
-    params.trailing_positionals,
-    params.required_keywords,
-    params.optional_keywords,
-    params.rest_keywords,
-    type
-  );
+  if (rbs_is_untyped_params(&params)) {
+    *function = rbs_untyped_function(type);
+  } else {
+    *function = rbs_function(
+      params.required_positionals,
+      params.optional_positionals,
+      params.rest_positionals,
+      params.trailing_positionals,
+      params.required_keywords,
+      params.optional_keywords,
+      params.rest_keywords,
+      type
+    );
+  }
 }
 
 /*
