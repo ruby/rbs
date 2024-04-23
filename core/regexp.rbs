@@ -1544,8 +1544,8 @@ class Regexp
   #
   # If any regexp pattern contains captures, the behavior is unspecified.
   #
-  def self.union: (*_ToRegexp | string patterns) -> Regexp
-                | (array[_ToRegexp | string] patterns) -> Regexp
+  def self.union: (*Regexp | _ToRegexp | string patterns) -> Regexp
+                | (array[Regexp | _ToRegexp | string] patterns) -> Regexp
                 | (Symbol | [Symbol] symbol_pattern) -> Regexp
 
   # <!--
