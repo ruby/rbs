@@ -482,7 +482,7 @@ module Gem
   #   rdoc-file=lib/rubygems.rb
   #   - find_unresolved_default_spec(path)
   # -->
-  # Find a Gem::Specification of default gem from `path`
+  # Find an unresolved Gem::Specification of default gem from `path`
   #
   def self.find_unresolved_default_spec: (String path) -> Specification?
 
