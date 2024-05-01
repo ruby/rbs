@@ -2,7 +2,7 @@ require_relative '../test_helper'
 require 'resolv'
 
 class ResolvDNSSingletonTest < Test::Unit::TestCase
-  include TypeAssertions
+  include TestHelper
   library 'resolv'
   testing 'singleton(::Resolv::DNS)'
 
@@ -39,7 +39,7 @@ class ResolvDNSSingletonTest < Test::Unit::TestCase
 end
 
 class ResolvDNSinstanceTest < Test::Unit::TestCase
-  include TypeAssertions
+  include TestHelper
   library 'resolv'
   testing '::Resolv::DNS'
 
@@ -158,7 +158,7 @@ class ResolvDNSinstanceTest < Test::Unit::TestCase
 end
 
 class ResolvDNSConfigSingletonTest < Test::Unit::TestCase
-  include TypeAssertions
+  include TestHelper
   library 'resolv'
   testing 'singleton(::Resolv::DNS::Config)'
 
@@ -176,7 +176,7 @@ class ResolvDNSConfigSingletonTest < Test::Unit::TestCase
 end
 
 class ResolvDNSConfigInstanceTest < Test::Unit::TestCase
-  include TypeAssertions
+  include TestHelper
   library 'resolv'
   testing '::Resolv::DNS::Config'
 
@@ -221,7 +221,7 @@ class ResolvDNSConfigInstanceTest < Test::Unit::TestCase
 end
 
 # class ResolvDNSMessageSingletonTest < Test::Unit::TestCase
-#   include TypeAssertions
+#   include TestHelper
 #   library 'resolv'
 #   testing 'singleton(::Resolv::DNS::Message)'
 
@@ -232,7 +232,7 @@ end
 # end
 
 class ResolvDNSMessageInstanceTest < Test::Unit::TestCase
-  include TypeAssertions
+  include TestHelper
   library 'resolv'
   testing '::Resolv::DNS::Message'
 
@@ -302,7 +302,7 @@ class ResolvDNSMessageInstanceTest < Test::Unit::TestCase
 end
 
 class ResolvDNSMessageEncoderInstanceTest < Test::Unit::TestCase
-  include TypeAssertions
+  include TestHelper
   library 'resolv'
   testing '::Resolv::DNS::Message::MessageEncoder'
 
@@ -352,7 +352,7 @@ class ResolvDNSMessageEncoderInstanceTest < Test::Unit::TestCase
 end
 
 class ResolvDNSMessageDecoderInstanceTest < Test::Unit::TestCase
-  include TypeAssertions
+  include TestHelper
   library 'resolv'
   testing '::Resolv::DNS::Message::MessageDecoder'
 
@@ -404,7 +404,7 @@ class ResolvDNSMessageDecoderInstanceTest < Test::Unit::TestCase
 end
 
 class ResolvDNSNameInstanceTest < Test::Unit::TestCase
-  include TypeAssertions
+  include TestHelper
   library 'resolv'
   testing '::Resolv::DNS::Name'
 
@@ -446,7 +446,7 @@ class ResolvDNSNameInstanceTest < Test::Unit::TestCase
 end
 
 class ResolvDNSLabelStrInstanceTest < Test::Unit::TestCase
-  include TypeAssertions
+  include TestHelper
   library 'resolv'
   testing '::Resolv::DNS::Label::Str'
 
@@ -477,7 +477,7 @@ end
 
 
 class ResolvDNSRequesterInstanceTest < Test::Unit::TestCase
-  include TypeAssertions
+  include TestHelper
   library 'resolv'
   testing '::Resolv::DNS::Requester'
 
@@ -488,5 +488,18 @@ class ResolvDNSRequesterInstanceTest < Test::Unit::TestCase
   def test_close
     assert_send_type "() -> void",
       requester, :close
+  end
+end
+
+class ResolvDNSResourceGenericSigletonTest < Test::Unit::TestCase
+  include TestHelper
+  library 'resolv'
+  testing 'singleton(::Resolv::DNS::Resource::Generic)'
+
+  def test_create
+    rrtype = assert_send_type "(Integer, Integer) -> Class",
+      Resolv::DNS::Resource::Generic, :create, Resolv::DNS::Resource::IN::ClassValue, 65280
+    assert_send_type "(String) -> ::Resolv::DNS::Resource::Generic",
+      rrtype, :new, ''
   end
 end

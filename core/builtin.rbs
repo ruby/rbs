@@ -266,6 +266,7 @@ type real = Integer | Float | Rational
 #
 # A lot of builtin functions accept either a Symbol, a String, or something which has `.to_str`
 # defined.
+#
 type interned = Symbol | string
 
 # `boolish` is a type for documentation.

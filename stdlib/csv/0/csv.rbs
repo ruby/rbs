@@ -1,15 +1,6 @@
 # <!-- rdoc-file=lib/csv.rb -->
 # ## CSV
 #
-# ### In a Hurry?
-#
-# If you are familiar with CSV data and have a particular task in mind, you may
-# want to go directly to the:
-# *   [Recipes for CSV](doc/csv/recipes/recipes_rdoc.html).
-#
-#
-# Otherwise, read on here, about the API: classes, methods, and constants.
-#
 # ### CSV Data
 #
 # CSV (comma-separated values) data is a text representation of a table:
@@ -380,15 +371,6 @@
 # feature will be used as the line-ending translation can cause problems with
 # resetting the document position to where it was before the read ahead.
 #
-# ---
-#
-# Raises an exception if the given value is not String-convertible:
-#     row_sep = BasicObject.new
-#     # Raises NoMethodError (undefined method `to_s' for #<BasicObject:>)
-#     CSV.generate(ary, row_sep: row_sep)
-#     # Raises NoMethodError (undefined method `to_s' for #<BasicObject:>)
-#     CSV.parse(str, row_sep: row_sep)
-#
 # ###### Option `col_sep`
 #
 # Specifies the String field separator to be used for both parsing and
@@ -444,13 +426,6 @@
 #     col_sep = ''
 #     # Raises ArgumentError (:col_sep must be 1 or more characters: "")
 #     CSV.parse("foo0\nbar1\nbaz2\n", col_sep: col_sep)
-#
-# Raises an exception if the given value is not String-convertible:
-#     col_sep = BasicObject.new
-#     # Raises NoMethodError (undefined method `to_s' for #<BasicObject:>)
-#     CSV.generate(line, col_sep: col_sep)
-#     # Raises NoMethodError (undefined method `to_s' for #<BasicObject:>)
-#     CSV.parse(str, col_sep: col_sep)
 #
 # ###### Option `quote_char`
 #
@@ -832,13 +807,14 @@
 #
 # ###### Option `liberal_parsing`
 #
-# Specifies the boolean value that determines whether CSV will attempt to parse
-# input not conformant with RFC 4180, such as double quotes in unquoted fields.
+# Specifies the boolean or hash value that determines whether CSV will attempt
+# to parse input not conformant with RFC 4180, such as double quotes in unquoted
+# fields.
 #
 # Default value:
 #     CSV::DEFAULT_OPTIONS.fetch(:liberal_parsing) # => false
 #
-# For examples in this section:
+# For the next two examples:
 #     str = 'is,this "three, or four",fields'
 #
 # Without `liberal_parsing`:
@@ -848,6 +824,24 @@
 # With `liberal_parsing`:
 #     ary = CSV.parse_line(str, liberal_parsing: true)
 #     ary # => ["is", "this \"three", " or four\"", "fields"]
+#
+# Use the `backslash_quote` sub-option to parse values that use a backslash to
+# escape a double-quote character.  This causes the parser to treat `\"` as if
+# it were `""`.
+#
+# For the next two examples:
+#     str = 'Show,"Harry \"Handcuff\" Houdini, the one and only","Tampa Theater"'
+#
+# With `liberal_parsing`, but without the `backslash_quote` sub-option:
+#     # Incorrect interpretation of backslash; incorrectly interprets the quoted comma as a field separator.
+#     ary = CSV.parse_line(str, liberal_parsing: true)
+#     ary # => ["Show", "\"Harry \\\"Handcuff\\\" Houdini", " the one and only\"", "Tampa Theater"]
+#     puts ary[1] # => "Harry \"Handcuff\" Houdini
+#
+# With `liberal_parsing` and its `backslash_quote` sub-option:
+#     ary = CSV.parse_line(str, liberal_parsing: { backslash_quote: true })
+#     ary # => ["Show", "Harry \"Handcuff\" Houdini, the one and only", "Tampa Theater"]
+#     puts ary[1] # => Harry "Handcuff" Houdini, the one and only
 #
 # ###### Option `nil_value`
 #
@@ -988,15 +982,6 @@
 # feature will be used as the line-ending translation can cause problems with
 # resetting the document position to where it was before the read ahead.
 #
-# ---
-#
-# Raises an exception if the given value is not String-convertible:
-#     row_sep = BasicObject.new
-#     # Raises NoMethodError (undefined method `to_s' for #<BasicObject:>)
-#     CSV.generate(ary, row_sep: row_sep)
-#     # Raises NoMethodError (undefined method `to_s' for #<BasicObject:>)
-#     CSV.parse(str, row_sep: row_sep)
-#
 # ###### Option `col_sep`
 #
 # Specifies the String field separator to be used for both parsing and
@@ -1052,13 +1037,6 @@
 #     col_sep = ''
 #     # Raises ArgumentError (:col_sep must be 1 or more characters: "")
 #     CSV.parse("foo0\nbar1\nbaz2\n", col_sep: col_sep)
-#
-# Raises an exception if the given value is not String-convertible:
-#     col_sep = BasicObject.new
-#     # Raises NoMethodError (undefined method `to_s' for #<BasicObject:>)
-#     CSV.generate(line, col_sep: col_sep)
-#     # Raises NoMethodError (undefined method `to_s' for #<BasicObject:>)
-#     CSV.parse(str, col_sep: col_sep)
 #
 # ###### Option `quote_char`
 #
@@ -1124,7 +1102,7 @@
 #
 # With `write_headers`":
 #     CSV.open(file_path,'w',
-#         :write_headers=> true,
+#         :write_headers => true,
 #         :headers => ['Name','Value']
 #       ) do |csv|
 #         csv << ['foo', '0']
@@ -1191,14 +1169,6 @@
 #     str # => "a,b,c\n"
 #
 # See also [Write Converters](#class-CSV-label-Write+Converters)
-#
-# ---
-#
-# Raises an exception if the converter returns a value that is neither `nil` nor
-# String-convertible:
-#     bad_converter = proc {|field| BasicObject.new }
-#     # Raises NoMethodError (undefined method `is_a?' for #<BasicObject:>)
-#     CSV.generate_line(['a', 'b', 'c'], write_converters: bad_converter)#
 #
 # ###### Option `write_nil_value`
 #
@@ -1737,8 +1707,8 @@ class CSV < Object
   #
   # Arguments:
   # *   Argument `path_or_io` must be a file path or an IO stream.
-  # *   Argument `mode`, if given, must be a File mode See [Open
-  #     Mode](https://ruby-doc.org/core/IO.html#method-c-new-label-Open+Mode).
+  # *   Argument `mode`, if given, must be a File mode. See [Access
+  #     Modes](rdoc-ref:File@Access+Modes).
   # *   Arguments `**options` must be keyword options. See [Options for
   #     Parsing](#class-CSV-label-Options+for+Parsing).
   # *   This method optionally accepts an additional `:encoding` option that you
@@ -1752,7 +1722,10 @@ class CSV < Object
   #     would read `UTF-32BE` data from the file but transcode it to `UTF-8`
   #     before parsing.
   #
-  def self.foreach: [U] (String | IO | StringIO path, ?::Hash[Symbol, U] options) { (::Array[String?] arg0) -> void } -> void
+  def self.foreach: (String | IO path, ?String mode, headers: true, **untyped options) { (::CSV::Row arg0) -> void } -> void
+                  | (String | IO path, ?String mode, headers: true, **untyped options) -> Enumerator[::CSV::Row, void]
+                  | (String | IO path, ?String mode, **untyped options) { (::Array[String?] arg0) -> void } -> void
+                  | (String | IO path, ?String mode, **untyped options) -> Enumerator[::Array[String?], void]
 
   # <!--
   #   rdoc-file=lib/csv.rb

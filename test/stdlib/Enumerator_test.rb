@@ -1,7 +1,7 @@
 require_relative "test_helper"
 
 class EnumeratorTest < Test::Unit::TestCase
-  include TypeAssertions
+  include TestHelper
 
   testing "::Enumerator[::Integer, Array[::Integer]]"
 
@@ -18,12 +18,30 @@ class EnumeratorTest < Test::Unit::TestCase
     assert_send_type "(String) -> Enumerator[[Integer, String], String]", g, :with_object, ''
     assert_send_type "(String) { (Integer, String) -> untyped } -> String", g, :with_object, '' do end
   end
+
+  def test_each
+    enum = Enumerator.new { [1,2,3] }
+    assert_send_type "() { (Integer) -> nil } -> [1,2,3]",
+                     enum, :each do end
+  end
 end
 
 class EnumeratorSingletonTest < Test::Unit::TestCase
-  include TypeAssertions
+  include TestHelper
 
   testing "singleton(::Enumerator)"
+
+  def test_new
+    assert_send_type "() { (Enumerator::Yielder) -> 12345 } -> Enumerator[untyped, 12345]",
+                     Enumerator, :new do 12345 end
+  end
+
+  def test_produce
+    assert_send_type(
+      "(Integer initial) { (Integer) -> Integer } -> Enumerator[Integer, bot]",
+      Enumerator, :produce, 1, &:succ
+    )
+  end
 
   def test_product
     assert_send_type(
@@ -34,7 +52,7 @@ class EnumeratorSingletonTest < Test::Unit::TestCase
 end
 
 class EnumeratorYielderTest < Test::Unit::TestCase
-  include TypeAssertions
+  include TestHelper
 
   testing "::Enumerator::Yielder"
 

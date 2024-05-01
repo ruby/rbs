@@ -2,7 +2,7 @@ require_relative "test_helper"
 require "time"
 
 class TimeExtensionSingletonTest < Test::Unit::TestCase
-  include TypeAssertions
+  include TestHelper
 
   library "time"
   testing "singleton(::Time)"
@@ -83,7 +83,7 @@ class TimeExtensionSingletonTest < Test::Unit::TestCase
 end
 
 class TimeExtensionInstanceTest < Test::Unit::TestCase
-  include TypeAssertions
+  include TestHelper
 
   library "time"
   testing "::Time"

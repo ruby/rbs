@@ -3,7 +3,7 @@ require "bigdecimal"
 require "bigdecimal/math"
 
 class BigMathSingletonTest < Test::Unit::TestCase
-  include TypeAssertions
+  include TestHelper
   library "bigdecimal", "bigdecimal-math"
   testing "singleton(::BigMath)"
 
@@ -49,7 +49,7 @@ class BigMathSingletonTest < Test::Unit::TestCase
 end
 
 class BigMathTest < Test::Unit::TestCase
-  include TypeAssertions
+  include TestHelper
   library "bigdecimal", "bigdecimal-math"
   testing "::BigMath"
 

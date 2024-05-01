@@ -86,7 +86,7 @@ module RBS
 
         def a: () -> untyped
 
-        NAME: String
+        NAME: ::String
       end
     end
   end
@@ -155,7 +155,7 @@ module RBS
 
         def a: () -> untyped
 
-        NAME: String
+        NAME: ::String
       end
     end
   end
@@ -314,7 +314,7 @@ end
 
                   def self.to_s: () -> untyped
 
-                  INSTANCE: C
+                  INSTANCE: ::RBS::RuntimePrototypeTest::TestForOverrideModuleName::C
                 end
 
                 class C2 < ::RBS::RuntimePrototypeTest::TestForOverrideModuleName::C
@@ -325,7 +325,7 @@ end
 
                   def self.to_s: () -> untyped
 
-                  X: Integer
+                  X: ::Integer
                 end
               end
             end
@@ -365,7 +365,7 @@ end
                 end
 
                 module M
-                  HASH: Hash[untyped, untyped]
+                  HASH: ::Hash[untyped, untyped]
                 end
               end
             end
@@ -533,22 +533,34 @@ end
     end
   end
 
-  class Unnamed
+  class Constants
+    module Name
+      class Space
+      end
+    end
     A = ARGF
     B = ENV
+    C = BasicObject.new
+    D = Name::Space.new
+    E = Class.new # skip
+    F = Module.new # skip
   end
 
-  def test_unnamed
+  def test_constants
     SignatureManager.new do |manager|
       manager.build do |env|
-        p = Runtime.new(patterns: ["RBS::RuntimePrototypeTest::Unnamed"], env: env, merge: false)
+        p = Runtime.new(patterns: ["RBS::RuntimePrototypeTest::Constants"], env: env, merge: false)
         assert_write p.decls, <<~RBS
           module RBS
             class RuntimePrototypeTest < ::Test::Unit::TestCase
-              class Unnamed
+              class Constants
                 A: ::RBS::Unnamed::ARGFClass
 
                 B: ::RBS::Unnamed::ENVClass
+
+                C: ::BasicObject
+
+                D: ::RBS::RuntimePrototypeTest::Constants::Name::Space
               end
             end
           end
@@ -587,6 +599,363 @@ end
                 private
 
                 def baz: () -> untyped
+              end
+            end
+          end
+        RBS
+      end
+    end
+  end
+
+  class TodoClass
+    module MixinDefined
+    end
+    include MixinDefined
+    module MixinTodo
+    end
+    extend MixinTodo
+
+    def public_defined; end
+    def public_todo; end
+    private def private_defined; end
+    private def private_todo; end
+    def self.singleton_defined; end
+    def self.singleton_todo; end
+    private def accessibility_mismatch; end
+
+    CONST_DEFINED = 1
+    CONST_TODO = 1
+  end
+
+  module TodoModule
+    def public_defined; end
+    def public_todo; end
+  end
+
+  def test_todo
+    SignatureManager.new do |manager|
+      manager.files[Pathname("foo.rbs")] = <<~RBS
+        module RBS
+          class RuntimePrototypeTest < ::Test::Unit::TestCase
+            class TodoClass
+              module MixinDefined
+              end
+              include MixinDefined
+              def public_defined: () -> void
+              private def private_defined: () -> void
+              def self.singleton_defined: () -> void
+              def accessibility_mismatch: () -> void
+              CONST_DEFINED: Integer
+            end
+            module TodoModule
+              def public_defined: () -> void
+            end
+          end
+        end
+      RBS
+
+      manager.build do |env|
+        p = Runtime.new(patterns: ["RBS::RuntimePrototypeTest::TodoClass"], env: env, merge: false, todo: true)
+        assert_write p.decls, <<~RBS
+          module RBS
+            class RuntimePrototypeTest < ::Test::Unit::TestCase
+              class TodoClass
+                extend RBS::RuntimePrototypeTest::TodoClass::MixinTodo
+
+                def self.singleton_todo: () -> untyped
+
+                public
+
+                def public_todo: () -> untyped
+
+                private
+
+                def accessibility_mismatch: () -> untyped
+
+                def private_todo: () -> untyped
+
+                CONST_TODO: ::Integer
+              end
+            end
+          end
+        RBS
+
+        p = Runtime.new(patterns: ["RBS::RuntimePrototypeTest::TodoModule"], env: env, merge: false, todo: true)
+        assert_write p.decls, <<~RBS
+          module RBS
+            class RuntimePrototypeTest < ::Test::Unit::TestCase
+              module TodoModule
+                public
+
+                def public_todo: () -> untyped
+              end
+            end
+          end
+        RBS
+      end
+    end
+  end
+
+  class StructInheritWithNil < Struct.new(:foo, :bar, :baz?, keyword_init: nil)
+  end
+  StructKeywordInitTrue = Struct.new(:foo, :bar, keyword_init: true)
+  StructKeywordInitFalse = Struct.new(:foo, :bar, keyword_init: false)
+  class StructDirectInherited < Struct
+  end
+
+  def test_struct
+    SignatureManager.new do |manager|
+      manager.build do |env|
+        p = Runtime.new(patterns: ["RBS::RuntimePrototypeTest::StructInheritWithNil"], env: env, merge: false)
+        if Runtime::StructGenerator::CAN_CALL_KEYWORD_INIT_P
+          assert_write p.decls, <<~RBS
+            module RBS
+              class RuntimePrototypeTest < ::Test::Unit::TestCase
+                class StructInheritWithNil < ::Struct[untyped]
+                  def self.new: (?untyped foo, ?untyped bar, ?untyped `baz?`) -> instance
+                              | (?foo: untyped, ?bar: untyped, ?baz?: untyped) -> instance
+
+                  def self.[]: (?untyped foo, ?untyped bar, ?untyped `baz?`) -> instance
+                             | (?foo: untyped, ?bar: untyped, ?baz?: untyped) -> instance
+
+                  def self.keyword_init?: () -> nil
+
+                  def self.members: () -> [ :foo, :bar, :baz? ]
+
+                  def members: () -> [ :foo, :bar, :baz? ]
+
+                  attr_accessor foo: untyped
+
+                  attr_accessor bar: untyped
+
+                  attr_accessor baz?: untyped
+                end
+              end
+            end
+          RBS
+        else
+          assert_write p.decls, <<~RBS
+            module RBS
+              class RuntimePrototypeTest < ::Test::Unit::TestCase
+                class StructInheritWithNil < ::Struct[untyped]
+                  def self.new: (?untyped foo, ?untyped bar, ?untyped `baz?`) -> instance
+                              | (?foo: untyped, ?bar: untyped, ?baz?: untyped) -> instance
+
+                  def self.[]: (?untyped foo, ?untyped bar, ?untyped `baz?`) -> instance
+                             | (?foo: untyped, ?bar: untyped, ?baz?: untyped) -> instance
+
+                  def self.members: () -> [ :foo, :bar, :baz? ]
+
+                  def members: () -> [ :foo, :bar, :baz? ]
+
+                  attr_accessor foo: untyped
+
+                  attr_accessor bar: untyped
+
+                  attr_accessor baz?: untyped
+                end
+              end
+            end
+          RBS
+        end
+
+        p = Runtime.new(patterns: ["RBS::RuntimePrototypeTest::StructKeywordInitTrue"], env: env, merge: false)
+        if Runtime::StructGenerator::CAN_CALL_KEYWORD_INIT_P
+          assert_write p.decls, <<~RBS
+            module RBS
+              class RuntimePrototypeTest < ::Test::Unit::TestCase
+                class StructKeywordInitTrue < ::Struct[untyped]
+                  def self.new: (?foo: untyped, ?bar: untyped) -> instance
+
+                  def self.[]: (?foo: untyped, ?bar: untyped) -> instance
+
+                  def self.keyword_init?: () -> true
+
+                  def self.members: () -> [ :foo, :bar ]
+
+                  def members: () -> [ :foo, :bar ]
+
+                  attr_accessor foo: untyped
+
+                  attr_accessor bar: untyped
+                end
+              end
+            end
+          RBS
+        else
+          assert_write p.decls, <<~RBS
+            module RBS
+              class RuntimePrototypeTest < ::Test::Unit::TestCase
+                class StructKeywordInitTrue < ::Struct[untyped]
+                  def self.new: (?untyped foo, ?untyped bar) -> instance
+                              | (?foo: untyped, ?bar: untyped) -> instance
+
+                  def self.[]: (?untyped foo, ?untyped bar) -> instance
+                             | (?foo: untyped, ?bar: untyped) -> instance
+
+                  def self.members: () -> [ :foo, :bar ]
+
+                  def members: () -> [ :foo, :bar ]
+
+                  attr_accessor foo: untyped
+
+                  attr_accessor bar: untyped
+                end
+              end
+            end
+          RBS
+        end
+
+        p = Runtime.new(patterns: ["RBS::RuntimePrototypeTest::StructKeywordInitFalse"], env: env, merge: false)
+        if Runtime::StructGenerator::CAN_CALL_KEYWORD_INIT_P
+          assert_write p.decls, <<~RBS
+            module RBS
+              class RuntimePrototypeTest < ::Test::Unit::TestCase
+                class StructKeywordInitFalse < ::Struct[untyped]
+                  def self.new: (?untyped foo, ?untyped bar) -> instance
+
+                  def self.[]: (?untyped foo, ?untyped bar) -> instance
+
+                  def self.keyword_init?: () -> false
+
+                  def self.members: () -> [ :foo, :bar ]
+
+                  def members: () -> [ :foo, :bar ]
+
+                  attr_accessor foo: untyped
+
+                  attr_accessor bar: untyped
+                end
+              end
+            end
+          RBS
+        else
+          assert_write p.decls, <<~RBS
+            module RBS
+              class RuntimePrototypeTest < ::Test::Unit::TestCase
+                class StructKeywordInitFalse < ::Struct[untyped]
+                  def self.new: (?untyped foo, ?untyped bar) -> instance
+                              | (?foo: untyped, ?bar: untyped) -> instance
+
+                  def self.[]: (?untyped foo, ?untyped bar) -> instance
+                             | (?foo: untyped, ?bar: untyped) -> instance
+
+                  def self.members: () -> [ :foo, :bar ]
+
+                  def members: () -> [ :foo, :bar ]
+
+                  attr_accessor foo: untyped
+
+                  attr_accessor bar: untyped
+                end
+              end
+            end
+          RBS
+        end
+
+        p = Runtime.new(patterns: ["RBS::RuntimePrototypeTest::StructDirectInherited"], env: env, merge: false)
+        assert_write p.decls, <<~RBS
+          module RBS
+            class RuntimePrototypeTest < ::Test::Unit::TestCase
+              class StructDirectInherited < ::Struct[untyped]
+              end
+            end
+          end
+        RBS
+      end
+    end
+  end
+
+  if RUBY_VERSION >= '3.2'
+    class DataInherit < Data.define(:foo, :bar, :baz?)
+    end
+    DataConst = Data.define(:foo, :bar)
+    class DataDirectInherit < Data
+    end
+
+    def test_data
+      SignatureManager.new do |manager|
+        manager.build do |env|
+          p = Runtime.new(patterns: ["RBS::RuntimePrototypeTest::DataInherit"], env: env, merge: false)
+          assert_write p.decls, <<~RBS
+            module RBS
+              class RuntimePrototypeTest < ::Test::Unit::TestCase
+                class DataInherit < ::Data
+                  def self.new: (untyped foo, untyped bar, untyped `baz?`) -> instance
+                              | (foo: untyped, bar: untyped, baz?: untyped) -> instance
+
+                  def self.[]: (untyped foo, untyped bar, untyped `baz?`) -> instance
+                             | (foo: untyped, bar: untyped, baz?: untyped) -> instance
+
+                  def self.members: () -> [ :foo, :bar, :baz? ]
+
+                  def members: () -> [ :foo, :bar, :baz? ]
+
+                  attr_reader foo: untyped
+
+                  attr_reader bar: untyped
+
+                  attr_reader baz?: untyped
+                end
+              end
+            end
+          RBS
+
+          p = Runtime.new(patterns: ["RBS::RuntimePrototypeTest::DataConst"], env: env, merge: false)
+          assert_write p.decls, <<~RBS
+            module RBS
+              class RuntimePrototypeTest < ::Test::Unit::TestCase
+                class DataConst < ::Data
+                  def self.new: (untyped foo, untyped bar) -> instance
+                              | (foo: untyped, bar: untyped) -> instance
+
+                  def self.[]: (untyped foo, untyped bar) -> instance
+                             | (foo: untyped, bar: untyped) -> instance
+
+                  def self.members: () -> [ :foo, :bar ]
+
+                  def members: () -> [ :foo, :bar ]
+
+                  attr_reader foo: untyped
+
+                  attr_reader bar: untyped
+                end
+              end
+            end
+          RBS
+
+          p = Runtime.new(patterns: ["RBS::RuntimePrototypeTest::DataDirectInherit"], env: env, merge: false)
+          assert_write p.decls, <<~RBS
+            module RBS
+              class RuntimePrototypeTest < ::Test::Unit::TestCase
+                class DataDirectInherit < ::Data
+                end
+              end
+            end
+          RBS
+        end
+      end
+    end
+  end
+
+  class Redefined
+    def self.constants = raise
+    def class = raise
+  end
+
+  def test_reflection
+    SignatureManager.new do |manager|
+      manager.build do |env|
+        p = Runtime.new(patterns: ["RBS::RuntimePrototypeTest::Redefined"], env: env, merge: false)
+        assert_write p.decls, <<~RBS
+          module RBS
+            class RuntimePrototypeTest < ::Test::Unit::TestCase
+              class Redefined
+                def self.constants: () -> untyped
+
+                public
+
+                def class: () -> untyped
               end
             end
           end

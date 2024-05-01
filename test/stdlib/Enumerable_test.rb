@@ -127,7 +127,7 @@ class EnumerableTest < StdlibTest
 end
 
 class EnumerableTest2 < Test::Unit::TestCase
-  include TypeAssertions
+  include TestHelper
 
   class TestEnumerable
     include Enumerable
@@ -211,7 +211,7 @@ class EnumerableTest2 < Test::Unit::TestCase
   end
 
   def test_inject
-    assert_send_type "(String init, Symbol method) -> untyped", TestEnumerable.new, :inject, '', :<<
+    assert_send_type "(String init, Symbol method) -> untyped", TestEnumerable.new, :inject, +'', :<<
     assert_send_type "(Symbol method) -> String", TestEnumerable.new, :inject, :+
     assert_send_type("(Integer initial) { (Integer, String) -> Integer } -> Integer", TestEnumerable.new, :inject, 0) do |memo, item|
       memo ^ item.hash

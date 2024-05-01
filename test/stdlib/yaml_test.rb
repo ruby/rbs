@@ -4,7 +4,7 @@ require "yaml"
 require "tmpdir"
 
 class YAMLSingletonTest < Test::Unit::TestCase
-  include TypeAssertions
+  include TestHelper
 
   library "yaml"
   testing "singleton(::YAML)"
@@ -54,6 +54,22 @@ foo: 123
     assert_send_type(
       "(::String, permitted_classes: ::Array[::Class], permitted_symbols: ::Array[::Symbol], aliases: bool, filename: ::_ToS, fallback: ::Symbol, symbolize_names: bool, freeze: bool) -> untyped",
       YAML, :safe_load, <<-YAML, permitted_classes: [Integer], permitted_symbols: [:foo], aliases: true, filename: ToS.new("foo.yaml"), fallback: :foo, symbolize_names: true, freeze: false
+foo: 123
+      YAML
+    )
+  end
+
+  def test_unsafe_load
+    assert_send_type(
+      "(::String) -> untyped",
+      YAML, :unsafe_load, <<-YAML
+foo: 123
+      YAML
+    )
+
+    assert_send_type(
+      "(::String, filename: ::_ToS, fallback: ::Symbol, symbolize_names: bool, freeze: bool, strict_integer: bool) -> untyped",
+      YAML, :unsafe_load, <<-YAML, filename: ToS.new("foo.yaml"), fallback: :foo, symbolize_names: true, freeze: false, strict_integer: false
 foo: 123
       YAML
     )

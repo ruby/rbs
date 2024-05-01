@@ -2,7 +2,7 @@ require_relative "test_helper"
 require "nkf"
 
 class NKFSingletonTest < Test::Unit::TestCase
-  include TypeAssertions
+  include TestHelper
 
   library "nkf"
   testing "singleton(::NKF)"

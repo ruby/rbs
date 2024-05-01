@@ -482,8 +482,8 @@ class Socket < BasicSocket
   #       puts sock.read
   #     }
   #
-  def self.tcp: (String host, Integer port, ?String local_host, ?Integer local_port, ?resolv_timeout: Numeric, ?connect_timeout: Numeric) -> instance
-              | (String host, Integer port, ?String local_host, ?Integer local_port, ?resolv_timeout: Numeric, ?connect_timeout: Numeric) { (instance) -> void } -> void
+  def self.tcp: (String host, Integer port, ?String local_host, ?Integer local_port, ?resolv_timeout: Time::_Timeout, ?connect_timeout: Time::_Timeout) -> instance
+              | (String host, Integer port, ?String local_host, ?Integer local_port, ?resolv_timeout: Time::_Timeout, ?connect_timeout: Time::_Timeout) { (instance) -> void } -> void
 
   # <!--
   #   rdoc-file=ext/socket/lib/socket.rb
@@ -1289,9 +1289,10 @@ class Socket < BasicSocket
   # received. The second element, *sender_addrinfo*, contains protocol-specific
   # address information of the sender.
   #
-  # When recvfrom(2) returns 0, Socket#recvfrom_nonblock returns an empty string
-  # as data. The meaning depends on the socket: EOF on TCP, empty packet on UDP,
-  # etc.
+  # When recvfrom(2) returns 0, Socket#recv_nonblock returns nil. In most cases it
+  # means the connection was closed, but for UDP connections it may mean an empty
+  # packet was received, as the underlying API makes it impossible to distinguish
+  # these two cases.
   #
   # ### Parameters
   # *   `maxlen` - the maximum number of bytes to receive from the socket
@@ -1517,8 +1518,8 @@ Socket::AF_IMPLINK: Integer
 #
 Socket::AF_INET: Integer
 
-# <!-- rdoc-file=ext/socket/constdefs.c -->
-# IPv6 protocol
+# <!-- rdoc-file=lib/ipaddr.rb -->
+# IPv6 protocol family
 #
 Socket::AF_INET6: Integer
 
@@ -4155,5 +4156,5 @@ class Socket::AncillaryData
   #     p Socket::AncillaryData.new(:INET6, :IPV6, :PKTINFO, "")
   #     #=> #<Socket::AncillaryData: INET6 IPV6 PKTINFO "">
   #
-  def initialize: (Symbol | String | Integer family, Symbol | String | Integer cmsg_level, Symbol | String | Integer cmsg_data, String cmsg_data) -> untyped
+  def initialize: (interned | Integer family, interned | Integer cmsg_level, interned | Integer cmsg_data, String cmsg_data) -> untyped
 end

@@ -13,6 +13,10 @@ module RBS
 
       def keyword_hash?: (node) -> bool
 
+      # Returns a symbol if the node is a symbol literal node
+      # 
+      def symbol_literal_node?: (node) -> Symbol?
+
       def args_from_node: (node?) -> Array[untyped]
 
       def untyped: () -> Types::Bases::Any

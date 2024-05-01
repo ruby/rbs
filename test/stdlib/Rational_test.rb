@@ -181,7 +181,7 @@ class RationalTest < StdlibTest
 end
 
 class RationalInstanceTest < Test::Unit::TestCase
-  include TypeAssertions
+  include TestHelper
 
   testing "::Rational"
 

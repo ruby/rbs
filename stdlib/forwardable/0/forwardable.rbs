@@ -134,7 +134,7 @@ module Forwardable
   #     def_delegator :@records, :<<
   #     def_delegator :@records, :map
   #
-  def def_instance_delegators: (Symbol | String accessor, *Symbol methods) -> void
+  def def_instance_delegators: (interned accessor, *Symbol methods) -> void
 
   # <!--
   #   rdoc-file=lib/forwardable.rb
@@ -171,7 +171,7 @@ module Forwardable
   #     q.push 23  #=> NoMethodError
   #     q.to_i     #=> 1
   #
-  def def_instance_delegator: (Symbol | String accessor, Symbol method, ?Symbol ali) -> void
+  def def_instance_delegator: (interned accessor, Symbol method, ?Symbol ali) -> void
 
   # <!--
   #   rdoc-file=lib/forwardable.rb
@@ -240,7 +240,7 @@ module SingleForwardable
   #     def_delegator :@records, :<<
   #     def_delegator :@records, :map
   #
-  def def_single_delegators: (Symbol | String accessor, *Symbol methods) -> void
+  def def_single_delegators: (interned accessor, *Symbol methods) -> void
 
   # <!--
   #   rdoc-file=lib/forwardable.rb
@@ -257,7 +257,7 @@ module SingleForwardable
   # method of the same name in *accessor*).  If *new_name* is provided, it is used
   # as the name for the delegate method. Returns the name of the method defined.
   #
-  def def_single_delegator: (Symbol | String accessor, Symbol method, ?Symbol ali) -> void
+  def def_single_delegator: (interned accessor, Symbol method, ?Symbol ali) -> void
 
   # <!--
   #   rdoc-file=lib/forwardable.rb

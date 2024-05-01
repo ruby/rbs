@@ -3,7 +3,7 @@ require 'digest'
 require 'digest/bubblebabble'
 
 class DigestSingletonTest < Test::Unit::TestCase
-  include TypeAssertions
+  include TestHelper
 
   library 'digest'
   testing 'singleton(::Digest)'
@@ -41,7 +41,7 @@ class DigestSingletonTest < Test::Unit::TestCase
 end
 
 class DigestInstanceTest < Test::Unit::TestCase
-  include TypeAssertions
+  include TestHelper
 
   library 'digest'
   testing '::Digest'
@@ -60,7 +60,7 @@ class DigestInstanceTest < Test::Unit::TestCase
 end
 
 class DigestRootTest < Test::Unit::TestCase
-  include TypeAssertions
+  include TestHelper
 
   library 'digest'
   testing '::Object'

@@ -1,7 +1,7 @@
 require_relative "test_helper"
 
 class Thread::Backtrace::LocationTest < Test::Unit::TestCase
-  include TypeAssertions
+  include TestHelper
 
   testing "::Thread::Backtrace::Location"
 

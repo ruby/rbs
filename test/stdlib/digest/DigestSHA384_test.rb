@@ -3,7 +3,7 @@ require 'digest'
 require 'digest/bubblebabble'
 
 class DigestSHA384SingletonTest < Test::Unit::TestCase
-  include TypeAssertions
+  include TestHelper
 
   library 'digest'
   testing 'singleton(::Digest::SHA384)'
@@ -35,13 +35,13 @@ class DigestSHA384SingletonTest < Test::Unit::TestCase
 end
 
 class DigestSHA384InstanceTest < Test::Unit::TestCase
-  include TypeAssertions
+  include TestHelper
 
   library 'digest'
   testing '::Digest::SHA384'
 
   def test_left_shift
-    assert_send_type '(::String) -> self',
+    assert_send_type '(::String) -> Digest::SHA384',
                      ::Digest::SHA384.new, :<<, '_binary_left_shift_'
   end
 
@@ -56,12 +56,12 @@ class DigestSHA384InstanceTest < Test::Unit::TestCase
   end
 
   def test_reset
-    assert_send_type '() -> self',
+    assert_send_type '() -> Digest::SHA384',
                      ::Digest::SHA384.new, :reset
   end
 
   def test_update
-    assert_send_type '(::String) -> self',
+    assert_send_type '(::String) -> Digest::SHA384',
                      ::Digest::SHA384.new, :update, '_update_'
   end
 
@@ -71,7 +71,7 @@ class DigestSHA384InstanceTest < Test::Unit::TestCase
   end
 
   def test_initialize_copy
-    assert_send_type '(::Digest::Base) -> self',
+    assert_send_type '(::Digest::Base) -> Digest::SHA384',
                      ::Digest::SHA384.new, :initialize_copy, ::Digest::SHA384.new
   end
 
@@ -118,7 +118,7 @@ class DigestSHA384InstanceTest < Test::Unit::TestCase
   end
 
   def test_file
-    assert_send_type '(::String) -> self',
+    assert_send_type '(::String) -> Digest::SHA384',
                      ::Digest::SHA384.new, :file, 'README.md'
   end
 

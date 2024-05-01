@@ -1,26 +1,83 @@
 # frozen_string_literal: true
 
+require_relative 'runtime/helpers'
+require_relative 'runtime/value_object_generator'
+require_relative 'runtime/reflection'
+
 module RBS
   module Prototype
     class Runtime
-      include Helpers
+      class Todo
+        def initialize(builder:)
+          @builder = builder
+        end
+
+        def skip_mixin?(type_name:, module_name:, mixin_class:)
+          return false unless @builder.env.module_class_entry(type_name.absolute!)
+          return false unless @builder.env.module_class_entry(module_name.absolute!)
+
+          mixin_decls(type_name).any? do |decl|
+            decl.instance_of?(mixin_class) && decl.name == module_name.absolute!
+          end
+        end
+
+        def skip_singleton_method?(module_name:, method:, accessibility:)
+          return false unless @builder.env.module_class_entry(module_name.absolute!)
+
+          method_definition = @builder.build_singleton(module_name.absolute!).methods[method.name]
+          return false unless method_definition
+
+          method_definition.accessibility == accessibility
+        end
+
+        def skip_instance_method?(module_name:, method:, accessibility:)
+          return false unless @builder.env.module_class_entry(module_name.absolute!)
+
+          method_definition = @builder.build_instance(module_name.absolute!).methods[method.name]
+          return false unless method_definition
+
+          method_definition.accessibility == accessibility
+        end
+
+        def skip_constant?(module_name:, name:)
+          namespace = Namespace.new(path: module_name.split('::').map(&:to_sym), absolute: true)
+          @builder.env.constant_decl?(TypeName.new(namespace: namespace, name: name))
+        end
+
+        private
+
+        def mixin_decls(type_name)
+          type_name_absolute = type_name.absolute!
+          (@mixin_decls_cache ||= {}).fetch(type_name_absolute) do
+            @mixin_decls_cache[type_name_absolute] = @builder.env.class_decls[type_name_absolute].decls.flat_map do |d|
+              d.decl.members.select { |m| m.kind_of?(AST::Members::Mixin) }
+            end
+          end
+        end
+      end
+      private_constant :Todo
+
+      include Prototype::Helpers
+      include Runtime::Helpers
 
       attr_reader :patterns
       attr_reader :env
       attr_reader :merge
+      attr_reader :todo
       attr_reader :owners_included
       attr_accessor :outline
 
-      def initialize(patterns:, env:, merge:, owners_included: [])
+      def initialize(patterns:, env:, merge:, todo: false, owners_included: [])
         @patterns = patterns
         @decls = nil
-        @modules = []
+        @modules = {}
         @env = env
         @merge = merge
         @owners_included = owners_included.map do |name|
           Object.const_get(name)
         end
         @outline = false
+        @todo = todo
       end
 
       def target?(const)
@@ -36,6 +93,10 @@ module RBS
         end
       end
 
+      def todo_object
+        @todo_object ||= Todo.new(builder: builder) if todo
+      end
+
       def builder
         @builder ||= DefinitionBuilder.new(env: env)
       end
@@ -47,8 +108,11 @@ module RBS
       def decls
         unless @decls
           @decls = []
-          @modules = ObjectSpace.each_object(Module).to_a
-          @modules.select {|mod| target?(mod) }.sort_by{|mod| const_name!(mod) }.each do |mod|
+          @modules = ObjectSpace.each_object(Module)
+            .map { |mod| [const_name(mod), mod] }
+            .select { |name, _| name }
+            .to_h
+          @modules.select { |name, mod| target?(mod) }.sort_by { |name, _| name }.each do |_, mod|
             case mod
             when Class
               generate_class mod
@@ -59,22 +123,6 @@ module RBS
         end
 
         @decls or raise
-      end
-
-      def to_type_name(name, full_name: false)
-        *prefix, last = name.split(/::/)
-
-        last or raise
-
-        if full_name
-          if prefix.empty?
-            TypeName.new(name: last.to_sym, namespace: Namespace.empty)
-          else
-            TypeName.new(name: last.to_sym, namespace: Namespace.parse(prefix.join("::")))
-          end
-        else
-          TypeName.new(name: last.to_sym, namespace: Namespace.empty)
-        end
       end
 
       private def each_mixined_module(type_name, mod)
@@ -248,8 +296,10 @@ module RBS
       end
 
       def generate_methods(mod, module_name, members)
+        module_name_absolute = to_type_name(const_name!(mod), full_name: true).absolute!
         mod.singleton_methods.select {|name| target_method?(mod, singleton: name) }.sort.each do |name|
           method = mod.singleton_class.instance_method(name)
+          next if todo_object&.skip_singleton_method?(module_name: module_name_absolute, method: method, accessibility: :public)
 
           if can_alias?(mod.singleton_class, method)
             members << AST::Members::Alias.new(
@@ -286,6 +336,7 @@ module RBS
 
           public_instance_methods.sort.each do |name|
             method = mod.instance_method(name)
+            next if todo_object&.skip_instance_method?(module_name: module_name_absolute, method: method, accessibility: :public)
 
             if can_alias?(mod, method)
               members << AST::Members::Alias.new(
@@ -319,11 +370,14 @@ module RBS
 
         private_instance_methods = mod.private_instance_methods.select {|name| target_method?(mod, instance: name) }
         unless private_instance_methods.empty?
+          added = false
           members << AST::Members::Private.new(location: nil)
 
           private_instance_methods.sort.each do |name|
             method = mod.instance_method(name)
+            next if todo_object&.skip_instance_method?(module_name: module_name_absolute, method: method, accessibility: :private)
 
+            added = true
             if can_alias?(mod, method)
               members << AST::Members::Alias.new(
                 new_name: method.name,
@@ -352,6 +406,8 @@ module RBS
               end
             end
           end
+
+          members.pop unless added
         end
       end
 
@@ -366,7 +422,10 @@ module RBS
       end
 
       def generate_constants(mod, decls)
-        mod.constants(false).sort.each do |name|
+        module_name = const_name!(mod)
+        Reflection.constants_of(mod, false).sort.each do |name|
+          next if todo_object&.skip_constant?(module_name: module_name, name: name)
+
           begin
             value = mod.const_get(name)
           rescue StandardError, LoadError => e
@@ -374,8 +433,10 @@ module RBS
             next
           end
 
-          next if value.is_a?(Class) || value.is_a?(Module)
-          unless value.class.name
+          next if Reflection.object_class(value).equal?(Class)
+          next if Reflection.object_class(value).equal?(Module)
+
+          unless Reflection.object_class(value).name
             RBS.logger.warn("Skipping constant #{name} #{value} of #{mod} as an instance of anonymous class")
             next
           end
@@ -393,7 +454,7 @@ module RBS
                  when ENV
                    Types::ClassInstance.new(name: TypeName("::RBS::Unnamed::ENVClass"), args: [], location: nil)
                  else
-                   value_type_name = to_type_name(const_name!(value.class))
+                   value_type_name = to_type_name(const_name!(Reflection.object_class(value)), full_name: true).absolute!
                    args = type_args(value_type_name)
                    Types::ClassInstance.new(name: value_type_name, args: args, location: nil)
                  end
@@ -423,6 +484,7 @@ module RBS
       end
 
       def generate_class(mod)
+        type_name_absolute = to_type_name(const_name!(mod), full_name: true).absolute!
         type_name = to_type_name(const_name!(mod))
         outer_decls = ensure_outer_module_declarations(mod)
 
@@ -432,31 +494,30 @@ module RBS
         end #: AST::Declarations::Class?
 
         unless decl
-          decl = AST::Declarations::Class.new(
-            name: to_type_name(only_name(mod)),
-            type_params: type_params(mod),
-            super_class: generate_super_class(mod),
-            members: [],
-            annotations: [],
-            location: nil,
-            comment: nil
-          )
+          if StructGenerator.generatable?(mod)
+            decl = StructGenerator.new(mod).build_decl
+          elsif DataGenerator.generatable?(mod)
+            decl = DataGenerator.new(mod).build_decl
+          else
+            decl = AST::Declarations::Class.new(
+              name: to_type_name(only_name(mod)),
+              type_params: type_params(mod),
+              super_class: generate_super_class(mod),
+              members: [],
+              annotations: [],
+              location: nil,
+              comment: nil
+            )
+          end
 
           outer_decls << decl
         end
 
-        each_mixined_module(type_name, mod) do |module_name, module_full_name, mixin_class|
-          args = type_args(module_full_name)
-          decl.members << mixin_class.new(
-            name: module_name,
-            args: args,
-            location: nil,
-            comment: nil,
-            annotations: []
-          )
-        end
+        generate_mixin(mod, decl, type_name, type_name_absolute)
 
-        generate_methods(mod, type_name, decl.members) unless outline
+        unless mod < Struct || (RUBY_VERSION >= '3.2' && mod < Data)
+          generate_methods(mod, type_name, decl.members) unless outline
+        end
 
         generate_constants mod, decl.members
       end
@@ -469,6 +530,7 @@ module RBS
           return
         end
 
+        type_name_absolute = to_type_name(name, full_name: true).absolute!
         type_name = to_type_name(name)
         outer_decls = ensure_outer_module_declarations(mod)
 
@@ -491,7 +553,17 @@ module RBS
           outer_decls << decl
         end
 
+        generate_mixin(mod, decl, type_name, type_name_absolute)
+
+        generate_methods(mod, type_name, decl.members) unless outline
+
+        generate_constants mod, decl.members
+      end
+
+      def generate_mixin(mod, decl, type_name, type_name_absolute)
         each_mixined_module(type_name, mod) do |module_name, module_full_name, mixin_class|
+          next if todo_object&.skip_mixin?(type_name: type_name_absolute, module_name: module_full_name, mixin_class: mixin_class)
+
           args = type_args(module_full_name)
           decl.members << mixin_class.new(
             name: module_name,
@@ -501,10 +573,6 @@ module RBS
             annotations: []
           )
         end
-
-        generate_methods(mod, type_name, decl.members) unless outline
-
-        generate_constants mod, decl.members
       end
 
       # Generate/find outer module declarations
@@ -518,7 +586,7 @@ module RBS
 
         outer_module_names&.each_with_index do |outer_module_name, i|
           current_name = outer_module_names.take(i+1).join('::')
-          outer_module = @modules.detect { |x| const_name(x) == current_name }
+          outer_module = @modules[current_name]
           outer_decl = destination.detect do |decl|
             case outer_module
             when Class
@@ -531,7 +599,7 @@ module RBS
           # Insert AST::Declarations if declarations are not added previously
           unless outer_decl
             outer_module or raise
-            
+
             if outer_module.is_a?(Class)
               outer_decl = AST::Declarations::Class.new(
                 name: to_type_name(outer_module_name),
@@ -562,31 +630,6 @@ module RBS
 
         # Return the array of declarations checked out at the end
         destination
-      end
-
-      # Returns the exact name & not compactly declared name
-      def only_name(mod)
-        # No nil check because this method is invoked after checking if the module exists
-        const_name!(mod).split(/::/).last or raise # (A::B::C) => C
-      end
-
-      def const_name!(const)
-        const_name(const) or raise
-      end
-
-      def const_name(const)
-        @module_name_method ||= Module.instance_method(:name)
-        name = @module_name_method.bind(const).call
-        return nil unless name
-
-        begin
-          Object.const_get(name)
-        rescue NameError
-          # Should generate const name if anonymous or internal module (e.g. NameError::message)
-          nil
-        else
-          name
-        end
       end
 
       def type_args(type_name)

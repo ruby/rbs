@@ -163,7 +163,7 @@ class BasicObject
   #     k = Klass.new
   #     k.send :hello, "gentle", "readers"   #=> "Hello gentle readers"
   #
-  def __send__: (String | Symbol arg0, *untyped args) -> untyped
+  def __send__: (interned name, *untyped, **untyped) ?{ (*untyped, **untyped) -> untyped } -> untyped
 
   # <!-- rdoc-file=object.c -->
   # Equality --- At the Object level, #== returns `true` only if `obj` and `other`
@@ -195,7 +195,7 @@ class BasicObject
   #     1 == 1.0     #=> true
   #     1.eql? 1.0   #=> false
   #
-  def equal?: (untyped other) -> bool
+  alias equal? ==
 
   # <!--
   #   rdoc-file=vm_eval.c
@@ -228,7 +228,7 @@ class BasicObject
   #     k.instance_eval { the_secret }       #=> "Ssssh! The secret is 99."
   #     k.instance_eval {|obj| obj == self } #=> true
   #
-  def instance_eval: (String, ?String filename, ?Integer lineno) -> untyped
+  def instance_eval: (string code, ?string filename, ?int lineno) -> untyped
                    | [U] () { (self) [self: self] -> U } -> U
 
   # <!--
@@ -256,7 +256,7 @@ class BasicObject
   # -->
   # Returns a new BasicObject.
   #
-  def initialize: () -> void
+  def initialize: () -> nil
 
   private
 
@@ -318,7 +318,7 @@ class BasicObject
   #     Adding one
   #     Adding three
   #
-  def singleton_method_added: (Symbol) -> void
+  def singleton_method_added: (Symbol name) -> nil
 
   # <!--
   #   rdoc-file=object.c
@@ -345,7 +345,7 @@ class BasicObject
   #     Removing three
   #     Removing one
   #
-  def singleton_method_removed: (Symbol) -> void
+  def singleton_method_removed: (Symbol name) -> nil
 
   # <!--
   #   rdoc-file=object.c
@@ -368,5 +368,5 @@ class BasicObject
   #
   #     Undefining one
   #
-  def singleton_method_undefined: (Symbol) -> void
+  def singleton_method_undefined: (Symbol name) -> nil
 end

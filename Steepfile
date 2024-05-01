@@ -5,15 +5,15 @@ target :lib do
   check "lib"
   ignore(
     "lib/rbs/test",
-    "lib/rbs/test.rb"
+    # "lib/rbs/test.rb"
   )
 
-  library "pathname", "json", "logger", "monitor", "tsort", "uri", 'dbm', 'pstore', 'singleton', 'shellwords', 'fileutils', 'find', 'digest', 'abbrev'
-  signature 'stdlib/yaml/0'
+  library "pathname", "json", "logger", "monitor", "tsort", "uri", 'dbm', 'pstore', 'singleton', 'shellwords', 'fileutils', 'find', 'digest', 'abbrev', 'prettyprint', 'yaml', "psych", "securerandom"
   signature "stdlib/strscan/0/"
   signature "stdlib/optparse/0/"
   signature "stdlib/rdoc/0/"
   signature "stdlib/ripper/0"
+  signature "stdlib/pp/0"
 
   # configure_code_diagnostics do |config|
   #   config[D::Ruby::MethodDefinitionMissing] = :hint

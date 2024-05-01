@@ -1,7 +1,7 @@
 require_relative "test_helper"
 
 class Thread::BacktraceSingletonTest < Test::Unit::TestCase
-  include TypeAssertions
+  include TestHelper
 
   testing "singleton(::Thread::Backtrace)"
 

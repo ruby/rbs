@@ -37,13 +37,9 @@ module RBS
             end
           end
 
-          method_block = Types::Block.new(
-            required: required,
-            type: Types::Function.empty(untyped),
-            self_type: nil
-          )
-
           if yields
+            function = Types::Function.empty(untyped)
+
             yields.each do |yield_node|
               array_content = yield_node.children[0]&.children&.compact || []
 
@@ -54,9 +50,9 @@ module RBS
                                         [array_content, nil]
                                       end
 
-              if (diff = positionals.size - method_block.type.required_positionals.size) > 0
+              if (diff = positionals.size - function.required_positionals.size) > 0
                 diff.times do
-                  method_block.type.required_positionals << Types::Function::Param.new(
+                  function.required_positionals << Types::Function::Param.new(
                     type: untyped,
                     name: nil
                   )
@@ -67,7 +63,7 @@ module RBS
                 keywords.children[0].children.each_slice(2) do |key_node, value_node|
                   if key_node
                     key = key_node.children[0]
-                    method_block.type.required_keywords[key] ||=
+                    function.required_keywords[key] ||=
                       Types::Function::Param.new(
                         type: untyped,
                         name: nil
@@ -76,10 +72,13 @@ module RBS
                 end
               end
             end
+          else
+            function = Types::UntypedFunction.new(return_type: untyped)
           end
-        end
 
-        method_block
+
+          Types::Block.new(required: required, type: function, self_type: nil)
+        end
       end
 
       def each_child(node, &block)
@@ -109,7 +108,7 @@ module RBS
       def keyword_hash?(node)
         if node && node.type == :HASH
           node.children[0].children.compact.each_slice(2).all? {|key, _|
-            key.type == :LIT && key.children[0].is_a?(Symbol)
+            symbol_literal_node?(key)
           }
         else
           false
@@ -120,6 +119,17 @@ module RBS
       #       https://bugs.ruby-lang.org/issues/17495
       def args_from_node(args_node)
         args_node&.children || [0, nil, nil, nil, 0, nil, nil, nil, nil, nil]
+      end
+
+      def symbol_literal_node?(node)
+        case node.type
+        when :LIT
+          if node.children[0].is_a?(Symbol)
+            node.children[0]
+          end
+        when :SYM
+          node.children[0]
+        end
       end
 
       def untyped

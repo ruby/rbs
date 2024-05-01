@@ -1,7 +1,7 @@
 require_relative "test_helper"
 
 class FalseClassInstanceTest < Test::Unit::TestCase
-  include TypeAssertions
+  include TestHelper
 
   testing '::FalseClass'
 

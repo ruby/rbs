@@ -1,7 +1,7 @@
 require_relative "test_helper"
 
 class ModuleSingletonTest < Test::Unit::TestCase
-  include TypeAssertions
+  include TestHelper
 
   testing "singleton(::Module)"
 
@@ -19,12 +19,26 @@ class ModuleSingletonTest < Test::Unit::TestCase
 end
 
 class ModuleInstanceTest < Test::Unit::TestCase
-  include TypeAssertions
+  include TestHelper
 
   testing "::Module"
 
   module Foo
     BAR = 1
+  end
+
+  def test_include
+    assert_send_type "(Module) -> Module",
+                     Module.new, :include, Module.new
+    assert_send_type "(Module, Module) -> Module",
+                     Module.new, :include, Module.new, Module.new
+  end
+
+  def test_prepend
+    assert_send_type "(Module) -> Module",
+                     Module.new, :prepend, Module.new
+    assert_send_type "(Module, Module) -> Module",
+                     Module.new, :prepend, Module.new, Module.new
   end
 
   def test_refine
@@ -72,6 +86,36 @@ class ModuleInstanceTest < Test::Unit::TestCase
 
     assert_send_type "() { (Module) -> nil } -> nil",
                      Foo, :module_eval do nil end
+  end
+
+  def test_module_function
+    mod = Module.new do
+      def foo; end
+
+      def bar; end
+    end
+
+    assert_send_type(
+      "() -> nil",
+      mod, :module_function
+    )
+    assert_send_type(
+      "(Symbol) -> Symbol",
+      mod, :module_function, :foo
+    )
+    assert_send_type(
+      "(String) -> String",
+      mod, :module_function, "foo"
+    )
+    assert_send_type(
+      "(ToStr) -> ToStr",
+      mod, :module_function, ToStr.new("foo")
+    )
+
+    assert_send_type(
+      "(Symbol, String) -> Array[Symbol | String]",
+      mod, :module_function, :foo, "bar"
+    )
   end
 
   def test_class_eval
@@ -124,8 +168,80 @@ class ModuleInstanceTest < Test::Unit::TestCase
     )
 
     assert_send_type(
-      "(Symbol, String) -> Array[Symbol | String]",
+      "(Symbol, String) -> Array[interned]",
       mod, :private, :foo, "bar"
+    )
+
+    assert_send_type(
+      "(Array[Symbol | String]) -> Array[Symbol | String]",
+      mod, :private, [:foo, "bar"]
+    )
+  end
+
+  def test_private_class_method
+    mod = Module.new do
+      def self.foo; end
+      def self.bar; end
+    end
+
+    assert_send_type(
+      "(Symbol) -> Module",
+      mod, :private_class_method, :foo
+    )
+
+    assert_send_type(
+      "(Symbol, Symbol) -> Module",
+      mod, :private_class_method, :foo, :bar
+    )
+
+    assert_send_type(
+      "(String) -> Module",
+      mod, :private_class_method, "foo"
+    )
+
+    assert_send_type(
+      "(String, String) -> Module",
+      mod, :private_class_method, "foo", "bar"
+    )
+
+    assert_send_type(
+      "(Array[Symbol | String]) -> Module",
+      mod, :private_class_method, [:foo, "bar"]
+    )
+  end
+
+  def test_protected
+    mod = Module.new do
+      def foo; end
+
+      def bar; end
+    end
+
+    assert_send_type(
+      "() -> nil",
+      mod, :protected
+    )
+    assert_send_type(
+      "(Symbol) -> Symbol",
+      mod, :protected, :foo
+    )
+    assert_send_type(
+      "(String) -> String",
+      mod, :protected, "foo"
+    )
+    assert_send_type(
+      "(ToStr) -> ToStr",
+      mod, :protected, ToStr.new("foo")
+    )
+
+    assert_send_type(
+      "(Symbol, String) -> Array[Symbol | String]",
+      mod, :protected, :foo, "bar"
+    )
+
+    assert_send_type(
+      "(Array[Symbol | String]) -> Array[Symbol | String]",
+      mod, :protected, [:foo, "bar"]
     )
   end
 
@@ -154,8 +270,45 @@ class ModuleInstanceTest < Test::Unit::TestCase
     )
 
     assert_send_type(
-      "(Symbol, String) -> Array[Symbol | String]",
+      "(Symbol, String) -> Array[interned]",
       mod, :public, :foo, "bar"
+    )
+
+    assert_send_type(
+      "(Array[Symbol | String]) -> Array[Symbol | String]",
+      mod, :public, [:foo, "bar"]
+    )
+  end
+
+  def test_public_class_method
+    mod = Module.new do
+      def self.foo; end
+      def self.bar; end
+    end
+
+    assert_send_type(
+      "(Symbol) -> Module",
+      mod, :public_class_method, :foo
+    )
+
+    assert_send_type(
+      "(Symbol, Symbol) -> Module",
+      mod, :public_class_method, :foo, :bar
+    )
+
+    assert_send_type(
+      "(String) -> Module",
+      mod, :public_class_method, "foo"
+    )
+
+    assert_send_type(
+      "(String, String) -> Module",
+      mod, :public_class_method, "foo", "bar"
+    )
+
+    assert_send_type(
+      "(Array[Symbol | String]) -> Module",
+      mod, :public_class_method, [:foo, "bar"]
     )
   end
 
@@ -163,7 +316,7 @@ class ModuleInstanceTest < Test::Unit::TestCase
     if RUBY_VERSION >= '3.0'
       mod = Module.new
       assert_send_type(
-        "(*Symbol | String arg0) -> Array[Symbol]",
+        "(*interned arg0) -> Array[Symbol]",
         mod, :attr, :foo
       )
     end
@@ -260,5 +413,21 @@ class ModuleInstanceTest < Test::Unit::TestCase
         mod, :attr_accessor, :foo, "bar"
       )
     end
+  end
+
+  def test_set_temporary_name
+    mod = Module.new
+
+    with_string "fake_name" do |name|
+      assert_send_type(
+        "(::string) -> ::Module",
+        mod, :set_temporary_name, name
+      )
+    end
+
+    assert_send_type(
+      "(nil) -> Module",
+      mod, :set_temporary_name, nil
+    )
   end
 end

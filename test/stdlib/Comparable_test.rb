@@ -1,7 +1,7 @@
 require_relative "test_helper"
 
 class ComparableTest < Test::Unit::TestCase
-  include TypeAssertions
+  include TestHelper
 
   class Test
     include Comparable

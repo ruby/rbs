@@ -1,3 +1,3 @@
 dependencies:
+  - name: net-protocol
   - name: uri
-  - name: timeout

@@ -515,7 +515,7 @@ class CGI
   # This method does not perform charset conversion.
   #
   def http_header: (?String options) -> String
-                 | (?Hash[String | Symbol, untyped] header_hash) -> String
+                 | (?Hash[interned, untyped] header_hash) -> String
 
   def nph?: () -> untyped
 
@@ -586,7 +586,7 @@ class CGI
   #        # string
   #
   def out: (?String content_type_string) { () -> String } -> void
-         | (Hash[String | Symbol, untyped] headers_hash) { () -> String } -> void
+         | (Hash[interned, untyped] headers_hash) { () -> String } -> void
 
   # <!--
   #   rdoc-file=lib/cgi/core.rb

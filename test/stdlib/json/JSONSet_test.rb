@@ -3,7 +3,7 @@ require "json"
 require "json/add/set"
 
 class JSONSetSingletonTest < Test::Unit::TestCase
-  include TypeAssertions
+  include TestHelper
 
   library "json"
   testing "singleton(::Set)"
@@ -15,7 +15,7 @@ class JSONSetSingletonTest < Test::Unit::TestCase
 end
 
 class JSONSetInstanceTest < Test::Unit::TestCase
-  include TypeAssertions
+  include TestHelper
 
   library "json"
   testing "::Set[Integer]"

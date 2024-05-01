@@ -1,7 +1,7 @@
 require_relative "test_helper"
 
 class RipperSingletonTest < Test::Unit::TestCase
-  include TypeAssertions
+  include TestHelper
 
   library "ripper"
   testing "singleton(::Ripper)"
@@ -58,7 +58,7 @@ class RipperSingletonTest < Test::Unit::TestCase
 end
 
 class RipperTest < Test::Unit::TestCase
-  include TypeAssertions
+  include TestHelper
 
   library "ripper"
   testing "::Ripper"
@@ -190,7 +190,7 @@ class RipperTest < Test::Unit::TestCase
 end
 
 class Ripper::FilterSingletonTest < Test::Unit::TestCase
-  include TypeAssertions
+  include TestHelper
 
   library "ripper"
   testing "singleton(::Ripper::Filter)"
@@ -202,7 +202,7 @@ class Ripper::FilterSingletonTest < Test::Unit::TestCase
 end
 
 class Ripper::FilterTest < Test::Unit::TestCase
-  include TypeAssertions
+  include TestHelper
 
   library "ripper"
   testing "::Ripper::Filter"

@@ -190,8 +190,6 @@ class Rational < Numeric
   #     (1/2r).abs    #=> (1/2)
   #     (-1/2r).abs   #=> (1/2)
   #
-  # Rational#magnitude is an alias for Rational#abs.
-  #
   def abs: () -> Rational
 
   def abs2: () -> Rational
@@ -327,8 +325,6 @@ class Rational < Numeric
   #
   #     (1/2r).abs    #=> (1/2)
   #     (-1/2r).abs   #=> (1/2)
-  #
-  # Rational#magnitude is an alias for Rational#abs.
   #
   alias magnitude abs
 

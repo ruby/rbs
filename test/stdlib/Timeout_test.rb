@@ -3,7 +3,7 @@ require "timeout"
 require "bigdecimal"
 
 class TimeoutSingletonTest < Test::Unit::TestCase
-  include TypeAssertions
+  include TestHelper
 
   library "timeout"
   testing "singleton(::Timeout)"

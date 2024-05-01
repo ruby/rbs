@@ -1,11 +1,8 @@
 # <!-- rdoc-file=lib/set.rb -->
-# This library provides the Set class, which deals with a collection
+# This library provides the Set class, which implements a collection
 # of unordered values with no duplicates. It is a hybrid of Array's
 # intuitive inter-operation facilities and Hash's fast lookup.
 # The method `to_set` is added to Enumerable for convenience.
-# Set implements a collection of unordered values with no duplicates.
-# This is a hybrid of Array's intuitive inter-operation facilities and
-# Hash's fast lookup.
 # Set is easy to use with Enumerable objects (implementing `each`).
 # Most of the initializer methods and binary operators accept generic
 # Enumerable objects besides sets and arrays. An Enumerable object
@@ -123,7 +120,8 @@
 #      If the given object is not an element in the set,
 #      adds it and returns `self`; otherwise, returns `nil`.
 # *   #merge:
-#      Adds each given object to the set; returns `self`.
+#      Merges the elements of each given enumerable object to the set; returns
+#     `self`.
 # *   #replace:
 #      Replaces the contents of the set with the contents
 #      of a given enumerable.
@@ -439,7 +437,7 @@ class Set[unchecked out A]
   #     Set[1, 2, 3].disjoint? [3, 4]      #=> false
   #     Set[1, 2, 3].disjoint? 4..5        #=> true
   #
-  def disjoint?: (self) -> bool
+  def disjoint?: (_Each[A]) -> bool
 
   # <!--
   #   rdoc-file=lib/set.rb
@@ -502,7 +500,7 @@ class Set[unchecked out A]
   #     Set[1, 2, 3].intersect? 4..5        #=> false
   #     Set[1, 2, 3].intersect? [3, 4]      #=> true
   #
-  def intersect?: (self) -> bool
+  def intersect?: (_Each[A]) -> bool
 
   # <!--
   #   rdoc-file=lib/set.rb
@@ -531,9 +529,9 @@ class Set[unchecked out A]
 
   # <!--
   #   rdoc-file=lib/set.rb
-  #   - merge(enum)
+  #   - merge(*enums, **nil)
   # -->
-  # Merges the elements of the given enumerable object to the set and
+  # Merges the elements of the given enumerable objects to the set and
   # returns self.
   #
   def merge: (_Each[A]) -> self
@@ -625,4 +623,5 @@ module Enumerable[unchecked out Elem]
   # Needs to `require "set"` to use this method.
   #
   def to_set: () -> Set[Elem]
+            | [T] { (Elem) -> T } -> Set[T]
 end

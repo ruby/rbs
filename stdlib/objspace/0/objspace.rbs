@@ -4,9 +4,9 @@
 #
 # You need to `require 'objspace'` to use this extension module.
 #
-# Generally, you *SHOULD NOT* use this library if you do not know about the MRI
-# implementation.  Mainly, this library is for (memory) profiler developers and
-# MRI developers who need to know about MRI memory usage.
+# Generally, you **SHOULD** **NOT** use this library if you do not know about
+# the MRI implementation.  Mainly, this library is for (memory) profiler
+# developers and MRI developers who need to know about MRI memory usage.
 #
 %a{annotate:rdoc:source:from=ext/objspace}
 module ObjectSpace
@@ -233,11 +233,19 @@ module ObjectSpace
 
   # <!--
   #   rdoc-file=ext/objspace/lib/objspace.rb
-  #   - ObjectSpace.dump(obj[, output: :string]) -> "{ ... }"
-  #   - ObjectSpace.dump(obj, output: :file) -> #<File:/tmp/rubyobj20131125-88733-1xkfmpv.json>
-  #   - ObjectSpace.dump(obj, output: :stdout) -> nil
+  #   - dump(obj, output: :string)
   # -->
   # Dump the contents of a ruby object as JSON.
+  #
+  # *output* can be one of: `:stdout`, `:file`, `:string`, or IO object.
+  #
+  # *   `:file` means dumping to a tempfile and returning corresponding File
+  #     object;
+  # *   `:stdout` means printing the dump and returning `nil`;
+  # *   `:string` means returning a string with the dump;
+  # *   if an instance of IO object is provided, the output goes there, and the
+  #     object is returned.
+  #
   #
   # This method is only expected to work with C Ruby. This is an experimental
   # method and is subject to change. In particular, the function signature and
@@ -247,16 +255,14 @@ module ObjectSpace
 
   # <!--
   #   rdoc-file=ext/objspace/lib/objspace.rb
-  #   - ObjectSpace.dump_all([output: :file]) -> #<File:/tmp/rubyheap20131125-88469-laoj3v.json>
-  #   - ObjectSpace.dump_all(output: :stdout) -> nil
-  #   - ObjectSpace.dump_all(output: :string) -> "{...}\n{...}\n..."
-  #   - ObjectSpace.dump_all(output: File.open('heap.json','w')) -> #<File:heap.json>
-  #   - ObjectSpace.dump_all(output: :string, since: 42) -> "{...}\n{...}\n..."
+  #   - dump_all(output: :file, full: false, since: nil, shapes: true)
   # -->
   # Dump the contents of the ruby heap as JSON.
   #
-  # *full* must be a boolean. If true all heap slots are dumped including the
-  # empty ones (T_NONE).
+  # *output* argument is the same as for #dump.
+  #
+  # *full* must be a boolean. If true, all heap slots are dumped including the
+  # empty ones (`T_NONE`).
   #
   # *since* must be a non-negative integer or `nil`.
   #

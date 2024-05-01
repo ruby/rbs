@@ -107,7 +107,7 @@ module RBS
           "#{clause.namespace}*"
         end
       end
-      
+
       puts "use #{clauses.join(", ")}"
     end
 
@@ -264,8 +264,8 @@ module RBS
       when AST::Members::Alias
         write_comment member.comment
         write_annotation member.annotations
-        new_name = member.singleton? ? "self.#{member.new_name}" : member.new_name
-        old_name = member.singleton? ? "self.#{member.old_name}" : member.old_name
+        new_name = member.singleton? ? "self.#{method_name(member.new_name)}" : method_name(member.new_name)
+        old_name = member.singleton? ? "self.#{method_name(member.old_name)}" : method_name(member.old_name)
         puts "alias #{new_name} #{old_name}"
       when AST::Members::InstanceVariable
         write_comment member.comment
@@ -385,7 +385,7 @@ module RBS
                    ""
                  end
 
-      "#{visibility}attr_#{kind} #{receiver}#{attr.name}#{var}: #{attr.type}"
+      "#{visibility}attr_#{kind} #{receiver}#{method_name(attr.name)}#{var}: #{attr.type}"
     end
 
     def preserve_empty_line(prev, decl)

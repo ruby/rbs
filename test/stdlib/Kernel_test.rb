@@ -2,6 +2,114 @@ require_relative "test_helper"
 
 require "securerandom"
 
+class KernelSingletonTest < Test::Unit::TestCase
+  include TestHelper
+
+  testing "singleton(::Kernel)"
+
+  def test_Array
+    assert_send_type "(nil) -> []",
+                     Kernel, :Array, nil
+
+    with_array(1r, 2r).chain([ToA.new(1r,2r)]).each do |ary|
+      assert_send_type "(::array[Rational] | ::_ToA[Rational]) -> Array[Rational]",
+                       Kernel, :Array, ary
+    end
+
+    assert_send_type "(Rational) -> [Rational]",
+                     Kernel, :Array, 1r
+  end
+
+  def test_Float
+    with_float 1.0 do |float|
+      assert_send_type "(::float) -> Float",
+                       Kernel, :Float, float
+      assert_send_type "(::float, exception: true) -> Float",
+                       Kernel, :Float, float, exception: true
+      assert_send_type "(::float, exception: bool) -> Float?",
+                       Kernel, :Float, float, exception: false
+    end
+
+    assert_send_type "(untyped, ?exception: bool) -> Float?",
+                     Kernel, :Float, :hello, exception: false
+  end
+
+  def test_Hash
+    assert_send_type "(nil) -> Hash[untyped, untyped]",
+                     Kernel, :Hash, nil
+    assert_send_type "([]) -> Hash[untyped, untyped]",
+                     Kernel, :Hash, []
+
+    with_hash 'a' => 3 do |hash|
+      assert_send_type "(::hash[String, Integer]) -> Hash[String, Integer]",
+                       Kernel, :Hash, hash
+    end
+  end
+
+  def test_Integer
+    with_int(1).chain([ToI.new(1)]).each do |int|
+      assert_send_type "(::int | ::_ToI) -> Integer",
+                       Kernel, :Integer, int
+      assert_send_type "(::int | ::_ToI, exception: true) -> Integer",
+                       Kernel, :Integer, int, exception: true
+      assert_send_type "(::int | ::_ToI, exception: bool) -> Integer?",
+                       Kernel, :Integer, int, exception: false
+    end
+
+    with_string "123" do |string|
+      with_int 8 do |base|
+        assert_send_type "(::string, ::int) -> Integer",
+                         Kernel, :Integer, string, base
+        assert_send_type "(::string, ::int, exception: true) -> Integer",
+                         Kernel, :Integer, string, base, exception: true
+        assert_send_type "(::string, ::int, exception: bool) -> Integer?",
+                         Kernel, :Integer, string, base, exception: false
+      end
+    end
+
+    assert_send_type "(untyped, ?exception: bool) -> Integer?",
+                     Kernel, :Integer, :hello, exception: false
+  end
+
+
+  def test_String
+    with_string do |string|
+      assert_send_type "(::string) -> String",
+                       Kernel, :String, string
+    end
+
+    assert_send_type "(::_ToS) -> String",
+                     Kernel, :String, ToS.new
+  end
+
+  def test_autoload?
+    with_interned :TestModuleForAutoload do |interned|
+      assert_send_type "(::interned) -> String?",
+                       Kernel, :autoload?, interned
+    end
+
+    autoload :TestModuleForAutoload, '/shouldnt/be/executed'
+
+    with_interned :TestModuleForAutoload do |interned|
+      assert_send_type "(::interned) -> String?",
+                       Kernel, :autoload?, interned
+    end
+  end
+
+  def test_rand
+    assert_send_type "() -> Float", Kernel, :rand
+    assert_send_type "(0) -> Float", Kernel, :rand, 0
+    assert_send_type "(_ToInt) -> Float", Kernel, :rand, 0.0
+    assert_send_type "(_ToInt) -> Float", Kernel, :rand, 0r
+    assert_send_type "(_ToInt) -> Float", Kernel, :rand, 0i
+    assert_send_type "(_ToInt) -> Integer", Kernel, :rand, 10
+    assert_send_type "(Range[Integer]) -> Integer", Kernel, :rand, 1..10
+    assert_send_type "(Range[Integer]) -> nil", Kernel, :rand, 0...0
+    assert_send_type "(Range[Float]) -> Float", Kernel, :rand, 0.0...10.0
+    assert_send_type "(Range[Float]) -> nil", Kernel, :rand, 0.0...0.0
+  end
+end
+
 class KernelTest < StdlibTest
   target Kernel
   discard_output
@@ -32,13 +140,6 @@ class KernelTest < StdlibTest
 
   def test_class
     Object.new.class
-  end
-
-  def test_define_singleton_method
-    define_singleton_method("_#{SecureRandom.hex(10)}") {}
-    define_singleton_method(:"_#{SecureRandom.hex(10)}") {}
-    define_singleton_method("_#{SecureRandom.hex(10)}", proc {})
-    define_singleton_method(:"_#{SecureRandom.hex(10)}", proc {})
   end
 
   def test_eval
@@ -83,6 +184,14 @@ class KernelTest < StdlibTest
   def test_display
     1.display
     1.display($stderr)
+
+    stdout = STDOUT.dup
+    STDOUT.reopen(IO::NULL)
+    Object.new.display()
+    Object.new.display(STDOUT)
+    Object.new.display(StringIO.new)
+  ensure
+    STDOUT.reopen(stdout)
   end
 
   def test_dup
@@ -98,6 +207,16 @@ class KernelTest < StdlibTest
 
     enum_for :each, 1
     enum_for(:each, 1) { 2 }
+
+    obj = Object.new
+
+    obj.enum_for(:instance_exec)
+    obj.enum_for(:instance_exec, 1,2,3)
+    obj.enum_for(:instance_exec, 1,2,3) { |x,y,z| x + y + z }
+
+    obj.to_enum(:instance_exec)
+    obj.to_enum(:instance_exec, 1, 2, 3)
+    obj.to_enum(:instance_exec, 1, 2, 3) { |x, y, z| x + y + z }
   end
 
   def test_eql?
@@ -550,6 +669,11 @@ class KernelTest < StdlibTest
     rescue test_error
     end
 
+    begin
+      fail test_error.new('a'), foo: 1, bar: 2, baz: 3, cause: RuntimeError.new("?")
+    rescue test_error
+    end
+
     exception_container = Class.new do
       define_method :exception do |arg = 'a'|
         test_error.new(arg)
@@ -741,5 +865,158 @@ class KernelTest < StdlibTest
 
   def test_system
     # TODO
+  end
+
+  def test_operators
+    if RUBY_VERSION < "3.2.0"
+      Object.new !~ 123
+    end
+
+    Object.new <=> 123
+    Object.new <=> Object.new
+
+    Object.new === false
+  end
+
+  def test_eql
+    Object.new.eql?(1)
+  end
+
+  def test_frozen
+    Object.new.frozen?
+  end
+
+  def test_itself
+    Object.new.itself
+  end
+
+  def test_kind_of?
+    Object.new.kind_of?(String)
+  end
+
+  def test_object_id
+    Object.new.object_id
+  end
+
+  def test_respond_to?
+    obj = Object.new
+
+    obj.respond_to?(:to_s)
+    obj.respond_to?('to_s')
+    obj.respond_to?('to_s', true)
+  end
+
+  if Kernel.method_defined?(:taint)
+    def test_taint
+      obj = Object.new
+
+      obj.taint
+      obj.tainted?
+      obj.untaint
+    end
+  end
+
+  def test_yield_self
+    obj = Object.new
+
+    obj.yield_self { }
+    obj.then { }
+  end
+end
+
+class KernelInstanceTest < Test::Unit::TestCase
+  include TestHelper
+
+  testing "::Kernel"
+
+  def test_extend
+    assert_send_type "(Module) -> Object",
+                      Object.new, :extend, Module.new
+    assert_send_type "(Module, Module) -> Object",
+                      Object.new, :extend, Module.new, Module.new
+  end
+
+  def test_define_singleton_method
+    obj = Object.new
+
+    assert_send_type(
+      "(::Symbol) { () -> void } -> Symbol",
+      obj, :define_singleton_method,
+      :foo
+    ) do end
+
+    assert_send_type(
+      "(::Symbol, ::Proc) -> Symbol",
+      obj, :define_singleton_method,
+      :bar,
+      -> {}
+    )
+
+    assert_send_type(
+      "(::Symbol, ::Method) -> Symbol",
+      obj, :define_singleton_method,
+      :bar,
+      obj.method(:to_s)
+    )
+
+    assert_send_type(
+      "(::Symbol, ::UnboundMethod) -> Symbol",
+      obj, :define_singleton_method,
+      :bar,
+      Object.instance_method(:to_s)
+    )
+  end
+
+  def test_respond_to_missing?
+    obj = Object.new
+
+    # The default implementation always returns `false` regardless of the args,
+    # let alone their types; though overrides only have to support Symbol + bool
+    assert_send_type(
+      "(::Symbol, bool) -> bool",
+      obj, :respond_to_missing?, :to_s, true
+    )
+  end
+
+  def test_pp
+    original_stdout = $stdout
+    $stdout = StringIO.new
+
+    assert_send_type "() -> nil",
+                     self, :pp
+    assert_send_type "(123) -> 123",
+                     self, :pp, 123
+    assert_send_type "(123, :foo) -> [123, :foo]",
+                     self, :pp, 123, :foo
+    assert_send_type "(123, :foo, nil) -> [123, :foo, nil]",
+                     self, :pp, 123, :foo, nil
+  ensure
+    $stdout = original_stdout
+  end
+
+  def test_initialize_copy
+    assert_send_type(
+      "(Object) -> Object",
+      Object.new, :initialize_copy, Object.new
+    )
+  end
+
+  def test_initialize_clone
+    assert_send_type(
+      "(Object) -> Object",
+      Object.new, :initialize_clone, Object.new
+    )
+
+    assert_send_type(
+      "(Object, freeze: bool) -> Object",
+      Object.new, :initialize_clone, Object.new, freeze: true
+    )
+  end
+
+  def test_initialize_dup
+    assert_send_type(
+      "(Object) -> Object",
+      Object.new, :initialize_dup, Object.new
+    )
   end
 end

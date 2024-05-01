@@ -6,7 +6,7 @@ if RUBY_VERSION < '3'
 end
 
 class RactorSingletonTest < Test::Unit::TestCase
-  include TypeAssertions
+  include TestHelper
 
   testing "singleton(::Ractor)"
 
@@ -101,7 +101,7 @@ class RactorSingletonTest < Test::Unit::TestCase
 end
 
 class RactorInstanceTest < Test::Unit::TestCase
-  include TypeAssertions
+  include TestHelper
 
   testing "::Ractor"
 

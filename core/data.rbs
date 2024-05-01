@@ -27,7 +27,7 @@
 #     distance.unit #=> "km"
 #
 # Constructed object also has a reasonable definitions of #== operator, #to_h
-# hash conversion, and #deconstruct/#deconstruct_keys to be used in pattern
+# hash conversion, and #deconstruct / #deconstruct_keys to be used in pattern
 # matching.
 #
 # ::define method accepts an optional block and evaluates it in the context of
@@ -66,11 +66,9 @@
 class Data
   # <!--
   #   rdoc-file=struct.c
-  #   - define(name, *symbols) -> class
   #   - define(*symbols) -> class
   # -->
-  # Defines a new Data class. If the first argument is a string, the class is
-  # stored in `Data::<name>` constant.
+  # Defines a new Data class.
   #
   #     measure = Data.define(:amount, :unit)
   #     #=> #<Class:0x00007f70c6868498>

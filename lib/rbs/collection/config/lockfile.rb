@@ -12,7 +12,6 @@ module RBS
           @path = path
           @gemfile_lock_path = gemfile_lock_path
 
-          @sources = {}
           @gems = {}
         end
 
@@ -26,27 +25,15 @@ module RBS
           end
         end
 
-        def each_source(&block)
-          if block
-            sources.each_value(&block)
-            yield Sources::Rubygems.instance
-            yield Sources::Stdlib.instance
-          else
-            enum_for :each_source
-          end
-        end
-
         def to_lockfile
           # @type var data: lockfile_data
 
           data = {
-            "sources" => sources.each_value.sort_by {|s| s.name }.map {|source| source.to_lockfile },
             "path" => path.to_s,
             "gems" => gems.each_value.sort_by {|g| g[:name] }.map {|hash| library_data(hash) },
             "gemfile_lock_path" => gemfile_lock_path.to_s
           }
 
-          data.delete("sources") if sources.empty?
           data.delete("gems") if gems.empty?
 
           data
@@ -59,18 +46,6 @@ module RBS
           end
 
           lockfile = Lockfile.new(lockfile_path: lockfile_path, path: path, gemfile_lock_path: gemfile_lock_path)
-
-          if sources = data["sources"]
-            sources.each do |src|
-              git = Sources::Git.new(
-                name: src["name"],
-                revision: src["revision"],
-                remote: src["remote"],
-                repo_dir: src["repo_dir"]
-              )
-              lockfile.sources[git.name] = git
-            end
-          end
 
           if gems = data["gems"]
             gems.each do |gem|

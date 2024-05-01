@@ -2,7 +2,7 @@ require_relative "test_helper"
 require "zlib"
 
 class ZlibSingletonTest < Test::Unit::TestCase
-  include TypeAssertions
+  include TestHelper
 
   library "zlib"
   testing "singleton(::Zlib)"

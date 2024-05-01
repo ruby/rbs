@@ -3,7 +3,7 @@ require 'digest'
 require 'digest/bubblebabble'
 
 class DigestMD5SingletonTest < Test::Unit::TestCase
-  include TypeAssertions
+  include TestHelper
 
   library 'digest'
   testing 'singleton(::Digest::MD5)'
@@ -35,13 +35,13 @@ class DigestMD5SingletonTest < Test::Unit::TestCase
 end
 
 class DigestMD5InstanceTest < Test::Unit::TestCase
-  include TypeAssertions
+  include TestHelper
 
   library 'digest'
   testing '::Digest::MD5'
 
   def test_left_shift
-    assert_send_type '(::String) -> self',
+    assert_send_type '(::String) -> Digest::MD5',
                      ::Digest::MD5.new, :<<, '_binary_left_shift_'
   end
 
@@ -56,12 +56,12 @@ class DigestMD5InstanceTest < Test::Unit::TestCase
   end
 
   def test_reset
-    assert_send_type '() -> self',
+    assert_send_type '() -> Digest::MD5',
                      ::Digest::MD5.new, :reset
   end
 
   def test_update
-    assert_send_type '(::String) -> self',
+    assert_send_type '(::String) -> Digest::MD5',
                      ::Digest::MD5.new, :update, '_update_'
   end
 
@@ -71,7 +71,7 @@ class DigestMD5InstanceTest < Test::Unit::TestCase
   end
 
   def test_initialize_copy
-    assert_send_type '(::Digest::Base) -> self',
+    assert_send_type '(::Digest::Base) -> Digest::MD5',
                      ::Digest::MD5.new, :initialize_copy, ::Digest::MD5.new
   end
 
@@ -118,7 +118,7 @@ class DigestMD5InstanceTest < Test::Unit::TestCase
   end
 
   def test_file
-    assert_send_type '(::String) -> self',
+    assert_send_type '(::String) -> Digest::MD5',
                      ::Digest::MD5.new, :file, 'README.md'
   end
 

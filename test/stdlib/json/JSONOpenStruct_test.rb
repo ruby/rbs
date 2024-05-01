@@ -3,7 +3,7 @@ require "json"
 require "json/add/ostruct"
 
 class JSONOpenStructSingletonTest < Test::Unit::TestCase
-  include TypeAssertions
+  include TestHelper
 
   library "json"
   testing "singleton(::OpenStruct)"
@@ -15,7 +15,7 @@ class JSONOpenStructSingletonTest < Test::Unit::TestCase
 end
 
 class JSONOpenStructInstanceTest < Test::Unit::TestCase
-  include TypeAssertions
+  include TestHelper
 
   library "json"
   testing "::OpenStruct"

@@ -149,7 +149,7 @@ module RBS
           method = definition.methods[method_name]
           if method
             RBS.logger.debug { "Type checking `#{self_class}#{format_method_name(method_name)}`..."}
-            errors = check.overloaded_call(method, format_method_name(method_name), trace, errors: [])
+            errors = check.overloaded_call(method, method_name, trace, errors: [])
 
             if errors.empty?
               RBS.logger.debug { "No type error detected 👏" }

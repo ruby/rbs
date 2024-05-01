@@ -62,20 +62,6 @@ module RBS
 
       super "#{Location.to_string location}: Syntax error: #{error_message}, token=`#{location.source}` (#{token_type})"
     end
-
-    def error_value
-      RBS.print_warning {
-        "#{self.class.name}#error_value is deprecated and will be deleted in RBS 2.0. Consider using `location.source` instead."
-      }
-      location.source
-    end
-
-    def token_str
-      RBS.print_warning {
-        "#{self.class.name}#token_str is deprecated and will be deleted in RBS 2.0. Consider using `token_type` instead."
-      }
-      token_type
-    end
   end
 
   class InvalidTypeApplicationError < DefinitionError
@@ -555,6 +541,17 @@ module RBS
 
     def location
       @alias_entry.decl.location
+    end
+  end
+
+  class WillSyntaxError < DefinitionError
+    include DetailedMessageable
+
+    attr_reader :location
+
+    def initialize(message, location:)
+      super "#{Location.to_string(location)}: #{message}"
+      @location = location
     end
   end
 end

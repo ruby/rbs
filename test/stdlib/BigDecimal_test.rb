@@ -3,7 +3,7 @@ require "bigdecimal"
 require "bigdecimal/util"
 
 class BigDecimalSingletonTest < Test::Unit::TestCase
-  include TypeAssertions
+  include TestHelper
   library "bigdecimal"
   testing "singleton(::BigDecimal)"
 
@@ -76,7 +76,7 @@ class BigDecimalSingletonTest < Test::Unit::TestCase
 end
 
 class BigDecimalTest < Test::Unit::TestCase
-  include TypeAssertions
+  include TestHelper
   library "bigdecimal"
   testing "::BigDecimal"
 
@@ -96,12 +96,12 @@ class BigDecimalTest < Test::Unit::TestCase
   end
 
   def test_clone
-    assert_send_type  "() -> self",
+    assert_send_type  "() -> BigDecimal",
                       BigDecimal("1.23"), :clone
   end
 
   def test_dup
-    assert_send_type  "() -> self",
+    assert_send_type  "() -> BigDecimal",
                       BigDecimal("1.23"), :dup
   end
 
@@ -216,7 +216,7 @@ class BigDecimalTest < Test::Unit::TestCase
   end
 
   def test_nonzero?
-    assert_send_type  "() -> self?",
+    assert_send_type  "() -> BigDecimal",
                       BigDecimal("1.23"), :nonzero?
   end
 
@@ -365,7 +365,7 @@ class BigDecimalTest < Test::Unit::TestCase
 end
 
 class IntegerToBigDecimalTest < Test::Unit::TestCase
-  include TypeAssertions
+  include TestHelper
 
   library "bigdecimal"
   testing "::Integer"
@@ -396,7 +396,7 @@ class IntegerToBigDecimalTest < Test::Unit::TestCase
 end
 
 class FloatToBigDecimalTest < Test::Unit::TestCase
-  include TypeAssertions
+  include TestHelper
 
   library "bigdecimal"
   testing "::Float"
@@ -427,7 +427,7 @@ class FloatToBigDecimalTest < Test::Unit::TestCase
 end
 
 class StringToBigDecimalTest < Test::Unit::TestCase
-  include TypeAssertions
+  include TestHelper
 
   library "bigdecimal"
   testing "::String"
@@ -438,7 +438,7 @@ class StringToBigDecimalTest < Test::Unit::TestCase
 end
 
 class RationalToBigDecimalTest < Test::Unit::TestCase
-  include TypeAssertions
+  include TestHelper
 
   library "bigdecimal"
   testing "::Rational"
@@ -469,7 +469,7 @@ class RationalToBigDecimalTest < Test::Unit::TestCase
 end
 
 class ComplexToBigDecimalTest < Test::Unit::TestCase
-  include TypeAssertions
+  include TestHelper
 
   library "bigdecimal"
   testing "::Complex"
@@ -500,7 +500,7 @@ class ComplexToBigDecimalTest < Test::Unit::TestCase
 end
 
 class NilToBigDecimalTest < Test::Unit::TestCase
-  include TypeAssertions
+  include TestHelper
 
   library "bigdecimal"
   testing "::NilClass"

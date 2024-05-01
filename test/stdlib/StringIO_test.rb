@@ -16,12 +16,12 @@ class StringIOTest < StdlibTest
   end
 
   def test_close_write
-    io = StringIO.new('example')
+    io = StringIO.new(+'example')
     io.close_write
   end
 
   def test_closed_write?
-    io = StringIO.new('example')
+    io = StringIO.new(+'example')
     io.closed_write?
     io.close_write
     io.closed_write?
@@ -40,7 +40,7 @@ class StringIOTest < StdlibTest
 end
 
 class StringIOTypeTest < Test::Unit::TestCase
-  include TypeAssertions
+  include TestHelper
 
   testing '::StringIO'
 

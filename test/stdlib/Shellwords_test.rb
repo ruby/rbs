@@ -2,7 +2,7 @@ require_relative "test_helper"
 require "shellwords"
 
 class ShellwordsSingletonTest < Test::Unit::TestCase
-  include TypeAssertions
+  include TestHelper
 
   library "shellwords"
   testing "singleton(::Shellwords)"
@@ -44,7 +44,7 @@ class ShellwordsSingletonTest < Test::Unit::TestCase
 end
 
 class ShellwordsTest < Test::Unit::TestCase
-  include TypeAssertions
+  include TestHelper
 
   library "shellwords"
   testing "::Shellwords"
@@ -75,7 +75,7 @@ class ShellwordsTest < Test::Unit::TestCase
 end
 
 class ShellwordsArrayTest < Test::Unit::TestCase
-  include TypeAssertions
+  include TestHelper
 
   library "shellwords"
   testing "::Array[String]"
@@ -87,7 +87,7 @@ class ShellwordsArrayTest < Test::Unit::TestCase
 end
 
 class ShellwordsStringTest < Test::Unit::TestCase
-  include TypeAssertions
+  include TestHelper
 
   library "shellwords"
   testing "::String"

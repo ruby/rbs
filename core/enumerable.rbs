@@ -5,7 +5,8 @@
 #
 # *   [Querying](rdoc-ref:Enumerable@Methods+for+Querying)
 # *   [Fetching](rdoc-ref:Enumerable@Methods+for+Fetching)
-# *   [Searching](rdoc-ref:Enumerable@Methods+for+Searching)
+# *   [Searching and
+#     Filtering](rdoc-ref:Enumerable@Methods+for+Searching+and+Filtering)
 # *   [Sorting](rdoc-ref:Enumerable@Methods+for+Sorting)
 # *   [Iterating](rdoc-ref:Enumerable@Methods+for+Iterating)
 # *   [And more....](rdoc-ref:Enumerable@Other+Methods)
@@ -210,6 +211,8 @@ module Enumerable[unchecked out Elem] : _Each[Elem]
   # -->
   # Returns whether every element meets a given criterion.
   #
+  # If `self` has no element, returns `true` and argument or block are not used.
+  #
   # With no argument and no block, returns whether every element is truthy:
   #
   #     (1..4).all?           # => true
@@ -251,6 +254,8 @@ module Enumerable[unchecked out Elem] : _Each[Elem]
   #   - any? {|element| ... } -> true or false
   # -->
   # Returns whether any element meets a given criterion.
+  #
+  # If `self` has no element, returns `false` and argument or block are not used.
   #
   # With no argument and no block, returns whether any element is truthy:
   #
@@ -521,8 +526,6 @@ module Enumerable[unchecked out Elem] : _Each[Elem]
   #
   #     (0..4).to_a # => [0, 1, 2, 3, 4]
   #
-  # Enumerable#entries is an alias for Enumerable#to_a.
-  #
   def entries: () -> ::Array[Elem]
 
   # <!--
@@ -721,8 +724,6 @@ module Enumerable[unchecked out Elem] : _Each[Elem]
   #     {foo: 0, bar: 1, baz: 2}.include?('foo') # => false
   #     {foo: 0, bar: 1, baz: 2}.include?(0)     # => false
   #
-  # Enumerable#member? is an alias for Enumerable#include?.
-  #
   def include?: (Elem arg0) -> bool
 
   # <!--
@@ -873,8 +874,6 @@ module Enumerable[unchecked out Elem] : _Each[Elem]
   #     "Memo: 1; element: 2"
   #     "Memo: 3; element: 3"
   #     "Memo: 6; element: 4"
-  #
-  # Enumerable#reduce is an alias for Enumerable#inject.
   #
   def inject: (untyped init, Symbol method) -> untyped
             | (Symbol method) -> untyped
@@ -1446,8 +1445,8 @@ module Enumerable[unchecked out Elem] : _Each[Elem]
 
   # <!--
   #   rdoc-file=enum.c
-  #   - to_h -> hash
-  #   - to_h {|element| ... }  -> hash
+  #   - to_h(*args) -> hash
+  #   - to_h(*args) {|element| ... }  -> hash
   # -->
   # When `self` consists of 2-element arrays, returns a hash each of whose entries
   # is the key-value pair formed from one of those arrays:
@@ -1569,8 +1568,6 @@ module Enumerable[unchecked out Elem] : _Each[Elem]
   #     {foo: 0, bar: 1, baz: 2}.include?(:foo)  # => true
   #     {foo: 0, bar: 1, baz: 2}.include?('foo') # => false
   #     {foo: 0, bar: 1, baz: 2}.include?(0)     # => false
-  #
-  # Enumerable#member? is an alias for Enumerable#include?.
   #
   def member?: (Elem arg0) -> bool
 
@@ -1717,19 +1714,15 @@ module Enumerable[unchecked out Elem] : _Each[Elem]
   #     "Memo: 3; element: 3"
   #     "Memo: 6; element: 4"
   #
-  # Enumerable#reduce is an alias for Enumerable#inject.
-  #
   alias reduce inject
 
   # <!--
   #   rdoc-file=enum.c
-  #   - to_a -> array
+  #   - to_a(*args) -> array
   # -->
   # Returns an array containing the items in `self`:
   #
   #     (0..4).to_a # => [0, 1, 2, 3, 4]
-  #
-  # Enumerable#entries is an alias for Enumerable#to_a.
   #
   def to_a: () -> ::Array[Elem]
 
@@ -1774,8 +1767,8 @@ module Enumerable[unchecked out Elem] : _Each[Elem]
   #     %w[a b c c b a a b c].uniq       # => ["a", "b", "c"]
   #     [0, 1, 2, 2, 1, 0, 0, 1, 2].uniq # => [0, 1, 2]
   #
-  # With a block, returns a new array containing only for which the block returns
-  # a unique value:
+  # With a block, returns a new array containing elements only for which the block
+  # returns a unique value:
   #
   #     a = [0, 1, 2, 3, 4, 5, 5, 4, 3, 2, 1]
   #     a.uniq {|i| i.even? ? i : 0 } # => [0, 2, 4]

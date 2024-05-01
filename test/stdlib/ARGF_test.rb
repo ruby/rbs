@@ -4,12 +4,12 @@ require 'tempfile'
 # initialize temporary class
 module RBS
   module Unnamed
-    ARGFClass = ARGF.class
+    ARGFClass ||= ARGF.class
   end
 end
 
 class ARGFTest < Test::Unit::TestCase
-  include TypeAssertions
+  include TestHelper
   testing "::RBS::Unnamed::ARGFClass"
 
   def argf_for_write
@@ -96,7 +96,7 @@ class ARGFTest < Test::Unit::TestCase
   end
 
   def test_binmode
-    assert_send_type  "() -> self",
+    assert_send_type  "() -> RBS::Unnamed::ARGFClass",
                       ARGF.class.new(__FILE__), :binmode
   end
 
@@ -106,7 +106,7 @@ class ARGFTest < Test::Unit::TestCase
   end
 
   def test_close
-    assert_send_type  "() -> self",
+    assert_send_type  "() -> RBS::Unnamed::ARGFClass",
                       ARGF.class.new(__FILE__), :close
   end
 
@@ -116,55 +116,55 @@ class ARGFTest < Test::Unit::TestCase
   end
 
   def test_each
-    assert_send_type  "() { (::String line) -> untyped } -> self",
+    assert_send_type  "() { (::String line) -> untyped } -> RBS::Unnamed::ARGFClass",
                       ARGF.class.new(__FILE__), :each do |line| line end
-    assert_send_type  "(::String sep) { (::String line) -> untyped } -> self",
+    assert_send_type  "(::String sep) { (::String line) -> untyped } -> RBS::Unnamed::ARGFClass",
                       ARGF.class.new(__FILE__), :each, "\n" do |line| line end
-    assert_send_type  "(::String sep, ::Integer limit) { (::String line) -> untyped } -> self",
+    assert_send_type  "(::String sep, ::Integer limit) { (::String line) -> untyped } -> RBS::Unnamed::ARGFClass",
                       ARGF.class.new(__FILE__), :each, "\n", 1 do |line| line end
 
-    assert_send_type  "() -> ::Enumerator[::String, self]",
+    assert_send_type  "() -> ::Enumerator[::String, RBS::Unnamed::ARGFClass]",
                       ARGF.class.new(__FILE__), :each
-    assert_send_type  "(::String sep) -> ::Enumerator[::String, self]",
+    assert_send_type  "(::String sep) -> ::Enumerator[::String, RBS::Unnamed::ARGFClass]",
                       ARGF.class.new(__FILE__), :each, "\n"
-    assert_send_type  "(::String sep, ::Integer limit) -> ::Enumerator[::String, self]",
+    assert_send_type  "(::String sep, ::Integer limit) -> ::Enumerator[::String, RBS::Unnamed::ARGFClass]",
                       ARGF.class.new(__FILE__), :each, "\n", 1
   end
 
   def test_each_byte
-    assert_send_type  "() { (::Integer byte) -> untyped } -> self",
+    assert_send_type  "() { (::Integer byte) -> untyped } -> RBS::Unnamed::ARGFClass",
                       ARGF.class.new(__FILE__), :each_byte do |byte| byte end
-    assert_send_type  "() -> ::Enumerator[::Integer, self]",
+    assert_send_type  "() -> ::Enumerator[::Integer, RBS::Unnamed::ARGFClass]",
                       ARGF.class.new(__FILE__), :each_byte
   end
 
   def test_each_char
-    assert_send_type  "() { (::String char) -> untyped } -> self",
+    assert_send_type  "() { (::String char) -> untyped } -> RBS::Unnamed::ARGFClass",
                       ARGF.class.new(__FILE__), :each_char do |char| char end
-    assert_send_type  "() -> ::Enumerator[::String, self]",
+    assert_send_type  "() -> ::Enumerator[::String, RBS::Unnamed::ARGFClass]",
                       ARGF.class.new(__FILE__), :each_char
   end
 
   def test_each_codepoint
-    assert_send_type  "() { (::Integer codepoint) -> untyped } -> self",
+    assert_send_type  "() { (::Integer codepoint) -> untyped } -> RBS::Unnamed::ARGFClass",
                       ARGF.class.new(__FILE__), :each_codepoint do |codepoint| end
-    assert_send_type  "() -> ::Enumerator[::Integer, self]",
+    assert_send_type  "() -> ::Enumerator[::Integer, RBS::Unnamed::ARGFClass]",
                       ARGF.class.new(__FILE__), :each_codepoint
   end
 
   def test_each_line
-    assert_send_type  "() { (::String line) -> untyped } -> self",
+    assert_send_type  "() { (::String line) -> untyped } -> RBS::Unnamed::ARGFClass",
                       ARGF.class.new(__FILE__), :each_line do |line| line end
-    assert_send_type  "(::String sep) { (::String line) -> untyped } -> self",
+    assert_send_type  "(::String sep) { (::String line) -> untyped } -> RBS::Unnamed::ARGFClass",
                       ARGF.class.new(__FILE__), :each_line, "\n" do |line| line end
-    assert_send_type  "(::String sep, ::Integer limit) { (::String line) -> untyped } -> self",
+    assert_send_type  "(::String sep, ::Integer limit) { (::String line) -> untyped } -> RBS::Unnamed::ARGFClass",
                       ARGF.class.new(__FILE__), :each_line, "\n", 1 do |line| line end
 
-    assert_send_type  "() -> ::Enumerator[::String, self]",
+    assert_send_type  "() -> ::Enumerator[::String, RBS::Unnamed::ARGFClass]",
                       ARGF.class.new(__FILE__), :each_line
-    assert_send_type  "(::String sep) -> ::Enumerator[::String, self]",
+    assert_send_type  "(::String sep) -> ::Enumerator[::String, RBS::Unnamed::ARGFClass]",
                       ARGF.class.new(__FILE__), :each_line, "\n"
-    assert_send_type  "(::String sep, ::Integer limit) -> ::Enumerator[::String, self]",
+    assert_send_type  "(::String sep, ::Integer limit) -> ::Enumerator[::String, RBS::Unnamed::ARGFClass]",
                       ARGF.class.new(__FILE__), :each_line, "\n", 1
   end
 
@@ -223,7 +223,7 @@ class ARGFTest < Test::Unit::TestCase
   end
 
   def test_inplace_mode=()
-    assert_send_type  "(::String) -> self",
+    assert_send_type  "(::String) -> RBS::Unnamed::ARGFClass",
                       ARGF.class.new(__FILE__), :inplace_mode=, ".bak"
   end
 
@@ -263,7 +263,7 @@ class ARGFTest < Test::Unit::TestCase
     assert_send_type  "(::int length) -> ::String",
                       ARGF.class.new(__FILE__), :read, 1
     assert_send_type  "(::int length, ::string outbuf) -> ::String",
-                      ARGF.class.new(__FILE__), :read, 1, ""
+                      ARGF.class.new(__FILE__), :read, 1, +""
     assert_send_type  "(::int length) -> nil",
                       ARGF.class.new(Tempfile.new), :read, 1
   end
@@ -272,7 +272,7 @@ class ARGFTest < Test::Unit::TestCase
     assert_send_type  "(::int maxlen) -> ::String",
                       ARGF.class.new(__FILE__), :read_nonblock, 1
     assert_send_type  "(::int maxlen, ::string buf) -> ::String",
-                      ARGF.class.new(__FILE__), :read_nonblock, 1, ""
+                      ARGF.class.new(__FILE__), :read_nonblock, 1, +""
   end
 
   def test_readbyte
@@ -289,7 +289,7 @@ class ARGFTest < Test::Unit::TestCase
     assert_send_type  "(::int maxlen) -> ::String",
                       ARGF.class.new(__FILE__), :readpartial, 1
     assert_send_type  "(::int maxlen, ::string buf) -> ::String",
-                      ARGF.class.new(__FILE__), :readpartial, 1, ""
+                      ARGF.class.new(__FILE__), :readpartial, 1, +""
   end
 
   def test_rewind
@@ -305,18 +305,18 @@ class ARGFTest < Test::Unit::TestCase
 
   end
   def test_set_encoding
-    assert_send_type  "(::String) -> self",
+    assert_send_type  "(::String) -> RBS::Unnamed::ARGFClass",
                       ARGF.class.new(__FILE__), :set_encoding, "utf-8"
-    assert_send_type  "(::Encoding) -> self",
+    assert_send_type  "(::Encoding) -> RBS::Unnamed::ARGFClass",
                       ARGF.class.new(__FILE__), :set_encoding, Encoding::UTF_8
-    assert_send_type  "(::String, ::String) -> self",
+    assert_send_type  "(::String, ::String) -> RBS::Unnamed::ARGFClass",
                       ARGF.class.new(__FILE__), :set_encoding, "utf-8", "utf-8"
-    assert_send_type  "(::Encoding, ::Encoding) -> self",
+    assert_send_type  "(::Encoding, ::Encoding) -> RBS::Unnamed::ARGFClass",
                       ARGF.class.new(__FILE__), :set_encoding, Encoding::UTF_8, Encoding::UTF_8
   end
 
   def test_skip
-    assert_send_type  "() -> self",
+    assert_send_type  "() -> RBS::Unnamed::ARGFClass",
                       ARGF.class.new(__FILE__), :skip
   end
 

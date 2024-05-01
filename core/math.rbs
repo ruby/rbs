@@ -127,6 +127,37 @@
 # *   ::hypot: Returns `sqrt(a**2 + b**2)` for the given `a` and `b`.
 #
 module Math
+  # <!-- rdoc-file=math.c -->
+  # Definition of the mathematical constant E for Euler's number (e) as a Float
+  # number.
+  #
+  E: Float
+
+  # <!-- rdoc-file=math.c -->
+  # Definition of the mathematical constant PI as a Float number.
+  #
+  PI: Float
+
+  # <!-- rdoc-file=math.c -->
+  # Raised when a mathematical function is evaluated outside of its domain of
+  # definition.
+  #
+  # For example, since `cos` returns values in the range -1..1, its inverse
+  # function `acos` is only defined on that interval:
+  #
+  #     Math.acos(42)
+  #
+  # *produces:*
+  #
+  #     Math::DomainError: Numerical argument is out of domain - "acos"
+  #
+  class DomainError < StandardError
+  end
+
+  # A type that's passable to `Math` functions: A `Numeric` type that defines `.to_f`.
+  #
+  type double = Numeric & _ToF
+
   # <!--
   #   rdoc-file=math.c
   #   - Math.acos(x) -> float
@@ -144,7 +175,7 @@ module Math
   #     acos(0.0)  # => 1.5707963267948966 # PI/2
   #     acos(1.0)  # => 0.0
   #
-  def self.acos: (Numeric x) -> Float
+  def self.acos: (double x) -> Float
 
   # <!--
   #   rdoc-file=math.c
@@ -162,7 +193,7 @@ module Math
   #     acosh(1.0)      # => 0.0
   #     acosh(INFINITY) # => Infinity
   #
-  def self.acosh: (Numeric x) -> Float
+  def self.acosh: (double x) -> Float
 
   # <!--
   #   rdoc-file=math.c
@@ -181,7 +212,7 @@ module Math
   #     asin(0.0)  # => 0.0
   #     asin(1.0)  # => 1.5707963267948966  # PI/2
   #
-  def self.asin: (Numeric x) -> Float
+  def self.asin: (double x) -> Float
 
   # <!--
   #   rdoc-file=math.c
@@ -200,7 +231,7 @@ module Math
   #     asinh(0.0)       # => 0.0
   #     asinh(INFINITY)  # => Infinity
   #
-  def self.asinh: (Numeric x) -> Float
+  def self.asinh: (double x) -> Float
 
   # <!--
   #   rdoc-file=math.c
@@ -224,7 +255,7 @@ module Math
   #     atan(PI)        # => 1.2626272556789115
   #     atan(INFINITY)  # => 1.5707963267948966  # PI/2
   #
-  def self.atan: (Numeric x) -> Float
+  def self.atan: (double x) -> Float
 
   # <!--
   #   rdoc-file=math.c
@@ -247,7 +278,7 @@ module Math
   #     atan2(-1.0, 1.0)  # => -0.7853981633974483 # -PI/4
   #     atan2(0.0, -1.0)  # => 3.141592653589793   # PI
   #
-  def self.atan2: (Numeric y, Numeric x) -> Float
+  def self.atan2: (double y, double x) -> Float
 
   # <!--
   #   rdoc-file=math.c
@@ -266,7 +297,7 @@ module Math
   #     atanh(0.0)  # => 0.0
   #     atanh(1.0)  # => Infinity
   #
-  def self.atanh: (Numeric x) -> Float
+  def self.atanh: (double x) -> Float
 
   # <!--
   #   rdoc-file=math.c
@@ -292,7 +323,7 @@ module Math
   #     cbrt(27.0)      # => 3.0
   #     cbrt(INFINITY)  # => Infinity
   #
-  def self.cbrt: (Numeric x) -> Float
+  def self.cbrt: (double x) -> Float
 
   # <!--
   #   rdoc-file=math.c
@@ -314,7 +345,7 @@ module Math
   #     cos(PI/2)  # => 6.123031769111886e-17 # 0.0000000000000001
   #     cos(PI)    # => -1.0
   #
-  def self.cos: (Numeric x) -> Float
+  def self.cos: (double x) -> Float
 
   # <!--
   #   rdoc-file=math.c
@@ -335,7 +366,7 @@ module Math
   #     cosh(0.0)       # => 1.0
   #     cosh(INFINITY)  # => Infinity
   #
-  def self.cosh: (Numeric x) -> Float
+  def self.cosh: (double x) -> Float
 
   # <!--
   #   rdoc-file=math.c
@@ -356,7 +387,7 @@ module Math
   #
   # Related: Math.erfc.
   #
-  def self.erf: (Numeric x) -> Float
+  def self.erf: (double x) -> Float
 
   # <!--
   #   rdoc-file=math.c
@@ -378,7 +409,7 @@ module Math
   #
   # Related: Math.erf.
   #
-  def self.erfc: (Numeric x) -> Float
+  def self.erfc: (double x) -> Float
 
   # <!--
   #   rdoc-file=math.c
@@ -400,7 +431,7 @@ module Math
   #     exp(2.0)       # => 7.38905609893065    # E**2
   #     exp(INFINITY)  # => Infinity
   #
-  def self.exp: (Numeric x) -> Float
+  def self.exp: (double x) -> Float
 
   # <!--
   #   rdoc-file=math.c
@@ -431,7 +462,7 @@ module Math
   #
   # Related: Math.ldexp (inverse of Math.frexp).
   #
-  def self.frexp: (Numeric x) -> [ Float, Integer ]
+  def self.frexp: (double x) -> [Float, Integer]
 
   # <!--
   #   rdoc-file=math.c
@@ -458,7 +489,7 @@ module Math
   #
   # Related: Math.lgamma.
   #
-  def self.gamma: (Numeric x) -> Float
+  def self.gamma: (double x) -> Float
 
   # <!--
   #   rdoc-file=math.c
@@ -483,7 +514,7 @@ module Math
   # Note that if either argument is `INFINITY` or `-INFINITY`, the result is
   # `Infinity`.
   #
-  def self.hypot: (Numeric x, Numeric y) -> Float
+  def self.hypot: (double x, double y) -> Float
 
   # <!--
   #   rdoc-file=math.c
@@ -511,7 +542,7 @@ module Math
   #
   # Related: Math.frexp (inverse of Math.ldexp).
   #
-  def self.ldexp: (Numeric fraction, Numeric exponent) -> Float
+  def self.ldexp: (double fraction, int exponent) -> Float
 
   # <!--
   #   rdoc-file=math.c
@@ -552,7 +583,7 @@ module Math
   #
   # Related: Math.gamma.
   #
-  def self.lgamma: (Numeric x) -> [ Float, Integer ]
+  def self.lgamma: (double x) -> [Float, -1 | 1]
 
   # <!--
   #   rdoc-file=math.c
@@ -580,7 +611,7 @@ module Math
   #     log(1.0, 10.0)  # => 0.0
   #     log(10.0, 10.0) # => 1.0
   #
-  def self.log: (Numeric x, ?Numeric base) -> Float
+  def self.log: (double x, ?double base) -> Float
 
   # <!--
   #   rdoc-file=math.c
@@ -600,7 +631,7 @@ module Math
   #     log10(10.0)     # => 1.0
   #     log10(INFINITY) # => Infinity
   #
-  def self.log10: (Numeric x) -> Float
+  def self.log10: (double x) -> Float
 
   # <!--
   #   rdoc-file=math.c
@@ -620,7 +651,7 @@ module Math
   #     log2(2.0)      # => 1.0
   #     log2(INFINITY) # => Infinity
   #
-  def self.log2: (Numeric x) -> Float
+  def self.log2: (double x) -> Float
 
   # <!--
   #   rdoc-file=math.c
@@ -642,7 +673,7 @@ module Math
   #     sin(PI/2)  # => 1.0
   #     sin(PI)    # => 1.2246063538223773e-16  # 0.0000000000000001
   #
-  def self.sin: (Numeric x) -> Float
+  def self.sin: (double x) -> Float
 
   # <!--
   #   rdoc-file=math.c
@@ -663,7 +694,7 @@ module Math
   #     sinh(0.0)       # => 0.0
   #     sinh(INFINITY)  # => Infinity
   #
-  def self.sinh: (Numeric x) -> Float
+  def self.sinh: (double x) -> Float
 
   # <!--
   #   rdoc-file=math.c
@@ -686,7 +717,7 @@ module Math
   #     sqrt(9.0)      # => 3.0
   #     sqrt(INFINITY) # => Infinity
   #
-  def self.sqrt: (Numeric x) -> Float
+  def self.sqrt: (double x) -> Float
 
   # <!--
   #   rdoc-file=math.c
@@ -709,7 +740,7 @@ module Math
   #     tan(PI/2)  # => 1.633123935319537e+16   # 16331239353195370.0
   #     tan(PI)    # => -1.2246467991473532e-16 # -0.0000000000000001
   #
-  def self.tan: (Numeric x) -> Float
+  def self.tan: (double x) -> Float
 
   # <!--
   #   rdoc-file=math.c
@@ -730,32 +761,5 @@ module Math
   #     tanh(0.0)       # => 0.0
   #     tanh(INFINITY)  # => 1.0
   #
-  def self.tanh: (Numeric x) -> Float
-end
-
-# <!-- rdoc-file=math.c -->
-# Definition of the mathematical constant E for Euler's number (e) as a Float
-# number.
-#
-Math::E: Float
-
-# <!-- rdoc-file=math.c -->
-# Definition of the mathematical constant PI as a Float number.
-#
-Math::PI: Float
-
-# <!-- rdoc-file=math.c -->
-# Raised when a mathematical function is evaluated outside of its domain of
-# definition.
-#
-# For example, since `cos` returns values in the range -1..1, its inverse
-# function `acos` is only defined on that interval:
-#
-#     Math.acos(42)
-#
-# *produces:*
-#
-#     Math::DomainError: Numerical argument is out of domain - "acos"
-#
-class Math::DomainError < StandardError
+  def self.tanh: (double x) -> Float
 end

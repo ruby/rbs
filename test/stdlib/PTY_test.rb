@@ -2,7 +2,7 @@ require_relative "test_helper"
 require "pty"
 
 class PTYSingletonTest < Test::Unit::TestCase
-  include TypeAssertions
+  include TestHelper
 
   library "pty"
   testing "singleton(::PTY)"

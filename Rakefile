@@ -56,7 +56,7 @@ end
 task :validate => :compile do
   require 'yaml'
 
-  sh "#{ruby} #{rbs} validate --silent"
+  sh "#{ruby} #{rbs} validate"
 
   libs = FileList["stdlib/*"].map {|path| File.basename(path).to_s }
 
@@ -72,7 +72,7 @@ task :validate => :compile do
   end
 
   libs.each do |lib|
-    sh "#{ruby} #{rbs} -r #{lib} validate --silent"
+    sh "#{ruby} #{rbs} -r #{lib} validate"
   end
 end
 
@@ -84,11 +84,12 @@ end
 
 task :stdlib_test => :compile do
   test_files = FileList["test/stdlib/**/*_test.rb"].reject do |path|
-    path =~ %r{Ractor}
+    path =~ %r{Ractor} || path =~ %r{Encoding}
   end
   sh "#{ruby} -Ilib #{bin}/test_runner.rb #{test_files.join(' ')}"
   # TODO: Ractor tests need to be run in a separate process
   sh "#{ruby} -Ilib #{bin}/test_runner.rb test/stdlib/Ractor_test.rb"
+  sh "#{ruby} -Ilib #{bin}/test_runner.rb test/stdlib/Encoding_test.rb"
 end
 
 task :rubocop do
@@ -152,36 +153,38 @@ namespace :generate do
 
           <%- unless class_methods.empty? -%>
           class <%= target %>SingletonTest < Test::Unit::TestCase
-            include TypeAssertions
+            include TestHelper
 
             # library "pathname", "securerandom"     # Declare library signatures to load
             testing "singleton(::<%= target %>)"
 
-          <%- class_methods.each do |method_name, definition| %>
+          <%- class_methods.each do |method_name, definition| -%>
             def test_<%= test_name_for(method_name) %>
           <%- definition.method_types.each do |method_type| -%>
-              assert_send_type  "<%= method_type %>",
-                                <%= target %>, :<%= method_name %>
+              assert_send_type "<%= method_type %>",
+                               <%= target %>, :<%= method_name %>
           <%- end -%>
             end
+
           <%- end -%>
           end
           <%- end -%>
 
           <%- unless instance_methods.empty? -%>
           class <%= target %>Test < Test::Unit::TestCase
-            include TypeAssertions
+            include TestHelper
 
             # library "pathname", "securerandom"     # Declare library signatures to load
             testing "::<%= target %>"
 
-          <%- instance_methods.each do |method_name, definition| %>
+          <%- instance_methods.each do |method_name, definition| -%>
             def test_<%= test_name_for(method_name) %>
           <%- definition.method_types.each do |method_type| -%>
-              assert_send_type  "<%= method_type %>",
-                                <%= target %>.new, :<%= method_name %>
+              assert_send_type "<%= method_type %>",
+                               <%= target %>.new, :<%= method_name %>
           <%- end -%>
             end
+
           <%- end -%>
           end
           <%- end -%>

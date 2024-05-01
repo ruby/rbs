@@ -74,13 +74,7 @@ module PTY
   #
   def self.check: (Integer pid, ?boolish raise) -> Process::Status?
 
-  # <!--
-  #   rdoc-file=ext/pty/pty.c
-  #   - PTY.spawn([env,] command_line)  { |r, w, pid| ... }
-  #   - PTY.spawn([env,] command_line)  => [r, w, pid]
-  #   - PTY.spawn([env,] command, arguments, ...)  { |r, w, pid| ... }
-  #   - PTY.spawn([env,] command, arguments, ...)  => [r, w, pid]
-  # -->
+  # <!-- rdoc-file=ext/pty/pty.c -->
   # Spawns the specified command on a newly allocated pty. You can also use the
   # alias ::getpty.
   #

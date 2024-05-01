@@ -146,7 +146,7 @@ module Benchmark
   #     >total:   2.930000   0.000000   2.930000 (  2.932889)
   #     >avg:     0.976667   0.000000   0.976667 (  0.977630)
   #
-  def self?.benchmark: (String caption, ?Integer? label_width, ?String? format, *String labels) { (Report report) -> (Array[Tms] | void) } -> Array[Tms]
+  def self?.benchmark: (String caption, ?Integer? label_width, ?String? format, *String labels) { (Report report) -> (Array[Tms] | untyped) } -> Array[Tms]
 
   # <!--
   #   rdoc-file=lib/benchmark.rb

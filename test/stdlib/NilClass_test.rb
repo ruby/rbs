@@ -1,7 +1,7 @@
 require_relative "test_helper"
 
 class NilClassInstanceTest < Test::Unit::TestCase
-  include TypeAssertions
+  include TestHelper
 
   testing '::NilClass'
 

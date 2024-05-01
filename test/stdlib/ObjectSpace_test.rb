@@ -2,7 +2,7 @@ require_relative "test_helper"
 require 'objspace'
 
 class ObjectSpaceTest < Test::Unit::TestCase
-  include TypeAssertions
+  include TestHelper
 
   library "objspace"
   testing "singleton(::ObjectSpace)"
@@ -23,9 +23,9 @@ class ObjectSpaceTest < Test::Unit::TestCase
 
   def test_define_finalizer
     assert_send_type "(top, ^(Integer) -> void) -> [Integer, Proc]",
-                     ObjectSpace, :define_finalizer, "abc", ->(id) { "id: #{id}" }
+                     ObjectSpace, :define_finalizer, +"abc", ->(id) { "id: #{id}" }
     assert_send_type "(top) { (Integer) -> void } -> [Integer, Proc]",
-                     ObjectSpace, :define_finalizer, "abc" do |id| "id: #{id}" end
+                     ObjectSpace, :define_finalizer, +"abc" do |id| "id: #{id}" end
   end
 
   def test_each_object
@@ -53,7 +53,7 @@ class ObjectSpaceTest < Test::Unit::TestCase
 
   def test_undefine_finalizer
     assert_send_type "(String) -> String",
-                     ObjectSpace, :undefine_finalizer, "abc"
+                     ObjectSpace, :undefine_finalizer, +"abc"
     assert_send_type "(Array) -> Array",
                      ObjectSpace, :undefine_finalizer, []
   end
@@ -212,11 +212,15 @@ class ObjectSpaceTest < Test::Unit::TestCase
   def test_trace_object_allocations_debug_start
     assert_send_type "() -> void",
       ObjectSpace, :trace_object_allocations_debug_start
+  ensure
+    ObjectSpace.trace_object_allocations_stop
   end
 
   def test_trace_object_allocations_start
     assert_send_type "() -> void",
       ObjectSpace, :trace_object_allocations_start
+  ensure
+    ObjectSpace.trace_object_allocations_stop
   end
 
   def test_trace_object_allocations_stop

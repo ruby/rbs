@@ -2,7 +2,7 @@ require_relative "test_helper"
 require "resolv"
 
 class ResolvSingletonTest < Test::Unit::TestCase
-  include TypeAssertions
+  include TestHelper
 
   library "resolv"
   testing "singleton(::Resolv)"
@@ -39,7 +39,7 @@ class ResolvSingletonTest < Test::Unit::TestCase
 end
 
 class ResolvInstanceTest < Test::Unit::TestCase
-    include TypeAssertions
+    include TestHelper
 
     library "resolv"
     testing "::Resolv"

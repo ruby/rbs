@@ -2,7 +2,7 @@ require_relative "test_helper"
 require 'mutex_m'
 
 class Mutex_mInstanceTest < Test::Unit::TestCase
-  include TypeAssertions
+  include TestHelper
 
   library 'mutex_m'
   testing "::Mutex_m"

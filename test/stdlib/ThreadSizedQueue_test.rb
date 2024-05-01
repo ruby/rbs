@@ -37,6 +37,6 @@ class ThreadSizedQueueTest < StdlibTest
     q.push(:a, true)
     q.push(:a, false)
     q.push(:a, timeout: 0.1)
-    q.push(:a, timeout: ToF.new(0.1))
+    q.push(:a, timeout: ToF.new(0.1).__with_object_methods(:==))
   end
 end

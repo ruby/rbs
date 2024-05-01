@@ -138,7 +138,9 @@ module Gem
   #
   # ## Preventing Version Catastrophe:
   #
-  # From: http://blog.zenspider.com/2008/10/rubygems-howto-preventing-cata.html
+  # From:
+  # https://www.zenspider.com/ruby/2008/10/rubygems-how-to-preventing-catastrophe.
+  # html
   #
   # Let's say you're depending on the fnord gem version 2.y.z. If you specify your
   # dependency as ">= 2.0.0" then, you're good, right? What happens if fnord 3.0
@@ -225,6 +227,8 @@ module Gem
     #   rdoc-file=lib/rubygems/version.rb
     #   - canonical_segments()
     # -->
+    # remove trailing zeros segments before first letter or at the end of the
+    # version
     #
     def canonical_segments: () -> Array[Integer | String]
 

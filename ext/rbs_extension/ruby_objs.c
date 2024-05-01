@@ -170,6 +170,17 @@ VALUE rbs_function_param(VALUE type, VALUE name, VALUE location) {
   );
 }
 
+VALUE rbs_untyped_function(VALUE return_type) {
+  VALUE args = rb_hash_new();
+  rb_hash_aset(args, ID2SYM(rb_intern("return_type")), return_type);
+
+  return CLASS_NEW_INSTANCE(
+    RBS_Types_UntypedFunction,
+    1,
+    &args
+  );
+}
+
 VALUE rbs_function(
   VALUE required_positional_params,
   VALUE optional_positional_params,
@@ -234,10 +245,10 @@ VALUE rbs_literal(VALUE literal, VALUE location) {
   );
 }
 
-VALUE rbs_record(VALUE fields, VALUE location) {
+VALUE rbs_record(VALUE fields,VALUE location) {
   VALUE args = rb_hash_new();
   rb_hash_aset(args, ID2SYM(rb_intern("location")), location);
-  rb_hash_aset(args, ID2SYM(rb_intern("fields")), fields);
+  rb_hash_aset(args, ID2SYM(rb_intern("all_fields")), fields);
 
   return CLASS_NEW_INSTANCE(
     RBS_Types_Record,
@@ -588,4 +599,3 @@ VALUE rbs_ast_directives_use_wildcard_clause(VALUE namespace, VALUE location) {
 
   return CLASS_NEW_INSTANCE(RBS_AST_Directives_Use_WildcardClause, 1, &kwargs);
 }
-

@@ -3,7 +3,7 @@ require 'digest'
 require 'digest/bubblebabble'
 
 class DigestRMD160SingletonTest < Test::Unit::TestCase
-  include TypeAssertions
+  include TestHelper
 
   library 'digest'
   testing 'singleton(::Digest::RMD160)'
@@ -35,13 +35,13 @@ class DigestRMD160SingletonTest < Test::Unit::TestCase
 end
 
 class DigestRMD160InstanceTest < Test::Unit::TestCase
-  include TypeAssertions
+  include TestHelper
 
   library 'digest'
   testing '::Digest::RMD160'
 
   def test_left_shift
-    assert_send_type '(::String) -> self',
+    assert_send_type '(::String) -> Digest::RMD160',
                      ::Digest::RMD160.new, :<<, '_binary_left_shift_'
   end
 
@@ -56,12 +56,12 @@ class DigestRMD160InstanceTest < Test::Unit::TestCase
   end
 
   def test_reset
-    assert_send_type '() -> self',
+    assert_send_type '() -> Digest::RMD160',
                      ::Digest::RMD160.new, :reset
   end
 
   def test_update
-    assert_send_type '(::String) -> self',
+    assert_send_type '(::String) -> Digest::RMD160',
                      ::Digest::RMD160.new, :update, '_update_'
   end
 
@@ -71,7 +71,7 @@ class DigestRMD160InstanceTest < Test::Unit::TestCase
   end
 
   def test_initialize_copy
-    assert_send_type '(::Digest::Base) -> self',
+    assert_send_type '(::Digest::Base) -> Digest::RMD160',
                      ::Digest::RMD160.new, :initialize_copy, ::Digest::RMD160.new
   end
 
@@ -118,7 +118,7 @@ class DigestRMD160InstanceTest < Test::Unit::TestCase
   end
 
   def test_file
-    assert_send_type '(::String) -> self',
+    assert_send_type '(::String) -> Digest::RMD160',
                      ::Digest::RMD160.new, :file, 'README.md'
   end
 

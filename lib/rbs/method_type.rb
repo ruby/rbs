@@ -86,6 +86,9 @@ module RBS
         type.each_type(&block)
         self.block&.yield_self do |b|
           b.type.each_type(&block)
+          if b.self_type
+            yield b.self_type
+          end
         end
       else
         enum_for :each_type
@@ -113,6 +116,26 @@ module RBS
 
     def type_param_names
       type_params.map(&:name)
+    end
+
+    def has_self_type?
+      each_type.any? {|type| type.has_self_type? }
+    end
+
+    def has_classish_type?
+      each_type.any? {|type| type.has_classish_type? }
+    end
+
+    def with_nonreturn_void?
+      if type.with_nonreturn_void?
+        true
+      else
+        if block = block()
+          block.type.with_nonreturn_void? || block.self_type&.with_nonreturn_void? || false
+        else
+          false
+        end
+      end
     end
   end
 end

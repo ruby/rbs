@@ -8,7 +8,13 @@
 # Newly created threads belong to the same group as the thread from which they
 # were created.
 #
-class ThreadGroup < Object
+class ThreadGroup
+  # <!-- rdoc-file=thread.c -->
+  # The default ThreadGroup created when Ruby starts; all Threads belong to it by
+  # default.
+  #
+  Default: ThreadGroup
+
   # <!--
   #   rdoc-file=thread.c
   #   - thgrp.add(thread)   -> thgrp
@@ -34,7 +40,7 @@ class ThreadGroup < Object
   #     Initial group now #<Thread:0x401b3c18>#<Thread:0x401bdf4c>
   #     tg group now #<Thread:0x401b3c90>
   #
-  def add: (Thread thread) -> ThreadGroup
+  def add: (Thread thread) -> self
 
   # <!--
   #   rdoc-file=thread.c
@@ -69,11 +75,5 @@ class ThreadGroup < Object
   #
   #     ThreadGroup::Default.list   #=> [#<Thread:0x401bdf4c run>]
   #
-  def list: () -> ::Array[Thread]
+  def list: () -> Array[Thread]
 end
-
-# <!-- rdoc-file=thread.c -->
-# The default ThreadGroup created when Ruby starts; all Threads belong to it by
-# default.
-#
-ThreadGroup::Default: ThreadGroup

@@ -1,7 +1,7 @@
 require_relative "test_helper"
 
 class ThreadSingletonTest < Test::Unit::TestCase
-  include TypeAssertions
+  include TestHelper
 
   testing "singleton(::Thread)"
 
@@ -33,7 +33,7 @@ class ThreadSingletonTest < Test::Unit::TestCase
 end
 
 class ThreadTest < Test::Unit::TestCase
-  include TypeAssertions
+  include TestHelper
 
   testing "::Thread"
 
@@ -42,5 +42,31 @@ class ThreadTest < Test::Unit::TestCase
       "() -> Integer",
       Thread.current, :native_thread_id
     )
+  end
+
+  def test_raise
+    t = Thread.new do
+      begin
+        sleep
+      rescue
+        retry
+      end
+    end
+    t.report_on_exception = false
+
+    assert_send_type "() -> nil",
+                     t, :raise
+    assert_send_type "(String) -> nil",
+                     t, :raise, "Error!"
+    assert_send_type "(singleton(StandardError)) -> nil",
+                     t, :raise, StandardError
+    assert_send_type "(StandardError) -> nil",
+                     t, :raise, StandardError.new('Error!')
+    assert_send_type "(singleton(StandardError), String) -> nil",
+                     t, :raise, StandardError, 'Error!'
+    assert_send_type "(singleton(StandardError), String, Array[String]) -> nil",
+                     t, :raise, StandardError, 'Error!', caller
+
+    t.kill
   end
 end

@@ -344,7 +344,7 @@ end
 #
 # *raises the exception:*
 #
-#     NoMethodError: undefined method `to_ary' for "hello":String
+#     NoMethodError: undefined method `to_ary' for an instance of String
 #
 class NoMethodError[T] < NameError[T]
   # <!--

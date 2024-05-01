@@ -669,6 +669,42 @@ class RBS::TypeParsingTest < Test::Unit::TestCase
     assert_equal "a.rbs:1:2...1:5: Syntax error: unexpected record key token, token=`foo` (tLIDENT)", error.message
   end
 
+  def test_record_with_optional_key
+    Parser.parse_type("{ ?foo: untyped }").yield_self do |type|
+      assert_instance_of Types::Record, type
+      assert_equal({}, type.fields)
+      assert_equal({
+                     foo: Types::Bases::Any.new(location: nil),
+                   }, type.optional_fields)
+      assert_equal "{ ?foo: untyped }", type.location.source
+    end
+
+    error = assert_raises(RBS::ParsingError) do
+      Parser.parse_type("{ 1?: untyped }")
+    end
+    assert_equal "pQUESTION", error.token_type
+    assert_equal "?", error.location.source
+    assert_equal "a.rbs:1:3...1:4: Syntax error: expected a token `pFATARROW`, token=`?` (pQUESTION)", error.message
+  end
+
+  def test_record_with_intersection_key
+    error = assert_raises(RBS::ParsingError) do
+      Parser.parse_type("{ 1&2: untyped }")
+    end
+    assert_equal "pAMP", error.token_type
+    assert_equal "&", error.location.source
+    assert_equal "a.rbs:1:3...1:4: Syntax error: expected a token `pFATARROW`, token=`&` (pAMP)", error.message
+  end
+
+  def test_record_with_union_key
+    error = assert_raises(RBS::ParsingError) do
+      Parser.parse_type("{ 1|2: untyped }")
+    end
+    assert_equal "pBAR", error.token_type
+    assert_equal "|", error.location.source
+    assert_equal "a.rbs:1:3...1:4: Syntax error: expected a token `pFATARROW`, token=`|` (pBAR)", error.message
+  end
+
   def test_type_var
     Parser.parse_type("Array[A]", variables: []).yield_self do |type|
       assert_instance_of Types::ClassInstance, type
@@ -752,6 +788,31 @@ class RBS::TypeParsingTest < Test::Unit::TestCase
       assert_instance_of RBS::Location, type.location
 
       assert_equal "::Foo", type.location[:name].source
+    end
+  end
+
+  def test_untyped__todo
+    Parser.parse_type("__todo__").yield_self do |type|
+      assert_instance_of Types::Bases::Any, type
+      assert_equal "__todo__", type.location.source
+    end
+  end
+
+  def test_escape_sequences
+    Parser.parse_type('"escape sequences \a\b\e\f\n\r\s\t\v\""').yield_self do |type|
+      assert_instance_of Types::Literal, type
+      assert_equal "escape sequences \a\b\e\f\n\r\s\t\v\"", type.literal
+    end
+
+    Parser.parse_type(%q{'not escape sequences \a\b\e\f\n\r\s\t\v\"'}).yield_self do |type|
+      assert_instance_of Types::Literal, type
+      assert_equal 'not escape sequences \a\b\e\f\n\r\s\t\v\"', type.literal
+    end
+
+    Parser.parse_type('["\u0000", "\00", "\x00"]').yield_self do |type|
+      assert_equal "\u0000", type.types[0].literal
+      assert_equal "\00", type.types[1].literal
+      assert_equal "\x00", type.types[2].literal
     end
   end
 end

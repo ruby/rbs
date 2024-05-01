@@ -2,7 +2,7 @@ require_relative "../test_helper"
 require 'tempfile'
 
 class TempfileSingletonTest < Test::Unit::TestCase
-  include TypeAssertions
+  include TestHelper
 
   library "tempfile"
   testing "singleton(::Tempfile)"
@@ -43,7 +43,7 @@ class TempfileSingletonTest < Test::Unit::TestCase
 end
 
 class TempfileTest < Test::Unit::TestCase
-  include TypeAssertions
+  include TestHelper
 
   library "tempfile"
   testing "::Tempfile"

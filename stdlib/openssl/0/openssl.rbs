@@ -20,23 +20,21 @@
 #
 #     key = OpenSSL::PKey::RSA.new 2048
 #
-#     open 'private_key.pem', 'w' do |io| io.write key.to_pem end
-#     open 'public_key.pem', 'w' do |io| io.write key.public_key.to_pem end
+#     File.write 'private_key.pem', key.private_to_pem
+#     File.write 'public_key.pem', key.public_to_pem
 #
 # ### Exporting a Key
 #
 # Keys saved to disk without encryption are not secure as anyone who gets ahold
 # of the key may use it unless it is encrypted.  In order to securely export a
-# key you may export it with a pass phrase.
+# key you may export it with a password.
 #
 #     cipher = OpenSSL::Cipher.new 'aes-256-cbc'
-#     pass_phrase = 'my secure pass phrase goes here'
+#     password = 'my secure password goes here'
 #
-#     key_secure = key.export cipher, pass_phrase
+#     key_secure = key.private_to_pem cipher, password
 #
-#     open 'private.secure.pem', 'w' do |io|
-#       io.write key_secure
-#     end
+#     File.write 'private.secure.pem', key_secure
 #
 # OpenSSL::Cipher.ciphers returns a list of available ciphers.
 #
@@ -56,13 +54,13 @@
 #
 # ### Loading an Encrypted Key
 #
-# OpenSSL will prompt you for your pass phrase when loading an encrypted key. If
-# you will not be able to type in the pass phrase you may provide it when
-# loading the key:
+# OpenSSL will prompt you for your password when loading an encrypted key. If
+# you will not be able to type in the password you may provide it when loading
+# the key:
 #
 #     key4_pem = File.read 'private.secure.pem'
-#     pass_phrase = 'my secure pass phrase goes here'
-#     key4 = OpenSSL::PKey.read key4_pem, pass_phrase
+#     password = 'my secure password goes here'
+#     key4 = OpenSSL::PKey.read key4_pem, password
 #
 # ## RSA Encryption
 #
@@ -175,44 +173,6 @@
 #     decrypted = cipher.update encrypted
 #     decrypted << cipher.final
 #
-# ## PKCS #5 Password-based Encryption
-#
-# PKCS #5 is a password-based encryption standard documented at
-# [RFC2898](http://www.ietf.org/rfc/rfc2898.txt).  It allows a short password or
-# passphrase to be used to create a secure encryption key. If possible, PBKDF2
-# as described above should be used if the circumstances allow it.
-#
-# PKCS #5 uses a Cipher, a pass phrase and a salt to generate an encryption key.
-#
-#     pass_phrase = 'my secure pass phrase goes here'
-#     salt = '8 octets'
-#
-# ### Encryption
-#
-# First set up the cipher for encryption
-#
-#     encryptor = OpenSSL::Cipher.new 'aes-256-cbc'
-#     encryptor.encrypt
-#     encryptor.pkcs5_keyivgen pass_phrase, salt
-#
-# Then pass the data you want to encrypt through
-#
-#     encrypted = encryptor.update 'top secret document'
-#     encrypted << encryptor.final
-#
-# ### Decryption
-#
-# Use a new Cipher instance set up for decryption
-#
-#     decryptor = OpenSSL::Cipher.new 'aes-256-cbc'
-#     decryptor.decrypt
-#     decryptor.pkcs5_keyivgen pass_phrase, salt
-#
-# Then pass the data you want to decrypt through
-#
-#     plain = decryptor.update encrypted
-#     plain << decryptor.final
-#
 # ## X509 Certificates
 #
 # ### Creating a Certificate
@@ -290,12 +250,12 @@
 # not readable by other users.
 #
 #     ca_key = OpenSSL::PKey::RSA.new 2048
-#     pass_phrase = 'my secure pass phrase goes here'
+#     password = 'my secure password goes here'
 #
-#     cipher = OpenSSL::Cipher.new 'aes-256-cbc'
+#     cipher = 'aes-256-cbc'
 #
 #     open 'ca_key.pem', 'w', 0400 do |io|
-#       io.write ca_key.export(cipher, pass_phrase)
+#       io.write ca_key.private_to_pem(cipher, password)
 #     end
 #
 # ### CA Certificate
@@ -584,7 +544,18 @@ module OpenSSL
   OPENSSL_VERSION: String
 
   # <!-- rdoc-file=ext/openssl/ossl.c -->
-  # Version number of OpenSSL the ruby OpenSSL extension was built with (base 16)
+  # Version number of OpenSSL the ruby OpenSSL extension was built with (base 16).
+  # The formats are below.
+  #
+  # OpenSSL 3
+  # :   `0xMNN00PP0 (major minor 00 patch 0)`
+  # OpenSSL before 3
+  # :   `0xMNNFFPPS (major minor fix patch status)`
+  # LibreSSL
+  # :   `0x20000000 (fixed value)`
+  #
+  #
+  # See also the man page OPENSSL_VERSION_NUMBER(3).
   #
   OPENSSL_VERSION_NUMBER: Integer
 
@@ -812,7 +783,7 @@ module OpenSSL
     #       puts "Header length: #{header_len} Tag: #{tag} Tag class: #{tag_class} Constructed: #{constructed}"
     #     end
     #
-    def self.traverse: (String | _ToDer der) { (::Integer, ::Integer, ::Integer, ::Integer, bool, tag_class, ::Integer) -> void } -> void
+    def self.traverse: (String | _ToDer der) { ([::Integer, ::Integer, ::Integer, ::Integer, bool, tag_class, ::Integer]) -> void } -> void
 
     BIT_STRING: Integer
 
@@ -3221,13 +3192,9 @@ module OpenSSL
     # Return the hash value computed with *name* Digest. *name* is either the long
     # name or short name of a supported digest algorithm.
     #
-    # ### Examples
+    # ### Example
     #
     #     OpenSSL::Digest.digest("SHA256", "abc")
-    #
-    # which is equivalent to:
-    #
-    #     OpenSSL::Digest.digest('SHA256', "abc")
     #
     def self.digest: (String name, String data) -> String
 
@@ -3998,7 +3965,7 @@ module OpenSSL
     #
     # ### Parameters
     # pass
-    # :   The passphrase.
+    # :   The password.
     # salt
     # :   The salt. Salts prevent attacks based on dictionaries of common passwords
     #     and attacks based on rainbow tables. It is a public value that can be
@@ -4312,7 +4279,7 @@ module OpenSSL
   #     require 'net/http'
   #
   #     http_response =
-  #       Net::HTTP.start ocsp_uri.hostname, ocsp.port do |http|
+  #       Net::HTTP.start ocsp_uri.hostname, ocsp_uri.port do |http|
   #         http.post ocsp_uri.path, request.to_der,
   #                   'content-type' => 'application/ocsp-request'
   #     end
@@ -5637,9 +5604,20 @@ module OpenSSL
       #   - dh.to_pem -> aString
       #   - dh.to_s -> aString
       # -->
-      # Encodes this DH to its PEM encoding. Note that any existing per-session
-      # public/private keys will **not** get encoded, just the Diffie-Hellman
-      # parameters will be encoded.
+      # Serializes the DH parameters to a PEM-encoding.
+      #
+      # Note that any existing per-session public/private keys will **not** get
+      # encoded, just the Diffie-Hellman parameters will be encoded.
+      #
+      # PEM-encoded parameters will look like:
+      #
+      #     -----BEGIN DH PARAMETERS-----
+      #     [...]
+      #     -----END DH PARAMETERS-----
+      #
+      # See also #public_to_pem (X.509 SubjectPublicKeyInfo) and #private_to_pem (PKCS
+      # #8 PrivateKeyInfo or EncryptedPrivateKeyInfo) for serialization with the
+      # private or public key components.
       #
       def export: () -> String
 
@@ -5765,23 +5743,50 @@ module OpenSSL
       #   rdoc-file=ext/openssl/ossl_pkey_dh.c
       #   - dh.to_der -> aString
       # -->
-      # Encodes this DH to its DER encoding. Note that any existing per-session
-      # public/private keys will **not** get encoded, just the Diffie-Hellman
-      # parameters will be encoded.
+      # Serializes the DH parameters to a DER-encoding
+      #
+      # Note that any existing per-session public/private keys will **not** get
+      # encoded, just the Diffie-Hellman parameters will be encoded.
+      #
+      # See also #public_to_der (X.509 SubjectPublicKeyInfo) and #private_to_der (PKCS
+      # #8 PrivateKeyInfo or EncryptedPrivateKeyInfo) for serialization with the
+      # private or public key components.
       #
       def to_der: () -> String
 
       # <!-- rdoc-file=ext/openssl/ossl_pkey_dh.c -->
-      # Encodes this DH to its PEM encoding. Note that any existing per-session
-      # public/private keys will **not** get encoded, just the Diffie-Hellman
-      # parameters will be encoded.
+      # Serializes the DH parameters to a PEM-encoding.
+      #
+      # Note that any existing per-session public/private keys will **not** get
+      # encoded, just the Diffie-Hellman parameters will be encoded.
+      #
+      # PEM-encoded parameters will look like:
+      #
+      #     -----BEGIN DH PARAMETERS-----
+      #     [...]
+      #     -----END DH PARAMETERS-----
+      #
+      # See also #public_to_pem (X.509 SubjectPublicKeyInfo) and #private_to_pem (PKCS
+      # #8 PrivateKeyInfo or EncryptedPrivateKeyInfo) for serialization with the
+      # private or public key components.
       #
       alias to_pem export
 
       # <!-- rdoc-file=ext/openssl/ossl_pkey_dh.c -->
-      # Encodes this DH to its PEM encoding. Note that any existing per-session
-      # public/private keys will **not** get encoded, just the Diffie-Hellman
-      # parameters will be encoded.
+      # Serializes the DH parameters to a PEM-encoding.
+      #
+      # Note that any existing per-session public/private keys will **not** get
+      # encoded, just the Diffie-Hellman parameters will be encoded.
+      #
+      # PEM-encoded parameters will look like:
+      #
+      #     -----BEGIN DH PARAMETERS-----
+      #     [...]
+      #     -----END DH PARAMETERS-----
+      #
+      # See also #public_to_pem (X.509 SubjectPublicKeyInfo) and #private_to_pem (PKCS
+      # #8 PrivateKeyInfo or EncryptedPrivateKeyInfo) for serialization with the
+      # private or public key components.
       #
       alias to_s export
 
@@ -5885,16 +5890,54 @@ module OpenSSL
       #   - dsa.to_pem([cipher, password]) -> aString
       #   - dsa.to_s([cipher, password]) -> aString
       # -->
-      # Encodes this DSA to its PEM encoding.
+      # Serializes a private or public key to a PEM-encoding.
       #
-      # ### Parameters
-      # *   *cipher* is an OpenSSL::Cipher.
-      # *   *password* is a string containing your password.
+      # When the key contains public components only
+      # :   Serializes it into an X.509 SubjectPublicKeyInfo. The parameters *cipher*
+      #     and *password* are ignored.
+      #
+      #     A PEM-encoded key will look like:
+      #
+      #         -----BEGIN PUBLIC KEY-----
+      #         [...]
+      #         -----END PUBLIC KEY-----
+      #
+      #     Consider using #public_to_pem instead. This serializes the key into an
+      #     X.509 SubjectPublicKeyInfo regardless of whether it is a public key or a
+      #     private key.
+      #
+      # When the key contains private components, and no parameters are given
+      # :   Serializes it into a traditional OpenSSL DSAPrivateKey.
+      #
+      #     A PEM-encoded key will look like:
+      #
+      #         -----BEGIN DSA PRIVATE KEY-----
+      #         [...]
+      #         -----END DSA PRIVATE KEY-----
+      #
+      # When the key contains private components, and *cipher* and *password* are given
+      # :   Serializes it into a traditional OpenSSL DSAPrivateKey and encrypts it in
+      #     OpenSSL's traditional PEM encryption format. *cipher* must be a cipher
+      #     name understood by OpenSSL::Cipher.new or an instance of OpenSSL::Cipher.
+      #
+      #     An encrypted PEM-encoded key will look like:
+      #
+      #         -----BEGIN DSA PRIVATE KEY-----
+      #         Proc-Type: 4,ENCRYPTED
+      #         DEK-Info: AES-128-CBC,733F5302505B34701FC41F5C0746E4C0
+      #
+      #         [...]
+      #         -----END DSA PRIVATE KEY-----
+      #
+      #     Note that this format uses MD5 to derive the encryption key, and hence
+      #     will not be available on FIPS-compliant systems.
       #
       #
-      # ### Examples
-      #     DSA.to_pem -> aString
-      #     DSA.to_pem(cipher, 'mypassword') -> aString
+      # **This method is kept for compatibility.** This should only be used when the
+      # traditional, non-standard OpenSSL format is required.
+      #
+      # Consider using #public_to_pem (X.509 SubjectPublicKeyInfo) or #private_to_pem
+      # (PKCS #8 PrivateKeyInfo or EncryptedPrivateKeyInfo) instead.
       #
       def export: (String cipher, String password) -> String
                 | () -> String
@@ -6018,35 +6061,118 @@ module OpenSSL
       #   rdoc-file=ext/openssl/ossl_pkey_dsa.c
       #   - dsa.to_der -> aString
       # -->
-      # Encodes this DSA to its DER encoding.
+      # Serializes a private or public key to a DER-encoding.
+      #
+      # See #to_pem for details.
+      #
+      # **This method is kept for compatibility.** This should only be used when the
+      # traditional, non-standard OpenSSL format is required.
+      #
+      # Consider using #public_to_der or #private_to_der instead.
       #
       def to_der: () -> String
 
       # <!-- rdoc-file=ext/openssl/ossl_pkey_dsa.c -->
-      # Encodes this DSA to its PEM encoding.
+      # Serializes a private or public key to a PEM-encoding.
       #
-      # ### Parameters
-      # *   *cipher* is an OpenSSL::Cipher.
-      # *   *password* is a string containing your password.
+      # When the key contains public components only
+      # :   Serializes it into an X.509 SubjectPublicKeyInfo. The parameters *cipher*
+      #     and *password* are ignored.
+      #
+      #     A PEM-encoded key will look like:
+      #
+      #         -----BEGIN PUBLIC KEY-----
+      #         [...]
+      #         -----END PUBLIC KEY-----
+      #
+      #     Consider using #public_to_pem instead. This serializes the key into an
+      #     X.509 SubjectPublicKeyInfo regardless of whether it is a public key or a
+      #     private key.
+      #
+      # When the key contains private components, and no parameters are given
+      # :   Serializes it into a traditional OpenSSL DSAPrivateKey.
+      #
+      #     A PEM-encoded key will look like:
+      #
+      #         -----BEGIN DSA PRIVATE KEY-----
+      #         [...]
+      #         -----END DSA PRIVATE KEY-----
+      #
+      # When the key contains private components, and *cipher* and *password* are given
+      # :   Serializes it into a traditional OpenSSL DSAPrivateKey and encrypts it in
+      #     OpenSSL's traditional PEM encryption format. *cipher* must be a cipher
+      #     name understood by OpenSSL::Cipher.new or an instance of OpenSSL::Cipher.
+      #
+      #     An encrypted PEM-encoded key will look like:
+      #
+      #         -----BEGIN DSA PRIVATE KEY-----
+      #         Proc-Type: 4,ENCRYPTED
+      #         DEK-Info: AES-128-CBC,733F5302505B34701FC41F5C0746E4C0
+      #
+      #         [...]
+      #         -----END DSA PRIVATE KEY-----
+      #
+      #     Note that this format uses MD5 to derive the encryption key, and hence
+      #     will not be available on FIPS-compliant systems.
       #
       #
-      # ### Examples
-      #     DSA.to_pem -> aString
-      #     DSA.to_pem(cipher, 'mypassword') -> aString
+      # **This method is kept for compatibility.** This should only be used when the
+      # traditional, non-standard OpenSSL format is required.
+      #
+      # Consider using #public_to_pem (X.509 SubjectPublicKeyInfo) or #private_to_pem
+      # (PKCS #8 PrivateKeyInfo or EncryptedPrivateKeyInfo) instead.
       #
       alias to_pem export
 
       # <!-- rdoc-file=ext/openssl/ossl_pkey_dsa.c -->
-      # Encodes this DSA to its PEM encoding.
+      # Serializes a private or public key to a PEM-encoding.
       #
-      # ### Parameters
-      # *   *cipher* is an OpenSSL::Cipher.
-      # *   *password* is a string containing your password.
+      # When the key contains public components only
+      # :   Serializes it into an X.509 SubjectPublicKeyInfo. The parameters *cipher*
+      #     and *password* are ignored.
+      #
+      #     A PEM-encoded key will look like:
+      #
+      #         -----BEGIN PUBLIC KEY-----
+      #         [...]
+      #         -----END PUBLIC KEY-----
+      #
+      #     Consider using #public_to_pem instead. This serializes the key into an
+      #     X.509 SubjectPublicKeyInfo regardless of whether it is a public key or a
+      #     private key.
+      #
+      # When the key contains private components, and no parameters are given
+      # :   Serializes it into a traditional OpenSSL DSAPrivateKey.
+      #
+      #     A PEM-encoded key will look like:
+      #
+      #         -----BEGIN DSA PRIVATE KEY-----
+      #         [...]
+      #         -----END DSA PRIVATE KEY-----
+      #
+      # When the key contains private components, and *cipher* and *password* are given
+      # :   Serializes it into a traditional OpenSSL DSAPrivateKey and encrypts it in
+      #     OpenSSL's traditional PEM encryption format. *cipher* must be a cipher
+      #     name understood by OpenSSL::Cipher.new or an instance of OpenSSL::Cipher.
+      #
+      #     An encrypted PEM-encoded key will look like:
+      #
+      #         -----BEGIN DSA PRIVATE KEY-----
+      #         Proc-Type: 4,ENCRYPTED
+      #         DEK-Info: AES-128-CBC,733F5302505B34701FC41F5C0746E4C0
+      #
+      #         [...]
+      #         -----END DSA PRIVATE KEY-----
+      #
+      #     Note that this format uses MD5 to derive the encryption key, and hence
+      #     will not be available on FIPS-compliant systems.
       #
       #
-      # ### Examples
-      #     DSA.to_pem -> aString
-      #     DSA.to_pem(cipher, 'mypassword') -> aString
+      # **This method is kept for compatibility.** This should only be used when the
+      # traditional, non-standard OpenSSL format is required.
+      #
+      # Consider using #public_to_pem (X.509 SubjectPublicKeyInfo) or #private_to_pem
+      # (PKCS #8 PrivateKeyInfo or EncryptedPrivateKeyInfo) instead.
       #
       alias to_s export
 
@@ -6197,13 +6323,57 @@ module OpenSSL
 
       # <!--
       #   rdoc-file=ext/openssl/ossl_pkey_ec.c
-      #   - key.export([cipher, pass_phrase]) => String
-      #   - key.to_pem([cipher, pass_phrase]) => String
+      #   - key.export([cipher, password]) => String
+      #   - key.to_pem([cipher, password]) => String
       # -->
-      # Outputs the EC key in PEM encoding.  If *cipher* and *pass_phrase* are given
-      # they will be used to encrypt the key.  *cipher* must be an OpenSSL::Cipher
-      # instance. Note that encryption will only be effective for a private key,
-      # public keys will always be encoded in plain text.
+      # Serializes a private or public key to a PEM-encoding.
+      #
+      # When the key contains public components only
+      # :   Serializes it into an X.509 SubjectPublicKeyInfo. The parameters *cipher*
+      #     and *password* are ignored.
+      #
+      #     A PEM-encoded key will look like:
+      #
+      #         -----BEGIN PUBLIC KEY-----
+      #         [...]
+      #         -----END PUBLIC KEY-----
+      #
+      #     Consider using #public_to_pem instead. This serializes the key into an
+      #     X.509 SubjectPublicKeyInfo regardless of whether it is a public key or a
+      #     private key.
+      #
+      # When the key contains private components, and no parameters are given
+      # :   Serializes it into a SEC 1/RFC 5915 ECPrivateKey.
+      #
+      #     A PEM-encoded key will look like:
+      #
+      #         -----BEGIN EC PRIVATE KEY-----
+      #         [...]
+      #         -----END EC PRIVATE KEY-----
+      #
+      # When the key contains private components, and *cipher* and *password* are given
+      # :   Serializes it into a SEC 1/RFC 5915 ECPrivateKey and encrypts it in
+      #     OpenSSL's traditional PEM encryption format. *cipher* must be a cipher
+      #     name understood by OpenSSL::Cipher.new or an instance of OpenSSL::Cipher.
+      #
+      #     An encrypted PEM-encoded key will look like:
+      #
+      #         -----BEGIN EC PRIVATE KEY-----
+      #         Proc-Type: 4,ENCRYPTED
+      #         DEK-Info: AES-128-CBC,733F5302505B34701FC41F5C0746E4C0
+      #
+      #         [...]
+      #         -----END EC PRIVATE KEY-----
+      #
+      #     Note that this format uses MD5 to derive the encryption key, and hence
+      #     will not be available on FIPS-compliant systems.
+      #
+      #
+      # **This method is kept for compatibility.** This should only be used when the
+      # SEC 1/RFC 5915 ECPrivateKey format is required.
+      #
+      # Consider using #public_to_pem (X.509 SubjectPublicKeyInfo) or #private_to_pem
+      # (PKCS #8 PrivateKeyInfo or EncryptedPrivateKeyInfo) instead.
       #
       def export: (String cipher, String password) -> String
                 | () -> String
@@ -6321,15 +6491,66 @@ module OpenSSL
       #   rdoc-file=ext/openssl/ossl_pkey_ec.c
       #   - key.to_der   => String
       # -->
-      # See the OpenSSL documentation for i2d_ECPrivateKey_bio()
+      # Serializes a private or public key to a DER-encoding.
+      #
+      # See #to_pem for details.
+      #
+      # **This method is kept for compatibility.** This should only be used when the
+      # SEC 1/RFC 5915 ECPrivateKey format is required.
+      #
+      # Consider using #public_to_der or #private_to_der instead.
       #
       def to_der: () -> String
 
       # <!-- rdoc-file=ext/openssl/ossl_pkey_ec.c -->
-      # Outputs the EC key in PEM encoding.  If *cipher* and *pass_phrase* are given
-      # they will be used to encrypt the key.  *cipher* must be an OpenSSL::Cipher
-      # instance. Note that encryption will only be effective for a private key,
-      # public keys will always be encoded in plain text.
+      # Serializes a private or public key to a PEM-encoding.
+      #
+      # When the key contains public components only
+      # :   Serializes it into an X.509 SubjectPublicKeyInfo. The parameters *cipher*
+      #     and *password* are ignored.
+      #
+      #     A PEM-encoded key will look like:
+      #
+      #         -----BEGIN PUBLIC KEY-----
+      #         [...]
+      #         -----END PUBLIC KEY-----
+      #
+      #     Consider using #public_to_pem instead. This serializes the key into an
+      #     X.509 SubjectPublicKeyInfo regardless of whether it is a public key or a
+      #     private key.
+      #
+      # When the key contains private components, and no parameters are given
+      # :   Serializes it into a SEC 1/RFC 5915 ECPrivateKey.
+      #
+      #     A PEM-encoded key will look like:
+      #
+      #         -----BEGIN EC PRIVATE KEY-----
+      #         [...]
+      #         -----END EC PRIVATE KEY-----
+      #
+      # When the key contains private components, and *cipher* and *password* are given
+      # :   Serializes it into a SEC 1/RFC 5915 ECPrivateKey and encrypts it in
+      #     OpenSSL's traditional PEM encryption format. *cipher* must be a cipher
+      #     name understood by OpenSSL::Cipher.new or an instance of OpenSSL::Cipher.
+      #
+      #     An encrypted PEM-encoded key will look like:
+      #
+      #         -----BEGIN EC PRIVATE KEY-----
+      #         Proc-Type: 4,ENCRYPTED
+      #         DEK-Info: AES-128-CBC,733F5302505B34701FC41F5C0746E4C0
+      #
+      #         [...]
+      #         -----END EC PRIVATE KEY-----
+      #
+      #     Note that this format uses MD5 to derive the encryption key, and hence
+      #     will not be available on FIPS-compliant systems.
+      #
+      #
+      # **This method is kept for compatibility.** This should only be used when the
+      # SEC 1/RFC 5915 ECPrivateKey format is required.
+      #
+      # Consider using #public_to_pem (X.509 SubjectPublicKeyInfo) or #private_to_pem
+      # (PKCS #8 PrivateKeyInfo or EncryptedPrivateKeyInfo) instead.
       #
       alias to_pem export
 
@@ -6771,6 +6992,18 @@ module OpenSSL
       # Serializes the private key to PEM-encoded PKCS #8 format. See #private_to_der
       # for more details.
       #
+      # An unencrypted PEM-encoded key will look like:
+      #
+      #     -----BEGIN PRIVATE KEY-----
+      #     [...]
+      #     -----END PRIVATE KEY-----
+      #
+      # An encrypted PEM-encoded key will look like:
+      #
+      #     -----BEGIN ENCRYPTED PRIVATE KEY-----
+      #     [...]
+      #     -----END ENCRYPTED PRIVATE KEY-----
+      #
       def private_to_pem: (String cipher, String password) -> String
                         | () -> String
 
@@ -6787,6 +7020,12 @@ module OpenSSL
       #   - pkey.public_to_pem -> string
       # -->
       # Serializes the public key to PEM-encoded X.509 SubjectPublicKeyInfo format.
+      #
+      # A PEM-encoded key will look like:
+      #
+      #     -----BEGIN PUBLIC KEY-----
+      #     [...]
+      #     -----END PUBLIC KEY-----
       #
       def public_to_pem: () -> String
 
@@ -6909,13 +7148,58 @@ module OpenSSL
 
       # <!--
       #   rdoc-file=ext/openssl/ossl_pkey_rsa.c
-      #   - rsa.export([cipher, pass_phrase]) => PEM-format String
-      #   - rsa.to_pem([cipher, pass_phrase]) => PEM-format String
-      #   - rsa.to_s([cipher, pass_phrase]) => PEM-format String
+      #   - rsa.export([cipher, password]) => PEM-format String
+      #   - rsa.to_pem([cipher, password]) => PEM-format String
+      #   - rsa.to_s([cipher, password]) => PEM-format String
       # -->
-      # Outputs this keypair in PEM encoding.  If *cipher* and *pass_phrase* are given
-      # they will be used to encrypt the key.  *cipher* must be an OpenSSL::Cipher
-      # instance.
+      # Serializes a private or public key to a PEM-encoding.
+      #
+      # When the key contains public components only
+      # :   Serializes it into an X.509 SubjectPublicKeyInfo. The parameters *cipher*
+      #     and *password* are ignored.
+      #
+      #     A PEM-encoded key will look like:
+      #
+      #         -----BEGIN PUBLIC KEY-----
+      #         [...]
+      #         -----END PUBLIC KEY-----
+      #
+      #     Consider using #public_to_pem instead. This serializes the key into an
+      #     X.509 SubjectPublicKeyInfo regardless of whether the key is a public key
+      #     or a private key.
+      #
+      # When the key contains private components, and no parameters are given
+      # :   Serializes it into a PKCS #1 RSAPrivateKey.
+      #
+      #     A PEM-encoded key will look like:
+      #
+      #         -----BEGIN RSA PRIVATE KEY-----
+      #         [...]
+      #         -----END RSA PRIVATE KEY-----
+      #
+      # When the key contains private components, and *cipher* and *password* are given
+      # :   Serializes it into a PKCS #1 RSAPrivateKey and encrypts it in OpenSSL's
+      #     traditional PEM encryption format. *cipher* must be a cipher name
+      #     understood by OpenSSL::Cipher.new or an instance of OpenSSL::Cipher.
+      #
+      #     An encrypted PEM-encoded key will look like:
+      #
+      #         -----BEGIN RSA PRIVATE KEY-----
+      #         Proc-Type: 4,ENCRYPTED
+      #         DEK-Info: AES-128-CBC,733F5302505B34701FC41F5C0746E4C0
+      #
+      #         [...]
+      #         -----END RSA PRIVATE KEY-----
+      #
+      #     Note that this format uses MD5 to derive the encryption key, and hence
+      #     will not be available on FIPS-compliant systems.
+      #
+      #
+      # **This method is kept for compatibility.** This should only be used when the
+      # PKCS #1 RSAPrivateKey format is required.
+      #
+      # Consider using #public_to_pem (X.509 SubjectPublicKeyInfo) or #private_to_pem
+      # (PKCS #8 PrivateKeyInfo or EncryptedPrivateKeyInfo) instead.
       #
       def export: (String cipher, String password) -> String
                 | () -> String
@@ -7093,21 +7377,118 @@ module OpenSSL
       #   rdoc-file=ext/openssl/ossl_pkey_rsa.c
       #   - rsa.to_der => DER-format String
       # -->
-      # Outputs this keypair in DER encoding.
+      # Serializes a private or public key to a DER-encoding.
+      #
+      # See #to_pem for details.
+      #
+      # **This method is kept for compatibility.** This should only be used when the
+      # PKCS #1 RSAPrivateKey format is required.
+      #
+      # Consider using #public_to_der or #private_to_der instead.
       #
       def to_der: () -> String
 
       # <!-- rdoc-file=ext/openssl/ossl_pkey_rsa.c -->
-      # Outputs this keypair in PEM encoding.  If *cipher* and *pass_phrase* are given
-      # they will be used to encrypt the key.  *cipher* must be an OpenSSL::Cipher
-      # instance.
+      # Serializes a private or public key to a PEM-encoding.
+      #
+      # When the key contains public components only
+      # :   Serializes it into an X.509 SubjectPublicKeyInfo. The parameters *cipher*
+      #     and *password* are ignored.
+      #
+      #     A PEM-encoded key will look like:
+      #
+      #         -----BEGIN PUBLIC KEY-----
+      #         [...]
+      #         -----END PUBLIC KEY-----
+      #
+      #     Consider using #public_to_pem instead. This serializes the key into an
+      #     X.509 SubjectPublicKeyInfo regardless of whether the key is a public key
+      #     or a private key.
+      #
+      # When the key contains private components, and no parameters are given
+      # :   Serializes it into a PKCS #1 RSAPrivateKey.
+      #
+      #     A PEM-encoded key will look like:
+      #
+      #         -----BEGIN RSA PRIVATE KEY-----
+      #         [...]
+      #         -----END RSA PRIVATE KEY-----
+      #
+      # When the key contains private components, and *cipher* and *password* are given
+      # :   Serializes it into a PKCS #1 RSAPrivateKey and encrypts it in OpenSSL's
+      #     traditional PEM encryption format. *cipher* must be a cipher name
+      #     understood by OpenSSL::Cipher.new or an instance of OpenSSL::Cipher.
+      #
+      #     An encrypted PEM-encoded key will look like:
+      #
+      #         -----BEGIN RSA PRIVATE KEY-----
+      #         Proc-Type: 4,ENCRYPTED
+      #         DEK-Info: AES-128-CBC,733F5302505B34701FC41F5C0746E4C0
+      #
+      #         [...]
+      #         -----END RSA PRIVATE KEY-----
+      #
+      #     Note that this format uses MD5 to derive the encryption key, and hence
+      #     will not be available on FIPS-compliant systems.
+      #
+      #
+      # **This method is kept for compatibility.** This should only be used when the
+      # PKCS #1 RSAPrivateKey format is required.
+      #
+      # Consider using #public_to_pem (X.509 SubjectPublicKeyInfo) or #private_to_pem
+      # (PKCS #8 PrivateKeyInfo or EncryptedPrivateKeyInfo) instead.
       #
       alias to_pem export
 
       # <!-- rdoc-file=ext/openssl/ossl_pkey_rsa.c -->
-      # Outputs this keypair in PEM encoding.  If *cipher* and *pass_phrase* are given
-      # they will be used to encrypt the key.  *cipher* must be an OpenSSL::Cipher
-      # instance.
+      # Serializes a private or public key to a PEM-encoding.
+      #
+      # When the key contains public components only
+      # :   Serializes it into an X.509 SubjectPublicKeyInfo. The parameters *cipher*
+      #     and *password* are ignored.
+      #
+      #     A PEM-encoded key will look like:
+      #
+      #         -----BEGIN PUBLIC KEY-----
+      #         [...]
+      #         -----END PUBLIC KEY-----
+      #
+      #     Consider using #public_to_pem instead. This serializes the key into an
+      #     X.509 SubjectPublicKeyInfo regardless of whether the key is a public key
+      #     or a private key.
+      #
+      # When the key contains private components, and no parameters are given
+      # :   Serializes it into a PKCS #1 RSAPrivateKey.
+      #
+      #     A PEM-encoded key will look like:
+      #
+      #         -----BEGIN RSA PRIVATE KEY-----
+      #         [...]
+      #         -----END RSA PRIVATE KEY-----
+      #
+      # When the key contains private components, and *cipher* and *password* are given
+      # :   Serializes it into a PKCS #1 RSAPrivateKey and encrypts it in OpenSSL's
+      #     traditional PEM encryption format. *cipher* must be a cipher name
+      #     understood by OpenSSL::Cipher.new or an instance of OpenSSL::Cipher.
+      #
+      #     An encrypted PEM-encoded key will look like:
+      #
+      #         -----BEGIN RSA PRIVATE KEY-----
+      #         Proc-Type: 4,ENCRYPTED
+      #         DEK-Info: AES-128-CBC,733F5302505B34701FC41F5C0746E4C0
+      #
+      #         [...]
+      #         -----END RSA PRIVATE KEY-----
+      #
+      #     Note that this format uses MD5 to derive the encryption key, and hence
+      #     will not be available on FIPS-compliant systems.
+      #
+      #
+      # **This method is kept for compatibility.** This should only be used when the
+      # PKCS #1 RSAPrivateKey format is required.
+      #
+      # Consider using #public_to_pem (X.509 SubjectPublicKeyInfo) or #private_to_pem
+      # (PKCS #8 PrivateKeyInfo or EncryptedPrivateKeyInfo) instead.
       #
       alias to_s export
 
@@ -7153,8 +7534,8 @@ module OpenSSL
       # <!--
       #   rdoc-file=ext/openssl/ossl_pkey_rsa.c
       #   - RSA.new -> rsa
-      #   - RSA.new(encoded_key [, passphrase]) -> rsa
-      #   - RSA.new(encoded_key) { passphrase } -> rsa
+      #   - RSA.new(encoded_key [, password ]) -> rsa
+      #   - RSA.new(encoded_key) { password } -> rsa
       #   - RSA.new(size [, exponent]) -> rsa
       # -->
       # Generates or loads an RSA keypair.
@@ -7164,9 +7545,9 @@ module OpenSSL
       # #set_crt_params.
       #
       # If called with a String, tries to parse as DER or PEM encoding of an RSA key.
-      # Note that, if *passphrase* is not specified but the key is encrypted with a
-      # passphrase, OpenSSL will prompt for it. See also OpenSSL::PKey.read which can
-      # parse keys of any kinds.
+      # Note that if *password* is not specified, but the key is encrypted with a
+      # password, OpenSSL will prompt for it. See also OpenSSL::PKey.read which can
+      # parse keys of any kind.
       #
       # If called with a number, generates a new key pair. This form works as an alias
       # of RSA.generate.
@@ -7174,7 +7555,7 @@ module OpenSSL
       # Examples:
       #     OpenSSL::PKey::RSA.new 2048
       #     OpenSSL::PKey::RSA.new File.read 'rsa.pem'
-      #     OpenSSL::PKey::RSA.new File.read('rsa.pem'), 'my pass phrase'
+      #     OpenSSL::PKey::RSA.new File.read('rsa.pem'), 'my password'
       #
       def initialize: () -> void
                     | (Integer key_size) -> void
@@ -8418,7 +8799,7 @@ module OpenSSL
       # -->
       # See BasicSocket#shutdown for details.
       #
-      def shutdown: (Symbol | String | Integer how) -> void
+      def shutdown: (interned | Integer how) -> void
 
       # <!-- rdoc-file=ext/openssl/lib/openssl/ssl.rb -->
       # When true then #accept works exactly the same as TCPServer#accept

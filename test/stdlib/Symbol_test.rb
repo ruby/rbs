@@ -1,7 +1,7 @@
 require_relative "test_helper"
 
 class SymbolSingletonTest < Test::Unit::TestCase
-  include TypeAssertions
+  include TestHelper
 
   testing "singleton(::Symbol)"
 
@@ -12,7 +12,7 @@ class SymbolSingletonTest < Test::Unit::TestCase
 end
 
 class SymbolInstanceTest < Test::Unit::TestCase
-  include TypeAssertions
+  include TestHelper
 
   testing "::Symbol"
 
@@ -42,6 +42,13 @@ class SymbolInstanceTest < Test::Unit::TestCase
                      :a, :=~, /a/
     assert_send_type "(nil) -> nil",
                      :a, :=~, nil
+
+    matcher = BlankSlate.new
+    def matcher.=~(rhs)
+      :world
+    end
+    assert_send_type '(String::_MatchAgainst[String, Symbol]) -> Symbol',
+                     :hello, :=~, matcher
   end
 
   def test_aref

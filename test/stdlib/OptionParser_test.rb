@@ -2,7 +2,7 @@ require_relative "test_helper"
 require "optparse"
 
 class OptionParserSingletonTest < Test::Unit::TestCase
-  include TypeAssertions
+  include TestHelper
   library "optparse"
   testing "singleton(::OptionParser)"
 
@@ -42,7 +42,7 @@ class OptionParserSingletonTest < Test::Unit::TestCase
 end
 
 class OptionParserTest < Test::Unit::TestCase
-  include TypeAssertions
+  include TestHelper
   library "optparse"
   testing "::OptionParser"
 
@@ -117,45 +117,45 @@ class OptionParserTest < Test::Unit::TestCase
   end
 
   def test_on
-    assert_send_type "(*String) -> self", opt, :on, '-a'
-    assert_send_type "(String, Class) -> self", opt, :on, '-a', Array
-    assert_send_type "(String, Class, String) -> self", opt, :on, '-a', Array, 'description'
-    assert_send_type "(String, String, Class, String) -> self", opt, :on, '-a', '--all', Array, 'description'
-    assert_send_type "(String, Array[String]) -> self", opt, :on, '-a', ['foo', 'bar']
-    assert_send_type "(String, String, Array[String]) -> self", opt, :on, '-a', '--all', ['foo', 'bar']
-    assert_send_type "(String, Hash[Symbol, untyped]) -> self", opt, :on, '-a', {foo: 1, bar: 2}
-    assert_send_type "(String, String, Hash[Symbol, untyped]) -> self", opt, :on, '-a', '--all', {foo: 1, bar: 2}
-    assert_send_type "(String, Regexp) -> self", opt, :on, '-a', /foo/
-    assert_send_type "(String, String, Regexp) -> self", opt, :on, '-a', '--all', /foo/
-    assert_send_type "(*String, Proc) -> self", opt, :on, '-a', proc {}
+    assert_send_type "(*String) -> OptionParser", opt, :on, '-a'
+    assert_send_type "(String, Class) -> OptionParser", opt, :on, '-a', Array
+    assert_send_type "(String, Class, String) -> OptionParser", opt, :on, '-a', Array, 'description'
+    assert_send_type "(String, String, Class, String) -> OptionParser", opt, :on, '-a', '--all', Array, 'description'
+    assert_send_type "(String, Array[String]) -> OptionParser", opt, :on, '-a', ['foo', 'bar']
+    assert_send_type "(String, String, Array[String]) -> OptionParser", opt, :on, '-a', '--all', ['foo', 'bar']
+    assert_send_type "(String, Hash[Symbol, untyped]) -> OptionParser", opt, :on, '-a', {foo: 1, bar: 2}
+    assert_send_type "(String, String, Hash[Symbol, untyped]) -> OptionParser", opt, :on, '-a', '--all', {foo: 1, bar: 2}
+    assert_send_type "(String, Regexp) -> OptionParser", opt, :on, '-a', /foo/
+    assert_send_type "(String, String, Regexp) -> OptionParser", opt, :on, '-a', '--all', /foo/
+    assert_send_type "(*String, Proc) -> OptionParser", opt, :on, '-a', proc {}
   end
 
   def test_on_head
-    assert_send_type "(*String) -> self", opt, :on_head, '-a'
-    assert_send_type "(String, Class) -> self", opt, :on_head, '-a', Array
-    assert_send_type "(String, Class, String) -> self", opt, :on_head, '-a', Array, 'description'
-    assert_send_type "(String, String, Class, String) -> self", opt, :on_head, '-a', '--all', Array, 'description'
-    assert_send_type "(String, Array[String]) -> self", opt, :on_head, '-a', ['foo', 'bar']
-    assert_send_type "(String, String, Array[String]) -> self", opt, :on_head, '-a', '--all', ['foo', 'bar']
-    assert_send_type "(String, Hash[Symbol, untyped]) -> self", opt, :on_head, '-a', {foo: 1, bar: 2}
-    assert_send_type "(String, String, Hash[Symbol, untyped]) -> self", opt, :on_head, '-a', '--all', {foo: 1, bar: 2}
-    assert_send_type "(String, Regexp) -> self", opt, :on_head, '-a', /foo/
-    assert_send_type "(String, String, Regexp) -> self", opt, :on_head, '-a', '--all', /foo/
-    assert_send_type "(*String, Proc) -> self", opt, :on_head, '-a', proc {}
+    assert_send_type "(*String) -> OptionParser", opt, :on_head, '-a'
+    assert_send_type "(String, Class) -> OptionParser", opt, :on_head, '-a', Array
+    assert_send_type "(String, Class, String) -> OptionParser", opt, :on_head, '-a', Array, 'description'
+    assert_send_type "(String, String, Class, String) -> OptionParser", opt, :on_head, '-a', '--all', Array, 'description'
+    assert_send_type "(String, Array[String]) -> OptionParser", opt, :on_head, '-a', ['foo', 'bar']
+    assert_send_type "(String, String, Array[String]) -> OptionParser", opt, :on_head, '-a', '--all', ['foo', 'bar']
+    assert_send_type "(String, Hash[Symbol, untyped]) -> OptionParser", opt, :on_head, '-a', {foo: 1, bar: 2}
+    assert_send_type "(String, String, Hash[Symbol, untyped]) -> OptionParser", opt, :on_head, '-a', '--all', {foo: 1, bar: 2}
+    assert_send_type "(String, Regexp) -> OptionParser", opt, :on_head, '-a', /foo/
+    assert_send_type "(String, String, Regexp) -> OptionParser", opt, :on_head, '-a', '--all', /foo/
+    assert_send_type "(*String, Proc) -> OptionParser", opt, :on_head, '-a', proc {}
   end
 
   def test_on_tail
-    assert_send_type "(*String) -> self", opt, :on_tail, '-a'
-    assert_send_type "(String, Class) -> self", opt, :on_tail, '-a', Array
-    assert_send_type "(String, Class, String) -> self", opt, :on_tail, '-a', Array, 'description'
-    assert_send_type "(String, String, Class, String) -> self", opt, :on_tail, '-a', '--all', Array, 'description'
-    assert_send_type "(String, Array[String]) -> self", opt, :on_tail, '-a', ['foo', 'bar']
-    assert_send_type "(String, String, Array[String]) -> self", opt, :on_tail, '-a', '--all', ['foo', 'bar']
-    assert_send_type "(String, Hash[Symbol, untyped]) -> self", opt, :on_tail, '-a', {foo: 1, bar: 2}
-    assert_send_type "(String, String, Hash[Symbol, untyped]) -> self", opt, :on_tail, '-a', '--all', {foo: 1, bar: 2}
-    assert_send_type "(String, Regexp) -> self", opt, :on_tail, '-a', /foo/
-    assert_send_type "(String, String, Regexp) -> self", opt, :on_tail, '-a', '--all', /foo/
-    assert_send_type "(*String, Proc) -> self", opt, :on_tail, '-a', proc {}
+    assert_send_type "(*String) -> OptionParser", opt, :on_tail, '-a'
+    assert_send_type "(String, Class) -> OptionParser", opt, :on_tail, '-a', Array
+    assert_send_type "(String, Class, String) -> OptionParser", opt, :on_tail, '-a', Array, 'description'
+    assert_send_type "(String, String, Class, String) -> OptionParser", opt, :on_tail, '-a', '--all', Array, 'description'
+    assert_send_type "(String, Array[String]) -> OptionParser", opt, :on_tail, '-a', ['foo', 'bar']
+    assert_send_type "(String, String, Array[String]) -> OptionParser", opt, :on_tail, '-a', '--all', ['foo', 'bar']
+    assert_send_type "(String, Hash[Symbol, untyped]) -> OptionParser", opt, :on_tail, '-a', {foo: 1, bar: 2}
+    assert_send_type "(String, String, Hash[Symbol, untyped]) -> OptionParser", opt, :on_tail, '-a', '--all', {foo: 1, bar: 2}
+    assert_send_type "(String, Regexp) -> OptionParser", opt, :on_tail, '-a', /foo/
+    assert_send_type "(String, String, Regexp) -> OptionParser", opt, :on_tail, '-a', '--all', /foo/
+    assert_send_type "(*String, Proc) -> OptionParser", opt, :on_tail, '-a', proc {}
   end
 
   def test_order
@@ -234,7 +234,7 @@ class OptionParserArguableTest < Test::Unit::TestCase
     include OptionParser::Arguable
   end
 
-  include TypeAssertions
+  include TestHelper
   library "optparse"
   testing "::OptionParser::Arguable"
 

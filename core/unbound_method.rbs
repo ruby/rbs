@@ -60,7 +60,29 @@ class UnboundMethod
   #     Array.instance_method(:sum) == Enumerable.instance_method(:sum)
   #     #=> false, Array redefines the method for efficiency
   #
-  def ==: (untyped) -> bool
+  def ==: (untyped other) -> bool
+
+  # <!-- rdoc-file=proc.c -->
+  # Two unbound method objects are equal if they refer to the same method
+  # definition.
+  #
+  #     Array.instance_method(:each_slice) == Enumerable.instance_method(:each_slice)
+  #     #=> true
+  #
+  #     Array.instance_method(:sum) == Enumerable.instance_method(:sum)
+  #     #=> false, Array redefines the method for efficiency
+  #
+  alias eql? ==
+
+  # <!--
+  #   rdoc-file=proc.c
+  #   - meth.hash   -> integer
+  # -->
+  # Returns a hash value corresponding to the method object.
+  #
+  # See also Object#hash.
+  #
+  def hash: () -> Integer
 
   # <!--
   #   rdoc-file=proc.c
@@ -78,7 +100,7 @@ class UnboundMethod
   #     m.call # => "bar"
   #     n = m.clone.call # => "bar"
   #
-  def clone: () -> self
+  def clone: () -> instance
 
   # <!--
   #   rdoc-file=proc.c
@@ -189,6 +211,34 @@ class UnboundMethod
   #
   def inspect: () -> String
 
+  # <!-- rdoc-file=proc.c -->
+  # Returns a human-readable description of the underlying method.
+  #
+  #     "cat".method(:count).inspect   #=> "#<Method: String#count(*)>"
+  #     (1..3).method(:map).inspect    #=> "#<Method: Range(Enumerable)#map()>"
+  #
+  # In the latter case, the method description includes the "owner" of the
+  # original method (`Enumerable` module, which is included into `Range`).
+  #
+  # `inspect` also provides, when possible, method argument names (call sequence)
+  # and source location.
+  #
+  #     require 'net/http'
+  #     Net::HTTP.method(:get).inspect
+  #     #=> "#<Method: Net::HTTP.get(uri_or_host, path=..., port=...) <skip>/lib/ruby/2.7.0/net/http.rb:457>"
+  #
+  # `...` in argument definition means argument is optional (has some default
+  # value).
+  #
+  # For methods defined in C (language core and extensions), location and argument
+  # names can't be extracted, and only generic information is provided in form of
+  # `*` (any number of arguments) or `_` (some positional argument).
+  #
+  #     "cat".method(:count).inspect   #=> "#<Method: String#count(*)>"
+  #     "cat".method(:+).inspect       #=> "#<Method: String#+(_)>""
+  #
+  alias to_s inspect
+
   # <!--
   #   rdoc-file=proc.c
   #   - meth.name    -> symbol
@@ -213,7 +263,7 @@ class UnboundMethod
   #
   #     (1..3).method(:map).owner #=> Enumerable
   #
-  def owner: () -> Module
+  def owner: () -> (Class | Module)
 
   # <!--
   #   rdoc-file=proc.c
@@ -233,8 +283,7 @@ class UnboundMethod
   #     def foo(bar, baz, *args, &blk); end
   #     method(:foo).parameters #=> [[:req, :bar], [:req, :baz], [:rest, :args], [:block, :blk]]
   #
-  def parameters: () -> ::Array[[ Symbol, Symbol ]]
-                | () -> ::Array[[ Symbol ]]
+  def parameters: () -> Method::param_types
 
   # <!--
   #   rdoc-file=proc.c
@@ -243,7 +292,7 @@ class UnboundMethod
   # Returns the Ruby source filename and line number containing this method or nil
   # if this method was not defined in Ruby (i.e. native).
   #
-  def source_location: () -> [ String, Integer ]?
+  def source_location: () -> [String, Integer]?
 
   # <!--
   #   rdoc-file=proc.c
@@ -276,5 +325,5 @@ class UnboundMethod
   # arguments. This is semantically equivalent to `umeth.bind(recv).call(args,
   # ...)`.
   #
-  def bind_call: (untyped recv, *untyped args) ?{ (*untyped) -> untyped } -> untyped
+  def bind_call: (untyped recv, *untyped, **untyped) ?{ (*untyped, **untyped) -> untyped } -> untyped
 end

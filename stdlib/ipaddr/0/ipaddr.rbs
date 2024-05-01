@@ -295,7 +295,8 @@ class IPAddr
   # Returns true if the ipaddr is a private address.  IPv4 addresses in
   # 10.0.0.0/8, 172.16.0.0/12 and 192.168.0.0/16 as defined in RFC 1918 and IPv6
   # Unique Local Addresses in fc00::/7 as defined in RFC 4193 are considered
-  # private.
+  # private. Private IPv4 addresses in the IPv4-mapped IPv6 address range are also
+  # considered private.
   #
   def private?: () -> bool
 

@@ -1,7 +1,7 @@
 require_relative "test_helper"
 
 class ArraySingletonTest < Test::Unit::TestCase
-  include TypeAssertions
+  include TestHelper
 
   testing "singleton(::Array)"
 
@@ -36,7 +36,7 @@ class ArraySingletonTest < Test::Unit::TestCase
 end
 
 class ArrayInstanceTest < Test::Unit::TestCase
-  include TypeAssertions
+  include TestHelper
 
   testing "::Array[::Integer]"
 
@@ -226,7 +226,7 @@ class ArrayInstanceTest < Test::Unit::TestCase
   def test_concat
     assert_send_type "(Array[Integer], Array[Integer]) -> Array[Integer]",
                      [1,2,3], :concat, [4,5,6], [7,8,9]
-    assert_send_type "(Array[Integer], Array[Integer]) -> self",
+    assert_send_type "(Array[Integer], Array[Integer]) -> Array[Integer]",
                      Class.new(Array).new, :concat, [4,5,6], [7,8,9]
   end
 
@@ -240,8 +240,11 @@ class ArrayInstanceTest < Test::Unit::TestCase
   end
 
   def test_cycle
-    assert_send_type "() { (Integer) -> void } -> nil",
-                     [1,2,3], :cycle do break end
+    assert_send_type(
+      "() { (Integer) -> void } -> nil",
+      [1,2,3], :cycle, &proc { break_from_block }
+    )
+
     assert_send_type "(Integer) { (Integer) -> void } -> nil",
                      [1,2,3], :cycle, 3 do end
     assert_send_type "(ToInt) { (Integer) -> void } -> nil",
@@ -594,7 +597,7 @@ class ArrayInstanceTest < Test::Unit::TestCase
                      [1,2,3], :pack, ToStr.new("ccc")
 
     assert_send_type "(String, buffer: String) -> String",
-                     [1,2,3], :pack, "ccc", buffer: ""
+                     [1,2,3], :pack, "ccc", buffer: +""
     assert_send_type "(String, buffer: nil) -> String",
                      [1,2,3], :pack, "ccc", buffer: nil
     refute_send_type "(ToStr, buffer: ToStr) -> String",
@@ -633,7 +636,7 @@ class ArrayInstanceTest < Test::Unit::TestCase
                      [1,2,3], :product, ["a", "b"]
     assert_send_type "(Array[String], Array[Symbol]) -> Array[[Integer, String, Symbol]]",
                      [1,2,3], :product, ["a", "b"], [:a, :b]
-    assert_send_type "(Array[String], Array[Symbol], Array[true | false]) -> Array[Array[Integer | String | Symbol | true | false]]",
+    assert_send_type "(Array[String], Array[Symbol], Array[true | false]) -> Array[Array[Integer | interned | true | false]]",
                      [1,2,3], :product, ["a", "b"], [:a, :b], [true, false]
   end
 

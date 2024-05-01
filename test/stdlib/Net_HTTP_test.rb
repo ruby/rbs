@@ -3,7 +3,7 @@ require "net/http"
 require "uri"
 
 class NetSingletonTest < Test::Unit::TestCase
-  include TypeAssertions
+  include TestHelper
 
   library "net-http", "uri"
   testing "singleton(::Net::HTTP)"
@@ -16,18 +16,24 @@ class NetSingletonTest < Test::Unit::TestCase
                      Net::HTTP, :get_print, 'www.ruby-lang.org', '/en'
     assert_send_type "(URI::Generic, Hash[String, String]) -> nil",
                      Net::HTTP, :get_print, URI("https://www.ruby-lang.org"), {"Accept" => "text/html"} if RUBY_VERSION >= '3.0'
+    assert_send_type "(URI::Generic, Hash[Symbol, String]) -> nil",
+                     Net::HTTP, :get_print, URI("https://www.ruby-lang.org"), {Accept: "text/html"} if RUBY_VERSION >= '3.0'
     assert_send_type "(URI::Generic) -> String",
                      Net::HTTP, :get, URI("https://www.ruby-lang.org")
     assert_send_type "(String, String) -> String",
                      Net::HTTP, :get, 'www.ruby-lang.org', '/en'
     assert_send_type "(URI::Generic, Hash[String, String]) -> String",
                      Net::HTTP, :get, URI("https://www.ruby-lang.org"), {"Accept" => "text/html"} if RUBY_VERSION >= '3.0'
+    assert_send_type "(URI::Generic, Hash[Symbol, String]) -> String",
+                     Net::HTTP, :get, URI("https://www.ruby-lang.org"), {Accept: "text/html"} if RUBY_VERSION >= '3.0'
     assert_send_type "(URI::Generic) -> Net::HTTPResponse",
                      Net::HTTP, :get_response, URI("https://www.ruby-lang.org")
     assert_send_type "(String, String) -> Net::HTTPResponse",
                      Net::HTTP, :get_response, 'www.ruby-lang.org', '/en'
     assert_send_type "(URI::Generic, Hash[String, String]) -> Net::HTTPResponse",
                      Net::HTTP, :get_response, URI("https://www.ruby-lang.org"), {"Accept" => "text/html"} if RUBY_VERSION >= '3.0'
+    assert_send_type "(URI::Generic, Hash[Symbol, String]) -> Net::HTTPResponse",
+                     Net::HTTP, :get_response, URI("https://www.ruby-lang.org"), {Accept: "text/html"} if RUBY_VERSION >= '3.0'
   ensure
     $stdout = STDOUT
   end
@@ -35,6 +41,8 @@ class NetSingletonTest < Test::Unit::TestCase
   def test_post
     assert_send_type "(URI, String, Hash[String, String]) -> Net::HTTPResponse",
                      Net::HTTP, :post, URI('http://www.example.com/api/search'), { "q" => "ruby", "max" => "50" }.to_json, "Content-Type" => "application/json"
+    assert_send_type "(URI, String, Hash[Symbol, String]) -> Net::HTTPResponse",
+                     Net::HTTP, :post, URI('http://www.example.com/api/search'), { "q" => "ruby", "max" => "50" }.to_json, "Content-Type": "application/json"
     assert_send_type "(URI, Hash[String, Symbol]) -> Net::HTTPResponse",
                      Net::HTTP, :post_form, URI('http://www.example.com/api/search'), { "q" => :ruby, "max" => :max }
   end
@@ -46,7 +54,7 @@ class NetSingletonTest < Test::Unit::TestCase
 end
 
 class NetInstanceTest < Test::Unit::TestCase
-  include TypeAssertions
+  include TestHelper
 
   library "net-http", "uri"
   testing "::Net::HTTP"
@@ -169,6 +177,8 @@ class NetInstanceTest < Test::Unit::TestCase
                      Net::HTTP.start('www.ruby-lang.org', 443, use_ssl: true), :get, '/en'
     assert_send_type "(String, Hash[String, String]) -> Net::HTTPResponse",
                      Net::HTTP.start('www.ruby-lang.org', 443, use_ssl: true), :get, '/en', { "Accept" => "text/html" }
+    assert_send_type "(String, Hash[Symbol, String]) -> Net::HTTPResponse",
+                     Net::HTTP.start('www.ruby-lang.org', 443, use_ssl: true), :get, '/en', { Accept: "text/html" }
     assert_send_type "(String) { (String) -> untyped } -> Net::HTTPResponse",
                      Net::HTTP.start('www.ruby-lang.org', 443, use_ssl: true), :get, '/en' do |string| string end
     assert_send_type "(String, Hash[String, String]) { (String) -> untyped } -> Net::HTTPResponse",
@@ -308,7 +318,7 @@ class NetInstanceTest < Test::Unit::TestCase
 end
 
 class TestHTTPRequest < Test::Unit::TestCase
-  include TypeAssertions
+  include TestHelper
 
   library "net-http", "uri"
   testing "::Net::HTTPRequest"
@@ -454,7 +464,7 @@ class TestHTTPRequest < Test::Unit::TestCase
 end
 
 class TestSingletonNetHTTPResponse < Test::Unit::TestCase
-  include TypeAssertions
+  include TestHelper
 
   library "net-http", "uri"
   testing "singleton(::Net::HTTPResponse)"
@@ -466,7 +476,7 @@ class TestSingletonNetHTTPResponse < Test::Unit::TestCase
 end
 
 class TestInstanceNetHTTPResponse < Test::Unit::TestCase
-  include TypeAssertions
+  include TestHelper
 
   library "net-http", "uri"
   testing "::Net::HTTPResponse"

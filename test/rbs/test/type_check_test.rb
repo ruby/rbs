@@ -60,11 +60,198 @@ EOF
 
         assert typecheck.value([1,2,3].each, parse_type("Enumerator[Integer, Array[Integer]]"))
         assert typecheck.value(loop, parse_type("Enumerator[nil, bot]"))
+        assert typecheck.value([].each, parse_type("Enumerator[String, Array[String]]"))
+        assert typecheck.value([].each, parse_type("Enumerator[Integer, Array[Integer]]"))
 
         assert typecheck.value(true, parse_type("bool"))
         assert typecheck.value(false, parse_type("bool"))
         refute typecheck.value(nil, parse_type("bool"))
         refute typecheck.value("", parse_type("bool"))
+      end
+    end
+  end
+
+  def test_type_check_interface
+    SignatureManager.new do |manager|
+      manager.files[Pathname("foo.rbs")] = <<EOF
+interface _NoArgs
+  def f: () -> void
+end
+interface _PosArgs
+  def f: (Integer) -> void
+end
+interface _OptArgs
+  def f: (?Integer) -> void
+end
+interface _PosOptArgs
+  def f: (Integer, ?String) -> void
+end
+interface _RestArgs
+  def f: (*Integer) -> void
+end
+interface _TrailingArgs
+  def f: (*Integer, Integer) -> void
+end
+interface _ReqKeyArgs
+  def f: (a: Integer, b: String) -> void
+end
+interface _OptKeyArgs
+  def f: (?a: Integer, ?b: String) -> void
+end
+interface _PosReqKeyArgs
+  def f: (Integer a, b: Integer) -> void
+end
+interface _RestKeyArgs
+  def f: (**Integer) -> void
+end
+interface _PosRestKeyArgs
+  def f: (Integer, **Integer) -> void
+end
+interface _ReqKeyRestKeyArgs
+  def f: (a: Integer, **Integer) -> void
+end
+interface _ReqBlockArgs
+  def f: () { (Integer) -> void } -> void
+end
+interface _OptBlockArgs
+  def f: () ?{ (Integer) -> void } -> void
+end
+interface _AllArgs
+  def f: (Integer, ?Integer, *Integer, Integer, e: Integer, ?f: Integer, **Integer) -> void
+end
+interface _Overload
+  def f: (Integer) -> void
+          | (Integer, Integer) -> void
+end
+EOF
+      manager.build do |env|
+        builder = DefinitionBuilder.new(env: env)
+        typecheck = Test::TypeCheck.new(
+          self_class: Integer,
+          builder: builder,
+          sample_size: 100,
+          unchecked_classes: []
+        )
+
+        [
+          [ ->(o) { def o.f(); end }, '::_NoArgs' ],
+          [ ->(o) { def o.f(a = nil); end }, '::_NoArgs' ],
+          [ ->(o) { def o.f(*r); end }, '::_NoArgs' ],
+          [ ->(o) { def o.f(**rk); end }, '::_NoArgs' ],
+          [ ->(o) { def o.f(*r, **rk); end }, '::_NoArgs' ],
+          [ ->(o) { def o.f(...); end }, '::_NoArgs' ],
+          [ ->(o) { def o.f(a); end }, '::_PosArgs' ],
+          [ ->(o) { def o.f(a = nil); end }, '::_PosArgs' ],
+          [ ->(o) { def o.f(a, &b); end }, '::_PosArgs' ],
+          [ ->(o) { def o.f(a, b = nil); end }, '::_PosArgs' ],
+          [ ->(o) { def o.f(*a); end }, '::_PosArgs' ],
+          [ ->(o) { def o.f(a, *r); end }, '::_PosArgs' ],
+          [ ->(o) { def o.f(a, **kr); end }, '::_PosArgs' ],
+          [ ->(o) { def o.f(a = nil); end }, '::_OptArgs' ],
+          [ ->(o) { def o.f(a, b = nil); end }, '::_PosOptArgs' ],
+          [ ->(o) { def o.f(*a); end }, '::_PosOptArgs' ],
+          [ ->(o) { def o.f(a, *r); end }, '::_PosOptArgs' ],
+          [ ->(o) { def o.f(*r); end }, '::_RestArgs' ],
+          [ ->(o) { def o.f(*r, a); end }, '::_TrailingArgs' ],
+          [ ->(o) { def o.f(a:, b:); end }, '::_ReqKeyArgs' ],
+          [ ->(o) { def o.f(b:, a:); end }, '::_ReqKeyArgs' ],
+          [ ->(o) { def o.f(a:, b: 1); end }, '::_ReqKeyArgs' ],
+          [ ->(o) { def o.f(*a); end }, '::_ReqKeyArgs' ],
+          [ ->(o) { def o.f(**rk); end }, '::_ReqKeyArgs' ],
+          [ ->(o) { def o.f(a); end }, '::_ReqKeyArgs' ],
+          [ ->(o) { def o.f(a = {}); end }, '::_ReqKeyArgs' ],
+          [ ->(o) { def o.f(a = {}, b = {}); end }, '::_ReqKeyArgs' ],
+          [ ->(o) { def o.f(a: 1, b: 'b'); end }, '::_OptKeyArgs' ],
+          [ ->(o) { def o.f(b: 'b', a: 1); end }, '::_OptKeyArgs' ],
+          [ ->(o) { def o.f(*r); end }, '::_OptKeyArgs' ],
+          [ ->(o) { def o.f(**rk); end }, '::_OptKeyArgs' ],
+          [ ->(o) { def o.f(a = {}); end }, '::_OptKeyArgs' ],
+          [ ->(o) { def o.f(a, b:); end }, '::_PosReqKeyArgs' ],
+          [ ->(o) { def o.f(a, b); end }, '::_PosReqKeyArgs' ],
+          [ ->(o) { def o.f(a, b = nil); end }, '::_PosReqKeyArgs' ],
+          [ ->(o) { def o.f(*r); end }, '::_RestKeyArgs' ],
+          [ ->(o) { def o.f(**rk); end }, '::_RestKeyArgs' ],
+          [ ->(o) { def o.f(*r, **rk); end }, '::_RestKeyArgs' ],
+          [ ->(o) { def o.f(a: nil, **rk); end }, '::_RestKeyArgs' ],
+          [ ->(o) { def o.f(a = {}); end }, '::_RestKeyArgs' ],
+          [ ->(o) { def o.f(a, **rk); end }, '::_PosRestKeyArgs' ],
+          [ ->(o) { def o.f(a, b = {}); end }, '::_PosRestKeyArgs' ],
+          [ ->(o) { def o.f(a:, **rk); end }, '::_ReqKeyRestKeyArgs' ],
+          [ ->(o) { def o.f(a: nil, **rk); end }, '::_ReqKeyRestKeyArgs' ],
+          [ ->(o) { def o.f(a); end }, '::_ReqKeyRestKeyArgs' ],
+          [ ->(o) { def o.f(a = nil); end }, '::_ReqKeyRestKeyArgs' ],
+          [ ->(o) { def o.f(*r); end }, '::_ReqKeyRestKeyArgs' ],
+          [ ->(o) { def o.f(); end }, '::_ReqBlockArgs' ],
+          [ ->(o) { def o.f(&b); end }, '::_ReqBlockArgs' ],
+          [ ->(o) { def o.f(); end }, '::_OptBlockArgs' ],
+          [ ->(o) { def o.f(&b); end }, '::_OptBlockArgs' ],
+          [ ->(o) { def o.f(a, b = nil, *c, d, e:, f: nil, **g); end }, '::_AllArgs' ],
+          [ ->(o) { def o.f(*r); end }, '::_AllArgs' ],
+          [ ->(o) { def o.f(...); end }, '::_AllArgs' ],
+          [ ->(o) { def o.f(a, b = nil); end }, '::_Overload' ],
+          [ ->(o) { def o.f(a = nil, b = nil); end }, '::_Overload' ],
+          [ ->(o) { def o.f(*r); end }, '::_Overload' ],
+        ].each do |definer, interface|
+          success = Object.new
+          definer.call(success)
+
+          yes = ArgumentChecker.new(builder: builder, interface: interface).no_argument_error?(:f) do |args, kwargs, block|
+            success.f(*args, **kwargs, &block)
+          end
+          assert yes
+          assert typecheck.value(success, parse_type(interface))
+        end
+
+        [
+          [ ->(o) { def o.f(a); end }, '::_NoArgs' ],
+          [ ->(o) { def o.f(a:); end }, '::_NoArgs' ],
+          [ ->(o) { def o.f(); end }, '::_PosArgs' ],
+          [ ->(o) { def o.f(a, b); end }, '::_PosArgs' ],
+          [ ->(o) { def o.f(a, b, *r); end }, '::_PosArgs' ],
+          [ ->(o) { def o.f(a: 1); end }, '::_PosArgs' ],
+          [ ->(o) { def o.f(a, &b); end }, '::_OptArgs' ],
+          [ ->(o) { def o.f(); end }, '::_PosOptArgs' ],
+          [ ->(o) { def o.f(a); end }, '::_PosOptArgs' ],
+          [ ->(o) { def o.f(a, b); end }, '::_PosOptArgs' ],
+          [ ->(o) { def o.f(); end }, '::_RestArgs' ],
+          [ ->(o) { def o.f(a, *r); end }, '::_RestArgs' ],
+          [ ->(o) { def o.f(*r, a); end }, '::_RestArgs' ],
+          [ ->(o) { def o.f(a); end }, '::_TrailingArgs' ],
+          [ ->(o) { def o.f(a, *b, c); end }, '::_TrailingArgs' ],
+          [ ->(o) { def o.f(); end }, '::_ReqKeyArgs' ],
+          [ ->(o) { def o.f(a:, b:, c:); end }, '::_ReqKeyArgs' ],
+          [ ->(o) { def o.f(a:); end }, '::_ReqKeyArgs' ],
+          [ ->(o) { def o.f(a: 1); end }, '::_ReqKeyArgs' ],
+          [ ->(o) { def o.f(); end }, '::_OptKeyArgs' ],
+          [ ->(o) { def o.f(a); end }, '::_OptKeyArgs' ],
+          [ ->(o) { def o.f(a:, b: 'b'); end }, '::_OptKeyArgs' ],
+          [ ->(o) { def o.f(a); end }, '::_PosReqKeyArgs' ],
+          [ ->(o) { def o.f(a, z:); end }, '::_PosReqKeyArgs' ],
+          [ ->(o) { def o.f(); end }, '::_RestKeyArgs' ],
+          [ ->(o) { def o.f(a); end }, '::_RestKeyArgs' ],
+          [ ->(o) { def o.f(a:); end }, '::_RestKeyArgs' ],
+          [ ->(o) { def o.f(a:, **rk); end }, '::_RestKeyArgs' ],
+          [ ->(o) { def o.f(); end }, '::_ReqKeyRestKeyArgs' ],
+          [ ->(o) { def o.f(a:); end }, '::_ReqKeyRestKeyArgs' ],
+          [ ->(o) { def o.f(a, **b); end }, '::_ReqKeyRestKeyArgs' ],
+          [ ->(o) { def o.f(**rk); end }, '::_PosRestKeyArgs' ],
+          [ ->(o) { def o.f(); end }, '::_AllArgs' ],
+          [ ->(o) { def o.f(**rk); end }, '::_AllArgs' ],
+          [ ->(o) { def o.f(a, b); end }, '::_Overload' ],
+          [ ->(o) { def o.f(a); end }, '::_Overload' ],
+          [ ->(o) { def o.f(a = nil); end }, '::_Overload' ],
+          [ ->(o) { def o.f(); end }, '::_Overload' ],
+          [ ->(o) { def o.f(a, b, c); end }, '::_Overload' ],
+        ].each do |definer, interface|
+          failure = Object.new
+          definer.call(failure)
+
+          no = ArgumentChecker.new(builder: builder, interface: interface).no_argument_error?(:f) do |args, kwargs, block|
+            failure.f(*args, **kwargs, &block)
+          end
+          refute no
+          refute typecheck.value(failure, parse_type(interface))
+        end
       end
     end
   end
@@ -190,7 +377,7 @@ EOF
 
         parse_method_type("(Integer) -> String").tap do |method_type|
           errors = []
-          typecheck.return "#foo",
+          typecheck.return :foo,
                            method_type,
                            method_type.type,
                            Test::ArgumentsReturn.exception(arguments: [1], exception: RuntimeError.new("test")),
@@ -199,7 +386,7 @@ EOF
           assert_empty errors
 
           errors.clear
-          typecheck.return "#foo",
+          typecheck.return :foo,
                            method_type,
                            method_type.type,
                            Test::ArgumentsReturn.return(arguments: [1], value: "5"),
@@ -210,7 +397,7 @@ EOF
 
         parse_method_type("(Integer) -> bot").tap do |method_type|
           errors = []
-          typecheck.return "#foo",
+          typecheck.return :foo,
                            method_type,
                            method_type.type,
                            Test::ArgumentsReturn.exception(arguments: [1], exception: RuntimeError.new("test")),
@@ -219,13 +406,39 @@ EOF
           assert_empty errors
 
           errors.clear
-          typecheck.return "#foo",
+          typecheck.return :foo,
                            method_type,
                            method_type.type,
                            Test::ArgumentsReturn.return(arguments: [1], value: "5"),
                            errors,
                            return_error: Test::Errors::ReturnTypeError
           assert errors.any? {|error| error.is_a?(Test::Errors::ReturnTypeError) }
+        end
+      end
+    end
+  end
+
+  def test_typecheck_return_singleton
+    SignatureManager.new do |manager|
+      manager.build do |env|
+        typecheck = Test::TypeCheck.new(
+          self_class: Object.singleton_class,
+          builder: DefinitionBuilder.new(env: env),
+          sample_size: 100,
+          unchecked_classes: []
+        )
+
+        parse_method_type("() -> Integer").tap do |method_type|
+          errors = []
+          typecheck.return :foo,
+                           method_type,
+                           method_type.type,
+                           Test::ArgumentsReturn.return(arguments: [], value: 'a'),
+                           errors,
+                           return_error: Test::Errors::ReturnTypeError
+
+          assert_equal 1, errors.size
+          assert_equal "[Object.foo] ReturnTypeError: expected `Integer` but returns `\"a\"`", RBS::Test::Errors.to_string(errors.first)
         end
       end
     end
@@ -283,7 +496,7 @@ EOF
 
         parse_method_type("(Integer) -> String").tap do |method_type|
           errors = []
-          typecheck.args "#foo",
+          typecheck.args :foo,
                          method_type,
                          method_type.type,
                          Test::ArgumentsReturn.return(arguments: [1], value: "1"),
@@ -293,7 +506,7 @@ EOF
           assert_empty errors
 
           errors = []
-          typecheck.args "#foo",
+          typecheck.args :foo,
                          method_type,
                          method_type.type,
                          Test::ArgumentsReturn.return(arguments: ["1"], value: "1"),
@@ -303,7 +516,7 @@ EOF
           assert errors.any? {|error| error.is_a?(Test::Errors::ArgumentTypeError) }
 
           errors = []
-          typecheck.args "#foo",
+          typecheck.args :foo,
                          method_type,
                          method_type.type,
                          Test::ArgumentsReturn.return(arguments: [1, 2], value: "1"),
@@ -313,7 +526,7 @@ EOF
           assert errors.any? {|error| error.is_a?(Test::Errors::ArgumentError) }
 
           errors = []
-          typecheck.args "#foo",
+          typecheck.args :foo,
                          method_type,
                          method_type.type,
                          Test::ArgumentsReturn.return(arguments: [{ hello: :world }], value: "1"),
@@ -325,7 +538,7 @@ EOF
 
         parse_method_type("(foo: Integer, ?bar: String, **Symbol) -> String").tap do |method_type|
           errors = []
-          typecheck.args "#foo",
+          typecheck.args :foo,
                          method_type,
                          method_type.type,
                          Test::ArgumentsReturn.return(arguments: [{ foo: 31, baz: :baz }], value: "1"),
@@ -335,7 +548,7 @@ EOF
           assert_empty errors
 
           errors = []
-          typecheck.args "#foo",
+          typecheck.args :foo,
                          method_type,
                          method_type.type,
                          Test::ArgumentsReturn.return(arguments: [{ foo: "foo" }], value: "1"),
@@ -345,7 +558,7 @@ EOF
           assert errors.any? {|error| error.is_a?(Test::Errors::ArgumentTypeError) }
 
           errors = []
-          typecheck.args "#foo",
+          typecheck.args :foo,
                          method_type,
                          method_type.type,
                          Test::ArgumentsReturn.return(arguments: [{ bar: "bar" }], value: "1"),
@@ -357,7 +570,7 @@ EOF
 
         parse_method_type("(?String, ?encoding: String) -> String").tap do |method_type|
           errors = []
-          typecheck.args "#foo",
+          typecheck.args :foo,
                          method_type,
                          method_type.type,
                          Test::ArgumentsReturn.return(arguments: [{ encoding: "ASCII-8BIT" }], value: "foo"),
@@ -369,7 +582,7 @@ EOF
 
         parse_method_type("(parent: untyped, type: untyped) -> untyped").tap do |method_type|
           errors = []
-          typecheck.args "#foo",
+          typecheck.args :foo,
                          method_type,
                          method_type.type,
                          Test::ArgumentsReturn.return(arguments: [{ parent: nil, type: nil }], value: nil),
@@ -381,7 +594,7 @@ EOF
 
         parse_method_type("(Integer?, *String) -> String").tap do |method_type|
           errors = []
-          typecheck.args "#foo",
+          typecheck.args :foo,
                          method_type,
                          method_type.type,
                          Test::ArgumentsReturn.return(arguments: [1], value: "1"),
@@ -390,7 +603,7 @@ EOF
                          argument_error: Test::Errors::ArgumentError
           assert_empty errors
 
-          typecheck.args "#foo",
+          typecheck.args :foo,
                          method_type,
                          method_type.type,
                          Test::ArgumentsReturn.return(arguments: [1, ''], value: "1"),
@@ -399,7 +612,7 @@ EOF
                          argument_error: Test::Errors::ArgumentError
           assert_empty errors
 
-          typecheck.args "#foo",
+          typecheck.args :foo,
                          method_type,
                          method_type.type,
                          Test::ArgumentsReturn.return(arguments: [1, '', ''], value: "1"),
@@ -484,7 +697,7 @@ EOF
         builder.build_instance(type_name("::Foo")).tap do |foo|
           typecheck.overloaded_call(
             foo.methods[:foo],
-            "#foo",
+            :foo,
             Test::CallTrace.new(
               method_name: :foo,
               method_call: Test::ArgumentsReturn.return(
@@ -517,22 +730,28 @@ EOF
             assert_instance_of RBS::Test::Errors::ReturnTypeError, errors[0]
           end
 
-          typecheck.overloaded_call(
-            foo.methods[:foo],
-            "#foo",
-            Test::CallTrace.new(
-              method_name: :foo,
-              method_call: Test::ArgumentsReturn.return(
-                arguments: [3],
-                value: 30
+          begin
+            RBS.logger_output = logger = StringIO.new
+            typecheck.overloaded_call(
+              foo.methods[:foo],
+              :foo,
+              Test::CallTrace.new(
+                method_name: :foo,
+                method_call: Test::ArgumentsReturn.return(
+                  arguments: [3],
+                  value: 30
+                ),
+                block_calls: [],
+                block_given: false
               ),
-              block_calls: [],
-              block_given: false
-            ),
-            errors: []
-          ).tap do |errors|
-            assert_equal 1, errors.size
-            assert_instance_of RBS::Test::Errors::UnresolvedOverloadingError, errors[0]
+              errors: []
+            ).tap do |errors|
+              assert_equal 1, errors.size
+              assert_instance_of RBS::Test::Errors::UnresolvedOverloadingError, errors[0]
+              assert_include logger.string, '[Object#foo] UnresolvedOverloadingError method_type=`() -> ::String` details=["ArgumentError: expected method type () -> ::String", "ReturnTypeError: expected `::String` but returns `30`"], method_type=`(::Integer) -> ::String` details=["ReturnTypeError: expected `::String` but returns `30`"]'
+            end
+          ensure
+            RBS.logger_output = nil
           end
         end
       end
