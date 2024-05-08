@@ -31,7 +31,7 @@ jobs:
           - ruby: "3.3"
             job: lexer compile confirm_lexer
           - ruby: "3.3"
-            job: rubocop validate test_doc build test_generate_stdlib
+            job: rubocop validate test_doc build test_generate_stdlib raap
     steps:
       - uses: actions/checkout@v4
       - uses: ruby/setup-ruby@v1
