@@ -35,7 +35,7 @@ GEM
     language_server-protocol (3.17.0.3)
     marcel (1.0.2)
     memory_profiler (1.0.1)
-    minitest (5.22.3)
+    minitest (5.23.1)
     mutex_m (0.2.0)
     net-protocol (0.2.2)
       timeout
