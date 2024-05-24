@@ -767,4 +767,26 @@ RBS
       RBS::Parser.parse_type("^(?) { (?) -> void } -> Integer")
     end
   end
+
+  def test__lex
+    content = <<~RBS
+      # LineComment
+      class Foo[T < Integer] < Bar # Comment
+      end
+    RBS
+    tokens = RBS::Parser._lex(buffer(content), content.length)
+    assert_equal [:tLINECOMMENT, '# LineComment', 0...13], tokens[0].then { |t| [t[0], t[1].source, t[1].range] }
+    assert_equal [:kCLASS, 'class', 14...19], tokens[1].then { |t| [t[0], t[1].source, t[1].range] }
+    assert_equal [:tUIDENT, 'Foo', 20...23], tokens[2].then { |t| [t[0], t[1].source, t[1].range] }
+    assert_equal [:pLBRACKET, '[', 23...24], tokens[3].then { |t| [t[0], t[1].source, t[1].range] }
+    assert_equal [:tUIDENT, 'T', 24...25], tokens[4].then { |t| [t[0], t[1].source, t[1].range] }
+    assert_equal [:pLT, '<', 26...27], tokens[5].then { |t| [t[0], t[1].source, t[1].range] }
+    assert_equal [:tUIDENT, 'Integer', 28...35], tokens[6].then { |t| [t[0], t[1].source, t[1].range] }
+    assert_equal [:pRBRACKET, ']', 35...36], tokens[7].then { |t| [t[0], t[1].source, t[1].range] }
+    assert_equal [:pLT, '<', 37...38], tokens[8].then { |t| [t[0], t[1].source, t[1].range] }
+    assert_equal [:tUIDENT, 'Bar', 39...42], tokens[9].then { |t| [t[0], t[1].source, t[1].range] }
+    assert_equal [:tCOMMENT, '# Comment', 43...52], tokens[10].then { |t| [t[0], t[1].source, t[1].range] }
+    assert_equal [:kEND, 'end', 53...56], tokens[11].then { |t| [t[0], t[1].source, t[1].range] }
+    assert_equal [:pEOF, '', 57...58], tokens[12].then { |t| [t[0], t[1].source, t[1].range] }
+  end
 end
