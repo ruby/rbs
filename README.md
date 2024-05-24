@@ -191,6 +191,10 @@ Here is a list of some places you can talk with active maintainers.
 - [Ruby Discord Server (invite link)](https://discord.gg/ad2acQFtkh) -- We have `rbs` channel in Ruby Discord server.
 - [ruby-jp Slack Workspace (in Japanese)](https://ruby-jp.github.io/) -- We have `types` channel in ruby-jp slack workspace.
 
+If you are seeking RBS for gems that are not a standard library, visit:
+
+- [gem_rbs_collection GitHub Repository](https://github.com/ruby/gem_rbs_collection) -- We host a collection of RBS for gems.
+
 ## Development
 
 After checking out the repo, run `bin/setup` to install dependencies. Then, run `bundle exec rake test` to run the tests. You can also run `bin/console` for an interactive prompt that will allow you to experiment.
