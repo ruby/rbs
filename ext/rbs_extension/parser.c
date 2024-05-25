@@ -2805,56 +2805,84 @@ VALUE parse_signature(parserstate *state) {
   return ret;
 }
 
+struct parse_type_arg {
+  parserstate *parser;
+  VALUE require_eof;
+};
+
+static VALUE
+ensure_free_parser(VALUE parser) {
+  free_parser((parserstate *)parser);
+  return Qnil;
+}
+
+static VALUE
+parse_type_try(VALUE a) {
+  struct parse_type_arg *arg = (struct parse_type_arg *)a;
+
+  if (arg->parser->next_token.type == pEOF) {
+    return Qnil;
+  }
+
+  VALUE type = parse_type(arg->parser);
+
+  if (RB_TEST(arg->require_eof)) {
+    parser_advance_assert(arg->parser, pEOF);
+  }
+
+  return type;
+}
+
 static VALUE
 rbsparser_parse_type(VALUE self, VALUE buffer, VALUE start_pos, VALUE end_pos, VALUE variables, VALUE require_eof)
 {
   parserstate *parser = alloc_parser(buffer, FIX2INT(start_pos), FIX2INT(end_pos), variables);
+  struct parse_type_arg arg = {
+    parser,
+    require_eof
+  };
+  return rb_ensure(parse_type_try, (VALUE)&arg, ensure_free_parser, (VALUE)parser);
+}
 
-  if (parser->next_token.type == pEOF) {
-    free_parser(parser);
+static VALUE
+parse_method_type_try(VALUE a) {
+  struct parse_type_arg *arg = (struct parse_type_arg *)a;
+
+  if (arg->parser->next_token.type == pEOF) {
     return Qnil;
   }
 
-  VALUE type = parse_type(parser);
+  VALUE method_type = parse_method_type(arg->parser);
 
-  if (RB_TEST(require_eof)) {
-    parser_advance_assert(parser, pEOF);
+  if (RB_TEST(arg->require_eof)) {
+    parser_advance_assert(arg->parser, pEOF);
   }
 
-  free_parser(parser);
-
-  return type;
+  return method_type;
 }
 
 static VALUE
 rbsparser_parse_method_type(VALUE self, VALUE buffer, VALUE start_pos, VALUE end_pos, VALUE variables, VALUE require_eof)
 {
   parserstate *parser = alloc_parser(buffer, FIX2INT(start_pos), FIX2INT(end_pos), variables);
+  struct parse_type_arg arg = {
+    parser,
+    require_eof
+  };
+  return rb_ensure(parse_method_type_try, (VALUE)&arg, ensure_free_parser, (VALUE)parser);
+}
 
-  if (parser->next_token.type == pEOF) {
-    free_parser(parser);
-    return Qnil;
-  }
-
-  VALUE method_type = parse_method_type(parser);
-
-  if (RB_TEST(require_eof)) {
-    parser_advance_assert(parser, pEOF);
-  }
-
-  free_parser(parser);
-
-  return method_type;
+static VALUE
+parse_signature_try(VALUE a) {
+  parserstate *parser = (parserstate *)a;
+  return parse_signature(parser);
 }
 
 static VALUE
 rbsparser_parse_signature(VALUE self, VALUE buffer, VALUE end_pos)
 {
   parserstate *parser = alloc_parser(buffer, 0, FIX2INT(end_pos), Qnil);
-  VALUE pair = parse_signature(parser);
-  free_parser(parser);
-
-  return pair;
+  return rb_ensure(parse_signature_try, (VALUE)parser, ensure_free_parser, (VALUE)parser);
 }
 
 void rbs__init_parser(void) {
