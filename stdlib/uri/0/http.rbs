@@ -45,8 +45,8 @@ module URI
     # Currently, if passed userinfo components this method generates invalid HTTP
     # URIs as per RFC 1738.
     #
-    def self.build: (Array[String | Integer] args) -> URI::HTTP
-                  | ({ userinfo: String?, host: String?, port: Integer?, path: String?, query: String?, fragment: String? }) -> URI::HTTP
+    def self.build: (Array[String | Integer] args) -> instance
+                  | ({ userinfo: String?, host: String?, port: Integer?, path: String?, query: String?, fragment: String? }) -> instance
 
     # <!--
     #   rdoc-file=lib/uri/http.rb

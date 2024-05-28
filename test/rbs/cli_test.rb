@@ -48,6 +48,31 @@ class RBS::CliTest < Test::Unit::TestCase
     [stdout, stderr]
   end
 
+  def bundle_install(*gems)
+    stdout, stderr, status =
+      Bundler.with_unbundled_env do
+        gems = gems.map do |gem|
+          if gem == :gemspec
+            "gemspec"
+          else
+            "gem '#{gem}'"
+          end
+        end
+
+        (Pathname(Dir.pwd) + "Gemfile").write(<<~RUBY)
+          source "https://rubygems.org"
+
+          #{gems.join("\n")}
+        RUBY
+
+        Open3.capture3("bundle", "install", chdir: Dir.pwd)
+      end
+
+    assert_predicate status, :success?, stderr
+
+    [stdout, stderr]
+  end
+
   def with_cli
     orig_logger_output = RBS.logger_output
     RBS.logger_output = stdout
@@ -972,26 +997,8 @@ Processing `lib`...
 
           path: #{dir.join('gem_rbs_collection')}
         YAML
-        dir.join('Gemfile').write(<<~GEMFILE)
-          source 'https://rubygems.org'
-          gem 'ast'
-        GEMFILE
-        dir.join('Gemfile.lock').write(<<~LOCK)
-          GEM
-            remote: https://rubygems.org/
-            specs:
-              ast (2.4.2)
 
-          PLATFORMS
-            x86_64-linux
-
-          DEPENDENCIES
-            ast
-
-          BUNDLED WITH
-             2.2.0
-        LOCK
-
+        bundle_install('ast', 'abbrev', 'bigdecimal')
         _stdout, _stderr = run_rbs_collection("install", bundler: true)
 
         rbs_collection_lock = dir.join('rbs_collection.lock.yaml')
@@ -1056,26 +1063,8 @@ Processing `lib`...
 
           path: #{dir.join('gem_rbs_collection')}
         YAML
-        dir.join('Gemfile').write(<<~GEMFILE)
-          source 'https://rubygems.org'
-          gem 'ast'
-        GEMFILE
-        dir.join('Gemfile.lock').write(<<~LOCK)
-          GEM
-            remote: https://rubygems.org/
-            specs:
-              ast (2.4.2)
 
-          PLATFORMS
-            x86_64-linux
-
-          DEPENDENCIES
-            ast
-
-          BUNDLED WITH
-             2.2.0
-        LOCK
-
+        bundle_install('ast', 'abbrev', 'bigdecimal')
         run_rbs_collection("update", bundler: true)
 
         assert dir.join('rbs_collection.lock.yaml').exist?
@@ -1097,31 +1086,6 @@ Processing `lib`...
 
           path: #{dir.join('gem_rbs_collection')}
         YAML
-        dir.join('Gemfile').write(<<~GEMFILE)
-          source 'https://rubygems.org'
-          gemspec
-        GEMFILE
-        dir.join('Gemfile.lock').write(<<~LOCK)
-          PATH
-            remote: .
-            specs:
-              hola (0.0.0)
-                ast (>= 2)
-
-          GEM
-            remote: https://rubygems.org/
-            specs:
-              ast (2.4.2)
-
-          PLATFORMS
-            arm64-darwin-22
-
-          DEPENDENCIES
-            hola!
-
-          BUNDLED WITH
-            2.2.0
-        LOCK
         gemspec_path = dir / "hola.gemspec"
         gemspec_path.write <<~RUBY
           Gem::Specification.new do |s|
@@ -1140,6 +1104,7 @@ Processing `lib`...
         RUBY
         (dir/"sig").mkdir
 
+        bundle_install(:gemspec, "abbrev", "bigdecimal")
         stdout, _ = run_rbs_collection("install", bundler: true)
 
         assert_match(/Installing ast:(\d(\.\d)*)/, stdout)

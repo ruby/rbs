@@ -14,6 +14,7 @@ jobs:
       fail-fast: false
       matrix:
         ruby: ['3.0', '3.1', '3.2', '3.3', head]
+        rubyopt: [""]
         job:
           - test
         include:
@@ -21,6 +22,12 @@ jobs:
             job: stdlib_test rubocop
           - ruby: "3.3"
             job: stdlib_test
+          - ruby: "3.3"
+            job: test
+            rubyopt: "--enable-frozen-string-literal"
+          - ruby: "3.3"
+            job: stdlib_test
+            rubyopt: "--enable-frozen-string-literal"
           - ruby: "3.3"
             job: lexer compile confirm_lexer
           - ruby: "3.3"

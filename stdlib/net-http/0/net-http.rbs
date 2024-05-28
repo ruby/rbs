@@ -1,4 +1,6 @@
 module Net
+  type headers = Hash[String | Symbol, untyped]
+
   class HTTPBadResponse < StandardError
   end
 
@@ -775,7 +777,7 @@ module Net
     # -->
     # Like Net::HTTP.get, but writes the returned body to $stdout; returns `nil`.
     #
-    def self.get_print: (URI::Generic uri, ?Hash[String, untyped] header) -> void
+    def self.get_print: (URI::Generic uri, ?headers header) -> void
                       | (String host, String path, ?Integer port) -> void
 
     # <!--
@@ -811,7 +813,7 @@ module Net
     # *   Net::HTTP::Get: request class for HTTP method `GET`.
     # *   Net::HTTP#get: convenience method for HTTP method `GET`.
     #
-    def self.get: (URI::Generic uri, ?Hash[String, untyped] header) -> String
+    def self.get: (URI::Generic uri, ?headers header) -> String
                 | (String host, String path, ?Integer port) -> String
 
     # <!--
@@ -822,7 +824,7 @@ module Net
     # Like Net::HTTP.get, but returns a Net::HTTPResponse object instead of the body
     # string.
     #
-    def self.get_response: (URI::Generic uri, ?Hash[String, untyped] header) ?{ (Net::HTTPResponse) -> void } -> Net::HTTPResponse
+    def self.get_response: (URI::Generic uri, ?headers header) ?{ (Net::HTTPResponse) -> void } -> Net::HTTPResponse
                          | (String host, String path, ?Integer port) -> Net::HTTPResponse
 
     # <!--
@@ -854,7 +856,7 @@ module Net
     # *   Net::HTTP::Post: request class for HTTP method `POST`.
     # *   Net::HTTP#post: convenience method for HTTP method `POST`.
     #
-    def self.post: (URI::Generic url, String data, ?Hash[String, untyped] header) -> Net::HTTPResponse
+    def self.post: (URI::Generic url, String data, ?headers header) -> Net::HTTPResponse
 
     # <!--
     #   rdoc-file=lib/net/http.rb
@@ -1613,7 +1615,7 @@ module Net
     # *   Net::HTTP::Get: request class for HTTP method GET.
     # *   Net::HTTP.get: sends GET request, returns response body.
     #
-    def get: (String path, ?Hash[String, untyped] initheader, ?bot dest) ?{ (String body_segment) -> void } -> Net::HTTPResponse
+    def get: (String path, ?headers initheader, ?bot dest) ?{ (String body_segment) -> void } -> Net::HTTPResponse
 
     # <!--
     #   rdoc-file=lib/net/http.rb
@@ -1633,7 +1635,7 @@ module Net
     #      ["content-type", ["application/json; charset=utf-8"]],
     #      ["connection", ["close"]]]
     #
-    def head: (String path, ?Hash[String, untyped] initheader) -> Net::HTTPResponse
+    def head: (String path, ?headers initheader) -> Net::HTTPResponse
 
     # <!--
     #   rdoc-file=lib/net/http.rb
@@ -1666,7 +1668,7 @@ module Net
     # *   Net::HTTP::Post: request class for HTTP method POST.
     # *   Net::HTTP.post: sends POST request, returns response body.
     #
-    def post: (String path, String data, ?Hash[String, untyped] initheader, ?bot dest) ?{ (String body_segment) -> void } -> Net::HTTPResponse
+    def post: (String path, String data, ?headers initheader, ?bot dest) ?{ (String body_segment) -> void } -> Net::HTTPResponse
 
     # <!--
     #   rdoc-file=lib/net/http.rb
@@ -1694,7 +1696,7 @@ module Net
     #
     #     http.patch('/todos/1', data) # => #<Net::HTTPCreated 201 Created readbody=true>
     #
-    def patch: (String path, String data, ?Hash[String, untyped] initheader, ?bot dest) ?{ (String body_segment) -> void } -> Net::HTTPResponse
+    def patch: (String path, String data, ?headers initheader, ?bot dest) ?{ (String body_segment) -> void } -> Net::HTTPResponse
 
     # <!--
     #   rdoc-file=lib/net/http.rb
@@ -1710,7 +1712,7 @@ module Net
     #     http = Net::HTTP.new(hostname)
     #     http.put('/todos/1', data) # => #<Net::HTTPOK 200 OK readbody=true>
     #
-    def put: (String path, String data, ?Hash[String, untyped] initheader) -> Net::HTTPResponse
+    def put: (String path, String data, ?headers initheader) -> Net::HTTPResponse
 
     # <!--
     #   rdoc-file=lib/net/http.rb
@@ -1726,7 +1728,7 @@ module Net
     #     http = Net::HTTP.new(hostname)
     #     http.proppatch('/todos/1', data)
     #
-    def proppatch: (String path, String body, ?Hash[String, untyped] initheader) -> Net::HTTPResponse
+    def proppatch: (String path, String body, ?headers initheader) -> Net::HTTPResponse
 
     # <!--
     #   rdoc-file=lib/net/http.rb
@@ -1742,7 +1744,7 @@ module Net
     #     http = Net::HTTP.new(hostname)
     #     http.lock('/todos/1', data)
     #
-    def lock: (String path, String body, ?Hash[String, untyped] initheader) -> Net::HTTPResponse
+    def lock: (String path, String body, ?headers initheader) -> Net::HTTPResponse
 
     # <!--
     #   rdoc-file=lib/net/http.rb
@@ -1758,7 +1760,7 @@ module Net
     #     http = Net::HTTP.new(hostname)
     #     http.unlock('/todos/1', data)
     #
-    def unlock: (String path, String body, ?Hash[String, untyped] initheader) -> Net::HTTPResponse
+    def unlock: (String path, String body, ?headers initheader) -> Net::HTTPResponse
 
     # <!--
     #   rdoc-file=lib/net/http.rb
@@ -1773,7 +1775,7 @@ module Net
     #     http = Net::HTTP.new(hostname)
     #     http.options('/')
     #
-    def options: (String path, ?Hash[String, untyped] initheader) -> Net::HTTPResponse
+    def options: (String path, ?headers initheader) -> Net::HTTPResponse
 
     # <!--
     #   rdoc-file=lib/net/http.rb
@@ -1789,7 +1791,7 @@ module Net
     #     http = Net::HTTP.new(hostname)
     #     http.propfind('/todos/1', data)
     #
-    def propfind: (String path, ?untyped? body, ?Hash[String, untyped] initheader) -> Net::HTTPResponse
+    def propfind: (String path, ?untyped? body, ?headers initheader) -> Net::HTTPResponse
 
     # <!--
     #   rdoc-file=lib/net/http.rb
@@ -1804,7 +1806,7 @@ module Net
     #     http = Net::HTTP.new(hostname)
     #     http.delete('/todos/1')
     #
-    def delete: (String path, ?Hash[String, untyped] initheader) -> Net::HTTPResponse
+    def delete: (String path, ?headers initheader) -> Net::HTTPResponse
 
     # <!--
     #   rdoc-file=lib/net/http.rb
@@ -1819,7 +1821,7 @@ module Net
     #     http = Net::HTTP.new(hostname)
     #     http.move('/todos/1')
     #
-    def move: (String path, ?Hash[String, untyped] initheader) -> Net::HTTPResponse
+    def move: (String path, ?headers initheader) -> Net::HTTPResponse
 
     # <!--
     #   rdoc-file=lib/net/http.rb
@@ -1834,7 +1836,7 @@ module Net
     #     http = Net::HTTP.new(hostname)
     #     http.copy('/todos/1')
     #
-    def copy: (String path, ?Hash[String, untyped] initheader) -> Net::HTTPResponse
+    def copy: (String path, ?headers initheader) -> Net::HTTPResponse
 
     # <!--
     #   rdoc-file=lib/net/http.rb
@@ -1850,7 +1852,7 @@ module Net
     #     http.mkcol('/todos/1', data)
     #     http = Net::HTTP.new(hostname)
     #
-    def mkcol: (String path, ?untyped? body, ?Hash[String, untyped] initheader) -> Net::HTTPResponse
+    def mkcol: (String path, ?untyped? body, ?headers initheader) -> Net::HTTPResponse
 
     # <!--
     #   rdoc-file=lib/net/http.rb
@@ -1865,7 +1867,7 @@ module Net
     #     http = Net::HTTP.new(hostname)
     #     http.trace('/todos/1')
     #
-    def trace: (String path, ?Hash[String, untyped] initheader) -> Net::HTTPResponse
+    def trace: (String path, ?headers initheader) -> Net::HTTPResponse
 
     # <!--
     #   rdoc-file=lib/net/http.rb
@@ -1893,7 +1895,7 @@ module Net
     #
     #     #<Net::HTTPOK 200 OK readbody=false>
     #
-    def request_get: (String path, ?Hash[String, untyped] initheader) ?{ (Net::HTTPResponse response) -> void } -> Net::HTTPResponse
+    def request_get: (String path, ?headers initheader) ?{ (Net::HTTPResponse response) -> void } -> Net::HTTPResponse
 
     # <!--
     #   rdoc-file=lib/net/http.rb
@@ -1908,7 +1910,7 @@ module Net
     #     http = Net::HTTP.new(hostname)
     #     http.head('/todos/1') # => #<Net::HTTPOK 200 OK readbody=true>
     #
-    def request_head: (String path, ?Hash[String, untyped] initheader) ?{ (Net::HTTPResponse response) -> void } -> Net::HTTPResponse
+    def request_head: (String path, ?headers initheader) ?{ (Net::HTTPResponse response) -> void } -> Net::HTTPResponse
 
     # <!--
     #   rdoc-file=lib/net/http.rb
@@ -1937,9 +1939,9 @@ module Net
     #
     #     "{\n  \"xyzzy\": \"\",\n  \"id\": 201\n}"
     #
-    def request_post: (String path, String data, ?Hash[String, untyped] initheader) ?{ (Net::HTTPResponse response) -> void } -> Net::HTTPResponse
+    def request_post: (String path, String data, ?headers initheader) ?{ (Net::HTTPResponse response) -> void } -> Net::HTTPResponse
 
-    def request_put: (String path, String data, ?Hash[String, untyped] initheader) ?{ (Net::HTTPResponse response) -> void } -> Net::HTTPResponse
+    def request_put: (String path, String data, ?headers initheader) ?{ (Net::HTTPResponse response) -> void } -> Net::HTTPResponse
 
     # <!--
     #   rdoc-file=lib/net/http.rb
@@ -1987,7 +1989,7 @@ module Net
     #     http.send_request('POST', '/todos', 'xyzzy')
     #     # => #<Net::HTTPCreated 201 Created readbody=true>
     #
-    def send_request: (String name, String path, ?String? data, ?Hash[String, untyped]? header) -> Net::HTTPResponse
+    def send_request: (String name, String path, ?String? data, ?headers? header) -> Net::HTTPResponse
 
     # <!--
     #   rdoc-file=lib/net/http.rb
@@ -2076,7 +2078,7 @@ module Net
     #   - new(m, reqbody, resbody, uri_or_path, initheader = nil)
     # -->
     #
-    def initialize: (String m, boolish reqbody, boolish resbody, URI::Generic | String uri_or_path, ?Hash[String, untyped] initheader) -> Net::HTTP
+    def initialize: (String m, boolish reqbody, boolish resbody, URI::Generic | String uri_or_path, ?headers initheader) -> Net::HTTP
 
     # <!-- rdoc-file=lib/net/http/generic_request.rb -->
     # Returns the string method name for the request:
@@ -3288,8 +3290,8 @@ module Net
     # to enable compression of the response body unless Accept-Encoding or Range are
     # supplied in `initheader`.
     #
-    def initialize: (String path, ?Hash[String, untyped] initheader) -> void
-                  | (URI::Generic uri, ?Hash[String, untyped] initheader) -> void
+    def initialize: (String path, ?headers initheader) -> void
+                  | (URI::Generic uri, ?headers initheader) -> void
   end
 
   # <!-- rdoc-file=lib/net/http/requests.rb -->

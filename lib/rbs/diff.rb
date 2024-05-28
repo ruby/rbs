@@ -83,7 +83,7 @@ module RBS
         manifest_pathname = dir_pathname / 'manifest.yaml'
         if manifest_pathname.exist?
           manifest = YAML.safe_load(manifest_pathname.read)
-          if manifest['dependencies']
+          if manifest && manifest['dependencies']
             manifest['dependencies'].each do |dependency|
               loader.add(library: dependency['name'], version: nil)
             end

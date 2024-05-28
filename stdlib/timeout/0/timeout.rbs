@@ -63,6 +63,12 @@ module Timeout
 end
 
 # <!-- rdoc-file=lib/timeout.rb -->
+# Internal error raised to when a timeout is triggered.
+#
+class Timeout::ExitException < Exception
+end
+
+# <!-- rdoc-file=lib/timeout.rb -->
 # Raised by Timeout.timeout when the block times out.
 #
 class Timeout::Error < RuntimeError

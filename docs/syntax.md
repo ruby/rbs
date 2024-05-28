@@ -45,6 +45,7 @@ _literal_ ::= _string-literal_
             | `false`
 
 _proc_ ::= `^` _parameters?_ _self-type-binding?_ _block?_ `->` _type_
+         | `^` `(` `?` `)` `->` _type_                                   # Proc type with untyped parameter
 ```
 
 ### Class instance type
@@ -310,6 +311,7 @@ end
 
 ```markdown
 _method-type_ ::= _parameters?_ _block?_ `->` _type_                # Method type
+                | `(` `?` `)` `->` _type_                           # Method type with untyped parameters
 
 _parameters?_ ::=                   (Empty)
                 | _parameters_      (Parameters)
@@ -333,9 +335,11 @@ _var-name_ ::= /[a-z]\w*/
 _self-type-binding?_ =                              (Empty)
                      | `[` `self` `:` _type_ `]`    (Self type binding)
 
-_block?_ =                                                           (No block)
+_block?_ =                                                            (No block)
          | `{` _parameters_ _self-type-binding?_ `->` _type_ `}`      (Block)
+         | `{` `(` `?` `)` `->` _type_ `}`                            (Block with untyped parameters)
          | `?` `{` _parameters_ _self-type-binding?_ `->` _type_ `}`  (Optional block)
+         | `?` `{` `(` `?` `)` `->` _type_ `}`                        (Optional block with untyped parameters)
 ```
 
 ### Parameters

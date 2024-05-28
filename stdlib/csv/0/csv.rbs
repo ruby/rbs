@@ -1722,7 +1722,10 @@ class CSV < Object
   #     would read `UTF-32BE` data from the file but transcode it to `UTF-8`
   #     before parsing.
   #
-  def self.foreach: [U] (String | IO | StringIO path, ?::Hash[Symbol, U] options) { (::Array[String?] arg0) -> void } -> void
+  def self.foreach: (String | IO path, ?String mode, headers: true, **untyped options) { (::CSV::Row arg0) -> void } -> void
+                  | (String | IO path, ?String mode, headers: true, **untyped options) -> Enumerator[::CSV::Row, void]
+                  | (String | IO path, ?String mode, **untyped options) { (::Array[String?] arg0) -> void } -> void
+                  | (String | IO path, ?String mode, **untyped options) -> Enumerator[::Array[String?], void]
 
   # <!--
   #   rdoc-file=lib/csv.rb

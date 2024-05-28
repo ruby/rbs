@@ -28,11 +28,6 @@ module RBS
       end
     end
 
-    autoload :SyntaxError, "rbs/parser_compat/syntax_error"
-    autoload :SemanticsError, "rbs/parser_compat/semantics_error"
-    autoload :LexerError, "rbs/parser_compat/lexer_error"
-    autoload :LocatedValue, "rbs/parser_compat/located_value"
-
     KEYWORDS = %w(
       bool
       bot

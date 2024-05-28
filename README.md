@@ -69,7 +69,7 @@ gem "rbs"
 
 The gem ships with the `rbs` command line tool to demonstrate what it can do and help develop RBS.
 
-```bash
+```console
 $ rbs version
 $ rbs list
 $ rbs ancestors ::Object
@@ -98,7 +98,7 @@ end
 
 Running prototype on the above will automatically generate
 
-```
+```console
 $ rbs prototype rb person.rb
 class Person
   @name: untyped

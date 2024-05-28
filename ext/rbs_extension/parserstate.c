@@ -277,6 +277,10 @@ parserstate *alloc_parser(VALUE buffer, int start_pos, int end_pos, VALUE variab
 
   StringValue(string);
 
+  if (start_pos < 0 || end_pos < 0) {
+    rb_raise(rb_eArgError, "negative position range: %d...%d", start_pos, end_pos);
+  }
+
   lexstate *lexer = calloc(1, sizeof(lexstate));
   lexer->string = string;
   lexer->current.line = 1;

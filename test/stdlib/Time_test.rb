@@ -343,6 +343,25 @@ class TimeSingletonTest < Test::Unit::TestCase
   end
 end
 
+class TimeInstanceTest < Test::Unit::TestCase
+  include TestHelper
+  testing "::Time"
+
+  def test_to_a
+    assert_send_type "() -> [ Integer, Integer, Integer, Integer, Integer, Integer, Integer, Integer, bool, String ]",
+                     Time.now, :to_a
+    assert_send_type "() -> [ Integer, Integer, Integer, Integer, Integer, Integer, Integer, Integer, bool, nil ]",
+                     Time.now(in: 0), :to_a
+  end
+
+  def test_zone
+    assert_send_type "() -> String",
+                     Time.now, :zone
+    assert_send_type "() -> nil",
+                     Time.now(in: 0), :zone
+  end
+end
+
 class TimeInDateTest < Test::Unit::TestCase
   include TestHelper
 

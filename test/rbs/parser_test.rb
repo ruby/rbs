@@ -717,6 +717,12 @@ RBS
     end
   end
 
+  def test_negative_range
+    assert_raises ArgumentError do
+      RBS::Parser.parse_type("a", range: -2...-1)
+    end
+  end
+
   def test_parse_eof_nil
     code = buffer("type1   ")
 
@@ -743,6 +749,22 @@ RBS
     RBS::Parser.parse_method_type("() -> void () -> void", range: 0..., require_eof: false)
     assert_raises(RBS::ParsingError) do
       RBS::Parser.parse_method_type("() -> void () -> void", range: 0..., require_eof: true)
+    end
+  end
+
+  def test_proc__untyped_function
+    RBS::Parser.parse_type("^(?) -> Integer").tap do |type|
+      assert_instance_of RBS::Types::UntypedFunction, type.type
+    end
+
+    RBS::Parser.parse_type("^() { (?) -> String } -> Integer").tap do |type|
+      assert_instance_of RBS::Types::UntypedFunction, type.block.type
+    end
+  end
+
+  def test_proc__untyped_function_parse_error
+    assert_raises(RBS::ParsingError) do
+      RBS::Parser.parse_type("^(?) { (?) -> void } -> Integer")
     end
   end
 end

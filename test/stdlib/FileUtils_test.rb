@@ -606,14 +606,8 @@ class FileUtilsSingletonTest < Test::Unit::TestCase
   end
 
   def test_uptodate?
-    assert_send_type  "(String, String) -> bool",
-                      FileUtils, :uptodate?, "foo", "bar"
     assert_send_type  "(String, Array[String | ToStr | ToPath]) -> bool",
                       FileUtils, :uptodate?, "foo", ["bar", ToStr.new("bar"), ToPath.new("bar")]
-    assert_send_type  "(ToStr, ToStr) -> bool",
-                      FileUtils, :uptodate?, ToStr.new("foo"), ToStr.new("bar")
-    assert_send_type  "(ToPath, ToPath) -> bool",
-                      FileUtils, :uptodate?, ToPath.new("foo"), ToPath.new("bar")
   end
 end
 
@@ -970,7 +964,10 @@ class FileUtilsInstanceTest < Test::Unit::TestCase
   end
 
   def test_uptodate?
-    assert_send_type  "(String, String) -> bool",
-                      Foo.new, :uptodate?, "foo", "bar"
+    in_tmpdir do
+      FileUtils.touch "foo"
+      assert_send_type  "(String, Array[String]) -> bool",
+                        Foo.new, :uptodate?, "foo", ["bar"]
+    end
   end
 end

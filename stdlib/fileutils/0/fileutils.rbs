@@ -1771,5 +1771,5 @@ module FileUtils
   #
   # Related: FileUtils.touch.
   #
-  def self?.uptodate?: (path new, pathlist old_list) -> bool
+  def self?.uptodate?: (path new, _Each[path] old_list) -> bool
 end
