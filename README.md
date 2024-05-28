@@ -190,10 +190,7 @@ Here is a list of some places you can talk with active maintainers.
 
 - [Ruby Discord Server (invite link)](https://discord.gg/ad2acQFtkh) -- We have `rbs` channel in Ruby Discord server.
 - [ruby-jp Slack Workspace (in Japanese)](https://ruby-jp.github.io/) -- We have `types` channel in ruby-jp slack workspace.
-
-If you are seeking RBS for gems that are not a standard library, visit:
-
-- [gem_rbs_collection GitHub Repository](https://github.com/ruby/gem_rbs_collection) -- We host a collection of RBS for gems.
+- [gem_rbs_collection](https://github.com/ruby/gem_rbs_collection) -- We have a repository of third-party RBS type definitions, for the case your dependency doesn't ship with RBS files.
 
 ## Development
 
