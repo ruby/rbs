@@ -18,7 +18,7 @@ GEM
     ast (2.4.2)
     base64 (0.2.0)
     benchmark-ips (2.13.0)
-    bigdecimal (3.1.7)
+    bigdecimal (3.1.8)
     csv (3.3.0)
     dbm (1.1.0)
     diff-lcs (1.5.1)
