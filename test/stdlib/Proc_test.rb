@@ -73,4 +73,13 @@ class ProcInstanceTest < Test::Unit::TestCase
     assert_send_type '(ToInt) -> ::Proc',
                       Proc.new(){}, :curry, ToInt.new(42)
   end
+
+  def test_parameters
+    assert_send_type '() -> Array[[ Symbol, Symbol ]]',
+                     ->(a, b = nil, *c, d, e:, f: nil, **g, &h){}, :parameters
+    assert_send_type '(lambda: true) -> Array[[ Symbol, Symbol ]]',
+                     ->(a){}, :parameters, lambda: true
+    assert_send_type '(lambda: false) -> Array[[ Symbol, Symbol ]]',
+                     ->(a){}, :parameters, lambda: false
+  end
 end
