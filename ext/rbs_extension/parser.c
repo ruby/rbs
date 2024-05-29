@@ -2885,9 +2885,29 @@ rbsparser_parse_signature(VALUE self, VALUE buffer, VALUE end_pos)
   return rb_ensure(parse_signature_try, (VALUE)parser, ensure_free_parser, (VALUE)parser);
 }
 
+static VALUE
+rbsparser_lex(VALUE self, VALUE buffer, VALUE end_pos) {
+  lexstate *lexer = alloc_lexer(buffer, 0, FIX2INT(end_pos));
+  VALUE results = rb_ary_new();
+
+  token token = NullToken;
+  while (token.type != pEOF) {
+    token = rbsparser_next_token(lexer);
+    VALUE type = ID2SYM(rb_intern(token_type_str(token.type)));
+    VALUE location = rbs_new_location(buffer, token.range);
+    VALUE pair = rb_ary_new3(2, type, location);
+    rb_ary_push(results, pair);
+  }
+
+  free(lexer);
+
+  return results;
+}
+
 void rbs__init_parser(void) {
   RBS_Parser = rb_define_class_under(RBS, "Parser", rb_cObject);
   rb_define_singleton_method(RBS_Parser, "_parse_type", rbsparser_parse_type, 5);
   rb_define_singleton_method(RBS_Parser, "_parse_method_type", rbsparser_parse_method_type, 5);
   rb_define_singleton_method(RBS_Parser, "_parse_signature", rbsparser_parse_signature, 2);
+  rb_define_singleton_method(RBS_Parser, "_lex", rbsparser_lex, 2);
 }

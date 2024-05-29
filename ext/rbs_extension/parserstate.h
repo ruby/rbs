@@ -94,6 +94,15 @@ void parser_insert_typevar(parserstate *state, ID id);
 bool parser_typevar_member(parserstate *state, ID id);
 
 /**
+ * Allocate new lexstate object.
+ *
+ * ```
+ * alloc_lexer(buffer, 0, 31)    // New lexstate with buffer
+ * ```
+ * */
+lexstate *alloc_lexer(VALUE buffer, int start_pos, int end_pos);
+
+/**
  * Allocate new parserstate object.
  *
  * ```

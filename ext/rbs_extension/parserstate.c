@@ -272,7 +272,7 @@ VALUE comment_to_ruby(comment *com, VALUE buffer) {
   );
 }
 
-parserstate *alloc_parser(VALUE buffer, int start_pos, int end_pos, VALUE variables) {
+lexstate *alloc_lexer(VALUE buffer, int start_pos, int end_pos) {
   VALUE string = rb_funcall(buffer, rb_intern("content"), 0);
 
   StringValue(string);
@@ -290,6 +290,11 @@ parserstate *alloc_parser(VALUE buffer, int start_pos, int end_pos, VALUE variab
   lexer->start = lexer->current;
   lexer->first_token_of_line = lexer->current.column == 0;
 
+  return lexer;
+}
+
+parserstate *alloc_parser(VALUE buffer, int start_pos, int end_pos, VALUE variables) {
+  lexstate *lexer = alloc_lexer(buffer, start_pos, end_pos);
   parserstate *parser = calloc(1, sizeof(parserstate));
   parser->lexstate = lexer;
   parser->buffer = buffer;
