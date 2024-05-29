@@ -109,6 +109,8 @@ void parser_advance(parserstate *state) {
       // skip
     } else if (state->next_token3.type == tLINECOMMENT) {
       insert_comment_line(state, state->next_token3);
+    } else if (state->next_token3.type == tTRIVIA) {
+      //skip
     } else {
       break;
     }

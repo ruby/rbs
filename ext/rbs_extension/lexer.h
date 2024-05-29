@@ -78,6 +78,8 @@ enum TokenType {
   tCOMMENT,         /* Comment */
   tLINECOMMENT,     /* Comment of all line */
 
+  tTRIVIA,          /* Trivia tokens -- space and new line */
+
   tDQSTRING,        /* Double quoted string */
   tSQSTRING,        /* Single quoted string */
   tINTEGER,         /* Integer */

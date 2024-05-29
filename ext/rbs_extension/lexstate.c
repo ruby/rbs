@@ -77,6 +77,8 @@ static const char *RBS_TOKENTYPE_NAMES[] = {
   "tCOMMENT",
   "tLINECOMMENT",
 
+  "tTRIVIA",
+
   "tDQSTRING",        /* Double quoted string */
   "tSQSTRING",        /* Single quoted string */
   "tINTEGER",         /* Integer */
@@ -120,7 +122,9 @@ token next_token(lexstate *state, enum TokenType type) {
   t.range.start = state->start;
   t.range.end = state->current;
   state->start = state->current;
-  state->first_token_of_line = false;
+  if (type != tTRIVIA) {
+    state->first_token_of_line = false;
+  }
 
   return t;
 }
