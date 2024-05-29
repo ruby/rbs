@@ -24,8 +24,8 @@ module RBS
 
     def self.lex(source)
       buf = buffer(source)
-      value = _lex(buf, buf.last_position)
-      value.map! do |type, location|
+      list = _lex(buf, buf.last_position)
+      value = list.map do |type, location|
         Token.new(type: type, location: location)
       end
       LexResult.new(buffer: buf, value: value)
