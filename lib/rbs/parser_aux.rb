@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
+require_relative "parser/lex_result"
+require_relative "parser/token"
+
 module RBS
   class Parser
     def self.parse_type(source, range: 0..., variables: [], require_eof: false)
@@ -17,34 +20,6 @@ module RBS
       dirs, decls = _parse_signature(buf, buf.last_position)
 
       [buf, dirs, decls]
-    end
-
-    class LexResult
-      attr_reader :buffer
-      attr_reader :value
-
-      def initialize(buffer:, value:)
-        @buffer = buffer
-        @value = value
-      end
-    end
-
-    class Token
-      attr_reader :type
-      attr_reader :location
-
-      def initialize(type:, location:)
-        @type = type
-        @location = location
-      end
-
-      def value
-        @location.source
-      end
-
-      def comment?
-        @type == :tCOMMENT || @type == :tLINECOMMENT
-      end
     end
 
     def self.lex(source)
