@@ -415,7 +415,7 @@ class Set[unchecked out A]
   # Equivalent to Set#delete_if, but returns nil if no changes were
   # made. Returns an enumerator if no block is given.
   #
-  def reject!: () { (A) -> untyped } -> self
+  def reject!: () { (A) -> untyped } -> self?
 
   # <!--
   #   rdoc-file=lib/set.rb
@@ -437,7 +437,7 @@ class Set[unchecked out A]
   #     Set[1, 2, 3].disjoint? [3, 4]      #=> false
   #     Set[1, 2, 3].disjoint? 4..5        #=> true
   #
-  def disjoint?: (_Each[A]) -> bool
+  def disjoint?: (Set[A] | Enumerable[A]) -> bool
 
   # <!--
   #   rdoc-file=lib/set.rb
@@ -458,8 +458,8 @@ class Set[unchecked out A]
   #
   # Returns an enumerator if no block is given.
   #
-  def divide: () { (A, A) -> untyped } -> Set[self]
-            | () { (A) -> untyped } -> Set[self]
+  def divide: () { (A, A) -> Hash::_Key } -> Set[self]
+            | () { (A) -> Hash::_Key } -> Set[self]
 
   # <!--
   #   rdoc-file=lib/set.rb
@@ -500,7 +500,7 @@ class Set[unchecked out A]
   #     Set[1, 2, 3].intersect? 4..5        #=> false
   #     Set[1, 2, 3].intersect? [3, 4]      #=> true
   #
-  def intersect?: (_Each[A]) -> bool
+  def intersect?: (Set[A] | Enumerable[A]) -> bool
 
   # <!--
   #   rdoc-file=lib/set.rb
@@ -534,7 +534,7 @@ class Set[unchecked out A]
   # Merges the elements of the given enumerable objects to the set and
   # returns self.
   #
-  def merge: (_Each[A]) -> self
+  def merge: (*_Each[A]) -> self
 
   # <!--
   #   rdoc-file=lib/set.rb
@@ -544,7 +544,13 @@ class Set[unchecked out A]
   #
   def subset?: (self) -> bool
 
-  def proper_subst?: (self) -> bool
+  # <!--
+  #   rdoc-file=lib/set.rb
+  #   - proper_subset?(set)
+  # -->
+  # Returns true if the set is a proper subset of the given set.
+  #
+  def proper_subset?: (self) -> bool
 
   # <!--
   #   rdoc-file=lib/set.rb

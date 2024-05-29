@@ -50,6 +50,9 @@ GEM
     psych (4.0.6)
       stringio
     public_suffix (5.0.5)
+    raap (0.7.0)
+      rbs (~> 3.0)
+      timeout (~> 0.4)
     racc (1.8.0)
     rainbow (3.1.1)
     rake (13.2.1)
@@ -120,6 +123,7 @@ DEPENDENCIES
   mutex_m
   net-smtp
   nkf
+  raap
   rake
   rake-compiler
   rbs!

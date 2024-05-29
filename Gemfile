@@ -23,6 +23,7 @@ gem "base64"
 gem "mutex_m"
 gem "nkf"
 gem "fileutils"
+gem "raap"
 
 # Performance profiling and benchmarking
 gem 'stackprof'

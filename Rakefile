@@ -92,6 +92,10 @@ task :stdlib_test => :compile do
   sh "#{ruby} -Ilib #{bin}/test_runner.rb test/stdlib/Encoding_test.rb"
 end
 
+task :raap => :compile do
+  sh %q[cat test/raap.txt | egrep -v '^#|^$' | xargs bundle exec raap]
+end
+
 task :rubocop do
   sh "rubocop --parallel"
 end
