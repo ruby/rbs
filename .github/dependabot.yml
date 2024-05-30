@@ -1,13 +1,21 @@
 version: 2
 updates:
-  - package-ecosystem: "bundler"
+  - package-ecosystem: bundler
     directory: "/"
     schedule:
-      interval: "daily"
-  - package-ecosystem: "bundler"
+      interval: daily
+    open-pull-requests-limit: 10
+    allow:
+      - dependency-type: all
+
+  - package-ecosystem: bundler
     directory: "/steep"
     schedule:
-      interval: "daily"
+      interval: daily
+    open-pull-requests-limit: 10
+    allow:
+      - dependency-type: all
+
   - package-ecosystem: 'github-actions'
     directory: '/'
     schedule:
