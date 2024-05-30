@@ -1,0 +1,18 @@
+name: Merge dependabot PRs automatically
+on:
+  pull_request:
+    paths:
+      - '!rbs.gemspec'
+      - '!Gemfile'
+      - '!steep/Gemfile'
+
+permissions:
+  pull-requests: write
+  contents: write
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Hello
+        run: echo Hello world
