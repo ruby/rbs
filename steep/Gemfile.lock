@@ -14,7 +14,7 @@ GEM
       tzinfo (~> 2.0)
     ast (2.4.2)
     base64 (0.2.0)
-    bigdecimal (3.1.4)
+    bigdecimal (3.1.8)
     concurrent-ruby (1.2.2)
     connection_pool (2.4.1)
     csv (3.2.8)
