@@ -1,4 +1,4 @@
-name: Merge dependabot PRs automatically
+name: Test dependabot path config
 on:
   pull_request:
     paths:
@@ -11,7 +11,7 @@ permissions:
   contents: write
 
 jobs:
-  test:
+  test_paths:
     runs-on: ubuntu-latest
     steps:
       - name: Hello
