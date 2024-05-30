@@ -75,6 +75,20 @@ class RBS::LocationTest < Test::Unit::TestCase
     assert_equal "foo.rbs:1:0...2:3", loc.to_s
   end
 
+  def test_location_inspect
+    content = ''
+    loc = Location.new(Buffer.new(name: "trivia.rbs", content: content), 0, content.length)
+    assert_include loc.inspect, "source=\"\""
+
+    content = "\n"
+    loc = Location.new(Buffer.new(name: "trivia.rbs", content: content), 0, content.length)
+    assert_include loc.inspect, "source=\"\\n\""
+
+    content = "class Foo\n  def foo: () -> void\nend\n"
+    loc = Location.new(Buffer.new(name: "foo.rbs", content: content), 0, content.length)
+    assert_include loc.inspect, "source=\"class Foo\""
+  end
+
   private
 
   def buffer(content: nil)
