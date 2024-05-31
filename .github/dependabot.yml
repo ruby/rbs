@@ -4,7 +4,7 @@ updates:
     directory: "/"
     schedule:
       interval: daily
-    open-pull-requests-limit: 10
+    open-pull-requests-limit: 3
     allow:
       - dependency-type: all
 
@@ -12,7 +12,7 @@ updates:
     directory: "/steep"
     schedule:
       interval: daily
-    open-pull-requests-limit: 10
+    open-pull-requests-limit: 3
     allow:
       - dependency-type: all
 
