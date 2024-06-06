@@ -56,6 +56,8 @@ class RBS::Collection::Sources::GitTest < Test::Unit::TestCase
       git "init", chdir: origin_repo
       git "config", "user.email", "you@example.com", chdir: origin_repo
       git "config", "user.name", "Your Name", chdir: origin_repo
+      # Ignore potential signing key protected by passphrase
+      git "config", "commit.gpgsign", "false", chdir: origin_repo
       git "checkout", "-b", "main", chdir: origin_repo
 
       git "commit", "--allow-empty", "-m", "Initial commit", chdir: origin_repo
