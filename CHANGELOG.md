@@ -1,6 +1,30 @@
 # CHANGELOG
 
-## master
+## 3.4.4 (2024-02-08)
+
+### Miscellaneous
+
+* Backport [#1752](https://github.com/ruby/rbs/pull/1752) ([#1753](https://github.com/ruby/rbs/pull/1753))
+
+## 3.4.3 (2024-01-25)
+
+### Library changes
+
+#### rbs collection
+
+* Backport [#1731](https://github.com/ruby/rbs/pull/1731) ([#1735](https://github.com/ruby/rbs/pull/1735))
+
+## 3.4.2 (2024-01-19)
+
+### Miscellaneous
+
+* Backport [#1724](https://github.com/ruby/rbs/pull/1724) ([#1726](https://github.com/ruby/rbs/pull/1726))
+
+## 3.4.1 (2023-12-26)
+
+### Signature updates
+
+* Update embedded RDoc based on ruby-3.3.0 (Backport #1699) ([#1700](https://github.com/ruby/rbs/pull/1700))
 
 ## 3.4.0 (2023-12-21)
 
