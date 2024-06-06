@@ -31,7 +31,6 @@ Assume you have three RBS files in your gem package:
 
 ```yaml
 dependencies:
-  - name: abbrev
   - name: json
   - name: logger
   - name: optparse
