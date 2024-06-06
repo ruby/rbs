@@ -19,7 +19,7 @@ Rake::TestTask.new(:test => :compile) do |t|
   end
 end
 
-multitask :default => [:test, :stdlib_test, :rubocop, :validate, :test_doc]
+multitask :default => [:test, :stdlib_test, :typecheck_test, :rubocop, :validate, :test_doc]
 
 task :lexer do
   sh "re2c -W --no-generation-date -o ext/rbs_extension/lexer.c ext/rbs_extension/lexer.re"
@@ -90,6 +90,19 @@ task :stdlib_test => :compile do
   # TODO: Ractor tests need to be run in a separate process
   sh "#{ruby} -Ilib #{bin}/test_runner.rb test/stdlib/Ractor_test.rb"
   sh "#{ruby} -Ilib #{bin}/test_runner.rb test/stdlib/Encoding_test.rb"
+end
+
+task :typecheck_test => :compile do
+  FileList["test/typecheck/*"].each do |test|
+    Dir.chdir(test) do
+      expectations = File.join(test, "steep_expectations.yml")
+      if File.exist?(expectations)
+        sh "steep check --with_expectations"
+      else
+        sh "steep check"
+      end
+    end
+  end
 end
 
 task :raap => :compile do

@@ -766,7 +766,8 @@ class Integer < Numeric
   #     13.divmod(Rational(4, 1)) # => [3, (1/1)]
   #
   def divmod: (Integer) -> [ Integer, Integer ]
-            | (Float) -> [ Float, Float ]
+            | (Float) -> [ Integer, Float ]
+            | (Rational) -> [ Integer, Rational ]
             | (Numeric) -> [ Numeric, Numeric ]
 
   # <!--

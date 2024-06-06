@@ -245,7 +245,8 @@ class Rational < Numeric
 
   def div: (Numeric) -> Integer
 
-  def divmod: (Numeric) -> [ Numeric, Numeric ]
+  def divmod: (Integer | Float | Rational) -> [ Integer, Rational ]
+            | (Numeric) -> [ Numeric, Numeric ]
 
   def dup: () -> self
 
