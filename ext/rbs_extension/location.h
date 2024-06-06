@@ -16,17 +16,19 @@ typedef struct {
 
 typedef unsigned int rbs_loc_entry_bitmap;
 
+// The flexible array always allocates, but it's okay.
+// This struct is not allocated when the `rbs_loc` doesn't have children.
 typedef struct {
   unsigned short len;
   unsigned short cap;
   rbs_loc_entry_bitmap required_p;
-  rbs_loc_entry entries[0];
+  rbs_loc_entry entries[1];
 } rbs_loc_children;
 
 typedef struct {
   VALUE buffer;
   range rg;
-  rbs_loc_children *children;
+  rbs_loc_children *children; // NULL when no children is allocated
 } rbs_loc;
 
 /**
