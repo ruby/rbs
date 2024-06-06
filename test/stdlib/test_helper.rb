@@ -79,6 +79,22 @@ module WithStdlibAliases
       end
     end
   end
+
+  def with_coercible(method, return_value: :hello)
+    equivself = Struct.new(:equiv_self)
+    equivother = Struct.new(:equiv_other) do
+      define_method(method) do |other|
+        fail unless equivself === other
+        return_value
+      end
+    end
+
+    yield Class.new{
+      define_method(:coerce) do |float|
+        [equivother.new(float), equivself.new(self)]
+      end
+    }.new
+  end
 end
 
 class Writer
