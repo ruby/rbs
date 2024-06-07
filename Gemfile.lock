@@ -2,6 +2,7 @@ PATH
   remote: .
   specs:
     rbs (3.5.1.pre.1)
+      logger
 
 PATH
   remote: test/assets/test-gem
