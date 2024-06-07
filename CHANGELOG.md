@@ -1,5 +1,16 @@
 # CHANGELOG
 
+## 3.5.1 (2024-06-07)
+
+### Library changes
+
+* Add explicit dependency on the `logger` gem ([#1865](https://github.com/ruby/rbs/pull/1865))
+* Make c99, c23 compatible ([#1870](https://github.com/ruby/rbs/pull/1870))
+
+### Miscellaneous
+
+* Don't try to sign git commits when running tests ([#1867](https://github.com/ruby/rbs/pull/1867))
+
 ## 3.5.0 (2024-06-06)
 
 ### Signature updates
