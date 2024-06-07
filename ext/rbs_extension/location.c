@@ -2,6 +2,7 @@
 
 #define RBS_LOC_REQUIRED_P(loc, i) ((loc)->children->required_p & (1 << (i)))
 #define RBS_LOC_OPTIONAL_P(loc, i) (!RBS_LOC_REQUIRED_P((loc), (i)))
+#define RBS_LOC_CHILDREN_SIZE(cap) (sizeof(rbs_loc_children) + sizeof(rbs_loc_entry) * (cap))
 
 VALUE RBS_Location;
 
@@ -25,7 +26,7 @@ static void check_children_max(unsigned short n) {
 void rbs_loc_alloc_children(rbs_loc *loc, unsigned short cap) {
   check_children_max(cap);
 
-  size_t s = sizeof(rbs_loc_children) + sizeof(rbs_loc_entry) * cap;
+  size_t s = RBS_LOC_CHILDREN_SIZE(cap);
   loc->children = malloc(s);
 
   loc->children->len = 0;
@@ -39,7 +40,7 @@ static void check_children_cap(rbs_loc *loc) {
   } else {
     if (loc->children->len == loc->children->cap) {
       check_children_max(loc->children->cap + 1);
-      size_t s = sizeof(rbs_loc_children) + sizeof(rbs_loc_entry) * (++loc->children->cap);
+      size_t s = RBS_LOC_CHILDREN_SIZE(++loc->children->cap);
       loc->children = realloc(loc->children, s);
     }
   }
@@ -85,7 +86,7 @@ static size_t rbs_loc_memsize(const void *ptr) {
   if (loc->children == NULL) {
     return sizeof(rbs_loc);
   } else {
-    return sizeof(rbs_loc) + sizeof(rbs_loc_children) + sizeof(rbs_loc_entry) * loc->children->cap;
+    return sizeof(rbs_loc) + RBS_LOC_CHILDREN_SIZE(loc->children->cap);
   }
 }
 
@@ -129,7 +130,7 @@ static VALUE location_initialize_copy(VALUE self, VALUE other) {
   self_loc->rg = other_loc->rg;
   if (other_loc->children != NULL) {
     rbs_loc_alloc_children(self_loc, other_loc->children->cap);
-    memcpy(self_loc->children, other_loc->children, sizeof(rbs_loc_children) + sizeof(rbs_loc_entry) * other_loc->children->cap);
+    memcpy(self_loc->children, other_loc->children, RBS_LOC_CHILDREN_SIZE(other_loc->children->cap));
   }
 
   return Qnil;
