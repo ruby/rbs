@@ -106,7 +106,7 @@ task :typecheck_test => :compile do
 end
 
 task :raap => :compile do
-  sh %q[cat test/raap.txt | egrep -v '^#|^$' | xargs bundle exec raap]
+  sh %q[ruby test/raap.rb | xargs bundle exec raap -r digest/bubblebabble --library digest --allow-private]
 end
 
 task :rubocop do
