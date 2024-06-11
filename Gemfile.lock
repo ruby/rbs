@@ -29,7 +29,7 @@ GEM
     base64 (0.2.0)
     benchmark-ips (2.13.0)
     bigdecimal (3.1.8)
-    concurrent-ruby (1.3.1)
+    concurrent-ruby (1.3.3)
     connection_pool (2.4.1)
     csv (3.3.0)
     dbm (1.1.0)
@@ -118,7 +118,7 @@ GEM
     ruby-progressbar (1.13.0)
     securerandom (0.3.1)
     stackprof (0.2.26)
-    steep (1.7.0.dev.4)
+    steep (1.7.0)
       activesupport (>= 5.1)
       concurrent-ruby (>= 1.1.10)
       csv (>= 3.0.9)
@@ -177,7 +177,7 @@ DEPENDENCIES
   rubocop
   rubocop-rubycw
   stackprof
-  steep (~> 1.7.0.dev)
+  steep (~> 1.7.0)
   tempfile
   test-unit
 
