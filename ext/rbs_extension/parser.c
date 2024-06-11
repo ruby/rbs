@@ -726,6 +726,16 @@ static VALUE parse_proc_type(parserstate *state) {
   return rbs_proc(function, block, loc, proc_self);
 }
 
+static void check_key_duplication(parserstate *state, VALUE fields, VALUE key) {
+  if (!NIL_P(rb_hash_aref(fields, key))) {
+    raise_syntax_error(
+      state,
+      state->current_token,
+      "duplicated record key"
+    );
+  }
+}
+
 /**
  * ... `{` ... `}` ...
  *        >   >
@@ -757,6 +767,7 @@ VALUE parse_record_attributes(parserstate *state) {
     if (is_keyword(state)) {
       // { foo: type } syntax
       key = parse_keyword_key(state);
+      check_key_duplication(state, fields, key);
       parser_advance_assert(state, pCOLON);
     } else {
       // { key => type } syntax
@@ -778,6 +789,7 @@ VALUE parse_record_attributes(parserstate *state) {
           "unexpected record key token"
         );
       }
+      check_key_duplication(state, fields, key);
       parser_advance_assert(state, pFATARROW);
     }
     type = parse_type(state);

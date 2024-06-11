@@ -705,6 +705,56 @@ class RBS::TypeParsingTest < Test::Unit::TestCase
     assert_equal "a.rbs:1:3...1:4: Syntax error: expected a token `pFATARROW`, token=`|` (pBAR)", error.message
   end
 
+  def test_record_key_duplication
+    assert_raises(RBS::ParsingError) do
+      Parser.parse_type('{ foo: Integer, foo: String }')
+    end.tap do |error|
+      assert_equal "tLIDENT", error.token_type
+      assert_equal "foo", error.location.source
+      assert_equal "a.rbs:1:16...1:19: Syntax error: duplicated record key, token=`foo` (tLIDENT)", error.message
+    end
+
+    assert_raises(RBS::ParsingError) do
+      Parser.parse_type('{ foo: Integer, ?foo: String }')
+    end.tap do |error|
+      assert_equal "tLIDENT", error.token_type
+      assert_equal "foo", error.location.source
+      assert_equal "a.rbs:1:17...1:20: Syntax error: duplicated record key, token=`foo` (tLIDENT)", error.message
+    end
+
+    assert_raises(RBS::ParsingError) do
+      Parser.parse_type('{ ?foo: Integer, ?foo: String }')
+    end.tap do |error|
+      assert_equal "tLIDENT", error.token_type
+      assert_equal "foo", error.location.source
+      assert_equal "a.rbs:1:18...1:21: Syntax error: duplicated record key, token=`foo` (tLIDENT)", error.message
+    end
+
+    assert_raises(RBS::ParsingError) do
+      Parser.parse_type('{ foo: 1, "foo" => 2, \'foo\' => 3 }')
+    end.tap do |error|
+      assert_equal "tSQSTRING", error.token_type
+      assert_equal "'foo'", error.location.source
+      assert_equal "a.rbs:1:22...1:27: Syntax error: duplicated record key, token=`'foo'` (tSQSTRING)", error.message
+    end
+
+    assert_raises(RBS::ParsingError) do
+      Parser.parse_type('{ foo: 1, \'foo\' => 2, "foo" => 3 }')
+    end.tap do |error|
+      assert_equal "tDQSTRING", error.token_type
+      assert_equal '"foo"', error.location.source
+      assert_equal "a.rbs:1:22...1:27: Syntax error: duplicated record key, token=`\"foo\"` (tDQSTRING)", error.message
+    end
+
+    assert_raises(RBS::ParsingError) do
+      Parser.parse_type('{ void => 1, void: 2 }')
+    end.tap do |error|
+      assert_equal "kVOID", error.token_type
+      assert_equal 'void', error.location.source
+      assert_equal "a.rbs:1:2...1:6: Syntax error: unexpected record key token, token=`void` (kVOID)", error.message
+    end
+  end
+
   def test_type_var
     Parser.parse_type("Array[A]", variables: []).yield_self do |type|
       assert_instance_of Types::ClassInstance, type
