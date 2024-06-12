@@ -118,7 +118,7 @@ GEM
     ruby-progressbar (1.13.0)
     securerandom (0.3.1)
     stackprof (0.2.26)
-    steep (1.7.0.dev.4)
+    steep (1.7.1)
       activesupport (>= 5.1)
       concurrent-ruby (>= 1.1.10)
       csv (>= 3.0.9)
@@ -177,7 +177,7 @@ DEPENDENCIES
   rubocop
   rubocop-rubycw
   stackprof
-  steep (~> 1.7.0.dev)
+  steep (~> 1.7.1)
   tempfile
   test-unit
 
