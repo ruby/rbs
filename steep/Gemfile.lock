@@ -30,7 +30,7 @@ GEM
     logger (1.6.0)
     minitest (5.23.1)
     mutex_m (0.2.0)
-    parser (3.3.2.0)
+    parser (3.3.3.0)
       ast (~> 2.4.1)
       racc
     racc (1.8.0)
