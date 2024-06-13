@@ -109,7 +109,7 @@ module RBS
     end
 
     def has_parser?
-      defined?(RubyVM::AbstractSyntaxTree)
+      defined?(RubyVM::AbstractSyntaxTree) ? true : false
     end
 
     def run(args)
