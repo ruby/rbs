@@ -184,10 +184,10 @@ class StringScanner
   # If nothing was priorly matched, it returns nil.
   #
   #     s = StringScanner.new("Fri Dec 12 1975 14:39")
-  #     s.scan(/(\w+) (\w+) (\d+) /)       # -> "Fri Dec 12 "
-  #     s.captures                         # -> ["Fri", "Dec", "12"]
-  #     s.scan(/(\w+) (\w+) (\d+) /)       # -> nil
-  #     s.captures                         # -> nil
+  #     s.scan(/(\w+) (\w+) (\d+) (1980)?/)       # -> "Fri Dec 12 "
+  #     s.captures                                # -> ["Fri", "Dec", "12", nil]
+  #     s.scan(/(\w+) (\w+) (\d+) (1980)?/)       # -> nil
+  #     s.captures                                # -> nil
   #
   def captures: () -> Array[String]?
 
