@@ -329,11 +329,22 @@ static VALUE parse_keyword_key(parserstate *state) {
 /*
   keyword ::= {} keyword `:` <function_param>
 */
-static void parse_keyword(parserstate *state, VALUE keywords) {
+static void parse_keyword(parserstate *state, VALUE keywords, VALUE memo) {
   VALUE key;
   VALUE param;
 
   key = parse_keyword_key(state);
+
+  if (!NIL_P(rb_hash_aref(memo, key))) {
+    raise_syntax_error(
+      state,
+      state->current_token,
+      "duplicated keyword argument"
+    );
+  } else {
+    rb_hash_aset(memo, key, Qtrue);
+  }
+
   parser_advance_assert(state, pCOLON);
   param = parse_function_param(state);
 
@@ -403,6 +414,8 @@ static void parse_params(parserstate *state, method_params *params) {
     return;
   }
 
+  VALUE memo = rb_hash_new();
+
   while (true) {
     VALUE param;
 
@@ -441,7 +454,7 @@ PARSE_OPTIONAL_PARAMS:
         parser_advance(state);
 
         if (is_keyword(state)) {
-          parse_keyword(state, params->optional_keywords);
+          parse_keyword(state, params->optional_keywords, memo);
           parser_advance_if(state, pCOMMA);
           goto PARSE_KEYWORDS;
         }
@@ -506,7 +519,7 @@ PARSE_KEYWORDS:
     case pQUESTION:
       parser_advance(state);
       if (is_keyword(state)) {
-        parse_keyword(state, params->optional_keywords);
+        parse_keyword(state, params->optional_keywords, memo);
       } else {
         raise_syntax_error(
           state,
@@ -529,7 +542,7 @@ PARSE_KEYWORDS:
     case tBANGIDENT:
     KEYWORD_CASES
       if (is_keyword(state)) {
-        parse_keyword(state, params->required_keywords);
+        parse_keyword(state, params->required_keywords, memo);
       } else {
         raise_syntax_error(
           state,
@@ -713,6 +726,16 @@ static VALUE parse_proc_type(parserstate *state) {
   return rbs_proc(function, block, loc, proc_self);
 }
 
+static void check_key_duplication(parserstate *state, VALUE fields, VALUE key) {
+  if (!NIL_P(rb_hash_aref(fields, key))) {
+    raise_syntax_error(
+      state,
+      state->current_token,
+      "duplicated record key"
+    );
+  }
+}
+
 /**
  * ... `{` ... `}` ...
  *        >   >
@@ -744,6 +767,7 @@ VALUE parse_record_attributes(parserstate *state) {
     if (is_keyword(state)) {
       // { foo: type } syntax
       key = parse_keyword_key(state);
+      check_key_duplication(state, fields, key);
       parser_advance_assert(state, pCOLON);
     } else {
       // { key => type } syntax
@@ -765,6 +789,7 @@ VALUE parse_record_attributes(parserstate *state) {
           "unexpected record key token"
         );
       }
+      check_key_duplication(state, fields, key);
       parser_advance_assert(state, pFATARROW);
     }
     type = parse_type(state);

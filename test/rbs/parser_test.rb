@@ -669,6 +669,44 @@ RBS
     end
   end
 
+  def test_duplicate_keyword
+    RBS::Parser.parse_method_type(buffer("(top foo, foo: top) -> void")).tap do |method_type|
+      assert_equal "top foo, foo: top", method_type.type.param_to_s
+    end
+
+    RBS::Parser.parse_method_type(buffer("(?foo, foo: top) -> void")).tap do |method_type|
+      assert_equal "?foo, foo: top", method_type.type.param_to_s
+    end
+
+    RBS::Parser.parse_method_type(buffer("(foo: top, **top foo) -> void")).tap do |method_type|
+      assert_equal "foo: top, **top foo", method_type.type.param_to_s
+    end
+
+    assert_raises RBS::ParsingError do
+      RBS::Parser.parse_method_type(buffer("(foo: top, foo: top) -> void"))
+    end.tap do |exn|
+      assert_equal "test.rbs:1:11...1:14: Syntax error: duplicated keyword argument, token=`foo` (tLIDENT)", exn.message
+    end
+
+    assert_raises RBS::ParsingError do
+      RBS::Parser.parse_method_type(buffer("(foo: top, ?foo: top) -> void"))
+    end.tap do |exn|
+      assert_equal "test.rbs:1:12...1:15: Syntax error: duplicated keyword argument, token=`foo` (tLIDENT)", exn.message
+    end
+
+    assert_raises RBS::ParsingError do
+      RBS::Parser.parse_method_type(buffer("(?foo: top, foo: top) -> void"))
+    end.tap do |exn|
+      assert_equal "test.rbs:1:12...1:15: Syntax error: duplicated keyword argument, token=`foo` (tLIDENT)", exn.message
+    end
+
+    assert_raises RBS::ParsingError do
+      RBS::Parser.parse_method_type(buffer("(?foo: top, ?foo: top) -> void"))
+    end.tap do |exn|
+      assert_equal "test.rbs:1:13...1:16: Syntax error: duplicated keyword argument, token=`foo` (tLIDENT)", exn.message
+    end
+  end
+
   def test_parse_method_type2
     RBS::Parser.parse_method_type(buffer("(foo?: String, bar!: Integer) -> void")).tap do |method_type|
       assert_equal "foo?: String, bar!: Integer", method_type.type.param_to_s
