@@ -9,11 +9,10 @@ on:
 
 jobs:
   test:
-    runs-on: ${{ matrix.os }}
+    runs-on: "windows-latest"
     strategy:
       fail-fast: false
       matrix:
-        os: [windows-2019, windows-2022]
         ruby: [ucrt, mswin]
     steps:
       - uses: actions/checkout@v4
