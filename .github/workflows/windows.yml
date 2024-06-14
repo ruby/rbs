@@ -8,12 +8,12 @@ on:
   merge_group: {}
 
 jobs:
-  test:
+  compile:
     runs-on: "windows-latest"
     strategy:
       fail-fast: false
       matrix:
-        ruby: [ucrt, mswin]
+        ruby: ['3.2', '3.3', ucrt, mswin]
     steps:
       - uses: actions/checkout@v4
       - name: load ruby
