@@ -70,7 +70,7 @@ GEM
     power_assert (2.0.3)
     psych (4.0.6)
       stringio
-    public_suffix (5.0.5)
+    public_suffix (5.1.0)
     raap (0.8.0)
       rbs (~> 3.0)
       timeout (~> 0.4)
