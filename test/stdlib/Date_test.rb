@@ -21,17 +21,17 @@ class DateSingletonTest < Test::Unit::TestCase
   end
 
   def test__httpdate
-    assert_send_type  "(::String str) -> ::Hash[Symbol, Integer]",
+    assert_send_type  "(::String str, ?limit: Integer) -> Date::datetime_with_timezone_record",
                       Date, :_httpdate, "Sat Aug 15 00:00:00 2020"
   end
 
   def test__iso8601
-    assert_send_type  "(::String str) -> ::Hash[Symbol, Integer]",
+    assert_send_type  "(::String str, ?limit: Integer) -> ::Hash[Symbol, Integer]",
                       Date, :_iso8601, "2020-08-15"
   end
 
   def test__jisx0301
-    assert_send_type  "(::String str) -> ::Hash[Symbol, Integer]",
+    assert_send_type  "(::String str, ?limit: Integer) -> ::Hash[Symbol, Integer]",
                       Date, :_jisx0301, "2020-08-15"
   end
 
@@ -43,17 +43,17 @@ class DateSingletonTest < Test::Unit::TestCase
   end
 
   def test__rfc2822
-    assert_send_type  "(::String str) -> ::Hash[Symbol, Integer | String]",
+    assert_send_type  "(::String str, ?limit: Integer) -> Date::datetime_with_timezone_record",
                       Date, :_rfc2822, "Sat Aug 15 2020 00:00:00 +09:00"
   end
 
   def test__rfc3339
-    assert_send_type  "(::String str) -> ::Hash[Symbol, Integer | String]",
+    assert_send_type  "(::String str, ?limit: Integer) -> Date::datetime_with_timezone_record",
                       Date, :_rfc3339, "2020-08-15T00:00:00+09:00"
   end
 
   def test__rfc822
-    assert_send_type  "(::String str) -> ::Hash[Symbol, Integer | String]",
+    assert_send_type  "(::String str, ?limit: Integer) -> Date::datetime_with_timezone_record",
                       Date, :_rfc822, "Sat Aug 15 2020 00:00:00 +09:00"
   end
 

@@ -7856,6 +7856,46 @@ module OpenSSL
     # be frozen afterward.
     #
     class SSLContext
+      type context_params = {
+        ?alpn_protocols: Array[String]?,
+        ?alpn_select_cb: (^(Array[String]) -> String?)?,
+        ?keylog_cb: (^(SSLSocket sock, String line) -> void)?,
+        ?ssl_timeout: Numeric?,
+        ?ciphers: Array[String]?,
+        ?ciphersuites: String?,
+        ?tmp_dh: (^(Session, Integer, Integer) -> PKey::DH)?,
+        ?tmp_dh_callback: (^(Session, Integer, Integer) -> PKey::DH)?,
+        ?ecdh_curves: String?,
+        ?security_level: Integer?,
+        ?key: PKey::PKey?,
+        ?session_cache_mode: Integer?,
+        ?session_cache_size: Integer?,
+        ?timeout: Numeric?,
+        ?options: Integer?,
+        ?servername_cb: (^(SSLSocket, String) -> SSLContext?)?,
+        ?min_version: tls_version?,
+        ?max_version: tls_version?,
+        ?cert: X509::Certificate?,
+        ?client_ca: Array[X509::Certificate] | X509::Certificate | nil,
+        ?ca_file: String?,
+        ?ca_path: String?,
+        ?verify_mode: verify_mode?,
+        ?verify_depth: Integer?,
+        ?verify_callback: (^(bool preverify_ok, X509::StoreContext store_ctx) -> boolish)?,
+        ?ssl_version: tls_version?,
+        ?verify_hostname: boolish?,
+        ?cert_store: X509::Store?,
+        ?extra_chain_cert: Array[X509::Certificate]?,
+        ?client_cert_cb: (^(Session) -> [ X509::Certificate, PKey::PKey ])?,
+        ?session_id_context: Integer?,
+        ?session_get_cb: (^(SSLSocket, Integer) -> Session?)?,
+        ?session_new_cb: (^(SSLSocket) -> untyped)?,
+        ?session_remove_cb: (^(SSLContext, Session) -> void)?,
+        ?renegotiation_cb: (^(SSLSocket) -> void)?,
+        ?npn_protocols: Array[String]?,
+        ?npn_select_cb: (^(Array[String]) -> String?)?
+      }
+
       public
 
       # <!--
@@ -8028,6 +8068,18 @@ module OpenSSL
                   | (Array[String] ciphers) -> void
                   | (String colon_sep_ciphers) -> void
 
+      # <!--
+      #   rdoc-file=ext/openssl/ossl_ssl.c
+      #   - ctx.ciphersuites = "cipher1:cipher2:..."
+      #   - ctx.ciphersuites = [name, ...]
+      #   - ctx.ciphersuites = [[name, version, bits, alg_bits], ...]
+      # -->
+      # Sets the list of available TLSv1.3 cipher suites for this context.
+      #
+      def ciphersuites=: (Array[[ String, String, Integer, Integer ]] ciphers) -> void
+                       | (Array[String] ciphers) -> void
+                       | (String colon_sep_ciphers) -> void
+
       # <!-- rdoc-file=ext/openssl/ossl_ssl.c -->
       # A certificate or Array of certificates that will be sent to the client.
       #
@@ -8139,6 +8191,50 @@ module OpenSSL
       #
       def key=: (PKey::PKey) -> PKey::PKey
 
+      # <!-- rdoc-file=ext/openssl/ossl_ssl.c -->
+      # A callback invoked when TLS key material is generated or received, in order to
+      # allow applications to store this keying material for debugging purposes.
+      #
+      # The callback is invoked with an SSLSocket and a string containing the key
+      # material in the format used by NSS for its SSLKEYLOGFILE debugging output.
+      #
+      # It is only compatible with OpenSSL >= 1.1.1. Even if LibreSSL implements
+      # SSL_CTX_set_keylog_callback() from v3.4.2, it does nothing (see
+      # https://github.com/libressl-portable/openbsd/commit/648d39f0f035835d0653342d13
+      # 9883b9661e9cb6).
+      #
+      # ### Example
+      #
+      #     context.keylog_cb = proc do |_sock, line|
+      #       File.open('ssl_keylog_file', "a") do |f|
+      #         f.write("#{line}\n")
+      #       end
+      #     end
+      #
+      def keylog_cb: () -> (^(SSLSocket sock, String line) -> void)?
+
+      # <!-- rdoc-file=ext/openssl/ossl_ssl.c -->
+      # A callback invoked when TLS key material is generated or received, in order to
+      # allow applications to store this keying material for debugging purposes.
+      #
+      # The callback is invoked with an SSLSocket and a string containing the key
+      # material in the format used by NSS for its SSLKEYLOGFILE debugging output.
+      #
+      # It is only compatible with OpenSSL >= 1.1.1. Even if LibreSSL implements
+      # SSL_CTX_set_keylog_callback() from v3.4.2, it does nothing (see
+      # https://github.com/libressl-portable/openbsd/commit/648d39f0f035835d0653342d13
+      # 9883b9661e9cb6).
+      #
+      # ### Example
+      #
+      #     context.keylog_cb = proc do |_sock, line|
+      #       File.open('ssl_keylog_file', "a") do |f|
+      #         f.write("#{line}\n")
+      #       end
+      #     end
+      #
+      def keylog_cb=: (^(SSLSocket sock, String line) -> void) -> ^(SSLSocket sock, String line) -> void
+
       # <!--
       #   rdoc-file=ext/openssl/lib/openssl/ssl.rb
       #   - ctx.max_version = OpenSSL::SSL::TLS1_2_VERSION
@@ -8183,7 +8279,7 @@ module OpenSSL
       #
       #     ctx.npn_protocols = ["http/1.1", "spdy/2"]
       #
-      def npn_protocols: () -> untyped
+      def npn_protocols: () -> Array[String]?
 
       # <!-- rdoc-file=ext/openssl/ossl_ssl.c -->
       # An Enumerable of Strings. Each String represents a protocol to be advertised
@@ -8195,7 +8291,7 @@ module OpenSSL
       #
       #     ctx.npn_protocols = ["http/1.1", "spdy/2"]
       #
-      def npn_protocols=: (untyped) -> untyped
+      def npn_protocols=: (Array[String]? protos) ->  Array[String]
 
       # <!-- rdoc-file=ext/openssl/ossl_ssl.c -->
       # A callback invoked on the client side when the client needs to select a
@@ -8213,7 +8309,7 @@ module OpenSSL
       #       protocols.first
       #     end
       #
-      def npn_select_cb: () -> untyped
+      def npn_select_cb: () -> (^(Array[String]) -> String? | nil)
 
       # <!-- rdoc-file=ext/openssl/ossl_ssl.c -->
       # A callback invoked on the client side when the client needs to select a
@@ -8231,7 +8327,7 @@ module OpenSSL
       #       protocols.first
       #     end
       #
-      def npn_select_cb=: (untyped) -> untyped
+      def npn_select_cb=: (^(Array[String]) -> String? alpn_select_callback) -> void
 
       # <!--
       #   rdoc-file=ext/openssl/ossl_ssl.c
@@ -8414,7 +8510,20 @@ module OpenSSL
       # :   Number of sessions proposed by clients that were found in the cache but
       #     had expired due to timeouts
       #
-      def session_cache_stats: () -> Hash[Symbol, Integer]
+      def session_cache_stats: () -> {
+        accept: Integer,
+        accept_good: Integer,
+        accept_renegotiate: Integer,
+        cache_full: Integer,
+        cache_hits: Integer,
+        cache_misses: Integer,
+        cache_num: Integer,
+        cb_hits: Integer,
+        connect: Integer,
+        connect_good: Integer,
+        connect_renegotiate: Integer,
+        timeouts: Integer
+      }
 
       # <!-- rdoc-file=ext/openssl/ossl_ssl.c -->
       # A callback invoked on a server when a session is proposed by the client but
@@ -8504,7 +8613,7 @@ module OpenSSL
       # If the verify_mode is not VERIFY_NONE and ca_file, ca_path and cert_store are
       # not set then the system default certificate store is used.
       #
-      def set_params: (?untyped params) -> untyped
+      def set_params: (context_params params) -> untyped
 
       # <!--
       #   rdoc-file=ext/openssl/ossl_ssl.c
@@ -8689,7 +8798,7 @@ module OpenSSL
 
       DEFAULT_CERT_STORE: X509::Store
 
-      DEFAULT_PARAMS: Hash[Symbol, untyped]
+      DEFAULT_PARAMS: context_params
 
       DEFAULT_TMP_DH_CALLBACK: Proc
 

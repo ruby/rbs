@@ -1635,6 +1635,38 @@ class CSV < Object
   include Enumerable[untyped]
   extend Forwardable
 
+  type parsing_options = {
+    ?row_sep: String | :auto,
+    ?col_sep: String,
+    ?quote_char: String,
+    ?field_size_limit: Integer,
+    ?converters: Symbol,
+    ?unconverted_fields: bool,
+    ?headers: bool | Symbol | String | Array[String],
+    ?return_headers: bool,
+    ?header_converters: Symbol,
+    ?skip_blanks: bool,
+    ?skip_lines: Regexp | String | nil,
+    ?strip: bool,
+    ?liberal_parsing: bool,
+    ?nil_value: untyped,
+    ?empty_value: untyped
+  }
+
+  type write_converter = ^(String field) -> String
+
+  type generating_options = {
+    ?row_sep: String | :auto,
+    ?col_sep: String,
+    ?quote_char: String,
+    ?write_headers: bool,
+    ?force_quotes: bool,
+    ?quote_empty: bool,
+    ?write_converters: write_converter | Array[write_converter],
+    ?write_nil_value: string,
+    ?write_empty_value: string
+  }
+
   # <!--
   #   rdoc-file=lib/csv.rb
   #   - foreach(path_or_io, mode='r', **options) {|row| ... )
@@ -1773,7 +1805,7 @@ class CSV < Object
   #     # Raises ArgumentError (Cannot parse nil as CSV):
   #     CSV.new(nil)
   #
-  def initialize: (?String | IO | StringIO io, ?::Hash[Symbol, untyped] options) -> void
+  def initialize: (?String | IO | StringIO io, ?(parsing_options | generating_options) options) -> void
 
   # <!--
   #   rdoc-file=lib/csv.rb
@@ -1895,7 +1927,7 @@ class CSV < Object
   #     # Raises NoMethodError (undefined method `close' for :foo:Symbol)
   #     CSV.parse(:foo)
   #
-  def self.parse: (String str, ?::Hash[Symbol, untyped] options) ?{ (::Array[String?] arg0) -> void } -> ::Array[::Array[String?]]?
+  def self.parse: (String str, ?(parsing_options | generating_options) options) ?{ (::Array[String?] arg0) -> void } -> ::Array[::Array[String?]]?
 
   # <!--
   #   rdoc-file=lib/csv.rb
@@ -1965,7 +1997,7 @@ class CSV < Object
   #     # Raises ArgumentError (Cannot parse nil as CSV):
   #     CSV.parse_line(nil)
   #
-  def self.parse_line: (String str, ?::Hash[Symbol, untyped] options) -> ::Array[String?]?
+  def self.parse_line: (String str, ?(parsing_options | generating_options) options) -> ::Array[String?]?
 
   # <!--
   #   rdoc-file=lib/csv.rb
@@ -2031,7 +2063,7 @@ class CSV < Object
   #     File.write(path, string)
   #     CSV.read(path, headers: true) # => #<CSV::Table mode:col_or_row row_count:4>
   #
-  def self.read: (String path, ?::Hash[Symbol, untyped] options) -> ::Array[::Array[String?]]
+  def self.read: (String path, ?(parsing_options | generating_options) options) -> ::Array[::Array[String?]]
 
   # <!--
   #   rdoc-file=lib/csv.rb

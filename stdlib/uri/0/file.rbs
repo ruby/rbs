@@ -4,6 +4,11 @@ module URI
   # The "file" URI is defined by RFC8089.
   #
   class File < Generic
+    type build_opts = {
+      ?host: String?,
+      ?path: String?
+    }
+
     # <!-- rdoc-file=lib/uri/file.rb -->
     # A Default port of nil for URI::File.
     #
@@ -47,7 +52,7 @@ module URI
     #     uri3.to_s  # => "file:///path/my%20file.txt"
     #
     def self.build: (Array[String] args) -> URI::File
-                  | ({ host: String?, path: String? }) -> URI::File
+                  | (build_opts args) -> URI::File
 
     # <!--
     #   rdoc-file=lib/uri/file.rb
