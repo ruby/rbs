@@ -6,6 +6,14 @@ This is a guide for testing core/stdlib types.
 
 We support writing tests for core/stdlib signatures.
 
+### Setup
+
+To prepare, execute the following command.
+
+```
+$ bundle exec rake compile:rbs_extension
+```
+
 ### Writing tests
 
 First, execute `generate:stdlib_test` rake task with a class name that you want to test.
