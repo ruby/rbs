@@ -132,6 +132,21 @@ VALUE rbs_tuple(VALUE types, VALUE location) {
   );
 }
 
+VALUE rbs_tuple2(VALUE types, VALUE location, VALUE rest_type) {
+  VALUE args = rb_hash_new();
+  rb_hash_aset(args, ID2SYM(rb_intern("types")), types);
+  rb_hash_aset(args, ID2SYM(rb_intern("location")), location);
+  if (rest_type) {
+    rb_hash_aset(args, ID2SYM(rb_intern("rest_type")), rest_type);
+  }
+
+  return CLASS_NEW_INSTANCE(
+    RBS_Types_Tuple,
+    1,
+    &args
+  );
+}
+
 VALUE rbs_optional(VALUE type, VALUE location) {
   VALUE args = rb_hash_new();
   rb_hash_aset(args, ID2SYM(rb_intern("type")), type);
