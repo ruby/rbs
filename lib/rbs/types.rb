@@ -1267,7 +1267,7 @@ module RBS
         return_type.has_classish_type?
       end
 
-      def with_nonreturn_void
+      def with_nonreturn_void?
         false
       end
 
