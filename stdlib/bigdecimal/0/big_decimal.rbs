@@ -441,7 +441,10 @@ class BigDecimal < Numeric
   #
   # Related: BigDecimal#power.
   #
-  def **: (Numeric) -> BigDecimal
+  def **: (Integer) -> BigDecimal
+        | (Float) -> (Integer | BigDecimal)
+        | (Rational) -> (Integer | BigDecimal)
+        | (BigDecimal) -> BigDecimal
 
   # <!--
   #   rdoc-file=ext/bigdecimal/bigdecimal.c

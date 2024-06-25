@@ -84,8 +84,10 @@ class Rational < Numeric
   #     Rational(1, 2) ** 0               #=> (1/1)
   #     Rational(1, 2) ** 0.0             #=> 1.0
   #
-  def **: (Complex) -> Complex
-        | (Numeric) -> Numeric
+  def **: (Integer) -> Rational
+        | (Float) -> (Float | Complex)
+        | (Rational) -> (Float | Rational | Complex)
+        | (Complex) -> (Rational | Complex)
 
   # <!--
   #   rdoc-file=rational.c
