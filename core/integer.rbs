@@ -230,9 +230,9 @@ class Integer < Numeric
   #     2 ** Rational(3, 1) # => (8/1)
   #     2 ** Complex(3, 0)  # => (8+0i)
   #
-  def **: (Integer) -> Numeric
-        | (Float) -> Numeric
-        | (Rational) -> Numeric
+  def **: (Integer) -> (Integer | Rational)
+        | (Float) -> (Float | Complex)
+        | (Rational) -> (Rational | Float | Complex)
         | (Complex) -> Complex
 
   # <!--

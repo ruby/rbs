@@ -4,3 +4,8 @@
 
 Set[Integer]
 Enumerable[Integer]#to_set
+Integer#**
+Float#**
+Rational#**
+Complex#**
+BigDecimal#**

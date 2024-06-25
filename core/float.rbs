@@ -142,8 +142,10 @@ class Float < Numeric
   #     f ** Rational(2, 1) # => 9.8596
   #     f ** Complex(2, 0)  # => (9.8596+0i)
   #
-  def **: (Complex) -> Complex
-        | (Numeric) -> Float
+  def **: (Integer) -> Float
+        | (Float) -> (Float | Complex)
+        | (Rational) -> (Float | Complex)
+        | (Complex) -> Complex
 
   # <!--
   #   rdoc-file=numeric.c
