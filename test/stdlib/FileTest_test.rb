@@ -6,7 +6,7 @@ class FileTestSingletonTest < Test::Unit::TestCase
   testing "singleton(::FileTest)"
 
 
-  def with_path_io(path: __FILE__, io: default=IO.open(IO.sysopen(File.expand_path(__FILE__))), &block)
+  def with_path_io(path: __FILE__, io: default=File.open(File.expand_path(__FILE__)), &block)
     with_path(path, &block)
     with_io(io, &block)
   ensure
