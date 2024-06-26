@@ -163,14 +163,14 @@ class ResolvDNSConfigSingletonTest < Test::Unit::TestCase
   testing 'singleton(::Resolv::DNS::Config)'
 
   def test_default_config_hash
-    assert_send_type  '() -> Hash[Symbol, untyped]',
+    assert_send_type  '() -> ::Resolv::DNS::config_options',
       Resolv::DNS::Config, :default_config_hash
-    assert_send_type  '(String) -> Hash[Symbol, untyped]',
+    assert_send_type  '(String) -> ::Resolv::DNS::config_options',
       Resolv::DNS::Config, :default_config_hash, "/etc/resolv.conf"
   end
 
   def test_parse_resolv_conf
-    assert_send_type  '(String) -> Hash[Symbol, untyped]',
+    assert_send_type  '(String) -> ::Resolv::DNS::config_options',
       Resolv::DNS::Config, :parse_resolv_conf, "/etc/resolv.conf"
   end
 end

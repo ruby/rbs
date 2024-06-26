@@ -156,6 +156,14 @@ Resolv::DefaultResolver: Resolv
 # *   etc.
 #
 class Resolv::DNS
+  type config_options = {
+    nameserver: String | Array[String],
+    search: String | Array[String],
+    ndots: Integer,
+    ?nameserver_port: Array[[String, Integer]],
+    ?raise_timeout_errors: bool
+  }
+
   type ip_address = Resolv::IPv4 | Resolv::IPv6
 
   type dns_name = Name | String
@@ -371,7 +379,7 @@ class Resolv::DNS
   #                     :search => ['ruby-lang.org'],
   #                     :ndots => 1)
   #
-  def initialize: (?String | Hash[Symbol, untyped] config_info) -> untyped
+  def initialize: (?String | config_options config_info) -> untyped
 
   def use_ipv6?: () -> untyped
 end
@@ -391,9 +399,9 @@ Resolv::DNS::RequestIDMutex: Thread::Mutex
 Resolv::DNS::UDPSize: Integer
 
 class Resolv::DNS::Config
-  def self.default_config_hash: (?String filename) -> Hash[Symbol, untyped]
+  def self.default_config_hash: (?String filename) -> Resolv::DNS::config_options
 
-  def self.parse_resolv_conf: (String filename) -> Hash[Symbol, untyped]
+  def self.parse_resolv_conf: (String filename) -> Resolv::DNS::config_options
 
   public
 
@@ -413,7 +421,7 @@ class Resolv::DNS::Config
 
   private
 
-  def initialize: (?String | Hash[Symbol, untyped] config_info) -> untyped
+  def initialize: (?String | Resolv::DNS::config_options config_info) -> untyped
 end
 
 Resolv::DNS::Config::InitialTimeout: Integer
@@ -1859,7 +1867,7 @@ class Resolv::MDNS < Resolv::DNS
   # Hash
   # :   Must contain :nameserver or :nameserver_port like Resolv::DNS#initialize.
   #
-  def initialize: (?String | Hash[Symbol, untyped] config_info) -> untyped
+  def initialize: (?String | Resolv::DNS::config_options config_info) -> untyped
 end
 
 # <!-- rdoc-file=lib/resolv.rb -->

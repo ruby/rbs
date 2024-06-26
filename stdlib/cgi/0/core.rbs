@@ -273,6 +273,12 @@ class CGI
 
   extend CGI::Util
 
+  type options_hash = {
+     ?accept_charset: String,
+     ?tag_maker: String,
+     ?max_multipart_length: Integer | ^() -> Integer
+  }
+
   # <!--
   #   rdoc-file=lib/cgi/core.rb
   #   - CGI.new(tag_maker) { block }
@@ -352,7 +358,7 @@ class CGI
   # varies according to the REQUEST_METHOD.
   #
   def initialize: (?String tag_maker) ?{ (String name, String value) -> void } -> void
-                | (Hash[Symbol, untyped] options_hash) ?{ (String name, String value) -> void } -> void
+                | (options_hash options_hash) ?{ (String name, String value) -> void } -> void
 
   # <!--
   #   rdoc-file=lib/cgi/core.rb
