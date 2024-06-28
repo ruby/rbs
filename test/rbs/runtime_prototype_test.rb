@@ -76,8 +76,6 @@ module RBS
 
         def self.baz: () { (*untyped) -> untyped } -> untyped
 
-        public
-
         alias bar foo
 
         def foo: (untyped foo, ?untyped bar, *untyped baz, untyped a, b: untyped, ?c: untyped, **untyped) -> untyped
@@ -145,8 +143,6 @@ module RBS
 
         def self.baz: () { (*untyped) -> untyped } -> untyped
 
-        public
-
         alias bar foo
 
         def foo: (untyped foo, ?untyped bar, *untyped baz, untyped a, b: untyped, ?c: untyped, **untyped) -> untyped
@@ -191,8 +187,6 @@ module RBS
       class ChildClass < ::RBS::RuntimePrototypeTest::IncludeTests::SuperClass
         def self.foo: () -> untyped
 
-        public
-
         def bar: () -> untyped
 
         def foo: () -> untyped
@@ -200,8 +194,6 @@ module RBS
 
       class SuperClass
         def self.foo: () -> untyped
-
-        public
 
         def foo: () -> untyped
       end
@@ -266,8 +258,6 @@ end
 module RBS
   class RuntimePrototypeTest < ::Test::Unit::TestCase
     class TestForArgumentForwarding
-      public
-
       def foo: (*untyped) { (*untyped) -> untyped } -> untyped
     end
   end
@@ -416,8 +406,6 @@ end
             module RBS
               class RuntimePrototypeTest < ::Test::Unit::TestCase
                 class TestForYield
-                  public
-
                   def m1: () { () -> untyped } -> untyped
 
                   def m2: () { (untyped) -> untyped } -> untyped
@@ -592,8 +580,6 @@ end
               class DefineMethodAlias
                 def self.qux: () -> untyped
 
-                public
-
                 def bar: () -> untyped
 
                 private
@@ -664,8 +650,6 @@ end
 
                 def self.singleton_todo: () -> untyped
 
-                public
-
                 def public_todo: () -> untyped
 
                 private
@@ -685,8 +669,6 @@ end
           module RBS
             class RuntimePrototypeTest < ::Test::Unit::TestCase
               module TodoModule
-                public
-
                 def public_todo: () -> untyped
               end
             end
@@ -952,8 +934,6 @@ end
             class RuntimePrototypeTest < ::Test::Unit::TestCase
               class Redefined
                 def self.constants: () -> untyped
-
-                public
 
                 def class: () -> untyped
               end
