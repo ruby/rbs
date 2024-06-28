@@ -332,8 +332,6 @@ module RBS
 
         public_instance_methods = mod.public_instance_methods.select {|name| target_method?(mod, instance: name) }
         unless public_instance_methods.empty?
-          members << AST::Members::Public.new(location: nil)
-
           public_instance_methods.sort.each do |name|
             method = mod.instance_method(name)
             next if todo_object&.skip_instance_method?(module_name: module_name_absolute, method: method, accessibility: :public)
