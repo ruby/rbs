@@ -3,6 +3,13 @@ require_relative "test_helper"
 class EnumerableTest < StdlibTest
   target Enumerable
 
+  def test_enum_for
+    enumerable.enum_for
+    enumerable.enum_for { 0 }
+    enumerable.enum_for(:each)
+    enumerable.enum_for(:each) { 0 }
+  end
+
   def test_find_all
     enumerable.find_all
     enumerable.find_all { |x| x.even? }
@@ -192,6 +199,13 @@ class EnumerableTest2 < Test::Unit::TestCase
       "(Integer) { (Array[String]) -> void } -> EnumerableTest2::TestEnumerable",
       TestEnumerable.new, :each_slice, 2
     ) do end
+  end
+
+  def test_enum_for
+    assert_send_type(
+      "() ?{ () -> Integer } -> Enumerator[String, EnumerableTest2::TestEnumerable]",
+      TestEnumerable.new, :enum_for
+    )
   end
 
   def test_find_index
