@@ -396,7 +396,7 @@ class Module < Object
   #
   #     Hello there!
   #
-  def class_exec: [U] (*untyped args) { () -> U } -> U
+  def class_exec: [U, V] (*V args) { (*V args) [self: self] -> U } -> U
 
   # <!--
   #   rdoc-file=object.c
