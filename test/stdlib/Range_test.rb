@@ -94,6 +94,11 @@ class RangeTest < StdlibTest
     (1..10).min(3) { |i, j| i <=> j }
   end
 
+  def test_percent
+    (1..10).%(2)
+    ('A'...'Z').%(2) { |s| s.downcase }
+  end
+
   def test_size
     (1..10).size
     ('A'...'Z').size
