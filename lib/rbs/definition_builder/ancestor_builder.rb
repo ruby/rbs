@@ -111,7 +111,7 @@ module RBS
             params: nil,
             super_class: super_class,
             self_types: nil,
-            included_modules: nil,
+            included_modules: [],
             included_interfaces: nil,
             prepended_modules: nil,
             extended_modules: [],
@@ -306,7 +306,7 @@ module RBS
 
         mixin_ancestors(entry,
                         type_name,
-                        included_modules: nil,
+                        included_modules: ancestors.included_modules,
                         included_interfaces: nil,
                         prepended_modules: nil,
                         extended_modules: ancestors.extended_modules,
