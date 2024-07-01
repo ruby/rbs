@@ -111,7 +111,7 @@ module RBS
             params: nil,
             super_class: super_class,
             self_types: nil,
-            included_modules: nil,
+            included_modules: [],
             included_interfaces: nil,
             prepended_modules: nil,
             extended_modules: [],
@@ -306,7 +306,7 @@ module RBS
 
         mixin_ancestors(entry,
                         type_name,
-                        included_modules: nil,
+                        included_modules: ancestors.included_modules,
                         included_interfaces: nil,
                         prepended_modules: nil,
                         extended_modules: ancestors.extended_modules,
@@ -334,7 +334,32 @@ module RBS
           end
       end
 
+      def auto_extended_modules(type_name, resolver)
+        auto_extended_modules = [] #: Array[Definition::Ancestor::Instance]
+
+        mod = env.class_decls[type_name] or raise "Unknown name for include: #{type_name}"
+        mod.decls.each do |mod_decl|
+          mod_decl.decl.annotations.each do |annotation|
+            if annotation.string.start_with? "autoextend:"
+              auto_extended_mod_name = TypeName(annotation.string.split(":", 2)[1])
+              auto_extended_mod_name = resolver.resolve(auto_extended_mod_name, context: mod_decl.context) || auto_extended_mod_name
+
+              auto_extend_source = AST::Members::Extend.new(
+                name: auto_extended_mod_name,
+                args: [],
+                annotations: [],
+                location: nil,
+                comment: nil,
+              )
+              auto_extended_modules << Definition::Ancestor::Instance.new(name: auto_extended_mod_name, args: [], source: auto_extend_source)
+            end
+          end
+        end
+        auto_extended_modules
+      end
+
       def mixin_ancestors0(decl, type_name, align_params:, included_modules:, included_interfaces:, extended_modules:, prepended_modules:, extended_interfaces:)
+        resolver = Resolver::TypeNameResolver.new(env)
         decl.each_mixin do |member|
           case member
           when AST::Members::Include
@@ -348,6 +373,12 @@ module RBS
 
               module_name = env.normalize_module_name(module_name)
               included_modules << Definition::Ancestor::Instance.new(name: module_name, args: module_args, source: member)
+
+              if extended_modules
+                auto_extended_modules(module_name, resolver).each do |mod|
+                  extended_modules << mod unless extended_modules.include?(mod)
+                end
+              end
             when member.name.interface? && included_interfaces
               NoMixinFoundError.check!(member.name, env: env, member: member)
 
@@ -375,7 +406,8 @@ module RBS
               NoMixinFoundError.check!(member.name, env: env, member: member)
 
               module_name = env.normalize_module_name(module_name)
-              extended_modules << Definition::Ancestor::Instance.new(name: module_name, args: module_args, source: member)
+              mod = Definition::Ancestor::Instance.new(name: module_name, args: module_args, source: member)
+              extended_modules << mod unless extended_modules.include?(mod)
             when member.name.interface? && extended_interfaces
               NoMixinFoundError.check!(member.name, env: env, member: member)
 
