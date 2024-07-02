@@ -675,7 +675,7 @@ module Kernel : BasicObject
                     | (int | _ToR rational_like, exception: bool) -> Rational?
                     | (int | _ToR numer, ?int | _ToR denom, ?exception: true) -> Rational
                     | (int | _ToR numer, ?int | _ToR denom, exception: bool) -> Rational?
-                    | [T] (Numeric&_RationalDiv[T] numer, Numeric denom, ?exception: bool) -> T
+                    | [T] (Numeric & _RationalDiv[T] numer, Numeric denom, ?exception: bool) -> T
                     | [T < Numeric] (T value, 1, ?exception: bool) -> T
                     | (untyped, ?untyped, ?exception: bool) -> Rational?
 

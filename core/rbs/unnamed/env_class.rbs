@@ -231,8 +231,8 @@ module RBS
       #
       %a{annotate:rdoc:copy:ENV.fetch}
       def fetch: (String name) -> String
-              | [X] (String name, X default) -> (String | X)
-              | [X] (String name) { (String) -> X } -> (String | X)
+               | [X] (String name, X default) -> (String | X)
+               | [X] (String name) { (String) -> X } -> (String | X)
 
       # <!--
       #   rdoc-file=hash.c
@@ -382,7 +382,7 @@ module RBS
       #
       %a{annotate:rdoc:copy:ENV.each_pair}
       def each_pair: () -> ::Enumerator[[ String, String ], self]
-                  | () { ([ String, String ]) -> void } -> self
+                   | () { ([ String, String ]) -> void } -> self
 
       # <!--
       #   rdoc-file=hash.c
@@ -479,7 +479,7 @@ module RBS
       #
       %a{annotate:rdoc:copy:ENV.delete_if}
       def delete_if: () -> ::Enumerator[[ String, String ], self]
-                  | () { (String name, String value) -> boolish } -> self
+                   | () { (String name, String value) -> boolish } -> self
 
       # <!--
       #   rdoc-file=hash.c
@@ -501,7 +501,7 @@ module RBS
       #
       %a{annotate:rdoc:copy:ENV.keep_if}
       def keep_if: () -> ::Enumerator[[ String, String ], self]
-                | () { (String name, String value) -> boolish } -> self
+                 | () { (String name, String value) -> boolish } -> self
 
       # <!--
       #   rdoc-file=hash.c
@@ -588,7 +588,7 @@ module RBS
       #
       %a{annotate:rdoc:copy:ENV.reject!}
       def reject!: () -> ::Enumerator[[ String, String ], self?]
-                | () { (String name, String value) -> boolish } -> self?
+                 | () { (String name, String value) -> boolish } -> self?
 
       # <!--
       #   rdoc-file=hash.c
@@ -674,7 +674,7 @@ module RBS
       #
       %a{annotate:rdoc:copy:ENV.select!}
       def select!: () -> ::Enumerator[[ String, String ], self?]
-                | () { (String name, String value) -> boolish } -> self?
+                 | () { (String name, String value) -> boolish } -> self?
 
       # <!--
       #   rdoc-file=hash.c

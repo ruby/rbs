@@ -154,7 +154,7 @@ module Zlib
     # SYNC_FLUSH, FULL_FLUSH and FINISH.
     #
     def flush: (?Integer flush) -> String
-             | (?Integer flush) {(String chunk) -> nil } -> nil
+             | (?Integer flush) { (String chunk) -> nil } -> nil
 
     # <!--
     #   rdoc-file=ext/zlib/zlib.c

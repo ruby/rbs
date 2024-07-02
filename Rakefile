@@ -110,7 +110,13 @@ task :raap => :compile do
 end
 
 task :rubocop do
-  sh "rubocop --parallel"
+  format = if ENV["CI"]
+    "github"
+  else
+    "progress"
+  end
+
+  sh "rubocop --parallel --format #{format}"
 end
 
 namespace :generate do
