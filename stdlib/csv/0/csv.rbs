@@ -2289,6 +2289,33 @@ class CSV::Row < Object
 
   # <!--
   #   rdoc-file=lib/csv/row.rb
+  #   - CSV::Row.new(headers, fields, header_row = false) -> csv_row
+  # -->
+  # Returns the new CSV::Row instance constructed from arguments `headers` and
+  # `fields`; both should be Arrays; note that the fields need not be Strings:
+  #     row = CSV::Row.new(['Name', 'Value'], ['foo', 0])
+  #     row # => #<CSV::Row "Name":"foo" "Value":0>
+  #
+  # If the Array lengths are different, the shorter is `nil`-filled:
+  #     row = CSV::Row.new(['Name', 'Value', 'Date', 'Size'], ['foo', 0])
+  #     row # => #<CSV::Row "Name":"foo" "Value":0 "Date":nil "Size":nil>
+  #
+  # Each CSV::Row object is either a *field row* or a *header row*; by default, a
+  # new row is a field row;  for the row created above:
+  #     row.field_row? # => true
+  #     row.header_row? # => false
+  #
+  # If the optional argument `header_row` is given as `true`, the created row is a
+  # header row:
+  #     row = CSV::Row.new(['Name', 'Value'], ['foo', 0], header_row = true)
+  #     row # => #<CSV::Row "Name":"foo" "Value":0>
+  #     row.field_row? # => false
+  #     row.header_row? # => true
+  #
+  def initialize: (Array[untyped] headers, Array[untyped] fields, ?header_row: bool) -> void
+
+  # <!--
+  #   rdoc-file=lib/csv/row.rb
   #   - row << [header, value] -> self
   #   - row << hash -> self
   #   - row << value -> self
