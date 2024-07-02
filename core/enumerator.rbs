@@ -130,6 +130,13 @@
 class Enumerator[unchecked out Elem, out Return] < Object
   include Enumerable[Elem]
 
+  # A convenience interface for `each` with optional block
+  #
+  interface _Each[out E, out R]
+    def each: () { (E) -> void } -> R
+            | () -> Enumerator[E, R]
+  end
+
   # <!--
   #   rdoc-file=enumerator.c
   #   - Enumerator.produce(initial = nil) { |prev| block } -> enumerator
