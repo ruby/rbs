@@ -146,7 +146,7 @@ class Integer < Numeric
   #
   # Raises an exception unless `object.to_int` returns an Integer object.
   #
-  def self.try_convert: (int) -> Integer
+  def self.try_convert: (int object) -> Integer
                       | (untyped) -> Integer?
 
   # <!--
@@ -312,7 +312,7 @@ class Integer < Numeric
   #
   def <: (Integer other) -> bool
        | (Float other) -> bool
-       | [C < Numeric::_Coerce[self, X, Y], X < Numeric::_OpLt[Y, Z], Y, Z] (C other) -> Z
+       | [C < Numeric::_Coerce[self, X, Y], X < Numeric::_OpLt[Y], Y] (C other) -> bool
 
   # <!--
   #   rdoc-file=numeric.c
@@ -348,7 +348,7 @@ class Integer < Numeric
   #
   def <=: (Integer other) -> bool
         | (Float other) -> bool
-        | [C < Numeric::_Coerce[self, X, Y], X < Numeric::_OpLe[Y, Z], Y, Z] (C other) -> Z
+        | [C < Numeric::_Coerce[self, X, Y], X < Numeric::_OpLe[Y], Y] (C other) -> bool
 
   # <!--
   #   rdoc-file=numeric.c
@@ -376,7 +376,7 @@ class Integer < Numeric
   # This method is the basis for comparisons in module Comparable.
   #
   def <=>: (Integer | Float other) -> (-1 | 0 | 1)
-         | (untyped) -> Integer?
+         | (untyped) -> (-1 | 0 | 1)?
 
   # <!-- rdoc-file=numeric.c -->
   # Returns `true` if `self` is numerically equal to `other`; `false` otherwise.
@@ -417,7 +417,7 @@ class Integer < Numeric
   #
   def >: (Integer other) -> bool
        | (Float other) -> bool
-       | [C < Numeric::_Coerce[self, X, Y], X < Numeric::_OpGt[Y, Z], Y, Z] (C other) -> Z
+       | [C < Numeric::_Coerce[self, X, Y], X < Numeric::_OpGt[Y], Y] (C other) -> bool
 
   # <!--
   #   rdoc-file=numeric.c
@@ -436,7 +436,7 @@ class Integer < Numeric
   #
   def >=: (Integer other) -> bool
         | (Float other) -> bool
-        | [C < Numeric::_Coerce[self, X, Y], X < Numeric::_OpGe[Y, Z], Y, Z] (C other) -> Z
+        | [C < Numeric::_Coerce[self, X, Y], X < Numeric::_OpGe[Y], Y] (C other) -> bool
 
   # <!--
   #   rdoc-file=numeric.c
@@ -494,7 +494,7 @@ class Integer < Numeric
   # Raises an exception if the slice cannot be constructed.
   #
   def []: (int offset, ?int size) -> Integer
-        | (range[int] range) -> Integer # not quite
+        | (range[int] range) -> Integer
 
   # <!--
   #   rdoc-file=numeric.c
@@ -658,11 +658,9 @@ class Integer < Numeric
     T1 < Numeric::_OpSub[T2, T3],
     T2,
     T3 < Numeric::_Coerce[self, T4, T5],
-    T4 < Numeric::_Div[T5, T6],
-    T5,
-    T6 < Numeric::_OpUNeg[T7],
-    T7
-  ] (T0 other) -> T7
+    T4 < Numeric::_Div[T5],
+    T5
+  ] (T0 other) -> Integer
 
   # <!--
   #   rdoc-file=numeric.c
@@ -740,7 +738,7 @@ class Integer < Numeric
   #     Raises an exception if +numeric+ does not have method +div+.
   #
   def div: (Integer | float other) -> Integer
-         | [C < Numeric::_Coerce[self, X, Y], X < Numeric::_Div[Y, Z], Y, Z] (C other) -> Z
+         | [C < Numeric::_Coerce[self, X, Y], X < Numeric::_Div[Y], Y] (C other) -> Integer
 
   # <!--
   #   rdoc-file=numeric.c
@@ -767,8 +765,8 @@ class Integer < Numeric
   #     13.divmod(Rational(4, 1)) # => [3, (1/1)]
   #
   def divmod: (Integer other) -> [Integer, Integer]
-            | (Float other) -> [Float, Float]
-            | [C < Numeric::_Coerce[self, X, Y], X < Numeric::_DivMod[Y, Z], Y, Z] (C other) -> Z
+            | (float other) -> [Float, Float]
+            | [C < Numeric::_Coerce[self, X, Y], X < Numeric::_Divmod[Y, R], Y, R] (C other) -> [Integer, R]
 
   # <!--
   #   rdoc-file=numeric.c
@@ -788,8 +786,10 @@ class Integer < Numeric
   #
   # With no block given, returns an Enumerator.
   #
-  def downto: (Numeric limit) -> Enumerator[Integer, self]
-            | (Numeric limit) { (Integer i) -> void } -> Integer
+  def downto: (Integer | Float limit) -> -> Enumerator[Integer, self]
+            | (Integer | Float limit) { (Integer i) -> void } -> self
+            | [C < Numeric::_Coerce[self, X, Y], X < Numeric::_OpGe[Y], Y] (C limit) -> Enumerator[Integer, self]
+            | [C < Numeric::_Coerce[self, X, Y], X < Numeric::_OpGe[Y], Y] (C limit) { (Integer i) -> void } -> Integer
 
   # <!--
   #   rdoc-file=numeric.rb
@@ -814,7 +814,7 @@ class Integer < Numeric
   # Raises an exception if `numeric` cannot be converted to a Float.
   #
   def fdiv: (Integer | float other) -> Float
-          | [C < Numeric::_Coerce[self, X, Y], X < Numeric::_Div[Y, _ToF], Y] (C other) -> Float
+          | [C < Numeric::_Coerce[self, X, Y], X < Numeric::_Div[Y], Y] (C other) -> Float
 
   # <!--
   #   rdoc-file=numeric.c
@@ -1011,7 +1011,7 @@ class Integer < Numeric
          | (Float) -> (Float | Complex)
          | (Rational) -> (Float | Rational | Complex)
          | (Complex) -> Complex
-
+         | __todo__
   # <!--
   #   rdoc-file=numeric.c
   #   - pred -> next_integer
@@ -1032,7 +1032,7 @@ class Integer < Numeric
   # Returns the value as a rational.  The optional argument `eps` is always
   # ignored.
   #
-  def rationalize: (?Numeric _ignored_eps) -> Rational
+  def rationalize: (?untyped _ignored_eps) -> Rational
 
   # <!--
   #   rdoc-file=numeric.c
@@ -1059,7 +1059,7 @@ class Integer < Numeric
                | (Float) -> Float
                | (Rational) -> Rational
                | (Numeric) -> Numeric
-
+  | __todo__
   # <!--
   #   rdoc-file=numeric.c
   #   - round(ndigits= 0, half: :up) -> integer
@@ -1215,8 +1215,6 @@ class Integer < Numeric
   #
   def to_s: (?int base) -> String
 
-  alias inspect to_s
-
   # <!--
   #   rdoc-file=numeric.c
   #   - truncate(ndigits = 0) -> integer
@@ -1258,8 +1256,10 @@ class Integer < Numeric
   #
   # With no block given, returns an Enumerator.
   #
-  def upto: (Numeric limit) -> Enumerator[Integer, self]
-          | (Numeric limit) { (Integer i) -> void } -> Integer
+  def upto: (Integer | Float limit) -> -> Enumerator[Integer, self]
+          | (Integer | Float limit) { (Integer i) -> void } -> self
+          | [C < Numeric::_Coerce[self, X, Y], X < Numeric::_OpGe[Y], Y] (C limit) -> Enumerator[Integer, self]
+          | [C < Numeric::_Coerce[self, X, Y], X < Numeric::_OpGe[Y], Y] (C limit) { (Integer i) -> void } -> Integer
 
   # <!--
   #   rdoc-file=numeric.rb

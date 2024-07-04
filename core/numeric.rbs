@@ -168,8 +168,64 @@ class Numeric
     def coerce: (Other other) -> [EquivOther, EquivSelf]
   end
 
+  interface _OpAdd[Other, Return]
+    def +: (Other other) -> Return
+  end
+
   interface _OpSub[Other, Return]
     def -: (Other other) -> Return
+  end
+
+  interface _OpMul[Other, Return]
+    def *: (Other other) -> Return
+  end
+
+  interface _OpDiv[Other, Return]
+    def /: (Other other) -> Return
+  end
+
+  interface _OpMod[Other, Return]
+    def %: (Other other) -> Return
+  end
+
+  interface _OpPow[Other, Return]
+    def **: (Other other) -> Return
+  end
+
+  interface _OpAnd[Other, Return]
+    def &: (Other other) -> Return
+  end
+
+  interface _OpOr[Other, Return]
+    def |: (Other other) -> Return
+  end
+
+  interface _OpXor[Other, Return]
+    def ^: (Other other) -> Return
+  end
+
+  interface _OpLt[Other]
+    def <: (Other other) -> bool
+  end
+
+  interface _OpLe[Other]
+    def <=: (Other other) -> bool
+  end
+
+  interface _OpGt[Other]
+    def >: (Other other) -> bool
+  end
+
+  interface _OpGe[Other]
+    def >=: (Other other) -> bool
+  end
+
+  interface _Div[Other]
+    def div: (Other other) -> Integer
+  end
+
+  interface _Divmod[Other, Remainder]
+    def divmod: (Other other) -> [Integer, Remainder]
   end
 
   public
