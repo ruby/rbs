@@ -51,6 +51,7 @@ module VersionHelper
 end
 
 module WithStdlibAliases
+  # def with_coerce()
   def with_timeout(seconds: 1, nanoseconds: 0)
     unless block_given?    
       return RBS::UnitTest::Convertibles::WithAliases::WithEnum.new(

@@ -106,9 +106,9 @@ class IntegerInstanceTest < Test::Unit::TestCase
   end
 
   def test_op_uneg
-    omit "todo: #{__method__}"
     with_random_Integers do |integer|
-
+      assert_send_type  '() -> Integer',
+                        integer, :-@
     end
   end
 
@@ -141,16 +141,27 @@ class IntegerInstanceTest < Test::Unit::TestCase
   end
 
   def test_op_cmp
-    omit "todo: #{__method__}"
     with_random_Integers do |integer|
-
+      assert_send_type  '(Integer) -> (-1 | 0 | 1)',
+                        integer, :<=>, 123
+      assert_send_type  '(Float) -> (-1 | 0 | 1)',
+                        integer, :<=>, 12.3
+      
+      with_untyped do |untyped|
+        assert_send_type  '(untyped) -> (-1 | 0 | 1)?',
+                          integer, :<=>, untyped
+      end
     end
   end
 
   def test_op_eq(method: :==)
-    omit "todo: #{__method__}"
     with_random_Integers do |integer|
+      with_untyped do |untyped|
+        defined? untyped.== or def untyped.==(r) = true
 
+        assert_send_type  '(untyped) -> bool',
+                          integer, method, untyped
+      end
     end
   end
 
@@ -488,9 +499,14 @@ class IntegerInstanceTest < Test::Unit::TestCase
   end
 
   def test_to_s(method: :to_s)
-    omit "todo: #{__method__}"
     with_random_Integers do |integer|
+      assert_send_type  '() -> String',
+                        integer, method
 
+      with_int 31 do |base|
+        assert_send_type  '(int) -> String',
+                          integer, method, base
+      end
     end
   end
 
