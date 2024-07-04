@@ -164,6 +164,14 @@ class Numeric
 
   type round_mode = :up | :down | :even | 'up' | 'down' | 'even' | str
 
+  interface _Coerce[Other, EquivOther, EquivSelf]
+    def coerce: (Other other) -> [EquivOther, EquivSelf]
+  end
+
+  interface _OpSub[Other, Return]
+    def -: (Other other) -> Return
+  end
+
   public
 
   # <!--

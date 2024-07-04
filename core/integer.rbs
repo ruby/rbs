@@ -149,8 +149,6 @@ class Integer < Numeric
   def self.try_convert: (int) -> Integer
                       | (untyped) -> Integer?
 
-  public
-
   # <!--
   #   rdoc-file=numeric.c
   #   - self % other -> real_number
@@ -178,10 +176,9 @@ class Integer < Numeric
   #     10 % 3.0            # => 1.0
   #     10 % Rational(3, 1) # => (1/1)
   #
-  def %: (Float) -> Float
-       | (Rational) -> Rational
-       | (Integer) -> Integer
-       | (Numeric) -> Numeric
+  def %: (Integer other) -> Integer
+       | (Float other) -> Float
+       | [C < Numeric::_Coerce[self, X, Y], X < Numeric::_OpMod[Y, Z], Y, Z] (C other) -> Z
 
   # <!--
   #   rdoc-file=numeric.c
@@ -196,7 +193,8 @@ class Integer < Numeric
   #
   # Related: Integer#| (bitwise OR), Integer#^ (bitwise EXCLUSIVE OR).
   #
-  def &: (Integer) -> Integer
+  def &: (Integer other) -> Integer
+       | [C < Numeric::_Coerce[self, X, Y], X < Numeric::_OpAnd[Y, Z], Y, Z] (C other) -> Z
 
   # <!--
   #   rdoc-file=numeric.c
@@ -211,10 +209,10 @@ class Integer < Numeric
   #     4 * Rational(1, 3) # => (4/3)
   #     4 * Complex(2, 0)  # => (8+0i)
   #
-  def *: (Float) -> Float
-       | (Rational) -> Rational
-       | (Complex) -> Complex
-       | (Integer) -> Integer
+  def *: (Integer other) -> Integer
+       | (Float other) -> Float
+       | (Complex other) -> Complex
+       | [C < Numeric::_Coerce[self, X, Y], X < Numeric::_OpMul[Y, Z], Y, Z] (C other) -> Z
 
   # <!--
   #   rdoc-file=numeric.c
@@ -230,10 +228,9 @@ class Integer < Numeric
   #     2 ** Rational(3, 1) # => (8/1)
   #     2 ** Complex(3, 0)  # => (8+0i)
   #
-  def **: (Integer) -> Numeric
-        | (Float) -> Numeric
-        | (Rational) -> Numeric
-        | (Complex) -> Complex
+  def **: (Integer other) -> (Integer | Rational)
+        | (Float other) -> (Float | Complex)
+        | [C < Numeric::_Coerce[self, X, Y], X < Numeric::_OpPow[Y, Z], Y, Z] (C other) -> Z
 
   # <!--
   #   rdoc-file=numeric.c
@@ -248,10 +245,10 @@ class Integer < Numeric
   #     2 + Rational(2, 1) # => (4/1)
   #     2 + Complex(2, 0)  # => (4+0i)
   #
-  def +: (Integer) -> Integer
-       | (Float) -> Float
-       | (Rational) -> Rational
-       | (Complex) -> Complex
+  def +: (Integer other) -> Integer
+       | (Float other) -> Float
+       | (Complex other) -> Complex
+       | [C < Numeric::_Coerce[self, X, Y], X < Numeric::_OpAdd[Y, Z], Y, Z] (C other) -> Z
 
   # <!--
   #   rdoc-file=numeric.c
@@ -266,10 +263,9 @@ class Integer < Numeric
   #     4 - Rational(2, 1) # => (2/1)
   #     4 - Complex(2, 0)  # => (2+0i)
   #
-  def -: (Integer) -> Integer
-       | (Float) -> Float
-       | (Rational) -> Rational
-       | (Complex) -> Complex
+  def -: (Integer other) -> Integer
+       | (Float other) -> Float
+       | [C < Numeric::_Coerce[self, X, Y], X < Numeric::_OpSub[Y, Z], Y, Z] (C other) -> Z
 
   # <!--
   #   rdoc-file=numeric.rb
@@ -296,10 +292,9 @@ class Integer < Numeric
   #      4 / Rational(3, 1) # => (4/3)
   #      4 / Complex(3, 0)  # => ((4/3)+0i)
   #
-  def /: (Integer) -> Integer
-       | (Float) -> Float
-       | (Rational) -> Rational
-       | (Complex) -> Complex
+  def /: (Integer other) -> Integer
+       | (Float other) -> Float
+       | [C < Numeric::_Coerce[self, X, Y], X < Numeric::_OpDiv[Y, Z], Y, Z] (C other) -> Z
 
   # <!--
   #   rdoc-file=numeric.c
@@ -315,7 +310,9 @@ class Integer < Numeric
   #
   #     Raises an exception if the comparison cannot be made.
   #
-  def <: (Numeric) -> bool
+  def <: (Integer other) -> bool
+       | (Float other) -> bool
+       | [C < Numeric::_Coerce[self, X, Y], X < Numeric::_OpLt[Y, Z], Y, Z] (C other) -> Z
 
   # <!--
   #   rdoc-file=numeric.c
@@ -332,7 +329,7 @@ class Integer < Numeric
   #
   # Related: Integer#>>.
   #
-  def <<: (int) -> Integer
+  def <<: (int count) -> Integer
 
   # <!--
   #   rdoc-file=numeric.c
@@ -349,7 +346,9 @@ class Integer < Numeric
   #
   # Raises an exception if the comparison cannot be made.
   #
-  def <=: (Numeric) -> bool
+  def <=: (Integer other) -> bool
+        | (Float other) -> bool
+        | [C < Numeric::_Coerce[self, X, Y], X < Numeric::_OpLe[Y, Z], Y, Z] (C other) -> Z
 
   # <!--
   #   rdoc-file=numeric.c
@@ -416,7 +415,9 @@ class Integer < Numeric
   #
   #     Raises an exception if the comparison cannot be made.
   #
-  def >: (Numeric) -> bool
+  def >: (Integer other) -> bool
+       | (Float other) -> bool
+       | [C < Numeric::_Coerce[self, X, Y], X < Numeric::_OpGt[Y, Z], Y, Z] (C other) -> Z
 
   # <!--
   #   rdoc-file=numeric.c
@@ -433,7 +434,9 @@ class Integer < Numeric
   #
   # Raises an exception if the comparison cannot be made.
   #
-  def >=: (Numeric) -> bool
+  def >=: (Integer other) -> bool
+        | (Float other) -> bool
+        | [C < Numeric::_Coerce[self, X, Y], X < Numeric::_OpGe[Y, Z], Y, Z] (C other) -> Z
 
   # <!--
   #   rdoc-file=numeric.c
@@ -450,7 +453,7 @@ class Integer < Numeric
   #
   # Related: Integer#<<.
   #
-  def >>: (int) -> Integer
+  def >>: (int count) -> Integer
 
   # <!--
   #   rdoc-file=numeric.c
@@ -490,9 +493,8 @@ class Integer < Numeric
   #
   # Raises an exception if the slice cannot be constructed.
   #
-  def []: (int) -> Integer
-        | (int i, int len) -> Integer
-        | (Range[int]) -> Integer
+  def []: (int offset, ?int size) -> Integer
+        | (range[int] range) -> Integer # not quite
 
   # <!--
   #   rdoc-file=numeric.c
@@ -507,7 +509,8 @@ class Integer < Numeric
   #
   # Related: Integer#& (bitwise AND), Integer#| (bitwise OR).
   #
-  def ^: (Integer) -> Integer
+  def ^: (Integer other) -> Integer
+       | [C < Numeric::_Coerce[self, X, Y], X < Numeric::_OpXor[Y, Z], Y, Z] (C other) -> Z
 
   # <!--
   #   rdoc-file=numeric.rb
@@ -650,7 +653,16 @@ class Integer < Numeric
   #
   #     3.ceildiv(1.2) # => 3
   #
-  def ceildiv: (Numeric other) -> Integer <-- todo
+  def ceildiv: [
+    T0 < Numeric::_Coerce[0, T1, T2],
+    T1 < Numeric::_OpSub[T2, T3],
+    T2,
+    T3 < Numeric::_Coerce[self, T4, T5],
+    T4 < Numeric::_Div[T5, T6],
+    T5,
+    T6 < Numeric::_OpUNeg[T7],
+    T7
+  ] (T0 other) -> T7
 
   # <!--
   #   rdoc-file=numeric.c
@@ -685,7 +697,8 @@ class Integer < Numeric
   #
   #     (0x3FFFFFFFFFFFFFFF+1).coerce(42)   #=> [42, 4611686018427387904]
   #
-  def coerce: (Numeric) -> [ Numeric, Numeric ] <--- todo
+  def coerce: (Integer other) -> [Integer, self]
+            | (float other) -> [Float, Float]
 
   # <!--
   #   rdoc-file=numeric.rb
@@ -726,7 +739,8 @@ class Integer < Numeric
   #
   #     Raises an exception if +numeric+ does not have method +div+.
   #
-  def div: (Numeric) -> Integer
+  def div: (Integer | float other) -> Integer
+         | [C < Numeric::_Coerce[self, X, Y], X < Numeric::_Div[Y, Z], Y, Z] (C other) -> Z
 
   # <!--
   #   rdoc-file=numeric.c
@@ -752,9 +766,9 @@ class Integer < Numeric
   #     13.divmod(4.0)            # => [3, 1.0]
   #     13.divmod(Rational(4, 1)) # => [3, (1/1)]
   #
-  def divmod: (Integer) -> [ Integer, Integer ]
-            | (Float) -> [ Float, Float ]
-            | (Numeric) -> [ Numeric, Numeric ]
+  def divmod: (Integer other) -> [Integer, Integer]
+            | (Float other) -> [Float, Float]
+            | [C < Numeric::_Coerce[self, X, Y], X < Numeric::_DivMod[Y, Z], Y, Z] (C other) -> Z
 
   # <!--
   #   rdoc-file=numeric.c
@@ -799,7 +813,8 @@ class Integer < Numeric
   #
   # Raises an exception if `numeric` cannot be converted to a Float.
   #
-  def fdiv: (Numeric) -> Float
+  def fdiv: (Integer | float other) -> Float
+          | [C < Numeric::_Coerce[self, X, Y], X < Numeric::_Div[Y, _ToF], Y] (C other) -> Float
 
   # <!--
   #   rdoc-file=numeric.c
@@ -837,7 +852,7 @@ class Integer < Numeric
   #     3.gcd(-7)                   #=> 1
   #     ((1<<31)-1).gcd((1<<61)-1)  #=> 1
   #
-  def gcd: (Integer) -> Integer
+  def gcd: (Integer other_int) -> Integer
 
   # <!--
   #   rdoc-file=rational.c
@@ -851,7 +866,7 @@ class Integer < Numeric
   #     3.gcdlcm(-7)                   #=> [1, 21]
   #     ((1<<31)-1).gcdlcm((1<<61)-1)  #=> [1, 4951760154835678088235319297]
   #
-  def gcdlcm: (Integer) -> [ Integer, Integer ]
+  def gcdlcm: (Integer other_int) -> [Integer, Integer]
 
   # <!-- rdoc-file=numeric.c -->
   # Returns a string containing the place-value representation of `self` in radix
@@ -889,7 +904,7 @@ class Integer < Numeric
   #     3.lcm(-7)                   #=> 21
   #     ((1<<31)-1).lcm((1<<61)-1)  #=> 4951760154835678088235319297
   #
-  def lcm: (Integer) -> Integer
+  def lcm: (Integer other_int) -> Integer
 
   # <!--
   #   rdoc-file=numeric.rb
@@ -1267,7 +1282,8 @@ class Integer < Numeric
   #
   # Related: Integer#& (bitwise AND), Integer#^ (bitwise EXCLUSIVE OR).
   #
-  def |: (Integer) -> Integer
+  def |: (Integer other) -> Integer
+       | [C < Numeric::_Coerce[self, X, Y], X < Numeric::_OpOr[Y, Z], Y, Z] (C other) -> Z
 
   # <!--
   #   rdoc-file=numeric.rb
