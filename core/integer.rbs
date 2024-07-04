@@ -128,7 +128,7 @@ class Integer < Numeric
   #
   # Raises an exception if `numeric` is negative.
   #
-  def self.sqrt: (int n) -> Integer
+  def self.sqrt: (int object) -> Integer
 
   # <!--
   #   rdoc-file=numeric.c
