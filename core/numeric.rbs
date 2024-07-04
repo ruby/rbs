@@ -162,6 +162,8 @@
 class Numeric
   include Comparable
 
+  type round_mode = :up | :down | :even | 'up' | 'down' | 'even' | str
+
   public
 
   # <!--
