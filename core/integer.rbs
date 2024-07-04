@@ -786,7 +786,7 @@ class Integer < Numeric
   #
   # With no block given, returns an Enumerator.
   #
-  def downto: (Integer | Float limit) -> -> Enumerator[Integer, self]
+  def downto: (Integer | Float limit) -> Enumerator[Integer, self]
             | (Integer | Float limit) { (Integer i) -> void } -> self
             | [C < Numeric::_Coerce[self, X, Y], X < Numeric::_OpGe[Y], Y] (C limit) -> Enumerator[Integer, self]
             | [C < Numeric::_Coerce[self, X, Y], X < Numeric::_OpGe[Y], Y] (C limit) { (Integer i) -> void } -> Integer
@@ -1011,7 +1011,7 @@ class Integer < Numeric
          | (Float) -> (Float | Complex)
          | (Rational) -> (Float | Rational | Complex)
          | (Complex) -> Complex
-         | __todo__
+         # | __todo__
   # <!--
   #   rdoc-file=numeric.c
   #   - pred -> next_integer
@@ -1059,7 +1059,7 @@ class Integer < Numeric
                | (Float) -> Float
                | (Rational) -> Rational
                | (Numeric) -> Numeric
-  | __todo__
+  # | __todo__
   # <!--
   #   rdoc-file=numeric.c
   #   - round(ndigits= 0, half: :up) -> integer
@@ -1256,7 +1256,7 @@ class Integer < Numeric
   #
   # With no block given, returns an Enumerator.
   #
-  def upto: (Integer | Float limit) -> -> Enumerator[Integer, self]
+  def upto: (Integer | Float limit) -> Enumerator[Integer, self]
           | (Integer | Float limit) { (Integer i) -> void } -> self
           | [C < Numeric::_Coerce[self, X, Y], X < Numeric::_OpGe[Y], Y] (C limit) -> Enumerator[Integer, self]
           | [C < Numeric::_Coerce[self, X, Y], X < Numeric::_OpGe[Y], Y] (C limit) { (Integer i) -> void } -> Integer

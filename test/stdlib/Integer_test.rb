@@ -1,372 +1,48 @@
 require_relative "test_helper"
 
-class IntegerTest < StdlibTest
-  target Integer
 
-  def test_sqrt
-    Integer.sqrt(4)
-    Integer.sqrt(4.0)
-    Integer.sqrt(4/1r)
-    Integer.sqrt(ToInt.new)
-  end
-
-  def test_modulo
-    3 % 1
-    3 % 1.1
-    3 % 1.5r
-  end
-
-  def test_bitwise_ops
-    3 & 1
-    1 ^ 3
-  end
-
-  def test_calc
-    3 * 1
-    3 * 1.0
-    3 * (1r/3)
-
-    3 - 1
-    3 - 0.1
-    3 - 1r
-    3 - 1.to_c
-
-    1 ** 1
-    2 ** 2.1
-    3 ** 3r
-    3 ** 10.to_c
-
-    3 + 1
-    3 + 1.0
-    3 + (1r/3)
-    3 + 10.to_c
-
-    3 / 1
-    3 / 1.0
-    3 / (1r/3)
-    30 / 10.to_c
-  end
-
-  def test_compare
-    3 < 1
-    3 < 1.0
-    3 < 1r
-
-    1 > 1
-    1 > 1.0
-    1 > 1r
-
-    1 <= 3
-    1 <= 1.3
-    1 <= 3r
-
-    1 >= 3
-    1 >= 1.3
-    1 >= 3r
-
-    1 <=> 1
-    1 <=> 1.0
-    1 <=> 3r
-
-    3 === 3.0
-    3 === ""
-  end
-
-  def test_shift
-    1 << 30
-    1 << 30.to_f
-    1 << ToInt.new
-
-    1 >> 30
-    1 >> 30.to_f
-    1 >> ToInt.new
-  end
-
-  def test_aref
-    3[0]
-    3[0.3]
-    3[ToInt.new]
-
-    3[1,2]
-    3[1...3]
-  end
-
-  def test_to_s
-    1.to_s
-    1.to_s(2)
-    1.to_s(3)
-    1.to_s(4)
-    1.to_s(5)
-    1.to_s(6)
-    1.to_s(7)
-    1.to_s(8)
-    1.to_s(9)
-    1.to_s(10)
-    1.to_s(11)
-    1.to_s(12)
-    1.to_s(13)
-    1.to_s(14)
-    1.to_s(15)
-    1.to_s(16)
-    1.to_s(17)
-    1.to_s(18)
-    1.to_s(19)
-    1.to_s(20)
-    1.to_s(21)
-    1.to_s(22)
-    1.to_s(23)
-    1.to_s(24)
-    1.to_s(25)
-    1.to_s(26)
-    1.to_s(27)
-    1.to_s(28)
-    1.to_s(29)
-    1.to_s(30)
-    1.to_s(31)
-    1.to_s(32)
-    1.to_s(33)
-    1.to_s(34)
-    1.to_s(35)
-    1.to_s(36)
-    30.to_s(ToInt.new)
-  end
-
-  def test_abs_abs2
-    3.abs
-    3.abs2
-  end
-
-  def test_allbits?
-    1.allbits?(1)
-    2.allbits?(1)
-    3.allbits?(ToInt.new)
-  end
-
-  def test_angle
-    3.angle()
-  end
-
-  def test_anybits?
-    0xf0.anybits?(0xf)
-    0xf1.anybits?(0xf)
-    0xf1.anybits?(ToInt.new)
-  end
-
-  def test_arg
-    3.arg
-  end
-
-  def test_bit_length
-    3.bit_length
-  end
-
-  def test_ceil
-    3.ceil
-    3.ceil(10)
-    3.ceil(ToInt.new)
-  end
-
-  def test_ceildiv
-    3.ceildiv(10)
-    3.ceildiv(1.3)
-  end
-
-  def test_chr
-    3.chr
-    3.chr(Encoding::UTF_8)
-    3.chr("UTF-7")
-    3.chr(ToStr.new("ASCII-8BIT"))
-  end
-
-  def test_conj
-    3.conj
-  end
-
-  def test_conjugate
-    3.conjugate
-  end
-
-  def test_denominator
-    3.denominator
-  end
-
-  def test_digits
-    3.digits
-    3.digits(3)
-    3.digits(3.0)
-    30.digits(ToInt.new)
-  end
-
-  def test_div
-    30.div(10)
-  end
-
-  def test_div_mod
-    3.divmod(3)
-    40.divmod(1.0)
-    30.divmod(30r)
-  end
-
-  def test_down_to
-    30.downto(1) {}
-    30.downto(31)
-    30.downto(4.2)
-  end
-
-  def test_eql?
-    1.eql?("")
-    3.eql?(1.0)
-  end
-
-  def test_even?
-    30.even?
-  end
-
-  def test_fdiv
-    30.fdiv(30)
-    30.fdiv(3r)
-    30.fdiv(3.1)
-  end
-
-  def test_finite?
-    30.finite?
-  end
-
-  def test_floor
-    30.floor
-    30.floor(3)
-    30.floor(ToInt.new)
-  end
-
-  def test_gcd
-    30.gcd(1)
-  end
-
-  def test_gcdlcm
-    30.gcdlcm(31)
-  end
-
-  def test_infinite?
-    30.infinite?
-  end
-
-  def test_lcm
-    30.lcm(50)
-  end
-
-  def test_magnitude
-    30.magnitude
-  end
-
-  def test_modulo_
-    30.modulo(30)
-    30.modulo(3.1)
-    30.modulo(3r/5)
-  end
-
-  def test_next
-    30.next
-  end
-
-  def test_nobits?
-    0xf0.nobits?(0xf)
-    0xf1.nobits?(0xf)
-    30.nobits?(ToInt.new)
-  end
-
-  def test_nonzero?
-    30.nonzero?
-    0.nonzero?
-  end
-
-  def test_numerator
-    30.numerator
-  end
-
-  def test_pow
-    1.pow(30)
-    1.pow(2.0)
-    1.pow(30.to_c)
-    3.pow(3, 5)
-  end
-
-  def test_quo
-    3.quo(1)
-    3.quo(2.1)
-    3.quo(4r/5)
-    3.quo(10.to_c)
-  end
-
-  def test_rationalize
-    3.rationalize
-    3.rationalize(30)
-  end
-
-  def test_remainder
-    3.remainder(1)
-    3.remainder(1.3)
-    3.remainder(1r/3)
-  end
-
-  def test_round
-    13.round()
-    13.round(half: :up)
-    14.round(-1, half: :down)
-    15.round(ToInt.new)
-  end
-
-  def test_step
-    3.step { break }
-    3.step
-    3.step(10, 2) {}
-    3.step(10, 2)
-    3.step(10, 1.1) {}
-    3.step(10, 1.1)
-
-    3.step(to: 30) { break }
-    3.step(to: 30)
-    3.step(to: 30, by: 100) {}
-    3.step(to: 30, by: 100)
-    3.step(to: 30, by: 10.0) {}
-    3.step(to: 30, by: 10.0)
-  end
-
-  def test_times
-    3.times {}
-    3.times
-  end
-
-  def test_truncate
-    100.truncate
-    100.truncate(10)
-    100.truncate(ToInt.new(-2))
-  end
-
-  def test_upto
-    5.upto(10) {}
-    5.upto(10.1) {}
-  end
-end
-
-
+#     assert_send_type "(Integer) -> Integer",
+#                      1, :pow, 2
+#     assert_send_type "(Integer) -> Rational",
+#                      -2, :pow, -1
+#     assert_send_type "(Integer, Integer) -> Integer",
+#                      1, :pow, 2, 10
+#     assert_send_type "(Float) -> Float",
+#                      1, :pow, 1.0
+#     assert_send_type "(Float) -> Complex",
+#                      -9, :pow, 0.1
+#     assert_send_type "(Rational) -> Float",
+#                      2, :pow, 1/2r
+#     assert_send_type "(Rational) -> Rational",
+#                      1, :pow, 1r
+#     assert_send_type "(Rational) -> Complex",
+#                      -3, :pow, -4/3r
+#     assert_send_type "(Complex) -> Complex",
+#                      1, :pow, 1i
+#   end
+# end
 class IntegerSingletonTest < Test::Unit::TestCase
   include TestHelper
 
   testing "singleton(::Integer)"
 
+  def test_sqrt
+    with_int do |int|
+      assert_send_type  '(int) -> Integer',
+                        Integer, :sqrt, int
+    end
+  end
+
   def test_try_convert
-    assert_send_type(
-      "(Integer) -> Integer",
-      Integer, :try_convert, 10
-    )
-    assert_send_type(
-      "(ToInt) -> Integer",
-      Integer, :try_convert, ToInt.new(10)
-    )
-    assert_send_type(
-      "(String) -> nil",
-      Integer, :try_convert, "10"
-    )
+    with_int do |int|
+      assert_send_type  '(int) -> Integer',
+                        Integer, :try_convert, int
+    end
+
+    with_untyped do |untyped|
+      assert_send_type  '(untyped) -> Integer?',
+                        Integer, :try_convert, untyped
+    end
   end
 end
 
@@ -375,24 +51,486 @@ class IntegerInstanceTest < Test::Unit::TestCase
 
   testing "::Integer"
 
+  def with_random_Integers
+    [0, -1, 100, -123, rand(-10000..10000)].each do |integer|
+      yield integer
+    end
+  end
+
+  def with_random_ints(&block)
+    with_random_Integers do |integer|
+      with_int(integer, &block)
+    end
+  end
+
+  def test_op_mod(method: :%)
+    omit "todo: #{__method__}"
+    with_random_Integers do |integer|
+
+    end
+  end
+
+  def test_op_and
+    omit "todo: #{__method__}"
+    with_random_Integers do |integer|
+
+    end
+  end
+
+  def test_op_mul
+    omit "todo: #{__method__}"
+    with_random_Integers do |integer|
+
+    end
+  end
+
+  def test_op_pow
+    omit "todo: #{__method__}"
+    with_random_Integers do |integer|
+
+    end
+  end
+
+  def test_op_add
+    omit "todo: #{__method__}"
+    with_random_Integers do |integer|
+
+    end
+  end
+
+  def test_op_sub
+    omit "todo: #{__method__}"
+    with_random_Integers do |integer|
+
+    end
+  end
+
+  def test_op_uneg
+    omit "todo: #{__method__}"
+    with_random_Integers do |integer|
+
+    end
+  end
+
+  def test_op_div
+    omit "todo: #{__method__}"
+    with_random_Integers do |integer|
+
+    end
+  end
+
+  def test_op_lt
+    omit "todo: #{__method__}"
+    with_random_Integers do |integer|
+
+    end
+  end
+
+  def test_op_rsh
+    omit "todo: #{__method__}"
+    with_random_Integers do |integer|
+
+    end
+  end
+
+  def test_op_le
+    omit "todo: #{__method__}"
+    with_random_Integers do |integer|
+
+    end
+  end
+
+  def test_op_cmp
+    omit "todo: #{__method__}"
+    with_random_Integers do |integer|
+
+    end
+  end
+
+  def test_op_eq(method: :==)
+    omit "todo: #{__method__}"
+    with_random_Integers do |integer|
+
+    end
+  end
+
+  def test_op_eqq
+    test_op_eq(method: :===)
+  end
+
+  def test_op_gt
+    omit "todo: #{__method__}"
+    with_random_Integers do |integer|
+
+    end
+  end
+
+  def test_op_ge
+    omit "todo: #{__method__}"
+    with_random_Integers do |integer|
+
+    end
+  end
+
+  def test_op_lsh
+    omit "todo: #{__method__}"
+    with_random_Integers do |integer|
+
+    end
+  end
+
+  def test_op_aref
+    omit "todo: #{__method__}"
+    with_random_Integers do |integer|
+
+    end
+  end
+
+  def test_op_xor
+    omit "todo: #{__method__}"
+    with_random_Integers do |integer|
+
+    end
+  end
+
+  def test_abs(method: :abs)
+    with_random_Integers do |integer|
+      assert_send_type  '() -> Integer',
+                        integer, method
+    end
+  end
+
+  def test_allbits?
+    with_random_Integers do |integer|
+      with_random_ints do |mask|
+        assert_send_type  '(int) -> bool',
+                          integer, :allbits?, mask
+      end
+    end
+  end
+
+  def test_anybits?
+    with_random_Integers do |integer|
+      with_random_ints do |mask|
+        assert_send_type  '(int) -> bool',
+                          integer, :anybits?, mask
+      end
+    end
+  end
+
+  def test_bit_length
+    with_random_Integers do |integer|
+      assert_send_type  '() -> Integer',
+                        integer, :bit_length
+    end
+  end
+
+  def test_ceil
+    with_random_Integers do |integer|
+      assert_send_type  '() -> Integer',
+                        integer, :ceil
+
+      with_random_ints do |digits|
+        assert_send_type  '(int) -> Integer',
+                          integer, :ceil, digits
+      end
+    end
+  end
+
+  def test_ceildiv
+    omit "todo: #{__method__}"
+    with_random_Integers do |integer|
+
+    end
+  end
+
+  def test_chr
+    assert_send_type  '() -> String',
+                      'a'.ord, :chr
+
+    with_encoding do |enc|
+      assert_send_type  '(encoding) -> String',
+                        'a'.ord, :chr, enc
+    end
+  end
+
+  def test_coerce
+    with_random_Integers do |integer|
+      assert_send_type  '(Integer) -> [Integer, Integer]',
+                        integer, :coerce, 123
+      
+      with_float do |float|
+        assert_send_type  '(float) -> [Float, Float]',
+                          integer, :coerce, float
+      end
+    end
+  end
+
+  def test_denominator
+    assert_send_type  '() -> 1',
+                      123, :denominator
+  end
+
+  def test_digits
+    with_random_Integers do |integer|
+      integer = integer.abs # to prevent exceptions
+
+      assert_send_type  '() -> Array[Integer]',
+                        integer, :digits
+
+      with_int 16 do |base|
+        assert_send_type  '(int) -> Array[Integer]',
+                          integer, :digits, base
+      end
+    end
+  end
+
+  def test_div
+    omit "todo: #{__method__}"
+    with_random_Integers do |integer|
+
+    end
+  end
+
+  def test_divmod
+    omit "todo: #{__method__}"
+    with_random_Integers do |integer|
+
+    end
+  end
+
+  def test_downto
+    omit "todo: #{__method__}"
+    with_random_Integers do |integer|
+
+    end
+  end
+
+  def test_even?
+    with_random_Integers do |integer|
+      assert_send_type  '() -> bool',
+                        integer, :even?
+    end
+  end
+
+  def test_fdiv
+    omit "todo: #{__method__}"
+    with_random_Integers do |integer|
+
+    end
+  end
+
+  def test_floor
+    with_random_Integers do |integer|
+      assert_send_type  '() -> Integer',
+                        integer, :floor
+
+      with_random_ints do |digits|
+        assert_send_type  '(int) -> Integer',
+                          integer, :floor, digits
+      end
+    end
+  end
+
+  def test_gcd
+    with_random_Integers do |integer|
+      with_random_Integers do |other_int|
+        assert_send_type  '(Integer) -> Integer',
+                          integer, :gcd, other_int
+      end
+    end
+  end
+
+  def test_gcdlcm
+    with_random_Integers do |integer|
+      with_random_Integers do |other_int|
+        assert_send_type  '(Integer) -> [Integer, Integer]',
+                          integer, :gcdlcm, other_int
+      end
+    end
+  end
+
+  def test_inspect
+    test_to_s(method: :to_s)
+  end
+
+  def test_integer?
+    assert_send_type  '() -> true',
+                      123, :integer?
+  end
+
+  def test_lcm
+    with_random_Integers do |integer|
+      with_random_Integers do |other_int|
+        assert_send_type  '(Integer) -> Integer',
+                          integer, :lcm, other_int
+      end
+    end
+  end
+
+  def test_magnitude
+    test_abs(method: :magnitude)
+  end
+
+  def test_modulo
+    test_op_mod(method: :modulo)
+  end
+
+  def test_next
+    test_succ(method: :next)
+  end
+
+  def test_nobits?
+    with_random_Integers do |integer|
+      with_random_ints do |mask|
+        assert_send_type  '(int) -> bool',
+                          integer, :nobits?, mask
+      end
+    end
+  end
+
+  def test_numerator
+    assert_send_type  '() -> Integer',
+                      123, :numerator
+  end
+
+  def test_odd?
+    with_random_Integers do |integer|
+      assert_send_type  '() -> bool',
+                        integer, :odd?
+    end
+  end
+
+  def test_ord
+    assert_send_type  '() -> Integer',
+                      123, :ord
+  end
+
   def test_pow
-    assert_send_type "(Integer) -> Integer",
-                     1, :pow, 2
-    assert_send_type "(Integer) -> Rational",
-                     -2, :pow, -1
-    assert_send_type "(Integer, Integer) -> Integer",
-                     1, :pow, 2, 10
-    assert_send_type "(Float) -> Float",
-                     1, :pow, 1.0
-    assert_send_type "(Float) -> Complex",
-                     -9, :pow, 0.1
-    assert_send_type "(Rational) -> Float",
-                     2, :pow, 1/2r
-    assert_send_type "(Rational) -> Rational",
-                     1, :pow, 1r
-    assert_send_type "(Rational) -> Complex",
-                     -3, :pow, -4/3r
-    assert_send_type "(Complex) -> Complex",
-                     1, :pow, 1i
+    omit "todo: #{__method__}" # actual todo
+    with_random_Integers do |integer|
+
+    end
+  end
+
+  def test_pred
+    with_random_Integers do |integer|
+      assert_send_type  '() -> Integer',
+                        integer, :pred
+    end
+  end
+
+  def test_rationalize
+    with_random_Integers do |integer|
+      assert_send_type  '() -> Rational',
+                        integer, :rationalize
+
+      with_untyped do |untyped|
+        assert_send_type  '(untyped) -> Rational',
+                          integer, :rationalize, untyped
+      end
+    end
+  end
+
+  def test_remainder
+    omit "todo: #{__method__}" # actual todo
+    with_random_Integers do |integer|
+
+    end
+  end
+
+  def test_round
+    omit "todo: #{__method__}"
+    with_random_Integers do |integer|
+
+    end
+  end
+
+  def test_size
+    with_random_Integers do |integer|
+      assert_send_type  '() -> Integer',
+                        integer, :size
+    end
+  end
+
+  def test_succ(method: :succ)
+    with_random_Integers do |integer|
+      assert_send_type  '() -> Integer',
+                        integer, method
+    end
+  end
+
+  def test_times
+    omit "todo: #{__method__}"
+    with_random_Integers do |integer|
+
+    end
+  end
+
+  def test_to_f
+    assert_send_type  '() -> Float',
+                      123, :to_f
+  end
+
+  def test_to_i
+    assert_send_type  '() -> Integer',
+                      123, :to_i
+  end
+
+  def test_to_int
+    assert_send_type  '() -> Integer',
+                      123, :to_int
+  end
+
+  def test_to_r
+    assert_send_type  '() -> Rational',
+                      123, :to_r
+  end
+
+  def test_to_s(method: :to_s)
+    omit "todo: #{__method__}"
+    with_random_Integers do |integer|
+
+    end
+  end
+
+  def test_truncate
+    with_random_Integers do |integer|
+      assert_send_type  '() -> Integer',
+                        integer, :truncate
+
+      with_random_ints do |digits|
+        assert_send_type  '(int) -> Integer',
+                          integer, :truncate, digits
+      end
+    end
+  end
+
+  def test_upto
+    omit "todo: #{__method__}"
+    with_random_Integers do |integer|
+
+    end
+  end
+
+  def test_zero?
+    with_random_Integers do |integer|
+      assert_send_type  '() -> bool',
+                        integer, :zero?
+    end
+  end
+
+  def test_op_or
+    omit "todo: #{__method__}"
+    with_random_Integers do |integer|
+
+    end
+  end
+
+  def test_op_comp
+    with_random_Integers do |integer|
+      assert_send_type  '() -> Integer',
+                        123, :~@
+    end
   end
 end
