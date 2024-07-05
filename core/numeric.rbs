@@ -162,7 +162,7 @@
 class Numeric
   include Comparable
 
-  type round_mode = :up | :down | :even | 'up' | 'down' | 'even' | str
+  type round_half = string | :up | :down | :even | 'up' | 'down' | 'even'
 
   interface _Coerce[Other, EquivOther, EquivSelf]
     def coerce: (Other other) -> [EquivOther, EquivSelf]

@@ -64,23 +64,44 @@ class IntegerInstanceTest < Test::Unit::TestCase
   end
 
   def test_op_mod(method: :%)
-    omit "todo: #{__method__}"
     with_random_Integers do |integer|
+      assert_send_type  '(Integer) -> Integer',
+                        integer, method, 123
+      assert_send_type  '(Float) -> Float',
+                        integer, method, 12.3
 
+      with_coerce self: 'Integer', method: :% do |coerced|
+        assert_send_type  '[Y, Z] (Numeric::_Coerce[Integer, Numeric::_OpMod[Y, Z], Y]) -> Z',
+                          integer, method, coerced
+      end
     end
   end
 
   def test_op_and
-    omit "todo: #{__method__}"
     with_random_Integers do |integer|
+      assert_send_type  '(Integer) -> Integer',
+                        integer, :&, 123
 
+      with_coerce self: 'Integer', method: :& do |coerced|
+        assert_send_type  '[Y, Z] (Numeric::_Coerce[Integer, Numeric::_OpAnd[Y, Z], Y]) -> Z',
+                          integer, :&, coerced
+      end
     end
   end
 
   def test_op_mul
-    omit "todo: #{__method__}"
     with_random_Integers do |integer|
+      assert_send_type  '(Integer) -> Integer',
+                        integer, :*, 123
+      assert_send_type  '(Float) -> Float',
+                        integer, :*, 12.3
+      assert_send_type  '(Complex) -> Complex',
+                        integer, :*, 12+3i
 
+      with_coerce self: 'Integer', method: :* do |coerced|
+        assert_send_type  '[Y, Z] (Numeric::_Coerce[Integer, Numeric::_OpMul[Y, Z], Y]) -> Z',
+                          integer, :*, coerced
+      end
     end
   end
 
@@ -92,16 +113,32 @@ class IntegerInstanceTest < Test::Unit::TestCase
   end
 
   def test_op_add
-    omit "todo: #{__method__}"
     with_random_Integers do |integer|
+      assert_send_type  '(Integer) -> Integer',
+                        integer, :+, 123
+      assert_send_type  '(Float) -> Float',
+                        integer, :+, 12.3
+      assert_send_type  '(Complex) -> Complex',
+                        integer, :+, 12+3i
 
+      with_coerce self: 'Integer', method: :+ do |coerced|
+        assert_send_type  '[Y, Z] (Numeric::_Coerce[Integer, Numeric::_OpAdd[Y, Z], Y]) -> Z',
+                          integer, :+, coerced
+      end
     end
   end
 
   def test_op_sub
-    omit "todo: #{__method__}"
     with_random_Integers do |integer|
+      assert_send_type  '(Integer) -> Integer',
+                        integer, :-, 123
+      assert_send_type  '(Float) -> Float',
+                        integer, :-, 12.3
 
+      with_coerce self: 'Integer', method: :- do |coerced|
+        assert_send_type  '[Y, Z] (Numeric::_Coerce[Integer, Numeric::_OpSub[Y, Z], Y]) -> Z',
+                          integer, :-, coerced
+      end
     end
   end
 
@@ -113,30 +150,53 @@ class IntegerInstanceTest < Test::Unit::TestCase
   end
 
   def test_op_div
-    omit "todo: #{__method__}"
     with_random_Integers do |integer|
+      assert_send_type  '(Integer) -> Integer',
+                        integer, :/, 123
+      assert_send_type  '(Float) -> Float',
+                        integer, :/, 12.3
 
+      with_coerce self: 'Integer', method: :/ do |coerced|
+        assert_send_type  '[Y, Z] (Numeric::_Coerce[Integer, Numeric::_OpDiv[Y, Z], Y]) -> Z',
+                          integer, :/, coerced
+      end
     end
   end
 
   def test_op_lt
-    omit "todo: #{__method__}"
     with_random_Integers do |integer|
+      assert_send_type  '(Integer) -> bool',
+                        integer, :<, 123
+      assert_send_type  '(Float) -> bool',
+                        integer, :<, 12.3
 
+      with_coerce self: 'Integer', method: :<, return_value: integer < 12 do |coerced|
+        assert_send_type  '[Y] (Numeric::_Coerce[Integer, Numeric::_OpLt[Y], Y]) -> bool',
+                          integer, :<, coerced
+      end
     end
   end
 
   def test_op_rsh
-    omit "todo: #{__method__}"
     with_random_Integers do |integer|
-
+      with_random_ints do |amount|
+        assert_send_type  '(int) -> Integer',
+                          integer, :<<, amount
+      end
     end
   end
 
   def test_op_le
-    omit "todo: #{__method__}"
     with_random_Integers do |integer|
+      assert_send_type  '(Integer) -> bool',
+                        integer, :<=, 123
+      assert_send_type  '(Float) -> bool',
+                        integer, :<=, 12.3
 
+      with_coerce self: 'Integer', method: :<=, return_value: integer <= 12 do |coerced|
+        assert_send_type  '[Y] (Numeric::_Coerce[Integer, Numeric::_OpLe[Y], Y]) -> bool',
+                          integer, :<=, coerced
+      end
     end
   end
 
@@ -170,36 +230,76 @@ class IntegerInstanceTest < Test::Unit::TestCase
   end
 
   def test_op_gt
-    omit "todo: #{__method__}"
     with_random_Integers do |integer|
+      assert_send_type  '(Integer) -> bool',
+                        integer, :>, 123
+      assert_send_type  '(Float) -> bool',
+                        integer, :>, 12.3
 
+      with_coerce self: 'Integer', method: :>, return_value: integer > 12 do |coerced|
+        assert_send_type  '[Y] (Numeric::_Coerce[Integer, Numeric::_OpGt[Y], Y]) -> bool',
+                          integer, :>, coerced
+      end
     end
   end
 
   def test_op_ge
-    omit "todo: #{__method__}"
     with_random_Integers do |integer|
+      assert_send_type  '(Integer) -> bool',
+                        integer, :>=, 123
+      assert_send_type  '(Float) -> bool',
+                        integer, :>=, 12.3
 
+      with_coerce self: 'Integer', method: :>=, return_value: integer >= 12 do |coerced|
+        assert_send_type  '[Y] (Numeric::_Coerce[Integer, Numeric::_OpGe[Y], Y]) -> bool',
+                          integer, :>=, coerced
+      end
     end
   end
 
   def test_op_lsh
-    omit "todo: #{__method__}"
     with_random_Integers do |integer|
-
+      with_random_ints do |amount|
+        assert_send_type  '(int) -> Integer',
+                          integer, :<<, amount
+      end
     end
   end
 
   def test_op_aref
-    omit "todo: #{__method__}"
+    omit 'arg'
     with_random_Integers do |integer|
+      with_random_ints do |offset|
+        assert_send_type  '(int) -> Integer',
+                          integer, :[], offset
 
+        with_random_ints do |size|
+          assert_send_type  '(int, int) -> Integer',
+                            integer, :[], offset, size
+        end
+      end
+
+      with_random_Integers do |start|
+        with_random_Integers do |stop|
+          with_range with_int(start), with_int(stop) do |range|
+            # unless defined?
+            assert_send_type  '(range[int]) -> Integer',
+                              integer, :[], range
+          end
+        end
+      end
     end
   end
 
   def test_op_xor
-    omit "todo: #{__method__}"
     with_random_Integers do |integer|
+      assert_send_type  '(Integer) -> Integer',
+                        integer, :^, 123
+
+      with_coerce self: 'Integer', method: :^ do |coerced|
+        assert_send_type  '[Y, Z] (Numeric::_Coerce[Integer, Numeric::_OpXor[Y, Z], Y]) -> Z',
+                          integer, :^, coerced
+      end
 
     end
   end
@@ -297,10 +397,21 @@ class IntegerInstanceTest < Test::Unit::TestCase
   end
 
   def test_div
-    omit "todo: #{__method__}"
-    with_random_Integers do |integer|
+    omit 'TODO'
+    # with_random_Integers do |integer|
+    #   assert_send_type  '(Integer) -> Integer',
+    #                     integer, :div, 123
 
-    end
+    #   with_float 12.3 do |float|
+    #     assert_send_type  '(float) -> Integer',
+    #                       integer, :div, float
+    #   end
+
+    #   with_coerce self: 'Integer', method: :div, return_value: 12 do |coerced|
+    #     assert_send_type  '[Y] (Numeric::_Coerce[Integer, Numeric::_Div[Y], Y]) -> Integer',
+    #                       integer, :div, coerced
+    #   end
+    # end
   end
 
   def test_divmod
@@ -311,9 +422,37 @@ class IntegerInstanceTest < Test::Unit::TestCase
   end
 
   def test_downto
-    omit "todo: #{__method__}"
+    omit 'whyy'
     with_random_Integers do |integer|
+      assert_send_type  '(Integer) -> Enumerator[Integer, Integer]',
+                        integer, :downto, 123
+      assert_send_type  '(Float) -> Enumerator[Integer, Integer]',
+                        integer, :downto, 12.3
+      assert_send_type  '(Integer) { (Integer) -> void } -> Integer',
+                        integer, :downto, 123 do |_| end
+      assert_send_type  '(Float) { (Integer) -> void } -> Integer',
+                        integer, :downto, 12.3 do |_| end
 
+      coerced = BlankSlate.new.__with_object_methods(:define_singleton_method)
+      geq = BlankSlate.new.__with_object_methods(:define_singleton_method)
+
+      coerced.define_singleton_method(:coerce) do |rhs|
+        [geq, rhs]
+      end
+
+      geq.define_singleton_method(:>=) do |x|
+        # ::Kernel.p x
+        x >= integer - 10
+      end
+
+      geq.define_singleton_method(:<) do |x|
+        x < integer - 10
+      end
+
+      assert_send_type  '[Y] (Numeric::_Coerce[Integer, Numeric::_OpGe[Y], Y] limit) -> Enumerator[Integer, Integer]',
+                        integer, :downto, coerced
+      assert_send_type  '[Y] (Numeric::_Coerce[Integer, Numeric::_OpGe[Y], Y] limit) { (Integer) -> void } -> Integer',
+                        integer, :downto, coerced do |i| end
     end
   end
 
@@ -451,9 +590,19 @@ class IntegerInstanceTest < Test::Unit::TestCase
   end
 
   def test_round
-    omit "todo: #{__method__}"
     with_random_Integers do |integer|
+      assert_send_type  '() -> Integer',
+                        integer, :round
 
+      with_round_half do |half|
+        assert_send_type  '(half: Numeric::round_half) -> Integer',
+                          integer, :round, half: half
+
+        with_random_ints do |digits|
+          assert_send_type  '(int, half: Numeric::round_half) -> Integer',
+                            integer, :round, digits, half: half
+        end
+      end
     end
   end
 
@@ -472,9 +621,11 @@ class IntegerInstanceTest < Test::Unit::TestCase
   end
 
   def test_times
-    omit "todo: #{__method__}"
     with_random_Integers do |integer|
-
+      assert_send_type  '() -> Enumerator[Integer, Integer]',
+                        integer, :times
+      assert_send_type  '() { (Integer) -> void } -> Integer',
+                        integer, :times do |_| end
     end
   end
 
@@ -523,9 +674,31 @@ class IntegerInstanceTest < Test::Unit::TestCase
   end
 
   def test_upto
-    omit "todo: #{__method__}"
     with_random_Integers do |integer|
+      assert_send_type  '(Integer) -> Enumerator[Integer, Integer]',
+                        integer, :upto, 123
+      assert_send_type  '(Float) -> Enumerator[Integer, Integer]',
+                        integer, :upto, 12.3
+      assert_send_type  '(Integer) { (Integer) -> void } -> Integer',
+                        integer, :upto, 123 do |_| end
+      assert_send_type  '(Float) { (Integer) -> void } -> Integer',
+                        integer, :upto, 12.3 do |_| end
 
+      coerced = BlankSlate.new.__with_object_methods(:define_singleton_method)
+      geq = BlankSlate.new.__with_object_methods(:define_singleton_method)
+
+      coerced.define_singleton_method(:coerce) do |rhs|
+        [geq, rhs]
+      end
+
+      geq.define_singleton_method(:>) do |x|
+        integer + 10 > x
+      end
+
+      assert_send_type  '[Y] (Numeric::_Coerce[Integer, Numeric::_OpGt[Y], Y] limit) -> Enumerator[Integer, Integer]',
+                        integer, :upto, coerced
+      assert_send_type  '[Y] (Numeric::_Coerce[Integer, Numeric::_OpGt[Y], Y] limit) { (Integer) -> void } -> Integer',
+                        integer, :upto, coerced do |i| end
     end
   end
 
@@ -537,9 +710,14 @@ class IntegerInstanceTest < Test::Unit::TestCase
   end
 
   def test_op_or
-    omit "todo: #{__method__}"
     with_random_Integers do |integer|
+      assert_send_type  '(Integer) -> Integer',
+                        integer, :|, 123
 
+      with_coerce self: 'Integer', method: :| do |coerced|
+        assert_send_type  '[Y, Z] (Numeric::_Coerce[Integer, Numeric::_OpOr[Y, Z], Y]) -> Z',
+                          integer, :|, coerced
+      end
     end
   end
 

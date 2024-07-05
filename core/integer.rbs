@@ -737,7 +737,7 @@ class Integer < Numeric
   #
   #     Raises an exception if +numeric+ does not have method +div+.
   #
-  def div: (Integer | float other) -> Integer
+  def div: (Numeric other) -> Integer
          | [C < Numeric::_Coerce[self, X, Y], X < Numeric::_Div[Y], Y] (C other) -> Integer
 
   # <!--
@@ -1056,6 +1056,7 @@ class Integer < Numeric
   #     13.remainder(Rational(4, 1)) # => (1/1)
   #
   def remainder: (Integer) -> Integer
+              | [C < Numeric::_Coerce[self, X, Y], X < Numeric::_OpGt[Y], Y] (C limit) -> Enumerator[Integer, self]
                | (Float) -> Float
                | (Rational) -> Rational
                | (Numeric) -> Numeric
@@ -1106,7 +1107,7 @@ class Integer < Numeric
   #
   # Related: Integer#truncate.
   #
-  def round: (?int digits, ?half: Numeric::round_mode) -> Integer
+  def round: (?int digits, ?half: Numeric::round_half) -> Integer
 
   # <!--
   #   rdoc-file=numeric.rb
@@ -1258,8 +1259,8 @@ class Integer < Numeric
   #
   def upto: (Integer | Float limit) -> Enumerator[Integer, self]
           | (Integer | Float limit) { (Integer i) -> void } -> self
-          | [C < Numeric::_Coerce[self, X, Y], X < Numeric::_OpGe[Y], Y] (C limit) -> Enumerator[Integer, self]
-          | [C < Numeric::_Coerce[self, X, Y], X < Numeric::_OpGe[Y], Y] (C limit) { (Integer i) -> void } -> Integer
+          | [C < Numeric::_Coerce[self, X, Y], X < Numeric::_OpGt[Y], Y] (C limit) -> Enumerator[Integer, self]
+          | [C < Numeric::_Coerce[self, X, Y], X < Numeric::_OpGt[Y], Y] (C limit) { (Integer i) -> void } -> Integer
 
   # <!--
   #   rdoc-file=numeric.rb

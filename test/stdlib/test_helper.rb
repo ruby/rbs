@@ -51,7 +51,37 @@ module VersionHelper
 end
 
 module WithStdlibAliases
-  # def with_coerce()
+  def with_round_half(&block)
+    %i[up down even].each do |val|
+      block.call val
+      with_string(val.to_s, &block)
+    end
+  end
+
+  def with_coerce(self:, method:, return_value: nil)
+    blankslate = RBS::UnitTest::Convertibles::BlankSlate
+
+    coercer = blankslate.new.__with_object_methods(:define_singleton_method)
+    equiv_other = blankslate.new.__with_object_methods(:define_singleton_method)
+    equiv_self = blankslate.new
+    return_value = blankslate.new if nil == return_value
+    self_ = binding.local_variable_get(:self)
+
+    assert_type_fn = method(:assert_type)
+    coercer.define_singleton_method :coerce do |other|
+      assert_type_fn.call self_, other
+      [equiv_other, equiv_self]
+    end
+
+    assert_fn = method(:assert)
+    equiv_other.define_singleton_method method do |other|
+      assert_fn.call ::Object.instance_method(:equal?).bind_call(other, equiv_self)
+      return_value
+    end
+
+    yield coercer
+  end
+
   def with_timeout(seconds: 1, nanoseconds: 0)
     unless block_given?    
       return RBS::UnitTest::Convertibles::WithAliases::WithEnum.new(
