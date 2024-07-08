@@ -127,7 +127,7 @@ module RBS
 
             # `Range` requires `begin <=> end` to return non-nil, but doesn't actually
             # end up using the return value of it. This is to add that in when needed.
-            def lower.<=>(rhs) = :not_nil unless defined? lower.<=>
+            defined?(lower.<=>) or def lower.<=>(rhs) = :not_nil
 
             # If `lower <=> rhs` is defined but nil, then that means we're going to be constructing
             # an illegal range (eg `3..ToInt.new(4)`). So, we need to skip yielding an invalid range

@@ -162,6 +162,115 @@
 class Numeric
   include Comparable
 
+  # Type alias for the `half` parameter in `round` functions.
+  type round_half = string | :up | :down | :even | 'up' | 'down' | 'even'
+
+  # Interface which indicates a type implements ruby's coercion scheme.
+  #
+  # The `coerce` method is only used in the stdlib of Ruby when an operator (such as `Integer#+`)
+  # doesn't know how to handle the second argument. Instead, `other_arg.coerce(the_integer)` is
+  # called, and then operation is then run on the two return arguments (`equiv_self + equiv_other`).
+  #
+  # Traditionally, `_Coerce` functions return a tuple of `[MyClass.new(...), self]`, this is not
+  # a strict requirement, and there are cases where it's useful to return other types. As such,
+  # three generics are required to represent `_Coerce`.
+  interface _Coerce[Other, EquivOther, EquivSelf]
+    # Coerce `other` and `self` into types where the original operation can be performed.
+    # 
+    # See `_Coerce` for more details.
+    def coerce: (Other other) -> [EquivOther, EquivSelf]
+  end
+
+  # Adds an `Other` to `self`, returning a `Return`.
+  interface _OpAdd[Other, Return]
+    # Performs the addition.
+    def +: (Other other) -> Return
+  end
+
+  # Subtracts an `Other` from `self`, returning a `Return`.
+  interface _OpSub[Other, Return]
+    # Performs the subtraction.
+    def -: (Other other) -> Return
+  end
+
+  # Multiplies `self` by an `Other`, returning a `Return`.
+  interface _OpMul[Other, Return]
+    # Performs the multiplication.
+    def *: (Other other) -> Return
+  end
+
+  # Divides `self` by an `Other`, returning a `Return`.
+  interface _OpDiv[Other, Return]
+    # Performs the division.
+    def /: (Other other) -> Return
+  end
+
+  # Modulos `self` by an `Other`, returning a `Return`.
+  interface _OpMod[Other, Return]
+    # Performs the modulus.
+    def %: (Other other) -> Return
+  end
+
+  # Exponentiates `self` by `Other`, returning a `Return`.
+  interface _OpPow[Other, Return]
+    # Performs the exponentiation.
+    def **: (Other other) -> Return
+  end
+
+  # Performs bitwise AND of `self` and `Other`, returning a `Return`.
+  interface _OpAnd[Other, Return]
+    # Performs the bitwise AND.
+    def &: (Other other) -> Return
+  end
+
+  # Performs bitwise OR of `self` and `Other`, returning a `Return`.
+  interface _OpOr[Other, Return]
+    # Performs the bitwise OR.
+    def |: (Other other) -> Return
+  end
+
+  # Performs bitwise XOR of `self` and `Other`, returning a `Return`.
+  interface _OpXor[Other, Return]
+    # Performs the bitwise XOR.
+    def ^: (Other other) -> Return
+  end
+
+  # Returns whether `self` is less than `Other`.
+  interface _OpLt[Other]
+    # Performs the lesser-than comparison.
+    def <: (Other other) -> bool
+  end
+
+  # Returns whether `self` is less than or equal to `Other`.
+  interface _OpLe[Other]
+    # Performs the lesser-than-or-equal-to comparison.
+    def <=: (Other other) -> bool
+  end
+
+  # Returns whether `self` is greater than `Other`.
+  interface _OpGt[Other]
+    # Performs the greater-than comparison.
+    def >: (Other other) -> bool
+  end
+
+  # Returns whether `self` is greater than or equal to `Other`.
+  interface _OpGe[Other]
+    # Performs the greater-than-or-equal-to comparison.
+    def >=: (Other other) -> bool
+  end
+
+  # Performs integer division of `self` by `Other`.
+  interface _Div[Other]
+    # Performs the integer division.
+    def div: (Other other) -> Integer
+  end
+
+  # Performs integer division of `self` by `Other`, returning the whole part and the `Remainder`.
+  interface _Divmod[Other, Remainder]
+    # Performs the division and modulus.
+    def divmod: (Other other) -> [Integer, Remainder]
+  end
+
   public
 
   # <!--
