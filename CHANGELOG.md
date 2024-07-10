@@ -1,5 +1,17 @@
 # CHANGELOG
 
+## 3.5.2 (2024-07-10)
+
+### Library changes
+
+* Update docs for ruby-3.3.4 ([#1923](https://github.com/ruby/rbs/pull/1923), Backported in [#1925](https://github.com/ruby/rbs/pull/1925))
+* Update docs for ruby-3.3.3 ([#1889](https://github.com/ruby/rbs/pull/1889), Backported in [#1925](https://github.com/ruby/rbs/pull/1925))
+* Fix #1905: Fix typo in `UntypedFunction` ([#1906](https://github.com/ruby/rbs/pull/1906), Backported in [#1925](https://github.com/ruby/rbs/pull/1925))
+
+### Miscellaneous
+
+* Use `File.open` instead of `IO.sysopen` ([#1913](https://github.com/ruby/rbs/pull/1913))
+
 ## 3.5.1 (2024-06-07)
 
 ### Library changes
