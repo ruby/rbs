@@ -64,7 +64,7 @@ GEM
       net-protocol
     nkf (0.2.0)
     parallel (1.25.1)
-    parser (3.3.3.0)
+    parser (3.3.4.0)
       ast (~> 2.4.1)
       racc
     power_assert (2.0.3)
