@@ -699,11 +699,15 @@ class String
   #     String.new(capacity: 1)
   #     String.new('foo', capacity: 4096)
   #
+  # Note that Ruby strings are null-terminated internally, so the internal buffer
+  # size will be one or more bytes larger than the requested capacity depending on
+  # the encoding.
+  #
   # The `string`, `encoding`, and `capacity` arguments may all be used together:
   #
   #     String.new('hello', encoding: 'UTF-8', capacity: 25)
   #
-  def initialize: (?string source, ?encoding: encoding?, ?capacity: int?) -> self
+  def initialize: (?string source, ?encoding: encoding, ?capacity: int) -> void
 
   # <!--
   #   rdoc-file=string.c
@@ -1185,7 +1189,7 @@ class String
   # offset does not land on character (codepoint) boundary, an IndexError will be
   # raised.
   #
-  def bytesplice: (int start, int length, string str) -> String
+  def bytesplice: (Integer start, int length, string str) -> String
                 | (int start, int length, string str, int str_start, int str_length) -> String
                 | (range[int?] range, string str, ?range[int?] str_range) -> String
 
@@ -2098,7 +2102,7 @@ class String
   # Related: String#sub, String#gsub, String#sub!.
   #
   def gsub!: (Regexp | string pattern, string | hash[String, _ToS] replacement) -> self?
-           | (Regexp | string pattern) -> Enumerator[String, self]
+           | (Regexp | string pattern) -> Enumerator[String, self?]
            | (Regexp | string pattern) { (String match) -> _ToS } -> self?
 
   # <!--

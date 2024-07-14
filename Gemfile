@@ -12,7 +12,6 @@ gem "rubocop"
 gem "rubocop-rubycw"
 gem "json"
 gem "json-schema"
-gem 'stackprof'
 gem "goodcheck"
 gem "dbm"
 gem 'digest'
@@ -24,6 +23,12 @@ gem "base64"
 gem "mutex_m"
 gem "nkf"
 gem "fileutils"
+gem "raap"
+
+# Performance profiling and benchmarking
+gem 'stackprof'
+gem 'memory_profiler'
+gem 'benchmark-ips'
 
 # Test gems
 gem "rbs-amber", path: "test/assets/test-gem"
@@ -34,4 +39,8 @@ gem 'csv'
 
 group :minitest do
   gem "minitest"
+end
+
+group :typecheck_test do
+  gem "steep", "~> 1.7.1", require: false
 end

@@ -3,7 +3,6 @@
 require "open3"
 require "optparse"
 require "shellwords"
-require "abbrev"
 require "stringio"
 
 module RBS
@@ -110,7 +109,7 @@ module RBS
     end
 
     def has_parser?
-      defined?(RubyVM::AbstractSyntaxTree)
+      defined?(RubyVM::AbstractSyntaxTree) ? true : false
     end
 
     def run(args)
@@ -1062,14 +1061,13 @@ EOB
       config_path = options.config_path or raise
       lock_path = Collection::Config.to_lockfile_path(config_path)
 
-      subcommand = Abbrev.abbrev(['install', 'update', 'help'])[args[0]] || args[0]
-      case subcommand
-      when 'install'
+      case args[0]
+      when 'install', 'instal', 'insta', 'inst', 'ins', 'in', 'i'
         unless params[:frozen]
           Collection::Config.generate_lockfile(config_path: config_path, definition: Bundler.definition)
         end
         Collection::Installer.new(lockfile_path: lock_path, stdout: stdout).install_from_lockfile
-      when 'update'
+      when 'update', 'updat', 'upda', 'upd', 'up', 'u'
         # TODO: Be aware of argv to update only specified gem
         Collection::Config.generate_lockfile(config_path: config_path, definition: Bundler.definition, with_lockfile: false)
         Collection::Installer.new(lockfile_path: lock_path, stdout: stdout).install_from_lockfile
@@ -1107,7 +1105,7 @@ EOB
           exit 1
         end
         Collection::Cleaner.new(lockfile_path: lock_path)
-      when 'help'
+      when 'help', 'hel', 'he', 'h'
         puts opts.help
       else
         puts opts.help

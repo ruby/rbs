@@ -597,7 +597,7 @@ class ArrayInstanceTest < Test::Unit::TestCase
                      [1,2,3], :pack, ToStr.new("ccc")
 
     assert_send_type "(String, buffer: String) -> String",
-                     [1,2,3], :pack, "ccc", buffer: ""
+                     [1,2,3], :pack, "ccc", buffer: +""
     assert_send_type "(String, buffer: nil) -> String",
                      [1,2,3], :pack, "ccc", buffer: nil
     refute_send_type "(ToStr, buffer: ToStr) -> String",

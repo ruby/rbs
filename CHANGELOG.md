@@ -1,6 +1,118 @@
 # CHANGELOG
 
-## master
+## 3.5.1 (2024-06-07)
+
+### Library changes
+
+* Add explicit dependency on the `logger` gem ([#1865](https://github.com/ruby/rbs/pull/1865))
+* Make c99, c23 compatible ([#1870](https://github.com/ruby/rbs/pull/1870))
+
+### Miscellaneous
+
+* Don't try to sign git commits when running tests ([#1867](https://github.com/ruby/rbs/pull/1867))
+
+## 3.5.0 (2024-06-06)
+
+### Signature updates
+
+* `net-http` headers ([#1750](https://github.com/ruby/rbs/pull/1750))
+* `CSV.foreach` ([#1738](https://github.com/ruby/rbs/pull/1738))
+* `Enumerator#initialize` ([#1801](https://github.com/ruby/rbs/pull/1801))
+* `Float#divmod`, `Rational#divmod` ([#1868](https://github.com/ruby/rbs/pull/1868))
+* `GC` ([#1530](https://github.com/ruby/rbs/pull/1530))
+* `Integer#pow` ([#1706](https://github.com/ruby/rbs/pull/1706))
+* `Kernel.rand` ([#1783](https://github.com/ruby/rbs/pull/1783))
+* `Kernel#extend` ([#1769](https://github.com/ruby/rbs/pull/1769))
+* `Module#include`, `Module#prepend` ([#1769](https://github.com/ruby/rbs/pull/1769))
+* `Proc#parameters` ([#1819](https://github.com/ruby/rbs/pull/1819))
+* `Range#step` ([#1709](https://github.com/ruby/rbs/pull/1709))
+* `Regexp.union` ([#1809](https://github.com/ruby/rbs/pull/1809))
+* `RubyVM::YJIT.enable` ([#1812](https://github.com/ruby/rbs/pull/1812))
+* `RubyVM::YJIT`, `RubyVM::RJIT` ([#1746](https://github.com/ruby/rbs/pull/1746))
+* `String#bytesplice` ([#1793](https://github.com/ruby/rbs/pull/1793))
+* `String#gsub!` ([#1768](https://github.com/ruby/rbs/pull/1768))
+* `Symbol#=~` ([#1704](https://github.com/ruby/rbs/pull/1704))
+* `Time#initialize` ([#1771](https://github.com/ruby/rbs/pull/1771))
+* `Time#zone` ([#1770](https://github.com/ruby/rbs/pull/1770))
+* `Timeout::ExitException`  ([#1803](https://github.com/ruby/rbs/pull/1803))
+* `URI::MailTo` ([#1858](https://github.com/ruby/rbs/pull/1858))
+* Update docs ([#1811](https://github.com/ruby/rbs/pull/1811), [#1699](https://github.com/ruby/rbs/pull/1699))
+
+### Language updates
+
+* Fix proc type syntax ([#1807](https://github.com/ruby/rbs/pull/1807))
+* Function types with untyped parameter ([#1806](https://github.com/ruby/rbs/pull/1806))
+* Fix record type ([#1732](https://github.com/ruby/rbs/pull/1732))
+* parser: enable record types with optional fields ([#1717](https://github.com/ruby/rbs/pull/1717))
+
+### Library changes
+
+* Drop dependency on `abbrev` ([#1866](https://github.com/ruby/rbs/pull/1866))
+* Fix source display ([#1832](https://github.com/ruby/rbs/pull/1832))
+* Include trivia tokens to lex result ([#1831](https://github.com/ruby/rbs/pull/1831))
+* Implement token list API ([#1829](https://github.com/ruby/rbs/pull/1829))
+* Fix memory leak when ParsingError ([#1830](https://github.com/ruby/rbs/pull/1830))
+* [rbs diff] Fix error when empty manifest.yaml ([#1762](https://github.com/ruby/rbs/pull/1762))
+* Remove deprecated API since RBS v1 ([#1805](https://github.com/ruby/rbs/pull/1805))
+* Use array instead of linked list for rbs  location's child ([#1786](https://github.com/ruby/rbs/pull/1786))
+* Fix SEGV with parse negative position ([#1790](https://github.com/ruby/rbs/pull/1790))
+* Add location for attribute ([#1787](https://github.com/ruby/rbs/pull/1787))
+* Always be private ([#1774](https://github.com/ruby/rbs/pull/1774))
+* Prevent resource leak with type/method-type parser when reaching EOF. ([#1742](https://github.com/ruby/rbs/pull/1742))
+* Allow loading RBS from different version of a gem ([#1731](https://github.com/ruby/rbs/pull/1731))
+* Fix method name tag on assertion ([#1705](https://github.com/ruby/rbs/pull/1705))
+* Improve interface check by method parameters ([#1698](https://github.com/ruby/rbs/pull/1698))
+
+#### rbs prototype
+
+* Fix prototype for ruby-3.4 ([#1760](https://github.com/ruby/rbs/pull/1760))
+* Fix 3.4 `prototype rb` failure ([#1713](https://github.com/ruby/rbs/pull/1713))
+* Add Numeric Node's check for parse rbs ([#1711](https://github.com/ruby/rbs/pull/1711))
+
+#### rbs collection
+
+* Fix RBS loading precedence ([#1720](https://github.com/ruby/rbs/pull/1720))
+* Refactor Git source by using `git?` method ([#1701](https://github.com/ruby/rbs/pull/1701))
+
+### Miscellaneous
+
+* Introduce RaaP for testing of signature ([#1810](https://github.com/ruby/rbs/pull/1810))
+* Revise .gemspec to remove `Gemfile` and `Gemfile.lock` ([#1856](https://github.com/ruby/rbs/pull/1856))
+* Add link to gem_rbs_collection to README ([#1827](https://github.com/ruby/rbs/pull/1827))
+* Remove `Gemfile.lock` from the gem package ([#1823](https://github.com/ruby/rbs/pull/1823))
+* Modify template to use TestHelper ([#1776](https://github.com/ruby/rbs/pull/1776))
+* Should focus on `String.new` not `String#initialize`. ([#1789](https://github.com/ruby/rbs/pull/1789))
+* Make the test suite compatible with `--enable-frozen-string-literal` ([#1767](https://github.com/ruby/rbs/pull/1767))
+* Stop reusing `fd` ([#1752](https://github.com/ruby/rbs/pull/1752))
+* Fix test failures on Ruby 3.4 ([#1734](https://github.com/ruby/rbs/pull/1734))
+* Stop trace object allocations during test ([#1724](https://github.com/ruby/rbs/pull/1724))
+* Fix head test fails ([#1719](https://github.com/ruby/rbs/pull/1719))
+
+## 3.4.4 (2024-02-08)
+
+### Miscellaneous
+
+* Backport [#1752](https://github.com/ruby/rbs/pull/1752) ([#1753](https://github.com/ruby/rbs/pull/1753))
+
+## 3.4.3 (2024-01-25)
+
+### Library changes
+
+#### rbs collection
+
+* Backport [#1731](https://github.com/ruby/rbs/pull/1731) ([#1735](https://github.com/ruby/rbs/pull/1735))
+
+## 3.4.2 (2024-01-19)
+
+### Miscellaneous
+
+* Backport [#1724](https://github.com/ruby/rbs/pull/1724) ([#1726](https://github.com/ruby/rbs/pull/1726))
+
+## 3.4.1 (2023-12-26)
+
+### Signature updates
+
+* Update embedded RDoc based on ruby-3.3.0 (Backport #1699) ([#1700](https://github.com/ruby/rbs/pull/1700))
 
 ## 3.4.0 (2023-12-21)
 

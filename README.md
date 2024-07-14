@@ -69,7 +69,7 @@ gem "rbs"
 
 The gem ships with the `rbs` command line tool to demonstrate what it can do and help develop RBS.
 
-```bash
+```console
 $ rbs version
 $ rbs list
 $ rbs ancestors ::Object
@@ -98,7 +98,7 @@ end
 
 Running prototype on the above will automatically generate
 
-```
+```console
 $ rbs prototype rb person.rb
 class Person
   @name: untyped
@@ -190,6 +190,7 @@ Here is a list of some places you can talk with active maintainers.
 
 - [Ruby Discord Server (invite link)](https://discord.gg/ad2acQFtkh) -- We have `rbs` channel in Ruby Discord server.
 - [ruby-jp Slack Workspace (in Japanese)](https://ruby-jp.github.io/) -- We have `types` channel in ruby-jp slack workspace.
+- [gem_rbs_collection](https://github.com/ruby/gem_rbs_collection) -- We have a repository of third-party RBS type definitions, for the case your dependency doesn't ship with RBS files.
 
 ## Development
 

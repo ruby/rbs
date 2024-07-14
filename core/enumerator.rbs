@@ -293,7 +293,7 @@ class Enumerator[unchecked out Elem, out Return] < Object
   # lazy fashion (see Enumerator#size). It can either be a value or a callable
   # object.
   #
-  def initialize: (?Integer arg0) { (Enumerator::Yielder arg0) -> void } -> void
+  def initialize: (?Integer arg0) { (Enumerator::Yielder arg0) -> Return } -> void
 
   # <!--
   #   rdoc-file=enumerator.c

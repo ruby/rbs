@@ -35,19 +35,16 @@ class IOSingletonTest < Test::Unit::TestCase
 
   def test_open
     Dir.mktmpdir do |dir|
-      fd = IO.sysopen(File.expand_path(__FILE__))
-
       assert_send_type "(Integer) -> IO",
-                       IO, :open, fd
+                       IO, :open, IO.sysopen(File.expand_path(__FILE__))
       assert_send_type "(ToInt, String) -> IO",
-                       IO, :open, ToInt.new(fd), "r"
+                       IO, :open, ToInt.new(IO.sysopen(File.expand_path(__FILE__))), "r"
       assert_send_type "(Integer) { (IO) -> Integer } -> Integer",
-                       IO, :open, fd do |io| io.read.size end
+                       IO, :open, IO.sysopen(File.expand_path(__FILE__)), &proc {|io| io.read.size }
 
-      fd = IO.sysopen(File.expand_path(__FILE__))
       assert_send_type(
         "(ToInt, path: String) -> IO",
-        IO, :open, ToInt.new(fd), path: "<<TEST>>"
+        IO, :open, ToInt.new(IO.sysopen(File.expand_path(__FILE__))), path: "<<TEST>>"
       )
     end
   end
@@ -265,11 +262,11 @@ class IOInstanceTest < Test::Unit::TestCase
       assert_send_type "(nil) -> String",
                        io, :read, nil
       assert_send_type "(Integer, String) -> String",
-                       io, :read, 0, "buffer"
+                       io, :read, 0, +"buffer"
       assert_send_type "(Integer, String) -> nil",
-                       io, :read, 1, "buffer"
+                       io, :read, 1, +"buffer"
       assert_send_type "(nil, String) -> String",
-                       io, :read, nil, "buffer"
+                       io, :read, nil, +"buffer"
     end
   end
 
@@ -278,7 +275,7 @@ class IOInstanceTest < Test::Unit::TestCase
       assert_send_type "(Integer) -> String",
                        io, :readpartial, 10
       assert_send_type "(Integer, String) -> String",
-                       io, :readpartial, 10, "buffer"
+                       io, :readpartial, 10, +"buffer"
     end
   end
 

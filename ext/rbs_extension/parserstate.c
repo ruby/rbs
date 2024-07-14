@@ -109,6 +109,8 @@ void parser_advance(parserstate *state) {
       // skip
     } else if (state->next_token3.type == tLINECOMMENT) {
       insert_comment_line(state, state->next_token3);
+    } else if (state->next_token3.type == tTRIVIA) {
+      //skip
     } else {
       break;
     }
@@ -272,10 +274,14 @@ VALUE comment_to_ruby(comment *com, VALUE buffer) {
   );
 }
 
-parserstate *alloc_parser(VALUE buffer, int start_pos, int end_pos, VALUE variables) {
+lexstate *alloc_lexer(VALUE buffer, int start_pos, int end_pos) {
   VALUE string = rb_funcall(buffer, rb_intern("content"), 0);
 
   StringValue(string);
+
+  if (start_pos < 0 || end_pos < 0) {
+    rb_raise(rb_eArgError, "negative position range: %d...%d", start_pos, end_pos);
+  }
 
   lexstate *lexer = calloc(1, sizeof(lexstate));
   lexer->string = string;
@@ -286,6 +292,11 @@ parserstate *alloc_parser(VALUE buffer, int start_pos, int end_pos, VALUE variab
   lexer->start = lexer->current;
   lexer->first_token_of_line = lexer->current.column == 0;
 
+  return lexer;
+}
+
+parserstate *alloc_parser(VALUE buffer, int start_pos, int end_pos, VALUE variables) {
+  lexstate *lexer = alloc_lexer(buffer, start_pos, end_pos);
   parserstate *parser = calloc(1, sizeof(parserstate));
   parser->lexstate = lexer;
   parser->buffer = buffer;

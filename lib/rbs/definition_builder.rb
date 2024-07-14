@@ -630,12 +630,12 @@ module RBS
         end
 
         # @type var accessibility: RBS::Definition::accessibility
-        accessibility = if method.name == :initialize
-                          :private
-                        else
-                          method.accessibility
-                        end
-
+        accessibility =
+          if original.instance? && [:initialize, :initialize_copy, :initialize_clone, :initialize_dup, :respond_to_missing?].include?(method.name)
+            :private
+          else
+            method.accessibility
+          end
         # Skip setting up `super_method` if `implemented_in` is `nil`, that means the type doesn't have implementation.
         # This typically happens if the type is an interface.
         if implemented_in
@@ -669,7 +669,7 @@ module RBS
                 ]
               ),
               block: nil,
-              location: nil
+              location: original.location
             )
           else
             # getter
@@ -677,7 +677,7 @@ module RBS
               type_params: [],
               type: Types::Function.empty(attr_type),
               block: nil,
-              location: nil
+              location: original.location
             )
           end
 

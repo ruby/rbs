@@ -669,6 +669,44 @@ RBS
     end
   end
 
+  def test_duplicate_keyword
+    RBS::Parser.parse_method_type(buffer("(top foo, foo: top) -> void")).tap do |method_type|
+      assert_equal "top foo, foo: top", method_type.type.param_to_s
+    end
+
+    RBS::Parser.parse_method_type(buffer("(?foo, foo: top) -> void")).tap do |method_type|
+      assert_equal "?foo, foo: top", method_type.type.param_to_s
+    end
+
+    RBS::Parser.parse_method_type(buffer("(foo: top, **top foo) -> void")).tap do |method_type|
+      assert_equal "foo: top, **top foo", method_type.type.param_to_s
+    end
+
+    assert_raises RBS::ParsingError do
+      RBS::Parser.parse_method_type(buffer("(foo: top, foo: top) -> void"))
+    end.tap do |exn|
+      assert_equal "test.rbs:1:11...1:14: Syntax error: duplicated keyword argument, token=`foo` (tLIDENT)", exn.message
+    end
+
+    assert_raises RBS::ParsingError do
+      RBS::Parser.parse_method_type(buffer("(foo: top, ?foo: top) -> void"))
+    end.tap do |exn|
+      assert_equal "test.rbs:1:12...1:15: Syntax error: duplicated keyword argument, token=`foo` (tLIDENT)", exn.message
+    end
+
+    assert_raises RBS::ParsingError do
+      RBS::Parser.parse_method_type(buffer("(?foo: top, foo: top) -> void"))
+    end.tap do |exn|
+      assert_equal "test.rbs:1:12...1:15: Syntax error: duplicated keyword argument, token=`foo` (tLIDENT)", exn.message
+    end
+
+    assert_raises RBS::ParsingError do
+      RBS::Parser.parse_method_type(buffer("(?foo: top, ?foo: top) -> void"))
+    end.tap do |exn|
+      assert_equal "test.rbs:1:13...1:16: Syntax error: duplicated keyword argument, token=`foo` (tLIDENT)", exn.message
+    end
+  end
+
   def test_parse_method_type2
     RBS::Parser.parse_method_type(buffer("(foo?: String, bar!: Integer) -> void")).tap do |method_type|
       assert_equal "foo?: String, bar!: Integer", method_type.type.param_to_s
@@ -717,6 +755,12 @@ RBS
     end
   end
 
+  def test_negative_range
+    assert_raises ArgumentError do
+      RBS::Parser.parse_type("a", range: -2...-1)
+    end
+  end
+
   def test_parse_eof_nil
     code = buffer("type1   ")
 
@@ -744,5 +788,52 @@ RBS
     assert_raises(RBS::ParsingError) do
       RBS::Parser.parse_method_type("() -> void () -> void", range: 0..., require_eof: true)
     end
+  end
+
+  def test_proc__untyped_function
+    RBS::Parser.parse_type("^(?) -> Integer").tap do |type|
+      assert_instance_of RBS::Types::UntypedFunction, type.type
+    end
+
+    RBS::Parser.parse_type("^() { (?) -> String } -> Integer").tap do |type|
+      assert_instance_of RBS::Types::UntypedFunction, type.block.type
+    end
+  end
+
+  def test_proc__untyped_function_parse_error
+    assert_raises(RBS::ParsingError) do
+      RBS::Parser.parse_type("^(?) { (?) -> void } -> Integer")
+    end
+  end
+
+  def test__lex
+    content = <<~RBS
+      # LineComment
+      class Foo[T < Integer] < Bar # Comment
+      end
+    RBS
+    tokens = RBS::Parser._lex(buffer(content), content.length)
+    assert_equal [:tLINECOMMENT, '# LineComment', 0...13], tokens.shift.then { |t| [t[0], t[1].source, t[1].range] }
+    assert_equal [:tTRIVIA, "\n", 13...14], tokens.shift.then { |t| [t[0], t[1].source, t[1].range] }
+    assert_equal [:kCLASS, 'class', 14...19], tokens.shift.then { |t| [t[0], t[1].source, t[1].range] }
+    assert_equal [:tTRIVIA, " ", 19...20], tokens.shift.then { |t| [t[0], t[1].source, t[1].range] }
+    assert_equal [:tUIDENT, 'Foo', 20...23], tokens.shift.then { |t| [t[0], t[1].source, t[1].range] }
+    assert_equal [:pLBRACKET, '[', 23...24], tokens.shift.then { |t| [t[0], t[1].source, t[1].range] }
+    assert_equal [:tUIDENT, 'T', 24...25], tokens.shift.then { |t| [t[0], t[1].source, t[1].range] }
+    assert_equal [:tTRIVIA, " ", 25...26], tokens.shift.then { |t| [t[0], t[1].source, t[1].range] }
+    assert_equal [:pLT, '<', 26...27], tokens.shift.then { |t| [t[0], t[1].source, t[1].range] }
+    assert_equal [:tTRIVIA, " ", 27...28], tokens.shift.then { |t| [t[0], t[1].source, t[1].range] }
+    assert_equal [:tUIDENT, 'Integer', 28...35], tokens.shift.then { |t| [t[0], t[1].source, t[1].range] }
+    assert_equal [:pRBRACKET, ']', 35...36], tokens.shift.then { |t| [t[0], t[1].source, t[1].range] }
+    assert_equal [:tTRIVIA, " ", 36...37], tokens.shift.then { |t| [t[0], t[1].source, t[1].range] }
+    assert_equal [:pLT, '<', 37...38], tokens.shift.then { |t| [t[0], t[1].source, t[1].range] }
+    assert_equal [:tTRIVIA, " ", 38...39], tokens.shift.then { |t| [t[0], t[1].source, t[1].range] }
+    assert_equal [:tUIDENT, 'Bar', 39...42], tokens.shift.then { |t| [t[0], t[1].source, t[1].range] }
+    assert_equal [:tTRIVIA, " ", 42...43], tokens.shift.then { |t| [t[0], t[1].source, t[1].range] }
+    assert_equal [:tCOMMENT, '# Comment', 43...52], tokens.shift.then { |t| [t[0], t[1].source, t[1].range] }
+    assert_equal [:tTRIVIA, "\n", 52...53], tokens.shift.then { |t| [t[0], t[1].source, t[1].range] }
+    assert_equal [:kEND, 'end', 53...56], tokens.shift.then { |t| [t[0], t[1].source, t[1].range] }
+    assert_equal [:tTRIVIA, "\n", 56...57], tokens.shift.then { |t| [t[0], t[1].source, t[1].range] }
+    assert_equal [:pEOF, '', 57...58], tokens.shift.then { |t| [t[0], t[1].source, t[1].range] }
   end
 end

@@ -100,7 +100,7 @@ class RegexpSingletonTest < Test::Unit::TestCase
 
     assert_send_type  '(Regexp, nil) -> bool',
                       Regexp, :linear_time?, /(.+)++/, nil
-    
+
     with_untyped do |timeout|
       assert_send_type  '(Regexp, timeout: untyped) -> bool',
                         Regexp, :linear_time?, /(.+)++/, timeout: timeout
@@ -121,7 +121,7 @@ class RegexpSingletonTest < Test::Unit::TestCase
       with_int(Regexp::IGNORECASE).and(with_string('i'), true, false, nil) do |options|
         assert_send_type  '(string, int | string | bool | nil) -> bool',
                           Regexp, :linear_time?, regexp, options
-        
+
         with_untyped do |timeout|
           assert_send_type  '(string, int | string | bool | nil, timeout: untyped) -> bool',
                             Regexp, :linear_time?, regexp, options, timeout: timeout
@@ -203,6 +203,17 @@ class RegexpSingletonTest < Test::Unit::TestCase
                           Regexp, :union, array
       end
     end
+
+    assert_send_type(
+      '(Regexp, String) -> Regexp',
+      Regexp, :union, /hello/, "world"
+    )
+
+    assert_send_type(
+      '(Array[Regexp | String]) -> Regexp',
+      Regexp, :union, [/hello/, "world"]
+    )
+
   end
 
   def test_new
@@ -311,7 +322,7 @@ class RegexpInstanceTest < Test::Unit::TestCase
                         /a/, :match, str do 1r end
       assert_send_type  '[T] (interned) { (MatchData) -> T } -> nil',
                         /b/, :match, str do 1r end
-     
+
       with_int 0 do |offset|
         assert_send_type  '(interned, int) -> MatchData',
                           /a/, :match, str, offset
@@ -343,7 +354,7 @@ class RegexpInstanceTest < Test::Unit::TestCase
                         /a/, :match?, str
       assert_send_type  '(interned) -> false',
                         /b/, :match?, str
-     
+
       with_int 0 do |offset|
         assert_send_type  '(interned, int) -> true',
                           /a/, :match?, str, offset

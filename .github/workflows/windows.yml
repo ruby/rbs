@@ -1,0 +1,26 @@
+name: Ruby on Windows
+
+on:
+  push:
+    branches:
+      - master
+  pull_request: {}
+  merge_group: {}
+
+jobs:
+  compile:
+    runs-on: "windows-latest"
+    strategy:
+      fail-fast: false
+      matrix:
+        ruby: ['3.2', '3.3', ucrt, mswin]
+    steps:
+      - uses: actions/checkout@v4
+      - name: load ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: ${{ matrix.ruby }}
+      - name: rake-compiler
+        run: gem install rake-compiler
+      - name: compile
+        run: rake compile

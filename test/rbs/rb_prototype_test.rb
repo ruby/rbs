@@ -62,7 +62,7 @@ end
 
     assert_write parser.decls, <<-EOF
 class Hello
-  def hello: (untyped a, ?::Integer b, *untyped c, untyped d, e: untyped, ?f: ::Integer, **untyped g) { () -> untyped } -> nil
+  def hello: (untyped a, ?::Integer b, *untyped c, untyped d, e: untyped, ?f: ::Integer, **untyped g) { (?) -> untyped } -> nil
 
   def self.world: () { (untyped, untyped, untyped, x: untyped, y: untyped) -> untyped } -> untyped
 
@@ -1070,14 +1070,14 @@ end
       # Ruby <=3.3 generates AST without kwrest args for `...` args
       assert_write parser.decls, <<~RBS
         module M
-          def foo: (*untyped) ?{ () -> untyped } -> nil
+          def foo: (*untyped) ?{ (?) -> untyped } -> nil
         end
       RBS
     else
       # Ruby 3.4 generates AST with kwrest args for `...` args
       assert_write parser.decls, <<~RBS
         module M
-          def foo: (*untyped, **untyped) ?{ () -> untyped } -> nil
+          def foo: (*untyped, **untyped) ?{ (?) -> untyped } -> nil
         end
       RBS
     end

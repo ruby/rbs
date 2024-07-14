@@ -309,9 +309,13 @@ module RubyVM::YJIT
   #   rdoc-file=yjit.rb
   #   - enable(stats: false)
   # -->
-  # Enable YJIT compilation.
+  # Enable YJIT compilation. `stats` option decides whether to enable YJIT stats
+  # or not.
+  # *   `false`: Disable stats.
+  # *   `true`: Enable stats. Print stats at exit.
+  # *   `:quiet`: Enable stats. Do not print stats at exit.
   #
-  def self.enable: () -> void
+  def self.enable: (?stats: false | true | :quiet) -> void
 
   # <!--
   #   rdoc-file=yjit.rb

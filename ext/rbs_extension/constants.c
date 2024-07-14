@@ -61,6 +61,7 @@ VALUE RBS_Types_ClassInstance;
 VALUE RBS_Types_ClassSingleton;
 VALUE RBS_Types_Function_Param;
 VALUE RBS_Types_Function;
+VALUE RBS_Types_UntypedFunction;
 VALUE RBS_Types_Interface;
 VALUE RBS_Types_Intersection;
 VALUE RBS_Types_Literal;
@@ -138,6 +139,7 @@ void rbs__init_constants(void) {
   IMPORT_CONSTANT(RBS_Types_ClassInstance, RBS_Types, "ClassInstance");
   IMPORT_CONSTANT(RBS_Types_ClassSingleton, RBS_Types, "ClassSingleton");
   IMPORT_CONSTANT(RBS_Types_Function, RBS_Types, "Function");
+  IMPORT_CONSTANT(RBS_Types_UntypedFunction, RBS_Types, "UntypedFunction");
   IMPORT_CONSTANT(RBS_Types_Function_Param, RBS_Types_Function, "Param");
   IMPORT_CONSTANT(RBS_Types_Interface, RBS_Types, "Interface");
   IMPORT_CONSTANT(RBS_Types_Intersection, RBS_Types, "Intersection");

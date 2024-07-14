@@ -1,0 +1,6 @@
+# Specify the class/module and method names to be executed by RaaP.
+# By prefixing with `!`, you can skip testing a method.
+# Lines beginning with `#` are comments.
+
+Set[Integer]
+Enumerable[Integer]#to_set

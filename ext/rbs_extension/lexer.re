@@ -3,7 +3,6 @@
 token rbsparser_next_token(lexstate *state) {
   lexstate backup;
 
-start:
   backup = *state;
 
   /*!re2c
@@ -139,9 +138,9 @@ start:
 
       "$" global_ident      { return next_token(state, tGIDENT); }
 
-      skip = [ \t\n\r]+;
+      skip = ([ \t]+|[\r\n]);
 
-      skip     { state->start = state->current; goto start; }
+      skip     { return next_token(state, tTRIVIA); }
       "\x00"   { return next_token(state, pEOF); }
       *        { return next_token(state, ErrorToken); }
   */

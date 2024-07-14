@@ -14,11 +14,11 @@ module RBS
     type loc = def_loc | attr_loc
 
     attr_reader type_params: Array[AST::TypeParam]
-    attr_reader type: Types::Function
+    attr_reader type: Types::function
     attr_reader block: Types::Block?
     attr_reader location: loc?
 
-    def initialize: (type_params: Array[AST::TypeParam], type: Types::Function, block: Types::Block?, location: loc?) -> void
+    def initialize: (type_params: Array[AST::TypeParam], type: Types::function, block: Types::Block?, location: loc?) -> void
 
     def ==: (untyped other) -> bool
 
@@ -29,7 +29,7 @@ module RBS
     #
     def sub: (Substitution) -> MethodType
 
-    def update: (?type_params: Array[AST::TypeParam], ?type: Types::Function, ?block: Types::Block?, ?location: loc?) -> MethodType
+    def update: (?type_params: Array[AST::TypeParam], ?type: Types::function, ?block: Types::Block?, ?location: loc?) -> MethodType
 
     def free_variables: (?Set[Symbol] set) -> Set[Symbol]
 
