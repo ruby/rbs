@@ -2437,7 +2437,7 @@ module Net
   # *   #each_name: Passes each field name to the block.
   # *   #each_value: Passes each string field value to the block.
   #
-  module HTTPHeader
+  module HTTPHeader : BasicObject
     # <!--
     #   rdoc-file=lib/net/http/header.rb
     #   - initialize_http_header(initheader)
