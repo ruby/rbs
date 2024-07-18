@@ -441,7 +441,10 @@ class BigDecimal < Numeric
   #
   # Related: BigDecimal#power.
   #
-  def **: (Numeric) -> BigDecimal
+  def **: (Integer) -> BigDecimal
+        | (Float) -> (Integer | BigDecimal)
+        | (Rational) -> (Integer | BigDecimal)
+        | (BigDecimal) -> BigDecimal
 
   # <!--
   #   rdoc-file=ext/bigdecimal/bigdecimal.c
@@ -1497,6 +1500,23 @@ class Integer
   #
   def -: (BigDecimal) -> BigDecimal
     | ...
+
+  # <!--
+  #   rdoc-file=numeric.c
+  #   - self ** numeric -> numeric_result
+  # -->
+  # Raises `self` to the power of `numeric`:
+  #
+  #     2 ** 3              # => 8
+  #     2 ** -3             # => (1/8)
+  #     -2 ** 3             # => -8
+  #     -2 ** -3            # => (-1/8)
+  #     2 ** 3.3            # => 9.849155306759329
+  #     2 ** Rational(3, 1) # => (8/1)
+  #     2 ** Complex(3, 0)  # => (8+0i)
+  #
+  def **: (BigDecimal) -> BigDecimal
+        | ...
 end
 
 %a{annotate:rdoc:skip}
@@ -1581,6 +1601,22 @@ class Float
   #
   def -: (BigDecimal) -> BigDecimal
     | ...
+
+  # <!--
+  #   rdoc-file=numeric.c
+  #   - self ** other -> numeric
+  # -->
+  # Raises `self` to the power of `other`:
+  #
+  #     f = 3.14
+  #     f ** 2              # => 9.8596
+  #     f ** -2             # => 0.1014239928597509
+  #     f ** 2.1            # => 11.054834900588839
+  #     f ** Rational(2, 1) # => 9.8596
+  #     f ** Complex(2, 0)  # => (9.8596+0i)
+  #
+  def **: (BigDecimal) -> BigDecimal
+        | ...
 end
 
 %a{annotate:rdoc:skip}
@@ -1684,6 +1720,22 @@ class Rational
   #
   def -: (BigDecimal) -> BigDecimal
     | ...
+
+  # <!--
+  #   rdoc-file=rational.c
+  #   - rat ** numeric  ->  numeric
+  # -->
+  # Performs exponentiation.
+  #
+  #     Rational(2)    ** Rational(3)     #=> (8/1)
+  #     Rational(10)   ** -2              #=> (1/100)
+  #     Rational(10)   ** -2.0            #=> 0.01
+  #     Rational(-4)   ** Rational(1, 2)  #=> (0.0+2.0i)
+  #     Rational(1, 2) ** 0               #=> (1/1)
+  #     Rational(1, 2) ** 0.0             #=> 1.0
+  #
+  def **: (BigDecimal) -> (Rational | BigDecimal)
+        | ...
 end
 
 %a{annotate:rdoc:skip}
@@ -1768,6 +1820,18 @@ class Complex
   #
   def -: (BigDecimal) -> Complex
     | ...
+
+  # <!--
+  #   rdoc-file=complex.c
+  #   - complex ** numeric -> new_complex
+  # -->
+  # Returns `self` raised to power `numeric`:
+  #
+  #     Complex('i') ** 2             # => (-1+0i)
+  #     Complex(-8) ** Rational(1, 3) # => (1.0000000000000002+1.7320508075688772i)
+  #
+  def **: (BigDecimal) -> Complex
+        | ...
 end
 
 %a{annotate:rdoc:skip}

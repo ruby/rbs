@@ -106,7 +106,7 @@ task :typecheck_test => :compile do
 end
 
 task :raap => :compile do
-  sh %q[cat test/raap.txt | egrep -v '^#|^$' | xargs bundle exec raap]
+  sh %q[cat test/raap.txt | egrep -v '^#|^$' | xargs bundle exec raap --require bigdecimal/util --library bigdecimal]
 end
 
 task :rubocop do

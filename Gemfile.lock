@@ -71,7 +71,7 @@ GEM
     psych (4.0.6)
       stringio
     public_suffix (6.0.0)
-    raap (0.8.0)
+    raap (0.10.0)
       rbs (~> 3.0)
       timeout (~> 0.4)
     racc (1.8.0)
