@@ -245,6 +245,36 @@ class Range[out Elem] < Object
 
   # <!--
   #   rdoc-file=range.c
+  #   - %(n) {|element| ... } -> self
+  #   - %(n)                  -> enumerator
+  # -->
+  # Iterates over the elements of `self`.
+  #
+  # With a block given, calls the block with selected elements of the range;
+  # returns `self`:
+  #
+  #     a = []
+  #     (1..5).%(2) {|element| a.push(element) } # => 1..5
+  #     a # => [1, 3, 5]
+  #     a = []
+  #     ('a'..'e').%(2) {|element| a.push(element) } # => "a".."e"
+  #     a # => ["a", "c", "e"]
+  #
+  # With no block given, returns an enumerator, which will be of class
+  # Enumerator::ArithmeticSequence if `self` is numeric; otherwise of class
+  # Enumerator:
+  #
+  #     e = (1..5) % 2 # => ((1..5).%(2))
+  #     e.class        # => Enumerator::ArithmeticSequence
+  #     ('a'..'e') % 2 # =>  #<Enumerator: ...>
+  #
+  # Related: Range#step.
+  #
+  def %: (Numeric | int n) -> Enumerator[Elem, self]
+    | (Numeric | int n) { (Elem element) -> void } -> self
+
+  # <!--
+  #   rdoc-file=range.c
   #   - self == other -> true or false
   # -->
   # Returns `true` if and only if:

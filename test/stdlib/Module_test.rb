@@ -130,6 +130,12 @@ class ModuleInstanceTest < Test::Unit::TestCase
                      Foo, :class_eval do nil end
   end
 
+  def test_class_exec
+    assert_send_type '(*String) { (*String) [self: Foo] -> Integer } -> Integer',
+                      Foo, :class_exec, '1', '2' do |*x| x.join.to_i end
+  end
+
+
   def test_alias_method
     mod = Module.new do
       def foo

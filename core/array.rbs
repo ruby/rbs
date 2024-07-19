@@ -1082,7 +1082,7 @@ class Array[unchecked out Elem] < Object
   #     a.at(0) # => :foo
   #     a.at(2) # => 2
   #
-  def at: (int index) -> Elem?
+  def at: %a{implicitly-returns-nil} (int index) -> Elem
 
   # <!--
   #   rdoc-file=array.c
@@ -1378,7 +1378,7 @@ class Array[unchecked out Elem] < Object
   #
   # If `index` is too small (far from zero), returns nil.
   #
-  def delete_at: (int index) -> Elem?
+  def delete_at: %a{implicitly-returns-nil} (int index) -> Elem
 
   # <!--
   #   rdoc-file=array.c
@@ -1942,7 +1942,7 @@ class Array[unchecked out Elem] < Object
   #
   # Related: #last.
   #
-  def first: () -> Elem?
+  def first: %a{implicitly-returns-nil} () -> Elem
            | (int n) -> ::Array[Elem]
 
   # <!--
@@ -2241,7 +2241,7 @@ class Array[unchecked out Elem] < Object
   #
   # Related: #first.
   #
-  def last: () -> Elem?
+  def last: %a{implicitly-returns-nil} () -> Elem
           | (int n) -> ::Array[Elem]
 
   # <!--
@@ -2321,8 +2321,8 @@ class Array[unchecked out Elem] < Object
   #
   #     ['0', '00', '000'].max(2) {|a, b| a.size <=> b.size } # => ["000", "00"]
   #
-  def max: () -> Elem?
-         | () { (Elem a, Elem b) -> ::Integer? } -> Elem?
+  def max: %a{implicitly-returns-nil} () -> Elem
+         | %a{implicitly-returns-nil} () { (Elem a, Elem b) -> ::Integer? } -> Elem
          | (int n) -> ::Array[Elem]
          | (int n) { (Elem a, Elem b) -> ::Integer? } -> ::Array[Elem]
 
@@ -3118,7 +3118,7 @@ class Array[unchecked out Elem] < Object
   #     a.sample(random: Random.new(1))     #=> 6
   #     a.sample(4, random: Random.new(1))  #=> [6, 10, 9, 2]
   #
-  def sample: (?random: _Rand rng) -> Elem?
+  def sample: %a{implicitly-returns-nil} (?random: _Rand rng) -> Elem
             | (int n, ?random: _Rand rng) -> ::Array[Elem]
 
   # <!--
@@ -3197,7 +3197,7 @@ class Array[unchecked out Elem] < Object
   #
   # Related: #push, #pop, #unshift.
   #
-  def shift: () -> Elem?
+  def shift: %a{implicitly-returns-nil} () -> Elem
            | (int n) -> ::Array[Elem]
 
   # <!--
@@ -3323,7 +3323,7 @@ class Array[unchecked out Elem] < Object
   #     # Raises TypeError (no implicit conversion of Symbol into Integer):
   #     a[:foo]
   #
-  def slice: (int index) -> Elem?
+  def slice: %a{implicitly-returns-nil} (int index) -> Elem
            | (int start, int length) -> ::Array[Elem]?
            | (::Range[::Integer] range) -> ::Array[Elem]?
 
@@ -3393,7 +3393,7 @@ class Array[unchecked out Elem] < Object
   #     a.slice!(-2..2) # => ["bar", 2]
   #     a # => [:foo]
   #
-  def slice!: (int index) -> Elem?
+  def slice!: %a{implicitly-returns-nil} (int index) -> Elem
             | (int start, int length) -> ::Array[Elem]?
             | (::Range[::Integer] range) -> ::Array[Elem]?
 
