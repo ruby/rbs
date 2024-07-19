@@ -4,6 +4,21 @@
 # #import_methods.
 #
 class Refinement < Module
+  # <!--
+  #   rdoc-file=eval.c
+  #   - target    -> class_or_module
+  # -->
+  # Return the class or module refined by the receiver.
+  #
+  #     module M
+  #       refine String do
+  #       end
+  #     end
+  #
+  #     M.refinements[0].target # => String
+  #
+  def target: () -> Module?
+
   private
 
   # <!--
@@ -40,30 +55,5 @@ class Refinement < Module
   #       end
   #     end
   #
-  def import_methods: (*Module) -> self
-
-  # <!--
-  #   rdoc-file=eval.c
-  #   - refined_class    -> class
-  # -->
-  # Deprecated; prefer #target.
-  #
-  # Return the class refined by the receiver.
-  #
-  def refined_class: () -> Module
-
-  # <!--
-  #   rdoc-file=eval.c
-  #   - target    -> class_or_module
-  # -->
-  # Return the class or module refined by the receiver.
-  #
-  #     module M
-  #       refine String do
-  #       end
-  #     end
-  #
-  #     M.refinements[0].target # => String
-  #
-  def target: () -> Module
+  def import_methods: (Module module, *Module extra_modules) -> self
 end
