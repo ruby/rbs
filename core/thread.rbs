@@ -382,7 +382,7 @@ class Thread < Object
   # If you're going to subclass Thread, be sure to call super in your `initialize`
   # method, otherwise a ThreadError will be raised.
   #
-  def initialize: (*untyped) { (*untyped) -> void } -> void
+  def initialize: (*untyped) { (?) -> void } -> void
 
   # <!--
   #   rdoc-file=thread.c
@@ -1178,7 +1178,7 @@ class Thread < Object
   # calling `start` in that subclass will not invoke the subclass's `initialize`
   # method.
   #
-  def self.start: (*untyped args) { (*untyped) -> void } -> instance
+  def self.start: (*untyped args) { (?) -> void } -> instance
 
   # <!--
   #   rdoc-file=thread.c

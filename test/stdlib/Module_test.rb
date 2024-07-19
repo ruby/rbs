@@ -135,7 +135,6 @@ class ModuleInstanceTest < Test::Unit::TestCase
                       Foo, :class_exec, '1', '2' do |*x| x.join.to_i end
   end
 
-
   def test_alias_method
     mod = Module.new do
       def foo
