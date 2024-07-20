@@ -151,7 +151,7 @@ class Symbol
   # Related: String#<=>.
   #
   def <=>: (Symbol object) -> (-1 | 0 | 1)
-         | (untyped) -> nil
+         | (untyped) -> (-1 | 0 | 1)?
 
   # <!--
   #   rdoc-file=string.c
@@ -236,8 +236,7 @@ class Symbol
   #
   # Related: Symbol#casecmp?, String#casecmp.
   #
-  def casecmp: (Symbol object) -> (-1 | 0 | 1)?
-             | (untyped) -> nil
+  def casecmp: (untyped object) -> (-1 | 0 | 1)?
 
   # <!--
   #   rdoc-file=string.c
@@ -270,8 +269,7 @@ class Symbol
   #
   # Related: Symbol#casecmp, String#casecmp?.
   #
-  def casecmp?: (Symbol object) -> bool?
-              | (untyped) -> nil
+  def casecmp?: (untyped object) -> bool?
 
   # <!--
   #   rdoc-file=string.c

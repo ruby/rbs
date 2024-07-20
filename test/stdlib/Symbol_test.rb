@@ -22,10 +22,8 @@ class SymbolInstanceTest < Test::Unit::TestCase
                        :s, :<=>, other
     end
 
-    with_untyped do |untyped|
-      next if Symbol === untyped
-
-      assert_send_type '(untyped) -> nil',
+    with_untyped.and :sym do |untyped|
+      assert_send_type '(untyped) -> Integer?',
                        :a, :<=>, untyped
     end
   end
@@ -127,10 +125,8 @@ class SymbolInstanceTest < Test::Unit::TestCase
     assert_send_type '(Symbol) -> nil',
                      "\u{e4 f6 fc}".encode('ISO-8859-1').to_sym, :casecmp, :"\u{c4 d6 dc}"
 
-    with_untyped do |other|
-      next if Symbol === other
-
-      assert_send_type '(untyped) -> nil',
+    with_untyped.and :sym do |other|
+      assert_send_type '(untyped) -> (-1 | 0 | 1)?',
                        :a, :casecmp, other
     end
   end
@@ -145,10 +141,8 @@ class SymbolInstanceTest < Test::Unit::TestCase
     assert_send_type '(Symbol) -> nil',
                      '\u{e4 f6 fc}'.encode('ISO-8859-1').to_sym, :casecmp?, :'\u{c4 d6 dc}'
 
-    with_untyped do |other|
-      next if Symbol === other
-
-      assert_send_type '(untyped) -> nil',
+    with_untyped.and :sym do |other|
+      assert_send_type '(untyped) -> bool?',
                        :a, :casecmp?, other
     end
   end
