@@ -2,7 +2,7 @@
 $!: Exception?
 
 # The array contains the module names loaded by require.
-$": Array[String]
+alias $" $LOADED_FEATURES
 
 # The process number of the Ruby running this script. Same as Process.pid.
 $$: Integer
@@ -23,17 +23,17 @@ $+: String?
 $,: String?
 
 # The input record separator, newline by default.
-$-0: String?
+alias $-0 $/
 
 # The default separator for String#split. Non-nil $; will be deprecated.
-$-F: Regexp | String | nil
+alias $-F $;
 
 # Load path for searching Ruby scripts and extension libraries used
 # by Kernel#load and Kernel#require.
 # Has a singleton method <code>$LOAD_PATH.resolve_feature_path(feature)</code>
 # that returns [+:rb+ or +:so+, path], which resolves the feature to
 # the path the original Kernel#require method would load.
-$-I: Array[String]
+alias $-I $LOAD_PATH
 
 $-W: 0 | 1 | 2
 
@@ -45,7 +45,7 @@ $-a: bool
 # backtrace).  Setting this to a true value enables debug output as
 # if <tt>-d</tt> were given on the command line.  Setting this to a false
 # value disables debug output.
-$-d: boolish
+alias $-d $DEBUG
 
 # In in-place-edit mode, this variable holds the extension, otherwise +nil+.
 $-i: String?
@@ -60,13 +60,13 @@ $-p: bool
 # Setting this to a true value enables warnings as if <tt>-w</tt> or <tt>-v</tt> were given
 # on the command line.  Setting this to +nil+ disables warnings,
 # including from Kernel#warn.
-$-v: bool?
+alias $-v $VERBOSE
 
 # The verbose flag, which is set by the <tt>-w</tt> or <tt>-v</tt> switch.
 # Setting this to a true value enables warnings as if <tt>-w</tt> or <tt>-v</tt> were given
 # on the command line.  Setting this to +nil+ disables warnings,
 # including from Kernel#warn.
-$-w: bool?
+alias $-w $VERBOSE
 
 # The current input line number of the last file that was read.
 $.: Integer
@@ -75,7 +75,7 @@ $.: Integer
 $/: String?
 
 # Contains the name of the script being executed. May be assignable.
-$0: String
+alias $0 $PROGRAM_NAME
 
 # The Nth group of the last successful match. May be > 1.
 $1: String?
@@ -109,7 +109,7 @@ $9: String?
 # Has a singleton method <code>$LOAD_PATH.resolve_feature_path(feature)</code>
 # that returns [+:rb+ or +:so+, path], which resolves the feature to
 # the path the original Kernel#require method would load.
-$:: Array[String]
+alias $: $LOAD_PATH
 
 # The default separator for String#split. Non-nil $; will be deprecated. Aliased to $-F.
 $;: Regexp | String | nil
@@ -118,7 +118,7 @@ $;: Regexp | String | nil
 $<: RBS::Unnamed::ARGFClass
 
 # This variable is no longer effective. Deprecated.
-$=: bool
+$=: false
 
 # The default output stream for Kernel#print and Kernel#printf. $stdout by default.
 $>: IO
@@ -150,7 +150,7 @@ $LOADED_FEATURES: Array[String]
 $LOAD_PATH: Array[String] & _LoadPathAPI
 
 interface _LoadPathAPI
-  def resolve_feature_path: (String) -> [:rb | :so, String]?
+  def resolve_feature_path: (path feature_path) -> [:rb | :so, String]?
 end
 
 # Contains the name of the script being executed. May be assignable.
