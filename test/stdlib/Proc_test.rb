@@ -9,7 +9,7 @@ class ProcSingletonTest < Test::Unit::TestCase
   end
 
   def test_new
-    assert_send_type '() { (*untyped, **untyped) -> untyped } -> ProcSingletonTest::MyProc',
+    assert_send_type '() { (?) -> untyped } -> ProcSingletonTest::MyProc',
                      MyProc, :new do end
   end
 end
@@ -96,7 +96,7 @@ class ProcInstanceTest < Test::Unit::TestCase
   end
 
   def test_call(method: :call)
-    assert_send_type  '(*untyped, **untyped) ?{ (*untyped, **untyped) -> untyped } -> untyped',
+    assert_send_type  '(?) -> untyped',
                       proc{1r}, method, 1, 2i, foo: :three do end
   end
 

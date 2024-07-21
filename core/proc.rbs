@@ -290,7 +290,7 @@
 #
 class Proc
   interface _Callable
-    def call: (*untyped, **untyped) ?{ (*untyped, **untyped) -> untyped } -> untyped
+    def call: (?) -> untyped
   end
 
   # <!--
@@ -306,7 +306,7 @@ class Proc
   #
   #     Proc.new    #=> ArgumentError
   #
-  def self.new: () { (*untyped, **untyped) -> untyped } -> instance
+  def self.new: () { (?) -> untyped } -> instance
 
   def clone: () -> instance
   def dup: () -> instance
@@ -555,7 +555,7 @@ class Proc
   #
   # See also Proc#lambda?.
   #
-  def call: (*untyped, **untyped) ?{ (*untyped, **untyped) -> untyped } -> untyped
+  def call: (?) -> untyped
 
   # <!-- rdoc-file=proc.c -->
   # Invokes the block, setting the block's parameters to the values in *params*
