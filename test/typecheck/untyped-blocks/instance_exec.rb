@@ -4,8 +4,8 @@
   # @type var b: String
   # @type var c: Symbol
 
-  a + 2
-  b + "2"
+  p a + 2
+  p b + "2"
   c.id2name
 
   self.size
