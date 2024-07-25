@@ -64,7 +64,7 @@ Interface type denotes _type of a value which can be a subtype of the interface_
 
 ```rbs
 _ToS                          # _ToS interface
-::MyApp::_Each[String]        # Interface name with namespace and type application
+::Enumerator::_Each[String]   # Interface name with namespace and type application
 ```
 
 ### Alias type
