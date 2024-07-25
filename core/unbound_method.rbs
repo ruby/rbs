@@ -325,5 +325,5 @@ class UnboundMethod
   # arguments. This is semantically equivalent to `umeth.bind(recv).call(args,
   # ...)`.
   #
-  def bind_call: (untyped recv, *untyped, **untyped) ?{ (*untyped, **untyped) -> untyped } -> untyped
+  def bind_call: (untyped recv, *untyped, **untyped) ?{ (?) -> untyped } -> untyped
 end

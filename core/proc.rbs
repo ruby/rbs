@@ -480,7 +480,7 @@ class Proc < Object
   #
   #     Proc.new    #=> ArgumentError
   #
-  def initialize: () { (*untyped) -> untyped } -> void
+  def initialize: () { (?) -> untyped } -> void
 
   # <!--
   #   rdoc-file=proc.c

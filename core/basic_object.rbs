@@ -163,7 +163,7 @@ class BasicObject
   #     k = Klass.new
   #     k.send :hello, "gentle", "readers"   #=> "Hello gentle readers"
   #
-  def __send__: (interned name, *untyped, **untyped) ?{ (*untyped, **untyped) -> untyped } -> untyped
+  def __send__: (interned name, *untyped, **untyped) ?{ (?) -> untyped } -> untyped
 
   # <!-- rdoc-file=object.c -->
   # Equality --- At the Object level, #== returns `true` only if `obj` and `other`
@@ -248,7 +248,7 @@ class BasicObject
   #     k = KlassWithSecret.new
   #     k.instance_exec(5) {|x| @secret+x }   #=> 104
   #
-  def instance_exec: [U, V] (*V args) { (*V args) [self: self] -> U } -> U
+  def instance_exec: [U] (*untyped, **untyped) { (?) [self: self] -> U } -> U
 
   # <!--
   #   rdoc-file=object.c
@@ -295,7 +295,7 @@ class BasicObject
   #     r.mm      #=> 2000
   #     r.foo     #=> NoMethodError
   #
-  def method_missing: (Symbol, *untyped, **untyped) ?{ (*untyped, **untyped) -> untyped } -> untyped
+  def method_missing: (Symbol, *untyped, **untyped) ?{ (?) -> untyped } -> untyped
 
   # <!--
   #   rdoc-file=object.c

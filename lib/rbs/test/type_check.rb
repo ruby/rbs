@@ -150,6 +150,8 @@ module RBS
       end
 
       def zip_args(args, fun, &block)
+        return true if fun.is_a?(Types::UntypedFunction)
+        
         case
         when args.empty?
           if fun.required_positionals.empty? && fun.trailing_positionals.empty? && fun.required_keywords.empty?

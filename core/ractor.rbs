@@ -355,7 +355,7 @@ class Ractor
   #     p r
   #     #=> #<Ractor:#3 my ractor test.rb:1 terminated>
   #
-  def self.new: (*untyped args, ?name: string) { (*untyped) -> untyped } -> Ractor
+  def self.new: (*untyped args, ?name: string) { (?) -> untyped } -> Ractor
 
   # <!--
   #   rdoc-file=ractor.rb

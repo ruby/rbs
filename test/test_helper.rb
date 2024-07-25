@@ -296,37 +296,37 @@ SIG
   end
 end
 
-if $0.end_with?("_test.rb")
-  at_exit do
-    argv = ARGV.dup
-    test_unit_args = []
+# if $0.end_with?("_test.rb")
+#   at_exit do
+#     argv = ARGV.dup
+#     test_unit_args = []
 
-    OptionParser.new do |opts|
-      opts.on("--name NAME") do |name|
-        name = name.gsub(/(\A\/)|(\/\Z)/, '')
-        klass_name, method_name = name.split("#", 2)
+#     OptionParser.new do |opts|
+#       opts.on("--name NAME") do |name|
+#         name = name.gsub(/(\A\/)|(\/\Z)/, '')
+#         klass_name, method_name = name.split("#", 2)
 
-        constant = ObjectSpace.each_object(Class).find do |klass|
-          if klass.name
-            klass.name == klass_name || klass.name.end_with?("::#{klass_name}")
-          end
-        end
+#         constant = ObjectSpace.each_object(Class).find do |klass|
+#           if klass.name
+#             klass.name == klass_name || klass.name.end_with?("::#{klass_name}")
+#           end
+#         end
 
-        if constant
-          if method_name
-            test_unit_args << "--name"
-            test_unit_args << "#{constant.name}##{method_name}"
-          else
-            test_unit_args << "--testcase"
-            test_unit_args << constant.name
-          end
-        end
-      end
-    end.order!(argv)
-    test_unit_args.push(*argv)
+#         if constant
+#           if method_name
+#             test_unit_args << "--name"
+#             test_unit_args << "#{constant.name}##{method_name}"
+#           else
+#             test_unit_args << "--testcase"
+#             test_unit_args << constant.name
+#           end
+#         end
+#       end
+#     end.order!(argv)
+#     test_unit_args.push(*argv)
 
-    RBS.logger.info { "Forwarding to test-unit command line: #{test_unit_args.inspect}" }
+#     RBS.logger.info { "Forwarding to test-unit command line: #{test_unit_args.inspect}" }
 
-    Test::Unit::AutoRunner.run(false, nil, test_unit_args)
-  end
-end
+#     Test::Unit::AutoRunner.run(false, nil, test_unit_args)
+#   end
+# end

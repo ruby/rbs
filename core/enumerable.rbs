@@ -528,7 +528,7 @@ module Enumerable[unchecked out Elem] : _Each[Elem]
   #
   def entries: () -> ::Array[Elem]
 
-  def enum_for: (Symbol method, *untyped, **untyped) ?{ (*untyped, **untyped) -> Integer } -> Enumerator[untyped, untyped]
+  def enum_for: (Symbol method, *untyped, **untyped) ?{ (?) -> Integer } -> Enumerator[untyped, untyped]
     | () ?{ () -> Integer } -> Enumerator[Elem, self]
 
   %a{annotate:rdoc:skip}
