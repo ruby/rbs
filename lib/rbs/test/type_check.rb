@@ -80,7 +80,7 @@ module RBS
             # Block is given, but not yielded
           end
         else
-          if call.block_given
+          if call.block_given && !method_type.type.is_a?(Types::UntypedFunction)
             errors << Errors::UnexpectedBlockError.new(klass: self_class, method_name: method_name, method_type: method_type)
           end
         end
