@@ -121,7 +121,7 @@ $<: RBS::Unnamed::ARGFClass
 $=: false
 
 # The default output stream for Kernel#print and Kernel#printf. $stdout by default.
-$>: IO
+alias $> $stdout
 
 # The status of the last executed child process (thread-local).
 $?: Process::Status?
