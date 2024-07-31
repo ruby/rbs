@@ -74,7 +74,7 @@ GEM
     raap (0.8.0)
       rbs (~> 3.0)
       timeout (~> 0.4)
-    racc (1.8.0)
+    racc (1.8.1)
     rainbow (3.1.1)
     rake (13.2.1)
     rake-compiler (1.2.7)
