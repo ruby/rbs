@@ -37,7 +37,7 @@ module RBS
       interface_methods = interface_methods(included_interfaces)
       methods = method_builder.build_interface(type_name)
 
-      import_methods(definition, type_name, methods, interface_methods, subst)
+      import_methods(definition, type_name, methods, interface_methods, subst, nil)
     end
 
     def build_interface(type_name)
@@ -86,6 +86,19 @@ module RBS
       one_ancestors = ancestor_builder.one_instance_ancestors(type_name)
       methods = method_builder.build_instance(type_name)
 
+      self_type_methods = one_ancestors.each_self_type.with_object({}) do |self_type, hash| #$ Hash[Symbol, Definition::Method]
+        self_type.args.each do |arg|
+          validate_type_presence(arg)
+        end
+
+        self_type_defn = self_type.name.interface? ? build_interface(self_type.name) : build_instance(self_type.name)
+
+        s = subst + tapp_subst(self_type.name, self_type.args)
+        self_type_defn.methods.each do |method_name, method_def|
+          hash[method_name] = method_def.sub(s)
+        end
+      end
+
       one_ancestors.each_included_module do |mod|
         mod.args.each do |arg|
           validate_type_presence(arg)
@@ -100,7 +113,7 @@ module RBS
         [interface, *other_interfaces]
       end
       interface_methods = interface_methods(all_interfaces)
-      import_methods(definition, type_name, methods, interface_methods, subst)
+      import_methods(definition, type_name, methods, interface_methods, subst, self_type_methods)
 
       one_ancestors.each_prepended_module do |mod|
         mod.args.each do |arg|
@@ -254,7 +267,7 @@ module RBS
             [interface, *other_interfaces]
           end
           interface_methods = interface_methods(all_interfaces)
-          import_methods(definition, type_name, methods, interface_methods, Substitution.new)
+          import_methods(definition, type_name, methods, interface_methods, Substitution.new, nil)
 
           entry.decls.each do |d|
             d.decl.members.each do |member|
@@ -529,7 +542,7 @@ module RBS
       )
     end
 
-    def import_methods(definition, module_name, module_methods, interfaces_methods, subst)
+    def import_methods(definition, module_name, module_methods, interfaces_methods, subst, self_type_methods)
       new_methods = {} #: Hash[Symbol, Definition::Method]
       interface_method_duplicates = Set[] #: Set[Symbol]
 
@@ -567,6 +580,7 @@ module RBS
             definition,
             method,
             subst_,
+            nil,
             defined_in: interface.name,
             implemented_in: module_name
           )
@@ -579,6 +593,7 @@ module RBS
           definition,
           method,
           subst,
+          self_type_methods,
           defined_in: module_name,
           implemented_in: module_name.interface? ? nil : module_name
         )
@@ -587,12 +602,12 @@ module RBS
       definition.methods.merge!(new_methods)
     end
 
-    def define_method(methods, definition, method, subst, defined_in:, implemented_in: defined_in)
+    def define_method(methods, definition, method, subst, self_type_methods, defined_in:, implemented_in: defined_in)
       existing_method = methods[method.name] || definition.methods[method.name]
 
       case original = method.original
       when AST::Members::Alias
-        original_method = methods[original.old_name] || definition.methods[original.old_name]
+        original_method = methods[original.old_name] || definition.methods[original.old_name] || self_type_methods&.fetch(original.old_name, nil)
 
         unless original_method
           raise UnknownMethodAliasError.new(
