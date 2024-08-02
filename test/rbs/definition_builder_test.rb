@@ -2686,4 +2686,23 @@ end
       end
     end
   end
+
+  def test_alias__to_module_self_indierect_method
+    SignatureManager.new(system_builtin: false) do |manager|
+      manager.add_file("foo.rbs", <<-EOF)
+module Kernel
+  alias foo __id__
+end
+
+module Foo
+end
+      EOF
+
+      manager.build do |env|
+        builder = DefinitionBuilder.new(env: env)
+
+        builder.build_instance(type_name("::Foo"))
+      end
+    end
+  end
 end
