@@ -10,6 +10,7 @@ gem "test-unit"
 gem "rspec"
 gem "rubocop"
 gem "rubocop-rubycw"
+gem "rubocop-on-rbs" if Gem::Version.new(RUBY_VERSION) >= Gem::Version.new('3.1')
 gem "json"
 gem "json-schema"
 gem "goodcheck"

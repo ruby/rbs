@@ -352,7 +352,7 @@ class TracePoint < Object
   #     trace.enable { p tp.lineno }
   #     #=> RuntimeError: access from outside
   #
-  def enable:     (?target: (Method | UnboundMethod | Proc)?, ?target_line: Integer?, ?target_thread: Thread?) -> bool
+  def enable: (?target: (Method | UnboundMethod | Proc)?, ?target_line: Integer?, ?target_thread: Thread?) -> bool
             | [R] (?target: (Method | UnboundMethod | Proc)?, ?target_line: Integer?, ?target_thread: Thread?) { () -> R } -> R
 
   # <!--
