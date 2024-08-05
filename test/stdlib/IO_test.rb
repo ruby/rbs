@@ -49,12 +49,8 @@ class IOSingletonTest < Test::Unit::TestCase
     end
   end
 
-  def ruby
-    ENV["RUBY"] || RbConfig.ruby
-  end
-
   def test_popen
-    with_string("#{ruby} -v") do |command|
+    with_string("#{RUBY_EXECUTABLE} -v") do |command|
       assert_send_type(
         "(string) { (IO) -> nil } -> nil",
         IO, :popen, command, &proc { nil }

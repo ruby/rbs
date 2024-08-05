@@ -118,7 +118,7 @@ $;: Regexp | String | nil
 $<: RBS::Unnamed::ARGFClass
 
 # This variable is no longer effective. Deprecated.
-$=: bool
+$=: false
 
 # The default output stream for Kernel#print and Kernel#printf. $stdout by default.
 $>: IO
@@ -150,7 +150,7 @@ $LOADED_FEATURES: Array[String]
 $LOAD_PATH: Array[String] & _LoadPathAPI
 
 interface _LoadPathAPI
-  def resolve_feature_path: (String) -> [:rb | :so, String]?
+  def resolve_feature_path: (path feature_path) -> [:rb | :so, String]?
 end
 
 # Contains the name of the script being executed. May be assignable.

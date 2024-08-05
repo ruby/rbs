@@ -155,6 +155,8 @@ module TestHelper
   def self.included(base)
     base.extend RBS::UnitTest::TypeAssertions::ClassMethods
   end
+
+  RUBY_EXECUTABLE = ENV["RUBY"] || RbConfig.ruby
 end
 
 class StdlibTest < Test::Unit::TestCase
