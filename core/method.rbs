@@ -22,8 +22,99 @@
 #     %w[2017-03-01 2017-03-02].collect(&Date.method(:parse))
 #     #=> [#<Date: 2017-03-01 ((2457814j,0s,0n),+0s,2299161j)>, #<Date: 2017-03-02 ((2457815j,0s,0n),+0s,2299161j)>]
 #
-class Method < Object
+class Method
+  # The return type from `#parameters` methods (such as those defined on `Method`, `Proc`, and `UnboundMethod`).
   type param_types = Array[[:req | :opt | :rest | :keyreq | :key | :keyrest | :block, Symbol] | [:rest | :keyrest | :nokey]]
+
+  # <!--
+  #   rdoc-file=proc.c
+  #   - meth.eql?(other_meth)  -> true or false
+  #   - meth == other_meth  -> true or false
+  # -->
+  # Two method objects are equal if they are bound to the same object and refer to
+  # the same method definition and the classes defining the methods are the same
+  # class or module.
+  #
+  def ==: (untyped other) -> bool
+
+  # <!-- rdoc-file=proc.c -->
+  # Two method objects are equal if they are bound to the same object and refer to
+  # the same method definition and the classes defining the methods are the same
+  # class or module.
+  #
+  alias eql? ==
+
+  # <!--
+  #   rdoc-file=proc.c
+  #   - meth.hash   -> integer
+  # -->
+  # Returns a hash value corresponding to the method object.
+  #
+  # See also Object#hash.
+  #
+  def hash: () -> Integer
+
+  def dup: () -> instance
+
+  # <!--
+  #   rdoc-file=proc.c
+  #   - meth.to_s      ->  string
+  #   - meth.inspect   ->  string
+  # -->
+  # Returns a human-readable description of the underlying method.
+  #
+  #     "cat".method(:count).inspect   #=> "#<Method: String#count(*)>"
+  #     (1..3).method(:map).inspect    #=> "#<Method: Range(Enumerable)#map()>"
+  #
+  # In the latter case, the method description includes the "owner" of the
+  # original method (`Enumerable` module, which is included into `Range`).
+  #
+  # `inspect` also provides, when possible, method argument names (call sequence)
+  # and source location.
+  #
+  #     require 'net/http'
+  #     Net::HTTP.method(:get).inspect
+  #     #=> "#<Method: Net::HTTP.get(uri_or_host, path=..., port=...) <skip>/lib/ruby/2.7.0/net/http.rb:457>"
+  #
+  # `...` in argument definition means argument is optional (has some default
+  # value).
+  #
+  # For methods defined in C (language core and extensions), location and argument
+  # names can't be extracted, and only generic information is provided in form of
+  # `*` (any number of arguments) or `_` (some positional argument).
+  #
+  #     "cat".method(:count).inspect   #=> "#<Method: String#count(*)>"
+  #     "cat".method(:+).inspect       #=> "#<Method: String#+(_)>""
+  #
+  def inspect: () -> String
+
+  # <!-- rdoc-file=proc.c -->
+  # Returns a human-readable description of the underlying method.
+  #
+  #     "cat".method(:count).inspect   #=> "#<Method: String#count(*)>"
+  #     (1..3).method(:map).inspect    #=> "#<Method: Range(Enumerable)#map()>"
+  #
+  # In the latter case, the method description includes the "owner" of the
+  # original method (`Enumerable` module, which is included into `Range`).
+  #
+  # `inspect` also provides, when possible, method argument names (call sequence)
+  # and source location.
+  #
+  #     require 'net/http'
+  #     Net::HTTP.method(:get).inspect
+  #     #=> "#<Method: Net::HTTP.get(uri_or_host, path=..., port=...) <skip>/lib/ruby/2.7.0/net/http.rb:457>"
+  #
+  # `...` in argument definition means argument is optional (has some default
+  # value).
+  #
+  # For methods defined in C (language core and extensions), location and argument
+  # names can't be extracted, and only generic information is provided in form of
+  # `*` (any number of arguments) or `_` (some positional argument).
+  #
+  #     "cat".method(:count).inspect   #=> "#<Method: String#count(*)>"
+  #     "cat".method(:+).inspect       #=> "#<Method: String#+(_)>""
+  #
+  alias to_s inspect
 
   # <!--
   #   rdoc-file=proc.c
@@ -44,7 +135,7 @@ class Method < Object
   #     m.call(3)    #=> 15
   #     m.call(20)   #=> 32
   #
-  def call: (*untyped args) -> untyped
+  def call: (?) -> untyped
 
   # <!--
   #   rdoc-file=proc.c
@@ -62,7 +153,7 @@ class Method < Object
   #     g = proc {|x| x + x }
   #     p (f << g).call(2) #=> 16
   #
-  def <<: (Proc g) -> Proc
+  def <<: (Proc::_Callable g) -> Proc
 
   # <!-- rdoc-file=proc.c -->
   # Invokes the *meth* with the specified arguments, returning the method's return
@@ -90,7 +181,7 @@ class Method < Object
   #     g = proc {|x| x + x }
   #     p (f >> g).call(2) #=> 8
   #
-  def >>: (Proc g) -> Proc
+  def >>: (Proc::_Callable g) -> Proc
 
   # <!-- rdoc-file=proc.c -->
   # Invokes the *meth* with the specified arguments, returning the method's return
@@ -161,7 +252,7 @@ class Method < Object
   #     m.call # => "bar"
   #     n = m.clone.call # => "bar"
   #
-  def clone: () -> Method
+  def clone: () -> instance
 
   # <!--
   #   rdoc-file=proc.c
@@ -194,7 +285,7 @@ class Method < Object
   #     proc3 = proc2.call(:y, :z) #=> #<Proc>
   #     proc3.call(:a)             #=> [:x, :y, :z, :a]
   #
-  def curry: (?Integer arity) -> Proc
+  def curry: (?int? arity) -> Proc
 
   # <!--
   #   rdoc-file=proc.c
@@ -273,7 +364,7 @@ class Method < Object
   # Returns the Ruby source filename and line number containing this method or nil
   # if this method was not defined in Ruby (i.e. native).
   #
-  def source_location: () -> [ String, Integer ]?
+  def source_location: () -> [String, Integer]?
 
   # <!--
   #   rdoc-file=proc.c
