@@ -227,10 +227,10 @@ VALUE parse_type_name(parserstate *state, TypeNameKind kind, range *rg) {
   type_list ::= {} type `,` ... <`,`> eol
               | {} type `,` ... `,` <type> eol
 */
-static VALUE parse_type_list(parserstate *state, enum TokenType eol, VALUE types) {
+static void parse_type_list(parserstate *state, enum TokenType eol, VALUE *types) {
   while (true) {
-    melt_array(&types);
-    rb_ary_push(types, parse_type(state));
+    melt_array(types);
+    rb_ary_push(*types, parse_type(state));
 
     if (state->next_token.type == pCOMMA) {
       parser_advance(state);
@@ -250,8 +250,6 @@ static VALUE parse_type_list(parserstate *state, enum TokenType eol, VALUE types
       }
     }
   }
-
-  return types;
 }
 
 static bool is_keyword_token(enum TokenType type) {
@@ -900,7 +898,7 @@ static VALUE parse_instance_type(parserstate *state, bool parse_alias) {
     if (state->next_token.type == pLBRACKET) {
       parser_advance(state);
       args_range.start = state->current_token.range.start;
-      parse_type_list(state, pRBRACKET, types);
+      parse_type_list(state, pRBRACKET, &types);
       parser_advance_assert(state, pRBRACKET);
       args_range.end = state->current_token.range.end;
     } else {
@@ -1041,7 +1039,7 @@ static VALUE parse_simple(parserstate *state) {
     rg.start = state->current_token.range.start;
     VALUE types = EMPTY_ARRAY;
     if (state->next_token.type != pRBRACKET) {
-      parse_type_list(state, pRBRACKET, types);
+      parse_type_list(state, pRBRACKET, &types);
     }
     parser_advance_assert(state, pRBRACKET);
     rg.end = state->current_token.range.end;
@@ -1749,7 +1747,7 @@ void class_instance_name(parserstate *state, TypeNameKind kind, VALUE *name, VAL
   if (state->next_token.type == pLBRACKET) {
     parser_advance(state);
     args_range->start = state->current_token.range.start;
-    parse_type_list(state, pRBRACKET, args);
+    parse_type_list(state, pRBRACKET, &args);
     parser_advance_assert(state, pRBRACKET);
     args_range->end = state->current_token.range.end;
   } else {
@@ -2272,7 +2270,7 @@ void parse_module_self_types(parserstate *state, VALUE array) {
     if (state->next_token.type == pLBRACKET) {
       parser_advance(state);
       args_range.start = state->current_token.range.start;
-      parse_type_list(state, pRBRACKET, args);
+      parse_type_list(state, pRBRACKET, &args);
       parser_advance(state);
       self_range.end = args_range.end = state->current_token.range.end;
     }
