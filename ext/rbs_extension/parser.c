@@ -2696,10 +2696,11 @@ VALUE parse_namespace(parserstate *state, range *rg) {
     parser_advance(state);
   }
 
-  VALUE path = rb_ary_new();
+  VALUE path = EMPTY_ARRAY;
 
   while (true) {
     if (state->next_token.type == tUIDENT && state->next_token2.type == pCOLON2) {
+      melt_array(&path);
       rb_ary_push(path, ID2SYM(INTERN_TOKEN(state, state->next_token)));
       if (null_position_p(rg->start)) {
         rg->start = state->next_token.range.start;
