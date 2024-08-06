@@ -1808,7 +1808,7 @@ VALUE parse_mixin_member(parserstate *state, bool from_interface, position comme
   parser_push_typevar_table(state, reset_typevar_scope);
 
   VALUE name;
-  VALUE args = rb_ary_new();
+  VALUE args = EMPTY_ARRAY;
   class_instance_name(
     state,
     from_interface ? INTERFACE_NAME : (INTERFACE_NAME | CLASS_NAME),
