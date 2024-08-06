@@ -52,6 +52,21 @@ typedef struct {
   VALUE rest_keywords;
 } method_params;
 
+static VALUE EMPTY_ARRAY;
+static VALUE EMPTY_HASH;
+
+static void inline melt_array(VALUE *array) {
+  if (*array == EMPTY_ARRAY) {
+    *array = rb_ary_new();
+  }
+}
+
+static void inline melt_hash(VALUE *hash) {
+  if (*hash == EMPTY_HASH) {
+    *hash = rb_hash_new();
+  }
+}
+
 static bool rbs_is_untyped_params(method_params *params) {
   return NIL_P(params->required_positionals);
 }
@@ -329,7 +344,7 @@ static VALUE parse_keyword_key(parserstate *state) {
 /*
   keyword ::= {} keyword `:` <function_param>
 */
-static void parse_keyword(parserstate *state, VALUE keywords, VALUE memo) {
+static void parse_keyword(parserstate *state, VALUE *keywords, VALUE memo) {
   VALUE key;
   VALUE param;
 
@@ -348,7 +363,8 @@ static void parse_keyword(parserstate *state, VALUE keywords, VALUE memo) {
   parser_advance_assert(state, pCOLON);
   param = parse_function_param(state);
 
-  rb_hash_aset(keywords, key, param);
+  melt_hash(keywords);
+  rb_hash_aset(*keywords, key, param);
 
   return;
 }
@@ -435,6 +451,7 @@ static void parse_params(parserstate *state, method_params *params) {
         }
 
         param = parse_function_param(state);
+        melt_array(&params->required_positionals);
         rb_ary_push(params->required_positionals, param);
 
         break;
@@ -454,12 +471,13 @@ PARSE_OPTIONAL_PARAMS:
         parser_advance(state);
 
         if (is_keyword(state)) {
-          parse_keyword(state, params->optional_keywords, memo);
+          parse_keyword(state, &params->optional_keywords, memo);
           parser_advance_if(state, pCOMMA);
           goto PARSE_KEYWORDS;
         }
 
         param = parse_function_param(state);
+        melt_array(&params->optional_positionals);
         rb_ary_push(params->optional_positionals, param);
 
         break;
@@ -503,6 +521,7 @@ PARSE_TRAILING_PARAMS:
         }
 
         param = parse_function_param(state);
+        melt_array(&params->trailing_positionals);
         rb_ary_push(params->trailing_positionals, param);
 
         break;
@@ -519,7 +538,7 @@ PARSE_KEYWORDS:
     case pQUESTION:
       parser_advance(state);
       if (is_keyword(state)) {
-        parse_keyword(state, params->optional_keywords, memo);
+        parse_keyword(state, &params->optional_keywords, memo);
       } else {
         raise_syntax_error(
           state,
@@ -542,7 +561,7 @@ PARSE_KEYWORDS:
     case tBANGIDENT:
     KEYWORD_CASES
       if (is_keyword(state)) {
-        parse_keyword(state, params->required_keywords, memo);
+        parse_keyword(state, &params->required_keywords, memo);
       } else {
         raise_syntax_error(
           state,
@@ -593,12 +612,12 @@ static VALUE parse_optional(parserstate *state) {
 }
 
 static void initialize_method_params(method_params *params){
-  params->required_positionals = rb_ary_new();
-  params->optional_positionals = rb_ary_new();
+  params->required_positionals = EMPTY_ARRAY;
+  params->optional_positionals = EMPTY_ARRAY;
   params->rest_positionals = Qnil;
-  params->trailing_positionals = rb_ary_new();
-  params->required_keywords = rb_hash_new();
-  params->optional_keywords = rb_hash_new();
+  params->trailing_positionals = EMPTY_ARRAY;
+  params->required_keywords = EMPTY_HASH;
+  params->optional_keywords = EMPTY_HASH;
   params->rest_keywords = Qnil;
 }
 
@@ -2943,6 +2962,11 @@ rbsparser_lex(VALUE self, VALUE buffer, VALUE end_pos) {
 void rbs__init_parser(void) {
   RBS_Parser = rb_define_class_under(RBS, "Parser", rb_cObject);
   rb_gc_register_mark_object(RBS_Parser);
+  EMPTY_ARRAY = rb_obj_freeze(rb_ary_new());
+  EMPTY_HASH = rb_obj_freeze(rb_hash_new());
+  rb_global_variable(&EMPTY_ARRAY);
+  rb_global_variable(&EMPTY_HASH);
+
   rb_define_singleton_method(RBS_Parser, "_parse_type", rbsparser_parse_type, 5);
   rb_define_singleton_method(RBS_Parser, "_parse_method_type", rbsparser_parse_method_type, 5);
   rb_define_singleton_method(RBS_Parser, "_parse_signature", rbsparser_parse_signature, 2);
