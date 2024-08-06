@@ -2164,7 +2164,7 @@ VALUE parse_attribute_member(parserstate *state, position comment_pos, VALUE ann
                      | alias_member   (instance only)
 */
 VALUE parse_interface_members(parserstate *state) {
-  VALUE members = rb_ary_new();
+  VALUE members = EMPTY_ARRAY;
 
   while (state->next_token.type != kEND) {
     VALUE annotations = EMPTY_ARRAY;
@@ -2198,6 +2198,7 @@ VALUE parse_interface_members(parserstate *state) {
       );
     }
 
+    melt_array(&members);
     rb_ary_push(members, member);
   }
 
