@@ -2498,7 +2498,7 @@ VALUE parse_class_decl_super(parserstate *state, range *lt_range) {
     *lt_range = state->current_token.range;
     super_range.start = state->next_token.range.start;
 
-    args = rb_ary_new();
+    args = EMPTY_ARRAY;
     class_instance_name(state, CLASS_NAME, &name, args, &name_range, &args_range);
 
     super_range.end = state->current_token.range.end;
