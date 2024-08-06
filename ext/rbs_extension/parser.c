@@ -1739,7 +1739,7 @@ VALUE parse_member_def(parserstate *state, bool instance_only, bool accept_overl
  *
  * @param kind
  * */
-void class_instance_name(parserstate *state, TypeNameKind kind, VALUE *name, VALUE args, range *name_range, range *args_range) {
+void class_instance_name(parserstate *state, TypeNameKind kind, VALUE *name, VALUE *args, range *name_range, range *args_range) {
   parser_advance(state);
 
   *name = parse_type_name(state, kind, name_range);
@@ -1747,7 +1747,7 @@ void class_instance_name(parserstate *state, TypeNameKind kind, VALUE *name, VAL
   if (state->next_token.type == pLBRACKET) {
     parser_advance(state);
     args_range->start = state->current_token.range.start;
-    parse_type_list(state, pRBRACKET, &args);
+    parse_type_list(state, pRBRACKET, args);
     parser_advance_assert(state, pRBRACKET);
     args_range->end = state->current_token.range.end;
   } else {
@@ -1810,7 +1810,7 @@ VALUE parse_mixin_member(parserstate *state, bool from_interface, position comme
   class_instance_name(
     state,
     from_interface ? INTERFACE_NAME : (INTERFACE_NAME | CLASS_NAME),
-    &name, args, &name_range, &args_range
+    &name, &args, &name_range, &args_range
   );
 
   parser_pop_typevar_table(state);
@@ -2497,7 +2497,7 @@ VALUE parse_class_decl_super(parserstate *state, range *lt_range) {
     super_range.start = state->next_token.range.start;
 
     args = EMPTY_ARRAY;
-    class_instance_name(state, CLASS_NAME, &name, args, &name_range, &args_range);
+    class_instance_name(state, CLASS_NAME, &name, &args, &name_range, &args_range);
 
     super_range.end = state->current_token.range.end;
 
