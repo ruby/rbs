@@ -1039,7 +1039,7 @@ static VALUE parse_simple(parserstate *state) {
   case pLBRACKET: {
     range rg;
     rg.start = state->current_token.range.start;
-    VALUE types = rb_ary_new();
+    VALUE types = EMPTY_ARRAY;
     if (state->next_token.type != pRBRACKET) {
       parse_type_list(state, pRBRACKET, types);
     }
@@ -1049,7 +1049,7 @@ static VALUE parse_simple(parserstate *state) {
     return rbs_tuple(types, rbs_new_location(state->buffer, rg));
   }
   case pAREF_OPR: {
-    return rbs_tuple(rb_ary_new(), rbs_new_location(state->buffer, state->current_token.range));
+    return rbs_tuple(EMPTY_ARRAY, rbs_new_location(state->buffer, state->current_token.range));
   }
   case pLBRACE: {
     position start = state->current_token.range.start;
