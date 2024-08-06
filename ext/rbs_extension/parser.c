@@ -2253,7 +2253,7 @@ VALUE parse_interface_decl(parserstate *state, position comment_pos, VALUE annot
   module_self_type ::= <module_name>
                      | module_name `[` type_list <`]`>
 */
-void parse_module_self_types(parserstate *state, VALUE array) {
+void parse_module_self_types(parserstate *state, VALUE *array) {
   while (true) {
     range self_range;
     range name_range;
@@ -2282,8 +2282,8 @@ void parse_module_self_types(parserstate *state, VALUE array) {
     rbs_loc_add_optional_child(loc, rb_intern("args"), args_range);
 
     VALUE self_type = rbs_ast_decl_module_self(module_name, args, location);
-    melt_array(&array);
-    rb_ary_push(array, self_type);
+    melt_array(array);
+    rb_ary_push(*array, self_type);
 
     if (state->next_token.type == pCOMMA) {
       parser_advance(state);
@@ -2401,7 +2401,7 @@ VALUE parse_module_decl0(parserstate *state, range keyword_range, VALUE module_n
     parser_advance(state);
     colon_range = state->current_token.range;
     self_types_range.start = state->next_token.range.start;
-    parse_module_self_types(state, self_types);
+    parse_module_self_types(state, &self_types);
     self_types_range.end = state->current_token.range.end;
   } else {
     colon_range = NULL_RANGE;
