@@ -1461,6 +1461,7 @@ void parse_annotations(parserstate *state, VALUE annotations, position *annot_po
         *annot_pos = state->current_token.range.start;
       }
 
+      melt_array(&annotations);
       rb_ary_push(annotations, parse_annotation(state));
     } else {
       break;
@@ -1645,7 +1646,7 @@ VALUE parse_member_def(parserstate *state, bool instance_only, bool accept_overl
 
   bool loop = true;
   while (loop) {
-    VALUE annotations = rb_ary_new();
+    VALUE annotations = EMPTY_ARRAY;
     position overload_annot_pos = NullPosition;
 
     if (state->next_token.type == tANNOTATION) {
@@ -2166,7 +2167,7 @@ VALUE parse_interface_members(parserstate *state) {
   VALUE members = rb_ary_new();
 
   while (state->next_token.type != kEND) {
-    VALUE annotations = rb_ary_new();
+    VALUE annotations = EMPTY_ARRAY;
     position annot_pos = NullPosition;
 
     parse_annotations(state, annotations, &annot_pos);
@@ -2310,7 +2311,7 @@ VALUE parse_module_members(parserstate *state) {
 
   while (state->next_token.type != kEND) {
     VALUE member;
-    VALUE annotations = rb_ary_new();
+    VALUE annotations = EMPTY_ARRAY;
     position annot_pos = NullPosition;
 
     parse_annotations(state, annotations, &annot_pos);
@@ -2648,7 +2649,7 @@ VALUE parse_nested_decl(parserstate *state, const char *nested_in, position anno
 }
 
 VALUE parse_decl(parserstate *state) {
-  VALUE annotations = rb_ary_new();
+  VALUE annotations = EMPTY_ARRAY;
   position annot_pos = NullPosition;
 
   parse_annotations(state, annotations, &annot_pos);
