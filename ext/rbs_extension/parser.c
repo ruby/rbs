@@ -229,6 +229,7 @@ VALUE parse_type_name(parserstate *state, TypeNameKind kind, range *rg) {
 */
 static VALUE parse_type_list(parserstate *state, enum TokenType eol, VALUE types) {
   while (true) {
+    melt_array(&types);
     rb_ary_push(types, parse_type(state));
 
     if (state->next_token.type == pCOMMA) {
@@ -883,7 +884,7 @@ static VALUE parse_instance_type(parserstate *state, bool parse_alias) {
     }
 
     VALUE typename = parse_type_name(state, expected_kind, &name_range);
-    VALUE types = rb_ary_new();
+    VALUE types = EMPTY_ARRAY;
 
     TypeNameKind kind;
     if (state->current_token.type == tUIDENT) {
