@@ -2283,6 +2283,7 @@ void parse_module_self_types(parserstate *state, VALUE array) {
     rbs_loc_add_optional_child(loc, rb_intern("args"), args_range);
 
     VALUE self_type = rbs_ast_decl_module_self(module_name, args, location);
+    melt_array(&array);
     rb_ary_push(array, self_type);
 
     if (state->next_token.type == pCOMMA) {
@@ -2394,7 +2395,7 @@ VALUE parse_module_decl0(parserstate *state, range keyword_range, VALUE module_n
   decl_range.start = keyword_range.start;
 
   VALUE type_params = parse_type_params(state, &type_params_range, true);
-  VALUE self_types = rb_ary_new();
+  VALUE self_types = EMPTY_ARRAY;
 
   if (state->next_token.type == pCOLON) {
     parser_advance(state);
