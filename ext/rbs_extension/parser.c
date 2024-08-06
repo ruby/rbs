@@ -152,7 +152,7 @@ void parser_advance_no_gap(parserstate *state) {
 */
 VALUE parse_type_name(parserstate *state, TypeNameKind kind, range *rg) {
   VALUE absolute = Qfalse;
-  VALUE path = rb_ary_new();
+  VALUE path = EMPTY_ARRAY;
   VALUE namespace;
 
   if (rg) {
@@ -170,6 +170,7 @@ VALUE parse_type_name(parserstate *state, TypeNameKind kind, range *rg) {
     && state->current_token.range.end.byte_pos == state->next_token.range.start.byte_pos
     && state->next_token.range.end.byte_pos == state->next_token2.range.start.byte_pos
   ) {
+    melt_array(&path);
     rb_ary_push(path, ID2SYM(INTERN_TOKEN(state, state->current_token)));
 
     parser_advance(state);
