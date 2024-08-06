@@ -1134,7 +1134,7 @@ VALUE parse_type(parserstate *state) {
   type_param ::= tUIDENT                            (module_type_params == false)
 */
 VALUE parse_type_params(parserstate *state, range *rg, bool module_type_params) {
-  VALUE params = rb_ary_new();
+  VALUE params = EMPTY_ARRAY;
 
   if (state->next_token.type == pLBRACKET) {
     parser_advance(state);
@@ -1210,6 +1210,7 @@ VALUE parse_type_params(parserstate *state, range *rg, bool module_type_params) 
       rbs_loc_add_optional_child(loc, rb_intern("upper_bound"), upper_bound_range);
 
       VALUE param = rbs_ast_type_param(name, variance, unchecked, upper_bound, location);
+      melt_array(&params);
       rb_ary_push(params, param);
 
       if (state->next_token.type == pCOMMA) {
