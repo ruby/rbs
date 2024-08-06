@@ -2838,14 +2838,16 @@ VALUE parse_use_directive(parserstate *state) {
 }
 
 VALUE parse_signature(parserstate *state) {
-  VALUE dirs = rb_ary_new();
-  VALUE decls = rb_ary_new();
+  VALUE dirs = EMPTY_ARRAY;
+  VALUE decls = EMPTY_ARRAY;
 
   while (state->next_token.type == kUSE) {
+    melt_array(&dirs);
     rb_ary_push(dirs, parse_use_directive(state));
   }
 
   while (state->next_token.type != pEOF) {
+    melt_array(&decls);
     rb_ary_push(decls, parse_decl(state));
   }
 
