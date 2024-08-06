@@ -1448,7 +1448,7 @@ VALUE parse_annotation(parserstate *state) {
   annotations ::= {} annotation ... <annotation>
                 | {<>}
 */
-void parse_annotations(parserstate *state, VALUE annotations, position *annot_pos) {
+void parse_annotations(parserstate *state, VALUE *annotations, position *annot_pos) {
   *annot_pos = NullPosition;
 
   while (true) {
@@ -1459,8 +1459,8 @@ void parse_annotations(parserstate *state, VALUE annotations, position *annot_po
         *annot_pos = state->current_token.range.start;
       }
 
-      melt_array(&annotations);
-      rb_ary_push(annotations, parse_annotation(state));
+      melt_array(annotations);
+      rb_ary_push(*annotations, parse_annotation(state));
     } else {
       break;
     }
@@ -1648,7 +1648,7 @@ VALUE parse_member_def(parserstate *state, bool instance_only, bool accept_overl
     position overload_annot_pos = NullPosition;
 
     if (state->next_token.type == tANNOTATION) {
-      parse_annotations(state, annotations, &overload_annot_pos);
+      parse_annotations(state, &annotations, &overload_annot_pos);
     }
 
     switch (state->next_token.type) {
@@ -2168,7 +2168,7 @@ VALUE parse_interface_members(parserstate *state) {
     VALUE annotations = EMPTY_ARRAY;
     position annot_pos = NullPosition;
 
-    parse_annotations(state, annotations, &annot_pos);
+    parse_annotations(state, &annotations, &annot_pos);
 
     parser_advance(state);
 
@@ -2314,7 +2314,7 @@ VALUE parse_module_members(parserstate *state) {
     VALUE annotations = EMPTY_ARRAY;
     position annot_pos = NullPosition;
 
-    parse_annotations(state, annotations, &annot_pos);
+    parse_annotations(state, &annotations, &annot_pos);
 
     parser_advance(state);
 
@@ -2653,7 +2653,7 @@ VALUE parse_decl(parserstate *state) {
   VALUE annotations = EMPTY_ARRAY;
   position annot_pos = NullPosition;
 
-  parse_annotations(state, annotations, &annot_pos);
+  parse_annotations(state, &annotations, &annot_pos);
 
   parser_advance(state);
   switch (state->current_token.type) {
