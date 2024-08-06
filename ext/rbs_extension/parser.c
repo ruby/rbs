@@ -2309,7 +2309,7 @@ VALUE parse_nested_decl(parserstate *state, const char *nested_in, position anno
                   | `private`
 */
 VALUE parse_module_members(parserstate *state) {
-  VALUE members = rb_ary_new();
+  VALUE members = EMPTY_ARRAY;
 
   while (state->next_token.type != kEND) {
     VALUE member;
@@ -2374,6 +2374,7 @@ VALUE parse_module_members(parserstate *state) {
       break;
     }
 
+    melt_array(&members);
     rb_ary_push(members, member);
   }
 
