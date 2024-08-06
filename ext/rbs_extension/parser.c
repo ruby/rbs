@@ -2267,7 +2267,7 @@ void parse_module_self_types(parserstate *state, VALUE array) {
     VALUE module_name = parse_type_name(state, CLASS_NAME | INTERFACE_NAME, &name_range);
     self_range.end = name_range.end;
 
-    VALUE args = rb_ary_new();
+    VALUE args = EMPTY_ARRAY;
     if (state->next_token.type == pLBRACKET) {
       parser_advance(state);
       args_range.start = state->current_token.range.start;
