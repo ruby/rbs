@@ -4,6 +4,11 @@ module URI
   # RFC6068, the mailto URL scheme.
   #
   class MailTo < Generic
+    type build_opts = {
+      ?headers: Array[Array[String]]?,
+      ?to: String?
+    }
+
     EMAIL_REGEXP: Regexp
 
     # <!--
@@ -36,9 +41,9 @@ module URI
     #     m3 = URI::MailTo.build({:to => 'listman@example.com', :headers => [['subject', 'subscribe']]})
     #     m3.to_s  # => "mailto:listman@example.com?subject=subscribe"
     #
-    def self.build: (Array[String]) -> instance
-                  | ([String, Array[Array[String]]]) -> instance
-                  | (Hash[Symbol, String | Array[Array[String]]]) -> instance
+    def self.build: (Array[String] args) -> instance
+                  | ([String, Array[Array[String]]] args) -> instance
+                  | (build_opts args) -> instance
 
     # <!-- rdoc-file=lib/uri/mailto.rb -->
     # E-mail headers set by the URL, as an Array of Arrays.

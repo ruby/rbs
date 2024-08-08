@@ -71,6 +71,10 @@
 # *   Other non-numeric: raises TypeError.
 #
 class Date
+  type date_record = { mday: Integer, mon: Integer, year: Integer }
+
+  type datetime_with_timezone_record = { ?wday: Integer, ?mday: Integer, ?mon: Integer, ?year: Integer, ?hour: Integer, ?min: Integer, ?sec: Integer, ?zone: String, ?offset: Integer}
+
   # <!--
   #   rdoc-file=ext/date/date_core.c
   #   - Date.new(year = -4712, month = 1, mday = 1, start = Date::ITALY) -> date
@@ -112,7 +116,7 @@ class Date
   #
   # Related: Date.httpdate (returns a Date object).
   #
-  def self._httpdate: (String str) -> Hash[Symbol, Integer]
+  def self._httpdate: (String str, ?limit: Integer) -> datetime_with_timezone_record
 
   # <!--
   #   rdoc-file=ext/date/date_core.c
@@ -130,7 +134,7 @@ class Date
   #
   # Related: Date.iso8601 (returns a Date object).
   #
-  def self._iso8601: (String str) -> Hash[Symbol, Integer]
+  def self._iso8601: (String str, ?limit: Integer) -> date_record
 
   # <!--
   #   rdoc-file=ext/date/date_core.c
@@ -147,7 +151,7 @@ class Date
   #
   # Related: Date.jisx0301 (returns a Date object).
   #
-  def self._jisx0301: (String str) -> Hash[Symbol, Integer]
+  def self._jisx0301: (String str, ?limit: Integer) -> date_record
 
   # <!--
   #   rdoc-file=ext/date/date_core.c
@@ -192,7 +196,7 @@ class Date
   #
   # Related: Date.rfc2822 (returns a Date object).
   #
-  def self._rfc2822: (String str) -> Hash[Symbol, Integer | String]
+  def self._rfc2822: (String str, ?limit: Integer) -> datetime_with_timezone_record
 
   # <!--
   #   rdoc-file=ext/date/date_core.c
@@ -210,7 +214,7 @@ class Date
   #
   # Related: Date.rfc3339 (returns a Date object).
   #
-  def self._rfc3339: (String str) -> Hash[Symbol, Integer | String]
+  def self._rfc3339: (String str, ?limit: Integer) -> datetime_with_timezone_record
 
   # <!--
   #   rdoc-file=ext/date/date_core.c
@@ -228,7 +232,7 @@ class Date
   #
   # Related: Date.rfc2822 (returns a Date object).
   #
-  def self._rfc822: (String str) -> Hash[Symbol, Integer | String]
+  def self._rfc822: (String str, ?limit: Integer) -> datetime_with_timezone_record
 
   # <!--
   #   rdoc-file=ext/date/date_core.c

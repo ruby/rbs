@@ -913,6 +913,27 @@ module Net
     #
     def self.https_default_port: () -> Integer
 
+    type start_options = {
+      ?ca_file: String,
+      ?ca_path: String,
+      ?cert: OpenSSL::X509::Certificate,
+      ?cert_store: OpenSSL::X509::Store,
+      ?ciphers: Array[String],
+      ?close_on_empty_response: bool,
+      ?ipaddr: String,
+      ?keep_alive_timeout: Numeric,
+      ?key: OpenSSL::PKey::PKey,
+      ?open_timeout: Numeric,
+      ?read_timeout: Numeric,
+      ?ssl_timeout: Numeric,
+      ?ssl_version: OpenSSL::SSL::tls_version,
+      ?use_ssl: bool,
+      ?verify_callback: ^(bool preverify_ok, OpenSSL::X509::StoreContext store_ctx) -> boolish,
+      ?verify_depth: Integer,
+      ?verify_mode: OpenSSL::SSL::verify_mode,
+      ?write_timeout: Numeric
+    }
+
     # <!--
     #   rdoc-file=lib/net/http.rb
     #   - HTTP.start(address, port = nil, p_addr = :ENV, p_port = nil, p_user = nil, p_pass = nil, opts) -> http
@@ -1003,8 +1024,8 @@ module Net
     # Note: If `port` is `nil` and `opts[:use_ssl]` is a truthy value, the value
     # passed to `new` is Net::HTTP.https_default_port, not `port`.
     #
-    def self.start: (String address, ?Integer? port, ?String | :ENV | nil p_addr, ?Integer? p_port, ?String? p_user, ?String? p_pass, ?Hash[Symbol, untyped]? opt) -> Net::HTTP
-                  | [T] (String address, ?Integer? port, ?String | :ENV | nil p_addr, ?Integer? p_port, ?String? p_user, ?String? p_pass, ?Hash[Symbol, untyped]? opt) { (Net::HTTP) -> T } -> T
+    def self.start: (String address, ?Integer? port, ?String | :ENV | nil p_addr, ?Integer? p_port, ?String? p_user, ?String? p_pass, ?start_options opt) -> Net::HTTP
+                  | [T] (String address, ?Integer? port, ?String | :ENV | nil p_addr, ?Integer? p_port, ?String? p_user, ?String? p_pass, ?start_options opt) { (Net::HTTP) -> T } -> T
 
     # <!--
     #   rdoc-file=lib/net/http.rb
