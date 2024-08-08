@@ -77,6 +77,8 @@ module RBS
 
         def initialize: (name: TypeName, type_params: Array[TypeParam], members: Array[member], super_class: Super?, annotations: Array[Annotation], location: loc?, comment: Comment?) -> void
 
+        def update: (?name: TypeName, ?type_params: Array[TypeParam], ?members: Array[member], ?super_class: Super?, ?annotations: Array[Annotation], ?location: loc?, ?comment: Comment?) -> Declarations::Class
+
         include _HashEqual
         include _ToJson
       end
@@ -131,6 +133,8 @@ module RBS
 
         def initialize: (name: TypeName, type_params: Array[TypeParam], members: Array[member], location: loc?, annotations: Array[Annotation], self_types: Array[Self], comment: Comment?) -> void
 
+        def update: (?name: TypeName, ?type_params: Array[TypeParam], ?members: Array[member], ?location: loc?, ?annotations: Array[Annotation], ?self_types: Array[Self], ?comment: Comment?) -> Declarations::Module
+
         include _HashEqual
         include _ToJson
       end
@@ -159,6 +163,8 @@ module RBS
         attr_reader comment: Comment?
 
         def initialize: (name: TypeName, type_params: Array[TypeParam], members: Array[member], annotations: Array[Annotation], location: loc?, comment: Comment?) -> void
+
+        def update: (?name: TypeName, ?type_params: Array[TypeParam], ?members: Array[member], ?annotations: Array[Annotation], ?location: loc?, ?comment: Comment?) -> Declarations::Interface
 
         include MixinHelper
 
