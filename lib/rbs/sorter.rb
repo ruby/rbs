@@ -17,18 +17,18 @@ module RBS
       buffer = Buffer.new(name: path, content: path.read)
       _, _, sigs = Parser.parse_signature(buffer)
 
-      sigs.each do |m|
-        sort_decl! m
+      sigs = sigs.map do |m|
+        sort_decl m
       end
 
       stdout.puts "Writing #{path}..."
       path.open('w') do |out|
         writer = RBS::Writer.new(out: out)
-        writer.write sigs
+        writer.write _ = sigs
       end
     end
 
-    def sort_decl!(decl)
+    def sort_decl(decl)
       case decl
       when Declarations::Class, Declarations::Module, Declarations::Interface
         partitioned = {
@@ -52,7 +52,8 @@ module RBS
           private_instance_methods: [],
         } #: partitioned
 
-        decl.members.each { |m| sort_decl! m }
+        members = decl.members.map { |m| sort_decl m }
+        decl = decl.update(members: _ = members)
 
         visibility_annotated_members = [] #: Array[member]
 
@@ -188,7 +189,9 @@ module RBS
 
         members.push(*partitioned[:other_decls])
 
-        decl.members.replace(_ = members)
+        decl.update(members: _ = members)
+      else
+        decl
       end
     end
   end
