@@ -36,6 +36,6 @@ module RBS
       other_decls: Array[member]
     }
 
-    def sort_decl!: (member decl) -> void
+    def sort_decl: (member decl) -> member
   end
 end
