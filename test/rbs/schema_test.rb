@@ -96,6 +96,7 @@ class RBS::SchemaTest < Test::Unit::TestCase
     refute_type parse_type("Foo"), "alias"
 
     assert_type parse_type("[Integer]"), "tuple"
+    assert_type parse_type("[Integer, *String]"), "tuple"
     refute_type parse_type("Foo"), "tuple"
 
     assert_type parse_type("{ id: Integer, name: String }"), "record"

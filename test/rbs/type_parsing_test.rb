@@ -203,6 +203,15 @@ class RBS::TypeParsingTest < Test::Unit::TestCase
       assert_equal [], type.types
       assert_equal "[]", type.location.source
     end
+
+    Parser.parse_type("[untyped, *untyped]").yield_self do |type|
+      assert_instance_of Types::Tuple, type
+      assert_equal [
+                     Types::Bases::Any.new(location: nil),
+                   ], type.types
+      assert_equal Types::Bases::Any.new(location: nil), type.rest_type
+      assert_equal "[untyped, *untyped]", type.location.source
+    end
   end
 
   def test_union_intersection
